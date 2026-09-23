@@ -60,6 +60,9 @@ function _planInContractRead(){ return true; }
 function _pEntDay(nom,m,d){ return (nom==='A'&&d===8)?{type:'cp'}:null; }
 function _planPlId(m){ return 'std'; }
 function _planWorkH(pl,m,d,e){ if(e&&e.type==='cp') return 0; return pl==='std'?7:0; }
+// CHAMP-2 (§169) : la cadence lit les heures DANS LES RANGS. Meme stub : ce test porte sur le poids de
+//   l'effectif et le CP ; la formation a son harnais (mv-harnais-champ).
+function _planChampH(pl,m,d,e){ if(e&&e.type==='cp') return 0; return pl==='std'?7:0; }
 function _planDayH(pl,m,d,e){ return 7; }
 function _planEffN(m){ return m.collectif?m.effectif:1; }
 ${corps}
@@ -148,7 +151,9 @@ export { _pilEchCadence };`;
 //   priorite et passe par le moteur de la tournee (_dzSimuler). Une seule journee.
 {
   const jm=fn(SRC.pil,'_dzJourMbr').replace(/^\s*\/\/.*$/gm,'');
-  t('⑧ la journee d\'une personne vient de _planWorkPersRange, jour par jour', /_planWorkPersRange\(m,dt,dt\)/.test(jm));
+  // CHAMP-1 (§169) : la journee lit les heures DANS LES RANGS (formation, evenement familial a 0),
+  //   plus le travail effectif de la loi. Detail : scripts/mv-harnais-champ.mjs.
+  t('⑧ la journee d\'une personne vient de _planChampPersRange, jour par jour', /_planChampPersRange\(m,dt,dt\)/.test(jm));
   t('⑧ une equipe collective compte son effectif du jour (_planEffN)', /_planEffN\(m,mi,dd\)/.test(jm));
   t('⑧ « qui fait quoi » passe par le moteur de la tournee', /_dzSimuler\(/.test(fn(SRC.pil,'_dzRepTache')));
   t('⑧ plus de cadence moyenne dans Decider', !/function _pilSimInitData\(/.test(SRC.pil));
@@ -306,7 +311,7 @@ if(CONTRE){
     const r=await testCadence(m); return Math.abs(r.cadence-224/3)<1e-9;
   });
   await attend('CP compte comme presence', async()=>{
-    const m=SRC.plan.replace('var hM = _planWorkH(_planPlId(mbr), m, d, ent, yr);','var hM = _planDayH(_planPlId(mbr), m, d, ent);');
+    const m=SRC.plan.replace('var hM = _planChampH(_planPlId(mbr), m, d, ent, yr);','var hM = _planDayH(_planPlId(mbr), m, d, ent);');
     if(m===SRC.plan) throw new Error('ancre absente');
     const r=await testCadence(m); return Math.abs(r.totalH-224)<1e-9;
   });

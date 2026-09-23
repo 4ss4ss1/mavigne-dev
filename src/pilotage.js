@@ -2554,7 +2554,8 @@ function _opDiffusHtml(){
 //             jour de la fenêtre si elle n'est pas ouverte (on compte les 40
 //             du 31 août, pas les 6 du 24)
 //   équipe  = les affectés à la priorité, AU PLANNING DE CHAQUE JOUR
-//             (_planWorkPersRange : congés, récup, contrats, collectifs)
+//             (_planChampPersRange : congés, récup, arrêts, absences,
+//             formation, contrats, collectifs — CHAMP-1)
 //   coupure = PLAN_PAUSE_MIN : elle allonge la présence, jamais le travail
 //   trajets = calculés parcelle à parcelle (_dzHop), règle du domaine
 //             CONFIG.eco.trajet (défaut : à pied ≤ 300 m à 4 km/h, au-delà
@@ -2582,9 +2583,16 @@ function _dzHm(deb,plus){ var p=String(deb||'').split(':'); if(p.length<2) retur
 function _dzDoigt(){ try{ return !!(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches); }catch(e){ if(DEBUG) console.warn('[pilotage] pointeur', e); return false; } }
 
 // ── L'équipe au planning, personne par personne, jour par jour ──
-// Même source que la masse salariale et la capacité : _planWorkPersRange
-// (travail EFFECTIF : un congé, une récup, un jour hors contrat valent 0 ;
-// une équipe collective est multipliée par son effectif du jour).
+// ★★ CHAMP-1 (23/09/2026) — Nico : « une personne en formation, en arrêt, en cp,
+//   absente ne doit pas être comptée dans l'effectif du jour pour l'organisation
+//   des travaux ». La journée venait de _planWorkPersRange, le TRAVAIL EFFECTIF de
+//   la loi : une formation ou un événement familial y valent la journée entière
+//   (assimilés, et c'est juste pour la paie et l'annualisation). La tournée comptait
+//   donc un salarié en CFA dans l'équipe du jour. Elle lit désormais
+//   _planChampPersRange (planning.js) : même parcours, mêmes contrats, même effectif
+//   collectif, mais la formation et l'événement familial valent 0 ; une absence sur
+//   une partie de la journée n'ampute que ses heures. Congé, récup, arrêt et absence
+//   valaient déjà 0. La masse salariale et la cadence restent sur le travail effectif.
 function _dzMbs(){
   if(_DZ_MBS) return _DZ_MBS;
   var o={}; (window.MEMBRES||[]).forEach(function(m){ if(m&&m.nom&&!m.bureau&&m.statut!=='Inactif') o[m.nom]=m; });
@@ -2596,7 +2604,7 @@ function _dzJourMbr(m,iso){
   var k=m.nom+'|'+iso; if(_DZ_CACHE[k]) return _DZ_CACHE[k];
   var out={h:0,n:0,pH:0};
   try{
-    var dt=_dzDt(iso), pH=(typeof window._planWorkPersRange==='function')?(window._planWorkPersRange(m,dt,dt)||0):0;
+    var dt=_dzDt(iso), pH=(typeof window._planChampPersRange==='function')?(window._planChampPersRange(m,dt,dt)||0):0;
     if(pH>0.01){
       var n=1;
       if(_dzColl(m)){
@@ -2614,7 +2622,11 @@ function _dzJourMbr(m,iso){
 function _dzEnt(m,iso){ var dt=_dzDt(iso); return (((((window.PLANNING_ENTRIES||{})[m.nom]||{})[dt.getFullYear()]||{})[dt.getMonth()]||{})[dt.getDate()])||null; }
 function _dzMotif(m,iso){
   var e=_dzEnt(m,iso);
-  if(e){ if(e.type==='cp') return 'en cong\u00e9'; if(e.type==='recup') return 'en r\u00e9cup'; if(e.absent) return 'absent'; }
+  if(e){
+    if(e.type==='cp') return 'en cong\u00e9'; if(e.type==='recup') return 'en r\u00e9cup';
+    // CHAMP-1 : le motif dit POURQUOI la personne manque — formation et arrêt en clair.
+    if(e.absent){ var mo=(e.motif||''); return mo==='formation'?'en formation':mo==='arret'?'en arr\u00eat':mo==='famille'?'absent \u00b7 \u00e9v\u00e9nement familial':'absent'; }
+  }
   if(typeof window._mvEnContratLe==='function'&&!window._mvEnContratLe(m,iso)) return 'hors contrat';
   return 'pas au planning';
 }
@@ -5403,7 +5415,7 @@ function _ecoRate(){
   //   autant qu'un permanent a 22 €/h sur l'annee entiere : 18,75 €/h affiche, 16,3
   //   reel — et le budget de la vendange, qui en decoule, faux de 15 %.
   //   _planWorkPersRange : les heures REELLEMENT travaillees sur [d0,d1], contrats
-  //   et effectif collectif compris — la meme source que la cadence et l'exercice.
+  //   et effectif collectif compris — la meme source que l'exercice (la cadence, elle, lit les heures dans les rangs depuis CHAMP-2).
   //   Repli (planning absent) : grille annuelle x effectif de la fiche.
   var ck=_d0R+'|'+_d1R+'|'+membres.length;
   if(_ECO_RATE_CACHE.k===ck) return _ECO_RATE_CACHE.v;
@@ -6063,8 +6075,12 @@ function _pecHJour(){ var v=Number(((window.CONFIG&&window.CONFIG.eco)||{}).h_jo
 // EXACTEMENT le même moteur que l'ordre de passage et le simulateur de renfort.
 // Aucune troisième définition de « combien d'heures » dans ce fichier.
 // ── Presence reelle du domaine sur la periode consultee ──────────────
-// Source unique : _planWorkPersRange (planning.js), la MEME que Economie > Exercice.
-// On ne redefinit pas « combien d'heures a-t-on travaille » une seconde fois.
+// Source unique : _planChampPersRange (planning.js) — les heures DANS LES RANGS.
+// ★★ CHAMP-2 (23/09/2026) — Nico : « on la passe sur la meme lecture » que Decider.
+//   Avant : _planWorkPersRange, le travail effectif de la loi — une formation ou un
+//   evenement familial y valaient la journee, et gonflaient la presence face au bareme
+//   (le biais « bareme un peu serre » s'en trouvait accru). Economie > Exercice et le
+//   taux horaire, qui parlent d'heures PAYEES, restent sur 'work'/'paid'.
 //
 // ⚠ FENETRE : bornee a aujourd'hui, mais on verifie d'ABORD que la periode a
 // commence. Sans ce test, une periode a venir (debut 10/08 alors qu'on est le 09)
@@ -6081,7 +6097,7 @@ var _PEC_CAD_KMIN = 0.5, _PEC_CAD_KMAX = 3;
 function _pecCadPresence(){
   var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
   if(!s||!s.debut||!s.fin) return null;
-  if(typeof window._planWorkPersRange!=='function') return null;
+  if(typeof window._planChampPersRange!=='function') return null;
   var now=new Date(), t=_pexIso(now.getFullYear(), now.getMonth(), now.getDate());
   var d0=String(s.debut).slice(0,10), d1=String(s.fin).slice(0,10);
   if(d1>t) d1=t;
@@ -6095,7 +6111,7 @@ function _pecCadPresence(){
   var D0=_pexD(d0), D1=_pexD(d1), h=0, n=0;
   mbrs.forEach(function(m){
     var v=0;
-    try{ v=Number(window._planWorkPersRange(m,D0,D1))||0; }
+    try{ v=Number(window._planChampPersRange(m,D0,D1))||0; }
     catch(e){ if(window.logError) window.logError({level:'info',cat:'eco',msg:'cadence presence '+(m.nom||'')}); }
     if(v>0){ h+=v; n++; }
   });
@@ -6128,7 +6144,7 @@ function _pecCadHisto(hBarCourant){
   if(!per || !per.debut || !per.fin) return null;
   var d0=String(per.debut).slice(0,10), d1=String(per.fin).slice(0,10);
   if(d1<d0) return null;
-  if(typeof window._planWorkPersRange!=='function') return null;
+  if(typeof window._planChampPersRange!=='function') return null;
   var okPer=(typeof window._mvEnContratSurPeriode==='function');
   var mbrs=(window.MEMBRES||[]).filter(function(m){
     if(!m||!m.nom) return false;
@@ -6138,7 +6154,7 @@ function _pecCadHisto(hBarCourant){
   var D0=_pexD(d0), D1=_pexD(d1), pres=0, n=0;
   mbrs.forEach(function(m){
     var v=0;
-    try{ v=Number(window._planWorkPersRange(m,D0,D1))||0; }
+    try{ v=Number(window._planChampPersRange(m,D0,D1))||0; }
     catch(e){ if(window.logError) window.logError({level:'info',cat:'eco',msg:'cadence histo '+(m.nom||'')}); }
     if(v>0){ pres+=v; n++; }
   });
@@ -6273,8 +6289,8 @@ function _pecData(){
   // REDUIRE un bareme qui, mesure au planning, est juste a quelques pour cent pres.
   // Un mauvais conseil avec l'autorite d'une mesure.
   //
-  // La presence vient donc du PLANNING (_planWorkPersRange, meme source que
-  // Economie > Exercice), moins les heures de sessions tracteur — et T.tracH est
+  // La presence vient donc du PLANNING (_planChampPersRange : heures dans les rangs,
+  // formation et evenement familial a 0 — CHAMP-2), moins les heures de sessions tracteur — et T.tracH est
   // deja agregee ci-dessus, on ne recompte pas les sessions une seconde fois.
   // 100 % des jours travailles : le probleme de couverture disparait.
   //

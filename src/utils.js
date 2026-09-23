@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.55';
+export const APP_VERSION = '7.57';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,19 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.57', items: [
+    { emoji: 'equipe', titre: 'Décider ne compte plus un salarié en formation dans l’équipe du jour',
+      desc: "Dans Pilotage › Décider, la tournée du jour et «\u00a0Qui fait quoi\u00a0» comptaient un salarié <b>en formation</b> "
+        + "(jour de CFA) ou en <b>événement familial</b> comme s’il était dans les rangs\u00a0: pour la paie, ces jours valent "
+        + "du travail, mais personne n’est à la vigne. Ils sont maintenant retirés, comme les congés, la récup, les arrêts et "
+        + "les absences. Une formation d’une demi-journée ne retire que ses heures. Dans la liste de l’équipe, chaque absent "
+        + "dit pourquoi\u00a0: «\u00a0en formation\u00a0», «\u00a0en arrêt\u00a0», «\u00a0en congé\u00a0»… La paie et le compteur d’heures ne changent pas." },
+    { emoji: 'graphique', titre: 'La cadence ne compte plus la formation comme du temps à la vigne',
+      desc: "La cadence de l’équipe et l’écart de cadence face au barème (Pilotage) comptaient un jour de formation ou "
+        + "d’événement familial comme une journée passée dans les rangs\u00a0: le temps «\u00a0réellement passé\u00a0» était gonflé, "
+        + "et l’écart penchait vers «\u00a0barème trop serré\u00a0». Ils comptent désormais zéro, comme dans Décider. "
+        + "Le coût de la main-d’œuvre, lui, compte toujours ces heures\u00a0: elles sont payées." }
+  ] },
   { v: '7.55', items: [
     { emoji: 'chrono', titre: 'Rouvrir la session ne tue plus la mesure en cours',
       desc: "Fermer puis rouvrir la session pendant une mesure — ou revenir dans l’appli après une mise en veille — "
@@ -3796,7 +3809,7 @@ export const MV_INFO = {
   ] },
 
   'pil.cadence': { t: 'L\u2019écart de cadence', p: [
-    'Il compare le <b>temps réellement passé</b> — les heures du planning — au <b>barème h/ha</b> du travail déjà fait. Un écart positif veut dire que l\u2019équipe a mis plus de temps que le barème ne le prévoit.',
+    'Il compare le <b>temps réellement passé</b> — les heures du planning, congés, arrêts, absences et jours de formation retirés — au <b>barème h/ha</b> du travail déjà fait. Un écart positif veut dire que l\u2019équipe a mis plus de temps que le barème ne le prévoit.',
     'Il cherche sa source dans un ordre, et <b>dit toujours laquelle il a trouvée</b>. D\u2019abord la période en cours, dès <b>40 % du barème réalisé</b> — en dessous, le travail fait ne ressemble pas assez à celui qui reste. Sinon la <b>même période de la campagne précédente</b>, si elle est archivée : la ligne porte alors un <b>\u21a9</b> et nomme la campagne. Sinon rien, et l\u2019écran l\u2019écrit plutôt que d\u2019inventer un chiffre.',
     'La cadence ne s\u2019applique qu\u2019au <b>reste à engager</b>, jamais à ce qui est déjà dépensé : à 100 % d\u2019avancement, la projection retombe exactement sur l\u2019engagé. Sans cette règle, l\u2019écran annonçait une fin à 37 k\u20ac alors que 79 k\u20ac étaient déjà payés — sur la même carte.',
     '<b>Un biais assumé.</b> Une entrée de planning porte des heures, jamais une activité : la cave, l\u2019atelier et le bureau restent donc dans la présence, alors que le barème ne compte que la vigne. La présence est <b>surévaluée</b>, et l\u2019indicateur penche vers « barème un peu serré ». Sur une période où la cave tourne, l\u2019écart parle surtout d\u2019elle.',
@@ -3826,7 +3839,7 @@ export const MV_INFO = {
   'pil.tournee': { t: 'La tournée du jour', p: [
     '<b>Le travail</b> : la priorité du moment, diffusée dans Vigne. Sans priorité, le travail qui a le plus d\u2019heures restantes.',
     '<b>Le jour</b> : aujourd\u2019hui s\u2019il est travaillé au planning, sinon le prochain jour travaillé. Si la fenêtre du travail n\u2019est pas encore ouverte, son premier jour : on compte ceux qui seront là ce jour-là.',
-    '<b>L\u2019équipe</b> : les personnes affectées à la priorité qui travaillent ce jour-là au planning. Congés, récup et absences sont retirés ; une équipe collective compte son effectif du jour. Sans équipe affectée : tout le monde au champ.',
+    '<b>L\u2019équipe</b> : les personnes affectées à la priorité qui travaillent ce jour-là au planning. Congés, récup, arrêts, absences et jours de formation sont retirés — on ne compte que ceux qui seront dans les rangs ; une absence sur une partie de la journée ne retire que ses heures. Une équipe collective compte son effectif du jour. Sans équipe affectée : tout le monde au champ.',
     '<b>Le travail par jour</b> : les heures prévues au planning, jour par jour et personne par personne. La coupure ne se retire pas du travail : elle allonge la présence.',
     '<b>Les trajets</b> : calculés entre chaque parcelle et la suivante, à vol d\u2019oiseau — à pied jusqu\u2019à 300 m (4 km/h), au-delà en camion (5 min + 25 km/h), 5 min pour une parcelle sans position. La case Trajets règle ces cinq valeurs.',
     '<b>La fin</b> : la tournée se déroule jour après jour avec l\u2019équipe du planning, puis se compare à la fenêtre de chaque travail coché. « Il faudrait N personnes » sort de la même simulation, relancée avec N personnes de plus.'

@@ -277,6 +277,14 @@ jobs:
           node scripts/mv-harnais-sessions.mjs
           node scripts/mv-harnais-sessions.mjs --contre
 
+      # CHAMP-1 (§169) : Decider comptait dans l'equipe du jour un salarie en formation ou en evenement familial
+      # (travail effectif de la loi, assimile). Les vraies fonctions de planning.js, jour par jour et sur une plage ;
+      # la contre-epreuve remet l'ancienne lecture et doit rougir. La paie, elle, garde la formation.
+      - name: Harnais — qui est dans les rangs ce jour-la (Decider)
+        run: |
+          node scripts/mv-harnais-champ.mjs
+          node scripts/mv-harnais-champ.mjs --contre
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build

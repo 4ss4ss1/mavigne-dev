@@ -51,7 +51,7 @@ function decor(over) {
       { nom: 'Printemps 2026', debut: '2026-03-08', fin: '2026-07-31', active: true }
     ],
     _mvEnContratSurPeriode: () => true,
-    _planWorkPersRange: over._planWorkPersRange !== undefined ? over._planWorkPersRange
+    _planChampPersRange: over._planChampPersRange !== undefined ? over._planChampPersRange
                         : ((m) => (m.nom === 'Alice' ? 700 : 500)),   // 1200 h au total
     logError: () => {}
   };
@@ -95,7 +95,7 @@ ok('hFaites a zero → null (pas de division)', appel(decor({ snap: { saisonNom:
 ok('periode absente de SAISONS → null',       appel(decor({ SAISONS: [{ nom: 'Printemps 2026', debut: '2026-03-08', fin: '2026-07-31', active: true }] })) === null);
 ok('periode sans dates → null',               appel(decor({ SAISONS: [{ nom: 'Printemps 2025' }, { nom: 'Printemps 2026', debut: '2026-03-08', fin: '2026-07-31', active: true }] })) === null);
 ok('aucun membre → null',                     appel(decor({ MEMBRES: [] })) === null);
-ok('planning vide sur la fenetre → null',     appel(decor({ _planWorkPersRange: () => 0 })) === null);
+ok('planning vide sur la fenetre → null',     appel(decor({ _planChampPersRange: () => 0 })) === null);
 ok('tracteur >= presence → null (jamais 0 h de vigne)',
    appel(decor({ _ecoTracHByParc: () => ({ h: { 'Ergot': 5000 } }) })) === null);
 ok('_ecoTracHByParc qui jette → tracteur a 0, pas de plantage',

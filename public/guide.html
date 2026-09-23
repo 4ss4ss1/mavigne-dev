@@ -2649,8 +2649,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     « Échéances par tâche » de La campagne lit la même simulation, travail par travail. « Vers le »
     signale une fin après la période, l'équipe de la dernière semaine reconduite.</li>
     <li><b>Charge restante</b>, exprimée en <b>jours ouvrés</b> comptés depuis aujourd'hui.</li>
-    <li><b>Cadence de l'équipe</b> sur les dernières semaines&nbsp;: les heures réellement travaillées
-    au planning, une équipe collective à son effectif, un congé payé compté zéro.</li>
+    <li><b>Cadence de l'équipe</b> sur les dernières semaines&nbsp;: les heures passées dans les rangs
+    au planning, une équipe collective à son effectif. Congés, récup, arrêts, absences et jours de
+    formation comptent zéro.</li>
     <li><b>Effectif</b> : combien de personnes sont au champ aujourd'hui, et combien il en faudrait
     la semaine la plus chargée. Les deux se comptent de la même façon — une <b>équipe collective</b>
     y pèse son <b>effectif inscrit au contrat</b>, pas une ligne de tableau.</li>
@@ -2726,8 +2727,10 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Le jour</b> : aujourd'hui s'il est travaillé au planning, sinon le prochain jour travaillé.
     Les flèches passent d'un jour travaillé à l'autre.</li>
     <li><b>L'équipe</b> : les personnes affectées à la priorité qui travaillent ce jour-là au planning.
-    Congés, récup et absences sont retirés. Sans équipe affectée, toute l'équipe au champ. Toucher la
-    case ouvre la liste : un nom se retire ou s'ajoute, pour essayer.</li>
+    Congés, récup, arrêts, absences et <b>jours de formation</b> sont retirés : on ne compte que ceux qui
+    seront dans les rangs. Une absence sur une partie de la journée ne retire que ses heures. Sans équipe
+    affectée, toute l'équipe au champ. Toucher la case ouvre la liste : un nom se retire ou s'ajoute, pour
+    essayer, et chaque absent dit pourquoi (« en congé », « en formation », « en arrêt »…).</li>
     <li><b>Un contrat de groupe compte pour son effectif.</b> Une fiche « équipe de vendange » à
     quarante personnes vaut quarante, pas une ligne de tableau.</li>
     <li><b>Une fenêtre pas encore ouverte</b> : la tournée se calcule sur son premier jour. Si vos
@@ -2826,8 +2829,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   montants à zéro : ce n'est pas une panne, c'est la protection des salaires.</div></div>
 
   <details><summary>D'où vient l'écart de cadence&nbsp;?</summary>
-    <div class="dbody">Il compare deux grandeurs&nbsp;: les <b>heures réellement travaillées au
-    planning</b> sur la période (moins les heures de sessions tracteur, déjà comptées ailleurs) et
+    <div class="dbody">Il compare deux grandeurs&nbsp;: les <b>heures passées dans les rangs au
+    planning</b> sur la période — congés, arrêts, absences et jours de formation retirés, moins les
+    heures de sessions tracteur, déjà comptées ailleurs — et
     les <b>heures de barème du travail fait</b>. Un écart positif veut dire que le travail prend
     plus de temps que le barème ne le prévoit.<br>
     L'écran cherche sa source dans cet ordre, et <b>dit toujours laquelle il a trouvée</b>&nbsp;:

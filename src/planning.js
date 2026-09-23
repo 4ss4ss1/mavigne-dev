@@ -992,6 +992,25 @@ function _planWorkH(plId,m,d,e,yr){
   }
   return _planDayH(plId,m,d,e,yr);
 }
+// ── ★★ CHAMP-1 — PRESENT DANS LES RANGS, distinct du TRAVAIL EFFECTIF ──
+// _planWorkH compte une formation ou un evenement familial comme du travail : c'est la
+//   LOI (assimile, art. L6222-24 / L3142) et c'est juste pour l'annualisation, les
+//   durees maximales et la paie. Mais ce jour-la, la personne n'est PAS a la vigne.
+// _planChampH = les heures ou la personne est reellement disponible pour les travaux :
+//   conge, recup, arret, absence (quel que soit le motif), formation, evenement familial
+//   valent 0 ; une absence sur une partie de la journee ampute la journee de ses seules
+//   heures, formation comprise. Lecteurs : Pilotage > Decider (tournee du jour,
+//   « Qui fait quoi »), via _planChampPersRange, ET la cadence (_planTeamCadence,
+//   _pecCadPresence, _pecCadHisto — CHAMP-2 : « on la passe sur la meme lecture »). Nico, 23/09/2026 : « une personne en
+//   formation, en arret, en cp, absente ne doit pas etre comptee dans l'effectif du jour
+//   pour l'organisation des travaux ».
+function _planChampH(plId,m,d,e,yr){
+  if(e&&e.absent&&_planAbsMotif(e).assim){
+    if(_planAbsPartiel(e))return Math.max(0,_planRefH(plId,m,d,e,yr)-_planAbsH(e));
+    return 0;
+  }
+  return _planWorkH(plId,m,d,e,yr);
+}
 // Travail effectif d'un mois (jours sous contrat uniquement)
 function _planWorkMonth(mbr,m){
   var plId=_planPlId(mbr),ent=_pEntMonth(mbr.nom,m),w=0;
@@ -1024,6 +1043,7 @@ function _planWorkRange(mbr,from,to){
 //    Un seul parcours, deux mesures, exactement la paire documentee juste en dessous :
 //      mode 'paid' -> _planDayH  = SOCLE PAYE       (un conge paye compte ses heures)
 //      mode 'work' -> _planWorkH = TRAVAIL EFFECTIF (un conge paye compte 0)
+//      mode 'champ'-> _planChampH = DANS LES RANGS (formation, evenement familial : 0)
 //    Un exercice COMPTABLE veut le premier : un CP se paie. La capacite au champ, elle,
 //    veut le second. Les melanger donnerait deux ecrans qui se contredisent.
 //
@@ -1033,7 +1053,7 @@ function _planWorkRange(mbr,from,to){
 //      _planCtxYear etant pose sur l'annee du jour courant, _pEntDay lit la bonne annee
 //      — une fenetre a cheval sur deux annees civiles reste juste.
 // ENTREE DE MESURE 1/5 — fenetre de dates. Appelee seulement par
-// _planPaidRange / _planWorkPersRange, donc seulement par le Pilotage.
+// _planPaidRange / _planWorkPersRange / _planChampPersRange, donc seulement par le Pilotage.
 function _planRangeH(mbr,from,to,mode){
   return _planWide(function(){ return _planRangeH_(mbr,from,to,mode); });
 }
@@ -1047,7 +1067,7 @@ function _planRangeH_(mbr,from,to,mode){
     _planCtxYear=yr;
     if(_planInContractRead(mbr,mi,d)){
       var yb=(PLANNING_ENTRIES[mbr.nom]||{})[yr]||{}, e=(yb[mi]||{})[d];
-      var h=(mode==='work')?_planWorkH(plId,mi,d,e,yr):_planDayH(plId,mi,d,e,yr);
+      var h=(mode==='champ')?_planChampH(plId,mi,d,e,yr):(mode==='work')?_planWorkH(plId,mi,d,e,yr):_planDayH(plId,mi,d,e,yr);
       if(h>0) tot+=h*_planEffN(mbr,mi,d);
     }
     cur.setDate(cur.getDate()+1);
@@ -1059,8 +1079,12 @@ function _planRangeH_(mbr,from,to,mode){
 // dates vient d'ICI, jamais d'une copie privee du parcours du planning.
 function _planPaidRange(mbr,from,to){ return _planRangeH(mbr,from,to,'paid'); }
 function _planWorkPersRange(mbr,from,to){ return _planRangeH(mbr,from,to,'work'); }
+// ★★ CHAMP-1/2 — les heures dans les rangs (formation et evenement familial a 0), pour
+//   l'organisation des travaux ET la cadence. La masse salariale reste sur 'work'.
+function _planChampPersRange(mbr,from,to){ return _planRangeH(mbr,from,to,'champ'); }
 window._planPaidRange     = _planPaidRange;
 window._planWorkPersRange = _planWorkPersRange;
+window._planChampPersRange = _planChampPersRange;
 window._planWorkMonth=_planWorkMonth;
 function _planCalcMonth(mbr,m){
   var plId=_planPlId(mbr);
@@ -1833,8 +1857,8 @@ function _planTeamCadence_(from, to){
   //   equipe de vendange de 30 pesait 1, comme une CP pesait une journee de presence.
   //   Mesure au bac : « 26 h/j » pendant qu'une tuile voisine annoncait 32 personnes
   //   dans les rangs — et le simulateur en deduisait 13 jours pour 324 h a 33.
-  //   Meme paire de mesures que _planRangeH_ (mode 'work' x _planEffN) : une seule
-  //   definition de « combien d'heures a-t-on travaille ».
+  //   Meme paire de mesures que _planRangeH_ (mode 'champ' x _planEffN depuis CHAMP-2) :
+  //   une seule definition de « combien d'heures a-t-on passe dans les rangs ».
   //   hPers = heures de travail par PERSONNE et par jour travaille — la « journee
   //   mesuree » que le simulateur attendait sous le nom perH.
   var totalH = 0, jours = {}, guard = 0, persJ = 0;
@@ -1848,7 +1872,9 @@ function _planTeamCadence_(from, to){
       var mbr = mbrs[i];
       if(!_planInContractRead(mbr, m, d)) continue;
       var ent = _pEntDay(mbr.nom,m,d);
-      var hM = _planWorkH(_planPlId(mbr), m, d, ent, yr);
+      // CHAMP-2 : les heures DANS LES RANGS (formation, evenement familial a 0), plus le travail
+      //   effectif de la loi — une cadence d'equipe mesure ce que l'equipe a pu faire a la vigne.
+      var hM = _planChampH(_planPlId(mbr), m, d, ent, yr);
       if(hM > 0){ var nM = _planEffN(mbr, m, d); dayTeam += hM * nM; persJ += nM; }
     }
     if(dayTeam > 0){ totalH += dayTeam; jours[m + '-' + d] = 1; }

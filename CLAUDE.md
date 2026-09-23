@@ -2,7 +2,17 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **22 septembre 2026 (SESS-1)** — ★★★ **LES SESSIONS TRACTEUR NE PERDENT PLUS RIEN (§168)**.
+> Dernière consolidation : **23 septembre 2026 (CHAMP-1 + CHAMP-2)** — ★★ **LES HEURES « DANS LES RANGS » : DÉCIDER
+> ET LA CADENCE NE COMPTENT PLUS UN SALARIÉ EN FORMATION (§169)**. Nico : « dans pilotage, une personne en formation, en arrêt,
+> en cp, absente ne doit pas être comptée dans l'effectif du jour pour l'organisation des travaux », puis, pour la cadence :
+> « on la passe sur la même lecture ». Mesuré : congé, récup, arrêt et absence valaient DÉJÀ 0 ; la **formation** et
+> l'**événement familial**, non — le travail effectif de la loi les assimile (journée entière). Nouvelle lecture
+> `_planChampPersRange` (mode `'champ'` de `_planRangeH_`, `_planChampH`) : Décider (`_dzJourMbr`) ET la cadence
+> (`_planTeamCadence_`, `_pecCadPresence`, `_pecCadHisto`). Paie, compteur, taux horaire, exercice : inchangés (`'work'`/`'paid'`).
+> Harnais neuf `mv-harnais-champ` (28 assertions, 11 contre-épreuves). **APP 7.55 → 7.57 · SW 8.24 → 8.26** (7.56/8.25 de
+> CHAMP-1, livrées seules, jamais poussées : REMPLACÉES), base `59e2a39`. Détail en **§169**.
+>
+> ★ Précédente : **22 septembre 2026 (SESS-1)** — ★★★ **LES SESSIONS TRACTEUR NE PERDENT PLUS RIEN (§168)**.
 > Nico : « Enlève absolument tous les bugs qu'il peut y avoir dans les sessions tracteurs. » Relu, le moteur perdait des
 > mesures de quatre façons : ① **rouvrir la session TUAIT la mesure en cours** — la reprise la jugeait « lancée en retard »
 > dès qu'elle était jeune (probablement l'essentiel des 17 écartées du 22/09) ; ② la pause oubliait le temps d'avant ; ③ refaire
@@ -22775,3 +22785,65 @@ se croisaient. ⑥ **`tracteur.js` a pris 22 ko** (159 → 181) : `mv-harnais-ty
 qu'on se pose la question du découpage. Réponse : le moteur du chrono (≈ 600 lignes, de `_chrNeuf` à `_chrRestaurer`, plus
 l'historique) est le candidat naturel à un `src/chrono.js`, frontière gardée sur le modèle de CUV-DEC (§164) — dans un lot
 dédié, pas dans celui qui répare des pertes de données. Référence regravée.
+
+---
+
+## 169. ★★ CHAMP-1 + CHAMP-2 — LES HEURES « DANS LES RANGS » : DÉCIDER ET LA CADENCE NE COMPTENT PLUS UN SALARIÉ EN FORMATION (23/09 — `src/planning.js` · `src/pilotage.js` · `src/utils.js` · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `public/guide.html` · `scripts/mv-harnais-champ.mjs` (neuf) · `scripts/mv-harnais-pil-coherence.mjs` · `scripts/harnais-cadence-escalier.mjs` · `package.json` · `.github/workflows/ci.yml` · `scripts/harnais-claude-md.mjs` · APP 7.55 → **7.57** · SW 8.24 → **8.26** · base `59e2a39`)
+
+> Nico : *« dans pilotage, une personne en formation, en arrêt, en cp, absente ne doit pas être comptée dans l'effectif du jour
+> pour l'organisation des travaux »*.
+
+### 169a. Mesuré AVANT d'écrire
+
+- L'effectif du jour de Décider (tournée du jour, « Qui fait quoi », choix du jour, simulation jour par jour) passe par UNE
+  fonction : `_dzJourMbr` → `_planWorkPersRange(m,dt,dt)` → `_planRangeH_(…,'work')` → `_planWorkH`.
+- `_planWorkH` rend 0 pour un congé, une récup, un arrêt, toute absence non assimilée : **ces quatre cas étaient déjà justes**.
+  Mais `mo.assim` (formation, événement familial) rend **la journée prévue** — c'est la loi (L6222-24, L3142), juste pour
+  l'annualisation, les durées maximales et la paie. Un salarié au CFA comptait donc dans l'équipe de la tournée.
+- La carte « À la vigne aujourd'hui » du cockpit (`_pilData.presences`) testait déjà `e.absent` sans regarder le motif :
+  formation comptée absente. Rien à y changer.
+- Les autres lecteurs de `_planWorkPersRange` (`_ecoRate` : taux horaire pondéré ; `_pecCadPresence` / `_pecCadHisto` : cadence
+  contre barème ; exercice) raisonnent en heures PAYÉES ou TRAVAILLÉES au sens de la loi : **non touchés**. ⚠️ La cadence garde
+  donc un biais connu (une formation compte comme présence) — hors du périmètre de CHAMP-1, basculée par CHAMP-2 (169d).
+
+### 169b. Le choix
+
+- Écarté : filtrer dans `pilotage.js` en relisant l'entrée du jour. Il aurait fallu recopier la référence du jour
+  (`_planRefH`) pour l'absence partielle — une seconde définition de la journée, exactement ce que DZ-1 avait fermé.
+- Retenu : un troisième mode du parcours de plage existant. `_planChampH` = `_planWorkH`, sauf un motif assimilé : 0, ou la
+  journée amputée de `_planAbsH` si l'absence est partielle (formation l'après-midi → la matinée compte). Exposé en
+  `window._planChampPersRange`. Appelant de CHAMP-1 : `_dzJourMbr` ; la cadence s'y ajoute (169d).
+- `_dzMotif` dit pourquoi : « en formation », « en arrêt », « absent · événement familial », « absent » (le reste, dont
+  l'absence sans motif lue « injustifiée » depuis NET-1).
+
+### 169c. Vérifié
+
+- `mv-harnais-champ` : les VRAIES fonctions extraites de `planning.js` (C20). 18 scénarios (jour ordinaire, CP, récup, arrêt,
+  injustifiée, sans motif, formation, famille, formation partielle, perso partiel, journée modifiée, semaine en `'champ'` 7 h
+  contre 21 h en `'work'`, collectif ×6, hors contrat) + 6 appelants. **8 contre-épreuves mordent**, dont le défaut d'origine
+  (A7 rougit) et « le travail effectif perd la formation » (la paie serait fausse → A12 rougit).
+- `mv-harnais-pil-coherence` ⑧ repointé sur `_planChampPersRange` (il exigeait `_planWorkPersRange`).
+- ⚠️ Pas rejoué dans un navigateur : le lot ne change ni un écran ni un geste, seulement qui entre dans le compte.
+
+### 169d. CHAMP-2 — la cadence sur la même lecture
+
+> Nico, à la livraison de CHAMP-1 (qui laissait la cadence ouverte) : *« on la passe sur la même lecture »*. CHAMP-1 n'avait
+> pas été poussé : les deux partent ensemble, numéros 7.57 / 8.26 (on ne réutilise pas 7.56 / 8.25, déjà livrées — règle du doute).
+
+- **Trois lecteurs basculent en `'champ'`** : `_planTeamCadence_` (KPI « Cadence équipe », repli de la marge, `_pilEchCadence`
+  et son `hPers`), `_pecCadPresence` (écart de cadence, période en cours), `_pecCadHisto` (marche 2, campagne d'avant).
+- **Restent sur le travail effectif / payé** : `_ecoRate` (le poids d'un taux horaire = heures PAYÉES) et l'exercice
+  (`_pexCalc`, masse salariale). Une formation se paie : la retirer du coût serait faux.
+- Effet attendu : la présence baisse les semaines de CFA → l'écart de cadence penche un peu moins vers « barème trop serré ».
+  Le biais « cave, atelier, bureau dans la présence » demeure (fiche `pil.cadence`, inchangée sur ce point).
+- Harnais : `mv-harnais-champ` exécute `_planTeamCadence_` réelle (semaine lun.→ven. : 7 h sur 1 jour, contre 21 h sur 3 en
+  travail effectif) + B7/B8 ; 3 contre-épreuves de plus. `mv-harnais-pil-coherence` ① : stub `_planChampH` et ancre de la
+  contre-épreuve « CP compte comme présence » repointés. ⚠️ **`harnais-cadence-escalier.mjs` n'est branché NULLE PART**
+  (ni `check`, ni CI) et portait déjà **1 rouge sur la base** (« le KPI écart de cadence annonce la source histo ») : son
+  stub est repointé sur `_planChampPersRange` (sinon 9 rouges), le rouge d'origine reste — à examiner, puis brancher ou retirer.
+
+### 169e. Ouvert, et dit
+
+① Une journée de CP d'une demi-journée vaut 0 dans les rangs (comme avant) : le modèle CP n'a pas d'heures de présence.
+② La carte « À la vigne aujourd'hui » compte absent toute la journée une absence partielle (inchangé).
+
