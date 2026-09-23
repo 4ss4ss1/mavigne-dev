@@ -2,7 +2,27 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **23 septembre 2026 (CHAMP-1 + CHAMP-2)** — ★★ **LES HEURES « DANS LES RANGS » : DÉCIDER
+> Dernière consolidation : **23 septembre 2026 (TOUR-2)** — ★★★ **LE RETOUR FERME CE QUI EST OUVERT, ET UN APPUI VA OÙ
+> L'ON APPUIE (§171)**. Deuxième lot du tour complet (§170f). `_mvBack` ne connaissait que `.overlay` : six surfaces d'autres
+> familles (feuille du Cuvier, tri, « Ce qu'il manque », « c'est fait », « Plus », feuilles de Décider) restaient ouvertes
+> pendant que la page changeait. `_MV_SURFACES` + `_mvTopSurface` (app.js) les ferment par LEUR fermeture, la plus haute
+> d'abord, la porte CGU jamais ; chaque ouverture pose une entrée d'historique. Le crayon INVISIBLE de la puce de conducteur
+> (qui volait l'appui au milieu du nom) devient un bouton frère visible ; icône « traitement » rétablie ; `touch-action:
+> manipulation` ; zones d'appui des puces ; décalage sous le bandeau de la démo avec code. Harnais neuf `mv-harnais-retour`
+> (31 assertions, 11 contre-épreuves) ; rejoué sur l'appli compilée, vrais contacts. **APP 7.58 → 7.59 · SW 8.27 → 8.28**,
+> base `8014ce2` — ⚠️ TOUR-1 (§170) pas poussé : **ce lot le contient**. Détail en **§171**.
+>
+> ★ Précédente : **23 septembre 2026 (TOUR-1)** — ★★★ **LE TOUR COMPLET DE L'APPLI, ET LE PREMIER LOT QUI EN SORT :
+> L'AFFICHAGE (§170)**. Nico : « fais un tour complet de l'appli pour vérifier les bugs d'affichage, les boutons morts, les index z,
+> la sensibilité aux taps ». Tour joué sur l'appli compilée (Chromium 390×844 tactile, 58 écrans, ~85 fenêtres, chaque bouton appuyé,
+> contraste MESURÉ à l'écran dans les deux thèmes, bouton retour rejoué). Aucun bouton mort. Ce lot corrige l'affichage : deux cartes
+> sombres dont le texte avait perdu sa couleur à TYPO-1 (`color:inherit` sans couleur sur la carte), la ligne de cuve du Cuvier
+> (des `<span>` sans `display:block`), la date de la barre méta, `--cave` pris comme couleur de TEXTE (noir sur noir en sombre),
+> 11 champs à fond blanc en dur, `--bordeaux` jamais déclaré. Écarts de contraste mesurés à l'écran : clair 21 → 12, sombre 66 → 33.
+> **APP 7.57 → 7.58 · SW 8.26 → 8.27**, base `8014ce2`. ⚠️ Le bouton retour, les appuis et le bandeau démo restent OUVERTS :
+> lot suivant, liste en **§170f**. Détail en **§170**.
+>
+> ★ Précédente : **23 septembre 2026 (CHAMP-1 + CHAMP-2)** — ★★ **LES HEURES « DANS LES RANGS » : DÉCIDER
 > ET LA CADENCE NE COMPTENT PLUS UN SALARIÉ EN FORMATION (§169)**. Nico : « dans pilotage, une personne en formation, en arrêt,
 > en cp, absente ne doit pas être comptée dans l'effectif du jour pour l'organisation des travaux », puis, pour la cadence :
 > « on la passe sur la même lecture ». Mesuré : congé, récup, arrêt et absence valaient DÉJÀ 0 ; la **formation** et
@@ -1517,7 +1537,21 @@ parcelle impossible ; journées homogènes → le mode collant redevient bon).
 
 Français **terse**. « **go** » / « **intègre** » / « **suite** » / « **go lot X** » / « **continu** »
 = exécution autonome immédiate, sans recap ni check-in. Un **upload des fichiers demandés** vaut go.
-Livraison = **fichiers complets** via `present_files`, **jamais** d'instructions de patch manuel.
+Livraison = **fichiers complets**, **jamais** d'instructions de patch manuel.
+★★★ **DEPUIS LE 23/09 — LA LIVRAISON EST UN ZIP QUI REPRODUIT L'ARBORESCENCE DU DÉPÔT.** Demandé par Nico : *« mets tout dans
+un fichier zip et dans leurs dossiers respectifs, que je puisse dézipper plus facilement »*. Un seul fichier
+`mavigne-<LOT>.zip` présenté par `present_files`, dont chaque entrée porte son **chemin réel dans le dépôt**
+(`src/app.js`, `public/sw.js`, `guide/06-tracteur.html`, `scripts/…`, `.github/workflows/ci.yml`, `CLAUDE.md`, `.mv-base`…).
+Nico le dézippe **à la racine de `mavigne-dev\`** en acceptant de remplacer : chaque fichier tombe à sa place, plus de
+renommage à annoncer, plus de fichier oublié parce que le dossier de sortie était plat.
+- **Construire le zip depuis la racine du clone** (`cd mavigne-dev && zip mavigne-X.zip chemin/1 chemin/2 …`), jamais
+  depuis `/mnt/user-data/outputs` (plat : les chemins seraient perdus). Vérifier avec `unzip -l` que chaque entrée a son
+  dossier avant de présenter.
+- **Le contenu du zip = la colonne « Fichier » de la note de livraison**, ni plus ni moins. Toujours sans les fichiers
+  fabriqués par un script (`public/guide.html`, `dist/`) : on livre l'entrée, on nomme la commande.
+- Le tableau de la note de livraison reste obligatoire (ce qui change, fichier par fichier, et la colonne bump) ; il écrit
+  les chemins complets.
+- Un zip qui contient un lot précédent non poussé le **dit** en tête de réponse (« ce zip contient aussi TOUR-1 »).
 Workflow : **maquette → validation → intégration**. Questions **uniquement** en cas d'ambiguïté
 technique bloquante — mais alors les poser **avec une recommandation**, pour ne pas bloquer.
 
@@ -22847,3 +22881,219 @@ dédié, pas dans celui qui répare des pertes de données. Référence regravé
 ① Une journée de CP d'une demi-journée vaut 0 dans les rangs (comme avant) : le modèle CP n'a pas d'heures de présence.
 ② La carte « À la vigne aujourd'hui » compte absent toute la journée une absence partielle (inchangé).
 
+## 170. ★★★ TOUR-1 — LE TOUR COMPLET, ET CE QU'IL A TROUVÉ ; LOT 1 : L'AFFICHAGE (23/09 — `src/styles.css` · `src/cuvier.js` · `src/cave.js` · `src/pilotage.js` · `src/reglages.js` · `src/planning.js` · `src/utils.js` · `index.html` · `public/sw.js` · `scripts/harnais-claude-md.mjs` · APP 7.57 → **7.58** · SW 8.26 → **8.27** · base `8014ce2`)
+
+Nico : *« fais un tour complet de l'appli pour vérifier les bugs d'affichage, les boutons morts, les index z, la sensibilité aux
+taps »*, puis *« finis le tour d'abord, ne fais aucune livraison »*, puis *« go »*.
+
+### 170a. ★★★ La méthode — un tour qui touche l'écran, et qui ment moins qu'on le croit
+
+Outillage hors dépôt (`/home/claude/tour/`, jetable) : l'appli COMPILÉE servie en local, Chromium 1194 (`/opt/pw-browsers`) en
+390 × 844 tactile, réseau Firebase coupé, entrée par `_startDemoVisite` avec `fbLoginDemo` remplacé et 12 parcelles posées par
+`applyFbData` (le scénario de visite sème le reste). Quatre passes :
+1. **les écrans** : chaque module, chaque onglet et sous-onglet (58), mesurés sur toute leur hauteur — cibles < 32 px,
+   débordement, recouvrement (`elementFromPoint` au centre), `onclick` vers une fonction absente ;
+2. **les appuis** : chaque bouton appuyé par `touchscreen.tap` (vrais contacts), réaction lue par un `MutationObserver`,
+   chaque fenêtre ouverte mesurée à son tour (dessus de tout ? cibles ? débordement ?) ;
+3. **le contraste À L'ÉCRAN** : chaque texte visible, sa couleur, le fond réel remonté d'ancêtre en ancêtre, dans les DEUX
+   thèmes — ce que `mv-harnais-contraste` (statique, règle par règle) ne peut pas voir : une couleur héritée, un fond posé par
+   une autre règle, un `style=""` écrit en JS ;
+4. **le bouton retour** : `popstate` rejoué avec chaque type de feuille ouverte.
+
+★★ **Ce que l'outil a mal mesuré, et qu'il a fallu démêler avant d'écrire une ligne :**
+- « ? Aide » et la pastille « i » sortaient « trop petits » : ils portent DÉJÀ une zone tactile de 44 px en `::after`. L'outil
+  mesurait le dessin. **Une cible se mesure par sa zone d'appui, pas par sa boîte.**
+- Les encadrés d'alerte saumon « illisibles en sombre » : faux, le scanner lisait le PREMIER arrêt d'un dégradé.
+- Pilotage › Décider › « Agrandir » « à moitié vide » : c'est le repli HORS LIGNE (SVG de hauteur fixe) ; en ligne, Leaflet
+  remplit `.lf`. Bac à sable = hors ligne.
+- Des appuis « à y = 0 » : un blocage de défilement laissé par la fermeture forcée de l'outil, puis un `scrollIntoView` en
+  défilement doux lu trop tôt. Rejoué écran par écran, à la main.
+- `color-mix()` rendu par Chromium en `color(srgb …)` : le scanner ne le lisait pas et criait au blanc sur blanc.
+**Aucun défaut de ce lot n'a été retenu sur la seule foi de l'outil : chacun a sa capture ou sa cause dans le code.**
+
+### 170b. ★★★ Les causes — trois familles, et deux d'entre elles viennent de lots de nettoyage
+
+1. **TYPO-1 (§127) a laissé deux cartes sans couleur de texte.** `.sc-act{color:#fff}` et `.hv2-trac-val{color:#fff}` sont
+   devenus `<div class="mv-t" style="color:inherit">` / `mv-n` : hériter de QUOI ? `.scard-enc` et `.hv2-trac-card` ne
+   posaient pas de `color` — le texte remontait à `--texte`, foncé, sur bleu nuit et vert foncé (1,3:1). Couleur posée sur la
+   règle qui porte le VRAI fond (le dégradé de `.scard-enc`, ligne ~3058 — c'est celle que lit `mv-harnais-contraste`).
+   Le pourcentage sort blanc : l'or d'avant (`.sc-pct`) n'est plus atteignable, le `style="color:inherit"` du HTML passe
+   devant toute règle de feuille.
+2. **Le balisage valide a cassé la mise en page.** La ligne de cuve (`.mvv-hd`) est un `<button>` : ses morceaux sont des
+   `<span>` (§24 : pas de `<div>` dans un bouton). Mais `.mvv-nom`, `.mvv-sub`, `.mvv-mini` n'avaient pas `display:block` :
+   ils s'enchaînaient en ligne, se chevauchaient avec `.mvv-rt`, et la barre (hauteur sur un inline) disparaissait. ★ Le
+   commentaire de `_pilPhotoHtml` le dit déjà : « des `<span display:block>`, pas des `<div>` ». **La règle a deux moitiés ;
+   la ligne de cuve n'en avait appliqué qu'une.**
+3. **Des jetons de SURFACE pris comme couleur de TEXTE** (la famille de CONTRASTE-2, §131) : `color:var(--cave)` (fond le plus
+   sombre de l'appli) sur 11 titres/chiffres du Pilotage, 2 titres des Réglages, 2 styles du Cuvier → noir sur noir en sombre ;
+   `background:#fff` en dur dans 11 règles dont le texte suit le thème → blanc sur blanc en sombre, **y compris l'écran
+   d'acceptation des conditions** (`.mvt-fi`, première connexion d'un admin) ; `--bordeaux` appelé 11 fois avec son repli
+   `#7A1020` mais **déclaré nulle part** (sauf dans le rapport imprimable, document séparé) → 1,6:1 en sombre.
+Plus : la date de `.mod-meta-row` restait en crème (règle d'août écrite quand elle vivait dans la partie SOMBRE de l'en-tête ;
+elle est posée sur `--bg-app` depuis) ; les week-ends du Planning en `--gris` (couleur de bordure, 1,4:1) ; l'année active du
+Planning en `#524399` en dur ; `.cmp-alert.ok` et `.per-badge` en `#2D5016` en dur ; `.pil-diagwrap` au z-index du dock (90).
+
+### 170c. Les corrections
+
+| Où | Quoi |
+|---|---|
+| `styles.css` | `.scard-enc{color:#fff}` sur la règle au dégradé ; `.hv2-trac-card{color:#fff}` et fond `color-mix(--vert 78 %, noir)` (identique à l'œil en clair ; en sombre `--vert` vaut `#5A9E3A`, le blanc y lisait 2,9:1 → ~4,9) ; `.mod-header .mod-meta-row .hv2-date{color:var(--texte-doux)!important}` ; week-ends `--texte-doux` à 72 % ; `--bordeaux` déclaré dans le bloc clair ET les deux blocs sombres (`#E8848C`) ; `.mvt-fi` fond `--bg-card` |
+| `cuvier.js` | `display:block` sur `.mvv-nom/.mvv-sub/.mvv-mini/.mvv-mini-f` ; `.vt-cv.done` en `color-mix` du thème ; 7 champs → `--bg-card` ; `.mvv-kpi-num` et `.mvv-tab.active` → `--texte` |
+| `cave.js` | `.mva-form` (dégradé) et 4 champs → `--bg-card` |
+| `pilotage.js` | 11 × `color:var(--cave)` → `--texte` (en clair : `#14110D` → `#1A1A14`, invisible) ; 2 champs inline → `--bg-card` + `--texte` ; `.pil-diagwrap` z 90 → 8905 (sous le plancher modal 9200, au-dessus du dock) |
+| `reglages.js` · `index.html` · `planning.js` | 2 titres → `--texte` ; `.cmp-alert.ok`, `.per-badge` → `--tag-green-tx` ; année active → `color-mix(--plan-acc 70 %, --texte)` |
+
+⚠️ Écartés : les 4 emplois de `--cave` et `--bordeaux` d'`app.js` (`_rsCss`, rapport imprimable : document séparé, fond papier) ;
+`.mv-dk.on .mv-dk-ic` et `.vt-fb.on` (texte sombre sur fond or/crème fixe : juste dans les deux thèmes) ; `.cmp-alert.warn`
+(`#8A4210` en dur, faible en sombre mais changer le jeton éclaircit le clair — à trancher).
+
+### 170d. Mesuré
+
+- Contraste À L'ÉCRAN (scanner du tour, 33 écrans) : **clair 21 → 12 écarts**, aucun sous 2,2:1 ; **sombre 66 → 33**, dont les
+  pires (1,6) sont les faux positifs des dégradés (170a). **Aucun écart nouveau** dans les deux thèmes.
+- Captures avant / après regardées : session en cours, carte d'accueil, lignes de cuve (clair) ; accueil, Pilotage › L'année,
+  tournée, maturités, session (sombre).
+- `mv-harnais-contraste` : vert, et il réclame une regravure (12 jetons de surface de moins en texte, 10 écarts de moins en
+  sombre) — **non regravée ici**, cf. 170e. `mv-harnais-jetons`, `-theme`, `-couches`, `-echelle`, `-typo`, `-cuvier`, `-cuv7`,
+  `-info`, `preflight`, `lint-cliquet` : verts. Chaîne `npm run check` : voir la note de livraison.
+
+### 170e. Regravure du cliquet de contraste
+
+Le harnais dit « progrès, regraver ». La règle (§6c) : regraver après une baisse, **clé par clé**, jamais pour taire un rouge.
+Les baisses sont celles de ce lot (170c) ; la regravure est laissée à la prochaine exécution chez Nico
+(`node scripts/mv-harnais-contraste.mjs --baseline`) — tant qu'elle n'est pas faite, le cliquet tolère simplement le niveau
+d'avant, rien ne peut remonter plus haut que lui.
+
+### 170f. ★★ OUVERT — le lot suivant (trouvé par le tour, pas encore corrigé)
+
+1. **Bouton retour d'Android** — `_mvBack` ne ferme que `.overlay.open`. Rejoué : feuille du Cuvier (`#mvv-ov`), feuille
+   « Plus » du dock (`#mv-dock-sheet.show`), feuille « c'est fait » (`.mvds-bg`) → la page change, **la feuille reste
+   par-dessus** ; panneau « Ce qu'il manque » (`.pil-diagwrap.show`) → ne se ferme pas. Lus, non rejoués : feuille de tri
+   (`#mv-tri-ov`, `_mvTriFermer`), feuilles de Décider (`[data-op=shut]`, `[data-op=fmx]`). Fermetures existantes :
+   `_vendSheetClose` (exposée), `_dockPlusClose`, `_mvdsClose` (app.js), `_pilDiagClose` (**à exposer**).
+2. **Puce de conducteur du Tracteur** (admin) — une zone VIDE de 16 px (`<span onclick="editCond()">`, son crayon perdu au
+   nettoyage des émojis) vit DANS la puce : un appui au MILIEU de « Jean » ouvre la fiche du conducteur au lieu de filtrer
+   (l'ajustement tactile du navigateur aimante le doigt vers la cible la plus profonde). Rejoué deux fois. `editCond` n'a pas
+   d'autre entrée : il faut un crayon visible, en frère de la puce, pas en enfant.
+3. **Icône du bouton « traitement »** (formulaire de session) — `updateTracTraitBtn` fait `ico.textContent=''` dans les deux
+   branches : le SVG du carré est effacé au premier appui. Lu, pas vu à l'écran.
+4. **Double appui** — aucun `touch-action:manipulation` global (seulement `.sdp-row`) : deux appuis rapides sur un « + »
+   peuvent zoomer sous iOS. Idée : une règle sur `button, a, [onclick], [role=button], label, summary, select, input,
+   textarea` placée TÔT dans `styles.css` (les `touch-action:none` de `.modal-handle` et `.home-w-drag`, plus bas, gagnent).
+5. **Cibles** réellement petites : `.chip/.fchip/.tfchip/.ptfchip` (26–31 px), `.mvcm-chip`, `.mvr-fchip`, `.hv2-voir-tout`
+   (15 px), `.pil-souslig .pil-gear2`, croix de « Nouvelle cuvée ». Zone en `::after` (aucune n'en porte), verticale ≤ 5 px
+   entre deux rangées de puces (les rangées du Tracteur sont à ~10 px l'une de l'autre).
+6. **Démo avec code** — `#demo-banner` (fixe, 9991) recouvre la rangée haute de l'en-tête (roue, synchro, Personnaliser,
+   Actualiser) : aucun décalage n'est appliqué. La visite publique n'affiche pas le bandeau.
+7. Restent en sombre, mesurés : barres de la carte « Travaux mécaniques » (blanc 60 % sur vert, 2,9) ; `.cmp-alert.warn`.
+
+### 170g. Accompagnement
+
+Guide public : relu sur ce que le lot touche — les 13 passages qui parlent de thème ou de couleur (01, 04, 06, 07, 08, 10,
+11, 12) décrivent un code couleur qui ne change pas ; aucun ne décrit la ligne de cuve ni le panneau « Ce qu'il manque » au
+pixel. **Rien à changer.** `MV_AIDE` : aucun geste ni onglet ne change — **relue, rien à changer**. `MV_INFO` : aucune méthode de calcul
+ne change. `WHATS_NEW` 7.58 : quatre entrées, exécutées par `mv-whatsnew-check`. Visite guidée : aucun sélecteur visé ne bouge.
+
+### 170h. La note de livraison
+
+**Base `8014ce2`. APP 7.57 → 7.58 · SW 8.26 → 8.27.** `npm run build && firebase deploy --only hosting`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/styles.css` | cartes sombres, date, week-ends, `--bordeaux`, champ de la porte CGU | ★ APP · ★ SW |
+| `src/cuvier.js` | ligne de cuve empilée, tournée et champs en sombre | — |
+| `src/cave.js` | maturités et mise en bouteille en sombre | — |
+| `src/pilotage.js` | textes en sombre, deux champs, panneau au-dessus du dock | — |
+| `src/reglages.js` · `src/planning.js` | deux titres ; année active | — |
+| `src/utils.js` | APP 7.58 ; « Quoi de neuf » | ★ APP |
+| `index.html` · `public/sw.js` | 4 versions, deux pastilles vertes · 8.27 | ★ APP · ★ SW |
+| `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | SECTIONS 202 · §170 · base | — |
+
+## 171. ★★★ TOUR-2 — LE RETOUR FERME CE QUI EST OUVERT, ET UN APPUI VA OÙ L'ON APPUIE (23/09 — `src/app.js` · `src/utils.js` · `src/cuvier.js` · `src/pilotage.js` · `src/tracteur.js` · `src/styles.css` · `index.html` · `public/sw.js` · `guide/06-tracteur.html` · `scripts/mv-harnais-retour.mjs` (neuf) · `package.json` · `.github/workflows/ci.yml` · `scripts/harnais-claude-md.mjs` · APP 7.58 → **7.59** · SW 8.27 → **8.28** · base `8014ce2`, s'empile sur §170)
+
+Nico : *« go »* — le lot suivant annoncé en §170f.
+
+### 171a. ★★★ Le retour : une liste de surfaces, chacune avec SA fermeture
+
+`_mvBack` fermait `_mvTopOverlay()` (famille `.overlay`) puis partait sur la page d'accueil du rôle. Six surfaces vivent hors de
+cette famille, chacune ouverte par son module. Rejoué avant le lot : feuille du Cuvier / « Plus » / « c'est fait » ouvertes +
+retour → **la page changeait et la feuille restait par-dessus** ; « Ce qu'il manque » ne se fermait pas.
+
+- `_MV_SURFACES` (app.js) : sélecteur + fermeture **que le module utilise déjà** — `_vendSheetClose`, `_mvTriFermer`,
+  `_pilDiagClose` (désormais exposée), `_mvdsClose`, `_dockPlusClose`, et pour Décider le clic sur son propre bouton
+  (`[data-op=shut]`, `[data-op=fmx]`) : `_PIL_OP` garde l'état, le module se re-rend au clic. **Jamais un
+  `classList.remove` maison** : la fermeture du module remet aussi son état à zéro (`MV_TRI_ETAT`, `_MVDS_UNDO`…).
+- `_mvTopSurface()` : la plus haute à l'écran (z-index), à égalité la dernière dans le DOM — la règle de `_mvTopOverlay`,
+  étendue à toutes les familles. Un dialogue (9200+) ouvert sur la feuille du Cuvier (9000) se ferme d'abord.
+- ★ **La porte CGU (`.mvt-ov`, 9500) n'est PAS dans la liste** : fail-closed, le retour ne doit jamais la faire tomber.
+  Contre-épreuve dédiée.
+- ★★ **L'entrée d'historique.** Ces surfaces s'ouvraient sans `pushState` : sur la page d'accueil du rôle, le retour n'avait
+  rien à consommer et **quittait l'appli**. Chaque ouverture appelle maintenant `window._mvHistPush()` — une fois : la feuille
+  du Cuvier qui remplace une étape par la suivante, le panneau déjà ouvert, la feuille de Décider déjà ouverte n'en reposent
+  pas. `_mvCloseable` compte les surfaces ouvertes, pour que l'entrée soit reposée après une fermeture. ⚠️ Comme pour
+  `openOv` depuis toujours, une surface fermée par sa croix laisse son entrée : le retour suivant ne ferme rien et ramène à
+  l'accueil du rôle. Comportement identique à celui des dialogues, assumé.
+
+### 171b. ★★ La puce de conducteur — une cible invisible dans une cible visible
+
+`<div class="chip" onclick="filtrer"> Jean <span onclick="editCond()" style="padding:12px 8px"></span></div>` : le `<span>` avait
+perdu son émoji au nettoyage des icônes, gardé ses 16 px de marge d'appui. **Rejoué : un appui au MILIEU de « Jean » (centre à
+9 px de la zone) ouvrait la fiche.** L'ajustement tactile de Chromium aimante le doigt vers la cible la plus profonde sous la
+zone de contact. ★ **Deux cibles imbriquées ne se départagent pas au pixel sur un écran tactile : on ne met jamais un bouton
+dans un bouton.** Le crayon devient `<button class="chip chip-ed">` **frère**, visible (`crayon` 16). `editCond` n'avait pas
+d'autre entrée. Rejoué après : appui au milieu → filtre, aucune fiche ; appui sur le crayon (36 × 30) → la fiche.
+Même famille : `updateTracTraitBtn` faisait `ico.textContent=''` dans ses deux branches — le SVG du carré disparaissait au
+premier appui. → `_mvSetIcon(ico, on?'valide':'carre', 18)`, rejoué dans les deux sens.
+
+### 171c. Les appuis
+
+- `button, a, [onclick], [role=button], label, summary, select, input, textarea { touch-action:manipulation }`, posée **juste
+  après `*{}`** : les `touch-action:none` de `.modal-handle`, `.home-w-drag` et des graphes ont la même force et gagnent par leur
+  place (assertion D du harnais). Leaflet pose `none` sur son conteneur, qui l'emporte sur ses descendants.
+- Zones en `::after` : `.chip/.fchip/.tfchip/.ptfchip` (−5 / −3 px : les deux rangées de puces du Tracteur sont à ~10 px),
+  `.hv2-voir-tout` (−10 / −8), `.pil-gear2` (−8 / −6). « ? Aide » et « i » en avaient déjà une (§170a).
+- Démo avec code : `body.mv-demo-on` (posée par `_initLoginDemo`, hauteur mesurée dans `--mv-demo-h`) décale `#app-root` et
+  les en-têtes collants, comme `mv-trial-on`. Rejoué : bandeau 50 px, rangée haute de l'en-tête à y = 66, atteinte.
+
+### 171d. Les contrôles
+
+- `scripts/mv-harnais-retour.mjs` (neuf) — **31 assertions, 11 contre-épreuves**, toutes détectées. A : le VRAI `_mvBack` avec
+  ses cinq voisins, extrait d'app.js, dans un DOM factice (chaque surface seule, l'ordre des couches, l'égalité, la porte CGU,
+  rien d'ouvert) ; B : l'entrée d'historique à chaque ouverture ; C : la puce et l'icône ; D : double appui, zones, bandeau.
+  Contre-épreuve n°1 : l'ANCIEN `_mvBack` mot pour mot → 9 rouges. Branché dans `check`, `prebuild`, la CI ; `npm run test:retour`.
+- ★ **Deux rouges du premier passage venaient du TEST** : l'ancre `_condList().map(` existe quatre fois dans tracteur.js (le
+  harnais lisait un `<select>`) ; et la contre-épreuve « `_mvCloseable` ignore les surfaces » était muette — hors page « hub »,
+  `_mvCloseable` rend vrai par la page seule. Le cas est rejoué sur la page « hub », le seul où la surface fait la différence.
+- **Rejeu sur l'appli compilée** (Chromium 390 × 844, vrais contacts, `/home/claude/tour/rejeu2.py`) : les quatre surfaces
+  ouvertes puis retour → fermées, page inchangée ; dialogue sur feuille → retour 1 ferme le dialogue, retour 2 la feuille ;
+  puce / crayon / icône comme en 171b ; aucune erreur de page.
+
+### 171e. Accompagnement
+
+`MV_AIDE.tracteur` : « Toucher le nom d'un conducteur » (filtre ; crayon → fiche). `guide/06-tracteur.html` : même phrase sous la
+roue crantée (`public/guide.html` régénéré par le crochet — **non livré**). « Quoi de neuf » 7.59 : trois entrées, exécutées par
+`mv-whatsnew-check`. `MV_INFO` : aucun chiffre ne change. Visite guidée : aucun sélecteur visé ne bouge.
+
+### 171f. Ouvert
+
+① Un vrai téléphone Android pour le retour (le rejeu déclenche `popstate`, pas le geste système) et un iPhone pour le double
+appui. ② Petites cibles non traitées : `.mvcm-chip` (Chai, 31 px), `.mvr-fchip` (Réserve), mois J/F/M… du Planning (côte à côte,
+toute la barre est couverte), croix de « Nouvelle cuvée ». ③ `.cmp-alert.warn` et les barres de la carte « Travaux mécaniques »
+en sombre (§170f ⑦). ④ `mv-harnais-contraste --baseline` (§170e), chez Nico.
+
+### 171g. La note de livraison
+
+**Base `8014ce2`, TOUR-1 compris. APP 7.57 → 7.59 · SW 8.26 → 8.28** (7.58 / 8.27 = TOUR-1, livré séparément : si déjà déployé,
+7.59 le remplace). `node scripts/build-guide.mjs`, puis `npm run build && firebase deploy --only hosting`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/app.js` | `_MV_SURFACES`, `_mvTopSurface`, `_mvBack`, `_mvCloseable` ; entrée d'historique à « Plus » et « c'est fait » ; décalage démo | — |
+| `src/utils.js` | APP 7.59 ; « Quoi de neuf » ; fiche Tracteur ; entrée d'historique du tri | ★ APP |
+| `src/cuvier.js` · `src/pilotage.js` | entrée d'historique (feuille, panneau, Décider) ; `_pilDiagClose` exposée (+ TOUR-1) | — |
+| `src/tracteur.js` | crayon du conducteur en bouton frère ; icône « traitement » | — |
+| `src/styles.css` | double appui, zones d'appui, crayon, décalage démo (+ TOUR-1) | ★ APP · ★ SW |
+| `index.html` · `public/sw.js` | 4 versions · 8.28 | ★ APP · ★ SW |
+| `guide/06-tracteur.html` | le crayon du conducteur | — |
+| `scripts/mv-harnais-retour.mjs` · `package.json` · `.github/workflows/ci.yml` | harnais neuf aux trois portes, `test:retour` | — |
+| `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | SECTIONS 203 · §171 · base | — |

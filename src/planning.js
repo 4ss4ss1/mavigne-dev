@@ -156,7 +156,7 @@ function _pl2YearTabs(){
     h+='<button onclick="planSetYear('+y+')" style="cursor:pointer;font-family:inherit;border-radius:11px;padding:7px 13px;min-width:74px;text-align:left;'
       +'border:1.5px solid '+(on?'var(--plan-acc)':'var(--gris-clair)')+';background:'+(on?'var(--plan-acc-pale)':'var(--bg-card)')+';'
       +'box-shadow:'+(on?'0 0 0 1px var(--plan-acc) inset':'none')+';display:flex;flex-direction:column;gap:1px">'
-      +'<span style="font-size:var(--pt-md,20px);font-weight:800;line-height:1;letter-spacing:.4px;color:'+(on?'#524399':'var(--texte)')+'">'+y+'</span>'
+      +'<span style="font-size:var(--pt-md,20px);font-weight:800;line-height:1;letter-spacing:.4px;color:'+(on?'color-mix(in srgb,var(--plan-acc) 70%,var(--texte))':'var(--texte)')+'">'+y+'</span>'
       +'<span style="font-size:var(--pt-nano,9.5px);display:flex;align-items:center;gap:4px;color:var(--texte-doux)"><span style="width:6px;height:6px;border-radius:50%;background:'+(data?'var(--vert-med)':'var(--gris-clair)')+'"></span>'+(data?'saisi':'vide')+'</span>'
     +'</button>';
   });

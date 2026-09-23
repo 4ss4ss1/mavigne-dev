@@ -311,14 +311,14 @@
 .cmp-alert .ic{font-weight:700;flex-shrink:0}
 .cmp-alert.warn{background:var(--orange-pale);color:#8A4210;border:1px solid #EBCBAA}
 .cmp-alert.bad{background:var(--rouge-pale);color:var(--rouge-tx,#A0291E);border:1px solid #E9C4BF}
-.cmp-alert.ok{background:var(--vert-pale);color:#2D5016;border:1px solid #CFE3BF}
+.cmp-alert.ok{background:var(--vert-pale);color:var(--tag-green-tx,#2D5016);border:1px solid #CFE3BF}
 .per-card{display:flex;align-items:center;gap:10px;border:1px solid var(--gris-clair);border-radius:13px;background:var(--bg-card);padding:11px 12px;margin-bottom:8px}
 .per-card.on{border-color:var(--vert-med);box-shadow:0 0 0 2px rgba(61,107,39,0.12)}
 .per-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
 .per-id{flex:1;min-width:0;cursor:pointer}
 .per-nom{font-size:15px;font-weight:600;color:var(--texte);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .per-meta{font-size:11.5px;color:var(--texte-doux);margin-top:1px}
-.per-badge{font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:20px;background:var(--vert-pale);color:#2D5016}
+.per-badge{font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:20px;background:var(--vert-pale);color:var(--tag-green-tx,#2D5016)}
 .per-act{display:flex;gap:6px;flex-shrink:0}
 .per-act button{background:transparent;border:1.5px solid var(--gris);border-radius:9px;min-width:44px;min-height:44px;font-size:13px;cursor:pointer;color:var(--texte-doux);font-family:inherit}
 .per-act button.dgr{border-color:rgba(122,16,32,0.3);color:#7A1020}
@@ -624,7 +624,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v7.57</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v7.59</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -1246,7 +1246,7 @@
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v7.57</div>
+        <div class="mod-header-sub">Ma Vigne v7.59</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
       
@@ -1353,7 +1353,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg></div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v7.57 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div class="ver-tag">Ma Vigne v7.59 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -3479,7 +3479,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:12px;font-weight:600;">v7.57</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:12px;font-weight:600;">v7.59</span>
       </div>
     </div>
     <div class="modal-body">

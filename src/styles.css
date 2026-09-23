@@ -126,6 +126,10 @@
      10 appels. Il devient un renvoi vers --r-lg au lieu d'une valeur jumelle. */
   --radius-card:var(--r-lg,16px);
   --rouge:#A0291E;--rouge-pale:#FAEAE8;
+  /* TOUR-1 : --bordeaux etait appele 11 fois avec son repli #7A1020 mais DECLARE nulle part :
+     en sombre, ce bordeaux tombait a 1,6:1 sur le fond (« % vol potentiel », total des
+     bouteilles, estimation alcoolique). Il devient un jeton qui suit le theme. */
+  --bordeaux:#7A1020;
   --orange:#B85A1A;--orange-pale:#FBF0E6;
   --plan-acc:#7B6DB8;--plan-acc-pale:rgba(123,109,184,0.12);
   --shadow-sm:0 1px 2px rgba(40,30,15,0.05),0 2px 8px rgba(40,30,15,0.07);
@@ -176,6 +180,7 @@ input::placeholder,textarea::placeholder{color:var(--texte-doux);opacity:1;}
   --blanc:#1C1A16;--gris-clair:#2D2924;--gris:#3A352E;
   --texte:#F0EFE9;--texte-med:#D0CEC6;--texte-doux:#B0AEA6;
   --rouge:#E05545;--rouge-pale:rgba(224,85,69,0.22);
+  --bordeaux:#E8848C;
   --orange:#D4721A;--orange-pale:rgba(212,114,26,0.20);
   --plan-acc:#A394E8;--plan-acc-pale:rgba(163,148,232,0.16);
   --shadow-sm:0 2px 8px rgba(0,0,0,0.35);
@@ -212,6 +217,7 @@ input::placeholder,textarea::placeholder{color:var(--texte-doux);opacity:1;}
     --blanc:#1C1A16;--gris-clair:#2D2924;--gris:#3A352E;
     --texte:#F0EFE9;--texte-med:#D0CEC6;--texte-doux:#B0AEA6;
     --rouge:#E05545;--rouge-pale:rgba(224,85,69,0.22);
+  --bordeaux:#E8848C;
     --orange:#D4721A;--orange-pale:rgba(212,114,26,0.20);
     --plan-acc:#A394E8;--plan-acc-pale:rgba(163,148,232,0.16);
     --shadow-sm:0 2px 8px rgba(0,0,0,0.35);
@@ -251,6 +257,13 @@ input::placeholder,textarea::placeholder{color:var(--texte-doux);opacity:1;}
   #app-root:not([data-theme="light"]) .hv2-card-or{background:linear-gradient(135deg,rgba(212,168,75,0.14),rgba(180,130,40,0.10));}
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+/* TOUR-2 (§171) — le double appui ne zoome plus. Sans cette règle, deux appuis rapides sur
+   un « + », un compteur ou une puce faisaient zoomer la page sous iOS au lieu de compter deux
+   fois. `manipulation` garde le défilement et le pincement ; il retire seulement le zoom au
+   double appui. ⚠️ Posée TÔT exprès : les `touch-action:none` plus bas (.modal-handle,
+   .home-w-drag, les graphes) ont la même force et gagnent par leur place. Dans la carte,
+   Leaflet pose `none` sur son conteneur, qui l'emporte sur ses enfants. */
+button,a,[onclick],[role="button"],label,summary,select,input,textarea{touch-action:manipulation;}
 html{overscroll-behavior-y:none;}
 body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;overscroll-behavior-y:none;}
 #app-root{background:var(--bg-app);min-height:100vh;transition:background 0.3s,color 0.3s;color:var(--texte);}
@@ -470,9 +483,33 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .chips-row::-webkit-scrollbar{display:none;}
 .chip{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:var(--pt-micro,11px);font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:var(--bg-card);transition:all 0.15s;display:flex;align-items:center;gap:5px;}
 .chip.active.ac{border-color:var(--acier);background:var(--acier-pale);color:var(--acier);}
+/* TOUR-2 : le crayon du conducteur, FRERE de sa puce (il vivait dedans, invisible). */
+.chip.chip-ed{display:inline-flex;align-items:center;padding-left:var(--e-2,8px);padding-right:var(--e-2,8px);color:var(--texte-doux);}
+/* TOUR-2 — zones d'appui. Ces puces mesurent 26 a 31 px de haut ; la zone s'etend en ::after
+   (aucune d'elles n'en porte) sans changer le dessin. Verticale 5 px : deux rangees de puces
+   (Tracteur) ne sont qu'a ~10 px l'une de l'autre, leurs zones se touchent sans se chevaucher ;
+   laterale 3 px, soit la moitie de l'ecart entre deux puces. */
+.chip,.fchip,.tfchip,.ptfchip{position:relative;}
+.chip::after,.fchip::after,.tfchip::after,.ptfchip::after{content:'';position:absolute;inset:-5px -3px;}
+.hv2-voir-tout{position:relative;}
+.hv2-voir-tout::after{content:'';position:absolute;inset:-10px -8px;}
+.pil-gear2{position:relative;}
+.pil-gear2::after{content:'';position:absolute;inset:-8px -6px;}
+/* TOUR-2 — demo avec code d'acces : le bandeau fixe (#demo-banner, 9991) recouvrait la rangee
+   haute de l'en-tete (roue, synchro, Personnaliser, Actualiser) — aucun decalage n'etait pose.
+   Meme mecanique que le bandeau d'essai (body.mv-trial-on) ; la hauteur est mesuree par
+   _initLoginDemo (--mv-demo-h). */
+body.mv-demo-on #app-root{padding-top:var(--mv-demo-h,40px);}
+body.mv-demo-on .mod-header,body.mv-demo-on .pil-tabsbar{top:var(--mv-demo-h,40px);}
 .readonly-banner{background:var(--or-pale);border:1px solid var(--or);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--terre);display:flex;gap:8px;align-items:center;}
 .scard{background:var(--bg-card);border-radius:16px;margin-bottom:12px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);overflow:hidden;}
 .scard-enc{background:var(--acier);border:1px solid rgba(255,255,255,0.06);}
+/* TOUR-1 : depuis TYPO-1, le titre (.mv-t) et le pourcentage (.mv-n) HERITENT leur couleur
+   (style="color:inherit") — la carte sombre doit donc la porter elle-meme, sinon ils
+   sortent en --texte (foncé) sur le bleu nuit. La couleur est posee sur la regle qui porte
+   le VRAI fond (le degrade, plus bas) : c'est elle que lit mv-harnais-contraste. Le
+   pourcentage sort en blanc : son style="color:inherit" ecrit dans le HTML passe devant
+   toute regle de cette feuille (l'or d'avant n'est plus atteignable sans toucher le JS). */
 .scard-enc .sc-act{color:#fff;}
 .scard-enc .sc-date{color:rgba(255,255,255,0.5);}
 .scard-enc .sc-cond{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.75);}
@@ -1179,8 +1216,11 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .hv2-chip-or{background:rgba(184,145,58,0.15);color:var(--or);}
 
 /* tracteur card sombre */
-.hv2-trac-card{margin:0 16px;background:var(--vert);border-radius:18px;padding:18px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:transform 0.15s;box-shadow:var(--shadow-md);}
+.hv2-trac-card{margin:0 16px;color:#fff;background:color-mix(in srgb,var(--vert) 78%,#000);border-radius:18px;padding:18px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:transform 0.15s;box-shadow:var(--shadow-md);}
 .hv2-trac-card:active{transform:scale(0.98);}
+/* TOUR-1 : meme cause que .scard-enc (TYPO-1, color:inherit). Le fond est assombri de 22 % :
+   invisible en clair (#1E3A12 est deja tres sombre), mais en sombre --vert vaut #5A9E3A et le
+   blanc n'y lisait qu'a 2,9:1 — il passe a ~4,9:1. */
 .hv2-trac-left{flex-shrink:0;}
 .hv2-trac-val{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:#fff;line-height:1;}
 .hv2-trac-val span{font-family:'Outfit',sans-serif;font-size:13px;font-weight:300;color:rgba(255,255,255,0.6);margin-left:2px;}
@@ -2556,7 +2596,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pl2-name.pl2-nameon{background:var(--plan-acc-pale);box-shadow:inset 2px 0 0 var(--plan-acc);}
 .pl2-dh-dow{display:block;font-size:var(--pt-nano,9.5px);font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--texte-doux);}
 .pl2-dh-num{display:inline-block;font-size:var(--pt-base,14px);font-weight:700;margin-top:1px;font-variant-numeric:tabular-nums;color:var(--texte);}
-.pl2-dh.pl2-we .pl2-dh-num,.pl2-dh.pl2-we .pl2-dh-dow{color:var(--gris);}
+.pl2-dh.pl2-we .pl2-dh-num,.pl2-dh.pl2-we .pl2-dh-dow{color:var(--texte-doux);opacity:.72;}
 .pl2-dh.pl2-today .pl2-dh-num{background:var(--vert-med);color:#fff;border-radius:50%;width:24px;height:24px;line-height:24px;}
 .pl2-dh-fer{display:block;width:5px;height:5px;border-radius:50%;background:var(--or);margin:3px auto 0;}
 .pl2-dh-out .pl2-dh-num{color:var(--gris);}
@@ -3055,7 +3095,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 
 /* ══ Lot 1c — Chantier en cours : carte héros (CSS pur, aucun changement de rendu) ══ */
 #trac-enc-banner{display:none !important;}
-.scard-enc{background:linear-gradient(158deg,#20303F,#141E28);border:1px solid rgba(255,255,255,0.08);border-radius:20px;box-shadow:0 8px 26px rgba(15,25,35,0.40);position:relative;}
+.scard-enc{color:#fff;background:linear-gradient(158deg,#20303F,#141E28);border:1px solid rgba(255,255,255,0.08);border-radius:20px;box-shadow:0 8px 26px rgba(15,25,35,0.40);position:relative;}
 .scard-enc::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2.5px;background:linear-gradient(90deg,#8A5A38 0%,#C2871E 50%,#3D6B27 100%);}
 .scard-enc .sc-hd{padding:18px 19px 13px;align-items:flex-start;}
 .scard-enc .sc-ico{width:46px;height:46px;font-size:24px;background:rgba(74,159,200,0.16);}
@@ -3589,6 +3629,10 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
    Accueil, Parcelles et Journal en theme clair. On recible la surface
    REELLEMENT sombre, comme le fait deja LISIBILITE 2 pour les onglets. --- */
 .mod-header .hv2-date{ color:rgba(240,226,200,.78)!important; }
+/* TOUR-1 : la date vit desormais dans .mod-meta-row, posee sur le fond CLAIR de l'en-tete
+   (--bg-app) : la couleur creme ci-dessus y tombait a 1,1:1. Dans la barre meta, elle suit
+   le texte doux du theme (clair : fonce ; sombre : clair). */
+.mod-header .mod-meta-row .hv2-date{ color:var(--texte-doux)!important; }
 /* Pastille meteo de l'Accueil : rendue sur UNE ligne dans .mod-meta-row.
    La regle d'origine empilait temp/desc -> +10 px de hauteur d'en-tete. */
 .mod-meta-row .hv2-meteo-mini{ padding:4px 10px; flex-shrink:0; }
@@ -3638,7 +3682,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .mvt-fl{ display:block; font-size:var(--pt-lbl,10.5px); letter-spacing:.6px; text-transform:uppercase; color:var(--or,#B8911F); font-weight:600; margin-bottom:5px; }
 .mvt-fi{
   width:100%; font-family:'Outfit',sans-serif; font-size:16px; color:var(--texte,#2A2520);
-  background:#fff; border:1px solid var(--line,#E7E1D5); border-radius:10px; padding:11px 12px;
+  background:var(--bg-card,#fff); border:1px solid var(--line,#E7E1D5); border-radius:10px; padding:11px 12px;
   outline:none; transition:border-color .15s,box-shadow .15s;
 }
 .mvt-fi:focus{ border-color:var(--or,#B8911F); box-shadow:0 0 0 3px rgba(184,145,58,0.13); }

@@ -1447,7 +1447,11 @@ var _demoCodeVerified = null;
 
 function _initLoginDemo(){
   var banner = document.getElementById('demo-banner');
-  if(banner) banner.style.display = 'flex';
+  if(banner){ banner.style.display = 'flex';
+    // TOUR-2 : l'appli se decale sous le bandeau (styles.css, body.mv-demo-on) — sinon il
+    // recouvre la rangee haute de l'en-tete, et ses boutons ne repondent plus.
+    document.body.classList.add('mv-demo-on');
+    document.documentElement.style.setProperty('--mv-demo-h', (banner.offsetHeight||40)+'px'); }
   var profiles = document.getElementById('login-profiles');
   if(!profiles) return;
   profiles.style.display = 'block';
@@ -5175,7 +5179,7 @@ function _dockSync(page){
 window._dockSync=_dockSync;
 function _dockGo(p){ _dockPlusClose(); goTo(p); }
 window._dockGo=_dockGo;
-function _dockPlus(){ var s=document.getElementById('mv-dock-sheet'),b=document.getElementById('mv-dock-sheet-bg'); if(s)s.classList.add('show'); if(b)b.classList.add('show'); }
+function _dockPlus(){ var s=document.getElementById('mv-dock-sheet'),b=document.getElementById('mv-dock-sheet-bg'); if(s&&!s.classList.contains('show'))_mvHistPush(); if(s)s.classList.add('show'); if(b)b.classList.add('show'); }
 window._dockPlus=_dockPlus;
 function _dockPlusClose(){ var s=document.getElementById('mv-dock-sheet'),b=document.getElementById('mv-dock-sheet-bg'); if(s)s.classList.remove('show'); if(b)b.classList.remove('show'); }
 window._dockPlusClose=_dockPlusClose;
@@ -5801,8 +5805,53 @@ function openHubAide(){
 // ════ ROUTEUR HISTORIQUE — bouton retour Android/navigateur (v4.35) ════
 // Aucune fermeture d'overlay existante n'est modifiee : au retour, on
 // detecte .overlay.open et on la ferme en priorite, sinon retour au hub.
+// ★ TOUR-2 (§171) — LE RETOUR NE CONNAISSAIT QU'UNE FAMILLE DE FENETRES.
+//   `.overlay` passe par openOv/closeOv ; mais six surfaces vivent hors de cette
+//   famille, chacune avec sa propre ouverture. Rejoue sur l'appli compilee : feuille
+//   du Cuvier ouverte + retour -> la page partait sur l'accueil du role et la feuille
+//   RESTAIT affichee par-dessus. Meme chose pour la feuille « Plus » du dock et la
+//   feuille « c'est fait » ; le panneau « Ce qu'il manque » ne se fermait jamais.
+//   Chaque surface est declaree ICI avec la fermeture QUE SON MODULE UTILISE DEJA
+//   (jamais un classList.remove maison : la fermeture du module remet aussi son
+//   etat a zero). La plus haute a l'ecran se ferme en premier, comme les overlays.
+//   ⚠️ La porte CGU (.mvt-ov) n'est PAS dans la liste : elle est en fail-closed, le
+//   retour ne doit jamais la faire tomber.
+var _MV_SURFACES=[
+  {q:'#mvv-ov.open',        f:function(){ if(window._vendSheetClose) window._vendSheetClose(); }},
+  {q:'#mv-tri-ov.open',     f:function(){ if(window._mvTriFermer) window._mvTriFermer(); }},
+  {q:'#pil-diagwrap.show',  f:function(){ if(window._pilDiagClose) window._pilDiagClose(); }},
+  {q:'.mvds-bg',            f:function(){ _mvdsClose(); }},
+  {q:'#mv-dock-sheet.show', f:function(){ _dockPlusClose(); }},
+  // Decider (Pilotage) : la feuille et la carte agrandie se ferment par leur propre
+  // bouton — le module garde leur etat dans _PIL_OP et se re-rend au clic.
+  {q:'.pil-dz-shw',         f:function(el){ var b=el.querySelector('[data-op="shut"]'); if(b) b.click(); }},
+  {q:'.pil-dz-fm',          f:function(el){ var b=el.querySelector('[data-op="fmx"]'); if(b) b.click(); }}
+];
+function _mvZ(el){ var z=parseInt(getComputedStyle(el).zIndex,10); return isNaN(z)?0:z; }
+// La surface reellement au-dessus, toutes familles confondues : z-index le plus
+// eleve, puis la derniere dans le DOM (meme regle que _mvTopOverlay).
+function _mvTopSurface(){
+  var best=null, bestZ=-Infinity;
+  function cand(el,close){
+    var z=_mvZ(el);
+    if(!best || z>bestZ || (z===bestZ && (best.el.compareDocumentPosition(el) & 4))){ best={el:el,close:close}; bestZ=z; }
+  }
+  var ov=_mvTopOverlay();
+  if(ov) cand(ov,function(){ ov.classList.remove('open'); });
+  _MV_SURFACES.forEach(function(s){
+    var el=document.querySelector(s.q);
+    if(el) cand(el,function(){ s.f(el); });
+  });
+  return best;
+}
+window._mvTopSurface=_mvTopSurface;
+// Une surface qui s'ouvre sans passer par openOv pose AUSSI une entree
+// d'historique : sinon, sur la page d'accueil du role, le retour n'avait plus
+// rien a consommer et QUITTAIT l'appli au lieu de fermer la feuille.
+window._mvHistPush=function(){ _mvHistPush(); };
 function _mvCloseable(){
   if(document.querySelector('.overlay.open')) return true;
+  if(_MV_SURFACES.some(function(s){ return !!document.querySelector(s.q); })) return true;
   var _a=document.querySelector('.page.active');
   return !!(_a && _a.id!=='page-hub');
 }
@@ -5820,8 +5869,8 @@ function _mvTopOverlay(){
   return top;
 }
 function _mvBack(){
-  var ov=_mvTopOverlay();
-  if(ov){ ov.classList.remove('open'); return true; }
+  var top=_mvTopSurface();
+  if(top){ top.close(); return true; }
   var a=document.querySelector('.page.active');
   if(a && a.id!==_landingPage()){ _goLanding(); return true; }
   return false; // deja au hub -> laisser quitter l'app
@@ -8766,7 +8815,9 @@ function _mvdsOpen(o){
   bg.className='mvds-bg'+(fini?' mvds-bg-fin':'');
   bg.innerHTML=h;
   bg.addEventListener('click',function(e){ if(e.target===bg)_mvdsClose(); });
+  var _mvdsDeja=!!document.querySelector('.mvds-bg');
   document.body.appendChild(bg);
+  if(!_mvdsDeja) _mvHistPush();  // TOUR-2 : le retour Android ferme la feuille
   if(snap&&!fini)_mvdsCount(bg.querySelector('.mvds-cnt'),pctOld,pctNew);
 }
 

@@ -5541,7 +5541,7 @@ var _ECO_IN_CSS='width:78px;padding:7px 8px;border:1.5px solid var(--gris-clair)
 var _ECO_ROW_CSS='display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap';
 function _ecoCarte(titre,sous,corps){
   return '<div style="background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin:14px 16px">'
-    +'<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--cave,#14110D);margin-bottom:3px">'+titre+'</div>'
+    +'<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--texte,#14110D);margin-bottom:3px">'+titre+'</div>'
     +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-bottom:12px">'+sous+'</div>'
     +corps+'</div>';
 }
@@ -5758,7 +5758,7 @@ function _aocRenderCard(){
      `mvc-*` sont posees par `_caveV2InjectCss` (cave.js) : arriver dans les
      Reglages sans avoir ouvert la Cave rendrait cette carte SANS STYLE. */
   var h='<div style="background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin:14px 0">'
-    +'<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--cave,#14110D);margin-bottom:3px">Appellations et plafonds de rendement</div>'
+    +'<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--texte,#14110D);margin-bottom:3px">Appellations et plafonds de rendement</div>'
     +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-bottom:12px">Le rendement maximum est fix\u00e9 <b>par arr\u00eat\u00e9, campagne par campagne</b>. D\u00e9clarez vos appellations, posez leur plafond pour chaque mill\u00e9sime, puis rattachez vos parcelles. Un plafond pos\u00e9 directement sur une parcelle (Cave \u203a Le mill\u00e9sime) reste <b>prioritaire</b> sur celui de son appellation.</div>'
     +'<div style="height:3px;border-radius:3px;background:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27);margin-bottom:14px"></div>';
 

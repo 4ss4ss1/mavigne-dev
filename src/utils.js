@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.57';
+export const APP_VERSION = '7.59';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -394,6 +394,7 @@ window._mvTriOuvrir = function(o){
   }
   _mvTriRendre();
   requestAnimationFrame(function(){ ov.classList.add('open'); });
+  if(window._mvHistPush) window._mvHistPush();  /* TOUR-2 : le retour Android ferme cette surface (app.js, _MV_SURFACES) */
   return true;
 };
 
@@ -715,6 +716,35 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.59', items: [
+    { emoji: 'retour', titre: 'Le bouton retour du téléphone ferme ce qui est ouvert',
+      desc: "Sur Android, le bouton retour ne fermait que certaines fenêtres. Avec une feuille du Cuvier, la feuille «\u00a0Plus\u00a0» du menu, "
+        + "la feuille «\u00a0c’est fait\u00a0» après une validation, le panneau «\u00a0Ce qu’il manque\u00a0» du Pilotage, la feuille de tri ou les feuilles "
+        + "de Décider, il changeait de page et laissait la feuille par-dessus. Il la ferme maintenant, et vous restez où vous étiez." },
+    { emoji: 'tracteur', titre: 'Tracteur\u00a0: toucher un conducteur filtre, le crayon modifie',
+      desc: "Pour l’administrateur, un crayon invisible vivait dans chaque nom de conducteur\u00a0: un appui au milieu de «\u00a0Jean\u00a0» ouvrait "
+        + "sa fiche au lieu de filtrer ses sessions. Le nom filtre, et un petit crayon visible, juste à côté, ouvre la fiche. "
+        + "L’icône de la case «\u00a0traitement\u00a0» du formulaire de session ne disparaît plus au premier appui." },
+    { emoji: 'doigt', titre: 'Des appuis plus sûrs',
+      desc: "Deux appuis rapides sur un bouton ne font plus zoomer la page sur iPhone. Les puces de filtre, «\u00a0Tout voir\u00a0» de l’accueil "
+        + "et la roue du Pilotage répondent sur une zone plus large que leur dessin." }
+  ] },
+  { v: '7.58', items: [
+    { emoji: 'contraste', titre: 'Des textes redevenus lisibles',
+      desc: "Plusieurs titres et chiffres étaient écrits foncé sur fond foncé ou clair sur fond clair\u00a0: la session tracteur <b>en cours</b> "
+        + "(titre et pourcentage), la carte «\u00a0Travaux mécaniques\u00a0» de l’accueil, la <b>date</b> sous l’en-tête de chaque module, "
+        + "les samedis et dimanches du Planning, l’année choisie du Planning. En thème sombre\u00a0: les chiffres et les titres de "
+        + "Pilotage › L’année, le panneau «\u00a0Ce qu’il manque\u00a0», les titres des Réglages, les pastilles «\u00a0Active\u00a0». Tout se lit, dans les deux thèmes." },
+    { emoji: 'cuve', titre: 'Le Cuvier\u00a0: la ligne de chaque cuve ne se chevauche plus',
+      desc: "Dans la liste des cuves, le nom, les parcelles, le pourcentage de fermentation et l’état se superposaient sur une seule ligne. "
+        + "Le nom est de nouveau au-dessus, les parcelles et le dernier relevé en dessous, la barre d’avancement sous le tout." },
+    { emoji: 'lune', titre: 'Thème sombre\u00a0: les champs de saisie ne sont plus blancs',
+      desc: "Dans la tournée du Cuvier, les maturités, la mise en bouteille, les relevés et l’écran d’acceptation des conditions, "
+        + "les champs restaient blancs avec un texte clair\u00a0: on ne voyait pas ce qu’on tapait. Ils suivent maintenant le thème, "
+        + "comme la cuve déjà relevée de la tournée et le formulaire des maturités." },
+    { emoji: 'graphique', titre: 'Pilotage\u00a0: « Ce qu’il manque » passe devant la barre du bas',
+      desc: "Le panneau ouvert par «\u00a0N choses à compléter\u00a0» passait sous la barre des modules, qui cachait son bas. Il passe désormais devant." }
+  ] },
   { v: '7.57', items: [
     { emoji: 'equipe', titre: 'Décider ne compte plus un salarié en formation dans l’équipe du jour',
       desc: "Dans Pilotage › Décider, la tournée du jour et «\u00a0Qui fait quoi\u00a0» comptaient un salarié <b>en formation</b> "
@@ -3442,6 +3472,7 @@ var MV_AIDE = {
       ['Onglet Sessions', ": le travail fait avec la machine. Onglet Entretien : révisions, réparations, appoints de cuve."],
       ['Le parc', "s’affiche en pastilles sous les chiffres — toucher une machine filtre l’écran."],
       ['Une session en cours', "reste signalée en haut tant qu’elle n’est pas fermée."],
+      ['Toucher le nom d’un conducteur', "filtre ses sessions. Pour l’administrateur, le petit crayon juste à côté ouvre sa fiche : formé, en formation, suspendu."],
       ['Faire défiler la liste ne coche rien', ": seule compte une parcelle touchée doigt immobile. Toucher l’écran pour arrêter une liste qui défile ne coche rien non plus, et deux appuis coup sur coup n’en font qu’un — la liste vient de se réordonner, la parcelle sous le doigt n’est plus la même. Décocher une parcelle demande une confirmation, parce que cela efface le temps mesuré ou la valeur saisie dessus."],
       ['Reprendre la mesure', ": chrono allumé, toucher une parcelle déjà faite propose de la reprendre — le temps de cette fois s’ajoute à celui d’avant. Interrompre une parcelle garde le temps déjà passé, et rouvrir la session ou l’appli pendant une mesure ne l’arrête plus. Commencer une mesure dans une autre session ferme celle restée ouverte."],
       ['Historique des gestes', "en bas de la session, pour l’administrateur : chaque début, fin, reprise, pause et décoche, avec l’heure, gardés trois jours. « Rétablir » remet une parcelle décochée telle qu’elle était."],

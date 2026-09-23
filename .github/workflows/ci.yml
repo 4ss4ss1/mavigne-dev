@@ -285,6 +285,14 @@ jobs:
           node scripts/mv-harnais-champ.mjs
           node scripts/mv-harnais-champ.mjs --contre
 
+      # TOUR-2 (§171) : le retour Android ne fermait que la famille .overlay (feuilles du Cuvier, « Plus »,
+      # « c'est fait », « Ce qu'il manque », tri, Decider restaient ouvertes) ; un crayon invisible dans la puce
+      # de conducteur volait l'appui. Le VRAI _mvBack d'app.js dans un DOM factice ; 11 contre-epreuves.
+      - name: Harnais — le retour ferme ce qui est ouvert, un appui va ou l'on appuie
+        run: |
+          node scripts/mv-harnais-retour.mjs
+          node scripts/mv-harnais-retour.mjs --contre
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build

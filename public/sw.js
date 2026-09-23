@@ -1,4 +1,13 @@
-// MA VIGNE — Service Worker v8.26
+// MA VIGNE — Service Worker v8.28
+// v8.28 (23/09/2026) — TOUR-2 : le retour Android ferme toutes les surfaces (_MV_SURFACES + _mvTopSurface, app.js :
+//   feuille du Cuvier, tri, « Ce qu'il manque », « c'est fait », « Plus », feuilles de Décider ; chaque ouverture pose une
+//   entrée d'historique) ; crayon du conducteur en bouton frère (l'ancien, invisible, volait l'appui) ; icône « traitement »
+//   rétablie ; touch-action:manipulation ; zones d'appui des puces ; décalage sous le bandeau de la démo. APP 7.58 → 7.59.
+// v8.27 (23/09/2026) — TOUR-1 : affichage — textes illisibles corrigés (session tracteur en cours et carte « Travaux
+//   mécaniques » : couleur perdue depuis TYPO-1 ; date de la barre méta ; week-ends et année du Planning ; Pilotage et
+//   Réglages en sombre : --cave pris comme couleur de texte ; --bordeaux devient un jeton des deux thèmes) ; ligne de cuve du
+//   Cuvier ré-empilée (spans sans display:block) ; champs blancs en dur → --bg-card (tournée, maturités, bouteilles,
+//   relevés, porte CGU) ; panneau « Ce qu'il manque » au-dessus du dock. APP 7.57 → 7.58.
 // v8.26 (23/09/2026) — CHAMP-1 + CHAMP-2 : les heures « dans les rangs » (_planChampPersRange, planning.js — formation
 //   et événement familial à 0, absence partielle amputée de ses heures) remplacent le travail effectif de la loi dans
 //   Pilotage › Décider (équipe du jour de la tournée et de « Qui fait quoi » ; la liste dit « en formation », « en arrêt »)
@@ -4121,7 +4130,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.26';
+const CACHE_NAME   = 'mavigne-v8.28';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4137,7 +4146,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.26 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.28 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4157,7 +4166,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.26 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.28 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

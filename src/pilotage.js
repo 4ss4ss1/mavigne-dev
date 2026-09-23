@@ -1610,7 +1610,7 @@ function _pilDeuxCadresHtml(ann){
     return '<div style="flex:1;min-width:210px;background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:13px;padding:12px 14px">'
       +'<div style="font-size:var(--pt-nano,9.5px);letter-spacing:1.4px;text-transform:uppercase;color:var(--texte-doux);font-weight:700">'+titre+'</div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:3px 0 7px;line-height:1.4">'+sous+'</div>'
-      +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xl,27px);font-weight:700;color:var(--cave);line-height:1.05">'+val
+      +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xl,27px);font-weight:700;color:var(--texte);line-height:1.05">'+val
       +'<span style="font-family:Outfit,sans-serif;font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--texte-doux)">'+unite+'</span></div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px;line-height:1.4">'+det+'</div></div>';
   };
@@ -1662,7 +1662,7 @@ function _pilDeuxCadresHtml(ann){
   });
 
   return '<div id="pil-an-cadres" style="background:var(--bg-app);border:1px solid var(--gris-clair);border-radius:16px;padding:14px 16px;margin:0 0 16px">'
-    +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-md,20px);font-weight:700;color:var(--cave)">Deux fa\u00e7ons de compter votre ann\u00e9e</div>'
+    +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-md,20px);font-weight:700;color:var(--texte)">Deux fa\u00e7ons de compter votre ann\u00e9e</div>'
     +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin:3px 0 12px;line-height:1.5">'
     +'Un domaine en a <b>deux</b>, et elles ne r\u00e9pondent pas \u00e0 la m\u00eame question. '
     +'Elles ne donnent pas le m\u00eame total\u00a0: c\u2019est normal, ce n\u2019est pas une erreur.</div>'
@@ -1907,7 +1907,7 @@ function _pilPanelEtp(d){
     //   ce qui n'existe pas \u2014 et fait douter du reste.
     +(_partN?('<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:repeating-linear-gradient(45deg,rgba(122,92,168,.30) 0 2px,transparent 2px 5px);display:inline-block"></i> deux p\u00e9riodes se recouvrent \u2014 deux barres au m\u00eame endroit</span>'):'')
     +'</div>';
-  var secTtl='font-weight:600;font-size:var(--pt-txt,12.5px);color:var(--cave);margin:14px 0 2px';
+  var secTtl='font-weight:600;font-size:var(--pt-txt,12.5px);color:var(--texte);margin:14px 0 2px';
   // ── Frise annuelle : clic sur une campagne = ZOOM (axe X et axe Y) ───────────
   // ★ Plus de chip « Annee » : la frise EST la tuile. Une case a cocher qui vide
   //   son propre panneau n'est pas un reglage, c'est une trappe.
@@ -1979,7 +1979,7 @@ function _pilPanelTemps(d){
     +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:#5C8A3E;display:inline-block"></i> dans l\'effectif</span>'
     +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:#9B2D1F;display:inline-block"></i> pic \u2014 sous-effectif</span>'
     +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:16px;height:0;border-top:2px solid #14110D;display:inline-block"></i> effectif pr\u00e9sent</span></div>';
-  var secTtl='font-weight:600;font-size:var(--pt-txt,12.5px);color:var(--cave);margin:14px 0 2px';
+  var secTtl='font-weight:600;font-size:var(--pt-txt,12.5px);color:var(--texte);margin:14px 0 2px';
   // ── Bloc répartition « Où va le temps » (présence → vigne / tracteur / autres) ──
   // ★ Meme periode que `cd` : additionner les heures de tracteur d'une campagne
   //   a la charge d'une autre donnerait une repartition dont les deux parts ne
@@ -2014,7 +2014,7 @@ function _pilPanelTemps(d){
   _footR+=' <b>Une moyenne n\u2019est pas un pic.</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.avc.temps')):'')+'';
   var repartBlock='<div style="border:1px solid var(--gris);border-radius:11px;padding:12px 14px;margin-bottom:12px;background:#fff">'
     +'<div style="font-size:var(--pt-micro,11px);font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--texte-doux)">O\u00f9 va le temps de l\u2019\u00e9quipe</div>'
-    +'<div style="display:flex;align-items:baseline;gap:7px;margin:8px 0 3px"><span style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xl,27px);font-weight:700;color:var(--cave)">'+_pilNum(_prez)+' h</span><span style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux)">pr\u00e9sence \u00b7 '+_etpF(_prez)+' ETP \u00e9quipe</span></div>'
+    +'<div style="display:flex;align-items:baseline;gap:7px;margin:8px 0 3px"><span style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xl,27px);font-weight:700;color:var(--texte)">'+_pilNum(_prez)+' h</span><span style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux)">pr\u00e9sence \u00b7 '+_etpF(_prez)+' ETP \u00e9quipe</span></div>'
     +'<div style="display:flex;height:24px;border-radius:7px;overflow:hidden;border:1px solid var(--gris);margin:9px 0">'+_segR(_wV,'linear-gradient(180deg,#5C8A3A,#3D6B27)')+_segR(_wT,'linear-gradient(180deg,#6FB6D6,#4A9FC8)')+_segR(_wA,'linear-gradient(180deg,#B98A5E,#8A5A38)')+'</div>'
     +_rowR('#3D6B27','Travaux vigne','(bar\u00e8me)',_vig,_pV,_etpF(_vig))
     +((_tH>0)?_rowR('#4A9FC8','Tracteur','(estim\u00e9 h/ha)',_tH,_pT,_etpF(_tH)):'')
@@ -3216,7 +3216,7 @@ function _pilOpAction(el){
   else if(op==='stp'){ var k=el.getAttribute('data-k'), dv=parseFloat(el.getAttribute('data-d'))||0;
     if(k==='jour'){ OP.J=Math.max(1,Math.min(12,Math.round(((C.e0.J||7)+dv)*2)/2)); if(OP.J===C.jPlan) OP.J=null; }
     else if(k==='coup'){ OP.coup=Math.max(0,Math.min(180,(C.e0.coup||0)+dv)); if(OP.coup===C.coupPlan) OP.coup=null; } }
-  else if(op==='sheet'){ OP._sheet=el.getAttribute('data-k'); }
+  else if(op==='sheet'){ if(!OP._sheet&&window._mvHistPush) window._mvHistPush(); OP._sheet=el.getAttribute('data-k'); }
   else if(op==='shut'){ OP._sheet=null; }
   else if(op==='pp'){ var nm=el.getAttribute('data-nom'); if(el.getAttribute('data-b')==='1') OP.excl[nm]=!OP.excl[nm]; else OP.add[nm]=!OP.add[nm]; }
   else if(op==='R'){ OP.R=Math.max(0,(OP.R||0)+(parseInt(el.getAttribute('data-d'),10)||0)); }
@@ -3226,7 +3226,7 @@ function _pilOpAction(el){
   else if(op==='reset'){ OP.excl={}; OP.add={}; OP.R=0; OP.J=null; OP.coup=null; OP.ref=null; OP.refManuel=false; OP.H=null; }
   else if(op==='essai'){ OP.R=(OP.R||0)+(parseInt(el.getAttribute('data-r'),10)||0); }
   else if(op==='renfort'){ _dzOuvrirCarte('renfort'); return; }
-  else if(op==='fm'){ OP._fm=true; }
+  else if(op==='fm'){ if(!OP._fm&&window._mvHistPush) window._mvHistPush(); OP._fm=true; }
   else if(op==='fmx'){ OP._fm=false; }
   else if(op==='autres'){ OP._autres=!OP._autres; }
   else if(!_opCanEdit()){ return; }
@@ -9275,7 +9275,7 @@ function _pilCssV2(){
   +'.pil-photo{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:14px;padding:13px 14px 12px;box-shadow:var(--shadow-sm);text-align:left;width:100%;font-family:inherit;cursor:pointer;transition:border-color .12s;min-height:112px;display:block}'
   +'.pil-photo:hover{border-color:var(--or)}'
   +'.pil-photo .k{display:flex;align-items:center;gap:6px;font-size:var(--pt-nano,9.5px);letter-spacing:1.5px;text-transform:uppercase;color:var(--texte-doux);font-weight:700}'
-  +'.pil-photo .v{display:block;font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xxl,31px);font-weight:700;line-height:1.05;margin:5px 0 0;color:var(--cave);font-variant-numeric:tabular-nums}'
+  +'.pil-photo .v{display:block;font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xxl,31px);font-weight:700;line-height:1.05;margin:5px 0 0;color:var(--texte);font-variant-numeric:tabular-nums}'
   +'.pil-photo .u{display:inline;font-family:Outfit,sans-serif;font-size:var(--pt-base,14px);font-weight:600;color:var(--texte-doux)}'
   +'.pil-photo .s{display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px;line-height:1.35}'
   +'.pil-photo .go{display:block;font-size:var(--pt-lbl,10.5px);color:var(--terre);font-weight:700;margin-top:7px}'
@@ -9288,11 +9288,11 @@ function _pilCssV2(){
   +'.pil-diagbtn{border:1px solid var(--orange);background:var(--orange-pale);color:var(--orange);border-radius:9px;padding:6px 11px;font-size:var(--pt-txt,12.5px);font-weight:700;white-space:nowrap;min-height:34px;font-family:inherit;cursor:pointer}'
   +'.pil-diagbtn.grave{border-color:var(--rouge);background:var(--rouge-pale);color:var(--rouge-tx,#A0291E)}'
   +'.pil-diagbtn.clean{border-color:var(--vert-med);background:var(--vert-pale);color:var(--vert-med)}'
-  +'.pil-diagwrap{position:fixed;inset:0;background:rgba(20,17,13,.45);z-index:90;display:none;align-items:flex-end;justify-content:center}'
+  +'.pil-diagwrap{position:fixed;inset:0;background:rgba(20,17,13,.45);z-index:8905;display:none;align-items:flex-end;justify-content:center}'
   +'.pil-diagwrap.show{display:flex}'
   +'.pil-diagsheet{background:var(--bg-app);width:100%;max-width:640px;max-height:86vh;overflow:auto;border-radius:18px 18px 0 0;padding:17px 17px 34px}'
   +'.pil-diag-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}'
-  +'.pil-diag-t{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-lg,23px);font-weight:700;color:var(--cave);line-height:1.15}'
+  +'.pil-diag-t{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-lg,23px);font-weight:700;color:var(--texte);line-height:1.15}'
   +'.pil-diag-s{font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-top:2px}'
   +'.pil-diag-x{border:1px solid var(--gris);background:var(--bg-card);border-radius:8px;width:32px;height:32px;font-size:var(--pt-sm,17px);color:var(--texte-doux);flex-shrink:0;font-family:inherit;cursor:pointer}'
   +'.pil-diag-ok{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:13px;padding:16px;text-align:center;color:var(--vert-med);font-weight:600;margin-top:11px}'
@@ -9307,7 +9307,7 @@ function _pilCssV2(){
   +'.pil-dl-f{font-size:var(--pt-txt,12.5px);color:var(--texte-doux);line-height:1.5}'
   +'.pil-dl-f b{color:var(--texte)}'
   +'.pil-diag-go{margin-top:9px;border:1px solid var(--cave);background:var(--cave);color:var(--or-clair);border-radius:8px;padding:7px 13px;font-size:var(--pt-txt,12.5px);font-weight:700;font-family:inherit;cursor:pointer;min-height:34px}'
-  +'.pil-diag-go.ghost{background:var(--bg-card);color:var(--cave)}'
+  +'.pil-diag-go.ghost{background:var(--bg-card);color:var(--texte)}'
   +'.pil-flag{cursor:pointer}'
   // ══ LA SOUS-LIGNE — ce qui reste du bandeau de titre ══
   +'.pil-souslig{max-width:1280px;margin:0 auto;padding:7px 24px 0;display:flex;align-items:center;gap:10px;'
@@ -10044,17 +10044,20 @@ function _pilDiagSheetHtml(quoi){
 function _pilDiagOpen(quoi){
   var w=document.getElementById('pil-diagwrap'); if(!w) return;
   var b=document.getElementById('pil-diagsheet'); if(b) b.innerHTML=_pilDiagSheetHtml(quoi||null);
+  var _deja=w.classList.contains('show');
   w.classList.add('show');
+  if(!_deja){ if(window._mvHistPush) window._mvHistPush();  /* TOUR-2 : le retour Android ferme cette surface (app.js, _MV_SURFACES) */ }
 }
 function _pilDiagClose(){
   var w=document.getElementById('pil-diagwrap'); if(w) w.classList.remove('show');
 }
+window._pilDiagClose=_pilDiagClose;   // TOUR-2 : appelee par le retour Android (app.js)
 
 // ── Paramétrage : carte « objectif » + fenêtres de tâches ──
 function _pilObjCard(cd,admin){
   var objIso=_pilObjectifGet();
   var cardCss='background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin-bottom:16px';
-  var ttlCss='font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--cave)';
+  var ttlCss='font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--texte)';
   var inCss='border:1px solid var(--gris);border-radius:7px;padding:5px 8px;font-family:Outfit;font-size:var(--pt-base,14px);font-weight:700;background:#fff;color:var(--texte)';
   var nom=cd?cd.saison:_pilSaisonNom();
   return '<div style="'+cardCss+'">'
@@ -10074,7 +10077,7 @@ function _pilObjCard(cd,admin){
 function _pilSimEcoCard(admin){
   var e=(window.CONFIG&&window.CONFIG.eco)||{};
   var cardCss='background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin-bottom:16px';
-  var ttlCss='font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--cave)';
+  var ttlCss='font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--texte)';
   var inCss='width:78px;padding:7px 8px;border:1.5px solid var(--gris-clair);border-radius:9px;font-family:inherit;font-size:var(--pt-base,14px);text-align:right;background:var(--bg-app);color:var(--texte);box-sizing:border-box';
   var dis=admin?'':' disabled';
   // Vide = valeur par defaut : on n'ecrit jamais le defaut en base, il reste dans le lecteur
@@ -10156,7 +10159,7 @@ function _pilParamBody(d){
   var cd=(window._chargeSaisonData&&window.getSaisonActive)?window._chargeSaisonData(window._pilSaison()):null;
   var admin=(typeof window.isAdmin==='function')&&window.isAdmin();
   var cardCss='background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin-bottom:16px';
-  var ttlCss='font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--cave)';
+  var ttlCss='font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--texte)';
   var thCss='text-align:left;font-size:var(--pt-micro,11px);text-transform:uppercase;letter-spacing:.04em;color:var(--texte-doux);padding:6px 8px;border-bottom:1px solid var(--gris-clair)';
   var tdCss='padding:7px 8px;border-bottom:1px solid #F0ECE1';
   if(!cd||!cd.taskWindows||!cd.taskWindows.length){
@@ -10196,8 +10199,8 @@ function _pilParamBody(d){
     var tag=t.horsPeriode
       ? '<span style="font-size:var(--pt-lbl,10.5px);color:#9B2D1F;font-weight:700" title="Une fen\u00eatre est enregistr\u00e9e pour cette t\u00e2che, mais ses dates sont hors de cette p\u00e9riode. La fen\u00eatre par d\u00e9faut est appliqu\u00e9e.">\u26a0 hors p\u00e9riode</span>'
       : (t.custom?'<span style="font-size:var(--pt-lbl,10.5px);color:var(--orange);font-weight:700">\u2022 perso</span>':'<span style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux)">auto</span>');
-    var inCss='border:1px solid var(--gris);border-radius:7px;padding:3px 5px;font-family:Outfit;font-size:var(--pt-txt,12.5px);background:#fff';
-    var nCss='width:58px;text-align:center;border:1px solid var(--gris);border-radius:7px;padding:3px 0;font-family:Outfit;font-size:var(--pt-txt,12.5px);background:#fff';
+    var inCss='border:1px solid var(--gris);border-radius:7px;padding:3px 5px;font-family:Outfit;font-size:var(--pt-txt,12.5px);background:var(--bg-card,#fff);color:var(--texte)';
+    var nCss='width:58px;text-align:center;border:1px solid var(--gris);border-radius:7px;padding:3px 0;font-family:Outfit;font-size:var(--pt-txt,12.5px);background:var(--bg-card,#fff);color:var(--texte)';
     return '<tr>'
       +'<td style="'+tdCss+';white-space:nowrap"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:'+_taskColor(t.nom)+';margin-right:7px;vertical-align:-1px"></span><b>'+_pilEsc(t.nom)+'</b> '+tag+'</td>'
       +'<td style="'+tdCss+';color:var(--texte-doux);white-space:nowrap">'+_pilNum(t.h)+' h</td>'

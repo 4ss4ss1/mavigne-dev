@@ -1289,7 +1289,8 @@ function updateTracTraitBtn(pfx){
   var lbl=document.getElementById(pfx+'-trait-lbl');
   if(!btn)return;
   btn.className='trac-trait-toggle'+(on?' on':'');
-  if(ico)ico.textContent=on?'':'';
+  // TOUR-2 : textContent='' effacait le SVG du carre au premier appui (les deux branches vides).
+  if(ico&&window._mvSetIcon)window._mvSetIcon(ico,on?'valide':'carre',18);
   if(lbl)lbl.style.color=on?'var(--orange)':'var(--texte)';
 }
 
@@ -1461,7 +1462,14 @@ function renderTracteur(){
   // Filtres conducteurs
   const cc=document.getElementById('cond-chips');
   if(cc)cc.innerHTML=`<div class="chip ${window.fCond==='tous'?'active ac':''}" onclick="window.fCond='tous';renderTracteur()">Tous</div>`
-    +_condList().map(c=>`<div class="chip ${window.fCond===c.nom?'active ac':''}" onclick="window.fCond='${_escAttr(c.nom)}';renderTracteur()">${c.statut==='En formation'?'':''} ${_escHtml(c.nom)}${isAdmin()?`<span style="opacity:0.5;margin-left:4px;padding:12px 8px;margin-top:-12px;margin-bottom:-12px;display:inline-flex;align-items:center" onclick="event.stopPropagation();editCond('${_escAttr(c.nom)}')"></span>`:''}</div>`).join('');
+    // ★ TOUR-2 (§171) : le crayon d'edition vivait DANS la puce, en <span> vide (son emoji
+    //   avait disparu au nettoyage des icones) avec 12 px de marge d'appui. Invisible, et
+    //   l'ajustement tactile du navigateur y aimantait le doigt : un appui au MILIEU de
+    //   « Jean » ouvrait la fiche au lieu de filtrer (rejoue sur l'appli compilee). Le crayon
+    //   devient un bouton VISIBLE, FRERE de la puce : filtrer et modifier ne partagent plus
+    //   aucun pixel.
+    +_condList().map(c=>`<div class="chip ${window.fCond===c.nom?'active ac':''}" onclick="window.fCond='${_escAttr(c.nom)}';renderTracteur()">${_escHtml(c.nom)}</div>`
+      +(isAdmin()?'<button type="button" class="chip chip-ed" aria-label="Modifier '+_escAttr(c.nom)+'" title="Modifier '+_escAttr(c.nom)+'" onclick="editCond(\''+_escAttr(c.nom)+'\')">'+_mvIcon('crayon',16)+'</button>':'')).join('');
 
   if(cc && typeof isAdmin==='function' && isAdmin()) cc.insertAdjacentHTML('beforeend','<div class="chip" style="border-style:dashed;opacity:0.85;cursor:pointer" onclick="openAddConducteur()">Conducteur</div>');
 

@@ -9,8 +9,8 @@
   },
   "code": {
     "clair": {
-      "mesurees": 853,
-      "nonResoluble": 258,
+      "mesurees": 854,
+      "nonResoluble": 261,
       "fondInconnu": 428,
       "sous": {
         "src/app.js": 5,
@@ -26,33 +26,33 @@
       }
     },
     "sombre": {
-      "mesurees": 853,
-      "nonResoluble": 258,
+      "mesurees": 854,
+      "nonResoluble": 261,
       "fondInconnu": 430,
       "sous": {
         "src/app.js": 7,
-        "src/cave.js": 20,
-        "src/cuvier.js": 27,
+        "src/cave.js": 16,
+        "src/cuvier.js": 20,
         "src/phyto.js": 1,
-        "src/pilotage.js": 8,
+        "src/pilotage.js": 7,
         "src/planning.js": 8,
-        "src/reglages.js": 15,
+        "src/reglages.js": 14,
         "src/reserve.js": 7,
         "src/tracteur.js": 5,
-        "index.html": 25,
-        "src/styles.css": 90
+        "index.html": 23,
+        "src/styles.css": 89
       }
     }
   },
   "surfaces": {
     "src/app.js": 5,
     "src/cave.js": 1,
-    "src/cuvier.js": 3,
-    "src/pilotage.js": 12,
+    "src/cuvier.js": 1,
+    "src/pilotage.js": 1,
     "src/planning.js": 6,
-    "src/reglages.js": 3,
+    "src/reglages.js": 1,
     "src/tracteur.js": 1,
     "index.html": 1,
-    "src/styles.css": 11
+    "src/styles.css": 10
   }
 }
