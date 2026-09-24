@@ -8348,7 +8348,7 @@ function openValidationPanel(nomParcelle,nomTache,btn){
   document.getElementById('vp-equipe-val').value='non';
   document.getElementById('vp-equipe-section').style.display='none';
   // Préparer la liste des membres
-  _buildMembresCheckboxes('vp-membres-pick',nomParcelle);
+  _buildMembresCheckboxes('vp-membres-pick',nomParcelle,_eqtHors(nomTache));
   var jEC=JOURNAL.find(function(j){return j.parcelle===nomParcelle&&j.tache===nomTache&&j.statut==='En cours'&&!j.meteo&&j.ts_debut;});
   var vpT=document.getElementById('vp-temps-ecoule');
   if(jEC&&vpT){var el=Date.now()-jEC.ts_debut,hh=Math.floor(el/3600000),mm=Math.floor((el%3600000)/60000);vpT.style.display='block';vpT.textContent='Démarré il y a '+(hh>0?hh+'h ':'')+mm+'min';}
@@ -8375,7 +8375,7 @@ function toggleNivEquipeMode(val){
   });
   var hv=document.getElementById('niv-equipe-val');if(hv)hv.value=val;
   var sec=document.getElementById('niv-equipe-section');if(sec)sec.style.display=val==='oui'?'block':'none';
-  if(val==='oui')_buildMembresCheckboxes('niv-membres-pick','');
+  if(val==='oui')_buildMembresCheckboxes('niv-membres-pick','',_eqtHors(_nivTache));
 }
 function toggleJEMode(val){
   document.querySelectorAll('#je-equipe-pick .pchk').forEach(el=>{
@@ -8385,11 +8385,32 @@ function toggleJEMode(val){
   document.getElementById('je-equipe-val').value=val;
   document.getElementById('je-equipe-section').style.display=val==='oui'?'block':'none';
 }
-function _buildMembresCheckboxes(containerId,excludeNom){
+// ★★ TV-2 (23/09/2026) — LE VALIDATEUR PEUT SE DÉCOCHER DU GROUPE (administrateur seulement).
+//   Nico : « il faut permettre au validateur de se décocher (seulement si admin) ». Le validateur
+//   (`qui`) était IMPLICITEMENT dans le groupe (_jePrefillTeam : « validateur implicite ») : quand
+//   Nico valide pour l'équipe sans être dans les rangs, ses heures allaient aux parcelles
+//   (_ecoTempsVigne, §172d). L'entrée garde `qui` — c'est l'AUTEUR, la traçabilité ne bouge pas —
+//   et porte `quiHors:true` : l'auteur n'a pas travaillé. Les lecteurs du groupe (_ecoTempsVigne,
+//   _ecoEquipeByParc, _jivQui) sautent alors `qui`.
+//   ⚠️ Pas pour un non-administrateur : un salarié qui valide EST dans les rangs.
+//   ⚠️ Un groupe VIDE sans le validateur n'a personne : la validation est refusée, pas enregistrée
+//      avec zéro travailleur.
+function _mvMoiAdmin(){ try{ return (typeof isAdmin==='function'&&isAdmin()) && !!(currentUser&&currentUser.nom); }catch(e){ return false; } }
+function _mvQuiHors(containerId){
+  if(!_mvMoiAdmin()) return false;
+  var el=document.querySelector('#'+containerId+' .mbr-moi');
+  return !!(el && !el.classList.contains('sel'));
+}
+function _buildMembresCheckboxes(containerId,excludeNom,moiHors){
   const container=document.getElementById(containerId);
   if(!container)return;
   const membres=MEMBRES.filter(m=>m.statut!=='Inactif'&&m.nom!==(excludeNom||currentUser?.nom)&&m.nom!==currentUser?.nom);
-  container.innerHTML=membres.map(m=>`<div class="pchk mbr-chk" data-nom="${_escHtml(m.nom)}" onclick="this.classList.toggle('sel');this.classList.toggle('vert')" style="display:flex;align-items:center;gap:6px"><div style="width:20px;height:20px;border-radius:50%;background:${m.couleur||'#888'};display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white">${_escHtml(m.nom[0])}</div>${_escHtml(m.nom)}</div>`).join('');
+  // La puce « Moi » n'a PAS de data-nom : _getSelectedMembres ne la ramasse jamais, et
+  // _jePrefillTeam (qui vise .mbr-chk) ne la touche pas.
+  const moi=_mvMoiAdmin()
+    ? `<div class="pchk mbr-moi${moiHors?'':' sel vert'}" data-moi="1" onclick="this.classList.toggle('sel');this.classList.toggle('vert')" title="Décochez si vous validez sans avoir travaillé dans les rangs">Moi (${_escHtml(currentUser.nom)})</div>`
+    : '';
+  container.innerHTML=moi+membres.map(m=>`<div class="pchk mbr-chk" data-nom="${_escHtml(m.nom)}" onclick="this.classList.toggle('sel');this.classList.toggle('vert')" style="display:flex;align-items:center;gap:6px"><div style="width:20px;height:20px;border-radius:50%;background:${m.couleur||'#888'};display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white">${_escHtml(m.nom[0])}</div>${_escHtml(m.nom)}</div>`).join('');
 }
 function _getSelectedMembres(containerId){
   return Array.from(document.querySelectorAll(`#${containerId} .pchk.sel`)).map(el=>el.dataset.nom).filter(Boolean);
@@ -8401,6 +8422,8 @@ async function confirmValidation(){
   const equipe=document.getElementById('vp-equipe-val').value==='oui';
   const date=document.getElementById('vp-date').value||_mvToday();
   const membresEquipe=equipe?_getSelectedMembres('vp-membres-pick'):[];
+  const quiHors=equipe&&_mvQuiHors('vp-membres-pick');
+  if(quiHors&&!membresEquipe.length){showToast('Personne dans le groupe : cochez qui a travaillé','#B85A1A');return;}
   p.taches[_validTache]='Validé';
   // Entreplantation : stocker le nombre de trous tarrière (saisie manuelle)
   var trous=null;
@@ -8415,6 +8438,7 @@ async function confirmValidation(){
   }
   if(_validBtn){_validBtn.classList.add('on');_validBtn.classList.remove('off');_validBtn.textContent='';_validBtn.title='Validé — cliquer pour annuler';}
   var jEntry={id:Date.now().toString(16),date,parcelle:_validParcelle,tache:_validTache,qui:currentUser.nom,statut:'Validé',equipe,membresEquipe};
+  if(quiHors)jEntry.quiHors=true;
   if(trous)jEntry.plantation_trous=trous;
   // Météo moyenne sur la période de la tâche (du premier "En cours" à aujourd'hui)
   var _mDeb=_findDebutTache(_validParcelle,_validTache,date)||date;
@@ -8428,7 +8452,7 @@ async function confirmValidation(){
   renderParcelles();computePStats();
   if(navigator.vibrate)navigator.vibrate(60);
   _mvdsOpen({tache:_validTache,parcelle:_validParcelle,surf:p.surface,
-             membres:equipe?[currentUser.nom].concat(membresEquipe.filter(function(n){return n!==currentUser.nom;})):[],
+             membres:equipe?(quiHors?[]:[currentUser.nom]).concat(membresEquipe.filter(function(n){return n!==currentUser.nom;})):[],
              detail:trous?(trous+' trous'):''});
 }
 function _jePrefillTeam(){
@@ -8501,7 +8525,10 @@ async function saveJournalEntry(){
   const equipe=document.getElementById('je-equipe-val').value==='oui';
   const membresEquipe=equipe?_getSelectedMembres('je-membres-pick'):[];
   if(!parcelle||!tache)return;
+  const quiHors=equipe&&_mvQuiHors('je-membres-pick');
+  if(quiHors&&!membresEquipe.length){showToast('Personne dans le groupe : cochez qui a travaillé','#B85A1A');return;}
   var jEntry={id:Date.now().toString(16),date,parcelle,tache,qui:currentUser.nom,statut,equipe,membresEquipe};
+  if(quiHors)jEntry.quiHors=true;
   // Météo moyenne si validation
   if(statut==='Validé'){
     var _mDeb=_findDebutTache(parcelle,tache,date)||date;
@@ -9115,6 +9142,9 @@ function _setNivOv(n){
 
 function confirmNiveaux(){
   if(_mvValidBlocked())return;
+  var _nivEq=document.getElementById('niv-equipe-val')&&document.getElementById('niv-equipe-val').value==='oui';
+  var quiHors=_nivEq&&_mvQuiHors('niv-membres-pick');
+  if(quiHors&&!_getSelectedMembres('niv-membres-pick').length){showToast('Personne dans le groupe : cochez qui a travaillé','#B85A1A');return;}
   var p=PARCELLES.find(function(x){return x.nom===_nivParcelle;});
   if(!p)return;
   _mvdsSnap(_nivTache);
@@ -9137,7 +9167,9 @@ function confirmNiveaux(){
   var date=document.getElementById('niv-date')&&document.getElementById('niv-date').value||_mvToday();
   var equipe=document.getElementById('niv-equipe-val')&&document.getElementById('niv-equipe-val').value==='oui';
   var membresEquipe=equipe?_getSelectedMembres('niv-membres-pick'):[];
-  JOURNAL.unshift({id:Date.now().toString(16),date:date,parcelle:_nivParcelle,tache:_nivTache,qui:currentUser.nom,statut:statut,equipe:equipe,membresEquipe:membresEquipe,niveaux:_nivSelDone.slice().sort()});
+  var _jeN={id:Date.now().toString(16),date:date,parcelle:_nivParcelle,tache:_nivTache,qui:currentUser.nom,statut:statut,equipe:equipe,membresEquipe:membresEquipe,niveaux:_nivSelDone.slice().sort()};
+  if(quiHors&&equipe)_jeN.quiHors=true;
+  JOURNAL.unshift(_jeN);
   recalcTravaux(_nivTache);
   injectMeteoIfNeeded(date);
   saveData('parcelles');saveData('journal');saveData('travaux');
@@ -9146,7 +9178,7 @@ function confirmNiveaux(){
   if(navigator.vibrate)navigator.vibrate(60);
   var doneLabel=_nivSelDone.slice().sort().map(function(n){return 'N'+n;}).join('+');
   _mvdsOpen({tache:_nivTache,parcelle:_nivParcelle,surf:p.surface,detail:doneLabel||'mise à jour',
-             membres:equipe?[currentUser.nom].concat(membresEquipe.filter(function(n){return n!==currentUser.nom;})):[]});
+             membres:equipe?(quiHors?[]:[currentUser.nom]).concat(membresEquipe.filter(function(n){return n!==currentUser.nom;})):[]});
   // Rafraîchir l'Accueil si actif (heures card + avancement)
   var _nivPid=(document.querySelector('.page.active')||{}).id||'';
   if(_nivPid==='page-home'&&typeof renderHome==='function')renderHome();
@@ -9254,6 +9286,9 @@ function _setPassOv(n){
 
 function confirmPassages(){
   if(_mvValidBlocked())return;
+  var _passEq=document.getElementById('pass-equipe-val')&&document.getElementById('pass-equipe-val').value==='oui';
+  var quiHors=_passEq&&_mvQuiHors('pass-membres-pick');
+  if(quiHors&&!_getSelectedMembres('pass-membres-pick').length){showToast('Personne dans le groupe : cochez qui a travaillé','#B85A1A');return;}
   var p=PARCELLES.find(function(x){return x.nom===_passParcelle;});
   if(!p)return;
   _mvdsSnap(_passTache);
@@ -9271,7 +9306,9 @@ function confirmPassages(){
   var equipe=document.getElementById('pass-equipe-val')&&document.getElementById('pass-equipe-val').value==='oui';
   var membresEquipe=equipe?_getSelectedMembres('pass-membres-pick'):[];
   var statut=doneCnt>=planNb?'Validé':(doneCnt>0||commParcelle.length>0)?'En cours':'Non démarré';
-  JOURNAL.unshift({id:Date.now().toString(16),date:date,parcelle:_passParcelle,tache:_passTache,qui:currentUser.nom,statut:statut,equipe:equipe,membresEquipe:membresEquipe,passages:doneParcelle});
+  var _jeP={id:Date.now().toString(16),date:date,parcelle:_passParcelle,tache:_passTache,qui:currentUser.nom,statut:statut,equipe:equipe,membresEquipe:membresEquipe,passages:doneParcelle};
+  if(quiHors&&equipe)_jeP.quiHors=true;
+  JOURNAL.unshift(_jeP);
   recalcTravaux(_passTache);
   injectMeteoIfNeeded(date);
   saveData('parcelles');saveData('journal');saveData('travaux');
@@ -9280,7 +9317,7 @@ function confirmPassages(){
   if(navigator.vibrate)navigator.vibrate(60);
   var passLabel=doneParcelle.map(function(i){return 'P'+i;}).join('+');
   _mvdsOpen({tache:_passTache,parcelle:_passParcelle,surf:p.surface,detail:passLabel,
-             membres:equipe?[currentUser.nom].concat(membresEquipe.filter(function(n){return n!==currentUser.nom;})):[]});
+             membres:equipe?(quiHors?[]:[currentUser.nom]).concat(membresEquipe.filter(function(n){return n!==currentUser.nom;})):[]});
   // Rafraîchir l'Accueil si actif (heures card + avancement)
   var _pasPid=(document.querySelector('.page.active')||{}).id||'';
   if(_pasPid==='page-home'&&typeof renderHome==='function')renderHome();
@@ -9305,7 +9342,7 @@ function togglePassEquipeMode(val){
   });
   var hv=document.getElementById('pass-equipe-val');if(hv)hv.value=val;
   var sec=document.getElementById('pass-equipe-section');if(sec)sec.style.display=val==='oui'?'block':'none';
-  if(val==='oui')_buildMembresCheckboxes('pass-membres-pick','');
+  if(val==='oui')_buildMembresCheckboxes('pass-membres-pick','',_eqtHors(_passTache));
 }
 
 
@@ -11287,6 +11324,10 @@ function _eqtLoad(){
   _eqtLoaded=true;
 }
 function _eqtSave(){try{localStorage.setItem(_eqtKey(),JSON.stringify(EQUIPE_TACHE));localStorage.setItem(_eqtRecentKey(),JSON.stringify(EQUIPE_RECENT));}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_eqtSave'); }}
+// TV-2 : « le validateur n'est pas dans les rangs », mémorisé PAR TÂCHE à côté de l'équipe
+//   (clé réservée __hors, comme __default). Lu seulement pour un administrateur.
+function _eqtHors(task){ if(!_eqtLoaded)_eqtLoad(); if(!_mvMoiAdmin()) return false; var h=EQUIPE_TACHE.__hors; return !!(h&&typeof h==='object'&&!Array.isArray(h)&&h[task]); }
+function _eqtSetHors(task,v){ if(!_eqtLoaded)_eqtLoad(); var h=(EQUIPE_TACHE.__hors&&typeof EQUIPE_TACHE.__hors==='object'&&!Array.isArray(EQUIPE_TACHE.__hors))?EQUIPE_TACHE.__hors:{}; if(v) h[task]=1; else delete h[task]; EQUIPE_TACHE.__hors=h; _eqtSave(); }
 function _eqtFor(task){ if(!_eqtLoaded)_eqtLoad(); var t=(EQUIPE_TACHE[task]!==undefined)?EQUIPE_TACHE[task]:(EQUIPE_TACHE.__default||[]); return _eqtClean(t); }
 function _eqtSet(task,team){ if(!_eqtLoaded)_eqtLoad(); team=_eqtClean(team); EQUIPE_TACHE[task]=team; _eqtPushRecent(team); _eqtSave(); }
 
@@ -11356,15 +11397,16 @@ function _pvRenderTeamBar(){
   var w=document.getElementById('p-team-bar');if(!w)return;
   if(pTacheFilter==='toutes'||!canWrite()){w.innerHTML='';return;}
   var team=_eqtFor(pTacheFilter);
-  var names=team.length?team.join(', '):'Moi seul';
+  var names=team.length?(team.join(', ')+(_eqtHors(pTacheFilter)?' \u00b7 sans moi':'')):'Moi seul';
   var avs=team.length?team.slice(0,4).map(function(n){return '<div class="pv-team-av" style="background:'+(COULEURS_MBR[n]||'#3D6B27')+'">'+(n[0]||'?')+'</div>';}).join(''):'<div class="pv-team-av" style="background:#3D6B27"></div>';
   var tl=(typeof tNom==='function')?tNom(pTacheFilter):pTacheFilter;
   w.innerHTML='<div class="pv-team-bar" onclick="openPTeamJour()"><span class="pv-team-ico"></span><div class="pv-team-info"><div class="pv-team-lbl">Équipe sur <b>'+_escHtml(tl)+'</b></div><div class="pv-team-names">'+_escHtml(names)+'</div></div><div class="pv-team-avs">'+avs+'</div><span class="pv-team-edit">Changer</span></div>';
 }
 
-var _pvTeamSel=[];
+var _pvTeamSel=[], _pvMoiHors=false;
 function openPTeamJour(){
   _pvTeamSel=_eqtFor(pTacheFilter).slice();
+  _pvMoiHors=_eqtHors(pTacheFilter);
   var tt=document.getElementById('pv-team-task');if(tt)tt.textContent=((typeof tNom==='function')?tNom(pTacheFilter):pTacheFilter);
   _pvBuildRecent();_pvBuildTeamPick();openOv('ovPTeam');
 }
@@ -11383,13 +11425,24 @@ function _pvBuildRecent(){
 }
 function _pvBuildTeamPick(){
   var c=document.getElementById('pv-team-pick');if(!c)return;
-  c.innerHTML=(MEMBRES||[]).filter(function(m){return m.statut!=='Inactif';}).map(function(m){
+  // TV-2 : pour l'administrateur, sa propre puce devient « Moi aussi dans les rangs » — elle dit
+  //   si le validateur compte dans le groupe, au lieu de l'y mettre deux fois.
+  var adm=_mvMoiAdmin(), me=adm?currentUser.nom:null;
+  var moi=adm?('<div class="pv-mbr-chip'+(_pvMoiHors?'':' sel')+'" onclick="_pvToggleMoi()" title="Décochez si vous validez pour l\u2019équipe sans travailler dans les rangs"><span class="pv-mbr-av" style="background:'+(COULEURS_MBR[me]||'#3D6B27')+'">'+(me[0]||'?')+'</span>Moi aussi dans les rangs</div>'):'';
+  c.innerHTML=moi+(MEMBRES||[]).filter(function(m){return m.statut!=='Inactif'&&m.nom!==me;}).map(function(m){
     var on=_pvTeamSel.indexOf(m.nom)>=0;
     return '<div class="pv-mbr-chip'+(on?' sel':'')+'" onclick="_pvToggleTeamMbr(\''+_escAttr(m.nom)+'\')"><span class="pv-mbr-av" style="background:'+(COULEURS_MBR[m.nom]||'#3D6B27')+'">'+(m.nom[0]||'?')+'</span>'+_escHtml(m.nom)+'</div>';
   }).join('');
 }
+function _pvToggleMoi(){_pvMoiHors=!_pvMoiHors;_pvBuildTeamPick();}
 function _pvToggleTeamMbr(n){var i=_pvTeamSel.indexOf(n);if(i>=0)_pvTeamSel.splice(i,1);else _pvTeamSel.push(n);_pvBuildTeamPick();}
 function _pvApplyTeam(team){
+  // TV-2 : l'administrateur ne figure plus dans sa propre équipe (il est `qui`), et « sans moi »
+  //   n'a de sens qu'avec quelqu'un d'autre — « Moi seul » le remet dans les rangs.
+  if(_mvMoiAdmin()){
+    team=(team||[]).filter(function(n){return n!==currentUser.nom;});
+    _eqtSetHors(pTacheFilter, !!(_pvMoiHors && _eqtClean(team).length));
+  }
   _eqtSet(pTacheFilter,team);closeOv(null,'ovPTeam');_pvRenderTeamBar();
   var t=_eqtClean(team),tl=(typeof tNom==='function')?tNom(pTacheFilter):pTacheFilter;
   showToast((t.length?t.join(', '):'Seul')+' → '+tl,'#3D6B27');
@@ -11421,6 +11474,7 @@ function pQuickValidate(nom,evt){
   var prev=(p.taches[task]===undefined)?undefined:JSON.parse(JSON.stringify(p.taches[task]));
   var date=_mvToday();
   var _eqt=_eqtFor(task);var equipe=_eqt.length>0,membresEquipe=equipe?_eqt.slice():[];
+  var quiHors=equipe&&_eqtHors(task);   // TV-2 : « sans moi », mémorisé avec l'équipe de la tâche
   var jid=Date.now().toString(16)+'-qv';
   var label,extra={};
   if(type==='simple'){
@@ -11445,6 +11499,7 @@ function pQuickValidate(nom,evt){
     extra.statut=g;
   }
   var jEntry=Object.assign({id:jid,date:date,parcelle:nom,tache:task,qui:currentUser.nom,equipe:equipe,membresEquipe:membresEquipe},extra);
+  if(quiHors) jEntry.quiHors=true;   // TV-2
   JOURNAL.unshift(jEntry);
   recalcTravaux(task);
   injectMeteoIfNeeded(date);
@@ -11453,7 +11508,7 @@ function pQuickValidate(nom,evt){
   var who=equipe?('Équipe ('+membresEquipe.length+')'):currentUser.nom;
   if(getTacheStatut(p,task)==='Validé'){
     _mvdsOpen({tache:task,parcelle:nom,surf:p.surface,
-               membres:equipe?[currentUser.nom].concat(membresEquipe.filter(function(n){return n!==currentUser.nom;})):[],
+               membres:equipe?(quiHors?[]:[currentUser.nom]).concat(membresEquipe.filter(function(n){return n!==currentUser.nom;})):[],
                undo:function(){pQuickUndoEntry(nom,task,prev,jid);}});
   } else {
     _pvToast(label+' · '+nom+' · '+who, function(){pQuickUndoEntry(nom,task,prev,jid);});
@@ -11603,6 +11658,7 @@ window.setPCurStep=setPCurStep;
 window.openPTeamJour=openPTeamJour;
 window.savePTeamJour=savePTeamJour;
 window._pvToggleTeamMbr=_pvToggleTeamMbr;
+window._pvToggleMoi=_pvToggleMoi;   // TV-2 : appelée par la puce « Moi aussi dans les rangs »
 window._pvApplyTeam=_pvApplyTeam;
 window._pvActions=_pvActions;
 window.pQuickStart=pQuickStart;

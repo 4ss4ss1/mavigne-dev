@@ -3905,7 +3905,7 @@ function _jivDansFen(iso,d0,d1){
    ⚠️ JOURNAL.membresEquipe est la structure qui rend possible tout le reste
    (§15) — la lire, jamais se contenter de `qui` quand elle est la. */
 function _jivQui(j){
-  var L=[]; if(j&&j.qui) L.push(j.qui);
+  var L=[]; if(j&&j.qui&&!j.quiHors) L.push(j.qui);   // TV-2 : l'auteur hors des rangs n'y est pas
   ((j&&j.membresEquipe)||[]).forEach(function(n){ if(n && L.indexOf(n)<0) L.push(n); });
   return L;
 }

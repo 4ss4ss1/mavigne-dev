@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.59';
+export const APP_VERSION = '7.60';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -716,6 +716,18 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.60', items: [
+    { emoji: 'chrono', titre: 'Pilotage\u00a0: le temps réellement passé dans chaque parcelle',
+      desc: "Nouvelle carte «\u00a0Temps réel contre barème\u00a0» dans Économie › Postes & travaux. Les heures «\u00a0dans les rangs\u00a0» du planning "
+        + "de chaque salarié (congés, absences, formation et conduite du tracteur retirés) sont versées aux parcelles qu’il valide, "
+        + "lui ou son groupe\u00a0: trois personnes une heure sur un are, c’est trois heures sur ce travail. Plusieurs parcelles le même jour "
+        + "se partagent <b>au prorata de la surface</b>, et les jours sans validation vont au travail validé ensuite. Pour chaque travail, "
+        + "le <b>h/ha réel</b> se lit à côté du <b>h/ha du barème</b>\u00a0: plus vite, ou plus lent, que la convention." },
+    { emoji: 'equipe', titre: 'Valider pour l’équipe sans être dans les rangs',
+      desc: "L’administrateur qui valide un travail pour son équipe peut maintenant <b>se décocher</b> du groupe\u00a0: puce «\u00a0Moi\u00a0» dans le "
+        + "panneau de validation, ou «\u00a0Moi aussi dans les rangs\u00a0» sur la barre d’équipe de la tâche. La validation reste signée de son nom, "
+        + "mais ses heures ne partent pas sur la parcelle. Le choix est retenu pour chaque tâche." }
+  ] },
   { v: '7.59', items: [
     { emoji: 'retour', titre: 'Le bouton retour du téléphone ferme ce qui est ouvert',
       desc: "Sur Android, le bouton retour ne fermait que certaines fenêtres. Avec une feuille du Cuvier, la feuille «\u00a0Plus\u00a0» du menu, "
@@ -3453,6 +3465,7 @@ var MV_AIDE = {
       ['L’anneau doré qui respire', "sur la carte marque la parcelle <b>commencée et pas finie</b> pour le travail affiché\u00a0: celle où «\u00a0Début\u00a0» a été touché sans validation. S’il n’y en a aucune, il se pose sur la <b>prochaine à faire</b>, le n°\u00a01 de la tournée enregistrée. Sur «\u00a0toutes\u00a0», c’est la priorité du moment. Plusieurs parcelles commencées ont chacune leur anneau, et rien ne s’affiche sur une période archivée."],
       ['La recherche', "accepte le nom du climat comme le lieu-dit."],
       ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique."],
+      ['Valider pour l’équipe sans y être', "l’administrateur voit sa propre puce dans le groupe («\u00a0Moi\u00a0», «\u00a0Moi aussi dans les rangs\u00a0» sur la barre d’équipe)\u00a0: décochée, la validation reste signée de son nom mais ses heures ne vont pas à la parcelle. Le choix est retenu pour la tâche."],
       ['L’état du vignoble', "s’imprime depuis la roue crantée de la Vigne, bloc Documents : toutes vos parcelles sur une page, avec la surface, le cépage, la commune, l’avancement, le dernier travail, le dernier rendement — et la liste de ce qui reste à renseigner."]
     ]
   },
@@ -3648,7 +3661,7 @@ var MV_AIDE = {
       ['Le manque d’effectif se lit sur la semaine du pic', ", contre ce qui est prévu au planning <b>cette semaine-là</b> — pas contre la présence d’aujourd’hui. Un pic qui tombe dans onze mois ne se compare pas à qui est là ce matin."],
       ['Le total de l’Exercice n’est pas un compte de résultat', ": Ma Vigne connaît ce qui passe par elle — heures payées, carburant, achats d’intrants. Ni le fermage, ni les amortissements, ni les assurances, ni vos cotisations d’exploitant. Ce total sert à <b>piloter vos charges d’un bilan à l’autre</b>, pas à remplacer votre comptable."],
       ['La carte de fiabilité d’Économie', ": elle relit la liste du bandeau <b>« à compléter »</b> — mêmes lignes, mêmes mots, mêmes boutons — et n’en garde que ce qui met un <b>poste de ce budget à zéro</b> : un taux horaire, le prix du GNR, une dose. Ce n’est pas « un peu bas » : c’est zéro, et le budget affiché n’est qu’un plancher. La puce « N remarques » en dessous ouvre tout ce qui n’empêche pas un calcul mais change sa lecture."],
-      ['Économie', "compare un budget de barème à ce qui est engagé, sur la <b>période consultée</b> — le coût d’un bilan entier se lit dans sa sous-vue <b>Exercice</b>. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire."],
+      ['Économie', "compare un budget de barème à ce qui est engagé, sur la <b>période consultée</b> — le coût d’un bilan entier se lit dans sa sous-vue <b>Exercice</b>. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire. Dans <b>Postes & travaux</b>, le <b>temps réel</b> de chaque travail — les heures du planning versées aux parcelles validées, au prorata de la surface — se lit à côté du h/ha du barème."],
       ['Économie › Exercice', "coupe l’année <b>au jour</b> : l’<b>engagé</b> (ce qui est sorti) à gauche d’aujourd’hui, le <b>prévu</b> (les salaires que la grille du planning annonce) hachuré à droite, et le total à la clôture qui dit qu’il contient du prévu. Contre l’an dernier, la comparaison se fait <b>aux mêmes jours</b>, pas dix mois de grille contre douze mois payés."],
       ['La carte de verdict d’Économie', ": elle dit en une phrase où vous en êtes, et pose les boutons pour agir — voir quel travail dérape, ouvrir le barème. Quand la cadence affichée vient de la campagne précédente, une ligne sous le texte le dit, avec le nom de cette campagne. Le <b>comment</b> du calcul est derrière son petit « i »."],
       ['L’écart de cadence cherche sa source dans un ordre', ", et dit toujours laquelle il a trouvée. D’abord <b>la période en cours</b>, dès 40 % de barème réalisé. Sinon <b>la même période de la campagne précédente</b>, si elle est archivée — la ligne porte alors un <b>↩</b> et nomme la campagne : cet écart-là <b>se lit, il ne s’applique pas</b> au budget ni à la date de fin. Même règle quand le facteur sort de [0,5 ; 3] : un trou de saisie n’est pas une cadence, l’écran le dit. Sinon rien, et l’écran l’écrit plutôt que d’afficher un chiffre inventé."],
@@ -3851,6 +3864,16 @@ export const MV_INFO = {
   // ⚠️ FICHE VIVANTE : ses paragraphes sont remplaces a chaque rendu par
   //   _pecAlertes (pilotage.js). Ce qui suit est le repli — il s'affiche si le
   //   module n'a pas encore tourne, et il doit rester vrai dans ce cas-la.
+  // ★ TV-1 (23/09/2026) — posée sur la carte « Temps réel contre barème » (_pecCarteTemps).
+  'pil.eco.temps': { t: 'Temps réel contre barème', p: [
+    'Pour chaque salarié, chaque jour : ses heures <b>dans les rangs</b> au planning — congés, récup, arrêts, absences et formation à zéro — moins ses heures de <b>conduite tracteur</b>, déjà mesurées par les sessions. Le bureau n\u2019entre pas.',
+    'Ces heures sont versées aux travaux qu\u2019il <b>valide, lui ou son groupe</b> : une validation vaut pour toutes les personnes nommées. Trois personnes une heure sur un are, c\u2019est trois heures sur ce travail.',
+    'Plusieurs parcelles validées <b>le même jour</b> se partagent <b>au prorata de leur surface</b>. Trois personnes huit heures sur 1 ha, 0,5 ha et 0,5 ha : 24 h pour 2 ha, soit <b>12 h/ha</b> — contre 15 au barème, le travail est allé plus vite que la convention.',
+    'Une validation marque la <b>fin</b> d\u2019un travail. Les jours sans validation vont donc au travail que la personne valide <b>ensuite</b>. Ce qui n\u2019a pas encore trouvé de validation reste <b>en attente</b>, affiché sous le tableau — jamais perdu, jamais compté deux fois.',
+    'Pour le relevage et les travaux à passages, seul le niveau ou le passage <b>nouvellement fait</b> compte, et le barème est celui de ce niveau. Une validation annulée ne compte plus.',
+    '<b>Celui qui valide compte dans le groupe</b>, sauf s\u2019il s\u2019est décoché : un administrateur qui valide pour l\u2019équipe sans être dans les rangs retire sa puce « Moi », et ses heures du jour restent en attente. Les validations d\u2019avant ce réglage comptent leur auteur.'
+  ] },
+
   'pil.eco.remarques': { t: 'Les remarques du moment', p: [
     'Aucune remarque à afficher pour l\u2019instant. Ouvrez l\u2019onglet Économie pour que cette fiche se remplisse.'
   ] },

@@ -796,6 +796,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   travaillent ensemble, faites <b>une seule entrée</b> avec tous les noms — pas une entrée chacun. Les
   heures et l'avancement se répartissent correctement. Plusieurs équipes peuvent travailler en parallèle
   dans la même journée sur des tâches différentes.</div></div>
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-equipe"></use></svg></span><div><b>Valider pour l'équipe sans y
+  être.</b> Celui qui valide compte dans le groupe. Un <b>administrateur</b> qui valide pour son équipe sans avoir
+  travaillé dans les rangs décoche sa puce <b>« Moi »</b> dans le panneau de validation — ou <b>« Moi aussi dans les
+  rangs »</b> sur la barre d'équipe de la tâche. La validation reste signée de son nom ; ses heures, elles, ne vont
+  pas à la parcelle dans le temps réel du Pilotage. Le choix est retenu pour chaque tâche.</div></div>
 
   <details><summary>J'ai validé la mauvaise parcelle</summary>
     <div class="dbody">Touchez <b>Annuler</b> dans le message qui s'affiche juste après. Passé ce délai,
@@ -2813,6 +2818,12 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       pas et ne peuvent pas y être : cette carte est un <b>barème</b> et ne porte aucune date,
       alors qu'un achat en porte une. Ils se comptent dans <b>Exercice</b>, et un bouton y mène</li>
       <li><b>Coût par hectare et par parcelle</b> : main-d'œuvre, tracteur, carburant, phyto</li>
+      <li><b>Temps réel contre barème</b> : les heures « dans les rangs » du planning de chaque
+      salarié — congés, absences, formation et conduite du tracteur retirés — sont versées aux
+      parcelles qu'il valide, lui ou son groupe. Plusieurs parcelles le même jour se partagent
+      <b>au prorata de la surface</b> ; les jours sans validation vont au travail validé ensuite.
+      Pour chaque travail, le <b>h/ha réel</b> se lit à côté du <b>h/ha du barème</b> : trois
+      personnes huit heures sur 2 ha, c'est 12 h/ha — plus vite qu'un barème à 15</li>
       <li>S'appuie sur les taux horaires et le prix réel du GNR</li>
       <li>Le carburant est <b>mesuré</b>, pas estimé : c'est la somme de vos pleins, répartie entre
       les parcelles au prorata des heures machine — à défaut, de la surface. Le total est juste au

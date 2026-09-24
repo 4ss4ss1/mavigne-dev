@@ -5498,7 +5498,7 @@ function _ecoEquipeByParc(){
   (window.JOURNAL||[]).forEach(function(j){
     if(!j||j.meteo||j.statut!=='Valid\u00e9'||!j.parcelle||!j.date) return;
     if(!_in(j)) return;
-    var noms=[]; if(j.qui) noms.push(j.qui);
+    var noms=[]; if(j.qui && !j.quiHors) noms.push(j.qui);   // TV-2 : le validateur hors des rangs ne compte pas
     (j.membresEquipe||[]).forEach(function(n){ if(n && noms.indexOf(n)<0) noms.push(n); });
     if(!noms.length) return;
     var k=j.parcelle;
@@ -5535,6 +5535,201 @@ function _ecoEquipeByParc(){
              taux:(wt>0?sum/wt:0), noms:Object.keys(e.noms) };
   });
   return out;
+}
+
+// ════════════════════════════════════════════════════════════════════════════════
+// ★★★ TV-1 (23/09/2026) — LE TEMPS REELLEMENT PASSE DANS CHAQUE PARCELLE
+// ════════════════════════════════════════════════════════════════════════════════
+// Nico : « il faudrait que le moteur calcule le nombre de vignes validees en une
+// journee pour faire un prorata du temps passe dans chaque parcelle en fonction du
+// nombre d'heures comptees sur le planning des salaries qui travaillent dans les
+// vignes » — puis, precise : une validation vaut pour TOUT le groupe nomme (Victor,
+// Shana et Alicia 1 h sur un are = 3 h sur la tache) ; plusieurs parcelles le meme
+// jour se partagent AU PRORATA DE LA SURFACE (3 personnes x 8 h sur 1 ha + 0,5 + 0,5
+// = 24 h pour 2 ha, soit 12 h/ha contre 15 au bareme : c'est ce qui dit si le travail
+// va plus vite ou plus lent que la convention).
+//
+// LA REGLE, PAR SALARIE :
+//   heures du jour = heures DANS LES RANGS du planning (_planChampPersRange : conge,
+//     recup, arret, absence, formation, evenement familial a 0) MOINS ses heures de
+//     conduite tracteur ce jour-la (deja mesurees par les sessions) ;
+//   elles S'ACCUMULENT jusqu'au jour ou il figure sur une validation (qui ou
+//     membresEquipe), puis se versent sur les travaux clos ce jour-la, au prorata de
+//     la surface des parcelles.
+// ⚠️ POURQUOI ACCUMULER : une validation marque la FIN d'un travail, pas une journee.
+//   Mesure chez MG (§20b) : 12 journees-personne sur 247 portaient une validation en
+//   hiver. « Le jour meme seulement » laisserait ~95 % des heures d'hiver sur aucune
+//   parcelle. Les jours sans validation vont donc au travail que la personne clot
+//   ensuite — ce qu'elle faisait, par construction.
+// ⚠️ PROPRIETE QUI REND LE MODELE SUR : une heure n'est versee QU'UNE FOIS. Une
+//   validation en trop ne cree pas d'heures, elle redistribue celles d'avant elle.
+//   Ce qui n'est pas encore verse (depuis la derniere validation de la personne) est
+//   « en attente », affiche a part, jamais perdu en silence.
+// ⚠️ UN EVENEMENT DE CLOTURE, c'est :
+//   · une entree « Valide » d'une tache simple ;
+//   · pour une tache a niveaux ou a passages, une entree qui AJOUTE un niveau / un
+//     passage fait — la liste est CUMULATIVE (confirmNiveaux ecrit tous les niveaux
+//     faits a ce jour), et le statut peut rester « En cours » alors que du travail
+//     vient d'etre clos. On compare donc a l'entree precedente du meme couple ;
+//   · « Annule » retire la derniere cloture du couple (une validation par erreur).
+//   La validation groupee « Domaine » n'a pas de surface : elle n'entre pas.
+// ⚠️ LE VALIDATEUR (`qui`) compte dans le groupe, SAUF si l'entree porte `quiHors:true`
+//   (TV-2 : un administrateur qui valide pour l'equipe peut se decocher a la saisie). Les
+//   entrees d'avant TV-2 n'ont pas ce champ : l'auteur y compte, comme avant.
+var _ECO_TV=null;
+function _ecoTvNivs(j, cle){
+  var a=Array.isArray(j[cle])?j[cle]:[], out=[];
+  a.forEach(function(x){ var n=parseInt(String(x).replace(/\D/g,''),10); if(n>0 && out.indexOf(n)<0) out.push(n); });
+  return out;
+}
+function _ecoTvDef(nom){
+  var T=window.TACHES||[];
+  for(var i=0;i<T.length;i++) if(T[i] && T[i].nom===nom) return T[i];
+  return null;
+}
+// Heures de BAREME du travail clos par un evenement (surface x h/ha du niveau, du
+// passage ou de la tache) — la reference contre laquelle on lit le temps reel.
+function _ecoTvBar(p, def, ev){
+  var surf=parseFloat(p.surface)||0;
+  if(!def) return 0;
+  if(def.trous){ var tr=parseInt(ev.trous||p.plantation_trous,10)||0; return tr>0 ? tr*_opMinTrou(def)/60 : 0; }
+  if(ev.niv && ev.niv.length){
+    var N=def.niveaux||[], h=0;
+    ev.niv.forEach(function(k){ N.forEach(function(n){ if(n && n.num===k) h+=Number(n.hha)||0; }); });
+    return surf*h;
+  }
+  if(ev.pass && ev.pass.length){ var hp=0; ev.pass.forEach(function(k){ hp+=_opPassHha(def,k); }); return surf*hp; }
+  return surf*((def.hha)||0);
+}
+// Les evenements de cloture de la fenetre, tries par date. Rend aussi le nombre
+// d'entrees ecartees et pourquoi (le harnais les compte).
+function _ecoTvEvents(d0, d1){
+  var byNom={}; (window.PARCELLES||[]).forEach(function(p){ if(p && p.nom!=null) byNom[String(p.nom)]=p; });
+  var J=(window.JOURNAL||[]).filter(function(j){
+    return j && !j.meteo && j.date && j.parcelle && j.tache && String(j.date).slice(0,10)<=d1;
+  }).slice();
+  // Ordre chronologique : la date, puis l'ordre de saisie (id = horodatage hex quand il l'est).
+  function _ts(j){ var n=parseInt(String(j.id||''),16); return isFinite(n)?n:0; }
+  J.sort(function(a,b){ var da=String(a.date).slice(0,10), db=String(b.date).slice(0,10);
+    return da<db?-1:(da>db?1:(_ts(a)-_ts(b))); });
+  var prev={}, ev=[], byPair={}, nHorsParc=0;
+  J.forEach(function(j){
+    var dt=String(j.date).slice(0,10), nom=String(j.parcelle), p=byNom[nom];
+    if(!p){ if(nom!=='Domaine') nHorsParc++; return; }
+    var k=nom+'\u0000'+j.tache, st=String(j.statut||'');
+    if(st==='Annul\u00e9'){
+      var L=byPair[k]||[];
+      for(var i=L.length-1;i>=0;i--){ if(!L[i].annule){ L[i].annule=true; break; } }
+      prev[k]={niv:[],pass:[]};
+      return;
+    }
+    var P=prev[k]||{niv:[],pass:[]};
+    var niv=_ecoTvNivs(j,'niveaux'), pass=_ecoTvNivs(j,'passages');
+    var nNiv=niv.filter(function(x){ return P.niv.indexOf(x)<0; });
+    var nPass=pass.filter(function(x){ return P.pass.indexOf(x)<0; });
+    // ★ UNION, pas remplacement (TV-2) : la validation d'un appui (pQuickValidate) écrit le SEUL
+    //   passage du jour ([2]), les panneaux écrivent la liste ENTIÈRE ([1,2]). Remplacer ferait
+    //   recompter le passage 1 à la liste entière suivante. « Annulé » remet à zéro, plus haut.
+    if(niv.length||pass.length) prev[k]={
+      niv:P.niv.concat(nNiv), pass:P.pass.concat(nPass) };
+    var clot = nNiv.length>0 || nPass.length>0 || (st==='Valid\u00e9' && !niv.length && !pass.length);
+    if(!clot || dt<d0) return;
+    var noms=[]; if(j.qui && !j.quiHors) noms.push(j.qui);   // TV-2 : le validateur hors des rangs ne compte pas
+    (j.membresEquipe||[]).forEach(function(n){ if(n && noms.indexOf(n)<0) noms.push(n); });
+    var e={ date:dt, parc:nom, tache:j.tache, surf:parseFloat(p.surface)||0, noms:noms,
+            niv:nNiv, pass:nPass, trous:j.plantation_trous||null, p:p };
+    (byPair[k]=byPair[k]||[]).push(e);
+    ev.push(e);
+  });
+  return { ev:ev.filter(function(e){ return !e.annule; }), nHorsParc:nHorsParc };
+}
+function _ecoTempsVigne(){
+  var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  var d0=s&&s.debut?String(s.debut).slice(0,10):'', d1=s&&s.fin?String(s.fin).slice(0,10):'';
+  var _n=new Date(), auj=_pexIso(_n.getFullYear(),_n.getMonth(),_n.getDate());
+  var vide={ ok:false, pairs:{}, taches:[], parcs:{}, gens:[], hChamp:0, hTrac:0, hAff:0, hAtt:0, nEv:0, d0:d0, d1:d1 };
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d0) || !/^\d{4}-\d{2}-\d{2}$/.test(d1) || d1<d0) return vide;
+  // ★ La periode doit avoir COMMENCE (piege de _pecCadPresence, §20b) : sinon la
+  //   fenetre part a l'envers et tout sort a zero en silence.
+  if(auj<d0) return vide;
+  var fin=(d1<auj)?d1:auj;
+  var key=d0+'|'+fin;
+  if(_ECO_TV && _ECO_TV.key===key) return _ECO_TV.v;
+  if(typeof window._planChampPersRange!=='function'){ _ECO_TV={key:key,v:vide}; return vide; }
+
+  var E=_ecoTvEvents(d0, fin);
+  var evBy={};                       // nom -> date -> [evenements]
+  E.ev.forEach(function(e){ e.noms.forEach(function(n){
+    (evBy[n]=evBy[n]||{}); (evBy[n][e.date]=evBy[n][e.date]||[]).push(e);
+  }); });
+  var tr={condH:{}};
+  try{ tr=_ecoTracHByParc({d0:d0,d1:fin}); }catch(e){ tr={condH:{}}; }
+  var okPer=(typeof window._mvEnContratSurPeriode==='function');
+  var mbrs=(window.MEMBRES||[]).filter(function(m){
+    if(!m||!m.nom) return false;
+    return okPer ? window._mvEnContratSurPeriode(m,d0,fin) : (m.statut!=='Inactif' && !m.bureau);
+  });
+  var pairs={}, gens=[], T={hChamp:0,hTrac:0,hAff:0,hAtt:0};
+  mbrs.forEach(function(m){
+    var acc=0, g={nom:m.nom, hChamp:0, hTrac:0, hAff:0, hAtt:0, nEv:0, dAtt:''};
+    var cd=(tr.condH&&tr.condH[m.nom])||{};
+    for(var d=d0, guard=0; d<=fin && guard<400; d=_pexJourApres(d), guard++){
+      var h=0;
+      try{ h=Number(window._planChampPersRange(m,_pexD(d),_pexD(d)))||0; }catch(e){ h=0; }
+      var ht=Math.min(h, Number(cd[d])||0);
+      g.hChamp+=h; g.hTrac+=ht;
+      var hv=h-ht;
+      if(hv>0){ if(!(acc>0)) g.dAtt=d; acc+=hv; }
+      var L=(evBy[m.nom]||{})[d];
+      if(L && L.length && acc>0){
+        // Prorata de la SURFACE (regle de Nico). Surfaces toutes nulles : parts egales,
+        // plutot que de perdre les heures.
+        var S=0; L.forEach(function(e){ S+=e.surf; });
+        L.forEach(function(e){
+          var part=(S>0)?(e.surf/S):(1/L.length), v=acc*part;
+          var k=e.parc+'\u0000'+e.tache;
+          var P=pairs[k]||(pairs[k]={parc:e.parc, tache:e.tache, h:0, bar:0, surf:0, n:0, noms:{}});
+          P.h+=v; P.noms[m.nom]=1;
+        });
+        g.hAff+=acc; g.nEv+=L.length; acc=0; g.dAtt='';
+      }
+    }
+    g.hAtt=acc;
+    if(g.hChamp>0 || g.hAff>0){
+      gens.push(g);
+      T.hChamp+=g.hChamp; T.hTrac+=g.hTrac; T.hAff+=g.hAff; T.hAtt+=g.hAtt;
+    }
+  });
+  // Le bareme et la surface de chaque couple, UNE fois par evenement (et non par
+  // personne) : le bareme mesure le travail, pas le nombre de gens qui l'ont fait.
+  var vus={};
+  E.ev.forEach(function(e){
+    var k=e.parc+'\u0000'+e.tache, P=pairs[k];
+    var b=_ecoTvBar(e.p, _ecoTvDef(e.tache), e);
+    if(!P){ P=pairs[k]={parc:e.parc, tache:e.tache, h:0, bar:0, surf:0, n:0, noms:{}, sansH:true}; }
+    P.bar+=b; P.n++;
+    if(!vus[k]){ P.surf=e.surf; vus[k]=1; }
+  });
+  var byT={}, parcs={};
+  Object.keys(pairs).forEach(function(k){
+    var P=pairs[k];
+    var t=byT[P.tache]||(byT[P.tache]={nom:P.tache, h:0, bar:0, surf:0, nP:0, nSansH:0});
+    t.h+=P.h; t.bar+=P.bar; t.surf+=P.surf; t.nP++; if(!(P.h>0)) t.nSansH++;
+    var q=parcs[P.parc]||(parcs[P.parc]={h:0,bar:0});
+    q.h+=P.h; q.bar+=P.bar;
+  });
+  var taches=Object.keys(byT).map(function(n){ var t=byT[n];
+    t.hhaR=t.surf>0?t.h/t.surf:0; t.hhaB=t.surf>0?t.bar/t.surf:0;
+    // Ecart lu seulement quand les deux cotes existent : un couple sans heure versee
+    // (personne du groupe au planning) ne fait pas « -100 % ».
+    t.ecart=(t.bar>0 && t.h>0)?((t.h-t.bar)/t.bar*100):null;
+    return t; }).sort(function(a,b){ return b.h-a.h || (a.nom<b.nom?-1:1); });
+  gens.sort(function(a,b){ return b.hAtt-a.hAtt || (a.nom<b.nom?-1:1); });
+  var v={ ok:true, pairs:pairs, taches:taches, parcs:parcs, gens:gens,
+          hChamp:T.hChamp, hTrac:T.hTrac, hAff:T.hAff, hAtt:T.hAtt,
+          nEv:E.ev.length, nHorsParc:E.nHorsParc, d0:d0, d1:d1, fin:fin };
+  _ECO_TV={key:key, v:v};
+  return v;
 }
 
 // ── Surcoût de retard par parcelle ───────────────────────────────
@@ -5670,7 +5865,7 @@ function _ecoGnrReel(win){
 //   entre deux bilans et non par campagne. APPELEE SANS ARGUMENT, LA FONCTION EST
 //   STRICTEMENT INCHANGEE — une seule definition de « ce que coute une session ».
 function _ecoTracHByParc(win){
-  var out={h:{},cost:{},qui:{},nAnon:0,nSess:0,byDate:{},gnrByDate:{},hByDate:{},condByDate:{}};
+  var out={h:{},cost:{},qui:{},nAnon:0,nSess:0,byDate:{},gnrByDate:{},hByDate:{},condByDate:{},condH:{}};
   var _rate0=_ecoRate(), _cfgT=_ecoCfg();
   var _mBy={}; (window.MEMBRES||[]).forEach(function(m){ if(m&&m.nom) _mBy[m.nom]=m; });
   // ★ TAUX A LA DATE DE LA SESSION. Une session de mars se valorise au taux de mars,
@@ -5718,6 +5913,13 @@ function _ecoTracHByParc(win){
         out.hByDate[se.date]=(out.hByDate[se.date]||0)+h;
       }
       if(se.conducteur){ if(!out.qui[nom]) out.qui[nom]={}; out.qui[nom][se.conducteur]=(out.qui[nom][se.conducteur]||0)+h; }
+      // ★ AJOUT PUR (TV-1) : les heures de conduite d'UN conducteur UN jour. Le temps vigne
+      //   (_ecoTempsVigne) les retire de ses heures dans les rangs : elles sont deja mesurees.
+      if(se.conducteur && se.date){
+        var _cd=String(se.date).slice(0,10);
+        if(!out.condH[se.conducteur]) out.condH[se.conducteur]={};
+        out.condH[se.conducteur][_cd]=(out.condH[se.conducteur][_cd]||0)+h;
+      }
     });
   });
   return out;
@@ -7170,6 +7372,43 @@ function _pecViewPostes(E){
     +'<div class="pec-scroll" style="margin-top:14px"><table class="pec-tbl"><thead><tr><th>Travail</th><th class="r">Heures</th><th class="r">Fait</th><th class="r">Engag\u00e9</th><th class="r">Reste</th><th class="r">Budget</th><th class="r">\u20AC/ha</th><th class="r">Part</th></tr></thead>'
     +'<tbody>'+(trows||'<tr><td colspan="8" class="pec-empty">Aucun travail chiffr\u00e9.</td></tr>')+'</tbody></table></div>'
     +'<div class="pec-acts"><button class="pec-btn" data-pec="sub" data-v="par"><span>\uD83C\uDF47</span> Voir parcelle par parcelle</button></div>'
+    +'</div></div>';
+  H+=_pecCarteTemps();
+  return H;
+}
+
+// ── TV-1 : le temps réel contre le barème, travail par travail ───────
+// Lit _ecoTempsVigne, ne calcule rien. Le chiffre qui compte est le h/ha RÉEL à
+// côté du h/ha du BARÈME : « plus vite ou plus lent que la convention ».
+function _pecCarteTemps(){
+  var V=null; try{ V=_ecoTempsVigne(); }catch(e){ V=null; if(window.logError) window.logError({level:'info',cat:'eco',msg:'temps vigne illisible'}); }
+  var info=(typeof _mvInfoBtn==='function')?(' '+_mvInfoBtn('pil.eco.temps')):'';
+  var H='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Temps r\u00e9el contre bar\u00e8me</div>'
+    +'<div class="pec-cs">Heures du planning vers\u00e9es aux parcelles valid\u00e9es'+info+'</div></div><div class="pec-cb">';
+  if(!V || !V.ok){
+    return H+'<div class="pec-empty">P\u00e9riode sans dates, pas encore commenc\u00e9e, ou planning pas encore ouvert\u00a0: rien \u00e0 verser.</div></div></div>';
+  }
+  if(!V.taches.length){
+    return H+'<div class="pec-empty">Aucune validation sur la p\u00e9riode pour l\u2019instant. Les heures du planning attendent la premi\u00e8re\u00a0: <b>'
+      +_ecoH1(V.hAtt)+' h</b> en attente.</div></div></div>';
+  }
+  var rows=V.taches.map(function(t){
+    var ec=t.ecart, col=(ec===null)?'var(--texte-doux)':(ec>15?'var(--rouge)':(ec>5?'var(--orange)':(ec<-8?'var(--vert-med)':'var(--texte)')));
+    return '<tr><td class="n">'+_pilEsc(_pilTnom(t.nom))+'</td>'
+      +'<td class="r">'+_pilHa(Math.round(t.surf*100)/100)+'</td>'
+      +'<td class="r">'+_ecoH1(t.h)+'</td>'
+      +'<td class="r"><b>'+(t.h>0?_ecoH1(t.hhaR):'\u2014')+'</b></td>'
+      +'<td class="r">'+_ecoH1(t.hhaB)+'</td>'
+      +'<td class="r" style="color:'+col+'">'+(ec===null?'\u2014':((ec>0?'+':'')+Math.round(ec)+' %'))+'</td></tr>';
+  }).join('');
+  var att=V.gens.filter(function(g){ return g.hAtt>=0.5; });
+  var attTxt=att.length
+    ? (' \u00b7 <b>'+_ecoH1(V.hAtt)+' h en attente</b> d\u2019une validation ('+_pilEsc(att.slice(0,3).map(function(g){ return g.nom+' '+_ecoH1(g.hAtt)+' h'; }).join(', '))+(att.length>3?'\u2026':'')+')')
+    : '';
+  H+='<div class="pec-scroll"><table class="pec-tbl" style="min-width:480px"><thead><tr><th>Travail</th><th class="r">ha</th><th class="r">Heures</th><th class="r">h/ha r\u00e9el</th><th class="r">h/ha bar\u00e8me</th><th class="r">\u00c9cart</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table></div>'
+    +'<div class="pec-vcadre"><span><b>'+_ecoH1(V.hAff)+' h</b> vers\u00e9es sur '+V.nEv+' validation'+(V.nEv>1?'s':'')
+    +(V.hTrac>0?(' \u00b7 '+_ecoH1(V.hTrac)+' h de conduite tracteur retir\u00e9es'):'')+attTxt+'.</span></div>'
     +'</div></div>';
   return H;
 }
@@ -9447,7 +9686,7 @@ function _pilCrumbHtml(){
 // noCmp=true : la comparaison a l'exercice N-1 double le travail et ne sert a
 // aucune des deux vues qui appellent d'ici.
 var _PIL_EXO=null;
-function _pilExoOublier(){ _PIL_EXO=null; _ECO_RATE_CACHE={k:null,v:0}; _PIL_DIAGC=null; }
+function _pilExoOublier(){ _PIL_EXO=null; _ECO_RATE_CACHE={k:null,v:0}; _PIL_DIAGC=null; _ECO_TV=null; }
 function _pilExoData(){
   if(_PIL_EXO!==null) return _PIL_EXO;
   var X=null;

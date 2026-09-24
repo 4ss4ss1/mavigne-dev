@@ -2,7 +2,24 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **23 septembre 2026 (TOUR-2)** — ★★★ **LE RETOUR FERME CE QUI EST OUVERT, ET UN APPUI VA OÙ
+> Dernière consolidation : **23 septembre 2026 (TV-1 + TV-2)** — ★★★ **LE TEMPS RÉELLEMENT PASSÉ DANS CHAQUE PARCELLE (§172)**.
+> ★ TV-2, même lot, même 7.60 (TV-1 jamais poussé) : **l'administrateur qui valide peut se décocher du groupe** — puce « Moi »
+> des panneaux, « Moi aussi dans les rangs » de la barre d'équipe (mémorisé par tâche, `EQUIPE_TACHE.__hors`) ; l'entrée garde
+> `qui` et porte `quiHors:true` ; moteur, `_ecoEquipeByParc` et `_jivQui` sautent l'auteur. Les listes de passages se RÉUNISSENT
+> (la validation d'un appui écrit `[2]`, les panneaux `[1,2]`). ⚠️ **QUESTION OUVERTE (§28) : brancher l'écart de cadence sur
+> ce moteur ?** Nico : « on laisse comme il est pour le moment ». Harnais : 38 assertions, 13 contre-épreuves.
+> Nico : « il faudrait que le moteur calcule le nombre de vignes validées en une journée pour faire un prorata du temps passé
+> dans chaque parcelle en fonction du nombre d'heures comptées sur le planning ». Précisé : une validation vaut pour TOUT le
+> groupe nommé ; plusieurs parcelles le même jour se partagent au PRORATA DE LA SURFACE. `_ecoTempsVigne` (pilotage.js) : par
+> salarié et par jour, heures dans les rangs (`_planChampPersRange`) moins sa conduite tracteur (`condH`, ajout pur à
+> `_ecoTracHByParc`), ACCUMULÉES jusqu'à sa prochaine validation (une validation marque une FIN — 12 journées-personne sur 247
+> en portaient une l'hiver), puis versées au prorata de la surface. Niveaux/passages : seul le NOUVEAU compte (listes
+> cumulatives) ; « Annulé » retire la clôture. Carte « Temps réel contre barème » (Postes & travaux), fiche `pil.eco.temps`.
+> Harnais neuf `mv-harnais-temps-vigne` (38 assertions, 13 contre-épreuves, TV-2 compris). **APP 7.59 → 7.60 · SW 8.28 → 8.29**, base
+> `96f7f1d`. ⚠️ ENG-1 (« Engagé à ce jour » en euros sortis) : écrit puis ABANDONNÉ à la demande de Nico, jamais livré —
+> ne pas le reprendre de mémoire. Détail en **§172**.
+>
+> ★ Précédente : **23 septembre 2026 (TOUR-2)** — ★★★ **LE RETOUR FERME CE QUI EST OUVERT, ET UN APPUI VA OÙ
 > L'ON APPUIE (§171)**. Deuxième lot du tour complet (§170f). `_mvBack` ne connaissait que `.overlay` : six surfaces d'autres
 > familles (feuille du Cuvier, tri, « Ce qu'il manque », « c'est fait », « Plus », feuilles de Décider) restaient ouvertes
 > pendant que la page changeait. `_MV_SURFACES` + `_mvTopSurface` (app.js) les ferment par LEUR fermeture, la plus haute
@@ -5306,6 +5323,16 @@ radios/cases, section « pièces à joindre » explicite.
 ---
 
 ## 28. État courant & backlog
+
+### ⚠️ QUESTION OUVERTE — L'ÉCART DE CADENCE ET LE TEMPS RÉEL (§172f ③, posée le 23/09)
+
+Deux mesures du temps existent depuis TV-1. **L'écart de cadence** (`_pecCadPresence`, Synthèse, verdict, date de fin, facteur
+`_pilFacteurK`) compare la **présence globale** du planning (moins le tracteur) au barème de TOUT le travail fait — cave, atelier et
+bureau restent dedans (biais écrit à l'écran). **Le temps réel** (`_ecoTempsVigne`) verse les heures aux parcelles **validées** :
+il n'a pas ce biais, mais il ne voit que ce qui est validé (le reste est « en attente »).
+**La question** : brancher la cadence sur les heures VERSÉES (Σ h versées contre Σ barème des clôtures) ? Nico, 23/09 : *« on laisse
+l'écart de cadence comme il est pour le moment »*. **Ne rien changer sans lui.** Avant d'en reparler, mesurer chez MG : la part
+d'heures « en attente », et l'écart des deux mesures sur une période close.
 
 ### ⚠️ PREP-1 — À JOUER SUR UN DOMAINE JETABLE AVANT UN VRAI CLIENT (§134)
 
@@ -23097,3 +23124,118 @@ en sombre (§170f ⑦). ④ `mv-harnais-contraste --baseline` (§170e), chez Nic
 | `guide/06-tracteur.html` | le crayon du conducteur | — |
 | `scripts/mv-harnais-retour.mjs` · `package.json` · `.github/workflows/ci.yml` | harnais neuf aux trois portes, `test:retour` | — |
 | `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | SECTIONS 203 · §171 · base | — |
+
+## 172. ★★★ TV-1 + TV-2 — LE TEMPS RÉELLEMENT PASSÉ DANS CHAQUE PARCELLE (23/09 — `src/pilotage.js` · `src/app.js` · `src/reglages.js` · `src/utils.js` · `guide/04-vigne.html` · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-temps-vigne.mjs` (neuf) · `package.json` · `.github/workflows/ci.yml` · `scripts/harnais-claude-md.mjs` · APP 7.59 → **7.60** · SW 8.28 → **8.29** · base `96f7f1d`)
+
+### 172a. La demande, et ce qu'elle réglait
+
+*« On n'a toujours pas de moyen pour le calcul du temps de travail vigne. Il faudrait que le moteur calcule le nombre de vignes
+validées en une journée pour faire un prorata du temps passé dans chaque parcelle en fonction du nombre d'heures comptées sur le
+planning des salariés qui travaillent dans les vignes. »* Puis, sur question : une validation vaut pour **tout le groupe nommé**
+(Victor, Shana, Alicia 1 h sur un are = 3 h sur la tâche) ; plusieurs parcelles le même jour se partagent **au prorata de la
+surface** — *« 3 parcelles, 1 ha et 2 de 0,5, à 3 pendant 8 h, ça fait 12 h pour 1 ha même si le barème en convient 15 : c'est ce
+qui nous dit si le travail est plus rapide ou plus lent que la convention »*.
+
+Ce qui existait : `_ecoEquipeByParc` répartissait déjà 1/N une journée-personne entre les parcelles validées — en **journées**,
+pas en heures, et seulement pour pondérer le taux. La cadence (`_pecCadPresence`) compare une présence **globale** à un barème
+global : elle ne dit rien d'un travail précis.
+
+### 172b. La règle (`_ecoTempsVigne`)
+
+Par salarié sous contrat sur la période (bureau exclu : `_mvEnContratSurPeriode` **sans** 4e argument — ⚠️ le cliquet ④ de
+pil-coherence exige qu'un seul appelant passe `true`), jour par jour de `debut` à `min(fin, aujourd'hui)` :
+1. heures du jour = `_planChampPersRange(m, j, j)` (congé, récup, arrêt, absence, formation, famille à 0 — CHAMP-1) **moins** sa
+   conduite tracteur du jour, bornée aux heures du jour (`_ecoTracHByParc().condH[nom][iso]`, **ajout pur**) ;
+2. elles **s'accumulent** jusqu'au jour où il figure sur une clôture (`qui` ou `membresEquipe`) ;
+3. elles se **versent** sur les clôtures de ce jour, au prorata de la surface des parcelles (surfaces toutes nulles : parts égales).
+
+⚠️⚠️ **POURQUOI ACCUMULER.** Une validation marque la FIN d'un travail (§20b : 12 journées-personne sur 247 en portaient une l'hiver,
+165 sur 559 au printemps). La règle « le jour même seulement » laissait ~95 % des heures d'hiver sur aucune parcelle. Nico a répondu
+à la question « les jours sans validation vont où ? » par la mécanique du groupe, pas par une option : le report sur la clôture
+suivante est **une hypothèse de Claude**, écrite dans la fiche, à confirmer à l'usage.
+★ **Propriété** : une heure n'est versée qu'une fois. Une validation en trop redistribue, elle ne crée rien. Invariant tenu par le
+harnais : **versé + en attente = rangs − conduite**. Ce qui attend (depuis la dernière clôture de la personne) s'affiche sous le
+tableau, nom par nom.
+
+**Une clôture** (`_ecoTvEvents`) : entrée « Validé » d'une tâche simple ; pour niveaux/passages, une entrée qui **ajoute** un niveau
+ou un passage à la précédente du même couple — les listes sont **cumulatives** (`confirmNiveaux` écrit `_nivSelDone` entier) et le
+statut peut rester « En cours » alors que du travail vient d'être clos ; « Annulé » retire la dernière clôture du couple et remet la
+liste à zéro. « Domaine » (validation groupée) n'a pas de surface : ignorée. Tri par date puis par `id` (horodatage hex).
+**Le barème** d'une clôture (`_ecoTvBar`) : surface × h/ha de la tâche, ou des seuls niveaux/passages nouveaux, ou trous × min —
+compté **une fois par clôture**, jamais par personne (contre-épreuve dédiée).
+
+### 172c. L'écran
+
+Économie › Postes & travaux, sous « Coût par travail » : carte **« Temps réel contre barème »** (`_pecCarteTemps`, ne calcule
+rien) — Travail · ha · Heures · **h/ha réel** · h/ha barème · Écart (couleurs de la cadence : >15 rouge, >5 orange, <−8 vert).
+Ligne de cadre : heures versées, nombre de validations, conduite retirée, heures en attente (3 noms au plus). Écart `—` quand un
+couple a un barème sans heure versée (personne du groupe au planning) : pas de « −100 % ». Cache `_ECO_TV`, oublié dans
+`_pilExoOublier`, clé `debut|fin`.
+
+### 172d. ~~Limite connue~~ — le validateur compte dans le groupe (RÉGLÉ par TV-2, 172i)
+
+`qui` est toujours dans le groupe (`_jePrefillTeam` : « validateur implicite »). Nico valide souvent pour l'équipe **sans être dans
+les rangs** : SES heures du jour vont alors à ces parcelles. Nico : *« il faudra le corriger ça d'ailleurs »*. Le remède est à la
+**saisie** (le validateur doit pouvoir se décocher du groupe) — lot à part, pas dans le moteur : le moteur ne peut pas deviner.
+
+### 172e. Accompagnement
+
+Fiche `MV_INFO` **neuve** `pil.eco.temps` (posée sur la carte). `MV_AIDE` Pilotage, ligne Économie : une phrase sur le temps réel.
+`guide/11-pilotage.html`, carte Économie : un point (⚠️ `public/guide.html` **non livré** — `node scripts/build-guide.mjs`).
+« Quoi de neuf » 7.60 : une entrée (icône `chrono` — `horloge` n'existe pas dans le sprite). Visite guidée : rien ne bouge.
+
+### 172f. Ce qui n'a pas été mesuré
+
+① Aucune donnée réelle : les chiffres de MG ne sont pas lus (pas d'accès). À regarder en premier : la part d'heures **en attente**
+— si elle est grosse, des salariés travaillent sans figurer sur les validations. ② Aucun rendu regardé (pas de navigateur lancé
+sur la carte). ③ La cadence globale (`_pecCadPresence`) n'est **pas** rebranchée sur ce moteur : deux mesures du temps existent
+désormais — à trancher avec Nico (garder la présence globale, ou la remplacer par les heures versées). ④ Pré-existants, rouges
+sur la base `96f7f1d` **avant** ce lot, hors `npm run check` : `harnais-cadence-escalier` (« le KPI écart de cadence annonce la
+source histo ») et `mv-harnais-audit-pil` (B5, B6).
+
+### 172g. ENG-1 — écrit, puis abandonné
+
+Même journée, demande précédente : « Engagé à ce jour » en euros **sortis** (salaires sous contrat + achats, GNR, réparations,
+fûts), via `_pexData` rejoué sur la fenêtre de la période, courbe au jour (`byD`). Écrit dans le bac à sable, puis Nico : *« non
+stoppe, je ne pousserai pas »*. **Rien n'est livré, rien n'est dans ce lot.** Ne pas le reprendre de mémoire : si la demande
+revient, repartir d'ici et reposer la question du budget (il resterait un barème vigne seule, l'engagé contiendrait cave et bureau).
+
+### 172i. ★★ TV-2 — le validateur peut se décocher (administrateur seulement)
+
+Nico : *« il faut permettre au validateur de se décocher (seulement si admin) »*. Même lot, même version (TV-1 n'était pas poussé).
+- **Donnée** : l'entrée garde `qui` (l'auteur — la traçabilité ne bouge pas) et porte **`quiHors:true`** quand l'auteur n'a pas
+  travaillé. Les entrées d'avant n'ont pas le champ : l'auteur y compte, comme avant. Aucune règle Firestore ne liste les champs du
+  journal (vérifié : `firestore.rules`, `functions/`).
+- **Lecteurs** : `_ecoTvEvents`, `_ecoEquipeByParc` (pilotage.js) et `_jivQui` (reglages.js) sautent `qui` si `quiHors`.
+- **Panneaux** (`_buildMembresCheckboxes`, 3e argument `moiHors`) : pour un administrateur (`_mvMoiAdmin` = `isAdmin()` + un nom),
+  une puce **« Moi (nom) »** en tête, sans `data-nom` (jamais ramassée par `_getSelectedMembres`, jamais touchée par
+  `_jePrefillTeam` qui vise `.mbr-chk`). Cochée par défaut, sauf si la tâche est mémorisée « sans moi ». `_mvQuiHors(id)` la lit.
+  Cinq chemins d'écriture : `confirmValidation`, `saveJournalEntry`, `confirmNiveaux`, `confirmPassages`, `pQuickValidate`.
+  **Groupe vide sans le validateur = refus** (« Personne dans le groupe ») — pour niveaux et passages, le refus est en TÊTE de
+  fonction, avant la mutation de `p.taches` (contre-épreuve dédiée).
+- **Barre d'équipe** (validation d'un appui) : la puce de l'administrateur devient **« Moi aussi dans les rangs »** (`_pvToggleMoi`,
+  exposée) ; décochée, « sans moi » est **mémorisé par tâche** dans `EQUIPE_TACHE.__hors` (clé réservée, comme `__default` ; rien
+  n'itère `EQUIPE_TACHE`). « Moi seul » remet le validateur dans les rangs. L'administrateur est retiré de sa propre équipe
+  (il est `qui`). La barre affiche « · sans moi ».
+- **Moteur, trouvé en écrivant TV-2** : `pQuickValidate` écrit le SEUL passage du jour (`passages:[2]`), les panneaux la liste
+  ENTIÈRE (`[1,2]`). Le « précédent » était REMPLACÉ : une liste entière après un appui recomptait le passage 1. Il est désormais
+  **réuni** (`P.pass.concat(nPass)`), remis à zéro par « Annulé ».
+- **Accompagnement** : `MV_AIDE.parcelles` (« Valider pour l'équipe sans y être »), fiche `pil.eco.temps` (la limite devient la
+  règle), « Quoi de neuf » 7.60 (2e entrée), `guide/04-vigne.html` (note sous la règle d'équipe).
+- ⚠️ **Non regardé à l'écran** : la puce « Moi » dans les quatre panneaux, la barre d'équipe, le refus.
+
+### 172h. La note de livraison
+
+**Base `96f7f1d`. APP 7.59 → 7.60 · SW 8.28 → 8.29.** `node scripts/build-guide.mjs`, puis `npm run build && firebase deploy --only hosting`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/pilotage.js` | `_ecoTempsVigne` + `_ecoTvEvents`/`_ecoTvBar`/`_ecoTvNivs`/`_ecoTvDef` ; `condH` dans `_ecoTracHByParc` ; `_pecCarteTemps` ; `_ECO_TV` oublié ; `quiHors` (TV-2) | — |
+| `src/app.js` | TV-2 : puce « Moi », `_mvMoiAdmin`, `_mvQuiHors`, `_eqtHors`/`_eqtSetHors`, `_pvToggleMoi`, `quiHors` aux cinq écritures | — |
+| `src/reglages.js` | TV-2 : `_jivQui` saute l'auteur hors des rangs | — |
+| `guide/04-vigne.html` | TV-2 : valider pour l'équipe sans y être | — |
+| `src/utils.js` | APP 7.60 ; « Quoi de neuf » ; fiche `pil.eco.temps` ; `MV_AIDE` Pilotage | ★ APP |
+| `index.html` · `public/sw.js` | 4 versions · 8.29 (en-tête, `CACHE_NAME`, 2 `console.log`) | ★ APP · ★ SW |
+| `guide/11-pilotage.html` | le temps réel contre barème | — |
+| `scripts/mv-harnais-temps-vigne.mjs` · `package.json` · `.github/workflows/ci.yml` | harnais neuf aux trois portes, `test:temps-vigne` | — |
+| `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | SECTIONS 204 · §172 · base | — |

@@ -293,6 +293,14 @@ jobs:
           node scripts/mv-harnais-retour.mjs
           node scripts/mv-harnais-retour.mjs --contre
 
+      # TV-1 (§172) : le temps reellement passe dans chaque parcelle — heures dans les rangs du planning (moins la
+      # conduite tracteur) versees aux parcelles validees par le salarie ou son groupe, au prorata de la surface.
+      # Les vraies fonctions de pilotage.js ; 8 contre-epreuves (parts egales, pas de report, tracteur, niveaux...).
+      - name: Harnais — le temps reel contre le bareme (TV-1)
+        run: |
+          node scripts/mv-harnais-temps-vigne.mjs
+          node scripts/mv-harnais-temps-vigne.mjs --contre
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build
