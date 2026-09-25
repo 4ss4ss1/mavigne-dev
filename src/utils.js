@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.60';
+export const APP_VERSION = '7.61';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -716,6 +716,14 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.61', items: [
+    { emoji: 'euro', titre: 'Pilotage\u00a0: « Engagé à ce jour » compte les heures vraiment passées',
+      desc: "La main-d’œuvre engagée valorisait au barème les seules parcelles <b>validées</b>\u00a0: une semaine de dégrafage pas encore validée "
+        + "valait zéro. Elle se lit maintenant dans le <b>planning</b>\u00a0: les heures dans les rangs de chaque salarié vigne depuis le début de "
+        + "la période, validées ou non, à son taux chargé du jour. La conduite du tracteur reste comptée à part, et une journée où le salarié figure "
+        + "sur une <b>opération de cave</b> sort de la vigne. «\u00a0% du budget\u00a0» et «\u00a0% du travail fait\u00a0» se lisent côte à côte\u00a0: "
+        + "l’écart entre les deux dit si l’on est en avance ou en retard." }
+  ] },
   { v: '7.60', items: [
     { emoji: 'chrono', titre: 'Pilotage\u00a0: le temps réellement passé dans chaque parcelle',
       desc: "Nouvelle carte «\u00a0Temps réel contre barème\u00a0» dans Économie › Postes & travaux. Les heures «\u00a0dans les rangs\u00a0» du planning "
@@ -3661,7 +3669,7 @@ var MV_AIDE = {
       ['Le manque d’effectif se lit sur la semaine du pic', ", contre ce qui est prévu au planning <b>cette semaine-là</b> — pas contre la présence d’aujourd’hui. Un pic qui tombe dans onze mois ne se compare pas à qui est là ce matin."],
       ['Le total de l’Exercice n’est pas un compte de résultat', ": Ma Vigne connaît ce qui passe par elle — heures payées, carburant, achats d’intrants. Ni le fermage, ni les amortissements, ni les assurances, ni vos cotisations d’exploitant. Ce total sert à <b>piloter vos charges d’un bilan à l’autre</b>, pas à remplacer votre comptable."],
       ['La carte de fiabilité d’Économie', ": elle relit la liste du bandeau <b>« à compléter »</b> — mêmes lignes, mêmes mots, mêmes boutons — et n’en garde que ce qui met un <b>poste de ce budget à zéro</b> : un taux horaire, le prix du GNR, une dose. Ce n’est pas « un peu bas » : c’est zéro, et le budget affiché n’est qu’un plancher. La puce « N remarques » en dessous ouvre tout ce qui n’empêche pas un calcul mais change sa lecture."],
-      ['Économie', "compare un budget de barème à ce qui est engagé, sur la <b>période consultée</b> — le coût d’un bilan entier se lit dans sa sous-vue <b>Exercice</b>. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire. Dans <b>Postes & travaux</b>, le <b>temps réel</b> de chaque travail — les heures du planning versées aux parcelles validées, au prorata de la surface — se lit à côté du h/ha du barème."],
+      ['Économie', "compare un budget de barème à ce qui est engagé — les heures réellement passées dans les rangs au planning, validées ou non —, sur la <b>période consultée</b> — le coût d’un bilan entier se lit dans sa sous-vue <b>Exercice</b>. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire. Dans <b>Postes & travaux</b>, le <b>temps réel</b> de chaque travail — les heures du planning versées aux parcelles validées, au prorata de la surface — se lit à côté du h/ha du barème."],
       ['Économie › Exercice', "coupe l’année <b>au jour</b> : l’<b>engagé</b> (ce qui est sorti) à gauche d’aujourd’hui, le <b>prévu</b> (les salaires que la grille du planning annonce) hachuré à droite, et le total à la clôture qui dit qu’il contient du prévu. Contre l’an dernier, la comparaison se fait <b>aux mêmes jours</b>, pas dix mois de grille contre douze mois payés."],
       ['La carte de verdict d’Économie', ": elle dit en une phrase où vous en êtes, et pose les boutons pour agir — voir quel travail dérape, ouvrir le barème. Quand la cadence affichée vient de la campagne précédente, une ligne sous le texte le dit, avec le nom de cette campagne. Le <b>comment</b> du calcul est derrière son petit « i »."],
       ['L’écart de cadence cherche sa source dans un ordre', ", et dit toujours laquelle il a trouvée. D’abord <b>la période en cours</b>, dès 40 % de barème réalisé. Sinon <b>la même période de la campagne précédente</b>, si elle est archivée — la ligne porte alors un <b>↩</b> et nomme la campagne : cet écart-là <b>se lit, il ne s’applique pas</b> au budget ni à la date de fin. Même règle quand le facteur sort de [0,5 ; 3] : un trou de saisie n’est pas une cadence, l’écran le dit. Sinon rien, et l’écran l’écrit plutôt que d’afficher un chiffre inventé."],
@@ -3864,9 +3872,18 @@ export const MV_INFO = {
   // ⚠️ FICHE VIVANTE : ses paragraphes sont remplaces a chaque rendu par
   //   _pecAlertes (pilotage.js). Ce qui suit est le repli — il s'affiche si le
   //   module n'a pas encore tourne, et il doit rester vrai dans ce cas-la.
+  // ★ ENG-2 (24/09/2026) — posée à côté du chiffre, dans la Synthèse (_pecViewSynthese).
+  'pil.eco.engage': { t: 'Engagé à ce jour', p: [
+    'La <b>main-d\u2019\u0153uvre</b> engagée, ce sont les heures <b>réellement payées</b> : pour chaque salarié vigne, ses heures dans les rangs au planning depuis le début de la période jusqu\u2019à aujourd\u2019hui — congés, absences et formation à zéro, bureau exclu — au <b>taux chargé</b> de sa fiche, celui qui valait ce jour-là.',
+    'Qu\u2019une parcelle soit validée ou non n\u2019y change rien : une semaine de dégrafage pas encore validée est déjà payée. C\u2019est ce qui permet de lire l\u2019avance ou le retard : <b>30 % du budget engagé pour 15 % du travail fait</b>, c\u2019est du retard, en euros.',
+    'Deux choses en sont retirées. La <b>conduite du tracteur</b>, comptée à part dans son propre poste. Les <b>journées de cave</b> : un jour où le salarié figure parmi les intervenants d\u2019une opération de cave (soutirage, remontage…), sa journée entière sort de la vigne — l\u2019opération ne dit pas combien de temps elle a pris.',
+    'Le tracteur, le carburant et le phyto sont comptés comme avant. Le <b>budget</b>, lui, reste le barème : surface \u00d7 heures par hectare \u00d7 taux.',
+    'Un jour d\u2019atelier ou de bureau d\u2019un salarié vigne n\u2019est écrit nulle part : il reste compté dans la vigne. Un salarié sans taux sur sa fiche est compté au taux moyen du domaine.'
+  ] },
+
   // ★ TV-1 (23/09/2026) — posée sur la carte « Temps réel contre barème » (_pecCarteTemps).
   'pil.eco.temps': { t: 'Temps réel contre barème', p: [
-    'Pour chaque salarié, chaque jour : ses heures <b>dans les rangs</b> au planning — congés, récup, arrêts, absences et formation à zéro — moins ses heures de <b>conduite tracteur</b>, déjà mesurées par les sessions. Le bureau n\u2019entre pas.',
+    'Pour chaque salarié, chaque jour : ses heures <b>dans les rangs</b> au planning — congés, récup, arrêts, absences et formation à zéro — moins ses heures de <b>conduite tracteur</b>, déjà mesurées par les sessions. Le bureau n\u2019entre pas. Un jour où il figure sur une <b>opération de cave</b>, sa journée entière sort de la vigne.',
     'Ces heures sont versées aux travaux qu\u2019il <b>valide, lui ou son groupe</b> : une validation vaut pour toutes les personnes nommées. Trois personnes une heure sur un are, c\u2019est trois heures sur ce travail.',
     'Plusieurs parcelles validées <b>le même jour</b> se partagent <b>au prorata de leur surface</b>. Trois personnes huit heures sur 1 ha, 0,5 ha et 0,5 ha : 24 h pour 2 ha, soit <b>12 h/ha</b> — contre 15 au barème, le travail est allé plus vite que la convention.',
     'Une validation marque la <b>fin</b> d\u2019un travail. Les jours sans validation vont donc au travail que la personne valide <b>ensuite</b>. Ce qui n\u2019a pas encore trouvé de validation reste <b>en attente</b>, affiché sous le tableau — jamais perdu, jamais compté deux fois.',
@@ -4019,7 +4036,7 @@ export const MV_INFO = {
     'Cet écran chiffre le <b>coût de culture</b> d\u2019une campagne : ce qu\u2019il faut de main-d\u2019œuvre, de tracteur, de carburant et de produits pour mener le raisin au bout du rang.',
     'Les <b>achats</b>, les <b>réparations</b> et les <b>fûts</b> n\u2019y sont pas, et ne peuvent pas y être : ils portent une <b>date</b>, ce budget n\u2019en porte aucune — c\u2019est un barème, pas un relevé. Ils se comptent dans <b>Exercice</b>, d\u2019un bilan à l\u2019autre, avec les salaires.',
     'Les quatre postes ne sont pas connus de la même façon, et c\u2019est ce qui explique leurs écarts de fiabilité.',
-    'La <b>main-d\u2019\u0153uvre vigne</b> est un <b>barème complet</b> : surface \u00d7 heures par hectare \u00d7 taux de l\u2019équipe, sur toute la période — y compris le travail qui reste à faire.',
+    'La <b>main-d\u2019\u0153uvre vigne</b> est budgétée au <b>barème complet</b> : surface \u00d7 heures par hectare \u00d7 taux de l\u2019équipe, sur toute la période — y compris le travail qui reste à faire. Son <b>engagé</b>, lui, vient des heures payées du planning (voir « Engagé à ce jour »).',
     'Le <b>tracteur</b> et le <b>phyto</b> ne sont connus qu\u2019en <b>réalisé</b> : ils n\u2019existent que là où une session ou un traitement a été saisi. Au-delà de <b>15 % d\u2019avancement</b>, ils sont extrapolés au rythme constaté ; en dessous, ils affichent le réalisé seul, parce qu\u2019extrapoler sur trois sessions ne veut rien dire.',
     'Le <b>GNR</b>, lui, est <b>mesuré</b> : c\u2019est la somme de vos pleins, au litre près. Ce qui reste approché, c\u2019est sa <b>répartition</b> entre parcelles — un plein est rattaché à une machine et à une date, jamais à une parcelle. Le total est juste, sa ventilation est proportionnelle aux heures machine.',
     'Tant qu\u2019<b>aucun plein n\u2019est relevé</b> sur la période, le carburant repasse à l\u2019ancien calcul — heures × consommation × prix — et la ligne affiche «\u202fL ESTIMÉS\u202f». Le mot est là pour être lu.',

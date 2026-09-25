@@ -19,6 +19,8 @@
      B. Les branchements : la carte lit le moteur, la fiche existe et est posée,
         le cache est oublié à la repeinte, _ecoTracHByParc expose condH.
 
+     D. ENG-2 : l'euro engagé au taux du jour, les journées de cave retirées (intervenants
+        seulement, jamais operateur ni analyse) ; _pecData et la courbe les lisent.
      C. TV-2 : le validateur administrateur peut se décocher (`quiHors`). Moteur exécuté ;
         les cinq chemins d'écriture d'app.js et les lecteurs du groupe lus sans commentaires.
 
@@ -48,7 +50,7 @@ function extraire(src, nom) {
 }
 const nu = s => s.split('\n').filter(l => !l.trimStart().startsWith('//')).join('\n');
 
-const VOULUES = ['_pexIso', '_pexD', '_pexIsoToMs2', '_pexIsoPlus', '_pexJourApres', '_opPassHha', '_opMinTrou',
+const VOULUES = ['_ecoCaveJours', '_pexIso', '_pexD', '_pexIsoToMs2', '_pexIsoPlus', '_pexJourApres', '_opPassHha', '_opMinTrou',
   '_ecoTvNivs', '_ecoTvDef', '_ecoTvBar', '_ecoTvEvents', '_ecoTempsVigne'];
 
 /* Stubs : ils RENDENT des données. HEURES[nom][iso] = heures dans les rangs ce jour ;
@@ -56,6 +58,9 @@ const VOULUES = ['_pexIso', '_pexD', '_pexIsoToMs2', '_pexIsoPlus', '_pexJourApr
 const PRELUDE = `
 var window = { PARCELLES:[], JOURNAL:[], MEMBRES:[], TACHES:[] };
 var HEURES = {}, COND = {}, PER = { nom:'Hiver', debut:'2026-01-05', fin:'2026-01-16' };
+var TAUX = {}, RATE0 = 18;
+function _ecoRate(){ return RATE0; }
+window._mvPaieTauxEffAt = function(m, iso){ var t=TAUX[m.nom]; if(typeof t==='function') return t(iso); return t||0; };
 var _ECO_TV = null;
 window._pilSaison = function(){ return PER; };
 window._mvEnContratSurPeriode = function(m){ return !m.bureau; };
@@ -72,7 +77,7 @@ function charger(src) {
   if (manque.length) return { manque };
   const code = PRELUDE + morceaux.join('\n') + `
 ;return { tv: function(){ _ECO_TV=null; return _ecoTempsVigne(); },
-  set: function(o){ Object.assign(window, o.w||{}); if(o.h) HEURES=o.h; if(o.c) COND=o.c; if(o.per) PER=o.per; } };`;
+  set: function(o){ Object.assign(window, o.w||{}); if(o.h) HEURES=o.h; if(o.c) COND=o.c; if(o.per) PER=o.per; if(o.t) TAUX=o.t; } };`;
   return { M: new Function(code)() };
 }
 
@@ -175,6 +180,37 @@ function scenarios(M) {
   eq('E6 · barème = passage 1 (10) + passage 2 (8)', tP.bar, 18);
   M.set({ w: { TACHES } });
 
+  // ── I : ENG-2 — l'exemple de Nico : 4 salariés, une semaine, 19 €/h ─────
+  const SEM = ['2026-01-05', '2026-01-06', '2026-01-07', '2026-01-08', '2026-01-09'];
+  M.set({ w: { PARCELLES: [P('L', 1)], TACHES, MEMBRES: [{ nom: 'A' }, { nom: 'B' }, { nom: 'C' }, { nom: 'D' }], JOURNAL: [],
+    CAVE_ELEVAGE: { operations: [] } },
+    h: { A: jours(SEM, 8), B: jours(SEM, 8), C: jours(SEM, 8), D: jours(SEM, 8) }, c: {},
+    t: { A: 19, B: 19, C: 19, D: 19 } });
+  V = M.tv();
+  eq('I1 · 4 × 8 h × 5 j × 19 € = 3 040 € engagés, SANS aucune validation', V.eur, 3040);
+  eq('I2 · 160 h dans les rangs', V.hVigne, 160);
+  // Taux qui change en cours de semaine, et une fiche sans taux
+  M.set({ t: { A: iso => (iso < '2026-01-07' ? 17 : 19), B: 0, C: 19, D: 19 } });
+  V = M.tv();
+  eq('I3 · taux du JOUR : A = 2 j × 8 × 17 + 3 j × 8 × 19 ; B au taux moyen (18)', V.eur, (2 * 8 * 17 + 3 * 8 * 19) + 40 * 18 + 40 * 19 * 2);
+  eq('I4 · une fiche sans taux est signalée', V.nSansTaux, 1);
+  // Journée de cave
+  M.set({ w: { CAVE_ELEVAGE: { operations: [
+      { id: 'o1', type: 'soutirage', date: '2026-01-06', intervenants: ['A', 'B'], operateur: 'Nico' },
+      { id: 'o2', type: 'soutirage', date: '2026-01-07', intervenants: [], operateur: 'C' },
+      { id: 'o3', type: 'analyse', date: '2026-01-08', intervenants: ['D'] } ] } },
+    t: { A: 19, B: 19, C: 19, D: 19 } });
+  V = M.tv();
+  eq('I5 · deux journées de cave (A, B le 6) retirées : 16 h', V.hCave, 16);
+  eq('I6 · … et leurs euros : 3 040 − 16 × 19', V.eur, 3040 - 16 * 19);
+  ok('I7 · `operateur` seul ne sort personne de la vigne (C le 7)', !((V.gens.find(g => g.nom === 'C') || {}).hCave > 0));
+  ok('I8 · une analyse ne vide pas une journée (D le 8)', !((V.gens.find(g => g.nom === 'D') || {}).hCave > 0));
+  // Courbe : les euros au jour, somme = total
+  const sD = Object.values(V.byD).reduce((a, b) => a + b, 0);
+  eq('I9 · la courbe au jour vaut l\'engagé, au centime', sD, V.eur);
+  eq('I10 · rien le 6 pour A et B : 2 × 8 × 19 seulement ce jour-là', V.byD['2026-01-06'], 2 * 8 * 19);
+  M.set({ w: { CAVE_ELEVAGE: { operations: [] } }, t: {} });
+
   // ── F : période pas encore commencée ───────────────────────────────────
   M.set({ per: { nom: 'Futur', debut: '2099-01-01', fin: '2099-03-01' } });
   V = M.tv();
@@ -193,6 +229,16 @@ function branchements(src) {
   R.push(['G6 · _ecoTracHByParc expose la conduite par conducteur et par jour', /out\.condH\[se\.conducteur\]\[_cd\]/.test(extraire(L, '_ecoTracHByParc') || '')]);
   R.push(['G7 · le moteur lit les heures DANS LES RANGS, pas le travail effectif',
     /_planChampPersRange\(m,_pexD\(d\),_pexD\(d\)\)/.test(extraire(L, '_ecoTempsVigne') || '') && !/_planWorkPersRange/.test(extraire(L, '_ecoTempsVigne') || '')]);
+  // ENG-2 — _pecData, la courbe, les tableaux
+  const pd = extraire(L, '_pecData') || '', tl = extraire(L, '_pecTimeline') || '';
+  R.push(['J1 · l\'engagé prend la main-d\'œuvre du planning', /var moReel = \(TVe && TVe\.ok\) \? TVe\.eur : T\.moF;/.test(pd)
+    && /var engage = moReel \+ T\.tracF \+ T\.gnrF \+ T\.phyF;/.test(pd)]);
+  R.push(['J2 · la projection ajoute le reste de TRAVAIL au barème', /projFin = cadAppl \? \(engage \+ resteBar\*\(1\+ecart\)\) : \(engage \+ resteBar\)/.test(pd)]);
+  R.push(['J3 · le poste main-d\'œuvre vaut l\'engagé réel (le total des postes = l\'engagé)', /k:'mo',[^\n]*fait:moReel/.test(pd)]);
+  R.push(['J4 · la courbe pose la main-d\'œuvre au jour payé', /E\.moSrc==='planning' && E\.tv && E\.tv\.byD/.test(tl)]);
+  R.push(['J5 · les tableaux par parcelle restent au barème (engageBar)', (L.match(/_ecoEur\(E\.engageBar\)/g) || []).length >= 1 && /n2\(E\.engageBar\)/.test(L)]);
+  R.push(['J6 · la fiche pil.eco.engage existe et est posée', /'pil\.eco\.engage':\s*\{/.test(src.utl) && /_mvInfoBtn\('pil\.eco\.engage'\)/.test(L)]);
+
   // TV-2 — la saisie
   const A = nu(src.app), G = nu(src.reg);
   R.push(['H1 · se décocher est réservé à l\'administrateur', /function _mvMoiAdmin\(\)\{[^\n]*isAdmin\(\)/.test(A)
@@ -220,7 +266,7 @@ function executer(src) {
 /* ── Contre-épreuves ───────────────────────────────────────────────────── */
 const MUT = [
   ['parts égales au lieu du prorata de surface', 'var part=(S>0)?(e.surf/S):(1/L.length)', 'var part=1/L.length'],
-  ['les heures ne s\'accumulent plus d\'un jour à l\'autre', "if(hv>0){ if(!(acc>0)) g.dAtt=d; acc+=hv; }", "acc=0; if(hv>0){ acc+=hv; }"],
+  ['les heures ne s\'accumulent plus d\'un jour à l\'autre', "if(!(acc>0)) g.dAtt=d; acc+=hv;", "acc=hv;"],
   ['la conduite tracteur n\'est plus retirée', 'var ht=Math.min(h, Number(cd[d])||0);', 'var ht=0;'],
   ['la liste cumulative des niveaux n\'est plus comparée à la précédente', 'var nNiv=niv.filter(function(x){ return P.niv.indexOf(x)<0; });', 'var nNiv=niv.slice();'],
   ['« Annulé » est ignoré', "if(st==='Annul\\u00e9'){", "if(false){"],
@@ -228,6 +274,12 @@ const MUT = [
   ['le bareme est compté une fois par personne', 'P.bar+=b; P.n++;', 'P.bar+=b*Object.keys(P.noms).length||b; P.n++;'],
   ['la période future ouvre une fenêtre à l\'envers', "  if(auj<d0) return vide;\n", '\n'],
   ['quiHors ignoré par le moteur', "var noms=[]; if(j.qui && !j.quiHors) noms.push(j.qui);   // TV-2 : le validateur hors des rangs ne compte pas\n    (j.membresEquipe||[]).forEach(function(n){ if(n && noms.indexOf(n)<0) noms.push(n); });\n    var e=", "var noms=[]; if(j.qui) noms.push(j.qui);\n    (j.membresEquipe||[]).forEach(function(n){ if(n && noms.indexOf(n)<0) noms.push(n); });\n    var e="],
+  ['ENG-2 : operateur compte comme intervenant', "(Array.isArray(op.intervenants)?op.intervenants:[]).forEach(", "(Array.isArray(op.intervenants)&&op.intervenants.length?op.intervenants:[op.operateur]).forEach("],
+  ['ENG-2 : les analyses vident une journée', "if(!op || op.type==='analyse' || !op.date) return;", "if(!op || !op.date) return;"],
+  ['ENG-2 : les journées de cave ne sortent plus', "if(hv>0 && cj[d]){ g.hCave+=hv; hv=0; }", ""],
+  ['ENG-2 : taux fixe au lieu du taux du jour', "Number(window._mvPaieTauxEffAt(m,d))||0", "Number(window._mvPaieTauxEffAt(m,d0))||0"],
+  ['ENG-2 : l\'engagé revient au barème des validations', "var engage = moReel + T.tracF + T.gnrF + T.phyF;", "var engage = T.moF + T.tracF + T.gnrF + T.phyF;"],
+  ['ENG-2 : la courbe ignore le planning', "if(E.moSrc==='planning' && E.tv && E.tv.byD){", "if(false){"],
   ['tout le monde peut se décocher (plus de garde administrateur)', "  if(!_mvMoiAdmin()) return false;\n  var el=document.querySelector", "  var el=document.querySelector", 'app'],
   ['niveaux : le refus du groupe vide vient APRÈS la mutation', "  var _nivEq=document.getElementById('niv-equipe-val')", "  ;var _nivEq=document.getElementById('niv-equipe-val')", 'app'],
   ['le journal (Réglages) compte l\'auteur hors des rangs', "if(j&&j.qui&&!j.quiHors) L.push(j.qui);", "if(j&&j.qui) L.push(j.qui);", 'reg'],

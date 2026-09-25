@@ -2,7 +2,17 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **23 septembre 2026 (TV-1 + TV-2)** — ★★★ **LE TEMPS RÉELLEMENT PASSÉ DANS CHAQUE PARCELLE (§172)**.
+> Dernière consolidation : **24 septembre 2026 (ENG-2)** — ★★★ **« ENGAGÉ À CE JOUR » COMPTE LES HEURES PAYÉES (§173)**.
+> Nico : « une semaine à 3 ou 4 à dégrafer, 17-19 € chargés, 8 h, 5 jours : je ne suis pas sûr que ça fasse 1 400 € ». La
+> main-d'œuvre engagée était le BARÈME des travaux VALIDÉS (T.moF) : elle suivait l'avancement par construction. Elle vient
+> maintenant de `_ecoTempsVigne` (E.moReel) : heures dans les rangs du planning, salariés vigne, moins la conduite tracteur,
+> moins les JOURNÉES DE CAVE (`_ecoCaveJours` : `intervenants` des opérations d'élevage, jamais `operateur`, jamais une
+> analyse), × taux chargé DU JOUR — validées ou non. `engageBar` garde l'ancien calcul pour les tableaux par parcelle et par
+> tâche (colonnes « Réalisé »). Projection = engagé + reste de travail au barème (`resteBar`). Courbe : main-d'œuvre au jour
+> payé. Fiche neuve `pil.eco.engage`. **APP 7.60 → 7.61 · SW 8.29 → 8.30**, base `d684d4e`. Écart de cadence : INCHANGÉ
+> (Nico) — il ne retire pas les journées de cave, lui. Détail en **§173**.
+>
+> ★ Précédente : **23 septembre 2026 (TV-1 + TV-2)** — ★★★ **LE TEMPS RÉELLEMENT PASSÉ DANS CHAQUE PARCELLE (§172)**.
 > ★ TV-2, même lot, même 7.60 (TV-1 jamais poussé) : **l'administrateur qui valide peut se décocher du groupe** — puce « Moi »
 > des panneaux, « Moi aussi dans les rangs » de la barre d'équipe (mémorisé par tâche, `EQUIPE_TACHE.__hors`) ; l'entrée garde
 > `qui` et porte `quiHors:true` ; moteur, `_ecoEquipeByParc` et `_jivQui` sautent l'auteur. Les listes de passages se RÉUNISSENT
@@ -5331,7 +5341,8 @@ Deux mesures du temps existent depuis TV-1. **L'écart de cadence** (`_pecCadPre
 bureau restent dedans (biais écrit à l'écran). **Le temps réel** (`_ecoTempsVigne`) verse les heures aux parcelles **validées** :
 il n'a pas ce biais, mais il ne voit que ce qui est validé (le reste est « en attente »).
 **La question** : brancher la cadence sur les heures VERSÉES (Σ h versées contre Σ barème des clôtures) ? Nico, 23/09 : *« on laisse
-l'écart de cadence comme il est pour le moment »*. **Ne rien changer sans lui.** Avant d'en reparler, mesurer chez MG : la part
+l'écart de cadence comme il est pour le moment »*. **Ne rien changer sans lui.** ★ Depuis ENG-2 (§173), l'engagé retire les journées de cave
+et la cadence non : un argument de plus pour la brancher, à lui présenter tel quel. Avant d'en reparler, mesurer chez MG : la part
 d'heures « en attente », et l'écart des deux mesures sur une période close.
 
 ### ⚠️ PREP-1 — À JOUER SUR UN DOMAINE JETABLE AVANT UN VRAI CLIENT (§134)
@@ -23239,3 +23250,73 @@ Nico : *« il faut permettre au validateur de se décocher (seulement si admin) 
 | `guide/11-pilotage.html` | le temps réel contre barème | — |
 | `scripts/mv-harnais-temps-vigne.mjs` · `package.json` · `.github/workflows/ci.yml` | harnais neuf aux trois portes, `test:temps-vigne` | — |
 | `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | SECTIONS 204 · §172 · base | — |
+
+## 173. ★★★ ENG-2 — « ENGAGÉ À CE JOUR » COMPTE LES HEURES PAYÉES, ET LES JOURNÉES DE CAVE SORTENT DE LA VIGNE (24/09 — `src/pilotage.js` · `src/utils.js` · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-temps-vigne.mjs` · `scripts/banc/garde-projection.mjs` · `scripts/harnais-claude-md.mjs` · APP 7.60 → **7.61** · SW 8.29 → **8.30** · base `d684d4e`)
+
+### 173a. Le constat de Nico, et pourquoi il avait raison
+
+*« Pour le calcul engagé à ce jour, si on est en avance ou en retard, je n'ai pas l'impression que ça fonctionne. Ça fait une
+semaine qu'ils sont en train de dégrafer, à 3 ou à 4, à 17-19 € chargés, 8 h, 5 jours : je ne suis pas sûr que ça fasse 1 400 €. »*
+L'écran lisait **1 411 €** pour 2 % d'avancement. Vérifié dans `_pecData` : `T.moF = fH × tx`, heures de **barème** des travaux
+**validés** (1 411 ÷ 19,54 ≈ 72 h). Une parcelle dégrafée non validée valait 0 € ; une parcelle validée valait son h/ha même si
+l'équipe y avait passé le double. L'engagé suivait l'avancement **par construction** — le commentaire de `_pecData` le disait
+déjà pour tracteur/GNR/phyto (« les deux pourcentages sont alors égaux par construction ») ; c'était vrai aussi de la
+main-d'œuvre. Le calcul de Nico : 4 × 8 × 5 × 19 ≈ **3 040 €** (à 3 : 2 280 €).
+
+### 173b. La règle
+
+`E.moReel = _ecoTempsVigne().eur` (TV-1, une seule définition de l'heure vigne) : par salarié vigne sous contrat (bureau exclu),
+jour par jour du début de la période à aujourd'hui, heures dans les rangs (`_planChampPersRange`) − conduite tracteur du jour
+(comptée à part, poste « Conduite tracteur ») − **journée de cave** entière, × `_mvPaieTauxEffAt(m, jour)` (repli : `_ecoRate()`,
+compté dans `nSansTaux`). **Validées ou non** : une heure en attente est payée. `engage = moReel + tracF + gnrF + phyF`.
+Budget : **inchangé** (barème). `resteE = budget − engage` ; `resteBar = budget − engageBar` (le reste de TRAVAIL).
+`projFin = cadAppl ? engage + resteBar×(1+écart) : engage + resteBar` — tant que l'engagé valait le barème du fait, la branche
+sans cadence retombait sur le budget ; elle y retombe encore dans ce cas. Repli complet sur l'ancien calcul si la période n'a pas
+de dates, n'a pas commencé, ou si le planning n'est pas chargé (`moSrc:'bareme'`).
+
+### 173c. Les journées de cave (`_ecoCaveJours`)
+
+Le planning ne porte **aucune activité** (vérifié : ni poste ni lieu sur une entrée). Nico : *« il n'y a pas de planning cave,
+c'est au jour le jour »* ; les opérations de cave sont saisies *« presque toujours avec les noms »*. Un jour où un salarié figure
+dans `CAVE_ELEVAGE.operations[].intervenants`, sa journée entière sort de la vigne (l'opération n'a pas de durée).
+⚠️ **Jamais `operateur`** : c'est celui qui a SAISI (currentUser) — le repli de `_caveWho` ferait sortir de la vigne chaque jour où
+Nico note un soutirage. ⚠️ **Pas les `analyse`** : un prélèvement ne vide pas une journée. ⚠️ **Pas la cuverie des vendanges**
+(`CAVE_VENDANGE…mesures_fa[].qui`) : son « qui » vaut par défaut celui qui ouvre la tournée — à trancher avec Nico.
+Les heures retirées s'affichent (`hCave`) sous la carte « Temps réel contre barème », et ne sont pas versées aux parcelles.
+**Reste compté dans la vigne** : l'atelier et le bureau d'un salarié vigne (rien ne les écrit) — dit dans la fiche.
+
+### 173d. L'écran
+
+KPI « Engagé à ce jour » : fiche neuve `pil.eco.engage` ; sous-ligne « X % du budget pour Y % du travail fait · Z h dans les
+rangs ». Poste « Main-d'œuvre vigne » : `fait = moReel` (le total des postes reste l'engagé). Tableaux **Parcelles** et **Coût par
+travail**, graphe des tâches, CSV : au barème (`engageBar`), colonnes renommées **« Réalisé »** (et « Reste à faire ») — un mot,
+un sens (§113). Courbe « Rythme de dépense » : main-d'œuvre au **jour payé** (`E.tv.byD`), repli journal inchangé. Verdict
+« La période démarre » : une phrase de plus, « Déjà X engagés (Y % du budget) pour Z % du travail validé ».
+⚠️ **L'écart de cadence n'est PAS touché** (Nico, 23/09) : sa présence ne retire pas les journées de cave. Deux mesures du temps
+coexistent donc — la question est au backlog (§28).
+
+### 173e. Harnais
+
+`mv-harnais-temps-vigne` : +16 assertions (I1-I10 exécutées : l'exemple de Nico à 3 040 € sans validation, taux du jour, fiche sans
+taux, journée de cave, `operateur` et analyse sans effet, courbe = engagé ; J1-J6 branchements), +6 contre-épreuves (54 / 19).
+`banc/garde-projection` : l'ancre du budget projeté suit la formule (`resteBar`) ; son intention — la garde par `cadAppl` — est
+inchangée. Pré-existants rouges sur la base, hors `check` : `harnais-cadence-escalier`, `mv-harnais-audit-pil` (B5, B6).
+
+### 173f. Ce qui n'a pas été mesuré
+
+① Aucune donnée réelle : le chiffre de MG après ce lot n'est pas connu. **À regarder** : si l'engagé paraît trop haut, vérifier que
+le compte de Nico (chef d'équipe) n'est pas compté comme salarié vigne les jours de bureau — le drapeau « bureau » de la fiche
+l'exclut en entier. ② Aucun rendu regardé.
+
+### 173g. La note de livraison
+
+**Base `d684d4e`. APP 7.60 → 7.61 · SW 8.29 → 8.30.** `node scripts/build-guide.mjs`, puis `npm run build && firebase deploy --only hosting`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/pilotage.js` | `_ecoCaveJours` ; `_ecoTempsVigne` (cave, € au jour, `byD`) ; `_pecData` (`moReel`, `engageBar`, `resteBar`, projection) ; courbe ; KPI ; tableaux « Réalisé » ; verdict | — |
+| `src/utils.js` | APP 7.61 ; « Quoi de neuf » ; fiches `pil.eco.engage` (neuve), `pil.eco.temps`, `pil.eco.postes` ; `MV_AIDE` Pilotage | ★ APP |
+| `index.html` · `public/sw.js` | 4 versions · 8.30 | ★ APP · ★ SW |
+| `guide/11-pilotage.html` | Engagé à ce jour | — |
+| `scripts/mv-harnais-temps-vigne.mjs` · `scripts/banc/garde-projection.mjs` | ENG-2 | — |
+| `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | SECTIONS 205 · §173 · base | — |

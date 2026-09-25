@@ -1,4 +1,8 @@
-// MA VIGNE — Service Worker v8.29
+// MA VIGNE — Service Worker v8.30
+// v8.30 (24/09/2026) — ENG-2 : Pilotage › Économie, la main-d'œuvre de « Engagé à ce jour » = heures dans les rangs du
+//   planning (salariés vigne, moins la conduite tracteur, moins les journées de cave repérées aux intervenants des
+//   opérations) × taux chargé du jour, validées ou non (_ecoTempsVigne → E.moReel). Tableaux au barème : « Réalisé ».
+//   Fiche pil.eco.engage. APP 7.60 → 7.61.
 // v8.29 (23/09/2026) — TV-1 : Pilotage › Économie › Postes & travaux, carte « Temps réel contre barème » : les heures
 //   dans les rangs du planning (moins la conduite tracteur) versées aux parcelles validées par le salarié ou son groupe,
 //   au prorata de la surface ; jours sans validation reportés sur la suivante (_ecoTempsVigne, pilotage.js). Fiche
@@ -4134,7 +4138,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.29';
+const CACHE_NAME   = 'mavigne-v8.30';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4150,7 +4154,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.29 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.30 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4170,7 +4174,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.29 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.30 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
