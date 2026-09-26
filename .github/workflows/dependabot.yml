@@ -1,0 +1,15 @@
+# Dependabot — mise à jour des actions GitHub épinglées par empreinte (SHA) dans ci.yml.
+# Une fois par mois, il ouvre au plus UNE pull request qui remplace les empreintes
+# par celles des nouvelles versions (le commentaire « # v5.x.y » est mis à jour aussi).
+# Relire le lien de release dans la PR, laisser la CI passer, puis Merge.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "ci"
