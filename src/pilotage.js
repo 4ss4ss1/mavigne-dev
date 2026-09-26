@@ -599,8 +599,8 @@ function _pilCmpSnapshot(){
     });
     if(bestP) return bestP;
   }
-  // \u26a0 CMP-NOM (26/09/2026) : le repli par nom est un repli pour les archives NON
-  //   DATABLES (periode supprimee de SAISONS), rien d'autre. Il reprenait avant tout
+  // \u26a0 CMP-NOM (26/09/2026, §182) : le repli par nom est un repli pour les archives
+  //   NON DATABLES (periode supprimee de SAISONS), rien d'autre. Il reprenait avant tout
   //   ce que le chemin par dates venait d'ecarter : « Hiver 2026 - 2027 » rejetait
   //   « Hiver 2025–2026 » (clos a 32 %, hFaites 787 h), puis le repli le rendait par
   //   son nom — et le verdict d'Economie affichait « +190,9 % de temps en plus » en
@@ -9433,6 +9433,161 @@ function _arcLigne(an,list,cur){
     +(cur?' <em>en cours</em>':'')+'</span><span class="m">'+meta+'</span></div>'
     +'<div class="arc-fr'+(cur?' cur':' old')+'">'+segs+'</div></div>';
 }
+// ═════════════════════════════════════════════════════════════════
+// ★★ ARCH-2 (26/09/2026) — LE BILAN PAR ANNÉE, CALCULÉ À PARTIR DES ARCHIVES DE CAMPAGNE
+// Décision de Nico : une archive par campagne (la photo, ARCH-1) + une archive
+// annuelle qui regroupe les campagnes de l'année — année vigne OU exercice
+// comptable, au choix du domaine. L'annuel n'est JAMAIS recopié : une seconde
+// copie ferait revenir la duplication que ARCH-1 a supprimée (§178).
+//   · Cadre : CONFIG.eco.archive_cadre ('vigne' par défaut | 'exercice'), réglé
+//     par l'admin. Bornes lues aux sources uniques : _mvCampagneBornes
+//     (campagne_mois) et _mvExerciceAn (exercice_mois) — utils.js.
+//   · Interventions et sessions : datées une à une -> rangées dans leur année.
+//   · Heures : totalisées par tâche pour la campagne entière, SANS date dans
+//     l'archive. Campagne dans une seule année -> tout va à cette année. Campagne
+//     à cheval (possible seulement si le cadre ne suit pas les campagnes, ex.
+//     exercice janvier -> décembre) -> réparties au prorata de ses interventions
+//     datées dans chaque année ; à défaut d'intervention, au prorata des jours.
+//     La carte le dit (« dont X h réparties »).
+//   · Archives d'avant ARCH-1 : chacune portait TOUT le journal. On ne garde que
+//     les entrées de SA campagne (_saisonForDate) et on dédoublonne par id : une
+//     intervention n'est jamais comptée deux fois.
+// ═════════════════════════════════════════════════════════════════
+function _arcCadre(){
+  var v=((window.CONFIG&&window.CONFIG.eco)||{}).archive_cadre;
+  return v==='exercice'?'exercice':'vigne';
+}
+function _arcAnDe(cadre, iso){
+  if(cadre==='exercice' && typeof window._mvExercice==='function'){
+    try{ return window._mvExercice(String(iso).slice(0,10)).an; }
+    catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'exercice illisible \u2014 repli sur l\u2019ann\u00e9e vigne'}); }
+  }
+  return _arcCampagneDe(String(iso).slice(0,10));
+}
+function _arcAnBornes(cadre, an){
+  if(cadre==='exercice' && typeof window._mvExerciceAn==='function'){
+    try{ var b=window._mvExerciceAn(an); if(b&&b.d0&&b.d1) return b; }
+    catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'bornes d\u2019exercice illisibles'}); }
+  }
+  return _arcBornes(an);
+}
+function _arcAnnees(cadre){
+  var H=window.HISTORIQUE||[], S=window.SAISONS||[], par={}, vus={};
+  var sfd=(typeof window._saisonForDate==='function')?window._saisonForDate:null;
+  function an(k){ return par[k]||(par[k]={an:k, campagnes:[], h:0, hRep:0, inter:0, parc:{}, sess:0, taches:{}}); }
+  function camp(A,nom){ if(A.campagnes.indexOf(nom)<0) A.campagnes.push(nom); }
+  H.forEach(function(h){
+    if(!h||!h.saisonNom) return;
+    var sa=S.find(function(x){ return x&&x.nom===h.saisonNom; });
+    var datee=!!(sa&&sa.debut&&sa.fin);
+    var J=(h.journal||[]).filter(function(j){
+      if(!j||j.meteo||!j.date) return false;
+      if(datee && sfd && sfd(String(j.date).slice(0,10))!==h.saisonNom) return false;
+      if(j.id){ if(vus['j'+j.id]) return false; vus['j'+j.id]=1; }
+      return true;
+    });
+    var Ss=(h.sessions||[]).filter(function(x){
+      if(!x) return false;
+      var d=x.date?String(x.date).slice(0,10):'';
+      if(datee && sfd && d && sfd(d)!==h.saisonNom) return false;
+      if(datee && !d && x.saison && x.saison!==h.saisonNom) return false;
+      if(x.id){ if(vus['s'+x.id]) return false; vus['s'+x.id]=1; }
+      return true;
+    });
+    var dates=J.map(function(j){ return String(j.date).slice(0,10); }).sort();
+    var d0=datee?sa.debut:(dates[0]||String(h.archivedAt||'').slice(0,10));
+    var d1=datee?sa.fin:(dates[dates.length-1]||d0);
+    if(!d0) return;
+    var a0=_arcAnDe(cadre,d0), a1=_arcAnDe(cadre,d1), parts={};
+    if(a0===a1) parts[a0]=1;
+    else {
+      J.forEach(function(j){ var k=_arcAnDe(cadre,j.date); parts[k]=(parts[k]||0)+1; });
+      if(!J.length){
+        for(var k=a0;k<=a1;k++){
+          var b=_arcAnBornes(cadre,k);
+          var x0=(d0>b.d0)?d0:b.d0, x1=(d1<b.d1)?d1:b.d1;
+          var dj=_arcN(x1)-_arcN(x0)+1; if(dj>0) parts[k]=dj;
+        }
+      }
+      var tot=Object.keys(parts).reduce(function(n,k){ return n+parts[k]; },0)||1;
+      Object.keys(parts).forEach(function(k){ parts[k]=parts[k]/tot; });
+    }
+    var hT=Number(h.stats&&h.stats.hFaites)||0, TS=(h.stats&&h.stats.tachesStats)||[];
+    Object.keys(parts).forEach(function(k){
+      var A=an(+k), w=parts[k];
+      camp(A,h.saisonNom);
+      A.h+=hT*w; if(w<1) A.hRep+=hT*w;
+      TS.forEach(function(t){ if(t&&t.nom&&Number(t.h_done)) A.taches[t.nom]=(A.taches[t.nom]||0)+Number(t.h_done)*w; });
+    });
+    J.forEach(function(j){
+      var A=an(_arcAnDe(cadre,j.date)); A.inter++; camp(A,h.saisonNom);
+      if(j.parcelle && j.parcelle!=='Domaine') A.parc[j.parcelle]=1;
+    });
+    Ss.forEach(function(x){ var A=an(_arcAnDe(cadre, x.date?String(x.date).slice(0,10):d1)); A.sess++; });
+  });
+  var cur=_arcAnDe(cadre,_mvToday()); an(cur);
+  return Object.keys(par).map(Number).sort(function(a,b){ return b-a; }).map(function(k){
+    var A=par[k];
+    A.bornes=_arcAnBornes(cadre,k); A.enCours=(k===cur); A.nParc=Object.keys(A.parc).length;
+    A.top=Object.keys(A.taches).map(function(n){ return {nom:n,h:A.taches[n]}; }).sort(function(a,b){ return b.h-a.h; });
+    return A;
+  });
+}
+function _arcBlocAnnuel(){
+  var cadre=_arcCadre(), L=_arcAnnees(cadre);
+  var adm=(typeof window.isAdmin==='function' && window.isAdmin());
+  var opt=function(v,lbl){
+    var on=(v===cadre)?' on':'';
+    /* data-v + lecture dans le gestionnaire : aucune valeur interpolee dans le JS (C24b). */
+    return adm ? '<button class="'+on.trim()+'" data-v="'+v+'" onclick="window._arcSetCadre&&window._arcSetCadre(this.getAttribute(\'data-v\'))">'+lbl+'</button>'
+               : '<span class="'+on.trim()+'">'+lbl+'</span>';
+  };
+  var bc=_arcAnBornes(cadre,_arcAnDe(cadre,_mvToday()));
+  var h='<div class="arcan"><div class="arcan-h"><div class="arcan-t">Bilan par ann\u00e9e</div>'
+    +'<div class="arcan-seg">'+opt('vigne','Ann\u00e9e vigne')+opt('exercice','Exercice comptable')+'</div></div>'
+    +'<div class="arcan-sub">Calcul\u00e9 \u00e0 partir des archives de campagne \u2014 '
+    +(cadre==='exercice'?'exercice comptable':'ann\u00e9e vigne')+' : <b>'+_pilEsc(bc.lbl||'')+'</b>.'
+    +(adm?'':' Le cadre est choisi par l\u2019administrateur.')+'</div>';
+  h+=L.map(function(A){
+    var r='<div class="arcan-y"><div class="arcan-yh"><b>'+_pilEsc(A.bornes.court||String(A.an))
+      +(A.enCours?'<em>en cours</em>':'')+'</b><span>'+_pilEsc(A.bornes.lbl||'')+'</span></div>';
+    if(!A.campagnes.length){
+      return r+'<div class="arcan-vide">Aucune campagne close cette ann\u00e9e. Le bilan se remplit \u00e0 chaque cl\u00f4ture.</div></div>';
+    }
+    r+='<div class="arcan-camp">'+A.campagnes.map(function(n){ return '<span>'+_pilEsc(n)+'</span>'; }).join('')+'</div>';
+    r+='<div class="arcan-g">'
+      +'<div><div class="l">Heures archiv\u00e9es</div><div class="v">'+(A.h>0?_pilHa(Math.round(A.h))+' h':'\u2014')+'</div></div>'
+      +'<div><div class="l">Interventions</div><div class="v">'+A.inter+'</div></div>'
+      +'<div><div class="l">Parcelles touch\u00e9es</div><div class="v">'+A.nParc+'</div></div>'
+      +'<div><div class="l">Sessions tracteur</div><div class="v">'+A.sess+'</div></div></div>';
+    var tk=A.top.filter(function(t){ return t.h>=0.5; });
+    if(tk.length){
+      var aff=tk.slice(0,3), reste=tk.slice(3).reduce(function(n,t){ return n+t.h; },0);
+      r+='<div class="arcan-tk">'+aff.map(function(t){ return _pilEsc(t.nom)+' '+_pilHa(Math.round(t.h))+' h'; }).join(' \u00b7 ')
+        +(reste>=0.5?' \u00b7 autres '+_pilHa(Math.round(reste))+' h':'')+'</div>';
+    }
+    if(A.hRep>=0.5) r+='<div class="arcan-tk">dont '+_pilHa(Math.round(A.hRep))+' h r\u00e9parties : une campagne \u00e0 cheval sur deux ann\u00e9es est partag\u00e9e au prorata de ses interventions dat\u00e9es.</div>';
+    return r+'</div>';
+  }).join('');
+  return h+'</div>';
+}
+// Réglage du cadre annuel — admin seul, même patron que _pexSetMois.
+function _arcSetCadre(v){
+  if(!(typeof window.isAdmin==='function' && window.isAdmin())){
+    if(window.showToast) window.showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#C0392B');
+    return;
+  }
+  if(v!=='vigne' && v!=='exercice') return;
+  if(v===_arcCadre()) return;
+  if(typeof window._ecoCfgSet==='function') window._ecoCfgSet('eco','archive_cadre',v);
+  if(_arcCadre()!==v){
+    if(window.showToast) window.showToast('R\u00e9glage non enregistr\u00e9 \u2014 mise \u00e0 jour de R\u00e9glages requise','#B85A1A');
+    return;
+  }
+  _pilFillContent(_pilData());
+}
+window._arcSetCadre=_arcSetCadre;
+
 function _pilTabArc(d){
   var S=(window.SAISONS||[]).filter(function(s){ return s&&s.debut&&s.fin&&s.fin>=s.debut; });
   if(!S.length) return '<div class="arc-empty">Aucune période datée. Les campagnes apparaissent ici '
@@ -9457,6 +9612,7 @@ function _pilTabArc(d){
     +'<div><div class="v">'+S.length+'</div><div class="l">périodes</div></div>'
     +'<div><div class="v">'+(hTot>0?_pilHa(hTot):'—')+'</div><div class="l">heures archivées</div></div>'
     +'</div>';
+  h+=_arcBlocAnnuel();   /* ★ ARCH-2 */
   h+='<button class="arc-cmp" onclick="window._arcOpenCmp&&window._arcOpenCmp()">'
     +_mvIcon('graphique',16)+' Comparer deux saisons</button>';
   // Le bilan de campagne vit dans cave.js (importe AVANT pilotage.js) : on ne

@@ -2,12 +2,34 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **26 septembre 2026 (CMP-NOM)** — ★★ **LE REPLI PAR NOM RENDAIT L'HIVER CLOS À 32 % (§177)**.
-> Nico : verdict d'Économie « +190,9 % de temps en plus — 2 289 h contre 787 h, mesuré sur Hiver 2025–2026 », alors que
-> l'écart réel est de 2 % sur une tâche. C'était **exactement** le dénominateur ampute de §43 (hFaites 787 h, période close à
-> 32 %) : le chemin par dates de `_pilCmpSnapshot` l'écartait, le **repli par nom** (« Hiver » = « Hiver ») le rendait, sans
-> aucune garde. Le repli ne sert plus que les archives NON DATABLES, et applique l'achèvement. Le verdict « cadence à
-> mesurer » renvoie au temps réel par travail. `src/pilotage.js` seul : **aucun bump** (APP 7.63 · SW 8.32), base `43e30ec`.
+> Dernière consolidation : **26 septembre 2026 (CMP-NOM, rejoué)** — ★★ **LE REPLI PAR NOM RENDAIT L'HIVER CLOS À 32 % (§182)**.
+> Verdict d'Économie « +190,9 % de temps en plus — 2 289 h contre 787 h, mesuré sur Hiver 2025–2026 », alors que l'écart réel est
+> de 2 % sur une tâche : le dénominateur amputé de §43, rendu par le **repli par nom** de `_pilCmpSnapshot` après que le chemin par
+> dates l'avait écarté. Repli réservé aux archives non datables + achèvement. ⚠️⚠️ **Première livraison ÉCRASANTE** : construite sur
+> `43e30ec` et collée APRÈS TAILLE-1/ARCH-1/ARCH-2/STOCK-1/HORLOGE-1, elle a effacé ARCH-2 de `pilotage.js` et §177-§181 d'ici
+> (commit `c9dd10e`). Rejouée sur les fichiers d'HORLOGE-1. `src/pilotage.js` : **aucun bump** (APP 7.66 · SW 8.35), base `c9dd10e`.
+> Détail en **§182**.
+>
+> ★ Précédente : **26 septembre 2026 (HORLOGE-1)** — ★ **LES DATES PIÈGES (§181)** : aucun défaut trouvé — `_mvISO`,
+> campagne, exercice et semaine ISO justes aux 10 instants pièges (25/10 journée de 25 h, 28/03 heure sautée, 00 h 30, 1er août,
+> semaine 53, 29/02). Harnais `mv-harnais-horloge` (check) + `npm run tour:dates` (l'appli entière, horloge figée). Aucun bump.
+> Détail en **§181**.
+>
+> ★ Précédente : **26 septembre 2026 (STOCK-1)** — ★★ **UNE SAISIE HORS LIGNE NE DISPARAÎT PLUS (§180)**. Si
+> `localStorage` refusait d'écrire la file (quota), l'erreur était avalée et `_loadQueue` (appelée par `_flushQueue`) remplaçait la
+> mémoire par le disque : saisie perdue à la reconnexion. Marques `_mvFileMemSeule` + restauration ; message unique ;
+> `navigator.storage.persist()`. **APP 7.65 → 7.66 · SW 8.34 → 8.35**, base `43e30ec` (s'empile sur §177-179). Détail en **§180**.
+>
+> ★ Précédente : **26 septembre 2026 (ARCH-2)** — ★★ **LE BILAN PAR ANNÉE, CALCULÉ (§179)**. Pilotage › Archives :
+> une carte par année (année vigne ou exercice comptable, `CONFIG.eco.archive_cadre`, admin) calculée à partir des archives de
+> campagne — jamais recopiée. Dédoublonnage des archives d'avant ARCH-1 ; heures d'une campagne à cheval réparties au prorata de
+> ses interventions datées. **APP 7.64 → 7.65 · SW 8.33 → 8.34**, base `43e30ec` (s'empile sur §177-178). Détail en **§179**.
+>
+> ★ Précédente : **26 septembre 2026 (ARCH-1)** — ★★ **L'ARCHIVE DE CAMPAGNE EST UNE PHOTO DE LA CAMPAGNE (§178)**.
+> `npm run taille` (§177) sur MG : `historique` 192 Ko, les deux archives portaient les MÊMES 319 entrées (chaque clôture recopiait
+> tout le journal depuis le premier jour) → limite Firestore vers la 4e clôture. Et `_clotExec` activait la nouvelle campagne sans
+> attendre l'enregistrement de l'archive. Décision de Nico : une archive par campagne = sa photo ; vue annuelle CALCULÉE (ARCH-2).
+> **APP 7.63 → 7.64 · SW 8.32 → 8.33**, base `43e30ec`. Détail en **§178**.
 >
 > ★ Précédente : **26 septembre 2026 (TOUR-4)** — ★★ **LE PREMIER « npm run tour » (§176)** : 845 écrans, 2 navigateurs,
 > 5 rôles. Un vrai défaut : `goTo('pilotage')` ouvrait le Pilotage à l'ouvrier, au tractoriste, au saisonnier → garde **SEC-PIL**
@@ -23488,6 +23510,8 @@ pas de boucle). Tenue par `mv-harnais-pres` (56 verts, contre-épreuve n°10).
   blocs **repliés**. Le tour coupe désormais chaque rectangle par ses ancêtres qui masquent leur débordement (`clip`), ignore ce qui
   est invisible après coupe, et ne regarde pas l'intérieur de `.leaflet-container`.
 Le prochain tour dira ce qui reste ; ce qui restera sera à regarder pour de bon.
+**2e tour (26/09) : 0 bug, 39 à voir.** Les 8 chevauchements restants étaient des `<b>`/`<span>` qui passent à la ligne (rectangle
+englobant sur deux lignes) : le tour compare désormais les boîtes de ligne une à une (`getClientRects`, TOUR-5).
 
 ### 176d. Ouvert : les cibles trop petites
 
@@ -23504,50 +23528,218 @@ de page, point de synchro) restent signalées, faute de décision.
 ⚠️ Le `.mv-base` de §174 n'avait pas été commité (fichier qui commence par un point, perdu à la copie) : le dépôt portait encore
 `d684d4e`. Sans effet cette fois (la garde ne vérifie qu'un `.mv-base` MODIFIÉ), mais c'est le même piège que `.gitleaksignore`.
 
-## 177. ★★ CMP-NOM — LE REPLI PAR NOM RENDAIT L'HIVER CLOS À 32 % (26/09 — `src/pilotage.js` · `scripts/banc/banc.mjs` · `scripts/banc/baseline.json` · `scripts/harnais-claude-md.mjs` · APP **7.63** et SW **8.32** inchangés · base `43e30ec`)
+## 177. ★ TAILLE-1 — LA TAILLE DE CHAQUE DOCUMENT, FACE À LA LIMITE DE 1 MIO (26/09 — `scripts/mv-taille-docs.mjs` (neuf) · `package.json` · `.github/workflows/ci.yml` · `scripts/harnais-claude-md.mjs` · aucun bump · base `43e30ec`)
 
-### 177a. Le constat
+Chaque module est **un** document Firestore (`{ value: … }`, `fbDocRef`), et Firestore refuse tout document au-delà de **1 048 576
+octets**. `_mvDocSize` compte des **entrées** (garde anti-écrasement) ; rien ne mesurait des **octets**. Le jour où un module franchit
+la limite, ses enregistrements échouent pour tout le domaine.
+
+`npm run taille -- "chemin\mavigne_sauvegarde_<domaine>_<date>.json"` lit une **Sauvegarde complète** (Réglages › Domaine › Documents &
+impressions › Données brutes) **sur le poste** — aucune donnée ne sort — et donne, par document, sa taille calculée selon la règle
+publiée par Firestore (segments du nom + 1, + 16 ; chaîne + 1 ; nombre 8 ; booléen et null 1 ; clés + 1 ; document + 32), son
+pourcentage de la limite, et, avec une **deuxième sauvegarde plus ancienne**, le rythme de croissance et le mois où la limite serait
+atteinte. Seuils : ≥ 50 % à surveiller, ≥ 80 % urgent (code 1). Seul le champ `value` est dans la sauvegarde (`fbLireTout`) : un
+champ technique voisin n'est pas compté, d'où des seuils prudents. `--test` (dans `check`, `prebuild`, CI) rejoue l'exemple de la
+documentation Firestore (`users/jeff/tasks/my_task_id` : nom 44, champs 71, **147 octets**).
+
+## 178. ★★ ARCH-1 — L'ARCHIVE DE CAMPAGNE EST UNE PHOTO DE LA CAMPAGNE, ET LA CLÔTURE NE LA PERD PLUS (26/09 — `src/reglages.js` · `src/utils.js` · `index.html` · `public/sw.js` · `scripts/mv-harnais-arch.mjs` (neuf) · `scripts/mv-harnais-toast-honnete.mjs` · `package.json` · `.github/workflows/ci.yml` · `scripts/harnais-claude-md.mjs` · APP 7.63 → **7.64** · SW 8.32 → **8.33** · base `43e30ec`)
+
+### 178a. Le constat, mesuré
+
+`npm run taille` (§177) sur Marchand-Grillot : `historique` = **192 Ko** (18,8 % de la limite), plus gros document du domaine. Détail
+par archive : « Hiver 2025–2026 » 118 Ko / 319 entrées, « Printemps 2026 » 114 Ko / **319 entrées** — les mêmes. Le journal n'est
+jamais vidé au changement de campagne (`activateSaison` n'y touche pas) et chaque archive copiait `JOURNAL` entier (moins la météo)
++ `SESSIONS` entier : croissance qui s'accélère, limite Firestore (1 Mio) vers la **4e clôture**. Et le jour venu, `_clotExec`
+appelait `saveData('historique')` **sans attendre**, puis `activateSaison` : campagne close, archive refusée, sans un mot.
+
+### 178b. La décision de Nico (26/09)
+
+« Avoir une photo de la campagne par archive, et aussi une archive annuelle qui regroupe toutes les campagnes de l'année — année vigne
+ou année fiscale, en fonction de ce que le client a choisi. » Réponse technique retenue : **l'archive annuelle est CALCULÉE à partir
+des archives de campagne** (par la date de chaque entrée, dans le cadre `campagne_mois` ou `exercice_mois`), **jamais recopiée** —
+sinon la duplication revient. C'est ARCH-2. ARCH-1 fait la photo et la clôture sûre.
+
+### 178c. Ce qui change
+
+- `_arcDeLaCampagne(nom, liste, champDate)` : ne garde que les entrées de LA campagne, par **`_saisonForDate`** (la règle que l'appli
+  applique déjà pour filtrer le journal par campagne), sans la météo ; session sans date → son champ `saison`. **Campagne sans dates**
+  (`debut`/`fin` absents de `SAISONS`) : on garde tout, comme avant, plutôt qu'un journal vide. ⚠️ Une entrée datée hors de toute
+  campagne n'entre dans aucune archive (elle reste dans le journal vivant).
+- `_arcSnapshot(saison)` : une seule fabrique pour les deux chemins (`archiveSaisonActive` et `_clotExec`) ; marque `arcV:2` ;
+  statistiques calculées sur le journal de la campagne.
+- `_arcAlleger(H)` : les archives d'avant (sans `arcV:2`) sont réduites à leur campagne **au prochain enregistrement**, statistiques
+  recalculées ; archive d'une campagne absente de `SAISONS` laissée intacte. Pas d'écriture au chargement.
+- `_arcEnregistrer(H)` : **vrai seulement si `fbSave` rend `ok:true`**. Refuse hors ligne (la file d'attente n'est pas le serveur),
+  au-delà de 1 000 000 octets (règle de taille Firestore, `_arcTaille`), compte verrouillé, protection anti-perte, exception.
+  ⚠️ La garde anti-destruction de `historique` compte des **archives** (`_mvDocSize` = longueur du tableau), pas leurs entrées :
+  l'allègement ne la déclenche pas.
+- `_clotExec` devient `async` : contrôles de saisie d'abord, puis archive, **puis** — seulement si `_arcEnregistrer` a réussi —
+  `activateSaison`. Échec : `HISTORIQUE` revient à l'état d'avant, rien n'est clos. Garde `_CLOT_EN_COURS` contre le double appui.
+  « Archiver la saison » (Réglages) suit le même chemin ; son message de fin dit « Enregistrement en cours » puis un toast confirme.
+
+### 178d. Harnais
+
+`scripts/mv-harnais-arch.mjs` (dans `check`, `prebuild`, CI, `npm run test:arch`) : **21 assertions** sur les vraies fonctions de
+`reglages.js` (+ `_saisonForDate` de `utils.js`), exécutées ; **6 contre-épreuves** (recopie du journal, allègement retiré, file
+d'attente crue, envoi hors ligne, activation malgré le refus, double appui). Chaîne `check` complète verte.
+`mv-harnais-toast-honnete` affiné : un `showToast` dans les 5 lignes d'un `fbSave` n'est coupable que s'il vient AVANT toute
+lecture de `.ok` (le toast d'échec de `_arcEnregistrer` lit `r.ok` d'abord). Vérifié à la main : un toast placé juste après
+`fbSave` rougit toujours.
+
+### 178e. Ce qui reste
+
+ARCH-2 : la vue annuelle calculée et le choix du cadre (année vigne / exercice) — partir de l'onglet Archives du Pilotage, déjà rangé
+sur l'axe de l'année vigne. Plus tard, si `npm run taille` le demande : un document par année (`COLLECTIONS` est une liste fixe —
+sauvegarde, restauration, règles et chargement en dépendent). Estimation après ARCH-1 : ~110 Ko par archive, 3 à 4 ans de marge.
+
+## 179. ★★ ARCH-2 — LE BILAN PAR ANNÉE, CALCULÉ À PARTIR DES ARCHIVES DE CAMPAGNE (26/09 — `src/pilotage.js` · `src/reglages.js` · `src/utils.js` · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `public/guide.html` · `scripts/mv-harnais-arch.mjs` · `scripts/preflight-baseline.json` · `scripts/harnais-claude-md.mjs` · APP 7.64 → **7.65** · SW 8.33 → **8.34** · base `43e30ec`, s'empile sur §177-178)
+
+### 179a. La demande, et la maquette
+
+Nico (26/09) : « une archive par campagne, et une archive annuelle qui regroupe toutes les campagnes de l'année — année vigne ou
+année fiscale, en fonction de ce que le client a choisi ». Maquette (bloc « Bilan par année » sous la frise des Archives, sélecteur
+Année vigne / Exercice comptable, une carte par année) validée telle quelle. Précision de Nico : l'exercice comptable, pour la
+plupart des domaines, va du 1er août au 31 juillet — c'est le défaut de `exercice_mois` ; le cas janvier → décembre est rare.
+
+### 179b. Les règles
+
+- **Calculé, jamais recopié** : une seconde copie annuelle ferait revenir la duplication supprimée par ARCH-1.
+- **Cadre** : `CONFIG.eco.archive_cadre` = `'vigne'` (défaut) | `'exercice'`, écrit par `_ecoCfgSet` (liste `_ECO_TXT`), changé par
+  l'admin seul (`_arcSetCadre`, patron `_pexSetMois`). Bornes lues aux sources uniques : `_mvCampagneBornes` / `_mvCampagneDe`
+  (`campagne_mois`) et `_mvExerciceAn` / `_mvExercice` (`exercice_mois`). Les autres rôles voient le cadre, sans bouton.
+- **Interventions et sessions** : datées une à une → rangées dans leur année. « Parcelles touchées » exclut le pseudo-lieu
+  `Domaine`.
+- **Heures** : dans l'archive, `stats.hFaites` et `stats.tachesStats` sont des totaux de campagne SANS date. Campagne dans une seule
+  année → tout à cette année. Campagne à cheval (seulement si le cadre ne suit pas les campagnes) → prorata de ses interventions
+  datées ; sans intervention, prorata des jours. La carte l'affiche (« dont … h réparties »). Chez MG (vigne et exercice en août),
+  jamais.
+- **Archives d'avant ARCH-1** (tout le journal dans chacune) : on ne garde que les entrées de SA campagne (`_saisonForDate`) et on
+  dédoublonne par `id` (journal et sessions) — campagnes absentes de `SAISONS` comprises.
+- L'année en cours a toujours sa carte (« Aucune campagne close cette année »).
+
+### 179c. Harnais et tension signalée
+
+`mv-harnais-arch` étendu : section F, **37 assertions** au total sur les vraies fonctions (`pilotage.js` + axes de `utils.js`),
+**10 contre-épreuves** (dédoublonnage, répartition, cadre exercice, droit admin ajoutés). ⚠️ Tension : le guide pose « les Archives
+se lisent, ce qui se règle vit dans la roue crantée » ; le sélecteur de cadre, validé sur maquette, vit dans l'onglet. Signalé à
+Nico ; à déplacer dans la roue (« Le cadre de votre campagne ») s'il le préfère.
+Deux rouges de la chaîne, corrigés : ① **C24b** (preflight) — le bouton de cadre interpolait sa valeur dans `onclick` ; il porte
+`data-v` et le gestionnaire la lit (`this.getAttribute('data-v')`). ② **Contraste sombre** — pastille de campagne `--terre` sur
+`--or-pale` illisible en sombre ; remplacée par `--texte-med` sur `--bg-card` bordé. Cliquet C24b regravé : `admin-gt.js` 57 → **56**
+(gain d'ESC-1, §174, jamais gravé) — `scripts/preflight-baseline.json`.
+
+## 180. ★★ STOCK-1 — UNE SAISIE HORS LIGNE NE DISPARAÎT PLUS QUAND LE DISQUE REFUSE (26/09 — `src/firebase.js` · `src/utils.js` · `index.html` · `public/sw.js` · `scripts/mv-harnais-stock.mjs` (neuf) · `scripts/mv-harnais-prep.mjs` · `scripts/mv-harnais-fusion-docs.mjs` · `package.json` · `.github/workflows/ci.yml` · `scripts/harnais-claude-md.mjs` · APP 7.65 → **7.66** · SW 8.34 → **8.35** · base `43e30ec`, s'empile sur §177-179)
+
+### 180a. Le défaut, lu dans le code
+
+Point 2 de l'audit « ce qu'il reste à vérifier » (26/09). La file hors ligne vit dans `localStorage` (`mavigne_offline_queue` + ses
+bases FUSION-1). `_queueSave` avalait l'échec de `setItem` (`_mvAvale`) : la saisie ne vivait plus qu'en mémoire. Puis `_flushQueue`
+commence par `_loadQueue()`, qui **remplaçait** `_offlineQueue` par le disque — ancien ou vide. À la reconnexion, la saisie partait,
+sans message, sans même fermer l'appli. Cause typique : quota `localStorage` (~5 Mo par origine) — la file porte des documents
+ENTIERS plus leur base ; `historique` seul pèse 192 Ko chez MG. Et l'appli ne demandait jamais `navigator.storage.persist()` :
+un téléphone à court de place peut vider le stockage d'un site (Safari efface celui d'un site NON installé après 7 jours sans visite).
+
+### 180b. La correction
+
+- `_mvFileMemSeule` : clés dont l'écriture disque a échoué. `_queueSave` : succès → marque retirée ; échec → `_mvFileDisqueKo`
+  (marque + `logError` `warning` cat `stockage` + UN toast « Stockage du téléphone plein — la saisie est gardée, mais ne fermez pas
+  l'appli avant le retour du réseau »).
+- `_loadQueue` : relit le disque comme avant (**le disque fait foi** : un autre onglet a pu y écrire — PREP-1), puis remet par-dessus
+  la valeur de MÉMOIRE (et sa base) des seules clés marquées.
+- Fin de `_flushQueue` : disque accepté → marques remises à zéro ; refusé → tout ce qui reste est marqué.
+- `_mvDemanderPersistance` : `navigator.storage.persisted()` puis `persist()`, une fois, au premier passage hors ligne et au démarrage
+  d'une appli installée (`display-mode: standalone`) ; résultat dans `window._mvStockagePersistant` (true / false / null = API absente).
+  Pas au démarrage d'un onglet : Firefox afficherait une demande d'autorisation à froid.
+- ⚠️ Une saisie gardée en mémoire seulement ne survit pas à la fermeture de l'appli : c'est ce que dit le message. La vraie
+  parade au quota serait une file en IndexedDB — non faite, à décider si `logError` montre des `stockage` en production.
+
+### 180c. Harnais
+
+`scripts/mv-harnais-stock.mjs` (check, prebuild, CI, `npm run test:stock`) : **16 assertions** sur les vraies fonctions de
+`firebase.js`, exécutées avec un `localStorage` à quota simulé et un `navigator.storage` factice ; **5 contre-épreuves**.
+Ajustés : `mv-harnais-prep` et `mv-harnais-fusion-docs` extraient `_queueSave` / `_loadQueue` — ils extraient désormais aussi
+`_mvFileDisqueKo`, `_mvDemanderPersistance` et les trois variables de STOCK-1 (75 et 29 verts, contre-épreuves inchangées).
+
+## 181. ★ HORLOGE-1 — L'APPLI AUX DATES PIÈGES : RIEN À CORRIGER, DEUX FILETS POSÉS (26/09 — `scripts/mv-harnais-horloge.mjs` (neuf) · `scripts/mv-tour.mjs` · `package.json` · `.github/workflows/ci.yml` · `scripts/harnais-claude-md.mjs` · aucun bump · base `43e30ec`)
+
+Point 3 de l'audit du 26/09. **Lecture du code** : les 98 calculs en millisecondes (`86400000`, `864e5`) passent soit par `Date.UTC`
+/ getters UTC de bout en bout, soit par `Math.round` sur des écarts (robuste à une journée de 23 h ou 25 h) ; les `Math.floor` restants
+mesurent des durées écoulées ou partent de midi (`renderHomeMaSemaine` : `j.date+'T12:00:00'`). Les `toISOString().slice(0,10)` ne
+sérialisent que des dates construites en UTC. `_mvISO` lit les getters LOCAUX. **Aucun défaut trouvé** — l'essentiel avait été
+soldé le 23/08 (`mv-harnais-fuseau`, `_mvJourApres`).
+
+**Filet 1 — `scripts/mv-harnais-horloge.mjs`** (check, prebuild, CI, `npm run test:horloge`) : se relance en fils par fuseau.
+A. Sous Europe/Paris, horloge FIGÉE (Date remplacée) à 10 instants — 27/09 00 h 30 (l'UTC est encore le 26), 25/10 01 h 30, 02 h 30
+(l'heure qui se répète) et 23 h 30 (journée de 25 h), 31/07 23 h 59 et 01/08 00 h 05 (campagne ET exercice), 31/12/2026 23 h 59,
+01/01/2027 00 h 05, 28/03/2027 03 h 30 (après l'heure sautée), 29/02/2028 : `_mvISO(new Date())`, `_mvAujIso()`, `_mvCampagneDe`,
+`_mvExercice().an`. B. `_planIsoWeek` contre une semaine ISO de référence (UTC), **chaque jour de 2024 à 2030**, sous Paris,
+Martinique, Nouméa, UTC ; 31/12/2026 = **S53**. 14 assertions, 3 contre-épreuves (`_mvISO` en `toISOString`, semaine en `floor`,
+campagne décalée d'un mois).
+
+**Filet 2 — `npm run tour:dates`** (`mv-tour.mjs --dates`, pas dans check : navigateur) : Chromium réglé sur `Europe/Paris`,
+`page.clock.setFixedTime` à 9 de ces instants, rôles admin et ouvrier, écrans 375 et 1280 px, tous les modules et onglets. En plus de
+l'audit habituel (« Invalid Date » ajouté aux textes cassés) : `_mvToday()`, `_mvCampagneDe` et `_mvExercice` comparés à la date
+locale attendue. Le tour normal règle lui aussi le fuseau sur Paris (`timezoneId`), pour mesurer l'appli comme la vivent les
+domaines, quel que soit le poste.
+
+⚠️ Non couvert : un domaine hors de France métropolitaine à l'ouest de Greenwich (DOM, UTC−4) — les `new Date('AAAA-MM-JJ')`
+suivis de getters locaux y reculeraient d'un jour. Aucun client concerné à ce jour.
+
+## 182. ★★ CMP-NOM — LE REPLI PAR NOM RENDAIT L'HIVER CLOS À 32 % (26/09 — `src/pilotage.js` · `scripts/banc/banc.mjs` · `scripts/banc/baseline.json` · `scripts/harnais-claude-md.mjs` · APP **7.66** et SW **8.35** inchangés · base `c9dd10e`)
+
+### 182a. Le constat
 
 Capture de Nico, Économie › Synthèse : *« ↩ Le travail prend plus de temps que le barème — mesuré sur la campagne précédente.
 +190,9 % … 2 289,2 h de présence contre 787 h prévues … mesuré sur Hiver 2025–2026 — cette période en est à 12 % sur 40 % »*.
 Nico : *« incompréhensible, pour l'instant l'écart est de 2 % sur une tâche »* (carte « Temps réel contre barème », TV-1).
 
-### 177b. La cause, reproduite
+### 182b. La cause, reproduite
 
 787 h = `stats.hFaites` de `Hiver 2025–2026`, archivé à **32 %** — le dénominateur amputé de §43a (×2,93 alors, ×2,909 ici).
 §43c avait posé la garde d'achèvement (`_pilCmpAcheve` ≥ 80 %) **dans le chemin par dates** de `_pilCmpSnapshot`. Période active
-`Hiver 2026 - 2027` : le chemin par dates rejette bien l'hiver 2025 (achèvement), ne trouve rien, et tombe dans le **repli par nom**
-— écrit pour les archives dont la période a été supprimée de `SAISONS` — qui apparie par radical (« Hiver ») et année, **sans
-aucune garde**. Reproduit sur `scripts/banc/instantane.json`, active = `Hiver 2026 - 2027` : base → `Hiver 2025–2026` (32 %) ; lot → `null`.
-⚠️ Pourquoi le banc n'a rien vu : ses scénarios synthétiques s'appelaient `Vend` / `VendPrec` — **sans année, radicaux différents**,
-le repli n'y jouait jamais. Et l'active réelle de l'instantané est `Vendanges` (radical sans homologue).
+`Hiver 2026 - 2027` : le chemin par dates rejette bien l'hiver 2025, ne trouve rien, et tombe dans le **repli par nom** — écrit pour
+les archives dont la période a été supprimée de `SAISONS` — qui apparie par radical (« Hiver ») et année, **sans aucune garde**.
+Reproduit sur `scripts/banc/instantane.json`, active = `Hiver 2026 - 2027` : base → `Hiver 2025–2026` (32 %) ; lot → `null`.
+⚠️ Le banc ne pouvait pas le voir : ses scénarios s'appelaient `Vend` / `VendPrec` (sans année, radicaux différents) et l'active réelle
+de l'instantané est `Vendanges` — le repli n'y jouait jamais.
 
-### 177c. Le correctif
+### 182c. Le correctif
 
-Dans le repli : ① une archive **datable** (sa période existe dans `SAISONS`) a déjà été jugée par le chemin par dates → sautée
-(seulement si l'active a un `debut`) ; ② `_pilCmpAcheve` ≥ 80 % s'applique aussi. Effet : `_pecCadHisto` rend `null`, le verdict passe
-en « Le budget tient, la cadence reste à mesurer », et `_pilCmpHtml` (comparaison tâche par tâche) affiche « Aucune saison comparable
-archivée » — comportement déjà jugé juste en §43h (« plutôt rien que n'importe quoi »).
-Verdict « cadence à mesurer » : quand `E.tv.taches` n'est pas vide, une phrase (« le temps réel se lit déjà travail par travail ») et
-un bouton **« Temps réel par travail ›»** vers Postes & travaux.
+Dans le repli : ① une archive **datable** (sa période existe dans `SAISONS`) a déjà été jugée par le chemin par dates → sautée (si
+l'active a un `debut`) ; ② `_pilCmpAcheve` ≥ 80 % s'applique aussi. Effet : `_pecCadHisto` rend `null`, le verdict passe en « Le budget
+tient, la cadence reste à mesurer », et `_pilCmpHtml` affiche « Aucune saison comparable archivée » (déjà jugé juste en §43h).
+Verdict « cadence à mesurer » : si `E.tv.taches` n'est pas vide, une phrase et un bouton **« Temps réel par travail ›»** (Postes & travaux).
 
-### 177d. Banc
+### 182d. Banc
 
 5 scénarios → 9 : `scenario_hiver_par_nom` (données réelles, active = l'hiver : `null`), `scenario_garde_datable` (datée, disjointe,
-100 %, même radical : `null` — **seule** la garde datable peut la rejeter, sinon l'achèvement la masque sur le cas réel : leçon 43e,
-vérifiée en contre-épreuve avant d'ajouter ce scénario), `scenario_nom_sans_dates` (95 %, période absente : appariée — le repli sert
-encore), `scenario_nom_sans_dates_incomplet` (32 % : `null`). Contre-épreuves : retirer ① → 1 rouge ; retirer ② → 1 rouge ; base
-d'origine → 3 rouges. Regravé (`--engraver`) : ajout de clés seulement.
+100 %, même radical : `null` — **seule** la garde datable peut la rejeter ; sans lui, l'achèvement la masque sur le cas réel, vérifié
+en contre-épreuve : leçon 43e), `scenario_nom_sans_dates` (95 %, période absente : appariée), `scenario_nom_sans_dates_incomplet`
+(32 % : `null`). Contre-épreuves : retirer ① → 1 rouge ; retirer ② → 1 rouge ; base → 3 rouges.
 
-### 177e. Accompagnement
+### 182e. ⚠️⚠️⚠️ L'ÉCRASEMENT — la règle d'or n°1 enfreinte par Claude
 
-Fiche `pil.cadence` et `MV_AIDE` Pilotage (utils.js) relues : elles disent « la même période de la campagne précédente, si elle est
-archivée » — toujours vrai, rien à changer. Guide 11 : rien ne bouge. Pas de « Quoi de neuf » (module seul, pas de bump).
+La première livraison (zip `cmp-nom`) a été construite sur `43e30ec` à 19 h 43. Entre-temps, une autre conversation avait livré
+TAILLE-1 (§177), ARCH-1 (§178), ARCH-2 (§179), STOCK-1 (§180), HORLOGE-1 (§181), tous collés avant elle, puis poussés avec elle dans
+`c9dd10e`. Cinq fichiers communs : `pilotage.js` (**ARCH-2 effacé** : `_arcAnnees`, `_arcBlocAnnuel`, `_arcSetCadre` — `mv-harnais-arch`
+plantait), `CLAUDE.md` (§177-§181 effacés, **même numéro §177** réutilisé), `harnais-claude-md.mjs` (`SECTIONS` 213 → 209), et les
+deux fichiers du banc (non touchés par l'autre lot : sans perte). Vu par `harnais-claude-md` : « 4 scripts muets » — les harnais des
+lots effacés n'étaient plus nommés.
+**Le réflexe manqué** : `git pull` juste avant de construire le zip, demandé une heure après la livraison. Il n'a pas été fait.
+**La réparation** : les zips des cinq lots redéposés par Nico ; `horloge-1.zip` est cumulatif, ses fichiers correspondent au dépôt
+à l'octet partout **sauf** aux quatre écrasés. Rejoué sur eux : `pilotage.js` = HORLOGE-1 + 16 lignes ajoutées, 0 retirée ;
+`CLAUDE.md` = HORLOGE-1 + cet en-tête + §182 ; `SECTIONS` 213 → 214.
+★ **Ce que ça confirme** : deux conversations Claude ouvertes en parallèle sur le même dépôt, c'est la situation du 13/08. Chacune
+croit sa base à jour. Seul un pull juste avant le paquet le vérifie.
 
-### 177f. Ouvert
+### 182f. Accompagnement
 
-- **Question de fond de §43h toujours ouverte** : empêcher (ou signaler) la clôture d'une période très incomplète.
-- Pré-existants rouges sur la base, hors `check` : `harnais-cadence-escalier` (« le KPI écart de cadence annonce la source histo »),
-  `mv-harnais-audit-pil` (B5, B6) — inchangés par ce lot.
-- Non regardé à l'écran (pas de navigateur).
+Fiche `pil.cadence` et `MV_AIDE` Pilotage relues : « la même période de la campagne précédente, si elle est archivée » — toujours
+vrai, rien à changer. Guide : rien. Pas de « Quoi de neuf » (module seul, pas de bump).
+
+### 182g. Ouvert
+
+- Question de §43h toujours ouverte : empêcher (ou signaler) la clôture d'une période très incomplète.
+- Pré-existants rouges, hors `check` : `harnais-cadence-escalier`, `mv-harnais-audit-pil` (B5, B6).
+- Non regardé à l'écran.
 
