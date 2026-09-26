@@ -316,10 +316,54 @@ function _mvBasesFileEcrire() {
     try { localStorage.removeItem(_MV_FILE_BASE_CLE); } catch (e2) { if (window._mvAvale) window._mvAvale(e2, 'firebase.js/_mvBasesFileEcrire#2'); }
   }
 }
+// ★★ STOCK-1 (26/09/2026) — UNE SAISIE HORS LIGNE NE DISPARAÎT PLUS QUAND LE DISQUE REFUSE.
+//   Avant : si localStorage.setItem échouait (quota plein, stockage désactivé), l'erreur était
+//   avalée ; la saisie ne vivait plus qu'en mémoire, et _flushQueue commence par _loadQueue(),
+//   qui REMPLAÇAIT la mémoire par le disque — ancien ou vide. À la reconnexion, la saisie
+//   partait à la poubelle sans un mot, même sans fermer l'appli.
+//   Désormais : les clés dont l'écriture disque a échoué sont notées (_mvFileMemSeule) ;
+//   _loadQueue garde leur valeur de MÉMOIRE (et leur base) au lieu de la relecture ; tout le
+//   reste se comporte comme avant (le disque fait foi : un autre onglet a pu y écrire).
+//   Et l'utilisateur est prévenu une fois : ne pas fermer l'appli avant le retour du réseau.
+var _mvFileMemSeule = {};
+var _mvFileAlerte = false;
+function _mvFileDisqueKo(key, e) {
+  _mvFileMemSeule[key] = 1;
+  if (window.logError) window.logError({ level:'warning', cat:'stockage', msg:'File hors ligne non écrite sur le disque : ' + key + ' — gardée en mémoire', detail:String(e && e.name || e) });
+  if (!_mvFileAlerte) {
+    _mvFileAlerte = true;
+    if (window.showToast) window.showToast('Stockage du téléphone plein — la saisie est gardée, mais ne fermez pas l\u2019appli avant le retour du réseau', '#B85A1A');
+  }
+}
+// ★ STOCK-1 — demander au navigateur de ne pas effacer ce que l'appli stocke (file hors ligne,
+//   cache Firestore). Sans cette demande, un téléphone à court de place peut tout vider. Demandé
+//   au premier passage hors ligne (le moment où ça compte) et au démarrage d'une appli installée.
+//   Le résultat est exposé (window._mvStockagePersistant) pour le diagnostic.
+var _mvPersistDemande = false;
+function _mvDemanderPersistance() {
+  if (_mvPersistDemande) return;
+  _mvPersistDemande = true;
+  try {
+    if (!(navigator.storage && navigator.storage.persist && navigator.storage.persisted)) { window._mvStockagePersistant = null; return; }
+    navigator.storage.persisted().then(function (deja) {
+      if (deja) { window._mvStockagePersistant = true; return; }
+      return navigator.storage.persist().then(function (ok) {
+        window._mvStockagePersistant = !!ok;
+        if (!ok && window.logError) window.logError({ level:'info', cat:'stockage', msg:'Stockage persistant refusé par le navigateur' });
+      });
+    }).catch(function (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvDemanderPersistance'); });
+  } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvDemanderPersistance#2'); }
+}
+try {
+  if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) _mvDemanderPersistance();
+} catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/persist-boot'); }
+
 function _queueSave(key, value, base) {
+  _mvDemanderPersistance();
   _offlineQueue[key] = value;
   if (!Object.prototype.hasOwnProperty.call(_offlineBases, key)) _offlineBases[key] = (base === undefined) ? null : base;
-  try { localStorage.setItem('mavigne_offline_queue', JSON.stringify(_offlineQueue)); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_queueSave'); }
+  try { localStorage.setItem('mavigne_offline_queue', JSON.stringify(_offlineQueue)); delete _mvFileMemSeule[key]; }
+  catch(e){ _mvFileDisqueKo(key, e); }
   _mvBasesFileEcrire();
   // PREP-1 (§134) — la file porte le domaine qui l'a remplie (lue par _flushQueue en préparation).
   try { localStorage.setItem('mavigne_offline_queue_t', TENANT_ID || ''); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_queueSave#t'); }
@@ -363,12 +407,19 @@ function _mvPrepTenant(data) {
 }
 
 function _loadQueue() {
+  // STOCK-1 : ce que le disque n'a pas pu recevoir reste en MÉMOIRE — on le remet par-dessus la relecture.
+  var memQ = _offlineQueue, memB = _offlineBases;
   try {
     var raw = localStorage.getItem('mavigne_offline_queue');
     if (raw) _offlineQueue = JSON.parse(raw) || {};
   } catch (e) { _offlineQueue = {}; }
   try { var rb = localStorage.getItem(_MV_FILE_BASE_CLE); _offlineBases = rb ? (JSON.parse(rb) || {}) : {}; }
   catch (e) { _offlineBases = {}; if (window._mvAvale) window._mvAvale(e, 'firebase.js/_loadQueue#base'); }
+  Object.keys(_mvFileMemSeule).forEach(function (k) {
+    if (!memQ || !Object.prototype.hasOwnProperty.call(memQ, k)) { delete _mvFileMemSeule[k]; return; }
+    _offlineQueue[k] = memQ[k];
+    if (memB && Object.prototype.hasOwnProperty.call(memB, k)) _offlineBases[k] = memB[k];
+  });
 }
 
 async function _flushQueue() {
@@ -438,7 +489,12 @@ async function _flushQueue() {
       success = false;
     }
   }
-  try { localStorage.setItem('mavigne_offline_queue', JSON.stringify(_offlineQueue)); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_flushQueue'); }
+  try {
+    localStorage.setItem('mavigne_offline_queue', JSON.stringify(_offlineQueue));
+    _mvFileMemSeule = {};                                  // STOCK-1 : tout ce qui reste est sur le disque
+  } catch(e){
+    Object.keys(_offlineQueue).forEach(function (k) { _mvFileDisqueKo(k, e); });   // STOCK-1 : restent en mémoire
+  }
   _mvBasesFileEcrire();
   if (Object.keys(_offlineQueue).length === 0) {
     try { localStorage.removeItem('mavigne_offline_queue_t'); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_flushQueue#t'); }

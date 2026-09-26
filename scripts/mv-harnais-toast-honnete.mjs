@@ -124,7 +124,11 @@ console.log('\n  2. plus aucun fbSave direct suivi d\'un message de succes');
       if (/fbSaveToast|fbToastApres/.test(lignes[i])) continue;
       inspectes++;
       const suite = lignes.slice(i, i + 5).join('\n');
-      if (/showToast\s*\(/.test(suite)) coupables.push(rel + ':' + (i + 1));
+      // ARCH-1 (§178) : un message qui vient APRÈS la lecture du résultat (`.ok`) sait
+      // déjà — c'est exactement ce que ce harnais demande. Seul un toast qui précède
+      // toute lecture de `.ok` est coupable.
+      const iT = suite.search(/showToast\s*\(/);
+      if (iT >= 0 && !/\.ok\b/.test(suite.slice(0, iT))) coupables.push(rel + ':' + (i + 1));
     }
   }
   verifie('des appels fbSave ont bien ete inspectes', inspectes > 0, 'inspectes=' + inspectes);

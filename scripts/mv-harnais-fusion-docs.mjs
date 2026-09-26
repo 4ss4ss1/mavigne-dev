@@ -73,12 +73,14 @@ function affectation(src, nom) {
   }
   throw new Error('accolade non fermée : window.' + nom);
 }
-const VARS = ['_MV_FUSION_EXCLUES', '_fbBases', '_offlineBases', '_MV_FILE_BASE_CLE', '_MV_GUARD_FLOORS'];
+const VARS = ['_MV_FUSION_EXCLUES', '_fbBases', '_offlineBases', '_MV_FILE_BASE_CLE', '_MV_GUARD_FLOORS',
+  '_mvFileMemSeule', '_mvFileAlerte', '_mvPersistDemande'];   // STOCK-1 (§180)
 const FNS = ['_mvDeepEqual', '_mvIsObj', '_mvMerge3', '_mvMergeParcelles', '_mvEgal', '_mvCanon', '_mvFusion',
   '_mvFusionObjet', '_mvIdentite', '_mvClesListes', '_mvFusionListe', '_mvBaseNoter', '_mvBaseDe', '_mvBaseMem',
   '_mvSauverFusion', '_mvApresFusion', '_mvParcellesApres', '_entryHasProg', '_tachesBlockHasProg', '_mvParcProgCount',
   '_mvIntrantsCount', '_mvPaieCount', '_mvDocSize', '_mvBlockDestructive', '_saveParcellesMerged', '_fsNoNestedArrays',
-  '_fbClone', 'applyFbData', '_mvBaseFile', '_mvBasesFileEcrire', '_queueSave', '_loadQueue', '_flushQueue', '_retryAsync'];
+  '_fbClone', 'applyFbData', '_mvBaseFile', '_mvBasesFileEcrire', '_mvFileDisqueKo', '_mvDemanderPersistance',   // STOCK-1
+  '_queueSave', '_loadQueue', '_flushQueue', '_retryAsync'];
 const bloc = src => VARS.map(n => blocVar(src, n)).join('\n') + '\n' + FNS.map(n => fonction(src, n)).join('\n')
   + '\n' + affectation(src, 'fbSave');
 

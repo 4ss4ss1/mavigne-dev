@@ -132,6 +132,47 @@ mesures.scenario_temoin_acheve = (() => {
   return a ? a.saisonNom : null;   // attendu : 'VendPrec'
 })();
 
+// ★ CMP-NOM (26/09/2026) — LE REPLI PAR NOM. Les quatre scenarios ci-dessus ont
+//   des noms sans annee ('Vend', 'VendPrec') : le repli par nom n'y jouait jamais,
+//   et il rendait ce que le chemin par dates venait d'ecarter. Vecu a l'ecran :
+//   « Hiver 2026 - 2027 » actif, « Hiver 2025–2026 » (clos a 32 %) rendu par son
+//   nom, verdict d'Economie a +190,9 % en rouge.
+// Donnees REELLES, periode active = l'hiver qui s'ouvre : rien ne doit s'apparier.
+mesures.scenario_hiver_par_nom = (() => {
+  const r = monte(snap.saisons.map(x => ({ ...x, active: x.nom === 'Hiver 2026 - 2027' })),
+                  snap.historique);
+  const a = r.api._pilCmpSnapshot();
+  return a ? a.saisonNom : null;   // attendu : null (hiver clos a 32 %)
+})();
+// Garde DATABLE isolee : archive achevee a 100 %, meme radical de nom, mais datee
+// et disjointe. Le chemin par dates l'a ecartee (recouvrement) ; seule la garde
+// « datable » du repli l'empeche de revenir par son nom. Sans ce scenario, la
+// garde d'achevement masque l'autre sur le cas reel (lecon de 43e).
+mesures.scenario_garde_datable = (() => {
+  const sais = [
+    { nom: 'Hiv 2026', debut: '2026-10-01', fin: '2027-03-31', active: true },
+    { nom: 'Hiv 2025', debut: '2025-04-01', fin: '2025-07-31', active: false }
+  ];
+  const r = monte(sais, [{ saisonNom: 'Hiv 2025', stats: { hFaites: 800, tachesStats: tachesA(100) } }]);
+  const a = r.api._pilCmpSnapshot();
+  return a ? a.saisonNom : null;   // attendu : null (datee, disjointe)
+})();
+// Le repli garde sa raison d'etre : une archive NON DATABLE (periode supprimee de
+// SAISONS), achevee, s'apparie par son nom...
+mesures.scenario_nom_sans_dates = (() => {
+  const sais = [{ nom: 'Hiv 2026', debut: '2026-10-01', fin: '2027-03-31', active: true }];
+  const r = monte(sais, [{ saisonNom: 'Hiv 2025', stats: { hFaites: 800, tachesStats: tachesA(95) } }]);
+  const a = r.api._pilCmpSnapshot();
+  return a ? a.saisonNom : null;   // attendu : 'Hiv 2025'
+})();
+// ... mais pas si elle a ete close incomplete : l'achevement vaut aussi sans dates.
+mesures.scenario_nom_sans_dates_incomplet = (() => {
+  const sais = [{ nom: 'Hiv 2026', debut: '2026-10-01', fin: '2027-03-31', active: true }];
+  const r = monte(sais, [{ saisonNom: 'Hiv 2025', stats: { hFaites: 800, tachesStats: tachesA(32) } }]);
+  const a = r.api._pilCmpSnapshot();
+  return a ? a.saisonNom : null;   // attendu : null
+})();
+
 // ── Regles de bon sens : vraies quelles que soient les donnees ──────────────
 // Une valeur figee dit « ca a change ». Une regle dit « c'est faux ». Il faut
 // les deux : le figement seul aurait grave -202 j comme reference.
@@ -166,7 +207,19 @@ const regles = [
    'une periode close au tiers sert de reference : son hFaites est ampute'],
   ['la garde ACHEVEMENT laisse passer l\'achevee',
    () => mesures.scenario_temoin_acheve === 'VendPrec',
-   'la garde bloque tout, pas seulement l\'incomplet']
+   'la garde bloque tout, pas seulement l\'incomplet'],
+  ['le repli par nom ne rend pas une archive DATABLE deja ecartee',
+   () => mesures.scenario_hiver_par_nom === null,
+   'l\'hiver clos a 32 % revient par son nom : verdict a +190,9 % (26/09)'],
+  ['la garde DATABLE du repli mord seule',
+   () => mesures.scenario_garde_datable === null,
+   'une archive datee et disjointe revient par son nom'],
+  ['le repli par nom sert encore une archive sans dates',
+   () => mesures.scenario_nom_sans_dates === 'Hiv 2025',
+   'le repli ne sert plus a rien : une archive dont la periode a ete supprimee n\'a plus d\'homologue'],
+  ['le repli par nom applique l\'achevement',
+   () => mesures.scenario_nom_sans_dates_incomplet === null,
+   'une archive sans dates close au tiers sert de reference']
 ];
 
 // ── Sortie ──────────────────────────────────────────────────────────────────

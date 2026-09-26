@@ -2667,6 +2667,97 @@ function notifyPriorityChange(){
 }
 // ════ window.HISTORIQUE MULTI-window.SAISONS ════
 
+// ════ ARCH-1 (26/09/2026) — L'ARCHIVE DE CAMPAGNE EST UNE PHOTO DE LA CAMPAGNE ════
+// Avant : chaque archive recopiait TOUT le journal depuis le premier jour (le journal
+// n'est jamais vide au changement de campagne) + toutes les sessions. Mesure du 26/09
+// (npm run taille, §177) : « Hiver 2025–2026 » et « Printemps 2026 » portaient les
+// MEMES 319 entrees ; `historique` a 192 Ko et une croissance qui touchait la limite
+// Firestore (1 Mio / document) vers la 4e cloture. Decision de Nico : une archive par
+// campagne = la photo de CETTE campagne ; la vue annuelle (ARCH-2) sera CALCULEE a
+// partir des archives de campagne, jamais recopiee.
+// ★ L'attribution d'une entree a une campagne passe par _saisonForDate (utils.js),
+//   la regle que l'appli applique DEJA partout pour filtrer le journal par campagne.
+// ★ Campagne sans dates de debut/fin : on ne peut rien attribuer -> on garde tout
+//   (comportement d'avant), plutot que d'archiver un journal vide.
+function _arcDatee(nom){
+  var s=(window.SAISONS||[]).find(function(x){ return x&&x.nom===nom; });
+  return !!(s&&s.debut&&s.fin);
+}
+function _arcDeLaCampagne(nom, liste, champDate){
+  var L=(liste||[]).filter(function(x){ return x && !x.meteo; });
+  if(!_arcDatee(nom) || typeof window._saisonForDate!=='function') return L;
+  return L.filter(function(x){
+    var d=x[champDate||'date'];
+    if(d) return window._saisonForDate(String(d).slice(0,10))===nom;
+    return x.saison===nom;                    // session sans date : son champ saison
+  });
+}
+function _arcSnapshot(saison){
+  var J=_arcDeLaCampagne(saison.nom, window.JOURNAL, 'date');
+  var S=_arcDeLaCampagne(saison.nom, window.SESSIONS, 'date');
+  var T=window.getTachesSaison();
+  return {
+    saisonNom: saison.nom, periode: saison.periode, archivedAt: new Date().toISOString(),
+    arcV: 2,                                   // ARCH-1 : journal et sessions de LA campagne
+    parcelles: deepClone(window.PARCELLES),
+    journal: deepClone(J),
+    sessions: deepClone(S),
+    taches: deepClone(T),
+    travaux: deepClone(window.TRAVAUX),
+    stats: _calcHistoStats(window.PARCELLES, J, T, window.TRAVAUX)
+  };
+}
+// Les archives d'AVANT ARCH-1 sont allegees au prochain enregistrement : chacune ne
+// garde que le journal et les sessions de sa campagne, et ses statistiques sont
+// recalculees sur ce journal. Une archive dont la campagne n'a pas (ou plus) de dates
+// dans SAISONS est laissee telle quelle.
+function _arcAlleger(H){
+  (H||[]).forEach(function(h){
+    if(!h || h.arcV===2 || !_arcDatee(h.saisonNom)) return;
+    h.journal=_arcDeLaCampagne(h.saisonNom, h.journal, 'date');
+    h.sessions=_arcDeLaCampagne(h.saisonNom, h.sessions, 'date');
+    try{ h.stats=_calcHistoStats(h.parcelles||[], h.journal, h.taches||[], h.travaux||{}); }
+    catch(e){ if(window.logError) window.logError({level:'info',cat:'archive',msg:'stats non recalculees : '+h.saisonNom,detail:String(e)}); }
+    h.arcV=2;
+  });
+  return H;
+}
+// Taille Firestore du document `historique` (regle publiee, cf. scripts/mv-taille-docs.mjs).
+function _arcTaille(v){
+  if(v===null||v===undefined||typeof v==='boolean') return 1;
+  if(typeof v==='number') return 8;
+  if(typeof v==='string') return new Blob([v]).size+1;
+  if(Array.isArray(v)) return v.reduce(function(s,x){ return s+_arcTaille(x); },0);
+  if(typeof v==='object') return Object.keys(v).reduce(function(s,k){ return s+new Blob([k]).size+1+_arcTaille(v[k]); },0);
+  return 8;
+}
+var _ARC_PLAFOND = 1000000;   // marge sous la limite Firestore (1 048 576)
+// Enregistre l'archive et ATTEND la reponse. Rend true seulement si Firestore l'a
+// reellement acceptee. Avant ARCH-1 : saveData sans attendre, puis activation de la
+// nouvelle campagne — un refus (document trop gros, hors ligne, protection) perdait
+// l'archive en silence alors que la campagne etait bel et bien close.
+async function _arcEnregistrer(H){
+  if(window._MV_LOCKED){ if(window.showToast) showToast('Enregistrement impossible \u2014 compte verrouill\u00e9','#C0392B'); return false; }
+  if(navigator.onLine===false){
+    if(window.showToast) showToast('Hors ligne \u2014 l\u2019archive ne peut pas \u00eatre enregistr\u00e9e. R\u00e9essayez avec du r\u00e9seau.','#B85A1A');
+    return false;
+  }
+  var n=_arcTaille({value:H})+80;
+  if(n>_ARC_PLAFOND){
+    if(window.showToast) showToast('Archives trop volumineuses ('+Math.round(n/1024)+' Ko) \u2014 rien n\u2019a \u00e9t\u00e9 enregistr\u00e9','#C0392B');
+    if(window.logError) window.logError({level:'critical',cat:'archive',msg:'historique au-dela du plafond',detail:n+' octets'});
+    return false;
+  }
+  var r=null;
+  try{ r=await window.fbSave('historique', H); }
+  catch(e){ if(window.logError) window.logError({level:'error',cat:'archive',msg:'fbSave historique a leve',detail:String(e)}); }
+  if(!r || r.ok!==true){
+    if(window.showToast) showToast('L\u2019archive n\u2019a pas pu \u00eatre enregistr\u00e9e'+(r&&r.blocked?' (protection anti-perte)':'')+' \u2014 rien n\u2019a chang\u00e9','#C0392B');
+    return false;
+  }
+  return true;
+}
+
 // Crée un snapshot de la saison active et l'archive dans window.HISTORIQUE
 function archiveSaisonActive(){
   const saison = window.getSaisonActive();
@@ -2678,26 +2769,20 @@ function archiveSaisonActive(){
     sub: existing>=0 ? 'Le snapshot existant de "'+saison.nom+'" sera remplacé par l\'état actuel.' : 'Sauvegarde l\'état actuel des parcelles, du journal et des sessions.',
     word: 'ARCHIVER',
     btn: existing>=0 ? 'Écraser le snapshot' : 'Archiver la saison',
-    successSub: 'Snapshot enregistré.',
+    successSub: 'Enregistrement en cours \u2014 un message confirme la fin.',
     items: existing>=0
       ? ['Le snapshot précédent sera écrasé','L\'opération est réversible en réarchivant']
       : ['État des parcelles', 'Entrées journal', 'Sessions tracteur'],
-    exec: function(){
-      const snapshot = {
-        saisonNom: saison.nom,
-        periode: saison.periode,
-        archivedAt: new Date().toISOString(),
-        parcelles: deepClone(window.PARCELLES),
-        journal: deepClone(window.JOURNAL.filter(j=>!j.meteo)),
-        sessions: deepClone(window.SESSIONS),
-        taches: deepClone(window.getTachesSaison()),
-        travaux: deepClone(window.TRAVAUX),
-        stats: _calcHistoStats(window.PARCELLES, window.JOURNAL.filter(j=>!j.meteo), window.getTachesSaison(), window.TRAVAUX)
-      };
-      if(existing>=0) window.HISTORIQUE[existing] = snapshot;
-      else window.HISTORIQUE.unshift(snapshot);
-      window.HISTORIQUE = window.HISTORIQUE;
-      window.saveData('historique');
+    exec: async function(){
+      // ARCH-1 : photo de LA campagne, anciennes archives allegees, enregistrement ATTENDU.
+      var avant = deepClone(window.HISTORIQUE||[]);
+      var H = _arcAlleger(deepClone(window.HISTORIQUE||[]));
+      var snapshot = _arcSnapshot(saison);
+      var ex = H.findIndex(function(h){ return h&&h.saisonNom===saison.nom; });
+      if(ex>=0) H[ex] = snapshot; else H.unshift(snapshot);
+      window.HISTORIQUE = H;
+      if(await _arcEnregistrer(H)){ if(window.showToast) showToast('Archive enregistr\u00e9e','#3D6B27'); }
+      else window.HISTORIQUE = avant;
       renderHistorique();
     }
   };
@@ -2892,24 +2977,38 @@ function _clotSyncConfirm(){
   var t2=document.getElementById('clot-cf-new2'); if(t2)t2.textContent=name;
 }
 
-function _clotExec(){
+var _CLOT_EN_COURS = false;
+async function _clotExec(){
+  if(_CLOT_EN_COURS) return;                  // double appui : une seule cloture
   var saison=(window.getSaisonActive && window.getSaisonActive())||{};
+  // ARCH-1 : la nouvelle campagne n'est activee QUE si l'archive est reellement
+  // enregistree. Sinon rien ne change : ni archive a moitie, ni campagne close sans photo.
+  // (Les controles de saisie du mode « create » passent AVANT l'archivage.)
+  if(_CLOT.mode==='create'){
+    var nm0=(((document.getElementById('clot-name')||{}).value)||'').trim();
+    if(!nm0){ if(window.showToast)showToast('Nom de campagne requis','#B85A1A'); return; }
+    if((window.SAISONS||[]).some(function(s){ return (s.nom||'').trim().toLowerCase()===nm0.toLowerCase(); })){ if(window.showToast)showToast('\u00ab '+nm0+' \u00bb existe d\u00e9j\u00e0','#B85A1A'); return; }
+  } else if(!(((document.getElementById('clot-prep')||{}).value)||'')){
+    if(window.showToast)showToast('Choisis une campagne préparée','#B85A1A'); return;
+  }
+  _CLOT_EN_COURS = true;
+  var avant = deepClone(window.HISTORIQUE||[]);
   try{
-    var jNoMeteo=(window.JOURNAL||[]).filter(function(j){ return j && !j.meteo; });
-    var snap={
-      saisonNom:saison.nom, periode:saison.periode, archivedAt:new Date().toISOString(),
-      parcelles:deepClone(window.PARCELLES),
-      journal:deepClone(jNoMeteo),
-      sessions:deepClone(window.SESSIONS),
-      taches:deepClone(window.getTachesSaison()),
-      travaux:deepClone(window.TRAVAUX),
-      stats:_calcHistoStats(window.PARCELLES, jNoMeteo, window.getTachesSaison(), window.TRAVAUX)
-    };
-    var ex=(window.HISTORIQUE||[]).findIndex(function(h){ return h.saisonNom===saison.nom; });
-    if(ex>=0) window.HISTORIQUE[ex]=snap; else window.HISTORIQUE.unshift(snap);
-    window.HISTORIQUE=window.HISTORIQUE;
-    window.saveData('historique');
-  }catch(e){ if(window.showToast)showToast('Archivage impossible — clôture annulée','#B85A1A'); return; }
+    var H=_arcAlleger(deepClone(window.HISTORIQUE||[]));
+    var snap=_arcSnapshot(saison);
+    var ex=H.findIndex(function(h){ return h&&h.saisonNom===saison.nom; });
+    if(ex>=0) H[ex]=snap; else H.unshift(snap);
+    window.HISTORIQUE=H;
+    if(window.showToast) showToast('Enregistrement de l\u2019archive\u2026','#8A6A2A');
+    var ok=await _arcEnregistrer(H);
+    if(!ok){ window.HISTORIQUE=avant; _CLOT_EN_COURS=false; return; }
+  }catch(e){
+    window.HISTORIQUE=avant; _CLOT_EN_COURS=false;
+    if(window.showToast)showToast('Archivage impossible — clôture annulée','#B85A1A');
+    if(window.logError) window.logError({level:'error',cat:'archive',msg:'cloture : archivage a leve',detail:String(e)});
+    return;
+  }
+  _CLOT_EN_COURS = false;
   var newNom='';
   if(_CLOT.mode==='create'){
     var nm=(((document.getElementById('clot-name')||{}).value)||'').trim();
@@ -5507,6 +5606,8 @@ window._ecoCfgSet=function(group,key,val){
     //                  campagne_mois celui du CYCLE DE VIGNE. Ils peuvent coincider ;
     //                  ils ne doivent JAMAIS etre confondus dans un ecrivain commun.
     //                  0 est legitime ici aussi (campagne civile).
+    //   archive_cadre: 'vigne' (defaut) | 'exercice' — cadre du BILAN PAR ANNEE des
+    //                  Archives (ARCH-2, §179). Lu par _arcCadre (pilotage.js).
     //   futs_trait   : traitement du FUT ACHETE dans l'exercice comptable.
     //                  'hors' (defaut) = il ne compte pas ; 'achat' = il compte en
     //                  entier a la date de sa facture. Lu par _ecoFutTrait (pilotage.js).
@@ -5515,7 +5616,7 @@ window._ecoCfgSet=function(group,key,val){
     //   aurait enregistre 0, le lecteur serait retombe sur son defaut, et le reglage
     //   aurait eu l'air de ne pas prendre — sans une seule erreur nulle part. Les
     //   valeurs autorisees sont enumerees ici : une chaine libre n'entre pas.
-    var _ECO_TXT={futs_trait:{hors:1, achat:1}};
+    var _ECO_TXT={futs_trait:{hors:1, achat:1}, archive_cadre:{vigne:1, exercice:1}};   /* archive_cadre : ARCH-2, §179 */
     if(_ECO_TXT[key]){
       var _tv=String(val==null?'':val).trim();
       if(!_ECO_TXT[key][_tv]) return;

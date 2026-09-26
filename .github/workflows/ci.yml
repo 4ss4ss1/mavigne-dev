@@ -308,6 +308,32 @@ jobs:
           node scripts/mv-harnais-pres.mjs
           node scripts/mv-harnais-pres.mjs --contre
 
+      # TAILLE-1 (§177) : le calcul de taille Firestore rejoue l'exemple publie (147 octets). Le script lui-meme
+      # se lance sur une sauvegarde, sur le poste (npm run taille -- fichier.json).
+      - name: Auto-controle — calcul de taille des documents (TAILLE-1)
+        run: node scripts/mv-taille-docs.mjs --test
+
+      # ARCH-1 (§178) : l'archive de campagne ne porte que SA campagne ; la cloture n'active la nouvelle campagne
+      # que si l'archive est reellement enregistree. Vraies fonctions de reglages.js ; 6 contre-epreuves.
+      - name: Harnais — archive de campagne et cloture sure (ARCH-1)
+        run: |
+          node scripts/mv-harnais-arch.mjs
+          node scripts/mv-harnais-arch.mjs --contre
+
+      # STOCK-1 (§180) : une saisie hors ligne ne disparait plus quand le disque refuse d'ecrire la file ;
+      # stockage persistant demande. Vraies fonctions de firebase.js ; 5 contre-epreuves.
+      - name: Harnais — file hors ligne et stockage persistant (STOCK-1)
+        run: |
+          node scripts/mv-harnais-stock.mjs
+          node scripts/mv-harnais-stock.mjs --contre
+
+      # HORLOGE-1 (§181) : aujourd'hui / campagne / exercice a 10 instants pieges (heure de Paris, horloge figee) et
+      # semaine ISO du planning 2024-2030 sous 4 fuseaux. Le harnais se relance en fils, un par fuseau.
+      - name: Harnais — dates pieges et changement d'heure (HORLOGE-1)
+        run: |
+          node scripts/mv-harnais-horloge.mjs
+          node scripts/mv-harnais-horloge.mjs --contre
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build

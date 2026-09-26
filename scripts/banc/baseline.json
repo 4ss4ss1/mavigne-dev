@@ -13,5 +13,9 @@
  "scenario_legitime": "Printemps 2026",
  "scenario_garde_recouvrement": null,
  "scenario_garde_achevement": null,
- "scenario_temoin_acheve": "VendPrec"
+ "scenario_temoin_acheve": "VendPrec",
+ "scenario_hiver_par_nom": null,
+ "scenario_garde_datable": null,
+ "scenario_nom_sans_dates": "Hiv 2025",
+ "scenario_nom_sans_dates_incomplet": null
 }

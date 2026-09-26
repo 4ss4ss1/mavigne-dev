@@ -599,11 +599,21 @@ function _pilCmpSnapshot(){
     });
     if(bestP) return bestP;
   }
+  // \u26a0 CMP-NOM (26/09/2026) : le repli par nom est un repli pour les archives NON
+  //   DATABLES (periode supprimee de SAISONS), rien d'autre. Il reprenait avant tout
+  //   ce que le chemin par dates venait d'ecarter : « Hiver 2026 - 2027 » rejetait
+  //   « Hiver 2025–2026 » (clos a 32 %, hFaites 787 h), puis le repli le rendait par
+  //   son nom — et le verdict d'Economie affichait « +190,9 % de temps en plus » en
+  //   rouge, soit 2 289 h de presence sur le tiers du travail qui avait ete valide.
+  //   Donc : une archive datable a deja ete jugee (recouvrement + achevement) et ne
+  //   repasse pas par ici ; et l'achevement vaut aussi pour une archive sans dates.
   var nom=String(sa.nom||'');
   var base=nom.replace(/\s*\d{4}.*$/,'').trim();
   var ym=nom.match(/\d{4}/); var year=ym?parseInt(ym[0],10):null;
   var best=null, bestY=-1;
   H.forEach(function(h){
+    if(sa.debut){ var peN=_pilCmpPeriode(h&&h.saisonNom); if(peN && peN.debut) return; }
+    if(_pilCmpAcheve(h)<_PIL_CMP_ACHEVE) return;
     var hn=String(h.saisonNom||''); var hb=hn.replace(/\s*\d{4}.*$/,'').trim();
     var hy=hn.match(/\d{4}/); hy=hy?parseInt(hy[0],10):null;
     if(hb && base && hb.toLowerCase()===base.toLowerCase() && hy!=null && (year==null||hy<year) && hy>bestY){ bestY=hy; best=h; }
@@ -7030,6 +7040,12 @@ function _pecVerdict(E,TL){
       +(E.cad.src
          ? ('L\u2019\u00e9cart de cadence appara\u00eetra seul, d\u00e8s <b>'+Math.round(E.cad.seuil)+' %</b> d\u2019avancement.')
          : 'L\u2019\u00e9cart de cadence est indisponible : aucune heure de planning sur cette p\u00e9riode.');
+    // CMP-NOM : sous le seuil, ce qui se mesure deja, c'est le temps reel travail par
+    //   travail (TV-1). Le verdict y renvoie plutot que de laisser croire qu'il n'y a rien.
+    if(E.tv && E.tv.taches && E.tv.taches.length){
+      d+=' En attendant, le temps r\u00e9el se lit d\u00e9j\u00e0 travail par travail.';
+      act.push(['sub','pos','Temps r\u00e9el par travail']);
+    }
   } else if(ec>15){
     em=['alerte','rouge']; t='Le travail prend plus de temps que le bar\u00e8me';
     d='Sur ce qui est fait, l\u2019\u00e9quipe a pass\u00e9 <b>'+_pilEsc(_pecPct(ec))+' de temps en plus</b> que le bar\u00e8me h/ha \u2014 '+_ecoH1(E.cad.hReel)+' h de pr\u00e9sence contre '+_ecoH1(E.cad.hBar)+' h pr\u00e9vues. '

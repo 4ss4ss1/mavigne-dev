@@ -150,7 +150,7 @@ async function entre(mut) { const M = monterApp(mut); drapeau(M); await M._mvPre
 
 /* ══ 2 · firebase.js ══ */
 const blocFb = S => fonction(S.utils, '_mvPrepOn', 'src/utils.js') + '\n'
-  + ['_loadQueue', '_queueSave', '_flushQueue', '_mvPrepTenant', '_mvBaseFile', '_mvBasesFileEcrire'].map(n => fonction(S.fb, n, 'src/firebase.js')).join('\n') + '\n'
+  + ['_loadQueue', '_queueSave', '_flushQueue', '_mvPrepTenant', '_mvBaseFile', '_mvBasesFileEcrire', '_mvFileDisqueKo', '_mvDemanderPersistance'].map(n => fonction(S.fb, n, 'src/firebase.js')).join('\n') + '\n'
   + ['_fbQueueTenant', '_plan'].map(n => affectation(S.fb, n, 'src/firebase.js')).join('\n');
 const BLOC_FB = blocFb(SRC);
 const PRELUDE_FB = STOCK + `
@@ -161,6 +161,8 @@ var _offlineQueue = {};
 // FUSION-1 (§146) — la file garde sa base, et l'envoi fusionne (éprouvé par mv-harnais-fusion-docs) :
 // ici, seule compte la marque de domaine — une écriture fusionnée compte comme une écriture.
 var _offlineBases = {}, _MV_FILE_BASE_CLE = 'mavigne_offline_queue_base', _fbBases = {}, _baseParcelles = null;
+// STOCK-1 (§180) — la file retient les clés que le disque a refusées (éprouvé par mv-harnais-stock).
+var _mvFileMemSeule = {}, _mvFileAlerte = false, _mvPersistDemande = false;
 var _MV_FUSION_EXCLUES = { parcelles: 1, kml_polygons: 1, travaux: 1 };
 function deepClone(v){ return v === undefined ? undefined : JSON.parse(JSON.stringify(v)); }
 function _mvBaseDe(){ return undefined; }

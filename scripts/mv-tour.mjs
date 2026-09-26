@@ -6,6 +6,7 @@
 //           npm run tour -- --chromium   (Chromium seul, plus rapide)
 //           npm run tour -- --captures   (une capture de CHAQUE écran, pas seulement des fautifs)
 //           npm run tour -- --headed     (voir le navigateur travailler)
+//           npm run tour -- --dates      (HORLOGE-1 : l'appli à 9 moments pièges, heure de Paris)
 // Première fois :  npx playwright install chromium webkit
 //
 // Même principe qu'e2e-local : ZÉRO émulateur, réseau Firebase COUPÉ, données
@@ -50,6 +51,24 @@ const ARGS     = process.argv.slice(2);
 const HEADED   = ARGS.includes('--headed');
 const TOUT_CAP = ARGS.includes('--captures');
 const CHROMIUM_SEUL = ARGS.includes('--chromium');
+const DATES    = ARGS.includes('--dates');
+
+// ★ HORLOGE-1 (§181) — les moments où une appli qui mélange heure locale et UTC se trahit.
+//   Le navigateur est réglé sur Europe/Paris et son horloge FIGÉE à l'instant voulu
+//   (page.clock.setFixedTime : Date est faux, les minuteurs tournent normalement).
+//   mv-harnais-fuseau éprouve les fonctions une à une sous cinq fuseaux ; ici, c'est
+//   l'appli ENTIÈRE, écrans et onglets, qui vit ces instants.
+const MOMENTS = [
+  { id: 'minuit-passe', iso: '2026-09-27T00:30:00+02:00', lib: '27/09 00 h 30 (UTC = encore le 26)' },
+  { id: 'avant-heure-hiver', iso: '2026-10-25T01:30:00+02:00', lib: '25/10 01 h 30, avant le changement d\u2019heure' },
+  { id: 'heure-doublee', iso: '2026-10-25T02:30:00+01:00', lib: '25/10 02 h 30, l\u2019heure qui se répète' },
+  { id: 'jour-25h', iso: '2026-10-25T23:30:00+01:00', lib: '25/10 23 h 30, fin d\u2019une journée de 25 h' },
+  { id: 'bascule-campagne', iso: '2026-08-01T00:05:00+02:00', lib: '01/08 00 h 05, nouvelle campagne et nouvel exercice' },
+  { id: 'semaine-53', iso: '2026-12-31T23:59:00+01:00', lib: '31/12/2026 23 h 59, semaine 53' },
+  { id: 'nouvel-an', iso: '2027-01-01T00:05:00+01:00', lib: '01/01/2027 00 h 05' },
+  { id: 'heure-ete', iso: '2027-03-28T03:30:00+02:00', lib: '28/03/2027 03 h 30, juste après l\u2019heure sautée' },
+  { id: 'bissextile', iso: '2028-02-29T12:00:00+01:00', lib: '29/02/2028' },
+];
 
 const ECRANS = [
   { id: 'iphone-se', w: 375,  h: 667,  lib: 'iPhone SE' },
@@ -181,7 +200,7 @@ function auditDansLaPage(piegeActif) {
   const zones = [racine].concat(Array.from(document.querySelectorAll('.overlay.open, #mv-dock')));
 
   // 1. Texte cassé à l'écran
-  const RE = /(&amp;|&lt;|&gt;|&quot;|&#39;|&#x27;|&nbsp;|\\u[0-9a-fA-F]{4}|\bundefined\b|\bNaN\b|\[object Object\]|\bnull\b|\bInfinity\b)/;
+  const RE = /(&amp;|&lt;|&gt;|&quot;|&#39;|&#x27;|&nbsp;|\\u[0-9a-fA-F]{4}|\bundefined\b|\bNaN\b|\[object Object\]|\bnull\b|\bInfinity\b|Invalid Date)/;   // Invalid Date : HORLOGE-1
   const vu = new Set();
   for (const z of zones) {
     const tw = document.createTreeWalker(z, NodeFilter.SHOW_TEXT);
@@ -228,18 +247,32 @@ function auditDansLaPage(piegeActif) {
   // (dock, fenêtre ouverte, en-tête collant) ou la page elle-même. On ne compare que
   // dans une même couche : le contenu qui défile SOUS le dock n'est pas un défaut.
   const couche = (el) => { for (let p = el; p && p !== document.body; p = p.parentElement) { if (/fixed|sticky/.test(getComputedStyle(p).position)) return p; } return null; };
-  const R = feuilles.map((el) => { const k = couche(el); return { el, r: clip(el), couche: k, fixe: !!k }; });
+  const R = feuilles.map((el) => {
+    const k = couche(el);
+    // TOUR-5 : un élément EN LIGNE (<b>, <span>) qui passe à la ligne a un rectangle
+    // englobant qui couvre les deux lignes entières — il « chevauchait » ses voisins de
+    // paragraphe (2e tour : les 8 derniers faux). On compare ses boîtes de ligne une à une.
+    const lignes = getComputedStyle(el).display === 'inline' ? Array.from(el.getClientRects()) : null;
+    return { el, r: clip(el), lignes: (lignes && lignes.length > 1) ? lignes : null, couche: k, fixe: !!k };
+  });
+  const inter = (p, q) => {
+    const x = Math.min(p.right, q.right) - Math.max(p.left, q.left);
+    const y = Math.min(p.bottom, q.bottom) - Math.max(p.top, q.top);
+    return (x < 3 || y < 3) ? 0 : x * y;
+  };
   let nChev = 0;
   for (let i = 0; i < R.length && nChev < 12; i++) {
     for (let j = i + 1; j < R.length && nChev < 12; j++) {
       const a = R[i], b = R[j];
       if (a.couche !== b.couche) continue;
       if (a.el.contains(b.el) || b.el.contains(a.el)) continue;
-      const x = Math.min(a.r.right, b.r.right) - Math.max(a.r.left, b.r.left);
-      const y = Math.min(a.r.bottom, b.r.bottom) - Math.max(a.r.top, b.r.top);
-      if (x < 3 || y < 3) continue;
-      const petit = Math.min(a.r.width * a.r.height, b.r.width * b.r.height);
-      if (x * y < 0.25 * petit) continue;
+      const la = a.lignes || [a.r], lb = b.lignes || [b.r];
+      let pire = 0, petit = 1;
+      for (const p of la) for (const q of lb) {
+        const s = inter(p, q);
+        if (s > pire) { pire = s; petit = Math.min(p.width * p.height, q.width * q.height); }
+      }
+      if (!pire || pire < 0.25 * petit) continue;
       nChev++;
       voir.push({ type: 'chevauchement', detail: court(a.el) + ' « ' + txt(a.el) + ' » ⟷ ' + court(b.el) + ' « ' + txt(b.el) + ' »' });
     }
@@ -290,16 +323,19 @@ function auditDansLaPage(piegeActif) {
 }
 
 // ---- Une session : un navigateur, un rôle ------------------------------------
-async function session(type, nav, role, ctx) {
-  const context = await nav.newContext({ serviceWorkers: 'block', viewport: { width: 1280, height: 800 } });
+async function session(type, nav, role, ctx, opts = {}) {
+  // Europe/Paris explicite : le tour mesure l'appli telle que la vivent les domaines, pas le fuseau du poste.
+  const context = await nav.newContext({ serviceWorkers: 'block', viewport: { width: 1280, height: 800 }, timezoneId: 'Europe/Paris', locale: 'fr-FR' });
   const page = await context.newPage();
+  if (opts.horloge) await page.clock.setFixedTime(new Date(opts.horloge.iso));
+  const qui = role.id + (opts.horloge ? ' @ ' + opts.horloge.id : '');
   await page.route('**/*', (route) => {
     const u = route.request().url();
     if (/googleapis\.com|gstatic\.com|recaptcha\.net|google\.com\/recaptcha|cloudfunctions\.net|firebaseapp\.com|firebasestorage|firebaseio\.com|identitytoolkit/i.test(u)) return route.abort();
     return route.continue();
   });
   let ecran = 'boot';
-  const noter = (nature, typeDef, detail) => ctx.constats.push({ nav: type, role: role.id, ecran, nature, type: typeDef, detail });
+  const noter = (nature, typeDef, detail) => ctx.constats.push({ nav: type, role: qui, ecran, nature, type: typeDef, detail });
   page.on('pageerror', (e) => { const t = e && e.message ? e.message : String(e); if (!isBenign(t)) noter('bug', 'erreur JS', t.slice(0, 300)); });
   page.on('console', (m) => { if (m.type() === 'error' && !isBenign(m.text())) noter('bug', 'erreur JS', m.text().slice(0, 300)); });
 
@@ -337,13 +373,32 @@ async function session(type, nav, role, ctx) {
       return (!ls || ls.style.display === 'none' || ls.offsetParent === null) && !!window.currentUser;
     }, { timeout: 20000 });
     await fermer();
+    // HORLOGE-1 : « aujourd'hui » selon l'appli = la date LOCALE de Paris à cet instant ; la
+    // campagne et l'exercice (défaut : ouverture le 1er août) en découlent. À 00 h 30, une
+    // appli qui lit l'UTC se croit encore la veille — et range la saisie dans le mauvais jour.
+    if (opts.horloge) {
+      ecran = 'horloge';
+      const jour = opts.horloge.iso.slice(0, 10), an = +jour.slice(0, 4), mo = +jour.slice(5, 7);
+      const att = { today: jour, camp: mo >= 8 ? an : an - 1, ex: mo >= 8 ? an : an - 1 };
+      const vu = await page.evaluate(() => {
+        const t = typeof window._mvToday === 'function' ? window._mvToday() : '';
+        return { today: t, camp: typeof window._mvCampagneDe === 'function' ? window._mvCampagneDe(t) : null,
+                 ex: typeof window._mvExercice === 'function' ? window._mvExercice().an : null };
+      }).catch(() => null);
+      if (!vu) noter('bug', 'horloge', 'lecture de _mvToday impossible');
+      else {
+        if (vu.today !== att.today) noter('bug', 'mauvais jour', '« aujourd\u2019hui » = ' + vu.today + ' au lieu de ' + att.today + ' (' + opts.horloge.lib + ')');
+        if (vu.camp !== att.camp) noter('bug', 'mauvaise campagne', 'campagne ' + vu.camp + ' au lieu de ' + att.camp + ' (' + opts.horloge.lib + ')');
+        if (vu.ex !== att.ex) noter('bug', 'mauvais exercice', 'exercice ' + vu.ex + ' au lieu de ' + att.ex + ' (' + opts.horloge.lib + ')');
+      }
+    }
   } catch (e) {
     noter('bug', 'connexion impossible', (e && e.message ? e.message : String(e)).split('\n')[0]);
     await context.close();
     return;
   }
 
-  for (const E of ECRANS) {
+  for (const E of (opts.ecrans || ECRANS)) {
     await page.setViewportSize({ width: E.w, height: E.h });
     await page.waitForTimeout(300);
     await page.evaluate(() => { if (window._dockBuild) window._dockBuild(); }).catch(() => {});
@@ -351,7 +406,7 @@ async function session(type, nav, role, ctx) {
     const pages = await page.evaluate(() => Array.from(document.querySelectorAll('#mv-dock-inner .mv-dk[data-page], #mv-dock-sheet-items .mv-sg[data-page]')).map((b) => b.getAttribute('data-page'))).catch(() => []);
     ecran = E.id + ' › dock';
     if (!pages.length) { noter('bug', 'dock vide', 'aucun module proposé'); continue; }
-    if (E.id === 'ordi') ctx.dock[type + '|' + role.id] = pages.slice();
+    if (E.id === 'ordi' && !opts.horloge) ctx.dock[type + '|' + role.id] = pages.slice();
     const aPil = pages.includes('pilotage');
     if (aPil !== role.pilotage) noter('bug', 'droit d\u2019accès', 'Pilotage ' + (aPil ? 'proposé' : 'absent') + ' pour le rôle ' + role.id);
     // Accès FORCÉ : goTo('pilotage') sans le rôle doit retomber ailleurs.
@@ -386,8 +441,8 @@ async function session(type, nav, role, ctx) {
         r.bug.forEach((x) => noter('bug', x.type, x.detail));
         r.voir.forEach((x) => noter('voir', x.type, x.detail));
         if (r.bug.length || r.voir.length || TOUT_CAP || (role.id === 'admin' && (E.id === 'iphone-se' || E.id === 'ordi'))) {
-          const nom = [type, role.id, E.id, p, (nomOng || 'vue').replace(/[^a-z0-9]+/gi, '-').toLowerCase()].join('_') + '.png';
-          try { await page.screenshot({ path: path.join(SORTIE, nom), fullPage: true }); ctx.captures[type + '|' + role.id + '|' + ecran] = nom; } catch (e) {}
+          const nom = [type, qui.replace(/[^a-z0-9]+/gi, '-'), E.id, p, (nomOng || 'vue').replace(/[^a-z0-9]+/gi, '-').toLowerCase()].join('_') + '.png';
+          try { await page.screenshot({ path: path.join(SORTIE, nom), fullPage: true }); ctx.captures[type + '|' + qui + '|' + ecran] = nom; } catch (e) {}
         }
       }
     }
@@ -417,7 +472,7 @@ function rapport(ctx, navs, duree) {
   const html = '<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tour complet — Ma Vigne</title>'
     + '<style>body{font:14px/1.5 system-ui,sans-serif;margin:24px;color:#222}h1{font-size:20px}table{border-collapse:collapse;width:100%;margin:12px 0 28px}td,th{border:1px solid #ddd;padding:6px 8px;vertical-align:top;text-align:left}'
     + 'tr.bug td:first-child{color:#fff;background:#B83A2A;font-weight:600}tr.voir td:first-child{background:#F3E2B8}.ou{font-size:12px;color:#555}.r{display:flex;gap:24px;flex-wrap:wrap}.r div{background:#f5f2ea;padding:10px 16px;border-radius:8px}</style>'
-    + '<h1>Tour complet — rôles et mise en page</h1><div class="r"><div><b>' + nBug + '</b> bugs distincts</div><div><b>' + nVoir + '</b> points à voir</div><div><b>' + ctx.nEcrans + '</b> écrans audités</div>'
+    + '<h1>' + (DATES ? 'Tour aux dates pièges (heure de Paris)' : 'Tour complet — rôles et mise en page') + '</h1><div class="r"><div><b>' + nBug + '</b> bugs distincts</div><div><b>' + nVoir + '</b> points à voir</div><div><b>' + ctx.nEcrans + '</b> écrans audités</div>'
     + '<div>' + esc(navs.join(' + ')) + '</div><div>' + Math.round(duree / 1000) + ' s</div></div>'
     + '<h2>Constats</h2><table><tr><th>Nature</th><th>Type</th><th>Détail</th><th>Écrans</th><th>Où (lien = capture)</th></tr>' + (lignes || '<tr><td colspan="5">Aucun constat.</td></tr>') + '</table>'
     + '<h2>Ce que chaque rôle voit dans le dock (écran ordinateur)</h2><table><tr><th>Navigateur · rôle</th><th>Modules</th></tr>' + dock + '</table>'
@@ -444,7 +499,7 @@ async function main() {
   const t0 = Date.now();
   const ctx = { constats: [], captures: {}, dock: {}, nEcrans: 0 };
   const navs = [];
-  const types = CHROMIUM_SEUL ? ['chromium'] : ['chromium', 'webkit'];
+  const types = (CHROMIUM_SEUL || DATES) ? ['chromium'] : ['chromium', 'webkit'];
   for (const type of types) {
     let nav;
     try { nav = await playwright[type].launch({ headless: !HEADED }); }
@@ -453,10 +508,14 @@ async function main() {
       continue;
     }
     navs.push(type === 'webkit' ? 'Safari (WebKit)' : 'Chrome (Chromium)');
-    for (const role of ROLES) {
-      process.stdout.write(c.dim('  ' + type + ' · ' + role.id + '… '));
+    // HORLOGE-1 : en mode --dates, deux rôles (admin, ouvrier) × deux écrans × chaque moment piège.
+    const passes = DATES
+      ? MOMENTS.flatMap((m) => ROLES.filter((r) => r.id === 'admin' || r.id === 'ouvrier').map((r) => ({ role: r, opts: { horloge: m, ecrans: ECRANS.filter((e) => e.id === 'iphone-se' || e.id === 'ordi') } })))
+      : ROLES.map((r) => ({ role: r, opts: {} }));
+    for (const { role, opts } of passes) {
+      process.stdout.write(c.dim('  ' + type + ' · ' + role.id + (opts.horloge ? ' @ ' + opts.horloge.lib : '') + '… '));
       const avant = ctx.constats.length;
-      try { await session(type, nav, role, ctx); }
+      try { await session(type, nav, role, ctx, opts); }
       catch (e) { ctx.constats.push({ nav: type, role: role.id, ecran: '?', nature: 'bug', type: 'le tour a planté', detail: (e && e.message ? e.message : String(e)).split('\n')[0] }); }
       const n = ctx.constats.slice(avant);
       console.log((n.some((k) => k.nature === 'bug') ? c.r : c.g)(n.filter((k) => k.nature === 'bug').length + ' bug(s)') + c.dim(', ' + n.filter((k) => k.nature === 'voir').length + ' à voir'));

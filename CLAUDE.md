@@ -2,7 +2,14 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **26 septembre 2026 (TOUR-4)** — ★★ **LE PREMIER « npm run tour » (§176)** : 845 écrans, 2 navigateurs,
+> Dernière consolidation : **26 septembre 2026 (CMP-NOM)** — ★★ **LE REPLI PAR NOM RENDAIT L'HIVER CLOS À 32 % (§177)**.
+> Nico : verdict d'Économie « +190,9 % de temps en plus — 2 289 h contre 787 h, mesuré sur Hiver 2025–2026 », alors que
+> l'écart réel est de 2 % sur une tâche. C'était **exactement** le dénominateur ampute de §43 (hFaites 787 h, période close à
+> 32 %) : le chemin par dates de `_pilCmpSnapshot` l'écartait, le **repli par nom** (« Hiver » = « Hiver ») le rendait, sans
+> aucune garde. Le repli ne sert plus que les archives NON DATABLES, et applique l'achèvement. Le verdict « cadence à
+> mesurer » renvoie au temps réel par travail. `src/pilotage.js` seul : **aucun bump** (APP 7.63 · SW 8.32), base `43e30ec`.
+>
+> ★ Précédente : **26 septembre 2026 (TOUR-4)** — ★★ **LE PREMIER « npm run tour » (§176)** : 845 écrans, 2 navigateurs,
 > 5 rôles. Un vrai défaut : `goTo('pilotage')` ouvrait le Pilotage à l'ouvrier, au tractoriste, au saisonnier → garde **SEC-PIL**
 > (patron SEC-GT). Le reste : faux positifs du tour corrigés (tuiles Leaflet, blocs repliés, variante de police jamais demandée,
 > avertissement viewport de Safari). **APP 7.62 → 7.63 · SW 8.31 → 8.32**, base `4f7fb23`. Détail en **§176**.
@@ -23496,4 +23503,51 @@ de page, point de synchro) restent signalées, faute de décision.
 
 ⚠️ Le `.mv-base` de §174 n'avait pas été commité (fichier qui commence par un point, perdu à la copie) : le dépôt portait encore
 `d684d4e`. Sans effet cette fois (la garde ne vérifie qu'un `.mv-base` MODIFIÉ), mais c'est le même piège que `.gitleaksignore`.
+
+## 177. ★★ CMP-NOM — LE REPLI PAR NOM RENDAIT L'HIVER CLOS À 32 % (26/09 — `src/pilotage.js` · `scripts/banc/banc.mjs` · `scripts/banc/baseline.json` · `scripts/harnais-claude-md.mjs` · APP **7.63** et SW **8.32** inchangés · base `43e30ec`)
+
+### 177a. Le constat
+
+Capture de Nico, Économie › Synthèse : *« ↩ Le travail prend plus de temps que le barème — mesuré sur la campagne précédente.
++190,9 % … 2 289,2 h de présence contre 787 h prévues … mesuré sur Hiver 2025–2026 — cette période en est à 12 % sur 40 % »*.
+Nico : *« incompréhensible, pour l'instant l'écart est de 2 % sur une tâche »* (carte « Temps réel contre barème », TV-1).
+
+### 177b. La cause, reproduite
+
+787 h = `stats.hFaites` de `Hiver 2025–2026`, archivé à **32 %** — le dénominateur amputé de §43a (×2,93 alors, ×2,909 ici).
+§43c avait posé la garde d'achèvement (`_pilCmpAcheve` ≥ 80 %) **dans le chemin par dates** de `_pilCmpSnapshot`. Période active
+`Hiver 2026 - 2027` : le chemin par dates rejette bien l'hiver 2025 (achèvement), ne trouve rien, et tombe dans le **repli par nom**
+— écrit pour les archives dont la période a été supprimée de `SAISONS` — qui apparie par radical (« Hiver ») et année, **sans
+aucune garde**. Reproduit sur `scripts/banc/instantane.json`, active = `Hiver 2026 - 2027` : base → `Hiver 2025–2026` (32 %) ; lot → `null`.
+⚠️ Pourquoi le banc n'a rien vu : ses scénarios synthétiques s'appelaient `Vend` / `VendPrec` — **sans année, radicaux différents**,
+le repli n'y jouait jamais. Et l'active réelle de l'instantané est `Vendanges` (radical sans homologue).
+
+### 177c. Le correctif
+
+Dans le repli : ① une archive **datable** (sa période existe dans `SAISONS`) a déjà été jugée par le chemin par dates → sautée
+(seulement si l'active a un `debut`) ; ② `_pilCmpAcheve` ≥ 80 % s'applique aussi. Effet : `_pecCadHisto` rend `null`, le verdict passe
+en « Le budget tient, la cadence reste à mesurer », et `_pilCmpHtml` (comparaison tâche par tâche) affiche « Aucune saison comparable
+archivée » — comportement déjà jugé juste en §43h (« plutôt rien que n'importe quoi »).
+Verdict « cadence à mesurer » : quand `E.tv.taches` n'est pas vide, une phrase (« le temps réel se lit déjà travail par travail ») et
+un bouton **« Temps réel par travail ›»** vers Postes & travaux.
+
+### 177d. Banc
+
+5 scénarios → 9 : `scenario_hiver_par_nom` (données réelles, active = l'hiver : `null`), `scenario_garde_datable` (datée, disjointe,
+100 %, même radical : `null` — **seule** la garde datable peut la rejeter, sinon l'achèvement la masque sur le cas réel : leçon 43e,
+vérifiée en contre-épreuve avant d'ajouter ce scénario), `scenario_nom_sans_dates` (95 %, période absente : appariée — le repli sert
+encore), `scenario_nom_sans_dates_incomplet` (32 % : `null`). Contre-épreuves : retirer ① → 1 rouge ; retirer ② → 1 rouge ; base
+d'origine → 3 rouges. Regravé (`--engraver`) : ajout de clés seulement.
+
+### 177e. Accompagnement
+
+Fiche `pil.cadence` et `MV_AIDE` Pilotage (utils.js) relues : elles disent « la même période de la campagne précédente, si elle est
+archivée » — toujours vrai, rien à changer. Guide 11 : rien ne bouge. Pas de « Quoi de neuf » (module seul, pas de bump).
+
+### 177f. Ouvert
+
+- **Question de fond de §43h toujours ouverte** : empêcher (ou signaler) la clôture d'une période très incomplète.
+- Pré-existants rouges sur la base, hors `check` : `harnais-cadence-escalier` (« le KPI écart de cadence annonce la source histo »),
+  `mv-harnais-audit-pil` (B5, B6) — inchangés par ce lot.
+- Non regardé à l'écran (pas de navigateur).
 

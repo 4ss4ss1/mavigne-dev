@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.63';
+export const APP_VERSION = '7.66';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -716,6 +716,28 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.66', items: [
+    { emoji: 'antenne', titre: 'Une saisie faite hors ligne ne se perd plus',
+      desc: "Si la mémoire du téléphone était pleine, une saisie faite sans réseau pouvait disparaître au retour du réseau, sans "
+        + "un mot. Elle est maintenant gardée jusqu’à l’envoi, et un message vous prévient de ne pas fermer l’appli d’ici là. "
+        + "Ma Vigne demande aussi au navigateur de ne pas effacer ses données quand le téléphone manque de place." }
+  ] },
+  { v: '7.65', items: [
+    { emoji: 'calendrier', titre: 'Le bilan par année, dans les Archives',
+      desc: "Pilotage › Archives\u00a0: sous la frise, une carte par année regroupe les campagnes closes — heures archivées, "
+        + "interventions, parcelles touchées, sessions tracteur et principales tâches. Elle est <b>calculée</b> à partir des "
+        + "archives de campagne, jamais recopiée. L’administrateur choisit le cadre\u00a0: <b>année vigne</b> ou <b>exercice "
+        + "comptable</b>. Une intervention n’est jamais comptée deux fois, même dans les archives faites avant la v7.64." }
+  ] },
+  { v: '7.64', items: [
+    { emoji: 'carton', titre: 'Chaque archive est la photo de sa campagne',
+      desc: "À la clôture, l’archive recopiait <b>tout le journal depuis le premier jour</b>\u00a0: l’archive du printemps contenait "
+        + "aussi l’hiver. Elle ne garde plus que le journal et les sessions de <b>sa</b> campagne. Les archives déjà faites sont "
+        + "allégées de la même façon à la prochaine clôture. Le journal en cours, lui, ne change pas." },
+    { emoji: 'bouclier', titre: 'Une clôture ne perd plus son archive',
+      desc: "La nouvelle campagne n’est activée que lorsque l’archive est réellement enregistrée sur le serveur. Hors ligne, ou si "
+        + "l’enregistrement est refusé, rien ne change et un message le dit\u00a0: vous réessayez avec du réseau." }
+  ] },
   { v: '7.63', items: [
     { emoji: 'bouclier', titre: 'Le Pilotage reste réservé, même par un lien direct',
       desc: "Le Pilotage n’est proposé qu’à l’administrateur et au rôle pilotage. Un ouvrier, un tractoriste ou un saisonnier "

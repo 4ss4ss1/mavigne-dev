@@ -1,4 +1,11 @@
-// MA VIGNE — Service Worker v8.32
+// MA VIGNE — Service Worker v8.35
+// v8.35 (26/09/2026) — STOCK-1 : file hors ligne — echec d'ecriture disque garde en memoire (_mvFileMemSeule),
+//   _loadQueue ne l'ecrase plus ; navigator.storage.persist() demande (_mvDemanderPersistance). APP 7.65 -> 7.66.
+// v8.34 (26/09/2026) — ARCH-2 : bilan par annee des Archives (_arcAnnees/_arcBlocAnnuel, pilotage.js), calcule a
+//   partir des archives de campagne ; cadre CONFIG.eco.archive_cadre (vigne|exercice, _arcSetCadre admin). APP 7.64 -> 7.65.
+// v8.33 (26/09/2026) — ARCH-1 : archive de campagne = journal et sessions de LA campagne (_arcSnapshot,
+//   _arcDeLaCampagne via _saisonForDate) ; anciennes archives allegees a l'enregistrement (_arcAlleger) ;
+//   _clotExec attend _arcEnregistrer (fbSave ok:true) avant activateSaison. APP 7.63 -> 7.64.
 // v8.32 (26/09/2026) — TOUR-4 : goTo refuse le Pilotage sans _canPilotage (SEC-PIL, meme patron que SEC-GT),
 //   vu par le premier « npm run tour » (ouvrier, tractoriste, saisonnier). APP 7.62 -> 7.63.
 // v8.31 (26/09/2026) — PRES-1 : regle de presence unique (utils.js, _mvSansDateContrat + _mvCompteSansDate) —
@@ -4147,7 +4154,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.32';
+const CACHE_NAME   = 'mavigne-v8.35';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4163,7 +4170,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.32 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.35 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4183,7 +4190,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.32 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.35 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
