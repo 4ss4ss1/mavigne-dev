@@ -1,0 +1,5 @@
+# Faux positifs revus le 2026-09-26 — clés publiques par conception
+# Clé Firebase web (identifie le projet, ne donne aucun droit : ce sont les règles qui protègent)
+6756111555e436b97542d8472bf59bab2e7ee4c4:src/firebase.js:gcp-api-key:47
+# Clé de SITE reCAPTCHA v3 pour App Check (publique, la clé secrète reste côté Google)
+6756111555e436b97542d8472bf59bab2e7ee4c4:src/firebase.js:generic-api-key:61

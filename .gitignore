@@ -63,3 +63,4 @@ serviceAccountKey.json
 *.csv
 sauvegardes/
 exports/
+rapports/
