@@ -181,6 +181,10 @@ function testsC(S, t) {
   t('app.js et cave.js : showSyncBadge local = relais vers window.showSyncBadge',
     [S.app, S.cave].every(s => /function showSyncBadge\(msg, color\)\{\s*if\(typeof window\.showSyncBadge === 'function'\) window\.showSyncBadge\(msg, color\);/.test(sansCom(s))));
 
+  // SEC-PIL (TOUR-4, §176) : goTo refuse le Pilotage sans le rôle (vu par npm run tour).
+  const gt = bloc(sansCom(S.app), 'function goTo(') || '';
+  t('app.js › goTo refuse le Pilotage sans _canPilotage (SEC-PIL)', /if\(page==='pilotage' && !_canPilotage\(\)\)\{[^}]*page=_landingPage\(\)/.test(gt));
+
   const attr = /\bon[a-z]+=\\?"[^"]*&#39;/;
   const fautifs = [];
   for (const f of fs.readdirSync(path.join(RACINE, 'src')).filter(f => f.endsWith('.js'))) {
@@ -229,6 +233,7 @@ const MUT = [
   ['le constat du Pilotage disparait', S => muter(S, 'pil', "k:sansDate.length+' fiche'", "k:sansDate.length+' dossier'").pil.includes('sans date de contrat')
       ? muter(muter(S, 'pil', "k:sansDate.length+' fiche'", "k:sansDate.length+' dossier'"), 'pil', "+' sans date de contrat',", "+' incomplete',") : null],
   ['app.js reimporte showSyncBadge', S => muter(S, 'app', "getRoleLabel, showToast, wmoDesc,", "getRoleLabel, showToast, showSyncBadge, wmoDesc,")],
+  ['goTo laisse de nouveau passer le Pilotage (SEC-PIL)', S => muter(S, 'app', "if(page==='pilotage' && !_canPilotage()){", "if(page==='pilotage' && false){")],
   ['admin-gt reecrit &#39; dans l\u2019onclick', S => muter(S, 'agt',
     "agtInsPerTache(' + i + ',\\'' + _escAttr(t) + '\\')", "agtInsPerTache(' + i + ',\\'' + E(t).replace(/'/g, '&#39;') + '\\')")],
 ];

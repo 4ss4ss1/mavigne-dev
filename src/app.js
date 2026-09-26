@@ -5899,6 +5899,16 @@ function goTo(page){
     if(window.showToast)showToast('Acc\u00e8s r\u00e9serv\u00e9','#C0392B');
     page=_landingPage().replace('page-','');
   }
+  // SEC-PIL (TOUR-4, 26/09/2026) — le Pilotage n'est proposé qu'à l'admin et au rôle
+  // pilotage (_canPilotage, dock), mais goTo('pilotage') l'ouvrait pour un ouvrier, un
+  // tractoriste ou un saisonnier : le tour complet (npm run tour) l'a vu sur les trois.
+  // Ce n'est pas une fuite de données — les règles Firestore restent la vraie barrière
+  // (le doc `paie`, taux nominatifs, est admin-only) — mais un écran de direction ne
+  // s'ouvre pas pour qui n'a pas le rôle, même par un appel direct. Même patron que SEC-GT.
+  if(page==='pilotage' && !_canPilotage()){
+    if(window.showToast)showToast('Acc\u00e8s r\u00e9serv\u00e9','#C0392B');
+    page=_landingPage().replace('page-','');
+  }
   if(_mvPageGated(page)){
     // Deux causes possibles, deux messages : la formule du domaine (l'admin peut
     // y remedier en changeant d'abonnement) ou un masquage decide pour ce membre

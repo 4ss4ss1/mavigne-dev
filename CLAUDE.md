@@ -2,7 +2,12 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **26 septembre 2026 (PRES-1 + PDF-1 + SYNC-1 + ESC-1)** — ★★★ **UNE SEULE RÈGLE DE PRÉSENCE (§174)**.
+> Dernière consolidation : **26 septembre 2026 (TOUR-4)** — ★★ **LE PREMIER « npm run tour » (§176)** : 845 écrans, 2 navigateurs,
+> 5 rôles. Un vrai défaut : `goTo('pilotage')` ouvrait le Pilotage à l'ouvrier, au tractoriste, au saisonnier → garde **SEC-PIL**
+> (patron SEC-GT). Le reste : faux positifs du tour corrigés (tuiles Leaflet, blocs repliés, variante de police jamais demandée,
+> avertissement viewport de Safari). **APP 7.62 → 7.63 · SW 8.31 → 8.32**, base `4f7fb23`. Détail en **§176**.
+>
+> ★ Précédente : **26 septembre 2026 (PRES-1 + PDF-1 + SYNC-1 + ESC-1)** — ★★★ **UNE SEULE RÈGLE DE PRÉSENCE (§174)**.
 > Le lot 1 du tour complet (code mort, doublons, lu sans navigateur) a trouvé quatre défauts. ① Deux règles de « était-il là ? » :
 > `utils.js` comptait une fiche **Inactive sans date de contrat**, `_planCouvre` l'excluait — la même personne comptée sur un
 > écran et pas sur l'autre. Décision de Nico (26/09), qui **remplace la convention du 09/07** : Inactive sans date = ABSENTE,
@@ -23449,3 +23454,46 @@ BUG, 1 = au moins un BUG, 2 = le tour n'a pas tourné. **Pas dans `check`** : il
 premier lancement chez Nico dira si les ancres (roster, `.mvu-tab`, `.page.active`, `#mv-dock-inner`) et les délais tiennent ; une
 panne au premier lancement est un défaut du script. Les fenêtres (feuilles, formulaires) et la saisie viennent au lot 3, E-Phy au
 lot 4. Le code mort de §174f attend les captures de ce lot.
+
+## 176. ★★ TOUR-4 — LE PREMIER TOUR : UNE GARDE POUR LE PILOTAGE, ET UN TOUR QUI NE CRIE PLUS AU LOUP (26/09 — `src/app.js` · `src/utils.js` · `index.html` · `public/sw.js` · `scripts/mv-tour.mjs` · `scripts/mv-harnais-pres.mjs` · `scripts/harnais-claude-md.mjs` · APP 7.62 → **7.63** · SW 8.31 → **8.32** · base `4f7fb23`)
+
+### 176a. Ce que le premier tour a rendu
+
+`npm run tour` a tourné chez Nico du premier coup : **845 écrans**, Chrome + Safari, 5 rôles, 844 s. **4 « bugs »**, **115 « à voir »**.
+Matrice du dock conforme : Pilotage proposé à admin et pilotage seulement ; les sept autres modules à tous.
+
+### 176b. Le vrai défaut : SEC-PIL
+
+`goTo('pilotage')` ouvrait le Pilotage pour ouvrier, tractoriste, saisonnier (3 bugs × 2 navigateurs) : le dock le cachait, `goTo` ne
+vérifiait rien. **Pas une fuite de données** — les règles Firestore restent la barrière (doc `paie`, taux nominatifs, admin-only :
+`firestore.rules`) — mais un écran de direction ne s'ouvre pas sans le rôle. Garde en tête de `goTo`, **même patron que SEC-GT** :
+`if(page==='pilotage' && !_canPilotage())` → toast « Accès réservé » + `_landingPage()` (qui ne rend jamais le Pilotage sans le rôle :
+pas de boucle). Tenue par `mv-harnais-pres` (56 verts, contre-épreuve n°10).
+
+### 176c. Les faux positifs du tour, et leur correction
+
+- **Erreur JS × 5 (Safari)** : « Viewport argument key interactive-widget not recognized » — Safari ignore une clé que Chrome lit.
+  Ajoutée aux messages bénins.
+- **Police de secours × 746 écrans** : `document.fonts.check('16px "Cormorant Garamond"')` teste la variante 400 normal, que la page
+  n'emploie pas ; les six fichiers Cormorant sont bien là. Le tour teste désormais **la graisse et le style réellement employés**,
+  après `document.fonts.ready`.
+- **Chevauchements** : la plupart venaient des **tuiles Leaflet** (positionnées hors du cadre, masquées par `overflow:hidden`) et de
+  blocs **repliés**. Le tour coupe désormais chaque rectangle par ses ancêtres qui masquent leur débordement (`clip`), ignore ce qui
+  est invisible après coupe, et ne regarde pas l'intérieur de `.leaflet-container`.
+Le prochain tour dira ce qui reste ; ce qui restera sera à regarder pour de bon.
+
+### 176d. Ouvert : les cibles trop petites
+
+66 groupes « bouton trop petit » (< 32 px), tous réels au sens de la mesure. Les plus nets : `.mv-i` 20×20 (bulles d'info, 420 écrans),
+`span.m-email-edit` 12×15 (crayon de l'e-mail, Réglages › Équipe), `.hv2-voir-tout` 15 px de haut (« Tout voir → »), `#pil-gear` 25 px
+de haut, `.mv-help-btn` 26 px de haut ; les puces de filtre (`.tfchip`, `.ptfchip`, `.chip`) font 26 à 30 px.
+**Décision de Nico (26/09) : ON LAISSE** les bulles `.mv-i`, le crayon `.m-email-edit`, « Tout voir » `.hv2-voir-tout`, la roue
+`#pil-gear` et les puces `.tfchip` / `.ptfchip` / `.chip` à leur taille. Proposition refusée : agrandir la zone de toucher par un
+pseudo-élément transparent. `mv-tour.mjs` ne les signale plus ; les autres petites cibles (`.mv-help-btn`, thème, liens de pied
+de page, point de synchro) restent signalées, faute de décision.
+
+### 176e. Note
+
+⚠️ Le `.mv-base` de §174 n'avait pas été commité (fichier qui commence par un point, perdu à la copie) : le dépôt portait encore
+`d684d4e`. Sans effet cette fois (la garde ne vérifie qu'un `.mv-base` MODIFIÉ), mais c'est le même piège que `.gitleaksignore`.
+

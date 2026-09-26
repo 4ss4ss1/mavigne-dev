@@ -121,6 +121,8 @@ const BENIGN = [
   /Access to (fetch|XMLHttpRequest)|CORS/i, /Quota/i, /permission-denied/i,
   /Service Worker non enregistr/i, /reading 'scope'/i, /ServiceWorker/i,
   /navigator\.vibrate/i, /hasn't tapped/i, /chromestatus/i,
+  // TOUR-4 : Safari ignore la clé interactive-widget de la balise viewport (Chrome la lit). Avertissement, pas une erreur.
+  /Viewport argument key "interactive-widget"/i,
 ];
 const isBenign = (t) => BENIGN.some((re) => re.test(t || ''));
 const c = { g:s=>`\x1b[32m${s}\x1b[0m`, r:s=>`\x1b[31m${s}\x1b[0m`, y:s=>`\x1b[33m${s}\x1b[0m`, dim:s=>`\x1b[2m${s}\x1b[0m`, b:s=>`\x1b[1m${s}\x1b[0m` };
@@ -150,6 +152,22 @@ function auditDansLaPage(piegeActif) {
     if (cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) === 0) return false;
     if (el.offsetParent === null && cs.position !== 'fixed' && el.tagName !== 'BODY') return false;
     return true;
+  };
+  // TOUR-4 : rectangle RÉELLEMENT visible — coupé par chaque ancêtre qui masque son
+  // débordement. Sans ça, une tuile de carte Leaflet (positionnée hors du cadre, masquée
+  // par overflow:hidden) ou un bloc replié « chevauchait » tout le reste : 1er tour, 40 faux.
+  const clip = (el) => {
+    const r0 = el.getBoundingClientRect();
+    let l = r0.left, t = r0.top, rr = r0.right, b = r0.bottom;
+    for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+      const cs = getComputedStyle(p);
+      if (cs.overflowX !== 'visible' || cs.overflowY !== 'visible') {
+        const q = p.getBoundingClientRect();
+        l = Math.max(l, q.left); t = Math.max(t, q.top); rr = Math.min(rr, q.right); b = Math.min(b, q.bottom);
+      }
+      if (cs.position === 'fixed') break;
+    }
+    return { left: l, top: t, right: rr, bottom: b, width: rr - l, height: b - t };
   };
   const court = (el) => {
     if (!el) return '?';
@@ -197,9 +215,11 @@ function auditDansLaPage(piegeActif) {
     z.querySelectorAll('*').forEach((el) => {
       if (feuilles.length > 700) return;
       if (/^(SCRIPT|STYLE|SVG|PATH|G|OPTION)$/i.test(el.tagName)) return;
+      if (el.closest('.leaflet-container')) return;   // TOUR-4 : la carte a ses propres couches (tuiles, contrôles)
       const aTexte = Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.nodeValue.trim().length > 1);
       if (!aTexte && !/^(BUTTON|INPUT|SELECT|IMG)$/.test(el.tagName)) return;
       if (!vis(el)) return;
+      const cr = clip(el); if (cr.width < 2 || cr.height < 2) return;   // replié ou hors cadre : invisible
       feuilles.push(el);
     });
   }
@@ -208,7 +228,7 @@ function auditDansLaPage(piegeActif) {
   // (dock, fenêtre ouverte, en-tête collant) ou la page elle-même. On ne compare que
   // dans une même couche : le contenu qui défile SOUS le dock n'est pas un défaut.
   const couche = (el) => { for (let p = el; p && p !== document.body; p = p.parentElement) { if (/fixed|sticky/.test(getComputedStyle(p).position)) return p; } return null; };
-  const R = feuilles.map((el) => { const k = couche(el); return { el, r: el.getBoundingClientRect(), couche: k, fixe: !!k }; });
+  const R = feuilles.map((el) => { const k = couche(el); return { el, r: clip(el), couche: k, fixe: !!k }; });
   let nChev = 0;
   for (let i = 0; i < R.length && nChev < 12; i++) {
     for (let j = i + 1; j < R.length && nChev < 12; j++) {
@@ -247,15 +267,24 @@ function auditDansLaPage(piegeActif) {
     z.querySelectorAll('button, [onclick], .mvu-tab, a[href], input[type=checkbox], input[type=radio]').forEach((el) => {
       if (nPetit >= 10 || !vis(el)) return;
       if (el.closest('p, li') && el.tagName === 'A') return;        // lien dans une phrase
+      // Tailles ACCEPTÉES par Nico (26/09, §176d) : on ne les signale plus.
+      if (el.matches('.mv-i, .m-email-edit, .hv2-voir-tout, #pil-gear, .tfchip, .ptfchip, .chip')) return;
       const r = el.getBoundingClientRect();
       if (r.width < 32 || r.height < 32) { nPetit++; voir.push({ type: 'bouton trop petit', detail: court(el) + ' « ' + txt(el) + ' » ' + Math.round(r.width) + '×' + Math.round(r.height) + ' px' }); }
     });
   }
   // 10. Police de secours
   const GEN = /^(system-ui|-apple-system|blinkmacsystemfont|sans-serif|serif|monospace|cursive|fantasy|ui-sans-serif|ui-serif|ui-monospace|inherit|initial|arial|helvetica|segoe ui|roboto)$/i;
-  const fam = new Set();
-  feuilles.forEach((el) => { const f = (getComputedStyle(el).fontFamily || '').split(',')[0].replace(/["']/g, '').trim(); if (f) fam.add(f); });
-  fam.forEach((f) => { if (!GEN.test(f) && document.fonts && !document.fonts.check('16px "' + f + '"')) voir.push({ type: 'police de secours', detail: '« ' + f + ' » demandée mais pas chargée' }); });
+  // TOUR-4 : on teste la graisse et le style RÉELLEMENT employés. document.fonts.check
+  // sur « 16px Cormorant » (400 normal) rendait faux sur 746 écrans alors que la page
+  // n'emploie que 500/600 : check dit « pas chargé » pour une variante jamais demandée.
+  const fam = new Map();
+  feuilles.forEach((el) => {
+    const cs = getComputedStyle(el);
+    const f = (cs.fontFamily || '').split(',')[0].replace(/["']/g, '').trim();
+    if (f && !GEN.test(f)) fam.set(cs.fontStyle + ' ' + cs.fontWeight + ' 16px "' + f + '"', f + ' ' + cs.fontWeight + (cs.fontStyle === 'italic' ? ' italique' : ''));
+  });
+  fam.forEach((lib, spec) => { if (document.fonts && !document.fonts.check(spec)) voir.push({ type: 'police de secours', detail: '« ' + lib + ' » demandée mais pas chargée' }); });
 
   return { bug, voir, page: racine.id || '?' };
 }
@@ -352,7 +381,7 @@ async function session(type, nav, role, ctx) {
         ecran = E.id + ' › ' + p + (nomOng ? ' › ' + nomOng : '');
         ctx.nEcrans++;
         let r;
-        try { r = await page.evaluate(auditDansLaPage, true); }
+        try { await page.evaluate(() => document.fonts && document.fonts.ready).catch(() => {}); r = await page.evaluate(auditDansLaPage, true); }
         catch (e) { noter('bug', 'audit impossible', (e && e.message ? e.message : String(e)).split('\n')[0]); continue; }
         r.bug.forEach((x) => noter('bug', x.type, x.detail));
         r.voir.forEach((x) => noter('voir', x.type, x.detail));

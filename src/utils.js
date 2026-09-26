@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.62';
+export const APP_VERSION = '7.63';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -716,6 +716,12 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.63', items: [
+    { emoji: 'bouclier', titre: 'Le Pilotage reste réservé, même par un lien direct',
+      desc: "Le Pilotage n’est proposé qu’à l’administrateur et au rôle pilotage. Un ouvrier, un tractoriste ou un saisonnier "
+        + "pouvait pourtant l’ouvrir par un appel direct. C’est fermé\u00a0: il retombe sur son écran d’accueil. Les rémunérations, "
+        + "elles, n’ont jamais été lisibles hors administrateur." }
+  ] },
   { v: '7.62', items: [
     { emoji: 'equipe', titre: 'Une fiche sans date de contrat est maintenant signalée',
       desc: "Chaque salarié doit avoir ses dates de contrat. Le Pilotage affiche désormais «\u00a0fiche sans date de contrat\u00a0» dans "
