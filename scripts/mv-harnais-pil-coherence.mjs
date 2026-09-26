@@ -108,7 +108,7 @@ export { _pilEchCadence };`;
 
 // ── ④ utils.js : _mvEnContratSurPeriode et le 4e argument ────────────────────
 {
-  const src=`const window={ _mvContrats:()=>[] };\n${winFn(SRC.util,'_mvEnContratSurPeriode')}\nexport const f=window._mvEnContratSurPeriode;`;
+  const src=`const window={ _mvContrats:()=>[] };\n${winFn(SRC.util,'_mvSansDateContrat')}\n${winFn(SRC.util,'_mvCompteSansDate')}\n${winFn(SRC.util,'_mvEnContratSurPeriode')}\nexport const f=window._mvEnContratSurPeriode;`;  // PRES-1 (§174) : la regle unique
   const M=await charger(src);
   t('④ bureau exclu sans 4e argument (capacite vigne)', M.f({nom:'E',bureau:true},'2026-08-01','2027-07-31')===false);
   t('④ bureau inclus avec avecBureau (masse salariale)', M.f({nom:'E',bureau:true},'2026-08-01','2027-07-31',true)===true);

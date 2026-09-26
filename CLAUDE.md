@@ -2,7 +2,16 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **24 septembre 2026 (ENG-2)** — ★★★ **« ENGAGÉ À CE JOUR » COMPTE LES HEURES PAYÉES (§173)**.
+> Dernière consolidation : **26 septembre 2026 (PRES-1 + PDF-1 + SYNC-1 + ESC-1)** — ★★★ **UNE SEULE RÈGLE DE PRÉSENCE (§174)**.
+> Le lot 1 du tour complet (code mort, doublons, lu sans navigateur) a trouvé quatre défauts. ① Deux règles de « était-il là ? » :
+> `utils.js` comptait une fiche **Inactive sans date de contrat**, `_planCouvre` l'excluait — la même personne comptée sur un
+> écran et pas sur l'autre. Décision de Nico (26/09), qui **remplace la convention du 09/07** : Inactive sans date = ABSENTE,
+> sauf les années où elle a des heures au planning ; tout salarié doit avoir des dates, et l'appli le signale (constat Pilotage
+> « fiche sans date de contrat »). ② `fbDeleteAnalyse` n'était appelée nulle part : les PDF restaient dans Storage. ③ Le point de
+> synchro restait figé (import direct de `showSyncBadge`). ④ Un `&#39;` dans un onclick de l'Admin GT. **APP 7.61 → 7.62 · SW 8.30 →
+> 8.31**, base `b4104fb`. Détail en **§174**.
+>
+> ★ Précédente : **24 septembre 2026 (ENG-2)** — ★★★ **« ENGAGÉ À CE JOUR » COMPTE LES HEURES PAYÉES (§173)**.
 > Nico : « une semaine à 3 ou 4 à dégrafer, 17-19 € chargés, 8 h, 5 jours : je ne suis pas sûr que ça fasse 1 400 € ». La
 > main-d'œuvre engagée était le BARÈME des travaux VALIDÉS (T.moF) : elle suivait l'avancement par construction. Elle vient
 > maintenant de `_ecoTempsVigne` (E.moReel) : heures dans les rangs du planning, salariés vigne, moins la conduite tracteur,
@@ -23320,3 +23329,123 @@ l'exclut en entier. ② Aucun rendu regardé.
 | `guide/11-pilotage.html` | Engagé à ce jour | — |
 | `scripts/mv-harnais-temps-vigne.mjs` · `scripts/banc/garde-projection.mjs` | ENG-2 | — |
 | `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | SECTIONS 205 · §173 · base | — |
+
+## 174. ★★★ PRES-1 + PDF-1 + SYNC-1 + ESC-1 — UNE SEULE RÈGLE DE PRÉSENCE, ET LES PDF SUPPRIMÉS LE SONT VRAIMENT (26/09 — `src/utils.js` · `src/planning.js` · `src/pilotage.js` · `src/cave.js` · `src/app.js` · `src/admin-gt.js` · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `public/guide.html` · `scripts/mv-harnais-pres.mjs` (neuf) · `scripts/mv-harnais-effectif-periode.mjs` · `scripts/mv-harnais-asm1.mjs` · `scripts/mv-harnais-pil-coherence.mjs` · `package.json` · `.github/workflows/ci.yml` · `scripts/harnais-claude-md.mjs` · APP 7.61 → **7.62** · SW 8.30 → **8.31** · base `b4104fb`)
+
+### 174a. D'où vient ce lot
+
+Nico a demandé « le tour complet » de ce qui est derrière le login. **Lot 1 = lecture du code, sans navigateur** (le bac à sable
+de Claude ne peut pas télécharger Chromium) : fonctions jamais appelées, `onclick` vers une fonction absente, copier-coller
+(`jscpd`), ESLint `no-unused-vars`, classes CSS introuvables. Résultat global : **0,34 %** de lignes dupliquées ; les 841
+fonctions appelées depuis un attribut `on*=` sont toutes exposées sur `window` ; aucun code inatteignable. **Quatre défauts réels**,
+corrigés ici. Le reste (code mort) attend le lot 2 — voir 174f.
+
+### 174b. PRES-1 — une seule règle de présence (décision de Nico, 26/09)
+
+⚠️⚠️ **CETTE DÉCISION REMPLACE LA CONVENTION DU 09/07** (« CDI sans date = présent, le statut n'y figure pas »), écrite dans le
+commentaire de `_mvEnContratSurPeriode`. Nico : « une fiche inactive sans date de contrat ne compte pas. Les fiches inactives avec
+date de contrat comptent le temps de leur date de contrat. » Puis, sur la question des heures déjà saisies : « oui, mais
+logiquement tous les salariés ont des dates de contrat ; s'il n'y en a pas il faut que l'appli prévienne l'admin ».
+
+| Fiche | Compte ? |
+|---|---|
+| Active sans date | Oui, toujours (inchangé) |
+| Active ou Inactive avec dates | Pendant ses dates (inchangé) |
+| Inactive sans date | **Non**, sauf les années où elle a des heures dans `PLANNING_ENTRIES` |
+
+★ L'exception des heures protège la paie : sans elle, la grille du mois, les totaux et le relevé envoyé à la compta perdaient des
+heures faites. ★ « Sans date » = aucune période, **ou** des périodes sans début ni fin (`_mvSansDateContrat`) ; une fin seule date
+la fiche.
+
+**Une seule définition**, dans `utils.js` : `window._mvSansDateContrat(m)` + `window._mvCompteSansDate(m, d0, d1, yDef)`. Branchées sur
+les **cinq** lecteurs de « était-il là ? » : `_mvEnContratSurPeriode`, `_mvEnContratLe` (utils) ; `_planCouvre`, `_planJourCouvert`,
+`_inContractDay` (planning, via les relais `_planSansDate` / `_planCompteSansDate`, dont le repli n'existe que pour les harnais qui
+n'ont pas `utils.js`). ⚠️ `_planInContract` (question 3 : plafond, congés, grille du contrat EN COURS) n'est **pas** touché — cf. le
+commentaire au-dessus de `_inContractDay`. ⚠️ Le drapeau `bureau` reste lu par `_mvEnContratSurPeriode` seul, comme avant.
+
+**Le signalement** : constat du diagnostic Pilotage (`_pilDiag`), gravité `'o'`, `cible:'equipe'`, `touche:['effectif','budget']`,
+« N fiche(s) sans date de contrat », les quatre premiers noms, bouton vers Réglages › Équipe. Toute fiche, active ou non, bureau
+compris : « tous les salariés ont des dates ».
+
+### 174c. PDF-1 — un PDF dont plus rien ne parle quitte le stockage
+
+`fbDeleteAnalyse` (firebase.js) existait et **n'était appelée nulle part**. `cave.js` écrivait `pdf_path` / `storage_path` et ne s'en
+resservait jamais : supprimer une opération ou une cuvée, remplacer le PDF d'une analyse, laissait le fichier dans Storage. Place
+perdue, et la DPA promet qu'une donnée supprimée l'est. **Méthode** : `_cavePdfRefs()` photographie les chemins cités (opérations +
+analyses) AVANT la modification ; `_cavePdfPurge(avant)` supprime APRÈS ceux qui ne sont plus cités. Un PDF partagé (rattachement
+groupé) ne part qu'avec la dernière opération qui le cite. Six chemins : `saveCaveOp`, `_attachPdfToOp`, rattachement groupé
+(`linkOps`), `deleteCaveOp`, `deleteCuvee`, `deleteCuveeById`. Échec (hors ligne, droits) : `logError` niveau info, le fichier reste —
+les règles Storage réservent `delete` à l'admin du tenant.
+
+### 174d. SYNC-1 et ESC-1
+
+**SYNC-1.** `app.js` enveloppe `window.showSyncBadge` pour piloter le **point** de synchro. `app.js` (3 appels) et `cave.js` (8 appels)
+importaient la version brute de `utils.js` : la pilule changeait, le point restait figé. Les deux modules ont maintenant un
+`showSyncBadge` local qui relaie vers `window.showSyncBadge` (patron de `firebase.js`) ; l'import est retiré. ⚠️ Ne jamais poser
+`window.showSyncBadge = showSyncBadge` dans ces modules : récursion.
+**ESC-1.** `admin-gt.js`, `agtInsPerTache` : `E(t).replace(/'/g,'&#39;')` dans un `onclick` — le piège de `harnais-escattr` (le
+navigateur redécode `&#39;` avant le JS). Remplacé par `_escAttr(t)`. C'était le **seul** cas du code.
+
+### 174e. Harnais
+
+`scripts/mv-harnais-pres.mjs` (neuf, dans `check`, `prebuild`, CI, `npm run test:pres`) : **55 assertions**. A — les cinq lecteurs
+exécutés sur les mêmes fiches rendent la même réponse (7 cas chacun). B — la purge exécutée (supprimé, partagé, remplacé, rien ne
+change). C — le code lu sans commentaires (six chemins de Cave, constat, imports, `&#39;`). **9 contre-épreuves, 9 rougissent.**
+Ajustés : `mv-harnais-effectif-periode` (extrait les relais ; F6 réancrée sur `_planCompteSansDate`), `mv-harnais-asm1` (extrait
+`_cavePdfRefs`/`_cavePdfPurge`), `mv-harnais-pil-coherence` (④ extrait la règle unique). Chaîne `check` complète jouée par tranches
+dans le bac à sable : verte.
+
+### 174f. Ce qui n'a pas été fait, et pourquoi
+
+① **Code mort, gardé exprès jusqu'au lot 2** (captures d'écran comme filet) : 9 fonctions jamais appelées (`_mvDeniedStashClear`,
+`_fbActivateTrial`, `_ecoParcMOh`, `openPilotage`, `_mvPaieSetTaux`, `_rsvAteCol`, `_chronoSummary`, `_mvTriCmp` — testée par
+`mv-harnais-tri1`, jamais utilisée —, `_mvSalarieAt`) ; 11 imports inutilisés ; **~397 classes CSS introuvables, ~45 Ko (12 %)** de
+`styles.css` (familles `cave-*`, `hv2-*`, `ph-*`, `pl2-*`, `plan-*`, `rb-*`). ② Aucune donnée réelle : combien de fiches MG n'ont pas
+de dates n'est pas connu — le constat le dira. ③ Aucun rendu regardé.
+
+### 174g. La note de livraison
+
+**Base `b4104fb`. APP 7.61 → 7.62 · SW 8.30 → 8.31.** `npm run build && firebase deploy --only hosting`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/utils.js` | `_mvSansDateContrat`, `_mvCompteSansDate` ; `_mvEnContratSurPeriode`, `_mvEnContratLe` ; APP 7.62 ; « Quoi de neuf » | ★ APP |
+| `src/planning.js` | `_planSansDate`, `_planCompteSansDate` ; `_planCouvre`, `_planJourCouvert`, `_inContractDay` | — |
+| `src/pilotage.js` | constat « fiche sans date de contrat » | — |
+| `src/cave.js` | `_cavePdfRefs`, `_cavePdfPurge` sur six chemins ; `showSyncBadge` local | — |
+| `src/app.js` | `showSyncBadge` local, import retiré | ★ APP |
+| `src/admin-gt.js` | `_escAttr` dans `agtInsPerTache` | — |
+| `index.html` · `public/sw.js` | 4 versions · 8.31 | ★ APP · ★ SW |
+| `guide/11-pilotage.html` · `public/guide.html` | « sans date de contrat » dans la liste « à compléter » | — |
+| `scripts/mv-harnais-pres.mjs` (neuf) · 3 harnais ajustés · `package.json` · `.github/workflows/ci.yml` | PRES-1 | — |
+| `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | SECTIONS 206 · §174 · base | — |
+
+## 175. ★★ TOUR-3 — LE TOUR COMPLET, LOT 2 : CHAQUE RÔLE, CHAQUE ÉCRAN, DANS UN VRAI NAVIGATEUR (26/09 — `scripts/mv-tour.mjs` (neuf) · `package.json` · `scripts/harnais-claude-md.mjs` · aucun bump · base `b4104fb`, s'empile sur §174)
+
+### 175a. Pourquoi
+
+Presque tous les harnais lisent le code sans l'afficher (`mv-harnais-alignement` le dit : « il ne mesure AUCUN pixel »). Seuls
+`smoke` et `e2e-local` ouvrent un navigateur, avec **un seul compte** (admin), sous Chrome seul. Nico (26/09) : « l'application doit
+être parfaite pour le client, ouvrier, admin, pilote, tractoriste — mise en page, juxtaposition, échappement, police ».
+
+### 175b. Ce que fait `npm run tour`
+
+Même principe qu'`e2e-local` (réseau Firebase coupé, données injectées par `applyFbData`, `signIn` seul mocké), port **5198**.
+Chromium **et WebKit** (Safari) si installés (`npx playwright install chromium webkit`) × **5 rôles** (admin, pilotage, ouvrier,
+tractoriste, saisonnier — un compte chacun dans les données) × **4 écrans** (375, 412, 820, 1280 px) × chaque module du dock ×
+chaque onglet `.mvu-tab` visible (8 au plus). Sur chaque écran, un audit exécuté DANS la page, sur ce qui est visible :
+- **BUG** : erreur JS · texte cassé (`&amp;`, `&#39;`, `\u00e9`, `undefined`, `NaN`, `[object Object]`, `null`) · balise piégée
+  exécutée (un nom de parcelle contient `<img onerror>`) · débordement horizontal · image cassée · id en double · Pilotage proposé
+  (ou atteint par `goTo`) sans le rôle.
+- **À VOIR** : chevauchement (comparé DANS une même couche : dock, fenêtre ouverte, en-tête collant, page) · texte coupé sans « … »
+  · bouton < 32 px · police de secours · élément qui sort de l'écran.
+Les données contiennent exprès apostrophes, « & », guillemets, accents, une fiche sans date (le constat PRES-1 doit sortir).
+Rapport : `rapports/tour/rapport.html` (constats regroupés, liens vers les captures, matrice du dock par rôle). Code 0 = aucun
+BUG, 1 = au moins un BUG, 2 = le tour n'a pas tourné. **Pas dans `check`** : il lui faut un navigateur.
+
+### 175c. Ce qui n'est pas prouvé
+
+⚠️ **Écrit sans pouvoir être lancé** (le bac à sable de Claude ne télécharge pas Chromium) : seule la syntaxe est vérifiée. Le
+premier lancement chez Nico dira si les ancres (roster, `.mvu-tab`, `.page.active`, `#mv-dock-inner`) et les délais tiennent ; une
+panne au premier lancement est un défaut du script. Les fenêtres (feuilles, formulaires) et la saisie viennent au lot 3, E-Phy au
+lot 4. Le code mort de §174f attend les captures de ce lot.

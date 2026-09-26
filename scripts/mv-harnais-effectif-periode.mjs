@@ -70,7 +70,8 @@ const NOMS = [
   '_planDays', '_planGetTpl', '_planGetRefH', '_planFmt',
   '_planInContract', '_planJourCouvert', '_planDansCtr',
   '_planInContractRead', '_planInContractCtr', '_planWide',
-  '_planMbrs', '_planEntAn', '_planCouvre', '_planMbrsPer', '_planMbrsMois', '_planMbrsAn',
+  '_planMbrs', '_planEntAn', '_planSansDate', '_planCompteSansDate', '_planCouvre',  // PRES-1 (§174) : relais de la regle unique
+  '_planMbrsPer', '_planMbrsMois', '_planMbrsAn',
   // SEM-1 (17/09/2026) : _planDayH rend les heures du MODELE un jour sans saisie, a partir de la regle de septembre 2026
   '_planRecupActiveAt',
   '_planPlId', '_planPlanned', '_planTimingH', '_planDefTiming', '_planDayH', '_planEffective',
@@ -311,8 +312,10 @@ contre('F5 les archives ne dedoublonnent plus',
 
 // F6 — la garde « fiche sans aucune date » retiree : une fiche morte pese partout
 contre('F6 garde « fiche sans aucune date » retiree',
-  s => s.replace('    for(var y=y0;y<=y1;y++){if(_planEntAn(mbr.nom,y))return true;}\n    return false;',
-                 '    for(var y=y0;y<=y1;y++){if(_planEntAn(mbr.nom,y))return true;}\n    return true;'),
+  // PRES-1 (§174) : la garde vit desormais dans _planCompteSansDate (repli de la
+  // regle unique de utils.js, seul actif ici puisque utils.js n'est pas charge).
+  s => s.replace('  for(var y=y0;y<=y1;y++){if(_planEntAn(mbr.nom,y))return true;}\n  return false;',
+                 '  for(var y=y0;y<=y1;y++){if(_planEntAn(mbr.nom,y))return true;}\n  return true;'),
   m => makeEnv({ source: m })._planCouvre({ nom: 'z', statut: 'Inactif' }, '2026-01-01', '2026-12-31') === false);
 
 // F7 — le mode large retire : un contrat ARCHIVE cesse de peser.

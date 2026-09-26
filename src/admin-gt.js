@@ -4359,7 +4359,7 @@ function _agtInsRender() {
         h += '<div class="agi-p2" style="padding-top:2px">';
         dispo.forEach(function (t) {
           var on = (p.taches || []).indexOf(t) >= 0;
-          h += '<button onclick="agtInsPerTache(' + i + ',\'' + E(t).replace(/'/g, '&#39;') + '\')" '
+          h += '<button onclick="agtInsPerTache(' + i + ',\'' + _escAttr(t) + '\')" '
             + 'style="border-radius:7px;padding:5px 9px;font-size:12px;cursor:pointer;font-family:inherit;'
             + 'border:1px solid ' + (on ? '#C9A84C' : 'rgba(240,226,200,.14)') + ';'
             + 'background:' + (on ? 'rgba(201,168,76,.16)' : 'transparent') + ';'

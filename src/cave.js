@@ -8,15 +8,22 @@
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 //
 // D\u00E9pendances (via window.*) :
-//   window.fbSave, window.fbDeleteAnalyse   \u2190 firebase.js
+//   window.fbSave, window.fbDeleteAnalyse (appelee par _cavePdfPurge, PDF-1)   \u2190 firebase.js
 //   window.CAVE_ELEVAGE                     \u2190 expos\u00E9 sur window par ce module
 //   window.currentUser                      \u2190 app.js globals
 //   window.closeOv                          \u2190 app.js
 //
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-import { isAdmin, isSaisonnier, canWrite, showToast, showSyncBadge, _escHtml, _escAttr,
+import { isAdmin, isSaisonnier, canWrite, showToast, _escHtml, _escAttr,
          _mvIcon, _mvSetIcon, _mvIconInline } from './utils.js';
+// ★ SYNC-1 (26/09/2026) — passer par window.showSyncBadge, jamais par l'import de utils.js.
+//   app.js enveloppe window.showSyncBadge pour piloter le POINT de synchro ; l'import
+//   direct appelait la version brute et contournait l'enveloppe : la pilule changeait,
+//   le point restait fige. Meme patron que firebase.js.
+function showSyncBadge(msg, color){
+  if(typeof window.showSyncBadge === 'function') window.showSyncBadge(msg, color);
+}
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -75,6 +82,33 @@ function _copResetPdfZone() {
   var inp=document.getElementById('cop-pdf-input');if(inp)inp.value='';
 }
 
+// ★ PDF-1 (26/09/2026) — UN PDF DONT PLUS RIEN NE PARLE QUITTE LE STOCKAGE.
+//   fbDeleteAnalyse existait (firebase.js) et n'etait appelee NULLE PART : supprimer
+//   une operation, une cuvee, ou remplacer le PDF d'une analyse laissait le fichier
+//   dans Firebase Storage pour toujours. Ca coute de la place, et la DPA promet
+//   qu'une donnee supprimee l'est vraiment.
+//   Methode : photographier les chemins references AVANT la modification, puis
+//   supprimer ceux qui ne sont plus references APRES. Un PDF partage par plusieurs
+//   operations (rattachement groupe) ne part qu'avec la derniere qui le cite.
+function _cavePdfRefs(){
+  var S={};
+  (CAVE_ELEVAGE.operations||[]).forEach(function(o){ if(o&&o.data&&o.data.pdf_path) S[o.data.pdf_path]=1; });
+  (CAVE_ELEVAGE.analyses||[]).forEach(function(a){ if(a&&a.storage_path) S[a.storage_path]=1; });
+  return S;
+}
+function _cavePdfPurge(avant){
+  if(!avant||typeof window.fbDeleteAnalyse!=='function') return;
+  var apres=_cavePdfRefs();
+  Object.keys(avant).forEach(function(path){
+    if(apres[path]) return;
+    try{
+      window.fbDeleteAnalyse(path).catch(function(e){
+        if(window.logError) window.logError({level:'info',cat:'cave',msg:'PDF non supprime du stockage',detail:(e&&e.code)||String(e)});
+      });
+    }catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'PDF non supprime du stockage',detail:String(e)}); }
+  });
+}
+
 async function _attachPdfToOp(input) {
   var opId=input&&input.dataset&&input.dataset.opId;
   input.value='';
@@ -86,6 +120,7 @@ async function _attachPdfToOp(input) {
   var op=(CAVE_ELEVAGE.operations||[]).find(function(o){return o.id===opId;});
   if(!op){showToast('Op\u00e9ration introuvable','#E07060');return;}
   showSyncBadge('Upload PDF\u2026','#B8913A');
+  var _pdfAvant=_cavePdfRefs();
   try {
     var res=await window.fbUploadAnalyse(file,function(){});
     if(!op.data)op.data={};
@@ -93,6 +128,7 @@ async function _attachPdfToOp(input) {
     op.data.pdf_nom=file.name;op.data.pdf_taille=file.size;
     window.CAVE_ELEVAGE=CAVE_ELEVAGE;
     window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'PDF rattach\u00e9','#3D6B27');
+    _cavePdfPurge(_pdfAvant);
     renderCave();
   } catch(e) {
     showToast('Erreur upload PDF','#E07060');
@@ -1473,6 +1509,7 @@ function _cuvToggle(field, val) {
 }
 
 async function saveCaveOp() {
+  var _pdfAvant=_cavePdfRefs(); // PDF-1
   var actives=CAVE_ELEVAGE.cuvees.filter(function(c){return c.statut!=='embouteille';});
   var date=(document.getElementById('cop-date')||{}).value;
   var notes=((document.getElementById('cop-notes')||{}).value||'').trim();
@@ -1574,6 +1611,7 @@ async function saveCaveOp() {
   }
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
   window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Op\u00e9ration enregistr\u00e9e','#C0845A');
+  _cavePdfPurge(_pdfAvant);
   window.closeOv(null,'ovCaveOp');
   _copResetPdfZone();
   renderCave();
@@ -1712,10 +1750,12 @@ function saveCuvee() {
 function deleteCuvee() {
   var existId=(document.getElementById('cuv-id')||{}).value;
   if(!existId) return;
+  var _pdfAvant=_cavePdfRefs(); // PDF-1
   CAVE_ELEVAGE.cuvees=CAVE_ELEVAGE.cuvees.filter(function(c){return c.id!==existId;});
   CAVE_ELEVAGE.operations=CAVE_ELEVAGE.operations.filter(function(o){return o.cuvee_id!==existId;});
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
   window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Cuv\u00e9e supprim\u00e9e','#B85A1A');
+  _cavePdfPurge(_pdfAvant);
   window.closeOv(null,'ovCuveeMgmt');
   renderCave();
 }
@@ -2328,10 +2368,12 @@ function openCuveeDetail(cuvId){
 function deleteCuveeById(cuvId) {
   window.openConfirmDel('Supprimer cette cuvée ?','Toutes ses opérations seront également supprimées.',function(){
     var existId=cuvId;
+    var _pdfAvant=_cavePdfRefs(); // PDF-1
     CAVE_ELEVAGE.cuvees=CAVE_ELEVAGE.cuvees.filter(function(c){return c.id!==existId;});
     CAVE_ELEVAGE.operations=CAVE_ELEVAGE.operations.filter(function(o){return o.cuvee_id!==existId;});
     window.CAVE_ELEVAGE=CAVE_ELEVAGE;
     window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Cuv\u00E9e supprim\u00E9e','#B85A1A');
+    _cavePdfPurge(_pdfAvant);
     renderCave();
   });
 }
@@ -2412,11 +2454,13 @@ function deleteCaveOp(opId) {
   window.openConfirmDel(_asm?'D\u00e9faire cet assemblage ?':'Supprimer cette opération ?',
     _asm?'Le f\u00fbt redevient entam\u00e9, et le vin retourne \u00e0 sa source.':'',function(){
     if(_asm) _asmDefaire(_op);
+    var _pdfAvant=_cavePdfRefs(); // PDF-1
     CAVE_ELEVAGE.operations=CAVE_ELEVAGE.operations.filter(function(o){return o.id!==opId;});
     window.CAVE_ELEVAGE=CAVE_ELEVAGE;
     if(_asm){ window.CAVE_VENDANGE=CAVE_VENDANGE;
       window.fbSaveToast({cave_elevage:CAVE_ELEVAGE, cave_vendange:CAVE_VENDANGE},'Assemblage d\u00e9fait','#3D6B27'); }
     else window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Op\u00E9ration supprim\u00E9e','#3D6B27');
+    _cavePdfPurge(_pdfAvant);
     renderCave();
   },null,_asm?'D\u00e9faire':undefined);
 }
@@ -3167,6 +3211,7 @@ async function saveCaveAna() {
     var btn=document.getElementById('cana-save-btn');
     if(btn){btn.disabled=true;btn.textContent='Envoi\u2026';}
     showSyncBadge('Upload PDF\u2026','#B8913A');
+    var _pdfAvant=_cavePdfRefs(); // PDF-1
     try{
       var res=await window.fbUploadAnalyse(_caveAnaPendingFile,function(p){if(btn)btn.textContent='Envoi\u2026 '+p+'%';});
       linkOps.forEach(function(op){
@@ -3176,6 +3221,7 @@ async function saveCaveAna() {
       });
       window.CAVE_ELEVAGE=CAVE_ELEVAGE;
       var _mvEtat=window.fbSaveToast({cave_elevage:CAVE_ELEVAGE});
+      _cavePdfPurge(_pdfAvant);
       window.closeOv(null,'ovCaveAna');
       _caveAnaPendingFile=null;_caveAnaSelIds=[];_caveAnaLinkedOpIds=[];
       var nb=linkOps.length;

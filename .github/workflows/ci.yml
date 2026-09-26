@@ -301,6 +301,13 @@ jobs:
           node scripts/mv-harnais-temps-vigne.mjs
           node scripts/mv-harnais-temps-vigne.mjs --contre
 
+      # PRES-1 + PDF-1 + SYNC-1 + ESC-1 (§174) : une seule regle de presence (Inactive sans date = absente, sauf
+      # heures saisies) executee sur les cinq lecteurs ; purge des PDF orphelins ; badge de synchro ; echappement.
+      - name: Harnais — une seule regle de presence, PDF orphelins (PRES-1)
+        run: |
+          node scripts/mv-harnais-pres.mjs
+          node scripts/mv-harnais-pres.mjs --contre
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build

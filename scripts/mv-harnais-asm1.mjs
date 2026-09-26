@@ -72,7 +72,9 @@ const NC = ['_vendCfg', '_mvF1', '_vendCuvF1', '_mvBtl', '_mlKgHl', '_vendHlKg',
   '_rmNum', '_rmF', '_rmDetail', '_rmVolRepli', '_rmMilCuve', '_rmMilCuvees', '_rmLignes',
   '_caveBilanChaine', '_caveBtlGraphSvg',
   '_asmCuvee', '_asmAocsCuve', '_asmAocsCuvee', '_asmIdxCuve', '_asmSources', '_asmFutSvg', '_asmCarteHtml',
-  '_asmFutTxt', '_asmRefus', '_asmApercu', '_asmValider', '_asmDefaire', 'deleteCaveOp'];
+  '_asmFutTxt', '_asmRefus', '_asmApercu', '_asmValider', '_asmDefaire',
+  // PDF-1 (§174) : deleteCaveOp photographie et purge les PDF orphelins.
+  '_cavePdfRefs', '_cavePdfPurge', 'deleteCaveOp'];
 const TABLES = ['_VEND_STAT', '_VEND_OPS', '_VEND_INTR', '_VEND_FROID', '_VEND_CHAUD', 'RM_TYPES', 'RM_HORS'];
 const PRELUDE = `
 var window = { CONFIG: { cave: { fut_l: 228 } }, PARCELLES: [], currentUser: { nom: 'Nico' } };

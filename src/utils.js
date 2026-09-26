@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.61';
+export const APP_VERSION = '7.62';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -716,6 +716,20 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.62', items: [
+    { emoji: 'equipe', titre: 'Une fiche sans date de contrat est maintenant signalée',
+      desc: "Chaque salarié doit avoir ses dates de contrat. Le Pilotage affiche désormais «\u00a0fiche sans date de contrat\u00a0» dans "
+        + "<b>Ce qu’il faut regarder</b>, avec les noms concernés et un bouton vers Réglages › Équipe. La règle est la même partout\u00a0: "
+        + "une fiche <b>inactive sans date</b> ne compte plus dans l’effectif ni la capacité, sauf les années où elle a des heures au "
+        + "planning — ces heures ont été faites et restent payées. Le Planning et le Pilotage ne peuvent plus compter la même personne "
+        + "différemment." },
+    { emoji: 'document', titre: 'Cave\u00a0: un PDF supprimé l’est vraiment',
+      desc: "Supprimer une opération ou une cuvée, ou remplacer le PDF d’une analyse, laissait l’ancien fichier sur le serveur. "
+        + "Il est maintenant effacé dès que plus aucune opération ni analyse ne l’utilise." },
+    { emoji: 'check', titre: 'Le point de synchronisation suit toutes les actions',
+      desc: "Après «\u00a0Actualiser\u00a0», un envoi de PDF en Cave ou un message non envoyé, le petit point de synchronisation "
+        + "restait sur son état précédent. Il suit maintenant chaque changement, comme la pastille." }
+  ] },
   { v: '7.61', items: [
     { emoji: 'euro', titre: 'Pilotage\u00a0: « Engagé à ce jour » compte les heures vraiment passées',
       desc: "La main-d’œuvre engagée valorisait au barème les seules parcelles <b>validées</b>\u00a0: une semaine de dégrafage pas encore validée "
@@ -4567,7 +4581,8 @@ function _saisonTaches(nom){
 window._mvEnContratLe = function(m, ds){
   if(!m) return false;
   var P = (typeof window._mvContrats === 'function') ? window._mvContrats(m) : [];
-  if(!P.length) return true;   // aucune date : on ne peut rien affirmer -> present
+  // PRES-1 (26/09) : sans date, la regle unique (_mvCompteSansDate) decide.
+  if(!P.length || window._mvSansDateContrat(m)) return window._mvCompteSansDate(m, ds, ds);
   if(!ds) return true;
   for(var i = 0; i < P.length; i++){
     if(P[i].debut && ds < P[i].debut) continue;
@@ -5201,24 +5216,46 @@ window._mvJourApres = function(iso){
 //   lui ; la masse salariale de l'exercice (_pexData) passe true — un salaire est
 //   un salaire. Avant, son commentaire disait « le bureau N'EST PAS exclu » et
 //   cette ligne faisait le contraire (defaut 0a-quater, mesure le 14/08).
+// ★ PRES-1 (26/09/2026) — la fiche porte-t-elle AU MOINS une date de contrat ?
+//   Une periode sans debut ni fin ne situe rien dans le temps : elle compte comme
+//   « sans date », exactement comme une fiche sans periode du tout.
+window._mvSansDateContrat = function(m){
+  if(!m) return true;
+  var P = (typeof window._mvContrats === 'function') ? (window._mvContrats(m) || []) : [];
+  for(var i = 0; i < P.length; i++){ if(P[i].debut || P[i].fin) return false; }
+  return true;
+};
+// ★ PRES-1 — une fiche SANS DATE compte-t-elle sur la periode [d0, d1] ?
+//   Active : oui. Inactive : seulement sur les annees ou elle a des heures saisies
+//   (window.PLANNING_ENTRIES[nom][annee]). yDef = annee de repli quand d0 est vide
+//   (le Planning passe son annee de calcul, _pY()).
+window._mvCompteSansDate = function(m, d0, d1, yDef){
+  if(!m) return false;
+  if(m.statut !== 'Inactif') return true;
+  var y0 = parseInt(String(d0 || '').slice(0, 4), 10) || yDef || new Date().getFullYear();
+  var y1 = parseInt(String(d1 || '').slice(0, 4), 10) || y0;
+  var E = (window.PLANNING_ENTRIES || {})[m.nom];
+  if(!E) return false;
+  for(var y = y0; y <= y1; y++){ if(E[y]) return true; }
+  return false;
+};
+
 window._mvEnContratSurPeriode = function(m, d0, d1, avecBureau){
   if(!m || (m.bureau && !avecBureau)) return false;
   var P = window._mvContrats(m);
-  // ★★★ SANS AUCUNE DATE = CDI DEPUIS TOUJOURS, PRESENT SUR TOUTE PERIODE.
-  //   Convention posee par Nico le 09/07/2026 et jamais revisee : « effectif present
-  //   = membres non-bureau dont le contrat est actif a la date ; CDI sans date =
-  //   present en permanence ». Le STATUT n'y figure pas, et c'est deliberé.
-  //   ⚠⚠ CE QUE FAISAIT LA LIGNE D'AVANT (`return m.statut !== 'Inactif'`) :
-  //   une fiche sans aucune date passee en Inactif sortait de TOUTES les periodes,
-  //   PASSEES COMPRISES. Une campagne archivee se rejouait donc avec un salarie de
-  //   moins, des mois apres sa cloture — un chiffre d'histoire qui bouge parce qu'on
-  //   a range une liste. Or « Inactif » est un CONFORT DE SAISIE (ne plus avoir a le
-  //   selectionner a l'ouverture), pas un fait d'historique : le contrat est termine,
-  //   on ne sait juste pas quand. Sans date, la seule reponse honnete est « present ».
-  //   ★ Corollaire assume : un compte de service sans dates compterait comme un CDI.
-  //   La reponse n'est pas dans le statut, elle est dans le drapeau `bureau` juste
-  //   au-dessus — ou dans la suppression de la fiche.
-  if(!P.length) return true;
+  // ★★★ FICHE SANS AUCUNE DATE DE CONTRAT — regle de presence du 26/09/2026 (lot PRES-1),
+  //   qui REMPLACE la convention du 09/07 (« CDI sans date = present, statut ignore »).
+  //   Decision de Nico : tout salarie a des dates de contrat ; une fiche qui n'en a pas
+  //   est une fiche a completer, et le diagnostic du Pilotage le signale (constat
+  //   « fiche sans date de contrat », cible Reglages › Equipe).
+  //     • Active sans date   -> presente (inchange).
+  //     • Inactive sans date -> ABSENTE, sauf sur les annees ou elle porte des heures
+  //       saisies au planning : ces heures ont ete faites et se paient, elles ne doivent
+  //       disparaitre ni de la grille, ni des totaux, ni du releve envoye a la compta.
+  //   ⚠️ UNE SEULE DEFINITION : _mvSansDateContrat + _mvCompteSansDate ci-dessous, lues
+  //   aussi par le Planning (_planCouvre, _planJourCouvert, _inContractDay) et par
+  //   _mvEnContratLe. Deux regles de « etait-il la ? » = deux ecrans qui se contredisent.
+  if(window._mvSansDateContrat(m)) return window._mvCompteSansDate(m, d0, d1);
   for(var i = 0; i < P.length; i++){
     if(P[i].debut && d1 && P[i].debut > d1) continue;
     if(P[i].fin   && d0 && P[i].fin   < d0) continue;

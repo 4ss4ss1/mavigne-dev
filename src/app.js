@@ -8,11 +8,18 @@
 import './styles.css';
 // ── Import Firebase (doit être en tête — fournit window.firebase, fbSave, etc.) ──
 import { isAdmin, isTractoriste, isSaisonnier, canWrite,
-         getRoleLabel, showToast, showSyncBadge, wmoDesc, wmoIcone, TABREV, tNom,
+         getRoleLabel, showToast, wmoDesc, wmoIcone, TABREV, tNom,
          applyTheme, setThemeMode, initTheme, logError, _closeCriticalOverlay, _escHtml, _escAttr,
          GT_ADMIN_EMAIL, DEMO_TENANT, DEMO_FIREBASE_EMAIL, DEMO_FIREBASE_PWD, dreEffectif,
          _mvBadge, _mvIcon, _mvIconTache, _mvIconInline, _actIcone, _swNotify,
 } from './utils.js';
+// ★ SYNC-1 (26/09/2026) — passer par window.showSyncBadge, jamais par l'import de utils.js.
+//   app.js enveloppe window.showSyncBadge pour piloter le POINT de synchro ; l'import
+//   direct appelait la version brute et contournait l'enveloppe : la pilule changeait,
+//   le point restait fige. Meme patron que firebase.js.
+function showSyncBadge(msg, color){
+  if(typeof window.showSyncBadge === 'function') window.showSyncBadge(msg, color);
+}
 // Exposer constantes démo sur window pour accès cross-module
 import './firebase.js';
 import './onboarding.js';

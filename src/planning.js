@@ -760,17 +760,32 @@ function _planMbrs(){return (window.MEMBRES||[]).filter(function(m){return m.sta
 //   INACTIVE ne compte que si la periode demandee porte des heures saisies —
 //   sinon une fiche morte depuis deux ans pese sur toutes les mesures de toutes
 //   les annees, avec de la reference face a zero heure faite.
+// ★ PRES-1 (26/09/2026) : cette regle est desormais CELLE DE TOUTE L'APPLI. Elle
+//   vit dans utils.js (_mvSansDateContrat + _mvCompteSansDate) ; utils.js disait
+//   l'inverse (Inactive sans date = presente), d'ou une meme fiche comptee sur un
+//   ecran et pas sur l'autre. Une fiche sans date est signalee au Pilotage.
 function _planEntAn(nom,yr){var b=PLANNING_ENTRIES[nom];return !!(b&&b[yr]);}
+// PRES-1 (26/09/2026) : relais vers la regle unique de utils.js. Le repli ne sert
+// que si utils.js n'est pas charge (harnais) ; il applique la meme regle.
+function _planSansDate(mbr){
+  if(typeof window._mvSansDateContrat==='function')return window._mvSansDateContrat(mbr);
+  var P=(typeof window._mvContrats==='function')?(window._mvContrats(mbr)||[]):[];
+  for(var i=0;i<P.length;i++){if(P[i].debut||P[i].fin)return false;}
+  return true;
+}
+function _planCompteSansDate(mbr,d0,d1){
+  if(typeof window._mvCompteSansDate==='function')return window._mvCompteSansDate(mbr,d0,d1,_pY());
+  if(!mbr||mbr.statut!=='Inactif')return !!mbr;
+  var y0=parseInt(String(d0||'').slice(0,4),10)||_pY();
+  var y1=parseInt(String(d1||'').slice(0,4),10)||y0;
+  for(var y=y0;y<=y1;y++){if(_planEntAn(mbr.nom,y))return true;}
+  return false;
+}
 function _planCouvre(mbr,d0,d1){
   if(!mbr)return false;
   var P=(typeof window._mvContrats==='function')?window._mvContrats(mbr):[];
-  if(!P.length){
-    if(mbr.statut!=='Inactif')return true;
-    var y0=parseInt(String(d0||'').slice(0,4),10)||_pY();
-    var y1=parseInt(String(d1||'').slice(0,4),10)||y0;
-    for(var y=y0;y<=y1;y++){if(_planEntAn(mbr.nom,y))return true;}
-    return false;
-  }
+  // PRES-1 (26/09) : sans date, la regle UNIQUE de utils.js decide (_mvCompteSansDate).
+  if(!P.length||_planSansDate(mbr))return _planCompteSansDate(mbr,d0,d1);
   for(var i=0;i<P.length;i++){
     if(P[i].debut&&d1&&P[i].debut>d1)continue;
     if(P[i].fin&&d0&&P[i].fin<d0)continue;
@@ -823,10 +838,12 @@ function _planInContract(mbr,m,d){
 // seule difference etait l'archivage.
 function _planJourCouvert(mbr,m,d){
   var P=(typeof window._mvContrats==='function')?window._mvContrats(mbr):null;
-  // Pas de tableau, ou fiche sans aucune date : comportement d'origine.
-  if(!P||!P.length)return _planInContract(mbr,m,d);
+  // Pas de tableau : comportement d'origine.
+  if(!P)return _planInContract(mbr,m,d);
   var year=_pY();
   var ds=year+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+  // PRES-1 (26/09) : fiche sans date -> regle unique (Inactive = absente, sauf heures saisies).
+  if(!P.length||_planSansDate(mbr))return _planCompteSansDate(mbr,ds,ds);
   for(var i=0;i<P.length;i++){
     if(P[i].debut&&ds<P[i].debut)continue;
     if(P[i].fin&&ds>P[i].fin)continue;
@@ -1581,7 +1598,7 @@ function _chargeSaisonData(s){
   function _inContractDay(mb,ds){
     var P=(typeof window._mvContrats==='function')?window._mvContrats(mb):null;
     if(!P){ if(!mb.debut_contrat&&!mb.fin_contrat)return true; if(mb.debut_contrat&&ds<mb.debut_contrat)return false; if(mb.fin_contrat&&ds>mb.fin_contrat)return false; return true; }
-    if(!P.length) return true;
+    if(!P.length||_planSansDate(mb)) return _planCompteSansDate(mb,ds,ds); // PRES-1 (26/09)
     for(var i=0;i<P.length;i++){ if(P[i].debut&&ds<P[i].debut)continue; if(P[i].fin&&ds>P[i].fin)continue; return true; }
     return false;
   }

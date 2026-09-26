@@ -10185,6 +10185,23 @@ function _pilDiag(){
     k:P.tot.nSansTaux+' fiche'+(P.tot.nSansTaux>1?'s':'')+' sans taux horaire',
     f:'Leurs heures comptent dans l\u2019effectif mais <b>pas dans le co\u00fbt</b>. La masse salariale affich\u00e9e est un plancher, pas une mesure.',
     ou:'R\u00e9glages \u203a \u00c9quipe' });
+  // ── Les dates de contrat (PRES-1, 26/09/2026) ─────────────────────────────
+  //   Tout salarie a des dates de contrat. Sans elles, la regle de presence
+  //   (utils.js, _mvCompteSansDate) ne peut que deviner : une fiche ACTIVE compte
+  //   toute l'annee, une fiche INACTIVE ne compte plus (sauf les annees ou elle a
+  //   des heures au planning). Le constat dit lesquelles, et ou les completer.
+  var sansDate=(window.MEMBRES||[]).filter(function(m){
+    return m && m.nom && typeof window._mvSansDateContrat==='function' && window._mvSansDateContrat(m);
+  });
+  if(sansDate.length) out.push({ g:'o', cible:'equipe', touche:['effectif','budget'],
+    k:sansDate.length+' fiche'+(sansDate.length>1?'s':'')+' sans date de contrat',
+    f:'<b>'+_pilEsc(sansDate.slice(0,4).map(function(m){return m.nom;}).join(', '))
+     +(sansDate.length>4?(' et '+(sansDate.length-4)+' autre'+(sansDate.length-4>1?'s':'')):'')
+     +'</b> n\u2019'+(sansDate.length>1?'ont':'a')+' aucune date de contrat. '
+     +'Une fiche active sans date compte comme pr\u00e9sente <b>toute l\u2019ann\u00e9e</b>\u00a0; une fiche inactive sans date '
+     +'<b>ne compte plus</b>, sauf les ann\u00e9es o\u00f9 elle a des heures au planning. '
+     +'L\u2019effectif et la masse salariale en d\u00e9pendent\u00a0: posez la date de d\u00e9but, et la date de fin s\u2019il y a lieu.',
+    ou:'R\u00e9glages \u203a \u00c9quipe' });
   if(P && !P.hasGnr) out.push({ g:'o', cible:'entretien', touche:['budget'], zero:true, poste:'Carburant',
     k:'Prix du GNR inconnu',
     f:'Aucun appoint de cuve saisi\u00a0: le <b>carburant compte pour z\u00e9ro</b>, sur la campagne comme sur l\u2019exercice. Le prix se d\u00e9duit des pleins not\u00e9s dans Tracteur \u203a Entretien.',
