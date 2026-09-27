@@ -12,7 +12,7 @@
 #  Trois jobs en parallele pour que le rouge soit lisible d'un coup d'oeil :
 #    · controles : preflight -> lint -> build -> smoke   (~3 min)
 #    · e2e       : les 10 pages, login DOM reel           (~5 min)
-#    · rules     : firestore.rules sur l'emulateur        (RULES-1, §188)
+#    · rules     : firestore.rules sur l'emulateur        (RULES-1, §189)
 # ============================================================================
 
 name: CI
@@ -412,7 +412,7 @@ jobs:
         run: npm run test:e2e
 
   # ==========================================================================
-  # ★★★ RULES-1 (§188) — firestore.rules EXECUTEES par le vrai moteur.
+  # ★★★ RULES-1 (§189) — firestore.rules EXECUTEES par le vrai moteur.
   # Tous les autres controles LISENT le fichier de regles comme du texte : ils
   # voient qu'une ligne existe, jamais ce que le moteur en fait. Ici, 53 requetes
   # reelles sur l'emulateur (un membre de A ne lit jamais B, fiche Inactive

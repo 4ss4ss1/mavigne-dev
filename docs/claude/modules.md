@@ -1,6 +1,6 @@
 # Ma Vigne — Référence des modules
 
-> Scindé de `CLAUDE.md` le 27/09/2026 (§188). Ce fichier décrit **comment chaque module fonctionne
+> Scindé de `CLAUDE.md` le 27/09/2026 (§189). Ce fichier décrit **comment chaque module fonctionne
 > aujourd'hui** : modèle de données, Cloud Functions, parcelles, journal, campagne, phyto, Admin GT,
 > planning, Cave, Pilotage, design, terrain, tarifs, RGPD, aide, guide, démo.
 > ⚠️ **Avant de toucher un module, lire SA section ici** — puis chercher les fonctions touchées dans

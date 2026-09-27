@@ -1,6 +1,6 @@
 # Ma Vigne — Chantiers §80 à §129
 
-> Scindé de `CLAUDE.md` le 27/09/2026 (§188). Le **récit** des chantiers : ce qui a été mesuré,
+> Scindé de `CLAUDE.md` le 27/09/2026 (§189). Le **récit** des chantiers : ce qui a été mesuré,
 > envisagé, écarté, et pourquoi le code est comme il est. Consulté à la demande — une référence
 > « §N » se trouve par `docs/claude/INDEX.md`.
 > ⚠️ Un chantier raconte l'état **du jour où il a été écrit**. Ce qui s'applique à tout lot a été

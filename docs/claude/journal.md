@@ -2,13 +2,24 @@
 
 > Archive de l'en-tête de `CLAUDE.md`. Jusqu'au 27/09/2026, chaque consolidation s'empilait EN TÊTE
 > du document, au-dessus de la première règle d'or : 1 190 lignes d'historique à traverser avant
-> d'atteindre une consigne (§188). Désormais `CLAUDE.md` ne porte que la DERNIÈRE consolidation ;
+> d'atteindre une consigne (§189). Désormais `CLAUDE.md` ne porte que la DERNIÈRE consolidation ;
 > la précédente descend ici, **en tête** (ordre antichronologique).
 > ⚠️ Archive : les états « à déployer », les numéros de version et les « points en suspens » cités
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
-> ★ Consolidation (la dernière avant la scission du document, §188) : **27 septembre 2026 (VER-2)** — l'**e2e de la CI tombait depuis VER-1** (runs #103 à #106) : `/version.json` en
+> ★ Consolidation : **27 septembre 2026 (RÉAL-1)** — ★★ **LE « RÉALISÉ » DES TABLEAUX EST CE QUI A ÉTÉ PAYÉ (§188)**.
+> Capture de Nico : dégrafage à 100 %, Réalisé 6 494 € = Budget 6 494 €, et juste dessous 374 h réelles. Le « Réalisé » de Coût par
+> travail et du tableau des parcelles était le barème du fait — égal au budget par construction. Il vient maintenant des euros que
+> `_ecoTempsVigne` verse avec les heures (taux du jour), colonne **Écart** = réalisé − barème du fait. Et le barème d'une parcelle
+> **revalidée** (tâche simple) ne se compte plus deux fois (+2 % affiché au lieu de ~+14 %). **APP 7.71 → 7.72 · SW 8.40 → 8.41**,
+> base `9801910`. Détail en **§188**.
+>
+>
+> ⚠️ Cette consolidation (RÉAL-1, §188) a été ÉCRASÉE le 27/09 par le push de la scission (§189), construite sur la
+> base d'avant elle, puis restaurée ici — voir §189d.
+>
+> ★ Consolidation (l'avant-dernière avant la scission du document, §189) : **27 septembre 2026 (VER-2)** — l'**e2e de la CI tombait depuis VER-1** (runs #103 à #106) : `/version.json` en
 > dev = `index.html` en 200 (repli SPA de Vite) → `r.json()` lève → `_mvAvale` → `console.error` → e2e rouge. Contrôle du content-type.
 > Rejoué ici dans un vrai Chromium (`@sparticuz/chromium`, §187). **APP 7.70 → 7.71 · SW 8.39 → 8.40**, base `8268927`. Détail en **§187**.
 >

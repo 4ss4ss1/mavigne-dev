@@ -4,18 +4,21 @@
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
 > Dernière consolidation : **27 septembre 2026 (RULES-1 + DOC-1)** — ★★★ **LES RÈGLES FIRESTORE EXÉCUTÉES PAR LE VRAI MOTEUR,
-> ET CE DOCUMENT SCINDÉ (§188)**. Aucun script n'exécutait `firestore.rules` : tous le lisaient comme du texte. Harnais neuf
+> ET CE DOCUMENT SCINDÉ (§189)**. Aucun script n'exécutait `firestore.rules` : tous le lisaient comme du texte. Harnais neuf
 > `mv-harnais-rules` (53 requêtes sur l'émulateur, 12 contre-épreuves, 2 constats), job CI `rules` à part (Java 21 + émulateur).
-> ⚠️⚠️ **Jamais joué contre le vrai moteur côté Claude** (le `.jar` de l'émulateur est bloqué dans le bac à sable) : le premier run
-> du job `rules` est la première vraie preuve. Et ce fichier passe de 23 910 à ~2 600 lignes : le cœur ici, le reste dans
-> `docs/claude/` (mode d'emploi juste au-dessus). **Aucun bump** (scripts, CI, doc), base `9801910`. Détail en **§188**.
+> ★★ **Joué chez Nico le 27/09 : 53/53 verts, 12/12 contre-épreuves rougissent** (le `.jar` de l'émulateur est bloqué dans le
+> bac à sable de Claude : c'est sa machine, puis le job CI `rules`, qui prouvent). Et ce fichier passe de 23 910 à ~2 600 lignes : le cœur ici, le reste dans
+> `docs/claude/` (mode d'emploi juste au-dessus). **Aucun bump** (scripts, CI, doc), base `9801910`. Détail en **§189**.
+> ⚠️⚠️ **Le push de ce lot avait EFFACÉ §188 (RÉAL-1)**, poussé une heure plus tôt : le zip portait un `CLAUDE.md` et un
+> `harnais-claude-md.mjs` complets construits AVANT lui. Code de RÉAL-1 intact ; sa section et sa consolidation sont restaurées
+> à l'identique, ce lot devient §189, et une garde neuve relit les titres des 12 derniers commits (§189d).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
-> ★★★ **Depuis le 27/09 (§188), la documentation est scindée.** Ce fichier faisait 23 910 lignes, dont
+> ★★★ **Depuis le 27/09 (§189), la documentation est scindée.** Ce fichier faisait 23 910 lignes, dont
 > **1 190 lignes d'historique AVANT la première règle d'or** : les consignes se perdaient dans le récit.
 > Il ne garde que ce qui s'applique **à chaque lot**, et il se lit **en entier** en tête de session.
 
@@ -382,7 +385,7 @@ session suivante — une session suivante commence par le lire, et lit alors un 
 ce que la précédente a fait.
 
 - **Le dernier lot d'une conversation inclut ce fichier.** S'il n'y figure pas, le lot n'est pas fini.
-- ★ **Depuis la scission (§188), « ce fichier » = la documentation entière** : la consolidation en tête
+- ★ **Depuis la scission (§189), « ce fichier » = la documentation entière** : la consolidation en tête
   d'ici (l'ancienne descend dans `docs/claude/journal.md`), la section chantier dans le bon
   `docs/claude/chantiers-*`, la consigne générale ICI, puis l'index régénéré. Le rangement est dans
   le mode d'emploi, en tête de ce fichier — et `harnais-claude-md.mjs` le fait respecter.
@@ -743,7 +746,7 @@ mavigne/
 ├── scripts/                ← inject-precache.mjs (IDEMPOTENT), preflight.mjs (C1→C22),
 │                              preflight-baseline.json, build-guide.mjs,
 │                              smoke.mjs, e2e-local.mjs, e2e.mjs + e2e-seed.mjs
-├── docs/claude/            ← ★ la documentation hors cœur (§188) : modules.md, chantiers-*.md,
+├── docs/claude/            ← ★ la documentation hors cœur (§189) : modules.md, chantiers-*.md,
 │                             journal.md, INDEX.md (GÉNÉRÉ par scripts/mv-claude-index.mjs)
 ├── firebase.json · firestore.rules · storage.rules
 └── vite.config.js · eslint.config.js · package.json
@@ -814,7 +817,7 @@ npm run build && firebase deploy
 | **1 — smoke** | `npm run test:smoke` | l'app **boote** sans exception + 23 globals |
 | **2 — E2E local (DÉFAUT)** | `npm run test:e2e` | **login DOM réel + 10 pages + interactions** |
 | **2bis — E2E émulateurs** | `npm run test:e2e:emu` | + couche Firestore réelle — **BLOQUÉ SDK** |
-| ★ **RULES — règles Firestore** | `npm run test:rules` | `firestore.rules` **exécutées** sur l'émulateur : 53 requêtes + 12 contre-épreuves (§188). Java 21 requis ; **hors `npm run check`**, job CI `rules` |
+| ★ **RULES — règles Firestore** | `npm run test:rules` | `firestore.rules` **exécutées** sur l'émulateur : 53 requêtes + 12 contre-épreuves (§189). Java 21 requis ; **hors `npm run check`**, job CI `rules` |
 
 ⚠️ **`smoke.mjs` sert `dist/`** → il teste le **dernier build**, pas les sources.
 
@@ -1249,7 +1252,7 @@ claim ne prend effet **qu'après rechargement** (cache de jeton ~1 h).
    son accès. ★ L'écran de création en lot le dit **avant** d'essayer.
 ⚠️ **Accorder `admin` expose les rémunérations des collègues** (`paie`) — à discuter avant.
 
-★★★ **Les règles se prouvent en les EXÉCUTANT (RULES-1, §188).** `mv-harnais-rules` joue 53 requêtes réelles
+★★★ **Les règles se prouvent en les EXÉCUTANT (RULES-1, §189).** `mv-harnais-rules` joue 53 requêtes réelles
 sur l'émulateur (isolement entre domaines, `off`, `ro`, admin-only, `paie`, `config`, démo, session GT, collections
 fermées). **Toute modification de `firestore.rules` ajoute son cas ET sa contre-épreuve** — un contrôle qui LIT le
 fichier (preflight, `mv-harnais-droits`) voit qu'une ligne existe, jamais ce que le moteur en fait.
@@ -1788,11 +1791,10 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
-### ⚠️ RULES-1 — LE PREMIER RUN RÉEL, PUIS DEUX ÉCARTS À TRANCHER (§188, posé le 27/09)
+### ⚠️ RULES-1 — LE PREMIER RUN RÉEL, PUIS DEUX ÉCARTS À TRANCHER (§189, posé le 27/09)
 
-1. ⚠️⚠️⚠️ **Lire le premier run du job CI `rules`** (ou `npm run test:rules` chez Nico, Java 21). Le harnais n'a
-   **jamais** tourné contre le vrai moteur côté Claude. Un rouge peut être une faille OU une attente fausse du
-   harnais (§42f) : lire le cas avant de toucher aux règles.
+1. ✅ **Premier run réel, chez Nico le 27/09 : 53/53, 12/12.** Reste à voir le job CI `rules` vert au premier push,
+   et que le journal du SDK se tait (`setLogLevel('silent')`, posé après ce run, pas encore rejoué).
 2. **F01 — une fiche Inactive lit encore `_mv_signatures/{slug}`** : ce bloc compare le claim `tenant` sans
    regarder `off`. Faible (un reçu CGU, aucune donnée métier), mais contraire à ACCES-1 (§186). Ajouter
    `&& request.auth.token.get('off', false) != true` ? **Décision de Nico.**

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* ───────────────────────────────────────────────────────────────────────────
-   DOC-1 (§188) — L'INDEX DES SECTIONS : « §N » → le fichier qui la porte
+   DOC-1 (§189) — L'INDEX DES SECTIONS : « §N » → le fichier qui la porte
    Lancer : node scripts/mv-claude-index.mjs            (régénère docs/claude/INDEX.md)
             node scripts/mv-claude-index.mjs --check    (rouge si l'index est en retard)
 

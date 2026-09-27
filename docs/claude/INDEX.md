@@ -230,4 +230,5 @@
 | 185 | 185. ★★ DROITS-1 — LA LECTURE SEULE, MÊME RÈGLE DANS L'APPLI ET SUR LE SERVEUR (27/09 — `src/utils.js` · `s… | `docs/claude/chantiers-180-229.md` |
 | 186 | 186. ★★ DROITS-2 + ACCES-1 — LECTURE SEULE = AUCUN RÔLE D'ÉCRITURE, ET UNE FICHE INACTIVE PERD L'ACCÈS (27/… | `docs/claude/chantiers-180-229.md` |
 | 187 | 187. ★ VER-2 — L'E2E DE LA CI TOMBAIT DEPUIS VER-1 (27/09 — `src/app.js` · `src/utils.js` · `index.html` · … | `docs/claude/chantiers-180-229.md` |
-| 188 | 188. ★★★ RULES-1 + DOC-1 — LES RÈGLES FIRESTORE EXÉCUTÉES PAR LE VRAI MOTEUR, ET CE DOCUMENT SCINDÉ (27/09 … | `docs/claude/chantiers-180-229.md` |
+| 188 | 188. ★★ RÉAL-1 — LE « RÉALISÉ » DES TABLEAUX EST CE QUI A ÉTÉ PAYÉ, ET UNE REVALIDATION NE DOUBLE PLUS LE B… | `docs/claude/chantiers-180-229.md` |
+| 189 | 189. ★★★ RULES-1 + DOC-1 — LES RÈGLES FIRESTORE EXÉCUTÉES PAR LE VRAI MOTEUR, ET CE DOCUMENT SCINDÉ (27/09 … | `docs/claude/chantiers-180-229.md` |

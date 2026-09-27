@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* ───────────────────────────────────────────────────────────────────────────
-   HARNAIS — RULES-1 : LES RÈGLES FIRESTORE, EXÉCUTÉES PAR LE VRAI MOTEUR (§188)
+   HARNAIS — RULES-1 : LES RÈGLES FIRESTORE, EXÉCUTÉES PAR LE VRAI MOTEUR (§189)
    Lancer : npm run test:rules        (démarre l'émulateur, joue, puis --contre)
    À la main, émulateur déjà lancé :
             FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 node scripts/mv-harnais-rules.mjs [--contre]
@@ -38,6 +38,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { initializeTestEnvironment, assertSucceeds, assertFails } from '@firebase/rules-unit-testing';
+import { setLogLevel } from 'firebase/firestore';
+
+/* ⚠️ SILENCE DU SDK — vécu au premier run réel (27/09, chez Nico) : chaque refus ATTENDU faisait
+   écrire au SDK Firestore un bloc « PERMISSION_DENIED … false for 'create' @ L206 … » — des
+   centaines de lignes pour 53 cas verts, où un vrai rouge se serait noyé. Le harnais ne lit PAS
+   ces journaux : un refus se juge sur l'exception (jouerUn), et toute AUTRE exception fait
+   planter en code 2. Faire taire le journal ne masque donc rien de ce que le harnais mesure. */
+setLogLevel('silent');
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const RULES = fs.readFileSync(path.join(RACINE, 'firestore.rules'), 'utf8');

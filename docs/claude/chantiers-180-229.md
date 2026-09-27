@@ -1,6 +1,6 @@
 # Ma Vigne — Chantiers §180 à §229
 
-> Scindé de `CLAUDE.md` le 27/09/2026 (§188). Le **récit** des chantiers : ce qui a été mesuré,
+> Scindé de `CLAUDE.md` le 27/09/2026 (§189). Le **récit** des chantiers : ce qui a été mesuré,
 > envisagé, écarté, et pourquoi le code est comme il est. Consulté à la demande — une référence
 > « §N » se trouve par `docs/claude/INDEX.md`.
 > ⚠️ Un chantier raconte l'état **du jour où il a été écrit**. Ce qui s'applique à tout lot a été
@@ -266,9 +266,56 @@ injoignable », vient du bac à sable qui bloque `api.open-meteo.com` — joigna
 
 ---
 
-## 188. ★★★ RULES-1 + DOC-1 — LES RÈGLES FIRESTORE EXÉCUTÉES PAR LE VRAI MOTEUR, ET CE DOCUMENT SCINDÉ (27/09 — `scripts/mv-harnais-rules.mjs` (neuf) · `scripts/mv-claude-index.mjs` (neuf) · `scripts/harnais-claude-md.mjs` · `package.json` · `package-lock.json` · `.github/workflows/ci.yml` · `CLAUDE.md` · `docs/claude/` (neuf) · **aucun bump**, base `9801910`)
+## 188. ★★ RÉAL-1 — LE « RÉALISÉ » DES TABLEAUX EST CE QUI A ÉTÉ PAYÉ, ET UNE REVALIDATION NE DOUBLE PLUS LE BARÈME (27/09 — `src/pilotage.js` · `src/utils.js` · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `public/guide.html` · `scripts/mv-harnais-temps-vigne.mjs` · `scripts/typo-baseline.json` · `scripts/harnais-claude-md.mjs` · APP 7.71 → **7.72** · SW 8.40 → **8.41** · base `9801910`)
 
-### 188a. Le point de départ — une liste générique, vérifiée sur le dépôt
+**Constat (capture de Nico, 27/09)** : Économie › Postes & travaux, « Coût par travail » : Dégraffage 329,4 h · 100 % · **Réalisé
+6 494 € · Reste 0 € · Budget 6 494 €** ; dessous, « Temps réel contre barème » : 374,3 h versées, 31,8 h/ha réel contre 31,2 au
+barème, **+2 %**. Nico : *« entre le budget et le réalisé il y a une différence (la preuve en est juste en bas). Il faut que le réalisé
+se mette en haut aussi et que nous voyons une différence de budget. Ça sert à ça un outil de pilotage. »*
+
+**Cause ①** : ENG-2 (§173d) avait laissé les colonnes « Réalisé » au barème (`t.fE`, `r.moF`, `engageBar`) — barème du fait = budget
+du fait, égalité par construction. **Cause ②, trouvée en lisant la capture** : 11,76 ha des deux côtés, mais 329,4 h de barème au
+budget (28 h/ha) contre 31,2 h/ha dans la carte temps — **52 validations** pour une quarantaine de parcelles : `_ecoTempsVigne`
+comptait `_ecoTvBar` **à chaque** « Validé » d'une tâche simple, revalidations comprises. Le barème gonflé masquait l'écart (+2 %
+au lieu de 374,3 / 329,4 ≈ **+14 %**). ⚠️ Inférence tirée des chiffres de la capture, **non vérifiée sur les données de MG** (pas
+d'accès) : à confirmer en rouvrant l'écran après déploiement — h/ha barème de la carte temps ≈ 28.
+
+**Moteur (`_ecoTempsVigne`)** : `accE` suit `acc` — les euros de chaque heure (taux du jour, repli taux moyen) sont versés avec elle
+au prorata de la surface → `pairs[k].eur`, `taches[].eur`, `parcs[nom].eur`, `eAff`, `eAtt` (invariant tenu : versé + attente =
+`eur`). **`_ecoTvEvents`** : un « Validé » simple sur un couple déjà validé **dans la période** (pas d'« Annulé » entre) porte
+`dup:true` → clôture (les heures y vont) mais barème 0. Borné à `dt>=d0` : la même tâche revient chaque campagne.
+
+**`_pecData`** : `t.reE` (euros versés au travail, rapprochés par `_friseNorm`), `t.ecE = reE − fE` ; `r.moRe`, `r.engRe = moRe +
+tracteur + GNR + phyto`, `r.ecE = moRe − moF` ; `E.engRe`, `E.ecRe`, `E.reAttE/H` (payé, en attente d'une validation), `E.reHorsE`
+(versé à un travail absent de la liste de la période). Repli sans planning (`reOk:false`) : réalisé = barème, écart `—`.
+**Inchangés** : `engage`, `engageBar`, `resteBar`, la projection, le KPI, l'écart de cadence (§28 reste ouvert).
+
+**Écran** : Coût par travail — Travail · Heures · Fait · **Réalisé** (+ heures versées) · **Écart** (€ et % du barème du fait, couleurs
+de la carte temps : >15 rouge, >5 orange, <−8 vert) · Reste · Budget · €/ha · Part ; ligne Total ; cadre : définitions + montant en
+attente. Graphe : barre pleine = réalisé, débord au-delà du budget en rouge, trait = barème du fait, droite = écart. Parcelles : MO
+et Réalisé payés, colonne Écart, tris mémorisés `moF`/`engage` redirigés ; CSV : + `Ecart EUR`, `MO bareme du fait EUR`, `Heures realisees`.
+
+**Accompagnement** : fiches `pil.eco.travaux` (réécrite : budget / réalisé / écart / attente), `pil.eco.parcelles` (MO payée, Écart),
+`pil.eco.temps` (revalidation). `guide/11-pilotage.html` + `public/guide.html` régénéré. « Quoi de neuf » 7.72 (2 entrées).
+`pil.eco.engage`, `pil.eco.postes` relues : rien à changer. Visite guidée : rien ne bouge.
+
+**Harnais** `mv-harnais-temps-vigne` : R1-R10 exécutés (euros par couple/travail/parcelle au taux du jour, attente en euros,
+invariant, revalidation une fois, Validé-Annulé-Validé, validation d'une période passée), J5 réécrit, J7-J11 branchements ;
++5 contre-épreuves (69 assertions / 24).
+
+**Rendu regardé** (Chromium `@sparticuz/chromium`, appli en dev, données injectées, planning et taux forcés) : Coût par travail
+(barre réalisée, débord rouge, trait du barème du fait, colonne Écart, Total, cadre « en attente »), Temps réel contre barème (même
+écart, barème une fois malgré une double validation), Parcelle par parcelle (MO, Réalisé, Écart, pied). Thème sombre et téléphone :
+non regardés. **`npm run check` vert.** Cliquet TYPO-1 « aucun module n'enfle de plus de 5 % » : `pilotage.js` était déjà à
++4,7 % depuis la dernière gravure (721 → 755 ko sur la base), ce lot ajoute 8,6 ko → **regravé** (`--baseline`, seules les
+colonnes ko bougent). ⚠️ La question du découpage de `pilotage.js` (764 ko) reste posée.
+**Non mesuré** : aucune donnée réelle (MG).
+
+---
+
+## 189. ★★★ RULES-1 + DOC-1 — LES RÈGLES FIRESTORE EXÉCUTÉES PAR LE VRAI MOTEUR, ET CE DOCUMENT SCINDÉ (27/09 — `scripts/mv-harnais-rules.mjs` (neuf) · `scripts/mv-claude-index.mjs` (neuf) · `scripts/harnais-claude-md.mjs` · `package.json` · `package-lock.json` · `.github/workflows/ci.yml` · `CLAUDE.md` · `docs/claude/` (neuf) · **aucun bump**, base `9801910`)
+
+### 189a. Le point de départ — une liste générique, vérifiée sur le dépôt
 
 Nico soumet une liste de pistes d'amélioration écrite depuis l'arborescence, pas depuis le code. Confrontée au dépôt :
 - **écarté — ranger `scripts/` en sous-dossiers** : 138 fichiers (pas 80) ; les contre-épreuves calculent la racine
@@ -283,7 +330,7 @@ Nico soumet une liste de pistes d'amélioration écrite depuis l'arborescence, p
 - **retenu, pas fait** : une liste unique des harnais (`check` = `prebuild`, double exécution en CI) → §28 ;
 - **retenus et faits** : les règles Firestore exécutées (RULES-1) et la taille de ce document (DOC-1).
 
-### 188b. RULES-1 — ce que le moteur fait des règles, requête par requête
+### 189b. RULES-1 — ce que le moteur fait des règles, requête par requête
 
 **Constat.** Aucun script n'exécutait `firestore.rules`. `mv-harnais-droits`, `mv-harnais-version` et
 `harnais-claude-md` le LISENT : ils voient qu'une ligne existe, jamais ce que le moteur en fait. Or une règle se
@@ -329,8 +376,15 @@ Vérifié : syntaxe (`node --check`), types de l'API (lus dans le `index.d.ts` i
 moteur factice (témoin, 12 ancres trouvées une fois chacune, codes de sortie, message clair sans émulateur).
 **Le premier run du job `rules` est la première vraie preuve.** Un rouge peut être une faille OU une attente fausse
 du harnais — c'est la famille de §42f : lire le cas avant de toucher aux règles.
+★★ **JOUÉ LE 27/09 CHEZ NICO** (`npm run test:rules`, Windows, émulateur `v1.19.8`) : **53 vertes, 0 rouge**, témoin
+vert, **12/12 contre-épreuves rougissent**, F01 et F02 affichés. `npm run build` vert avant (check complet + Vite).
+Seul défaut : le SDK journalisait un bloc « PERMISSION_DENIED … » à chaque refus ATTENDU — des centaines de lignes
+où un vrai rouge se serait noyé. `setLogLevel('silent')` en tête du harnais : il ne lit pas ces journaux (un refus
+se juge sur l'exception, toute autre exception plante en code 2), les faire taire ne masque rien de ce qu'il mesure.
+⚠️ Ce silence n'a pas été rejoué contre l'émulateur : au prochain `npm run test:rules`, vérifier que le bruit a
+disparu (s'il reste, c'est que le SDK compat charge une autre instance du journal — sans effet sur le résultat).
 
-### 188c. DOC-1 — le cœur se lit en entier, le reste se consulte
+### 189c. DOC-1 — le cœur se lit en entier, le reste se consulte
 
 **Mesuré le 27/09** : ce fichier faisait **23 910 lignes**. Les 1 190 premières étaient des consolidations
 empilées, AVANT la règle d'or n°1 ; les chantiers §30–§187 en faisaient 17 700. Une session qui « lit CLAUDE.md »
@@ -342,7 +396,7 @@ lisait surtout du récit, et les consignes s'y perdaient — c'est la raison don
 |---|---|---|
 | `CLAUDE.md` | mode d'emploi (neuf) · dernière consolidation · règles d'or · environnement · communication · §1–§8c · §24 · §25 · §27a · §28 · §29 | ~2 600 |
 | `docs/claude/modules.md` | §9–§23 · §26–§27f sauf §27a | ~2 490 |
-| `docs/claude/chantiers-030-079.md` … `chantiers-180-229.md` | §30 → §188, par tranches de 50 | ~17 800 |
+| `docs/claude/chantiers-030-079.md` … `chantiers-180-229.md` | §30 → §189, par tranches de 50 | ~17 800 |
 | `docs/claude/journal.md` | l'ancien en-tête (consolidations jusqu'à VER-2) | ~1 200 |
 | `docs/claude/INDEX.md` | GÉNÉRÉ par `scripts/mv-claude-index.mjs` (`--check` dans `npm run check`) | — |
 
@@ -363,3 +417,32 @@ retrouve **caractère pour caractère** dans les nouveaux fichiers, sauf les cin
 du bac à sable). Cliquet ESLint : 0 erreur, plafond 0.
 ★ Les renvois « CLAUDE.md §82a » dans les commentaires des scripts restent justes : l'index les résout.
 ⚠️ **Rangement à respecter à chaque lot** : il est écrit dans le mode d'emploi, en tête de `CLAUDE.md`.
+
+### 189d. ⚠️⚠️⚠️ L'ÉCRASEMENT DE RÉAL-1 — et la garde qui manquait
+
+**Ce qui s'est passé (27/09).** Ce lot a été construit et livré sur `9801910`, frais au moment de la livraison. Pendant ce
+temps, RÉAL-1 (§188, `1cd9e4b`, 12 h 08) a été poussé depuis une autre conversation : il ajoutait sa section §188 et sa
+consolidation à `CLAUDE.md`, et relevait `SECTIONS` à 220. Le zip de ce lot a ensuite été décompressé PAR-DESSUS (`3bc79d1`,
+« rearchi ») : `CLAUDE.md` et `harnais-claude-md.mjs` complets, construits avant RÉAL-1, ont remplacé les siens.
+**Le code de RÉAL-1 n'a pas été touché** (`pilotage.js`, `utils.js`, `index.html`, `sw.js`, guide, harnais `temps-vigne` :
+aucun fichier commun). **Sa documentation, si** : section et consolidation effacées, et ce lot avait pris le même numéro.
+
+**Pourquoi rien n'a rougi.** `SECTIONS` : 220 des deux côtés (chaque lot ajoutait UNE section) — la faute exacte de §126.
+« Aucun numéro en doublon » ne voit pas un remplacement. La liste de titres protégés ne connaît que quatre chantiers.
+Découvert par Claude en re-mesurant la fraîcheur avant de livrer un correctif (règle d'or n°1) : le dépôt avait bougé,
+et le diff de `CLAUDE.md` dans `1cd9e4b` montrait 54 lignes que la tête ne contenait plus.
+
+**Réparation.** Repartie de la tête (`3bc79d1`) : la section RÉAL-1 et sa consolidation reprises **caractère pour caractère**
+de `1cd9e4b` (vérifié) — la section en §188 dans `chantiers-180-229.md`, la consolidation en tête de `journal.md`. Ce lot est
+renuméroté **§189** (RÉAL-1 était premier). `SECTIONS` → 221.
+
+**La garde neuve** (`harnais-claude-md.mjs`, bloc 4) : les titres « ## N. … » des **12 derniers commits** (CLAUDE.md, puis
+`docs/claude/` une fois la scission faite) doivent tous exister encore, mot pour mot. Un renommage volontaire se déclare
+dans `RENOMMES` (l'ancien titre de ce lot y est, §188 → §189). **Contre-épreuve jouée** : la section RÉAL-1 retirée →
+« disparu depuis 5e2fca5 : ## 188. RÉAL-1… », rouge ; restaurée → vert. Sur `3bc79d1` tel que poussé, elle aurait rougi.
+
+★★ **La leçon côté livraison** : un zip qui porte des fichiers de DOCUMENTATION complets (`CLAUDE.md`, `docs/claude/*`,
+`harnais-claude-md.mjs`) écrase tout lot poussé après sa base, exactement comme un fichier de code complet (règle d'or n°1).
+Deux lots préparés dans deux conversations le même jour doivent s'intégrer **l'un après l'autre, le second reconstruit sur
+le premier** — jamais décompressés tous les deux sur la même base.
+
