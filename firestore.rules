@@ -240,6 +240,17 @@ service cloud.firestore {
                    && request.resource.data.value is map
                    && request.resource.data.value.size() <= 200;
 
+      // 5. DROITS-1 (§185) — le journal d'erreurs : la règle 3 (tout membre NON-ro) refusait
+      //    les erreurs d'un saisonnier ou d'un pilote — fbAppendError avalait le refus, leurs
+      //    incidents n'arrivaient jamais à l'Admin GT. Tout membre (pas la démo) peut y ajouter ;
+      //    forme { value: liste } bornée à 100 (le plafond que fbAppendError applique).
+      allow write: if isMyTenant(collection)
+                   && docId == 'error_log'
+                   && request.auth.token.get('demo', false) != true
+                   && shapeOk()
+                   && request.resource.data.value is list
+                   && request.resource.data.value.size() <= 100;
+
       // ── Sous-collections éventuelles (profondeur ≥ 3) ───────────────
       // Aucune n'existe aujourd'hui sous un tenant. Ce bloc ne fait que PRÉSERVER
       // à l'identique la portée récursive de l'ancien {document=**} : lecture pour

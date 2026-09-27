@@ -1496,6 +1496,7 @@ async function _saveParcellesMerged(localValue, baseFile) {
 //    ⚠️ Un appelant qui veut savoir doit LIRE LE RETOUR. Un `.then()` nu annoncerait
 //    « Enregistre ✓ » sur une ecriture qui n'est jamais partie — c'est le faux positif
 //    que le `throw` servait a eviter, et il incombe desormais a l'appelant (saveData).
+var _mvRoDit = false;   // DROITS-1 : le message « lecture seule » n'est dit qu'une fois par session
 window.fbSave = async function (key, value) {
   // Demo (bac a sable local) : on n'ecrit JAMAIS dans Firestore. L'etat en memoire + le
   // localStorage (deja ecrits par saveData) donnent l'experience interactive ; au rechargement
@@ -1504,6 +1505,19 @@ window.fbSave = async function (key, value) {
   if (TENANT_ID === 'domaine-dupont') {
     if (typeof showSyncBadge === 'function') showSyncBadge('Sauvegardé', '#3D6B27');
     return { ok: true, local: true };
+  }
+  // ★★ DROITS-1 (§185) — un rôle en lecture seule (claim `ro`, deriveRo) n'a le droit d'écrire AUCUN
+  //   de ces documents : les règles refusent tout. Avant, l'appli tentait quand même (écran resté
+  //   actif, migration au chargement…), prenait le refus, mettait la valeur au coffre et affichait
+  //   en rouge « Enregistrement refusé ». On ne tente plus : un message clair, une fois par session.
+  //   ⚠️ AVANT _ignoreNext : sinon la prochaine mise à jour distante de cette clé serait ignorée.
+  if (window._mvLectureSeule && window._mvLectureSeule()) {
+    if (!_mvRoDit) {
+      _mvRoDit = true;
+      if (window.showToast) window.showToast('Votre r\u00f4le est en lecture seule \u2014 rien n\u2019est enregistr\u00e9', '#7A1020');
+    }
+    if (window.logError) window.logError({ level:'info', cat:'droits', msg:'Écriture non tentée (lecture seule) : ' + key });
+    return { ok: false, denied: true, ro: true };
   }
   _ignoreNext[key]   = true;
   _ignoreBefore[key] = Date.now() + 4000;

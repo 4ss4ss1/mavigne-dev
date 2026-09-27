@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.68';
+export const APP_VERSION = '7.69';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -722,6 +722,12 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.69', items: [
+    { emoji: 'oeil', titre: 'Lecture seule\u00a0: un message clair au lieu d’un refus en rouge',
+      desc: "Un saisonnier ou un pilote est en lecture seule. S’il touchait un bouton d’enregistrement, l’appli tentait quand "
+        + "même, se faisait refuser et affichait en rouge «\u00a0Enregistrement refusé\u00a0». Elle n’essaie plus\u00a0: un message "
+        + "dit une fois que son rôle est en lecture seule. Et ses incidents remontent désormais à l’assistance, comme ceux des autres." }
+  ] },
   { v: '7.68', items: [
     { emoji: 'bouclier', titre: 'Une vieille version ne peut plus écraser vos données',
       desc: "Une application restée ouverte des jours pouvait continuer à enregistrer avec une ancienne version. Quand une mise "
@@ -3045,6 +3051,16 @@ export function canSeePilotage() {
   if(!window.currentUser || !window.currentUser.roles) return false;
   var r = window.currentUser.roles;
   return r.includes('admin') || r.includes('pilotage');
+}
+// ★★ DROITS-1 (27/09/2026, §185) — « lecture seule » AU SENS DU SERVEUR. Copie exacte de deriveRo
+//   (functions/claims.js), qui pose le claim `ro` que les règles Firestore lisent : aucun rôle
+//   d'écriture (admin, ouvrier, tractoriste) ET saisonnier ou pilotage. Distinct de canWrite(), qui
+//   règle l'AFFICHAGE (un tractoriste seul n'a pas canWrite mais écrit ses sessions). Tenu égal à
+//   deriveRo par mv-harnais-droits sur les 32 combinaisons de rôles.
+export function _mvLectureSeule() {
+  var r = (window.currentUser && Array.isArray(window.currentUser.roles)) ? window.currentUser.roles : [];
+  var noWrite = r.indexOf('admin') < 0 && r.indexOf('ouvrier') < 0 && r.indexOf('tractoriste') < 0;
+  return noWrite && (r.indexOf('saisonnier') >= 0 || r.indexOf('pilotage') >= 0);
 }
 export function canWrite() {
   if(!window.currentUser || !window.currentUser.roles) return false;
@@ -6169,5 +6185,6 @@ window.TEMJ               = TEMJ;
 window.COULEURS_MBR       = COULEURS_MBR;
 window.APP_VERSION        = APP_VERSION;
 window.MV_FORMAT          = MV_FORMAT;   // VER-1
+window._mvLectureSeule    = _mvLectureSeule;   // DROITS-1
 window.checkWhatsNew      = checkWhatsNew;
 window.dismissWhatsNew    = dismissWhatsNew;

@@ -349,6 +349,13 @@ jobs:
           node scripts/mv-harnais-version.mjs --contre
           node scripts/mv-version-json.mjs --test
 
+      # DROITS-1 (§185) : lecture seule identique dans l'appli (_mvLectureSeule) et sur le serveur (deriveRo), sur
+      # les 32 combinaisons de roles ; fbSave ne tente plus ; regle error_log pour tout membre.
+      - name: Harnais — lecture seule et remontee des erreurs (DROITS-1)
+        run: |
+          node scripts/mv-harnais-droits.mjs
+          node scripts/mv-harnais-droits.mjs --contre
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build

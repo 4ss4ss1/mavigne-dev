@@ -2,7 +2,12 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **27 septembre 2026 (VER-1)** — ★★★ **LES VERSIONS PÉRIMÉES (§184)**. Une PWA jamais fermée gardait
+> Dernière consolidation : **27 septembre 2026 (DROITS-1)** — ★★ **LA LECTURE SEULE (§185)**. Le serveur pose `ro` (deriveRo),
+> l'appli l'ignorait : elle tentait d'écrire, prenait le refus, coffre + « Enregistrement refusé » en rouge. `_mvLectureSeule` (copie
+> de deriveRo, égalité tenue sur 32 combinaisons) : `fbSave` ne tente plus, un message une fois. Et `error_log` refusait les rôles
+> `ro` → règle 5. ⚠️ **Règles à déployer.** **APP 7.68 → 7.69 · SW 8.37 → 8.38**, base `aaee21c`. Détail en **§185**.
+>
+> ★ Précédente : **27 septembre 2026 (VER-1)** — ★★★ **LES VERSIONS PÉRIMÉES (§184)**. Une PWA jamais fermée gardait
 > l'ancien code des jours et écrivait avec (MAJ-1 n'impose rien pendant l'utilisation). Plancher AUTOMATIQUE : `MV_FORMAT` (utils.js)
 > publié au build dans `/version.json` ; format installé plus bas → écritures en file, écran « Mise à jour obligatoire ». Retour après
 > ≥ 4 h sans rien en cours → activation douce (`MV_ACTIVER`). Parc d'appareils (`appareils`, Admin GT). ⚠️ **Règles Firestore à
@@ -23817,4 +23822,30 @@ format de donnée » ; la mise à jour au retour : « parfait » ; le parc d'app
 (`_mvVerifierVersion` avec fetch simulé, `_mvRienEnCours`, `fbNoterAppareil`, `_agtFicheAppareils`) et le câblage ; 6
 contre-épreuves. `mv-version-json.mjs --test` dans check. **Déploiement** : `firebase deploy --only hosting,firestore:rules`
 (la règle `appareils` est neuve ; sans elle, l'écriture du parc est refusée — sans autre effet, le refus est avalé).
+
+## 185. ★★ DROITS-1 — LA LECTURE SEULE, MÊME RÈGLE DANS L'APPLI ET SUR LE SERVEUR (27/09 — `src/utils.js` · `src/firebase.js` · `firestore.rules` · `index.html` · `public/sw.js` · `scripts/mv-harnais-droits.mjs` (neuf) · `package.json` · `.github/workflows/ci.yml` · `scripts/harnais-claude-md.mjs` · APP 7.68 → **7.69** · SW 8.37 → **8.38** · base `aaee21c`)
+
+Point 6 de l'audit du 26/09 (droits d'écriture par rôle). **Lu dans le code** :
+- Le serveur pose le claim `ro` par `deriveRo` (claims.js) : aucun rôle d'écriture (admin, ouvrier, tractoriste) ET saisonnier ou
+  pilotage. Les règles refusent alors TOUT document métier (`canWrite()` des règles).
+- L'appli n'avait pas cette notion : `canWrite()` (utils.js) règle l'AFFICHAGE et diffère volontairement (tractoriste seul : pas de
+  `canWrite`, mais il écrit ses sessions). `saveData` / `fbSave` n'avaient aucune garde : un écran resté actif ou une migration au
+  chargement (`_migrateTachesSaison` écrit `parcelles` sans condition de rôle) tentait l'écriture → refus → `_mvStashDenied` (coffre)
+  + badge rouge « Enregistrement refusé — … · saisie conservée » + `warning`. Rien de perdu (STASH-1), mais un faux drame.
+- `error_log` relevait de la règle 3 (membres NON-ro) : `fbAppendError` avalait le refus — **aucune erreur d'un saisonnier ou d'un
+  pilote n'est jamais arrivée à l'Admin GT**.
+
+**Correction.** `_mvLectureSeule()` (utils.js, `window._mvLectureSeule`) : copie exacte de `deriveRo`. `fbSave` : garde **avant**
+`_ignoreNext` (sinon la prochaine mise à jour distante de la clé serait ignorée) → aucune tentative, `{ok:false, denied:true, ro:true}`,
+toast « Votre rôle est en lecture seule — rien n'est enregistré » une fois par session (`_mvRoDit`), `logError` `info` cat `droits`.
+**Règle 5** : `error_log` écrit par tout membre (pas la démo), liste ≤ 100.
+
+**Harnais** `scripts/mv-harnais-droits.mjs` (check, prebuild, CI, `npm run test:droits`) : `_mvLectureSeule` et `deriveRo` exécutées
+sur les **32 combinaisons** des cinq rôles (aucun écart, 7 en lecture seule), position de la garde, message unique, règle 5 ;
+3 contre-épreuves. **Déploiement** : `firebase deploy --only hosting,firestore:rules`.
+
+⚠️ **Ouvert, décision de Nico** : un membre SANS AUCUN rôle (`roles: []`) n'est pas `ro` pour le serveur (`deriveRo` exige saisonnier
+ou pilotage) — il peut écrire les documents métier. L'appli ne lui montre aucun bouton (`canWrite` faux), mais les règles le laissent
+passer. Rendre `ro` tout membre sans rôle d'écriture fermerait la porte (changement de `deriveRo`, déploiement des fonctions,
+jetons rafraîchis à la connexion suivante).
 
