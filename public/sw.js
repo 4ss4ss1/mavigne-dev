@@ -1,4 +1,6 @@
-// MA VIGNE — Service Worker v8.40
+// MA VIGNE — Service Worker v8.41
+// v8.41 (27/09/2026) — REAL-1 : le « Realise » de Cout par travail et du tableau des parcelles = heures du planning
+//   versees x taux du jour, colonne Ecart au bareme du fait ; bareme d'une revalidation compte une fois. APP 7.71 -> 7.72.
 // v8.40 (27/09/2026) — VER-2 : _mvVerifierVersion ignore une reponse non JSON (repli index.html du serveur de dev) —
 //   l'e2e de la CI tombait depuis VER-1 (runs #103 a #106). APP 7.70 -> 7.71.
 // v8.39 (27/09/2026) — DROITS-2 : lecture seule = aucun role d'ecriture (deriveRo + _mvLectureSeule + _vendLectureSeule),
@@ -4164,7 +4166,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.40';
+const CACHE_NAME   = 'mavigne-v8.41';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4180,7 +4182,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.40 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.41 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4200,7 +4202,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.40 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.41 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

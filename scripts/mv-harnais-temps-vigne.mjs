@@ -21,6 +21,8 @@
 
      D. ENG-2 : l'euro engagé au taux du jour, les journées de cave retirées (intervenants
         seulement, jamais operateur ni analyse) ; _pecData et la courbe les lisent.
+     R. RÉAL-1 (§188) : les euros suivent les heures jusqu'au travail et à la parcelle (le
+        « Réalisé » des tableaux) ; une revalidation d'une tâche simple ne recompte pas le barème.
      C. TV-2 : le validateur administrateur peut se décocher (`quiHors`). Moteur exécuté ;
         les cinq chemins d'écriture d'app.js et les lecteurs du groupe lus sans commentaires.
 
@@ -211,6 +213,45 @@ function scenarios(M) {
   eq('I10 · rien le 6 pour A et B : 2 × 8 × 19 seulement ce jour-là', V.byD['2026-01-06'], 2 * 8 * 19);
   M.set({ w: { CAVE_ELEVAGE: { operations: [] } }, t: {} });
 
+  // ── R : RÉAL-1 — le réalisé en euros, et la revalidation ──────────────
+  M.set({ w: { PARCELLES: [P('M', 1), P('N', 1)], TACHES, MEMBRES: [{ nom: 'Victor' }, { nom: 'Shana' }], CAVE_ELEVAGE: { operations: [] },
+    JOURNAL: [
+      { id: '800', date: '2026-01-06', parcelle: 'M', tache: 'Taille', qui: 'Victor', statut: 'Validé', membresEquipe: ['Shana'] },
+      { id: '801', date: '2026-01-06', parcelle: 'N', tache: 'Taille', qui: 'Victor', statut: 'Validé', membresEquipe: ['Shana'] } ] },
+    h: { Victor: jours(['2026-01-05', '2026-01-06', '2026-01-07'], 8), Shana: jours(['2026-01-05', '2026-01-06'], 7) }, c: {},
+    t: { Victor: iso => (iso < '2026-01-06' ? 18 : 20), Shana: 17 } });
+  V = M.tv();
+  const pe = (parc, t) => ((V.pairs[parc + '\u0000' + t] || {}).eur) || 0;
+  eq('R1 · M reçoit la moitié des euros payés : (8×18 + 8×20 + 14×17) / 2', pe('M', 'Taille'), (8 * 18 + 8 * 20 + 14 * 17) / 2);
+  eq('R2 · le travail porte la somme de ses couples', (V.taches.find(t => t.nom === 'Taille') || {}).eur, 8 * 18 + 8 * 20 + 14 * 17);
+  eq('R3 · la parcelle porte ses euros', (V.parcs.N || {}).eur, (8 * 18 + 8 * 20 + 14 * 17) / 2);
+  eq('R4 · le 7 (Victor, 8 × 20 €) attend une validation, en euros aussi', V.eAtt, 160);
+  eq('R5 · INVARIANT : euros versés + en attente = engagé', V.eAff + V.eAtt, V.eur);
+  // Revalidation d'une tâche simple dans la période : les heures y vont, le barème une fois
+  M.set({ w: { PARCELLES: [P('O', 2)], JOURNAL: [
+      { id: '900', date: '2026-01-05', parcelle: 'O', tache: 'Taille', qui: 'Victor', statut: 'Validé' },
+      { id: '901', date: '2026-01-06', parcelle: 'O', tache: 'Taille', qui: 'Victor', statut: 'Validé' } ] },
+    h: { Victor: jours(['2026-01-05', '2026-01-06'], 8), Shana: {} }, t: { Victor: 20 } });
+  V = M.tv();
+  const tO = V.taches.find(t => t.nom === 'Taille') || {};
+  eq('R6 · deux validations de la même parcelle : barème compté UNE fois (2 ha × 15)', tO.bar, 30);
+  eq('R7 · … mais les heures des deux jours y vont (16 h)', tO.h, 16);
+  eq('R8 · … h/ha barème lu juste : 15', tO.hhaB, 15);
+  // Annulé entre les deux : la seconde validation recompte
+  M.set({ w: { JOURNAL: [
+      { id: '910', date: '2026-01-05', parcelle: 'O', tache: 'Taille', qui: 'Victor', statut: 'Validé' },
+      { id: '911', date: '2026-01-05', parcelle: 'O', tache: 'Taille', qui: 'Victor', statut: 'Annulé' },
+      { id: '912', date: '2026-01-06', parcelle: 'O', tache: 'Taille', qui: 'Victor', statut: 'Validé' } ] } });
+  V = M.tv();
+  eq('R9 · Validé, Annulé, Validé : barème une fois (la première est retirée)', (V.taches.find(t => t.nom === 'Taille') || {}).bar, 30);
+  // Validée la campagne d'avant (avant le début de la période) : la validation de cette période compte
+  M.set({ w: { JOURNAL: [
+      { id: '920', date: '2025-06-10', parcelle: 'O', tache: 'Taille', qui: 'Victor', statut: 'Validé' },
+      { id: '921', date: '2026-01-06', parcelle: 'O', tache: 'Taille', qui: 'Victor', statut: 'Validé' } ] } });
+  V = M.tv();
+  eq('R10 · une validation d\'une période passée ne rend pas celle-ci « déjà faite »', (V.taches.find(t => t.nom === 'Taille') || {}).bar, 30);
+  M.set({ t: {} });
+
   // ── F : période pas encore commencée ───────────────────────────────────
   M.set({ per: { nom: 'Futur', debut: '2099-01-01', fin: '2099-03-01' } });
   V = M.tv();
@@ -236,7 +277,16 @@ function branchements(src) {
   R.push(['J2 · la projection ajoute le reste de TRAVAIL au barème', /projFin = cadAppl \? \(engage \+ resteBar\*\(1\+ecart\)\) : \(engage \+ resteBar\)/.test(pd)]);
   R.push(['J3 · le poste main-d\'œuvre vaut l\'engagé réel (le total des postes = l\'engagé)', /k:'mo',[^\n]*fait:moReel/.test(pd)]);
   R.push(['J4 · la courbe pose la main-d\'œuvre au jour payé', /E\.moSrc==='planning' && E\.tv && E\.tv\.byD/.test(tl)]);
-  R.push(['J5 · les tableaux par parcelle restent au barème (engageBar)', (L.match(/_ecoEur\(E\.engageBar\)/g) || []).length >= 1 && /n2\(E\.engageBar\)/.test(L)]);
+  // RÉAL-1 (§188) : les tableaux Parcelles et Coût par travail lisent le RÉALISÉ payé, avec l'écart au barème du fait.
+  R.push(['J5 · le réalisé d\'un travail vient des euros versés, repli au barème sans planning', /t\.reE = tvOk \? \(x \? x\.eur : 0\) : t\.fE;/.test(pd)
+    && /t\.ecE = \(tvOk && \(t\.fE>0 \|\| t\.reE>0\)\) \? \(t\.reE - t\.fE\) : null;/.test(pd)]);
+  R.push(['J7 · le réalisé d\'une parcelle vient des euros versés à la parcelle', /r\.moRe  = tvOk \? \(q \? q\.eur : 0\) : r\.moF;/.test(pd)
+    && /r\.engRe = r\.moRe \+ r\.tracF \+ r\.gnrF \+ r\.phyF;/.test(pd)]);
+  const vp = extraire(L, '_pecViewPostes') || '', vpa = extraire(L, '_pecViewParcelles') || '';
+  R.push(['J8 · le tableau Coût par travail affiche le réalisé et l\'écart', /_ecoEur\(t\.reE\)/.test(vp) && /_pecEcTd\(t\.ecE, t\.fE\)/.test(vp) && !/_ecoEur\(t\.fE\)/.test(vp)]);
+  R.push(['J9 · le tableau Parcelles affiche le réalisé et l\'écart', /_ecoEur\(r\.engRe\)/.test(vpa) && /_pecEcTd\(r\.ecE, r\.moF\)/.test(vpa) && !/_ecoEur\(r\.engage\)/.test(vpa)]);
+  R.push(['J10 · les heures en attente sont dites sous le tableau des travaux', /E\.reAttE>=1/.test(vp)]);
+  R.push(['J11 · le graphe des travaux dessine le réalisé payé', /var re=\(t\.reE!=null\)\?t\.reE:t\.fE/.test(extraire(L, '_pecTaskSvg') || '')]);
   R.push(['J6 · la fiche pil.eco.engage existe et est posée', /'pil\.eco\.engage':\s*\{/.test(src.utl) && /_mvInfoBtn\('pil\.eco\.engage'\)/.test(L)]);
 
   // TV-2 — la saisie
@@ -283,6 +333,11 @@ const MUT = [
   ['tout le monde peut se décocher (plus de garde administrateur)', "  if(!_mvMoiAdmin()) return false;\n  var el=document.querySelector", "  var el=document.querySelector", 'app'],
   ['niveaux : le refus du groupe vide vient APRÈS la mutation', "  var _nivEq=document.getElementById('niv-equipe-val')", "  ;var _nivEq=document.getElementById('niv-equipe-val')", 'app'],
   ['le journal (Réglages) compte l\'auteur hors des rangs', "if(j&&j.qui&&!j.quiHors) L.push(j.qui);", "if(j&&j.qui) L.push(j.qui);", 'reg'],
+  ['RÉAL-1 : les euros ne suivent plus les heures', 'P.eur+=accE*part;', 'P.eur+=0;'],
+  ['RÉAL-1 : une revalidation recompte le barème', 'var b=e.dup ? 0 : _ecoTvBar(', 'var b=_ecoTvBar('],
+  ['RÉAL-1 : la revalidation n\'est plus bornée à la période', "if(clot && dt>=d0 && st==='Valid\\u00e9'", "if(clot && st==='Valid\\u00e9'"],
+  ['RÉAL-1 : le réalisé du tableau revient au barème du fait', 't.reE = tvOk ? (x ? x.eur : 0) : t.fE;', 't.reE = t.fE;'],
+  ['RÉAL-1 : le tableau Parcelles revient au barème', "+'<td class=\"r\">'+_pilEsc(_ecoEur(r.engRe))+'</td>'", "+'<td class=\"r\">'+_pilEsc(_ecoEur(r.engage))+'</td>'"],
   ['la liste des passages est remplacée au lieu d\'être réunie', 'niv:P.niv.concat(nNiv), pass:P.pass.concat(nPass) };', 'niv:niv.length?niv:P.niv, pass:pass.length?pass:P.pass };'],
 ];
 

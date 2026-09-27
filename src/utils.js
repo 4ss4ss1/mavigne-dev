@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.71';
+export const APP_VERSION = '7.72';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -722,6 +722,16 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.72', items: [
+    { emoji: 'euro', titre: 'Le réalisé d’un travail est ce qu’il a vraiment coûté',
+      desc: "Pilotage › Économie, «\u00a0Coût par travail\u00a0»\u00a0: une tâche finie affichait un réalisé égal à son budget "
+        + "alors que les heures passées disaient autre chose. Le réalisé compte maintenant les heures du planning versées aux "
+        + "parcelles validées, au taux chargé du jour, et une colonne «\u00a0Écart\u00a0» montre la différence avec le barème du "
+        + "travail fait\u00a0: en plus, c’est plus cher que prévu. Même chose dans le tableau parcelle par parcelle." },
+    { emoji: 'chrono', titre: 'Une parcelle validée deux fois ne compte plus double',
+      desc: "Dans «\u00a0Temps réel contre barème\u00a0», une parcelle revalidée sans annulation entre les deux voyait son barème "
+        + "compté deux fois, ce qui masquait l’écart réel. Ses heures y vont toujours, son barème une seule fois." }
+  ] },
   { v: '7.71', items: [
     { emoji: 'check', titre: 'Vérification de version plus discrète',
       desc: "La vérification automatique de la version, arrivée en 7.68, pouvait laisser une fausse alerte dans le journal "
@@ -3983,7 +3993,7 @@ export const MV_INFO = {
     'Ces heures sont versées aux travaux qu\u2019il <b>valide, lui ou son groupe</b> : une validation vaut pour toutes les personnes nommées. Trois personnes une heure sur un are, c\u2019est trois heures sur ce travail.',
     'Plusieurs parcelles validées <b>le même jour</b> se partagent <b>au prorata de leur surface</b>. Trois personnes huit heures sur 1 ha, 0,5 ha et 0,5 ha : 24 h pour 2 ha, soit <b>12 h/ha</b> — contre 15 au barème, le travail est allé plus vite que la convention.',
     'Une validation marque la <b>fin</b> d\u2019un travail. Les jours sans validation vont donc au travail que la personne valide <b>ensuite</b>. Ce qui n\u2019a pas encore trouvé de validation reste <b>en attente</b>, affiché sous le tableau — jamais perdu, jamais compté deux fois.',
-    'Pour le relevage et les travaux à passages, seul le niveau ou le passage <b>nouvellement fait</b> compte, et le barème est celui de ce niveau. Une validation annulée ne compte plus.',
+    'Pour le relevage et les travaux à passages, seul le niveau ou le passage <b>nouvellement fait</b> compte, et le barème est celui de ce niveau. Une validation annulée ne compte plus. Une parcelle <b>validée deux fois</b> sans annulation reçoit les heures des deux, mais son barème <b>une seule fois</b> : le travail n\u2019a pas été fait deux fois.',
     '<b>Celui qui valide compte dans le groupe</b>, sauf s\u2019il s\u2019est décoché : un administrateur qui valide pour l\u2019équipe sans être dans les rangs retire sa puce « Moi », et ses heures du jour restent en attente. Les validations d\u2019avant ce réglage comptent leur auteur.'
   ] },
 
@@ -4141,14 +4151,17 @@ export const MV_INFO = {
 
   'pil.eco.travaux': { t: 'Le coût par travail', p: [
     'Le total d\u2019une parcelle dépend surtout de sa <b>taille</b> : une grande parcelle coûte cher parce qu\u2019elle est grande. Le coût d\u2019un <b>travail</b>, lui, se décide — mécaniser, prendre un renfort, changer la conduite. C\u2019est là qu\u2019il y a des choix à faire.',
-    'Le calcul est un <b>barème</b> : surface \u00d7 heures par hectare \u00d7 taux moyen de l\u2019équipe qui l\u2019a faite. Il ne lit pas les heures du journal — le journal dit <b>qui</b> a travaillé, jamais combien d\u2019heures.',
+    'Le <b>budget</b> est un <b>barème</b> : surface \u00d7 heures par hectare \u00d7 taux moyen de l\u2019équipe qui l\u2019a faite.',
+    'Le <b>réalisé</b>, lui, est ce que le travail a <b>coûté</b> : les heures du planning versées aux parcelles validées (la règle de « Temps réel contre barème »), chacune au <b>taux chargé</b> du salarié ce jour-là. Un travail pas encore validé n\u2019a pas encore de réalisé.',
+    'L\u2019<b>écart</b> = réalisé \u2212 barème du travail <b>fait</b>. Les deux portent sur le même travail, celui qui est validé : <b>+</b> veut dire plus cher que prévu, <b>\u2212</b> moins cher. Sur le graphique, le trait vertical marque le barème du fait, et ce qui dépasse le budget est en rouge.',
+    'Les heures payées qui <b>attendent une validation</b> sont dans l\u2019engagé, mais sur aucun travail encore : leur montant est écrit sous le tableau. Sans planning ouvert, le réalisé retombe au barème et l\u2019écart ne se lit pas.',
     '<b>Main-d\u2019\u0153uvre vigne uniquement.</b> Le tracteur, le GNR et le phyto ne sont pas répartis par travail : ils n\u2019en portent pas la trace.',
     'Quand un travail dépasse durablement son barème, c\u2019est le <b>barème</b> qu\u2019on corrige dans Réglages \u203a Tâches — jamais le taux horaire.'
   ] },
 
   'pil.eco.parcelles': { t: 'Le tableau des parcelles', p: [
     '<b>Cliquez sur un en-tête</b> pour trier. Recliquer la même colonne inverse le sens.',
-    '<b>MO</b> = main-d\u2019\u0153uvre <b>déjà faite</b>. <b>Reste</b> = main-d\u2019\u0153uvre <b>encore à faire</b>. <b>Budget</b> = le total de la période, les deux réunis.',
+    '<b>MO</b> = main-d\u2019\u0153uvre <b>payée</b> pour la parcelle : les heures du planning versées à ses validations, au taux du jour. <b>Écart</b> = cette MO \u2212 le barème du travail fait (<b>+</b> = plus cher que prévu). <b>Reste</b> = main-d\u2019\u0153uvre <b>encore à faire</b>, au barème. <b>Budget</b> = le barème de la période.',
     '<b>Tracteur et phyto</b> sont du <b>réalisé</b> : seulement ce qui a été saisi, sans projection. Le <b>GNR</b> est l\u2019enveloppe réelle de vos pleins, répartie entre les parcelles au prorata des heures machine — à défaut d\u2019heures saisies, au prorata de la <b>surface</b>.',
     'Le <b>coût à l\u2019hectare</b> neutralise la taille. Ce qui reste, c\u2019est ce qu\u2019une parcelle a de particulier : plants à remplacer, passages en plus, équipe plus chère, tri des tâches.',
     'La répartition d\u2019une journée entre plusieurs parcelles suit une <b>règle 1/N</b> : c\u2019est la seule convention inventée par le logiciel, et elle suppose qu\u2019une parcelle se fait dans la journée.'

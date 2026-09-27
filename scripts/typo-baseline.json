@@ -2,17 +2,17 @@
   "src/admin-gt.js": {
     "dur": 281,
     "petit": 97,
-    "ko": 381
+    "ko": 384
   },
   "src/app.js": {
     "dur": 206,
     "petit": 79,
-    "ko": 746
+    "ko": 761
   },
   "src/cave.js": {
     "dur": 32,
     "petit": 24,
-    "ko": 539
+    "ko": 541
   },
   "src/cuvier.js": {
     "dur": 0,
@@ -22,7 +22,7 @@
   "src/firebase.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 156
+    "ko": 163
   },
   "src/onboarding.js": {
     "dur": 6,
@@ -37,17 +37,17 @@
   "src/pilotage.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 721
+    "ko": 764
   },
   "src/planning.js": {
     "dur": 185,
     "petit": 98,
-    "ko": 611
+    "ko": 621
   },
   "src/reglages.js": {
     "dur": 209,
     "petit": 100,
-    "ko": 421
+    "ko": 428
   },
   "src/reserve.js": {
     "dur": 33,
@@ -62,16 +62,16 @@
   "src/utils.js": {
     "dur": 6,
     "petit": 2,
-    "ko": 633
+    "ko": 658
   },
   "index.html": {
     "dur": 261,
     "petit": 47,
-    "ko": 338
+    "ko": 340
   },
   "src/styles.css": {
     "dur": 573,
     "petit": 128,
-    "ko": 444
+    "ko": 448
   }
 }

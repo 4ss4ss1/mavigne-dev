@@ -5656,11 +5656,21 @@ function _ecoTvEvents(d0, d1){
     if(niv.length||pass.length) prev[k]={
       niv:P.niv.concat(nNiv), pass:P.pass.concat(nPass) };
     var clot = nNiv.length>0 || nPass.length>0 || (st==='Valid\u00e9' && !niv.length && !pass.length);
+    // ★★ RÉAL-1 (27/09/2026) — UNE TÂCHE SIMPLE SE VALIDE UNE FOIS. Une parcelle revalidée
+    //   (deux « Validé » sans « Annulé » entre les deux) reste une clôture — les heures du
+    //   groupe y vont —, mais son BARÈME n'est plus recompté : le travail n'a pas été fait deux
+    //   fois. Constaté à l'écran : 52 validations de dégrafage pour une quarantaine de
+    //   parcelles, barème 31,2 h/ha contre 28 au budget — l'écart annonçait +2 % au lieu de
+    //   +14 %. Borné à la période (dt>=d0) : la même tâche revient chaque campagne.
+    var dup=false;
+    if(clot && dt>=d0 && st==='Valid\u00e9' && !niv.length && !pass.length){
+      dup=!!P.val; prev[k]={ niv:(prev[k]||P).niv, pass:(prev[k]||P).pass, val:true };
+    }
     if(!clot || dt<d0) return;
     var noms=[]; if(j.qui && !j.quiHors) noms.push(j.qui);   // TV-2 : le validateur hors des rangs ne compte pas
     (j.membresEquipe||[]).forEach(function(n){ if(n && noms.indexOf(n)<0) noms.push(n); });
     var e={ date:dt, parc:nom, tache:j.tache, surf:parseFloat(p.surface)||0, noms:noms,
-            niv:nNiv, pass:nPass, trous:j.plantation_trous||null, p:p };
+            niv:nNiv, pass:nPass, trous:j.plantation_trous||null, p:p, dup:dup };
     (byPair[k]=byPair[k]||[]).push(e);
     ev.push(e);
   });
@@ -5694,7 +5704,7 @@ function _ecoTempsVigne(){
   var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
   var d0=s&&s.debut?String(s.debut).slice(0,10):'', d1=s&&s.fin?String(s.fin).slice(0,10):'';
   var _n=new Date(), auj=_pexIso(_n.getFullYear(),_n.getMonth(),_n.getDate());
-  var vide={ ok:false, pairs:{}, taches:[], parcs:{}, gens:[], hChamp:0, hTrac:0, hAff:0, hAtt:0, hCave:0, hVigne:0, eur:0, byD:{}, nSansTaux:0, nEv:0, d0:d0, d1:d1 };
+  var vide={ ok:false, pairs:{}, taches:[], parcs:{}, gens:[], hChamp:0, hTrac:0, hAff:0, hAtt:0, hCave:0, hVigne:0, eur:0, eAff:0, eAtt:0, byD:{}, nSansTaux:0, nEv:0, d0:d0, d1:d1 };
   if(!/^\d{4}-\d{2}-\d{2}$/.test(d0) || !/^\d{4}-\d{2}-\d{2}$/.test(d1) || d1<d0) return vide;
   // ★ La periode doit avoir COMMENCE (piege de _pecCadPresence, §20b) : sinon la
   //   fenetre part a l'envers et tout sort a zero en silence.
@@ -5720,9 +5730,11 @@ function _ecoTempsVigne(){
     if(!m||!m.nom) return false;
     return okPer ? window._mvEnContratSurPeriode(m,d0,fin) : (m.statut!=='Inactif' && !m.bureau);
   });
-  var pairs={}, gens=[], T={hChamp:0,hTrac:0,hAff:0,hAtt:0,hCave:0,hVigne:0};
+  var pairs={}, gens=[], T={hChamp:0,hTrac:0,hAff:0,hAtt:0,hCave:0,hVigne:0,eAff:0,eAtt:0};
   mbrs.forEach(function(m){
-    var acc=0, g={nom:m.nom, hChamp:0, hTrac:0, hAff:0, hAtt:0, hCave:0, hVigne:0, eur:0, nEv:0, dAtt:'', sansTaux:false};
+    // RÉAL-1 : accE suit acc — les euros de ces heures, chacune à SON taux du jour, versés
+    //   avec elles. Le réalisé d'un travail est donc ce que ses heures ont coûté, pas un taux moyen.
+    var acc=0, accE=0, g={nom:m.nom, hChamp:0, hTrac:0, hAff:0, hAtt:0, hCave:0, hVigne:0, eur:0, eAff:0, eAtt:0, nEv:0, dAtt:'', sansTaux:false};
     var cd=(tr.condH&&tr.condH[m.nom])||{}, cj=cave[m.nom]||{};
     for(var d=d0, guard=0; d<=fin && guard<400; d=_pexJourApres(d), guard++){
       var h=0;
@@ -5736,7 +5748,7 @@ function _ecoTempsVigne(){
         // ENG-2 : l'euro engagé, au taux chargé de CE jour (une augmentation ne réécrit pas mars).
         var tx=0; try{ tx=(typeof window._mvPaieTauxEffAt==='function')?Number(window._mvPaieTauxEffAt(m,d))||0:0; }catch(e){ tx=0; }
         if(!(tx>0)){ tx=rate0; g.sansTaux=true; }
-        if(tx>0){ var eu=hv*tx; g.eur+=eu; eurT+=eu; byD[d]=(byD[d]||0)+eu; }
+        if(tx>0){ var eu=hv*tx; g.eur+=eu; eurT+=eu; byD[d]=(byD[d]||0)+eu; accE+=eu; }
       }
       var L=(evBy[m.nom]||{})[d];
       if(L && L.length && acc>0){
@@ -5746,16 +5758,17 @@ function _ecoTempsVigne(){
         L.forEach(function(e){
           var part=(S>0)?(e.surf/S):(1/L.length), v=acc*part;
           var k=e.parc+'\u0000'+e.tache;
-          var P=pairs[k]||(pairs[k]={parc:e.parc, tache:e.tache, h:0, bar:0, surf:0, n:0, noms:{}});
-          P.h+=v; P.noms[m.nom]=1;
+          var P=pairs[k]||(pairs[k]={parc:e.parc, tache:e.tache, h:0, eur:0, bar:0, surf:0, n:0, noms:{}});
+          P.h+=v; P.eur+=accE*part; P.noms[m.nom]=1;
         });
-        g.hAff+=acc; g.nEv+=L.length; acc=0; g.dAtt='';
+        g.hAff+=acc; g.eAff+=accE; g.nEv+=L.length; acc=0; accE=0; g.dAtt='';
       }
     }
-    g.hAtt=acc;
+    g.hAtt=acc; g.eAtt=accE;
     if(g.hChamp>0 || g.hAff>0){
       gens.push(g);
       T.hChamp+=g.hChamp; T.hTrac+=g.hTrac; T.hAff+=g.hAff; T.hAtt+=g.hAtt; T.hCave+=g.hCave; T.hVigne+=g.hVigne;
+      T.eAff+=g.eAff; T.eAtt+=g.eAtt;
       if(g.sansTaux && g.hVigne>0) nSansTaux++;
     }
   });
@@ -5764,18 +5777,18 @@ function _ecoTempsVigne(){
   var vus={};
   E.ev.forEach(function(e){
     var k=e.parc+'\u0000'+e.tache, P=pairs[k];
-    var b=_ecoTvBar(e.p, _ecoTvDef(e.tache), e);
-    if(!P){ P=pairs[k]={parc:e.parc, tache:e.tache, h:0, bar:0, surf:0, n:0, noms:{}, sansH:true}; }
+    var b=e.dup ? 0 : _ecoTvBar(e.p, _ecoTvDef(e.tache), e);   // RÉAL-1 : une revalidation ne recompte pas le barème
+    if(!P){ P=pairs[k]={parc:e.parc, tache:e.tache, h:0, eur:0, bar:0, surf:0, n:0, noms:{}, sansH:true}; }
     P.bar+=b; P.n++;
     if(!vus[k]){ P.surf=e.surf; vus[k]=1; }
   });
   var byT={}, parcs={};
   Object.keys(pairs).forEach(function(k){
     var P=pairs[k];
-    var t=byT[P.tache]||(byT[P.tache]={nom:P.tache, h:0, bar:0, surf:0, nP:0, nSansH:0});
-    t.h+=P.h; t.bar+=P.bar; t.surf+=P.surf; t.nP++; if(!(P.h>0)) t.nSansH++;
-    var q=parcs[P.parc]||(parcs[P.parc]={h:0,bar:0});
-    q.h+=P.h; q.bar+=P.bar;
+    var t=byT[P.tache]||(byT[P.tache]={nom:P.tache, h:0, eur:0, bar:0, surf:0, nP:0, nSansH:0});
+    t.h+=P.h; t.eur+=P.eur; t.bar+=P.bar; t.surf+=P.surf; t.nP++; if(!(P.h>0)) t.nSansH++;
+    var q=parcs[P.parc]||(parcs[P.parc]={h:0,eur:0,bar:0});
+    q.h+=P.h; q.eur+=P.eur; q.bar+=P.bar;
   });
   var taches=Object.keys(byT).map(function(n){ var t=byT[n];
     t.hhaR=t.surf>0?t.h/t.surf:0; t.hhaB=t.surf>0?t.bar/t.surf:0;
@@ -5786,7 +5799,7 @@ function _ecoTempsVigne(){
   gens.sort(function(a,b){ return b.hAtt-a.hAtt || (a.nom<b.nom?-1:1); });
   var v={ ok:true, pairs:pairs, taches:taches, parcs:parcs, gens:gens,
           hChamp:T.hChamp, hTrac:T.hTrac, hAff:T.hAff, hAtt:T.hAtt, hCave:T.hCave, hVigne:T.hVigne,
-          eur:eurT, byD:byD, nSansTaux:nSansTaux,
+          eur:eurT, eAff:T.eAff, eAtt:T.eAtt, byD:byD, nSansTaux:nSansTaux,
           nEv:E.ev.length, nHorsParc:E.nHorsParc, d0:d0, d1:d1, fin:fin };
   _ECO_TV={key:key, v:v};
   return v;
@@ -6100,6 +6113,18 @@ function _pecEurK(n){
   return _ecoEur(v);
 }
 function _pecPct(n){ return (Math.round((Number(n)||0)*10)/10).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:1})+' %'; }
+// RÉAL-1 — l'écart réalisé − barème du fait. Plus = le travail a coûté PLUS que prévu.
+//   Mêmes seuils que la carte « Temps réel contre barème » (>15 rouge, >5 orange, <−8 vert),
+//   lus en % du barème du fait : les deux cartes colorent le même écart de la même façon.
+function _pecEcPct(ec, base){ return (ec===null || ec===undefined || !(Number(base)>0)) ? null : (ec/base*100); }
+function _pecEcCol(pc){ return (pc===null) ? 'var(--texte)' : (pc>15?'var(--rouge)':(pc>5?'var(--orange)':(pc<-8?'var(--vert-med)':'var(--texte)'))); }
+function _pecEcEur(ec){ if(ec===null || ec===undefined) return '\u2014'; var r=Math.round(ec); return (r>0?'+':(r<0?'\u2212':''))+_ecoEur(Math.abs(r)); }
+function _pecEcTd(ec, base){
+  if(ec===null || ec===undefined) return '<td class="r" style="color:var(--texte-doux)">\u2014</td>';
+  var pc=_pecEcPct(ec, base);
+  return '<td class="r" style="color:'+_pecEcCol(pc)+';font-weight:700">'+_pilEsc(_pecEcEur(ec))
+    +(pc!==null?('<div style="font-weight:400;font-size:var(--pt-micro,11px)">'+(pc>0?'+':(pc<0?'\u2212':''))+_pilEsc(_pecPct(Math.abs(pc)))+'</div>'):'')+'</td>';
+}
 function _pecMoisCourt(m){ return ['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'][m]||''; }
 function _pecIsoToMs(iso){ var t=Date.parse(String(iso||'')+'T00:00:00'); return isNaN(t)?null:t; }
 function _pecMsToIso(ms){ var d=new Date(ms); var m=d.getMonth()+1, j=d.getDate(); return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(j<10?'0':'')+j; }
@@ -6557,6 +6582,31 @@ function _pecData(){
   // qu'il reste d'argent. La projection l'utilise (ci-dessous).
   var resteBar = Math.max(0, budget-engageBar);
   var consPct = budget>0 ? (engage/budget*100) : 0;
+
+  // ★★★ RÉAL-1 (27/09/2026) — LE RÉALISÉ DES TABLEAUX EST CE QUI A ÉTÉ PAYÉ.
+  // Nico, capture à l'appui : dégrafage à 100 %, « Réalisé 6 494 € = Budget 6 494 € », et juste
+  // en dessous 374 h réelles pour 329 h au barème. « Ça sert à ça un outil de pilotage. »
+  // AVANT : Réalisé = heures de BARÈME du fait × taux — égal au budget du fait PAR CONSTRUCTION,
+  //   il ne pouvait montrer aucune différence.
+  // MAINTENANT : Réalisé = les euros des heures du planning VERSÉES au travail (ou à la parcelle)
+  //   par _ecoTempsVigne, chaque heure à son taux du jour. Écart = réalisé − barème du fait
+  //   (moF / fE) : les deux côtés portent sur le même travail, celui qui est validé.
+  //   Les heures EN ATTENTE d'une validation sont payées (dans l'engagé) mais n'ont pas encore
+  //   de travail : elles sont dites sous le tableau, jamais réparties au hasard.
+  // Repli (période sans dates, pas commencée, planning absent) : réalisé = barème, écart « — ».
+  var tvOk = !!(TVe && TVe.ok);
+  var tvByT = {};
+  if(tvOk) (TVe.taches||[]).forEach(function(x){ tvByT[_friseNorm(x.nom)]=x; });
+  var T_moRe=0;
+  rows.forEach(function(r){
+    var q = tvOk ? (TVe.parcs[r.nom]||null) : null;
+    r.moRe  = tvOk ? (q ? q.eur : 0) : r.moF;
+    r.hRe   = q ? q.h : 0;
+    r.engRe = r.moRe + r.tracF + r.gnrF + r.phyF;
+    r.ecE   = (tvOk && (r.moF>0 || r.moRe>0)) ? (r.moRe - r.moF) : null;
+    T_moRe += r.moRe;
+  });
+  T.moRe = T_moRe;
   var avcPct  = avc*100;
 
   // ⚠⚠ PIEGE EVITE, trouve au harnais : un premier jet definissait la derive
@@ -6655,11 +6705,22 @@ function _pecData(){
     { k:'phy',  lab:'Produits phyto',               col:_PEC_COL.phy,  fait:T.phyF,  budget:phyB,  proj:projOn, det:'doses \u00d7 surface \u00d7 prix R\u00e9serve' }
   ];
 
+  var tvVus = {};
   var tlist = tOrder.map(function(n){ var t=tasks[n];
     t.euHa = t.surf>0 ? t.bE/t.surf : 0;
     t.pct  = t.bH>0 ? t.fH/t.bH*100 : 100;
     t.part = budget>0 ? t.bE/budget*100 : 0;
+    // RÉAL-1 : le réalisé du travail = les euros de ses heures versées ; écart au barème du fait.
+    var nk=_friseNorm(t.nom), x=tvOk ? (tvByT[nk]||null) : null;
+    if(x) tvVus[nk]=1;
+    t.reE = tvOk ? (x ? x.eur : 0) : t.fE;
+    t.reH = x ? x.h : 0;
+    t.ecE = (tvOk && (t.fE>0 || t.reE>0)) ? (t.reE - t.fE) : null;
     return t; }).sort(function(a,b){ return b.bE-a.bE; });
+  // Heures versées à un travail absent de la liste de la période (tâche retirée de la saison) :
+  //   comptées dans l'engagé, montrées sous le tableau plutôt que perdues.
+  var tvHorsE = 0;
+  if(tvOk) (TVe.taches||[]).forEach(function(x){ if(!tvVus[_friseNorm(x.nom)]) tvHorsE += x.eur; });
 
   var rec=_pecRecolte(), kgB=_pecKgB();
   var bouteilles = (rec.kg>0) ? (rec.kg/kgB) : 0;
@@ -6678,6 +6739,8 @@ function _pecData(){
     projFin:projFin,
     budget:budget, engage:engage, resteE:resteE, engageBar:engageBar, resteBar:resteBar,
     moReel:moReel, moSrc:moSrc, tv:((TVe&&TVe.ok)?TVe:null),
+    reOk:tvOk, engRe:(T.moRe + T.tracF + T.gnrF + T.phyF), ecRe:(tvOk ? (T.moRe - T.moF) : null),
+    reAttE:(tvOk ? (TVe.eAtt||0) : 0), reAttH:(tvOk ? (TVe.hAtt||0) : 0), reHorsE:tvHorsE,
     coutHaB:(T.surf>0?budget/T.surf:0), coutHaE:(T.surf>0?engage/T.surf:0),
     rec:rec, kgB:kgB, bouteilles:bouteilles,
     eurKg:(rec.kg>0?budget/rec.kg:0), eurBt:(bouteilles>0?budget/bouteilles:0),
@@ -6943,29 +7006,47 @@ function _pecTaskSvg(E,w){
   var pL=et?0:200, pR=et?0:132, rowH=et?48:34, pT=et?24:26, pB=12;
   var c=window._mvGraphCadre(w, pT+ts.length*rowH+pB, { padL:pL, padR:pR, padT:pT, padB:pB });
   var W=c.w, iw=c.iw;
-  var mx=_pecNiceMax(ts[0].bE);
+  // RÉAL-1 : la barre pleine est le RÉALISÉ (payé) ; au-delà du budget du travail, la part qui
+  //   déborde est rouge. Le trait vertical marque le barème du fait : barre pleine qui le
+  //   dépasse = plus cher que prévu, qui s'arrête avant = moins cher.
+  var mxV=0; ts.forEach(function(t){ mxV=Math.max(mxV, t.bE, t.reE||0); });
+  var mx=_pecNiceMax(mxV);
   var lx=et?0:pL;
   var g='<rect x="'+lx+'" y="7" width="11" height="9" rx="2" fill="'+_PEC_COL.mo+'"/>'
        +'<text x="'+(lx+16)+'" y="15" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">R\u00e9alis\u00e9</text>'
        +'<rect x="'+(lx+78)+'" y="7" width="11" height="9" rx="2" fill="'+_PEC_COL.mo+'" opacity=".28"/>'
-       +'<text x="'+(lx+94)+'" y="15" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">Reste \u00e0 faire</text>';
+       +'<text x="'+(lx+94)+'" y="15" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">Budget</text>'
+       +(E.reOk?('<rect x="'+(lx+148)+'" y="5" width="2" height="13" fill="var(--texte)"/>'
+       +'<text x="'+(lx+156)+'" y="15" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">Bar\u00e8me du fait</text>'):'');
+  function _tsBar(x0, by, bh, t, wTot){
+    var re=(t.reE!=null)?t.reE:t.fE, wRe=re/mx*iw, wIn=Math.min(wRe,wTot), o='';
+    o+='<rect x="'+x0+'" y="'+by+'" width="'+Math.max(0,wIn).toFixed(1)+'" height="'+bh+'" rx="4" fill="'+_PEC_COL.mo+'"/>';
+    if(wRe>wTot+0.5) o+='<rect x="'+(x0+wTot).toFixed(1)+'" y="'+by+'" width="'+(wRe-wTot).toFixed(1)+'" height="'+bh+'" rx="3" fill="var(--rouge)"/>';
+    if(E.reOk && t.fE>0){ var xf=x0+t.fE/mx*iw; o+='<rect x="'+(xf-1).toFixed(1)+'" y="'+(by-3)+'" width="2" height="'+(bh+6)+'" fill="var(--texte)"/>'; }
+    return o;
+  }
+  function _tsDroite(t){
+    if(t.ecE!==null && t.ecE!==undefined) return _pecEcEur(t.ecE)+' \u00b7 '+Math.round(t.pct)+' %';
+    return _ecoEur(t.euHa)+'/ha \u00b7 '+Math.round(t.pct)+' %';
+  }
+  function _tsCol(t){ return (t.ecE!==null && t.ecE!==undefined) ? _pecEcCol(_pecEcPct(t.ecE,t.fE)) : c.col.texte; }
   ts.forEach(function(t,i){
     var y=pT+i*rowH;
-    var wTot=t.bE/mx*iw, wDone=t.fE/mx*iw;
+    var wTot=t.bE/mx*iw;
     if(et){
       var by=y+17, bh=14;
       g+='<text x="0" y="'+(y+11)+'" font-size="'+c.txt.axe+'" font-weight="600" fill="var(--texte)">'+_pilEsc(_pecTrunc(_pilTnom(t.nom),22))+'</text>'
         +'<text x="'+W+'" y="'+(y+11)+'" text-anchor="end" font-size="'+c.txt.axe+'" font-weight="700" fill="var(--texte)">'+_pilEsc(_pecEurK(t.bE))+'</text>'
         +'<rect x="0" y="'+by+'" width="'+Math.max(1,wTot).toFixed(1)+'" height="'+bh+'" rx="4" fill="'+_PEC_COL.mo+'" opacity=".22"/>'
-        +'<rect x="0" y="'+by+'" width="'+Math.max(0,wDone).toFixed(1)+'" height="'+bh+'" rx="4" fill="'+_PEC_COL.mo+'"/>'
-        +'<text x="'+W+'" y="'+(by+bh+11)+'" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">'+_pilEsc(_ecoEur(t.euHa))+'/ha \u00b7 '+Math.round(t.pct)+' %</text>';
+        +_tsBar(0, by, bh, t, wTot)
+        +'<text x="'+W+'" y="'+(by+bh+11)+'" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+_tsCol(t)+'">'+_pilEsc(_tsDroite(t))+'</text>';
     } else {
       var by2=y+5, bh2=17;
       g+='<text x="'+(pL-12)+'" y="'+(by2+13)+'" text-anchor="end" font-size="'+c.txt.val+'" font-weight="600" fill="var(--texte)">'+_pilEsc(_pecTrunc(_pilTnom(t.nom),24))+'</text>'
         +'<rect x="'+pL+'" y="'+by2+'" width="'+Math.max(1,wTot).toFixed(1)+'" height="'+bh2+'" rx="4" fill="'+_PEC_COL.mo+'" opacity=".22"/>'
-        +'<rect x="'+pL+'" y="'+by2+'" width="'+Math.max(0,wDone).toFixed(1)+'" height="'+bh2+'" rx="4" fill="'+_PEC_COL.mo+'"/>'
-        +'<text x="'+(pL+wTot+10).toFixed(1)+'" y="'+(by2+13)+'" font-size="'+c.txt.val+'" font-weight="700" fill="var(--texte)">'+_pilEsc(_pecEurK(t.bE))+'</text>'
-        +'<text x="'+(W-4)+'" y="'+(by2+13)+'" text-anchor="end" font-size="'+c.txt.axe+'" fill="'+c.col.texte+'">'+_pilEsc(_ecoEur(t.euHa))+'/ha \u00b7 '+Math.round(t.pct)+' %</text>';
+        +_tsBar(pL, by2, bh2, t, wTot)
+        +'<text x="'+(pL+Math.max(wTot,(t.reE||0)/mx*iw)+10).toFixed(1)+'" y="'+(by2+13)+'" font-size="'+c.txt.val+'" font-weight="700" fill="var(--texte)">'+_pilEsc(_pecEurK(t.bE))+'</text>'
+        +'<text x="'+(W-4)+'" y="'+(by2+13)+'" text-anchor="end" font-size="'+c.txt.axe+'" fill="'+_tsCol(t)+'">'+_pilEsc(_tsDroite(t))+'</text>';
     }
   });
   return window._mvGraphSvg(c, 'Co\u00fbt par travail : '+ts.length+' travaux chiffr\u00e9s, du plus cher au moins cher.', g);
@@ -7464,23 +7545,44 @@ function _pecViewPostes(E){
     +'<div class="pec-acts"><button class="pec-btn" data-pec="sub" data-v="exe"><span>'+_mvIcon('calendrier',16)+'</span> Voir les d\u00e9penses de l\u2019exercice</button></div>'
     +'</div></div>';
 
+  // RÉAL-1 : Réalisé = ce que les heures versées au travail ont coûté (planning × taux du jour) ;
+  //   Écart = réalisé − barème du travail fait. Repli sans planning : réalisé = barème, écart —.
+  var tS={bH:0,fH:0,reE:0,fE:0,rE:0,bE:0,surf:0};
   var trows=(E.tasks||[]).map(function(t){
+    tS.bH+=t.bH; tS.fH+=t.fH; tS.reE+=t.reE; tS.fE+=t.fE; tS.rE+=t.rE; tS.bE+=t.bE; tS.surf+=t.surf;
     return '<tr><td class="n">'+_pilEsc(_pilTnom(t.nom))+'</td>'
       +'<td class="r">'+_ecoH1(t.bH)+' h</td>'
       +'<td class="r">'+Math.round(t.pct)+' %</td>'
-      +'<td class="r">'+_pilEsc(_ecoEur(t.fE))+'</td>'
+      +'<td class="r">'+_pilEsc(_ecoEur(t.reE))+(E.reOk&&t.reH>0?('<div style="color:var(--texte-doux);font-size:var(--pt-micro,11px)">'+_ecoH1(t.reH)+' h</div>'):'')+'</td>'
+      +_pecEcTd(t.ecE, t.fE)
       +'<td class="r">'+_pilEsc(_ecoEur(t.rE))+'</td>'
       +'<td class="r n">'+_pilEsc(_ecoEur(t.bE))+'</td>'
       +'<td class="r">'+_pilEsc(_ecoEur(t.euHa))+'</td>'
       +'<td class="r">'+_pilEsc(_pecPct(t.part))+'</td></tr>';
   }).join('');
+  var tEc = E.reOk ? (tS.reE - tS.fE) : null;
+  var tfoot = (E.tasks||[]).length>1
+    ? '<tfoot><tr><td>Total</td><td class="r">'+_ecoH1(tS.bH)+' h</td><td class="r">'+Math.round(tS.bH>0?tS.fH/tS.bH*100:0)+' %</td>'
+      +'<td class="r">'+_pilEsc(_ecoEur(tS.reE))+'</td>'+_pecEcTd(tEc, tS.fE)
+      +'<td class="r">'+_pilEsc(_ecoEur(tS.rE))+'</td><td class="r">'+_pilEsc(_ecoEur(tS.bE))+'</td>'
+      +'<td class="r">'+(tS.surf>0?_pilEsc(_ecoEur(tS.bE/tS.surf)):'\u2014')+'</td><td class="r">'+_pilEsc(_pecPct(E.budget>0?tS.bE/E.budget*100:0))+'</td></tr></tfoot>'
+    : '';
+  var tNote;
+  if(E.reOk){
+    tNote='<b>R\u00e9alis\u00e9</b> = heures du planning vers\u00e9es aux parcelles valid\u00e9es, au taux charg\u00e9 du jour. <b>\u00c9cart</b> = r\u00e9alis\u00e9 \u2212 bar\u00e8me du travail fait\u00a0: <b>+</b> = plus cher que pr\u00e9vu.'
+      +(E.reAttE>=1?(' <b>'+_pilEsc(_ecoEur(E.reAttE))+'</b> ('+_ecoH1(E.reAttH)+' h) attendent une validation\u00a0: pay\u00e9s, dans l\u2019engag\u00e9, sur aucun travail encore.'):'')
+      +(E.reHorsE>=1?(' <b>'+_pilEsc(_ecoEur(E.reHorsE))+'</b> vers\u00e9s \u00e0 des travaux hors de la liste de la p\u00e9riode.'):'');
+  } else {
+    tNote='Planning pas encore ouvert ou p\u00e9riode sans dates\u00a0: le <b>r\u00e9alis\u00e9</b> est au bar\u00e8me, aucun \u00e9cart ne peut \u00eatre lu.';
+  }
   window._mvGraphSuivre('#pec-g-task', function(w){ return _pecTaskSvg(E,w); });
   H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Co\u00fbt par travail</div>'
     +'<div class="pec-cs">Main-d\u2019\u0153uvre vigne uniquement'
     +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.travaux')):'')+'</div></div>'
     +'<div class="pec-cb"><div id="pec-g-task"></div>'
-    +'<div class="pec-scroll" style="margin-top:14px"><table class="pec-tbl"><thead><tr><th>Travail</th><th class="r">Heures</th><th class="r">Fait</th><th class="r">R\u00e9alis\u00e9</th><th class="r">Reste</th><th class="r">Budget</th><th class="r">\u20AC/ha</th><th class="r">Part</th></tr></thead>'
-    +'<tbody>'+(trows||'<tr><td colspan="8" class="pec-empty">Aucun travail chiffr\u00e9.</td></tr>')+'</tbody></table></div>'
+    +'<div class="pec-scroll" style="margin-top:14px"><table class="pec-tbl" style="min-width:640px"><thead><tr><th>Travail</th><th class="r">Heures</th><th class="r">Fait</th><th class="r">R\u00e9alis\u00e9</th><th class="r">\u00c9cart</th><th class="r">Reste</th><th class="r">Budget</th><th class="r">\u20AC/ha</th><th class="r">Part</th></tr></thead>'
+    +'<tbody>'+(trows||'<tr><td colspan="9" class="pec-empty">Aucun travail chiffr\u00e9.</td></tr>')+'</tbody>'+tfoot+'</table></div>'
+    +'<div class="pec-vcadre"><span>'+tNote+'</span></div>'
     +'<div class="pec-acts"><button class="pec-btn" data-pec="sub" data-v="par"><span>\uD83C\uDF47</span> Voir parcelle par parcelle</button></div>'
     +'</div></div>';
   H+=_pecCarteTemps();
@@ -7529,17 +7631,19 @@ var _PEC_COLS=[
   ['nom',   'Parcelle',  0],
   ['surf',  'ha',        1],
   ['pct',   'Fait',      1],
-  ['moF',   'MO',        1],
+  ['moRe',  'MO',        1],
   ['tracF', 'Tracteur',  1],
   ['gnrF',  'GNR',       1],
   ['phyF',  'Phyto',     1],
-  ['engage','R\u00e9alis\u00e9',1],
+  ['engRe', 'R\u00e9alis\u00e9',1],
+  ['ecE',   '\u00c9cart',  1],
   ['reste', 'Reste',     1],
   ['budget','Budget',    1],
   ['coutHa','\u20AC/ha', 1]
 ];
 function _pecSortRows(E){
   var k=_PEC_PSORT, dir=_PEC_PDIR;
+  if(k==='moF') k='moRe'; else if(k==='engage') k='engRe';   // RÉAL-1 : anciens tris mémorisés
   return (E.rows||[]).slice().sort(function(a,b){
     var x=a[k], y=b[k];
     if(typeof x==='string'||typeof y==='string') return String(x).localeCompare(String(y),'fr')*(dir<0?-1:1);
@@ -7562,20 +7666,21 @@ function _pecViewParcelles(E){
     return '<tr><td class="n">'+_pilEsc(r.nom)+'<div style="margin-top:4px;display:flex;gap:5px;flex-wrap:wrap">'+badge+plants+ret+'</div></td>'
       +'<td class="r">'+_pilHa(r.surf)+'</td>'
       +'<td class="r" style="color:'+pcol+';font-weight:700">'+Math.round(r.pct)+' %</td>'
-      +'<td class="r">'+_pilEsc(_ecoEur(r.moF))+'</td>'
+      +'<td class="r">'+_pilEsc(_ecoEur(r.moRe))+'</td>'
       +'<td class="r">'+(r.tracF>0?_pilEsc(_ecoEur(r.tracF)):'\u2014')+'</td>'
       +'<td class="r">'+(r.gnrF>0?_pilEsc(_ecoEur(r.gnrF)):'\u2014')+'</td>'
       +'<td class="r">'+(r.phyF>0?_pilEsc(_ecoEur(r.phyF)):'\u2014')+'</td>'
-      +'<td class="r">'+_pilEsc(_ecoEur(r.engage))+'</td>'
+      +'<td class="r">'+_pilEsc(_ecoEur(r.engRe))+'</td>'
+      +_pecEcTd(r.ecE, r.moF)
       +'<td class="r">'+_pilEsc(_ecoEur(r.reste))+'</td>'
       +'<td class="r n">'+_pilEsc(_ecoEur(r.budget))+'</td>'
       +'<td class="r">'+_pilEsc(_ecoEur(r.coutHa))+'</td></tr>';
-  }).join('') || '<tr><td colspan="11" class="pec-empty">Aucune parcelle active.</td></tr>';
+  }).join('') || '<tr><td colspan="12" class="pec-empty">Aucune parcelle active.</td></tr>';
   var foot='<tr><td>'+rows.length+' parcelle'+(rows.length>1?'s':'')+'</td>'
     +'<td class="r">'+_pilHa(E.tot.surf)+'</td><td class="r">'+Math.round(E.avc)+' %</td>'
-    +'<td class="r">'+_pilEsc(_ecoEur(E.tot.moF))+'</td><td class="r">'+_pilEsc(_ecoEur(E.tot.tracF))+'</td>'
+    +'<td class="r">'+_pilEsc(_ecoEur(E.tot.moRe))+'</td><td class="r">'+_pilEsc(_ecoEur(E.tot.tracF))+'</td>'
     +'<td class="r">'+_pilEsc(_ecoEur(E.tot.gnrF))+'</td><td class="r">'+_pilEsc(_ecoEur(E.tot.phyF))+'</td>'
-    +'<td class="r">'+_pilEsc(_ecoEur(E.engageBar))+'</td><td class="r">'+_pilEsc(_ecoEur(E.tot.moR))+'</td>'
+    +'<td class="r">'+_pilEsc(_ecoEur(E.engRe))+'</td>'+_pecEcTd(E.ecRe, E.tot.moF)+'<td class="r">'+_pilEsc(_ecoEur(E.tot.moR))+'</td>'
     +'<td class="r">'+_pilEsc(_ecoEur(E.budget))+'</td><td class="r">'+_pilEsc(_ecoEur(E.coutHaB))+'</td></tr>';
   var H='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Co\u00fbt parcelle par parcelle</div>'
     // ★ LA LEGENDE DES COLONNES N'EST PAS UN CADRE : c'est un mode d'emploi du
@@ -7583,10 +7688,12 @@ function _pecViewParcelles(E){
     //   la fiche, avec « cliquez pour trier ».
     +'<div class="pec-cs"><b>Budget</b> de la p\u00e9riode, parcelle par parcelle'
     +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.parcelles')):'')+'</div></div>'
-    +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:900px"><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody><tfoot>'+foot+'</tfoot></table></div>'
+    +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:980px"><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody><tfoot>'+foot+'</tfoot></table></div>'
     +'<div class="pec-acts"><button class="pec-btn" data-pec="csv"><span>'+_mvIcon('chevron',16)+'</span> T\u00e9l\u00e9charger le tableau (CSV)</button>'
     +'<button class="pec-btn" data-pec="copy"><span>'+_mvIcon('liste',16)+'</span> Copier pour un tableur</button></div>'
-    +'<div class="pec-note">Le co\u00fbt d\u2019une parcelle est un <b>co\u00fbt de culture</b> : ni vinification, ni foncier, ni amortissement du mat\u00e9riel. Les heures viennent du bar\u00e8me h/ha du domaine, le taux de la fiche de paie de chaque salari\u00e9, et le tracteur du taux de son conducteur.</div>'
+    +'<div class="pec-note">Le co\u00fbt d\u2019une parcelle est un <b>co\u00fbt de culture</b> : ni vinification, ni foncier, ni amortissement du mat\u00e9riel. Le <b>budget</b> vient du bar\u00e8me h/ha du domaine\u00a0; la <b>MO r\u00e9alis\u00e9e</b>, des heures du planning vers\u00e9es aux parcelles valid\u00e9es, au taux de la fiche de paie de chaque salari\u00e9 le jour m\u00eame\u00a0; le tracteur, du taux de son conducteur.'
+    +(E.reOk && E.reAttE>=1 ? (' <b>'+_pilEsc(_ecoEur(E.reAttE))+'</b> d\u2019heures attendent une validation\u00a0: dans l\u2019engag\u00e9, sur aucune parcelle encore.') : '')
+    +'</div>'
     +'</div></div>';
   window._mvGraphSuivre('#pec-g-ecart', function(w){ return _pecEcartSvg(E,w); });
   H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">\u00c9cart au co\u00fbt moyen \u00e0 l\u2019hectare</div>'
@@ -7599,15 +7706,15 @@ function _pecViewParcelles(E){
 // ── Export : le tableau, tel qu'il est trié à l'écran ────────────────
 function _pecTableTxt(E,sep){
   var rows=_pecSortRows(E);
-  var L=[['Parcelle','Surface ha','Avancement %','MO engagee EUR','Tracteur EUR','GNR EUR','Phyto EUR','Realise EUR','Reste EUR','Budget EUR','EUR par ha','Heures budget','Heures restantes','Taux EUR/h','Source taux','Plants','Retard modelise EUR'].join(sep)];
+  var L=[['Parcelle','Surface ha','Avancement %','MO realisee EUR','Tracteur EUR','GNR EUR','Phyto EUR','Realise EUR','Ecart EUR','MO bareme du fait EUR','Heures realisees','Reste EUR','Budget EUR','EUR par ha','Heures budget','Heures restantes','Taux EUR/h','Source taux','Plants','Retard modelise EUR'].join(sep)];
   function n2(v){ return String(Math.round((Number(v)||0)*100)/100).replace('.',','); }
   rows.forEach(function(r){
-    L.push([String(r.nom).replace(/[\t\r\n;]/g,' '), n2(r.surf), Math.round(r.pct), n2(r.moF), n2(r.tracF), n2(r.gnrF), n2(r.phyF),
-            n2(r.engage), n2(r.reste), n2(r.budget), n2(r.coutHa), n2(r.bH), n2(r.rH), n2(r.tx),
+    L.push([String(r.nom).replace(/[\t\r\n;]/g,' '), n2(r.surf), Math.round(r.pct), n2(r.moRe), n2(r.tracF), n2(r.gnrF), n2(r.phyF),
+            n2(r.engRe), (r.ecE===null?'':n2(r.ecE)), n2(r.moF), n2(r.hRe), n2(r.reste), n2(r.budget), n2(r.coutHa), n2(r.bH), n2(r.rH), n2(r.tx),
             (r.src==='reel'?'equipe reelle':'taux moyen'), r.trous||0, n2(r.retE)].join(sep));
   });
-  L.push(['TOTAL', n2(E.tot.surf), Math.round(E.avc), n2(E.tot.moF), n2(E.tot.tracF), n2(E.tot.gnrF), n2(E.tot.phyF),
-          n2(E.engageBar), n2(E.tot.moR), n2(E.budget), n2(E.coutHaB), n2(E.tot.bH), n2(E.tot.rH), n2(E.rate), '', E.tot.trous, n2(E.tot.retE)].join(sep));
+  L.push(['TOTAL', n2(E.tot.surf), Math.round(E.avc), n2(E.tot.moRe), n2(E.tot.tracF), n2(E.tot.gnrF), n2(E.tot.phyF),
+          n2(E.engRe), (E.ecRe===null?'':n2(E.ecRe)), n2(E.tot.moF), '', n2(E.tot.moR), n2(E.budget), n2(E.coutHaB), n2(E.tot.bH), n2(E.tot.rH), n2(E.rate), '', E.tot.trous, n2(E.tot.retE)].join(sep));
   return L.join('\r\n');
 }
 function _pecExport(kind,E){
