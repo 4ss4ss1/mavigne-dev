@@ -446,3 +446,55 @@ dans `RENOMMES` (l'ancien titre de ce lot y est, §188 → §189). **Contre-épr
 Deux lots préparés dans deux conversations le même jour doivent s'intégrer **l'un après l'autre, le second reconstruit sur
 le premier** — jamais décompressés tous les deux sur la même base.
 
+---
+
+## 190. ★★ LISTE-1 — UNE SEULE LISTE DE CONTRÔLES, JOUÉE UNE SEULE FOIS (27/09 — `scripts/mv-harnais-liste.mjs` (neuf) · `scripts/mv-lanceur.mjs` (neuf) · `scripts/mv-harnais-portes.mjs` (réécrit) · `package.json` · `.github/workflows/ci.yml` · `scripts/harnais-claude-md.mjs` · **aucun bump**, base `a4d7efe`)
+
+### 190a. Le constat
+
+Proposé au §28 par RULES-1 (§189a), lancé par Nico. **Mesuré sur `a4d7efe`** : `check` et `prebuild` étaient deux chaînes
+**identiques** de 143 commandes, recopiées à la main dans `package.json` ; `ci.yml` rejouait **70** de ces commandes en 34
+étapes nommées, puis `npm run build` relançait **les 143** via `prebuild` — chaque contrôle de la CI tournait **deux fois**.
+Trois listes pour une seule porte : `mv-harnais-portes` n'existait que pour les empêcher de diverger, parce qu'elles avaient
+déjà divergé (46 contre 25, dont 14 que le poste ne lançait jamais).
+
+### 190b. Ce qui est fait
+
+- **`scripts/mv-harnais-liste.mjs`** — LA liste : `HARNAIS = [[commande, groupe?], …]` dans l'ordre d'exécution, et
+  `GROUPES` : les raisons d'être. **Même suite, même ordre** que l'ancienne chaîne `check` (vérifié : 143 = 143, comparaison
+  exacte avec `git show HEAD:package.json`), plus une ligne : `mv-harnais-portes --contre`. Les **34 commentaires** que
+  `ci.yml` portait au-dessus de ses étapes sont repris **mot pour mot** dans `GROUPES` (générés depuis le fichier, pas
+  réécrits) : 70 commandes y sont rattachées. Certains parlent de l'ancienne CI — l'en-tête le dit ; ils sont gardés parce
+  qu'ils disent POURQUOI le contrôle existe.
+  Une commande = `node scripts/x.mjs` + au plus un drapeau : pas de `&&`, pas de tube, une liste relisible ligne à ligne.
+- **`scripts/mv-lanceur.mjs`** — joue la liste, chaque commande dans son propre processus (`process.execPath` : le même Node
+  que npm, sous Windows aussi), sortie telle quelle. Par défaut : **premier rouge, arrêt, code 1** — la chaîne `&&` d'avant,
+  avec la commande de reprise affichée (`--depuis`). `--continuer` : tout, puis le résumé des rouges avec la raison d'être de
+  leur groupe. `--groupe a,b`, `--liste`. Chemin rouge testé sur une liste factice (arrêt, reprise affichée, `--continuer`,
+  codes de sortie).
+- **`package.json`** : `check` = `node scripts/mv-lanceur.mjs` · `prebuild` = `npm run check`.
+- **`ci.yml`** : les 34 étapes deviennent **une** (`node scripts/mv-lanceur.mjs --continuer`), et le build devient
+  **`npm run build --ignore-scripts`** — npm saute alors les hooks `pre`/`post` mais joue `build` lui-même (vérifié sur npm 10,
+  celui de Node 22 en CI : `prebuild` sauté, `build` joué). Sans ce drapeau, `prebuild` relancerait tout.
+  ⚠️ `build` n'a PAS été dédoublé en `build:seul` : C9 (preflight) et VER-1 lisent `scripts.build` et y exigent
+  `inject-precache` une seule fois puis `mv-version-json` — `--ignore-scripts` évite une seconde copie de la commande.
+- **`mv-harnais-portes.mjs`** réécrit : il gardait trois listes jumelles, il garde désormais le **câblage** —
+  A. `check` = le lanceur, `prebuild` = `npm run check`, aucun script de `package.json` ne recopie une chaîne (≥ 5
+  invocations) · B. la liste est saine (forme, fichiers présents, aucun doublon, groupes cités et utilisés, cliquet ESLint
+  présent, le lanceur ne se lance pas) · C. la CI lance le lanceur une fois avec `--continuer`, rien hors de la liste
+  (`CI_SEUL` vide), et construit avec `--ignore-scripts`. **13 assertions, 12 contre-épreuves**, dans la liste.
+
+### 190c. Ce qui change à l'usage
+
+**Ajouter un contrôle = UNE ligne dans `mv-harnais-liste.mjs`** (+ sa contre-épreuve). Plus rien à recopier dans
+`package.json` ni dans `ci.yml` — c'est la consigne posée au §6b du cœur. Côté CI, on perd les 34 étapes nommées de
+GitHub ; le résumé final du lanceur les remplace (chaque rouge avec sa raison d'être). Durée de la CI : un passage au
+lieu de deux.
+
+### 190d. Mesuré / pas vérifié
+
+`npm run check` (désormais le lanceur) : **144 commandes, 0 rouge, 375 s** dans le bac à sable. `mv-harnais-portes` :
+13 vertes, 12/12 contre-épreuves. `harnais-claude-md` : 63 vertes. ESLint : 0. Pas vérifié : **le job CI `controles` sous sa
+nouvelle forme** (premier push) — en particulier que `npm run build --ignore-scripts` se comporte sur le runner comme
+sur npm 10 ici.
+

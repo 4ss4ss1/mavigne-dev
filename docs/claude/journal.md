@@ -8,6 +8,16 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **27 septembre 2026 (RULES-1 + DOC-1)** — ★★★ **LES RÈGLES FIRESTORE EXÉCUTÉES PAR LE VRAI MOTEUR,
+> ET CE DOCUMENT SCINDÉ (§189)**. Aucun script n'exécutait `firestore.rules` : tous le lisaient comme du texte. Harnais neuf
+> `mv-harnais-rules` (53 requêtes sur l'émulateur, 12 contre-épreuves, 2 constats), job CI `rules` à part (Java 21 + émulateur).
+> ★★ **Joué chez Nico le 27/09 : 53/53 verts, 12/12 contre-épreuves rougissent** (le `.jar` de l'émulateur est bloqué dans le
+> bac à sable de Claude : c'est sa machine, puis le job CI `rules`, qui prouvent). Et ce fichier passe de 23 910 à ~2 600 lignes : le cœur ici, le reste dans
+> `docs/claude/` (mode d'emploi juste au-dessus). **Aucun bump** (scripts, CI, doc), base `9801910`. Détail en **§189**.
+> ⚠️⚠️ **Le push de ce lot avait EFFACÉ §188 (RÉAL-1)**, poussé une heure plus tôt : le zip portait un `CLAUDE.md` et un
+> `harnais-claude-md.mjs` complets construits AVANT lui. Code de RÉAL-1 intact ; sa section et sa consolidation sont restaurées
+> à l'identique, ce lot devient §189, et une garde neuve relit les titres des 12 derniers commits (§189d).
+>
 > ★ Consolidation : **27 septembre 2026 (RÉAL-1)** — ★★ **LE « RÉALISÉ » DES TABLEAUX EST CE QUI A ÉTÉ PAYÉ (§188)**.
 > Capture de Nico : dégrafage à 100 %, Réalisé 6 494 € = Budget 6 494 €, et juste dessous 374 h réelles. Le « Réalisé » de Coût par
 > travail et du tableau des parcelles était le barème du fait — égal au budget par construction. Il vient maintenant des euros que

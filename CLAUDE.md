@@ -3,15 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **27 septembre 2026 (RULES-1 + DOC-1)** — ★★★ **LES RÈGLES FIRESTORE EXÉCUTÉES PAR LE VRAI MOTEUR,
-> ET CE DOCUMENT SCINDÉ (§189)**. Aucun script n'exécutait `firestore.rules` : tous le lisaient comme du texte. Harnais neuf
-> `mv-harnais-rules` (53 requêtes sur l'émulateur, 12 contre-épreuves, 2 constats), job CI `rules` à part (Java 21 + émulateur).
-> ★★ **Joué chez Nico le 27/09 : 53/53 verts, 12/12 contre-épreuves rougissent** (le `.jar` de l'émulateur est bloqué dans le
-> bac à sable de Claude : c'est sa machine, puis le job CI `rules`, qui prouvent). Et ce fichier passe de 23 910 à ~2 600 lignes : le cœur ici, le reste dans
-> `docs/claude/` (mode d'emploi juste au-dessus). **Aucun bump** (scripts, CI, doc), base `9801910`. Détail en **§189**.
-> ⚠️⚠️ **Le push de ce lot avait EFFACÉ §188 (RÉAL-1)**, poussé une heure plus tôt : le zip portait un `CLAUDE.md` et un
-> `harnais-claude-md.mjs` complets construits AVANT lui. Code de RÉAL-1 intact ; sa section et sa consolidation sont restaurées
-> à l'identique, ce lot devient §189, et une garde neuve relit les titres des 12 derniers commits (§189d).
+> Dernière consolidation : **27 septembre 2026 (LISTE-1)** — ★★ **UNE SEULE LISTE DE CONTRÔLES, JOUÉE UNE SEULE FOIS (§190)**.
+> `check` et `prebuild` étaient deux copies à la main de la même chaîne de 142 commandes, et la CI en rejouait 70 à la main avant
+> que `npm run build` ne relance tout : chaque contrôle de la CI tournait deux fois. Désormais **`scripts/mv-harnais-liste.mjs`**
+> (la liste, dans l'ordre exact de l'ancienne chaîne) est jouée par **`scripts/mv-lanceur.mjs`** : `check` = le lanceur,
+> `prebuild` = `npm run check`, CI = le lanceur `--continuer` puis `npm run build --ignore-scripts`. **Ajouter un contrôle = une
+> ligne dans la liste.** `mv-harnais-portes` garde ce câblage (13 assertions, 12 contre-épreuves). **Aucun bump**, base `a4d7efe`.
+> Détail en **§190**.
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -813,11 +811,16 @@ npm run build && firebase deploy
 
 | Palier | Commande | Couvre |
 |---|---|---|
-| **0 — preflight** | `npm run check` (auto `prebuild`) | **C1 → C25** : statique + invariants anti-perte **exécutés** + cliquet XSS (C24) + App Check (C25) |
+| **0 — preflight** | `npm run check` (auto `prebuild`) — ★ joue `scripts/mv-harnais-liste.mjs` (§190) | **C1 → C25** : statique + invariants anti-perte **exécutés** + cliquet XSS (C24) + App Check (C25) |
 | **1 — smoke** | `npm run test:smoke` | l'app **boote** sans exception + 23 globals |
 | **2 — E2E local (DÉFAUT)** | `npm run test:e2e` | **login DOM réel + 10 pages + interactions** |
 | **2bis — E2E émulateurs** | `npm run test:e2e:emu` | + couche Firestore réelle — **BLOQUÉ SDK** |
 | ★ **RULES — règles Firestore** | `npm run test:rules` | `firestore.rules` **exécutées** sur l'émulateur : 53 requêtes + 12 contre-épreuves (§189). Java 21 requis ; **hors `npm run check`**, job CI `rules` |
+
+★★★ **AJOUTER UN CONTRÔLE = UNE LIGNE DANS `scripts/mv-harnais-liste.mjs`** (LISTE-1, §190), et sa contre-épreuve sur
+la ligne suivante. **Rien dans `package.json`, rien dans `ci.yml`** : `check` = `node scripts/mv-lanceur.mjs`, `prebuild` =
+`npm run check`, la CI joue le lanceur `--continuer`. `mv-harnais-portes` rougit si une seconde liste revient. Reprendre après
+un rouge : `node scripts/mv-lanceur.mjs --depuis <script>` ; un groupe seul : `--groupe <id>` ; voir la liste : `--liste`.
 
 ⚠️ **`smoke.mjs` sert `dist/`** → il teste le **dernier build**, pas les sources.
 
@@ -1801,7 +1804,7 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 3. **F02 — `error_log` n'est borné que pour les `ro`** : la règle 3 (tout membre non-ro) l'accepte sans le plafond
    de 100 de la règle 5. Sans gravité (la limite de 1 Mio de Firestore tient), à aligner ou à assumer.
    Chaque écart fermé : retirer sa ligne de `CONSTATS` dans `mv-harnais-rules.mjs` (le harnais le signale).
-4. ★ **Proposé, pas fait — une liste unique des harnais.** `check` et `prebuild` sont **deux chaînes identiques de
+4. ✅ **FAIT (LISTE-1, §190) — une liste unique des harnais.** Historique de l'entrée : `check` et `prebuild` sont **deux chaînes identiques de
    142 commandes**, copiées à la main ; et la CI rejoue un sous-ensemble à la main, puis `npm run build` relance
    **tout** via `prebuild` (double exécution). Un manifeste lu par un seul lanceur, `prebuild: "npm run check"`,
    la CI sur le même lanceur. ⚠️ Ne PAS déplacer les scripts en sous-dossiers : les contre-épreuves calculent la

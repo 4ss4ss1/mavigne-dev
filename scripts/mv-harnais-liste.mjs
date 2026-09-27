@@ -1,0 +1,386 @@
+#!/usr/bin/env node
+/* ───────────────────────────────────────────────────────────────────────────
+   LISTE-1 (§190) — LA LISTE UNIQUE DES CONTRÔLES
+   Lue par : scripts/mv-lanceur.mjs  (npm run check = prebuild = la CI)
+             scripts/mv-harnais-portes.mjs  (la cohérence des portes)
+
+   ══ POURQUOI ══
+   Jusqu'au 27/09, la même chaîne de 142 commandes était écrite DEUX FOIS dans
+   package.json (`check` et `prebuild`, copiées à la main), et la CI en rejouait une
+   partie à la main (70 invocations, étapes nommées) avant que `npm run build` ne
+   relance TOUT via `prebuild` : chaque harnais de la CI tournait deux fois. Trois
+   listes pour une seule porte — `mv-harnais-portes` existait pour les empêcher de
+   diverger, parce qu'elles avaient déjà divergé (46 contre 25, dont 14 que le poste
+   ne lançait jamais).
+   ★ Il n'y a plus qu'UNE liste, ici. Ajouter un harnais = UNE ligne ci-dessous
+     (et sa contre-épreuve sur la ligne suivante). Rien dans package.json, rien dans
+     ci.yml.
+
+   ══ FORME ══
+   HARNAIS : [commande, groupe] dans l'ORDRE D'EXÉCUTION — celui de l'ancienne
+   chaîne `check`, repris tel quel (rien n'a été réordonné). Le groupe est facultatif :
+   il nomme ce qui a une raison écrite (GROUPES), et `--groupe` permet d'en lancer un.
+   GROUPES : les raisons d'être, reprises MOT POUR MOT des commentaires de l'ancien
+   ci.yml, qui les portait au-dessus de chaque étape. Elles n'ont pas été réécrites.
+   ⚠️ Ces commentaires parlent parfois de l'ANCIENNE CI (« npm run build le relance en
+     prebuild », « ici c'est pour échouer VITE »…) : ils sont d'avant LISTE-1, gardés tels
+     quels parce qu'ils disent POURQUOI le contrôle existe — c'est cela qui compte.
+   ⚠️ Une commande = `node scripts/<fichier>.mjs` + au plus un drapeau (`--contre`,
+     `--check`, `--test`). Le lanceur refuse toute autre forme : pas de `&&`, pas de
+     tube, pas de variable — une liste qu'on peut relire ligne à ligne.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+export const GROUPES = {
+
+  // C1–C22 : le filet anti-regression. Lecture seule, ~1 s.
+  // (npm run build le relance en prebuild ; ici c'est pour echouer VITE
+  //  et sur une etape NOMMEE, avant les 50 s de build.)
+  'preflight': 'Preflight (C1–C22)',
+
+  // Confidentialite : aucune adresse e-mail de tiers dans ce qui est PUBLIE.
+  // Vecu le 05/09 : app.js portait sept personnes nommees avec leur adresse
+  // personnelle reelle, servies a tous les domaines, depuis le premier commit.
+  // ⚠ Ne dit rien de l'historique git, qui garde tout : cf. CLAUDE.md.
+  'confidentialite-aucune': 'Confidentialite — aucune donnee personnelle publiee',
+
+  // Portee des noms apres bundling : un nom lu dans un module et declare
+  // dans un autre sans window n'existe pas dans le bundle (Rollup renomme).
+  'globaux-un-nom-lu-existe-t': 'Globaux — un nom lu existe-t-il apres bundling',
+
+  // Cliquet : bloque toute erreur NOUVELLE, tolere le plafond documente
+  // dans scripts/lint-cliquet.mjs.
+  'eslint-cliquet-anti': 'ESLint — cliquet anti-regression',
+
+  // Cliquet de vocabulaire : « pause dejeuner » est banni du PLANNING (le mot
+  // designe en droit un droit du salarie). Il etait ecrit depuis le 11/08 mais
+  // AUCUN appelant ne l'executait — ni npm run lint, ni la CI. Branche ici.
+  'vocabulaire-presence-coupure': 'Vocabulaire — presence / coupure / heures dues',
+
+  // Le guide public est ASSEMBLE depuis guide/*.html par un script hors build.
+  // Vecu le 13/08 : les sources avaient ete enrichies sans regenerer, et la
+  // page deployee est restee en retard sans que rien ne le signale.
+  'guide-la-page-deployee-est': 'Guide — la page deployee est en phase avec ses sources',
+
+  // Le tri des parcelles et l'appartenance d'une tache a une periode. La table
+  // d'etats faisait DESCENDRE la parcelle qu'on venait de commencer, et une tache
+  // creee hors convention n'entrait dans aucune periode : elle disparaissait de
+  // l'ecran au moment de l'enregistrement. Contre-epreuve incluse.
+  'tri-des-parcelles-tache': 'Harnais — tri des parcelles + tache/periode',
+
+  // Le journal des nouveautes s'EXECUTE au lieu de se relire, et les
+  // documents ne doivent pas s'echapper de la charte MV_DOC (cliquet).
+  'journal-des-nouveautes': 'Journal des nouveautes + chartes de document',
+
+  // Harnais des documents : modules reels charges dans Node, aucun reseau.
+  'les-six-documents': 'Harnais — les six documents',
+
+  // Deux cliquets du Pilotage. L'echelle : 28 tailles de texte ecrites a la
+  // main vivent desormais sur onze pas nommes — sans ce controle, la 29e
+  // revient au premier ecran ajoute et rien ne rougit. La pastille : aucune
+  // ne doit ouvrir une feuille vide, aucune fiche ne doit rester orpheline,
+  // et l'ecouteur doit garder son stopPropagation (sans lui, ouvrir la fiche
+  // replie la tuile qu'on cherche a comprendre). La carte : le chiffre et sa
+  // ligne de cadre doivent rester DANS l'en-tete — c'est la seule chose qui
+  // autorise le repli par defaut — et la migration de disposition est
+  // EXECUTEE sur de vrais etats memorises, pas relue.
+  'echelle-pastille-i-carte-a': 'Harnais — echelle, pastille « i », carte a trois etages',
+
+  // Le jeu d'icones (DS-1). Un <use> qui vise un symbol absent ne rend RIEN,
+  // en silence : c'est le piege du repli CSS applique aux icones. Le harnais
+  // verifie que tout appel a son symbol, qu'aucun symbol ne dort sans emploi,
+  // qu'aucune forme ne fige sa couleur (elle ne se repeindrait plus en mode
+  // sombre), qu'aucun DOCUMENT IMPRIME n'appelle `_mvIcon` (le sprite n'existe
+  // pas dans l'onglet ou il s'ouvre) et que le compte d'emojis rendus NE
+  // REMONTE JAMAIS — module par module, pas seulement au total.
+  // ⚠️ La contre-epreuve tourne AUSSI : un harnais qui ne rougit jamais ne
+  //   prouve rien. Elle repose les six fautes, une par une, sur une copie.
+  // ⚠️ Le sprite est COMMITE et `lucide-static` n'est PAS une dependance :
+  // la CI n'installe rien de plus. `build-sprite.mjs` est un outil manuel.
+  'le-jeu-dicones-et-sa-contre': 'Harnais — le jeu d\'icones, et sa contre-epreuve',
+
+  // La carte d'une PARCELLE dans la liste (a ne pas confondre avec
+  // `mv-harnais-carte.mjs`, qui vise la carte a trois etages du Pilotage).
+  // ⚠️ Il existe parce qu'une regle CSS a vecu des mois SANS ATTEINDRE son
+  //   element : `.pc-ord` etait ecrite `.pc-nom .pc-ord`, or `.pc-nom` est le
+  //   titre d'AVANT la charte DS-2 et plus aucun ecran ne l'emet. Le rang de
+  //   tournee sortait en texte brut, colle au nom. Une regle qui ne s'applique
+  //   a rien ne casse pas : elle se tait. Ni node --check, ni ESLint, ni le
+  //   preflight ne pouvaient la voir. Le harnais reconstruit la CHAINE
+  //   D'ANCETRES emise par app.js et exige qu'une regle la MATCHE.
+  // ⚠️⚠️ La contre-epreuve tourne AUSSI, et elle a servi le jour meme : la
+  //   premiere version du controle cherchait `.pc-ord` QUELQUE PART dans la
+  //   feuille — et `.pc-nom .pc-ord` contient cette chaine. Elle repondait
+  //   vert sur le defaut exact qu'elle visait. Meme famille que §48.
+  'la-carte-de-parcelle-et-sa': 'Harnais — la carte de parcelle, et sa contre-epreuve',
+
+  // La visite guidee est la VITRINE : une demo cassee est cassee en public.
+  // Deux regles qu'aucun autre controle ne porte. ① On ne facture que ce
+  // qu'on a montre : toute ligne de DEMO2_CREDITS doit etre demontree par
+  // un moment (la plus grosse ligne du chiffrage ne l'etait pas). ② Aucun
+  // moment ne vise le corps d'une carte du Pilotage : depuis §42 elles
+  // arrivent repliees, `querySelector` trouve un element qui mesure zero,
+  // et les masques couvrent l'ecran ENTIER. C22 voit qu'un selecteur EXISTE,
+  // jamais qu'il est VISIBLE.
+  // ⚠️ La contre-epreuve tourne AUSSI en CI : un harnais qui ne rougit
+  //   jamais ne prouve rien, et c'est elle qui a trouve que l'assertion sur
+  //   les selecteurs se prouvait toute seule (elle cherchait la cible dans
+  //   le fichier qui l'ecrit).
+  'la-visite-guidee-et-sa': 'Harnais — la visite guidee, et sa contre-epreuve',
+
+  // Le pic du Pilotage. Deux fautes reelles, toutes deux invisibles a la
+  // relecture : un pic de la FENETRE affiche sur l'ecran « Aujourd'hui »
+  // (donc un renfort reclame pour une semaine deja faite), et un manque
+  // calcule sur un comptage de tetes proratise sur des jours de CALENDRIER
+  // au lieu des heures reellement travaillables. Le harnais EXECUTE
+  // _pilPicPortee sur des semaines ou head, headMax et capH/cap valent trois
+  // nombres DIFFERENTS : aucune assertion ne peut passer par hasard.
+  // ⚠️ La contre-epreuve tourne AUSSI : neuf fautes reposees une par une,
+  //   dont le repli sur headMax — qui aurait ferme le manque en silence.
+  'le-pic-a-venir-et-sa-contre': 'Harnais — le pic a venir, et sa contre-epreuve',
+
+  // CRB-2 — l'enveloppe de dispersion des courbes de la cave. Il tient les
+  // invariants du moteur (min <= mediane <= max, aucune extrapolation, le
+  // couloir qui s'arrete sous trois cuves) ET le fait que le cahier de
+  // cuverie imprime ne passe PAS par le couloir.
+  // ⚠️ La contre-epreuve tourne AUSSI ici : un harnais qui ne rougit sur
+  //    rien ne prouve rien.
+  'crb-2-le-couloir-des-courbes': 'Harnais — CRB-2, le couloir des courbes',
+
+  // ⚠️⚠️ Un modele de planning est un CALENDRIER, pas une semaine type : il se
+  // lit « mois -> numero du jour -> heures ». Relu sur une autre annee il
+  // glisse d'un jour (0 lundi et 39 samedis sur 2027), ET AUCUN TOTAL NE
+  // BOUGE — aucun controle par les sommes ne pouvait le voir.
+  'recalage-du-modele-sur': 'Harnais — recalage du modele sur l\'annee affichee',
+
+  // ★★★ RECUP-1 : une journee ecourtee se retire du compteur AU TAUX NORMAL, les heures
+  // sup gardent leur taux (25 % jusqu'a la 43e heure de la semaine, 50 % au-dela), et ce
+  // que le compteur ne couvre pas est retenu sur la paie — sauf si le domaine a arrete la
+  // journee. Une regle qui chiffre des euros : ses neuf defauts doivent tous rougir.
+  'heures-manquees-et-recup': 'Harnais — heures manquees et recup majoree',
+
+  // ★★★ BOOT-1 + REPRISE-1 (§145) : le demarrage ne reste jamais muet (attentes bornees,
+  // filet final, demarrage sans attendre `load`), et le retour de veille verifie que le
+  // serveur repond encore (sonde, relance du flux, relecture, voyant « Pas de synchro »).
+  // Rejoue sous une HORLOGE SIMULEE : une attente qui ne se regle jamais se teste en 1 ms.
+  'demarrage-borne-et-retour-de': 'Harnais — demarrage borne et retour de veille',
+
+  // ★★★ FUSION-1 (§146) : une ecriture n'efface plus ce qu'un autre appareil a saisi. Fusion a
+  // trois voies, transaction, file hors ligne avec sa base, parcelles : 400 tirages au hasard ou
+  // rien ne se perd, et chaque defaut corrige, reintroduit, doit rougir.
+  'fusion-des-documents-entre': 'Harnais — fusion des documents entre appareils',
+
+  // ★★ CIBLE-1 (§163) : ce que les cartes entourent — la parcelle COMMENCEE et pas finie, sinon la PROCHAINE
+  // (n°1 de la tournee enregistree dans Decider). Definitions EXECUTEES sur des parcelles et des journaux
+  // fabriques, plus les quatre cartes qui les appellent. Le depart retenait la PREMIERE validee du jour :
+  // ce defaut, reinjecte (deux fois : _opJournalLast et _dzDernierFait), doit rougir.
+  'ce-que-les-cartes-montrent': 'Harnais — ce que les cartes montrent',
+
+  // CREUX-1 (§165) : ce qui manque dans les futs dit la verite — la feuille Decuver
+  // ne double plus le bois, un fut enleve de la fiche emporte son vide, « Mes futs
+  // sont pleins » corrige le manque. Sur les vraies fonctions de la Cave.
+  'ce-qui-manque-dans-les-futs': 'Harnais — ce qui manque dans les futs',
+
+  // TAP-1 (§166) : dans une session tracteur, faire defiler cochait la parcelle sous le doigt (la coche
+  // partait au lever du doigt, quel que soit son chemin). Le vrai bloc de tracteur.js, sous de vrais
+  // enchainements d'evenements tactiles ; la contre-epreuve remet l'ancien geste et doit rougir.
+  'un-appui-nest-pas-un': 'Harnais — un appui n\'est pas un defilement (sessions tracteur)',
+
+  // SESS-1 (§167) : le moteur des sessions tracteur perdait des mesures — rouvrir la session tuait la
+  // mesure en cours, la pause oubliait le temps d'avant, refaire une parcelle remplacait son temps, un
+  // seul chrono pour tout l'appareil. Le vrai moteur de tracteur.js, rejoue sous une horloge factice.
+  'les-sessions-tracteur-ne': 'Harnais — les sessions tracteur ne perdent plus rien',
+
+  // CHAMP-1 (§169) : Decider comptait dans l'equipe du jour un salarie en formation ou en evenement familial
+  // (travail effectif de la loi, assimile). Les vraies fonctions de planning.js, jour par jour et sur une plage ;
+  // la contre-epreuve remet l'ancienne lecture et doit rougir. La paie, elle, garde la formation.
+  'qui-est-dans-les-rangs-ce': 'Harnais — qui est dans les rangs ce jour-la (Decider)',
+
+  // TOUR-2 (§171) : le retour Android ne fermait que la famille .overlay (feuilles du Cuvier, « Plus »,
+  // « c'est fait », « Ce qu'il manque », tri, Decider restaient ouvertes) ; un crayon invisible dans la puce
+  // de conducteur volait l'appui. Le VRAI _mvBack d'app.js dans un DOM factice ; 11 contre-epreuves.
+  'le-retour-ferme-ce-qui-est': 'Harnais — le retour ferme ce qui est ouvert, un appui va ou l\'on appuie',
+
+  // TV-1 (§172) : le temps reellement passe dans chaque parcelle — heures dans les rangs du planning (moins la
+  // conduite tracteur) versees aux parcelles validees par le salarie ou son groupe, au prorata de la surface.
+  // Les vraies fonctions de pilotage.js ; 8 contre-epreuves (parts egales, pas de report, tracteur, niveaux...).
+  'le-temps-reel-contre-le': 'Harnais — le temps reel contre le bareme (TV-1)',
+
+  // PRES-1 + PDF-1 + SYNC-1 + ESC-1 (§174) : une seule regle de presence (Inactive sans date = absente, sauf
+  // heures saisies) executee sur les cinq lecteurs ; purge des PDF orphelins ; badge de synchro ; echappement.
+  'une-seule-regle-de-presence': 'Harnais — une seule regle de presence, PDF orphelins (PRES-1)',
+
+  // TAILLE-1 (§177) : le calcul de taille Firestore rejoue l'exemple publie (147 octets). Le script lui-meme
+  // se lance sur une sauvegarde, sur le poste (npm run taille -- fichier.json).
+  'auto-controle-calcul-de': 'Auto-controle — calcul de taille des documents (TAILLE-1)',
+
+  // ARCH-1 (§178) : l'archive de campagne ne porte que SA campagne ; la cloture n'active la nouvelle campagne
+  // que si l'archive est reellement enregistree. Vraies fonctions de reglages.js ; 6 contre-epreuves.
+  'archive-de-campagne-et': 'Harnais — archive de campagne et cloture sure (ARCH-1)',
+
+  // STOCK-1 (§180) : une saisie hors ligne ne disparait plus quand le disque refuse d'ecrire la file ;
+  // stockage persistant demande. Vraies fonctions de firebase.js ; 5 contre-epreuves.
+  'file-hors-ligne-et-stockage': 'Harnais — file hors ligne et stockage persistant (STOCK-1)',
+
+  // HORLOGE-1 (§181) : aujourd'hui / campagne / exercice a 10 instants pieges (heure de Paris, horloge figee) et
+  // semaine ISO du planning 2024-2030 sous 4 fuseaux. Le harnais se relance en fils, un par fuseau.
+  'dates-pieges-et-changement': 'Harnais — dates pieges et changement d\'heure (HORLOGE-1)',
+
+  // TOUR-6 (§182) : frise du cockpit (etiquettes sur etages) et echelle des mois des Archives (une sur deux
+  // en ecran etroit) — deux chevauchements vus par npm run tour, tenus sans navigateur.
+  'etiquettes-de-la-frise-et-de': 'Harnais — etiquettes de la frise et de l\'echelle (TOUR-6)',
+
+  // VER-1 (§184) : version plancher automatique (/version.json, MV_FORMAT), mise a jour au retour, parc
+  // d'appareils. Vraies fonctions d'app.js, firebase.js, admin-gt.js ; 6 contre-epreuves.
+  'versions-perimees-et-parc': 'Harnais — versions perimees et parc d\'appareils (VER-1)',
+
+  // DROITS-1 (§185) : lecture seule identique dans l'appli (_mvLectureSeule) et sur le serveur (deriveRo), sur
+  // les 32 combinaisons de roles ; fbSave ne tente plus ; regle error_log pour tout membre.
+  'lecture-seule-et-remontee': 'Harnais — lecture seule et remontee des erreurs (DROITS-1)',
+};
+
+export const HARNAIS = [
+  ['node scripts/mv-base.mjs'],
+  ['node scripts/mv-harnais-portes.mjs'],
+  ['node scripts/mv-harnais-portes.mjs --contre'],   // LISTE-1 (§190) : le câblage de la liste unique, et sa contre-épreuve
+  ['node scripts/lint-cliquet.mjs', 'eslint-cliquet-anti'],
+  ['node scripts/preflight.mjs', 'preflight'],
+  ['node scripts/mv-harnais-globaux.mjs', 'globaux-un-nom-lu-existe-t'],
+  ['node scripts/mv-harnais-cuvier.mjs', 'globaux-un-nom-lu-existe-t'],
+  ['node scripts/mv-harnais-confidentialite.mjs', 'confidentialite-aucune'],
+  ['node scripts/mv-harnais-icones.mjs', 'le-jeu-dicones-et-sa-contre'],
+  ['node scripts/mv-harnais-theme.mjs'],
+  ['node scripts/mv-harnais-echelle.mjs', 'echelle-pastille-i-carte-a'],
+  ['node scripts/mv-harnais-jetons.mjs'],
+  ['node scripts/mv-harnais-carte-parcelle.mjs', 'la-carte-de-parcelle-et-sa'],
+  ['node scripts/mv-harnais-kml-fusion.mjs'],
+  ['node scripts/mv-harnais-effectif-periode.mjs'],
+  ['node scripts/mv-harnais-pic-avenir.mjs', 'le-pic-a-venir-et-sa-contre'],
+  ['node scripts/mv-harnais-retard.mjs'],
+  ['node scripts/mv-harnais-releve.mjs', 'les-six-documents'],
+  ['node scripts/mv-harnais-recalage.mjs', 'recalage-du-modele-sur'],
+  ['node scripts/mv-harnais-fuseau.mjs'],
+  ['node scripts/mv-harnais-ateliers.mjs'],
+  ['node scripts/mv-harnais-achats.mjs'],
+  ['node scripts/mv-harnais-vendange-parts.mjs'],
+  ['node scripts/mv-harnais-vendange-garde.mjs'],
+  ['node scripts/mv-harnais-reste-a-rentrer.mjs'],
+  ['node scripts/mv-harnais-rdtmil.mjs'],
+  ['node scripts/mv-harnais-poids-caisse.mjs'],
+  ['node scripts/mv-harnais-couches.mjs'],
+  ['node scripts/mv-harnais-subset.mjs'],
+  ['node scripts/mv-harnais-intrants.mjs'],
+  ['node scripts/mv-harnais-fusion.mjs'],
+  ['node scripts/mv-harnais-cuvdoc.mjs', 'les-six-documents'],
+  ['node scripts/mv-harnais-courbes.mjs'],
+  ['node scripts/mv-harnais-parcours.mjs'],
+  ['node scripts/mv-harnais-alignement.mjs'],
+  ['node scripts/mv-harnais-majoration.mjs'],
+  ['node scripts/mv-harnais-recup.mjs', 'heures-manquees-et-recup'],
+  ['node scripts/mv-harnais-semaine.mjs', 'heures-manquees-et-recup'],
+  ['node scripts/mv-harnais-agenda.mjs'],
+  ['node scripts/mv-harnais-vigne-tri.mjs', 'tri-des-parcelles-tache'],
+  ['node scripts/mv-harnais-vigne-tri.mjs --contre', 'tri-des-parcelles-tache'],
+  ['node scripts/mv-harnais-cave-auj.mjs'],
+  ['node scripts/mv-harnais-cave-reglages.mjs'],
+  ['node scripts/mv-harnais-cave-mil.mjs'],
+  ['node scripts/mv-harnais-cave6.mjs'],
+  ['node scripts/mv-harnais-cuv7.mjs'],
+  ['node scripts/mv-harnais-cuv8.mjs'],
+  ['node scripts/mv-harnais-cuv13.mjs'],
+  ['node scripts/mv-harnais-futcap.mjs'],
+  ['node scripts/mv-harnais-futcap.mjs --contre'],
+  ['node scripts/mv-harnais-vol1.mjs'],
+  ['node scripts/mv-harnais-vol1.mjs --contre'],
+  ['node scripts/mv-harnais-asm1.mjs'],
+  ['node scripts/mv-harnais-asm1.mjs --contre'],
+  ['node scripts/mv-harnais-creux.mjs', 'ce-qui-manque-dans-les-futs'],
+  ['node scripts/mv-harnais-creux.mjs --contre', 'ce-qui-manque-dans-les-futs'],
+  ['node scripts/mv-harnais-prep.mjs'],
+  ['node scripts/mv-harnais-tri1.mjs'],
+  ['node scripts/mv-harnais-tri2.mjs'],
+  ['node scripts/mv-harnais-tri3.mjs'],
+  ['node scripts/mv-harnais-cuvgr3.mjs'],
+  ['node scripts/mv-harnais-crb2.mjs', 'crb-2-le-couloir-des-courbes'],
+  ['node scripts/mv-harnais-regl-module.mjs'],
+  ['node scripts/mv-harnais-reseau.mjs'],
+  ['node scripts/mv-harnais-tiers.mjs'],
+  ['node scripts/mv-harnais-tiers.mjs --contre'],
+  ['node scripts/mv-harnais-signature.mjs'],
+  ['node scripts/mv-harnais-signature.mjs --contre'],
+  ['node scripts/mv-harnais-auth1.mjs'],
+  ['node scripts/mv-harnais-reprise.mjs', 'demarrage-borne-et-retour-de'],
+  ['node scripts/mv-harnais-reprise.mjs --contre', 'demarrage-borne-et-retour-de'],
+  ['node scripts/mv-harnais-fusion-docs.mjs', 'fusion-des-documents-entre'],
+  ['node scripts/mv-harnais-fusion-docs.mjs --contre', 'fusion-des-documents-entre'],
+  ['node scripts/mv-harnais-toast-honnete.mjs'],
+  ['node scripts/mv-harnais-info.mjs', 'echelle-pastille-i-carte-a'],
+  ['node scripts/mv-harnais-pil-coherence.mjs'],
+  ['node scripts/mv-harnais-axe.mjs'],
+  ['node scripts/mv-harnais-sauvegarde.mjs'],
+  ['node scripts/mv-harnais-typo.mjs'],
+  ['node scripts/mv-harnais-contraste.mjs'],
+  ['node scripts/mv-harnais-avale.mjs'],
+  ['node scripts/mv-banc-documents.mjs'],
+  ['node scripts/harnais-claude-md.mjs'],
+  ['node scripts/mv-claude-index.mjs --check'],
+  ['node scripts/banc/banc.mjs'],
+  ['node scripts/banc/garde-projection.mjs'],
+  ['node scripts/harnais-escattr.mjs'],
+  ['node scripts/build-guide.mjs --check', 'guide-la-page-deployee-est'],
+  ['node scripts/lint-vocabulaire.mjs', 'vocabulaire-presence-coupure'],
+  ['node scripts/mv-sitemap.mjs --check'],
+  ['node scripts/mv-whatsnew-check.mjs', 'journal-des-nouveautes'],
+  ['node scripts/mv-chartes-doc.mjs', 'journal-des-nouveautes'],
+  ['node scripts/mv-harnais-vignoble.mjs', 'les-six-documents'],
+  ['node scripts/mv-harnais-carte.mjs', 'echelle-pastille-i-carte-a'],
+  ['node scripts/mv-harnais-entretien.mjs', 'les-six-documents'],
+  ['node scripts/harnais-demo.mjs', 'la-visite-guidee-et-sa'],
+  ['node scripts/harnais-demo-contre.mjs', 'la-visite-guidee-et-sa'],
+  ['node scripts/mv-harnais-confidentialite.mjs --contre', 'confidentialite-aucune'],
+  ['node scripts/mv-harnais-globaux.mjs --contre', 'globaux-un-nom-lu-existe-t'],
+  ['node scripts/mv-harnais-cuvier.mjs --contre', 'globaux-un-nom-lu-existe-t'],
+  ['node scripts/mv-harnais-carte-parcelle.mjs --contre', 'la-carte-de-parcelle-et-sa'],
+  ['node scripts/mv-harnais-pic-avenir.mjs --contre', 'le-pic-a-venir-et-sa-contre'],
+  ['node scripts/mv-harnais-icones-contre.mjs', 'le-jeu-dicones-et-sa-contre'],
+  ['node scripts/mv-harnais-crb2.mjs --contre', 'crb-2-le-couloir-des-courbes'],
+  ['node scripts/mv-harnais-recalage.mjs --contre', 'recalage-du-modele-sur'],
+  ['node scripts/mv-harnais-cuv8.mjs --contre'],
+  ['node scripts/mv-harnais-cuv13.mjs --contre'],
+  ['node scripts/mv-harnais-prep.mjs --contre'],
+  ['node scripts/mv-harnais-axe.mjs --contre'],
+  ['node scripts/mv-harnais-sauvegarde.mjs --contre'],
+  ['node scripts/mv-harnais-typo.mjs --contre'],
+  ['node scripts/mv-harnais-contraste.mjs --contre'],
+  ['node scripts/mv-harnais-avale.mjs --contre'],
+  ['node scripts/mv-banc-documents.mjs --contre'],
+  ['node scripts/mv-harnais-subset.mjs --contre'],
+  ['node scripts/mv-harnais-recup.mjs --contre', 'heures-manquees-et-recup'],
+  ['node scripts/mv-harnais-cible.mjs', 'ce-que-les-cartes-montrent'],
+  ['node scripts/mv-harnais-cible.mjs --contre', 'ce-que-les-cartes-montrent'],
+  ['node scripts/mv-harnais-tap.mjs', 'un-appui-nest-pas-un'],
+  ['node scripts/mv-harnais-tap.mjs --contre', 'un-appui-nest-pas-un'],
+  ['node scripts/mv-harnais-sessions.mjs', 'les-sessions-tracteur-ne'],
+  ['node scripts/mv-harnais-sessions.mjs --contre', 'les-sessions-tracteur-ne'],
+  ['node scripts/mv-harnais-champ.mjs', 'qui-est-dans-les-rangs-ce'],
+  ['node scripts/mv-harnais-champ.mjs --contre', 'qui-est-dans-les-rangs-ce'],
+  ['node scripts/mv-harnais-retour.mjs', 'le-retour-ferme-ce-qui-est'],
+  ['node scripts/mv-harnais-retour.mjs --contre', 'le-retour-ferme-ce-qui-est'],
+  ['node scripts/mv-harnais-temps-vigne.mjs', 'le-temps-reel-contre-le'],
+  ['node scripts/mv-harnais-temps-vigne.mjs --contre', 'le-temps-reel-contre-le'],
+  ['node scripts/mv-harnais-pres.mjs', 'une-seule-regle-de-presence'],
+  ['node scripts/mv-harnais-pres.mjs --contre', 'une-seule-regle-de-presence'],
+  ['node scripts/mv-taille-docs.mjs --test', 'auto-controle-calcul-de'],
+  ['node scripts/mv-harnais-arch.mjs', 'archive-de-campagne-et'],
+  ['node scripts/mv-harnais-arch.mjs --contre', 'archive-de-campagne-et'],
+  ['node scripts/mv-harnais-stock.mjs', 'file-hors-ligne-et-stockage'],
+  ['node scripts/mv-harnais-stock.mjs --contre', 'file-hors-ligne-et-stockage'],
+  ['node scripts/mv-harnais-horloge.mjs', 'dates-pieges-et-changement'],
+  ['node scripts/mv-harnais-horloge.mjs --contre', 'dates-pieges-et-changement'],
+  ['node scripts/mv-harnais-etiquettes.mjs', 'etiquettes-de-la-frise-et-de'],
+  ['node scripts/mv-harnais-etiquettes.mjs --contre', 'etiquettes-de-la-frise-et-de'],
+  ['node scripts/mv-harnais-version.mjs', 'versions-perimees-et-parc'],
+  ['node scripts/mv-harnais-version.mjs --contre', 'versions-perimees-et-parc'],
+  ['node scripts/mv-version-json.mjs --test', 'versions-perimees-et-parc'],
+  ['node scripts/mv-harnais-droits.mjs', 'lecture-seule-et-remontee'],
+  ['node scripts/mv-harnais-droits.mjs --contre', 'lecture-seule-et-remontee'],
+];
