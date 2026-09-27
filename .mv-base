@@ -1,1 +1,1 @@
-a7f9a5cc5ce06cbc1bcbd5c6b35f8b2ee941c9cd  # base : a7f9a5c — remerror (DROITS-1) — lot DROITS-2 + ACCES-1 (§186 : lecture seule = aucun rôle d'écriture ; fiche Inactive = plus d'accès) — APP 7.69 → 7.70 / SW 8.38 → 8.39
+82689272b2e3f56ef32d011250fffee549b1b8c4  # base : 8268927 — Create TESTS-MENSUELS.md — lot VER-2 (§187 : e2e de la CI, version.json non JSON en dev) — APP 7.70 → 7.71 / SW 8.39 → 8.40

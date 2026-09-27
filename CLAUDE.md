@@ -2,7 +2,11 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **27 septembre 2026 (DROITS-2 + ACCES-1)** — ★★ **LECTURE SEULE = AUCUN RÔLE D'ÉCRITURE, ET UNE FICHE
+> Dernière consolidation : **27 septembre 2026 (VER-2)** — l'**e2e de la CI tombait depuis VER-1** (runs #103 à #106) : `/version.json` en
+> dev = `index.html` en 200 (repli SPA de Vite) → `r.json()` lève → `_mvAvale` → `console.error` → e2e rouge. Contrôle du content-type.
+> Rejoué ici dans un vrai Chromium (`@sparticuz/chromium`, §187). **APP 7.70 → 7.71 · SW 8.39 → 8.40**, base `8268927`. Détail en **§187**.
+>
+> ★ Précédente : **27 septembre 2026 (DROITS-2 + ACCES-1)** — ★★ **LECTURE SEULE = AUCUN RÔLE D'ÉCRITURE, ET UNE FICHE
 > INACTIVE PERD L'ACCÈS (§186)**. `deriveRo`
 > ne posait `ro` qu'avec saisonnier ou pilotage : un membre sans rôle écrivait côté serveur. Fermé, sur décision de Nico ; les trois
 > copies (claims.js, utils.js, cuvier.js) bougent ensemble. ACCES-1 : claim `off` (fiche Inactive) refusé par `isMyTenant`, sessions
@@ -23887,4 +23891,20 @@ avant DROITS-2 il pouvait même écrire (rôles `[]` ⇒ pas `ro`). Correction :
 - Retour : fiche Actif + rôle → `off` retombe, accès à la connexion suivante. Conseil donné : ajouter une NOUVELLE période de contrat,
   ne pas déplacer les anciennes dates (présence et heures du passé). Guide 02-roles mis à jour.
 `mv-harnais-droits` : section D, 16 assertions au total, 7 contre-épreuves.
+
+## 187. ★ VER-2 — L'E2E DE LA CI TOMBAIT DEPUIS VER-1 (27/09 — `src/app.js` · `src/utils.js` · `index.html` · `public/sw.js` · `scripts/mv-harnais-version.mjs` · `scripts/harnais-claude-md.mjs` · APP 7.70 → **7.71** · SW 8.39 → **8.40** · base `8268927`)
+
+**Constat (captures de Nico, 27/09)** : CI rouge sur les runs #103 (majauto = VER-1) à #106 ; #102 (archives) vert. Job « contrôles »
+vert ; job **e2e** rouge à l'étape « E2E local (données injectées) », annotation « Process completed with exit code 1 ». Les journaux
+de GitHub demandent une connexion ; l'API était limitée (403, IP partagée).
+**Rejoué ici** : Playwright piloté sur le Chromium du paquet npm `@sparticuz/chromium` (le téléchargement Playwright est bloqué dans le
+bac à sable, npm ne l'est pas) — `chromium.launch({ executablePath: '/tmp/chromium', args: ['--no-sandbox', ...] })` sur une copie
+de `e2e-local.mjs`. Sortie : `✖ Page tracteur — [MaVigne Error] INFO [avale] erreur avalée dans app.js/_mvVerifierVersion —
+SyntaxError: Unexpected token '<'`. **Cause** : en dev, `/version.json` n'existe pas ; Vite répond `index.html` en **200** (repli
+SPA) ; `r.ok` passait, `r.json()` levait, `_mvAvale` → `logError` → `console.error`, que l'e2e compte comme une erreur.
+**Correction** : `_mvVerifierVersion` ne parse que si le `content-type` contient `json`. Harnais `mv-harnais-version` : cas « serveur
+de dev » (27 verts, 7 contre-épreuves). Après correction, l'e2e rejoué ici est **OK** (la seule autre alerte, « Météo secteur
+injoignable », vient du bac à sable qui bloque `api.open-meteo.com` — joignable en CI, où #102 était vert avec le même code).
+★ **Outil gagné** : Claude peut désormais lancer `e2e-local`, `smoke` et `mv-tour` dans son bac à sable (Chromium de
+`@sparticuz/chromium`) — les lots navigateur n'ont plus à être écrits à l'aveugle.
 

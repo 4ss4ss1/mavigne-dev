@@ -11046,7 +11046,11 @@ async function _mvVerifierVersion(){
   _mvVerDerniere=now;
   try{
     var r=await fetch('/version.json?t='+now,{cache:'no-store'});
-    if(!r.ok) return;                                         // dev, e2e : pas de fichier, rien à faire
+    if(!r.ok) return;                                         // pas de fichier, rien à faire
+    // VER-2 (27/09) : le serveur de dev (Vite) répond à une adresse inconnue par index.html, en 200.
+    // Sans ce contrôle, r.json() levait, _mvAvale le journalisait en console.error — et l'e2e de la
+    // CI tombait (runs #103 à #106). Pas du JSON = pas de version publiée = rien à faire.
+    if(!/json/i.test(r.headers.get('content-type')||'')) return;
     var j=await r.json();
     var fmt=parseInt(j&&j.format,10);
     if(fmt>0 && fmt>(Number(window.MV_FORMAT)||0)) _mvPasserPerime(j);

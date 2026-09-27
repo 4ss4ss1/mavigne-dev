@@ -44,10 +44,15 @@ const sansCom = s => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"\\])\/\
 function monterVer(S, rep) {
   const f = bloc(S.app, 'async function _mvVerifierVersion(');
   if (!f) throw new Error('extraction _mvVerifierVersion');
-  const E = { fetchs: 0, perime: 0 };
+  const E = { fetchs: 0, perime: 0, jsonLu: 0 };
   const W = { MV_FORMAT: 1 };
   const navigator = { onLine: rep.horsLigne ? false : true };
-  const fetch = async () => { E.fetchs++; if (rep.statut === 404) return { ok: false }; return { ok: true, json: async () => rep.json }; };
+  const fetch = async () => {
+    E.fetchs++;
+    if (rep.statut === 404) return { ok: false };
+    if (rep.html) return { ok: true, headers: { get: () => 'text/html' }, json: async () => { E.jsonLu++; throw new SyntaxError("Unexpected token '<'"); } };
+    return { ok: true, headers: { get: () => 'application/json' }, json: async () => rep.json };
+  };
   const fn = new Function('window', 'navigator', 'fetch', 'var _mvVerDerniere=0; function _mvPasserPerime(j){ window._MV_PERIME=true; E.perime++; } var E=arguments[3];\n'
     + f + '\nreturn _mvVerifierVersion;')(W, navigator, fetch, E);
   return { fn, W, E };
@@ -67,6 +72,8 @@ async function jouer(S, silencieux) {
     t('Format serveur plus bas ou nul → rien', !M.W._MV_PERIME);
     M = monterVer(S, { statut: 404 }); await M.fn();
     t('Pas de fichier (dev, e2e) → rien', !M.W._MV_PERIME && M.E.fetchs === 1);
+    M = monterVer(S, { html: true }); let leve = false; try { await M.fn(); } catch (e) { leve = true; }
+    t('Serveur de dev (index.html en 200) → rien, sans lire du JSON ni lever (VER-2, e2e de la CI)', !M.W._MV_PERIME && M.E.jsonLu === 0 && !leve);
     M = monterVer(S, { horsLigne: true, json: { format: 9 } }); await M.fn();
     t('Hors ligne → aucune lecture', M.E.fetchs === 0 && !M.W._MV_PERIME);
     M = monterVer(S, { json: { format: 1 } }); await M.fn(); await M.fn();
@@ -140,6 +147,7 @@ function muter(S, f, a, b) { if (!S[f].includes(a)) throw new Error('ancre intro
 const MUT = [
   ['fbSave écrit malgré une version périmée', S => muter(S, 'fb', "  if (window._MV_PERIME) {\n    _queueSave(key, value, _mvBaseMem(key));", "  if (false) {\n    _queueSave(key, value, _mvBaseMem(key));")],
   ['la file part avec le code périmé', S => muter(S, 'fb', "  if (window._MV_PERIME) return;   // VER-1", "  // VER-1")],
+  ['VER-2 : on parse de nouveau une page HTML comme du JSON', S => muter(S, 'app', "    if(!/json/i.test(r.headers.get('content-type')||'')) return;\n", "")],
   ['même format = périmé (bloque chaque déploiement)', S => muter(S, 'app', "if(fmt>0 && fmt>(Number(window.MV_FORMAT)||0))", "if(fmt>0 && fmt>=(Number(window.MV_FORMAT)||0))")],
   ['l\u2019activation au retour ignore ce qui est en cours', S => muter(S, 'app', "if(absent>=_MV_RETOUR_H*3600000 && _mvRienEnCours())", "if(absent>=_MV_RETOUR_H*3600000)")],
   ['le parc écrase au lieu de fusionner', S => muter(S, 'fb', "await setDoc(fbDocRef('appareils'), { value: ligne }, { merge: true });", "await setDoc(fbDocRef('appareils'), { value: ligne });")],

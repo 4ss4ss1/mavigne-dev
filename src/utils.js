@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.70';
+export const APP_VERSION = '7.71';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -722,6 +722,11 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.71', items: [
+    { emoji: 'check', titre: 'Vérification de version plus discrète',
+      desc: "La vérification automatique de la version, arrivée en 7.68, pouvait laisser une fausse alerte dans le journal "
+        + "d’incidents quand le serveur ne répondait pas comme prévu. Elle se tait désormais dans ce cas. Rien ne change pour vous." }
+  ] },
   { v: '7.70', items: [
     { emoji: 'bouclier', titre: 'Un compte sans rôle ne peut plus rien modifier',
       desc: "Seuls les rôles administrateur, ouvrier et tractoriste enregistrent. Un compte sans aucun de ces rôles était déjà "
