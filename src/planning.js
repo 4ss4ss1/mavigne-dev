@@ -4835,22 +4835,32 @@ function _pfAnneeTable(A,m,c){
   A.forEach(function(x){if(x.i<=m){cum.s+=x.sup;cum.p+=x.payees;cum.g+=x.gagnee;cum.r+=x.priseV;cum.a+=x.absV;cum.pc+=x.payeCV;}});
   var th=function(k,a,b){return '<th class="n'+(k?' '+k:'')+'">'+a+'<br>'+b+'</th>';};
   var hs=c.court?'H.\u00a0sup':'Heures sup';                 // l'écran d'un téléphone (332 px utiles) : les huit colonnes tiennent sans défiler
+  var cumMajDF=A.reduce(function(a,x){return a+(x.i<=m&&!x.act&&x.majCpt?(x.majDF||0):0);},0);   // ★ CLAIR-2
   var h='<table class="'+c.table+'"><thead><tr><th>Mois</th>'+th('',hs,'faites')+th('',hs,'pay\u00e9es')
     +th(c.cv,'R\u00e9cup','gagn\u00e9e')+th(c.rc,'R\u00e9cup','prise')+th(c.rc,'Absences','reprises')+th(c.rc,'R\u00e9cup','restante')+th('','Heures \u00e0','rattraper')+'</tr></thead><tbody>'
     +A.map(function(x){
       if(x.i>m)return '<tr class="'+c.vide+'"><td>'+PLAN_MOIS_C[x.i]+'</td><td></td><td></td><td class="'+c.cv+'"></td><td></td><td></td><td></td><td></td></tr>';
+      // \u2605 CLAIR-2 : la part dimanche/f\u00e9ri\u00e9 de la r\u00e9cup gagn\u00e9e, visible sans recalcul
+      var majSub=(!x.act&&x.majCpt&&x.majDF>0.0001)?'<br><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);font-weight:400">dont '+F(x.majDF)+' dim./f\u00e9ri\u00e9</span>':'';
       return '<tr'+(x.cur?' class="cur"':'')+'><td>'+PLAN_MOIS_C[x.i]+'</td><td class="n">'+z(x.sup)+'</td><td class="n">'+z(x.payees)+'</td>'
-        +'<td class="n '+c.cv+'">'+z(x.gagnee)+((!x.act&&x.gagnee>0.0001)?'*':'')+'</td><td class="n '+c.rc+'">'+z(x.priseV)+'</td><td class="n '+c.rc+'">'+z(x.absV)+'</td>'
+        +'<td class="n '+c.cv+'">'+z(x.gagnee)+((!x.act&&x.gagnee>0.0001)?'*':'')+majSub+'</td><td class="n '+c.rc+'">'+z(x.priseV)+'</td><td class="n '+c.rc+'">'+z(x.absV)+'</td>'
         +'<td class="n '+c.rc+' b">'+F(Math.max(0,x.soldeRecup))+'</td><td class="n'+(x.dette>0.0001?' dn':'')+'">'+F(x.dette)+'</td></tr>';
     }).join('')
-    +'<tr class="'+c.tot+'"><td>Depuis janvier</td><td class="n">'+F(cum.s)+'</td><td class="n">'+F(cum.p)+'</td><td class="n '+c.cv+'">'+F(cum.g)+'</td><td class="n '+c.rc+'">'+F(cum.r)+'</td><td class="n '+c.rc+'">'+F(cum.a)+'</td><td></td><td></td></tr></tbody></table>';
+    +'<tr class="'+c.tot+'"><td>Depuis janvier</td><td class="n">'+F(cum.s)+'</td><td class="n">'+F(cum.p)+'</td><td class="n '+c.cv+'">'+F(cum.g)
+      +(cumMajDF>0.0001?'<br><span style="font-size:var(--pt-micro,11px);font-weight:400">dont '+F(cumMajDF)+' dim./férié</span>':'')
+      +'</td><td class="n '+c.rc+'">'+F(cum.r)+'</td><td class="n '+c.rc+'">'+F(cum.a)+'</td><td></td><td></td></tr></tbody></table>';
   // ★ AVANT-2 — la légende disait « majoration comprise » sous une ligne d'août à 27h pour 27h : fausse pour les mois d'avant
   //   la bascule. Ces mois portent un astérisque, et la légende dit la règle d'avant et où leur majoration est entrée.
   var avantB=A.filter(function(x){return x.i<=m&&!x.act&&x.gagnee>0.0001;}).length>0,rvA=A.reduce(function(a,x){return a+(x.i<=m?(x.revalo||0):0);},0),iB=-1;
   A.forEach(function(x){if(iB<0&&x.act)iB=x.i;});
-  var cur=A[m]||{},note='Heures sup\u00a0: l\u2019heure faite, sans majoration. R\u00e9cup\u00a0: le temps \u00e0 prendre, majoration comprise (1h \u00e0 25\u202f% = 1h15, 1h \u00e0 50\u202f% = 1h30). '
-    +(avantB?'* Avant '+(iB>=0?PLAN_MOIS[iB].toLowerCase():'septembre')+' '+planYear+', le compteur comptait 1h sup = 1h de r\u00e9cup'
-      +(rvA>0.0001?'\u00a0; les heures encore au compteur ont pris leur majoration en '+PLAN_MOIS[iB].toLowerCase()+' (+'+F(rvA)+', dans sa r\u00e9cup gagn\u00e9e). ':'. '):'')
+  // ★ CLAIR-2 (27/09/2026) — Nico : « chaque phrase doit être bien comprise ». Une idée par phrase ; la « majoration
+  //   des dimanches/fériés déjà dans la récup gagnée » renvoie maintenant au « dont … » visible sous le mois concerné,
+  //   plutôt que de le redire en prose.
+  var cur=A[m]||{},note='Heures sup\u00a0: l\u2019heure faite, sans majoration. R\u00e9cup\u00a0: le temps \u00e0 prendre, majoration comprise (1h \u00e0 25\u00a0% = 1h15, 1h \u00e0 50\u00a0% = 1h30). '
+    +(avantB?'* Avant '+(iB>=0?PLAN_MOIS[iB].toLowerCase():'septembre')+' '+planYear+'\u00a0: le compteur comptait 1h sup = 1h de r\u00e9cup, sans majoration.'
+      +(rvA>0.0001?' Les heures qui restaient au compteur ont re\u00e7u leur majoration en '+PLAN_MOIS[iB].toLowerCase()+' (+'+F(rvA)+', compt\u00e9e dans la r\u00e9cup gagn\u00e9e de ce mois-l\u00e0).':'')
+      +(cumMajDF>0.0001?' Les dimanches et f\u00e9ri\u00e9s travaill\u00e9s avant la bascule ajoutent leur propre majoration \u00e0 la r\u00e9cup gagn\u00e9e du mois o\u00f9 ils ont \u00e9t\u00e9 faits (le \u00ab\u00a0dont \u2026 dim./f\u00e9ri\u00e9\u00a0\u00bb sous certains mois).':'')
+      +' ':'')
     +'R\u00e9cup restante = celle du mois d\u2019avant + gagn\u00e9e \u2212 prise \u2212 absences reprises'+((cur.payeCV||0)>0.0001?' \u2212 '+F(cur.payeCV)+' pay\u00e9es sur le compteur en '+PLAN_MOIS[m].toLowerCase():'')+'.';
   // ★★★ DIMAV-1 (22/09/2026) — Nico : « une ligne visible du nombre d'heures qui ont été effectuées ces jours-là, mois par mois,
   //   et ce que ça ajoute en temps de repos réel ». Les mois d'avant la bascule seulement : depuis, les dimanches et fériés ont
@@ -4864,7 +4874,8 @@ function _pfAnneeTable(A,m,c){
       +DF.map(function(x){return '<tr><td>'+PLAN_MOIS_C[x.i]+'</td>'+tdv(x.hDim)+tdv(x.hFer)+'<td class="n '+c.cv+' b">'+(x.majCpt?'+'+F(x.majDF):'')+'</td></tr>';}).join('')
       +'<tr class="'+c.tot+'"><td>Total</td><td class="n">'+F(tD)+'</td><td class="n">'+F(tF)+'</td><td class="n '+c.cv+'">+'+F(tM)+'</td></tr></tbody></table>',
       entete:'Dimanches et jours f\u00e9ri\u00e9s travaill\u00e9s avant '+PLAN_MOIS[iB2].toLowerCase()+' '+planYear,
-      legende:'Heures lues au planning, jour par jour. Repos ajout\u00e9 = la majoration\u00a0: dimanche +'+TX.dim+'\u202f%, f\u00e9ri\u00e9 +'+TX.ferie+'\u202f% (le taux le plus fort si les deux tombent le m\u00eame jour), entr\u00e9e au compteur le mois o\u00f9 le jour a \u00e9t\u00e9 travaill\u00e9 \u2014 elle est dans sa r\u00e9cup gagn\u00e9e. L\u2019heure elle-m\u00eame est d\u00e9j\u00e0 dans les heures du mois.'};
+      // ★ CLAIR-2 : quatre idées, quatre phrases courtes, plutôt qu'une seule phrase qui les empile toutes.
+      legende:'Heures lues au planning, jour par jour. Repos ajout\u00e9 = la majoration\u00a0: dimanche +'+TX.dim+'\u00a0%, f\u00e9ri\u00e9 +'+TX.ferie+'\u00a0% (le taux le plus fort si les deux tombent le m\u00eame jour). Elle est d\u00e9j\u00e0 compt\u00e9e dans la r\u00e9cup gagn\u00e9e du mois o\u00f9 le jour a \u00e9t\u00e9 travaill\u00e9, au tableau ci-dessus (\u00ab\u00a0dont \u2026 dim./f\u00e9ri\u00e9\u00a0\u00bb). L\u2019heure travaill\u00e9e, elle, est d\u00e9j\u00e0 dans les heures sup faites de ce m\u00eame mois \u2014 elle n\u2019est pas compt\u00e9e deux fois.'};
   }
   return {html:h,legende:note,cum:cum,df:df};
 }
@@ -7557,11 +7568,11 @@ function _planReleveFiche_(nom,mbr,_ctr){
       +(P.acomptes.length?'<h4 class="st">Acomptes sur salaire</h4>'+ac:'')
       +'<h4 class="st">\u00c0 savoir</h4><ul class="sav">'
         +'<li><b>Heures sup</b>\u00a0: au-del\u00e0 du planning de la semaine, du lundi au dimanche (cong\u00e9, r\u00e9cup, arr\u00eat comptent comme faits)\u00a0; la semaine compte dans le mois o\u00f9 elle finit. Les huit premi\u00e8res \u00e0 25\u202f%, les suivantes \u00e0 50\u202f%\u00a0; dimanche ou f\u00e9ri\u00e9\u00a0: le taux le plus fort, une fois. Une heure en plus qui rattrape une heure manqu\u00e9e de la semaine n\u2019est pas une heure sup.</li>'
-        +'<li><b>Absences du salari\u00e9</b> (injustifi\u00e9e, personnelle, retard)\u00a0: rattrap\u00e9es par les heures en plus de leur semaine, puis prises sur la r\u00e9cup (1h d\u2019absence = 1h de r\u00e9cup, les heures \u00e0 50\u202f% d\u2019abord)\u00a0; le reste est retenu sur le salaire.</li>'
+        +'<li><b>Absences du salari\u00e9</b> (injustifi\u00e9e, personnelle, retard)\u00a0: d\u2019abord rattrap\u00e9es par les heures en plus faites la m\u00eame semaine. Ce qu\u2019il en reste est pris sur la r\u00e9cup d\u00e9j\u00e0 acquise (1h d\u2019absence = 1h de r\u00e9cup), en vidant d\u2019abord la r\u00e9cup gagn\u00e9e au taux de 50\u00a0%. Ce qui manque encore est retenu sur le salaire.</li>'
         +'<li><b>Absences du domaine</b> (journ\u00e9e \u00e9court\u00e9e, pluie\u2026)\u00a0: jamais retenues. Rattrap\u00e9es dans la semaine apr\u00e8s celles du salari\u00e9, puis prises sur la r\u00e9cup\u00a0; le reste va aux heures \u00e0 rattraper, que les prochaines heures sup comblent.</li>'
-        +'<li><b>Paiement</b>\u00a0: une fois les absences couvertes \u2014 une retenue ou des heures sup \u00e0 payer, jamais les deux'+(P.payable?', majoration du dimanche comprise':'')+'. Le taux le plus fort sort toujours d\u2019abord. \u00ab\u00a0Pay\u00e9es\u00a0\u00bb\u00a0: l\u2019heure faite, la paie applique le taux\u00a0; \u00ab\u00a0r\u00e9cup\u00a0\u00bb\u00a0: le temps \u00e0 prendre, majoration comprise.</li>'
+        +'<li><b>Paiement</b>\u00a0: une fois les absences couvertes, la feuille porte soit une retenue, soit des heures sup \u00e0 payer \u2014 jamais les deux'+(P.payable?', majoration du dimanche comprise':'')+'. S\u2019il reste des heures sup \u00e0 plusieurs taux, celles \u00e0 50\u00a0% sont toujours r\u00e9gl\u00e9es en premier. \u00ab\u00a0Pay\u00e9es\u00a0\u00bb\u00a0: l\u2019heure faite, la paie applique le taux. \u00ab\u00a0R\u00e9cup\u00a0\u00bb\u00a0: le temps \u00e0 prendre, majoration d\u00e9j\u00e0 comprise.</li>'
         +((D.avantEst>0.0001||(P.r&&P.r.revalo>0.0001)||(function(R){return R.src.avant>0.0001||R.c25.av+R.c50.av>0.0001;})(_pfRestants(mbr,P)))
-          ?'<li><b>Heures sup d\u2019avant septembre 2026</b>\u00a0: le compteur les comptait au mois, sans taux, 1h pour 1h. Leur taux est relu semaine par semaine avec la r\u00e8gle d\u2019aujourd\u2019hui\u00a0; celles qui restaient au compteur ont pris leur majoration le 1er septembre. La compta le confirme. Un dimanche ou un f\u00e9ri\u00e9 travaill\u00e9 avant septembre a sa majoration \u00e0 part, en repos, le mois m\u00eame (tableau \u00ab\u00a0Dimanches et jours f\u00e9ri\u00e9s travaill\u00e9s\u00a0\u00bb).</li>':'')+'</ul>'
+          ?'<li><b>Heures sup d\u2019avant septembre 2026</b>\u00a0: le compteur les comptait au mois, sans taux, 1h pour 1h. Leur taux est relu semaine par semaine avec la r\u00e8gle d\u2019aujourd\u2019hui. Celles qui restaient encore au compteur ont re\u00e7u leur majoration le 1er septembre \u2014 la compta le confirme. Un dimanche ou un f\u00e9ri\u00e9 travaill\u00e9 avant septembre a sa propre majoration, mise en repos le mois m\u00eame\u00a0: elle appara\u00eet dans la r\u00e9cup gagn\u00e9e de ce mois-l\u00e0 (colonne \u00ab\u00a0dont \u2026 dim./f\u00e9ri\u00e9\u00a0\u00bb du d\u00e9tail de l\u2019ann\u00e9e, et tableau \u00ab\u00a0Dimanches et jours f\u00e9ri\u00e9s travaill\u00e9s\u00a0\u00bb).</li>':'')+'</ul>'
     +'</div></div>'
     +'<p class="lieu">Fait le <b>'+_edite+'</b>, \u00e0 \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026</p>'
     +'<div class="sig"><div><span>Signature salari\u00e9</span>'+(cases?'<div class="cases">'+cases+'</div>':'')+'<i></i></div>'
