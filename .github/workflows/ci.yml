@@ -9,9 +9,10 @@
 #     functions -> backfill -> hosting -> rules. La CI allume le feu vert ou
 #     rouge, elle ne touche pas au levier. Aucun secret n'est necessaire ici.
 #
-#  Deux jobs en parallele pour que le rouge soit lisible d'un coup d'oeil :
+#  Trois jobs en parallele pour que le rouge soit lisible d'un coup d'oeil :
 #    · controles : preflight -> lint -> build -> smoke   (~3 min)
 #    · e2e       : les 10 pages, login DOM reel           (~5 min)
+#    · rules     : firestore.rules sur l'emulateur        (RULES-1, §188)
 # ============================================================================
 
 name: CI
@@ -409,3 +410,41 @@ jobs:
       #    "Re-run failed jobs" dans l'onglet Actions.
       - name: E2E local (donnees injectees)
         run: npm run test:e2e
+
+  # ==========================================================================
+  # ★★★ RULES-1 (§188) — firestore.rules EXECUTEES par le vrai moteur.
+  # Tous les autres controles LISENT le fichier de regles comme du texte : ils
+  # voient qu'une ligne existe, jamais ce que le moteur en fait. Ici, 53 requetes
+  # reelles sur l'emulateur (un membre de A ne lit jamais B, fiche Inactive
+  # dehors, ro, admin-only, paie, demo, session GT), puis 12 contre-epreuves :
+  # chaque faute est posee sur une copie des regles et le cas vise doit rougir.
+  # ⚠️ Job a part : il lui faut Java (l'emulateur est un .jar) et firebase-tools,
+  #    que le reste de la CI n'installe pas. Il ne deploie rien, ne lit aucun
+  #    secret : projet `demo-mv-rules`, qui n'atteint jamais un vrai projet.
+  rules:
+    name: Regles Firestore — emulateur (RULES-1)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Node 22
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      # firebase-tools 14 exige Java 21 pour les emulateurs.
+      - name: Java 21 (emulateur Firestore)
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6  # v6.0.1
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Installer les dependances
+        run: npm ci
+
+      - name: Regles Firestore — harnais + contre-epreuves
+        run: npm run test:rules

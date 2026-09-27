@@ -1,6 +1,7 @@
 // CLAUDE.md doit décrire le code RÉEL. Chaque affirmation vérifiable est vérifiée
 // contre les fichiers — un document de continuité qui ment est pire qu'absent.
 import { readFileSync as R, readdirSync } from 'node:fs';
+import { fichiersDoc, construire } from './mv-claude-index.mjs';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -13,7 +14,14 @@ import { dirname, join } from 'node:path';
       vert a planté chez Nico au premier lancement (§53). `fileURLToPath` est la
       seule forme juste sur les deux systèmes. */
 const B = join(dirname(fileURLToPath(import.meta.url)), '..') + '/';
-const MD=R(B+'CLAUDE.md','utf8'), C=R(B+'functions/claims.js','utf8'),
+/* ★★★ DOC-1 (§188) — LA DOCUMENTATION EST SCINDÉE : `CLAUDE.md` (le cœur, lu en entier) +
+   `docs/claude/*.md` (modules, chantiers, journal). Toutes les assertions ci-dessous portent
+   sur l'ENSEMBLE (MD) : une section déplacée n'a pas disparu. Le cœur seul (COEUR) a ses
+   propres assertions, en fin de fichier. CRLF normalisé : le poste de Nico est sous Windows. */
+const lireN = f => R(B + f, 'utf8').replace(/\r\n/g, '\n');
+const COEUR = lireN('CLAUDE.md');
+const DOCS = fichiersDoc().map(f => [f, lireN(f)]);
+const MD = DOCS.map(([, t]) => t).join('\n'), C=R(B+'functions/claims.js','utf8'),
       A=R(B+'src/admin-gt.js','utf8'), AP=R(B+'src/app.js','utf8'),
       SW=R(B+'public/sw.js','utf8'), U=R(B+'src/utils.js','utf8'),
       FJ=R(B+'firebase.json','utf8'), RU=R(B+'firestore.rules','utf8');
@@ -197,7 +205,7 @@ t(`tout script de scripts/ est nommé dans le document (${muets.length} muet(s))
 }
 
 /* 2) Une section ne disparaît pas, même si son numéro est réutilisé. */
-const SECTIONS = 220;  /* +§188 (RÉAL-1), relevé DANS son lot. +§187 (VER-2), relevé DANS son lot. +§186 (DROITS-2), relevé DANS son lot. +§185 (DROITS-1), relevé DANS son lot. +§184 (VER-1), relevé DANS son lot. +§183 (TOUR-6), relevé DANS son lot. +§182 (CMP-NOM), relevé DANS son lot. +§181 (HORLOGE-1), relevé DANS son lot. +§180 (STOCK-1), relevé DANS son lot. +§179 (ARCH-2), relevé DANS son lot. +§178 (ARCH-1), relevé DANS son lot. +§177 (TAILLE-1), relevé DANS son lot. +§176 (TOUR-4), relevé DANS son lot. +§175 (TOUR-3), relevé DANS son lot. +§174 (PRES-1), relevé DANS son lot. +§173 (ENG-2), relevé DANS son lot. +§172 (TV-1), relevé DANS son lot. +§171 (TOUR-2), relevé DANS son lot. +§170 (TOUR-1), relevé DANS son lot. +§169 (CHAMP-1), relevé DANS son lot. +§168 (SESS-1), relevé DANS son lot. +§167 (DIMAV-1), relevé DANS son lot. +§166 (TAP-1), relevé DANS son lot. +§165 (CREUX-1), relevé DANS son lot. +§164 (CUV-DEC), relevé DANS son lot. +§163 (CIBLE-1), relevé DANS son lot. +§162 (DZ-1), relevé DANS son lot. +§161 (AVANT-2), relevé DANS son lot. +§160 (CLAIR-1), relevé DANS son lot. +§159 (TAUX-1 + DIM-1), relevé DANS son lot. +§158 (NOTIF-1), relevé DANS son lot. +§157 (MAJ-1), relevé DANS son lot. +§156 (SIGN-1), relevé DANS son lot. +§155 (TIERS-1), relevé DANS son lot. +§154 (PAIE-1), relevé DANS son lot. +§153 (ASM-1 + VOL-2), relevé DANS son lot. +§152 (VOL-1), relevé DANS son lot. +§151 (FIGE-1), relevé DANS son lot. +§150 (NET-1), relevé DANS son lot — et RATTRAPAGE de +§148 (FUT-CAP + CUV-14) et +§149 (FUT-CAP-2), non relevés dans le leur. +§147 (AVANT-1), relevé DANS son lot. +§146 (FUSION-1), relevé DANS son lot. +§145 (BOOT-1 + REPRISE-1), relevé DANS son lot. +§144 (SEM-3), relevé DANS son lot. +§143 (SEM-2), relevé DANS son lot. +§142 (SEM-1), relevé DANS son lot. +§141 (FICHE-5), relevé DANS son lot. +§140 (FICHE-4), relevé DANS son lot. +§139 (FICHE-3), relevé DANS son lot. +§138 (FICHE-2), relevé DANS son lot. +§137 (FICHE-1), relevé DANS son lot. +§136 (RECUP-2), relevé DANS son lot. +§135 (RECUP-1), relevé DANS son lot — le compte mesuré était déjà 166 avant elle : +1 hérité, relevé aussi. +§134 (PREP-1), relevé DANS son lot. +§133 (CUV-13), relevé DANS son lot. +§132 (AVALE-1). +§131 (CONTRASTE-2). +§130 (CONTRASTE-1). +§128 (NS-1 + BAS-1 + PLUS-1), relevé DANS son lot. +§125 (VIS-1) et +§126 (l’ecrasement) — ⚠️ §124 (SAUV-1) a ete EFFACE par le lot VIS-1 colle par-dessus, et le compteur n’a rien vu : les deux lots ajoutaient UNE section chacun, 156 = 156 (cf. §126). +§124 (SAUV-1) — et RATTRAPAGE des 2 crans que le script réclamait depuis §122 (audit) et §123 (AXE-1), relévés ici faute de l'avoir été dans leur lot : ★ un compteur qu'on laisse dériver de deux crans est un compteur qu'on apprend à ignorer. +§121 (TRI-3). +§120 (TRI-2). +§119 (TRI-1). +§118 (CUV-10). +§117 (zone de 996, à trancher au labo). +§115 (CUV-8) et +§116 (CUV-9), relevés DANS leur lot. +§114 (ECO-EXO). +§113 (ECO-NOM). +§109 (CUV-7). +§108 (VIG-TRI/VIG-TACHE). +§107 (PORTES). +§106 (FUT-LOC). +§105 (PIL-FIN) — le script en réclamait 1 de plus depuis §104, relevé au cran réel. +§104 (PIL-EXO/DIAG). +§103 (PIL-COH). +§102 (CAVE-6, non relevé dans son lot). +§101 (NAV-4/5). +§100 (NAV-3). +§99 (NAV-2). +§98 (NAV-1). +§97 (CAVE-5). +§96 (CAVE-3). +§95 (CAVE-2). +§94 (CAVE-1). +§93 (RDTMOY-2). +§92 (RDTMOY-1). +§91 (RDTAOC-1). +§90 (RDTMIL-1). +§89 (PILCRB-1). +§88 (CUVDOC-3). +§87 (CUVDOC-2). +§86 (CUVDOC-1) — et RATTRAPAGE des 4 crans que le script réclamait depuis §82. +§81 (PARC-1). +§80 (CUV-4). Relevé DANS LE LOT qui ajoute la section : le message
+const SECTIONS = 220;  /* +§188 (RULES-1 + DOC-1), relevé DANS son lot. +§187 (VER-2), relevé DANS son lot. +§186 (DROITS-2), relevé DANS son lot. +§185 (DROITS-1), relevé DANS son lot. +§184 (VER-1), relevé DANS son lot. +§183 (TOUR-6), relevé DANS son lot. +§182 (CMP-NOM), relevé DANS son lot. +§181 (HORLOGE-1), relevé DANS son lot. +§180 (STOCK-1), relevé DANS son lot. +§179 (ARCH-2), relevé DANS son lot. +§178 (ARCH-1), relevé DANS son lot. +§177 (TAILLE-1), relevé DANS son lot. +§176 (TOUR-4), relevé DANS son lot. +§175 (TOUR-3), relevé DANS son lot. +§174 (PRES-1), relevé DANS son lot. +§173 (ENG-2), relevé DANS son lot. +§172 (TV-1), relevé DANS son lot. +§171 (TOUR-2), relevé DANS son lot. +§170 (TOUR-1), relevé DANS son lot. +§169 (CHAMP-1), relevé DANS son lot. +§168 (SESS-1), relevé DANS son lot. +§167 (DIMAV-1), relevé DANS son lot. +§166 (TAP-1), relevé DANS son lot. +§165 (CREUX-1), relevé DANS son lot. +§164 (CUV-DEC), relevé DANS son lot. +§163 (CIBLE-1), relevé DANS son lot. +§162 (DZ-1), relevé DANS son lot. +§161 (AVANT-2), relevé DANS son lot. +§160 (CLAIR-1), relevé DANS son lot. +§159 (TAUX-1 + DIM-1), relevé DANS son lot. +§158 (NOTIF-1), relevé DANS son lot. +§157 (MAJ-1), relevé DANS son lot. +§156 (SIGN-1), relevé DANS son lot. +§155 (TIERS-1), relevé DANS son lot. +§154 (PAIE-1), relevé DANS son lot. +§153 (ASM-1 + VOL-2), relevé DANS son lot. +§152 (VOL-1), relevé DANS son lot. +§151 (FIGE-1), relevé DANS son lot. +§150 (NET-1), relevé DANS son lot — et RATTRAPAGE de +§148 (FUT-CAP + CUV-14) et +§149 (FUT-CAP-2), non relevés dans le leur. +§147 (AVANT-1), relevé DANS son lot. +§146 (FUSION-1), relevé DANS son lot. +§145 (BOOT-1 + REPRISE-1), relevé DANS son lot. +§144 (SEM-3), relevé DANS son lot. +§143 (SEM-2), relevé DANS son lot. +§142 (SEM-1), relevé DANS son lot. +§141 (FICHE-5), relevé DANS son lot. +§140 (FICHE-4), relevé DANS son lot. +§139 (FICHE-3), relevé DANS son lot. +§138 (FICHE-2), relevé DANS son lot. +§137 (FICHE-1), relevé DANS son lot. +§136 (RECUP-2), relevé DANS son lot. +§135 (RECUP-1), relevé DANS son lot — le compte mesuré était déjà 166 avant elle : +1 hérité, relevé aussi. +§134 (PREP-1), relevé DANS son lot. +§133 (CUV-13), relevé DANS son lot. +§132 (AVALE-1). +§131 (CONTRASTE-2). +§130 (CONTRASTE-1). +§128 (NS-1 + BAS-1 + PLUS-1), relevé DANS son lot. +§125 (VIS-1) et +§126 (l’ecrasement) — ⚠️ §124 (SAUV-1) a ete EFFACE par le lot VIS-1 colle par-dessus, et le compteur n’a rien vu : les deux lots ajoutaient UNE section chacun, 156 = 156 (cf. §126). +§124 (SAUV-1) — et RATTRAPAGE des 2 crans que le script réclamait depuis §122 (audit) et §123 (AXE-1), relévés ici faute de l'avoir été dans leur lot : ★ un compteur qu'on laisse dériver de deux crans est un compteur qu'on apprend à ignorer. +§121 (TRI-3). +§120 (TRI-2). +§119 (TRI-1). +§118 (CUV-10). +§117 (zone de 996, à trancher au labo). +§115 (CUV-8) et +§116 (CUV-9), relevés DANS leur lot. +§114 (ECO-EXO). +§113 (ECO-NOM). +§109 (CUV-7). +§108 (VIG-TRI/VIG-TACHE). +§107 (PORTES). +§106 (FUT-LOC). +§105 (PIL-FIN) — le script en réclamait 1 de plus depuis §104, relevé au cran réel. +§104 (PIL-EXO/DIAG). +§103 (PIL-COH). +§102 (CAVE-6, non relevé dans son lot). +§101 (NAV-4/5). +§100 (NAV-3). +§99 (NAV-2). +§98 (NAV-1). +§97 (CAVE-5). +§96 (CAVE-3). +§95 (CAVE-2). +§94 (CAVE-1). +§93 (RDTMOY-2). +§92 (RDTMOY-1). +§91 (RDTAOC-1). +§90 (RDTMIL-1). +§89 (PILCRB-1). +§88 (CUVDOC-3). +§87 (CUVDOC-2). +§86 (CUVDOC-1) — et RATTRAPAGE des 4 crans que le script réclamait depuis §82. +§81 (PARC-1). +§80 (CUV-4). Relevé DANS LE LOT qui ajoute la section : le message
                           « ↑ N de plus » est une consigne, et un cran de jeu laissé aujourd'hui
                           en vaut dix-neuf dans trois semaines — c'est exactement ce qui s'est
                           produit le 06/09.
@@ -231,5 +239,37 @@ for (const [sujet, titre] of [
      new RegExp('^## \\d+[a-z]?\\. .*' + titre.replace(/'/g, "'"), 'm').test(MD));
 /* Celui-ci n'est pas un titre : un harnais se nomme dans le corps du texte. */
 t('★ le document connaît toujours le harnais des jetons', MD.includes('mv-harnais-jetons'));
+
+console.log('\n── la scission (DOC-1, §188) ──');
+/* Le cœur ne peut pas perdre une consigne en la « rangeant » : ses sections obligatoires
+   sont nommées ici. Déplacer l'une d'elles vers docs/claude/ rougit. */
+for (const [lib, re] of [
+  ['mode d\'emploi',         /^## 🧭 Mode d'emploi/m],
+  ['les six règles d\'or',   /^## ⚖️ Les six règles d'or/m],
+  ['environnement de Nico',  /^## 🖥️ Environnement de Nico/m],
+  ['communication',          /^## 💬 Communication/m],
+  ...['1','2','3','4','5','6','6b','6c','7','8','8b','8c','24','25','27a','28','29']
+     .map(n => ['§' + n, new RegExp('^## ' + n + '\\. ', 'm')])
+]) t(`le cœur (CLAUDE.md) porte : ${lib}`, re.test(COEUR));
+t('le mode d\'emploi précède la règle d\'or n°1',
+  COEUR.indexOf("## 🧭 Mode d'emploi") > -1 && COEUR.indexOf("## 🧭 Mode d'emploi") < COEUR.indexOf("**Règle d'or n°1 —"));
+t('une seule consolidation en tête du cœur (les précédentes → docs/claude/journal.md)',
+  (COEUR.match(/^> Dernière consolidation :/gm) || []).length === 1 && !/^> ★ Précédente/m.test(COEUR));
+/* Plafond du cœur : CLIQUET. S'il déborde, on descend de l'HISTORIQUE, jamais une consigne. */
+const PLAFOND_COEUR = 2800;   /* 27/09 (§188) : 2 604 lignes à la scission */
+const nCoeur = COEUR.split('\n').length;
+t(`le cœur reste sous son plafond (${nCoeur} ≤ ${PLAFOND_COEUR} lignes)`, nCoeur <= PLAFOND_COEUR);
+{
+  const mal = [];
+  for (const [f, txt] of DOCS) for (const m of txt.matchAll(/^## (\d+)[a-z]?\. /gm)) {
+    const n = Number(m[1]); if (n < 30) continue;
+    const a = 30 + Math.floor((n - 30) / 50) * 50;
+    const attendu = `docs/claude/chantiers-${String(a).padStart(3, '0')}-${String(a + 49).padStart(3, '0')}.md`;
+    if (f !== attendu) mal.push(`§${n} dans ${f}`);
+  }
+  t(`chaque chantier (§30+) est dans le fichier de sa tranche (${mal.length} mal rangé(s))`, mal.length === 0, mal.join(' · '));
+}
+t('docs/claude/INDEX.md est à jour (node scripts/mv-claude-index.mjs)',
+  (() => { try { return lireN('docs/claude/INDEX.md') === construire(); } catch { return false; } })());
 console.log('\n'+(ko?`\x1b[31m✗ ${ko} rouge(s) sur ${ok+ko}\x1b[0m`:`\x1b[32m✓ ${ok} vertes, 0 rouge\x1b[0m`));
 process.exit(ko?1:0);
