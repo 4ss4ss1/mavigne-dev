@@ -23,7 +23,13 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.67';
+export const APP_VERSION = '7.68';
+// ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
+//   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
+//   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
+//   dont le format est plus bas arrête d'écrire et demande la mise à jour (app.js, _mvVerifierVersion).
+//   Nico n'a rien à faire : la publication et le blocage sont automatiques (décision du 27/09).
+export const MV_FORMAT = 1;
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -716,6 +722,15 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.68', items: [
+    { emoji: 'bouclier', titre: 'Une vieille version ne peut plus écraser vos données',
+      desc: "Une application restée ouverte des jours pouvait continuer à enregistrer avec une ancienne version. Quand une mise "
+        + "à jour change la façon dont les données sont enregistrées, l’ancienne version s’arrête maintenant d’écrire et affiche "
+        + "«\u00a0Mise à jour obligatoire\u00a0» — vos saisies restent sur l’appareil et partent après la mise à jour." },
+    { emoji: 'chrono', titre: 'La mise à jour se fait au retour, pas pendant la saisie',
+      desc: "Si Ma Vigne est restée en arrière-plan plusieurs heures, elle installe la nouvelle version en revenant au premier "
+        + "plan — seulement si rien n’est en cours. Pendant que vous travaillez, rien ne change." }
+  ] },
   { v: '7.67', items: [
     { emoji: 'oeil', titre: 'Deux libellés qui se marchaient dessus',
       desc: "Pilotage › Aujourd’hui\u00a0: quand l’objectif ou la fin prévue tombe près d’aujourd’hui, «\u00a0Auj.\u00a0», «\u00a0Fin prévue\u00a0» "
@@ -6153,5 +6168,6 @@ window.TCLS               = TCLS;
 window.TEMJ               = TEMJ;
 window.COULEURS_MBR       = COULEURS_MBR;
 window.APP_VERSION        = APP_VERSION;
+window.MV_FORMAT          = MV_FORMAT;   // VER-1
 window.checkWhatsNew      = checkWhatsNew;
 window.dismissWhatsNew    = dismissWhatsNew;

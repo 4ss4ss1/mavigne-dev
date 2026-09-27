@@ -423,6 +423,7 @@ function _loadQueue() {
 }
 
 async function _flushQueue() {
+  if (window._MV_PERIME) return;   // VER-1 : la file part avec le code à jour, jamais avec le périmé
   _loadQueue();
   var keys = Object.keys(_offlineQueue);
   if (keys.length === 0) return;
@@ -1506,6 +1507,14 @@ window.fbSave = async function (key, value) {
   }
   _ignoreNext[key]   = true;
   _ignoreBefore[key] = Date.now() + 4000;
+  // ★★ VER-1 (§184) — une version PÉRIMÉE (format de données plus ancien que celui publié par le
+  //   serveur, app.js _mvVerifierVersion) n'écrit plus : elle pourrait écraser ce qu'une version à
+  //   jour a écrit dans le nouveau format. La saisie va dans la file hors ligne, qui survit au
+  //   rechargement et partira avec le code à jour.
+  if (window._MV_PERIME) {
+    _queueSave(key, value, _mvBaseMem(key));
+    return { ok: false, queued: true, perime: true };
+  }
   if (!navigator.onLine) {
     _queueSave(key, value, _mvBaseMem(key));
     return { ok: false, queued: true, offline: true };
@@ -2777,6 +2786,37 @@ window.fbLogDemoAccess = async function(code, action) {
 // Appende une entrée dans mavigne_{TENANT_ID}/error_log (format {value:[…]})
 // Accessible à tout utilisateur authentifié (règles Firestore existantes, pas de changement requis).
 // Lisible par Admin GT via fbAdminRead(slug, 'error_log').
+// ★★ VER-1 (§184) — LE PARC D'APPAREILS. Chaque appareil note, à la connexion, sa version et son
+//   format dans mavigne_{slug}/appareils ({ value: { <id d'appareil>: {...} } }), fusion par clé
+//   (setDoc merge) : deux appareils qui écrivent en même temps ne s'écrasent pas. Lu par l'Admin GT
+//   (fiche du domaine). Écrit aussi par les rôles en lecture seule — règle dédiée (firestore.rules).
+//   Jamais en démo ni en mode préparation (ce n'est pas un appareil du domaine).
+function _mvIdAppareil() {
+  try {
+    var id = localStorage.getItem('mavigne_appareil_id');
+    if (!id || !/^[a-z0-9]{8,24}$/.test(id)) {
+      id = (Date.now().toString(36) + Math.random().toString(36).slice(2, 10)).slice(0, 20);
+      localStorage.setItem('mavigne_appareil_id', id);
+    }
+    return id;
+  } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvIdAppareil'); return ''; }
+}
+window.fbNoterAppareil = async function (nom) {
+  try {
+    if (!TENANT_ID || TENANT_ID === 'domaine-dupont') return false;
+    if (window._mvPrepOn && window._mvPrepOn()) return false;
+    var id = _mvIdAppareil(); if (!id) return false;
+    var ua = String(navigator.userAgent || '');
+    var sys = /iPhone|iPad/.test(ua) ? 'iOS' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows' : /Mac/.test(ua) ? 'Mac' : 'Autre';
+    var nav = /Edg\//.test(ua) ? 'Edge' : /Firefox\//.test(ua) ? 'Firefox' : (/Safari\//.test(ua) && !/Chrome\//.test(ua)) ? 'Safari' : 'Chrome';
+    var inst = false; try { inst = !!(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches); } catch (e) { inst = false; }
+    var ligne = {}; ligne[id] = { nom: String(nom || '').slice(0, 60), v: String(window.APP_VERSION || ''), f: Number(window.MV_FORMAT) || 0,
+                                  sys: sys, nav: nav, installe: inst, ts: new Date().toISOString() };
+    await setDoc(fbDocRef('appareils'), { value: ligne }, { merge: true });
+    return true;
+  } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbNoterAppareil'); return false; }
+};
+
 window.fbAppendError = async function(entry) {
   try {
     var ref = fbDocRef('error_log');

@@ -3379,6 +3379,7 @@ function _mvApresEntree(){
         _migrateTachesV3();
         _migrateTachesSaison();
         window._dataReady = true;
+        if(window.fbNoterAppareil && currentUser) window.fbNoterAppareil(currentUser.nom);   // VER-1 : le parc d'appareils
         applyVigneSaison();
         var activePage = document.querySelector('.page.active');
         var pid = activePage ? activePage.id : '';
@@ -10986,6 +10987,88 @@ function _swReload() {
   if(DEBUG) console.log('[SW] Rechargement (nouveau SW déjà en contrôle)');
   window.location.reload();
 }
+
+// ════ ★★ VER-1 (27/09/2026, §184) — LES VERSIONS PÉRIMÉES ════
+// MAJ-1 (§157) a voulu qu'aucune mise à jour ne s'impose PENDANT l'utilisation : le nouveau SW
+// attend le prochain lancement complet. Mais une PWA jamais fermée garde l'ancien code des jours
+// et écrit avec. Trois gestes, décidés par Nico le 27/09 :
+//   1. VERSION PLANCHER AUTOMATIQUE — le build publie /version.json { app, format } (MV_FORMAT,
+//      utils.js). Un appareil dont le format est plus bas passe « périmé » : fbSave n'écrit plus
+//      (file hors ligne), un écran demande la mise à jour. Nico n'a rien à régler.
+//   2. MISE À JOUR AU RETOUR — revenue au premier plan après ≥ _MV_RETOUR_H heures, l'appli active
+//      la version en attente et recharge, seulement si rien n'est en cours (aucune fenêtre ouverte,
+//      aucun champ actif, rien dans la file). Pendant l'utilisation, rien ne change (esprit MAJ-1).
+//   3. LE PARC — fbNoterAppareil (firebase.js), appelé après l'entrée ; affiché dans l'Admin GT.
+// L'activation passe par le message MV_ACTIVER (sw.js → skipWaiting), envoyé UNIQUEMENT par le
+// bouton de l'écran de mise à jour ou par le retour après une longue absence ; le rechargement est
+// fait par le filet controllerchange existant.
+var _MV_RETOUR_H = 4;
+var _mvCacheDepuis = 0, _mvVerDerniere = 0;
+window._MV_PERIME = false;
+function _mvActiverMaj(force){
+  var recharger=function(){ try{ window.location.reload(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvActiverMaj#reload'); } };
+  if(!('serviceWorker' in navigator)){ if(force) recharger(); return; }
+  navigator.serviceWorker.getRegistration().then(function(reg){
+    if(!reg){ if(force) recharger(); return; }
+    return reg.update().catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvActiverMaj#update'); }).then(function(){
+      if(reg.waiting){ reg.waiting.postMessage({type:'MV_ACTIVER'}); if(force) setTimeout(recharger, 6000); }
+      else if(force) recharger();
+    });
+  }).catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvActiverMaj'); if(force) recharger(); });
+}
+window._mvActiverMaj=_mvActiverMaj;
+function _mvEcranPerime(j){
+  if(document.getElementById('mv-perime-ov')) return;
+  var ov=document.createElement('div');
+  ov.id='mv-perime-ov';
+  ov.setAttribute('role','alertdialog'); ov.setAttribute('aria-modal','true');
+  ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(15,19,25,.72);display:flex;align-items:center;justify-content:center;padding:24px';
+  ov.innerHTML='<div style="max-width:380px;width:100%;background:var(--bg-card,#fff);color:var(--texte,#1a1a1a);border-radius:16px;padding:22px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.35)">'
+    +'<div style="font-size:var(--pt-sm,17px);font-weight:700;margin-bottom:8px">Mise \u00e0 jour obligatoire</div>'
+    +'<div style="font-size:var(--pt-txt,12.5px);line-height:1.55;color:var(--texte-med,#444);margin-bottom:16px">Une nouvelle version de Ma Vigne enregistre les donn\u00e9es autrement. '
+    +'Pour ne rien \u00e9craser, cette version ne peut plus enregistrer&nbsp;: vos saisies sont <b>gard\u00e9es sur l\u2019appareil</b> et partiront apr\u00e8s la mise \u00e0 jour.</div>'
+    +'<button id="mv-perime-btn" style="width:100%;min-height:44px;border:0;border-radius:12px;background:#3D6B27;color:#fff;font-family:inherit;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer">Mettre \u00e0 jour maintenant</button>'
+    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#777);margin-top:10px">Version install\u00e9e '+_escHtml(String(window.APP_VERSION||'?'))
+    +(j&&j.app?(' \u00b7 disponible '+_escHtml(String(j.app))):'')+'</div></div>';
+  document.body.appendChild(ov);
+  var b=document.getElementById('mv-perime-btn');
+  if(b) b.addEventListener('click', function(){ b.disabled=true; b.textContent='Installation\u2026'; _mvActiverMaj(true); });
+}
+function _mvPasserPerime(j){
+  if(window._MV_PERIME) return;
+  window._MV_PERIME=true;
+  if(window.logError) window.logError({level:'info',cat:'version',msg:'Version périmée — écritures suspendues',detail:'installée '+(window.APP_VERSION||'?')+' f'+(window.MV_FORMAT||'?')+' · serveur '+(j&&j.app)+' f'+(j&&j.format)});
+  _mvEcranPerime(j);
+}
+async function _mvVerifierVersion(){
+  if(!navigator.onLine) return;
+  var now=Date.now(); if(now-_mvVerDerniere<60000) return;   // pas plus d'une fois par minute
+  _mvVerDerniere=now;
+  try{
+    var r=await fetch('/version.json?t='+now,{cache:'no-store'});
+    if(!r.ok) return;                                         // dev, e2e : pas de fichier, rien à faire
+    var j=await r.json();
+    var fmt=parseInt(j&&j.format,10);
+    if(fmt>0 && fmt>(Number(window.MV_FORMAT)||0)) _mvPasserPerime(j);
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvVerifierVersion'); }
+}
+window._mvVerifierVersion=_mvVerifierVersion;
+function _mvRienEnCours(){
+  if(document.querySelector('.overlay.open')) return false;
+  var a=document.activeElement;
+  if(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return false;
+  if(typeof window._offlineQueueCount==='function' && window._offlineQueueCount()>0) return false;
+  return true;
+}
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState==='hidden'){ _mvCacheDepuis=Date.now(); return; }
+  var absent=_mvCacheDepuis ? (Date.now()-_mvCacheDepuis) : 0;
+  _mvCacheDepuis=0;
+  _mvVerifierVersion();
+  if(absent>=_MV_RETOUR_H*3600000 && _mvRienEnCours()) _mvActiverMaj(false);
+});
+setTimeout(_mvVerifierVersion, 8000);
+setInterval(_mvVerifierVersion, 30*60*1000);
 
 
 // ★ REPRISE-1 (§145) — après une relecture au retour de veille : repeindre l'écran ouvert, sauf si l'on

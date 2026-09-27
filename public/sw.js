@@ -1,4 +1,6 @@
-// MA VIGNE — Service Worker v8.36
+// MA VIGNE — Service Worker v8.37
+// v8.37 (27/09/2026) — VER-1 : message MV_ACTIVER -> skipWaiting (bouton de mise a jour obligatoire, ou retour apres
+//   >= 4 h sans rien en cours) ; /version.json jamais intercepte. APP 7.67 -> 7.68.
 // v8.36 (27/09/2026) — TOUR-6 : frise du cockpit, etiquettes sur etages (_PIL_TL_ECART, cap.n1/n2) ; echelle des mois
 //   des Archives, une etiquette sur deux en ecran etroit (_cmpEchelle, classe imp). APP 7.66 -> 7.67.
 // v8.35 (26/09/2026) — STOCK-1 : file hors ligne — echec d'ecriture disque garde en memoire (_mvFileMemSeule),
@@ -4156,7 +4158,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.36';
+const CACHE_NAME   = 'mavigne-v8.37';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4172,7 +4174,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.36 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.37 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4192,7 +4194,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.36 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.37 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
@@ -4219,6 +4221,9 @@ self.addEventListener('fetch', event => {
 
   // Cloud Functions : toujours réseau direct
   if (url.hostname.includes('cloudfunctions.net')) return;
+
+  // VER-1 (§184) : /version.json dit ce que le SERVEUR sert — jamais une copie en cache.
+  if (url.pathname === '/version.json') return;
 
   if (url.hostname.includes('firestore.googleapis.com') ||
       url.hostname.includes('firebase') ||
@@ -4364,6 +4369,10 @@ self.addEventListener('sync', event => {
 self.addEventListener('message', event => {
   // MAJ-1 (§157) : branche SKIP_WAITING retirée — plus rien ne l'envoie (app.js).
   if (event.data?.type === 'FLUSH_QUEUE') flushOfflineQueue();
+  // VER-1 (§184) : activation DEMANDÉE — bouton « Mettre à jour » d'une version périmée, ou retour
+  // après une longue absence sans rien en cours (app.js, _mvActiverMaj). MAJ-1 reste la règle :
+  // rien d'autre n'envoie ce message, aucune activation n'est forcée pendant l'utilisation.
+  if (event.data?.type === 'MV_ACTIVER') self.skipWaiting();
   // Mise à jour du tenant courant dans le cache persistant
   if (event.data?.type === 'SET_TENANT') {
     var tenant = event.data.tenant;

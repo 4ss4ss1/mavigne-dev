@@ -372,6 +372,7 @@ async function renderAdminGT(){
     var reps = window.fbAdminRead?await window.fbAdminRead(slug,'support_reports'):null;
     var repList = Array.isArray(reps)?reps:[];
     var saisonData = window.fbAdminRead?await window.fbAdminRead(slug,'saisons'):null;
+    var appareils = window.fbAdminRead?await window.fbAdminRead(slug,'appareils'):null;   // VER-1 : le parc
     var _saisonActive=(Array.isArray(saisonData)&&saisonData.find(function(s){return s.active;}));
     var saisonNom=_saisonActive?_saisonActive.nom:'—';
     _agtTenants.push({
@@ -384,7 +385,8 @@ async function renderAdminGT(){
       errorsOpen:errList.filter(function(e){return !e.resolved;}).length,
       errorsCrit:errList.filter(function(e){return e.level==='critical'&&!e.resolved;}).length,
       reports:repList,
-      reportsOpen:repList.filter(function(r){return !r.resolved;}).length
+      reportsOpen:repList.filter(function(r){return !r.resolved;}).length,
+      appareils:(appareils&&typeof appareils==='object'&&!Array.isArray(appareils))?appareils:{}
     });
   }
 
@@ -866,6 +868,35 @@ function _agtFicheAcces(slug){
   return _agtFicheSec('Acc\u00e8s GUERETTECH', c);
 }
 
+// ★★ VER-1 (§184) — LE PARC D'APPAREILS D'UN DOMAINE : qui tourne sur quelle version.
+//   Écrit par chaque appareil à la connexion (firebase.js, fbNoterAppareil). Une version plus
+//   ancienne que la version courante est signalée ; un FORMAT plus ancien = l'appareil est bloqué
+//   en écriture (version périmée) jusqu'à sa mise à jour.
+function _agtFicheAppareils(t){
+  var A=(t&&t.appareils)||{}, ids=Object.keys(A);
+  var cur=String(window.APP_VERSION||''), fcur=Number(window.MV_FORMAT)||0;
+  var cmpV=function(a,b){ var x=String(a||'0').split('.').map(Number), y=String(b||'0').split('.').map(Number);
+    for(var i=0;i<Math.max(x.length,y.length);i++){ var d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; };
+  var c='';
+  if(!ids.length){
+    c='<div style="font-size:var(--pt-txt,12.5px);color:rgba(255,255,255,0.28)">Aucun appareil enregistr\u00e9 (se remplit \u00e0 la prochaine connexion de chacun).</div>';
+  } else {
+    var L=ids.map(function(k){ return A[k]||{}; }).sort(function(a,b){ return String(b.ts||'').localeCompare(String(a.ts||'')); });
+    var nVieux=L.filter(function(a){ return cmpV(a.v,cur)<0; }).length;
+    if(nVieux) c+='<div style="font-size:var(--pt-micro,11px);color:#FBBF24;padding-bottom:4px">'+nVieux+' appareil'+(nVieux>1?'s':'')+' sur une version ant\u00e9rieure \u00e0 '+_escHtml(cur)+'</div>';
+    L.slice(0,12).forEach(function(a){
+      var vieux=cmpV(a.v,cur)<0, bloque=(Number(a.f)||0)<fcur;
+      c+='<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:var(--pt-micro,11px);flex-wrap:wrap">';
+      c+='<span style="flex:1;min-width:120px;color:rgba(255,255,255,0.55)">'+_escHtml(a.nom||'?')+' \u00b7 '+_escHtml((a.sys||'')+' '+(a.nav||''))+(a.installe?' \u00b7 install\u00e9e':'')+'</span>';
+      c+='<span style="color:'+(bloque?'#F87171':(vieux?'#FBBF24':'rgba(255,255,255,0.45)'))+';font-weight:600">v'+_escHtml(a.v||'?')+(bloque?' \u00b7 bloqu\u00e9e':'')+'</span>';
+      c+='<span style="color:rgba(255,255,255,0.25)">'+_agtRelTime(a.ts)+'</span>';
+      c+='</div>';
+    });
+    if(L.length>12) c+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3);padding-top:2px">'+L.length+' appareils au total</div>';
+  }
+  return _agtFicheSec('Appareils', c);
+}
+
 function _agtBuildClients(){
   var h='';
   // La carte E-Phy a demenage dans Outils (lot C) : c'est de la maintenance de
@@ -913,6 +944,7 @@ function _agtBuildClients(){
       h+=_agtFicheBiz(t.slug);
       h+=_agtFicheIncid(t);
       h+=_agtFicheAcces(t.slug);
+      h+=_agtFicheAppareils(t);   /* VER-1 */
       h+='<div class="agt-section-lbl" style="margin:12px 0 8px">Actions</div>';
       h+='<button class="agt-btn" style="width:100%;background:linear-gradient(135deg,rgba(124,77,214,0.25),rgba(139,92,246,0.18));border-color:rgba(139,92,246,0.4);color:#C4B5FD;font-weight:600;margin-bottom:8px" onclick="agtShowFiche(\''+t.slug+'\')">Fiche client — tout paramétrer</button>';
       h+='<button class="agt-btn" style="width:100%;border-color:rgba(139,92,246,0.4);color:#C4B5FD;font-weight:600;margin-bottom:8px" onclick="agtPrepOuvrir(\''+_escAttr(t.slug)+'\')">Préparer ce domaine — ses écrans, en direct</button>';

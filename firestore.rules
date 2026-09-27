@@ -230,6 +230,16 @@ service cloud.firestore {
                    && canWrite()
                    && shapeOk() && countOk(docId);
 
+      // 4. VER-1 (§184) — le parc d'appareils : chaque membre, lecture seule comprise, note la
+      //    version de SON appareil (setDoc merge sur { value: { <id>: {...} } }). Rien d'autre :
+      //    forme { value } imposée ; aucune donnée métier dans ce document.
+      allow write: if isMyTenant(collection)
+                   && docId == 'appareils'
+                   && request.auth.token.get('demo', false) != true
+                   && shapeOk()
+                   && request.resource.data.value is map
+                   && request.resource.data.value.size() <= 200;
+
       // ── Sous-collections éventuelles (profondeur ≥ 3) ───────────────
       // Aucune n'existe aujourd'hui sous un tenant. Ce bloc ne fait que PRÉSERVER
       // à l'identique la portée récursive de l'ancien {document=**} : lecture pour

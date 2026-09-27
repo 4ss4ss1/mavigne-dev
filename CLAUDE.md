@@ -2,7 +2,13 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **27 septembre 2026 (TOUR-6)** — `npm run tour:dates` chez Nico : **0 bug** sur 803 écrans aux 9 instants
+> Dernière consolidation : **27 septembre 2026 (VER-1)** — ★★★ **LES VERSIONS PÉRIMÉES (§184)**. Une PWA jamais fermée gardait
+> l'ancien code des jours et écrivait avec (MAJ-1 n'impose rien pendant l'utilisation). Plancher AUTOMATIQUE : `MV_FORMAT` (utils.js)
+> publié au build dans `/version.json` ; format installé plus bas → écritures en file, écran « Mise à jour obligatoire ». Retour après
+> ≥ 4 h sans rien en cours → activation douce (`MV_ACTIVER`). Parc d'appareils (`appareils`, Admin GT). ⚠️ **Règles Firestore à
+> déployer.** **APP 7.67 → 7.68 · SW 8.36 → 8.37**, base `d41cde1`. Détail en **§184**.
+>
+> ★ Précédente : **27 septembre 2026 (TOUR-6)** — `npm run tour:dates` chez Nico : **0 bug** sur 803 écrans aux 9 instants
 > pièges (jour, campagne, exercice justes ; aucun « Invalid Date »). Deux chevauchements réels corrigés : frise du cockpit (étiquettes
 > sur étages) et échelle des mois des Archives sur téléphone. **APP 7.66 → 7.67 · SW 8.35 → 8.36**, base `36c6263`. Détail en **§183**.
 >
@@ -23766,4 +23772,49 @@ décision) et **5 chevauchements, les deux mêmes partout** — donc réels (TOU
 ⚠️ Rejoué sur `36c6263` : la première version de ce lot (construite sur `43e30ec` + §177-181 locaux) ignorait CMP-NOM (§182,
 `_pilCmpSnapshot`), poussé entre-temps — la coller aurait effacé son repli par nom. Seule la frise de `_pilCockpitTimeline` touche
 `pilotage.js` ; les autres fichiers n'avaient que les écarts de TOUR-6.
+
+## 184. ★★★ VER-1 — UNE VERSION PÉRIMÉE N'ÉCRIT PLUS, LE PARC SE VOIT (27/09 — `src/utils.js` · `src/app.js` · `src/firebase.js` · `src/admin-gt.js` · `public/sw.js` · `index.html` · `firebase.json` · `firestore.rules` · `guide/01-demarrer.html` · `public/guide.html` · `scripts/mv-version-json.mjs` (neuf) · `scripts/mv-harnais-version.mjs` (neuf) · `package.json` · `.github/workflows/ci.yml` · `scripts/harnais-claude-md.mjs` · APP 7.67 → **7.68** · SW 8.36 → **8.37** · base `d41cde1`)
+
+### 184a. Le trou
+
+Point 5 de l'audit du 26/09. MAJ-1 (§157) : le nouveau SW attend le prochain lancement complet, rien ne s'impose pendant
+l'utilisation (choix voulu). Mais une PWA qu'on ne ferme jamais garde l'ancien code des jours, et **écrit avec** : aucune version
+minimale nulle part (ni appli, ni règles), et les écritures ne portent pas de version. Pire cas : un appareil d'avant FUSION-1
+(§146) réécrit des documents entiers sans fusion. Moins grave mais réel : une v < 7.64 qui clôture refait l'archive lourde et
+n'attend pas l'enregistrement (ARCH-1).
+
+### 184b. Les décisions de Nico (27/09)
+
+« Il faut que ça soit automatique, je ne peux pas remonter le plancher manuellement à chaque mise à jour où il y a un changement de
+format de donnée » ; la mise à jour au retour : « parfait » ; le parc d'appareils : « parfait ».
+
+### 184c. Ce qui est en place
+
+1. **Plancher automatique.** `export const MV_FORMAT = 1` (utils.js, exposé `window.MV_FORMAT`). `npm run build` lance
+   `scripts/mv-version-json.mjs`, qui écrit `dist/version.json` `{ app, format, build }` lus dans utils.js ; servi `no-store`
+   (firebase.json), jamais intercepté par le SW. `_mvVerifierVersion` (app.js) le relit 8 s après le chargement, toutes les 30 min
+   et à chaque retour au premier plan (au plus une fois par minute ; 404 en dev/e2e = rien). **Format serveur > format installé** →
+   `window._MV_PERIME = true` : `fbSave` met en file au lieu d'écrire (`{ok:false, queued:true, perime:true}`), `_flushQueue` ne
+   part pas, écran « Mise à jour obligatoire » (`#mv-perime-ov`, créé à la volée) dont le bouton active la version en attente.
+   Un déploiement SANS changement de format ne bloque personne.
+   ⚠️⚠️ **RÈGLE DE LOT** : tout lot qui change la FORME de ce qui est écrit en base (structure, champ renommé ou détourné) monte
+   `MV_FORMAT` de 1. Pas pour un écran ou un calcul. C'est le seul geste manuel, et il est à Claude, dans le lot — pas à Nico.
+   ⚠️ Ne protège que les appareils ≥ 7.68 : une version plus ancienne ne lit pas `version.json`. Pour elles, restent la
+   notification NOTIF-1 et le retour (point 2) une fois qu'elles auront pris la 7.68.
+2. **Mise à jour au retour.** Revenue au premier plan après ≥ `_MV_RETOUR_H` (4) heures, si `_mvRienEnCours()` (aucune
+   `.overlay.open`, aucun champ actif, file vide) → `_mvActiverMaj(false)` : `reg.update()` puis `MV_ACTIVER` à la version en
+   attente ; le filet `controllerchange` existant recharge. `sw.js` : `MV_ACTIVER` → `self.skipWaiting()`, **seule** activation du
+   SW ; rien d'autre ne l'envoie. L'esprit de MAJ-1 tient : jamais pendant l'utilisation.
+3. **Parc d'appareils.** `fbNoterAppareil(nom)` (firebase.js), après `_fbLoadAfterAuth` dans `_mvApresEntree` : identifiant
+   d'appareil stable (`mavigne_appareil_id`), `{nom, v, f, sys, nav, installe, ts}` écrit par `setDoc(..., {merge:true})` dans
+   `mavigne_{slug}/appareils` — fusion par clé, pas d'écrasement entre appareils. Jamais en démo ni en préparation. **Règle
+   Firestore n° 4** : tout membre du domaine, lecture seule comprise (pas la démo), forme `{value}` et map ≤ 200 entrées. Admin GT,
+   fiche du domaine : section « Appareils » (12 plus récents), version ancienne en ambre, **« bloquée »** en rouge si format plus bas.
+
+### 184d. Harnais et déploiement
+
+`scripts/mv-harnais-version.mjs` (check, prebuild, CI, `npm run test:version`) : 26 assertions sur les vraies fonctions
+(`_mvVerifierVersion` avec fetch simulé, `_mvRienEnCours`, `fbNoterAppareil`, `_agtFicheAppareils`) et le câblage ; 6
+contre-épreuves. `mv-version-json.mjs --test` dans check. **Déploiement** : `firebase deploy --only hosting,firestore:rules`
+(la règle `appareils` est neuve ; sans elle, l'écriture du parc est refusée — sans autre effet, le refus est avalé).
 
