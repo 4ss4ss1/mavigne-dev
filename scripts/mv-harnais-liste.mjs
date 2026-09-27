@@ -158,6 +158,13 @@ export const GROUPES = {
   // journee. Une regle qui chiffre des euros : ses neuf defauts doivent tous rougir.
   'heures-manquees-et-recup': 'Harnais — heures manquees et recup majoree',
 
+  // ★★★ RELEVE-3 (27/09) : le bouton « Releve » plantait sur un mois FIGE (mode paye, dimanche
+  // travaille hors heures sup) — l'instantane de « Figer » garde la majoration sans ses jours.
+  // Tous les harnais etaient verts : ils ne jouaient que des donnees ecrites par le code du jour.
+  // Celui-ci tire des mois AU HASARD, avec des saisies abimees et des instantanes d'avant, et
+  // appelle chaque surface du Planning : aucune exception, aucun « undefined » / « NaN » affiche.
+  'aucune-donnee-ne-fait-planter': 'Harnais — aucune donnee ne fait planter le Planning',
+
   // ★★★ BOOT-1 + REPRISE-1 (§145) : le demarrage ne reste jamais muet (attentes bornees,
   // filet final, demarrage sans attendre `load`), et le retour de veille verifie que le
   // serveur repond encore (sonde, relance du flux, relecture, voyant « Pas de synchro »).
@@ -277,6 +284,7 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-majoration.mjs'],
   ['node scripts/mv-harnais-recup.mjs', 'heures-manquees-et-recup'],
   ['node scripts/mv-harnais-semaine.mjs', 'heures-manquees-et-recup'],
+  ['node scripts/mv-harnais-robustesse-planning.mjs', 'aucune-donnee-ne-fait-planter'],
   ['node scripts/mv-harnais-agenda.mjs'],
   ['node scripts/mv-harnais-vigne-tri.mjs', 'tri-des-parcelles-tache'],
   ['node scripts/mv-harnais-vigne-tri.mjs --contre', 'tri-des-parcelles-tache'],
@@ -355,6 +363,7 @@ export const HARNAIS = [
   ['node scripts/mv-banc-documents.mjs --contre'],
   ['node scripts/mv-harnais-subset.mjs --contre'],
   ['node scripts/mv-harnais-recup.mjs --contre', 'heures-manquees-et-recup'],
+  ['node scripts/mv-harnais-robustesse-planning.mjs --contre', 'aucune-donnee-ne-fait-planter'],
   ['node scripts/mv-harnais-cible.mjs', 'ce-que-les-cartes-montrent'],
   ['node scripts/mv-harnais-cible.mjs --contre', 'ce-que-les-cartes-montrent'],
   ['node scripts/mv-harnais-tap.mjs', 'un-appui-nest-pas-un'],

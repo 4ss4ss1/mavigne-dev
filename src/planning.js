@@ -4377,7 +4377,7 @@ function _planPaieMois(mbr,m){
   P.report={de:(r.reportDe!=null?r.reportDe:-1),ret:r.reportRet||0,retNC:r.reportRetNC||0,rendre:r.reportRendre||0,rendu:r.rendu||0,aRendre:r.aRendre||0,maj:r.reportMaj||[]};
   P.nonPayees+=P.report.retNC-P.report.rendu;
   P.fige=act?_planHsupFige(nom,m):null;P.reportSuivant=r.reportSuivant||0;
-  if(P.fige){P.nonPayeesVive=P.nonPayees;P.nonPayees=P.fige.retenue||0;if(P.payable)P.majSeule=(P.fige.maj||[]).slice();}
+  if(P.fige){P.nonPayeesVive=P.nonPayees;P.nonPayees=P.fige.retenue||0;if(P.payable)P.majSeule=_pfMajJours(P.fige.maj,hm.majHs);}
   var rec=(PLANNING_HSUP[nom]||{})[_planHsupKey(m)]||{};
   P.demande=(typeof rec.demande==='boolean')?rec.demande:(P.payeTotal>0.0001);
   var mk=_pY()+'-'+String(m+1).padStart(2,'0');
@@ -4449,10 +4449,23 @@ function _pfMajNom(P){
   var n={};(P.majSeule||[]).forEach(function(x){n[x.nat]=1;});(P.report&&P.report.maj||[]).forEach(function(x){n[x.nat]=1;});
   return (n.dim&&!n.fer)?'la majoration du dimanche':((n.fer&&!n.dim)?'la majoration du jour f\u00e9ri\u00e9':'la majoration des dimanches et f\u00e9ri\u00e9s');
 }
+// ★★★ RELEVE-3 (27/09/2026) — UN MOIS FIGÉ FAISAIT PLANTER LE RELEVÉ. L'instantané de « Figer » garde la majoration du
+//   dimanche sans la liste de ses jours ({taux,nat,h}) : `l.jours.length` levait « Cannot read properties of undefined »
+//   dès qu'un dimanche ou un férié travaillé hors heures sup tombait dans un mois figé en mode payé. Remonté du terrain.
+//   Sans jours connus, le libellé reste générique ; _pfV3 les retrouve d'abord dans le calcul vivant (_pfMajJours).
 function _pfNatLib(l){
-  if(l.nat==='dim')return 'Dimanche'+(l.jours.length===1?' '+l.jours[0]:'s');
-  if(l.nat==='fer')return 'Jour'+(l.jours.length>1?'s':'')+' f\u00e9ri\u00e9'+(l.jours.length>1?'s':'');
+  var j=(l&&Array.isArray(l.jours))?l.jours:[];
+  if(l&&l.nat==='dim')return 'Dimanche'+(j.length===1?' '+j[0]:(j.length>1?'s':''));
+  if(l&&l.nat==='fer')return 'Jour'+(j.length>1?'s':'')+' f\u00e9ri\u00e9'+(j.length>1?'s':'');
   return 'Heures sup';
+}
+// Les jours d'une majoration figée, relus dans le calcul du mois (même taux, même nature) : l'instantané ne les garde pas.
+function _pfMajJours(L,vif){
+  return (L||[]).map(function(x){
+    if(x&&Array.isArray(x.jours))return x;
+    var v=(vif||[]).filter(function(y){return y&&y.taux===x.taux&&y.nat===x.nat;})[0];
+    return Object.assign({},x,{jours:(v&&Array.isArray(v.jours))?v.jours.slice():[]});
+  });
 }
 // ★★★ SEM-3 (18/09/2026) — UNE SEULE SOURCE POUR LE CADRE « POUR LA PAIE » : le relevé v3 (SEM-2) calculait ses
 //   absences par cause, ses lignes et son bas de cadre DANS _planReleveFiche_ ; l'écran de la fiche gardait

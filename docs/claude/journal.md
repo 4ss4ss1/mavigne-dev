@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **27 septembre 2026 (LISTE-1)** — ★★ **UNE SEULE LISTE DE CONTRÔLES, JOUÉE UNE SEULE FOIS (§190)**.
+> `check` et `prebuild` étaient deux copies à la main de la même chaîne de 142 commandes, et la CI en rejouait 70 à la main avant
+> que `npm run build` ne relance tout : chaque contrôle de la CI tournait deux fois. Désormais **`scripts/mv-harnais-liste.mjs`**
+> (la liste, dans l'ordre exact de l'ancienne chaîne) est jouée par **`scripts/mv-lanceur.mjs`** : `check` = le lanceur,
+> `prebuild` = `npm run check`, CI = le lanceur `--continuer` puis `npm run build --ignore-scripts`. **Ajouter un contrôle = une
+> ligne dans la liste.** `mv-harnais-portes` garde ce câblage (13 assertions, 12 contre-épreuves). **Aucun bump**, base `a4d7efe`.
+> Détail en **§190**.
+>
 > ★ Consolidation : **27 septembre 2026 (RULES-1 + DOC-1)** — ★★★ **LES RÈGLES FIRESTORE EXÉCUTÉES PAR LE VRAI MOTEUR,
 > ET CE DOCUMENT SCINDÉ (§189)**. Aucun script n'exécutait `firestore.rules` : tous le lisaient comme du texte. Harnais neuf
 > `mv-harnais-rules` (53 requêtes sur l'émulateur, 12 contre-épreuves, 2 constats), job CI `rules` à part (Java 21 + émulateur).

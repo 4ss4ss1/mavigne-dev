@@ -3,13 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **27 septembre 2026 (LISTE-1)** — ★★ **UNE SEULE LISTE DE CONTRÔLES, JOUÉE UNE SEULE FOIS (§190)**.
-> `check` et `prebuild` étaient deux copies à la main de la même chaîne de 142 commandes, et la CI en rejouait 70 à la main avant
-> que `npm run build` ne relance tout : chaque contrôle de la CI tournait deux fois. Désormais **`scripts/mv-harnais-liste.mjs`**
-> (la liste, dans l'ordre exact de l'ancienne chaîne) est jouée par **`scripts/mv-lanceur.mjs`** : `check` = le lanceur,
-> `prebuild` = `npm run check`, CI = le lanceur `--continuer` puis `npm run build --ignore-scripts`. **Ajouter un contrôle = une
-> ligne dans la liste.** `mv-harnais-portes` garde ce câblage (13 assertions, 12 contre-épreuves). **Aucun bump**, base `a4d7efe`.
-> Détail en **§190**.
+> Dernière consolidation : **27 septembre 2026 (RELEVE-3)** — ★★★ **LE RELEVÉ D'UN MOIS FIGÉ PLANTAIT (§191)**. Remonté du
+> terrain : « Relevé » levait `Cannot read properties of undefined (reading 'length')` sur un mois figé, en mode payé, avec un
+> dimanche travaillé hors heures sup — l'instantané de « Figer » garde la majoration **sans ses jours**, et `_pfNatLib` lisait
+> `l.jours.length`. Corrigé sans toucher au format en base (`_pfMajJours` relit les jours dans le calcul du mois). ★★ Harnais
+> neuf **`mv-harnais-robustesse-planning`** : des mois **tirés au hasard**, saisies abîmées et instantanés d'avant, toutes les
+> surfaces du Planning — aucune exception, aucun « undefined »/« NaN » affiché. **Bump APP 7.72 → 7.73, SW 8.41 → 8.42**,
+> base `4da4367`. Consigne neuve au §24 (n°20). Détail en **§191**.
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1357,6 +1357,10 @@ regarder**. Une assertion verte n'a jamais montré un texte coupé en trois.
 19. ★★ **Un index partagé entre deux listes est un piège.** Vécu : une boucle sur les parcelles
     remettait à vide le champ de la **période** de même rang, que la boucle précédente venait de
     remplir. **Trouvé par le harnais DOM, invisible à la lecture.**
+20. ★★★ **UNE DONNÉE ENREGISTRÉE PAR UNE VERSION D'AVANT N'A PAS LA FORME D'AUJOURD'HUI** (RELEVE-3, §191). Un instantané,
+    une sauvegarde, une archive ne gardent que les champs choisis le jour où on les écrit. Tout lecteur d'une donnée
+    persistée tolère un champ absent (`Array.isArray(x)?x:[]`, jamais `x.length` nu) ; et un harnais qui ne joue que des
+    données fabriquées par le code du jour ne le verra jamais — d'où le tirage au hasard de `mv-harnais-robustesse-planning`.
 
 **CSS / HTML**
 1. **`display:flex|block` sur `#page-xxx` interdit.**
@@ -1809,6 +1813,13 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
    **tout** via `prebuild` (double exécution). Un manifeste lu par un seul lanceur, `prebuild: "npm run check"`,
    la CI sur le même lanceur. ⚠️ Ne PAS déplacer les scripts en sous-dossiers : les contre-épreuves calculent la
    racine par `join(ICI, '..')`, et les chemins sont écrits dans `ci.yml`, le crochet et des centaines de renvois.
+
+### ★ ROB-2 — LE TIRAGE AU HASARD, MODULE PAR MODULE (§191, posé le 27/09)
+
+Seul le Planning passe au tirage au hasard (`mv-harnais-robustesse-planning`). Demande de Nico : *« vérifie partout »*.
+Même patron, un lot par module, dans cet ordre : **Pilotage** (il relit le Planning, les sessions, la cave) · **Cave/Cuvier** ·
+**Tracteur** · **Réserve** · **Accueil/Journal** (`app.js`). À chaque fois : données abîmées ET formes d'avant de ce que le
+module enregistre (instantanés, archives), toutes ses surfaces, rouge sur exception ou « undefined »/« NaN » affiché.
 
 ### ⚠️ QUESTION OUVERTE — L'ÉCART DE CADENCE ET LE TEMPS RÉEL (§172f ③, posée le 23/09)
 

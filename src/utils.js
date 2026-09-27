@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.72';
+export const APP_VERSION = '7.73';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -722,6 +722,12 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.73', items: [
+    { emoji: 'document', titre: 'Le relevé d’heures s’imprime aussi pour un mois figé',
+      desc: "Planning, fiche d’un salarié, bouton «\u00a0Relevé\u00a0»\u00a0: sur un mois déjà figé pour la compta, avec un dimanche ou un "
+        + "jour férié travaillé, le relevé ne s’ouvrait pas et un message d’erreur apparaissait. Il s’imprime de nouveau, et nomme "
+        + "bien le jour travaillé. Rien n’est à refaire\u00a0: le mois reste figé tel qu’il est parti." }
+  ] },
   { v: '7.72', items: [
     { emoji: 'euro', titre: 'Le réalisé d’un travail est ce qu’il a vraiment coûté',
       desc: "Pilotage › Économie, «\u00a0Coût par travail\u00a0»\u00a0: une tâche finie affichait un réalisé égal à son budget "

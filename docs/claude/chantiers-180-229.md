@@ -498,3 +498,56 @@ lieu de deux.
 nouvelle forme** (premier push) — en particulier que `npm run build --ignore-scripts` se comporte sur le runner comme
 sur npm 10 ici.
 
+
+## 191. ★★★ RELEVE-3 — LE RELEVÉ D'UN MOIS FIGÉ PLANTAIT, ET UN HARNAIS QUI TIRE LES DONNÉES AU HASARD (27/09 — `src/planning.js` · `scripts/mv-harnais-robustesse-planning.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `src/utils.js` · `index.html` · `public/sw.js` · **bump APP + SW**, base `4da4367`)
+
+### 191a. Le constat
+
+Remonté du terrain, capture à l'appui : bouton « Relevé » de la fiche d'un salarié, septembre 2026 figé le 25/09 →
+`Uncaught TypeError: Cannot read properties of undefined (reading 'length')`. L'écran de la fiche, lui, s'affichait.
+**Les 96 contrôles du relevé et ceux de la récup étaient verts.**
+
+**La cause**, retrouvée en rejouant le vrai `planning.js` dans Node sur des mois tirés au hasard (graine 11, octobre figé) :
+`_planFigeInstantane` range la majoration du dimanche sous la forme `{taux, nat, h}` — **sans ses jours**. Un mois figé, en
+mode payé, reprend cette liste telle quelle (`P.majSeule = P.fige.maj`). Le relevé papier écrit « Dimanche 13 » et appelle
+`_pfNatLib`, qui lisait `l.jours.length`. L'écran ne plantait pas parce qu'il ne nomme jamais le jour (`x.nat` seulement).
+Trois conditions à réunir : mois figé · mode `paye` · dimanche ou férié travaillé **hors** heures sup (majoration seule —
+ici des heures qui rattrapaient une absence de la semaine).
+
+### 191b. Ce qui est fait
+
+- **`_pfNatLib`** tolère une majoration sans jours : « Dimanche », « Jour férié » (générique) au lieu de lever.
+- **`_pfMajJours(L, vif)`** (neuf) : pour un mois figé, relit les jours dans le calcul vivant du mois (`hm.majHs`, même taux,
+  même nature). Le relevé du 25/09 dit donc bien « Dimanche 13 », **sans défiger**.
+- **Arbitrage : l'instantané ne change PAS de forme.** Y ajouter `jours` aurait été plus simple pour les mois à venir, mais
+  n'aurait rien réparé des instantanés déjà en base, et changeait un format persisté que `_planCompteur` relit (FIGE-1,
+  DIM-1). Relire au lieu de réécrire : zéro migration, et les instantanés d'avant sont couverts par construction.
+- **`mv-harnais-robustesse-planning.mjs`** (neuf, dans la liste + sa contre-épreuve) :
+  A. le cas du terrain à la main, sous trois formes d'instantané (celle du jour, celle du 25/09 sans jours, une date seule),
+  plus le libellé appelé directement sans jours (défense en profondeur) ;
+  B. **24 domaines tirés au hasard** (graine fixe : un rouge se rejoue) × 12 mois × quatre dates du jour, saisies réalistes
+  ET abîmées (motifs inconnus, horaires vides, `motif_h` négatif ou texte, mois figés sous cinq formes d'avant), et **chaque
+  surface du Planning** : grille, tableau, synthèse, annuel, onglet Équipe, hors contrat, 4 onglets de la fiche (salarié et
+  équipe collective), feuille d'un jour, trois relevés. Rouge sur une exception, une erreur journalisée, ou un
+  « undefined », « NaN », « [object Object] », « Infinity » dans ce qui s'affiche. `--long` : 200 tirages.
+
+### 191c. Ce qu'on a appris
+
+★★★ **Un harnais qui ne joue que des données écrites par le code du jour ne voit jamais une donnée d'avant.** Tous les
+scénarios du relevé passaient par `_planFigeInstantane` *actuel*, puis relisaient aussitôt : le trou n'était pas dans le
+code du jour, il était entre deux structures (ce que l'instantané garde / ce que le relevé lit). **Consigne posée au §24
+(build, n°20).** Le tirage au hasard l'a trouvé en 40 domaines, sans qu'on sache quoi chercher.
+★ **Un tirage « sale » vient parfois du test.** Premier passage : un « NaN j » de congés restants — il venait d'un
+`cp_initial_j: 'x'` injecté par le harnais, que Réglages ne peut pas écrire (`parseFloat(...)||0`). Retiré du générateur.
+★ **Contre-épreuve muette, puis comprise.** Remettre l'ancien `_pfNatLib` seul restait vert : la relecture des jours le
+protège. Ce n'est pas un trou (§6b) — mais le libellé doit tenir seul, d'où l'assertion A11 qui l'appelle sans jours.
+
+### 191d. Mesuré / pas vérifié
+
+Base : section A **6 rouges** (le plantage exact). Corrigé : **25 vertes**, **4/4 contre-épreuves** rougissent (l'ancien
+libellé, la relecture des jours retirée, un plantage inédit dans l'onglet Congés, un « NaN » dans le relevé). `--long` : 200
+tirages verts (122 s). Section B ≈ 17 s dans la liste. `mv-harnais-portes` : 13 vertes, 12/12.
+**Pas vérifié** : le rendu papier à l'œil (aucun navigateur ici) — ouvrir le relevé de septembre et regarder la ligne
+« Dimanche 13 » de la page 2 (« Les heures sup de septembre »).
+**Hors périmètre, dit à Nico** : seul le Planning est passé au tirage au hasard. Même méthode à appliquer module par module
+(Pilotage, Cave, Tracteur, Réserve) — un lot par module.
