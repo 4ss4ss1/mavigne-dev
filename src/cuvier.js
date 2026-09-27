@@ -1495,9 +1495,10 @@ function openOvVendRec(id, presetParc) {
 function _vendLectureSeule(){
   try{
     var u=window.currentUser, r=(u&&u.roles)||[];
-    if(!u||!r.length) return false;
-    if(r.indexOf('admin')>=0||r.indexOf('ouvrier')>=0||r.indexOf('tractoriste')>=0) return false;
-    return r.indexOf('saisonnier')>=0||r.indexOf('pilotage')>=0;
+    if(!u) return false;
+    if(u._isGTAdmin) return false;   // GUERETTECH ecrit par isGtAdmin(), quels que soient ses roles
+    // DROITS-2 (§186) : aucun role d'ecriture = lecture seule (deriveRo, meme sans saisonnier/pilotage).
+    return !(r.indexOf('admin')>=0||r.indexOf('ouvrier')>=0||r.indexOf('tractoriste')>=0);
   }catch(e){
     if(window.logError) window.logError({level:'info',cat:'cave',msg:'Role illisible (vendange)',detail:String(e)});
     return false;   // en cas de doute on laisse faire : le serveur tranchera

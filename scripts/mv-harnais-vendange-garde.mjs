@@ -53,13 +53,15 @@ console.log('\n  1. _vendLectureSeule() est le miroir de deriveRo()');
   let ecarts = [];
   for (let m = 0; m < (1 << ROLES.length); m++) {
     const r = ROLES.filter((_, i) => m & (1 << i));
-    if (!r.length) continue;                       // aucun role : cas hors modele
+    // DROITS-2 (§186) : « aucun rôle » est désormais DANS le modèle (lecture seule des deux côtés).
     box.window.currentUser = { roles: r };
     const serveur = vm.runInContext('deriveRo(' + JSON.stringify(r) + ')', box);
     const client  = vm.runInContext('_vendLectureSeule()', box);
     if (!!serveur !== !!client) ecarts.push(r.join('+') + ' serveur=' + serveur + ' client=' + client);
   }
-  verifie('les 31 combinaisons de roles donnent le meme verdict', ecarts.length === 0, ecarts.join(' | '));
+  verifie('les 32 combinaisons de roles (aucun role compris) donnent le meme verdict', ecarts.length === 0, ecarts.join(' | '));
+  box.window.currentUser = { roles: [] };
+  verifie('aucun role -> lecture seule (DROITS-2)', vm.runInContext('_vendLectureSeule()', box) === true);
 
   box.window.currentUser = null;
   verifie('pas de session -> on laisse faire (le serveur tranchera)', vm.runInContext('_vendLectureSeule()', box) === false);

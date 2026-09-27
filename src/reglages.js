@@ -2306,6 +2306,7 @@ function saveEditMembre(){
   const nom=document.getElementById('em-nom').value;
   const m=window.MEMBRES.find(x=>x.nom===nom);
   if(!m)return;
+  const _statutAvant=m.statut||'Actif';   // ACCES-1 : passer Inactif (ou revenir) change l'ACCÈS
   m.statut=document.getElementById('em-statut').value;
   const allRoles=['admin','ouvrier','tractoriste','saisonnier','pilotage'];
   const _rolesAvant=(m.roles||[]).slice().sort().join(',');   // SEC-1 : detecter un vrai changement
@@ -2322,9 +2323,17 @@ function saveEditMembre(){
   // Changer les roles ici doit reposer le claim, sinon promouvoir quelqu'un
   // administrateur ne lui donne aucun droit tant que gtBackfillClaims n'est pas relance.
   // Appel best-effort : l'enregistrement du membre n'en depend pas.
-  if(m.email && m.roles.slice().sort().join(',')!==_rolesAvant && window._fbUpdateMemberRoles){
-    window._fbUpdateMemberRoles(m.email, m.roles)
-      .then(function(){ showToast('\ud83d\udd11 Droits mis \u00e0 jour pour '+nom,'#3D6B27'); })
+  // ACCES-1 (§186) : un changement de STATUT repose aussi les droits — Inactif coupe l'accès au
+  // domaine et les sessions ouvertes, Actif le rend.
+  var _statutChange=((m.statut||'Actif')==='Inactif')!==(_statutAvant==='Inactif');
+  if(m.email && (m.roles.slice().sort().join(',')!==_rolesAvant || _statutChange) && window._fbUpdateMemberRoles){
+    window._fbUpdateMemberRoles(m.email, m.roles, (m.statut||'Actif')==='Inactif')
+      .then(function(r){
+        var d=(r&&r.data)||r||{};
+        // Texte seul : le cliquet des emojis (mv-harnais-icones) ne remonte pas.
+        showToast(d.sessionsCoupees ? ('Acc\u00e8s retir\u00e9 \u00e0 '+nom+' \u2014 ses sessions ouvertes se ferment dans l\u2019heure')
+          : (_statutChange && (m.statut||'Actif')!=='Inactif' ? ('Acc\u00e8s r\u00e9tabli pour '+nom) : ('\ud83d\udd11 Droits mis \u00e0 jour pour '+nom)),'#3D6B27');
+      })
       .catch(function(e){
         var reason=(e&&e.details&&e.details.reason)||'';
         if(reason==='no_account'){ showToast('\u26a0\ufe0f '+nom+' n\'a pas de compte \u2014 r\u00f4les enregistr\u00e9s, droits non pos\u00e9s','#B85A1A'); return; }

@@ -2,7 +2,14 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **27 septembre 2026 (DROITS-1)** — ★★ **LA LECTURE SEULE (§185)**. Le serveur pose `ro` (deriveRo),
+> Dernière consolidation : **27 septembre 2026 (DROITS-2 + ACCES-1)** — ★★ **LECTURE SEULE = AUCUN RÔLE D'ÉCRITURE, ET UNE FICHE
+> INACTIVE PERD L'ACCÈS (§186)**. `deriveRo`
+> ne posait `ro` qu'avec saisonnier ou pilotage : un membre sans rôle écrivait côté serveur. Fermé, sur décision de Nico ; les trois
+> copies (claims.js, utils.js, cuvier.js) bougent ensemble. ACCES-1 : claim `off` (fiche Inactive) refusé par `isMyTenant`, sessions
+> coupées (`revokeRefreshTokens`). ⚠️ **Fonctions + règles à déployer PUIS `gtBackfillClaims` à relancer.**
+> **APP 7.69 → 7.70 · SW 8.38 → 8.39**, base `a7f9a5c`. Détail en **§186**.
+>
+> ★ Précédente : **27 septembre 2026 (DROITS-1)** — ★★ **LA LECTURE SEULE (§185)**. Le serveur pose `ro` (deriveRo),
 > l'appli l'ignorait : elle tentait d'écrire, prenait le refus, coffre + « Enregistrement refusé » en rouge. `_mvLectureSeule` (copie
 > de deriveRo, égalité tenue sur 32 combinaisons) : `fbSave` ne tente plus, un message une fois. Et `error_log` refusait les rôles
 > `ro` → règle 5. ⚠️ **Règles à déployer.** **APP 7.68 → 7.69 · SW 8.37 → 8.38**, base `aaee21c`. Détail en **§185**.
@@ -23848,4 +23855,36 @@ sur les **32 combinaisons** des cinq rôles (aucun écart, 7 en lecture seule), 
 ou pilotage) — il peut écrire les documents métier. L'appli ne lui montre aucun bouton (`canWrite` faux), mais les règles le laissent
 passer. Rendre `ro` tout membre sans rôle d'écriture fermerait la porte (changement de `deriveRo`, déploiement des fonctions,
 jetons rafraîchis à la connexion suivante).
+
+## 186. ★★ DROITS-2 + ACCES-1 — LECTURE SEULE = AUCUN RÔLE D'ÉCRITURE, ET UNE FICHE INACTIVE PERD L'ACCÈS (27/09 — `functions/claims.js` · `firestore.rules` · `src/utils.js` · `src/cuvier.js` · `src/firebase.js` · `src/reglages.js` · `guide/02-roles.html` · `public/guide.html` · `index.html` · `public/sw.js` · `scripts/mv-harnais-droits.mjs` · `scripts/mv-harnais-vendange-garde.mjs` · `scripts/harnais-claude-md.mjs` · APP 7.69 → **7.70** · SW 8.38 → **8.39** · base `a7f9a5c`)
+
+Point ouvert de §185, décision de Nico (27/09) : « oui » — fermer la porte. **Avant** : `deriveRo` = aucun rôle d'écriture **ET**
+(saisonnier **ou** pilotage). Un membre sans aucun rôle (`roles: []`, ou des rôles inconnus comme `bureau`) n'était pas `ro` : les
+règles le laissaient écrire journal, parcelles… (l'appli ne lui montrait aucun bouton). **Désormais** : `ro` = aucun de admin,
+ouvrier, tractoriste. Les **trois copies** bougent ensemble et restent tenues égales : `deriveRo` (claims.js), `_mvLectureSeule`
+(utils.js, `mv-harnais-droits` : 32 combinaisons, aucun rôle compris) et `_vendLectureSeule` (cuvier.js, `mv-harnais-vendange-garde`
+— son cas « aucun rôle » était hors modèle, il y entre). Côté appli, sans session → rien n'est bloqué ; **le compte GUERETTECH
+(`_isGTAdmin`) n'est jamais bloqué** (les règles le laissent écrire par `isGtAdmin()`, quels que soient ses rôles dans un domaine).
+
+⚠️⚠️ **Déploiement en deux temps.** Le claim `ro` n'est recalculé qu'à la création d'un compte, à un changement de rôles
+(`updateMemberRoles`) ou par **`gtBackfillClaims`** (pas de bouton : console du navigateur, session GT,
+`await window.fbCallFn('gtBackfillClaims', {})` → rapport `updated / notFound / errors`). Donc : ① vérifier dans Réglages › Équipe
+de chaque domaine que toute personne qui saisit a admin, ouvrier ou tractoriste — **le backfill rendra lecture seule tout le reste** ;
+② `firebase deploy --only functions,hosting,firestore:rules` ; ③ lancer `gtBackfillClaims`. Les jetons se rafraîchissent à la connexion suivante
+(ou dans l'heure).
+
+**ACCES-1 (même lot, question de Nico du 27/09).** Sa pratique pour un départ : fiche en Inactif, rôles retirés ; au retour, Actif et
+rôle rendu. **Lu dans le code** : la tuile disparaît (`initLogin`) et `getLoginEmail` ne répond plus pour un Inactif — mais **une
+session déjà ouverte restait active** (le jeton porte `tenant`, rien ne la coupait) : l'ancien salarié lisait tout le domaine, et
+avant DROITS-2 il pouvait même écrire (rôles `[]` ⇒ pas `ro`). Correction :
+- `deriveOff(statut)` (claims.js) ; claim **`off`** posé par `updateMemberRoles` (paramètre `inactif` transmis par Réglages ; à défaut,
+  lu dans le doc `membres`) et par `gtBackfillClaims` ; jamais pour GUERETTECH ni la démo. **`tenant` est GARDÉ** : le retirer
+  laisserait un admin d'un AUTRE domaine rattacher ce compte au sien (`updateMemberRoles` accepte un compte sans tenant).
+- Au PASSAGE à Inactif : `revokeRefreshTokens` — le jeton en cours meurt à son expiration (≤ 1 h), la session tombe.
+- **Règles** : `isMyTenant` exige `off != true` → plus de lecture ni d'écriture.
+- Réglages (`saveEditMembre`) : un changement de STATUT repose les droits (avant : seulement un changement de rôles) ; toasts
+  « Accès retiré à … — ses sessions ouvertes se ferment dans l'heure » / « Accès rétabli pour … ».
+- Retour : fiche Actif + rôle → `off` retombe, accès à la connexion suivante. Conseil donné : ajouter une NOUVELLE période de contrat,
+  ne pas déplacer les anciennes dates (présence et heures du passé). Guide 02-roles mis à jour.
+`mv-harnais-droits` : section D, 16 assertions au total, 7 contre-épreuves.
 

@@ -1,1 +1,1 @@
-aaee21c8bdb113715232ca6eaf7ba02ef377334c  # base : aaee21c — majauto (VER-1) — lot DROITS-1 (§185 : lecture seule appli = serveur, error_log pour tous) — APP 7.68 → 7.69 / SW 8.37 → 8.38
+a7f9a5cc5ce06cbc1bcbd5c6b35f8b2ee941c9cd  # base : a7f9a5c — remerror (DROITS-1) — lot DROITS-2 + ACCES-1 (§186 : lecture seule = aucun rôle d'écriture ; fiche Inactive = plus d'accès) — APP 7.69 → 7.70 / SW 8.38 → 8.39

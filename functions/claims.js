@@ -151,11 +151,30 @@ function assertTenantAdmin(request) {
   return { isGt: false, tenant: t.tenant, token: t };
 }
 
-// ro (read-only) = saisonnier OU pilotage, sans aucun rôle d'écriture
+// ro (read-only) = AUCUN rôle d'écriture (admin, ouvrier, tractoriste) — DROITS-2, §186 (avant : saisonnier ou pilotage requis)
+// ★ DROITS-2 (27/09/2026, §186) — LECTURE SEULE = AUCUN RÔLE D'ÉCRITURE. Avant : `ro` n'était
+//   posé que si le compte avait saisonnier ou pilotage ; un membre SANS AUCUN rôle (roles: [],
+//   ou des rôles inconnus) n'était pas `ro` et les règles le laissaient écrire journal, parcelles…
+//   — l'appli ne lui montrait aucun bouton, mais la porte serveur était ouverte. Décision de Nico :
+//   la fermer. Seuls admin, ouvrier et tractoriste écrivent.
+//   ⚠️ TROIS COPIES de cette règle, tenues égales par harnais : ici, _mvLectureSeule (utils.js,
+//   mv-harnais-droits) et _vendLectureSeule (cuvier.js, mv-harnais-vendange-garde).
 function deriveRo(roles) {
   const r = Array.isArray(roles) ? roles : [];
-  const noWrite = !r.includes('admin') && !r.includes('ouvrier') && !r.includes('tractoriste');
-  return noWrite && (r.includes('saisonnier') || r.includes('pilotage'));
+  return !r.includes('admin') && !r.includes('ouvrier') && !r.includes('tractoriste');
+}
+
+// ★★ ACCES-1 (27/09/2026, §186) — UNE FICHE INACTIVE N'A PLUS ACCÈS AU DOMAINE.
+//   Nico, pour un départ, passe la fiche en Inactif et retire les rôles. La tuile disparaissait
+//   et getLoginEmail ne répondait plus — mais une session DÉJÀ OUVERTE restait active (le jeton
+//   porte `tenant`), et l'ancien salarié lisait tout le domaine. Claim `off` : les règles
+//   (isMyTenant) refusent lecture et écriture à un compte `off`. On GARDE `tenant` : l'enlever
+//   laisserait n'importe quel admin d'un AUTRE domaine rattacher ce compte au sien
+//   (updateMemberRoles n'accepte qu'un compte sans tenant ou déjà du bon domaine).
+//   Au passage à Inactif : revokeRefreshTokens — le jeton en cours meurt à son expiration
+//   (une heure au plus). Retour en Actif : `off` retombe, l'accès revient à la connexion suivante.
+function deriveOff(statut) {
+  return String(statut || 'Actif') === 'Inactif';
 }
 
 // ── deriveAdm — DÉRIVATION UNIQUE du rôle admin (SEC-1) ───────────────
@@ -367,11 +386,14 @@ exports.gtBackfillClaims = onCall({ region: REGION, enforceAppCheck: true, timeo
         tenant: slug,
         ro:  (isDemoTenant || deriveRo(m.roles)) ? true : null,
         adm: (!isDemoTenant && deriveAdm(m.roles)) ? true : null,
+        off: (!isDemoTenant && m.email !== GT_EMAIL && deriveOff(m.statut)) ? true : null,   // ACCES-1
       };
       if (isDemoTenant) patch.demo = true;
       // Le compte GT cumule gtAdmin + tenant + adm (dérivé de ses rôles comme tout le monde).
       if (m.email === GT_EMAIL) patch.gtAdmin = true;
-      try { const r = await mergeClaims(m.email, patch);
+      try { const avant = patch.off ? ((await admin.auth().getUserByEmail(m.email)).customClaims || {}).off : true;
+            const r = await mergeClaims(m.email, patch);
+            if (patch.off && avant !== true) await admin.auth().revokeRefreshTokens(r.uid);   // ACCES-1 : sessions coupées
             report.updated.push(m.email + ' → ' + JSON.stringify(r.claims) + (r.changed ? '' : ' (inchangé)')); }
       catch (e) {
         if (e instanceof HttpsError) { report.errors.push(slug + ':' + m.email + ':' + e.message); continue; }
@@ -1199,12 +1221,29 @@ exports.updateMemberRoles = onCall({ region: REGION, enforceAppCheck: true }, as
     if (!ctx.isGt && tc.gtAdmin === true) {
       throw new HttpsError('permission-denied', 'Compte GUERETTECH — modification réservée à GUERETTECH.');
     }
+    // ACCES-1 : l'admin transmet le statut (`inactif`) ; à défaut, on le lit dans le doc membres.
+    let off;
+    if (typeof (request.data && request.data.inactif) === 'boolean') off = request.data.inactif;
+    else {
+      off = false;
+      try {
+        const ms = await admin.firestore().doc('mavigne_' + tenant + '/membres').get();
+        const mv = ms.exists ? ms.data() : null;
+        const arr = mv ? (Array.isArray(mv.value) ? mv.value : (Array.isArray(mv) ? mv : [])) : [];
+        const fiche = arr.find((x) => x && x.email && String(x.email).toLowerCase() === email.toLowerCase());
+        off = !!(fiche && deriveOff(fiche.statut));
+      } catch (e) { console.warn('[updateMemberRoles] statut illisible', e.message); }
+    }
+    if (tc.gtAdmin === true) off = false;   // GUERETTECH n'est jamais coupé de ses domaines
     const r = await mergeClaims(email, {
       tenant: tenant,
       ro:  deriveRo(roles)  ? true : null,
       adm: deriveAdm(roles) ? true : null,
+      off: off ? true : null,
     });
-    return { ok: true, uid: r.uid, claims: r.claims, changed: r.changed };
+    let coupe = false;
+    if (off && tc.off !== true) { await admin.auth().revokeRefreshTokens(r.uid); coupe = true; }
+    return { ok: true, uid: r.uid, claims: r.claims, changed: r.changed, sessionsCoupees: coupe };
   } catch (e) {
     if (e instanceof HttpsError) throw e;
     if (e.code === 'auth/user-not-found') throw new HttpsError('not-found', 'Aucun compte Auth pour ' + email, { reason: 'no_account' });

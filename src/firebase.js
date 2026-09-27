@@ -2425,8 +2425,11 @@ window.createAuthAccount = async function (email, password, opts) {
 // Appelée par reglages.js (enregistrement d'un membre). Sans elle, promouvoir
 // quelqu'un administrateur ne lui donnerait aucun droit d'écriture tant que
 // gtBackfillClaims n'a pas été relancé à la main.
-window._fbUpdateMemberRoles = function (email, roles) {
-  return window.fbCallFn('updateMemberRoles', _mvPrepTenant({ email: email, roles: roles || [] }));
+// ACCES-1 (§186) : `inactif` (booléen) accompagne les rôles — une fiche Inactive perd l'accès au domaine.
+window._fbUpdateMemberRoles = function (email, roles, inactif) {
+  var d = { email: email, roles: roles || [] };
+  if (typeof inactif === 'boolean') d.inactif = inactif;
+  return window.fbCallFn('updateMemberRoles', _mvPrepTenant(d));
 };
 
 // ── SEC-2 — mots de passe ────────────────────────────────────────────

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.69';
+export const APP_VERSION = '7.70';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -722,6 +722,16 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.70', items: [
+    { emoji: 'bouclier', titre: 'Un compte sans rôle ne peut plus rien modifier',
+      desc: "Seuls les rôles administrateur, ouvrier et tractoriste enregistrent. Un compte sans aucun de ces rôles était déjà "
+        + "privé de boutons, mais le serveur l’aurait laissé écrire\u00a0; c’est fermé. Vérifiez dans Réglages › Équipe que "
+        + "chaque personne qui saisit a bien l’un de ces trois rôles." },
+    { emoji: 'cle', titre: 'Une fiche passée Inactive perd vraiment l’accès',
+      desc: "Passer un salarié ou un saisonnier en Inactif retirait sa tuile de connexion, mais un téléphone resté connecté "
+        + "gardait l’accès au domaine. Désormais l’accès est coupé, sessions ouvertes comprises (dans l’heure au plus tard). "
+        + "S’il revient, repassez la fiche en Actif avec un rôle\u00a0: l’accès revient à sa prochaine connexion." }
+  ] },
   { v: '7.69', items: [
     { emoji: 'oeil', titre: 'Lecture seule\u00a0: un message clair au lieu d’un refus en rouge',
       desc: "Un saisonnier ou un pilote est en lecture seule. S’il touchait un bouton d’enregistrement, l’appli tentait quand "
@@ -3052,15 +3062,17 @@ export function canSeePilotage() {
   var r = window.currentUser.roles;
   return r.includes('admin') || r.includes('pilotage');
 }
-// ★★ DROITS-1 (27/09/2026, §185) — « lecture seule » AU SENS DU SERVEUR. Copie exacte de deriveRo
-//   (functions/claims.js), qui pose le claim `ro` que les règles Firestore lisent : aucun rôle
-//   d'écriture (admin, ouvrier, tractoriste) ET saisonnier ou pilotage. Distinct de canWrite(), qui
-//   règle l'AFFICHAGE (un tractoriste seul n'a pas canWrite mais écrit ses sessions). Tenu égal à
-//   deriveRo par mv-harnais-droits sur les 32 combinaisons de rôles.
+// ★★ DROITS-1 (27/09/2026, §185) — « lecture seule » AU SENS DU SERVEUR : copie exacte de deriveRo
+//   (functions/claims.js), qui pose le claim `ro` que les règles Firestore lisent. Distinct de
+//   canWrite(), qui règle l'AFFICHAGE (un tractoriste seul n'a pas canWrite mais écrit ses
+//   sessions). Tenu égal à deriveRo par mv-harnais-droits sur les 32 combinaisons de rôles.
+// ★ DROITS-2 (§186) : aucun rôle d'écriture = lecture seule, même sans saisonnier ni pilotage.
+//   Sans session (avant la connexion), on ne bloque rien : aucun enregistrement n'a lieu alors.
 export function _mvLectureSeule() {
-  var r = (window.currentUser && Array.isArray(window.currentUser.roles)) ? window.currentUser.roles : [];
-  var noWrite = r.indexOf('admin') < 0 && r.indexOf('ouvrier') < 0 && r.indexOf('tractoriste') < 0;
-  return noWrite && (r.indexOf('saisonnier') >= 0 || r.indexOf('pilotage') >= 0);
+  if (!window.currentUser) return false;
+  if (window.currentUser._isGTAdmin) return false;   // GUERETTECH : les règles le laissent écrire (isGtAdmin), quels que soient ses rôles
+  var r = Array.isArray(window.currentUser.roles) ? window.currentUser.roles : [];
+  return r.indexOf('admin') < 0 && r.indexOf('ouvrier') < 0 && r.indexOf('tractoriste') < 0;
 }
 export function canWrite() {
   if(!window.currentUser || !window.currentUser.roles) return false;

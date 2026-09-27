@@ -83,6 +83,7 @@ service cloud.firestore {
     function isMyTenant(col) {
       return request.auth != null
              && request.auth.token.get('tenant', '') != ''
+             && request.auth.token.get('off', false) != true       // ACCES-1 (§186) : fiche Inactive = plus d'accès
              && col == 'mavigne_' + request.auth.token.get('tenant', '');
     }
     // Droit d'écrire QUOI QUE CE SOIT dans son domaine. Le compte démo en est exclu
