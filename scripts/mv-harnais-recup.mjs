@@ -711,7 +711,7 @@ function lance(R) {
   const rvW = releve();
   eq('W9 · relevé : le cadre, la page 2 et « À savoir » disent la même chose', [bx(rvW, B25, '23h', '12h du mois + 11h d\u2019avant'),
     rvW.indexOf('<tr><td>Heures sup \u00e0 +25\u202f%<small class="est">dont 18h d\u2019avant septembre</small></td><td class="n">18h</td><td class="n cv">22h30 de repos</td>') !== -1,
-    rvW.indexOf('<li><b>Heures sup d\u2019avant septembre 2026</b>\u00a0:') !== -1 && rvW.indexOf('ont pris leur majoration le 1er septembre') !== -1].join('/'), 'true/true/true');
+    rvW.indexOf('<li><b>Heures sup d\u2019avant septembre 2026</b>\u00a0:') !== -1 && rvW.indexOf('ont reçu leur majoration le 1er septembre') !== -1].join('/'), 'true/true/true');
   // Un report d'avant Ma Vigne, un jour de récup en mars, un dimanche travaillé le 12 juillet
   const anM = anW(); anM[2] = { 20: { type: 'recup' } }; anM[6][12] = T('08:00', '17:00');
   domaine({ ent: anM, hsup: { '2026-dep': { solde: 30, date: '2026-01-01' }, '2026-09': { demande: true } } });
@@ -990,7 +990,7 @@ function lance(R) {
   pages.length = 0; window._planReleveIndiv('Jean', 8);
   const rAC = pages[0] ? pages[0].html : '';
   eq('AC6 · le relevé : « 27h* » en août, la légende dit la règle d’avant et où la majoration est entrée, le compteur a sa ligne', [rAC.indexOf('<td class="n cv">27h*</td>') !== -1,
-    rAC.indexOf('* Avant septembre 2026, le compteur comptait 1h sup = 1h de r\u00e9cup\u00a0; les heures encore au compteur ont pris leur majoration en septembre (+9h30, dans sa r\u00e9cup gagn\u00e9e).') !== -1,
+    rAC.indexOf('* Avant septembre 2026\u00a0: le compteur comptait 1h sup = 1h de récup, sans majoration. Les heures qui restaient au compteur ont reçu leur majoration en septembre (+9h30, comptée dans la récup gagnée de ce mois-là).') !== -1,
     rAC.indexOf('Majoration des heures sup d\u2019avant septembre, rest\u00e9es au compteur</td><td class="n pos">+9h30') !== -1 || rAC.indexOf('Majoration des heures sup d\u2019avant septembre, rest\u00e9es au compteur') !== -1].join('/'), 'true/true/true');
   // Ce qui reste à 1 pour 1 : le report d'avant Ma Vigne, et les heures d'un dimanche déjà majorées à part
   domaine({ ent: { 6: { 12: T('08:00', '17:00') } }, hsup: { '2026-dep': { solde: 10, date: '2026-01-01' } } });
