@@ -4047,7 +4047,12 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pf-cl-sup{grid-template-columns:minmax(0,1fr)}
 .pf-cl-sup .pf-cl-v{justify-content:stretch;text-align:left;margin-top:var(--e-1,4px)}
 .pf-cl-sup .pf-cl-v>span{display:block;width:100%}
-.pf-cl-v .tx3{display:grid;grid-template-columns:1fr 1fr 1.35fr;gap:var(--e-1,4px)}
+.pf-cl-v .tx3{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:var(--e-1,4px)}
+/* DIM-2 : le tableau de l'année en trois familles (heures sup de semaine, dimanches, fériés) */
+.pf-an .pf-fs{background:var(--terre-pale)}.pf-an .pf-fd{background:rgba(214,176,52,0.16)}.pf-an .pf-ff{background:rgba(217,119,6,0.12)}
+.pf-an .pf-gs{border-left:1.5px solid var(--gris-clair)}.pf-an tr.pf-grp th{text-align:center;border-bottom:none}
+/* DIM-2 : la majoration seule d'un dimanche ou d'un férié prévu, à part dans la case de son taux */
+.pf-cl-v .tb em{display:block;font-style:normal;font-weight:600;font-size:var(--pt-micro,11px);line-height:1.3;color:var(--terre-tx,#8A5A38);margin-top:2px}
 .pf-cl-v .tb{display:block;border:1px solid var(--gris-clair);border-radius:var(--r-sm,8px);padding:var(--e-1,4px) var(--e-2,8px);background:var(--terre-pale)}
 .pf-cl-v .tb small{display:block;font-size:var(--pt-micro,11px);color:var(--texte-med)}
 .pf-cl-v .tb b{display:block;font-size:var(--pt-md,20px);line-height:1.15}

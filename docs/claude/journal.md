@@ -8,6 +8,20 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **27 septembre 2026 (MEP-1)** — ★★ **LE RELEVÉ REPASSE À DEUX PAGES, CHAQUE CHOSE ÉCRITE UNE FOIS
+> (§192)**. Page 2 en flux à deux colonnes qui s'équilibre, `.cl` borné au cadre (il défaisait Contrats et Congés), signatures
+> d'un seul tenant, Total de la page 1 protégé ; doublons retirés (« dont … dim./férié », dimanche du mois, règle d'avant
+> septembre ×3). ★★★ **Un vrai Chromium tourne dans le bac à sable** (`@sparticuz/chromium` + `puppeteer-core`, §192b) : les
+> documents imprimables se REGARDENT désormais. **Bump APP 7.73 → 7.74, SW 8.42 → 8.43**, base `3446620`. Détail en **§192**.
+>
+> ★ Consolidation : **27 septembre 2026 (RELEVE-3)** — ★★★ **LE RELEVÉ D'UN MOIS FIGÉ PLANTAIT (§191)**. Remonté du
+> terrain : « Relevé » levait `Cannot read properties of undefined (reading 'length')` sur un mois figé, en mode payé, avec un
+> dimanche travaillé hors heures sup — l'instantané de « Figer » garde la majoration **sans ses jours**, et `_pfNatLib` lisait
+> `l.jours.length`. Corrigé sans toucher au format en base (`_pfMajJours` relit les jours dans le calcul du mois). ★★ Harnais
+> neuf **`mv-harnais-robustesse-planning`** : des mois **tirés au hasard**, saisies abîmées et instantanés d'avant, toutes les
+> surfaces du Planning — aucune exception, aucun « undefined »/« NaN » affiché. **Bump APP 7.72 → 7.73, SW 8.41 → 8.42**,
+> base `4da4367`. Consigne neuve au §24 (n°20). Détail en **§191**.
+>
 > ★ Consolidation : **27 septembre 2026 (LISTE-1)** — ★★ **UNE SEULE LISTE DE CONTRÔLES, JOUÉE UNE SEULE FOIS (§190)**.
 > `check` et `prebuild` étaient deux copies à la main de la même chaîne de 142 commandes, et la CI en rejouait 70 à la main avant
 > que `npm run build` ne relance tout : chaque contrôle de la CI tournait deux fois. Désormais **`scripts/mv-harnais-liste.mjs`**

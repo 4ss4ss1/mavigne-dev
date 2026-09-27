@@ -22,6 +22,8 @@
 //      collective), la feuille d'un jour, le releve papier.
 //      ROUGE si : une exception, OU un « undefined », « NaN », « [object Object] »,
 //      « Infinity » dans ce qui s'affiche.
+//   C. MEP-1 (§192) : les quatre causes de mise en page trouvées sur un PDF imprimé (tableau qui débordait,
+//      style .cl global, colonnes figées, signature orpheline) et le doublon du dimanche ne reviennent pas.
 //
 //  Usage :
 //    node scripts/mv-harnais-robustesse-planning.mjs            # 24 tirages
@@ -55,6 +57,14 @@ if (CONTRE) {
       [['P.majSeule=_pfMajJours(P.fige.maj,hm.majHs);', 'P.majSeule=(P.fige.maj||[]).slice();']], 'A'],
     ['un plantage inédit dans l\u2019onglet Congés (hors du cas connu)',
       [['var cpJ=P.jours.filter(function(x){return x.payeType===\'cp\';});\n', 'var cpJ=P.joursX.filter(function(x){return x.payeType===\'cp\';});\n']], 'B'],
+    ['la page 2 redit le dimanche que la page 1 porte déjà (doublon MEP-1)',
+      [["var majTxt=P.payable?'':(P.majSeule||[]).map(", "var majTxt=(P.majSeule||[]).map("]], 'A'],
+    ['le style .cl redevient global (blocs Contrats et Congés défaits)',
+      [["'.cpt{padding:2px 10px 5px}.cpt .cl{display:grid", "'.cpt{padding:2px 10px 5px}.cl{display:grid"]], 'A'],
+    ['la page 2 revient en deux colonnes figées',
+      [["'.p2{column-count:2;column-gap:16px}", "'.p2{display:grid;grid-template-columns:1fr 1fr;gap:16px}"]], 'A'],
+    ['un mois figé recalcule ce qui est parti au lieu de le montrer (DIM-2)',
+      [["var BK=FGc?(Array.isArray(FGc.bank)?FGc.bank:[]):(r.payesBank||[]);", "var BK=(r.payesBank||[]);FGc=null;"]], 'A'],
     ['un « NaN » dans le releve papier',
       [['<title>Relev\\u00e9 d\\u2019heures \\u2014 \'+_escHtml(nom)', '<title>Relev\\u00e9 d\\u2019heures \'+(0/0)+\' \\u2014 \'+_escHtml(nom)']], 'B'],
   ];
@@ -160,9 +170,12 @@ if (SECTION.includes('A')) {
   console.log('\nA. Mois figé, mode payé, dimanche travaillé hors heures sup');
   const mbr = { nom: 'Nico', statut: 'Actif', type_contrat: 'CDI', planning_id: 'standard' };
   const monter = () => {
-    Object.assign(vider(window.PLANNING_TEMPLATES), { 2026: { standard: modeleFixe(2026) } });
-    // Le 9 : absence personnelle d'une journée ; le 13 (dimanche) : 7 h qui la rattrapent dans la semaine.
-    Object.assign(vider(window.PLANNING_ENTRIES), { Nico: { 2026: { 8: { 9: { absent: true, motif: 'perso' }, 13: { timing: { debut: '07:00', fin: '14:00', continu: true } } } } } });
+    // ★ DIM-2 (§193) : un dimanche NON prévu compte désormais en entier (heures sup). La majoration SEULE — le cas qui plantait —
+    //   ne naît plus que d'un dimanche PRÉVU au planning : le 13 est donc prévu (7h) et travaillé.
+    const tplA = modeleFixe(2026); tplA[8][13] = 7;
+    Object.assign(vider(window.PLANNING_TEMPLATES), { 2026: { standard: tplA } });
+    // Le 9 : 2h d'absence personnelle (la majoration, 3h30, les couvre et il en reste à payer) ; le 13 (dimanche prévu) : 7 h.
+    Object.assign(vider(window.PLANNING_ENTRIES), { Nico: { 2026: { 8: { 9: { absent: true, motif: 'perso', abs_de: '13:00', abs_a: '15:00', motif_h: 2 }, 13: { timing: { debut: '07:00', fin: '14:00', continu: true } } } } } });
     Object.assign(vider(window.PLANNING_HSUP), { Nico: {} }); vider(window.PLANNING_ACOMPTES);
     Object.assign(vider(window.CONFIG), { hsup_mode: 'paye', coupure_heure: '12:00' });
     window.MEMBRES.length = 0; window.MEMBRES.push(mbr);
@@ -183,12 +196,37 @@ if (SECTION.includes('A')) {
     try { h = releve('Nico'); } catch (e) { err = e; }
     T('A' + (2 + 3 * i) + ' · ' + lib + ' : le relevé se produit', !err && h.length > 1000, err ? err.message : 'relevé vide');
     T('A' + (3 + 3 * i) + ' · ' + lib + ' : rien de sale dans le relevé', !err && sale(h).length === 0, sale(h).join(' | '));
-    if (i < 2) T('A' + (4 + 3 * i) + ' · ' + lib + ' : le relevé nomme « Dimanche 13 »', h.indexOf('Dimanche 13') !== -1, 'absent du relevé');
+    // ★ MEP-1 (§192) : en mode payé, le dimanche se lit en page 1 (« Majorations à payer ») et sur sa ligne du jour ; la page 2
+    //   ne le redit plus. Les jours retrouvés par _pfMajJours se vérifient donc sur le calcul lui-même, pas sur une phrase.
+    if (i < 2) {
+      const js = ((R._planPaieMois(mbr, 8).majSeule || []).filter(x => x.nat === 'dim')[0] || {}).jours;
+      // ★ DIM-2 : « Pour la compta » la range dans la case 50 %, « majoration seule (dimanche 13) » — les jours retrouvés servent là.
+      T('A' + (4 + 3 * i) + ' · ' + lib + ' : les jours de la majoration figée sont retrouvés (13), « Pour la compta » la nomme dans sa case, la page 2 ne la répète pas',
+        Array.isArray(js) && js.indexOf(13) !== -1 && h.indexOf('majoration seule (dimanche 13)') !== -1 && h.indexOf('travaill\u00e9es hors heures sup') === -1,
+        'jours=' + JSON.stringify(js) + ' · compta=' + (h.indexOf('majoration seule (dimanche 13)') !== -1) + ' · répété=' + (h.indexOf('travaill\u00e9es hors heures sup') !== -1));
+    }
     else T('A' + (4 + 3 * i) + ' · ' + lib + ' : la fiche s\u2019ouvre sur ses 4 onglets', ['resume', 'jours', 'hsup', 'cp'].every(t => { try { R.openPlanFiche('Nico'); R.planFicheTab(t); return sale(els['pf-body'].innerHTML).length === 0; } catch { return false; } }));
   });
   // Défense en profondeur : le libellé lui-même ne doit jamais lever, même si une majoration lui arrive sans ses jours
   //   par un chemin que la relecture de _planPaieMois ne couvre pas (demain : un nouveau lecteur de l'instantané).
   let lb = null; try { lb = [R._pfNatLib({ taux: 50, nat: 'dim', h: 7 }), R._pfNatLib({ taux: 100, nat: 'fer', h: 7 }), R._pfNatLib({ nat: 'dim', jours: null })]; } catch (e) { lb = e.message; }
+  // ★ DIM-2 — un mois figé montre ce qui est PARTI : un instantané d'avant ce lot n'a que le nombre d'heures prises au compteur
+  //   (`spill`), sans taux — le cadre le dit, daté, au lieu de recalculer ; et le contrôle compte ces heures dans le total.
+  monter(); window.PLANNING_HSUP.Nico['2026-09'] = { demande: true, paye: 5, fige: { le: '2026-09-25', payes: [{ taux: 25, nat: 'hs', brut: 2 }], retenue: 0, spill: 3, maj: [], majRep: [] } };
+  const hf = releve('Nico');
+  T('A12 · mois figé d’avant ce lot : « 3h prises sur le compteur à l’envoi du 25/09/2026 », et le total envoyé (5h)',
+    hf.indexOf('<b>3h</b> <small>prises sur le compteur \u00e0 l\u2019envoi du 25/09/2026') !== -1 && hf.indexOf('= <b>5h</b>') !== -1);
+
+  // ═══ C. LA MISE EN PAGE DU PAPIER (MEP-1, §192) — ce qu'un contrôle sans navigateur PEUT tenir ═══
+  //   Le rendu lui-même se regarde (impression réelle : 3 pages → 2 le 27/09). Ici, les quatre causes trouvées ce jour-là
+  //   ne doivent pas revenir : chacune a été vue sur un PDF, aucune n'aurait rougi ailleurs.
+  monter(); window.PLANNING_HSUP.Nico['2026-09'] = { fige: R._planFigeInstantane(mbr, 8) };
+  const hc = releve('Nico'), css = (hc.match(/<style>([\s\S]*?)<\/style>/) || [])[1] || '';
+  T('C1 · le style des lignes « Pour la compta » (.cl) est borné au cadre : il défaisait les blocs Contrats et Congés', !/(^|\})\.cl\{/.test(css) && css.indexOf('.cpt .cl{') !== -1);
+  T('C2 · la page 2 est UN flux en deux colonnes qui s\u2019équilibre, pas deux colonnes figées', css.indexOf('.p2{column-count:2') !== -1 && hc.indexOf('<div class="p2"><div class="bk">') !== -1);
+  T('C3 · « Fait le », les signatures et la mention restent d\u2019un seul tenant', css.indexOf('.fin{break-inside:avoid') !== -1 && hc.indexOf('<div class="fin"><p class="lieu">') !== -1);
+  T('C4 · le libellé d\u2019une absence peut passer à la ligne (sinon « Observations » s\u2019écrase et le Total sort de la page 1)', css.indexOf('.j td.cab:not(.n){white-space:normal') !== -1);
+  T('C5 · le détail de l\u2019année ne redit plus « dont … dim./férié » (doublon du tableau des dimanches)', hc.indexOf('dim./f\u00e9ri\u00e9</span>') === -1);
   T('A11 · une majoration sans ses jours se nomme « Dimanche » / « Jour férié », sans planter', Array.isArray(lb) && lb[0] === 'Dimanche' && lb[1] === 'Jour f\u00e9ri\u00e9' && lb[2] === 'Dimanche', JSON.stringify(lb));
 }
 
@@ -256,7 +294,7 @@ if (SECTION.includes('B')) {
     const ac = {};
     if (rnd() < .3) ac['2026-09'] = [{ date: '2026-09-10', montant: 200, note: 'avance' }];
     Object.assign(vider(window.PLANNING_ACOMPTES), { Nico: ac });
-    Object.assign(vider(window.CONFIG), { hsup_mode: pick(['paye', 'recup', 'cloture', undefined]), coupure_heure: pick(['12:00', '', undefined]), cp_mode: pick(['ouvrables', 'ouvres']) });
+    Object.assign(vider(window.CONFIG), { dimfer_hs: pick(['toujours', undefined]), hsup_mode: pick(['paye', 'recup', 'cloture', undefined]), coupure_heure: pick(['12:00', '', undefined]), cp_mode: pick(['ouvrables', 'ouvres']) });
     window.MEMBRES.length = 0;
     window.MEMBRES.push(mbr,
       { nom: 'Équipe V', statut: 'Actif', type_contrat: 'Saisonnier', planning_id: 'standard', collectif: true, effectif: pick([5, 30]), debut_contrat: '2026-09-08', fin_contrat: '2026-09-25' },

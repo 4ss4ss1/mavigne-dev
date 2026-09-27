@@ -3,13 +3,12 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **27 septembre 2026 (RELEVE-3)** — ★★★ **LE RELEVÉ D'UN MOIS FIGÉ PLANTAIT (§191)**. Remonté du
-> terrain : « Relevé » levait `Cannot read properties of undefined (reading 'length')` sur un mois figé, en mode payé, avec un
-> dimanche travaillé hors heures sup — l'instantané de « Figer » garde la majoration **sans ses jours**, et `_pfNatLib` lisait
-> `l.jours.length`. Corrigé sans toucher au format en base (`_pfMajJours` relit les jours dans le calcul du mois). ★★ Harnais
-> neuf **`mv-harnais-robustesse-planning`** : des mois **tirés au hasard**, saisies abîmées et instantanés d'avant, toutes les
-> surfaces du Planning — aucune exception, aucun « undefined »/« NaN » affiché. **Bump APP 7.72 → 7.73, SW 8.41 → 8.42**,
-> base `4da4367`. Consigne neuve au §24 (n°20). Détail en **§191**.
+> Dernière consolidation : **27 septembre 2026 (DIM-2 + DIM-3)** — ★★★ **UN DIMANCHE COMPTE EN ENTIER, « POUR LA COMPTA » EN
+> CASES 25 / 50 / 100 %, L'ANNÉE EN TROIS FAMILLES, ET UN RÉGLAGE « DIMANCHES ET FÉRIÉS : TOUJOURS DES HEURES SUP » (§193)**.
+> Mode payé : la majoration voyage avec l'heure (DIMAV-1 défait). Réglage `CONFIG.dimfer_hs` (défaut inchangé) : en « toujours »,
+> même un dimanche prévu au modèle est une heure sup, avant septembre aussi, et le paiement d'un mois d'alors se relit comme un
+> total. Mois figé = ce qui est parti (`fige.bank`). ⚠️ Trois hypothèses de paie fausses en route (§193d bis) : **demander, ne pas
+> supposer**. **Bump APP 7.74 → 7.75, SW 8.43 → 8.44**, base `3446620`, zip avec MEP-1. Détail en **§193**.
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -668,6 +667,8 @@ des fûts et des intrants, récoltes, suivi d'élevage, carnet d'entretien, rég
 - **Tests** : Playwright (Chromium headless) + firebase-admin en devDeps.
   ⚠️ **Le CDN de Playwright n'est PAS joignable depuis le bac à sable Claude** : les contrôles
   visuels passent par un **harnais DOM stubé en Node**, pas par une capture. Voir §6b.
+  ★★★ **Mais un Chromium, si** (§192b) : `@sparticuz/chromium` + `puppeteer-core` depuis npm, dans `/home/claude`. Imprimer
+  en PDF, rendre en PNG, **regarder** — et mesurer la hauteur des pages et la largeur des tableaux.
   ★ En revanche **npm et PyPI SONT joignables** — c'est ce qui permet de récupérer les polices et
   d'installer `pypdfium2` pour contrôler un PDF au pixel (§18c). ★★ **Et depuis le 10/08, GitHub
   aussi est joignable** (`github.com`, `raw.githubusercontent.com`, `codeload.github.com` sont dans
@@ -1813,6 +1814,13 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
    **tout** via `prebuild` (double exécution). Un manifeste lu par un seul lanceur, `prebuild: "npm run check"`,
    la CI sur le même lanceur. ⚠️ Ne PAS déplacer les scripts en sous-dossiers : les contre-épreuves calculent la
    racine par `join(ICI, '..')`, et les chemins sont écrits dans `ci.yml`, le crochet et des centaines de renvois.
+
+### ⚠️ DIM-4 — L'ORDRE DE SORTIE DES HEURES, CHOIX DU DOMAINE (§193f, posé le 27/09)
+
+Aujourd'hui le taux le plus élevé sort d'abord, partout (paiement, récup, absences). Nico : *« prendre d'abord les heures du taux le
+plus élevé ou alors laisser le choix lors de la demande »* — ce n'est pas une généralité, ses clients peuvent faire autrement. La loi
+ne règle pas l'ordre ; le choix paiement/repos relève de l'accord collectif ou de l'employeur, jamais du salarié seul. À faire : un
+réglage de domaine (défaut : le plus élevé), et le choix de l'employeur au moment de la demande.
 
 ### ★ ROB-2 — LE TIRAGE AU HASARD, MODULE PAR MODULE (§191, posé le 27/09)
 

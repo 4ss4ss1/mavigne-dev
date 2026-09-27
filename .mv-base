@@ -1,1 +1,1 @@
-4da4367b6dd68b24e41f52a4048e71e0f6ea101a  # base : 4da4367 — ok — lot RELEVE-3 (§191 : le relevé d'un mois figé ne plante plus ; harnais de tirage au hasard du Planning) — APP 7.72 → 7.73 / SW 8.41 → 8.42
+3446620f9db3147838efd0795e4f1ace5c7d5b0e  # base : 3446620 — planning (RELEVE-3) — lots MEP-1 (§192) + DIM-2/DIM-3 (§193 : dimanche en entier, cases 25/50/100 %, année en trois familles, réglage « toujours des heures sup ») — APP 7.73 → 7.75 / SW 8.42 → 8.44

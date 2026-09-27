@@ -1,4 +1,12 @@
-// MA VIGNE — Service Worker v8.42
+// MA VIGNE — Service Worker v8.44
+// v8.44 (27/09/2026) — DIM-2 : un dimanche/ferie non prevu compte en entier (_planHsupMois) ; mode paye, la majoration voyage
+//   avec l'heure avant septembre (_planMajAuCompteur, pile dim/fer a leur taux, revalorise) ; Pour la compta en cases 25/50/100 %
+//   (_pfCompta), mois fige = ce qui est parti (fige.bank) ; annee en trois familles (_pfAnnee/_pfAnneeTable) ; styles.css.
+//   DIM-3 : reglage CONFIG.dimfer_hs 'toujours' (planSetDimFer) — dimanche/ferie toujours en heures sup, avant septembre aussi,
+//   paiement d'avant relu comme un total. APP 7.74 -> 7.75.
+// v8.43 (27/09/2026) — MEP-1 : releve d'heures — page 2 en flux a deux colonnes (column-count, blocs entiers), style .cl borne
+//   au cadre, signatures d'un seul tenant, absence qui passe a la ligne ; doublons retires (dont dim./ferie, dimanche du mois,
+//   regle d'avant septembre, mois a venir). APP 7.73 -> 7.74.
 // v8.42 (27/09/2026) — RELEVE-3 : le releve d'un mois FIGE ne plante plus (mode paye, dimanche/ferie travaille hors heures
 //   sup) — _pfNatLib tolere une majoration sans ses jours, _pfMajJours les relit dans le calcul du mois. APP 7.72 -> 7.73.
 // v8.41 (27/09/2026) — REAL-1 : le « Realise » de Cout par travail et du tableau des parcelles = heures du planning
@@ -4168,7 +4176,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.42';
+const CACHE_NAME   = 'mavigne-v8.44';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4184,7 +4192,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.42 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.44 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4204,7 +4212,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.42 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.44 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

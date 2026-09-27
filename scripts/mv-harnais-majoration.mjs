@@ -213,11 +213,13 @@ function lance(code){
   c = faireCtx(code, { annee: 2026, CONFIG: { hsup_mode: 'cloture' }, entrees: ent14 });
   eq('14d · mode cloture : au compteur', 4, c._planMajBank(MBR, 8));
 
-  // 16. ★ DIMAV-1 — avant septembre 2026, la majoration va au compteur quel que soit le mode (Ma Vigne n'editait pas ces paies)
+  // 16. ★ DIMAV-1 — avant septembre 2026, la majoration allait au compteur quel que soit le mode.
+  //     ★★ DIM-2 (27/09, §193) : DÉFAIT EN MODE PAYÉ. Les dimanches et fériés étaient payés dans le mois, majoration comprise
+  //     (Nico) : la majoration voyage avec l'heure, avant comme après la bascule. En mode récup, elle entre au compteur (16d).
   const ent16 = { 2: { h: 8, timing: { debut:'07:00', fin:'15:00' } } };        // dimanche 2 aout 2026
   c = faireCtx(code, { annee: 2026, CONFIG: { hsup_mode: 'paye' }, entrees: ent16 });
   eq('16 · 2 aout 2026 est bien un dimanche', 0, c._planDow(7, 2));
-  eq('16b · aout, mode paye : au compteur', 4, c._planMajBank(MBR, 7));
+  eq('16b · aout, mode paye : rien au compteur — la majoration voyage avec l’heure (DIM-2)', 0, c._planMajBank(MBR, 7));
   eq('16c · aout, mode paye : le dimanche compte ses 8h', 8, c._planMajMonth(MBR, 7).hDim);
   c = faireCtx(code, { annee: 2026, CONFIG: { hsup_mode: 'recup' }, entrees: ent16 });
   eq('16d · aout, mode recup : au compteur, pareil', 4, c._planMajBank(MBR, 7));

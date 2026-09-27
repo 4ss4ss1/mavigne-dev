@@ -218,8 +218,10 @@
   <ul class="dot">
     <li><b>Résumé</b> — le cadre <b>Pour la compta</b> : une ligne par chose que la compta saisit, toujours dans le
     même ordre — le <b>salaire de base</b> (<b>retenue</b> de tant d'heures, ou <b>Aucune retenue</b>), les <b>heures sup à
-    payer</b> (trois totaux, toujours les mêmes : à +25&nbsp;%, à +50&nbsp;%, dimanches et jours fériés — chacun dit ce
-    qui vient du mois et ce qui vient d'avant), les <b>congés payés</b>, l'<b>arrêt de travail</b>, l'<b>acompte</b>.
+    payer</b> (une case par taux, toujours les trois mêmes : <b>heures à 25&nbsp;%</b>, <b>à 50&nbsp;%</b>, <b>à 100&nbsp;%</b> —
+    un dimanche ou un férié rejoint la case de son taux ; chaque case dit ce qui vient du mois et de quel mois viennent les
+    heures prises au compteur ; la <b>majoration seule</b> d'un dimanche ou d'un férié prévu au planning y figure à part, à
+    préciser à l'envoi ; en bas, un contrôle additionne les heures sup jusqu'à la demande du salarié), les <b>congés payés</b>, l'<b>arrêt de travail</b>, l'<b>acompte</b>.
     Le chiffre est en gros ; « aucun », en gris, veut dire qu'il n'y a rien — pas un oubli ; le pourquoi est écrit en
     petit dessous (les absences du salarié et ce qu'elles sont devenues). Dessous, <b>Pour le salarié</b> : la récup
     restante, les <b>heures à rattraper</b>, les heures sup restantes à payer, la récup prise. En bas, le mois en
@@ -241,10 +243,10 @@
     d'avant septembre <b>encore au compteur le 1er septembre</b> — ni payées, ni prises — prennent ce jour-là leur
     majoration en récup, comme les heures faites depuis (1&nbsp;h&nbsp;15 à 25&nbsp;%, 1&nbsp;h&nbsp;30 à 50&nbsp;%) :
     le gain apparaît une fois, en septembre (« Majoration des heures sup d'avant septembre »). Restent à 1&nbsp;h pour
-    1&nbsp;h : un dimanche ou un férié déjà majoré à part (sa majoration est entrée en repos le mois même), et le report d'avant Ma Vigne. Le report
+    1&nbsp;h : en mode récup, un dimanche ou un férié déjà majoré à part (sa majoration est entrée en repos le mois même), et le report d'avant Ma Vigne. En mode payé, un dimanche ou un férié encore au compteur prend son taux ce jour-là, comme les autres heures. Le report
     d'avant Ma Vigne reste <b>taux à vérifier</b>. Les heures payées se prennent d'abord sur celles au taux le plus fort (50&nbsp;%, dimanche, férié) et
-    sortent de la récup. La case existe quel que soit le mode du domaine. Le cadre donne alors <b>trois totaux</b> — à +25&nbsp;%, à +50&nbsp;%, dimanches et jours fériés ; un report d'avant
-    Ma Vigne, sans taux connu, reste sur sa ligne « taux à vérifier » —, et l'onglet
+    sortent de la récup. La case existe quel que soit le mode du domaine. Le cadre donne alors <b>ses trois cases</b> — à 25&nbsp;%, à 50&nbsp;%, à 100&nbsp;% ; un report d'avant
+    Ma Vigne, sans taux connu, reste sous « À vérifier » —, et l'onglet
     Compteur ajoute la carte <b>Heures sup restantes à payer</b> : les heures encore payables, taux par taux,
     le décompte (reportées + faites − payées − prises en récup) et leur équivalent en récup. Ce sont les mêmes
     heures, comptées une fois en repos, une fois en heures brutes. Pour les heures d'avant septembre, le détail
@@ -259,8 +261,9 @@
     ligne ; la carte <b>Heures à rattraper</b> (absences et journées écourtées par le domaine : ce que la semaine, la
     récup puis les heures sup du mois ont rattrapé, ce qui reste — toujours affichée, même à zéro) ; l'année mois par mois avec son total
     depuis janvier, et le report d'avant Ma Vigne, replié.
-    L'année se lit mois par mois : <b>heures sup faites</b> et <b>heures sup payées</b> (l'heure faite, ce que la
-    paie saisit), puis, en temps de récup, la <b>récup gagnée</b> (majoration comprise), la <b>récup prise</b>,
+    L'année se lit mois par mois, en trois familles côte à côte, chacune <b>faites</b> et <b>payées</b> : les
+    <b>heures sup de semaine</b>, les <b>dimanches</b>, les <b>jours fériés</b> (toutes les heures travaillées ces jours-là ;
+    payées = parties dans la case de leur taux, majoration seule comprise), puis, en temps de récup, la <b>récup gagnée</b> (majoration comprise), la <b>récup prise</b>,
     les <b>absences reprises</b> (1&nbsp;h d'absence = 1&nbsp;h), la <b>récup restante</b>, et les <b>heures à
     rattraper</b>. Chaque ligne tombe juste : récup restante = celle du mois d'avant + gagnée − prise − absences
     reprises − ce qu'un paiement a pris au compteur.</li>
@@ -279,7 +282,9 @@
     donne <b>1&nbsp;h&nbsp;15</b> de récup, une heure à 50&nbsp;% <b>1&nbsp;h&nbsp;30</b>. L'équation se lit
     «&nbsp;acquises − retirées = de récup&nbsp;», avec le calcul écrit en clair.</li>
     <li>Une heure en plus qui rattrape une heure manquée <b>de la même semaine</b> n'est pas une heure sup : elle
-    compte heure pour heure, sans majoration — la ligne de semaine du relevé le dit.</li>
+    compte heure pour heure, sans majoration — la ligne de semaine du relevé le dit. <b>Sauf un dimanche ou un férié
+    non prévu</b> : il compte toujours <b>en entier, à son taux</b> (4&nbsp;h de dimanche = 6&nbsp;h de récup, ou 4&nbsp;h payées
+    à 50&nbsp;%) ; l'absence de la semaine se reprend alors sur la récup, heure pour heure.</li>
     <li>Ce que la semaine n'a pas rattrapé d'une absence se reprend <b>sur la récup et les heures sup du mois, heure
     pour heure</b> : 1&nbsp;h manquée, 1&nbsp;h de récup en moins. La récup la plus ancienne passe d'abord ; dans un
     même mois, ce qui se prend en temps (absence, heures à rattraper, récup prise) part des <b>heures à 50&nbsp;%
@@ -287,7 +292,10 @@
     <b>retenu sur la paie</b> ; pour le domaine, il va aux <b>heures à rattraper</b>, que les prochaines heures sup
     comblent — jamais retenu. Le salarié passe d'abord. Des heures sup ne se paient qu'une fois les absences
     couvertes : un relevé porte une retenue ou des heures sup à payer, <b>jamais les deux</b>.</li>
-    <li><b>Dimanche ou férié hors heures sup, domaine qui paie</b> : la majoration couvre d'abord les absences du mois, les
+    <li><b>Dimanche ou férié prévu au planning, domaine qui paie</b> : ses heures sont des heures normales, seule sa
+    <b>majoration</b> est due — sauf si le domaine a choisi, dans la roue crantée, <b>« Dimanches et jours fériés travaillés :
+    toujours des heures sup »</b> : alors toutes leurs heures sont des heures sup à leur taux, avant septembre aussi (le paiement
+    saisi pour un mois d'alors se relit comme un total : les heures du mois d'abord, taux le plus fort en tête) ; la majoration couvre d'abord les absences du mois, les
     heures à rattraper et la récup prise, après les heures sup ; seul ce qu'il en reste part en paie. Une feuille ne porte
     jamais une retenue à côté d'une majoration à payer. Dans un mois figé, une majoration née après l'envoi passe au mois
     suivant, où elle suit la même règle.</li>
@@ -298,10 +306,11 @@
     dans le mois n'y entrent pas ; des heures payées en puisant dans le compteur en retirent ce qu'elles valent
     (2&nbsp;h à 25&nbsp;% = 2&nbsp;h&nbsp;30) et se déclarent en heures brutes. Le cadre Pour la compta les distingue
     alors, « du mois » et « prises sur le compteur », pour que rien ne soit déclaré deux fois.</li>
-    <li>Le <b>relevé PDF</b> tient en deux pages. Page&nbsp;1 : le cadre « Pour la compta », puis le mois jour par jour —
+    <li>Le <b>relevé PDF</b> tient en deux pages ; un mois très chargé allonge la première d'une feuille, sans rien couper. Page&nbsp;1 : le cadre « Pour la compta », puis le mois jour par jour —
     chaque absence dit <b>sa cause et ce qu'elle devient</b> (payée, rattrapée dans la semaine, reprise sur la récup, à
     rattraper, retenue), une colonne donne les <b>heures sup</b> du jour, et chaque semaine se lit en
-    entier, avec en gris les jours du mois d'avant qu'elle emporte. Page&nbsp;2 : les heures sup par taux, le
+    entier, avec en gris les jours du mois d'avant qu'elle emporte. Page&nbsp;2 : le détail de l'année en tête, sur toute la
+    largeur (trois familles : heures sup de semaine, dimanches, fériés), puis les heures sup par taux, le
     <b>compteur de récup</b> depuis le solde du mois d'avant, le compte des <b>heures à rattraper</b>, le détail mois
     par mois (heures sup faites et payées, récup gagnée, prise, <b>absences reprises</b>, <b>récup restante</b>,
     <b>heures à rattraper</b>) et le cumul depuis janvier, les durées et repos à surveiller (plus de 10&nbsp;h dans la journée, semaine sans repos), les signatures.</li>
@@ -329,13 +338,15 @@
     deux additionn&eacute;s. Une <b>heure sup faite un dimanche</b> aussi. Le <b>samedi</b> n'est pas concern&eacute;.</li>
     <li>La majoration suit vos heures sup&nbsp;: <b>pay&eacute;es</b>, elle s'imprime sur la feuille
     d'heures, pr&ecirc;te pour la paie&nbsp;; <b>r&eacute;cup&eacute;r&eacute;es</b>, elle s'ajoute au
-    compteur d'heures. <b>Avant septembre 2026</b>, elle va au compteur en repos dans tous les cas, le mois o&ugrave;
-    le jour a &eacute;t&eacute; travaill&eacute;&nbsp;: ces paies ne passaient pas par Ma Vigne. Un dimanche de 8&nbsp;h
+    compteur d'heures. <b>Avant septembre 2026</b>, en mode r&eacute;cup, elle est all&eacute;e au compteur en repos le mois o&ugrave;
+    le jour a &eacute;t&eacute; travaill&eacute; ; en mode pay&eacute;, elle voyage avec l'heure (pay&eacute;e dans le mois, ou prise
+    &agrave; son taux quand l'heure est encore au compteur). En mode r&eacute;cup, un dimanche de 8&nbsp;h
     ajoute 4&nbsp;h de repos.</li>
     <li>Le tableau <b>&laquo;&nbsp;&Eacute;cart au planning &middot; mois par mois&nbsp;&raquo;</b> de chaque salari&eacute;
     a une colonne <b>Dim. et f&eacute;ri&eacute;s</b> (les heures lues au planning, jour par jour) &agrave; c&ocirc;t&eacute; de
-    la <b>Majoration</b>. L'onglet Compteur et le relev&eacute; listent, mois par mois, les dimanches et f&eacute;ri&eacute;s
-    travaill&eacute;s avant septembre et le repos qu'ils ont ajout&eacute;.</li>
+    la <b>Majoration</b>. Le d&eacute;tail de l'ann&eacute;e (onglet Compteur et relev&eacute;) a ses colonnes <b>Dimanches</b> et
+    <b>Jours f&eacute;ri&eacute;s</b>, faites et pay&eacute;es ; en mode r&eacute;cup, un tableau liste aussi les dimanches et f&eacute;ri&eacute;s
+    d'avant septembre et le repos qu'ils ont ajout&eacute;.</li>
     <li>Le calcul d&eacute;marre en <b>janvier 2026</b>&nbsp;: les mois d&eacute;j&agrave;
     pass&eacute;s en paie avant cette date ne bougent pas.</li>
   </ul>
@@ -389,8 +400,8 @@
     <b>Prévu</b>, <b>Fait</b>, <b>Absence</b> —, les heures sup du jour, les observations, le total de chaque semaine et
     celui du mois. Un congé
     payé s'inscrit en absence payée : il n'est jamais compté comme des heures manquées.</li>
-    <li><b>Page 2</b> : où vont les heures sup, le temps de récup, les heures à rattraper, le détail
-    mois par mois, puis les blocs ci-dessous, et trois cases : la signature du salarié, celle de l'employeur,
+    <li><b>Page 2</b> : le détail mois par mois en tête, puis où vont les heures sup, le temps de récup, les heures à rattraper,
+    puis les blocs ci-dessous, et trois cases : la signature du salarié, celle de l'employeur,
     et <b>la date d'envoi à la compta</b>.</li>
     <li><b>Le mois jour par jour</b> : statut de chaque journée et heures effectives, sur les seuls
     jours sous contrat (relevés d'avant septembre 2026).</li>

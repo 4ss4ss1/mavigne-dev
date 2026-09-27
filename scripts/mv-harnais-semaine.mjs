@@ -143,17 +143,19 @@ let z = R._planHsupMois(M[0], 8);
 eq('Chloé 21h', z.plus, 21); eq('Chloé taux', bk(z), '25hs:11.5 50hs:4 50dim:5.5'); eq('Chloé domaine rattrapé', [z.domaine, z.rattrape.domaine].join('/'), '0/1.5');
 eq('Chloé S1 déjà en août', z.semaines[0].deja, 3.5);
 z = R._planHsupMois(M[1], 8);
-eq('Nico 5h — le 9, sans motif, est injustifié : les heures en plus de sa semaine le rattrapent', z.plus, 5); eq('Nico taux : 5h à 25 %', bk(z), '25hs:5'); eq('Nico domaine : 1h30 rattrapées, 1h30 restent — son absence du 9 passe d’abord dans la semaine (PAIE-1)', [z.domaine, z.rattrape.domaine].join('/'), '1.5/1.5');
+// ★★ DIM-2 (27/09, §193) : un dimanche NON prévu ne rattrape plus — il compte en entier, à son taux (Nico). Le 9 de Nico
+//   n'est plus rattrapé que par les 1h30 du mardi 8 ; son dimanche 13 (5h30) devient des heures sup à +50 %.
+eq('Nico 10h30 — 5h à 25 % et son dimanche 13 en entier ; le 9 n’est rattrapé que par les heures en plus de semaine (DIM-2)', z.plus, 10.5); eq('Nico taux : 5h à 25 %, 5h30 le dimanche à 50 %', bk(z), '25hs:5 50dim:5.5'); eq('Nico domaine : 1h30 rattrapées, 1h30 restent — son absence du 9 passe d’abord dans la semaine (PAIE-1)', [z.domaine, z.rattrape.domaine].join('/'), '1.5/1.5');
 eq('Nico faites 165h, le 18 vaut 8h', [R._planPaieMois(M[1], 8).faites, R._planDayH('nico', 8, 18, null)].join('/'), '165/8');
 z = R._planHsupMois(M[2], 8);
-eq('Victor 0h — les 2 et 12, sans motif, sont injustifiés', z.plus, 0); eq('Victor taux', bk(z), ''); eq('Victor absence : 12h rattrapées, 25h30 restent — le salarié d’abord dans la semaine (PAIE-1)', [z.rattrape.retire, z.retire].join('/'), '12/25.5');
-eq('Victor domaine : rien dans la semaine, 5h30 restent — le 11 passe après son absence du 12 (PAIE-1)', [z.rattrape.domaine, z.domaine].join('/'), '0/5.5'); eq('Victor dimanche : majoration seule 3h30', JSON.stringify(z.majHs.map(x => [x.taux, x.nat, x.h])), '[[50,"dim",3.5]]');
+eq('Victor 3h30 — son dimanche, en entier (DIM-2) ; les 2 et 12, sans motif, sont injustifiés', z.plus, 3.5); eq('Victor taux', bk(z), '50dim:3.5'); eq('Victor absence : 8h30 rattrapées (plus le dimanche), 29h restent — le salarié d’abord dans la semaine (PAIE-1)', [z.rattrape.retire, z.retire].join('/'), '8.5/29');
+eq('Victor domaine : rien dans la semaine, 5h30 restent — le 11 passe après son absence du 12 (PAIE-1)', [z.rattrape.domaine, z.domaine].join('/'), '0/5.5'); eq('Victor dimanche : plus de majoration seule — il n’était pas prévu (DIM-2)', JSON.stringify(z.majHs.map(x => [x.taux, x.nat, x.h])), '[]');
 const rows = n => R._planCompteur(M[n], 8).rows[8];
 // Le solde de départ + l'écart historique d'août (3h30 / 2h / 0h) donnent le solde d'entrée de septembre
 // ★ AVANT-2 (20/09/2026) : au 1er septembre, les heures sup d'août encore au compteur prennent leur majoration (3h30 à 25 % : +0h52).
 eq('Chloé compteur : 31 + 3h30 d’août, majorées (+0h52) + 28h37 = 64h', R._planBank(M[0], 8).solde, 31 + 3.5 * 1.25 + 28.625);
-eq('Nico compteur : 43h30 + 2h d’août, majorées (+0h30, AVANT-2) + 2h45 de majoration du dimanche 13 − 1h30 reprises − 25h payées au compteur = 22h15 (PAIE-1 : sa demande de 30h est un total)', R._planBank(M[1], 8).solde, 43.5 + 2 * 1.25 + 2.75 - 1.5 - 25);
-eq('Nico : 10h30 demandées sur le mois, 5h payées — ses heures sup du mois', rows(1).paye, 5);
+eq('Nico compteur : 43h30 + 2h d’août, majorées (+0h30) − 5h30 d’absence du 9 − 1h30 du domaine − 19h30 payées au compteur = 19h30 ; ses 10h30 du mois sont payées (DIM-2 : même valeur qu’avant, le dimanche payé à 150 % au lieu de 5h30 prises au compteur + 2h45 de majoration gardée)', R._planBank(M[1], 8).solde, 43.5 + 2 * 1.25 - 5.5 - 1.5 - 19.5);
+eq('Nico : 10h30 demandées sur le mois, 10h30 payées — ses heures sup du mois, dimanche compris', rows(1).paye, 10.5);
 eq('Victor compteur : 20 + 1h45 − 25h30 = 3h45 retenues ; les 5h30 du domaine à rattraper ; rien de payé (PAIE-1)', [R._planBank(M[2], 8).solde, rows(2).retenue, R._planBank(M[2], 8).dette, rows(2).paye].join('/'), '0/3.75/5.5/0');
 console.log(rouge ? '  ' + rouge + ' rouge(s)' : '  ✓ les trois relevés de septembre : le vrai moteur dit comme la maquette v3');
 process.exit(rouge ? 1 : 0);

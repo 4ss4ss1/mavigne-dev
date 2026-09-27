@@ -551,3 +551,171 @@ tirages verts (122 s). Section B ≈ 17 s dans la liste. `mv-harnais-portes` : 1
 « Dimanche 13 » de la page 2 (« Les heures sup de septembre »).
 **Hors périmètre, dit à Nico** : seul le Planning est passé au tirage au hasard. Même méthode à appliquer module par module
 (Pilotage, Cave, Tracteur, Réserve) — un lot par module.
+
+## 192. ★★ MEP-1 — LE RELEVÉ REPASSE À DEUX PAGES, CHAQUE CHOSE ÉCRITE UNE FOIS (27/09 — `src/planning.js` · `scripts/mv-harnais-robustesse-planning.mjs` · `scripts/mv-harnais-recup.mjs` · `src/utils.js` · `index.html` · `public/sw.js` · **bump APP + SW**, base `3446620`)
+
+### 192a. Le constat
+
+Nico, relevé de septembre imprimé après RELEVE-3 (§191) : *« corrige doublon et mise en page »*. Le PDF faisait **trois pages**
+(la légende des dimanches, les signatures et le pied en page 3), le tableau de l'année **mordait sur la colonne de droite**
+(« 0h » et « Récup restante » par-dessus « Heures sup restantes à payer »), les blocs Contrats et Congés étaient décalés.
+
+### 192b. ★★★ L'OUTIL QUI MANQUAIT : UN VRAI NAVIGATEUR DANS LE BAC À SABLE
+
+§4 disait « le CDN de Playwright n'est pas joignable : aucun contrôle visuel ». **C'est vrai de Playwright, pas de Chromium.**
+Le paquet npm **`@sparticuz/chromium`** embarque un Chromium compressé DANS son archive npm (registre autorisé) ; avec
+`puppeteer-core`, il démarre ici. Recette (dans `/home/claude`, jamais dans le dépôt) : `npm i @sparticuz/chromium@131
+puppeteer-core@23`, `executablePath: await chromium.executablePath()`, `args: chromium.args`. Un petit serveur HTTP local sur
+`public/` donne les vraies polices (`/fonts/fonts.css`, le `<base href>` du relevé pointe sur l'origine). `page.pdf()` puis
+`pypdfium2` → PNG → on REGARDE. Le relevé a été généré par le vrai `planning.js` chargé dans Node (patron des harnais), avec
+un mois proche du cas du terrain. **C'est ainsi que les défauts ci-dessous ont été vus — et mesurés** (hauteur de chaque
+`.pg`, largeur de chaque tableau contre sa colonne). ★ À réutiliser pour tout document imprimable et tout écran.
+
+### 192c. Mise en page — quatre causes
+
+1. **`.cl` global.** PAIE-1 avait nommé `.cl` les lignes du cadre « Pour la compta » (`display:grid; 30mm 1fr`, bordure) ;
+   `_plRvContratsHtml` et `_plRvCpHtml` utilisaient déjà `.crow .cl` pour leurs libellés : la règle de PAIE-1 les mettait en
+   grille. Bornée à `.cpt .cl`. **Même famille que le préfixe `mvs-` partagé (§24 CSS n°5) : un nom court se réutilise.**
+2. **Deux colonnes figées** (`grid`). La gauche portait compteur, rattrapage, année, dimanches : 968 px contre ~740 à droite.
+   Désormais **un flux `column-count:2`** : blocs `.bk` (et `.ctr`, `.soldean`, `.lim`) en `break-inside:avoid`, « À savoir »
+   sécable entre ses points. Le navigateur équilibre, quelles que soient les données. Ordre de lecture inchangé.
+3. **Signature orpheline** : « Fait le », signatures et mention regroupées dans `.fin` (`break-inside:avoid`).
+4. **Page 1 — le Total pouvait sortir de la page, coupé sans rien dire** (`.pg` est à hauteur fixe, `overflow:hidden`).
+   Trouvé en testant une absence partielle « décidée par le domaine » : son libellé insécable écrasait « Observations » à trois
+   mots par ligne. `.j td.cab:not(.n)` passe à la ligne (min 30 mm). ⚠️ **Rien ne garantit la page 1 pour tout salarié** : un
+   mois très chargé en observations peut encore déborder — à surveiller, voir 192f.
+
+### 192d. Doublons retirés — et l'arbitrage
+
+- **« dont … dim./férié » sous chaque mois** (CLAIR-2, modification de Nico le matin même, `f2c1d97`) = la colonne « Repos
+  ajouté » du tableau des dimanches juste dessous, au chiffre près. Et c'est sa ligne insécable qui élargissait la colonne.
+  **Arbitrage : on garde le tableau (heures ET repos, par mois), on retire le « dont »** — écran et papier. La légende de
+  l'année renvoie au tableau qui suit, avec le total (+73h45). **Dit à Nico, réversible s'il préfère l'inverse.**
+- **« Dimanche 13 : … hors heures sup » en page 2** : en mode payé, « Majorations à payer » (page 1) et la ligne du jour le
+  portent. Gardé en mode récup (la page 1 n'a pas de ligne « à payer »).
+- **La règle « avant septembre » écrite trois fois** : sur le papier seulement (`c.bref` de `_pfAnneeTable`), la légende ne
+  redit plus la majoration reçue en septembre ni le payé sur le compteur (lignes du tableau « compteur ») ; la légende des
+  dimanches ne redit plus « déjà dans la récup gagnée » ; « À savoir » ne garde que la relecture du taux et « la compta le
+  confirme ». ⚠️ Une première réécriture avait dit « à confirmer avec la compta » : **le sens changeait**, rétabli.
+- La conversion « 1h à 25 % = 1h15 » (deux fois), le « — » d'un contrat sans terme, les mois à venir vides.
+
+### 192e. Mesuré / pas vérifié
+
+Rendu réel : **3 pages → 2**, aucun tableau plus large que sa colonne, page 1 : Total visible. `mv-harnais-robustesse-planning` :
+**30 vertes** (section C neuve, statique : les quatre causes et le doublon du dimanche), **7/7 contre-épreuves**.
+`mv-harnais-recup` : 426 (AC6 recalée sur la légende brève — elle exigeait la phrase retirée). Contrôle complet : voir la note
+de livraison. **Pas vérifié** : ton PDF réel — la page 2 de l'exemple est **pleine à quelques pixels** ; un salarié plus
+chargé peut repasser à 3 pages (le flux garantit alors qu'aucun bloc ni signature n'est coupé, pas le nombre de pages).
+
+### 192f. Ce qui reste ouvert
+
+- Les pages imprimables ne sont mesurées par **aucun contrôle automatique** : le navigateur de 192b n'est pas dans la liste
+  (paquet de 60 Mo, hors `package.json`). Piste : un harnais « hauteur de page » dans la CI, où Chromium est installable.
+- ROB-2 (§28) : le tirage au hasard, module par module.
+
+## 193. ★★★ DIM-2 — UN DIMANCHE COMPTE EN ENTIER, « POUR LA COMPTA » EN CASES 25 / 50 / 100 %, L'ANNÉE EN TROIS FAMILLES (27/09 — `src/planning.js` · `src/styles.css` · `src/utils.js` (MV_AIDE, WHATS_NEW) · `guide/10-planning.html` · `index.html` · `public/sw.js` · `scripts/mv-harnais-recup.mjs` · `scripts/mv-harnais-semaine.mjs` · `scripts/mv-harnais-majoration.mjs` · `scripts/mv-harnais-robustesse-planning.mjs` · **bump APP + SW**, base `3446620` — le zip porte aussi MEP-1, non poussé)
+
+### 193a. D'où ça vient
+
+Nico, devant son relevé de septembre : *« explique-moi heures sup à payer et majoration à payer, on parle de dimanche, d'un côté
+5h30 et de l'autre 1h »*, puis *« ces feuilles ne sont pas claires pour moi »*. Le fond, obtenu en quatre échanges :
+- **La compta saisit** : *salaire de base + nombre d'heures à 25 % + à 50 % + à 100 %* (100 % = payées double, un férié). Aucune case
+  « majoration seule », aucune case « taux normal ».
+- **Un dimanche** : *« 4h de dimanche = 6h de récup, ou payé 4h sup de dimanche à 50 % ; en cas de rattrapage, je fais quand même
+  4h de dimanche, 6h de récup, et je rattrape 1h sur ces 6h »*. Le code découpait ce dimanche : 1h « de rattrapage » (majoration
+  seule, 0h30) + 3h sup — même valeur (5h), mais une ligne qu'aucune case ne reçoit.
+- **Un dimanche PRÉVU au planning** (le modèle de Nico en porte un sur deux, d'avril à juillet) : *« je mettais le nombre d'heures
+  à 50 % — que la majoration en fait, mais je le spécifiais à l'envoi »*. La majoration seule est donc légitime, dans la case de
+  son taux, avec une mention.
+- **Avant septembre** : *« les dimanches et fériés, je les faisais obligatoirement payer sur le mois »* ; *« j'indiquais 30h sup à
+  25 % »* ; *« ce n'est pas une généralité »* → souplesse : l'ordre de sortie est un choix du domaine (193f).
+- **Législation** (vérifiée, travail-emploi.gouv.fr et fiches paie) : paiement ou repos se décide par accord collectif, à défaut par
+  l'employeur (CSE non opposé) ; le salarié ne choisit pas les modalités ; **aucune règle d'ordre d'imputation entre taux**.
+
+### 193b. Ce qui est fait — le calcul
+
+1. **`_planHsupMois`** : un jour de dimanche/férié (`y.jm`) n'entre plus dans le pot des heures en plus qui rattrapent la semaine
+   (`totP`) et n'en consomme rien (`conso=0`) : il est entièrement heure sup, à son taux. L'absence non rattrapée passe au compteur
+   (1h = 1h), comme toute absence. La majoration seule (`majHs`) ne naît plus que d'un dimanche PRÉVU. Depuis septembre seulement.
+2. **Mode payé, avant septembre — DIMAV-1 défait** : `_planMajAuCompteur(m) = !_planHsupPayable()`. La majoration ne s'ajoute plus en
+   repos à part ; `_planEstLecture` range le « déjà majoré » par nature (`dim`, `fer`), `_pfEstPile` (mode payé) empile
+   25 % → 50 % → dimanche → férié (le haut sort d'abord, TAUX-1), et `revalorise` donne au dimanche/férié encore au compteur son taux
+   à la bascule. **Mode récup : inchangé** (la majoration y est un vrai repos, §73d).
+
+### 193c. Ce qui est fait — l'affichage
+
+- **`_pfCompta`** : la ligne « Heures à payer » = une case par taux (25, 50, 100 toujours ; un autre taux s'ajoute s'il existe).
+  Chaque case : heures sup du mois + heures prises au compteur **avec leur mois d'origine** ; la majoration seule à part (`<em>`,
+  « + 1h majoration seule (dimanche 11) »). Contrôle en bas : « Heures sup : a + b + c = total, à la demande du salarié ; la
+  majoration seule n'est pas une heure sup… à préciser à l'envoi ». Plus de « Majorations à payer » ni d'« Autres heures » :
+  ce qui n'a vraiment pas de taux (report d'avant Ma Vigne, repos de majoration en mode récup, dimanche d'avant septembre « déjà
+  majoré » en mode récup) va sous **« À vérifier »**.
+- **Mois figé = ce qui est parti** : cases depuis `fige.payes`, heures du compteur depuis **`fige.bank`** (nouveau champ de
+  l'instantané : taux, nature, mois, heures) ; un instantané plus ancien n'a que `spill` → « Xh prises sur le compteur à l'envoi du
+  JJ/MM, sans détail de taux », sous « À vérifier ». Même règle dans le tableau de l'année.
+- **`_pfAnnee` / `_pfAnneeTable`** : trois familles, *faites / payées* — heures sup de semaine (avant septembre : relues, part
+  dimanche/férié retirée), dimanches, fériés (toutes les heures de ces jours ; payées = parties dans leur case, majoration seule
+  comprise) —, puis la récup et les heures à rattraper. Écran (`pf-scroll`) et papier (en tête de page 2, pleine largeur).
+  Le tableau « Dimanches et fériés d'avant septembre » ne reste qu'en mode récup.
+- **Relevé** : la page 1 s'allonge au lieu de couper (`.pg1{height:auto}`) — **défaut préexistant** : le relevé de septembre d'un
+  salarié réel perdait ses derniers jours ET la ligne Total ; « Page 1 sur 2 » (faux dès qu'un mois déborde) devient « Le mois,
+  jour par jour » / « Le compteur et l'année » ; « À savoir » dit l'exception du dimanche et perd le point « avant septembre »
+  (redit par la légende). Rendu réel (Chromium, §192b) sur les 7 salariés actifs : 2 feuilles, 3 pour le mois le plus chargé.
+
+### 193d. ★★★ Mesuré sur la sauvegarde réelle du domaine de référence — et ce qu'il faut savoir
+
+Avant/après (script hors dépôt, vrai `planning.js`, rubrique `paie` NON lue) : un salarié passe de **51h45 à 0h** de récup fin
+septembre, un autre de 38h à 27h45 ; trois ne bougent pas. Cause : DIMAV-1 avait ajouté en repos la majoration de dimanches **déjà
+payés dans le mois**. Conséquence : sur les 24h30 prises au compteur à l'envoi du 25/09, **12h36 n'ont plus d'heures derrière** ;
+le mois étant figé, elles passent « à retenir » sur octobre (FIGE-1). **Décision de Nico (27/09) : on laisse la reprise en
+octobre.** ⚠️ Autre salarié : son absence restante de septembre passe de 20h30 à 24h (figé, l'écart va sur octobre).
+★ **Leçon** : *« je les payais dans le mois »* ne se déduit d'aucune donnée — les paiements d'avant septembre n'ont pas de nature.
+Deux lectures possibles (les « payées » comprenaient ou non la majoration seule) donnaient **0h** ou **≈ 91h40** de récup : seule la
+question à Nico a tranché. Une règle métier sur l'historique se vérifie auprès de celui qui l'a vécu, jamais par le calcul seul.
+★ **Erreur de Claude, reconnue** : il avait affirmé que la sauvegarde ne contenait pas les salaires ; elle contient `paie`.
+
+### 193d bis. DIM-2 bis, retiré — puis DIM-3 : le réglage « toujours des heures sup »
+
+Nico, sur l'aperçu livré : *« où sont passées toutes les heures de dimanche et de jour férié ? »* (avril–juillet : « faites »,
+rien en face). Claude a d'abord supposé qu'elles étaient **payées dans le mois comme majoration seule** et l'a affiché (DIM-2 bis).
+**Faux** : *« avant, je comptais mes heures de dimanche et de férié DANS les heures sup, je ne les ajoutais pas ; je dois encore
+pouvoir les décompter »*, et *« il n'y a rien à coder en dur depuis mon planning, ce n'est pas une généralité »*.
+La cause réelle : le modèle de planning de ce salarié porte des dimanches (10h un sur deux, avril–juillet) **sans saisie** ; la règle
+générale « dimanche prévu = journée normale + majoration seule » les excluait des heures sup. La règle n'était pas codée d'après ce
+planning — elle s'y appliquait à tort, faute de réglage.
+
+**DIM-3** : `CONFIG.dimfer_hs` — `'planning'` (défaut, inchangé pour les autres domaines) ou `'toujours'` (roue crantée du Planning,
+bloc « Dimanches et jours fériés travaillés », `planSetDimFer`). En « toujours » :
+- depuis septembre, `_planHsupMois` : toutes les heures travaillées d'un dimanche/férié sont « en plus » (`bp = jm.h`), un dimanche
+  prévu non travaillé ne manque pas (`bm = 0`) → heures sup à leur taux, jamais de majoration seule ;
+- avant septembre, `_planSupCalc` (règle du mois) : dimanches et fériés sortent de l'écart du mois (`_planDfMois` : prévu, fait),
+  puis toutes leurs heures faites s'ajoutent aux heures sup ;
+- **avant septembre, le paiement saisi se relit comme un total** (`_planCompteur`, `bankAv`) : l'ancien partage « du mois / au
+  compteur » suivait des heures sup qui ne comptaient pas les dimanches prévus ; avec eux, les heures du mois passent d'abord,
+  taux le plus fort en tête (la pile, `_pfEstPile`). Sans cette relecture, les paiements d'avril–juillet vidaient janvier.
+Mesuré (sauvegarde réelle, réglage « toujours » simulé) : la récup fin septembre du salarié concerné est **109h45** (en ligne : 51h45 ;
+avec DIM-2 seul : 0h) ; ses 24h30 prises au compteur le 25/09 sont couvertes — **plus rien à retenir en octobre pour lui**. Deux
+autres salariés gardent un petit écart couvert à tort à l'envoi (0h45 et 4h20) : la majoration de dimanche en repos qui les
+couvrait (DIMAV-1) n'existe plus en mode payé → à retenir sur octobre. Les trois autres ne bougent pas.
+⚠️ **À signaler à la compta** : les paiements d'avant septembre étaient déclarés « à 25 % » ; la relecture fait sortir d'abord les
+heures de dimanche (+50 %) et de férié (+100 %) de chaque mois. L'écart de majoration éventuel se règle avec la compta, pas par
+l'application.
+★ **Leçons** : (1) une information retirée d'un calcul (DIMAV-1) peut disparaître d'un écran — relire chaque tableau qui la
+montrait ; (2) **ne jamais supposer une pratique de paie** : trois hypothèses successives de Claude étaient fausses, chaque fois
+la question à Nico a tranché ; (3) une règle générale qui se trompe sur un client appelle un **réglage**, pas une exception.
+
+### 193e. Mesuré / pas vérifié
+
+`mv-harnais-recup` : **428** vertes, **87/87** défauts détectés (onze contre-épreuves réancrées, deux neuves : le dimanche qui
+rattrape de nouveau, « À savoir » sans l'exception). `mv-harnais-semaine` vert (trois septembres réels recalés sur DIM-2, valeurs
+vérifiées à la main). `mv-harnais-majoration` 34. `mv-harnais-robustesse-planning` : 31 vertes, 8/8 contre-épreuves (scénario A
+passé en dimanche PRÉVU, A12 : un mois figé montre ce qui est parti). Contrôle complet : voir la note de livraison.
+**Pas vérifié** : le rendu à l'écran de la fiche (le tableau à douze colonnes défile dans `pf-scroll` : à regarder sur téléphone).
+
+### 193f. Ce qui reste ouvert
+
+- **DIM-4 — l'ordre de sortie, choix du domaine** (Nico : *« prendre d'abord le taux le plus élevé, ou laisser le choix lors de la demande »*).
+  Aujourd'hui : le plus élevé d'abord, partout. À faire : un réglage (défaut : le plus élevé), et éventuellement le choix de
+  l'employeur au moment de la demande — la loi ne donne pas ce choix au salarié.
+- Le tableau « compteur de récup » d'un mois figé reste le calcul vivant (« Payées sur le compteur, 11h54 à déclarer » alors que
+  24h30 sont parties) : le report sur le mois suivant est dit par la carte « Envoi à la compta ». À clarifier sur le papier.

@@ -234,3 +234,5 @@
 | 189 | 189. ★★★ RULES-1 + DOC-1 — LES RÈGLES FIRESTORE EXÉCUTÉES PAR LE VRAI MOTEUR, ET CE DOCUMENT SCINDÉ (27/09 … | `docs/claude/chantiers-180-229.md` |
 | 190 | 190. ★★ LISTE-1 — UNE SEULE LISTE DE CONTRÔLES, JOUÉE UNE SEULE FOIS (27/09 — `scripts/mv-harnais-liste.mjs… | `docs/claude/chantiers-180-229.md` |
 | 191 | 191. ★★★ RELEVE-3 — LE RELEVÉ D'UN MOIS FIGÉ PLANTAIT, ET UN HARNAIS QUI TIRE LES DONNÉES AU HASARD (27/09 … | `docs/claude/chantiers-180-229.md` |
+| 192 | 192. ★★ MEP-1 — LE RELEVÉ REPASSE À DEUX PAGES, CHAQUE CHOSE ÉCRITE UNE FOIS (27/09 — `src/planning.js` · `… | `docs/claude/chantiers-180-229.md` |
+| 193 | 193. ★★★ DIM-2 — UN DIMANCHE COMPTE EN ENTIER, « POUR LA COMPTA » EN CASES 25 / 50 / 100 %, L'ANNÉE EN TROI… | `docs/claude/chantiers-180-229.md` |
