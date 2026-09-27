@@ -334,6 +334,13 @@ jobs:
           node scripts/mv-harnais-horloge.mjs
           node scripts/mv-harnais-horloge.mjs --contre
 
+      # TOUR-6 (§182) : frise du cockpit (etiquettes sur etages) et echelle des mois des Archives (une sur deux
+      # en ecran etroit) — deux chevauchements vus par npm run tour, tenus sans navigateur.
+      - name: Harnais — etiquettes de la frise et de l'echelle (TOUR-6)
+        run: |
+          node scripts/mv-harnais-etiquettes.mjs
+          node scripts/mv-harnais-etiquettes.mjs --contre
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build

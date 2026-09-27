@@ -1390,12 +1390,19 @@ function _cmpEchelle(a,b){
   // Le pas est ANCRE SUR JANVIER. Sans cela, sur 18 mois demarrant en octobre, un pas de 2 n'ecrit
   // que les rangs pairs : janvier n'apparait jamais, donc l'annee non plus — alors que la fenetre
   // contient justement deux "oct" indistinguables. Le repere d'annee prime sur le premier mois.
-  var off=0;
-  for(var q=0;q<ms.length;q++){ if(ms[q].m===0){ off=q%pas; break; } }
+  var off=0, jan=-1;
+  for(var q=0;q<ms.length;q++){ if(ms[q].m===0){ off=q%pas; jan=q; break; } }
+  // TOUR-6 (27/09/2026) — sur un telephone, douze mois sur ~300 px : « août 26 » (aligne a
+  // gauche, plus large) chevauchait « sept » (npm run tour, 375 px). En ecran etroit, une
+  // etiquette sur deux se cache (classe `imp`, CSS) — la parite suit JANVIER pour que
+  // l'annee reste lisible, et le mois qui suit l'etiquette de tete se cache toujours.
+  var visibles=[];
   ms.forEach(function(o,i){
     out+='<i class="'+(o.m===0?'y':'')+'" style="left:'+o.x+'%"></i>';
     if(((i-off)%pas+pas)%pas||o.x>96) return;
-    var cls=o.x<4?'a0':(o.x>92?'a1':'');
+    var rang=visibles.length; visibles.push(i);
+    var imp=(pas===1) && i!==0 && ((jan>=0 ? (((i-jan)%2+2)%2===1) : (rang%2===1)) || rang===1);
+    var cls=(o.x<4?'a0':(o.x>92?'a1':''))+(imp?' imp':'');
     var an=(i===0||o.m===0)?'<em>'+String(o.y).slice(2)+'</em>':'';
     out+='<span class="'+cls+'" style="left:'+o.x+'%">'+_CMP_MOIS[o.m].replace('.','')+an+'</span>';
   });

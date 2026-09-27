@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.66';
+export const APP_VERSION = '7.67';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -716,6 +716,12 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.67', items: [
+    { emoji: 'oeil', titre: 'Deux libellés qui se marchaient dessus',
+      desc: "Pilotage › Aujourd’hui\u00a0: quand l’objectif ou la fin prévue tombe près d’aujourd’hui, «\u00a0Auj.\u00a0», «\u00a0Fin prévue\u00a0» "
+        + "et «\u00a0Objectif\u00a0» se superposaient sur la frise. Ils se placent maintenant sur deux lignes. Archives, sur téléphone\u00a0: "
+        + "l’échelle des mois n’affiche plus qu’un mois sur deux, pour que «\u00a0août\u00a026\u00a0» ne recouvre plus «\u00a0sept\u00a0»." }
+  ] },
   { v: '7.66', items: [
     { emoji: 'antenne', titre: 'Une saisie faite hors ligne ne se perd plus',
       desc: "Si la mémoire du téléphone était pleine, une saisie faite sans réseau pouvait disparaître au retour du réseau, sans "

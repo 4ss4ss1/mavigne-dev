@@ -2266,6 +2266,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pil-tl-marge.over{background:repeating-linear-gradient(45deg,rgba(160,41,30,.3),rgba(160,41,30,.3) 5px,transparent 5px,transparent 10px);}
 .pil-tl-mk{position:absolute;top:50%;width:11px;height:11px;margin-left:-5.5px;border-radius:50%;background:var(--bg-card);border:2.5px solid var(--texte-doux);transform:translateY(-50%);}
 .pil-tl-mk .cap{position:absolute;top:-24px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:var(--pt-nano,9.5px);font-weight:600;letter-spacing:.8px;text-transform:uppercase;background:transparent;padding:0;}
+.pil-tl-mk .cap.n1{top:-40px;}.pil-tl-mk .cap.n2{top:-56px;}.pil-tl.n1{margin-top:calc(var(--e-8,40px) + var(--e-2,8px));}.pil-tl.n2{margin-top:calc(var(--e-8,40px) + var(--e-6,24px));}
 .pil-tl-mk .cap.bot{top:auto;bottom:-24px;color:var(--texte-doux);font-weight:500;letter-spacing:.2px;text-transform:none;font-size:var(--pt-lbl,10.5px);}
 .pil-tl-today{border-color:#9B2D1F;}.pil-tl-today .cap{color:#9B2D1F;}
 .pil-tl-proj{border-color:var(--vert-med);}.pil-tl-proj .cap{color:var(--vert-med);}

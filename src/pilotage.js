@@ -4742,6 +4742,7 @@ function _pilMargeSous(m){
 }
 
 // ── Frise de saison : aujourd'hui → objectif, fin prévue + marge ──
+var _PIL_TL_ECART = 0.22;   // TOUR-6 : sous cet ecart (part de la frise), deux etiquettes ne tiennent pas cote a cote
 function _pilCockpitTimeline(m){
   if(!m.proj||!m.obj) return '';
   var today=new Date(); today.setHours(0,0,0,0);
@@ -4751,11 +4752,23 @@ function _pilCockpitTimeline(m){
   function fr(t){ return Math.max(0,Math.min(1,(t-T0)/(T1-T0))); }
   var fP=fr(m.proj.getTime()), fO=fr(m.obj.getTime());
   var lo=Math.min(fP,fO)*100, hi=Math.max(fP,fO)*100, over=(m.marge!=null&&m.marge<0);
-  return '<div class="pil-tl-wrap"><div class="pil-tl">'
+  // TOUR-6 (27/09/2026) — les trois etiquettes se chevauchaient quand deux reperes
+  // tombent pres l'un de l'autre (objectif proche d'aujourd'hui, fin prevue sur
+  // l'objectif) : « AUJ. » sur « OBJECTIF », vu par npm run tour sur 17 ecrans, de
+  // 375 a 1280 px. Chaque etiquette monte d'un etage si elle est a moins de
+  // _PIL_TL_ECART de la derniere posee a son etage ; la frise s'ecarte d'autant.
+  var mk=[{k:'today',x:0},{k:'proj',x:fP},{k:'obj',x:fO}].sort(function(a,b){ return a.x-b.x; });
+  var der=[], niv={}, nMax=0;
+  mk.forEach(function(o){
+    var n=0; while(n<2 && der[n]!=null && (o.x-der[n])<_PIL_TL_ECART) n++;
+    der[n]=o.x; niv[o.k]=n; if(n>nMax) nMax=n;
+  });
+  var cap=function(k,lbl){ return '<span class="cap'+(niv[k]?(' n'+niv[k]):'')+'">'+lbl+'</span>'; };
+  return '<div class="pil-tl-wrap"><div class="pil-tl'+(nMax?(' n'+nMax):'')+'">'
     +'<div class="pil-tl-marge'+(over?' over':'')+'" style="left:'+lo.toFixed(1)+'%;right:'+(100-hi).toFixed(1)+'%"></div>'
-    +'<div class="pil-tl-mk pil-tl-today" style="left:0"><span class="cap">Auj.</span><span class="cap bot">'+_pilDfrObj(today)+'</span></div>'
-    +'<div class="pil-tl-mk pil-tl-proj" style="left:'+(fP*100).toFixed(1)+'%"><span class="cap">Fin prévue</span></div>'
-    +'<div class="pil-tl-mk pil-tl-obj" style="left:'+(fO*100).toFixed(1)+'%"><span class="cap">Objectif</span></div>'
+    +'<div class="pil-tl-mk pil-tl-today" style="left:0">'+cap('today','Auj.')+'<span class="cap bot">'+_pilDfrObj(today)+'</span></div>'
+    +'<div class="pil-tl-mk pil-tl-proj" style="left:'+(fP*100).toFixed(1)+'%">'+cap('proj','Fin prévue')+'</div>'
+    +'<div class="pil-tl-mk pil-tl-obj" style="left:'+(fO*100).toFixed(1)+'%">'+cap('obj','Objectif')+'</div>'
     +'</div></div>';
 }
 

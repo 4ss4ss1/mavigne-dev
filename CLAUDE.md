@@ -2,7 +2,11 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **26 septembre 2026 (CMP-NOM, rejoué)** — ★★ **LE REPLI PAR NOM RENDAIT L'HIVER CLOS À 32 % (§182)**.
+> Dernière consolidation : **27 septembre 2026 (TOUR-6)** — `npm run tour:dates` chez Nico : **0 bug** sur 803 écrans aux 9 instants
+> pièges (jour, campagne, exercice justes ; aucun « Invalid Date »). Deux chevauchements réels corrigés : frise du cockpit (étiquettes
+> sur étages) et échelle des mois des Archives sur téléphone. **APP 7.66 → 7.67 · SW 8.35 → 8.36**, base `36c6263`. Détail en **§183**.
+>
+> ★ Précédente : **26 septembre 2026 (CMP-NOM, rejoué)** — ★★ **LE REPLI PAR NOM RENDAIT L'HIVER CLOS À 32 % (§182)**.
 > Verdict d'Économie « +190,9 % de temps en plus — 2 289 h contre 787 h, mesuré sur Hiver 2025–2026 », alors que l'écart réel est
 > de 2 % sur une tâche : le dénominateur amputé de §43, rendu par le **repli par nom** de `_pilCmpSnapshot` après que le chemin par
 > dates l'avait écarté. Repli réservé aux archives non datables + achèvement. ⚠️⚠️ **Première livraison ÉCRASANTE** : construite sur
@@ -23742,4 +23746,24 @@ vrai, rien à changer. Guide : rien. Pas de « Quoi de neuf » (module seul, pas
 - Question de §43h toujours ouverte : empêcher (ou signaler) la clôture d'une période très incomplète.
 - Pré-existants rouges, hors `check` : `harnais-cadence-escalier`, `mv-harnais-audit-pil` (B5, B6).
 - Non regardé à l'écran.
+
+## 183. ★ TOUR-6 — LES DATES PIÈGES PASSENT, DEUX CHEVAUCHEMENTS CORRIGÉS (27/09 — `src/pilotage.js` · `src/reglages.js` · `src/styles.css` · `src/utils.js` · `index.html` · `public/sw.js` · `scripts/mv-harnais-etiquettes.mjs` (neuf) · `package.json` · `.github/workflows/ci.yml` · `scripts/harnais-claude-md.mjs` · APP 7.66 → **7.67** · SW 8.35 → **8.36** · base `36c6263`, après CMP-NOM §182)
+
+**`npm run tour:dates` chez Nico (27/09)** : Chromium, heure de Paris, 9 instants pièges × admin et ouvrier × 375 et 1280 px :
+**803 écrans, 0 bug** — aucun mauvais jour, campagne ou exercice, aucun « Invalid Date ». 38 « à voir » : 33 petites cibles (sans
+décision) et **5 chevauchements, les deux mêmes partout** — donc réels (TOUR-5 avait éliminé les faux des éléments en ligne) :
+- **Frise du cockpit** (Pilotage › Aujourd'hui, `_pilCockpitTimeline`) : « AUJ. » sur « OBJECTIF » (17 écrans, 375 ET 1280 px) —
+  deux repères proches, trois étiquettes à la même hauteur. Désormais chaque étiquette monte d'un étage (classes `cap.n1`, `cap.n2`)
+  si elle est à moins de `_PIL_TL_ECART` (0,22 de la frise) de la dernière posée à son étage ; la frise s'écarte (`pil-tl.n1/n2` : 48 et 64 px écrits en jetons avec repli, `calc(var(--e-8,40px) + var(--e-2,8px))`, pour ne pas faire monter le cliquet d'espacement de `mv-harnais-echelle`).
+- **Échelle des mois des Archives** (`_cmpEchelle`, reglages.js) à 375 px : « août 26 » (étiquette de tête, alignée à gauche, plus
+  large) sur « sept ». En écran étroit (`@media (max-width:520px)`, classe `imp`), une étiquette sur deux se cache — parité calée
+  sur JANVIER pour garder l'année, et le mois qui suit l'étiquette de tête toujours caché. Visible sur téléphone : août 26 · nov ·
+  janv 27 · mars · mai · juil.
+
+`scripts/mv-harnais-etiquettes.mjs` (check, prebuild, CI, `npm run test:etiquettes`) : 10 assertions sur les vraies fonctions
+(étages de la frise dans quatre configurations, masquage de l'échelle, CSS présents), 3 contre-épreuves.
+
+⚠️ Rejoué sur `36c6263` : la première version de ce lot (construite sur `43e30ec` + §177-181 locaux) ignorait CMP-NOM (§182,
+`_pilCmpSnapshot`), poussé entre-temps — la coller aurait effacé son repli par nom. Seule la frise de `_pilCockpitTimeline` touche
+`pilotage.js` ; les autres fichiers n'avaient que les écarts de TOUR-6.
 
