@@ -227,7 +227,6 @@ var PLAN_DEF_T = {
   8.5:{d:'07:00',f:'16:30'}, // 9.5h - 1h = 8.5h
   10:{d:'06:00',f:'17:00'}   // 11h - 1h = 10h
 };
-var PLAN_FERIES={0:{1:"Jour de l'An"},3:{6:'Lundi de P\u00e2ques'},4:{1:'F\u00eate du Travail',8:'Victoire 1945',14:'Ascension',25:'Lundi de Pentec\u00f4te'},6:{14:'F\u00eate Nationale'},7:{15:'Assomption'},10:{1:'Toussaint',11:'Armistice'},11:{25:'No\u00ebl'}};
 var PLAN_MOIS=['Janvier','F\u00e9vrier','Mars','Avril','Mai','Juin','Juillet','Ao\u00fbt','Septembre','Octobre','Novembre','D\u00e9cembre'];
 // \u2605 Abreviations FRANCAISES (AFNOR NF Z44-001). « Jun » et « Jul » etaient
 //   anglaises, et se lisaient telles quelles sur un document signe : le bloc
@@ -1055,13 +1054,14 @@ function _planWorkRange(mbr,from,to){
     guard++;
     var yr=cur.getFullYear(),mi=cur.getMonth(),d=cur.getDate();
     _planCtxYear=yr;
-    if(_planInContract(mbr,mi,d)){
-      var yb=(PLANNING_ENTRIES[mbr.nom]||{})[yr]||{};
-      tot+=_planWorkH(plId,mi,d,(yb[mi]||{})[d]);
-    }
+    try{
+      if(_planInContract(mbr,mi,d)){
+        var yb=(PLANNING_ENTRIES[mbr.nom]||{})[yr]||{};
+        tot+=_planWorkH(plId,mi,d,(yb[mi]||{})[d]);
+      }
+    } finally { _planCtxYear=_sv; }
     cur.setDate(cur.getDate()+1);
   }
-  _planCtxYear=_sv;
   return tot;
 }
 // ★★ HEURES-PERSONNES SUR UNE PLAGE DE DATES REELLES — socle de la masse salariale.
@@ -1090,14 +1090,15 @@ function _planRangeH_(mbr,from,to,mode){
     guard++;
     var yr=cur.getFullYear(),mi=cur.getMonth(),d=cur.getDate();
     _planCtxYear=yr;
-    if(_planInContractRead(mbr,mi,d)){
-      var yb=(PLANNING_ENTRIES[mbr.nom]||{})[yr]||{}, e=(yb[mi]||{})[d];
-      var h=(mode==='champ')?_planChampH(plId,mi,d,e,yr):(mode==='work')?_planWorkH(plId,mi,d,e,yr):_planDayH(plId,mi,d,e,yr);
-      if(h>0) tot+=h*_planEffN(mbr,mi,d);
-    }
+    try{
+      if(_planInContractRead(mbr,mi,d)){
+        var yb=(PLANNING_ENTRIES[mbr.nom]||{})[yr]||{}, e=(yb[mi]||{})[d];
+        var h=(mode==='champ')?_planChampH(plId,mi,d,e,yr):(mode==='work')?_planWorkH(plId,mi,d,e,yr):_planDayH(plId,mi,d,e,yr);
+        if(h>0) tot+=h*_planEffN(mbr,mi,d);
+      }
+    } finally { _planCtxYear=_sv; }
     cur.setDate(cur.getDate()+1);
   }
-  _planCtxYear=_sv;
   return tot;
 }
 // Exposees pour Pilotage > Economie > Exercice : la masse salariale d'une fenetre de
@@ -1504,7 +1505,7 @@ function _chargeSaisonData(s){
     // ENTREE DE MESURE 2/5 — capacite de la saison. mbrs vient de
     // _mvEnContratSurPeriode (tous contrats) : sans le mode large, une fiche
     // reembauchee etait DANS la liste et pesait 0 h de capacite.
-    _planCtxYear=x.yr; _planWide(function(){ mbrs.forEach(function(mb){ capEquipe+=(((_planSummary(mb,x.m)||{}).ref)||0)*ratio*_mbPoids(mb); }); }); _planCtxYear=null;
+    window._planSurAnnee(x.yr,function(){ _planWide(function(){ mbrs.forEach(function(mb){ capEquipe+=(((_planSummary(mb,x.m)||{}).ref)||0)*ratio*_mbPoids(mb); }); }); });
   });
   var etpDispo=capRefTotal>0?capEquipe/capRefTotal:0;
   // Repartition par ORDRE des taches (vue par pics) + capacite reellement presente / mois.
@@ -2489,7 +2490,10 @@ function _planRecupH(mbr,m){
   }
   return h;
 }
-function _planHsupKey(m){return planYear+'-'+String(m+1).padStart(2,'0');}
+// ★ _pY() et non planYear : sous _planSurAnnee (PDF mensuel Reglages, Pilotage) et dans les
+//   parcours de plage, l'annee de CALCUL n'est pas l'annee affichee. Hors contexte, _pY()===planYear :
+//   les ecritures des onglets (planSaveHsupAt, planSaveHsupBankAt, planSaveDepart) gardent exactement la meme cle.
+function _planHsupKey(m){return _pY()+'-'+String(m+1).padStart(2,'0');}
 function _planHsupPaye(nom,m){return((PLANNING_HSUP[nom]||{})[_planHsupKey(m)]||{}).paye||0;}
 function _planHsupPayeBank(nom,m){return((PLANNING_HSUP[nom]||{})[_planHsupKey(m)]||{}).paye_bank||0;}
 // ★★ FIGE-1 (19/09/2026) — CE QUI EST PARTI À LA COMPTA NE BOUGE PLUS. Nico : « on fige à l'envoi ce qui a été payé et
@@ -2538,7 +2542,7 @@ function _planBank(mbr,uptoMonth){
   return{tr:c.tr,solde:c.solde,forced:0,forcedSrc:[],overdraw:c.overdraw,dette:c.dette,retenue:r.retenue||0,rows:c.rows};
 }
 // ── Solde de départ (report d'heures avant Ma Vigne) — par salarié / année ──
-function _planDepartKey(){ return planYear+'-dep'; }
+function _planDepartKey(){ return _pY()+'-dep'; }
 function _planDepartRec(nom){ return (PLANNING_HSUP[nom]||{})[_planDepartKey()]||{}; }
 function _planDepartSolde(mbr){ var v=parseFloat(_planDepartRec(mbr.nom).solde); return isNaN(v)?0:v; }
 function _planDepartDate(mbr){ return _planDepartRec(mbr.nom).date||''; }
@@ -3980,7 +3984,7 @@ function _planBuildMonHtml(mbr,canEdit){
       +'<div class="plan-day-info">'
         +'<div class="plan-day-label" style="color:'+st.c+'">'+st.l+cpBadge+'</div>'
         +(tStr?'<div class="plan-day-timing" style="color:'+tColor+'">'+_mvIcon('chrono',16)+' '+tStr+'</div>':'')
-        +(e&&e.comment&&!e.absent&&!isCp&&!e.canicule?'<div class="plan-day-comment">'+_mvIcon('bulle',16)+' '+e.comment+'</div>':'')
+        +(e&&e.comment&&!e.absent&&!isCp&&!e.canicule?'<div class="plan-day-comment">'+_mvIcon('bulle',16)+' '+_escHtml(e.comment)+'</div>':'')
       +'</div>'
       +'<div class="plan-day-hours">'
         +(e&&pl>0?'<div class="plan-day-pl">'+_planFmt(pl)+'</div>':'')
@@ -9068,7 +9072,6 @@ window._planDow                 = _planDow;
 window.PLAN_MOIS                = PLAN_MOIS;
 window.PLAN_MOIS_C              = PLAN_MOIS_C;
 window.PLAN_JOURS               = PLAN_JOURS;
-window.PLAN_FERIES              = PLAN_FERIES;
 
 /* ══════════════════════════════════════════════════════════════════════════
    LE RELEVÉ INDIVIDUEL — LES CONTRATS, LES CONGÉS, ET L'ACCÈS AU DOCUMENT
