@@ -2851,6 +2851,55 @@ function _livVol(l){ return _livJus(l)+_livLie(l); }
 function _livRetour(l){ return l.lignes.some(function(x){ return !!x.part.retour; }); }
 function _livProrata(l){ return l.lignes.some(function(x){ return x.part.retour&&x.part.retour.src==='prorata'; }); }
 function _livDateRet(l){ var d=''; l.lignes.forEach(function(x){ if(x.part.retour&&x.part.retour.le>d) d=x.part.retour.le; }); return d; }
+// ★★ RET-G — UN RETOUR POUR PLUSIEURS LIVRAISONS.
+// Un acheteur ne renvoie pas toujours un chiffre par chargement : souvent il
+// envoie UN total de jus et de lie pour tout ce qu'il a reçu, jours confondus.
+// Les livraisons couvertes par ce total portent le même `retour.grp` ; les
+// litres sont répartis au prorata des kilos sur TOUTES leurs lignes, la
+// dernière reçoit le reste (même règle que VD-2 : aucun litre inventé).
+// ⚠️ Un groupe s'ouvre, se corrige et s'efface EN ENTIER : n'en rouvrir qu'une
+//   livraison laisserait les autres avec la répartition d'un total qui n'est
+//   plus le bon.
+function _livGrp(l){
+  var g=''; l.lignes.some(function(x){ var r=x.part.retour; if(r&&r.grp){ g=r.grp; return true; } return false; });
+  return g;
+}
+// Les livraisons (index dans `ls`) qui partagent le retour de ls[li].
+function _vendGrpLis(ls,li){
+  var g=ls[li]?_livGrp(ls[li]):''; if(!g) return [li];
+  var out=[]; ls.forEach(function(l,i){ if(_livGrp(l)===g) out.push(i); });
+  return out;
+}
+// Les lignes de saisie de plusieurs livraisons, de la plus ancienne à la plus récente.
+function _vendRetLignes(ls,lis){
+  var out=[];
+  lis.slice().sort(function(a,b){ return String(ls[a].date).localeCompare(String(ls[b].date)); })
+    .forEach(function(i){
+      ls[i].lignes.forEach(function(x){
+        var r=x.part.retour||null;
+        out.push({date:ls[i].date,parcelle:x.parcelle,part:x.part,rec:x.rec,caisses:_vpCs(x.part),pck:_vpPck(x.part),
+                  jus:r?(Number(r.jus)||0):0, lie:r?(Number(r.lie)||0):0});
+      });
+    });
+  return out;
+}
+// Écrit caisses, poids et retour sur les parts. `rep` null = pas de retour.
+// ⚠️ Une récolte d'avant VD-1 n'a pas de `parts[]` : sa part est fabriquée à
+//   la lecture, et `_vendParts` en fabrique une NOUVELLE à chaque appel. Écrire
+//   `rec.parts=_vendParts(rec)` rangeait dans la récolte une part neuve et
+//   laissait le retour sur l'ancienne — perdu à l'enregistrement. On range la
+//   part même qu'on vient de corriger.
+function _vendRetEcrit(lignes,rep,le,src,grp){
+  lignes.forEach(function(x,i){
+    x.part.caisses=x.caisses; x.part.pck=x.pck;
+    if(!Array.isArray(x.rec.parts)||!x.rec.parts.length){ delete x.part._mig; x.rec.parts=[x.part]; }
+    if(rep){
+      x.part.retour={jus:rep[i].jus,lie:rep[i].lie,le:le,src:src};
+      if(grp) x.part.retour.grp=grp;
+    } else if(x.part.retour) delete x.part.retour;
+    x.rec.nb_caisses=_recCaisses(x.rec);
+  });
+}
 // Kilos pour faire un hectolitre. C'est le rendement réel, celui que seul le
 // client peut donner ; tout le reste du Cuvier travaille sur une estimation.
 function _vendRendKgHl(kg,litres){ return litres>0?(kg/(litres/100)):0; }
@@ -2953,8 +3002,13 @@ function openVendLivs(ci){
    +'<div class="mvv-sheet-sub">'+_vendKgTxt(kg)+' kg livr\u00e9s'
    +(vol>0?(' \u00b7 '+_vendL1(vol/100)+' hL rendus \u00b7 <b>'+_vendKgTxt(_vendRendKgHl(kgRet,vol))+' kg/hL</b> r\u00e9el'):'')
    +'</div>';
+  // ★ RET-G — le client a envoyé un seul total pour plusieurs livraisons.
+  if(canWrite()&&ls.length>1)
+    h+='<div class="mvl-a" style="margin:0 0 10px"><button class="w" onclick="openVendRetGroupe('+ci+')">'
+     +'Un seul retour pour plusieurs livraisons</button></div>';
   ls.forEach(function(l,li){
-    var ret=_livRetour(l);
+    var ret=_livRetour(l), grp=ret?_livGrp(l):'';
+    var nGrp=grp?ls.filter(function(y){ return _livGrp(y)===grp; }).length:0;
     h+='<div class="mvl-liv"><div class="mvl-h"><span class="mvl-d">'+_vendFrDate(l.date)+'</span>'
      +'<span class="mvl-b '+(ret?'ok':'att')+'">'+(ret?'retour re\u00e7u':'retour attendu')+'</span>'
      +'<span class="mvl-k">'+_livCs(l)+' c. \u00b7 '+_vendKgTxt(_livKg(l))+' kg</span></div>'
@@ -2964,7 +3018,8 @@ function openVendLivs(ci){
       var v=_livVol(l);
       h+='<div class="mvl-ret"><b>'+_vendKgTxt(_livJus(l))+' L de jus</b> \u00b7 '+_vendKgTxt(_livLie(l))+' L de lie \u00b7 '
        +_vendL1(v/100)+' hL \u2192 <b>'+_vendKgTxt(_vendRendKgHl(_livKg(l),v))+' kg/hL</b>'
-       +(_livProrata(l)?'<br><span style="color:var(--orange,#B85A1A)">r\u00e9parti au prorata entre les parcelles</span>':'')
+       +(nGrp>1?('<br><span style="color:var(--orange,#B85A1A)">part d\u2019un retour group\u00e9 sur '+nGrp+' livraisons, r\u00e9parti au prorata des kilos</span>')
+         :(_livProrata(l)?'<br><span style="color:var(--orange,#B85A1A)">r\u00e9parti au prorata entre les parcelles</span>':''))
        +'<br><span style="color:var(--texte-doux,#5F5F5F)">re\u00e7u le '+_vendFrDate(_livDateRet(l))+'</span></div>';
     }
     h+='<div class="mvl-a">'
@@ -2978,31 +3033,102 @@ function openVendLivs(ci){
 }
 
 // ── La saisie du retour ────────────────────────────────────────────────────
+// Une livraison qui fait partie d'un retour groupé rouvre tout le groupe.
 function openVendRetour(ci,li){
   if(!canWrite()) return;
   var c=_vendClients()[ci]; if(!c) return;
-  var l=_vendLivs(c.nom)[li]; if(!l) return;
-  var detail=l.lignes.length>1 && l.lignes.every(function(x){ return x.part.retour&&x.part.retour.src==='saisi'; });
-  _vliv={ci:ci,li:li,nom:c.nom,date:l.date,detail:detail,le:_livDateRet(l)||_vendAujId(),
-    lignes:l.lignes.map(function(x){
-      var r=x.part.retour||null;
-      return {parcelle:x.parcelle,part:x.part,rec:x.rec,caisses:_vpCs(x.part),pck:_vpPck(x.part),
-              jus:r?(Number(r.jus)||0):0, lie:r?(Number(r.lie)||0):0};
-    })};
+  var ls=_vendLivs(c.nom); if(!ls[li]) return;
+  _vendRetOpen(ci,_vendGrpLis(ls,li));
+}
+function _vendRetOpen(ci,lis){
+  var c=_vendClients()[ci]; if(!c) return;
+  var ls=_vendLivs(c.nom);
+  lis=lis.filter(function(i){ return !!ls[i]; }); if(!lis.length) return;
+  var lignes=_vendRetLignes(ls,lis);
+  var grp='', le='';
+  lignes.forEach(function(x){ var r=x.part.retour; if(!r) return; if(r.grp&&!grp) grp=r.grp; if(r.le>le) le=r.le; });
+  if(lis.length>1&&!grp) grp='g'+Date.now().toString(36);
+  var dates=lignes.map(function(x){ return x.date; });
+  var detail=lignes.length>1 && lignes.every(function(x){ return x.part.retour&&x.part.retour.src==='saisi'; });
+  _vliv={ci:ci,li:lis[0],lis:lis,nom:c.nom,date:dates[0],fin:dates[dates.length-1],
+    grp:(lis.length>1?grp:''),detail:detail,le:le||_vendAujId(),lignes:lignes};
   _vliv.jus=_vliv.lignes.reduce(function(s,x){ return s+x.jus; },0);
   _vliv.lie=_vliv.lignes.reduce(function(s,x){ return s+x.lie; },0);
   _vendRetourRender();
+}
+// Nom d'une ligne de saisie : la date s'ajoute quand le retour couvre plusieurs jours.
+function _vlNom(x){
+  return _escHtml(x.parcelle)+((_vliv.lis&&_vliv.lis.length>1)?(' <span class="u">'+_vendFrDate(x.date)+'</span>'):'');
+}
+
+// ── Le choix des livraisons couvertes par un même retour ──────────────────
+var _vlsel=null;
+function openVendRetGroupe(ci){
+  if(!canWrite()) return;
+  var c=_vendClients()[ci]; if(!c) return;
+  var ls=_vendLivs(c.nom);
+  _vlsel={ci:ci,on:{}};
+  // Coché d'office : ce qui attend encore son retour.
+  ls.forEach(function(l,i){ if(!_livRetour(l)) _vlsel.on[i]=1; });
+  _vendRetGrpRender();
+}
+function _vendRetGrpSel(ls){
+  return Object.keys(_vlsel.on).map(Number).filter(function(i){ return !!ls[i]; }).sort(function(a,b){ return a-b; });
+}
+function _vendRetGrpRender(){
+  _vendVracCss();
+  var c=_vendClients()[_vlsel.ci]; if(!c) return;
+  var ls=_vendLivs(c.nom), sel=_vendRetGrpSel(ls);
+  var kg=sel.reduce(function(s,i){ return s+_livKg(ls[i]); },0);
+  var h='<div class="mvv-sheet-hd"><div class="mvv-sheet-t">Un seul retour</div>'
+   +'<button class="mv-gh mvv-sheet-x" onclick="openVendLivs('+_vlsel.ci+')" title="Retour" aria-label="Retour">'+_mvIcon('croix',18)+'</button></div>'
+   +'<div class="mvv-sheet-sub">'+_escHtml(c.nom)+' a donn\u00e9 un total de jus et de lie pour plusieurs livraisons\u00a0? '
+   +'Cochez celles qu\u2019il couvre. Les litres seront r\u00e9partis au prorata des kilos, livraison par livraison.</div>';
+  ls.forEach(function(l,i){
+    var on=!!_vlsel.on[i], ret=_livRetour(l), g=ret?_livGrp(l):'';
+    h+='<div class="mvl-chk'+(on?' on':'')+'" onclick="_vendRetGrpTog('+i+')"><div class="bx">'+(on?_mvIcon('check',16):'')+'</div>'
+     +'<div style="flex:1;min-width:0"><div class="tx">'+_vendFrDate(l.date)+' \u00b7 '+_livCs(l)+' c. \u00b7 '+_vendKgTxt(_livKg(l))+' kg</div>'
+     +'<div class="sb">'+l.lignes.map(function(x){ return _escHtml(x.parcelle); }).join(' \u00b7 ')
+     +(ret?('<br><span style="color:var(--orange,#B85A1A)">'+(g?'d\u00e9j\u00e0 dans un retour group\u00e9':'retour d\u00e9j\u00e0 saisi')
+        +(on?' \u2014 il sera remplac\u00e9':'')+'</span>'):'')
+     +'</div></div></div>';
+  });
+  h+='<button class="mvv-save" style="margin-top:14px" onclick="_vendRetGrpGo()">'
+   +(sel.length?('Saisir le retour \u00b7 '+sel.length+' livraison'+(sel.length>1?'s':'')+' \u00b7 '+_vendKgTxt(kg)+' kg'):'Cochez au moins une livraison')
+   +'</button>';
+  _vendSheet(h);
+}
+// Cocher une livraison d'un groupe existant coche tout le groupe : on ne
+// découpe pas un total déjà réparti.
+function _vendRetGrpTog(i){
+  if(!_vlsel) return;
+  var c=_vendClients()[_vlsel.ci]; if(!c) return;
+  var ls=_vendLivs(c.nom), on=!_vlsel.on[i];
+  _vendGrpLis(ls,i).forEach(function(j){ if(on) _vlsel.on[j]=1; else delete _vlsel.on[j]; });
+  _vendRetGrpRender();
+}
+function _vendRetGrpGo(){
+  if(!_vlsel) return;
+  var c=_vendClients()[_vlsel.ci]; if(!c) return;
+  var ls=_vendLivs(c.nom), sel=_vendRetGrpSel(ls);
+  if(!sel.length){ showToast('Cochez au moins une livraison','#B85A1A'); return; }
+  var ans={}; sel.forEach(function(i){ ans[String(ls[i].date).slice(0,4)]=1; });
+  if(Object.keys(ans).length>1){ showToast('Un retour ne couvre qu\u2019un seul mill\u00e9sime','#B85A1A'); return; }
+  _vendRetOpen(_vlsel.ci,sel);
 }
 function _vlKg(){ return _vliv.lignes.reduce(function(s,x){ return s+x.caisses*x.pck; },0); }
 function _vlJus(){ return _vliv.detail?_vliv.lignes.reduce(function(s,x){ return s+x.jus; },0):(Number(_vliv.jus)||0); }
 function _vlLie(){ return _vliv.detail?_vliv.lignes.reduce(function(s,x){ return s+x.lie; },0):(Number(_vliv.lie)||0); }
 function _vendRetourRender(){
-  var h='<div class="mvv-sheet-hd"><div class="mvv-sheet-t">Livraison du '+_vendFrDate(_vliv.date)+'</div>'
+  var multi=_vliv.lis&&_vliv.lis.length>1;
+  var h='<div class="mvv-sheet-hd"><div class="mvv-sheet-t">'
+   +(multi?('Retour group\u00e9 \u00b7 '+_vliv.lis.length+' livraisons'):('Livraison du '+_vendFrDate(_vliv.date)))+'</div>'
    +'<button class="mv-gh mvv-sheet-x" onclick="openVendLivs('+_vliv.ci+')" title="Retour" aria-label="Retour">'+_mvIcon('croix',18)+'</button></div>'
-   +'<div class="mvv-sheet-sub">'+_escHtml(_vliv.nom)+'</div>';
+   +'<div class="mvv-sheet-sub">'+_escHtml(_vliv.nom)
+   +(multi?(' \u00b7 du '+_vendFrDate(_vliv.date)+' au '+_vendFrDate(_vliv.fin)):'')+'</div>';
   h+='<label class="mvv-flbl">Ce qui est parti</label>';
   _vliv.lignes.forEach(function(x,i){
-    h+='<div class="mvl-row"><span class="nm">'+_escHtml(x.parcelle)+'</span>'
+    h+='<div class="mvl-row"><span class="nm">'+_vlNom(x)+'</span>'
      +'<input type="number" min="0" inputmode="numeric" value="'+x.caisses+'" oninput="_vendRetSet('+i+',\'caisses\',this.value)">'
      +'<span class="u">\u00d7</span>'
      +'<input type="number" min="1" max="80" step="0.5" value="'+x.pck+'" oninput="_vendRetSet('+i+',\'pck\',this.value)">'
@@ -3013,12 +3139,12 @@ function _vendRetourRender(){
   h+='<label class="mvv-flbl">Ce que le client a rendu</label>';
   if(_vliv.lignes.length>1){
     h+='<div class="mvl-chk'+(_vliv.detail?' on':'')+'" onclick="_vendRetDetail()"><div class="bx">'+(_vliv.detail?_mvIcon('check',16):'')+'</div>'
-     +'<div><div class="tx">Le client a d\u00e9taill\u00e9 par parcelle</div>'
+     +'<div><div class="tx">Le client a d\u00e9taill\u00e9 '+(multi?'ligne par ligne':'par parcelle')+'</div>'
      +'<div class="sb">Sinon les litres sont r\u00e9partis au prorata des kilos, et le document le dit.</div></div></div>';
   }
   if(_vliv.detail){
     _vliv.lignes.forEach(function(x,i){
-      h+='<div class="mvl-row"><span class="nm">'+_escHtml(x.parcelle)+'</span>'
+      h+='<div class="mvl-row"><span class="nm">'+_vlNom(x)+'</span>'
        +'<input type="text" inputmode="decimal" value="'+_vendNbTxt(x.jus,0)+'" oninput="_vendRetSet('+i+',\'jus\',this.value)"><span class="u">L jus</span>'
        +'<input type="text" inputmode="decimal" value="'+_vendNbTxt(x.lie,0)+'" oninput="_vendRetSet('+i+',\'lie\',this.value)"><span class="u">L lie</span></div>';
     });
@@ -3032,7 +3158,7 @@ function _vendRetourRender(){
   h+='<div id="mvl-calc">'+_vendRetCalcHtml()+'</div>';
   h+='<button class="mvv-save" style="margin-top:14px" onclick="_vendRetSave()">Enregistrer</button>';
   if(_vliv.lignes.some(function(x){ return !!x.part.retour; }))
-    h+='<button class="mvv-del" onclick="_vendRetClear()">Effacer le retour du client</button>';
+    h+='<button class="mvv-del" onclick="_vendRetClear()">'+(multi?'Effacer le retour group\u00e9':'Effacer le retour du client')+'</button>';
   _vendSheet(h);
 }
 function _vendRetCalcHtml(){
@@ -3090,16 +3216,8 @@ function _vendRetSave(){
   var jus=_vlJus(), lie=_vlLie(), vol=jus+lie, kg=_vlKg();
   var rep=_vliv.detail?_vliv.lignes.map(function(x){ return {jus:x.jus,lie:x.lie}; }):_vendRetProrata(jus,lie);
   var seule=(_vliv.lignes.length===1);
-  _vliv.lignes.forEach(function(x,i){
-    x.part.caisses=x.caisses; x.part.pck=x.pck;
-    // ⚠️ La part n'est peut-être encore qu'une part de migration : l'écrire dans
-    // la récolte, sinon la correction serait perdue au prochain chargement.
-    if(!Array.isArray(x.rec.parts)||!x.rec.parts.length) x.rec.parts=_vendParts(x.rec);
-    if(vol>0) x.part.retour={jus:rep[i].jus,lie:rep[i].lie,le:_vliv.le,
-                             src:(_vliv.detail||seule)?'saisi':'prorata'};
-    else if(x.part.retour) delete x.part.retour;
-    x.rec.nb_caisses=_recCaisses(x.rec);
-  });
+  // ★ RET-G — un retour groupé marque chaque part du même `grp`.
+  _vendRetEcrit(_vliv.lignes, vol>0?rep:null, _vliv.le, (_vliv.detail||seule)?'saisi':'prorata', _vliv.grp||'');
   // ⚠️ DÉFAUT CUV-5 : cet écran corrige des CAISSES et des POIDS, donc des
   //   kilos — et il ne prévenait pas la parcelle. `rendement_hist` gardait les
   //   anciens kg/ha, et Pilotage lisait la vieille valeur pour son prix de
@@ -3124,6 +3242,15 @@ function _vendRetClear(){
   if(!_vendGarde()) return;
   var ci=_vliv.ci;
   _vliv.lignes.forEach(function(x){ if(x.part.retour) delete x.part.retour; });
+  // ⚠️ Même défaut que CUV-5 sur _vendRetSave : effacer des litres change le
+  //   volume de la parcelle, et `rendement_hist` gardait l'ancien hL/ha.
+  _vendParcLot(function(){
+    var _vus={};
+    _vliv.lignes.forEach(function(x){
+      if(!x.rec||!x.rec.id||_vus[x.rec.id]) return;
+      _vus[x.rec.id]=1; _vendRecordRendement(x.rec,null);
+    });
+  });
   window.CAVE_VENDANGE=CAVE_VENDANGE;
   _vendFbSave('Retour effac\u00e9','#B85A1A');
   openVendLivs(ci);
@@ -3173,11 +3300,12 @@ function _vendBlLignes(livs){
   return out;
 }
 function _vendBlCorps(client,lignes,mode){
-  var kg=0,cs=0,jus=0,lie=0,kgRet=0,pk={},parc={},prorata=false,sansRet=0;
+  var kg=0,cs=0,jus=0,lie=0,kgRet=0,pk={},parc={},prorata=false,groupe=false,sansRet=0;
   lignes.forEach(function(x){
     kg+=x.kg; cs+=x.caisses; pk[x.pck]=1; parc[x.parcelle]=1;
     if(x.retour){ jus+=(Number(x.retour.jus)||0); lie+=(Number(x.retour.lie)||0); kgRet+=x.kg;
-                  if(x.retour.src==='prorata') prorata=true; }
+                  if(x.retour.src==='prorata') prorata=true;
+                  if(x.retour.grp) groupe=true; }
     else sansRet++;
   });
   var vol=jus+lie;
@@ -3249,6 +3377,7 @@ function _vendBlCorps(client,lignes,mode){
    +(avecHa?' <b>Les surfaces sont celles achet\u00e9es sur chaque parcelle</b>, telles que convenues avec le domaine ; '
             +'une parcelle vendang\u00e9e en deux passages n\u2019est compt\u00e9e qu\u2019une fois.':'')
    +(vol>0?(' <b>Les volumes sont ceux annonc\u00e9s par le client</b>, ils n\u2019engagent pas le domaine.'
+            +(groupe?' Le client a donn\u00e9 un volume global pour plusieurs livraisons\u00a0: il est r\u00e9parti entre elles au prorata des kilos.':'')
             +(prorata?' Le d\u00e9tail par parcelle est une r\u00e9partition au prorata des kilos, pas une mesure.':'')):'')
    +' Document produit par Ma Vigne \u00e0 partir du journal de vendange du domaine.</div>';
   h+='<div class="bl-sig"><div><div class="k">Le livreur</div><div class="s">Date et signature</div></div>'
@@ -4943,6 +5072,9 @@ window.openVendVrac         = openVendVrac;
 window._vendSetRdtBase      = _vendSetRdtBase;
 window.openVendLivs         = openVendLivs;
 window.openVendRetour       = openVendRetour;
+window.openVendRetGroupe    = openVendRetGroupe;
+window._vendRetGrpTog       = _vendRetGrpTog;
+window._vendRetGrpGo        = _vendRetGrpGo;
 window._vendRetSet          = _vendRetSet;
 window._vendRetGlob         = _vendRetGlob;
 window._vendRetDate         = _vendRetDate;

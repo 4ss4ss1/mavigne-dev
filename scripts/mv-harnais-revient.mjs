@@ -134,7 +134,7 @@ const T = {
   G6: ['chaque carte a sa fiche, chaque fiche sa pastille', (A, S) => ['pil.eco.revient', 'pil.eco.revrdt', 'pil.eco.revconv', 'pil.eco.revcout']
     .every(k => S.utils.includes("'" + k + "': {") && fn(S.pil, '_pecViewRevient').includes("_mvInfoBtn('" + k + "')"))],
   G7: ['l’aide, le guide et « Quoi de neuf » le disent', (A, S) => S.utils.includes("['Économie › Revient',")
-    && /export const WHATS_NEW = \[\n  \{ v: '7\.76'/.test(S.utils) && S.utils.includes('Le revient du millésime, dans Économie')
+    && /\n  \{ v: '7\.76', items: \[/.test(S.utils) && S.utils.includes('Le revient du millésime, dans Économie')
     && S.g11.includes('{ic:bouteille} Revient')],
   G8: ['la Cave s’ouvre sur la section demandée, Aujourd’hui par défaut', (A, S) =>
     S.pil.includes("var _s=(typeof sec==='string'&&sec)?sec:'aujourdhui';") && S.pil.includes("window._pilOuvrirCave(_pe.getAttribute('data-v')||'')")]

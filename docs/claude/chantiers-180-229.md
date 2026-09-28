@@ -791,3 +791,51 @@ réécrite sur le défaut.
 `mv-harnais-revient` : **26 assertions** (escalier, conversion, vendu, appellation, états, part du domaine, cycle, câblage, aide),
 **10 contre-épreuves sur 10**. D3 était vert sur code abîmé tant que l'essai n'avait pas de raisin vendu : corrigé.
 Rendu regardé dans Chromium (bureau, téléphone, sombre) sur données d'essai — **pas sur les vraies** (§28, REV-1).
+
+---
+
+## 195. ★★ RET-G — UN SEUL RETOUR CLIENT POUR PLUSIEURS LIVRAISONS (28/09 — `src/cuvier.js` · `src/utils.js` (MV_AIDE, WHATS_NEW) · `guide/08-cave.html` · `index.html` · `public/sw.js` · `scripts/mv-harnais-vendange-parts.mjs` · `scripts/mv-harnais-revient.mjs` · **bump APP + SW**, base `3abe175`)
+
+### 195a. D'où ça vient
+
+Nico, capture de la fiche d'un acheteur (deux livraisons « retour attendu », 29/08 et 28/08) : *« ici le client m'envoie un récap
+en jus de la totalité, donc il faut que je puisse mettre sur la totalité de ce qui a été récolté. Donne la possibilité de joindre
+plusieurs récoltes même si le jour est différent pour un même client. »* VD-2 (§62a) avait posé l'unité = le **chargement**
+(client + date) : un retour ne pouvait couvrir qu'un jour.
+
+### 195b. Ce qui est fait
+
+- **Un bouton dans les livraisons du client** (dès deux livraisons) : *Un seul retour pour plusieurs livraisons* → une feuille de
+  cases (`openVendRetGroupe`) — cochées d'office : celles qui attendent leur retour. Puis la feuille de saisie **habituelle**, sur
+  toutes les lignes des livraisons cochées (`_vendRetOpen(ci, lis)`), la date à côté de la parcelle.
+- **La répartition est celle de VD-2**, `_vendRetProrata`, rejouée sur toutes les lignes : la dernière reçoit le reste, aucun litre
+  inventé. La case « détaillé ligne par ligne » reste possible.
+- **`retour.grp`** sur chaque part couverte. C'est ce qui fait qu'une livraison groupée **se rouvre avec tout son groupe**
+  (`_vendGrpLis`), que cocher l'une coche les autres, et que « Effacer » efface le groupe. ⚠️ Arbitrage : on ne découpe jamais un
+  total déjà réparti — rouvrir une seule livraison laisserait les autres porter la répartition d'un total qui n'est plus le bon.
+- **Un millésime par retour** (refus en toast) : `_vendLivs` ne filtre pas l'année (voir 195d).
+- L'écriture est sortie dans **`_vendRetEcrit`** (pure, testable), appelée par `_vendRetSave`. Le bon et le récap écrivent, quand
+  un groupe est présent, que *le client a donné un volume global pour plusieurs livraisons, réparti au prorata des kilos*.
+- Rien ne change pour le rendement : `_vendVolPart` lit toujours `part.retour`, marqué `prorata`.
+
+### 195c. ★★ Deux défauts trouvés en chemin
+
+1. **Le retour d'une récolte d'avant VD-1 était perdu.** `_vendParts(r)` fabrique une part NEUVE à chaque appel pour une récolte
+   sans `parts[]`. `_vendRetSave` faisait `rec.parts=_vendParts(rec)` : il rangeait une part neuve et laissait le retour (et la
+   correction de caisses) sur l'ancienne. Corrigé : `rec.parts=[x.part]`. Contre-épreuve dédiée.
+2. **Effacer un retour ne prévenait pas la parcelle** — le même défaut que CUV-5 (§82d) sur `_vendRetSave`, resté sur
+   `_vendRetClear` : `rendement_hist` gardait le volume effacé. Il repasse désormais par `_vendRecordRendement` dans `_vendParcLot`.
+
+### 195d. Mesuré, et ce qui reste ouvert
+
+- `mv-harnais-vendange-parts.mjs` : **149 assertions** vertes ; trois contre-épreuves neuves (groupe rouvert seul, `grp` non écrit,
+  part de migration refabriquée) — la contre-épreuve rougit sur chacune (12 rouges au total).
+- ⚠️ **`mv-harnais-revient.mjs` (G7) exigeait que `WHATS_NEW` S'OUVRE sur 7.76** : le bump suivant, n'importe lequel, le
+  rougissait. Il cherche maintenant le bloc 7.76, où qu'il soit. *Un harnais de lot vérifie que son annonce existe, pas qu'elle
+  reste la dernière.*
+- ⚠️ **Collision évitée** : REV-1 (§194) a été poussé pendant ce lot avec APP 7.76 / SW 8.45 — les numéros que ce lot avait pris.
+  Re-mesuré avant livraison (`git fetch`), patchs rejoués sur `3abe175`, numéros relevés à 7.77 / 8.46.
+- **Non vérifié à l'œil** : la feuille de cases et la saisie groupée sur téléphone (aucun navigateur lancé pour ce lot).
+- ⚠️ **Ouvert** : `_vendLivs(nom)` ne filtre pas le millésime — le « Récap de campagne » d'un client suivi deux ans mêle les deux
+  campagnes (en-tête « Millésime » pris sur la première ligne). À trancher avec Nico : un sélecteur d'année dans la fiche client.
+

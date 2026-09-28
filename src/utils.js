@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.76';
+export const APP_VERSION = '7.77';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -722,6 +722,14 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.77', items: [
+    { emoji: 'document', titre: 'Un seul retour du client pour plusieurs livraisons',
+      desc: "Un acheteur de raisin envoie souvent un seul total de jus et de lie pour tout ce qu\u2019il a re\u00e7u, alors que les "
+        + "livraisons sont parties des jours diff\u00e9rents. Dans les ventes en vrac, le bouton \u00ab\u00a0Un seul retour pour plusieurs "
+        + "livraisons\u00a0\u00bb permet de cocher les livraisons couvertes et de saisir ce total une fois\u00a0: les litres sont r\u00e9partis au "
+        + "prorata des kilos, livraison par livraison, et le rendement de chaque parcelle suit. Rouvrir une de ces livraisons rouvre tout le "
+        + "retour group\u00e9." },
+  ] },
   { v: '7.76', items: [
     { emoji: 'bouteille', titre: 'Le revient du millésime, dans Économie',
       desc: "Nouvelle sous-vue «\u00a0Revient\u00a0»\u00a0: le rendement, les bouteilles et le coût vigne par bouteille du millésime, par "
@@ -3737,6 +3745,7 @@ var MV_AIDE = {
       ['Les hectolitres estimés viennent des kilos', "la jauge d’une cuve, les apports par parcelle et la proposition de fûts se calculent sur le poids réel de chaque apport, pas sur le nombre de caisses multiplié par le réglage. Avec plusieurs tailles de caisse, c’est la seule façon d’être juste. Le volume mesuré au décuvage, lui, prime toujours sur l’estimation."],
       ['Le bon de livraison', "s’ouvre depuis la ligne « kg vendus en raisin » de l’écran Récoltes. Une livraison, c’est un chargement : un client, une date, même s’il emporte deux parcelles. Le bon ne dit que des kilos — aucun prix."],
       ['Le retour du client', "les litres de jus et de lie qu’il a obtenus, saisis des semaines plus tard sur la livraison. Corriger les caisses ne touche pas aux litres, et l’inverse non plus : deux mesures, deux personnes, deux moments."],
+      ['Un seul retour pour plusieurs livraisons', "quand l’acheteur envoie un total de jus et de lie pour plusieurs livraisons, même de jours différents : dans ses livraisons, « Un seul retour pour plusieurs livraisons », cochez celles qu’il couvre et saisissez le total une fois. Les litres sont répartis au prorata des kilos. Rouvrir, corriger ou effacer une de ces livraisons agit sur tout le groupe."],
       ['Le rendement va chercher le mesuré d’abord', "les litres rendus par l’acheteur, puis le volume décuvé — mesuré s’il a été saisi, sinon celui des contenants remplis —, et seulement à défaut une estimation d’après les kilos. Tant que la cuve n’est pas décuvée, il n’y a rien à mesurer : la parcelle affiche une fourchette et le pourcentage mesuré, et le chiffre net arrive avec le décuvage. Il manque des litres, pas des raisins."],
       ['La contenance d’une cuve n’est pas son contenu', "le volume inscrit sur une cuve de vinification est sa contenance — celle du parc à cuves, qui se pré-remplit toute seule. Elle sert à la jauge de remplissage, jamais au rendement : une cuve à moitié pleine ne donne pas son volume en vin. Le rendement, lui, attend le décuvage. Elle ne sert pas non plus aux doses, ni à la chaîne De la récolte à la bouteille : ce que la cuve <b>contient</b>, c’est ce que ses caisses donnent à la règle du Cuvier (kilos par hectolitre), saignées déduites, puis le volume décuvé."],
       ['Une cuve n’est pas un fût', "elle ne sort pas de La Réserve, elle n’a pas d’âge, et elle a sa contenance propre. Ajouter une cuve à une cuvée ne change aucun compte de fûts. Le volume que vous inscrivez est celui qui est réellement dedans, pas la contenance de la cuve."],

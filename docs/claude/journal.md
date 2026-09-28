@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **28 septembre 2026 (REV-1)** — ★★★ **ÉCONOMIE › REVIENT : RENDEMENT, BOUTEILLES ET COÛT VIGNE
+> DU MILLÉSIME, SUR LE CYCLE D'UNE VENDANGE À LA SUIVANTE (§194)**. Nouvelle sous-vue `rev` (`_pecViewRevient`, moteur pur
+> `_pecRevCalc`). L'ancienne carte « Prix de revient » divisait le coût de la PÉRIODE par toute la récolte et convertissait à
+> 1,3 kg/col (~28 % de bouteilles de moins que la Cave) : elle n'est plus qu'une porte. Escalier du rendement : récolté → moyenne
+> de ses millésimes → moyenne de l'appellation → rien, JAMAIS le plafond. ⚠️ **J'avais affirmé qu'un moteur « euros de l'année
+> vigne » existait : faux** (le panneau des deux cadres ne compte que des heures) — on rejoue l'engagé daté sur le cycle.
+> **Bump APP 7.75 → 7.76, SW 8.44 → 8.45**, base `d42cdbe`. Détail en **§194**.
+>
 > ★ Consolidation : **27 septembre 2026 (DIM-2 + DIM-3)** — ★★★ **UN DIMANCHE COMPTE EN ENTIER, « POUR LA COMPTA » EN
 > CASES 25 / 50 / 100 %, L'ANNÉE EN TROIS FAMILLES, ET UN RÉGLAGE « DIMANCHES ET FÉRIÉS : TOUJOURS DES HEURES SUP » (§193)**.
 > Mode payé : la majoration voyage avec l'heure (DIMAV-1 défait). Réglage `CONFIG.dimfer_hs` (défaut inchangé) : en « toujours »,

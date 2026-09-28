@@ -390,6 +390,65 @@ T('★ prorata : la somme retombe sur le total annoncé', r[0].jus + r[1].jus, 5
 T('prorata : le quart sur 200 des 800 kg', r[0].jus, 138.8);
 T('prorata : la lie aussi', r[0].lie + r[1].lie, 50);
 
+// ── 6b. RET-G : UN RETOUR POUR PLUSIEURS LIVRAISONS ───────────────────────
+/*  Remonté du terrain : l'acheteur envoie UN total de jus et de lie pour tout
+    ce qu'il a reçu, jours confondus. Le total se répartit au prorata des kilos
+    sur toutes les lignes, et les livraisons couvertes partagent `retour.grp`
+    pour se rouvrir ENSEMBLE.
+    ⚠️ Et une récolte d'avant VD-1 (sans parts[]) perdait son retour : sa part
+    est refabriquée à chaque lecture. */
+const NOMS_G = ['_livGrp','_vendGrpLis','_vendRetLignes','_vendRetEcrit','_vendRetProrata'];
+const absentsG = NOMS_G.filter(x => !corps(x));
+if (absentsG.length){ console.error('ROUGE — RET-G introuvable : ' + absentsG.join(', ')); process.exit(1); }
+const RG = [
+  { id:'g1', parcelle:'Fourneau Vieille', date:'2026-08-29', parts:[ { dom:false, client:'Latour', caisses:34, pck:20 } ] },
+  { id:'g2', parcelle:'Platieres',        date:'2026-08-28', parts:[ { dom:false, client:'Latour', caisses:38, pck:20 } ] },
+  { id:'g3', parcelle:'Croix des Champs', date:'2026-08-28', parts:[ { dom:false, client:'Latour', caisses:10, pck:20 } ] },
+  { id:'g4', parcelle:'Mansouze',         date:'2026-08-28', parts:[ { dom:false, client:'Latour', caisses:19, pck:20 } ] },
+  { id:'g5', parcelle:'Vieille vigne',    date:'2026-08-27', nb_caisses:5, vendu:true, client:'Latour' }   // d'avant VD-1
+];
+let codeG = codeLiv.replace(/\nreturn \{[^}]*\};$/, '')
+  + '\nvar _vliv={lignes:[],detail:false};\n'
+  + 'function _vlKg(){ return _vliv.lignes.reduce(function(s,x){ return s+x.caisses*x.pck; },0); }\n'
+  + NOMS_G.map(corps).join('\n')
+  + '\nreturn {' + NOMS_LIV.join(',') + ',' + NOMS_G.join(',') + ',setL:function(l){ _vliv.lignes=l; }};';
+if (CONTRE){
+  /* Contre-épreuve 4 — une livraison groupée se rouvre SEULE.
+     Contre-épreuve 5 — le groupe n'est pas écrit sur les parts.
+     Contre-épreuve 6 — la part de migration refabriquée (le défaut d'origine). */
+  codeG = codeG.replace("var g=ls[li]?_livGrp(ls[li]):''; if(!g) return [li];", "return [li];");
+  codeG = codeG.replace('if(grp) x.part.retour.grp=grp;', '');
+  codeG = codeG.replace('delete x.part._mig; x.rec.parts=[x.part];', 'x.rec.parts=_vendParts(x.rec);');
+}
+// eslint-disable-next-line no-new-func
+const G = new Function('CLIENTS','CFG','RECS', codeG)(CLIENTS, CFG, RG);
+let lsG = G._vendLivs('Latour');
+T('RET-G : trois livraisons, trois jours', lsG.length, 3);
+T('RET-G : sans retour, une livraison se rouvre seule', G._vendGrpLis(lsG, 1).join(','), '1');
+const lignesG = G._vendRetLignes(lsG, [0, 1, 2]);
+T('RET-G : les lignes des trois livraisons', lignesG.length, 5);
+T('RET-G : de la plus ancienne à la plus récente', lignesG[0].date + '>' + lignesG[4].date, '2026-08-27>2026-08-29');
+G.setL(lignesG);
+const repG = G._vendRetProrata(1500, 120);
+T('★ RET-G : le total se répartit sans litre inventé', Math.round(repG.reduce((a, x) => a + x.jus, 0) * 10) / 10, 1500);
+T('RET-G : 680 kg sur 2 145 prennent leur part', repG[4].jus, Math.round((1500 - repG.slice(0, 4).reduce((a, x) => a + x.jus, 0)) * 10) / 10);
+G._vendRetEcrit(lignesG, repG, '2026-09-20', 'prorata', 'gT');
+lsG = G._vendLivs('Latour');
+T('RET-G : les trois livraisons ont leur retour', lsG.every(G._livRetour), true);
+T('★ RET-G : elles partagent le même groupe', lsG.map(G._livGrp).join(','), 'gT,gT,gT');
+T('★ RET-G : en rouvrir une rouvre les trois', G._vendGrpLis(lsG, 2).join(','), '0,1,2');
+T('RET-G : la somme des livraisons = le total du client', Math.round(lsG.reduce((a, l) => a + G._livJus(l), 0) * 10) / 10, 1500);
+T('★ RET-G : la récolte d\'avant VD-1 garde son retour', !!(RG[4].parts && RG[4].parts[0] && RG[4].parts[0].retour), true);
+const recapG = G._vendBlCorps({ nom:'Latour' }, G._vendBlLignes(lsG), 'campagne');
+T('RET-G : le récap dit que le volume était global', /volume global pour plusieurs livraisons/.test(recapG), true);
+T('RET-G : rendement du récap sur 2 145 kg / 16,2 hL', /2\u202f?145 kg|2 145 kg|2145 kg/.test(recapG), true);
+G._vendRetEcrit(G._vendRetLignes(lsG, [0, 1, 2]), null, '', '', '');
+lsG = G._vendLivs('Latour');
+T('RET-G : effacer efface tout le groupe', lsG.some(G._livRetour), false);
+G._vendRetEcrit(G._vendRetLignes(lsG, [0]), [{ jus:500, lie:40 }], '2026-09-21', 'saisi', '');
+lsG = G._vendLivs('Latour');
+T('RET-G : un retour simple n\'a pas de groupe', G._livGrp(lsG[0]), '');
+
 // ── 7. VD-3 : LE RENDEMENT, ET CE QU'IL VAUT ──────────────────────────────
 /*  ⚠️⚠️⚠️ LE DÉFAUT QUE CE VOLET INTERDIT : afficher un hL/ha net — et un
     « % du maximum d'appellation » calculé dessus — alors que deux volumes sur

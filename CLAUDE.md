@@ -3,13 +3,11 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **28 septembre 2026 (REV-1)** — ★★★ **ÉCONOMIE › REVIENT : RENDEMENT, BOUTEILLES ET COÛT VIGNE
-> DU MILLÉSIME, SUR LE CYCLE D'UNE VENDANGE À LA SUIVANTE (§194)**. Nouvelle sous-vue `rev` (`_pecViewRevient`, moteur pur
-> `_pecRevCalc`). L'ancienne carte « Prix de revient » divisait le coût de la PÉRIODE par toute la récolte et convertissait à
-> 1,3 kg/col (~28 % de bouteilles de moins que la Cave) : elle n'est plus qu'une porte. Escalier du rendement : récolté → moyenne
-> de ses millésimes → moyenne de l'appellation → rien, JAMAIS le plafond. ⚠️ **J'avais affirmé qu'un moteur « euros de l'année
-> vigne » existait : faux** (le panneau des deux cadres ne compte que des heures) — on rejoue l'engagé daté sur le cycle.
-> **Bump APP 7.75 → 7.76, SW 8.44 → 8.45**, base `d42cdbe`. Détail en **§194**.
+> Dernière consolidation : **28 septembre 2026 (RET-G)** — ★★ **UN SEUL RETOUR CLIENT POUR PLUSIEURS LIVRAISONS (§195)**. Ventes
+> en vrac : l'acheteur envoie un total de jus + lie pour des livraisons de jours différents ; on coche celles qu'il couvre, le total
+> se répartit au prorata des kilos sur toutes leurs lignes, `retour.grp` les lie (rouvrir/effacer = tout le groupe). En route, deux
+> défauts d'avant : le retour d'une récolte d'avant VD-1 était **perdu** à l'enregistrement, et effacer un retour ne recalculait
+> pas le rendement de la parcelle. **Bump APP 7.76 → 7.77, SW 8.45 → 8.46**, base `3abe175`. Détail en **§195**.
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---

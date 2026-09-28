@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v8.45
+// MA VIGNE — Service Worker v8.46
+// v8.46 (28/09/2026) — RET-G : ventes en vrac, un seul retour client (jus + lie) pour plusieurs livraisons de jours differents
+//   (openVendRetGroupe, retour.grp, _vendRetEcrit) ; retour d'une recolte d'avant VD-1 plus perdu ; effacer un retour
+//   recalcule le rendement de la parcelle. cuvier.js + utils.js. APP 7.76 -> 7.77.
 // v8.45 (28/09/2026) — REV-1 (§194) : Économie › Revient (_pecViewRevient, _pecRevData, _pecRevCalc) — rendement, bouteilles et
 //   coût vigne du millésime sur son cycle ; carte Prix de revient de la Synthèse réduite à une porte ; conversion de la Cave
 //   (fin de _pecKgB) ; réglages pertes_elevage / autres_charges ; _ecoTempsVigne(win) ; APP 7.76.
@@ -4179,7 +4182,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.45';
+const CACHE_NAME   = 'mavigne-v8.46';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4195,7 +4198,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.45 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.46 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4215,7 +4218,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.45 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.46 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
