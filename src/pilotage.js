@@ -4862,10 +4862,12 @@ function _pilCkCave(){
     +'<div class="ks">'+_pilEsc(v.t)+'</div>'
     +'<button type="button" class="pil-ck-btn" onclick="_pilOuvrirCave()">Ouvrir la Cave</button></div>';
 }
-window._pilOuvrirCave=function(){
-  if(typeof window.selectCaveSection==='function'){ try{ window.selectCaveSection('aujourdhui'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilOuvrirCave'); } }
+window._pilOuvrirCave=function(sec){
+  // REV-1 : la section est un argument (défaut : Aujourd'hui) — le Revient ouvre Le millésime ou Le Cuvier.
+  var _s=(typeof sec==='string'&&sec)?sec:'aujourdhui';
+  if(typeof window.selectCaveSection==='function'){ try{ window.selectCaveSection(_s); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilOuvrirCave'); } }
   if(typeof goTo==='function') goTo('cave');
-  if(typeof window.selectCaveSection==='function'){ try{ window.selectCaveSection('aujourdhui'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilOuvrirCave#2'); } }
+  if(typeof window.selectCaveSection==='function'){ try{ window.selectCaveSection(_s); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilOuvrirCave#2'); } }
 };
 function _pilCkJours(){
   var days=_pilTreatDays();
@@ -5700,9 +5702,13 @@ function _ecoCaveJours(d0, d1){
   });
   return out;
 }
-function _ecoTempsVigne(){
-  var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
-  var d0=s&&s.debut?String(s.debut).slice(0,10):'', d1=s&&s.fin?String(s.fin).slice(0,10):'';
+function _ecoTempsVigne(win){
+  // ★ REV-1 : fenêtre OPTIONNELLE {d0,d1} — même patron que _ecoTracHByParc(win). Sans
+  //   elle, la période consultée, comme avant. Le Revient la rejoue sur le cycle du
+  //   millésime : une seule définition de l'heure vigne.
+  var _w=!!(win&&win.d0&&win.d1);
+  var s=_w?null:((typeof window._pilSaison==='function')?window._pilSaison():null);
+  var d0=_w?String(win.d0).slice(0,10):(s&&s.debut?String(s.debut).slice(0,10):''), d1=_w?String(win.d1).slice(0,10):(s&&s.fin?String(s.fin).slice(0,10):'');
   var _n=new Date(), auj=_pexIso(_n.getFullYear(),_n.getMonth(),_n.getDate());
   var vide={ ok:false, pairs:{}, taches:[], parcs:{}, gens:[], hChamp:0, hTrac:0, hAff:0, hAtt:0, hCave:0, hVigne:0, eur:0, eAff:0, eAtt:0, byD:{}, nSansTaux:0, nEv:0, d0:d0, d1:d1 };
   if(!/^\d{4}-\d{2}-\d{2}$/.test(d0) || !/^\d{4}-\d{2}-\d{2}$/.test(d1) || d1<d0) return vide;
@@ -5736,7 +5742,7 @@ function _ecoTempsVigne(){
     //   avec elles. Le réalisé d'un travail est donc ce que ses heures ont coûté, pas un taux moyen.
     var acc=0, accE=0, g={nom:m.nom, hChamp:0, hTrac:0, hAff:0, hAtt:0, hCave:0, hVigne:0, eur:0, eAff:0, eAtt:0, nEv:0, dAtt:'', sansTaux:false};
     var cd=(tr.condH&&tr.condH[m.nom])||{}, cj=cave[m.nom]||{};
-    for(var d=d0, guard=0; d<=fin && guard<400; d=_pexJourApres(d), guard++){
+    for(var d=d0, guard=0; d<=fin && guard<800; d=_pexJourApres(d), guard++){
       var h=0;
       try{ h=Number(window._planChampPersRange(m,_pexD(d),_pexD(d)))||0; }catch(e){ h=0; }
       var ht=Math.min(h, Number(cd[d])||0);
@@ -6143,7 +6149,7 @@ function _pecLoadSt(){
   try{
     var raw=localStorage.getItem(_pecStKey()); if(!raw) return;
     var o=JSON.parse(raw); if(!o||typeof o!=='object') return;
-    if(o.sub==='syn'||o.sub==='pos'||o.sub==='par'||o.sub==='ach'||o.sub==='exe') _PEC_SUB=o.sub;
+    if(o.sub==='syn'||o.sub==='pos'||o.sub==='par'||o.sub==='rev'||o.sub==='ach'||o.sub==='exe') _PEC_SUB=o.sub;
     if(o.axe==='nat'||o.axe==='ate') _PEC_AXE=o.axe;
     // Exercice consulte : une annee d'OUVERTURE, ou null = celui d'aujourd'hui.
     _PEX_AN=(typeof o.exan==='number'&&isFinite(o.exan))?o.exan:null;
@@ -6299,6 +6305,43 @@ function _pecCss(){
   +'.pex-warn .t{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-md,20px);font-weight:600;color:var(--texte);line-height:1.25}'
   +'.pex-warn .d{font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-top:5px;line-height:1.6}'
   +'.pex-warn .d b{color:var(--texte-med)}'
+  /* REV-1 — la sous-vue Revient (préfixe prv-, vérifié libre) */
+  +'.prv-mils{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 12px}'
+  +'.prv-mils button{border:1px solid var(--gris-clair);background:var(--bg-app);color:var(--texte-doux);border-radius:16px;padding:6px 13px;font-family:inherit;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;min-height:36px}'
+  +'.prv-mils button.on{background:var(--bg-card);color:var(--texte);border-color:var(--gris)}'
+  +'.prv-e{display:inline-block;font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:1px;text-transform:uppercase;border-radius:8px;padding:2px 7px;margin-left:6px}'
+  +'.prv-e-p{background:var(--tag-amber-bg);color:var(--tag-amber-tx)}'
+  +'.prv-e-c{background:var(--vert-pale);color:var(--vert-med)}'
+  +'.prv-e-j{background:var(--tag-blue-bg);color:var(--tag-blue-tx)}'
+  +'.prv-row{cursor:pointer}'
+  +'.prv-row:hover td{background:var(--bg-app)}'
+  +'.prv-chev{display:inline-block;width:14px;color:var(--texte-doux);transition:transform .15s}'
+  +'.prv-row.open .prv-chev{transform:rotate(90deg)}'
+  +'.prv-det td{background:var(--bg-app);font-size:var(--pt-micro,11px)}'
+  +'.prv-det td:first-child{padding-left:28px}'
+  +'.prv-hid{display:none}'
+  +'.prv-tot td{font-weight:700;border-bottom:0}'
+  +'.prv-tbl td:first-child{min-width:0}'
+  +'.prv-jg{height:5px;background:var(--gris-clair);border-radius:3px;margin-top:4px;overflow:hidden;min-width:56px}'
+  +'.prv-jg i{display:block;height:100%;background:var(--vert-med)}'
+  +'.prv-jg i.est{background:repeating-linear-gradient(90deg,var(--orange) 0 4px,transparent 4px 7px)}'
+  +'.prv-src{font-size:var(--pt-nano,9.5px);font-weight:700;border-radius:6px;padding:1px 6px;margin-left:4px;white-space:nowrap}'
+  +'.prv-src.r{background:var(--vert-pale);color:var(--vert-med)}'
+  +'.prv-src.h,.prv-src.m{background:var(--tag-amber-bg);color:var(--tag-amber-tx)}'
+  +'.prv-src.n{background:var(--gris-clair);color:var(--texte-doux)}'
+  +'.prv-flux{display:flex;flex-wrap:wrap;align-items:stretch}'
+  +'.prv-fx{flex:1;min-width:120px;padding:10px 12px;border:1px solid var(--gris-clair);border-radius:12px}'
+  +'.prv-fx .l{font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--texte-doux)}'
+  +'.prv-fx .v{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-lg,23px);font-weight:700;color:var(--texte);font-variant-numeric:tabular-nums}'
+  +'.prv-fx .s{font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);line-height:1.4}'
+  +'.prv-ar{align-self:center;padding:0 6px;color:var(--or);font-size:var(--pt-sm,17px)}'
+  +'.prv-complet{margin-top:12px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;padding:10px 12px;border:1px dashed var(--or);border-radius:10px;background:var(--or-pale)}'
+  +'.prv-cl{font-size:var(--pt-lbl,10.5px);font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--texte-doux)}'
+  +'.prv-cv{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xl,27px);font-weight:700;color:var(--texte)}'
+  +'.prv-go{cursor:pointer}'
+  +'.prv-go:hover{background:var(--bg-app)!important}'
+  +'@media(max-width:640px){.prv-tbl{min-width:0;font-size:var(--pt-micro,11px)}.prv-tbl .prv-hs{display:none}.prv-tbl th,.prv-tbl td{padding:8px 4px;white-space:normal;letter-spacing:0}.prv-det td:first-child{padding-left:12px}.prv-tbl td:last-child{white-space:nowrap}.prv-jg{min-width:40px}}'
+  +'@media(max-width:700px){.prv-ar{width:100%;text-align:center;transform:rotate(90deg);padding:2px 0}.prv-fx{min-width:100%}}'
   +'@media(max-width:640px){.pex-set{flex-direction:column}.pex-selm{width:100%}.pec-k{padding:13px 15px}.pec-k .v{font-size:var(--pt-xl,27px)}.pec-ct{font-size:var(--pt-md,20px)}.pec-verdict .t{font-size:var(--pt-md,20px)}.pec-subnav{align-items:flex-start}}';
   var st=document.createElement('style');
   st.id='pec-css'; st.textContent=css;
@@ -6311,46 +6354,283 @@ function _pecCss(){
 // exact, sans deviner de millésime. À défaut, le millésime le plus récent, annoncé
 // comme tel : un prix de revient calculé sur la récolte de l'an dernier reste utile,
 // à condition de ne jamais faire croire que c'est celle de l'année.
-function _pecRecolte(){
-  var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
-  var d1=(s&&s.debut)?s.debut:null, d2=(s&&s.fin)?s.fin:null;
-  var P=(window.PARCELLES||[]).filter(function(p){ return p && p.statut!=='Arrachee'; });
-  function kgOf(p,r){
-    var v=Number(r&&r.kg)||0;
-    if(!(v>0)){ var kh=Number(r&&r.kg_ha)||0; if(kh>0) v=kh*(parseFloat(p.surface)||0); }
-    return v>0?v:0;
-  }
-  var kg=0, ha=0, n=0, mil=null;
-  if(d1&&d2){
-    P.forEach(function(p){
-      var sk=0, got=false;
-      (Array.isArray(p.rendement_hist)?p.rendement_hist:[]).forEach(function(r){
-        if(!r||!r.date||r.date<d1||r.date>d2) return;
-        var v=kgOf(p,r); if(v>0){ sk+=v; got=true; if(r.millesime!=null) mil=r.millesime; }
-      });
-      if(got){ kg+=sk; ha+=(parseFloat(p.surface)||0); n++; }
-    });
-    if(kg>0) return { kg:kg, ha:ha, n:n, mil:mil, src:'saison' };
-  }
-  var best=null;
-  P.forEach(function(p){ (Array.isArray(p.rendement_hist)?p.rendement_hist:[]).forEach(function(r){
-    var m=Number(r&&r.millesime)||0; if(m>0 && (best===null||m>best)) best=m; }); });
-  if(best===null) return { kg:0, ha:0, n:0, mil:null, src:'' };
-  kg=0; ha=0; n=0;
-  P.forEach(function(p){
-    var sk=0, got=false;
-    (Array.isArray(p.rendement_hist)?p.rendement_hist:[]).forEach(function(r){
-      if(!r||Number(r.millesime)!==best) return;
-      var v=kgOf(p,r); if(v>0){ sk+=v; got=true; }
-    });
-    if(got){ kg+=sk; ha+=(parseFloat(p.surface)||0); n++; }
-  });
-  return { kg:kg, ha:ha, n:n, mil:best, src:(kg>0?'hist':'') };
+// ════════════════════════════════════════════════════════════════════════════════
+// ★★★ REV-1 (§194, 28/09/2026) — LE REVIENT : rendement, bouteilles et coût vigne
+// ════════════════════════════════════════════════════════════════════════════════
+// Nico : « mettre les rendements et bouteilles probables dans Économie, avec un coût
+// de revient probable (on n'a que le coût vigne, pas la structure) ». Maquette v1
+// validée (« go avec les recommandations »).
+// Remplace la carte « Prix de revient » de la Synthèse, qui avait TROIS défauts :
+//  ① elle divisait le coût de la PÉRIODE consultée par TOUTE la récolte — zoomée sur
+//    « Vendanges », dix jours de coût pour un millésime entier (même faute que celle
+//    corrigée le 12/08 sur « Deux façons de compter ») ;
+//  ② elle convertissait à 1,3 kg/col (_pecKgB) quand la Cave compte au kg/hL du
+//    Cuvier (135 kg/hL ≈ 1,01 kg/col) : ~28 % de bouteilles en moins. Son commentaire
+//    disait « 1,3 kg/col ≈ 130 kg pour 1 hL » : c'était faux (130 kg/hL = 0,98 kg/col) ;
+//  ③ avant vendange, elle prenait la récolte de l'an passé avec les coûts de cette année.
+// LES RÈGLES :
+//  · UN SEUL CADRE : le CYCLE du millésime, du lendemain de la dernière récolte M-1 à la
+//    fin de la vendange M. ⚠️ Aucun moteur « euros de l'année vigne » n'existait (le
+//    panneau des deux cadres ne compte que des HEURES de barème) : on rejoue donc
+//    l'ENGAGÉ de la campagne — les moteurs DATÉS _ecoTempsVigne, _ecoTracHByParc,
+//    _ecoGnrReel, _ecoPhytoByParc — sur la fenêtre du cycle. Consommer, pas dupliquer.
+//  · UNE SEULE CONVERSION : celle de la Cave (_mlKgHl, 133 cols/hL).
+//  · L'ESCALIER DU RENDEMENT, parcelle par parcelle : ① récolté cette année ② moyenne de
+//    ses millésimes connus ③ moyenne constatée cette année dans son appellation ④ rien.
+//    JAMAIS le plafond : c'est un maximum réglementaire, pas une prévision.
+//  · LE RAISIN VENDU sort des bouteilles ET de leur coût, au prorata des kilos.
+//  · Tout ce qui est calculé ici se lit dans une fonction PURE (_pecRevCalc) : c'est ce
+//    qui rend le harnais possible (mv-harnais-revient).
+var _PEC_REV_MIL = null;           // millésime consulté ; null = l'année en cours
+function _pecRevPertesCfg(){ var v=Number(((window.CONFIG&&window.CONFIG.eco)||{}).pertes_elevage); return (isFinite(v)&&v>=0&&v<60)?v:5; }
+function _pecRevAutres(){ var v=Number(((window.CONFIG&&window.CONFIG.eco)||{}).autres_charges); return (isFinite(v)&&v>0)?v:0; }
+function _pecRevAuj(){
+  var _n=new Date();
+  return ((typeof window._mvAujIso==='function')&&window._mvAujIso())||_pexIso(_n.getFullYear(),_n.getMonth(),_n.getDate());
 }
-// Kilos de raisin par bouteille — hypothèse de conversion, JAMAIS une mesure.
-// Réglable dans Pilotage › Outils › Paramétrage. 1,3 kg/col est l'ordre de grandeur
-// bourguignon usuel (≈ 130 kg pour 1 hL) ; chaque domaine a le sien.
-function _pecKgB(){ var v=Number(((window.CONFIG&&window.CONFIG.eco)||{}).kg_bouteille); return (isFinite(v)&&v>0)?v:1.3; }
+function _pecRevKgHl(){ var v=(typeof window._mlKgHl==='function')?Number(window._mlKgHl()):0; return (isFinite(v)&&v>0)?v:135; }
+// Les dates de récolte d'un millésime, triées. La récolte datée est le seul signal
+// SÛR d'une fin de vendange : un planning peut dire ce qui était prévu, pas ce qui
+// a eu lieu.
+function _pecRevRecDates(mil){
+  var a=String(mil), out=[];
+  ((window.CAVE_VENDANGE&&window.CAVE_VENDANGE.recoltes)||[]).forEach(function(r){
+    var d=String((r&&r.date)||'').slice(0,10); if(d.slice(0,4)===a) out.push(d);
+  });
+  return out.sort();
+}
+// Les millésimes proposés : l'année en cours (le « probable »), puis les trois
+// précédentes QUI ONT une récolte — en janvier, c'est l'an passé qu'on veut lire.
+function _pecRevMils(){
+  var y=parseInt(_pecRevAuj().slice(0,4),10), out=[y];
+  for(var m=y-1;m>=y-3;m--) if(_pecRevRecDates(m).length) out.push(m);
+  return out;
+}
+function _pecRevMil(){ var L=_pecRevMils(); return (_PEC_REV_MIL!=null && L.indexOf(_PEC_REV_MIL)>=0)?_PEC_REV_MIL:L[0]; }
+// Le cycle du millésime : ses deux bornes, et D'OÙ vient chacune — l'écran le dit.
+//   fin   : 'rec'  dernière récolte (vendange finie, ou millésime passé)
+//           'plan' fin de vendange prévue par les fenêtres des tâches (à venir)
+//           'auj'  ni l'un ni l'autre : le coût s'arrête à aujourd'hui
+//   début : 'rec'  lendemain de la dernière récolte M-1
+//           'an'   aucune récolte M-1 saisie : un an avant la fin
+function _pecRevCycle(mil, auj){
+  var y=parseInt(auj.slice(0,4),10);
+  var rec=_pecRevRecDates(mil), prev=_pecRevRecDates(mil-1);
+  var last=rec.length?rec[rec.length-1]:'';
+  var reste=null;
+  try{ reste=(typeof window._vendResteARentrer==='function')?window._vendResteARentrer(mil):null; }catch(e){ reste=null; }
+  var nReste=(reste&&reste.lignes)?reste.lignes.length:null;
+  var complet=!!(last && nReste===0);
+  var plan=null;
+  try{ var A=_pilAnnuelData(); if(A&&A.vend&&String(A.vend.fin).slice(0,4)===String(mil)) plan=A.vend; }catch(e){ plan=null; }
+  var d1, src1;
+  if(last && (complet || mil<y)){ d1=last; src1='rec'; }
+  else if(plan && String(plan.fin).slice(0,10)>=auj){ d1=String(plan.fin).slice(0,10); src1='plan'; }
+  else { d1=auj; src1='auj'; }
+  var d0, src0;
+  if(prev.length){ d0=_pexJourApres(prev[prev.length-1]); src0='rec'; }
+  else { d0=_pexJourApres((parseInt(d1.slice(0,4),10)-1)+d1.slice(4)); src0='an'; }
+  return { d0:d0, d1:d1, src0:src0, src1:src1, complet:complet, nReste:nReste, last:last };
+}
+// Main-d'œuvre PRÉVUE entre deux dates : les heures au champ que le planning annonce,
+// au taux chargé du jour. Même population que _ecoTempsVigne (bureau exclu). ⚠️ Le
+// futur ne sait ni le tracteur ni la cave : ce prévu est un peu haut, la fiche le dit.
+function _pecRevPrevuMO(d0, d1){
+  if(typeof window._planChampPersRange!=='function' || !(d1>=d0)) return 0;
+  var rate0=0; try{ rate0=Number(_ecoRate())||0; }catch(e){ rate0=0; }
+  var okPer=(typeof window._mvEnContratSurPeriode==='function'), eur=0;
+  (window.MEMBRES||[]).forEach(function(m){
+    if(!m||!m.nom) return;
+    if(okPer ? !window._mvEnContratSurPeriode(m,d0,d1) : (m.statut==='Inactif'||m.bureau)) return;
+    for(var d=d0, g=0; d<=d1 && g<800; d=_pexJourApres(d), g++){
+      var h=0; try{ h=Number(window._planChampPersRange(m,_pexD(d),_pexD(d)))||0; }catch(e){ h=0; }
+      if(!(h>0)) continue;
+      // (NaN comme 0 retombent sur le taux moyen : le test ci-dessous couvre les deux)
+      var tx=0; try{ tx=(typeof window._mvPaieTauxEffAt==='function')?Number(window._mvPaieTauxEffAt(m,d)):0; }catch(e){ tx=0; }
+      if(!(tx>0)) tx=rate0;
+      eur+=h*tx;
+    }
+  });
+  return eur;
+}
+// Le coût du cycle, parcelle par parcelle. C'est l'ENGAGÉ de la campagne (moReel +
+// tracteur + GNR + phyto, _pecData) rejoué sur les dates du cycle, plus le prévu de
+// main-d'œuvre jusqu'à la fin de vendange quand elle est à venir.
+//   · MO : les euros versés aux parcelles par _ecoTempsVigne ; ce qui attend une
+//     validation est réparti comme ce qui est versé (à défaut, à la surface) — la
+//     vigne entière a coûté ces heures, elles ne se perdent pas ;
+//   · tracteur : le coût des sessions, parcelle par parcelle ;
+//   · GNR : les pleins (sinon le modèle), répartis aux heures machine — même clé que
+//     _pecData ; à la surface sans aucune heure ;
+//   · phyto : doses × surface × prix, parcelle par parcelle.
+function _pecRevCouts(cy, auj, parc){
+  var out={ by:{}, tot:{mo:0, prevu:0, trac:0, gnr:0, phy:0}, fin:'', ok:false, tvOk:false, nSansTaux:0, gnrSrc:'' };
+  parc.forEach(function(p){ out.by[p.nom]={mo:0, trac:0, gnr:0, phy:0}; });
+  var surfT=0; parc.forEach(function(p){ surfT+=parseFloat(p.surface)||0; });
+  function partSurf(p){ return surfT>0?((parseFloat(p.surface)||0)/surfT):0; }
+  if(auj>=cy.d0){
+    var fin=(cy.d1<auj)?cy.d1:auj, win={d0:cy.d0, d1:fin};
+    out.fin=fin; out.ok=true;
+    var TV=null; try{ TV=_ecoTempsVigne(win); }catch(e){ TV=null; }
+    if(TV&&TV.ok){
+      out.tvOk=true; out.nSansTaux=TV.nSansTaux||0;
+      var att=0; parc.forEach(function(p){ var q=TV.parcs[p.nom]; att+=(q&&q.eur)||0; });
+      parc.forEach(function(p){
+        var q=TV.parcs[p.nom], sh=(att>0)?(((q&&q.eur)||0)/att):partSurf(p);
+        out.by[p.nom].mo=TV.eur*sh;
+      });
+      out.tot.mo=TV.eur;
+    }
+    var tr=null; try{ tr=_ecoTracHByParc(win); }catch(e){ tr=null; }
+    var hT=0;
+    if(tr) parc.forEach(function(p){ var c=(tr.cost&&tr.cost[p.nom])||0; out.by[p.nom].trac=c; out.tot.trac+=c; hT+=(tr.h&&tr.h[p.nom])||0; });
+    var g=null; try{ g=_ecoGnrReel(win); }catch(e){ g=null; }
+    var gT=0;
+    if(g&&g.ok) gT=g.eur||0;
+    else if(tr) Object.keys(tr.gnrByDate||{}).forEach(function(k){ gT+=tr.gnrByDate[k]||0; });
+    out.gnrSrc=(g&&g.ok)?'reel':'modele';
+    parc.forEach(function(p){ var sh=(hT>0)?(((tr.h&&tr.h[p.nom])||0)/hT):partSurf(p); out.by[p.nom].gnr=gT*sh; });
+    out.tot.gnr=gT;
+    var ph=null; try{ ph=_ecoPhytoByParc(win); }catch(e){ ph=null; }
+    if(ph) parc.forEach(function(p){ var c=(ph.cost&&ph.cost[p.nom])||0; out.by[p.nom].phy=c; out.tot.phy+=c; });
+  }
+  if(cy.d1>auj){
+    var d0p=(auj>=cy.d0)?_pexJourApres(auj):cy.d0;
+    var pv=_pecRevPrevuMO(d0p, cy.d1);
+    out.tot.prevu=pv;
+    parc.forEach(function(p){ out.by[p.nom].mo+=pv*partSurf(p); });
+  }
+  return out;
+}
+// Les rendements d'un millésime, par nom de parcelle — _mlRendements, la source de
+// la Cave (escalier des volumes VD-3). On la lit, on ne la refait pas.
+function _pecRevRdtMap(m){
+  var out={}; if(typeof window._mlRendements!=='function') return out;
+  var L=[]; try{ L=window._mlRendements(m)||[]; }catch(e){ L=[]; }
+  L.forEach(function(o){ if(o&&o.parcelle&&o.parcelle.nom) out[o.parcelle.nom]=o; });
+  return out;
+}
+// Le rendement d'une parcelle sur un millésime PASSÉ : la Cave s'il est suivi au
+// Cuvier, sinon l'historique de la parcelle (rendement_hist, saisies anciennes).
+function _pecRevHistHa(p, m, RD, kgHl){
+  var o=RD[m]&&RD[m][p.nom]; if(o&&o.hlHa>0) return o.hlHa;
+  var s=parseFloat(p.surface)||0; if(!(s>0)) return null;
+  var hl=0, vu=false;
+  (Array.isArray(p.rendement_hist)?p.rendement_hist:[]).forEach(function(e){
+    if(!e||Number(e.millesime)!==m) return;
+    var v=e.vol||null, x=0;
+    if(v&&Number(v.hl)>0) x=Number(v.hl)+Math.max(0,Number(v.kg_manquants)||0)/kgHl;
+    else { var kg=Number(e.kg)||0; if(!(kg>0)&&Number(e.kg_ha)>0) kg=Number(e.kg_ha)*s; x=kg/kgHl; }
+    if(x>0){ hl+=x; vu=true; }
+  });
+  return vu?(hl/s):null;
+}
+// La récolte d'une parcelle : volume de la parcelle entière (le hL/ha réglementaire),
+// et la PART DU DOMAINE — ce qui deviendra des bouteilles, et la part du coût
+// qu'elles portent (prorata des kilos). Le reste est du raisin vendu.
+function _pecRevRec(o, p, kgHl){
+  var s=parseFloat(p.surface)||0, kg=Number(o.kg)||0;
+  var hlTot=(o.hlHa!=null&&s>0)?(o.hlHa*s):(kg/kgHl);
+  var parts=(o.rdt&&o.rdt.parts)||[], dp=null;
+  parts.forEach(function(x){ if(x&&x.dom) dp=x; });
+  if(!o.vendu || !parts.length) return { hlTot:hlTot, domHl:hlTot, domShare:1, kg:kg, kgVendu:0 };
+  if(!dp || !(dp.kg>0)) return { hlTot:hlTot, domHl:0, domShare:0, kg:kg, kgVendu:kg };
+  var domHl=(Number(dp.hl)||0)+Math.max(0,dp.kg-(Number(dp.connu)||0))/kgHl;
+  return { hlTot:hlTot, domHl:domHl, domShare:(kg>0?Math.min(1,dp.kg/kg):1), kg:kg, kgVendu:Math.max(0,kg-dp.kg) };
+}
+function _pecRevAoc(p){
+  var a=null; try{ a=(typeof window._vendAocDe==='function')?window._vendAocDe(p):null; }catch(e){ a=null; }
+  return (a&&a.nom)||String((p&&p.appellation)||'').trim()||'Sans appellation';
+}
+// La part des anges MESURÉE : le dernier millésime entièrement mis en bouteille,
+// bouteilles × 0,75 L contre le volume décuvé. Une valeur hors de [0 ; 40 %] est une
+// saisie incomplète, pas une perte : on l'écarte et le réglage sert.
+function _pecRevPertesMes(mil){
+  if(typeof window._mlChaine!=='function') return null;
+  for(var m=mil-1;m>=mil-3;m--){
+    var ch=null; try{ ch=window._mlChaine(m); }catch(e){ ch=null; }
+    if(!ch||!(ch.hlDecuve>0)||!(ch.btl>0)||ch.hlCuve>0||ch.hlFut>0) continue;
+    var q=1-ch.btl*0.0075/ch.hlDecuve;
+    if(q>=0&&q<=0.4) return { pct:Math.round(q*1000)/10, mil:m };
+  }
+  return null;
+}
+// ★ LE CALCUL, PUR : ni DOM ni globale. P = [{nom, surf, aoc, max, cout:{mo,trac,gnr,phy},
+//   rec:null|{hlTot, domHl, domShare, kg, kgVendu}, hist:[hL/ha…]}], pertes en %.
+function _pecRevCalc(P, pertes){
+  var k=Math.max(0,1-(Number(pertes)||0)/100)*100/0.75;      // cols de 75 cl par hL logé
+  var POST=['mo','trac','gnr','phy'];
+  var moy={};
+  P.forEach(function(p){
+    if(p.rec&&p.surf>0&&p.rec.hlTot>0){ var q=moy[p.aoc]||(moy[p.aoc]={hl:0,ha:0}); q.hl+=p.rec.hlTot; q.ha+=p.surf; }
+  });
+  var T={ ha:0, haAvec:0, haSans:0, nSans:0, hl:0, domHl:0, cols:0, cout:0, coutDom:0, coutSans:0,
+          coutVendu:0, kgVendu:0, kgPese:0, nR:0, n:0, po:{mo:0, trac:0, gnr:0, phy:0} };
+  var G={}, ordre=[];
+  var rows=P.map(function(p){
+    var src='n', hlha=null, hlTot=0, domHl=0, share=1;
+    if(p.rec && ((p.rec.hlTot>0)||(p.rec.kg>0))){
+      src='r'; hlTot=p.rec.hlTot||0; hlha=(p.surf>0)?(hlTot/p.surf):null;
+      domHl=p.rec.domHl||0; share=(p.rec.domShare!=null)?p.rec.domShare:1;
+    } else if(p.hist&&p.hist.length){
+      src='h'; var sh=0; p.hist.forEach(function(x){ sh+=x; }); hlha=sh/p.hist.length;
+    } else if(moy[p.aoc]&&moy[p.aoc].ha>0){
+      src='m'; hlha=moy[p.aoc].hl/moy[p.aoc].ha;
+    }
+    if(src==='h'||src==='m'){ hlTot=hlha*p.surf; domHl=hlTot; }
+    var c=p.cout||{}, cout=0, po={};
+    POST.forEach(function(x){ var v=Number(c[x])||0; po[x]=v; cout+=v; });
+    var avec=(src!=='n');
+    var r={ nom:p.nom, aoc:p.aoc, surf:p.surf, max:p.max, src:src, hlha:hlha, hl:hlTot, domHl:domHl, share:share,
+            cols:avec?domHl*k:0, cout:cout, coutDom:avec?cout*share:0 };
+    r.eurCol=(r.cols>0)?(r.coutDom/r.cols):null;
+    var g=G[p.aoc];
+    if(!g){ g=G[p.aoc]={ aoc:p.aoc, ha:0, haAvec:0, hl:0, domHl:0, cols:0, coutDom:0, est:false, nR:0, n:0, maxs:[], rows:[] }; ordre.push(p.aoc); }
+    g.ha+=p.surf; g.n++; g.rows.push(r);
+    if(p.max!=null && g.maxs.indexOf(p.max)<0) g.maxs.push(p.max);
+    T.ha+=p.surf; T.n++; T.cout+=cout;
+    if(avec){
+      g.haAvec+=p.surf; g.hl+=hlTot; g.domHl+=domHl; g.cols+=r.cols; g.coutDom+=r.coutDom;
+      if(src==='r'){ g.nR++; T.nR++; } else g.est=true;
+      T.haAvec+=p.surf; T.hl+=hlTot; T.domHl+=domHl; T.cols+=r.cols; T.coutDom+=r.coutDom;
+      POST.forEach(function(x){ T.po[x]+=po[x]*share; });
+      if(src==='r'){ T.coutVendu+=cout*(1-share); T.kgVendu+=(p.rec.kgVendu||0); T.kgPese+=(p.rec.kg||0); }
+    } else { T.haSans+=p.surf; T.nSans++; T.coutSans+=cout; }
+    return r;
+  });
+  var aoc=ordre.map(function(n){
+    var g=G[n];
+    g.hlha=(g.haAvec>0)?(g.hl/g.haAvec):null;
+    g.eurCol=(g.cols>0)?(g.coutDom/g.cols):null;
+    g.maxs.sort(function(a,b){ return a-b; });
+    return g;
+  }).sort(function(a,b){ return (b.ha-a.ha) || (a.aoc<b.aoc?-1:1); });
+  T.hlha=(T.haAvec>0)?(T.hl/T.haAvec):null;
+  T.eurCol=(T.cols>0)?(T.coutDom/T.cols):null;
+  var etat=(T.n>0 && T.nR===T.n)?'cons':((T.haAvec>0)?'prob':'vide');
+  return { rows:rows, aoc:aoc, tot:T, etat:etat, k:k };
+}
+// Tout ce que l'écran lit, rassemblé. Aucune règle ici : elles sont au-dessus.
+function _pecRevData(mil){
+  var auj=_pecRevAuj(), M=(mil!=null)?mil:_pecRevMil(), kgHl=_pecRevKgHl();
+  var parc=(window.PARCELLES||[]).filter(function(p){ return p && p.nom && p.statut!=='Arrachee'; });
+  var cy=_pecRevCycle(M, auj);
+  var C=_pecRevCouts(cy, auj, parc);
+  var RD={};
+  for(var m=M;m>=M-3;m--) RD[m]=_pecRevRdtMap(m);
+  var P=parc.map(function(p){
+    var o=RD[M][p.nom]||null, hist=[];
+    for(var m2=M-1;m2>=M-3;m2--){ var h=_pecRevHistHa(p,m2,RD,kgHl); if(h!=null&&h>0) hist.push(h); }
+    var mx=null; try{ mx=(typeof window._vendRdtMax==='function')?window._vendRdtMax(p,M).max:null; }catch(e){ mx=null; }
+    return { nom:p.nom, surf:parseFloat(p.surface)||0, aoc:_pecRevAoc(p), max:mx,
+             cout:C.by[p.nom], rec:o?_pecRevRec(o,p,kgHl):null, hist:hist };
+  });
+  var pm=_pecRevPertesMes(M), pertes=pm?pm.pct:_pecRevPertesCfg();
+  var R=_pecRevCalc(P, pertes);
+  R.mil=M; R.cy=cy; R.couts=C; R.kgHl=kgHl; R.pertes=pertes; R.pertesMes=pm; R.auj=auj;
+  R.autres=_pecRevAutres(); R.mils=_pecRevMils();
+  return R;
+}
 // Journee de reference : convertit les journees-personnes du journal en heures, base
 // de l'ecart de cadence. Defaut 7 h, aligne sur le simulateur de renfort (_rfCfg.hJour).
 // UN SEUL lecteur : le defaut vivait en dur dans _pecData, il y aurait diverge du jour
@@ -6722,9 +7002,6 @@ function _pecData(){
   var tvHorsE = 0;
   if(tvOk) (TVe.taches||[]).forEach(function(x){ if(!tvVus[_friseNorm(x.nom)]) tvHorsE += x.eur; });
 
-  var rec=_pecRecolte(), kgB=_pecKgB();
-  var bouteilles = (rec.kg>0) ? (rec.kg/kgB) : 0;
-
   return {
     rows:rows, tasks:tlist, pairs:pairs, tot:T, postes:postes,
     rate:rate, cfg:cfg, phy:phy, rcfg:rcfg, minTrou:_ecoMinTrou(),
@@ -6742,8 +7019,6 @@ function _pecData(){
     reOk:tvOk, engRe:(T.moRe + T.tracF + T.gnrF + T.phyF), ecRe:(tvOk ? (T.moRe - T.moF) : null),
     reAttE:(tvOk ? (TVe.eAtt||0) : 0), reAttH:(tvOk ? (TVe.hAtt||0) : 0), reHorsE:tvHorsE,
     coutHaB:(T.surf>0?budget/T.surf:0), coutHaE:(T.surf>0?engage/T.surf:0),
-    rec:rec, kgB:kgB, bouteilles:bouteilles,
-    eurKg:(rec.kg>0?budget/rec.kg:0), eurBt:(bouteilles>0?budget/bouteilles:0),
     eurPlant:(T.plantH>0?T.plantE/Math.max(1,T.trous):0),
     hasRate:(rate>0), hasGnr:(cfg.gnrL>0), hasPhyto:(T.phyF>0),
     hasPlant:(T.trous>0), hasTrac:(T.tracH>0),
@@ -7473,28 +7748,22 @@ function _pecViewSynthese(E,TL){
          : ('Neutralis\u00e9 sous '+Math.round(E.cad.seuil)+' % du bar\u00e8me r\u00e9alis\u00e9 \u2014 '+Math.round(E.avc)+' % \u00e0 ce jour, et aucune campagne comparable archiv\u00e9e.'))+'</div>'
     +'</div></div>';
 
-  // Prix de revient
-  var rec=E.rec, recTxt;
-  if(rec.src==='saison') recTxt='r\u00e9colte de la p\u00e9riode \u00b7 '+_pilNum(rec.kg)+' kg sur '+rec.n+' parcelle'+(rec.n>1?'s':'');
-  else if(rec.src==='hist') recTxt='derni\u00e8re r\u00e9colte connue \u2014 mill\u00e9sime <b>'+_pilEsc(String(rec.mil))+'</b> \u00b7 '+_pilNum(rec.kg)+' kg';
-  else recTxt='aucune r\u00e9colte enregistr\u00e9e \u2014 les rendements se saisissent au <b>Cuvier</b>';
-  var mini='<div><div class="l">Co\u00fbt \u00e0 l\u2019hectare</div><div class="v">'+_pilEsc(_ecoEur(E.coutHaB))+'</div><div class="s">budget \u00b7 engag\u00e9 '+_pilEsc(_ecoEur(E.coutHaE))+'</div></div>';
-  if(rec.kg>0){
-    mini+='<div><div class="l">Co\u00fbt du kilo</div><div class="v">'+_pilEsc(_ecoEur2(E.eurKg))+'<small> \u20AC/kg</small></div><div class="s">sur '+_pilNum(rec.kg)+' kg de raisin</div></div>'
-        +'<div><div class="l">Co\u00fbt de la bouteille</div><div class="v">'+_pilEsc(_ecoEur2(E.eurBt))+'<small> \u20AC</small></div><div class="s">\u2248 '+_pilNum(E.bouteilles)+' cols \u00e0 '+_pilEsc(_ecoEur2(E.kgB))+' kg/col</div></div>';
-  } else {
-    mini+='<div><div class="l">Co\u00fbt du kilo</div><div class="v">\u2014</div><div class="s">saisir la r\u00e9colte au Cuvier</div></div>';
-  }
+  // Prix de revient — REV-1 (§194) : la bouteille se lit dans la sous-vue Revient,
+  //   cadrée sur le CYCLE du millésime (elle divisait ici le coût de la période
+  //   consultée par toute la récolte). Il en reste une porte, plus les coûts qui ne
+  //   dépendent pas de la récolte : l'hectare de la période, le plant, l'heure.
+  var RV=null; try{ RV=_pecRevData(); }catch(e){ RV=null; }
+  var mini='<div class="prv-go" data-pec="sub" data-v="rev"><div class="l">Co\u00fbt vigne / bouteille</div><div class="v">'
+    +((RV&&RV.tot.eurCol!=null)?(_pecRevE2(RV.tot.eurCol)+'<small> \u20AC</small>'):'\u2014')+'</div>'
+    +'<div class="s">'+(RV?('mill\u00e9sime '+RV.mil+' \u00b7 '+(RV.etat==='cons'?'constat\u00e9':'probable')):'calcul indisponible')+' \u00b7 Revient \u203A</div></div>';
+  mini+='<div><div class="l">Co\u00fbt \u00e0 l\u2019hectare</div><div class="v">'+_pilEsc(_ecoEur(E.coutHaB))+'</div><div class="s">budget de la p\u00e9riode \u00b7 engag\u00e9 '+_pilEsc(_ecoEur(E.coutHaE))+'</div></div>';
   if(E.hasPlant) mini+='<div><div class="l">Co\u00fbt du plant</div><div class="v">'+_pilEsc(_ecoEur2(E.eurPlant))+'<small> \u20AC</small></div><div class="s">'+_pilNum(E.tot.trous)+' plants \u00e0 '+E.minTrou+' min</div></div>';
   mini+='<div><div class="l">Co\u00fbt de l\u2019heure</div><div class="v">'+_pilEsc(_ecoEur2(E.rate))+'<small> \u20AC/h</small></div><div class="s">taux moyen de l\u2019\u00e9quipe de terrain</div></div>';
-  // ① Le cadre dit SUR QUELLE RECOLTE le prix est calcule. L'hypothese de
-  //   conversion et ce que le prix ne contient pas expliquent le CALCUL : fiche.
-  //   ③ Le bouton « Regler les hypotheses » existait deja, deux lignes plus bas.
   H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Prix de revient</div>'
-    +'<div class="pec-cs">'+recTxt+' \u00b7 co\u00fbts de <b>culture</b> seulement'
+    +'<div class="pec-cs">la bouteille sur le cycle du mill\u00e9sime \u00b7 le reste sur la p\u00e9riode'
     +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.revient')):'')+'</div></div>'
     +'<div class="pec-cb"><div class="pec-mini">'+mini+'</div>'
-    +'<div class="pec-acts"><button class="pec-btn" data-pec="param"><span>\u2699\uFE0F</span> R\u00e9gler les hypoth\u00e8ses</button>'
+    +'<div class="pec-acts"><button class="pec-btn" data-pec="sub" data-v="rev"><span>'+_mvIcon('bouteille',16)+'</span> Voir le revient du mill\u00e9sime</button>'
     +'<button class="pec-btn" data-pec="sub" data-v="pos"><span>'+_mvIcon('boussole',16)+'</span> Voir le co\u00fbt de la campagne</button></div></div></div>';
 
   H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Ce qu\u2019il faut regarder</div></div><div class="pec-cb">'+_pecAlertes(E,TL)+'</div></div>';
@@ -7748,7 +8017,7 @@ function _pecExport(kind,E){
 }
 
 // ── Barre de sous-vues ───────────────────────────────────────────────
-var _PEC_SUBS=[['syn','graphique','Synth\u00e8se'],['pos','cible','Postes & travaux'],['par','raisin','Parcelles'],['ach','euro','Achats'],['exe','calendrier','Exercice']];
+var _PEC_SUBS=[['syn','graphique','Synth\u00e8se'],['pos','cible','Postes & travaux'],['par','raisin','Parcelles'],['rev','bouteille','Revient'],['ach','euro','Achats'],['exe','calendrier','Exercice']];
 function _pecSubNav(E){
   var b=_PEC_SUBS.map(function(s){
     var ic=(typeof _mvIcon==='function')?_mvIcon(s[1],16):'';
@@ -9282,6 +9551,143 @@ function _pexView(){
     + _pexFutChoix();
 }
 
+// ── La vue « Revient » (REV-1) ──────────────────────────────────────────────
+// Un entonnoir : combien de vin → combien de bouteilles → combien coûte chacune.
+// Les trois règles du module (§42b) : le CADRE en une ligne sous chaque titre, la
+// MÉTHODE derrière un « i », ce qui dit quoi faire est un BOUTON.
+function _pecRevE2(n){ return (Math.round((Number(n)||0)*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function _pecRevF1(n){ return (Math.round((Number(n)||0)*10)/10).toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1}); }
+function _pecRevDt(iso){ var s=String(iso||''); return (s.length>=10)?(s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(0,4)):'\u2014'; }
+function _pecRevEtat(R){
+  return (R.etat==='cons')?'<span class="prv-e prv-e-c">constat\u00e9</span>':'<span class="prv-e prv-e-p">probable</span>';
+}
+function _pecRevMax(g){
+  if(!g.maxs.length) return '\u2014';
+  var a=g.maxs[0], b=g.maxs[g.maxs.length-1];
+  return (a===b)?_pilNum(a):(_pilNum(a)+'\u2013'+_pilNum(b));
+}
+var _PEC_REV_SRC={ r:'r\u00e9colt\u00e9e', h:'moy. de ses mill\u00e9simes', m:'moy. de l\u2019appellation', n:'sans estimation' };
+function _pecViewRevient(){
+  var R=null;
+  try{ R=_pecRevData(); }catch(e){ R=null; if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'revient',err:e}); }
+  if(!R) return '<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Revient</div>'
+    +'<div class="pec-cs">le calcul n\u2019a pas abouti '+_mvInfoBtn('pil.eco.revient')+'</div></div></div>';
+  var T=R.tot, C=R.couts, cy=R.cy, H='';
+  var haR=0; R.rows.forEach(function(r){ if(r.src==='r') haR+=r.surf; });
+  var pctR=(T.ha>0)?Math.round(haR/T.ha*100):0;
+  var projete=(C.tot.prevu>0);
+
+  // ① Le millésime, son cycle, et les trois chiffres
+  var chips='';
+  if(R.mils.length>1){
+    chips='<div class="prv-mils">'+R.mils.map(function(m){
+      return '<button data-pec="revmil" data-v="'+m+'"'+(m===R.mil?' class="on"':'')+'>'+m+'</button>';
+    }).join('')+'</div>';
+  }
+  var cadre='cycle du '+_pecRevDt(cy.d0)+' au '+_pecRevDt(cy.d1)
+    +' \u00b7 '+(R.etat==='cons'?'tout est r\u00e9colt\u00e9':(pctR+' % r\u00e9colt\u00e9'))
+    +' \u00b7 co\u00fbts de <b>culture</b> seulement';
+  var sR=(T.hlha!=null)?(_pilNum(T.hl)+' hL sur '+_pilHa(T.haAvec)+' ha'):'aucun rendement connu';
+  var cols=(R.etat==='cons')?T.cols:(Math.round(T.cols/100)*100);
+  var sB='75 cl \u00b7 pertes '+_pecRevF1(R.pertes)+' % '+(R.pertesMes?('mesur\u00e9es sur '+R.pertesMes.mil):'(r\u00e9glage)')
+    +(T.kgVendu>0?(' \u00b7 raisin vendu retir\u00e9'):'');
+  var sC=(T.eurCol!=null)
+    ? (_pecEurK(T.coutDom)+(projete?' engag\u00e9s et pr\u00e9vus':' sur le cycle')+' \u00f7 '+_pilNum(T.cols)+' cols')
+    : 'il faut un rendement pour diviser';
+  H+='<div class="pec-card">'+'<div class="pec-ch"><div class="pec-ct">Mill\u00e9sime '+R.mil+'</div>'
+    +'<div class="pec-cs">'+cadre+' '+_mvInfoBtn('pil.eco.revient')+'</div></div>'
+    +'<div class="pec-cb" style="padding-bottom:0">'+chips+'</div>'
+    +'<div class="pec-kpis">'
+    +'<div class="pec-k"><div class="l">Rendement'+_pecRevEtat(R)+'</div><div class="v">'
+      +(T.hlha!=null?_pecRevF1(T.hlha):'\u2014')+'<small> hL/ha</small></div><div class="s">'+sR
+      +(T.haSans>0?('<br>'+_pilHa(T.haSans)+' ha sans estimation, compt\u00e9s \u00e0 part'):'')+'</div></div>'
+    +'<div class="pec-k"><div class="l">Bouteilles'+_pecRevEtat(R)+'</div><div class="v">'
+      +(T.cols>0?((R.etat==='cons'?'':'\u2248\u00a0')+_pilNum(cols)):'\u2014')+'</div><div class="s">'+sB+'</div></div>'
+    +'<div class="pec-k"><div class="l">Co\u00fbt vigne / bouteille'+(projete?'<span class="prv-e prv-e-j">projet\u00e9</span>':'')+'</div><div class="v">'
+      +(T.eurCol!=null?(_pecRevE2(T.eurCol)+'<small> \u20AC</small>'):'\u2014')+'</div><div class="s">'+sC+'</div></div>'
+    +'</div>';
+  // Ce qui borne ou affaiblit le chiffre : dit, jamais deviné.
+  var notes=[];
+  if(cy.src0==='an') notes.push('D\u00e9but du cycle\u00a0: aucune r\u00e9colte '+(R.mil-1)+' saisie, il part un an avant sa fin.');
+  if(cy.src1==='plan') notes.push('Fin de vendange pr\u00e9vue le '+_pecRevDt(cy.d1)+'\u00a0: la main-d\u2019\u0153uvre jusque-l\u00e0 vient du planning.');
+  if(cy.src1==='auj') notes.push('Fin de vendange non dat\u00e9e\u00a0: le co\u00fbt s\u2019arr\u00eate \u00e0 aujourd\u2019hui.');
+  if(!C.tvOk) notes.push('Main-d\u2019\u0153uvre non chiffr\u00e9e\u00a0: le planning ne dit encore rien de ce cycle.');
+  if(C.nSansTaux>0) notes.push(C.nSansTaux+' salari\u00e9'+(C.nSansTaux>1?'s':'')+' sans taux horaire, compt\u00e9'+(C.nSansTaux>1?'s':'')+' au taux moyen.');
+  if(notes.length) H+='<div class="pec-cb"><div class="pec-note">'+notes.join('<br>')+'</div></div>';
+  if(R.etat==='vide') H+='<div class="pec-cb"><div class="pec-acts" style="margin-top:0"><button class="pec-btn" data-pec="cave" data-v="vendange"><span>'+_mvIcon('raisin',16)+'</span> Saisir les r\u00e9coltes au Cuvier</button></div></div>';
+  H+='</div>';
+
+  // ② Par appellation — la ligne se déplie en parcelles
+  var tb='<div class="pec-scroll"><table class="pec-tbl prv-tbl"><thead><tr><th>Appellation</th><th class="prv-hs" style="text-align:right">Surface</th>'
+    +'<th style="text-align:right">hL/ha</th><th class="prv-hs" style="text-align:right">Plafond</th><th style="text-align:right">Bouteilles</th>'
+    +'<th style="text-align:right">\u20AC / col</th></tr></thead><tbody>';
+  R.aoc.forEach(function(g,i){
+    var ref=(g.maxs.length?g.maxs[g.maxs.length-1]:0);
+    var w=(g.hlha!=null&&ref>0)?Math.min(100,g.hlha/ref*100):0;
+    tb+='<tr class="prv-row" data-pec="revrow" data-v="'+i+'"><td><span class="prv-chev">\u203A</span><b>'+_pilEsc(g.aoc)+'</b></td>'
+      +'<td class="prv-hs" style="text-align:right">'+_pilHa(g.ha)+' ha</td>'
+      +'<td style="text-align:right">'+(g.hlha!=null?_pecRevF1(g.hlha):'\u2014')+(g.est?'<span class="prv-src h">est.</span>':'')
+        +(ref>0?('<div class="prv-jg"><i'+(g.est?' class="est"':'')+' style="width:'+Math.round(w)+'%"></i></div>'):'')+'</td>'
+      +'<td class="prv-hs" style="text-align:right;color:var(--texte-doux)">'+_pecRevMax(g)+'</td>'
+      +'<td style="text-align:right">'+(g.cols>0?_pilNum(g.cols):'\u2014')+'</td>'
+      +'<td style="text-align:right;font-weight:700">'+(g.eurCol!=null?(_pecRevE2(g.eurCol)+' \u20AC'):'\u2014')+'</td></tr>';
+    g.rows.forEach(function(r){
+      tb+='<tr class="prv-det prv-hid" data-prv="'+i+'"><td>'+_pilEsc(r.nom)+' <span class="prv-src '+r.src+'">'+_PEC_REV_SRC[r.src]+'</span>'
+        +(r.src==='r'&&r.share<1?(' <span class="prv-src n">'+(r.share>0?('domaine '+Math.round(r.share*100)+' %'):'tout vendu')+'</span>'):'')+'</td>'
+        +'<td class="prv-hs" style="text-align:right">'+_pilHa(r.surf)+' ha</td>'
+        +'<td style="text-align:right">'+(r.hlha!=null?_pecRevF1(r.hlha):'\u2014')+'</td>'
+        +'<td class="prv-hs" style="text-align:right;color:var(--texte-doux)">'+(r.max!=null?_pilNum(r.max):'\u2014')+'</td>'
+        +'<td style="text-align:right">'+(r.cols>0?_pilNum(r.cols):'\u2014')+'</td>'
+        +'<td style="text-align:right">'+(r.eurCol!=null?(_pecRevE2(r.eurCol)+' \u20AC'):'\u2014')+'</td></tr>';
+    });
+  });
+  tb+='<tr class="prv-tot"><td>Domaine</td><td class="prv-hs" style="text-align:right">'+_pilHa(T.ha)+' ha</td>'
+    +'<td style="text-align:right">'+(T.hlha!=null?_pecRevF1(T.hlha):'\u2014')+'</td><td class="prv-hs"></td>'
+    +'<td style="text-align:right">'+(T.cols>0?_pilNum(T.cols):'\u2014')+'</td>'
+    +'<td style="text-align:right">'+(T.eurCol!=null?(_pecRevE2(T.eurCol)+' \u20AC'):'\u2014')+'</td></tr></tbody></table></div>';
+  H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Par appellation</div>'
+    +'<div class="pec-cs">touchez une ligne pour voir ses parcelles '+_mvInfoBtn('pil.eco.revrdt')+'</div></div>'
+    +'<div class="pec-cb">'+tb+'</div></div>';
+
+  // ③ Du raisin à la bouteille — les conversions de la Cave
+  var kgT=T.hl*R.kgHl, hlVendu=Math.max(0,T.hl-T.domHl), hlEl=T.domHl*Math.max(0,1-R.pertes/100);
+  var fx=function(l,v,s){ return '<div class="prv-fx"><div class="l">'+l+'</div><div class="v">'+v+'</div><div class="s">'+s+'</div></div>'; };
+  var ar='<div class="prv-ar" aria-hidden="true">\u2192</div>';
+  H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Du raisin \u00e0 la bouteille</div>'
+    +'<div class="pec-cs">les m\u00eames conversions que la Cave '+_mvInfoBtn('pil.eco.revconv')+'</div></div>'
+    +'<div class="pec-cb"><div class="prv-flux">'
+    +fx('Raisin', _pecRevF1(kgT/1000)+' t', (R.etat==='cons'?'pes\u00e9':('dont '+_pecRevF1(T.kgPese/1000)+' t pes\u00e9es')))+ar
+    +fx('Vin du domaine', _pilNum(T.domHl)+' hL', (hlVendu>0.5?(_pilNum(hlVendu)+' hL de raisin vendu retir\u00e9s'):('\u00e0 '+_pilNum(R.kgHl)+' kg/hL')))+ar
+    +fx('Apr\u00e8s \u00e9levage', _pilNum(hlEl)+' hL', '\u2212 '+_pecRevF1(R.pertes)+' %'+(R.pertesMes?' (mesur\u00e9es)':' (r\u00e9glage)'))+ar
+    +fx('Bouteilles', (T.cols>0?_pilNum(T.cols):'\u2014'), '133 cols par hL')
+    +'</div></div></div>';
+
+  // ④ Ce que coûte une bouteille à la vigne
+  var POS=[['mo','Main-d\u2019\u0153uvre vigne',_PEC_COL.mo],['trac','Conduite tracteur',_PEC_COL.trac],['gnr','Carburant GNR',_PEC_COL.gnr],['phy','Produits phyto',_PEC_COL.phy]];
+  var poT=0; POS.forEach(function(x){ poT+=T.po[x[0]]||0; });
+  var bar='<div class="pec-bar" style="height:16px">'+POS.map(function(x){
+    var v=T.po[x[0]]||0; return (poT>0&&v>0)?('<i style="width:'+(v/poT*100).toFixed(2)+'%;background:'+x[2]+'"></i>'):''; }).join('')+'</div>';
+  var leg='<div class="pec-leg">'+POS.map(function(x){
+    var v=(T.cols>0)?((T.po[x[0]]||0)/T.cols):null;
+    return '<span class="pec-lg"><em style="background:'+x[2]+'"></em>'+x[1]+' <b>'+(v!=null?(_pecRevE2(v)+' \u20AC'):'\u2014')+'</b></span>'; }).join('')+'</div>';
+  var comp='';
+  if(R.autres>0 && T.cols>0 && T.eurCol!=null){
+    comp='<div class="prv-complet"><div><div class="prv-cl">Co\u00fbt complet indicatif</div>'
+      +'<div class="pec-cs">vigne '+_pecRevE2(T.eurCol)+' \u20AC + autres charges '+_ecoEur(R.autres)+' \u00f7 '+_pilNum(T.cols)+' cols</div></div>'
+      +'<div class="prv-cv">'+_pecRevE2(T.eurCol+R.autres/T.cols)+' \u20AC</div></div>';
+  }
+  H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Ce que co\u00fbte une bouteille \u00e0 la vigne</div>'
+    +'<div class="pec-cs">sur le cycle, par poste'+(projete?' \u00b7 main-d\u2019\u0153uvre pr\u00e9vue comprise':'')+' '+_mvInfoBtn('pil.eco.revcout')+'</div></div>'
+    +'<div class="pec-cb">'+bar+leg+comp
+    +'<div class="pec-note"><b>Pas compt\u00e9 ici</b>\u00a0: vinification, f\u00fbts et \u00e9levage, mise en bouteille, bouchons, \u00e9tiquettes, '
+      +'fermage ou loyer, amortissements, frais de structure. Ce chiffre est <b>un plancher</b>, jamais un prix de revient complet.</div>'
+    +'<div class="pec-acts"><button class="pec-btn" data-pec="param"><span>'+_mvIcon('engrenage',16)+'</span> R\u00e9gler les hypoth\u00e8ses</button>'
+    +'<button class="pec-btn" data-pec="cave" data-v="millesime"><span>'+_mvIcon('raisin',16)+'</span> Voir le mill\u00e9sime en cave</button>'
+    +'<button class="pec-btn" data-pec="sub" data-v="pos"><span>'+_mvIcon('boussole',16)+'</span> Voir le co\u00fbt de la campagne</button></div>'
+    +'</div></div>';
+  return H;
+}
+
 function _pilTabEco(d){
   _pecCss();
   var E=_pecData();
@@ -9301,6 +9707,7 @@ function _pilTabEco(d){
   else if(_PEC_SUB==='par') body=_pecViewParcelles(E);
   else if(_PEC_SUB==='ach') body=_pachView();
   else if(_PEC_SUB==='exe') body=_pexView();
+  else if(_PEC_SUB==='rev') body=_pecViewRevient();
   else body=_pecViewSynthese(E,TL);
   return '<div class="pec-wrap">'+_pilCadreAvert(_pilAvertEco())+_pecSubNav(E)+body+'</div>';
 }
@@ -10005,6 +10412,11 @@ function _pilCadreAvert(txt){
 // pour ca, et qui a donc l'avertissement inverse.
 function _pilAvertEco(){
   var nom=_pilSaisonNom(), camp=_PIL_SCOPE.camp;
+  // REV-1 : le Revient a son propre cadre, le cycle du millésime — il l'écrit sous son titre.
+  if(_PEC_SUB==='rev'){
+    return camp ? ('Cette sous-vue cadre sur le <b>cycle du mill\u00e9sime</b>, d\u2019une vendange \u00e0 la suivante \u2014 pas sur <b>'
+      +_pilEsc(camp)+'</b>, la campagne \u00e9pingl\u00e9e en haut.') : '';
+  }
   if(_PEC_SUB==='exe'){
     return camp ? ('Cette sous-vue cadre sur l\u2019<b>exercice comptable</b>, d\u2019un bilan \u00e0 l\u2019autre \u2014 pas sur <b>'
       +_pilEsc(camp)+'</b>, la campagne \u00e9pingl\u00e9e en haut.') : '';
@@ -10751,21 +11163,33 @@ function _pilSimEcoCard(admin){
 // dormir le journal des erreurs pendant des mois. On relit donc la valeur apres l'appel,
 // et si rien n'a bouge on le DIT, plutot que de laisser croire que c'est enregistre.
 var _PEC_HYPO = {
-  kg_bouteille:{ ico:'\uD83C\uDF77', tit:'Raisin par bouteille',
-                 sub:'base du <b>co\u00fbt \u00e0 la bouteille</b> \u2014 hypoth\u00e8se de conversion, jamais une mesure',
-                 def:'1.3', unite:'kg / col', step:'0.1', min:'0.1' },
+  // REV-1 : « Raisin par bouteille » (1,3 kg/col) est retiré — la conversion est celle de
+  //   la Cave (kg/hL du Cuvier). Restent deux hypothèses du Revient, dites comme telles.
+  pertes_elevage:{ ico:'\uD83C\uDF77', tit:'Pertes d\u2019\u00e9levage',
+                 sub:'base des <b>bouteilles probables</b> \u2014 servi tant qu\u2019aucune part des anges n\u2019est mesur\u00e9e',
+                 def:'5', unite:'%', step:'0.5', min:'0' },
+  autres_charges:{ ic:'euro', tit:'Autres charges de l\u2019ann\u00e9e',
+                 sub:'facultatif \u2014 fermage, cave, amortissements, structure\u00a0: donne un <b>co\u00fbt complet indicatif</b>',
+                 def:'aucune', unite:'\u20AC', step:'100', min:'0' },
   h_jour:      { ico:'\u23F1\uFE0F', tit:'Journ\u00e9e de r\u00e9f\u00e9rence',
                  sub:'convertit les journ\u00e9es de pr\u00e9sence du journal en heures, base de l\u2019<b>\u00e9cart de cadence</b>',
                  def:'7', unite:'h / jour', step:'0.5', min:'1' }
 };
-function _pecHypoVal(key){ return (key==='h_jour') ? _pecHJour() : _pecKgB(); }
+function _pecHypoVal(key){
+  if(key==='h_jour') return _pecHJour();
+  if(key==='pertes_elevage') return _pecRevPertesCfg();
+  if(key==='autres_charges'){ var a=_pecRevAutres(); return a>0?a:''; }
+  return '';
+}
 function _pecHypoSet(key,v){
   if(!_PEC_HYPO[key]) return;
   if(!(typeof window.isAdmin==='function' && window.isAdmin())) return;
+  // Un champ vidé : la perte retombe sur son défaut, les autres charges sur « aucune ».
+  if(String(v==null?'':v).trim()===''){ v=(key==='pertes_elevage')?5:(key==='autres_charges'?0:v); }
   var before=((window.CONFIG&&window.CONFIG.eco)||{})[key];
   if(typeof window._ecoCfgSet==='function') window._ecoCfgSet('eco',key,v);
   var after=((window.CONFIG&&window.CONFIG.eco)||{})[key];
-  if(String(after)===String(before)){
+  if(String(after)===String(before) && Number(after)!==Number(v)){
     if(window.showToast) window.showToast('R\u00e9glage non enregistr\u00e9 \u2014 mise \u00e0 jour de R\u00e9glages requise','#B85A1A');
     return;
   }
@@ -10777,7 +11201,7 @@ function _pecHypoRows(admin){
   return Object.keys(_PEC_HYPO).map(function(k){
     var o=_PEC_HYPO[k];
     return '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--gris-clair)">'
-      +'<div style="flex:1;min-width:190px"><div style="font-size:var(--pt-base,14px);color:var(--texte);font-weight:600">'+o.ico+' '+o.tit+'</div>'
+      +'<div style="flex:1;min-width:190px"><div style="font-size:var(--pt-base,14px);color:var(--texte);font-weight:600">'+((o.ic&&typeof _mvIcon==='function')?_mvIcon(o.ic,16):(o.ico||''))+' '+o.tit+'</div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+o.sub+'</div></div>'
       +'<span style="display:inline-flex;align-items:center;gap:5px">'
       +'<input type="number" min="'+o.min+'" step="'+o.step+'" value="'+_pecHypoVal(k)+'" placeholder="'+o.def+'"'+(admin?'':' disabled')
@@ -11082,6 +11506,16 @@ function _pilBindContent(content){
       //   choisir le meme nom sans jamais se marcher dessus.
       if(_pa==='pachper'){ const _pv=_pe.getAttribute('data-v');
         if((_pv==='exe'||_pv==='tout')&&_pv!==_PACH_PER){ _PACH_PER=_pv; _pilFillContent(_pilData()); } return; }
+      // REV-1 : déplier une appellation (sans re-rendre : rien d'autre ne bouge),
+      //   changer de millésime, ouvrir la Cave sur la bonne section.
+      if(_pa==='revrow'){ const _ri=_pe.getAttribute('data-v'); const _op=!_pe.classList.contains('open');
+        _pe.classList.toggle('open',_op);
+        const _dl=document.querySelectorAll('.prv-det[data-prv="'+_ri+'"]');
+        for(let _k=0;_k<_dl.length;_k++) _dl[_k].classList.toggle('prv-hid',!_op);
+        return; }
+      if(_pa==='revmil'){ const _mv=parseInt(_pe.getAttribute('data-v'),10);
+        if(!isNaN(_mv)&&_mv!==_PEC_REV_MIL){ _PEC_REV_MIL=_mv; _pilFillContent(_pilData()); } return; }
+      if(_pa==='cave'){ if(typeof window._pilOuvrirCave==='function') window._pilOuvrirCave(_pe.getAttribute('data-v')||''); return; }
       if(_pa==='pach'){ _pachOpen(_pe.getAttribute('data-v')||''); return; }
       if(_pa==='pachadd'){ _pachAdd(); return; }
       if(_pa==='axe'){ var _av=_pe.getAttribute('data-v'); if((_av==='nat'||_av==='ate')&&_av!==_PEC_AXE){ _PEC_AXE=_av; _pecSaveSt(); _pilFillContent(_pilData()); } return; }

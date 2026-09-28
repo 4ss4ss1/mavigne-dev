@@ -3,12 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **27 septembre 2026 (DIM-2 + DIM-3)** — ★★★ **UN DIMANCHE COMPTE EN ENTIER, « POUR LA COMPTA » EN
-> CASES 25 / 50 / 100 %, L'ANNÉE EN TROIS FAMILLES, ET UN RÉGLAGE « DIMANCHES ET FÉRIÉS : TOUJOURS DES HEURES SUP » (§193)**.
-> Mode payé : la majoration voyage avec l'heure (DIMAV-1 défait). Réglage `CONFIG.dimfer_hs` (défaut inchangé) : en « toujours »,
-> même un dimanche prévu au modèle est une heure sup, avant septembre aussi, et le paiement d'un mois d'alors se relit comme un
-> total. Mois figé = ce qui est parti (`fige.bank`). ⚠️ Trois hypothèses de paie fausses en route (§193d bis) : **demander, ne pas
-> supposer**. **Bump APP 7.74 → 7.75, SW 8.43 → 8.44**, base `3446620`, zip avec MEP-1. Détail en **§193**.
+> Dernière consolidation : **28 septembre 2026 (REV-1)** — ★★★ **ÉCONOMIE › REVIENT : RENDEMENT, BOUTEILLES ET COÛT VIGNE
+> DU MILLÉSIME, SUR LE CYCLE D'UNE VENDANGE À LA SUIVANTE (§194)**. Nouvelle sous-vue `rev` (`_pecViewRevient`, moteur pur
+> `_pecRevCalc`). L'ancienne carte « Prix de revient » divisait le coût de la PÉRIODE par toute la récolte et convertissait à
+> 1,3 kg/col (~28 % de bouteilles de moins que la Cave) : elle n'est plus qu'une porte. Escalier du rendement : récolté → moyenne
+> de ses millésimes → moyenne de l'appellation → rien, JAMAIS le plafond. ⚠️ **J'avais affirmé qu'un moteur « euros de l'année
+> vigne » existait : faux** (le panneau des deux cadres ne compte que des heures) — on rejoue l'engagé daté sur le cycle.
+> **Bump APP 7.75 → 7.76, SW 8.44 → 8.45**, base `d42cdbe`. Détail en **§194**.
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1798,6 +1799,16 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ REV-1 — CE QUI RESTE OUVERT SUR LE REVIENT (§194, posé le 28/09)
+
+1. **À regarder chez Nico, sur les vraies données** : le cycle affiché (sans récolte 2025 saisie, il part un an avant la fin), le
+   coût vigne par bouteille, et l'écart avec l'ancien chiffre de la Synthèse (annoncé dans `WHATS_NEW`).
+2. **Le prévu de main-d'œuvre ne sait ni le tracteur ni la cave à venir** (`_pecRevPrevuMO`) : il est plutôt haut. Le dire à la
+   fiche a suffi pour ce lot ; le soustraire exigerait un planning d'activités qui n'existe pas.
+3. **`_pecRevData` est appelé par la Synthèse ET par Revient** : `_ecoTempsVigne` n'a qu'une case de cache, les deux fenêtres
+   (période et cycle) se chassent. Coût non mesuré sur un vrai domaine — à regarder si l'onglet rame.
+4. **ROB-2** : ajouter le Revient au tirage au hasard quand le lot Pilotage passera.
 
 ### ⚠️ RULES-1 — LE PREMIER RUN RÉEL, PUIS DEUX ÉCARTS À TRANCHER (§189, posé le 27/09)
 

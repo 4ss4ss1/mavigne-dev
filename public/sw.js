@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v8.44
+// MA VIGNE — Service Worker v8.45
+// v8.45 (28/09/2026) — REV-1 (§194) : Économie › Revient (_pecViewRevient, _pecRevData, _pecRevCalc) — rendement, bouteilles et
+//   coût vigne du millésime sur son cycle ; carte Prix de revient de la Synthèse réduite à une porte ; conversion de la Cave
+//   (fin de _pecKgB) ; réglages pertes_elevage / autres_charges ; _ecoTempsVigne(win) ; APP 7.76.
 // v8.44 (27/09/2026) — DIM-2 : un dimanche/ferie non prevu compte en entier (_planHsupMois) ; mode paye, la majoration voyage
 //   avec l'heure avant septembre (_planMajAuCompteur, pile dim/fer a leur taux, revalorise) ; Pour la compta en cases 25/50/100 %
 //   (_pfCompta), mois fige = ce qui est parti (fige.bank) ; annee en trois familles (_pfAnnee/_pfAnneeTable) ; styles.css.
@@ -4176,7 +4179,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.44';
+const CACHE_NAME   = 'mavigne-v8.45';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4192,7 +4195,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.44 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.45 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4212,7 +4215,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.44 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.45 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.75';
+export const APP_VERSION = '7.76';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -722,6 +722,20 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.76', items: [
+    { emoji: 'bouteille', titre: 'Le revient du millésime, dans Économie',
+      desc: "Nouvelle sous-vue «\u00a0Revient\u00a0»\u00a0: le rendement, les bouteilles et le coût vigne par bouteille du millésime, par "
+        + "appellation. Tant que la vendange n’est pas finie, une parcelle pas encore récoltée prend la moyenne de ses millésimes "
+        + "connus, et les chiffres sont marqués «\u00a0probable\u00a0». Tout se lit sur le cycle du millésime, d’une vendange à la suivante." },
+    { emoji: 'check', titre: 'Les mêmes bouteilles que la Cave',
+      desc: "Le coût à la bouteille de la Synthèse utilisait sa propre conversion (1,3\u00a0kg de raisin par bouteille) et divisait le "
+        + "coût de la période affichée par toute la récolte. Il compte désormais comme la Cave, au kg/hL du Cuvier, sur le cycle "
+        + "entier\u00a0: le chiffre peut bouger nettement. Le raisin vendu sort des bouteilles et de leur coût." },
+    { emoji: 'engrenage', titre: 'Deux réglages dans la roue crantée',
+      desc: "Les pertes d’élevage (5\u00a0% par défaut, remplacées par la part des anges mesurée quand un millésime est entièrement "
+        + "mis en bouteille), et, si vous le voulez, vos autres charges de l’année — fermage, cave, structure — pour un coût "
+        + "complet indicatif. «\u00a0Raisin par bouteille\u00a0» disparaît." }
+  ] },
   { v: '7.75', items: [
     { emoji: 'document', titre: 'Enfin un relevé d’heures compréhensible',
       desc: "Après de longues heures de réflexion et de prise de tête, l’application arrive enfin à un relevé d’heures et une "
@@ -3796,7 +3810,7 @@ var MV_AIDE = {
       ['Le petit rond « i » dit d’où vient un chiffre', ": touchez-le, une fiche s’ouvre et explique comment ce chiffre est calculé, sur quelle fenêtre, et ce qu’il ne dit pas. Ce qui <b>cadre</b> un chiffre — sa date, sa source, son périmètre — reste toujours affiché à côté de lui, en une ligne. C’est la méthode qui se range, jamais le cadre."],
       ['Quand il manque quelque chose, un bouton vous y emmène', ": plus de chemin à retenir. « Cuve GNR à renseigner », « fiches à passer en Inactif » — le bouton ouvre l’écran concerné, sur le bon onglet, et fait clignoter l’endroit exact une seconde."],
       _mvAideOngletsPil,
-      ['La barre du haut dit où vous regardez', ": l’exercice entier, ou une campagne. Cliquez une campagne dans la frise de l’année et les trois chiffres du haut, la frise et les tableaux de la campagne suivent. La croix revient à l’année. <b>Trois écrans ont leur propre cadre</b> et ne se recadrent pas : Économie chiffre la période consultée, la Cave suit le millésime, la Conformité roule sur sept ans — chacun l’écrit au-dessus de ses chiffres."],
+      ['La barre du haut dit où vous regardez', ": l’exercice entier, ou une campagne. Cliquez une campagne dans la frise de l’année et les trois chiffres du haut, la frise et les tableaux de la campagne suivent. La croix revient à l’année. <b>Trois écrans ont leur propre cadre</b> et ne se recadrent pas : Économie chiffre la période consultée (sauf ses sous-vues Exercice et Revient, qui ont chacune leur cadre), la Cave suit le millésime, la Conformité roule sur sept ans — chacun l’écrit au-dessus de ses chiffres."],
       ['Les trois chiffres du haut', "— les travaux, l’effectif, le budget — ne s’affichent que sur <b>L’année</b> et <b>La campagne</b>, les deux niveaux de zoom. Ils changent avec ce que vous regardez, et chacun mène à l’écran qui le détaille. Ailleurs, ils ne servaient plus à choisir où aller : sur Économie et sur Conformité, ils répétaient l’écran juste en dessous."],
       ['Une seule date de fin', "pour tout le module : Aujourd’hui, sa frise et Échéances par tâche lisent la même simulation que La campagne sans renfort — chaque travail dans sa fenêtre, l’équipe partagée entre les travaux ouverts en même temps, le tracteur déduit, aux heures normales du planning. Le « i » à côté de la marge dit les trois choses qui la distinguent du simulateur de renfort, et « vers le » signale une fin après la période, l’équipe de la dernière semaine reconduite."],
       ['La conformité n’est plus dans cette ligne', "et c’est une question d’échelle : le cuivre roule sur <b>sept ans glissants</b>, il ne bouge pas quand vous cliquez une campagne. Un chiffre qui ignore la portée n’a pas sa place dans une ligne qui se recadre. Il se lit en entier dans l’onglet Conformité, et le bouton « à compléter » remonte toujours ses alertes, sur tous les onglets."],
@@ -3815,6 +3829,7 @@ var MV_AIDE = {
       ['La carte de fiabilité d’Économie', ": elle relit la liste du bandeau <b>« à compléter »</b> — mêmes lignes, mêmes mots, mêmes boutons — et n’en garde que ce qui met un <b>poste de ce budget à zéro</b> : un taux horaire, le prix du GNR, une dose. Ce n’est pas « un peu bas » : c’est zéro, et le budget affiché n’est qu’un plancher. La puce « N remarques » en dessous ouvre tout ce qui n’empêche pas un calcul mais change sa lecture."],
       ['Économie', "compare un budget de barème à ce qui est engagé — les heures réellement passées dans les rangs au planning, validées ou non —, sur la <b>période consultée</b> — le coût d’un bilan entier se lit dans sa sous-vue <b>Exercice</b>. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire. Dans <b>Postes & travaux</b>, le <b>temps réel</b> de chaque travail — les heures du planning versées aux parcelles validées, au prorata de la surface — se lit à côté du h/ha du barème."],
       ['Économie › Exercice', "coupe l’année <b>au jour</b> : l’<b>engagé</b> (ce qui est sorti) à gauche d’aujourd’hui, le <b>prévu</b> (les salaires que la grille du planning annonce) hachuré à droite, et le total à la clôture qui dit qu’il contient du prévu. Contre l’an dernier, la comparaison se fait <b>aux mêmes jours</b>, pas dix mois de grille contre douze mois payés."],
+      ['Économie › Revient', "répond à trois questions pour le millésime : combien de vin, combien de bouteilles, combien coûte chacune à la vigne. Tout se lit sur le <b>cycle</b> du millésime, d’une vendange à la suivante. Tant qu’une parcelle n’est pas récoltée, son rendement est la moyenne de ses millésimes connus — jamais le plafond — et les chiffres sont marqués <b>probable</b>. Le tableau se lit par appellation ; touchez une ligne pour voir ses parcelles. Deux réglages dans la roue crantée : les pertes d’élevage, et vos autres charges de l’année pour un coût complet indicatif."],
       ['La carte de verdict d’Économie', ": elle dit en une phrase où vous en êtes, et pose les boutons pour agir — voir quel travail dérape, ouvrir le barème. Quand la cadence affichée vient de la campagne précédente, une ligne sous le texte le dit, avec le nom de cette campagne. Le <b>comment</b> du calcul est derrière son petit « i »."],
       ['L’écart de cadence cherche sa source dans un ordre', ", et dit toujours laquelle il a trouvée. D’abord <b>la période en cours</b>, dès 40 % de barème réalisé. Sinon <b>la même période de la campagne précédente</b>, si elle est archivée — la ligne porte alors un <b>↩</b> et nomme la campagne : cet écart-là <b>se lit, il ne s’applique pas</b> au budget ni à la date de fin. Même règle quand le facteur sort de [0,5 ; 3] : un trou de saisie n’est pas une cadence, l’écran le dit. Sinon rien, et l’écran l’écrit plutôt que d’afficher un chiffre inventé."],
       ['Conformité', "suit le cuivre sur sept ans, le nombre de passages, le <b>registre phyto</b> et les délais de rentrée en cours. Le registre était rangé dans « L’équipe &amp; le matériel » alors qu’il lit exactement les mêmes traitements que « Passages phyto » : il est désormais juste en dessous, en détail de ce total."],
@@ -4169,11 +4184,32 @@ export const MV_INFO = {
     'Le poste « Autres » se vide à mesure que vous renseignez un <b>barème h/ha par activité</b> dans Réglages \u203a Tracteur : tant qu\u2019il est vide, le tracteur ne peut pas être détaché du reste.'
   ] },
 
-  'pil.eco.revient': { t: 'Le prix de revient', p: [
-    'Ce sont les <b>coûts de culture</b> : ce qu\u2019il a fallu pour amener le raisin jusqu\u2019au bout du rang. <b>Ni vinification, ni sèche, ni foncier, ni amortissement</b> — ces postes-là ne passent pas par Ma Vigne.',
-    'Le coût <b>à la bouteille</b> repose sur une <b>hypothèse de conversion</b> : un nombre de kilos de raisin par col. C\u2019est un réglage, pas une mesure — il se change dans la <b>roue crantée du Pilotage</b>, avec la journée de référence.',
-    'Le coût <b>au kilo</b>, lui, ne dépend d\u2019aucune hypothèse : il divise simplement le coût de culture par la récolte pesée.',
-    'Quand aucune récolte n\u2019est enregistrée, l\u2019écran le dit plutôt que d\u2019afficher un prix. Les rendements se saisissent au <b>Cuvier</b>.'
+  'pil.eco.revient': { t: 'Le revient d’un millésime', p: [
+    'Ce sont les <b>coûts de culture</b> : ce qu’il a fallu pour amener le raisin jusqu’au bout du rang. <b>Ni vinification, ni fûts, ni mise, ni foncier, ni amortissement</b> — ces postes-là ne passent pas par Ma Vigne. Le chiffre est un <b>plancher</b>.',
+    'Tout se lit sur le <b>cycle du millésime</b> : du lendemain de la dernière récolte de l’an passé à la fin de la vendange. Pas sur la période consultée — un coût de dix jours divisé par une récolte entière ne veut rien dire. Sans récolte saisie l’an passé, le cycle part <b>un an avant sa fin</b>, et l’écran le dit.',
+    'Le coût reprend ce que la campagne appelle l’<b>engagé</b> : les heures payées dans les rangs au planning (bureau, tracteur et journées de cave retirés), la conduite du tracteur, le carburant et les produits phyto. Tant que la vendange est à venir, s’y ajoute la <b>main-d’œuvre prévue</b> au planning jusqu’à sa fin prévue — le chiffre est alors marqué <b>projeté</b>.',
+    '<b>Probable</b> tant qu’une parcelle n’est pas récoltée, <b>constaté</b> quand tout est rentré. Les millésimes précédents qui ont une récolte se choisissent en tête : en janvier, c’est l’an passé qu’on veut lire.'
+  ] },
+
+  'pil.eco.revrdt': { t: 'Le rendement probable, parcelle par parcelle', p: [
+    'Chaque parcelle prend le meilleur chiffre disponible, dans cet ordre : <b>d’abord, récolté cette année</b> (le volume de la Cave, mesuré ou estimé au kg/hL) · <b>sinon, la moyenne de ses millésimes connus</b> (jusqu’à trois) · <b>sinon, la moyenne constatée cette année dans son appellation</b> · sinon <b>aucune estimation</b>, et la parcelle est comptée à part.',
+    'Le <b>plafond de l’appellation</b> n’est jamais pris comme prévision : c’est un maximum réglementaire, pas ce que la vigne donnera. Il sert de repère dans la jauge.',
+    'Le hL/ha est rapporté à la <b>parcelle entière</b>, comme dans la Cave. Les bouteilles, elles, ne comptent que la <b>part du domaine</b> : le raisin vendu en sort, et la part du coût qu’il porte aussi, au prorata des kilos. Une parcelle pas encore récoltée est comptée entièrement pour le domaine.',
+    'Une parcelle sans estimation sort des bouteilles <b>et</b> de leur coût : diviser son coût par les bouteilles des autres gonflerait leur prix.'
+  ] },
+
+  'pil.eco.revconv': { t: 'Du raisin à la bouteille', p: [
+    '<b>Kilos → hectolitres</b> : le rapport kg/hL réglé au Cuvier (le milieu de la fourchette), pour tout ce qui n’a pas de volume mesuré. C’est la même règle que la Cave : les deux écrans comptent les mêmes bouteilles.',
+    '<b>Pertes d’élevage</b> : la part des anges <b>mesurée</b> sur le dernier millésime entièrement mis en bouteille, s’il y en a un ; sinon le réglage (5 % par défaut, dans la roue crantée).',
+    '<b>Hectolitres → bouteilles</b> : 1 hL donne 133 bouteilles de 75 cl.',
+    'Avant, Économie utilisait sa propre hypothèse, 1,3 kg de raisin par bouteille : elle comptait environ 28 % de bouteilles de moins que la Cave. Il n’y a plus qu’une règle.'
+  ] },
+
+  'pil.eco.revcout': { t: 'Ce que coûte une bouteille à la vigne', p: [
+    'Le coût de chaque parcelle est divisé par ses bouteilles, puis additionné par appellation : un Gevrey à 36 hL/ha et un Bourgogne à 49 hL/ha n’ont pas le même prix de revient, et une moyenne le cacherait.',
+    'Les heures qui attendent encore une validation sont réparties entre parcelles comme celles déjà versées ; le carburant, aux heures machine ; la main-d’œuvre prévue, à la surface. La vigne entière a coûté ces heures : elles ne se perdent pas.',
+    'Attention : la main-d’œuvre <b>prévue</b> ne connaît ni le tracteur ni la cave à venir : elle est plutôt haute.',
+    'Les <b>autres charges de l’année</b>, si vous les saisissez dans la roue crantée (fermage, cave, amortissements, structure — un seul montant), donnent un <b>coût complet indicatif</b>. Ce n’est pas un calcul de comptable : c’est un ordre de grandeur, pour le comparer à un prix de vente.'
   ] },
 
   'pil.eco.postes': { t: 'Le coût de la campagne', p: [

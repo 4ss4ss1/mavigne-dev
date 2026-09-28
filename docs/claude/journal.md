@@ -8,6 +8,13 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **27 septembre 2026 (DIM-2 + DIM-3)** — ★★★ **UN DIMANCHE COMPTE EN ENTIER, « POUR LA COMPTA » EN
+> CASES 25 / 50 / 100 %, L'ANNÉE EN TROIS FAMILLES, ET UN RÉGLAGE « DIMANCHES ET FÉRIÉS : TOUJOURS DES HEURES SUP » (§193)**.
+> Mode payé : la majoration voyage avec l'heure (DIMAV-1 défait). Réglage `CONFIG.dimfer_hs` (défaut inchangé) : en « toujours »,
+> même un dimanche prévu au modèle est une heure sup, avant septembre aussi, et le paiement d'un mois d'alors se relit comme un
+> total. Mois figé = ce qui est parti (`fige.bank`). ⚠️ Trois hypothèses de paie fausses en route (§193d bis) : **demander, ne pas
+> supposer**. **Bump APP 7.74 → 7.75, SW 8.43 → 8.44**, base `3446620`, zip avec MEP-1. Détail en **§193**.
+
 > ★ Consolidation : **27 septembre 2026 (MEP-1)** — ★★ **LE RELEVÉ REPASSE À DEUX PAGES, CHAQUE CHOSE ÉCRITE UNE FOIS
 > (§192)**. Page 2 en flux à deux colonnes qui s'équilibre, `.cl` borné au cadre (il défaisait Contrats et Congés), signatures
 > d'un seul tenant, Total de la page 1 protégé ; doublons retirés (« dont … dim./férié », dimanche du mois, règle d'avant

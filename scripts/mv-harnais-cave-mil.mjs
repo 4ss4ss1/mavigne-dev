@@ -77,7 +77,10 @@ function jouer(cave, pil, rsv, ut, html, css, silencieux) {
   const ck = extraire(pil, '_pilCkCave') || '';
   T(/window\._mlAgendaComplet/.test(ck) && /window\._mlVerdict/.test(ck), 'la carte Cave LIT _mlVerdict et _mlAgendaComplet de cave.js');
   T(/_pilOuvrirCave\(\)/.test(ck) && /window\._pilOuvrirCave\s*=\s*function/.test(pil), 'la carte a son bouton, et il est sur window');
-  T(/selectCaveSection\('aujourdhui'\)/.test(pil), 'le bouton ouvre la Cave sur Aujourd\u2019hui');
+  /* REV-1 (§194) : la section devient un argument (le Revient ouvre Le millesime) ; la
+     carte appelle _pilOuvrirCave() SANS argument, donc le defaut doit rester Aujourd'hui. */
+  T(/_s=\(typeof sec==='string'&&sec\)\?sec:'aujourdhui'/.test(pil) && /selectCaveSection\(_s\)/.test(pil),
+    'le bouton ouvre la Cave sur Aujourd\u2019hui (d\u00e9faut de _pilOuvrirCave)');
   T(/auj_cave:1/.test(pil) && /\['auj_cave','La Cave/.test(pil), 'la carte est un panneau param\u00e9trable (auj_cave)');
   T(/\.pil-ck-btn\{/.test(css), 'le bouton de la carte a son style');
 

@@ -236,3 +236,4 @@
 | 191 | 191. ★★★ RELEVE-3 — LE RELEVÉ D'UN MOIS FIGÉ PLANTAIT, ET UN HARNAIS QUI TIRE LES DONNÉES AU HASARD (27/09 … | `docs/claude/chantiers-180-229.md` |
 | 192 | 192. ★★ MEP-1 — LE RELEVÉ REPASSE À DEUX PAGES, CHAQUE CHOSE ÉCRITE UNE FOIS (27/09 — `src/planning.js` · `… | `docs/claude/chantiers-180-229.md` |
 | 193 | 193. ★★★ DIM-2 — UN DIMANCHE COMPTE EN ENTIER, « POUR LA COMPTA » EN CASES 25 / 50 / 100 %, L'ANNÉE EN TROI… | `docs/claude/chantiers-180-229.md` |
+| 194 | 194. ★★★ REV-1 — ÉCONOMIE › REVIENT : RENDEMENT, BOUTEILLES ET COÛT VIGNE DU MILLÉSIME (28/09 — `src/pilota… | `docs/claude/chantiers-180-229.md` |

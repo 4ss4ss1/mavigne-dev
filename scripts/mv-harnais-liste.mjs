@@ -297,6 +297,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-cuv13.mjs'],
   ['node scripts/mv-harnais-futcap.mjs'],
   ['node scripts/mv-harnais-futcap.mjs --contre'],
+  ['node scripts/mv-harnais-revient.mjs'],
+  ['node scripts/mv-harnais-revient.mjs --contre'],
   ['node scripts/mv-harnais-vol1.mjs'],
   ['node scripts/mv-harnais-vol1.mjs --contre'],
   ['node scripts/mv-harnais-asm1.mjs'],

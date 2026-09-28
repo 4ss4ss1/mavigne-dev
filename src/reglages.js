@@ -5599,7 +5599,13 @@ window._ecoCfgSet=function(group,key,val){
   } else if(group==='eco'){
     // Parametres du simulateur << Cout selon l'effectif >>, du surcout de retard, et
     // des DEUX hypotheses du pilotage economique (Pilotage > Outils > Parametrage) :
-    //   kg_bouteille : kilos de raisin par col, base du cout a la bouteille.
+    //   kg_bouteille : HERITAGE — plus lu depuis REV-1 (§194) : la bouteille se convertit au
+    //                  kg/hL du Cuvier. Garde dans la liste pour ne pas faire echouer une
+    //                  ecriture d'un appareil pas encore a jour.
+    //   pertes_elevage : % de pertes d'elevage du Revient, tant qu'aucune part des anges
+    //                  n'est mesuree (defaut 5, lu par _pecRevPertesCfg). 0 est legitime.
+    //   autres_charges : EUR par an, facultatif — fermage, cave, structure — pour un cout
+    //                  complet INDICATIF (lu par _pecRevAutres). 0 = aucun.
     //   h_jour       : journee de reference, base de l'ecart de cadence (temps passe
     //                  au journal, en journees-personnes, contre les heures de bareme).
     // Liste blanche : aucune ecriture arbitraire possible dans CONFIG.eco. Une cle
@@ -5641,7 +5647,7 @@ window._ecoCfgSet=function(group,key,val){
       if(window.saveData) window.saveData('config');
       return;
     }
-    if(['pen_retard_sem','pen_plafond','rdt_renfort','cout_fixe_renfort','maj_hsup','k_retard','trac_etp','kg_bouteille','h_jour','exercice_mois','campagne_mois'].indexOf(key)<0) return;
+    if(['pen_retard_sem','pen_plafond','rdt_renfort','cout_fixe_renfort','maj_hsup','k_retard','trac_etp','kg_bouteille','h_jour','exercice_mois','campagne_mois','pertes_elevage','autres_charges'].indexOf(key)<0) return;
     if(!C.eco||typeof C.eco!=='object') C.eco={};
     C.eco[key]=_ecoNum(val);
   } else { return; }

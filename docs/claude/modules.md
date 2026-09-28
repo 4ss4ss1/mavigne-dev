@@ -1248,8 +1248,10 @@ indissociables dont un **filet de tolérance** en tête de `switchCaveOng`.
 
 ### ★★★ Économie — l'écart de cadence, refait le 09/08 (il était faux d'un facteur 5)
 
-**4 sous-vues** `_PEC_SUBS` : 📈 Synthèse (la carte de verdict `_pecVerdict` vit là) ·
-🧭 Postes & travaux · 🍇 Parcelles · 📅 Exercice.
+**6 sous-vues** `_PEC_SUBS` : Synthèse (la carte de verdict `_pecVerdict` vit là) · Postes & travaux · Parcelles ·
+★ **Revient** (§194 : rendement, bouteilles et coût vigne du millésime sur son CYCLE, moteur pur `_pecRevCalc`) · Achats · Exercice.
+⚠️ La carte « Prix de revient » de la Synthèse n'est plus qu'une porte vers Revient : **plus aucune conversion kg/col dans
+Économie** — la bouteille se compte au kg/hL du Cuvier, comme la Cave.
 
 **Le coût de main-d'œuvre n'a JAMAIS dépendu des heures du journal** : c'est
 `heures de BARÈME × taux pondéré par l'équipe réelle`. **Le journal dit QUI, jamais COMBIEN

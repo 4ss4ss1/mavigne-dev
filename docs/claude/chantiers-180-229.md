@@ -719,3 +719,75 @@ passé en dimanche PRÉVU, A12 : un mois figé montre ce qui est parti). Contrô
   l'employeur au moment de la demande — la loi ne donne pas ce choix au salarié.
 - Le tableau « compteur de récup » d'un mois figé reste le calcul vivant (« Payées sur le compteur, 11h54 à déclarer » alors que
   24h30 sont parties) : le report sur le mois suivant est dit par la carte « Envoi à la compta ». À clarifier sur le papier.
+
+## 194. ★★★ REV-1 — ÉCONOMIE › REVIENT : RENDEMENT, BOUTEILLES ET COÛT VIGNE DU MILLÉSIME (28/09 — `src/pilotage.js` · `src/reglages.js` · `src/utils.js` (MV_INFO ×4, MV_AIDE, WHATS_NEW) · `guide/11-pilotage.html` · `index.html` · `public/sw.js` · `scripts/mv-harnais-revient.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/mv-harnais-cave-mil.mjs` · **bump APP + SW**, base `d42cdbe`)
+
+> Nico : *« que penses-tu de mettre les rendements et bouteilles probables dans Économie, avec un calcul de coût de revient
+> probable (mais on n'a que le coût vigne) ; il faut que l'expérience soit simple, bien rangée »*. Proposition → maquette
+> `maquette-eco-revient-v1.html` (trois états de vendange, réglages vivants) → *« go avec les recommandations »*.
+
+### 194a. L'inventaire : la chose existait, fausse de trois façons
+
+Économie › Synthèse portait déjà une carte « Prix de revient » (coût/ha, /kg, /bouteille). Trois défauts, **mesurés dans le code** :
+① `_pecData` cadre sur la **période consultée** : zoomé sur « Vendanges », dix jours de coût divisés par toute la récolte — la
+faute corrigée le 12/08 sur « Deux façons de compter », jamais corrigée ici ; ② `_pecKgB` = **1,3 kg/col** quand la Cave compte au
+kg/hL du Cuvier (`_mlKgHl`, 135 kg/hL ≈ 1,01 kg/col) : **~28 % de bouteilles en moins**. Son commentaire disait « 1,3 kg/col ≈
+130 kg pour 1 hL » — faux (130 kg/hL = 0,98 kg/col) ; ③ avant vendange, `_pecRecolte` prenait la récolte de l'an passé avec les
+coûts de cette année.
+
+### 194b. ⚠️ Une affirmation fausse, la mienne
+
+J'ai écrit à Nico, en proposant le lot, que le moteur de l'année vigne « existait déjà (celui de Deux façons de compter) ».
+**Faux** : `_pilDeuxCadresHtml` ne compte que des **heures de barème** pour le cycle ; les euros de sa cellule sont ceux de
+l'exercice. **Aucun moteur ne chiffrait un cycle en euros.** Repéré en écrivant le code, dit à Nico dans la réponse suivante.
+**C'est le corollaire du 11/08 : un constat que j'énonce se mesure comme les autres.**
+
+### 194c. L'arbitrage : rejouer l'engagé sur les dates du cycle
+
+Écartés : faire tourner `_pecData` pour chaque campagne du cycle en substituant `window._visuSaison` (les défs de tâches et les
+validations suivent la saison visualisée : un calcul faux en silence) ; `_pexData` sur la fenêtre (masse salariale de TOUT le
+domaine, cave et bureau compris — ce n'est plus un coût vigne). **Retenu** : les quatre moteurs DATÉS de l'engagé —
+`_ecoTempsVigne` (qui prend désormais une fenêtre `win`, même patron que `_ecoTracHByParc(win)`), `_ecoTracHByParc`,
+`_ecoGnrReel`, `_ecoPhytoByParc` — rejoués sur le cycle, + la main-d'œuvre **prévue** au planning jusqu'à la fin de vendange
+quand elle est à venir (`_pecRevPrevuMO`, même population que TV-1). ⚠️ `guard<400` de `_ecoTempsVigne` passé à **800** : un
+cycle peut dépasser 400 jours, et la boucle se serait tronquée **sans rien dire**.
+
+**Le cycle** (`_pecRevCycle`) : début = lendemain de la dernière récolte M-1, sinon un an avant la fin (`src0:'an'`, dit à
+l'écran) ; fin = dernière récolte si tout est rentré ou millésime passé, sinon la fin de vendange des fenêtres de tâches
+(`_pilAnnuelData().vend`), sinon aujourd'hui. **La récolte datée est le seul signal sûr d'une fin de vendange.**
+
+### 194d. Les règles du calcul (`_pecRevCalc`, PUR)
+
+- **Escalier du rendement** : récolté (`_mlRendements`, la source de la Cave) → moyenne de ses millésimes connus (jusqu'à trois ;
+  Cave, sinon `rendement_hist`) → moyenne constatée cette année dans l'appellation → rien. **Jamais le plafond.**
+- Une parcelle **sans estimation** sort des bouteilles ET du coût (sinon son coût gonfle le prix des autres).
+- **Raisin vendu** : hL/ha sur la parcelle entière (réglementaire, comme la Cave), bouteilles = part du domaine, coût au prorata
+  des kilos (`_pecRevRec`). VD-3 disait « le domaine travaille toute la vigne » : vrai pour le rendement, pas pour le prix d'une
+  bouteille qui n'emporte pas le raisin vendu.
+- **Conversion unique** : hL × (1 − pertes) × 133,3. Pertes = part des anges **mesurée** sur le dernier millésime entièrement
+  embouteillé (`_pecRevPertesMes`, écartée hors [0 ; 40 %]), sinon le réglage `CONFIG.eco.pertes_elevage` (5 %).
+- **Par appellation** (`_vendAocDe`, sinon `p.appellation`) : Σ coût ÷ Σ bouteilles.
+- `CONFIG.eco.autres_charges` (facultatif, 0 = aucun) → **coût complet indicatif**, jamais présenté comme un calcul comptable.
+
+### 194e. L'écran
+
+Sous-vue `rev` entre Parcelles et Achats (`_PEC_SUBS`, état mémorisé accepté). Quatre cartes : le millésime (puces des années qui
+ont une récolte, cadre du cycle, trois chiffres « probable / constaté / projeté ») · par appellation (ligne qui se déplie en
+parcelles **sans re-rendu**, source de chaque rendement) · du raisin à la bouteille · le coût par poste + « pas compté ici ».
+La Synthèse garde une porte (première cellule de « Prix de revient ») et les coûts qui ne dépendent pas de la récolte.
+`_pilAvertEco` a une branche `rev` (cadre propre). `_pilOuvrirCave(sec)` prend une section (défaut Aujourd'hui).
+Téléphone : Surface et Plafond cachés sous 640 px, « € / col » — sans ça, le prix sortait de l'écran.
+
+### 194f. Ce que les contrôles ont trouvé en route
+
+Six rouges au premier `npm run check`, aucun ne venait du calcul : un emoji neuf (`_PEC_HYPO` accepte désormais `ic:` → `_mvIcon`),
+un « ⚠️ » dans une fiche, ①②③ hors du subset des polices, une ombre sans repli, des pastilles orange/bleu sous 4,5 de contraste
+(→ `--tag-amber-*`, `--tag-blue-*`), une clé MV_INFO à trois niveaux (`pil.eco.rev.rdt` → `pil.eco.revrdt`). Et **une
+collision d'ancre** : `_pecRevPrevuMO` recopiait mot pour mot `Number(window._mvPaieTauxEffAt(m,d))||0`, ancre de mutation de
+`mv-harnais-temps-vigne --contre` — devenue double, la contre-épreuve refusait de tourner. **Écrire du code neuf peut désarmer
+un harnais existant sans toucher à ce qu'il teste.** `mv-harnais-cave-mil` lisait le texte exact de `_pilOuvrirCave` : assertion
+réécrite sur le défaut.
+
+`mv-harnais-revient` : **26 assertions** (escalier, conversion, vendu, appellation, états, part du domaine, cycle, câblage, aide),
+**10 contre-épreuves sur 10**. D3 était vert sur code abîmé tant que l'essai n'avait pas de raisin vendu : corrigé.
+Rendu regardé dans Chromium (bureau, téléphone, sombre) sur données d'essai — **pas sur les vraies** (§28, REV-1).

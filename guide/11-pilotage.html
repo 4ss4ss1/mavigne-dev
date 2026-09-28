@@ -97,6 +97,31 @@
   ouvert au moins une fois pour connaître vos heures payées. Sa masse salariale compte <b>tout le
   monde</b>, bureau compris — un salaire est un salaire, et une pastille le signale dans le tableau ;
   la capacité au champ, le pic et le renfort, eux, restent hors bureau.</p>
+  <h3>{ic:bouteille} Revient — combien de vin, combien de bouteilles, combien chacune</h3>
+  <p>La sous-vue <b>Revient</b> répond, pour le millésime, à trois questions dans l'ordre : le
+  <b>rendement</b>, les <b>bouteilles</b>, et le <b>coût vigne d'une bouteille</b>. Tout se lit sur le
+  <b>cycle du millésime</b> : du lendemain de la dernière récolte de l'an passé à la fin de la vendange —
+  jamais sur la période affichée en haut.</p>
+  <ul class="dot">
+    <li><b>Probable, puis constaté.</b> Tant qu'une parcelle n'est pas récoltée, elle prend la moyenne
+    de ses millésimes connus, sinon la moyenne constatée cette année dans son appellation. Le
+    <b>plafond</b> de l'appellation n'est jamais pris comme prévision : il sert de repère dans la jauge.
+    Quand tout est rentré, les chiffres passent à « constaté ».</li>
+    <li><b>Par appellation.</b> Touchez une ligne : ses parcelles se déplient, chacune avec la source de
+    son rendement. Une parcelle sans aucune estimation est comptée à part, hors bouteilles et hors coût.</li>
+    <li><b>Les bouteilles de la Cave.</b> Les kilos deviennent des hectolitres au kg/hL du Cuvier, moins
+    les pertes d'élevage, à 133 bouteilles par hectolitre. Le <b>raisin vendu</b> sort des bouteilles et
+    de la part du coût qu'il porte.</li>
+    <li><b>Le coût vigne</b> : les heures payées dans les rangs, le tracteur, le carburant et les produits
+    du cycle — plus, tant que la vendange est à venir, la main-d'œuvre prévue au planning (le chiffre est
+    alors « projeté »). Un plancher : ni vinification, ni fûts, ni mise, ni fermage, ni amortissements.</li>
+  </ul>
+  <div class="note tip"><span class="ni" aria-hidden="true">{ic:engrenage}</span><div>Deux réglages dans la
+  roue crantée : les <b>pertes d'élevage</b> (5 % par défaut, remplacées par la part des anges mesurée
+  dès qu'un millésime est entièrement mis en bouteille), et vos <b>autres charges de l'année</b> — un seul
+  montant, facultatif — pour afficher un <b>coût complet indicatif</b>. Dans la Synthèse, la carte
+  « Prix de revient » garde une porte vers cette sous-vue.</div></div>
+
   <p>Sur un exercice <b>en cours</b>, l'année est coupée <b>au jour</b> : à gauche d'aujourd'hui,
   l'<b>engagé</b> — ce qui est sorti, à sa date ; à droite, le <b>prévu</b> — les salaires que la grille du
   planning annonce jusqu'à la clôture, hachurés sur le graphe. Un mois entamé est coupé au jour. Le
@@ -113,7 +138,7 @@
   <div class="note tip"><span class="ni" aria-hidden="true">{ic:lien}</span><div>Toutes les cartes
   d'Économie suivent maintenant la même règle : sous le titre, <b>une ligne</b> qui dit sur quoi porte
   le chiffre — « budget de la période », « main-d'œuvre vigne uniquement », « à surface égale ». Le
-  <b>comment</b> est derrière le « i » de la carte : l'hypothèse de conversion du prix de revient, le
+  <b>comment</b> est derrière le « i » de la carte : le calcul du revient d'un millésime, le
   détail des colonnes, la différence entre heures payées et heures travaillées.</div></div>
 
   <h3>{ic:lien} Ce qui manque devient un bouton</h3>
@@ -138,7 +163,7 @@
     <li><b>La barre du haut dit où vous regardez</b> : l'exercice entier, ou une campagne. Cliquez
     une campagne dans la frise de l'année et les trois chiffres du haut, la frise et les tableaux
     de la campagne suivent. La croix revient à l'année. <b>Trois écrans ont leur propre cadre</b> et
-    ne se recadrent pas : l'Économie chiffre la période consultée, la
+    ne se recadrent pas : l'Économie chiffre la période consultée (ses sous-vues Exercice et Revient ont chacune leur cadre), la
     Conformité roule sur sept ans glissants — chacun l'écrit au-dessus de ses chiffres, plutôt que
     de répondre en silence sur une autre fenêtre que celle affichée.</li>
     <li><b>Trois chiffres en tête de « L'année » et de « La campagne »</b> : les travaux, l'effectif,
@@ -379,6 +404,8 @@
       du jour. La conduite du tracteur est comptée à part, et une journée où le salarié figure sur une
       <b>opération de cave</b> sort de la vigne. Le budget reste le barème : « 30 % du budget pour 15 % du
       travail fait », c'est du retard</li>
+      <li><b>Revient</b> : le rendement, les bouteilles et le coût vigne d'une bouteille du millésime, par
+      appellation, sur le cycle d'une vendange à la suivante — « probable » tant que tout n'est pas rentré</li>
       <li><b>Coût par travail</b> et <b>parcelle par parcelle</b> : le <b>réalisé</b> est ce que le travail a
       coûté — les heures du planning versées aux parcelles validées, au taux chargé du jour — et la colonne
       <b>Écart</b> le compare au barème du travail fait : en plus, c'est plus cher que prévu. Les heures payées
