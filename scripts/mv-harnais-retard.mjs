@@ -67,7 +67,9 @@ const VOULUES = [
   // RECUP-1 : _planDayH, _planWorkH et _pl2Cell lisent aussi l'absence sur une partie de journee
   '_planAbsPartiel',
   // SEM-1 : _planDayH rend les heures du MODELE un jour sans saisie, a partir de la regle de septembre 2026
-  '_planRecupActiveAt'
+  '_planRecupActiveAt',
+  // SCHEMA-1 : _planApplyAbs pose la journee par _pEntPose, qui la controle d'abord
+  '_pEntPose', '_planEntreeProbleme'
 ];
 
 const morceaux = [];

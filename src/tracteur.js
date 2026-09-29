@@ -1504,7 +1504,7 @@ function renderTracteur(){
   if(encBanner&&encTxt){
     if(dataEnc.length){
       encBanner.style.display='flex';
-      encTxt.textContent=dataEnc.length+' session'+(dataEnc.length>1?'s':'')+' en cours · '+dataEnc[0].avancement+'% d\'avancement';
+      encTxt.textContent=dataEnc.length+' session'+(dataEnc.length>1?'s':'')+' en cours · '+(Number(dataEnc[0].avancement)||0)+'% d\'avancement';   // ROB-2 : une session d'avant sans avancement affichait « undefined% »
     } else {
       encBanner.style.display='none';
     }
@@ -2188,7 +2188,7 @@ function openSessionDetail(id){
   if(!s.parcellesSkip)s.parcellesSkip=[];
   const amap=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
   document.getElementById('sd-titre').textContent=s.activite;
-  document.getElementById('sd-meta').textContent=`${_fmtDate(s.date)} · ${s.conducteur}`;
+  document.getElementById('sd-meta').textContent=`${_fmtDate(s.date)} · ${s.conducteur||''}`;   // ROB-2 : jamais « undefined »
   renderSDTracEncart();
   closeSdTracPicker();
   updateSDSkipBtn();
@@ -2839,7 +2839,7 @@ function renderSDTracEncart(){
     ?'Chez le réparateur · Retour '+_fmtDate((tracRep).prevu_retour||'')
     :isOverride
     ?'✱ Override — défaut : '+(defTrac?defTrac.nom:(defRaw||'—'))
-    :'Tracteur dédié '+s.activite;
+    :'Tracteur dédié '+(s.activite||'');
   var btnCls=tracRep?'sd-trac-changer-btn is-rep':'sd-trac-changer-btn';
   var dot='<div style="width:9px;height:9px;border-radius:50%;background:'+col+';flex-shrink:0;margin-top:1px"></div>';
   encart.className=cls;
@@ -2968,12 +2968,12 @@ function _fillTracPickWithId(pfx, actNom, selId, defId){
     var rep=REPARATEUR[t.id];
     var col=couleurTracType(t.type);
     var isDefaut=t.id===defId;
-    return '<div class="trac-sel-btn'+(sel?' selected':'')+'" data-pfx="'+pfx+'" data-tracid="'+t.id+'" data-defid="'+defId+'"'+(sel?' style="border-color:'+col+';background:'+col+'18"':'')+'>'+
+    return '<div class="trac-sel-btn'+(sel?' selected':'')+'" data-pfx="'+pfx+'" data-tracid="'+t.id+'" data-defid="'+(defId||'')+'"'+(sel?' style="border-color:'+col+';background:'+col+'18"':'')+'>'+
       '<div style="display:flex;align-items:center;gap:10px">'+
         '<div class="trac-sel-radio"'+(sel?' style="border-color:'+col+';background:'+col+'"':'')+'>'+(sel?_mvIcon('check',16):'')+'</div>'+
         '<div>'+
           '<div style="font-size:13px;font-weight:'+(sel?'700':'500')+';color:'+(sel?'var(--texte)':'var(--texte-doux)')+'">'+_escHtml(t.nom)+' — '+_escHtml(t.modele)+'</div>'+
-          '<div style="font-size:10px;color:'+col+'">'+t.type+(isDefaut?' · Défaut pour '+actNom:'')+'</div>'+
+          '<div style="font-size:10px;color:'+col+'">'+_escHtml(t.type||'')+(isDefaut?' · Défaut pour '+actNom:'')+'</div>'+
         '</div>'+
       '</div>'+
       (rep?'<span style="font-size:10px;font-weight:600;background:var(--rouge-pale);color:var(--rouge-tx,#A0291E);border-radius:6px;padding:2px 8px">En répar.</span>':'')+

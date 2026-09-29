@@ -65,6 +65,9 @@ function _planWorkH(pl,m,d,e){ if(e&&e.type==='cp') return 0; return pl==='std'?
 function _planChampH(pl,m,d,e){ if(e&&e.type==='cp') return 0; return pl==='std'?7:0; }
 function _planDayH(pl,m,d,e){ return 7; }
 function _planEffN(m){ return m.collectif?m.effectif:1; }
+// CTX-1 : la boucle pose l'annee de chaque jour par la VRAIE primitive, extraite du module.
+const window={};
+${winFn(planSrc,'_planSurAnnee')};
 ${corps}
 export { _planTeamCadence_ };`;
   const M=await charger(src);

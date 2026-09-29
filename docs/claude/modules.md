@@ -834,6 +834,78 @@ blocs, la liste « à finir » périmée). **Rédiger le mode d'emploi d'un écr
 - ★ **Multi-sélection corrigée** — `planMultiApply()` écrivait des entrées nues sans la logique
   métier du chemin « Outils ». Correctif : `_planCpDayType` + `_planCpCount` appelés par **les deux**.
 
+### ★★ Modèle de données du Planning (posé le 28/09, relevé dans le code)
+
+★ **Source de vérité : le code.** Ce tableau a été relevé dans `planning.js` (moteurs d'écriture
+`_planApplyHeures`/`_planApplyAbs`/`_planApplySimple`/`_planApplyAbsPart`, pose des CP, `_planFigeInstantane`).
+Un champ ajouté au code sans être ajouté ici est une dette : **le mettre à jour dans le même lot.**
+★★ **SCHEMA-1 — ce tableau est EXÉCUTÉ.** Toute journée passe par **`_pEntPose(nom,m,d,e)`**, qui la soumet à
+`_planEntreeProbleme(e)` : forme inconnue, champ hors forme ou valeur impossible → **refusée, rien d'écrit**, une trace
+`logError` (cat `planning`, **sans nom ni commentaire** : le journal est lu hors du domaine), et le moteur compte le jour
+en « ignoré ». **Ajouter un champ = l'ajouter ici, dans `_planEntreeProbleme` ET dans `mv-harnais-schema-planning`.**
+⚠️ Le contrôle porte sur ce qu'on **écrit**, jamais sur le stock : une entrée ancienne n'est ni relue ni rejetée.
+Filet : `mv-harnais-schema-planning` (A. formes valides · B. refus · C. refus = rien d'écrit + trace anonyme ·
+D. **aucune écriture directe `_pEntEnsure(…)[d]=` hors de `_pEntPose`**) et sa contre-épreuve `--contre` (4 défauts).
+★★ **CTX-1 — l'année de calcul ne fuit jamais.** `_pY()` lit `_planCtxYear`, et les clés d'heures sup et du solde de
+départ la suivent (lot du 28/09) : une fonction qui la pose sans la rendre enverrait une saisie dans l'année d'à côté.
+**Poser l'année = `window._planSurAnnee(yr, fn)`** (try/finally, imbrication sûre). Sept sites la posaient à la main sans
+`finally`, dont quatre la remettaient à `null` au lieu de la valeur d'avant (`_chargeSaisonData`, capacité présente,
+`_planSeasonHours`, `_planTeamCadence_`, `_planCpDayType`, `_planCpCount`, retrait de CP) : tous passent par la primitive.
+Les boucles qui gardent un `continue` ou un `return` dans le `try` restent écrites à la main — **avec** `finally`.
+Filet : `mv-harnais-ctx-planning` (A. la primitive exécutée : sortie, exception, imbrication · B. aucun `_planCtxYear=null`
+hors déclaration · C. toute fonction qui pose l'année contient un `finally`) et `--contre` (3 défauts).
+⚠️ Un harnais qui **extrait** une fonction passant par `_planSurAnnee` doit extraire aussi la primitive
+(`mv-harnais-pil-coherence`, `mv-harnais-champ` le font) : sans elle, « `window._planSurAnnee is not a function` ».
+
+**Adressage** — mois **0-11**, jour **1-31**, année sur 4 chiffres ; toutes les clés sont des **chaînes** dans Firestore.
+
+| clé Firestore | forme | accès |
+|---|---|---|
+| `planning_entries` | `[nom][année][mois][jour] → entrée` | `_pEntDay` / `_pEntEnsure` (année = `_pY()`) |
+| `planning_templates` | `[année][plId] → modèle` | `_pTplStore` / `_planGetTpl` |
+| `planning_hsup` | `[nom]['AAAA-MM'] → mois` · `[nom]['AAAA-dep'] → départ` | `_planHsupKey(m)` / `_planDepartKey()` (année = `_pY()`) |
+| `planning_acomptes` | `[nom]['AAAA-MM'] → [{date, montant, note}]` | `planSaveAcompte` |
+
+⚠️ **Ancienne forme** sans année (`[nom][mois][jour]`, `[plId]`) : relue au chargement par `_planMigrateYears`, rangée
+sous `_MV_PLAN_BASE_YEAR` (2026). Ne jamais écrire dans cette forme.
+⚠️ **Tout le monde est clé par NOM** (`MEMBRES`, entrées, hsup, acomptes) : renommer un salarié sans migrer ses clés
+le coupe de son historique.
+
+**Une entrée de jour — cinq formes, et aucune autre n'est écrite :**
+
+| forme | champs | écrite par |
+|---|---|---|
+| heures | `timing:{debut,fin,continu}`, `comment`, option `reduit_motif`, option `canicule:true` | `_planApplyHeures` |
+| échange | idem + `remplacement:true` (seulement un jour à 0 h au modèle) | `_planApplyHeures` (`remp`) |
+| absence | `absent:true`, `motif`, `comment` ; option `timing` et `remplacement` conservés (retard, ou jour d'échange) ; `motif_h` (heures manquées), `motif_t` (heure d'arrivée, retard) ; `abs_de`/`abs_a` (absence partielle) | `_planApplyAbs`, `_planApplyAbsPart` |
+| congé payé | `type:'cp'`, `heures` (heures rémunérées du jour) | pose des CP (3 sites) |
+| récup | `type:'recup'` | `_planApplySimple('rec')` |
+
+- **Horaire chaleur** = forme heures avec `canicule:true` et `comment:'Chaleur'` : 06:00 → 14:00 continu depuis la barre
+  (`_planApplySimple('heat')`), horaires choisis depuis l'outil chaleur (`planCaniculeApply`).
+- **Équipe collective** : `effectif:n` se **fusionne** dans l'entrée existante, jamais seul (`planSelEffectif`).
+- `timing.debut`/`fin` = `'HH:MM'`. `motif` ∈ `PLAN_ABS_MOTIFS` : `arret` · `sansolde` · `famille` · `formation` ·
+  `injustifie` · `perso` · `domaine` · `retard` (seul `heures:true`) · `autre` (repli d'un id inconnu).
+- ⚠️ `fer`, `we`, `out` sont des **états d'affichage** du calendrier CP, **jamais** des `type` d'entrée.
+- Pas d'entrée = jour au modèle (heures prévues du modèle, rien de saisi).
+
+**Un modèle** (`planning_templates[année][plId]`) : `[mois][jour] → heures prévues`, plus deux clés méta :
+`_timings[mois] = {d|debut, f|fin, continu, p}` (`p` = heure de coupure du mois, lue par `_planCoupureH`) et
+`_timings_jour[mois][jour] = 'D'|'M'|'A'` (position dans une séquence), et ★ **`_horaires_dma = {decale, fin}`**
+(DMA-1, facultatif) : D = début du mois → `fin` · M = `decale` → `fin` · A = `decale` → fin du mois.
+**Absent = 09:00 / 16:30**, les valeurs d'origine, autrefois écrites en dur dans `_planDefTiming` (venues d'un salarié
+du domaine de référence) : un autre domaine qui importait des codes D/M/A héritait de ses horaires. Posé par la ligne CSV
+`horaires_dma;<prise décalée>;<fin commune>` (`_planCsvDma` : deux heures valides, fin après la prise, sinon ignorée et
+**dit** dans le toast) ; l'export la réécrit dès que le modèle a des codes. Recopié tel quel au recalage d'année (`_planRecale`).
+Équivalence vérifiée avant livraison : 20 000 cas tirés au hasard sans réglage, 0 écart avec l'ancien calcul.
+Filet : `mv-harnais-dma` (valeurs d'avant · réglage appliqué · repli · ligne CSV · import/export) et `--contre` (4 défauts).
+⚠️ **Ouvert** : Pilotage (`_dzHoraire`) lit l'heure de début du MOIS et ignore les codes D/M/A — un jour M y commence à
+l'heure du mois, pas à la prise décalée. Divergence d'avant DMA-1, non traitée ici.
+
+**Un mois d'heures sup** (`planning_hsup[nom]['AAAA-MM']`) : `paye`, `paye_bank`, `demande`, option `sup_override`,
+option `fige = {le, payes:[{taux,nat,brut}], retenue, spill, bank:[{taux,nat,mois,brut}], maj:[{taux,nat,h}], majRep:[…]}`.
+**Le départ** (`['AAAA-dep']`) : `solde`, `date`.
+
 ### ★ Heures supplémentaires
 
 - **Colonne cumulée « Reste à prendre »** : accumulé − récup prise − heures payées.
@@ -899,8 +971,8 @@ au lieu de neuf, une sélection qui n'est plus un mode).
   cours de frappe → **`onblur` pour les dates**, `onchange` pour les nombres.
   ★ **Règle réappliquée le 09/08** à l'éditeur de périodes de l'assistant d'installation.
 - **iOS `input[type="time"]`** et **tout champ** rempli après `innerHTML` : `.value` **en JS**.
-- **Incohérence ouverte** : `_pl2Annual` somme la référence **brute** du modèle, alors que
-  `_planSummary.ref` exclut hors-contrat et récups. **Décision de conception d'abord.**
+- ✅ **Incohérence close** (vérifié le 28/09) : `_pl2Annual` somme `_planSummary.ref` (bornée au contrat, sans récups),
+  la même référence que la carte du salarié. Corrigé dès le socle ; l'entrée du backlog avait survécu au correctif.
 - Le modèle « standard » totalise 1589 h/an contre 1607 → avertissement orange.
 - `planning.js` **seul** = **aucun bump**.
 

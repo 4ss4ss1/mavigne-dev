@@ -3,11 +3,11 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **28 septembre 2026 (RET-G)** — ★★ **UN SEUL RETOUR CLIENT POUR PLUSIEURS LIVRAISONS (§195)**. Ventes
-> en vrac : l'acheteur envoie un total de jus + lie pour des livraisons de jours différents ; on coche celles qu'il couvre, le total
-> se répartit au prorata des kilos sur toutes leurs lignes, `retour.grp` les lie (rouvrir/effacer = tout le groupe). En route, deux
-> défauts d'avant : le retour d'une récolte d'avant VD-1 était **perdu** à l'enregistrement, et effacer un retour ne recalculait
-> pas le rendement de la parcelle. **Bump APP 7.76 → 7.77, SW 8.45 → 8.46**, base `3abe175`. Détail en **§195**.
+> Dernière consolidation : **28 septembre 2026 (ROB-2 Réserve)** — ★★ **LE TIRAGE AU HASARD PASSE SUR LA RÉSERVE**
+> (`mv-harnais-robustesse-reserve` : onglets, saisies, fiche de chaque lot, parc emprunté par la Cave, 4 documents imprimables).
+> Trouvé : un fût nul faisait tomber trois écrans → **LISTES-1 étendu au document INTRANTS** (`_MV_SOUS_LISTES.intrants`).
+> ROB-2 reste : **Accueil/Journal** (`app.js`). Cumul non déployé depuis `d42e975` : SCHEMA-1, CTX-1, DMA-1, n°16, ROB-2 Pilotage +
+> Cave + Tracteur + Réserve, LISTES-1. **Bump SW 8.49 → 8.50, APP 7.77 inchangé** (invisible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1834,8 +1834,40 @@ réglage de domaine (défaut : le plus élevé), et le choix de l'employeur au m
 ### ★ ROB-2 — LE TIRAGE AU HASARD, MODULE PAR MODULE (§191, posé le 27/09)
 
 Seul le Planning passe au tirage au hasard (`mv-harnais-robustesse-planning`). Demande de Nico : *« vérifie partout »*.
-Même patron, un lot par module, dans cet ordre : **Pilotage** (il relit le Planning, les sessions, la cave) · **Cave/Cuvier** ·
-**Tracteur** · **Réserve** · **Accueil/Journal** (`app.js`). À chaque fois : données abîmées ET formes d'avant de ce que le
+✅ **Pilotage fait le 28/09** : `mv-harnais-robustesse-pilotage` charge l'**application entière** dans Node (app.js et ses
+modules dans l'ordre réel, sans CSS ni Firebase ; ★ `window` **est** `globalThis`, sinon les noms posés par `window.X =`
+et lus nus ailleurs n'existent pas), pose les données par **`applyFbData`** (le vrai chemin — écrire `window.X` laisserait
+app.js sur ses copies internes), et rend les 8 onglets + les 6 vues d'Économie × 2 axes sur 12 domaines tirés au hasard
+(`--long` : 100). ★ Une erreur **avalée** (`_mvAvale`, niveau info) compte comme un plantage. 4 contre-épreuves.
+✅ **LISTES-1 (28/09, SW 8.47)** : le tirage y glisse aussi des éléments nuls DANS les listes. Ils faisaient tomber toute la
+page (`_pilData` sur un tracteur nul, **`_parcConcern` d'app.js** sur une parcelle nulle). Corrigé en UN point : **`applyFbData`
+et `loadData` écartent des 13 listes d'objets** (`_MV_LISTES_OBJETS`) tout ce qui n'est pas une fiche, avec une trace
+`LISTES-1` (clé + types, jamais le contenu). Section C du harnais, et contre-épreuve sur une copie d'app.js (`MV_ROB_APP`).
+★ **Une nouvelle liste d'objets = l'ajouter à `_MV_LISTES_OBJETS`.**
+✅ **Cave/Cuvier fait le 28/09** : `mv-harnais-robustesse-cave` — 11 vues (Aujourd'hui, Réglages, Millésime ×2, Chai ×3,
+Cuvier ×4) + la fiche de chaque cuvée, 12 domaines (`--long` : 100, 1 200 rendus), 5 contre-épreuves. ★ Le chargeur de
+l'application entière est **partagé** : `scripts/mv-app-node.mjs` (`chargerApp({remplace})`) — ★ ses doublures (`logError`,
+`_mvAvale`…) se posent **APRÈS** le chargement, sinon utils.js les écrase sans bruit. Trouvé et corrigé : une cuvée nulle
+faisait tomber le Chai → **LISTES-1 étendu aux listes rangées dans un document** (`_MV_SOUS_LISTES`, SW 8.48) ; trois
+« undefined / NaN » d'affichage dans `cave.js` (type d'opération absent ×2, ligne de soufre incomplète, millésime d'une date
+illisible). ⚠️ **Tirages essayés et RETIRÉS** : un lot de fûts sans année ou nul, une cuvée sans id — aucun chemin
+d'écriture ne les produit ; durcir chaque lecteur contre eux serait du code pour un cas qui n'existe pas.
+✅ **Tracteur fait le 28/09** : `mv-harnais-robustesse-tracteur` — Sessions, Entretien, réglages du parc, liste des fiches,
+fiche de chaque tracteur (pour CHAQUE tracteur sélectionné), détail et modification de chaque session ; 5 contre-épreuves,
+dont deux qui retirent les correctifs eux-mêmes. Corrigé dans `tracteur.js` : « undefined% d'avancement » (session d'avant),
+« Tracteur dédié undefined », « date · undefined », type de tracteur absent, et **`data-defid="undefined"` sur toute activité
+sans tracteur par défaut — un cas NORMAL en production**. ★ `REPARATEUR_HIST` est un **objet** `{idTracteur:[périodes]}`, pas
+une liste : retiré de `_MV_LISTES_OBJETS`, et le générateur du Pilotage le tirait en liste (corrigé). ★ `REPARATEUR[id]=null`
+est écrit par la suppression d'un tracteur : le tirage le garde. ⚠️ Retirés du tirage, faute de chemin d'écriture : une
+immobilisation sans date de départ (le formulaire l'exige), un pointage de chronomètre dont l'instant n'est pas un nombre.
+✅ **Réserve faite le 28/09** : `mv-harnais-robustesse-reserve` — Fûts (millésime courant, tous, 2024), Intrants, Bilan
+matière, saisies (achat, inventaire, séparation, nouveau lot), fiche de chaque lot, le parc et le registre qu'emprunte la Cave,
+et **4 documents imprimables** (lus par une doublure de `_mvDocOpen` qui garde ce qu'on lui passe). 4 contre-épreuves. Trouvé :
+un fût nul faisait tomber les Fûts, le parc de la Cave et le document → **LISTES-1 étendu au document INTRANTS** (SW 8.50).
+⚠️ `fut_four`, `fut_ref`, `achat_four` sont des listes de **noms** (textes) : hors du filtre. Retiré du tirage : un intrant sans
+catégorie ou sans unité (deux listes déroulantes, jamais vides).
+Même patron, un lot par module, dans cet ordre : ~~**Pilotage**~~ · ~~**Cave/Cuvier**~~ ·
+~~**Tracteur**~~ · ~~**Réserve**~~ · **Accueil/Journal** (`app.js`). À chaque fois : données abîmées ET formes d'avant de ce que le
 module enregistre (instantanés, archives), toutes ses surfaces, rouge sur exception ou « undefined »/« NaN » affiché.
 
 ### ⚠️ QUESTION OUVERTE — L'ÉCART DE CADENCE ET LE TEMPS RÉEL (§172f ③, posée le 23/09)
@@ -2434,8 +2466,10 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
 15. ✅ ~~**`.cave-tabs`**~~ — **RAYÉ ENTIÈREMENT, vérifié le 16/08.** Les deux barres mortes sont
     purgées (`index.html:1745` porte le commentaire) **et la règle CSS orpheline est partie aussi** :
     `grep cave-tabs styles.css` = **0**. L'entrée ne gardait qu'un reliquat déjà traité.
-16. **`_pl2Annual` (`planning.js:1669`) vs `_planGetRefH` (`l.349`)** — 1 ligne, mais **décision de
-    conception d'abord**.
+16. ✅ ~~**`_pl2Annual` vs `_planGetRefH`**~~ — **RAYÉ, vérifié le 28/09 : déjà corrigé depuis le socle (`6756111`).**
+    `_pl2Annual_` somme `_planSummary(m,mi).ref`, bornée au contrat comme la carte du salarié. Les six lecteurs
+    restants de `_planGetRefH` veulent bien le MODÈLE nu (total annuel du modèle, capacité 1 ETP, éditeur de
+    modèle, replis de Réglages et de Pilotage) — ce n'est pas la même question.
 17. **Terminologie heures sup** : « Solde cumulé » (`planning.js:2319`) vs « Reste à prendre »
     (`l.4322`) — **les deux libellés coexistent, vérifié**.
 17b. ★ **Le nom d'un salarié, dans la grille, coche sa ligne** et n'ouvre plus sa fiche (§19a).

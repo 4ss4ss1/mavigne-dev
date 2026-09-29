@@ -86,9 +86,13 @@ function charger(src) {
   const tMotifs = table(src.plan, 'var PLAN_ABS_MOTIFS=[', '];');
   const tDefT   = table(src.plan, 'var PLAN_DEF_T = {', '};');
   const dRecup  = table(src.plan, "var PLAN_RECUP_DEBUT='", "';");
+  // CTX-1 : _planTeamCadence_ pose l'annee de chaque jour par la VRAIE primitive, extraite telle quelle.
+  const iSA = src.plan.indexOf('window._planSurAnnee=function');
+  const tSA = iSA < 0 ? null : extraire(src.plan.slice(iSA).replace('window._planSurAnnee=function', 'function __SA'), '__SA');
+  if (!tSA) manque.push('window._planSurAnnee');
   if (!tMotifs) manque.push('PLAN_ABS_MOTIFS'); if (!tDefT) manque.push('PLAN_DEF_T'); if (!dRecup) manque.push('PLAN_RECUP_DEBUT');
   if (manque.length) return { manque };
-  const code = PRELUDE + dRecup + '\n' + tDefT + '\n' + tMotifs + '\n' + morceaux.join('\n') + `
+  const code = PRELUDE + tSA + '\nwindow._planSurAnnee = __SA;\n' + dRecup + '\n' + tDefT + '\n' + tMotifs + '\n' + morceaux.join('\n') + `
 ;return { champ:_planChampH, work:_planWorkH, range:_planRangeH_, cad:_planTeamCadence_,
   set:function(o){ if(o.tpl){ TPL=o.tpl; PLANNING_TEMPLATES[planYear]={A:TPL}; }
     if(o.ent) PLANNING_ENTRIES=o.ent; if(o.effn!=null) EFFN=o.effn; if(o.contrat!=null) CONTRAT=o.contrat; } };`;

@@ -60,8 +60,61 @@ var _mvKeyLoaded = {};
 var _mvKeySeen = {};
 window._mvKeyLoaded = _mvKeyLoaded;
 window._mvKeySeen   = _mvKeySeen;
+// ── LISTES-1 (28/09/2026) — UNE LISTE NE PORTE QUE DES FICHES ────────────────
+// Ces documents sont des LISTES D'OBJETS, et tout le code les lit comme tels
+// (`p.statut`, `t.id`, `m.nom`…). Un élément nul, un texte, un nombre ou un tableau
+// glissé dedans — écriture interrompue, vieille version, import tordu — faisait
+// tomber des pages ENTIÈRES : le 28/09, le tirage au hasard du Pilotage
+// (mv-harnais-robustesse-pilotage --listes) l'a vu dans _parcConcern (une parcelle
+// nulle) et dans _pilData (un tracteur nul). Plutôt que des gardes éparpillées sur
+// des centaines de lectures, on filtre UNE fois, à l'entrée : applyFbData (Firestore)
+// et loadData (le repli hors ligne).
+// ⚠️ Ce qui est écarté ne revient pas : la prochaine sauvegarde réécrit la liste
+//    propre. Rien n'y était lisible. Le garde anti-écrasement (firebase.js) bloque
+//    toujours une liste qui perdrait plus de la moitié de ses éléments.
+// ⚠️ La trace ne porte que la clé et les TYPES écartés, jamais leur contenu.
+var _MV_LISTES_OBJETS = {parcelles:1, membres:1, saisons:1, taches:1, journal:1, sessions:1, traitements:1,
+  catalogue:1, conducteurs:1, activites:1, historique:1, tracteurs_list:1, entretiens:1};
+// ⚠️ PAS `reparateur_hist` : c'est un OBJET {idTracteur:[périodes]} (tracteur.js), pas une liste. Il figurait
+//    ici à la première version de LISTES-1 (sans effet : le filtre ne touche que les tableaux) ; retiré le 28/09.
+// ★ Même règle pour les listes RANGÉES DANS un document (le Chai, le Cuvier) : ajouté le
+//   28/09 quand le tirage de la Cave (mv-harnais-robustesse-cave) a fait tomber le Chai sur
+//   une cuvée nulle. Une sous-liste qui n'est pas un tableau (null, texte) est RETIRÉE : les
+//   valeurs par défaut d'applyFbData (`cuvees:[]`…) reprennent alors leur place — sans ça,
+//   `Object.assign(défauts, value)` recopiait le null PAR-DESSUS le tableau vide.
+var _MV_SOUS_LISTES = {cave_elevage:['cuvees','operations','analyses'], cave_vendange:['recoltes','cuves_vinif','analyses'],
+  // La Réserve (ajouté le 28/09, tirage mv-harnais-robustesse-reserve : un fût nul faisait tomber les Fûts, le parc
+  // de la Cave et le document). ⚠️ PAS fut_four / fut_ref / achat_four : ce sont des listes de NOMS (textes).
+  intrants:['produits','achats','inventaires','futs','fut_mouv']};
+function _mvListeObjets(key, value){
+  if(_MV_SOUS_LISTES[key] && value && typeof value === 'object' && !Array.isArray(value)){
+    var copie = Object.assign({}, value);
+    _MV_SOUS_LISTES[key].forEach(function(sk){
+      if(!Object.prototype.hasOwnProperty.call(copie, sk)) return;
+      if(!Array.isArray(copie[sk])){
+        if(window.logError) window.logError({level:'warning', cat:'donnees', msg:'LISTES-1 \u00b7 '+key+'.'+sk+' n\u2019est pas une liste : valeur par d\u00e9faut',
+          detail:copie[sk]===null?'null':typeof copie[sk]});
+        delete copie[sk];
+      } else copie[sk] = _mvFiltreFiches(key+'.'+sk, copie[sk]);
+    });
+    return copie;
+  }
+  if(!_MV_LISTES_OBJETS[key] || !Array.isArray(value)) return value;
+  return _mvFiltreFiches(key, value);
+}
+function _mvFiltreFiches(key, value){
+  var ok = value.filter(function(x){ return x !== null && typeof x === 'object' && !Array.isArray(x); });
+  if(ok.length !== value.length && window.logError){
+    var types = {};
+    value.forEach(function(x){ if(!(x !== null && typeof x === 'object' && !Array.isArray(x))){ var t = x===null?'null':Array.isArray(x)?'tableau':typeof x; types[t]=(types[t]||0)+1; } });
+    window.logError({level:'warning', cat:'donnees', msg:'LISTES-1 \u00b7 '+(value.length-ok.length)+' \u00e9l\u00e9ment(s) illisible(s) \u00e9cart\u00e9(s) de '+key,
+      detail:Object.keys(types).map(function(t){ return types[t]+' '+t; }).join(', ')});
+  }
+  return ok;
+}
 function applyFbData(key, value) {
   if(value === undefined || value === null) return;
+  value = _mvListeObjets(key, value);
   if(window._visiteScenarioReady) return; // Visite : scénario figé -> on ignore toute donnée Firestore tardive
   _mvKeySeen[key] = true;     // #wipe : reponse serveur RECUE pour cette cle (avant tout filtre)
   var _staticKeys = {saisons:1, taches:1, membres:1, activites:1, conducteurs:1, catalogue:1};
@@ -902,6 +955,8 @@ function loadData() {
     const raw = localStorage.getItem(_lsk);
     if (!raw) return false;
     const d = JSON.parse(raw);
+    // LISTES-1 : le repli hors ligne passe par le même filtre que Firestore.
+    Object.keys(_MV_LISTES_OBJETS).concat(Object.keys(_MV_SOUS_LISTES)).forEach(function(k){ var K=k.toUpperCase(); if(d[K]) d[K]=_mvListeObjets(k, d[K]); });
     if (d.PARCELLES)    { PARCELLES.length=0; d.PARCELLES.forEach(x=>PARCELLES.push(x)); }
     if (d.JOURNAL)      { JOURNAL = d.JOURNAL; window.JOURNAL = JOURNAL; }
     if (d.SESSIONS)     { SESSIONS = d.SESSIONS; window.SESSIONS = SESSIONS; }

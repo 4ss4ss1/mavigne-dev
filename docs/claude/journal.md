@@ -8,6 +8,35 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **28 septembre 2026 (ROB-2 Tracteur)** — ★★ **LE TIRAGE AU HASARD PASSE SUR LE TRACTEUR**
+> (`mv-harnais-robustesse-tracteur`, chaque vue pour chaque tracteur, chaque session). Corrigé dans `tracteur.js` : quatre
+> « undefined » affichés et un `data-defid="undefined"` que produit toute activité sans tracteur par défaut. `REPARATEUR_HIST`
+> est un objet par tracteur : retiré de la liste LISTES-1. Le chargeur partagé gagne `insertAdjacentHTML`.
+> Cumul non déployé depuis `d42e975` : SCHEMA-1, CTX-1, DMA-1, n°16, ROB-2 Pilotage + Cave + Tracteur, LISTES-1 (+ sous-listes).
+> **Bump SW 8.48 → 8.49, APP 7.77 inchangé** (invisible).
+>
+> ★ Consolidation : **28 septembre 2026 (ROB-2 Cave/Cuvier)** — ★★ **LE TIRAGE AU HASARD PASSE SUR LA CAVE ET LE
+> CUVIER** (`mv-harnais-robustesse-cave`, 11 vues + la fiche de chaque cuvée), sur un chargeur de l'application entière désormais
+> partagé (`scripts/mv-app-node.mjs`). Trouvé : une cuvée nulle faisait tomber le Chai → **LISTES-1 étendu** aux listes rangées
+> dans `cave_elevage` / `cave_vendange` (`_MV_SOUS_LISTES`) ; trois affichages « undefined / NaN » de `cave.js` corrigés.
+> Cumul non déployé depuis `d42e975` : SCHEMA-1, CTX-1, DMA-1, n°16, ROB-2 Pilotage, LISTES-1 (voir `docs/claude/journal.md`).
+> **Bump SW 8.47 → 8.48, APP 7.77 inchangé** (invisible).
+>
+> ★ Consolidation : **28 septembre 2026 (LISTES-1)** — ★★ **UNE LISTE NE PORTE QUE DES FICHES**. `applyFbData` et le
+> repli hors ligne (`loadData`) écartent des 14 listes d'objets tout élément nul / texte / nombre / tableau (`_mvListeObjets`,
+> trace `LISTES-1` sans contenu) : une parcelle ou un tracteur nul faisait tomber des pages entières. Trouvé par le nouveau
+> tirage au hasard du Pilotage (ROB-2, `mv-harnais-robustesse-pilotage`, qui charge **l'application entière** dans Node).
+> Même série, sans bump : **SCHEMA-1** (une journée du Planning contrôlée à l'écriture, `_pEntPose`), **CTX-1** (l'année de
+> calcul ne fuit plus, `_planSurAnnee`), **DMA-1** (horaires des jours D/M/A propres au modèle, ligne CSV `horaires_dma`),
+> n°16 du backlog rayé (déjà corrigé). Tout est dans `docs/claude/modules.md` §19. **Bump SW 8.46 → 8.47, APP 7.77 inchangé**
+> (invisible), base `d42e975`.
+>
+> ★ Consolidation : **28 septembre 2026 (RET-G)** — ★★ **UN SEUL RETOUR CLIENT POUR PLUSIEURS LIVRAISONS (§195)**. Ventes
+> en vrac : l'acheteur envoie un total de jus + lie pour des livraisons de jours différents ; on coche celles qu'il couvre, le total
+> se répartit au prorata des kilos sur toutes leurs lignes, `retour.grp` les lie (rouvrir/effacer = tout le groupe). En route, deux
+> défauts d'avant : le retour d'une récolte d'avant VD-1 était **perdu** à l'enregistrement, et effacer un retour ne recalculait
+> pas le rendement de la parcelle. **Bump APP 7.76 → 7.77, SW 8.45 → 8.46**, base `3abe175`. Détail en **§195**.
+>
 > ★ Consolidation : **28 septembre 2026 (REV-1)** — ★★★ **ÉCONOMIE › REVIENT : RENDEMENT, BOUTEILLES ET COÛT VIGNE
 > DU MILLÉSIME, SUR LE CYCLE D'UNE VENDANGE À LA SUIVANTE (§194)**. Nouvelle sous-vue `rev` (`_pecViewRevient`, moteur pur
 > `_pecRevCalc`). L'ancienne carte « Prix de revient » divisait le coût de la PÉRIODE par toute la récolte et convertissait à

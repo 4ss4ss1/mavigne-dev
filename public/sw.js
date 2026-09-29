@@ -1,4 +1,15 @@
-// MA VIGNE — Service Worker v8.46
+// MA VIGNE — Service Worker v8.50
+// v8.50 (28/09/2026) — ROB-2 Reserve (mv-harnais-robustesse-reserve) : LISTES-1 etendu au document INTRANTS (produits, achats,
+//   inventaires, futs, fut_mouv) — un fut nul faisait tomber les Futs, le parc de la Cave et le document imprimable. app.js ; APP 7.77 inchange.
+// v8.49 (28/09/2026) — ROB-2 Tracteur (mv-harnais-robustesse-tracteur) : tracteur.js, quatre affichages « undefined » (avancement d'une
+//   session d'avant, activite / conducteur absents, type de tracteur absent) et data-defid="undefined" d'une activite sans tracteur
+//   par defaut. app.js : `reparateur_hist` retire de _MV_LISTES_OBJETS (c'est un objet par tracteur). APP 7.77 inchange.
+// v8.48 (28/09/2026) — LISTES-1 etendu aux listes RANGEES dans un document : cave_elevage (cuvees, operations, analyses) et
+//   cave_vendange (recoltes, cuves_vinif, analyses) — elements non-objets ecartes, sous-liste nulle rendue a sa valeur par defaut
+//   (_MV_SOUS_LISTES). Trouve par mv-harnais-robustesse-cave (ROB-2). app.js, invisible : APP 7.77 inchange.
+// v8.47 (28/09/2026) — LISTES-1 : applyFbData et le repli hors ligne (loadData) ecartent des listes d'objets tout element
+//   nul / texte / nombre / tableau (_mvListeObjets, trace LISTES-1 sans contenu) — une parcelle ou un tracteur nul faisait
+//   tomber des pages entieres (vu par mv-harnais-robustesse-pilotage). app.js seul, invisible : APP 7.77 inchange.
 // v8.46 (28/09/2026) — RET-G : ventes en vrac, un seul retour client (jus + lie) pour plusieurs livraisons de jours differents
 //   (openVendRetGroupe, retour.grp, _vendRetEcrit) ; retour d'une recolte d'avant VD-1 plus perdu ; effacer un retour
 //   recalcule le rendement de la parcelle. cuvier.js + utils.js. APP 7.76 -> 7.77.
@@ -4182,7 +4193,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.46';
+const CACHE_NAME   = 'mavigne-v8.50';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4198,7 +4209,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.46 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.50 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4218,7 +4229,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.46 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.50 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

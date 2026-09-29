@@ -73,6 +73,72 @@ function _pEntEnsure(nom,m){
   if(!PLANNING_ENTRIES[nom][Y][m])PLANNING_ENTRIES[nom][Y][m]={};
   return PLANNING_ENTRIES[nom][Y][m];
 }
+// ── SCHEMA-1 (28/09/2026) — LE CONTRÔLE À L'ÉCRITURE ──────────────────────────
+// Une journée n'a que CINQ formes (docs/claude/modules.md, §19 « Modèle de données du
+// Planning ») : heures, échange (heures + remplacement), absence, congé payé, récup.
+// Tout moteur qui pose une journée passe par _pEntPose : une forme inconnue, un champ
+// en trop ou une valeur impossible est REFUSÉE et tracée, au lieu de partir dans
+// Firestore où chaque calcul de paie la relirait sans rien dire.
+// ⚠️ Le contrôle porte sur ce qu'on ÉCRIT, jamais sur le stock : les entrées anciennes
+//    ne sont ni relues ni rejetées ici. ⚠️ Le détail tracé ne porte aucun nom ni
+//    commentaire — le journal des erreurs est lu hors du domaine.
+// Renvoie '' si la journée est valide, sinon la raison (courte, sans donnée client).
+function _planEntreeProbleme(e){
+  var CHAMPS={
+    heures:{timing:1,comment:1,reduit_motif:1,canicule:1,remplacement:1,effectif:1},
+    absence:{absent:1,motif:1,comment:1,timing:1,remplacement:1,motif_h:1,motif_t:1,abs_de:1,abs_a:1,effectif:1},
+    cp:{type:1,heures:1,effectif:1},
+    recup:{type:1,effectif:1}
+  };
+  function hm(v){ // 'H:MM' ou 'HH:MM' — _planMinOf et _planTimingH acceptent les deux
+    if(typeof v!=='string')return false;
+    var r=/^(\d{1,2}):(\d{2})$/.exec(v);
+    return !!r&&+r[1]<24&&+r[2]<60;
+  }
+  function nb(v){ return typeof v==='number'&&isFinite(v)&&v>=0; }
+  function motif(id){ for(var i=0;i<PLAN_ABS_MOTIFS.length;i++)if(PLAN_ABS_MOTIFS[i].id===id)return true; return false; }
+  if(!e||typeof e!=='object'||Array.isArray(e))return 'pas un objet';
+  var f=(e.absent===true)?'absence'
+       :(e.type==='cp')?'cp'
+       :(e.type==='recup')?'recup'
+       :(e.type===undefined&&e.absent===undefined)?'heures':'';
+  if(!f)return 'forme inconnue';
+  for(var k in e){
+    if(!Object.prototype.hasOwnProperty.call(e,k))continue;
+    if(!CHAMPS[f][k])return 'champ '+String(k).slice(0,24)+' interdit (forme '+f+')';
+  }
+  if(e.timing!==undefined){
+    var t=e.timing;
+    if(!t||typeof t!=='object'||!hm(t.debut)||!hm(t.fin))return 'horaire invalide';
+    if(t.continu!==undefined&&typeof t.continu!=='boolean')return 'horaire invalide (continu)';
+  }
+  if(e.comment!==undefined&&typeof e.comment!=='string')return 'commentaire invalide';
+  if(e.canicule!==undefined&&typeof e.canicule!=='boolean')return 'chaleur invalide';
+  if(e.remplacement!==undefined&&typeof e.remplacement!=='boolean')return 'remplacement invalide';
+  if(e.reduit_motif!==undefined&&!motif(e.reduit_motif))return 'motif de journee reduite inconnu';
+  if(e.effectif!==undefined&&!(typeof e.effectif==='number'&&e.effectif%1===0&&e.effectif>=1&&e.effectif<=999))return 'effectif invalide';
+  if(f==='absence'){
+    if(!motif(e.motif))return 'motif d\u2019absence inconnu';
+    if(e.motif_h!==undefined&&!nb(e.motif_h))return 'heures manquees invalides';
+    if(e.motif_t!==undefined&&!hm(e.motif_t))return 'heure d\u2019arrivee invalide';
+    if(e.abs_de!==undefined&&!hm(e.abs_de))return 'debut d\u2019absence invalide';
+    if(e.abs_a!==undefined&&!hm(e.abs_a))return 'fin d\u2019absence invalide';
+  }
+  if(f==='cp'&&e.heures!==undefined&&!nb(e.heures))return 'heures de conge invalides';
+  return '';
+}
+// Le seul point d'écriture d'une journée. true = posée ; false = refusée (et tracée).
+function _pEntPose(nom,m,d,e){
+  var pb=_planEntreeProbleme(e);
+  if(pb){
+    if(window.logError)window.logError({level:'error',cat:'planning',
+      msg:'Journ\u00e9e refus\u00e9e \u00e0 l\u2019\u00e9criture : '+pb,
+      detail:'SCHEMA-1 \u00b7 '+_pY()+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0')});
+    return false;
+  }
+  _pEntEnsure(nom,m)[d]=e;
+  return true;
+}
 // ── Accès année-aware aux MODÈLES ──
 function _pTplStore(){ var Y=_pY(); if(!PLANNING_TEMPLATES[Y])PLANNING_TEMPLATES[Y]={}; return PLANNING_TEMPLATES[Y]; }
 
@@ -708,21 +774,28 @@ function _planDefTiming(pl,plId,m,d,yr){
     var _ct=(PLANNING_TEMPLATES[(yr!=null?yr:_pY())]||{})[plId];
     if(_ct){
       // 1. Code jour D/M/A — timing selon la position dans la sequence de jours
-      // ⚠️ Les horaires 09:00 et 16:30 ci-dessous sont ECRITS EN DUR. Ils viennent
-      // du cas d'un salarie precis d'un domaine precis. Tant qu'ils ne sont pas
-      // lus depuis le CSV, ce bloc n'est pas generalisable a un autre client.
-      // D (1er jour ou isolé) : début mensuel → 16h30  (ex: 07:00→16:30 = 8h30 en juin)
-      // M (milieu, séq. ≥ 3j) : 09:00 → 16h30          (= 6h30 net quel que soit le mois)
-      // A (dernier, auto-lendemain) : 09:00 → fin mensuelle (= 6h30 si fin=16:30)
+      // D (1er jour ou isolé) : début mensuel → fin commune   (ex: 07:00→16:30 = 8h30 en juin)
+      // M (milieu, séq. ≥ 3j) : prise décalée → fin commune   (= 6h30 net quel que soit le mois)
+      // A (dernier, auto-lendemain) : prise décalée → fin mensuelle (= 6h30 si fin=16:30)
       // Fix v3.28: v3.27 ne différenciait pas D/M/A → M et A affichaient 8h30 au lieu de 6h30.
+      // ★ DMA-1 (28/09/2026) — les deux horaires de la séquence sont PROPRES AU MODÈLE :
+      //   `_horaires_dma = {decale:'HH:MM', fin:'HH:MM'}`, posé par la ligne CSV
+      //   `horaires_dma;<prise décalée>;<fin commune>` (_planCsvDma). ABSENT = 09:00 / 16:30,
+      //   les valeurs d'origine : un modèle importé avant ce lot calcule EXACTEMENT comme avant.
+      //   Avant, ces deux heures étaient écrites en dur ici, venues d'un salarié d'un domaine :
+      //   un autre domaine qui importait des codes D/M/A héritait de ses horaires.
+      //   Inline (pas de fonction séparée) : les harnais extraient _planDefTiming seule.
       if(d!==undefined&&_ct._timings_jour&&_ct._timings_jour[m]&&_ct._timings_jour[m][d]){
         var tCode=_ct._timings_jour[m][d];
         var base=(_ct._timings&&_ct._timings[m])||{d:'07:00',f:'16:30'};
         var bd=base.d||base.debut||'07:00';
         var bf=base.f||base.fin||'16:30';
-        if(tCode==='M')return{d:'09:00',f:'16:30',continu:false};
-        if(tCode==='A')return{d:'09:00',f:bf,     continu:false};
-        return{d:bd,f:'16:30',continu:false}; // D (défaut, 1er jour ou isolé)
+        var _dma=(_ct._horaires_dma&&typeof _ct._horaires_dma==='object')?_ct._horaires_dma:{};
+        var _hm=function(v,def){ return (typeof v==='string'&&/^([01]?\d|2[0-3]):[0-5]\d$/.test(v))?v:def; };
+        var dDec=_hm(_dma.decale,'09:00'), fCom=_hm(_dma.fin,'16:30');
+        if(tCode==='M')return{d:dDec,f:fCom,continu:false};
+        if(tCode==='A')return{d:dDec,f:bf,  continu:false};
+        return{d:bd,f:fCom,continu:false}; // D (défaut, 1er jour ou isolé)
       }
       // 2. Horaire mensuel : utiliser l'heure de début du mois + calculer fin depuis pl
       // → gère l'annualisation : vendredi 5h en juin (début 07:00) → 07:00→12:00
@@ -1400,9 +1473,14 @@ function _mvTaskWin(nom){ return _MV_TASK_WIN[_mvTaskNorm(nom)]||[0,1]; }
 // -- Charge & ETP d'une saison : somme (h/ha x surface concernee) des taches de la saison,
 //    repartie sur la periode datee [debut,fin] au prorata de la capacite 1 ETP de chaque mois
 //    (template standard). L'ETP cible = nb d'ouvriers moyens necessaires pour finir dans les delais.
+// ★ CTX-1 : le corps tourne sur l'ANNÉE AFFICHÉE, et l'année de contexte d'avant est RENDUE à la sortie.
+//   L'ancien `_planCtxYear=null` en tête effaçait tout contexte appelant sans le restaurer.
 function _chargeSaisonData(s){
+  return window._planSurAnnee(planYear,function(){ return _chargeSaisonData_(s); });
+}
+function _chargeSaisonData_(s){
   if(!s||!s.debut||!s.fin)return null;
-  _planCtxYear=null; _planMigrateYears();
+  _planMigrateYears();
   var TAC=window.TACHES||[];
   // -- Quelles taches appartiennent a CETTE periode ? --------------------------
   // Source unique = la liste explicite portee par la periode (s.taches), celle que
@@ -1588,7 +1666,7 @@ function _chargeSaisonData(s){
   months.forEach(function(x){
     var full=capMonth(x.yr,x.m,true); var ratio=full>0?x.capRef/full:1;
     // ENTREE DE MESURE 3/5 — capacite reellement presente.
-    var cp=0; _planCtxYear=x.yr; _planWide(function(){ mbrs.forEach(function(mb){ cp+=(_planPresentRef(mb,x.m)||0)*ratio*_mbPoids(mb); }); }); _planCtxYear=null;
+    var cp=0; window._planSurAnnee(x.yr,function(){ _planWide(function(){ mbrs.forEach(function(mb){ cp+=(_planPresentRef(mb,x.m)||0)*ratio*_mbPoids(mb); }); }); });
     x.capPresent=cp;
     x.etpReq=x.capRef>0?x.chargeOrd/x.capRef:0;
     x.etpPres=x.capRef>0?x.capPresent/x.capRef:0;
@@ -1845,8 +1923,7 @@ function _planSeasonHours(s){
   if(isNaN(m0)||isNaN(m1)||m1<m0)return null;
   function pad(n){return ('0'+n).slice(-2);}
   var totRef=0,totWk=0,ouv={},any=false;
-  _planCtxYear=_sy;
-  mbrs.forEach(function(mb){
+  window._planSurAnnee(_sy,function(){ mbrs.forEach(function(mb){
     var plId=_planPlId(mb),mref=0,mwk=0;
     for(var m=m0;m<=m1;m++){
       var days=_planDays(m);
@@ -1863,8 +1940,7 @@ function _planSeasonHours(s){
     }
     if(mref>0||mwk>0){ouv[mb.nom]={h_dues:Math.round(mref*10)/10,h_faites:Math.round(mwk*10)/10};any=true;}
     totRef+=mref;totWk+=mwk;
-  });
-  _planCtxYear=null;
+  }); });
   if(!any)return null;
   return {h_dues:Math.round(totRef*10)/10,h_faites:Math.round(totWk*10)/10,ouvriers:ouv,source:'planning'};
 }
@@ -1899,8 +1975,7 @@ function _planTeamCadence_(from, to){
   while(cur <= end && guard < 400){
     guard++;
     var m = cur.getMonth(), d = cur.getDate(), dayTeam = 0, yr = cur.getFullYear();
-    _planCtxYear = yr;
-    for(var i=0;i<mbrs.length;i++){
+    window._planSurAnnee(yr, function(){ for(var i=0;i<mbrs.length;i++){
       var mbr = mbrs[i];
       if(!_planInContractRead(mbr, m, d)) continue;
       var ent = _pEntDay(mbr.nom,m,d);
@@ -1908,11 +1983,10 @@ function _planTeamCadence_(from, to){
       //   effectif de la loi — une cadence d'equipe mesure ce que l'equipe a pu faire a la vigne.
       var hM = _planChampH(_planPlId(mbr), m, d, ent, yr);
       if(hM > 0){ var nM = _planEffN(mbr, m, d); dayTeam += hM * nM; persJ += nM; }
-    }
+    } });
     if(dayTeam > 0){ totalH += dayTeam; jours[m + '-' + d] = 1; }
     cur.setDate(cur.getDate() + 1);
   }
-  _planCtxYear = null;
   var jo = Object.keys(jours).length;
   return { totalH: totalH, joursOuvres: jo, cadence: jo > 0 ? totalH / jo : 0,
            persJours: persJ, hPers: persJ > 0 ? totalH / persJ : 0 };
@@ -2715,7 +2789,7 @@ function _planApplyAbsPart(nom,d,motifId,de,a,com){
   if(!mbr||!_planInContract(mbr,planMonth,d))return {n:0,err:'Jour hors contrat.'};
   var r=_planAbsConstruit(mbr,d,motifId,true,de,a,com);
   if(r.err)return {n:0,err:r.err};
-  _pEntEnsure(nom,planMonth)[d]=r.e;
+  if(!_pEntPose(nom,planMonth,d,r.e))return {n:0,err:'Saisie refus\u00e9e (valeur invalide).'};
   return {n:1,part:r.part,h:r.manquees};
 }
 // Le compteur du mois, calcule avec ce jour tel qu'il SERAIT enregistre (e), ou sans lui
@@ -3677,14 +3751,14 @@ function _planApplyHeures(keys,o){
       if(pl>0){skip++;return;}
       if(ex&&(ex.absent||ex.type==='recup')){skip++;return;}
       if(ex&&ex.type==='cp')nCp++;
-      _pEntEnsure(p.nom,planMonth)[p.d]={timing:{debut:deb,fin:fin,continu:cont},comment:com,remplacement:true};
+      if(!_pEntPose(p.nom,planMonth,p.d,{timing:{debut:deb,fin:fin,continu:cont},comment:com,remplacement:true})){skip++;return;}
       n++;return;
     }
     if(!force&&ex&&(ex.type==='cp'||ex.type==='recup'||ex.absent)){skip++;return;}
     var e={timing:{debut:deb,fin:fin,continu:cont},comment:com};
     if(o.motif)e.reduit_motif=o.motif;
     if(heat){e.canicule=true;if(!e.comment)e.comment='Chaleur';}
-    _pEntEnsure(p.nom,planMonth)[p.d]=e;
+    if(!_pEntPose(p.nom,planMonth,p.d,e)){skip++;return;}
     n++;
   });
   return {n:n,skip:skip,cp:nCp};
@@ -3754,7 +3828,7 @@ function _planApplyAbs(keys,motifId,com,heuresVal,arrivee){
         var v=parseFloat(heuresVal);e.motif_h=(isNaN(v)||v<0)?0:v;
       }
     }
-    _pEntEnsure(p.nom,planMonth)[p.d]=e;
+    if(!_pEntPose(p.nom,planMonth,p.d,e)){skip++;return;}
     n++;
   });
   return {n:n,skip:skip,basc:basc,alheure:alheure,sansplan:sansplan};
@@ -3786,9 +3860,9 @@ function _planApplySimple(keys,kind,force){
     //    silence les conges deja poses dessus. Ils sont desormais preserves, et le
     //    toast le dit. Le geste unitaire (une seule case) ecrase toujours.
     if(!force&&ex&&(ex.type==='cp'||ex.type==='recup'||ex.absent)){skip++;return;}
-    _pEntEnsure(p.nom,planMonth)[p.d]=(kind==='rec')
+    if(!_pEntPose(p.nom,planMonth,p.d,(kind==='rec')
       ?{type:'recup'}
-      :{timing:{debut:'06:00',fin:'14:00',continu:true},canicule:true,comment:'Chaleur'};
+      :{timing:{debut:'06:00',fin:'14:00',continu:true},canicule:true,comment:'Chaleur'})){skip++;return;}
     n++;
   });
   return {n:n,skip:skip};
@@ -3849,10 +3923,9 @@ function _planEffApply(v){
     var mbr=(window.MEMBRES||[]).find(function(x){return x.nom===p.nom;});
     if(!mbr||!(window._mvEstCollectif&&window._mvEstCollectif(mbr))){skip++;return;}
     if(isNaN(p.d)||!_planInContract(mbr,planMonth,p.d)){skip++;return;}
-    var _eb=_pEntEnsure(p.nom,planMonth);
-    var e=_eb[p.d]||{};
+    var e=Object.assign({},_pEntDay(p.nom,planMonth,p.d)||{});
     e.effectif=n;
-    _eb[p.d]=e;
+    if(!_pEntPose(p.nom,planMonth,p.d,e)){skip++;return;}
     ok++;
     // Un effectif sans heures ne produit AUCUN total : 8 h x 0 personne et
     // 0 h x 30 personnes donnent le meme zero. On le dit plutot que de laisser
@@ -6034,15 +6107,14 @@ function _planCpApplySel(){
     var posed=0;
     r.marked.forEach(function(mk){
       _planCtxYear=mk.yr;
-      var ex=_pEntDay(r.mbr.nom,mk.mi,mk.d);
-      if(ex&&(ex.type==='recup'||ex.absent)){_planCtxYear=_sv;prot++;return;}
-      _pEntEnsure(r.mbr.nom,mk.mi)[mk.d]={type:'cp',heures:mk.pl};
-      _planCtxYear=_sv;
-      posed++;
+      try{
+        var ex=_pEntDay(r.mbr.nom,mk.mi,mk.d);
+        if(ex&&(ex.type==='recup'||ex.absent)){prot++;return;}
+        if(_pEntPose(r.mbr.nom,mk.mi,mk.d,{type:'cp',heures:parseFloat(mk.pl)||0}))posed++;
+      } finally { _planCtxYear=_sv; }
     });
     if(posed>0){nMbr++;totJ+=r.count;}
   });
-  _planCtxYear=_sv;
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
   window.fbSaveToast(nMbr>0?{planning_entries:PLANNING_ENTRIES}:null,
     nMbr>0?('Cong\u00e9s pos\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+totJ+'\u00a0j d\u00e9compt\u00e9'+(totJ>1?'s':'')+(prot>0?' \u00b7 '+prot+' pr\u00e9serv\u00e9'+(prot>1?'s':''):'')):'Aucun jour d\u00e9comptable dans la s\u00e9lection',
@@ -6093,13 +6165,12 @@ function _planCpNoms(){return Object.keys(_pl2CpSel).filter(function(n){return _
 //    en congé orange sans bouger le solde. Deux chemins d'écriture, une seule règle connue.
 //    Toute nouvelle voie de pose DOIT passer par ici, sinon la divergence revient.
 // Renvoie 'out' (hors contrat) | 'we' (dimanche, ou samedi de repos) | 'fer' (férié chômé) | 'cp'.
-// ⚠️ _planCtxYear est positionné le temps du calcul puis RESTAURÉ : _planInContract,
+// ⚠️ L'année de contexte est posée le temps du calcul (_planSurAnnee) puis RESTAURÉE : _planInContract,
 //    _planFerie et _planPlanned lisent tous l'année de contexte via _pY().
 function _planCpDayType(mbr,plId,yr,mi,d){
-  var _sv=_planCtxYear; _planCtxYear=yr;
   var dow=new Date(yr,mi,d).getDay();
-  var inC=_planInContract(mbr,mi,d), fer=_planFerie(mi,d), pl=_planPlanned(plId,mi,d);
-  _planCtxYear=_sv;
+  var L=window._planSurAnnee(yr,function(){ return {inC:_planInContract(mbr,mi,d), fer:_planFerie(mi,d), pl:_planPlanned(plId,mi,d)}; });
+  var inC=L.inC, fer=L.fer, pl=L.pl;
   var type;
   if(!inC)type='out';
   else if(dow===0)type='we';            // dimanche : jamais un jour de congé
@@ -6111,7 +6182,7 @@ function _planCpDayType(mbr,plId,yr,mi,d){
 // Décompte d'un ensemble de jours marqués — même règle que _planCpPris, appliquée en amont
 // pour que l'aperçu affiche EXACTEMENT ce que le compteur affichera après la pose.
 function _planCpCount(plId,marked,mode){
-  var _sv=_planCtxYear, count=0;
+  var count=0;
   marked.forEach(function(mk){
     if(mode==='ouvres'){ if(mk.dow>=1&&mk.dow<=5)count++; }
     else { if(mk.dow>=1&&mk.dow<=6)count++; }
@@ -6122,11 +6193,10 @@ function _planCpCount(plId,marked,mode){
       if(mk.dow!==5)return;
       var sat=new Date(mk.yr,mk.mi,mk.d+1), sy=sat.getFullYear(), sm=sat.getMonth(), sd=sat.getDate();
       if(marked.some(function(x){return x.yr===sy&&x.mi===sm&&x.d===sd;}))return;
-      _planCtxYear=sy; var sfer=_planFerie(sm,sd), spl=_planPlanned(plId,sm,sd); _planCtxYear=_sv;
-      if(sfer||spl>0)return;
+      var S=window._planSurAnnee(sy,function(){ return {fer:_planFerie(sm,sd), pl:_planPlanned(plId,sm,sd)}; });
+      if(S.fer||S.pl>0)return;
       count++;
     });
-    _planCtxYear=_sv;
   }
   return count;
 }
@@ -6214,15 +6284,14 @@ function planCpApply(){
     var posed=0;
     r.marked.forEach(function(mk){
       _planCtxYear=mk.yr;
-      var ex=_pEntDay(nom,mk.mi,mk.d);
-      if(ex&&(ex.type==='recup'||ex.absent)){_planCtxYear=_sv;return;}
-      _pEntEnsure(nom,mk.mi)[mk.d]={type:'cp',heures:mk.pl};
-      _planCtxYear=_sv;
-      posed++;
+      try{
+        var ex=_pEntDay(nom,mk.mi,mk.d);
+        if(ex&&(ex.type==='recup'||ex.absent))return;
+        if(_pEntPose(nom,mk.mi,mk.d,{type:'cp',heures:parseFloat(mk.pl)||0}))posed++;
+      } finally { _planCtxYear=_sv; }
     });
     if(posed>0){nMbr++;totJ+=r.count;}
   });
-  _planCtxYear=_sv;
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
   window.fbSaveToast(nMbr>0?{planning_entries:PLANNING_ENTRIES}:null,
     nMbr>0?('Cong\u00e9s pos\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+totJ+' j'):'Aucun jour applicable dans la plage',
@@ -6237,21 +6306,17 @@ function planCpRemove(){
   var du=_pl2CpDates.du, au=_pl2CpDates.au, noms=_planCpNoms();
   if(!du||!au||new Date(du+'T00:00:00')>new Date(au+'T00:00:00')){showToast('Choisissez une plage de dates valide','#E07060');return;}
   if(!noms.length){showToast('S\u00e9lectionnez au moins un salari\u00e9','#E07060');return;}
-  var a=new Date(du+'T00:00:00'), b=new Date(au+'T00:00:00'), nJ=0, nMbr=0, _sv=_planCtxYear;
+  var a=new Date(du+'T00:00:00'), b=new Date(au+'T00:00:00'), nJ=0, nMbr=0;
   noms.forEach(function(nom){
     var cur=new Date(a), guard=0, hit=0;
     while(cur<=b&&guard<420){
       guard++;
       var mi=cur.getMonth(), d=cur.getDate(), yr=cur.getFullYear();
-      _planCtxYear=yr;
-      var e=_pEntDay(nom,mi,d);
-      if(e&&e.type==='cp'){delete _pEntEnsure(nom,mi)[d];hit++;}
-      _planCtxYear=_sv;
+      if(window._planSurAnnee(yr,function(){ var e=_pEntDay(nom,mi,d); if(e&&e.type==='cp'){delete _pEntEnsure(nom,mi)[d];return true;} return false; }))hit++;
       cur.setDate(cur.getDate()+1);
     }
     if(hit>0){nMbr++;nJ+=hit;}
   });
-  _planCtxYear=_sv;
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
   window.fbSaveToast(nJ>0?{planning_entries:PLANNING_ENTRIES}:null,
     nJ>0?('Cong\u00e9s retir\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+nJ+' j'):'Aucun cong\u00e9 dans la plage',
@@ -6483,6 +6548,8 @@ function planAssignTpl(nom,plId){
 //   '12:00'  → coupure a heure fixe, le domaine l'a decidee
 //   'libre'  → coupure prise selon le chantier, le domaine l'a decide aussi
 //   ''       → le domaine ne s'est pas prononce : on n'affirme rien
+// Signature : _planCoupureH(m 0-11, plId, yr facultatif = _pY()) → 'HH:MM' | 'libre' | ''.
+//   Sans m ni plId : le reglage du domaine seul (CONFIG.coupure_heure).
 // ⚠️ Un mois du CSV peut porter sa propre heure (champ `p` du timing) : chez un
 // domaine dont la coupure suit la saison, le mois l'emporte sur le reglage.
 function _planCoupureH(m,plId,yr){
@@ -6733,6 +6800,13 @@ function planExportCSV(templateId){
       if(t)rows.push('timing'+S+_PLAN_MOIS_CSV[ti]+S+(t.d||t.debut||'08:00')+S+(t.f||t.fin||'16:00')+S+(t.continu?'oui':'non')+(t.p?(S+t.p):''));
     }
   }
+  // DMA-1 : les deux horaires des jours D/M/A, écrits dès que le modèle a des codes
+  //   (ou des horaires propres) — ce qui s'exporte se relit à l'identique.
+  if(tpl._timings_jour||tpl._horaires_dma){
+    var _dx=tpl._horaires_dma||{};
+    rows.push('# horaires_dma'+S+'prise_decalee(M,A)'+S+'fin_commune(D,M)');
+    rows.push('horaires_dma'+S+(_dx.decale||'09:00')+S+(_dx.fin||'16:30'));
+  }
   // En-tête + heures
   rows.push('# jour'+S+'jan'+S+'fev'+S+'... (heures pr\u00e9vues par mois \u00b7 suffixe D/M/A = horaire par jour)');
   rows.push(['jour'].concat(_PLAN_MOIS_CSV).join(S));
@@ -6755,6 +6829,17 @@ function planExportCSV(templateId){
   showToast('\u2705 CSV t\u00e9l\u00e9charg\u00e9','#3D6B27');
 }
 
+// DMA-1 — la ligne `horaires_dma;<prise décalée>;<fin commune>` du CSV. Rend
+// {decale, fin} si les deux heures sont valides et la fin après la prise, sinon null
+// (le modèle garde alors 09:00 / 16:30). Pure : exécutée seule par mv-harnais-dma.
+function _planCsvDma(parts){
+  var a=String((parts&&parts[1])||'').trim(), b=String((parts&&parts[2])||'').trim();
+  var ok=function(v){ return /^([01]?\d|2[0-3]):[0-5]\d$/.test(v); };
+  if(!ok(a)||!ok(b))return null;
+  var mn=function(v){ var x=v.split(':'); return (+x[0])*60+(+x[1]); };
+  if(mn(b)<=mn(a))return null;
+  return {decale:a,fin:b};
+}
 // ── Import CSV ──
 var _PLAN_MOIS_IDX={jan:0,fev:1,mar:2,avr:3,mai:4,jun:5,jul:6,aou:7,sep:8,oct:9,nov:10,dec:11};
 function planImportCSV(targetId){
@@ -6771,6 +6856,7 @@ function planImportCSV(targetId){
       var tplData={};
       var timings={};
       var jouTimings={};
+      var dma=null, dmaVue=false;
       lines.forEach(function(line){
         if(!line.trim()||line.charAt(0)==='#')return;
         var prefix=line.split(S)[0].trim().toLowerCase();
@@ -6789,6 +6875,8 @@ function planImportCSV(targetId){
           }
           return;
         }
+        // DMA-1 : horaires des jours D/M/A
+        if(prefix==='horaires_dma'){ dmaVue=true; dma=_planCsvDma(line.split(S)); return; }
         // En-tête
         if(prefix==='jour')return;
         // Données heures + codes D/M/A
@@ -6815,13 +6903,17 @@ function planImportCSV(targetId){
       var nJ=Object.keys(jouTimings).length;
       if(nT>0)tplData._timings=timings;
       if(nJ>0)tplData._timings_jour=jouTimings;
+      if(dma)tplData._horaires_dma=dma;
       _pTplStore()[targetId]=tplData;
       window.PLANNING_TEMPLATES=PLANNING_TEMPLATES;
       var _mvEtat=window.fbSaveToast({planning_templates:PLANNING_TEMPLATES});
       var msg='\u2705 CSV import\u00e9 \u2192 "'+targetId+'"';
       if(nT>0)msg+=' \u00b7 '+nT+' horaires mois';
       if(nJ>0)msg+=' \u00b7 '+(Object.values(jouTimings).reduce(function(s,m){return s+Object.keys(m).length;},0))+' jours \u00e0 horaire particulier';
-      window.fbToastApres(_mvEtat,msg,'#3D6B27');
+      if(dma)msg+=' \u00b7 D/M/A '+dma.decale+' \u2192 '+dma.fin;
+      var _dmaKo=dmaVue&&!dma;
+      if(_dmaKo)msg+=' \u00b7 ligne horaires_dma illisible : 09:00 / 16:30 conserv\u00e9s';
+      window.fbToastApres(_mvEtat,msg,_dmaKo?'#B85A1A':'#3D6B27');
       _planRenderCadre();
     }catch(err){showToast('\u274c Erreur CSV\u00a0: '+err.message,'var(--rouge)');}
   };
@@ -7259,8 +7351,8 @@ function savePlanDay(next){
   var r,msg;
   if(_planModalMode==='cp'&&one){
     var cpH=parseFloat((document.getElementById('plan-cp-heures')||{}).value);
-    if(isNaN(cpH))cpH=_planPlanned(_planPlId(_planEditDay.mbr),planMonth,day);
-    _pEntEnsure(nom,planMonth)[day]={type:'cp',heures:cpH};
+    if(isNaN(cpH))cpH=parseFloat(_planPlanned(_planPlId(_planEditDay.mbr),planMonth,day))||0;
+    if(!_pEntPose(nom,planMonth,day,{type:'cp',heures:cpH})){showToast('Heures de cong\u00e9 invalides','#C0392B');return;}
     r={n:1,skip:0};
     msg='\u2705 '+nom+' \u00b7 '+PLAN_JOURS[_planDow(planMonth,day)]+' '+day+' enregistr\u00e9';
   } else if(_planModalMode==='recup'){
@@ -7404,22 +7496,21 @@ function planCaniculeApply(nom){
   var a=new Date(du+'T00:00:00'), b=new Date(au+'T00:00:00');
   if(isNaN(a.getTime())||isNaN(b.getTime())||a>b){ showToast('Plage de dates invalide','#E07060'); return; }
   if(_planTimingH(deb,fin,cont)<=0){ showToast('Horaire invalide','#E07060'); return; }
-  var plId=_planPlId(mbr), n=0, guard=0, cur=new Date(a);
+  var plId=_planPlId(mbr), n=0, guard=0, cur=new Date(a), _sv=_planCtxYear;
   while(cur<=b&&guard<400){
     guard++;
     var dow=cur.getDay(), mi=cur.getMonth(), d=cur.getDate();
     _planCtxYear=cur.getFullYear();
-    if(dow!==0&&dow!==6&&_planPlanned(plId,mi,d)>0&&_planInContract(mbr,mi,d)){
-      var ex=_pEntDay(nom,mi,d);
-      if(!(ex&&(ex.type==='cp'||ex.type==='recup'||ex.absent))){
-        _pEntEnsure(nom,mi)[d]={timing:{debut:deb,fin:fin,continu:cont},canicule:true,comment:'Chaleur'};
-        n++;
+    try{
+      if(dow!==0&&dow!==6&&_planPlanned(plId,mi,d)>0&&_planInContract(mbr,mi,d)){
+        var ex=_pEntDay(nom,mi,d);
+        if(!(ex&&(ex.type==='cp'||ex.type==='recup'||ex.absent))){
+          if(_pEntPose(nom,mi,d,{timing:{debut:deb,fin:fin,continu:cont},canicule:true,comment:'Chaleur'}))n++;
+        }
       }
-    }
-    _planCtxYear=null;
+    } finally { _planCtxYear=_sv; }
     cur.setDate(cur.getDate()+1);
   }
-  _planCtxYear=null;
   window.PLANNING_ENTRIES=PLANNING_ENTRIES; _planCanicSave();
   if(n>0)window.fbSaveToast({planning_entries:PLANNING_ENTRIES},'\u2600\ufe0f '+n+' jour'+(n>1?'s':'')+' aménagé'+(n>1?'s':'')+' \u00b7 '+nom,'#D97706');
   else showToast('Aucun jour travaillé dans cette plage','#E07060');

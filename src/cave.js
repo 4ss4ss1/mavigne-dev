@@ -544,7 +544,8 @@ function _caveFmlLabel(v) {
 }
 
 function _caveTypeLabel(type) {
-  return {ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',assemblage:'Assemblage',autre:'Autre'}[type]||type;
+  // ROB-2 : une opération sans type (fiche abîmée) s'affichait « undefined » dans le journal.
+  return {ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',assemblage:'Assemblage',autre:'Autre'}[type]||(type?String(type):'Op\u00e9ration');
 }
 
 // \u2500\u2500 helpers multi-cuv\u00E9es formulaire op\u00E9ration \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -971,8 +972,17 @@ function _caveJDet(op){
     h+='<div class="mvc-jdet" style="color:#5CB87A">'+str+'</div>';
   }
   if(op.type==='soufre'&&op.data){
-    h+='<div class="mvc-jdet"><span class="mvc-soufre-g">'+op.data.grammes_pastille+'g</span>'+op.data.nb_total+' pastille'+(op.data.nb_total>1?'s':'')+' <b style="color:#3A8C40">= '+op.data.so2_total_g+' g SO\u2082</b></div>';
+    // ROB-2 : une ligne de soufre à qui manque un chiffre affichait « undefinedg » /
+    //   « = undefined g SO₂ » : chaque morceau ne s'écrit que s'il est un nombre. Un nombre
+    //   rangé en texte (« 5 ») s'affiche encore — relu à la revue du 29/09, pour ne rien
+    //   masquer de ce qui s'affichait avant.
+    var _sd=op.data, _sn=function(v){ return v!==null&&v!==''&&v!==undefined&&typeof v!=='object'&&isFinite(Number(v)); }, _sp='';
+    if(_sn(_sd.grammes_pastille)) _sp+='<span class="mvc-soufre-g">'+Number(_sd.grammes_pastille)+'g</span>';
+    if(_sn(_sd.nb_total)) _sp+=Number(_sd.nb_total)+' pastille'+(Number(_sd.nb_total)>1?'s':'')+' ';
+    if(_sn(_sd.so2_total_g)) _sp+='<b style="color:#3A8C40">= '+Number(_sd.so2_total_g)+' g SO\u2082</b>';
+    if(_sp) h+='<div class="mvc-jdet">'+_sp+'</div>';
   }
+
   if(op.type==='analyse'&&op._src==='op'&&op.data){
     var chips='';
     if(op.data.so2_libre) chips+='<span class="mvc-tag mvc-tag-so2">SO\u2082 libre '+op.data.so2_libre+'</span>';
@@ -2314,7 +2324,7 @@ function openCuveeDetail(cuvId){
     var tI={ouillage:'seau',soutirage:'rotation',soufre:'eprouvette',analyse:'microscope',retrait_fut:'\uD83D\uDEAA',assemblage:'fiole',autre:'crayon'};
     var tL={ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',retrait_fut:'Retrait f\u00FBt',assemblage:'Assemblage',autre:'Autre'};
     allIt.forEach(function(op){
-      var ico=_mvIcon(tI[op.type]||'crayon',16),lbl=tL[op.type]||op.type;
+      var ico=_mvIcon(tI[op.type]||'crayon',16),lbl=tL[op.type]||_caveTypeLabel(op.type);   // ROB-2 : jamais « undefined »
       html+='<div style="background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:11px;margin-bottom:7px;">';
       html+='<div style="display:flex;align-items:flex-start;gap:8px;">';
       html+='<span style="font-size:var(--pt-sm,17px);margin-top:1px;">'+ico+'</span>';
@@ -4619,7 +4629,8 @@ function _mlRdtMoyen(ch){
 function _mlMillesimes(){
   var set={};
   (CAVE_VENDANGE.recoltes||[]).forEach(function(r){
-    var a=String(r&&r.date||'').slice(0,4); if(a) set[a]=1;
+    // ROB-2 : une date illisible donnait un millésime « NaN » dans la barre des chips.
+    var a=String(r&&r.date||'').slice(0,4); if(/^\d{4}$/.test(a)) set[a]=1;
   });
   (CAVE_ELEVAGE.cuvees||[]).forEach(function(c){ if(c&&c.millesime) set[c.millesime]=1; });
   set[_mlCampagne()]=1;
