@@ -7906,6 +7906,111 @@ function saveDPCepage(){
   showToast('Cépage(s) enregistré(s)','#3D6B27');
 }
 
+// ══════ ARRACHAGE — sortir une parcelle du domaine (ADMIN SEULEMENT) ══════
+// ★ ARRACH-1 : la parcelle n'est JAMAIS supprimee. `p.nom` est la cle du journal, des sessions et des
+//   traitements : la supprimer casserait tout l'historique. On pose `statut:'Arrachee'` (sans accent,
+//   c'est la valeur que lisent tous les ecrans) + la date, le motif et l'auteur. Le statut d'avant est
+//   garde pour pouvoir remettre la parcelle en exploitation si l'arrachage a ete saisi par erreur.
+var _ARR_MOTIFS=['Fin de cycle du vignoble','Maladie ou d\u00e9p\u00e9rissement','Restructuration ou replantation','Vente ou fin de bail','Autre'];
+function _arrIsoJour(){
+  var d=new Date();
+  return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+}
+function _arrFrDate(iso){
+  var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');
+  return m?(m[3]+'/'+m[2]+'/'+m[1]):'';
+}
+function _dpFillArrach(p){
+  var row=document.getElementById('dp-arrach-row'); if(!row) return;
+  var adm=isAdmin();
+  var surActive=(typeof _mvOnActiveSaison==='function')?_mvOnActiveSaison():true;
+  if(p.statut==='Arrachee'){
+    var dt=_arrFrDate(p.dateArrachage);
+    var h='<div style="background:var(--gris-clair);border-radius:12px;padding:12px 14px;margin-top:16px">'
+      +'<div style="font-size:var(--pt-micro,11px);font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--rouge-tx,#A0291E)">Parcelle arrach\u00e9e</div>'
+      +'<div style="font-size:var(--pt-base,14px);font-weight:600;color:var(--texte);margin-top:5px">'
+      +(dt?('Le '+_escHtml(dt)):'Date non renseign\u00e9e')+(p.motifArrachage?(' \u00b7 '+_escHtml(p.motifArrachage)):'')+'</div>'
+      +(p.noteArrachage?('<div class="mv-l" style="margin-top:4px">'+_escHtml(p.noteArrachage)+'</div>'):'')
+      +'<div class="mv-l" style="margin-top:4px">Elle ne compte plus dans les surfaces ni l\u2019avancement. Son historique est conserv\u00e9.</div>';
+    if(adm&&surActive){
+      h+='<button type="button" id="dp-arrach-undo" style="margin-top:10px;background:transparent;border:1.5px solid var(--gris);border-radius:10px;padding:9px 14px;font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--texte-doux);font-family:inherit;cursor:pointer;min-height:44px">Remettre en exploitation</button>';
+    }
+    row.innerHTML=h+'</div>';
+    row.style.display='';
+    var u=document.getElementById('dp-arrach-undo');
+    if(u){
+      var armed=false;
+      u.onclick=function(){
+        if(!armed){
+          armed=true; u.textContent='Confirmer la remise en exploitation'; u.style.color='var(--rouge-tx,#A0291E)'; u.style.borderColor='var(--rouge)';
+          setTimeout(function(){ armed=false; if(u&&u.isConnected){ u.textContent='Remettre en exploitation'; u.style.color=''; u.style.borderColor=''; } },5000);
+          return;
+        }
+        remettreParcelleEnExploitation(p.nom);
+      };
+    }
+    return;
+  }
+  if(!adm||!surActive){ row.style.display='none'; row.innerHTML=''; return; }
+  row.innerHTML='<button type="button" id="dp-arrach-btn" style="width:100%;margin-top:18px;background:transparent;border:1.5px solid rgba(184,32,48,0.45);border-radius:12px;padding:12px 14px;font-size:var(--pt-txt,12.5px);font-weight:700;color:var(--rouge-tx,#A0291E);font-family:inherit;cursor:pointer;min-height:44px">'
+    +((typeof _mvIcon==='function')?_mvIcon('corbeille',16):'')+' Arracher cette parcelle\u2026</button>';
+  row.style.display='';
+  var b=document.getElementById('dp-arrach-btn'); if(b) b.onclick=function(){ openDPArrachage(); };
+}
+function openDPArrachage(){
+  var p=PARCELLES.find(function(x){return x.nom===_dpCurrentNom;});
+  if(!p||!isAdmin()||p.statut==='Arrachee') return;
+  var el;
+  el=document.getElementById('arr-hidden-nom'); if(el) el.value=p.nom;
+  el=document.getElementById('arr-parc-nom'); if(el) el.textContent=p.nom+' \u00b7 '+p.surface+' ha';
+  el=document.getElementById('arr-date'); if(el){ el.value=_arrIsoJour(); el.max=_arrIsoJour(); }
+  el=document.getElementById('arr-motif');
+  if(el) el.innerHTML=_ARR_MOTIFS.map(function(m){return '<option value="'+_escAttr(m)+'">'+_escHtml(m)+'</option>';}).join('');
+  el=document.getElementById('arr-note'); if(el) el.value='';
+  var enCours=(typeof JOURNAL!=='undefined'?JOURNAL:[]).filter(function(j){return j&&j.parcelle===p.nom&&j.statut==='En cours'&&!j.meteo;}).length;
+  el=document.getElementById('arr-warn');
+  if(el){
+    el.style.display=enCours?'':'none';
+    el.textContent=enCours?('Attention : '+enCours+' travail'+(enCours>1?'ux':'')+' en cours sur cette parcelle. '+(enCours>1?'Ils resteront':'Il restera')+' dans le journal, \u00e0 terminer ou annuler.'):'';
+  }
+  openOv('ovArrachage');
+}
+function _arrApres(nom,msg){
+  try{ TACHES.forEach(function(t){ recalcTravaux(t.nom); }); window.TRAVAUX=TRAVAUX; }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_arrApres'); }
+  saveData('parcelles');
+  closeOv(null,'ovArrachage');
+  renderParcelles(); computePStats();
+  if(typeof renderHomeCard==='function'){ try{ renderHomeCard(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_arrApres#2'); } }
+  openDP(nom);
+  showToast(msg,'#3D6B27');
+}
+function saveArrachage(){
+  if(!isAdmin()) return showToast('R\u00e9serv\u00e9 aux administrateurs','#B85A1A');
+  var nom=(document.getElementById('arr-hidden-nom')||{}).value||'';
+  var p=PARCELLES.find(function(x){return x.nom===nom;});
+  if(!p||p.statut==='Arrachee') return;
+  var date=(document.getElementById('arr-date')||{}).value||'';
+  if(!date) return showToast('Indiquer la date d\u2019arrachage','#B85A1A');
+  if(date>_arrIsoJour()) return showToast('La date d\u2019arrachage ne peut pas \u00eatre dans le futur','#B85A1A');
+  var note=String((document.getElementById('arr-note')||{}).value||'').trim().slice(0,300);
+  p.statutAvantArrachage=p.statut||'Active';
+  p.statut='Arrachee';
+  p.dateArrachage=date;
+  p.motifArrachage=String((document.getElementById('arr-motif')||{}).value||'Autre');
+  if(note) p.noteArrachage=note; else delete p.noteArrachage;
+  p.arracheePar=(window.currentUser&&window.currentUser.nom)||'';
+  _arrApres(nom,'Parcelle arrach\u00e9e');
+}
+function remettreParcelleEnExploitation(nom){
+  if(!isAdmin()) return showToast('R\u00e9serv\u00e9 aux administrateurs','#B85A1A');
+  var p=PARCELLES.find(function(x){return x.nom===nom;});
+  if(!p||p.statut!=='Arrachee') return;
+  var avant=p.statutAvantArrachage;
+  p.statut=(avant&&avant!=='Arrachee')?avant:'Active';
+  delete p.statutAvantArrachage; delete p.dateArrachage; delete p.motifArrachage; delete p.noteArrachage; delete p.arracheePar;
+  _arrApres(nom,'Parcelle remise en exploitation');
+}
+
 // ══════ Fork b — Historique des rendements par millésime (détail parcelle Vigne) ══════
 // Lit p.rendement_hist[] (écrit par le Cuvier, fork a). Rendu autonome (thème clair),
 // aucune dépendance à cave.js ni à index.html. Aucun onclick -> aucun export window.
@@ -7990,7 +8095,7 @@ function openDP(nom){
   const p=PARCELLES.find(x=>x.nom===nom);if(!p)return;
   const cl=getPCls(p);
   document.getElementById('dp-nom').textContent=p.nom;
-  document.getElementById('dp-sub').textContent=`${p.statut} · ${p.surface} ha`;
+  document.getElementById('dp-sub').textContent=`${p.statut==='Arrachee'?'Arrach\u00e9e':p.statut} · ${p.surface} ha`;
   _dpCurrentNom=nom;
   // Cépage (multi, entreplantation)
   var dpCepRow=document.getElementById('dp-cepage-row');
@@ -8016,6 +8121,7 @@ function openDP(nom){
   }
   try{ var _pmEl=document.getElementById('dp-parc-meteo'); if(_pmEl)_pmEl.dataset.nom=nom; }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/onclick'); }
   try{ _dpFillCommune(p); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/onclick#2'); }
+  try{ _dpFillArrach(p); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_dpFillArrach'); }
   try{ _dpFillParcMeteo(p); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/onclick#3'); }
   const pe=document.getElementById('dp-pct');
   pe.textContent=cl.pct+'%';
@@ -11357,6 +11463,7 @@ async function refreshApp(){
   if (typeof saveRepPonct !== "undefined") window.saveRepPonct = saveRepPonct;
   if (typeof openDPCepage !== "undefined") window.openDPCepage = openDPCepage;
   if (typeof saveDPCepage !== "undefined") window.saveDPCepage = saveDPCepage;
+  if (typeof saveArrachage !== "undefined") window.saveArrachage = saveArrachage;
   if (typeof _dpcToggleEntreplantation !== "undefined") window._dpcToggleEntreplantation = _dpcToggleEntreplantation;
   if (typeof openSessionDetail !== "undefined") window.openSessionDetail = openSessionDetail;
   if (typeof openEditSession !== "undefined") window.openEditSession = openEditSession;

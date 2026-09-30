@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.77';
+export const APP_VERSION = '7.78';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -722,6 +722,13 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.78', items: [
+    { emoji: 'raisin', titre: 'Arracher une parcelle depuis sa fiche',
+      desc: "Quand une vigne est arrach\u00e9e, il n\u2019y avait aucun moyen de le noter dans l\u2019application. Un administrateur peut "
+        + "d\u00e9sormais ouvrir la fiche de la parcelle, toucher \u00ab\u00a0Arracher cette parcelle\u00a0\u00bb, indiquer la date et le motif. "
+        + "La parcelle n\u2019est pas supprim\u00e9e\u00a0: elle sort des surfaces, de l\u2019avancement, du planning et du registre phyto, "
+        + "et son historique reste consultable. Une erreur se corrige dans la m\u00eame fiche avec \u00ab\u00a0Remettre en exploitation\u00a0\u00bb." },
+  ] },
   { v: '7.77', items: [
     { emoji: 'document', titre: 'Un seul retour du client pour plusieurs livraisons',
       desc: "Un acheteur de raisin envoie souvent un seul total de jus et de lie pour tout ce qu\u2019il a re\u00e7u, alors que les "

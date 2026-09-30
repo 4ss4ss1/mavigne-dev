@@ -839,3 +839,43 @@ plusieurs récoltes même si le jour est différent pour un même client. »* VD
 - ⚠️ **Ouvert** : `_vendLivs(nom)` ne filtre pas le millésime — le « Récap de campagne » d'un client suivi deux ans mêle les deux
   campagnes (en-tête « Millésime » pris sur la première ligne). À trancher avec Nico : un sélecteur d'année dans la fiche client.
 
+
+## 196. ★★ ARRACH-1 — ARRACHER UNE PARCELLE DEPUIS SA FICHE, RÉSERVÉ À L'ADMIN (29/09 — `src/app.js` · `src/utils.js` (WHATS_NEW) · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `public/guide.html` · `scripts/mv-harnais-arrachage.mjs` · `scripts/mv-harnais-liste.mjs` · **bump APP 7.77 → 7.78, SW 8.50 → 8.51**)
+
+### 196a. D'où ça vient
+
+Nico : *« On arrache des vignes, comment le noter sur l'appli ? »* Inventaire sur le dépôt : `statut:'Arrachee'` (sans accent) était lu
+partout (surfaces, avancement, planning, registre phyto, filtre « Arrachées ») mais **aucun écran ne le posait** — seule la console
+GT (`admin-gt.js`) ou Firestore à la main. ⚠️ Le guide (`guide/04-vigne.html`) disait pourtant « passez son statut à Arrachée dans
+sa fiche » : il décrivait un bouton qui n'existait pas. Nico a tranché : **arracher = admin seulement** ; le reste de la proposition
+(date, motif, note, jamais de suppression, remise en exploitation) est validé.
+
+### 196b. Ce qui est fait
+
+- **`_dpFillArrach(p)`**, appelée par `openDP` : bouton « Arracher cette parcelle… » si `isAdmin()` **et** saison consultée = saison
+  active (`_mvOnActiveSaison`). Sur une parcelle arrachée : carte d'information (date, motif, note) pour tous ; « Remettre en
+  exploitation » (deux appuis) pour l'admin seul.
+- **`openDPArrachage` / `saveArrachage`** : feuille `ovArrachage` (date ≤ aujourd'hui, motif parmi cinq, note ≤ 300 caractères),
+  avertissement s'il reste des travaux « En cours » sur la parcelle. Garde `isAdmin()` **dans la fonction d'écriture**, pas seulement
+  dans l'affichage du bouton.
+- **On ne supprime JAMAIS la parcelle** : `p.nom` est la clé du journal, des sessions et des traitements. On pose `statut:'Arrachee'`,
+  `dateArrachage`, `motifArrachage`, `noteArrachage`, `arracheePar` et **`statutAvantArrachage`** (pour la remise en exploitation).
+- **`remettreParcelleEnExploitation`** : rétablit le statut d'avant (ou `Active`) et **purge** les cinq champs.
+- Après écriture : `recalcTravaux` sur toutes les tâches, `saveData('parcelles')` (qui recalcule `SURF_TOTALE`), `renderParcelles`,
+  `computePStats`, `renderHomeCard`, fiche rouverte.
+- « Arrachée » s'écrit avec l'accent dans le sous-titre de la fiche (`dp-sub` affichait `Arrachee`).
+
+### 196c. Mesuré
+
+- `mv-harnais-arrachage.mjs` : **21 assertions** vertes, exécutées sur les **vraies fonctions** extraites de `app.js` (commentaires
+  retirés) ; **neuf contre-épreuves** (garde admin retirée sur l'écriture, bouton offert à tous, statut avec accent, date future
+  acceptée, parcelle supprimée, pas de sauvegarde, remise sans purge, motif non échappé, remise ouverte aux non-admins) — toutes rougissent.
+- ⚠️ Deux cliquets du projet ont rougi **à cause de ce lot** et ont été corrigés, pas contournés : `mv-harnais-typo` (des `font-size`
+  en px écrits en dur → variables `--pt-*`) et `mv-harnais-contraste` (texte blanc sur `--rouge` illisible en thème sombre →
+  `--rouge-pale` + `--rouge-tx`). *Un bouton rouge se construit avec les jetons du thème, pas avec `white` sur `--rouge`.*
+- ⚠️ Le contrôle de cohérence des portes exige de **nommer chaque script de `scripts/` dans la doc** : d'où ce paragraphe.
+- **Non vérifié à l'œil** : aucun navigateur lancé (Chromium non installable dans le bac à sable de rédaction) — la feuille et la
+  fiche sur téléphone, les deux thèmes. `npm run test:e2e` non joué.
+- **Ouvert** : les traitements et le journal d'une parcelle arrachée restent intacts (voulu) ; aucune règle Firestore ne distingue
+  encore « admin » pour cette écriture côté serveur — la restriction est portée par l'interface et par `isAdmin()`, comme pour le
+  cépage (`saveDPCepage`).
