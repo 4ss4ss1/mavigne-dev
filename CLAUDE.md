@@ -326,6 +326,14 @@ vaut un lot plus petit dont l'aide est juste qu'un gros lot dont l'aide ment.
 > | 5 | **`WHATS_NEW`** | `src/utils.js` | un bloc en tête, du point de vue de l'utilisateur |
 > | 6 | **`CLAUDE.md`** | ici | la section du lot, et **ce qui reste ouvert** |
 >
+> ★★ **PUBLIER UNE PAGE DU SITE : `npm run site` AVANT `npm run build`** (29/09). Dès qu'un lot touche
+> `guide/*.html` **ou** une page de `public/` (`logiciel-vigne`, `essai`, `demarrage`, mentions…),
+> cette commande régénère `guide.html` **et** remet à jour les `<lastmod>` de `sitemap.xml` — sans
+> commit intermédiaire. **À rappeler à Nico en fin de livraison, avec la séquence** : `npm run site`
+> → `npm run build` → `firebase deploy --only hosting`. ⚠️ **Ne jamais livrer `public/sitemap.xml`**
+> (dérivé, comme `guide.html`) : on livre la source, on nomme la commande. Un `lastmod` périmé ment à
+> Google (§27d). Après le déploiement : Search Console › Inspection de l'URL › demander l'indexation.
+>
 > ★★★ **ET LA CONSÉQUENCE QU'ON OUBLIE : ANNONCER, C'EST BUMPER.** `WHATS_NEW` vit dans `utils.js`
 > et le récap agrège **jusqu'à `APP_VERSION`**. Donc **tout lot visible par le client force un bump
 > APP + SW**, même si le code tenait dans un seul module. « Module seul = aucun bump » est vrai pour

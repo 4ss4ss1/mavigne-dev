@@ -2320,6 +2320,24 @@ Sous Linux, le fichier doit être exécutable (`git update-index --chmod=+x scri
 La règle « **ne jamais livrer `public/guide.html`** » ci-dessus **ne change pas** : Claude livre les
 sources, le crochet fabrique le généré chez Nico.
 
+### ★★★ 29/09 — `npm run site` : LE GUIDE ET LE SITEMAP, UNE SEULE COMMANDE
+
+**Constat.** `scripts/mv-sitemap.mjs` (SEO-1) datait les pages depuis **git** : il fallait commiter
+d'abord, puis le lancer à la main. Personne ne le faisait — `guide.html` annonçait le 12/09 dans le
+sitemap alors que le guide avait bougé le 28/09, et un assistant tiers a servi des explications
+anciennes. Le contrôle (`--check`, seuil 30 jours) ne rougit qu'au-delà d'un mois : il prévient, il
+ne corrige pas.
+
+**Le geste.** `npm run site` = `build-guide.mjs` puis `mv-sitemap.mjs`. ★ Un fichier **modifié mais
+pas encore commité** est daté **d'aujourd'hui** (`git status --porcelain`) : c'est le jour où il part
+en ligne. Une fois commité le même jour, `lastmod` = date du commit, donc rien ne bouge.
+Séquence de publication : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+
+⚠️ `public/sitemap.xml` est **dérivé** : on ne le livre pas (règle du 14/08). ⚠️ En clone
+**superficiel** (CI), la datation est impossible : le script se tait en `--check` et refuse d'écrire.
+⚠️ Le sitemap ne cite que ses pages ; toute nouvelle page indexable doit être ajoutée **ou** déclarée
+dans `HORS_SITEMAP` avec sa raison (le contrôle rougit sinon). Ne touche pas au `build` (§6).
+
 ### ⚠️⚠️ POURQUOI LE SCRIPT N'EST PAS DANS LE BUILD
 
 **C'est délibéré.** La règle « jamais un second `&& node scripts/…` » (§6) reste intacte.

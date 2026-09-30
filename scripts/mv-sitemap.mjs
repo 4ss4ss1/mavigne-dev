@@ -33,6 +33,7 @@
 //  Usage :
 //    node scripts/mv-sitemap.mjs --check   # controle (CI) — exit 1 si derive
 //    node scripts/mv-sitemap.mjs           # reecrit les lastmod depuis git
+//    npm run site                          # guide + sitemap, en une commande (29/09)
 //  LECTURE SEULE en --check. Vit dans scripts/ -> jamais deploye, aucun bump.
 // ============================================================================
 
@@ -76,8 +77,26 @@ const JOUR = 86400000;
 const ecart = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / JOUR);
 
 // ── Date du dernier commit d'un fichier (AAAA-MM-JJ) ────────────────────────
+// ★★★ 29/09 — UNE COMMANDE, PLUS DE FICHIER A LA MAIN. Un fichier MODIFIE mais pas
+// encore commite (ce que produit `build-guide.mjs`, ou une page retouchee) est date
+// d'AUJOURD'HUI : c'est la date a laquelle il va partir en ligne. Avant, il fallait
+// commiter D'ABORD pour que git puisse dater, puis relancer ce script. Maintenant
+// `npm run site` enchaine guide + sitemap sans commit intermediaire. Une fois commite
+// le meme jour, lastmod = date du commit : rien ne bouge, le controle reste vert.
+function aujourdhui() {
+  const d = new Date();
+  const z = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate());
+}
+function modifieNonCommite(rel) {
+  try {
+    return execFileSync('git', ['status', '--porcelain', '--', rel],
+      { cwd: RACINE, encoding: 'utf8' }).trim() !== '';
+  } catch { return false; }
+}
 function dateGit(rel) {
   try {
+    if (!SUPERFICIEL && modifieNonCommite(rel)) return aujourdhui();
     const d = execFileSync('git', ['log', '-1', '--format=%ad', '--date=short', '--', rel],
       { cwd: RACINE, encoding: 'utf8' }).trim();
     return d || null;
