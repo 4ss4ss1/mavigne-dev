@@ -8,6 +8,13 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **29 septembre 2026 (ROB-2 Accueil/Journal — ROB-2 TERMINÉ)** — ★★ **LE TIRAGE AU HASARD COUVRE
+> DÉSORMAIS TOUS LES MODULES** : Planning, Pilotage, Cave/Cuvier, Tracteur, Réserve, Accueil/Vigne/Journal. Le dernier a trouvé un
+> vrai défaut de production : **« NaN h » restantes dans la fiche d'une parcelle** dès que la période portait l'Entreplantation
+> (`openDP`), et en relisant l'entrée 26 du backlog, **« NaN h » au total de l'Accueil** dès qu'une tâche « en temps réel » est
+> activée (`calcHeures`). Les deux corrigés ; entrées 26, 0h et REV-1 ④ rayées. Posé sur **ARRACH-1** (§196, `c3cccda`, APP 7.78 · SW 8.51 : arracher une parcelle depuis
+> sa fiche). **Bump SW 8.51 → 8.52, APP 7.78 inchangé** (invisible).
+
 > ★ Consolidation : **28 septembre 2026 (ROB-2 Réserve)** — ★★ **LE TIRAGE AU HASARD PASSE SUR LA RÉSERVE**
 > (`mv-harnais-robustesse-reserve` : onglets, saisies, fiche de chaque lot, parc emprunté par la Cave, 4 documents imprimables).
 > Trouvé : un fût nul faisait tomber trois écrans → **LISTES-1 étendu au document INTRANTS** (`_MV_SOUS_LISTES.intrants`).

@@ -879,3 +879,43 @@ sa fiche » : il décrivait un bouton qui n'existait pas. Nico a tranché : **ar
 - **Ouvert** : les traitements et le journal d'une parcelle arrachée restent intacts (voulu) ; aucune règle Firestore ne distingue
   encore « admin » pour cette écriture côté serveur — la restriction est portée par l'interface et par `isAdmin()`, comme pour le
   cépage (`saveDPCepage`).
+
+## 197. ★★ PARC-XLS — LE FICHIER EXCEL DES PARCELLES SE TRIE, ET PORTE LE RENDEMENT EN hL/ha (30/09 — `src/reglages.js` · `src/utils.js` (MV_AIDE, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `guide/12-reglages.html` · `guide/13-donnees.html` · `scripts/mv-harnais-parc-xls.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · **bump APP 7.78 → 7.79, SW 8.52 → 8.53**, base `2ea6440`)
+
+### 197a. D'où ça vient
+
+Nico : *« Il faut pouvoir faire l'excel des parcelles, possibilité de trier par nom, du + au - et du - au + pour les rendements
+en HL/Ha. »* Inventaire : le fichier existait (« Avancement par parcelle », `exportCSVParcelles`, Données brutes), figé A → Z
+depuis TRI-2 (§120, « un ordre stable, posé sans question »), et **sans aucun rendement**. §119 l'avait listé parmi les
+documents à brancher sur la feuille de tri ; ce lot le fait.
+
+### 197b. Ce qui est fait
+
+- `exportCSVParcelles(c)` : **sans argument**, ouvre `_mvTriOuvrir` (millésimes = `_vendRecAnnees`, clés `nom` et `rendement`,
+  mémo `csvParcelles`) ; la feuille rappelle la fonction avec le choix. **Sans feuille** (utils.js en retard) : A → Z sur le
+  millésime le plus récent. **Sans aucune récolte** : seule la clé `nom`, aucune colonne de rendement.
+- Colonnes neuves : `Kilos <mil>`, `Rendement <mil> (hL/ha)`, `… : mesuré ou estimé`, `Fourchette <mil> (hL/ha)`.
+- ★ **Source unique : `_mlRendements(mil)`** — le hL/ha de l'écran Le millésime et de la carte du Pilotage. Rien n'est recalculé
+  dans `reglages.js`. La colonne porte `hlHa` (la meilleure valeur, celle qui trie) ; §63b oblige à dire à côté qu'un chiffre
+  `partiel` / `estime` n'est pas une mesure, d'où les deux colonnes de fiabilité.
+- ⚠️ **Absence en fin dans les deux sens** (même règle que `_vgnTrier`) : cases vides, pas des zéros.
+- Tout tient **dans la fonction** : `mv-harnais-tri2` l'extrait seule (`bloc`) et l'appelle sans feuille — une table de clés ou un
+  helper à côté l'aurait cassé.
+- Hub : ligne renommée « Parcelles — fichier Excel », `ask:'Millésime, puis tri'`, `ov:true` (le hub se ferme sous la feuille,
+  comme l'état du vignoble et les récoltes).
+
+### 197c. Mesuré
+
+- `mv-harnais-parc-xls.mjs` : **27 vertes** (feuille, deux sens par nom, deux sens par rendement, absence en fin, colonnes,
+  mesuré/partiel/estimé, millésime changé, trois replis) dont **4 contre-épreuves** qui rougissent (absence comptée zéro, sens
+  ignoré, estimation écrite « mesuré », feuille court-circuitée). `mv-harnais-tri2` reste vert (40).
+- ⚠️ Une assertion a rougi, et **c'était le test** : sans récolte, un choix « rendement, décroissant » retombe sur le nom **en
+  gardant le sens** (Z → A) — exactement ce que `_mvTriOuvrir` affiche quand il retombe sur la première clé valable.
+- **Non vérifié à l'œil** : la feuille sur téléphone, l'ouverture du fichier dans Excel FR (point-virgule + BOM, inchangés).
+
+### 197d. Ouvert
+
+- `_mlRendements` écarte toujours en silence une récolte dont le nom de parcelle n'est pas apparié (§90i) : la parcelle sort
+  alors **sans rendement** dans le fichier, sans ligne qui le dise.
+- Le plafond d'appellation (`o.max`) n'est pas dans le fichier : non demandé. À ajouter si Nico veut comparer au plafond dans
+  son tableur.

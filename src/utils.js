@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.78';
+export const APP_VERSION = '7.79';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -722,6 +722,13 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.79', items: [
+    { emoji: 'liste', titre: 'Le fichier Excel des parcelles se trie, et donne le rendement',
+      desc: "Le fichier des parcelles sortait toujours de A \u00e0 Z, sans aucun rendement. Avant de le t\u00e9l\u00e9charger, vous choisissez \u00e0 pr\u00e9sent "
+        + "le mill\u00e9sime et l\u2019ordre\u00a0: par nom, de A \u00e0 Z ou de Z \u00e0 A, ou par rendement en hL/ha, du plus fort au plus faible ou l\u2019inverse. "
+        + "Le fichier donne les kilos, le rendement \u2014 le m\u00eame chiffre que dans Le mill\u00e9sime \u2014, dit s\u2019il est mesur\u00e9 ou estim\u00e9 et donne sa fourchette. "
+        + "Une parcelle sans r\u00e9colte cette ann\u00e9e-l\u00e0 part en fin de liste, cases vides. Vigne \u203a roue crant\u00e9e \u203a Documents, ou R\u00e9glages \u203a Documents & impressions." },
+  ] },
   { v: '7.78', items: [
     { emoji: 'raisin', titre: 'Arracher une parcelle depuis sa fiche',
       desc: "Quand une vigne est arrach\u00e9e, il n\u2019y avait aucun moyen de le noter dans l\u2019application. Un administrateur peut "
@@ -3647,7 +3654,8 @@ var MV_AIDE = {
       ['La recherche', "accepte le nom du climat comme le lieu-dit."],
       ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique."],
       ['Valider pour l’équipe sans y être', "l’administrateur voit sa propre puce dans le groupe («\u00a0Moi\u00a0», «\u00a0Moi aussi dans les rangs\u00a0» sur la barre d’équipe)\u00a0: décochée, la validation reste signée de son nom mais ses heures ne vont pas à la parcelle. Le choix est retenu pour la tâche."],
-      ['L’état du vignoble', "s’imprime depuis la roue crantée de la Vigne, bloc Documents : toutes vos parcelles sur une page, avec la surface, le cépage, la commune, l’avancement, le dernier travail, le dernier rendement — et la liste de ce qui reste à renseigner."]
+      ['L’état du vignoble', "s’imprime depuis la roue crantée de la Vigne, bloc Documents : toutes vos parcelles sur une page, avec la surface, le cépage, la commune, l’avancement, le dernier travail, le dernier rendement — et la liste de ce qui reste à renseigner."],
+      ['Le fichier Excel des parcelles', "se prend au même endroit : une ligne par parcelle, avec la surface, l’avancement, chaque tâche et le rendement du millésime choisi en hL/ha — mesuré ou estimé, c’est écrit à côté. Avant de le télécharger, vous choisissez l’ordre : par nom (A → Z ou Z → A) ou par rendement (le plus fort ou le plus faible d’abord). Une parcelle sans récolte part en fin de liste."]
     ]
   },
   journal: {

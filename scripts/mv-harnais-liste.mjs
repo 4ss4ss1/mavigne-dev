@@ -317,6 +317,7 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-prep.mjs'],
   ['node scripts/mv-harnais-tri1.mjs'],
   ['node scripts/mv-harnais-tri2.mjs'],
+  ['node scripts/mv-harnais-parc-xls.mjs'],
   ['node scripts/mv-harnais-tri3.mjs'],
   ['node scripts/mv-harnais-cuvgr3.mjs'],
   ['node scripts/mv-harnais-crb2.mjs', 'crb-2-le-couloir-des-courbes'],

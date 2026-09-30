@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v8.52
+// MA VIGNE — Service Worker v8.53
+// v8.53 (30/09/2026) — PARC-XLS : le fichier Excel des parcelles (Documents › Donnees brutes) demande le millesime et l'ordre —
+//   par nom A->Z / Z->A ou par rendement hL/ha fort->faible / faible->fort (absence toujours en fin) — et porte kilos, hL/ha
+//   (source _mlRendements), mesure/estime et fourchette. reglages.js + utils.js (WHATS_NEW, MV_AIDE) + index. APP 7.78 -> 7.79.
 // v8.52 (30/09/2026) — ROB-2 Accueil/Vigne/Journal (mv-harnais-robustesse-accueil) : la fiche d'une parcelle affichait
 //   « NaN h » restantes des que la periode portait l'Entreplantation (tache a trous, sans bareme a l'hectare) sur une parcelle
 //   sans trous — app.js/openDP. Et l'Accueil affichait « NaN h » au total des qu'une tache « en temps reel » du catalogue
@@ -4198,7 +4201,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.52';
+const CACHE_NAME   = 'mavigne-v8.53';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4214,7 +4217,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.52 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.53 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4234,7 +4237,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.52 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.53 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

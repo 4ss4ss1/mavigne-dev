@@ -792,6 +792,19 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       Pilotage et dans le rapport de saison.</li>
   </ul>
 
+  <h4 style="margin-top:22px"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> Le fichier Excel des parcelles</h4>
+  <p>Au même endroit, <span class="path">Vigne › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> › Documents › Parcelles — fichier Excel</span>. Une
+  ligne par parcelle : surface, statut, avancement, <b>kilos et rendement du millésime en hL/ha</b>, puis une
+  colonne par tâche. Avant le téléchargement, vous choisissez le millésime et l'ordre :</p>
+  <ul class="dot">
+    <li><b>Par nom</b>, de A à Z ou de Z à A.</li>
+    <li><b>Par rendement</b>, le plus fort d'abord ou le plus faible d'abord. Une parcelle sans récolte
+      ce millésime-là part <b>en fin de liste dans les deux sens</b>, cases vides : une donnée absente
+      n'est pas un petit rendement.</li>
+    <li><b>Le chiffre est celui de l'écran Le millésime.</b> Tant que tous les kilos n'ont pas un volume
+      connu, il est <b>estimé</b> : la colonne d'à côté le dit, et donne la fourchette.</li>
+  </ul>
+
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-journal"></use></svg> Journal — la trace de ce qui a été fait</h3>
   <ul class="dot">
     <li>Bouton <b>+ Ajouter</b> : date, parcelle(s), tâche, intervenants, durée, commentaire.</li>
@@ -847,7 +860,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Parcelles &amp; secteurs météo</b> : affecter chaque parcelle à sa commune. Dès que deux
     communes sont actives, une météo par secteur apparaît sur l'Accueil.</li>
     <li><b>Documents</b> : l'état du vignoble, le rapport de saison, le journal des travaux et
-    l'avancement par parcelle en fichier. Le catalogue complet reste dans
+    le fichier Excel des parcelles. Le catalogue complet reste dans
     <span class="path">Réglages › Domaine › Documents &amp; impressions</span>.</li>
   </ul>
   <p>L'en-tête dit <b>Vigne</b> sur les trois onglets — Accueil, Parcelles, Journal — comme les autres
@@ -3100,7 +3113,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     des manipulations de cave, inventaire des fûts et des intrants, récoltes, suivi d'élevage,
     carnet d'entretien. <b>Ils ne tiennent lieu d'aucune déclaration officielle.</b></li>
     <li><b>Données brutes</b> — pour votre tableur ou votre comptable : journal des travaux,
-    avancement par parcelle, sauvegarde complète, restauration.</li>
+    fichier des parcelles (trié par nom ou par rendement), sauvegarde complète, restauration.</li>
   </ul>
   <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div>Un document dont le module
   est masqué pour vous n'apparaît pas dans la liste : inutile de proposer un registre de cave à un
@@ -3157,7 +3170,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     rapport de saison, planning de l'année, bilan de campagne, registre des manipulations, inventaires,
     carnet d'entretien.</td></tr>
     <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg> <b>Données brutes</b></td><td>Vos données telles quelles, pour votre tableur ou votre
-    comptable : journal des travaux, avancement par parcelle, sauvegarde complète.</td></tr>
+    comptable : journal des travaux, fichier des parcelles (avancement et rendement, trié par nom ou par
+    rendement), sauvegarde complète.</td></tr>
   </table></div>
   <p>Depuis peu, chaque module a aussi <b>ses</b> documents à portée de main, dans la roue crantée de son
   en-tête : ceux de la vigne dans <span class="path">Vigne › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg></span>, le carnet d'entretien dans

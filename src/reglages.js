@@ -3379,9 +3379,9 @@ var MV_DOCS = [
   { f:'brut',  act:'csvJournal',   mod:'vigne', ico:'\u{1F4CB}', bg:'var(--vert-pale)',  fm:'csv',
     t:'Journal des travaux \u2014 fichier Excel', ask:'Par date, puis par parcelle',
     s:'Toutes les entr\u00e9es depuis la mise en service \u2014 sans bornes de date \u2014 avec parcelle, t\u00e2che, ouvrier et statut. Pour une ann\u00e9e pr\u00e9cise, pr\u00e9f\u00e9rez le journal des interventions.' },
-  { f:'brut',  act:'csvParcelles', mod:'vigne', ico:'\u{1F5FA}\u{FE0F}', bg:'var(--or-pale)', fm:'csv',
-    t:'Avancement par parcelle', ask:'Par parcelle, de A \u00e0 Z',
-    s:'Une ligne par parcelle, une colonne par t\u00e2che.' },
+  { f:'brut',  act:'csvParcelles', mod:'vigne', ico:'\u{1F5FA}\u{FE0F}', bg:'var(--or-pale)', fm:'csv', ov:true,
+    t:'Parcelles \u2014 fichier Excel', ask:'Mill\u00e9sime, puis tri',
+    s:'Une ligne par parcelle\u00a0: surface, avancement, rendement du mill\u00e9sime en hL/ha, puis une colonne par t\u00e2che. Tri par nom ou par rendement.' },
   { f:'brut',  act:'json',         mod:'', ico:'\u{1F4BE}', bg:'var(--gris-clair)', fm:'json',
     t:'Sauvegarde compl\u00e8te', ask:'',
     s:'Tout le domaine dans un seul fichier\u00a0: parcelles, journal, planning, cave, r\u00e9serve, '
@@ -4257,25 +4257,117 @@ function _jivChoix(F){
   openOv(id);
 }
 
-function exportCSVParcelles(){
+/* ═══════════════════════════════════════════════════════════════════════════
+   ★ PARC-XLS — LE FICHIER EXCEL DES PARCELLES SE TRIE, ET IL PORTE LE RENDEMENT
+   ═══════════════════════════════════════════════════════════════════════════
+   Demande de Nico (30/09) : « pouvoir faire l'excel des parcelles, trier par
+   nom, du + au - et du - au + pour les rendements en hL/ha ».
+
+   Le fichier sortait toujours A -> Z, sans aucun rendement : il fallait ouvrir
+   le Millesime a cote pour savoir quelle parcelle avait produit quoi.
+
+   ★ UNE SEULE SOURCE POUR LE hL/ha : `_mlRendements(mil)` (cave.js), celle de
+     l'ecran Le millesime et de la carte du Pilotage. Aucun calcul neuf ici : le
+     fichier et l'ecran ne peuvent pas diverger (§Economie : deux definitions
+     d'un meme chiffre finissent toujours par diverger).
+   ⚠️ UN hL/ha N'EST UNE MESURE QUE SI TOUS LES KILOS ONT UN VOLUME CONNU (§63b).
+     Sinon la colonne porte la meilleure estimation (ce qui trie), et deux
+     colonnes a cote disent « estime » et donnent la fourchette. Un tableur qui
+     compare des chiffres doit savoir lesquels sont mesures.
+   ⚠️ UNE PARCELLE SANS RECOLTE SUR LE MILLESIME PART EN FIN DANS LES DEUX SENS.
+     Elle n'est pas la moins productive : l'ecrire en tete d'un tri croissant la
+     ferait lire comme un zero (meme regle que l'etat du vignoble, TRI-2).
+   ⚠️ TOUT TIENT DANS CETTE FONCTION, et c'est voulu : le harnais TRI-2 l'extrait
+     seule et l'appelle sans feuille de tri. Sans feuille (utils.js en retard chez
+     un client), le fichier sort A -> Z sur le millesime le plus recent — le
+     fichier d'avant ce lot, plus ses colonnes de rendement.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function exportCSVParcelles(c){
   if(!isAdmin())return;
+  let ans=[];
+  try{ ans=(typeof window._vendRecAnnees==='function')?(window._vendRecAnnees()||[]).map(String):[]; }
+  catch(e){ ans=[]; if(window.logError) window.logError({level:'info',cat:'csvParcelles',msg:'millesimes illisibles : '+(e&&e.message)}); }
+  const CLES=[{ v:'nom', lbl:'Parcelle', a:'A \u2192 Z', z:'Z \u2192 A' }];
+  if(ans.length) CLES.push({ v:'rendement', lbl:'Rendement', a:'le plus faible d\u2019abord', z:'le plus fort d\u2019abord' });
+  if(!c){
+    const nb=(window.PARCELLES||[]).length;
+    const opts={
+      titre:'Parcelles \u2014 fichier Excel', icone:'liste', memo:'csvParcelles',
+      sub:ans.length
+        ? 'Le mill\u00e9sime du rendement, puis l\u2019ordre des lignes.'
+        : 'Dans quel ordre ranger les parcelles\u00a0? Aucune r\u00e9colte n\u2019est encore saisie\u00a0: le fichier sort sans rendement.',
+      annees:ans, anLbl:'Mill\u00e9sime',
+      cles:CLES, defaut:{ an:ans[0]||'', cle:'nom', sens:'asc' },
+      btn:'T\u00e9l\u00e9charger le fichier',
+      compte:function(){ return nb+' parcelle'+(nb>1?'s':''); },
+      note:function(ch){
+        if(ch.cle==='rendement')
+          return 'Rendement en <b>hL/ha</b> du mill\u00e9sime '+ch.an+', le m\u00eame chiffre que dans Le mill\u00e9sime. '
+               + 'Une parcelle sans r\u00e9colte cette ann\u00e9e-l\u00e0 part <b>en fin de liste</b>, dans les deux sens\u00a0: '
+               + 'une donn\u00e9e absente n\u2019est pas un petit rendement.';
+        return ans.length
+          ? 'Le fichier donne aussi le rendement du mill\u00e9sime choisi en hL/ha, et dit s\u2019il est mesur\u00e9 ou estim\u00e9.'
+          : '';
+      },
+      cb:function(ch){ exportCSVParcelles(ch); }
+    };
+    if(typeof window._mvTriOuvrir==='function' && window._mvTriOuvrir(opts)) return;
+    c={ an:ans[0]||'', cle:'nom', sens:'asc' };
+  }
+  const mil=(c.an && ans.indexOf(String(c.an))!==-1) ? String(c.an) : (ans[0]||'');
+  const cle=(c.cle==='rendement' && mil) ? 'rendement' : 'nom';
+  const sg=(c.sens==='desc')?-1:1;
+
+  // Le rendement de chaque parcelle, lu tel que l'ecran Le millesime le calcule.
+  const rdt={};
+  if(mil && typeof window._mlRendements==='function'){
+    try{ (window._mlRendements(mil)||[]).forEach(function(o){ if(o&&o.parcelle&&o.parcelle.nom) rdt[o.parcelle.nom]=o; }); }
+    catch(e){ if(window.logError) window.logError({level:'warning',cat:'csvParcelles',msg:'rendements illisibles : '+(e&&e.message)}); }
+  }
+  const hlDe=p=>{ const o=rdt[p.nom]; return (o && o.hlHa!=null && isFinite(o.hlHa)) ? o.hlHa : null; };
+
   const tachesSaison=window.getTachesSaison();
   const colsTaches=tachesSaison.map(t=>t.nom);
-  const cols=['Parcelle','Surface (ha)','Statut','Avancement (%)',...colsTaches];
+  const colsRdt=mil ? ['Kilos '+mil,'Rendement '+mil+' (hL/ha)','Rendement '+mil+' : mesur\u00e9 ou estim\u00e9','Fourchette '+mil+' (hL/ha)'] : [];
+  const cols=['Parcelle','Surface (ha)','Statut','Avancement (%)',...colsRdt,...colsTaches];
   const q=v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`;
   const dec=v=>String(v==null?'':v).replace('.',',');
-  /* Meme regle que le journal : un ordre stable, pose sans question. */
-  const parcs=window.PARCELLES.slice().sort((a,b)=>
-    String(a.nom||'').localeCompare(String(b.nom||''),'fr'));
+  const parcs=window.PARCELLES.slice().sort((a,b)=>{
+    const nomCmp=String(a.nom||'').localeCompare(String(b.nom||''),'fr');
+    if(cle==='rendement'){
+      const x=hlDe(a), y=hlDe(b);
+      if(x==null || y==null){                              // l'absence ne se compare pas
+        if(x==null && y==null) return nomCmp;
+        return x==null ? 1 : -1;
+      }
+      return (x-y) ? sg*(x-y) : nomCmp;
+    }
+    return sg*nomCmp;
+  });
   const rows=parcs.map(p=>{
     const cl=window.getPCls(p);
     const tacheVals=colsTaches.map(t=>p.taches[t]||'Non démarré');
-    return [q(p.nom),q(dec(p.surface)),q(p.statut),q(cl.pct),...tacheVals.map(q)].join(';');
+    let vr=[];
+    if(mil){
+      const o=rdt[p.nom], hl=hlDe(p);
+      if(!o) vr=['','','',''];
+      else {
+        const fiab = hl==null ? 'surface inconnue'
+          : o.statut==='mesure' ? 'mesur\u00e9'
+          : o.statut==='partiel' ? ('estim\u00e9 \u2014 '+(o.pctOk||0)+'\u00a0% mesur\u00e9')
+          : 'estim\u00e9';
+        const four=(hl!=null && o.statut!=='mesure' && o.hlMin!=null && o.hlMax!=null)
+          ? (dec(o.hlMin)+' \u2013 '+dec(o.hlMax)) : '';
+        vr=[Math.round(o.kg||0), hl==null?'':dec(hl), fiab, four];
+      }
+    }
+    return [q(p.nom),q(dec(p.surface)),q(p.statut),q(cl.pct),...vr.map(q),...tacheVals.map(q)].join(';');
   });
   const csv=[cols.map(q).join(';'),...rows].join('\r\n');
   const date=_mvToday();
-  dlFile('\uFEFF'+csv,`mavigne_parcelles_${date}.csv`,'text/csv;charset=utf-8');
+  dlFile('\uFEFF'+csv,`mavigne_parcelles_${mil?mil+'_':''}${date}.csv`,'text/csv;charset=utf-8');
   showExportFeedback(`${window.PARCELLES.length} parcelles exportées en CSV !`);
+  if(window.showToast) window.showToast(window.PARCELLES.length+' parcelles \u00b7 fichier Excel t\u00e9l\u00e9charg\u00e9','#3D6B27');
 }
 
 function exportPDFMois(){

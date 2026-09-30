@@ -239,3 +239,4 @@
 | 194 | 194. ★★★ REV-1 — ÉCONOMIE › REVIENT : RENDEMENT, BOUTEILLES ET COÛT VIGNE DU MILLÉSIME (28/09 — `src/pilota… | `docs/claude/chantiers-180-229.md` |
 | 195 | 195. ★★ RET-G — UN SEUL RETOUR CLIENT POUR PLUSIEURS LIVRAISONS (28/09 — `src/cuvier.js` · `src/utils.js` (… | `docs/claude/chantiers-180-229.md` |
 | 196 | 196. ★★ ARRACH-1 — ARRACHER UNE PARCELLE DEPUIS SA FICHE, RÉSERVÉ À L'ADMIN (29/09 — `src/app.js` · `src/ut… | `docs/claude/chantiers-180-229.md` |
+| 197 | 197. ★★ PARC-XLS — LE FICHIER EXCEL DES PARCELLES SE TRIE, ET PORTE LE RENDEMENT EN hL/ha (30/09 — `src/reg… | `docs/claude/chantiers-180-229.md` |
