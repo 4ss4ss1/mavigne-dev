@@ -98,6 +98,10 @@ if (CONTRE) {
 // ── L'application entière, par le chargeur partagé des harnais ROB-2 (mv-app-node.mjs) ──
 const A = await chargerApp({ remplace: Object.assign({ 'pilotage.js': CIBLE }, APP_CIBLE ? { 'app.js': APP_CIBLE } : {}) });
 const { G, els, mem, JOURNAL_ERR, _D } = A;
+// Tâches par défaut (prises au chargement) et tâches « en temps réel » du catalogue, sans barème à
+// l'hectare — le 29/09, en activer une affichait « NaN h » à l'Accueil (calcHeures, que le Pilotage relit).
+const TACHES_DEF = JSON.parse(JSON.stringify(G.TACHES || []));
+const TACHES_TEMPS_REEL = ['Arrachage', 'Desherbage', 'Effeuillage', 'Vendange'].map(nom => ({ nom, anytime: true, tempsReel: true, complementaire: true }));
 
 let ok = 0, ko = 0;
 const T = (nom, c, d) => { if (c) ok++; else { ko++; console.log('   ROUGE  ' + nom + (d ? '  → ' + d : '')); } };
@@ -121,7 +125,7 @@ function rendre(onglet, sous, axe) {
 // window.X directement laisserait app.js lire ses copies d'avant.
 function poser(d) {
   const A = G.applyFbData;
-  const cles = { membres: d.MEMBRES || [], parcelles: d.PARCELLES || [], saisons: d.SAISONS || [], config: d.CONFIG || {},
+  const cles = { membres: d.MEMBRES || [], parcelles: d.PARCELLES || [], saisons: d.SAISONS || [], config: d.CONFIG || {}, taches: d.TACHES || TACHES_DEF,
     journal: d.JOURNAL || [], sessions: d.SESSIONS || [], traitements: d.TRAITEMENTS || [], activites: d.ACTIVITES || [],
     historique: d.HISTORIQUE || [], tracteurs_list: d.TRACTEURS_LIST || [], entretiens: d.ENTRETIENS || [], reparateur: d.REP || {},
     reparateur_hist: d.REPARATEUR_HIST || {}, planning_templates: d.PT || {}, planning_entries: d.PE || {}, planning_hsup: d.PH || {},
@@ -267,7 +271,8 @@ function domaineAuHasard() {
   //   (pilotage.js `_pilData` sur un tracteur nul ; app.js `_parcConcern` sur une parcelle nulle).
   //   ★ LISTES-1 : applyFbData écarte ces éléments à l'entrée (app.js, _mvListeObjets). Section C.
   for (const L of [PARCELLES, JOURNAL, SESSIONS, TRAITEMENTS, ENTRETIENS, TRACTEURS_LIST]) if (rnd() < .08) L.push(pick([null, 'x', 0, [], {}]));
-  return { MEMBRES, PARCELLES, SAISONS, JOURNAL, SESSIONS, TRACTEURS_LIST, ENTRETIENS, TRAITEMENTS, HISTORIQUE, REPARATEUR_HIST, ACTIVITES: [{ nom: 'Rognage', tracteurDefautId: 'tr1' }],
+  const TACHES = TACHES_DEF.concat(TACHES_TEMPS_REEL.filter(() => rnd() < .4));
+  return { TACHES, MEMBRES, PARCELLES, SAISONS, JOURNAL, SESSIONS, TRACTEURS_LIST, ENTRETIENS, TRAITEMENTS, HISTORIQUE, REPARATEUR_HIST, ACTIVITES: [{ nom: 'Rognage', tracteurDefautId: 'tr1' }],
     CONFIG, PT: { 2026: { standard: tpl } }, PE, PH: {}, CE, CV, IN, PAIE, REP: rnd() < .2 ? { tr1: { depuis: unJour() } } : {} };
 }
 // Réglages mémorisés par le module (formes d'avant, abîmées)

@@ -4844,11 +4844,16 @@ function calcHeures(){
     // saison active) -> aligne sur les branches niveaux/passages/trous qui recalculent deja a la volee.
     const validees=parcT.filter(p=>getTacheStatut(p,t.nom)==='Validé');
     const surfDone=validees.reduce((s,p)=>s+(p.surface||0),0);
-    const hTotal=Math.round(t.hha*surfT);
-    const hDone=Math.round(t.hha*surfDone*10)/10;
+    // ROB-2 (29/09) : les tâches « en temps réel » du catalogue (Arrachage, Désherbage manuel,
+    //   Effeuillage, Vendange) n'ont PAS de barème `hha` — elles se comptent au journal. Activer l'une
+    //   d'elles faisait `undefined × surface` : l'Accueil affichait « NaN h » au total. Sans barème,
+    //   la tâche ne prévoit rien (0 h), comme les branches passages/niveaux (`t.hha || 0`).
+    const _hha=(t.hha||0);
+    const hTotal=Math.round(_hha*surfT);
+    const hDone=Math.round(_hha*surfDone*10)/10;
     const hReste=Math.round((hTotal-hDone)*10)/10;
     const pct=surfT>0?Math.round(surfDone/surfT*100):0;
-    TRAVAUX[t.nom]={h_ha:t.hha,saison:((t.saisons&&t.saisons[0])||t.saison||''),surf_done:Math.round(surfDone*100)/100,surf_total:surfT,pct,h_total:hTotal,h_done:hDone,h_reste:hReste};
+    TRAVAUX[t.nom]={h_ha:_hha,saison:((t.saisons&&t.saisons[0])||t.saison||''),surf_done:Math.round(surfDone*100)/100,surf_total:surfT,pct,h_total:hTotal,h_done:hDone,h_reste:hReste};
     totalReste+=hReste;totalTotal+=hTotal;
     return{nom:t.nom,pct,h_done:hDone,h_total:hTotal,h_reste:hReste};
   });
@@ -8139,7 +8144,12 @@ function openDP(nom){
   let hReste=0;
   tachesSaison.forEach(t=>{
     if(exclues.includes(t.nom))return;
-    if(getTacheStatut(p,t.nom)!=='Validé')hReste+=((t.trous||t.nom==='Entreplantation')&&(p.plantation_trous||0)>0)?(p.plantation_trous*_plantMinTrou()/60):(t.hha*p.surface);
+    // ROB-2 (29/09) : une tâche « à trous » (Entreplantation) n'a PAS de barème à l'hectare — elle ne se
+    //   compte qu'en trous. Sur une parcelle sans trous à planter, elle faisait `undefined × surface` :
+    //   la fiche affichait « NaN h » restantes dès que la période portait l'Entreplantation (liste par
+    //   défaut). Même règle que calcHeures : sans trous, 0 h ; sinon le barème `t.hha || 0`.
+    var _dpTrous=(t.trous||t.nom==='Entreplantation');
+    if(getTacheStatut(p,t.nom)!=='Validé')hReste+=_dpTrous?(((p.plantation_trous||0)>0)?(p.plantation_trous*_plantMinTrou()/60):0):((t.hha||0)*(parseFloat(p.surface)||0));
   });
   document.getElementById('dp-hreste').innerHTML=Math.round(hReste)+'<span style="font-size:13px"> h</span>';
   var _dpVS=(typeof _visuSaison==='function'?_visuSaison():((getSaisonActive()||{}).nom||''));

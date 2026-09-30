@@ -3,11 +3,12 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **28 septembre 2026 (ROB-2 Réserve)** — ★★ **LE TIRAGE AU HASARD PASSE SUR LA RÉSERVE**
-> (`mv-harnais-robustesse-reserve` : onglets, saisies, fiche de chaque lot, parc emprunté par la Cave, 4 documents imprimables).
-> Trouvé : un fût nul faisait tomber trois écrans → **LISTES-1 étendu au document INTRANTS** (`_MV_SOUS_LISTES.intrants`).
-> ROB-2 reste : **Accueil/Journal** (`app.js`). Cumul non déployé depuis `d42e975` : SCHEMA-1, CTX-1, DMA-1, n°16, ROB-2 Pilotage +
-> Cave + Tracteur + Réserve, LISTES-1. **Bump SW 8.49 → 8.50, APP 7.77 inchangé** (invisible).
+> Dernière consolidation : **29 septembre 2026 (ROB-2 Accueil/Journal — ROB-2 TERMINÉ)** — ★★ **LE TIRAGE AU HASARD COUVRE
+> DÉSORMAIS TOUS LES MODULES** : Planning, Pilotage, Cave/Cuvier, Tracteur, Réserve, Accueil/Vigne/Journal. Le dernier a trouvé un
+> vrai défaut de production : **« NaN h » restantes dans la fiche d'une parcelle** dès que la période portait l'Entreplantation
+> (`openDP`), et en relisant l'entrée 26 du backlog, **« NaN h » au total de l'Accueil** dès qu'une tâche « en temps réel » est
+> activée (`calcHeures`). Les deux corrigés ; entrées 26, 0h et REV-1 ④ rayées. Posé sur **ARRACH-1** (§196, `c3cccda`, APP 7.78 · SW 8.51 : arracher une parcelle depuis
+> sa fiche). **Bump SW 8.51 → 8.52, APP 7.78 inchangé** (invisible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1806,7 +1807,8 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
    fiche a suffi pour ce lot ; le soustraire exigerait un planning d'activités qui n'existe pas.
 3. **`_pecRevData` est appelé par la Synthèse ET par Revient** : `_ecoTempsVigne` n'a qu'une case de cache, les deux fenêtres
    (période et cycle) se chassent. Coût non mesuré sur un vrai domaine — à regarder si l'onglet rame.
-4. **ROB-2** : ajouter le Revient au tirage au hasard quand le lot Pilotage passera.
+4. ✅ ~~**ROB-2** : ajouter le Revient au tirage au hasard~~ — **fait avec le Pilotage (28/09)** : `mv-harnais-robustesse-pilotage` rend
+   Économie › Revient (`rev`) sur les deux axes, à chaque domaine tiré.
 
 ### ⚠️ RULES-1 — LE PREMIER RUN RÉEL, PUIS DEUX ÉCARTS À TRANCHER (§189, posé le 27/09)
 
@@ -1866,8 +1868,18 @@ et **4 documents imprimables** (lus par une doublure de `_mvDocOpen` qui garde c
 un fût nul faisait tomber les Fûts, le parc de la Cave et le document → **LISTES-1 étendu au document INTRANTS** (SW 8.50).
 ⚠️ `fut_four`, `fut_ref`, `achat_four` sont des listes de **noms** (textes) : hors du filtre. Retiré du tirage : un intrant sans
 catégorie ou sans unité (deux listes déroulantes, jamais vides).
+✅ **Accueil/Vigne/Journal faits le 29/09** : `mv-harnais-robustesse-accueil` — Accueil, Vigne (toutes, tâche simple, à
+passages, à niveaux), Journal (tous, un ouvrier, une tâche, une parcelle), fiche + panneaux passages/niveaux de chaque
+parcelle, le mur, la saisie, l'équipe du jour ; 4 contre-épreuves dont une qui retire le correctif. ★★ **Vrai défaut de
+production trouvé** : la fiche d'une parcelle affichait **« NaN h » restantes** dès que la période portait l'Entreplantation
+(liste de tâches par défaut) — tâche « à trous » sans barème à l'hectare, `undefined × surface` sur une parcelle sans trous.
+Corrigé dans `openDP` (SW 8.52). ★★ **Et un second, trouvé en relisant l'entrée 26 du backlog** : activer une tâche « en temps
+réel » du catalogue (Arrachage, Désherbage, Effeuillage, Vendange — **aucun barème `hha`**) affichait **« NaN h » au total de
+l'Accueil** (`calcHeures`, branche des tâches simples). `t.hha || 0` comme les branches passages/niveaux. Le tirage de l'Accueil
+active désormais ces tâches au hasard (et celui du Pilotage aussi, sans qu'il ait montré le défaut). ⚠️ Retirés du tirage : surface en texte (les deux créateurs
+font `parseFloat`), entrée de journal sans date, météo sans `emoji`/`wind` (trois écrivains, toujours complets).
 Même patron, un lot par module, dans cet ordre : ~~**Pilotage**~~ · ~~**Cave/Cuvier**~~ ·
-~~**Tracteur**~~ · ~~**Réserve**~~ · **Accueil/Journal** (`app.js`). À chaque fois : données abîmées ET formes d'avant de ce que le
+~~**Tracteur**~~ · ~~**Réserve**~~ · ~~**Accueil/Journal**~~ (`app.js`). ★ **ROB-2 TERMINÉ le 29/09.** À chaque fois : données abîmées ET formes d'avant de ce que le
 module enregistre (instantanés, archives), toutes ses surfaces, rouge sur exception ou « undefined »/« NaN » affiché.
 
 ### ⚠️ QUESTION OUVERTE — L'ÉCART DE CADENCE ET LE TEMPS RÉEL (§172f ③, posée le 23/09)
@@ -2401,7 +2413,8 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
    `paie`** : ça donnerait un identifiant stable à un seul endroit et une fausse impression de
    sécurité partout ailleurs. Le vrai lot est *un identifiant de fiche membre*, et il touche bien
    plus que la paie. **Chantier à part entière, à chiffrer avant d'être promis.**
-0h. ★★ **`scripts/lint-cliquet.mjs` PLANTE** en `MODULE_NOT_FOUND` (constaté le 12/08 au soir en
+0h. ✅ **RAYÉ LE 29/09 — `lint-cliquet.mjs` démarre et passe** (« Aucune erreur nouvelle », joué par `npm run check`). Historique :
+   ~~**`scripts/lint-cliquet.mjs` PLANTE**~~ en `MODULE_NOT_FOUND` (constaté le 12/08 au soir en
    l'exécutant, pas en le supposant). **Préexistant**, mais ⚠️ *un linter qui ne démarre pas ne
    protège rien* — et il fait partie des paliers de test (§6b), donc son silence se lit comme un
    succès. Le réparer ou le retirer des paliers : les deux valent mieux que le laisser mort.
@@ -2502,8 +2515,9 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     en lisant un commentaire ; lire la fonction (règle vécue avec `mvprint.py` et DOCK).
 25. ✅ ~~**Ancien catalogue « Mes produits »**~~ — **RAYÉ. 0 occurrence dans tout `src/`.**
     Le backlog annonçait « 5 fichiers à arbitrer » : il n'y a plus rien à arbitrer.
-26. ★ **Vérifier les autres tâches `anytime:true`** — **cinq, vérifiées** : Entreplantation,
-    Arrachage, Désherbage manuel, Effeuillage, Vendange (`app.js:371`, `1020`, `1023-1026`).
+26. ✅ ~~**Vérifier les autres tâches `anytime:true`**~~ — **re-vérifié le 29/09, et deux défauts en sortaient** : aucune des
+    cinq n'a de barème `hha` ; l'Entreplantation faisait « NaN h » dans la fiche parcelle (`openDP`), les quatre « en temps réel »
+    faisaient « NaN h » au total de l'Accueil (`calcHeures`). Corrigés (SW 8.52), gardés par `mv-harnais-robustesse-accueil`.
 27. ★ **Variantes girondines** — le barème régional **existe** et `app.js:1062` nomme déjà le Médoc,
     le guyot double et les vignes de plus de 20 ans. **Reste la vérification documentaire :
     qu'aucun avenant postérieur à 2021 n'a révisé ces temps** (§30a).

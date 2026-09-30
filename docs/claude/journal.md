@@ -8,6 +8,12 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **28 septembre 2026 (ROB-2 Réserve)** — ★★ **LE TIRAGE AU HASARD PASSE SUR LA RÉSERVE**
+> (`mv-harnais-robustesse-reserve` : onglets, saisies, fiche de chaque lot, parc emprunté par la Cave, 4 documents imprimables).
+> Trouvé : un fût nul faisait tomber trois écrans → **LISTES-1 étendu au document INTRANTS** (`_MV_SOUS_LISTES.intrants`).
+> ROB-2 reste : **Accueil/Journal** (`app.js`). Cumul non déployé depuis `d42e975` : SCHEMA-1, CTX-1, DMA-1, n°16, ROB-2 Pilotage +
+> Cave + Tracteur + Réserve, LISTES-1. **Bump SW 8.49 → 8.50, APP 7.77 inchangé** (invisible).
+>
 > ★ Consolidation : **28 septembre 2026 (ROB-2 Tracteur)** — ★★ **LE TIRAGE AU HASARD PASSE SUR LE TRACTEUR**
 > (`mv-harnais-robustesse-tracteur`, chaque vue pour chaque tracteur, chaque session). Corrigé dans `tracteur.js` : quatre
 > « undefined » affichés et un `data-defid="undefined"` que produit toute activité sans tracteur par défaut. `REPARATEUR_HIST`
