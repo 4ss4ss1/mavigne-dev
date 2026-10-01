@@ -823,6 +823,12 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   travaillé dans les rangs décoche sa puce <b>« Moi »</b> dans le panneau de validation — ou <b>« Moi aussi dans les
   rangs »</b> sur la barre d'équipe de la tâche. La validation reste signée de son nom ; ses heures, elles, ne vont
   pas à la parcelle dans le temps réel du Pilotage. Le choix est retenu pour chaque tâche.</div></div>
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-equipe"></use></svg></span><div><b>Plusieurs équipes le même jour.</b>
+  Sur l'Accueil, l'administrateur touche <b>« Équipes du jour »</b> et range chacun dans une équipe. Toute la journée,
+  un salarié qui valide ou démarre une parcelle le fait avec <b>son</b> équipe : il n'a rien à cocher, ne peut pas la
+  changer et ne voit pas les autres. L'administrateur valide avec la sienne et peut corriger le groupe d'une validation.
+  Dans le Pilotage, chaque équipe garde ses parcelles. Rien de réglé, ou « Tout le monde ensemble » : l'application fait
+  comme d'habitude ; le lendemain, tout repart à zéro.</div></div>
 
   <details><summary>J'ai validé la mauvaise parcelle</summary>
     <div class="dbody">Touchez <b>Annuler</b> dans le message qui s'affiche juste après. Passé ce délai,
@@ -2896,8 +2902,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       qui attendent une validation sont dites sous le tableau</li>
       <li><b>Temps réel contre barème</b> : les heures « dans les rangs » du planning de chaque
       salarié — congés, absences, formation et conduite du tracteur retirés — sont versées aux
-      parcelles qu'il valide, lui ou son groupe. Plusieurs parcelles le même jour se partagent
-      <b>au prorata de la surface</b> ; les jours sans validation vont au travail validé ensuite.
+      parcelles validées ce jour-là : la validation vaut pour le groupe coché, et quelqu'un qui n'est
+      nommé sur aucune validation du jour voit sa journée partagée entre toutes les parcelles validées
+      ce jour-là. Plusieurs parcelles le même jour se partagent <b>au prorata du barème</b> (pour un même
+      travail, la surface) ; les jours où personne ne valide vont aux parcelles validées ensuite. Un jour
+      où des <b>équipes du jour</b> sont posées sur l'Accueil, chaque équipe garde ses parcelles.
       Pour chaque travail, le <b>h/ha réel</b> se lit à côté du <b>h/ha du barème</b> : trois
       personnes huit heures sur 2 ha, c'est 12 h/ha — plus vite qu'un barème à 15</li>
       <li>S'appuie sur les taux horaires et le prix réel du GNR</li>

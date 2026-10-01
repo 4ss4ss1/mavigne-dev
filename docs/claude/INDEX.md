@@ -240,3 +240,5 @@
 | 195 | 195. ★★ RET-G — UN SEUL RETOUR CLIENT POUR PLUSIEURS LIVRAISONS (28/09 — `src/cuvier.js` · `src/utils.js` (… | `docs/claude/chantiers-180-229.md` |
 | 196 | 196. ★★ ARRACH-1 — ARRACHER UNE PARCELLE DEPUIS SA FICHE, RÉSERVÉ À L'ADMIN (29/09 — `src/app.js` · `src/ut… | `docs/claude/chantiers-180-229.md` |
 | 197 | 197. ★★ PARC-XLS — LE FICHIER EXCEL DES PARCELLES SE TRIE, ET PORTE LE RENDEMENT EN hL/ha (30/09 — `src/reg… | `docs/claude/chantiers-180-229.md` |
+| 198 | 198. ★★★ PAR-1 — LA JOURNÉE SE PARTAGE ENTRE TOUTES LES PARCELLES VALIDÉES CE JOUR-LÀ, AU PRORATA DU BARÈME… | `docs/claude/chantiers-180-229.md` |
+| 199 | 199. ★★★ ÉQUIPES-1 — LES ÉQUIPES DU JOUR, POSÉES PAR L'ADMIN DEPUIS L'ACCUEIL (30/09 — `src/app.js` · `src/… | `docs/claude/chantiers-180-229.md` |

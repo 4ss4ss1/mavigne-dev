@@ -919,3 +919,80 @@ documents à brancher sur la feuille de tri ; ce lot le fait.
   alors **sans rendement** dans le fichier, sans ligne qui le dise.
 - Le plafond d'appellation (`o.max`) n'est pas dans le fichier : non demandé. À ajouter si Nico veut comparer au plafond dans
   son tableur.
+
+## 198. ★★★ PAR-1 — LA JOURNÉE SE PARTAGE ENTRE TOUTES LES PARCELLES VALIDÉES CE JOUR-LÀ, AU PRORATA DU BARÈME (30/09 — `src/pilotage.js` · `src/utils.js` (MV_INFO ×2, WHATS_NEW) · `guide/11-pilotage.html` · `index.html` · `public/sw.js` · `scripts/mv-harnais-temps-vigne.mjs` · **bump commun avec ÉQUIPES-1 (§199) : APP 7.79 → 7.80, SW 8.53 → 8.54**, base `8905702`)
+
+### 198a. Le constat
+
+Capture d'Économie › Parcelles (dégrafage, 12 % fait partout) : le total tenait (7 133 € payés pour 6 353 € au barème, +12 %),
+mais les écarts allaient **par séries identiques au dixième** — −90,2 % sur neuf petites parcelles (7 à 17 € de dégrafage chacune),
++297,4 % sur sept autres, ±49 %, +32 %, +83 %. Un même pourcentage sur une série = une validation commune.
+Cause lue dans `_ecoTempsVigne` : les heures d'un salarié n'allaient qu'aux validations où il était **nommé** (`qui` ou
+`membresEquipe`). Nico valide souvent pour l'équipe : groupe non coché → seules SES heures allaient aux parcelles du jour, celles de
+l'équipe s'accumulaient jusqu'à sa prochaine validation nommée, qui ramassait tout.
+
+### 198b. L'arbitrage
+
+Premier jet de Claude : griser les parcelles « validées en lot ». **Refusé net par Nico** : *« si je valide quatre parcelles
+aujourd'hui, les quatre on les étale sur la journée au prorata du barème… bien sûr qu'on veut afficher les écarts »*.
+★ La règle demandée au §172a était déjà une règle de JOURNÉE (« le nombre de vignes validées en une journée ») ; le report par
+personne nommée était la lecture de Claude, pas celle de Nico.
+Règle retenue, par salarié et par jour :
+1. **nommé** sur des validations du jour → ses heures (et son report) vont à ces validations (règle du groupe, TV-1 — deux équipes
+   cochées le même jour gardent chacune leurs parcelles) ;
+2. **pas nommé**, mais le domaine a validé ce jour-là → ses heures vont à **toutes** les validations du jour (`evJour`) ;
+3. **décoché** ce jour-là (`quiHors`, relevé par `e.hors`), ou **aucune** validation ce jour-là → report, comme avant.
+Partage au prorata du **barème** de la clôture (`e.b`, calculé une fois par `_ecoTvBar`) au lieu de la surface : identique pour un
+même travail, juste pour des travaux mêlés. Une revalidation (`dup`, barème 0) ne prend rien à côté d'une vraie clôture ; seule ce
+jour-là, repli surface (les heures ne se perdent jamais).
+⚠️ **Limite assumée** : quelqu'un qui passe plusieurs jours seul sur une parcelle non finie, pendant que d'autres valident, voit ses
+jours partir sur les parcelles des autres. C'est la contrepartie de la règle de Nico ; à revoir s'il le signale.
+Le tableau Parcelles, Coût par travail, Temps réel contre barème et le Revient lisent le même moteur : tous suivent.
+
+### 198c. Mesuré
+
+`mv-harnais-temps-vigne` : **79 assertions, 28 contre-épreuves** (avant : 69 / 24), toutes les anciennes vertes sans retouche.
+Neuves : P1-P3 (équipe non cochée, veille reportée sur la journée validée), P4-P5 (taille + relevage le même jour : 15/40 et 25/40),
+P6-P7 (deux équipes cochées), P8-P10 (revalidation du même jour, invariant). Contre-épreuves : prorata surface, journée du domaine
+retirée, décoché dans la journée, revalidation qui prend sa part ; « la validation vaut pour le seul validateur » ne rougissait plus
+(le pool couvrait l'oubli) — c'est P6 qui la tient désormais.
+**Non mesuré** : aucune donnée réelle (pas d'accès), aucun rendu regardé. Signe attendu chez Nico : les séries −90 % / +297 %
+disparaissent, le total MO du tableau ne bouge presque pas (seules les heures en attente peuvent baisser).
+
+## 199. ★★★ ÉQUIPES-1 — LES ÉQUIPES DU JOUR, POSÉES PAR L'ADMIN DEPUIS L'ACCUEIL (30/09 — `src/app.js` · `src/utils.js` (lecteur, MV_AIDE, MV_INFO, WHATS_NEW) · `src/pilotage.js` · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `guide/11-pilotage.html` · `scripts/mv-harnais-equipes-jour.mjs` (neuf) · `scripts/mv-harnais-temps-vigne.mjs` · `scripts/mv-harnais-liste.mjs` · **bump APP 7.79 → 7.80, SW 8.53 → 8.54**, base `8905702` + PAR-1)
+
+### 199a. D'où ça vient
+
+La limite de PAR-1 (§198b) : quelqu'un seul plusieurs jours sur une parcelle pendant que d'autres valident voyait ses jours partir
+sur leurs parcelles. Deux pistes écartées par Nico : **« Démarrer » obligatoire** (*« je ne veux pas qu'ils aient à appuyer sur
+démarrer… il faut juste qu'ils aient à valider »*) ; **équipes fixes dans Réglages** (*« les équipes changent souvent »*). Retenu :
+*« un réglage rapide, équipe du jour, depuis l'accueil… si j'indique rien, on continue comme maintenant ; si j'indique des
+équipes, on force »*. Découvert en route : la « barre d'équipe de la tâche » (`_eqtFor`) existait, mais **par téléphone**
+(localStorage), choisie par chacun, modifiable — rien que l'admin puisse imposer.
+
+### 199b. Ce qui est fait
+
+- **Donnée** : `CONFIG.equipes_jour = { 'AAAA-MM-JJ': [ {m:[noms]}, … ] }` — des objets, pas des tableaux de tableaux (Firestore les
+  refuse ; `_fsNoNestedArrays` les aurait convertis en objets indexés illisibles par le lecteur). `config` est admin-only en
+  écriture (firestore.rules, inchangé) et lisible par tous les membres. Deux ans gardés (le coût relit le cycle du millésime).
+- **Lecteur partagé** (`utils.js`) : `_mvEqJour(iso)`, `_mvEqDe(nom, iso)`, sur `window` pour `pilotage.js`. Équipe vide ignorée.
+- **Accueil** : ligne « Équipes du jour » sous la priorité (dans le bloc `priorite`, pour ne pas créer de nouveau bloc de
+  disposition), `_mvEqJourRender`. Admin : touche → `ovEqJour`, chaque salarié (hors bureau) sur Aucune / Équipe 1-3.
+  Salarié : voit **sa** seule équipe, lecture seule.
+- **Saisie** : `_mvEqApplique(e)` sur les **sept** `JOURNAL.unshift` (panneau, journal, niveaux, passages, appui, Démarrer ×2).
+  Salarié dans une équipe : groupe **forcé** (et `quiHors` retiré). Admin : son équipe si aucun groupe choisi, sa correction sinon.
+  `_mvEqUi(prefix)` dans les quatre panneaux : salarié → choix du groupe caché, note « Équipe du jour » ; admin → pré-coché.
+  `_eqtFor` lit l'équipe du jour d'abord (appui rapide, journal) ; `_eqtHors` faux un jour où l'admin est dans une équipe ;
+  `openPTeamJour` refuse au salarié, renvoie l'admin sur le réglage du jour.
+- **Calcul** (`_ecoTvEvents`, `_ecoTempsVigne`) : un jour d'équipes, **pas de journée du domaine** (`eqJour[d]`) ; une validation
+  sans groupe (hors réseau, ou d'avant la saisie forcée) prend l'équipe du jour de son auteur ; un groupe écrit l'emporte.
+
+### 199c. Mesuré
+
+`mv-harnais-equipes-jour` (neuf, aux portes via `mv-harnais-liste`) : **27 assertions, 8 contre-épreuves** — fonctions réelles
+exécutées (forçage salarié, correction admin, seul dans son équipe, date sans équipes, écriture en objets, purge, effacement,
+salarié qui ne peut pas enregistrer) et branchements (sept écritures, quatre panneaux, Accueil, barre, gestes exposés).
+`mv-harnais-temps-vigne` : **84 assertions, 30 contre-épreuves** (Q1-Q5 : Alicia seule garde ses jours, validation sans groupe,
+groupe écrit). **Non vérifié** : aucun rendu regardé (la ligne de l'Accueil, le panneau sur téléphone, les deux thèmes), aucune
+donnée réelle. ⚠️ Un téléphone qui n'a pas encore reçu le réglage écrit sans groupe forcé : c'est le calcul qui rattrape.
+**Ouvert** : `_ecoEquipeByParc` (taux pondéré de la parcelle) lit toujours le seul groupe écrit ; plus de trois équipes : non prévu.

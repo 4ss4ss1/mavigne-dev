@@ -6238,6 +6238,7 @@ function renderHome(){
     var el=document.getElementById(id); if(el)el.textContent=(typeof _visuSaison==='function'?_visuSaison():saison.nom);
   });
   if(typeof _updateSaisonSelector==='function')_updateSaisonSelector();
+  _mvEqJourRender();   // ÉQUIPES-1
 
 
   // Stats band Accueil
@@ -8376,7 +8377,7 @@ function marquerEnCours(nomParcelle,nomTache,btn){
   } else {
     p.taches[nomTache]='En cours';
     const today=_mvToday();
-    JOURNAL.unshift({id:Date.now().toString(16),date:today,parcelle:nomParcelle,tache:nomTache,qui:currentUser.nom,statut:'En cours',equipe:false,ts_debut:Date.now()});
+    JOURNAL.unshift(_mvEqApplique({id:Date.now().toString(16),date:today,parcelle:nomParcelle,tache:nomTache,qui:currentUser.nom,statut:'En cours',equipe:false,ts_debut:Date.now()}));
     injectMeteoIfNeeded(today);
     saveData('journal');
   }
@@ -8547,6 +8548,7 @@ function openValidationPanel(nomParcelle,nomTache,btn){
   var vpTrous=document.getElementById('vp-trous');
   if(vpPlant)vpPlant.style.display=((_vp_tDef(nomTache)&&_vp_tDef(nomTache).trous)||nomTache==='Entreplantation')?'block':'none';
   if(vpTrous){var _pvObj=PARCELLES.find(function(x){return x.nom===nomParcelle;});vpTrous.value=(_pvObj&&_pvObj.plantation_trous)?_pvObj.plantation_trous:'';}
+  _mvEqUi('vp');   // ÉQUIPES-1
   openOv('ovValidation');
 }
 function toggleEquipeMode(val){
@@ -8584,6 +8586,142 @@ function toggleJEMode(val){
 //   ⚠️ Pas pour un non-administrateur : un salarié qui valide EST dans les rangs.
 //   ⚠️ Un groupe VIDE sans le validateur n'a personne : la validation est refusée, pas enregistrée
 //      avec zéro travailleur.
+// ★★ ÉQUIPES-1 (30/09/2026) — LES ÉQUIPES DU JOUR. Nico : « je veux un réglage rapide, équipe du jour,
+//   depuis l'accueil… si j'indique rien, on continue comme maintenant ; si j'indique des équipes, on force ».
+//   · Réglage : admin seul (CONFIG est admin-only en écriture, firestore.rules), valable le jour même.
+//   · Saisie : un salarié qui valide ou démarre reçoit SON équipe du jour, sans pouvoir la changer
+//     (_mvEqApplique, appelé sur les sept écritures du journal). L'admin reçoit la sienne par défaut
+//     et garde le droit de corriger le groupe d'une validation.
+//   · Calcul (_ecoTvEvents / _ecoTempsVigne) : un jour avec équipes, personne ne rejoint la journée
+//     des autres — chaque équipe garde ses parcelles (§199).
+function _mvEqJourMoi(){
+  try{
+    var me=currentUser&&currentUser.nom;
+    if(!me || typeof window._mvEqDe!=='function') return null;
+    var T=window._mvEqDe(me,_mvToday());
+    return T ? T.filter(function(n){ return n!==me; }) : null;
+  }catch(e){ return null; }
+}
+function _mvEqApplique(e){
+  try{
+    if(!e || !e.qui || typeof window._mvEqDe!=='function') return e;
+    var T=window._mvEqDe(e.qui, e.date||_mvToday());
+    if(!T) return e;
+    var autres=T.filter(function(n){ return n!==e.qui; });
+    if(!_mvMoiAdmin()){
+      e.equipe=autres.length>0; e.membresEquipe=autres.slice(); delete e.quiHors; e.eqJour=true;
+    } else if(!(Array.isArray(e.membresEquipe) && e.membresEquipe.length)){
+      e.equipe=autres.length>0; e.membresEquipe=autres.slice(); if(autres.length) e.eqJour=true;
+    }
+  }catch(err){ if(window._mvAvale) window._mvAvale(err,'app.js/_mvEqApplique'); }
+  return e;
+}
+// Les panneaux de validation : l'équipe du jour s'affiche. Salarié : le choix du groupe disparaît.
+// Admin : son équipe est pré-cochée, modifiable.
+function _mvEqUi(prefix){
+  try{
+    var pick=document.getElementById(prefix+'-equipe-pick');
+    if(!pick) return;
+    var note=document.getElementById(prefix+'-eqj-note');
+    if(!note){ note=document.createElement('div'); note.id=prefix+'-eqj-note'; note.className='mv-l'; note.style.display='none'; pick.parentNode.insertBefore(note,pick); }
+    var me=currentUser&&currentUser.nom;
+    var T=(me && typeof window._mvEqDe==='function') ? window._mvEqDe(me,_mvToday()) : null;
+    if(!T){ note.style.display='none'; pick.style.display=''; return; }
+    var autres=T.filter(function(n){ return n!==me; });
+    note.style.display='';
+    if(!_mvMoiAdmin()){
+      pick.style.display='none';
+      var sec=document.getElementById(prefix+'-equipe-section'); if(sec) sec.style.display='none';
+      var hv=document.getElementById(prefix+'-equipe-val'); if(hv) hv.value=autres.length?'oui':'non';
+      note.textContent='\u00c9quipe du jour : '+T.join(' + ');
+      return;
+    }
+    pick.style.display='';
+    note.textContent='\u00c9quipe du jour : '+T.join(' + ')+' (modifiable)';
+    if(autres.length){
+      if(prefix==='vp') toggleEquipeMode('oui'); else if(prefix==='niv') toggleNivEquipeMode('oui');
+      else if(prefix==='pass') togglePassEquipeMode('oui'); else if(prefix==='je') toggleJEMode('oui');
+      document.querySelectorAll('#'+prefix+'-membres-pick .pchk.mbr-chk').forEach(function(el){
+        var on=autres.indexOf(el.dataset.nom)>=0; el.classList.toggle('sel',on); el.classList.toggle('vert',on);
+      });
+    }
+  }catch(err){ if(window._mvAvale) window._mvAvale(err,'app.js/_mvEqUi'); }
+}
+// ── La carte de l'Accueil et son réglage ──
+var _EQJ_SEL={};
+function _mvEqMembres(){ return (MEMBRES||[]).filter(function(m){ return m && m.nom && m.statut!=='Inactif' && !m.bureau; }); }
+function _mvEqJourRender(){
+  var w=document.getElementById('home-eqj-wrap'), tx=document.getElementById('home-eqj-txt');
+  if(!w || !tx) return;
+  var iso=_mvToday(), T=(typeof window._mvEqJour==='function')?window._mvEqJour(iso):null;
+  if(!_mvMoiAdmin()){
+    var me=currentUser&&currentUser.nom, mine=(T&&me)?window._mvEqDe(me,iso):null;
+    if(!mine){ w.style.display='none'; return; }
+    w.style.display=''; w.classList.remove('home-prio-pill-vide');
+    tx.textContent='Mon \u00e9quipe du jour : '+mine.join(' + ');
+    return;
+  }
+  w.style.display='';
+  if(!T){ w.classList.add('home-prio-pill-vide'); tx.textContent='\u00c9quipes du jour : tout le monde ensemble'; }
+  else { w.classList.remove('home-prio-pill-vide'); tx.textContent='\u00c9quipes du jour : '+T.map(function(t){ return t.join(' + '); }).join(' \u00b7 '); }
+}
+function openEqJour(){
+  if(!_mvMoiAdmin()) return;
+  var iso=_mvToday(), T=window._mvEqJour(iso)||[];
+  _EQJ_SEL={};
+  T.forEach(function(t,i){ t.forEach(function(n){ _EQJ_SEL[n]=i+1; }); });
+  var d=document.getElementById('eqj-date');
+  if(d){ var p=iso.split('-'); d.textContent='Aujourd\u2019hui, '+p[2]+'/'+p[1]+'/'+p[0]; }
+  _mvEqRows();
+  openOv('ovEqJour');
+}
+function _mvEqRows(){
+  var c=document.getElementById('eqj-rows'); if(!c) return;
+  c.innerHTML=_mvEqMembres().map(function(m){
+    var cur=_EQJ_SEL[m.nom]||0;
+    var ch=[0,1,2,3].map(function(k){
+      return '<div class="pchk'+(cur===k?' sel vert':'')+'" data-eqj-n="'+_escAttr(m.nom)+'" data-eqj-k="'+k+'" onclick="_mvEqPick(this)">'+(k?('\u00c9quipe '+k):'Aucune')+'</div>';
+    }).join('');
+    return '<div class="fl" style="margin-top:10px">'+_escHtml(m.nom)+'</div><div class="ppicker">'+ch+'</div>';
+  }).join('');
+}
+function _mvEqPick(el){
+  var n=el.getAttribute('data-eqj-n'), k=parseInt(el.getAttribute('data-eqj-k'),10)||0;
+  if(k) _EQJ_SEL[n]=k; else delete _EQJ_SEL[n];
+  _mvEqRows();
+}
+function _mvEqEcrire(iso, teams){
+  var cfg=window.CONFIG||{};
+  var E=(cfg.equipes_jour && typeof cfg.equipes_jour==='object' && !Array.isArray(cfg.equipes_jour)) ? Object.assign({},cfg.equipes_jour) : {};
+  if(teams && teams.length) E[iso]=teams.map(function(t){ return {m:t.slice()}; }); else delete E[iso];
+  // Deux ans gardés : le coût relit les journées passées (période consultée, cycle du millésime).
+  var lim=new Date(iso+'T12:00:00'); lim.setDate(lim.getDate()-730);
+  var limIso=_mvISO(lim);
+  Object.keys(E).forEach(function(k){ if(k<limIso) delete E[k]; });
+  cfg.equipes_jour=E; window.CONFIG=cfg;
+  if(typeof CONFIG!=='undefined') CONFIG=cfg;
+  saveData('config');
+}
+function _mvEqApres(msg){
+  closeOv(null,'ovEqJour');
+  _mvEqJourRender();
+  if(typeof _pvRenderTeamBar==='function'){ try{ _pvRenderTeamBar(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvEqApres'); } }
+  showToast(msg,'#3D6B27');
+}
+function saveEqJour(){
+  if(!_mvMoiAdmin()) return;
+  var by={};
+  Object.keys(_EQJ_SEL).forEach(function(n){ var k=_EQJ_SEL[n]; if(k>0) (by[k]=by[k]||[]).push(n); });
+  var teams=Object.keys(by).sort().map(function(k){ return by[k]; });
+  if(!teams.length){ clearEqJour(); return; }
+  _mvEqEcrire(_mvToday(), teams);
+  _mvEqApres(teams.length+' \u00e9quipe'+(teams.length>1?'s':'')+' pour aujourd\u2019hui');
+}
+function clearEqJour(){
+  if(!_mvMoiAdmin()) return;
+  _mvEqEcrire(_mvToday(), []);
+  _mvEqApres('Aujourd\u2019hui : tout le monde ensemble');
+}
 function _mvMoiAdmin(){ try{ return (typeof isAdmin==='function'&&isAdmin()) && !!(currentUser&&currentUser.nom); }catch(e){ return false; } }
 function _mvQuiHors(containerId){
   if(!_mvMoiAdmin()) return false;
@@ -8633,7 +8771,7 @@ async function confirmValidation(){
   var _mDeb=_findDebutTache(_validParcelle,_validTache,date)||date;
   var _mSnap=await fetchMeteoMoyenne(_mDeb,date);
   if(_mSnap)jEntry.meteo_snapshot=_mSnap;
-  JOURNAL.unshift(jEntry);
+  JOURNAL.unshift(_mvEqApplique(jEntry));
   recalcTravaux(_validTache);
   injectMeteoIfNeeded(date);
   saveData('parcelles'); saveData('journal'); saveData('travaux');
@@ -8703,6 +8841,7 @@ function openJournalEntry(){
   _buildMembresCheckboxes('je-membres-pick','');
   var _jeTs=document.getElementById('je-tache'); if(_jeTs){_jeTs.onchange=_jePrefillTeam;}
   _jePrefillTeam();
+  _mvEqUi('je');   // ÉQUIPES-1
   openOv('ovJournalEntry');
 }
 async function saveJournalEntry(){
@@ -8724,7 +8863,7 @@ async function saveJournalEntry(){
     var _mSnap=await fetchMeteoMoyenne(_mDeb,date);
     if(_mSnap)jEntry.meteo_snapshot=_mSnap;
   }
-  JOURNAL.unshift(jEntry);
+  JOURNAL.unshift(_mvEqApplique(jEntry));
   // Mettre à jour le statut de la parcelle si validé
   if(statut==='Validé'||statut==='En cours'){
     const p=PARCELLES.find(x=>x.nom===parcelle);
@@ -9229,6 +9368,7 @@ function openNiveauxPanel(nomParcelle, nomTache) {
   var _nhv=document.getElementById('niv-equipe-val');if(_nhv)_nhv.value='non';
   var _nsec=document.getElementById('niv-equipe-section');if(_nsec)_nsec.style.display='none';
   _renderNiveauxModal();
+  _mvEqUi('niv');   // ÉQUIPES-1
   openOv('ovNiveaux');
 }
 
@@ -9358,7 +9498,7 @@ function confirmNiveaux(){
   var membresEquipe=equipe?_getSelectedMembres('niv-membres-pick'):[];
   var _jeN={id:Date.now().toString(16),date:date,parcelle:_nivParcelle,tache:_nivTache,qui:currentUser.nom,statut:statut,equipe:equipe,membresEquipe:membresEquipe,niveaux:_nivSelDone.slice().sort()};
   if(quiHors&&equipe)_jeN.quiHors=true;
-  JOURNAL.unshift(_jeN);
+  JOURNAL.unshift(_mvEqApplique(_jeN));
   recalcTravaux(_nivTache);
   injectMeteoIfNeeded(date);
   saveData('parcelles');saveData('journal');saveData('travaux');
@@ -9404,6 +9544,7 @@ function openPassagesPanel(nomParcelle, nomTache){
   var _phv=document.getElementById('pass-equipe-val');if(_phv)_phv.value='non';
   var _psec=document.getElementById('pass-equipe-section');if(_psec)_psec.style.display='none';
   _renderPassagesModal();
+  _mvEqUi('pass');   // ÉQUIPES-1
   openOv('ovPassages');
 }
 
@@ -9497,7 +9638,7 @@ function confirmPassages(){
   var statut=doneCnt>=planNb?'Validé':(doneCnt>0||commParcelle.length>0)?'En cours':'Non démarré';
   var _jeP={id:Date.now().toString(16),date:date,parcelle:_passParcelle,tache:_passTache,qui:currentUser.nom,statut:statut,equipe:equipe,membresEquipe:membresEquipe,passages:doneParcelle};
   if(quiHors&&equipe)_jeP.quiHors=true;
-  JOURNAL.unshift(_jeP);
+  JOURNAL.unshift(_mvEqApplique(_jeP));
   recalcTravaux(_passTache);
   injectMeteoIfNeeded(date);
   saveData('parcelles');saveData('journal');saveData('travaux');
@@ -11459,6 +11600,10 @@ async function refreshApp(){
   if (typeof toggleEquipeMode !== "undefined") window.toggleEquipeMode = toggleEquipeMode;
   if (typeof toggleHomeCard !== "undefined") window.toggleHomeCard = toggleHomeCard;
   if (typeof toggleJEMode !== "undefined") window.toggleJEMode = toggleJEMode;
+  if (typeof openEqJour !== "undefined") window.openEqJour = openEqJour;   // ÉQUIPES-1
+  if (typeof saveEqJour !== "undefined") window.saveEqJour = saveEqJour;
+  if (typeof clearEqJour !== "undefined") window.clearEqJour = clearEqJour;
+  if (typeof _mvEqPick !== "undefined") window._mvEqPick = _mvEqPick;
   if (typeof togglePrioPill !== "undefined") window.togglePrioPill = togglePrioPill;
   if (typeof toggleRole !== "undefined") window.toggleRole = toggleRole;
   if (typeof toggleSDShowDone !== "undefined") window.toggleSDShowDone = toggleSDShowDone;
@@ -11602,9 +11747,9 @@ function _eqtLoad(){
 function _eqtSave(){try{localStorage.setItem(_eqtKey(),JSON.stringify(EQUIPE_TACHE));localStorage.setItem(_eqtRecentKey(),JSON.stringify(EQUIPE_RECENT));}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_eqtSave'); }}
 // TV-2 : « le validateur n'est pas dans les rangs », mémorisé PAR TÂCHE à côté de l'équipe
 //   (clé réservée __hors, comme __default). Lu seulement pour un administrateur.
-function _eqtHors(task){ if(!_eqtLoaded)_eqtLoad(); if(!_mvMoiAdmin()) return false; var h=EQUIPE_TACHE.__hors; return !!(h&&typeof h==='object'&&!Array.isArray(h)&&h[task]); }
+function _eqtHors(task){ if(!_eqtLoaded)_eqtLoad(); if(!_mvMoiAdmin()) return false; if(_mvEqJourMoi()) return false; var h=EQUIPE_TACHE.__hors; return !!(h&&typeof h==='object'&&!Array.isArray(h)&&h[task]); }
 function _eqtSetHors(task,v){ if(!_eqtLoaded)_eqtLoad(); var h=(EQUIPE_TACHE.__hors&&typeof EQUIPE_TACHE.__hors==='object'&&!Array.isArray(EQUIPE_TACHE.__hors))?EQUIPE_TACHE.__hors:{}; if(v) h[task]=1; else delete h[task]; EQUIPE_TACHE.__hors=h; _eqtSave(); }
-function _eqtFor(task){ if(!_eqtLoaded)_eqtLoad(); var t=(EQUIPE_TACHE[task]!==undefined)?EQUIPE_TACHE[task]:(EQUIPE_TACHE.__default||[]); return _eqtClean(t); }
+function _eqtFor(task){ if(!_eqtLoaded)_eqtLoad(); var _dj=_mvEqJourMoi(); if(_dj) return _eqtClean(_dj);   /* ÉQUIPES-1 : l'équipe du jour d'abord */ var t=(EQUIPE_TACHE[task]!==undefined)?EQUIPE_TACHE[task]:(EQUIPE_TACHE.__default||[]); return _eqtClean(t); }
 function _eqtSet(task,team){ if(!_eqtLoaded)_eqtLoad(); team=_eqtClean(team); EQUIPE_TACHE[task]=team; _eqtPushRecent(team); _eqtSave(); }
 
 function _pvDef(nom){return (TACHES||[]).find(function(t){return t.nom===nom;});}
@@ -11681,6 +11826,7 @@ function _pvRenderTeamBar(){
 
 var _pvTeamSel=[], _pvMoiHors=false;
 function openPTeamJour(){
+  if(_mvEqJourMoi()){ if(_mvMoiAdmin()) openEqJour(); else showToast('\u00c9quipe du jour fix\u00e9e par l\u2019administrateur','#7A4F2E'); return; }   // ÉQUIPES-1
   _pvTeamSel=_eqtFor(pTacheFilter).slice();
   _pvMoiHors=_eqtHors(pTacheFilter);
   var tt=document.getElementById('pv-team-task');if(tt)tt.textContent=((typeof tNom==='function')?tNom(pTacheFilter):pTacheFilter);
@@ -11776,7 +11922,7 @@ function pQuickValidate(nom,evt){
   }
   var jEntry=Object.assign({id:jid,date:date,parcelle:nom,tache:task,qui:currentUser.nom,equipe:equipe,membresEquipe:membresEquipe},extra);
   if(quiHors) jEntry.quiHors=true;   // TV-2
-  JOURNAL.unshift(jEntry);
+  JOURNAL.unshift(_mvEqApplique(jEntry));
   recalcTravaux(task);
   injectMeteoIfNeeded(date);
   saveData('parcelles');saveData('journal');saveData('travaux');
@@ -11831,7 +11977,7 @@ function pQuickStart(nom,evt){
   if(type==='simple'){
     if((p.taches[task]||'Non d\u00e9marr\u00e9')!=='Non d\u00e9marr\u00e9'){renderParcelles();return;}
     p.taches[task]='En cours';
-    JOURNAL.unshift({id:Date.now().toString(16),date:date,parcelle:nom,tache:task,qui:currentUser.nom,statut:'En cours',equipe:false,ts_debut:Date.now()});
+    JOURNAL.unshift(_mvEqApplique({id:Date.now().toString(16),date:date,parcelle:nom,tache:task,qui:currentUser.nom,statut:'En cours',equipe:false,ts_debut:Date.now()}));
     injectMeteoIfNeeded(date);
     saveData('journal');
   } else {

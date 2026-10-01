@@ -5671,8 +5671,17 @@ function _ecoTvEvents(d0, d1){
     if(!clot || dt<d0) return;
     var noms=[]; if(j.qui && !j.quiHors) noms.push(j.qui);   // TV-2 : le validateur hors des rangs ne compte pas
     (j.membresEquipe||[]).forEach(function(n){ if(n && noms.indexOf(n)<0) noms.push(n); });
-    var e={ date:dt, parc:nom, tache:j.tache, surf:parseFloat(p.surface)||0, noms:noms,
-            niv:nNiv, pass:nPass, trous:j.plantation_trous||null, p:p, dup:dup };
+    // ★★ ÉQUIPES-1 : un jour où l'admin a posé des équipes, une validation SANS groupe (faite hors réseau,
+    //   avant que le téléphone ait reçu le réglage, ou d'avant la saisie forcée) prend l'équipe du jour de
+    //   son auteur. Un groupe écrit l'emporte : c'est ce que la saisie a forcé, ou ce que l'admin a corrigé.
+    var EQd=(typeof window._mvEqJour==='function') ? window._mvEqJour(dt) : null;
+    if(EQd && !((j.membresEquipe||[]).length) && j.qui){
+      EQd.forEach(function(t){ if(t.indexOf(String(j.qui))<0) return;
+        t.forEach(function(n){ if(n && n!==j.qui && noms.indexOf(n)<0) noms.push(n); }); });
+    }
+    var e={ date:dt, parc:nom, tache:j.tache, surf:parseFloat(p.surface)||0, noms:noms, eqj:!!EQd,
+            niv:nNiv, pass:nPass, trous:j.plantation_trous||null, p:p, dup:dup,
+            hors:(j.qui && j.quiHors) ? String(j.qui) : '' };   // PAR-1 : décoché ce jour-là, il ne rejoint pas la journée du domaine
     (byPair[k]=byPair[k]||[]).push(e);
     ev.push(e);
   });
@@ -5721,10 +5730,33 @@ function _ecoTempsVigne(win){
   if(typeof window._planChampPersRange!=='function'){ _ECO_TV={key:key,v:vide}; return vide; }
 
   var E=_ecoTvEvents(d0, fin);
-  var evBy={};                       // nom -> date -> [evenements]
-  E.ev.forEach(function(e){ e.noms.forEach(function(n){
-    (evBy[n]=evBy[n]||{}); (evBy[n][e.date]=evBy[n][e.date]||[]).push(e);
-  }); });
+  // ★★★ PAR-1 (30/09/2026) — LA JOURNÉE SE PARTAGE ENTRE LES PARCELLES VALIDÉES CE JOUR-LÀ, AU PRORATA DU BARÈME.
+  // Nico, capture du tableau Parcelles à l'appui (dégrafage : des séries de parcelles à −90 %, d'autres à +297 %) :
+  //   « si je valide quatre parcelles aujourd'hui, les quatre on les étale sur la journée au prorata du barème ».
+  // AVANT : les heures d'un salarié n'allaient qu'aux validations où il était NOMMÉ. Nico valide souvent pour
+  //   l'équipe : quand le groupe n'était pas coché, seules SES heures allaient aux parcelles du jour (−90 %), et
+  //   celles de l'équipe s'accumulaient jusqu'à sa prochaine validation nommée, qui ramassait tout (+297 %).
+  //   Le total d'un travail restait juste ; la parcelle, non.
+  // MAINTENANT, par salarié et par jour :
+  //   · nommé sur des validations du jour → ses heures (et son report) vont à CES validations (règle du groupe, TV-1) ;
+  //   · pas nommé, mais le domaine a validé ce jour-là → ses heures vont à TOUTES les validations du jour ;
+  //   · décoché ce jour-là (quiHors, TV-2) ou aucune validation ce jour-là → report, comme avant.
+  //   Le partage se fait au prorata du BARÈME de chaque clôture (surface × h/ha du travail, du niveau, du passage,
+  //   ou trous) : même travail = même chose que la surface ; travaux mêlés = chacun selon ce qu'il demande.
+  //   Une revalidation (barème 0) ne prend rien si une vraie clôture est là ; seule ce jour-là, elle retombe sur la surface.
+  // ★★ ÉQUIPES-1 : un jour avec des équipes posées par l'admin, la journée du domaine n'existe pas —
+  //   chaque équipe garde ses parcelles, et quelqu'un hors de toute équipe garde ses heures pour SES
+  //   validations (le cas « seul trois jours sur sa parcelle pendant que les autres valident »).
+  var evBy={}, evJour={}, horsJour={}, eqJour={};   // … · date -> 1 quand des équipes étaient posées
+  E.ev.forEach(function(e){
+    e.b = e.dup ? 0 : _ecoTvBar(e.p, _ecoTvDef(e.tache), e);
+    if(e.eqj) eqJour[e.date]=1;
+    (evJour[e.date]=evJour[e.date]||[]).push(e);
+    if(e.hors) (horsJour[e.date]=horsJour[e.date]||{})[e.hors]=1;
+    e.noms.forEach(function(n){
+      (evBy[n]=evBy[n]||{}); (evBy[n][e.date]=evBy[n][e.date]||[]).push(e);
+    });
+  });
   var tr={condH:{}};
   try{ tr=_ecoTracHByParc({d0:d0,d1:fin}); }catch(e){ tr={condH:{}}; }
   var cave=_ecoCaveJours(d0, fin);
@@ -5757,12 +5789,13 @@ function _ecoTempsVigne(win){
         if(tx>0){ var eu=hv*tx; g.eur+=eu; eurT+=eu; byD[d]=(byD[d]||0)+eu; accE+=eu; }
       }
       var L=(evBy[m.nom]||{})[d];
+      if(!(L && L.length) && evJour[d] && !eqJour[d] && !(horsJour[d] && horsJour[d][m.nom])) L=evJour[d];   // PAR-1 : la journée du domaine (pas un jour d'équipes)
       if(L && L.length && acc>0){
-        // Prorata de la SURFACE (regle de Nico). Surfaces toutes nulles : parts egales,
-        // plutot que de perdre les heures.
-        var S=0; L.forEach(function(e){ S+=e.surf; });
+        // PAR-1 : prorata du BARÈME (règle de Nico). Barèmes tous nuls (revalidations seules) :
+        // la surface ; surfaces nulles aussi : parts égales, plutôt que de perdre les heures.
+        var S=0, Sb=0; L.forEach(function(e){ S+=e.surf; Sb+=(e.b||0); });
         L.forEach(function(e){
-          var part=(S>0)?(e.surf/S):(1/L.length), v=acc*part;
+          var part=(Sb>0)?((e.b||0)/Sb):((S>0)?(e.surf/S):(1/L.length)), v=acc*part;
           var k=e.parc+'\u0000'+e.tache;
           var P=pairs[k]||(pairs[k]={parc:e.parc, tache:e.tache, h:0, eur:0, bar:0, surf:0, n:0, noms:{}});
           P.h+=v; P.eur+=accE*part; P.noms[m.nom]=1;

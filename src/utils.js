@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.79';
+export const APP_VERSION = '7.80';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -722,6 +722,20 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.80', items: [
+    { emoji: 'equipe', titre: 'Les équipes du jour, depuis l\u2019Accueil',
+      desc: "Quand le domaine travaille en plusieurs équipes, l\u2019administrateur touche «\u00a0Équipes du jour\u00a0» sur l\u2019Accueil et répartit "
+        + "chacun. Toute la journée, un salarié qui valide ou démarre une parcelle le fait avec <b>son</b> équipe, sans rien cocher et sans "
+        + "pouvoir la changer. Dans le Pilotage, chaque équipe garde ses parcelles\u00a0: quelqu\u2019un qui passe plusieurs jours seul sur une "
+        + "grande parcelle voit ses heures y aller, et plus sur celles des autres. Rien de réglé\u00a0: l\u2019application fait comme avant, et "
+        + "le lendemain tout repart à zéro." },
+    { emoji: 'raisin', titre: 'Pilotage\u00a0: le coût parcelle par parcelle devient cohérent',
+      desc: "Dans Économie › Parcelles, des séries de parcelles affichaient \u221290\u00a0% et d\u2019autres +300\u00a0%\u00a0: quand vous validiez "
+        + "pour l\u2019équipe sans la cocher, seules vos heures allaient aux parcelles du jour, et celles de l\u2019équipe partaient sur sa "
+        + "validation suivante. Désormais, la journée de tous ceux qui travaillent dans les rangs se partage entre <b>toutes les parcelles "
+        + "validées ce jour-là</b>, au prorata du <b>barème</b>. Une équipe cochée garde ses parcelles, un administrateur décoché reste à "
+        + "part. Les chiffres par parcelle, le temps réel contre barème et le coût par travail changent donc un peu\u00a0: le total, lui, ne bouge pas." },
+  ] },
   { v: '7.79', items: [
     { emoji: 'liste', titre: 'Le fichier Excel des parcelles se trie, et donne le rendement',
       desc: "Le fichier des parcelles sortait toujours de A \u00e0 Z, sans aucun rendement. Avant de le t\u00e9l\u00e9charger, vous choisissez \u00e0 pr\u00e9sent "
@@ -3632,6 +3646,7 @@ var MV_AIDE = {
     ico: 'feuille', titre: 'Accueil', ancre: 'vigne',
     points: [
       ['La priorité du moment', "reste épinglée en haut : c’est ce que l’équipe attaque aujourd’hui."],
+      ['Équipes du jour', "juste sous la priorité. L’administrateur la touche pour répartir les salariés en équipes <b>pour la journée</b> : chacun validera et démarrera avec son équipe, sans pouvoir la changer, et ne voit pas les autres. Rien de réglé, ou « Tout le monde ensemble » : l’application fait comme d’habitude. Le lendemain, tout repart à zéro. Un salarié voit ici son équipe du jour, quand il y en a une."],
       ['La mise en route', "n’apparaît que chez l’administrateur d’un domaine neuf : sept étapes qui se cochent en lisant ce qui est déjà enregistré, rien à pointer à la main. Le bloc s’efface tout seul quand tout est fait."],
       ['Ma part du chantier', "montre ce que vous avez fait vous-même sur le travail en cours ; « Ma trace » ouvre le détail de votre campagne. Ce sont des hectares, jamais des heures, et rien n’est comparé entre collègues."],
       ['Appui long puis glisser', "déplace un bloc ; l’œil le masque. Chacun règle son Accueil."],
@@ -4067,11 +4082,12 @@ export const MV_INFO = {
   // ★ TV-1 (23/09/2026) — posée sur la carte « Temps réel contre barème » (_pecCarteTemps).
   'pil.eco.temps': { t: 'Temps réel contre barème', p: [
     'Pour chaque salarié, chaque jour : ses heures <b>dans les rangs</b> au planning — congés, récup, arrêts, absences et formation à zéro — moins ses heures de <b>conduite tracteur</b>, déjà mesurées par les sessions. Le bureau n\u2019entre pas. Un jour où il figure sur une <b>opération de cave</b>, sa journée entière sort de la vigne.',
-    'Ces heures sont versées aux travaux qu\u2019il <b>valide, lui ou son groupe</b> : une validation vaut pour toutes les personnes nommées. Trois personnes une heure sur un are, c\u2019est trois heures sur ce travail.',
-    'Plusieurs parcelles validées <b>le même jour</b> se partagent <b>au prorata de leur surface</b>. Trois personnes huit heures sur 1 ha, 0,5 ha et 0,5 ha : 24 h pour 2 ha, soit <b>12 h/ha</b> — contre 15 au barème, le travail est allé plus vite que la convention.',
-    'Une validation marque la <b>fin</b> d\u2019un travail. Les jours sans validation vont donc au travail que la personne valide <b>ensuite</b>. Ce qui n\u2019a pas encore trouvé de validation reste <b>en attente</b>, affiché sous le tableau — jamais perdu, jamais compté deux fois.',
-    'Pour le relevage et les travaux à passages, seul le niveau ou le passage <b>nouvellement fait</b> compte, et le barème est celui de ce niveau. Une validation annulée ne compte plus. Une parcelle <b>validée deux fois</b> sans annulation reçoit les heures des deux, mais son barème <b>une seule fois</b> : le travail n\u2019a pas été fait deux fois.',
-    '<b>Celui qui valide compte dans le groupe</b>, sauf s\u2019il s\u2019est décoché : un administrateur qui valide pour l\u2019équipe sans être dans les rangs retire sa puce « Moi », et ses heures du jour restent en attente. Les validations d\u2019avant ce réglage comptent leur auteur.'
+    'Ces heures sont versées aux parcelles <b>validées ce jour-là</b>. Une validation vaut pour toutes les personnes nommées : trois personnes une heure sur un are, c\u2019est trois heures sur ce travail. Quelqu\u2019un qui n\u2019est nommé sur aucune validation du jour voit sa journée partagée entre <b>toutes</b> les parcelles validées ce jour-là : valider pour l\u2019équipe sans la cocher ne fait pas perdre ses heures. Deux équipes cochées sur des parcelles différentes gardent chacune les leurs.',
+    'Plusieurs parcelles validées <b>le même jour</b> se partagent la journée <b>au prorata du barème</b> : pour un même travail, c\u2019est la surface. Trois personnes huit heures sur 1 ha, 0,5 ha et 0,5 ha de taille : 24 h pour 2 ha, soit <b>12 h/ha</b> — contre 15 au barème, le travail est allé plus vite que la convention. Une taille et un relevage validés le même jour se partagent la journée selon ce que chacun demande au barème.',
+    'Un jour où l\u2019administrateur a posé des <b>équipes du jour</b> (Accueil), chaque équipe garde ses parcelles : quelqu\u2019un qui n\u2019est pas dans le groupe d\u2019une validation n\u2019y met pas ses heures, il les garde pour ses propres validations. Une validation faite sans groupe ce jour-là prend l\u2019équipe du jour de son auteur.',
+    'Une validation marque la <b>fin</b> d\u2019un travail. Les jours où <b>personne</b> ne valide vont donc aux parcelles validées <b>ensuite</b>. Ce qui n\u2019a pas encore trouvé de validation reste <b>en attente</b>, affiché sous le tableau — jamais perdu, jamais compté deux fois.',
+    'Pour le relevage et les travaux à passages, seul le niveau ou le passage <b>nouvellement fait</b> compte, et le barème est celui de ce niveau. Une validation annulée ne compte plus. Une parcelle <b>validée deux fois</b> sans annulation ne compte son barème <b>qu\u2019une fois</b> : le travail n\u2019a pas été fait deux fois. Revalidée le même jour qu\u2019une autre parcelle, elle ne prend rien de la journée ; seule ce jour-là, elle la reçoit.',
+    '<b>Celui qui valide compte dans le groupe</b>, sauf s\u2019il s\u2019est décoché : un administrateur qui valide pour l\u2019équipe sans être dans les rangs retire sa puce « Moi », et ses heures du jour restent en attente — elles ne rejoignent pas non plus la journée des autres. Les validations d\u2019avant ce réglage comptent leur auteur.'
   ] },
 
   'pil.eco.remarques': { t: 'Les remarques du moment', p: [
@@ -4262,7 +4278,7 @@ export const MV_INFO = {
     '<b>MO</b> = main-d\u2019\u0153uvre <b>payée</b> pour la parcelle : les heures du planning versées à ses validations, au taux du jour. <b>Écart</b> = cette MO \u2212 le barème du travail fait (<b>+</b> = plus cher que prévu). <b>Reste</b> = main-d\u2019\u0153uvre <b>encore à faire</b>, au barème. <b>Budget</b> = le barème de la période.',
     '<b>Tracteur et phyto</b> sont du <b>réalisé</b> : seulement ce qui a été saisi, sans projection. Le <b>GNR</b> est l\u2019enveloppe réelle de vos pleins, répartie entre les parcelles au prorata des heures machine — à défaut d\u2019heures saisies, au prorata de la <b>surface</b>.',
     'Le <b>coût à l\u2019hectare</b> neutralise la taille. Ce qui reste, c\u2019est ce qu\u2019une parcelle a de particulier : plants à remplacer, passages en plus, équipe plus chère, tri des tâches.',
-    'La répartition d\u2019une journée entre plusieurs parcelles suit une <b>règle 1/N</b> : c\u2019est la seule convention inventée par le logiciel, et elle suppose qu\u2019une parcelle se fait dans la journée.'
+    'La <b>MO</b> d\u2019une parcelle suit la règle du temps réel : la journée de ceux qui sont dans les rangs se partage entre les parcelles <b>validées ce jour-là</b>, au prorata du barème, et les jours sans aucune validation vont aux parcelles validées ensuite. Une parcelle chère ou bon marché dit donc ce que l\u2019équipe y a passé entre deux validations — d\u2019où l\u2019intérêt de valider chaque parcelle le jour où elle est finie.'
   ] },
 
   'pil.exo.postes': { t: 'Les postes de l\u2019exercice', p: [
@@ -6312,6 +6328,33 @@ window.TCLS               = TCLS;
 window.TEMJ               = TEMJ;
 window.COULEURS_MBR       = COULEURS_MBR;
 window.APP_VERSION        = APP_VERSION;
+
+// ★★ ÉQUIPES-1 (30/09/2026) — LES ÉQUIPES DU JOUR, POSÉES PAR L'ADMINISTRATEUR DEPUIS L'ACCUEIL.
+//   CONFIG.equipes_jour = { 'AAAA-MM-JJ': [ {m:['Victor','Shana']}, {m:['Nico','Alicia']} ] }.
+//   ⚠️ Des objets {m:[…]} et non des tableaux de tableaux : Firestore refuse les tableaux imbriqués
+//      (_fsNoNestedArrays les convertirait en objets indexés, que ce lecteur ne relirait plus).
+//   Rien pour une date = rien de réglé : l'app se comporte comme avant. Lu par la saisie (app.js :
+//   le groupe est forcé) ET par le calcul du temps (pilotage.js : une validation hors réseau, sans
+//   groupe, est rattachée à l'équipe de son auteur ce jour-là).
+export function _mvEqJour(iso){
+  var c=window.CONFIG||{}, E=c.equipes_jour;
+  if(!E || typeof E!=='object' || Array.isArray(E)) return null;
+  var L=E[String(iso||'').slice(0,10)];
+  if(!Array.isArray(L)) return null;
+  var out=[];
+  L.forEach(function(t){
+    var m=(t && Array.isArray(t.m)) ? t.m.filter(function(n){ return n!=null && n!==''; }).map(String) : [];
+    if(m.length) out.push(m);
+  });
+  return out.length ? out : null;
+}
+export function _mvEqDe(nom, iso){
+  var L=_mvEqJour(iso); if(!L || nom==null) return null;
+  for(var i=0;i<L.length;i++){ if(L[i].indexOf(String(nom))>=0) return L[i].slice(); }
+  return null;
+}
+window._mvEqJour = _mvEqJour;
+window._mvEqDe   = _mvEqDe;
 window.MV_FORMAT          = MV_FORMAT;   // VER-1
 window._mvLectureSeule    = _mvLectureSeule;   // DROITS-1
 window.checkWhatsNew      = checkWhatsNew;

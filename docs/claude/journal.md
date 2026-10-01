@@ -8,6 +8,12 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **30 septembre 2026 (PARC-XLS)** — ★★ **LE FICHIER EXCEL DES PARCELLES SE TRIE ET PORTE LE
+> RENDEMENT** (§197). Demande de Nico : trier par nom, et par rendement en hL/ha dans les deux sens. `exportCSVParcelles`
+> ouvre la feuille de tri commune (`_mvTriOuvrir`) : millésime, puis nom A→Z / Z→A ou rendement fort→faible / faible→fort ;
+> colonnes kilos, hL/ha, mesuré/estimé, fourchette — **source unique `_mlRendements`**, aucun calcul neuf. Posé sur ROB-2
+> Accueil/Journal (`2ea6440`, SW 8.52). **Bump APP 7.78 → 7.79, SW 8.52 → 8.53** (visible).
+
 > ★ Consolidation : **29 septembre 2026 (ROB-2 Accueil/Journal — ROB-2 TERMINÉ)** — ★★ **LE TIRAGE AU HASARD COUVRE
 > DÉSORMAIS TOUS LES MODULES** : Planning, Pilotage, Cave/Cuvier, Tracteur, Réserve, Accueil/Vigne/Journal. Le dernier a trouvé un
 > vrai défaut de production : **« NaN h » restantes dans la fiche d'une parcelle** dès que la période portait l'Entreplantation

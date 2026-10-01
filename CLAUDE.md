@@ -3,11 +3,11 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **30 septembre 2026 (PARC-XLS)** — ★★ **LE FICHIER EXCEL DES PARCELLES SE TRIE ET PORTE LE
-> RENDEMENT** (§197). Demande de Nico : trier par nom, et par rendement en hL/ha dans les deux sens. `exportCSVParcelles`
-> ouvre la feuille de tri commune (`_mvTriOuvrir`) : millésime, puis nom A→Z / Z→A ou rendement fort→faible / faible→fort ;
-> colonnes kilos, hL/ha, mesuré/estimé, fourchette — **source unique `_mlRendements`**, aucun calcul neuf. Posé sur ROB-2
-> Accueil/Journal (`2ea6440`, SW 8.52). **Bump APP 7.78 → 7.79, SW 8.52 → 8.53** (visible).
+> Dernière consolidation : **30 septembre 2026 (PAR-1 + ÉQUIPES-1)** — ★★★ **LE TEMPS VIGNE SE PARTAGE PAR JOURNÉE, ET L'ADMIN
+> POSE LES ÉQUIPES DU JOUR.** PAR-1 (§198) : un salarié non coché rejoint les parcelles validées ce jour-là, au prorata du barème
+> (fin des séries −90 % / +297 % du tableau Parcelles). ÉQUIPES-1 (§199) : « Équipes du jour » sur l'Accueil (admin,
+> `CONFIG.equipes_jour`), groupe forcé à la saisie (`_mvEqApplique`, 7 écritures), et un jour d'équipes chaque équipe garde ses
+> parcelles. Posé sur **PARC-XLS** (§197, `8905702`, APP 7.79 · SW 8.53). **Bump APP 7.79 → 7.80, SW 8.53 → 8.54.**
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---

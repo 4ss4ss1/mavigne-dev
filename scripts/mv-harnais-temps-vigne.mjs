@@ -23,6 +23,11 @@
         seulement, jamais operateur ni analyse) ; _pecData et la courbe les lisent.
      R. RÉAL-1 (§188) : les euros suivent les heures jusqu'au travail et à la parcelle (le
         « Réalisé » des tableaux) ; une revalidation d'une tâche simple ne recompte pas le barème.
+     P. PAR-1 (§198) : la journée se partage entre TOUTES les parcelles validées ce jour-là, au prorata
+        du BARÈME — un salarié non nommé rejoint la journée du domaine ; le groupe nommé garde ses parcelles ;
+        le décoché (quiHors) reste en attente.
+     Q. ÉQUIPES-1 (§199) : un jour d'équipes posées par l'admin, pas de journée du domaine ; une
+        validation sans groupe prend l'équipe du jour de son auteur ; un groupe écrit l'emporte.
      C. TV-2 : le validateur administrateur peut se décocher (`quiHors`). Moteur exécuté ;
         les cinq chemins d'écriture d'app.js et les lecteurs du groupe lus sans commentaires.
 
@@ -60,7 +65,8 @@ const VOULUES = ['_ecoCaveJours', '_pexIso', '_pexD', '_pexIsoToMs2', '_pexIsoPl
 const PRELUDE = `
 var window = { PARCELLES:[], JOURNAL:[], MEMBRES:[], TACHES:[] };
 var HEURES = {}, COND = {}, PER = { nom:'Hiver', debut:'2026-01-05', fin:'2026-01-16' };
-var TAUX = {}, RATE0 = 18;
+var TAUX = {}, RATE0 = 18, EQJ = {};
+window._mvEqJour = function(iso){ var L=EQJ[iso]; return (L&&L.length)?L:null; };
 function _ecoRate(){ return RATE0; }
 window._mvPaieTauxEffAt = function(m, iso){ var t=TAUX[m.nom]; if(typeof t==='function') return t(iso); return t||0; };
 var _ECO_TV = null;
@@ -79,7 +85,7 @@ function charger(src) {
   if (manque.length) return { manque };
   const code = PRELUDE + morceaux.join('\n') + `
 ;return { tv: function(){ _ECO_TV=null; return _ecoTempsVigne(); },
-  set: function(o){ Object.assign(window, o.w||{}); if(o.h) HEURES=o.h; if(o.c) COND=o.c; if(o.per) PER=o.per; if(o.t) TAUX=o.t; } };`;
+  set: function(o){ Object.assign(window, o.w||{}); if(o.h) HEURES=o.h; if(o.c) COND=o.c; if(o.per) PER=o.per; if(o.t) TAUX=o.t; if(o.eq) EQJ=o.eq; } };`;
   return { M: new Function(code)() };
 }
 
@@ -252,6 +258,65 @@ function scenarios(M) {
   eq('R10 · une validation d\'une période passée ne rend pas celle-ci « déjà faite »', (V.taches.find(t => t.nom === 'Taille') || {}).bar, 30);
   M.set({ t: {} });
 
+  // ── P : PAR-1 — la journée du domaine, au prorata du barème ─────────────
+  // P1-P3 : Nico valide deux parcelles pour l'équipe sans la cocher (le cas du tableau Parcelles).
+  M.set({ w: { PARCELLES: [P('P', 1), P('Q', 0.5)], TACHES, MEMBRES: [{ nom: 'Nico' }, { nom: 'Victor' }, { nom: 'Shana' }], CAVE_ELEVAGE: { operations: [] },
+    JOURNAL: ['P', 'Q'].map((p, i) => ({ id: (0xa00 + i).toString(16), date: '2026-01-06', parcelle: p, tache: 'Taille', qui: 'Nico', statut: 'Validé' })) },
+    h: { Nico: jours(['2026-01-06'], 2), Victor: jours(['2026-01-05', '2026-01-06'], 8), Shana: jours(['2026-01-06'], 8) }, c: {}, t: {} });
+  V = M.tv();
+  eq('P1 · équipe non cochée : 2 + 16 + 8 = 26 h, 1 ha sur 1,5 → P reçoit 26 × 2/3', hp(V, 'P', 'Taille'), 26 * 2 / 3);
+  eq('P2 · … et Q le tiers', hp(V, 'Q', 'Taille'), 26 / 3);
+  eq('P3 · rien en attente : la veille de Victor rejoint la journée validée', V.hAtt, 0);
+  // P4 : travaux mêlés le même jour — le barème, pas la surface
+  M.set({ w: { PARCELLES: [P('R', 1), P('S', 1)], MEMBRES: [{ nom: 'Victor' }],
+    JOURNAL: [ { id: 'b00', date: '2026-01-05', parcelle: 'R', tache: 'Taille', qui: 'Victor', statut: 'Validé' },
+               { id: 'b01', date: '2026-01-05', parcelle: 'S', tache: 'Relevage', qui: 'Victor', statut: 'En cours', niveaux: [1] } ] },
+    h: { Victor: jours(['2026-01-05'], 8) } });
+  V = M.tv();
+  eq('P4 · taille 1 ha (15) et relevage niveau 1, 1 ha (25) : 8 h × 15/40 = 3 h sur R', hp(V, 'R', 'Taille'), 3);
+  eq('P5 · … et 5 h sur S', hp(V, 'S', 'Relevage'), 5);
+  // P6 : deux équipes nommées le même jour — chacune garde ses parcelles (règle du groupe)
+  M.set({ w: { PARCELLES: [P('T', 1), P('U', 1)], MEMBRES: [{ nom: 'Victor' }, { nom: 'Shana' }, { nom: 'Alicia' }],
+    JOURNAL: [ { id: 'c00', date: '2026-01-05', parcelle: 'T', tache: 'Taille', qui: 'Victor', statut: 'Validé', membresEquipe: ['Shana'] },
+               { id: 'c01', date: '2026-01-05', parcelle: 'U', tache: 'Taille', qui: 'Alicia', statut: 'Validé' } ] },
+    h: { Victor: jours(['2026-01-05'], 8), Shana: jours(['2026-01-05'], 8), Alicia: jours(['2026-01-05'], 8) } });
+  V = M.tv();
+  eq('P6 · équipe Victor + Shana : 16 h sur T', hp(V, 'T', 'Taille'), 16);
+  eq('P7 · Alicia seule : 8 h sur U', hp(V, 'U', 'Taille'), 8);
+  // P8 : une revalidation le même jour qu'une vraie clôture ne prend rien
+  M.set({ w: { PARCELLES: [P('W', 1), P('X', 1)], MEMBRES: [{ nom: 'Victor' }],
+    JOURNAL: [ { id: 'd00', date: '2026-01-05', parcelle: 'W', tache: 'Taille', qui: 'Victor', statut: 'Validé' },
+               { id: 'd01', date: '2026-01-06', parcelle: 'W', tache: 'Taille', qui: 'Victor', statut: 'Validé' },
+               { id: 'd02', date: '2026-01-06', parcelle: 'X', tache: 'Taille', qui: 'Victor', statut: 'Validé' } ] },
+    h: { Victor: jours(['2026-01-05', '2026-01-06'], 8) } });
+  V = M.tv();
+  eq('P8 · la revalidation de W le 6 ne prend rien : les 8 h du 6 vont à X', hp(V, 'X', 'Taille'), 8);
+  eq('P9 · W garde les 8 h du 5', hp(V, 'W', 'Taille'), 8);
+  eq('P10 · INVARIANT : versé + attente = rangs − conduite', V.hAff + V.hAtt, V.hChamp - V.hTrac);
+
+  // ── Q : ÉQUIPES-1 — les équipes du jour ────────────────────────────────
+  // Q1-Q2 : Victor + Shana valident T le 5 ; Alicia, seule dans son équipe, finit U le 6.
+  M.set({ w: { PARCELLES: [P('T', 1), P('U', 2)], TACHES, MEMBRES: [{ nom: 'Victor' }, { nom: 'Shana' }, { nom: 'Alicia' }],
+    JOURNAL: [ { id: 'e00', date: '2026-01-05', parcelle: 'T', tache: 'Taille', qui: 'Victor', statut: 'Validé', membresEquipe: ['Shana'] },
+               { id: 'e01', date: '2026-01-06', parcelle: 'U', tache: 'Taille', qui: 'Alicia', statut: 'Validé' } ] },
+    h: { Victor: jours(['2026-01-05'], 8), Shana: jours(['2026-01-05'], 8), Alicia: jours(['2026-01-05', '2026-01-06'], 8) },
+    eq: { '2026-01-05': [['Victor', 'Shana'], ['Alicia']], '2026-01-06': [['Alicia']] } });
+  V = M.tv();
+  eq('Q1 · jour d\'équipes : Alicia ne rejoint pas T — 16 h sur T', hp(V, 'T', 'Taille'), 16);
+  eq('Q2 · … ses deux jours vont à SA parcelle : 16 h sur U', hp(V, 'U', 'Taille'), 16);
+  // Q3 : validation sans groupe (hors réseau) un jour d'équipes : l'équipe du jour de l'auteur
+  M.set({ w: { PARCELLES: [P('V', 1)], JOURNAL: [ { id: 'e10', date: '2026-01-05', parcelle: 'V', tache: 'Taille', qui: 'Victor', statut: 'Validé', membresEquipe: [] } ] },
+    h: { Victor: jours(['2026-01-05'], 8), Shana: jours(['2026-01-05'], 8), Alicia: {} }, eq: { '2026-01-05': [['Victor', 'Shana'], ['Alicia']] } });
+  V = M.tv();
+  eq('Q3 · sans groupe écrit, Shana vient de l\'équipe du jour : 16 h sur V', hp(V, 'V', 'Taille'), 16);
+  // Q4-Q5 : un groupe écrit l'emporte (l'admin a mis Alicia avec Victor)
+  M.set({ w: { JOURNAL: [ { id: 'e20', date: '2026-01-05', parcelle: 'V', tache: 'Taille', qui: 'Victor', statut: 'Validé', membresEquipe: ['Alicia'] } ] },
+    h: { Victor: jours(['2026-01-05'], 8), Shana: jours(['2026-01-05'], 8), Alicia: jours(['2026-01-05'], 8) } });
+  V = M.tv();
+  eq('Q4 · groupe écrit Victor + Alicia : 16 h sur V', hp(V, 'V', 'Taille'), 16);
+  eq('Q5 · Shana, pas dans le groupe un jour d\'équipes : ses 8 h attendent', V.hAtt, 8);
+  M.set({ eq: {} });
+
   // ── F : période pas encore commencée ───────────────────────────────────
   M.set({ per: { nom: 'Futur', debut: '2099-01-01', fin: '2099-03-01' } });
   V = M.tv();
@@ -315,15 +380,21 @@ function executer(src) {
 
 /* ── Contre-épreuves ───────────────────────────────────────────────────── */
 const MUT = [
-  ['parts égales au lieu du prorata de surface', 'var part=(S>0)?(e.surf/S):(1/L.length)', 'var part=1/L.length'],
+  ['parts égales au lieu du prorata', 'var part=(Sb>0)?((e.b||0)/Sb):((S>0)?(e.surf/S):(1/L.length))', 'var part=1/L.length'],
+  ['PAR-1 : prorata de la surface au lieu du barème', 'var part=(Sb>0)?((e.b||0)/Sb):((S>0)?(e.surf/S):(1/L.length))', 'var part=(S>0)?(e.surf/S):(1/L.length)'],
+  ['PAR-1 : un salarié non nommé ne rejoint plus la journée du domaine', 'if(!(L && L.length) && evJour[d] && !eqJour[d] && !(horsJour[d] && horsJour[d][m.nom])) L=evJour[d];', ''],
+  ['PAR-1 : le décoché rejoint la journée du domaine', 'if(!(L && L.length) && evJour[d] && !eqJour[d] && !(horsJour[d] && horsJour[d][m.nom])) L=evJour[d];', 'if(!(L && L.length) && evJour[d] && !eqJour[d]) L=evJour[d];'],
+  ['ÉQUIPES-1 : un jour d\'équipes garde la journée du domaine', 'if(!(L && L.length) && evJour[d] && !eqJour[d] && !(horsJour[d] && horsJour[d][m.nom])) L=evJour[d];', 'if(!(L && L.length) && evJour[d] && !(horsJour[d] && horsJour[d][m.nom])) L=evJour[d];'],
+  ['ÉQUIPES-1 : une validation sans groupe ne prend plus l\'équipe du jour', 'if(EQd && !((j.membresEquipe||[]).length) && j.qui){', 'if(false){'],
+  ['PAR-1 : une revalidation prend sa part de la journée', 'e.b = e.dup ? 0 : _ecoTvBar(', 'e.b = _ecoTvBar('],
   ['les heures ne s\'accumulent plus d\'un jour à l\'autre', "if(!(acc>0)) g.dAtt=d; acc+=hv;", "acc=hv;"],
   ['la conduite tracteur n\'est plus retirée', 'var ht=Math.min(h, Number(cd[d])||0);', 'var ht=0;'],
   ['la liste cumulative des niveaux n\'est plus comparée à la précédente', 'var nNiv=niv.filter(function(x){ return P.niv.indexOf(x)<0; });', 'var nNiv=niv.slice();'],
   ['« Annulé » est ignoré', "if(st==='Annul\\u00e9'){", "if(false){"],
-  ['la validation vaut pour le seul validateur', "(j.membresEquipe||[]).forEach(function(n){ if(n && noms.indexOf(n)<0) noms.push(n); });\n    var e=", "var e="],
+  ['la validation vaut pour le seul validateur', "    (j.membresEquipe||[]).forEach(function(n){ if(n && noms.indexOf(n)<0) noms.push(n); });\n    // ★★ ÉQUIPES-1", "    // ★★ ÉQUIPES-1"],
   ['le bareme est compté une fois par personne', 'P.bar+=b; P.n++;', 'P.bar+=b*Object.keys(P.noms).length||b; P.n++;'],
   ['la période future ouvre une fenêtre à l\'envers', "  if(auj<d0) return vide;\n", '\n'],
-  ['quiHors ignoré par le moteur', "var noms=[]; if(j.qui && !j.quiHors) noms.push(j.qui);   // TV-2 : le validateur hors des rangs ne compte pas\n    (j.membresEquipe||[]).forEach(function(n){ if(n && noms.indexOf(n)<0) noms.push(n); });\n    var e=", "var noms=[]; if(j.qui) noms.push(j.qui);\n    (j.membresEquipe||[]).forEach(function(n){ if(n && noms.indexOf(n)<0) noms.push(n); });\n    var e="],
+  ['quiHors ignoré par le moteur', "var noms=[]; if(j.qui && !j.quiHors) noms.push(j.qui);   // TV-2 : le validateur hors des rangs ne compte pas\n    (j.membresEquipe||[]).forEach(function(n){ if(n && noms.indexOf(n)<0) noms.push(n); });\n    // ★★ ÉQUIPES-1", "var noms=[]; if(j.qui) noms.push(j.qui);\n    (j.membresEquipe||[]).forEach(function(n){ if(n && noms.indexOf(n)<0) noms.push(n); });\n    // ★★ ÉQUIPES-1"],
   ['ENG-2 : operateur compte comme intervenant', "(Array.isArray(op.intervenants)?op.intervenants:[]).forEach(", "(Array.isArray(op.intervenants)&&op.intervenants.length?op.intervenants:[op.operateur]).forEach("],
   ['ENG-2 : les analyses vident une journée', "if(!op || op.type==='analyse' || !op.date) return;", "if(!op || !op.date) return;"],
   ['ENG-2 : les journées de cave ne sortent plus', "if(hv>0 && cj[d]){ g.hCave+=hv; hv=0; }", ""],
