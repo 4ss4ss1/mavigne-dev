@@ -20,6 +20,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { poseDates } from './mv-dates-reelles.mjs';
+import { lireCave } from './mv-cave-src.mjs';   // \u2605 PARC-XLS-2 : la roue de la Cave
 poseDates(globalThis);
 
 const ICI = path.dirname(fileURLToPath(import.meta.url));
@@ -38,6 +39,7 @@ function bloc(src, entete) {
 }
 const REGL = fs.readFileSync(path.join(R, 'src/reglages.js'), 'utf8');
 const SRC  = bloc(REGL, 'function exportCSVParcelles(');
+const CAVE_SRC = bloc(lireCave(R), 'function _caveRegDocs(');
 
 function lancer(ctx, choix, src) {
   const r = { opts:null, nom:null, entete:null, lignes:null };
@@ -143,6 +145,25 @@ t('sans aucune r\u00e9colte : pas de colonne rendement, et un choix rendement re
   videF.entete.length === 4 && col(videF, 0)[0] === 'Les Corv\u00e9es');
 t('la collection source garde son ordre', PARCS[0].nom === 'La Justice');
 
+console.log('\n  \u2605 PARC-XLS-2 \u2014 la Cave le propose \u00e0 c\u00f4t\u00e9 des r\u00e9coltes\n');
+const CAT = [
+  { act:'phytoPdf', mod:'phyto' }, { act:'bilan', mod:'pilotage' }, { act:'manip', mod:'cave' },
+  { act:'futs', mod:'reserve' }, { act:'matur', mod:'cave' }, { act:'recoltes', mod:'cave' },
+  { act:'cuverie', mod:'cave' }, null, { act:'csvJournal', mod:'vigne' }, { act:'csvParcelles', mod:'vigne' }
+];
+const cave = (cat, src) => new Function('window', (src || CAVE_SRC) + '\nreturn _caveRegDocs();')({ MV_DOCS: cat });
+const rc = cave(CAT);
+t('le fichier des parcelles est dans la roue de la Cave, JUSTE APR\u00c8S les r\u00e9coltes',
+  rc.map(x => x.d.act).join(',') === 'bilan,manip,futs,matur,recoltes,csvParcelles,cuverie');
+t('c\u2019est la m\u00eame entr\u00e9e du catalogue (m\u00eame index, m\u00eame docsGo)',
+  rc.find(x => x.d.act === 'csvParcelles').i === 9 && rc.every(x => CAT[x.i] === x.d));
+t('le journal des travaux, lui, reste dans la Vigne', !rc.some(x => x.d.act === 'csvJournal'));
+const sansRec = cave(CAT.filter(d => !d || d.act !== 'recoltes'));
+t('sans ligne \u00ab r\u00e9coltes \u00bb : le fichier passe en fin de liste, il ne dispara\u00eet pas',
+  sansRec[sansRec.length - 1].d.act === 'csvParcelles');
+t('un catalogue sans fichier des parcelles donne la liste d\u2019avant ce lot',
+  cave(CAT.slice(0, 9)).map(x => x.d.act).join(',') === 'bilan,manip,futs,matur,recoltes,cuverie');
+
 // ═══════════════════════════════════════════════════════════════════════════
 console.log('\n  Contre-\u00e9preuves \u2014 chaque d\u00e9faut remis doit faire rougir\n');
 const ce = (nom, fn) => {
@@ -174,6 +195,19 @@ ce('feuille ignor\u00e9e \u2192 le fichier part sans laisser choisir', () => {
   const s = muter("if(typeof window._mvTriOuvrir==='function' && window._mvTriOuvrir(opts)) return;", "");
   const r = lancer(CTX, undefined, s);
   return r.lignes === null;
+});
+
+ce('fichier rang\u00e9 en fin de liste \u2192 il n\u2019est plus \u00e0 c\u00f4t\u00e9 des r\u00e9coltes', () => {
+  const a = "if(k<0) out.push(xls); else out.splice(k+1, 0, xls);";
+  if (CAVE_SRC.indexOf(a) < 0) throw new Error('mutation introuvable');
+  const r = cave(CAT, CAVE_SRC.replace(a, 'out.push(xls);'));
+  return r.map(x => x.d.act).join(',') === 'bilan,manip,futs,matur,recoltes,csvParcelles,cuverie';
+});
+ce('filtre de la Cave inchang\u00e9 \u2192 le fichier n\u2019appara\u00eet pas dans la Cave', () => {
+  const a = "if(d.act==='csvParcelles'){ xls={i:i, d:d}; return; }";
+  if (CAVE_SRC.indexOf(a) < 0) throw new Error('mutation introuvable');
+  const r = cave(CAT, CAVE_SRC.replace(a, ''));
+  return r.some(x => x.d.act === 'csvParcelles');
 });
 
 console.log('\n  ' + vert + ' vert' + (vert > 1 ? 's' : '') + ' \u00b7 ' + rouge

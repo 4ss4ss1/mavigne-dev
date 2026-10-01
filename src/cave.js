@@ -5649,15 +5649,26 @@ function _caveGoAoc(){
 
 // Les documents de la cave : ceux du catalogue MV_DOCS dont le module est la
 // cave, plus le bilan de campagne et l'inventaire des futs, qui parlent d'elle.
+// \u2605 PARC-XLS-2 (demande de Nico, 30/09) : le fichier Excel des parcelles — trie
+//   par rendement hL/ha du millesime — se range JUSTE APRES les recoltes de la
+//   vendange, la ou l'on regarde ce que chaque parcelle a donne. Meme entree du
+//   catalogue (meme index, meme docsGo) : aucune copie, aucun second document.
+//   Sans ligne « recoltes » dans le catalogue, il passe en fin de liste.
 var _CREG_DOC_ICO={cuverie:'journal', manip:'liste', bilan:'document', futs:'barrique',
-  matur:'microscope', recoltes:'raisin', elevage:'barrique'};
+  matur:'microscope', recoltes:'raisin', elevage:'barrique', csvParcelles:'liste'};
 function _caveRegDocs(){
   var cat=window.MV_DOCS; if(!Array.isArray(cat)) return [];
-  var out=[];
+  var out=[], xls=null;
   cat.forEach(function(d,i){
     if(!d) return;
+    if(d.act==='csvParcelles'){ xls={i:i, d:d}; return; }
     if(d.mod==='cave'||d.act==='bilan'||d.act==='futs') out.push({i:i, d:d});
   });
+  if(xls){
+    var k=-1;
+    out.forEach(function(x,j){ if(x.d.act==='recoltes') k=j; });
+    if(k<0) out.push(xls); else out.splice(k+1, 0, xls);
+  }
   return out;
 }
 function _caveRegDocsHtml(){

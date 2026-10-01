@@ -996,3 +996,29 @@ salarié qui ne peut pas enregistrer) et branchements (sept écritures, quatre p
 groupe écrit). **Non vérifié** : aucun rendu regardé (la ligne de l'Accueil, le panneau sur téléphone, les deux thèmes), aucune
 donnée réelle. ⚠️ Un téléphone qui n'a pas encore reçu le réglage écrit sans groupe forcé : c'est le calcul qui rattrape.
 **Ouvert** : `_ecoEquipeByParc` (taux pondéré de la parcelle) lit toujours le seul groupe écrit ; plus de trois équipes : non prévu.
+
+## 200. ★ PARC-XLS-2 — LE FICHIER EXCEL DES PARCELLES AUSSI DANS LA ROUE DE LA CAVE (30/09 — `src/cave.js` · `src/utils.js` (MV_AIDE cave, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/08-cave.html` · `guide/04-vigne.html` · `scripts/mv-harnais-parc-xls.mjs` · **bump APP 7.80 → 7.81, SW 8.54 → 8.55**, base `aa2baea`)
+
+### 200a. D'où ça vient
+
+Nico, juste après PARC-XLS (§197) : *« il faut mettre ça aussi en cave avec les récoltes »*. Lu comme : le fichier Excel des
+parcelles (tri par nom / par rendement hL/ha) doit être proposé dans la roue de la Cave, à côté des « Récoltes de la vendange ».
+⚠️ Lecture à confirmer par Nico : si la demande visait plutôt un tri en hL/ha **dans le PDF des récoltes** (qui trie déjà par
+rendement, mais en kg/ha), c'est un autre lot.
+
+### 200b. Ce qui est fait
+
+- `_caveRegDocs` (cave.js) prend l'entrée `csvParcelles` du catalogue et la range **juste après `recoltes`** ; sans `recoltes`
+  dans le catalogue, en fin de liste. **Même entrée, même index, même `docsGo(i)`** : aucun second document, aucune copie du
+  titre (le harnais `mv-harnais-cave-reglages` interdit de recopier un titre dans cave.js). `mod` reste `vigne` : un domaine sans
+  module Vigne voit la ligne grisée, comme toute ligne hors formule.
+- Icône `liste` ajoutée à `_CREG_DOC_ICO`.
+- ⚠️ Trouvé en route : la note du guide Cave annonçait **« Quatre documents »** dans la roue alors que MV_AIDE en comptait sept.
+  Réécrite avec la liste réelle (huit avec le fichier), règle d'or n°4.
+
+### 200c. Mesuré
+
+- `mv-harnais-parc-xls.mjs` : **34 vertes** (+5 : position après les récoltes, même index, journal resté dans la Vigne, repli en
+  fin de liste, catalogue sans fichier = liste d'avant) ; **6 contre-épreuves** (+2 : fichier poussé en fin de liste, filtre de la
+  Cave inchangé). `mv-harnais-cave-reglages` : 39/39 et 45/45 en `--contre`, inchangés.
+- **Non vérifié à l'œil** : la roue de la Cave sur téléphone.

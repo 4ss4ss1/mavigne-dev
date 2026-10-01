@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.80';
+export const APP_VERSION = '7.81';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -722,6 +722,12 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.81', items: [
+    { emoji: 'raisin', titre: 'Le fichier Excel des parcelles, aussi dans la Cave',
+      desc: "Le fichier des parcelles tri\u00e9 par rendement se trouvait dans la Vigne. Il est maintenant aussi dans la roue crant\u00e9e de la Cave, "
+        + "bloc Documents, juste apr\u00e8s les r\u00e9coltes de la vendange\u00a0: m\u00eame fichier, m\u00eame choix du mill\u00e9sime et de l\u2019ordre, "
+        + "par nom ou par rendement en hL/ha, du plus fort au plus faible ou l\u2019inverse." },
+  ] },
   { v: '7.80', items: [
     { emoji: 'equipe', titre: 'Les équipes du jour, depuis l\u2019Accueil',
       desc: "Quand le domaine travaille en plusieurs équipes, l\u2019administrateur touche «\u00a0Équipes du jour\u00a0» sur l\u2019Accueil et répartit "
@@ -3812,7 +3818,7 @@ var MV_AIDE = {
       ['Poser un plafond, puis tous les autres', "après la première saisie, l\u2019application propose de porter la même valeur sur les parcelles du millésime qui n\u2019ont aucun plafond, en les nommant d\u2019abord. Celles qui en ont déjà un ne sont jamais touchées."],
       ['Votre rendement au pressoir', "se règle dans la roue crantée de la Cave, bloc Le Cuvier, en kilos de raisin par hectolitre. Tous les écrans qui transforment des raisins en volume s’en servent — la chaîne de la récolte à la bouteille comme le bilan de campagne."],
       ['Les analyses labo', "s’attachent en PDF à la cuvée. Les supprimer est réservé à l’administrateur."],
-      ['Sept documents sortent de la Cave', "depuis la roue crantée de la Cave, bloc Documents — ou depuis Réglages, onglet Domaine, « Documents & impressions », qui les a tous : le contrôle de maturité avant vendange, les récoltes de la vendange, le cahier de cuverie pendant la fermentation, le suivi d’élevage, le registre des manipulations, le bilan de campagne et l’inventaire des fûts. Ce sont des états internes : Ma Vigne prépare, vous déclarez. Le cahier de cuverie imprime aussi <b>la courbe</b> de chaque cuve — densité et température, avec les opérations datées — au-dessus de son tableau ; sous trois relevés de densité, il n’y a pas de courbe. Il s’ouvre sur un <b>comparatif</b> de toutes les cuves, alignées sur leur jour d’encuvage et non sur le calendrier, avec le sucre relevé à la vigne avant l’encuvage."],
+      ['Huit documents sortent de la Cave', "depuis la roue crantée de la Cave, bloc Documents — ou depuis Réglages, onglet Domaine, « Documents & impressions », qui les a tous : le contrôle de maturité avant vendange, les récoltes de la vendange, le fichier Excel des parcelles (rendement du millésime en hL/ha, trié par nom ou par rendement), le cahier de cuverie pendant la fermentation, le suivi d’élevage, le registre des manipulations, le bilan de campagne et l’inventaire des fûts. Ce sont des états internes : Ma Vigne prépare, vous déclarez. Le cahier de cuverie imprime aussi <b>la courbe</b> de chaque cuve — densité et température, avec les opérations datées — au-dessus de son tableau ; sous trois relevés de densité, il n’y a pas de courbe. Il s’ouvre sur un <b>comparatif</b> de toutes les cuves, alignées sur leur jour d’encuvage et non sur le calendrier, avec le sucre relevé à la vigne avant l’encuvage."],
       ['Cinq documents demandent leur ordre', "l’<b>état du vignoble</b>, l’<b>inventaire des intrants</b>, les <b>récoltes de la vendange</b>, le <b>contrôle de maturité</b> et le <b>cahier de cuverie</b> posent la question avant d’éditer, et écrivent l’ordre choisi dans leur en-tête. Une valeur manquante part toujours en fin de liste, dans les deux sens : une donnée absente n’est pas une petite valeur. Les deux exports CSV, eux, ne demandent rien mais sortent désormais toujours dans le même ordre."],
       ['Les récoltes se trient avant d’imprimer', "le document demande le <b>millésime</b>, puis par quoi trier : parcelle, surface, rendement, kilos ou date. Il sait aussi sortir <b>une ligne par parcelle</b> au lieu d’une ligne par benne. L’ordre choisi est écrit dans l’en-tête du document, et retenu pour la fois suivante. <b>Le rendement affiché est celui de la parcelle entière</b>, cuvier et vrac réunis — une benne n’a pas de rendement."],
       ['Deux autres s’éditent au plus près de la livraison', "le bon de livraison d’un chargement et le récapitulatif de campagne d’un acheteur, depuis les ventes en vrac. Ils portent le nom du domaine, les kilos livrés, et les volumes rendus dès que le client a répondu."]
