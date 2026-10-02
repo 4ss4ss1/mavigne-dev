@@ -6137,7 +6137,7 @@ function _ecoPhytoByParc(win){
 
 // Palette des postes — une couleur, un poste, partout (KPI, donut, barres, tableau).
 var _PEC_COL = { mo:'#8A5A38', trac:'#2C3E50', gnr:'#C2871E', phy:'#5B2D8E', ret:'#B85A1A', dep:'#1A4A7A',
-                 loc:'#1D6F8C', fut:'#6B4226' };
+                 loc:'#1D6F8C', fut:'#6B4226', pre:'#4A6B3A' };   // pre : prestations (ARRACH-4)
 // ── LES ATELIERS — la DESTINATION de l'euro, pas sa nature ──────────────────
 // Economie trie par NATURE (salaire / carburant / achat / depense). L'atelier
 // est un SECOND AXE sur les MEMES euros : ou est parti l'argent, pas ce qu'on a
@@ -6518,8 +6518,8 @@ function _pecRevPrevuMO(d0, d1){
 //     _pecData ; à la surface sans aucune heure ;
 //   · phyto : doses × surface × prix, parcelle par parcelle.
 function _pecRevCouts(cy, auj, parc){
-  var out={ by:{}, tot:{mo:0, prevu:0, trac:0, gnr:0, phy:0}, fin:'', ok:false, tvOk:false, nSansTaux:0, gnrSrc:'' };
-  parc.forEach(function(p){ out.by[p.nom]={mo:0, trac:0, gnr:0, phy:0}; });
+  var out={ by:{}, tot:{mo:0, prevu:0, trac:0, gnr:0, phy:0, pre:0}, fin:'', ok:false, tvOk:false, nSansTaux:0, gnrSrc:'', arrEur:0, nArr:0 };
+  parc.forEach(function(p){ out.by[p.nom]={mo:0, trac:0, gnr:0, phy:0, pre:0}; });
   var surfT=0; parc.forEach(function(p){ surfT+=parseFloat(p.surface)||0; });
   function partSurf(p){ return surfT>0?((parseFloat(p.surface)||0)/surfT):0; }
   if(auj>=cy.d0){
@@ -6547,6 +6547,27 @@ function _pecRevCouts(cy, auj, parc){
     out.tot.gnr=gT;
     var ph=null; try{ ph=_ecoPhytoByParc(win); }catch(e){ ph=null; }
     if(ph) parc.forEach(function(p){ var c=(ph.cost&&ph.cost[p.nom])||0; out.by[p.nom].phy=c; out.tot.phy+=c; });
+    // ★★ ARRACH-5 — L'ARRACHAGE ET LES PRESTATIONS PÈSENT SUR LA BOUTEILLE. Nico : « le coût
+    //   d'arrachage et des travaux effectués sur l'année doit peser sur le prix de la bouteille ».
+    //   · La main-d'œuvre d'arrachage y était déjà : TV.eur entier est réparti sur les vignes en
+    //     place (les heures versées à une arrachée ne sortent pas du total, elles changent de clé).
+    //   · Ce qui manquait : le tracteur et le phyto posés sur une parcelle ARRACHÉE (elle n'est pas
+    //     dans `parc`), et toute PRESTATION (_ecoPrestaByParc). Une prestation sur une vigne en place
+    //     va à cette vigne ; ce qu'a coûté une vigne arrachée se répartit à la SURFACE sur les vignes
+    //     en place — elle ne donne pas de vin, le domaine en porte la charge.
+    var prs=null; try{ prs=_ecoPrestaByParc(win); }catch(e){ prs=null; }
+    var dansParc={}; parc.forEach(function(p){ dansParc[p.nom]=1; });
+    var arrE=0, nA={};
+    (window.PARCELLES||[]).forEach(function(p){
+      if(!p || p.nom==null || dansParc[p.nom] || p.statut!=='Arrachee') return;
+      var e=((tr&&tr.cost&&tr.cost[p.nom])||0)+((ph&&ph.cost&&ph.cost[p.nom])||0)+((prs&&prs.cost&&prs.cost[p.nom])||0);
+      if(e>0){ arrE+=e; nA[p.nom]=1; }
+    });
+    parc.forEach(function(p){
+      var c=((prs&&prs.cost&&prs.cost[p.nom])||0)+arrE*partSurf(p);
+      out.by[p.nom].pre=c; out.tot.pre+=c;
+    });
+    out.arrEur=arrE; out.nArr=Object.keys(nA).length;
   }
   if(cy.d1>auj){
     var d0p=(auj>=cy.d0)?_pexJourApres(auj):cy.d0;
@@ -6613,13 +6634,13 @@ function _pecRevPertesMes(mil){
 //   rec:null|{hlTot, domHl, domShare, kg, kgVendu}, hist:[hL/ha…]}], pertes en %.
 function _pecRevCalc(P, pertes){
   var k=Math.max(0,1-(Number(pertes)||0)/100)*100/0.75;      // cols de 75 cl par hL logé
-  var POST=['mo','trac','gnr','phy'];
+  var POST=['mo','trac','gnr','phy','pre'];   // pre : arrachage et prestations (ARRACH-5)
   var moy={};
   P.forEach(function(p){
     if(p.rec&&p.surf>0&&p.rec.hlTot>0){ var q=moy[p.aoc]||(moy[p.aoc]={hl:0,ha:0}); q.hl+=p.rec.hlTot; q.ha+=p.surf; }
   });
   var T={ ha:0, haAvec:0, haSans:0, nSans:0, hl:0, domHl:0, cols:0, cout:0, coutDom:0, coutSans:0,
-          coutVendu:0, kgVendu:0, kgPese:0, nR:0, n:0, po:{mo:0, trac:0, gnr:0, phy:0} };
+          coutVendu:0, kgVendu:0, kgPese:0, nR:0, n:0, po:{mo:0, trac:0, gnr:0, phy:0, pre:0} };
   var G={}, ordre=[];
   var rows=P.map(function(p){
     var src='n', hlha=null, hlTot=0, domHl=0, share=1;
@@ -6793,12 +6814,61 @@ function _pecCadHisto(hBarCourant){
            nom:String(snap.saisonNom||''), d0:d0, d1:d1, nMbr:n, hTrac:hTrac };
 }
 
+// ★★ ARRACH-4 (02/10/2026) — LES PRESTATIONS : ce qu'un prestataire a facturé pour une étape
+//   d'arrachage (ARRACH-3 : j.presta, j.prestaMontant). Source : le JOURNAL, la seule trace datée.
+//   · Une étape se rejoue dans l'ordre (date, puis ordre de saisie) : « Annulé » l'efface, une
+//     revalidation remplace la précédente — jamais deux factures pour une étape.
+//   · Posée à la DATE DE L'ÉTAPE, sur SA parcelle.
+//   · Un montant absent n'est pas zéro : il est compté à part (nSansPrix) et l'écran le dit.
+function _ecoPrestaByParc(win){
+  var out={ cost:{}, byDate:{}, tot:0, n:0, nSansPrix:0 };
+  var d0='', d1='';
+  if(win && win.d0 && win.d1){ d0=String(win.d0).slice(0,10); d1=String(win.d1).slice(0,10); }
+  else { var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
+         d0=(s&&s.debut)?String(s.debut).slice(0,10):''; d1=(s&&s.fin)?String(s.fin).slice(0,10):''; }
+  if(!d0 || !d1 || d1<d0) return out;
+  function _ts(j){ var n=parseInt(String(j.id||''),16); return isFinite(n)?n:0; }
+  var J=(window.JOURNAL||[]).filter(function(j){ return j && !j.meteo && j.parcelle && j.date && j.etape; }).slice();
+  J.sort(function(a,b){ var da=String(a.date).slice(0,10), db=String(b.date).slice(0,10);
+    return da<db?-1:(da>db?1:(_ts(a)-_ts(b))); });
+  var last={};
+  J.forEach(function(j){
+    var k=String(j.parcelle)+'\u0000'+String(j.tache||'')+'\u0000'+String(j.etape);
+    var st=String(j.statut||'');
+    if(st==='Annul\u00e9') { delete last[k]; return; }   // (forme distincte : ancre d'injection de mv-harnais-temps-vigne)
+    if(st!=='Valid\u00e9') return;
+    if(j.presta) last[k]=j; else delete last[k];
+  });
+  Object.keys(last).forEach(function(k){
+    var j=last[k], iso=String(j.date).slice(0,10);
+    if(iso<d0 || iso>d1) return;
+    out.n++;
+    var e=Number(j.prestaMontant);
+    if(!(e>0)){ out.nSansPrix++; return; }
+    out.cost[j.parcelle]=(out.cost[j.parcelle]||0)+e;
+    out.byDate[iso]=(out.byDate[iso]||0)+e;
+    out.tot+=e;
+  });
+  return out;
+}
 function _pecData(){
   var cfg=_ecoCfg(), rate=_ecoRate();
   var tracH=_ecoTracHByParc(), phy=_ecoPhytoByParc();
   var eqp=_ecoEquipeByParc(), ret=_ecoRetardByParc(), rcfg=_ecoRetardCfg();
   var defs=_ecoAllDefs();
-  var parc=(window.PARCELLES||[]).filter(function(p){ return p && p.statut!=='Arrachee'; });
+  var prs=_ecoPrestaByParc();
+  // ★★ ARRACH-4 — UNE PARCELLE ARRACHÉE QUI A COÛTÉ ENTRE AU TABLEAU. Elle en sortait toujours :
+  //   les heures d'arrachage versées sur elle (temps réel), son tracteur, ses prestations restaient
+  //   hors des lignes, alors que l'argent était dépensé. Elle n'entre que si elle a coûté sur la
+  //   période, SANS barème (le barème des travaux de la saison ne s'applique plus à une vigne
+  //   arrachée) et SANS surface au total (les €/ha du domaine restent ceux des vignes en place).
+  var TV0=null; try{ TV0=_ecoTempsVigne(); }catch(e){ TV0=null; }
+  var parc=(window.PARCELLES||[]).filter(function(p){
+    if(!p) return false;
+    if(p.statut!=='Arrachee') return true;
+    var q=(TV0&&TV0.ok&&TV0.parcs)?TV0.parcs[p.nom]:null;
+    return !!((q&&q.eur>0) || (tracH.h[p.nom]||0)>0 || (tracH.cost[p.nom]||0)>0 || (phy.cost[p.nom]||0)>0 || (prs.cost[p.nom]||0)>0);
+  });
   // ── Carburant : enveloppe reelle + cle de repartition ────────────────
   var gnrR=_ecoGnrReel();
   // Cle = heures machine par parcelle. Repli SURFACE si aucune heure n'a ete saisie
@@ -6808,20 +6878,21 @@ function _pecData(){
   parc.forEach(function(p){ var k=tracH.h[p.nom]||0; _kBy[p.nom]=k; _kSum+=k; });
   if(!(_kSum>0)){
     _kSurf=true; _kSum=0;
-    parc.forEach(function(p){ var k=parseFloat(p.surface)||0; _kBy[p.nom]=k; _kSum+=k; });
+    parc.forEach(function(p){ var k=(p.statut==='Arrachee')?0:(parseFloat(p.surface)||0); _kBy[p.nom]=k; _kSum+=k; });   // ARRACH-4 : pas de carburant « à la surface » sur une vigne arrachée
   }
   var _gnrOn = gnrR.ok && _kSum>0;
   var rows=[], tasks={}, tOrder=[], pairs=[];
   var T={ bH:0,fH:0,rH:0, moB:0,moF:0,moR:0, tracF:0,tracH:0, gnrF:0, litres:0, phyF:0,
-          surf:0, retH:0, retE:0, nRet:0, nReel:0, trous:0, plantH:0, plantE:0, nSansTaux:0 };
+          surf:0, retH:0, retE:0, nRet:0, nReel:0, trous:0, plantH:0, plantE:0, nSansTaux:0, prestF:0, nArr:0 };
   parc.forEach(function(p){
     var surf=parseFloat(p.surface)||0;
     var eq=eqp[p.nom]||null;
     var tx=(eq&&eq.taux>0)?eq.taux:rate;
     var src=(eq&&eq.taux>0)?'reel':'moyen';
     var bH=0, fH=0, rH=0, tks=[];
+    var arr=(p.statut==='Arrachee');   // ARRACH-4
     defs.forEach(function(def){
-      if(!def || !_opApplic(p,def)) return;
+      if(arr || !def || !_opApplic(p,def)) return;
       var full=Number(_opParcFull(p,def))||0;
       if(!(full>0)) return;
       var rst=Number(_opParcReste(p,def))||0;
@@ -6841,14 +6912,15 @@ function _pecData(){
     if(_gnrOn){ var _q=(_kBy[p.nom]||0)/_kSum; litres=gnrR.L*_q; gnrF=gnrR.eur*_q; }
     else { litres=thH*cfg.conso; gnrF=litres*cfg.gnrL; }
     var phyF=phy.cost[p.nom]||0;
-    var reel=tracF+gnrF+phyF;
+    var prestF=prs.cost[p.nom]||0;   // ARRACH-4
+    var reel=tracF+gnrF+phyF+prestF;
     var rr=ret[p.nom]||null, retH=rr?rr.h:0, retE=retH*tx;
     var pl=_ecoParcPlant(p);
     var budget=bH*tx+reel, engage=fH*tx+reel, resteE=rH*tx;
     rows.push({ nom:p.nom, surf:surf, tx:tx, src:src,
       bH:bH, fH:fH, rH:rH, pct:(bH>0?fH/bH*100:100),
       moB:bH*tx, moF:fH*tx, moR:resteE,
-      thH:thH, tracF:tracF, litres:litres, gnrF:gnrF, phyF:phyF,
+      thH:thH, tracF:tracF, litres:litres, gnrF:gnrF, phyF:phyF, prestF:prestF, arr:arr,
       condu:(tracH.qui[p.nom]||null),
       budget:budget, engage:engage, reste:resteE,
       coutHa:(surf>0?budget/surf:0), engHa:(surf>0?engage/surf:0),
@@ -6858,7 +6930,9 @@ function _pecData(){
     T.bH+=bH; T.fH+=fH; T.rH+=rH;
     T.moB+=bH*tx; T.moF+=fH*tx; T.moR+=resteE;
     T.tracF+=tracF; T.tracH+=thH; T.gnrF+=gnrF; T.litres+=litres; T.phyF+=phyF;
-    T.surf+=surf; T.retH+=retH; T.retE+=retE; if(retE>0) T.nRet++;
+    if(!arr) T.surf+=surf; else T.nArr++;
+    T.prestF+=prestF;
+    T.retH+=retH; T.retE+=retE; if(retE>0) T.nRet++;
     if(src==='reel') T.nReel++;
     T.trous+=pl.trous; T.plantH+=pl.h; T.plantE+=pl.h*tx;
   });
@@ -6876,6 +6950,8 @@ function _pecData(){
   T.gnrSrc = _gnrOn?'reel':'modele';
   T.gnrN = gnrR.n; T.gnrNSansLitres = gnrR.nSansLitres; T.gnrCle = _kSurf?'surface':'heures';
   T.byDatePhy  = phy.byDate  || {};
+  T.byDatePresta = prs.byDate || {};   // ARRACH-4
+  T.prestN = prs.n; T.prestSansPrix = prs.nSansPrix;
 
   // Avancement de référence = heures de barème réalisées / heures de barème totales.
   // C'est la MÊME grandeur que la jauge de l'onglet Avancement : deux écrans qui
@@ -6887,7 +6963,7 @@ function _pecData(){
   var projOn = avc>=0.15;
   var kProj = projOn ? (1/avc) : 1;
   var tracB = T.tracF*kProj, gnrB = T.gnrF*kProj, phyB = T.phyF*kProj;
-  var budget = T.moB + tracB + gnrB + phyB;
+  var budget = T.moB + tracB + gnrB + phyB + T.prestF;   // ARRACH-4 : une prestation n'a pas de prévu, son budget est ce qu'elle a coûté
   // ★★★ ENG-2 (24/09/2026) — LA MAIN-D'ŒUVRE ENGAGÉE EST CELLE QUI A ÉTÉ PAYÉE.
   // Nico : « une semaine à 3 ou 4 à dégrafer, à 17-19 € chargés, 8 h, 5 jours : je ne suis
   // pas sûr que ça fasse 1 400 € ». AVANT : T.moF = heures de BARÈME des travaux VALIDÉS ×
@@ -6911,6 +6987,7 @@ function _pecData(){
   var moSrc  = (TVe && TVe.ok) ? 'planning' : 'bareme';
   var engageBar = T.moF + T.tracF + T.gnrF + T.phyF;
   var engage = moReel + T.tracF + T.gnrF + T.phyF;
+  engageBar += T.prestF; engage += T.prestF;   // ARRACH-4 : les prestations
   var resteE = Math.max(0, budget-engage);
   // Le reste de TRAVAIL, lui, se lit au barème : c'est ce qu'il reste à faire, pas ce
   // qu'il reste d'argent. La projection l'utilise (ci-dessous).
@@ -6937,6 +7014,7 @@ function _pecData(){
     r.moRe  = tvOk ? (q ? q.eur : 0) : r.moF;
     r.hRe   = q ? q.h : 0;
     r.engRe = r.moRe + r.tracF + r.gnrF + r.phyF;
+    r.engRe += (r.prestF||0);   // ARRACH-4
     r.ecE   = (tvOk && (r.moF>0 || r.moRe>0)) ? (r.moRe - r.moF) : null;
     T_moRe += r.moRe;
   });
@@ -7038,6 +7116,10 @@ function _pecData(){
     { k:'gnr',  lab:'Carburant GNR',                col:_PEC_COL.gnr,  fait:T.gnrF,  budget:gnrB,  proj:projOn, det:_pecGnrDet(T.gnrSrc,T.litres,T.gnrN,T.gnrNSansLitres,T.gnrCle,cfg.gnrL) },
     { k:'phy',  lab:'Produits phyto',               col:_PEC_COL.phy,  fait:T.phyF,  budget:phyB,  proj:projOn, det:'doses \u00d7 surface \u00d7 prix R\u00e9serve' }
   ];
+  // ARRACH-4 : le poste n'apparaît que s'il existe — un domaine sans prestataire ne voit rien bouger.
+  if(T.prestF>0 || T.prestN>0) postes.push({ k:'pre', lab:'Prestations', col:_PEC_COL.pre, fait:T.prestF, budget:T.prestF, proj:false,
+    det:T.prestN+' \u00e9tape'+(T.prestN>1?'s':'')+' faite'+(T.prestN>1?'s':'')+' par un prestataire'
+      +(T.prestSansPrix?(' \u00b7 '+T.prestSansPrix+' sans montant'):'') });
 
   var tvVus = {};
   var tlist = tOrder.map(function(n){ var t=tasks[n];
@@ -7070,7 +7152,7 @@ function _pecData(){
     projFin:projFin,
     budget:budget, engage:engage, resteE:resteE, engageBar:engageBar, resteBar:resteBar,
     moReel:moReel, moSrc:moSrc, tv:((TVe&&TVe.ok)?TVe:null),
-    reOk:tvOk, engRe:(T.moRe + T.tracF + T.gnrF + T.phyF), ecRe:(tvOk ? (T.moRe - T.moF) : null),
+    reOk:tvOk, engRe:(T.moRe + T.tracF + T.gnrF + T.phyF + T.prestF), ecRe:(tvOk ? (T.moRe - T.moF) : null),
     reAttE:(tvOk ? (TVe.eAtt||0) : 0), reAttH:(tvOk ? (TVe.hAtt||0) : 0), reHorsE:tvHorsE,
     coutHaB:(T.surf>0?budget/T.surf:0), coutHaE:(T.surf>0?engage/T.surf:0),
     eurPlant:(T.plantH>0?T.plantE/Math.max(1,T.trous):0),
@@ -7129,6 +7211,7 @@ function _pecTimeline(E){
   }
   Object.keys(E.tot.byDateTrac||{}).forEach(function(iso){ add(iso, E.tot.byDateTrac[iso]); });
   Object.keys(E.tot.byDatePhy||{}).forEach(function(iso){ add(iso, E.tot.byDatePhy[iso]); });
+  Object.keys(E.tot.byDatePresta||{}).forEach(function(iso){ add(iso, E.tot.byDatePresta[iso]); });   // ARRACH-4
 
   var startIso = d1 || minIso;
   if(!startIso) return { ok:false };
@@ -7967,6 +8050,7 @@ var _PEC_COLS=[
   ['tracF', 'Tracteur',  1],
   ['gnrF',  'GNR',       1],
   ['phyF',  'Phyto',     1],
+  ['prestF','Presta.',   1],
   ['engRe', 'R\u00e9alis\u00e9',1],
   ['ecE',   '\u00c9cart',  1],
   ['reste', 'Reste',     1],
@@ -7992,26 +8076,29 @@ function _pecViewParcelles(E){
     var badge = (r.src==='reel')
       ? '<span class="pec-pill" style="background:var(--vert-pale);color:var(--vert-tx,#31601C)" title="taux pond\u00e9r\u00e9 par l\u2019\u00e9quipe r\u00e9ellement pr\u00e9sente">\u00e9quipe r\u00e9elle</span>'
       : '<span class="pec-pill" style="background:var(--gris-clair);color:var(--texte-doux)" title="aucune \u00e9quipe identifi\u00e9e au journal">taux moyen</span>';
+    if(r.arr) badge='<span class="pec-pill" style="background:var(--rouge-pale);color:var(--rouge-tx,#A0291E)" title="vigne arrach\u00e9e : ce qu\u2019elle a co\u00fbt\u00e9 sur la p\u00e9riode, sans bar\u00e8me ni surface au total">arrach\u00e9e</span>';   // ARRACH-4
     var ret = r.retE>0 ? ' <span class="pec-pill" style="background:var(--orange-pale);color:var(--orange)" title="surco\u00fbt de retard mod\u00e9lis\u00e9, hors total">+'+_ecoEur(r.retE)+' retard</span>' : '';
     var plants = r.trous>0 ? ' <span class="pec-pill" style="background:var(--tag-purple-bg);color:var(--tag-purple-tx)">'+_pilNum(r.trous)+' plants</span>' : '';
     var pcol=_pilPctColor(r.pct);
     return '<tr><td class="n">'+_pilEsc(r.nom)+'<div style="margin-top:4px;display:flex;gap:5px;flex-wrap:wrap">'+badge+plants+ret+'</div></td>'
       +'<td class="r">'+_pilHa(r.surf)+'</td>'
-      +'<td class="r" style="color:'+pcol+';font-weight:700">'+Math.round(r.pct)+' %</td>'
+      +(r.arr?'<td class="r">\u2014</td>':('<td class="r" style="color:'+pcol+';font-weight:700">'+Math.round(r.pct)+' %</td>'))
       +'<td class="r">'+_pilEsc(_ecoEur(r.moRe))+'</td>'
       +'<td class="r">'+(r.tracF>0?_pilEsc(_ecoEur(r.tracF)):'\u2014')+'</td>'
       +'<td class="r">'+(r.gnrF>0?_pilEsc(_ecoEur(r.gnrF)):'\u2014')+'</td>'
       +'<td class="r">'+(r.phyF>0?_pilEsc(_ecoEur(r.phyF)):'\u2014')+'</td>'
+      +'<td class="r">'+(r.prestF>0?_pilEsc(_ecoEur(r.prestF)):'\u2014')+'</td>'
       +'<td class="r">'+_pilEsc(_ecoEur(r.engRe))+'</td>'
       +_pecEcTd(r.ecE, r.moF)
       +'<td class="r">'+_pilEsc(_ecoEur(r.reste))+'</td>'
       +'<td class="r n">'+_pilEsc(_ecoEur(r.budget))+'</td>'
       +'<td class="r">'+_pilEsc(_ecoEur(r.coutHa))+'</td></tr>';
-  }).join('') || '<tr><td colspan="12" class="pec-empty">Aucune parcelle active.</td></tr>';
+  }).join('') || '<tr><td colspan="13" class="pec-empty">Aucune parcelle active.</td></tr>';
   var foot='<tr><td>'+rows.length+' parcelle'+(rows.length>1?'s':'')+'</td>'
     +'<td class="r">'+_pilHa(E.tot.surf)+'</td><td class="r">'+Math.round(E.avc)+' %</td>'
     +'<td class="r">'+_pilEsc(_ecoEur(E.tot.moRe))+'</td><td class="r">'+_pilEsc(_ecoEur(E.tot.tracF))+'</td>'
     +'<td class="r">'+_pilEsc(_ecoEur(E.tot.gnrF))+'</td><td class="r">'+_pilEsc(_ecoEur(E.tot.phyF))+'</td>'
+    +'<td class="r">'+_pilEsc(_ecoEur(E.tot.prestF||0))+'</td>'
     +'<td class="r">'+_pilEsc(_ecoEur(E.engRe))+'</td>'+_pecEcTd(E.ecRe, E.tot.moF)+'<td class="r">'+_pilEsc(_ecoEur(E.tot.moR))+'</td>'
     +'<td class="r">'+_pilEsc(_ecoEur(E.budget))+'</td><td class="r">'+_pilEsc(_ecoEur(E.coutHaB))+'</td></tr>';
   var H='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Co\u00fbt parcelle par parcelle</div>'
@@ -8020,7 +8107,7 @@ function _pecViewParcelles(E){
     //   la fiche, avec « cliquez pour trier ».
     +'<div class="pec-cs"><b>Budget</b> de la p\u00e9riode, parcelle par parcelle'
     +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.parcelles')):'')+'</div></div>'
-    +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:980px"><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody><tfoot>'+foot+'</tfoot></table></div>'
+    +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:1040px"><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody><tfoot>'+foot+'</tfoot></table></div>'
     +'<div class="pec-acts"><button class="pec-btn" data-pec="csv"><span>'+_mvIcon('chevron',16)+'</span> T\u00e9l\u00e9charger le tableau (CSV)</button>'
     +'<button class="pec-btn" data-pec="copy"><span>'+_mvIcon('liste',16)+'</span> Copier pour un tableur</button></div>'
     +'<div class="pec-note">Le co\u00fbt d\u2019une parcelle est un <b>co\u00fbt de culture</b> : ni vinification, ni foncier, ni amortissement du mat\u00e9riel. Le <b>budget</b> vient du bar\u00e8me h/ha du domaine\u00a0; la <b>MO r\u00e9alis\u00e9e</b>, des heures du planning vers\u00e9es aux parcelles valid\u00e9es, au taux de la fiche de paie de chaque salari\u00e9 le jour m\u00eame\u00a0; le tracteur, du taux de son conducteur.'
@@ -8038,14 +8125,14 @@ function _pecViewParcelles(E){
 // ── Export : le tableau, tel qu'il est trié à l'écran ────────────────
 function _pecTableTxt(E,sep){
   var rows=_pecSortRows(E);
-  var L=[['Parcelle','Surface ha','Avancement %','MO realisee EUR','Tracteur EUR','GNR EUR','Phyto EUR','Realise EUR','Ecart EUR','MO bareme du fait EUR','Heures realisees','Reste EUR','Budget EUR','EUR par ha','Heures budget','Heures restantes','Taux EUR/h','Source taux','Plants','Retard modelise EUR'].join(sep)];
+  var L=[['Parcelle','Surface ha','Avancement %','MO realisee EUR','Tracteur EUR','GNR EUR','Phyto EUR','Prestations EUR','Realise EUR','Ecart EUR','MO bareme du fait EUR','Heures realisees','Reste EUR','Budget EUR','EUR par ha','Heures budget','Heures restantes','Taux EUR/h','Source taux','Plants','Retard modelise EUR'].join(sep)];
   function n2(v){ return String(Math.round((Number(v)||0)*100)/100).replace('.',','); }
   rows.forEach(function(r){
-    L.push([String(r.nom).replace(/[\t\r\n;]/g,' '), n2(r.surf), Math.round(r.pct), n2(r.moRe), n2(r.tracF), n2(r.gnrF), n2(r.phyF),
+    L.push([String(r.nom).replace(/[\t\r\n;]/g,' '), n2(r.surf), Math.round(r.pct), n2(r.moRe), n2(r.tracF), n2(r.gnrF), n2(r.phyF), n2(r.prestF||0),
             n2(r.engRe), (r.ecE===null?'':n2(r.ecE)), n2(r.moF), n2(r.hRe), n2(r.reste), n2(r.budget), n2(r.coutHa), n2(r.bH), n2(r.rH), n2(r.tx),
             (r.src==='reel'?'equipe reelle':'taux moyen'), r.trous||0, n2(r.retE)].join(sep));
   });
-  L.push(['TOTAL', n2(E.tot.surf), Math.round(E.avc), n2(E.tot.moRe), n2(E.tot.tracF), n2(E.tot.gnrF), n2(E.tot.phyF),
+  L.push(['TOTAL', n2(E.tot.surf), Math.round(E.avc), n2(E.tot.moRe), n2(E.tot.tracF), n2(E.tot.gnrF), n2(E.tot.phyF), n2(E.tot.prestF||0),
           n2(E.engRe), (E.ecRe===null?'':n2(E.ecRe)), n2(E.tot.moF), '', n2(E.tot.moR), n2(E.budget), n2(E.coutHaB), n2(E.tot.bH), n2(E.tot.rH), n2(E.rate), '', E.tot.trous, n2(E.tot.retE)].join(sep));
   return L.join('\r\n');
 }
@@ -8226,7 +8313,7 @@ function _pexData(ex, noCmp, coupeIso){
   if(!ex) return null;
   var cfg=_ecoCfg();
   var mois=_pexMoisWin(ex);
-  var byM={}; mois.forEach(function(mo){ byM[mo.k]={sal:0, salP:0, gnr:0, ach:0, dep:0, fut:0}; });
+  var byM={}; mois.forEach(function(mo){ byM[mo.k]={sal:0, salP:0, gnr:0, ach:0, dep:0, fut:0, pre:0}; });
   var _n=new Date();
   var auj=(typeof window._mvAujIso==='function')?window._mvAujIso():_pexIso(_n.getFullYear(),_n.getMonth(),_n.getDate());
   var enCours=(auj>=ex.d0 && auj<=ex.d1);
@@ -8442,6 +8529,15 @@ function _pexData(ex, noCmp, coupeIso){
   });
   futRows.sort(function(a,b){ return a.date<b.date?1:-1; });
 
+  // ── 4c) PRESTATIONS — ARRACH-4 (02/10) ─────────────────────────────
+  // Ce qu'un prestataire a facturé pour une étape d'arrachage, à la date de l'étape. Une
+  // prestation n'est ni un intrant (La Réserve) ni une réparation : poste à part, atelier vigne.
+  var preR=_ecoPrestaByParc({d0:ex.d0, d1:dFin}), preT=preR.tot||0;
+  Object.keys(preR.byDate||{}).forEach(function(iso){
+    var k=parseInt(iso.slice(0,4),10)+'-'+(parseInt(iso.slice(5,7),10)-1);
+    if(byM[k]) byM[k].pre+=preR.byDate[iso];
+  });
+
   // ── 5) LA REPARTITION PAR ATELIER ──────────────────────────────────
   // ★★★ ELLE NE RECALCULE RIEN. Elle REVENTILE des euros deja comptes plus haut,
   //   ce qui donne l'invariant : la somme des ateliers vaut exactement
@@ -8499,6 +8595,7 @@ function _pexData(ex, noCmp, coupeIso){
     'La R\u00e9serve \u00b7 '+locR.n+' contrat'+(locR.n>1?'s':''), locT);
   if(futT>0) _ateAdd('cave',_pexFutLbl(),
     'La R\u00e9serve \u00b7 '+nFutAch+' lot'+(nFutAch>1?'s':'')+' factur\u00e9'+(nFutAch>1?'s':''), futT);
+  if(preT>0) _ateAdd('vigne','Prestations', 'Arrachage \u00b7 '+preR.n+' \u00e9tape'+(preR.n>1?'s':''), preT);   // ARRACH-4
   var ateT=0; _pexAteOrd().forEach(function(k){ ateT+=ateEur[k]; });
   _pexAteOrd().forEach(function(k){ ateSrc[k].sort(function(a,b){ return b.eur-a.eur; }); });
 
@@ -8508,6 +8605,7 @@ function _pexData(ex, noCmp, coupeIso){
 
   // ── Totaux ─────────────────────────────────────────────────────────
   var total=salT+gnrT+achT+repT+locT+futT;   // ENGAGÉ à la coupe
+  total+=preT;   // ARRACH-4 : les prestations
   var totalP=salP+achP, totalClot=total+totalP;  // prévu (grille + amendements chiffrés, FERTI-2) · à la clôture
   var surf=0;
   (window.PARCELLES||[]).forEach(function(p){ if(p&&p.statut!=='Arrachee') surf+=parseFloat(p.surface)||0; });
@@ -8525,6 +8623,8 @@ function _pexData(ex, noCmp, coupeIso){
     det:locR.n+' contrat'+(locR.n>1?'s':'')+' \u00b7 loyer au prorata des jours' });
   if(futT>0) postes.push({ k:'fut', lab:_pexFutLbl(), col:_PEC_COL.fut, eur:futT,
     det:nFutAch+' lot'+(nFutAch>1?'s':'')+' factur\u00e9'+(nFutAch>1?'s':'')+' dans l\u2019exercice' });
+  if(preT>0) postes.push({ k:'pre', lab:'Prestations', col:_PEC_COL.pre, eur:preT,
+    det:preR.n+' \u00e9tape'+(preR.n>1?'s':'')+' d\u2019arrachage par un prestataire'+(preR.nSansPrix?(' \u00b7 '+preR.nSansPrix+' sans montant'):'') });
   postes.forEach(function(p){ var _b=enCoursC?totalClot:total, _e=p.eur+(enCoursC?(p.eurP||0):0); p.part = _b>0 ? (_e/_b*100) : 0; });
 
   var cmp=null, cmpDate=null;
@@ -8545,7 +8645,7 @@ function _pexData(ex, noCmp, coupeIso){
   }
   return { ex:ex, mois:mois, byM:byM, gens:gens, postes:postes, achRows:achRows,
            salT:salT, gnrT:gnrT, achT:achT, repT:repT, total:total,
-           locT:locT, locR:locR, futT:futT, futTrait:futTrait, futRows:futRows,
+           preT:preT, preN:preR.n, locT:locT, locR:locR, futT:futT, futTrait:futTrait, futRows:futRows,
            nFutAch:nFutAch, nFutSansPrix:nFutSansPrix,
            repRows:repRows, nRep:nRep, nRepSansPrix:nRepSansPrix,
            ateEur:ateEur, ateSrc:ateSrc, ateT:ateT,
@@ -8825,7 +8925,7 @@ function _pexGraph(E,w){
   // ⚠️ TOUTE CLE COMPTEE DANS LE TOTAL DOIT ETRE EMPILEE ICI. Un poste ajoute au
   //   moteur sans etre ajoute a cette somme rabaisse l'echelle : la derniere barre
   //   deborde du cadre, en silence.
-  var maxV=0; M.forEach(function(mo){ var b=E.byM[mo.k]; var t=b.sal+b.gnr+b.ach+(b.dep||0)+(b.fut||0)+(b.salP||0); if(t>maxV) maxV=t; });
+  var maxV=0; M.forEach(function(mo){ var b=E.byM[mo.k]; var t=b.sal+b.gnr+b.ach+(b.dep||0)+(b.fut||0)+(b.salP||0)+(b.pre||0); if(t>maxV) maxV=t; });
   if(!(maxV>0)) return window._mvGraphVide('Aucune d\u00e9pense dat\u00e9e sur cet exercice',
     'Les d\u00e9penses se posent \u00e0 la date de leur travail, de leur plein ou de leur achat.');
   var top=_pecNiceMax(maxV*1.08);
@@ -8850,7 +8950,7 @@ function _pexGraph(E,w){
   var xCoupe=null;
   M.forEach(function(mo,i){
     var b=E.byM[mo.k], x=pL+step*i+(step-bw)/2, acc=0;
-    [['sal',_PEC_COL.mo],['gnr',_PEC_COL.gnr],['ach',_PEC_COL.phy],['dep',_PEC_COL.dep],['fut',_PEC_COL.loc],['salP','url(#pex-hach)']].forEach(function(pr){
+    [['sal',_PEC_COL.mo],['gnr',_PEC_COL.gnr],['ach',_PEC_COL.phy],['dep',_PEC_COL.dep],['fut',_PEC_COL.loc],['pre',_PEC_COL.pre],['salP','url(#pex-hach)']].forEach(function(pr){
       var v=b[pr[0]]||0; if(!(v>0)) return;
       var y0=Y(acc+v), y1=Y(acc), hh=Math.max(1,y1-y0);
       g+='<rect x="'+x.toFixed(1)+'" y="'+y0.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hh.toFixed(1)+'" fill="'+pr[1]+'" opacity="0.92"'+(pr[0]==='salP'?(' stroke="'+_PEC_COL.mo+'" stroke-width=".8" stroke-opacity=".7"'):'')+'/>';
@@ -9695,6 +9795,7 @@ function _pecViewRevient(){
   if(cy.src1==='plan') notes.push('Fin de vendange pr\u00e9vue le '+_pecRevDt(cy.d1)+'\u00a0: la main-d\u2019\u0153uvre jusque-l\u00e0 vient du planning.');
   if(cy.src1==='auj') notes.push('Fin de vendange non dat\u00e9e\u00a0: le co\u00fbt s\u2019arr\u00eate \u00e0 aujourd\u2019hui.');
   if(!C.tvOk) notes.push('Main-d\u2019\u0153uvre non chiffr\u00e9e\u00a0: le planning ne dit encore rien de ce cycle.');
+  if(C.arrEur>0) notes.push('Vignes arrach\u00e9es\u00a0: '+_pecEurK(C.arrEur)+' de tracteur, phyto et prestations sur '+C.nArr+' parcelle'+(C.nArr>1?'s':'')+', r\u00e9partis \u00e0 la surface sur les vignes en place.');
   if(C.nSansTaux>0) notes.push(C.nSansTaux+' salari\u00e9'+(C.nSansTaux>1?'s':'')+' sans taux horaire, compt\u00e9'+(C.nSansTaux>1?'s':'')+' au taux moyen.');
   if(notes.length) H+='<div class="pec-cb"><div class="pec-note">'+notes.join('<br>')+'</div></div>';
   if(R.etat==='vide') H+='<div class="pec-cb"><div class="pec-acts" style="margin-top:0"><button class="pec-btn" data-pec="cave" data-v="vendange"><span>'+_mvIcon('raisin',16)+'</span> Saisir les r\u00e9coltes au Cuvier</button></div></div>';
@@ -9746,7 +9847,7 @@ function _pecViewRevient(){
     +'</div></div></div>';
 
   // ④ Ce que coûte une bouteille à la vigne
-  var POS=[['mo','Main-d\u2019\u0153uvre vigne',_PEC_COL.mo],['trac','Conduite tracteur',_PEC_COL.trac],['gnr','Carburant GNR',_PEC_COL.gnr],['phy','Produits phyto',_PEC_COL.phy]];
+  var POS=[['mo','Main-d\u2019\u0153uvre vigne',_PEC_COL.mo],['trac','Conduite tracteur',_PEC_COL.trac],['gnr','Carburant GNR',_PEC_COL.gnr],['phy','Produits phyto',_PEC_COL.phy],['pre','Arrachage & prestations',_PEC_COL.pre]];
   var poT=0; POS.forEach(function(x){ poT+=T.po[x[0]]||0; });
   var bar='<div class="pec-bar" style="height:16px">'+POS.map(function(x){
     var v=T.po[x[0]]||0; return (poT>0&&v>0)?('<i style="width:'+(v/poT*100).toFixed(2)+'%;background:'+x[2]+'"></i>'):''; }).join('')+'</div>';

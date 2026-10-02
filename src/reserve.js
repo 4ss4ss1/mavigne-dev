@@ -1020,6 +1020,8 @@ function _rsvSaveAchat(){
   if(sel==='__new__'){
     var nom=document.getElementById('mvr-np-nom').value.trim();
     if(!nom){ showToast('Donne un nom à l\'intrant','#B85A1A'); return; }
+    // ARRACH-5 : une prestation n'est pas un intrant — elle se note sur l'étape d'arrachage.
+    if(typeof window._mvNomPrestation==='function'&&window._mvNomPrestation(nom)){ showToast('Une prestation se note sur l\u2019\u00e9tape d\u2019arrachage (fiche de la parcelle), pas dans La R\u00e9serve','#B85A1A'); return; }
     var cat=document.getElementById('mvr-np-cat').value;
     var src=document.getElementById('mvr-np-src').value;
     var unite=document.getElementById('mvr-np-unite').value;
@@ -1033,6 +1035,10 @@ function _rsvSaveAchat(){
   var q=parseFloat(document.getElementById('mvr-a-qte').value)|| (n*(p.contenance||0)) ||0;
   if(!q){ showToast('Renseigne une quantité (unités ou directe)','#B85A1A'); return; }
   var four=document.getElementById('mvr-a-four').value.trim();
+  // ARRACH-5 : une facture de prestataire déjà notée sur une étape d'arrachage ne se saisit pas ici.
+  var _fact=document.getElementById('mvr-a-fact').value.trim();
+  if(p&&typeof window._mvNomPrestation==='function'&&window._mvNomPrestation(p.nom)){ showToast('Une prestation se note sur l\u2019\u00e9tape d\u2019arrachage (fiche de la parcelle), pas dans La R\u00e9serve','#B85A1A'); return; }
+  if(_fact&&typeof window._mvFactureOu==='function'&&window._mvFactureOu(four,_fact,'achat')==='presta'){ showToast('Cette facture est d\u00e9j\u00e0 not\u00e9e sur une \u00e9tape d\u2019arrachage','#B85A1A'); return; }
   _uniqPush(INTRANTS.achat_four, four);
   INTRANTS.achats.push({id:_rid(), prodId:prodId, date:document.getElementById('mvr-a-date').value||_today(),
     four:four, q:q, unites:n||null, lot:document.getElementById('mvr-a-lot').value.trim(),

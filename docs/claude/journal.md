@@ -8,6 +8,20 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **2 octobre 2026 (ARRACH-4)** — ★★ **LE BACKLOG DE L'ARRACHAGE SOLDÉ** (§207). Demande de Nico :
+> « occupe-toi de ce qui est au backlog ». ① `_ecoPrestaByParc` (journal rejoué : « Annulé » efface, revalidation remplace) →
+> poste **Prestations** de la campagne (`_pecData`) et de l'exercice (`_pexData`, atelier vigne, barre mensuelle `pre`), colonne
+> **Presta.** du tableau ; ② une parcelle **arrachée qui a coûté** a sa ligne au tableau des parcelles, sans barème ni surface au
+> total ; ③ « + Journal » choisit l'étape (`je-etape`, `_arrPose`). Posé sur SEL-1 + ARRACH-3 (poussés : `517eb00`).
+> **Bump APP 7.87 → 7.88, SW 8.61 → 8.62** (visible).
+
+> ★ Consolidation : **2 octobre 2026 (ARRACH-3)** — ★★ **L'ARRACHAGE EN ÉTAPES, COMPOSÉ PAR L'ADMIN** (§206).
+> Nico : *« l'admin choisit ce qu'il veut mettre dans arrachage »*, une option prestataire par étape, et le moment où la parcelle
+> passe « Arrachée ». `CONFIG.arrachage = {etapes:[{id,lbl,presta}], apres}` (feuille `ovArrCfg`) ; sans étape, rien ne change.
+> Une entrée de journal par étape (`etape`, `etapeLbl`) ; `_ecoTvEvents` écarte `presta` et clé le couple par étape ; heures par
+> étape sous la ligne Arrachage du temps réel (`V.etapes`). Posé sur **SEL-1** (§205, non poussé : le zip contient les deux lots),
+> base `cad12b0`. **Bump APP 7.86 → 7.87, SW 8.60 → 8.61** (visible).
+
 > ★ Consolidation : **2 octobre 2026 (SEL-1)** — ★★ **ARRACHAGE, DÉSHERBAGE MANUEL, EFFEUILLAGE : LES PARCELLES SE
 > CHOISISSENT PAR CAMPAGNE** (§205). Nico : *« ce n'est pas toutes les parcelles qui sont concernées »*, puis *« l'année prochaine
 > ce sera d'autres parcelles »*. Règle unique dans `utils.js` (`_mvTacheConcerne`) : concernée = cochée pour la campagne

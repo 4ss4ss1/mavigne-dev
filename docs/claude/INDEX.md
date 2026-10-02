@@ -249,3 +249,5 @@
 | 204 | 204. ★★ FERTI-3 — LA SESSION « AMENDEMENT » COCHE LA TÂCHE, SANS DOUBLE COMPTE (02/10 — `src/phyto.js` · `s… | `docs/claude/chantiers-180-229.md` |
 | 205 | 205. ★★ SEL-1 — ARRACHAGE, DÉSHERBAGE MANUEL, EFFEUILLAGE : LES PARCELLES SE CHOISISSENT PAR CAMPAGNE (02/1… | `docs/claude/chantiers-180-229.md` |
 | 206 | 206. ★★ ARRACH-3 — L'ARRACHAGE EN ÉTAPES, COMPOSÉ PAR L'ADMIN (02/10 — `src/app.js` · `src/pilotage.js` · `… | `docs/claude/chantiers-180-229.md` |
+| 207 | 207. ★★ ARRACH-4 — LE BACKLOG DE L'ARRACHAGE : PRESTATIONS AU PILOTAGE, ARRACHÉE AU TABLEAU, ÉTAPE AU JOURN… | `docs/claude/chantiers-180-229.md` |
+| 208 | 208. ★★ ARRACH-5 — L'ARRACHAGE DANS LE PRIX DE LA BOUTEILLE, LA FACTURE DE PRESTATAIRE UNIQUE, LE BOUTON QU… | `docs/claude/chantiers-180-229.md` |

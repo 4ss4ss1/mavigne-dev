@@ -1300,3 +1300,84 @@ journal par étape. La tâche du catalogue ne change pas : un domaine qui ne dé
 - Accompagnement : `WHATS_NEW` 7.87, `MV_AIDE` Parcelles, `MV_INFO` `pil.eco.temps` (deux phrases : prestataire, lignes par étape),
   guide `04-vigne.html` (un encart). Visite guidée : aucun sélecteur touché.
 
+## 207. ★★ ARRACH-4 — LE BACKLOG DE L'ARRACHAGE : PRESTATIONS AU PILOTAGE, ARRACHÉE AU TABLEAU, ÉTAPE AU JOURNAL (02/10 — `src/pilotage.js` · `src/app.js` · `src/utils.js` · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-arrach4.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · **bump APP 7.87 → 7.88, SW 8.61 → 8.62**, posé sur SEL-1 + ARRACH-3, base `517eb00`)
+
+### 207a. La demande
+
+Nico : *« occupe-toi de ce qui est au backlog (formulaire, montant prestation, économie par parcelle) »* — les trois points
+ouverts au §206.
+
+### 207b. Les prestations (`_ecoPrestaByParc`, pilotage.js)
+
+- **Source : le journal**, entrées portant une `etape`, rejouées dans l'ordre (date, puis id hexadécimal) par couple parcelle ×
+  tâche × étape : « Annulé » efface, une revalidation **remplace** (jamais deux factures pour une étape), une revalidation par
+  l'équipe (sans `presta`) efface la prestation. Posée à la **date de l'étape**, sur **sa parcelle**. Un montant absent n'est
+  pas zéro : `nSansPrix`, dit dans le détail du poste.
+- **Campagne (`_pecData`)** : `prestF` par ligne, `T.prestF` ; dans `engage`, `engageBar`, `budget` (pas de prévu : le budget
+  d'une prestation est ce qu'elle a coûté, pas d'extrapolation à l'avancement) ; poste `pre` ajouté **seulement s'il existe** ;
+  courbe d'engagement (`T.byDatePresta`) ; colonne **Presta.** du tableau des parcelles et du CSV.
+- **Exercice (`_pexData`)** : bloc 4c, `preT` dans `total`, atelier **vigne** (invariant « somme des ateliers » tenu), barre
+  mensuelle `pre` — et la somme d'échelle du graphique (le piège écrit au-dessus de `maxV`).
+
+### 207c. L'arrachée au tableau des parcelles (`_pecData`)
+
+Une parcelle arrachée entre si elle a **coûté sur la période** (heures versées par le temps réel, tracteur, phyto ou prestation).
+`arr:true` : **aucun barème** (les travaux de la saison ne s'appliquent plus), **surface hors total** (`T.nArr`, les €/ha du
+domaine restent ceux des vignes en place), pas de carburant « à la surface » dans le repli de la clé GNR. Pastille « arrachée »,
+« Fait » à « — ». Le Revient (`_pecRevData`) l'écarte toujours (backlog 5).
+
+### 207d. Le formulaire du journal (app.js)
+
+`je-etape-wrap` (index.html) s'affiche pour l'Arrachage découpé (`_jeEtapeMaj`, appelé à l'ouverture et au changement de
+tâche) ; une étape prestataire montre nom et montant. `saveJournalEntry` écrit `etape`/`etapeLbl`/`presta…` et pose l'état par
+`_arrPose` — partagé avec `saveArrEtape` (fiche). Aucune écriture neuve du journal : toujours huit `JOURNAL.unshift(_mvEqApplique(`.
+
+### 207e. Mesuré
+
+- `mv-harnais-arrach4.mjs` : **19 assertions** (la vraie `_ecoPrestaByParc`, les vrais gestes du formulaire, le câblage de
+  `_pecData` / `_pexData` lu dans le source) ; **8 contre-épreuves** toutes rouges. `_pecData` et `_pexData` eux-mêmes tournent au
+  harnais de robustesse du Pilotage.
+- **Non vérifié à l'œil** : aucun navigateur lancé.
+- Accompagnement : `WHATS_NEW` 7.88, `MV_INFO` (`pil.eco.postes`, `pil.eco.parcelles`, `pil.exo.postes`), guide, note de la
+  feuille d'étape.
+
+## 208. ★★ ARRACH-5 — L'ARRACHAGE DANS LE PRIX DE LA BOUTEILLE, LA FACTURE DE PRESTATAIRE UNIQUE, LE BOUTON QUI S'ALLUME (02/10 — `src/pilotage.js` · `src/utils.js` · `src/app.js` · `src/reserve.js` · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-arrach5.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · **bump APP 7.88 → 7.89, SW 8.62 → 8.63**, posé sur ARRACH-4 non poussé, base `517eb00`)
+
+### 208a. La demande
+
+Nico : *« il faut que la facture prestataire ne puisse pas se noter ailleurs »* ; *« le coût d'arrachage et des travaux effectués
+sur l'année comptable (ou vigne) en cours doit peser sur le prix de la bouteille »* ; *« le bouton prestataire ne s'allume pas en
+vert »*.
+
+### 208b. Le bouton (app.js, `_arrCfgRows`)
+
+`.pchk.sel` n'a aucune règle CSS : la teinte vient de la seconde classe (`.pchk.sel.vert`, `.acre`, `.phyt`, styles.css ~882).
+La puce posait `sel` seul → `sel vert`. ★ Leçon : toute puce `.pchk` cochée porte DEUX classes.
+
+### 208c. La facture unique (`_mvFactureOu`, `_mvNomPrestation`, utils.js)
+
+- Les deux endroits qui portent une facture de fournisseur avec son n° : l'étape d'arrachage (journal : `prestaNom`,
+  `prestaFact`, nouveau champ sur la fiche et au formulaire) et les achats de La Réserve (`four`, `fact`). **Garde croisée** :
+  chacun refuse une facture (n° normalisé : casse, espaces, points, tirets, barres ; fournisseur comparé s'il est connu des deux
+  côtés) déjà connue de l'autre. Une étape annulée ne bloque pas.
+- La Réserve refuse aussi un intrant (neuf ou existant) dont le nom dit prestation / main-d'œuvre / arrachage.
+- **Limites écrites** : sans n° de facture, rien ne prouve le doublon ; les réparations du tracteur et les fûts n'ont pas de n° de
+  facture et ne sont pas gardés (ce ne sont pas des prestations d'arrachage).
+
+### 208d. Le revient (`_pecRevCouts`, poste `pre`)
+
+- **Ce qui y était déjà** : la main-d'œuvre d'arrachage — `TV.eur` entier est réparti sur les vignes en place (la part d'une
+  arrachée change de clé, elle ne sort pas du total).
+- **Ce qui manquait** : le tracteur et le phyto posés sur une parcelle arrachée (absente de `parc`) et toute prestation. Une
+  prestation sur une vigne en place lui revient ; ce qu'a coûté une vigne arrachée se répartit **à la surface** sur les vignes en
+  place (elle ne donne pas de vin, le domaine en porte la charge). `POST` gagne `pre` (sommé au coût, D3 du harnais revient
+  toujours valide), barre de répartition « Arrachage & prestations », note sous les chiffres quand une arrachée a coûté.
+- Fenêtre : le **cycle du millésime** (année vigne, d'une vendange à la suivante), comme le reste du revient.
+
+### 208e. Mesuré
+
+- `mv-harnais-arrach5.mjs` : **15 assertions** (vraies `_mvFactureOu`, `_mvNomPrestation`, `_pecRevCouts` sur des sources de coûts
+  connues) ; **6 contre-épreuves** toutes rouges.
+- **Non vérifié à l'œil** : aucun navigateur lancé.
+- Accompagnement : `WHATS_NEW` 7.89, `MV_INFO` (`pil.eco.revient`, `pil.exo.postes`), guide, note de la feuille d'étape.
+

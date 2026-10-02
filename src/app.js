@@ -8025,8 +8025,8 @@ function saveSelParc(){
 // · Chaque étape validée écrit UNE entrée au journal (tache 'Arrachage', etape, etapeLbl) : le temps réel
 //   lui verse ses heures (pilotage.js, _ecoTvEvents), étape par étape. Une étape prestataire porte
 //   `presta:true` et n'absorbe AUCUNE heure de l'équipe (même patron que auTracteur, FERTI-3).
-// · Le montant d'un prestataire est NOTÉ, jamais additionné : l'Économie n'a pas de poste prestations
-//   (vérifié le 02/10) — inventer un calcul serait pire que ne rien dire.
+// · Le montant d'un prestataire est additionné dans l'Économie depuis ARRACH-4 (pilotage.js,
+//   _ecoPrestaByParc) : poste « Prestations » de la campagne et de l'exercice, colonne du tableau.
 // · p.taches['Arrachage'] suit : aucune étape = Non démarré, une partie = En cours, toutes = Validé.
 var MV_ARR_ETAPES_CAT=[
   {id:'demontage', lbl:'D\u00e9montage du palissage'},
@@ -8091,6 +8091,7 @@ function openArrEtape(nom,id){
   el=document.getElementById('arre-presta'); if(el) el.style.display=e.presta?'':'none';
   el=document.getElementById('arre-pn'); if(el) el.value=(d&&d.pn)||'';
   el=document.getElementById('arre-pm'); if(el) el.value=(d&&d.pm)?String(d.pm):'';
+  el=document.getElementById('arre-pf'); if(el) el.value=(d&&d.pf)||'';
   el=document.getElementById('arre-fait'); if(el){ el.style.display=d?'':'none'; el.textContent=d?('\u00c9tape valid\u00e9e le '+fmtDate(d.d)+'.'):''; }
   el=document.getElementById('arre-undo'); if(el) el.style.display=(d&&isAdmin())?'':'none';
   el=document.getElementById('arre-ok'); if(el) el.style.display=d?'none':'';
@@ -8114,12 +8115,15 @@ function saveArrEtape(){
     j.presta=true; st.presta=true;
     if(pn){ j.prestaNom=pn; st.pn=pn; }
     if(pm>0){ j.prestaMontant=Math.round(pm*100)/100; st.pm=j.prestaMontant; }
+    var pf=String(((document.getElementById('arre-pf')||{}).value)||'').trim().slice(0,40);
+    if(pf){
+      // ARRACH-5 : une facture déjà saisie dans La Réserve ne se note pas une seconde fois.
+      if(typeof window._mvFactureOu==='function'&&window._mvFactureOu(pn,pf,'presta')==='achat'){ showToast('Cette facture est d\u00e9j\u00e0 dans La R\u00e9serve','#B85A1A'); return; }
+      j.prestaFact=pf; st.pf=pf;
+    }
   }
   _arrJournal(j);
-  var c=window._mvCampRef();
-  var f=(p.arrEtapes&&Number(p.arrEtapes.c)===c&&p.arrEtapes.f)?Object.assign({},p.arrEtapes.f):{};
-  f[e.id]=st; p.arrEtapes={c:c,f:f};
-  _arrSyncTache(p);
+  _arrPose(p,e.id,st);
   saveData('parcelles'); saveData('travaux'); saveData('journal');
   closeOv(null,'ovArrEtape');
   openDP(p.nom);
@@ -8132,6 +8136,38 @@ function saveArrEtape(){
       catch(err){ if(window._mvAvale) window._mvAvale(err,'app.js/saveArrEtape'); }
     },350);
   }
+}
+// L'état d'une étape faite, pour la campagne — partagé par la fiche (saveArrEtape) et le formulaire
+// du journal (saveJournalEntry, ARRACH-4).
+function _arrPose(p,id,st){
+  var c=window._mvCampRef();
+  var f=(p.arrEtapes&&Number(p.arrEtapes.c)===c&&p.arrEtapes.f)?Object.assign({},p.arrEtapes.f):{};
+  f[id]=st; p.arrEtapes={c:c,f:f};
+  _arrSyncTache(p);
+}
+// ── ARRACH-4 : le formulaire « + Journal » choisit l'étape quand l'arrachage est découpé ──
+function _jeEtapeMaj(){
+  var w=document.getElementById('je-etape-wrap'), s=document.getElementById('je-etape'), t=document.getElementById('je-tache');
+  if(!w||!s) return;
+  var on=!!(t&&t.value==='Arrachage'&&_arrActif());
+  w.style.display=on?'':'none';
+  if(on){
+    var cur=s.value;
+    s.innerHTML=_arrCfg().etapes.map(function(e){ return '<option value="'+_escAttr(e.id)+'">'+_escHtml(e.lbl+(e.presta?' (prestataire)':''))+'</option>'; }).join('');
+    if(cur&&_arrCfg().etapes.some(function(e){return e.id===cur;})) s.value=cur;
+  }
+  _jeEtapePresta();
+}
+function _jeEtapePresta(){
+  var b=document.getElementById('je-presta'); if(!b) return;
+  var e=_jeEtapeLue();
+  b.style.display=(e&&e.presta)?'':'none';
+}
+// L'étape choisie dans le formulaire, ou null (tâche autre, arrachage non découpé).
+function _jeEtapeLue(){
+  var t=document.getElementById('je-tache'), s=document.getElementById('je-etape');
+  if(!t||t.value!=='Arrachage'||!_arrActif()||!s) return null;
+  return _arrCfg().etapes.find(function(e){return e.id===s.value;})||null;
 }
 function annulerArrEtape(){
   if(!isAdmin()){ showToast('Admin requis','#B85A1A'); return; }
@@ -8165,7 +8201,7 @@ function _arrCfgRows(){
   c.innerHTML=_ARRCF.L.map(function(e,i){
     return '<div class="mv-tr" style="display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap">'
       +'<div class="pchk'+(e.on?' sel vert':'')+'" style="flex:1;min-width:150px" onclick="_arrCfgOp('+i+',\'on\')">'+_escHtml(e.lbl)+'</div>'
-      +'<div class="pchk'+(e.presta?' sel':'')+'" onclick="_arrCfgOp('+i+',\'presta\')"'+(e.on?'':' style="opacity:.45"')+'>Prestataire</div>'
+      +'<div class="pchk'+(e.presta?' sel vert':'')+'" onclick="_arrCfgOp('+i+',\'presta\')"'+(e.on?'':' style="opacity:.45"')+'>Prestataire</div>'   // ARRACH-5 : .pchk.sel ne colore rien sans sa teinte
       +'<button class="mv-gh" aria-label="Monter" title="Monter" onclick="_arrCfgOp('+i+',\'up\')"'+(i?'':' disabled')+'><span style="display:inline-flex;transform:rotate(180deg)">'+_mvIcon('chevron',16)+'</span></button>'
       +'<button class="mv-gh" aria-label="Descendre" title="Descendre" onclick="_arrCfgOp('+i+',\'down\')"'+(i<_ARRCF.L.length-1?'':' disabled')+'><span style="display:inline-flex">'+_mvIcon('chevron',16)+'</span></button>'
       +'</div>';
@@ -9163,7 +9199,11 @@ function openJournalEntry(){
   document.getElementById('je-equipe-section').style.display='none';
   document.getElementById('je-statut').value='Validé';
   _buildMembresCheckboxes('je-membres-pick','');
-  var _jeTs=document.getElementById('je-tache'); if(_jeTs){_jeTs.onchange=_jePrefillTeam;}
+  var _jeTs=document.getElementById('je-tache'); if(_jeTs){_jeTs.onchange=function(){ _jePrefillTeam(); _jeEtapeMaj(); };}   // ARRACH-4
+  var _jePn=document.getElementById('je-pn'); if(_jePn) _jePn.value='';
+  var _jePm=document.getElementById('je-pm'); if(_jePm) _jePm.value='';
+  var _jePf=document.getElementById('je-pf'); if(_jePf) _jePf.value='';
+  _jeEtapeMaj();
   _jePrefillTeam();
   _mvEqUi('je');   // ÉQUIPES-1
   openOv('ovJournalEntry');
@@ -9183,6 +9223,24 @@ async function saveJournalEntry(){
   if(quiHors&&!membresEquipe.length){showToast('Personne dans le groupe : cochez qui a travaillé','#B85A1A');return;}
   var jEntry={id:Date.now().toString(16),date,parcelle,tache,qui:currentUser.nom,statut,equipe,membresEquipe};
   if(quiHors)jEntry.quiHors=true;
+  // ARRACH-4 : arrachage découpé → l'entrée porte son étape, comme depuis la fiche (saveArrEtape).
+  var _jeEt=_jeEtapeLue(), _jeSt=null;
+  if(_jeEt){
+    if(date>_mvToday()){showToast('Date dans le futur','#B85A1A');return;}
+    jEntry.etape=_jeEt.id; jEntry.etapeLbl=_jeEt.lbl; _jeSt={d:date};
+    if(_jeEt.presta){
+      var _jePn2=String(((document.getElementById('je-pn')||{}).value)||'').trim().slice(0,80);
+      var _jePm2=parseFloat(String(((document.getElementById('je-pm')||{}).value)||'').replace(',','.'));
+      jEntry.presta=true; _jeSt.presta=true;
+      if(_jePn2){ jEntry.prestaNom=_jePn2; _jeSt.pn=_jePn2; }
+      if(_jePm2>0){ jEntry.prestaMontant=Math.round(_jePm2*100)/100; _jeSt.pm=jEntry.prestaMontant; }
+      var _jePf2=String(((document.getElementById('je-pf')||{}).value)||'').trim().slice(0,40);
+      if(_jePf2){
+        if(typeof window._mvFactureOu==='function'&&window._mvFactureOu(_jePn2,_jePf2,'presta')==='achat'){showToast('Cette facture est d\u00e9j\u00e0 dans La R\u00e9serve','#B85A1A');return;}   // ARRACH-5
+        jEntry.prestaFact=_jePf2; _jeSt.pf=_jePf2;
+      }
+    }
+  }
   // Météo moyenne si validation
   if(statut==='Validé'){
     var _mDeb=_findDebutTache(parcelle,tache,date)||date;
@@ -9191,7 +9249,10 @@ async function saveJournalEntry(){
   }
   JOURNAL.unshift(_mvEqApplique(jEntry));
   // Mettre à jour le statut de la parcelle si validé
-  if(statut==='Validé'||statut==='En cours'){
+  if(_jeEt&&statut==='Validé'){
+    var _jePp=PARCELLES.find(x=>x.nom===parcelle);
+    if(_jePp){ _arrPose(_jePp,_jeEt.id,_jeSt); saveData('parcelles'); saveData('travaux'); }   // ARRACH-4
+  } else if(statut==='Validé'||statut==='En cours'){
     const p=PARCELLES.find(x=>x.nom===parcelle);
     if(p&&p.taches&&_mvOnActiveSaison()){
       const actuel=p.taches[tache]||'Non démarré';
@@ -11968,6 +12029,7 @@ async function refreshApp(){
   if (typeof _arrCfgAjout !== "undefined") window._arrCfgAjout = _arrCfgAjout;
   if (typeof saveArrCfg !== "undefined") window.saveArrCfg = saveArrCfg;
   if (typeof _arrResume !== "undefined") window._arrResume = _arrResume;
+  if (typeof _jeEtapePresta !== "undefined") window._jeEtapePresta = _jeEtapePresta;   // ARRACH-4
   if (typeof _dpcToggleEntreplantation !== "undefined") window._dpcToggleEntreplantation = _dpcToggleEntreplantation;
   if (typeof openSessionDetail !== "undefined") window.openSessionDetail = openSessionDetail;
   if (typeof openEditSession !== "undefined") window.openEditSession = openEditSession;

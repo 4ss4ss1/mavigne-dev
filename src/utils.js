@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.87';
+export const APP_VERSION = '7.89';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -730,6 +730,25 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.89', items: [
+    { emoji: 'raisin', titre: 'L\u2019arrachage p\u00e8se sur le prix de la bouteille',
+      desc: "Dans le Pilotage, \u00c9conomie, <b>Revient</b>, le co\u00fbt vigne par bouteille compte maintenant ce que l\u2019arrachage et les prestataires ont co\u00fbt\u00e9 sur l\u2019ann\u00e9e vigne\u00a0: une prestation sur une vigne en place va \u00e0 cette vigne, et ce qu\u2019une vigne arrach\u00e9e a co\u00fbt\u00e9 (tracteur, phyto, prestataire) se r\u00e9partit sur les vignes en place. "
+        + "Les heures de l\u2019\u00e9quipe pass\u00e9es \u00e0 arracher y \u00e9taient d\u00e9j\u00e0. Une ligne \u00ab\u00a0Arrachage & prestations\u00a0\u00bb s\u2019ajoute \u00e0 la r\u00e9partition du co\u00fbt." },
+    { emoji: 'bouclier', titre: 'Une facture de prestataire ne se note qu\u2019une fois',
+      desc: "La facture d\u2019un prestataire se note sur l\u2019\u00e9tape d\u2019arrachage, avec son num\u00e9ro. La R\u00e9serve refuse alors la m\u00eame facture (m\u00eame fournisseur, m\u00eame num\u00e9ro), et l\u2019inverse. Elle refuse aussi un \u00ab\u00a0intrant\u00a0\u00bb dont le nom dit prestation, main-d\u2019\u0153uvre ou arrachage." },
+    { emoji: 'check', titre: 'Le bouton \u00ab\u00a0Prestataire\u00a0\u00bb s\u2019allume',
+      desc: "Dans le r\u00e9glage des \u00e9tapes de l\u2019arrachage, le bouton \u00ab\u00a0Prestataire\u00a0\u00bb restait gris une fois touch\u00e9. Il passe maintenant au vert." },
+  ] },
+  { v: '7.88', items: [
+    { emoji: 'euro', titre: 'Les prestations comptent dans l\u2019\u00c9conomie',
+      desc: "Le montant factur\u00e9 par un prestataire pour une \u00e9tape d\u2019arrachage entre maintenant dans le Pilotage, \u00c9conomie\u00a0: un poste <b>Prestations</b> dans le co\u00fbt de la campagne et dans l\u2019exercice, et une colonne dans le tableau des parcelles, \u00e0 la date de l\u2019\u00e9tape. "
+        + "Une \u00e9tape annul\u00e9e ne compte plus, une \u00e9tape revalid\u00e9e ne compte qu\u2019une fois." },
+    { emoji: 'carte', titre: 'Une parcelle arrach\u00e9e appara\u00eet dans le co\u00fbt parcelle par parcelle',
+      desc: "Quand une vigne arrach\u00e9e a co\u00fbt\u00e9 sur la p\u00e9riode \u2014 heures d\u2019arrachage, tracteur, prestataire \u2014, elle a sa ligne dans le tableau des parcelles, marqu\u00e9e \u00ab\u00a0arrach\u00e9e\u00a0\u00bb. "
+        + "Sans bar\u00e8me et sans surface au total\u00a0: le co\u00fbt \u00e0 l\u2019hectare du domaine reste celui des vignes en place." },
+    { emoji: 'journal', titre: '\u00ab\u00a0+ Journal\u00a0\u00bb conna\u00eet les \u00e9tapes de l\u2019arrachage',
+      desc: "Quand l\u2019arrachage est d\u00e9coup\u00e9 en \u00e9tapes, la saisie du journal demande laquelle, avec le prestataire et son montant pour une \u00e9tape qui en a un. La parcelle avance comme depuis sa fiche." },
+  ] },
   { v: '7.87', items: [
     { emoji: 'curseurs', titre: 'L\u2019arrachage en \u00e9tapes, compos\u00e9 par vous',
       desc: "Dans la roue crant\u00e9e de la Vigne, <b>T\u00e2ches</b>, la ligne Arrachage propose maintenant de <b>d\u00e9couper en \u00e9tapes</b>\u00a0: d\u00e9montage du palissage, arrachage des souches, ramassage, \u00e9pierrage, travail du sol avant repos, ou une \u00e9tape \u00e0 vous. "
@@ -4302,6 +4321,7 @@ export const MV_INFO = {
   ] },
 
   'pil.eco.revient': { t: 'Le revient d’un millésime', p: [
+    '<b>Arrachage et prestations</b> (ARRACH-5) : une prestation sur une vigne en place va \u00e0 cette vigne ; ce qu\u2019une vigne <b>arrach\u00e9e</b> a co\u00fbt\u00e9 sur le cycle (tracteur, phyto, prestataire) se r\u00e9partit \u00e0 la surface sur les vignes en place \u2014 elle ne donne pas de vin, le domaine en porte la charge. Les heures de l\u2019\u00e9quipe pass\u00e9es \u00e0 arracher \u00e9taient d\u00e9j\u00e0 dans la main-d\u2019\u0153uvre.',
     'Ce sont les <b>coûts de culture</b> : ce qu’il a fallu pour amener le raisin jusqu’au bout du rang. <b>Ni vinification, ni fûts, ni mise, ni foncier, ni amortissement</b> — ces postes-là ne passent pas par Ma Vigne. Le chiffre est un <b>plancher</b>.',
     'Tout se lit sur le <b>cycle du millésime</b> : du lendemain de la dernière récolte de l’an passé à la fin de la vendange. Pas sur la période consultée — un coût de dix jours divisé par une récolte entière ne veut rien dire. Sans récolte saisie l’an passé, le cycle part <b>un an avant sa fin</b>, et l’écran le dit.',
     'Le coût reprend ce que la campagne appelle l’<b>engagé</b> : les heures payées dans les rangs au planning (bureau, tracteur et journées de cave retirés), la conduite du tracteur, le carburant et les produits phyto. Tant que la vendange est à venir, s’y ajoute la <b>main-d’œuvre prévue</b> au planning jusqu’à sa fin prévue — le chiffre est alors marqué <b>projeté</b>.',
@@ -4330,6 +4350,7 @@ export const MV_INFO = {
   ] },
 
   'pil.eco.postes': { t: 'Le coût de la campagne', p: [
+    '<b>Prestations</b> (ARRACH-4) : ce qu\u2019un prestataire a factur\u00e9 pour une \u00e9tape d\u2019arrachage, \u00e0 la date de l\u2019\u00e9tape. Le poste n\u2019appara\u00eet que s\u2019il y en a. Pas de pr\u00e9vu : son budget est ce qu\u2019il a co\u00fbt\u00e9. Une \u00e9tape annul\u00e9e ne compte plus ; revalid\u00e9e, elle ne compte qu\u2019une fois. Un montant non saisi n\u2019est pas z\u00e9ro : il est dit \u00e0 part.',
     'Cet écran chiffre le <b>coût de culture</b> d\u2019une campagne : ce qu\u2019il faut de main-d\u2019œuvre, de tracteur, de carburant et de produits pour mener le raisin au bout du rang.',
     'Les <b>achats</b>, les <b>réparations</b> et les <b>fûts</b> n\u2019y sont pas, et ne peuvent pas y être : ils portent une <b>date</b>, ce budget n\u2019en porte aucune — c\u2019est un barème, pas un relevé. Ils se comptent dans <b>Exercice</b>, d\u2019un bilan à l\u2019autre, avec les salaires.',
     'Les quatre postes ne sont pas connus de la même façon, et c\u2019est ce qui explique leurs écarts de fiabilité.',
@@ -4351,6 +4372,7 @@ export const MV_INFO = {
   ] },
 
   'pil.eco.parcelles': { t: 'Le tableau des parcelles', p: [
+    'Une parcelle <b>arrach\u00e9e</b> a sa ligne quand elle a co\u00fbt\u00e9 sur la p\u00e9riode (heures vers\u00e9es, tracteur, phyto, prestation). Elle n\u2019a pas de bar\u00e8me et sa surface n\u2019entre pas au total : le co\u00fbt \u00e0 l\u2019hectare du domaine reste celui des vignes en place. La colonne <b>Presta.</b> porte ce que les prestataires ont factur\u00e9.',
     '<b>Cliquez sur un en-tête</b> pour trier. Recliquer la même colonne inverse le sens.',
     '<b>MO</b> = main-d\u2019\u0153uvre <b>payée</b> pour la parcelle : les heures du planning versées à ses validations, au taux du jour. <b>Écart</b> = cette MO \u2212 le barème du travail fait (<b>+</b> = plus cher que prévu). <b>Reste</b> = main-d\u2019\u0153uvre <b>encore à faire</b>, au barème. <b>Budget</b> = le barème de la période.',
     '<b>Tracteur et phyto</b> sont du <b>réalisé</b> : seulement ce qui a été saisi, sans projection. Le <b>GNR</b> est l\u2019enveloppe réelle de vos pleins, répartie entre les parcelles au prorata des heures machine — à défaut d\u2019heures saisies, au prorata de la <b>surface</b>.',
@@ -4359,6 +4381,7 @@ export const MV_INFO = {
   ] },
 
   'pil.exo.postes': { t: 'Les postes de l\u2019exercice', p: [
+    '<b>Prestations</b> : ce qu\u2019un prestataire a factur\u00e9 pour une \u00e9tape d\u2019arrachage, \u00e0 la date de l\u2019\u00e9tape, rang\u00e9 \u00e0 l\u2019atelier vigne. Avec son num\u00e9ro, la facture ne peut pas \u00eatre saisie une seconde fois dans La R\u00e9serve, et l\u2019inverse.',
     '<b>Quatre postes toujours présents</b> : les salaires, le carburant, les achats d\u2019intrants et les réparations (les passages chez le réparateur, à leur date de retour). Deux s\u2019ajoutent quand ils existent : la <b>location de fûts</b>, au prorata des jours de contrat, et les <b>fûts achetés</b> si vous avez choisi de les compter.',
     'La <b>conduite</b> du tracteur est déjà dans les salaires — c\u2019est du temps de travail payé. La compter une seconde fois au poste tracteur reviendrait à <b>payer deux fois le tractoriste</b>. Seul son <b>carburant</b> s\u2019ajoute.',
     'Le graphique <b>mois par mois</b> montre ce qui est sorti, à la date où c\u2019est sorti. Un exercice viticole n\u2019est pas régulier : la taille en hiver, les vendanges à l\u2019automne, un creux en été. Ces bosses sont normales — c\u2019est justement ce qu\u2019on vient regarder.',
@@ -5940,6 +5963,39 @@ function _mvSelResume(nom, camp){
   });
   return { n: n, ha: Math.round(ha * 100) / 100, trav: trav, camp: c, court: _mvCampagneBornes(c).court };
 }
+// ★★ ARRACH-5 — UNE FACTURE DE PRESTATAIRE NE SE NOTE QU'UNE FOIS, ET SUR L'ÉTAPE.
+//   Nico (02/10) : « il faut que la facture prestataire ne puisse pas se noter ailleurs ». Les deux
+//   endroits qui portent un montant de fournisseur avec son n° de facture sont l'étape d'arrachage
+//   (journal : prestaNom, prestaFact) et les achats de La Réserve (four, fact). La garde est
+//   CROISÉE : chacun refuse une facture (fournisseur + n°) déjà connue de l'autre. Et La Réserve
+//   refuse un intrant dont le nom dit « prestation » / « main-d'œuvre » / « arrachage » : ce n'est
+//   pas un intrant, c'est une prestation, qui se note sur l'étape.
+//   ⚠️ Sans n° de facture, la garde croisée ne peut rien prouver : elle ne devine pas.
+function _mvFactNorm(s){ return String(s == null ? '' : s).toLowerCase().replace(/[\s.\-_/]+/g, '').trim(); }
+function _mvFactureOu(four, num, exclure){
+  var f = _mvFactNorm(four), n = _mvFactNorm(num);
+  if(!n) return '';
+  var ex = exclure || '';
+  if(ex !== 'achat'){
+    var A = ((window.INTRANTS || {}).achats) || [];
+    for(var i = 0; i < A.length; i++){
+      var a = A[i]; if(!a) continue;
+      if(_mvFactNorm(a.fact) === n && (!f || !_mvFactNorm(a.four) || _mvFactNorm(a.four) === f)) return 'achat';
+    }
+  }
+  if(ex !== 'presta'){
+    var J = window.JOURNAL || [];
+    for(var k = 0; k < J.length; k++){
+      var j = J[k]; if(!j || !j.presta || j.statut !== 'Valid\u00e9') continue;
+      if(_mvFactNorm(j.prestaFact) === n && (!f || !_mvFactNorm(j.prestaNom) || _mvFactNorm(j.prestaNom) === f)) return 'presta';
+    }
+  }
+  return '';
+}
+var MV_RE_PRESTA = /prestat|main[\s\-]*d.?\s*(?:\u0153|oe)uvre|arrachage/i;
+function _mvNomPrestation(nom){ return MV_RE_PRESTA.test(String(nom == null ? '' : nom)); }
+window._mvFactureOu       = _mvFactureOu;
+window._mvNomPrestation   = _mvNomPrestation;
 window.MV_TACHES_SEL      = MV_TACHES_SEL;
 window._mvTacheSel        = _mvTacheSel;
 window._mvCampRef         = _mvCampRef;

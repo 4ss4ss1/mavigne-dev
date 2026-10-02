@@ -3,12 +3,12 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **2 octobre 2026 (ARRACH-3)** — ★★ **L'ARRACHAGE EN ÉTAPES, COMPOSÉ PAR L'ADMIN** (§206).
-> Nico : *« l'admin choisit ce qu'il veut mettre dans arrachage »*, une option prestataire par étape, et le moment où la parcelle
-> passe « Arrachée ». `CONFIG.arrachage = {etapes:[{id,lbl,presta}], apres}` (feuille `ovArrCfg`) ; sans étape, rien ne change.
-> Une entrée de journal par étape (`etape`, `etapeLbl`) ; `_ecoTvEvents` écarte `presta` et clé le couple par étape ; heures par
-> étape sous la ligne Arrachage du temps réel (`V.etapes`). Posé sur **SEL-1** (§205, non poussé : le zip contient les deux lots),
-> base `cad12b0`. **Bump APP 7.86 → 7.87, SW 8.60 → 8.61** (visible).
+> Dernière consolidation : **2 octobre 2026 (ARRACH-5)** — ★★ **L'ARRACHAGE DANS LE PRIX DE LA BOUTEILLE, LA FACTURE UNIQUE** (§208).
+> Nico : la facture prestataire « ne puisse pas se noter ailleurs » ; l'arrachage et les travaux de l'année « doivent peser sur le
+> prix de la bouteille » ; le bouton Prestataire ne s'allumait pas. ① `_pecRevCouts` : poste `pre` (prestations + tracteur/phyto
+> des vignes arrachées, à la surface sur les vignes en place) ; ② `_mvFactureOu` (utils.js) : garde croisée étape ↔ La Réserve sur
+> fournisseur + n° de facture, intrant « prestation » refusé ; ③ `.pchk.sel` sans teinte → `sel vert`. Posé sur ARRACH-4 (non
+> poussé, base `517eb00`). **Bump APP 7.88 → 7.89, SW 8.62 → 8.63** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1812,20 +1812,16 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
-### ⚠️ SEL-1 / ARRACH-3 — CE QUI RESTE OUVERT (§205-206, posé le 02/10)
+### ⚠️ SEL-1 / ARRACH-3 à 5 — CE QUI RESTE OUVERT (§205-208, posé le 02/10)
 
-1. ✅ ~~ARRACH-3~~ — **fait au §206**, sous une forme plus large que proposée : étapes composées par l'admin (pas trois imposées),
-   option prestataire, moment du passage « Arrachée » au choix. **Aucun barème par défaut** (§205d).
+1. ✅ ~~ARRACH-3~~ — fait au §206. ✅ ~~Formulaire du journal, montant prestataire, arrachée au tableau des parcelles~~ — faits
+   au §207.
 2. **À regarder chez Nico** : l'avancement de l'Effeuillage et du Désherbage sur la campagne en cours, juste après le
    déploiement — les parcelles déjà saisies doivent compter d'office ; les autres, plus.
-3. **Relu le 02/10** : le tableau Temps réel (par travail) compte les heures d'une parcelle arrachée sous Arrachage ; les tableaux
-   **par parcelle** de l'Économie (`pilotage.js` ~6669, ~6800) écartent les arrachées — le coût d'arrachage d'une parcelle donnée
-   ne s'y lit donc pas. À trancher avec Nico s'il le demande.
-4. **Le montant d'un prestataire n'entre dans aucun total** (pas de poste prestations dans l'Économie, vérifié). S'il en faut un,
-   c'est un lot à part : où il tombe (vigne ? investissement ?) se décide avec Nico.
-5. **Les autres chemins de validation** : la saisie générale du journal (« + Journal ») et le bouton « Début » écrivent encore un
-   Arrachage sans étape. `pQuickValidate` et `tapTacheSimple` renvoient vers la fiche quand l'arrachage est découpé ; le formulaire
-   du journal, non (il valide l'arrachage entier, comme avant).
+3. ✅ ~~Double saisie de la facture~~ — garde croisée au §208. ⚠️ Limite écrite : sans n° de facture, rien ne prouve le doublon ;
+   le nom « prestation / main-d'œuvre / arrachage » est refusé dans La Réserve, mais un intrant au nom anodin passerait.
+4. **Le bouton « Début »** écrit encore un arrachage « En cours » sans étape (sans effet sur les heures ni l'argent).
+5. ✅ ~~Le coût d'arrachage dans le Revient~~ — fait au §208 (Nico : il doit peser sur le prix de la bouteille).
 
 ### ⚠️ FERTI-3 — CE QUI RESTE OUVERT SUR L'AMENDEMENT (§202-203, posé le 02/10)
 1. ✅ **Le budget prévu des achats** : FAIT au §203 (`achP`, retiré dès la facture chiffrée).
