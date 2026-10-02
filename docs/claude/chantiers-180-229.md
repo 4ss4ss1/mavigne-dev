@@ -1022,3 +1022,75 @@ rendement, mais en kg/ha), c'est un autre lot.
   fin de liste, catalogue sans fichier = liste d'avant) ; **6 contre-épreuves** (+2 : fichier poussé en fin de liste, filtre de la
   Cave inchangé). `mv-harnais-cave-reglages` : 39/39 et 45/45 en `--contre`, inchangés.
 - **Non vérifié à l'œil** : la roue de la Cave sur téléphone.
+
+## 201. ★★ RDT-XLS — QUATRE RETOURS DE FIN DE VENDANGE : LE hL/ha À ZÉRO, LES RÉCOLTES EN hL/ha, LES ABSENTS DU PLANNING, LES APERÇUS ÉCRASÉS (02/10 — `src/cuvier.js` · `src/planning.js` · `src/utils.js` (`_mvDocOpen`, MV_AIDE ×2, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/08-cave.html` · `guide/10-planning.html` · `scripts/mv-harnais-vendange-parts.mjs` · `scripts/mv-harnais-tri1.mjs` · `scripts/mv-harnais-effectif-periode.mjs` · **bump APP 7.81 → 7.82, SW 8.55 → 8.56**, base `ff00c76`)
+
+### 201a. D'où ça vient
+
+Quatre captures de Nico, une phrase chacune : les inactifs sont encore sur le planning imprimé (« si je l'imprime
+aujourd'hui je veux qu'apparaissent les personnes prévues en contrat ») ; les rendements sont à mettre en hL/ha ; il reste des
+problèmes d'affichage ; des colonnes sont à 0 alors que l'information existe.
+
+### 201b. Le hL/ha à zéro — un nombre comparé strictement à une chaîne
+
+- `exportCSVParcelles` (PARC-XLS, §197) passe le millésime **en chaîne** (`'2026'`, tiré de `_vendRecAnnees`). `_mlRendements`
+  filtre les récoltes avec `String(...)===String(mil)` → les **kilos** sortaient justes. Mais il appelle ensuite
+  `_vendRdtParc(nom, mil)`, dont `_vendVolParc` et `_vendSurfParc` testaient `_vendMillOfDate(r.date)!==mil` — un **nombre**
+  contre une chaîne : toutes les récoltes écartées, `kg=0`, `kgKo=0`, `hlHa=0`, statut `aucune` (affiché « estimé ») et
+  fourchette « 0 – 0 ».
+- ⚠️ **Pourquoi aucun filet ne l'a vu** : `mv-harnais-parc-xls` remplace `_mlRendements` par un bouchon ; `mv-harnais-vendange-parts`
+  appelait `_vendRdtParc` avec `2026` en nombre, comme Le millésime. **Deux harnais verts, chacun sur sa moitié du chemin** —
+  personne ne jouait l'appel réel du fichier Excel jusqu'au bout.
+- Correctif **à la source**, pas chez l'appelant : les deux comparaisons passent en `String(...)!==String(mil)`. Tout appelant
+  (Excel, Le millésime, Pilotage › Revient, bilan) obtient le même résultat, quel que soit le type qu'il passe.
+- `mv-harnais-vendange-parts` : +3 assertions (chaîne = nombre, kilos non nuls, même surface) ; contre-épreuve 7 qui remet la
+  comparaison stricte → **les trois rougissent avec exactement le symptôme de la capture (0 kg)**.
+
+### 201c. Les récoltes de la vendange en hL/ha
+
+- `_vendRecHlObj(nom, mil)` lit `_mlRendements` (une fois par document : cache `_VREC_HL` remis à zéro par `_vendRecoltesDoc`) ;
+  `_vendRecRdtTri` sert le tri « Rendement ». Colonne `hL/ha` (et `hL/ha parcelle` en vue par apport), « ~ » devant un
+  chiffre non mesuré (§63b). **Sans `_mlRendements`** (cave.js en retard, harnais) : repli intégral sur le kg/ha d'avant —
+  jamais un tableau qui mélange les deux unités.
+- ⚠️ **« ≈ » refusé par `mv-harnais-subset`** : le caractère n'est pas dans le sous-ensemble de police — il serait sorti dans une
+  police de repli. Remplacé par « ~ ».
+- `_vendRecRdt` (kg/ha) **reste** : `mv-harnais-tri1`/`tri2` le comparent à `rendement_hist`, et c'est encore le chiffre de la
+  fiche parcelle.
+- **État sanitaire** : le curseur reste à 0 quand on ne le touche pas. « 0 % » se lisait comme une vendange pourrie ; c'est une
+  absence de note. Affiché « — », et la moyenne par parcelle ne pèse que les bennes notées (`kgEt`). Mesure faite sur la capture
+  de Nico : une seule parcelle notée (15 %). **Ce n'était pas « une colonne à 0 alors qu'on a l'info » : l'info n'a pas été saisie.**
+- `mv-harnais-tri1` : +4 (tri hL/ha, ordre différent du kg/ha sur le même jeu, état non noté hors moyenne).
+
+### 201d. Le planning de l'année : la date d'édition décide des noms
+
+- `_paGroupes(yr, auj)` : **année en cours** → `_planMbrsPer(auj, 31/12)` sans les fiches `Inactif` ; **année passée** → toute
+  l'équipe (la règle d'avant, voulue pour tirer le planning 2025 avec ceux qui sont partis) ; **année à venir** → inchangé.
+  L'en-tête écrit « Équipe sous contrat au JJ/MM/AAAA » quand le filtre joue : deux tirages de 2026 ne nomment pas les mêmes gens.
+- ⚠️ Le harnais `effectif-periode` affirmait l'**inverse** (E1 : « les sept anciens figurent sur le document 2026 »). C'était la
+  décision d'un lot antérieur, pas une erreur : **la demande de Nico la remplace**, E1 est réécrit (5 assertions, date passée en
+  argument) avec la contre-épreuve F8.
+- ⚠️ **Ce qui reste nommé** : une fiche **Active sans date de contrat** (règle PRES-1). Cas probable de « Vendangeurs » sur la
+  capture. Le guide le dit ; la réponse est de poser des dates, pas de deviner.
+
+### 201e. Les aperçus écrasés, et la roue de la Cave sans style
+
+- `_mvDocOpen` ouvrait chaque document avec `width=device-width` : un A4 paysage tenait sur ~410 px, d'où « LUND… » coupés dans
+  le planning et un tableau des récoltes qui débordait sous un en-tête resté à la largeur de l'écran. La feuille **imprimée**
+  était juste. La fenêtre prend maintenant la largeur utile de la page (1060 px paysage, 760 portrait ; `body` à 273 mm / 186 mm
+  en `@media screen` seulement) : le téléphone montre la page entière, `@page` régit toujours l'impression.
+- `renderVendParam` (réglages du Cuvier dans la roue de la Cave) n'injectait pas son CSS : ouvert depuis Aujourd'hui sans
+  passer par Le Cuvier, le bloc sortait brut. Il appelle `_vendInjectCss` + `_vendEnsureSheetCss` lui-même — **même patron que
+  `renderCaveReglages` pour le Chai**, qui avait déjà la garde (et le commentaire qui expliquait pourquoi).
+
+### 201f. Mesuré
+
+- `vendange-parts` 152 vertes (+3), contre-épreuve concluante ; `tri1` 46 (+4) ; `effectif-periode` 51 (+5, F8 rougit bien).
+- `npm run check` : voir la note de livraison (le guide a été régénéré localement pour que la chaîne passe — `public/guide.html`
+  et `public/sitemap.xml` ne sont **pas** livrés : `npm run site`).
+- **Non vérifié à l'œil** : l'aperçu des documents sur téléphone (zoom initial), la roue de la Cave ouverte à froid.
+
+### 201g. Ouvert
+
+- Un **contrôle croisé** manque : jouer l'appel réel `exportCSVParcelles → _mlRendements → _vendRdtParc` sans bouchon. Le défaut
+  de §201b vivait exactement dans la couture entre deux harnais.
+- Les autres documents ouverts hors `_mvDocOpen` (s'il en reste) gardent `device-width` — non inventoriés.

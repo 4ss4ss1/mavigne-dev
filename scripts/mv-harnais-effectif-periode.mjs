@@ -76,7 +76,7 @@ const NOMS = [
   '_planRecupActiveAt',
   '_planPlId', '_planPlanned', '_planTimingH', '_planDefTiming', '_planDayH', '_planEffective',
   '_planCalcMonth', '_planAbsLostH', '_planAbsNeutH', '_planRempH', '_planSummary',
-  '_pl2Actifs', '_pl2HorsContrat', '_pl2Annual', '_pl2Annual_', '_planGensArchives', '_paGroupes'
+  '_pl2Actifs', '_pl2HorsContrat', '_pl2Annual', '_pl2Annual_', '_planGensArchives', '_paAuj', '_paEnCours', '_paGroupes'
 ];
 
 // ── Bac a sable ──────────────────────────────────────────────────────────────
@@ -241,9 +241,17 @@ console.log('\nD. Le recap annuel');
 
 console.log('\nE. Le planning de l\'annee imprime');
 {
-  const g = y => (makeEnv({ membres: membres(false), mois: 7 })._paGroupes(y) || []).reduce((a, x) => a.concat(x.noms), []);
-  const g26 = g(2026), g25 = g(2025);
-  T('E1 2026 : les sept anciens figurent sur le document', ANCIENS.every(n => g26.includes(n)), g26.join(','));
+  // \u2605 RDT-XLS (02/10) : la date d'edition est passee en argument. Annee en cours = ceux qui
+  //   sont sous contrat d'ici le 31/12, fiches Inactives exclues ; annee passee = toute l'equipe.
+  const g = (y, auj, actifs, src) => (makeEnv({ membres: membres(!!actifs), mois: 7, source: src })._paGroupes(y, auj) || [])
+    .reduce((a, x) => a.concat(x.noms), []);
+  const juil = g(2026, '2026-07-01', true), oct = g(2026, '2026-10-02', false), octA = g(2026, '2026-10-02', true);
+  const passe = g(2026, '2027-03-01', false), g25 = g(2025, '2026-10-02', false);
+  T('E1 tire le 1er juillet 2026 : les sept saisonniers, encore sous contrat, figurent', ANCIENS.every(n => juil.includes(n)), juil.join(','));
+  T('E1b tire le 2 octobre 2026 : aucun des sept (contrats finis, fiches inactives)', ANCIENS.every(n => !oct.includes(n)), oct.join(','));
+  T('E1c tire le 2 octobre, fiches restees Actives : la DATE suffit a les retirer', ANCIENS.every(n => !octA.includes(n)), octA.join(','));
+  T('E1d tire le 2 octobre : les embauches d\'aout restent', ['Vic', 'Pauline'].every(n => oct.includes(n)), oct.join(','));
+  T('E1e 2026 tire en 2027 : toute l\'equipe de 2026, partis compris', ANCIENS.every(n => passe.includes(n)), passe.join(','));
   T('E2 2025 : aucun d\'eux (leurs contrats ne couvrent pas 2025)',
     ANCIENS.every(n => !g25.includes(n)), g25.join(','));
 }
@@ -347,6 +355,11 @@ contre('F7 le recap annuel sort du mode large',
   s => s.replace('function _pl2Annual(){ return _planWide(_pl2Annual_); }',
                  'function _pl2Annual(){ return _pl2Annual_(); }'),
   m => apportArchive(m) > 100);
+
+contre('F8 le planning de l\'annee en cours nomme de nouveau les partis',
+  s => s.replace("var mbrs=_paEnCours(yr,a)", "var mbrs=false"),
+  m => (makeEnv({ membres: membres(false), mois: 7, source: m })._paGroupes(2026, '2026-10-02') || [])
+         .reduce((a, x) => a.concat(x.noms), []).every(n => !ANCIENS.includes(n)));
 
 runContres();
 

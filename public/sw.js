@@ -1,4 +1,8 @@
-// MA VIGNE — Service Worker v8.55
+// MA VIGNE — Service Worker v8.56
+// v8.56 (02/10/2026) — RDT-XLS : fichier Excel des parcelles, rendement hL/ha et fourchette a zero (millesime en chaine compare
+//   strictement a un nombre dans _vendVolParc/_vendSurfParc) ; recoltes de la vendange en hL/ha (_mlRendements), etat sanitaire
+//   non note = « — » ; planning de l'annee en cours = equipe sous contrat d'aujourd'hui au 31/12 ; apercu des documents a la
+//   largeur de la feuille (_mvDocOpen) ; reglages du Cuvier styles sans passer par Le Cuvier. APP 7.81 -> 7.82.
 // v8.55 (30/09/2026) — PARC-XLS-2 : le fichier Excel des parcelles (tri par nom ou par rendement hL/ha) apparait aussi dans la
 //   roue de la Cave, juste apres les recoltes de la vendange — meme entree du catalogue (cave.js/_caveRegDocs). APP 7.80 -> 7.81.
 // v8.54 (30/09/2026) — PAR-1 + EQUIPES-1 : Pilotage > Economie, la journee de chacun dans les rangs se partage entre TOUTES les parcelles
@@ -4207,7 +4211,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.55';
+const CACHE_NAME   = 'mavigne-v8.56';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4223,7 +4227,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.55 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.56 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4243,7 +4247,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.55 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.56 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

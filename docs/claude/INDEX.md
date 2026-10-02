@@ -243,3 +243,4 @@
 | 198 | 198. ★★★ PAR-1 — LA JOURNÉE SE PARTAGE ENTRE TOUTES LES PARCELLES VALIDÉES CE JOUR-LÀ, AU PRORATA DU BARÈME… | `docs/claude/chantiers-180-229.md` |
 | 199 | 199. ★★★ ÉQUIPES-1 — LES ÉQUIPES DU JOUR, POSÉES PAR L'ADMIN DEPUIS L'ACCUEIL (30/09 — `src/app.js` · `src/… | `docs/claude/chantiers-180-229.md` |
 | 200 | 200. ★ PARC-XLS-2 — LE FICHIER EXCEL DES PARCELLES AUSSI DANS LA ROUE DE LA CAVE (30/09 — `src/cave.js` · `… | `docs/claude/chantiers-180-229.md` |
+| 201 | 201. ★★ RDT-XLS — QUATRE RETOURS DE FIN DE VENDANGE : LE hL/ha À ZÉRO, LES RÉCOLTES EN hL/ha, LES ABSENTS D… | `docs/claude/chantiers-180-229.md` |

@@ -72,11 +72,14 @@ function monter(patch) {
     + bloc(CAVE, 'function _vendRecMil(')
     + '\n' + bloc(CAVE, 'function _vendRecAnnees(')
     + '\n' + bloc(CAVE, 'function _vendRecRdt(')
+    + '\n var _VREC_HL=null;'
+    + '\n' + bloc(CAVE, 'function _vendRecHlObj(')
+    + '\n' + bloc(CAVE, 'function _vendRecRdtTri(')
     + '\n' + ligne(CAVE, 'var MV_TRI_RECOLTES = [')
     + '\n' + bloc(CAVE, 'function _vendRecTriApports(')
     + '\n' + bloc(CAVE, 'function _vendRecGrouper(')
     + '\n' + (patch || '')
-    + '\n return {_vendRecMil,_vendRecAnnees,_vendRecRdt,MV_TRI_RECOLTES,'
+    + '\n return {_vendRecMil,_vendRecAnnees,_vendRecRdt,_vendRecRdtTri,MV_TRI_RECOLTES,'
     + '_vendRecTriApports,_vendRecGrouper};';
   return new Function('ETAT', 'PARC', code)(st, PARC);
 }
@@ -145,6 +148,30 @@ t('le tri des groupes suit la meme cle',
   (() => { const l = g.map(x => x.nom);
            return l.every((n,i) => i === 0 ||
              M._vendRecRdt(l[i-1],'2026') >= M._vendRecRdt(n,'2026')); })());
+// \u2605 RDT-XLS (02/10) : avec _mlRendements present, le tri par rendement suit le hL/ha
+//   (le chiffre affiche), pas le kg/ha. Jeu choisi pour que les deux ordres DIFFERENT :
+//   Champerrier a le plus fort kg/ha mais le plus faible hL/ha (volume rendu bas).
+{
+  const HL = { 'La Justice':40.1, 'En Champs':55.2, 'Champerrier':21.0, 'Les Corvees':30.5 };
+  const stub = `
+    var window={ _mlRendements:function(m){ return Object.keys(HL).map(function(n){
+      return {parcelle:{nom:n}, hlHa:(m==='2026'?HL[n]:null), statut:'estime'}; }); } };
+    function _vendParcByName(n){ return HL[n]!=null?{nom:n}:null; }
+    var HL=${JSON.stringify(HL)};`;
+  const MH = monter(stub);
+  t('tri rendement : le hL/ha (_mlRendements) remplace le kg/ha quand il existe',
+    Math.round(MH._vendRecRdtTri('En Champs','2026')*10) === 552 && MH._vendRecRdtTri('Sans surface','2026') === 0);
+  const gh = MH._vendRecGrouper(cuv, c('rdt','desc','parcelle')).map(x => x.nom);
+  t('groupes tries par hL/ha decroissant : En Champs, La Justice, Champerrier, puis sans chiffre',
+    gh.indexOf('En Champs') < gh.indexOf('La Justice') && gh.indexOf('La Justice') < gh.indexOf('Champerrier')
+    && gh[gh.length-1] === 'Sans surface');
+  t('contre-epreuve : en kg/ha, Champerrier passerait devant (les deux ordres different bien)',
+    M._vendRecRdt('Champerrier','2026') > M._vendRecRdt('En Champs','2026'));
+  t('un etat sanitaire laisse a 0 ne pese pas dans la moyenne (kgEt)',
+    (() => { const z = cuv.map(r => r.id === 'r4' ? Object.assign({}, r, { etat_pct:0 }) : r);
+             const j = MH._vendRecGrouper(z, c('nom','asc','parcelle')).find(x => x.nom === 'La Justice');
+             return j.kgEt === 1680 + 1920 && Math.round(j.etat / j.kgEt) === Math.round((96*1680 + 90*1920) / 3600); })());
+}
 t('aucune parcelle perdue au groupement',
   g.length === new Set(cuv.map(r => r.parcelle)).size);
 

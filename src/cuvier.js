@@ -1344,6 +1344,11 @@ function _vendCfg(){return Object.assign({poids_caisse_kg:25,ratio_min:130,ratio
 function renderVendParam() {
   // Lot CAVE-2 : les reglages du Cuvier vivent dans la roue crantee de la Cave.
   var el=document.getElementById('cave-reg-cuvier'); if(!el) return;
+  // \u2605 RDT-XLS (02/10) : .mvv-set, .mvv-prow, .mvv-fi vivent dans _vendInjectCss, .mvv-fnote et
+  //   .mvv-save.ghost2 dans _vendEnsureSheetCss. Ouverte depuis Aujourd'hui SANS passer par Le Cuvier,
+  //   la roue de la Cave rendait ce bloc SANS STYLE (champs noirs, boutons gris). Meme garde que
+  //   renderCaveReglages pour le Chai (_caveV2InjectCss).
+  _vendInjectCss(); _vendEnsureSheetCss();
   var cfg=_vendCfg();
   var pck=cfg.poids_caisse_kg, rMin=cfg.ratio_min, rMax=cfg.ratio_max;
   var ex=100*pck;
@@ -2743,7 +2748,10 @@ function _vendSurfParc(nom,mil){
   var sp=_vendParcSurf(nom), dest={}, ord=[], conflit=[];
   (CAVE_VENDANGE.recoltes||[]).forEach(function(r){
     if(!r||r.parcelle!==nom) return;
-    if(_vendMillOfDate(r.date)!==mil) return;
+    // \u2605 RDT-XLS (02/10) : le millesime arrive en CHAINE depuis le fichier Excel des parcelles
+    //   ('2026') et en NOMBRE depuis Le millesime (2026). La comparaison stricte d'un nombre a une
+    //   chaine ecartait TOUTES les recoltes : 0 kg, 0 hL/ha, fourchette 0 \u2013 0. On compare des chaines.
+    if(String(_vendMillOfDate(r.date))!==String(mil)) return;
     _vendParts(r).forEach(function(p){
       if(_vpCs(p)<=0) return;
       var k=p.dom?'\u2014domaine':(p.client||'\u2014vrac');
@@ -2788,7 +2796,7 @@ function _vendVolParc(nom,mil){
   var hl=0,kgOk=0,kgKo=0,kg=0,srcs={},prorata=false,lignes=[];
   (CAVE_VENDANGE.recoltes||[]).forEach(function(r){
     if(!r||r.parcelle!==nom) return;
-    if(_vendMillOfDate(r.date)!==mil) return;
+    if(String(_vendMillOfDate(r.date))!==String(mil)) return;   // RDT-XLS : chaine ou nombre, cf. _vendSurfParc
     _vendParts(r).forEach(function(p){
       if(_vpCs(p)<=0) return;
       var k=_vpKg(p), v=_vendVolPart(r,p);
@@ -5905,6 +5913,34 @@ function _vendRecRdt(nom, mil){
   return kg/surf;
 }
 
+/* \u2605\u2605 RDT-XLS (02/10, demande de Nico : « les rendements sont a mettre en hL/ha »).
+   Le document des recoltes affiche et trie le hL/ha de la PARCELLE ENTIERE, lu chez
+   _mlRendements (cave.js) : le meme chiffre que Le millesime, la carte du Pilotage et
+   le fichier Excel des parcelles. Rien n'est recalcule ici. Un passage par document :
+   le cache est remis a zero a l'ouverture (_vendRecoltesDoc), le tri le relit.
+   Sans _mlRendements (cave.js en retard, harnais), repli sur le kg/ha d'avant : les
+   comparaisons restent homogenes, jamais un melange des deux unites. */
+var _VREC_HL=null;
+function _vendRecHlObj(nom, mil){
+  var f=(typeof window!=='undefined')?window._mlRendements:null;
+  if(typeof f!=='function') return null;
+  var k=String(mil);
+  if(!_VREC_HL||_VREC_HL.mil!==k){
+    var m={};
+    try{ (f(k)||[]).forEach(function(o){
+      if(o&&o.parcelle&&o.parcelle.nom) m[String(o.parcelle.nom).trim().toLowerCase()]=o; }); }
+    catch(e){ if(window.logError) window.logError({level:'warning',cat:'recoltes',msg:'rendements hL/ha illisibles : '+(e&&e.message)}); }
+    _VREC_HL={mil:k, m:m};
+  }
+  var p=_vendParcByName(nom);
+  return _VREC_HL.m[String(p?p.nom:(nom||'')).trim().toLowerCase()]||null;
+}
+function _vendRecRdtTri(nom, mil){
+  if(typeof window==='undefined'||typeof window._mlRendements!=='function') return _vendRecRdt(nom, mil);
+  var o=_vendRecHlObj(nom, mil);
+  return (o&&o.hlHa!=null&&isFinite(o.hlHa)&&o.hlHa>0)?o.hlHa:0;
+}
+
 /* Les cles de tri offertes. `grp` borne une cle a un groupement : trier des
    LIGNES par date n'a plus de sens quand une ligne agrege plusieurs journees. */
 var MV_TRI_RECOLTES = [
@@ -5927,7 +5963,7 @@ function _vendRecTriApports(list, c){
   var parc=(c.cle==='nom'||c.cle==='surface'||c.cle==='rdt');
   var val=function(r){
     if(c.cle==='surface') return _vendParcSurf(r.parcelle);
-    if(c.cle==='rdt')     return _vendRecRdt(r.parcelle, mil);
+    if(c.cle==='rdt')     return _vendRecRdtTri(r.parcelle, mil);
     if(c.cle==='kg')      return _recKg(r);
     if(c.cle==='date')    return String(r.date||'');
     return rang[r.id]!=null?rang[r.id]:0;
@@ -5955,9 +5991,11 @@ function _vendRecGrouper(list, c){
   var m={}, ord=[];
   list.forEach(function(r){
     var k=r.parcelle||'\u2014';
-    if(!m[k]){ m[k]={nom:k,n:0,cs:0,kg:0,d0:r.date,d1:r.date,dest:[],er:{},etat:0}; ord.push(k); }
+    if(!m[k]){ m[k]={nom:k,n:0,cs:0,kg:0,d0:r.date,d1:r.date,dest:[],er:{},etat:0,kgEt:0}; ord.push(k); }
     var g=m[k], kg=_recKg(r);
     g.n++; g.cs+=(r.nb_caisses||0); g.kg+=kg; g.etat+=(r.etat_pct||0)*kg;
+    // RDT-XLS : un curseur sanitaire laisse a 0 n'est pas une note — il ne pese pas dans la moyenne.
+    if((r.etat_pct||0)>0) g.kgEt+=kg;
     g.er[r.erasflage||'total']=1;
     if(String(r.date||'')<String(g.d0||'')) g.d0=r.date;
     if(String(r.date||'')>String(g.d1||'')) g.d1=r.date;
@@ -5970,7 +6008,7 @@ function _vendRecGrouper(list, c){
     var d;
     if(c.cle==='nom')          d=x.nom.localeCompare(y.nom,'fr');
     else if(c.cle==='surface') d=_vendParcSurf(x.nom)-_vendParcSurf(y.nom);
-    else if(c.cle==='rdt')     d=_vendRecRdt(x.nom,mil)-_vendRecRdt(y.nom,mil);
+    else if(c.cle==='rdt')     d=_vendRecRdtTri(x.nom,mil)-_vendRecRdtTri(y.nom,mil);
     else if(c.cle==='kg')      d=x.kg-y.kg;
     else                       d=String(x.d0||'').localeCompare(String(y.d0||''));
     if(d) return sg*d;
@@ -6026,7 +6064,19 @@ function _vendRecoltesDoc(c){
   var erLbl={total:'\u00c9rafl\u00e9e',partiel:'Partielle',entiere:'Vendange enti\u00e8re'};
   var grp=(c.groupe==='parcelle');
   var nf=function(n){ return Math.round(n).toLocaleString('fr-FR'); };
-  var rdtTxt=function(nom){ var v=_vendRecRdt(nom,mil); return v>0?nf(v)+' kg/ha':'\u2014'; };
+  // RDT-XLS : hL/ha de la parcelle entiere (_mlRendements). « ~ » = estime : une part des
+  //   kilos n'a pas encore de volume mesure (\u00a763b : une estimation ne se presente pas en mesure).
+  _VREC_HL=null;
+  var _hlOk=(typeof window._mlRendements==='function');
+  var rdtTxt=function(nom){
+    if(!_hlOk){ var v=_vendRecRdt(nom,mil); return v>0?nf(v)+' kg/ha':'\u2014'; }
+    var o=_vendRecHlObj(nom,mil);
+    if(!o||o.hlHa==null||!isFinite(o.hlHa)||!(o.hlHa>0)) return '\u2014';
+    var est=(o.statut!=='mesure');
+    return (est?'~\u00a0':'')+_mvF1(o.hlHa)+' hL/ha';
+  };
+  var uRdt=_hlOk?'hL/ha':'kg/ha';
+  var etatTxt=function(p){ return p>0?(p+'\u202f%'):'\u2014'; };
   // Combien d'apports cette parcelle a-t-elle sur le millesime ? Au-dela d'un
   // seul, la valeur affichee n'est pas celle de la ligne : elle est marquee.
   var nApp={}; recs.forEach(function(r){ var k=r.parcelle||'\u2014'; nApp[k]=(nApp[k]||0)+1; });
@@ -6048,7 +6098,7 @@ function _vendRecoltesDoc(c){
       +'<td class="n">'+(r.nb_caisses||0)+'</td>'
       +'<td class="n">'+nf(kg)+'</td>'
       +'<td class="n">'+rdtTxt(nom)+marque(nom)+'</td>'
-      +'<td class="n">'+(r.etat_pct||0)+'\u202f%</td>'
+      +'<td class="n">'+etatTxt(r.etat_pct||0)+'</td>'
       +'<td>'+(erLbl[r.erasflage]||'\u2014')+'</td>'
       +(vrac?'':'<td class="n">'+_vendHlRange(kg)+' hL</td>')
       +'</tr>';
@@ -6063,7 +6113,7 @@ function _vendRecoltesDoc(c){
       +'<td class="n">'+g.cs+'</td>'
       +'<td class="n">'+nf(g.kg)+'</td>'
       +'<td class="n">'+rdtTxt(g.nom)+marque(g.nom)+'</td>'
-      +'<td class="n">'+(g.kg>0?Math.round(g.etat/g.kg):0)+'\u202f%</td>'
+      +'<td class="n">'+etatTxt(g.kgEt>0?Math.round(g.etat/g.kgEt):0)+'</td>'
       +'<td>'+(er.length>1?'Mixte':(erLbl[er[0]]||'\u2014'))+'</td>'
       +(vrac?'':'<td class="n">'+_vendHlRange(g.kg)+' hL</td>')
       +'</tr>';
@@ -6076,14 +6126,14 @@ function _vendRecoltesDoc(c){
     var cols, corps, nSom, nTete;
     if(grp){
       var gs=_vendRecGrouper(list,c);
-      cols=['Parcelle','ha','P\u00e9riode',vrac?'Client(s)':'Cuv\u00e9e(s)','Apports','Caisses','kg','kg/ha','\u00c9tat moy.','\u00c9raflage'].concat(vrac?[]:['hL est.']);
+      cols=['Parcelle','ha','P\u00e9riode',vrac?'Client(s)':'Cuv\u00e9e(s)','Apports','Caisses','kg',uRdt,'\u00c9tat moy.','\u00c9raflage'].concat(vrac?[]:['hL est.']);
       corps=gs.map(function(g){return ligneParcelle(g,vrac);}).join('');
       nTete=4; nSom='<td class="n">'+list.length+'</td><td class="n">'+cs+'</td><td class="n">'+nf(kg)+'</td>';
       var nP=gs.length;
       var titre2=titre+' \u2014 '+nP+' parcelle'+(nP>1?'s':'');
       return _vendRecTable(titre2,cols,corps,nTete,nSom,3,vrac);
     }
-    cols=['Parcelle','Date',vrac?'Client':'Cuv\u00e9e','Caisses','kg','kg/ha parcelle','\u00c9tat','\u00c9raflage'].concat(vrac?[]:['hL est.']);
+    cols=['Parcelle','Date',vrac?'Client':'Cuv\u00e9e','Caisses','kg',uRdt+' parcelle','\u00c9tat','\u00c9raflage'].concat(vrac?[]:['hL est.']);
     corps=_vendRecTriApports(list,c).map(function(r){return ligneApport(r,vrac);}).join('');
     nTete=3; nSom='<td class="n">'+cs+'</td><td class="n">'+nf(kg)+'</td>';
     return _vendRecTable(titre+' \u2014 '+list.length+' apport'+(list.length>1?'s':''),
@@ -6093,7 +6143,7 @@ function _vendRecoltesDoc(c){
      pas : la case reste vide plutot que fausse. Le colspan de queue se CALCULE
      — un nombre ecrit a la main devient faux au premier ajout de colonne. */
   function _vendRecTable(titre,cols,corps,nTete,nSom,nbSom,vrac){
-    var num={'Caisses':1,'kg':1,'kg/ha':1,'kg/ha parcelle':1,'\u00c9tat':1,'\u00c9tat moy.':1,
+    var num={'Caisses':1,'kg':1,'kg/ha':1,'kg/ha parcelle':1,'hL/ha':1,'hL/ha parcelle':1,'\u00c9tat':1,'\u00c9tat moy.':1,
              'hL est.':1,'ha':1,'Apports':1};
     var th=cols.map(function(x){ return '<th'+(num[x]?' class="n"':'')+'>'+x+'</th>'; }).join('');
     var reste=cols.length-nTete-nbSom;
@@ -6113,9 +6163,14 @@ function _vendRecoltesDoc(c){
   var sansSurf=parcs.filter(function(n){ return !(_vendParcSurf(n)>0); });
   var mixtes=parcs.filter(function(n){ var p=partout[n]; return p&&p.c&&p.v; });
 
-  var note='<div class="rnote"><b>Le rendement porte sur toute la parcelle</b>\u00a0: ses kilos du '
-    +'mill\u00e9sime, cuvier et vrac r\u00e9unis, ramen\u00e9s \u00e0 sa surface. Ce n\u2019est jamais le rendement '
-    +'d\u2019un apport\u00a0: une benne n\u2019a pas de rendement.'
+  var note='<div class="rnote"><b>Le rendement porte sur toute la parcelle</b>\u00a0: '
+    +(_hlOk
+      ? 'en hL/ha, le m\u00eame chiffre que l\u2019\u00e9cran Le mill\u00e9sime \u2014 le volume connu (rendu par le client ou '
+        +'log\u00e9 au domaine), plus le reste des kilos converti au ratio du Cuvier, ramen\u00e9 \u00e0 la surface de la '
+        +'parcelle. \u00ab\u00a0~\u00a0\u00bb signale un chiffre encore estim\u00e9, qui se fixera au retour du client ou au d\u00e9cuvage. '
+      : 'ses kilos du mill\u00e9sime, cuvier et vrac r\u00e9unis, ramen\u00e9s \u00e0 sa surface. ')
+    +'Ce n\u2019est jamais le rendement d\u2019un apport\u00a0: une benne n\u2019a pas de rendement. '
+    +'Un \u00e9tat sanitaire non not\u00e9 \u00e0 la saisie s\u2019affiche \u00ab\u00a0\u2014\u00a0\u00bb et ne compte pas dans la moyenne.'
     +(mixtes.length?' '+mixtes.length+' parcelle'+(mixtes.length>1?'s partent':' part')
       +' \u00e0 la fois au cuvier et en vrac\u00a0: le m\u00eame chiffre appara\u00eet dans les deux sections, '
       +'et non deux moiti\u00e9s.':'')

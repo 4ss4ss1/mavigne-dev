@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.81';
+export const APP_VERSION = '7.82';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -128,11 +128,19 @@ window._mvDocOpen = function(o){
   var foot = (o.pied === false) ? '' : window._mvDocFoot({ domaine: dom });
   var corps = o.brut ? (o.corps || '')
             : '<div class="mvdoc-body">' + (o.corps || '') + '</div>';
+  // \u2605 RDT-XLS (02/10) : L'APERCU A LA LARGEUR DE LA FEUILLE, PAS DU TELEPHONE.
+  //   Avec width=device-width, un document A4 paysage s'ouvrait sur ~410 px : le
+  //   planning tronquait ses horaires (« LUND… »), les recoltes debordaient et
+  //   l'en-tete s'arretait a mi-tableau. La feuille imprimee etait juste, l'apercu
+  //   mentait. La fenetre prend la largeur utile de la page (A4 moins les marges),
+  //   le telephone la reduit pour la montrer entiere ; @page regit l'impression.
+  var _pays = (o.orient === 'paysage');
   var html = '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">'
-    + '<meta name="viewport" content="width=device-width,initial-scale=1">'
+    + '<meta name="viewport" content="width=' + (_pays ? 1060 : 760) + '">'
     + '<title>' + e(o.titre || 'Document') + ' \u2014 ' + e(dom) + '</title>'
     + '<link rel="stylesheet" href="/fonts/fonts.css">'
-    + '<style>' + window._mvDocCss(o.orient) + (o.css || '') + '</style></head>'
+    + '<style>' + window._mvDocCss(o.orient) + (o.css || '')
+    + '@media screen{body{width:' + (_pays ? '273mm' : '186mm') + ';margin:0 auto}}</style></head>'
     + '<body>' + hero + corps + foot
     + '<scr' + 'ipt>window.onload=function(){setTimeout(function(){window.print();},500);};</scr' + 'ipt>'
     + '</body></html>';
@@ -722,6 +730,20 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.82', items: [
+    { emoji: 'raisin', titre: 'Le rendement en hL/ha, enfin rempli dans le fichier Excel des parcelles',
+      desc: "Le fichier Excel des parcelles sortait ses colonnes de rendement \u00e0 z\u00e9ro \u2014 \u00ab\u00a00 estim\u00e9\u00a0\u00bb, fourchette \u00ab\u00a00 \u2013 0\u00a0\u00bb \u2014 alors que les kilos \u00e9taient bien l\u00e0. "
+        + "Le millésime choisi n\u2019\u00e9tait pas reconnu par le calcul du volume. C\u2019est corrig\u00e9\u00a0: le hL/ha, mesur\u00e9 ou estim\u00e9, et sa fourchette sortent maintenant comme \u00e0 l\u2019\u00e9cran Le mill\u00e9sime, et le tri par rendement redevient juste." },
+    { emoji: 'document', titre: 'Les récoltes de la vendange en hL/ha',
+      desc: "Le document des r\u00e9coltes affichait le rendement en kg/ha. Il l\u2019affiche d\u00e9sormais en <b>hL/ha</b>, le m\u00eame chiffre que Le mill\u00e9sime, avec un \u00ab\u00a0~\u00a0\u00bb quand il est encore estim\u00e9, et le tri par rendement suit ce chiffre. "
+        + "Un \u00e9tat sanitaire que personne n\u2019a not\u00e9 \u00e0 la saisie s\u2019affiche \u00ab\u00a0\u2014\u00a0\u00bb au lieu de \u00ab\u00a00\u00a0%\u00a0\u00bb, et ne tire plus la moyenne vers le bas." },
+    { emoji: 'calendrier', titre: 'Le planning de l\u2019ann\u00e9e ne nomme plus les absents',
+      desc: "Imprim\u00e9 en cours d\u2019ann\u00e9e, le planning listait tous ceux qui avaient travaill\u00e9 au domaine depuis janvier, saisonniers partis et fiches inactives compris. "
+        + "Il ne nomme plus que les personnes sous contrat d\u2019aujourd\u2019hui au 31 d\u00e9cembre, et l\u2019\u00e9crit dans son en-t\u00eate. Une ann\u00e9e pass\u00e9e garde toute son \u00e9quipe." },
+    { emoji: 'imprimante', titre: 'Les documents et les réglages de la Cave s\u2019affichent correctement',
+      desc: "Sur t\u00e9l\u00e9phone, les documents \u00e0 imprimer s\u2019ouvraient \u00e9cras\u00e9s \u00e0 la largeur de l\u2019\u00e9cran\u00a0: horaires coup\u00e9s, tableaux qui d\u00e9bordaient. L\u2019aper\u00e7u montre maintenant la feuille enti\u00e8re, comme elle sortira de l\u2019imprimante. "
+        + "Et la roue crant\u00e9e de la Cave, ouverte sans passer par Le Cuvier, affichait ses r\u00e9glages sans mise en forme\u00a0: c\u2019est r\u00e9par\u00e9." },
+  ] },
   { v: '7.81', items: [
     { emoji: 'raisin', titre: 'Le fichier Excel des parcelles, aussi dans la Cave',
       desc: "Le fichier des parcelles tri\u00e9 par rendement se trouvait dans la Vigne. Il est maintenant aussi dans la roue crant\u00e9e de la Cave, "
@@ -3741,7 +3763,7 @@ var MV_AIDE = {
       ['Figer le mois', "à l’envoi de la feuille à la compta, le bouton Figer de la fiche (Résumé, carte Envoi à la compta) fige ce qui est payé et retenu. Ce qui change ensuite dans le mois — une absence, des heures en plus, un motif corrigé — passe sur le mois suivant : à retenir (repris d’abord sur la récup et les heures sup), à rendre, ou une majoration à payer. Le paiement d’un mois figé ne se modifie plus ; Défiger le rouvre."],
       ['Pour la compta', "en tête du Résumé de la fiche et du relevé : une ligne par chose que la compta saisit — salaire de base, heures sup à payer, congés payés, arrêt de travail, acompte —, toujours dans le même ordre ; « aucun » veut dire qu’il n’y a rien. Les heures sup s’y écrivent en heures brutes, avec leur taux : pour 1 h sup à 25 %, on déclare 1 h à +25 %, jamais 1 h 15 — la compta majore elle-même. Le compteur, lui, compte toujours en temps de récup : des heures payées sortent du compteur et se déclarent en heures brutes. Une heure sup un dimanche ou un jour férié prend le taux le plus fort, une seule fois. Les heures y sont rangées en trois cases — à 25 %, à 50 %, à 100 % —, comme la compta les saisit ; la majoration seule d’un dimanche prévu y est à part, à préciser à l’envoi. Un mois figé montre ce qui est parti, pas un recalcul."],
       ['Présence, coupure, heures dues', "trois nombres qui se ressemblent et ne disent pas la même chose. La ‹‹ présence ›› va de l’arrivée au départ. La ‹‹ coupure ›› est le temps non travaillé au milieu : sa durée et son heure sont fixées par le domaine, dans la roue crantée du Planning, ce n’est pas un moment que chacun choisit. Les ‹‹ heures dues ›› sont ce qui part en paie et alimente le compteur des 1 607 h. Une journée de 09:00 à 16:00 avec une heure de coupure fait 7 h de présence et 6 h dues."],
-      ['Le planning de l’année', "s’imprime depuis le même endroit : le rythme sur douze mois, avec les heures de prise et de fin de service et la coupure déjeuner. Une page par modèle de semaine — c’est le document qu’on remet à l’équipe pour l’année à venir. Une variante nominative sort la même grille pour une seule personne, bornée à ses contrats, avec ses jours de formation et ses congés déjà posés."],
+      ['Le planning de l’année', "s’imprime depuis le même endroit : le rythme sur douze mois, avec les heures de prise et de fin de service et la coupure déjeuner. Une page par modèle de semaine — c’est le document qu’on remet à l’équipe pour l’année à venir. Pour l’année en cours, il ne nomme que les personnes sous contrat d’aujourd’hui au 31 décembre, fiches inactives exclues, et l’écrit dans son en-tête ; une année passée garde toute son équipe. Une variante nominative sort la même grille pour une seule personne, bornée à ses contrats, avec ses jours de formation et ses congés déjà posés."],
       ['Le relevé mensuel', "s’imprime depuis la roue crantée du Planning, bloc Documents. C’est un relevé d’heures, pas un bulletin de paie."],
       ['Le relevé d’un seul salarié', "s’imprime au même endroit, en choisissant la personne et le mois : son mois jour par jour, ses contrats avec leurs coupures, ses congés payés, son compteur d’heures et son annualisation, avec les signatures. Le bouton PDF de sa fiche sort exactement le même document. À partir de septembre 2026, il commence par le cadre Pour la compta, puis chaque jour en colonnes Prévu, Fait et Absence ; une case note la date d’envoi à la compta. Il compte tout le mois, les jours à venir aux heures du planning, pour partir à la compta la dernière semaine ; il porte une retenue sur salaire ou des heures sup à payer, jamais les deux. Les anciens salariés y figurent aussi, marqués comme tels : un relevé est un document d’histoire."],
       ['Un ancien salarié', "reste compté dans les mois où il était sous contrat. Reculez d’un mois dans Les gens : il reprend sa ligne dans la liste, avec ses heures, et il disparaît de la section Anciens salariés ce mois-là. Passer une fiche en Inactif ferme son accès à l’application, cela n’efface aucune heure déjà faite."],
@@ -3820,7 +3842,7 @@ var MV_AIDE = {
       ['Les analyses labo', "s’attachent en PDF à la cuvée. Les supprimer est réservé à l’administrateur."],
       ['Huit documents sortent de la Cave', "depuis la roue crantée de la Cave, bloc Documents — ou depuis Réglages, onglet Domaine, « Documents & impressions », qui les a tous : le contrôle de maturité avant vendange, les récoltes de la vendange, le fichier Excel des parcelles (rendement du millésime en hL/ha, trié par nom ou par rendement), le cahier de cuverie pendant la fermentation, le suivi d’élevage, le registre des manipulations, le bilan de campagne et l’inventaire des fûts. Ce sont des états internes : Ma Vigne prépare, vous déclarez. Le cahier de cuverie imprime aussi <b>la courbe</b> de chaque cuve — densité et température, avec les opérations datées — au-dessus de son tableau ; sous trois relevés de densité, il n’y a pas de courbe. Il s’ouvre sur un <b>comparatif</b> de toutes les cuves, alignées sur leur jour d’encuvage et non sur le calendrier, avec le sucre relevé à la vigne avant l’encuvage."],
       ['Cinq documents demandent leur ordre', "l’<b>état du vignoble</b>, l’<b>inventaire des intrants</b>, les <b>récoltes de la vendange</b>, le <b>contrôle de maturité</b> et le <b>cahier de cuverie</b> posent la question avant d’éditer, et écrivent l’ordre choisi dans leur en-tête. Une valeur manquante part toujours en fin de liste, dans les deux sens : une donnée absente n’est pas une petite valeur. Les deux exports CSV, eux, ne demandent rien mais sortent désormais toujours dans le même ordre."],
-      ['Les récoltes se trient avant d’imprimer', "le document demande le <b>millésime</b>, puis par quoi trier : parcelle, surface, rendement, kilos ou date. Il sait aussi sortir <b>une ligne par parcelle</b> au lieu d’une ligne par benne. L’ordre choisi est écrit dans l’en-tête du document, et retenu pour la fois suivante. <b>Le rendement affiché est celui de la parcelle entière</b>, cuvier et vrac réunis — une benne n’a pas de rendement."],
+      ['Les récoltes se trient avant d’imprimer', "le document demande le <b>millésime</b>, puis par quoi trier : parcelle, surface, rendement, kilos ou date. Il sait aussi sortir <b>une ligne par parcelle</b> au lieu d’une ligne par benne. L’ordre choisi est écrit dans l’en-tête du document, et retenu pour la fois suivante. <b>Le rendement affiché est en hL/ha, celui de la parcelle entière</b> — le même chiffre que Le millésime ; « ~ » devant signale une estimation. Une benne n’a pas de rendement. Un état sanitaire non noté à la saisie s’affiche « — » et ne compte pas dans la moyenne."],
       ['Deux autres s’éditent au plus près de la livraison', "le bon de livraison d’un chargement et le récapitulatif de campagne d’un acheteur, depuis les ventes en vrac. Ils portent le nom du domaine, les kilos livrés, et les volumes rendus dès que le client a répondu."]
     ]
   },

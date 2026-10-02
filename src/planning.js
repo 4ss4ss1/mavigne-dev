@@ -8382,8 +8382,25 @@ function _paDuree(min){
 // ★ Le statut ne filtre plus : le planning de 2025 doit montrer l'équipe de 2025,
 //   ceux qui sont partis depuis compris. Et le test de dates est monté d'un cran —
 //   _planMbrsAn lit TOUS les contrats de la fiche, pas le seul couple en cours.
-function _paGroupes(yr){
-  var out={}, mbrs=_planMbrsAn(yr);
+// \u2605\u2605 RDT-XLS (02/10, demande de Nico) : « si je l'imprime aujourd'hui je veux qu'apparaissent
+//   les personnes prevues en contrat ». Le document de l'ANNEE EN COURS ne nomme plus que
+//   ceux qui sont sous contrat entre aujourd'hui et le 31/12, fiches Inactives exclues :
+//   un saisonnier parti en juillet ou une fiche archivee n'ont rien a faire sur la feuille
+//   affichee en octobre. Une annee PASSEE garde toute son equipe (statut ignore), une annee
+//   a venir tous ceux dont un contrat la touche — c'est la regle d'avant, inchangee.
+//   `auj` est optionnel (harnais) ; sans lui, la date du jour de l'application.
+function _paAuj(auj){
+  if(auj) return String(auj);
+  if(typeof window._mvAujIso==='function') return window._mvAujIso();
+  if(typeof _mvToday==='function') return _mvToday();
+  var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function _paEnCours(yr,auj){ var a=_paAuj(auj); return a>=(yr+'-01-01') && a<=(yr+'-12-31'); }
+function _paGroupes(yr,auj){
+  var a=_paAuj(auj), out={};
+  var mbrs=_paEnCours(yr,a)
+    ? _planMbrsPer(a, yr+'-12-31').filter(function(m){ return m && m.statut!=='Inactif'; })
+    : _planMbrsAn(yr);
   mbrs.forEach(function(mb){
     var id=_planPlId(mb);
     if(!out[id]) out[id]={id:id,noms:[]};
@@ -8825,8 +8842,9 @@ var _PA_CSS =
 function _paDoc(yr,nom){
   var e=window._escHtml||function(x){return String(x==null?'':x);};
   if(nom) return _paDocNom(yr,nom,e);
-  var grps=_paGroupes(yr);
-  if(!grps.length){ if(window.showToast) window.showToast('Aucun salari\u00e9 sur '+yr,'#B85A1A'); return false; }
+  var grps=_paGroupes(yr), _enCours=_paEnCours(yr);
+  if(!grps.length){ if(window.showToast) window.showToast(_enCours
+      ? ('Personne sous contrat d\u2019ici la fin de '+yr) : ('Aucun salari\u00e9 sur '+yr),'#B85A1A'); return false; }
   var lim='<div class="mvdoc-lim"><b>Planning pr\u00e9visionnel.</b> Les dur\u00e9es sont des heures '
     + '<b>travaill\u00e9es</b>, coupure d\u00e9duite. Cong\u00e9s, absences et r\u00e9cup\u00e9rations n\u2019y figurent pas : ils '
     + 'apparaissent sur le relev\u00e9 mensuel d\u2019heures. Ni un contrat de travail, ni un bulletin de paie.</div>';
@@ -8884,6 +8902,8 @@ function _paDoc(yr,nom){
   return window._mvDocOpen({
     titre:'Planning de l\u2019ann\u00e9e '+yr,
     metas:[String(yr), grps.length+(grps.length>1?' mod\u00e8les de semaine':' mod\u00e8le de semaine'),
+           // L'assiette des noms se dit : la meme annee tiree en mars et en octobre ne nomme pas les memes gens.
+           _enCours ? ('\u00c9quipe sous contrat au '+_planFmtJour(_paAuj())) : '',
            '\u00c9dit\u00e9 le '+new Date().toLocaleDateString('fr-FR')],
     orient:'paysage', cat:'planning', css:_PA_CSS, corps:corps
   });

@@ -485,6 +485,10 @@ let codeRdt = 'var CAVE_VENDANGE={config:CFG,clients:CLIENTS,recoltes:RECS,cuves
   + 'function _vendMillOfDate(d){ return parseInt(String(d).slice(0,4),10); }\n'
   + PRELUDE + NOMS.map(corps).join('\n') + '\n' + NOMS_RDT.map(corps).join('\n')
   + '\nreturn {' + NOMS_RDT.join(',') + ', CFG:CFG};';
+if (CONTRE){
+  /* Contre-épreuve 7 — RDT-XLS : la comparaison stricte nombre / chaîne revient. */
+  codeRdt = codeRdt.split('String(_vendMillOfDate(r.date))!==String(mil)').join('_vendMillOfDate(r.date)!==mil');
+}
 const CUVEES = [];
 const WIN = { CONFIG:{ cave:{ fut_l:228 } } };
 // eslint-disable-next-line no-new-func
@@ -593,6 +597,14 @@ T('100 % mesuré', d3.vol.pctOk, 100);
 T('volume total 14,6 hL', Math.round(d3.vol.hl * 100) / 100, 14.6);
 T('rendement réel 2 034 kg / 14,6 hL', Math.round(V._vendRdtBase() === 'jus' ? 2034 / 14.6 : 0), 139);
 delete R3[0].parts[2].retour;
+
+/* ★ RDT-XLS (02/10) — LE MILLÉSIME ARRIVE EN CHAÎNE depuis le fichier Excel des parcelles.
+   _vendMillOfDate rend un NOMBRE ; une comparaison stricte écartait toutes les récoltes :
+   0 kg, 0 hL/ha, fourchette 0 – 0, alors que les kilos sortaient justes par un autre chemin. */
+const dS = V._vendRdtParc('Le Clos', '2026'), dN = V._vendRdtParc('Le Clos', 2026);
+T('★ millésime « 2026 » en chaîne : les mêmes kilos qu\u2019en nombre', dS.vol.kg, dN.vol.kg);
+T('★ millésime en chaîne : des kilos, pas zéro', dS.vol.kg > 0, true);
+T('★ millésime en chaîne : la même surface attribuée', Math.round(dS.surf.attribuee*10000), Math.round(dN.surf.attribuee*10000));
 
 console.log('\n' + (ko ? ko + ' ASSERTION(S) ROUGE(S) sur ' + n : 'TOUT VERT — ' + n + ' assertions'));
 if (CONTRE){

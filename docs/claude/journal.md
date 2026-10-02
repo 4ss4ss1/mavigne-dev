@@ -8,6 +8,12 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **30 septembre 2026 (PARC-XLS-2)** — ★ **LE FICHIER EXCEL DES PARCELLES AUSSI DANS LA CAVE** (§200).
+> Demande de Nico : « mettre ça aussi en cave avec les récoltes ». `_caveRegDocs` range l'entrée `csvParcelles` du catalogue
+> juste après « Récoltes de la vendange » — même entrée, même `docsGo(i)`, aucune copie. Guide Cave corrigé au passage (il
+> annonçait quatre documents). Posé sur **PAR-1 + ÉQUIPES-1** (§198-199, `aa2baea`, APP 7.80 · SW 8.54).
+> **Bump APP 7.80 → 7.81, SW 8.54 → 8.55** (visible).
+
 > ★ Consolidation : **30 septembre 2026 (PAR-1 + ÉQUIPES-1)** — ★★★ **LE TEMPS VIGNE SE PARTAGE PAR JOURNÉE, ET L'ADMIN
 > POSE LES ÉQUIPES DU JOUR.** PAR-1 (§198) : un salarié non coché rejoint les parcelles validées ce jour-là, au prorata du barème
 > (fin des séries −90 % / +297 % du tableau Parcelles). ÉQUIPES-1 (§199) : « Équipes du jour » sur l'Accueil (admin,

@@ -3,11 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **30 septembre 2026 (PARC-XLS-2)** — ★ **LE FICHIER EXCEL DES PARCELLES AUSSI DANS LA CAVE** (§200).
-> Demande de Nico : « mettre ça aussi en cave avec les récoltes ». `_caveRegDocs` range l'entrée `csvParcelles` du catalogue
-> juste après « Récoltes de la vendange » — même entrée, même `docsGo(i)`, aucune copie. Guide Cave corrigé au passage (il
-> annonçait quatre documents). Posé sur **PAR-1 + ÉQUIPES-1** (§198-199, `aa2baea`, APP 7.80 · SW 8.54).
-> **Bump APP 7.80 → 7.81, SW 8.54 → 8.55** (visible).
+> Dernière consolidation : **2 octobre 2026 (RDT-XLS)** — ★★ **QUATRE RETOURS DE NICO SUR LES DOCUMENTS DE FIN DE VENDANGE** (§201).
+> ① Fichier Excel des parcelles : rendement 0 et fourchette 0 – 0 — le millésime arrivait en chaîne, `_vendVolParc` /
+> `_vendSurfParc` le comparaient strictement au NOMBRE de `_vendMillOfDate` ; ② récoltes de la vendange en hL/ha
+> (`_mlRendements`, « ~ » = estimé), état sanitaire non noté = « — » ; ③ planning de l'année en cours = équipe sous contrat
+> d'aujourd'hui au 31/12, fiches Inactives exclues ; ④ aperçu des documents à la largeur de la feuille (`_mvDocOpen`) et
+> réglages du Cuvier stylés sans passer par Le Cuvier. Posé sur **PARC-XLS-2** (§200, `ff00c76`, APP 7.81 · SW 8.55).
+> **Bump APP 7.81 → 7.82, SW 8.55 → 8.56** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1369,6 +1371,11 @@ regarder**. Une assertion verte n'a jamais montré un texte coupé en trois.
     une sauvegarde, une archive ne gardent que les champs choisis le jour où on les écrit. Tout lecteur d'une donnée
     persistée tolère un champ absent (`Array.isArray(x)?x:[]`, jamais `x.length` nu) ; et un harnais qui ne joue que des
     données fabriquées par le code du jour ne le verra jamais — d'où le tirage au hasard de `mv-harnais-robustesse-planning`.
+21. ★★ **UN MILLÉSIME, UNE ANNÉE, UN IDENTIFIANT TRAVERSENT LES MODULES SOUS DEUX TYPES** (RDT-XLS, §201). `'2026'` vient d'une
+    feuille de tri ou d'une clé d'objet, `2026` d'un `parseInt`. Un `===`/`!==` entre les deux est **faux en silence** : le
+    fichier Excel sortait 0 hL/ha pendant que les kilos, filtrés avec `String()`, étaient justes. **Comparer `String(a)===String(b)`
+    dans la fonction qui filtre**, pas chez l'appelant ; et un harnais qui bouchonne une fonction doit avoir un frère qui
+    joue l'appel réel — le défaut vivait dans la couture entre deux harnais verts.
 
 **CSS / HTML**
 1. **`display:flex|block` sur `#page-xxx` interdit.**
