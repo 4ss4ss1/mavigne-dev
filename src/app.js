@@ -7459,7 +7459,8 @@ function getPCls(p){
   const tachesSaison=getTachesSaison();
   const exclues=p.tachesExclues||[];
   // Tâches actives (non exclues pour cette parcelle)
-  const tachesActives=tachesSaison.filter(t=>!((typeof _mvExclu==='function')?_mvExclu(p,t.nom,exclues):exclues.includes(t.nom)));   // SEL-1
+  const tachesActives=tachesSaison.filter(t=>!((typeof _mvExclu==='function')?_mvExclu(p,t.nom,exclues):exclues.includes(t.nom))
+    && !((typeof _mvArrHors==='function')&&_mvArrHors(p,t.nom)));   // SEL-1 · AVC-ARR : une arrachée ne compte que l'arrachage
   const totalSaison=tachesActives.length;
   const nbDone=tachesActives.filter(t=>getTacheStatut(p,t.nom)==='Validé').length;
   const pct=totalSaison>0?Math.round(nbDone/totalSaison*100):0;
@@ -8480,7 +8481,7 @@ function openDP(nom){
   var _dpBar=document.getElementById('dp-bar');
   if(_dpBar){_dpBar.style.width=cl.pct+'%';_dpBar.style.background=cl.fill;}
   // Heures restantes (hors tâches exclues)
-  const tachesSaison=getTachesSaison();
+  const tachesSaison=getTachesSaison().filter(t=>!_mvArrHors(p,t.nom));   // AVC-ARR : une arrachée ne montre que l'arrachage
   const exclues=p.tachesExclues||[];
   let hReste=0;
   tachesSaison.forEach(t=>{
@@ -8721,6 +8722,7 @@ function toggleExcluTache(nomParcelle,nomTache){
 function marquerEnCours(nomParcelle,nomTache,btn){
   if(_mvValidBlocked())return;
   const p=PARCELLES.find(x=>x.nom===nomParcelle);if(!p)return;
+  if(_mvArrRefus(p,nomTache))return;   // AVC-ARR
   const stat=p.taches[nomTache]||'Non démarré';
   if(stat==='En cours'){
     p.taches[nomTache]='Non démarré';
@@ -8744,6 +8746,7 @@ function marquerEnCours(nomParcelle,nomTache,btn){
 function tapTacheSimple(nomParcelle,nomTache,btn){
   if(_mvValidBlocked())return;
   if(nomTache==='Arrachage'&&_arrActif()){openDP(nomParcelle);return;}   // ARRACH-3
+  if(_mvArrRefus(PARCELLES.find(function(x){return x.nom===nomParcelle;}),nomTache))return;   // AVC-ARR
   var p=PARCELLES.find(function(x){return x.nom===nomParcelle;});
   if(!p)return;
   var stat=p.taches[nomTache]||'Non démarré';
@@ -8884,6 +8887,7 @@ function toggleTravail(nomParcelle,nomTache,btn){
 
 let _validParcelle='',_validTache='',_validBtn=null;
 function openValidationPanel(nomParcelle,nomTache,btn){
+  if(_mvArrRefus(PARCELLES.find(x=>x.nom===nomParcelle),nomTache))return;   // AVC-ARR
   _validParcelle=nomParcelle;_validTache=nomTache;_validBtn=btn;
   document.getElementById('vp-titre').textContent=nomTache;
   document.getElementById('vp-parcelle').textContent=nomParcelle;
@@ -9314,6 +9318,16 @@ function injectMeteoIfNeeded(date){
 //   ou déjà saisie au journal pendant la campagne (utils.js, _mvTacheConcerne). Une parcelle arrachée
 //   reste concernée par l'ARRACHAGE seul : sans elle, l'avancement de l'arrachage ne verrait jamais
 //   les parcelles finies.
+// ★ AVC-ARR (02/10/2026) — UNE PARCELLE ARRACHÉE NE PORTE PLUS QUE L'ARRACHAGE. Constaté chez Nico :
+//   trois parcelles arrachées affichaient « 50 % · 1/2 tâches » alors que l'arrachage y était à
+//   0 % — getPCls comptait les AUTRES travaux de la période sur une vigne qui n'existe plus, et la
+//   fiche laissait les valider. Une seule règle, lue par l'avancement, la fiche et chaque geste.
+function _mvArrHors(p,nom){ return !!(p && p.statut==='Arrachee' && nom!=='Arrachage'); }
+function _mvArrRefus(p,nom){
+  if(!_mvArrHors(p,nom)) return false;
+  showToast('Parcelle arrach\u00e9e : seul l\u2019arrachage s\u2019y valide','#B85A1A');
+  return true;
+}
 function _mvExclu(p,nom,exclues){
   if(typeof window._mvTacheSel==='function' && window._mvTacheSel(nom)) return window._mvTacheExclue(p,nom);
   return (exclues||p.tachesExclues||[]).includes(nom);
@@ -9745,6 +9759,7 @@ function recalcTravaux(nomTache){
 var _nivParcelle='', _nivTache='', _nivSelDone=[], _nivSelComm=[], _adminNiveaux=false, _nivOv=null;
 
 function openNiveauxPanel(nomParcelle, nomTache) {
+  if(_mvArrRefus(PARCELLES.find(function(x){return x.nom===nomParcelle;}),nomTache)) return;   // AVC-ARR
   _nivParcelle=nomParcelle; _nivTache=nomTache;
   _adminNiveaux=isAdmin();
   var p=PARCELLES.find(function(x){return x.nom===nomParcelle;});
@@ -9914,6 +9929,7 @@ function confirmNiveaux(){
 var _passParcelle='', _passTache='', _passSelDone=[], _passSelComm=[], _passOv=null;
 
 function openPassagesPanel(nomParcelle, nomTache){
+  if(_mvArrRefus(PARCELLES.find(function(x){return x.nom===nomParcelle;}),nomTache)) return;   // AVC-ARR
   _passParcelle=nomParcelle; _passTache=nomTache;
   var p=PARCELLES.find(function(x){return x.nom===nomParcelle;});
   var s=p&&p.taches&&p.taches[nomTache];
@@ -12299,6 +12315,7 @@ function _pvHideToast(){var t=document.getElementById('pv-toast');if(t)t.classLi
 function pQuickValidate(nom,evt){
   if(_mvValidBlocked())return;
   if(pTacheFilter==='Arrachage'&&_arrActif()){openDP(nom);return;}   // ARRACH-3 : une étape se choisit dans la fiche
+  if(_mvArrRefus(PARCELLES.find(function(x){return x.nom===nom;}),pTacheFilter))return;   // AVC-ARR
   if(!canWrite()){showToast('Lecture seule','#7A4F2E');return;}
   var p=PARCELLES.find(function(x){return x.nom===nom;});if(!p)return;
   var task=pTacheFilter,type=_pvType(task);

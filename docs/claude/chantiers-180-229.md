@@ -1381,3 +1381,28 @@ La puce posait `sel` seul → `sel vert`. ★ Leçon : toute puce `.pchk` coché
 - **Non vérifié à l'œil** : aucun navigateur lancé.
 - Accompagnement : `WHATS_NEW` 7.89, `MV_INFO` (`pil.eco.revient`, `pil.exo.postes`), guide, note de la feuille d'étape.
 
+## 209. ★ AVC-ARR — UNE PARCELLE ARRACHÉE NE PORTE PLUS QUE L'ARRACHAGE (02/10 — `src/app.js` · `src/utils.js` · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-avc-arr.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · **bump APP 7.89 → 7.90, SW 8.63 → 8.64**, base `7c29450`)
+
+### 209a. Le constat
+
+Nico, deux captures après déploiement d'ARRACH-4/5 : *« il y avait des bugs avant sur l'avancement des tâches »*. Écran Parcelles :
+Bras, Charreux, Marchais Petite (arrachées) à **50 % · 1/2 tâches** ; carte de l'Accueil : arrachage **0 %**, « il reste 3
+parcelles » (0,27 ha). Les deux disent vrai à leur façon : `getPCls` comptait **deux** travaux sur une arrachée (l'arrachage +
+un autre travail de la période, validé sur elle), l'Accueil ne compte que l'arrachage. Le défaut est le premier : une vigne
+arrachée n'a plus d'autre travail. Et la fiche (`openDP`) laissait valider ou démarrer ces autres travaux — le journal les
+refusait déjà (SEL-1), pas la fiche.
+⚠️ Non vérifiable d'ici : QUEL autre travail était validé sur ces parcelles (aucun accès aux données). Le 0 % de l'arrachage est
+juste : sur ces trois parcelles, aucune validation d'arrachage — déclarer « Arrachée » n'est pas valider le travail.
+
+### 209b. La règle
+
+`_mvArrHors(p, nom)` = parcelle arrachée et travail ≠ Arrachage. Lue par `getPCls` (pourcentage et « n/N tâches »), la fiche
+(`openDP` : liste et heures restantes), et `_mvArrRefus` dans six gestes : `marquerEnCours`, `openValidationPanel`,
+`openNiveauxPanel`, `openPassagesPanel`, `tapTacheSimple`, `pQuickValidate`. Les validations déjà posées restent en base,
+simplement plus comptées ni montrées.
+
+### 209c. Mesuré
+
+`mv-harnais-avc-arr.mjs` : **11 assertions** (la vraie `getPCls`, la vraie règle, les six gestes et la fiche lus dans le source),
+**3 contre-épreuves** rouges. Non vérifié à l'œil.
+

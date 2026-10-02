@@ -1,4 +1,6 @@
-// MA VIGNE — Service Worker v8.63
+// MA VIGNE — Service Worker v8.64
+// v8.64 (02/10/2026) — AVC-ARR : une parcelle arrachee ne porte plus que l'arrachage (getPCls, fiche, six gestes de
+//   validation refuses hors arrachage : _mvArrHors / _mvArrRefus). APP 7.89 -> 7.90.
 // v8.63 (02/10/2026) — ARRACH-5 : Revient : poste « Arrachage & prestations » (prestations + tracteur/phyto des vignes arrachees
 //   reparti a la surface) ; facture de prestataire unique (n° de facture, garde croisee etape <-> La Reserve, intrant nomme
 //   prestation refuse) ; bouton « Prestataire » du reglage des etapes en vert. APP 7.88 -> 7.89.
@@ -4236,7 +4238,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.63';
+const CACHE_NAME   = 'mavigne-v8.64';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4252,7 +4254,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.63 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.64 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4272,7 +4274,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.63 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.64 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

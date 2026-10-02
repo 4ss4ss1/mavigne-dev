@@ -3,12 +3,10 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **2 octobre 2026 (ARRACH-5)** — ★★ **L'ARRACHAGE DANS LE PRIX DE LA BOUTEILLE, LA FACTURE UNIQUE** (§208).
-> Nico : la facture prestataire « ne puisse pas se noter ailleurs » ; l'arrachage et les travaux de l'année « doivent peser sur le
-> prix de la bouteille » ; le bouton Prestataire ne s'allumait pas. ① `_pecRevCouts` : poste `pre` (prestations + tracteur/phyto
-> des vignes arrachées, à la surface sur les vignes en place) ; ② `_mvFactureOu` (utils.js) : garde croisée étape ↔ La Réserve sur
-> fournisseur + n° de facture, intrant « prestation » refusé ; ③ `.pchk.sel` sans teinte → `sel vert`. Posé sur ARRACH-4 (non
-> poussé, base `517eb00`). **Bump APP 7.88 → 7.89, SW 8.62 → 8.63** (visible).
+> Dernière consolidation : **2 octobre 2026 (AVC-ARR)** — ★ **UNE PARCELLE ARRACHÉE NE PORTE PLUS QUE L'ARRACHAGE** (§209).
+> Captures de Nico : trois arrachées à « 50 % · 1/2 tâches » quand l'arrachage y était à 0 %. `getPCls` comptait les autres travaux de
+> la période sur une arrachée, et la fiche laissait les valider. Règle `_mvArrHors` (app.js) lue par `getPCls`, la fiche (`openDP`)
+> et six gestes (`_mvArrRefus`). Posé sur ARRACH-4/5 (`7c29450`). **Bump APP 7.89 → 7.90, SW 8.63 → 8.64** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---

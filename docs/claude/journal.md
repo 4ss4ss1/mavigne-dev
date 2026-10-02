@@ -8,6 +8,13 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **2 octobre 2026 (ARRACH-5)** — ★★ **L'ARRACHAGE DANS LE PRIX DE LA BOUTEILLE, LA FACTURE UNIQUE** (§208).
+> Nico : la facture prestataire « ne puisse pas se noter ailleurs » ; l'arrachage et les travaux de l'année « doivent peser sur le
+> prix de la bouteille » ; le bouton Prestataire ne s'allumait pas. ① `_pecRevCouts` : poste `pre` (prestations + tracteur/phyto
+> des vignes arrachées, à la surface sur les vignes en place) ; ② `_mvFactureOu` (utils.js) : garde croisée étape ↔ La Réserve sur
+> fournisseur + n° de facture, intrant « prestation » refusé ; ③ `.pchk.sel` sans teinte → `sel vert`. Posé sur ARRACH-4 (non
+> poussé, base `517eb00`). **Bump APP 7.88 → 7.89, SW 8.62 → 8.63** (visible).
+
 > ★ Consolidation : **2 octobre 2026 (ARRACH-4)** — ★★ **LE BACKLOG DE L'ARRACHAGE SOLDÉ** (§207). Demande de Nico :
 > « occupe-toi de ce qui est au backlog ». ① `_ecoPrestaByParc` (journal rejoué : « Annulé » efface, revalidation remplace) →
 > poste **Prestations** de la campagne (`_pecData`) et de l'exercice (`_pexData`, atelier vigne, barre mensuelle `pre`), colonne
