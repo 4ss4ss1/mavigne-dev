@@ -8,6 +8,11 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **2 octobre 2026 (AVC-ARR)** — ★ **UNE PARCELLE ARRACHÉE NE PORTE PLUS QUE L'ARRACHAGE** (§209).
+> Captures de Nico : trois arrachées à « 50 % · 1/2 tâches » quand l'arrachage y était à 0 %. `getPCls` comptait les autres travaux de
+> la période sur une arrachée, et la fiche laissait les valider. Règle `_mvArrHors` (app.js) lue par `getPCls`, la fiche (`openDP`)
+> et six gestes (`_mvArrRefus`). Posé sur ARRACH-4/5 (`7c29450`). **Bump APP 7.89 → 7.90, SW 8.63 → 8.64** (visible).
+
 > ★ Consolidation : **2 octobre 2026 (ARRACH-5)** — ★★ **L'ARRACHAGE DANS LE PRIX DE LA BOUTEILLE, LA FACTURE UNIQUE** (§208).
 > Nico : la facture prestataire « ne puisse pas se noter ailleurs » ; l'arrachage et les travaux de l'année « doivent peser sur le
 > prix de la bouteille » ; le bouton Prestataire ne s'allumait pas. ① `_pecRevCouts` : poste `pre` (prestations + tracteur/phyto

@@ -252,3 +252,4 @@
 | 207 | 207. ★★ ARRACH-4 — LE BACKLOG DE L'ARRACHAGE : PRESTATIONS AU PILOTAGE, ARRACHÉE AU TABLEAU, ÉTAPE AU JOURN… | `docs/claude/chantiers-180-229.md` |
 | 208 | 208. ★★ ARRACH-5 — L'ARRACHAGE DANS LE PRIX DE LA BOUTEILLE, LA FACTURE DE PRESTATAIRE UNIQUE, LE BOUTON QU… | `docs/claude/chantiers-180-229.md` |
 | 209 | 209. ★ AVC-ARR — UNE PARCELLE ARRACHÉE NE PORTE PLUS QUE L'ARRACHAGE (02/10 — `src/app.js` · `src/utils.js`… | `docs/claude/chantiers-180-229.md` |
+| 210 | 210. ★ ARRACH-6 — L'ARRACHAGE EN UN GESTE, DANS UN SENS COMME DANS L'AUTRE (02/10 — `src/app.js` · `src/uti… | `docs/claude/chantiers-180-229.md` |

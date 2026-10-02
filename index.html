@@ -648,7 +648,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v7.90</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v7.91</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -1078,6 +1078,7 @@
       <div class="fl" style="margin-top:14px">Note <span style="font-size:var(--pt-micro,11px);font-weight:400;color:var(--texte-doux)">(optionnel)</span></div>
       <textarea id="arr-note" rows="2" maxlength="300" placeholder="Ex : arrachage prévu avant replantation en 2027" style="width:100%;box-sizing:border-box;border:1.5px solid var(--gris-clair);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:var(--pt-sm,17px);background:var(--bg-app);color:var(--texte);resize:vertical"></textarea>
       <div class="mv-l" style="margin-top:12px">La parcelle n'est pas supprimée : elle sort des surfaces, de l'avancement, du planning et du registre phyto, et son historique reste consultable. Une erreur se corrige depuis sa fiche avec « Remettre en exploitation ».</div>
+      <div id="arr-valide-row" style="display:none"></div>
       <div id="arr-warn" style="display:none;margin-top:10px;font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--orange)"></div>
       <button class="mbtn" style="background:var(--rouge-pale);color:var(--rouge-tx,#A0291E);border:1.5px solid var(--rouge);margin-top:18px" onclick="saveArrachage()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg> Confirmer l'arrachage</button>
       <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="closeOv(null,'ovArrachage')">Annuler</button>
@@ -1391,7 +1392,7 @@
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v7.90</div>
+        <div class="mod-header-sub">Ma Vigne v7.91</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
       
@@ -1498,7 +1499,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg></div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v7.90 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div class="ver-tag">Ma Vigne v7.91 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -3636,7 +3637,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:12px;font-weight:600;">v7.90</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:12px;font-weight:600;">v7.91</span>
       </div>
     </div>
     <div class="modal-body">

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.90';
+export const APP_VERSION = '7.91';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -730,6 +730,12 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.91', items: [
+    { emoji: 'corbeille', titre: 'Arracher une parcelle valide aussi le travail, en un seul geste',
+      desc: "D\u00e9clarer une parcelle \u00ab\u00a0Arrach\u00e9e\u00a0\u00bb ne validait pas le travail d\u2019arrachage\u00a0: il fallait la remettre en exploitation pour le valider, et les autres travaux de la p\u00e9riode r\u00e9apparaissaient. "
+        + "La feuille \u00ab\u00a0Arracher cette parcelle\u00a0\u00bb porte maintenant <b>Valider aussi le travail d\u2019arrachage</b>, coch\u00e9 d\u2019office\u00a0: la parcelle est arrach\u00e9e et son arrachage passe \u00e0 100\u00a0%, \u00e0 la date choisie. "
+        + "Dans l\u2019autre sens, valider l\u2019arrachage d\u2019une vigne en place propose de la d\u00e9clarer arrach\u00e9e." },
+  ] },
   { v: '7.90', items: [
     { emoji: 'carte', titre: 'L\u2019avancement d\u2019une parcelle arrach\u00e9e ne compte plus que l\u2019arrachage',
       desc: "Une parcelle arrach\u00e9e affichait par exemple \u00ab\u00a050\u00a0% \u00b7 1/2 t\u00e2ches\u00a0\u00bb alors que l\u2019arrachage y \u00e9tait \u00e0 0\u00a0%\u00a0: les autres travaux de la p\u00e9riode \u00e9taient encore compt\u00e9s sur une vigne qui n\u2019existe plus. "
@@ -3760,7 +3766,7 @@ var MV_AIDE = {
       ['Onglet Carte', ": les contours viennent de votre export PAC ou d’un fichier KML."],
       ['L’anneau doré qui respire', "sur la carte marque la parcelle <b>commencée et pas finie</b> pour le travail affiché\u00a0: celle où «\u00a0Début\u00a0» a été touché sans validation. S’il n’y en a aucune, il se pose sur la <b>prochaine à faire</b>, le n°\u00a01 de la tournée enregistrée. Sur «\u00a0toutes\u00a0», c’est la priorité du moment. Plusieurs parcelles commencées ont chacune leur anneau, et rien ne s’affiche sur une période archivée."],
       ['La recherche', "accepte le nom du climat comme le lieu-dit."],
-      ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique. Son avancement et sa fiche ne portent plus que l’<b>arrachage</b> : aucun autre travail ne s’y valide. Elle reste saisissable au journal pour son <b>arrachage</b>, en bas de la liste des parcelles, tant qu’elle est choisie pour la campagne."],
+      ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique. La déclarer arrachée valide aussi son <b>arrachage</b> (case cochée d’office) ; valider l’arrachage d’une vigne en place propose de la déclarer arrachée. Son avancement et sa fiche ne portent plus que l’<b>arrachage</b> : aucun autre travail ne s’y valide. Elle reste saisissable au journal pour son <b>arrachage</b>, en bas de la liste des parcelles, tant qu’elle est choisie pour la campagne."],
       ['L’arrachage en étapes', "quand l’administrateur l’a découpé (roue crantée, <b>Tâches</b>), la fiche de la parcelle montre une puce par étape : touchez-la pour la valider à sa date. Une étape <b>prestataire</b> se valide sans compter d’heures de l’équipe. Au moment choisi, l’application propose de passer la parcelle en « Arrachée »."],
       ['Arrachage, désherbage manuel, effeuillage', "ne concernent que les parcelles <b>choisies pour la campagne</b>. L’administrateur les coche dans la roue crantée, <b>Tâches</b>, sur la ligne du travail, ou une par une dans la fiche de la parcelle. Une parcelle où le travail a déjà été saisi compte d’office. L’an prochain, la liste repart vide."],
       ['Valider pour l’équipe sans y être', "l’administrateur voit sa propre puce dans le groupe («\u00a0Moi\u00a0», «\u00a0Moi aussi dans les rangs\u00a0» sur la barre d’équipe)\u00a0: décochée, la validation reste signée de son nom mais ses heures ne vont pas à la parcelle. Le choix est retenu pour la tâche."],

@@ -1406,3 +1406,35 @@ simplement plus comptées ni montrées.
 `mv-harnais-avc-arr.mjs` : **11 assertions** (la vraie `getPCls`, la vraie règle, les six gestes et la fiche lus dans le source),
 **3 contre-épreuves** rouges. Non vérifié à l'œil.
 
+## 210. ★ ARRACH-6 — L'ARRACHAGE EN UN GESTE, DANS UN SENS COMME DANS L'AUTRE (02/10 — `src/app.js` · `src/utils.js` · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-arrach6.mjs` (neuf) · `scripts/mv-harnais-arrach3.mjs` · `scripts/mv-harnais-liste.mjs` · **bump APP 7.90 → 7.91, SW 8.64 → 8.65**, base `01c6a2e`)
+
+### 210a. Le constat
+
+Nico, après AVC-ARR : *« quand je fais valider sur une parcelle, je l'avais déjà passée arrachée, donc je la remets en
+exploitation […] ça m'ouvre le listing des tâches possibles […] ça me marque 50 % […] c'est pas net »*. Le chemin naturel
+(valider l'arrachage, puis déclarer) n'était pas le sien : il déclare d'abord. Déclarer « Arrachée » (ARRACH-1) n'écrivait aucune
+validation ; pour en poser une il ressortait la parcelle — et AVC-ARR ne s'applique plus à une vigne « en place ».
+
+### 210b. Ce qui change
+
+- **Déclarer valide le travail** : `openDPArrachage` remplit `#arr-valide-row` (`_arrValideRowMaj`) — case « Valider aussi le
+  travail d'arrachage », **cochée d'office**, montrée seulement si l'Arrachage est dans la période et pas déjà validé ; en
+  arrachage par étapes, un renvoi aux étapes de la fiche. `saveArrachage` appelle `_arrValideAuPassage(p,date)` **avant**
+  `_arrApres` : une entrée de journal « Arrachage Validé » à la date d'arrachage (par `_arrJournal`, donc `_mvEqApplique` — toujours
+  huit écritures), parcelle choisie pour la campagne si elle ne l'était pas (SEL-1), `p.taches.Arrachage = 'Validé'`. La case ne
+  sert qu'une fois.
+- **Valider propose de déclarer** : `confirmValidation` d'un Arrachage sur une vigne en place, par un admin → `_arrProposer`
+  (au lieu du bilan de chantier). `_arrProposer` pose `_dpCurrentNom` : `openDPArrachage` lit la fiche courante, et depuis la
+  liste des parcelles elle aurait visé la dernière fiche ouverte. `saveArrEtape` passe aussi par lui.
+- Contre-épreuve « proposé à un salarié » d'ARRACH-3 mise à jour : la garde admin vit maintenant à deux endroits.
+
+### 210c. Pour les parcelles de Nico
+
+Celles remises en exploitation : valider l'arrachage → l'appli propose « Arrachée » → confirmer. Celles restées arrachées : leur
+fiche ne montre que l'arrachage (AVC-ARR) → le valider là.
+
+### 210d. Mesuré
+
+`mv-harnais-arrach6.mjs` : **13 assertions**, **5 contre-épreuves** rouges. Non vérifié à l'œil (pas de navigateur dans le bac à
+sable : `npx playwright install` refusé par le réseau).
+

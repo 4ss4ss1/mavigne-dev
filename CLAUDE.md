@@ -3,10 +3,11 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **2 octobre 2026 (AVC-ARR)** — ★ **UNE PARCELLE ARRACHÉE NE PORTE PLUS QUE L'ARRACHAGE** (§209).
-> Captures de Nico : trois arrachées à « 50 % · 1/2 tâches » quand l'arrachage y était à 0 %. `getPCls` comptait les autres travaux de
-> la période sur une arrachée, et la fiche laissait les valider. Règle `_mvArrHors` (app.js) lue par `getPCls`, la fiche (`openDP`)
-> et six gestes (`_mvArrRefus`). Posé sur ARRACH-4/5 (`7c29450`). **Bump APP 7.89 → 7.90, SW 8.63 → 8.64** (visible).
+> Dernière consolidation : **2 octobre 2026 (ARRACH-6)** — ★ **L'ARRACHAGE EN UN GESTE** (§210). Nico avait déclaré ses parcelles
+> « Arrachées » avant d'en valider le travail ; pour le valider il les remettait en exploitation → les autres travaux revenaient,
+> « 50 % », « c'est pas net ». ① La feuille « Arracher » valide aussi le travail (case cochée d'office, `_arrValideAuPassage`) ;
+> ② `confirmValidation` d'un arrachage sur une vigne en place propose « Arrachée » (`_arrProposer`, qui pose `_dpCurrentNom`).
+> Base `01c6a2e`. **Bump APP 7.90 → 7.91, SW 8.64 → 8.65** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---

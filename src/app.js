@@ -8133,7 +8133,7 @@ function saveArrEtape(){
   var tout=_arrNbFaites(p)>=cfg.etapes.length;
   if(p.statut!=='Arrachee'&&isAdmin()&&(cfg.apres==='*'?tout:cfg.apres===e.id)){
     setTimeout(function(){
-      try{ openDPArrachage(); var dEl=document.getElementById('arr-date'); if(dEl) dEl.value=date; }
+      try{ _arrProposer(p.nom,date); }
       catch(err){ if(window._mvAvale) window._mvAvale(err,'app.js/saveArrEtape'); }
     },350);
   }
@@ -8186,6 +8186,63 @@ function annulerArrEtape(){
   openDP(p.nom);
   showToast(e.lbl+' annul\u00e9','#B85A1A');
 }
+// ── ARRACH-6 : l'arrachage en UN geste, dans un sens comme dans l'autre ──
+// Nico (02/10) : il avait déclaré ses parcelles « Arrachées » AVANT d'en valider le travail ; pour le
+// valider, il les remettait en exploitation — les autres travaux de la période revenaient, « 50 % »,
+// « c'est pas net ». Deux portes, qui mènent au même état (arrachée ET arrachage validé) :
+//   ① déclarer « Arrachée » propose de valider le travail dans la même feuille (coché d'office) ;
+//   ② valider l'arrachage (arrachage simple) sur une vigne en place propose de la déclarer arrachée.
+// Avec les étapes (ARRACH-3), ① renvoie aux étapes de la fiche et ② existe déjà (saveArrEtape).
+var _ARRV={on:false};
+function _arrValideRowMaj(p){
+  var row=document.getElementById('arr-valide-row'); if(!row) return;
+  var dans=(typeof getTachesSaison==='function')&&getTachesSaison().some(function(t){return t&&t.nom==='Arrachage';});
+  var deja=(typeof getTacheStatut==='function')&&getTacheStatut(p,'Arrachage')==='Valid\u00e9';
+  if(!dans||deja){ row.style.display='none'; row.innerHTML=''; _ARRV.on=false; return; }
+  row.style.display='';
+  if(_arrActif()){
+    _ARRV.on=false;
+    row.innerHTML='<div class="mv-l" style="margin-top:12px">L\u2019arrachage est d\u00e9coup\u00e9 en \u00e9tapes : elles se valident dans la fiche de la parcelle, m\u00eame arrach\u00e9e.</div>';
+    return;
+  }
+  _ARRV.on=true;
+  _arrValideRowRendre(row);
+}
+function _arrValideRowRendre(row){
+  row.innerHTML='<div class="ppicker" style="margin-top:12px"><div class="pchk'+(_ARRV.on?' sel vert':'')+'" onclick="_arrValideBascule()">'
+    +(_ARRV.on?_mvIcon('check',16)+' ':'')+'Valider aussi le travail d\u2019arrachage</div></div>'
+    +'<div class="mv-l" style="margin-top:6px">Le travail est fini : l\u2019arrachage de cette parcelle passe \u00e0 100 %, et le temps de l\u2019\u00e9quipe va sur elle.</div>';
+}
+function _arrValideBascule(){
+  _ARRV.on=!_ARRV.on;
+  var row=document.getElementById('arr-valide-row'); if(row) _arrValideRowRendre(row);
+}
+// Appelée par saveArrachage, AVANT _arrApres (qui recalcule et sauve). N'écrit que si la case est cochée.
+function _arrValideAuPassage(p,date){
+  if(!_ARRV.on||!p) return false;
+  _ARRV.on=false;
+  if(typeof getTacheStatut==='function'&&getTacheStatut(p,'Arrachage')==='Valid\u00e9') return false;
+  _arrJournal({id:Date.now().toString(16)+'-ar',date:date,parcelle:p.nom,tache:'Arrachage',
+               qui:currentUser.nom,statut:'Valid\u00e9',equipe:false,membresEquipe:[]});
+  if(typeof window._mvSelPose==='function'&&typeof window._mvTacheConcerne==='function'&&!window._mvTacheConcerne(p,'Arrachage'))
+    window._mvSelPose(p,'Arrachage',true);
+  if(!p.taches) p.taches={};
+  if(typeof _mvOnActiveSaison!=='function'||_mvOnActiveSaison()) p.taches['Arrachage']='Valid\u00e9';
+  saveData('journal');
+  return true;
+}
+// Proposer « Arrachée » pour une parcelle précise, depuis n'importe quel écran (la feuille lit
+// _dpCurrentNom : sans cette ligne, elle viserait la dernière fiche ouverte).
+function _arrProposer(nom,date){
+  if(!isAdmin()) return false;
+  var p=PARCELLES.find(function(x){return x.nom===nom;});
+  if(!p||p.statut==='Arrachee') return false;
+  _dpCurrentNom=nom;
+  openDPArrachage();
+  var d=document.getElementById('arr-date'); if(d&&date) d.value=date;
+  return true;
+}
+
 // ── Le réglage (admin) : composer l'arrachage ──
 var _ARRCF={L:[],apres:'*'};
 function openArrCfg(){
@@ -8320,6 +8377,7 @@ function openDPArrachage(){
     el.style.display=enCours?'':'none';
     el.textContent=enCours?('Attention : '+enCours+' travail'+(enCours>1?'ux':'')+' en cours sur cette parcelle. '+(enCours>1?'Ils resteront':'Il restera')+' dans le journal, \u00e0 terminer ou annuler.'):'';
   }
+  if(typeof _arrValideRowMaj==='function') _arrValideRowMaj(p);   // ARRACH-6
   openOv('ovArrachage');
 }
 function _arrApres(nom,msg){
@@ -8346,7 +8404,8 @@ function saveArrachage(){
   p.motifArrachage=String((document.getElementById('arr-motif')||{}).value||'Autre');
   if(note) p.noteArrachage=note; else delete p.noteArrachage;
   p.arracheePar=(window.currentUser&&window.currentUser.nom)||'';
-  _arrApres(nom,'Parcelle arrach\u00e9e');
+  var _arrV=(typeof _arrValideAuPassage==='function')&&_arrValideAuPassage(p,date);   // ARRACH-6
+  _arrApres(nom,_arrV?'Parcelle arrach\u00e9e \u00b7 arrachage valid\u00e9':'Parcelle arrach\u00e9e');
 }
 function remettreParcelleEnExploitation(nom){
   if(!isAdmin()) return showToast('R\u00e9serv\u00e9 aux administrateurs','#B85A1A');
@@ -9137,6 +9196,8 @@ async function confirmValidation(){
   document.getElementById('ovValidation').classList.remove('open');
   renderParcelles();computePStats();
   if(navigator.vibrate)navigator.vibrate(60);
+  // ARRACH-6 : l'arrachage d'une vigne en place est fini → proposer de la déclarer arrachée.
+  if(_validTache==='Arrachage'&&p.statut!=='Arrachee'&&isAdmin()&&_arrProposer(p.nom,date)) return;
   _mvdsOpen({tache:_validTache,parcelle:_validParcelle,surf:p.surface,
              membres:equipe?(quiHors?[]:[currentUser.nom]).concat(membresEquipe.filter(function(n){return n!==currentUser.nom;})):[],
              detail:trous?(trous+' trous'):''});
@@ -12046,6 +12107,7 @@ async function refreshApp(){
   if (typeof saveArrCfg !== "undefined") window.saveArrCfg = saveArrCfg;
   if (typeof _arrResume !== "undefined") window._arrResume = _arrResume;
   if (typeof _jeEtapePresta !== "undefined") window._jeEtapePresta = _jeEtapePresta;   // ARRACH-4
+  if (typeof _arrValideBascule !== "undefined") window._arrValideBascule = _arrValideBascule;   // ARRACH-6
   if (typeof _dpcToggleEntreplantation !== "undefined") window._dpcToggleEntreplantation = _dpcToggleEntreplantation;
   if (typeof openSessionDetail !== "undefined") window.openSessionDetail = openSessionDetail;
   if (typeof openEditSession !== "undefined") window.openEditSession = openEditSession;

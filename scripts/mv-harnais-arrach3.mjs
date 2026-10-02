@@ -128,7 +128,8 @@ const D = [
   ['le prestataire absorbe les heures', b => b, t => t.replace('!j.presta && ', '')],
   ['une étape annulée vise le dernier arrachage', b => b, t => t.replace("+(j.etape?('\\u0000'+j.etape):'')", '')],
   ['« Arrachée » proposé à chaque étape', b => b.replace("(cfg.apres==='*'?tout:cfg.apres===e.id)", 'true'), t => t],
-  ['« Arrachée » proposé à un salarié', b => b.replace("p.statut!=='Arrachee'&&isAdmin()&&", "p.statut!=='Arrachee'&&"), t => t],
+  // ARRACH-6 : la garde vit à DEUX endroits (saveArrEtape et _arrProposer) — le défaut retire les deux.
+  ['« Arrachée » proposé à un salarié', b => b.replace("p.statut!=='Arrachee'&&isAdmin()&&", "p.statut!=='Arrachee'&&").replace("function _arrProposer(nom,date){\n  if(!isAdmin()) return false;", 'function _arrProposer(nom,date){'), t => t],
   ['la tâche validée dès la première étape', b => b.replace("n===0?'Non d\\u00e9marr\\u00e9':(n>=N?'Valid\\u00e9':'En cours')", "n===0?'Non d\\u00e9marr\\u00e9':'Valid\\u00e9'"), t => t],
   ['l\u2019état survit à la campagne', b => b.replace('(s&&Number(s.c)===c&&s.f', '(s&&s.f'), t => t],
   ['garde admin retirée de l\u2019annulation', b => b.replace("function annulerArrEtape(){\n  if(!isAdmin()){ showToast('Admin requis','#B85A1A'); return; }", 'function annulerArrEtape(){'), t => t],
