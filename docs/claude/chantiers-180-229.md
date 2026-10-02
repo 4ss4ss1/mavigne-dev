@@ -1195,3 +1195,108 @@ une validation annulée depuis la parcelle n'est pas refaite. Le registre (`_fer
 
 **Harnais** `mv-harnais-fertil` 54 → 70 (cas FERTI-3, épinglages Pilotage/app, 2 contre-épreuves).
 
+## 205. ★★ SEL-1 — ARRACHAGE, DÉSHERBAGE MANUEL, EFFEUILLAGE : LES PARCELLES SE CHOISISSENT PAR CAMPAGNE (02/10 — `src/utils.js` · `src/app.js` · `src/pilotage.js` · `src/planning.js` · `src/reglages.js` · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-selection.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · **bump APP 7.85 → 7.86, SW 8.59 → 8.60**, base `cad12b0`)
+
+### 205a. D'où ça vient
+
+Nico arrache quelques parcelles : *« le temps des travaux doit être compté aussi dans la vigne »*. Inventaire : la tâche
+**Arrachage** existait (catalogue, temps réel, sans barème) ; le moteur du temps réel (`_ecoTvEvents`, §172) ne filtre PAS les
+parcelles arrachées. Deux défauts : ① dès « Arrachée », la parcelle disparaissait de la saisie du journal (`openJournalEntry`) — les
+journées de ramassage attendaient au planning et se versaient sur la prochaine clôture **d'une autre parcelle** ; ② activée sur une
+période, la tâche concernait **toutes** les parcelles (avancement « 2/45 », « à faire » partout). Le seul outil, la tâche
+désactivée par parcelle (`p.tachesExclues`), marche à l'envers (tout concerné tant qu'on n'exclut pas) et il est **permanent**.
+Nico : *« il faudrait pouvoir faire une sélection simple »*, puis *« l'arrachage ne concerne que la saison en cours, l'année
+prochaine ce sera d'autres parcelles »*, et *« aussi pour l'effeuillage et le désherbage manuel »*.
+★ « Saison » dans sa bouche = l'**année** : axe **campagne** (§11c), pas période — un arrachage déborde de l'automne sur l'hiver.
+
+### 205b. La règle (`utils.js`, bloc SEL-1)
+
+- `MV_TACHES_SEL = ['Arrachage','Desherbage','Effeuillage']` (noms du catalogue ; `_normalizeTaches` garde `t.nom = cat.nom`).
+- **Concernée pour la campagne C** = `p.selCamp[tâche] === C` **ou** une entrée « Validé » / « En cours » de cette tâche sur
+  cette parcelle datée dans C (`_mvSelTravaillees`, mémoire courte dont la clé suit la longueur et les deux bouts du journal).
+- ★ **Pourquoi le journal compte** : le temps réel verse déjà les heures sur toute validation ; l'avancement doit voir la même
+  chose. Et c'est ce qui garde intactes les validations d'avant ce lot **sans migration** : une effeuilleuse déjà validée compte.
+- ★ **On stocke le NUMÉRO de campagne**, pas un booléen : la sélection tombe d'elle-même à la campagne suivante, sans remise à zéro
+  ni tâche planifiée (contre-épreuve dédiée).
+- **Campagne de référence** (`_mvCampRef`) : celle du jour sur la période active ; celle du **début** de la période consultée en
+  archive.
+- `p.tachesExclues` est **ignoré** pour ces trois tâches ; toutes les autres gardent l'ancienne règle, mot pour mot.
+- **Une parcelle arrachée n'est éligible qu'à l'arrachage** (`_mvSelEligible`) : `_parcConcern('Arrachage')` la garde (sans elle
+  l'avancement de l'arrachage ne verrait jamais les parcelles finies), les deux autres l'écartent.
+
+### 205c. Ce qui a été branché
+
+- Lecteurs passés par la règle : `getPCls`, filtre tâche de Parcelles, fiche (`openDP` : heures restantes, ligne grisée
+  « Pas choisie pour cette campagne », bouton réservé à l'admin pour ces tâches), `toggleExcluTache` (pose `selCamp` au lieu
+  d'exclure), `_parcConcern` (donc `recalcTravaux`, l'Accueil, le planning de passage), `_mvCibleCarte`, `_opApplic` et la
+  signature de cache des parcelles (Pilotage), `surfFn` (Planning), l'état du vignoble (`reglages.js`).
+- **Feuille `ovSelParc`** (statique dans `index.html`, `openOv`/`closeOv` → le retour Android est géré) : puces `.pchk` par
+  commune quand il y en a deux, recherche, total d'hectares ; une parcelle déjà travaillée est cochée d'office et ne se décoche pas.
+  Garde `isAdmin()` **dans** `saveSelParc`, pas seulement à l'ouverture. Ouverte par la ligne du travail dans la roue crantée ›
+  Tâches (`selHtml`, `_mvSelResume`).
+- **Journal** : les parcelles arrachées concernées par l'arrachage s'ajoutent en bas (`<optgroup>` « Arrachées — arrachage
+  seulement ») ; `saveJournalEntry` refuse toute autre tâche sur une arrachée.
+
+### 205d. La vérification des chiffres d'Internet (dans la conversation)
+
+Le tableau collé par Nico est arrivé coupé (seule la ligne « Dépalissage complet » : 35–50 h/ha en vigne étroite, 15–25 h/ha en
+vigne large). **Pas de source trouvée pour ces valeurs.** Sourcé : référentiels des Chambres d'agriculture du Val de Loire —
+arrachage complet 112 h + 400 € de prestation par ha (Sancerre, palissage 4 fils), 90 h (Pays de la Loire 2023, 3 fils).
+Le rapport ≈ 2 étroite/large tient parce que le temps suit la **longueur de rangs**, pas le nombre de pieds — alors que
+`_mvHhaDens` ajuste au nombre de pieds. ⚠️ Piège de mot : « dépalissage » = aussi l'enlèvement des bois de taille (le tirage) ;
+le « dépalissage 5 h » de la brochure Pays de la Loire, c'est ça. **Conclusion retenue : aucun barème par défaut**, les vrais
+temps viendront du temps réel.
+
+### 205e. Mesuré
+
+- `mv-harnais-selection.mjs` : **31 assertions** sur les vraies fonctions extraites de `utils.js` et `app.js` ; **9 contre-épreuves**
+  (booléen au lieu du numéro de campagne, journal ignoré, `tachesExclues` relu, arrachée éligible à tout, campagne du jour en
+  archive, « Annulé » compté, garde admin retirée de l'écriture, mémoire du journal figée, parcelle travaillée décochable) — toutes
+  rougissent.
+- **Non vérifié à l'œil** : aucun navigateur lancé — la feuille sur téléphone, les deux thèmes, la ligne de Réglages.
+- Accompagnement : `MV_AIDE` Parcelles (deux points), guide `04-vigne.html` (deux encarts), `WHATS_NEW` 7.86. `MV_INFO` : aucune
+  fiche ne décrit la méthode de l'avancement — rien à changer. Visite guidée : aucun sélecteur touché.
+
+## 206. ★★ ARRACH-3 — L'ARRACHAGE EN ÉTAPES, COMPOSÉ PAR L'ADMIN (02/10 — `src/app.js` · `src/pilotage.js` · `src/reglages.js` · `src/utils.js` · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-arrach3.mjs` (neuf) · `scripts/mv-harnais-equipes-jour.mjs` · `scripts/mv-harnais-liste.mjs` · **bump APP 7.86 → 7.87, SW 8.60 → 8.61**, posé sur SEL-1 non poussé, base `cad12b0`)
+
+### 206a. La demande
+
+Proposé : trois étapes fixes. Nico a élargi : *« l'admin choisit ce qu'il veut mettre dans arrachage »*, *« est-ce qu'il la passe
+arrachée à ce moment-là ou une fois que les trois étapes sont faites »*, *« on peut peut-être aussi mettre l'option prestataire »*.
+Chez lui : démontage et souches par l'équipe, ramassage par un prestataire — *« c'est l'exemple, pas à prendre en généralité »*.
+
+### 206b. Pourquoi PAS le type « niveaux »
+
+Le type `niveaux` est câblé pour le Relevage (`_relNivState`, niveaux numérotés, niveaux « Auto ») et `_normalizeTaches` IMPOSE
+le `type` du catalogue à chaque chargement : un `type:'niveaux'` posé par le domaine sur Arrachage serait effacé. L'arrachage en
+étapes vit donc à côté : `CONFIG.arrachage` (réglage), `p.arrEtapes = {c, f}` (état, numéro de campagne comme SEL-1), une entrée de
+journal par étape. La tâche du catalogue ne change pas : un domaine qui ne découpe pas ne voit **aucune** différence.
+
+### 206c. Ce qui a été écrit
+
+- **Réglage** (`openArrCfg` / `saveArrCfg`, feuille `ovArrCfg`, admin) : cinq étapes proposées + étape libre, ordre par flèches,
+  puce « Prestataire », choix « Proposer “Arrachée” après… » (une étape, ou toutes). Lien sur la ligne Arrachage de la roue
+  crantée › Tâches (`_arrResume`). Tout décocher supprime `CONFIG.arrachage`.
+- **Fiche parcelle** : une puce par étape (`_arrRowHtml`) ; toucher → `ovArrEtape` (date ≤ aujourd'hui ; prestataire : nom et
+  montant, optionnels). Valider écrit `{tache:'Arrachage', etape, etapeLbl, presta?, prestaNom?, prestaMontant?}` par l'unique
+  `_arrJournal` (passe par `_mvEqApplique` : **huit** écritures du journal, harnais ÉQUIPES-1 mis à jour). `p.taches['Arrachage']`
+  suit (Non démarré / En cours / Validé), jamais sur une période consultée en archive. L'admin annule une étape (entrée
+  « Annulé » portant la même étape).
+- **Passage « Arrachée »** : à l'étape choisie (ou à la dernière), **admin seul**, `openDPArrachage()` s'ouvre avec la date de
+  l'étape — proposé, jamais imposé.
+- **Temps réel** (`_ecoTvEvents`) : `!j.presta` écarte l'étape prestataire (patron `auTracteur`, FERTI-3) ; la clé du couple
+  porte l'étape (une annulation ne vise qu'elle ; deux étapes ne sont pas une revalidation RÉAL-1). `_ecoTempsVigne` rend
+  `V.etapes` (heures, euros, surface, h/ha par étape, ordre du réglage) ; `_pecCarteTemps` les affiche sous la ligne Arrachage.
+- `pQuickValidate` et `tapTacheSimple` renvoient vers la fiche quand l'arrachage est découpé. Le journal affiche l'étape et le
+  prestataire à côté de la tâche.
+
+### 206d. Mesuré
+
+- `mv-harnais-arrach3.mjs` : **26 assertions** sur les vraies fonctions (`app.js` bloc ARRACH-3, `pilotage.js` `_ecoTvEvents`) ;
+  **10 contre-épreuves** toutes rouges (prestataire qui absorbe les heures, annulation qui vise le dernier arrachage, proposition à
+  chaque étape, proposition à un salarié, tâche validée dès la 1re étape, état qui survit à la campagne, garde admin de
+  l'annulation, date future, montant oublié, statut écrit en archive).
+- **Non vérifié à l'œil** : aucun navigateur lancé.
+- Accompagnement : `WHATS_NEW` 7.87, `MV_AIDE` Parcelles, `MV_INFO` `pil.eco.temps` (deux phrases : prestataire, lignes par étape),
+  guide `04-vigne.html` (un encart). Visite guidée : aucun sélecteur touché.
+

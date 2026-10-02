@@ -7459,7 +7459,7 @@ function getPCls(p){
   const tachesSaison=getTachesSaison();
   const exclues=p.tachesExclues||[];
   // Tâches actives (non exclues pour cette parcelle)
-  const tachesActives=tachesSaison.filter(t=>!exclues.includes(t.nom));
+  const tachesActives=tachesSaison.filter(t=>!((typeof _mvExclu==='function')?_mvExclu(p,t.nom,exclues):exclues.includes(t.nom)));   // SEL-1
   const totalSaison=tachesActives.length;
   const nbDone=tachesActives.filter(t=>getTacheStatut(p,t.nom)==='Validé').length;
   const pct=totalSaison>0?Math.round(nbDone/totalSaison*100):0;
@@ -7740,8 +7740,9 @@ function renderParcelles(){
     if(pSearch&&!p.nom.toLowerCase().includes(pSearch.toLowerCase()))return false;
     // Filtre par tâche : afficher seulement les parcelles où la tâche n'est pas encore Validé
     if(pTacheFilter!=='toutes'){
-      if(p.statut==='Arrachee')return false; // jamais dans le filtre tâche
-      if((p.tachesExclues||[]).includes(pTacheFilter))return false; // tâche désactivée sur cette parcelle
+      // SEL-1 : une parcelle arrachée ne reste visible que sous « Arrachage », et seulement si elle est concernée.
+      if(p.statut==='Arrachee'&&pTacheFilter!=='Arrachage')return false; // jamais dans le filtre tâche
+      if((typeof _mvExclu==='function')?_mvExclu(p,pTacheFilter):(p.tachesExclues||[]).includes(pTacheFilter))return false; // tâche désactivée (ou non choisie cette campagne, SEL-1)
       if(!window.pShowDone&&_pvCurDone(p,pTacheFilter))return false; // étape/tâche courante déjà faite (QV)
     }
     return true;
@@ -7918,6 +7919,301 @@ function saveDPCepage(){
   closeOv(null,'ovCepage');
   openDP(nom);
   showToast('Cépage(s) enregistré(s)','#3D6B27');
+}
+
+// ══════ SEL-1 — LES PARCELLES CONCERNÉES PAR UNE TÂCHE « À LA SÉLECTION » (ADMIN) ══════
+// Arrachage, Désherbage manuel, Effeuillage : on coche les parcelles de la campagne, une fois,
+// dans une liste. La règle de concernement vit dans utils.js (_mvTacheConcerne, SEL-1) ; cette
+// feuille ne fait que poser p.selCamp et sauver. Une parcelle déjà travaillée cette campagne est
+// cochée d'office et verrouillée : la décocher n'y changerait rien (le journal fait foi).
+var _SELP={nom:'',camp:0,sel:{},trav:{}};
+function _mvSelLabel(nom){
+  var c=(window.TACHES_CATALOGUE||TACHES_CATALOGUE||[]).find(function(x){return x.nom===nom;});
+  return (c&&c.label)||nom;
+}
+function _mvSelListe(){
+  var q=String(((document.getElementById('selp-q')||{}).value)||'').trim().toLowerCase();
+  return (PARCELLES||[]).filter(function(p){
+    return window._mvSelEligible(p,_SELP.nom) && (!q || String(p.nom).toLowerCase().indexOf(q)>=0);
+  }).slice().sort(function(a,b){
+    var ca=(a.commune&&a.commune.nom)||'', cb=(b.commune&&b.commune.nom)||'';
+    if(ca!==cb){ if(!ca) return 1; if(!cb) return -1; return ca.localeCompare(cb,'fr'); }
+    return String(a.nom).localeCompare(String(b.nom),'fr');
+  });
+}
+function openSelParc(nom){
+  if(!isAdmin()){ showToast('Admin requis','#B85A1A'); return; }
+  if(typeof window._mvTacheSel!=='function'||!window._mvTacheSel(nom)) return;
+  var camp=window._mvCampRef();
+  _SELP={nom:nom,camp:camp,sel:{},trav:{}};
+  var T=window._mvSelTravaillees(camp);
+  (PARCELLES||[]).forEach(function(p){
+    if(!p||p.nom==null) return;
+    if(window._mvSelChoisie(p,nom,camp)) _SELP.sel[p.nom]=true;
+    if(T[String(p.nom)+'\u0000'+nom]) _SELP.trav[p.nom]=true;
+  });
+  var t=document.getElementById('selp-titre'); if(t) t.textContent=_mvSelLabel(nom);
+  var s=document.getElementById('selp-sub');
+  if(s) s.textContent='Parcelles concern\u00e9es \u00b7 campagne '+window._mvCampagneBornes(camp).court;
+  var q=document.getElementById('selp-q'); if(q) q.value='';
+  _mvSelRows();
+  openOv('ovSelParc');
+}
+function _mvSelRows(){
+  var c=document.getElementById('selp-rows'); if(!c) return;
+  var L=_mvSelListe();
+  var nbComm={}; L.forEach(function(p){ nbComm[(p.commune&&p.commune.nom)||'']=1; });
+  var parComm=Object.keys(nbComm).length>=2;
+  var h='', cur=null;
+  L.forEach(function(p){
+    var cm=(p.commune&&p.commune.nom)||'';
+    if(parComm && cm!==cur){
+      if(cur!==null) h+='</div>';
+      h+='<div class="fl" style="margin-top:12px">'+_escHtml(cm||'Sans commune')+'</div><div class="ppicker">';
+      cur=cm;
+    } else if(!parComm && cur===null){ h+='<div class="ppicker">'; cur=cm; }
+    var tr=!!_SELP.trav[p.nom], on=tr||!!_SELP.sel[p.nom];
+    var arr=(p.statut==='Arrachee')?' \u00b7 arrach\u00e9e':'';
+    h+='<div class="pchk'+(on?' sel vert':'')+'" data-selp-n="'+_escAttr(p.nom)+'" onclick="_mvSelPick(this)"'
+      +(tr?' title="D\u00e9j\u00e0 travaill\u00e9e cette campagne" style="opacity:.75"':'')+'>'
+      +_escHtml(p.nom)+' <span style="font-weight:400">'+_escHtml(String(p.surface||0))+' ha'+arr+(tr?' \u00b7 faite':'')+'</span></div>';
+  });
+  if(cur!==null) h+='</div>';
+  if(!L.length) h='<div class="mv-l" style="margin-top:10px">Aucune parcelle ne correspond.</div>';
+  c.innerHTML=h;
+  var n=0, ha=0;
+  (PARCELLES||[]).forEach(function(p){
+    if(!window._mvSelEligible(p,_SELP.nom)) return;
+    if(_SELP.trav[p.nom]||_SELP.sel[p.nom]){ n++; ha+=parseFloat(p.surface)||0; }
+  });
+  var tot=document.getElementById('selp-tot');
+  if(tot) tot.textContent=n?(n+' parcelle'+(n>1?'s':'')+' \u00b7 '+(Math.round(ha*100)/100).toLocaleString('fr-FR')+' ha'):'Aucune parcelle coch\u00e9e';
+}
+function _mvSelPick(el){
+  var n=el&&el.getAttribute('data-selp-n'); if(n==null) return;
+  if(_SELP.trav[n]){ showToast('D\u00e9j\u00e0 travaill\u00e9e cette campagne : elle reste concern\u00e9e','#B85A1A'); return; }
+  if(_SELP.sel[n]) delete _SELP.sel[n]; else _SELP.sel[n]=true;
+  _mvSelRows();
+}
+function saveSelParc(){
+  if(!isAdmin()){ showToast('Admin requis','#B85A1A'); return; }
+  var nom=_SELP.nom; if(!nom||!window._mvTacheSel(nom)) return;
+  var n=0;
+  (PARCELLES||[]).forEach(function(p){
+    if(!p||p.nom==null) return;
+    var on=!!_SELP.sel[p.nom] && window._mvSelEligible(p,nom);
+    window._mvSelPose(p,nom,on,_SELP.camp);
+    if(on||_SELP.trav[p.nom]) n++;
+  });
+  recalcTravaux(nom); window.TRAVAUX=TRAVAUX;
+  saveData('parcelles');
+  closeOv(null,'ovSelParc');
+  try{ renderParcelles(); computePStats(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveSelParc'); }
+  if(typeof renderHomeCard==='function'){ try{ renderHomeCard(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveSelParc#2'); } }
+  if(typeof window.renderReglages==='function'){ try{ window.renderReglages(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveSelParc#3'); } }
+  showToast(_mvSelLabel(nom)+' : '+n+' parcelle'+(n>1?'s':'')+' cette campagne','#3D6B27');
+}
+
+// ══════ ARRACH-3 — L'ARRACHAGE EN ÉTAPES, COMPOSÉ PAR L'ADMIN ══════
+// Nico (02/10) : « l'admin choisit ce qu'il veut mettre dans arrachage », une option prestataire par
+// étape, et le choix du moment où la parcelle passe « Arrachée ». Chez lui : démontage, souches, puis
+// ramassage par un prestataire — un EXEMPLE, pas une règle.
+// · Réglage domaine : CONFIG.arrachage = { etapes:[{id,lbl,presta}], apres:'<id>'|'*' }. Sans étape,
+//   l'arrachage reste la tâche simple d'avant : aucun domaine ne change sans le demander.
+// · État d'une parcelle : p.arrEtapes = { c:<campagne>, f:{ <id>:{d, presta, pn, pm} } }. Le numéro de
+//   campagne fait tomber l'état de lui-même l'an suivant (même règle que SEL-1).
+// · Chaque étape validée écrit UNE entrée au journal (tache 'Arrachage', etape, etapeLbl) : le temps réel
+//   lui verse ses heures (pilotage.js, _ecoTvEvents), étape par étape. Une étape prestataire porte
+//   `presta:true` et n'absorbe AUCUNE heure de l'équipe (même patron que auTracteur, FERTI-3).
+// · Le montant d'un prestataire est NOTÉ, jamais additionné : l'Économie n'a pas de poste prestations
+//   (vérifié le 02/10) — inventer un calcul serait pire que ne rien dire.
+// · p.taches['Arrachage'] suit : aucune étape = Non démarré, une partie = En cours, toutes = Validé.
+var MV_ARR_ETAPES_CAT=[
+  {id:'demontage', lbl:'D\u00e9montage du palissage'},
+  {id:'souches',   lbl:'Arrachage des souches'},
+  {id:'ramassage', lbl:'Ramassage des souches'},
+  {id:'epierrage', lbl:'\u00c9pierrage'},
+  {id:'sol',       lbl:'Travail du sol avant repos'}
+];
+function _arrCfg(){
+  var c=(window.CONFIG&&window.CONFIG.arrachage)||null;
+  var E=(c&&Array.isArray(c.etapes))?c.etapes.filter(function(e){return e&&e.id&&e.lbl;}).map(function(e){
+    return {id:String(e.id), lbl:String(e.lbl), presta:!!e.presta};
+  }):[];
+  var apres=(c&&c.apres)?String(c.apres):'';
+  if(apres!=='*'&&!E.some(function(e){return e.id===apres;}))
+    apres=E.some(function(e){return e.id==='souches';})?'souches':'*';
+  return {etapes:E, apres:apres};
+}
+function _arrActif(){ return _arrCfg().etapes.length>0; }
+function _arrEtat(p){
+  var c=window._mvCampRef(), s=p&&p.arrEtapes;
+  return (s&&Number(s.c)===c&&s.f&&typeof s.f==='object')?s.f:{};
+}
+function _arrNbFaites(p){ var f=_arrEtat(p); return _arrCfg().etapes.filter(function(e){return !!f[e.id];}).length; }
+function _arrStatutTache(p){
+  var n=_arrNbFaites(p), N=_arrCfg().etapes.length;
+  return n===0?'Non d\u00e9marr\u00e9':(n>=N?'Valid\u00e9':'En cours');
+}
+function _arrSyncTache(p){
+  if(!p.taches) p.taches={};
+  if(typeof _mvOnActiveSaison==='function'&&!_mvOnActiveSaison()) return;
+  p.taches['Arrachage']=_arrStatutTache(p);
+  recalcTravaux('Arrachage'); window.TRAVAUX=TRAVAUX;
+}
+// La ligne de la fiche parcelle : une puce par étape.
+function _arrRowHtml(p,canEdit){
+  var f=_arrEtat(p), E=_arrCfg().etapes, n=_arrNbFaites(p);
+  var chips=E.map(function(e){
+    var d=f[e.id];
+    var sub=(e.presta?' \u00b7 prestataire':'')+(d?(' \u00b7 '+fmtDate(d.d)):'');
+    var act=canEdit?(' onclick="openArrEtape(\''+_escAttr(p.nom)+'\',\''+_escAttr(e.id)+'\')"'):'';
+    return '<div class="pchk'+(d?' sel vert':'')+'"'+act+'>'+(d?_mvIcon('check',16)+' ':'')+_escHtml(e.lbl)
+      +'<span style="font-weight:400">'+_escHtml(sub)+'</span></div>';
+  }).join('');
+  return '<div class="val-row mv-tr"><div style="flex:1;min-width:0">'
+    +'<div class="mv-v" style="font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">Arrachage</div>'
+    +'<div class="mv-l" style="margin-top:2px">'+n+' \u00e9tape'+(n>1?'s':'')+' sur '+E.length+' \u00b7 temps r\u00e9el</div>'
+    +'<div class="ppicker" style="margin-top:6px">'+chips+'</div></div></div>';
+}
+var _ARRE={nom:'',id:''};
+function openArrEtape(nom,id){
+  if(_mvValidBlocked()) return;
+  if(!canWrite()){ showToast('Lecture seule','#7A4F2E'); return; }
+  var p=PARCELLES.find(function(x){return x.nom===nom;}); if(!p) return;
+  var e=_arrCfg().etapes.find(function(x){return x.id===id;}); if(!e) return;
+  _ARRE={nom:nom,id:id};
+  var d=_arrEtat(p)[id];
+  var el;
+  el=document.getElementById('arre-titre'); if(el) el.textContent=e.lbl;
+  el=document.getElementById('arre-sub'); if(el) el.textContent=p.nom+' \u00b7 '+p.surface+' ha';
+  el=document.getElementById('arre-date'); if(el){ el.value=(d&&d.d)||_mvToday(); el.max=_mvToday(); }
+  el=document.getElementById('arre-presta'); if(el) el.style.display=e.presta?'':'none';
+  el=document.getElementById('arre-pn'); if(el) el.value=(d&&d.pn)||'';
+  el=document.getElementById('arre-pm'); if(el) el.value=(d&&d.pm)?String(d.pm):'';
+  el=document.getElementById('arre-fait'); if(el){ el.style.display=d?'':'none'; el.textContent=d?('\u00c9tape valid\u00e9e le '+fmtDate(d.d)+'.'):''; }
+  el=document.getElementById('arre-undo'); if(el) el.style.display=(d&&isAdmin())?'':'none';
+  el=document.getElementById('arre-ok'); if(el) el.style.display=d?'none':'';
+  openOv('ovArrEtape');
+}
+// L'UNIQUE écriture du journal de l'arrachage en étapes (validation comme annulation).
+function _arrJournal(j){ JOURNAL.unshift(_mvEqApplique(j)); }
+function saveArrEtape(){
+  if(_mvValidBlocked()) return;
+  if(!canWrite()){ showToast('Lecture seule','#7A4F2E'); return; }
+  var p=PARCELLES.find(function(x){return x.nom===_ARRE.nom;}); if(!p) return;
+  var cfg=_arrCfg(), e=cfg.etapes.find(function(x){return x.id===_ARRE.id;}); if(!e) return;
+  var date=((document.getElementById('arre-date')||{}).value)||_mvToday();
+  if(date>_mvToday()){ showToast('Date dans le futur','#B85A1A'); return; }
+  var j={id:Date.now().toString(16)+'-ar',date:date,parcelle:p.nom,tache:'Arrachage',etape:e.id,etapeLbl:e.lbl,
+         qui:currentUser.nom,statut:'Valid\u00e9',equipe:false,membresEquipe:[]};
+  var st={d:date};
+  if(e.presta){
+    var pn=String(((document.getElementById('arre-pn')||{}).value)||'').trim().slice(0,80);
+    var pm=parseFloat(String(((document.getElementById('arre-pm')||{}).value)||'').replace(',','.'));
+    j.presta=true; st.presta=true;
+    if(pn){ j.prestaNom=pn; st.pn=pn; }
+    if(pm>0){ j.prestaMontant=Math.round(pm*100)/100; st.pm=j.prestaMontant; }
+  }
+  _arrJournal(j);
+  var c=window._mvCampRef();
+  var f=(p.arrEtapes&&Number(p.arrEtapes.c)===c&&p.arrEtapes.f)?Object.assign({},p.arrEtapes.f):{};
+  f[e.id]=st; p.arrEtapes={c:c,f:f};
+  _arrSyncTache(p);
+  saveData('parcelles'); saveData('travaux'); saveData('journal');
+  closeOv(null,'ovArrEtape');
+  openDP(p.nom);
+  showToast(e.lbl+' valid\u00e9'+(e.presta?' (prestataire)':''),'#3D6B27');
+  // ARRACH-3 : la parcelle passe « Arrachée » au moment choisi par l'admin — PROPOSÉ, jamais imposé.
+  var tout=_arrNbFaites(p)>=cfg.etapes.length;
+  if(p.statut!=='Arrachee'&&isAdmin()&&(cfg.apres==='*'?tout:cfg.apres===e.id)){
+    setTimeout(function(){
+      try{ openDPArrachage(); var dEl=document.getElementById('arr-date'); if(dEl) dEl.value=date; }
+      catch(err){ if(window._mvAvale) window._mvAvale(err,'app.js/saveArrEtape'); }
+    },350);
+  }
+}
+function annulerArrEtape(){
+  if(!isAdmin()){ showToast('Admin requis','#B85A1A'); return; }
+  var p=PARCELLES.find(function(x){return x.nom===_ARRE.nom;}); if(!p) return;
+  var e=_arrCfg().etapes.find(function(x){return x.id===_ARRE.id;}); if(!e) return;
+  var c=window._mvCampRef();
+  if(!(p.arrEtapes&&Number(p.arrEtapes.c)===c&&p.arrEtapes.f&&p.arrEtapes.f[e.id])) return;
+  var f=Object.assign({},p.arrEtapes.f); delete f[e.id];
+  p.arrEtapes={c:c,f:f};
+  _arrJournal({id:Date.now().toString(16)+'-ar',date:_mvToday(),parcelle:p.nom,tache:'Arrachage',etape:e.id,etapeLbl:e.lbl,
+               qui:currentUser.nom,statut:'Annul\u00e9',equipe:false,membresEquipe:[]});
+  _arrSyncTache(p);
+  saveData('parcelles'); saveData('travaux'); saveData('journal');
+  closeOv(null,'ovArrEtape');
+  openDP(p.nom);
+  showToast(e.lbl+' annul\u00e9','#B85A1A');
+}
+// ── Le réglage (admin) : composer l'arrachage ──
+var _ARRCF={L:[],apres:'*'};
+function openArrCfg(){
+  if(!isAdmin()){ showToast('Admin requis','#B85A1A'); return; }
+  var cfg=_arrCfg(), L=cfg.etapes.map(function(e){return {id:e.id,lbl:e.lbl,presta:e.presta,on:true};});
+  MV_ARR_ETAPES_CAT.forEach(function(c){ if(!L.some(function(x){return x.id===c.id;})) L.push({id:c.id,lbl:c.lbl,presta:false,on:false}); });
+  _ARRCF={L:L, apres:cfg.etapes.length?cfg.apres:'souches'};
+  var el=document.getElementById('arrcf-new'); if(el) el.value='';
+  _arrCfgRows();
+  openOv('ovArrCfg');
+}
+function _arrCfgRows(){
+  var c=document.getElementById('arrcf-rows'); if(!c) return;
+  c.innerHTML=_ARRCF.L.map(function(e,i){
+    return '<div class="mv-tr" style="display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap">'
+      +'<div class="pchk'+(e.on?' sel vert':'')+'" style="flex:1;min-width:150px" onclick="_arrCfgOp('+i+',\'on\')">'+_escHtml(e.lbl)+'</div>'
+      +'<div class="pchk'+(e.presta?' sel':'')+'" onclick="_arrCfgOp('+i+',\'presta\')"'+(e.on?'':' style="opacity:.45"')+'>Prestataire</div>'
+      +'<button class="mv-gh" aria-label="Monter" title="Monter" onclick="_arrCfgOp('+i+',\'up\')"'+(i?'':' disabled')+'><span style="display:inline-flex;transform:rotate(180deg)">'+_mvIcon('chevron',16)+'</span></button>'
+      +'<button class="mv-gh" aria-label="Descendre" title="Descendre" onclick="_arrCfgOp('+i+',\'down\')"'+(i<_ARRCF.L.length-1?'':' disabled')+'><span style="display:inline-flex">'+_mvIcon('chevron',16)+'</span></button>'
+      +'</div>';
+  }).join('');
+  var on=_ARRCF.L.filter(function(e){return e.on;});
+  if(_ARRCF.apres!=='*'&&!on.some(function(e){return e.id===_ARRCF.apres;})) _ARRCF.apres='*';
+  var s=document.getElementById('arrcf-apres');
+  if(s){
+    s.innerHTML=on.map(function(e){return '<option value="'+_escAttr(e.id)+'">Apr\u00e8s \u00ab\u00a0'+_escHtml(e.lbl)+'\u00a0\u00bb</option>';}).join('')
+      +'<option value="*">Quand toutes les \u00e9tapes sont faites</option>';
+    s.value=_ARRCF.apres;
+  }
+}
+function _arrCfgOp(i,op){
+  var L=_ARRCF.L, e=L[i]; if(!e) return;
+  if(op==='on') e.on=!e.on;
+  else if(op==='presta'){ if(e.on) e.presta=!e.presta; }
+  else if(op==='up'&&i>0){ L[i]=L[i-1]; L[i-1]=e; }
+  else if(op==='down'&&i<L.length-1){ L[i]=L[i+1]; L[i+1]=e; }
+  _arrCfgRows();
+}
+function _arrCfgAjout(){
+  var el=document.getElementById('arrcf-new'); if(!el) return;
+  var lbl=String(el.value||'').trim().slice(0,60); if(!lbl) return;
+  if(_ARRCF.L.some(function(e){return e.lbl.toLowerCase()===lbl.toLowerCase();})){ showToast('Cette \u00e9tape existe d\u00e9j\u00e0','#B85A1A'); return; }
+  _ARRCF.L.push({id:'x'+Date.now().toString(36),lbl:lbl,presta:false,on:true});
+  el.value='';
+  _arrCfgRows();
+}
+function saveArrCfg(){
+  if(!isAdmin()){ showToast('Admin requis','#B85A1A'); return; }
+  var s=document.getElementById('arrcf-apres'); if(s) _ARRCF.apres=s.value||'*';
+  var E=_ARRCF.L.filter(function(e){return e.on;}).map(function(e){return {id:e.id,lbl:e.lbl,presta:!!e.presta};});
+  var cfg=window.CONFIG||{};
+  if(E.length) cfg.arrachage={etapes:E, apres:_ARRCF.apres}; else delete cfg.arrachage;
+  window.CONFIG=cfg; if(typeof CONFIG!=='undefined') CONFIG=cfg;
+  saveData('config');
+  // Les statuts suivent le nouveau découpage, sur les parcelles déjà commencées.
+  (PARCELLES||[]).forEach(function(p){ if(p&&p.arrEtapes&&E.length&&_mvOnActiveSaison()){ if(!p.taches) p.taches={}; p.taches['Arrachage']=_arrStatutTache(p); } });
+  recalcTravaux('Arrachage'); window.TRAVAUX=TRAVAUX;
+  saveData('parcelles');
+  closeOv(null,'ovArrCfg');
+  if(typeof window.renderReglages==='function'){ try{ window.renderReglages(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveArrCfg'); } }
+  showToast(E.length?('Arrachage en '+E.length+' \u00e9tape'+(E.length>1?'s':'')):'Arrachage en une seule fois','#3D6B27');
+}
+function _arrResume(){
+  var cfg=_arrCfg(); if(!cfg.etapes.length) return '';
+  return cfg.etapes.map(function(e){return e.lbl+(e.presta?' (prestataire)':'');}).join(' \u00b7 ');
 }
 
 // ══════ ARRACHAGE — sortir une parcelle du domaine (ADMIN SEULEMENT) ══════
@@ -8152,7 +8448,7 @@ function openDP(nom){
   const exclues=p.tachesExclues||[];
   let hReste=0;
   tachesSaison.forEach(t=>{
-    if(exclues.includes(t.nom))return;
+    if((typeof _mvExclu==='function')?_mvExclu(p,t.nom,exclues):exclues.includes(t.nom))return;   // SEL-1
     // ROB-2 (29/09) : une tâche « à trous » (Entreplantation) n'a PAS de barème à l'hectare — elle ne se
     //   compte qu'en trous. Sur une parcelle sans trous à planter, elle faisait `undefined × surface` :
     //   la fiche affichait « NaN h » restantes dès que la période portait l'Entreplantation (liste par
@@ -8198,7 +8494,10 @@ function openDP(nom){
   const nomParcelle=p.nom;
   document.getElementById('dp-taches').innerHTML=tachesSaison.map(t=>{
     const stat=getTacheStatut(p,t.nom);
-    const isExclu=exclues.includes(t.nom);
+    const isExclu=(typeof _mvExclu==='function')?_mvExclu(p,t.nom,exclues):exclues.includes(t.nom);   // SEL-1
+    // SEL-1 : une tâche à la sélection se choisit par campagne, et seul l'administrateur la choisit.
+    const _isSel=(typeof window._mvTacheSel==='function')&&window._mvTacheSel(t.nom);
+    const canExcl=canEdit&&(!_isSel||isAdmin());
     const isOn=stat==='Validé';
     const isEnCours=stat==='En cours';
     const _plTr=((t.trous||t.nom==='Entreplantation'))?(parseInt(p.plantation_trous)||0):0;
@@ -8209,11 +8508,13 @@ function openDP(nom){
       return `<div class="val-row mv-tr" style="opacity:.45">
         <div style="flex:1">
           <div class="mv-v" style="font-size:13.5px;font-weight:600;color:var(--texte-doux);text-decoration:line-through">${_escHtml(t.nom)}</div>
-          <div class="mv-l">Non applicable sur cette parcelle</div>
+          <div class="mv-l">${_escHtml(_isSel?'Pas choisie pour cette campagne':'Non applicable sur cette parcelle')}</div>
         </div>
-        ${canEdit?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="background:var(--gris-clair);border:none;border-radius:8px;padding:5px 10px;font-size:10px;font-weight:600;color:var(--texte-doux);cursor:pointer;white-space:nowrap;margin-left:10px">Réactiver</button>`:''}
+        ${canExcl?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="background:var(--gris-clair);border:none;border-radius:8px;padding:5px 10px;font-size:10px;font-weight:600;color:var(--texte-doux);cursor:pointer;white-space:nowrap;margin-left:10px">Réactiver</button>`:''}
       </div>`;
     }
+    // ── ARRACH-3 : l'arrachage en étapes, quand l'admin l'a découpé ─────────
+    if(t.nom==='Arrachage'&&_arrActif()) return _arrRowHtml(p,canEdit);
     // ── Multi-niveaux (Relevage) ────────────────────────────────────────────
     if(t.type==='niveaux'){
       const badgesHtml=_relNivBadgesHtml(p);
@@ -8227,7 +8528,7 @@ function openDP(nom){
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           ${canEdit?`<button onclick="openNiveauxPanel('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="background:rgba(74,159,200,0.12);border:1px solid rgba(74,159,200,0.3);border-radius:8px;padding:7px 11px;font-size:var(--pt-micro,11px);font-weight:600;color:var(--acier-med);cursor:pointer;white-space:nowrap">${isOn?'✏ Modifier':'↑ Niveaux'}</button>`:''}
           ${canEdit&&stat!=='Non démarré'?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.08);border:1px solid rgba(184,90,26,0.28);border-radius:8px;padding:7px 9px;font-size:var(--pt-micro,11px);font-weight:600;color:#B85A1A;cursor:pointer" title="Annuler">↩</button>`:''}
-          ${canEdit&&!isOn?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:12px;cursor:pointer" title="Désactiver">${_mvIcon('croix',16)}</button>`:''}
+          ${canExcl&&!isOn?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:12px;cursor:pointer" title="Désactiver">${_mvIcon('croix',16)}</button>`:''}
         </div>
       </div>`;
     }
@@ -8243,7 +8544,7 @@ function openDP(nom){
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           ${canEdit?`<button onclick="openPassagesPanel('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="background:rgba(90,156,74,0.1);border:1px solid rgba(90,156,74,0.28);border-radius:8px;padding:7px 11px;font-size:var(--pt-micro,11px);font-weight:600;color:var(--vert);cursor:pointer;white-space:nowrap">${isOn?'✏ Modifier':'▶ Passages'}</button>`:''}
           ${canEdit&&isOn&&isAdmin()?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.12);border:1px solid rgba(184,90,26,0.3);border-radius:8px;padding:7px 9px;font-size:var(--pt-micro,11px);font-weight:600;color:#B85A1A;cursor:pointer" title="Admin : tout annuler">↩</button>`:''}
-          ${canEdit&&!isOn?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:12px;cursor:pointer" title="Désactiver">${_mvIcon('croix',16)}</button>`:''}
+          ${canExcl&&!isOn?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:12px;cursor:pointer" title="Désactiver">${_mvIcon('croix',16)}</button>`:''}
         </div>
       </div>`;
     }
@@ -8256,7 +8557,7 @@ function openDP(nom){
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
         ${canEdit?`<button onclick="tapTacheSimple('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}',this)" style="min-height:44px;padding:6px 11px;border-radius:8px;font-family:inherit;font-size:var(--pt-micro,11px);font-weight:700;cursor:${isOn?'default':'pointer'};border:1.5px solid ${isOn?'rgba(90,156,74,0.38)':isEnCours?'rgba(220,140,30,0.4)':'rgba(255,255,255,0.08)'};background:${isOn?'rgba(90,156,74,0.14)':isEnCours?'rgba(220,140,30,0.13)':'rgba(255,255,255,0.03)'};color:${isOn?'#6AB855':isEnCours?'#DCA030':'var(--texte-doux)'};white-space:nowrap">${isOn?'✓ Validé':isEnCours?'✓ Valider':'▶ Démarrer'}</button>`:`<span class="jst" style="font-size:10px;color:${isOn?'var(--vert)':isEnCours?'var(--or)':'var(--texte-doux)'}">${stat}</span>`}
         ${canEdit&&stat!=='Non démarré'?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.08);border:1px solid rgba(184,90,26,0.28);border-radius:8px;padding:6px 9px;font-size:13px;font-weight:600;color:#B85A1A;cursor:pointer" title="Annuler">↩</button>`:''}
-        ${canEdit&&!isOn&&!isEnCours?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:12px;cursor:pointer" title="Désactiver cette tâche pour cette parcelle">${_mvIcon('croix',16)}</button>`:''}
+        ${canExcl&&!isOn&&!isEnCours?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:12px;cursor:pointer" title="Désactiver cette tâche pour cette parcelle">${_mvIcon('croix',16)}</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -8360,10 +8661,19 @@ function openInMap(){
 
 function toggleExcluTache(nomParcelle,nomTache){
   const p=PARCELLES.find(x=>x.nom===nomParcelle);if(!p)return;
+  if(typeof window._mvTacheSel==='function'&&window._mvTacheSel(nomTache)){
+    // SEL-1 : Arrachage, Désherbage manuel, Effeuillage se choisissent pour la CAMPAGNE (utils.js),
+    //   jamais par p.tachesExclues — et par l'administrateur seul, comme dans la feuille.
+    if(!isAdmin()){showToast('Admin requis','#B85A1A');return;}
+    var _on=!window._mvTacheConcerne(p,nomTache);
+    window._mvSelPose(p,nomTache,_on);
+    if(!_on&&window._mvTacheConcerne(p,nomTache)) showToast('D\u00e9j\u00e0 travaill\u00e9e cette campagne : elle reste concern\u00e9e','#B85A1A');
+  } else {
   if(!p.tachesExclues)p.tachesExclues=[];
   const idx=p.tachesExclues.indexOf(nomTache);
   if(idx>=0){p.tachesExclues.splice(idx,1);}
   else{p.tachesExclues.push(nomTache);}
+  }
   recalcTravaux(nomTache); window.TRAVAUX=TRAVAUX; // MAJ heures + avancement du domaine
   saveData('parcelles');                            // persister l'exclusion
   renderParcelles();computePStats();
@@ -8397,6 +8707,7 @@ function marquerEnCours(nomParcelle,nomTache,btn){
 
 function tapTacheSimple(nomParcelle,nomTache,btn){
   if(_mvValidBlocked())return;
+  if(nomTache==='Arrachage'&&_arrActif()){openDP(nomParcelle);return;}   // ARRACH-3
   var p=PARCELLES.find(function(x){return x.nom===nomParcelle;});
   if(!p)return;
   var stat=p.taches[nomTache]||'Non démarré';
@@ -8598,7 +8909,7 @@ function toggleJEMode(val){
 //   depuis l'accueil… si j'indique rien, on continue comme maintenant ; si j'indique des équipes, on force ».
 //   · Réglage : admin seul (CONFIG est admin-only en écriture, firestore.rules), valable le jour même.
 //   · Saisie : un salarié qui valide ou démarre reçoit SON équipe du jour, sans pouvoir la changer
-//     (_mvEqApplique, appelé sur les sept écritures du journal). L'admin reçoit la sienne par défaut
+//     (_mvEqApplique, appelé sur les huit écritures du journal — la huitième, ARRACH-3, _arrJournal). L'admin reçoit la sienne par défaut
 //     et garde le droit de corriger le groupe d'une validation.
 //   · Calcul (_ecoTvEvents / _ecoTempsVigne) : un jour avec équipes, personne ne rejoint la journée
 //     des autres — chaque équipe garde ses parcelles (§199).
@@ -8835,6 +9146,11 @@ function openJournalEntry(){
   // Remplir les selects
   const ps=document.getElementById('je-parcelle');
   ps.innerHTML=PARCELLES.filter(p=>p.statut!=='Arrachee').map(p=>`<option value="${_escHtml(p.nom)}">${_escHtml(p.nom)}</option>`).join('');
+  // SEL-1 : une parcelle arrachée reste saisissable pour son ARRACHAGE (ramassage des souches, des
+  //   piquets…) tant qu'elle est concernée cette campagne. Sans elle, ces heures attendaient au
+  //   planning puis se versaient sur la prochaine parcelle validée ailleurs (§172).
+  var _jeArr=PARCELLES.filter(p=>p.statut==='Arrachee'&&typeof window._mvTacheConcerne==='function'&&window._mvTacheConcerne(p,'Arrachage'));
+  if(_jeArr.length) ps.innerHTML+='<optgroup label="Arrach\u00e9es \u2014 arrachage seulement">'+_jeArr.map(p=>`<option value="${_escHtml(p.nom)}">${_escHtml(p.nom)}</option>`).join('')+'</optgroup>';
   document.getElementById('je-date').value=_mvToday();
   var _jeD=document.getElementById('je-date');
   // onblur (et non onchange seul) : un <input type=date> émet onchange sur chaque date
@@ -8861,6 +9177,8 @@ async function saveJournalEntry(){
   const equipe=document.getElementById('je-equipe-val').value==='oui';
   const membresEquipe=equipe?_getSelectedMembres('je-membres-pick'):[];
   if(!parcelle||!tache)return;
+  var _jeP=PARCELLES.find(x=>x.nom===parcelle);
+  if(_jeP&&_jeP.statut==='Arrachee'&&tache!=='Arrachage'){showToast('Parcelle arrach\u00e9e : seul l\u2019arrachage s\u2019y saisit','#B85A1A');return;}   // SEL-1
   const quiHors=equipe&&_mvQuiHors('je-membres-pick');
   if(quiHors&&!membresEquipe.length){showToast('Personne dans le groupe : cochez qui a travaillé','#B85A1A');return;}
   var jEntry={id:Date.now().toString(16),date,parcelle,tache,qui:currentUser.nom,statut,equipe,membresEquipe};
@@ -8931,7 +9249,17 @@ function injectMeteoIfNeeded(date){
 // ── Surface / parcelles concernées par une tâche ─────────────────────────────
 // Une tâche désactivée sur une parcelle (p.tachesExclues) sort ENTIÈREMENT du
 // calcul de cette tâche : ni heures à faire, ni dénominateur d'avancement.
+// ★ SEL-1 : pour Arrachage, Désherbage manuel et Effeuillage, « concernée » = choisie pour la campagne
+//   ou déjà saisie au journal pendant la campagne (utils.js, _mvTacheConcerne). Une parcelle arrachée
+//   reste concernée par l'ARRACHAGE seul : sans elle, l'avancement de l'arrachage ne verrait jamais
+//   les parcelles finies.
+function _mvExclu(p,nom,exclues){
+  if(typeof window._mvTacheSel==='function' && window._mvTacheSel(nom)) return window._mvTacheExclue(p,nom);
+  return (exclues||p.tachesExclues||[]).includes(nom);
+}
 function _parcConcern(nomTache){
+  if(typeof window._mvTacheSel==='function' && window._mvTacheSel(nomTache))
+    return PARCELLES.filter(p=>window._mvSelEligible(p,nomTache) && window._mvTacheConcerne(p,nomTache));
   return PARCELLES.filter(p=>p.statut!=='Arrachee' && !((p.tachesExclues||[]).includes(nomTache)));
 }
 function _surfConcern(nomTache){
@@ -10117,7 +10445,8 @@ function renderJournalList(){
         const isEq=r.equipe||r.qui==='Equipe';
         const membresStr=isEq&&r.membresEquipe&&r.membresEquipe.length>0?` + ${r.membresEquipe.join(', ')}`:isEq?' + équipe':'';
         const quiAff=isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui}${membresStr})`:isEq?'Équipe':r.qui||'Non assigné';
-        const tacheAff=_escHtml(TABREV[r.tache]||r.tache);
+        // ARRACH-3 : l'étape d'arrachage, et le prestataire quand c'en est un, à côté de la tâche.
+        const tacheAff=_escHtml((TABREV[r.tache]||r.tache)+(r.etapeLbl?(' \u00b7 '+r.etapeLbl+(r.presta?(' (prestataire'+(r.prestaNom?' '+r.prestaNom:'')+')'):'')):''));
         const repSuffix=(r.reparation_types&&r.reparation_types.length)?_escHtml(' · '+r.reparation_types.join(', ')+(r.reparation_qte?(' ×'+r.reparation_qte):'')):'';
         const quiAffE=_escHtml(quiAff);
         const parcelleE=_escHtml(r.parcelle);
@@ -11627,6 +11956,18 @@ async function refreshApp(){
   if (typeof openDPCepage !== "undefined") window.openDPCepage = openDPCepage;
   if (typeof saveDPCepage !== "undefined") window.saveDPCepage = saveDPCepage;
   if (typeof saveArrachage !== "undefined") window.saveArrachage = saveArrachage;
+  if (typeof openSelParc !== "undefined") window.openSelParc = openSelParc;   // SEL-1
+  if (typeof _mvSelRows !== "undefined") window._mvSelRows = _mvSelRows;
+  if (typeof _mvSelPick !== "undefined") window._mvSelPick = _mvSelPick;
+  if (typeof saveSelParc !== "undefined") window.saveSelParc = saveSelParc;
+  if (typeof openArrEtape !== "undefined") window.openArrEtape = openArrEtape;   // ARRACH-3
+  if (typeof saveArrEtape !== "undefined") window.saveArrEtape = saveArrEtape;
+  if (typeof annulerArrEtape !== "undefined") window.annulerArrEtape = annulerArrEtape;
+  if (typeof openArrCfg !== "undefined") window.openArrCfg = openArrCfg;
+  if (typeof _arrCfgOp !== "undefined") window._arrCfgOp = _arrCfgOp;
+  if (typeof _arrCfgAjout !== "undefined") window._arrCfgAjout = _arrCfgAjout;
+  if (typeof saveArrCfg !== "undefined") window.saveArrCfg = saveArrCfg;
+  if (typeof _arrResume !== "undefined") window._arrResume = _arrResume;
   if (typeof _dpcToggleEntreplantation !== "undefined") window._dpcToggleEntreplantation = _dpcToggleEntreplantation;
   if (typeof openSessionDetail !== "undefined") window.openSessionDetail = openSessionDetail;
   if (typeof openEditSession !== "undefined") window.openEditSession = openEditSession;
@@ -11895,6 +12236,7 @@ function _pvHideToast(){var t=document.getElementById('pv-toast');if(t)t.classLi
 /* Validation rapide 1-tap */
 function pQuickValidate(nom,evt){
   if(_mvValidBlocked())return;
+  if(pTacheFilter==='Arrachage'&&_arrActif()){openDP(nom);return;}   // ARRACH-3 : une étape se choisit dans la fiche
   if(!canWrite()){showToast('Lecture seule','#7A4F2E');return;}
   var p=PARCELLES.find(function(x){return x.nom===nom;});if(!p)return;
   var task=pTacheFilter,type=_pvType(task);

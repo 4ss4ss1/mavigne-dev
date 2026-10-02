@@ -3,12 +3,12 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **2 octobre 2026 (FERTI-3)** — ★★ **LA SESSION « AMENDEMENT » COCHE LA TÂCHE, SANS DOUBLE COMPTE** (§204).
-> Validé par Nico. `saveData('sessions')` → `_ferSyncSessions` (phyto.js) : parcelle faite dans une session « Amendement » →
-> tâche « Amendement » validée + UNE entrée de journal `auTracteur:true`, `quiHors` (idempotent par session × parcelle ;
-> une annulation n'est pas refaite). Pilotage : `_ecoTvEvents`, le partage par personne et le repli barème écartent
-> `auTracteur`. ⚠️ Reste : calendrier vigne (§28). Posé sur **FERTI-1 + FERTI-2** (§202-203, non poussés : le zip les
-> contient), sur `3050f8e`. **Bump APP 7.84 → 7.85, SW 8.58 → 8.59** (visible).
+> Dernière consolidation : **2 octobre 2026 (ARRACH-3)** — ★★ **L'ARRACHAGE EN ÉTAPES, COMPOSÉ PAR L'ADMIN** (§206).
+> Nico : *« l'admin choisit ce qu'il veut mettre dans arrachage »*, une option prestataire par étape, et le moment où la parcelle
+> passe « Arrachée ». `CONFIG.arrachage = {etapes:[{id,lbl,presta}], apres}` (feuille `ovArrCfg`) ; sans étape, rien ne change.
+> Une entrée de journal par étape (`etape`, `etapeLbl`) ; `_ecoTvEvents` écarte `presta` et clé le couple par étape ; heures par
+> étape sous la ligne Arrachage du temps réel (`V.etapes`). Posé sur **SEL-1** (§205, non poussé : le zip contient les deux lots),
+> base `cad12b0`. **Bump APP 7.86 → 7.87, SW 8.60 → 8.61** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1811,6 +1811,21 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ SEL-1 / ARRACH-3 — CE QUI RESTE OUVERT (§205-206, posé le 02/10)
+
+1. ✅ ~~ARRACH-3~~ — **fait au §206**, sous une forme plus large que proposée : étapes composées par l'admin (pas trois imposées),
+   option prestataire, moment du passage « Arrachée » au choix. **Aucun barème par défaut** (§205d).
+2. **À regarder chez Nico** : l'avancement de l'Effeuillage et du Désherbage sur la campagne en cours, juste après le
+   déploiement — les parcelles déjà saisies doivent compter d'office ; les autres, plus.
+3. **Relu le 02/10** : le tableau Temps réel (par travail) compte les heures d'une parcelle arrachée sous Arrachage ; les tableaux
+   **par parcelle** de l'Économie (`pilotage.js` ~6669, ~6800) écartent les arrachées — le coût d'arrachage d'une parcelle donnée
+   ne s'y lit donc pas. À trancher avec Nico s'il le demande.
+4. **Le montant d'un prestataire n'entre dans aucun total** (pas de poste prestations dans l'Économie, vérifié). S'il en faut un,
+   c'est un lot à part : où il tombe (vigne ? investissement ?) se décide avec Nico.
+5. **Les autres chemins de validation** : la saisie générale du journal (« + Journal ») et le bouton « Début » écrivent encore un
+   Arrachage sans étape. `pQuickValidate` et `tapTacheSimple` renvoient vers la fiche quand l'arrachage est découpé ; le formulaire
+   du journal, non (il valide l'arrachage entier, comme avant).
 
 ### ⚠️ FERTI-3 — CE QUI RESTE OUVERT SUR L'AMENDEMENT (§202-203, posé le 02/10)
 1. ✅ **Le budget prévu des achats** : FAIT au §203 (`achP`, retiré dès la facture chiffrée).

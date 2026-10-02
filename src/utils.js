@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.85';
+export const APP_VERSION = '7.87';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -730,6 +730,23 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.87', items: [
+    { emoji: 'curseurs', titre: 'L\u2019arrachage en \u00e9tapes, compos\u00e9 par vous',
+      desc: "Dans la roue crant\u00e9e de la Vigne, <b>T\u00e2ches</b>, la ligne Arrachage propose maintenant de <b>d\u00e9couper en \u00e9tapes</b>\u00a0: d\u00e9montage du palissage, arrachage des souches, ramassage, \u00e9pierrage, travail du sol avant repos, ou une \u00e9tape \u00e0 vous. "
+        + "Cochez celles que vous faites, dans l\u2019ordre. Une \u00e9tape marqu\u00e9e <b>prestataire</b> se valide, mais aucune heure de l\u2019\u00e9quipe n\u2019y est compt\u00e9e\u00a0; le nom et le montant factur\u00e9 se notent dessus. "
+        + "Vous choisissez aussi quand l\u2019application propose de passer la parcelle en \u00ab\u00a0Arrach\u00e9e\u00a0\u00bb\u00a0: apr\u00e8s une \u00e9tape pr\u00e9cise, ou quand tout est fait." },
+    { emoji: 'graphique', titre: 'Les heures de chaque \u00e9tape, dans le temps r\u00e9el',
+      desc: "Dans le Pilotage, \u00c9conomie, le tableau \u00ab\u00a0Temps r\u00e9el contre bar\u00e8me\u00a0\u00bb affiche une ligne par \u00e9tape sous l\u2019arrachage, avec son h/ha r\u00e9el. Apr\u00e8s vos chantiers, vous connaissez vos propres temps, \u00e9tape par \u00e9tape." },
+  ] },
+  { v: '7.86', items: [
+    { emoji: 'carte', titre: 'Arrachage, d\u00e9sherbage manuel, effeuillage\u00a0: vous choisissez les parcelles',
+      desc: "Ces trois travaux ne concernent jamais tout le domaine. Activ\u00e9s, ils s\u2019affichaient pourtant \u00ab\u00a0\u00e0 faire\u00a0\u00bb partout, et l\u2019avancement les comptait sur toutes les parcelles. "
+        + "Dans la roue crant\u00e9e de la Vigne, <b>T\u00e2ches</b>, la ligne de chacun ouvre une liste\u00a0: l\u2019administrateur touche les parcelles concern\u00e9es, le total des hectares s\u2019affiche en bas. "
+        + "Le choix vaut pour la <b>campagne</b>\u00a0: l\u2019an prochain, la liste repart vide. Une parcelle o\u00f9 le travail a d\u00e9j\u00e0 \u00e9t\u00e9 saisi compte d\u2019office." },
+    { emoji: 'journal', titre: 'Le temps pass\u00e9 apr\u00e8s l\u2019arrachage se saisit sur la bonne parcelle',
+      desc: "Une parcelle d\u00e9clar\u00e9e arrach\u00e9e disparaissait du journal. Les journ\u00e9es pass\u00e9es ensuite \u00e0 ramasser souches et piquets ne pouvaient plus y \u00eatre not\u00e9es, "
+        + "et ces heures finissaient sur une autre parcelle. Elle reste maintenant propos\u00e9e au journal, en bas de la liste, <b>pour l\u2019arrachage seulement</b>, tant qu\u2019elle est choisie pour la campagne." },
+  ] },
   { v: '7.85', items: [
     { emoji: 'tracteur', titre: 'Le semis au tracteur coche la t\u00e2che \u00ab\u00a0Amendement\u00a0\u00bb',
       desc: "Quand une parcelle est faite dans une session tracteur de l\u2019activit\u00e9 \u00ab\u00a0Amendement\u00a0\u00bb, sa t\u00e2che \u00ab\u00a0Amendement\u00a0\u00bb se valide toute seule. "
@@ -3719,7 +3736,9 @@ var MV_AIDE = {
       ['Onglet Carte', ": les contours viennent de votre export PAC ou d’un fichier KML."],
       ['L’anneau doré qui respire', "sur la carte marque la parcelle <b>commencée et pas finie</b> pour le travail affiché\u00a0: celle où «\u00a0Début\u00a0» a été touché sans validation. S’il n’y en a aucune, il se pose sur la <b>prochaine à faire</b>, le n°\u00a01 de la tournée enregistrée. Sur «\u00a0toutes\u00a0», c’est la priorité du moment. Plusieurs parcelles commencées ont chacune leur anneau, et rien ne s’affiche sur une période archivée."],
       ['La recherche', "accepte le nom du climat comme le lieu-dit."],
-      ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique."],
+      ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique. Elle reste saisissable au journal pour son <b>arrachage</b>, en bas de la liste des parcelles, tant qu’elle est choisie pour la campagne."],
+      ['L’arrachage en étapes', "quand l’administrateur l’a découpé (roue crantée, <b>Tâches</b>), la fiche de la parcelle montre une puce par étape : touchez-la pour la valider à sa date. Une étape <b>prestataire</b> se valide sans compter d’heures de l’équipe. Au moment choisi, l’application propose de passer la parcelle en « Arrachée »."],
+      ['Arrachage, désherbage manuel, effeuillage', "ne concernent que les parcelles <b>choisies pour la campagne</b>. L’administrateur les coche dans la roue crantée, <b>Tâches</b>, sur la ligne du travail, ou une par une dans la fiche de la parcelle. Une parcelle où le travail a déjà été saisi compte d’office. L’an prochain, la liste repart vide."],
       ['Valider pour l’équipe sans y être', "l’administrateur voit sa propre puce dans le groupe («\u00a0Moi\u00a0», «\u00a0Moi aussi dans les rangs\u00a0» sur la barre d’équipe)\u00a0: décochée, la validation reste signée de son nom mais ses heures ne vont pas à la parcelle. Le choix est retenu pour la tâche."],
       ['L’état du vignoble', "s’imprime depuis la roue crantée de la Vigne, bloc Documents : toutes vos parcelles sur une page, avec la surface, le cépage, la commune, l’avancement, le dernier travail, le dernier rendement — et la liste de ce qui reste à renseigner."],
       ['Le fichier Excel des parcelles', "se prend au même endroit : une ligne par parcelle, avec la surface, l’avancement, chaque tâche et le rendement du millésime choisi en hL/ha — mesuré ou estimé, c’est écrit à côté. Avant de le télécharger, vous choisissez l’ordre : par nom (A → Z ou Z → A) ou par rendement (le plus fort ou le plus faible d’abord). Une parcelle sans récolte part en fin de liste."]
@@ -4139,11 +4158,12 @@ export const MV_INFO = {
   // ★ TV-1 (23/09/2026) — posée sur la carte « Temps réel contre barème » (_pecCarteTemps).
   'pil.eco.temps': { t: 'Temps réel contre barème', p: [
     'Pour chaque salarié, chaque jour : ses heures <b>dans les rangs</b> au planning — congés, récup, arrêts, absences et formation à zéro — moins ses heures de <b>conduite tracteur</b>, déjà mesurées par les sessions. Le bureau n\u2019entre pas. Un jour où il figure sur une <b>opération de cave</b>, sa journée entière sort de la vigne.',
-    'Ces heures sont versées aux parcelles <b>validées ce jour-là</b>. Une validation vaut pour toutes les personnes nommées : trois personnes une heure sur un are, c\u2019est trois heures sur ce travail. Quelqu\u2019un qui n\u2019est nommé sur aucune validation du jour voit sa journée partagée entre <b>toutes</b> les parcelles validées ce jour-là : valider pour l\u2019équipe sans la cocher ne fait pas perdre ses heures. Deux équipes cochées sur des parcelles différentes gardent chacune les leurs. Une parcelle validée par une session tracteur (« faite au tracteur ») ne reçoit pas d\u2019heures de l\u2019équipe : son temps est celui de la session.',
+    'Ces heures sont versées aux parcelles <b>validées ce jour-là</b>. Une validation vaut pour toutes les personnes nommées : trois personnes une heure sur un are, c\u2019est trois heures sur ce travail. Quelqu\u2019un qui n\u2019est nommé sur aucune validation du jour voit sa journée partagée entre <b>toutes</b> les parcelles validées ce jour-là : valider pour l\u2019équipe sans la cocher ne fait pas perdre ses heures. Deux équipes cochées sur des parcelles différentes gardent chacune les leurs. Une parcelle validée par une session tracteur (« faite au tracteur ») ne reçoit pas d\u2019heures de l\u2019équipe : son temps est celui de la session. Une étape d\u2019arrachage faite par un <b>prestataire</b> non plus : elle se valide, mais n\u2019absorbe aucune heure de l\u2019équipe.',
     'Plusieurs parcelles validées <b>le même jour</b> se partagent la journée <b>au prorata du barème</b> : pour un même travail, c\u2019est la surface. Trois personnes huit heures sur 1 ha, 0,5 ha et 0,5 ha de taille : 24 h pour 2 ha, soit <b>12 h/ha</b> — contre 15 au barème, le travail est allé plus vite que la convention. Une taille et un relevage validés le même jour se partagent la journée selon ce que chacun demande au barème.',
     'Un jour où l\u2019administrateur a posé des <b>équipes du jour</b> (Accueil), chaque équipe garde ses parcelles : quelqu\u2019un qui n\u2019est pas dans le groupe d\u2019une validation n\u2019y met pas ses heures, il les garde pour ses propres validations. Une validation faite sans groupe ce jour-là prend l\u2019équipe du jour de son auteur.',
     'Une validation marque la <b>fin</b> d\u2019un travail. Les jours où <b>personne</b> ne valide vont donc aux parcelles validées <b>ensuite</b>. Ce qui n\u2019a pas encore trouvé de validation reste <b>en attente</b>, affiché sous le tableau — jamais perdu, jamais compté deux fois.',
     'Pour le relevage et les travaux à passages, seul le niveau ou le passage <b>nouvellement fait</b> compte, et le barème est celui de ce niveau. Une validation annulée ne compte plus. Une parcelle <b>validée deux fois</b> sans annulation ne compte son barème <b>qu\u2019une fois</b> : le travail n\u2019a pas été fait deux fois. Revalidée le même jour qu\u2019une autre parcelle, elle ne prend rien de la journée ; seule ce jour-là, elle la reçoit.',
+    'Quand l\u2019administrateur a découpé l\u2019<b>arrachage en étapes</b>, chaque étape est son propre travail : ses heures s\u2019affichent sur une ligne à part, sous la ligne Arrachage, avec son h/ha réel. Annuler une étape ne retire qu\u2019elle. Il n\u2019y a pas de barème : la colonne reste vide.',
     '<b>Celui qui valide compte dans le groupe</b>, sauf s\u2019il s\u2019est décoché : un administrateur qui valide pour l\u2019équipe sans être dans les rangs retire sa puce « Moi », et ses heures du jour restent en attente — elles ne rejoignent pas non plus la journée des autres. Les validations d\u2019avant ce réglage comptent leur auteur.'
   ] },
 
@@ -5155,7 +5175,8 @@ window._mvTachePrio = function(){
 window._mvCibleCarte = function(T){
   if(!T || !window._mvVueActive()) return null;
   var act = (window.PARCELLES || []).filter(function(p){
-    return p && p.nom && p.statut !== 'Arrachee' && ((p.tachesExclues || []).indexOf(T) < 0);
+    return p && p.nom && p.statut !== 'Arrachee' &&
+      !((typeof window._mvTacheExclue === 'function') ? window._mvTacheExclue(p, T) : ((p.tachesExclues || []).indexOf(T) >= 0));   // SEL-1
   });
   var comm = act.filter(function(p){ return window._mvTacheEtat(p, T) === 'commencee'; });
   if(comm.length) return { etat: 'commencee', ps: comm, tache: T };
@@ -5816,6 +5837,119 @@ function _mvCampagneBornes(c){
 window._mvCampagneDe      = _mvCampagneDe;
 window._mvCampagneMois    = _mvCampagneMois;
 window._mvCampagneBornes  = _mvCampagneBornes;
+
+// ════════════════════════════════════════════════════════════════════════════
+// ★★ SEL-1 — LES TÂCHES « À LA SÉLECTION » : ARRACHAGE, DÉSHERBAGE, EFFEUILLAGE
+//
+// Ces trois travaux ne concernent jamais tout le domaine, et pas les mêmes
+// parcelles d'une année à l'autre (Nico, 02/10 : « l'année prochaine ce sera
+// d'autres parcelles qui seront à arracher »). Le réglage « tâche désactivée sur
+// la parcelle » (p.tachesExclues) marche À L'ENVERS de ce besoin — tout est
+// concerné tant qu'on n'a pas exclu — et il est PERMANENT.
+//
+// Règle : une parcelle est concernée par une tâche à la sélection, pour une
+// campagne C, si
+//   ① elle a été cochée pour C   (p.selCamp[tache] === C), OU
+//   ② la tâche y a été saisie au journal pendant C (« Validé » ou « En cours »).
+// ② n'est pas un confort : une effeuilleuse validée sur une parcelle oubliée dans
+// la sélection compte ses heures (le temps réel verse sur les validations, §172)
+// — l'avancement doit la voir aussi. C'est aussi ce qui garde intactes les
+// validations faites avant ce lot, sans migration.
+//
+// ⚠️ On stocke le NUMÉRO de campagne, pas un booléen : à la campagne suivante, la
+//   sélection tombe d'elle-même, sans tâche planifiée ni remise à zéro.
+// ⚠️ p.tachesExclues est IGNORÉ pour ces trois tâches. Les autres tâches gardent
+//   l'ancienne règle, inchangée.
+// ⚠️ La campagne de référence est celle de la période CONSULTÉE (archives), la
+//   campagne du jour sur la période active (§11c, axe campagne).
+// ════════════════════════════════════════════════════════════════════════════
+var MV_TACHES_SEL = ['Arrachage', 'Desherbage', 'Effeuillage'];
+function _mvTacheSel(nom){ return MV_TACHES_SEL.indexOf(String(nom == null ? '' : nom)) >= 0; }
+function _mvCampRef(){
+  try{
+    var sa = (typeof window.getSaisonActive === 'function') ? (window.getSaisonActive() || {}) : {};
+    var act = sa.nom || '';
+    var vn = (typeof window._visuSaison === 'function') ? window._visuSaison() : act;
+    if(vn && act && vn !== act){
+      var s = _saisonObj(vn);
+      if(s && s.debut) return _mvCampagneDe(s.debut);
+    }
+  }catch(e){ if(window._mvAvale) window._mvAvale(e, 'utils.js/_mvCampRef'); }
+  return _mvCampagneDe(_mvAujIso());
+}
+function _mvCampNum(camp){
+  var c = parseInt(camp, 10);
+  return isNaN(c) ? _mvCampRef() : c;
+}
+// Couples parcelle × tâche saisis au journal pendant la campagne. Mémoire courte :
+// la clé suit la longueur du journal et ses deux bouts (une saisie s'ajoute en
+// tête, une annulation aussi).
+var _MV_SEL_TRAV = null;
+function _mvSelTravaillees(camp){
+  var c = _mvCampNum(camp);
+  var J = window.JOURNAL || [];
+  var k = c + '|' + J.length + '|' + ((J[0] && J[0].id) || '') + '|' + ((J[J.length - 1] && J[J.length - 1].id) || '');
+  if(_MV_SEL_TRAV && _MV_SEL_TRAV.k === k) return _MV_SEL_TRAV.m;
+  var b = _mvCampagneBornes(c), m = {};
+  for(var i = 0; i < J.length; i++){
+    var j = J[i];
+    if(!j || j.meteo || !j.parcelle || !j.tache || !_mvTacheSel(j.tache)) continue;
+    var d = String(j.date || '').slice(0, 10);
+    if(!d || d < b.d0 || d > b.d1) continue;
+    var st = String(j.statut || '');
+    if(st !== 'Valid\u00e9' && st !== 'En cours') continue;
+    m[String(j.parcelle) + '\u0000' + j.tache] = true;
+  }
+  _MV_SEL_TRAV = { k: k, m: m };
+  return m;
+}
+function _mvSelChoisie(p, nom, camp){
+  var s = p && p.selCamp;
+  return !!(s && typeof s === 'object' && !Array.isArray(s) && Number(s[nom]) === _mvCampNum(camp));
+}
+// Une parcelle arrachée ne reçoit plus que l'arrachage.
+function _mvSelEligible(p, nom){
+  return !!(p && p.nom != null && (p.statut !== 'Arrachee' || nom === 'Arrachage'));
+}
+function _mvTacheConcerne(p, nom, camp){
+  if(!p) return false;
+  if(!_mvTacheSel(nom)) return (p.tachesExclues || []).indexOf(nom) < 0;
+  var c = _mvCampNum(camp);
+  if(_mvSelChoisie(p, nom, c)) return true;
+  return !!_mvSelTravaillees(c)[String(p.nom) + '\u0000' + nom];
+}
+function _mvTacheExclue(p, nom, camp){ return !_mvTacheConcerne(p, nom, camp); }
+// Coche / décoche pour une campagne. N'écrit RIEN en base : l'appelant sauve.
+function _mvSelPose(p, nom, on, camp){
+  if(!p || !_mvTacheSel(nom)) return false;
+  var c = _mvCampNum(camp);
+  var s = (p.selCamp && typeof p.selCamp === 'object' && !Array.isArray(p.selCamp)) ? Object.assign({}, p.selCamp) : {};
+  if(on) s[nom] = c;
+  else if(Number(s[nom]) === c) delete s[nom];
+  if(Object.keys(s).length) p.selCamp = s; else delete p.selCamp;
+  return true;
+}
+// Résumé pour Réglages : parcelles concernées, hectares, dont « déjà travaillées ».
+function _mvSelResume(nom, camp){
+  var c = _mvCampNum(camp), n = 0, ha = 0, trav = 0;
+  var T = _mvSelTravaillees(c);
+  (window.PARCELLES || []).forEach(function(p){
+    if(!_mvSelEligible(p, nom) || !_mvTacheConcerne(p, nom, c)) return;
+    n++; ha += parseFloat(p.surface) || 0;
+    if(T[String(p.nom) + '\u0000' + nom]) trav++;
+  });
+  return { n: n, ha: Math.round(ha * 100) / 100, trav: trav, camp: c, court: _mvCampagneBornes(c).court };
+}
+window.MV_TACHES_SEL      = MV_TACHES_SEL;
+window._mvTacheSel        = _mvTacheSel;
+window._mvCampRef         = _mvCampRef;
+window._mvSelTravaillees  = _mvSelTravaillees;
+window._mvSelChoisie      = _mvSelChoisie;
+window._mvSelEligible     = _mvSelEligible;
+window._mvTacheConcerne   = _mvTacheConcerne;
+window._mvTacheExclue     = _mvTacheExclue;
+window._mvSelPose         = _mvSelPose;
+window._mvSelResume       = _mvSelResume;
 
 // ════════════════════════════════════════════════════════════════════════════
 // ★★★ LES FENETRES D'UNE ANNEE — la liste unique que lisent les documents

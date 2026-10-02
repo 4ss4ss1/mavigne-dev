@@ -100,7 +100,7 @@ function scenarios(src) {
 function branchements(src) {
   const T = [], A = nu(src.app), U = nu(src.utl), H = src.html;
   const nW = (A.match(/JOURNAL\.unshift\(_mvEqApplique\(/g) || []).length;
-  T.push(['B1 · les sept écritures du journal passent par _mvEqApplique (obtenu ' + nW + ')', nW === 7]);
+  T.push(['B1 · les huit écritures du journal passent par _mvEqApplique (obtenu ' + nW + ')', nW === 8]);   // ARRACH-3 : _arrJournal
   for (const [p, f] of [['vp', 'openValidationPanel'], ['niv', 'openNiveauxPanel'], ['pass', 'openPassagesPanel'], ['je', 'openJournalEntry']]) {
     T.push(['B2 · ' + f + ' montre l\'équipe du jour', (extraire(A, f) || '').indexOf("_mvEqUi('" + p + "')") >= 0]);
   }

@@ -7,22 +7,22 @@
   "src/app.js": {
     "dur": 206,
     "petit": 79,
-    "ko": 761
+    "ko": 789
   },
   "src/cave.js": {
     "dur": 32,
     "petit": 24,
-    "ko": 541
+    "ko": 543
   },
   "src/cuvier.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 496
+    "ko": 507
   },
   "src/firebase.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 163
+    "ko": 164
   },
   "src/onboarding.js": {
     "dur": 6,
@@ -32,22 +32,22 @@
   "src/phyto.js": {
     "dur": 110,
     "petit": 44,
-    "ko": 150
+    "ko": 153
   },
   "src/pilotage.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 764
+    "ko": 800
   },
   "src/planning.js": {
     "dur": 185,
     "petit": 98,
-    "ko": 621
+    "ko": 648
   },
   "src/reglages.js": {
     "dur": 209,
     "petit": 100,
-    "ko": 428
+    "ko": 437
   },
   "src/reserve.js": {
     "dur": 33,
@@ -57,21 +57,21 @@
   "src/tracteur.js": {
     "dur": 49,
     "petit": 16,
-    "ko": 181
+    "ko": 182
   },
   "src/utils.js": {
     "dur": 6,
     "petit": 2,
-    "ko": 658
+    "ko": 692
   },
   "index.html": {
     "dur": 261,
     "petit": 47,
-    "ko": 340
+    "ko": 346
   },
   "src/styles.css": {
     "dur": 573,
     "petit": 128,
-    "ko": 448
+    "ko": 449
   }
 }

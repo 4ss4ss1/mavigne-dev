@@ -1,4 +1,10 @@
-// MA VIGNE — Service Worker v8.59
+// MA VIGNE — Service Worker v8.61
+// v8.61 (02/10/2026) — ARRACH-3 : l'arrachage en etapes composees par l'admin (CONFIG.arrachage, ovArrCfg), une entree de
+//   journal par etape (etape/etapeLbl), etape prestataire sans heure d'equipe (_ecoTvEvents ecarte presta), heures par etape
+//   sous la ligne Arrachage du temps reel, passage en « Arrachee » propose au moment choisi. APP 7.86 -> 7.87.
+// v8.60 (02/10/2026) — SEL-1 : Arrachage, Desherbage manuel et Effeuillage se choisissent PAR CAMPAGNE (p.selCamp, numero de
+//   campagne ; utils.js _mvTacheConcerne) dans une feuille (ovSelParc, Reglages > Taches) ; une parcelle saisie au journal pendant
+//   la campagne compte d'office ; une parcelle arrachee reste saisissable au journal pour l'arrachage seul. APP 7.85 -> 7.86.
 // v8.59 (02/10/2026) — FERTI-3 : saveData('sessions') -> _ferSyncSessions (phyto.js) : une parcelle faite dans une session
 //   « Amendement » valide la tache « Amendement » + UNE entree de journal auTracteur:true, quiHors (idempotent par session et
 //   parcelle ; une annulation n'est pas refaite). Pilotage : _ecoTvEvents, le partage par personne et le repli bareme ecartent
@@ -4224,7 +4230,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.59';
+const CACHE_NAME   = 'mavigne-v8.61';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4240,7 +4246,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.59 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.61 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4260,7 +4266,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.59 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.61 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

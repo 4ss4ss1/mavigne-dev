@@ -8,6 +8,21 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **2 octobre 2026 (SEL-1)** — ★★ **ARRACHAGE, DÉSHERBAGE MANUEL, EFFEUILLAGE : LES PARCELLES SE
+> CHOISISSENT PAR CAMPAGNE** (§205). Nico : *« ce n'est pas toutes les parcelles qui sont concernées »*, puis *« l'année prochaine
+> ce sera d'autres parcelles »*. Règle unique dans `utils.js` (`_mvTacheConcerne`) : concernée = cochée pour la campagne
+> (`p.selCamp[tâche]` = **numéro** de campagne) **ou** saisie au journal pendant la campagne ; `p.tachesExclues` ignoré pour ces
+> trois tâches. Feuille `ovSelParc` (admin) depuis la roue crantée › Tâches. Une parcelle arrachée reste saisissable au journal pour
+> l'arrachage seul. ⚠️ Écrit d'abord sur `3050f8e`, **rejoué sur FERTI-3** (`cad12b0`, poussé entre-temps) — §205 et non §202.
+> **Bump APP 7.85 → 7.86, SW 8.59 → 8.60** (visible).
+
+> ★ Consolidation : **2 octobre 2026 (FERTI-3)** — ★★ **LA SESSION « AMENDEMENT » COCHE LA TÂCHE, SANS DOUBLE COMPTE** (§204).
+> Validé par Nico. `saveData('sessions')` → `_ferSyncSessions` (phyto.js) : parcelle faite dans une session « Amendement » →
+> tâche « Amendement » validée + UNE entrée de journal `auTracteur:true`, `quiHors` (idempotent par session × parcelle ;
+> une annulation n'est pas refaite). Pilotage : `_ecoTvEvents`, le partage par personne et le repli barème écartent
+> `auTracteur`. ⚠️ Reste : calendrier vigne (§28). Posé sur **FERTI-1 + FERTI-2** (§202-203, non poussés : le zip les
+> contient), sur `3050f8e`. **Bump APP 7.84 → 7.85, SW 8.58 → 8.59** (visible).
+
 > ★ Consolidation : **2 octobre 2026 (FERTI-2)** — ★ **LE COÛT D'UN AMENDEMENT AU PRÉVU, L'ANNÉE DE PLANTATION** (§203).
 > Pilotage › Économie › Exercice : un amendement chiffré (`INTRANTS.fertil[].cout`) entre au **prévu** des achats à sa semaine
 > prévue et en SORT dès qu'un achat chiffré du même produit, daté après lui, est saisi — jamais compté deux fois (`achP`,

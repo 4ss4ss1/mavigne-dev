@@ -522,6 +522,23 @@ function renderReglages(){
       //   seules actions qui existent, en boutons fantomes.
       //   ⚠️ Plus d'icone devant le nom : dans une liste, c'est le texte qui
       //     porte l'information. Les icones restent sur les ACTIONS.
+      // ★ SEL-1 : Arrachage, Désherbage manuel, Effeuillage — les parcelles de la campagne se cochent
+      //   dans une feuille (app.js, openSelParc). La ligne dit combien sont choisies, et pour quelle campagne.
+      var selHtml='';
+      if(window._mvTacheSel&&window._mvTacheSel(t.nom)&&window._mvSelResume){
+        var _sr=window._mvSelResume(t.nom);
+        var _srTxt=_sr.n
+          ? (_sr.n+' parcelle'+(_sr.n>1?'s':'')+' \u00b7 '+String(_sr.ha).replace('.',',')+' ha \u00b7 campagne '+_sr.court+' \u2014 Modifier')
+          : ('Aucune parcelle choisie pour la campagne '+_sr.court+' \u2014 Choisir les parcelles');
+        selHtml='<div class="tcv-lnk" data-selp-t="'+nomEsc+'" onclick="event.stopPropagation();window.openSelParc(this.getAttribute(\'data-selp-t\'))" style="color:var(--vert-med)">'+_srTxt+'</div>';
+        convHtml+=selHtml;   // même emplacement, sous la ligne de la convention
+      }
+      // ★ ARRACH-3 : l'arrachage se découpe en étapes choisies par l'admin (app.js, openArrCfg).
+      if(t.nom==='Arrachage'&&window.openArrCfg){
+        var _arR=(typeof window._arrResume==='function')?window._arrResume():'';
+        convHtml+='<div class="tcv-lnk" onclick="event.stopPropagation();window.openArrCfg()" style="color:var(--vert-med)">'
+          +(_arR?('\u00c9tapes\u00a0: '+_escHtml(_arR)+' \u2014 Modifier'):'En une seule fois \u2014 D\u00e9couper en \u00e9tapes')+'</div>';
+      }
       return `<div class="mv-c">
         <div class="mv-hd">
           <div style="min-width:0"><div class="mv-t">${_escHtml(lbl)}</div>
@@ -6617,9 +6634,12 @@ function _vgnLignes(){
       cepages: _vgnCepages(p),
       complantee: !!p.entreplantation,
       pct: cl.pct || 0, nbDone: cl.nbDone || 0, nbTotal: cl.nbTotal || 0,
-      exclues: (p.tachesExclues || []).filter(function(t){
-        return taches.some(function(x){ return x.nom === t; });
-      }),
+      // SEL-1 : une tâche à la sélection non choisie cette campagne compte comme exclue.
+      exclues: (typeof window._mvTacheExclue === 'function')
+        ? taches.filter(function(x){ return window._mvTacheExclue(p, x.nom); }).map(function(x){ return x.nom; })
+        : (p.tachesExclues || []).filter(function(t){
+            return taches.some(function(x){ return x.nom === t; });
+          }),
       trous: parseInt(p.plantation_trous, 10) || 0,
       dernier: j ? { date:j.date, tache:String(j.tache || j.activite || '') } : null,
       rend: rh.length ? rh[0] : null,

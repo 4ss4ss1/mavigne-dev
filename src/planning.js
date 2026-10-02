@@ -1504,7 +1504,7 @@ function _chargeSaisonData_(s){
     return !!(t.anytime || (t.saisons&&t.saisons.length ? t.saisons.indexOf(ns)>=0 : (t.saison===ns||ns.indexOf(t.saison)>=0)));
   }
   // surface concernee = parcelles non arrachees et non exclues pour la tache (repro de _surfConcern, non expose)
-  function surfFn(nm){ return (window.PARCELLES||[]).filter(function(p){return p&&p.statut!=='Arrachee'&&((p.tachesExclues||[]).indexOf(nm)<0);}).reduce(function(a,p){return a+(parseFloat(p.surface)||0);},0); }
+  function surfFn(nm){ return (window.PARCELLES||[]).filter(function(p){return p&&p.statut!=='Arrachee'&&((typeof window._mvTacheConcerne==='function')?window._mvTacheConcerne(p,nm):((p.tachesExclues||[]).indexOf(nm)<0));}).reduce(function(a,p){return a+(parseFloat(p.surface)||0);},0); }
   var pg=window.SAISON_PASSAGES||{};
   var charge=0, taskDet=[];
   TAC.forEach(function(t){

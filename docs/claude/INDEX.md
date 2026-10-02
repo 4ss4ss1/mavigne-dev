@@ -247,3 +247,5 @@
 | 202 | 202. ★★ FERTI-1 — L'AMENDEMENT ET LE CAHIER DE FERTILISATION (02/10 — `src/phyto.js` · `index.html` · `src/… | `docs/claude/chantiers-180-229.md` |
 | 203 | 203. ★ FERTI-2 — LE COÛT D'UN AMENDEMENT AU PRÉVU, L'ANNÉE DE PLANTATION (02/10 — `src/pilotage.js` · `src/… | `docs/claude/chantiers-180-229.md` |
 | 204 | 204. ★★ FERTI-3 — LA SESSION « AMENDEMENT » COCHE LA TÂCHE, SANS DOUBLE COMPTE (02/10 — `src/phyto.js` · `s… | `docs/claude/chantiers-180-229.md` |
+| 205 | 205. ★★ SEL-1 — ARRACHAGE, DÉSHERBAGE MANUEL, EFFEUILLAGE : LES PARCELLES SE CHOISISSENT PAR CAMPAGNE (02/1… | `docs/claude/chantiers-180-229.md` |
+| 206 | 206. ★★ ARRACH-3 — L'ARRACHAGE EN ÉTAPES, COMPOSÉ PAR L'ADMIN (02/10 — `src/app.js` · `src/pilotage.js` · `… | `docs/claude/chantiers-180-229.md` |

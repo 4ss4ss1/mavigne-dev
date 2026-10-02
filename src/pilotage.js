@@ -1218,7 +1218,7 @@ function _pilAnnuelData(){
   }
   function _annSigP(p){
     if(!p) return '';
-    return (p.statut||'')+':'+(p.surface||0)+':'+((p.tachesExclues||[]).length);
+    return (p.statut||'')+':'+(p.surface||0)+':'+((p.tachesExclues||[]).length)+':'+JSON.stringify(p.selCamp||'');   // SEL-1
   }
   function _annSigT(t){
     if(!t) return '';
@@ -2337,7 +2337,11 @@ function _opCanEdit(){ return !!(typeof window.isAdmin==='function' && window.is
 function _opTaskDef(nom){ var arr=(typeof window.getTachesSaison==='function')?window.getTachesSaison():(window.TACHES||[]); return arr.find(function(t){ return t && t.nom===nom; }) || null; }
 function _opDefs(){ return (_PIL_OP&&_PIL_OP.tasks||[]).map(_opTaskDef).filter(Boolean); }
 function _opParcActive(){ return (window.PARCELLES||[]).filter(function(p){ return p && p.statut!=='Arrachee'; }); }
-function _opApplic(p,def){ return !(p.tachesExclues && p.tachesExclues.indexOf(def.nom)>=0); }
+function _opApplic(p,def){
+  // SEL-1 : Arrachage, Désherbage manuel, Effeuillage suivent la sélection de la campagne (utils.js).
+  if(typeof window._mvTacheConcerne==='function') return window._mvTacheConcerne(p,def.nom);
+  return !(p.tachesExclues && p.tachesExclues.indexOf(def.nom)>=0);
+}
 function _opTm(p){ return (typeof window._tachesFor==='function') ? window._tachesFor(p) : (p&&p.taches?p.taches:{}); }
 function _opPassHha(def,i){ return (def.passagesHha && def.passagesHha[i-1]!=null) ? def.passagesHha[i-1] : ((def.hha)||0); }
 function _opMinTrou(def){ return (typeof window._plantMinTrou==='function') ? window._plantMinTrou() : ((def&&def.minTrou)||3); }
@@ -5522,6 +5526,7 @@ function _ecoEquipeByParc(){
   var per={}, spread={};
   (window.JOURNAL||[]).forEach(function(j){
     if(!j||j.meteo||j.auTracteur||j.statut!=='Valid\u00e9'||!j.parcelle||!j.date) return;   // auTracteur : FERTI-3
+    if(j.presta) return;   // ARRACH-3 : une étape faite par un prestataire n'est le travail de personne de l'équipe
     if(!_in(j)) return;
     var noms=[]; if(j.qui && !j.quiHors) noms.push(j.qui);   // TV-2 : le validateur hors des rangs ne compte pas
     (j.membresEquipe||[]).forEach(function(n){ if(n && noms.indexOf(n)<0) noms.push(n); });
@@ -5634,7 +5639,9 @@ function _ecoTvEvents(d0, d1){
     // FERTI-3 : une validation « faite au tracteur » (auTracteur) n'est pas une journée dans les rangs.
     //   Son temps est celui de la session tracteur ; la compter ici ferait partager les heures de l'équipe
     //   sur la parcelle semée, et compter le travail deux fois.
-    return j && !j.meteo && !j.auTracteur && j.date && j.parcelle && j.tache && String(j.date).slice(0,10)<=d1;
+    // ARRACH-3 : une étape d'arrachage faite par un PRESTATAIRE (presta) n'est pas une journée de
+    //   l'équipe : elle n'absorbe aucune heure du planning (même patron que auTracteur).
+    return j && !j.meteo && !j.auTracteur && j.date && !j.presta && j.parcelle && j.tache && String(j.date).slice(0,10)<=d1;
   }).slice();
   // Ordre chronologique : la date, puis l'ordre de saisie (id = horodatage hex quand il l'est).
   function _ts(j){ var n=parseInt(String(j.id||''),16); return isFinite(n)?n:0; }
@@ -5644,7 +5651,9 @@ function _ecoTvEvents(d0, d1){
   J.forEach(function(j){
     var dt=String(j.date).slice(0,10), nom=String(j.parcelle), p=byNom[nom];
     if(!p){ if(nom!=='Domaine') nHorsParc++; return; }
-    var k=nom+'\u0000'+j.tache, st=String(j.statut||'');
+    // ARRACH-3 : une étape d'arrachage est son propre couple — l'annulation d'une étape ne vise qu'elle,
+    //   et deux étapes différentes ne sont pas une « revalidation » (RÉAL-1).
+    var k=nom+'\u0000'+j.tache+(j.etape?('\u0000'+j.etape):''), st=String(j.statut||'');
     if(st==='Annul\u00e9'){
       var L=byPair[k]||[];
       for(var i=L.length-1;i>=0;i--){ if(!L[i].annule){ L[i].annule=true; break; } }
@@ -5684,6 +5693,7 @@ function _ecoTvEvents(d0, d1){
     }
     var e={ date:dt, parc:nom, tache:j.tache, surf:parseFloat(p.surface)||0, noms:noms, eqj:!!EQd,
             niv:nNiv, pass:nPass, trous:j.plantation_trous||null, p:p, dup:dup,
+            etape:j.etape?String(j.etape):'', etapeLbl:j.etapeLbl?String(j.etapeLbl):'',
             hors:(j.qui && j.quiHors) ? String(j.qui) : '' };   // PAR-1 : décoché ce jour-là, il ne rejoint pas la journée du domaine
     (byPair[k]=byPair[k]||[]).push(e);
     ev.push(e);
@@ -5772,6 +5782,9 @@ function _ecoTempsVigne(win){
     return okPer ? window._mvEnContratSurPeriode(m,d0,fin) : (m.statut!=='Inactif' && !m.bureau);
   });
   var pairs={}, gens=[], T={hChamp:0,hTrac:0,hAff:0,hAtt:0,hCave:0,hVigne:0,eAff:0,eAtt:0};
+  // ARRACH-3 : les heures de l'arrachage, étape par étape (en plus du couple parcelle × Arrachage).
+  var etp={};
+  function _etp(e){ return etp[e.etape]||(etp[e.etape]={id:e.etape, lbl:e.etapeLbl||e.etape, h:0, eur:0, surf:0, ps:{}}); }
   mbrs.forEach(function(m){
     // RÉAL-1 : accE suit acc — les euros de ces heures, chacune à SON taux du jour, versés
     //   avec elles. Le réalisé d'un travail est donc ce que ses heures ont coûté, pas un taux moyen.
@@ -5802,6 +5815,7 @@ function _ecoTempsVigne(win){
           var k=e.parc+'\u0000'+e.tache;
           var P=pairs[k]||(pairs[k]={parc:e.parc, tache:e.tache, h:0, eur:0, bar:0, surf:0, n:0, noms:{}});
           P.h+=v; P.eur+=accE*part; P.noms[m.nom]=1;
+          if(e.etape){ var X=_etp(e); X.h+=v; X.eur+=accE*part; }
         });
         g.hAff+=acc; g.eAff+=accE; g.nEv+=L.length; acc=0; accE=0; g.dAtt='';
       }
@@ -5823,6 +5837,7 @@ function _ecoTempsVigne(win){
     if(!P){ P=pairs[k]={parc:e.parc, tache:e.tache, h:0, eur:0, bar:0, surf:0, n:0, noms:{}, sansH:true}; }
     P.bar+=b; P.n++;
     if(!vus[k]){ P.surf=e.surf; vus[k]=1; }
+    if(e.etape){ var X=_etp(e); if(!X.ps[e.parc]){ X.ps[e.parc]=1; X.surf+=e.surf; } }
   });
   var byT={}, parcs={};
   Object.keys(pairs).forEach(function(k){
@@ -5839,7 +5854,10 @@ function _ecoTempsVigne(win){
     t.ecart=(t.bar>0 && t.h>0)?((t.h-t.bar)/t.bar*100):null;
     return t; }).sort(function(a,b){ return b.h-a.h || (a.nom<b.nom?-1:1); });
   gens.sort(function(a,b){ return b.hAtt-a.hAtt || (a.nom<b.nom?-1:1); });
-  var v={ ok:true, pairs:pairs, taches:taches, parcs:parcs, gens:gens,
+  var _ordE=((window.CONFIG&&window.CONFIG.arrachage&&window.CONFIG.arrachage.etapes)||[]).map(function(x){ return x&&x.id; });
+  var etapes=Object.keys(etp).map(function(id){ var x=etp[id]; x.hhaR=x.surf>0?x.h/x.surf:0; delete x.ps; return x; })
+    .sort(function(a,b){ var ia=_ordE.indexOf(a.id), ib=_ordE.indexOf(b.id); return (ia<0?99:ia)-(ib<0?99:ib); });
+  var v={ ok:true, pairs:pairs, taches:taches, parcs:parcs, gens:gens, etapes:etapes,
           hChamp:T.hChamp, hTrac:T.hTrac, hAff:T.hAff, hAtt:T.hAtt, hCave:T.hCave, hVigne:T.hVigne,
           eur:eurT, eAff:T.eAff, eAtt:T.eAtt, byD:byD, nSansTaux:nSansTaux,
           nEv:E.ev.length, nHorsParc:E.nHorsParc, d0:d0, d1:d1, fin:fin };
@@ -7096,6 +7114,7 @@ function _pecTimeline(E){
   var jp={};
   (window.JOURNAL||[]).forEach(function(j){
     if(!j || j.meteo || j.auTracteur || j.statut!=='Valid\u00e9' || !j.parcelle || !j.tache || !j.date) return;   // auTracteur : FERTI-3
+    if(j.presta) return;   // ARRACH-3 : pas d'heures d'équipe sur une étape prestataire
     if(!inS(j.date)) return;
     var k=j.parcelle+'\u0000'+_friseNorm(j.tache);
     if(!jp[k]) jp[k]={};
@@ -7916,7 +7935,15 @@ function _pecCarteTemps(){
       +'<td class="r">'+_ecoH1(t.h)+'</td>'
       +'<td class="r"><b>'+(t.h>0?_ecoH1(t.hhaR):'\u2014')+'</b></td>'
       +'<td class="r">'+_ecoH1(t.hhaB)+'</td>'
-      +'<td class="r" style="color:'+col+'">'+(ec===null?'\u2014':((ec>0?'+':'')+Math.round(ec)+' %'))+'</td></tr>';
+      +'<td class="r" style="color:'+col+'">'+(ec===null?'\u2014':((ec>0?'+':'')+Math.round(ec)+' %'))+'</td></tr>'
+      // ARRACH-3 : sous la ligne Arrachage, une ligne par étape faite par l'équipe (pas les prestataires).
+      +((t.nom==='Arrachage')?(V.etapes||[]).map(function(x){
+        return '<tr><td class="n" style="padding-left:16px">\u00b7 '+_pilEsc(x.lbl)+'</td>'
+          +'<td class="r">'+_pilHa(Math.round(x.surf*100)/100)+'</td>'
+          +'<td class="r">'+_ecoH1(x.h)+'</td>'
+          +'<td class="r"><b>'+(x.h>0?_ecoH1(x.hhaR):'\u2014')+'</b></td>'
+          +'<td class="r">\u2014</td><td class="r">\u2014</td></tr>';
+      }).join(''):'');
   }).join('');
   var att=V.gens.filter(function(g){ return g.hAtt>=0.5; });
   var attTxt=att.length
