@@ -1,4 +1,17 @@
-// MA VIGNE — Service Worker v8.56
+// MA VIGNE — Service Worker v8.59
+// v8.59 (02/10/2026) — FERTI-3 : saveData('sessions') -> _ferSyncSessions (phyto.js) : une parcelle faite dans une session
+//   « Amendement » valide la tache « Amendement » + UNE entree de journal auTracteur:true, quiHors (idempotent par session et
+//   parcelle ; une annulation n'est pas refaite). Pilotage : _ecoTvEvents, le partage par personne et le repli bareme ecartent
+//   auTracteur (pas de double compte). phyto.js + app.js + pilotage.js + utils.js ; APP 7.84 -> 7.85.
+// v8.58 (02/10/2026) — FERTI-2 : Pilotage > Economie > Exercice, un amendement chiffre (INTRANTS.fertil[].cout) entre au PREVU des
+//   achats a sa semaine prevue et en sort des qu'un achat chiffre du meme produit, date apres lui, est saisi (jamais deux fois) ;
+//   annee de plantation (p.plantee) dans la fiche fertilisation, le cahier et le CSV. pilotage.js + phyto.js + utils.js ; APP 7.83 -> 7.84.
+// v8.57 (02/10/2026) — FERTI-1 : Phyto > onglet Fertilisation. Amendement en 5 etapes (produit E-Phy MFSC ou norme, composition,
+//   dose t/ha, poids du sac, parcelles, vitesse + ecartement + temps utile -> bareme h/ha) ; enregistre INTRANTS.fertil, le produit
+//   de La Reserve, la tache Amendement (exclusions des parcelles non cochees), l'activite tracteur et son bareme. Registre : dates
+//   d'epandage LUES (session Amendement, tache validee, ou date admin), azote de la campagne, carte controle (ZV, ilot, sol,
+//   analyse, fractionnement), cahier PDF + CSV (MV_DOCS fertiPdf/fertiCsv). `fertil` dans _rsvApply, le garde et LISTES-1.
+//   phyto.js + index.html + reserve.js + firebase.js + app.js + reglages.js + utils.js ; APP 7.82 -> 7.83.
 // v8.56 (02/10/2026) — RDT-XLS : fichier Excel des parcelles, rendement hL/ha et fourchette a zero (millesime en chaine compare
 //   strictement a un nombre dans _vendVolParc/_vendSurfParc) ; recoltes de la vendange en hL/ha (_mlRendements), etat sanitaire
 //   non note = « — » ; planning de l'annee en cours = equipe sous contrat d'aujourd'hui au 31/12 ; apercu des documents a la
@@ -4211,7 +4224,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.56';
+const CACHE_NAME   = 'mavigne-v8.59';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4227,7 +4240,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.56 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.59 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4247,7 +4260,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.56 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.59 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

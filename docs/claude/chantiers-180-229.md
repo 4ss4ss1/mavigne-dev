@@ -1094,3 +1094,104 @@ problèmes d'affichage ; des colonnes sont à 0 alors que l'information existe.
 - Un **contrôle croisé** manque : jouer l'appel réel `exportCSVParcelles → _mlRendements → _vendRdtParc` sans bouchon. Le défaut
   de §201b vivait exactement dans la couture entre deux harnais.
 - Les autres documents ouverts hors `_mvDocOpen` (s'il en reste) gardent `device-width` — non inventoriés.
+
+## 202. ★★ FERTI-1 — L'AMENDEMENT ET LE CAHIER DE FERTILISATION (02/10 — `src/phyto.js` · `index.html` · `src/reserve.js` · `src/firebase.js` · `src/app.js` · `src/reglages.js` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE phyto) · `public/sw.js` · `guide/07-phyto.html` · `scripts/mv-harnais-fertil.mjs` · `scripts/mv-harnais-liste.mjs` · **bump APP 7.82 → 7.83, SW 8.56 → 8.57**, base `3050f8e`)
+
+**La demande** (dictée, 02/10) : le fournisseur d'amendements passe ; on sème au tracteur, semoir arrière, sur CERTAINES
+parcelles. Dose conseillée en t/ha + poids du sac → sacs par parcelle ; coût ; travail prévu et temps de travaux ;
+Pilotage et budget à jour ; étapes conseillées, jamais obligatoires. Deux maquettes validées (v2 : ajout du cahier
+d'enregistrement de la fertilisation, cohérence E-Phy, « que l'admin n'ait pas à chercher partout »).
+
+**Ce que le code a dit avant d'écrire (inventaire)** :
+- Il n'existait **aucun calcul de temps tracteur depuis la vitesse** — seulement le barème h/ha saisi à la main par
+  activité (`a.h_ha`, Réglages › Activités tracteur). Nico s'en souvenait autrement : le calcul neuf ÉCRIT dans ce barème.
+- Le catalogue E-Phy synchronisé contient déjà la famille **MFSC** (`functions/ephy.js`) : la recherche se fait dedans,
+  filtrée `type==='MFSC'`. Un produit normé (NF U 44-051…) n'y est pas : saisie libre avec sa norme.
+- Une tâche s'applique à **toutes** les parcelles sauf `p.tachesExclues` (`_parcConcern`). Créer « Amendement » =
+  exclure les non-cochées ; un apport suivant ne fait qu'INCLURE (jamais ré-exclure ce qu'un apport précédent a inclus).
+- **Aucun lien activité tracteur → tâche.** D'où l'arbitrage central :
+
+**L'arbitrage : le registre LIT ses dates.** `_ferFaits()` : pour chaque apport et chaque parcelle, la première
+validation postérieure à la création de l'apport — session `activite==='Amendement'` (heure `t1` de la parcelle,
+sinon date de la session), puis journal `tache==='Amendement'` validé ; une date posée par l'admin (`op.man`) gagne.
+Une validation ne sert qu'à UN apport (le plus ancien qui l'attend). Écarté : écrire la date depuis `tracteur.js`
+(hook dans un module de 3 200 lignes, double source) — §3 « vérifier le chemin par défaut avant de construire ».
+
+**Données** : `INTRANTS.fertil` (aucune collection, aucune règle à déployer ; `intrants` est déjà admin-only en écriture).
+⚠️⚠️ La clé a été ajoutée **le même lot** à `_rsvApply` (sinon `[]` au rechargement puis écrasement — le piège
+`fut_mouv`), à `_mvIntrantsCount` (garde anti-perte) et à `_MV_SOUS_LISTES` (LISTES-1). Champs parcelle neufs, posés
+depuis l'onglet (fiche ZV / îlot / sol) : `p.zv`, `p.ilot`, `p.sol` — absents = tiret, jamais deviné.
+
+**Réglementaire, sourcé** (plaquette DRAAF BFC 7e programme, oct. 2024 ; arrêtés de bassin RM 2026-214/215 du
+30/07/2026, corrigés le 27/08) : contenu du CEP par apport (date, superficie, nature, teneur N, quantité N) + îlot,
+sol, culture, rendement ; campagne 01/09 – 31/08 ; conservation 5 campagnes ; type II par défaut ; analyse de sol au-delà
+de 3 ha en ZV (MO pour la vigne) ; fractionnement de l'azote minéral au-delà de 60 kg N/ha ; type 0 interdit 15/12 – 15/01.
+**Non fait, faute de lecture certaine** : le calendrier vigne par type (grille en couleurs), le calcul de dose GREN.
+
+**Harnais** `mv-harnais-fertil.mjs` (42 assertions, dont 6 contre-épreuves) : extrait le bloc FERTI-1 de `phyto.js`.
+**Ce que les contrôles ont dit en route** (premier passage du lanceur, 4 familles de rouges, toutes traitées) :
+- `mv-harnais-achats` épinglait la LISTE EXACTE du garde anti-perte (`['produits','achats','inventaires','futs']`) : il
+  rougissait à la première clé réelle ajoutée. Réécrit pour prouver ce qu'il voulait prouver — toute clé comptée existe au
+  modèle. Et `_rsvApply` n'est lu que sur ses **700 premiers caractères** : un commentaire posé AVANT `var d={…}` le faisait
+  sortir de la fenêtre → les 9 clés « jamais relues ». Commentaire déplacé après la ligne.
+- Compteur d'émojis (phyto 10 → 18) : les coches `\u2713` sont devenues `_mvIcon('check',16)`, les ★/⚠/→ des commentaires du
+  bloc des caractères simples. Un `confirm()` natif de repli retiré (preflight §22).
+- Barème typographique : les tailles du cahier imprimé passent par `var(--pt-nano/lbl,…)`.
+- `mv-harnais-robustesse-reserve --contre` posait son défaut sur la ligne LISTES-1 recopiée À L'IDENTIQUE
+  (`intrants:[…,'fut_mouv']};`) : « ancre introuvable » dès l'ajout de `fertil`. Ancre mise à jour, et `fertil` ajouté au
+  tirage au hasard du même harnais (un élément nul dans `fertil` est désormais éprouvé).
+- `build-guide --check` rougit tant que `public/guide.html` n'est pas refabriqué : normal, il n'est PAS livré
+  (`npm run site` le refait). Vérifié ici : refabriqué, il passe.
+- Contraste (CONTRASTE-1, 0 → 3 en clair, 1 → 7 en sombre) : l'orange, le rouge et le violet sur leur fond pâle passent
+  sous 4,5. Les pastilles et encadrés d'alerte gardent leur fond pâle, prennent l'encre du texte et un filet de leur
+  couleur. Les coches pleines (blanc sur vert) deviennent vert sur vert pâle : `--blanc` en couleur de texte est un jeton
+  de SURFACE, refusé par le même harnais.
+- ⚠️ **`phyto.js` 91 → 150 ko** (+65 %, seuil +5 %). Question du découpage posée : un module à part (`fertil.js`) aurait
+  demandé un nouveau point d'entrée et sa déclaration dans les listes de modules de plusieurs harnais, pour un onglet DU
+  Phyto qui partage sa recherche E-Phy (`_phyNorm`, `_phyEphy`). Gardé dans `phyto.js` ; **seule la ligne `ko` de
+  `phyto.js`** regravée dans `typo-baseline.json` (le `--baseline` complet aurait aussi avalé la croissance non regravée
+  de neuf autres modules — rendu à l'identique). Si le bloc grossit encore au FERTI-2 : le sortir.
+
+**Reste ouvert** : FERTI-2 (§28).
+
+## 203. ★ FERTI-2 — LE COÛT D'UN AMENDEMENT AU PRÉVU, L'ANNÉE DE PLANTATION (02/10 — `src/pilotage.js` · `src/phyto.js` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE phyto, MV_INFO de l'exercice) · `index.html` · `public/sw.js` · `guide/07-phyto.html` · `guide/11-pilotage.html` · `scripts/mv-harnais-fertil.mjs` · `scripts/mv-harnais-pil-coherence.mjs` · **bump APP 7.83 → 7.84, SW 8.57 → 8.58**, base FERTI-1 sur `3050f8e`)
+
+**Le prévu des achats.** `_pexData` (Économie › Exercice) ne connaissait que deux natures : l'ENGAGÉ daté et le PRÉVU des
+salaires (grille). Un amendement chiffré est une troisième chose : une dépense ANNONCÉE. Bloc « 3 bis » : `achP` = somme
+des `op.cout > 0` dont la date prévue (`op.sem`, sinon `op.cree`) tombe dans l'exercice, **seulement si `enCoursC`**
+(un exercice clos n'a plus de prévu ; un exercice futur n'en avait déjà pas pour les salaires — même règle). Un apport
+sort du prévu dès qu'un achat **chiffré** (`prix > 0`) du même `prodId`, daté entre sa création et la coupe, existe.
+Arbitrages : un achat SANS prix ne retire rien (sinon la dépense disparaîtrait des deux colonnes) ; un achat d'AVANT
+l'apport ne retire rien (c'est une autre livraison). Écarté : soustraire le montant facturé du prévu (facture partielle)
+— l'apport n'a pas de notion de livraisons multiples ; une facture = l'apport est réglé.
+`totalP=salP+achP`, ligne Achats `eurP`, phrase « pas de colonne prévu » réécrite (écran, MV_INFO, MV_AIDE, guide).
+⚠️ `mv-harnais-pil-coherence` épinglait `var totalP=salP, …` (⑫) : mis à jour, l'intention (clôture = engagé + prévu) tient.
+`byM[]` (le graphe mois par mois) ne porte PAS ce prévu : le hachuré reste celui des salaires — à décider si Nico le veut.
+
+**L'année de plantation** : aucun champ n'existait (§202). `p.plantee` (entier, 1850 → année en cours, sinon refus),
+posé depuis la fiche fertilisation de la parcelle ; cahier PDF et colonne CSV « Annee de plantation ».
+
+**Harnais** : `mv-harnais-fertil` 42 → 54 assertions (bloc du prévu extrait de `pilotage.js`, 7 cas + 1 contre-épreuve).
+**Reste ouvert** : FERTI-3 (§28).
+
+## 204. ★★ FERTI-3 — LA SESSION « AMENDEMENT » COCHE LA TÂCHE, SANS DOUBLE COMPTE (02/10 — `src/phyto.js` · `src/app.js` (`saveData`) · `src/pilotage.js` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE phyto + tracteur, MV_INFO temps vigne ×2) · `index.html` · `public/sw.js` · `guide/07-phyto.html` · `scripts/mv-harnais-fertil.mjs` · **bump APP 7.84 → 7.85, SW 8.58 → 8.59**)
+
+**La décision de Nico** : « la session coche la tâche, marquée faite au tracteur, pour que le Pilotage ne recompte pas ».
+
+**Pourquoi le marquage est indispensable, mesuré avant d'écrire** : le Pilotage compte les heures depuis le JOURNAL à
+trois endroits — `_ecoTvEvents` (PAR-1 : la journée de chacun se partage entre TOUTES les validations du jour), le
+partage par personne (coût par parcelle des personnes nommées) et le repli « barème daté ». Une validation ordinaire
+écrite par la session aurait (1) attiré une part des heures de l'équipe du jour sur la parcelle semée, (2) recompté au
+barème un travail dont le temps est déjà celui de la session (`_ecoTracHByParc`). D'où `auTracteur:true`, écarté aux
+trois endroits ; `quiHors:true` en plus (convention TV-2 : le validateur hors des rangs ne compte pas), pour tout
+lecteur futur qui ignorerait `auTracteur`. Les lecteurs de DATES (frise, dernière validation) la gardent : c'est vrai.
+
+**Le point d'accroche** : `tracteur.js` sauve les sessions par ~20 chemins (`saveData('sessions')`). Plutôt que vingt
+appels, une réconciliation au seul passage obligé, dans `saveData` (app.js), garde de réentrance `_ferSyncEnCours`.
+`_ferSyncSessions` est idempotente : une entrée `auTracteur` existe pour (session, parcelle) → rien ; tâche déjà validée
+à la main → rien ; parcelle exclue, arrachée, saison consultée non active, tâche absente → rien. ★ Elle ne DÉFAIT rien :
+une validation annulée depuis la parcelle n'est pas refaite. Le registre (`_ferFaits`) ignore la copie journal.
+Écarté : écrire `p.taches` sans entrée de journal — validation sans trace, ignorée de la frise et de la reconstruction.
+
+**Harnais** `mv-harnais-fertil` 54 → 70 (cas FERTI-3, épinglages Pilotage/app, 2 contre-épreuves).
+

@@ -192,7 +192,8 @@ export { _pilEchCadence };`;
   //   s'ajoute — jamais a assouplir en >=, sinon il ne prouve plus rien.
   t('⑫ les faits datés s\'arrêtent à dFin (4 filtres), plus à ex.d1', (px.match(/iso>dFin\) return;/g)||[]).length===4 && !/iso>ex\.d1\) return;/.test(px));
   t('⑫ le segment de paie est coupé à la coupe (engagé / prévu)', /prevu:false/.test(px) && /prevu:true/.test(px) && /byM\[mo\.k\]\.salP\+=h\*tx/.test(px));
-  t('⑫ totalClot = engagé + prévu', /var totalP=salP, totalClot=total\+totalP;/.test(px));
+  // FERTI-2 (02/10) : le prévu porte aussi les amendements chiffrés pas encore facturés (achP).
+  t('⑫ totalClot = engagé + prévu', /var totalP=salP\+achP, totalClot=total\+totalP;/.test(px));
   t('⑫ N-1 rejoué aux mêmes jours (à date comparable)', /_pexData\(exP, true, _cp\)/.test(px));
   const src=`${fn(SRC.pil,'_pexIsoToMs2')}\n${fn(SRC.pil,'_pexIsoPlus')}\n${fn(SRC.pil,'_pexJourApres')}\nexport {_pexIsoPlus,_pexJourApres};`;
   const M=await charger(src);

@@ -8,6 +8,29 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **2 octobre 2026 (FERTI-2)** — ★ **LE COÛT D'UN AMENDEMENT AU PRÉVU, L'ANNÉE DE PLANTATION** (§203).
+> Pilotage › Économie › Exercice : un amendement chiffré (`INTRANTS.fertil[].cout`) entre au **prévu** des achats à sa semaine
+> prévue et en SORT dès qu'un achat chiffré du même produit, daté après lui, est saisi — jamais compté deux fois (`achP`,
+> `totalP=salP+achP`). Fiche fertilisation : `p.plantee` (année de plantation) → cahier et CSV. ⚠️ Toujours ouverts : session →
+> tâche (question à Nico, risque de double compte des heures) et calendrier vigne (§28). Posé sur **FERTI-1** (§202, non poussé
+> au moment de l'écriture : le zip le contient), lui-même sur `3050f8e`. **Bump APP 7.83 → 7.84, SW 8.57 → 8.58** (visible).
+
+> ★ Consolidation : **2 octobre 2026 (FERTI-1)** — ★★ **L'AMENDEMENT ET LE CAHIER DE FERTILISATION** (§202).
+> Dicté par Nico : choisir un amendement, cocher des parcelles, et que sacs, temps tracteur, travail prévu, Pilotage et
+> registre se remplissent seuls. Phyto › onglet **Fertilisation** (`phyto.js`, bloc FERTI-1) : assistant en 5 étapes
+> conseillées, barème h/ha = (10 000 / écartement) / vitesse / temps utile ; écrit `INTRANTS.fertil` (★ clé ajoutée à
+> `_rsvApply`, au garde anti-perte et à LISTES-1), le produit de La Réserve, la tâche « Amendement » (exclusions des
+> parcelles non cochées) et l'activité tracteur. Dates d'épandage **LUES**, jamais écrites. Cahier PDF + CSV. ⚠️ Reste
+> ouvert : **FERTI-2** (§28). Posé sur **RDT-XLS** (§201, `3050f8e`, APP 7.82 · SW 8.56). **Bump APP 7.82 → 7.83, SW 8.56 → 8.57** (visible).
+
+> ★ Consolidation : **2 octobre 2026 (RDT-XLS)** — ★★ **QUATRE RETOURS DE NICO SUR LES DOCUMENTS DE FIN DE VENDANGE** (§201).
+> ① Fichier Excel des parcelles : rendement 0 et fourchette 0 – 0 — le millésime arrivait en chaîne, `_vendVolParc` /
+> `_vendSurfParc` le comparaient strictement au NOMBRE de `_vendMillOfDate` ; ② récoltes de la vendange en hL/ha
+> (`_mlRendements`, « ~ » = estimé), état sanitaire non noté = « — » ; ③ planning de l'année en cours = équipe sous contrat
+> d'aujourd'hui au 31/12, fiches Inactives exclues ; ④ aperçu des documents à la largeur de la feuille (`_mvDocOpen`) et
+> réglages du Cuvier stylés sans passer par Le Cuvier. Posé sur **PARC-XLS-2** (§200, `ff00c76`, APP 7.81 · SW 8.55).
+> **Bump APP 7.81 → 7.82, SW 8.55 → 8.56** (visible).
+
 > ★ Consolidation : **30 septembre 2026 (PARC-XLS-2)** — ★ **LE FICHIER EXCEL DES PARCELLES AUSSI DANS LA CAVE** (§200).
 > Demande de Nico : « mettre ça aussi en cave avec les récoltes ». `_caveRegDocs` range l'entrée `csvParcelles` du catalogue
 > juste après « Récoltes de la vendange » — même entrée, même `docsGo(i)`, aucune copie. Guide Cave corrigé au passage (il

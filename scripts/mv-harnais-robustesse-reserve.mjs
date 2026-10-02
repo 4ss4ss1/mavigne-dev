@@ -45,7 +45,7 @@ if (CONTRE) {
     ['reserve.js', 'une erreur journalisée à chaque rendu du corps',
       'function _rsvRenderBody(){\n', "function _rsvRenderBody(){\n  if(window.logError) window.logError({level:'error',cat:'reserve',msg:'contre-epreuve'});\n"],
     ['app.js', 'LISTES-1 ne regarde plus dans le document des intrants',
-      "  intrants:['produits','achats','inventaires','futs','fut_mouv']};", "  _intrants_retire:['produits']};"],
+      "  intrants:['produits','achats','inventaires','futs','fut_mouv','fertil']};", "  _intrants_retire:['produits']};"],
     ['reserve.js', 'un « NaN » dans le document imprimable',
       'function _rsvDoc(c){\n', "function _rsvDoc(c){\n  if(window._mvDocOpen) window._mvDocOpen({titre:'x', html:'NaN'}); return;\n"],
   ];
@@ -196,7 +196,7 @@ function domaine() {
     { produits: null, achats: 'x', futs: [] },                       // sous-listes abîmées : _rsvApply les remet à []
     {}]);
   // Un élément étranger DANS une sous-liste d'objets (écriture interrompue, vieille version).
-  for (const k of ['produits', 'achats', 'inventaires', 'futs', 'fut_mouv']) if (Array.isArray(intrants[k]) && rnd() < .08) intrants[k].push(pick([null, 'x', 0, []]));
+  for (const k of ['produits', 'achats', 'inventaires', 'futs', 'fut_mouv', 'fertil']) if (Array.isArray(intrants[k]) && rnd() < .08) intrants[k].push(pick([null, 'x', 0, []]));
   const traitements = [];
   for (let i = 0; i < Math.floor(rnd() * 5); i++) traitements.push({ id: 't' + i, date: unJour(), parcelles: pick([['Clos Bas'], [], null]), produits: pick([[{ nom: produits[0] ? produits[0].nom : 'Cuivre', dose: pick([0.5, '1', null]), unite: 'kg/ha' }], [], null]), surface: pick([1.1, null]) });
   const ce = { cuvees: pick([[{ id: 'c1', nom: 'Gevrey VV', millesime: 2025, tonneaux: [{ annee: 2024, nb: 4 }], statut: 'elevage' }], []]), operations: [], analyses: [], config: {} };

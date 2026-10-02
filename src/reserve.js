@@ -39,6 +39,9 @@ var INTRANTS = {
   fut_four: [],       // fournisseurs mémorisés (fûts)
   fut_ref: [],        // références mémorisées (fûts)
   achat_four: [],     // fournisseurs mémorisés (achats intrants)
+  // FERTI-1 : les apports d'amendement / fertilisant (registre de fertilisation,
+  // onglet Phyto › Fertilisation, phyto.js). Admin seul en écriture.
+  fertil: [],         // [{id,cree,prodId,prod:{nom,ref,N,P,K,typ,ab..},dose,kgSac,parcs[],trac{},man{}}]
 
 };
 window.INTRANTS = INTRANTS;
@@ -1446,7 +1449,9 @@ window._rsvApply=function(value){
   //   RELU : au rechargement il repartait a [], et la premiere sauvegarde
   //   suivante ecrasait le registre du parc dans Firestore. Toute cle du
   //   modele INTRANTS doit figurer ici, sinon elle se perd en silence.
-  var d={produits:[],achats:[],inventaires:[],futs:[],fut_mouv:[],fut_four:[],fut_ref:[],achat_four:[]};
+  var d={produits:[],achats:[],inventaires:[],futs:[],fut_mouv:[],fut_four:[],fut_ref:[],achat_four:[],fertil:[]};
+  // ★ FERTI-1 : `fertil` ajouté le jour même de sa création (registre de
+  //   fertilisation) — absent, il repartait à [] et s'effaçait.
   Object.keys(d).forEach(function(k){ INTRANTS[k]=Array.isArray(value[k])?value[k]:d[k]; });
   window.INTRANTS=INTRANTS;
   var ap=document.querySelector('.page.active');

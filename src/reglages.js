@@ -3313,6 +3313,14 @@ var MV_DOCS = [
   { f:'oblig', act:'cuivre',    mod:'phyto',    ico:'\u{1FA99}', bg:'var(--terre-pale)', fm:'pdf',
     t:'Synth\u00e8se cuivre', ask:'',
     s:'Cuivre m\u00e9tal par parcelle sur sept ans, face au plafond des sept ans.' },
+  // FERTI-1 : le cahier d'enregistrement de la fertilisation (zone vuln\u00e9rable),
+  //   tenu par l'onglet Phyto \u203a Fertilisation. Campagne = celle affich\u00e9e \u00e0 l'onglet.
+  { f:'oblig', act:'fertiPdf',  mod:'phyto',    ico:_mvIcon('pousse',20), bg:'var(--vert-pale)', fm:'pdf',
+    t:'Cahier de fertilisation', ask:'',
+    s:'Chaque apport d\u2019amendement ou d\u2019engrais, parcelle par parcelle\u00a0: date, superficie, produit, teneur et quantit\u00e9 d\u2019azote, \u00eelot, sol, rendement.' },
+  { f:'oblig', act:'fertiCsv',  mod:'phyto',    ico:_mvIcon('pousse',20), bg:'var(--vert-pale)', fm:'csv',
+    t:'Cahier de fertilisation \u2014 fichier Excel', ask:'',
+    s:'Le m\u00eame cahier, une ligne par apport et par parcelle, avec le SIRET.' },
   { f:'oblig', act:'mois',      mod:'planning', ico:'\u23F1\u{FE0F}', bg:'var(--bleu-pale)', fm:'pdf',
     t:'Relev\u00e9 mensuel d\u2019heures', ask:'Choix du mois',
     s:'Heures travaill\u00e9es, jours travaill\u00e9s et absences du mois \u2014 le format attendu par la MSA.' },
@@ -3521,6 +3529,8 @@ window.docsGo=function(i){
     case 'phytoPdf':     fn=window.exportPDFPhyto;         break;
     case 'phytoCsv':     fn=window._phytoExportCsv;        break;
     case 'cuivre':       fn=window.openSyntheseCuivre;     break;
+    case 'fertiPdf':     fn=window._ferExportPdf;          break;   /* FERTI-1 */
+    case 'fertiCsv':     fn=window._ferExportCsv;          break;   /* FERTI-1 */
     case 'vignoble':     fn=window._vgnExportVignoble;     break;
     case 'saison':       fn=window.openRapportSaison;      break;
     case 'annuel':       fn=window.planAnnuelPdf;        break;

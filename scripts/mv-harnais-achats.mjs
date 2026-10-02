@@ -76,8 +76,12 @@ t('le champ « chez qui » existe dans l\'overlay', /id="rep-four"/.test(readFil
 console.log('\n── CE QUE LE LOT PRECEDENT A DEFAIT\n');
 t('l\'onglet Depenses de La Reserve a disparu', !/_rsvTab==='depenses'/.test(RSV));
 t('la cle INTRANTS.depenses a disparu', !/depenses:\s*\[\]/.test(RSV));
-t('le garde ne compte plus une cle inexistante',
-  /\['produits','achats','inventaires','futs'\]/.test(readFileSync('src/firebase.js', 'utf8')));
+// \u2605 FERTI-1 (02/10) : la liste exacte \u00e9tait \u00e9pingl\u00e9e ; elle rougissait \u00e0 la premi\u00e8re cl\u00e9
+//   R\u00c9ELLE ajout\u00e9e (`fertil`). On teste ce qu'on veut prouver : toute cl\u00e9 compt\u00e9e existe au mod\u00e8le.
+{ const _g = (readFileSync('src/firebase.js', 'utf8').match(/\[((?:'[a-z_]+',?)+)\]\.forEach\(function \(k\)/) || [,''])[1];
+  const _cles = [..._g.matchAll(/'([a-z_]+)'/g)].map(m => m[1]);
+  t('le garde ne compte plus une cle inexistante',
+    _cles.length >= 4 && _cles.every(k => new RegExp('\\n  ' + k + ': \\[\\],').test(RSV)), _cles.join(', ')); }
 t('_eur2 survit au retrait du bloc qui le portait', /function _eur2\(n\)/.test(RSV));
 // ⚠️ L'ancienne version epinglait la LISTE EXACTE des champs du modele. Elle
 //   rougissait donc au premier champ ajoute, alors que `prix` y etait toujours.

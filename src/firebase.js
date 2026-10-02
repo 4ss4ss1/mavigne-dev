@@ -1379,7 +1379,8 @@ function _mvParcProgCount(arr) {
 function _mvIntrantsCount(v) {
   if (!v || typeof v !== 'object') return 0;
   var n = 0;
-  ['produits','achats','inventaires','futs'].forEach(function (k) {
+  // FERTI-1 : `fertil` (registre de fertilisation) compte, c'est une trace réglementaire.
+  ['produits','achats','inventaires','futs','fertil'].forEach(function (k) {
     if (Array.isArray(v[k])) n += v[k].length;
   });
   return n;

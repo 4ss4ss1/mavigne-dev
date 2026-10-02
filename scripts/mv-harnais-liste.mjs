@@ -319,6 +319,7 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-tri1.mjs'],
   ['node scripts/mv-harnais-tri2.mjs'],
   ['node scripts/mv-harnais-parc-xls.mjs'],
+  ['node scripts/mv-harnais-fertil.mjs'],          // FERTI-1 : amendement et registre de fertilisation
   ['node scripts/mv-harnais-tri3.mjs'],
   ['node scripts/mv-harnais-cuvgr3.mjs'],
   ['node scripts/mv-harnais-crb2.mjs', 'crb-2-le-couloir-des-courbes'],

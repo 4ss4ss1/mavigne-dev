@@ -5521,7 +5521,7 @@ function _ecoEquipeByParc(){
   var byNom={}; (window.MEMBRES||[]).forEach(function(m){ if(m&&m.nom) byNom[m.nom]=m; });
   var per={}, spread={};
   (window.JOURNAL||[]).forEach(function(j){
-    if(!j||j.meteo||j.statut!=='Valid\u00e9'||!j.parcelle||!j.date) return;
+    if(!j||j.meteo||j.auTracteur||j.statut!=='Valid\u00e9'||!j.parcelle||!j.date) return;   // auTracteur : FERTI-3
     if(!_in(j)) return;
     var noms=[]; if(j.qui && !j.quiHors) noms.push(j.qui);   // TV-2 : le validateur hors des rangs ne compte pas
     (j.membresEquipe||[]).forEach(function(n){ if(n && noms.indexOf(n)<0) noms.push(n); });
@@ -5631,7 +5631,10 @@ function _ecoTvBar(p, def, ev){
 function _ecoTvEvents(d0, d1){
   var byNom={}; (window.PARCELLES||[]).forEach(function(p){ if(p && p.nom!=null) byNom[String(p.nom)]=p; });
   var J=(window.JOURNAL||[]).filter(function(j){
-    return j && !j.meteo && j.date && j.parcelle && j.tache && String(j.date).slice(0,10)<=d1;
+    // FERTI-3 : une validation « faite au tracteur » (auTracteur) n'est pas une journée dans les rangs.
+    //   Son temps est celui de la session tracteur ; la compter ici ferait partager les heures de l'équipe
+    //   sur la parcelle semée, et compter le travail deux fois.
+    return j && !j.meteo && !j.auTracteur && j.date && j.parcelle && j.tache && String(j.date).slice(0,10)<=d1;
   }).slice();
   // Ordre chronologique : la date, puis l'ordre de saisie (id = horodatage hex quand il l'est).
   function _ts(j){ var n=parseInt(String(j.id||''),16); return isFinite(n)?n:0; }
@@ -7092,7 +7095,7 @@ function _pecTimeline(E){
   } else {
   var jp={};
   (window.JOURNAL||[]).forEach(function(j){
-    if(!j || j.meteo || j.statut!=='Valid\u00e9' || !j.parcelle || !j.tache || !j.date) return;
+    if(!j || j.meteo || j.auTracteur || j.statut!=='Valid\u00e9' || !j.parcelle || !j.tache || !j.date) return;   // auTracteur : FERTI-3
     if(!inS(j.date)) return;
     var k=j.parcelle+'\u0000'+_friseNorm(j.tache);
     if(!jp[k]) jp[k]={};
@@ -7698,7 +7701,7 @@ function _pecBandeExo(){
   return head
     +'<div class="pec-kpis">'
     +'<div class="pec-k"><div class="l">Sorti depuis l\u2019ouverture</div><div class="v">'+_pilEsc(_ecoEur(X.total))+'</div>'
-      +'<div class="s">'+(X.enCoursC?('\u00e0 la cl\u00f4ture '+_pilEsc(_pecEurK(X.totalClot))+' avec les salaires pr\u00e9vus'):'exercice clos')+'</div></div>'
+      +'<div class="s">'+(X.enCoursC?('\u00e0 la cl\u00f4ture '+_pilEsc(_pecEurK(X.totalClot))+', pr\u00e9vu compris'):'exercice clos')+'</div></div>'
     +'<div class="pec-k"><div class="l">\u00c0 l\u2019hectare</div><div class="v">'+_pilEsc(_ecoEur(X.coutHa))+'</div>'
       +'<div class="s">sur '+_pilHa(X.surf)+' ha plant\u00e9s</div></div>'
     +'</div>'
@@ -8183,7 +8186,7 @@ function _pexSegsTaux(nom, d0, d1){
 //     engagé = tout ce qui est daté jusqu'à la coupe (salaires payés, pleins,
 //              achats, réparations) ;
 //     prévu  = les salaires que la grille annonce APRÈS la coupe, jusqu'à la
-//              clôture — et rien d'autre : un plein ou un achat n'a pas de prévu.
+//              clôture — et les amendements chiffrés pas encore facturés (FERTI-2) : un plein n'a pas de prévu.
 //   La coupe vaut aujourd'hui (exercice en cours), la clôture (exercice clos :
 //   tout est engagé), la veille de l'ouverture (exercice futur : tout est prévu),
 //   ou la date passée en 3e argument — c'est ce qui permet de comparer l'an
@@ -8316,6 +8319,25 @@ function _pexData(ex, noCmp, coupeIso){
                    q:Number(a.q)||0, unite:(pr&&pr.unite)||'', eur:eur });
   });
   achRows.sort(function(a,b){ return a.date<b.date?1:-1; });
+  // ── 3 bis) ACHATS PRÉVUS — FERTI-2 (02/10) ─────────────────────────
+  // Un amendement enregistré avec un prix (INTRANTS.fertil[].cout) est une
+  // dépense ANNONCÉE : il entre au prévu de l'exercice en cours, à la date de sa
+  // semaine prévue (sinon de sa création), et en SORT dès qu'un achat CHIFFRÉ du
+  // même produit, daté après l'amendement, est saisi dans La Réserve — c'est alors
+  // la facture qui compte, à l'engagé. Jamais les deux à la fois.
+  // ⚠️ Un apport sans prix ne prévoit rien (jamais un montant inventé).
+  var achP=0, nAchP=0;
+  if(enCoursC){
+    ((window.INTRANTS&&Array.isArray(window.INTRANTS.fertil))?window.INTRANTS.fertil:[]).forEach(function(op){
+      if(!op||!(Number(op.cout)>0)) return;
+      var dp=String(op.sem||op.cree||'').slice(0,10);
+      if(!dp||dp<ex.d0||dp>ex.d1) return;
+      var c0=String(op.cree||'').slice(0,10);
+      var facture=ach.some(function(a){ return a&&a.prodId===op.prodId&&Number(a.prix)>0&&String(a.date||'').slice(0,10)>=c0&&String(a.date||'').slice(0,10)<=dFin; });
+      if(facture) return;
+      achP+=Number(op.cout); nAchP++;
+    });
+  }
 
   // ── 4) REPARATIONS : ce qui est passe chez le reparateur ───────────
   // ⚠️ La source est REPARATEUR_HIST, pas les fiches d'entretien. Le cycle
@@ -8459,7 +8481,7 @@ function _pexData(ex, noCmp, coupeIso){
 
   // ── Totaux ─────────────────────────────────────────────────────────
   var total=salT+gnrT+achT+repT+locT+futT;   // ENGAGÉ à la coupe
-  var totalP=salP, totalClot=total+totalP;  // prévu (grille) · à la clôture
+  var totalP=salP+achP, totalClot=total+totalP;  // prévu (grille + amendements chiffrés, FERTI-2) · à la clôture
   var surf=0;
   (window.PARCELLES||[]).forEach(function(p){ if(p&&p.statut!=='Arrachee') surf+=parseFloat(p.surface)||0; });
   var postes=[
@@ -8467,7 +8489,8 @@ function _pexData(ex, noCmp, coupeIso){
       det:_ecoH1(hPaid)+' h pay\u00e9es \u00b7 '+gens.length+' personne'+(gens.length>1?'s':'')
           +' \u00b7 co\u00fbt employeur (taux charg\u00e9 des fiches)' },
     { k:'gnr', lab:'Carburant GNR',         col:_PEC_COL.gnr, eur:gnrT, det:_pecGnrDet(gnrSrc,litres,gnrR.n,gnrR.nSansLitres,'',cfg.gnrL) },
-    { k:'ach', lab:'Achats d\u2019intrants', col:_PEC_COL.phy, eur:achT, det:nAch+' achat'+(nAch>1?'s':'')+' de La R\u00e9serve' },
+    { k:'ach', lab:'Achats d\u2019intrants', col:_PEC_COL.phy, eur:achT, eurP:(enCoursC?achP:null),
+      det:nAch+' achat'+(nAch>1?'s':'')+' de La R\u00e9serve'+(nAchP?' \u00b7 '+nAchP+' amendement'+(nAchP>1?'s':'')+' pr\u00e9vu'+(nAchP>1?'s':''):'') },
     { k:'dep', lab:'R\u00e9parations',        col:_PEC_COL.dep, eur:repT,
       det:nRep+' passage'+(nRep>1?'s':'')+' chez le r\u00e9parateur' }
   ];
@@ -8506,7 +8529,7 @@ function _pexData(ex, noCmp, coupeIso){
            nAch:nAch, nAchSansPrix:nAchSansPrix,
            hasPlan:canPaid, hasGnr:(cfg.gnrL>0), enCours:enCours, auj:auj, cmp:cmp,
            coupe:coupe, dFin:dFin, enCoursC:enCoursC,
-           salP:salP, hPaidP:hPaidP, totalP:totalP, totalClot:totalClot,
+           salP:salP, hPaidP:hPaidP, totalP:totalP, totalClot:totalClot, achP:achP, nAchP:nAchP,
            coutHaClot:(surf>0?totalClot/surf:0), cmpDate:cmpDate };
 }
 
@@ -8956,7 +8979,7 @@ function _pexEntete(E){
     +'<tbody>'+pr+'</tbody>'
     +'<tfoot><tr><td>Total</td><td class="r">'+_pilEsc(_ecoEur(E.total))+'</td>'+(PV?('<td class="r pex-prevu-c">'+_pilEsc(_ecoEur(E.totalP))+'</td><td class="r">'+_pilEsc(_ecoEur(E.totalClot))+'</td>'):'')+'<td class="r">100 %</td><td class="r">'+_pilEsc(_ecoEur(PV?E.coutHaClot:E.coutHa))+'</td><td class="r">'+(dClotT!=null?((dClotT>0?'+':'')+_pilEsc(_pecPct(dClotT))):'\u2014')+'</td><td></td></tr></tfoot>'
     +'</table></div>'
-    +(PV?'<div class="pec-cs" style="padding:8px 2px 0">Le carburant, les achats et les r\u00e9parations n\u2019ont <b>pas de colonne pr\u00e9vu</b>\u00a0: Ma Vigne ne conna\u00eet que ce qui est sorti. Seuls les salaires se lisent d\u2019avance, dans la grille du planning.</div>':'')
+    +(PV?'<div class="pec-cs" style="padding:8px 2px 0">Le carburant et les r\u00e9parations n\u2019ont <b>pas de colonne pr\u00e9vu</b>\u00a0: Ma Vigne ne conna\u00eet que ce qui est sorti. Se lisent d\u2019avance les salaires (grille du planning) et les amendements enregistr\u00e9s avec un prix, jusqu\u2019\u00e0 l\u2019arriv\u00e9e de leur facture.</div>':'')
     +'</div></div>';
   return { alertes:A.join(''), kpis:kpis, garde:garde, tPostes:tPostes };
 }

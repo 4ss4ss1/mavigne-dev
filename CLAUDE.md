@@ -3,13 +3,12 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **2 octobre 2026 (RDT-XLS)** — ★★ **QUATRE RETOURS DE NICO SUR LES DOCUMENTS DE FIN DE VENDANGE** (§201).
-> ① Fichier Excel des parcelles : rendement 0 et fourchette 0 – 0 — le millésime arrivait en chaîne, `_vendVolParc` /
-> `_vendSurfParc` le comparaient strictement au NOMBRE de `_vendMillOfDate` ; ② récoltes de la vendange en hL/ha
-> (`_mlRendements`, « ~ » = estimé), état sanitaire non noté = « — » ; ③ planning de l'année en cours = équipe sous contrat
-> d'aujourd'hui au 31/12, fiches Inactives exclues ; ④ aperçu des documents à la largeur de la feuille (`_mvDocOpen`) et
-> réglages du Cuvier stylés sans passer par Le Cuvier. Posé sur **PARC-XLS-2** (§200, `ff00c76`, APP 7.81 · SW 8.55).
-> **Bump APP 7.81 → 7.82, SW 8.55 → 8.56** (visible).
+> Dernière consolidation : **2 octobre 2026 (FERTI-3)** — ★★ **LA SESSION « AMENDEMENT » COCHE LA TÂCHE, SANS DOUBLE COMPTE** (§204).
+> Validé par Nico. `saveData('sessions')` → `_ferSyncSessions` (phyto.js) : parcelle faite dans une session « Amendement » →
+> tâche « Amendement » validée + UNE entrée de journal `auTracteur:true`, `quiHors` (idempotent par session × parcelle ;
+> une annulation n'est pas refaite). Pilotage : `_ecoTvEvents`, le partage par personne et le repli barème écartent
+> `auTracteur`. ⚠️ Reste : calendrier vigne (§28). Posé sur **FERTI-1 + FERTI-2** (§202-203, non poussés : le zip les
+> contient), sur `3050f8e`. **Bump APP 7.84 → 7.85, SW 8.58 → 8.59** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1812,6 +1811,14 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ FERTI-3 — CE QUI RESTE OUVERT SUR L'AMENDEMENT (§202-203, posé le 02/10)
+1. ✅ **Le budget prévu des achats** : FAIT au §203 (`achP`, retiré dès la facture chiffrée).
+2. ✅ **La session « Amendement » valide la tâche** : FAIT au §204 (`auTracteur`, écarté du temps vigne). ⚠️ À voir
+   si d'autres activités tracteur doivent un jour cocher LEUR tâche : le mécanisme est écrit pour l'amendement seul.
+3. **Calendrier d'épandage vigne** non contrôlé (grille régionale en couleurs, dates par type non lues). Seul le type 0
+   (15/12 – 15/01) l'est. ✅ **Année de plantation** : `p.plantee`, §203.
+4. **À l'œil, sur téléphone** : l'assistant (5 cartes repliables), l'onglet, le cahier imprimé. Aucun harnais ne lit une mise en page.
 
 ### ⚠️ REV-1 — CE QUI RESTE OUVERT SUR LE REVIENT (§194, posé le 28/09)
 

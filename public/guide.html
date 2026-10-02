@@ -437,7 +437,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 <a href="#vigne"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></em><span>Vigne<br><span style="font-size:11.5px;color:var(--muted)">Accueil · Parcelles · Journal</span></span></a>
 <a href="#saisons"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg></em><span>Saisons &amp; tâches<br><span style="font-size:11.5px;color:var(--muted)">Cycle, heures/ha, trous</span></span></a>
 <a href="#tracteur"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg></em><span>Tracteur<br><span style="font-size:11.5px;color:var(--muted)">Sessions, entretien, GNR</span></span></a>
-<a href="#phyto"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eprouvette"></use></svg></em><span>Phyto<br><span style="font-size:11.5px;color:var(--muted)">Registre &amp; catalogue E-Phy</span></span></a>
+<a href="#phyto"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eprouvette"></use></svg></em><span>Phyto<br><span style="font-size:11.5px;color:var(--muted)">Registre, fertilisation &amp; catalogue E-Phy</span></span></a>
 <a href="#cave"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-verre"></use></svg></em><span>Cave<br><span style="font-size:11.5px;color:var(--muted)">Aujourd'hui, Le Cuvier, Le Chai, Le millésime</span></span></a>
 <a href="#reserve"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg></em><span>La Réserve<br><span style="font-size:11.5px;color:var(--muted)">Intrants, parc à fûts, bilan matière</span></span></a>
 <a href="#planning"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg></em><span>Planning RH<br><span style="font-size:11.5px;color:var(--muted)">Heures, congés, compteur</span></span></a>
@@ -1120,7 +1120,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 <section id="phyto">
   <div class="sec-h">
     <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eprouvette"></use></svg></div>
-    <div><h2>Phyto</h2><div class="sub">Registre <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> · Catalogue E-Phy <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg></div></div>
+    <div><h2>Phyto</h2><div class="sub">Registre <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> · Catalogue E-Phy <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg> · Fertilisation <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pousse"></use></svg></div></div>
   </div>
   <p class="lead">Le module Phyto tient le <b>registre réglementaire</b> des traitements et s'appuie sur
   le catalogue officiel <b>E-Phy de l'ANSES</b>, mis à jour chaque semaine. C'est un module à part
@@ -1195,9 +1195,59 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <div class="dbody">C'est la durée pendant laquelle personne ne doit retourner dans la parcelle
     traitée. L'application le calcule à partir du produit, l'affiche sur l'Accueil et le rappelle dans
     l'onglet Conformité du Pilotage.</div></details>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pousse"></use></svg> Fertilisation — l'amendement et son cahier</h3>
+  <p>L'onglet <b>Fertilisation</b> tient le registre des amendements et des engrais. Le bouton rond
+  (administrateur) ouvre un amendement en cinq étapes conseillées. Aucune n'est obligatoire : ce qui
+  manque reste « — », rien n'est inventé.</p>
+  <ol class="steps">
+    <li><b>Le produit</b>Recherche dans E-Phy, famille des matières fertilisantes. Un amendement
+    <b>normé</b> (NF U 44-051, NF U 42-001…) n'a pas de numéro d'AMM : tapez son nom et sa norme,
+    écrite sur le sac. Puis la composition de l'étiquette (azote, phosphore, potasse, matière
+    organique, C/N), le type au sens de la directive nitrates (type II par défaut, comme le veut la
+    règle quand on ne connaît pas le produit), la dose conseillée en t/ha, le poids d'un sac et, si
+    vous l'avez, le prix.</li>
+    <li><b>Les parcelles</b>Cochez celles qui reçoivent l'amendement. Chaque ligne montre ses sacs
+    (arrondis au demi-sac), ses kilos, son azote et son temps. La commande est arrondie au sac entier.</li>
+    <li><b>Le passage tracteur</b>Machine, vitesse dans le rang, écartement (repris des réglages) et
+    <b>temps utile</b>.</li>
+    <li><b>Date et conditions</b>La semaine prévue et l'enfouissement.</li>
+    <li><b>Ce qui s'ajoute</b>Le résumé de tout ce que l'enregistrement va écrire.</li>
+  </ol>
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg></span><div><b>Le temps utile</b>,
+  c'est la part du temps où le semoir sème vraiment dans le rang. Le reste : demi-tours, recharges de
+  sacs, traverses. <b>75&nbsp;%</b> = 3 heures de semis sur 4 heures passées dans la parcelle. Avec
+  1&nbsp;m d'écartement et 4&nbsp;km/h, cela donne 3,3&nbsp;h par hectare.</div></div>
+  <p>À l'enregistrement, en un seul geste :</p>
+  <ul class="dot">
+    <li>la tâche <b>« Amendement »</b> est prévue sur les parcelles cochées, avec son barème : elle
+    compte dans l'avancement, le reste à faire et les temps de travaux du Pilotage ;</li>
+    <li>l'activité tracteur <b>« Amendement »</b> reçoit le même barème et la machine choisie ;</li>
+    <li>le produit entre dans <b>La Réserve</b> (fournitures vigne). L'achat se saisit à la livraison,
+    le prix à la facture. Un prix saisi dans l'amendement entre en attendant au <b>prévu</b> du Pilotage, et
+    la facture le remplace dès qu'elle est saisie ;</li>
+    <li>l'apport entre au registre, une ligne par parcelle.</li>
+  </ul>
+  <p>La <b>date d'épandage</b> ne se saisit pas : c'est le jour où la parcelle est validée, dans une
+  session tracteur de l'activité « Amendement » ou en validant la tâche. Sans l'un ni l'autre,
+  l'administrateur la pose à la main sur la ligne de la parcelle.</p>
+  <p>La session tracteur <b>coche aussi la tâche « Amendement »</b> de la parcelle. Le journal la note
+  « Fait au tracteur », au nom du conducteur. Dans le Pilotage, ce temps reste celui de la session : il n'est
+  pas compté une seconde fois. Une validation annulée depuis la parcelle n'est pas refaite par la même session.</p>
+  <p>En bas de l'onglet, <b>« Ce qu'un contrôle va demander »</b> : les parcelles en <b>zone
+  vulnérable</b>, leur <b>îlot PAC</b>, leur <b>type de sol</b> et leur <b>année de plantation</b> (touchez le
+  nom d'une parcelle pour les poser), l'analyse de sol exigée au-delà de 3&nbsp;ha en zone vulnérable, le fractionnement de
+  l'azote minéral au-delà de 60&nbsp;kg N/ha. Le <b>cahier d'enregistrement</b> s'imprime ou sort en
+  fichier tableur, pour la campagne du 1<sup>er</sup> septembre au 31 août.</p>
+  <div class="note legal"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg></span><div>Ma Vigne
+  enregistre la dose que vous choisissez. Le calcul de dose réglementaire (référentiel régional) et le
+  calendrier d'épandage restent de votre responsabilité et de celle de votre conseiller. Le zonage
+  des zones vulnérables a été revu en 2026 et peut ne couvrir qu'une partie d'une commune : la carte
+  officielle est sur le site de la DREAL.</div></div>
+
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> La roue crantée — les documents du Phyto</h3>
   <p>En haut à droite, la roue crantée imprime le <b>registre</b> sous ses deux formes — le PDF à
-  présenter, le fichier tableur attendu en contrôle à partir de 2027 — et la <b>synthèse cuivre</b>.
+  présenter, le fichier tableur attendu en contrôle à partir de 2027 —, la <b>synthèse cuivre</b> et le
+  <b>cahier de fertilisation</b>, en PDF et en fichier tableur.
   Le bouton d'export qui vivait au bas du registre n'existe plus. Administrateur seulement.</p>
 </section>
 
@@ -2636,8 +2686,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <p>Sur un exercice <b>en cours</b>, l'année est coupée <b>au jour</b> : à gauche d'aujourd'hui,
   l'<b>engagé</b> — ce qui est sorti, à sa date ; à droite, le <b>prévu</b> — les salaires que la grille du
   planning annonce jusqu'à la clôture, hachurés sur le graphe. Un mois entamé est coupé au jour. Le
-  carburant, les achats et les réparations n'ont pas de prévu&nbsp;: Ma Vigne ne connaît que ce qui est
-  sorti. La comparaison avec l'an dernier se fait <b>aux mêmes jours</b> après l'ouverture, et le total à la
+  carburant et les réparations n'ont pas de prévu&nbsp;: Ma Vigne ne connaît que ce qui est
+  sorti. Un <b>amendement enregistré avec un prix</b> (Phyto › Fertilisation) entre au prévu des achats à sa
+  semaine prévue, et en sort dès que sa facture est saisie dans La Réserve&nbsp;: jamais compté deux fois. La comparaison avec l'an dernier se fait <b>aux mêmes jours</b> après l'ouverture, et le total à la
   clôture dit qu'il contient du prévu.</p>
   <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-recu"></use></svg></span><div><b>Ce total n'est pas un
   compte de résultat.</b> Ma Vigne connaît ce qui passe par elle : les heures payées, le carburant,

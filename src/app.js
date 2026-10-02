@@ -85,7 +85,7 @@ var _MV_LISTES_OBJETS = {parcelles:1, membres:1, saisons:1, taches:1, journal:1,
 var _MV_SOUS_LISTES = {cave_elevage:['cuvees','operations','analyses'], cave_vendange:['recoltes','cuves_vinif','analyses'],
   // La Réserve (ajouté le 28/09, tirage mv-harnais-robustesse-reserve : un fût nul faisait tomber les Fûts, le parc
   // de la Cave et le document). ⚠️ PAS fut_four / fut_ref / achat_four : ce sont des listes de NOMS (textes).
-  intrants:['produits','achats','inventaires','futs','fut_mouv']};
+  intrants:['produits','achats','inventaires','futs','fut_mouv','fertil']};   // fertil : FERTI-1
 function _mvListeObjets(key, value){
   if(_MV_SOUS_LISTES[key] && value && typeof value === 'object' && !Array.isArray(value)){
     var copie = Object.assign({}, value);
@@ -852,6 +852,14 @@ function saveData(keyHint, toastMsg, toastCoul) {
       msg:'saveData('+keyHint+') ignore -- cle pas encore lue depuis Firestore',
       detail:'verrou de chargement (Couche 2 anti-perte)'});
     return;
+  }
+  // FERTI-3 : une session « Amendement » coche la tâche « Amendement » des parcelles qu'elle a faites,
+  //   marquée « faite au tracteur » (le Pilotage ne recompte pas ces heures). Réconciliation idempotente,
+  //   jamais réentrante : elle sauve elle-même parcelles et journal.
+  if(keyHint==='sessions' && typeof window._ferSyncSessions==='function' && !window._ferSyncEnCours){
+    window._ferSyncEnCours=true;
+    try{ window._ferSyncSessions(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveData _ferSyncSessions'); }
+    finally{ window._ferSyncEnCours=false; }
   }
   if((keyHint==='parcelles'||!keyHint) && typeof _recalcSurfTotale==='function'){ try{ _recalcSurfTotale(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveData'); } }
   // Toujours lire depuis window.* (source de vérité après synchro Firebase)

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.82';
+export const APP_VERSION = '7.85';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -730,6 +730,30 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.85', items: [
+    { emoji: 'tracteur', titre: 'Le semis au tracteur coche la t\u00e2che \u00ab\u00a0Amendement\u00a0\u00bb',
+      desc: "Quand une parcelle est faite dans une session tracteur de l\u2019activit\u00e9 \u00ab\u00a0Amendement\u00a0\u00bb, sa t\u00e2che \u00ab\u00a0Amendement\u00a0\u00bb se valide toute seule. "
+        + "Le journal le note \u00ab\u00a0Fait au tracteur\u00a0\u00bb, au nom du conducteur. Dans le Pilotage, ce temps reste celui de la session\u00a0: il n\u2019est pas compt\u00e9 une seconde fois, et les heures de l\u2019\u00e9quipe ne vont pas sur la parcelle sem\u00e9e. "
+        + "Une validation annul\u00e9e depuis la parcelle n\u2019est pas refaite par la m\u00eame session." },
+  ] },
+  { v: '7.84', items: [
+    { emoji: 'euro', titre: 'Le co\u00fbt d\u2019un amendement, d\u00e8s qu\u2019il est pr\u00e9vu',
+      desc: "Un amendement enregistr\u00e9 avec un prix entre maintenant au <b>pr\u00e9vu</b> des achats dans Pilotage \u203a \u00c9conomie \u203a Exercice, \u00e0 sa semaine pr\u00e9vue. "
+        + "D\u00e8s que sa facture est saisie dans La R\u00e9serve, c\u2019est elle qui compte, \u00e0 l\u2019engag\u00e9\u00a0: le montant n\u2019est jamais compt\u00e9 deux fois. Sans prix, rien n\u2019est pr\u00e9vu." },
+    { emoji: 'pousse', titre: 'L\u2019ann\u00e9e de plantation sur le cahier de fertilisation',
+      desc: "La fiche d\u2019une parcelle, dans l\u2019onglet Fertilisation, prend son <b>ann\u00e9e de plantation</b>. Elle sort sur le cahier imprim\u00e9 et dans le fichier tableur, \u00e0 la place du tiret." },
+  ] },
+  { v: '7.83', items: [
+    { emoji: 'pousse', titre: 'Un amendement, et le cahier de fertilisation qui se remplit seul',
+      desc: "Dans Phyto, un nouvel onglet <b>Fertilisation</b>. Le bouton rond ouvre l\u2019amendement\u00a0: le produit (cherch\u00e9 dans E-Phy, ou un produit norm\u00e9 avec sa norme), "
+        + "sa composition lue sur le sac, la dose conseill\u00e9e \u00e0 l\u2019hectare et le poids d\u2019un sac. Vous cochez les parcelles\u00a0: le nombre de sacs de chacune et la commande se calculent. "
+        + "La vitesse dans le rang et le temps utile donnent le temps tracteur. \u00c0 l\u2019enregistrement, la t\u00e2che \u00ab\u00a0Amendement\u00a0\u00bb est pr\u00e9vue sur ces parcelles, "
+        + "l\u2019activit\u00e9 tracteur re\u00e7oit son bar\u00e8me et le produit entre dans La R\u00e9serve. Rien n\u2019est obligatoire\u00a0: sans prix, le co\u00fbt reste \u00ab\u00a0\u2014\u00a0\u00bb." },
+    { emoji: 'document', titre: 'Le cahier d\u2019enregistrement de la fertilisation',
+      desc: "Chaque parcelle se date seule le jour o\u00f9 elle est valid\u00e9e\u00a0: session tracteur de l\u2019activit\u00e9 \u00ab\u00a0Amendement\u00a0\u00bb, ou t\u00e2che valid\u00e9e. "
+        + "L\u2019onglet montre l\u2019azote apport\u00e9 sur la campagne et ce qu\u2019un contr\u00f4le va demander\u00a0: zone vuln\u00e9rable, \u00eelot PAC, type de sol, analyse de sol. "
+        + "Le cahier s\u2019imprime, ou sort en fichier tableur, depuis l\u2019onglet ou la roue crant\u00e9e du Phyto." },
+  ] },
   { v: '7.82', items: [
     { emoji: 'raisin', titre: 'Le rendement en hL/ha, enfin rempli dans le fichier Excel des parcelles',
       desc: "Le fichier Excel des parcelles sortait ses colonnes de rendement \u00e0 z\u00e9ro \u2014 \u00ab\u00a00 estim\u00e9\u00a0\u00bb, fourchette \u00ab\u00a00 \u2013 0\u00a0\u00bb \u2014 alors que les kilos \u00e9taient bien l\u00e0. "
@@ -3714,6 +3738,7 @@ var MV_AIDE = {
   tracteur: {
     ico: 'tracteur', titre: 'Tracteur', ancre: 'tracteur',
     points: [
+      ['Une session \u00ab Amendement \u00bb', "coche la t\u00e2che \u00ab Amendement \u00bb de chaque parcelle faite, marqu\u00e9e \u00ab faite au tracteur \u00bb dans le journal. Le temps compt\u00e9 est celui de la session, pas une journ\u00e9e d\u2019\u00e9quipe. L\u2019amendement lui-m\u00eame se pr\u00e9pare dans Phyto \u203a Fertilisation."],
       ['Onglet Sessions', ": le travail fait avec la machine. Onglet Entretien : révisions, réparations, appoints de cuve."],
       ['Le parc', "s’affiche en pastilles sous les chiffres — toucher une machine filtre l’écran."],
       ['Une session en cours', "reste signalée en haut tant qu’elle n’est pas fermée."],
@@ -3738,9 +3763,13 @@ var MV_AIDE = {
     points: [
       ['Le catalogue produits', "vient d’E-Phy (ANSES) et se met à jour tout seul chaque semaine."],
       ['Un traitement', "= des produits, les parcelles cochées et un conducteur. La surface se calcule seule."],
-      ['Le bouton rond en bas à droite', "ouvre un nouveau traitement."],
+      ['Le bouton rond en bas \u00e0 droite', "ouvre un nouveau traitement sur l\u2019onglet Registre, un nouvel amendement sur l\u2019onglet Fertilisation (administrateur)."],
       ['Le délai de rentrée', "se déduit des mentions de danger du produit : la parcelle traitée se ferme d’elle-même jusqu’à son heure de libération."],
-      ['Le registre sort sous deux formes', "depuis la roue crantée en haut à droite : le PDF à présenter, et un fichier tableur avec une ligne par produit et par parcelle. Ce second format est celui qui sera attendu en contrôle à partir du 1er janvier 2027."],
+      ['Le registre des traitements sort sous deux formes', "depuis la roue crantée en haut à droite : le PDF à présenter, et un fichier tableur avec une ligne par produit et par parcelle. Ce second format est celui qui sera attendu en contrôle à partir du 1er janvier 2027."],
+      ['L\u2019onglet Fertilisation', "tient le registre des amendements et engrais. Le bouton rond (administrateur) ouvre un amendement en cinq \u00e9tapes conseill\u00e9es\u00a0: le produit et sa composition, les parcelles, le passage tracteur, la semaine pr\u00e9vue, puis ce qui s\u2019ajoute. Les sacs de chaque parcelle, la commande, l\u2019azote par hectare et le temps tracteur se calculent seuls."],
+      ['Le temps utile', "est la part du temps o\u00f9 le semoir s\u00e8me vraiment dans le rang. Le reste : demi-tours, recharges de sacs, traverses. 75 % = 3 heures de semis sur 4 heures dans la parcelle. Avec la vitesse et l\u2019\u00e9cartement, il donne le bar\u00e8me en heures par hectare."],
+      ['La date d\u2019\u00e9pandage', "ne se saisit pas : c\u2019est le jour o\u00f9 la parcelle est valid\u00e9e, dans une session tracteur de l\u2019activit\u00e9 \u00ab Amendement \u00bb ou en validant la t\u00e2che. La session coche aussi la t\u00e2che, marqu\u00e9e \u00ab faite au tracteur \u00bb : le Pilotage ne recompte pas ces heures. Sans l\u2019un ni l\u2019autre, l\u2019administrateur la pose \u00e0 la main sur la ligne de la parcelle."],
+      ['Ce qu\u2019un contr\u00f4le va demander', "en bas de l\u2019onglet : les parcelles en zone vuln\u00e9rable, leur \u00eelot PAC et leur sol (touchez le nom d\u2019une parcelle pour les poser), l\u2019analyse de sol au-del\u00e0 de 3 ha, le fractionnement de l\u2019azote min\u00e9ral. La fiche d\u2019une parcelle prend aussi son ann\u00e9e de plantation. Le cahier s\u2019imprime ou sort en fichier tableur au m\u00eame endroit."],
       ['Le budget cuivre', "cumule le cuivre métal sur sept ans glissants face au plafond. Il informe, il ne bloque rien. Sa synthèse s’imprime depuis la roue crantée."],
       ['Accès', ": rôle Admin ou Tractoriste."]
     ]
@@ -3895,7 +3924,7 @@ var MV_AIDE = {
       ['Le total de l’Exercice n’est pas un compte de résultat', ": Ma Vigne connaît ce qui passe par elle — heures payées, carburant, achats d’intrants. Ni le fermage, ni les amortissements, ni les assurances, ni vos cotisations d’exploitant. Ce total sert à <b>piloter vos charges d’un bilan à l’autre</b>, pas à remplacer votre comptable."],
       ['La carte de fiabilité d’Économie', ": elle relit la liste du bandeau <b>« à compléter »</b> — mêmes lignes, mêmes mots, mêmes boutons — et n’en garde que ce qui met un <b>poste de ce budget à zéro</b> : un taux horaire, le prix du GNR, une dose. Ce n’est pas « un peu bas » : c’est zéro, et le budget affiché n’est qu’un plancher. La puce « N remarques » en dessous ouvre tout ce qui n’empêche pas un calcul mais change sa lecture."],
       ['Économie', "compare un budget de barème à ce qui est engagé — les heures réellement passées dans les rangs au planning, validées ou non —, sur la <b>période consultée</b> — le coût d’un bilan entier se lit dans sa sous-vue <b>Exercice</b>. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire. Dans <b>Postes & travaux</b>, le <b>temps réel</b> de chaque travail — les heures du planning versées aux parcelles validées, au prorata de la surface — se lit à côté du h/ha du barème."],
-      ['Économie › Exercice', "coupe l’année <b>au jour</b> : l’<b>engagé</b> (ce qui est sorti) à gauche d’aujourd’hui, le <b>prévu</b> (les salaires que la grille du planning annonce) hachuré à droite, et le total à la clôture qui dit qu’il contient du prévu. Contre l’an dernier, la comparaison se fait <b>aux mêmes jours</b>, pas dix mois de grille contre douze mois payés."],
+      ['Économie › Exercice', "coupe l’année <b>au jour</b> : l’<b>engagé</b> (ce qui est sorti) à gauche d’aujourd’hui, le <b>prévu</b> (les salaires que la grille du planning annonce, et les amendements chiffrés pas encore facturés) hachuré à droite, et le total à la clôture qui dit qu’il contient du prévu. Contre l’an dernier, la comparaison se fait <b>aux mêmes jours</b>, pas dix mois de grille contre douze mois payés."],
       ['Économie › Revient', "répond à trois questions pour le millésime : combien de vin, combien de bouteilles, combien coûte chacune à la vigne. Tout se lit sur le <b>cycle</b> du millésime, d’une vendange à la suivante. Tant qu’une parcelle n’est pas récoltée, son rendement est la moyenne de ses millésimes connus — jamais le plafond — et les chiffres sont marqués <b>probable</b>. Le tableau se lit par appellation ; touchez une ligne pour voir ses parcelles. Deux réglages dans la roue crantée : les pertes d’élevage, et vos autres charges de l’année pour un coût complet indicatif."],
       ['La carte de verdict d’Économie', ": elle dit en une phrase où vous en êtes, et pose les boutons pour agir — voir quel travail dérape, ouvrir le barème. Quand la cadence affichée vient de la campagne précédente, une ligne sous le texte le dit, avec le nom de cette campagne. Le <b>comment</b> du calcul est derrière son petit « i »."],
       ['L’écart de cadence cherche sa source dans un ordre', ", et dit toujours laquelle il a trouvée. D’abord <b>la période en cours</b>, dès 40 % de barème réalisé. Sinon <b>la même période de la campagne précédente</b>, si elle est archivée — la ligne porte alors un <b>↩</b> et nomme la campagne : cet écart-là <b>se lit, il ne s’applique pas</b> au budget ni à la date de fin. Même règle quand le facteur sort de [0,5 ; 3] : un trou de saisie n’est pas une cadence, l’écran le dit. Sinon rien, et l’écran l’écrit plutôt que d’afficher un chiffre inventé."],
@@ -4110,7 +4139,7 @@ export const MV_INFO = {
   // ★ TV-1 (23/09/2026) — posée sur la carte « Temps réel contre barème » (_pecCarteTemps).
   'pil.eco.temps': { t: 'Temps réel contre barème', p: [
     'Pour chaque salarié, chaque jour : ses heures <b>dans les rangs</b> au planning — congés, récup, arrêts, absences et formation à zéro — moins ses heures de <b>conduite tracteur</b>, déjà mesurées par les sessions. Le bureau n\u2019entre pas. Un jour où il figure sur une <b>opération de cave</b>, sa journée entière sort de la vigne.',
-    'Ces heures sont versées aux parcelles <b>validées ce jour-là</b>. Une validation vaut pour toutes les personnes nommées : trois personnes une heure sur un are, c\u2019est trois heures sur ce travail. Quelqu\u2019un qui n\u2019est nommé sur aucune validation du jour voit sa journée partagée entre <b>toutes</b> les parcelles validées ce jour-là : valider pour l\u2019équipe sans la cocher ne fait pas perdre ses heures. Deux équipes cochées sur des parcelles différentes gardent chacune les leurs.',
+    'Ces heures sont versées aux parcelles <b>validées ce jour-là</b>. Une validation vaut pour toutes les personnes nommées : trois personnes une heure sur un are, c\u2019est trois heures sur ce travail. Quelqu\u2019un qui n\u2019est nommé sur aucune validation du jour voit sa journée partagée entre <b>toutes</b> les parcelles validées ce jour-là : valider pour l\u2019équipe sans la cocher ne fait pas perdre ses heures. Deux équipes cochées sur des parcelles différentes gardent chacune les leurs. Une parcelle validée par une session tracteur (« faite au tracteur ») ne reçoit pas d\u2019heures de l\u2019équipe : son temps est celui de la session.',
     'Plusieurs parcelles validées <b>le même jour</b> se partagent la journée <b>au prorata du barème</b> : pour un même travail, c\u2019est la surface. Trois personnes huit heures sur 1 ha, 0,5 ha et 0,5 ha de taille : 24 h pour 2 ha, soit <b>12 h/ha</b> — contre 15 au barème, le travail est allé plus vite que la convention. Une taille et un relevage validés le même jour se partagent la journée selon ce que chacun demande au barème.',
     'Un jour où l\u2019administrateur a posé des <b>équipes du jour</b> (Accueil), chaque équipe garde ses parcelles : quelqu\u2019un qui n\u2019est pas dans le groupe d\u2019une validation n\u2019y met pas ses heures, il les garde pour ses propres validations. Une validation faite sans groupe ce jour-là prend l\u2019équipe du jour de son auteur.',
     'Une validation marque la <b>fin</b> d\u2019un travail. Les jours où <b>personne</b> ne valide vont donc aux parcelles validées <b>ensuite</b>. Ce qui n\u2019a pas encore trouvé de validation reste <b>en attente</b>, affiché sous le tableau — jamais perdu, jamais compté deux fois.',
@@ -4306,14 +4335,14 @@ export const MV_INFO = {
     '<b>MO</b> = main-d\u2019\u0153uvre <b>payée</b> pour la parcelle : les heures du planning versées à ses validations, au taux du jour. <b>Écart</b> = cette MO \u2212 le barème du travail fait (<b>+</b> = plus cher que prévu). <b>Reste</b> = main-d\u2019\u0153uvre <b>encore à faire</b>, au barème. <b>Budget</b> = le barème de la période.',
     '<b>Tracteur et phyto</b> sont du <b>réalisé</b> : seulement ce qui a été saisi, sans projection. Le <b>GNR</b> est l\u2019enveloppe réelle de vos pleins, répartie entre les parcelles au prorata des heures machine — à défaut d\u2019heures saisies, au prorata de la <b>surface</b>.',
     'Le <b>coût à l\u2019hectare</b> neutralise la taille. Ce qui reste, c\u2019est ce qu\u2019une parcelle a de particulier : plants à remplacer, passages en plus, équipe plus chère, tri des tâches.',
-    'La <b>MO</b> d\u2019une parcelle suit la règle du temps réel : la journée de ceux qui sont dans les rangs se partage entre les parcelles <b>validées ce jour-là</b>, au prorata du barème, et les jours sans aucune validation vont aux parcelles validées ensuite. Une parcelle chère ou bon marché dit donc ce que l\u2019équipe y a passé entre deux validations — d\u2019où l\u2019intérêt de valider chaque parcelle le jour où elle est finie.'
+    'La <b>MO</b> d\u2019une parcelle suit la règle du temps réel : la journée de ceux qui sont dans les rangs se partage entre les parcelles <b>validées ce jour-là</b>, au prorata du barème, et les jours sans aucune validation vont aux parcelles validées ensuite. Une parcelle chère ou bon marché dit donc ce que l\u2019équipe y a passé entre deux validations — d\u2019où l\u2019intérêt de valider chaque parcelle le jour où elle est finie. Une validation « faite au tracteur » n\u2019entre pas dans ce partage : le temps de la machine est compté par la session.'
   ] },
 
   'pil.exo.postes': { t: 'Les postes de l\u2019exercice', p: [
     '<b>Quatre postes toujours présents</b> : les salaires, le carburant, les achats d\u2019intrants et les réparations (les passages chez le réparateur, à leur date de retour). Deux s\u2019ajoutent quand ils existent : la <b>location de fûts</b>, au prorata des jours de contrat, et les <b>fûts achetés</b> si vous avez choisi de les compter.',
     'La <b>conduite</b> du tracteur est déjà dans les salaires — c\u2019est du temps de travail payé. La compter une seconde fois au poste tracteur reviendrait à <b>payer deux fois le tractoriste</b>. Seul son <b>carburant</b> s\u2019ajoute.',
     'Le graphique <b>mois par mois</b> montre ce qui est sorti, à la date où c\u2019est sorti. Un exercice viticole n\u2019est pas régulier : la taille en hiver, les vendanges à l\u2019automne, un creux en été. Ces bosses sont normales — c\u2019est justement ce qu\u2019on vient regarder.',
-    'Sur un exercice <b>en cours</b>, l\u2019année est coupée <b>au jour</b> : à gauche d\u2019aujourd\u2019hui, l\u2019<b>engagé</b> — ce qui est sorti, à sa date ; à droite, le <b>prévu</b> — les salaires que la grille du planning annonce jusqu\u2019à la clôture, hachurés. Un mois entamé est coupé au jour, jamais compté d\u2019un seul côté. Le carburant, les achats et les réparations n\u2019ont pas de prévu : Ma Vigne ne connaît que ce qui est sorti.',
+    'Sur un exercice <b>en cours</b>, l\u2019année est coupée <b>au jour</b> : à gauche d\u2019aujourd\u2019hui, l\u2019<b>engagé</b> — ce qui est sorti, à sa date ; à droite, le <b>prévu</b> — les salaires que la grille du planning annonce jusqu\u2019à la clôture, hachurés. Un mois entamé est coupé au jour, jamais compté d\u2019un seul côté. Le carburant et les réparations n\u2019ont pas de prévu : Ma Vigne ne connaît que ce qui est sorti. Un amendement enregistré avec un prix (Phyto \u203a Fertilisation) entre au prévu des achats, à sa semaine prévue, et en sort dès que sa facture est saisie dans La Réserve : jamais compté deux fois.',
     'Contre l\u2019an dernier, deux comparaisons : <b>à date comparable</b> — ce qui est sorti aux mêmes jours après l\u2019ouverture — et l\u2019<b>exercice complet</b>, qui contient du prévu et le dit.'
   ] },
 
