@@ -3,11 +3,11 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **2 octobre 2026 (ARRACH-7)** — ★ **L'ARRACHAGE FINI POUR L'ÉQUIPE, LA SUITE AU PRESTATAIRE** (§211).
-> Capture de Nico : arrachage à 0 % alors que le démontage (travail de l'équipe) est fait partout et le reste au prestataire.
-> Deux lectures : `_arrFraction` (part des étapes faites) → `recalcTravaux` et `getPCls` ; `_arrEquipeFinie` (étapes non
-> prestataire faites) → `_mvPartTache` saute l'arrachage, `_mvPartCalc` le lit côté équipe. Base `03a41d2`.
-> **Bump APP 7.91 → 7.92, SW 8.65 → 8.66** (visible).
+> Dernière consolidation : **3 octobre 2026 (AVALE-2)** — ★★ **UNE ERREUR AVALÉE QUI SE RÉPÈTE REMONTE AU JOURNAL DU DOMAINE** (§212).
+> Issu de l'audit qualité du 02/10 (P3, vérifié avant d'agir). `_mvAvale` écrit aux paliers 1 / 10 / 100 / 1000 : `info` la 1re
+> fois (local, inchangé), `warning` dès la 10e (part vers l'Admin GT). Toujours `silencieux:true`, honoré par `logError` : aucun
+> toast « erreur avalée dans … » chez le client. Harnais `mv-harnais-avale` étendu (exécute le vrai `logError`). Base `6028b23`.
+> **SW 8.66 → 8.67, APP inchangée (7.92)** — invisible du client.
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -429,10 +429,8 @@ sans ouvrir un seul fichier. Chaque lot se termine donc par un tableau :
 
 - ★★★ **Git, depuis le 10 août — via GitHub Desktop.** Dépôt `4ss4ss1/mavigne-dev` (**public** —
   nécessaire au clone anonyme de Claude), cloné dans
-  `C:\Users\p4n0m\Desktop\Applications\mavigne-dev\` — ⚠️ **CHEMIN À CONFIRMER PAR NICO** : une
-  note de mémoire indique `C:\Users\p4n0m\Documents\GitHub\mavigne-dev` (le défaut de GitHub
-  Desktop). **Les deux sont invérifiables depuis le bac à sable** ; le premier qui relit tranche et
-  supprime l'autre. (dossier **distinct** de l'ancien `mavigne\`,
+  **`C:\Users\p4n0m\Desktop\Dev\mavigne-dev\`** (tranché le 02/10 : les deux chemins notés jusque-là
+  étaient faux). (dossier **distinct** de l'ancien `mavigne\`,
   qui peut être supprimé une fois vérifié que tout a bien été copié dedans). Nico édite dans
   `mavigne-dev\`, GitHub Desktop détecte les changements, **Commit + Push** (deux clics, pas de
   ligne de commande). ⚠️ Ça ne change **rien** à `npm run build` / `firebase deploy`, qui restent
@@ -467,8 +465,8 @@ sans ouvrir un seul fichier. Chaque lot se termine donc par un tableau :
   ⚠️ Pas non plus de **substitution de processus** `<(…)` : pour un diff, écrire les deux fichiers
   sur disque. ⚠️ Une commande shell contenant des parenthèses non protégées échoue
   (`Syntax error: "(" unexpected`) — passer par Python.
-- Poste : `C:\Users\p4n0m\Desktop\Applications\mavigne` (ancien dossier) et
-  `C:\Users\p4n0m\Desktop\Applications\mavigne-dev` (dépôt Git, celui qui fait foi désormais).
+- Poste : dépôt Git `C:\Users\p4n0m\Desktop\Dev\mavigne-dev` (celui qui fait foi ; l'ancien dossier
+  `mavigne\` n'est plus la référence).
   Firebase CLI. `winget` absent (installer via `.msi`). **Java 17 (Temurin)** pour les émulateurs.
 - **Deux comptes Firebase** : `ngdevpro@gmail.com` = admin GT (`gtAdmin:true`) ·
   `gueret.nicolas@gmail.com` = admin le domaine de référence (`adm:true`). Toute procédure GT (backfill,
@@ -2525,6 +2523,9 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     suite** — 234 → 200 → 193. Le cliquet C14 travaille.
     **La baisse est réelle** (C14 fait son travail) : le cliquet interdit d'en ajouter, il ne purge
     pas l'existant. **Un lot ciblé `app.js` réglerait les trois quarts du sujet.**
+    ★ **Re-mesuré le 02/10 (audit) : 17 vides** (pilotage 10). Les autres sont passés en `_mvAvale` (§132) — vides devenus
+    traçables, pas résolus. Depuis AVALE-2 (§212), une répétition remonte à l'Admin GT : **le tri par emplacement peut
+    désormais se faire sur les `warning` « ×10 » du journal**, pas sur un avis.
 19. **Rôle `pilotage` (`pil:true`)** — **0 occurrence, vérifié.** 2 arbitrages préalables.
     Corriger aussi `getLoginRoster` (`functions/claims.js:1360`, renvoie toujours `roles`).
 20. **Injection de données pures dans les guides.**

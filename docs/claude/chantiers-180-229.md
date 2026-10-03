@@ -1463,3 +1463,48 @@ leur tête elle est arrachée […] qu'on puisse passer à un autre chantier »*
 `mv-harnais-arrach7.mjs` : **10 assertions** (vraies `_arrFraction`, `_arrEquipeFinie`, `getPCls`, `_mvPartTache`,
 `_mvPartCalc`), **5 contre-épreuves** rouges. Non vérifié à l'œil.
 
+## 212. ★★ AVALE-2 — UNE ERREUR AVALÉE QUI SE RÉPÈTE REMONTE AU JOURNAL DU DOMAINE (03/10 — `src/utils.js` · `public/sw.js` · `scripts/mv-harnais-avale.mjs` · **SW 8.66 → 8.67, APP inchangée (7.92)**, base `6028b23`)
+
+### 212a. D'où ça vient — un audit relu avant d'agir
+
+Audit qualité de `src/` (02/10, fait hors de cette session, base `cad12b0`), point P3 : *« 281 erreurs avalées, signalées une
+seule fois par session, en niveau info »*. Constat **juste**, et même plus grave que l'audit ne le disait : `info` n'est pas
+dans `_ERR_SEND_LVL` (§132d), donc une erreur avalée **ne quittait jamais le téléphone**. Mille échecs du même bouton = une
+ligne locale, que seul « Signaler un problème » pouvait faire remonter, noyée parmi les `info`.
+★★★ **La correction proposée par l'audit était fausse** : passer à `level:'warning'` dès la 10e. `logError` peint un toast
+jaune pour tout `warning` — le client aurait vu « ⚠️ erreur avalée dans app.js/_recalcSurfTotale ». L'audit le soupçonnait
+(*« logError n'a pas été lu en entier : à mesurer »*) ; mesuré, c'était le cas. **Lire la fonction appelée avant d'en changer
+l'argument** (règle d'or n°3, corollaire du 07/08).
+Autres points du même audit, vérifiés le même jour et **non traités ici** : P2 (div cliquables au clavier) surestimé — 97 des
+374 `div onclick` sont des `event.stopPropagation()` de panneaux, pas des boutons, et le délégué proposé les aurait rendus
+tabulables ; P4 (ETP) faux pour l'essentiel — le rapport de saison lit déjà `_planSeasonHours` quand les champs sont vides, et
+pré-remplir les champs aurait FIGÉ le chiffre du Planning en saisie manuelle au premier « Enregistrer » (et l'audit lisait
+`ref` au lieu de `refBrute`) ; P6 — son code visait un `data-parc` et une fonction de carte unitaire qui n'existent pas.
+P1 et P7 redisaient les entrées 36 et 34 du backlog.
+
+### 212b. Ce qui change
+
+- `_mvAvale` écrit aux **paliers 1, 10, 100, 1000** (`_MV_AVALE_PALIERS`), jamais entre : le coût de `logError` (relecture +
+  réécriture du journal localStorage) reste borné à **4 écritures par emplacement et par session**. Le compteur
+  `window._mvAvalees` compte toujours tout.
+- Niveau : `info` au 1er palier (**inchangé** : un hoquet reste local, §132d tient), `warning` à partir de 10 → part vers
+  `error_log` du domaine (Admin GT) et passe devant les `info` dans « Signaler un problème ». Le message porte la récurrence :
+  `erreur avalée dans app.js/x (×10 cette session)` — le dédoublonnage de `_errShouldSend` (clé `cat|msg`) laisse donc passer
+  chaque palier.
+- `logError({silencieux:true})` : journalise et envoie selon le niveau, **ne peint rien**. Seul `_mvAvale` le pose.
+
+### 212c. Mesuré
+
+`mv-harnais-avale.mjs` : **23 assertions** (12 avant). Nouveau : 1 000 avalements → 4 traces `info,warning,warning,warning`,
+toutes silencieuses, messages ×10/×100/×1000 ; **section F : le VRAI `logError` exécuté** (extrait du source avec
+`_errShouldSend` et `_ERR_SEND_LVL`, doublures pour l'écran) — un `warning` silencieux ne peint aucun toast **et** part vers
+`fbAppendError`, une `info` ne part pas, un `warning` ordinaire (témoin) peint toujours son toast. Contre-épreuve **6/6
+injectés, 14 rouges** ; l'injection « `logError` ignore `silencieux` » seule rougit F.
+★ **Piège rencontré** : l'assertion D (`logError` n'appelle pas `_mvAvale`) cherche le nom dans le corps. Mon commentaire dans
+`logError` le citait → rouge. Reformulé. *Un test par recherche de texte lit aussi les commentaires.*
+
+### 212d. Ouvert
+
+① La valeur arrive **à l'usage** : c'est le journal GT qui dira, dans quelques jours, quels emplacements produisent des
+« ×10 ». C'est le lot de tri que §132 attendait. ② Les 17 `catch` encore vides (pilotage 10) ne sont pas touchés. ③ Aucun
+rendu navigateur (le changement ne peint rien, par construction).

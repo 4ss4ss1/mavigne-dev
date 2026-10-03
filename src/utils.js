@@ -3411,25 +3411,42 @@ function _errCurrentPage() {
    distinguer par relecture de 223 emplacements sans se tromper quelque part :
    on les rend tous TRACABLES, et le tri se fera sur des donnees.
 
-   ★★★ NIVEAU 'info', ET C'EST DELIBERE. `_ERR_SEND_LVL` n'envoie a Firestore que
-   critical / error / warning : une erreur avalee ne remontera donc PAS dans le
-   journal du domaine et n'inondera personne. Elle s'ecrit en local, ou l'ecran
+   ★★★ NIVEAU 'info' A LA PREMIERE FOIS, ET C'EST DELIBERE. `_ERR_SEND_LVL` n'envoie
+   a Firestore que critical / error / warning : une erreur avalee UNE fois ne remonte
+   donc PAS dans le journal du domaine et n'inonde personne (la 10e, si — AVALE-2). Elle s'ecrit en local, ou l'ecran
    Admin la lit deja. Ce lot ouvre une fenetre, il ne declenche pas d'alarme.
 
    ⚠️⚠️ UNE FOIS PAR EMPLACEMENT ET PAR SESSION. `logError` relit et reecrit tout
    le journal localStorage a chaque appel : appele depuis une boucle de rendu,
    il couterait plus cher que le defaut qu'il signale. Le compteur reste, lui,
-   et `window._mvAvalees` le rend lisible en console. */
+   et `window._mvAvalees` le rend lisible en console.
+
+   ★★★ AVALE-2 (§212) — UNE PANNE REPETEE PARLE, UN HOQUET RESTE DISCRET.
+   Le defaut d'avant : une erreur produite mille fois etait journalisee UNE fois,
+   en 'info', donc UNIQUEMENT dans le telephone. Le compteur montait et personne
+   ne le relisait jamais : du point de vue du journal du domaine, un bouton casse
+   a chaque tap etait aussi invisible qu'avec un catch vide.
+   On ecrit donc aux PALIERS 1, 10, 100, 1000 — jamais entre (le cout de logError
+   reste borne a quatre ecritures par emplacement et par session) :
+     - 1re fois  : 'info', local seulement. Inchange : un hoquet ne derange personne.
+     - 10e fois et au-dela : 'warning' -> part dans le journal du domaine (Admin GT)
+       et passe devant les 'info' dans « Signaler un probleme ». Dix fois dans la
+       meme session, ce n'est plus un incident : c'est en panne.
+   ⚠️⚠️ TOUJOURS `silencieux:true`. Un 'warning' ordinaire peint un toast jaune
+   « ⚠️ erreur avalée dans app.js/… » — du jargon a l'ecran du vigneron. Le palier
+   s'adresse a celui qui depanne, jamais au client. Le harnais tient les deux. */
 var _MV_AVALEES = {};
+var _MV_AVALE_PALIERS = { 1: 1, 10: 1, 100: 1, 1000: 1 };
 export function _mvAvale(e, ou) {
   var k = ou ? String(ou) : '?';
-  _MV_AVALEES[k] = (_MV_AVALEES[k] || 0) + 1;
-  if (_MV_AVALEES[k] > 1) return;   /* deja signale cette session */
+  var n = _MV_AVALEES[k] = (_MV_AVALEES[k] || 0) + 1;
+  if (!_MV_AVALE_PALIERS[n]) return;   /* hors palier : le compteur seul avance */
   if (typeof logError !== 'function') return;
   var d = '';
   if (e && (e.stack || e.message)) d = String(e.stack || e.message).slice(0, 300);
   else if (e !== undefined) d = String(e).slice(0, 300);
-  logError({ level: 'info', cat: 'avale', msg: 'erreur avalée dans ' + k, detail: d });
+  logError({ level: n >= 10 ? 'warning' : 'info', silencieux: true, cat: 'avale',
+    msg: 'erreur avalée dans ' + k + (n > 1 ? ' (×' + n + ' cette session)' : ''), detail: d });
 }
 
 export function logError(opts) {
@@ -3468,7 +3485,12 @@ export function logError(opts) {
   if(window.fbAppendError && _errShouldSend(entry)) window.fbAppendError(entry);
 
   // 3. Affichage utilisateur
-  if(level === 'critical') {
+  //    `silencieux` : journalise et envoie selon le niveau, mais ne peint RIEN a l'ecran.
+  //    Pose par le helper des erreurs avalees (AVALE-2, §212) : une panne repetee doit remonter a l'Admin GT
+  //    sans afficher au client un toast « erreur avalée dans app.js/… ».
+  if(opts.silencieux) {
+    /* rien a l'ecran */
+  } else if(level === 'critical') {
     _showCriticalOverlay(entry);
   } else if(level === 'error') {
     _mvSuppressToastCapture = true;
