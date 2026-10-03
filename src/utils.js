@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.91';
+export const APP_VERSION = '7.92';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -730,6 +730,11 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.92', items: [
+    { emoji: 'equipe', titre: 'L\u2019arrachage fini pour l\u2019\u00e9quipe, la suite au prestataire',
+      desc: "Quand l\u2019arrachage est d\u00e9coup\u00e9 en \u00e9tapes, son avancement compte maintenant la part faite\u00a0: d\u00e9montage fait, ramassage au prestataire, la parcelle est \u00e0 la moiti\u00e9 au lieu de 0\u00a0%. "
+        + "Et d\u00e8s que les \u00e9tapes de l\u2019\u00e9quipe sont faites partout, <b>Ma part du chantier</b> passe au chantier suivant\u00a0: ce qui reste est l\u2019affaire du prestataire. La fiche de la parcelle l\u2019\u00e9crit\u00a0: \u00ab\u00a0fini pour l\u2019\u00e9quipe, la suite au prestataire\u00a0\u00bb." },
+  ] },
   { v: '7.91', items: [
     { emoji: 'corbeille', titre: 'Arracher une parcelle valide aussi le travail, en un seul geste',
       desc: "D\u00e9clarer une parcelle \u00ab\u00a0Arrach\u00e9e\u00a0\u00bb ne validait pas le travail d\u2019arrachage\u00a0: il fallait la remettre en exploitation pour le valider, et les autres travaux de la p\u00e9riode r\u00e9apparaissaient. "
@@ -3767,7 +3772,7 @@ var MV_AIDE = {
       ['L’anneau doré qui respire', "sur la carte marque la parcelle <b>commencée et pas finie</b> pour le travail affiché\u00a0: celle où «\u00a0Début\u00a0» a été touché sans validation. S’il n’y en a aucune, il se pose sur la <b>prochaine à faire</b>, le n°\u00a01 de la tournée enregistrée. Sur «\u00a0toutes\u00a0», c’est la priorité du moment. Plusieurs parcelles commencées ont chacune leur anneau, et rien ne s’affiche sur une période archivée."],
       ['La recherche', "accepte le nom du climat comme le lieu-dit."],
       ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique. La déclarer arrachée valide aussi son <b>arrachage</b> (case cochée d’office) ; valider l’arrachage d’une vigne en place propose de la déclarer arrachée. Son avancement et sa fiche ne portent plus que l’<b>arrachage</b> : aucun autre travail ne s’y valide. Elle reste saisissable au journal pour son <b>arrachage</b>, en bas de la liste des parcelles, tant qu’elle est choisie pour la campagne."],
-      ['L’arrachage en étapes', "quand l’administrateur l’a découpé (roue crantée, <b>Tâches</b>), la fiche de la parcelle montre une puce par étape : touchez-la pour la valider à sa date. Une étape <b>prestataire</b> se valide sans compter d’heures de l’équipe. Au moment choisi, l’application propose de passer la parcelle en « Arrachée »."],
+      ['L’arrachage en étapes', "quand l’administrateur l’a découpé (roue crantée, <b>Tâches</b>), la fiche de la parcelle montre une puce par étape : touchez-la pour la valider à sa date. Une étape <b>prestataire</b> se valide sans compter d’heures de l’équipe. L’avancement compte la part des étapes faites ; quand celles de l’équipe sont faites partout, <b>Ma part du chantier</b> passe au suivant. Au moment choisi, l’application propose de passer la parcelle en « Arrachée »."],
       ['Arrachage, désherbage manuel, effeuillage', "ne concernent que les parcelles <b>choisies pour la campagne</b>. L’administrateur les coche dans la roue crantée, <b>Tâches</b>, sur la ligne du travail, ou une par une dans la fiche de la parcelle. Une parcelle où le travail a déjà été saisi compte d’office. L’an prochain, la liste repart vide."],
       ['Valider pour l’équipe sans y être', "l’administrateur voit sa propre puce dans le groupe («\u00a0Moi\u00a0», «\u00a0Moi aussi dans les rangs\u00a0» sur la barre d’équipe)\u00a0: décochée, la validation reste signée de son nom mais ses heures ne vont pas à la parcelle. Le choix est retenu pour la tâche."],
       ['L’état du vignoble', "s’imprime depuis la roue crantée de la Vigne, bloc Documents : toutes vos parcelles sur une page, avec la surface, le cépage, la commune, l’avancement, le dernier travail, le dernier rendement — et la liste de ce qui reste à renseigner."],

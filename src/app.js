@@ -6574,11 +6574,14 @@ function _mvPartTache(){
   lst.forEach(function(t){
     var tw=TRAVAUX[t.nom]||{};
     if((tw.pct||0)>=100)return;              // chantier fini : on ne le remet pas en avant
+    if(t.nom==='Arrachage'&&typeof _arrEquipeFiniePartout==='function'&&_arrEquipeFiniePartout())return;   // ARRACH-7 : la suite est au prestataire
     var n=cnt[t.nom]||0;
     if(n>bestN){bestN=n;best=t.nom;}
   });
   if(best)return best;
-  var open=lst.filter(function(t){var tw=TRAVAUX[t.nom]||{};return (tw.pct||0)<100;});
+  var open=lst.filter(function(t){var tw=TRAVAUX[t.nom]||{};
+    if(t.nom==='Arrachage'&&typeof _arrEquipeFiniePartout==='function'&&_arrEquipeFiniePartout())return false;   // ARRACH-7
+    return (tw.pct||0)<100;});
   if(!open.length)return null;
   open.sort(function(a,b){return ((TRAVAUX[b.nom]||{}).pct||0)-((TRAVAUX[a.nom]||{}).pct||0);});
   return open[0].nom;
@@ -6599,9 +6602,13 @@ function _mvPartCalc(tache,nom){
     if(j.date>=d15&&j.statut==='Validé')recent[j.parcelle]=1;
   });
   var mine=0,done=0,restS=0,restN=0,recS=0,restNoms=[],mineParcs=[];
+  // ARRACH-7 : pour l'arrachage découpé, « fait » se lit côté ÉQUIPE (étapes non prestataire faites).
+  var _fait=(tache==='Arrachage'&&typeof _arrActif==='function'&&_arrActif())
+    ? function(p){ return _arrEquipeFinie(p); }
+    : function(p){ return getTacheStatut(p,tache)==='Validé'; };
   parcs.forEach(function(p){
     var s=parseFloat(p.surface)||0;
-    if(getTacheStatut(p,tache)==='Validé'){
+    if(_fait(p)){
       done+=s;
       if(recent[p.nom])recS+=s;
       var c=contrib[p.nom]?Object.keys(contrib[p.nom]):[];
@@ -7463,7 +7470,9 @@ function getPCls(p){
     && !((typeof _mvArrHors==='function')&&_mvArrHors(p,t.nom)));   // SEL-1 · AVC-ARR : une arrachée ne compte que l'arrachage
   const totalSaison=tachesActives.length;
   const nbDone=tachesActives.filter(t=>getTacheStatut(p,t.nom)==='Validé').length;
-  const pct=totalSaison>0?Math.round(nbDone/totalSaison*100):0;
+  // ARRACH-7 : un arrachage découpé à moitié fait compte pour moitié (le compte « n/N tâches » reste entier).
+  const _arrPart=(typeof _arrActif==='function'&&_arrActif()&&tachesActives.some(t=>t.nom==='Arrachage')&&getTacheStatut(p,'Arrachage')!=='Validé')?_arrFraction(p):0;
+  const pct=totalSaison>0?Math.round((nbDone+_arrPart)/totalSaison*100):0;
   if(p.statut==='Arrachee')return{a:'ava-x',d:'dr',cl:'pr',col:'var(--rouge)',fill:'var(--rouge)',pct,nbDone,nbTotal:totalSaison};
   var _gc=pctColor(pct);
   if(pct===100)return{a:'ava-c',d:'dc',cl:'pv',col:_gc,fill:_gc,pct,nbDone,nbTotal:totalSaison};
@@ -8056,6 +8065,31 @@ function _arrStatutTache(p){
   var n=_arrNbFaites(p), N=_arrCfg().etapes.length;
   return n===0?'Non d\u00e9marr\u00e9':(n>=N?'Valid\u00e9':'En cours');
 }
+// ★ ARRACH-7 (02/10) — DEUX LECTURES D'UN MÊME CHANTIER. Nico : l'équipe a fait le démontage partout,
+//   le reste est au prestataire ; « ça devrait être marqué presque 50 % » pour le domaine, mais
+//   « pour l'équipe, dans leur tête elle est arrachée » — il faut pouvoir passer à un autre chantier.
+//   · _arrFraction : la part FAITE du chantier (étapes faites / étapes), pour l'avancement du domaine.
+//   · _arrEquipeFinie : toutes les étapes de l'ÉQUIPE (non prestataire) sont faites — pour « Ma part
+//     du chantier » et le choix du chantier du moment. Ce qui reste est au prestataire.
+//   Une parcelle validée d'un bloc (ARRACH-6, ou avant le découpage) vaut 1 et « finie ».
+function _arrFraction(p){
+  if(typeof getTacheStatut==='function'&&getTacheStatut(p,'Arrachage')==='Valid\u00e9') return 1;
+  var E=_arrCfg().etapes; if(!E.length) return 0;
+  var f=_arrEtat(p);
+  return E.filter(function(e){return !!f[e.id];}).length/E.length;
+}
+function _arrEquipeFinie(p){
+  if(typeof getTacheStatut==='function'&&getTacheStatut(p,'Arrachage')==='Valid\u00e9') return true;
+  var E=_arrCfg().etapes; if(!E.length) return false;
+  var f=_arrEtat(p);
+  return E.filter(function(e){return !e.presta;}).every(function(e){return !!f[e.id];});
+}
+// Toutes les parcelles concernées sont finies pour l'équipe (et il y en a au moins une).
+function _arrEquipeFiniePartout(){
+  if(!_arrActif()) return false;
+  var L=(typeof _parcConcern==='function')?_parcConcern('Arrachage'):[];
+  return L.length>0&&L.every(_arrEquipeFinie);
+}
 function _arrSyncTache(p){
   if(!p.taches) p.taches={};
   if(typeof _mvOnActiveSaison==='function'&&!_mvOnActiveSaison()) return;
@@ -8074,7 +8108,8 @@ function _arrRowHtml(p,canEdit){
   }).join('');
   return '<div class="val-row mv-tr"><div style="flex:1;min-width:0">'
     +'<div class="mv-v" style="font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">Arrachage</div>'
-    +'<div class="mv-l" style="margin-top:2px">'+n+' \u00e9tape'+(n>1?'s':'')+' sur '+E.length+' \u00b7 temps r\u00e9el</div>'
+    +'<div class="mv-l" style="margin-top:2px">'+n+' \u00e9tape'+(n>1?'s':'')+' sur '+E.length
+      +((n<E.length&&_arrEquipeFinie(p))?' \u00b7 <b>fini pour l\u2019\u00e9quipe</b>, la suite au prestataire':' \u00b7 temps r\u00e9el')+'</div>'
     +'<div class="ppicker" style="margin-top:6px">'+chips+'</div></div></div>';
 }
 var _ARRE={nom:'',id:''};
@@ -9799,6 +9834,16 @@ function recalcTravaux(nomTache){
     tw.h_reste=Math.round((tw.h_total-tw.h_done)*10)/10;
     tw.pct=_rtt>0?Math.round(_rtd/_rtt*100):0;
     tw.trous_total=_rtt;tw.trous_done=_rtd;tw.min_trou=_rmt;
+  } else if(nomTache==='Arrachage'&&typeof _arrActif==='function'&&_arrActif()){
+    // ARRACH-7 : arrachage découpé — chaque parcelle compte pour la part de ses étapes faites
+    //   (démontage fait, ramassage au prestataire : la moitié). L'équipe, elle, lit _arrEquipeFinie.
+    tw.surf_total=surfTot;
+    tw.h_total=Math.round((tw.h_ha||0)*surfTot);
+    const surfDone=parcActives.reduce((acc,p)=>acc+(parseFloat(p.surface)||0)*_arrFraction(p),0);
+    tw.surf_done=Math.round(surfDone*100)/100;
+    tw.h_done=Math.round((tw.h_ha||0)*surfDone*10)/10;
+    tw.h_reste=Math.round((tw.h_total-tw.h_done)*10)/10;
+    tw.pct=surfTot>0?Math.round(surfDone/surfTot*100):0;
   } else {
     // Simple — toujours rafraîchir surf_total/h_total (évite pct>100% si Firebase périmé)
     tw.surf_total=surfTot;

@@ -3,11 +3,11 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **2 octobre 2026 (ARRACH-6)** — ★ **L'ARRACHAGE EN UN GESTE** (§210). Nico avait déclaré ses parcelles
-> « Arrachées » avant d'en valider le travail ; pour le valider il les remettait en exploitation → les autres travaux revenaient,
-> « 50 % », « c'est pas net ». ① La feuille « Arracher » valide aussi le travail (case cochée d'office, `_arrValideAuPassage`) ;
-> ② `confirmValidation` d'un arrachage sur une vigne en place propose « Arrachée » (`_arrProposer`, qui pose `_dpCurrentNom`).
-> Base `01c6a2e`. **Bump APP 7.90 → 7.91, SW 8.64 → 8.65** (visible).
+> Dernière consolidation : **2 octobre 2026 (ARRACH-7)** — ★ **L'ARRACHAGE FINI POUR L'ÉQUIPE, LA SUITE AU PRESTATAIRE** (§211).
+> Capture de Nico : arrachage à 0 % alors que le démontage (travail de l'équipe) est fait partout et le reste au prestataire.
+> Deux lectures : `_arrFraction` (part des étapes faites) → `recalcTravaux` et `getPCls` ; `_arrEquipeFinie` (étapes non
+> prestataire faites) → `_mvPartTache` saute l'arrachage, `_mvPartCalc` le lit côté équipe. Base `03a41d2`.
+> **Bump APP 7.91 → 7.92, SW 8.65 → 8.66** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---

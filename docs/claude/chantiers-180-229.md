@@ -1438,3 +1438,28 @@ fiche ne montre que l'arrachage (AVC-ARR) → le valider là.
 `mv-harnais-arrach6.mjs` : **13 assertions**, **5 contre-épreuves** rouges. Non vérifié à l'œil (pas de navigateur dans le bac à
 sable : `npx playwright install` refusé par le réseau).
 
+## 211. ★ ARRACH-7 — L'ARRACHAGE FINI POUR L'ÉQUIPE, LA SUITE AU PRESTATAIRE (02/10 — `src/app.js` · `src/utils.js` · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-arrach7.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · **bump APP 7.91 → 7.92, SW 8.65 → 8.66**, base `03a41d2`)
+
+### 211a. Le constat
+
+Capture de l'Accueil : « Ma part du chantier » — Arrach. **0 %**, « il reste 4 parcelles ». Nico : le démontage (le travail de
+l'équipe) est fait partout, le reste dépend du prestataire ; *« ça devrait être marqué presque 50 % »*, et *« pour l'équipe, dans
+leur tête elle est arrachée […] qu'on puisse passer à un autre chantier »*. Le statut de l'arrachage découpé était binaire
+(Validé seulement à la dernière étape) et `_mvPartTache` gardait l'arrachage tant que son % < 100.
+
+### 211b. Deux lectures (bloc ARRACH-3)
+
+- `_arrFraction(p)` — étapes faites / étapes (1 si validé d'un bloc). **Domaine** : `recalcTravaux('Arrachage')` (nouvelle
+  branche, surface × part) et `getPCls` (le % de la carte ajoute la part ; « n/N tâches » reste entier).
+- `_arrEquipeFinie(p)` — toutes les étapes **non prestataire** faites (vrai si validé d'un bloc ; faux sans découpage).
+  `_arrEquipeFiniePartout()` — toutes les parcelles concernées, au moins une. **Équipe** : `_mvPartTache` saute l'arrachage
+  (dans le choix par activité ET dans le repli), `_mvPartCalc` compte « fait » côté équipe. Fiche : « fini pour l'équipe, la
+  suite au prestataire ».
+- ⚠️ « Presque 50 % » suppose deux étapes (démontage + une étape prestataire) ; à trois étapes, c'est 33 %. Et l'équipe n'est
+  « finie » que si les étapes du prestataire sont bien marquées **Prestataire** dans le réglage.
+
+### 211c. Mesuré
+
+`mv-harnais-arrach7.mjs` : **10 assertions** (vraies `_arrFraction`, `_arrEquipeFinie`, `getPCls`, `_mvPartTache`,
+`_mvPartCalc`), **5 contre-épreuves** rouges. Non vérifié à l'œil.
+
