@@ -2437,7 +2437,10 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pil-tbody{display:none;padding:4px 16px 16px;border-top:1px solid var(--gris-clair);}
 .pil-tile.open .pil-tbody{display:block;}
 /* — Carte du domaine — */
-.pil-map{height:520px;max-width:560px;margin:11px auto 0;border-radius:12px;overflow:hidden;background:var(--gris-clair);}
+/* COH-1 (03/10) : Leaflet emet des z-index jusqu'a 1000 (panneaux, controles) qui remontaient au
+   contexte racine : la carte du domaine passait PAR-DESSUS la barre du bas (#mv-dock, z-index 90).
+   Meme remede que #map-container (Parcelles) : position + z-index:0 confinent la carte chez elle. */
+.pil-map{position:relative;z-index:0;height:520px;max-width:560px;margin:11px auto 0;border-radius:12px;overflow:hidden;background:var(--gris-clair);}
 .pil-map .leaflet-container{height:100%;width:100%;background:var(--gris-clair);}
 .leaflet-tooltip.pil-plabel{background:rgba(10,5,8,.82);border:1px solid rgba(200,176,32,.5);border-radius:5px;color:#F0E2C8;font-family:'Outfit',sans-serif;font-size:var(--pt-nano,9.5px);font-weight:600;padding:1px 5px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.5);letter-spacing:.2px;pointer-events:none;}
 .leaflet-tooltip.pil-plabel::before{display:none;}
@@ -5182,7 +5185,8 @@ button.pil-dz-set{cursor:pointer;width:100%;}
 .pil-dz-verd .act{display:flex;flex-wrap:wrap;gap:var(--e-2,8px);margin-top:var(--e-2,8px);}
 .pil-dz-verd .act button{height:36px;padding:0 var(--e-3,12px);border:1px solid currentColor;border-radius:var(--dz-rs);background:transparent;color:inherit;font-family:inherit;font-size:var(--pt-micro,11px);font-weight:700;cursor:pointer;}
 .pil-dz-hor{margin-top:var(--e-2,8px);font-size:var(--pt-micro,11px);color:var(--texte-doux);}
-.pil-dz-map,.pil-dz-svg{position:relative;margin-top:var(--e-4,16px);border:1px solid var(--gris-clair);border-radius:var(--dz-rm);overflow:hidden;}
+/* COH-1 : meme confinement pour la carte de la tournee (Decider) — ses etiquettes sont a z-index 1000. */
+.pil-dz-map,.pil-dz-svg{position:relative;z-index:0;margin-top:var(--e-4,16px);border:1px solid var(--gris-clair);border-radius:var(--dz-rm);overflow:hidden;}
 .pil-dz-map .pil-dz-lf{height:220px;background:var(--gris-clair);}
 .pil-dz-map .tag,.pil-dz-map .hint{position:absolute;z-index:1000;pointer-events:none;display:inline-flex;align-items:center;gap:var(--e-1,4px);padding:2px 8px;border-radius:var(--dz-rs);background:var(--cave);color:var(--or-clair);}
 .pil-dz-map .tag{right:8px;top:8px;font-size:var(--pt-micro,11px);font-weight:700;}

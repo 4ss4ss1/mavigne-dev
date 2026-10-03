@@ -1166,7 +1166,9 @@ function _planRangeH_(mbr,from,to,mode){
     try{
       if(_planInContractRead(mbr,mi,d)){
         var yb=(PLANNING_ENTRIES[mbr.nom]||{})[yr]||{}, e=(yb[mi]||{})[d];
-        var h=(mode==='champ')?_planChampH(plId,mi,d,e,yr):(mode==='work')?_planWorkH(plId,mi,d,e,yr):_planDayH(plId,mi,d,e,yr);
+        // TENS-1 (§215) : 'prevu' = la grille du modele (annualisation), SANS la saisie du jour —
+        //   ce que le planning prevoyait. A comparer a 'work' (travail effectif, saisie comprise).
+        var h=(mode==='champ')?_planChampH(plId,mi,d,e,yr):(mode==='work')?_planWorkH(plId,mi,d,e,yr):(mode==='prevu')?_planDayH(plId,mi,d,null,yr):_planDayH(plId,mi,d,e,yr);
         if(h>0) tot+=h*_planEffN(mbr,mi,d);
       }
     } finally { _planCtxYear=_sv; }
@@ -1184,6 +1186,11 @@ function _planChampPersRange(mbr,from,to){ return _planRangeH(mbr,from,to,'champ
 window._planPaidRange     = _planPaidRange;
 window._planWorkPersRange = _planWorkPersRange;
 window._planChampPersRange = _planChampPersRange;
+// TENS-1 (§215) : le prevu du modele sur une fenetre, et le cadre legal (une seule definition des
+//   maxima : celle reglee ici, que la fiche du salarie applique deja semaine par semaine).
+function _planPrevuPersRange(mbr,from,to){ return _planRangeH(mbr,from,to,'prevu'); }
+window._planPrevuPersRange = _planPrevuPersRange;
+window._planLegal = _planLegal;
 window._planWorkMonth=_planWorkMonth;
 function _planCalcMonth(mbr,m){
   var plId=_planPlId(mbr);

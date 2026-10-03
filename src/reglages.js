@@ -5715,6 +5715,11 @@ window._ecoCfgSet=function(group,key,val){
   } else if(group==='ift'){
     if(!C.conformite||typeof C.conformite!=='object') C.conformite={};
     C.conformite.ift_ref=_ecoNum(val);
+  } else if(group==='prot'){
+    // PROT-1 (§218) : remanence par mode d'action, en jours (key = contact | penetrant | systemique)
+    if(!C.conformite||typeof C.conformite!=='object') C.conformite={};
+    if(['contact','penetrant','systemique'].indexOf(key)>=0) C.conformite['prot_'+key+'_j']=_ecoNum(val);
+    else if(key==='lessivage') C.conformite.prot_lessivage_mm=_ecoNum(val);   // PLUIE-1 (§220)
   } else if(group==='eco'){
     // Parametres du simulateur << Cout selon l'effectif >>, du surcout de retard, et
     // des DEUX hypotheses du pilotage economique (Pilotage > Outils > Parametrage) :
@@ -5817,6 +5822,12 @@ function _ecoRenderIftCard(){
   card.innerHTML=_ecoCarte('Conformit\u00e9','Base de l\u2019onglet <b>Conformit\u00e9</b> : passages phyto et IFT.',
      '<div style="'+_ECO_ROW_CSS+'"><div style="flex:1;min-width:180px"><div style="font-size:13.5px;color:var(--texte);font-weight:600">'+_mvIcon('eprouvette',16)+' IFT de r\u00e9f\u00e9rence</div><div style="font-size:11.5px;color:var(--texte-doux)">la r\u00e9f\u00e9rence r\u00e9gionale \u00e0 laquelle vos passages se comparent</div></div>'
       +'<span style="display:inline-flex;align-items:center;gap:5px"><input type="number" min="0" step="1" value="'+iftRef+'" placeholder="12" onchange="window._ecoCfgSet(\'ift\',null,this.value)" style="'+_ECO_IN_CSS+'"><span style="font-size:12px;color:var(--texte-doux)">IFT</span></span></div>'
+    // PROT-1 (§218) : les trois remanences, par mode d'action. Defauts sources (contact 10, penetrant 12, systemique 14 j).
+    +[['contact','Contact','cuivre, soufre, folpel\u2026','10','jours','_j'],['penetrant','P\u00e9n\u00e9trant','cymoxanil, mandipropamid\u2026','12','jours','_j'],['systemique','Syst\u00e9mique','phosphonates, m\u00e9f\u00e9noxam\u2026','14','jours','_j'],['lessivage','Lessivage d\u2019un contact','pluie cumul\u00e9e depuis le traitement qui met un contact \u00e0 nu (la moiti\u00e9 part dans les 5 premiers mm)','20','mm','_mm']].map(function(r){
+        var v=(cf['prot_'+r[0]+r[5]]!=null&&Number(cf['prot_'+r[0]+r[5]])>0)?cf['prot_'+r[0]+r[5]]:'';
+        return '<div style="'+_ECO_ROW_CSS+'"><div style="flex:1;min-width:180px"><div style="font-size:var(--pt-base,14px);color:var(--texte);font-weight:600">'+_mvIcon('bouclier',16)+' '+(r[0]==='lessivage'?r[1]:('R\u00e9manence '+r[1].toLowerCase()))+'</div><div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux)">'+r[2]+' \u2014 jours de protection apr\u00e8s un traitement ; lu par la carte \u00ab Traiter ? \u00bb</div></div>'
+          +'<span style="display:inline-flex;align-items:center;gap:5px"><input type="number" min="1" step="1" value="'+v+'" placeholder="'+r[3]+'" onchange="window._ecoCfgSet(\'prot\',\''+r[0]+'\',this.value)" style="'+_ECO_IN_CSS+'"><span style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux)">'+r[4]+'</span></span></div>';
+      }).join('')
     +'<div style="font-size:11.5px;color:var(--texte-doux);margin-top:12px;line-height:1.5">Le co\u00fbt phyto par parcelle est calcul\u00e9 dans Pilotage depuis les <b>doses</b> (assistant de traitement) \u00d7 le <b>prix unitaire des intrants</b> (Pilotage \u203a \u00c9conomie \u203a Achats).</div>');
 }
 window._ecoRenderIftCard=_ecoRenderIftCard;

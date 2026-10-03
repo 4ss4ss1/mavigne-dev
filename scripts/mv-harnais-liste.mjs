@@ -267,6 +267,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-avc-arr.mjs'],
   ['node scripts/mv-harnais-arrach6.mjs'],
   ['node scripts/mv-harnais-arrach7.mjs'],
+  ['node scripts/mv-harnais-coh1.mjs'],
+  ['node scripts/mv-harnais-coh1.mjs --contre'],   // COH-1 (§213) : un même chiffre, un même nom, une même surface partout
   ['node scripts/mv-harnais-equipes-jour.mjs'],
   ['node scripts/mv-harnais-kml-fusion.mjs'],
   ['node scripts/mv-harnais-effectif-periode.mjs'],

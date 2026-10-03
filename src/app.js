@@ -8,7 +8,7 @@
 import './styles.css';
 // ── Import Firebase (doit être en tête — fournit window.firebase, fbSave, etc.) ──
 import { isAdmin, isTractoriste, isSaisonnier, canWrite,
-         getRoleLabel, showToast, wmoDesc, wmoIcone, TABREV, tNom,
+         getRoleLabel, showToast, wmoDesc, wmoIcone, tNom, tAbr,
          applyTheme, setThemeMode, initTheme, logError, _closeCriticalOverlay, _escHtml, _escAttr,
          GT_ADMIN_EMAIL, DEMO_TENANT, DEMO_FIREBASE_EMAIL, DEMO_FIREBASE_PWD, dreEffectif,
          _mvBadge, _mvIcon, _mvIconTache, _mvIconInline, _actIcone, _swNotify,
@@ -4181,7 +4181,7 @@ function openCommuneEdit(nom){
   if(!isAdmin()){ showToast('Affectation des communes r\u00e9serv\u00e9e \u00e0 l\u2019administrateur','#B85A1A'); return; }
   _commEditNom=nom;
   var p=(window.PARCELLES||[]).find(function(x){return x.nom===nom;}); if(!p) return;
-  var sub=document.getElementById('comm-sub'); if(sub)sub.textContent=nom+' \u00b7 '+p.surface+' ha';
+  var sub=document.getElementById('comm-sub'); if(sub)sub.textContent=nom+' \u00b7 '+_pvSurfFr(p.surface)+' ha';
   var inp=document.getElementById('comm-input'); if(inp)inp.value=(p.commune&&p.commune.nom)?p.commune.nom:'';
   var box=document.getElementById('comm-results'); if(box){box.innerHTML='';box.style.display='none';}
   window._commPick=(p.commune&&p.commune.nom)?{nom:p.commune.nom,lat:parseFloat(p.commune.lat),lng:parseFloat(p.commune.lng)}:null;
@@ -4277,7 +4277,7 @@ function renderCommunesBulk(){
     var gps=_geoPlausible(parseFloat(p.lat),parseFloat(p.lng))
       ? '<span class="cmb-gps" title="Parcelle g\u00e9olocalis\u00e9e \u2014 m\u00e9t\u00e9o = centro\u00efde">\uD83D\uDEF0\uFE0F</span>' : '';
     var clk=_adm?(' onclick="openCommuneEdit(\''+_escAttr(p.nom)+'\')" style="cursor:pointer"'):' style="cursor:default"';
-    return '<div class="cmb-row"'+clk+'><div class="cmb-nom">'+_escHtml(p.nom)+gps+'</div><div class="cmb-surf">'+p.surface+' ha</div>'+tag+'</div>';
+    return '<div class="cmb-row"'+clk+'><div class="cmb-nom">'+_escHtml(p.nom)+gps+'</div><div class="cmb-surf">'+_pvSurfFr(p.surface)+' ha</div>'+tag+'</div>';
   }).join('');
   c.innerHTML='<div class="cmb-list">'+listHtml+'</div><div class="cmb-groups">'+grpHtml+'</div>';
 }
@@ -4769,6 +4769,17 @@ window._seasonMenuClose=_seasonMenuClose;
 document.addEventListener('click', function(ev){ var m=document.getElementById('saison-menu'); if(m&&m.classList.contains('open')){ var pl=document.getElementById('hv2-saison-pill'); if(pl&&!pl.contains(ev.target))_seasonMenuClose(); } });
 
 // ════ HEURES ════
+// COH-1 (03/10) : LA PART FAITE D'UNE TÂCHE SIMPLE SUR UNE PARCELLE — une seule règle pour calcHeures
+//   (Pilotage › La campagne, carte « Avancement par tâche » de l'Accueil), recalcTravaux et la carte de
+//   la parcelle : 1 si validée ; pour un arrachage découpé, la part de ses étapes faites (_arrFraction,
+//   ARRACH-7) ; 0 sinon. Avant, calcHeures ne connaissait que « Validé » : l'arrachage à moitié fait
+//   sortait à 0 % au Pilotage pendant que la liste des parcelles le montrait à 50 %, et la valeur
+//   partagée TRAVAUX était réécrite derrière recalcTravaux, au gré de l'ordre d'affichage.
+function _mvTFaite(p,nom){
+  if(getTacheStatut(p,nom)==='Validé') return 1;
+  if(nom==='Arrachage'&&typeof _arrActif==='function'&&_arrActif()&&typeof _arrFraction==='function') return _arrFraction(p)||0;
+  return 0;
+}
 function calcHeures(){
   const tachesSaison=getTachesSaison();
   let totalReste=0,totalTotal=0;
@@ -4844,14 +4855,14 @@ function calcHeures(){
         const _pc=surfT>0?Math.round(_sd/surfT*100):0;
         TRAVAUX[t.nom]={h_ha:(t.hha||0),saison:((t.saisons&&t.saisons[0])||t.saison||''),surf_done:Math.round(_sd*100)/100,surf_total:surfT,pct:_pc,h_total:_ht,h_done:_hd,h_reste:_hr};
         totalReste+=_hr;totalTotal+=_ht;
-        return{nom:t.nom,pct:_pc,h_done:_hd,h_total:_ht,h_reste:_hr};
+        return{nom:t.nom,pct:_pc,h_done:_hd,h_total:_ht,h_reste:_hr,surf_done:Math.round(_sd*100)/100,surf_total:surfT};
       }
     }
     // Tâche simple : TOUJOURS recalculer. Le cache TRAVAUX peut etre perime apres un changement de
     // saison consultee (les taches simples ne se recalculaient pas et gardaient l'avancement de la
     // saison active) -> aligne sur les branches niveaux/passages/trous qui recalculent deja a la volee.
-    const validees=parcT.filter(p=>getTacheStatut(p,t.nom)==='Validé');
-    const surfDone=validees.reduce((s,p)=>s+(p.surface||0),0);
+    // COH-1 : la part faite de chaque parcelle, par la règle commune (_mvTFaite, ci-dessus).
+    const surfDone=parcT.reduce((s,p)=>s+(parseFloat(p.surface)||0)*_mvTFaite(p,t.nom),0);
     // ROB-2 (29/09) : les tâches « en temps réel » du catalogue (Arrachage, Désherbage manuel,
     //   Effeuillage, Vendange) n'ont PAS de barème `hha` — elles se comptent au journal. Activer l'une
     //   d'elles faisait `undefined × surface` : l'Accueil affichait « NaN h » au total. Sans barème,
@@ -4863,7 +4874,7 @@ function calcHeures(){
     const pct=surfT>0?Math.round(surfDone/surfT*100):0;
     TRAVAUX[t.nom]={h_ha:_hha,saison:((t.saisons&&t.saisons[0])||t.saison||''),surf_done:Math.round(surfDone*100)/100,surf_total:surfT,pct,h_total:hTotal,h_done:hDone,h_reste:hReste};
     totalReste+=hReste;totalTotal+=hTotal;
-    return{nom:t.nom,pct,h_done:hDone,h_total:hTotal,h_reste:hReste};
+    return{nom:t.nom,pct,h_done:hDone,h_total:hTotal,h_reste:hReste,surf_done:Math.round(surfDone*100)/100,surf_total:surfT};
   });
   return{data,totalReste:Math.round(totalReste),totalTotal:Math.round(totalTotal)};
 }
@@ -4873,6 +4884,12 @@ function renderHeuresCard(containerId){
   const c=document.getElementById(containerId);
   function _col(pct){return pct===100?'var(--vert-med)':pct>=50?'var(--or)':'var(--orange)';}
   function _bar(pct,col){return `<div class="htache-bar-track" aria-hidden="true"><div class="htache-bar-fill" style="width:${pct}%;background:${col}"></div></div>`;}
+  // COH-1 (03/10) : une tâche sans barème à l'hectare (arrachage, désherbage manuel, entreplantation sans
+  //   trous saisis) ne prévoit aucune heure — « 0h / 0h » ne disait rien. Elle s'écrit en surface :
+  //   ce qui est fait sur ce qui est concerné, la même part que le pourcentage. Le nom passe par tAbr :
+  //   la colonne fait 72 px, c'est le seul endroit où la forme courte reste.
+  function _haT(v){return (Math.round((parseFloat(v)||0)*100)/100).toFixed(2).replace('.',',');}
+  function _qte(t){return (t.h_total>0||!(t.surf_total>0))?(t.h_done+'h / '+t.h_total+'h'):(_haT(t.surf_done)+' / '+_haT(t.surf_total)+' ha');}
   // Grid CSS aligné : col1=label(72px) col2=barre(1fr) col3=%(40px) col4=h_total(90px)
   const G='display:grid;grid-template-columns:72px 1fr 40px 90px;gap:0 6px;align-items:center;';
   c.innerHTML=`<div class="mv-hd" style="margin-bottom:14px">
@@ -4896,7 +4913,7 @@ function renderHeuresCard(containerId){
         // Ligne parent : barre globale (h_done/h_total) + sous-lignes
         return `<div class="htache-row" style="flex-direction:column;align-items:stretch;gap:1px">
           <div style="${G}padding:5px 0 2px;">
-            <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${tNom(t.nom)}</div>
+            <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_escHtml(tAbr(t.nom))}</div>
             ${_bar(t.pct,col)}
             <div class="htache-pct" style="color:${col};text-align:right;font-size:13px">${t.pct}%</div>
             <div style="font-size:10px;color:var(--texte-doux);text-align:right">${t.h_done}h/${t.h_total}h</div>
@@ -4910,7 +4927,7 @@ function renderHeuresCard(containerId){
         if(t.detail.length===1){
           const pas=t.detail[0];const nc=_col(pas.pct);
           return `<div class="htache-row" style="${G}padding:6px 0;">
-            <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${tNom(t.nom)}</div>
+            <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_escHtml(tAbr(t.nom))}</div>
             ${_bar(pas.pct,nc)}
             <div class="htache-pct" style="color:${nc};text-align:right;font-size:13px">${pas.pct}%</div>
             <div style="font-size:10px;color:var(--texte-doux);text-align:right">${pas.h_done}/${pas.h_total}h</div>
@@ -4928,7 +4945,7 @@ function renderHeuresCard(containerId){
         }).join('');
         return `<div class="htache-row" style="flex-direction:column;align-items:stretch;gap:1px">
           <div style="${G}padding:5px 0 2px;">
-            <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${tNom(t.nom)}</div>
+            <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_escHtml(tAbr(t.nom))}</div>
             ${_bar(t.pct,col)}
             <div class="htache-pct" style="color:${col};text-align:right;font-size:13px">${t.pct}%</div>
             <div style="font-size:10px;color:var(--texte-doux);text-align:right">${t.h_done}h/${t.h_total}h</div>
@@ -4938,10 +4955,10 @@ function renderHeuresCard(containerId){
       }
       // ── Simple ────────────────────────────────────────────────────────
       return `<div class="htache-row" style="${G}padding:6px 0;">
-        <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${tNom(t.nom)}</div>
+        <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_escHtml(tAbr(t.nom))}</div>
         ${_bar(t.pct,col)}
         <div class="htache-pct" style="color:${col};text-align:right;font-size:13px">${t.pct}%</div>
-        <div style="font-size:10px;color:var(--texte-doux);text-align:right">${t.h_done}h / ${t.h_total}h</div>
+        <div style="font-size:10px;color:var(--texte-doux);text-align:right">${_qte(t)}</div>
       </div>`;
     }).join('');
 }
@@ -6868,7 +6885,7 @@ function renderHomeMaPart(){
       +(r.them>0?('<span><i class="hmp-i-vt"></i>L\'\u00e9quipe \u00b7 '+ha(r.them)+' ha</span>'):'')
     +'</div>'
     +(r.restN>0?('<div class="hmp-rest">Il reste <b>'+r.restN+' parcelle'+(r.restN>1?'s':'')+'</b> \u2014 '+ha(r.rest)+' ha'
-      +(r.restNoms.length?(' \u00b7 '+_escHtml(r.restNoms.join(', '))+(r.restN>r.restNoms.length?'\u2026':'')):'')+'.'
+      +(r.restNoms.length?(' \u00b7 '+_escHtml(r.restNoms.join(', '))+(r.restN>r.restNoms.length?'\u2026':'.')):'.')
       +(r.fin?('<br>Au rythme des 15 derniers jours, fin vers le <b>'+_mvPartDate(r.fin)+'</b>.'):'')
       +(function(){
          if(!r.fin)return '';
@@ -7473,11 +7490,11 @@ function getPCls(p){
   // ARRACH-7 : un arrachage découpé à moitié fait compte pour moitié (le compte « n/N tâches » reste entier).
   const _arrPart=(typeof _arrActif==='function'&&_arrActif()&&tachesActives.some(t=>t.nom==='Arrachage')&&getTacheStatut(p,'Arrachage')!=='Validé')?_arrFraction(p):0;
   const pct=totalSaison>0?Math.round((nbDone+_arrPart)/totalSaison*100):0;
-  if(p.statut==='Arrachee')return{a:'ava-x',d:'dr',cl:'pr',col:'var(--rouge)',fill:'var(--rouge)',pct,nbDone,nbTotal:totalSaison};
+  if(p.statut==='Arrachee')return{a:'ava-x',d:'dr',cl:'pr',col:'var(--rouge)',fill:'var(--rouge)',pct,nbDone,nbTotal:totalSaison,part:_arrPart};
   var _gc=pctColor(pct);
-  if(pct===100)return{a:'ava-c',d:'dc',cl:'pv',col:_gc,fill:_gc,pct,nbDone,nbTotal:totalSaison};
-  if(pct>=75)return{a:'ava-a',d:'da',cl:'pa',col:_gc,fill:_gc,pct,nbDone,nbTotal:totalSaison};
-  return{a:'ava-r',d:'dr',cl:'pr',col:_gc,fill:_gc,pct,nbDone,nbTotal:totalSaison};
+  if(pct===100)return{a:'ava-c',d:'dc',cl:'pv',col:_gc,fill:_gc,pct,nbDone,nbTotal:totalSaison,part:_arrPart};
+  if(pct>=75)return{a:'ava-a',d:'da',cl:'pa',col:_gc,fill:_gc,pct,nbDone,nbTotal:totalSaison,part:_arrPart};
+  return{a:'ava-r',d:'dr',cl:'pr',col:_gc,fill:_gc,pct,nbDone,nbTotal:totalSaison,part:_arrPart};
 }
 function computePStats(){
   let c=0,e=0,r=0,a=0;
@@ -7610,7 +7627,15 @@ function _pOrdPill(nom){ var r=_pOrdRang(nom); return r?('<span class="pc-ord">'
 // separateur anglais dans une application de gestion francaise.
 // ⚠️ La PRECISION n'est pas touchee : une surface cadastrale se lit au dixieme
 //   d'are, l'arrondir a deux decimales ferait perdre 0,0061 ha a une parcelle.
-function _pvSurfFr(s){ if(s==null||s==='')return ''; return String(s).replace('.',','); }
+// SURF-1 (03/10) : la surface d'une PARCELLE s'écrit au centiare près — quatre décimales, 0,0870 ha
+//   = 8 a 70 ca, la précision du cadastre. Avant : la valeur brute, « 0,087 » sous « 0,1144 ». Les
+//   TOTAUX, eux, s'écrivent au centième (11,85 ha), jamais arrondis à l'hectare.
+function _pvSurfFr(s){ if(s==null||s==='')return ''; var v=parseFloat(String(s).replace(',','.')); return isFinite(v)?v.toFixed(4).replace('.',','):String(s); }
+// COH-1 (03/10) : le compte des tâches faites suit le pourcentage. Un arrachage découpé à moitié
+//   fait ajoute sa part au % (ARRACH-7) ; le compte restait entier et la carte lisait « 50 % ·
+//   0/1 tâches ». Il porte maintenant la même part : « 0,5/1 tâche », « 1,5/2 tâches ».
+function _pvNbFait(cl){ var n=Math.round((((cl&&cl.nbDone)||0)+((cl&&cl.part)||0))*10)/10; return String(n).replace('.',','); }
+function _pvCompte(cl){ var N=(cl&&cl.nbTotal)||0; return _pvNbFait(cl)+'/'+N+' t\u00e2che'+(N>1?'s':''); }
 function _pOrdDateFr(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||'')); return m?(m[3]+'/'+m[2]):''; }
 // Étiquette de carte : le numéro devant le nom quand la tournée est active.
 function _pOrdMapLabel(nom){ var r=_pOrdRang(nom); return (r?('<span class="pl-ord">'+r+'</span>'):'')+_escHtml(nom||''); }
@@ -7736,7 +7761,7 @@ function renderParcelles(){
     var showDoneBtn=pTacheFilter!=='toutes'?`<div class="ptfchip${window.pShowDone?' active ac':''}" onclick="window.pShowDone=!window.pShowDone;renderParcelles()" style="margin-left:auto;flex-shrink:0;border-style:dashed">${window.pShowDone?'Toutes':'À faire'}</div>`:'';
     var backPrio=(_prioTaskOK&&!isAdmin()&&_prioOverride)?'<div class="ptfchip pfc-back" onclick="_prioBackToPriority()">\u2190 Priorit\u00e9</div>':'';
     tfRow.innerHTML=backPrio+`<div class="ptfchip${pTacheFilter==='toutes'?' active':''}" data-t="toutes" onclick="setPTacheFilter('toutes',this)">Toutes tâches</div>`
-      +tachesSaisonFSorted.map(t=>`<div class="ptfchip${pTacheFilter===t.nom?' active':''}" data-t="${t.nom}" onclick="setPTacheFilter('${_escAttr(t.nom)}',this)">${t.nom}</div>`).join('')
+      +tachesSaisonFSorted.map(t=>`<div class="ptfchip${pTacheFilter===t.nom?' active':''}" data-t="${_escAttr(t.nom)}" onclick="setPTacheFilter('${_escAttr(t.nom)}',this)">${_escHtml(tNom(t.nom))}</div>`).join('')
       +showDoneBtn;
     }
   }
@@ -7822,16 +7847,16 @@ function renderParcelles(){
     if(pTacheFilter!=='toutes'){
       if(_pvType(pTacheFilter)!=='simple'){
         chips=_pvStepChips(p,pTacheFilter)
-          +tps.filter(([t])=>t!==pTacheFilter).slice(0,1).map(([t,s])=>`<span class="tc ${s==='Validé'?'tcv':'tce'}">${t}</span>`).join('');
+          +tps.filter(([t])=>t!==pTacheFilter).slice(0,1).map(([t,s])=>`<span class="tc ${s==='Validé'?'tcv':'tce'}">${_escHtml(tNom(t))}</span>`).join('');
       } else {
         const statutFiltre=getTacheStatut(p,pTacheFilter)||'Non démarré';
         const badgeCls=statutFiltre==='En cours'?'tce':'tc-nd';
-        chips=`<span class="tc ${badgeCls}" style="font-weight:700">${pTacheFilter} · ${statutFiltre}</span>`
-          +tps.filter(([t])=>t!==pTacheFilter).slice(0,2).map(([t,s])=>`<span class="tc ${s==='Validé'?'tcv':'tce'}">${t}</span>`).join('');
+        chips=`<span class="tc ${badgeCls}" style="font-weight:700">${_escHtml(tNom(pTacheFilter))} · ${statutFiltre}</span>`
+          +tps.filter(([t])=>t!==pTacheFilter).slice(0,2).map(([t,s])=>`<span class="tc ${s==='Validé'?'tcv':'tce'}">${_escHtml(tNom(t))}</span>`).join('');
       }
       more='';
     } else {
-      chips=tps.slice(0,4).map(([t,s])=>`<span class="tc ${s==='Validé'?'tcv':'tce'}">${t}</span>`).join('');
+      chips=tps.slice(0,4).map(([t,s])=>`<span class="tc ${s==='Validé'?'tcv':'tce'}">${_escHtml(tNom(t))}</span>`).join('');
       more=tps.length>4?`<span class="tc tcm">+${tps.length-4}</span>`:'';
     }
     var draeInfo=getDraeParcelle(p.nom);
@@ -7857,7 +7882,7 @@ function renderParcelles(){
         </div>
         <div style="text-align:right;flex:none">
           <div class="mv-n" style="color:${cl.pct===100?'var(--vert-med)':'var(--texte)'}">${cl.pct}<span style="font-size:13px">&nbsp;%</span></div>
-          <div class="mv-l">${cl.nbDone}/${cl.nbTotal} t\u00e2ches</div>
+          <div class="mv-l">${_pvCompte(cl)}</div>
         </div>
       </div>
       <div class="mv-track" style="margin-top:12px"><div class="mv-fill" style="width:${cl.pct}%;background:${cl.fill}"></div></div>
@@ -8122,7 +8147,7 @@ function openArrEtape(nom,id){
   var d=_arrEtat(p)[id];
   var el;
   el=document.getElementById('arre-titre'); if(el) el.textContent=e.lbl;
-  el=document.getElementById('arre-sub'); if(el) el.textContent=p.nom+' \u00b7 '+p.surface+' ha';
+  el=document.getElementById('arre-sub'); if(el) el.textContent=p.nom+' \u00b7 '+_pvSurfFr(p.surface)+' ha';
   el=document.getElementById('arre-date'); if(el){ el.value=(d&&d.d)||_mvToday(); el.max=_mvToday(); }
   el=document.getElementById('arre-presta'); if(el) el.style.display=e.presta?'':'none';
   el=document.getElementById('arre-pn'); if(el) el.value=(d&&d.pn)||'';
@@ -8401,7 +8426,7 @@ function openDPArrachage(){
   if(!p||!isAdmin()||p.statut==='Arrachee') return;
   var el;
   el=document.getElementById('arr-hidden-nom'); if(el) el.value=p.nom;
-  el=document.getElementById('arr-parc-nom'); if(el) el.textContent=p.nom+' \u00b7 '+p.surface+' ha';
+  el=document.getElementById('arr-parc-nom'); if(el) el.textContent=p.nom+' \u00b7 '+_pvSurfFr(p.surface)+' ha';
   el=document.getElementById('arr-date'); if(el){ el.value=_arrIsoJour(); el.max=_arrIsoJour(); }
   el=document.getElementById('arr-motif');
   if(el) el.innerHTML=_ARR_MOTIFS.map(function(m){return '<option value="'+_escAttr(m)+'">'+_escHtml(m)+'</option>';}).join('');
@@ -8536,7 +8561,7 @@ function openDP(nom){
   const p=PARCELLES.find(x=>x.nom===nom);if(!p)return;
   const cl=getPCls(p);
   document.getElementById('dp-nom').textContent=p.nom;
-  document.getElementById('dp-sub').textContent=`${p.statut==='Arrachee'?'Arrach\u00e9e':p.statut} · ${p.surface} ha`;
+  document.getElementById('dp-sub').textContent=`${p.statut==='Arrachee'?'Arrach\u00e9e':p.statut} · ${_pvSurfFr(p.surface)} ha`;
   _dpCurrentNom=nom;
   // Cépage (multi, entreplantation)
   var dpCepRow=document.getElementById('dp-cepage-row');
@@ -8571,7 +8596,7 @@ function openDP(nom){
   //   pese autant que le chiffre et la hierarchie a trois niveaux tombe a deux.
   document.getElementById('dp-surf').innerHTML=p.surface+'<span style="font-size:13px"> ha</span>';
   var _dpNbt=document.getElementById('dp-nbt');
-  if(_dpNbt)_dpNbt.innerHTML=cl.nbDone+'<span style="font-size:13px">/'+cl.nbTotal+'</span>';
+  if(_dpNbt)_dpNbt.innerHTML=_pvNbFait(cl)+'<span style="font-size:13px">/'+cl.nbTotal+'</span>';
   var _dpBar=document.getElementById('dp-bar');
   if(_dpBar){_dpBar.style.width=cl.pct+'%';_dpBar.style.background=cl.fill;}
   // Heures restantes (hors tâches exclues)
@@ -8638,7 +8663,7 @@ function openDP(nom){
     if(isExclu){
       return `<div class="val-row mv-tr" style="opacity:.45">
         <div style="flex:1">
-          <div class="mv-v" style="font-size:13.5px;font-weight:600;color:var(--texte-doux);text-decoration:line-through">${_escHtml(t.nom)}</div>
+          <div class="mv-v" style="font-size:13.5px;font-weight:600;color:var(--texte-doux);text-decoration:line-through">${_escHtml(tNom(t.nom))}</div>
           <div class="mv-l">${_escHtml(_isSel?'Pas choisie pour cette campagne':'Non applicable sur cette parcelle')}</div>
         </div>
         ${canExcl?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="background:var(--gris-clair);border:none;border-radius:8px;padding:5px 10px;font-size:10px;font-weight:600;color:var(--texte-doux);cursor:pointer;white-space:nowrap;margin-left:10px">Réactiver</button>`:''}
@@ -8652,7 +8677,7 @@ function openDP(nom){
       const hhaDetail=(t.niveaux||[]).map(n=>'N'+n.num+' '+n.hha+'h/ha').join(' · ');
       return `<div class="val-row mv-tr">
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600">${t.nom}</div>
+          <div style="font-size:13px;font-weight:600">${_escHtml(tNom(t.nom))}</div>
           <div style="font-size:10px;color:var(--texte-doux);margin-top:2px">${hhaDetail} · <span style="color:${statusColor};font-weight:600">${statusLabel}</span></div>
           <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">${badgesHtml}</div>
         </div>
@@ -8668,7 +8693,7 @@ function openDP(nom){
       const badgesHtml=_passBadgesHtml(p,t.nom);
       return `<div class="val-row mv-tr">
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600">${t.nom}</div>
+          <div style="font-size:13px;font-weight:600">${_escHtml(tNom(t.nom))}</div>
           <div style="font-size:10px;color:var(--texte-doux);margin-top:2px">${t.hha}h/ha/passage · ~${hEstim}h · <span style="color:${statusColor};font-weight:600">${statusLabel}</span></div>
           <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">${badgesHtml}</div>
         </div>
@@ -8682,7 +8707,7 @@ function openDP(nom){
     // ── Simple (défaut) ────────────────────────────────────────────────────
     return `<div class="val-row mv-tr">
       <div style="flex:1;min-width:0">
-        <div class="mv-v" style="font-size:13.5px;font-weight:600;color:var(--texte)">${_escHtml(t.nom)}</div>
+        <div class="mv-v" style="font-size:13.5px;font-weight:600;color:var(--texte)">${_escHtml(tNom(t.nom))}</div>
         <div style="font-size:10px;color:var(--texte-doux);margin-top:2px">${(t.trous||t.nom==='Entreplantation')?(_plTr>0?(_plTr+' trous · ~'+hEstim+'h'):'Tarière · aucun trou'):((t.tempsReel?(t.hha?('~'+t.hha+'h/ha estimé'):'temps réel'):(t.hha+'h/ha'))+' · ~'+hEstim+'h')} · <span style="color:${statusColor};font-weight:600">${statusLabel}</span></div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
@@ -8721,7 +8746,7 @@ function openRepPonct(){
   if(!_dpCurrentNom)return;
   var p=PARCELLES.find(function(x){return x.nom===_dpCurrentNom;});
   _repTypes=[];_repQ=0;
-  var sub=document.getElementById('rp-sub');if(sub)sub.textContent=_dpCurrentNom+(p?(' · '+p.surface+' ha'):'');
+  var sub=document.getElementById('rp-sub');if(sub)sub.textContent=_dpCurrentNom+(p?(' · '+_pvSurfFr(p.surface)+' ha'):'');
   document.querySelectorAll('#rp-chips .rp-chip').forEach(function(c){c.classList.remove('sel');});
   var qv=document.getElementById('rp-qval');if(qv)qv.textContent='0';
   var dt=document.getElementById('rp-date');if(dt)dt.value=_mvToday();
@@ -9261,7 +9286,7 @@ function _jeBuildTaches(){
   var dans=noms?TACHES.filter(function(t){return t&&noms.indexOf(t.nom)>=0;}):getTachesSaison();
   var autres=TACHES.filter(function(t){return t&&dans.indexOf(t)<0;});
   var opt=function(t){
-    return '<option value="'+_escAttr(t.nom)+'">'+_escHtml(t.nom)+'</option>';
+    return '<option value="'+_escAttr(t.nom)+'">'+_escHtml(tNom(t.nom))+'</option>';
   };
   var h='';
   if(dans.length){
@@ -10294,7 +10319,7 @@ function initMap(){
   _kmlSource.forEach(function(k){
     const p=PARCELLES.find(function(x){return x.nom.toLowerCase()===k.name.toLowerCase();});
     const col=p?getPCls(p).col:'#888888';
-    const popup=p?('<b>'+_escHtml(p.nom)+'</b><br>'+p.surface+' ha · '+getPCls(p).pct+'%'):('<b>'+_escHtml(k.name)+'</b>');
+    const popup=p?('<b>'+_escHtml(p.nom)+'</b><br>'+_pvSurfFr(p.surface)+' ha · '+getPCls(p).pct+'%'):('<b>'+_escHtml(k.name)+'</b>');
     const poly=L.polygon(k.pts,{color:col,fillColor:col,fillOpacity:0.28,weight:2}).addTo(leafMap).bindPopup(popup);
     var _ctr=k.pts.reduce(function(a,b){return[a[0]+b[0],a[1]+b[1]];},[0,0]);
     var _lc=[_ctr[0]/k.pts.length,_ctr[1]/k.pts.length];
@@ -10323,7 +10348,7 @@ function initMap(){
     if(_geoPlausible(la,ln)){
       var cl=getPCls(p);
       L.circleMarker([la,ln],{radius:6,fillColor:cl.col,color:'white',weight:2,fillOpacity:0.9})
-        .addTo(leafMap).bindPopup('<b>'+_escHtml(p.nom)+'</b><br>'+p.surface+' ha · '+cl.pct+'%')
+        .addTo(leafMap).bindPopup('<b>'+_escHtml(p.nom)+'</b><br>'+_pvSurfFr(p.surface)+' ha · '+cl.pct+'%')
         .on('click',function(){_mvMapTap(p.nom);});
       _mvFitBnds.push([la,ln]);
     } else if(p.commune && _geoPlausible(parseFloat(p.commune.lat),parseFloat(p.commune.lng))){
@@ -10335,7 +10360,7 @@ function initMap(){
   // Un repere "secteur" par commune (parcelles sans contour ni coordonnees propres)
   Object.keys(_mvCommGroups).forEach(function(_ck){
     var g=_mvCommGroups[_ck];
-    var liste=g.parc.map(function(pp){var c=getPCls(pp);return '<b>'+_escHtml(pp.nom)+'</b> · '+pp.surface+' ha · '+c.pct+'%';}).join('<br>');
+    var liste=g.parc.map(function(pp){var c=getPCls(pp);return '<b>'+_escHtml(pp.nom)+'</b> · '+_pvSurfFr(pp.surface)+' ha · '+c.pct+'%';}).join('<br>');
     var n=g.parc.length;
     var ic=L.divIcon({className:'',iconSize:[28,28],iconAnchor:[14,14],html:'<div style="width:28px;height:28px;border-radius:50%;background:#C9A84C;color:#1C1813;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font:700 13px/1 system-ui,sans-serif;">'+n+'</div>'});
     L.marker([g.lat,g.lng],{icon:ic}).addTo(leafMap)
@@ -10356,7 +10381,7 @@ function refreshMapColors(){
     if(!item.parcelle)return;
     const cl=getPCls(item.parcelle);
     item.poly.setStyle({color:cl.col,fillColor:cl.col});
-    item.poly.setPopupContent('<b>'+_escHtml(item.parcelle.nom)+'</b><br>'+item.parcelle.surface+' ha · '+cl.pct+'%');
+    item.poly.setPopupContent('<b>'+_escHtml(item.parcelle.nom)+'</b><br>'+_pvSurfFr(item.parcelle.surface)+' ha · '+cl.pct+'%');
   });
   _pOrdMapSync();
   _pCibleMapSync();
@@ -10399,7 +10424,7 @@ function _mvMapQuickOpen(nom){
   var cl=getPCls(p);
   var task=pTacheFilter,type=_pvType(task);
   var _e=document.getElementById('mq-nom'); if(_e)_e.textContent=p.nom;
-  var _s=document.getElementById('mq-sub'); if(_s)_s.textContent=p.statut+' '+String.fromCodePoint(0x00b7)+' '+p.surface+' ha';
+  var _s=document.getElementById('mq-sub'); if(_s)_s.textContent=p.statut+' '+String.fromCodePoint(0x00b7)+' '+_pvSurfFr(p.surface)+' ha';
   var pe=document.getElementById('mq-pct');
   if(pe){pe.textContent=cl.pct+'%';pe.style.color=(cl.pct===100?'var(--vert)':cl.pct>=75?'var(--or)':'var(--orange)');}
   var bar=document.getElementById('mq-bar-fill'); if(bar){bar.style.width=cl.pct+'%';bar.style.background=cl.col;}
@@ -10476,7 +10501,7 @@ function _mvMapHighlight(){
     if(!item.parcelle)return;
     var cl=getPCls(item.parcelle);
     item.poly.setStyle({color:cl.col,fillColor:cl.col,weight:2,dashArray:null,fillOpacity:0.28});
-    item.poly.setPopupContent('<b>'+_escHtml(item.parcelle.nom)+'</b><br>'+item.parcelle.surface+' ha '+String.fromCodePoint(0x00b7)+' '+cl.pct+'%');
+    item.poly.setPopupContent('<b>'+_escHtml(item.parcelle.nom)+'</b><br>'+_pvSurfFr(item.parcelle.surface)+' ha '+String.fromCodePoint(0x00b7)+' '+cl.pct+'%');
   });
   if(typeof _pProxHere==='undefined'||!_pProxHere)return;
   _leafLayers.forEach(function(item){
@@ -10629,7 +10654,7 @@ function renderJournalList(){
         const membresStr=isEq&&r.membresEquipe&&r.membresEquipe.length>0?` + ${r.membresEquipe.join(', ')}`:isEq?' + équipe':'';
         const quiAff=isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui}${membresStr})`:isEq?'Équipe':r.qui||'Non assigné';
         // ARRACH-3 : l'étape d'arrachage, et le prestataire quand c'en est un, à côté de la tâche.
-        const tacheAff=_escHtml((TABREV[r.tache]||r.tache)+(r.etapeLbl?(' \u00b7 '+r.etapeLbl+(r.presta?(' (prestataire'+(r.prestaNom?' '+r.prestaNom:'')+')'):'')):''));
+        const tacheAff=_escHtml(tNom(r.tache)+(r.etapeLbl?(' \u00b7 '+r.etapeLbl+(r.presta?(' (prestataire'+(r.prestaNom?' '+r.prestaNom:'')+')'):'')):''));
         const repSuffix=(r.reparation_types&&r.reparation_types.length)?_escHtml(' · '+r.reparation_types.join(', ')+(r.reparation_qte?(' ×'+r.reparation_qte):'')):'';
         const quiAffE=_escHtml(quiAff);
         const parcelleE=_escHtml(r.parcelle);

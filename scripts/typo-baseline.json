@@ -37,7 +37,7 @@
   "src/pilotage.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 800
+    "ko": 846
   },
   "src/planning.js": {
     "dur": 185,
@@ -62,7 +62,7 @@
   "src/utils.js": {
     "dur": 6,
     "petit": 2,
-    "ko": 692
+    "ko": 728
   },
   "index.html": {
     "dur": 261,

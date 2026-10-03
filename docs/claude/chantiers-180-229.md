@@ -1508,3 +1508,62 @@ injectés, 14 rouges** ; l'injection « `logError` ignore `silencieux` » seule 
 ① La valeur arrive **à l'usage** : c'est le journal GT qui dira, dans quelques jours, quels emplacements produisent des
 « ×10 ». C'est le lot de tri que §132 attendait. ② Les 17 `catch` encore vides (pilotage 10) ne sont pas touchés. ③ Aucun
 rendu navigateur (le changement ne peint rien, par construction).
+
+## 213. ★★ COH-1 — UN MÊME CHIFFRE, UN MÊME NOM, UNE MÊME SURFACE SUR TOUS LES ÉCRANS (03/10 — `src/app.js` · `src/pilotage.js` · `src/utils.js` · `src/styles.css` · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `guide/11-pilotage.html` · `public/guide.html` · `scripts/mv-harnais-coh1.mjs` (neuf) · `scripts/mv-harnais-arrachage.mjs` · `scripts/mv-harnais-arrach3.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · **APP 7.92 → 7.93, SW 8.67 → 8.68**, base `61f4ccd`)
+
+### 213a. D'où ça vient
+
+Cinq captures de Nico (03/10) : « Avancement par tâche » du Pilotage à `Arrach. 0 % · 0/0 h` pendant que la liste montrait les
+mêmes parcelles à 50-75 % ; la carte du domaine qui recouvre la barre du bas sur PC ; « Reparation », « Brulage » sur les puces
+de Parcelles et « Répar. » au Pilotage ; « 0,087 · 0,1144 · 11,50 · 12 ha » ; « Champitenois Petite…. » ; « 50 % · 0/1 tâches ».
+Plus deux demandes de fond (graphiques homogènes, renfort sans heures sup) découpées en lots 2 et 3 (§28). Ce lot-ci est le
+lot 1, sans maquette : il ne change aucune mise en page, il rend les chiffres et les mots cohérents.
+
+### 213b. Ce qui change
+
+- **L'arrachage, une seule règle.** `_mvTFaite(p, nom)` (app.js, juste avant `calcHeures`) : 1 si validée ; arrachage découpé →
+  `_arrFraction(p)` (ARRACH-7) ; 0 sinon. La branche « tâche simple » de `calcHeures` ne connaissait que « Validé » — et
+  réécrivait `TRAVAUX[nom]` derrière `recalcTravaux`, si bien que le chiffre gagnant dépendait de l'ordre d'affichage. Les
+  lignes rendues portent `surf_done` / `surf_total` (branche simple et entreplantation sans trous).
+- **Sans barème, en surface.** `_pilBarQte(t)` (Pilotage) et `_qte(t)` (carte de l'Accueil) : heures si `h_total > 0`, sinon
+  surface faite / concernée, sinon un tiret. Plus de « 0/0 h ».
+- **Le compte suit le pourcentage.** `getPCls` rend `part` (la part d'arrachage, en plus) ; `_pvNbFait` / `_pvCompte` écrivent
+  « 0,5/1 tâche », « 1,5/2 tâches ». `nbDone` reste entier (le harnais ARRACH-7 le lit).
+- **Les cartes du Pilotage restent chez elles.** `.pil-map` et `.pil-dz-map,.pil-dz-svg` : `position:relative; z-index:0` —
+  le remède de `#map-container` (Parcelles), jamais appliqué ici. Les panneaux Leaflet (jusqu'à 1000) passaient au-dessus de
+  `#mv-dock` (90). `.pil-dz-fm` (carte agrandie, fixe à 400) n'en avait pas besoin.
+- **Un seul nom.** `utils.js` : `TLIB` + `tLib(nom)` (clé → nom entier accentué ; une tâche du domaine garde son nom),
+  `tNom` = `tLib` (le défaut, partout), `tAbr` = `TABREV` puis `tLib` (forme courte, seulement la colonne de 72 px de la carte
+  de l'Accueil). `TABREV` : « Ébourg. ». Passent par `tNom` : puces de filtre, puces des cartes de parcelle, liste des travaux
+  de la fiche, menu des tâches, ligne du journal (qui lisait `TABREV` en direct — retiré, avec son import).
+- **Les surfaces.** `_pvSurfFr` : 4 décimales (le centiare). Les 11 sites `p.surface+' ha'` d'app.js (feuilles d'arrachage,
+  commentaire, réparation, bulles et fiche rapide de la carte) et l'en-tête de la fiche passent par elle. Carte du domaine :
+  total au centième (« 11,85 ha », plus `_pilNum` → « 12 »).
+- **Petits défauts.** « …. » (le point ajouté derrière la liste tronquée) ; « 0,0 ETP tracteur » masqué sous 0,05 ETP ; le
+  texte de la journée de référence (voir 213d).
+
+### 213c. Mesuré
+
+`mv-harnais-coh1.mjs` : **19 assertions** sur les vraies fonctions (bloc ARRACH-3 + `_mvTFaite` + `calcHeures` + `getPCls`,
+`_pvSurfFr` / `_pvCompte` / `_qte`, `_pilBarQte`, `tNom` / `tAbr`) et sur le texte (CSS, puces, journal, « … », ETP, h_jour).
+Contre-épreuve **12/12**. `mv-harnais-arrachage` et `mv-harnais-arrach3` exécutent les feuilles d'arrachage : ils ont reçu la
+vraie `_pvSurfFr` (extraite), verts, contre-épreuves vertes. Chaîne complète : **186 commandes vertes** (preflight : 0 erreur,
+3 avertissements préexistants de cave.js).
+★ **Pièges d'environnement** : un processus lancé en tâche de fond meurt à la fin de l'appel d'outil — le `npm ci` d'un tour
+précédent avait laissé un `node_modules` incomplet (eslint absent : `lint-cliquet` rouge pour rien), et le lanceur complet
+(> 5 min) ne peut pas tourner en une fois. Fait : `npm ci` relancé au premier plan, puis la liste jouée en lots parallèles
+(`xargs -P`), chaque commande avec son code de sortie.
+
+### 213d. Une erreur de Claude, rattrapée avant le code
+
+Dans la conversation, Claude avait annoncé que le réglage « Journée de référence » (7 h) ne servait plus à rien et serait
+retiré. **Faux** : il est le repli de `_pilEchCadence` (Échéances par tâche) quand le planning ne mesure aucune présence sur
+28 jours. La recherche `grep "hJour"` respectait la casse et ne voyait pas `_pecHJour`. Rattrapé en lisant
+`mv-harnais-pil-coherence` (qui l'extrait) ; dit à Nico. Le réglage reste ; seul son texte change (« repli des échéances »).
+★ **Chercher le nom exact de la fonction, ou sans casse, avant d'affirmer qu'elle n'a pas de lecteur.**
+
+### 213e. Ouvert
+
+① Aucun rendu navigateur : à regarder chez Nico — la carte du domaine sous la barre sur PC, les noms entiers dans la colonne
+de 126 px du Pilotage (coupés par des points de suspension au-delà), les surfaces à 4 décimales sur la liste. ② Les lots 2 et
+3, la passe d'audit, « Dégraffage », le repli de 7 h : §28, bloc COH-1.

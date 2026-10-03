@@ -3,11 +3,12 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **3 octobre 2026 (AVALE-2)** — ★★ **UNE ERREUR AVALÉE QUI SE RÉPÈTE REMONTE AU JOURNAL DU DOMAINE** (§212).
-> Issu de l'audit qualité du 02/10 (P3, vérifié avant d'agir). `_mvAvale` écrit aux paliers 1 / 10 / 100 / 1000 : `info` la 1re
-> fois (local, inchangé), `warning` dès la 10e (part vers l'Admin GT). Toujours `silencieux:true`, honoré par `logError` : aucun
-> toast « erreur avalée dans … » chez le client. Harnais `mv-harnais-avale` étendu (exécute le vrai `logError`). Base `6028b23`.
-> **SW 8.66 → 8.67, APP inchangée (7.92)** — invisible du client.
+> Dernière consolidation : **3 octobre 2026 (COH-1)** — ★★ **UN MÊME CHIFFRE, UN MÊME NOM, UNE MÊME SURFACE SUR TOUS LES ÉCRANS** (§213).
+> Premier des trois lots de la demande « une appli homogène » (captures de Nico, §28). L'arrachage découpé compte au Pilotage comme
+> sur la liste (`_mvTFaite`, règle commune ; surface faite / concernée quand la tâche n'a pas de barème) ; cartes Leaflet du
+> Pilotage confinées sous la barre du bas ; `tNom` = le nom entier et accentué, `tAbr` = la forme courte (seule la carte
+> « Avancement par tâche » de l'Accueil) ; surface d'une parcelle à 4 décimales, totaux à 2. Harnais `mv-harnais-coh1`
+> (19 assertions, contre-épreuve 12/12). Base `61f4ccd`. **APP 7.92 → 7.93, SW 8.67 → 8.68** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1808,6 +1809,34 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ COH-1 — LA DEMANDE DU 03/10 : UNE APPLI HOMOGÈNE (§213, posé le 03/10)
+
+Nico, 03/10 (cinq captures) : l'arrachage n'est pas compté partout, les cartes débordent sur PC, les graphiques sont trop
+différents entre eux, et des heures sup apparaissent dans Décider › le renfort. Découpage validé avec lui : trois lots.
+1. ✅ ~~Lot 1 — corrections sans maquette~~ — fait au §213.
+2. **Lot 2 — le renfort sans heures sup.** Nico : le renfort doit dire combien de saisonniers il faut sur une période,
+   JUSTEMENT pour que l'équipe n'en fasse pas. Capacité = heures du planning, rien de plus (`hMax = hJour`, comme la fin
+   prévue — décision du 10/09) ; plus de part « Heures sup » au coût ni au verdict ; la réponse devient un CALENDRIER
+   « du … au … : N saisonniers ». Un saisonnier compte aux heures du modèle standard de la semaine (Nico : surtout des
+   TESA, qui suivent l'horaire de l'équipe ; un CDD peut différer → réglage éventuel). Maquette → validation → intégration.
+   Vérifié le 03/10 : la capacité lit déjà le planning (`_capDayReal` : modèle de chacun, entrées, CP et récup à 0) et
+   `w.cap` le modèle standard jour par jour (`_cap1`) ; le seul ajout fixe est le ×8/7 de `_rfSim` (`hMax/hJour`).
+   ⚠️ Le modèle INTÉGRÉ dit 32 h en janvier-février (Nico : 28-29 h l'hiver, 39 h l'été) : vérifier chez lui que le modèle
+   2027 est enregistré (sinon bandeau « Le modèle … a été replacé » dans le Planning).
+3. **Lot 3 — kit graphique + mise en page PC.** Recommandation retenue : PAS d'option petit/grand par utilisateur ; un kit
+   (une barre en deux épaisseurs, un cadre en trois hauteurs, un seul style de grand chiffre, mêmes couleurs d'état) et un
+   bouton « Agrandir » sur chaque graphique (il existe déjà sur la carte de Décider). Constat : une vingtaine de familles de
+   barres dans `styles.css`, donuts et jauges chacun à sa taille, l'avancement par tâche dessiné deux fois (Accueil
+   `htache-*`, Pilotage `pil-b*`). Mise en page : `.page{max-width:none}` au-delà de 1200 px (Accueil et Parcelles à
+   1 900 px de large), `.pil-wrap` à 1 280. Maquette d'une page témoin d'abord.
+4. **La passe d'audit écran par écran** (téléphone et PC) promise à Nico : avec le lot 3.
+5. **« Dégraffage »** — tâche créée par le domaine (un seul f en français) : vérifier qu'un renommage dans Réglages ne casse
+   pas l'historique (le journal porte la clé `tache`) avant de le lui conseiller.
+6. **La journée de référence (7 h)** reste le repli de `_pilEchCadence` quand le planning ne mesure rien sur 28 jours : la
+   faire lire le modèle du planning (« compter les heures prévues au planning ») — avec le lot 2.
+7. **Surfaces hors Vigne** : `_pvSurfFr` ne couvre que `app.js` (liste, fiche, feuilles d'arrachage, bulles de carte). Les
+   autres modules écrivent encore la surface à leur façon — passe du lot 3.
 
 ### ⚠️ SEL-1 / ARRACH-3 à 5 — CE QUI RESTE OUVERT (§205-208, posé le 02/10)
 

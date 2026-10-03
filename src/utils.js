@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.92';
+export const APP_VERSION = '7.93';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -730,6 +730,21 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.93', items: [
+    { emoji: 'raisin', titre: 'L\u2019arrachage compte au Pilotage comme sur la liste des parcelles',
+      desc: "Un arrachage d\u00e9coup\u00e9 en \u00e9tapes, d\u00e9montage fait, s\u2019affichait \u00e0 50\u00a0% sur la liste des parcelles et \u00e0 0\u00a0% dans <b>Pilotage \u203a La campagne</b>. "
+        + "Les deux lisent maintenant la m\u00eame part. Et une t\u00e2che sans heures pr\u00e9vues \u00e0 l\u2019hectare (arrachage, d\u00e9sherbage manuel) ne s\u2019affiche plus \u00ab\u00a00/0\u00a0h\u00a0\u00bb\u00a0: "
+        + "elle s\u2019avance en surface, faite sur concern\u00e9e. Sur la carte d\u2019une parcelle, le compte des t\u00e2ches suit le pourcentage\u00a0: \u00ab\u00a01,5/2\u00a0t\u00e2ches\u00a0\u00bb au lieu de \u00ab\u00a075\u00a0% \u00b7 1/2\u00a0\u00bb." },
+    { emoji: 'carte', titre: 'La carte du domaine ne passe plus par-dessus la barre du bas',
+      desc: "Sur ordinateur, la carte du Pilotage recouvrait la barre des modules en bas de l\u2019\u00e9cran. Elle reste maintenant dans sa carte, comme celle de Parcelles. M\u00eame chose pour la carte de la tourn\u00e9e, dans D\u00e9cider." },
+    { emoji: 'check', titre: 'Un m\u00eame travail porte un seul nom, partout',
+      desc: "\u00ab\u00a0Reparation\u00a0\u00bb sur les filtres, \u00ab\u00a0R\u00e9par.\u00a0\u00bb au Pilotage, \u00ab\u00a0Brulage\u00a0\u00bb sans accent\u00a0: les travaux s\u2019\u00e9crivent maintenant en entier et accentu\u00e9s. "
+        + "La forme courte ne reste que dans la petite carte \u00ab\u00a0Avancement par t\u00e2che\u00a0\u00bb de l\u2019Accueil, o\u00f9 la place manque. Une t\u00e2che cr\u00e9\u00e9e par votre domaine garde le nom que vous lui avez donn\u00e9." },
+    { emoji: 'carte', titre: 'Les surfaces s\u2019\u00e9crivent toutes de la m\u00eame fa\u00e7on',
+      desc: "Une parcelle s\u2019\u00e9crit au centiare pr\u00e8s, avec quatre d\u00e9cimales\u00a0: \u00ab\u00a00,0870\u00a0ha\u00a0\u00bb sous \u00ab\u00a00,1144\u00a0ha\u00a0\u00bb, au lieu de \u00ab\u00a00,087\u00a0\u00bb. Un total s\u2019\u00e9crit au centi\u00e8me\u00a0: "
+        + "la carte du domaine dit \u00ab\u00a011,85\u00a0ha\u00a0\u00bb, plus \u00ab\u00a012\u00a0ha\u00a0\u00bb. "
+        + "Et la liste des parcelles qui restent, dans <b>Ma part du chantier</b>, ne finit plus par quatre points." },
+  ] },
   { v: '7.92', items: [
     { emoji: 'equipe', titre: 'L\u2019arrachage fini pour l\u2019\u00e9quipe, la suite au prestataire',
       desc: "Quand l\u2019arrachage est d\u00e9coup\u00e9 en \u00e9tapes, son avancement compte maintenant la part faite\u00a0: d\u00e9montage fait, ramassage au prestataire, la parcelle est \u00e0 la moiti\u00e9 au lieu de 0\u00a0%. "
@@ -3034,7 +3049,7 @@ export const DEMO_FIREBASE_PWD   = 'MaVigne2026!';
 // Copies locales — les modules importent depuis ici,
 // les fonctions restées dans app.js utilisent leurs propres const.
 export const TABREV = {
-  Ebourgeonnage:'Ebourg.', Ebourgeonnage1:'Ebourg. 1', Ebourgeonnage2:'Ebourg. 2',
+  Ebourgeonnage:'Ébourg.', Ebourgeonnage1:'Ébourg. 1', Ebourgeonnage2:'Ébourg. 2',
   Reparation:'Répar.', Plantation:'Plant.', Entreplantation:'Entrepl.',
   Arrachage:'Arrach.', Desherbage:'Désherb.', Effeuillage:'Effeuill.', Vendange:'Vend.',
   Accolage:'Accol.', Palissage:'Paliss.', Relevage:'Relev.'
@@ -3061,7 +3076,17 @@ export const TEMJ = {
 export const COULEURS_MBR = {};
 
 // ════ HELPERS TÂCHES ════
-export function tNom(nom) { return TABREV[nom] || nom; }
+// NOMS-1 (03/10) : UN SEUL NOM AFFICHÉ PAR TRAVAIL, ÉCRIT EN ENTIER ET ACCENTUÉ.
+//   Les clés internes (`Brulage`, `Reparation`, `Desherbage`) sont des identifiants, jamais un libellé :
+//   les puces de Parcelles les montraient telles quelles pendant que le Pilotage écrivait « Répar. » et
+//   le catalogue « Réparation » — trois noms pour un même travail. tNom rend désormais le nom ENTIER ;
+//   la forme courte (TABREV) ne sert plus qu'à une colonne étroite, par tAbr. Une tâche créée par le
+//   domaine garde le nom qu'il lui a donné.
+export const TLIB = { Brulage:'Brûlage', Reparation:'Réparation', Ebourgeonnage:'Ébourgeonnage',
+  Ebourgeonnage1:'Ébourgeonnage 1', Ebourgeonnage2:'Ébourgeonnage 2', Desherbage:'Désherbage' };
+export function tLib(nom) { return TLIB[nom] || nom; }
+export function tNom(nom) { return tLib(nom); }
+export function tAbr(nom) { return TABREV[nom] || tLib(nom); }
 
 // Délai de rentrée (DRE) effectif. Deux sources, on garde le MAX :
 //  - délai d'usage E-Phy (`drae`) — rarement renseigné ;
@@ -3788,6 +3813,7 @@ var MV_AIDE = {
     ico: 'carte', titre: 'Mes Parcelles', ancre: 'vigne',
     points: [
       ['Les filtres du haut', "trient par état : finies, en cours, arrachées."],
+      ['Sur chaque carte', "la surface au centiare près (0,0870 ha), le pourcentage, et le compte des tâches faites, qui suit la même règle : un arrachage à moitié fait compte pour une demie (« 1,5/2 tâches »)."],
       ['La colonne de droite', "porte les deux gestes du terrain, sans ouvrir la parcelle : « Début » signale qu’on attaque, « Valider » que c’est fini. Une tâche à passages affiche en plus le passage en cours (P1, P2, N1…)."],
       ['Le numéro devant le nom', "est le rang de la tournée du domaine. Il n’apparaît que si une tournée est fixée, et les parcelles se rangent dans cet ordre."],
       ['Onglet Carte', ": les contours viennent de votre export PAC ou d’un fichier KML."],
@@ -3989,6 +4015,7 @@ var MV_AIDE = {
       ['Le bouton « à compléter »', "liste ce qui manque pour que vos chiffres soient justes, et vous emmène à l’endroit exact où le renseigner. Un rond rouge sur un chiffre veut dire qu’il ne se calcule pas ; un rond orange, qu’il sort mais faux."],
       ['Les onglets vont du large au fin', ": l’année, puis la campagne, puis l’équipe et le matériel, puis la décision. Après le trait, ce sont des écrans de détail — on y arrive aussi en touchant un des trois chiffres."],
       ['La campagne', "montre l’avancement, mais aussi — sous « Où va le temps de l’équipe » — comment la présence se partage entre vigne, tracteur et le reste, avec la frise prévu/réel, la courbe par semaine et l’écart. Ces blocs parlent d’une campagne ; le pic de la semaine la plus chargée, lui, se lit dans « L’année »."],
+      ['Une tâche sans barème à l’hectare', "— arrachage, désherbage manuel, entreplantation sans trous saisis — ne prévoit pas d’heures : dans « Avancement par tâche », elle s’avance en <b>surface</b> faite sur surface concernée, la même part que sur la liste des parcelles."],
       ['Deux périodes qui se chevauchent', "ne comptent rien deux fois : les heures suivent les tâches, et une tâche n’appartient qu’à une seule période. Sur les jours communs, la frise hachure le fond en violet — il y a deux barres au même endroit, on lit la plus haute."],
       ['Une fenêtre de tâche s’arrête le jour écrit', " : fin au 25 avril, le 25 travaille. Et les heures se répartissent au prorata des jours <b>travaillables</b> : une semaine de ponts en reçoit moins, les semaines pleines récupèrent le reste."],
       ['Le marqueur « hors période »', "dans la roue crantée, fenêtres des tâches, veut dire qu’une fenêtre enregistrée ne tombe pas dans cette période. La fenêtre par défaut s’applique à la place, et l’écran le dit au lieu d’écraser tout le travail sur un seul jour."],
@@ -4808,6 +4835,8 @@ window.setThemeMode       = setThemeMode;
 window.applyTheme         = applyTheme;
 window.initTheme          = initTheme;
 window.tNom               = tNom;
+window.tLib               = tLib;
+window.tAbr               = tAbr;
 window.wmoDesc            = wmoDesc;
 window.wmoIcone           = wmoIcone;
 window.MV_METEO_IC        = MV_METEO_IC;

@@ -726,6 +726,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Filtre par tâche</b> : n'afficher que les parcelles concernées par la Taille, le Relevage…</li>
     <li><b>Recherche</b> par nom de parcelle, avec une croix pour tout effacer.</li>
     <li>Bascule <b>Liste</b> / <b>Carte</b>.</li>
+    <li>Chaque carte donne la <b>surface au centiare près</b> (0,0870&nbsp;ha), le <b>pourcentage</b> et le
+    <b>compte des tâches faites</b>, qui suivent la même règle : un arrachage à moitié fait compte pour une
+    demie (« 1,5/2 tâches »).</li>
     <li><b>Ma position</b> : classe les parcelles par distance et signale celle où vous vous trouvez.
     Le GPS n'est utilisé qu'à ce moment-là, à votre demande — aucun trajet n'est enregistré.</li>
   </ul>
@@ -2840,7 +2843,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> La campagne</h3>
   <ul class="dot">
-    <li><b>Jauge de saison</b> et <b>avancement par tâche</b>, avec comparatif de l'année précédente.</li>
+    <li><b>Jauge de saison</b> et <b>avancement par tâche</b>, avec comparatif de l'année précédente.
+    Une tâche sans heures prévues à l'hectare (arrachage, désherbage manuel) s'y lit en <b>surface</b>
+    faite sur surface concernée — la même part que sur la liste des parcelles.</li>
     <li><b>Donut de charge</b> : quelle tâche pèse le plus dans ce qui reste.</li>
     <li><b>Où va le temps de l'équipe</b> : la présence de la campagne partagée entre les travaux de
     vigne au barème, le tracteur et le reste (cave, trajets, entretien). Sous la barre, trois blocs

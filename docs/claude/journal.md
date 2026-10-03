@@ -8,6 +8,12 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **3 octobre 2026 (AVALE-2)** — ★★ **UNE ERREUR AVALÉE QUI SE RÉPÈTE REMONTE AU JOURNAL DU DOMAINE** (§212).
+> Issu de l'audit qualité du 02/10 (P3, vérifié avant d'agir). `_mvAvale` écrit aux paliers 1 / 10 / 100 / 1000 : `info` la 1re
+> fois (local, inchangé), `warning` dès la 10e (part vers l'Admin GT). Toujours `silencieux:true`, honoré par `logError` : aucun
+> toast « erreur avalée dans … » chez le client. Harnais `mv-harnais-avale` étendu (exécute le vrai `logError`). Base `6028b23`.
+> **SW 8.66 → 8.67, APP inchangée (7.92)** — invisible du client.
+
 > ★ Consolidation : **2 octobre 2026 (ARRACH-7)** — ★ **L'ARRACHAGE FINI POUR L'ÉQUIPE, LA SUITE AU PRESTATAIRE** (§211).
 > Capture de Nico : arrachage à 0 % alors que le démontage (travail de l'équipe) est fait partout et le reste au prestataire.
 > Deux lectures : `_arrFraction` (part des étapes faites) → `recalcTravaux` et `getPCls` ; `_arrEquipeFinie` (étapes non

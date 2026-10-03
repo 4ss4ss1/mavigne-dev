@@ -497,6 +497,14 @@ function _pilRenderGauge(d){
     + '<span class="pil-gm"><b class="done">'+d.done.length+'</b> terminées · <b>'+d.active.length+'</b> en cours</span>'
     + '</div>';
 }
+// COH-1 (03/10) : une tâche SANS barème à l'hectare (arrachage, désherbage manuel, entreplantation sans
+//   trous saisis) ne prévoit aucune heure : la ligne affichait « 0/0 h ». Elle s'écrit en surface, faite
+//   sur concernée — la même part que son pourcentage et que la liste des parcelles.
+function _pilBarQte(t){
+  if((t.h_total||0)>0) return _pilNum(t.h_done)+'/'+_pilNum(t.h_total)+' h';
+  if((t.surf_total||0)>0){ var f=function(v){ return (Math.round((Number(v)||0)*100)/100).toFixed(2).replace('.',','); }; return f(t.surf_done)+'/'+f(t.surf_total)+' ha'; }
+  return '\u2014';
+}
 function _pilRenderBar(d){
   var host=document.getElementById('pil-bar'); if(!host) return;
   var mode=_PIL_STATE.bar||'saison';
@@ -511,7 +519,7 @@ function _pilRenderBar(d){
       + '<div class="pil-blab">'+_pilEsc(_pilTnom(t.nom))+'</div>'
       + '<div class="pil-btrack"><div class="pil-bfill" style="width:'+Math.min(t.pct||0,100)+'%;background:'+col+'"></div></div>'
       + '<div class="pil-bpct" style="color:'+col+'">'+(t.pct||0)+'%</div>'
-      + '<div class="pil-bh">'+_pilNum(t.h_done)+'/'+_pilNum(t.h_total)+' h</div>'
+      + '<div class="pil-bh">'+_pilBarQte(t)+'</div>'
       + '</div>';
   }).join('');
 }
@@ -733,7 +741,7 @@ function _pilTile(id,dot,title,statHtml,subHtml,gradPct,bodyHtml,infoCle){
     + '</div>';
 }
 function _pilPanelCarte(d){
-  var ha=_pilNum(d.surfTot).replace(/\u202f/g,' ');
+  var ha=(Math.round((Number(d.surfTot)||0)*100)/100).toFixed(2).replace('.',',');   // SURF-1 (03/10) : un total au centième, jamais arrondi à l'hectare
   var body='<div class="pil-map" id="pil-map"></div>'
     + '<div class="pil-map-leg"><span>0 %</span><span class="pil-map-bar"></span><span>100 %</span>'
     + '<span style="display:flex;align-items:center;gap:6px"><span class="pil-map-sw" style="background:rgba(192,57,43,.5);border-color:#C0392B"></span>Arrachée</span>'
@@ -2038,7 +2046,7 @@ function _pilPanelTemps(d){
   if(s.etp_courbe!==0){ body+='<div style="'+secTtl+'">'+_pilEsc(cd.saison)+' \u2014 personnes n\u00e9cessaires / semaine</div><div style="width:100%;overflow-x:auto" id="pil-g-dem"></div>'+curveLeg;
     window._mvGraphSuivre('#pil-g-dem', function(lg){ return _pilDemandSvg(cd,lg); }, {max:1800}); }
   if(s.etp_ecart!==0){ body+='<div style="'+secTtl+'">\u00c9cart pr\u00e9vu / r\u00e9el</div>'+_pilEcartHtml(cd,real); }
-  var _subT=_pilNum(_vig)+' h de bar\u00e8me \u00b7 '+_etpF(_vig)+' ETP vigne'+((_tH>0)?(' \u00b7 '+_etpF(_tH)+' ETP tracteur'):'');
+  var _subT=_pilNum(_vig)+' h de bar\u00e8me \u00b7 '+_etpF(_vig)+' ETP vigne'+((_tH>0&&_cr>0&&_tH/_cr>=0.05)?(' \u00b7 '+_etpF(_tH)+' ETP tracteur'):'');   // COH-1 : quelques heures de tracteur sortaient « 0,0 ETP »
   return _pilTile('temps','#4A9FC8','Le temps de l\u2019\u00e9quipe \u00b7 '+cd.saison, _pilStat(_pilNum(_prez),' h de pr\u00e9sence'), _subT, Math.min(100,_pV), body);
 }
 
@@ -6706,8 +6714,10 @@ function _pecRevData(mil){
   R.autres=_pecRevAutres(); R.mils=_pecRevMils();
   return R;
 }
-// Journee de reference : convertit les journees-personnes du journal en heures, base
-// de l'ecart de cadence. Defaut 7 h, aligne sur le simulateur de renfort (_rfCfg.hJour).
+// Journee de reference : REPLI de _pilEchCadence (Echeances par tache) quand le planning ne donne
+// aucune presence mesuree sur 28 jours (et hPers quand il ne la mesure pas). COH-1 (03/10) : son
+// texte disait « base de l'ecart de cadence » — faux depuis que la cadence lit le planning
+// (_pecCadPresence). Defaut 7 h. _pecData la recopie encore dans `cad`, sans lecteur.
 // UN SEUL lecteur : le defaut vivait en dur dans _pecData, il y aurait diverge du jour
 // ou le champ est devenu reglable.
 function _pecHJour(){ var v=Number(((window.CONFIG&&window.CONFIG.eco)||{}).h_jour); return (isFinite(v)&&v>0)?v:7; }
@@ -11356,7 +11366,7 @@ var _PEC_HYPO = {
                  sub:'facultatif \u2014 fermage, cave, amortissements, structure\u00a0: donne un <b>co\u00fbt complet indicatif</b>',
                  def:'aucune', unite:'\u20AC', step:'100', min:'0' },
   h_jour:      { ico:'\u23F1\uFE0F', tit:'Journ\u00e9e de r\u00e9f\u00e9rence',
-                 sub:'convertit les journ\u00e9es de pr\u00e9sence du journal en heures, base de l\u2019<b>\u00e9cart de cadence</b>',
+                 sub:'repli des <b>\u00e9ch\u00e9ances par t\u00e2che</b>, seulement quand le planning ne donne aucune pr\u00e9sence sur les quatre derni\u00e8res semaines',
                  def:'7', unite:'h / jour', step:'0.5', min:'1' }
 };
 function _pecHypoVal(key){
