@@ -4889,6 +4889,38 @@ body,#app-root,.page{min-height:100dvh;}
   padding:9px 12px;font-size:11.5px;line-height:1.6;color:var(--texte-med);white-space:normal;}
 .rf-how b{color:var(--texte);}
 .rf-k{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px;vertical-align:-1px;}
+/* RENF-2 (§224) : la carte du renfort en calendrier — espacements, tailles et rayons aux jetons. */
+.rf2-v{display:flex;gap:var(--e-3,12px);align-items:baseline;flex-wrap:wrap;margin:var(--e-1,4px) 0 var(--e-0,2px);}
+.rf2-vu{font-weight:600;font-size:var(--pt-base,14px);color:var(--texte);}
+.rf2-vq{font-size:var(--pt-txt,12.5px);color:var(--texte-med);}
+.rf2-ok{display:inline-block;font-size:var(--pt-micro,11px);font-weight:600;color:var(--vert-med);background:var(--vert-pale);border-radius:10px;padding:var(--e-0,2px) var(--e-2,8px);margin-top:var(--e-1,4px);}
+.rf2-cal{border-top:1px solid var(--gris-clair);margin-top:var(--e-2,8px);}
+.rf2-row{display:grid;grid-template-columns:1fr auto;gap:var(--e-1,4px) var(--e-3,12px);padding:var(--e-3,12px) 0;border-bottom:1px solid var(--gris-clair);}
+.rf2-row .per{font-weight:600;font-size:var(--pt-base,14px);color:var(--texte);}
+.rf2-row small{display:block;font-weight:500;color:var(--texte-doux);font-size:var(--pt-micro,11px);margin-top:var(--e-0,2px);}
+.rf2-row .nb{text-align:right;font-weight:700;font-size:var(--pt-base,14px);white-space:nowrap;}
+.rf2-row.gap .per,.rf2-row.fin .per{font-weight:500;color:var(--texte-med);}
+.rf2-fr{grid-column:1/-1;position:relative;height:var(--e-2,8px);background:var(--gris-clair);border-radius:4px;overflow:hidden;}
+.rf2-fr i{position:absolute;top:0;bottom:0;background:var(--or);border-radius:4px;}
+.rf2-tot{display:flex;justify-content:space-between;gap:var(--e-2,8px);flex-wrap:wrap;padding:var(--e-2,8px) 0 0;font-size:var(--pt-txt,12.5px);}
+.rf2-tot small{color:var(--texte-doux);}
+.rf2-seg{display:flex;gap:var(--e-2,8px);flex-wrap:wrap;align-items:center;margin:var(--e-2,8px) 0;font-size:var(--pt-micro,11px);color:var(--texte-doux);}
+.rf2-seg select{font:inherit;color:var(--texte);border:1px solid var(--gris-clair);border-radius:6px;padding:var(--e-1,4px) var(--e-2,8px);background:var(--bg-card);}
+.rf2-cmp{border:1px solid var(--gris-clair);border-radius:10px;overflow:hidden;}
+.rf2-l{display:grid;grid-template-columns:1fr auto;gap:var(--e-0,2px) var(--e-3,12px);padding:var(--e-2,8px) var(--e-3,12px);border-top:1px solid var(--gris-clair);}
+.rf2-l:first-child{border-top:0;}
+.rf2-l.reco{background:var(--vert-pale);}
+.rf2-l .a{font-weight:600;font-size:var(--pt-txt,12.5px);color:var(--texte);}
+.rf2-l .e{text-align:right;font-weight:700;font-size:var(--pt-txt,12.5px);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.rf2-l .d{grid-column:1/-1;font-size:var(--pt-micro,11px);color:var(--texte-doux);}
+.rf2-l .d b{color:var(--rouge);font-weight:600;}
+.rf2-l .d b.v,.rf2-l.reco .d b{color:var(--vert-med);}
+.rf2-pied{font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:var(--e-2,8px);}
+.rf2-leg{display:flex;gap:var(--e-3,12px);flex-wrap:wrap;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:var(--e-1,4px);}
+.rf2-tir{height:0;border-top:2px dashed var(--texte);border-radius:0;vertical-align:3px;}
+.rf2-ferme{background:repeating-linear-gradient(45deg,var(--gris) 0 2px,transparent 2px 5px);}
+.rf2-choix{margin-top:var(--e-4,16px);border:1px solid var(--gris-clair);border-radius:10px;padding:var(--e-2,8px) var(--e-3,12px);}
+.rf2-choix summary{cursor:pointer;font-weight:600;font-size:var(--pt-txt,12.5px);color:var(--texte);}
 .rf-strats{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px;}
 .rf-strat{border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-med);
   font-family:'Outfit',sans-serif;font-size:11.5px;font-weight:600;padding:9px 13px;border-radius:20px;

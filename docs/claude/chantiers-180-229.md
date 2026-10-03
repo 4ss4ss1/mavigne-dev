@@ -1971,3 +1971,54 @@ le cliquet garde ce gain. Chaîne complète jouée sur une copie de `75107ff` + 
 ① Une garde contre les lots frères (§28, bloc COH-1, point 8). ② Règle de travail : un seul fil livre des fichiers complets à
 la fois, ou un push entre deux lots. ③ Le lot 2 de COH-1 (le renfort sans heures sup, maquette v2 validée) se construit sur
 cette fusion.
+
+## 224. ★★ RENF-2 — LE RENFORT DIT COMBIEN DE SAISONNIERS, ET QUAND — SANS HEURES SUP (03/10 — `src/pilotage.js` · `src/planning.js` · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW, MV_INFO pil.sim.* ×5, MV_AIDE pilotage) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `public/guide.html` · `scripts/mv-harnais-renf2.mjs` (neuf) · `scripts/mv-harnais-info.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · **APP 8.02 → 8.03, SW 8.77 → 8.78**, base `1a75533`)
+
+### 224a. D'où ça vient
+
+Nico, 03/10 : *« dans Décider, renfort, combien, quand, je ne comprends pas pourquoi apparaissent des heures sup — il faut
+indiquer combien de saisonniers il faut à une période donnée pour justement éviter que l'équipe ait à faire des heures
+sup »*. Vérifié : `_rfSim` plafonnait la capacité à `capNorm × hMax/hJour` = ×8/7 — chacun travaillait une heure de plus par
+jour avant que le simulateur réclame du monde, et le coût portait une part « Heures sup ». La capacité, elle, lisait déjà
+le planning jour par jour (`_capDayReal`, CP et récup à 0 ; `w.cap` = le modèle standard, `_cap1`). Nico : les heures à
+compter sont celles du planning (annualisé : ~28-29 h l'hiver, 39 h l'été) ; ses saisonniers sont surtout des TESA, qui
+suivent l'horaire de l'équipe. Maquettes v1 puis v2 (ajout de « Et sans renfort ? », demandé par Nico), v2 validée.
+
+### 224b. Ce qui change
+
+- **Plus d'heure sup cachée** : `_rfCfg` → `hMax: 7` (= `hJour`), `hCdd: 35`. Toute simulation compte le planning, rien de
+  plus — y compris `_pilCkInaction` (coût de l'inaction de l'écran du matin), dont le chiffre peut monter. Une heure sup
+  n'existe que si un scénario la nomme : `c.plaf` (plafond hebdomadaire par personne, proratisé sur la semaine entamée par
+  `capRatio`, posé par `_rfCtx`).
+- **Les heures d'un saisonnier** : `c.capS(i)` — TESA = `W[i].cap` (le modèle de la semaine), CDD = `c.hCdd × capRatio`,
+  0 une semaine fermée. `_rfSim` les paie (`capRenf`) et les fait travailler à `c.rdt`.
+- **Le calendrier** (`_rfCalendrier`) : tant qu'un travail déborde, le plus tôt à échoir est servi en premier ; sur SA
+  fenêtre (`_rfWOf(ws)` → `lim`), `_rfMinR(…, base)` cherche le plus petit nombre CONSTANT qui le fait tenir, en plus du
+  profil déjà posé, semaines fermées exclues. `_rfPeriodes` regroupe les semaines de même effectif ; une fermeture coupe.
+- **« Et sans renfort ? »** (`_rfSansRenfort`) : l'équipe seule au plafond choisi (défaut `_rfPlafDef` = la semaine la plus
+  longue du modèle, `window._planSemaineMax`, neuf dans planning.js ; boutons 43 et 48 h), ses heures sup comptées comme le
+  relevé (25 % jusqu'à la 43e heure, 50 % au-delà, au taux de l'équipe), le retard qui reste ; puis l'équipe sans heures
+  sup ; puis le plafond minimal qui ferait tout tenir.
+- **La carte** (`_rfBody`, `_rfCalSvg` au socle MV_GRAPH, `_pilPanelRenfort`) : verdict, calendrier, comparatif, semaine par
+  semaine, une ligne d'hypothèses (`rf-lim`) + TESA / CDD, « Choisir moi-même la période » (`_rfMinR` en rectangle).
+  Gestes : `window._rfContrat`, `_rfPlaf`, `_rfChoix` — les valeurs passent par `data-*`, jamais dans le gestionnaire (C24b).
+- **Retirées** (plus d'appelant) : `_rfBesoin`, `_rfBesoinC`, `_rfBest`, `_rfStrategies`, `_rfProfilSvg`, `_rfCoutSvg`,
+  `_rfRetardHtml`, `_rfBesoinHtml`, `_rfTable`, `_rfROpts`, `_rfSelHtml`, `window._rfSel`, `_rfSelAutre`, `_rfAppliquer`.
+  La fiche `pil.sim.fenetres` (le tableau d'avant) est retirée ; les cinq autres `pil.sim.*` sont réécrites et posées sur
+  les nouvelles sections.
+
+### 224c. Mesuré
+
+`mv-harnais-renf2.mjs` : **17 assertions** sur les vraies fonctions, scénario de la maquette — le moteur redonne EXACTEMENT
+ses chiffres : 2 saisonniers en deux périodes (Noël), 968 h en TESA, 1 190 h en CDD, 0 h sup ; sans renfort ni heures sup,
+la taille +12 semaines ; à 39 h, 550 h sup à 25 %, 13 416 € et la taille encore +7 ; à 48 h, 696 h à 25 % + 237 h à 50 %,
+23 907 € ; plafond minimal 46 h ; « 4 janv. – 26 mars » : 3 saisonniers. Contre-épreuve **7/7**. `mv-harnais-info` adapté :
+« les cinq sections du renfort portent leur fiche », nouvelles phrases témoins, nouvelle légende. Chaîne complète verte.
+★ **Piège** : la première contre-épreuve laissait deux défauts verts (le simulateur qui oublie `capS`, `_rfMinR` qui
+ignore le profil posé) — le scénario n'avait qu'un bloc et vérifiait les heures hors du simulateur. Deux assertions
+ajoutées, sur `capRenf` et sur `_rfMinR` appelé directement.
+
+### 224d. Ouvert
+
+① À l'œil chez Nico, sur ses données (§28, bloc COH-1, point 10). ② `c.hCdd` est en dur (35 h). ③ La journée de
+référence (7 h) reste le repli des échéances (§28, point 6).

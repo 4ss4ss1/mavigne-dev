@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **3 octobre 2026 (FUSION-1)** — ★★★ **LA SÉRIE §213-§221 RECOLLÉE SOUS COH-1 (§222) — DEUX FILS, UNE MÊME BASE** (§223).
+> Le commit `75107ff` avait collé les fichiers COMPLETS de COH-1 (bâti sur `61f4ccd`) par-dessus les neuf lots « densifier le
+> Pilotage », bâtis eux aussi sur `61f4ccd` dans une autre conversation : leur code avait disparu d'app.js, pilotage.js, utils.js,
+> styles.css et de la doc ; il ne restait que planning.js, reglages.js et leurs harnais (preflight rouge : `_planPrevuPersRange`
+> sans appelant). Réparé par une vraie fusion git à trois voies depuis `61f4ccd` (zip TRAIT-CUVE ↔ lot COH-1, 10 fichiers en
+> conflit). COH-1 renuméroté §222. ★ `.mv-base` ne voit pas deux lots frères : ils déclarent la même base.
+> Base `75107ff`. **APP 8.01 → 8.02, SW 8.76 → 8.77** (visible : COH-1 arrive avec la série).
+
 > ★ Consolidation : **3 octobre 2026 (TRAIT-CUVE)** — ★ **LE TRAITEMENT CONSEILLÉ, CHIFFRÉ DANS LA CUVE ; LE QUOI DE NEUF SPÉCIAL « MA VIGNE PRÉVOIT »** (§221).
 > Trois cartes se croisent (protection restante, fenêtre, tracteur) : une ligne « et si » en pointillé, à la CADENCE MESURÉE des
 > traitements (4/6/8 rangs : le barème ne le sait pas), **éteinte** (`CONFIG.features.trait_cuve`) jusqu'à l'été, hors du Quoi de neuf.

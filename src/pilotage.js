@@ -3590,6 +3590,7 @@ function _rfIso(o){ return _pilOrdIso(o); }
 //            aurais-je besoin si je n'avais embauche personne ? »
 var _RF_SEL = { R:0, a:0, b:0, dP:0, base:'eng' };   // dP = effectif simule EN PLUS ou EN MOINS
 var _RF_D   = null;
+var _RF_RES = null;   // RENF-2 : le résumé du dernier calendrier (tuile)
 
 
 
@@ -3600,7 +3601,10 @@ function _rfCfg(){
   var tr=Number(t['Saisonnier'])||Number(t['TESA'])||Number(t['Extra'])||0;
   return { k:_n(e.k_retard,15,0)/100, rdt:_n(e.rdt_renfort,85,1)/100,
            fixe:_n(e.cout_fixe_renfort,180,0), hs:_n(e.maj_hsup,25,0)/100,
-           tauxRenfort:tr, hJour:7, hMax:8 };
+           // RENF-2 (§224) : hMax = hJour — la capacité est celle du PLANNING, rien de plus. Avant, 8 h au lieu de 7
+           //   (+14 %) : le simulateur comptait sur des heures sup avant de réclamer du monde. Une heure sup n'existe
+           //   plus que dans un scénario qui la nomme (c.plaf, « Et sans renfort ? »). hCdd : un CDD à horaire fixe.
+           tauxRenfort:tr, hJour:7, hMax:7, hCdd:35 };
 }
 
 // ⚠⚠ PLAFOND DU RENFORT — SOURCE UNIQUE. _rfSelHtml et _rfBest en portaient
@@ -3665,9 +3669,14 @@ function _rfOkT(res,nom){
 //   au lieu de 150 en balayage lineaire, ce qui rend le deplafonnement gratuit.
 //   La monotonie est acquise — plus de capacite sur [a,b] ne peut pas faire
 //   finir un travail plus tard.
-function _rfMinR(ctx,a,b,rMax,nom){
+function _rfMinR(ctx,a,b,rMax,nom,base){
+  // RENF-2 (§224) : `base` = un profil déjà posé (le calendrier) ; R s'y AJOUTE sur [a,b], semaines fermées exclues
+  //   (le domaine fermé ne paie personne, et la période se coupe là). Sans base : le rectangle d'avant.
   function ok(R){
-    var r=_rfSim(ctx,_rfProf(ctx,{R:R,a:a,b:b}));
+    var p;
+    if(base){ p=base.slice(); for(var i=a;i<=b;i++){ if((ctx.W[i]||{}).cap>0) p[i]+=R; } }
+    else p=_rfProf(ctx,{R:R,a:a,b:b});
+    var r=_rfSim(ctx,p);
     return nom?_rfOkT(r,nom):!r.deborde;
   }
   if(ok(0)) return 0;
@@ -3677,46 +3686,6 @@ function _rfMinR(ctx,a,b,rMax,nom){
   return hi;
 }
 
-// ⚠⚠ « DE COMBIEN DE MONDE CETTE FENETRE A BESOIN » — la question que l'ecran
-//   ne posait nulle part. Le seul chiffre affiche, renfortMini, repondait en
-//   MOYENNE DE CAMPAGNE : le manque total divise par la capacite totale. Pour
-//   une vendange concentree sur deux semaines, ce nombre n'a aucun sens — il
-//   annonce 2 personnes la ou il en faut 40, et toutes les strategies proposees
-//   en decoulaient. Ici chaque travail est mesure DANS SA FENETRE.
-//   brut  = personnes qu'il faudrait en continu sur la fenetre pour cette tache
-//           seule (heures / capacite d'une personne sur ces semaines).
-//   dispo = permanents presents en moyenne sur la fenetre — PARTAGES avec les
-//           autres travaux ouverts au meme moment, d'ou R != brut - dispo.
-//   R     = le renfort reellement necessaire, obtenu par simulation.
-function _rfBesoin(ctx){
-  var W=ctx.W, rMax=_RF_RMAX_DUR, out=[];
-  (ctx.tw||[]).forEach(function(t){
-    if(!(t.h>0.01)) return;
-    // t.we est la borne EXCLUSIVE : le dernier jour travaille est we-1. Viser
-    // wOf(t.we) designait la semaine du LENDEMAIN de l'echeance — une semaine de
-    // rab quand la fenetre se terminait un dimanche.
-    var a=_rfWOf(W,t.ws), b=_rfWOf(W,t.we-1);
-    if(b<a) b=a;
-    var cap1=0, dispoH=0, i;
-    for(i=a;i<=b;i++){ cap1+=(W[i].cap||0); dispoH+=((ctx.dispo[i]||0)*(W[i].cap||0)); }
-    out.push({ nom:t.nom, a:a, b:b, sem:(b-a+1), h:t.h, cpt:!!t.cpt,
-               brut:(cap1>0?t.h/cap1:0), dispo:(cap1>0?dispoH/cap1:0),
-               R:_rfMinR(ctx,a,b,rMax,t.nom),
-               d0:_rfIso(W[a].o0), d1:_rfIso(W[b].o1) });
-  });
-  // Le travail qui commande en premier : celui qui exige le plus de monde.
-  out.sort(function(x,y){
-    var rx=(x.R===null)?1e9:x.R, ry=(y.R===null)?1e9:y.R;
-    return (ry-rx)||(x.a-y.a);
-  });
-  return out;
-}
-// Cache par contexte : _rfBody, _rfStrategies et _rfAppliquer lisent le meme
-// tableau. ctx est reconstruit a chaque rendu -> aucun risque de peremption.
-function _rfBesoinC(ctx){
-  if(!ctx._bes) ctx._bes=_rfBesoin(ctx);
-  return ctx._bes;
-}
 
 // ETP tracteur : MESURE. Heures de sessions de la periode / capacite d'un ETP.
 // CONFIG.eco.trac_etp force une hypothese ; une valeur <=0 repasse en mesure.
@@ -3820,7 +3789,7 @@ function _rfCtx(d,mode,cdIn,opts){
       // need RECALCULE sur le reste : garder celui du plan ferait mentir la
       // hauteur des colonnes du graphe.
       var wh=0; tw.forEach(function(t){ wh+=_rfHIn(cd,t,o0,w.o1+1); });
-      return { o0:o0, o1:w.o1, m:w.m, hours:wh, cap:cp, need:(cp>0?wh/cp:0),
+      return { o0:o0, o1:w.o1, m:w.m, hours:wh, cap:cp, capRatio:fr, need:(cp>0?wh/cp:0),
                head:w.head, headPerm:w.headPerm,
                capH:CR?CR.work:(w.capH!=null?w.capH*fr:null),
                capPay:CR?CR.pay:(w.capPay!=null?w.capPay*fr:null),
@@ -4008,9 +3977,14 @@ function _rfSim(ctx,prof){
   for(var w=0; w<nW+200; w++){
     var iw=Math.min(w,nW-1), cap=W[iw].cap||0, R=(prof&&prof[w])||0;
     if(R>pointe) pointe=R;
-    if(w<nW) capRenf+=R*cap;
+    var capS=(c.capS?c.capS(iw):cap);              // RENF-2 : heures PAYÉES d'un saisonnier (TESA = modèle de la semaine, CDD = fixe)
+    if(w<nW) capRenf+=R*capS;
     var dispoP=ctx.dispo[iw]||0;
-    var capNorm=(dispoP+R*c.rdt)*cap, capMax=capNorm*(c.hMax/c.hJour);
+    var capNorm=dispoP*cap+R*c.rdt*capS;
+    // RENF-2 : c.plaf = plafond hebdomadaire PAR PERSONNE, heures sup comprises, pour l'équipe seule (« Et sans
+    //   renfort ? »). Proratisé sur la semaine entamée (capRatio). Sans plaf, capMax = capNorm (hMax = hJour).
+    var capMax=(c.plaf>0)?Math.max(capNorm, dispoP*c.plaf*(W[iw].capRatio!=null?W[iw].capRatio:1)+R*c.rdt*capS)
+                         :capNorm*(c.hMax/c.hJour);
     // ⚠⚠ REPARTITION, PAS FILE D'ATTENTE. L'ancienne boucle servait la tache la
     //   plus urgente JUSQU'A EPUISEMENT de la capacite avant de passer a la
     //   suivante : une tache en retard gelait tout ce qui venait apres, et les
@@ -4121,76 +4095,7 @@ function _rfSim(ctx,prof){
            parSem:parSem, apres:apres };
 }
 
-// ⚠⚠ RECHERCHE BORNEE. L'ancienne version balayait TOUTES les combinaisons
-// nombre x debut x fin : sur une campagne de 40 semaines, ~10 000 simulations
-// completes A CHAQUE RENDU **et** a chaque clic — les boutons semblaient inertes
-// alors qu'ils mettaient plusieurs secondes. Ici : on cherche le plus petit
-// effectif qui boucle sur la campagne entiere, puis on RETRECIT la fenetre tant
-// que ca boucle encore, et on teste deux effectifs au-dessus. ~250 simulations.
-function _rfBest(ctx){
-  // ⚠ Le balayage lineaire de 0 a rMax n'etait tenable que parce que rMax etait
-  //   plafonne a 24 — c'est-a-dire au prix de ne jamais trouver la reponse quand
-  //   il faut 40 personnes. _rfMinR fait la meme chose par dichotomie, en 8
-  //   simulations quel que soit le plafond.
-  var n=ctx.W.length, rMax=_rfRMax(ctx);
-  var R0=_rfMinR(ctx,0,n-1,rMax,null);
-  if(R0===null) return null;                       // rien ne boucle : pas de conseil
-  var best=null;
-  for(var R=R0; R<=Math.min(rMax,R0+2); R++){
-    var a=0, b=n-1;
-    if(R>0){
-      while(a<b && !_rfSim(ctx,_rfProf(ctx,{R:R,a:a+1,b:b})).deborde) a++;
-      while(b>a && !_rfSim(ctx,_rfProf(ctx,{R:R,a:a,b:b-1})).deborde) b--;
-    } else { a=0; b=0; }
-    var s=_rfSim(ctx,_rfProf(ctx,{R:R,a:a,b:b}));
-    if(!s.deborde && (!best || s.decide<best.s.decide)) best={R:R,a:a,b:b,s:s};
-  }
-  return best;
-}
 
-// ⚠⚠ LES PROPOSITIONS PARTENT DES FENETRES, PLUS D'UNE MOYENNE. Les anciennes
-//   se calaient toutes sur renfortMini = manque total / capacite totale, puis
-//   « x2 sur une moitie de campagne ». Aucune ne pouvait tomber juste des qu'un
-//   travail court et lourd existait : on proposait 2 personnes toute l'annee et
-//   4 sur six mois pour une vendange qui en demande 40 sur deux semaines. Et
-//   comme aucune ne bouclait, l'ecran concluait « il faut plus de monde que ce
-//   que le simulateur a teste » sans jamais dire combien.
-function _rfStrategies(ctx){
-  var n=ctx.W.length, out=[], bes=_rfBesoinC(ctx);
-  out.push({nom:'Aucun renfort', sel:{R:0,a:0,b:0}});
-  // ★★★ LE GARDE-FOU : `tout` EST CALCULE D'ABORD, ET IL PLAFONNE LES AUTRES.
-  //   x.R n'est PAS « ce que cette tache demande » : c'est « combien de monde il
-  //   faut poser SUR LA SEULE FENETRE DE CETTE TACHE pour qu'elle tienne, alors
-  //   qu'on n'a rien fait avant ». Tout le retard accumule vient s'y ecraser, le
-  //   surcout de retard le multiplie, et le nombre s'envole.
-  //   Mesure du 12/08, sur le meme ecran, au meme instant :
-  //     · le tableau « Est-ce que ca tient dans les fenetres ? » : accolage,
-  //       il faudrait 3,2 personnes, il y en a deja 1,2 ;
-  //     · le bouton juste au-dessus : « Accolage — 26 pers. » ;
-  //     · et le bouton d'a cote : « 7 sur toute la periode », qui fait tenir
-  //       TOUTE la campagne, accolage compris.
-  //   Trois nombres, un seul ecran. Une proposition CIBLEE qui coute plus cher
-  //   que la solution GLOBALE n'est pas une proposition : c'est un piege.
-  //   On ne l'affiche plus. Ce qui reste est vrai et comparable.
-  var tout=_rfMinR(ctx,0,n-1,_RF_RMAX_DUR,null);
-  var plafond=(tout!=null&&tout>0)?tout:_RF_RMAX_DUR;
-  // Les deux travaux qui commandent, chacun avec le nombre exact que SA fenetre
-  // reclame. Au-dela de deux, la rangee de boutons devient illisible.
-  var k=0;
-  bes.forEach(function(x){
-    if(k>=2 || !(x.R>0) || x.R>plafond) return;
-    k++;
-    out.push({nom:_pilEsc(x.nom)+' \u2014 '+x.R+' pers.', sel:{R:x.R,a:x.a,b:x.b},
-      detail:x.R+' personne'+(x.R>1?'s':'')+' du '+_pilFmtD(x.d0)+' au '+_pilFmtD(x.d1)
-             +' \u00b7 '+x.sem+' semaine'+(x.sem>1?'s':'')+' \u2014 pos\u00e9s sur cette seule fen\u00eatre'});
-  });
-  if(tout!=null && tout>0) out.push({nom:tout+' sur toute la p\u00e9riode', sel:{R:tout,a:0,b:n-1},
-    detail:'le plus petit nombre qui tient sans jamais s\u2019arr\u00eater'});
-  var b=_rfBest(ctx);
-  if(b) out.push({nom:'Le meilleur placement trouv\u00e9', best:true, sel:{R:b.R,a:b.a,b:b.b},
-    detail:b.R+' renfort'+(b.R>1?'s':'')+' \u00b7 '+_pilFmtD(_rfIso(ctx.W[b.a].o0))+' \u2192 '+_pilFmtD(_rfIso(ctx.W[b.b].o1))});
-  return out;
-}
 
 // ── Étape 2 : le profil. Il dessine le RÉSULTAT de la simulation. Plus aucune
 //    zone cliquable : la sélection se fait au sélecteur, au-dessus. ──
@@ -4204,165 +4109,7 @@ function _rfLabJ(W,i){
   var ma=MO[parseInt(a[1],10)-1]||'', mb=MO[parseInt(b[1],10)-1]||'';
   return (ma===mb) ? (da+'\u2013'+db+' '+mb) : (da+' '+ma+'\u2013'+db+' '+mb);
 }
-function _rfProfilSvg(ctx,res,sel,opt,w){
-  opt=opt||{};
-  var W=ctx.W, n=W.length, PS=res.parSem;
-  var E=_pilEchelle(ctx.cd,w), X=E.X;
-  var c=window._mvGraphCadre(E.W,1);
-  var Wd=E.W,padL=E.padL,padR=E.padR,padT=22,padB=42,Ht=290,pw=E.plotW,ph=Ht-padT-padB;
-  // Une colonne n'occupe plus une fraction egale de la largeur : elle occupe
-  // les JOURS qu'elle couvre, exactement comme la barre correspondante de la
-  // frise. colW ne sert plus qu'a doser la densite des etiquettes.
-  function CX0(k){ return X(W[Math.max(0,Math.min(n-1,k))].o0); }
-  function CX1(k){ return X(W[Math.max(0,Math.min(n-1,k))].o1+1); }
-  // ★★★ LE ROUGE N'EST PLUS PLAFONNE A 4, ET IL EST EMPILE SUR LE MEME SOCLE
-  //   QUE LE RESTE DE LA COLONNE. Deux fautes, dans la meme image :
-  //   ① `Math.min(att,4)` : une semaine a qui il manque 40 personnes se dessinait
-  //      exactement comme une semaine a qui il en manque 4. Mesure du 12/08 :
-  //      SEPT colonnes consecutives a 6,0 pile — un PLATEAU PARFAIT, qui n'est pas
-  //      dans les donnees. C'etait 2 (effectif) + 4 (plafond). Un graphe qui rend
-  //      un manque de 40 identique a un manque de 4 empeche exactement la decision
-  //      qu'on vient le chercher.
-  //   ② Le rouge partait de `head+R` (des TETES) alors que le bas de la colonne
-  //      est empile en EQUIVALENTS-PERSONNES (b0 + dispo, soit capH/cap). Deux
-  //      unites dans une seule barre : le bloc rouge flottait au-dessus du vert.
-  //   Desormais : une seule unite du bas jusqu'au sommet, et le rouge dit sa
-  //   hauteur reelle. L'axe monte avec lui — c'est le but.
-  var colW=pw/n, top=2, i;
-  var b0=ctx.trac.etp;
-  for(i=0;i<n;i++){
-    var q=PS[i]||{}, R0=(sel&&sel.R&&i>=sel.a&&i<=sel.b)?sel.R:0;
-    var dt=b0+(ctx.dispo[i]||0)+R0;
-    var att=(q.cap>0)?q.reste/q.cap:0;
-    if(dt+att>top) top=dt+att;
-    if((W[i].need||0)>top) top=W[i].need;
-  }
-  top=Math.ceil(top)+1;
-  function Y(v){ return padT+ph-(v/top)*ph; }
-  var g='<defs><pattern id="rfoisif" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">'
-   +'<rect width="6" height="6" fill="var(--bg-card)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--gris)" stroke-width="2"/></pattern></defs>';
-  // Pas de graduation adaptatif : sans lui, un axe qui monte a 45 ecrit 23 nombres.
-  var _pas=(top>60?10:(top>26?5:(top>14?2:1)));
-  for(var v=0;v<=top;v+=_pas){
-    g+='<line x1="'+padL+'" y1="'+Y(v).toFixed(1)+'" x2="'+(Wd-padR)+'" y2="'+Y(v).toFixed(1)+'" stroke="'+c.col.grille+'"/>'
-      +'<text x="'+(padL-8)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">'+v+'</text>';
-  }
-  // Memes separations de mois que la frise du dessus : c'est ce qui permet de
-  // suivre une date d'un graphique a l'autre sans compter les colonnes.
-  ((ctx.cd&&ctx.cd.months)||[]).forEach(function(mo){
-    var mx=X(Math.max(E.s,E.moO0(mo)));
-    if(mx<padL-0.5||mx>Wd-padR+0.5) return;
-    g+='<line x1="'+mx.toFixed(1)+'" y1="'+padT+'" x2="'+mx.toFixed(1)+'" y2="'+(padT+ph).toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="1"/>';
-  });
-  g+='<line x1="'+X(E.e+1).toFixed(1)+'" y1="'+padT+'" x2="'+X(E.e+1).toFixed(1)+'" y2="'+(padT+ph).toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="1"/>';
-  // Voile sur la partie deja ecoulee (mode « reste ») : a gauche du trait rouge
-  // ce n'est pas vide, c'est derriere nous.
-  if(opt.grisJusqu!=null){
-    var _gx0=X(E.s), _gx1=X(opt.grisJusqu);
-    if(_gx1>_gx0+0.5){
-      g+='<rect x="'+_gx0.toFixed(1)+'" y="'+padT+'" width="'+(_gx1-_gx0).toFixed(1)+'" height="'+ph+'" fill="var(--texte)" opacity="0.05"/>'
-       +'<text x="'+((_gx0+_gx1)/2).toFixed(1)+'" y="'+(padT+ph/2).toFixed(1)+'" text-anchor="middle" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">d\u00e9j\u00e0 \u00e9coul\u00e9</text>';
-    }
-  }
-  // bande doree = semaines ou le renfort est employe
-  if(sel && sel.R>0){
-    var bx0=CX0(sel.a), bx1=CX1(sel.b);
-    g+='<rect x="'+bx0.toFixed(1)+'" y="'+padT+'" width="'+(bx1-bx0).toFixed(1)+'" height="'+ph+'" fill="'+c.col.prevu+'" opacity="0.12"/>';
-  }
-  for(i=0;i<n;i++){
-    var q2=PS[i]||{cap:W[i].cap,used:0,reste:0,capNorm:0};
-    var R=(sel&&sel.R&&i>=sel.a&&i<=sel.b)?sel.R:0;
-    // tT = SOMMET REEL de la pile (tracteur + capacite disponible + renfort pose).
-    // C'est de la que part le travail en attente, sinon le rouge flotte.
-    var dispoV=(ctx.dispo[i]||0)+R, tT=b0+dispoV;
-    var occ=(q2.capNorm>0)?Math.min(dispoV,(q2.used/q2.capNorm)*dispoV):0;
-    var att2=(q2.cap>0)?q2.reste/q2.cap:0;
-    var cx0=CX0(i), cx1=CX1(i), bx=cx0+2.5, bw=Math.max(1,cx1-cx0-5);
-    if(b0>0.01) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(b0).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(0)-Y(b0)).toFixed(1)+'" rx="2" fill="var(--acier)" opacity="0.72"/>';
-    if(occ>0.01) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(b0+occ).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(b0)-Y(b0+occ)).toFixed(1)+'" rx="2" fill="'+c.col.fait+'" opacity="0.85"/>';
-    if(dispoV-occ>0.04) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(b0+dispoV).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(b0+occ)-Y(b0+dispoV)).toFixed(1)+'" rx="2" fill="url(#rfoisif)" stroke="var(--gris)" stroke-width="1"/>';
-    if(att2>0.04) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(tT+att2).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(tT)-Y(tT+att2)).toFixed(1)+'" rx="2" fill="'+c.col.alerte+'" opacity="0.55"/>';
-  }
-  // ligne de l'effectif permanent : EN ESCALIER (elle varie avec les contrats)
-  // ★★ LA LIGNE EST DANS LA MEME UNITE QUE LES BARRES. Elle tracait `head`, un
-  //   comptage de TETES lisse, au-dessus de colonnes empilees en capacite reelle
-  //   (heures travaillables / capacite d'un ETP). Tant que tout le monde est a
-  //   temps plein les deux coincident et personne ne le voit ; un mi-temps, un
-  //   solde de CP ou une equipe collective les separent — et le lecteur conclut
-  //   que le graphe se contredit. On trace ce que la ligne PROMET : la capacite
-  //   dont on dispose reellement cette semaine-la, renfort pose compris.
-  var path='', _yEnd=0;
-  for(i=0;i<n;i++){
-    var _R=(sel&&sel.R&&i>=sel.a&&i<=sel.b)?sel.R:0;
-    var _v=b0+(ctx.dispo[i]||0)+_R;
-    var x0=CX0(i), x1=CX1(i), yy=Y(_v);
-    if(i===n-1) _yEnd=yy;
-    path+=(i===0?'M ':' L ')+x0.toFixed(1)+' '+yy.toFixed(1)+' L '+x1.toFixed(1)+' '+yy.toFixed(1);
-  }
-  g+='<path d="'+path+'" fill="none" stroke="var(--texte)" stroke-width="2.5" stroke-linejoin="round"/>'
-    +'<text x="'+(Wd-padR-4)+'" y="'+(_yEnd-6).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.mini+'" font-weight="700" fill="var(--texte)">'+_pilEsc(ctx.baseCourt||'pr\u00e9sents')+'</text>';
-  if(opt.note)
-    g+='<text x="'+(padL+pw/2).toFixed(1)+'" y="'+(padT+14)+'" text-anchor="middle" font-size="'+c.txt.axe+'" font-weight="700" fill="'+c.col.texte+'">'+_pilEsc(opt.note)+'</text>';
-  else if(!sel || !sel.R)
-    g+='<text x="'+(padL+pw/2).toFixed(1)+'" y="'+(padT+14)+'" text-anchor="middle" font-size="'+c.txt.axe+'" font-weight="700" fill="'+c.col.texte+'">aucun renfort en plus \u2014 voici la campagne avec '+_pilEsc(ctx.baseLbl||'ton \u00e9quipe')+'</text>';
-  // Densite adaptative : une etiquette « 23–29 aout » demande ~64 px. On saute
-  // des colonnes tant qu'elles n'ont pas cette largeur (72 px de marge, un
-  // libelle a cheval sur deux mois est le plus large), plutot que de superposer.
-  var stepX=Math.max(1,Math.ceil(72/Math.max(1,colW)));
-  for(i=0;i<n;i+=stepX){
-    var lx=(CX0(i)+CX1(i))/2;
-    g+='<line x1="'+lx.toFixed(1)+'" y1="'+(padT+ph).toFixed(1)+'" x2="'+lx.toFixed(1)+'" y2="'+(padT+ph+4).toFixed(1)+'" stroke="var(--gris)"/>'
-      +'<text x="'+lx.toFixed(1)+'" y="'+(Ht-22)+'" text-anchor="middle" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">'+_rfLabJ(W,i)+'</text>';
-  }
-  g+='<text x="'+(padL+pw/2).toFixed(1)+'" y="'+(Ht-6)+'" text-anchor="middle" font-size="'+c.txt.mini+'" letter-spacing="1.3" fill="'+c.col.texte+'">'+_pilEsc(opt.axe||'CAMPAGNE')+' \u00b7 '
-    +_pilFmtD(_rfIso(W[0].o0))+' \u2192 '+_pilFmtD(_rfIso(W[n-1].o1))+'</text>';
-  // Trait « aujourd'hui » : meme date, meme abscisse que sur la frise.
-  var _tj=E.o(E.todayIso);
-  if(_tj>=E.s && _tj<=E.e){
-    var _tx=X(_tj);
-    g+='<line x1="'+_tx.toFixed(1)+'" y1="'+padT+'" x2="'+_tx.toFixed(1)+'" y2="'+(padT+ph).toFixed(1)+'" stroke="'+c.col.texte+'" stroke-width="1.5" stroke-dasharray="4 3"/>'
-      +'<text x="'+(_tx+4).toFixed(1)+'" y="'+(padT+10)+'" font-size="'+c.txt.mini+'" font-weight="700" fill="'+c.col.texte+'">aujourd\u2019hui</text>';
-  }
-  return window._mvGraphSvg(window._mvGraphCadre(Wd,Ht),
-    'Profil du renfort semaine par semaine : effectif pr\u00e9sent, travail absorb\u00e9 et travail en attente.', g);
-}
 
-function _rfCoutSvg(ctx,res,meilleur,w){
-  // Ce graphe tient sur un telephone : une barre et quatre lignes de texte.
-  var c=window._mvGraphCadre((w>0?Math.max(460,w):940),128,{padL:14,padR:14,padT:14,padB:14});
-  var W=c.w,H=c.h,pad=c.padL,barY=50,barH=34,pw=c.iw;
-  var parts=[{l:'Renfort',v:res.cRenf,c:'var(--or)'},{l:'Heures sup',v:res.cHS,c:'var(--orange)'},{l:'Recrutement',v:res.cFixe,c:'var(--terre)'}];
-  var dec=parts.reduce(function(a,p){return a+p.v;},0);
-  var g='<text x="'+pad+'" y="16" font-size="'+c.txt.mini+'" letter-spacing="1.5" fill="'+c.col.texte+'">CE QUE TU D\u00c9CIDES</text>'
-   +'<text x="'+pad+'" y="39" font-size="'+(c.etroit?19:23)+'" font-weight="700" fill="var(--texte)" font-family="Cormorant Garamond,serif">'+_ecoEur(dec)+'</text>'
-   +'<text x="'+(W-pad)+'" y="16" text-anchor="end" font-size="'+c.txt.mini+'" letter-spacing="1.5" fill="'+c.col.texte+'">TOTAL DE LA CAMPAGNE</text>'
-   +'<text x="'+(W-pad)+'" y="38" text-anchor="end" font-size="'+(c.etroit?14:16)+'" font-weight="600" fill="'+c.col.texte+'" font-family="Cormorant Garamond,serif">'+_ecoEur(res.cout)+'</text>'
-   +'<text x="'+(W-pad)+'" y="52" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">dont '+_ecoEur(res.cSocle)+' de socle permanent, identique partout</text>';
-  if(dec<=0){
-    g+='<rect x="'+pad+'" y="'+barY+'" width="'+pw+'" height="'+barH+'" rx="4" fill="var(--gris-clair)" stroke="var(--gris)"/>'
-      +'<text x="'+(pad+pw/2)+'" y="'+(barY+barH/2+4)+'" text-anchor="middle" font-size="'+c.txt.axe+'" fill="'+c.col.texte+'">aucun renfort \u2014 rien de plus \u00e0 payer, et le travail glisse</text>';
-  } else {
-    var x=pad;
-    parts.forEach(function(p){
-      if(p.v<=0) return;
-      var w=p.v/dec*pw;
-      g+='<rect x="'+x.toFixed(1)+'" y="'+barY+'" width="'+w.toFixed(1)+'" height="'+barH+'" fill="'+p.c+'" opacity="0.88"/>';
-      if(w>92) g+='<text x="'+(x+w/2).toFixed(1)+'" y="'+(barY+barH/2+4)+'" text-anchor="middle" font-size="'+c.txt.axe+'" font-weight="700" fill="#FFFFFF">'+p.l+' \u00b7 '+_ecoEur(p.v)+'</text>';
-      else if(w>34) g+='<text x="'+(x+w/2).toFixed(1)+'" y="'+(barY+barH/2+4)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="700" fill="#FFFFFF">'+_ecoEur(p.v)+'</text>';
-      x+=w;
-    });
-  }
-  var msg, col=c.col.fait;
-  if(res.deborde){
-    msg=(res.horsDelai>0)
-      ? (''+_mvIcon('alerte',16)+' '+res.horsDelai+' t\u00e2che'+(res.horsDelai>1?'s':'')+' ne tiendra'+(res.horsDelai>1?'ront':'')+' pas son d\u00e9lai \u2014 jusqu\u2019\u00e0 '+res.depMax+' semaine'+(res.depMax>1?'s':'')+' de retard, et chaque semaine ajoute '+_pilNum(ctx.c.k*100)+' % de temps.')
-      : (''+_mvIcon('alerte',16)+' Le travail finit '+(res.finSem-ctx.W.length+1)+' semaines apr\u00e8s la campagne, et mord sur la suivante.');
-    col=c.col.alerte; }
-  else if(meilleur && meilleur.decide < res.decide-1) msg='En d\u00e9pla\u00e7ant ce renfort, la m\u00eame campagne se boucle pour '+_ecoEur(meilleur.decide)+' \u2014 soit '+_ecoEur(res.decide-meilleur.decide)+' de moins.';
-  else msg=''+_mvIcon('check',16)+' Aucune des strat\u00e9gies test\u00e9es ne boucle la campagne pour moins cher.';
-  g+='<text x="'+pad+'" y="'+(barY+barH+22)+'" font-size="'+c.txt.axe+'" font-weight="600" fill="'+col+'">'+_pilEsc(msg)+'</text>';
-  return window._mvGraphSvg(c, 'Ce que co\u00fbte la strat\u00e9gie de renfort : '+_ecoEur(dec)+' d\u00e9cid\u00e9s sur un total de campagne de '+_ecoEur(res.cout)+'.', g);
-}
 
 // Fin REELLE de la semaine w, meme au-dela de la campagne. La boucle de _rfSim
 // court jusqu'a nW+200 : une tache peut finir apres la derniere colonne connue.
@@ -4373,396 +4120,235 @@ function _rfWkEnd(ctx,w){
   return (w<=last) ? ctx.W[w].o1 : (ctx.W[last].o1+(w-last)*7);
 }
 
-// « Laquelle deborde, et de combien. » Une ligne par travail hors delai, dans
-// l'ordre du calendrier : c'est cet ordre qui montre l'effet domino, le premier
-// qui deborde poussant celui d'apres.
-function _rfRetardHtml(ctx,res){
-  var h='';
-  // ⚠ CE QUI EST PERDU SE LIT AVANT CE QUI EST EN RETARD. Un retard se rattrape,
-  //   une recolte non rentree ne se rattrape pas : melanger les deux dans une
-  //   colonne « +N sem. » faisait lire une impossibilite comme un delai.
-  var P=(res.taches||[]).filter(function(s){ return s.perdu>0.01; });
-  if(P.length){
-    P.sort(function(a,b){ return (a.lim-b.lim)||(b.perdu-a.perdu); });
-    h+='<div style="overflow-x:auto"><table class="rf-cmp" style="margin-top:10px"><tr>'
-      +'<th>Non rentr\u00e9</th><th class="r">Date limite</th><th class="r">Pas fait</th><th class="r">Part du travail</th></tr>';
-    h+=P.map(function(s){
-      var pc=(s.h0>0)?(100*s.perdu/s.h0):0;
-      return '<tr><td>'+_pilEsc(s.nom)+'</td>'
-        +'<td class="r">'+_pilFmtD(_rfIso(_rfWkEnd(ctx,s.lim)))+'</td>'
-        +'<td class="r" style="color:#9B2D1F;font-weight:600">'+_pilNum(s.perdu)+' h</td>'
-        +'<td class="r" style="color:#9B2D1F;font-weight:600">'+_pilNum(pc)+' %</td></tr>';
-    }).join('')+'</table></div>';
-  }
-  var L=(res.taches||[]).filter(function(s){ return s.dep>0; });
-  if(!L.length) return h;
-  L.sort(function(a,b){ return (a.lim-b.lim)||(b.dep-a.dep); });
-  h+='<div style="overflow-x:auto"><table class="rf-cmp" style="margin-top:10px"><tr>'
-    +'<th>Travail</th><th class="r">Devrait finir le</th><th class="r">Finit le</th><th class="r">Retard</th></tr>';
-  h+=L.map(function(s){
-    var fin=(s.fin===null)?null:s.fin;
-    return '<tr><td>'+_pilEsc(s.nom)+'</td>'
-      +'<td class="r">'+_pilFmtD(_rfIso(_rfWkEnd(ctx,s.lim)))+'</td>'
-      +'<td class="r" style="color:#9B2D1F">'+(fin===null?'pas avant la fin':_pilFmtD(_rfIso(_rfWkEnd(ctx,fin))))+'</td>'
-      +'<td class="r" style="color:#9B2D1F;font-weight:600">+'+_pilNum(s.dep)+' sem.</td></tr>';
-  }).join('')+'</table></div>';
-  return h;
+
+
+
+
+// ══ RENF-2 (§224) — LE RENFORT, COMBIEN ET QUAND : SANS HEURES SUP ══════════════════════════════════
+// Nico (03/10) : « il faut indiquer combien de saisonniers il faut à une période donnée, pour justement éviter
+//   que l'équipe ait à faire des heures sup ». Maquette v2 validée le 03/10. La réponse arrive d'office :
+//   tant qu'un travail déborde de sa fenêtre, on pose sur SA fenêtre (de son ouverture — ou d'aujourd'hui — à sa
+//   limite) le plus petit nombre CONSTANT de saisonniers qui le fait tenir (_rfMinR, en plus de ce qui est
+//   posé), puis on regroupe les semaines de même effectif. Un saisonnier en TESA suit l'horaire de l'équipe
+//   (Nico : « ça suit l'horaire de l'équipe ») ; en CDD, c.hCdd heures fixes. Aucune heure sup nulle part :
+//   elles n'existent que dans « Et sans renfort ? », qui les nomme et les chiffre aux taux du relevé.
+var _RF_MOIS=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
+function _rfCtxRenf(ctx){
+  var contrat=(_RF_SEL&&_RF_SEL.contrat==='cdd')?'cdd':'tesa', W=ctx.W, hC=(ctx.c&&ctx.c.hCdd)||35;
+  var c=Object.assign({}, ctx.c, { hMax:ctx.c.hJour, plaf:0, contrat:contrat,
+    capS:function(i){ var w=W[i]||{}; if(!(w.cap>0)) return 0; return (contrat==='cdd')?hC*(w.capRatio!=null?w.capRatio:1):w.cap; } });
+  return Object.assign({}, ctx, { c:c });
 }
-
-// ⚠⚠ CE QUE CHAQUE FENETRE DEMANDE. Le tableau que l'ecran n'avait pas, et qui
-//   repond seul a « 20 personnes a la fin ça passe, 20 au debut non » : du
-//   renfort pose hors de la fenetre d'un travail ne sert pas ce travail, il est
-//   paye et inemploye. Le nombre de la derniere colonne est VERIFIE par
-//   simulation, pas calcule en soustrayant deux moyennes.
-function _rfBesoinHtml(ctx){
-  var bes=_rfBesoinC(ctx).filter(function(x){ return x.R===null || x.R>0; });
-  if(!bes.length) return '';
-  var h='<div style="overflow-x:auto"><table class="rf-cmp" style="margin-top:10px"><tr>'
-    +'<th>Travail</th><th class="r">Sa fen\u00eatre</th><th class="r">Il faudrait</th>'
-    +'<th class="r">D\u00e9j\u00e0 l\u00e0</th><th class="r">Renfort \u00e0 poser</th></tr>';
-  h+=bes.map(function(x){
-    var rr=(x.R===null)
-      ? '<span style="color:#9B2D1F;font-weight:600">plus de '+_RF_RMAX_DUR+'</span>'
-      : '<b style="color:#B85A1A">'+_pilNum(x.R)+' pers.</b>';
-    return '<tr><td>'+_pilEsc(x.nom)
-        +(x.cpt?'<div class="rf-sub" style="color:#9B2D1F">sans rattrapage</div>':'')+'</td>'
-      +'<td class="r">'+_pilFmtD(x.d0)+' \u2192 '+_pilFmtD(x.d1)
-        +'<div class="rf-sub">'+_pilNum(x.sem)+' semaine'+(x.sem>1?'s':'')+'</div></td>'
-      +'<td class="r">'+_ecoH1(x.brut)+' pers.</td>'
-      +'<td class="r">'+_ecoH1(x.dispo)+' pers.</td>'
-      +'<td class="r">'+rr+'</td></tr>';
-  }).join('')+'</table></div>'
-   +'<div class="rf-how" style="margin-top:8px">La derni\u00e8re colonne est <b>v\u00e9rifi\u00e9e en simulant</b>, pas d\u00e9duite'
-   +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.fenetres')):'')+'</div>';
-  return h;
+function _rfCalendrier(ctx){
+  var x=_rfCtxRenf(ctx), n=x.W.length, prof=_rfProf(x,null), blocs=[], rMax=_rfRMax(x), garde=0;
+  var res=_rfSim(x,prof);
+  while(res.deborde && garde++<12){
+    var late=(res.taches||[]).filter(function(s){ return s.dep>0||s.perdu>0.01||s.fin===null; })
+      .sort(function(p,q){ return p.lim-q.lim; });
+    if(!late.length) break;
+    var s=late[0], tw=null;
+    (x.tw||[]).forEach(function(t){ if(t.nom===s.nom) tw=t; });
+    var a=tw?_rfWOf(x.W,tw.ws):0, b=Math.min(n-1,s.lim);
+    if(b<a) b=a;
+    var R=_rfMinR(x,a,b,rMax,s.nom,prof);
+    if(!(R>0)){ blocs.push({nom:s.nom,a:a,b:b,R:null}); break; }
+    for(var i=a;i<=b;i++){ if(x.W[i].cap>0) prof[i]+=R; }
+    blocs.push({nom:s.nom,a:a,b:b,R:R});
+    res=_rfSim(x,prof);
+  }
+  return { x:x, prof:prof, blocs:blocs, res:res, ok:!res.deborde };
 }
-
-function _rfTable(ctx,res,strs){
-  var rows=[{nom:'Ta s\u00e9lection', moi:true, r:res}];
-  strs.forEach(function(s){ rows.push({nom:s.nom, detail:s.detail, r:_rfSim(ctx,_rfProf(ctx,s.sel))}); });
-  // DEUX GROUPES, PAS UN CLASSEMENT UNIQUE. Une strategie qui ne boucle pas ne
-  // se compare pas au montant : elle repond a une autre question. Melangees, la
-  // moins chere de l'ecran est presque toujours celle qui ne finit rien a temps.
-  var via=rows.filter(function(x){ return !x.r.deborde; });
-  var hors=rows.filter(function(x){ return x.r.deborde; });
-  var mn=via.length?via.reduce(function(a,x){ return x.r.decide<a.r.decide?x:a; }):null;
-  function tri(L){
-    return L.slice().sort(function(a,b){
-      if(a.moi!==b.moi) return a.moi?-1:1;
-      return a.r.decide-b.r.decide;
-    });
+function _rfPeriodes(cal){
+  var x=cal.x, W=x.W, n=W.length, out=[], i=0;
+  while(i<n){
+    var r=cal.prof[i]||0;
+    if(!(r>0)||!(W[i].cap>0)){ i++; continue; }
+    var j=i, h=0, k;
+    while(j+1<n && (cal.prof[j+1]||0)===r && W[j+1].cap>0) j++;
+    for(k=i;k<=j;k++) h+=r*x.c.capS(k);
+    var pour=[];
+    cal.blocs.forEach(function(b){ if(b.R>0 && !(b.b<i||b.a>j) && pour.indexOf(b.nom)<0) pour.push(b.nom); });
+    out.push({a:i,b:j,R:r,h:h,pour:pour});
+    i=j+1;
   }
-  via=tri(via); hors=tri(hors);
-
-  function ligne(x,ok){
-    var fin, fc;
-    if(ok){ fin='dans les fen\u00eatres'; fc='#3D6B27'; }
-    else if(x.r.nPerdu>0){ fin=_pilNum(x.r.perdu)+' h non rentr\u00e9es'; fc='#9B2D1F'; }
-    else if(x.r.horsDelai>0){ fin=_pilNum(x.r.horsDelai)+' hors d\u00e9lai \u00b7 +'+_pilNum(x.r.depMax)+' sem.'; fc='#9B2D1F'; }
-    else { var dd=x.r.finSem-ctx.W.length+1; fin=(dd>52)?'ne finit jamais':('d\u00e9borde de '+_pilNum(dd)+' sem.'); fc='#9B2D1F'; }
-    var ec;
-    if(!ok) ec='<span style="color:#9B2D1F">ne boucle pas</span>';
-    else if(!mn||x===mn) ec='<span style="color:#3D6B27">le moins cher</span>';
-    else ec='<span style="color:#B85A1A">+'+_ecoEur(x.r.decide-mn.r.decide)+'</span>';
-    return '<tr'+(x.moi?' class="moi"':'')+'>'
-      +'<td'+(ok?'':' style="opacity:.62"')+'>'+(x.moi?'\u25b8 ':'')+_pilEsc(x.nom)
-        +(x.detail?('<div class="rf-sub">'+_pilEsc(x.detail)+'</div>'):'')+'</td>'
-      +'<td class="r" style="color:'+fc+(ok?'':';font-weight:600')+'">'+fin+'</td>'
-      +'<td class="r"'+(ok?'':' style="opacity:.62"')+'>'+_ecoEur(x.r.decide)+'</td>'
-      +'<td class="r">'+ec+'</td>'
-      +'<td class="r"'+(ok?'':' style="opacity:.62"')+'>'+_pilNum(x.r.capRenf)+' h</td>'
-      +'<td class="r"'+(x.r.inemploye>1?' style="color:#B85A1A"':'')+'>'+_pilNum(x.r.inemploye)+' h</td>'
-      +'<td class="r"'+(x.r.induit>1?' style="color:#9B2D1F;font-weight:600"':'')+'>'+_pilNum(x.r.induit)+' h</td></tr>';
-  }
-
-  var h='<div style="overflow-x:auto"><table class="rf-cmp"><tr>'
-    +'<th>Strat\u00e9gie</th><th class="r">\u00c9ch\u00e9ances</th><th class="r">\u00c0 d\u00e9cider</th><th class="r">\u00c9cart</th>'
-    +'<th class="r">Renfort</th><th class="r">Pay\u00e9 sans travail</th><th class="r">Ajout\u00e9 par le retard</th></tr>';
-  h+=via.map(function(x){ return ligne(x,true); }).join('');
-  if(hors.length){
-    h+='<tr><td colspan="7" style="padding:14px 8px 6px;border-top:2px solid rgba(155,45,31,.35);'
-      +'font-size:var(--pt-txt,12.5px);font-weight:600;color:#9B2D1F;letter-spacing:.02em">'
-      +'Ne finit pas dans les fen\u00eatres \u2014 le travail d\u00e9borde sur la suite</td></tr>';
-    h+=hors.map(function(x){ return ligne(x,false); }).join('');
-  }
-  h+='</table></div>';
-  // ⚠ « il faut plus de monde que ce que le simulateur a teste » etait un aveu,
-  //   pas une reponse. On cherche le nombre, jusqu'au plafond dur.
-  if(!via.length){
-    var t2=_rfMinR(ctx,0,ctx.W.length-1,_RF_RMAX_DUR,null);
-    h+='<div class="rf-how" style="border-color:rgba(155,45,31,.4)"><b>Aucune de ces strat\u00e9gies ne tient les fen\u00eatres.</b> '
-      +((t2!=null)
-        ? ('Il en faut <b>'+_pilNum(t2)+' de renfort sur toute la p\u00e9riode</b> pour y arriver. Le tableau de l\u2019\u00e9tape 3 dit dans quelle fen\u00eatre les placer \u2014 au bon moment, il en faut souvent bien moins.')
-        : ('M\u00eame <b>'+_RF_RMAX_DUR+' personnes</b> n\u2019y suffisent pas : les fen\u00eatres sont trop courtes pour la charge. Il faut d\u00e9caler des dates de fin dans R\u00e9glages \u203a Campagne, ou m\u00e9caniser une partie du travail.'))
-      +'</div>';
-  }
-  return { html:h, meilleur:mn?mn.r:null, mnRow:mn };
+  return out;
 }
-
-// Selecteur : nombre + fenetre. Remplace l'edition au clic dans les colonnes.
-// Options du champ « Renfort ». PAS VARIABLE : au-dela de 50, une liste de 150
-// entrees n'est plus manipulable au pouce — on passe par paliers, et la derniere
-// option ouvre la saisie libre pour tout nombre intermediaire.
-function _rfROpts(rMax,cur){
-  var vals=[], i;
-  for(i=0;i<=Math.min(rMax,50);i++) vals.push(i);
-  [60,75,100,125,150].forEach(function(v){ if(v<=rMax && vals.indexOf(v)<0) vals.push(v); });
-  if(cur>0 && vals.indexOf(cur)<0){ vals.push(cur); vals.sort(function(a,b){ return a-b; }); }
-  return vals.map(function(v){
-    return '<option value="'+v+'"'+(v===cur?' selected':'')+'>'+(v===0?'aucun':v)+'</option>';
-  }).join('')+'<option value="__autre">autre nombre\u2026</option>';
+// L'équipe SEULE, jusqu'à `plaf` heures par personne et par semaine (0 = aucune heure sup). Heures sup comme
+// le relevé : au-delà du planning de la semaine, 25 % jusqu'à la 43e heure, 50 % au-delà, au taux de l'équipe.
+function _rfSansRenfort(ctx,plaf){
+  var c=Object.assign({}, ctx.c, { hMax:ctx.c.hJour, plaf:(plaf>0?plaf:0), capS:null });
+  var x=Object.assign({}, ctx, { c:c }), r=_rfSim(x,_rfProf(x,null)), h25=0, h50=0;
+  (r.parSem||[]).forEach(function(s){
+    var p=s.dispo||0;
+    if(!(p>0) || !(s.used>s.capNorm+1e-6)) return;
+    var pp=s.used/p;
+    h25+=p*Math.max(0,Math.min(pp,43)-s.cap);
+    h50+=p*Math.max(0,pp-Math.max(43,s.cap));
+  });
+  return { r:r, h25:h25, h50:h50, hs:h25+h50, cout:(h25*1.25+h50*1.5)*(ctx.rate||0) };
 }
-function _rfSelHtml(ctx){
-  var n=ctx.W.length, rMax=_rfRMax(ctx), i, o;
-  var s=_RF_SEL, dPv=(s&&isFinite(s.dP))?s.dP:0;   // dP undefined -> AUCUNE option cochee -> le navigateur affiche la 1re (-2)
-  o=_rfROpts(rMax,s.R||0);
-  var selR='<label class="rf-f"><span>Renfort</span><select onchange="window._rfSel(\'R\',this.value)">'+o+'</select></label>';
-  var oP='';
-  for(i=-4;i<=8;i++){
-    var v=i/2;                                    // pas de 0,5 : les temps partiels comptent
-    oP+='<option value="'+v+'"'+(Math.abs(v-dPv)<0.01?' selected':'')+'>'
-       +(v>0?('+'+_ecoH1(v)):(v<0?_ecoH1(v):'mesur\u00e9'))+'</option>';
-  }
-  var selP='<label class="rf-f"><span>Effectif simul\u00e9</span><select onchange="window._rfSel(\'dP\',this.value)">'+oP+'</select></label>';
-  // Le socle : ce qui est deja signe, ou les permanents seuls.
-  var bs=(ctx.base==='perm')?'perm':'eng';
-  var selB='<label class="rf-f"><span>On part de</span><select onchange="window._rfSel(\'base\',this.value)">'
-    +'<option value="eng"'+(bs==='eng'?' selected':'')+'>tout ce qui est d\u00e9j\u00e0 sous contrat</option>'
-    +'<option value="perm"'+(bs==='perm'?' selected':'')+'>les permanents seuls</option>'
-    +'</select></label>';
-  function weeks(cur,attr){
-    var t='';
-    // « Du » montre le premier jour employe, « Au » le DERNIER : afficher o0 des
-    // deux cotes faisait lire « du 23 au 30 aout » pour un renfort qui travaille
-    // en realite jusqu'au 5 septembre.
-    var fin=(attr!=='Du');
-    for(var k=0;k<n;k++) t+='<option value="'+k+'"'+(k===cur?' selected':'')+'>'+_pilFmtD(_rfIso(fin?ctx.W[k].o1:ctx.W[k].o0))+'</option>';
-    return '<label class="rf-f"><span>'+attr+'</span><select onchange="window._rfSel(\''+(attr==='Du'?'a':'b')+'\',this.value)"'+(s.R>0?'':' disabled')+'>'+t+'</select></label>';
-  }
-  return '<div class="rf-sel">'+selB+selP+selR+weeks(Math.min(s.a,n-1),'Du')+weeks(Math.min(s.b,n-1),'Au')
-    +'<span class="rf-selinfo">'
-    +(Math.abs(ctx.dP)>0.01?('socle simul\u00e9 <b>'+_ecoH1(ctx.headMoy)+'</b> au lieu de '+_ecoH1(ctx.headMesMoy)+' \u00b7 '):'')
-    +(s.R>0?(_pilNum((Math.min(s.b,n-1)-Math.min(s.a,n-1)+1))+' semaine'+((s.b-s.a)>0?'s':'')+' \u00b7 '+_pilNum(s.R*(Math.min(s.b,n-1)-Math.min(s.a,n-1)+1))+' semaine-renfort'):('aucun renfort en plus \u2014 '+ctx.baseLbl))
-    +'</span></div>';
+// Le plafond proposé d'office : la semaine la plus longue du modèle du planning (Nico : 39 h l'été).
+function _rfPlafDef(ctx){
+  var m=(typeof window._planSemaineMax==='function')?(Number(window._planSemaineMax())||0):0, cm=0;
+  (ctx.W||[]).forEach(function(w){ if((w.cap||0)>cm) cm=w.cap; });
+  return Math.min(48, Math.max(Math.round(m>0?m:39), Math.ceil(cm)));
 }
-
+function _rfRetards(r){
+  return (r.taches||[]).filter(function(s){ return s.dep>0||s.perdu>0.01||s.fin===null; })
+    .map(function(s){ return _pilEsc(_pilTnom(s.nom).toLowerCase())+(s.perdu>0.01?' en partie perdue':(' +'+_pilNum(Math.max(1,s.dep))+' sem.')); });
+}
+function _rfCalSvg(cal,lg){
+  var x=cal.x, W=x.W, n=W.length, par=cal.res.parSem||[], c=window._mvGraphCadre(lg,(lg<480?210:240),{padT:30});
+  var mx=0;
+  par.forEach(function(s){ var eq=(s.dispo||0)*(s.cap||0); if(s.used>mx) mx=s.used; if(eq>mx) mx=eq; });
+  var pas=(mx>200?50:(mx>100?25:10)); mx=Math.max(pas,Math.ceil(mx/pas)*pas);
+  var iw=c.iw/Math.max(1,n), bw=Math.max(2,iw*0.68), v, k;
+  function X(i){ return c.padL+i*iw; }
+  function Y(q){ return c.padT+c.ih*(1-q/mx); }
+  var g='<defs><pattern id="rf2-h" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="5" fill="var(--gris)"/></pattern></defs>';
+  for(v=0;v<=mx;v+=pas) g+='<line x1="'+c.padL+'" x2="'+(c.padL+c.iw)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="'+c.col.grille+'" stroke-width="'+c.trait.grille+'"/>'
+    +'<text x="'+(c.padL-6)+'" y="'+(Y(v)+3.5)+'" text-anchor="end" font-size="'+c.txt.axe+'" fill="var(--texte-doux)">'+v+'</text>';
+  par.forEach(function(s,i){
+    if(!(W[i]&&W[i].cap>0)){ g+='<rect x="'+X(i)+'" y="'+c.padT+'" width="'+iw+'" height="'+c.ih+'" fill="url(#rf2-h)"/>'; return; }
+    var eq=Math.min(s.used,(s.dispo||0)*s.cap), rf=Math.max(0,s.used-eq), cx=X(i)+(iw-bw)/2;
+    if(eq>0) g+='<rect x="'+cx+'" y="'+Y(eq)+'" width="'+bw+'" height="'+(Y(0)-Y(eq))+'" fill="'+c.col.fait+'" rx="1.5"/>';
+    if(rf>0) g+='<rect x="'+cx+'" y="'+Y(eq+rf)+'" width="'+bw+'" height="'+(Y(eq)-Y(eq+rf))+'" fill="'+c.col.prevu+'" rx="1.5"/>';
+  });
+  var d='';
+  par.forEach(function(s,i){ var yy=Y((s.dispo||0)*s.cap); d+=(i?'L':'M')+X(i)+' '+yy+' L'+(X(i)+iw)+' '+yy+' '; });
+  g+='<path d="'+d+'" fill="none" stroke="var(--texte)" stroke-width="'+c.trait.prevu+'" stroke-dasharray="4 3"/>';
+  _rfPeriodes(cal).forEach(function(p){
+    var x0=X(p.a)+1, w0=Math.max(4,X(p.b+1)-X(p.a)-2);
+    g+='<rect x="'+x0+'" y="6" width="'+w0+'" height="15" rx="7.5" fill="var(--or-pale)" stroke="var(--or)"/>';
+    if(w0>58) g+='<text x="'+(x0+w0/2)+'" y="17" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="700" fill="var(--texte)">'+p.R+' saisonnier'+(p.R>1?'s':'')+'</text>';
+  });
+  var last=-1;
+  for(k=0;k<n;k++){ var m=W[k].m; if(m!=null && m!==last){ last=m; g+='<text x="'+(X(k)+2)+'" y="'+(c.h-8)+'" font-size="'+c.txt.axe+'" fill="var(--texte-doux)">'+_RF_MOIS[m]+'</text>'; } }
+  return window._mvGraphSvg(c,'Heures faites par semaine : l\u2019\u00e9quipe et le renfort',g);
+}
 function _rfBody(d){
+  _RF_RES=null;
   var P=_rfPair(d), ctxP=P.plan, ctx=P.dec;
-  if(!ctxP) return _pilEmptyGo('Renseignez les dates de d\u00e9but et de fin de la p\u00e9riode : les fen\u00eatres de t\u00e2ches et la charge en d\u00e9coulent.','saisons','R\u00e9glages \u203a Campagne');
-  if(ctxP.noRate) return _pilEmptyGo('Renseignez un <b>taux horaire</b> dans la fiche de chaque salari\u00e9 pour chiffrer les sc\u00e9narios.','equipe','R\u00e9glages \u203a \u00c9quipe');
-  // Deux graphes seulement s'ils racontent deux choses differentes. Le tri est
-  // fait par _rfMemeImage, DANS _rfPair : quand les deux dessinent la meme
-  // image, la paire rend deux fois le plan et pose le drapeau `meme`. Ici il
-  // n'y a donc plus qu'a lire ctx!==ctxP — un seul juge, pas deux.
-  var deux=(ctx!==ctxP);
-  var n=ctx.W.length;
-  if(_RF_SEL.b>=n) _RF_SEL.b=n-1;
-  if(_RF_SEL.a>=n) _RF_SEL.a=0;
-  var res=_rfSim(ctx,_rfProf(ctx,_RF_SEL));
-  var strs=_rfStrategies(ctx);
-  var tab=_rfTable(ctx,res,strs);
-  var real=(typeof _pilTaskReal==='function')?_pilTaskReal(ctxP.cd,d):null;
-  var fait=Math.max(0,ctxP.charge-ctx.charge);
-
-  var kpi='<div class="pil-ck"><div class="kl">Socle d\u00e9j\u00e0 engag\u00e9'+(deux?' \u00b7 restant':'')+'</div><div class="kv">'+_ecoEur(ctx.socle)+'</div>'
-      +'<div class="ks">\u2248 '+_ecoH1(ctx.headMoy)+' pr\u00e9sents en moyenne'
-      +(Math.abs(ctx.dP)>0.01?(' <b style="color:#B85A1A">('+(ctx.dP>0?'+':'')+_ecoH1(ctx.dP)+' simul\u00e9, mesur\u00e9 '+_ecoH1(ctx.headMesMoy)+')</b>'):'')
-      +(ctx.trac.etp>0.01?(' \u00b7 '+_ecoH1(ctx.trac.etp)+' au tracteur'+(ctx.trac.mesure?' (mesur\u00e9)':' (forc\u00e9)')):'')+'</div></div>'
-    +'<div class="pil-ck"><div class="kl">Ce qui manque</div><div class="kv" style="color:'+(ctx.manque>0?'#9B2D1F':'#3D6B27')+'">'
-      +(ctx.manque>0?(_pilNum(ctx.manque)+'<span class="u"> h</span>'):'\u2014')+'</div>'
-      +'<div class="ks">'+(ctx.manque>0
-          ? ('pointe \u00e0 '+_ecoH1(ctx.renfortPic)+' renfort'+(ctx.renfortPic>1.5?'s':'')+' sur la semaine la plus tendue')
-          : 'les permanents suffisent')+'</div></div>'
-    +'<div class="pil-ck"><div class="kl">Pay\u00e9 sans travail ouvert</div><div class="kv" style="color:'+(res.inemploye>1?'#B85A1A':'#3D6B27')+'">'+_pilNum(res.inemploye)+'<span class="u"> h</span></div>'
-      +'<div class="ks">'+(res.induit>1?(_pilNum(res.induit)+' h ajout\u00e9es par le retard \u00b7 '+res.horsDelai+' t\u00e2che'+(res.horsDelai>1?'s':'')+' hors d\u00e9lai'):'aucune heure ajout\u00e9e par le retard')+'</div></div>'
-    +'<div class="pil-ck"><div class="kl">\u00c0 d\u00e9cider</div><div class="kv">'+_ecoEur(res.decide)+'</div>'
-      +'<div class="ks">'+(res.pointe>0?(_pilNum(res.pointe)+' renfort'+(res.pointe>1?'s':'')):('aucun renfort'+((res.hSup>1)?(' \u00b7 '+_pilNum(res.hSup)+' h sup des permanents'):'')))+'</div></div>';
-
-  // Sur QUOI porte l'ecran. Dit en une phrase, en haut, avant tout chiffre.
-  var perim;
-  if(deux) perim='Cet \u00e9cran d\u00e9cide sur <b>ce qu\u2019il reste \u00e0 faire</b> \u00e0 partir d\u2019aujourd\u2019hui : <b>'+_pilNum(ctx.charge)+' h</b> sur les '+_pilNum(ctxP.charge)+' h de la campagne, '+_pilNum(fait)+' h d\u00e9j\u00e0 faites, <b>'+_pilNum(n)+' semaine'+(n>1?'s':'')+'</b> devant. Le plan complet de la campagne est plus bas, en \u00e9tape 5.';
-  else if(P.fini) perim='La campagne est <b>termin\u00e9e</b> : l\u2019\u00e9cran montre le plan complet, pour m\u00e9moire.';
-  // \u2605 Ce cas EXISTAIT et n'etait pas dit : la campagne a commence, mais aucune
-  //   heure n'a encore ete faite et aucune fenetre n'a bouge. Le reste et le
-  //   plan sont alors la MEME image \u2014 l'ecran en dessinait deux, a l'identique.
-  else if(P.meme) perim='La campagne a <b>commenc\u00e9</b>, mais rien n\u2019en est encore entam\u00e9 : ce qu\u2019il reste \u00e0 faire, c\u2019est toujours tout le plan. <b>Un seul graphique</b> \u2014 en dessiner deux identiques ne dirait rien de plus.';
-  else perim='La campagne <b>n\u2019a pas encore commenc\u00e9</b> : ce qu\u2019il reste \u00e0 faire, c\u2019est toute la campagne. Un seul graphique suffit.';
-
-  var boutons=strs.map(function(s,i){
-    return '<button class="rf-strat'+(s.best?' best':'')+'" onclick="window._rfAppliquer('+i+')">'+_pilEsc(s.nom)+'</button>';
-  }).join('');
-
-  var H='<div class="pil-cockpit-card" style="margin-bottom:12px"><div class="pil-cks">'+kpi+'</div></div>'
-    +'<div class="rf-how">'+perim+'</div>';
-
-  // ★★ « COMMENT LIRE » EST, PAR DEFINITION, CE QU'ON LIT UNE FOIS.
-  //   Cinq blocs de 130 a 300 caracteres expliquaient chacun la lecture d'un
-  //   graphe, affiches en permanence entre le titre de l'etape et le graphe
-  //   lui-meme. Une fois qu'on sait lire une frise, on ne relit pas la notice —
-  //   on la traverse pour atteindre le dessin. Ils passent derriere la pastille
-  //   du titre d'etape, ou ils restent a un doigt.
-  H+='<div class="rf-step"><div class="rf-n">1</div><div class="rf-t">Quand chaque travail peut se faire'
-    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.frise')):'')+'</div></div>'
-    +'<div style="width:100%;overflow-x:auto" id="rf-g-frise"></div>';
-  if(typeof _pilFriseSvg==='function') window._mvGraphSuivre('#rf-g-frise', function(lg){ return _pilFriseSvg(ctxP.cd,real,lg); });
-
-  H+='<div class="rf-step"><div class="rf-n">2</div><div class="rf-t">'+(deux?'Ce qu\u2019il te reste \u00e0 faire, semaine par semaine':'Ton renfort, semaine par semaine')
-    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.semaine')):'')+'</div></div>'
-    // ★ LA LEGENDE DES COULEURS RESTE : on ne la lit pas, on la CONSULTE du
-    //   regard, chaque fois qu'on revient sur le graphe. Ce qui part, c'est ce
-    //   que chaque couleur veut dire en profondeur — la definition du « retard »,
-    //   la majoration par semaine, les conges compris dans l'ecart.
-    +'<div class="rf-how">'
-    +'<span class="rf-k" style="background:#5C8A3E"></span>Vert : au travail. '
-    +'<span class="rf-k" style="background:#DCD6C6"></span>Hachur\u00e9 : pay\u00e9s sans travail ouvert. '
-    +'<span class="rf-k" style="background:#9B2D1F"></span>Rouge : en retard. '
-    +'<b>Ligne noire</b> : l\u2019\u00e9quipe d\u00e9j\u00e0 sous contrat, vendangeurs compris. '
-    +'<b>Choisissez votre renfort dans les listes ci-dessous</b> \u2014 il s\u2019<b>ajoute</b> \u00e0 cette ligne.</div>'
-    +_rfSelHtml(ctx)
-    +'<div class="rf-strats">'+boutons+'</div>'
-    +'<div style="width:100%;overflow-x:auto" id="rf-g-prof"></div>';
-  window._mvGraphSuivre('#rf-g-prof', function(lg){ return _rfProfilSvg(ctx,res,_RF_SEL,{grisJusqu:(deux?ctx.oDep:null),axe:(deux?'\u00c0 FAIRE':'CAMPAGNE'),note:(ctx.charge<0.5?'plus rien \u00e0 faire d\u2019ici la fin de la p\u00e9riode':null)},lg); });
-
-  // ETAPE 3 — L'ORDRE DES QUESTIONS EST LE SUJET. « Est-ce que ca tient » vient
-  // AVANT « combien ca coute ». Un montant lisible se compare : place en tete,
-  // il fait passer « aucun renfort » pour l'option economique alors qu'elle ne
-  // finit rien a temps. Le cout ne se lit qu'une fois l'echeance tranchee.
-  var nT=(ctx.tw||[]).length;
-  var verdict;
-  if(!res.deborde){
-    verdict='<div style="background:var(--tag-green-bg,#EEF4E7);border-radius:12px;padding:13px 15px;margin:10px 0 4px">'
-      +'<div style="font-size:var(--pt-base,14px);font-weight:600;color:var(--tag-green-tx,#3D6B27)">\u2713 Ta s\u00e9lection finit '
-      +(nT>1?('les '+_pilNum(nT)+' travaux dans leur fen\u00eatre'):'le travail dans sa fen\u00eatre')+'.</div>'
-      +'<div style="font-size:var(--pt-txt,12.5px);color:var(--tag-green-tx,#3D6B27);margin-top:4px;line-height:1.5">Aucun d\u00e9bordement, aucun travail pouss\u00e9 sur le suivant.</div></div>';
+  if(!ctxP) return _pilEmptyGo('Renseignez les dates de d\u00e9but et de fin de la p\u00e9riode : les fen\u00eatres de t\u00e2ches et la charge en d\u00e9coulent.','saisons','R\u00e9glages \u203a Saisons');
+  if(ctxP.noRate) return _pilEmptyGo('Renseignez un <b>taux horaire</b> dans la fiche de chaque salari\u00e9 pour chiffrer le renfort.','equipe','R\u00e9glages \u203a \u00c9quipe');
+  if(P.fini||!ctx||!ctx.W||!ctx.W.length) return '<div class="rf-how">La campagne est <b>termin\u00e9e</b> : il ne reste rien \u00e0 renforcer.</div>';
+  var cal=_rfCalendrier(ctx), x=cal.x, W=x.W, n=W.length, per=_rfPeriodes(cal);
+  var tauxR=(x.c.tauxRenfort>0?x.c.tauxRenfort:x.rate), pointe=0, hTot=0;
+  per.forEach(function(p){ if(p.R>pointe) pointe=p.R; hTot+=p.h; });
+  var cTot=hTot*tauxR+pointe*(x.c.fixe||0);
+  _RF_RES={ ok:cal.ok, pointe:pointe, cout:cTot };
+  function jr(o){ return _pilDfr(_rfIso(o)); }
+  var cdd=(x.c.contrat==='cdd'), H='';
+  // Le verdict
+  if(!cal.ok){
+    var bl=cal.blocs[cal.blocs.length-1]||{};
+    H+='<div class="rf2-v"><span class="pil-big">\u2014</span><span class="rf2-vu">'+_mvIcon('alerte',16)+' '
+      +_pilEsc(_pilTnom(bl.nom||'').toLowerCase()||'le travail')+' ne tient pas dans sa fen\u00eatre, m\u00eame avec du renfort</span></div>'
+      +'<div class="rf-how">La fen\u00eatre est trop courte pour ce qui reste. \u00c9largissez-la (roue crant\u00e9e, fen\u00eatres des t\u00e2ches) ou acceptez le retard.</div>';
+  } else if(!pointe){
+    H+='<div class="rf2-v"><span class="pil-big green">0</span><span class="rf2-vu">renfort : l\u2019\u00e9quipe suffit</span></div>'
+      +'<div class="rf2-ok">\u2713 Tout tient dans les fen\u00eatres, aux heures du planning \u00b7 0 heure sup</div>';
   } else {
-    // ⚠⚠ UNE RECOLTE NON RENTREE N'EST PAS UN RETARD. Elle passait dans la meme
-    //   phrase (« rien n'est abandonne, +15 %/semaine ») et dans la meme colonne
-    //   « +N sem. » : on lisait une impossibilite comme un delai negociable.
-    var tete, corps;
-    if(res.nPerdu>0){
-      tete=_pilNum(res.nPerdu)+' travail'+(res.nPerdu>1?'x':'')+' ne peut'+(res.nPerdu>1?'vent':'')+' pas \u00eatre rattrap\u00e9'+(res.nPerdu>1?'s':'')+'.';
-      corps='Ce qui n\u2019est pas fait avant la date limite est <b>perdu</b>, pas report\u00e9 : '
-        +'<b>'+_pilNum(res.perdu)+' h</b> de travail ne se feront jamais. '
-        +'Du renfort pos\u00e9 apr\u00e8s cette date n\u2019y change rien \u2014 il faut qu\u2019il tombe <b>dans la fen\u00eatre</b>.';
-    } else if(res.horsDelai>0){
-      tete=_pilNum(res.horsDelai)+' travail'+(res.horsDelai>1?'x':'')+' ne finit'+(res.horsDelai>1?'ssent':'')+' pas dans sa fen\u00eatre.';
-      corps='Rien n\u2019est abandonn\u00e9 : ce qui d\u00e9borde pousse le travail suivant, et chaque semaine de retard le rend <b>'
-        +_pilNum(ctx.c.k*100)+' % plus long</b>'+(res.induit>1?(' \u2014 '+_pilNum(res.induit)+' h ajout\u00e9es en tout'):'')+'.';
-    } else {
-      tete='Le travail d\u00e9borde de '+_pilNum(Math.max(1,res.finSem-ctx.W.length+1))+' semaine'+((res.finSem-ctx.W.length+1)>1?'s':'')+' sur la suite.';
-      corps='Rien n\u2019est abandonn\u00e9 : ce qui d\u00e9borde mord sur la campagne suivante.';
-    }
-    verdict='<div style="background:var(--tag-red-bg,#FBEDEA);border-radius:12px;padding:13px 15px;margin:10px 0 4px">'
-      +'<div style="font-size:var(--pt-base,14px);font-weight:600;color:#9B2D1F">'+_mvIcon('alerte',16)+' '+tete+'</div>'
-      +'<div style="font-size:var(--pt-txt,12.5px);color:#9B2D1F;margin-top:4px;line-height:1.5">'+corps+'</div></div>'
-      +_rfRetardHtml(ctx,res);
+    var gap=per.length>1;
+    H+='<div class="rf2-v"><span class="pil-big">'+pointe+'</span><span class="rf2-vu">saisonnier'+(pointe>1?'s':'')+'</span>'
+      +'<span class="rf2-vq">du '+jr(W[per[0].a].o0)+' au '+jr(W[per[per.length-1].b].o1)+(gap?', avec des pauses':'')+'</span></div>'
+      +'<div class="rf2-ok">\u2713 Tout tient dans les fen\u00eatres \u00b7 0 heure sup</div>';
   }
-
-  // La reponse a « comment finir dans les fenetres », donnee en clair plutot que
-  // laissee a deduire d'une ligne de tableau.
-  var conseil='';
-  if(tab.mnRow && tab.mnRow.moi){
-    conseil='<div class="rf-how" style="border-color:rgba(201,168,76,.55)"><b>Ta s\u00e9lection est d\u00e9j\u00e0 le meilleur placement trouv\u00e9.</b> '
-      +'Aucune des autres strat\u00e9gies test\u00e9es ne tient les fen\u00eatres pour moins cher.</div>';
-  } else if(tab.mnRow){
-    var m=tab.mnRow, ec=(!res.deborde)?(res.decide-m.r.decide):0;
-    conseil='<div class="rf-how" style="border-color:rgba(201,168,76,.55)">'
-      +'<b>Le plus petit renfort qui y arrive.</b> '+_pilEsc(m.nom)
-      +(m.detail?(' \u2014 '+_pilEsc(m.detail)):'')+' : <b>'+_pilNum(m.r.capRenf)+' h</b> de renfort'
-      +(ec>1?(', soit <b>'+_ecoEur(ec)+'</b> de moins que ta s\u00e9lection'):'')
-      +'. Le bouton est dans la liste des propositions, \u00e9tape 2.</div>';
+  // Le calendrier
+  if(pointe){
+    H+='<div class="rf-step"><div class="rf-t">Le calendrier '+_mvInfoBtn('pil.sim.frise')+'</div></div><div class="rf2-cal">';
+    per.forEach(function(p,k){
+      if(k>0){
+        var prv=per[k-1], ferme=true;
+        for(var q=prv.b+1;q<p.a;q++){ if(W[q].cap>0) ferme=false; }
+        if(p.a>prv.b+1) H+='<div class="rf2-row gap"><div class="per">'+(ferme?'Domaine ferm\u00e9':'Pas de renfort')+'<small>du '+jr(W[prv.b+1].o0)+' au '+jr(W[p.a-1].o1)+'</small></div><div class="nb">\u2014</div></div>';
+      }
+      var l=(p.a/n*100).toFixed(2), w=((p.b-p.a+1)/n*100).toFixed(2);
+      H+='<div class="rf2-row"><div class="per">Du '+jr(W[p.a].o0)+' au '+jr(W[p.b].o1)
+        +'<small>pour '+p.pour.map(function(t){ return _pilEsc(_pilTnom(t).toLowerCase()); }).join(', ')+' \u00b7 '+_pilNum(p.h)+' h \u00b7 '+_ecoEur(p.h*tauxR)+'</small></div>'
+        +'<div class="nb">'+p.R+'<small>saisonnier'+(p.R>1?'s':'')+'</small></div>'
+        +'<div class="rf2-fr"><i style="left:'+l+'%;width:'+w+'%"></i></div></div>';
+    });
+    var fins=(cal.res.taches||[]).filter(function(s){ return s.fin!==null; }).map(function(s){
+      return _pilEsc(_pilTnom(s.nom).toLowerCase())+' fini vers le '+jr(_rfWkEnd(x,s.fin)); });
+    H+='<div class="rf2-row fin"><div class="per">Ensuite : l\u2019\u00e9quipe suffit<small>'+fins.join(' \u00b7 ')+'</small></div><div class="nb">0</div></div></div>'
+      +'<div class="rf2-tot"><span>Renfort : <b>'+_pilNum(hTot)+' h pay\u00e9es</b> \u00b7 <b>'+_ecoEur(cTot)+'</b>'
+      +((x.c.fixe>0)?(' <small>(dont '+_ecoEur(pointe*x.c.fixe)+' d\u2019embauche)</small>'):'')+'</span><span>Heures sup : <b>0</b></span></div>';
   }
-
-  H+='<div class="rf-step"><div class="rf-n">3</div><div class="rf-t">Est-ce que \u00e7a tient dans les fen\u00eatres ?</div></div>'
-    +_rfBesoinHtml(ctx)+verdict+conseil;
-
-  H+='<div class="rf-step" style="margin-top:18px"><div class="rf-n">4</div><div class="rf-t">Ce que ce choix co\u00fbte'
-    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.cout')):'')+'</div></div>'
-    +'<div style="width:100%;overflow-x:auto" id="rf-g-cout"></div>'
-    +tab.html;
-  window._mvGraphSuivre('#rf-g-cout', function(lg){ return _rfCoutSvg(ctx,res,tab.meilleur,lg); });
-
-  // ── Etape 4 : le PLAN. Meme graphique, meme axe, mais la campagne entiere et
-  //    la charge theorique. Repere de dimensionnement, jamais la decision — d'ou
-  //    sa place APRES le cout, et l'absence de selecteur.
-  if(deux){
-    var resP=_rfSim(ctxP,_rfProf(ctxP,{R:0,a:0,b:0}));
-    window._mvGraphSuivre('#rf-g-prof0', function(lg){ return _rfProfilSvg(ctxP,resP,null,{note:'le plan de d\u00e9part, avec '+(ctxP.baseLbl||'l\u2019\u00e9quipe'),axe:'CAMPAGNE ENTI\u00c8RE'},lg); });
-    H+='<div class="rf-step"><div class="rf-n">5</div><div class="rf-t">Le plan de d\u00e9part \u2014 toute la campagne'
-      +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.plan')):'')+'</div></div>'
-      +'<div style="width:100%;overflow-x:auto" id="rf-g-prof0"></div>'
-      +'<div class="rf-how">Sur la campagne enti\u00e8re : <b>'+_pilNum(ctxP.charge)+' h</b> de travail pour <b>'+_pilNum(ctxP.capDispo)+' h</b> de capacit\u00e9 disponible ('+_pilEsc(ctxP.baseLbl||'')+', tracteur d\u00e9duit). '
-      +(ctxP.manque>0?('Il en manquait <b style="color:#9B2D1F">'+_pilNum(ctxP.manque)+' h</b>, soit au moins <b>'+_ecoH1(ctxP.renfortMini)+'</b> renfort sur toute la p\u00e9riode.'):'L\u2019effectif d\u00e9j\u00e0 en place suffisait sur le papier.')
-      +' Sans aucun renfort de plus, il restait <b>'+_pilNum(resP.inemploye)+' h</b> pay\u00e9es sans travail ouvert.</div>';
+  // Et sans renfort ?
+  if(pointe && cal.ok){
+    var pd=_rfPlafDef(x), opts=[pd,43,48].filter(function(v,i,a){ return a.indexOf(v)===i; }).sort(function(p,q){ return p-q; });
+    var pl=(_RF_SEL.plaf>0&&opts.indexOf(_RF_SEL.plaf)>=0)?_RF_SEL.plaf:pd;
+    var S=_rfSansRenfort(x,pl), S0=_rfSansRenfort(x,0), r1=_rfRetards(S.r), r0=_rfRetards(S0.r);
+    var cm=0; W.forEach(function(w){ if((w.cap||0)>cm) cm=w.cap; });
+    var plMin=null;
+    for(var C=Math.max(1,Math.ceil(cm));C<=48;C++){ if(!_rfSansRenfort(x,C).r.deborde){ plMin=C; break; } }
+    var Smin=plMin?_rfSansRenfort(x,plMin):null;
+    H+='<div class="rf-step"><div class="rf-t">Et sans renfort ? '+_mvInfoBtn('pil.sim.cout')+'</div></div>'
+      +'<div class="rf2-seg"><span>L\u2019\u00e9quipe monte jusqu\u2019\u00e0</span><div class="pil-seg">'
+      +opts.map(function(v){ return '<button type="button" data-p="'+Number(v)+'"'+(v===pl?' class="on"':'')+' onclick="window._rfPlaf(this.dataset.p)">'+Number(v)+' h</button>'; }).join('')
+      +'</div><span>par semaine</span></div>'
+      +'<div class="rf2-cmp">'
+      +'<div class="rf2-l reco"><div class="a">Avec le renfort propos\u00e9</div><div class="e">'+_ecoEur(cTot)+'</div>'
+      +'<div class="d">'+pointe+' saisonnier'+(pointe>1?'s':'')+' \u00b7 0 heure sup \u00b7 <b>tout tient</b> dans les fen\u00eatres</div></div>'
+      +'<div class="rf2-l"><div class="a">Sans renfort, l\u2019\u00e9quipe \u00e0 '+pl+' h</div><div class="e">'+_ecoEur(S.cout)+'</div>'
+      +'<div class="d">'+_pilNum(S.hs)+' h sup'+(S.h50>0.5?(' ('+_pilNum(S.h25)+' h \u00e0 25 %, '+_pilNum(S.h50)+' h \u00e0 50 %)'):' \u00e0 25 %')+' \u00b7 '
+      +(r1.length?('<b>en retard</b> : '+r1.join(' \u00b7 ')):'<b class="v">tout tient</b> dans les fen\u00eatres')+'</div></div>'
+      +'<div class="rf2-l"><div class="a">Sans renfort ni heures sup</div><div class="e">0 \u20ac</div>'
+      +'<div class="d">'+(r0.length?('<b>en retard</b> : '+r0.join(' \u00b7 ')):'<b class="v">tout tient</b> dans les fen\u00eatres')+'</div></div></div>'
+      +'<div class="rf2-pied">'+(Smin?('Pour tout tenir sans renfort, il faudrait des semaines de <b>'+plMin+' h</b> : '+_pilNum(Smin.hs)+' h sup, '+_ecoEur(Smin.cout)+'. ')
+         :'M\u00eame \u00e0 48 h par semaine, l\u2019\u00e9quipe seule ne tient pas les fen\u00eatres. ')
+      +'Heures sup compt\u00e9es comme le relev\u00e9, au taux de l\u2019\u00e9quipe ; le co\u00fbt du retard lui-m\u00eame n\u2019est pas chiffr\u00e9.</div>';
   }
-
-  // ★ « CE QUE LE MODELE SUPPOSE » est de la methode pure : cinq phrases sur les
-  //   conventions du simulateur. Elles ne disparaissent pas — elles cessent
-  //   d'etre lues a chaque simulation. La ligne qui reste porte le seul fait qui
-  //   change la lecture d'un resultat : rien n'est enregistre ici.
-  H+='<div class="rf-lim"><b>Ce que le mod\u00e8le suppose</b>'
-    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.modele')):'')
-    +' \u00b7 aucune de ces simulations n\u2019est enregistr\u00e9e.</div>';
+  // Semaine par semaine
+  H+='<div class="rf-step"><div class="rf-t">Semaine par semaine '+_mvInfoBtn('pil.sim.semaine')+'</div></div>'
+    +'<div style="width:100%;overflow-x:auto" id="rf-g-cal"></div>'
+    +'<div class="rf2-leg"><span><span class="rf-k" style="background:var(--vert-med)"></span>fait par l\u2019\u00e9quipe</span>'
+    +'<span><span class="rf-k" style="background:var(--or)"></span>fait par le renfort</span>'
+    +'<span><span class="rf-k rf2-tir"></span>l\u2019\u00e9quipe aux heures du planning</span>'
+    +'<span><span class="rf-k rf2-ferme"></span>domaine ferm\u00e9</span></div>';
+  window._mvGraphSuivre('#rf-g-cal', function(lg){ return _rfCalSvg(cal,lg); });
+  // Ce que le calcul suppose
+  var hyp=(cdd?'CDD \u00e0 '+(x.c.hCdd||35)+' h fixes':'TESA \u00e0 l\u2019horaire de l\u2019\u00e9quipe')+' \u00b7 cadence '+_pilNum(x.c.rdt*100)+' % \u00b7 '+_ecoEur(tauxR)+'/h \u00b7 heures du planning \u00b7 aucune heure sup';
+  H+='<div class="rf-lim">'+hyp+' '+_mvInfoBtn('pil.sim.modele')+'</div>'
+    +'<div class="rf2-seg"><span>Contrat du renfort :</span><div class="pil-seg">'
+    +'<button type="button"'+(cdd?'':' class="on"')+' onclick="window._rfContrat(\'tesa\')">TESA</button>'
+    +'<button type="button"'+(cdd?' class="on"':'')+' onclick="window._rfContrat(\'cdd\')">CDD '+(x.c.hCdd||35)+' h</button></div></div>';
+  // Choisir moi-même la période
+  var a=(_RF_SEL.choix?_RF_SEL.a:(per[0]?per[0].a:0)), b=(_RF_SEL.choix?_RF_SEL.b:(per.length?per[per.length-1].b:n-1));
+  a=Math.max(0,Math.min(n-1,a||0)); b=Math.max(a,Math.min(n-1,(b==null?n-1:b)));
+  var rc=_rfMinR(x,a,b,_rfRMax(x),null), so=function(cle,sel){
+    var h='<select data-cle="'+_pilEsc(cle)+'" onchange="window._rfChoix(this.dataset.cle,this.value)">';
+    for(var i=0;i<n;i++){ if(W[i].cap>0) h+='<option value="'+i+'"'+(i===sel?' selected':'')+'>'+_rfLabJ(W,i)+'</option>'; }
+    return h+'</select>';
+  };
+  H+='<details class="rf2-choix"'+(_RF_SEL.ouvert?' open':'')+'><summary>Choisir moi-m\u00eame la p\u00e9riode '+_mvInfoBtn('pil.sim.plan')+'</summary>'
+    +'<div class="rf2-seg"><span>Du</span>'+so('a',a)+'<span>au</span>'+so('b',b)+'</div>'
+    +'<div class="rf2-pied">'+((rc==null)?'Sur cette p\u00e9riode, m\u00eame beaucoup de monde ne suffit pas : un travail d\u00e9borde avant ou apr\u00e8s.'
+       :(rc===0)?'Personne : l\u2019\u00e9quipe suffit sur cette p\u00e9riode.'
+       :('\u2192 <b>'+rc+' saisonnier'+(rc>1?'s':'')+'</b> sur cette p\u00e9riode pour que tout tienne. M\u00eame r\u00e8gle : heures du planning, aucune heure sup.'))+'</div></details>';
   return H;
 }
+window._rfContrat=function(v){ _RF_SEL.contrat=(v==='cdd')?'cdd':'tesa'; _rfRefresh(); };
+window._rfPlaf=function(v){ var q=Number(v); _RF_SEL.plaf=(q>0)?q:0; _rfRefresh(); };
+window._rfChoix=function(cle,v){
+  var q=parseInt(v,10); if(!isFinite(q)) return;
+  if(!_RF_SEL.choix){ _RF_SEL.choix=true; }
+  if(cle==='a') _RF_SEL.a=q; else _RF_SEL.b=q;
+  if(_RF_SEL.b<_RF_SEL.a){ var t=_RF_SEL.a; _RF_SEL.a=_RF_SEL.b; _RF_SEL.b=t; }
+  _RF_SEL.ouvert=true; _rfRefresh();
+};
 
 function _pilPanelRenfort(d){
   _RF_D=d;
-  var ctx=_rfPair(d).dec, stat=_pilStat('\u2014','');
-  if(ctx && !ctx.noRate){
-    var r=_rfSim(ctx,_rfProf(ctx,_RF_SEL));
-    stat=_pilStat(r.pointe,' renfort'+(r.pointe>1?'s':'')+' \u00b7 '+_ecoEur(r.decide));
-  }
+  // RENF-2 (§224) : la tuile redit le calendrier — l'effectif le plus haut et son coût, ou « l'équipe suffit ».
+  var corps=_rfBody(d), stat=_pilStat('\u2014',''), Q=_RF_RES;
+  if(Q && Q.ok) stat=Q.pointe ? _pilStat(Q.pointe,' saisonnier'+(Q.pointe>1?'s':'')+' \u00b7 '+_ecoEur(Q.cout)) : _pilStat('0',' renfort \u00b7 l\u2019\u00e9quipe suffit');
   return _pilTile('renfort','#C9A84C','Renfort \u2014 combien, et quand', stat,
-    'ce qu\u2019il reste \u00e0 faire, et ce que le moment change', null,
-    '<div id="pil-rf-body">'+_rfBody(d)+'</div>');
+    'ce qu\u2019il reste \u00e0 faire, aux heures du planning, sans heures sup', null,
+    '<div id="pil-rf-body">'+corps+'</div>');
 }
 
-// Interactions (onclick/onchange inline -> exposees sur window).
-window._rfSel = function(champ,val){
-  // ⚠ La saisie libre passe par openPrompt : prompt() natif ne rend RIEN en PWA
-  //   iOS, et c'est justement l'appareil du chef de culture pendant la vendange.
-  if(champ==='R' && String(val)==='__autre'){ window._rfSelAutre(); return; }
-  // ⚠ 'base' se traite AVANT le parseInt : 'eng' n'est pas un nombre, le garde
-  //   isFinite ci-dessous avalerait le champ en silence.
-  if(champ==='base'){ _RF_SEL.base=(String(val)==='perm')?'perm':'eng'; _rfRefresh(); return; }
-  var v=parseInt(val,10); if(!isFinite(v)) return;
-  if(champ==='dP'){ _RF_SEL.dP=parseFloat(val)||0; _rfRefresh(); return; }
-  if(champ==='R'){ _RF_SEL.R=Math.max(0,v); }
-  else if(champ==='a'){ _RF_SEL.a=v; if(_RF_SEL.b<v) _RF_SEL.b=v; }
-  else if(champ==='b'){ _RF_SEL.b=v; if(_RF_SEL.a>v) _RF_SEL.a=v; }
-  _rfRefresh();
-};
-window._rfSelAutre = function(){
-  if(typeof window.openPrompt!=='function'){
-    if(typeof showToast==='function') showToast('Saisie indisponible','#B85A1A');
-    _rfRefresh(); return;
-  }
-  window.openPrompt({
-    titre:'Combien de renforts ?', icone:'\uD83D\uDC65', unite:'pers.', type:'nombre',
-    sub:'Jusqu\u2019\u00e0 '+_RF_RMAX_DUR+' personnes \u2014 une vendange manuelle en demande souvent 30 \u00e0 50.',
-    valeur:String(_RF_SEL.R||0), btnLabel:'Appliquer',
-    cb:function(v){
-      var x=Math.round(parseFloat(String(v).replace(',','.'))||0);
-      _RF_SEL.R=Math.max(0,Math.min(_RF_RMAX_DUR,x));
-      _rfRefresh();
-    }
-  });
-  // Le <select> est reste sur « autre nombre… » : on le remet a sa valeur tout
-  // de suite, pour que fermer la saisie sans valider ne laisse pas un champ
-  // qui affiche autre chose que ce que le calcul utilise.
-  _rfRefresh();
-};
-window._rfAppliquer = function(i){
-  // ⚠ MEME contexte que _rfBody, sinon les index « Du / Au » designent d'autres
-  //   semaines. Et dP est CONSERVE : le laisser tomber le remettait a undefined,
-  //   ce qui decochait TOUTES les options du selecteur « Permanents » -> le
-  //   navigateur affichait la premiere (-2) alors que le calcul, lui, tournait a 0.
-  var ctx=_rfPair(_RF_D).dec; if(!ctx||ctx.noRate) return;
-  var s=_rfStrategies(ctx)[i];
-  if(s&&s.sel) _RF_SEL={R:s.sel.R,a:s.sel.a,b:s.sel.b,dP:(_RF_SEL&&_RF_SEL.dP)||0};
-  _rfRefresh();
-};
 function _rfRefresh(){
   var host=document.getElementById('pil-rf-body');
   if(host && _RF_D){

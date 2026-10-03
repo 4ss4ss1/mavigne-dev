@@ -266,3 +266,4 @@
 | 221 | 221. ★ TRAIT-CUVE — LE TRAITEMENT CONSEILLÉ, CHIFFRÉ DANS LA CUVE ; LE QUOI DE NEUF SPÉCIAL « MA VIGNE PRÉV… | `docs/claude/chantiers-180-229.md` |
 | 222 | 222. ★★ COH-1 — UN MÊME CHIFFRE, UN MÊME NOM, UNE MÊME SURFACE SUR TOUS LES ÉCRANS (03/10 — `src/app.js` · … | `docs/claude/chantiers-180-229.md` |
 | 223 | 223. ★★★ FUSION-1 — LA SÉRIE §213-§221 RECOLLÉE SOUS COH-1 (03/10 — les fichiers des deux lots · `scripts/p… | `docs/claude/chantiers-180-229.md` |
+| 224 | 224. ★★ RENF-2 — LE RENFORT DIT COMBIEN DE SAISONNIERS, ET QUAND — SANS HEURES SUP (03/10 — `src/pilotage.j… | `docs/claude/chantiers-180-229.md` |

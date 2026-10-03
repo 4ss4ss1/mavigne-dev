@@ -1190,6 +1190,19 @@ window._planChampPersRange = _planChampPersRange;
 //   maxima : celle reglee ici, que la fiche du salarie applique deja semaine par semaine).
 function _planPrevuPersRange(mbr,from,to){ return _planRangeH(mbr,from,to,'prevu'); }
 window._planPrevuPersRange = _planPrevuPersRange;
+// RENF-2 (§224) : la semaine la plus longue du modèle « standard » sur l'année — le plafond proposé d'office par
+//   « Et sans renfort ? » (Pilotage › Décider). Lue dans la grille, jamais écrite en dur (Nico : 39 h l'été).
+function _planSemaineMax(yr){
+  var Y=(yr!=null?yr:_pY()), tpl=_planGetTpl('standard',Y), mx=0, sem=0, d=new Date(Y,0,1);
+  while(d.getFullYear()===Y){
+    if(d.getDay()===1) sem=0;
+    var mo=tpl[d.getMonth()]||{}; sem+=parseFloat(mo[String(d.getDate())])||0;
+    if(sem>mx) mx=sem;
+    d.setDate(d.getDate()+1);
+  }
+  return mx;
+}
+window._planSemaineMax = _planSemaineMax;
 window._planLegal = _planLegal;
 window._planWorkMonth=_planWorkMonth;
 function _planCalcMonth(mbr,m){

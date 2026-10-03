@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v8.77
+// MA VIGNE — Service Worker v8.78
+// v8.78 (03/10/2026) — RENF-2 (§224) : le renfort de Decider repond en calendrier (combien de saisonniers, quand),
+//   aux heures du planning, SANS heures sup (_rfCfg hMax = hJour) ; « Et sans renfort ? » chiffre les heures sup
+//   plafonnees (25 % / 50 %) et le retard ; TESA / CDD ; « Choisir moi-meme la periode ». APP 8.02 -> 8.03.
 // v8.77 (03/10/2026) — FUSION-1 (§223) : la serie §213-§221 (zip TRAIT-CUVE) recollee sous COH-1 (§222) — le commit 75107ff
 //   avait colle les fichiers complets de COH-1 par-dessus la serie (meme base 61f4ccd). Fusion git a trois voies depuis 61f4ccd.
 //   COH-1 : l'arrachage compte au Pilotage comme sur la liste, cartes du Pilotage sous la barre du bas, un seul nom par travail,
@@ -4267,7 +4270,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.77';
+const CACHE_NAME   = 'mavigne-v8.78';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4283,7 +4286,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.77 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.78 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4303,7 +4306,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.77 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.78 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

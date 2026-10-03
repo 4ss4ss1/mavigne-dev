@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '8.02';
+export const APP_VERSION = '8.03';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -767,6 +767,17 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '8.03', items: [
+    { emoji: 'equipe', titre: 'Le renfort dit combien de saisonniers, et quand — sans heures sup',
+      desc: "Dans <b>Pilotage › Décider</b>, la carte du renfort répond d’office : combien de saisonniers, de quelle date à quelle date, pour quel travail, et ce que ça coûte. "
+        + "Elle se calcule aux heures prévues au planning — un saisonnier en TESA suit l’horaire de l’équipe — et ne compte plus aucune heure sup : le renfort sert justement à ne pas en faire. "
+        + "Jusqu’ici, le simulateur laissait chacun travailler une heure de plus par jour avant de réclamer du monde." },
+    { emoji: 'balance', titre: 'Et sans renfort ? Le coût des heures sup et le retard, côte à côte',
+      desc: "Sous le calendrier, trois lignes comparent le renfort proposé, l’équipe seule qui monte jusqu’à un plafond (39, 43 ou 48 h par semaine) avec le coût de ses heures sup et le retard qui reste, "
+        + "et l’équipe seule sans heures sup. « Choisir moi-même la période » donne le nombre de saisonniers pour les dates de votre choix." },
+    { emoji: 'alerte', titre: 'Le coût de l’inaction se calcule aux heures du planning',
+      desc: "Sur l’écran du matin, le coût de l’inaction ne cache plus une heure de plus par jour dans son calcul : il suppose l’équipe aux heures prévues, comme le renfort. Le chiffre peut monter — il était trop optimiste." },
+  ] },
   { v: '8.02', items: [
     { emoji: 'raisin', titre: 'L\u2019arrachage compte au Pilotage comme sur la liste des parcelles',
       desc: "Un arrachage d\u00e9coup\u00e9 en \u00e9tapes, d\u00e9montage fait, s\u2019affichait \u00e0 50\u00a0% sur la liste des parcelles et \u00e0 0\u00a0% dans <b>Pilotage \u203a La campagne</b>. "
@@ -4117,7 +4128,7 @@ var MV_AIDE = {
       ['Deux périodes qui se chevauchent', "ne comptent rien deux fois : les heures suivent les tâches, et une tâche n’appartient qu’à une seule période. Sur les jours communs, la frise hachure le fond en violet — il y a deux barres au même endroit, on lit la plus haute."],
       ['Une fenêtre de tâche s’arrête le jour écrit', " : fin au 25 avril, le 25 travaille. Et les heures se répartissent au prorata des jours <b>travaillables</b> : une semaine de ponts en reçoit moins, les semaines pleines récupèrent le reste."],
       ['Le marqueur « hors période »', "dans la roue crantée, fenêtres des tâches, veut dire qu’une fenêtre enregistrée ne tombe pas dans cette période. La fenêtre par défaut s’applique à la place, et l’écran le dit au lieu d’écraser tout le travail sur un seul jour."],
-      ['Décider', "— l’onglet s’appelait <b>Simuler</b>, mais la tournée qu’on y enregistre part sur l’écran de toute l’équipe : c’est le seul endroit du Pilotage qui change ce que les autres voient. Trois cartes : <b>la tournée du jour</b> (jusqu’où l’équipe ira, dans quel ordre), <b>qui fait quoi</b> (l’équipe répartie entre les priorités) et <b>le renfort</b> (combien, et quand)."],
+      ['Décider', "— l’onglet s’appelait <b>Simuler</b>, mais la tournée qu’on y enregistre part sur l’écran de toute l’équipe : c’est le seul endroit du Pilotage qui change ce que les autres voient. Trois cartes : <b>la tournée du jour</b> (jusqu’où l’équipe ira, dans quel ordre), <b>qui fait quoi</b> (l’équipe répartie entre les priorités) et <b>le renfort</b> (combien de saisonniers, et quand — aux heures du planning, sans heures sup, avec « Et sans renfort ? » pour comparer)."],
       ['La tournée part du planning', " : le travail en priorité, le prochain jour travaillé, l’équipe affectée à la priorité et présente ce jour-là (congés et récup retirés), ses heures et sa coupure. Les trajets se calculent entre chaque parcelle et la suivante. Chaque case dit d’où vient sa valeur ; en toucher une passe l’écran en simulation, « Valeurs réelles » revient au planning."],
       ['L’anneau doré qui respire', "marque la parcelle commencée et pas finie, sinon la prochaine à faire\u00a0: sur la carte du domaine pour la priorité du moment, sur celle de la tournée pour les travaux cochés — c’est son n°\u00a01. Le départ de la tournée, lui, reste la dernière parcelle validée, sauf si vous en choisissez un autre."],
       ['Le rendement de la tournée', ": sous le résultat, la part du temps de l’équipe passée sur les parcelles face aux trajets, le coût de l’équipe et le revient à l’hectare. La même tournée « au plus proche » est calculée à côté, pour comparer ; un bouton prend cet ordre."],
@@ -4382,45 +4393,35 @@ export const MV_INFO = {
     'Rien n\u2019est enregistré ici : l\u2019affectation se diffuse dans Vigne \u203a Priorité du moment.'
   ] },
 
-  'pil.sim.frise': { t: 'Quand chaque travail peut se faire', p: [
-    'Une <b>ligne par travail</b>, une <b>barre par fenêtre</b> : du premier jour où il peut se faire au dernier jour où il devrait être fini.',
-    'C\u2019est ce qui explique qu\u2019on ne puisse pas <b>prendre de l\u2019avance</b> : l\u2019effeuillage ne se fait pas en avril, même avec dix personnes disponibles. Le renfort ne sert que s\u2019il tombe <b>dans la fenêtre</b>.',
-    'Les fenêtres viennent des <b>dates que vous avez saisies</b> dans Réglages \u203a Campagne. Une fenêtre absente prend la fenêtre par défaut, et l\u2019écran le dit plutôt que d\u2019écraser tout le travail sur un seul jour.'
+  'pil.sim.frise': { t: 'Le calendrier du renfort', p: [
+    'Chaque ligne dit <b>combien de saisonniers</b>, <b>de quand à quand</b>, pour <b>quel travail</b>, et ce que ça coûte. Il se calcule <b>tout seul</b>, sur ce qu’il reste à faire depuis aujourd’hui : aucun effectif ni aucune fenêtre à choisir avant de voir la réponse.',
+    'La règle : tant qu’un travail déborde de sa fenêtre, on pose sur <b>sa</b> fenêtre — de son ouverture, ou d’aujourd’hui, à sa limite — le <b>moins de monde possible</b> qui le fait tenir, en plus de ce qui est déjà posé. Les semaines de même effectif se regroupent en périodes ; une semaine où le domaine est fermé coupe la période.',
+    'L’équipe <b>déjà sous contrat</b> est comptée, saisonniers et vendangeurs déjà embauchés compris : le calendrier ne réclame que ce qui manque en plus.'
   ] },
 
-  'pil.sim.fenetres': { t: 'Le tableau des fenêtres', p: [
-    '<b>Il faudrait</b> = le monde qu\u2019il faudrait en continu sur cette fenêtre pour ce travail <b>seul</b>.',
-    '<b>Déjà là</b> = l\u2019effectif déjà sous contrat sur cette fenêtre, <b>vendangeurs et saisonniers compris</b> — mais <b>partagé avec les autres travaux ouverts</b> en même temps.',
-    'C\u2019est pourquoi la dernière colonne <b>n\u2019est pas la différence des deux</b> : elle est <b>vérifiée en simulant</b>, par dichotomie sur la vraie simulation.',
-    'Un renfort posé <b>en dehors</b> de la fenêtre ne sert pas ce travail : il est payé sans travail ouvert.'
-  ] },
 
   'pil.sim.semaine': { t: 'Semaine par semaine', p: [
-    '<b>Vert</b> : les gens qui travaillent vraiment cette semaine-là. <b>Hachuré</b> : les gens <b>payés sans travail ouvert</b> — présents, mais aucune fenêtre de tâche n\u2019est ouverte pour eux.',
-    '<b>Rouge</b> : le travail <b>en retard</b>. Ce n\u2019est pas ce qui reste à faire, c\u2019est ce qui <b>aurait dû être fini</b>. Il n\u2019apparaît qu\u2019après la date de fin d\u2019une tâche, et chaque semaine de plus la rend plus longue — sauf pour un travail <b>sans rattrapage</b> comme la vendange, où ce qui reste est <b>perdu</b>, pas reporté.',
-    'La <b>ligne noire</b> est l\u2019équipe déjà sous contrat, <b>vendangeurs et saisonniers compris</b>. C\u2019est la même que la frise des 52 semaines dans « L\u2019année ». Le renfort que vous posez s\u2019<b>ajoute</b> à cette ligne — il ne la remplace pas.',
-    'L\u2019écart entre la ligne noire et le vert compte aussi les <b>congés, absences et fermetures déjà saisis au Planning</b> : ces heures sont payées, mais personne n\u2019est dans les rangs.',
-    'Quand la campagne a commencé, le graphique démarre <b>aujourd\u2019hui</b> : la zone grisée à gauche est passée, et chaque travail ne compte plus que pour ce qu\u2019il en reste.'
+    'Une colonne par semaine : en <b>vert</b> ce que fait l’équipe, en <b>doré</b> ce que fait le renfort du calendrier. Le <b>tireté</b> est ce que l’équipe peut faire aux heures du planning : il suit l’annualisation, les congés et les fermetures. Le <b>hachuré</b> marque une semaine où le domaine est fermé.',
+    'La bande du haut redit l’effectif de chaque période. Aucune colonne ne passe le tireté sans doré : il n’y a pas d’heures sup dans ce plan.'
   ] },
 
-  'pil.sim.cout': { t: 'Ce que ce choix coûte', p: [
-    'Le coût <b>ne se lit qu\u2019une fois l\u2019échéance tranchée</b>. Les stratégies qui tiennent les fenêtres sont en haut du tableau ; celles qui débordent sont sous le trait rouge.',
-    'Ces dernières sont souvent <b>les moins chères sur le papier</b> — elles ne répondent simplement pas à la même question. Comparer leur prix à celui d\u2019une stratégie qui tient, c\u2019est comparer deux choses différentes.',
-    'La barre ne montre que <b>ce que vous décidez</b> : le socle des permanents est le même dans tous les scénarios, il ne peut pas les départager.'
+  'pil.sim.cout': { t: 'Et sans renfort ?', p: [
+    'Trois lignes à comparer : le renfort proposé ; l’équipe seule qui monte jusqu’au plafond choisi, en heures sup ; l’équipe seule sans heures sup. Pour chacune, ce que ça coûte en plus, et le retard qui reste.',
+    'Le plafond proposé d’office est la <b>semaine la plus longue de votre planning</b>, lue dans le modèle. 43 h est la dernière heure à 25 % ; 48 h, le maximum légal d’une semaine.',
+    'Les heures sup se comptent <b>comme le relevé</b> : au-delà du planning de la semaine, 25 % jusqu’à la 43<sup>e</sup> heure, 50 % au-delà, au coût moyen de l’équipe. Le travail en retard s’allonge du pourcentage réglé par semaine.',
+    'Ce que la fiche ne chiffre pas : le coût du retard lui-même — travaux décalés, récolte. Et une limite : sur plusieurs semaines, la moyenne légale autorisée est plus basse que 48 h : l’application ne la vérifie pas.'
   ] },
 
-  'pil.sim.plan': { t: 'Le plan de départ', p: [
-    'Le même graphique, mais sur la campagne <b>entière</b> et avec la charge <b>théorique</b> : ce que le barème demandait au départ, sans rien déduire de ce qui est déjà fait.',
-    'C\u2019est un <b>repère de dimensionnement</b> — utile en début de campagne, et pour préparer la suivante.',
-    '<b>La décision, elle, se prend à l\u2019étape 2</b>, sur ce qu\u2019il reste réellement à faire.'
+  'pil.sim.plan': { t: 'Choisir moi-même la période', p: [
+    'Pour une autre organisation que celle du calendrier : vous dites de quand à quand le renfort sera là, l’application donne le <b>plus petit nombre constant</b> de saisonniers qui fait tout tenir sur cette période. Même calcul, mêmes heures du planning, aucune heure sup.',
+    'Une période plus courte demande plus de monde ; une période qui commence après la limite d’un travail ne peut plus le sauver.'
   ] },
 
-  'pil.sim.modele': { t: 'Ce que le modèle suppose', p: [
-    'Le travail <b>finit par se faire</b>, même après la campagne : une stratégie qui déborde mord sur la suivante, et <b>ce report n\u2019est pas chiffré</b>.',
-    '<b>Sauf les travaux sans rattrapage</b> — la vendange. Ce qui n\u2019est pas fait dans la fenêtre est <b>perdu</b> : les heures perdues sont comptées, la <b>valeur de la récolte non rentrée ne l\u2019est pas</b>, volontairement. Mettre un prix sur une récolte perdue supposerait un cours et un rendement que Ma Vigne ne connaît pas.',
-    'Les <b>heures induites par le retard</b>, elles, sont comptées : chaque semaine hors fenêtre rend le travail plus long.',
-    'Les fenêtres viennent des <b>dates que vous avez saisies</b> ; ce qui est déjà fait vient de l\u2019<b>avancement réel des parcelles</b>. Le hachuré ne compte que le travail de vigne : le tracteur est déduit, la cave et l\u2019entretien ne le sont pas encore.',
-    'Ces réglages se modifient dans la <b>roue crantée du Pilotage</b>. <b>Rien n\u2019est enregistré ici</b> : une simulation ne change aucune donnée du domaine.'
+  'pil.sim.modele': { t: 'Ce que le calcul suppose', p: [
+    'Un saisonnier en <b>TESA</b> suit l’horaire de l’équipe : les heures du modèle de la semaine. En <b>CDD</b>, 35 h chaque semaine ouverte, quel que soit cet horaire.',
+    'Il fait la <b>cadence d’un renfort</b> (85 % par défaut) de ce que fait un permanent sur la même heure — réglage de la roue crantée, comme son taux horaire et ses frais d’embauche.',
+    'L’équipe compte aux <b>heures du planning</b> : modèle de chacun, congés, récup et fermetures retirés, tracteur déduit. <b>Aucune heure sup</b> dans le plan : le renfort sert justement à ne pas en faire.',
+    'Le travail <b>avance dès que l’équipe a de la marge</b>, dans la fenêtre de chaque tâche. <b>Sauf les travaux sans rattrapage</b> — la vendange : ce qui n’est pas fait dans sa fenêtre est perdu, et c’est compté.'
   ] },
 
   // ══ CONFORMITÉ ══

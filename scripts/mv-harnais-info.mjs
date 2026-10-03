@@ -335,14 +335,16 @@ for (const [nom, motif] of PARTIES)
    Simuler, Conformite, Cave, La campagne. « Comment lire » est, par definition,
    ce qu'on lit une fois — c'etait affiche en permanence entre chaque titre
    d'etape et son graphe. */
-t('les cinq etapes du simulateur portent leur fiche',
+/* RENF-2 (§224) : la carte du renfort est refaite (calendrier, « Et sans renfort ? », semaine par semaine,
+   hypotheses, periode choisie) — les cinq fiches pil.sim.* y sont toutes posees, sur les nouvelles sections. */
+t('les cinq sections du renfort portent leur fiche',
   ['frise','semaine','cout','plan','modele'].every(k => PILNU.includes("_mvInfoBtn('pil.sim." + k + "')")));
 t('plus aucun « Comment lire » a l\'ecran', !PILNU.includes('Comment lire'));
 t('… et les explications sont dans les fiches',
-  txt.includes('ligne par travail') && txt.includes('une fois l\u2019\u00e9ch\u00e9ance tranch\u00e9e'.replace(/\\u2019/g,'\u2019')));
+  txt.includes('moins de monde possible') && txt.includes('semaine la plus longue de votre planning'));
 /* La legende de couleurs RESTE : on ne la lit pas, on la consulte du regard. */
 t('la legende des couleurs reste a l\'ecran',
-  /rf-k[\s\S]{0,200}Vert[\s\S]{0,200}Hachur[\s\S]{0,200}Rouge/.test(PILNU));
+  /rf-k[\s\S]{0,200}fait par l[\s\S]{0,200}rf-k[\s\S]{0,200}fait par le renfort[\s\S]{0,300}domaine ferm/.test(PILNU));
 /* ⚠️ ON MESURE, ON NE CHERCHE PAS UNE PHRASE. Un `!includes` sur du texte
    echappe est vrai des qu'un niveau d'echappement diverge — donc toujours vert.
    La longueur du bloc, elle, ne ment pas. */
