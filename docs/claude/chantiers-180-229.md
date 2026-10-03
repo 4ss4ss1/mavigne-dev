@@ -2075,3 +2075,51 @@ ramenés à 10 et 20 px. `harnais-claude-md` : `SECTIONS` 244 → 256 (+§225, e
 ### 225f. Ouvert
 
 Voir §28, bloc ANN-1 : le rendu à regarder sur téléphone, « Vu » par appareil, le niveau 2 « à l'endroit du geste ».
+
+## 226. ★★ KIT-1 — LE KIT GRAPHIQUE COMMUN, LOT 3a : ACCUEIL ET PILOTAGE (03/10 — `src/utils.js` · `src/app.js` · `src/pilotage.js` · `src/styles.css` · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `guide/11-pilotage.html` · `public/guide.html` · `scripts/mv-harnais-kit1.mjs` (neuf) · `scripts/mv-harnais-coh1.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · **APP 8.04 → 8.05, SW 8.79 → 8.80**, base `bd53451`)
+
+### 226a. D'où ça vient
+
+Demande de Nico (03/10, COH-1) : égaliser les graphiques, « une appli homogène et agréable », et les cartes qui débordent sur
+PC. Recommandation retenue avant la maquette : pas d'option petit / grand, un kit + « Agrandir ». Maquette
+`maquette-kit-graphique-v1.html` (Accueil, La campagne, planche du kit), « go » de Nico sur les recommandations : la couleur
+dit l'état, plus de nom abrégé, deux colonnes à partir de 1 024 px, déploiement en trois lots. Inventaire au moment du lot :
+28 familles de barres et de jauges dans `styles.css`, 38 fonctions de dessin (24 appels au socle `_mvGraphSvg`), des cercles en
+quatre tailles (viewBox 100, 168, 184, 200).
+
+### 226b. Ce qui change
+
+- **Une ligne d'avancement** (`utils.js`) : `_mvkLigne` (nom · barre fine · % · détail), `_mvkAvancement(rows, retards)` (les
+  lignes de `calcHeures`, sous-lignes N1… / P1… des niveaux et passages), `_mvkEtat` (fait si 100 %, retard si la fenêtre est
+  passée, sinon cours — JAMAIS au pourcentage), `_mvkDet` (heures, sinon surface faite / concernée, sinon tiret — l'ex-`_pilBarQte`
+  de COH-1, retirée), `_mvkRetards(cd)` (les `taskWindows` de `_chargeSaisonData` dont la fin EXCLUSIVE `we` est passée).
+  `renderHeuresCard` (Accueil) et `_pilRenderBar` (Pilotage) appellent le même dessin — ordre de la saison, plus le tri par %.
+- **Plus de forme courte** : `tAbr` retiré (utils, import d'app.js). `tNom` = le nom entier partout.
+- **La barre des cartes de parcelle** : `getPCls().fill` dit l'état (vert fini, doré sinon) ; `col` (la carte) garde le dégradé.
+- **« Agrandir »** : `_mvGraphDessine` pose un bouton `.mvk-agr` dans le dessin de chaque graphe suivi (`_mvGraphSuivre`, refus
+  par `opts.agrandir === false`) ; un écouteur délégué appelle `_mvGraphAgrandir(i)`, qui ouvre `#ovGraph` (index.html, par
+  `openOv` : Échap, retour arrière, empilement) et redessine `build(w)` à la largeur de la feuille. Titre = l'`aria-label` du SVG.
+  Concerne aussi la Cave et le Cuvier (mêmes graphes suivis).
+- **Grands chiffres** : `font-variant-numeric: lining-nums proportional-nums` sur les classes de grands chiffres en Cormorant —
+  en chasse fixe (`tabular-nums`), le « 1 » prenait la largeur d'un « 0 » : « 12 % » se lisait « I 2 % ». La chasse fixe reste
+  aux colonnes (`.mvk-ligne .pct`).
+- **Largeur** : `--page-max: 1200px` ; `#page-home`, `#page-parcelles`, `#page-pilotage` centrées à 1 200 px au-delà de 1 200 px
+  (avant : `max-width:none`, 1 900 px sur un grand écran) ; `.pil-wrap` 1 280 → 1 200.
+
+### 226c. Mesuré
+
+`mv-harnais-kit1.mjs` : **12 assertions** — les vraies fonctions du kit exécutées (états, détail, noms entiers, sous-lignes,
+retards à la fin exclusive, bouton posé et refusé par `_mvGraphDessine`), le reste lu dans les sources. Contre-épreuve **6/6**.
+`mv-harnais-coh1` adapté (le formateur commun, plus de `tAbr`) : 19 vertes, 12/12. Chaîne complète verte.
+
+### 226d. Le vrai périmètre de 3a, dit à Nico
+
+L'**Accueil sur deux colonnes** n'est PAS dans ce lot : ses blocs se composent et se déplacent (`applyHomeLayout`, mode
+« Personnaliser ») ; une grille posée sans voir l'écran aurait pu casser le glisser-déposer. Il faut une capture du mode
+Personnaliser sur PC avant. Les Parcelles sur deux colonnes, même raison (bandeaux et barres d'équipe mêlés aux cartes).
+
+### 226e. Ouvert
+
+① 3b (Vigne hors Accueil, Planning, Tracteur) et 3c (Cave, Cuvier, La Réserve) : barres, cercles (une taille), cadre commun.
+② L'Accueil et les Parcelles sur deux colonnes, sur capture. ③ À l'œil chez Nico : la ligne d'avancement au téléphone (deux
+étages sous 480 px), le bouton « Agrandir » sur chaque graphe (y compris Cave et Cuvier), la largeur à 1 200 px.

@@ -8,7 +8,7 @@
 import './styles.css';
 // ── Import Firebase (doit être en tête — fournit window.firebase, fbSave, etc.) ──
 import { isAdmin, isTractoriste, isSaisonnier, canWrite,
-         getRoleLabel, showToast, wmoDesc, wmoIcone, tNom, tAbr,
+         getRoleLabel, showToast, wmoDesc, wmoIcone, tNom,
          applyTheme, setThemeMode, initTheme, logError, _closeCriticalOverlay, _escHtml, _escAttr,
          GT_ADMIN_EMAIL, DEMO_TENANT, DEMO_FIREBASE_EMAIL, DEMO_FIREBASE_PWD, dreEffectif,
          _mvBadge, _mvIcon, _mvIconTache, _mvIconInline, _actIcone, _swNotify,
@@ -4925,87 +4925,24 @@ function calcHeures(){
 }
 
 function renderHeuresCard(containerId){
+  // KIT-1 (§226) : la carte dessine avec le kit commun (_mvkAvancement, utils.js) — le MÊME dessin que
+  //   Pilotage › La campagne : noms entiers, couleur d'état (fini, en cours, en retard = fenêtre passée sans
+  //   être fini), la longueur pour l'avancement, le détail en heures ou en surface. Avant : une grille de 72 px,
+  //   des noms abrégés et une couleur au pourcentage (orange sous 50 %).
   const {data,totalReste}=calcHeures();
-  const c=document.getElementById(containerId);
-  function _col(pct){return pct===100?'var(--vert-med)':pct>=50?'var(--or)':'var(--orange)';}
-  function _bar(pct,col){return `<div class="htache-bar-track" aria-hidden="true"><div class="htache-bar-fill" style="width:${pct}%;background:${col}"></div></div>`;}
-  // COH-1 (03/10) : une tâche sans barème à l'hectare (arrachage, désherbage manuel, entreplantation sans
-  //   trous saisis) ne prévoit aucune heure — « 0h / 0h » ne disait rien. Elle s'écrit en surface :
-  //   ce qui est fait sur ce qui est concerné, la même part que le pourcentage. Le nom passe par tAbr :
-  //   la colonne fait 72 px, c'est le seul endroit où la forme courte reste.
-  function _haT(v){return (Math.round((parseFloat(v)||0)*100)/100).toFixed(2).replace('.',',');}
-  function _qte(t){return (t.h_total>0||!(t.surf_total>0))?(t.h_done+'h / '+t.h_total+'h'):(_haT(t.surf_done)+' / '+_haT(t.surf_total)+' ha');}
-  // Grid CSS aligné : col1=label(72px) col2=barre(1fr) col3=%(40px) col4=h_total(90px)
-  const G='display:grid;grid-template-columns:72px 1fr 40px 90px;gap:0 6px;align-items:center;';
+  const c=document.getElementById(containerId); if(!c) return;
+  let ret={};
+  try{
+    const sa=(typeof getSaisonActive==='function')?getSaisonActive():null;
+    const cd=(window._chargeSaisonData&&sa)?window._chargeSaisonData(sa):null;
+    ret=(typeof window._mvkRetards==='function')?window._mvkRetards(cd):{};
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/renderHeuresCard'); }
   c.innerHTML=`<div class="mv-hd" style="margin-bottom:14px">
       <div><div class="mv-l">Avancement par t\u00e2che</div>
         <div class="mv-t" style="margin-top:1px">${_escHtml(_visuSaison())}</div></div>
       <div style="text-align:right;flex:none"><div class="mv-n">${totalReste}<span style="font-size:13px"> h</span></div>
         <div class="mv-l">restantes</div></div></div>`
-    +data.map(t=>{
-      const col=_col(t.pct);
-      // ── Multi-niveaux (Relevage) : ligne parent globale + sous-ligne par niveau ──
-      if(t.detail&&(t.type==='niveaux'||t.nom==='Relevage')){
-        const subRows=t.detail.map(niv=>{
-          const nc=_col(niv.pct);
-          return `<div style="${G}padding:2px 0 2px 0;">
-            <span style="font-size:10px;font-weight:700;color:${nc};padding-left:14px">N${niv.num}</span>
-            ${_bar(niv.pct,nc)}
-            <span style="font-size:10px;color:${nc};font-weight:700;text-align:right">${niv.pct}%</span>
-            <span style="font-size:10px;color:var(--texte-doux);text-align:right">${niv.h_done}/${niv.h_total}h</span>
-          </div>`;
-        }).join('');
-        // Ligne parent : barre globale (h_done/h_total) + sous-lignes
-        return `<div class="htache-row" style="flex-direction:column;align-items:stretch;gap:1px">
-          <div style="${G}padding:5px 0 2px;">
-            <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_escHtml(tAbr(t.nom))}</div>
-            ${_bar(t.pct,col)}
-            <div class="htache-pct" style="color:${col};text-align:right;font-size:13px">${t.pct}%</div>
-            <div style="font-size:10px;color:var(--texte-doux);text-align:right">${t.h_done}h/${t.h_total}h</div>
-          </div>
-          ${subRows}
-        </div>`;
-      }
-      // ── Multi-passages (Eb/Pioche) : ligne parent globale + sous-ligne par passage ──
-      if(t.detail&&(t.type==='passages'||t.nom==='Ebourgeonnage'||t.nom==='Pioche')){
-        // 1 seul passage configuré → affichage simple
-        if(t.detail.length===1){
-          const pas=t.detail[0];const nc=_col(pas.pct);
-          return `<div class="htache-row" style="${G}padding:6px 0;">
-            <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_escHtml(tAbr(t.nom))}</div>
-            ${_bar(pas.pct,nc)}
-            <div class="htache-pct" style="color:${nc};text-align:right;font-size:13px">${pas.pct}%</div>
-            <div style="font-size:10px;color:var(--texte-doux);text-align:right">${pas.h_done}/${pas.h_total}h</div>
-          </div>`;
-        }
-        // 2+ passages → ligne parent + sous-lignes par passage
-        const subRows=t.detail.map(pas=>{
-          const nc=_col(pas.pct);
-          return `<div style="${G}padding:2px 0 2px 0;">
-            <span style="font-size:10px;font-weight:700;color:${nc};padding-left:14px">P${pas.num}</span>
-            ${_bar(pas.pct,nc)}
-            <span style="font-size:10px;color:${nc};font-weight:700;text-align:right">${pas.pct}%</span>
-            <span style="font-size:10px;color:var(--texte-doux);text-align:right">${pas.h_done}/${pas.h_total}h</span>
-          </div>`;
-        }).join('');
-        return `<div class="htache-row" style="flex-direction:column;align-items:stretch;gap:1px">
-          <div style="${G}padding:5px 0 2px;">
-            <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_escHtml(tAbr(t.nom))}</div>
-            ${_bar(t.pct,col)}
-            <div class="htache-pct" style="color:${col};text-align:right;font-size:13px">${t.pct}%</div>
-            <div style="font-size:10px;color:var(--texte-doux);text-align:right">${t.h_done}h/${t.h_total}h</div>
-          </div>
-          ${subRows}
-        </div>`;
-      }
-      // ── Simple ────────────────────────────────────────────────────────
-      return `<div class="htache-row" style="${G}padding:6px 0;">
-        <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_escHtml(tAbr(t.nom))}</div>
-        ${_bar(t.pct,col)}
-        <div class="htache-pct" style="color:${col};text-align:right;font-size:13px">${t.pct}%</div>
-        <div style="font-size:10px;color:var(--texte-doux);text-align:right">${_qte(t)}</div>
-      </div>`;
-    }).join('');
+    +'<div class="mvk-liste">'+((typeof window._mvkAvancement==='function')?window._mvkAvancement(data,ret):'')+'</div>';
 }
 
 
@@ -7537,9 +7474,11 @@ function getPCls(p){
   const pct=totalSaison>0?Math.round((nbDone+_arrPart)/totalSaison*100):0;
   if(p.statut==='Arrachee')return{a:'ava-x',d:'dr',cl:'pr',col:'var(--rouge)',fill:'var(--rouge)',pct,nbDone,nbTotal:totalSaison,part:_arrPart};
   var _gc=pctColor(pct);
-  if(pct===100)return{a:'ava-c',d:'dc',cl:'pv',col:_gc,fill:_gc,pct,nbDone,nbTotal:totalSaison,part:_arrPart};
-  if(pct>=75)return{a:'ava-a',d:'da',cl:'pa',col:_gc,fill:_gc,pct,nbDone,nbTotal:totalSaison,part:_arrPart};
-  return{a:'ava-r',d:'dr',cl:'pr',col:_gc,fill:_gc,pct,nbDone,nbTotal:totalSaison,part:_arrPart};
+  // KIT-1 (§226) : la barre de la carte dit l'ÉTAT (fini en vert, sinon doré) ; le dégradé reste à la carte du domaine (col).
+  var _fk=(pct===100)?'var(--vert-med)':'var(--or)';
+  if(pct===100)return{a:'ava-c',d:'dc',cl:'pv',col:_gc,fill:_fk,pct,nbDone,nbTotal:totalSaison,part:_arrPart};
+  if(pct>=75)return{a:'ava-a',d:'da',cl:'pa',col:_gc,fill:_fk,pct,nbDone,nbTotal:totalSaison,part:_arrPart};
+  return{a:'ava-r',d:'dr',cl:'pr',col:_gc,fill:_fk,pct,nbDone,nbTotal:totalSaison,part:_arrPart};
 }
 function computePStats(){
   let c=0,e=0,r=0,a=0;

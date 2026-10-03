@@ -497,32 +497,18 @@ function _pilRenderGauge(d){
     + '<span class="pil-gm"><b class="done">'+d.done.length+'</b> terminées · <b>'+d.active.length+'</b> en cours</span>'
     + '</div>';
 }
-// COH-1 (03/10) : une tâche SANS barème à l'hectare (arrachage, désherbage manuel, entreplantation sans
-//   trous saisis) ne prévoit aucune heure : la ligne affichait « 0/0 h ». Elle s'écrit en surface, faite
-//   sur concernée — la même part que son pourcentage et que la liste des parcelles.
-function _pilBarQte(t){
-  if((t.h_total||0)>0) return _pilNum(t.h_done)+'/'+_pilNum(t.h_total)+' h';
-  if((t.surf_total||0)>0){ var f=function(v){ return (Math.round((Number(v)||0)*100)/100).toFixed(2).replace('.',','); }; return f(t.surf_done)+'/'+f(t.surf_total)+' ha'; }
-  return '\u2014';
-}
 function _pilRenderBar(d){
   var host=document.getElementById('pil-bar'); if(!host) return;
   var mode=_PIL_STATE.bar||'saison';
   var seg=document.getElementById('pil-bar-seg');
   if(seg) seg.querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-b')===mode); });
   if(mode==='cmp'){ host.innerHTML=_pilCmpHtml(d); return; }
-  var rows = d.data.slice().sort(function(a,b){ return (b.pct||0)-(a.pct||0); });
-  if(!rows.length){ host.innerHTML='<div class="pil-empty">Aucune tâche pour la saison active</div>'; return; }
-  host.innerHTML = rows.map(function(t){
-    var col=_pilPctColor(t.pct||0);
-    return '<div class="pil-brow">'
-      + '<div class="pil-blab">'+_pilEsc(_pilTnom(t.nom))+'</div>'
-      + '<div class="pil-btrack"><div class="pil-bfill" style="width:'+Math.min(t.pct||0,100)+'%;background:'+col+'"></div></div>'
-      + '<div class="pil-bpct" style="color:'+col+'">'+(t.pct||0)+'%</div>'
-      + '<div class="pil-bh">'+_pilBarQte(t)+'</div>'
-      + '</div>';
-  }).join('');
+  // KIT-1 (§226) : le MÊME dessin que la carte de l'Accueil (_mvkAvancement) — ordre de la saison, noms entiers,
+  //   couleur d'état, détail en heures ou en surface. Avant : trié par pourcentage, dégradé terre (_pilPctColor).
+  if(!(d.data||[]).length){ host.innerHTML='<div class="pil-empty">Aucune tâche pour la saison active</div>'; return; }
+  host.innerHTML='<div class="mvk-liste">'+window._mvkAvancement(d.data,_pilRetards())+'</div>';
 }
+function _pilRetards(){ return (typeof window._mvkRetards==='function')?window._mvkRetards(_rfCd()):{}; }
 function _pilSaison(){
   var v=(typeof window._visuSaison==='function')?window._visuSaison():'';
   if(v && window.SAISONS){ var f=window.SAISONS.find(function(s){return s&&s.nom===v;}); if(f) return f; }

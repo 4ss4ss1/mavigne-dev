@@ -5488,3 +5488,39 @@ button.pil-dz-set{cursor:pointer;width:100%;}
 .mvn-corr{list-style:none;margin:0 0 8px;padding:0 0 0 12px;display:flex;flex-direction:column;gap:8px;}
 .mvn-corr li{font-size:var(--pt-txt,12.5px);line-height:1.4;color:var(--texte-med);}
 .mvn-anc-v{margin:12px 0 0;font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-doux);}
+
+/* ══ KIT-1 (§226) — LE KIT GRAPHIQUE COMMUN ═══════════════════════════════════════════════════════
+   La ligne d'avancement (Accueil, Pilotage › La campagne) : nom entier · barre · % · détail. La couleur dit
+   l'ÉTAT, la longueur l'avancement. Espacements, tailles et rayons aux jetons (cliquets echelle / jetons / typo). */
+.mvk-liste{display:flex;flex-direction:column;}
+.mvk-ligne{display:grid;grid-template-columns:minmax(96px,30%) minmax(0,1fr) 44px auto;gap:var(--e-1,4px) var(--e-3,12px);align-items:center;padding:var(--e-1,4px) 0;}
+.mvk-ligne .nom{font-size:var(--pt-txt,12.5px);font-weight:500;color:var(--texte-med);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mvk-ligne.sous .nom{padding-left:var(--e-3,12px);font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-doux);}
+.mvk-ligne .pct{font-size:var(--pt-txt,12.5px);font-weight:700;text-align:right;font-variant-numeric:tabular-nums;}
+.mvk-ligne .det{font-size:var(--pt-micro,11px);color:var(--texte-doux);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.mvk-barre{position:relative;display:block;height:6px;background:var(--gris-clair);border-radius:3px;overflow:hidden;}
+.mvk-barre.normale{height:10px;border-radius:5px;}
+.mvk-barre i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;}
+.mvk-fait{background:var(--vert-med);}.mvk-cours{background:var(--or);}.mvk-retard{background:var(--orange);}.mvk-alerte{background:var(--rouge);}
+.mvk-t-fait{color:var(--vert-med);}.mvk-t-cours{color:var(--texte);}.mvk-t-retard{color:var(--orange);}.mvk-t-alerte{color:var(--rouge);}
+@media (max-width:480px){
+  .mvk-ligne{grid-template-columns:minmax(0,1fr) 44px;}
+  .mvk-ligne .mvk-barre{grid-column:1/-1;grid-row:2;}
+  .mvk-ligne .det{grid-column:1/-1;grid-row:3;text-align:left;}
+}
+/* « Agrandir » : le bouton, posé dans le coin du graphe ; la feuille, à la largeur de l'écran. */
+.mvk-agr{position:absolute;top:0;right:0;z-index:1;font:inherit;font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-med);background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:10px;padding:var(--e-0,2px) var(--e-2,8px);cursor:pointer;}
+.mvk-agr:hover,.mvk-agr:focus-visible{color:var(--texte);border-color:var(--or);}
+.mvk-ovg{width:96vw;max-width:1100px;}
+.mvk-ovg-hd{display:flex;align-items:center;gap:var(--e-2,8px);margin-bottom:var(--e-3,12px);}
+.mvk-ovg-hd b{font-family:'Cormorant Garamond',serif;font-size:var(--pt-xl,22px);font-weight:600;color:var(--texte);}
+.mvk-ovg-hd button{margin-left:auto;font:inherit;font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--or-clair);background:var(--cave);border:0;border-radius:10px;padding:var(--e-1,4px) var(--e-3,12px);cursor:pointer;}
+#graph-inner{width:100%;overflow-x:auto;}
+/* Les grands chiffres : chiffres ALIGNÉS et PROPORTIONNELS. En chasse fixe, le « 1 » de la Cormorant prend la
+   largeur d'un « 0 » et laisse un trou : « 12 % » se lisait « I 2 % ». La chasse fixe reste aux colonnes. */
+.pil-th-stat b,.pil-big,.pil-ck .kv,.pil-kval,.pil-gauge-pct,.pil-ring-mid .pc,.pil-verdict .vbig,.pil-donut-c1,.pil-trx-co .v b,
+.hv2-card-val,.hv2-trac-val,.histo-col-pct,.hmsem-v,.pc-pct,.hc-total-val,.mvc-kpi-num,.pil-dom{font-variant-numeric:lining-nums proportional-nums;letter-spacing:0;}
+/* La largeur sur grand écran : une seule, 1 200 px (Accueil, Parcelles, Pilotage — les autres modules aux lots 3b/3c). */
+:root{--page-max:1200px;}
+.pil-wrap{max-width:var(--page-max,1200px);}
+@media (min-width:1200px){ #page-home,#page-parcelles,#page-pilotage{max-width:var(--page-max,1200px);margin-left:auto;margin-right:auto;} }

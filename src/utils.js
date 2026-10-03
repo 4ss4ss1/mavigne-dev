@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.04';
+export const APP_VERSION = '8.05';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -727,7 +727,12 @@ function _mvGraphDessine(e){
     return;                              // on ne vide pas : l'ancien dessin vaut mieux que rien
   }
   e.w = w; e.el = box;
-  box.innerHTML = (html == null) ? '' : html;
+  // KIT-1 (§226) : le bouton « Agrandir » fait partie du dessin (redessiné avec lui). Pas pour un graphe vide,
+  //   ni pour un graphe qui l'a refusé (opts.agrandir === false).
+  var agr = (html && e.agr !== false)
+    ? '<button type="button" class="mvk-agr" data-mvk-agr="' + _MV_GRAPHS.indexOf(e) + '" aria-label="Agrandir le graphique">Agrandir</button>' : '';
+  if(agr && box.style && !box.style.position) box.style.position = 'relative';
+  box.innerHTML = (html == null) ? '' : (agr + html);
   // CUVGR-3 : un graphe qui a emis des zones de touche recoit son infobulle.
   // Les autres ne passent meme pas la premiere ligne de _mvGraphTouch.
   if(window._mvGraphTouch) window._mvGraphTouch(box);
@@ -745,6 +750,7 @@ window._mvGraphSuivre = function(sel, build, opts){
   if(!e){ e = { sel: sel, w: 0, el: null, dit: false, max: 0 }; _MV_GRAPHS.push(e); }
   e.build = build;
   e.max = (opts && opts.max > 0) ? opts.max : 0;
+  e.agr = !(opts && opts.agrandir === false);   // KIT-1 (§226)
   _mvGraphDessine(e);
   if(!_mvGraphHooked){
     _mvGraphHooked = true;
@@ -771,7 +777,86 @@ window._mvGraphRepeindre = function(){
   for(var i = 0; i < _MV_GRAPHS.length; i++) _mvGraphDessine(_MV_GRAPHS[i]);
 };
 
+// ══ KIT-1 (§226) — LE KIT GRAPHIQUE COMMUN : LA LIGNE D'AVANCEMENT ═════════════════════════════════
+//   Une barre (fine dans une liste), une ligne (nom entier · barre · % · détail), un code de couleur : l'ÉTAT,
+//   jamais le pourcentage — fait = fini, cours = en cours, retard = sa fenêtre est passée sans qu'il soit fini.
+//   Nico (03/10) : « une appli homogène ». L'Accueil et Pilotage › La campagne dessinaient le même avancement de
+//   deux façons : l'un au pourcentage (orange sous 50 % — une tâche à 10 % en novembre paraissait en faute), avec
+//   des noms abrégés ; l'autre en dégradé terre, trié par pourcentage. Une seule source désormais.
+function _mvkNb(n){ return Math.round(Number(n)||0).toLocaleString('fr-FR'); }
+function _mvkHa(v){ return (Math.round((Number(v)||0)*100)/100).toFixed(2).replace('.',','); }
+function _mvkEtat(pct,enRetard){ return (pct>=100)?'fait':(enRetard?'retard':'cours'); }
+// Le détail : les heures quand la tâche a un barème, sinon la surface faite sur concernée (COH-1), sinon un tiret.
+function _mvkDet(t){
+  if((t.h_total||0)>0) return _mvkNb(t.h_done)+' / '+_mvkNb(t.h_total)+' h';
+  if((t.surf_total||0)>0) return _mvkHa(t.surf_done)+' / '+_mvkHa(t.surf_total)+' ha';
+  return '\u2014';
+}
+function _mvkLigne(nom,pct,etat,det,sous){
+  var p=Math.max(0,Math.min(100,Math.round(Number(pct)||0)));
+  return '<div class="mvk-ligne'+(sous?' sous':'')+'"><span class="nom">'+nom+'</span>'
+    +'<span class="mvk-barre"><i class="mvk-'+etat+'" style="width:'+p+'%"></i></span>'
+    +'<span class="pct mvk-t-'+etat+'">'+p+'\u00a0%</span><span class="det">'+det+'</span></div>';
+}
+function _mvkAvancement(rows,retards){
+  var R=retards||{};
+  return (rows||[]).map(function(t){
+    var late=!!R[t.nom], h=_mvkLigne(_escHtml(tNom(t.nom)), t.pct||0, _mvkEtat(t.pct||0,late), _mvkDet(t), false);
+    var niv=(t.type==='niveaux'||t.nom==='Relevage'), pas=(t.type==='passages'||t.nom==='Ebourgeonnage'||t.nom==='Pioche');
+    if(t.detail && t.detail.length>1 && (niv||pas)){
+      h+=t.detail.map(function(s){ return _mvkLigne((niv?'N':'P')+_mvkNb(s.num), s.pct||0, _mvkEtat(s.pct||0,late), _mvkDet(s), true); }).join('');
+    }
+    return h;
+  }).join('');
+}
+// Les tâches EN RETARD : leur fenêtre est passée (taskWindows de _chargeSaisonData, fin EXCLUSIVE `we`).
+function _mvkRetards(cd){
+  var out={}; if(!cd||!cd.taskWindows) return out;
+  var t=new Date(), o=Math.round((Date.UTC(t.getFullYear(),t.getMonth(),t.getDate())-Date.UTC(2026,0,1))/86400000);
+  cd.taskWindows.forEach(function(w){ if(w && w.we!=null && o>=w.we) out[w.nom]=true; });
+  return out;
+}
+window._mvkEtat=_mvkEtat; window._mvkDet=_mvkDet; window._mvkLigne=_mvkLigne;
+window._mvkAvancement=_mvkAvancement; window._mvkRetards=_mvkRetards;
+
+// ══ KIT-1 (§226) — « AGRANDIR » : chaque graphe suivi (_mvGraphSuivre) porte ce bouton ; le même dessin
+//   s'ouvre dans #ovGraph (openOv : Échap, retour arrière, empilement), redessiné à la largeur de la feuille.
+window._mvGraphAgrandir = function(i){
+  var e=_MV_GRAPHS[i]; if(!e || typeof e.build!=='function') return;
+  var host=document.getElementById('graph-inner'), tt=document.getElementById('graph-titre');
+  if(!host || typeof window.openOv!=='function') return;
+  var svg=e.el && e.el.querySelector ? e.el.querySelector('svg') : null;
+  if(tt) tt.textContent=(svg && svg.getAttribute('aria-label')) || 'Graphique';
+  window.openOv('ovGraph');
+  var w=Math.max(280, Math.min(1100, host.clientWidth || Math.round(Math.min(window.innerWidth*0.9, 1060))));
+  try { host.innerHTML=e.build(w) || ''; if(window._mvGraphTouch) window._mvGraphTouch(host); }
+  catch(err){
+    host.innerHTML='';
+    if(window.logError) window.logError({ level:'error', cat:'graphe', msg:'graphe agrandi impossible',
+      detail:e.sel+' — '+((err && err.message) ? err.message : String(err)) });
+  }
+};
+if(typeof document!=='undefined' && document.addEventListener){
+  document.addEventListener('click', function(ev){
+    var b=(ev.target && ev.target.closest) ? ev.target.closest('.mvk-agr') : null;
+    if(!b) return;
+    ev.stopPropagation();
+    window._mvGraphAgrandir(parseInt(b.getAttribute('data-mvk-agr'),10));
+  });
+}
+
 export const WHATS_NEW = [
+  { v: '8.05', d: '2026-10-03', items: [
+    { niv: 0, pour: ['tous'], emoji: 'graphique', titre: 'L’avancement par tâche, un seul dessin',
+      desc: "À l’Accueil comme dans <b>Pilotage › La campagne</b>, l’avancement par tâche se dessine de la même façon : les noms en entier, une barre fine, "
+        + "et une couleur qui dit l’état — vert quand c’est fini, doré en cours, orange quand la fenêtre du travail est passée sans qu’il soit fini. "
+        + "La couleur ne dépend plus du pourcentage : une tâche à 10 % en début de saison n’apparaît plus en faute. Sur la liste des parcelles, la barre suit la même règle." },
+    { niv: 0, pour: ['tous'], emoji: 'oeil', titre: '« Agrandir » sur chaque graphique',
+      desc: "Les graphiques du Pilotage et de la Cave portent un bouton « Agrandir » : le même dessin s’ouvre en grand, à la largeur de l’écran." },
+    { niv: 0, pour: ['tous'], emoji: 'carte', titre: 'Sur ordinateur, les pages ne s’étirent plus',
+      desc: "Au-delà de 1 200 px de large, l’Accueil, les Parcelles et le Pilotage gardent une largeur de lecture et se centrent, au lieu de s’étaler sur tout l’écran. "
+        + "Et les grands chiffres s’écrivent sans trou : « 12 % » ne se lit plus « I 2 % »." },
+  ] },
   { v: '8.04', d: '2026-10-03', items: [
     { niv: 2, pour: ['admin'], emoji: 'cloche', titre: 'Les nouveautés ne s’ouvrent plus à chaque mise à jour',
       desc: "Une fenêtre ne s’ouvre plus que pour une <b>grande nouveauté</b> : au plus une fois par mois, trois au plus. "
@@ -3527,13 +3612,13 @@ export const COULEURS_MBR = {};
 //   Les clés internes (`Brulage`, `Reparation`, `Desherbage`) sont des identifiants, jamais un libellé :
 //   les puces de Parcelles les montraient telles quelles pendant que le Pilotage écrivait « Répar. » et
 //   le catalogue « Réparation » — trois noms pour un même travail. tNom rend désormais le nom ENTIER ;
-//   la forme courte (TABREV) ne sert plus qu'à une colonne étroite, par tAbr. Une tâche créée par le
+//   la forme courte (TABREV) n'est plus affichée nulle part (KIT-1, §226). Une tâche créée par le
 //   domaine garde le nom qu'il lui a donné.
 export const TLIB = { Brulage:'Brûlage', Reparation:'Réparation', Ebourgeonnage:'Ébourgeonnage',
   Ebourgeonnage1:'Ébourgeonnage 1', Ebourgeonnage2:'Ébourgeonnage 2', Desherbage:'Désherbage' };
 export function tLib(nom) { return TLIB[nom] || nom; }
 export function tNom(nom) { return tLib(nom); }
-export function tAbr(nom) { return TABREV[nom] || tLib(nom); }
+// KIT-1 (§226) : tAbr est retiré — plus aucune forme courte affichée (Nico, 03/10 : « go » sur la maquette du kit).
 
 // Délai de rentrée (DRE) effectif. Deux sources, on garde le MAX :
 //  - délai d'usage E-Phy (`drae`) — rarement renseigné ;
@@ -4459,6 +4544,7 @@ var MV_AIDE = {
       ['La tension de l’équipe', ": le travail effectif de chacun sur 14 jours, face à ce que le planning prévoyait — jamais face au contrat. Au seuil : plus de 10 % au-dessus du prévu, ou une semaine au-delà de la moyenne autorisée. Le bouton ouvre le Planning."],
       ['Les petites courbes', ": à côté d’un chiffre du haut, elles montrent ses 14 derniers jours en écart à sa référence, le pointillé. La charge restante et le budget les tiennent d’une photo prise chaque jour à la première ouverture par un administrateur (60 jours gardés) ; un jour sans ouverture est un trou. La bande va de −30 % à +30 %, la même pour toutes : deux courbes côte à côte se comparent d’un coup d’œil. Le « i » dit ce que chaque point mesure."],
       ['Les alertes matériel se lisent sur les travaux en cours', ": chaque session tracteur lancée doit couvrir tout le domaine (l’amendement, ses parcelles choisies). Aujourd’hui montre ce qui reste à faire, en heures et en litres, place la prochaine <b>révision</b> dans ces travaux et dit ce qu’il restera dans la <b>cuve</b> une fois tout fini. Un travail terminé disparaît. La consommation de chaque tracteur, mesurée sur vos pleins, est dans L’équipe & le matériel."],
+      ['« Agrandir »', "sur un graphique ouvre le même dessin en grand, à la largeur de l’écran. Les barres d’avancement ont un seul code de couleur : vert fini, doré en cours, orange quand la fenêtre du travail est passée sans qu’il soit fini."],
       ['Quand il manque quelque chose, un bouton vous y emmène', ": plus de chemin à retenir. « Cuve GNR à renseigner », « fiches à passer en Inactif » — le bouton ouvre l’écran concerné, sur le bon onglet, et fait clignoter l’endroit exact une seconde."],
       _mvAideOngletsPil,
       ['La barre du haut dit où vous regardez', ": l’exercice entier, ou une campagne. Cliquez une campagne dans la frise de l’année et les trois chiffres du haut, la frise et les tableaux de la campagne suivent. La croix revient à l’année. <b>Trois écrans ont leur propre cadre</b> et ne se recadrent pas : Économie chiffre la période consultée (sauf ses sous-vues Exercice et Revient, qui ont chacune leur cadre), la Cave suit le millésime, la Conformité roule sur sept ans — chacun l’écrit au-dessus de ses chiffres."],
@@ -5359,7 +5445,6 @@ window.applyTheme         = applyTheme;
 window.initTheme          = initTheme;
 window.tNom               = tNom;
 window.tLib               = tLib;
-window.tAbr               = tAbr;
 window.wmoDesc            = wmoDesc;
 window.wmoIcone           = wmoIcone;
 window.MV_METEO_IC        = MV_METEO_IC;

@@ -3,13 +3,12 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **3 octobre 2026 (ANN-1)** — ★★ **LES NOUVEAUTÉS EN QUATRE NIVEAUX : LA FENÊTRE NE S'OUVRE PLUS QUE POUR LES GRANDES** (§225).
-> Nico : « le What's New est beaucoup trop présent ». Mesuré : 50 versions annoncées en deux semaines, une fenêtre d'office chez
-> tout le monde. Chaque item de `WHATS_NEW` porte désormais `niv` (0 Journal seul · 1 pastille « Nouveau » sur `cible` · 2 ligne
-> « À vérifier » sur l'Accueil jusqu'à « Vu » · 3 grande fenêtre, 30 jours, 3 au plus) et `pour` ; le bloc porte `d`. Journal des
-> nouveautés dans Réglages › Moi ; l'histoire d'avant 8.04 n'est pas réécrite. Harnais `mv-harnais-annonces` (33, contre-épreuve 9/9),
-> règles dans `mv-whatsnew-check`. Construit sur `1a75533`, rejoué sur `ca4caa2` (RENF-2 avait pris 8.03 et §224). Base `ca4caa2`.
-> **APP 8.03 → 8.04, SW 8.78 → 8.79**.
+> Dernière consolidation : **3 octobre 2026 (KIT-1)** — ★★ **LE KIT GRAPHIQUE COMMUN, LOT 3a : ACCUEIL ET PILOTAGE** (§226).
+> Maquette du kit validée (« go », Nico). Une ligne d'avancement commune (`_mvkAvancement`, utils.js) pour l'Accueil et
+> Pilotage › La campagne : noms entiers (`tAbr` retiré), couleur d'ÉTAT (fait / cours / retard = fenêtre passée, `_mvkRetards`),
+> détail heures ou surface (`_mvkDet`, ex-`_pilBarQte`) ; barre des parcelles à l'état ; « Agrandir » sur chaque graphe suivi
+> (`_mvGraphDessine` + `#ovGraph`) ; grands chiffres proportionnels (« I 2 % ») ; 1 200 px sur grand écran (3 pages).
+> Harnais `mv-harnais-kit1` (12, contre-épreuve 6/6). Base `bd53451`. **APP 8.04 → 8.05, SW 8.79 → 8.80** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1840,7 +1839,8 @@ différents entre eux, et des heures sup apparaissent dans Décider › le renfo
    `w.cap` le modèle standard jour par jour (`_cap1`) ; le seul ajout fixe est le ×8/7 de `_rfSim` (`hMax/hJour`).
    ⚠️ Le modèle INTÉGRÉ dit 32 h en janvier-février (Nico : 28-29 h l'hiver, 39 h l'été) : vérifier chez lui que le modèle
    2027 est enregistré (sinon bandeau « Le modèle … a été replacé » dans le Planning).
-3. **Lot 3 — kit graphique + mise en page PC.** Recommandation retenue : PAS d'option petit/grand par utilisateur ; un kit
+3. ◐ **Lot 3 — kit graphique + mise en page PC. 3a fait au §226 (KIT-1)** ; restent 3b (Vigne hors Accueil, Planning,
+   Tracteur) et 3c (Cave, Cuvier, La Réserve), et l'Accueil sur deux colonnes (voir §226e). Pour mémoire, la demande : Recommandation retenue : PAS d'option petit/grand par utilisateur ; un kit
    (une barre en deux épaisseurs, un cadre en trois hauteurs, un seul style de grand chiffre, mêmes couleurs d'état) et un
    bouton « Agrandir » sur chaque graphique (il existe déjà sur la carte de Décider). Constat : une vingtaine de familles de
    barres dans `styles.css`, donuts et jauges chacun à sa taille, l'avancement par tâche dessiné deux fois (Accueil

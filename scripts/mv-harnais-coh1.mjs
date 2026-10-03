@@ -2,7 +2,7 @@
 //   node scripts/mv-harnais-coh1.mjs           → doit être vert
 //   node scripts/mv-harnais-coh1.mjs --contre  → chaque défaut réinjecté doit rougir
 // Exécute les VRAIES fonctions extraites des sources : calcHeures + _mvTFaite + getPCls (app.js, avec le
-// bloc ARRACH-3), _pvSurfFr / _pvCompte / _qte (app.js), _pilBarQte (pilotage.js), tNom / tAbr (utils.js).
+// bloc ARRACH-3), _pvSurfFr / _pvCompte (app.js), _mvkDet (utils.js, le formateur commun depuis KIT-1 §226), tNom (utils.js).
 // Le reste (CSS des cartes, puces, journal, points de suspension) se vérifie sur le texte des sources.
 import fs from 'fs'; import path from 'path'; import vm from 'vm';
 import { fileURLToPath } from 'url';
@@ -37,14 +37,12 @@ function monde(S) {
     + '\n' + sansCom(fn(A, 'function _mvTFaite(p,nom){') + fn(A, 'function calcHeures(){') + fn(A, 'function getPCls(p){'))
     + '\n' + ligne(A, /function _mvArrHors\(p,nom\)\{[^\n]*\n/)
     + ligne(A, /function _pvSurfFr\(s\)\{[^\n]*\n/) + ligne(A, /function _pvNbFait\(cl\)\{[^\n]*\n/) + ligne(A, /function _pvCompte\(cl\)\{[^\n]*\n/)
-    + ligne(A, /function _haT\(v\)\{[^\n]*\}/) + '\n' + ligne(A, /function _qte\(t\)\{[^\n]*\}/) + '\n'
-    + sansCom(fn(S.pil, 'function _pilBarQte(t){'))
+    + ligne(U, /function _mvkNb\(n\)\{[^\n]*\n/) + ligne(U, /function _mvkHa\(v\)\{[^\n]*\n/) + sansCom(fn(U, 'function _mvkDet(t){'))
     + bloc(U, 'export const TABREV = {', '};').replace('export ', '') + '\n'
     + bloc(U, 'export const TLIB = {', '};').replace('export ', '') + '\n'
     + ligne(U, /export function tLib\(nom\)[^\n]*\n/).replace('export ', '')
     + ligne(U, /export function tNom\(nom\)[^\n]*\n/).replace('export ', '')
-    + ligne(U, /export function tAbr\(nom\)[^\n]*\n/).replace('export ', '')
-    + '\nthis.__f={calcHeures,getPCls,_pvSurfFr,_pvCompte,_qte,_pilBarQte,tNom,tAbr};';
+    + '\nthis.__f={calcHeures,getPCls,_pvSurfFr,_pvCompte,_mvkDet,tNom};';
   vm.runInContext(code, ctx);
   return { ctx, f: ctx.__f };
 }
@@ -58,15 +56,15 @@ function suite(S) {
   T('TRAVAUX n\u2019est plus réécrit à 0 derrière recalcTravaux', w.ctx.TRAVAUX.Arrachage && w.ctx.TRAVAUX.Arrachage.pct === 33);
   T('la ligne porte sa surface faite et concernée (0,07 sur 0,2 ha)', arr && arr.surf_done === 0.07 && Math.abs(arr.surf_total - 0.2) < 1e-9 && arr.h_total === 0);
   T('une tâche au barème ne bouge pas (Taille : 67 %, 35 h faites sur 53)', tai && tai.pct === 67 && tai.h_done === 35 && tai.h_total === 53);
-  T('Pilotage : sans barème, la ligne s\u2019écrit en surface', w.f._pilBarQte(arr) === '0,07/0,20 ha');
-  T('Pilotage : avec barème, elle reste en heures', w.f._pilBarQte(tai) === '35/53 h');
-  T('Pilotage : ni heures ni surface → un tiret, plus « 0/0 h »', w.f._pilBarQte({ h_total: 0, surf_total: 0 }) === '\u2014');
-  T('Accueil : la même règle (0,07 / 0,20 ha · 35h / 53h)', w.f._qte(arr) === '0,07 / 0,20 ha' && w.f._qte(tai) === '35h / 53h');
+  T('Pilotage : sans barème, la ligne s\u2019écrit en surface', w.f._mvkDet(arr) === '0,07 / 0,20 ha');
+  T('Pilotage : avec barème, elle reste en heures', w.f._mvkDet(tai) === '35 / 53 h');
+  T('Pilotage : ni heures ni surface → un tiret, plus « 0/0 h »', w.f._mvkDet({ h_total: 0, surf_total: 0 }) === '\u2014');
+  T('Accueil et Pilotage : un seul dessin (_mvkAvancement), donc un seul formateur', /window\._mvkAvancement\(data,ret\)/.test(S.app) && /window\._mvkAvancement\(d\.data,_pilRetards\(\)\)/.test(S.pil));
   T('carte : le compte suit le pourcentage (« 0,3/1 tâche », « 1,5/2 tâches »)',
     w.f._pvCompte(w.f.getPCls(w.ctx.PARCELLES[0])) === '0,3/1 t\u00e2che' && w.f._pvCompte({ nbDone: 1, part: 0.5, nbTotal: 2 }) === '1,5/2 t\u00e2ches');
   T('surface d\u2019une parcelle au centiare (0,0870 · 0,1144 · vide)', w.f._pvSurfFr(0.087) === '0,0870' && w.f._pvSurfFr('0,1144') === '0,1144' && w.f._pvSurfFr('') === '');
   T('un seul nom, entier et accentué (Brûlage, Réparation, Désherbage)', w.f.tNom('Brulage') === 'Brûlage' && w.f.tNom('Reparation') === 'Réparation' && w.f.tNom('Desherbage') === 'Désherbage');
-  T('une tâche du domaine garde son nom ; la forme courte reste à tAbr', w.f.tNom('Dégraffage') === 'Dégraffage' && w.f.tAbr('Reparation') === 'Répar.' && w.f.tAbr('Ebourgeonnage') === 'Ébourg.');
+  T('une tâche du domaine garde son nom ; plus aucune forme courte (KIT-1)', w.f.tNom('Dégraffage') === 'Dégraffage' && !/function tAbr\(/.test(S.uti));
   const A = S.app;
   T('puces de Parcelles : le nom affiché, plus la clé', /onclick="setPTacheFilter\('\$\{_escAttr\(t\.nom\)\}',this\)">\$\{_escHtml\(tNom\(t\.nom\)\)\}<\/div>/.test(A));
   T('journal : plus aucune lecture directe de TABREV dans app.js', !/TABREV\[/.test(A) && /const tacheAff=_escHtml\(tNom\(r\.tache\)/.test(A));
@@ -86,8 +84,8 @@ const sub = (k, a, b) => S => Object.assign({}, S, { [k]: S[k].replace(a, b) });
 const D = [
   ['calcHeures ne connaît plus que « Validé »', sub('app', '*_mvTFaite(p,t.nom),0);', "*(getTacheStatut(p,t.nom)==='Validé'?1:0),0);")],
   ['_mvTFaite oublie l\u2019arrachage découpé', sub('app', 'return _arrFraction(p)||0;', 'return 0;')],
-  ['le Pilotage repasse en heures pour tout', sub('pil', 'if((t.h_total||0)>0) return', 'if(true) return')],
-  ['l\u2019Accueil repasse en heures pour tout', sub('app', 'return (t.h_total>0||!(t.surf_total>0))?', 'return (true)?')],
+  ['le formateur commun repasse en heures pour tout', sub('uti', 'if((t.h_total||0)>0) return _mvkNb', 'if(true) return _mvkNb')],
+  ['l\u2019Accueil reprend son propre dessin', sub('app', 'window._mvkAvancement(data,ret)', 'window._mvkAutre(data,ret)')],
   ['tNom relit les abréviations et les clés brutes', sub('uti', 'export function tNom(nom) { return tLib(nom); }', 'export function tNom(nom) { return TABREV[nom] || nom; }')],
   ['le compte oublie la part de l\u2019arrachage', sub('app', '+((cl&&cl.part)||0))*10', ')*10')],
   ['la surface repasse en brut', sub('app', "return isFinite(v)?v.toFixed(4).replace('.',','):String(s);", "return String(s).replace('.',',');")],

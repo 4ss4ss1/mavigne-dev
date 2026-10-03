@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **3 octobre 2026 (ANN-1)** — ★★ **LES NOUVEAUTÉS EN QUATRE NIVEAUX : LA FENÊTRE NE S'OUVRE PLUS QUE POUR LES GRANDES** (§225).
+> Nico : « le What's New est beaucoup trop présent ». Mesuré : 50 versions annoncées en deux semaines, une fenêtre d'office chez
+> tout le monde. Chaque item de `WHATS_NEW` porte désormais `niv` (0 Journal seul · 1 pastille « Nouveau » sur `cible` · 2 ligne
+> « À vérifier » sur l'Accueil jusqu'à « Vu » · 3 grande fenêtre, 30 jours, 3 au plus) et `pour` ; le bloc porte `d`. Journal des
+> nouveautés dans Réglages › Moi ; l'histoire d'avant 8.04 n'est pas réécrite. Harnais `mv-harnais-annonces` (33, contre-épreuve 9/9),
+> règles dans `mv-whatsnew-check`. Construit sur `1a75533`, rejoué sur `ca4caa2` (RENF-2 avait pris 8.03 et §224). Base `ca4caa2`.
+> **APP 8.03 → 8.04, SW 8.78 → 8.79**.
+
 > ★ Consolidation : **3 octobre 2026 (RENF-2)** — ★★ **LE RENFORT DIT COMBIEN DE SAISONNIERS, ET QUAND — SANS HEURES SUP** (§224).
 > Lot 2 de COH-1, maquette v2 validée par Nico. `_rfCfg` : hMax = hJour (fini les 8 h au lieu de 7). La carte de Décider
 > répond d'office en calendrier (`_rfCalendrier` : par travail qui déborde, le moins de monde possible sur SA fenêtre, via

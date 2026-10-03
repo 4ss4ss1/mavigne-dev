@@ -131,7 +131,7 @@
   },
   "C24c_interpolation_nue": {
     "src/admin-gt.js": 0,
-    "src/app.js": 125,
+    "src/app.js": 82,
     "src/cave.js": 0,
     "src/cuvier.js": 0,
     "src/firebase.js": 0,
