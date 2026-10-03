@@ -69,7 +69,7 @@ var _PIL_ST_V = 4;
 var _PIL_DEFAULT = {
   show: {
     // Aujourd'hui (cockpit)
-    auj_marge:1, auj_charge:1, auj_cadence:1, auj_budget:1, auj_etp:1, auj_jours:1, auj_cave:1, auj_pres:1, auj_traiter:1, auj_prio:1, auj_alertes:1,
+    auj_marge:1, auj_charge:1, auj_cadence:1, auj_budget:1, auj_etp:1, auj_jours:1, auj_cave:1, auj_pres:1, auj_traiter:1, auj_prio:1, auj_alertes:1, auj_tension:1, auj_inaction:1,
     // Avancement
     // L'annee (niveau ①)
     // ⚠️⚠️ CES DEUX CLES MANQUAIENT AUX DEFAUTS. _pilNormalize ne garde que les
@@ -84,7 +84,7 @@ var _PIL_DEFAULT = {
     // Personnel
     prs_equipe:1, prs_presences:1, prs_capacite:1,
     // Matériel
-    mat_tracteur:1, mat_gnr:1,
+    mat_tracteur:1, mat_gnr:1, mat_conso:1,
     // Simulation
     sim_ordre:1, sim_etsi:1, sim_cout:1,
     // Conformité (`mat_phyto` garde son NOM et change d'onglet — cf. _pilTabCfm)
@@ -267,7 +267,7 @@ function _taskColor(nom){ return _PIL_TASK_COL[_friseNorm(nom)]||'#8A5A38'; }
 var _PIL_TILE_ICO={couteff:'balance',carte:'carte',temps:'balance',equipe:'equipe',
   tracteur:'tracteur',cave:'verre',presences:'equipe',phyto:'feuille',echeances:'calendrier',
   etp:'balance',capacite:'balance',simulateur:'equipe',ordrepassage:'cible',gnr:'carburant',
-  traitement:'pulverisateur',meteo:'nuage',vinif:'fiole',cout:'balance',cuivre:'fiole',
+  traitement:'pulverisateur',meteo:'nuage',conso:'carburant',vinif:'fiole',cout:'balance',cuivre:'fiole',
   ift:'pulverisateur',dre:'goutte'};
 function _pilIco(n){ return _mvIcon(n,16); }
 function _pilIcoFor(id){ return _pilIco(_PIL_TILE_ICO[id]||'graphique'); }
@@ -740,13 +740,99 @@ function _pilTile(id,dot,title,statHtml,subHtml,gradPct,bodyHtml,infoCle){
     + '<div class="pil-tbody" id="pil-body-'+id+'">'+(bodyHtml||'')+'</div>'
     + '</div>';
 }
+// ════════════════════════════════════════════════════════════════════════
+// CARTE-1 (§217) — LES VUES DE LA CARTE
+// La même carte, cinq lectures. Chaque vue prend ses chiffres là où ils vivent
+// déjà, jamais dans un calcul de plus :
+//   avc  : l'avancement (getPCls, la couleur d'avant) ;
+//   phy  : jours depuis le dernier traitement du registre (TRAITEMENTS, toutes
+//          campagnes : la protection ne s'arrête pas au 1er novembre) ;
+//   cep  : le cépage de la fiche parcelle (p.cepage), une couleur par cépage ;
+//   pass : les passages phyto de la campagne (_cfmPassages, la règle de la
+//          Conformité) face à la référence (_cfmIftRef) — des passages, pas un IFT ;
+//   cout : le coût engagé à l'hectare (_pecData, la vue Parcelles de l'Économie).
+// Une parcelle sans donnée reste grise : un vide n'est pas un zéro. Zéro passage,
+// lui, est une mesure : il a sa couleur.
+// ════════════════════════════════════════════════════════════════════════
+var _PIL_LENT='avc';
+var _PIL_LENTS=[['avc','Avancement'],['phy','Dernier traitement'],['cep','Cépage'],['pass','Passages phyto'],['cout','Coût / ha']];
+var _PIL_LENT_GRIS='#BDB6A8';
+var _PIL_CEP_COL={'pinot noir':'#7A1020','chardonnay':'#D8BC72','aligote':'#A8B86A','gamay':'#7B4DB8','pinot gris':'#B07A8A','pinot blanc':'#E3D9A6'};
+var _PIL_CEP_PAL=['#4A80C4','#C8853A','#3D8A8A','#8A5A38','#9C6BB0','#5B9B3A'];
+// Normalisation : _friseNorm (la meme que la frise), sans accents ni casse.
+function _pilLentMix(a,b,t){
+  var A=a.match(/\w\w/g).map(function(h){ return parseInt(h,16); }), B=b.match(/\w\w/g).map(function(h){ return parseInt(h,16); });
+  return '#'+A.map(function(v,i){ return Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0'); }).join('').toUpperCase();
+}
+function _pilLentRamp(t,stops){ t=Math.max(0,Math.min(1,t)); var n=stops.length-1, i=Math.min(n-1,Math.floor(t*n)); return _pilLentMix(stops[i],stops[i+1],t*n-i); }
+// Tout ce qu'une vue lit, calculé UNE fois par rendu de la carte.
+function _pilLentPrep(){
+  var L=_PIL_LENT, o={lent:L};
+  if(L==='phy'){
+    var der={}; (window.TRAITEMENTS||[]).forEach(function(t){ var dd=String((t&&t.date)||'').slice(0,10); if(!dd) return;
+      ((t&&t.parcelles)||[]).forEach(function(nom){ if(nom&&(!der[nom]||dd>der[nom])) der[nom]=dd; }); });
+    var n=new Date(), auj=new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime(), j={};
+    Object.keys(der).forEach(function(nom){ var t0=new Date(der[nom]+'T00:00:00').getTime(); if(isFinite(t0)) j[nom]=Math.max(0,Math.round((auj-t0)/86400000)); });
+    o.j=j;
+  } else if(L==='pass'){
+    var pass={}; _cfmPassages().forEach(function(r){ pass[r.nom]=r.pass; });
+    o.pass=pass; o.refIft=_cfmIftRef().v;
+  } else if(L==='cep'){
+    var cep={}, k=0;
+    (window.PARCELLES||[]).forEach(function(p){ if(!p||p.statut==='Arrachee') return; var c=_friseNorm(p.cepage); if(!c||cep[c]) return; cep[c]={col:_PIL_CEP_COL[c]||_PIL_CEP_PAL[(k++)%_PIL_CEP_PAL.length], nom:String(p.cepage).trim()}; });
+    o.cep=cep;
+  } else if(L==='cout'){
+    var E=_pecData(), c2={}, mn=null, mx=null;
+    if(E&&E.configured){ (E.rows||[]).forEach(function(r){ if(!r||r.arr||!(r.surf>0)) return; var v=Number(r.engHa)||0; c2[r.nom]=v; mn=(mn==null||v<mn)?v:mn; mx=(mx==null||v>mx)?v:mx; }); }
+    o.cout=c2; o.mn=mn; o.mx=mx; o.configured=!!(E&&E.configured);
+  }
+  return o;
+}
+// La couleur et le texte d'une parcelle dans la vue courante ; null = pas de donnée (gris).
+function _pilLentCol(p,o){
+  if(!p) return null;
+  if(o.lent==='phy'){ var j=o.j[p.nom]; if(j==null) return null; return {col:_pilLentRamp(j/14,['3D6B27','C2A14D','A0291E']), txt:(j===0?'traitée aujourd’hui':('dernier traitement il y a '+j+' j'))}; }
+  if(o.lent==='pass'){
+    var n=o.pass[p.nom]||0, r=o.refIft>0?n/o.refIft:0;
+    var col=r>1.25?'#A0291E':(r>1?'#B85A1A':_pilLentRamp(r,['DDEBD2','3D6B27']));
+    return {col:col, txt:n+' passage'+(n>1?'s':'')+' · référence '+o.refIft};
+  }
+  if(o.lent==='cep'){ var c=o.cep[_friseNorm(p.cepage)]; return c?{col:c.col, txt:c.nom}:null; }
+  if(o.lent==='cout'){
+    var v=o.cout[p.nom]; if(v==null) return null;
+    var t=(o.mx>o.mn)?(v-o.mn)/(o.mx-o.mn):0;
+    return {col:_pilLentRamp(t,['EAF3E2','C2A14D','8A5A38']), txt:_ecoEur(v)+' engagés à l’hectare'};
+  }
+  var cl=(typeof window.getPCls==='function')?window.getPCls(p):null;
+  return cl?{col:cl.col, txt:(cl.pct||0)+' %'}:null;
+}
+function _pilLentBtns(){
+  return '<div class="pil-lent" role="group" aria-label="Vue de la carte">'+_PIL_LENTS.map(function(l){
+    return '<button type="button" class="pil-lent-b'+(_PIL_LENT===l[0]?' on':'')+'" data-lent="'+l[0]+'" aria-pressed="'+(_PIL_LENT===l[0]?'true':'false')+'">'+_pilEsc(l[1])+'</button>';
+  }).join('')+'</div>';
+}
+function _pilLentLeg(o){
+  var sw=function(c,t){ return '<span class="pil-lent-sw"><i style="background:'+c+'"></i>'+t+'</span>'; };
+  var gr=function(stops,a,b,c){ return '<span>'+a+'</span><span class="pil-map-bar" style="background:linear-gradient(90deg,'+stops.map(function(s){ return '#'+s; }).join(',')+')"></span><span>'+b+'</span>'+(c?('<span>'+c+'</span>'):''); };
+  var H='';
+  if(o.lent==='phy') H=gr(['3D6B27','C2A14D','A0291E'],'0 j','14 j et plus','· jours depuis le dernier traitement');
+  else if(o.lent==='pass') H=sw('#DDEBD2','0')+sw('#3D6B27','jusqu’à la référence ('+o.refIft+')')+sw('#B85A1A','au-dessus')+sw('#A0291E','plus de 25 % au-dessus');
+  else if(o.lent==='cep'){ var ks=Object.keys(o.cep); H=ks.length?ks.map(function(k){ return sw(o.cep[k].col,_pilEsc(o.cep[k].nom)); }).join(''):'<span>aucun cépage renseigné sur les fiches</span>'; }
+  else if(o.lent==='cout') H=(o.mn!=null)?gr(['EAF3E2','C2A14D','8A5A38'],_ecoEur(o.mn),_ecoEur(o.mx),'· engagé à l’hectare'):('<span>'+(o.configured?'aucun coût engagé sur la période':'taux horaires à renseigner (Réglages › Équipe)')+'</span>');
+  else H='<span>0 %</span><span class="pil-map-bar"></span><span>100 %</span>';
+  if(o.lent!=='avc') H+=sw(_PIL_LENT_GRIS,'sans donnée');
+  return H;
+}
+var _PIL_LENT_PREP=null;
 function _pilPanelCarte(d){
   var ha=(Math.round((Number(d.surfTot)||0)*100)/100).toFixed(2).replace('.',',');   // SURF-1 (03/10) : un total au centième, jamais arrondi à l'hectare
-  var body='<div class="pil-map" id="pil-map"></div>'
-    + '<div class="pil-map-leg"><span>0 %</span><span class="pil-map-bar"></span><span>100 %</span>'
+  // CARTE-1 (§217) : le choix de la vue au-dessus, sa legende en dessous ; la carte lit la meme preparation.
+  _PIL_LENT_PREP=_pilLentPrep();
+  var body=_pilLentBtns()+'<div class="pil-map" id="pil-map"></div>'
+    + '<div class="pil-map-leg">'+_pilLentLeg(_PIL_LENT_PREP)
     + '<span style="display:flex;align-items:center;gap:6px"><span class="pil-map-sw" style="background:rgba(192,57,43,.5);border-color:#C0392B"></span>Arrachée</span>'
     + '<button type="button" class="pil-names-btn">'+(_pilNamesOn?(_mvIcon('etiquette',16)+' Noms '+_mvIcon('check',16)):(_mvIcon('etiquette',16)+' Noms'))+'</button></div>';
-  return _pilTile('carte','#7FA83A','Carte du domaine', _pilStat(d.gaugePct,' %',null), d.nActives+' parcelles · '+ha+' ha', d.gaugePct, body);
+  return _pilTile('carte','#7FA83A','Carte du domaine', _pilStat(d.gaugePct,' %',null), d.nActives+' parcelles · '+ha+' ha', d.gaugePct, body, 'pil.carte');
 }
 // Detruire une carte Leaflet pendant qu'une animation de zoom est en vol leve
 // « Cannot read properties of undefined (reading '_leaflet_pos') » 250 ms plus tard :
@@ -765,6 +851,8 @@ function _pilBuildMap(d){
   _pilMapLabels=[];
   var src=(window.KML_POLYGONS_DYNAMIC&&window.KML_POLYGONS_DYNAMIC.length)?window.KML_POLYGONS_DYNAMIC:(window.KML_DATA||[]);
   var P=window.PARCELLES||[];
+  var _lo=(_PIL_LENT_PREP&&_PIL_LENT_PREP.lent===_PIL_LENT)?_PIL_LENT_PREP:_pilLentPrep();   // CARTE-1 (§217)
+  var _gris=(_lo.lent==='avc')?'#888888':_PIL_LENT_GRIS;
   try{
     _pilMap=window.L.map(el,{zoomControl:true,attributionControl:false,zoomSnap:0,zoomDelta:0.5}).setView([47.205,4.972],12);
     window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(_pilMap);
@@ -773,19 +861,19 @@ function _pilBuildMap(d){
       if(!k||!k.pts||!k.pts.length) return;
       var p=P.find(function(x){ return x.nom && k.name && x.nom.toLowerCase()===k.name.toLowerCase(); });
       var arr = p && /arrach/i.test(p.statut||'');
-      var cl = (p && !arr && typeof window.getPCls==='function') ? window.getPCls(p) : null;
-      var col = arr ? '#C0392B' : (cl?cl.col:'#888888');
+      var lc = (p && !arr) ? _pilLentCol(p,_lo) : null;
+      var col = arr ? '#C0392B' : (lc?lc.col:_gris);
       var op  = arr ? 0.5 : 0.62;
       // remplissage clair + halo de contour coloré épais (visibilité à petit zoom)
       window.L.polygon(k.pts,{color:'#fff',weight:0.5,fillColor:col,fillOpacity:op}).addTo(_pilMap);
       window.L.polygon(k.pts,{color:col,weight:2.4,fill:false,opacity:0.95}).addTo(_pilMap);
       // point + nom au barycentre (comme l'onglet carte de Parcelles)
       var ctr=k.pts.reduce(function(a,b){ return [a[0]+b[0],a[1]+b[1]]; },[0,0]);
-      var lc=[ctr[0]/k.pts.length, ctr[1]/k.pts.length];
-      var mk=window.L.circleMarker(lc,{radius:3.5,fillColor:col,color:'#fff',weight:1.4,fillOpacity:1})
+      var ctrLL=[ctr[0]/k.pts.length, ctr[1]/k.pts.length];
+      var mk=window.L.circleMarker(ctrLL,{radius:3.5,fillColor:col,color:'#fff',weight:1.4,fillOpacity:1})
         .addTo(_pilMap)
-        .bindPopup(p?('<b>'+_pilEsc(p.nom)+'</b><br>'+(p.surface||0)+' ha · '+(arr?'arrachée':((cl?cl.pct:0)+' %'))):('<b>'+_pilEsc(k.name)+'</b>'));
-      var tt=window.L.tooltip({permanent:true,direction:'right',offset:[5,0],className:'pil-plabel'}).setContent(p?p.nom:k.name).setLatLng(lc);
+        .bindPopup(p?('<b>'+_pilEsc(p.nom)+'</b><br>'+(p.surface||0)+' ha · '+(arr?'arrachée':(lc?_pilEsc(lc.txt):'sans donnée'))):('<b>'+_pilEsc(k.name)+'</b>'));
+      var tt=window.L.tooltip({permanent:true,direction:'right',offset:[5,0],className:'pil-plabel'}).setContent(p?p.nom:k.name).setLatLng(ctrLL);
       if(_pilNamesOn) mk.bindTooltip(tt);
       _pilMapLabels.push({mk:mk,tt:tt});
       k.pts.forEach(function(pt){ bounds.push(pt); });
@@ -801,12 +889,12 @@ function _pilBuildMap(d){
         if(!p||/arrach/i.test(p.statut||'')) return;
         if(p.nom && _kn[String(p.nom).toLowerCase()]) return;
         var la=parseFloat(p.lat), ln=parseFloat(p.lng);
-        var cl=(typeof window.getPCls==='function')?window.getPCls(p):null;
-        var col=cl?cl.col:'#888888';
+        var lc=_pilLentCol(p,_lo);
+        var col=lc?lc.col:_gris;
         if(_ok(la,ln)){
           window.L.circleMarker([la,ln],{radius:3.5,fillColor:col,color:'#fff',weight:1.4,fillOpacity:1})
             .addTo(_pilMap)
-            .bindPopup('<b>'+_pilEsc(p.nom)+'</b><br>'+(p.surface||0)+' ha · '+(cl?cl.pct:0)+' %');
+            .bindPopup('<b>'+_pilEsc(p.nom)+'</b><br>'+(p.surface||0)+' ha · '+(lc?_pilEsc(lc.txt):'sans donnée'));
           bounds.push([la,ln]);
         } else if(p.commune && _ok(parseFloat(p.commune.lat),parseFloat(p.commune.lng))){
           var key=String(p.commune.nom||'').toLowerCase().trim();
@@ -816,7 +904,7 @@ function _pilBuildMap(d){
       });
       Object.keys(_cg).forEach(function(key){
         var g=_cg[key], n=g.parc.length;
-        var liste=g.parc.map(function(pp){var c=(typeof window.getPCls==='function')?window.getPCls(pp):null;return '<b>'+_pilEsc(pp.nom)+'</b> · '+(pp.surface||0)+' ha · '+(c?c.pct:0)+' %';}).join('<br>');
+        var liste=g.parc.map(function(pp){var c=_pilLentCol(pp,_lo);return '<b>'+_pilEsc(pp.nom)+'</b> · '+(pp.surface||0)+' ha · '+(c?_pilEsc(c.txt):'sans donnée');}).join('<br>');
         var ic=window.L.divIcon({className:'',iconSize:[24,24],iconAnchor:[12,12],html:'<div style="width:24px;height:24px;border-radius:50%;background:#C9A84C;color:#1C1813;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font:700 12px/1 system-ui,sans-serif;">'+n+'</div>'});
         window.L.marker([g.lat,g.lng],{icon:ic}).addTo(_pilMap)
           .bindPopup('<b>'+String.fromCodePoint(0x1F4CD)+' '+_pilEsc(g.nom)+'</b><br><span style="color:var(--texte-doux,#888);font-size:var(--pt-txt,12.5px);">'+n+' parcelle'+(n>1?'s':'')+' · commune</span><br>'+liste);
@@ -954,6 +1042,81 @@ function _pilEchCadence(d){
   // melangeait 28 jours de presence avec l'effectif d'aujourd'hui.
   var hPers=(cad && cad.hPers>0)?cad.hPers:hJ;
   return { cadH:cadH, estim:estim, hPers:hPers, nPers:nV };
+}
+// ════════════════════════════════════════════════════════════════════════
+// PHOTO-1 (§219) — LA PHOTO QUOTIDIENNE DES CHIFFRES DU COCKPIT
+// Le Pilotage recalcule la charge restante et le budget consomme a chaque
+// ouverture, et ne garde pas la veille : aucune petite courbe possible (§214a).
+// Decide avec Nico (03/10) : chaque jour, a la premiere ouverture d'Aujourd'hui par
+// un ADMINISTRATEUR, sur la PERIODE ACTIVE, une ligne {d, reste, cons, avc} est
+// ecrite dans CONFIG.photo (la configuration du domaine : deja ecrite par
+// l'admin, aucune regle Firestore nouvelle), 60 lignes au plus. Jamais reecrite
+// le meme jour, jamais retroactive : les courbes se remplissent en 14 jours.
+// Un jour sans ouverture est un trou (null), pas un zero. Le point du jour est
+// toujours la valeur en direct, photo ou pas.
+// ════════════════════════════════════════════════════════════════════════
+var _PIL_PHOTO_MAX=60;
+function _pilPhotoListe(){ var c=window.CONFIG; return (c&&Array.isArray(c.photo))?c.photo:[]; }
+function _pilPhotoIso(dt){ return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); }
+// Ecrit la photo du jour si elle manque. Rend true si une ecriture est partie.
+function _pilPhotoEcrire(d){
+  if(!d||typeof window.isAdmin!=='function'||!window.isAdmin()||typeof window.saveData!=='function') return false;
+  var sa=(typeof window.getSaisonActive==='function')?window.getSaisonActive():null, sp=_pilSaison();
+  if(!sa||!sp||sa.nom!==sp.nom) return false;   // une archive consultee ne photographie rien
+  var auj=_pilPhotoIso(new Date()), L=_pilPhotoListe();
+  if(L.some(function(x){ return x&&x.d===auj; })) return false;
+  var ph={d:auj, reste:Math.round(Number(d.totalReste)||0)};
+  var E=_pecData();
+  if(E&&E.configured){ ph.cons=Math.round((Number(E.cons)||0)*10)/10; ph.avc=Math.round((Number(E.avc)||0)*10)/10; }
+  var N=L.filter(function(x){ return x&&typeof x.d==='string'&&x.d<auj; }).concat([ph]);
+  N.sort(function(a,b){ return a.d<b.d?-1:(a.d>b.d?1:0); });
+  if(N.length>_PIL_PHOTO_MAX) N=N.slice(N.length-_PIL_PHOTO_MAX);
+  window.CONFIG=window.CONFIG||{}; window.CONFIG.photo=N;
+  window.saveData('config');
+  return true;
+}
+// Les 14 derniers jours d'une mesure f(photo) : null = jour sans photo.
+function _pilPhotoSerie(f){
+  var by={}; _pilPhotoListe().forEach(function(x){ if(x&&typeof x.d==='string') by[x.d]=x; });
+  var t=new Date(), out=[];
+  for(var k=13;k>=0;k--){ var x=by[_pilPhotoIso(new Date(t.getFullYear(),t.getMonth(),t.getDate()-k))]; var v=x?f(x):null; out.push((typeof v==='number'&&isFinite(v))?v:null); }
+  return out;
+}
+function _pilSparkNOk(s){ var n=0; s.forEach(function(v){ if(v!=null) n++; }); return n; }
+// Charge restante : ecart % a la premiere photo de la fenetre (il y a jusqu'a 14 j).
+// Descendre est favorable (mauvais : haut). Le point du jour = la charge en direct.
+function _pilSparkCharge(d){
+  var s=_pilPhotoSerie(function(x){ return (typeof x.reste==='number')?x.reste:null; }), ref=null;
+  for(var i=0;i<s.length;i++){ if(s[i]!=null){ ref=s[i]; break; } }
+  if(!(ref>0)) return null;
+  var live=Number(d&&d.totalReste); if(isFinite(live)) s[13]=live;
+  var out=s.map(function(v){ return v==null?null:(v-ref)/ref*100; });
+  return _pilSparkNOk(out)>=2?out:null;
+}
+// Budget : consomme − fait, en points de %. Zero = le budget suit le travail ; au-dessus, defavorable.
+function _pilSparkBudget(E){
+  var s=_pilPhotoSerie(function(x){ return (typeof x.cons==='number'&&typeof x.avc==='number')?(x.cons-x.avc):null; });
+  if(E&&E.configured&&isFinite(Number(E.cons))&&isFinite(Number(E.avc))) s[13]=Number(E.cons)-Number(E.avc);
+  return _pilSparkNOk(s)>=2?s:null;
+}
+function _pilSparkDernier(s){ if(!s) return null; for(var i=s.length-1;i>=0;i--){ if(s[i]!=null) return s[i]; } return null; }
+// ★ SPARK-1 (§214) — LA CADENCE DES 14 DERNIERS JOURS, EN ECART A SA REFERENCE.
+// Chaque point = la cadence des 7 jours qui finissent ce jour-la, mesuree comme le
+// KPI (_planTeamCadence : heures dans les rangs ÷ jours travailles), comparee a la
+// cadence des 4 dernieres semaines — le chiffre affiche. Fenetre sans jour
+// travaille = trou (null), jamais zero. Cadence estimee (sans planning) : rien.
+function _pilSparkCadence(m){
+  if(!m || m.estim || !(m.cadH>0) || typeof window._planTeamCadence!=='function') return null;
+  var out=[], t=new Date(), nOk=0;
+  for(var k=13;k>=0;k--){
+    var fin=new Date(t.getFullYear(),t.getMonth(),t.getDate()-k);
+    var deb=new Date(fin.getFullYear(),fin.getMonth(),fin.getDate()-6), c=null;
+    try{ c=window._planTeamCadence(deb,fin); }catch(e){ c=null; if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilSparkCadence'); }
+    var v=(c&&c.cadence>0)?c.cadence:null;
+    out.push(v!=null?((v-m.cadH)/m.cadH*100):null);
+    if(v!=null) nOk++;
+  }
+  return nOk>=2?out:null;
 }
 function _friseNorm(s){ return String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
 // ⚠️ `memeSaison` : d.data (calcHeures) ne connait que la periode CONSULTEE. Sur
@@ -2917,6 +3080,94 @@ function _dzHoraireTxt(d){
   if(d.deb) return 'Sur place '+d.deb+' \u2192 '+_dzHm(d.deb,d.J*60+(d.coup||0))+(d.coup?' \u00b7 coupure '+_dzMin(d.coup):' \u00b7 sans coupure');
   return 'Pr\u00e9sence '+_dzHj(d.J+(d.coup||0)/60)+' \u00b7 '+_dzHj(d.J)+' de travail'+(d.coup?' + '+_dzMin(d.coup)+' de coupure':'');
 }
+// ════════════════════════════════════════════════════════════════════════
+// TOUR-RDT (§216) — LE RENDEMENT DE LA TOURNÉE
+// Lu sur la MÊME simulation que le reste de la carte (_dzSimuler), jamais un
+// second calcul : le temps de l'équipe sur les parcelles face au temps de trajet
+// (heures de CALENDRIER de l'équipe : tout le monde se déplace), le coût de
+// l'équipe pour la tournée, et le revient à l'hectare. Puis la même tournée dans
+// l'ordre « au plus proche » (_opNNNames, le tri déjà proposé au-dessus), pour
+// comparer.
+// Coût d'un jour = Σ heures × effectif × taux de chacun à cette date
+// (_mvPaieTauxEffAt), taux moyen (_ecoRate) pour qui n'a pas de taux et pour les
+// personnes ajoutées sans nom (renfort simulé). La tournée ne paie que la part du
+// jour qu'elle occupe (used ÷ J) : le dernier jour, l'équipe passe à autre chose.
+// Sans aucun taux lisible (profil non admin), le coût est un tiret, jamais zéro.
+// ════════════════════════════════════════════════════════════════════════
+function _dzCoutJour(d,ctx){
+  var r0=_ecoRate(), mbs=_dzMbs(), eur=0, nSans=0, nNom=0;
+  if(ctx&&ctx.anon!=null){
+    if(!(r0>0)) return {eur:null, nSans:0};
+    return {eur:ctx.anon*d.J*r0, nSans:ctx.anon};
+  }
+  for(var i=0;i<(d.pers||[]).length;i++){
+    var p=d.pers[i], m=mbs[p.nom], n=(p.n>0?p.n:1);
+    var tx=(m&&typeof window._mvPaieTauxEffAt==='function')?Number(window._mvPaieTauxEffAt(m,d.iso)):0;
+    if(!(isFinite(tx)&&tx>0)){ if(!(r0>0)) return {eur:null, nSans:0}; tx=r0; nSans+=n; }
+    eur+=p.h*n*tx; nNom+=n;
+  }
+  var extra=Math.max(0,(d.n||0)-nNom);   // renfort simulé : sans nom, au taux moyen
+  if(extra>0){ if(!(r0>0)) return {eur:null, nSans:0}; eur+=extra*d.J*r0; nSans+=extra; }
+  return {eur:eur, nSans:nSans};
+}
+function _dzRdtSim(rows,sim,H,ctx){
+  var o={jours:sim.days.length, used:0, traj:0, surf:0, cout:0, nSans:0, pied:0, cam:0, gps:0, bloque:!!sim.bloque}, ok=true;
+  sim.days.forEach(function(d){
+    o.used+=d.used; o.traj+=d.traj; o.surf+=d.surf;
+    var c=_dzCoutJour(d,ctx);
+    if(c.eur==null){ ok=false; return; }
+    o.cout+=c.eur*(d.J>0?Math.min(1,d.used/d.J):0); o.nSans=Math.max(o.nSans,c.nSans);
+  });
+  rows.forEach(function(r,i){ if(!i) return; var hp=_dzHop(rows[i-1].p,r.p,H);
+    if(hp.mode==='pied') o.pied+=hp.min; else if(hp.mode==='camion') o.cam+=hp.min; else o.gps+=hp.min; });
+  o.utile=(o.used>0)?Math.max(0,o.used-o.traj/60)/o.used:null;
+  if(!ok) o.cout=null;
+  o.eurHa=(o.cout!=null&&o.surf>0)?o.cout/o.surf:null;
+  return o;
+}
+function _dzRendement(C){
+  if(C.rdt!==undefined) return C.rdt;
+  var r=null;
+  if(C.rows.length&&C.sim.days.length){
+    var A=_dzRdtSim(C.rows,C.sim,C.H,C.ctx), B=null, same=true;
+    var nn=_opNNNames(_opActTodo()), cur=C.rows.map(function(x){ return x.nom; });
+    if(nn.join('|')!==cur.join('|')){
+      var by={}; C.rows.forEach(function(x){ by[x.nom]=x; });
+      var rowsB=nn.map(function(n){ return by[n]; }).filter(Boolean);
+      if(rowsB.length===C.rows.length){ same=false; B=_dzRdtSim(rowsB,_dzSimuler(rowsB,C.ref.iso,C.ctx,C.H),C.H,C.ctx); }
+    }
+    r={A:A, B:B, same:same};
+  }
+  C.rdt=r;
+  return r;
+}
+function _dzRdtPc(x){ return x==null?'—':Math.round(x*100)+' %'; }
+function _dzRendementHtml(C){
+  var R=_dzRendement(C); if(!R) return '';
+  var A=R.A, U=A.used>0?A.used:1;
+  var w=function(h){ return Math.max(0,Math.min(100,h/U*100)).toFixed(2)+'%'; };
+  var uH=Math.max(0,A.used-A.traj/60);
+  var tr=[]; if(A.pied>0) tr.push(_dzMin(A.pied)+' à pied'); if(A.cam>0) tr.push(_dzMin(A.cam)+' en camion'); if(A.gps>0) tr.push(_dzMin(A.gps)+' estimées sans GPS');
+  var h='<div class="pil-dz-rdt"><div class="pil-dz-lbl">Rendement de la tournée'+_mvInfoBtn('pil.dzrdt')+'</div>'
+    +'<div class="pil-dz-rdt-bar" aria-hidden="true"><i class="u" style="width:'+w(uH)+'"></i><i class="p" style="width:'+w(A.pied/60)+'"></i><i class="c" style="width:'+w(A.cam/60)+'"></i><i class="g" style="width:'+w(A.gps/60)+'"></i></div>'
+    +'<div class="pil-dz-note"><b>'+_dzRdtPc(A.utile)+'</b> du temps de l’équipe sur les parcelles'+(tr.length?(' \u00b7 trajets : '+tr.join(', ')):' \u00b7 aucun trajet')+'</div>'
+    +'<div class="pil-dz-kpis"><div class="pil-dz-kpi"><b>'+(A.cout!=null?_ecoEur(A.cout):'—')+'</b><span>coût de l’équipe, tournée</span></div>'
+    +'<div class="pil-dz-kpi"><b>'+(A.eurHa!=null?_ecoEur(A.eurHa):'—')+'</b><span>revient à l’hectare</span></div>'
+    +'<div class="pil-dz-kpi"><b>'+_opFmtHa(A.surf)+'</b><span>sur la tournée</span></div></div>'
+    +((A.cout==null)?'<div class="pil-dz-note">Le coût demande les taux horaires de l’équipe, réservés à l’administrateur.</div>':(A.nSans?('<div class="pil-dz-note">Taux moyen pour '+_dzPl(A.nSans,'personne')+' sans taux propre.</div>'):''));
+  if(R.same) h+='<div class="pil-dz-note">L’ordre actuel est déjà celui « au plus proche ».</div>';
+  else if(R.B){
+    var B=R.B, best=function(a,b,low){ return (a!=null&&b!=null&&(low?a<b-1e-9:a>b+1e-9)); };
+    var row=function(lib,X,Y){ return '<tr><td>'+lib+'</td><td'+(best(X.jours,Y.jours,true)?' class="mieux"':'')+'>'+X.jours+'</td>'
+      +'<td'+(best(X.traj,Y.traj,true)?' class="mieux"':'')+'>'+_dzMin(X.traj)+'</td>'
+      +'<td'+(best(X.utile,Y.utile,false)?' class="mieux"':'')+'>'+_dzRdtPc(X.utile)+'</td>'
+      +'<td'+(best(X.eurHa,Y.eurHa,true)?' class="mieux"':'')+'>'+(X.eurHa!=null?_ecoEur(X.eurHa):'—')+'</td></tr>'; };
+    h+='<div class="pil-dz-rdt-sc"><table class="pil-dz-rdt-t"><thead><tr><th>Ordre</th><th>Jours</th><th>Trajets</th><th>Utile</th><th>€/ha</th></tr></thead><tbody>'
+      +row('Ordre actuel',A,B)+row('Au plus proche',B,A)+'</tbody></table></div>'
+      +(_opCanEdit()?'<div class="pil-dz-rdt-go"><button class="pil-dz-sort" data-op="sort" data-mode="nn">Prendre l’ordre au plus proche</button></div>':'');
+  }
+  return h+'</div>';
+}
 function _dzResultatHtml(C){
   var sim=C.sim, rows=C.rows;
   if(!sim.days.length) return '<div class="pil-dz-verd ko">'+_mvIcon('alerte',16)+'<div>Personne de cette \u00e9quipe n\u2019est au planning dans les mois qui viennent. Ajoutez quelqu\u2019un dans la case \u00c9quipe.</div></div>';
@@ -2944,7 +3195,8 @@ function _dzResultatHtml(C){
     });
   }
   h+='<div class="pil-dz-hor">'+_dzHoraireTxt(d1)+'</div></div></div>';
-  return h;
+  // TOUR-RDT (§216) : le rendement se lit sur la MEME simulation, juste sous le resultat.
+  return h+_dzRendementHtml(C);
 }
 function _dzTriHtml(C,edit){
   if(!edit) return '<div class="pil-dz-note pil-dz-ro">'+_mvIcon('cadenas',16)+' Tourn\u00e9e d\u00e9finie par l\u2019administrateur \u2014 lecture seule. Vos parcelles s\u2019affichent dans cet ordre, avec leur num\u00e9ro, dans Vigne.</div>';
@@ -4806,11 +5058,14 @@ function _pilCkBudget(){
   var nr=(E.cad.ok&&!E.cad.applic)
     ? (' \u00b7 \u00e9cart '+((E.cad.ecart>0)?'+':'')+Math.round(E.cad.ecart)+' % '+(E.cad.horsBornes?'hors bornes, non retenu':'lu sur la campagne pr\u00e9c\u00e9dente, non retenu'))
     : '';
-  return '<div class="pil-ck"><div class="kl">Budget consomm\u00e9</div>'
-    +'<div class="kv" style="color:'+col+'">'+Math.round(E.cons)+'<span class="u"> %</span></div>'
+  // PHOTO-1 (§219) : consomme − fait, en points, sur 14 jours de photos ; le point du jour en direct.
+  var _spB=_pilSparkBudget(E), _svgB=_spB?window._mvGraphSpark(_spB,{mauvais:'haut',aria:'Budget consommé moins travail fait, en points, sur les 14 derniers jours'}):'', _dB=_pilSparkDernier(_spB);
+  var _ksB=(_svgB&&_dB!=null)?(' \u00b7 consomm\u00e9 \u2212 fait : <b>'+(_dB>0?'+':'')+Math.round(_dB)+' pts</b>'):'';
+  return '<div class="pil-ck"><div class="kl">Budget consomm\u00e9'+(_svgB?_mvInfoBtn('pil.spark'):'')+'</div>'
+    +'<div class="pil-ck-row"><div class="kv" style="color:'+col+'">'+Math.round(E.cons)+'<span class="u"> %</span></div>'+(_svgB?'<span class="pil-spark">'+_svgB+'</span>':'')+'</div>'
     +'<div class="ks">'+(ec===null
         ? ('de '+_ecoEur(E.budget)+' \u00b7 '+Math.round(E.avc)+' % du travail fait'+nr)
-        : ('cadence <b style="color:'+col+'">'+(ec>0?'+':'')+Math.round(ec)+' %</b> vs bar\u00e8me \u00b7 fin \u2248 '+_pecEurK(E.projFin)))+'</div></div>';
+        : ('cadence <b style="color:'+col+'">'+(ec>0?'+':'')+Math.round(ec)+' %</b> vs bar\u00e8me \u00b7 fin \u2248 '+_pecEurK(E.projFin)))+_ksB+'</div></div>';
 }
 function _pilCkEtp(d){
   // ★ Le KPI suit la PORTEE, comme la photo Effectif juste au-dessus de lui.
@@ -4910,6 +5165,132 @@ function _pilCkPres(d){
       +(pers>pc+0.5?(' · <b>'+_pilEtpFmt(pers)+' personnes</b> au total (équipe collective)'):'')+'</div>'
     +(chips?'<div style="margin-top:7px">'+chips+'</div>':'')+'</div></div>';
 }
+// ════════════════════════════════════════════════════════════════════════
+// PROT-1 (§218) — LA PROTECTION RESTANTE, PARCELLE PAR PARCELLE
+// Le registre (TRAITEMENTS) dit QUAND et AVEC QUOI chaque parcelle a été traitée ;
+// il ne dit pas combien de temps ça protège. Trois rémanences, par MODE D'ACTION,
+// réglées dans Réglages › Pilotage › Conformité (défauts sourcés, §218a) :
+//   contact 10 j · pénétrant 12 j · systémique 14 j.
+// Le mode d'action d'un produit se DÉDUIT de sa substance active (p.sub), sinon de
+// son nom ; inconnu → contact, la rémanence la plus courte (prudent), et c'est dit.
+// Un traitement protège aussi longtemps que son produit le plus rémanent.
+// ⚠️ Pas de lessivage ici : l'appli n'enregistre pas la pluie tombée depuis le
+// traitement (lot PLUIE-1). Pas de pousse non plus. Les jours seuls.
+// ════════════════════════════════════════════════════════════════════════
+var _PIL_PROT_DEF={contact:10, penetrant:12, systemique:14};
+var _PIL_PROT_RX=[
+  ['systemique', /phosphon|fos[eé]tyl|m[eé]talaxyl|m[eé]f[eé]noxam|benalaxyl|oxathiapiprolin|myclobutanil|t[eé]buconazole|difenoconazole|penconazole|tetraconazole|spiroxamine|fluopyram/i],
+  ['penetrant',  /cymoxanil|dim[eé]thomorph|mandipropamid|iprovalicarb|benthiavalicarb|valifenalate|famoxadone|fenamidone|ametoctradin|cyazofamid|azoxystrobin|pyraclostrobin|trifloxystrobin|kr[eé]soxim|quinoxyfen|proquinazid|m[eé]trafenone|boscalid|cyflufenamid|fluxapyroxad|zoxamide/i],
+  ['contact',    /cuivre|copper|bouillie|oxychlorure|hydroxyde|soufre|sulfur|folpel|mancoz|m[eé]tirame|dithianon|fluazinam|amisulbrom|bacillus|cos-oga|cerevisane|huile/i]
+];
+var _PIL_PROT_LESS_DEF=20;   // PLUIE-1 (§220) : mm de pluie cumulee qui lessivent un CONTACT
+function _pilProtCfg(){
+  var c=(window.CONFIG&&window.CONFIG.conformite)||{}, o={}, k;
+  for(k in _PIL_PROT_DEF){ if(!Object.prototype.hasOwnProperty.call(_PIL_PROT_DEF,k)) continue;
+    var v=Number(c['prot_'+k+'_j']); o[k]=(isFinite(v)&&v>0)?v:_PIL_PROT_DEF[k]; }
+  var L=Number(c.prot_lessivage_mm); o.lessivage=(isFinite(L)&&L>0)?L:_PIL_PROT_LESS_DEF;
+  return o;
+}
+// PLUIE-1 (§220) : la pluie tombee APRES le jour du traitement, jusqu'a aujourd'hui (heures passees).
+// null = inconnue (pas de releve, ou un jour manque) — jamais zero.
+function _pilProtPluie(dateIso, pl, aujIso){
+  if(!pl||!pl.jours||!dateIso) return null;
+  var d=new Date(dateIso+'T12:00:00'); if(!isFinite(d.getTime())) return null;
+  var mm=0, g=0;
+  for(;;){ d.setDate(d.getDate()+1); var iso=_pilPhotoIso(d); if(iso>aujIso||g++>40) break;
+    var v=pl.jours[iso]; if(v==null||!isFinite(Number(v))) return null; mm+=Number(v); }
+  return Math.round(mm*10)/10;
+}
+// Mode d'action d'un produit du registre : {mode, deduit}. `deduit` = aucun mot connu.
+function _pilProtType(prod){
+  var s=String((prod&&(prod.sub||''))||'')+' '+String((prod&&prod.nom)||'');
+  for(var i=0;i<_PIL_PROT_RX.length;i++){ if(_PIL_PROT_RX[i][1].test(s)) return {mode:_PIL_PROT_RX[i][0], deduit:false}; }
+  return {mode:'contact', deduit:true};
+}
+// Par parcelle active : le dernier traitement et ce qu'il lui reste de protection.
+function _pilProtData(){
+  var cfg=_pilProtCfg(), der={};
+  (window.TRAITEMENTS||[]).forEach(function(t){
+    var dd=String((t&&t.date)||'').slice(0,10); if(!dd||!Array.isArray(t.parcelles)) return;
+    var rem=0, mode='contact', ded=true;
+    (Array.isArray(t.produits)?t.produits:[]).forEach(function(p){ var ty=_pilProtType(p); if(cfg[ty.mode]>rem){ rem=cfg[ty.mode]; mode=ty.mode; ded=ty.deduit; } });
+    if(!(rem>0)){ rem=cfg.contact; mode='contact'; ded=true; }
+    t.parcelles.forEach(function(nom){ if(nom&&(!der[nom]||dd>der[nom].date)) der[nom]={date:dd, rem:rem, mode:mode, deduit:ded}; });
+  });
+  var n=new Date(), auj=new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime(), aujIso=_pilPhotoIso(n), rows=[];
+  var pl=window.METEO_PLUIE||null, pluieOk=!!(pl&&pl.jours);
+  (window.PARCELLES||[]).forEach(function(p){
+    if(!p||p.statut==='Arrachee') return;
+    var e=der[p.nom]; if(!e){ rows.push({nom:p.nom, s:parseFloat(p.surface)||0, jamais:true}); return; }
+    var t0=new Date(e.date+'T00:00:00').getTime(), j=isFinite(t0)?Math.max(0,Math.round((auj-t0)/86400000)):null;
+    var reste=(j==null?null:e.rem-j), pluie=null, lessive=false;
+    // PLUIE-1 : un CONTACT lessive par la pluie cumulee depuis le traitement est a nu, quels que soient les jours.
+    if(e.mode==='contact'&&reste!=null&&reste>0){ pluie=_pilProtPluie(e.date,pl,aujIso); if(pluie!=null&&pluie>=cfg.lessivage){ lessive=true; reste=0; } }
+    else if(e.mode==='contact'){ pluie=_pilProtPluie(e.date,pl,aujIso); }
+    rows.push({nom:p.nom, s:parseFloat(p.surface)||0, date:e.date, j:j, rem:e.rem, mode:e.mode, deduit:e.deduit, reste:reste, pluie:pluie, lessive:lessive});
+  });
+  rows.sort(function(a,b){ var ra=(a.jamais?-1e9:a.reste), rb=(b.jamais?-1e9:b.reste); return ra-rb; });
+  var nu=rows.filter(function(r){ return r.jamais||r.reste<=0; }), bientot=rows.filter(function(r){ return !r.jamais&&r.reste>0&&r.reste<=2; });
+  return {rows:rows, cfg:cfg, nu:nu, bientot:bientot, nDed:rows.filter(function(r){ return !r.jamais&&r.deduit; }).length,
+          haNu:nu.reduce(function(a,r){ return a+r.s; },0), n:rows.length,
+          nLess:rows.filter(function(r){ return r.lessive; }).length, pluieOk:pluieOk, pluieAuj:(pl&&pl.auj&&pl.auj.mm!=null)?pl.auj.mm:null};
+}
+function _pilProtLib(m){ return m==='systemique'?'systémique':(m==='penetrant'?'pénétrant':'contact'); }
+// Le bloc, posé dans la carte « Traiter ? ».
+var _PIL_PLUIE_ATTENTE=false;
+// PLUIE-1 : la pluie se charge a part (app.js), une fois par heure ; la carte se repeint quand elle arrive.
+function _pilPluieDemander(){
+  var pl=window.METEO_PLUIE, frais=!!(pl&&pl.ts&&(Date.now()-pl.ts)<3600000);
+  if(frais||_PIL_PLUIE_ATTENTE||typeof window._pluieCharger!=='function') return;
+  _PIL_PLUIE_ATTENTE=true;
+  window._pluieCharger().then(function(ok){ _PIL_PLUIE_ATTENTE=false; if(ok&&_PIL_TAB==='auj'&&typeof renderPilotage==='function') renderPilotage(); })
+    .catch(function(e){ _PIL_PLUIE_ATTENTE=false; if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilPluieDemander'); });
+}
+function _pilProtHtml(){
+  _pilPluieDemander();
+  var P=_pilProtData(); if(!P.n) return '';
+  var tot=P.rows.length, nNu=P.nu.length, nB=P.bientot.length;
+  var big=nNu?(nNu+' parcelle'+(nNu>1?'s':'')+' à nu'):(nB?(nB+' parcelle'+(nB>1?'s':'')+' à nu d’ici 2 jours'):'tout le domaine est protégé');
+  var col=nNu?'var(--rouge)':(nB?'var(--orange)':'var(--vert-med)');
+  var h='<div class="pil-prot"><div class="pil-t2s pil-prot-k">Protection restante '+_mvInfoBtn('pil.prot')+'</div>'
+    +'<div class="pil-prot-big" style="color:'+col+'">'+big+'</div>'
+    +'<div class="pil-t2s">'+(nNu?(_pilHa(P.haNu)+' ha sans protection'+(nB?(' · '+nB+' de plus d’ici 2 jours'):'')):(nB?'sur '+tot+' parcelles':tot+' parcelles'))
+    +' · rémanences '+P.cfg.contact+' / '+P.cfg.penetrant+' / '+P.cfg.systemique+' j'+(P.nDed?(' · mode déduit pour '+P.nDed):'')
+    +(P.pluieOk?(' · lessivage à '+P.cfg.lessivage+' mm'+(P.nLess?(' : '+P.nLess+' lessivée'+(P.nLess>1?'s':'')):'')+(P.pluieAuj!=null?(' · aujourd’hui '+String(P.pluieAuj).replace('.',',')+' mm'):'')):' · pluie inconnue, les jours seuls')+'</div>';
+  var urg=P.rows.slice(0,6);
+  h+='<div class="pil-prot-l">'+urg.map(function(r){
+    var c=r.jamais||r.reste<=0?'b':(r.reste<=2?'o':'v');
+    var txt=r.jamais?'jamais traitée':(r.lessive?('lessivée · '+String(r.pluie).replace('.',',')+' mm'):(r.reste<=0?('à nu depuis '+(-r.reste)+' j'):('encore '+r.reste+' j')));
+    var sub=r.jamais?'':(' · '+_pilDfr(r.date)+' · '+_pilProtLib(r.mode)+(r.deduit?' ?':'')+((!r.lessive&&r.pluie!=null)?(' · '+String(r.pluie).replace('.',',')+' mm de pluie'):''));
+    return '<div class="pil-prot-r"><span class="pil-prot-pt '+c+'"></span><span class="n">'+_pilEsc(r.nom)+'</span><span class="v">'+txt+'<span>'+sub+'</span></span></div>';
+  }).join('')+'</div>'+(tot>6?'<div class="pil-t2s">… et '+(tot-6)+' autres, mieux protégées.</div>':'')+'</div>';
+  return h;
+}
+// ════════════════════════════════════════════════════════════════════════
+// INACTION-1 (§218) — LE COÛT DE L'INACTION, SUR LE COCKPIT
+// Ce que le simulateur de renfort (Décider) répond quand personne n'est ajouté :
+// _rfSim sur un profil vide. `induit` = les heures que le retard AJOUTE (le modèle
+// M3 : une tâche faite hors de sa fenêtre prend k_retard % de plus par semaine).
+// Converti au taux de l'équipe (ctx.rate). C'est le modèle qui parle, pas une
+// mesure : affiché à part, avec son hypothèse. Lecture seule — un seul calcul,
+// celui de Décider, qu'on ne refait pas ici (même _rfPair, même _rfSim).
+// ════════════════════════════════════════════════════════════════════════
+function _pilCkInaction(d){
+  if(typeof _rfPair!=='function') return '';
+  var P=_rfPair(d); if(!P||!P.dec||P.fini||P.dec.noRate) return '';
+  var ctx=P.dec, res=_rfSim(ctx,_rfProf(ctx,null)); if(!res) return '';
+  var k=Math.round(((ctx.c&&ctx.c.k)||0)*100), h=res.induit||0, eur=h*(ctx.rate||0);
+  var ok=!(h>1)&&!res.deborde;
+  var big=ok?'Rien à rattraper':('+ '+_pilNum(h)+' h · env. '+_ecoEur(eur));
+  var sub=ok?'les travaux tiennent dans leurs fenêtres sans renfort'
+    :('ajoutées par le retard si rien n’est décidé · '+(res.horsDelai||0)+' tâche'+(res.horsDelai>1?'s':'')+' hors délai'+(res.deborde?' · déborde de la campagne':''));
+  return '<div class="pil-inaction'+(ok?' ok':'')+'"><div class="pil-t2s pil-prot-k">Coût de l’inaction '+_mvInfoBtn('pil.inaction')+'</div>'
+    +'<div class="pil-prot-big" style="color:'+(ok?'var(--vert-med)':'var(--orange)')+'">'+big+'</div>'
+    +'<div class="pil-t2s">'+sub+'</div>'
+    +'<div class="pil-t2s">modèle : le travail hors fenêtre prend <b>+'+k+' % par semaine</b> de retard (réglage) · au taux de l’équipe · hypothèse, pas une mesure</div>'
+    +(ok?'':'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="renfort">Décider › le renfort \u203A</button></div>')
+    +'</div>';
+}
 function _pilCkTraiter(){
   var days=_pilTreatDays(), big, bigCol, body;
   if(days===undefined){ big='\u2014'; bigCol='var(--texte-doux)'; body='<div class="pil-t2s">pr\u00e9visions horaires indisponibles</div>'; }
@@ -4945,7 +5326,7 @@ function _pilCkTraiter(){
   //   moment « Je traite ou pas ? » vise `.pil-tile2` et attrape « A la vigne
   //   aujourd'hui », la premiere carte du cockpit. Ne pas renommer.
   return '<div class="pil-tile2" data-mvt="traiter"><div class="pil-t2h"><span class="ic">'+_pilIco('goutte')+'</span><span class="t">Traiter ?</span>'+_i+'</div>'
-    +'<div class="pil-t2b"><div class="pil-big" style="color:'+bigCol+'">'+big+'</div>'+body+'</div></div>';
+    +'<div class="pil-t2b"><div class="pil-big" style="color:'+bigCol+'">'+big+'</div>'+body+_pilProtHtml()+'</div></div>';   // PROT-1 (§218)
 }
 function _pilCkPrio(d){
   var p=d.prio;
@@ -4957,24 +5338,487 @@ function _pilCkPrio(d){
     +'<div class="pil-gbar"><i style="width:'+Math.min(p.pct||0,100)+'%;background:'+col+'"></i></div>'
     +'<div class="pil-t2s" style="margin-top:5px">'+(p.pct||0)+'% fait</div></div></div>';
 }
+// ════════════════════════════════════════════════════════════════════════
+// TENS-1 (§215) — LA TENSION DE L'ÉQUIPE
+// Pour chaque personne de l'équipe (ni bureau, ni équipe collective) : le TRAVAIL
+// EFFECTIF des 14 derniers jours (_planWorkPersRange — saisie comprise, la base des
+// durées maximales) face au PRÉVU du modèle sur la même fenêtre (_planPrevuPersRange —
+// la grille d'annualisation, sans la saisie). ★ Jamais face au contrat : en modulation,
+// une semaine haute est PRÉVUE, ce n'est pas de la fatigue.
+// Et la semaine la plus chargée des deux dernières (lundi-dimanche, la semaine en cours
+// jusqu'à aujourd'hui) face au cadre légal du Planning (_planLegal) : au-delà de la
+// moyenne autorisée (44 h par défaut) = à surveiller, la même règle que la fiche du
+// salarié ; au-delà du maximum absolu (48 h) = rouge.
+// Seuil d'une personne : plus de 10 % au-dessus du prévu, ou une semaine au-delà de la
+// moyenne. Le planning ne dit pas l'activité : la cave et l'atelier y comptent aussi.
+// ════════════════════════════════════════════════════════════════════════
+var _PIL_TENS_SEUIL = 10;   // % au-dessus du prévu, sur 14 jours
+function _pilTensJour(t,k){ return new Date(t.getFullYear(),t.getMonth(),t.getDate()-k); }
+function _pilTensData(d){
+  if(d&&d._tens!==undefined) return d._tens;
+  var out=null;
+  if(typeof window._planWorkPersRange==='function'&&typeof window._planPrevuPersRange==='function'&&typeof window._planLegal==='function'){
+    var L=window._planLegal(), t=new Date(), auj=_pilTensJour(t,0), deb=_pilTensJour(t,13);
+    var lun=_pilTensJour(t,(t.getDay()+6)%7), lunP=_pilTensJour(lun,7), dimP=_pilTensJour(lun,1);
+    var mb=((d&&d.membres)||[]).filter(function(m){ return m&&!m.bureau&&!(typeof window._mvEstCollectif==='function'&&window._mvEstCollectif(m)); });
+    var rows=[], F=0, P=0;
+    mb.forEach(function(m){
+      var f=window._planWorkPersRange(m,deb,auj), p=window._planPrevuPersRange(m,deb,auj);
+      var s1=window._planWorkPersRange(m,lunP,dimP), s2=window._planWorkPersRange(m,lun,auj), sm=Math.max(s1,s2);
+      if(!(f>0)&&!(p>0)) return;   // personne n'était là ni prévu : pas une ligne
+      var ec=(p>0)?(f-p)/p*100:null;
+      var niv=(sm>L.maxHebdo+1e-4)?'rouge':((sm>L.maxMoy+1e-4||(ec!=null&&ec>_PIL_TENS_SEUIL))?'orange':'ok');
+      rows.push({nom:m.nom, f:f, p:p, ec:ec, s1:s1, s2:s2, sm:sm, niv:niv});
+      F+=f; P+=p;
+    });
+    rows.sort(function(a,b){ var r={rouge:0,orange:1,ok:2}; return (r[a.niv]-r[b.niv])||((b.ec||0)-(a.ec||0)); });
+    // La petite courbe : l'écart de l'équipe sur 7 jours glissants, chaque jour des 14 derniers.
+    var serie=[];
+    for(var k=13;k>=0;k--){
+      var fin=_pilTensJour(t,k), d7=_pilTensJour(fin,6), f7=0, p7=0;
+      mb.forEach(function(m){ f7+=window._planWorkPersRange(m,d7,fin); p7+=window._planPrevuPersRange(m,d7,fin); });
+      serie.push(p7>0?(f7-p7)/p7*100:null);
+    }
+    out={ rows:rows, F:F, P:P, ec:(P>0?(F-P)/P*100:null), L:L, serie:serie,
+          nSeuil:rows.filter(function(r){ return r.niv!=='ok'; }).length,
+          nRouge:rows.filter(function(r){ return r.niv==='rouge'; }).length };
+  }
+  if(d) d._tens=out;
+  return out;
+}
+function _pilTensFmtEc(ec){ return ec==null?'—':((ec>0?'+':'')+Math.round(ec)+' %'); }
+// ── Le chiffre du bandeau ──
+function _pilCkTension(d){
+  var T=_pilTensData(d);
+  if(!T||!T.rows.length) return '<div class="pil-ck"><div class="kl">Tension équipe</div><div class="kv">—</div><div class="ks">'+(T?'aucune heure au planning sur 14 jours':'planning indisponible')+'</div></div>';
+  var col=T.nRouge?'var(--rouge)':(T.nSeuil?'var(--orange)':'var(--texte)');
+  var svg=window._mvGraphSpark(T.serie,{mauvais:'haut',aria:'Écart de l’équipe au planning prévu, sur 7 jours glissants, les 14 derniers jours'});
+  return '<div class="pil-ck"><div class="kl">Tension équipe'+_mvInfoBtn('pil.tension')+'</div>'
+    +'<div class="pil-ck-row"><div class="kv" style="color:'+col+'">'+(T.ec==null?'—':((T.ec>0?'+':'')+Math.round(T.ec)))+'<span class="u"> %</span></div>'+(svg?'<span class="pil-spark">'+svg+'</span>':'')+'</div>'
+    +'<div class="ks">travail effectif face au prévu \u00b7 14 j \u00b7 <b>'+T.nSeuil+' / '+T.rows.length+'</b> au seuil</div></div>';
+}
+// ── La carte de « La décision du jour » ──
+function _pilCardTension(d){
+  var T=_pilTensData(d);
+  if(!T||!T.rows.length) return '';
+  var mx=0; T.rows.forEach(function(r){ mx=Math.max(mx,r.f,r.p); });
+  mx=Math.max(10,Math.ceil(mx/10)*10);
+  var w=function(v){ return Math.max(0,Math.min(100,v/mx*100)).toFixed(2)+'%'; };
+  var rows=T.rows.map(function(r){
+    var cls=r.niv==='rouge'?'b':(r.niv==='orange'?'o':'v');
+    var sem=(r.sm>T.L.maxMoy+1e-4)?('<span class="pil-tens-sem">semaine à '+_pilNum(r.sm)+' h'+(r.niv==='rouge'?' — au-delà de '+T.L.maxHebdo+' h':'')+'</span>'):'';
+    return '<div class="pil-tens-r"><span class="n">'+_pilEsc(r.nom)+sem+'</span>'
+      +'<span class="k"><i class="'+cls+'" style="width:'+w(r.f)+'"></i>'+(r.p>0?'<u style="left:'+w(r.p)+'"></u>':'')+'</span>'
+      +'<span class="v"><b>'+_pilNum(r.f)+'</b> h<span>'+_pilTensFmtEc(r.ec)+'</span></span></div>';
+  }).join('');
+  var big=T.nRouge?(T.nRouge+' au-delà du maximum'):(T.nSeuil?(T.nSeuil+' personne'+(T.nSeuil>1?'s':'')+' au seuil'):'Personne au seuil');
+  var colB=T.nRouge?'var(--rouge)':(T.nSeuil?'var(--orange)':'var(--vert-med)');
+  return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('equipe')+'</span><span class="t">Tension de l’équipe</span>'+_mvInfoBtn('pil.tension')+'</div>'
+    +'<div class="pil-t2b"><div class="pil-big" style="color:'+colB+'">'+big+'</div>'
+    +'<div class="pil-t2s">14 derniers jours \u00b7 travail effectif face au planning prévu \u00b7 semaine au-delà de '+T.L.maxMoy+' h à surveiller</div>'
+    +'<div class="pil-tens">'+rows+'</div>'
+    +'<div class="pil-tens-r pil-tens-ax"><span></span><span class="pil-trx-ax"><span>0</span><span>'+(mx/2)+'</span><span>'+mx+' h</span></span><span></span></div>'
+    +'<div class="pil-trx-leg"><span><i class="f"></i>fait</span><span><i class="m"></i>prévu au planning</span></div>'
+    +'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="planning">Planning \u203A</button></div>'
+    +'</div></div>';
+}
 function _pilCkAlertes(d){
+  // GNR-M (§213) : la revision et la cuve ne sont plus deux lignes de cette liste.
+  //   Elles deviennent des cartes qui se projettent sur les travaux en cours
+  //   (_pilCkTracteur). La liste garde ce qui est vrai AUJOURD'HUI : les machines
+  //   immobilisees. Sans aucune carte ni aucune immobilisation, la phrase de calme
+  //   reste — mais jamais a cote d'une carte qui dit le contraire.
   var al=[];
-  var minRev=null, minRevNom=null;
-  (d.tracs||[]).forEach(function(t){ if(t.revReste!=null && (minRev==null||t.revReste<minRev)){ minRev=t.revReste; minRevNom=t.nom; } });
-  if(minRev!=null && minRev<=120) al.push(['amb','Révision <b>'+_pilEsc(minRevNom)+'</b> dans '+_pilNum(minRev)+' h','à planifier']);
   (d.tracs||[]).forEach(function(t){ if(t.rep) al.push(['red','<b>'+_pilEsc(t.nom)+'</b> immobilisé'+(t.rep.motif?' — '+_pilEsc(t.rep.motif):''), t.rep.prevu_retour?('retour '+_pilDfr(t.rep.prevu_retour)):'chez le réparateur']); });
-  if(d.gnr&&d.gnr.capacite){ var niv=Number(d.gnr.niveau)||0, pc=Math.round(niv/(Number(d.gnr.capacite)||1)*100); if(niv<=(Number(d.gnr.seuil)||0)) al.push(['red','Cuve GNR à <b>'+pc+' %</b> · '+_pilNum(niv)+' L','plein à prévoir']); }
   // ⚠️ L'ouillage en retard ne se calcule plus ici (seuil global, pas celui de
   //   chaque millesime) : la carte Cave d'Aujourd'hui lit le verdict de cave.js.
-  var inner;
-  if(!al.length){ inner='<div class="pil-alert"><span class="pt ok"></span><span>Rien à signaler — parc et GNR à jour</span></div>'; }
-  else { inner=al.slice(0,8).map(function(a){ return '<div class="pil-alert"><span class="pt '+a[0]+'"></span><span>'+a[1]+'</span>'+(a[2]?'<span class="when">'+_pilEsc(a[2])+'</span>':'')+'</div>'; }).join(''); }
-  return '<div class="pil-tile2 pil-alertcard"><div class="pil-alerts">'+inner+'</div></div>';
+  var cartes=_pilCkTracteur(d);
+  if(!al.length) return cartes || '<div class="pil-tile2 pil-alertcard"><div class="pil-alerts"><div class="pil-alert"><span class="pt ok"></span><span>Rien à signaler — parc et GNR à jour</span></div></div></div>';
+  var inner=al.slice(0,8).map(function(a){ return '<div class="pil-alert"><span class="pt '+a[0]+'"></span><span>'+a[1]+'</span>'+(a[2]?'<span class="when">'+_pilEsc(a[2])+'</span>':'')+'</div>'; }).join('');
+  return '<div class="pil-tile2 pil-alertcard"><div class="pil-alerts">'+inner+'</div></div>'+cartes;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// GNR-M (§213) — LE TRACTEUR SE PROJETTE SUR LES TRAVAUX EN COURS
+// La regle est celle de Nico : un travail tracteur LANCE (session « En cours »)
+// doit couvrir TOUT le domaine. Ce qui reste = les parcelles non arrachees, hors
+// celles desactivees dans la session, moins celles deja cochees — EXACTEMENT la
+// regle de la barre d'avancement de la session (renderSessionProgress). Une seule
+// definition du « reste ».
+// Exception, l'AMENDEMENT : les parcelles sont choisies dans l'apport (Phyto ›
+// Fertilisation). Le reste = les parcelles de l'apport qui attendent encore dans
+// _ferFaits — il compte des la creation de l'apport, session lancee ou non. Une
+// session « Amendement » ouverte affiche tout le domaine : on ne la lit pas
+// comme perimetre, seulement pour savoir quel tracteur la fait.
+// Un travail fini SORT : session passee « Terminé » (seule ou a la main) ou plus
+// rien a faire. On lit le STATUT, on ne recalcule pas le reste des vieilles
+// sessions : une parcelle plantee depuis les ferait revenir (§168 ⑦).
+// Les litres = heures restantes × la conso MESUREE du tracteur (pleins ÷ heures
+// notees entre eux), repli sur le reglage du Tracteur quand la mesure manque.
+// ⚠️ Il n'existe AUCUNE heure tracteur « au planning » : une entree de planning
+// porte des heures par personne, jamais une machine. D'ou cette regle-ci.
+// ════════════════════════════════════════════════════════════════════════
+var _PIL_GM_FER = 'Amendement';   // = FER_ACT de phyto.js (epingle par mv-harnais-gnr-mesure)
+var _PIL_GM_DORMANT_J = 21;       // jours sans coche avant de signaler une session oubliee
+var _PIL_GM_MIN_IV = 2;           // intervalles plein → plein valides, au minimum
+var _PIL_GM_MIN_H = 10;           // heures notees, au minimum, pour croire la mesure
+function _pilGmNom(x){ return (typeof x==='string')?x:((x&&x.nom)||''); }
+function _pilGmIso(dt){ return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); }
+function _pilGmFr(n,dec){ return (Number(n)||0).toFixed(dec==null?1:dec).replace('.',','); }
+// Meme appartenance a la campagne que _ecoGnrReel / _ecoTracHByParc.
+function _pilGmInCamp(iso){
+  if(!iso) return false;
+  var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  var seasonNom=(s&&s.nom)?s.nom:'';
+  var sn=(window._saisonForDate)?window._saisonForDate(iso):null; sn=sn||'';
+  if(sn) return sn===seasonNom;
+  return seasonNom===(((window.getSaisonActive&&window.getSaisonActive())||{}).nom||'');
+}
+function _pilGmTid(se, acts){
+  if(se&&se.tracteurId) return se.tracteurId;
+  var a=(acts||[]).find(function(x){ return x&&se&&x.nom===se.activite; });
+  return (a&&a.tracteurDefautId)||'';
+}
+// Heures NOTEES d'une session, parcelle par parcelle — la regle de _ecoTracHByParc :
+// duree chronometree (dmin) quand elle existe, sinon surface × bareme h/ha.
+// Datees a l'heure de fin de la parcelle (t1) quand elle existe, sinon a la session.
+function _pilGmHeuresSession(se, acts, parcs){
+  var out=[]; if(!se) return out;
+  var act=(acts||[]).find(function(a){ return a&&a.nom===se.activite; });
+  var hha=act?(parseFloat(act.h_ha)||0):0;
+  (Array.isArray(se.parcellesFaites)?se.parcellesFaites:[]).forEach(function(x){
+    var nom=_pilGmNom(x); if(!nom) return;
+    var dmin=(x&&typeof x==='object'&&typeof x.dmin==='number')?x.dmin:null, h, chrono=false;
+    if(dmin!=null){ h=dmin/60; chrono=true; }
+    else {
+      if(hha<=0) return;
+      var p=(parcs||[]).find(function(pp){ return pp&&pp.nom===nom; });
+      h=(p?(parseFloat(p.surface)||0):0)*hha;
+    }
+    if(!(h>0)) return;
+    var iso=(x&&typeof x==='object'&&typeof x.t1==='number')?_pilGmIso(new Date(x.t1)):String(se.date||'').slice(0,10);
+    if(iso) out.push({iso:iso, h:h, chrono:chrono});
+  });
+  return out;
+}
+// Heures notees d'un tracteur, par jour, sur la campagne : {h:{iso:h}, c:{iso:h chrono}}.
+function _pilGmHeuresTrac(tid){
+  var acts=window.ACTIVITES||[], parcs=window.PARCELLES||[], h={}, c={};
+  (window.SESSIONS||[]).forEach(function(se){
+    if(!se||_pilGmTid(se,acts)!==tid) return;
+    _pilGmHeuresSession(se,acts,parcs).forEach(function(r){
+      if(!_pilGmInCamp(r.iso)) return;
+      h[r.iso]=(h[r.iso]||0)+r.h; if(r.chrono) c[r.iso]=(c[r.iso]||0)+r.h;
+    });
+  });
+  return {h:h, c:c};
+}
+// ★ CONSO MESUREE d'un tracteur : le plein n°2 rembourse ce qui a brule depuis le
+// plein n°1. Ses litres se comptent face aux heures notees entre les deux : jours
+// APRES le plein precedent, jusqu'au jour du plein INCLUS (un plein n'a qu'une date,
+// pas d'heure : ce choix ne joue qu'aux deux bouts de la campagne). Le premier plein
+// sert de depart, ses litres ne comptent pas. Deux pleins le meme jour = un seul.
+// Moyenne PONDEREE (Σ litres ÷ Σ heures). Un intervalle sans aucune heure notee
+// (session oubliee) est ECARTE, et compte comme tel.
+function _pilGmConso(tid){
+  var out={tid:tid, iv:[], L:0, H:0, Hc:0, nOk:0, nEc:0, nSans:0, lh:null, ok:false};
+  if(!tid) return out;
+  var byDay={};
+  (window.ENTRETIENS||[]).forEach(function(f){
+    if(!f||!f.plein||f.tracteurId!==tid) return;
+    var iso=String(f.date||'').slice(0,10);
+    if(!_pilGmInCamp(iso)) return;
+    var L=Number(f.litres_plein)||0;
+    if(!(L>0)){ out.nSans++; return; }
+    byDay[iso]=(byDay[iso]||0)+L;
+  });
+  var days=Object.keys(byDay).sort();
+  if(days.length<2) return out;
+  var HT=_pilGmHeuresTrac(tid), hd=Object.keys(HT.h);
+  for(var i=1;i<days.length;i++){
+    var a=days[i-1], b=days[i], h=0, hc=0;
+    hd.forEach(function(dd){ if(dd>a&&dd<=b){ h+=HT.h[dd]; hc+=(HT.c[dd]||0); } });
+    var l=byDay[b];
+    if(!(h>0)){ out.iv.push({d:b, l:l, h:0, ecarte:true}); out.nEc++; continue; }
+    out.iv.push({d:b, l:l, h:h, hc:hc, lh:l/h});
+    out.L+=l; out.H+=h; out.Hc+=hc; out.nOk++;
+  }
+  out.ok = out.nOk>=_PIL_GM_MIN_IV && out.H>=_PIL_GM_MIN_H;
+  out.lh = out.ok ? out.L/out.H : null;
+  return out;
+}
+// Rythme d'un tracteur : heures notees sur les 28 derniers jours ÷ jours ouvres
+// (lundi-vendredi) de la meme fenetre. Un REPERE de date, jamais une projection.
+function _pilGmRythme(tid, refIso){
+  var HT=_pilGmHeuresTrac(tid), ref=refIso?new Date(refIso+'T12:00:00'):new Date();
+  var h=0, jo=0;
+  for(var k=0;k<28;k++){
+    var dt=new Date(ref.getTime()-k*86400000), iso=_pilGmIso(dt), wd=dt.getDay();
+    if(wd>=1&&wd<=5) jo++;
+    h+=(HT.h[iso]||0);
+  }
+  return (jo>0&&h>0)?h/jo:null;
+}
+// ★ LES TRAVAUX EN COURS. Rend {jobs, conso, domaine, cfgLh}.
+function _pilGmTravaux(){
+  var acts=window.ACTIVITES||[], parcs=window.PARCELLES||[];
+  var sessF=window._sessInSaison||function(){ return true; };
+  var sess=(window.SESSIONS||[]).filter(function(se){ return se&&sessF(se); });
+  var actives=parcs.filter(function(p){ return p&&p.statut!=='Arrachee'; });
+  var surfBy={}; actives.forEach(function(p){ surfBy[p.nom]=parseFloat(p.surface)||0; });
+  function somme(noms){ return noms.reduce(function(a,n){ return a+(surfBy[n]||0); },0); }
+  var now=Date.now(), jobs=[];
+  sess.forEach(function(se){
+    if(se.statut!=='En cours'||se.activite===_PIL_GM_FER) return;
+    var act=acts.find(function(a){ return a&&a.nom===se.activite; });
+    var hha=act?(parseFloat(act.h_ha)||0):0;
+    var skip=Array.isArray(se.parcellesSkip)?se.parcellesSkip:[];
+    var faits=(Array.isArray(se.parcellesFaites)?se.parcellesFaites:[]).map(_pilGmNom);
+    var per=actives.filter(function(p){ return skip.indexOf(p.nom)<0; }).map(function(p){ return p.nom; });
+    var reste=per.filter(function(n){ return faits.indexOf(n)<0; });
+    if(!reste.length) return;   // fini : il sort, meme si le statut n'a pas encore suivi
+    var last=null;
+    (Array.isArray(se.parcellesFaites)?se.parcellesFaites:[]).forEach(function(x){ if(x&&typeof x==='object'&&typeof x.t1==='number'&&(last==null||x.t1>last)) last=x.t1; });
+    if(last==null){ var t0=Date.parse(String(se.date||'').slice(0,10)+'T12:00:00'); if(isFinite(t0)) last=t0; }
+    var perHa=somme(per), resteHa=somme(reste);
+    jobs.push({ kind:'session', id:se.id, nom:se.activite||'Session', tid:_pilGmTid(se,acts),
+      debut:String(se.date||'').slice(0,10), perHa:perHa, faitHa:Math.max(0,perHa-resteHa), resteHa:resteHa,
+      nReste:reste.length, nSkip:skip.length, hha:hha, h:(hha>0?resteHa*hha:null),
+      dormJ:(last!=null?Math.floor((now-last)/86400000):null) });
+  });
+  if(typeof window._ferFaits==='function'&&window.INTRANTS&&Array.isArray(window.INTRANTS.fertil)){
+    var faitsF=window._ferFaits()||{};
+    var actF=acts.find(function(a){ return a&&a.nom===_PIL_GM_FER; });
+    var hhaF=actF?(parseFloat(actF.h_ha)||0):0;
+    var ouv=sess.filter(function(se){ return se.activite===_PIL_GM_FER&&se.statut==='En cours'; })
+      .sort(function(a,b){ return String(b.date||'').localeCompare(String(a.date||'')); })[0]||null;
+    var tidF=ouv?_pilGmTid(ouv,acts):((actF&&actF.tracteurDefautId)||'');
+    window.INTRANTS.fertil.forEach(function(op){
+      if(!op||!Array.isArray(op.parcs)||!op.parcs.length) return;
+      var c0=String(op.cree||'').slice(0,10);
+      if(!_pilGmInCamp(c0)) return;   // un apport d'une autre campagne ne se projette pas
+      var r=faitsF[op.id]||{};
+      var noms=op.parcs.filter(function(n){ return surfBy[n]!=null; });
+      var att=noms.filter(function(n){ return !r[n]; });
+      if(!att.length) return;
+      var perHa=somme(noms), resteHa=somme(att);
+      jobs.push({ kind:'amendement', id:op.id, nom:_PIL_GM_FER, sel:true, lance:!!ouv, tid:tidF,
+        debut:c0, perHa:perHa, faitHa:Math.max(0,perHa-resteHa), resteHa:resteHa, nReste:att.length,
+        nSel:noms.length, hha:hhaF, h:(hhaF>0?resteHa*hhaF:null), dormJ:null });
+    });
+  }
+  jobs.sort(function(a,b){ return String(a.debut).localeCompare(String(b.debut)); });
+  var cfgLh=_ecoCfg().conso, conso={};
+  jobs.forEach(function(j){
+    if(!j.tid){ j.l=null; j.src=null; return; }
+    var c=conso[j.tid]||(conso[j.tid]=_pilGmConso(j.tid));
+    var lh=c.ok?c.lh:cfgLh;
+    j.src=c.ok?'mesure':'reglage';
+    j.l=(j.h!=null&&lh>0)?j.h*lh:null;
+  });
+  return { jobs:jobs, conso:conso, domaine:somme(actives.map(function(p){ return p.nom; })), cfgLh:cfgLh };
+}
+// ★ LA REVISION LA PLUS PROCHE, PLACEE DANS LES TRAVAUX EN COURS. Les travaux d'un
+// tracteur se mettent bout a bout dans l'ordre ou ils ont ete lances.
+function _pilGmRevision(d, T){
+  var c=[];
+  (d.tracs||[]).forEach(function(t){
+    if(t.revReste==null) return;
+    var seq=T.jobs.filter(function(j){ return j.tid===t.id&&j.h!=null; });
+    var acc=0, dans=null;
+    seq.forEach(function(j){ if(dans==null&&t.revReste>0&&acc+j.h>=t.revReste) dans={job:j, pc:(t.revReste-acc)/j.h}; acc+=j.h; });
+    c.push({ t:t, seq:seq, tot:acc, dans:dans,
+      sansBareme:T.jobs.filter(function(j){ return j.tid===t.id&&j.h==null; }).length });
+  });
+  function rang(x){ return x.t.revReste<=0?0:(x.dans?1:2); }
+  c.sort(function(a,b){ return (rang(a)-rang(b))||(a.t.revReste-b.t.revReste); });
+  var r=c[0]||null;
+  if(!r) return null;
+  if(rang(r)===2&&r.t.revReste>120) return null;   // loin, et hors des travaux : rien a dire
+  return r;
+}
+function _pilGmLibJob(j){ return _pilEsc(_pilTnom(j.nom)); }
+// ★ TRAIT-CUVE (§221) — LE TRAITEMENT CONSEILLÉ, EN POINTILLÉ DANS LA CUVE.
+// Trois cartes se croisent : la protection restante dit qu'il y a des parcelles à nu
+// (ou qui le seront d'ici 2 jours), la fenêtre de traitement dit qu'un créneau existe
+// dans les 5 jours, et le tracteur dit ce que coûterait ce traitement en carburant :
+// tout le domaine (un travail lancé couvre le domaine, §213) × le barème h/ha de
+// l'activité de pulvérisation × la conso de son tracteur. Rien n'est lancé, rien n'est
+// compté : c'est une ligne « et si », en pointillé. Déjà une session de ce travail en
+// cours → rien (elle est dans les travaux). Pas d'activité de pulvérisation → rien.
+function _pilGmActPulve(){
+  var acts=window.ACTIVITES||[], tr={}; (window.TRACTEURS_LIST||[]).forEach(function(t){ if(t&&t.id) tr[t.id]=t; });
+  var a=acts.find(function(x){ return x&&/trait|pulv/i.test(String(x.nom||'')); })
+       ||acts.find(function(x){ return x&&x.tracteurDefautId&&tr[x.tracteurDefautId]&&tr[x.tracteurDefautId].traitementOnly; });
+  return a||null;
+}
+// ★ Le temps d'un traitement depend de la facon dont le pulve avance (4, 6 ou 8 rangs
+//   par passage, demi-tours) : un bareme h/ha ne le sait pas. On prend donc d'abord la
+//   CADENCE MESUREE de l'activite sur la campagne — minutes chronometrees ÷ hectares
+//   chronometres de ses sessions —, qui porte la vraie facon de faire du domaine ; le
+//   bareme sert de repli (moins de 0,5 ha chronometre). Nico, 03/10 : « ca depend si
+//   les traitements se font sur 4 rangs, 6 rangs, 8 rangs ».
+function _pilGmHhaMesure(nomAct){
+  var sessF=window._sessInSaison||function(){ return true; }, parcs=window.PARCELLES||[], surf={}, h=0, ha=0, n=0;
+  parcs.forEach(function(p){ if(p&&p.nom) surf[p.nom]=parseFloat(p.surface)||0; });
+  (window.SESSIONS||[]).forEach(function(se){
+    if(!se||se.activite!==nomAct||!sessF(se)) return;
+    var vu=false;
+    (Array.isArray(se.parcellesFaites)?se.parcellesFaites:[]).forEach(function(x){
+      if(!x||typeof x!=='object'||typeof x.dmin!=='number'||!(x.dmin>0)) return;
+      var s=surf[x.nom]||0; if(!(s>0)) return;
+      h+=x.dmin/60; ha+=s; vu=true;
+    });
+    if(vu) n++;
+  });
+  return (ha>=0.5&&h>0)?{hha:h/ha, n:n, ha:ha, mesure:true}:null;
+}
+// Interrupteur : CONFIG.features.trait_cuve. Eteint par defaut (03/10) — Nico veut laisser
+// l'equipe s'approprier le nouveau Pilotage avant d'annoncer cette ligne, a l'ete.
+function _pilGmTraitementOption(T){
+  var F=(window.CONFIG&&window.CONFIG.features)||{}; if(F.trait_cuve!==true) return null;
+  var act=_pilGmActPulve(); if(!act) return null;
+  var M=_pilGmHhaMesure(act.nom), hha=M?M.hha:(parseFloat(act.h_ha)||0); if(!(hha>0)) return null;
+  if(T.jobs.some(function(j){ return j.kind==='session'&&j.nom===act.nom; })) return null;   // deja lance : dans les travaux
+  var P=(typeof _pilProtData==='function')?_pilProtData():null; if(!P||!P.n) return null;
+  var nNu=P.nu.length+P.bientot.length; if(!nNu) return null;
+  var days=(typeof _pilTreatDays==='function')?_pilTreatDays():null; if(!days||!days.length) return null;
+  var fen=days.filter(function(x){ return x&&x.start!=null; })[0]; if(!fen) return null;
+  var tid=act.tracteurDefautId||'', c=tid?(T.conso[tid]||(T.conso[tid]=_pilGmConso(tid))):null;
+  var lh=(c&&c.ok)?c.lh:T.cfgLh; if(!(lh>0)) return null;
+  var h=T.domaine*hha;
+  return {nom:act.nom, h:h, l:h*lh, fen:String(fen.label||'')+' '+fen.start+'h\u2192'+fen.end+'h', nNu:nNu, src:(c&&c.ok)?'mesure':'reglage', hhaSrc:(M?('cadence mesurée sur '+M.n+' traitement'+(M.n>1?'s':'')):'barème')};
+}
+// ── Les cartes d'Aujourd'hui (section « Alertes matériel ») ──
+function _pilCkTracteur(d){
+  var T=_pilGmTravaux(), H='';
+  var trNom={}; (d.tracs||[]).forEach(function(t){ trNom[t.id]=t.nom; });
+  // ① Les travaux en cours
+  if(T.jobs.length){
+    var dom=T.domaine>0?T.domaine:1, hT=0, lT=0, nSansH=0, nSess=0, nAm=0;
+    var rows=T.jobs.map(function(j){
+      if(j.h!=null) hT+=j.h; else nSansH++;
+      if(j.l!=null) lT+=j.l;
+      if(j.kind==='session') nSess++; else nAm++;
+      var w=function(v){ return Math.max(0,Math.min(100,v/dom*100)).toFixed(2)+'%'; };
+      var sub=_pilEsc(trNom[j.tid]||'tracteur non choisi')+' \u00b7 ';
+      if(j.kind==='amendement') sub+='apport du '+_pilDfr(j.debut)+' \u00b7 '+j.nSel+' parcelle'+(j.nSel>1?'s':'')+' choisie'+(j.nSel>1?'s':'')+(j.lance?'':' \u00b7 session pas encore lancée');
+      else sub+='lancé le '+_pilDfr(j.debut)+(j.nSkip?(' \u00b7 '+j.nSkip+' désactivée'+(j.nSkip>1?'s':'')):'');
+      var dorm=(j.dormJ!=null&&j.dormJ>_PIL_GM_DORMANT_J)?'<span class="pil-trx-dorm">aucune parcelle cochée depuis '+j.dormJ+' j</span>':'';
+      return '<div class="pil-trx-job"><span class="pil-trx-nm"><b>'+_pilGmLibJob(j)+(j.sel?' <span class="pil-trx-tag">sélection</span>':'')+'</b><span>'+sub+'</span>'+dorm+'</span>'
+        +'<span class="pil-trx-trkc"><span class="pil-trx-trk"><i style="left:0;width:'+w(j.faitHa)+'" class="f"></i><i style="left:'+w(j.faitHa)+';width:'+w(j.resteHa)+'" class="r"></i></span>'
+        +'<span class="pil-trx-ha">'+_pilGmFr(j.resteHa,2)+' ha à faire sur '+_pilGmFr(j.perHa,2)+' ha</span></span>'
+        +'<span class="pil-trx-num">'+(j.h!=null?'<b>'+_pilGmFr(j.h)+'</b> h':'—')+'</span>'
+        +'<span class="pil-trx-num">'+(j.l!=null?'<b>'+_pilNum(j.l)+'</b> L':'—')+'</span></div>';
+    }).join('');
+    var quoi=[]; if(nSess) quoi.push(nSess+' session'+(nSess>1?'s':'')+' lancée'+(nSess>1?'s':'')); if(nAm) quoi.push(nAm+' apport'+(nAm>1?'s':'')+' d’amendement');
+    var cad=quoi.join(' + ')+' \u00b7 heures au barème, litres à la consommation de chaque tracteur'+(nSansH?(' \u00b7 '+nSansH+' sans barème, non compté'+(nSansH>1?'s':'')):'');
+    H+='<div class="pil-tile2 pil-trx-wide"><div class="pil-t2h"><span class="ic">'+_pilIco('tracteur')+'</span><span class="t">Travaux tracteur en cours</span>'+_mvInfoBtn('pil.trx')+'</div>'
+      +'<div class="pil-t2b"><div class="pil-big">'+_pilGmFr(hT)+' h \u00b7 '+_pilNum(lT)+' L pour finir</div>'
+      +'<div class="pil-t2s">'+cad+'</div>'
+      +'<div class="pil-trx-job pil-trx-hd"><span>Travail</span><span class="pil-trx-trkc">Reste à faire \u00b7 échelle : le domaine</span><span class="pil-trx-num">Heures</span><span class="pil-trx-num">Litres</span></div>'
+      +rows
+      +'<div class="pil-trx-job pil-trx-axl"><span></span><span class="pil-trx-trkc pil-trx-ax"><span>0</span><span>'+_pilGmFr(dom,2)+' ha</span></span><span></span><span></span></div>'
+      +'<div class="pil-trx-leg"><span><i class="f"></i>fait</span><span><i class="r"></i>reste à faire</span><span><i class="h"></i>hors du travail (désactivée, non choisie)</span></div>'
+      +'</div></div>';
+  }
+  // ② La révision
+  var R=_pilGmRevision(d,T);
+  if(R){
+    var t=R.t, big, col='var(--texte)';
+    if(t.revReste<=0){ big='Révision dépassée de '+_pilNum(-t.revReste)+' h'; col='var(--rouge)'; }
+    else if(R.dans){ big='Atteinte pendant : '+_pilGmLibJob(R.dans.job); col='var(--orange)'; }
+    else big='Pas atteinte par les travaux en cours';
+    var axMax=Math.max(10, Math.ceil(Math.max(t.revReste>0?t.revReste:0, R.tot)*1.15/10)*10);
+    var cols=['var(--terre)','var(--or)','var(--vert-med)'], seg='';
+    R.seq.forEach(function(j,k){ seg+='<i style="width:'+(j.h/axMax*100).toFixed(2)+'%;background:'+cols[k%3]+'" title="'+_pilEsc(_pilTnom(j.nom))+' \u00b7 '+_pilGmFr(j.h)+' h"></i>'; });
+    if(t.revReste>0) seg+='<u style="left:'+Math.min(100,t.revReste/axMax*100).toFixed(2)+'%"></u>';
+    var ry=_pilGmRythme(t.id,d.refDate), rep='';
+    if(ry&&t.revReste>0) rep='<div class="pil-t2s">Repère : au rythme mesuré de ce tracteur ('+_pilGmFr(ry)+' h par jour ouvré, 4 dernières semaines), environ '+Math.ceil(t.revReste/ry)+' jour'+(Math.ceil(t.revReste/ry)>1?'s':'')+' ouvré'+(Math.ceil(t.revReste/ry)>1?'s':'')+'.</div>';
+    var leg=R.seq.map(function(j,k){ return '<span><i style="background:'+cols[k%3]+'"></i>'+_pilGmLibJob(j)+' \u00b7 '+_pilGmFr(j.h)+' h</span>'; }).join('');
+    H+='<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('cle')+'</span><span class="t">Révision \u00b7 '+_pilEsc(t.nom||'Tracteur')+'</span>'+_mvInfoBtn('pil.trxrev')+'</div>'
+      +'<div class="pil-t2b"><div class="pil-big" style="color:'+col+'">'+big+'</div>'
+      +'<div class="pil-t2s">'+(t.revReste>0?_pilNum(t.revReste)+' h avant la révision \u00b7 ':'')+_pilGmFr(R.tot)+' h en cours sur ce tracteur'+(R.dans?(' \u00b7 à '+Math.round(R.dans.pc*100)+' % de ce travail'):'')+(R.sansBareme?(' \u00b7 '+R.sansBareme+' travail sans barème'):'')+'</div>'
+      +'<div class="pil-trx-carnet">'+seg+'</div>'
+      +'<div class="pil-trx-ax"><span>0</span><span>'+(axMax/2)+'</span><span>'+axMax+' h</span></div>'
+      +(leg?'<div class="pil-trx-leg">'+leg+'</div>':'')
+      +rep
+      +'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="entretien">Tracteur \u203A Entretien \u203A</button></div>'
+      +'</div></div>';
+  }
+  // ③ La cuve
+  var g=d.gnr;
+  if(g&&g.capacite){
+    var cap=Number(g.capacite)||0, niv=Number(g.niveau)||0, seuil=Number(g.seuil)||0;
+    var avecL=T.jobs.filter(function(j){ return j.l!=null; }), sansL=T.jobs.length-avecL.length;
+    if(avecL.length||niv<=seuil){
+      // ★ L'ECHELLE : la capacite ecrasait tout (410 L sur 1 500 = un quart de barre,
+      //   un travail de 5 L = un trait). Elle part de zero et va un peu au-dessus du
+      //   niveau du jour (ou du seuil), arrondie : la meme pour toutes les lignes.
+      var m=Math.max(niv,seuil,1)*1.1, pas=m<=200?50:(m<=600?100:(m<=1500?250:500));
+      var axG=Math.min(cap>0?cap:Infinity, Math.ceil(m/pas)*pas);
+      var x=function(v){ return (Math.max(0,Math.min(axG,v))/axG*100).toFixed(2)+'%'; };
+      var w2=function(a,b){ return (Math.abs(Math.max(0,Math.min(axG,a))-Math.max(0,Math.min(axG,b)))/axG*100).toFixed(2)+'%'; };
+      var u='<u style="left:'+x(seuil)+'"></u>', lignes='', n=niv;
+      var ligne=function(lib,de,a,cls,val,tot){ lignes+='<div class="pil-trx-cs'+(tot?' tot':'')+'"><span class="l">'+lib+'</span><span class="k"><i class="'+cls+'" style="left:'+x(Math.min(de,a))+';width:'+w2(de,a)+'"></i>'+u+'</span><span class="v">'+val+'</span></div>'; };
+      ligne('Aujourd’hui',0,niv,'n',_pilNum(niv)+' L');
+      avecL.forEach(function(j){ ligne('\u2212 '+_pilGmLibJob(j),n,n-j.l,'m','\u2212'+_pilNum(j.l)); n-=j.l; });
+      var apres=n, bas=apres<seuil;
+      if(avecL.length) ligne('Après les travaux',0,Math.max(0,apres),bas?'b':'o',_pilNum(apres)+' L',true);
+      // TRAIT-CUVE (§221) : la ligne « et si » du traitement conseille, en pointille.
+      var opt=_pilGmTraitementOption(T), apresT=null;
+      if(opt){ apresT=apres-opt.l; lignes+='<div class="pil-trx-cs option"><span class="l">\u2212 '+_pilEsc(_pilTnom(opt.nom))+' (conseillé)</span><span class="k"><i class="m" style="left:'+x(Math.min(apres,apresT))+';width:'+w2(apres,apresT)+'"></i>'+u+'</span><span class="v">\u2212'+_pilNum(opt.l)+'</span></div>'
+        +'<div class="pil-trx-cs tot option"><span class="l">Avec ce traitement</span><span class="k"><i class="'+(apresT<seuil?'b':'o')+'" style="left:0;width:'+w2(0,Math.max(0,apresT))+'"></i>'+u+'</span><span class="v">'+_pilNum(apresT)+' L</span></div>'; }
+      var bigG=avecL.length?(_pilNum(apres)+' L après les travaux en cours'):(_pilNum(niv)+' L, sous le seuil');
+      var mes=avecL.some(function(j){ return j.src==='mesure'; }), reg=avecL.some(function(j){ return j.src==='reglage'; });
+      var srcTxt=mes&&reg?'conso mesurée, réglage pour un tracteur sans mesure':(mes?'conso mesurée de chaque tracteur':'conso du réglage ('+_pilGmFr(T.cfgLh)+' L/h)');
+      H+='<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('carburant')+'</span><span class="t">Cuve GNR</span>'+_mvInfoBtn('pil.trxgnr')+'</div>'
+        +'<div class="pil-t2b"><div class="pil-big" style="color:'+((bas||niv<=seuil)?'var(--orange)':'var(--vert-med)')+'">'+bigG+'</div>'
+        +'<div class="pil-t2s">'+_pilNum(niv)+' L sur '+_pilNum(cap)+' \u00b7 seuil '+_pilNum(seuil)+' L'+(avecL.length?(' \u00b7 '+srcTxt):'')+(sansL?(' \u00b7 '+sansL+' travail sans barème, non compté'):'')
+        +(opt?(' \u00b7 pointillé : '+_pilEsc(_pilTnom(opt.nom))+' conseillé ('+opt.nNu+' parcelle'+(opt.nNu>1?'s':'')+' à nu ou presque, fenêtre '+_pilEsc(opt.fen)+'), '+_pilGmFr(opt.h)+' h sur le domaine ('+opt.hhaSrc+'), pas encore lancé'):'')+'</div>'
+        +'<div class="pil-trx-casc">'+lignes+'</div>'
+        +'<div class="pil-trx-cs"><span></span><span class="pil-trx-ax"><span>0</span><span>'+_pilNum(axG/2)+'</span><span>'+_pilNum(axG)+' L</span></span><span></span></div>'
+        +((bas||niv<=seuil)?'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="entretien">Tracteur \u203A Entretien \u203A</button></div>':'')
+        +'</div></div>';
+    }
+  }
+  return H?('<div class="pil-dec pil-trx">'+H+'</div>'):'';
+}
+// ── ③ Matériel : la consommation mesurée, tracteur par tracteur ──
+function _pilPanelConso(d){
+  var tr=(d.tracs||[]); if(!tr.length) return '';
+  var cfgLh=_ecoCfg().conso, L=0, H=0, Hc=0, rows=[], mx=12;
+  var C=tr.map(function(t){ var c=_pilGmConso(t.id); c.nom=t.nom; c.iv.forEach(function(v){ if(!v.ecarte&&v.lh>mx) mx=v.lh; }); return c; });
+  mx=Math.ceil(mx/3)*3;
+  C.forEach(function(c){
+    if(c.ok){ L+=c.L; H+=c.H; Hc+=c.Hc; }
+    var dots=c.iv.map(function(v){
+      if(v.ecarte) return '<circle cx="99%" cy="50%" r="5" class="e"><title>'+_pilNum(v.l)+' L sans aucune heure notée : écarté</title></circle>';
+      return '<circle cx="'+(Math.min(v.lh,mx)/mx*100).toFixed(1)+'%" cy="50%" r="'+Math.min(9,2.5+v.h/6).toFixed(1)+'" class="d"><title>'+_pilNum(v.l)+' L ÷ '+_pilGmFr(v.h)+' h = '+_pilGmFr(v.lh)+' L/h</title></circle>';
+    }).join('');
+    var moy=c.ok?'<line x1="'+(c.lh/mx*100).toFixed(1)+'%" x2="'+(c.lh/mx*100).toFixed(1)+'%" y1="2" y2="28" class="m"/>':'';
+    var regl=cfgLh>0?'<line x1="'+(Math.min(cfgLh,mx)/mx*100).toFixed(1)+'%" x2="'+(Math.min(cfgLh,mx)/mx*100).toFixed(1)+'%" y1="0" y2="30" class="g"/>':'';
+    var val=c.ok?('<b>'+_pilGmFr(c.lh)+'</b> L/h<span>'+c.nOk+' intervalle'+(c.nOk>1?'s':'')+' \u00b7 '+Math.round(c.Hc/c.H*100)+' % chrono</span>')
+               :('<b>—</b><span>pas assez de pleins : réglage '+_pilGmFr(cfgLh)+' L/h utilisé</span>');
+    rows.push('<div class="pil-trx-co"><span class="n">'+_pilEsc(c.nom||'Tracteur')+(c.nEc?('<span>'+c.nEc+' écarté'+(c.nEc>1?'s':'')+'</span>'):'')+(c.nSans?('<span>'+c.nSans+' plein'+(c.nSans>1?'s':'')+' sans litres</span>'):'')+'</span>'
+      +'<span class="s"><svg width="100%" height="30" aria-hidden="true"><line x1="0" x2="100%" y1="50%" y2="50%" class="t"/>'+regl+dots+moy+'</svg></span>'
+      +'<span class="v">'+val+'</span></div>');
+  });
+  var ax=''; for(var k=0;k<=mx;k+=mx/4) ax+='<span>'+_pilGmFr(k,k%1?1:0)+(k===mx?' L/h':'')+'</span>';
+  var body=rows.join('')+'<div class="pil-trx-co"><span></span><span class="s pil-trx-ax">'+ax+'</span><span></span></div>'
+    +'<div class="pil-trx-leg"><span><i class="d"></i>un intervalle plein \u2192 plein</span><span><i class="m"></i>moyenne pondérée</span><span><i class="g"></i>réglage actuel</span></div>';
+  var flotte=H>0?L/H:null;
+  return _pilTile('conso','#B85A1A','Consommation mesurée',
+    _pilStat(flotte!=null?_pilGmFr(flotte):'—',' L/h', null),
+    flotte!=null?('litres des pleins ÷ heures notées entre eux \u00b7 campagne \u00b7 '+Math.round(Hc/H*100)+' % des heures chronométrées'):'pas encore assez de pleins notés avec leurs litres',
+    null, body, 'pil.conso');
 }
 
 // ── Onglet AUJOURD'HUI (cockpit) ──
 function _pilTabAuj(d){
   var m=_pilMargeCalc(d), admin=(typeof window.isAdmin==='function')&&window.isAdmin(), H='';
+  // PHOTO-1 (§219) : la photo du jour, une fois, par l'admin, sur la periode active.
+  try{ _pilPhotoEcrire(d); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilPhotoEcrire'); }
   var cockpit='';
   if(_pilShow('auj_marge')){
     var ringPc=d.gaugePct, C=2*Math.PI*74, dash=(ringPc/100*C);
@@ -4997,13 +5841,27 @@ function _pilTabAuj(d){
       +'</div></div>';
     cockpit+=_pilCockpitTimeline(m);
   }
+  if(_pilShow('auj_inaction')) cockpit+=_pilCkInaction(d);   // INACTION-1 (§218)
   var kpis='';
   if(_pilShow('auj_charge')){
     var _ksC = (m.seasonJ==null) ? 'projection indisponible'
       : ('\u2248 '+m.seasonJ+' j ouvrés '+(m.src==='planning'?'d’ici là':'à la cadence'));
-    kpis+='<div class="pil-ck"><div class="kl">Charge restante</div><div class="kv">'+_pilNum(d.totalReste)+'<span class="u"> h</span></div><div class="ks">'+_ksC+'</div></div>';
+    // PHOTO-1 (§219) : la petite courbe lit les photos quotidiennes ; le point du jour est en direct.
+    var _spR=_pilSparkCharge(d), _svgR=_spR?window._mvGraphSpark(_spR,{mauvais:'haut',aria:'Charge restante des 14 derniers jours, en écart à la charge du premier jour de la fenêtre'}):'', _dR=_pilSparkDernier(_spR);
+    if(_svgR&&_dR!=null) _ksC+=' · 14 j : <b>'+(_dR>0?'+':'')+Math.round(_dR)+' %</b>';
+    kpis+='<div class="pil-ck"><div class="kl">Charge restante'+(_svgR?_mvInfoBtn('pil.spark'):'')+'</div><div class="pil-ck-row"><div class="kv">'+_pilNum(d.totalReste)+'<span class="u"> h</span></div>'+(_svgR?'<span class="pil-spark">'+_svgR+'</span>':'')+'</div><div class="ks">'+_ksC+'</div></div>';
   }
-  if(_pilShow('auj_cadence')) kpis+='<div class="pil-ck"><div class="kl">Cadence équipe</div><div class="kv">'+(m.cadH>0?Math.round(m.cadH):'—')+'<span class="u"> h/j</span></div><div class="ks">'+(m.estim?'estimée (effectif)':'réelle · 4 dern. sem.')+'</div></div>';
+  if(_pilShow('auj_cadence')){
+    // SPARK-1 (§214) : la petite courbe dit si la cadence des 7 derniers jours est
+    //   au-dessus ou au-dessous du chiffre affiche (4 dernieres semaines).
+    var _spC=_pilSparkCadence(m), _svgC=_spC?window._mvGraphSpark(_spC,{mauvais:'bas',aria:'Cadence des 14 derniers jours, en écart à la moyenne des 4 dernières semaines'}):'';
+    var _lastC=null; if(_spC){ for(var _iC=_spC.length-1;_iC>=0;_iC--){ if(_spC[_iC]!=null){ _lastC=_spC[_iC]; break; } } }
+    var _ksCad=m.estim?'estimée (effectif)':('réelle · 4 dern. sem.'+((_svgC&&_lastC!=null)?(' · 7 derniers jours : <b>'+(_lastC>0?'+':'')+Math.round(_lastC)+' %</b>'):''));
+    kpis+='<div class="pil-ck"><div class="kl">Cadence équipe'+(_svgC?_mvInfoBtn('pil.spark'):'')+'</div>'
+      +'<div class="pil-ck-row"><div class="kv">'+(m.cadH>0?Math.round(m.cadH):'—')+'<span class="u"> h/j</span></div>'+(_svgC?'<span class="pil-spark">'+_svgC+'</span>':'')+'</div>'
+      +'<div class="ks">'+_ksCad+'</div></div>';
+  }
+  if(_pilShow('auj_tension')) kpis+=_pilCkTension(d);
   if(_pilShow('auj_budget')) kpis+=_pilCkBudget();
   if(_pilShow('auj_etp')) kpis+=_pilCkEtp(d);
   if(_pilShow('auj_jours')) kpis+=_pilCkJours();
@@ -5014,6 +5872,7 @@ function _pilTabAuj(d){
   if(_pilShow('auj_pres')) dec+=_pilCkPres(d);
   if(_pilShow('auj_traiter')) dec+=_pilCkTraiter();
   if(_pilShow('auj_prio')) dec+=_pilCkPrio(d);
+  if(_pilShow('auj_tension')) dec+=_pilCardTension(d);
   if(dec) H+='<div class="pil-sec-h">La décision du jour</div><div class="pil-dec">'+dec+'</div>';
   if(_pilShow('auj_alertes')) H+='<div class="pil-sec-h">Alertes matériel</div>'+_pilCkAlertes(d);
   return H || '<div class="pil-empty">Aucun indicateur affiché — activez-les via « Choisir les indicateurs ».</div>';
@@ -5369,6 +6228,7 @@ function _pilTabMat(d){
   var H='<div class="pil-panels">';
   if(_pilShow('mat_tracteur')) H+=_pilPanelTracteur(d);
   if(_pilShow('mat_gnr')) H+=_pilPanelGnr(d);
+  if(_pilShow('mat_conso')) H+=_pilPanelConso(d);
   H+='</div>';
   return H;
 }
@@ -10069,10 +10929,10 @@ function _pilTabCfm(d){
 
 // ── Personnalisation PAR ONGLET (visibilité des tuiles) ──
 var _PIL_PERSO_DEFS={
-  auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_cave','La Cave \u2014 ce qui presse'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ? · fenêtre 5 jours'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave']],
+  auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_tension','Tension équipe'],['auj_inaction','Coût de l’inaction'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_cave','La Cave \u2014 ce qui presse'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ? · fenêtre 5 jours'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave']],
   an: [['an_cadres','Deux fa\u00e7ons de compter l\'ann\u00e9e'],['an_budget','Le budget de l\'ann\u00e9e, mois par mois'],['an_frise','Les 52 semaines de l\'exercice']],
   avc:[['avc_gauge','Jauge de saison'],['avc_bar','Avancement par tâche'],['avc_pie','Charge (donut)'],['avc_temps','Où va le temps de l\'équipe'],['avc_echeances','Échéances par tâche'],['avc_carte','Carte du domaine']],
-  equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR']],
+  equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_conso','Consommation mesurée']],
   sim:[['sim_ordre','La tournée du jour'],['sim_etsi','Qui fait quoi'],['sim_cout','Renfort : combien et quand']],
   cfm:[['cfm_cuivre','Cuivre (bio · 7 ans)'],['cfm_ift','Passages phyto / IFT'],['mat_phyto','Registre phyto'],['cfm_dre','Délai de rentrée (DRE)']]
 };
@@ -10911,6 +11771,7 @@ var _PIL_DIAG_CIBLES = {
   dens:      ['home',    'vigne',  'set-sec-dens',     '_mvReglOpen'],
   secteurs:  ['home',    'vigne',  'set-sec-secteurs', '_mvReglOpen'],
   equipe:    ['reglages','equipe', 'set-sec-equipe'],
+  planning:  ['planning', null, null],   // TENS-1 (§215) : la carte « Tension de l’équipe »
   tracteurs: ['tracteur','tracteur','set-sec-tracteurs','_mvReglOpen'],
   parcelles: ['parcelles',null,null],
   // ★ PREMIERE CIBLE HORS DES REGLAGES. « Cuve GNR a renseigner (Tracteur ›
@@ -10948,6 +11809,8 @@ window._pilGo = function(cible){
       setTimeout(function(){ _pilFlash(document.getElementById('pil-an-cadres')); }, 240);
       return;
     }
+    // Cible INTERNE (INACTION-1, §218) : Décider, ou vit le simulateur de renfort.
+    if(cible==='renfort'){ if(_PIL_TAB!=='sim'){ _PIL_TAB='sim'; _pilSaveTab('sim'); renderPilotage(); } return; }
     // Cible INTERNE : l'Exercice de l'Economie, sur l'axe atelier.
     if(cible==='exercice'){
       var _ch=false;
@@ -11557,7 +12420,7 @@ function _pilFillContent(d){
   else if(tab==='equ'){
     var _hEqu=
         (_pilAnyShow(['prs_equipe','prs_presences','prs_capacite'])?'<div class="pil-sec-h">Personnel</div>'+_pilTabPrs(d):'')
-      + (_pilAnyShow(['mat_tracteur','mat_gnr'])?'<div class="pil-sec-h">Matériel</div>'+_pilTabMat(d):'');
+      + (_pilAnyShow(['mat_tracteur','mat_gnr','mat_conso'])?'<div class="pil-sec-h">Matériel</div>'+_pilTabMat(d):'');
     // Les six autres onglets ont leur repli ; celui-ci sortait un ECRAN BLANC,
     // sans meme la phrase qui dit comment rallumer les tuiles.
     host.innerHTML=_hEqu || '<div class="pil-empty">Aucun indicateur affiché — activez-les via « Choisir les indicateurs ».</div>';
@@ -11623,6 +12486,7 @@ function _pilBindContent(content){
   content.addEventListener('click', function(e){
     var _sb=e.target.closest('[data-sim]'); if(_sb){ e.stopPropagation(); _pilSimAction(_sb.getAttribute('data-sim'), _sb.getAttribute('data-ti')); return; }
     var _ob=e.target.closest('[data-op]'); if(_ob){ e.stopPropagation(); _pilOpAction(_ob); return; }
+    var _lb=e.target.closest('.pil-lent-b'); if(_lb){ e.stopPropagation(); var _lv=_lb.getAttribute('data-lent'); if(_lv&&_lv!==_PIL_LENT){ _PIL_LENT=_lv; _PIL_LENT_PREP=null; renderPilotage(); } return; }   // CARTE-1 (§217)
     var nb=e.target.closest('.pil-names-btn'); if(nb){ e.stopPropagation(); _pilNamesOn=!_pilNamesOn; _pilApplyNames(); nb.textContent=_pilNamesOn?'\uD83C\uDFF7 Noms \u2713':'\uD83C\uDFF7 Noms'; return; }
     // Clic sur une campagne de la frise annuelle : zoom / retour. Re-cliquer la
     // meme campagne (ou le bouton de retour, qui porte son nom) revient a l'annee.

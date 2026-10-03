@@ -21,7 +21,7 @@ function surfaceFn(src) {
   return src.slice(i, j);
 }
 
-// COH-1 (§213) : les feuilles d'arrachage écrivent la surface par _pvSurfFr (4 décimales) — la vraie fonction, extraite.
+// COH-1 (§222) : les feuilles d'arrachage écrivent la surface par _pvSurfFr (4 décimales) — la vraie fonction, extraite.
 const PVSURF = APP.match(/function _pvSurfFr\(s\)\{[^\n]*\n/)[0];
 function monde(codeArr, { admin = true, surActive = true } = {}) {
   const els = {}; const toasts = []; const log = [];

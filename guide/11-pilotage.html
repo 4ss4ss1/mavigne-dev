@@ -7,6 +7,14 @@
   <p class="lead">Le Pilotage est un tableau de bord de <b>lecture</b>, pensé pour décider :
   où en est-on, tiendra-t-on les délais, peut-on traiter demain, combien coûte cet hectare. Il ne
   recalcule ni ne réécrit aucune de vos saisies — c'est ce qui permet de l'ouvrir sans crainte.</p>
+  <div class="note"><span class="ni" aria-hidden="true">{ic:etincelles}</span><div><b>Octobre 2026 — le Pilotage prévoit.</b>
+  Une grande mise à jour a repensé cet écran pour tirer le meilleur des prévisions possibles avec ce que vous saisissez chaque
+  jour. Ce qui est nouveau, et où le trouver : le <b>tracteur</b> se projette sur les travaux en cours, avec sa révision, sa cuve
+  et sa consommation mesurée sur vos pleins (Aujourd'hui, L'équipe &amp; le matériel) ; la <b>protection phyto</b> parcelle par
+  parcelle, pluie comprise, et le <b>coût de l'inaction</b> (Aujourd'hui) ; la <b>tension de l'équipe</b> et les <b>petites
+  courbes</b> de la cadence, de la charge et du budget (Aujourd'hui) ; le <b>rendement de la tournée</b> (Décider) ; la
+  <b>carte en cinq vues</b> (La campagne). Chaque chiffre neuf a son « i » qui dit d'où il vient. Prenez le temps de la prise
+  en main ; s'il reste des erreurs, signalez-les depuis l'application.</div></div>
   <div class="note"><span class="ni" aria-hidden="true">{ic:crayon}</span><div><b>Deux réglages s'y
   posent tout de même</b>, parce que c'est là qu'on voit qu'ils manquent : le <b>mois d'ouverture de
   l'exercice</b>, sur la frise annuelle, et le <b>plafond de rendement de l'appellation</b>, sur la
@@ -249,6 +257,37 @@
     <li><b>À la vigne aujourd'hui</b> : présences réelles, absences déduites du planning.</li>
     <li><b>Tâche prioritaire</b> en cours et <b>alertes</b> matériel, et la carte <b>Cave</b> — ce qui presse, un bouton.</li>
   </ul>
+  <p>La <b>Cadence équipe</b> porte une petite courbe : ses 14 derniers jours, chaque point étant la cadence des 7 jours
+  précédents comparée au chiffre affiché (les 4 dernières semaines, le pointillé). La bande va de −30 % à +30 %. Sous le
+  pointillé, la courbe passe en orange : l'équipe va moins vite que d'habitude. La <b>Charge restante</b> et le <b>Budget</b>
+  ont la leur grâce à une photo prise chaque jour à la première ouverture par un administrateur (60 jours gardés) : la pente
+  de la charge sur 14 jours, et l'écart entre le budget consommé et le travail fait. Un jour sans ouverture est un trou.</p>
+  <p>Sous la marge, le <b>coût de l'inaction</b> : ce que le retard ajoute en heures et en euros si personne n'est
+  ajouté, d'après le simulateur de renfort de Décider et son hypothèse (+15 % par semaine de retard, réglable). Un modèle,
+  pas une mesure. Dans la carte <b>Traiter ?</b>, la <b>protection restante</b> : combien de parcelles sont à nu, lesquelles
+  le seront d'ici deux jours, et pour chacune le dernier traitement et les jours qui restent — d'après trois rémanences par
+  mode d'action (Réglages › Pilotage › Conformité : contact 10 j, pénétrant 12 j, systémique 14 j par défaut), et la pluie
+  tombée depuis le traitement : un contact est à nu dès 20 mm cumulés (réglable). La pousse n'est pas comptée.</p>
+  <p>La <b>Tension de l'équipe</b> compare, pour chaque personne, le travail effectif des 14 derniers jours à ce que le
+  planning prévoyait — jamais au contrat : en modulation, une semaine haute est prévue. Au seuil : plus de 10 % au-dessus du
+  prévu, ou une des deux dernières semaines au-delà de la moyenne autorisée réglée dans le Planning (44 h par défaut). En rouge :
+  au-delà du maximum (48 h). Le chiffre du haut a sa petite courbe ; la carte détaille chaque personne et ouvre le Planning.</p>
+
+  <h3>{ic:tracteur} Le tracteur, sur les travaux en cours</h3>
+  <p>Un travail tracteur lancé doit couvrir <b>tout le domaine</b>. Les alertes matériel d'Aujourd'hui
+  partent donc des sessions <b>en cours</b> :</p>
+  <ul class="dot">
+    <li><b>Travaux tracteur en cours</b> : pour chaque session, les hectares qui restent (toutes les
+    parcelles sauf les arrachées et celles désactivées dans la session), les <b>heures</b> au barème
+    et les <b>litres</b> à la consommation du tracteur. L'<b>amendement</b> suit les parcelles choisies
+    dans l'apport, dès sa création. Un travail <b>terminé disparaît</b>.</li>
+    <li><b>Révision</b> : les heures avant la révision, placées dans ces travaux mis bout à bout —
+    « atteinte pendant le rognage ». Le repère en jours vient du rythme mesuré du tracteur.</li>
+    <li><b>Cuve GNR</b> : le niveau, moins les litres de chaque travail. La dernière ligne dit ce
+    qu'il restera quand tout sera fini, face à votre seuil.</li>
+  </ul>
+  <p>Il n'y a pas d'heures de tracteur au planning : un travail pas encore lancé n'est pas compté.
+  Les machines immobilisées restent en liste, au-dessus.</p>
 
   <h3>{ic:raisin} La campagne</h3>
   <ul class="dot">
@@ -256,6 +295,10 @@
     Une tâche sans heures prévues à l'hectare (arrachage, désherbage manuel) s'y lit en <b>surface</b>
     faite sur surface concernée — la même part que sur la liste des parcelles.</li>
     <li><b>Donut de charge</b> : quelle tâche pèse le plus dans ce qui reste.</li>
+    <li><b>Carte du domaine, en cinq vues</b> : l'avancement, les jours depuis le dernier traitement, le cépage,
+    les passages phyto de la campagne face à votre référence (des passages, pas un IFT), et le coût engagé à
+    l'hectare. La légende suit la vue choisie ; une parcelle sans donnée reste grise. Touchez une parcelle pour
+    lire sa valeur.</li>
     <li><b>Où va le temps de l'équipe</b> : la présence de la campagne partagée entre les travaux de
     vigne au barème, le tracteur et le reste (cave, trajets, entretien). Sous la barre, trois blocs
     dépliables : la <b>frise prévu / réel</b> tâche par tâche, la <b>courbe des personnes nécessaires
@@ -288,6 +331,10 @@
     avec un bouton qui l'essaie. Dessous, la carte et l'ordre de passage, rangé <b>jour par jour</b>.
     L'ordre défini par l'administrateur est <b>partagé à toute l'équipe</b> ; les autres le consultent
     en lecture seule. Une tournée par travail, pas une seule pour tout le domaine.</li>
+    <li><b>Le rendement de la tournée</b>, juste sous le résultat : la part du temps de l'équipe passée sur
+    les parcelles face aux trajets (à pied, en camion), le coût de l'équipe pour la tournée et le revient à
+    l'hectare — la main-d'œuvre seule. La même tournée est recalculée « au plus proche » pour comparer les
+    jours, les trajets et les euros à l'hectare ; un bouton prend cet ordre.</li>
     <li><b>Qui fait quoi</b> : chaque travail en priorité, avec son équipe affectée et sa date de fin.
     Les boutons + et − déplacent une personne, la date suit. Même jour, même planning et même calcul
     que la tournée : les deux cartes donnent la même date.</li>
@@ -359,7 +406,11 @@
     l'effectif <b>prévu au planning cette semaine-là</b> — pas à la présence d'aujourd'hui. Un pic qui
     tombe dans onze mois ne se compare pas à qui est là ce matin. La présence du jour est affichée
     juste en dessous, sous son propre nom.</li>
-    <li><b>Parc tracteur</b> et niveau de la <b>cuve GNR</b>. Ce sont les deux seules cartes de la
+    <li><b>Consommation mesurée</b> : pour chaque tracteur, les litres de vos pleins divisés par les
+    heures notées entre deux pleins. Chaque point est un intervalle ; la part des heures
+    chronométrées dit la fiabilité. Sans assez de pleins notés avec leurs litres, le réglage du
+    Tracteur reste utilisé, et la carte le dit.</li>
+    <li><b>Parc tracteur</b> et niveau de la <b>cuve GNR</b>. Avec la consommation, ce sont les seules cartes de la
     moitié « matériel » : le <b>registre phyto</b> est passé dans <b>Conformité</b>, et la
     <b>fenêtre de traitement</b> dans <b>Aujourd'hui</b>. L'un est une pièce réglementaire, l'autre
     une décision du jour — ni l'un ni l'autre ne se lit à l'échelle d'un parc de machines.</li>

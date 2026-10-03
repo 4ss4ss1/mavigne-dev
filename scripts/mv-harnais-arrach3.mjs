@@ -20,7 +20,7 @@ if (i0 < 0 || i1 < i0) throw new Error('bloc ARRACH-3 introuvable');
 const BLK = sansCom(APP.slice(i0, i1));
 const TV = sansCom(fn(PIL, 'function _ecoTvNivs(j, cle){') + fn(PIL, 'function _ecoTvEvents(d0, d1){'));
 
-// COH-1 (§213) : les feuilles d'arrachage écrivent la surface par _pvSurfFr (4 décimales) — la vraie fonction, extraite.
+// COH-1 (§222) : les feuilles d'arrachage écrivent la surface par _pvSurfFr (4 décimales) — la vraie fonction, extraite.
 const PVSURF = APP.match(/function _pvSurfFr\(s\)\{[^\n]*\n/)[0];
 function monde(blk, tv, { admin = true, actif = true, cfg } = {}) {
   const toasts = [], log = [], els = {};

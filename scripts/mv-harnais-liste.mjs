@@ -268,7 +268,7 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-arrach6.mjs'],
   ['node scripts/mv-harnais-arrach7.mjs'],
   ['node scripts/mv-harnais-coh1.mjs'],
-  ['node scripts/mv-harnais-coh1.mjs --contre'],   // COH-1 (§213) : un même chiffre, un même nom, une même surface partout
+  ['node scripts/mv-harnais-coh1.mjs --contre'],   // COH-1 (§222) : un même chiffre, un même nom, une même surface partout
   ['node scripts/mv-harnais-equipes-jour.mjs'],
   ['node scripts/mv-harnais-kml-fusion.mjs'],
   ['node scripts/mv-harnais-effectif-periode.mjs'],
@@ -432,4 +432,18 @@ export const HARNAIS = [
   ['node scripts/mv-version-json.mjs --test', 'versions-perimees-et-parc'],
   ['node scripts/mv-harnais-droits.mjs', 'lecture-seule-et-remontee'],
   ['node scripts/mv-harnais-droits.mjs --contre', 'lecture-seule-et-remontee'],
+  ['node scripts/mv-harnais-gnr-mesure.mjs'],          // GNR-M (§213) : le tracteur sur les travaux en cours, conso mesurée
+  ['node scripts/mv-harnais-gnr-mesure.mjs --contre'],
+  ['node scripts/mv-harnais-spark.mjs'],               // SPARK-1 (§214) : la petite courbe d’un chiffre
+  ['node scripts/mv-harnais-spark.mjs --contre'],
+  ['node scripts/mv-harnais-tension.mjs'],             // TENS-1 (§215) : la tension de l’équipe face au planning prévu
+  ['node scripts/mv-harnais-tension.mjs --contre'],
+  ['node scripts/mv-harnais-tournee-rdt.mjs'],         // TOUR-RDT (§216) : le rendement de la tournée
+  ['node scripts/mv-harnais-tournee-rdt.mjs --contre'],
+  ['node scripts/mv-harnais-carte-vues.mjs'],          // CARTE-1 (§217) : les vues de la carte
+  ['node scripts/mv-harnais-carte-vues.mjs --contre'],
+  ['node scripts/mv-harnais-protection.mjs'],          // PROT-1 + INACTION-1 (§218)
+  ['node scripts/mv-harnais-protection.mjs --contre'],
+  ['node scripts/mv-harnais-photo.mjs'],               // PHOTO-1 (§219) : la photo quotidienne des chiffres
+  ['node scripts/mv-harnais-photo.mjs --contre'],
 ];

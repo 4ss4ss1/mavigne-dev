@@ -4416,6 +4416,51 @@ function _findDebutTache(parcelle, tache, dateRef){
   return ok.reduce(function(min,j){return j.date<min?j.date:min;},ok[0].date);
 }
 
+// ════════════════════════════════════════════════════════════════════════
+// PLUIE-1 (§220) — LA PLUIE TOMBEE, JOUR PAR JOUR, POUR LE LESSIVAGE
+// Un cuivre est lessive vers 20 mm de pluie cumulee depuis le traitement (IFV,
+// Chambres : la moitie part dans les 5 premiers mm). L'appli ne gardait aucun
+// millimetre : le releve meteo du journal note temperature, vent, ciel. Ici, un
+// appel Open-Meteo A PART (le principal est lu par index 0 = aujourd'hui, un
+// past_days le decalerait) : les 15 derniers jours en cumul quotidien, et les
+// heures d'aujourd'hui deja passees. Rien n'est ecrit en base : cache local d'une
+// heure. Lecteur : la protection restante du Pilotage (_pilProtData). Rend une
+// promesse de true (donnees fraiches ou en cache), false sinon — jamais un zero.
+// ════════════════════════════════════════════════════════════════════════
+var _PLUIE_TTL_MS=60*60*1000;
+function _pluieIsoLocal(dt){ return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); }
+// Transforme la reponse Open-Meteo en {jours:{iso:mm}, auj:{iso,mm}} ; `now` = horloge (testable).
+function _pluieLire(d, now){
+  if(!d||!d.daily||!Array.isArray(d.daily.time)||!Array.isArray(d.daily.precipitation_sum)) return null;
+  var jours={}, i;
+  for(i=0;i<d.daily.time.length;i++){ var v=d.daily.precipitation_sum[i]; if(v!=null&&isFinite(Number(v))) jours[String(d.daily.time[i]).slice(0,10)]=Math.round(Number(v)*10)/10; }
+  var t=now||new Date(), auj=_pluieIsoLocal(t), hNow=auj+'T'+String(t.getHours()).padStart(2,'0'), mm=0, vu=false;
+  if(d.hourly&&Array.isArray(d.hourly.time)&&Array.isArray(d.hourly.precipitation)){
+    for(i=0;i<d.hourly.time.length;i++){ var h=String(d.hourly.time[i]); if(h.slice(0,10)!==auj) continue; if(h.slice(0,13)>hNow) continue;
+      var p=d.hourly.precipitation[i]; if(p!=null&&isFinite(Number(p))){ mm+=Number(p); vu=true; } }
+  }
+  // Le jour meme ne vaut que ses heures passees : la somme quotidienne contient la prevision du soir.
+  if(vu) jours[auj]=Math.round(mm*10)/10; else delete jours[auj];   // sans heures : le jour reste inconnu, pas une prevision
+  return {ts:(now||new Date()).getTime(), jours:jours, auj:{iso:auj, mm:(vu?Math.round(mm*10)/10:null)}};
+}
+async function _pluieCharger(force){
+  try{
+    var C=window.METEO_PLUIE;
+    if(!force&&C&&C.ts&&(Date.now()-C.ts)<_PLUIE_TTL_MS) return true;
+    if(!C){ try{ var raw=localStorage.getItem('mavigne_pluie_cache'); if(raw){ var cc=JSON.parse(raw); if(cc&&cc.ts&&(Date.now()-cc.ts)<_PLUIE_TTL_MS&&cc.jours){ window.METEO_PLUIE=cc; return true; } } }catch(e0){ if(window._mvAvale) window._mvAvale(e0,'app.js/_pluieCharger/cache'); } }
+    var _geo=getDomaineGeo(); if(!_geo||_geo.lat==null) return !!window.METEO_PLUIE;
+    var url='https://api.open-meteo.com/v1/forecast?latitude='+(_geo.lat).toFixed(4)+'&longitude='+(_geo.lng).toFixed(4)
+      +'&daily=precipitation_sum&hourly=precipitation&past_days=15&forecast_days=1&timezone=Europe%2FParis';
+    var r=await fetch(url); var d=await r.json();
+    var P=_pluieLire(d, new Date()); if(!P) return !!window.METEO_PLUIE;
+    window.METEO_PLUIE=P;
+    try{ localStorage.setItem('mavigne_pluie_cache',JSON.stringify(P)); }catch(e1){ if(window._mvAvale) window._mvAvale(e1,'app.js/_pluieCharger/set'); }
+    return true;
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_pluieCharger'); return !!window.METEO_PLUIE; }
+}
+window._pluieLire=_pluieLire;
+window._pluieCharger=_pluieCharger;
+
 // Récupère la météo moyenne sur une plage de dates via Open-Meteo (daily)
 async function fetchMeteoMoyenne(dateDebut, dateFin){
   try{

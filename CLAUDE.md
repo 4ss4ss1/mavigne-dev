@@ -3,12 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **3 octobre 2026 (COH-1)** — ★★ **UN MÊME CHIFFRE, UN MÊME NOM, UNE MÊME SURFACE SUR TOUS LES ÉCRANS** (§213).
-> Premier des trois lots de la demande « une appli homogène » (captures de Nico, §28). L'arrachage découpé compte au Pilotage comme
-> sur la liste (`_mvTFaite`, règle commune ; surface faite / concernée quand la tâche n'a pas de barème) ; cartes Leaflet du
-> Pilotage confinées sous la barre du bas ; `tNom` = le nom entier et accentué, `tAbr` = la forme courte (seule la carte
-> « Avancement par tâche » de l'Accueil) ; surface d'une parcelle à 4 décimales, totaux à 2. Harnais `mv-harnais-coh1`
-> (19 assertions, contre-épreuve 12/12). Base `61f4ccd`. **APP 7.92 → 7.93, SW 8.67 → 8.68** (visible).
+> Dernière consolidation : **3 octobre 2026 (FUSION-1)** — ★★★ **LA SÉRIE §213-§221 RECOLLÉE SOUS COH-1 (§222) — DEUX FILS, UNE MÊME BASE** (§223).
+> Le commit `75107ff` avait collé les fichiers COMPLETS de COH-1 (bâti sur `61f4ccd`) par-dessus les neuf lots « densifier le
+> Pilotage », bâtis eux aussi sur `61f4ccd` dans une autre conversation : leur code avait disparu d'app.js, pilotage.js, utils.js,
+> styles.css et de la doc ; il ne restait que planning.js, reglages.js et leurs harnais (preflight rouge : `_planPrevuPersRange`
+> sans appelant). Réparé par une vraie fusion git à trois voies depuis `61f4ccd` (zip TRAIT-CUVE ↔ lot COH-1, 10 fichiers en
+> conflit). COH-1 renuméroté §222. ★ `.mv-base` ne voit pas deux lots frères : ils déclarent la même base.
+> Base `75107ff`. **APP 8.01 → 8.02, SW 8.76 → 8.77** (visible : COH-1 arrive avec la série).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1810,11 +1811,11 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
-### ⚠️ COH-1 — LA DEMANDE DU 03/10 : UNE APPLI HOMOGÈNE (§213, posé le 03/10)
+### ⚠️ COH-1 — LA DEMANDE DU 03/10 : UNE APPLI HOMOGÈNE (§222, posé le 03/10)
 
 Nico, 03/10 (cinq captures) : l'arrachage n'est pas compté partout, les cartes débordent sur PC, les graphiques sont trop
 différents entre eux, et des heures sup apparaissent dans Décider › le renfort. Découpage validé avec lui : trois lots.
-1. ✅ ~~Lot 1 — corrections sans maquette~~ — fait au §213.
+1. ✅ ~~Lot 1 — corrections sans maquette~~ — fait au §222.
 2. **Lot 2 — le renfort sans heures sup.** Nico : le renfort doit dire combien de saisonniers il faut sur une période,
    JUSTEMENT pour que l'équipe n'en fasse pas. Capacité = heures du planning, rien de plus (`hMax = hJour`, comme la fin
    prévue — décision du 10/09) ; plus de part « Heures sup » au coût ni au verdict ; la réponse devient un CALENDRIER
@@ -1837,6 +1838,32 @@ différents entre eux, et des heures sup apparaissent dans Décider › le renfo
    faire lire le modèle du planning (« compter les heures prévues au planning ») — avec le lot 2.
 7. **Surfaces hors Vigne** : `_pvSurfFr` ne couvre que `app.js` (liste, fiche, feuilles d'arrachage, bulles de carte). Les
    autres modules écrivent encore la surface à leur façon — passe du lot 3.
+8. **★ Une garde contre les lots frères** (§223) : deux lots bâtis sur la même base passent tous deux `mv-base`, et le
+   second collé écrase le premier. Piste : un fichier `.mv-lots` (liste des lots intégrés, en ajout seul) porté par chaque
+   zip ; `mv-base` refuse un zip dont la liste n'inclut pas celle du HEAD. **Décision de Nico.** En attendant : un seul fil
+   livre des fichiers complets à la fois, ou un push entre deux lots.
+9. **Lot 2 — maquette v2 validée par Nico (03/10)** : en plus du calendrier, « Et sans renfort ? » — l'équipe seule avec
+   des heures sup plafonnées (39 / 43 / 48 h ; défaut proposé : la semaine la plus longue du modèle du planning), leur coût
+   aux taux du relevé (25 % jusqu'à la 43e heure, 50 % au-delà) et le retard qui reste ; plus « sans renfort ni heures sup ».
+### ⚠️ GNR-M ET LA SÉRIE « DENSIFIER LE PILOTAGE » — CE QUI RESTE OUVERT (§222, posé le 03/10)
+
+1. **À l'œil chez Nico, sur ses vraies données** : les trois cartes d'Aujourd'hui sur téléphone, la part chronométrée et les
+   intervalles écartés de la tuile Consommation mesurée. Aucun harnais ne lit ses pleins réels.
+2. **Les lots suivants de la maquette validée** (`maquette-pilotage-densite.html`), dans l'ordre recommandé :
+   ✅ **SPARK** — fait au §214 pour la **seule Cadence** (`_mvGraphSpark` sur le moteur commun). ⚠️ **Question à Nico : un
+   relevé quotidien ?** Charge restante et Budget n'ont aucun historique daté (§214a) ; pour leur donner une courbe, il faut
+   écrire chaque jour un instantané (reste, % consommé, % fait). Recommandation : un document par domaine, une ligne par jour,
+   écrit au premier affichage du Pilotage par un admin, borné à 60 jours. Pas de rétroactif : la courbe se remplit en 14 jours.
+   ✅ **TENS** — fait au §215 (face au prévu du modèle, semaine face au cadre légal du Planning) ; ✅ **TOUR** — fait au §216 (rendement sous le résultat, comparaison « au plus proche ») ; ✅ **CARTE** — fait au §217 (cinq vues, chacune à sa source) ; ✅ **PROT + INACTION** — faits au §218 (rémanences réglables 10 / 12 / 14 j, mode déduit de la substance ; coût de l'inaction = le « sans renfort » de Décider).
+3. ✅ **PHOTO-1** — fait au §219 (`CONFIG.photo`, 60 jours ; courbes de la Charge restante et du Budget). **À regarder chez Nico
+   après deux ouvertures d'Aujourd'hui.** Découpage de `pilotage.js` : décision de Nico, **rien maintenant** (866 ko, on découpe si
+   on approche 950).
+4. ✅ **PLUIE-1** — fait au §220 (lue chez Open-Meteo, pas stockée ; seuil réglable). Reste : la pousse, et l'heure du traitement
+   face à une pluie dans les 2 h.
+5. ✅ **Le traitement conseillé en pointillé dans la cuve** — fait au §221 (protection à nu + fenêtre + activité de pulvérisation).
+   Éteint par `CONFIG.features.trait_cuve` jusqu'à l'été, à la cadence mesurée des traitements ; à allumer avec son Quoi de neuf.
+6. **Limites assumées du §213** : conso par tracteur, pas par travail ; heures restantes au barème (le rythme chronométré de chaque
+   session pourrait les affiner).
 
 ### ⚠️ SEL-1 / ARRACH-3 à 5 — CE QUI RESTE OUVERT (§205-208, posé le 02/10)
 

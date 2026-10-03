@@ -8,6 +8,72 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **3 octobre 2026 (TRAIT-CUVE)** — ★ **LE TRAITEMENT CONSEILLÉ, CHIFFRÉ DANS LA CUVE ; LE QUOI DE NEUF SPÉCIAL « MA VIGNE PRÉVOIT »** (§221).
+> Trois cartes se croisent (protection restante, fenêtre, tracteur) : une ligne « et si » en pointillé, à la CADENCE MESURÉE des
+> traitements (4/6/8 rangs : le barème ne le sait pas), **éteinte** (`CONFIG.features.trait_cuve`) jusqu'à l'été, hors du Quoi de neuf.
+> Quoi de neuf spécial dicté et relu par Nico en tête de 8.01, intro de section dans le guide Pilotage. **Fin de la série « densifier »** :
+> neuf lots (§213-221) dans un seul zip tant que rien n'est poussé — à déployer et à regarder en vrai avant tout lot suivant.
+> Harnais `mv-harnais-gnr-mesure` (49 + 11/11). Base `61f4ccd`. **APP 8.00 → 8.01, SW 8.75 → 8.76.**
+> ⚠️ Publié en parallèle de COH-1 sur la même base `61f4ccd` ; écrasé par `75107ff`, recollé par FUSION-1 (§223).
+
+> ★ Consolidation : **3 octobre 2026 (COH-1)** — ★★ **UN MÊME CHIFFRE, UN MÊME NOM, UNE MÊME SURFACE SUR TOUS LES ÉCRANS** (§222).
+> Premier des trois lots de la demande « une appli homogène » (captures de Nico, §28). L'arrachage découpé compte au Pilotage comme
+> sur la liste (`_mvTFaite`, règle commune ; surface faite / concernée quand la tâche n'a pas de barème) ; cartes Leaflet du
+> Pilotage confinées sous la barre du bas ; `tNom` = le nom entier et accentué, `tAbr` = la forme courte (seule la carte
+> « Avancement par tâche » de l'Accueil) ; surface d'une parcelle à 4 décimales, totaux à 2. Harnais `mv-harnais-coh1`
+> (19 assertions, contre-épreuve 12/12). Base `61f4ccd`. **APP 7.92 → 7.93, SW 8.67 → 8.68** (visible).
+> ⚠️ Porté par `75107ff`, qui écrasait la série §213-§221 ; COH-1 renuméroté §222 et recollé en APP 8.02 / SW 8.77 (§223).
+
+> ★ Consolidation : **3 octobre 2026 (PLUIE-1)** — ★ **LA PLUIE TOMBÉE DEPUIS LE TRAITEMENT LESSIVE LES CONTACTS** (§220).
+> Appel Open-Meteo à part (`_pluieCharger`, 15 jours, cache local 1 h, rien en base) : le jour même ne vaut que ses heures passées,
+> un jour manquant est inconnu. Un contact est à nu dès `prot_lessivage_mm` (20) de pluie cumulée après le traitement ; pénétrants et
+> systémiques ne se lessivent pas. Huit lots dans un seul zip tant que rien n'est poussé. Harnais `mv-harnais-protection` (32 + 12/12).
+> Base `61f4ccd`. **APP 7.99 → 8.00, SW 8.74 → 8.75.**
+
+> ★ Consolidation : **3 octobre 2026 (PHOTO-1)** — ★ **LA PHOTO QUOTIDIENNE DES CHIFFRES DU COCKPIT, ET LES DEUX COURBES QU'ELLE PERMET** (§219).
+> `CONFIG.photo` : une ligne {d, reste, cons, avc} par jour, écrite par l'admin au rendu d'Aujourd'hui, période active seulement,
+> 60 lignes, jamais réécrite. Charge restante : écart à la première photo de la fenêtre ; Budget : consommé − fait en points ; le
+> point du jour en direct, un jour sans ouverture est un trou. Sept lots dans un seul zip tant que rien n'est poussé. Harnais
+> `mv-harnais-photo` (15 + 7/7). Base `61f4ccd`. **APP 7.98 → 7.99, SW 8.73 → 8.74.**
+
+> ★ Consolidation : **3 octobre 2026 (PROT-1 + INACTION-1)** — ★★ **LA PROTECTION RESTANTE PAR PARCELLE, LE COÛT DE L'INACTION SUR LE COCKPIT** (§218).
+> Rémanences par mode d'action (réglages, défauts sourcés 10 / 12 / 14 j), mode déduit de la substance E-Phy, « ? » quand deviné ;
+> pas de lessivage faute de pluie enregistrée (PLUIE-1 au §28). Coût de l'inaction = le « sans renfort » de Décider, sous la marge.
+> Fin de la série « densifier » (§213-218), six lots dans un seul zip tant que rien n'est poussé. Harnais `mv-harnais-protection`
+> (21 + 8/8). Base `61f4ccd`. **APP 7.97 → 7.98, SW 8.72 → 8.73.**
+
+> ★ Consolidation : **3 octobre 2026 (CARTE-1)** — ★ **LA CARTE DU DOMAINE SE LIT DE CINQ FAÇONS, CHACUNE À SA SOURCE** (§217).
+> Avancement (`getPCls`), dernier traitement (registre), cépage (fiche), passages phyto (`_cfmPassages` + `_cfmIftRef`, la règle de
+> la Conformité), coût engagé/ha (`_pecData`). Un vide est gris, un zéro a sa couleur. Construit sur GNR-M, SPARK-1, TENS-1 et
+> TOUR-RDT, livrés dans le même zip tant qu'ils ne sont pas poussés. Harnais `mv-harnais-carte-vues` (23 + 7/7). Base `61f4ccd`.
+> **APP 7.96 → 7.97, SW 8.71 → 8.72.**
+
+> ★ Consolidation : **3 octobre 2026 (TOUR-RDT)** — ★ **LE RENDEMENT DE LA TOURNÉE, SUR LA MÊME SIMULATION** (§216).
+> Sous le résultat de Décider : temps de l'équipe sur les parcelles face aux trajets, coût de l'équipe (taux de chacun, part du jour
+> occupée), revient/ha, et la même tournée « au plus proche » pour comparer — tout lu sur `_dzSimuler`, aucun second calcul.
+> Construit sur GNR-M, SPARK-1 et TENS-1, livrés dans le même zip tant qu'ils ne sont pas poussés. Harnais `mv-harnais-tournee-rdt`
+> (20 + 7/7). Base `61f4ccd`. **APP 7.95 → 7.96, SW 8.70 → 8.71.**
+
+> ★ Consolidation : **3 octobre 2026 (TENS-1)** — ★★ **LA TENSION DE L'ÉQUIPE, FACE AU PLANNING PRÉVU, JAMAIS AU CONTRAT** (§215).
+> Travail effectif 14 j (`_planWorkPersRange`) face au prévu du modèle (`_planPrevuPersRange`, nouveau mode `'prevu'` de
+> `_planRangeH_` : la grille sans la saisie). Semaine la plus chargée face au cadre légal du Planning (`_planLegal`, exposé) :
+> au-delà de 44 h à surveiller, de 48 h rouge — le « plafond de deux semaines » de la maquette n'existe pas en droit. Un chiffre
+> du bandeau avec sa petite courbe, une carte par personne. Construit sur GNR-M et SPARK-1, livrés dans le même zip tant qu'ils
+> ne sont pas poussés. Harnais `mv-harnais-tension` (27 + 8/8). Base `61f4ccd`. **APP 7.94 → 7.95, SW 8.69 → 8.70.**
+
+> ★ Consolidation : **3 octobre 2026 (SPARK-1)** — ★ **LA CADENCE A SA PETITE COURBE, ET LE MOTEUR DE GRAPHE SAIT LES FAIRE** (§214).
+> `_mvGraphSpark` (utils.js) : écarts en %, bande commune ±30 %, trou = courbe coupée, jamais une ligne inventée. Seule la Cadence
+> a un historique daté (`_planTeamCadence`) : Charge restante et Budget n'en ont pas — question du relevé quotidien posée (§28).
+> Construit sur GNR-M (§213), livré dans le même zip tant que GNR-M n'est pas poussé. Harnais `mv-harnais-spark` (19 + 7/7).
+> Base `61f4ccd`. **APP 7.93 → 7.94, SW 8.68 → 8.69.**
+
+> ★ Consolidation : **3 octobre 2026 (GNR-M)** — ★★ **LE TRACTEUR SE PROJETTE SUR LES TRAVAUX EN COURS, LA CONSO DE CHAQUE TRACTEUR EST MESURÉE** (§213).
+> Règle de Nico : un travail tracteur lancé couvre tout le domaine — c'est déjà la barre d'avancement de la session ; l'amendement
+> suit les parcelles de l'apport ; un travail fini sort (on lit le statut). Aujourd'hui › Alertes matériel : travaux en cours (ha,
+> heures, litres), révision placée dans ces travaux, cuve après eux. L'équipe & le matériel : conso mesurée (pleins ÷ heures notées).
+> ★ Il n'existe aucune heure tracteur au planning. Harnais `mv-harnais-gnr-mesure` (45 assertions, 9/9 contre-épreuves). Base
+> `61f4ccd`. **APP 7.92 → 7.93, SW 8.67 → 8.68.**
+
 > ★ Consolidation : **3 octobre 2026 (AVALE-2)** — ★★ **UNE ERREUR AVALÉE QUI SE RÉPÈTE REMONTE AU JOURNAL DU DOMAINE** (§212).
 > Issu de l'audit qualité du 02/10 (P3, vérifié avant d'agir). `_mvAvale` écrit aux paliers 1 / 10 / 100 / 1000 : `info` la 1re
 > fois (local, inchangé), `warning` dès la 10e (part vers l'Admin GT). Toujours `silencieux:true`, honoré par `logError` : aucun

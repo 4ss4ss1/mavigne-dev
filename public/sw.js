@@ -1,7 +1,27 @@
-// MA VIGNE — Service Worker v8.68
-// v8.68 (03/10/2026) — COH-1 : l'arrachage compte au Pilotage comme sur la liste (part des etapes, surface faite pour une tache
-//   sans bareme), cartes du Pilotage sous la barre du bas, un seul nom par travail (tNom entier, tAbr court), surfaces 4/2 decimales,
-//   les 4 points de Ma part du chantier, 0,0 ETP tracteur, texte de la journee de reference. APP 7.92 -> 7.93.
+// MA VIGNE — Service Worker v8.77
+// v8.77 (03/10/2026) — FUSION-1 (§223) : la serie §213-§221 (zip TRAIT-CUVE) recollee sous COH-1 (§222) — le commit 75107ff
+//   avait colle les fichiers complets de COH-1 par-dessus la serie (meme base 61f4ccd). Fusion git a trois voies depuis 61f4ccd.
+//   COH-1 : l'arrachage compte au Pilotage comme sur la liste, cartes du Pilotage sous la barre du bas, un seul nom par travail,
+//   surfaces 4/2 decimales. APP 8.01 -> 8.02.
+// v8.76 (03/10/2026) — TRAIT-CUVE : le traitement conseille en pointille dans la cuve (parcelles a nu + fenetre + bareme de
+//   l'activite de pulverisation) ; Quoi de neuf special « Ma Vigne prevoit », intro du guide Pilotage. APP 8.01.
+// v8.75 (03/10/2026) — PLUIE-1 : la pluie des 15 derniers jours (Open-Meteo, appel a part, cache local 1 h) lessive les
+//   contacts dans la protection restante (seuil reglable, 20 mm). APP 8.00.
+// v8.74 (03/10/2026) — PHOTO-1 : photo quotidienne des chiffres du cockpit (CONFIG.photo, 60 j, admin, periode active) et
+//   petites courbes de la Charge restante et du Budget consomme. APP 7.99.
+// v8.73 (03/10/2026) — PROT-1 + INACTION-1 : protection restante par parcelle dans « Traiter ? » (remanences par mode
+//   d'action, reglables, mode deduit de la substance), cout de l'inaction sous la marge (simulateur de renfort, profil vide). APP 7.98.
+// v8.72 (03/10/2026) — CARTE-1 : cinq vues de la carte du domaine (avancement, dernier traitement, cepage, passages phyto
+//   face a la reference, cout engage/ha), chacune lue a sa source ; legende et fiche « i ». APP 7.97.
+// v8.71 (03/10/2026) — TOUR-RDT : rendement de la tournee sous le resultat de Decider (temps utile face aux trajets, cout de
+//   l'equipe, revient/ha) et comparaison avec l'ordre « au plus proche », sur la meme simulation. APP 7.96.
+// v8.70 (03/10/2026) — TENS-1 : tension de l'equipe (travail effectif 14 j face au prevu du modele, semaine au-dela de la
+//   moyenne / du maximum legal du Planning) : un chiffre du bandeau avec sa petite courbe, une carte par personne. APP 7.95.
+// v8.69 (03/10/2026) — SPARK-1 : la Cadence equipe du cockpit recoit sa petite courbe (14 j, cadence 7 j glissants en ecart
+//   a la cadence 4 semaines, bande commune ±30 %), primitive _mvGraphSpark ajoutee au moteur de graphe. APP 7.94.
+// v8.68 (03/10/2026) — GNR-M : Pilotage › Aujourd'hui projette le tracteur sur les travaux en cours (reste du domaine,
+//   heures, litres ; amendement = parcelles de l'apport ; un travail fini disparait), place la revision dans ces travaux et
+//   lit la cuve apres eux ; L'equipe & le materiel mesure la conso de chaque tracteur (pleins ÷ heures notees). APP 7.93.
 // v8.67 (03/10/2026) — AVALE-2 : une erreur avalee qui se repete remonte au journal du domaine (paliers 1/10/100/1000,
 //   'warning' des la 10e, toujours sans toast : logError({silencieux:true})). APP inchangee (7.92).
 // v8.66 (02/10/2026) — ARRACH-7 : arrachage decoupe lu deux fois — part faite des etapes dans l'avancement (recalcTravaux,
@@ -4247,7 +4267,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.68';
+const CACHE_NAME   = 'mavigne-v8.77';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4263,7 +4283,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.68 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.77 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4283,7 +4303,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.68 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.77 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

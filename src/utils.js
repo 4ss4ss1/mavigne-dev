@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.93';
+export const APP_VERSION = '8.02';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -547,6 +547,43 @@ window._mvGraphSvg = function(c, aria, corps){
     + ' style="display:block">' + (corps || '') + '</svg>';
 };
 
+// ★ SPARK-1 (§214) — LA PETITE COURBE D'UN CHIFFRE. Un ECART en %, jamais une valeur
+// brute : chaque point dit de combien le chiffre s'eloigne de SA reference (le
+// pointille, au milieu). La bande est la MEME pour toutes les petites courbes
+// (±30 % par defaut) : deux courbes cote a cote se comparent a l'oeil. Au-dela,
+// le point se colle au bord — il ne sort pas du cadre.
+// `vals` : tableau d'ecarts en %, `null` = jour sans mesure (la courbe se coupe :
+// un trou n'est pas un zero). `o.mauvais` : 'haut' (au-dessus = defavorable) ou
+// 'bas'. Couleur du dernier point : vert si favorable ou a moins de 3 %, orange
+// sinon. Aucun texte dans le SVG : le chiffre et son cadre restent dans la carte.
+// Rend '' si moins de deux points mesures — jamais une ligne inventee.
+window.MV_SPARK_BANDE = 30;
+window._mvGraphSpark = function(vals, o){
+  o = o || {};
+  var v = Array.isArray(vals) ? vals : [];
+  var n = v.length, nOk = 0, last = null, i;
+  for(i = 0; i < n; i++){ if(typeof v[i] === 'number' && isFinite(v[i])){ nOk++; last = i; } }
+  if(nOk < 2 || n < 2) return '';
+  var B = (o.bande > 0) ? o.bande : window.MV_SPARK_BANDE;
+  var c = window._mvGraphCadre((o.w > 0) ? o.w : 96, (o.h > 0) ? o.h : 34, { padL: 2, padR: 5, padT: 4, padB: 4, grad: 0 });
+  var y = function(e){ var k = Math.max(-B, Math.min(B, e)); return c.padT + c.ih / 2 - (k / B) * (c.ih / 2); };
+  var x = function(k){ return c.padL + (k / (n - 1)) * c.iw; };
+  var d = '', ouvert = false;
+  for(i = 0; i < n; i++){
+    var e = v[i];
+    if(!(typeof e === 'number' && isFinite(e))){ ouvert = false; continue; }
+    d += (ouvert ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(e).toFixed(1);
+    ouvert = true;
+  }
+  var eL = v[last], mauvais = (o.mauvais === 'bas') ? (eL < 0) : (eL > 0);
+  var col = (Math.abs(eL) < 3 || !mauvais) ? c.col.fait : c.col.attention;
+  var ym = (c.padT + c.ih / 2).toFixed(1);
+  var corps = '<line x1="' + c.padL + '" x2="' + (c.w - c.padR) + '" y1="' + ym + '" y2="' + ym + '" stroke="' + c.col.prevu + '" stroke-width="' + c.trait.grille + '" stroke-dasharray="2 2"/>'
+    + '<path d="' + d + '" fill="none" stroke="' + col + '" stroke-width="' + c.trait.prevu + '" stroke-linejoin="round" stroke-linecap="round"/>'
+    + '<circle cx="' + x(last).toFixed(1) + '" cy="' + y(eL).toFixed(1) + '" r="2.6" fill="' + col + '"/>';
+  return window._mvGraphSvg(c, o.aria || '', corps);
+};
+
 // L'etat vide, un seul bloc pour toute l'application : ce qui manque, puis le
 // geste qui le remplit. Un graphe non alimente ne trace JAMAIS une ligne plate
 // ni un zero — un zero est une mesure.
@@ -730,7 +767,7 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
-  { v: '7.93', items: [
+  { v: '8.02', items: [
     { emoji: 'raisin', titre: 'L\u2019arrachage compte au Pilotage comme sur la liste des parcelles',
       desc: "Un arrachage d\u00e9coup\u00e9 en \u00e9tapes, d\u00e9montage fait, s\u2019affichait \u00e0 50\u00a0% sur la liste des parcelles et \u00e0 0\u00a0% dans <b>Pilotage \u203a La campagne</b>. "
         + "Les deux lisent maintenant la m\u00eame part. Et une t\u00e2che sans heures pr\u00e9vues \u00e0 l\u2019hectare (arrachage, d\u00e9sherbage manuel) ne s\u2019affiche plus \u00ab\u00a00/0\u00a0h\u00a0\u00bb\u00a0: "
@@ -744,6 +781,61 @@ export const WHATS_NEW = [
       desc: "Une parcelle s\u2019\u00e9crit au centiare pr\u00e8s, avec quatre d\u00e9cimales\u00a0: \u00ab\u00a00,0870\u00a0ha\u00a0\u00bb sous \u00ab\u00a00,1144\u00a0ha\u00a0\u00bb, au lieu de \u00ab\u00a00,087\u00a0\u00bb. Un total s\u2019\u00e9crit au centi\u00e8me\u00a0: "
         + "la carte du domaine dit \u00ab\u00a011,85\u00a0ha\u00a0\u00bb, plus \u00ab\u00a012\u00a0ha\u00a0\u00bb. "
         + "Et la liste des parcelles qui restent, dans <b>Ma part du chantier</b>, ne finit plus par quatre points." },
+  ] },
+  { v: '8.01', items: [
+    { emoji: 'etincelles', titre: 'Une grande mise à jour : Ma Vigne prévoit',
+      desc: "Cette version est spéciale. Le Pilotage a été repensé pour tirer le meilleur des prévisions que l’application peut faire avec ce que vous saisissez chaque jour. La puissance de calcul disponible aujourd’hui permet d’anticiper beaucoup de choses, et c’est maintenant dans Ma Vigne : "
+        + "<b>le tracteur</b> se projette sur les travaux en cours — révision, cuve, consommation mesurée sur vos pleins ; <b>la protection phyto</b> se lit parcelle par parcelle, pluie comprise ; <b>l’équipe</b> a sa cadence, sa tension et ses petites courbes ; <b>la tournée</b> dit son rendement ; <b>la carte</b> se lit de cinq façons ; <b>le coût de l’inaction</b> s’affiche sur l’écran du matin ; une <b>photo quotidienne</b> donne une courbe à la charge restante et au budget. "
+        + "Chaque chiffre nouveau porte un « i » qui dit d’où il vient, et le guide a été mis à jour pour vous accompagner (Pilotage, en tête de section). Prenez une quinzaine de jours pour vous approprier ces nouveaux repères : c’est normal, et c’est fait pour durer. Il peut rester des erreurs : n’hésitez pas à les remonter avec « Signaler un problème ». Je reste à votre disposition pour tout échange, et d’autres nouveautés suivront une fois ces repères pris en main. "
+        + "Vous tenez là un outil puissant pour la conduite de votre vigne — faites-le travailler pour vous. — Nico, GUERETTECH" },
+  ] },
+  { v: '8.00', items: [
+    { emoji: 'pluie', titre: 'La pluie lessive maintenant les contacts',
+      desc: "La protection restante compte la pluie tombée depuis chaque traitement, lue chez Météo-France via Open-Meteo pour les 15 derniers jours. "
+        + "Un contact (cuivre, soufre, folpel…) est à nu dès 20 mm cumulés, réglable dans Réglages › Pilotage › Conformité ; les pénétrants et systémiques ne se lessivent pas. "
+        + "Chaque ligne dit ses millimètres ; le jour même ne compte que ses heures déjà passées. Sans réseau, l’écran le dit et garde les jours seuls." },
+  ] },
+  { v: '7.99', items: [
+    { emoji: 'graphique', titre: 'La charge restante et le budget ont leur petite courbe',
+      desc: "Chaque jour, à la première ouverture d’Aujourd’hui par un administrateur, l’appli note la charge restante, le budget consommé et le travail fait — une ligne par jour, 60 jours gardés, dans la configuration du domaine. "
+        + "Au bout de quelques jours, la Charge restante montre sa pente sur 14 jours, et le Budget l’écart entre ce qui est consommé et ce qui est fait. Rien n’est rétroactif : les courbes se remplissent en deux semaines. Un jour sans ouverture est un trou, pas un zéro." },
+  ] },
+  { v: '7.98', items: [
+    { emoji: 'bouclier', titre: 'Ce qu’il reste de protection, parcelle par parcelle',
+      desc: "La carte « Traiter ? » dit maintenant combien de parcelles sont à nu, lesquelles le seront d’ici deux jours, et pour chacune le dernier traitement et les jours de protection qui restent. "
+        + "Trois rémanences, par mode d’action, se règlent dans Réglages › Pilotage › Conformité : contact 10 jours, pénétrant 12, systémique 14 par défaut. Le mode d’action est déduit de la substance active ; quand il est deviné, un « ? » le dit." },
+    { emoji: 'euro', titre: 'Le coût de l’inaction, sur l’écran du matin',
+      desc: "Sous la marge sur votre objectif, Aujourd’hui affiche ce que le retard ajoute si personne n’est ajouté : les heures et les euros, d’après le simulateur de renfort de Décider, avec son hypothèse (+15 % par semaine de retard, réglable). C’est un modèle, pas une mesure, et c’est écrit à côté." },
+  ] },
+  { v: '7.97', items: [
+    { emoji: 'carte', titre: 'La carte du domaine change de lecture',
+      desc: "Pilotage › La campagne : au-dessus de la carte, cinq vues — l’avancement, les jours depuis le dernier traitement, le cépage, les passages phyto de la campagne face à votre référence, et le coût engagé à l’hectare. "
+        + "La légende suit la vue choisie ; une parcelle sans donnée reste grise, et touchez-en une pour lire sa valeur." },
+  ] },
+  { v: '7.96', items: [
+    { emoji: 'parcours', titre: 'Ce que rapporte l’ordre de passage',
+      desc: "Sous le résultat de la tournée, Décider affiche maintenant son rendement : la part du temps de l’équipe passée sur les parcelles face aux trajets (à pied, en camion), le coût de l’équipe pour la tournée et le revient à l’hectare. "
+        + "La même tournée est recalculée « au plus proche » pour comparer jours, trajets et euros à l’hectare — et un bouton prend cet ordre si vous le préférez." },
+  ] },
+  { v: '7.95', items: [
+    { emoji: 'equipe', titre: 'La tension de l’équipe, face au planning prévu',
+      desc: "Pilotage › Aujourd’hui compare, pour chaque personne, le travail effectif des 14 derniers jours à ce que le planning prévoyait — pas au contrat : en modulation, une semaine haute est prévue. "
+        + "Une personne passe au seuil à plus de 10 % au-dessus du prévu, ou quand une des deux dernières semaines dépasse la moyenne autorisée réglée dans le Planning (44 h par défaut). Au-delà du maximum (48 h), elle passe en rouge. "
+        + "Le chiffre du haut a sa petite courbe : l’écart de l’équipe, jour après jour." },
+  ] },
+  { v: '7.94', items: [
+    { emoji: 'graphique', titre: 'La cadence a sa petite courbe',
+      desc: "Dans Pilotage › Aujourd’hui, la Cadence équipe montre ses 14 derniers jours : chaque point est la cadence des 7 jours précédents, comparée au chiffre affiché (les 4 dernières semaines). "
+        + "Sous le pointillé, l’équipe va moins vite que d’habitude : la courbe passe en orange, et la ligne du dessous donne l’écart du moment." },
+  ] },
+  { v: '7.93', items: [
+    { emoji: 'tracteur', titre: 'Le tracteur se projette sur les travaux en cours',
+      desc: "Un travail tracteur lancé doit couvrir tout le domaine : Pilotage › Aujourd’hui affiche maintenant, pour chaque session en cours, les hectares qui restent, les heures et les litres pour finir. "
+        + "L’amendement suit ses parcelles choisies, dès la création de l’apport. Un travail terminé disparaît. "
+        + "La <b>révision</b> se place dans ces travaux (« atteinte pendant le rognage ») et la <b>cuve</b> se lit après eux : ce qu’il restera quand tout sera fini, face à votre seuil." },
+    { emoji: 'carburant', titre: 'La consommation de chaque tracteur est mesurée',
+      desc: "Les litres de vos pleins, divisés par les heures notées entre deux pleins : Pilotage › L’équipe & le matériel montre la consommation réelle de chaque tracteur, et la part des heures chronométrées. "
+        + "Tant qu’un tracteur n’a pas assez de pleins notés avec leurs litres, le réglage du Tracteur reste utilisé, et l’écran le dit." },
   ] },
   { v: '7.92', items: [
     { emoji: 'equipe', titre: 'L\u2019arrachage fini pour l\u2019\u00e9quipe, la suite au prestataire',
@@ -4006,6 +4098,11 @@ var MV_AIDE = {
       ['La roue crantée', "en haut à droite ouvre ce qui se règle : objectifs de fin, fenêtres des tâches, hypothèses de calcul, IFT de référence — et le bilan de campagne à imprimer. Administrateur seulement."],
       ['Les cartes arrivent repliées', ": chaque bloc montre son <b>chiffre</b> et la ligne qui dit sur quoi il a été calculé, même fermé — rien n’est caché. Touchez-en une pour voir son détail : elle s’ouvre en grand, et la précédente se referme, pour que les autres restent rangées côte à côte."],
       ['Le petit rond « i » dit d’où vient un chiffre', ": touchez-le, une fiche s’ouvre et explique comment ce chiffre est calculé, sur quelle fenêtre, et ce qu’il ne dit pas. Ce qui <b>cadre</b> un chiffre — sa date, sa source, son périmètre — reste toujours affiché à côté de lui, en une ligne. C’est la méthode qui se range, jamais le cadre."],
+      ['La protection restante', ": dans la carte « Traiter ? », combien de parcelles sont à nu et pour chacune les jours de protection qui restent, d’après le dernier traitement du registre, trois rémanences par mode d’action et la pluie tombée depuis (un contact est à nu dès 20 mm, réglable, Réglages › Pilotage › Conformité). La pousse n’est pas comptée."],
+      ['Le coût de l’inaction', ": sous la marge, ce que le retard ajoute en heures et en euros si personne n’est ajouté, d’après le simulateur de renfort. Un modèle, pas une mesure ; le bouton mène à Décider."],
+      ['La tension de l’équipe', ": le travail effectif de chacun sur 14 jours, face à ce que le planning prévoyait — jamais face au contrat. Au seuil : plus de 10 % au-dessus du prévu, ou une semaine au-delà de la moyenne autorisée. Le bouton ouvre le Planning."],
+      ['Les petites courbes', ": à côté d’un chiffre du haut, elles montrent ses 14 derniers jours en écart à sa référence, le pointillé. La charge restante et le budget les tiennent d’une photo prise chaque jour à la première ouverture par un administrateur (60 jours gardés) ; un jour sans ouverture est un trou. La bande va de −30 % à +30 %, la même pour toutes : deux courbes côte à côte se comparent d’un coup d’œil. Le « i » dit ce que chaque point mesure."],
+      ['Les alertes matériel se lisent sur les travaux en cours', ": chaque session tracteur lancée doit couvrir tout le domaine (l’amendement, ses parcelles choisies). Aujourd’hui montre ce qui reste à faire, en heures et en litres, place la prochaine <b>révision</b> dans ces travaux et dit ce qu’il restera dans la <b>cuve</b> une fois tout fini. Un travail terminé disparaît. La consommation de chaque tracteur, mesurée sur vos pleins, est dans L’équipe & le matériel."],
       ['Quand il manque quelque chose, un bouton vous y emmène', ": plus de chemin à retenir. « Cuve GNR à renseigner », « fiches à passer en Inactif » — le bouton ouvre l’écran concerné, sur le bon onglet, et fait clignoter l’endroit exact une seconde."],
       _mvAideOngletsPil,
       ['La barre du haut dit où vous regardez', ": l’exercice entier, ou une campagne. Cliquez une campagne dans la frise de l’année et les trois chiffres du haut, la frise et les tableaux de la campagne suivent. La croix revient à l’année. <b>Trois écrans ont leur propre cadre</b> et ne se recadrent pas : Économie chiffre la période consultée (sauf ses sous-vues Exercice et Revient, qui ont chacune leur cadre), la Cave suit le millésime, la Conformité roule sur sept ans — chacun l’écrit au-dessus de ses chiffres."],
@@ -4014,6 +4111,7 @@ var MV_AIDE = {
       ['La conformité n’est plus dans cette ligne', "et c’est une question d’échelle : le cuivre roule sur <b>sept ans glissants</b>, il ne bouge pas quand vous cliquez une campagne. Un chiffre qui ignore la portée n’a pas sa place dans une ligne qui se recadre. Il se lit en entier dans l’onglet Conformité, et le bouton « à compléter » remonte toujours ses alertes, sur tous les onglets."],
       ['Le bouton « à compléter »', "liste ce qui manque pour que vos chiffres soient justes, et vous emmène à l’endroit exact où le renseigner. Un rond rouge sur un chiffre veut dire qu’il ne se calcule pas ; un rond orange, qu’il sort mais faux."],
       ['Les onglets vont du large au fin', ": l’année, puis la campagne, puis l’équipe et le matériel, puis la décision. Après le trait, ce sont des écrans de détail — on y arrive aussi en touchant un des trois chiffres."],
+      ['La carte du domaine se lit de cinq façons', " : l’avancement, les jours depuis le dernier traitement, le cépage, les passages phyto face à votre référence, le coût engagé à l’hectare. La légende suit la vue ; une parcelle sans donnée reste grise."],
       ['La campagne', "montre l’avancement, mais aussi — sous « Où va le temps de l’équipe » — comment la présence se partage entre vigne, tracteur et le reste, avec la frise prévu/réel, la courbe par semaine et l’écart. Ces blocs parlent d’une campagne ; le pic de la semaine la plus chargée, lui, se lit dans « L’année »."],
       ['Une tâche sans barème à l’hectare', "— arrachage, désherbage manuel, entreplantation sans trous saisis — ne prévoit pas d’heures : dans « Avancement par tâche », elle s’avance en <b>surface</b> faite sur surface concernée, la même part que sur la liste des parcelles."],
       ['Deux périodes qui se chevauchent', "ne comptent rien deux fois : les heures suivent les tâches, et une tâche n’appartient qu’à une seule période. Sur les jours communs, la frise hachure le fond en violet — il y a deux barres au même endroit, on lit la plus haute."],
@@ -4022,6 +4120,7 @@ var MV_AIDE = {
       ['Décider', "— l’onglet s’appelait <b>Simuler</b>, mais la tournée qu’on y enregistre part sur l’écran de toute l’équipe : c’est le seul endroit du Pilotage qui change ce que les autres voient. Trois cartes : <b>la tournée du jour</b> (jusqu’où l’équipe ira, dans quel ordre), <b>qui fait quoi</b> (l’équipe répartie entre les priorités) et <b>le renfort</b> (combien, et quand)."],
       ['La tournée part du planning', " : le travail en priorité, le prochain jour travaillé, l’équipe affectée à la priorité et présente ce jour-là (congés et récup retirés), ses heures et sa coupure. Les trajets se calculent entre chaque parcelle et la suivante. Chaque case dit d’où vient sa valeur ; en toucher une passe l’écran en simulation, « Valeurs réelles » revient au planning."],
       ['L’anneau doré qui respire', "marque la parcelle commencée et pas finie, sinon la prochaine à faire\u00a0: sur la carte du domaine pour la priorité du moment, sur celle de la tournée pour les travaux cochés — c’est son n°\u00a01. Le départ de la tournée, lui, reste la dernière parcelle validée, sauf si vous en choisissez un autre."],
+      ['Le rendement de la tournée', ": sous le résultat, la part du temps de l’équipe passée sur les parcelles face aux trajets, le coût de l’équipe et le revient à l’hectare. La même tournée « au plus proche » est calculée à côté, pour comparer ; un bouton prend cet ordre."],
       ['Un contrat de groupe compte pour son effectif', " : une fiche « équipe de vendange » à 40 vaut 40 personnes, pas une ligne. Et quand la fenêtre du travail n’est pas encore ouverte, la tournée se calcule sur son premier jour : on compte ceux qui seront là ce jour-là, pas ceux d’aujourd’hui."],
       ['Le manque d’effectif se lit sur la semaine du pic', ", contre ce qui est prévu au planning <b>cette semaine-là</b> — pas contre la présence d’aujourd’hui. Un pic qui tombe dans onze mois ne se compare pas à qui est là ce matin."],
       ['Le total de l’Exercice n’est pas un compte de résultat', ": Ma Vigne connaît ce qui passe par elle — heures payées, carburant, achats d’intrants. Ni le fermage, ni les amortissements, ni les assurances, ni vos cotisations d’exploitant. Ce total sert à <b>piloter vos charges d’un bilan à l’autre</b>, pas à remplacer votre comptable."],
@@ -4539,6 +4638,83 @@ export const MV_INFO = {
     'Le <b>seuil bas</b> est celui que vous avez réglé dans Tracteur \u203a Entretien, pas une valeur du logiciel.',
     'Le prix au litre est la <b>moyenne pondérée des appoints</b>, arrêtée <b>à la date de chaque plein</b> : un plein de mars ne se valorise pas au prix moyen incluant les livraisons de septembre. Sans aucun appoint, le carburant reste à <b>zéro</b> dans tous les coûts — pas «\u202fà peu près\u202f», à zéro.',
     'Ces mêmes pleins <b>sont</b> le coût carburant du Pilotage. Un plein non noté n\u2019est pas seulement un niveau de cuve faux : c\u2019est du carburant absent de vos coûts.'
+  ] },
+
+  'pil.spark': { t: 'La petite courbe', p: [
+    'Elle montre les <b>14 derniers jours</b>. Chaque point dit de combien le chiffre s’écarte de <b>sa référence</b>, le pointillé au milieu.',
+    'Pour la cadence : chaque point est la cadence des <b>7 jours</b> qui finissent ce jour-là, comparée à la cadence des 4 dernières semaines — le chiffre affiché. Même mesure : les heures dans les rangs du planning, divisées par les jours travaillés.',
+    'La bande va de <b>−30 % à +30 %</b>, la même pour toutes les petites courbes : au-delà, le point reste collé au bord. Un jour sans mesure coupe la courbe ; il ne compte pas pour zéro.',
+    'Pour la tension : chaque point est l’écart de toute l’équipe, sur les 7 jours qui finissent ce jour-là, entre le travail effectif et le planning prévu.',
+    'Pour la charge restante et le budget, les points viennent de la <b>photo quotidienne</b> : chaque jour, à la première ouverture par un administrateur, l’appli note la charge restante, le % consommé et le % fait (60 jours gardés, dans la configuration du domaine). Charge : l’écart à la charge du premier jour de la fenêtre — descendre est favorable. Budget : consommé moins fait, en points — zéro veut dire que le budget suit le travail. Le point du jour est toujours la valeur en direct ; un jour sans ouverture est un trou.',
+    'Vert : favorable, ou à moins de 3 % de la référence. Orange : défavorable — pour la cadence, sous la moyenne ; pour la tension, au-dessus du prévu.'
+  ] },
+
+  'pil.tension': { t: 'Tension de l’équipe', p: [
+    'Pour chaque personne de l’équipe (hors bureau et hors équipe collective) : le <b>travail effectif</b> des 14 derniers jours, saisie du planning comprise, face au <b>prévu du modèle</b> sur les mêmes jours — la grille d’annualisation, sans les saisies.',
+    'Jamais face au contrat : en modulation, une semaine haute est <b>prévue</b>. Ce n’est pas de la fatigue, c’est le plan.',
+    'Une personne passe <b>au seuil</b> quand elle est à plus de 10 % au-dessus du prévu, ou quand une des deux dernières semaines (lundi à dimanche, la semaine en cours jusqu’à aujourd’hui) dépasse la <b>moyenne autorisée</b> réglée dans le Planning. Au-delà du <b>maximum absolu</b>, elle passe en rouge. Ce sont les mêmes repères que la fiche du salarié.',
+    'Le chiffre du haut est l’écart de toute l’équipe sur 14 jours. Le trait de chaque ligne marque le prévu ; la barre, le fait — même échelle pour tout le monde.',
+    'Le planning ne dit pas l’activité : les heures de cave ou d’atelier comptent aussi. Une personne sans aucune heure prévue ni faite n’a pas de ligne.'
+  ] },
+
+  'pil.dzrdt': { t: 'Rendement de la tournée', p: [
+    'Tout se lit sur la <b>même simulation</b> que le résultat juste au-dessus : l’équipe du planning de chaque jour, les trajets entre chaque parcelle et la suivante, à pied ou en camion selon la règle des trajets.',
+    'La barre partage le temps de l’équipe entre les parcelles (vert) et les trajets (à pied, en camion ; hachuré quand une parcelle n’a pas de GPS et que le trajet est estimé). Le trajet est du temps de toute l’équipe : tout le monde se déplace.',
+    'Coût de l’équipe = heures de chacun × son taux horaire à cette date ; le <b>taux moyen</b> pour qui n’a pas de taux propre et pour les personnes ajoutées dans la simulation. La tournée ne paie que la part du jour qu’elle occupe : le dernier jour, l’équipe passe à autre chose.',
+    'Revient à l’hectare = ce coût ÷ la surface de la tournée. C’est la main-d’œuvre du travail coché, ni le carburant ni les produits.',
+    'La ligne « Au plus proche » refait la même tournée dans l’ordre du tri du même nom. En gras, le meilleur des deux.'
+  ] },
+
+  'pil.carte': { t: 'Carte du domaine', p: [
+    'Le chiffre est l’avancement de la campagne. La carte, elle, se lit de cinq façons : choisissez la vue au-dessus, la légende suit.',
+    '<b>Avancement</b> : la couleur habituelle des parcelles. <b>Dernier traitement</b> : les jours depuis la dernière intervention du registre phyto sur la parcelle, toutes campagnes confondues — vert le jour même, rouge à partir de 14 jours.',
+    '<b>Cépage</b> : celui de la fiche parcelle. <b>Passages phyto</b> : les passages de la campagne, comptés comme dans Conformité, face à votre référence. Ce sont des passages, pas un IFT : le registre ne porte pas de dose de référence par produit.',
+    '<b>Coût / ha</b> : ce que la parcelle a coûté jusqu’ici à l’hectare, comme dans Économie › Parcelles. L’échelle va de la parcelle la moins chère à la plus chère.',
+    'Une parcelle sans donnée reste grise : un vide n’est pas un zéro. Zéro passage, lui, est une mesure et garde sa couleur.'
+  ] },
+
+  'pil.prot': { t: 'Protection restante', p: [
+    'Pour chaque parcelle : le <b>dernier traitement du registre</b> qui la concerne, et sa rémanence. Ce qu’il reste = la rémanence moins les jours écoulés. À zéro ou moins, la parcelle est <b>à nu</b>.',
+    'Trois rémanences, par <b>mode d’action</b>, réglées dans Réglages › Pilotage › Conformité : contact (cuivre, soufre, folpel…), pénétrant (cymoxanil, mandipropamid…), systémique (phosphonates, méfénoxam…). Par défaut 10, 12 et 14 jours, d’après les étiquettes, l’IFV et les Chambres d’agriculture.',
+    'Le mode d’action est <b>déduit de la substance active</b> du produit, sinon de son nom. Substance inconnue : contact, la rémanence la plus courte, et un « ? » le dit. Un traitement protège aussi longtemps que son produit le plus rémanent.',
+    'La <b>pluie</b> tombée après le jour du traitement, jusqu’aux heures déjà passées d’aujourd’hui, est lue chez Météo-France via Open-Meteo (15 derniers jours, rafraîchie chaque heure). Un <b>contact</b> est lessivé — à nu — dès le seuil réglé (20 mm par défaut ; la moitié part dans les 5 premiers mm). Un pénétrant ou un systémique ne se lessive pas. Pluie inconnue (pas de réseau, un jour manquant) : les jours seuls, et l’écran le dit.',
+    'Ce que ce calcul <b>ne sait pas</b> encore : la pousse de la vigne (15 à 20 cm de pousse découvrent des feuilles neuves), et l’heure du traitement face à une pluie dans les deux heures qui suivent.'
+  ] },
+
+  'pil.inaction': { t: 'Coût de l’inaction', p: [
+    'C’est ce que le <b>simulateur de renfort</b> de Décider répond quand personne n’est ajouté : les heures que le retard ajoute, et ce qu’elles coûtent au taux de l’équipe.',
+    'Le modèle : une tâche faite hors de sa fenêtre prend un peu plus de temps à chaque semaine de retard — <b>+15 % par semaine</b> par défaut, réglable dans les hypothèses de Décider. Les heures s’accumulent de semaine en semaine.',
+    'C’est une <b>hypothèse</b>, pas une mesure. Le chiffre sert à décider d’un renfort, pas à être inscrit dans un budget. Le bouton mène au simulateur, où le renfort s’essaie.',
+    '« Rien à rattraper » veut dire que chaque tâche finit dans sa fenêtre sans renfort, d’après la même simulation.'
+  ] },
+
+  'pil.trx': { t: 'Travaux tracteur en cours', p: [
+    'Un travail lancé — une session « En cours » — doit couvrir <b>tout le domaine</b> : toutes les parcelles, sauf les arrachées et celles désactivées dans la session. Ce qui reste = ces parcelles moins celles déjà cochées. C’est la même règle que la barre d’avancement de la session.',
+    '<b>L’amendement fait exception</b> : ses parcelles sont choisies dans l’apport (Phyto › Fertilisation). Ce qui reste = les parcelles de l’apport qui attendent encore. Il compte dès la création de l’apport, session lancée ou non.',
+    'Heures = surface restante × <b>barème h/ha</b> de l’activité. Litres = ces heures × la <b>consommation mesurée</b> du tracteur de la session (sinon son tracteur par défaut) ; le réglage du Tracteur sert tant que la mesure manque. Un travail sans barème affiche un tiret : il n’est pas compté à zéro.',
+    'Un travail terminé <b>disparaît</b> : session passée « Terminé », seule à la dernière parcelle ou à la main. Une session oubliée « En cours » compte quand même : elle est signalée quand aucune parcelle n’a été cochée depuis 21 jours.',
+    'Il n’y a pas d’heures de tracteur au planning : le planning porte des heures par personne, jamais une machine. Un travail pas encore lancé n’est donc pas compté.'
+  ] },
+
+  'pil.trxrev': { t: 'Révision dans les travaux en cours', p: [
+    'Les heures avant la révision (révision moins compteur), face aux heures des <b>travaux en cours</b> sur ce tracteur, mis bout à bout dans l’ordre où ils ont été lancés. Le trait rouge tombe dans le travail pendant lequel la révision sera atteinte.',
+    'Le repère en jours vient du <b>rythme mesuré</b> du tracteur : ses heures notées sur les 4 dernières semaines, divisées par les jours ouvrés. Ce n’est pas une date promise.',
+    'L’ordre réel des travaux peut différer, et le compteur n’avance qu’avec les sessions saisies : l’échéance est au plus tôt, jamais au plus tard.'
+  ] },
+
+  'pil.trxgnr': { t: 'La cuve après les travaux en cours', p: [
+    'Le niveau de la cuve, moins les litres qu’il faut pour <b>finir les travaux en cours</b>, travail par travail. La barre en bas est ce qu’il restera, face à votre seuil (le pointillé).',
+    'L’échelle part de zéro et va un peu au-dessus du niveau du jour (ou du seuil s’il est plus haut), arrondie : la <b>même pour toutes les lignes</b>. La capacité de la cuve est écrite au-dessus, en clair.',
+    'La consommation est celle du <b>tracteur</b>, pas celle du travail : un griffage et un rognage faits avec la même machine sont comptés au même litre par heure.',
+    'La ligne <b>« conseillé »</b>, en pointillé, n’apparaît que si la protection restante compte des parcelles à nu (ou qui le seront d’ici deux jours) et qu’une fenêtre de traitement existe dans les cinq jours : le traitement de tout le domaine, à la <b>cadence mesurée</b> de l’activité de pulvérisation sur vos propres traitements chronométrés — elle porte votre façon de faire, 4, 6 ou 8 rangs par passage — ou, faute de chrono, à son barème h/ha ; à la consommation de son tracteur. Rien n’est lancé ni compté. Cette ligne est pour l’instant éteinte : elle sera allumée à la belle saison.'
+  ] },
+
+  'pil.conso': { t: 'Consommation mesurée', p: [
+    'Pour chaque tracteur : <b>litres des pleins ÷ heures notées entre ces pleins</b>. Le plein n°2 rembourse ce qui a brûlé depuis le plein n°1 : ses litres se comptent face aux heures notées depuis le jour du plein précédent jusqu’au sien. Le premier plein de la campagne sert de départ.',
+    'Les heures viennent des sessions, parcelle par parcelle : la durée <b>chronométrée</b> quand elle existe, sinon la surface × le barème. La part chronométrée est affichée : c’est la fiabilité du chiffre.',
+    'La moyenne est <b>pondérée</b> : un plein après 24 heures de travail pèse plus qu’un plein après 4 heures. Chaque point est un intervalle, sa taille dit ses heures.',
+    'Ce sont des litres par heure <b>notée</b>, route et manœuvres comprises. Des heures non saisies gonflent le chiffre. Un intervalle sans aucune heure notée est écarté et compté comme tel ; un plein sans litres aussi.',
+    'Il faut au moins <b>2 intervalles et 10 heures</b> pour croire la mesure. En dessous, le réglage du Tracteur reste utilisé, et l’écran le dit.'
   ] },
 
   'pil.phyto': { t: 'Registre phyto', p: [

@@ -1509,9 +1509,370 @@ injectés, 14 rouges** ; l'injection « `logError` ignore `silencieux` » seule 
 « ×10 ». C'est le lot de tri que §132 attendait. ② Les 17 `catch` encore vides (pilotage 10) ne sont pas touchés. ③ Aucun
 rendu navigateur (le changement ne peint rien, par construction).
 
-## 213. ★★ COH-1 — UN MÊME CHIFFRE, UN MÊME NOM, UNE MÊME SURFACE SUR TOUS LES ÉCRANS (03/10 — `src/app.js` · `src/pilotage.js` · `src/utils.js` · `src/styles.css` · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `guide/11-pilotage.html` · `public/guide.html` · `scripts/mv-harnais-coh1.mjs` (neuf) · `scripts/mv-harnais-arrachage.mjs` · `scripts/mv-harnais-arrach3.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · **APP 7.92 → 7.93, SW 8.67 → 8.68**, base `61f4ccd`)
+## 213. ★★ GNR-M — LE TRACTEUR SE PROJETTE SUR LES TRAVAUX EN COURS, LA CONSO DE CHAQUE TRACTEUR EST MESURÉE (03/10 — `src/pilotage.js` · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE pilotage, MV_INFO ×4) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-gnr-mesure.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · **APP 7.92 → 7.93, SW 8.67 → 8.68**, base `61f4ccd`)
 
 ### 213a. D'où ça vient
+
+Série « densifier le Pilotage » (maquette validée le 03/10, `maquette-pilotage-densite.html`, trois versions). Premier lot de
+six : GNR-M. Les autres (SPARK, TENS, TOUR, CARTE, PROT + INACTION) sont au §28.
+**Trois corrections de modèle en route — c'est elles qui font le lot :**
+1. ★★★ **Il n'existe aucune heure tracteur « au planning ».** La maquette v2 projetait la cuve sur « les heures du planning × la
+   conso » : une entrée de planning porte des heures **par personne**, jamais une activité ni une machine, et le simulateur ne
+   mesure qu'un ETP tracteur global. Dit par Claude, vérifié dans le code, **avant** Nico.
+2. ★★★ **La règle de Nico** : *« quand un travail est mis en place il faut que tout le domaine soit fait (que tu peux avoir par
+   rapport aux parcelles déjà validées) — exception pour amendement où nous sélectionnons les parcelles avant »*. Cette règle
+   **existait déjà** dans le code : c'est le calcul de la barre d'avancement d'une session (`renderSessionProgress`). Une seule
+   définition du « reste » : non arrachées, hors `parcellesSkip`, moins `parcellesFaites`.
+3. ★★ *« une fois le travail sur le domaine terminé tu retires la ligne »* : on lit le **statut** (« Terminé », posé seul à la
+   dernière parcelle ou à la main), et on écarte aussi tout travail sans reste. ⚠️ On ne recalcule JAMAIS le reste des vieilles
+   sessions contre les parcelles d'aujourd'hui : une parcelle plantée depuis les ferait revenir (le piège §168 ⑦).
+
+### 213b. Ce qui change
+
+- **Aujourd'hui › Alertes matériel** (`_pilCkAlertes` → `_pilCkTracteur`) : la liste ne garde que les machines immobilisées ;
+  la révision et la cuve deviennent des cartes. Sans carte ni immobilisation, la phrase de calme reste — jamais à côté d'une
+  carte qui dit le contraire.
+  - **Travaux tracteur en cours** : une ligne par session « En cours » de la campagne (`_sessInSaison`), reste en ha sur
+    l'échelle du domaine, heures = reste × barème h/ha de l'activité, litres = heures × conso du tracteur (session, sinon
+    tracteur par défaut). Sans barème : tiret, jamais zéro. Session sans parcelle cochée depuis plus de 21 jours : signalée,
+    toujours comptée (règle de Nico).
+  - **Amendement** : la session « Amendement » n'est JAMAIS un périmètre (elle affiche tout le domaine) ; on lit les apports
+    (`INTRANTS.fertil`) de la campagne, leurs parcelles en attente dans `_ferFaits`. L'apport compte dès sa création ; la
+    session ouverte ne sert qu'à savoir quel tracteur le fait. Nom de l'activité recopié dans `_PIL_GM_FER`, **épinglé** au
+    `FER_ACT` de `phyto.js` par le harnais (pas de nouvel export dans un module de 150 ko).
+  - **Révision** (`_pilGmRevision`) : les travaux du tracteur bout à bout, dans l'ordre de lancement ; le trait tombe dans le
+    travail pendant lequel la révision est atteinte. Priorité : dépassée, puis atteinte dans les travaux, puis la plus proche
+    (au-delà de 120 h et hors travaux : pas de carte, comme l'ancienne alerte). Repère en jours = rythme mesuré (heures notées
+    sur 28 jours ÷ jours ouvrés), dit comme un repère.
+  - **Cuve** : cascade niveau − litres de chaque travail → ce qu'il restera, face au seuil. Échelle : de zéro à un peu au-dessus
+    du niveau (ou du seuil), arrondie — ★ la capacité écrasait tout (410 L sur 1 500 = un quart de barre, un travail de 5 L =
+    un trait), **vu à l'œil sur une capture**, aucun harnais ne l'aurait dit.
+- **L'équipe & le matériel › Consommation mesurée** (`_pilPanelConso`, clé `mat_conso`) : par tracteur, Σ litres des pleins ÷
+  Σ heures notées entre eux (`_pilGmConso`). Le plein n°2 rembourse ce qui a brûlé depuis le n°1 : jours APRÈS le plein
+  précédent, jusqu'au jour du plein INCLUS (un plein n'a pas d'heure — l'ambiguïté ne joue qu'aux deux bouts). Premier plein =
+  départ. Deux pleins le même jour = un. Intervalle sans heure = écarté et compté ; plein sans litres = compté à part. Heures =
+  `dmin` (chrono) sinon surface × barème — la règle de `_ecoTracHByParc`. Il faut 2 intervalles et 10 h, sinon repli sur le
+  réglage `conso_gnr_lh`, et l'écran le dit.
+
+### 213c. Mesuré
+
+`mv-harnais-gnr-mesure.mjs` (neuf, branché dans la liste) : **45 assertions**, bloc extrait du vrai `pilotage.js` avec ses
+helpers réels (`_pilTile`, `_ecoCfg`…), horloge figée. **9 contre-épreuves, 9 rougissent** (désactivées recomptées, statut
+ignoré, session Amendement périmètre, jour du plein recompté, moyenne non pondérée, apport recompté, travail fini maintenu,
+apport d'une autre campagne, arrachées comptées). Rendu regardé en vrai (Chrome, CSS réel, 1 100 px et 390 px).
+
+### 213d. Leçons
+
+- ★★★ **Une règle métier dictée existe souvent déjà dans le code, sous un autre nom.** « Tout le domaine doit être fait » =
+  `renderSessionProgress`. La reprendre telle quelle évite deux définitions du « reste » qui divergeraient.
+- ★★ **Une échelle « vraie » peut être illisible.** La capacité de cuve était la référence la plus juste et la moins utile :
+  l'échelle commune se choisit pour l'écart qu'on veut lire, et se dit (l'axe porte ses bornes, la capacité est écrite).
+- ★ **Un numéro de section se lit dans l'index, pas dans la conversation** : ce lot s'est d'abord appelé « §206 » — déjà pris
+  par ARRACH-3. Rattrapé avant livraison.
+
+### 213e. Ouvert
+
+① **À l'œil chez Nico** : les cartes sur son téléphone, avec ses vraies sessions et ses vrais pleins — en particulier la part
+chronométrée et des intervalles écartés. ② La conso est celle du **tracteur**, pas du travail (pulvé et griffage au même L/h). ③ Le
+**traitement conseillé** en pointillé dans la cuve (maquette v3) n'est pas fait : il demande de relier la carte « Traiter ? » à
+une activité de pulvérisation. ④ Heures restantes au barème ; le rythme chronométré de chaque session pourrait les affiner.
+
+## 214. ★ SPARK-1 — LA CADENCE A SA PETITE COURBE, ET LE MOTEUR DE GRAPHE SAIT LES FAIRE (03/10 — `src/utils.js` (`_mvGraphSpark`, APP, WHATS_NEW, MV_AIDE, MV_INFO `pil.spark`) · `src/pilotage.js` · `src/styles.css` · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-spark.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · **APP 7.93 → 7.94, SW 8.68 → 8.69**, base `61f4ccd` + GNR-M non poussé)
+
+### 214a. Ce qui était demandé, et ce que les données permettent
+
+Deuxième lot de la série « densifier le Pilotage » (maquette v2) : une petite courbe de 14 jours à côté de **quatre** chiffres
+du bandeau, en écart à leur référence, même bande ±30 %. **Inventaire avant d'écrire — un seul des quatre a un historique daté :**
+- **Cadence équipe** : oui. `_planTeamCadence(deb, fin)` (planning.js) mesure n'importe quelle fenêtre — c'est déjà la source du KPI.
+- **Charge restante** : **non.** `calcHeures` ne connaît que l'état du jour ; reconstruire le reste d'il y a dix jours demanderait
+  de rejouer les validations au barème, c'est-à-dire une **seconde définition** du « fait » à côté de celle de `calcHeures`
+  (étapes, sélections SEL-1, densité…). Elles divergeraient.
+- **Budget consommé** : **non.** `_pecData()` calcule un état, pas une série ; l'avancement d'il y a dix jours n'existe nulle part.
+- **Tension** : c'est le lot TENS.
+- **Colonnes de la tâche prioritaire** : **écartées.** Le temps réel (`_ecoTvEvents`, PAR-1) verse les heures **à la validation** :
+  un jour de validation ramasse les jours d'avant. Des colonnes par jour montreraient des pics là où il n'y a eu qu'une saisie.
+Le moteur le dit lui-même : *« un graphe non alimenté ne trace JAMAIS une ligne plate ni un zéro »*. Le lot est donc réduit à la
+cadence, et la question d'un **relevé quotidien** est posée à Nico (§28).
+
+### 214b. Ce qui change
+
+- `window._mvGraphSpark(vals, o)` (utils.js, après `_mvGraphSvg`) : la petite courbe sur le moteur commun (`_mvGraphCadre` +
+  `_mvGraphSvg`, couleurs `MV_GRAPH_COL`). Des **écarts en %**, jamais des valeurs brutes ; bande `MV_SPARK_BANDE` = ±30 %, le
+  point se colle au bord ; `null` = trou qui **coupe** la courbe ; moins de deux mesures = `''` ; vert si favorable ou à moins de
+  3 %, orange sinon ; référence en pointillé `prevu` au milieu ; aucun texte dans le SVG.
+- `_pilSparkCadence(m)` : 14 points, chacun = cadence des **7 jours** qui finissent ce jour-là, comparée à `m.cadH` (4 semaines,
+  le chiffre affiché). Cadence estimée (pas de planning) : rien. La ligne de cadre ajoute « 7 derniers jours : −9 % ».
+
+### 214c. Mesuré
+
+`mv-harnais-spark.mjs` : **19 assertions** (primitive extraite AVEC son moteur ; `_planTeamCadence` doublé avec SA signature et
+ses appels enregistrés : fenêtres de 7 jours, dernière = aujourd'hui) ; **7 contre-épreuves, 7 rougissent**. Rendu regardé (Chrome,
+CSS réel) : à −9 % sur une bande de ±30 % la courbe est presque plate — c'est le prix d'une bande commune, et c'est voulu.
+
+### 214d. Ouvert
+
+① **Le relevé quotidien** (question à Nico, §28) : sans lui, Charge restante et Budget n'auront jamais de courbe. ② La bande
+±30 % est peut-être trop large pour la cadence — à juger sur les vraies données, sans casser l'échelle commune.
+
+## 215. ★★ TENS-1 — LA TENSION DE L'ÉQUIPE, FACE AU PLANNING PRÉVU, JAMAIS AU CONTRAT (03/10 — `src/planning.js` · `src/pilotage.js` · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE, MV_INFO `pil.tension` + `pil.spark`) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-tension.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · **APP 7.94 → 7.95, SW 8.69 → 8.70**, base `61f4ccd` + GNR-M + SPARK-1 non poussés)
+
+### 215a. Le modèle, corrigé dès la maquette
+
+La proposition d'origine comparait les heures faites aux **heures du contrat** : faux en annualisation, où une semaine haute est
+**prévue**. La maquette v2 a remplacé le contrat par le **planning prévu** ; Nico a validé. Restait à trouver ce « prévu » dans le
+code : c'est la **grille du modèle** (`_planDayH(plId, m, d, null, yr)` — la journée SANS la saisie), et le « fait » est le
+**travail effectif** (`_planWorkH`, saisie comprise : la base licite des durées maximales). Aucune fonction du planning ne rendait le
+prévu sur une fenêtre : `_planRangeH_` reçoit un 4e mode, `'prevu'`, et `_planPrevuPersRange` est exposé. Le cadre légal existait
+(`_planLegal`, réglable par convention, déjà appliqué semaine par semaine dans la fiche du salarié) : exposé tel quel.
+★ **Le « plafond de deux semaines » de la maquette (2 × 48 h) n'existe pas en droit** : le maximum est **par semaine**. Le lot lit la
+semaine la plus chargée des deux dernières (lundi-dimanche, la courante jusqu'à aujourd'hui) avec **les repères de la fiche** :
+au-delà de la moyenne (44 h) = à surveiller, au-delà du maximum (48 h) = rouge.
+
+### 215b. Ce qui change
+
+- `_pilTensData(d)` (mémorisée sur `d` le temps d'un rendu) : par personne (ni bureau, ni collective), fait et prévu sur 14 jours,
+  écart, semaines ; **au seuil** = +10 % au prévu (`_PIL_TENS_SEUIL`) ou semaine > moyenne ; rouge = semaine > maximum. Sans prévu,
+  l'écart est `null` (tiret), jamais 0 %. La série de la petite courbe = l'écart de l'équipe sur 7 jours glissants.
+- Bandeau : **Tension équipe** (clé `auj_tension`), avec sa petite courbe (`_mvGraphSpark`, haut = défavorable).
+- La décision du jour : **Tension de l'équipe**, une ligne par personne, barre du fait et trait du prévu sur une échelle commune,
+  semaine chargée écrite sous le nom, bouton **Planning ›** (nouvelle cible `planning` de `_PIL_DIAG_CIBLES`).
+
+### 215c. Mesuré
+
+`mv-harnais-tension.mjs` : **27 assertions** (vrai `_planRangeH_` extrait, voisins doublés et appels enregistrés : `'prevu'` passe
+`e = null` ; bloc TENS extrait, planning écrit à la main sous horloge figée) ; **8 contre-épreuves, 8 rougissent**. ★ Deux erreurs
+du **harnais**, aucune du code : une assertion de tête qui oubliait un jour de Léa dans la fenêtre (le code avait raison), puis une
+contre-épreuve devenue **muette** une fois l'assertion corrigée — Victor passait le seuil par l'écart ET par la semaine, retirer
+l'une des deux règles ne changeait rien. Un cas « au seuil par l'écart seul » (Marc) l'a rendue utile. Rendu regardé (390 px).
+
+### 215d. Ouvert
+
+① **À l'œil chez Nico** : ses vraies personnes, et la saison où la modulation est haute — c'est là qu'on verra si +10 % est le bon
+seuil. ② Le planning ne dit pas l'activité : cave et atelier comptent dans le fait.
+
+## 216. ★ TOUR-RDT — LE RENDEMENT DE LA TOURNÉE, SUR LA MÊME SIMULATION (03/10 — `src/pilotage.js` · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE, MV_INFO `pil.dzrdt`) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-tournee-rdt.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · **APP 7.95 → 7.96, SW 8.70 → 8.71**, base `61f4ccd` + GNR-M, SPARK-1, TENS-1 non poussés)
+
+### 216a. Ce qui existait déjà
+
+La tournée du jour (Décider) simulait déjà tout ce qu'il fallait : `_dzSimuler` pose, jour après jour, le travail
+(personnes-heures ÷ effectif) et les trajets (`_dzHop`, temps de **calendrier** de l'équipe : tout le monde se déplace) dans
+la journée de chaque jour (`used` sur `J`). Le résultat affichait le premier jour (surface, travail, trajets). Rien ne disait
+la part du temps perdue en route sur toute la tournée, ni ce que coûtait l'ordre choisi. ★ **Aucun second calcul** : le rendement
+lit `C.sim` ; la comparaison relance la même `_dzSimuler` sur l'ordre du tri « Au plus proche » (`_opNNNames`), déjà proposé.
+
+### 216b. Ce qui change
+
+- `_dzCoutJour(d, ctx)` : Σ heures × effectif × taux à la date (`_mvPaieTauxEffAt`) ; taux moyen (`_ecoRate`) pour qui n'en a
+  pas et pour les personnes sans nom (renfort `ctx.R`, équipe anonyme `ctx.anon`) ; aucun taux lisible → `null`, jamais 0.
+- `_dzRdtSim` : temps utile = (used − trajets) ÷ used ; trajets répartis à pied / en camion / estimés sans GPS ; coût = coût du jour
+  × **part du jour occupée** (le dernier jour, l'équipe passe à autre chose) ; revient/ha = coût ÷ surface.
+- `_dzRendementHtml` sous le résultat : barre (vert parcelles, terre à pied, orange camion, hachuré sans GPS), trois chiffres,
+  tableau « Ordre actuel / Au plus proche » (meilleur en gras, sans couleur), bouton « Prendre l'ordre au plus proche » (même
+  `data-op="sort"` que le tri, admin seulement) ; ordre déjà le plus proche : une phrase.
+
+### 216c. Mesuré
+
+`mv-harnais-tournee-rdt.mjs` : **20 assertions**, attendus posés à la main sans relire la simulation (utile = 10,5 h ÷ (10,5 h +
+trajets) ; coût = taux × heures × part du jour) ; **7 contre-épreuves, 7 rougissent**. Rendu regardé (390 px). Une assertion
+écrite avec un « ou » de repli (deux formules acceptées faute d'avoir compté les jours) a été réécrite : une assertion qui accepte
+deux réponses n'en vérifie aucune.
+
+### 216d. Ouvert
+
+① Le revient/ha est la **main-d'œuvre du travail coché** seule (ni carburant ni produits) — c'est dit dans la fiche. ② La
+comparaison ne propose que « au plus proche » ; « par commune » pourrait suivre si Nico le juge utile.
+③ ⚠️ **`pilotage.js` 800 → 846 ko** sur les quatre lots de la série (GNR-M, SPARK-1, TENS-1, TOUR-RDT), chacun sous 5 % mais
+le cliquet de taille mesure depuis le dernier push : rouge au contrôle complet. **Seule la ligne `ko` de `pilotage.js`** est
+regravée dans `typo-baseline.json` (pas `--baseline` complet, qui avalerait la croissance des autres modules — leçon §202).
+Question du découpage posée : la série « densifier » pourrait vivre dans un module à part si CARTE et PROT ajoutent encore.
+
+## 217. ★ CARTE-1 — LA CARTE DU DOMAINE SE LIT DE CINQ FAÇONS, CHACUNE À SA SOURCE (03/10 — `src/pilotage.js` · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE, MV_INFO `pil.carte`) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-carte-vues.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · **APP 7.96 → 7.97, SW 8.71 → 8.72**, base `61f4ccd` + GNR-M, SPARK-1, TENS-1, TOUR-RDT non poussés)
+
+### 217a. Le principe
+
+La carte Leaflet de La campagne (`_pilBuildMap`) ne savait peindre qu'une chose : l'avancement (`getPCls`). Cinq vues, et
+**aucune ne recalcule** : avancement = `getPCls` ; dernier traitement = la date la plus récente du **registre** (`TRAITEMENTS`, toutes
+campagnes — la protection ne s'arrête pas au changement de campagne) ; cépage = `p.cepage` (comparé sans accents ni casse) ;
+passages = `_cfmPassages()` + `_cfmIftRef()`, **la règle de la Conformité** (une session = un passage ; des passages, pas un IFT) ;
+coût = `engHa` des lignes de `_pecData()`, la vue Parcelles de l'Économie (arrachées hors de l'échelle).
+**Un vide est gris, un zéro a sa couleur** : zéro passage est une mesure ; une parcelle absente du tableau de l'Économie, non.
+
+### 217b. Ce qui change
+
+`_PIL_LENT` (vue courante, en mémoire), `_pilLentPrep()` (ce que la vue lit, **une fois par rendu**, partagé par la tuile et la
+carte via `_PIL_LENT_PREP`), `_pilLentCol(p, o)` (couleur + texte du popup), `_pilLentBtns()` (cinq boutons, `aria-pressed`),
+`_pilLentLeg(o)` (légende propre à la vue, « sans donnée » toujours dite). Contours KML, épingles et regroupements par commune
+passent tous par `_pilLentCol`. La tuile gagne sa fiche « i » (`pil.carte`).
+
+### 217c. Mesuré
+
+`mv-harnais-carte-vues.mjs` : **23 assertions**, vraies sources de la Conformité extraites ; **7 contre-épreuves, 7 rougissent**.
+★ **Vu à l'œil, pas par un harnais** : la légende des cépages affichait le cépage d'une vigne **arrachée** (le registre des cépages
+partait de toutes les parcelles). Corrigé, épinglé par une assertion et une contre-épreuve.
+
+★★ **Le contrôle complet a rendu quatre rouges que les harnais du lot ne voyaient pas**, tous dans le code neuf, tous corrigés :
+ESLint `no-redeclare` (un `var lc` repris pour le barycentre d'un polygone) ; C19 du preflight (`o.ref` — `ref` est un nom de champ
+surveillé, même porteur d'un nombre : renommé `refIft`) ; le jeton `--shadow-sm` sans repli ; et deux caractères hors du sous-ensemble
+de police (`\u0300`/`\u036f` d'une normalisation recopiée : `_friseNorm` existait, une seule normalisation désormais). **Un harnais
+vert sur le sens ne dispense jamais du contrôle complet** — et un bloc recopié d'un autre module amène ses propres cliquets.
+⚠️ Le rendu Leaflet (polygones repeints, bulles) n'a pas été regardé dans un navigateur : les boutons et la légende seulement.
+
+### 217d. Ouvert
+
+① La vue choisie n'est pas mémorisée d'une session à l'autre (elle revient sur l'avancement) — à mémoriser si Nico le souhaite.
+② Sur téléphone, les cinq boutons défilent : la vue active peut sortir de l'écran.
+
+## 218. ★★ PROT-1 + INACTION-1 — LA PROTECTION RESTANTE PAR PARCELLE, LE COÛT DE L'INACTION SUR LE COCKPIT (03/10 — `src/pilotage.js` · `src/reglages.js` · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE, MV_INFO `pil.prot` + `pil.inaction`) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-protection.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · **APP 7.97 → 7.98, SW 8.72 → 8.73**, base `61f4ccd` + les cinq lots précédents non poussés)
+
+### 218a. Les valeurs, vérifiées avant d'écrire
+
+Nico : *« Go sur tes reco »*, après vérification dans les textes (étiquettes Nufarm/Adama/Syngenta/Corteva, IFV, Chambres
+d'agriculture, guides bio) : **contact 10 j** (étiquette cuivre : couverture tous les 8-10 j selon climat, lessivage et pousse ;
+sans pluie ni pousse on peut attendre 25 j), **pénétrant 12 j** (cymoxanil seul 5-6 j mais en cadence 10-12 avec son cuivre ;
+mandipropamid 12-14 j), **systémique 14 j** (phosphonates, méfénoxam, Zorvec : 14 j, à resserrer à 10-12 sous pression ; IFV Nîmes :
+21 j possibles sur oïdium). **Lessivage : 20 mm cumulés pour un CONTACT seulement** (la moitié part dans les 5 premiers mm) ; un
+pénétrant ou un systémique est à l'abri 1 à 2 h après l'application. Ma première proposition disait contact 7 j : trop court.
+
+### 218b. Ce qui change, et ce qui est écarté
+
+- **Réglages › Pilotage › Conformité** : trois champs `prot_contact_j / prot_penetrant_j / prot_systemique_j` (`CONFIG.conformite`,
+  groupe `'prot'` de `_ecoCfgSet`, clé vérifiée). Vides = défauts 10 / 12 / 14.
+- **Mode d'action** (`_pilProtType`) : déduit de la **substance active** (`p.sub`, E-Phy), sinon du nom, par trois listes de
+  mots ; rien de connu → **contact**, la rémanence la plus courte, et `deduit:true` (un « ? » à l'écran). Un mélange protège
+  comme son produit **le plus rémanent** (c'est ainsi que les étiquettes des mélanges cuivre + cymoxanil sont cadencées).
+- **Protection restante** (`_pilProtData`, `_pilProtHtml`) dans la carte « Traiter ? » : par parcelle active, le dernier
+  traitement du registre, reste = rémanence − jours ; « jamais traitée » en tête, puis à nu, puis les plus proches ; chiffre : N à
+  nu, ha sans protection, N à nu d'ici 2 jours.
+- ⚠️ **ÉCARTÉ, et dit à la fiche : le lessivage et la pousse.** L'appli n'enregistre **pas la pluie tombée** : le relevé météo
+  quotidien du journal (`meteo:true`) porte température, vent, ciel — pas les millimètres — et les prévisions horaires ne remontent
+  que 24 h. Un réglage « 20 mm » sans donnée de pluie serait un réglage sans effet : non posé. Lot **PLUIE-1** au §28.
+- **Coût de l'inaction** (`_pilCkInaction`, clé `auj_inaction`) sous la marge : `_rfSim` du contexte de `_rfPair` avec un **profil
+  vide** — exactement ce que la carte renfort de Décider affiche déjà en « sans renfort » ; `induit` × `ctx.rate`, le `k_retard`
+  écrit à côté, bouton vers Décider (cible interne `renfort` de `_pilGo`). Campagne finie, sans taux ou qui boucle : rien, ou
+  « Rien à rattraper ».
+
+### 218c. Mesuré
+
+`mv-harnais-protection.mjs` : **21 assertions** (bloc extrait, horloge figée ; le VRAI `_ecoCfgSet` de reglages.js exécuté ;
+`_rfSim` doublé avec sa signature) ; **8 contre-épreuves, 8 rougissent**. Une assertion fausse (une espace fine dans « 4 922 € »
+rendue par `toLocaleString`), le code avait raison. Rendu regardé (390 px).
+★ **Le contrôle complet a rendu trois cliquets rouges**, corrigés : un `≈` hors du sous-ensemble de police (→ « env. »), un
+`font-weight:400` et un rayon de 12 px (un pas) dans le CSS neuf, et trois tailles en px en dur copiées de la ligne IFT des réglages
+(→ jetons `--pt-*`). Même leçon qu'au §217 : copier une ligne voisine, c'est copier sa dette.
+
+### 218d. Ouvert
+
+① **PLUIE-1** : enregistrer la pluie du jour (Open-Meteo `daily.precipitation_sum`, `past_days`) dans le relevé météo du journal,
+puis appliquer le lessivage (contact : 20 mm cumulés, moitié à 5 mm). ② Rémanence **par produit** (le catalogue local) pour les
+cas où la substance ne suffit pas. ③ La pousse n'est pas mesurée : un stade phénologique pourrait la remplacer.
+
+## 219. ★ PHOTO-1 — LA PHOTO QUOTIDIENNE DES CHIFFRES DU COCKPIT, ET LES DEUX COURBES QU'ELLE PERMET (03/10 — `src/pilotage.js` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE, MV_INFO `pil.spark`) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-photo.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · **APP 7.98 → 7.99, SW 8.73 → 8.74**, base `61f4ccd` + six lots non poussés)
+
+### 219a. La décision
+
+§214a : la Charge restante et le Budget n'avaient aucun historique daté. Question posée, Nico : *« Go sur tes reco »* — une photo
+par jour, dans la configuration du domaine (déjà écrite par l'admin : aucune règle Firestore nouvelle), 60 lignes, rien de
+rétroactif. `CONFIG` est chargé en entier (`window.CONFIG = value`) et `_fbClone` ne neutralise que les tableaux imbriqués : un
+tableau d'objets `{d, reste, cons, avc}` passe.
+
+### 219b. Ce qui change
+
+- `_pilPhotoEcrire(d)` au rendu d'Aujourd'hui : **admin**, **période active** (`_pilSaison().nom === getSaisonActive().nom` — une
+  archive consultée ne photographie rien), **une fois par jour** (jamais réécrite : le chiffre du matin fait foi), lignes futures ou
+  sans date écartées, tri, 60 au plus, `saveData('config')` (le verrou de chargement anti-perte est le sien). ★ « Regarder n'écrit
+  pas » (§168) reste la règle ; ici l'écriture est le BUT, décidé, borné à un geste par jour.
+- `_pilSparkCharge(d)` : écart % à la **première photo de la fenêtre** (descendre = favorable) ; `_pilSparkBudget(E)` : **consommé −
+  fait, en points** (zéro = le budget suit le travail). Dans les deux, le point du jour est la **valeur en direct**, photo ou pas ;
+  un jour sans ouverture est un trou. Sur `_mvGraphSpark` (§214), rien sous deux points.
+
+### 219c. Mesuré
+
+`mv-harnais-photo.mjs` : **15 assertions** (vrai `_pilSaison` extrait, `saveData` compté) ; **7 contre-épreuves, 7 rougissent**. Une
+assertion fausse (le compte des lignes gardées sur 81), le code avait raison.
+
+### 219d. Ouvert
+
+① La courbe n'existera qu'après deux ouvertures d'Aujourd'hui par un admin : à regarder chez Nico dans quelques jours. ② La
+référence de la charge est « il y a 14 jours », pas la trajectoire du plan — celle-ci n'existe pas sous forme datée.
+
+## 220. ★ PLUIE-1 — LA PLUIE TOMBÉE DEPUIS LE TRAITEMENT LESSIVE LES CONTACTS (03/10 — `src/app.js` · `src/pilotage.js` · `src/reglages.js` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE, MV_INFO `pil.prot`) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-protection.mjs` (étendu) · **APP 7.99 → 8.00, SW 8.74 → 8.75**, base `61f4ccd` + sept lots non poussés)
+
+### 220a. Le choix : lire la pluie, pas la stocker
+
+§218b l'avait écarté faute de donnée. Trois voies : ① ajouter `past_days` à l'appel météo principal — **non** : ce code lit
+`daily[0]` comme « aujourd'hui » (probabilité de pluie, gel), un décalage de 15 jours casserait l'accueil ; ② écrire les mm dans le
+relevé météo quotidien du journal — une donnée de plus en base, écrite le matin alors que la journée n'est pas finie ; ③ **un appel
+Open-Meteo à part** (`_pluieCharger`, app.js : `daily=precipitation_sum&hourly=precipitation&past_days=15&forecast_days=1`),
+rien en base, cache local d'une heure. Retenu : ③. Quinze jours suffisent — au-delà, la rémanence la plus longue (14 j) est déjà
+passée. ★ **Le jour même ne vaut que ses heures passées** (`_pluieLire`) : la somme quotidienne d'Open-Meteo contient la prévision
+du soir ; sans heures, le jour est **inconnu**, pas prévu.
+
+### 220b. Ce qui change
+
+- `_pilProtPluie(date, pl, auj)` : Σ mm des jours **après** le jour du traitement jusqu'à aujourd'hui ; un jour manquant → `null`
+  (inconnu), jamais zéro. Un **contact** avec reste > 0 et pluie ≥ `prot_lessivage_mm` (réglage, 20 par défaut, 4e champ de la
+  carte Conformité) passe `lessive`, reste 0, et la ligne dit « lessivée · 28,5 mm ». Pénétrants et systémiques : pas de lessivage
+  (à l'abri 1-2 h après, §218a). La carte demande la pluie une fois par heure (`_pilPluieDemander`) et se repeint quand elle arrive ;
+  sans relevé : « pluie inconnue, les jours seuls ».
+
+### 220c. Mesuré
+
+`mv-harnais-protection.mjs` étendu : **32 assertions** (`_pluieLire` extraite d'app.js sur une réponse Open-Meteo écrite à la main ;
+F lessivée à 28,5 mm, G à 7 mm encore protégée, pénétrant non lessivé, jour manquant → inconnu, seuil réglé à 30 mm) ; **12
+contre-épreuves, 12 rougissent** (dont : le jour du traitement compté, un jour manquant compté zéro, le jour même pris en prévision
+entière). Deux assertions fausses (deux jours de pluie oubliés dans l'attendu ; une ancre déplacée), le code avait raison.
+
+### 220d. Ouvert
+
+① **Aucun navigateur** : l'appel réel à Open-Meteo et le repeint de la carte à l'arrivée de la pluie sont à regarder chez Nico.
+② La « moitié dans les 5 premiers mm » n'est pas modélisée : seuil unique. ③ L'heure du traitement face à une pluie dans les 2 h.
+
+## 221. ★ TRAIT-CUVE — LE TRAITEMENT CONSEILLÉ, CHIFFRÉ DANS LA CUVE ; LE QUOI DE NEUF SPÉCIAL « MA VIGNE PRÉVOIT » (03/10 — `src/pilotage.js` · `src/utils.js` (APP, WHATS_NEW spécial, MV_INFO `pil.trxgnr`) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` (intro de section) · `scripts/mv-harnais-gnr-mesure.mjs` (étendu) · **APP 8.00 → 8.01, SW 8.75 → 8.76**, base `61f4ccd` + huit lots non poussés)
+
+### 221a. Le croisement
+
+Trois cartes se lisent ensemble : la **protection restante** (des parcelles à nu, ou qui le seront d'ici deux jours — §218, §220),
+la **fenêtre de traitement** (un créneau dans les cinq jours — `_pilTreatDays`) et le **tracteur** (`_pilGmTravaux` : domaine, conso
+par tracteur). `_pilGmTraitementOption` n'existe que si les trois disent oui : alors la cuve reçoit « − Traitement (conseillé) » en
+pointillé et « Avec ce traitement », au barème h/ha de l'**activité de pulvérisation** — trouvée par son nom (« trait », « pulv »)
+ou par son tracteur `traitementOnly`. Déjà une session de ce travail en cours → elle est dans les travaux, pas de pointillé. Pas
+d'activité, pas de barème, pas de fenêtre, rien à nu : rien. ★ **Une ligne « et si » reste en pointillé et hors des totaux** :
+elle sert à commander le plein, pas à compter.
+★★ **Correction de Nico (dictée, 03/10)** : *« ça dépend si les traitements se font sur 4 rangs, 6 rangs, 8 rangs, la façon dont le
+tracteur avance »*. Un barème h/ha ne le sait pas. `_pilGmHhaMesure(activité)` prend d'abord la **cadence mesurée** sur la campagne —
+minutes chronométrées ÷ hectares chronométrés des sessions de l'activité (une parcelle sans `dmin` ne compte pas), au moins 0,5 ha —
+qui porte la vraie façon de faire du domaine ; le barème est le repli, et le cadre dit lequel des deux parle.
+★★ **Interrupteur éteint** : `CONFIG.features.trait_cuve === true` seulement. Nico veut laisser l'équipe s'approprier le nouveau
+Pilotage une quinzaine de jours et garder cette ligne pour l'été. Le code est là, testé, et le Quoi de neuf 8.01 **n'en parle pas**.
+
+### 221b. Le Quoi de neuf spécial
+
+Demandé par Nico (dicté) : un bloc de tête qui dit que **cette version est spéciale**, que le Pilotage a été repensé pour tirer le
+meilleur des prévisions possibles, que la puissance de calcul le permet, que tout est dans le guide, qu'il faudra un temps de prise
+en main, qu'il peut rester des erreurs à remonter, et qu'il reste à disposition — signé Nico, GUERETTECH. Relu par Nico : « une
+quinzaine de jours » de prise en main, « d'autres surprises plus tard », et **rien sur la cuve** (gardé pour l'été). Seul item de 8.01
+(`_whatsNewSince` donne ensuite le récap cumulatif des neuf blocs à qui vient de 7.92). Le guide reçoit une **intro de section**
+Pilotage, « Octobre 2026 — le Pilotage prévoit », qui dit où trouver chaque nouveauté.
+
+### 221c. Mesuré
+
+`mv-harnais-gnr-mesure.mjs` étendu : **52 assertions** (option présente : domaine × cadence MESURÉE 1,33 h/ha × 6 L/h, fenêtre et
+source écrites ; repli barème sous 0,5 ha chronométré ; absente sans parcelle à nu, sans fenêtre, si le traitement est déjà lancé, ou
+interrupteur éteint) ; **14 contre-épreuves, 14 rougissent** (dont « la cadence mesurée est ignorée », « une parcelle sans chrono
+compte », « l'interrupteur ne retient plus rien »).
+★ **Le contrôle complet a rattrapé deux choses** : les quatre affichages de version d'`index.html` et le bump SW n'avaient PAS été
+posés — le script de patch s'était arrêté sur une ancre fausse AVANT ces lignes, et ses « ok » précédents ne couvraient que ce qui
+précédait (le piège du §25, deux « ok » pour zéro octet) ; et `utils.js` 692 → 728 ko sur les neuf lots (seule sa ligne `ko`
+regravée dans `typo-baseline.json`, comme pour `pilotage.js` au §216).
+
+### 221d. Ouvert
+
+① Allumer `CONFIG.features.trait_cuve` à l'été, avec son Quoi de neuf (texte prêt au §221b d'origine, à redire). ② Fin de la série : les neuf
+lots §213-221 sont dans un seul zip tant que `61f4ccd` reste la base — **à déployer et à regarder en vrai avant tout lot suivant.**
+
+## 222. ★★ COH-1 — UN MÊME CHIFFRE, UN MÊME NOM, UNE MÊME SURFACE SUR TOUS LES ÉCRANS (03/10 — `src/app.js` · `src/pilotage.js` · `src/utils.js` · `src/styles.css` · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `guide/11-pilotage.html` · `public/guide.html` · `scripts/mv-harnais-coh1.mjs` (neuf) · `scripts/mv-harnais-arrachage.mjs` · `scripts/mv-harnais-arrach3.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · **publié en APP 7.93 / SW 8.68 dans `75107ff`, recollé en APP 8.02 / SW 8.77** — voir §223, base `61f4ccd`)
+
+### 222a. D'où ça vient
 
 Cinq captures de Nico (03/10) : « Avancement par tâche » du Pilotage à `Arrach. 0 % · 0/0 h` pendant que la liste montrait les
 mêmes parcelles à 50-75 % ; la carte du domaine qui recouvre la barre du bas sur PC ; « Reparation », « Brulage » sur les puces
@@ -1519,7 +1880,7 @@ de Parcelles et « Répar. » au Pilotage ; « 0,087 · 0,1144 · 11,50 · 12 ha
 Plus deux demandes de fond (graphiques homogènes, renfort sans heures sup) découpées en lots 2 et 3 (§28). Ce lot-ci est le
 lot 1, sans maquette : il ne change aucune mise en page, il rend les chiffres et les mots cohérents.
 
-### 213b. Ce qui change
+### 222b. Ce qui change
 
 - **L'arrachage, une seule règle.** `_mvTFaite(p, nom)` (app.js, juste avant `calcHeures`) : 1 si validée ; arrachage découpé →
   `_arrFraction(p)` (ARRACH-7) ; 0 sinon. La branche « tâche simple » de `calcHeures` ne connaissait que « Validé » — et
@@ -1540,9 +1901,9 @@ lot 1, sans maquette : il ne change aucune mise en page, il rend les chiffres et
   commentaire, réparation, bulles et fiche rapide de la carte) et l'en-tête de la fiche passent par elle. Carte du domaine :
   total au centième (« 11,85 ha », plus `_pilNum` → « 12 »).
 - **Petits défauts.** « …. » (le point ajouté derrière la liste tronquée) ; « 0,0 ETP tracteur » masqué sous 0,05 ETP ; le
-  texte de la journée de référence (voir 213d).
+  texte de la journée de référence (voir 222d).
 
-### 213c. Mesuré
+### 222c. Mesuré
 
 `mv-harnais-coh1.mjs` : **19 assertions** sur les vraies fonctions (bloc ARRACH-3 + `_mvTFaite` + `calcHeures` + `getPCls`,
 `_pvSurfFr` / `_pvCompte` / `_qte`, `_pilBarQte`, `tNom` / `tAbr`) et sur le texte (CSS, puces, journal, « … », ETP, h_jour).
@@ -1554,7 +1915,7 @@ précédent avait laissé un `node_modules` incomplet (eslint absent : `lint-cli
 (> 5 min) ne peut pas tourner en une fois. Fait : `npm ci` relancé au premier plan, puis la liste jouée en lots parallèles
 (`xargs -P`), chaque commande avec son code de sortie.
 
-### 213d. Une erreur de Claude, rattrapée avant le code
+### 222d. Une erreur de Claude, rattrapée avant le code
 
 Dans la conversation, Claude avait annoncé que le réglage « Journée de référence » (7 h) ne servait plus à rien et serait
 retiré. **Faux** : il est le repli de `_pilEchCadence` (Échéances par tâche) quand le planning ne mesure aucune présence sur
@@ -1562,8 +1923,51 @@ retiré. **Faux** : il est le repli de `_pilEchCadence` (Échéances par tâche)
 `mv-harnais-pil-coherence` (qui l'extrait) ; dit à Nico. Le réglage reste ; seul son texte change (« repli des échéances »).
 ★ **Chercher le nom exact de la fonction, ou sans casse, avant d'affirmer qu'elle n'a pas de lecteur.**
 
-### 213e. Ouvert
+### 222e. Ouvert
 
 ① Aucun rendu navigateur : à regarder chez Nico — la carte du domaine sous la barre sur PC, les noms entiers dans la colonne
 de 126 px du Pilotage (coupés par des points de suspension au-delà), les surfaces à 4 décimales sur la liste. ② Les lots 2 et
 3, la passe d'audit, « Dégraffage », le repli de 7 h : §28, bloc COH-1.
+
+## 223. ★★★ FUSION-1 — LA SÉRIE §213-§221 RECOLLÉE SOUS COH-1 (03/10 — les fichiers des deux lots · `scripts/preflight-baseline.json` (regravé) · `.mv-base` · **APP 8.01 → 8.02, SW 8.76 → 8.77**, base `75107ff`)
+
+### 223a. Ce qui s'est passé
+
+Deux conversations ont livré en parallèle sur la même base `61f4ccd` : la série « densifier le Pilotage » (§213-§221, neuf
+lots, zip cumulatif TRAIT-CUVE, APP 8.01 / SW 8.76) et COH-1 (APP 7.93 / SW 8.68). Les deux zips ont été collés, COH-1 en
+dernier, puis poussés en `75107ff`. Les fichiers COMPLETS de COH-1 — `app.js`, `pilotage.js`, `utils.js`, `styles.css`,
+`index.html`, `sw.js`, `CLAUDE.md`, la doc, la liste des harnais — ont écrasé ceux de la série. Il restait d'elle
+`planning.js`, `reglages.js`, `typo-baseline.json` et sept harnais, qui échouaient tous. Symptôme visible : le preflight
+rouge sur `_planPrevuPersRange`, la moitié de TENS-1 restée dans `planning.js` sans sa moitié appelante (`pilotage.js`). La
+construction était bloquée (`prebuild`) : rien n'est parti en production.
+★ **`mv-base` ne pouvait rien voir** : les deux zips déclaraient la même base, et c'était vrai. Il garde la base, pas la
+fratrie (§28, bloc COH-1, point 8).
+
+### 223b. La réparation
+
+Fusion git à trois voies depuis la base commune : branche `autre` = `61f4ccd` + zip TRAIT-CUVE, branche `coh1` = `61f4ccd` +
+lot COH-1, `git merge`. Dix fichiers en conflit, résolus à la main :
+- `src/pilotage.js` (1) : `_pilPanelCarte` — le corps de CARTE-1 (vues, légende) et la surface au centième de COH-1.
+- `src/utils.js` (2) : `APP_VERSION` 8.02 ; `WHATS_NEW` — COH-1 passe en 8.02, au-dessus de 8.01…7.93 de la série. Le bloc
+  8.02 s'est retrouvé sans sa fermeture `] },` (git avait rangé la fermeture dans la partie commune) : `node --check` l'a vu.
+- `index.html` (4), `public/sw.js` (4) : v8.02 / v8.77 ; l'historique du SW de la série gardé, une ligne de fusion en tête.
+- `scripts/harnais-claude-md.mjs` : `SECTIONS` 242 → 244 (§222, §223).
+- `CLAUDE.md` : en-tête neuf ; au §28, les deux blocs (COH-1 puis la série). `journal.md` : les en-têtes TRAIT-CUVE et COH-1
+  descendent, annotés. `chantiers-180-229.md` : la série garde §213-§221, COH-1 devient §222. `INDEX.md` régénéré.
+- Fusionnés sans conflit : `app.js`, `styles.css`, `mv-harnais-liste.mjs`, `guide/11-pilotage.html` (`public/guide.html`
+  régénéré).
+Le zip se pose sur `75107ff` (`.mv-base`). Vérifié : `planning.js`, `reglages.js`, `typo-baseline.json` et les sept harnais
+sont identiques dans `75107ff`, dans le zip TRAIT-CUVE et dans la fusion.
+
+### 223c. Mesuré
+
+Sur `75107ff` : les sept harnais de la série **rouges** (« les scénarios s'exécutent sans planter »), preflight **1 erreur**.
+Après fusion : les sept **verts**, `mv-harnais-coh1` vert (19, contre-épreuve 12/12), preflight **0 erreur**. La référence du
+preflight est regravée : COH-1 avait fait baisser deux compteurs (champs non échappés 13 → 9, substitutions nues 139 → 125),
+le cliquet garde ce gain. Chaîne complète jouée sur une copie de `75107ff` + les fichiers du zip, comme chez Nico.
+
+### 223d. Ouvert
+
+① Une garde contre les lots frères (§28, bloc COH-1, point 8). ② Règle de travail : un seul fil livre des fichiers complets à
+la fois, ou un push entre deux lots. ③ Le lot 2 de COH-1 (le renfort sans heures sup, maquette v2 validée) se construit sur
+cette fusion.

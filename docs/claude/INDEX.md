@@ -255,4 +255,14 @@
 | 210 | 210. ★ ARRACH-6 — L'ARRACHAGE EN UN GESTE, DANS UN SENS COMME DANS L'AUTRE (02/10 — `src/app.js` · `src/uti… | `docs/claude/chantiers-180-229.md` |
 | 211 | 211. ★ ARRACH-7 — L'ARRACHAGE FINI POUR L'ÉQUIPE, LA SUITE AU PRESTATAIRE (02/10 — `src/app.js` · `src/util… | `docs/claude/chantiers-180-229.md` |
 | 212 | 212. ★★ AVALE-2 — UNE ERREUR AVALÉE QUI SE RÉPÈTE REMONTE AU JOURNAL DU DOMAINE (03/10 — `src/utils.js` · `… | `docs/claude/chantiers-180-229.md` |
-| 213 | 213. ★★ COH-1 — UN MÊME CHIFFRE, UN MÊME NOM, UNE MÊME SURFACE SUR TOUS LES ÉCRANS (03/10 — `src/app.js` · … | `docs/claude/chantiers-180-229.md` |
+| 213 | 213. ★★ GNR-M — LE TRACTEUR SE PROJETTE SUR LES TRAVAUX EN COURS, LA CONSO DE CHAQUE TRACTEUR EST MESURÉE (… | `docs/claude/chantiers-180-229.md` |
+| 214 | 214. ★ SPARK-1 — LA CADENCE A SA PETITE COURBE, ET LE MOTEUR DE GRAPHE SAIT LES FAIRE (03/10 — `src/utils.j… | `docs/claude/chantiers-180-229.md` |
+| 215 | 215. ★★ TENS-1 — LA TENSION DE L'ÉQUIPE, FACE AU PLANNING PRÉVU, JAMAIS AU CONTRAT (03/10 — `src/planning.j… | `docs/claude/chantiers-180-229.md` |
+| 216 | 216. ★ TOUR-RDT — LE RENDEMENT DE LA TOURNÉE, SUR LA MÊME SIMULATION (03/10 — `src/pilotage.js` · `src/styl… | `docs/claude/chantiers-180-229.md` |
+| 217 | 217. ★ CARTE-1 — LA CARTE DU DOMAINE SE LIT DE CINQ FAÇONS, CHACUNE À SA SOURCE (03/10 — `src/pilotage.js` … | `docs/claude/chantiers-180-229.md` |
+| 218 | 218. ★★ PROT-1 + INACTION-1 — LA PROTECTION RESTANTE PAR PARCELLE, LE COÛT DE L'INACTION SUR LE COCKPIT (03… | `docs/claude/chantiers-180-229.md` |
+| 219 | 219. ★ PHOTO-1 — LA PHOTO QUOTIDIENNE DES CHIFFRES DU COCKPIT, ET LES DEUX COURBES QU'ELLE PERMET (03/10 — … | `docs/claude/chantiers-180-229.md` |
+| 220 | 220. ★ PLUIE-1 — LA PLUIE TOMBÉE DEPUIS LE TRAITEMENT LESSIVE LES CONTACTS (03/10 — `src/app.js` · `src/pil… | `docs/claude/chantiers-180-229.md` |
+| 221 | 221. ★ TRAIT-CUVE — LE TRAITEMENT CONSEILLÉ, CHIFFRÉ DANS LA CUVE ; LE QUOI DE NEUF SPÉCIAL « MA VIGNE PRÉV… | `docs/claude/chantiers-180-229.md` |
+| 222 | 222. ★★ COH-1 — UN MÊME CHIFFRE, UN MÊME NOM, UNE MÊME SURFACE SUR TOUS LES ÉCRANS (03/10 — `src/app.js` · … | `docs/claude/chantiers-180-229.md` |
+| 223 | 223. ★★★ FUSION-1 — LA SÉRIE §213-§221 RECOLLÉE SOUS COH-1 (03/10 — les fichiers des deux lots · `scripts/p… | `docs/claude/chantiers-180-229.md` |
