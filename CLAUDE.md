@@ -3,12 +3,10 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **3 octobre 2026 (KIT-1)** — ★★ **LE KIT GRAPHIQUE COMMUN, LOT 3a : ACCUEIL ET PILOTAGE** (§226).
-> Maquette du kit validée (« go », Nico). Une ligne d'avancement commune (`_mvkAvancement`, utils.js) pour l'Accueil et
-> Pilotage › La campagne : noms entiers (`tAbr` retiré), couleur d'ÉTAT (fait / cours / retard = fenêtre passée, `_mvkRetards`),
-> détail heures ou surface (`_mvkDet`, ex-`_pilBarQte`) ; barre des parcelles à l'état ; « Agrandir » sur chaque graphe suivi
-> (`_mvGraphDessine` + `#ovGraph`) ; grands chiffres proportionnels (« I 2 % ») ; 1 200 px sur grand écran (3 pages).
-> Harnais `mv-harnais-kit1` (12, contre-épreuve 6/6). Base `bd53451`. **APP 8.04 → 8.05, SW 8.79 → 8.80** (visible).
+> Dernière consolidation : **3 octobre 2026 (ANN-1b)** — ★ **LA GRANDE NOUVEAUTÉ QUI MONTRE LE CHEMIN DU JOURNAL** (§225g).
+> Demandé par Nico : un dernier Quoi de neuf, **majeur**, pour que tout le monde sache où lire les mises à jour. `WHATS_NEW` 8.06 :
+> un item `niv: 3, pour: ['tous']` → la grande fenêtre (la première du système ANN-1 : 8.04 et 8.05 n'avaient aucun niveau 3).
+> Base `c855567` (ANN-1 poussé en `bd53451`, KIT-1 en `c855567`). **APP 8.05 → 8.06, SW 8.80 → 8.81**.
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---

@@ -1,4 +1,6 @@
-// MA VIGNE — Service Worker v8.80
+// MA VIGNE — Service Worker v8.81
+// v8.81 (03/10/2026) — ANN-1b (§225g) : la grande nouveaute qui montre le chemin — WHATS_NEW 8.06 niveau 3 pour tous :
+//   les mises a jour se lisent dans Reglages › Moi › Journal des nouveautes. APP 8.05 -> 8.06.
 // v8.80 (03/10/2026) — KIT-1 (§226) : lot 3a du kit graphique — une ligne d'avancement commune (Accueil, Pilotage),
 //   couleur d'etat, noms entiers (tAbr retire), barre des parcelles a l'etat, « Agrandir » sur chaque graphe suivi
 //   (#ovGraph), grands chiffres proportionnels, largeur 1200 px sur grand ecran. APP 8.04 -> 8.05.
@@ -4276,7 +4278,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.80';
+const CACHE_NAME   = 'mavigne-v8.81';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4292,7 +4294,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.80 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.81 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4312,7 +4314,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.80 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.81 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

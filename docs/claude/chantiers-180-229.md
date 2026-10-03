@@ -2076,6 +2076,13 @@ ramenés à 10 et 20 px. `harnais-claude-md` : `SECTIONS` 244 → 256 (+§225, e
 
 Voir §28, bloc ANN-1 : le rendu à regarder sur téléphone, « Vu » par appareil, le niveau 2 « à l'endroit du geste ».
 
+### 225g. 8.06 — la grande nouveauté qui montre le chemin (03/10, base `c855567`, APP 8.05 → 8.06, SW 8.80 → 8.81)
+
+Nico, après la livraison : « un dernier What's New pour prévenir tout le monde de regarder dans Réglages › Moi › Journal des
+nouveautés — un What's New majeur ». Un bloc 8.06 à un item `niv: 3, pour: ['tous']`. C'est la PREMIÈRE grande fenêtre du
+système (8.04 : niveaux 2 et 1 ; 8.05, KIT-1 : trois niveaux 0) : aucune fenêtre n'a pu armer les 30 jours avant elle. Une
+première installation ne la voit pas (base = version installée) — voulu : le Journal est alors déjà sous ses yeux.
+
 ## 226. ★★ KIT-1 — LE KIT GRAPHIQUE COMMUN, LOT 3a : ACCUEIL ET PILOTAGE (03/10 — `src/utils.js` · `src/app.js` · `src/pilotage.js` · `src/styles.css` · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `guide/11-pilotage.html` · `public/guide.html` · `scripts/mv-harnais-kit1.mjs` (neuf) · `scripts/mv-harnais-coh1.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · **APP 8.04 → 8.05, SW 8.79 → 8.80**, base `bd53451`)
 
 ### 226a. D'où ça vient

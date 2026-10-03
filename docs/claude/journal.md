@@ -8,6 +8,13 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **3 octobre 2026 (KIT-1)** — ★★ **LE KIT GRAPHIQUE COMMUN, LOT 3a : ACCUEIL ET PILOTAGE** (§226).
+> Maquette du kit validée (« go », Nico). Une ligne d'avancement commune (`_mvkAvancement`, utils.js) pour l'Accueil et
+> Pilotage › La campagne : noms entiers (`tAbr` retiré), couleur d'ÉTAT (fait / cours / retard = fenêtre passée, `_mvkRetards`),
+> détail heures ou surface (`_mvkDet`, ex-`_pilBarQte`) ; barre des parcelles à l'état ; « Agrandir » sur chaque graphe suivi
+> (`_mvGraphDessine` + `#ovGraph`) ; grands chiffres proportionnels (« I 2 % ») ; 1 200 px sur grand écran (3 pages).
+> Harnais `mv-harnais-kit1` (12, contre-épreuve 6/6). Base `bd53451`. **APP 8.04 → 8.05, SW 8.79 → 8.80** (visible).
+
 > ★ Consolidation : **3 octobre 2026 (ANN-1)** — ★★ **LES NOUVEAUTÉS EN QUATRE NIVEAUX : LA FENÊTRE NE S'OUVRE PLUS QUE POUR LES GRANDES** (§225).
 > Nico : « le What's New est beaucoup trop présent ». Mesuré : 50 versions annoncées en deux semaines, une fenêtre d'office chez
 > tout le monde. Chaque item de `WHATS_NEW` porte désormais `niv` (0 Journal seul · 1 pastille « Nouveau » sur `cible` · 2 ligne

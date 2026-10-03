@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.05';
+export const APP_VERSION = '8.06';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -846,6 +846,11 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.06', d: '2026-10-03', items: [
+    { niv: 3, pour: ['tous'], emoji: 'livre', titre: 'Les mises à jour se lisent maintenant dans Réglages › Moi',
+      desc: "Pour voir ce qui a changé dans Ma Vigne — les nouveautés comme les petites corrections —, ouvrez <b>Réglages › Moi › Journal des nouveautés</b> : tout y est rangé, mois par mois. "
+        + "L’application ne vous interrompt plus à chaque mise à jour : cette fenêtre ne s’ouvre plus que pour une grande nouveauté, au plus une fois par mois." },
+  ] },
   { v: '8.05', d: '2026-10-03', items: [
     { niv: 0, pour: ['tous'], emoji: 'graphique', titre: 'L’avancement par tâche, un seul dessin',
       desc: "À l’Accueil comme dans <b>Pilotage › La campagne</b>, l’avancement par tâche se dessine de la même façon : les noms en entier, une barre fine, "
