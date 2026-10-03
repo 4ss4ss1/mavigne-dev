@@ -448,4 +448,6 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-protection.mjs --contre'],
   ['node scripts/mv-harnais-photo.mjs'],               // PHOTO-1 (§219) : la photo quotidienne des chiffres
   ['node scripts/mv-harnais-photo.mjs --contre'],
+  ['node scripts/mv-harnais-annonces.mjs'],           // ANN-1 (§225) : les quatre niveaux des nouveautés
+  ['node scripts/mv-harnais-annonces.mjs --contre'],
 ];

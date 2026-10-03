@@ -3,13 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **3 octobre 2026 (RENF-2)** — ★★ **LE RENFORT DIT COMBIEN DE SAISONNIERS, ET QUAND — SANS HEURES SUP** (§224).
-> Lot 2 de COH-1, maquette v2 validée par Nico. `_rfCfg` : hMax = hJour (fini les 8 h au lieu de 7). La carte de Décider
-> répond d'office en calendrier (`_rfCalendrier` : par travail qui déborde, le moins de monde possible sur SA fenêtre, via
-> `_rfMinR` étendu à un profil posé) ; « Et sans renfort ? » (`_rfSansRenfort`, plafond nommé `c.plaf`, 25 % jusqu'à la 43e
-> heure, 50 % au-delà) ; TESA / CDD (`c.capS`) ; « Choisir moi-même la période ». Onze fonctions de l'ancienne carte retirées.
-> Harnais `mv-harnais-renf2` (17, contre-épreuve 7/7) : le vrai moteur redonne les chiffres de la maquette. Base `1a75533`.
-> **APP 8.02 → 8.03, SW 8.77 → 8.78** (visible).
+> Dernière consolidation : **3 octobre 2026 (ANN-1)** — ★★ **LES NOUVEAUTÉS EN QUATRE NIVEAUX : LA FENÊTRE NE S'OUVRE PLUS QUE POUR LES GRANDES** (§225).
+> Nico : « le What's New est beaucoup trop présent ». Mesuré : 50 versions annoncées en deux semaines, une fenêtre d'office chez
+> tout le monde. Chaque item de `WHATS_NEW` porte désormais `niv` (0 Journal seul · 1 pastille « Nouveau » sur `cible` · 2 ligne
+> « À vérifier » sur l'Accueil jusqu'à « Vu » · 3 grande fenêtre, 30 jours, 3 au plus) et `pour` ; le bloc porte `d`. Journal des
+> nouveautés dans Réglages › Moi ; l'histoire d'avant 8.04 n'est pas réécrite. Harnais `mv-harnais-annonces` (33, contre-épreuve 9/9),
+> règles dans `mv-whatsnew-check`. Construit sur `1a75533`, rejoué sur `ca4caa2` (RENF-2 avait pris 8.03 et §224). Base `ca4caa2`.
+> **APP 8.03 → 8.04, SW 8.78 → 8.79**.
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -287,7 +287,7 @@ au lot suivant : c'est une **condition de clôture**, au même titre que le pref
 | **Fiche `MV_INFO`** du chiffre touché | `src/utils.js` | dès que la MÉTHODE de calcul change, ou qu'un chiffre cesse d'être posé |
 | **Section du guide public** | `guide/NN-<section>.html` → `node scripts/build-guide.mjs` | dès qu'une fonctionnalité décrite change |
 | **Visite guidée** `_mvtSteps` | `src/app.js` | dès qu'un sélecteur visé bouge |
-| **`WHATS_NEW`** | `src/utils.js` | dès que le changement est **visible** par l'utilisateur |
+| **`WHATS_NEW`** | `src/utils.js` | dès que le changement est **visible** par l'utilisateur — avec son `niv` et son `pour` (§225) |
 | **Écran qui énumère ce qui reste à faire** | selon | dès qu'on lui apprend à faire une des choses listées |
 
 **Le geste concret, avant de livrer :** ouvrir la fiche `MV_AIDE` du module touché et la **relire à
@@ -324,7 +324,7 @@ vaut un lot plus petit dont l'aide est juste qu'un gros lot dont l'aide ment.
 > | 2 | **Le guide public** | `guide/NN-*.html` puis `node scripts/build-guide.mjs` | relire la section contre l'écran neuf |
 > | 3 | **La fiche `MV_AIDE`** du module | `src/utils.js` | idem, à voix haute |
 > | 4 | **`MV_INFO`** du chiffre touché | `src/utils.js` | seulement si une méthode de calcul change |
-> | 5 | **`WHATS_NEW`** | `src/utils.js` | un bloc en tête, du point de vue de l'utilisateur |
+> | 5 | **`WHATS_NEW`** | `src/utils.js` | un bloc en tête (`d`), du point de vue de l'utilisateur, chaque item avec `niv` et `pour` |
 > | 6 | **`CLAUDE.md`** | ici | la section du lot, et **ce qui reste ouvert** |
 >
 > ★★ **PUBLIER UNE PAGE DU SITE : `npm run site` AVANT `npm run build`** (29/09). Dès qu'un lot touche
@@ -1138,10 +1138,17 @@ Quand on livre un second lot sans savoir si le précédent a été déployé : *
 - Sauter un numéro → **aucune conséquence**.
 
 **`WHATS_NEW`** (dans `utils.js`, forme réelle **`export const WHATS_NEW = [`**) = journal
-**versionné** `[{v, items:[{emoji,titre,desc}]}]` : on **préfixe un bloc**, jamais on ne remplace ;
+**versionné** `[{v, d, items:[{niv, pour, cible?, emoji, titre, desc}]}]` : on **préfixe un bloc**, jamais on ne remplace ;
 récap **cumulatif** via `_whatsNewSince`/`_cmpVer` ; sous-lot technique = `items:[]` ; correctif
 invisible = `WHATS_NEW = []` et **bump SW seul** ; rédaction **du point de vue de l'utilisateur** —
 le problème vécu d'abord, le correctif ensuite.
+
+★★ **ANN-1 (§225) — DÉCIDER LE NIVEAU, ITEM PAR ITEM.** Depuis 8.04 le bloc porte `d:'AAAA-MM-JJ'` et chaque item `niv` +
+`pour` (`tous` · `admin` · `salaries` · `tractoriste` · un module) : **0** Journal seul (les corrections) · **1** pastille
+« Nouveau » sur `cible` (un `#id` qui existe : une ligne ou un bouton, jamais un onglet — la barre défile et la coupe) · **2**
+« À vérifier » sur l'Accueil jusqu'à « Vu » (un chiffre qui bouge, un réglage à contrôler — **rare**, sinon la lassitude revient)
+· **3** la grande fenêtre (30 jours, 3 au plus). Titre d'un item classé = texte pur (échappé). `mv-whatsnew-check` refuse un bloc
+sans `d`, un item sans `niv`/`pour`, une cible introuvable. Les blocs d'avant 8.04 ne se réécrivent pas.
 
 ⚠️⚠️ **Un `WHATS_NEW` n'est PAS une preuve de livraison.** **Lire la fonction.**
 
@@ -1810,6 +1817,14 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ ANN-1 — CE QUI RESTE OUVERT SUR LES NOUVEAUTÉS (§225, posé le 03/10)
+
+1. **À regarder chez Nico, sur téléphone** : la ligne « À vérifier » sous les chiffres (admin), la pastille sur Réglages › Moi ›
+   Journal des nouveautés, le Journal lui-même. Aucun harnais ne lit une mise en page ; rendu non regardé côté Claude.
+2. **« Vu » est par appareil** (localStorage, clé domaine + personne) : un « Vu » du téléphone ne suit pas sur l'ordinateur. Le
+   porter en base = une collection par personne ; à décider si ça gêne à l'usage.
+3. **Le niveau 2 « à l'endroit du geste »** (dans la feuille de validation d'un ouvrier) n'existe pas : il vit sur l'Accueil.
 
 ### ⚠️ COH-1 — LA DEMANDE DU 03/10 : UNE APPLI HOMOGÈNE (§222, posé le 03/10)
 

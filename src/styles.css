@@ -5438,3 +5438,53 @@ button.pil-dz-set{cursor:pointer;width:100%;}
   .pil-dz-wrap{display:grid;grid-template-columns:minmax(320px,400px) minmax(0,1fr);gap:var(--e-6,24px);align-items:start;}
   .pil-dz-map .pil-dz-lf{height:340px;}
 }
+
+/* ═══ ANN-1 (§225) — LES QUATRE NIVEAUX DES NOUVEAUTÉS ═══════════════════════
+   Niveau 2 : une ligne « À vérifier » sur l'Accueil (#home-annonce). Niveau 1 : la
+   pastille « Nouveau » posée sur sa cible. Le Journal et la fiche d'un item vivent dans
+   la feuille des « i » (#ovInfo) et reprennent ses classes (mva-, mvi-).
+   ⚠️ Espacements pris dans l'échelle (2/4/8/12/16/20/24/32/40) et tailles par jetons :
+      mv-harnais-echelle et mv-harnais-typo refusent le reste.
+   ⚠️ Rayons hors des pas du socle (10/20 px) : mv-harnais-jetons compte un 8/12/16/999 px, repli compris.
+   ⚠️ La pastille garde son bordeaux FIXE en thème sombre : --bordeaux y devient rose
+      clair, et le texte crème ne s'y lirait plus. */
+#home-annonce{padding:12px 16px 0;}
+.mvn-carte{display:flex;align-items:center;gap:8px;background:var(--orange-pale);border:1px solid rgba(184,90,26,0.30);border-radius:10px;padding:4px 4px 4px 12px;}
+.mvn-carte-ic{display:flex;flex:none;color:var(--orange);}
+.mvn-carte-txt{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:8px 0;border:0;background:none;text-align:left;cursor:pointer;font-family:'Outfit',sans-serif;color:var(--texte);}
+.mvn-carte-lb{font-size:var(--pt-micro,11px);font-weight:600;color:var(--vin-tx);}
+.mvn-carte-ti{display:block;max-width:100%;font-size:var(--pt-txt,12.5px);font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mvn-carte-vu,.mvn-l-vu{flex:none;min-height:44px;min-width:56px;padding:0 12px;border-radius:10px;border:1px solid rgba(184,90,26,0.35);background:transparent;color:var(--vin-tx);font-family:'Outfit',sans-serif;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;}
+.mvn-nouv{position:absolute;top:-8px;right:12px;z-index:2;display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;background:#7A1020;color:#FBF3E4;font-family:'Outfit',sans-serif;font-size:var(--pt-lbl,10.5px);font-weight:700;line-height:1.4;letter-spacing:.02em;white-space:nowrap;cursor:pointer;animation:mvnPulse 2.4s ease-out infinite;}
+.mvn-nouv::after{content:'';position:absolute;inset:-8px;}
+@keyframes mvnPulse{0%{box-shadow:0 0 0 0 rgba(122,16,32,.45);}70%{box-shadow:0 0 0 8px rgba(122,16,32,0);}100%{box-shadow:0 0 0 0 rgba(122,16,32,0);}}
+@media (prefers-reduced-motion:reduce){.mvn-nouv{animation:none;}}
+.mvn-wn-lien{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;margin-top:4px;padding:0;border:0;background:none;font-family:'Outfit',sans-serif;font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--vert-med);cursor:pointer;}
+.mvn-wn-autres{margin-top:12px;padding-top:12px;border-top:1px solid var(--gris-clair);font-size:var(--pt-micro,11px);line-height:1.5;color:var(--texte-doux);}
+.mvn-j{padding:4px 20px 8px;}
+.mvn-mois{padding-top:16px;}
+.mvn-mois-t{font-family:'Cormorant Garamond',serif;font-size:var(--pt-md,20px);font-weight:600;color:var(--texte);margin-bottom:8px;}
+.mvn-sec{display:flex;flex-direction:column;gap:8px;margin-bottom:8px;}
+.mvn-l{padding:12px;border-radius:10px;background:var(--bg-card);border:1px solid var(--gris-clair);}
+.mvn-l-maj{border-color:rgba(122,16,32,0.24);}
+.mvn-l-imp{background:var(--orange-pale);border-color:rgba(184,90,26,0.28);}
+.mvn-l-hd{margin-bottom:4px;}
+.mvn-tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:var(--pt-micro,11px);font-weight:600;}
+.mvn-tag-maj{color:var(--bordeaux);background:rgba(122,16,32,0.08);}
+.mvn-tag-imp{color:#FFFFFF;background:#9A4A14;}
+.mvn-tag-vu{color:var(--texte-med);background:var(--gris-clair);}
+.mvn-l-ti{font-size:var(--pt-base,14px);font-weight:600;line-height:1.35;color:var(--texte);}
+.mvn-l-tx{margin-top:4px;font-size:var(--pt-txt,12.5px);line-height:1.5;color:var(--texte-med);}
+.mvn-l-tx b{color:var(--texte);font-weight:600;}
+.mvn-l-vu{margin-top:8px;}
+.mvn-liste{margin-bottom:8px;border-radius:10px;background:var(--bg-card);border:1px solid var(--gris-clair);overflow:hidden;}
+.mvn-liste-hd{display:flex;align-items:center;gap:4px;padding:8px 12px 4px;font-size:var(--pt-micro,11px);font-weight:600;color:var(--vert-med);}
+.mvn-liste .mvn-l{border:0;border-top:1px solid var(--gris-clair);border-radius:0;background:transparent;}
+.mvn-plier{width:100%;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 12px;border:0;border-top:1px solid var(--gris-clair);background:transparent;font-family:'Outfit',sans-serif;font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--vert-med);text-align:left;cursor:pointer;}
+.mvn-plier-lb{flex:1;}
+.mvn-plier svg{transition:transform .2s;}
+.mvn-plier.on svg{transform:rotate(180deg);}
+.mvn-plier-c{padding:0 4px;border-top:0;color:var(--texte-med);}
+.mvn-corr{list-style:none;margin:0 0 8px;padding:0 0 0 12px;display:flex;flex-direction:column;gap:8px;}
+.mvn-corr li{font-size:var(--pt-txt,12.5px);line-height:1.4;color:var(--texte-med);}
+.mvn-anc-v{margin:12px 0 0;font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-doux);}

@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **3 octobre 2026 (RENF-2)** — ★★ **LE RENFORT DIT COMBIEN DE SAISONNIERS, ET QUAND — SANS HEURES SUP** (§224).
+> Lot 2 de COH-1, maquette v2 validée par Nico. `_rfCfg` : hMax = hJour (fini les 8 h au lieu de 7). La carte de Décider
+> répond d'office en calendrier (`_rfCalendrier` : par travail qui déborde, le moins de monde possible sur SA fenêtre, via
+> `_rfMinR` étendu à un profil posé) ; « Et sans renfort ? » (`_rfSansRenfort`, plafond nommé `c.plaf`, 25 % jusqu'à la 43e
+> heure, 50 % au-delà) ; TESA / CDD (`c.capS`) ; « Choisir moi-même la période ». Onze fonctions de l'ancienne carte retirées.
+> Harnais `mv-harnais-renf2` (17, contre-épreuve 7/7) : le vrai moteur redonne les chiffres de la maquette. Base `1a75533`.
+> **APP 8.02 → 8.03, SW 8.77 → 8.78** (visible).
+
 > ★ Consolidation : **3 octobre 2026 (FUSION-1)** — ★★★ **LA SÉRIE §213-§221 RECOLLÉE SOUS COH-1 (§222) — DEUX FILS, UNE MÊME BASE** (§223).
 > Le commit `75107ff` avait collé les fichiers COMPLETS de COH-1 (bâti sur `61f4ccd`) par-dessus les neuf lots « densifier le
 > Pilotage », bâtis eux aussi sur `61f4ccd` dans une autre conversation : leur code avait disparu d'app.js, pilotage.js, utils.js,

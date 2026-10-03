@@ -59,6 +59,46 @@ T('aucune version en double', new Set(WN.map(b => b.v)).size === WN.length);
 T('chaque item porte emoji, titre et desc',
   WN.every(b => (b.items || []).every(it => it.emoji && it.titre && it.desc)));
 
+// ── ANN-1 (§225) : depuis 8.04, chaque bloc porte sa date et chaque item son niveau et son
+//    public. Le contrôle n'impose pas d'annoncer : il impose de DÉCIDER, item par item.
+//    niv 0 = Journal seul · 1 = pastille « Nouveau » sur `cible` · 2 = « À vérifier » sur
+//    l'Accueil jusqu'à « Vu » · 3 = grande fenêtre (30 jours, trois au plus).
+//    ⚠️ Une cible est un #id, et cet id doit exister (index.html ou src/) : sinon la pastille
+//    ne se pose nulle part, en silence — le cas exact de C22 pour la visite guidée.
+const ANN_DEPUIS = '8.04';
+const POUR_OK = new Set(['tous', 'admin', 'salaries', 'tractoriste',
+  'vigne', 'tracteur', 'phyto', 'cave', 'reserve', 'planning', 'pilotage']);
+const HTML = fs.readFileSync(path.join(RACINE, 'index.html'), 'utf8');
+const JSSRC = fs.readdirSync(path.join(RACINE, 'src')).filter(f => f.endsWith('.js'))
+  .map(f => fs.readFileSync(path.join(RACINE, 'src', f), 'utf8')).join('\n');
+const classes = WN.filter(b => cmp(b.v, ANN_DEPUIS) >= 0);
+const fautes = [];
+for (const b of classes) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(b.d || '')) fautes.push(b.v + " : pas de date d:'AAAA-MM-JJ'");
+  let n3 = 0;
+  (b.items || []).forEach((it, k) => {
+    const o = b.v + '#' + k;
+    if (![0, 1, 2, 3].includes(it.niv)) fautes.push(o + ' : niv absent ou hors 0–3');
+    if (it.niv === 3) n3++;
+    if (!Array.isArray(it.pour) || !it.pour.length || !it.pour.every(p => POUR_OK.has(p)))
+      fautes.push(o + ' : pour absent ou inconnu (' + JSON.stringify(it.pour) + ')');
+    if (/[<&]/.test(it.titre || '')) fautes.push(o + ' : titre classé avec < ou & (texte pur attendu, il est échappé)');
+    if (it.cible != null) {
+      const m = /^#([\w-]+)$/.exec(String(it.cible));
+      if (it.niv !== 1) fautes.push(o + ' : cible posée sur un niveau autre que 1');
+      if (!m) fautes.push(o + ' : cible « ' + it.cible + ' » — un #id attendu');
+      else if (!HTML.includes('id="' + m[1] + '"') && !JSSRC.includes('id="' + m[1] + '"'))
+        fautes.push(o + ' : cible #' + m[1] + ' introuvable dans index.html et src/');
+    }
+  });
+  if (n3 > 3) fautes.push(b.v + ' : ' + n3 + ' grandes nouveautés (la fenêtre en montre trois au plus)');
+}
+T('ANN-1 : depuis ' + ANN_DEPUIS + ', chaque bloc porte d, chaque item niv et pour, chaque cible existe',
+  fautes.length === 0, fautes.slice(0, 4).join(' · '));
+const trop2 = classes.filter(b => (b.items || []).filter(it => it.niv === 2).length > 2).map(b => b.v);
+if (trop2.length) console.log('   note  plus de deux « à vérifier » dans ' + trop2.join(', ')
+  + ' : la carte n’en montre qu’un à la fois — garder ce niveau rare.');
+
 const txt = WN.flatMap(b => (b.items || []).flatMap(it => [it.emoji, it.titre, it.desc])).join('\n');
 T('aucun backslash rendu littéralement', txt.indexOf('\\') === -1);
 let bad = 0;
@@ -86,7 +126,7 @@ T('depuis ' + APP + ' → rien à annoncer', since(APP).length === 0);
 T('depuis une version future → rien', since('99.99').length === 0);
 
 console.log('\n  ' + (ko ? ko + ' erreur(s)' : 'tout vert') + '  ·  bloc ' + WN[0].v + ' :');
-(WN[0].items || []).forEach(it => console.log('   ' + it.emoji + '  ' + it.titre));
+(WN[0].items || []).forEach(it => console.log('   ' + it.emoji + '  ' + (it.niv != null ? '[niv ' + it.niv + '] ' : '') + it.titre));
 if (!(WN[0].items || []).length) console.log('   (aucun item : correctif invisible, bump SW seul)');
 console.log();
 process.exit(ko ? 1 : 0);

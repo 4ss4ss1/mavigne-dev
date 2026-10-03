@@ -20,10 +20,15 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 
 // ════ WHATS NEW ════
 // APP_VERSION : version index.html affichee dans Reglages.
-// WHATS_NEW   : tableau vide = modal desactive pour cette version.
-// Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
-// Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '8.03';
+// WHATS_NEW   : journal versionne, un bloc par version APP, toujours prefixe en tete.
+// Format bloc : { v:'8.04', d:'AAAA-MM-JJ', items:[…] } — `d` obligatoire depuis 8.04 (ANN-1, §225).
+// Format item : { niv:0|1|2|3, pour:['tous'|'admin'|'salaries'|'tractoriste'|<module>],
+//                 cible:'#selecteur' (niveau 1 seulement), emoji:'nom-d-icone',
+//                 titre:'Texte pur', desc:'Phrase utilisateur, <b> permis.' }
+//   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
+//   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
+// Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
+export const APP_VERSION = '8.04';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -767,6 +772,17 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '8.04', d: '2026-10-03', items: [
+    { niv: 2, pour: ['admin'], emoji: 'cloche', titre: 'Les nouveautés ne s’ouvrent plus à chaque mise à jour',
+      desc: "Une fenêtre ne s’ouvre plus que pour une <b>grande nouveauté</b> : au plus une fois par mois, trois au plus. "
+        + "Ce qui demande votre attention — un chiffre qui change, un réglage à vérifier — tient en une ligne sur l’Accueil, pour les seules personnes concernées, jusqu’à ce que vous touchiez « Vu ». "
+        + "Une nouveauté porte une pastille « Nouveau » là où elle se trouve, jusqu’à ce que vous vous en serviez. "
+        + "Chacun ne voit que ce qui le concerne : un ouvrier n’a plus à lire les nouveautés du Pilotage. "
+        + "Tout le reste, petites corrections comprises, se lit quand vous voulez dans <b>Réglages › Moi › Journal des nouveautés</b>." },
+    { niv: 1, pour: ['tous'], cible: '#regl-nouv-row', emoji: 'livre', titre: 'Le Journal des nouveautés',
+      desc: "Dans <b>Réglages › Moi</b> : tout ce qui a changé dans Ma Vigne, mois par mois. Les grandes nouveautés d’abord, ce qu’il faut vérifier ensuite, puis les nouveautés ; les corrections sont repliées en bas. "
+        + "Les versions d’avant octobre 2026 s’y relisent aussi, sous « Versions précédentes »." },
+  ] },
   { v: '8.03', items: [
     { emoji: 'equipe', titre: 'Le renfort dit combien de saisonniers, et quand — sans heures sup',
       desc: "Dans <b>Pilotage › Décider</b>, la carte du renfort répond d’office : combien de saisonniers, de quelle date à quelle date, pour quel travail, et ce que ça coûte. "
@@ -3103,36 +3119,364 @@ function _wnRow(item, sep) {
     + '</div>';
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// ★★ ANN-1 (§225) — LES QUATRE NIVEAUX DES NOUVEAUTÉS
+// ════════════════════════════════════════════════════════════════════════════
+// Nico, 03/10 : « le What's New est beaucoup trop présent parfois ». Mesuré : 50 versions
+// annoncées du 19/09 au 02/10 (247 changements en septembre), et une fenêtre qui s'ouvrait
+// d'office chez tout le monde, ouvriers compris, presque chaque jour. À ce rythme on la
+// ferme sans la lire — y compris le jour où elle annonce une correction qui touche la paie :
+// l'attention baisse dès la 2e ou 3e exposition à un message qui se ressemble.
+// Chaque item de WHATS_NEW porte désormais :
+//   · niv   — 0 discret : le Journal seul ;
+//             1 nouveau : une pastille « Nouveau » sur l'élément (cible), 15 jours au plus
+//               ou jusqu'au premier usage ;
+//             2 à vérifier : une carte d'une ligne sur l'Accueil, jusqu'à « Vu » ;
+//             3 grande nouveauté : la fenêtre, au plus une fois tous les 30 jours, trois au plus ;
+//   · pour  — 'tous', 'admin', 'salaries', 'tractoriste' ou une clé de module ;
+//   · cible — niveau 1 seulement : le sélecteur de l'élément qui porte la pastille.
+//   Le bloc porte sa date `d` (AAAA-MM-JJ) : le Journal range par mois.
+// ⚠️ Les blocs d'avant 8.04 n'ont ni niv ni d : on ne réécrit pas l'histoire. Ils ne
+//   déclenchent plus rien et se relisent dans le Journal, sous « Versions précédentes ».
+// ⚠️ Le texte vient TOUJOURS du code (WHATS_NEW), jamais d'une saisie : la description porte
+//   ses <b>, comme MV_INFO. Le titre d'un item classé est du texte pur, échappé à l'affichage
+//   (mv-whatsnew-check refuse un < ou un & dans un titre classé).
+// ⚠️ « Vu » et la base vivent dans le navigateur, par domaine et par personne (même forme de
+//   clé que la disposition de l'Accueil) : un « Vu » donné sur le téléphone ne suit pas sur
+//   l'ordinateur. Assumé pour ce lot (§225).
+var _MV_ANN_MAJ_JOURS = 30;   // la grande fenêtre : au plus une fois tous les 30 jours
+var _MV_ANN_MAJ_MAX   = 3;    // ... et trois grandes nouveautés au plus
+var _MV_ANN_MAJ_AGE   = 60;   // une grande nouveauté plus vieille ne s'ouvre plus (Journal seul)
+var _MV_ANN_IMP_AGE   = 90;   // un « à vérifier » jamais vu quitte l'Accueil au bout de 90 jours
+var _MV_ANN_NOUV_AGE  = 15;   // une pastille « Nouveau » : 15 jours au plus
+var _MV_ANN_MODS = { vigne: 1, tracteur: 1, phyto: 1, cave: 1, reserve: 1, planning: 1, pilotage: 1 };
+var _MV_ANN_MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août',
+  'septembre', 'octobre', 'novembre', 'décembre'];
+
+function _mvAnnCle(suffixe) {
+  var u = window.currentUser;
+  return 'mavigne_ann_' + suffixe + '_' + (window.TENANT_ID || 'default') + '_' + ((u && u.nom) || 'anon');
+}
+function _mvAnnLire(suffixe, defaut) {
+  try { var v = localStorage.getItem(_mvAnnCle(suffixe)); return v == null ? defaut : JSON.parse(v); }
+  catch (e) { if (window._mvAvale) window._mvAvale(e, 'utils.js/_mvAnnLire'); return defaut; }
+}
+function _mvAnnEcrire(suffixe, v) {
+  try { localStorage.setItem(_mvAnnCle(suffixe), JSON.stringify(v)); }
+  catch (e) { if (window._mvAvale) window._mvAvale(e, 'utils.js/_mvAnnEcrire'); }
+}
+function _mvAnnVus() { var v = _mvAnnLire('vus', []); return Array.isArray(v) ? v : []; }
+function _mvAnnMarquer(id) {
+  if (!id) return;
+  var v = _mvAnnVus();
+  if (v.indexOf(id) < 0) { v.push(id); _mvAnnEcrire('vus', v.slice(-300)); }
+}
+
+// Chaque item reçoit son identité : la version et son rang dans le bloc. Un bloc publié ne
+// se réécrit pas : l'identité est stable d'une version à l'autre.
+function _mvAnnItems() {
+  var out = [];
+  for (var i = 0; i < WHATS_NEW.length; i++) {
+    var b = WHATS_NEW[i];
+    if (!b || !Array.isArray(b.items)) continue;
+    for (var k = 0; k < b.items.length; k++) {
+      var it = b.items[k];
+      if (it) out.push({ id: b.v + '#' + k, v: b.v, d: b.d || '', niv: typeof it.niv === 'number' ? it.niv : -1, it: it });
+    }
+  }
+  return out;
+}
+
+// « pour » : à qui l'item parle. Absent = tout le monde (les blocs d'avant 8.04).
+// ⚠️ Une clé de module suit la VISIBILITÉ du module (formule et masquage, _canModule) ;
+//   le Pilotage exige en plus le droit de le voir (admin ou rôle pilotage).
+function _mvAnnPourMoi(it) {
+  var p = it && it.pour;
+  if (!Array.isArray(p) || !p.length) return true;
+  var r = (window.currentUser && window.currentUser.roles) || [];
+  for (var i = 0; i < p.length; i++) {
+    var t = p[i];
+    if (t === 'tous') return true;
+    if (t === 'admin' && r.indexOf('admin') >= 0) return true;
+    if (t === 'salaries' && (r.indexOf('ouvrier') >= 0 || r.indexOf('tractoriste') >= 0)) return true;
+    if (t === 'tractoriste' && r.indexOf('tractoriste') >= 0) return true;
+    if (_MV_ANN_MODS[t] === 1) {
+      var vis = true;
+      try { if (typeof window._canModule === 'function') vis = !!window._canModule(t); }
+      catch (e) { if (window._mvAvale) window._mvAvale(e, 'utils.js/_mvAnnPourMoi'); }
+      if (t === 'pilotage' && !canSeePilotage()) vis = false;
+      if (vis) return true;
+    }
+  }
+  return false;
+}
+
+function _mvAnnJours(depuis, auj) {
+  if (!depuis || !auj) return 0;
+  return Math.round((new Date(auj + 'T12:00:00') - new Date(depuis + 'T12:00:00')) / 86400000);
+}
+
+// Ce qui attend la personne à un niveau : paru après sa base et pas après la version
+// installée, pour elle, ni vu, ni trop vieux. Le plus récent d'abord.
+function _mvAnnAttente(niv, base, vus, auj) {
+  var age = niv === 3 ? _MV_ANN_MAJ_AGE : niv === 2 ? _MV_ANN_IMP_AGE : _MV_ANN_NOUV_AGE;
+  return _mvAnnItems().filter(function (a) {
+    if (a.niv !== niv || vus.indexOf(a.id) >= 0) return false;
+    if (_cmpVer(a.v, base) <= 0 || _cmpVer(a.v, APP_VERSION) > 0) return false;
+    if (niv === 1 && !a.it.cible) return false;
+    if (a.d && _mvAnnJours(a.d, auj) > age) return false;
+    return _mvAnnPourMoi(a.it);
+  }).sort(function (x, y) { return _cmpVer(y.v, x.v); });
+}
+
+// ── Niveau 2 : la carte « À vérifier » de l'Accueil. Une ligne, pas un bloc : l'étiquette,
+//    le titre, et « Vu ». Le détail s'ouvre au toucher, dans la feuille des « i ».
+function _mvAnnCarte(base, vus, auj) {
+  var el = document.getElementById('home-annonce');
+  if (!el) return;
+  var L = (base == null) ? [] : _mvAnnAttente(2, base, vus, auj);
+  if (!L.length) { el.innerHTML = ''; el.style.display = 'none'; return; }
+  var a = L[0];
+  el.style.display = '';
+  el.innerHTML = '<div class="mvn-carte">'
+    + '<span class="mvn-carte-ic" aria-hidden="true">' + _mvIcon('alerte', 18) + '</span>'
+    + '<button type="button" class="mvn-carte-txt" data-ann-lire="' + _escAttr(a.id) + '">'
+    + '<span class="mvn-carte-lb">À vérifier' + (L.length > 1 ? ', 1 sur ' + L.length : '') + '</span>'
+    + '<span class="mvn-carte-ti">' + _escHtml(a.it.titre) + '</span></button>'
+    + '<button type="button" class="mvn-carte-vu" data-ann-vu="' + _escAttr(a.id) + '">Vu</button>'
+    + '</div>';
+}
+function _mvAnnCarteMaj() {
+  _mvAnnCarte(_mvAnnLire('base', null), _mvAnnVus(), _mvAujIso());
+}
+
+// ── Niveau 1 : la pastille « Nouveau », posée sur l'élément que vise `cible`.
+//    Les écrans se redessinent sans cesse (innerHTML) : un observateur la repose après
+//    chaque rendu. Il ne tourne QUE s'il y a une pastille à poser, et se débranche ensuite.
+// ⚠️ La pastille déborde le haut de sa cible : une cible logée dans un conteneur qui défile
+//   (une barre d'onglets) la couperait — viser la ligne ou le bouton, pas l'onglet.
+var _MVN_OBS = null, _MVN_RAF = 0, _MVN_ACTIFS = [];
+function _mvNouvPoser() {
+  _MVN_RAF = 0;
+  var ids = _MVN_ACTIFS.map(function (a) { return a.id; });
+  var poses = document.querySelectorAll('.mvn-nouv[data-nouv]');
+  for (var i = 0; i < poses.length; i++)
+    if (ids.indexOf(poses[i].getAttribute('data-nouv')) < 0) poses[i].remove();
+  for (var k = 0; k < _MVN_ACTIFS.length; k++) {
+    var el = null;
+    try { el = document.querySelector(_MVN_ACTIFS[k].it.cible); }
+    catch (e) { if (window._mvAvale) window._mvAvale(e, 'utils.js/_mvNouvPoser'); }
+    if (!el || el.querySelector('.mvn-nouv')) continue;
+    var b = document.createElement('span');
+    b.className = 'mvn-nouv';
+    b.setAttribute('data-nouv', _MVN_ACTIFS[k].id);
+    b.textContent = 'Nouveau';
+    if (window.getComputedStyle && window.getComputedStyle(el).position === 'static') el.style.position = 'relative';
+    el.appendChild(b);
+  }
+  if (!_MVN_ACTIFS.length && _MVN_OBS) { _MVN_OBS.disconnect(); _MVN_OBS = null; }
+}
+function _mvNouvVeille() {
+  var base = _mvAnnLire('base', null);
+  _MVN_ACTIFS = (base == null) ? [] : _mvAnnAttente(1, base, _mvAnnVus(), _mvAujIso());
+  if (_MVN_ACTIFS.length && !_MVN_OBS && typeof MutationObserver === 'function' && document.body) {
+    _MVN_OBS = new MutationObserver(function () { if (!_MVN_RAF) _MVN_RAF = requestAnimationFrame(_mvNouvPoser); });
+    _MVN_OBS.observe(document.body, { childList: true, subtree: true });
+  }
+  _mvNouvPoser();
+}
+// Le premier usage de l'élément vaut « vu » : la pastille s'en va.
+function _mvNouvUsage(t) {
+  for (var k = 0; k < _MVN_ACTIFS.length; k++) {
+    var hit = null;
+    try { hit = t.closest(_MVN_ACTIFS[k].it.cible); }
+    catch (e) { if (window._mvAvale) window._mvAvale(e, 'utils.js/_mvNouvUsage'); }
+    if (hit) { _mvAnnMarquer(_MVN_ACTIFS[k].id); _mvNouvVeille(); return; }
+  }
+}
+
+// La fiche d'un item, dans la feuille des « i » (#ovInfo) : ouverte depuis la carte de
+// l'Accueil ou depuis une pastille.
+function _mvAnnFiche(id) {
+  var el = document.getElementById('info-inner');
+  var a = _mvAnnItems().filter(function (x) { return x.id === id; })[0];
+  if (!el || !a) return;
+  var imp = a.niv === 2;
+  el.innerHTML = '<div class="modal-hd mva-hd"><span class="mvi-ic" aria-hidden="true">'
+    + _mvIcon(imp ? 'alerte' : 'etincelles', 18) + '</span>'
+    + '<div><div class="modal-title">' + _escHtml(a.it.titre) + '</div>'
+    + '<div class="modal-sub">' + (imp ? 'À vérifier' : a.niv === 3 ? 'Grande nouveauté' : 'Nouveau')
+    + ', version ' + _escHtml(a.v) + '</div></div></div>'
+    + '<div class="mvi-bd"><p>' + a.it.desc + '</p></div>'
+    + '<div class="mva-foot">'
+    + (imp ? '<button type="button" class="mva-fbtn" data-ann-vu="' + _escAttr(a.id) + '">Vu</button>'
+           : '<button type="button" class="mva-fbtn" data-ann-fermer="1">Compris</button>')
+    + '<button type="button" class="mva-fbtn" data-ann-journal="1">Journal des nouveautés</button></div>';
+  if (window.openOv) window.openOv('ovInfo');
+}
+
+// ── Le Journal des nouveautés (Réglages › Moi) : tout, mois par mois. Dans un mois : les
+//    grandes nouveautés, puis « À vérifier », puis « Nouveau » (quatre, le reste replié), et
+//    les corrections repliées en bas. Les blocs d'avant 8.04 (ni date ni niveau) se
+//    relisent sous « Versions précédentes ».
+var _MV_ANN_PLIS = {};
+function _mvAnnMoisNom(m) {
+  var n = _MV_ANN_MOIS[parseInt(m.slice(5, 7), 10) - 1] || '';
+  return n.charAt(0).toUpperCase() + n.slice(1) + ' ' + m.slice(0, 4);
+}
+function _mvAnnLigne(a, genre, vus) {
+  var vu = vus.indexOf(a.id) >= 0, tag = '';
+  if (genre === 'maj') tag = '<span class="mvn-tag mvn-tag-maj">Grande nouveauté</span>';
+  if (genre === 'imp') tag = vu ? '<span class="mvn-tag mvn-tag-vu">Vu</span>' : '<span class="mvn-tag mvn-tag-imp">À vérifier</span>';
+  return '<div class="mvn-l mvn-l-' + genre + '">'
+    + (tag ? '<div class="mvn-l-hd">' + tag + '</div>' : '')
+    + '<div class="mvn-l-ti">' + _escHtml(a.it.titre) + '</div>'
+    + '<div class="mvn-l-tx">' + a.it.desc + '</div>'
+    + (genre === 'imp' && !vu ? '<button type="button" class="mvn-l-vu" data-ann-vu="' + _escAttr(a.id) + '">Vu</button>' : '')
+    + '</div>';
+}
+function _mvAnnPlier(cle, libelle, classe) {
+  return '<button type="button" class="mvn-plier' + classe + (_MV_ANN_PLIS[cle] ? ' on' : '')
+    + '" data-ann-plier="' + _escAttr(cle) + '"><span class="mvn-plier-lb">' + libelle + '</span>'
+    + _mvIcon('chevron', 16) + '</button>';
+}
+function _mvAnnMoisHtml(m, L, vus) {
+  var S = { 3: [], 2: [], 1: [], 0: [] };
+  L.forEach(function (a) { (S[a.niv] || S[0]).push(a); });
+  var h = '<div class="mvn-mois"><div class="mvn-mois-t">' + _mvAnnMoisNom(m) + '</div>';
+  if (S[3].length) h += '<div class="mvn-sec">' + S[3].map(function (a) { return _mvAnnLigne(a, 'maj', vus); }).join('') + '</div>';
+  if (S[2].length) h += '<div class="mvn-sec">' + S[2].map(function (a) { return _mvAnnLigne(a, 'imp', vus); }).join('') + '</div>';
+  if (S[1].length) {
+    var ouvert = !!_MV_ANN_PLIS[m + '-n'];
+    h += '<div class="mvn-liste"><div class="mvn-liste-hd">' + _mvIcon('etiquette', 16) + 'Nouveau</div>'
+      + (ouvert ? S[1] : S[1].slice(0, 4)).map(function (a) { return _mvAnnLigne(a, 'nouv', vus); }).join('')
+      + (S[1].length > 4 ? _mvAnnPlier(m + '-n', ouvert ? 'Réduire la liste' : (S[1].length === 5 ? 'Voir l’autre' : 'Voir les ' + (S[1].length - 4) + ' autres'), '') : '')
+      + '</div>';
+  }
+  if (S[0].length) {
+    var co = !!_MV_ANN_PLIS[m + '-c'];
+    h += _mvAnnPlier(m + '-c', co ? 'Masquer les corrections'
+      : S[0].length + (S[0].length > 1 ? ' corrections' : ' correction'), ' mvn-plier-c');
+    if (co) h += '<ul class="mvn-corr">' + S[0].map(function (a) { return '<li>' + _escHtml(a.it.titre) + '</li>'; }).join('') + '</ul>';
+  }
+  return h + '</div>';
+}
+function _mvAnnAnciensHtml(L) {
+  var ouvert = !!_MV_ANN_PLIS.anciens, vers = [], parV = {};
+  L.forEach(function (a) { if (!parV[a.v]) { parV[a.v] = []; vers.push(a.v); } parV[a.v].push(a.it); });
+  var h = '<div class="mvn-mois">' + _mvAnnPlier('anciens', ouvert ? 'Masquer les versions précédentes'
+    : 'Versions précédentes (' + vers.length + ')', ' mvn-plier-c');
+  if (ouvert) vers.forEach(function (v) {
+    h += '<div class="mvn-anc-v">Version ' + _escHtml(v) + '</div>';
+    parV[v].forEach(function (it, i) { h += _wnRow(it, i < parV[v].length - 1 ? 'border-bottom:1px solid rgba(0,0,0,0.06);' : ''); });
+  });
+  return h + '</div>';
+}
+function _mvAnnJournalHtml() {
+  var vus = _mvAnnVus(), mois = {}, ordre = [], anciens = [];
+  _mvAnnItems().forEach(function (a) {
+    if (!_mvAnnPourMoi(a.it) || _cmpVer(a.v, APP_VERSION) > 0) return;
+    if (a.niv < 0 || !a.d) { anciens.push(a); return; }
+    var m = a.d.slice(0, 7);
+    if (!mois[m]) { mois[m] = []; ordre.push(m); }
+    mois[m].push(a);
+  });
+  var h = '<div class="modal-hd mva-hd"><span class="mvi-ic" aria-hidden="true">' + _mvIcon('etincelles', 18) + '</span>'
+    + '<div><div class="modal-title">Journal des nouveautés</div>'
+    + '<div class="modal-sub">Tout ce qui a changé, mois par mois. Ma Vigne v' + APP_VERSION + '</div></div></div>'
+    + '<div class="mvn-j">';
+  ordre.forEach(function (m) { h += _mvAnnMoisHtml(m, mois[m], vus); });
+  if (anciens.length) h += _mvAnnAnciensHtml(anciens);
+  return h + '</div><div class="mva-foot"><button type="button" class="mva-fbtn" data-ann-fermer="1">Fermer</button></div>';
+}
+function _mvAnnJournalOuvert() {
+  var el = document.getElementById('info-inner');
+  return !!(el && el.querySelector('.mvn-j'));
+}
+window.openNouvJournal = function () {
+  var el = document.getElementById('info-inner');
+  if (!el) return;
+  var ov = document.getElementById('ovWhatsNew');
+  if (ov && ov.classList.contains('open')) dismissWhatsNew();   // la grande fenêtre se range, comme « Compris »
+  el.innerHTML = _mvAnnJournalHtml();
+  if (window.openOv) window.openOv('ovInfo');
+};
+
+// UN SEUL ÉCOUTEUR, posé une fois, comme celui des pastilles « i » : les boutons des
+// annonces portent des data-ann-*, jamais un onclick écrit dans le HTML (C24).
+// ⚠️ stopPropagation : la pastille vit DANS sa cible — sans lui, la toucher ouvrirait aussi
+//   l'écran visé au lieu de dire ce qui est nouveau.
+if (typeof document !== 'undefined') {
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (!t || !t.closest) return;
+    var b = t.closest('[data-ann-vu],[data-ann-lire],[data-ann-journal],[data-ann-plier],[data-ann-fermer],.mvn-nouv');
+    if (!b) { _mvNouvUsage(t); return; }
+    e.preventDefault();
+    e.stopPropagation();
+    var j = document.getElementById('info-inner');
+    if (b.hasAttribute('data-ann-vu')) {
+      _mvAnnMarquer(b.getAttribute('data-ann-vu'));
+      _mvAnnCarteMaj();
+      if (_mvAnnJournalOuvert()) j.innerHTML = _mvAnnJournalHtml();
+      else if (b.closest('#info-inner') && window.closeOv) window.closeOv(null, 'ovInfo');
+    } else if (b.hasAttribute('data-ann-lire')) {
+      _mvAnnFiche(b.getAttribute('data-ann-lire'));
+    } else if (b.hasAttribute('data-ann-journal')) {
+      window.openNouvJournal();
+    } else if (b.hasAttribute('data-ann-plier')) {
+      var k = b.getAttribute('data-ann-plier');
+      _MV_ANN_PLIS[k] = !_MV_ANN_PLIS[k];
+      if (j) j.innerHTML = _mvAnnJournalHtml();
+    } else if (b.hasAttribute('data-ann-fermer')) {
+      if (window.closeOv) window.closeOv(null, 'ovInfo');
+    } else {
+      var id = b.getAttribute('data-nouv');
+      _mvAnnMarquer(id);
+      _mvNouvVeille();
+      _mvAnnFiche(id);
+    }
+  }, true);
+}
+
 let _whatsNewShown = false;
 export function checkWhatsNew() {
   if (_whatsNewShown) return;
   if (_mvPrepOn()) return;   // PREP-1 (§134) : les nouveautés d'un domaine ne regardent pas GUERETTECH
   var seen = localStorage.getItem('mavigne_last_seen_version');
-  if (!seen) { try{ localStorage.setItem('mavigne_last_seen_version', APP_VERSION); }catch(e){ if(window._mvAvale) window._mvAvale(e,'utils.js/checkWhatsNew'); } return; } // 1er install : pas de recap
-  if (_cmpVer(seen, APP_VERSION) >= 0) return; // déjà à jour (ou downgrade)
-  var blocks = _whatsNewSince(seen);
-  if (!blocks.length) return; // que des versions techniques → rien à montrer, curseur inchangé
+  // ANN-1 : la BASE se pose une fois par personne — sa dernière version vue, sinon la version
+  //   installée (1re installation : aucun récapitulatif). Rien de paru avant elle ne se déclenche.
+  var base = _mvAnnLire('base', null);
+  if (base == null) { base = seen || APP_VERSION; _mvAnnEcrire('base', base); }
+  if (!seen) { try{ localStorage.setItem('mavigne_last_seen_version', APP_VERSION); }catch(e){ if(window._mvAvale) window._mvAvale(e,'utils.js/checkWhatsNew'); } }
+  var vus = _mvAnnVus(), auj = _mvAujIso();
+  _mvAnnCarte(base, vus, auj);   // niveau 2 — la carte de l'Accueil
+  _mvNouvVeille();               // niveau 1 — les pastilles
+  // Niveau 3 — la grande fenêtre : au plus une fois tous les 30 jours, trois nouveautés au plus.
+  var der = _mvAnnLire('fenetre', '');
+  if (der && _mvAnnJours(der, auj) < _MV_ANN_MAJ_JOURS) return;
+  var maj = _mvAnnAttente(3, base, vus, auj).slice(0, _MV_ANN_MAJ_MAX);
+  if (!maj.length) return;
   _whatsNewShown = true;
-  var multi = blocks.length > 1;
+  var autres = 0;
+  _whatsNewSince(seen || APP_VERSION).forEach(function (b) { autres += b.items.length; });
+  autres = Math.max(0, autres - maj.length);
   var badge = document.getElementById('wn-version-badge');
   if (badge) badge.textContent = 'v' + APP_VERSION;
   var titleEl = document.getElementById('wn-title');
-  if (titleEl) titleEl.textContent = multi ? "Tout ce qui a changé depuis votre dernière visite" : "Nouveautés de cette version";
+  if (titleEl) titleEl.textContent = maj.length > 1 ? 'Les grandes nouveautés' : 'Une grande nouveauté';
   var container = document.getElementById('wn-items');
   if (container) {
     var html = '';
-    if (multi) {
-      blocks.forEach(function(b) {
-        html += '<div style="display:flex;align-items:center;gap:8px;margin:14px 0 2px;">'
-          + '<span style="font-size:var(--pt-micro,11px);font-weight:600;color:#7A1020;background:rgba(122,16,32,0.08);border:1px solid rgba(122,16,32,0.2);border-radius:6px;padding:2px 8px;">Version ' + b.v + '</span>'
-          + '<span style="flex:1;height:1px;background:rgba(0,0,0,0.06);"></span></div>';
-        b.items.forEach(function(it, i) { html += _wnRow(it, i < b.items.length - 1 ? 'border-bottom:1px solid rgba(0,0,0,0.06);' : ''); });
-      });
-    } else {
-      blocks[0].items.forEach(function(it, i) { html += _wnRow(it, i < blocks[0].items.length - 1 ? 'border-bottom:1px solid rgba(0,0,0,0.06);' : ''); });
-    }
+    maj.forEach(function (a, i) { html += _wnRow(a.it, i < maj.length - 1 ? 'border-bottom:1px solid rgba(0,0,0,0.06);' : ''); });
+    if (autres) html += '<div class="mvn-wn-autres">Et ' + autres + (autres > 1 ? ' autres changements' : ' autre changement')
+      + ' depuis votre dernière visite, à lire dans le Journal des nouveautés.</div>';
     container.innerHTML = html;
   }
+  // Vues dès l'ouverture : la fenêtre ne revient pas pour les mêmes nouveautés.
+  maj.forEach(function (a) { vus.push(a.id); });
+  _mvAnnEcrire('vus', vus.slice(-300));
+  _mvAnnEcrire('fenetre', auj);
   setTimeout(function() { if (window.openOv) window.openOv('ovWhatsNew'); }, 700);
 }
 export function dismissWhatsNew() {
@@ -3901,6 +4245,7 @@ var MV_AIDE = {
     points: [
       ['La priorité du moment', "reste épinglée en haut : c’est ce que l’équipe attaque aujourd’hui."],
       ['Équipes du jour', "juste sous la priorité. L’administrateur la touche pour répartir les salariés en équipes <b>pour la journée</b> : chacun validera et démarrera avec son équipe, sans pouvoir la changer, et ne voit pas les autres. Rien de réglé, ou « Tout le monde ensemble » : l’application fait comme d’habitude. Le lendemain, tout repart à zéro. Un salarié voit ici son équipe du jour, quand il y en a une."],
+      ['Une ligne « À vérifier »', "peut s’afficher sous les chiffres : un changement de l’application qui vous concerne — un chiffre qui bouge, un réglage à contrôler. Touchez-la pour le détail, « Vu » pour la ranger ; elle reste dans Réglages › Moi › Journal des nouveautés."],
       ['La mise en route', "n’apparaît que chez l’administrateur d’un domaine neuf : sept étapes qui se cochent en lisant ce qui est déjà enregistré, rien à pointer à la main. Le bloc s’efface tout seul quand tout est fait."],
       ['Ma part du chantier', "montre ce que vous avez fait vous-même sur le travail en cours ; « Ma trace » ouvre le détail de votre campagne. Ce sont des hectares, jamais des heures, et rien n’est comparé entre collègues."],
       ['Appui long puis glisser', "déplace un bloc ; l’œil le masque. Chacun règle son Accueil."],
@@ -4164,6 +4509,7 @@ var MV_AIDE = {
       ['Le mot de passe initial', "d’un nouveau membre s’affiche une seule fois — notez-le avant de fermer."],
       ['Passer un membre en inactif', "plutôt que le supprimer conserve son historique."],
       ['Documents & impressions', "dans l’onglet Domaine rassemble tout ce que Ma Vigne sait sortir : ce qui est obligatoire en contrôle, vos états internes, et vos données brutes."],
+      ['Le Journal des nouveautés', "dans l’onglet Moi, garde tout ce qui a changé, mois par mois. Une fenêtre ne s’ouvre plus que pour une grande nouveauté, au plus une fois par mois ; un point à vérifier attend sur l’Accueil jusqu’à « Vu » ; une pastille « Nouveau » marque une nouveauté là où elle se trouve."],
       ['La zone dangereuse', "ne réinitialise que cet appareil : les données du domaine restent sur le serveur."]
     ]
   }

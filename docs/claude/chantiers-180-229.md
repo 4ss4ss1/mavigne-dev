@@ -2022,3 +2022,56 @@ ajoutées, sur `capRenf` et sur `_rfMinR` appelé directement.
 
 ① À l'œil chez Nico, sur ses données (§28, bloc COH-1, point 10). ② `c.hCdd` est en dur (35 h). ③ La journée de
 référence (7 h) reste le repli des échéances (§28, point 6).
+
+## 225. ★★ ANN-1 — LES NOUVEAUTÉS EN QUATRE NIVEAUX (03/10 — `src/utils.js` (APP, WHATS_NEW 8.03, bloc ANN-1, MV_AIDE Accueil et Réglages) · `index.html` · `src/styles.css` · `public/sw.js` · `guide/01-demarrer.html` · `guide/12-reglages.html` · `guide/14-depannage.html` · `scripts/mv-harnais-annonces.mjs` (neuf) · `scripts/mv-whatsnew-check.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · **APP 8.03 → 8.04, SW 8.78 → 8.79**, base `ca4caa2`)
+
+### 225a. La demande, et ce qui a été mesuré avant d'agir
+
+Nico, 03/10 (dicté) : prévenir différemment une petite correction, une correction importante et une nouveauté à connaître —
+« le What's New est beaucoup trop présent parfois ». Mesuré sur le dépôt : du 19/09 au 02/10, **50 versions annoncées et 109
+nouveautés** d'environ 330 caractères ; septembre seul, **104 versions et 247 changements**. La fenêtre s'ouvrait d'office chez
+tout le monde (aucun tri par rôle), ne se relisait nulle part, et ses deux boutons faisaient la même chose. Les sources lues
+(NN/g, Google Play, Atlassian, Apple, Linear, études d'habituation de BYU : l'attention baisse dès la 2e ou 3e exposition à un
+message qui se ressemble) disent la même chose : graduer, et réserver l'interruption aux grandes nouvelles.
+
+### 225b. La maquette refusée
+
+Une maquette « canvas » (cinq écrans redessinés à la main) a été jugée **mal faite** : illisible sur téléphone, un dessin qui
+imitait l'appli au lieu de partir de sa feuille de style, un bandeau « À vérifier » trop lourd (un bloc ambre et un gros bouton
+en tête d'Accueil, l'inverse du but). Nico a validé sur la description textuelle. ★ **Une maquette Ma Vigne est UNE page HTML
+construite sur `styles.css`** — pas un canvas d'outil, pas un redessin. Le bandeau est devenu une ligne.
+
+### 225c. Le modèle
+
+`niv` 0–3, `pour`, `cible` (niveau 1), `d` sur le bloc ; la règle est au §7 de `CLAUDE.md`. La **base** se pose une fois par
+personne (dernière version vue, sinon la version installée : aucun récapitulatif à la première installation) ; « Vu » et la base
+vivent en localStorage, clé domaine + personne (`mavigne_ann_*`). Niveau 3 : 30 jours entre deux fenêtres, 3 au plus, 60 jours
+d'âge au plus, vues dès l'ouverture. Niveau 2 : la plus récente non vue (« 1 sur N »), 90 jours. Niveau 1 : la pastille est
+reposée par un `MutationObserver` (les écrans se redessinent sans cesse), branché seulement s'il y a une pastille à poser et
+débranché ensuite ; le premier usage de la cible vaut « vu » ; 15 jours. Le Journal et la fiche d'un item vivent dans la feuille
+des « i » (`#ovInfo`) : mois, niveaux, corrections repliées, « Versions précédentes » pour l'histoire d'avant 8.04.
+
+### 225d. Contraintes rencontrées en route
+
+- `mv-harnais-prep` exige `if (_mvPrepOn()) return;` **avant** le premier `localStorage` de `checkWhatsNew` : gardé mot pour mot.
+- C15 : `_whatsNewSince` serait devenu une fonction morte ; il compte désormais « et N autres changements » sous la fenêtre.
+- C19 / C24 : les titres classés passent par `_escHtml` ; les boutons portent des `data-ann-*` lus par un écouteur délégué (le
+  patron des `data-mvi`), aucun `onclick` construit avec une valeur.
+- `mv-harnais-icones` a rougi sur une icône en 14 px : l'échelle du jeu est 16/18/20/24/40.
+- ★ **Rejoué sur une base neuve.** Construit sur `1a75533`, le lot a été rejoué sur `ca4caa2` : RENF-2 avait pris 8.03 / 8.78
+  et le numéro de section précédent pendant qu'il se construisait. Le `git fetch` d'avant livraison l'a vu (règle d'or n°1) ; les
+  patchs, écrits pour être rejoués, sont repassés sans conflit, numéros relevés (APP 8.04, SW 8.79, §225).
+- Le harnais a d'abord rougi sur « l'observateur se débranche » : il lisait l'observateur d'un autre scénario. Le test avait tort.
+
+### 225e. Mesuré
+
+Preflight **0 erreur** (1 avertissement préexistant, `cave.js`). `mv-harnais-annonces` **33 verts, contre-épreuve 9/9** (filtre
+« pour », base, « Vu », âge, cadence de 30 jours, trois au plus, garde PREP, échappement, pastille qui bloquerait l'écran visé).
+`mv-whatsnew-check` étendu ; contre-épreuve faite sur une copie (bloc sans `d`, cible inexistante → rouge).
+Chaîne complète (`mv-harnais-liste`, 202 commandes) jouée par tranches, `TZ=Europe/Paris` : **verte**, après une correction en
+route — `mv-harnais-jetons` comptait six rayons du bloc qui doublaient un pas du socle (8/12/16/999 px, **repli de `var()` compris**) :
+ramenés à 10 et 20 px. `harnais-claude-md` : `SECTIONS` 244 → 256 (+§225, et 11 crans que le script réclamait déjà sur `1a75533`).
+
+### 225f. Ouvert
+
+Voir §28, bloc ANN-1 : le rendu à regarder sur téléphone, « Vu » par appareil, le niveau 2 « à l'endroit du geste ».
