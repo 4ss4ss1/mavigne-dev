@@ -8,6 +8,11 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **3 octobre 2026 (ANN-1b)** — ★ **LA GRANDE NOUVEAUTÉ QUI MONTRE LE CHEMIN DU JOURNAL** (§225g).
+> Demandé par Nico : un dernier Quoi de neuf, **majeur**, pour que tout le monde sache où lire les mises à jour. `WHATS_NEW` 8.06 :
+> un item `niv: 3, pour: ['tous']` → la grande fenêtre (la première du système ANN-1 : 8.04 et 8.05 n'avaient aucun niveau 3).
+> Base `c855567` (ANN-1 poussé en `bd53451`, KIT-1 en `c855567`). **APP 8.05 → 8.06, SW 8.80 → 8.81**.
+
 > ★ Consolidation : **3 octobre 2026 (KIT-1)** — ★★ **LE KIT GRAPHIQUE COMMUN, LOT 3a : ACCUEIL ET PILOTAGE** (§226).
 > Maquette du kit validée (« go », Nico). Une ligne d'avancement commune (`_mvkAvancement`, utils.js) pour l'Accueil et
 > Pilotage › La campagne : noms entiers (`tAbr` retiré), couleur d'ÉTAT (fait / cours / retard = fenêtre passée, `_mvkRetards`),

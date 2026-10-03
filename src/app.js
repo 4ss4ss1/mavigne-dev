@@ -5824,25 +5824,31 @@ function _homeDndInit(){
 }
 function _homeDragStart(el,e){
   if(navigator.vibrate)navigator.vibrate(40);
-  _homeDrag={el:el,y:e.clientY};
+  _homeDrag={el:el,y:e.clientY,x:e.clientX};
   el.classList.add('home-w-dragging');
   document.addEventListener('pointermove',_homeDragMove,{passive:false});
   document.addEventListener('pointerup',_homeDragEnd);
   document.addEventListener('pointercancel',_homeDragEnd);
 }
 function _homeDragMove(e){
+  // KIT-2 (§227) : sur ordinateur, l'Accueil passe sur DEUX colonnes. Le glissement suit donc le doigt dans les
+  //   deux sens (translate x/y), et la place se cherche dans le bloc qui contient le CENTRE du bloc tiré : moitié
+  //   haute → avant lui, moitié basse → après. Au téléphone (une colonne), c'est exactement la règle d'avant.
+  //   Avant : translateY seul, et le premier voisin de la RANGÉE gagnait — impossible de viser la colonne de droite.
   if(!_homeDrag)return;
   e.preventDefault();
-  var dy=e.clientY-_homeDrag.y;
-  _homeDrag.el.style.transform='translateY('+dy+'px)';
+  var dx=e.clientX-(_homeDrag.x||e.clientX), dy=e.clientY-_homeDrag.y;
+  _homeDrag.el.style.transform='translate('+dx+'px,'+dy+'px)';
   var page=document.getElementById('page-home');if(!page)return;
   var sibs=[].slice.call(page.querySelectorAll('.home-w:not(.home-w-dragging):not(.home-w-pinned)'));
   var r=_homeDrag.el.getBoundingClientRect();
-  var mid=r.top+r.height/2;
+  var cx=r.left+r.width/2, cy=r.top+r.height/2;
   for(var k=0;k<sibs.length;k++){
     var sr=sibs[k].getBoundingClientRect();
-    if(mid>sr.top&&mid<sr.top+sr.height/2){sibs[k].before(_homeDrag.el);_homeDrag.el.style.transform='';_homeDrag.y=e.clientY;break;}
-    if(mid<sr.bottom&&mid>sr.top+sr.height/2){sibs[k].after(_homeDrag.el);_homeDrag.el.style.transform='';_homeDrag.y=e.clientY;break;}
+    if(cx<sr.left||cx>sr.right||cy<sr.top||cy>sr.bottom) continue;
+    if(cy<sr.top+sr.height/2) sibs[k].before(_homeDrag.el); else sibs[k].after(_homeDrag.el);
+    _homeDrag.el.style.transform=''; _homeDrag.y=e.clientY; _homeDrag.x=e.clientX;
+    break;
   }
 }
 function _homeDragEnd(){
@@ -6120,7 +6126,8 @@ function renderHomeCard(){
   const _picto=document.getElementById('home-stat-picto');
   const _chip=document.getElementById('home-stat-chip');
   const _content=document.getElementById('home-stat-content');
-  const barCol=pctGlobal>=75?'var(--vert-med)':pctGlobal>=40?'var(--or)':'var(--orange)';
+  // KIT-2 (§227) : la barre dit l'ÉTAT (kit KIT-1) — dorée en cours, verte finie. Avant : orange sous 40 %.
+  const barCol=pctGlobal>=100?'var(--vert-med)':'var(--or)';
   if(homeCardMode===0){
     // ── Charte DS-2 ── Le pourcentage est LE sujet : il passe en heros, la
     //   jauge se cale a cote, et le contexte descend en etiquette douce.
@@ -6133,14 +6140,14 @@ function renderHomeCard(){
         <div class="mv-hn">${pctGlobal}<span style="font-size:22px;font-weight:600">%</span></div>
         <div style="flex:1;padding-bottom:7px">
           <div class="mv-track"><div class="mv-fill" style="width:${pctGlobal}%;background:${barCol}"></div></div>
-          <div class="mv-l" style="margin-top:6px">${parcActives.length} parcelles \u00b7 ${parcActives.reduce((s,p)=>s+(parseFloat(p.surface)||0),0).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2})} ha</div>
+          <div class="mv-l" style="margin-top:6px">${parcActives.length} parcelles \u00b7 ${parcActives.reduce((s,p)=>s+(parseFloat(p.surface)||0),0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})} ha</div>
         </div></div>`;
   } else {
     const t=tacheLaPlusAvancee;
     _picto.textContent='';
     _chip.textContent='';
     if(t){
-      const colT=t.pct>=75?'var(--or)':'var(--orange)';
+      const colT=t.pct>=100?'var(--vert-med)':'var(--or)';   // KIT-2 : l'état, pas le pourcentage
       _content.innerHTML=`<div class="mv-hd"><div><div class="mv-l">Le travail le plus avanc\u00e9</div>
           <div class="mv-t" style="margin-top:1px">${_escHtml(tNom(t.nom))}</div></div>
           ${_mvBadge('En cours','ambre')}</div>
@@ -6253,11 +6260,11 @@ function renderHome(){
   var elAvt=document.getElementById('hs-avancement');
   var elNbP=document.getElementById('hs-nb-parc');
   var elSurf=document.getElementById('hs-surf');
-  if(elAvt)elAvt.textContent=pctGlobal+'%';
+  if(elAvt)elAvt.textContent=pctGlobal+'\u00a0%';   // KIT-2 : « 17 % », comme partout
   if(elNbP)elNbP.textContent=parcActives.length;
   if(elSurf){
     var surfTot=PARCELLES.filter(function(p){return p.statut!=='Arrachee';}).reduce(function(s,p){return s+parseFloat(p.surface||0);},0);
-    elSurf.textContent=surfTot>0?surfTot.toFixed(2):'—';
+    elSurf.textContent=surfTot>0?surfTot.toFixed(2).replace('.',','):'—';   // KIT-2 : « 11,85 », plus « 11.85 »
   }
 
   // Sub line Accueil

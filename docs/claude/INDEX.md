@@ -269,3 +269,4 @@
 | 224 | 224. ★★ RENF-2 — LE RENFORT DIT COMBIEN DE SAISONNIERS, ET QUAND — SANS HEURES SUP (03/10 — `src/pilotage.j… | `docs/claude/chantiers-180-229.md` |
 | 225 | 225. ★★ ANN-1 — LES NOUVEAUTÉS EN QUATRE NIVEAUX (03/10 — `src/utils.js` (APP, WHATS_NEW 8.03, bloc ANN-1, … | `docs/claude/chantiers-180-229.md` |
 | 226 | 226. ★★ KIT-1 — LE KIT GRAPHIQUE COMMUN, LOT 3a : ACCUEIL ET PILOTAGE (03/10 — `src/utils.js` · `src/app.js… | `docs/claude/chantiers-180-229.md` |
+| 227 | 227. ★ KIT-2 — L'ACCUEIL ET LES PARCELLES SUR DEUX COLONNES ; LES CHIFFRES DROITS PARTOUT (03/10 — `src/app… | `docs/claude/chantiers-180-229.md` |

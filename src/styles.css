@@ -5524,3 +5524,28 @@ button.pil-dz-set{cursor:pointer;width:100%;}
 :root{--page-max:1200px;}
 .pil-wrap{max-width:var(--page-max,1200px);}
 @media (min-width:1200px){ #page-home,#page-parcelles,#page-pilotage{max-width:var(--page-max,1200px);margin-left:auto;margin-right:auto;} }
+
+/* ══ KIT-2 (§227) ═══════════════════════════════════════════════════════════════════════════════════
+   1. LES CHIFFRES ALIGNÉS PARTOUT. La Cormorant servie (public/fonts, sous-police latin) dessine par défaut des
+      chiffres ELZÉVIRIENS : un « 1 » court comme un « I », un « 7 » qui descend — « 17 % » se lisait « I7% »,
+      « 19° » « I9° » (captures du 03/10). La sous-police garde la fonction `lnum` (vérifié : one.lf, seven.lf) ;
+      elle s'active ici une fois pour toutes, par héritage. L'Outfit dessine déjà des chiffres alignés : rien ne
+      change pour elle. Une règle qui pose `tabular-nums` passe en chiffres alignés à chasse fixe (one.tf). */
+body{font-variant-numeric:lining-nums;}
+/* 2. L'ACCUEIL SUR DEUX COLONNES à partir de 1 024 px. Les blocs (.home-w) sont les enfants directs de la page
+      (applyHomeLayout les y ré-appende dans l'ordre choisi) : la page devient la grille. Tout ce qui n'est pas un
+      bloc (en-tête, onglets, chiffres, bandeaux, pied administrateur) et le bloc épinglé prennent toute la
+      largeur ; les blocs se rangent deux par deux, dans l'ordre de lecture. Le glissement suit les deux sens. */
+@media (min-width:1024px){
+  #page-home.active{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--e-4,16px);align-content:start;align-items:start;}
+  #page-home > *{grid-column:1/-1;min-width:0;}
+  #page-home > .home-w{grid-column:auto;}
+  #page-home > .home-w.home-w-pinned{grid-column:1/-1;}
+}
+/* 3. LES PARCELLES SUR DEUX COLONNES : les cartes (.mv-c) ont leur propre conteneur, #pList, séparé des bandeaux du haut
+      (priorité, recherche, proximité, filtres, barre d'équipe) — la grille ne touche qu'aux cartes. Un message vide prend
+      toute la largeur. */
+@media (min-width:1024px){
+  #pList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--e-3,12px);align-items:start;}
+  #pList > :not(.mv-c){grid-column:1/-1;}
+}

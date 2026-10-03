@@ -3,10 +3,14 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **3 octobre 2026 (ANN-1b)** — ★ **LA GRANDE NOUVEAUTÉ QUI MONTRE LE CHEMIN DU JOURNAL** (§225g).
-> Demandé par Nico : un dernier Quoi de neuf, **majeur**, pour que tout le monde sache où lire les mises à jour. `WHATS_NEW` 8.06 :
-> un item `niv: 3, pour: ['tous']` → la grande fenêtre (la première du système ANN-1 : 8.04 et 8.05 n'avaient aucun niveau 3).
-> Base `c855567` (ANN-1 poussé en `bd53451`, KIT-1 en `c855567`). **APP 8.05 → 8.06, SW 8.80 → 8.81**.
+> Dernière consolidation : **3 octobre 2026 (KIT-2)** — ★ **L'ACCUEIL ET LES PARCELLES SUR DEUX COLONNES ; LES CHIFFRES DROITS PARTOUT** (§227).
+> Sur les captures de Nico (PC, mode normal et Personnaliser) : `#page-home.active` en grille de deux colonnes à partir de
+> 1 024 px (les `.home-w` en sont les enfants directs ; le reste et le bloc épinglé en pleine largeur), `_homeDragMove` en
+> deux dimensions ; les cartes de parcelle (`.mv-c`, conteneur `#pList`, séparé des bandeaux) aussi sur deux colonnes. Chiffres
+> elzéviriens de la Cormorant (« I7% », « I9° ») → `body{font-variant-numeric:lining-nums}` (la sous-police garde `lnum`).
+> Tuiles « 17 % » / « 11,85 », barre de saison à l'état. Reconstruit sur `b6d2cd5` : la première livraison (base `c855567`)
+> doublait ANN-1b, poussé entre-temps avec les mêmes numéros. Harnais `mv-harnais-kit2` (11, contre-épreuve 6/6).
+> Base `b6d2cd5`. **APP 8.06 → 8.07, SW 8.81 → 8.82** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1837,8 +1841,8 @@ différents entre eux, et des heures sup apparaissent dans Décider › le renfo
    `w.cap` le modèle standard jour par jour (`_cap1`) ; le seul ajout fixe est le ×8/7 de `_rfSim` (`hMax/hJour`).
    ⚠️ Le modèle INTÉGRÉ dit 32 h en janvier-février (Nico : 28-29 h l'hiver, 39 h l'été) : vérifier chez lui que le modèle
    2027 est enregistré (sinon bandeau « Le modèle … a été replacé » dans le Planning).
-3. ◐ **Lot 3 — kit graphique + mise en page PC. 3a fait au §226 (KIT-1)** ; restent 3b (Vigne hors Accueil, Planning,
-   Tracteur) et 3c (Cave, Cuvier, La Réserve), et l'Accueil sur deux colonnes (voir §226e). Pour mémoire, la demande : Recommandation retenue : PAS d'option petit/grand par utilisateur ; un kit
+3. ◐ **Lot 3 — kit graphique + mise en page PC. 3a fait au §226 (KIT-1), l'Accueil et les Parcelles sur deux colonnes
+   au §227 (KIT-2)** ; restent 3b (Vigne hors Accueil, Planning, Tracteur) et 3c (Cave, Cuvier, La Réserve). Pour mémoire : Recommandation retenue : PAS d'option petit/grand par utilisateur ; un kit
    (une barre en deux épaisseurs, un cadre en trois hauteurs, un seul style de grand chiffre, mêmes couleurs d'état) et un
    bouton « Agrandir » sur chaque graphique (il existe déjà sur la carte de Décider). Constat : une vingtaine de familles de
    barres dans `styles.css`, donuts et jauges chacun à sa taille, l'avancement par tâche dessiné deux fois (Accueil

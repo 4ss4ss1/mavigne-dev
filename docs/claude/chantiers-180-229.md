@@ -2130,3 +2130,45 @@ Personnaliser sur PC avant. Les Parcelles sur deux colonnes, même raison (bande
 ① 3b (Vigne hors Accueil, Planning, Tracteur) et 3c (Cave, Cuvier, La Réserve) : barres, cercles (une taille), cadre commun.
 ② L'Accueil et les Parcelles sur deux colonnes, sur capture. ③ À l'œil chez Nico : la ligne d'avancement au téléphone (deux
 étages sous 480 px), le bouton « Agrandir » sur chaque graphe (y compris Cave et Cuvier), la largeur à 1 200 px.
+
+## 227. ★ KIT-2 — L'ACCUEIL ET LES PARCELLES SUR DEUX COLONNES ; LES CHIFFRES DROITS PARTOUT (03/10 — `src/app.js` · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE home) · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `public/guide.html` · `scripts/mv-harnais-kit2.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `scripts/typo-baseline.json` · **APP 8.06 → 8.07, SW 8.81 → 8.82**, base `b6d2cd5`)
+
+### 227a. D'où ça vient
+
+KIT-1 (§226d) avait laissé l'Accueil et les Parcelles sur une colonne, faute d'avoir vu l'écran. Nico a envoyé deux
+captures de l'Accueil sur PC (mode normal, mode Personnaliser). Lu dans le code : `applyHomeLayout` ré-appende chaque
+`.home-w` dans `#page-home` — les blocs sont les enfants DIRECTS de la page, mêlés à l'en-tête, aux onglets, aux tuiles, aux
+bandeaux, au pied administrateur ; et `_homeDragMove` ne regardait que la hauteur (le voisin de GAUCHE de la rangée gagnait).
+Pour les Parcelles, la capture demandée s'est révélée inutile : les cartes (`.mv-c`) vivent dans leur propre conteneur
+`#pList`, frère — et non parent — des bandeaux (priorité, recherche, proximité, tournée, filtres, barre d'équipe).
+★ **Reconstruit une fois** : la première livraison de KIT-2 (base `c855567`, APP 8.06) est arrivée pendant qu'un autre fil
+poussait ANN-1b (§225g) sur la même base, avec les mêmes numéros. Elle n'a pas été collée ; `mv-base` l'aurait refusée
+(HEAD `b6d2cd5`). Le lot est refait sur `b6d2cd5`, en 8.07 / 8.82.
+
+### 227b. Ce qui change
+
+- **Accueil** : `@media (min-width:1024px)` — `#page-home.active` en grille de deux colonnes (le `.active` est obligatoire :
+  `.page` est en `display:none` hors de la page courante) ; `#page-home > *` pleine largeur, `.home-w` une colonne,
+  `.home-w-pinned` pleine largeur. `_homeDragMove` suit le doigt en x et y et cherche le bloc qui CONTIENT le centre du bloc
+  tiré (moitié haute → avant, basse → après) ; en une colonne, la règle d'avant ; dans l'allée, rien.
+- **Parcelles** : `#pList` en grille de deux colonnes ; ce qui n'est pas une carte (`:not(.mv-c)`, le message vide) en pleine
+  largeur. Les bandeaux, au-dessus, ne sont pas dans la grille.
+- **Chiffres elzéviriens** (« I7% », « I9° » sur les captures) : la Cormorant servie (`public/fonts`, sous-police latin) dessine
+  par défaut des chiffres elzéviriens (« one » haut de 386 unités, « seven » qui descend à −275). fontTools : la sous-police
+  garde `lnum` (one.lf, seven.lf, 634 de haut) et `tnum` (one.tf, alignés à chasse fixe — le trou de « I 2 % »).
+  `body{font-variant-numeric:lining-nums}` les active partout par héritage. ⚠️ Une régénération des sous-polices doit garder `lnum`.
+- **Tuiles** « 17 % » et « 11,85 » ; surface de la carte de saison au centième ; **barre de saison** et « travail le plus
+  avancé » à l'état (doré en cours, vert fini — avant : orange sous 40 %).
+
+### 227c. Mesuré
+
+`mv-harnais-kit2.mjs` : **11 assertions**, dont le VRAI `_homeDragMove` exécuté sur une page factice en deux colonnes puis en
+une. Contre-épreuve **6/6** (la première version laissait vert « la surface reprend son point » : le motif vérifié existait aussi
+dans le rapport de saison ; l'assertion vise désormais la ligne de la tuile). Cliquet typo regravé si la croissance cumulée de
+`styles.css` (plusieurs lots depuis la référence) dépasse 5 % — ce lot n'y ajoute qu'environ 2 ko. Chaîne complète verte.
+
+### 227d. Ouvert
+
+① À l'œil chez Nico : deux blocs de hauteurs inégales côte à côte laissent un blanc (l'ordre se règle en mode Personnaliser) ;
+le glisser-déposer d'une colonne à l'autre ; la liste des parcelles sur deux colonnes ; les chiffres droits. ② 3b et 3c du kit.
+③ Deux fils livrent encore en parallèle (annonces / kit) : un seul à la fois, ou un push entre deux lots.

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.06';
+export const APP_VERSION = '8.07';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -846,6 +846,14 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.07', d: '2026-10-03', items: [
+    { niv: 0, pour: ['tous'], emoji: 'carte', titre: 'Sur ordinateur, l’Accueil et les Parcelles passent sur deux colonnes',
+      desc: "À partir de 1 024 px de large, les blocs de l’Accueil se rangent deux par deux, dans l’ordre que vous leur avez donné. "
+        + "En mode Personnaliser, un bloc se glisse aussi d’une colonne à l’autre. La liste des parcelles se range aussi sur deux colonnes, les bandeaux du haut gardent toute la largeur. Au téléphone, rien ne change." },
+    { niv: 0, pour: ['tous'], emoji: 'oeil', titre: 'Les chiffres se lisent du premier coup',
+      desc: "Les grands chiffres de l’application étaient dessinés « à l’ancienne », un 1 court comme un I : « 17 % » se lisait « I7% », « 19° » « I9° ». "
+        + "Ils sont maintenant droits partout. Sur l’Accueil, la surface s’écrit « 11,85 ha » et la barre de la saison est dorée tant qu’elle n’est pas finie." },
+  ] },
   { v: '8.06', d: '2026-10-03', items: [
     { niv: 3, pour: ['tous'], emoji: 'livre', titre: 'Les mises à jour se lisent maintenant dans Réglages › Moi',
       desc: "Pour voir ce qui a changé dans Ma Vigne — les nouveautés comme les petites corrections —, ouvrez <b>Réglages › Moi › Journal des nouveautés</b> : tout y est rangé, mois par mois. "
@@ -4338,7 +4346,7 @@ var MV_AIDE = {
       ['Une ligne « À vérifier »', "peut s’afficher sous les chiffres : un changement de l’application qui vous concerne — un chiffre qui bouge, un réglage à contrôler. Touchez-la pour le détail, « Vu » pour la ranger ; elle reste dans Réglages › Moi › Journal des nouveautés."],
       ['La mise en route', "n’apparaît que chez l’administrateur d’un domaine neuf : sept étapes qui se cochent en lisant ce qui est déjà enregistré, rien à pointer à la main. Le bloc s’efface tout seul quand tout est fait."],
       ['Ma part du chantier', "montre ce que vous avez fait vous-même sur le travail en cours ; « Ma trace » ouvre le détail de votre campagne. Ce sont des hectares, jamais des heures, et rien n’est comparé entre collègues."],
-      ['Appui long puis glisser', "déplace un bloc ; l’œil le masque. Chacun règle son Accueil."],
+      ['Appui long puis glisser', "déplace un bloc ; l’œil le masque. Chacun règle son Accueil. Sur ordinateur, les blocs se rangent sur deux colonnes, et un bloc se glisse aussi d’une colonne à l’autre."],
       ['La pastille de saison', "change la vue. Revenir sur une période passée ne touche pas à la période active."],
       ['Actualiser', "force une resynchronisation quand un chiffre semble figé."],
       ['Le voyant en haut de l’écran', "dit où en est la synchro. Orange avec «\u00a0Pas de synchro\u00a0»\u00a0: le téléphone a du réseau mais ne joint plus le serveur, et ne reçoit plus ce que les autres saisissent — touchez-le, puis «\u00a0Relancer l’application\u00a0». Au retour de veille, l’application vérifie d’elle-même et relit ce qui a changé."],
