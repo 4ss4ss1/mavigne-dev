@@ -41,8 +41,8 @@ function suite(S) {
   g = glisse(S, DEUX, 425, 300);
   T('dans l\u2019allée entre deux colonnes, rien ne bouge', g.log.length === 0);
   const css = S.css;
-  T('l\u2019Accueil sur deux colonnes à partir de 1 024 px, SANS TROUS : les blocs dans #home-cols, rangé en colonnes (KIT-5, §233)',
-    /@media \(min-width:1024px\)\{[\s\S]{0,600}#home-cols\{column-count:2;column-gap:var\(--e-4,16px\);\}/.test(css) && /#home-cols > \.home-w\{break-inside:avoid;/.test(css));
+  T('l\u2019Accueil sur deux colonnes à partir de 1 024 px, EN RANGÉES : les blocs dans #home-cols, même hauteur par rangée, un bloc seul en pleine largeur (ALIGN-2, §237)',
+    /@media \(min-width:1024px\)\{[\s\S]{0,1400}#home-cols\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\);column-gap:var\(--e-4,16px\);align-items:stretch;\}/.test(css) && /#home-cols > \.home-w-large,#home-cols > \.home-w-seul\{grid-column:1\/-1;\}/.test(css));   /* ALIGN-2 (§237) : en rangées */
   T('… les blocs vont dans #home-cols, l\u2019en-tête et le bloc épinglé restent hors des colonnes', /cols\.appendChild\(el\); \/\/ ré-appende dans l'ordre du layout/.test(S.app) && /page\.appendChild\(pin\);/.test(S.app) && !/#page-home\.active\{display:grid/.test(css));
   T('les Parcelles sur deux colonnes : la grille ne touche que les cartes (#pList), le reste pleine largeur',
     /#pList\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\);/.test(css) && /#pList > :not\(\.mv-c\)\{grid-column:1\/-1;\}/.test(css));
@@ -60,7 +60,7 @@ if (ko) process.exit(1);
 const sub = (k, a, b) => S => Object.assign({}, S, { [k]: S[k].replace(a, b) });
 const D = [
   ['le glissement ne regarde plus que la hauteur', sub('app', 'if(cx<sr.left||cx>sr.right||cy<sr.top||cy>sr.bottom) continue;', 'if(cy<sr.top||cy>sr.bottom) continue;')],
-  ['l\u2019Accueil revient sur une colonne', sub('css', '#home-cols{column-count:2;', '#home-cols{column-count:1;')],
+  ['l\u2019Accueil revient sur une colonne', sub('css', '#home-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));', '#home-cols{display:block;grid-template-columns:none;')],
   ['les blocs restent sous la page, hors des colonnes', sub('app', 'cols.appendChild(el); // ré-appende', 'page.appendChild(el); // ré-appende')],
   ['la liste des parcelles revient sur une colonne', sub('css', '#pList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));', '#pList{display:block;')],
   ['les chiffres elzéviriens reviennent', sub('css', '\nbody{font-variant-numeric:lining-nums;}', '\n')],

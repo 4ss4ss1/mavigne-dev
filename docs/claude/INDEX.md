@@ -279,3 +279,5 @@
 | 233 | 233. ★ KIT-5 — L'ACCUEIL SUR DEUX COLONNES, SANS TROUS (03/10 — `src/app.js` · `src/styles.css` · `guide/04… | `docs/claude/chantiers-230-279.md` |
 | 234 | 234. ★★ ANNEE-1 — PILOTAGE › L'ANNÉE, UN CADRE À LA FOIS (04/10 — `src/pilotage.js` · `src/utils.js` (APP, … | `docs/claude/chantiers-230-279.md` |
 | 235 | 235. ★★ PRIO-1 — LA TÂCHE DU MOMENT : UNE SEULE RÈGLE, D'APRÈS LES DATES DE TRAVAUX (04/10 — `src/app.js` ·… | `docs/claude/chantiers-230-279.md` |
+| 236 | 236. ★★ ALIGN-1 — LA DÉCISION DU JOUR : QUATRE TUILES BÂTIES PAREIL (04/10 — `src/pilotage.js` · `src/style… | `docs/claude/chantiers-230-279.md` |
+| 237 | 237. ★★ ALIGN-2 — L'ACCUEIL EN RANGÉES (04/10 — `src/app.js` · `src/styles.css` · `src/utils.js` (APP, WHAT… | `docs/claude/chantiers-230-279.md` |

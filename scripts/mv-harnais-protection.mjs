@@ -109,7 +109,7 @@ function scenarios(pil, reg, journal, app) {
     const X4 = charger(pil, { sim: { induit: 0, horsDelai: 0, deborde: false } });
     t('tout boucle : « Rien à rattraper », pas de bouton', X4._pilCkInaction({}).includes('Rien à rattraper') && !X4._pilCkInaction({}).includes('data-diag'));
     t('campagne finie, ou sans taux, ou sans simulateur : rien', charger(pil, { fini: true })._pilCkInaction({}) === '' && charger(pil, { noRate: true })._pilCkInaction({}) === '' && charger(pil, { rf: 'none' })._pilCkInaction({}) === '');
-    t('branché : « Traiter ? » appelle la protection, le cockpit appelle l’inaction', /\+body\+_pilProtHtml\(\)\+/.test(pil) && /_pilShow\('auj_inaction'\)\) cockpit\+=_pilCkInaction\(d\)/.test(pil));
+    t('branché : la carte « Protection restante » (rangée .pil-dec2, ALIGN-1 §236) appelle la protection, le cockpit appelle l’inaction', /det\+=_pilProtCarte\(\)/.test(pil) && /function _pilProtCarte\(\)\{\s*var h=_pilProtHtml\(\)/.test(pil) && /_pilShow\('auj_inaction'\)\) cockpit\+=_pilCkInaction\(d\)/.test(pil));
     // le reglage, pour de vrai
     const RG = chargerReg(reg);
     RG._ecoCfgSet('prot', 'penetrant', '11'); RG._ecoCfgSet('prot', 'autre', '99');

@@ -4356,11 +4356,16 @@ function _pilCkPres(d){
   var tot=(d.presences||[]).filter(function(p){return !p.bureau;}).length;
   var pc=(d.presentFiches!=null?d.presentFiches:(d.presentChamp||0));
   var pers=(d.presentChamp!=null?d.presentChamp:pc);
-  return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('equipe')+'</span><span class="t">À la vigne aujourd\'hui</span></div>'
-    +'<div class="pil-t2b"><div class="pil-big green">'+pc+' présent'+(pc>1?'s':'')+'</div>'
-    +'<div class="pil-t2s">sur '+tot+(ind.length?' · '+ind.length+' indisponible'+(ind.length>1?'s':''):' · équipe au complet')
+  // ALIGN-1 (§236) : quatre étages comme les trois autres tuiles. La bande dit QUI : les absents
+  //   s'il y en a, sinon les présents, en initiales. Le pied mène au Planning.
+  var ici=(d.presences||[]).filter(function(p){ return !p.bureau && p.etat==='present'; });
+  var ban=chips||ici.slice(0,6).map(function(p){ var nm=String(p.nom||'?'); return '<span class="pil-tz-ini" title="'+_pilEsc(nm)+'">'+_pilEsc(nm.charAt(0).toUpperCase())+'</span>'; }).join('');
+  return '<div class="pil-tile2 pil-tz"><div class="pil-t2h"><span class="ic">'+_pilIco('equipe')+'</span><span class="t">À la vigne aujourd\'hui</span></div>'
+    +'<div class="pil-t2b"><div class="pil-tz-big pil-big green">'+pc+' présent'+(pc>1?'s':'')+'</div>'
+    +'<div class="pil-tz-rai pil-t2s">sur '+tot+(ind.length?' · '+ind.length+' indisponible'+(ind.length>1?'s':''):' · équipe au complet')
       +(pers>pc+0.5?(' · <b>'+_pilEtpFmt(pers)+' personnes</b> au total (équipe collective)'):'')+'</div>'
-    +(chips?'<div style="margin-top:7px">'+chips+'</div>':'')+'</div></div>';
+    +'<div class="pil-tz-ban">'+ban+'</div>'
+    +'<div class="pil-tz-pied"><button class="pil-diag-go ghost" data-diag="planning">Planning \u203A</button></div></div></div>';
 }
 // ════════════════════════════════════════════════════════════════════════
 // PROT-1 (§218) — LA PROTECTION RESTANTE, PARCELLE PAR PARCELLE
@@ -4443,24 +4448,33 @@ function _pilPluieDemander(){
   window._pluieCharger().then(function(ok){ _PIL_PLUIE_ATTENTE=false; if(ok&&_PIL_TAB==='auj'&&typeof renderPilotage==='function') renderPilotage(); })
     .catch(function(e){ _PIL_PLUIE_ATTENTE=false; if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilPluieDemander'); });
 }
+// ALIGN-1 (§236) — LA PROTECTION A SA PROPRE CARTE, sous la décision du jour (rangée .pil-dec2). Elle
+// vivait dans « Traiter ? » et étirait la rangée des quatre tuiles. Les 5 parcelles les plus urgentes ;
+// le bouton montre les autres (_PIL_PROT_TOUT, cible interne `prot_tout` de _pilGo).
+var _PIL_PROT_TOUT=false;
+function _pilProtCarte(){
+  var h=_pilProtHtml(); if(!h) return '';
+  return '<div class="pil-tile2 pil-det"><div class="pil-t2h"><span class="ic">'+_pilIco('goutte')+'</span><span class="t">Protection restante</span>'+_mvInfoBtn('pil.prot')+'</div>'
+    +'<div class="pil-t2b">'+h+'</div></div>';
+}
 function _pilProtHtml(){
   _pilPluieDemander();
   var P=_pilProtData(); if(!P.n) return '';
   var tot=P.rows.length, nNu=P.nu.length, nB=P.bientot.length;
   var big=nNu?(nNu+' parcelle'+(nNu>1?'s':'')+' à nu'):(nB?(nB+' parcelle'+(nB>1?'s':'')+' à nu d’ici 2 jours'):'tout le domaine est protégé');
   var col=nNu?'var(--rouge)':(nB?'var(--orange)':'var(--vert-med)');
-  var h='<div class="pil-prot"><div class="pil-t2s pil-prot-k">Protection restante '+_mvInfoBtn('pil.prot')+'</div>'
+  var h='<div class="pil-prot">'
     +'<div class="pil-prot-big" style="color:'+col+'">'+big+'</div>'
     +'<div class="pil-t2s">'+(nNu?(_pilHa(P.haNu)+' ha sans protection'+(nB?(' · '+nB+' de plus d’ici 2 jours'):'')):(nB?'sur '+tot+' parcelles':tot+' parcelles'))
     +' · rémanences '+P.cfg.contact+' / '+P.cfg.penetrant+' / '+P.cfg.systemique+' j'+(P.nDed?(' · mode déduit pour '+P.nDed):'')
     +(P.pluieOk?(' · lessivage à '+P.cfg.lessivage+' mm'+(P.nLess?(' : '+P.nLess+' lessivée'+(P.nLess>1?'s':'')):'')+(P.pluieAuj!=null?(' · aujourd’hui '+String(P.pluieAuj).replace('.',',')+' mm'):'')):' · pluie inconnue, les jours seuls')+'</div>';
-  var urg=P.rows.slice(0,6);
+  var lim=_PIL_PROT_TOUT?tot:5, urg=P.rows.slice(0,lim);
   h+='<div class="pil-prot-l">'+urg.map(function(r){
     var c=r.jamais||r.reste<=0?'b':(r.reste<=2?'o':'v');
     var txt=r.jamais?'jamais traitée':(r.lessive?('lessivée · '+String(r.pluie).replace('.',',')+' mm'):(r.reste<=0?('à nu depuis '+(-r.reste)+' j'):('encore '+r.reste+' j')));
     var sub=r.jamais?'':(' · '+_pilDfr(r.date)+' · '+_pilProtLib(r.mode)+(r.deduit?' ?':'')+((!r.lessive&&r.pluie!=null)?(' · '+String(r.pluie).replace('.',',')+' mm de pluie'):''));
     return '<div class="pil-prot-r"><span class="pil-prot-pt '+c+'"></span><span class="n">'+_pilEsc(r.nom)+'</span><span class="v">'+txt+'<span>'+sub+'</span></span></div>';
-  }).join('')+'</div>'+(tot>6?'<div class="pil-t2s">… et '+(tot-6)+' autres, mieux protégées.</div>':'')+'</div>';
+  }).join('')+'</div>'+(tot>5?'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="prot_tout">'+(_PIL_PROT_TOUT?'Ne garder que les 5 plus urgentes':('Et '+(tot-5)+' autre'+(tot-5>1?'s':'')+', mieux protégée'+(tot-5>1?'s':'')))+' \u203A</button></div>':'')+'</div>';
   return h;
 }
 // ════════════════════════════════════════════════════════════════════════
@@ -4489,29 +4503,33 @@ function _pilCkInaction(d){
     +'</div>';
 }
 function _pilCkTraiter(){
-  var days=_pilTreatDays(), big, bigCol, body;
-  if(days===undefined){ big='\u2014'; bigCol='var(--texte-doux)'; body='<div class="pil-t2s">pr\u00e9visions horaires indisponibles</div>'; }
+  // ALIGN-1 (§236) : quatre étages (verdict, raison, bande, pied) comme les trois autres tuiles. La
+  //   bande montre la fenêtre sur les 24 heures ; le pied porte le dépliant des jours suivants. La
+  //   protection restante a QUITTÉ cette tuile pour sa propre carte (_pilProtCarte, rangée .pil-dec2) :
+  //   ses six lignes étiraient toute la rangée des quatre tuiles (Nico, capture du 04/10).
+  var days=_pilTreatDays(), big, bigCol, rai='', ban='', pied='';
+  if(days===undefined){ big='\u2014'; bigCol='var(--texte-doux)'; rai='pr\u00e9visions horaires indisponibles'; }
   else {
     var tj=(days||[]).filter(function(x){ return /aujourd/i.test(x.label); })[0] || (days&&days[0]);
     if(tj&&tj.start!=null){
       big='Oui \u2014 '+tj.start+'h \u2192 '+tj.end+'h'; bigCol='var(--vert-med)';
       var risk=tj.leach||(tj.ppMax!=null&&tj.ppMax>=PIL_TREAT_PP_ALERT);
-      body='<div class="pil-t2s">sec \u00b7 '+tj.wMax+' km/h \u00b7 '+tj.tMax+'\u00b0 \u00b7 meilleure fen\u00eatre du jour</div>'
-        +(risk?'<div class="pil-t2s" style="color:var(--orange);margin-top:5px">\u26A0 pluie ensuite \u2014 risque de lessivage</div>':'');
+      rai='sec \u00b7 '+tj.wMax+' km/h \u00b7 '+tj.tMax+'\u00b0 \u00b7 meilleure fen\u00eatre du jour';
+      var g0=Math.max(0,Math.min(24,+tj.start||0)), g1=Math.max(g0,Math.min(24,+tj.end||0));
+      ban='<div class="pil-tz-strip"><i style="left:'+(g0/24*100).toFixed(1)+'%;width:'+((g1-g0)/24*100).toFixed(1)+'%"></i></div>'
+        +'<div class="pil-tz-ax pil-t2s"><span>0 h</span><span>12 h</span><span>24 h</span></div>'
+        +(risk?'<div class="pil-t2s" style="color:var(--orange)">\u26A0 pluie ensuite \u2014 risque de lessivage</div>':'');
     } else {
       big='Pas aujourd\u2019hui'; bigCol='var(--orange)';
-      body='<div class="pil-t2s">'+(tj?('aucune fen\u00eatre \u00b7 '+tj.reason):'aucune fen\u00eatre claire')+'</div>';
+      rai=(tj?('aucune fen\u00eatre \u00b7 '+tj.reason):'aucune fen\u00eatre claire');
       var nxt=(days||[]).filter(function(x){ return x.start!=null; })[0];
-      if(nxt) body+='<div class="pil-t2s" style="margin-top:5px;color:var(--vert-med)">prochaine : '+nxt.label+' '+nxt.start+'h\u2192'+nxt.end+'h</div>';
+      if(nxt) ban='<div class="pil-t2s" style="color:var(--vert-med)">prochaine : '+nxt.label+' '+nxt.start+'h\u2192'+nxt.end+'h</div>';
     }
-    // \u2605 LES CINQ JOURS ARRIVENT ICI, DERRIERE UN DEPLIANT. La carte vit dans une
-    //   grille de trois colonnes : cinq lignes toujours ouvertes etireraient ses
-    //   deux voisines sur toute leur hauteur. Ferme, le depliant ne coute qu'une
-    //   ligne ; ouvert, il porte exactement le dessin de l'ancienne carte.
-    //   \u26a0\ufe0f Ce n'est PAS \u00ab cacher un chiffre \u00bb : le verdict du jour \u2014 le seul qu'on
-    //     lit pour decider ce matin \u2014 reste en gros au-dessus, toujours affiche.
+    // \u2605 LES CINQ JOURS ARRIVENT ICI, DERRIERE UN DEPLIANT : fermé, il ne coûte qu'une ligne dans le
+    //   pied ; ouvert, la tuile grandit et ses voisines la suivent, leurs pieds restent alignés en bas.
+    //   \u26a0\ufe0f Ce n'est PAS \u00ab cacher un chiffre \u00bb : le verdict du jour reste en gros au-dessus.
     if(days && days.length){
-      body+='<details class="pil-t5"><summary>les '+days.length+' prochains jours</summary>'
+      pied='<details class="pil-t5"><summary>les '+days.length+' prochains jours</summary>'
         +'<div class="pil-t5b">'+_pilTreatRows(days)+'</div></details>';
     }
   }
@@ -4519,11 +4537,10 @@ function _pilCkTraiter(){
   // qui disparait. Une fiche ecrite et posee nulle part est un rouge de harnais.
   var _i=(typeof _mvInfoBtn==='function')?_mvInfoBtn('pil.traitement'):'';
   // ⚠️ `data-mvt="traiter"` EST UN POINT D'ACCROCHE DE LA VISITE GUIDEE, au
-  //   meme titre que `.pil-dec` et `.pil-cockpit-card` (§20b). Sans lui, le
-  //   moment « Je traite ou pas ? » vise `.pil-tile2` et attrape « A la vigne
-  //   aujourd'hui », la premiere carte du cockpit. Ne pas renommer.
-  return '<div class="pil-tile2" data-mvt="traiter"><div class="pil-t2h"><span class="ic">'+_pilIco('goutte')+'</span><span class="t">Traiter ?</span>'+_i+'</div>'
-    +'<div class="pil-t2b"><div class="pil-big" style="color:'+bigCol+'">'+big+'</div>'+body+_pilProtHtml()+'</div></div>';   // PROT-1 (§218)
+  //   meme titre que `.pil-dec` et `.pil-cockpit-card` (§20b). Ne pas renommer.
+  return '<div class="pil-tile2 pil-tz" data-mvt="traiter"><div class="pil-t2h"><span class="ic">'+_pilIco('goutte')+'</span><span class="t">Traiter ?</span>'+_i+'</div>'
+    +'<div class="pil-t2b"><div class="pil-tz-big pil-big" style="color:'+bigCol+'">'+big+'</div>'
+    +'<div class="pil-tz-rai pil-t2s">'+rai+'</div><div class="pil-tz-ban">'+ban+'</div><div class="pil-tz-pied">'+pied+'</div></div></div>';
 }
 // ════════════════════════════════════════════════════════════════════════════
 // PRIO-1 (§235) — LA TÂCHE PRIORITAIRE SUIT LA RÈGLE COMMUNE (window._mvTacheDuMoment, app.js)
@@ -4542,22 +4559,21 @@ function _pilCkPrio(d){
         fini:function(n){ return !byNom[n]||(byNom[n].pct||0)>=100; } })
     : null;
   var _i=(typeof _mvInfoBtn==='function')?_mvInfoBtn('pil.prio'):'';
-  var H='<div class="pil-tile2" id="pil-prio"><div class="pil-t2h"><span class="ic">'+_pilIco('cible')+'</span><span class="t">Tâche prioritaire</span>'+_i+'</div>';
+  var H='<div class="pil-tile2 pil-tz" id="pil-prio"><div class="pil-t2h"><span class="ic">'+_pilIco('cible')+'</span><span class="t">Tâche prioritaire</span>'+_i+'</div>';
   if(!M||!M.taches.length) return H+'<div class="pil-t2b"><div class="pil-t2s">aucune t\u00e2che en cours</div></div></div>';
   var adm=(typeof window.isAdmin==='function')&&window.isAdmin();
   var go=function(lbl){ return adm?'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="priorite">'+lbl+' \u203A</button></div>':''; };
   var dt=function(n){ return (M.dates&&M.dates[n])||{}; };
   if(M.mode==='choix'){
-    var lis=M.taches.slice(0,4).map(function(n){
-      var t=byNom[n]||{};
-      return '<div class="pil-t2s"><b>'+_pilEsc(_pilTnom(n))+'</b> \u00b7 '+(t.pct||0)+'\u00a0% fait \u00b7 '+_pilNum(t.h_reste||0)+'\u00a0h'
-        +(M.retard[n]?' \u00b7 <b style="color:var(--rouge)">en retard</b>':'')+'</div>';
-    }).join('');
-    var rest=M.taches.length-4;
-    return H+'<div class="pil-t2b"><div class="pil-big">\u00c0 choisir</div>'
-      +'<div class="pil-t2s">'+M.taches.length+' t\u00e2ches dans leurs dates en m\u00eame temps \u2014 '+(adm?'\u00e0 vous de fixer la priorit\u00e9':'l\u2019administrateur fixe la priorit\u00e9')+'</div>'
-      +lis+(rest>0?'<div class="pil-t2s">et '+rest+' autre'+(rest>1?'s':'')+'</div>':'')
-      +go('Choisir la priorit\u00e9')+'</div></div>';
+    // ALIGN-1 (§236) : la bande nomme les tâches en une ligne (étiquettes) — une liste détaillée
+    //   étirerait la rangée des quatre tuiles.
+    var lis=M.taches.slice(0,6).map(function(n){
+      return '<span class="pil-chip2">'+_pilEsc(_pilTnom(n))+(M.retard[n]?' \u00b7 en retard':'')+'</span>';
+    }).join('')+(M.taches.length>6?'<span class="pil-chip2">+'+(M.taches.length-6)+'</span>':'');
+    return H+'<div class="pil-t2b"><div class="pil-tz-big pil-big">\u00c0 choisir</div>'
+      +'<div class="pil-tz-rai pil-t2s">'+M.taches.length+' t\u00e2ches dans leurs dates en m\u00eame temps \u2014 '+(adm?'\u00e0 vous de fixer la priorit\u00e9':'l\u2019administrateur fixe la priorit\u00e9')+'</div>'
+      +'<div class="pil-tz-ban">'+lis+'</div>'
+      +'<div class="pil-tz-pied">'+go('Choisir la priorit\u00e9')+'</div></div></div>';
   }
   var n=M.taches[0], t=byNom[n]||{}, e=dt(n), pq;
   if(M.mode==='admin'){
@@ -4571,11 +4587,13 @@ function _pilCkPrio(d){
   } else {
     pq='seule t\u00e2che dans ses dates'+(e.fin?' \u00b7 jusqu\u2019au '+_pilFmtD(e.fin):'');
   }
-  return H+'<div class="pil-t2b"><div class="pil-big">'+_pilEsc(_pilTnom(n))+'</div>'
-    +'<div class="pil-t2s">'+pq+'</div>'
-    +'<div class="pil-gbar"><i style="width:'+Math.min(t.pct||0,100)+'%;background:'+_pilPctColor(t.pct||0)+'"></i></div>'
-    +'<div class="pil-t2s" style="margin-top:5px">'+(t.pct||0)+'\u00a0% fait \u00b7 '+_pilNum(t.h_reste||0)+' h restantes</div>'
-    +(M.mode==='admin'?go('Changer la priorit\u00e9'):'')+'</div></div>';
+  // ALIGN-1 (§236) : le bouton de l'admin dans tous les cas (maquette validée le 04/10) — fixer une
+  //   priorité sans attendre qu'un chevauchement le demande.
+  return H+'<div class="pil-t2b"><div class="pil-tz-big pil-big">'+_pilEsc(_pilTnom(n))+'</div>'
+    +'<div class="pil-tz-rai pil-t2s">'+pq+'</div>'
+    +'<div class="pil-tz-ban"><div class="pil-gbar"><i style="width:'+Math.min(t.pct||0,100)+'%;background:'+_pilPctColor(t.pct||0)+'"></i></div>'
+    +'<div class="pil-t2s">'+(t.pct||0)+'\u00a0% fait \u00b7 '+_pilNum(t.h_reste||0)+' h restantes</div></div>'
+    +'<div class="pil-tz-pied">'+go(M.mode==='admin'?'Changer la priorit\u00e9':'Fixer une priorit\u00e9')+'</div></div></div>';
 }
 // ════════════════════════════════════════════════════════════════════════
 // TENS-1 (§215) — LA TENSION DE L'ÉQUIPE
@@ -4637,6 +4655,23 @@ function _pilCkTension(d){
     +'<div class="ks">travail effectif face au prévu \u00b7 14 j \u00b7 <b>'+T.nSeuil+' / '+T.rows.length+'</b> au seuil</div></div>';
 }
 // ── La carte de « La décision du jour » ──
+// ALIGN-1 (§236) — LA TUILE DE LA TENSION : le verdict et la personne la plus chargée, en quatre
+// étages comme les autres. Le détail, une ligne par personne, descend dans _pilCardTension.
+function _pilTuileTension(d){
+  var T=_pilTensData(d);
+  if(!T||!T.rows.length) return '';
+  var big=T.nRouge?(T.nRouge+' au-delà du maximum'):(T.nSeuil?(T.nSeuil+' personne'+(T.nSeuil>1?'s':'')+' au seuil'):'Personne au seuil');
+  var colB=T.nRouge?'var(--rouge)':(T.nSeuil?'var(--orange)':'var(--vert-med)');
+  var rang={rouge:2,orange:1};
+  var top=T.rows.slice().sort(function(a,b){ return ((rang[b.niv]||0)-(rang[a.niv]||0))||((b.ec||0)-(a.ec||0)); })[0];
+  var mx=Math.max(10,top.f||0,top.p||0), cls=top.niv==='rouge'?'b':(top.niv==='orange'?'o':'v');
+  var ban='<div class="pil-tz-tens"><b>'+_pilEsc(top.nom)+'</b><span class="k"><i class="'+cls+'" style="width:'+Math.min(100,(top.f||0)/mx*100).toFixed(1)+'%"></i></span><b>'+_pilTensFmtEc(top.ec)+'</b></div>';
+  return '<div class="pil-tile2 pil-tz"><div class="pil-t2h"><span class="ic">'+_pilIco('equipe')+'</span><span class="t">Tension de l’équipe</span>'+_mvInfoBtn('pil.tension')+'</div>'
+    +'<div class="pil-t2b"><div class="pil-tz-big pil-big" style="color:'+colB+'">'+big+'</div>'
+    +'<div class="pil-tz-rai pil-t2s">14 derniers jours \u00b7 travail effectif face au planning prévu</div>'
+    +'<div class="pil-tz-ban">'+ban+'</div>'
+    +'<div class="pil-tz-pied"><button class="pil-diag-go ghost" data-diag="planning">Planning \u203A</button></div></div></div>';
+}
 function _pilCardTension(d){
   var T=_pilTensData(d);
   if(!T||!T.rows.length) return '';
@@ -4650,10 +4685,10 @@ function _pilCardTension(d){
       +'<span class="k"><i class="'+cls+'" style="width:'+w(r.f)+'"></i>'+(r.p>0?'<u style="left:'+w(r.p)+'"></u>':'')+'</span>'
       +'<span class="v"><b>'+_pilNum(r.f)+'</b> h<span>'+_pilTensFmtEc(r.ec)+'</span></span></div>';
   }).join('');
-  var big=T.nRouge?(T.nRouge+' au-delà du maximum'):(T.nSeuil?(T.nSeuil+' personne'+(T.nSeuil>1?'s':'')+' au seuil'):'Personne au seuil');
-  var colB=T.nRouge?'var(--rouge)':(T.nSeuil?'var(--orange)':'var(--vert-med)');
-  return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('equipe')+'</span><span class="t">Tension de l’équipe</span>'+_mvInfoBtn('pil.tension')+'</div>'
-    +'<div class="pil-t2b"><div class="pil-big" style="color:'+colB+'">'+big+'</div>'
+  // ALIGN-1 (§236) : cette carte est devenue le DÉTAIL (rangée .pil-dec2) ; le verdict et sa pastille
+  //   vivent dans la tuile _pilTuileTension, en haut.
+  return '<div class="pil-tile2 pil-det"><div class="pil-t2h"><span class="ic">'+_pilIco('equipe')+'</span><span class="t">Tension de l’équipe — détail</span></div>'
+    +'<div class="pil-t2b"><div class="pil-big">Les 14 derniers jours</div>'
     +'<div class="pil-t2s">14 derniers jours \u00b7 travail effectif face au planning prévu \u00b7 semaine au-delà de '+T.L.maxMoy+' h à surveiller</div>'
     +'<div class="pil-tens">'+rows+'</div>'
     +'<div class="pil-tens-r pil-tens-ax"><span></span><span class="pil-trx-ax"><span>0</span><span>'+(mx/2)+'</span><span>'+mx+' h</span></span><span></span></div>'
@@ -5107,12 +5142,17 @@ function _pilTabAuj(d){
   if(_pilShow('auj_cave')) kpis+=_pilCkCave();
   if(kpis) cockpit+='<div class="pil-cks">'+kpis+'</div>';
   if(cockpit) H+='<div class="pil-cockpit-card">'+cockpit+'</div>';
-  var dec='';
+  // ALIGN-1 (§236) : la rangée du haut porte les quatre VERDICTS, bâtis pareil ; la rangée du dessous
+  //   (.pil-dec2) porte les DÉTAILS — la protection et la tension par personne, 5 lignes au plus.
+  var dec='', det='';
   if(_pilShow('auj_pres')) dec+=_pilCkPres(d);
   if(_pilShow('auj_traiter')) dec+=_pilCkTraiter();
   if(_pilShow('auj_prio')) dec+=_pilCkPrio(d);
-  if(_pilShow('auj_tension')) dec+=_pilCardTension(d);
+  if(_pilShow('auj_tension')) dec+=_pilTuileTension(d);
+  if(_pilShow('auj_traiter')) det+=_pilProtCarte();
+  if(_pilShow('auj_tension')) det+=_pilCardTension(d);
   if(dec) H+='<div class="pil-sec-h">La décision du jour</div><div class="pil-dec">'+dec+'</div>';
+  if(det) H+='<div class="pil-dec2">'+det+'</div>';
   if(_pilShow('auj_alertes')) H+='<div class="pil-sec-h">Alertes matériel</div>'+_pilCkAlertes(d);
   return H || '<div class="pil-empty">Aucun indicateur affiché — activez-les via « Choisir les indicateurs ».</div>';
 }
@@ -11403,6 +11443,9 @@ window._pilGo = function(cible){
       setTimeout(function(){ _pilFlash(document.getElementById('pil-an-cadres')); }, 240);
       return;
     }
+    // Cible INTERNE (ALIGN-1, §236) : la carte « Protection restante » montre les 5 parcelles les plus
+    //   urgentes ; son bouton déplie les autres, ou les replie.
+    if(cible==='prot_tout'){ _PIL_PROT_TOUT=!_PIL_PROT_TOUT; renderPilotage(); return; }
     // Cible INTERNE (PRIO-1, §235) : l'éditeur de la priorité du moment (administrateur), depuis la carte
     //   « Tâche prioritaire » — quand plusieurs tâches sont dans leurs dates en même temps, ou pour la changer.
     if(cible==='priorite'){

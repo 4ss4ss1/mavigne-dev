@@ -4133,7 +4133,11 @@ function _wxStoreCard(g,store){
 function renderHomeMeteoCommunes(){
   var c=document.getElementById('home-meteo-communes'); if(!c) return;
   var groups=_communesActives();
-  if(groups.length<2){ c.innerHTML=''; return; }
+  // ALIGN-2 (§237) : la météo par secteur a son propre bloc, et UNE carte. Moins de deux communes : le bloc s'efface (son
+  //   voisin de rangée prend toute la largeur) et l'entrée « Communes » revient sous la météo 5 jours.
+  var wrapS=document.querySelector('.home-w[data-w="meteosect"]'), bulkE=document.getElementById('home-cm-bulk');
+  if(groups.length<2){ c.innerHTML=''; if(wrapS)wrapS.style.display='none'; if(bulkE)bulkE.style.display=''; if(typeof _homeRangees==='function')_homeRangees(); return; }
+  if(wrapS)wrapS.style.display=''; if(bulkE)bulkE.style.display='none';
   var store=window.METEO_PAR_COMMUNE, ts=window._MV_WXCOM_TS||0;
   // Un relevé en mémoire qui ne couvre pas tous les secteurs actuels est périmé :
   // une commune vient d'être affectée, ou l'on revient d'un autre domaine.
@@ -4143,11 +4147,11 @@ function renderHomeMeteoCommunes(){
     setTimeout(function(){ try{fetchMeteoCommunes();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/renderHomeMeteoCommunes'); } },50);   // le verrou est tenu par fetchMeteoCommunes
   }
   var age=_wxAgeTxt(ts);
-  var html='<div class="cm-wx-head">M\u00e9t\u00e9o par secteur'
-    +(age?('<span class="cm-wx-age">'+_escHtml(age)+'</span>'):'')+'</div><div class="cm-wx-grid">';
+  var html='<div class="mv-c cm-wx-carte">'+(age?('<div class="cm-wx-age">'+_escHtml(age)+'</div>'):'')+'<div class="cm-wx-grid cm-wx-lignes">';
   groups.forEach(function(g){ html+=_wxStoreCard(g,store); });
-  html+='</div>';
+  html+='</div><button type="button" class="cm-wx-pied" onclick="openCommunesBulk()">Communes &amp; m\u00e9t\u00e9o par secteur \u203A</button></div>';
   c.innerHTML=html;
+  if(typeof _homeRangees==='function')_homeRangees();
 }
 
 // ════ AFFECTATION COMMUNE — édition d'une parcelle ════
@@ -5671,7 +5675,9 @@ window.toggleHiContrast=toggleHiContrast;
 // drag&drop appui long, disposition par défaut du domaine (admin).
 // localStorage (immédiat) + CONFIG.home_layout[nom] via saveData('config').
 // ════════════════════════════════
-const HOME_WIDGETS=['demarrage','mapart','avancement','meteo5','raccourcis','masemaine','dre','heures','tracteur','travaux'];
+// ALIGN-2 (§237) : l'ordre par défaut forme les rangées de la maquette validée le 04/10 — Ma part | la saison,
+//   l'avancement par tâche | la météo par secteur, la météo 5 jours | les travaux mécaniques. « meteosect » est né de « meteo5 ».
+const HOME_WIDGETS=['demarrage','mapart','avancement','heures','meteosect','meteo5','tracteur','raccourcis','masemaine','dre','travaux'];
 // Widgets qui doivent apparaitre EN HAUT chez ceux qui ont deja personnalise leur accueil :
 // la regle generale ajoute les nouveaux widgets en QUEUE, ou celui-ci serait invisible.
 const HOME_NEW_TOP=['demarrage','mapart'];
@@ -5687,7 +5693,12 @@ function getHomeLayout(){
   if(!lay){try{lay=JSON.parse(localStorage.getItem(_homeLayoutKey())||'null');}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/getHomeLayout#2'); }}
   if(!lay){try{var cfgD=window.CONFIG||{};if(cfgD.home_layout_default&&Array.isArray(cfgD.home_layout_default.order))lay=cfgD.home_layout_default;}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/getHomeLayout#3'); }}
   if(!lay||!Array.isArray(lay.order))lay={order:HOME_WIDGETS.slice(),hidden:[],compact:[]};
-  lay={order:(lay.order||[]).slice(),hidden:(lay.hidden||[]).slice(),compact:(lay.compact||[]).slice()};
+  lay={order:(lay.order||[]).slice(),hidden:(lay.hidden||[]).slice(),compact:(lay.compact||[]).slice(),large:(lay.large||[]).slice()};
+  // ALIGN-2 (§237) : « meteosect » est né de « meteo5 » — il prend sa place dans un ordre déjà réglé, et son état masqué.
+  if(lay.order.indexOf('meteosect')===-1&&lay.order.indexOf('meteo5')!==-1){
+    lay.order.splice(lay.order.indexOf('meteo5'),0,'meteosect');
+    if(lay.hidden.indexOf('meteo5')!==-1&&lay.hidden.indexOf('meteosect')===-1)lay.hidden.push('meteosect');
+  }
   HOME_WIDGETS.forEach(function(w){
     if(lay.order.indexOf(w)!==-1)return;
     if(HOME_NEW_TOP.indexOf(w)!==-1)lay.order.unshift(w); else lay.order.push(w); // futurs widgets
@@ -5695,6 +5706,7 @@ function getHomeLayout(){
   lay.order=lay.order.filter(function(w){return HOME_WIDGETS.indexOf(w)!==-1;});   // purge aussi 'priorite' des anciens layouts
   lay.hidden=lay.hidden.filter(function(w){return HOME_WIDGETS.indexOf(w)!==-1;});
   lay.compact=lay.compact.filter(function(w){return HOME_WIDGETS.indexOf(w)!==-1||w===HOME_PINNED;});
+  lay.large=lay.large.filter(function(w){return HOME_WIDGETS.indexOf(w)!==-1;});
   return lay;
 }
 function saveHomeLayout(lay){
@@ -5732,6 +5744,7 @@ function applyHomeLayout(){
     cols.appendChild(el); // ré-appende dans l'ordre du layout
     el.classList.toggle('home-w-off',lay.hidden.indexOf(id)!==-1);
     el.classList.toggle('home-w-compact',lay.compact.indexOf(id)!==-1);
+    el.classList.toggle('home-w-large',lay.large.indexOf(id)!==-1);   // ALIGN-2 (§237)
   });
   // footer admin (disposition du domaine) toujours en dernier
   var foot=document.getElementById('home-admin-foot');
@@ -5741,11 +5754,12 @@ function applyHomeLayout(){
   }
   _homeRenderGrips(lay);
   _homeDndInit();
+  _homeRangees();
 }
 function _homeRenderGrips(lay){
   var page=document.getElementById('page-home');if(!page)return;
   page.querySelectorAll('.home-w').forEach(function(el){
-    ['.home-w-grip','.home-w-eye','.home-w-size','.home-w-pin'].forEach(function(sel){
+    ['.home-w-grip','.home-w-eye','.home-w-size','.home-w-pin','.home-w-larg'].forEach(function(sel){
       var old=el.querySelector(':scope > '+sel);if(old)old.remove();
     });
     if(!homeEditMode)return;
@@ -5773,6 +5787,13 @@ function _homeRenderGrips(lay){
     window._mvSetIcon(eye, hidden?'interdit':'oeil', 16);
     eye.setAttribute('onclick','homeWidgetToggle(\''+id+'\')');
     el.appendChild(eye);
+    // ALIGN-2 (§237) : demi ou pleine largeur, sur ordinateur (le bouton ne s'y montre qu'à partir de 1 024 px).
+    var large=lay.large.indexOf(id)!==-1;
+    var lg=document.createElement('button');lg.type='button';lg.className='home-w-larg'+(large?' act':'');
+    lg.textContent=large?'Demi-largeur':'Pleine largeur';lg.title=large?'Repasser en demi-largeur':'Pleine largeur (ordinateur)';
+    lg.setAttribute('aria-label',lg.title);
+    lg.setAttribute('onclick','homeWidgetLarge(\''+id+'\')');
+    el.appendChild(lg);
   });
 }
 function homeWidgetMove(id,dir){
@@ -5786,6 +5807,33 @@ function homeWidgetToggle(id){
   if(i>=0)lay.hidden.splice(i,1);else lay.hidden.push(id);
   saveHomeLayout(lay);applyHomeLayout();
 }
+// ALIGN-2 (§237) — L'ACCUEIL EN RANGÉES (maquette validée le 04/10). Sur ordinateur, #home-cols est une grille de
+//   deux colonnes : les deux blocs d'une rangée ont la même hauteur, leur carte remplit le bloc, leur pied est collé en
+//   bas. Un bloc « pleine largeur » (lay.large, bouton « Pleine largeur ») prend la rangée entière ; un bloc resté SEUL dans sa rangée —
+//   voisin masqué, vide, ou pleine largeur — la prend aussi (home-w-seul) : jamais de trou à côté d'un bloc.
+//   Au téléphone, une seule colonne : ces classes n'y changent rien.
+function _homeRangees(){
+  var cols=document.getElementById('home-cols'); if(!cols) return;
+  var vis=[].slice.call(cols.children).filter(function(el){
+    if(!el.classList||!el.classList.contains('home-w')) return false;
+    el.classList.remove('home-w-seul');
+    if(el.classList.contains('home-w-off')&&!homeEditMode) return false;
+    return el.style.display!=='none';
+  });
+  var att=null;
+  vis.forEach(function(el){
+    if(el.classList.contains('home-w-large')){ if(att) att.classList.add('home-w-seul'); att=null; return; }
+    att=att?null:el;
+  });
+  if(att) att.classList.add('home-w-seul');
+}
+function homeWidgetLarge(id){
+  var lay=getHomeLayout();var i=lay.large.indexOf(id);
+  if(i>=0)lay.large.splice(i,1);else lay.large.push(id);
+  saveHomeLayout(lay);applyHomeLayout();
+  showToast(i>=0?'Bloc en demi-largeur':'Bloc en pleine largeur','#3D6B27');
+}
+window.homeWidgetLarge=homeWidgetLarge;
 function homeWidgetSize(id){
   var lay=getHomeLayout();var i=lay.compact.indexOf(id);
   if(i>=0)lay.compact.splice(i,1);else lay.compact.push(id);
@@ -5868,6 +5916,7 @@ function _homeDragEnd(){
   }
   saveHomeLayout(lay);
   _homeRenderGrips(lay);
+  _homeRangees();
   if(navigator.vibrate)navigator.vibrate(60);
   showToast('Ordre enregistr\u00e9','#3D6B27');
   _homeDrag=null;
@@ -6379,6 +6428,7 @@ function _renderHomeWidgets(){
   try{renderHomeMaSemaine();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#2'); }
   try{renderHomeDRE();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#3'); }
   try{renderHomeRaccourcis();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#4'); }
+  try{_homeRangees();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#5'); }   // ALIGN-2 : un bloc a pu s'effacer
 }
 
 // ── Météo 5 jours ──

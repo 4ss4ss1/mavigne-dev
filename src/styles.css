@@ -1454,7 +1454,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .home-w.home-w-off{display:none;}
 .home-edit .home-w{border:1.5px dashed var(--gris);border-radius:18px;margin:12px 8px 0;padding:4px 4px 8px 44px;}
 .home-edit .home-w.home-w-off{display:block;opacity:0.45;}
-.home-edit .home-w>*:not(.home-w-grip):not(.home-w-eye):not(.home-w-size):not(.home-w-pin){pointer-events:none;}
+.home-edit .home-w>*:not(.home-w-grip):not(.home-w-eye):not(.home-w-size):not(.home-w-pin):not(.home-w-larg){pointer-events:none;}
 .home-w-grip{display:none;position:absolute;left:6px;top:0;bottom:0;width:34px;flex-direction:column;justify-content:center;align-items:center;gap:4px;z-index:3;}
 .home-edit .home-w-grip{display:flex;}
 .home-w-grip button{background:var(--gris-clair);border:1px solid var(--gris);border-radius:9px;width:32px;height:32px;font-size:12px;color:var(--texte-med);cursor:pointer;}
@@ -2286,6 +2286,39 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pil-sec-h::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--or) 0%,var(--gris-clair) 45%,transparent 100%);opacity:.75;}
 /* — Tuiles « décision du jour » — */
 .pil-dec{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:18px;}
+/* ═══ ALIGN-1 (§236, 04/10/2026) — LA DÉCISION DU JOUR : QUATRE TUILES BÂTIES PAREIL ═══
+   Nico (capture du 04/10) : quatre cartes de même hauteur, contenu collé en haut, deux grands
+   vides. Chaque tuile a désormais les mêmes étages — verdict, raison, bande, pied —, chaque étage
+   sa hauteur, le pied collé en bas : les verdicts tombent sur la même ligne, les boutons aussi.
+   Les listes (parcelles à nu, tension par personne) descendent dans .pil-dec2, 5 lignes au plus.
+   Une carte de détail seule prend toute la largeur. Sur téléphone, les tuiles vont par deux.
+   Maquette validée le 04/10 (canevas « Ma Vigne — alignement Accueil et Pilotage »). */
+.pil-dec{align-items:stretch;}
+.pil-tz{display:flex;flex-direction:column;}
+.pil-tz>.pil-t2b{flex:1;display:flex;flex-direction:column;min-width:0;}
+.pil-tz-big{min-height:30px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pil-tz-rai{min-height:35px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.pil-tz-ban{margin-top:var(--e-3,12px);min-height:30px;min-width:0;}
+.pil-tz-ban .pil-gbar{margin-top:0;}
+.pil-tz-ban .pil-chip2{background:var(--gris-clair);color:var(--texte);}
+.pil-tz-pied{margin-top:auto;padding-top:var(--e-3,12px);}
+.pil-tz-pied:empty{display:none;}
+.pil-tz-strip{position:relative;height:10px;border-radius:5px;background:var(--gris-clair);overflow:hidden;}
+.pil-tz-strip i{position:absolute;top:0;bottom:0;background:var(--vert-clair);border-radius:5px;}
+.pil-tz-ax{display:flex;justify-content:space-between;}
+.pil-tz-ini{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--gris-clair);color:var(--texte);font-size:var(--pt-txt,12.5px);font-weight:700;margin:0 var(--e-1,4px) 0 0;}
+.pil-tz-tens{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:var(--e-2,8px);align-items:center;font-size:var(--pt-txt,12.5px);}
+.pil-tz-tens .k{display:block;height:7px;border-radius:4px;background:var(--gris-clair);overflow:hidden;}
+.pil-tz-tens .k i{display:block;height:100%;border-radius:4px;}
+.pil-tz-tens .k i.v{background:var(--vert-med);}
+.pil-tz-tens .k i.o{background:var(--orange);}
+.pil-tz-tens .k i.b{background:var(--rouge);}
+.pil-dec2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:18px;align-items:stretch;}
+.pil-det{display:flex;flex-direction:column;}
+.pil-det>.pil-t2b{flex:1;display:flex;flex-direction:column;}
+.pil-det .pil-prot{margin-top:0;padding-top:0;border-top:0;flex:1;display:flex;flex-direction:column;}
+.pil-det .pil-trx-go{margin-top:auto;padding-top:var(--e-3,12px);}
+@media (max-width:600px){.pil-dec{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--e-3,12px);}.pil-tz .pil-big{font-size:var(--pt-md,20px);}.pil-dec2{grid-template-columns:minmax(0,1fr);}}
 .pil-t2h{display:flex;align-items:center;gap:10px;padding:14px 16px 0;}
 .pil-t2h .ic{width:30px;height:30px;border-radius:9px;background:var(--or-pale);color:var(--terre);display:flex;align-items:center;justify-content:center;flex:none;}
 .pil-t2h .ic svg{width:16px;height:16px;}
@@ -5540,8 +5573,24 @@ body{font-variant-numeric:lining-nums;}
   /* KIT-5 (§233) : la grille de KIT-2 laissait un trou sous chaque bloc court posé à côté d'un bloc long (une rangée
      prend la hauteur du plus haut). Les blocs vivent maintenant dans #home-cols, rangé en COLONNES équilibrées :
      plus aucun trou. L'ordre se lit de haut en bas dans la colonne de gauche, puis dans celle de droite. */
-  #home-cols{column-count:2;column-gap:var(--e-4,16px);}
-  #home-cols > .home-w{break-inside:avoid;page-break-inside:avoid;}
+  /* ALIGN-2 (§237, 04/10) : les colonnes de KIT-5 ne laissaient plus de trou, mais plus rien ne s'alignait (Nico : « l'alignement
+     n'est pas chouette »). Retour à la grille, en RANGÉES PLEINES : les deux blocs d'une rangée s'étirent à la même hauteur,
+     leur carte remplit le bloc, leur pied est collé en bas ; un bloc pleine largeur (bouton « Pleine largeur ») ou resté seul prend la rangée
+     entière (_homeRangees). Maquette validée le 04/10. */
+  #home-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--e-4,16px);align-items:stretch;}
+  #home-cols > .home-w{display:flex;flex-direction:column;min-width:0;}
+  #home-cols > .home-w-large,#home-cols > .home-w-seul{grid-column:1/-1;}
+  .home-lbl-pc{display:block;}
+  #home-cols .hv2-card-solo{margin-top:0;flex:1;display:flex;}
+  #home-cols #home-stat-card{flex:1;display:flex;flex-direction:column;}
+  #home-cols #home-stat-card > .hv2-card-pied{margin-top:auto;}
+  #home-cols #home-mapart,#home-cols #home-meteo-communes,#home-cols #home-meteo5,#home-cols .hv2-hcard-wrap{flex:1;display:flex;flex-direction:column;}
+  #home-cols #home-mapart > .mv-c,#home-cols .cm-wx-carte,#home-cols #heures-card-home{flex:1;margin-bottom:0;}
+  #home-cols #home-mapart > .mv-c{display:flex;flex-direction:column;}
+  #home-cols #home-mapart .hmp-rest{margin-top:auto;}
+  #home-cols #home-meteo5 > :first-child{flex:1;}
+  #home-cols .hv2-trac-card{flex:1;}
+  .home-edit .home-w-larg{display:block;}
 }
 /* 3. LES PARCELLES SUR DEUX COLONNES : les cartes (.mv-c) ont leur propre conteneur, #pList, séparé des bandeaux du haut
       (priorité, recherche, proximité, filtres, barre d'équipe) — la grille ne touche qu'aux cartes. Un message vide prend
@@ -5585,3 +5634,21 @@ body{font-variant-numeric:lining-nums;}
 body .vt-prog-bar{height:6px;border-radius:3px;}
 body .vt-prog-f{border-radius:3px;background:var(--or);}
 body .mvv-rh-fill{background:var(--terre,#8A5A38);}
+
+/* ═══ ALIGN-2 (§237, 04/10/2026) — L'ACCUEIL EN RANGÉES : ce qui vaut à toutes les tailles ═══
+   La météo par secteur en UNE carte, une ligne par secteur (au lieu d'une carte par secteur) ; le titre « Avancement de
+   la saison » ne se montre que sur ordinateur, où il aligne la carte de saison sur ses voisines ; le bouton « Pleine
+   largeur » n'existe que sur ordinateur, en mode édition (la règle qui le montre vit dans le bloc 1 024 px). */
+.home-lbl-pc{display:none;}
+.hv2-card-solo{margin-top:var(--e-4,16px);}
+.hv2-card-pied{margin-top:var(--e-3,12px);}
+.cm-wx-carte{display:flex;flex-direction:column;}
+.cm-wx-lignes{gap:0;}
+.cm-wx-lignes .cm-wx-card{background:none;border:0;border-bottom:1px solid var(--gris-clair);border-radius:0;box-shadow:none;padding:var(--e-2,8px) 0;}
+.cm-wx-lignes .cm-wx-card:last-child{border-bottom:0;}
+.cm-wx-lignes .cm-wx-card::before{display:none;}
+.cm-wx-carte .cm-wx-age{display:block;margin:0 0 var(--e-1,4px);}
+.cm-wx-pied{margin-top:auto;align-self:flex-start;background:none;border:0;padding:var(--e-3,12px) 0 0;font:inherit;font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--texte);cursor:pointer;min-height:44px;}
+.home-w-larg{display:none;position:absolute;right:116px;top:8px;background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:10px;padding:var(--e-1,4px) var(--e-2,8px);font-size:var(--pt-txt,12.5px);cursor:pointer;min-width:44px;min-height:34px;z-index:3;color:var(--texte);}
+.home-w-larg.act{border-color:var(--or);}
+@media (max-width:1023px){.home-edit .home-w-larg{display:none;}}

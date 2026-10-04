@@ -1,0 +1,32 @@
+{
+  "lot": "ALIGN-2",
+  "section": "§237",
+  "base": "3b9c695360880756f7bd1413882b8e209adbd028",
+  "inclut": [
+    "ALIGN-1"
+  ],
+  "date": "2026-10-04",
+  "fichiers": {
+    ".mv-base": "32b2411f81b9fd46bbd18f1f3a48962f5f19982379cba0179e6b870eddb49442",
+    "CLAUDE.md": "5dd603eb2afeb5ff91871ec693fc842ee992123279795c2a37a86445142fbf89",
+    "docs/claude/INDEX.md": "bfd2d7de3a219afd1c31256eb4cd6e9a904a620aa84e1828dc23c0f699d7b61b",
+    "docs/claude/chantiers-230-279.md": "79276fd0c3c7ed5d150c77ab85d8238b69492575ca96c7dc78c3a98f149b6258",
+    "docs/claude/journal.md": "1fc002faee0ae726af34eb020defb16b351e4279fc8f8102fae9dafccada347a",
+    "docs/claude/modules.md": "78fcc67b4c5a0431b6da421d1b13ca7b04ec8391352efb3671fd5f2ee4d8e423",
+    "guide/04-vigne.html": "5b9345df99c95cd3509f6256a1b49c43d0fa7f6973dd13b1e7e122b887524bb9",
+    "guide/11-pilotage.html": "bf718e527bb2c107d20b4f74c9a17d3abf0b70f1b959d95d25f3d1b0031906ca",
+    "index.html": "995cf00622ca89a9f449f2eb81fcad9163290b126606fb59c72c05895b6da7c9",
+    "public/sw.js": "a8fa8c5d9c7b252052884398c3e60eba2f7cddc133798dc082c0a859316e7c97",
+    "scripts/harnais-claude-md.mjs": "570a8dd211962b02cb09f190355664853e8b132501102e22baf562801dffd34c",
+    "scripts/mv-harnais-kit2.mjs": "4b3f0589d2ddbbbe9f161cbb2e25f210c51586fdeffa1b49c1c2aa10c45cbe2f",
+    "scripts/mv-harnais-liste.mjs": "94812325e1a202441799468d47f5c79ad8e7c20a516d0dcdd472813858ba1977",
+    "scripts/mv-harnais-protection.mjs": "caf6f37bcda1362bb2c315c04af5a918399fdd54d25008e2cfd228a2b824d3e7",
+    "scripts/mv-harnais-tension.mjs": "ecaf20f26e78ea471b9d2668ca7ea5445d1c4e467f891ffa10dae1a0825e316e",
+    "src/app.js": "0f79ca44d50f2a32dfa2d119d508451662e1d829b2f7b26e7ac4fa9b598295af",
+    "src/pilotage.js": "d655565191dfe3b918c3b18a22d6121d9f1b80360f3ed1491b844c6e7e896d43",
+    "src/styles.css": "c8dfc0f5f98a5cfc18f6e49f2bc55f25bbcdc69e27614343bde04f0fdb13e6d6",
+    "src/utils.js": "670b27d24daace55a72d81c464e57065feff4bec97ac1994936d010b6b484ddb",
+    "scripts/mv-harnais-align.mjs": "a36fdbe1b10b204a52e801cef926b871152c9582c9739015816d306e47897eac",
+    "scripts/mv-harnais-align2.mjs": "6e9c277c074f6435fbd6e0c0d66fb23108c142004f2984e85cdaf758d5014303"
+  }
+}

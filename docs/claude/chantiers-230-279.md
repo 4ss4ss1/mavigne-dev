@@ -170,3 +170,49 @@ pour l'équipe vit maintenant dans le collecteur, sa contre-épreuve vise la nou
 (historique du §28) est descendue dans `docs/claude/journal.md`.
 **Pas vérifié** : le rendu à l'œil (carte et bloc, ordinateur et téléphone) ; les dates de travaux réelles du domaine de référence ;
 `npm run build`, `test:smoke`, `test:e2e`.
+
+## 236. ★★ ALIGN-1 — LA DÉCISION DU JOUR : QUATRE TUILES BÂTIES PAREIL (04/10 — `src/pilotage.js` · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE pilotage, MV_INFO `pil.prio`) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-align.mjs` (neuf) · `scripts/mv-harnais-protection.mjs` · `scripts/mv-harnais-tension.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `lots/ALIGN-1.json` · **APP 8.13 → 8.14, SW 8.88 → 8.89**, base `3b9c695`)
+
+**La demande** (Nico, 04/10, deux captures) : l'Accueil et le Pilotage « mal alignés » — des encarts de même taille, en
+regardant ce que font les autres logiciels, « que ce soit parfait ».
+**Recherche** : un système de design de tableaux de bord pose l'égalité de hauteur dans une rangée comme obligatoire et borne
+les listes intégrées à 5 lignes + « voir plus » ; Grafana donne à chaque panneau une largeur (24 colonnes) ET une hauteur ;
+Sigma conseille de construire par rangées d'éléments de même taille. Lecture retenue : la carte a sa taille, le contenu s'y
+adapte ; jamais l'inverse.
+**Maquette** (canevas Design « Ma Vigne — alignement Accueil et Pilotage » : Accueil ordinateur, Pilotage ordinateur,
+Pilotage téléphone) : **validée « c'est parfait »**, avec ses cinq points — météo des secteurs en une carte ; la liste des
+parcelles à nu sortie de « Traiter ? » ; bouton de priorité toujours là pour l'admin ; la carte de saison gardée ; deux tailles
+de bloc à l'Accueil, un bloc masqué laisse son voisin prendre toute la largeur.
+**Fait (lot 1, Pilotage)** : les quatre tuiles (`_pilCkPres`, `_pilCkTraiter`, `_pilCkPrio`, `_pilTuileTension`, neuve) portent
+les mêmes étages `pil-tz-big` → `pil-tz-rai` (2 lignes au plus) → `pil-tz-ban` → `pil-tz-pied` (collé en bas). Présents : la
+bande nomme les absents, sinon les présents en initiales ; pied → Planning. Traiter : la bande montre la fenêtre sur 24 h, le
+pied porte le dépliant des jours. Priorité : en `choix`, les tâches en étiquettes ; « Fixer / Choisir / Changer la priorité »
+pour l'admin dans tous les cas. Tension : verdict + la personne la plus chargée. Rangée `.pil-dec2` : `_pilProtCarte`
+(5 parcelles, `_PIL_PROT_TOUT` + cible `prot_tout` de `_pilGo`) et `_pilCardTension` devenue le détail (« Les 14 derniers
+jours »). Une carte de détail seule prend toute la largeur (`auto-fit`). Téléphone : tuiles par deux.
+**Harnais** `scripts/mv-harnais-align.mjs` : 13 vertes (étages dans l'ordre, rangées, CSS qui aligne, tuile tension exécutée),
+9 contre-épreuves qui rougissent. Suivis : `mv-harnais-protection` (la carte de la rangée appelle la protection) et
+`mv-harnais-tension` (la tuile en haut, le détail dessous) — un harnais qui déménage se suit.
+**Pas fait** : l'Accueil en rangées (ALIGN-2, §28). **Pas vérifié** : le rendu à l'œil ; `npm run build`, `test:smoke`,
+`test:e2e`. `mv-harnais-audit-pil` (hors liste) : 2 rouges déjà présents sur la base, non touchés.
+
+## 237. ★★ ALIGN-2 — L'ACCUEIL EN RANGÉES (04/10 — `src/app.js` · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE home) · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-align2.mjs` (neuf) · `scripts/mv-harnais-kit2.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `lots/ALIGN-2.json` · **APP 8.14 → 8.15, SW 8.89 → 8.90**, base `3b9c695`, zip cumulatif avec ALIGN-1 non poussé)
+
+**La demande** : la deuxième moitié de la maquette validée (§236) — l'Accueil sur ordinateur. Historique : KIT-2 (§227) posait une
+grille, un trou sous chaque bloc court ; KIT-5 (§233) des colonnes CSS, plus de trou mais plus rien d'aligné (Nico, 04/10).
+**Fait** : `#home-cols` redevient une grille de deux colonnes, en RANGÉES PLEINES (`align-items:stretch`) ; chaque bloc est une
+colonne flex, sa carte remplit le bloc (Ma part, saison, tâches, secteurs, 5 jours, tracteur), son pied collé en bas
+(`.hmp-rest`, `.hv2-card-pied`, `.cm-wx-pied`). `_homeRangees()` (après `applyHomeLayout`, le glisser-déposer, le rendu des blocs
+et la météo par secteur) pose `home-w-seul` sur un bloc resté seul dans sa rangée — voisin masqué (hors mode édition), vide
+(`style.display='none'`) ou pleine largeur — qui prend alors la rangée entière. `lay.large` (conservé et purgé par
+`getHomeLayout`) + bouton « Pleine largeur » / « Demi-largeur » (`homeWidgetLarge`, ordinateur, mode édition ; cliquable : exclu du
+`pointer-events:none`). La météo par secteur quitte « meteo5 » pour son bloc « meteosect » (migration : il prend la place de
+« meteo5 » dans un ordre déjà réglé, et son état masqué) et devient UNE carte, une ligne par secteur ; sous deux communes, le bloc
+s'efface et l'entrée « Communes » (`#home-cm-bulk`) revient sous la météo 5 jours. Titre « Avancement de la saison » sur ordinateur
+seulement (aligne la carte de saison sur ses voisines). Ordre par défaut = les rangées de la maquette.
+**Arbitrages** : le symbole ↔ prévu sur le bouton comptait comme un emoji (`mv-harnais-icones`) → le bouton dit « Pleine
+largeur » en toutes lettres ; sa bordure passe sur `--gris-clair` (filet retenu, `mv-harnais-jetons`).
+**Harnais** `scripts/mv-harnais-align2.mjs` : 16 vertes (`_homeRangees` exécuté sur un faux DOM, migration de `getHomeLayout`
+exécutée, CSS, météo par secteur, index.html, boutons du mode édition), 10 contre-épreuves qui rougissent. `mv-harnais-kit2` suivi
+(grille en rangées au lieu des colonnes).
+**Pas vérifié** : le rendu à l'œil ; le glisser-déposer à la souris dans la grille ; `npm run build`, `test:smoke`, `test:e2e`.

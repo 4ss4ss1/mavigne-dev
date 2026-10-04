@@ -467,4 +467,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-annonces.mjs --contre'],
   ['node scripts/mv-harnais-prio.mjs'],               // PRIO-1 (§235) : la tâche du moment, une seule règle
   ['node scripts/mv-harnais-prio.mjs --contre'],
+  ['node scripts/mv-harnais-align.mjs'],              // ALIGN-1 (§236) : la décision du jour, quatre tuiles bâties pareil
+  ['node scripts/mv-harnais-align.mjs --contre'],
+  ['node scripts/mv-harnais-align2.mjs'],             // ALIGN-2 (§237) : l'Accueil en rangées
+  ['node scripts/mv-harnais-align2.mjs --contre'],
 ];

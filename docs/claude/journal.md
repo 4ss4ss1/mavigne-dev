@@ -8,6 +8,22 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **4 octobre 2026 (ALIGN-1)** — ★★ **LA DÉCISION DU JOUR : QUATRE TUILES BÂTIES PAREIL** (§236).
+> Nico (04/10, capture) : quatre cartes de même hauteur au Pilotage, contenu collé en haut, deux grands vides. Recherche (rangées de
+> même hauteur, le contenu s'adapte à la carte) puis maquette (canevas Design, Accueil + Pilotage + téléphone) validée « c'est
+> parfait ». Lot 1 = Pilotage : chaque tuile a quatre étages (verdict, raison, bande, pied ; `pil-tz-*`), pied collé en bas ; la
+> protection (`_pilProtCarte`) et la tension par personne (`_pilCardTension`) descendent dans `.pil-dec2`, 5 lignes + bouton
+> (`prot_tout`) ; tuile `_pilTuileTension` ; bouton de priorité toujours là pour l'admin ; tuiles par deux sur téléphone.
+> Harnais `mv-harnais-align` (neuf). Marque `lots/ALIGN-1.json`. Base `3b9c695`. **APP 8.13 → 8.14, SW 8.88 → 8.89** (visible).
+
+> ★ Consolidation : **4 octobre 2026 (PRIO-1)** — ★★ **LA TÂCHE DU MOMENT : UNE SEULE RÈGLE, D'APRÈS LES DATES DE TRAVAUX** (§235).
+> Nico (04/10, captures) : la « tâche prioritaire » restait la Taille quoi qu'il fixe — Pilotage = la tâche aux plus d'heures restantes
+> (« pôle long »), Ma part du chantier = la plus travaillée sur 15 j sinon la première de la liste ; seuls Parcelles et Décider lisaient
+> la priorité fixée. Règle tranchée par Nico : l'ordre vient des dates de travaux de la période (`saison.echeances`, chaque domaine le
+> sien) ; priorité fixée d'abord ; une seule tâche dans ses dates → elle ; plusieurs → l'admin choisit, jamais l'appli ; aucune → la
+> prochaine. Moteur pur `_mvPrioRegle` + collecteur `_mvTacheDuMoment` (app.js), lus par `_pilCkPrio`, `_mvPartTache`, `_dzTachesDefaut`.
+> Harnais `mv-harnais-prio` (neuf, 36 + 14/14). Marque `lots/PRIO-1.json`. Base `a1286f4`. **APP 8.12 → 8.13, SW 8.87 → 8.88** (visible).
+
 > ★ Consolidation : **4 octobre 2026 (ANNEE-1)** — ★★ **PILOTAGE › L'ANNÉE, UN CADRE À LA FOIS** (§234).
 > Nico (04/10, capture) : l'onglet ne montrait que le pic des vendanges, affichait cinq chiffres pour un même exercice et posait
 > l'exercice en euros face à une année vigne en heures — le cycle FINI le 6/09. Maquette (canevas Design) validée : un seul cadre à

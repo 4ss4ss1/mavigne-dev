@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.13';
+export const APP_VERSION = '8.15';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -852,6 +852,18 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.15', d: '2026-10-04', items: [
+    { niv: 0, pour: ['tous'], emoji: 'feuille', titre: 'L’Accueil rangé en rangées',
+      desc: "Sur ordinateur, les blocs de l’Accueil vont par deux, en rangées : les deux blocs d’une rangée ont la même hauteur, leurs bas s’alignent. "
+        + "En mode édition, le bouton « Pleine largeur » met un bloc sur toute la rangée ; un bloc masqué laisse son voisin prendre toute la largeur. "
+        + "La météo par secteur a son propre bloc, en une seule carte." },
+  ] },
+  { v: '8.14', d: '2026-10-04', items: [
+    { niv: 0, pour: ['admin'], emoji: 'graphique', titre: 'La décision du jour, mieux rangée',
+      desc: "Au Pilotage, les quatre cartes du jour sont bâties pareil : le verdict, la raison, un repère, un bouton — les verdicts tombent sur la même ligne, les boutons aussi. "
+        + "La protection restante et le détail de la tension ont leur propre carte juste en dessous, avec les 5 lignes les plus urgentes et un bouton pour le reste. "
+        + "La carte de la tâche prioritaire propose toujours à l’administrateur de fixer la priorité. Sur téléphone, les quatre cartes vont par deux." },
+  ] },
   { v: '8.13', d: '2026-10-04', items: [
     { niv: 2, pour: ['admin'], emoji: 'cible', titre: 'La tâche prioritaire suit vos dates de travaux',
       desc: "Le Pilotage affichait en tâche prioritaire celle qui avait le plus d’heures restantes — la taille tout l’hiver, quelle que soit la priorité que vous fixiez. "
@@ -4400,7 +4412,7 @@ var MV_AIDE = {
       ['Une ligne « À vérifier »', "peut s’afficher sous les chiffres : un changement de l’application qui vous concerne — un chiffre qui bouge, un réglage à contrôler. Touchez-la pour le détail, « Vu » pour la ranger ; elle reste dans Réglages › Moi › Journal des nouveautés."],
       ['La mise en route', "n’apparaît que chez l’administrateur d’un domaine neuf : sept étapes qui se cochent en lisant ce qui est déjà enregistré, rien à pointer à la main. Le bloc s’efface tout seul quand tout est fait."],
       ['Ma part du chantier', "montre ce que vous avez fait vous-même sur la tâche du moment : la priorité de votre équipe ; sans priorité, la seule tâche dans ses dates de travaux ; si plusieurs se chevauchent, celle où vous avez le plus travaillé ces 15 derniers jours. La ligne sous le titre dit pourquoi. « Ma trace » ouvre le détail de votre campagne. Ce sont des hectares, jamais des heures, et rien n’est comparé entre collègues."],
-      ['Appui long puis glisser', "déplace un bloc ; l’œil le masque. Chacun règle son Accueil. Sur ordinateur, les blocs se rangent sur deux colonnes, et un bloc se glisse aussi d’une colonne à l’autre."],
+      ['Appui long puis glisser', "déplace un bloc ; l’œil le masque. Chacun règle son Accueil. Sur ordinateur, les blocs vont par deux, en rangées de même hauteur ; le bouton « Pleine largeur » met un bloc sur toute la rangée, et un bloc masqué laisse son voisin prendre toute la largeur."],
       ['La pastille de saison', "change la vue. Revenir sur une période passée ne touche pas à la période active."],
       ['Actualiser', "force une resynchronisation quand un chiffre semble figé."],
       ['Le voyant en haut de l’écran', "dit où en est la synchro. Orange avec «\u00a0Pas de synchro\u00a0»\u00a0: le téléphone a du réseau mais ne joint plus le serveur, et ne reçoit plus ce que les autres saisissent — touchez-le, puis «\u00a0Relancer l’application\u00a0». Au retour de veille, l’application vérifie d’elle-même et relit ce qui a changé."],
@@ -4606,10 +4618,10 @@ var MV_AIDE = {
       ['La roue crantée', "en haut à droite ouvre ce qui se règle : objectifs de fin, fenêtres des tâches, hypothèses de calcul, IFT de référence — et le bilan de campagne à imprimer. Administrateur seulement."],
       ['Les cartes arrivent repliées', ": chaque bloc montre son <b>chiffre</b> et la ligne qui dit sur quoi il a été calculé, même fermé — rien n’est caché. Touchez-en une pour voir son détail : elle s’ouvre en grand, et la précédente se referme, pour que les autres restent rangées côte à côte."],
       ['Le petit rond « i » dit d’où vient un chiffre', ": touchez-le, une fiche s’ouvre et explique comment ce chiffre est calculé, sur quelle fenêtre, et ce qu’il ne dit pas. Ce qui <b>cadre</b> un chiffre — sa date, sa source, son périmètre — reste toujours affiché à côté de lui, en une ligne. C’est la méthode qui se range, jamais le cadre."],
-      ['La protection restante', ": dans la carte « Traiter ? », combien de parcelles sont à nu et pour chacune les jours de protection qui restent, d’après le dernier traitement du registre, trois rémanences par mode d’action et la pluie tombée depuis (un contact est à nu dès 20 mm, réglable, Réglages › Pilotage › Conformité). La pousse n’est pas comptée."],
+      ['La protection restante', ": sa propre carte, sous la décision du jour : combien de parcelles sont à nu et, pour les 5 plus urgentes, les jours de protection qui restent, d’après le dernier traitement du registre, trois rémanences par mode d’action et la pluie tombée depuis (un contact est à nu dès 20 mm, réglable, Réglages › Pilotage › Conformité). Le bouton montre les autres parcelles. La pousse n’est pas comptée."],
       ['Le coût de l’inaction', ": sous la marge, ce que le retard ajoute en heures et en euros si personne n’est ajouté, d’après le simulateur de renfort. Un modèle, pas une mesure ; le bouton mène à Décider."],
-      ['La tension de l’équipe', ": le travail effectif de chacun sur 14 jours, face à ce que le planning prévoyait — jamais face au contrat. Au seuil : plus de 10 % au-dessus du prévu, ou une semaine au-delà de la moyenne autorisée. Le bouton ouvre le Planning."],
-      ['La tâche prioritaire', ": la priorité du moment fixée par l’administrateur ; sans elle, la seule tâche dans ses dates de travaux. Quand plusieurs tâches se chevauchent, la carte ne choisit pas : un bouton ouvre le choix de la priorité. Le nombre d’heures ne décide jamais."],
+      ['La tension de l’équipe', ": le travail effectif de chacun sur 14 jours, face à ce que le planning prévoyait — jamais face au contrat. Au seuil : plus de 10 % au-dessus du prévu, ou une semaine au-delà de la moyenne autorisée. La carte du jour donne le verdict et la personne la plus chargée ; la carte du dessous, une ligne par personne. Le bouton ouvre le Planning."],
+      ['La tâche prioritaire', ": la priorité du moment fixée par l’administrateur ; sans elle, la seule tâche dans ses dates de travaux. Quand plusieurs tâches se chevauchent, la carte ne choisit pas. L’administrateur y trouve toujours un bouton pour fixer la priorité. Le nombre d’heures ne décide jamais."],
       ['Les petites courbes', ": à côté d’un chiffre du haut, elles montrent ses 14 derniers jours en écart à sa référence, le pointillé. La charge restante et le budget les tiennent d’une photo prise chaque jour à la première ouverture par un administrateur (60 jours gardés) ; un jour sans ouverture est un trou. La bande va de −30 % à +30 %, la même pour toutes : deux courbes côte à côte se comparent d’un coup d’œil. Le « i » dit ce que chaque point mesure."],
       ['Les alertes matériel se lisent sur les travaux en cours', ": chaque session tracteur lancée doit couvrir tout le domaine (l’amendement, ses parcelles choisies). Aujourd’hui montre ce qui reste à faire, en heures et en litres, place la prochaine <b>révision</b> dans ces travaux et dit ce qu’il restera dans la <b>cuve</b> une fois tout fini. Un travail terminé disparaît. La consommation de chaque tracteur, mesurée sur vos pleins, est dans L’équipe & le matériel."],
       ['« Agrandir »', "sur un graphique ouvre le même dessin en grand, à la largeur de l’écran. Les barres d’avancement ont un seul code de couleur : vert fini, doré en cours, orange quand la fenêtre du travail est passée sans qu’il soit fini."],
@@ -5229,7 +5241,7 @@ export const MV_INFO = {
   'pil.prio': { t: 'La tâche prioritaire', p: [
     'La <b>priorité du moment</b> fixée par l\u2019administrateur passe toujours devant (Vigne \u203a Parcelles \u203a «\u00a0Définir une tâche prioritaire\u00a0»). Une priorité terminée ne compte plus.',
     'Sans priorité fixée, l\u2019ordre vient des <b>dates de travaux</b> de chaque tâche, posées dans la saison (Réglages \u203a Domaine \u203a Saisons, le crayon, «\u00a0Dates de travaux estimées\u00a0») ou dans la roue crantée du Pilotage (fenêtres des tâches). Une seule tâche pas finie dans ses dates : c\u2019est elle.',
-    'Plusieurs tâches dans leurs dates en même temps : l\u2019application <b>ne choisit pas</b>. La priorité se décide, elle ne se calcule pas : le bouton de la carte ouvre le choix, réservé à l\u2019administrateur.',
+    'Plusieurs tâches dans leurs dates en même temps : l\u2019application <b>ne choisit pas</b>. La priorité se décide, elle ne se calcule pas : le bouton de la carte, réservé à l\u2019administrateur, ouvre le choix — il est là dans tous les cas, pour fixer une priorité sans attendre un chevauchement.',
     'Une tâche pas finie dont la date de fin est passée reste dans la course, marquée «\u00a0en retard\u00a0». Une tâche <b>sans dates à elle</b> court sur toute la saison : elle chevauche toutes les autres.',
     'Aucune tâche dans ses dates aujourd\u2019hui : la carte montre la prochaine, avec sa date de début. <b>Le nombre d\u2019heures ne décide jamais</b> : la tâche la plus longue n\u2019est pas forcément celle qu\u2019on peut faire maintenant.',
     'Ma part du chantier, sur l\u2019Accueil, et le travail coché par défaut dans Décider suivent la même règle.'

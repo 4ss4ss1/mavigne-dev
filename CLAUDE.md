@@ -3,13 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **4 octobre 2026 (PRIO-1)** — ★★ **LA TÂCHE DU MOMENT : UNE SEULE RÈGLE, D'APRÈS LES DATES DE TRAVAUX** (§235).
-> Nico (04/10, captures) : la « tâche prioritaire » restait la Taille quoi qu'il fixe — Pilotage = la tâche aux plus d'heures restantes
-> (« pôle long »), Ma part du chantier = la plus travaillée sur 15 j sinon la première de la liste ; seuls Parcelles et Décider lisaient
-> la priorité fixée. Règle tranchée par Nico : l'ordre vient des dates de travaux de la période (`saison.echeances`, chaque domaine le
-> sien) ; priorité fixée d'abord ; une seule tâche dans ses dates → elle ; plusieurs → l'admin choisit, jamais l'appli ; aucune → la
-> prochaine. Moteur pur `_mvPrioRegle` + collecteur `_mvTacheDuMoment` (app.js), lus par `_pilCkPrio`, `_mvPartTache`, `_dzTachesDefaut`.
-> Harnais `mv-harnais-prio` (neuf, 36 + 14/14). Marque `lots/PRIO-1.json`. Base `a1286f4`. **APP 8.12 → 8.13, SW 8.87 → 8.88** (visible).
+> Dernière consolidation : **4 octobre 2026 (ALIGN-2, avec ALIGN-1 non poussé)** — ★★ **L'ACCUEIL EN RANGÉES** (§237).
+> Suite de la maquette validée « c'est parfait » (§236). KIT-2 (grille) laissait des trous, KIT-5 (colonnes) n'alignait plus rien :
+> `#home-cols` redevient une grille, en RANGÉES PLEINES — même hauteur par rangée, carte qui remplit le bloc, pied collé en bas ;
+> `_homeRangees` étire un bloc resté seul (voisin masqué, vide ou pleine largeur) ; `lay.large` + bouton « Pleine largeur » (ordinateur,
+> mode édition) ; « meteosect » né de « meteo5 » (migration : sa place et son état masqué), secteurs en UNE carte ; ordre par défaut
+> de la maquette. Harnais `mv-harnais-align2` (neuf), `mv-harnais-kit2` suivi. Zip CUMULATIF ALIGN-1 + ALIGN-2, marques `lots/ALIGN-1.json`
+> et `lots/ALIGN-2.json`. Base `3b9c695`. **APP 8.13 → 8.15, SW 8.88 → 8.90** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1819,13 +1819,21 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ ALIGN-1 — CE QUI RESTE OUVERT (§236, posé le 04/10)
+
+1. **ALIGN-2, l'Accueil en rangées** : fait (§237). À regarder à l'œil chez Nico sur ordinateur : les rangées, le bouton « Pleine
+   largeur » en mode édition, la météo par secteur en une carte, un bloc masqué qui laisse son voisin s'étirer.
+2. **À l'œil chez Nico** : la rangée de la décision du jour (ordinateur et téléphone), la carte « Protection restante » et son
+   bouton, la tuile de la tension. Aucun harnais ne lit une mise en page.
+3. `mv-harnais-audit-pil` (hors de `npm run check`) porte 2 rouges déjà présents sur la base `3b9c695` (B5 Cave, B6 clé `equ`) :
+   non touchés par ALIGN-1, à regarder à part.
+
 ### ⚠️ PRIO-1 — CE QUI RESTE OUVERT (§235, posé le 04/10)
 
 1. **À regarder chez Nico** : les dates de travaux de chaque tâche de l'hiver en cours — sans dates à elle, une tâche court sur
    toute la période et chevauche tout, et la carte dira « À choisir » ; puis la carte Tâche prioritaire et Ma part du chantier sur
    ses vraies données (ordinateur et téléphone). Aucun harnais ne lit une mise en page.
-2. **L'alignement de l'Accueil et du Pilotage** (Nico, 04/10 : « l'alignement n'est pas chouette », regarder ce que font les autres
-   logiciels) : recherche puis maquette, à valider avant intégration. C'est aussi la passe d'audit écran par écran (COH-1, point 4).
+2. **L'alignement** : maquette validée le 04/10 ; le Pilotage (ALIGN-1, §236) et l'Accueil (ALIGN-2, §237) sont faits.
 3. **Le crayon de la pastille priorité de l'Accueil est toujours caché** (`renderHome` pose `display:none` dans les deux branches) :
    la priorité se fixe depuis Parcelles, ou depuis le bouton de la carte du Pilotage. À trancher avec Nico.
 4. **L'anneau doré de la carte** (`_mvTachePrio`, utils.js) suit la seule priorité fixée, pas la règle des dates : laissé tel quel,

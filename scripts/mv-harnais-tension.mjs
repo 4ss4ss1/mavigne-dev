@@ -133,7 +133,7 @@ function scenarios(pil, pla, journal) {
     t('③ aucun undefined / NaN, balises équilibrées', !/undefined|NaN/.test(C + K) && (C.match(/<div[ >]/g) || []).length === (C.match(/<\/div>/g) || []).length && (C.match(/<span[ >]/g) || []).length === (C.match(/<\/span>/g) || []).length);
     t('③ le bouton mène au Planning', C.includes('data-diag="planning"') && /planning:\s*\['planning', null, null\]/.test(pil));
     t('③ sans planning : un tiret, pas de carte', X._pilCkTension({ membres: [] }).includes('<div class="kv">—</div>') && X._pilCardTension({ membres: [] }) === '');
-    t('③ branché : chiffre et carte sous la clé auj_tension', /_pilShow\('auj_tension'\)\) kpis\+=_pilCkTension\(d\)/.test(pil) && /_pilShow\('auj_tension'\)\) dec\+=_pilCardTension\(d\)/.test(pil));
+    t('③ branché : chiffre et carte sous la clé auj_tension', /_pilShow\('auj_tension'\)\) kpis\+=_pilCkTension\(d\)/.test(pil) && /_pilShow\('auj_tension'\)\) dec\+=_pilTuileTension\(d\)/.test(pil) && /_pilShow\('auj_tension'\)\) det\+=_pilCardTension\(d\)/.test(pil)   /* ALIGN-1 (§236) : la tuile en haut, le détail dessous */);
   } catch (e) { t('les scénarios s’exécutent sans planter', false, e.stack); }
   return { ok, ko };
 }

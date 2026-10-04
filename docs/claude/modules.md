@@ -1221,6 +1221,12 @@ indissociables dont un **filet de tolérance** en tête de `switchCaveOng`.
 
 ## 20b. Pilotage
 
+★★ **ALIGN-2 (§237) — L'ACCUEIL EN RANGÉES.** `#home-cols` en grille, rangées pleines ; `_homeRangees` étire un bloc seul ;
+`lay.large` + bouton « Pleine largeur » ; bloc « meteosect » (secteurs en une carte). Voir §237.
+
+★★ **ALIGN-1 (§236) — LA DÉCISION DU JOUR.** Quatre tuiles `.pil-tz` aux étages alignés (verdict, raison, bande, pied collé en
+bas) ; les listes dans la rangée `.pil-dec2` (`_pilProtCarte`, `_pilCardTension`), 5 lignes + bouton ; tuiles par deux sur téléphone.
+
 ★★ **PRIO-1 (§235) — LA TÂCHE PRIORITAIRE.** La carte d'Aujourd'hui (`_pilCkPrio`), Ma part du chantier (Accueil, `_mvPartTache`)
 et le travail coché par défaut de Décider (`_dzTachesDefaut`) lisent UNE règle, `window._mvTacheDuMoment` (app.js, moteur pur
 `_mvPrioRegle`) : priorité fixée → seule tâche dans ses dates (`saison.echeances`) → plusieurs : l'admin choisit, l'écran le dit →
