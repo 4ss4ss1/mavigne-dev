@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **3 octobre 2026 (RENOM-1 + LOTS-1)** — ★★ **RENOMMER UNE TÂCHE ; LA GARDE DES LOTS FRÈRES** (§230, §231).
+> RENOM-1 : `_renameTache` (reglages.js) migre toutes les clés d'une tâche du domaine (parcelles et chaque période, exclusions,
+> journal, périodes et échéances, TRAVAUX, passages, priorité, objectifs, équipes du jour) ; entrée dans la fenêtre « Modifier »
+> (`#ovRenTache`) ; les tâches du catalogue ne se renomment pas. LOTS-1 : chaque lot pose sa marque `lots/<LOT>.json`
+> (`scripts/mv-lot-marque.mjs`) ; `scripts/mv-lots.mjs`, juste après `mv-base`, refuse deux lots frères en attente de commit et
+> un fichier écrasé — **ligne 7 de la clôture de lot**. ★ Zip CUMULATIF : KIT-3 + KIT-4 (non poussés) + RENOM-1 + LOTS-1.
+> Harnais `mv-harnais-renom` (8, 5/5) et `mv-harnais-lots` (6, 4/4). Base `1d3a59b`. **APP 8.09 → 8.10, SW 8.84 → 8.85** (visible).
+
 > ★ Consolidation : **3 octobre 2026 (KIT-4)** — ★ **LOT 3c DU KIT (CAVE, CUVIER) ET LES SURFACES DE TOUS LES MODULES** (§229).
 > `window._mvHaP` (parcelle, 4 décimales) et `window._mvHaT` (total, 2), toujours à la virgule, dans le Traitement, le Tracteur,
 > les Réglages et le Cuvier (17 surfaces écrites à la main, plusieurs au point). Barres de la Cave, de la vendange et du

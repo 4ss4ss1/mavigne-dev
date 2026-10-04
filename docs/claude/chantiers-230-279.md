@@ -68,3 +68,45 @@ contre-essais refaits sans toucher à git — un fichier retouché, puis un lot 
 ① À l'œil chez Nico : renommer « Dégraffage » (Réglages › Tâches › crayon) une fois l'équipe synchronisée. ② Le tour à l'œil
 de 3b / 3c. ③ Le premier `npm run check` après ce zip doit dire « lot LOTS-1 en attente de commit : ses N fichiers sont ceux
 qu'il a livrés » — puis, après le commit, « aucun lot en attente ».
+
+## 232. ★★ RENOM-3 — L'ADMIN RENOMME, LA RÈGLE S'IMPOSE À TOUS LES APPAREILS (03/10 — `src/reglages.js` · `src/firebase.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/12-reglages.html` · `public/guide.html` · `scripts/mv-harnais-renom.mjs` · `lots/RENOM-3.json` · **APP 8.10 → 8.11, SW 8.85 → 8.86**, base `9a6cf8e`)
+
+### 232a. D'où ça vient
+
+RENOM-1 (§230, poussé en 8.10) migrait toutes les clés, avec la consigne « une fois les appareils de l'équipe synchronisés ».
+Nico : impossible à demander à une équipe ni à un client (« imagine des équipes de 30 »). Une première réponse — un simple
+NOM AFFICHÉ, la clé intacte (« RENOM-2 ») — a été écartée par Nico avant d'être collée : il veut une VRAIE correction
+d'orthographe, dans les données, mais imposée par l'admin : *« c'est l'admin qui prévaut ; les autres téléphones, quand ils
+synchronisent, reprennent son orthographe, ils ne forcent pas la leur ; avec plusieurs admins, la modification enregistrée
+en amont force la nouvelle orthographe partout »*. En cas de conflit d'état : « l'état le plus avancé gagne » (validé par Nico).
+
+### 232b. Ce qui change
+
+- **Le renommage devient une règle** : `saveRenTache` (admin seul — `isAdmin()`, refus écrit sinon) pousse
+  `{de, vers, quand, par}` dans `CONFIG.renommages_taches`, applique `_renameTache`, enregistre tout.
+- **Chaque appareil applique les règles** — `_mvAppliquerRenommages(cle)` : à chaque chargement (après `_migrateTaskNames`,
+  firebase.js) et à CHAQUE donnée reçue (`_fbSubscribe`, clés `config`, `parcelles`, `journal`, `taches`, `saisons`,
+  `travaux`). Dans l'ordre des dates : la plus récente l'emporte (A→B puis B→C donne C). Toute trace de l'ancien nom —
+  écrite plus tard par un téléphone resté hors ligne comprise — est réécrite. Personne n'a besoin d'être synchronisé avant.
+- **Conflit** : `_renFusion` — deux avancements pour la même tâche (ancien nom, nouveau nom) : l'état le plus avancé gagne
+  (Validé > En cours > autre), clé par clé pour les niveaux et les passages. Une définition en double dans `TACHES` (recréée
+  par un appareil en retard) disparaît.
+- **Qui enregistre** : un appareil d'ADMIN enregistre la correction ; les autres corrigent en mémoire (leurs droits d'écriture
+  ne couvrent pas `config` ni `taches`), et la renvoient avec leurs propres écritures. `_renameTache` rend le nombre de traces
+  corrigées : 0 → rien n'est écrit, donc pas de boucle d'écritures entre appareils.
+
+### 232c. Mesuré
+
+`mv-harnais-renom.mjs` : **15 assertions** (les 8 de RENOM-1, plus : l'état le plus avancé gagne, l'ordre des dates, la définition
+en double, l'admin enregistre, idempotence — 0 à la passe suivante —, un non-admin corrige sans écrire, `saveRenTache` réservé à
+l'admin). Contre-épreuve **9/9**.
+
+## 233. ★ KIT-5 — L'ACCUEIL SUR DEUX COLONNES, SANS TROUS (03/10 — `src/app.js` · `src/styles.css` · `guide/04-vigne.html` · `scripts/mv-harnais-kit2.mjs`, même zip que §232)
+
+Nico : « les deux colonnes c'est parfait, mais il y a des trous entre chaque module ». La grille de KIT-2 (§227) donnait à
+chaque RANGÉE la hauteur de son bloc le plus haut : un bloc court à côté d'un bloc long laissait un blanc. `applyHomeLayout`
+range maintenant les blocs dans leur propre conteneur, `#home-cols`, juste après le bloc épinglé (l'en-tête, les tuiles, les
+bandeaux et le bloc épinglé restent hors des colonnes) ; à partir de 1 024 px, `#home-cols` se range en COLONNES CSS équilibrées
+(`column-count:2`, `break-inside:avoid` sur chaque bloc) — plus aucun trou. Conséquence dite à Nico : l'ordre se lit de haut
+en bas dans la colonne de gauche, puis dans celle de droite. Le glisser-déposer de KIT-2 (le bloc qui contient le centre du
+bloc tiré) marche tel quel : il cherche les blocs dans toute la page. `mv-harnais-kit2` adapté (11, contre-épreuve 7/7).

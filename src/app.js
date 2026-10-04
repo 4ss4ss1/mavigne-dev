@@ -5722,9 +5722,14 @@ function applyHomeLayout(){
     pin.classList.remove('home-w-off');
     pin.classList.toggle('home-w-compact',lay.compact.indexOf(HOME_PINNED)!==-1);
   }
+  // KIT-5 (§233) : les blocs vont dans leur propre conteneur, #home-cols, juste après le bloc épinglé. Sur ordinateur, il
+  //   se range en COLONNES (CSS), sans les trous qu'une grille laisse sous un bloc court à côté d'un bloc long (Nico, 03/10).
+  var cols=document.getElementById('home-cols');
+  if(!cols){ cols=document.createElement('div'); cols.id='home-cols'; cols.className='home-cols'; }
+  page.appendChild(cols);
   lay.order.forEach(function(id){
     var el=page.querySelector('.home-w[data-w="'+id+'"]');if(!el)return;
-    page.appendChild(el); // ré-appende dans l'ordre du layout
+    cols.appendChild(el); // ré-appende dans l'ordre du layout
     el.classList.toggle('home-w-off',lay.hidden.indexOf(id)!==-1);
     el.classList.toggle('home-w-compact',lay.compact.indexOf(id)!==-1);
   });

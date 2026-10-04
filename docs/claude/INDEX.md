@@ -274,3 +274,5 @@
 | 229 | 229. ★ KIT-4 — LOT 3c DU KIT (CAVE, CUVIER) ET LES SURFACES DE TOUS LES MODULES (03/10 — `src/utils.js` · `… | `docs/claude/chantiers-180-229.md` |
 | 230 | 230. ★★ RENOM-1 — RENOMMER UNE TÂCHE DU DOMAINE (03/10 — `src/reglages.js` · `index.html` (`#ovRenTache`) ·… | `docs/claude/chantiers-230-279.md` |
 | 231 | 231. ★★ LOTS-1 — LA GARDE DES LOTS FRÈRES (03/10 — `scripts/mv-lots.mjs` (neuf) · `scripts/mv-lot-marque.mj… | `docs/claude/chantiers-230-279.md` |
+| 232 | 232. ★★ RENOM-3 — L'ADMIN RENOMME, LA RÈGLE S'IMPOSE À TOUS LES APPAREILS (03/10 — `src/reglages.js` · `src… | `docs/claude/chantiers-230-279.md` |
+| 233 | 233. ★ KIT-5 — L'ACCUEIL SUR DEUX COLONNES, SANS TROUS (03/10 — `src/app.js` · `src/styles.css` · `guide/04… | `docs/claude/chantiers-230-279.md` |

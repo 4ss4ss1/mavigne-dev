@@ -5537,10 +5537,11 @@ body{font-variant-numeric:lining-nums;}
       bloc (en-tête, onglets, chiffres, bandeaux, pied administrateur) et le bloc épinglé prennent toute la
       largeur ; les blocs se rangent deux par deux, dans l'ordre de lecture. Le glissement suit les deux sens. */
 @media (min-width:1024px){
-  #page-home.active{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--e-4,16px);align-content:start;align-items:start;}
-  #page-home > *{grid-column:1/-1;min-width:0;}
-  #page-home > .home-w{grid-column:auto;}
-  #page-home > .home-w.home-w-pinned{grid-column:1/-1;}
+  /* KIT-5 (§233) : la grille de KIT-2 laissait un trou sous chaque bloc court posé à côté d'un bloc long (une rangée
+     prend la hauteur du plus haut). Les blocs vivent maintenant dans #home-cols, rangé en COLONNES équilibrées :
+     plus aucun trou. L'ordre se lit de haut en bas dans la colonne de gauche, puis dans celle de droite. */
+  #home-cols{column-count:2;column-gap:var(--e-4,16px);}
+  #home-cols > .home-w{break-inside:avoid;page-break-inside:avoid;}
 }
 /* 3. LES PARCELLES SUR DEUX COLONNES : les cartes (.mv-c) ont leur propre conteneur, #pList, séparé des bandeaux du haut
       (priorité, recherche, proximité, filtres, barre d'équipe) — la grille ne touche qu'aux cartes. Un message vide prend

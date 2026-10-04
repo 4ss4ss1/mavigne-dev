@@ -3,13 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **3 octobre 2026 (RENOM-1 + LOTS-1)** — ★★ **RENOMMER UNE TÂCHE ; LA GARDE DES LOTS FRÈRES** (§230, §231).
-> RENOM-1 : `_renameTache` (reglages.js) migre toutes les clés d'une tâche du domaine (parcelles et chaque période, exclusions,
-> journal, périodes et échéances, TRAVAUX, passages, priorité, objectifs, équipes du jour) ; entrée dans la fenêtre « Modifier »
-> (`#ovRenTache`) ; les tâches du catalogue ne se renomment pas. LOTS-1 : chaque lot pose sa marque `lots/<LOT>.json`
-> (`scripts/mv-lot-marque.mjs`) ; `scripts/mv-lots.mjs`, juste après `mv-base`, refuse deux lots frères en attente de commit et
-> un fichier écrasé — **ligne 7 de la clôture de lot**. ★ Zip CUMULATIF : KIT-3 + KIT-4 (non poussés) + RENOM-1 + LOTS-1.
-> Harnais `mv-harnais-renom` (8, 5/5) et `mv-harnais-lots` (6, 4/4). Base `1d3a59b`. **APP 8.09 → 8.10, SW 8.84 → 8.85** (visible).
+> Dernière consolidation : **3 octobre 2026 (RENOM-3 + KIT-5)** — ★★ **L'ADMIN RENOMME, LA RÈGLE S'IMPOSE À TOUS LES APPAREILS ; L'ACCUEIL SANS TROUS** (§232, §233).
+> RENOM-3 : un renommage (admin seul) devient une règle `CONFIG.renommages_taches` ({de, vers, quand, par}) que CHAQUE appareil
+> applique à chaque chargement et à chaque donnée reçue (`_mvAppliquerRenommages`, firebase.js) — dans l'ordre des dates ;
+> l'état le plus avancé gagne (`_renFusion`) ; un appareil d'admin enregistre, les autres corrigent en mémoire. Personne n'a à
+> être synchronisé avant (Nico : « c'est l'admin qui prévaut »). KIT-5 : les blocs de l'Accueil dans `#home-cols`, en colonnes
+> CSS — plus de trous. Harnais `mv-harnais-renom` (15, 9/9), `mv-harnais-kit2` adapté (11, 7/7). Marque `lots/RENOM-3.json`.
+> Base `9a6cf8e`. **APP 8.10 → 8.11, SW 8.85 → 8.86** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1849,8 +1849,8 @@ différents entre eux, et des heures sup apparaissent dans Décider › le renfo
    `htache-*`, Pilotage `pil-b*`). Mise en page : `.page{max-width:none}` au-delà de 1200 px (Accueil et Parcelles à
    1 900 px de large), `.pil-wrap` à 1 280. Maquette d'une page témoin d'abord.
 4. **La passe d'audit écran par écran** (téléphone et PC) promise à Nico : avec le lot 3.
-5. ✅ ~~« Dégraffage »~~ — « Go » de Nico (03/10) : `_renameTache` au §230. Reste à Nico de renommer la sienne (Réglages ›
-   Tâches › crayon › « Renommer cette tâche »).
+5. ✅ ~~« Dégraffage »~~ — §230 (la migration) + §232 (la règle de l'admin, imposée à chaque appareil à sa synchronisation).
+   Reste à Nico de renommer la sienne (Réglages › Tâches › crayon › « Renommer cette tâche ») — l'équipe n'a rien à faire.
 6. ✅ ~~La journée de référence (7 h)~~ — `_pilEchCadence` lit d'abord la journée du modèle du planning (§228).
 7. ✅ ~~Surfaces hors Vigne~~ — `window._mvHaP` / `_mvHaT` dans tous les modules (§229). La Cave garde `_vendHaTxt` (vendange).
 10. **RENF-2, à regarder chez Nico** (§224) : la carte sur ses vraies données — le calendrier de l'hiver, le plafond proposé

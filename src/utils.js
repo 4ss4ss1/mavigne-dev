@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.10';
+export const APP_VERSION = '8.11';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -852,6 +852,13 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.11', d: '2026-10-03', items: [
+    { niv: 0, pour: ['admin'], emoji: 'etiquette', titre: 'Renommer une tâche : l’administrateur l’impose partout',
+      desc: "Quand un administrateur renomme une tâche créée par son domaine, le nouveau nom s’impose à tous les téléphones : chacun le reprend à sa prochaine synchronisation, sans que personne ait rien à faire. "
+        + "Un téléphone resté hors ligne qui écrirait encore l’ancien nom est corrigé à son retour ; si deux valeurs se croisent, l’état le plus avancé est gardé." },
+    { niv: 0, pour: ['tous'], emoji: 'carte', titre: 'L’Accueil sur ordinateur, sans trous',
+      desc: "Sur deux colonnes, les blocs de l’Accueil s’empilent maintenant sans laisser de blanc sous un bloc court. L’ordre se lit de haut en bas, colonne de gauche puis colonne de droite." },
+  ] },
   { v: '8.10', d: '2026-10-03', items: [
     { niv: 0, pour: ['admin'], emoji: 'etiquette', titre: 'Renommer une tâche créée par votre domaine',
       desc: "Dans <b>Réglages › Tâches</b>, la fenêtre « Modifier » (le crayon) d’une tâche créée par votre domaine propose « Renommer cette tâche ». Tout son historique suit le nouveau nom : "

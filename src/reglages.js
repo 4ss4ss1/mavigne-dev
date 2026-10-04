@@ -1750,28 +1750,45 @@ function _renTacheErreur(oldN,newN){
     return 'Ce nom est celui d\u2019une t\u00e2che du catalogue.';
   return '';
 }
+// RENOM-3 (§232) : deux valeurs d'avancement pour la même tâche (l'une écrite sous l'ancien nom par un téléphone resté
+//   hors ligne, l'autre sous le nouveau) : l'état le PLUS AVANCÉ gagne — aucun travail fait ne se perd. Nico, 03/10.
+function _renRang(v){ return v==='Valid\u00e9'?3:(v==='En cours'?2:(v?1:0)); }
+function _renFusion(a,b){
+  if(a&&typeof a==='object'&&b&&typeof b==='object'){ var o={}, k;
+    for(k in a){ if(Object.prototype.hasOwnProperty.call(a,k)) o[k]=a[k]; }
+    for(k in b){ if(Object.prototype.hasOwnProperty.call(b,k)) o[k]=(_renRang(b[k])>_renRang(o[k]))?b[k]:o[k]; }
+    return o; }
+  if(a&&typeof a==='object') return a;
+  if(b&&typeof b==='object') return b;
+  return (_renRang(b)>_renRang(a))?b:a;
+}
 function _renameTache(oldN,newN){
   if(!oldN||!newN||oldN===newN) return false;
   var own=Object.prototype.hasOwnProperty;
-  var mv=function(o){ if(o&&typeof o==='object'&&!Array.isArray(o)&&own.call(o,oldN)){ if(!own.call(o,newN)) o[newN]=o[oldN]; delete o[oldN]; } };
-  var rl=function(a){ if(Array.isArray(a)) for(var i=0;i<a.length;i++){ if(a[i]===oldN) a[i]=newN; } };
-  (window.TACHES||[]).forEach(function(t){ if(t&&t.nom===oldN) t.nom=newN; });
+  var nb=0;   // RENOM-3 : le nombre de traces corrigées (0 = rien à enregistrer)
+  var mv=function(o){ if(o&&typeof o==='object'&&!Array.isArray(o)&&own.call(o,oldN)){ if(!own.call(o,newN)) o[newN]=o[oldN]; delete o[oldN]; nb++; } };
+  var mvFus=function(o){ if(o&&typeof o==='object'&&!Array.isArray(o)&&own.call(o,oldN)){ o[newN]=own.call(o,newN)?_renFusion(o[newN],o[oldN]):o[oldN]; delete o[oldN]; nb++; } };
+  var rl=function(a){ if(Array.isArray(a)) for(var i=0;i<a.length;i++){ if(a[i]===oldN){ a[i]=newN; nb++; } } };
+  if((window.TACHES||[]).some(function(t){ return t&&t.nom===oldN; })){
+    var tDef=(window.TACHES||[]).some(function(t){ return t&&t.nom===newN; });
+    window.TACHES=(window.TACHES||[]).filter(function(t){ if(t&&t.nom===oldN){ nb++; if(tDef) return false; t.nom=newN; tDef=true; } return true; });
+  }
   (window.PARCELLES||[]).forEach(function(p){
     if(!p) return;
-    mv(p.taches);
-    if(p.tachesAll&&typeof p.tachesAll==='object') Object.keys(p.tachesAll).forEach(function(k){ mv(p.tachesAll[k]); });
+    mvFus(p.taches);
+    if(p.tachesAll&&typeof p.tachesAll==='object') Object.keys(p.tachesAll).forEach(function(k){ mvFus(p.tachesAll[k]); });
     rl(p.tachesExclues);
   });
-  (window.JOURNAL||[]).forEach(function(e){ if(e&&e.tache===oldN) e.tache=newN; });
+  (window.JOURNAL||[]).forEach(function(e){ if(e&&e.tache===oldN){ e.tache=newN; nb++; } });
   (window.SAISONS||[]).forEach(function(s){ if(s){ rl(s.taches); mv(s.echeances); } });
   mv(window.TRAVAUX); mv(window.SAISON_PASSAGES);
   var cfg=window.CONFIG||{};
   mv(cfg.saison_passages); mv(cfg.objectifs_fin);
-  if(cfg.tachesPrio&&Array.isArray(cfg.tachesPrio.items)) cfg.tachesPrio.items.forEach(function(it){ if(it&&it.t===oldN) it.t=newN; });
+  if(cfg.tachesPrio&&Array.isArray(cfg.tachesPrio.items)) cfg.tachesPrio.items.forEach(function(it){ if(it&&it.t===oldN){ it.t=newN; nb++; } });
   if(cfg.equipes_jour&&typeof cfg.equipes_jour==='object') Object.keys(cfg.equipes_jour).forEach(function(d){
-    (Array.isArray(cfg.equipes_jour[d])?cfg.equipes_jour[d]:[]).forEach(function(q){ if(q&&q.tache===oldN) q.tache=newN; if(q&&q.t===oldN) q.t=newN; });
+    (Array.isArray(cfg.equipes_jour[d])?cfg.equipes_jour[d]:[]).forEach(function(q){ if(q&&q.tache===oldN){ q.tache=newN; nb++; } if(q&&q.t===oldN){ q.t=newN; nb++; } });
   });
-  return true;
+  return nb;
 }
 function openRenTache(nom){
   var b=document.getElementById('rtache-body'); if(!b) return;
@@ -1779,22 +1796,46 @@ function openRenTache(nom){
   b.innerHTML='<div class="fl">Nouveau nom (actuel : '+_escHtml(nom)+')</div>'
     +'<input type="text" class="fi" id="rtache-nom" maxlength="40" autocomplete="off" value="'+a+'">'
     +'<div id="rtache-err" class="mv-l" style="color:var(--rouge);min-height:16px;margin-top:6px"></div>'
-    +'<div class="mv-l" style="margin:6px 0 14px">Tout l\u2019historique suit le nouveau nom : l\u2019avancement des parcelles, le journal, les p\u00e9riodes et leurs \u00e9ch\u00e9ances, la priorit\u00e9, les \u00e9quipes du jour. Faites-le quand les appareils de l\u2019\u00e9quipe sont synchronis\u00e9s.</div>'
+    +'<div class="mv-l" style="margin:6px 0 14px">Le nouveau nom remplace l\u2019ancien partout \u2014 avancement des parcelles, journal, p\u00e9riodes, priorit\u00e9, \u00e9quipes \u2014 et sur tous les t\u00e9l\u00e9phones : chacun le reprend \u00e0 sa prochaine synchronisation, sans que personne ait rien \u00e0 faire. Un t\u00e9l\u00e9phone rest\u00e9 hors ligne qui \u00e9crirait encore l\u2019ancien nom est corrig\u00e9 \u00e0 son retour.</div>'
     +'<button type="button" class="mbtn verte" data-nom="'+a+'" onclick="saveRenTache(this.dataset.nom)">Renommer</button>';
   window.openOv('ovRenTache');
 }
 function saveRenTache(oldN){
   var inp=document.getElementById('rtache-nom'), err=document.getElementById('rtache-err');
   var n=inp?String(inp.value||'').trim():'';
+  // RENOM-3 (§232) : seul un administrateur renomme — et son renommage devient une RÈGLE du domaine.
+  if(!(typeof window.isAdmin==='function'&&window.isAdmin())){ if(err) err.textContent='Seul un administrateur renomme une t\u00e2che.'; return; }
   var m=_renTacheErreur(oldN,n);
   if(m){ if(err) err.textContent=m; return; }
+  var cfg=window.CONFIG||(window.CONFIG={});
+  if(!Array.isArray(cfg.renommages_taches)) cfg.renommages_taches=[];
+  cfg.renommages_taches.push({ de:oldN, vers:n, quand:new Date().toISOString(), par:((window.currentUser&&window.currentUser.nom)||'') });
   _renameTache(oldN,n);
   ['taches','parcelles','journal','saisons','travaux'].forEach(function(k){ window.saveData(k); });
-  window.saveData('config','T\u00e2che renomm\u00e9e : '+n);
+  window.saveData('config','T\u00e2che renomm\u00e9e partout : '+n);
   window.closeOv(null,'ovRenTache');
   renderReglages();
 }
 window.openRenTache=openRenTache; window.saveRenTache=saveRenTache;
+// RENOM-3 (§232) — LES RÈGLES DE RENOMMAGE S'IMPOSENT À TOUS LES APPAREILS. Nico (03/10) : « c'est l'admin qui prévaut ;
+//   les autres téléphones, quand ils synchronisent, reprennent son orthographe, ils ne forcent pas la leur ». Chaque
+//   renommage d'un admin est une règle de CONFIG.renommages_taches ({de, vers, quand, par}). Chaque appareil les applique,
+//   dans l'ordre des dates (la plus récente l'emporte), à chaque chargement et à chaque donnée reçue (firebase.js) : toute
+//   trace de l'ancien nom — écrite plus tard par un téléphone resté hors ligne comprise — est réécrite. Personne n'a besoin
+//   d'être synchronisé avant. Un appareil d'ADMIN enregistre la correction ; les autres la gardent en mémoire (leurs droits
+//   d'écriture ne couvrent pas tout), et la renvoient avec leur prochaine écriture.
+function _mvAppliquerRenommages(cle){
+  var cfg=window.CONFIG||{}, L=Array.isArray(cfg.renommages_taches)?cfg.renommages_taches.slice():[];
+  if(!L.length) return 0;
+  L.sort(function(a,b){ return String((a&&a.quand)||'').localeCompare(String((b&&b.quand)||'')); });
+  var n=0;
+  L.forEach(function(r){ if(r&&r.de&&r.vers&&r.de!==r.vers) n+=_renameTache(r.de,r.vers)||0; });
+  if(n>0&&typeof window.isAdmin==='function'&&window.isAdmin()&&typeof window.saveData==='function'){
+    ['taches','parcelles','journal','saisons','travaux','config'].forEach(function(k){ window.saveData(k); });
+  }
+  return n;
+}
+window._mvAppliquerRenommages=_mvAppliquerRenommages;
 
 function openEditHha(nom){
   var t=window.TACHES.find(function(x){return x.nom===nom;});

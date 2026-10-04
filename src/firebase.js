@@ -810,6 +810,8 @@ function _fbSubscribe(key) {
       if (_ignoreBefore[key] && Date.now() < _ignoreBefore[key]) return;
       var _sv = snap.data().value;
       applyFbData(key, _sv);
+      // RENOM-3 (§232) : une donnée reçue (d'un téléphone resté hors ligne, peut-être) repasse par les règles de renommage.
+      if (typeof window._mvAppliquerRenommages === 'function' && /^(config|parcelles|journal|taches|saisons|travaux)$/.test(key)) window._mvAppliquerRenommages(key);
       _mvBaseNoter(key, _sv, _md);   // ★ FUSION-1 : la base suit ce qui descend du serveur
       if (window.currentUser) {
         var p = document.querySelector('.page.active');
@@ -1727,6 +1729,7 @@ window._fbLoadAfterAuth = async function () {
     // supprimer les 16 relectures redondantes (garde membres + 15 fbPushIfAbsent).
     var _pulled = await fbPullAll();
     _migrateTaskNames();
+    if (typeof window._mvAppliquerRenommages === 'function') window._mvAppliquerRenommages();   // RENOM-3 (§232)
     var _initData = {
       parcelles:      window.PARCELLES,
       journal:        window.JOURNAL,
