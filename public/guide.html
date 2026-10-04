@@ -2768,16 +2768,16 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   puis la décision. Ils portent leur numéro. Après le trait, l'Économie et la Conformité
   sont des <b>écrans de détail</b> — pas des niveaux de zoom.</p>
   <ul class="dot">
-    <li><b>La barre du haut dit où vous regardez</b> : l'exercice entier, ou une campagne. Cliquez
-    une campagne dans la frise de l'année et les trois chiffres du haut, la frise et les tableaux
-    de la campagne suivent. La croix revient à l'année. <b>Trois écrans ont leur propre cadre</b> et
+    <li><b>La barre du haut dit où vous regardez</b> : l'exercice entier, ou une campagne. Touchez
+    une campagne dans « L'année » et les trois chiffres du haut et les tableaux de la campagne
+    suivent. La croix revient à l'année. <b>Trois écrans ont leur propre cadre</b> et
     ne se recadrent pas : l'Économie chiffre la période consultée (ses sous-vues Exercice et Revient ont chacune leur cadre), la
     Conformité roule sur sept ans glissants — chacun l'écrit au-dessus de ses chiffres, plutôt que
     de répondre en silence sur une autre fenêtre que celle affichée.</li>
     <li><b>Trois chiffres en tête de « L'année » et de « La campagne »</b> : les travaux, l'effectif,
     le budget, à la maille de ce que vous regardez. Toucher l'un d'eux ouvre l'écran qui le détaille.
-    L'effectif affiche le <b>pic</b>, pas la moyenne : une moyenne annuelle n'existe aucun jour de
-    l'année, et c'est le pic qui décide d'un recrutement.
+    Sur l'année, l'effectif dit <b>combien de personnes manqueront</b>, et à partir de quand —
+    plus le pic de la vendange passée ; sur une campagne choisie, il garde son pic.
     <br><b>Ils ne s'affichent que sur ces deux onglets</b>, et c'est voulu : ce sont les deux niveaux
     de zoom. Sur « Aujourd'hui », le cockpit répond déjà aux mêmes questions, en mieux ; sur les
     écrans de détail, on y arrive justement <i>en touchant</i> un de ces chiffres.
@@ -2793,47 +2793,31 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg> L'année</h3>
   <ul class="dot">
-    <li><b>Le budget de l'année, mois par mois</b> : deux courbes cumulées. En tireté, le
-    <b>prévu</b> — vos heures de barème étalées sur les mois par la fenêtre de chaque travail,
-    valorisées au taux moyen. En trait plein, le <b>dépensé réel</b> — salaires chargés, carburant
-    et achats, posés à leur date. Le carburant se pose à la date du <b>plein</b>, pas à celle des
-    sessions : ce sont deux évènements datés, et ce ne sont pas les mêmes dates. Les deux totaux étaient déjà sur la carte juste au-dessus ; ce que
-    la courbe ajoute, c'est <b>à quel moment</b> l'écart se creuse.
-    <div class="note" style="margin:8px 0 0"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div><b>L'écart
-    entre les deux courbes n'est pas un dépassement.</b> Elles ne couvrent pas le même périmètre : le
-    prévu ne chiffre que <b>le travail de vigne</b>, la dépense réelle porte <b>tout le domaine</b> —
-    la cave, l'atelier et le bureau compris. Pendant la vendange, la cave tourne à plein : la courbe
-    du dépensé monte sans qu'un seul rang coûte plus cher. L'écran l'écrit sous le graphe, en toutes
-    lettres, plutôt que de vous laisser conclure de travers.</div></div>
-    <br>Le dépensé <b>s'arrête au mois en cours</b> : le prolonger à plat ferait lire « plus rien ne
-    sort » là où il n'y a simplement pas encore de donnée.</li>
-    <li><b>Les 52 semaines de l'exercice</b> : vos périodes en couleur, et sous chacune le nombre de
-    personnes nécessaires semaine par semaine. Le vert est ce que l'équipe absorbe, le rouge ce qu'il
-    reste à recruter — le renfort se lit en hauteur de rouge, sans calcul.</li>
-    <li><b>Cliquez une période</b> : l'axe se recale dessus, l'échelle verticale suit, et les tâches qui
-    la composent apparaissent en bandes. C'est ce qui permet de voir la taille alors que la vendange
-    écrase tout.</li>
-    <li><b>Deux hachures, deux sens, deux messages.</b> Les zones hachurées <b>en biais montant</b> ne
-    sont couvertes par <b>aucune</b> période : ce n'est pas un zéro, c'est une absence de mesure, et la
-    courbe d'effectif s'y interrompt au lieu de la traverser. Les zones hachurées <b>en biais
-    descendant</b>, en violet, sont couvertes par <b>deux</b> périodes à la fois : il y a donc deux
-    barres dessinées au même endroit, l'une derrière l'autre. Le chiffre reste juste — on lit la plus
-    haute, on n'additionne pas — mais il faut savoir qu'on n'en voit qu'une.</li>
-    <li><b>Deux périodes peuvent se chevaucher</b> sans que rien ne soit compté deux fois. Les heures
-    suivent les <b>tâches</b>, et chaque tâche n'appartient qu'à une seule période : sur les jours
-    communs, ce sont les bandes du calendrier qui se superposent, jamais la charge. L'écran le dit
-    en gris sous la frise, et n'en fait pas une alerte.</li>
-    <li><b>Deux façons de compter votre année.</b> Un domaine en a deux, et elles ne répondent pas à
-    la même question. L'<b>exercice comptable</b> va d'un bilan à l'autre : c'est lui qui répond à
-    « ce que m'a coûté l'année fiscale ». Il est fixé par votre comptable — ce n'est pas un réglage
-    d'affichage, et l'application ne vous demandera jamais de le déplacer. L'<b>année vigne</b> va
-    d'après une vendange jusqu'à la fin de la suivante : c'est elle qui dit si une campagne a coûté
-    cher. Les deux totaux diffèrent, et c'est normal : une campagne à cheval sur la clôture est
-    partagée entre deux bilans, une campagne entièrement hors de l'exercice n'y apparaît pas du tout.
-    Le panneau les affiche côte à côte, avec le détail campagne par campagne.</li>
-    <li><b>Si votre clôture traverse la vendange</b>, l'écran vous dit combien de jours de récolte
-    tombent de chaque côté. Ce n'est pas une erreur à corriger : c'est votre calendrier comptable.
-    Il faut seulement le savoir en lisant le bilan.</li>
+    <li><b>Un cadre à la fois.</b> En tête de l'onglet, choisissez l'<b>exercice comptable</b> — d'un
+    bilan à l'autre, fixé par votre comptable — ou l'<b>année vigne</b>, qui suit le mois d'ouverture
+    de votre campagne (roue crantée d'Économie › Exercice), le même cadre que les Archives. Les flèches
+    remontent aux années passées ; au rechargement, l'écran revient à l'année en cours. Tout l'onglet
+    et les trois chiffres du haut suivent le cadre choisi. <b>Changer de cadre change les dates,
+    jamais le calcul</b> : les deux totaux ne s'affichent donc jamais côte à côte.</li>
+    <li><b>Les campagnes du cadre</b> s'alignent sur une frise, avec leurs heures de barème et leur
+    état — faite, en cours, à venir. Touchez-en une pour zoomer dessus : les trois chiffres du haut et
+    l'onglet « La campagne » la détaillent. Si votre année vigne a les mêmes dates que votre exercice,
+    l'écran le dit et vous emmène régler le mois de la campagne : choisissez celui qui suit vos
+    vendanges.</li>
+    <li><b>Le budget de l'année</b>, en euros : <b>dépensé</b> à ce jour, <b>reste prévu</b> d'ici la
+    fin du cadre, <b>total attendu</b>. C'est le moteur d'Économie › Exercice, joué sur les dates du
+    cadre : salaires chargés au planning, carburant au plein, achats, réparations. Le reste prévu ne
+    connaît que ce qui est saisi : une embauche ou un achat à venir n'y est pas. Le graphe mois par
+    mois règle son échelle sur les mois à venir ; un mois passé qui la dépasse — celui des vendanges,
+    souvent — est coupé net, son montant écrit au-dessus. Le tableau donne chaque poste.</li>
+    <li><b>Le renfort à prévoir</b> : une photo du jour. Avec l'équipe prévue au planning, combien de
+    personnes manqueront, et à partir de quand, pour que les travaux tiennent dans leur fenêtre — une
+    ligne par période de manque. Dessous, semaine par semaine : le vert est ce que l'équipe couvre, le
+    rouge hachuré ce qu'il reste à trouver, le trait noir ce que l'équipe peut faire ; les semaines
+    passées sont en gris. <b>Combien recruter et quand</b> se chiffre dans Décider › Le renfort : le
+    bouton y mène.</li>
+    <li><b>Ce qui n'est pas daté n'est pas compté.</b> Au-delà de la dernière période datée, ni besoin
+    ni équipe : l'écran le dit, plutôt que d'afficher un zéro.</li>
   </ul>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-boussole"></use></svg> Aujourd'hui</h3>
@@ -2906,8 +2890,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     dépliables : la <b>frise prévu / réel</b> tâche par tâche, la <b>courbe des personnes nécessaires
     par semaine</b>, et l'<b>écart</b> entre ce qui était prévu et ce que dit le journal. Ces quatre
     blocs parlent d'<b>une campagne</b> : ils étaient rangés dans « L'année », ils sont ici.
-    Une moyenne n'est pas un pic : pour la semaine la plus chargée, c'est la frise des 52 semaines,
-    dans « L'année », qui répond.</li>
+    Ce qui manquera en personnes d'ici la fin de l'année se lit dans « L'année »,
+    carte « Le renfort à prévoir ».</li>
     <li><b>Échéances par tâche</b> : date de fin projetée pour chacune, en jours ouvrés.</li>
     <li><b>La fenêtre d'une tâche s'arrête le jour écrit.</b> Si vous fixez la fin d'un travail au
     25 avril, le 25 avril travaille. La même règle vaut pour le dernier jour de la période elle-même.</li>

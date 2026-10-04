@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **3 octobre 2026 (RENOM-3 + KIT-5)** — ★★ **L'ADMIN RENOMME, LA RÈGLE S'IMPOSE À TOUS LES APPAREILS ; L'ACCUEIL SANS TROUS** (§232, §233).
+> RENOM-3 : un renommage (admin seul) devient une règle `CONFIG.renommages_taches` ({de, vers, quand, par}) que CHAQUE appareil
+> applique à chaque chargement et à chaque donnée reçue (`_mvAppliquerRenommages`, firebase.js) — dans l'ordre des dates ;
+> l'état le plus avancé gagne (`_renFusion`) ; un appareil d'admin enregistre, les autres corrigent en mémoire. Personne n'a à
+> être synchronisé avant (Nico : « c'est l'admin qui prévaut »). KIT-5 : les blocs de l'Accueil dans `#home-cols`, en colonnes
+> CSS — plus de trous. Harnais `mv-harnais-renom` (15, 9/9), `mv-harnais-kit2` adapté (11, 7/7). Marque `lots/RENOM-3.json`.
+> Base `9a6cf8e`. **APP 8.10 → 8.11, SW 8.85 → 8.86** (visible).
+
 > ★ Consolidation : **3 octobre 2026 (RENOM-1 + LOTS-1)** — ★★ **RENOMMER UNE TÂCHE ; LA GARDE DES LOTS FRÈRES** (§230, §231).
 > RENOM-1 : `_renameTache` (reglages.js) migre toutes les clés d'une tâche du domaine (parcelles et chaque période, exclusions,
 > journal, périodes et échéances, TRAVAUX, passages, priorité, objectifs, équipes du jour) ; entrée dans la fenêtre « Modifier »

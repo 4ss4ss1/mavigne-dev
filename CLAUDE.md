@@ -3,13 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **3 octobre 2026 (RENOM-3 + KIT-5)** — ★★ **L'ADMIN RENOMME, LA RÈGLE S'IMPOSE À TOUS LES APPAREILS ; L'ACCUEIL SANS TROUS** (§232, §233).
-> RENOM-3 : un renommage (admin seul) devient une règle `CONFIG.renommages_taches` ({de, vers, quand, par}) que CHAQUE appareil
-> applique à chaque chargement et à chaque donnée reçue (`_mvAppliquerRenommages`, firebase.js) — dans l'ordre des dates ;
-> l'état le plus avancé gagne (`_renFusion`) ; un appareil d'admin enregistre, les autres corrigent en mémoire. Personne n'a à
-> être synchronisé avant (Nico : « c'est l'admin qui prévaut »). KIT-5 : les blocs de l'Accueil dans `#home-cols`, en colonnes
-> CSS — plus de trous. Harnais `mv-harnais-renom` (15, 9/9), `mv-harnais-kit2` adapté (11, 7/7). Marque `lots/RENOM-3.json`.
-> Base `9a6cf8e`. **APP 8.10 → 8.11, SW 8.85 → 8.86** (visible).
+> Dernière consolidation : **4 octobre 2026 (ANNEE-1)** — ★★ **PILOTAGE › L'ANNÉE, UN CADRE À LA FOIS** (§234).
+> Nico (04/10, capture) : l'onglet ne montrait que le pic des vendanges, affichait cinq chiffres pour un même exercice et posait
+> l'exercice en euros face à une année vigne en heures — le cycle FINI le 6/09. Maquette (canevas Design) validée : un seul cadre à
+> la fois — exercice comptable OU année vigne (`_mvCampagneBornes`, choix de Nico) — dans `_PIL_SCOPE` (`cadre` mémorisé, `recul`
+> NON) ; budget en euros = `_pexData` aux dates du cadre (dépensé / reste prévu / total) ; « Le renfort à prévoir » = photo des
+> manques (`_pilAnFenetres`), bouton vers Décider ; photos et fil d'Ariane suivent. Harnais `mv-harnais-annee` (neuf).
+> Marque `lots/ANNEE-1.json`. Base `70406bb`. **APP 8.11 → 8.12, SW 8.86 → 8.87** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1818,6 +1818,13 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ ANNEE-1 — CE QUI RESTE OUVERT (§234, posé le 04/10)
+
+1. **À regarder chez Nico** : L'année sur ses vraies données, ordinateur et téléphone — le cadre, les deux graphes coupés, les
+   lignes du renfort ; et son mois de campagne (s'il est resté sur août, l'année vigne a les dates de l'exercice : l'écran le dit).
+2. **Économie, « bis repetita »** (Nico, 04/10) : la même revue est à faire sur l'onglet Économie — après L'année.
+3. Le renfort de L'année (photo) et celui de Décider (simulation) peuvent différer : voulu (Nico, 04/10), écrit dans `MV_INFO`.
 
 ### ⚠️ ANN-1 — CE QUI RESTE OUVERT SUR LES NOUVEAUTÉS (§225, posé le 03/10)
 

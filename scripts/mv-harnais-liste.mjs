@@ -282,6 +282,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-kit4.mjs --contre'],
   ['node scripts/mv-harnais-renom.mjs'],
   ['node scripts/mv-harnais-renom.mjs --contre'],
+  ['node scripts/mv-harnais-annee.mjs'],
+  ['node scripts/mv-harnais-annee.mjs --contre'],
   ['node scripts/mv-harnais-lots.mjs'],
   ['node scripts/mv-harnais-lots.mjs --contre'],   // RENF-2 (§224) : le renfort en calendrier, sans heures sup   // COH-1 (§222) : un même chiffre, un même nom, une même surface partout
   ['node scripts/mv-harnais-equipes-jour.mjs'],

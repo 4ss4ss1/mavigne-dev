@@ -46,7 +46,7 @@ T('A4 libelle d\'onglet echappe',          /_pilEsc\(t\[2\]\)/.test(NC));
 // ⚠️ L'ASSERTION EXIGEAIT L'ADJACENCE, PAS LA PRESENCE. Elle rougissait des
 //   qu'une cle du meme onglet s'intercalait — ici `an_budget`. Son INTENTION
 //   etait « les deux cles sont aux defauts » : on la teste, une par une.
-T('A3 an_cadres est aux defauts',          /\ban_cadres:1/.test(NC));
+T('A3 an_cadres a quitte les defauts (ANNEE-1 : le cadre est une navigation)', !/\ban_cadres:1/.test(NC));
 T('A3 an_frise est aux defauts',           /\ban_frise:1/.test(NC));
 T('A3 an_budget est aux defauts',          /\ban_budget:1/.test(NC));
 T('A3 avc_etp a quitte les defauts',       !/avc_etp:1/.test(NC));

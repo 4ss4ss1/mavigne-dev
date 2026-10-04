@@ -110,3 +110,31 @@ bandeaux et le bloc épinglé restent hors des colonnes) ; à partir de 1 024 px
 (`column-count:2`, `break-inside:avoid` sur chaque bloc) — plus aucun trou. Conséquence dite à Nico : l'ordre se lit de haut
 en bas dans la colonne de gauche, puis dans celle de droite. Le glisser-déposer de KIT-2 (le bloc qui contient le centre du
 bloc tiré) marche tel quel : il cherche les blocs dans toute la page. `mv-harnais-kit2` adapté (11, contre-épreuve 7/7).
+
+## 234. ★★ ANNEE-1 — PILOTAGE › L'ANNÉE, UN CADRE À LA FOIS (04/10 — `src/pilotage.js` · `src/utils.js` (APP, WHATS_NEW, MV_INFO, MV_AIDE) · `src/app.js` · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-annee.mjs` (neuf) · `scripts/mv-harnais-audit-pil.mjs` · `scripts/mv-harnais-pil-coherence.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `lots/ANNEE-1.json` · **APP 8.11 → 8.12, SW 8.86 → 8.87**, base `70406bb`)
+
+**La demande** (Nico, 04/10, capture de son écran) : la partie budget à l'année « mal faite » — elle ne met en avant que le
+pic des vendanges (connu de tous, et passé en octobre), affiche plusieurs chiffres pour l'année comptable, et compare
+l'exercice en euros à l'année vigne en heures de barème : « ça ne veut strictement rien dire ».
+**Mesuré sur sa capture** : pour le seul exercice 2026-2027, 83 k€ engagés, 206 k€ à la clôture, 167 k€ « prévus » (barème ×
+taux, vigne seule), 8 523 h de barème, des heures payées — deux « prévus » qui ne comptent pas la même chose. La case « année
+vigne » (8 194 h) = Hiver 2025-26 + Printemps 2026 + Vendanges 2026 : le cycle FINI le 6/09, à côté d'un exercice ouvert le
+1/08. La tuile Charge & ETP titrait sur le pic passé (25,3) dans un cadre rouge « il en manque ~0 », pendant que le graphe
+montrait du renfort à trouver en hiver et au printemps, sans une phrase.
+**Maquette** : canevas Design interactif (ordinateur + téléphone), validée « c'est parfait, on go de cette façon ».
+**Fait** : un cadre à la fois en tête d'onglet (`_pilAnCadreHtml`, segmenté + flèches + pastille `pil.cadres`) ; la frise du
+cadre et ses puces de campagnes (zoom `data-etpc`) ; « Le budget de l'année » = `_pexData` aux dates du cadre (trois chiffres,
+barre, mois par mois, postes) ; « Le renfort à prévoir » = `_pilAnFenetres` (lignes) + graphe semaine par semaine, bouton
+`data-diag="renfort"` ; les photos Travaux/Effectif/Budget et le fil d'Ariane lisent le cadre.
+**Arbitrages** : ① l'année vigne = `_mvCampagneBornes` (Nico, « continuer » sur la question posée) et non « le lendemain des
+vendanges » de la maquette — une troisième définition aurait contredit les Archives ; si le mois de campagne = celui de
+l'exercice, l'écran le dit avec un bouton vers la roue crantée. ② Le renfort de L'année est une PHOTO (besoin face à
+`_pilDispoSem`, semaine par semaine) ; Décider garde la simulation — Nico : les deux sont cohérents. ③ Le recul n'est pas
+mémorisé (même motif que la bande d'Économie, §113) ; le cadre l'est. ④ Le trait du graphe = ce que l'équipe peut faire
+(`_pilDispoSem`) et non `head` : l'ancien passait au-dessus du vert alors qu'il manquait du monde. ⑤ `an_cadres` quitte les
+indicateurs : le cadre est une navigation. ⑥ Retirés, morts sans appelant : `_pilDeuxCadresHtml`, `_pilPanelEtp`,
+`_pilFriseAnneeSvg`, `_pilAnneeVigneHtml`, `_pilAnnPartage`, `_pilAnnTaches`.
+**Trouvé en route** : la racine du fil d'Ariane lisait `X.debut`/`X.fin` sur `_mvExercice()`, qui rend `d0`/`d1` — elle
+affichait « Exercice » tout court depuis des semaines. Le graphe mensuel oubliait les fûts et les prestations (la somme des
+mois ≠ le total) ; les amendements prévus n'avaient pas de mois → `byM[k].achP` posé dans `_pexData`.
+**Pas vérifié** : le rendu à l'œil (ordinateur, téléphone) ; `npm run build`, `test:smoke`, `test:e2e`.

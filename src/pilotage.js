@@ -78,7 +78,9 @@ var _PIL_DEFAULT = {
     //   avait demenage — ressuscitait a 1, valeur que _pilMigrShow recopiait
     //   aussitot dans `an_frise`. Une case decochee se recochait donc TOUTE SEULE a
     //   la session suivante, et la migration du lot 3 rejouait indefiniment.
-    an_cadres:1, an_budget:1, an_frise:1,
+    // ANNEE-1 (§234) : `an_cadres` a QUITTE la liste — le cadre de l'annee est une
+    //   navigation, toujours affichee ; `an_frise` porte « Le renfort a prevoir ».
+    an_budget:1, an_frise:1,
     // Avancement (`avc_etp` RETIRE : deplace vers `an_frise`, cf. _PIL_SHOW_MIGR)
     avc_gauge:1, avc_bar:1, avc_pie:1, avc_temps:1, avc_echeances:1, avc_carte:1,
     // Personnel
@@ -99,7 +101,7 @@ var _PIL_DEFAULT = {
   //   indicateurs, sept pleines largeurs empilees, ~4 500 px de defilement.
   //   ⚠️ Replier NE CACHE AUCUN CHIFFRE : depuis ce lot le chiffre et sa ligne
   //     de cadre vivent dans l'EN-TETE. On replie le detail, jamais le nombre.
-  collapsed:{echeances:1,carte:1,etp:1,anbudget:1,temps:1,equipe:1,tracteur:1,cave:1,presences:1,gnr:1,capacite:1,simulateur:1,renfort:1,phyto:1,cout:1,couteff:1,cuivre:1,ift:1,dre:1},
+  collapsed:{echeances:1,carte:1,anrenfort:1,anbudget:1,temps:1,equipe:1,tracteur:1,cave:1,presences:1,gnr:1,capacite:1,simulateur:1,renfort:1,phyto:1,cout:1,couteff:1,cuivre:1,ift:1,dre:1},
   v: _PIL_ST_V,
   sub:   {trac_revision:1,trac_controle:1,trac_repar:1,trac_intercep:1,cave_fml:1,cave_sout:1,cave_ouillage:1,pres_cp:1,pres_recup:1,pres_mal:1,etp_frise:1,etp_courbe:1,etp_ecart:1}
 };
@@ -220,7 +222,7 @@ var _PIL_ZOOM_FIN = 'sim';
 // le lot 5 declarait mort. Et `an` n'avait AUCUNE entree : le titre du niveau ①
 // sortait VIDE, la roue crantee flottant seule dans l'en-tete.
 // ⚠️ Les cles ne bougent pas ; seuls les mots changent.
-var _PIL_LABELS = {auj:'Aujourd\'hui',an:'L\'année — les douze mois, d\'un cadre à l\'autre',avc:'La campagne — avancement, temps et échéances',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, passages phyto et délai de rentrée',arc:'Archives des campagnes',sim:'Décider — la tournée du jour, qui fait quoi, et le renfort'};
+var _PIL_LABELS = {auj:'Aujourd\'hui',an:'L\'année — un cadre à la fois : budget et renfort',avc:'La campagne — avancement, temps et échéances',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, passages phyto et délai de rentrée',arc:'Archives des campagnes',sim:'Décider — la tournée du jour, qui fait quoi, et le renfort'};
 var _PIL_VALID_TAB = {auj:1,an:1,avc:1,equ:1,cav:1,eco:1,cfm:1,arc:1,sim:1};
 // Migration des onglets memorises avant le regroupement.
 // Migration des cles memorisees : `ecf` (l'onglet composite) part sur l'economie.
@@ -268,7 +270,7 @@ var _PIL_TILE_ICO={couteff:'balance',carte:'carte',temps:'balance',equipe:'equip
   tracteur:'tracteur',cave:'verre',presences:'equipe',phyto:'feuille',echeances:'calendrier',
   etp:'balance',capacite:'balance',simulateur:'equipe',ordrepassage:'cible',gnr:'carburant',
   traitement:'pulverisateur',meteo:'nuage',conso:'carburant',vinif:'fiole',cout:'balance',cuivre:'fiole',
-  ift:'pulverisateur',dre:'goutte'};
+  ift:'pulverisateur',dre:'goutte',anbudget:'euro',anrenfort:'equipe'};
 function _pilIco(n){ return _mvIcon(n,16); }
 function _pilIcoFor(id){ return _pilIco(_PIL_TILE_ICO[id]||'graphique'); }
 function _pilHa(v){ return (Number(v)||0).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2}).replace(/\u202f/g,' '); }
@@ -1314,19 +1316,35 @@ function _pilEcartHtml(cd, real){
 // `camp` remplace _PIL_ETPSEL, qui n'en est plus qu'un alias de lecture.
 // ⚠️ Toute nouvelle vue lit _PIL_SCOPE. On n'ajoute pas un sixieme selecteur.
 // ════════════════════════════════════════════════════════════════════════════
-var _PIL_SCOPE = { camp:null };    // nom de la campagne zoomee ; null = l'annee
+// ANNEE-1 (§234) : la portee porte aussi le CADRE de l'annee ('exo' | 'vig') et le
+// RECUL (0 = l'annee en cours, -1 = la precedente…). Une seule portee, jamais un
+// sixieme selecteur : l'onglet L'annee, les photos et le fil d'Ariane la lisent.
+var _PIL_SCOPE = { camp:null, cadre:'exo', recul:0 };
 
 // Meme patron de cle que _pilTabKey : un module, une facon de nommer.
 function _pilScopeKey(){ return 'mavigne_pil_scope_'+_pilTenant(); }
 function _pilScopeLoad(){
   try{ var v=localStorage.getItem(_pilScopeKey()); if(v!=null) _PIL_SCOPE.camp=(v==='')?null:v; }
   catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'scope: lecture impossible'}); }
+  try{ var c=localStorage.getItem(_pilCadreKey()); if(c==='vig'||c==='exo') _PIL_SCOPE.cadre=c; }
+  catch(e2){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'cadre: lecture impossible'}); }
 }
 function _pilScopeSet(camp){
   _PIL_SCOPE.camp = camp || null;
   try{ localStorage.setItem(_pilScopeKey(), _PIL_SCOPE.camp||''); }
   catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'scope: ecriture impossible'}); }
 }
+// ANNEE-1 (§234) — le cadre de l'annee : exercice comptable ou annee vigne.
+function _pilCadreKey(){ return 'mavigne_pil_cadre_'+_pilTenant(); }
+function _pilCadreSet(c){
+  _PIL_SCOPE.cadre=(c==='vig')?'vig':'exo';
+  try{ localStorage.setItem(_pilCadreKey(), _PIL_SCOPE.cadre); }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'cadre: ecriture impossible'}); }
+}
+// ⚠️ LE RECUL N'EST PAS MEMORISE — expres. Une annee consultee la veille et reprise
+//   au rechargement afficherait un cadre clos la ou l'on attend l'annee en cours :
+//   le mensonge silencieux que la bande d'Economie evite deja (_PEX_AN, §113).
+function _pilReculSet(r){ r=parseInt(r,10); _PIL_SCOPE.recul=(isNaN(r)||r>0)?0:r; }
 // La campagne portee EXISTE-T-ELLE encore ? Une periode supprimee ou renommee
 // laisserait une portee fantome : l'ecran filtrerait sur un nom que plus
 // personne ne porte, et n'afficherait rien sans dire pourquoi.
@@ -1492,10 +1510,6 @@ function _pilAnnPer(nom){
   var a=_PIL_ANN; if(!a||nom==null) return null;
   for(var i=0;i<a.pers.length;i++){ if(a.pers[i].nom===nom) return a.pers[i]; }
   return null;   // periode renommee ou supprimee -> on retombe sur l'annee entiere
-}
-function _pilAnnTaches(p){
-  var tw=(p&&p.cd&&p.cd.taskWindows)||[];
-  return tw.slice().sort(function(a,b){ return String(a.start).localeCompare(String(b.start)); }).slice(0,12);
 }
 
 // ══ LA PORTEE COMMANDE AUSSI LA CHARGE ET L'EFFECTIF ═══════════════════
@@ -1689,56 +1703,6 @@ function _pilSemLabO(o0){
   var dd=_pilOrdD(o0);
   return 'semaine du '+dd.getUTCDate()+' '+MOA[dd.getUTCMonth()]+' '+dd.getUTCFullYear();
 }
-// ── LES DEUX CADRES ─────────────────────────────────────────────────────────
-// ⚠️ CORRECTION DE FOND (12/08/2026, sur retour de Nico). Cet ecran disait
-//    « exercice mal aligne, corrigez-le » et allait jusqu'a « aucune lecture
-//    annuelle n'est fiable tant que c'est le cas ». C'etait un MAUVAIS CONSEIL :
-//    un exercice comptable est fixe par le comptable, parfois par le statut. On
-//    ne le deplace pas pour qu'un graphique tombe mieux.
-//
-//    La vraie panne etait ailleurs : UN SEUL cadre pour DEUX questions.
-//      · L'EXERCICE COMPTABLE (bilan a bilan) repond a « ce que m'a coute
-//        l'annee fiscale ». C'est une donnee, pas un reglage.
-//      · L'ANNEE VIGNE (apres vendange N -> fin vendange N+1) repond a « ce que
-//        m'a coute un cycle de production ». C'est un cycle biologique.
-//    Les deux sont justes. Ils ne donnent pas le meme nombre, et c'est NORMAL.
-//    L'ecran doit donc les NOMMER et dire ce que chacun repond — pas en
-//    declarer un cassé.
-//
-//    Ce qui reste utile a signaler : quand une borne d'exercice TRAVERSE la
-//    vendange, la recolte est repartie sur deux bilans. Ca ne se corrige pas,
-//    ca se SAIT — et on le chiffre en jours, exactement, sans fausse precision.
-function _pilAnneeVigneHtml(ann){
-  if(!ann||!ann.ex) return '';
-  var A=ann.align, out='';
-  var MLB=(window.MV_EX_MOIS_LBL)||['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet','ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
-  var admin=!!(typeof window.isAdmin==='function' && window.isAdmin());
-  var fr=function(d){ if(!d)return'\u2014'; var p=String(d).split('-'); return p.length===3?(parseInt(p[2],10)+' '+MLB[parseInt(p[1],10)-1]):d; };
-  var box=function(bg,col,html){
-    return '<div style="margin:0 0 8px;padding:9px 12px;border-radius:9px;background:'+bg+';color:'+col+';font-size:var(--pt-txt,12.5px);line-height:1.55">'+html+'</div>';
-  };
-  // On ne signale QUE la coupure, parce qu'elle seule repartit une recolte sur
-  // deux bilans. Une vendange qui « ouvre » l'annee n'est pas un defaut : c'est
-  // le calendrier de votre comptable, et il n'y a rien a corriger.
-  if(A && A.coupe && ann.vend){
-    var J=_pilAnnSplitVend(ann);
-    var bouton=(admin&&A.moisIdeal!=null)
-      ? (' <button data-exm="'+A.moisIdeal+'" style="border:1px solid currentColor;background:transparent;color:inherit;border-radius:16px;padding:3px 11px;font-size:var(--pt-micro,11px);font-weight:700;cursor:pointer;margin-left:4px">D\u00e9caler au 1\u1D49\u02B3 '+MLB[A.moisIdeal]+'</button>')
-      : '';
-    out+=box('#FBF0DC','#8A5A38',''+_mvIcon('info',16)+' <b>Votre vendange est \u00e0 cheval sur deux exercices.</b> Elle court du '
-      +fr(ann.vend.debut)+' au '+fr(ann.vend.fin)+' : sur ses <b>'+J.total+' jours</b>, '
-      +'<b>'+J.dedans+'</b> tombent dans cet exercice et <b>'+J.dehors+'</b> dans le suivant. '
-      +'Le co\u00fbt de la r\u00e9colte se lit donc sur <b>deux bilans</b>, dans \u00e0 peu pr\u00e8s cette proportion. '
-      +'Ce n\u2019est pas une erreur \u2014 c\u2019est votre calendrier comptable. Il n\u2019y a rien \u00e0 corriger\u00a0; '
-      +'il faut seulement le savoir en lisant le bilan.'
-      +(bouton?('<br><span style="font-size:var(--pt-micro,11px);opacity:.85">Si votre comptable accepte de changer la date de cl\u00f4ture, la r\u00e9colte tiendrait dans un seul exercice\u00a0:</span>'+bouton):''));
-  }
-  if(ann.hors&&ann.hors.length){
-    out+=box('#FBF0DC','#8A5A38',''+_mvIcon('info',16)+' <b>'+ann.hors.length+' p\u00e9riode'+(ann.hors.length>1?'s':'')+' hors de cet exercice</b> \u2014 '
-      +_pilEsc(ann.hors.join(', '))+'. Leur travail et leur co\u00fbt tombent dans une autre ann\u00e9e comptable.');
-  }
-  return out;
-}
 
 // Combien de jours de vendange tombent de chaque cote de la borne. En JOURS,
 // pas en euros : les jours se comptent exactement, le cout se prorate — et une
@@ -1753,286 +1717,7 @@ function _pilAnnSplitVend(ann){
   return { total:tot, dedans:dedans, dehors:Math.max(0,tot-dedans) };
 }
 
-// ── « DEUX FACONS DE COMPTER » ──────────────────────────────────────────────
-// Le panneau qui manquait. Un domaine a DEUX annees, et elles ne repondent pas
-// a la meme question :
-//   · l'EXERCICE COMPTABLE, bilan a bilan, fixe par le comptable ;
-//   · l'ANNEE VIGNE, apres une vendange jusqu'a la fin de la suivante.
-// Sans ce panneau, l'utilisateur voit deux totaux differents pour « l'annee »
-// et croit a une erreur. Ce n'en est pas une : ce sont deux questions.
-function _pilDeuxCadresHtml(ann){
-  if(!ann||!ann.ex) return '';
-  var MLB=(window.MV_EX_MOIS_LBL)||['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet','ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
-  var fr=function(d){ if(!d)return'\u2014'; var q=String(d).split('-'); return q.length===3?(parseInt(q[2],10)+' '+MLB[parseInt(q[1],10)-1]+' '+q[0]):d; };
 
-  // ⚠️⚠️ CORRECTION DU 12/08 : ce bloc lisait _pecData, qui cadre sur la
-  //   CAMPAGNE CONSULTEE. La cellule « Exercice comptable · du 1er aout 2026 au
-  //   31 juillet 2027 » affichait donc 45 k€ : le cout d'une vendange de dix
-  //   jours, sous l'etiquette d'une annee entiere. Le chiffre etait juste, son
-  //   etiquette fausse — et c'est pire, parce qu'on ne le verifie pas.
-  //   La source est desormais _pexData, le seul moteur cadre sur des DATES :
-  //   salaires charges (heures payees x taux charge des fiches, planning),
-  //   carburant GNR et achats d'intrants sur la fenetre du bilan.
-  var eur=null, det='', X=_pilExoData()||null;
-  if(X && (X.total>0 || X.totalP>0)){
-    eur=X.total;
-    // ★ Exercice en cours : le chiffre est l'ENGAGÉ (ce qui est sorti) ; la ligne
-    //   dessous nomme la clôture, prévu compris. Avant, 216 k€ « payés » un 10
-    //   septembre — dix mois de grille comptés comme sortis.
-    det=(X.enCoursC
-          ? ('engag\u00e9s au '+_pilDfr(X.coupe)+' \u00b7 <b>'+_pilNb(Math.round(X.totalClot/1000))+' k\u20ac</b> \u00e0 la cl\u00f4ture, pr\u00e9vu compris<br>')
-          : '')
-       +_ecoH1(X.hPaid)+' h pay\u00e9es \u00b7 '+X.gens.length+' personne'+(X.gens.length>1?'s':'')
-       +(X.gnrT>0?(' \u00b7 '+_pilNb(Math.round(X.litres))+' L de GNR'):'')
-       +(X.nAch>0?(' \u00b7 '+X.nAch+' achat'+(X.nAch>1?'s':'')):'');
-  }
-
-  var cell=function(titre,sous,val,unite,det){
-    return '<div style="flex:1;min-width:210px;background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:13px;padding:12px 14px">'
-      +'<div style="font-size:var(--pt-nano,9.5px);letter-spacing:1.4px;text-transform:uppercase;color:var(--texte-doux);font-weight:700">'+titre+'</div>'
-      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:3px 0 7px;line-height:1.4">'+sous+'</div>'
-      +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xl,27px);font-weight:700;color:var(--texte);line-height:1.05">'+val
-      +'<span style="font-family:Outfit,sans-serif;font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--texte-doux)">'+unite+'</span></div>'
-      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px;line-height:1.4">'+det+'</div></div>';
-  };
-
-  // ══ QUELLES CAMPAGNES FORMENT L'ANNEE VIGNE ═══════════════════════
-  //   « D'apres une vendange jusqu'a la fin de la suivante ». Sommer TOUTES les
-  //   campagnes datees donnerait un total a cheval sur deux cycles : un hiver
-  //   2025-2026 (qui cloture le cycle precedent) additionne a un hiver 2026-2027
-  //   (qui ouvre le suivant). Deux fois le meme hiver dans un chiffre annonce
-  //   comme un cycle.
-  //   On part donc de la campagne qui PORTE la fin de vendange, et on remonte
-  //   tant qu'on ne retombe pas sur une campagne qui porte, elle aussi, une
-  //   vendange. Sans vendange datee, on ne devine pas : le cycle vaut null et la
-  //   cellule le dit deja (« aucune vendange datee »).
-  var aVend=ann.pers.map(function(pe){
-    return ((pe.cd&&pe.cd.taskWindows)||[]).some(function(t){ return _friseNorm(t.nom).indexOf('vendang')>=0; });
-  });
-  var dansCycle=ann.pers.map(function(){ return false; });
-  if(ann.vend){
-    var iv=-1;
-    for(var q=0;q<ann.pers.length;q++){
-      if(ann.pers[q].debut<=ann.vend.fin && ann.pers[q].fin>=ann.vend.fin) iv=q;
-    }
-    if(iv<0) for(var q2=ann.pers.length-1;q2>=0;q2--){ if(aVend[q2]){ iv=q2; break; } }
-    if(iv>=0){
-      dansCycle[iv]=true;
-      for(var q3=iv-1;q3>=0;q3--){ if(aVend[q3]) break; dansCycle[q3]=true; }
-    }
-  }
-
-  // Les campagnes, en heures de bareme : exactes, elles.
-  var lignes='', hTot=0, nCycle=0;
-  ann.pers.forEach(function(pe,ip){
-    if(!pe.cd) return;
-    // ⚠️ `charge`, PAS `totalTotal` : cette derniere n'existe pas sur l'objet
-    //   rendu par _chargeSaisonData (elle vient de calcHeures, app.js). Les
-    //   quatre lignes du tableau sortaient toutes a 0 h.
-    var h=Math.round(pe.cd.charge||0);
-    if(dansCycle[ip]){ hTot+=h; nCycle++; }
-    var dedans = !(pe.fin<ann.ex.d0 || pe.debut>ann.ex.d1);
-    var chev = dedans && (pe.debut<ann.ex.d0 || pe.fin>ann.ex.d1);
-    lignes+='<tr><td style="padding:6px 8px;border-bottom:1px solid var(--gris-clair)"><b>'+_pilEsc(pe.nom)+'</b>'
-      +(chev?' <span style="font-size:var(--pt-lbl,10.5px);font-weight:700;color:var(--orange);background:var(--orange-pale);border-radius:20px;padding:1px 7px">\u00e0 cheval</span>':'')
-      +(!dedans?' <span style="font-size:var(--pt-lbl,10.5px);font-weight:700;color:var(--texte-doux);background:var(--gris-clair);border-radius:20px;padding:1px 7px">hors exercice</span>':'')
-      +(dansCycle[ip]?' <span style="font-size:var(--pt-lbl,10.5px);font-weight:700;color:var(--vert-med);background:var(--vert-pale);border-radius:20px;padding:1px 7px">ann\u00e9e vigne</span>':'')
-      +'</td><td style="padding:6px 8px;border-bottom:1px solid var(--gris-clair);text-align:right;font-variant-numeric:tabular-nums;font-weight:600'
-      +(dansCycle[ip]?'':';color:var(--texte-doux)')+'">'
-      +_pilNb(h)+' h</td></tr>';
-  });
-
-  return '<div id="pil-an-cadres" style="background:var(--bg-app);border:1px solid var(--gris-clair);border-radius:16px;padding:14px 16px;margin:0 0 16px">'
-    +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-md,20px);font-weight:700;color:var(--texte)">Deux fa\u00e7ons de compter votre ann\u00e9e</div>'
-    +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin:3px 0 12px;line-height:1.5">'
-    +'Un domaine en a <b>deux</b>, et elles ne r\u00e9pondent pas \u00e0 la m\u00eame question. '
-    +'Elles ne donnent pas le m\u00eame total\u00a0: c\u2019est normal, ce n\u2019est pas une erreur.</div>'
-    +'<div style="display:flex;gap:11px;flex-wrap:wrap">'
-    +cell(''+_mvIcon('livre',16)+' Exercice comptable',
-          'Ce que voit votre comptable, d\u2019un bilan \u00e0 l\u2019autre. Fix\u00e9 par lui\u00a0: ce n\u2019est pas un r\u00e9glage d\u2019affichage.',
-          (eur!=null?_pilNb(Math.round(eur/1000)):'\u2014'), (eur!=null?' k\u20ac':''),
-          'du '+fr(ann.ex.d0)+' au '+fr(ann.ex.d1)+(det?('<br>'+det):''))
-    +cell(''+_mvIcon('raisin',16)+' Ann\u00e9e vigne',
-          'Un cycle de production\u00a0: d\u2019apr\u00e8s une vendange jusqu\u2019\u00e0 la fin de la suivante. C\u2019est le cadre qui dit si une campagne a co\u00fbt\u00e9 cher.',
-          (nCycle>0?_pilNb(hTot):'\u2014'), (nCycle>0?' h de bar\u00e8me':''),
-          (ann.vend
-            ? ('vendange du '+fr(ann.vend.debut)+' au '+fr(ann.vend.fin)
-               +'<br>'+nCycle+' campagne'+(nCycle>1?'s':'')+' dans ce cycle')
-            : 'aucune vendange dat\u00e9e \u2014 le cycle ne peut pas \u00eatre born\u00e9'))
-    +'</div>'
-    // ★ 530 CARACTERES D'EXPLICATION -> UNE LIGNE + LA PASTILLE.
-    //   Le lecteur a besoin de savoir QUE les deux totaux different et que ce
-    //   n'est pas une erreur ; POURQUOI se lit une fois.
-    +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin:11px 0 7px;line-height:1.5;display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
-    +'<span><b style="color:var(--texte)">Le d\u00e9tail, campagne par campagne.</b> Seules les lignes marqu\u00e9es '
-    +'<b style="color:var(--vert-med)">ann\u00e9e vigne</b> entrent dans le total de droite.</span>'
-    +_mvInfoBtn('pil.cadres')+'</div>'
-    +'<table style="width:100%;border-collapse:collapse;font-size:var(--pt-txt,12.5px)">'+lignes+'</table>'
-    // ★ 440 CARACTERES EN ITALIQUE -> LE CADRE SEUL. « Heures de bareme » change
-    //   la lecture du tableau : ca reste. Le reste (d'ou vient le cout, ce qui
-    //   n'y est pas) explique le calcul : MV_INFO['pil.cadres'].
-    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:8px;font-style:italic">'
-      +'Heures de <b>bar\u00e8me</b>\u00a0: ce que le travail devrait prendre, pas ce qu\u2019il a pris.</div>'
-    +'</div>';
-}
-
-// \u2605\u2605\u2605 LES JOURS COUVERTS PAR PLUS D'UNE PERIODE.
-//   \u26a0 CE N'EST PAS UN DEFAUT DE COMPTAGE, et on ne le represente pas comme tel.
-//   Les heures suivent les TACHES, une tache n'appartient qu'a UNE periode : rien
-//   n'est compte deux fois (\u00a735c, verifie sur _chargeSaisonData \u2014 ne pas
-//   reintroduire l'alerte). C'est un defaut de DESSIN : sur un jour partage, la
-//   frise peint DEUX barres au meme endroit, l'une par-dessus l'autre. Le chiffre
-//   affiche reste juste (c'est un maximum, pas une somme) mais le lecteur voit une
-//   barre la ou il y en a deux, et rien ne lui dit de quelle periode est celle du
-//   dessus. On hachure le fond : la zone se lit, les barres restent lisibles.
-//   Balayage : +1 a chaque debut, -1 au lendemain de chaque fin. Partage = 2 et
-//   plus. Deux periodes bout a bout (fin le X, debut le X+1) ne partagent RIEN.
-function _pilAnnPartage(ann){
-  if(!ann||!ann.pers||ann.pers.length<2) return [];
-  var ev=[];
-  ann.pers.forEach(function(p){
-    var a=_pilAnnOrd(p.debut), b=_pilAnnOrd(p.fin);
-    if(isNaN(a)||isNaN(b)||b<a) return;
-    ev.push([a,1]); ev.push([b+1,-1]);
-  });
-  ev.sort(function(x,y){ return (x[0]-y[0])||(x[1]-y[1]); });
-  var n=0, deb=null, out=[];
-  ev.forEach(function(x){
-    var av=n; n+=x[1];
-    if(av<2 && n>=2) deb=x[0];
-    else if(av>=2 && n<2 && deb!=null){ if(x[0]>deb) out.push([deb,x[0]-1]); deb=null; }
-  });
-  return out;
-}
-function _pilFriseAnneeSvg(ann,w){
-  if(!ann||!ann.weeks.length) return window._mvGraphVide(
-    'Aucune p\u00e9riode dat\u00e9e sur la campagne',
-    'Renseignez les dates de d\u00e9but et de fin de vos p\u00e9riodes (R\u00e9glages \u203a Saisons).');
-  var selP=_pilAnnPer(_PIL_SCOPE.camp), s, e;
-  if(selP){ var d0=_pilAnnOrd(selP.debut), d1=_pilAnnOrd(selP.fin);
-    var mg=Math.max(2,Math.round((d1-d0)*0.04)); s=d0-mg; e=d1+mg; }
-  else { s=ann.s; e=ann.e; }
-  var L2=Math.max(1,e-s+1), W=(w>0)?Math.round(Math.max(620,w)):1000;
-  var padL=(W<760)?38:52, padR=16, plotW=W-padL-padR;
-  function X(o){ return padL+(o-s)/L2*plotW; }
-  var tks=selP?_pilAnnTaches(selP):[];
-  var bandH=selP?(tks.length*13+2):22;
-  // La hauteur suit la largeur : un graphe de 1 200 px de large et 206 px de
-  // haut ecrase ses barres et rend l'hiver illisible sous le pic de vendange.
-  var chH=(W<760)?170:(W<1000?206:Math.min(300,Math.round(150+W*0.09)));
-  var padT=bandH+16, scH=28, H=padT+chH+scH;
-  var c=window._mvGraphCadre(W,H);
-  var vis=ann.weeks.filter(function(x){
-    return x.o1>=s && x.o0<=e && (selP?(x.per===selP.idx):true);
-  });
-  // ★ L'ECHELLE VERTICALE SUIT LE ZOOM — c'est tout l'interet du clic. Sur l'annee
-  // l'axe monte au pic de vendange (~42) et l'hiver (~3) rampe en bas, illisible.
-  // Zoome sur l'hiver l'axe redescend a 5 et le detail apparait.
-  var yMax=1;
-  vis.forEach(function(x){ if(x.need>yMax)yMax=x.need; if(x.head>yMax)yMax=x.head; });
-  var step=yMax>60?20:(yMax>30?10:(yMax>12?5:(yMax>5?2:1)));
-  var yTop=Math.ceil(yMax/step)*step; if(!(yTop>0))yTop=step;
-  function Y(v){ return padT+chH-(v/yTop)*chH; }
-  var MN=['JANV','F\u00c9VR','MARS','AVR','MAI','JUIN','JUIL','AO\u00dbT','SEPT','OCT','NOV','D\u00c9C'];
-  // Deux motifs, deux SENS, deux inclinaisons opposees : un trou (aucune periode)
-  // ne doit pas ressembler a un partage (deux periodes). Meme trame = meme
-  // message pour l'oeil, quel que soit le texte de la legende.
-  var g='<defs><pattern id="pil-ann-h" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">'
-    +'<line x1="0" y1="0" x2="0" y2="6" stroke="'+c.col.texte+'" stroke-width="1.4" opacity="0.28"/></pattern>'
-    +'<pattern id="pil-ann-p" width="7" height="7" patternTransform="rotate(-45)" patternUnits="userSpaceOnUse">'
-    +'<line x1="0" y1="0" x2="0" y2="7" stroke="#7A5CA8" stroke-width="2" opacity="0.20"/></pattern></defs>';
-  var _part=[];
-  if(!selP){
-    ann.trous.forEach(function(t){
-      var x0=X(Math.max(t[0],s)), x1=X(Math.min(t[1]+1,e+1));
-      if(x1>x0) g+='<rect x="'+x0.toFixed(1)+'" y="'+padT+'" width="'+(x1-x0).toFixed(1)+'" height="'+chH+'" fill="url(#pil-ann-h)"/>';
-    });
-    _part=_pilAnnPartage(ann);
-    _part.forEach(function(t){
-      var x0=X(Math.max(t[0],s)), x1=X(Math.min(t[1]+1,e+1));
-      if(x1>x0) g+='<rect x="'+x0.toFixed(1)+'" y="'+padT+'" width="'+(x1-x0).toFixed(1)+'" height="'+chH+'" fill="url(#pil-ann-p)"/>';
-    });
-  }
-  for(var v=0;v<=yTop;v+=step){
-    g+='<line x1="'+padL+'" y1="'+Y(v).toFixed(1)+'" x2="'+(W-padR)+'" y2="'+Y(v).toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="1"/>'
-      +'<text x="'+(padL-7)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'" font-family="Outfit">'+v+'</text>';
-  }
-  // ★ BARRES EMPILEES : vert = ce que l'equipe absorbe, rouge = le renfort a
-  // trouver. L'ancienne barre etait coloriee EN ENTIER (vert OU rouge) : elle
-  // disait « ca deborde » sans dire de combien. Ici la hauteur de rouge EST le
-  // nombre de personnes a recruter, lisible sans calcul.
-  vis.forEach(function(x){
-    if(!(x.cap>0)||x.need<=0.01) return;
-    var bx=Math.max(padL,X(x.o0))+1, bx2=Math.min(W-padR,X(x.o1+1)), bw=Math.max(1.5,bx2-bx-1);
-    var base=Math.min(x.need,x.head), ov=Math.max(0,x.need-x.head);
-    g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(base).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(padT+chH-Y(base)).toFixed(1)+'" rx="2" fill="'+_PIL_SEM.fait+'" opacity="0.85"/>';
-    if(ov>0.02) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(x.need).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(base)-Y(x.need)).toFixed(1)+'" rx="2" fill="'+_PIL_SEM.faute+'" opacity="0.92"/>';
-  });
-  // Deux lignes : effectif PRESENT (plein) et SOCLE PERMANENT (pointille, equipes
-  // collectives exclues — c'est headPerm, deja calcule par planning.js). Le socle
-  // rend l'hiver lisible meme quand l'axe est cale sur le pic : on lit « au-dessus
-  // de cette ligne, c'est du renfort a trouver », et non un chiffre absolu perdu.
-  // ★ LA LIGNE SE COUPE SUR UN TROU. Elle enchainait en 'L' quelle que soit la
-  //   distance : entre deux periodes separees d'un mois, un segment droit
-  //   traversait une fenetre ou RIEN n'avait ete mesure. Le trait affirmait un
-  //   effectif la ou l'application n'en connait aucun. On insere un point
-  //   `gap` des que la semaine suivante ne colle pas a la precedente.
-  var ptsH=[], ptsP=[], prevFin=null;
-  vis.forEach(function(x){
-    if(prevFin!==null && x.o0>prevFin+1){ ptsH.push({gap:true}); ptsP.push({gap:true}); }
-    var x0=Math.max(padL,X(x.o0)), x1=Math.min(W-padR,X(x.o1+1));
-    ptsH.push({x0:x0,x1:x1,y:Y(x.head)});
-    ptsP.push({x0:x0,x1:x1,y:Y(x.headPerm)});
-    prevFin=x.o1;
-  });
-  var qq=_pilPolyBreak(ptsP), pp=_pilPolyBreak(ptsH);
-  if(qq) g+='<path d="'+qq+'" fill="none" stroke="'+_PIL_SEM.socle+'" stroke-width="1.8" stroke-dasharray="5 4"/>';
-  if(pp) g+='<path d="'+pp+'" fill="none" stroke="var(--texte)" stroke-width="2.4" stroke-linejoin="round"/>';
-  var tIso=(typeof window._mvAujIso==='function')?window._mvAujIso():_mvToday();
-  var tj=_pilAnnOrd(tIso);
-  // Le trait du jour est un REPERE, pas une alerte : il ne prend plus la
-  // couleur des barres de renfort, avec qui il partageait `col.alerte`.
-  if(tj>=s&&tj<=e) g+='<line x1="'+X(tj).toFixed(1)+'" y1="'+padT+'" x2="'+X(tj).toFixed(1)+'" y2="'+(padT+chH).toFixed(1)+'" stroke="'+_PIL_SEM.aujourdhui+'" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.55"/>';
-  if(!selP){
-    ann.pers.forEach(function(p){
-      var x0=Math.max(padL,X(_pilAnnOrd(p.debut))), x1=Math.min(W-padR,X(_pilAnnOrd(p.fin)+1)), bw=x1-x0;
-      if(!(bw>0)) return;
-      g+='<g data-etpc="'+_pilEsc(p.nom)+'" style="cursor:pointer">'
-        +'<rect x="'+x0.toFixed(1)+'" y="'+(padT-bandH-8)+'" width="'+bw.toFixed(1)+'" height="'+bandH+'" rx="4" fill="'+p.col+'"/>';
-      if(bw>78) g+='<text x="'+(x0+bw/2).toFixed(1)+'" y="'+(padT-bandH+7)+'" text-anchor="middle" font-size="'+c.txt.axe+'" font-weight="600" fill="#fff" font-family="Outfit" pointer-events="none">'+_pilEsc(p.nom)+'</text>';
-      g+='</g>';
-    });
-  } else {
-    // Zoome : les bandes du haut deviennent les TACHES de la campagne. C'est la
-    // reponse a « laquelle fait le pic ? », impossible a lire sur l'annee entiere.
-    var r=0;
-    tks.forEach(function(t){
-      var x0=Math.max(padL,X(_pilAnnOrd(t.start))), x1=Math.min(W-padR,X(_pilAnnOrd(t.end)+1));
-      var yy=padT-bandH-8+r*13;
-      g+='<rect x="'+x0.toFixed(1)+'" y="'+yy+'" width="'+Math.max(3,x1-x0).toFixed(1)+'" height="11" rx="3" fill="'+_taskColor(t.nom)+'"/>'
-        +'<text x="'+(x0+5).toFixed(1)+'" y="'+(yy+8.5)+'" font-size="'+c.txt.mini+'" font-weight="600" fill="#fff" font-family="Outfit">'+_pilEsc(t.nom)+'</text>';
-      r++;
-    });
-  }
-  var dt=_pilOrdD(s);
-  var cy=dt.getUTCFullYear(), cm=dt.getUTCMonth();
-  for(var q=0;q<30;q++){
-    var mo0=_pilAnnOrd(cy+'-'+String(cm+1).padStart(2,'0')+'-01');
-    if(mo0>e) break;
-    var ny=(cm===11)?cy+1:cy, nm=(cm+1)%12;
-    var mo1=_pilAnnOrd(ny+'-'+String(nm+1).padStart(2,'0')+'-01');
-    if(mo1>=s){
-      if(mo0>=s) g+='<line x1="'+X(mo0).toFixed(1)+'" y1="'+padT+'" x2="'+X(mo0).toFixed(1)+'" y2="'+(padT+chH+4).toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="1"/>';
-      var cx=(X(Math.max(mo0,s))+X(Math.min(mo1,e+1)))/2;
-      if(cx>padL+14&&cx<W-padR-14) g+='<text x="'+cx.toFixed(1)+'" y="'+(padT+chH+19)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="600" fill="'+c.col.texte+'" font-family="Outfit">'+MN[cm]+'</text>';
-    }
-    cy=ny; cm=nm;
-  }
-  return window._mvGraphSvg(window._mvGraphCadre(W,H),
-    (selP?('Personnes n\u00e9cessaires par semaine sur '+selP.nom):'Personnes n\u00e9cessaires par semaine sur la campagne')
-    +', face \u00e0 l\u2019effectif pr\u00e9sent.'
-    +(_part.length?(' '+_part.length+' zone'+(_part.length>1?'s':'')+' o\u00f9 deux p\u00e9riodes se recouvrent, hachur\u00e9e'+(_part.length>1?'s':'')+' : deux barres y sont dessin\u00e9es au m\u00eame endroit.'):''), g);
-}
 
 // ── NIVEAU ① — L'ANNEE : la frise des 52 semaines et le pic ─────────────────
 // ⚠️⚠️ CE QUI A QUITTE CETTE TUILE (12/08/2026, retour Nico). La repartition
@@ -2044,93 +1729,6 @@ function _pilFriseAnneeSvg(ann,w){
 //   DEPLACE PAS : IL DOCUMENTE LA FAUTE. Les quatre blocs vivent desormais dans
 //   « La campagne » (_pilPanelTemps), au niveau de zoom qui repond a leur
 //   question. Le bandeau a disparu avec eux — il n'y a plus rien a excuser.
-function _pilPanelEtp(d){
-  var cd=_pilCdVue();
-  var PP=_pilPicPortee();
-  if(!cd||!cd.months.length){
-    return _pilTile('etp','#C9A84C','Charge & ETP \u00b7 saison', _pilStat('\u2014',''), 'datez la saison pour estimer la charge', null,
-      _pilEmptyGo('Renseignez les dates de d\u00e9but et de fin de la campagne active pour calculer la charge et l\'ETP n\u00e9cessaire.','saisons','R\u00e9glages \u203a Campagne'));
-  }
-  function _e(v){ return (Math.round((v||0)*10)/10).toString().replace('.',','); }
-  var ann=_pilAnnuelData();
-  // ══ LE PIC ET L'EFFECTIF SE LISENT A LA SEMAINE ═══════════════════════════
-  // cd.peakReq est le maximum HEBDOMADAIRE et cd.peakPres l'effectif de CETTE
-  // semaine-la (planning.js). Avant, deux moyennes mensuelles de grandeurs qui
-  // varient d'un facteur 20 dans le mois se comparaient : « 27 ETP requis »
-  // contre « 11,2 presents » — un chiffre qui n'existe AUCUN jour de l'annee.
-  // ★ `dispo`, pas `head` (voir _pilDispoSem). Ici le pic RESTE celui de la
-  //   fenetre, passe compris : « L'annee » raconte l'annee, y compris la
-  //   vendange qu'on vient de faire. Ce qui change, c'est qu'on dit quand elle
-  //   est derriere — l'onglet « Aujourd'hui », lui, lit PP.av.
-  var peak4=PP.pic||0, presAtPeak=PP.dispo||0;
-  var anyShort=!!PP.court, pkw=PP.picW||null;
-  // Nombre de zones ou deux periodes se recouvrent. Meme source que la frise
-  // (_pilAnnPartage) : la legende ne peut pas annoncer autre chose que le dessin.
-  var _partN=(ann&&!_pilAnnPer(_PIL_SCOPE.camp))?_pilAnnPartage(ann).length:0;
-  var cadre=_pilCadreLbl(PP);
-  function _semLab(wk){ return wk?_pilSemLabO(wk.o0):''; }
-  var synth, sBg, sCol;
-  var _pass=PP.passe?' \u00b7 d\u00e9j\u00e0 pass\u00e9':'';
-  if(anyShort){
-    synth='Sur '+cadre+' \u2014 pic \u00e0 '+_e(peak4)+' personnes'+(pkw?(' \u00b7 '+_semLab(pkw)+_pass):'')+' pour '+_e(presAtPeak)+' disponibles \u2192 il en manque ~'+_e(PP.manque||0);
-    sBg='#F3D9D4'; sCol='var(--rouge)';
-  } else {
-    synth='Sur '+cadre+' \u2014 aucune semaine en sous-effectif. Pic \u00e0 '+_e(peak4)+' personnes'+(pkw?(' \u00b7 '+_semLab(pkw)+_pass):'')+'.';
-    sBg='#DCEBD0'; sCol='var(--vert-med)';
-  }
-  var annLeg='<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:8px 0 2px">'
-    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:var(--vert-med);display:inline-block"></i> couvert par l\u2019\u00e9quipe</span>'
-    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:var(--rouge);display:inline-block"></i> renfort \u00e0 trouver</span>'
-    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:16px;height:0;border-top:2px solid var(--texte);display:inline-block"></i> effectif pr\u00e9sent</span>'
-    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:16px;height:0;border-top:2px dashed #4A9FC8;display:inline-block"></i> socle permanent</span>'
-    // \u2605 La hachure violette n'apparait dans la legende QUE s'il y a une zone
-    //   partagee. Une legende qui nomme une trame absente du dessin fait chercher
-    //   ce qui n'existe pas \u2014 et fait douter du reste.
-    +(_partN?('<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:repeating-linear-gradient(45deg,rgba(122,92,168,.30) 0 2px,transparent 2px 5px);display:inline-block"></i> deux p\u00e9riodes se recouvrent \u2014 deux barres au m\u00eame endroit</span>'):'')
-    +'</div>';
-  var secTtl='font-weight:600;font-size:var(--pt-txt,12.5px);color:var(--texte);margin:14px 0 2px';
-  // ── Frise annuelle : clic sur une campagne = ZOOM (axe X et axe Y) ───────────
-  // ★ Plus de chip « Annee » : la frise EST la tuile. Une case a cocher qui vide
-  //   son propre panneau n'est pas un reglage, c'est une trappe.
-  var annBlock='';
-  if(ann){
-    var _selP=_pilAnnPer(_PIL_SCOPE.camp);
-    annBlock='<div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:2px 0 2px">'
-      +'<div style="'+secTtl+';margin:0">'+(_selP?_pilEsc(_selP.nom):'Toute la campagne')+' \u2014 personnes n\u00e9cessaires / semaine</div>'
-      +(_selP?('<button data-etpc="'+_pilEsc(_selP.nom)+'" style="border:1px solid var(--gris);background:#fff;color:var(--texte-doux);border-radius:20px;padding:4px 11px;font-size:var(--pt-micro,11px);font-weight:600;cursor:pointer">\u2190 toute la campagne</button>'):'')
-      +'</div>'
-      +'<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);margin:0 0 6px">'
-      +(_selP?'L\u2019\u00e9chelle verticale suit le zoom \u2014 les bandes du haut sont les t\u00e2ches de la campagne.'
-             :((ann.ex?('Ann\u00e9e = exercice comptable \u00b7 '+_pilEsc(ann.ex.lbl)+'. '):'')
-               +'Cliquez une campagne pour zoomer dessus. Les zones hachur\u00e9es ne sont couvertes par aucune p\u00e9riode.'))
-      +'</div>'
-      +(_selP?'':_pilAnneeVigneHtml(ann))
-      +'<div style="width:100%;overflow-x:auto" id="pil-g-ann"></div>'+annLeg;
-    // ══ LE CHEVAUCHEMENT DE PERIODES N'EST PAS UN DEFAUT ══════════════════════
-    // ⚠️⚠️ CE BLOC DISAIT EXACTEMENT L'INVERSE : « les heures y sont comptees
-    //   deux fois sur la frise », en rouge. C'etait FAUX, et verifiable en
-    //   deux lectures : _chargeSaisonData calcule la charge d'une periode sur
-    //   les taches de SA liste (s.taches, une tache par periode), jamais sur
-    //   ses jours. Deux periodes qui partagent des jours ne partagent pas des
-    //   heures. Le rouge accusait le calendrier du domaine d'une faute que le
-    //   calcul ne commet pas — et poussait a decouper des periodes justes.
-    //   ★ On compte les TACHES, pas les JOURS. Le fait reste dit, en gris.
-    if(ann.ovl.length) annBlock+='<div style="margin:6px 0 0;padding:8px 11px;border-radius:9px;background:rgba(74,159,200,.08);color:var(--texte-doux);font-size:var(--pt-micro,11px);line-height:1.5">'
-      +'<b>'+_pilEsc(ann.ovl.join(', '))+'</b> partage'+(ann.ovl.length>1?'nt':'')+' des jours avec la p\u00e9riode pr\u00e9c\u00e9dente. '
-      +'C\u2019est normal, et <b>rien n\u2019est compt\u00e9 deux fois</b> : les heures suivent les <b>t\u00e2ches</b>, et chaque t\u00e2che n\u2019appartient qu\u2019\u00e0 une seule p\u00e9riode. '
-      +'Sur les jours communs, les deux bandes se superposent \u2014 c\u2019est un recouvrement de <b>calendrier</b>, pas de charge.</div>';
-    // ★ La frise de l'annee est le graphe le plus large du module : douze mois,
-    //   cinquante-deux semaines, deux courbes et les bandes de campagnes. Elle
-    //   prend la largeur de la carte (plafond propre), au lieu des 760 px
-    //   generiques qui la laissaient a 60 % de la page.
-    window._mvGraphSuivre('#pil-g-ann', function(lg){ return _pilFriseAnneeSvg(ann,lg); }, {max:1800});
-  }
-  var body=annBlock || _pilEmptyGo('Renseignez au moins une p\u00e9riode dat\u00e9e pour dessiner les 52 semaines de l\u2019exercice.','saisons','R\u00e9glages \u203a Campagne');
-  body+='<div style="margin-top:10px;padding:9px 11px;border-radius:9px;background:'+sBg+';color:'+sCol+';font-size:var(--pt-txt,12.5px);font-weight:600">'+synth+'</div>';
-  var cov=peak4>0?Math.min(presAtPeak/peak4*100,100):100;
-  var _sub=_e(presAtPeak)+' disponibles au pic'+(pkw?(' \u00b7 '+_semLab(pkw)):'');
-  return _pilTile('etp','#C9A84C','Charge & ETP \u00b7 '+cadre, _pilStat(_e(peak4),' au pic'), _sub, cov, body);
-}
 
 // ── NIVEAU ② — LA CAMPAGNE : ou part le temps de l'equipe ───────────────────
 // Les quatre blocs qui detaillent UNE campagne : la repartition de la presence,
@@ -5464,232 +5062,516 @@ function _pilTabAuj(d){
   return H || '<div class="pil-empty">Aucun indicateur affiché — activez-les via « Choisir les indicateurs ».</div>';
 }
 
-// ── Onglet AVANCEMENT ──
-// ── Niveau 1 : L'ANNEE ──────────────────────────────────────────────────────
-// La vue d'ensemble. On y voit les douze mois d'un coup, les campagnes qui les
-// decoupent, et le cadre comptable qui dit ou l'annee commence. On zoome
-// depuis ici : cliquer une campagne pose la portee, et tout le module suit.
 // ════════════════════════════════════════════════════════════════════════════
-// LE BUDGET DE L'ANNEE, MOIS PAR MOIS — LE PREVU ET LE DEPENSE
+// ★★★ ANNEE-1 (§234, 04/10/2026) — L'ANNEE, UN CADRE A LA FOIS
 // ────────────────────────────────────────────────────────────────────────────
-// La carte « Deux façons de compter l'année », juste au-dessus, porte deja les
-// deux TOTAUX. Ce que ce graphe ajoute, c'est QUAND l'ecart s'ouvre : un total
-// ne dit pas si le retard s'est pris en avril ou en aout.
-//
-// ⚠️⚠️⚠️ DEUX PERIMETRES, ET C'EST DELIBERE — LE DIRE EST LA MOITIE DU TRAVAIL.
-//   · Le PREVU est du bareme : heures/ha × surface, etalees mois par mois par la
-//     fenetre de chaque tache (cd.months[].chargeOrd, calcule par planning.js),
-//     valorisees au taux moyen. Perimetre : LE TRAVAIL DE VIGNE, rien d'autre.
-//   · Le DEPENSE vient de _pexData : salaires charges, GNR, achats d'intrants,
-//     poses a la date de leur travail, de leur plein ou de leur achat. Perimetre :
-//     TOUT LE DOMAINE — la cave, l'atelier et le bureau y sont.
-//   L'ecart entre les deux courbes N'EST DONC PAS UN DEPASSEMENT. Pendant la
-//   vendange la cave tourne a plein : la courbe du depense decolle sans qu'un
-//   seul rang coute plus cher. Un ecran qui superposerait ces deux courbes sans
-//   le dire commettrait exactement la faute de §33/§34 — un numerateur et un
-//   denominateur qui ne parlent pas de la meme chose.
-//
-// ⚠️ POURQUOI PAS « BAREME PREVU CONTRE BAREME FAIT », qui serait a perimetre
-//   egal ? Parce que la donnee n'existe pas a l'echelle de l'annee, et le module
-//   l'ecrit deja dans _pilPhotosData : « le pourcentage fait n'a d'assiette que
-//   sur la periode CONSULTEE — calcHeures() ne connait qu'elle ». L'etendre a
-//   l'exercice serait un pourcentage sans denominateur. On ne trace pas une
-//   courbe qu'on ne sait pas calculer.
-//
-// ⚠️ Le depense S'ARRETE AU MOIS COURANT. Le prolonger a plat jusqu'a la cloture
-//   ferait lire « plus rien ne sort » la ou il n'y a simplement pas encore de
-//   donnee. Un trou n'est pas un zero, et un zero est une mesure.
+// Nico (04/10, capture a l'appui) : l'onglet ne mettait en avant que le pic des
+// vendanges — connu de tous, et passe en octobre —, affichait cinq chiffres pour
+// le meme exercice (engage, cloture, « prevu » au bareme, heures de bareme, heures
+// payees) et posait un exercice en EUROS a cote d'une annee vigne en HEURES DE
+// BAREME — pas meme la meme annee : la case « annee vigne » comptait le cycle FINI
+// le 6 septembre. Maquette (canevas) validee le 04/10 : « on go de cette facon ».
+// LES REGLES :
+//  · UN SEUL CADRE A LA FOIS, choisi en tete d'onglet : exercice comptable OU
+//    annee vigne, et l'annee avec les fleches. Il vit dans _PIL_SCOPE (cadre,
+//    recul) : pas de sixieme selecteur. L'onglet, les photos et le fil le lisent.
+//  · L'ANNEE VIGNE = _mvCampagneBornes (mois d'ouverture de la campagne, roue
+//    crantee d'Economie › Exercice) — la definition des Archives. Pas de troisieme
+//    definition « du lendemain des vendanges » (Nico, 04/10 : « continuer »).
+//  · LE BUDGET = _pexData sur les dates du cadre : le meme moteur, le meme calcul
+//    dans les deux cadres, en euros — engage, reste prevu, total. Plus de « prevu
+//    au bareme » face a la depense de tout le domaine : deux perimetres.
+//  · LE RENFORT REGARDE DEVANT : avec l'equipe prevue au planning, combien de
+//    personnes manqueront, et quand (Nico : « une photo d'aujourd'hui »). Le
+//    combien-recruter se chiffre dans Decider › Le renfort : un BOUTON y mene.
+//  · L'ECHELLE SUIT CE QUI VIENT : un mois ou une semaine passes qui la depassent
+//    (la vendange) sont coupes net, leur valeur ecrite au-dessus.
 // ════════════════════════════════════════════════════════════════════════════
-function _pilAnBudgetData(){
-  var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
-  if(!ann || !ann.ex) return null;
-  var mois=null; try{ mois=_pexMoisWin(ann.ex); }catch(e){ mois=null; }
-  if(!mois || !mois.length) return null;
+var _PIL_ANB=null, _PIL_ANR=null;
+var _PIL_AN_MOIS=['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet','ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
+function _pilAnAuj(){
+  var a=(typeof window._mvAujIso==='function')?window._mvAujIso():'';
+  if(a) return String(a).slice(0,10);
+  var n=new Date(); return _pexIso(n.getFullYear(),n.getMonth(),n.getDate());
+}
+// « 14 decembre », « 1er aout 2026 » : le jour et le mois en toutes lettres.
+function _pilAnDfrJM(iso){
+  var p=String(iso||'').split('-'); if(p.length<3) return String(iso||'');
+  var j=parseInt(p[2],10);
+  return (j===1?'1er':String(j))+' '+(_PIL_AN_MOIS[parseInt(p[1],10)-1]||'');
+}
+function _pilAnDfrLong(iso){ var p=String(iso||'').split('-'); return _pilAnDfrJM(iso)+(p.length===3?(' '+p[0]):''); }
 
-  var taux=0; try{ taux=Number(_ecoRate())||0; }catch(e){ taux=0; }
-  var idx={}; mois.forEach(function(mo,i){ idx[mo.k]=i; });
-
-  // ── Le prevu : les heures de bareme, mois par mois ────────────────────────
-  // ⚠️ MEME BORNAGE QUE LES PHOTOS. Une campagne entierement hors de l'exercice
-  //   comptable n'entre pas dans un total annonce « sur l'exercice » — ann.hors
-  //   la nomme, et « Deux façons de compter » l'affiche deja en clair.
-  var hPrev=mois.map(function(){ return 0; }), nCd=0, nSansMois=0;
-  ann.pers.forEach(function(p){
-    if(!p.cd) return;
-    if(p.fin<ann.ex.d0 || p.debut>ann.ex.d1) return;
-    if(!p.cd.months || !p.cd.months.length){ nSansMois++; return; }
-    nCd++;
-    p.cd.months.forEach(function(x){
-      var k=x.yr+'-'+x.m;
-      if(idx[k]!=null) hPrev[idx[k]]+=Number(x.chargeOrd)||0;
-    });
-  });
-  var hTot=0; hPrev.forEach(function(h){ hTot+=h; });
-
-  // ── Le depense : le moteur de l'exercice, deja cadre sur des dates ────────
-  // On le CONSOMME, on ne le recalcule pas : un second calcul donnerait un
-  // second chiffre, et c'est la faute que ce module passe son temps a corriger.
-  var X=_pilExoData()||null;
-  var eReel=mois.map(function(mo){
-    if(!X || !X.byM || !X.byM[mo.k]) return null;
-    var b=X.byM[mo.k];
-    return (b.sal||0)+(b.gnr||0)+(b.ach||0)+(b.dep||0);
-  });
-  // Jusqu'ou la mesure porte : le mois qui contient aujourd'hui, ou le dernier
-  // mois de l'exercice s'il est clos. Au-dela, la courbe s'arrete.
-  var auj=(typeof window._mvAujIso==='function')?window._mvAujIso():'';
-  var iMax=mois.length-1;
-  if(auj && auj<=ann.ex.d1){
-    iMax=-1;
-    for(var q=0;q<mois.length;q++){ if(mois[q].d0<=auj) iMax=q; }
-    if(iMax<0) iMax=0;
-  }
-
-  var ePrev=hPrev.map(function(h){ return h*taux; });
-  var cumP=[], cumR=[], aP=0, aR=0, reelTot=0;
-  for(var i=0;i<mois.length;i++){
-    aP+=ePrev[i]; cumP.push(aP);
-    if(i<=iMax && eReel[i]!=null){ aR+=eReel[i]; cumR.push(aR); reelTot=aR; }
-    else cumR.push(null);
-  }
-  return { mois:mois, hPrev:hPrev, ePrev:ePrev, eReel:eReel,
-           cumP:cumP, cumR:cumR, iMax:iMax, taux:taux, hTot:hTot,
-           prevTot:aP, reelTot:reelTot, nCd:nCd, nSansMois:nSansMois,
-           reelOk:!!(X && X.total>0), ex:ann.ex };
+// Le cadre consulte : { cadre, an, d0, d1, court, titre, enCours, clos, prevOk, recul, F }.
+// null si utils.js ne sait pas borner l'exercice — l'onglet le dit, sans inventer.
+function _pilAnCadre(){
+  var cadre=(_PIL_SCOPE.cadre==='vig')?'vig':'exo', auj=_pilAnAuj();
+  var okV=(typeof window._mvCampagneBornes==='function' && typeof window._mvCampagneDe==='function');
+  var okE=(typeof window._mvExercice==='function' && typeof window._mvExerciceAn==='function');
+  if(cadre==='vig' && !okV) cadre='exo';
+  if(cadre==='exo' && !okE) return null;
+  function borne(an){ return (cadre==='vig')?window._mvCampagneBornes(an):window._mvExerciceAn(an); }
+  function anDe(iso){ return (cadre==='vig')?window._mvCampagneDe(iso):window._mvExercice(iso).an; }
+  var F0=null, F=null;
+  try{ F0=borne(anDe(auj)); }catch(e){ F0=null; if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'annee: bornes du cadre'}); }
+  if(!F0 || !F0.d0) return null;
+  var rec=parseInt(_PIL_SCOPE.recul,10); if(isNaN(rec)||rec>0) rec=0;
+  // Le cadre le plus ancien qui contient une periode datee : en deca, rien a lire.
+  var minAn=F0.an, deb='';
+  var _pers=(typeof window._cmpVisibles==='function')?(window._cmpVisibles()||[]):(window.SAISONS||[]);
+  _pers.forEach(function(p){ if(p && p.debut && (!deb || String(p.debut).slice(0,10)<deb)) deb=String(p.debut).slice(0,10); });
+  if(deb){ try{ minAn=Math.min(F0.an, anDe(deb)); }catch(e2){ minAn=F0.an; } }
+  if(F0.an+rec<minAn){ rec=minAn-F0.an; _PIL_SCOPE.recul=rec; }
+  try{ F=borne(F0.an+rec); }catch(e3){ F=null; }
+  if(!F || !F.d0) return null;
+  var memes=false;
+  try{ memes=(typeof window._mvCampagneMois==='function' && typeof window._mvExerciceMois==='function'
+               && window._mvCampagneMois()===window._mvExerciceMois()); }catch(e4){ memes=false; }
+  var court=F.court||String(F.an);
+  return { cadre:cadre, an:F.an, recul:rec, d0:F.d0, d1:F.d1, court:court, F:F, auj:auj,
+           enCours:(auj>=F.d0 && auj<=F.d1), clos:(auj>F.d1), prevOk:(F.an-1>=minAn), memes:memes,
+           titre:((cadre==='vig')?'Ann\u00e9e vigne ':'Exercice comptable ')+court };
 }
 
-function _pilAnBudgetSvg(B,w){
-  if(!B) return window._mvGraphVide('L\u2019exercice comptable n\u2019est pas d\u00e9limit\u00e9',
-    'R\u00e9glages \u203a Campagne : datez vos p\u00e9riodes, et fixez le mois d\u2019ouverture de l\u2019exercice.');
-  if(!(B.taux>0)) return window._mvGraphVide('Aucun taux horaire renseign\u00e9',
-    'Sans taux, les heures de bar\u00e8me ne se convertissent pas en euros. R\u00e9glages \u203a \u00c9quipe.');
-  if(!(B.prevTot>0)) return window._mvGraphVide('Aucune heure de bar\u00e8me sur l\u2019exercice',
-    'Datez vos campagnes et renseignez les heures/ha des travaux : le pr\u00e9vu en d\u00e9coule.');
+// ── LE BUDGET DU CADRE ───────────────────────────────────────────────────────
+// Les mois, lus dans le moteur : DEPENSE = tout ce que _pexData engage (salaires,
+// GNR, achats, reparations, futs, prestations — le graphe d'avant oubliait les
+// deux derniers, et la somme des mois ne retombait pas sur le total) ; PREVU =
+// salaires de la grille + amendements chiffres (byM.achP). Fonction PURE (harnais).
+function _pilAnBudgetMois(X, auj){
+  return ((X && X.mois) ? X.mois : []).map(function(mo){
+    var b=(X.byM && X.byM[mo.k]) || {};
+    var dep=(b.sal||0)+(b.gnr||0)+(b.ach||0)+(b.dep||0)+(b.fut||0)+(b.pre||0);
+    var prev=(b.salP||0)+(b.achP||0);
+    return { k:mo.k, lbl:mo.lbl, d0:mo.d0, d1:mo.d1, dep:dep, prev:prev,
+             etat:(mo.d1<auj)?'p':((mo.d0>auj)?'f':'c') };
+  });
+}
+function _pilAnBudgetData(){
+  var C=_pilAnCadre(); if(!C) return null;
+  var k=C.cadre+'|'+C.d0+'|'+C.d1+'|'+C.auj;
+  if(_PIL_ANB && _PIL_ANB.k===k) return _PIL_ANB.v;
+  var X=null;
+  try{ X=_pexData(C.F,true); }
+  catch(e){ X=null; if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'annee: budget illisible'}); }
+  var v=null;
+  if(X){
+    // Reste prevu = ce que la grille et les amendements annoncent APRES la coupe.
+    var reste=X.enCoursC ? (Number(X.totalP)||0) : 0, dep=Number(X.total)||0;
+    v={ C:C, X:X, mois:_pilAnBudgetMois(X,C.auj), dep:dep, reste:reste, tot:dep+reste, enCours:!!X.enCoursC,
+        coupe:X.coupe||C.auj,
+        postes:(X.postes||[]).filter(function(p){ return p && (p.k==='sal' || (Number(p.eur)||0)>0 || (Number(p.eurP)||0)>0); }) };
+  }
+  _PIL_ANB={k:k, v:v};
+  return v;
+}
 
-  var M=B.mois;
-  var maxV=0;
-  B.cumP.forEach(function(v){ if(v>maxV) maxV=v; });
-  B.cumR.forEach(function(v){ if(v!=null && v>maxV) maxV=v; });
-  var top=_pecNiceMax(maxV*1.08);
+// ── LE RENFORT DU CADRE ──────────────────────────────────────────────────────
+// Les fenetres de manque. Une journee compte si l'equipe prevue la laisse court
+// d'au moins une DEMI-personne (seuil : en dessous, l'arrondi dirait « 0 »). Les
+// jours qui se suivent font UNE fenetre ; une semaine sous le seuil la coupe. Le
+// passe ne compte pas : on ne recrute pas pour une semaine finie. Deux periodes qui
+// se recouvrent : le jour garde le manque le plus fort. Fonction PURE (harnais).
+function _pilAnFenetres(sem, oAuj){
+  var jours={}, lo=null, hi=null;
+  (sem||[]).forEach(function(w){
+    if(!w || w.o1<oAuj) return;
+    for(var o=Math.max(w.o0,oAuj); o<=w.o1; o++){
+      var j=jours[o];
+      if(!j || w.manque>j.m) jours[o]={m:w.manque, per:w.per};
+      if(lo==null || o<lo) lo=o;
+      if(hi==null || o>hi) hi=o;
+    }
+  });
+  var out=[], cur=null;
+  if(lo==null) return out;
+  for(var d=lo; d<=hi; d++){
+    var q=jours[d];
+    if(q && q.m>=0.5){
+      if(!cur){ cur={o0:d, o1:d, max:q.m, min:q.m, oMax:d, per:{}}; out.push(cur); }
+      cur.o1=d;
+      if(q.m>cur.max){ cur.max=q.m; cur.oMax=d; }
+      if(q.m<cur.min) cur.min=q.m;
+      if(q.per!=null) cur.per[q.per]=1;
+    } else cur=null;
+  }
+  return out;
+}
+// Les semaines du cadre : besoin (need) et ce que l'equipe peut faire
+// (_pilDispoSem, la definition unique), bornees aux dates du cadre.
+function _pilAnRenfortData(){
+  var C=_pilAnCadre(); if(!C) return null;
+  var ann=null;
+  try{ ann=_pilAnnuelData(); }catch(e){ ann=null; if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'annee: semaines illisibles'}); }
+  var k=C.cadre+'|'+C.d0+'|'+C.d1+'|'+C.auj+'|'+(ann?String(_PIL_ANNK):'-');
+  if(_PIL_ANR && _PIL_ANR.k===k) return _PIL_ANR.v;
+  var s=_pilAnnOrd(C.d0), e=_pilAnnOrd(C.d1), oA=_pilAnnOrd(C.auj), sem=[], couv=[];
+  ((ann && ann.weeks) || []).forEach(function(x){
+    if(!x || !(x.cap>0) || x.o1<s || x.o0>e) return;
+    var need=Number(x.need), dispo=Number(_pilDispoSem(x));
+    if(!isFinite(need) || need<0) need=0;
+    if(!isFinite(dispo) || dispo<0) dispo=0;
+    sem.push({ o0:Math.max(x.o0,s), o1:Math.min(x.o1,e), need:need, dispo:dispo,
+               manque:Math.max(0,need-dispo), passe:(x.o1<oA), per:x.per });
+  });
+  sem.sort(function(a,b){ return a.o0-b.o0; });
+  // Ce que les periodes couvrent : au-dela, ni besoin ni equipe — un trou, pas un zero.
+  ((ann && ann.pers) || []).forEach(function(p){
+    if(!p || !p.debut || !p.fin) return;
+    var a=Math.max(_pilAnnOrd(p.debut),s), b=Math.min(_pilAnnOrd(p.fin),e);
+    if(!isNaN(a) && !isNaN(b) && b>=a) couv.push([a,b]);
+  });
+  couv.sort(function(x,y){ return x[0]-y[0]; });
+  var finCouv=null;
+  couv.forEach(function(iv){ if(finCouv==null || iv[1]>finCouv) finCouv=iv[1]; });
+  var fen=_pilAnFenetres(sem,oA).map(function(r){
+    var noms=[];
+    Object.keys(r.per).forEach(function(i){ var p=ann && ann.pers && ann.pers[i]; if(p && p.nom && noms.indexOf(p.nom)<0) noms.push(p.nom); });
+    var nMax=Math.max(1,Math.round(r.max)), nMin=Math.max(1,Math.round(r.min));
+    return { a:_pilOrdIso(r.o0), b:_pilOrdIso(r.o1), oMax:r.oMax, n:nMax, plat:(nMin===nMax), noms:noms,
+             sem:Math.max(1,Math.round((r.o1-r.o0+1)/7)) };
+  });
+  var vend=false;
+  ((ann && ann.pers) || []).forEach(function(p){
+    ((p && p.cd && p.cd.taskWindows) || []).forEach(function(t){
+      if(t && _friseNorm(t.nom).indexOf('vendang')>=0 && String(t.end)>=C.d0 && String(t.start)<=C.d1) vend=true;
+    });
+  });
+  var v={ C:C, s:s, e:e, oAuj:oA, sem:sem, couv:couv, fen:fen, vend:vend, ok:(sem.length>0),
+          finCouv:(finCouv!=null ? _pilOrdIso(finCouv) : null),
+          trouFin:(finCouv!=null && finCouv<e && C.enCours) };
+  _PIL_ANR={k:k, v:v};
+  return v;
+}
 
+// ── LE BLOC DU CADRE (en tete d'onglet) ──────────────────────────────────────
+// ⚠️ L'id `pil-an-cadres` RESTE : le constat « vendange a cheval » (_pilDiag,
+//   cible interne `an_cadres`) y fait clignoter le bloc.
+function _pilAnCadreHtml(){
+  var C=_pilAnCadre();
+  if(!C) return '<div id="pil-an-cadres" class="pil-anc">'
+    +_pilEmptyGo('L\u2019exercice comptable ne se borne pas : fixez son mois d\u2019ouverture.','exercice','\u00c9conomie \u203a Exercice')+'</div>';
+  var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
+  function on(c){ return C.cadre===c; }
+  var h='<div id="pil-an-cadres" class="pil-anc">'
+    +'<div class="pil-anc-l1">'
+    +'<div class="pil-seg pil-anseg" role="group" aria-label="Cadre de l\u2019ann\u00e9e">'
+    +'<button type="button" data-ancadre="exo" class="'+(on('exo')?'on':'')+'" aria-pressed="'+on('exo')+'">Exercice comptable</button>'
+    +'<button type="button" data-ancadre="vig" class="'+(on('vig')?'on':'')+'" aria-pressed="'+on('vig')+'">Ann\u00e9e vigne</button></div>'
+    +'<div class="pil-annav">'
+    +'<button type="button" class="pil-annav-b" data-anrecul="-1" aria-label="Ann\u00e9e pr\u00e9c\u00e9dente"'+(C.prevOk?'':' disabled')+'>\u2039</button>'
+    +'<span class="pil-annav-l">'+_pilEsc(C.court)+'</span>'
+    +'<button type="button" class="pil-annav-b" data-anrecul="1" aria-label="Ann\u00e9e suivante"'+(C.recul<0?'':' disabled')+'>\u203a</button></div>'
+    +'<span class="pil-anbadge'+(C.enCours?' on':'')+'">'+(C.enCours?'en cours':(C.cadre==='vig'?'close':'clos'))+'</span>'
+    +'<span class="pil-anc-sp"></span>'+_mvInfoBtn('pil.cadres')
+    +'</div>'
+    +'<div class="pil-anc-t">'+_pilEsc(C.titre)+'</div>'
+    +'<div class="pil-anc-d">Du '+_pilEsc(_pilAnDfrLong(C.d0))+' au '+_pilEsc(_pilAnDfrLong(C.d1))+'. '
+    +(C.cadre==='vig' ? 'Un cycle de production, d\u2019une vendange \u00e0 la suivante.' : 'Le cadre de votre bilan, fix\u00e9 par votre comptable.')
+    +' <b>Changer de cadre change les dates, jamais le calcul.</b></div>'
+    +_pilAnFriseCadre(C, ann);
+  if(C.memes){
+    var mo=(typeof window._mvCampagneMois==='function')?_PIL_AN_MOIS[window._mvCampagneMois()]:'';
+    h+='<div class="pil-anc-av">'+_mvIcon('info',16)+'<span>Votre ann\u00e9e vigne a les <b>m\u00eames dates</b> que votre exercice'
+      +(mo?(' : les deux s\u2019ouvrent en '+mo):'')+'. Pour que la vendange cl\u00f4ture l\u2019ann\u00e9e vigne, choisissez le mois qui suit vos vendanges. '
+      +'<button type="button" class="pil-diag-go ghost" data-diag="exercice">R\u00e9gler le mois de la campagne \u203a</button></span></div>';
+  }
+  if(C.cadre==='exo') h+=_pilAnCoupeHtml(C, ann);
+  return h+'</div>';
+}
+// La frise du cadre : ses campagnes, leur etat, le jour. Les puces ZOOMENT
+// (data-etpc, le chemin de la portee) : c'est l'entree qu'offrait l'ancienne frise.
+function _pilAnFriseCadre(C, ann){
+  var s=_pilAnnOrd(C.d0), e=_pilAnnOrd(C.d1), L=Math.max(1,e-s+1), oA=_pilAnnOrd(C.auj);
+  var bandes='', puces='', n=0;
+  ((ann && ann.pers) || []).forEach(function(p){
+    if(!p || !p.debut || !p.fin || p.fin<C.d0 || p.debut>C.d1) return;
+    var a=Math.max(_pilAnnOrd(p.debut),s), b=Math.min(_pilAnnOrd(p.fin),e);
+    if(isNaN(a) || isNaN(b) || b<a) return;
+    n++;
+    var etat=(p.fin<C.auj)?'faite':((p.debut>C.auj)?'\u00e0 venir':'en cours');
+    var cl=(etat==='faite')?'f':((etat==='en cours')?'c':'v');
+    var chev=(p.debut<C.d0 || p.fin>C.d1), h=Math.round((p.cd && p.cd.charge) || 0), sel=(_PIL_SCOPE.camp===p.nom);
+    bandes+='<span class="pil-anfr-b '+cl+'" style="left:'+((a-s)/L*100).toFixed(2)+'%;width:'+((b-a+1)/L*100).toFixed(2)+'%"></span>';
+    puces+='<button type="button" class="pil-anchip'+(sel?' sel':'')+'" data-etpc="'+_pilEsc(p.nom)+'" aria-pressed="'+sel+'" title="Zoomer sur cette campagne">'
+      +'<i class="'+cl+'"></i><b>'+_pilEsc(p.nom)+'</b><span>'+(h>0?(_pilNb(h)+'\u00a0h \u00b7 '):'')+etat+(chev?' \u00b7 \u00e0 cheval':'')+'</span></button>';
+  });
+  var jour=(C.enCours && !isNaN(oA)) ? ('<span class="pil-anfr-auj" style="left:'+((oA-s)/L*100).toFixed(2)+'%"><em>aujourd\u2019hui</em></span>') : '';
+  return '<div class="pil-anfr"><div class="pil-anfr-t">'+bandes+jour+'</div>'
+    +'<div class="pil-anfr-e"><span>'+_pilEsc(_pilDfr(C.d0))+'</span><span>'+_pilEsc(_pilDfr(C.d1))+'</span></div></div>'
+    +(n ? ('<div class="pil-anchips">'+puces+'</div>')
+        : ('<div class="pil-anc-av">'+_mvIcon('info',16)+'<span>Aucune p\u00e9riode dat\u00e9e dans ce cadre. '
+           +'<button type="button" class="pil-diag-go ghost" data-diag="saisons">R\u00e9glages \u203a Campagne \u203a</button></span></div>'));
+}
+// La seule chose utile a signaler sur un exercice : une borne qui TRAVERSE la
+// vendange (la recolte se lit sur deux bilans). En jours, exactement (§34, lot 6).
+// ann.align se mesure sur l'exercice de la periode active : ailleurs, on se tait.
+function _pilAnCoupeHtml(C, ann){
+  if(!ann || !ann.ex || !ann.align || !ann.align.coupe || !ann.vend || ann.ex.d0!==C.d0) return '';
+  var J=_pilAnnSplitVend(ann);
+  var admin=!!(typeof window.isAdmin==='function' && window.isAdmin());
+  var bt=(admin && ann.align.moisIdeal!=null)
+    ? (' <button type="button" class="pil-diag-go ghost" data-exm="'+ann.align.moisIdeal+'">D\u00e9caler au 1\u1D49\u02B3 '+_PIL_AN_MOIS[ann.align.moisIdeal]+' \u203a</button>') : '';
+  return '<div class="pil-anc-av">'+_mvIcon('info',16)+'<span><b>Votre vendange est \u00e0 cheval sur deux exercices.</b> Sur ses '
+    +J.total+' jours, '+J.dedans+' tombent dans cet exercice et '+J.dehors+' dans le suivant : son co\u00fbt se lit sur deux bilans. '
+    +'Ce n\u2019est pas une erreur, c\u2019est votre calendrier comptable.'
+    +(bt ? ('<br>Si votre comptable accepte de d\u00e9placer la cl\u00f4ture, la r\u00e9colte tiendrait dans un seul exercice :'+bt) : '')+'</span></div>';
+}
+
+// ── LA CARTE « LE BUDGET DE L'ANNEE » ────────────────────────────────────────
+function _pilAnFig(t, s, v, cl){
+  return '<div class="pil-anf-c '+cl+'"><div class="l">'+t+'</div><div class="v">'+v+'<span>\u00a0k\u20ac</span></div><div class="s">'+_pilEsc(s)+'</div></div>';
+}
+function _pilAnPostesHtml(B){
+  var P=(B && B.postes) || []; if(!P.length) return '';
+  function K(v){ return _pilNb(Math.round((Number(v)||0)/1000))+'\u00a0k\u20ac'; }
+  var en=!!B.enCours, sD=0, sP=0;
+  var h='<div class="pil-anp'+(en?'':' clos')+'" role="table" aria-label="Le budget par poste">'
+    +'<div class="hd" role="row"><span role="columnheader">Poste</span><span role="columnheader">D\u00e9pens\u00e9</span>'
+    +(en?'<span role="columnheader">Reste pr\u00e9vu</span><span role="columnheader">Total</span>':'')+'</div>';
+  P.forEach(function(p){
+    var e=Number(p.eur)||0, pr=(p.eurP!=null) ? (Number(p.eurP)||0) : null;
+    sD+=e; sP+=(pr||0);
+    h+='<div role="row"><span role="cell">'+_pilEsc(p.lab||'')+'</span><span role="cell">'+K(e)+'</span>'
+      +(en ? ('<span role="cell">'+(pr==null?'\u2014':K(pr))+'</span><span role="cell">'+K(e+(pr||0))+'</span>') : '')+'</div>';
+  });
+  h+='<div class="tt" role="row"><span role="cell">Total</span><span role="cell">'+K(sD)+'</span>'
+    +(en ? ('<span role="cell">'+K(sP)+'</span><span role="cell">'+K(sD+sP)+'</span>') : '')+'</div>';
+  return h+'</div>';
+}
+function _pilPanelAnBudget(){
+  var B=null;
+  try{ B=_pilAnBudgetData(); }catch(e){ B=null; if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'annee: carte budget'}); }
+  var C=(B && B.C) || _pilAnCadre();
+  var sub='salaires charg\u00e9s, carburant, achats et r\u00e9parations \u00b7 tout le domaine'+(C?(' \u00b7 '+C.titre):'');
+  if(!B || !C || !(B.tot>0)){
+    return _pilTile('anbudget','#8A5A38','Le budget de l\u2019ann\u00e9e', _pilStat('\u2014',''), sub, null,
+      _pilEmptyGo('Rien ne se chiffre encore sur ce cadre : ni salaire au planning, ni plein, ni achat dat\u00e9. \u00c9conomie \u203a Exercice dit ce qui manque.','exercice','\u00c9conomie \u203a Exercice'),
+      'pil.an.budget');
+  }
+  function K(v){ return _pilNb(Math.round((Number(v)||0)/1000)); }
+  var stat=B.enCours
+    ? _pilStat(K(B.dep),' k\u20ac d\u00e9pens\u00e9s sur '+K(B.tot)+'\u00a0k\u20ac attendus')
+    : _pilStat(K(B.dep),' k\u20ac d\u00e9pens\u00e9s sur '+(C.cadre==='vig'?'le cycle':'l\u2019exercice'));
+  var body;
+  if(B.enCours){
+    var pc=Math.max(0, Math.min(100, B.dep/B.tot*100));
+    body='<div class="pil-anf">'
+      +_pilAnFig('D\u00e9pens\u00e9','au '+_pilDfr(B.coupe),K(B.dep),'m')
+      +_pilAnFig('Reste pr\u00e9vu','d\u2019ici le '+_pilDfr(C.d1),K(B.reste),'p')
+      +_pilAnFig('Total attendu','\u00e0 la fin '+(C.cadre==='vig'?'du cycle':'de l\u2019exercice'),K(B.tot),'t')
+      +'</div><div class="pil-anbar" aria-hidden="true"><i style="width:'+pc.toFixed(1)+'%"></i></div>';
+  } else {
+    body='<div class="pil-anf">'+_pilAnFig('D\u00e9pens\u00e9','du '+_pilDfr(C.d0)+' au '+_pilDfr(C.d1),K(B.dep),'m')+'</div>';
+  }
+  body+='<div class="pil-anh">Mois par mois</div><div style="width:100%;overflow-x:auto" id="pil-g-anb"></div>';
+  window._mvGraphSuivre('#pil-g-anb', function(lg){ return _pilAnBudgetSvg(B,lg); }, {max:1400});
+  body+=_pilAnPostesHtml(B);
+  body+='<div class="pil-ann">'+(B.enCours
+    ? 'Le reste pr\u00e9vu, c\u2019est ce que l\u2019appli conna\u00eet d\u00e9j\u00e0 : les salaires que le planning annonce pour les personnes sous contrat, et les amendements chiffr\u00e9s pas encore factur\u00e9s. Une embauche ou un achat pas encore saisi n\u2019y est pas ; le carburant compte au plein, il n\u2019a pas de pr\u00e9vu.'
+    : 'Ce cadre est clos : tout est engag\u00e9, plus rien n\u2019est pr\u00e9vu.')+'</div>';
+  return _pilTile('anbudget','#8A5A38','Le budget de l\u2019ann\u00e9e', stat, sub, null, body, 'pil.an.budget');
+}
+// Mois par mois. L'echelle suit les mois A VENIR (annee en cours) : un mois passe
+// qui la depasse — la vendange — est coupe net, son montant ecrit au-dessus.
+// Graduations par 5 : _pecNiceMax rend m×10^n, m dans un jeu que 5 divise rond.
+function _pilAnBudgetSvg(B, w){
+  if(!B || !B.mois || !B.mois.length) return window._mvGraphVide('Aucun mois dans ce cadre','Fixez le mois d\u2019ouverture de l\u2019exercice (\u00c9conomie \u203a Exercice).');
+  var M=B.mois, enC=!!(B.C && B.C.enCours), ref=0, coupe=false;
+  M.forEach(function(m){ if(!enC || m.etat!=='p') ref=Math.max(ref, m.dep+m.prev); });
+  if(!(ref>0)) M.forEach(function(m){ ref=Math.max(ref, m.dep+m.prev); });
+  if(!(ref>0)) return window._mvGraphVide('Rien de d\u00e9pens\u00e9 ni de pr\u00e9vu sur ce cadre','Le planning, les pleins et les achats dat\u00e9s alimentent ce graphe.');
+  var top=_pecNiceMax(ref*1.08);
   var c0=window._mvGraphCadre(w,100), et=c0.etroit;
-  // ⚠️⚠️ DEUX DEFAUTS VUS A LA CAPTURE, ET PAR RIEN D'AUTRE.
-  //   ① LES GRADUATIONS TOMBAIENT SUR DES VALEURS NON RONDES : 33,3 k · 66,7 k ·
-  //     133,3 k. Le cadre par defaut pose `grad` a 6, et _pecNiceMax rend un `top`
-  //     de la forme m x 10^n avec m dans {1 ; 1,5 ; 2 ; 2,5 ; 3 ; 4 ; 5 ; 7,5 ; 10}.
-  //     Divise par 6, AUCUN de ces neuf m ne tombe rond ; divise par 5, TOUS le
-  //     font (0,2 · 0,3 · 0,4 · 0,5 · 0,6 · 0,8 · 1 · 1,5 · 2). En etroit, 2 pas
-  //     jouent le meme role sans charger l'axe. C'est une propriete de
-  //     _pecNiceMax, pas un reglage a l'oeil.
-  //   ② LE « € » DE L'AXE CHEVAUCHAIT LA GRADUATION DU HAUT. L'unite se pose a
-  //     pT-4, la graduation la plus haute a pT+4 : huit pixels d'ecart pour du
-  //     texte de onze. Deux marges de plus en haut, et l'unite remonte d'autant.
-  //   \u26a0\ufe0f Les deux existent aussi dans _pexGraph, d'ou ce dessin est derive. Ils
-  //     n'y sont PAS corriges ici : cet ecran n'est pas dans le lot, et une
-  //     correction non demandee sur un graphe qu'on n'a pas regarde est un pari.
-  //     Note au backlog plutot qu'un geste en passant.
-  var c=window._mvGraphCadre(w, et?222:270, { padL:et?44:58, padR:et?12:18, padT:24, padB:et?30:34,
-                                              grad:(et?2:5) });
-  var W=c.w, pL=c.padL, pR=c.padR, pT=c.padT, iw=c.iw, ih=c.ih;
-  var step=(M.length>1)?(iw/(M.length-1)):iw;
-  function X(i){ return (M.length>1)?(pL+step*i):(pL+iw/2); }
-  function Y(v){ return pT+ih-(v/top)*ih; }
-
+  var c=window._mvGraphCadre(w, et?212:252, { padL:et?44:58, padR:et?10:16, padT:30, padB:et?28:32, grad:(et?2:5) });
+  var W=c.w, pL=c.padL, pR=c.padR, pT=c.padT, ih=c.ih, base=pT+ih;
+  var slot=c.iw/M.length, bw=Math.max(5, Math.min(40, slot*0.62));
   var g='';
-  for(var k=0;k<=c.grad;k++){
-    var v=top*k/c.grad, y=Y(v);
+  for(var k=0; k<=c.grad; k++){
+    var v=top*k/c.grad, y=base-(v/top)*ih;
     g+='<line x1="'+pL+'" y1="'+y.toFixed(1)+'" x2="'+(W-pR)+'" y2="'+y.toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="'+c.trait.grille+'"/>'
       +'<text x="'+(pL-7)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="'+(et?c.txt.mini:c.txt.axe)+'" fill="'+c.col.texte+'">'+_pilEsc(_pecAxeEur(v))+'</text>';
   }
-  g+='<text x="'+(pL-7)+'" y="'+(pT-11)+'" text-anchor="end" font-size="'+c.txt.unite+'" fill="'+c.col.texte+'">\u20AC</text>';
-
-  // Le prevu : trait plein clair sur toute l'annee — c'est un PLAN, il est connu
-  // d'avance jusqu'a la cloture.
-  var dP=''; B.cumP.forEach(function(v,i){ dP+=(i?' L ':'M ')+X(i).toFixed(1)+' '+Y(v).toFixed(1); });
-  g+='<path d="'+dP+'" fill="none" stroke="'+_PEC_COL.mo+'" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="6 4"/>';
-
-  // Le depense : trait plein, ARRETE au dernier mois mesure.
-  var dR='', nR=0;
-  B.cumR.forEach(function(v,i){ if(v==null) return; dR+=(nR?' L ':'M ')+X(i).toFixed(1)+' '+Y(v).toFixed(1); nR++; });
-  if(nR>0){
-    g+='<path d="'+dR+'" fill="none" stroke="#2C3E50" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>';
-    g+='<circle cx="'+X(B.iMax).toFixed(1)+'" cy="'+Y(B.cumR[B.iMax]!=null?B.cumR[B.iMax]:0).toFixed(1)+'" r="3.6" fill="#2C3E50"/>';
-  }
-
-  var pas=et?(M.length>8?3:2):(M.length<=13?1:2);
-  M.forEach(function(mo,i){
-    if(i%pas===0)
-      g+='<text x="'+X(i).toFixed(1)+'" y="'+(c.h-11)+'" text-anchor="middle" font-size="'+(et?c.txt.mini:c.txt.axe)+'" fill="'+c.col.texte+'">'+_pilEsc(mo.lbl)+'</text>';
+  g+='<text x="'+(pL-7)+'" y="'+(pT-14)+'" text-anchor="end" font-size="'+c.txt.unite+'" fill="'+c.col.texte+'">\u20AC</text>';
+  var pas=(et && M.length>8)?2:1;
+  M.forEach(function(m, i){
+    var x=pL+slot*i+(slot-bw)/2, cx=x+bw/2;
+    var hd=Math.min(m.dep,top)/top*ih, hp=Math.min(m.prev, Math.max(0,top-m.dep))/top*ih;
+    if(hd>0.2) g+='<rect x="'+x.toFixed(1)+'" y="'+(base-hd).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hd.toFixed(1)+'" rx="2" fill="'+c.col.mesure+'"/>';
+    if(hp>0.2) g+='<rect x="'+x.toFixed(1)+'" y="'+(base-hd-hp).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hp.toFixed(1)+'" rx="2" fill="'+c.col.prevu+'" opacity="0.8"/>';
+    if(m.dep+m.prev>top){
+      coupe=true;
+      g+='<path d="M'+(x-1).toFixed(1)+' '+(pT+12)+' l'+(bw+2).toFixed(1)+' -5 M'+(x-1).toFixed(1)+' '+(pT+17)+' l'+(bw+2).toFixed(1)+' -5" stroke="var(--bg-card)" stroke-width="2.4" fill="none"/>'
+        +'<text x="'+cx.toFixed(1)+'" y="'+(pT-6)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="600" fill="'+c.col.mesure+'">'+_pilEsc(_pecEurK(m.dep+m.prev))+'</text>';
+    }
+    if(i%pas===0) g+='<text x="'+cx.toFixed(1)+'" y="'+(c.h-10)+'" text-anchor="middle" font-size="'+(et?c.txt.mini:c.txt.axe)+'" fill="'+(m.etat==='c'?c.col.alerte:c.col.texte)+'"'
+      +(m.etat==='c'?' font-weight="600"':'')+'>'+_pilEsc(m.lbl)+'</text>';
   });
-
-  return window._mvGraphSvg(c, 'Cumul mois par mois du budget de vigne pr\u00e9vu au bar\u00e8me et de la d\u00e9pense r\u00e9elle du domaine.', g)
-    +'<div class="pil-anb-leg">'
-    +'<span><em style="background:transparent;border-top:2px dashed '+_PEC_COL.mo+';height:0;border-radius:0"></em>pr\u00e9vu \u00b7 vigne au bar\u00e8me</span>'
-    +'<span><em style="background:#2C3E50"></em>d\u00e9pens\u00e9 \u00b7 tout le domaine</span>'
-    +'</div>';
+  return window._mvGraphSvg(c, 'Le budget du cadre, mois par mois : d\u00e9pens\u00e9 et pr\u00e9vu.', g)
+    +'<div class="pil-anb-leg"><span><em style="background:'+c.col.mesure+'"></em>d\u00e9pens\u00e9</span>'
+    +(enC?('<span><em style="background:'+c.col.prevu+'"></em>pr\u00e9vu</span>'):'')
+    +'<span><em style="background:transparent;border-top:2px solid '+c.col.alerte+';height:0;border-radius:0"></em>le mois en cours</span>'
+    +(coupe?'<span>un mois coup\u00e9 : son montant est \u00e9crit au-dessus</span>':'')+'</div>';
 }
 
-function _pilPanelAnBudget(){
-  var B=null; try{ B=_pilAnBudgetData(); }catch(e){ B=null;
-    if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'budget annuel : calcul illisible'}); }
-
-  // La ligne de cadre porte LES DEUX PERIMETRES. C'est ce qui empeche de lire
-  // l'ecart comme un depassement — donc elle reste a l'ecran, toujours.
-  var sub = B
-    ? ('bar\u00e8me vigne \u00d7 ' + _ecoEur2(B.taux) + ' \u20ac/h, face \u00e0 la d\u00e9pense r\u00e9elle de tout le domaine')
-    : 'exercice comptable non d\u00e9limit\u00e9';
-  var stat = (B && B.prevTot>0)
-    ? _pilStat(_pilNb(Math.round(B.prevTot/1000)),' k\u20ac pr\u00e9vus', (B.reelOk?null:'sans mesure'))
-    : _pilStat('\u2014','');
-
-  var body='<div style="width:100%;overflow-x:auto" id="pil-g-anb"></div>';
-  window._mvGraphSuivre('#pil-g-anb', function(lg){ return _pilAnBudgetSvg(B,lg); }, {max:1400});
-
-  if(B && B.prevTot>0){
-    var ecart=(B.reelTot||0)-((B.cumP[B.iMax]!=null)?B.cumP[B.iMax]:0);
-    var moisLbl=(B.mois[B.iMax]?B.mois[B.iMax].lbl:'');
-    body+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:11px;line-height:1.5;'
-      +'border:1px solid var(--gris-clair);border-radius:9px;padding:9px 12px">';
-    if(B.reelOk && B.reelTot>0){
-      body+='\u00c0 fin <b>'+_pilEsc(moisLbl)+'</b>, le plan de vigne cumule <b>'+_pilEsc(_pecEurK(B.cumP[B.iMax]||0))
-        +'</b> et la d\u00e9pense mesur\u00e9e <b>'+_pilEsc(_pecEurK(B.reelTot))+'</b>. '
-        +'<b>L\u2019\u00e9cart de '+_pilEsc(_pecEurK(Math.abs(ecart)))+' n\u2019est pas un d\u00e9passement</b> : '
-        +'les deux courbes ne couvrent pas le m\u00eame p\u00e9rim\u00e8tre.';
-    } else {
-      body+='La d\u00e9pense r\u00e9elle n\u2019est pas trac\u00e9e : le co\u00fbt de l\u2019exercice n\u2019a pas abouti. '
-        +'Seul le plan de vigne est lisible.';
-    }
-    if(B.nSansMois>0)
-      body+=' <b>'+B.nSansMois+' campagne'+(B.nSansMois>1?'s ne sont pas dat\u00e9es':' n\u2019est pas dat\u00e9e')
-        +'</b> : son bar\u00e8me n\u2019entre pas dans le plan.';
-    body+='</div>';
-    if(!B.reelOk)
-      body+=_pilEmptyGo('Le co\u00fbt de l\u2019exercice ne se calcule pas : ouvrez \u00c9conomie \u203a Exercice pour voir ce qui bloque.','eco','\u00c9conomie \u203a Exercice');
+// ── LA CARTE « LE RENFORT A PREVOIR » ────────────────────────────────────────
+function _pilPanelAnRenfort(){
+  var R=null;
+  try{ R=_pilAnRenfortData(); }catch(e){ R=null; if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'annee: carte renfort'}); }
+  var C=(R && R.C) || _pilAnCadre();
+  if(!C) return '';
+  if(!C.enCours){
+    return _pilTile('anrenfort','#C9A84C','Le renfort \u00e0 pr\u00e9voir', _pilStat('\u2014',''),
+      (C.cadre==='vig'?'ann\u00e9e close':'exercice clos')+' \u00b7 plus de renfort \u00e0 d\u00e9cider', null,
+      '<div class="pil-empty">Ce cadre est termin\u00e9 : il n\u2019y a plus de renfort \u00e0 d\u00e9cider. Les effectifs de l\u2019\u00e9poque restent dans les Archives.'
+      +'<div class="pil-anr-go"><button type="button" class="pil-diag-go ghost" data-pgo="arc">Archives \u203a</button></div></div>', 'pil.an.renfort');
   }
+  if(!R || !R.ok){
+    return _pilTile('anrenfort','#C9A84C','Le renfort \u00e0 pr\u00e9voir', _pilStat('\u2014',''), 'aucune semaine dat\u00e9e dans ce cadre', null,
+      _pilEmptyGo('Datez vos p\u00e9riodes : les besoins en personnes, semaine par semaine, en d\u00e9coulent.','saisons','R\u00e9glages \u203a Campagne'), 'pil.an.renfort');
+  }
+  var F=R.fen, src=' \u00b7 d\u2019apr\u00e8s le bar\u00e8me et le planning des personnes sous contrat', stat, sub;
+  if(F.length){
+    var f0=F[0];
+    stat=_pilStat('+'+f0.n, ' personne'+(f0.n>1?'s':'')+' '+(f0.a<=C.auj?'d\u00e8s cette semaine':('d\u00e8s le '+_pilAnDfrJM(f0.a))));
+    sub=(F[1] ? ('puis '+(F[1].plat?'':'jusqu\u2019\u00e0 ')+F[1].n+' en '+_PIL_AN_MOIS[_pilOrdD(F[1].oMax).getUTCMonth()]) : ('jusqu\u2019au '+_pilDfr(f0.b)))+src;
+  } else {
+    stat=_pilStat('0',' renfort \u00e0 pr\u00e9voir');
+    sub='l\u2019\u00e9quipe pr\u00e9vue suffit'+(R.finCouv?(' jusqu\u2019au '+_pilDfr(R.finCouv)):'')+src;
+  }
+  var body='';
+  if(F.length){
+    body+='<div class="pil-anr">';
+    F.forEach(function(f){
+      body+='<div class="pil-anr-l"><i></i><b>'+_pilEsc(_pilDfr(f.a))+' \u2192 '+_pilEsc(_pilDfr(f.b))+'</b>'
+        +'<span class="n">'+(f.plat?'':'jusqu\u2019\u00e0 ')+f.n+' personne'+(f.n>1?'s':'')+'</span>'
+        +'<span class="s">'+_pilEsc(f.noms.join(', '))+(f.noms.length?' \u00b7 ':'')+f.sem+' semaine'+(f.sem>1?'s':'')+'</span></div>';
+    });
+    body+='</div>';
+  } else {
+    body+='<div class="pil-ann">Aucune semaine \u00e0 venir o\u00f9 l\u2019\u00e9quipe pr\u00e9vue reste court d\u2019une demi-personne ou plus.</div>';
+  }
+  if(R.trouFin){
+    body+='<div class="pil-anc-av">'+_mvIcon('info',16)+'<span>Rien n\u2019est dat\u00e9 apr\u00e8s le '+_pilEsc(_pilDfr(R.finCouv))
+      +((C.cadre==='vig' && !R.vend)?' \u2014 les vendanges de ce cycle non plus':'')
+      +' : ce qui suit n\u2019entre ni dans le renfort ni dans le budget. '
+      +'<button type="button" class="pil-diag-go ghost" data-diag="saisons">R\u00e9glages \u203a Campagne \u203a</button></span></div>';
+  }
+  body+='<div class="pil-anh">Personnes n\u00e9cessaires, semaine par semaine</div><div style="width:100%;overflow-x:auto" id="pil-g-anr"></div>';
+  window._mvGraphSuivre('#pil-g-anr', function(lg){ return _pilAnRenfortSvg(R,lg); }, {max:1800});
+  body+='<div class="pil-anb-leg"><span><em style="background:var(--vert-med)"></em>couvert par l\u2019\u00e9quipe</span>'
+    +'<span><em class="pil-anr-h"></em>renfort \u00e0 trouver</span>'
+    +'<span><em style="background:transparent;border-top:2px solid var(--texte);height:0;border-radius:0"></em>ce que l\u2019\u00e9quipe peut faire, d\u2019apr\u00e8s le planning</span>'
+    +'<span><em style="background:var(--gris)"></em>semaines pass\u00e9es</span></div>';
+  body+='<div class="pil-anr-go"><span>Combien recruter, quand, et ce que co\u00fbte de ne rien faire :</span>'
+    +'<button type="button" class="pil-diag-go" data-diag="renfort">D\u00e9cider \u203a Le renfort \u203a</button></div>';
+  return _pilTile('anrenfort','#C9A84C','Le renfort \u00e0 pr\u00e9voir', stat, sub, null, body, 'pil.an.renfort');
+}
+// Semaine par semaine, sur tout le cadre. L'echelle suit les semaines A VENIR ;
+// une semaine passee qui la depasse (la vendange) est coupee, son chiffre au-dessus.
+// Vert = couvert par l'equipe · hachure rouge = renfort a trouver · trait = ce
+// que l'equipe peut faire (_pilDispoSem) : le rouge commence PILE au-dessus du
+// trait. L'ancien trait (head, un comptage de tetes) passait au-dessus du vert
+// alors qu'il manquait du monde.
+function _pilAnRenfortSvg(R, w){
+  if(!R || !R.sem || !R.sem.length) return window._mvGraphVide('Aucune semaine dat\u00e9e dans ce cadre','Datez vos p\u00e9riodes (R\u00e9glages \u203a Campagne) : les besoins en personnes en d\u00e9coulent.');
+  var s=R.s, e=R.e, L=Math.max(1,e-s+1), oA=R.oAuj;
+  var c0=window._mvGraphCadre(w,100), et=c0.etroit;
+  var c=window._mvGraphCadre(w, et?204:244, { padL:et?36:48, padR:et?10:16, padT:30, padB:et?28:32, grad:4 });
+  var pL=c.padL, pT=c.padT, ih=c.ih, base=pT+ih;
+  function X(o){ return pL+(o-s)/L*c.iw; }
+  var fut=R.sem.filter(function(x){ return !x.passe; }), lst=fut.length?fut:R.sem, yMax=2;
+  lst.forEach(function(x){ if(x.need>yMax) yMax=x.need; if(x.dispo>yMax) yMax=x.dispo; });
+  var step=yMax>60?20:(yMax>30?10:(yMax>12?5:(yMax>5?2:1)));
+  var yTop=Math.ceil((yMax*1.05)/step)*step; if(!(yTop>0)) yTop=step;
+  function H(v){ return Math.min(Math.max(v,0),yTop)/yTop*ih; }
+  var g='<defs><pattern id="pil-anr-hp" width="5" height="5" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">'
+    +'<rect width="5" height="5" fill="var(--rouge-pale)"/><line x1="0" y1="0" x2="0" y2="5" stroke="'+c.col.alerte+'" stroke-width="2.6"/></pattern></defs>';
+  for(var v=0; v<=yTop+1e-9; v+=step){
+    var y=base-H(v);
+    g+='<line x1="'+pL+'" y1="'+y.toFixed(1)+'" x2="'+(c.w-c.padR)+'" y2="'+y.toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="'+c.trait.grille+'"/>'
+      +'<text x="'+(pL-6)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="'+(et?c.txt.mini:c.txt.axe)+'" fill="'+c.col.texte+'">'+v+'</text>';
+  }
+  g+='<text x="'+(pL-6)+'" y="'+(pT-16)+'" text-anchor="end" font-size="'+c.txt.unite+'" fill="'+c.col.texte+'">pers.</text>';
+  // Ce qu'aucune periode ne couvre : grise, jamais a zero.
+  var cur=s;
+  function trou(a,b){
+    var xa=X(a), xb=X(b+1);
+    if(xb-xa<1) return;
+    g+='<rect x="'+xa.toFixed(1)+'" y="'+pT+'" width="'+(xb-xa).toFixed(1)+'" height="'+ih.toFixed(1)+'" fill="var(--gris-clair)" opacity="0.55"/>';
+    if(xb-xa>78) g+='<text x="'+((xa+xb)/2).toFixed(1)+'" y="'+(pT+ih/2).toFixed(1)+'" text-anchor="middle" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">aucune p\u00e9riode</text>';
+  }
+  (R.couv||[]).forEach(function(iv){ if(iv[0]>cur) trou(cur, iv[0]-1); if(iv[1]+1>cur) cur=iv[1]+1; });
+  if(cur<=e) trou(cur, e);
+  R.sem.forEach(function(x){
+    var x0=X(x.o0), x1=X(x.o1+1), bw=Math.max(1, x1-x0-1.2), xa=x0+0.6;
+    if(x.passe){
+      var hp=H(x.need);
+      if(hp>0.2) g+='<rect x="'+xa.toFixed(1)+'" y="'+(base-hp).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hp.toFixed(1)+'" rx="1.5" fill="var(--gris)"/>';
+      if(x.need>yTop) g+='<path d="M'+(xa-1).toFixed(1)+' '+(pT+10)+' l'+(bw+2).toFixed(1)+' -4" stroke="var(--bg-card)" stroke-width="2.2" fill="none"/>'
+        +'<text x="'+(xa+bw/2).toFixed(1)+'" y="'+(pT-6)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="600" fill="'+c.col.texte+'">'+_pilUn(x.need)+'</text>';
+      return;
+    }
+    var hc=H(Math.min(x.need, x.dispo)), hr=H(x.need)-hc, yc=base-H(x.dispo);
+    if(hc>0.2) g+='<rect x="'+xa.toFixed(1)+'" y="'+(base-hc).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hc.toFixed(1)+'" rx="1.5" fill="'+c.col.fait+'"/>';
+    if(hr>0.2) g+='<rect x="'+xa.toFixed(1)+'" y="'+(base-hc-hr).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hr.toFixed(1)+'" rx="1.5" fill="url(#pil-anr-hp)" stroke="'+c.col.alerte+'" stroke-width="0.8"/>';
+    g+='<line x1="'+(xa-0.6).toFixed(1)+'" y1="'+yc.toFixed(1)+'" x2="'+(xa+bw+0.6).toFixed(1)+'" y2="'+yc.toFixed(1)+'" stroke="var(--texte)" stroke-width="2"/>';
+  });
+  if(!isNaN(oA) && oA>=s && oA<=e){
+    var xt=X(oA);
+    g+='<line x1="'+xt.toFixed(1)+'" y1="'+(pT-4)+'" x2="'+xt.toFixed(1)+'" y2="'+base.toFixed(1)+'" stroke="'+c.col.alerte+'" stroke-width="1.5" stroke-dasharray="4 3"/>'
+      +'<text x="'+(xt+4).toFixed(1)+'" y="'+(pT-16)+'" font-size="'+c.txt.mini+'" font-weight="600" fill="'+c.col.alerte+'">aujourd\u2019hui</text>';
+  }
+  var MN=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
+  var d0=_pilOrdD(s), y0=d0.getUTCFullYear(), m0=d0.getUTCMonth(), k2=0;
+  for(var i=0; i<14; i++){
+    var mo=(m0+i)%12, an=y0+Math.floor((m0+i)/12);
+    var o=_pilAnnOrd(an+'-'+(mo<9?'0':'')+(mo+1)+'-01');
+    if(isNaN(o) || o>e) break;
+    if(o<s) continue;
+    g+='<line x1="'+X(o).toFixed(1)+'" y1="'+base.toFixed(1)+'" x2="'+X(o).toFixed(1)+'" y2="'+(base+4).toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="1"/>';
+    if(!et || k2%2===0) g+='<text x="'+(X(o)+3).toFixed(1)+'" y="'+(c.h-10)+'" font-size="'+(et?c.txt.mini:c.txt.axe)+'" fill="'+c.col.texte+'">'+MN[mo]+'</text>';
+    k2++;
+  }
+  return window._mvGraphSvg(c, 'Personnes n\u00e9cessaires par semaine sur le cadre, et ce que l\u2019\u00e9quipe pr\u00e9vue peut faire.', g);
+}
 
-  return _pilTile('anbudget','#8A5A38','Le budget de l\u2019ann\u00e9e, mois par mois',
-    stat, sub, null, body, 'pil.an.budget');
+// ── LES PHOTOS DE L'ANNEE (sans campagne zoomee) ────────────────────────────
+// Les memes chiffres que les deux cartes, au mot pres : une photo qui dirait
+// autre chose que la carte qu'elle ouvre serait un deuxieme chiffre.
+function _pilPhotoEffAn(D, flag){
+  var C=D.cad, R=D.renf;
+  if(!C.enCours) return _pilPhotoHtml('Effectif','equipe','\u2014','', (C.cadre==='vig'?'ann\u00e9e close':'exercice clos')+' \u00b7 plus de renfort \u00e0 d\u00e9cider','an',flag||'','effectif');
+  if(!R || !R.ok) return _pilPhotoHtml('Effectif','equipe','\u2014','', 'aucune semaine dat\u00e9e dans ce cadre','an',flag||'','effectif');
+  var F=R.fen || [];
+  if(!F.length) return _pilPhotoHtml('Effectif','equipe','0',' pers.', '\u00e0 trouver \u00b7 l\u2019\u00e9quipe pr\u00e9vue suffit'+(R.finCouv?(' jusqu\u2019au '+_pilDfr(R.finCouv)):''),'an',flag||'','effectif');
+  var f0=F[0];
+  var s='\u00e0 trouver '+(f0.a<=C.auj?'cette semaine':('d\u00e8s le '+_pilDfr(f0.a)))
+    +(F[1]?(' \u00b7 '+F[1].n+' en '+_PIL_AN_MOIS[_pilOrdD(F[1].oMax).getUTCMonth()]):'');
+  return _pilPhotoHtml('Effectif','equipe','+'+f0.n,' pers.', s,'an', flag||_pilFlag('o','Il manquera du monde : voir \u00ab Le renfort \u00e0 pr\u00e9voir \u00bb'),'effectif');
+}
+function _pilPhotoBudAn(D, flag){
+  var C=D.cad, B=D.bud;
+  if(!C || !B || !(B.tot>0)) return _pilPhotoHtml('Budget','euro','\u2014','','le co\u00fbt de ce cadre ne se calcule pas encore','eco',
+    flag||_pilFlag('r','Ouvrez \u00c9conomie \u203a Exercice pour voir ce qui bloque'),'budget');
+  function K(v){ return _pilNb(Math.round((Number(v)||0)/1000)); }
+  var s=B.enCours
+    ? ('d\u00e9pens\u00e9s au '+_pilDfr(B.coupe)+' \u00b7 <b>'+K(B.tot)+' k\u20ac</b> attendus au '+_pilDfr(C.d1))
+    : ('d\u00e9pens\u00e9s sur '+(C.cadre==='vig'?'l\u2019ann\u00e9e vigne ':'l\u2019exercice ')+_pilEsc(C.court));
+  return _pilPhotoHtml('Budget','euro',K(B.dep),' k\u20ac', s,'an', flag||'','budget');
 }
 
 function _pilTabAn(d){
-  // Le bandeau d'alignement annee/vendange est deja DANS _pilPanelEtp
-  // (_pilAnneeVigneHtml). On ne le rappelle pas ici : deux cadres de l'annee
-  // sur un meme ecran, c'est la faute qu'on corrige.
-  var H='';
-  // Le cadre se lit AVANT les chiffres : sans lui, deux totaux differents pour
-  // « l'annee » passent pour une erreur.
-  if(_pilShow('an_cadres')){
-    var _a=null; try{ _a=_pilAnnuelData(); }catch(e){ _a=null; }
-    if(_a) H+=_pilDeuxCadresHtml(_a);
-  }
-  // Le graphe se lit APRES les deux cadres — ils disent ce que \u00ab l'annee \u00bb veut
-  // dire — et AVANT la frise des 52 semaines, qui descend au detail hebdomadaire.
-  var _pan='';
-  if(_pilShow('an_budget')) _pan+=_pilPanelAnBudget();
-  if(_pilShow('an_frise'))  _pan+=_pilPanelEtp(d);
-  if(_pan) H+='<div class="pil-panels">'+_pan+'</div>';
-  return H || '<div class="pil-empty">Aucun indicateur affiché.</div>';
+  // Le cadre se lit AVANT les chiffres : il dit de quelle annee on parle.
+  var H=_pilAnCadreHtml();
+  var pan='';
+  if(_pilShow('an_budget')) pan+=_pilPanelAnBudget();
+  if(_pilShow('an_frise'))  pan+=_pilPanelAnRenfort();
+  if(pan) H+='<div class="pil-panels">'+pan+'</div>';
+  return H || '<div class="pil-empty">Aucun indicateur affich\u00e9.</div>';
 }
+
+// ── Onglet AVANCEMENT ──
 
 function _pilTabAvc(d){
   var H='';
@@ -8769,7 +8651,7 @@ function _pexData(ex, noCmp, coupeIso){
   if(!ex) return null;
   var cfg=_ecoCfg();
   var mois=_pexMoisWin(ex);
-  var byM={}; mois.forEach(function(mo){ byM[mo.k]={sal:0, salP:0, gnr:0, ach:0, dep:0, fut:0, pre:0}; });
+  var byM={}; mois.forEach(function(mo){ byM[mo.k]={sal:0, salP:0, gnr:0, ach:0, dep:0, fut:0, pre:0, achP:0}; });
   var _n=new Date();
   var auj=(typeof window._mvAujIso==='function')?window._mvAujIso():_pexIso(_n.getFullYear(),_n.getMonth(),_n.getDate());
   var enCours=(auj>=ex.d0 && auj<=ex.d1);
@@ -8906,6 +8788,9 @@ function _pexData(ex, noCmp, coupeIso){
       var facture=ach.some(function(a){ return a&&a.prodId===op.prodId&&Number(a.prix)>0&&String(a.date||'').slice(0,10)>=c0&&String(a.date||'').slice(0,10)<=dFin; });
       if(facture) return;
       achP+=Number(op.cout); nAchP++;
+      // ANNEE-1 (§234) : le prevu d'un amendement trouve son MOIS (la semaine prevue) —
+      //   sans lui, le graphe mensuel de L'annee ne retombait pas sur le total prevu.
+      var _kp=parseInt(dp.slice(0,4),10)+'-'+(parseInt(dp.slice(5,7),10)-1); if(byM[_kp]) byM[_kp].achP+=Number(op.cout);
     });
   }
 
@@ -10516,7 +10401,7 @@ function _pilTabCfm(d){
 // ── Personnalisation PAR ONGLET (visibilité des tuiles) ──
 var _PIL_PERSO_DEFS={
   auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_tension','Tension équipe'],['auj_inaction','Coût de l’inaction'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_cave','La Cave \u2014 ce qui presse'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ? · fenêtre 5 jours'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave']],
-  an: [['an_cadres','Deux fa\u00e7ons de compter l\'ann\u00e9e'],['an_budget','Le budget de l\'ann\u00e9e, mois par mois'],['an_frise','Les 52 semaines de l\'exercice']],
+  an: [['an_budget','Le budget de l\'ann\u00e9e'],['an_frise','Le renfort \u00e0 pr\u00e9voir']],
   avc:[['avc_gauge','Jauge de saison'],['avc_bar','Avancement par tâche'],['avc_pie','Charge (donut)'],['avc_temps','Où va le temps de l\'équipe'],['avc_echeances','Échéances par tâche'],['avc_carte','Carte du domaine']],
   equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_conso','Consommation mesurée']],
   sim:[['sim_ordre','La tournée du jour'],['sim_etsi','Qui fait quoi'],['sim_cout','Renfort : combien et quand']],
@@ -11006,6 +10891,61 @@ function _pilCssV2(){
   +'.pil-t5[open]>summary::after{transform:rotate(90deg)}'
   +'.pil-t5b{display:flex;flex-direction:column;gap:6px;margin-top:9px}'
   // Le graphe du budget annuel : legende sur une ligne, comme celle d'\u00c9conomie.
+  +'.pil-anc{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:12px 16px 16px;margin:0 0 16px;box-shadow:var(--shadow-sm,0 1px 2px rgba(40,30,15,0.05),0 2px 8px rgba(40,30,15,0.07))}'
+  +'.pil-anc-l1{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap}'
+  +'.pil-anseg button{min-height:40px;padding:0 16px;font-size:var(--pt-txt,12.5px)}'
+  +'.pil-annav{display:inline-flex;align-items:center;gap:4px}'
+  +'.pil-annav-b{min-width:40px;min-height:40px;border:1px solid var(--gris-clair);background:var(--bg-card);color:var(--texte);border-radius:12px;font-size:var(--pt-sm,17px);line-height:1;cursor:pointer}'
+  +'.pil-annav-b[disabled]{opacity:.35;cursor:default}'
+  +'.pil-annav-l{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-md,20px);font-weight:700;min-width:96px;text-align:center;font-variant-numeric:tabular-nums}'
+  +'.pil-anbadge{font-size:var(--pt-lbl,10.5px);font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 8px;border-radius:999px;background:var(--tag-grey-bg);color:var(--tag-grey-tx)}'
+  +'.pil-anbadge.on{background:var(--vert-pale);color:var(--vert-med)}'
+  +'.pil-anc-sp{flex:1}'
+  +'.pil-anc-t{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-lg,23px);font-weight:700;color:var(--texte);margin:12px 0 4px}'
+  +'.pil-anc-d{font-size:var(--pt-txt,12.5px);line-height:1.55;color:var(--texte-med)}'
+  +'.pil-anc-d b{color:var(--texte);font-weight:600}'
+  +'.pil-anfr{margin:24px 0 8px}'
+  +'.pil-anfr-t{position:relative;height:12px;border-radius:999px;background:var(--bg-app);border:1px solid var(--gris-clair)}'
+  +'.pil-anfr-b{position:absolute;top:-1px;bottom:-1px;border-radius:999px;box-sizing:border-box}'
+  +'.pil-anfr-b.f,.pil-anchip i.f{background:var(--gris)}'
+  +'.pil-anfr-b.c,.pil-anchip i.c{background:var(--vert-med)}'
+  +'.pil-anfr-b.v,.pil-anchip i.v{background:var(--vert-pale);border:1px solid var(--vert-clair)}'
+  +'.pil-anfr-auj{position:absolute;top:-20px;bottom:-4px;border-left:2px solid var(--rouge)}'
+  +'.pil-anfr-auj em{position:absolute;top:-4px;left:4px;font-style:normal;font-size:var(--pt-lbl,10.5px);font-weight:600;color:var(--rouge);white-space:nowrap}'
+  +'.pil-anfr-e{display:flex;justify-content:space-between;gap:8px;margin-top:4px;font-size:var(--pt-lbl,10.5px);color:var(--texte-doux)}'
+  +'.pil-anchips{display:flex;flex-wrap:wrap;gap:8px}'
+  +'.pil-anchip{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:4px 12px;border-radius:999px;border:1px solid var(--gris-clair);background:var(--bg-card);font-family:inherit;font-size:var(--pt-micro,11px);color:var(--texte);cursor:pointer}'
+  +'.pil-anchip i{width:10px;height:10px;border-radius:50%;flex:none;box-sizing:border-box}'
+  +'.pil-anchip b{font-weight:600;font-size:var(--pt-txt,12.5px)}'
+  +'.pil-anchip span{color:var(--texte-doux)}'
+  +'.pil-anchip.sel{border-color:var(--or);box-shadow:0 0 0 2px var(--or-pale)}'
+  +'.pil-anc-av{display:flex;gap:8px;align-items:flex-start;margin-top:12px;padding:8px 12px;border-radius:12px;background:var(--orange-pale);color:var(--orange);font-size:var(--pt-txt,12.5px);line-height:1.5}'
+  +'.pil-anc-av svg{flex:none;margin-top:2px}'
+  +'.pil-anc-av .pil-diag-go{margin-top:4px}'
+  +'.pil-anf{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:12px 0 8px}'
+  +'.pil-anf-c{background:var(--bg-app);border-radius:12px;padding:8px 12px}'
+  +'.pil-anf-c .l{font-size:var(--pt-nano,9.5px);letter-spacing:1.4px;text-transform:uppercase;color:var(--texte-doux);font-weight:700}'
+  +'.pil-anf-c .v{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xl,27px);font-weight:700;line-height:1.1;margin-top:4px;font-variant-numeric:tabular-nums;color:var(--texte)}'
+  +'.pil-anf-c .v span{font-family:Outfit,sans-serif;font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--texte-doux)}'
+  +'.pil-anf-c.m .v{color:var(--terre)}'
+  +'.pil-anf-c .s{font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px}'
+  +'.pil-anbar{display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--or-clair);margin:0 0 12px}'
+  +'.pil-anbar i{display:block;height:100%;background:var(--terre)}'
+  +'.pil-anh{font-weight:600;font-size:var(--pt-txt,12.5px);color:var(--texte);margin:16px 0 4px}'
+  +'.pil-anp{display:grid;grid-template-columns:minmax(0,1.7fr) repeat(3,minmax(0,1fr));font-size:var(--pt-txt,12.5px);margin-top:12px}'
+  +'.pil-anp.clos{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);max-width:420px}'
+  +'.pil-anp>div{display:contents}'
+  +'.pil-anp span{padding:8px;border-top:1px solid var(--gris-clair);text-align:right;font-variant-numeric:tabular-nums}'
+  +'.pil-anp span:first-child{text-align:left}'
+  +'.pil-anp .hd span{border-top:0;font-size:var(--pt-nano,9.5px);letter-spacing:1.2px;text-transform:uppercase;color:var(--texte-doux);font-weight:700}'
+  +'.pil-anp .tt span{font-weight:700;border-top:1px solid var(--gris)}'
+  +'.pil-ann{font-size:var(--pt-micro,11px);line-height:1.5;color:var(--texte-doux);margin-top:8px}'
+  +'.pil-anr-l{display:flex;align-items:center;gap:4px 12px;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--gris-clair)}'
+  +'.pil-anr-l i,.pil-anb-leg em.pil-anr-h{width:16px;height:12px;border-radius:4px;flex:none;background:repeating-linear-gradient(135deg,var(--rouge) 0 2px,var(--rouge-pale) 2px 4px)}'
+  +'.pil-anr-l b{font-weight:600;font-size:var(--pt-txt,12.5px);min-width:150px}'
+  +'.pil-anr-l .n{font-weight:700;font-size:var(--pt-base,14px);color:var(--rouge);min-width:110px}'
+  +'.pil-anr-l .s{font-size:var(--pt-micro,11px);color:var(--texte-doux)}'
+  +'.pil-anr-go{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;font-size:var(--pt-txt,12.5px);color:var(--texte-med)}'
   +'.pil-anb-leg{display:flex;gap:15px;flex-wrap:wrap;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:9px}'
   +'.pil-anb-leg span{display:inline-flex;align-items:center;gap:6px}'
   +'.pil-anb-leg em{width:15px;height:10px;border-radius:3px;display:inline-block;font-style:normal}'
@@ -11072,27 +11012,20 @@ function _pilAvertCfm(){
   return camp ? ('La conformit\u00e9 se lit sur l\u2019ann\u00e9e, et le cuivre sur <b>sept ans glissants</b>\u00a0: '
     +'cet \u00e9cran ne se recadre pas sur <b>'+_pilEsc(camp)+'</b>.') : '';
 }
+
 function _pilCrumbHtml(){
-  // _mvExercice() rend {an,debut,fin} — il n'existe pas de fonction de libelle,
-  // on le compose ici plutot que d'appeler un helper imaginaire.
-  var ex='Exercice', X=null;
-  try{ X=(typeof window._mvExercice==='function')?window._mvExercice():null; }catch(e){ X=null; }
-  if(X && X.debut && X.fin){
-    var a0=String(X.debut).slice(0,4), a1=String(X.fin).slice(0,4);
-    // « Exercice comptable », pas « Exercice » : c'est le cadre du bilan, et
-    // le distinguer de l'annee vigne commence par le nommer.
-    ex='Exercice comptable '+(a0===a1?a0:(a0+'-'+a1.slice(2)));
-  }
+  // ANNEE-1 (§234) : la racine NOMME le cadre consulte. Elle lisait X.debut/X.fin sur
+  //   _mvExercice(), qui rend d0/d1 : la racine affichait « Exercice » tout court.
+  var CA=null; try{ CA=_pilAnCadre(); }catch(eA){ CA=null; if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'fil: cadre illisible'}); }
+  var ex=CA ? CA.titre : 'Exercice comptable';
   var h='<button class="pil-cr root" id="pil-cr-root" title="Revenir \u00e0 l\u2019ann\u00e9e enti\u00e8re">\u2302 '+_pilEsc(ex)+'</button>';
   if(_PIL_SCOPE.camp){
     h+='<span class="pil-cr-sep">\u203A</span><span class="pil-cr sel">'+_mvIcon('raisin',16)+' '+_pilEsc(_PIL_SCOPE.camp)
       +'<button class="x" id="pil-cr-x" title="Revenir \u00e0 l\u2019ann\u00e9e">\u00d7</button></span>';
   } else {
-    // ★ « cliquez une campagne dans la frise pour zoomer » est une INSTRUCTION :
-    //   on l'apprend une fois, puis on la traverse. Elle disparait sur telephone,
-    //   ou elle prenait une ligne entiere de la barre collante — donc de chaque
-    //   ecran, en permanence. Sur grand ecran elle reste : la place ne manque pas.
-    h+='<span class="pil-cr-note">l\u2019ann\u00e9e enti\u00e8re \u2014 cliquez une campagne dans la frise pour zoomer</span>';
+    // ★ Une INSTRUCTION : on l'apprend une fois, puis on la traverse. Elle disparait
+    //   sur telephone (CSS), ou elle prenait une ligne de la barre collante.
+    h+='<span class="pil-cr-note">l\u2019ann\u00e9e enti\u00e8re \u2014 touchez une campagne dans L\u2019ann\u00e9e pour zoomer</span>';
   }
   return h;
 }
@@ -11112,7 +11045,7 @@ function _pilCrumbHtml(){
 // noCmp=true : la comparaison a l'exercice N-1 double le travail et ne sert a
 // aucune des deux vues qui appellent d'ici.
 var _PIL_EXO=null;
-function _pilExoOublier(){ _PIL_EXO=null; _ECO_RATE_CACHE={k:null,v:0}; _PIL_DIAGC=null; _ECO_TV=null; }
+function _pilExoOublier(){ _PIL_EXO=null; _ECO_RATE_CACHE={k:null,v:0}; _PIL_DIAGC=null; _ECO_TV=null; _PIL_ANB=null; _PIL_ANR=null; }
 function _pilExoData(){
   if(_PIL_EXO!==null) return _PIL_EXO;
   var X=null;
@@ -11131,7 +11064,11 @@ function _pilPhotosData(){
   //   « Deux façons de compter » l'affiche en clair) n'entre pas dans un total
   //   annonce « sur l'exercice ». Le bornage des SEMAINES vit dans _pilPicPortee,
   //   definition unique du pic ; celui des HEURES vit ici.
-  function _dansEx(p){ return !(ann&&ann.ex) || !(p.fin<ann.ex.d0 || p.debut>ann.ex.d1); }
+  // ANNEE-1 (§234) : sans campagne zoomee, la portee est le CADRE choisi (exercice ou
+  //   annee vigne) — les memes bornes que l'onglet L'annee.
+  var _C=null; try{ _C=_pilAnCadre(); }catch(eC){ _C=null; if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'photos: cadre illisible'}); }
+  var _S=_C?_pilAnnOrd(_C.d0):(ann?ann.s:0), _E=_C?_pilAnnOrd(_C.d1):(ann?ann.e:0);
+  function _dansEx(p){ return !_C || !(p.fin<_C.d0 || p.debut>_C.d1); }
 
   // TRAVAUX — heures de bareme de la portee.
   // ⚠️⚠️ _chargeSaisonData NE REND PAS totalTotal/totalReste. Ces deux cles
@@ -11152,9 +11089,9 @@ function _pilPhotosData(){
       //   n'a que 23 jours sur 145. Le tableau « Deux facons de compter » garde la
       //   ligne entiere — c'est lui qui explique le partage.
       var h=Math.round(p.cd.charge||0), part=1;
-      if(ann.ex){
+      if(_C){
         var a=_pilAnnOrd(p.debut), b=_pilAnnOrd(p.fin);
-        var a2=Math.max(a,ann.s), b2=Math.min(b,ann.e);
+        var a2=Math.max(a,_S), b2=Math.min(b,_E);
         if(!isNaN(a)&&!isNaN(b)&&b>=a&&(a2>a||b2<b)){ part=Math.max(0,(b2-a2+1))/(b-a+1); nChev++; }
       }
       hTot+=Math.round(h*part); nPer++;
@@ -11206,11 +11143,18 @@ function _pilPhotosData(){
   var campEco=!!(camp && _pilSaisonNom() && camp===_pilSaisonNom());
 
 
+  // ANNEE-1 : le budget et le renfort du cadre — les memes objets que les deux cartes.
+  var _bud=null, _renf=null;
+  if(!camp){
+    try{ _bud=_pilAnBudgetData(); }catch(eB){ _bud=null; if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'photos: budget du cadre'}); }
+    try{ _renf=_pilAnRenfortData(); }catch(eR){ _renf=null; if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'photos: renfort du cadre'}); }
+  }
   return { ann:ann, selP:selP, hTot:hTot, hFait:hFait, pct:pct, nPer:nPer, pic:pic, picW:picW,
            moy:moy, head:head, corps:corps, picPasse:picPasse,
            manque:manque, eur:eur, sansTaux:sansTaux, ecoOk:ecoOk,
            exo:exo, campEco:campEco, nChev:nChev,
-           trous:(ann&&ann.trous)?ann.trous.length:0, ovl:(ann&&ann.ovl)?ann.ovl.length:0 };
+           trous:(ann&&ann.trous)?ann.trous.length:0, ovl:(ann&&ann.ovl)?ann.ovl.length:0,
+           cad:_C, bud:_bud, renf:_renf };
 }
 
 
@@ -11233,7 +11177,7 @@ function _pilFlag(g,titre){
 function _pilPhotosHtml(){
   var D;
   try{ D=_pilPhotosData(); }catch(e){ return ''; }
-  var camp=_PIL_SCOPE.camp, cadre=camp?('sur '+_pilEsc(camp)):'sur l\u2019exercice';
+  var camp=_PIL_SCOPE.camp, cadre=camp?('sur '+_pilEsc(camp)):((D.cad&&D.cad.cadre==='vig')?'sur l\u2019ann\u00e9e vigne':'sur l\u2019exercice');
 
   // ★ Les drapeaux viennent du MOTEUR, pas d'un test ecrit sur place : un
   //   chiffre ne peut pas porter un drapeau que la liste ne contient pas.
@@ -11252,7 +11196,7 @@ function _pilPhotosHtml(){
   if(!(D.hTot>0)) sT='aucun bar\u00e8me chiffr\u00e9 '+cadre;
   else if(D.pct!=null) sT=D.pct+' % fait '+cadre;
   else if(camp) sT='de bar\u00e8me '+cadre;
-  else sT='de bar\u00e8me \u00b7 '+D.nPer+' campagne'+(D.nPer>1?'s':'')+' dans l\u2019exercice'
+  else sT='de bar\u00e8me \u00b7 '+D.nPer+' campagne'+(D.nPer>1?'s':'')+' dans '+((D.cad&&D.cad.cadre==='vig')?'l\u2019ann\u00e9e vigne':'l\u2019exercice')
     +(D.nChev>0?(' \u00b7 '+D.nChev+' \u00e0 cheval, au prorata de ses jours'):'');
   var pTrav=_pilPhotoHtml('Travaux','feuille',_pilNb(D.hTot),' h', sT, camp?'avc':'an', fT, 'travaux');
 
@@ -11265,6 +11209,11 @@ function _pilPhotosHtml(){
   //   dans la meme couleur que ceux qu'on peut encore traiter.
   var fE = drap('effectif') || ((D.manque>0.05 && !D.picPasse) ? _pilFlag('o','Il manque '+_pilUn(D.manque)+' personne(s) au pic') : '');
   var pEff=_pilPhotoHtml('Effectif','equipe',D.pic>0?_pilUn(D.pic):'\u2014',D.pic>0?' pers.':'', sE,'equ',fE,'effectif');
+  // ★ ANNEE-1 (§234) : sur l'annee, l'effectif REGARDE DEVANT — combien de personnes
+  //   manqueront, et quand, avec l'equipe prevue (la photo de « Le renfort a prevoir »).
+  //   Le pic de la vendange passee, tout le monde le connait (Nico, 04/10). Sur une
+  //   campagne zoomee, la photo garde son pic : il decrit CETTE campagne.
+  if(!camp && D.cad){ pEff=_pilPhotoEffAn(D, drap('effectif')); }
 
   // BUDGET — le cadre du chiffre est ECRIT SOUS LE CHIFFRE, toujours.
   var fB=drap('budget'), pBud;
@@ -11287,6 +11236,10 @@ function _pilPhotosHtml(){
       : _pilPhotoHtml('Budget','euro','\u2014','','le calcul du co\u00fbt n\u2019a pas abouti','eco',
           _pilFlag('r','Ouvrez \u00c9conomie pour voir ce qui bloque'),'budget');
   }
+
+  // ★ ANNEE-1 (§234) : sans zoom, le budget est celui du CADRE choisi — le meme moteur
+  //   (_pexData) et les memes chiffres que la carte « Le budget de l'annee ».
+  if(!camp){ pBud=_pilPhotoBudAn(D, fB); }
 
   // ★★★ LA PHOTO CONFORMITE A QUITTE LA BANDE, ET C'EST UNE QUESTION D'ECHELLE.
   //   Les trois autres sont des statistiques DE LA PORTEE : Travaux en est la
@@ -11513,7 +11466,7 @@ function _pilDiag(){
       f:'Sur ses <b>'+J.total+' jours</b>, <b>'+J.dedans+'</b> tombent dans cet exercice et <b>'+J.dehors+'</b> dans le suivant. '
        +'Le co\u00fbt de la r\u00e9colte se lit donc sur <b>deux bilans</b>. Ce n\u2019est pas une erreur\u00a0: '
        +'c\u2019est votre calendrier comptable, et il n\u2019y a rien \u00e0 corriger \u2014 seulement \u00e0 le savoir.',
-      ou:'Voir les deux cadres' });
+      ou:'Voir le cadre de l\u2019ann\u00e9e' });
   }
 
   // ── Le cout ──────────────────────────────────────────────────────────────
@@ -12074,7 +12027,14 @@ function _pilBindContent(content){
     var _ob=e.target.closest('[data-op]'); if(_ob){ e.stopPropagation(); _pilOpAction(_ob); return; }
     var _lb=e.target.closest('.pil-lent-b'); if(_lb){ e.stopPropagation(); var _lv=_lb.getAttribute('data-lent'); if(_lv&&_lv!==_PIL_LENT){ _PIL_LENT=_lv; _PIL_LENT_PREP=null; renderPilotage(); } return; }   // CARTE-1 (§217)
     var nb=e.target.closest('.pil-names-btn'); if(nb){ e.stopPropagation(); _pilNamesOn=!_pilNamesOn; _pilApplyNames(); nb.textContent=_pilNamesOn?'\uD83C\uDFF7 Noms \u2713':'\uD83C\uDFF7 Noms'; return; }
-    // Clic sur une campagne de la frise annuelle : zoom / retour. Re-cliquer la
+    // ANNEE-1 (§234) : le cadre et l'annee consultes. Meme chemin que le zoom sur une
+    // campagne : la portee change, le fil d'Ariane et les photos suivent.
+    var _ac=e.target.closest('[data-ancadre]');
+    if(_ac){ e.stopPropagation(); _pilCadreSet(_ac.getAttribute('data-ancadre')); _pilPortee(); _pilFillContent(_pilData()); return; }
+    var _ar=e.target.closest('[data-anrecul]');
+    if(_ar){ e.stopPropagation(); if(_ar.disabled) return;
+      _pilReculSet((parseInt(_PIL_SCOPE.recul,10)||0)+(parseInt(_ar.getAttribute('data-anrecul'),10)||0)); _pilPortee(); _pilFillContent(_pilData()); return; }
+    // Clic sur une campagne (puces de L'annee) : zoom / retour. Re-cliquer la
     // meme campagne (ou le bouton de retour, qui porte son nom) revient a l'annee.
     // Reglage de l'ouverture d'exercice depuis la frise annuelle. _pexSetMois
     // verifie lui-meme le droit admin et RELIT la valeur apres ecriture : si

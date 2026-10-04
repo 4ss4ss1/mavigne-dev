@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.11';
+export const APP_VERSION = '8.12';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -852,6 +852,16 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.12', d: '2026-10-04', items: [
+    { niv: 1, pour: ['admin'], cible: '#pil-an-cadres', emoji: 'calendrier', titre: 'L’année se lit dans un seul cadre à la fois',
+      desc: "L’onglet « L’année » du Pilotage mettait en avant le pic des vendanges, affichait plusieurs chiffres différents pour le même exercice, et posait votre exercice comptable en euros à côté d’une année vigne en heures — qui n’était même pas la même année. "
+        + "Choisissez maintenant en tête d’onglet l’<b>exercice comptable</b> ou l’<b>année vigne</b>, et l’année avec les flèches : tout l’écran suit. Le <b>budget</b> est en euros, avec le même calcul dans les deux cadres : dépensé, reste prévu, total attendu. "
+        + "<b>Le renfort à prévoir</b> dit, avec l’équipe prévue au planning, combien de personnes manqueront et quand ; un bouton mène à Décider pour chiffrer les embauches." },
+    { niv: 0, pour: ['admin'], emoji: 'equipe', titre: 'Le chiffre « Effectif » regarde devant',
+      desc: "En tête de L’année, il annonçait le pic de la vendange, même passée. Il dit maintenant combien de personnes il faudra trouver, et à partir de quand. Sur une campagne choisie, il garde son pic." },
+    { niv: 0, pour: ['admin'], emoji: 'euro', titre: 'Les mois du budget retombent sur le total',
+      desc: "Le budget mois par mois oubliait les fûts et les prestations d’arrachage, et ne plaçait pas les amendements prévus : la somme des mois ne retombait pas sur le total de l’année. La barre du haut affichait aussi « Exercice » tout court : elle nomme maintenant le cadre consulté." }
+  ] },
   { v: '8.11', d: '2026-10-03', items: [
     { niv: 0, pour: ['admin'], emoji: 'etiquette', titre: 'Renommer une tâche : l’administrateur l’impose partout',
       desc: "Quand un administrateur renomme une tâche créée par son domaine, le nouveau nom s’impose à tous les téléphones : chacun le reprend à sa prochaine synchronisation, sans que personne ait rien à faire. "
@@ -4594,14 +4604,15 @@ var MV_AIDE = {
       ['« Agrandir »', "sur un graphique ouvre le même dessin en grand, à la largeur de l’écran. Les barres d’avancement ont un seul code de couleur : vert fini, doré en cours, orange quand la fenêtre du travail est passée sans qu’il soit fini."],
       ['Quand il manque quelque chose, un bouton vous y emmène', ": plus de chemin à retenir. « Cuve GNR à renseigner », « fiches à passer en Inactif » — le bouton ouvre l’écran concerné, sur le bon onglet, et fait clignoter l’endroit exact une seconde."],
       _mvAideOngletsPil,
-      ['La barre du haut dit où vous regardez', ": l’exercice entier, ou une campagne. Cliquez une campagne dans la frise de l’année et les trois chiffres du haut, la frise et les tableaux de la campagne suivent. La croix revient à l’année. <b>Trois écrans ont leur propre cadre</b> et ne se recadrent pas : Économie chiffre la période consultée (sauf ses sous-vues Exercice et Revient, qui ont chacune leur cadre), la Cave suit le millésime, la Conformité roule sur sept ans — chacun l’écrit au-dessus de ses chiffres."],
+      ['La barre du haut dit où vous regardez', ": l’exercice entier, ou une campagne. Touchez une campagne dans L’année et les trois chiffres du haut et les tableaux de la campagne suivent. La croix revient à l’année. <b>Trois écrans ont leur propre cadre</b> et ne se recadrent pas : Économie chiffre la période consultée (sauf ses sous-vues Exercice et Revient, qui ont chacune leur cadre), la Cave suit le millésime, la Conformité roule sur sept ans — chacun l’écrit au-dessus de ses chiffres."],
       ['Les trois chiffres du haut', "— les travaux, l’effectif, le budget — ne s’affichent que sur <b>L’année</b> et <b>La campagne</b>, les deux niveaux de zoom. Ils changent avec ce que vous regardez, et chacun mène à l’écran qui le détaille. Ailleurs, ils ne servaient plus à choisir où aller : sur Économie et sur Conformité, ils répétaient l’écran juste en dessous."],
+      ['L’année, un cadre à la fois', ": en tête de l’onglet, choisissez l’<b>exercice comptable</b> ou l’<b>année vigne</b>, et l’année avec les flèches ; tout l’onglet et les trois chiffres du haut suivent. Le <b>budget</b> est en euros, avec le même calcul dans les deux cadres : dépensé, reste prévu, total attendu. Le <b>renfort</b> dit, avec l’équipe prévue au planning, combien de personnes manqueront et quand ; le bouton mène à Décider pour chiffrer les embauches."],
       ['Une seule date de fin', "pour tout le module : Aujourd’hui, sa frise et Échéances par tâche lisent la même simulation que La campagne sans renfort — chaque travail dans sa fenêtre, l’équipe partagée entre les travaux ouverts en même temps, le tracteur déduit, aux heures normales du planning. Le « i » à côté de la marge dit les trois choses qui la distinguent du simulateur de renfort, et « vers le » signale une fin après la période, l’équipe de la dernière semaine reconduite."],
       ['La conformité n’est plus dans cette ligne', "et c’est une question d’échelle : le cuivre roule sur <b>sept ans glissants</b>, il ne bouge pas quand vous cliquez une campagne. Un chiffre qui ignore la portée n’a pas sa place dans une ligne qui se recadre. Il se lit en entier dans l’onglet Conformité, et le bouton « à compléter » remonte toujours ses alertes, sur tous les onglets."],
       ['Le bouton « à compléter »', "liste ce qui manque pour que vos chiffres soient justes, et vous emmène à l’endroit exact où le renseigner. Un rond rouge sur un chiffre veut dire qu’il ne se calcule pas ; un rond orange, qu’il sort mais faux."],
       ['Les onglets vont du large au fin', ": l’année, puis la campagne, puis l’équipe et le matériel, puis la décision. Après le trait, ce sont des écrans de détail — on y arrive aussi en touchant un des trois chiffres."],
       ['La carte du domaine se lit de cinq façons', " : l’avancement, les jours depuis le dernier traitement, le cépage, les passages phyto face à votre référence, le coût engagé à l’hectare. La légende suit la vue ; une parcelle sans donnée reste grise."],
-      ['La campagne', "montre l’avancement, mais aussi — sous « Où va le temps de l’équipe » — comment la présence se partage entre vigne, tracteur et le reste, avec la frise prévu/réel, la courbe par semaine et l’écart. Ces blocs parlent d’une campagne ; le pic de la semaine la plus chargée, lui, se lit dans « L’année »."],
+      ['La campagne', "montre l’avancement, mais aussi — sous « Où va le temps de l’équipe » — comment la présence se partage entre vigne, tracteur et le reste, avec la frise prévu/réel, la courbe par semaine et l’écart. Ces blocs parlent d’une campagne ; ce qui manquera en personnes d’ici la fin de l’année, lui, se lit dans « L’année »."],
       ['Une tâche sans barème à l’hectare', "— arrachage, désherbage manuel, entreplantation sans trous saisis — ne prévoit pas d’heures : dans « Avancement par tâche », elle s’avance en <b>surface</b> faite sur surface concernée, la même part que sur la liste des parcelles."],
       ['Deux périodes qui se chevauchent', "ne comptent rien deux fois : les heures suivent les tâches, et une tâche n’appartient qu’à une seule période. Sur les jours communs, la frise hachure le fond en violet — il y a deux barres au même endroit, on lit la plus haute."],
       ['Une fenêtre de tâche s’arrête le jour écrit', " : fin au 25 avril, le 25 travaille. Et les heures se répartissent au prorata des jours <b>travaillables</b> : une semaine de ponts en reçoit moins, les semaines pleines récupèrent le reste."],
@@ -5213,20 +5224,26 @@ export const MV_INFO = {
   ] },
 
   'pil.cadres': { t: 'Pourquoi les deux totaux diffèrent', p: [
-    'Une campagne <b>à cheval</b> sur la clôture est partagée entre deux bilans. Une campagne <b>entièrement hors</b> de l\u2019exercice n\u2019y apparaît pas du tout, alors qu\u2019elle appartient bien à un cycle de vigne. À l\u2019inverse, un hiver qui <b>ouvre</b> le cycle suivant tombe dans cet exercice sans appartenir à cette année vigne.',
-    'Seules les lignes marquées <b>année vigne</b> entrent dans le total de droite.',
-    'Les heures du tableau sont du <b>barème</b> : ce que le travail devrait prendre, pas ce qu\u2019il a pris.',
-    'Le coût de l\u2019exercice vient d\u2019<b>Économie \u203a Exercice</b>, qui cadre déjà d\u2019un bilan à l\u2019autre. Il n\u2019est <b>pas recalculé ici</b> : un second calcul donnerait un second chiffre.',
-    'Fermage, amortissements, assurances et frais généraux n\u2019y sont pas : <b>ce n\u2019est pas un compte de résultat</b>.'
+    'L’<b>exercice comptable</b> va d’un bilan à l’autre : il répond à « combien m’a coûté l’année fiscale ». Il est fixé par votre comptable — ce n’est pas un réglage d’affichage.',
+    'L’<b>année vigne</b> suit le mois d’ouverture de votre campagne (roue crantée d’Économie › Exercice), le même cadre que les Archives : elle répond à « combien m’a coûté un cycle ». Choisissez le mois qui suit vos vendanges : la récolte clôt alors l’année qu’elle aboutit.',
+    'Le calcul est <b>le même</b> dans les deux : salaires chargés, carburant, achats, réparations, datés au jour. Seules les dates changent — c’est pour cela que les deux totaux ne s’affichent jamais côte à côte.',
+    'Les flèches remontent aux années passées ; au rechargement, l’écran revient toujours à l’année en cours. Toucher une campagne zoome dessus : les trois chiffres du haut et l’onglet La campagne la détaillent.'
   ] },
 
-  'pil.an.budget': { t: 'Le budget de l\u2019année, mois par mois', p: [
-    '<b>Deux périmètres, et c\u2019est voulu.</b> La courbe en tireté (le <b>prévu</b>) ne chiffre que le <b>travail de vigne</b> : heures/ha \u00d7 surface, étalées sur les mois par la fenêtre de chaque travail, valorisées au taux horaire moyen. La courbe pleine (le <b>dépensé</b>) porte <b>tout le domaine</b> : salaires chargés, carburant, achats d\u2019intrants \u2014 la cave, l\u2019atelier et le bureau compris.',
-    '<b>L\u2019écart entre les deux n\u2019est donc pas un dépassement.</b> Pendant la vendange, la cave tourne à plein : la courbe du dépensé monte sans qu\u2019un seul rang coûte plus cher. Les deux totaux se lisent déjà, chacun sous son nom, dans la carte \u00ab Deux façons de compter l\u2019année \u00bb juste au-dessus.',
-    'Pourquoi pas \u00ab barème prévu contre barème fait \u00bb, qui serait à périmètre égal ? Parce que <b>l\u2019avancement ne se connaît que sur la campagne consultée</b>. L\u2019étendre à l\u2019exercice entier donnerait un pourcentage sans dénominateur. On ne trace pas une courbe qu\u2019on ne sait pas calculer.',
-    'Le dépensé <b>s\u2019arrête au mois en cours</b>. Le prolonger à plat jusqu\u2019à la clôture ferait lire \u00ab plus rien ne sort \u00bb là où il n\u2019y a pas encore de donnée.',
-    'Une campagne <b>entièrement hors</b> de l\u2019exercice comptable n\u2019entre pas dans le prévu \u2014 c\u2019est le même bornage que les chiffres du haut. Une campagne <b>sans dates</b> n\u2019y entre pas non plus, et l\u2019écran la compte sous le graphe.',
-    'Le taux horaire est une <b>moyenne pondérée</b> par les heures que chacun travaille sur la période, effectif d\u2019équipe compris : le coût d\u2019une parcelle est un budget de saison, on ne sait pas qui fera quel rang.'
+  'pil.an.budget': { t: 'Le budget de l’année', p: [
+    'Un seul moteur : celui d’<b>Économie › Exercice</b>, joué sur les dates du cadre. <b>Dépensé</b> = ce qui est daté jusqu’à aujourd’hui : salaires payés au planning, pleins de GNR, achats, réparations, fûts, prestations. <b>Reste prévu</b> = les salaires que le planning annonce jusqu’à la fin, et les amendements chiffrés pas encore facturés.',
+    'Le prévu ne connaît que ce qui est saisi : une embauche ou un achat à venir n’y entre pas tant qu’il n’est pas dans l’appli. Le carburant n’a pas de prévu : il compte au plein.',
+    'Le graphe règle son échelle sur les mois <b>à venir</b>. Un mois passé qui la dépasse — celui des vendanges, souvent — est coupé net, son montant écrit au-dessus.',
+    'Le « prévu au barème » (heures/ha × surface) ne se compare plus ici à la dépense de tout le domaine : les deux ne comptent pas les mêmes choses.',
+    'Fermage, amortissements, assurances et frais généraux n’y sont pas : <b>ce n’est pas un compte de résultat</b>.'
+  ] },
+
+  'pil.an.renfort': { t: 'Le renfort à prévoir', p: [
+    'Une <b>photo du jour</b> : avec l’équipe prévue au planning — contrats, horaires de chacun, congés —, combien de personnes manqueront, et quand, pour que les travaux tiennent dans leur fenêtre au barème.',
+    'Chaque semaine compare le <b>besoin</b> (les heures de barème de la semaine, ramenées à une personne) à <b>ce que l’équipe peut faire</b> la même semaine. Une semaine où il manque une demi-personne ou plus ouvre une ligne ; les semaines qui se suivent font une seule ligne, avec le manque le plus fort.',
+    'L’échelle suit les semaines à venir. Les semaines passées restent en gris ; la vendange, si elle dépasse, est coupée net avec son chiffre.',
+    '<b>Combien recruter, quand, et ce que coûte de ne rien faire</b> se chiffrent dans Décider › Le renfort. Lui laisse glisser le travail dans sa fenêtre : ses chiffres peuvent être plus bas que cette photo.',
+    'Rien n’est compté au-delà de la dernière période datée : un trou n’est pas un zéro.'
   ] }
 
 };

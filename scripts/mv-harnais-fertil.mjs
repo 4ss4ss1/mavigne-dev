@@ -167,8 +167,9 @@ const PIL = lire('src/pilotage.js');
 const pj = PIL.indexOf('var achP=0, nAchP=0;'), pk = PIL.indexOf('\n  }\n', pj);
 const PREVU = (pj >= 0 && pk > pj) ? PIL.slice(pj, pk + 4) : '';
 function prevu(src, o) {
-  const f = new Function('window', 'enCoursC', 'ex', 'dFin', 'ach', src + '\nreturn { achP, nAchP };');
-  return f({ INTRANTS: { fertil: o.ops } }, o.enCours !== false, { d0: '2026-01-01', d1: '2026-12-31' }, o.dFin || '2026-10-02', o.ach || []);
+    // ANNEE-1 (§234) : le bloc place aussi le prévu dans son mois (byM[k].achP) — on lui passe un byM vide.
+  const f = new Function('window', 'enCoursC', 'ex', 'dFin', 'ach', 'byM', src + '\nreturn { achP, nAchP };');
+  return f({ INTRANTS: { fertil: o.ops } }, o.enCours !== false, { d0: '2026-01-01', d1: '2026-12-31' }, o.dFin || '2026-10-02', o.ach || [], {});
 }
 const OPS = [{ cout: 410, prodId: 'p1', cree: '2026-10-02', sem: '2026-11-09' }, { cout: null, prodId: 'p2', cree: '2026-10-02' }];
 t('le bloc du pr\u00e9vu est trouv\u00e9 dans pilotage.js', PREVU.length > 100);

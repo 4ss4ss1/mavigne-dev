@@ -3065,7 +3065,7 @@ var _MVT_CHAPS=[
   {f:'outils',id:'reserve',  ic:'carton', t:'La R\u00e9serve', x:'Stocks, achats, inventaires et parc \u00e0 f\u00fbts : le bilan mati\u00e8re se tient tout seul.'},
 
   {f:'pil',   id:'pilotage', ic:'boussole', t:'Aujourd\u2019hui \u2014 la vue chef', x:'Marge sur votre objectif, charge restante, cadence, et la d\u00e9cision du jour.'},
-  {f:'pil',   id:'annee',    ic:'calendrier', t:'L\u2019ann\u00e9e \u2014 les douze mois', x:'La frise annuelle, l\u2019exercice comptable et l\u2019ann\u00e9e vigne : deux cadres, deux r\u00e9ponses.'},
+  {f:'pil',   id:'annee',    ic:'calendrier', t:'L\u2019ann\u00e9e \u2014 un cadre \u00e0 la fois', x:'L\u2019exercice comptable ou l\u2019ann\u00e9e vigne : le budget en euros, et le renfort \u00e0 pr\u00e9voir.'},
   {f:'pil',   id:'campagne', ic:'raisin', t:'La campagne', x:'Avancement par t\u00e2che, temps pass\u00e9, \u00e9ch\u00e9ances et comparatif avec l\u2019an dernier.'},
   {f:'pil',   id:'eco',      ic:'euro', t:'Ce que co\u00fbte une parcelle', x:'Le co\u00fbt en euros et \u00e0 l\u2019hectare, pond\u00e9r\u00e9 par l\u2019\u00e9quipe r\u00e9ellement pass\u00e9e.'},
   {f:'pil',   id:'etp',      ic:'graphique', t:'Combien de bras', x:'Effectif pr\u00e9sent semaine par semaine, charge \u00e0 absorber, mat\u00e9riel et pic de saison.'},

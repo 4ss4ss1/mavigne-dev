@@ -203,8 +203,8 @@ export { _pilEchCadence };`;
   t('⑫ l\'exercice clos garde son en-tête d\'avant', /D\\u00e9penses de l\\u2019exercice/.test(en));
   const gr=fn(SRC.pil,'_pexGraph').replace(/^\s*\/\/.*$/gm,'');
   t('⑫ le graphe hachure le prévu et marque la coupe', /pex-hach/.test(gr) && /\['salP','url\(#pex-hach\)'\]/.test(gr) && /aujourd\\u2019hui/.test(gr));
-  const cd=fn(SRC.pil,'_pilDeuxCadresHtml').replace(/^\s*\/\/.*$/gm,'');
-  t('⑫ le cadre « Exercice comptable » nomme la clôture, prévu compris', /X\.enCoursC/.test(cd) && /X\.totalClot/.test(cd));
+  const cd=fn(SRC.pil,'_pilAnBudgetData').replace(/^\s*\/\/.*$/gm,'');
+  t('⑫ le budget de L\'année nomme l\'engagé et le reste prévu (ANNEE-1)', /X\.enCoursC/.test(cd) && /X\.totalP/.test(cd) && /X\.total\)/.test(cd));
 }
 
 // ── ⑬ lot PIL-DIAG : une seule liste ─────────────────────────────────────────

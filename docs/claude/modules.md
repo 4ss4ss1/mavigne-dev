@@ -1277,8 +1277,8 @@ indissociables dont un **filet de tolérance** en tête de `switchCaveOng`.
   Budget · Conformité, à la maille de la portée, chacune menant à l'écran qui la détaille.
   ★ **En frise d'une ligne sous 700 px.** ⚠️ Elles restent **quatre** et **visibles** : on ne
   remplace pas quatre chiffres par un bouton « voir les chiffres » — le harnais l'interdit.
-  ⚠️ **L'effectif affiche le PIC, jamais la moyenne** — une moyenne annuelle n'existe aucun jour de
-  l'année, et c'est le pic qui décide d'un recrutement.
+  ⚠️ **Sur l'année, l'effectif REGARDE DEVANT** (ANNEE-1, §234) : combien de personnes manqueront et quand, avec
+  l'équipe prévue — la même photo que « Le renfort à prévoir ». Sur une campagne zoomée, il garde son **pic**, jamais la moyenne.
   ⚠️ **Source absente ⇒ tiret, jamais zéro.** Un tableau de bord qui écrit 0 là où il n'a pas su
   calculer ment.
 
@@ -1296,12 +1296,12 @@ indissociables dont un **filet de tolérance** en tête de `switchCaveOng`.
   ★ `_pilDiagCouverture` **pèse la gravité, pas le nombre** — dix remarques améliorables ne valent
   pas un trou dans le calendrier. Plancher à 35 %.
 
-- ★★★ **LES DEUX CADRES DE L'ANNÉE** (`_pilDeuxCadresHtml`, niveau ①). Un domaine a **deux années**
-  et elles ne répondent pas à la même question :
-  **l'EXERCICE COMPTABLE** (bilan à bilan) → *« ce que m'a coûté l'année fiscale »* ;
-  **l'ANNÉE VIGNE** (après vendange N → fin vendange N+1) → *« ce que m'a coûté un cycle »*.
-  Les deux totaux diffèrent, **et c'est normal** : une campagne à cheval sur la clôture est
-  partagée entre deux bilans, une campagne entièrement hors de l'exercice n'y apparaît pas du tout.
+- ★★★ **L'ANNÉE, UN CADRE À LA FOIS** (ANNEE-1, §234 — remplace « Deux façons de compter » et la frise des 52 semaines).
+  `_PIL_SCOPE.cadre` ('exo' | 'vig', mémorisé) + `recul` (0 = en cours, NON mémorisé) ; `_pilAnCadre()` rend les bornes
+  (`_mvExerciceAn` / `_mvCampagneBornes` — l'année vigne des Archives, une seule définition). Tout l'onglet, les photos et le fil
+  d'Ariane lisent ce cadre. Budget = `_pexData(C.F,true)` (dépensé / reste prévu / total, postes du moteur) ; renfort =
+  `_pilAnFenetres` sur `ann.weeks` bornées (besoin face à `_pilDispoSem`, seuil d'une demi-personne). L'échelle des deux graphes
+  suit ce qui VIENT ; un passé qui la dépasse est coupé, sa valeur écrite. Les puces des campagnes portent `data-etpc` (le zoom).
   ⚠️⚠️ **UN EXERCICE COMPTABLE EST UNE DONNÉE, PAS UN RÉGLAGE.** Voir §34, lot 6.
 
 - ★★ **Un seul moteur de graphe.** `_mvGraphCadre` / `_mvGraphSvg` (utils.js) existait déjà et
