@@ -3,13 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **4 octobre 2026 (GESTES-1, avec la note NOTE-DRM non poussée)** — ★★ **DÉGUSTER, TRAITER, FILTRER** (§239).
-> Benchmark des logiciels de cave puis maquette `maquette-cave-gestes-v1.html` validée « go avec les recos », plus une demande de Nico :
-> désigner UN FÛT quand une anomalie s'y montre (de base, la dégustation porte sur la cuvée). Trois types dans « Nouvelle opération » :
-> fût = lot + repère (aucun fût nominatif) ; traitement = produit de La Réserve, unité et quantité lues du Cuvier (frontière), sortie de
-> stock par `_consoCuvier` ; registre : famille par nature (`_rmTraitT`, « Corrections d'acidité »), filtration en pratiques, dégustation
-> en pied. Au passage : les 82 fûts en dur du soufre, l'espace avant « · » (entrée 10). DRM : backlog, entrée 43. Harnais `mv-harnais-gestes`
-> (neuf, 60 + 7/7). Marque `lots/GESTES-1.json`. Base `5a0d37e` (rejoué sur ALIGN-3). **APP 8.16 → 8.17, SW 8.91 → 8.92** (visible).
+> Dernière consolidation : **4 octobre 2026 (DEMO-4)** — ★★ **LA DÉMO DU SITE : UN DOMAINE, QUATRE TÉLÉPHONES** (§240).
+> Demande du 03/10 (« comme Apple ou Google ») → maquette publiée, cinq tours de retouches, « go » le 04/10. `/demo.html`, page neuve du
+> site : le produit en vedette, « Quel téléphone prenez-vous en main ? », un parcours par rôle (gérant 8 scènes, ouvrier 7, tractoriste 6,
+> maître de chai 8) sur des CAPTURES de la vraie appli prises avec les droits de chaque rôle, « Un domaine, quatre téléphones », sept
+> questions sans nommer un concurrent, la fin en heures (127 h à 12 ha et 6 permanents, zéro montant). `logiciel-vigne` y mène ; le tour
+> `?demo=visite` reste la porte « librement ». Harnais `mv-harnais-demo` (neuf, 11 + 10/10). Marque `lots/DEMO-4.json`. Base `8645b31`.
+> **Aucun bump** (page du site, hors shell). Rappel : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---

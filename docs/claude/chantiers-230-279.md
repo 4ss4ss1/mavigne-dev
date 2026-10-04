@@ -273,3 +273,62 @@ plus : **pouvoir désigner un fût** quand une anomalie s'y montre ; de base, la
 - **Rejoué sur une base neuve** : construit sur `657cb29`, le lot a trouvé ALIGN-3 poussé entre-temps (§238, APP 8.16, SW 8.91). Mes
   fichiers que l'amont n'avait pas touchés repris tels quels (vérifié fichier par fichier) ; les autres rejoués sur `5a0d37e` ; section,
   version et SW décalés (§239, 8.17, 8.92). Un numéro déjà servi n'est jamais réutilisé (règle d'or n°1).
+
+## 240. ★★ DEMO-4 — LA DÉMO DU SITE : UN DOMAINE, QUATRE TÉLÉPHONES (04/10 — `public/demo.html` (neuf) · `public/demo/` (61 captures, neuves) · `public/logiciel-vigne.html` · `scripts/mv-harnais-demo.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · **aucun bump** : page du site, hors shell · base `8645b31`)
+
+**La demande** (Nico, 03/10) : refaire la démo du site « comme Apple ou Google », que le prospect se dise « c'est cette appli qu'il me
+faut ». Maquette publiée, cinq tours de retouches le 04/10 : ouverture « De la parcelle au registre, sans rien ressaisir » (aucune accroche
+de saison) ; une première page au code des grands (le produit en vedette, plus de dessin) ; le chef prépare AVANT que Jean ne valide ; un
+parcours cave ne montre pas la vigne sans faire le lien ; puis le principe retenu — **un parcours par téléphone** (gérant, ouvrier,
+tractoriste, maître de chai), en insistant sur ce que chacun voit. Cave poussée (GESTES-1, §239), puis « go ».
+
+### 240a. Ce qui change
+
+- **`/demo.html`, page neuve du site** : ouverture (le produit en vedette), « Quel téléphone prenez-vous en main ? » (quatre tuiles, deux
+  curseurs : surface et permanents), le parcours du rôle choisi, « Un domaine, quatre téléphones » (les quatre barres du bas côte à côte,
+  soulignées ; toucher un téléphone change de visite), sept questions à poser à n'importe quel logiciel, la fin en heures sur SON domaine.
+  Menu « Chapitres » (26 écrans). Clair et sombre, téléphone et ordinateur, mouvement réduit respecté.
+- **Les parcours** : gérant (il prépare, le bureau sait, échéances, renfort, coût — 8 scènes) ; ouvrier (le chef prépare, ce que voit Jean,
+  il valide, le bureau sait — 7) ; tractoriste (« Tu prends le tracteur aujourd'hui ? », son chantier, le registre — 6) ; maître de chai
+  (ce qui presse, tournée, courbe, dégustation de GESTES-1, le lien aux rangs — 8).
+- **Les écrans sont des CAPTURES de la vraie appli** (APP 8.17, domaine `?demo=visite` + `public/mavigne_demo_data.json`, Chromium du bac à
+  sable), `public/demo/*.webp`. Chaque rôle est capturé avec SES droits : rôles réels et `mods` d'un vrai membre (`_isDemo` levé, car
+  `_mvModOff` ne restreint jamais la démo). Réglages retenus : ouvrier sans Cave ni Tracteur ; tractoriste sans Cave ; maître de chai sans
+  Vigne, Tracteur ni Phyto. Barres relevées : gérant Pilotage · Vigne · Tracteur · Phyto · Plus ; ouvrier Vigne · Phyto · Réserve ·
+  Planning · Réglages ; tractoriste qui prend le tracteur Tracteur · Phyto · Vigne · Réserve · Plus ; maître de chai Cave · Réserve ·
+  Planning · Réglages.
+- **Le site y mène** : les cinq « Voir la démo » de `logiciel-vigne.html` → `/demo.html` (« 3 minutes »). Le tour `?demo=visite` reste la
+  porte « Ouvrir la vraie appli, librement » en fin de démo.
+
+### 240b. Les arbitrages
+
+- **Captures, pas l'appli dans un cadre** : la maquette annonçait « à l'intégration, ce sera l'application elle-même ». Écarté pour ce
+  lot : deux instances de l'appli en iframes (téléphone + ordinateur), le bundle entier avant la première image, l'orchestration des rôles
+  par messages — lourd sur le téléphone d'un prospect. Les captures sont les vrais écrans, au pixel ; l'appli vivante reste à un geste.
+- **Zéro montant** (décision du 15/08) : la fin compte en heures. Le barème de la démo (127 h à 12 ha et 6 permanents) devient continu :
+  validations et tracteur suivent la surface ; pointage (4 min + 1 par permanent) et fins de mois (30 min + 10 par permanent) suivent
+  l'équipe. Règles proposées par Claude, acceptées par le « go » ; le harnais tient les 127 h du site.
+- **Aucun concurrent nommé** : Process2Wine, agreo et Isagri couvrent aussi vigne, chai et équipe (vérifié le 03/10). Pas de « le seul
+  tout-en-un » : des questions que le prospect pose lui-même.
+- **`noindex,follow`** : page d'expérience, presque sans texte — `logiciel-vigne` reste la porte d'entrée de Google. Hors sitemap par
+  construction (`mv-sitemap` ne réclame que les pages indexables).
+
+### 240c. Mesuré
+
+`mv-harnais-demo.mjs` : **11 assertions** — les 61 images de la table présentes, les 33 écrans cités tous adossés à une image, 29 étapes
+sans écran inconnu, 127 h joué sur la VRAIE `lignes()` extraite de la page, zéro montant, polices auto-hébergées, `noindex`, les deux
+portes (essai, appli libre), le site qui y mène. Contre-épreuve **10/10**. Les quatre parcours cliqués de bout en bout dans Chromium sur la
+page servie (téléphone sombre et clair, ordinateur) : zéro erreur, aucune ressource en échec.
+
+### 240d. Trouvé en route
+
+- **Un caviste à qui l'on ne masque que la Vigne** est arrivé sur le Phyto, toast « Module masqué pour votre profil » (accueil forcé dans le
+  bac à sable, pas une vraie connexion) : Phyto passe avant Cave dans sa barre. À vérifier chez Nico.
+- **« Tap pour enregistrer l'avancement »** du Tracteur n'a rien ouvert dans le bac à sable : non tranché, peut-être le bac à sable.
+
+### 240e. Ouvert
+
+① **Les captures vieillissent** : à refaire quand un écran montré change ; les scripts de capture du bac à sable ne sont pas versionnés (à
+faire : `scripts/mv-demo-captures.mjs`). ② Quelques chapitres libres datent d'APP 8.07 (météo, planning, fiche de Jean, documents, apports,
+négoce, réserve, registre phyto, et les deux écrans d'ordinateur du bureau — chiffres identiques). ③ La version « appli vivante dans le
+cadre », si Nico la veut un jour. ④ À l'œil chez Nico, sur un vrai iPhone. ⑤ Les deux trouvailles de 240d.

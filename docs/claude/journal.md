@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **4 octobre 2026 (GESTES-1, avec la note NOTE-DRM non poussée)** — ★★ **DÉGUSTER, TRAITER, FILTRER** (§239).
+> Benchmark des logiciels de cave puis maquette `maquette-cave-gestes-v1.html` validée « go avec les recos », plus une demande de Nico :
+> désigner UN FÛT quand une anomalie s'y montre (de base, la dégustation porte sur la cuvée). Trois types dans « Nouvelle opération » :
+> fût = lot + repère (aucun fût nominatif) ; traitement = produit de La Réserve, unité et quantité lues du Cuvier (frontière), sortie de
+> stock par `_consoCuvier` ; registre : famille par nature (`_rmTraitT`, « Corrections d'acidité »), filtration en pratiques, dégustation
+> en pied. Au passage : les 82 fûts en dur du soufre, l'espace avant « · » (entrée 10). DRM : backlog, entrée 43. Harnais `mv-harnais-gestes`
+> (neuf, 60 + 7/7). Marque `lots/GESTES-1.json`. Base `5a0d37e` (rejoué sur ALIGN-3). **APP 8.16 → 8.17, SW 8.91 → 8.92** (visible).
+
 > ★ Consolidation : **4 octobre 2026 (ALIGN-3)** — ★ **CORRECTIF : UN BLOC MASQUÉ RESTE MASQUÉ SUR L'ACCUEIL** (§238).
 > Nico (04/10, après ALIGN-2 en ligne) : les blocs masqués réapparaissaient une fois la personnalisation validée, l'ordre semblait
 > bousculé, « on ne voit pas l'œil ». Cause : `#home-cols > .home-w{display:flex}` (un ID) battait `.home-w.home-w-off{display:none}`

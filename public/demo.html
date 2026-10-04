@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La démo de Ma Vigne — un domaine, quatre téléphones</title>
+<meta name="description" content="Trois minutes sur les vrais écrans de Ma Vigne : ce que voient le gérant, l’ouvrier, le tractoriste et le maître de chai, au domaine.">
+<meta name="robots" content="noindex,follow">
+<meta name="theme-color" content="#14100C">
+<meta property="og:type" content="website">
+<meta property="og:title" content="La démo de Ma Vigne — un domaine, quatre téléphones">
+<meta property="og:description" content="De la parcelle au registre, sans rien ressaisir. Trois minutes sur les vrais écrans.">
+<meta property="og:url" content="https://mavigneapp.fr/demo.html">
+<meta property="og:image" content="https://mavigneapp.fr/og-mavigne.png">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+:root{
+  --bg:#F2EBDF; --fg:#21190F; --fg2:#6A5C49; --accent:#8A6719; --gold:#B8912F;
+  --card:rgba(70,48,14,.05); --cardb:rgba(70,48,14,.15); --btn:#21190F; --btnfg:#F3ECDF;
+  --bezel:#17120D; --ok:#4E7A2E; --skyA:.55;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14100C; --fg:#EFE6D4; --fg2:#B5A88F; --accent:#D9BE73; --gold:#C9A84C;
+    --card:rgba(255,246,226,.055); --cardb:rgba(232,214,166,.16); --btn:#D9BE73; --btnfg:#1B140C;
+    --bezel:#0A0806; --ok:#8DBA63; --skyA:1;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14100C; --fg:#EFE6D4; --fg2:#B5A88F; --accent:#D9BE73; --gold:#C9A84C;
+  --card:rgba(255,246,226,.055); --cardb:rgba(232,214,166,.16); --btn:#D9BE73; --btnfg:#1B140C;
+  --bezel:#0A0806; --ok:#8DBA63; --skyA:1;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:'Outfit',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:10px}
+#app{position:relative;height:100%;display:flex;flex-direction:column;overflow:hidden}
+.sky{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1.6s ease}
+.sky.on{opacity:var(--skyA)}
+
+/* barre du haut */
+.bar{position:relative;z-index:5;display:flex;align-items:center;gap:14px;padding:10px 16px 6px}
+.brand{display:flex;align-items:center;gap:8px;background:none;border:0;padding:4px;cursor:pointer;flex-shrink:0}
+.brand img{width:28px;height:28px;object-fit:contain}
+.brand span{font-family:'Cormorant Garamond',Georgia,serif;font-size:20px;font-weight:600;letter-spacing:.2px}
+.prog{flex:1;display:flex;gap:5px;min-width:0}
+.prog button{flex:1;height:22px;border:0;padding:0;background:none;cursor:pointer;position:relative}
+.prog button::before{content:'';position:absolute;left:0;right:0;top:10px;height:3px;border-radius:3px;background:var(--cardb)}
+.prog button.done::before{background:color-mix(in srgb,var(--gold) 55%,transparent)}
+.prog button.cur::before{background:var(--gold)}
+.chap{flex-shrink:0;border:1px solid var(--cardb);background:var(--card);border-radius:99px;padding:7px 13px;font-size:13.5px;font-weight:500;cursor:pointer}
+
+/* scène */
+#stage{position:relative;flex:1;min-height:0;z-index:2}
+.scene{position:absolute;inset:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:10px;padding:6px 20px 14px;opacity:0;transform:translateX(26px);transition:opacity .45s ease,transform .55s cubic-bezier(.2,.7,.2,1)}
+.scene.in{opacity:1;transform:none}
+.scene.out{opacity:0;transform:translateX(-26px)}
+.scene.back{transform:translateX(-26px)}
+.scene.back.out{transform:translateX(26px)}
+.hour{margin:0;font-size:14px;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums;letter-spacing:.2px}
+h1{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-size:clamp(29px,7.6vw,46px);line-height:1.04;letter-spacing:-.2px;margin:4px 0 8px;text-wrap:balance}
+.lede{margin:0;font-size:15.5px;line-height:1.5;color:var(--fg2);max-width:46ch;text-wrap:pretty;transition:opacity .3s}
+.proof{margin:10px 0 0;font-size:14px;line-height:1.45;padding-left:12px;border-left:2px solid var(--gold);max-width:46ch}
+.dev{min-height:0;display:flex;align-items:center;justify-content:center}
+.act{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px}
+.go{border:0;border-radius:15px;padding:14px 22px;background:var(--btn);color:var(--btnfg);font-weight:600;font-size:16px;cursor:pointer;flex:1;max-width:420px;box-shadow:0 10px 26px rgba(0,0,0,.22)}
+.go:disabled{opacity:.35;cursor:default;box-shadow:none}
+.prev{border:0;background:none;color:var(--fg2);font-size:14.5px;padding:12px 6px;cursor:pointer;flex-shrink:0}
+.prompt{flex:1;display:flex;align-items:center;gap:10px;font-weight:500;font-size:15px;color:var(--accent)}
+.prompt i{width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 0 var(--gold);animation:pulse 1.6s infinite;flex-shrink:0}
+.skip{border:0;background:none;color:var(--fg2);text-decoration:underline;text-underline-offset:3px;font-size:13.5px;cursor:pointer;padding:10px 4px;flex-shrink:0}
+
+/* appareil */
+.phone{position:relative;height:100%;max-height:700px;aspect-ratio:390/844;max-width:100%;border:6px solid var(--bezel);border-radius:32px;background:var(--bezel);box-shadow:0 30px 70px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.06)}
+.screen{position:relative;width:100%;height:100%;border-radius:26px;overflow:hidden;background:#EFE8DA}
+.screen img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.screen img.after{opacity:0;transition:opacity .55s ease}
+.screen.done img.after{opacity:1}
+.hot{position:absolute;border:0;background:transparent;border-radius:14px;cursor:pointer;z-index:3}
+.hot::after{content:'';position:absolute;inset:-5px;border-radius:16px;border:2.5px solid var(--gold);animation:ring 1.6s ease-in-out infinite}
+.screen.done .hot{display:none}
+.ring{position:absolute;border:2.5px solid #C9A84C;border-radius:16px;box-shadow:0 0 0 2000px rgba(20,14,8,.18),0 0 24px rgba(201,168,76,.55);pointer-events:none;opacity:0;transition:opacity .6s .35s}
+.scene.in .ring{opacity:1}
+.ripple{position:absolute;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:rgba(201,168,76,.55);pointer-events:none;animation:rip .7s ease-out forwards;z-index:4}
+.laptop{width:min(100%,780px)}
+.lscreen{position:relative;aspect-ratio:16/10;border:11px solid var(--bezel);border-bottom-width:13px;border-radius:16px 16px 4px 4px;overflow:hidden;background:#EFE8DA;box-shadow:0 30px 70px rgba(0,0,0,.35)}
+.lscreen img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top}
+.lscreen img.after{opacity:0;transition:opacity .8s ease}
+.lscreen.done img.after{opacity:1}
+.lbase{height:13px;margin:0 -6%;border-radius:0 0 14px 14px;background:linear-gradient(#2c251d,#120e0a)}
+
+/* la sève */
+.s-seve{grid-template-rows:auto auto minmax(0,1fr) auto}
+.s-seve .dev{position:relative}
+.s-seve .laptop{width:100%}
+.rcs{display:flex;flex-direction:column;gap:8px;overflow:auto;padding:2px 2px 4px}
+.rc{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:16px;background:var(--card);border:1px solid var(--cardb);opacity:0;transform:translateY(10px);transition:opacity .45s,transform .5s cubic-bezier(.2,.7,.2,1)}
+.rc.on{opacity:1;transform:none}
+.rc svg{width:22px;height:22px;flex-shrink:0;stroke:var(--accent);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.rc div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.rc b{font-weight:500;font-size:13.5px;color:var(--fg2)}
+.rc span{font-size:16px;font-weight:500}
+.rc s{color:var(--fg2);text-decoration-thickness:1.5px;font-weight:400}
+.rc em{font-style:normal;color:var(--accent);margin:0 4px}
+.seve-line{position:absolute;inset:0;pointer-events:none;overflow:visible}
+.seve-line path{fill:none;stroke:#C9A84C;stroke-width:2.2;stroke-linecap:round;stroke-dasharray:var(--len);stroke-dashoffset:var(--len);filter:drop-shadow(0 0 6px rgba(201,168,76,.8))}
+.seve-line.run path{animation:draw 1.1s .2s ease-in-out forwards}
+.mini-phone{position:absolute;height:62%;aspect-ratio:390/844;left:-10px;bottom:-26px;border:5px solid var(--bezel);border-radius:26px;overflow:hidden;background:var(--bezel);box-shadow:0 20px 50px rgba(0,0,0,.45);display:none}
+.mini-phone img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:21px;display:block}
+.replay{border:1px solid var(--cardb);background:var(--card);border-radius:99px;padding:6px 12px;font-size:13px;cursor:pointer;color:var(--fg2)}
+
+/* ouverture : le produit en vedette, comme chez Apple ou Linear */
+.s-open{display:flex;flex-direction:column;align-items:center;text-align:center;padding:5vh 20px 0;overflow:hidden}
+.op-txt{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center}
+.s-open h1{font-size:clamp(40px,11vw,86px);line-height:1;letter-spacing:-.8px;max-width:13ch;margin:0 0 16px}
+.s-open .lede{max-width:33ch;font-size:16.5px;margin:0 auto}
+.cta-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px 24px;margin-top:24px}
+.pill{border:0;border-radius:99px;padding:15px 30px;background:var(--btn);color:var(--btnfg);font-weight:600;font-size:16px;cursor:pointer;box-shadow:0 14px 34px rgba(201,168,76,.26)}
+.lien{border:0;background:none;color:var(--accent);font-weight:500;font-size:15.5px;cursor:pointer;padding:10px 2px}
+.hero{position:relative;flex:1;min-height:200px;width:100%;max-width:1180px;margin-top:4.5vh}
+.hero::before{content:'';position:absolute;left:50%;top:-6%;width:150%;height:115%;transform:translateX(-50%);background:radial-gradient(closest-side,rgba(201,168,76,.30),rgba(201,168,76,.09) 55%,transparent 78%);pointer-events:none}
+.hero::after{content:'';position:absolute;left:-30px;right:-30px;bottom:0;height:40%;background:linear-gradient(to bottom,transparent,var(--bg) 66%);pointer-events:none;z-index:3}
+.h-phone{position:absolute;z-index:2;left:50%;top:0;height:124%;aspect-ratio:390/844;border:7px solid var(--bezel);border-radius:44px;overflow:hidden;background:var(--bezel);box-shadow:0 40px 90px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.09);transform:translate(-50%,46px);opacity:0;transition:transform 1.15s cubic-bezier(.16,.84,.24,1) .3s,opacity .9s ease .3s}
+.h-phone img{width:100%;height:100%;object-fit:cover;object-position:top;display:block;border-radius:37px}
+.h-laptop{display:none}
+.scene.in .h-phone{transform:translate(-50%,0);opacity:1}
+.caption{position:absolute;left:0;right:0;bottom:10px;z-index:4;margin:0;font-size:11.5px;line-height:1.4;color:var(--fg2);padding:0 22px}
+
+/* profil */
+.s-prof{display:block;overflow-y:auto;padding-bottom:30px}
+.prof-in{max-width:620px;margin:0 auto}
+.who{display:grid;gap:10px;margin:18px 0 20px}
+.opt{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:15px 17px;border-radius:18px;border:1.5px solid var(--cardb);background:var(--card);cursor:pointer;transition:border-color .2s,background .2s}
+.opt b{font-family:'Cormorant Garamond',Georgia,serif;font-size:23px;font-weight:600;line-height:1.1}
+.opt span{font-size:14px;color:var(--fg2)}
+.opt[aria-pressed="true"]{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 13%,transparent)}
+.size p{margin:14px 0 8px;font-size:14px;font-weight:500;color:var(--fg2)}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chips button{border:1px solid var(--cardb);background:var(--card);border-radius:99px;padding:8px 13px;font-size:14px;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--btn);color:var(--btnfg);border-color:transparent}
+.s-prof .go{margin-top:24px;width:100%}
+
+/* questions */
+.s-q{display:block;overflow-y:auto}
+.q-in{max-width:700px;margin:0 auto;padding-bottom:20px}
+.qs{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:10px}
+.q{padding:14px 16px;border-radius:18px;background:var(--card);border:1px solid var(--cardb);opacity:0;transform:translateY(10px);transition:opacity .45s,transform .5s cubic-bezier(.2,.7,.2,1)}
+.scene.in .q{opacity:1;transform:none}
+.q p{margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-size:21px;font-weight:600;line-height:1.15}
+.q div{margin-top:7px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14.5px;color:var(--accent);font-weight:500}
+.q button{border:0;background:none;color:var(--fg2);font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;flex-shrink:0;padding:4px 0}
+
+/* fin */
+.s-fin{display:block;overflow-y:auto}
+.fin-in{max-width:620px;margin:0 auto;padding-bottom:30px}
+.fin-prof{display:flex;flex-direction:column;gap:8px;margin:6px 0 4px}
+.fin-prof .chips button{padding:6px 11px;font-size:13px}
+.bigh{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-size:clamp(76px,22vw,120px);line-height:.9;margin:18px 0 4px;font-variant-numeric:lining-nums tabular-nums}
+.bigh small{font-size:.38em;margin-left:6px;color:var(--fg2)}
+.bigsub{margin:6px 0 18px;font-size:16px;line-height:1.45}
+.lines{display:grid;gap:0;border-top:1px solid var(--cardb)}
+.ln{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:11px 0;border-bottom:1px solid var(--cardb);font-size:14.5px}
+.ln b{font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.ln .vu{grid-column:1/-1;font-size:12.5px;color:var(--fg2)}
+.ln .vu button{border:0;background:none;padding:0;color:var(--accent);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-size:12.5px}
+.hors{display:flex;gap:10px;align-items:flex-start;margin:16px 0 0;font-size:14px;line-height:1.45;color:var(--fg2);cursor:pointer}
+.hors input{width:20px;height:20px;accent-color:#B8912F;flex-shrink:0;margin-top:1px}
+.hyp{font-size:12.5px;line-height:1.5;color:var(--fg2);margin:14px 0 0}
+.quote{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-weight:500;font-size:25px;line-height:1.2;margin:26px 0 18px}
+.cta{display:block;text-align:center;text-decoration:none;border-radius:15px;padding:15px 20px;background:var(--btn);color:var(--btnfg);font-weight:600;font-size:16px;box-shadow:0 10px 26px rgba(0,0,0,.22)}
+.ghost{display:block;width:100%;text-align:center;text-decoration:none;margin-top:9px;border-radius:15px;padding:13px 20px;border:1px solid var(--cardb);background:var(--card);color:var(--fg);font-size:15px;cursor:pointer}
+.sign{margin:22px 0 0;font-size:13.5px;color:var(--fg2);line-height:1.5}
+
+/* menu des chapitres */
+.menu{position:fixed;inset:0;z-index:20;background:color-mix(in srgb,var(--bg) 96%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);overflow-y:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 18px calc(30px + env(safe-area-inset-bottom,0px));opacity:0;pointer-events:none;transition:opacity .3s}
+.menu.on{opacity:1;pointer-events:auto}
+.menu-in{max-width:980px;margin:0 auto}
+.menu-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.menu h2{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-size:34px;margin:6px 0 2px}
+.menu .x{border:1px solid var(--cardb);background:var(--card);border-radius:99px;padding:8px 14px;cursor:pointer;font-size:14px}
+.grp{margin:22px 0 8px;font-size:15px;font-weight:600;color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.it{display:flex;flex-direction:column;text-align:left;padding:0;border:1px solid var(--cardb);background:var(--card);border-radius:16px;overflow:hidden;cursor:pointer}
+.it img{width:100%;aspect-ratio:4/5;object-fit:cover;object-position:top;display:block;background:#EFE8DA}
+.it b{font-weight:500;font-size:14px;line-height:1.25;padding:9px 11px 0}
+.it span{font-size:12.5px;line-height:1.35;color:var(--fg2);padding:3px 11px 11px}
+.it .vu{color:var(--accent)}
+
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(201,168,76,.6)}70%{box-shadow:0 0 0 12px rgba(201,168,76,0)}100%{box-shadow:0 0 0 0 rgba(201,168,76,0)}}
+@keyframes ring{0%,100%{transform:scale(1);opacity:.95}50%{transform:scale(1.06);opacity:.55}}
+@keyframes rip{to{transform:scale(9);opacity:0}}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+/* ordinateur et tablette en largeur */
+@media (min-width:920px){
+  .bar{padding:16px 34px 8px}
+  .scene{grid-template-columns:minmax(320px,440px) minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;column-gap:56px;padding:10px 46px 26px}
+  .scene .txt{grid-column:1;grid-row:1;align-self:center}
+  .scene .dev{grid-column:2;grid-row:1 / span 2}
+  .scene .act{grid-column:1;grid-row:2}
+  .phone{border-width:11px;border-radius:52px;max-height:calc(100vh - 140px)}
+  .screen{border-radius:41px}
+  h1{font-size:clamp(40px,4.2vw,58px)}
+  .s-seve{grid-template-rows:auto minmax(0,1fr) auto}
+  .s-seve .txt{grid-row:1;align-self:end}
+  .s-seve .rcs{grid-column:1;grid-row:2;align-self:start;overflow:visible}
+  .s-seve .dev{grid-row:1 / span 3;padding:0 30px 30px 60px}
+  .s-seve .act{grid-row:3}
+  .mini-phone{display:block}
+  .s-open{padding:4.5vh 46px 0}
+  .s-open h1{font-size:clamp(46px,4.7vw,74px);max-width:21ch}
+  .hero{margin-top:4.5vh}
+  .h-laptop{display:block;position:absolute;z-index:1;left:50%;top:0;width:min(76%,860px);transform:translate(-50%,56px);opacity:0;transition:transform 1.2s cubic-bezier(.16,.84,.24,1) .12s,opacity 1s ease .12s}
+  .scene.in .h-laptop{transform:translate(-50%,0);opacity:1}
+  .h-phone{left:auto;right:max(3%,calc(50% - 480px));top:12%;height:108%;transform:translate(0,64px)}
+  .scene.in .h-phone{transform:translate(0,0)}
+  .s-prof,.s-q,.s-fin{display:block}
+}
+@media (max-width:919px){
+  .s-seve .laptop{max-width:290px;margin:0 auto}
+  .s-seve .rc{padding:8px 12px}
+  .s-seve .rc span{font-size:15px}
+  .s-seve .rc b{font-size:12.5px}
+  .s-seve .dev{align-items:flex-start}
+}
+@media (max-height:700px) and (max-width:919px){
+  .s-open{padding-top:2.5vh}
+  .s-open h1{font-size:34px;margin-bottom:10px}
+  .s-open .lede{font-size:15px}
+  .cta-row{margin-top:16px}
+  .hero{margin-top:2vh}
+  .caption{display:none}
+  h1{font-size:27px}
+  .lede{font-size:14.5px}
+  .proof{display:none}
+}
+
+/* ===== Passe 2 : chaque écran au niveau de l'ouverture ===== */
+:root{--rim:#bcae9b}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--rim:#3d3329}}
+:root[data-theme="dark"]{--rim:#3d3329}
+.go,.pill,.cta{border-radius:99px;box-shadow:0 14px 34px rgba(201,168,76,.22)}
+.go{padding:15px 30px}
+.ghost{border-radius:99px}
+.prev{width:50px;height:50px;border-radius:50%;border:1px solid var(--cardb);background:var(--card);display:inline-flex;align-items:center;justify-content:center;padding:0;font-size:0;flex-shrink:0}
+.prev::before{content:'';width:10px;height:10px;border-left:2px solid var(--fg);border-bottom:2px solid var(--fg);transform:translateX(2px) rotate(45deg)}
+.act{justify-content:center;gap:12px;flex-wrap:wrap}
+.prompt{flex:1 1 100%;justify-content:center}
+.scene .txt{text-align:center}
+.lede{margin-left:auto;margin-right:auto}
+.proof{width:fit-content;max-width:42ch;margin:12px auto 0;padding:9px 14px;border:1px solid var(--cardb);border-radius:14px;background:var(--card);font-size:13.5px;text-align:left}
+.dev{position:relative}
+.dev::before{content:'';position:absolute;left:50%;top:50%;width:min(140%,820px);height:115%;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(201,168,76,.22),rgba(201,168,76,.06) 60%,transparent 80%);pointer-events:none}
+.phone,.laptop{position:relative;z-index:1}
+.phone{border-color:#0d0b09;box-shadow:0 0 0 1.5px var(--rim),0 34px 80px rgba(0,0,0,.42)}
+.lscreen{border-color:#0d0b09;box-shadow:0 0 0 1.5px var(--rim),0 34px 80px rgba(0,0,0,.42)}
+.mini-phone{border-color:#0d0b09;box-shadow:0 0 0 1.5px var(--rim),0 20px 50px rgba(0,0,0,.45)}
+/* profil */
+.s-prof .prof-in{text-align:center;max-width:1000px}
+.who{display:grid;gap:10px;margin:22px auto 18px;max-width:560px;text-align:left}
+.opt{position:relative;display:grid;grid-template-columns:62px 1fr 26px;align-items:center;gap:14px;padding:9px 14px 9px 9px;border-radius:22px}
+.opt span{font-size:inherit;color:inherit}
+.opt .opt-img{width:62px;height:80px;border-radius:14px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;background:radial-gradient(closest-side,rgba(201,168,76,.38),transparent 90%),color-mix(in srgb,var(--fg) 6%,transparent)}
+.opt .mini{display:block;height:70px;aspect-ratio:390/844;border:2.5px solid #0d0b09;border-bottom:0;border-radius:9px 9px 0 0;overflow:hidden;box-shadow:0 0 0 1px var(--rim)}
+.opt .mini img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.opt .opt-t{display:flex;flex-direction:column;gap:3px}
+.opt .opt-t b{font-family:'Cormorant Garamond',Georgia,serif;font-size:22px;font-weight:600;line-height:1.1}
+.opt .opt-t span{font-size:13.5px;color:var(--fg2);line-height:1.35}
+.opt .opt-ck{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--cardb)}
+.opt[aria-pressed="true"]{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 11%,transparent)}
+.opt[aria-pressed="true"] .opt-ck{border-color:var(--gold);background:var(--gold) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='%231B140C' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/15px no-repeat}
+.s-prof .go{display:block;width:100%;max-width:420px;margin:22px auto 0}
+/* curseurs */
+.curs{display:grid;gap:14px;max-width:560px;margin:6px auto 0;padding:16px 18px 12px;border-radius:22px;background:var(--card);border:1px solid var(--cardb);text-align:left}
+.cur{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:4px 12px}
+.cur-l{font-size:14px;color:var(--fg2);font-weight:500}
+.cur output{font-family:'Cormorant Garamond',Georgia,serif;font-size:25px;font-weight:600;font-variant-numeric:lining-nums tabular-nums;line-height:1}
+.cur input{grid-column:1/-1;width:100%;-webkit-appearance:none;appearance:none;height:30px;background:transparent;margin:0;cursor:pointer}
+.cur input::-webkit-slider-runnable-track{height:6px;border-radius:6px;background:linear-gradient(to right,var(--gold) var(--p,50%),var(--cardb) var(--p,50%))}
+.cur input::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-10px;border-radius:50%;border:0;background:#FBF7EE;box-shadow:0 2px 8px rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.06)}
+.cur input::-moz-range-track{height:6px;border-radius:6px;background:var(--cardb)}
+.cur input::-moz-range-progress{height:6px;border-radius:6px;background:var(--gold)}
+.cur input::-moz-range-thumb{width:26px;height:26px;border-radius:50%;border:0;background:#FBF7EE;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+/* la sève : notifications */
+.rc{gap:11px;padding:10px 12px;border-radius:20px;background:color-mix(in srgb,var(--fg) 8%,transparent);box-shadow:0 12px 30px rgba(0,0,0,.2);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.rc .rc-app{width:34px;height:34px;border-radius:9px;background:#1A140E;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 0 1px var(--rim)}
+.rc .rc-app img{width:24px;height:24px;object-fit:contain}
+.rc .rc-b{flex:1;gap:1px}
+.rc .rc-h{display:flex;flex-direction:row;justify-content:space-between;gap:8px;font-size:11.5px;color:var(--fg2)}
+.rc .rc-h b{font-size:11.5px;font-weight:600;color:var(--fg2)}
+.rc .rc-t{margin:0;font-size:13.5px;font-weight:500;color:var(--fg2)}
+.rc .rc-v{margin:0;font-size:15.5px;font-weight:500}
+/* questions */
+.s-q .q-in{text-align:center;max-width:760px}
+.qs{gap:0;margin-top:22px;border-top:1px solid var(--cardb);text-align:left}
+.q{padding:16px 2px;border:0;border-bottom:1px solid var(--cardb);border-radius:0;background:none}
+.q div{margin-top:8px;justify-content:flex-start;align-items:flex-start;gap:10px;color:var(--fg);font-weight:400;font-size:15px}
+.q div svg{width:20px;height:20px;flex-shrink:0;margin-top:1px;fill:none;stroke:var(--gold);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.q div span{flex:1}
+/* fin */
+.s-fin .fin-in{text-align:center;max-width:680px}
+.s-fin .curs{margin-top:18px}
+.bigh{margin:28px 0 2px}
+.bigsub{max-width:34ch;margin:6px auto 26px}
+.lines{max-width:600px;margin:0 auto;text-align:left}
+.hors{max-width:600px;margin:18px auto 0;align-items:center;justify-content:space-between;text-align:left}
+.hors input{-webkit-appearance:none;appearance:none;width:50px;height:30px;margin:0;border-radius:99px;background:var(--cardb);position:relative;flex-shrink:0;cursor:pointer;transition:background .2s}
+.hors input::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#FBF7EE;box-shadow:0 1px 4px rgba(0,0,0,.35);transition:transform .2s}
+.hors input:checked{background:var(--gold)}
+.hors input:checked::after{transform:translateX(20px)}
+.hyp{max-width:600px;margin:14px auto 0;text-align:left}
+.quote{max-width:24ch;margin:30px auto 20px}
+.cta,.s-fin .ghost{max-width:420px;margin-left:auto;margin-right:auto}
+.sign{display:flex;align-items:center;justify-content:center;gap:10px}
+.sign img{width:30px;height:30px;object-fit:contain}
+/* menu */
+.menu .x{width:44px;height:44px;border-radius:50%;padding:0;font-size:0;position:relative;flex-shrink:0}
+.menu .x::before,.menu .x::after{content:'';position:absolute;left:50%;top:50%;width:16px;height:2px;border-radius:2px;background:var(--fg)}
+.menu .x::before{transform:translate(-50%,-50%) rotate(45deg)}
+.menu .x::after{transform:translate(-50%,-50%) rotate(-45deg)}
+.it{border-radius:18px}
+.s-quatre{display:block;overflow-y:auto}
+.q4-in{max-width:1100px;margin:0 auto;text-align:center}
+.q4-row{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -20px;padding:22px 20px 10px;-webkit-overflow-scrolling:touch}
+.q4{flex:0 0 60%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;gap:7px;border:0;background:none;cursor:pointer;padding:0;text-align:center;color:inherit}
+.q4-ph{position:relative;width:100%;aspect-ratio:390/844;border:6px solid #0d0b09;border-radius:30px;overflow:hidden;background:#0d0b09;box-shadow:0 0 0 1.5px var(--rim),0 24px 50px rgba(0,0,0,.4)}
+.q4-ph img{width:100%;height:100%;object-fit:cover;object-position:top;display:block;border-radius:24px}
+.q4-ph::after{content:'';position:absolute;left:3%;right:3%;bottom:1%;height:8%;border:2px solid rgba(201,168,76,.9);border-radius:14px;box-shadow:0 0 16px rgba(201,168,76,.55)}
+.q4 b{font-family:'Cormorant Garamond',Georgia,serif;font-size:22px;font-weight:600;margin-top:6px}
+.q4-d{font-size:13.5px;color:var(--fg2);line-height:1.4;max-width:30ch}
+.q4-go{font-size:13.5px;color:var(--accent);font-weight:500;text-decoration:underline;text-underline-offset:3px}
+.q4-moi{font-size:12.5px;font-weight:600;color:var(--btnfg);background:var(--btn);border-radius:99px;padding:3px 10px}
+.q4-note{font-size:13.5px;color:var(--fg2);margin:12px auto 0;max-width:46ch}
+.s-quatre .act{margin-top:18px}
+@media (min-width:920px){.q4-row{overflow:visible;margin:0;padding:26px 0 6px;justify-content:center}.q4{flex:1 1 0;max-width:230px}.s-quatre .act{justify-content:center}}
+.lienp{display:inline-block;margin-top:10px;border:0;background:none;padding:6px 0;color:var(--accent);font-weight:500;font-size:14.5px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.menu .lede{margin-left:0;margin-right:0;text-align:left}
+@media (max-width:919px){
+  .s-seve .laptop{max-width:228px}
+  .rcs{gap:6px}
+  .rc{padding:7px 10px;gap:10px}
+  .rc .rc-app{width:28px;height:28px;border-radius:8px}
+  .rc .rc-app img{width:20px;height:20px}
+  .rc .rc-h,.rc .rc-h b{font-size:10.5px}
+  .rc .rc-t{font-size:12.5px}
+  .rc .rc-v{font-size:14.5px}
+}
+@media (min-width:920px){
+  .scene .txt{text-align:left}
+  .scene .lede{margin-left:0;margin-right:0}
+  .proof{margin-left:0}
+  .act{justify-content:flex-start;flex-wrap:nowrap}
+  .prompt{flex:1}
+  .s-prof .lede,.s-q .lede,.s-fin .lede,.s-quatre .lede{margin-left:auto;margin-right:auto}
+  .who{grid-template-columns:repeat(4,1fr);gap:16px;max-width:none}
+  .opt{grid-template-columns:1fr;padding:0;overflow:hidden;align-items:stretch}
+  .opt .opt-img{width:100%;height:auto;aspect-ratio:16/10;border-radius:0}
+  .opt .mini{height:86%;border-width:4px;border-radius:16px 16px 0 0}
+  .opt .opt-t{padding:14px 18px 18px}
+  .opt .opt-ck{position:absolute;top:12px;right:12px;background-color:color-mix(in srgb,var(--bg) 55%,transparent)}
+  .curs{grid-template-columns:1fr 1fr;gap:30px}
+  .s-q .q-in{text-align:left;max-width:1040px}
+  .s-q .lede{margin-left:0}
+  .q{display:grid;grid-template-columns:1.25fr 1fr;gap:30px;align-items:baseline;padding:20px 2px}
+  .q div{margin-top:0}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .scene,.rc,.q,.sky,.screen img.after,.lscreen img.after,.ring{transition-duration:.01s!important}
+  .seve-line.run path{animation-duration:.01s!important}
+  .h-phone,.h-laptop{transition-duration:.01s!important}
+  .hot::after,.prompt i{animation:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="sky" id="skyA"></div><div class="sky" id="skyB"></div>
+  <header class="bar">
+    <button class="brand" data-act="home" aria-label="Revenir au début"><img id="logo" alt=""><span>Ma Vigne</span></button>
+    <nav class="prog" id="prog" aria-label="Progression"></nav>
+    <button class="chap" data-act="menu">Chapitres</button>
+  </header>
+  <main id="stage" aria-live="polite"></main>
+</div>
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Tous les chapitres"></div>
+<script id="imgdata" type="application/json">{"r-ger-prep": "/demo/r-ger-prep.webp", "t-r-ger-prep": "/demo/t-r-ger-prep.webp", "r-ouv-accueil": "/demo/r-ouv-accueil.webp", "t-r-ouv-accueil": "/demo/t-r-ouv-accueil.webp", "r-ouv-liste": "/demo/r-ouv-liste.webp", "t-r-ouv-liste": "/demo/t-r-ouv-liste.webp", "r-ouv-fait": "/demo/r-ouv-fait.webp", "t-r-ouv-fait": "/demo/t-r-ouv-fait.webp", "r-ger-echeances": "/demo/r-ger-echeances.webp", "t-r-ger-echeances": "/demo/t-r-ger-echeances.webp", "r-ger-renfort": "/demo/r-ger-renfort.webp", "t-r-ger-renfort": "/demo/t-r-ger-renfort.webp", "r-ger-cout": "/demo/r-ger-cout.webp", "t-r-ger-cout": "/demo/t-r-ger-cout.webp", "r-ger-conformite": "/demo/r-ger-conformite.webp", "t-r-ger-conformite": "/demo/t-r-ger-conformite.webp", "r-trac-matin": "/demo/r-trac-matin.webp", "t-r-trac-matin": "/demo/t-r-trac-matin.webp", "r-trac-sessions": "/demo/r-trac-sessions.webp", "t-r-trac-sessions": "/demo/t-r-trac-sessions.webp", "r-chai-accueil": "/demo/r-chai-accueil.webp", "t-r-chai-accueil": "/demo/t-r-chai-accueil.webp", "r-chai-tournee": "/demo/r-chai-tournee.webp", "t-r-chai-tournee": "/demo/t-r-chai-tournee.webp", "r-chai-tournee-apres": "/demo/r-chai-tournee-apres.webp", "t-r-chai-tournee-apres": "/demo/t-r-chai-tournee-apres.webp", "r-chai-courbe": "/demo/r-chai-courbe.webp", "t-r-chai-courbe": "/demo/t-r-chai-courbe.webp", "r-chai-deguster2": "/demo/r-chai-deguster2.webp", "t-r-chai-deguster2": "/demo/t-r-chai-deguster2.webp", "r-ger-journal": "/demo/r-ger-journal.webp", "t-r-ger-journal": "/demo/t-r-ger-journal.webp", "r-ger-accueil": "/demo/r-ger-accueil.webp", "t-r-ger-accueil": "/demo/t-r-ger-accueil.webp", "r-ger-pilotage": "/demo/r-ger-pilotage.webp", "t-r-ger-pilotage": "/demo/t-r-ger-pilotage.webp", "r-chai-chai": "/demo/r-chai-chai.webp", "t-r-chai-chai": "/demo/t-r-chai-chai.webp", "phyto": "/demo/phyto.webp", "t-phyto": "/demo/t-phyto.webp", "meteo-secteurs": "/demo/meteo-secteurs.webp", "t-meteo-secteurs": "/demo/t-meteo-secteurs.webp", "planning": "/demo/planning.webp", "t-planning": "/demo/t-planning.webp", "fiche-jean": "/demo/fiche-jean.webp", "t-fiche-jean": "/demo/t-fiche-jean.webp", "documents": "/demo/documents.webp", "t-documents": "/demo/t-documents.webp", "apports": "/demo/apports.webp", "t-apports": "/demo/t-apports.webp", "negoce": "/demo/negoce.webp", "t-negoce": "/demo/t-negoce.webp", "reserve": "/demo/reserve.webp", "t-reserve": "/demo/t-reserve.webp", "pilotage-auj-pc": "/demo/pilotage-auj-pc.webp", "pilotage-auj-apres-pc": "/demo/pilotage-auj-apres-pc.webp", "renfort-pc": "/demo/renfort-pc.webp", "cout-parcelle-pc": "/demo/cout-parcelle-pc.webp", "planning-pc": "/demo/planning-pc.webp", "t-pilotage-auj-apres-pc": "/demo/t-pilotage-auj-apres-pc.webp", "logo": "/demo/logo.webp"}</script>
+<script id="metadata" type="application/json">{"meteo-secteurs": {"vw": 390, "vh": 844, "rects": [{"s": "#home-meteo-communes", "x": 0, "y": 150.359375, "w": 390, "h": 237}]}, "apports": {"vw": 390, "vh": 844, "rects": [{"s": ".mvv-camp", "x": 14, "y": 378, "w": 362, "h": 135}]}, "negoce": {"vw": 390, "vh": 844, "rects": [{"s": ".mvv-camp-sold", "x": 30, "y": 150, "w": 330, "h": 27}]}, "reserve": {"vw": 390, "vh": 844, "rects": []}, "phyto": {"vw": 390, "vh": 844, "rects": []}, "planning": {"vw": 390, "vh": 844, "rects": []}, "fiche-jean": {"vw": 390, "vh": 844, "rects": []}, "documents": {"vw": 390, "vh": 844, "rects": []}, "r-ger-accueil": {"vw": 390, "vh": 844, "rects": []}, "r-ger-prep": {"vw": 390, "vh": 844, "rects": [{"s": "#ovPriority .mbtn.verte", "x": 20, "y": 669, "w": 350, "h": 47}]}, "r-ger-pilotage": {"vw": 390, "vh": 844, "rects": []}, "r-ouv-accueil": {"vw": 390, "vh": 844, "rects": [{"s": "dock", "x": 4, "y": 770, "w": 382, "h": 70}]}, "r-ouv-liste": {"vw": 390, "vh": 844, "rects": [{"s": ".pcard-qv .pc-validate", "x": 290, "y": 323.9375, "w": 67, "h": 80.140625}, {"s": ".pcard-qv", "x": 16, "y": 250.9375, "w": 358, "h": 170.140625}]}, "r-ouv-fait": {"vw": 390, "vh": 844, "rects": []}, "r-ger-journal": {"vw": 390, "vh": 844, "rects": []}, "r-ger-echeances": {"vw": 390, "vh": 844, "rects": [{"s": ".pil-tile[data-pid=\"echeances\"]", "x": 24, "y": 341.359375, "w": 342, "h": 270.8125}]}, "r-ger-cout": {"vw": 390, "vh": 844, "rects": []}, "r-ger-renfort": {"vw": 390, "vh": 844, "rects": []}, "r-ger-conformite": {"vw": 390, "vh": 844, "rects": []}, "r-trac-sessions": {"vw": 390, "vh": 844, "rects": [{"s": "carte", "x": 15, "y": 346, "w": 354, "h": 224}]}, "r-chai-accueil": {"vw": 390, "vh": 844, "rects": [{"s": "presse", "x": 12, "y": 292, "w": 360, "h": 225}]}, "r-chai-tournee": {"vw": 390, "vh": 844, "rects": [{"s": ".vt-cnt", "x": 256, "y": 570.140625, "w": 46, "h": 46}]}, "r-chai-tournee-apres": {"vw": 390, "vh": 844, "rects": [{"s": ".vt-cnt", "x": 256, "y": 570.140625, "w": 46, "h": 46}]}, "r-chai-courbe": {"vw": 390, "vh": 844, "rects": [{"s": ".mvv-det-g", "x": 30, "y": 150.546875, "w": 333, "h": 292}]}, "r-chai-chai": {"vw": 390, "vh": 844, "rects": []}, "r-trac-matin": {"vw": 390, "vh": 844, "rects": [{"s": "txt:Oui, je prends le tracteur", "x": 20, "y": 471.71875, "w": 350, "h": 118.390625}]}, "r-chai-deguster2": {"vw": 390, "vh": 844, "rects": [{"s": "#cop-dg-next", "x": 20, "y": 718.96875, "w": 350, "h": 49}]}}</script>
+<script>
+(function(){
+'use strict';
+const IMG = JSON.parse(document.getElementById('imgdata').textContent);
+const META = JSON.parse(document.getElementById('metadata').textContent);
+const $ = (s, r=document) => r.querySelector(s);
+const esc = (t) => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/ ([?!;:»])/g, '\u202F$1').replace(/« /g, '«\u00A0').replace(/(\d) (h|%|j|hL|ha)\b/g, '$1\u00A0$2').replace(/ h (\d)/g, '\u00A0h\u00A0$1');
+const isPC = () => matchMedia('(min-width:920px)').matches;
+const calme = matchMedia('(prefers-reduced-motion: reduce)').matches;
+$('#logo').src = IMG['logo'];
+
+// rectangle capturé (px CSS, écran 390×844) → pourcentages dans l'écran
+function pct(name, sel, pad){
+  const m = META[name]; if(!m) return null;
+  const r = (m.rects||[]).find(x => x && x.s === sel); if(!r) return null;
+  pad = pad || 0;
+  const x = Math.max(0, r.x - pad), y = Math.max(0, r.y - pad);
+  const w = Math.min(m.vw - x, r.w + 2*pad), h = Math.min(m.vh - y, r.h + 2*pad);
+  return `left:${(x/m.vw*100).toFixed(2)}%;top:${(y/m.vh*100).toFixed(2)}%;width:${(w/m.vw*100).toFixed(2)}%;height:${(h/m.vh*100).toFixed(2)}%`;
+}
+
+// ── Les écrans ─────────────────────────────────────────────
+const SC = {
+  prep:{ hour:'7 h 55', title:'Le matin, le chef prépare la journée.', img:'r-ger-prep',
+    lede:'Il choisit la tâche du jour, l’équipe qui s’en charge, et laisse un mot pour tous.',
+    hot:{ sel:'#ovPriority .mbtn.verte', prompt:'Touchez « Diffuser la priorité »', label:'Diffuser la priorité', after:'r-ouv-accueil',
+      lede:'C’est parti. Sur le téléphone de Jean, la journée est déjà là : la priorité, sa part du chantier, les parcelles qui restent.' } },
+  o_vue:{ hour:'8 h', title:'Ce que voit Jean, et rien d’autre.', img:'r-ouv-accueil', ring:['dock',2],
+    lede:'Dans sa barre : la Vigne, le Phyto, la Réserve, le Planning et ses Réglages. Ni Pilotage, ni Cave, ni Tracteur.',
+    proof:'C’est le gérant qui coche, personne par personne, ce que chacun a sous les yeux.' },
+  geste:{ hour:'8 h 10', title:'À Jean, il ne reste qu’à valider.', img:'r-ouv-liste',
+    lede:'Tout a été préparé au bureau. Lui palisse, et touche « Valider » quand une parcelle est finie. Rien à taper.',
+    hot:{ sel:'.pcard-qv .pc-validate', prompt:'Touchez « Valider » à la place de Jean', label:'Valider Aux Murgers', after:'r-ouv-fait',
+      lede:'C’est fait. Aux Murgers est palissée, l’équipe du jour est enregistrée avec lui. Jean range son téléphone.' } },
+  seve:{ type:'seve', hour:'8 h 10, la même minute', title:'Au bureau, c’est déjà su.',
+    lede:'Jean vient de valider Aux Murgers dans le rang. Personne n’a rien ressaisi : le bureau le sait déjà.' },
+  d_echeances:{ hour:'10 h', title:'Quand est-ce que ce sera fini ?', img:'r-ger-echeances', ring:['.pil-tile[data-pid="echeances"]',4],
+    lede:'À la cadence de votre équipe, chaque tâche a sa date de fin. En jours ouvrés, pas en pourcentage. Elle bouge à chaque coche.',
+    proof:'Palissage : 27 jours ouvrés, fin vers le 4 au 10 novembre.' },
+  d_renfort:{ hour:'11 h 30', title:'Faut-il embaucher ? Combien, et quand ?', img:'r-ger-renfort', pc:'renfort-pc',
+    lede:'Le renfort répond par un calendrier, aux heures du planning, sans heure sup cachée.',
+    proof:'Ici la réponse est honnête : personne, l’équipe suffit. Un logiciel qui sait aussi vous dire non.' },
+  d_cout:{ hour:'18 h 10', title:'Ce que coûte vraiment chaque parcelle.', img:'r-ger-cout', pc:'cout-parcelle-pc',
+    lede:'Le temps de l’équipe se pose sur les parcelles où elle a travaillé. Le coût suit, à l’hectare, sans tableur.' },
+  v_meteo:{ hour:'7 h 45', title:'Il pleut à Fixin, pas à Gevrey.', img:'meteo-secteurs', ring:['#home-meteo-communes',-4],
+    lede:'Une prévision par commune, à la maille d’un kilomètre et demi. C’est elle qui décide où part l’équipe ce matin.' },
+  v_controle:{ hour:'16 h 25', title:'Le jour du contrôle.', img:'r-ger-conformite',
+    lede:'Cuivre métal sur sept ans, passages par parcelle, registre tenu avec le catalogue officiel E-Phy, délais de rentrée : tout est déjà là.',
+    proof:'Et le registre au format lisible par une machine, obligatoire au 1er janvier 2027, sort en un geste.' },
+  t_matin:{ hour:'7 h 30', title:'Tu prends le tracteur aujourd’hui ?', img:'r-trac-matin',
+    lede:'Chaque matin, l’appli ne lui pose qu’une question.',
+    hot:{ sel:'txt:Oui, je prends le tracteur', prompt:'Touchez « Oui, je prends le tracteur »', label:'Oui, je prends le tracteur', after:'r-trac-sessions',
+      lede:'Ses écrans se rangent dans l’ordre de sa journée : Tracteur, Phyto et Vigne en premier. Demain, la question se reposera.' } },
+  t_vue:{ hour:'7 h 35', title:'Son chantier, sa machine, son avancement.', img:'r-trac-sessions', ring:['carte',4],
+    lede:'Le griffage en cours sur le New Holland, et l’avancement du domaine : 1,05 ha sur 7,02. Un toucher pour noter où il en est.',
+    proof:'Dans sa barre : Tracteur, Phyto, Vigne, Réserve. Planning et Réglages attendent sous « Plus ».' },
+  t_phyto:{ hour:'11 h', title:'Le registre se tient en passant.', img:'phyto',
+    lede:'Le traitement qu’il vient de passer s’inscrit au registre : produit, dose, parcelles, applicateur.',
+    proof:'Lui et le gérant sont les seuls à pouvoir l’écrire.' },
+  c_aujourdhui:{ hour:'7 h', title:'Ce qui presse ce matin.', img:'r-chai-accueil', ring:['presse',3],
+    lede:'Son téléphone s’ouvre sur la Cave, ce qui presse en tête : la cuve à contrôler, les fûts à ouiller, les cuves à mesurer.',
+    proof:'Dans sa barre : Cave, Réserve, Planning, Réglages. Pas de Vigne, pas de Tracteur.' },
+  c_tournee:{ hour:'7 h 10', title:'Six cuves, une ligne chacune.', img:'r-chai-tournee',
+    lede:'Densité, température, pigeage : la tournée se remplit au cuvier, au téléphone, une main libre.',
+    hot:{ sel:'.vt-cnt', prompt:'Comptez un pigeage', label:'Compter un pigeage', after:'r-chai-tournee-apres',
+      lede:'Compté. Les cuves sans relevé du jour remontent en tête : on ne cherche pas laquelle il reste.' } },
+  c_courbe:{ hour:'7 h 20', title:'La cuve 3 est à 1006.', img:'r-chai-courbe', ring:['.mvv-det-g',2],
+    lede:'La courbe le dit avant vous : la fermentation s’achève, le décuvage se prépare. Chaque cuve porte son propre seuil du vin sec.' },
+  c_deguster:{ hour:'15 h', title:'Déguster, et noter la suite.', img:'r-chai-deguster2', ring:['#cop-dg-next',4],
+    lede:'Sur la cuvée, ou sur un fût précis quand une anomalie s’y montre. Comment il goûte, ce qu’on y remarque, la suite à donner.',
+    proof:'Puis « goûter la suivante » : la feuille se rouvre sur la cuvée d’après.' },
+  c_apports:{ hour:'10 h 30', title:'Des caisses au rendement.', img:'apports', ring:['.mvv-camp',3],
+    lede:'Les apports se saisissent en caisses. L’application en fait des kilos, des hectolitres, et un rendement par parcelle face au plafond.',
+    proof:'1 438 caisses, 36 tonnes, 225 hL estimés : tout est rentré.' },
+  c_lien:{ hour:'16 h', title:'Vos cuves commencent dans les rangs.', img:'r-ger-journal',
+    lede:'Les parcelles qui vous livrent sont suivies dans la même appli. Ce que l’équipe y fait le matin, vous le lisez au cuvier : quelle parcelle, quel travail, quel jour.',
+    lienp:{ label:'Voir comment Jean valide une parcelle', id:'geste' } },
+  v_planning:{ hour:'17 h', title:'L’équipe, la semaine, les heures.', img:'planning', pc:'planning-pc',
+    lede:'Charge du mois, capacité de l’équipe, congés : la semaine se lit d’un coup d’œil. Et pour chacun, le relevé du mois sort prêt pour la compta.' },
+  quatre:{ type:'quatre', hour:'18 h', title:'Un domaine, quatre téléphones.',
+    lede:'Chacun n’a sous les yeux que ce qui le regarde. Le gérant, lui, voit tout.' },
+  questions:{ type:'questions', hour:'18 h 15', title:'Posez ces questions à n’importe quel logiciel.',
+    lede:'Pas besoin de nous croire sur parole. Comparez.' },
+  fin:{ type:'fin', hour:'18 h 20', title:'Votre domaine, dans Ma Vigne.' },
+  // chapitres libres
+  journal:{ grp:'Dans les vignes', title:'Le journal s’écrit tout seul', img:'r-ger-journal', lede:'Qui a fait quoi, où, quand. La mémoire du domaine, sans un mot tapé.' },
+  phyto:{ grp:'Dans les vignes', title:'Le registre phyto', img:'phyto', lede:'Chaque passage avec sa dose, ses parcelles et son applicateur.' },
+  negoce:{ grp:'Au cuvier et au chai', title:'Le raisin vendu', img:'negoce', lede:'Ce qui part au négoce garde son bon de livraison et ne fausse pas votre rendement.' },
+  chai:{ grp:'Au cuvier et au chai', title:'Le Chai', img:'r-chai-chai', lede:'Fûts, ouillages en retard, part des anges : le millésime d’avant continue pendant que l’autre fermente.' },
+  reserve:{ grp:'Au cuvier et au chai', title:'La Réserve', img:'reserve', lede:'Chaque sulfitage saisi au cuvier descend du stock tout seul.' },
+  planning:{ grp:'L’équipe', title:'Le planning de l’équipe', img:'planning', pc:'planning-pc', lede:'Charge du mois, capacité de l’équipe, congés : la semaine se lit d’un coup d’œil.' },
+  'fiche-jean':{ grp:'L’équipe', title:'La fiche de Jean, prête pour la compta', img:'fiche-jean', lede:'Heures à payer, congés, acomptes, retenues : le relevé du mois sort en PDF.' },
+  'pilotage-auj':{ grp:'Piloter', title:'Aujourd’hui, la vue du chef', img:'r-ger-pilotage', pc:'pilotage-auj-pc', lede:'La saison faite, l’avance ou le retard sur votre objectif, et ce que coûte l’inaction.' },
+  documents:{ grp:'Piloter', title:'Documents et impressions', img:'documents', lede:'Les obligatoires d’abord : registre phyto en PDF et en fichier, synthèse cuivre, cahier de fertilisation.' }
+};
+const GROUPES = [
+  ['Le gérant', ['prep','seve','pilotage-auj','d_echeances','d_renfort','d_cout','v_controle','documents','v_planning','fiche-jean']],
+  ['L’ouvrier', ['o_vue','geste','journal']],
+  ['Le tractoriste', ['t_matin','t_vue','t_phyto']],
+  ['Le maître de chai', ['c_aujourdhui','c_tournee','c_courbe','c_deguster','c_apports','chai','negoce','reserve']],
+  ['Pour tout le domaine', ['quatre','v_meteo','phyto']]
+];
+const PATHS = {
+  gerant:['prep','seve','d_echeances','d_renfort','d_cout','quatre','questions','fin'],
+  ouvrier:['prep','o_vue','geste','seve','quatre','questions','fin'],
+  tractoriste:['t_matin','t_vue','t_phyto','quatre','questions','fin'],
+  chai:['c_aujourdhui','c_tournee','c_courbe','c_deguster','c_lien','quatre','questions','fin']
+};
+const QUATRE = [
+  ['gerant','r-ger-accueil','Le gérant','Pilotage, Vigne, Tracteur, Phyto, et tout le reste sous « Plus ».'],
+  ['ouvrier','r-ouv-accueil','L’ouvrier','Vigne, Phyto, Réserve, Planning, Réglages.'],
+  ['tractoriste','r-trac-sessions','Le tractoriste','Tracteur en premier les jours où il le prend, puis Phyto, Vigne, Réserve.'],
+  ['chai','r-chai-accueil','Le maître de chai','Cave, Réserve, Planning, Réglages.']
+];
+const S = { persona:null, ha:12, eq:6, path:[], idx:-1, cur:null, vus:new Set(), retour:null, hors:false };
+const fmtHa = (v) => String(Math.round(v*10)/10).replace('.', ',') + '\u00a0ha';
+
+// ── Le chiffrage : le barème de la démo (127 h à 12 ha et 6 permanents), ajusté ──
+function lignes(){
+  const ha = S.ha, eq = S.eq, pt = 4 + eq, fm = 30 + 10*eq;
+  return [
+    {lab:'Journal et validations', min:5, freq:Math.round(400*ha/12), sc:'geste'},
+    {lab:'Pointage du soir : heures, retards, récupérations', min:pt, freq:220, sc:'v_planning'},
+    {lab:'Fins de mois : heures, congés, relevé pour la compta', min:fm, freq:12, sc:'fiche-jean'},
+    {lab:'Carnet tracteur : passages, pleins, entretiens', min:10, freq:Math.round(60*ha/12), sc:'t_vue'},
+    {lab:'Saisonniers et vendanges : dossiers, relevés', min:Math.max(15,Math.round(40*ha/12)), freq:12, sc:'v_planning'},
+    {lab:'Cuvier et chai : suivi des cuves', min:15, freq:Math.max(12,Math.round(24*ha/12)), sc:'c_tournee'},
+    {lab:'Registre phyto', min:20, freq:16, sc:'v_controle'},
+    {lab:'Les papiers : ressortir, recompter, imprimer', min:60, freq:6, sc:'documents'},
+    {lab:'La Réserve : stock et bilan matière', min:20, freq:12, sc:'reserve'}
+  ].map(l => Object.assign(l, { h: Math.round(l.min*l.freq/60) }));
+}
+function totalH(){ return Math.round(lignes().reduce((a, l) => a + l.min*l.freq, 0)/60 + (S.hors ? HORS_H : 0)); }
+const HORS_H = Math.round(10*220/60);
+
+// ── La lumière suit l'heure de la scène ──
+let skyOn = 'A';
+function ciel(hour){
+  const h = parseInt(hour, 10);
+  let g;
+  if(isNaN(h) || h < 7) g = 'radial-gradient(120% 70% at 50% -10%, rgba(74,62,104,.30), transparent 60%)';
+  else if(h < 9) g = 'radial-gradient(110% 70% at 15% -5%, rgba(214,132,62,.26), transparent 58%), radial-gradient(90% 60% at 85% 0%, rgba(201,168,76,.12), transparent 60%)';
+  else if(h < 16) g = 'radial-gradient(120% 75% at 50% -12%, rgba(212,178,92,.22), transparent 62%)';
+  else if(h < 18) g = 'radial-gradient(110% 70% at 85% -5%, rgba(196,128,40,.25), transparent 60%)';
+  else g = 'radial-gradient(110% 70% at 70% -8%, rgba(142,47,58,.28), transparent 60%), radial-gradient(80% 50% at 10% 0%, rgba(196,128,40,.12), transparent 60%)';
+  const nxt = skyOn === 'A' ? 'B' : 'A';
+  const el = $('#sky' + nxt); el.style.background = g; el.classList.add('on'); $('#sky' + skyOn).classList.remove('on'); skyOn = nxt;
+}
+
+// ── Rendus ──
+function ecran(name, s){
+  const m = s.hot ? pct(name, s.hot.sel, 4) : null;
+  const ring = s.ring ? pct(name, s.ring[0], s.ring[1]) : null;
+  return `<div class="phone"><div class="screen">
+      <img src="${IMG[name]||''}" alt="Écran réel de l’application : ${esc(s.title)}" decoding="async">
+      ${s.hot ? `<img class="after" src="${IMG[s.hot.after]||''}" alt="" decoding="async">` : ''}
+      ${m ? `<button class="hot" style="${m}" data-act="hot" aria-label="${esc(s.hot.label)}"></button>` : ''}
+      ${ring ? `<div class="ring" style="${ring}"></div>` : ''}
+    </div></div>`;
+}
+function portable(name, s){
+  return `<div class="laptop"><div class="lscreen"><img src="${IMG[name]||''}" alt="Écran réel de l’application sur ordinateur : ${esc(s.title)}" decoding="async"></div><div class="lbase"></div></div>`;
+}
+function bas(s, libre){
+  if(libre) return `<div class="act"><button class="prev" data-act="retour" aria-label="Retour">Retour</button><button class="go" data-act="menu">Tous les chapitres</button></div>`;
+  const first = S.idx <= 0;
+  if(s.hot) return `<div class="act"><div class="prompt" id="prompt"><i></i><span>${esc(s.hot.prompt)}</span></div><button class="skip" data-act="voir">Voir sans toucher</button></div>`;
+  return `<div class="act">${first ? '' : '<button class="prev" data-act="prev" aria-label="Retour">Retour</button>'}<button class="go" data-act="next">Continuer</button></div>`;
+}
+function rScreen(id, s, libre){
+  const usePC = isPC() && s.pc && IMG[s.pc];
+  return `<section class="scene">
+    <div class="txt">${s.hour && !libre ? `<p class="hour">${esc(s.hour)}</p>` : (s.grp ? `<p class="hour">${esc(s.grp)}</p>` : '')}
+      <h1>${esc(s.title)}</h1><p class="lede" id="lede">${esc(s.lede)}</p>${s.proof ? `<p class="proof">${esc(s.proof)}</p>` : ''}${s.lienp ? `<button class="lienp" data-act="voirch" data-id="${s.lienp.id}">${esc(s.lienp.label)}</button>` : ''}</div>
+    <div class="dev">${usePC ? portable(s.pc, s) : ecran(s.img, s)}</div>
+    ${bas(s, libre)}</section>`;
+}
+const ICO = {
+  journal:'<svg viewBox="0 0 24 24"><path d="M6 3h10l3 3v15H6z"/><path d="M9 9h7M9 13h7M9 17h4"/></svg>',
+  avance:'<svg viewBox="0 0 24 24"><path d="M4 18h16"/><path d="M6 14l4-4 3 3 5-6"/></svg>',
+  saison:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 8 8h-8z"/></svg>',
+  date:'<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>',
+  sablier:'<svg viewBox="0 0 24 24"><path d="M7 3h10M7 21h10M8 3c0 5 8 6 8 9s-8 4-8 9M16 3c0 5-8 6-8 9s8 4 8 9"/></svg>'
+};
+function rSeve(s){
+  const rc = [
+    ['Le journal','Palissage, Aux Murgers, avec l’équipe du jour'],
+    ['Avancement du palissage','<s>0\u00a0%</s><em>→</em>7\u00a0%'],
+    ['Saison faite','<s>0\u00a0%</s><em>→</em>2\u00a0%'],
+    ['Fin prévue de la période','<s>mer. 11 nov.</s><em>→</em>mar. 10 nov.'],
+    ['Palissage, ce qu’il reste','<s>351\u00a0h, 32\u00a0j</s><em>→</em>326\u00a0h, 27\u00a0j']
+  ].map(r => `<div class="rc"><span class="rc-app"><img src="${IMG['logo']}" alt=""></span><div class="rc-b"><div class="rc-h"><b>Ma Vigne</b><time>à l’instant</time></div><p class="rc-t">${r[0]}</p><p class="rc-v">${r[1]}</p></div></div>`).join('');
+  const pc = isPC();
+  return `<section class="scene s-seve">
+    <div class="txt"><p class="hour">${esc(s.hour)}</p><h1>${esc(s.title)}</h1><p class="lede">${esc(s.lede)}</p></div>
+    <div class="dev">
+      <div class="laptop"><div class="lscreen" id="lscr"><img src="${IMG['pilotage-auj-pc']}" alt="Le Pilotage au bureau, avant la coche" decoding="async"><img class="after" src="${IMG['pilotage-auj-apres-pc']}" alt="Le Pilotage au bureau, juste après la coche" decoding="async"></div><div class="lbase"></div></div>
+      ${pc ? `<div class="mini-phone"><img src="${IMG['r-ouv-fait']}" alt="Le téléphone de Jean, juste après sa coche"></div><svg class="seve-line" id="sline"><path id="spath" d=""/></svg>` : ''}
+    </div>
+    <div class="rcs" id="rcs">${rc}</div>
+    <div class="act"><button class="prev" data-act="prev" aria-label="Retour">Retour</button><button class="replay" data-act="replay">Rejouer</button><button class="go" data-act="next">Continuer</button></div>
+  </section>`;
+}
+function jouerSeve(){
+  const l = $('#lscr'); if(!l) return;
+  l.classList.remove('done'); document.querySelectorAll('.rc').forEach(r => r.classList.remove('on'));
+  const sl = $('#sline');
+  if(sl){
+    const dev = sl.parentElement.getBoundingClientRect(), ph = $('.mini-phone').getBoundingClientRect(), sc = l.getBoundingClientRect();
+    const x1 = ph.left - dev.left + ph.width*0.62, y1 = ph.top - dev.top + ph.height*0.42;
+    const x2 = sc.left - dev.left + sc.width*0.16, y2 = sc.top - dev.top + sc.height*0.3;
+    const d = `M${x1},${y1} C${x1+60},${y1-90} ${x2-90},${y2+60} ${x2},${y2}`;
+    const p = $('#spath'); p.setAttribute('d', d); const len = Math.ceil(p.getTotalLength());
+    sl.style.setProperty('--len', len); sl.classList.remove('run'); void sl.getBoundingClientRect(); sl.classList.add('run');
+  }
+  const t0 = calme ? 0 : 1250;
+  setTimeout(() => l.classList.add('done'), t0);
+  document.querySelectorAll('.rc').forEach((r, i) => setTimeout(() => r.classList.add('on'), calme ? 0 : t0 + 250 + i*330));
+}
+const CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>';
+function rQuestions(s){
+  const Q = [
+    ['Puis-je ouvrir la vraie application, maintenant, sans rendez-vous ?','Vous y êtes depuis trois minutes.',null],
+    ['Mes ouvriers s’en serviront-ils sans formation ?','Jean a un bouton : Valider.','geste'],
+    ['Chacun n’a-t-il que ce qui le regarde ?','Quatre téléphones, quatre barres différentes.','quatre'],
+    ['Quand mon palissage sera-t-il fini, à la cadence de mon équipe ?','Une date en jours ouvrés, recalculée à chaque coche.','d_echeances'],
+    ['Faut-il embaucher, combien, et quelles semaines, sans heures sup ?','Un calendrier. Ici : personne, l’équipe suffit.','d_renfort'],
+    ['Le jour du contrôle, combien de temps pour sortir le registre et le cuivre sur sept ans ?','Le temps d’ouvrir une page.','v_controle'],
+    ['Qui l’a écrite, et est-ce qu’il taille, lui ?','Un chef de culture, en activité en Côte de Nuits.',null]
+  ];
+  const li = Q.map((q, i) => `<li class="q" style="transition-delay:${calme?0:(.15+i*.12).toFixed(2)}s"><p>${esc(q[0])}</p><div>${CHECK}<span>${esc(q[1])}</span>${q[2] ? `<button data-act="voirch" data-id="${q[2]}">Revoir l’écran</button>` : ''}</div></li>`).join('');
+  return `<section class="scene s-q"><div class="q-in"><p class="hour">${esc(s.hour)}</p><h1>${esc(s.title)}</h1><p class="lede">${esc(s.lede)}</p>
+    <ul class="qs">${li}</ul><div class="act" style="margin-top:22px"><button class="prev" data-act="prev" aria-label="Retour">Retour</button><button class="go" data-act="next">Continuer</button></div></div></section>`;
+}
+function rQuatre(s, libre){
+  const cards = QUATRE.map(q => `<button class="q4" data-act="prendre" data-p="${q[0]}" aria-label="Prendre le téléphone : ${esc(q[2])}"><span class="q4-ph"><img src="${IMG[q[1]]||''}" alt="" decoding="async"></span><b>${esc(q[2])}</b><span class="q4-d">${esc(q[3])}</span>${S.persona===q[0] ? '<span class="q4-moi">Votre visite</span>' : '<span class="q4-go">Prendre ce téléphone</span>'}</button>`).join('');
+  const act = libre ? '<button class="prev" data-act="retour" aria-label="Retour">Retour</button><button class="go" data-act="menu">Tous les chapitres</button>' : '<button class="prev" data-act="prev" aria-label="Retour">Retour</button><button class="go" data-act="next">Continuer</button>';
+  return `<section class="scene s-quatre"><div class="q4-in"><p class="hour">${esc(s.hour)}</p><h1>${esc(s.title)}</h1><p class="lede">${esc(s.lede)}</p>
+    <div class="q4-row">${cards}</div>
+    <p class="q4-note">C’est le gérant qui coche, personne par personne, les modules de chacun.</p>
+    <div class="act">${act}</div></div></section>`;
+}
+function curseurs(){
+  return `<div class="curs">
+    <label class="cur"><span class="cur-l">Votre surface</span><output id="o-ha">${fmtHa(S.ha)}</output><input type="range" min="2" max="60" step="0.5" value="${S.ha}" data-act="slide" data-k="ha" aria-label="Surface du domaine, en hectares"></label>
+    <label class="cur"><span class="cur-l">Vos permanents</span><output id="o-eq">${S.eq}</output><input type="range" min="1" max="20" step="1" value="${S.eq}" data-act="slide" data-k="eq" aria-label="Nombre de salariés permanents"></label>
+  </div>`;
+}
+function initCurs(){ document.querySelectorAll('.scene.in input[type=range], .scene:last-child input[type=range]').forEach(i => i.style.setProperty('--p', ((i.value - i.min)/(i.max - i.min)*100) + '%')); }
+function rFin(s){
+  const L = lignes(), tot = totalH();
+  const rows = L.map((l, i) => {
+    const vu = S.vus.has(l.sc), hr = SC[l.sc] && SC[l.sc].hour;
+    return `<div class="ln"><span>${esc(l.lab)}</span><b data-i="${i}">≈\u00a0${l.h}\u00a0h</b><span class="vu">${vu ? `Vu dans la démo${hr ? ', à ' + esc(hr) : ''}` : `<button data-act="voirch" data-id="${l.sc}">Voir l’écran qui le montre</button>`}</span></div>`;
+  }).join('');
+  return `<section class="scene s-fin"><div class="fin-in">
+    <p class="hour">${esc(s.hour)}</p><h1>${esc(s.title)}</h1>
+    <p class="lede">Réglez sur votre domaine, le compte suit.</p>
+    ${curseurs()}
+    <div class="bigh"><span id="bigN" data-n="${tot}">${tot}</span><small>h par an</small></div>
+    <p class="bigsub">Soit <b id="jours">${Math.round(tot/8)}</b> journées de bureau rendues à la vigne, ligne par ligne.</p>
+    <div class="lines">${rows}</div>
+    <label class="hors"><span>Compter aussi « retrouver l’info, éviter le déplacement pour rien » : environ ${HORS_H}\u00a0h de plus. Vous seul savez si ça compte chez vous.</span><input type="checkbox" role="switch" data-act="hors" ${S.hors ? 'checked' : ''}></label>
+    <p class="hyp">Le barème de base est compté sur mes propres journées en Côte de Nuits. L’ajustement à votre surface et à votre équipe est une estimation.</p>
+    <p class="quote">Quinze jours sur vos parcelles, vos surfaces, votre barème. Vous compterez vous-même.</p>
+    <a class="cta" href="/essai.html" target="_blank" rel="noopener">Demander mes 15 jours d’essai</a>
+    <a class="ghost" href="/?demo=visite" target="_blank" rel="noopener">Ouvrir la vraie appli, librement</a>
+    <button class="ghost" data-act="menu">Revoir un chapitre</button>
+    <p class="sign"><img src="${IMG['logo']}" alt="">Nicolas Guéret, chef de culture en Côte de Nuits, et l’auteur de Ma Vigne.</p>
+  </div></section>`;
+}
+function majFin(){
+  const L = lignes(), tot = totalH();
+  const b = $('#bigN'); if(b){ b.textContent = tot; b.dataset.n = tot; }
+  const j = $('#jours'); if(j) j.textContent = Math.round(tot/8);
+  L.forEach((l, i) => { const e = document.querySelector('.scene.in .ln b[data-i="' + i + '"]'); if(e) e.textContent = '\u2248\u00a0' + l.h + '\u00a0h'; });
+}
+function compter(){
+  const el = $('#bigN'); if(!el) return;
+  const n = +el.dataset.n; if(calme){ el.textContent = n; return; }
+  const t0 = performance.now(), D = 1100;
+  const step = (t) => { const k = Math.min(1, (t - t0)/D), e = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(n*e); if(k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+function rOpen(){
+  const n = GROUPES.reduce((t, g) => t + g[1].length, 0);
+  return `<section class="scene s-open">
+    <div class="op-txt">
+      <h1>De la parcelle au registre, sans rien ressaisir.</h1>
+      <p class="lede">Trois minutes sur les vrais écrans de l’application. Vous touchez, elle répond.</p>
+      <div class="cta-row"><button class="pill" data-act="start">Commencer la démo</button><button class="lien" data-act="menu">Voir les ${n} chapitres</button></div>
+    </div>
+    <div class="hero" aria-hidden="true">
+      <div class="h-laptop"><div class="lscreen"><img src="${IMG['pilotage-auj-apres-pc']}" alt="" decoding="async"></div><div class="lbase"></div></div>
+      <div class="h-phone"><img src="${IMG['r-ouv-fait']}" alt="" decoding="async"></div>
+      <p class="caption">Captures de la vraie application, sur un domaine de démonstration. Rien n’est enregistré.</p>
+    </div>
+  </section>`;
+}
+function rProfil(){
+  const o = (p, img, t, x) => `<button class="opt" data-act="persona" data-p="${p}" aria-pressed="${S.persona===p}"><span class="opt-img"><span class="mini"><img src="${IMG[img]}" alt="" decoding="async"></span></span><span class="opt-t"><b>${t}</b><span>${x}</span></span><span class="opt-ck" aria-hidden="true"></span></button>`;
+  return `<section class="scene s-prof"><div class="prof-in">
+    <p class="hour">6 h 45</p><h1>Quel téléphone prenez-vous en main ?</h1><p class="lede">Au domaine, chacun a le sien. On vous montre ce qu’il y voit, et ce qu’il fait de sa journée.</p>
+    <div class="who">${o('gerant','r-ger-accueil','Le gérant','Il prépare, il pilote, il voit tout.')}${o('ouvrier','r-ouv-accueil','L’ouvrier','Sa tâche, ses parcelles, un bouton.')}${o('tractoriste','r-trac-sessions','Le tractoriste','Son chantier, sa machine, son avancement.')}${o('chai','r-chai-accueil','Le maître de chai','Le cuvier, le chai, ce qui presse.')}</div>
+    ${curseurs()}
+    <button class="go" data-act="go-path" ${S.persona ? '' : 'disabled'}>Commencer la visite</button>
+  </div></section>`;
+}
+
+// ── Navigation ──
+function progres(){
+  const p = $('#prog');
+  if(S.idx < 0 || S.retour){ p.innerHTML = ''; return; }
+  p.innerHTML = S.path.map((id, i) => `<button class="${i < S.idx ? 'done' : (i === S.idx ? 'cur' : '')}" data-act="seg" data-i="${i}" aria-label="Étape ${i+1} sur ${S.path.length}${i===S.idx?', en cours':''}"></button>`).join('');
+}
+function poser(html, sens){
+  const st = $('#stage'), old = st.querySelector('.scene:not(.out)');
+  const tmp = document.createElement('div'); tmp.innerHTML = html.trim();
+  const el = tmp.firstChild; if(sens < 0) el.classList.add('back');
+  st.appendChild(el);
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('in')));
+  if(old){ old.classList.add('out'); if(sens < 0) old.classList.add('back'); setTimeout(() => old.remove(), 600); }
+  return el;
+}
+function afficher(id, sens, libre){
+  const s = SC[id];
+  S.cur = id; S.vus.add(id);
+  if(s.hour) ciel(s.hour);
+  const html = s.type === 'seve' ? rSeve(s) : s.type === 'questions' ? rQuestions(s) : s.type === 'fin' ? rFin(s) : s.type === 'quatre' ? rQuatre(s, libre) : rScreen(id, s, libre);
+  poser(html, sens || 1);
+  progres();
+  if(s.type === 'seve') setTimeout(jouerSeve, 500);
+  if(s.type === 'fin') setTimeout(compter, 350);
+  initCurs();
+}
+function ouverture(){ S.idx = -1; S.retour = null; S.cur = 'open'; ciel('6'); progres(); poser(rOpen(), 1); }
+function profil(){ S.idx = -1; S.retour = null; S.cur = 'profil'; ciel('6'); progres(); poser(rProfil(), 1); initCurs(); }
+function aller(i, sens){ S.retour = null; S.idx = Math.max(0, Math.min(S.path.length - 1, i)); afficher(S.path[S.idx], sens); }
+function suivant(){ if(S.idx < S.path.length - 1) aller(S.idx + 1, 1); }
+function precedent(){ if(S.retour){ revenir(); return; } if(S.idx > 0) aller(S.idx - 1, -1); else if(S.idx === 0) profil(); }
+function chapitre(id){
+  fermerMenu();
+  if(!S.retour) S.retour = { idx:S.idx, cur:S.cur };
+  progres();
+  const s = SC[id];
+  if(s.type) { afficher(id, 1, true); return; }
+  afficher(id, 1, true);
+}
+function revenir(){
+  const r = S.retour; S.retour = null;
+  if(!r || r.idx < 0){ if(r && r.cur === 'profil') profil(); else ouverture(); return; }
+  S.idx = r.idx; afficher(S.path[S.idx], -1);
+}
+function ouvrirMenu(){
+  const m = $('#menu');
+  m.innerHTML = `<div class="menu-in"><div class="menu-top"><h2>Tous les chapitres</h2><button class="x" data-act="close" aria-label="Fermer">Fermer</button></div>
+    <p class="lede">Chaque écran est réel. Rien n’est enregistré.</p>
+    ${GROUPES.map(([g, ids]) => `<p class="grp">${esc(g)}</p><div class="grid">${ids.map(id => { const s = SC[id]; const im = s.type === 'seve' ? 'pilotage-auj-apres-pc' : s.img; return `<button class="it" data-act="ch" data-id="${id}"><img src="${IMG['t-' + im] || IMG[im] || ''}" alt="" loading="lazy"><b>${esc(s.title)}</b><span class="${S.vus.has(id) ? 'vu' : ''}">${S.vus.has(id) ? 'Déjà vu' : esc((s.lede||'').split('. ')[0])}</span></button>`; }).join('')}</div>`).join('')}
+  </div>`;
+  m.classList.add('on'); const x = m.querySelector('.x'); if(x) x.focus();
+}
+function fermerMenu(){ $('#menu').classList.remove('on'); }
+
+// ── Gestes ──
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-act]'); if(!b) return;
+  const a = b.dataset.act;
+  if(a === 'start') profil();
+  else if(a === 'home') ouverture();
+  else if(a === 'persona'){ S.persona = b.dataset.p; document.querySelectorAll('.opt').forEach(o => o.setAttribute('aria-pressed', o === b)); const g = document.querySelector('[data-act="go-path"]'); if(g) g.disabled = false; }
+  else if(a === 'chip'){ S[b.dataset.k] = b.dataset.v; b.parentElement.querySelectorAll('button').forEach(c => c.setAttribute('aria-pressed', c === b)); if(S.cur === 'fin' && !S.retour){ const sc = document.querySelector('.scene.in .fin-in'); const y = document.querySelector('.scene.in').scrollTop; const st = $('#stage'); const old = st.querySelector('.scene.in'); const tmp = document.createElement('div'); tmp.innerHTML = rFin(SC.fin).trim(); const el = tmp.firstChild; el.classList.add('in'); el.style.transition = 'none'; st.replaceChild(el, old); el.scrollTop = y; compter(); } }
+  else if(a === 'go-path'){ S.path = PATHS[S.persona] || PATHS.gerant; aller(0, 1); }
+  else if(a === 'prendre'){ S.persona = b.dataset.p; S.path = PATHS[S.persona]; S.retour = null; aller(0, 1); }
+  else if(a === 'next') suivant();
+  else if(a === 'prev') precedent();
+  else if(a === 'seg') aller(+b.dataset.i, +b.dataset.i < S.idx ? -1 : 1);
+  else if(a === 'menu') ouvrirMenu();
+  else if(a === 'close') fermerMenu();
+  else if(a === 'ch' || a === 'voirch') chapitre(b.dataset.id);
+  else if(a === 'retour') revenir();
+  else if(a === 'replay') jouerSeve();
+  else if(a === 'hot' || a === 'voir') geste(e, a === 'hot');
+});
+document.addEventListener('change', (e) => {
+  if(e.target.matches('[data-act="hors"]')){ S.hors = e.target.checked; majFin(); }
+});
+document.addEventListener('input', (e) => {
+  const i = e.target; if(!i.matches('[data-act="slide"]')) return;
+  S[i.dataset.k] = +i.value;
+  i.style.setProperty('--p', ((i.value - i.min)/(i.max - i.min)*100) + '%');
+  const o = i.parentElement.querySelector('output'); if(o) o.textContent = i.dataset.k === 'ha' ? fmtHa(S.ha) : S.eq;
+  if(S.cur === 'fin') majFin();
+});
+function geste(e, touche){
+  const sc = document.querySelector('.scene.in .screen'); if(!sc || sc.classList.contains('done')) return;
+  const s = SC[S.cur]; if(!s || !s.hot) return;
+  if(touche){
+    const r = sc.getBoundingClientRect(), rp = document.createElement('span'); rp.className = 'ripple';
+    rp.style.left = (e.clientX - r.left) + 'px'; rp.style.top = (e.clientY - r.top) + 'px'; sc.appendChild(rp); setTimeout(() => rp.remove(), 800);
+    if(navigator.vibrate) { try{ navigator.vibrate(12); }catch(_){} }
+  }
+  sc.classList.add('done');
+  const l = $('#lede'); if(l){ l.style.opacity = 0; setTimeout(() => { l.textContent = s.hot.lede; l.style.opacity = 1; }, 280); }
+  const act = document.querySelector('.scene.in .act');
+  if(act) act.outerHTML = `<div class="act">${S.idx > 0 && !S.retour ? '<button class="prev" data-act="prev" aria-label="Retour">Retour</button>' : ''}<button class="go" data-act="${S.retour ? 'retour' : 'next'}">${S.retour ? 'Revenir' : 'Continuer'}</button></div>`;
+}
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape'){ fermerMenu(); return; }
+  if($('#menu').classList.contains('on')) return;
+  if(e.target.closest('input,textarea')) return;
+  if(e.key === 'ArrowRight'){ if(S.cur === 'open') profil(); else if(S.idx >= 0 && !document.querySelector('.scene.in .hot')) suivant(); }
+  if(e.key === 'ArrowLeft') precedent();
+});
+let x0 = null, y0 = null;
+$('#stage').addEventListener('touchstart', (e) => { const t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; }, { passive:true });
+$('#stage').addEventListener('touchend', (e) => {
+  if(x0 === null) return; const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; x0 = null;
+  if(Math.abs(dx) < 70 || Math.abs(dy) > Math.abs(dx)*0.7) return;
+  if(dx < 0 && S.idx >= 0 && !S.retour && !document.querySelector('.scene.in .hot:not([style*="display: none"])') ) { if(!(document.querySelector('.scene.in .screen') && !document.querySelector('.scene.in .screen.done') && SC[S.cur].hot)) suivant(); }
+  if(dx > 0) precedent();
+}, { passive:true });
+addEventListener('resize', () => { if(S.cur === 'seve' && !S.retour){ clearTimeout(window.__rs); window.__rs = setTimeout(() => afficher('seve', 1), 250); } });
+
+ouverture();
+})();
+</script>
+</body>
+</html>

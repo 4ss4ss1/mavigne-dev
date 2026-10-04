@@ -469,6 +469,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-prio.mjs --contre'],
   ['node scripts/mv-harnais-gestes.mjs'],             // GESTES-1 (§239) : déguster, traiter, filtrer
   ['node scripts/mv-harnais-gestes.mjs --contre'],
+  ['node scripts/mv-harnais-demo.mjs'],               // DEMO-4 (§240) : la démo du site, un domaine, quatre téléphones
+  ['node scripts/mv-harnais-demo.mjs --contre'],
   ['node scripts/mv-harnais-align.mjs'],              // ALIGN-1 (§236) : la décision du jour, quatre tuiles bâties pareil
   ['node scripts/mv-harnais-align.mjs --contre'],
   ['node scripts/mv-harnais-align2.mjs'],             // ALIGN-2 (§237) : l'Accueil en rangées
