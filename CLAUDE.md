@@ -3,13 +3,12 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **4 octobre 2026 (DEMO-4)** — ★★ **LA DÉMO DU SITE : UN DOMAINE, QUATRE TÉLÉPHONES** (§240).
-> Demande du 03/10 (« comme Apple ou Google ») → maquette publiée, cinq tours de retouches, « go » le 04/10. `/demo.html`, page neuve du
-> site : le produit en vedette, « Quel téléphone prenez-vous en main ? », un parcours par rôle (gérant 8 scènes, ouvrier 7, tractoriste 6,
-> maître de chai 8) sur des CAPTURES de la vraie appli prises avec les droits de chaque rôle, « Un domaine, quatre téléphones », sept
-> questions sans nommer un concurrent, la fin en heures (127 h à 12 ha et 6 permanents, zéro montant). `logiciel-vigne` y mène ; le tour
-> `?demo=visite` reste la porte « librement ». Harnais `mv-harnais-demo` (neuf, 11 + 10/10). Marque `lots/DEMO-4.json`. Base `8645b31`.
-> **Aucun bump** (page du site, hors shell). Rappel : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+> Dernière consolidation : **4 octobre 2026 (AUDIT-PERF)** — ★★ **VITESSE, DONNÉES, ERGONOMIE TERRAIN : L'AUDIT MESURÉ** (§241).
+> Demande de Nico (04/10) : le niveau de Linear, Notion, Figma. Audit mesuré dans un vrai Chromium (build de prod, téléphone ×4),
+> `audit-perf-ux.md` à la racine, rien d'intégré. Deux défauts PROUVÉS : « Valider » de la feuille attend Open-Meteo sans limite avant
+> d'écrire (`confirmValidation`, `saveJournalEntry` ; `pQuickValidate` a le bon patron) ; hors réseau on n'entre pas et l'écran dit
+> « Mot de passe incorrect. » (`appCheck/fetch-network-error`). Aussi : voile imposé de 3,4 s, profils vides 18,6 s sur un réseau qui
+> traîne, gel de 0,6 s par validation reçue, journal plein vers 6 600 entrées. 13 lots proposés. §4 corrigé. Base `c62f429`. **Aucun bump**.
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -655,7 +654,7 @@ des fûts et des intrants, récoltes, suivi d'élevage, carnet d'entretien, rég
 
 ## 4. Stack technique
 
-- **Build** : Vite + Rollup, sortie **IIFE**. `minify:false` en dev ; Terser `toplevel` + `unsafe` en
+- **Build** : Vite + Rollup, sortie **module ES en un seul fichier** (`<script type="module">`, vu au build du 04/10, §241 — « IIFE » était faux). `minify:false` en dev ; Terser `toplevel` + `unsafe` en
   prod. Hosting Firebase. ⚠️ `root:'.'`, `publicDir:'public'`, `outDir:'dist'`,
   `rollupOptions.input = { main: './index.html' }`. Assets hashés dans **`dist/assets/`**.
 - **Firebase v10 modulaire** + compat `window.firebase` : Firestore (**eur3**), Auth, Storage,
@@ -683,7 +682,7 @@ des fûts et des intrants, récoltes, suivi d'élevage, carnet d'entretien, rég
   les domaines autorisés) — c'est ce qui permet le clone direct du dépôt (voir Règle d'or n°1).
 - **Projet Firebase** : `mavigne-a0fd5`. Deux bases visibles : `(default)` en **eur3** (la vraie) et
   `restore-24` (à ignorer). Coût constaté ≈ 0 €.
-- ⚠️ **Chargement à froid lent** : `_fbLoadAfterAuth` enchaîne ~40 `getDoc` séquentiels.
+- ⚠️ **Ouverture à froid lente** — plus à cause des lectures (en parallèle depuis PERF-1) : voile imposé, mot de passe à chaque ouverture, attentes réseau mises bout à bout. Mesures et plan : `audit-perf-ux.md` (§241).
 - ★ **Aucune requête Firestore filtrée** — zéro `where(`, `orderBy(`, `limit(` dans l'app **et** les
   Cloud Functions. **Conséquence : aucun index composite, et `firestore.indexes.json` n'a pas lieu
   d'exister.**
@@ -1818,6 +1817,12 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ AUDIT-PERF — CE QUI RESTE OUVERT (§241, posé le 04/10)
+
+1. **Le plan est dans `audit-perf-ux.md`** (racine), rien d'intégré : d'abord VALID-1 et LOGIN-1 (petits, prouvés), puis VOILE-1 et PROFILS-1.
+2. **Décisions de Nico** : ENTREE-1 (entrer sans retaper le mot de passe — téléphones partagés ?), le premier appui qui « démarre » une tâche dans la fiche parcelle, PAQUET-1, DONNEES-1, IDS-1, GT-1.
+3. **À fournir par Nico** : `npm run taille -- ancienne.json recente.json` sur deux sauvegardes complètes — les vraies tailles et le mois de la limite.
 
 ### ⚠️ GESTES-1 — CE QUI RESTE OUVERT (§239, posé le 04/10)
 

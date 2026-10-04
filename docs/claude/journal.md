@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **4 octobre 2026 (DEMO-4)** — ★★ **LA DÉMO DU SITE : UN DOMAINE, QUATRE TÉLÉPHONES** (§240).
+> Demande du 03/10 (« comme Apple ou Google ») → maquette publiée, cinq tours de retouches, « go » le 04/10. `/demo.html`, page neuve du
+> site : le produit en vedette, « Quel téléphone prenez-vous en main ? », un parcours par rôle (gérant 8 scènes, ouvrier 7, tractoriste 6,
+> maître de chai 8) sur des CAPTURES de la vraie appli prises avec les droits de chaque rôle, « Un domaine, quatre téléphones », sept
+> questions sans nommer un concurrent, la fin en heures (127 h à 12 ha et 6 permanents, zéro montant). `logiciel-vigne` y mène ; le tour
+> `?demo=visite` reste la porte « librement ». Harnais `mv-harnais-demo` (neuf, 11 + 10/10). Marque `lots/DEMO-4.json`. Base `8645b31`.
+> **Aucun bump** (page du site, hors shell). Rappel : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+
 > ★ Consolidation : **4 octobre 2026 (GESTES-1, avec la note NOTE-DRM non poussée)** — ★★ **DÉGUSTER, TRAITER, FILTRER** (§239).
 > Benchmark des logiciels de cave puis maquette `maquette-cave-gestes-v1.html` validée « go avec les recos », plus une demande de Nico :
 > désigner UN FÛT quand une anomalie s'y montre (de base, la dégustation porte sur la cuvée). Trois types dans « Nouvelle opération » :

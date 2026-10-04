@@ -332,3 +332,72 @@ page servie (téléphone sombre et clair, ordinateur) : zéro erreur, aucune res
 faire : `scripts/mv-demo-captures.mjs`). ② Quelques chapitres libres datent d'APP 8.07 (météo, planning, fiche de Jean, documents, apports,
 négoce, réserve, registre phyto, et les deux écrans d'ordinateur du bureau — chiffres identiques). ③ La version « appli vivante dans le
 cadre », si Nico la veut un jour. ④ À l'œil chez Nico, sur un vrai iPhone. ⑤ Les deux trouvailles de 240d.
+
+---
+
+## 241. ★★ AUDIT-PERF — VITESSE, DONNÉES, ERGONOMIE TERRAIN : L'AUDIT MESURÉ (04/10 — `audit-perf-ux.md` (neuf, racine) · `CLAUDE.md` · `docs/claude/chantiers-230-279.md` · `docs/claude/journal.md` · `docs/claude/INDEX.md` · `scripts/harnais-claude-md.mjs` · `lots/AUDIT-PERF.json` · **aucun bump** : documentation seule · base `c62f429`)
+
+### 241a. La demande
+
+Nico (04/10) : « auditer et optimiser » Ma Vigne pour atteindre le niveau de Linear, Notion et Figma — vitesse perçue,
+données robustes et souples, ergonomie terrain avec un minimum de gestes — avec un plan priorisé et des exemples de code.
+Le message citait Node.js, Prisma et JWT : ce n'est pas la stack du dépôt. Reformulé, puis « go » pour un audit sur la
+VRAIE stack (Firestore, Cloud Functions, claims). Méthode NAV-0 : un document à la racine, rien d'intégré, à valider lot
+par lot.
+
+### 241b. Mesuré — et comment
+
+Chromium du bac à sable (§192b) sur le **build de production**, écran 390 × 844, processeur ralenti ×4 pour le « téléphone
+moyen » ; données injectées par `applyFbData` puis connexion simulée (la méthode d'`e2e-local`) ; Google et Firebase coupés,
+ou laissés sans réponse, au niveau de la page ; médianes de 5 essais (3 pour le démarrage). Le tableau complet est au §1
+de l'audit. L'essentiel :
+
+- **Prouvé** : « Valider » de la feuille de validation (`confirmValidation`, et `saveJournalEntry` au statut « Validé »)
+  attend `fetchMeteoMoyenne` — Open-Meteo, sans limite de temps — **avant** d'écrire et de fermer. Météo sans réponse :
+  feuille ouverte et rien d'écrit à 30 s. Contre-épreuve, réseau coupé net : tout passe en moins d'une seconde.
+  `pQuickValidate` (le bouton de la carte) a déjà le bon patron : écrire d'abord, la météo ensuite.
+- **Prouvé** : hors réseau, à froid, les profils s'affichent mais la connexion échoue sur `appCheck/fetch-network-error`,
+  et `confirmLogin` affiche « Mot de passe incorrect. ». Contre-épreuve, connexion simulée réussie : l'appli entre.
+- **Ouverture** : voile imposé de 3,42 s (2,2 + 0,9 + 0,32 s) ; en ligne avec un réseau sans réponse, zone des profils
+  vide jusqu'à 18,6 s — les bornes de `_fbLoad` (5 + 8 + 6 s) passent avant la liste gardée sur le téléphone ; le mot de
+  passe à chaque ouverture, session valable ou non.
+- **Rendu** : `renderHome` coûte 115 à 125 ms au téléphone moyen, quelle que soit la taille ; une validation reçue sur
+  l'Accueil fige l'écran 255 ms (journal de 1 000) puis 613 ms (15 000), dont la copie complète de `_mvBaseNoter`,
+  4 → 105 ms ; le Journal met 346 à 588 ms à s'afficher.
+- **Données** : une entrée de journal ≈ 158 octets (règle de `mv-taille-docs.mjs`) → limite de 1 Mio vers 6 600 entrées ;
+  le journal n'est jamais allégé et porte une entrée météo par jour et par commune ; liens par noms partout.
+- **Paquet** : 3 902 kB en un fichier (gzip 1 163, brotli ≈ 870) ; `WHATS_NEW` = 339 Ko réduit (300 versions) ;
+  `admin-gt.js` = 6,7 % du JS livré à chaque client.
+- **Ergonomie** : 2 031 textes sous 12 px dont 408 sous 10 px (deux tiers par trois jetons : relever trois lignes en touche
+  1 396) ; `.val-toggle` à 26 px de haut ; 57 transitions sur 245 d'un quart de seconde ou plus ; 17 points de rupture.
+
+### 241c. Trouvé en route
+
+- **Deux lignes fausses au §4 de CLAUDE.md**, corrigées : la sortie de build est un **module ES** (`<script
+  type="module">` dans `dist/index.html`), pas un IIFE ; et « `_fbLoadAfterAuth` enchaîne ~40 `getDoc` séquentiels » est
+  faux depuis PERF-1. Un audit qui lit le §4 avant le code le croit : c'est la règle d'or n° 3, appliquée au socle.
+- **Trois pièges d'essai, à connaître pour toute mesure navigateur** :
+  ① le service worker fait l'appel météo **à la place** de la page — l'interception au niveau de la page ne le voit pas,
+  le bac à sable le coupe net, et l'essai « réseau sans réponse » passait au vert pour une mauvaise raison ; il faut
+  `setBypassServiceWorker`. ② Un script reCAPTCHA sans réponse **retient l'événement `load`** : `_mvDemarrer` part alors sur
+  son filet de 2,5 s, et un essai qui attend `load` expire. ③ Le voile couvre les tuiles pendant ses 3,4 s : un clic aux
+  coordonnées tombe sur le logo — attendre son retrait avant tout geste.
+- **`pQuickValidate` complète l'objet d'origine** une fois la météo arrivée ; une synchronisation a pu remplacer le tableau
+  du journal entre-temps (lu dans le code, à vérifier) — VALID-1 le fait passer par une recherche par id.
+
+### 241d. Arbitrages
+
+- **Rester sur Firestore** (pas de Prisma ni de base SQL) : les défauts tiennent à la forme des données (gros tableaux,
+  liens par nom), pas au moteur ; Firestore donne la copie hors ligne, l'écoute en temps réel, des règles prouvées et un
+  coût proche de zéro. Prisma n'a pas de connecteur Firestore.
+- **Aucun code dans ce lot**, même pour les deux petits défauts : VALID-1 et LOGIN-1 changent ce que voit l'utilisateur, ils
+  partent avec leur aide, leur `WHATS_NEW` et leur bump, sur « go » de Nico.
+- **Scripts de mesure non versionnés**, comme les captures de DEMO-4 : un lot à part s'il le faut
+  (`mv-mesure-perf.mjs`, hors de `npm run check`).
+- **ENTREE-1** : recommandation de l'option C (« Rester connecté sur ce téléphone », par appareil), parce que les tuiles
+  laissent penser que certains téléphones sont partagés — décision de Nico.
+
+### 241e. Ouvert
+
+→ CLAUDE.md §28 (bloc AUDIT-PERF) ; ce qui n'a pas été mesuré est listé au §6 de l'audit (vrai téléphone, vrai réseau,
+vraies tailles de documents, service worker dans la boucle de l'essai météo, Lighthouse).

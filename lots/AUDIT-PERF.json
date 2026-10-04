@@ -1,0 +1,16 @@
+{
+  "lot": "AUDIT-PERF",
+  "section": "§241",
+  "base": "c62f42912f22df09b68aeac840506b4792588783",
+  "inclut": [],
+  "date": "2026-10-04",
+  "fichiers": {
+    ".mv-base": "8055d209c199f875291a17cfa1ec00446323c6875af1b8d35847e4ab6149ae9e",
+    "CLAUDE.md": "20db0aa55f7fa2990c6176922f3b1a94a5014cf9137d8fac5f28a1e51e924b5d",
+    "docs/claude/INDEX.md": "cb261bd1dec68b6b7aad7eef03b804cfe6206784c619170743a63d99c3a878de",
+    "docs/claude/chantiers-230-279.md": "a7f0093119303a75577bab68114b906cceaa1bb2125d59e0be84d3f2c23f4493",
+    "docs/claude/journal.md": "62e64b1cf288a6ba6ce4cc56c9816f9473c7cb3f56dceb6bbd1ed24d951ecc38",
+    "scripts/harnais-claude-md.mjs": "d0a343a51b59bd058343efec27b82e97624a8ba395b96bd221cc6c0cbcaf764e",
+    "audit-perf-ux.md": "653ce9e94a0fc80ed130eed3e4f38a68368521258d6562d7d6a8e1705658ccb1"
+  }
+}

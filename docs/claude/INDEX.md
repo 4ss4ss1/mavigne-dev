@@ -284,3 +284,4 @@
 | 238 | 238. ★ ALIGN-3 — CORRECTIF : UN BLOC MASQUÉ RESTE MASQUÉ SUR L'ACCUEIL (04/10 — `src/styles.css` · `src/app… | `docs/claude/chantiers-230-279.md` |
 | 239 | 239. ★★ GESTES-1 — DÉGUSTER, TRAITER, FILTRER : TROIS GESTES DU MAÎTRE DE CHAIS (04/10 — `index.html` · `sr… | `docs/claude/chantiers-230-279.md` |
 | 240 | 240. ★★ DEMO-4 — LA DÉMO DU SITE : UN DOMAINE, QUATRE TÉLÉPHONES (04/10 — `public/demo.html` (neuf) · `publ… | `docs/claude/chantiers-230-279.md` |
+| 241 | 241. ★★ AUDIT-PERF — VITESSE, DONNÉES, ERGONOMIE TERRAIN : L'AUDIT MESURÉ (04/10 — `audit-perf-ux.md` (neuf… | `docs/claude/chantiers-230-279.md` |
