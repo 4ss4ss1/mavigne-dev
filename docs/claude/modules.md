@@ -1184,6 +1184,8 @@ sans bump — c'est une page de `public/`, hors `SHELL_STATIC` (§27d).
   l'autre côté passe par le bloc « LA FRONTIÈRE » en fin du fichier qui le déclare ; les harnais lisent la Cave par
   `scripts/mv-cave-src.mjs`, jamais par un chemin en dur.
 - **Le Chai** (namespace `mvc-`) : élevage, fûts, **jauges de part des anges**.
+  ★★ **GESTES-1 (§239)** : « Nouvelle opération » a huit types ; `degustation` (une cuvée, ou un fût désigné par lot + repère),
+  `traitement` (produit de La Réserve, unités du Cuvier, sortie de stock par `_consoCuvier`), `filtration` (perte notée, volume intact).
 - **Le Cuvier** : vendange. **Cuvées normalisées** (`_cuvKey` + distance de Levenshtein).
   ★ **Repeint aux couleurs de la Cave le 09/08** (c'était le dernier écran sombre ; 7 textes hérités
   étaient illisibles).

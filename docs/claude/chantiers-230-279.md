@@ -234,3 +234,42 @@ du contenu (`z-index:5`).
 en classes ; il faut les redire au même niveau. Aucun harnais ne le voyait : `mv-harnais-align2` le garde maintenant (2 assertions,
 2 contre-épreuves de plus).
 **Pas vérifié** : le rendu à l'œil sur ordinateur ; `npm run build`, `test:smoke`, `test:e2e`.
+
+## 239. ★★ GESTES-1 — DÉGUSTER, TRAITER, FILTRER : TROIS GESTES DU MAÎTRE DE CHAIS (04/10 — `index.html` · `src/cave.js` · `src/cuvier.js` · `src/reserve.js` · `src/utils.js` · `guide/08-cave.html` · `public/sw.js` · `scripts/mv-harnais-gestes.mjs` (neuf) · APP 8.16 → 8.17 · SW 8.91 → 8.92 · base `5a0d37e`, rejoué sur ALIGN-3)
+
+**La demande** (Nico, 04/10) : en maître de chais, inventorier les manipulations de l'élevage, regarder les logiciels de référence,
+proposer ce qui manque côté cave « sans que ce soit trop complexe ». **Hors périmètre, tranché** : rien de réglementaire (DRM, registre
+d'entrées-sorties) → §28, entrée 43. Benchmark : vintrace et InnoVint tournent autour des ordres de travaux (et leurs utilisateurs se
+plaignent de devoir les écrire) ; Process2Wine, agreo, Isagri côté français. Onze propositions classées ; lot 1 = dégustation, traitement,
+filtration. Maquette `maquette-cave-gestes-v1.html` (page HTML sur `styles.css` et le vrai formulaire, règle §225b) → « go avec les recos »,
+plus : **pouvoir désigner un fût** quand une anomalie s'y montre ; de base, la dégustation porte sur la cuvée.
+
+### 239a. Les arbitrages
+
+- **Le fût désigné n'est pas nominatif** (§20e reste vrai) : la dégustation garde le LOT de la cuvée (`annee`, `four`, `ref`, `l`) et un
+  **repère** libre (numéro à la craie, emplacement). La suite « Retirer le fût » n'apparaît qu'en mode fût.
+- **Une dégustation = une cuvée** : `toggleCopCuvee` passe en sélection simple, « Toutes » se masque, `saveCaveOp` refuse sinon.
+  « Enregistrer et goûter la suivante » rouvre la feuille sur la cuvée suivante du millésime (`_copDgOuvrirSuivante`), s'arrête à la dernière.
+- **Une règle, une source** : l'unité de dose (kg → g/hL, L → mL/hL), l'unité de quantité, le calcul et son affichage viennent du Cuvier
+  (`_vendIntrUnite`, `_vendIntrUniteQ`, `_vendIntrQte`, `_vendIntrQteTxt`, `_vendIntrProds`, ajoutés à SA frontière). Aucune copie.
+- **La sortie de stock** : `_consoCuvier` (reserve.js) compte aussi les traitements du Chai (`op.data.prod_id`, `op.data.qte`) ; il ne
+  rendait plus RIEN sans données de Cuvier (retour anticipé) — corrigé dans le même geste. Libellé : « adjonctions du Cuvier et traitements du Chai ».
+- **Le registre** : `traitement` → famille par NATURE (`_rmTraitT` : acidité → famille neuve « Corrections d'acidité », le reste →
+  Adjonctions) ; `filtration` → pratiques de cave ; `degustation` → hors registre, comptée en pied (`RM_HORS`).
+- **La perte de filtration est notée, elle ne touche pas au volume** de la cuvée : les volumes sont la zone sensible (VOL-1, CREUX-1).
+- **La suite d'une dégustation est notée et affichée, pas encore rappelée** : le rappel dans « Ce qui vient » est GESTES-2 (lot réduit,
+  §27a : on réduit plutôt que de livrer en deux morceaux une aide fausse).
+
+### 239b. Trouvé en route
+
+- **Entrée 10 du backlog, retrouvée** : la pastille « Village 2026· 12 » vivait à `_copRenderCuvChips`, le point médian écrit `\u00b7` —
+  c'est pourquoi le grep du 11/08 sur « · » ne la voyait pas (§25, règle 21 : varier le motif).
+- **L'aperçu du soufre comptait 82 fûts écrits en dur** tant qu'aucune cuvée n'était cochée (`_copGetNbFuts()||82`) ; l'enregistrement,
+  lui, comptait juste. L'aperçu attend désormais une cuvée.
+- **Le harnais neuf a d'abord rougi sur lui-même** : il comptait les handlers du seul `index.html`, alors que six boutons sont
+  fabriqués par `cave.js`. Assertion corrigée (deux sources), pas le code.
+- **Deux cliquets ont mordu** : cinq `font-weight:400` (hors des trois pas 500/600/700) et cinq `font-size` en px dans les mentions
+  neuves → `500` et `var(--pt-micro,11px)`.
+- **Rejoué sur une base neuve** : construit sur `657cb29`, le lot a trouvé ALIGN-3 poussé entre-temps (§238, APP 8.16, SW 8.91). Mes
+  fichiers que l'amont n'avait pas touchés repris tels quels (vérifié fichier par fichier) ; les autres rejoués sur `5a0d37e` ; section,
+  version et SW décalés (§239, 8.17, 8.92). Un numéro déjà servi n'est jamais réutilisé (règle d'or n°1).

@@ -49,7 +49,7 @@ var _jFilter = 'tous';    // filtre journal cave: tous|ouillage|soutirage|soufre
 var _caveAnaLinkedOpIds = [];  // IDs ops s\u00E9lectionn\u00E9es pour rattachement PDF (multi)
 var _caveExpAllCuv = true;     // export: toutes cuv\u00E9es
 var _caveExpCuvSel = new Set(); // export: cuv\u00E9es s\u00E9lectionn\u00E9es
-var _caveExpTypes = new Set(['ouillage','soutirage','soufre','analyse','autre']); // export: types actifs
+var _caveExpTypes = new Set(['ouillage','soutirage','soufre','analyse','degustation','traitement','filtration','autre']); // export: types actifs
 var _convMode = 'liq2past'; // convertisseur SO2
 var _convDilution = 5;
 
@@ -545,13 +545,13 @@ function _caveFmlLabel(v) {
 
 function _caveTypeLabel(type) {
   // ROB-2 : une opération sans type (fiche abîmée) s'affichait « undefined » dans le journal.
-  return {ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',assemblage:'Assemblage',autre:'Autre'}[type]||(type?String(type):'Op\u00e9ration');
+  return {ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',assemblage:'Assemblage',degustation:'D\u00e9gustation',traitement:'Traitement',filtration:'Filtration',autre:'Autre'}[type]||(type?String(type):'Op\u00e9ration');
 }
 
 // \u2500\u2500 helpers multi-cuv\u00E9es formulaire op\u00E9ration \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 var _COP_MOIS_C=['jan','f\u00e9v','mar','avr','mai','juin','juil','ao\u00fbt','sep','oct','nov','d\u00e9c'];
 var _COP_MOIS_L=['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet','ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
-function _copAccent(){return {ouillage:'#C0845A',soutirage:'#5CB87A',soufre:'#4A9C50',analyse:'#4A9FC8',autre:'#A0A8B8'}[_caveOpType]||'#A0A8B8';}
+function _copAccent(){return {ouillage:'#C0845A',soutirage:'#5CB87A',soufre:'#4A9C50',analyse:'#4A9FC8',degustation:'#9B4F6E',traitement:'#B8963E',filtration:'#5B8FA8',autre:'#A0A8B8'}[_caveOpType]||'#A0A8B8';}
 function _caveCuvLabel(op){
   var ids=op.cuvees_ids||(op.cuvee_id?[op.cuvee_id]:[]);
   if(!ids.length)return '\u2014';
@@ -594,11 +594,13 @@ function _copUpdateChips(){
   var a=_copAccent();
   var ab=document.getElementById('cop-chip-all');
   if(ab){ab.style.background=_copAllCuv?a:'';ab.style.color=_copAllCuv?'#fff':'';ab.style.border=_copAllCuv?'none':'';}
+  if(ab) ab.style.display=(_caveOpType==='degustation')?'none':''; // ★ GESTES-1
   actives.forEach(function(c){
     var b=document.getElementById('cop-chip-'+c.id);if(!b)return;
     var on=_copAllCuv||_copCuvSel.has(c.id);
     b.style.background=on?a+'1e':'';b.style.color=on?a:'';b.style.border=on?'1px solid '+a+'88':'';
   });
+  _copNouvSync(); // ★ GESTES-1
 }
 function _copUpdateFutsSummary(){
   var n=_copGetNbFuts(),el=document.getElementById('cop-cuvees-summary');if(!el)return;
@@ -690,13 +692,13 @@ function _copRenderCuvChips(){
   cuvs.forEach(function(c){
     var nbT=_caveNbTonneaux(c);
     ch+='<button class="cave-cuvee-chip" id="cop-chip-'+c.id+'" onclick="toggleCopCuvee(\''+c.id+'\')">'
-       +_escHtml(c.nom)+(c.millesime?' '+_escHtml(c.millesime):'')+'\u00b7 '+nbT+'</button>';
+       +_escHtml(c.nom)+(c.millesime?' '+_escHtml(c.millesime):'')+' \u00b7 '+nbT+'</button>';
   });
   wrap.innerHTML=ch;
 }
 
-function toggleCopAllCuv(){_copAllCuv=!_copAllCuv;if(_copAllCuv)_copCuvSel.clear();_copUpdateChips();_copUpdateFutsSummary();}
-function toggleCopCuvee(id){if(_copAllCuv){_copAllCuv=false;_copCuvSel.clear();}if(_copCuvSel.has(id))_copCuvSel.delete(id);else _copCuvSel.add(id);_copUpdateChips();_copUpdateFutsSummary();}
+function toggleCopAllCuv(){if(_caveOpType==='degustation')return;_copAllCuv=!_copAllCuv;if(_copAllCuv)_copCuvSel.clear();_copUpdateChips();_copUpdateFutsSummary();}
+function toggleCopCuvee(id){if(_caveOpType==='degustation'){_copAllCuv=false;_copCuvSel=new Set([id]);_copUpdateChips();_copUpdateFutsSummary();return;}if(_copAllCuv){_copAllCuv=false;_copCuvSel.clear();}if(_copCuvSel.has(id))_copCuvSel.delete(id);else _copCuvSel.add(id);_copUpdateChips();_copUpdateFutsSummary();}
 function adjCopOuillette(d){_copOuillette=Math.max(1,_copOuillette+d);var el=document.getElementById('cop-ouillette-val');if(el)el.textContent=_copOuillette;updateCopOuillageCalc();}
 function updateCopOuillageCalc(){
   var nb=parseInt((document.getElementById('cop-nb-ouillettes')||{}).value)||0;
@@ -983,6 +985,9 @@ function _caveJDet(op){
     if(_sp) h+='<div class="mvc-jdet">'+_sp+'</div>';
   }
 
+  if(op.type==='degustation'||op.type==='traitement'||op.type==='filtration'){   // ★ GESTES-1
+    _copNouvLignes(op).forEach(function(x){ h+='<div class="mvc-jdet">'+_escHtml(x)+'</div>'; });
+  }
   if(op.type==='analyse'&&op._src==='op'&&op.data){
     var chips='';
     if(op.data.so2_libre) chips+='<span class="mvc-tag mvc-tag-so2">SO\u2082 libre '+op.data.so2_libre+'</span>';
@@ -1387,6 +1392,7 @@ function openOvCaveOp(opId) {
   var sfCalc=document.getElementById('cop-sf-result');if(sfCalc)sfCalc.style.display='none';
   _copSyncSoufreUI();
   var nEl=document.getElementById('cop-notes');if(nEl)nEl.value='';
+  _copNouvReset(); // ★ GESTES-1
   var idEl=document.getElementById('cop-op-id');if(idEl)idEl.value=opId||'';
   var titleEl=document.getElementById('ov-cave-title');
   if(titleEl)titleEl.textContent=opId?'Modifier op\u00e9ration':'Nouvelle op\u00e9ration';
@@ -1440,6 +1446,7 @@ function openOvCaveOp(opId) {
         var sfnEl=document.getElementById('cop-sf-nb');if(sfnEl)sfnEl.value=op.data.nb_input||'';
         _copUpdateSoufreCalc();
       }
+      if(op.type==='degustation'||op.type==='traitement'||op.type==='filtration') _copNouvPrefill(op); // ★ GESTES-1
       if(nEl)nEl.value=op.notes||'';
       _copIntSel=(op.intervenants&&op.intervenants.length)?op.intervenants.slice():(op.operateur?[op.operateur]:_copIntSel);
       _copRenderIntChips();
@@ -1473,7 +1480,7 @@ function openOvCaveOp(opId) {
 
 function selCaveOpType(type) {
   _caveOpType=type;
-  ['ouillage','soutirage','soufre','analyse','autre'].forEach(function(t) {
+  ['ouillage','soutirage','soufre','analyse','degustation','traitement','filtration','autre'].forEach(function(t) {
     var btn=document.getElementById('cot-'+t);
     if(btn) btn.classList.toggle('sel',t===type);
     var fields=document.getElementById('cop-fields-'+t);
@@ -1482,7 +1489,227 @@ function selCaveOpType(type) {
   var nw=document.getElementById('cop-notes-wrap');
   if(nw)nw.style.display=type==='soutirage'?'none':'block';
   if(type==='soufre') _copUpdateSoufreCalc();
+  // ★ GESTES-1 — une dégustation porte sur UNE cuvée : on garde la première cochée.
+  if(type==='degustation' && (_copAllCuv || _copCuvSel.size>1)){
+    var _f1=_copAllCuv?null:Array.from(_copCuvSel)[0]; _copAllCuv=false; _copCuvSel=new Set(_f1?[_f1]:[]);
+    if(typeof _copUpdateFutsSummary==='function') _copUpdateFutsSummary();
+  }
+  var _nx=document.getElementById('cop-dg-next'); if(_nx) _nx.style.display=(type==='degustation')?'':'none';
+  var _ne=document.getElementById('cop-notes'); if(_ne) _ne.placeholder=(type==='degustation')?'Nez, bouche, finale\u2026':'Observations\u2026';
   _copUpdateChips();
+}
+
+/* ════ ★★ GESTES-1 (§239) — DÉGUSTATION, TRAITEMENT, FILTRATION ════════════════
+   Trois gestes du maître de chais qui passaient par « Autre ». Maquette validée le
+   04/10 « go avec les recos », plus une demande de Nico : pouvoir désigner UN FÛT
+   quand une anomalie s'y montre — la dégustation reste, de base, sur la cuvée.
+   ⚠️ Le fût n'est PAS nominatif (§20e) : on désigne le LOT (année, tonnelier,
+      référence) et un REPÈRE libre (numéro à la craie, emplacement).
+   ⚠️ L'unité de dose et la quantité viennent du CUVIER (frontière : _vendIntrUnite,
+      _vendIntrUniteQ, _vendIntrQte, _vendIntrQteTxt) : une règle, une source.
+   ⚠️ Rien de réglementaire (backlog §28, entrée 43) : le registre reste interne.
+   ════════════════════════════════════════════════════════════════════════════ */
+var _COP_DG_ETATS=[['tb','Très bien','#5CB87A'],['b','Bien','#8DC868'],['s','À surveiller','#D8BC72'],['p','Problème','#E07060']];
+var _COP_DG_SIG=[['fruit','Fruité'],['ouv','Ouvert'],['ferm','Fermé'],['red','Réduit'],['oxy','Oxydatif'],['vol','Volatile'],['ani','Animal'],['bois','Bois marqué']];
+var _COP_DG_SUITE=[['rien','Rien'],['sout','Soutirer'],['ana','Analyser'],['asm','Assembler'],['mise','Prête pour la mise'],['retfut','Retirer le fût']];
+var _COP_TR_NAT=[['col','Collage'],['sta','Stabilisation'],['aci','Acidité'],['tan','Tanins · gomme'],['ens','Ensemencement'],['aut','Autre produit']];
+var _COP_FI_TYPES=[['pla','Plaques'],['len','Lenticulaire'],['tan','Tangentielle'],['car','Cartouche'],['ter','Terre']];
+var _COP_FI_SEUILS=[5,1,0.65,0.45,0.2];
+var _copDg={etat:null,sig:[],suite:null,fut:false,futKey:'',repere:''};
+var _copTr={nature:'col',prod:'',volMan:false};
+var _copFi={type:'pla',seuil:null};
+var _copDgSuivante=false;
+function _copNf(x,d){ x=Number(x); if(!isFinite(x)) return '\u2014'; var p=Math.pow(10,d==null?1:d); return String(Math.round(x*p)/p).replace('.',','); }
+function _copQteTxt(q,u){ var t=(typeof window._vendIntrQteTxt==='function')?window._vendIntrQteTxt(q,u):null; return t?(t.n+' '+t.u):(_copNf(q,2)+' '+(u||'')); }
+function _copNouvCuvs(){
+  var ids=_copAllCuv?_copCuvsDuMil().map(function(c){return c.id;}):Array.from(_copCuvSel);
+  return (CAVE_ELEVAGE.cuvees||[]).filter(function(c){ return c&&ids.indexOf(c.id)!==-1; });
+}
+function _copNouvVolHl(){ return _copNouvCuvs().reduce(function(s,c){ var v=_caveVolHl(c); return s+((isFinite(v)&&v>0)?v:0); },0); }
+function _copChipH(on,lbl,fn,a){ return '<button class="cave-cuvee-chip" onclick="'+fn+'"'+(on?' style="background:'+a+'1e;color:'+a+';border:1px solid '+a+'88;"':'')+'>'+_escHtml(lbl)+'</button>'; }
+function _copTogH(on,lbl,fn,flex){ return '<button class="cave-toggle-btn'+(on?' cave-toggle-active':'')+'" style="flex:'+flex+';" onclick="'+fn+'">'+lbl+'</button>'; }
+function _copTrProds(){ return (typeof window._vendIntrProds==='function')?(window._vendIntrProds()||[]):[]; }
+function _copTrProdObj(){ return _copTrProds().filter(function(p){ return p&&p.id===_copTr.prod; })[0]||null; }
+function _copTrUnite(p){ return (typeof window._vendIntrUnite==='function')?window._vendIntrUnite(p):''; }
+function _copTrUniteQ(p){ return (typeof window._vendIntrUniteQ==='function')?window._vendIntrUniteQ(p):''; }
+function _copDgFutKey(l){ return [(l&&l.annee!=null)?l.annee:'',(l&&l.four)||'',(l&&l.ref)||''].join('|'); }
+function _copDgFutLbl(l){
+  var n=parseInt(l.nb,10)||0, p=['Fût '+(l.annee!=null?l.annee:'?')];
+  if(l.four) p.push(l.four); if(l.ref) p.push(l.ref); if(l.l) p.push(l.l+' L');
+  return p.join(' \u00b7 ')+(n?' \u2014 '+n+' fût'+(n>1?'s':''):'');
+}
+function _copNouvReset(){
+  _copDg={etat:null,sig:[],suite:null,fut:false,futKey:'',repere:''};
+  _copTr={nature:'col',prod:'',volMan:false};
+  _copFi={type:'pla',seuil:null};
+  ['cop-tr-dose','cop-tr-vol','cop-fi-perte','cop-dg-repere'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  _copNouvSync();
+}
+function _copNouvSync(){
+  if(_caveOpType==='degustation') _copDgSync();
+  else if(_caveOpType==='traitement') _copTrSync();
+  else if(_caveOpType==='filtration') _copFiSync();
+}
+function _copDgSync(){
+  var a=_copAccent(), e=document.getElementById('cop-dg-etat');
+  if(e) e.innerHTML=_COP_DG_ETATS.map(function(x){ return _copTogH(_copDg.etat===x[0],'<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+x[2]+';margin-right:6px;"></span>'+_escHtml(x[1]),"_copDgEtat('"+x[0]+"')",'1 1 45%'); }).join('');
+  var s=document.getElementById('cop-dg-sig');
+  if(s) s.innerHTML=_COP_DG_SIG.map(function(x){ return _copChipH(_copDg.sig.indexOf(x[0])!==-1,x[1],"_copDgSig('"+x[0]+"')",a); }).join('');
+  var u=document.getElementById('cop-dg-suite');
+  if(u) u.innerHTML=_COP_DG_SUITE.filter(function(x){ return x[0]!=='retfut'||_copDg.fut; }).map(function(x){ return _copChipH(_copDg.suite===x[0],x[1],"_copDgSuite('"+x[0]+"')",a); }).join('');
+  ['cuvee','fut'].forEach(function(m){ var b=document.getElementById('cop-dg-m-'+m); if(b) b.classList.toggle('cave-toggle-active',(m==='fut')===!!_copDg.fut); });
+  var w=document.getElementById('cop-dg-fut-wrap'); if(w) w.style.display=_copDg.fut?'block':'none';
+  var sel=document.getElementById('cop-dg-fut');
+  if(sel){
+    var c=_copNouvCuvs()[0], lots=(c&&Array.isArray(c.tonneaux))?c.tonneaux.filter(function(x){ return x&&(parseInt(x.nb,10)||0)>0; }):[];
+    sel.innerHTML=lots.length?lots.map(function(l){ var k=_copDgFutKey(l); return '<option value="'+_escAttr(k)+'">'+_escHtml(_copDgFutLbl(l))+'</option>'; }).join(''):'<option value="">Aucun fût dans cette cuvée</option>';
+    if(lots.length&&!lots.some(function(l){ return _copDgFutKey(l)===_copDg.futKey; })) _copDg.futKey=_copDgFutKey(lots[0]);
+    if(!lots.length) _copDg.futKey='';
+    sel.value=_copDg.futKey;   // .value pose EN JS (§24, piege 5)
+  }
+}
+window._copDgEtat=function(v){ _copDg.etat=(_copDg.etat===v)?null:v; _copDgSync(); };
+window._copDgSig=function(v){ var i=_copDg.sig.indexOf(v); if(i===-1) _copDg.sig.push(v); else _copDg.sig.splice(i,1); _copDgSync(); };
+window._copDgSuite=function(v){ _copDg.suite=(_copDg.suite===v)?null:v; _copDgSync(); };
+window._copDgMode=function(m){ _copDg.fut=(m==='fut'); if(!_copDg.fut&&_copDg.suite==='retfut') _copDg.suite=null; _copDgSync(); };
+window._copDgFut=function(k){ _copDg.futKey=String(k||''); };
+window._copDgRepere=function(v){ _copDg.repere=String(v||''); };
+window._copDgNext=async function(){ _copDgSuivante=true; try{ await saveCaveOp(); } finally { _copDgSuivante=false; } };
+function _copDgOuvrirSuivante(prevId){
+  var prev=(CAVE_ELEVAGE.cuvees||[]).find(function(c){ return c&&c.id===prevId; }); if(!prev) return;
+  var m=(prev.millesime==null||prev.millesime==='')?'?':String(prev.millesime);
+  _copMil=m;
+  var l=_copCuvsDuMil(), i=-1;
+  l.forEach(function(c,k){ if(c.id===prevId) i=k; });
+  if(i===-1||i>=l.length-1){ showToast('C\u2019était la dernière cuvée du '+(m==='?'?'sans millésime':m),'#C0845A'); return; }
+  var nx=l[i+1];
+  _caveQuickOp(null,'degustation',nx.id);
+  _copMil=m; _copRenderMils(); _copRenderCuvChips();
+  _copAllCuv=false; _copCuvSel=new Set([nx.id]); _copUpdateChips();
+  if(typeof _copUpdateFutsSummary==='function') _copUpdateFutsSummary();
+  showToast('Cuvée suivante : '+nx.nom+(nx.millesime?' '+nx.millesime:''),'#C0845A');
+}
+function _copTrSync(){
+  var n=document.getElementById('cop-tr-nat');
+  if(n) n.innerHTML=_COP_TR_NAT.map(function(x){ return _copTogH(_copTr.nature===x[0],_escHtml(x[1]),"_copTrNat('"+x[0]+"')",'1 1 30%'); }).join('');
+  var s=document.getElementById('cop-tr-prod');
+  if(s){
+    var prods=_copTrProds();
+    s.innerHTML='<option value="">\u2014 Aucun produit (hors bilan matière) \u2014</option>'+prods.map(function(p){ return '<option value="'+_escAttr(p.id)+'">'+_escHtml(p.nom)+'</option>'; }).join('');
+    if(!_copTrProdObj()) _copTr.prod='';
+    s.value=_copTr.prod;
+  }
+  _copTrCalc();
+}
+window._copTrNat=function(v){ _copTr.nature=v; _copTrSync(); };
+window._copTrProd=function(v){ _copTr.prod=String(v||''); _copTrCalc(); };
+window._copTrVolEdit=function(){ _copTr.volMan=true; _copTrCalc(); };
+window._copTrCalc=_copTrCalc;
+function _copTrCalc(){
+  var p=_copTrProdObj(), ue=document.getElementById('cop-tr-unit');
+  if(ue) ue.textContent='\u2014 '+(p?_copTrUnite(p):'selon le produit');
+  var ve=document.getElementById('cop-tr-vol'), vs=document.getElementById('cop-tr-vol-src'), nC=_copNouvCuvs().length, vA=_copNouvVolHl();
+  if(ve&&!_copTr.volMan) ve.value=vA>0?String(Math.round(vA*10)/10):'';
+  if(vs) vs.textContent=_copTr.volMan?'Volume saisi à la main.':(nC?'Le volume des cuvées choisies \u2014 modifiable.':'Choisissez une cuvée : le volume se remplit seul.');
+  var dose=parseFloat((document.getElementById('cop-tr-dose')||{}).value), vol=parseFloat(ve?ve.value:'');
+  var q=(p&&typeof window._vendIntrQte==='function')?window._vendIntrQte(dose,vol):0, uq=_copTrUniteQ(p);
+  var qe=document.getElementById('cop-tr-q'), re=document.getElementById('cop-tr-reste'), rg=document.getElementById('cop-tr-reg');
+  var suit=!!(p&&p.conso_src==='cuvier');
+  var st=(suit&&typeof window._rsvStockPour==='function')?window._rsvStockPour(p.id,(document.getElementById('cop-op-id')||{}).value||null):null;
+  var reste=(st&&isFinite(st.q))?(st.q-q):null;
+  if(qe) qe.textContent=p?(q>0?_copQteTxt(q,uq):'\u2014'):'hors stock';
+  if(re){ re.textContent=(reste==null)?'\u2014':(reste<0?'il manque '+_copQteTxt(-reste,uq):_copQteTxt(reste,uq)); re.style.color=(reste!=null&&reste<0)?'#E07060':''; }
+  if(rg){
+    var T=_rmTraitT({nature:_copTr.nature}), fam=(T.fam==='acidite')?'Corrections d\u2019acidité':'Adjonctions';
+    rg.innerHTML='\u2192 Registre des manipulations : <b>'+fam+' \u00b7 '+_escHtml(T.lbl)+'</b>'
+      +(p?(suit?' \u00b7 sort du stock de La Réserve.':' \u00b7 ce produit ne suit pas les adjonctions dans La Réserve : son stock ne bouge pas.')
+         :' \u00b7 sans produit, l\u2019opération ne sort d\u2019aucun stock.');
+  }
+}
+function _copFiSync(){
+  var a=_copAccent(), t=document.getElementById('cop-fi-type');
+  if(t) t.innerHTML=_COP_FI_TYPES.map(function(x){ return _copTogH(_copFi.type===x[0],_escHtml(x[1]),"_copFiType('"+x[0]+"')",'1 1 30%'); }).join('');
+  var s=document.getElementById('cop-fi-seuil');
+  if(s) s.innerHTML=_COP_FI_SEUILS.map(function(v){ return _copChipH(_copFi.seuil===v,_copNf(v,2)+' \u00b5m','_copFiSeuil('+v+')',a); }).join('');
+  _copFiCalc();
+}
+window._copFiType=function(v){ _copFi.type=v; _copFiSync(); };
+window._copFiSeuil=function(v){ v=Number(v); _copFi.seuil=(_copFi.seuil===v)?null:v; _copFiSync(); };
+window._copFiCalc=_copFiCalc;
+function _copFiCalc(){
+  var v=_copNouvVolHl(), pe=parseFloat((document.getElementById('cop-fi-perte')||{}).value);
+  var ve=document.getElementById('cop-fi-vol'), pc=document.getElementById('cop-fi-pct');
+  if(ve) ve.textContent=v>0?_copNf(v):'\u2014';
+  if(pc) pc.textContent=(v>0&&pe>0)?(_copNf(pe/v)+' %'):'\u2014';
+}
+// Ce que saveCaveOp écrit dans op.data. null = refus (le toast dit pourquoi).
+function _copNouvData(cuvees){
+  var t=_caveOpType;
+  if(t==='degustation'){
+    if(cuvees.length!==1){ showToast('Une dégustation porte sur une seule cuvée','#E07060'); return null; }
+    var d={etat:_copDg.etat, signaux:_copDg.sig.slice(), suite:_copDg.suite, fut:null};
+    if(_copDg.fut){
+      var lots=Array.isArray(cuvees[0].tonneaux)?cuvees[0].tonneaux:[], f=null;
+      lots.forEach(function(l){ if(l&&_copDgFutKey(l)===_copDg.futKey) f=l; });
+      d.fut={annee:(f&&f.annee!=null)?f.annee:null, four:(f&&f.four)||'', ref:(f&&f.ref)||'', l:(f&&f.l)||null, repere:String(_copDg.repere||'').trim()};
+    }
+    return d;
+  }
+  if(t==='traitement'){
+    var p=_copTrProdObj(), dose=parseFloat((document.getElementById('cop-tr-dose')||{}).value), vol=parseFloat((document.getElementById('cop-tr-vol')||{}).value);
+    if(p&&!(dose>0)){ showToast('Saisissez la dose','#E07060'); return null; }
+    var q=(p&&typeof window._vendIntrQte==='function')?window._vendIntrQte(dose,vol):0;
+    return {nature:_copTr.nature, prod_id:p?p.id:'', produit:p?p.nom:'', dose:(dose>0?dose:null), dose_unit:p?_copTrUnite(p):'',
+            volume_hl:(vol>0?Math.round(vol*100)/100:null), vol_src:_copTr.volMan?'saisi':'contenants',
+            qte:(q>0?Math.round(q*1000)/1000:null), qte_unite:p?_copTrUniteQ(p):''};
+  }
+  var fv=_copNouvVolHl(), pe=parseFloat((document.getElementById('cop-fi-perte')||{}).value);
+  var fl=_COP_FI_TYPES.filter(function(x){ return x[0]===_copFi.type; })[0];
+  return {ftype:_copFi.type, ftype_lbl:fl?fl[1]:'', seuil_um:_copFi.seuil, perte_l:(pe>0?pe:null), volume_hl:(fv>0?Math.round(fv*100)/100:null)};
+}
+function _copNouvPrefill(op){
+  var d=(op&&op.data)||{};
+  if(op.type==='degustation'){
+    var fo=(d.fut&&typeof d.fut==='object')?d.fut:null;
+    _copDg={etat:d.etat||null, sig:Array.isArray(d.signaux)?d.signaux.slice():[], suite:d.suite||null, fut:!!fo, futKey:fo?_copDgFutKey(fo):'', repere:fo?String(fo.repere||''):''};
+    var r=document.getElementById('cop-dg-repere'); if(r) r.value=_copDg.repere;
+  } else if(op.type==='traitement'){
+    _copTr={nature:d.nature||'col', prod:d.prod_id||'', volMan:d.vol_src==='saisi'};
+    var de=document.getElementById('cop-tr-dose'); if(de) de.value=(d.dose!=null?d.dose:'');
+    var ve=document.getElementById('cop-tr-vol'); if(ve) ve.value=(d.volume_hl!=null?d.volume_hl:'');
+  } else if(op.type==='filtration'){
+    _copFi={type:d.ftype||'pla', seuil:(d.seuil_um!=null&&isFinite(Number(d.seuil_um)))?Number(d.seuil_um):null};
+    var pe=document.getElementById('cop-fi-perte'); if(pe) pe.value=(d.perte_l!=null?d.perte_l:'');
+  }
+  _copNouvSync();
+}
+// Les lignes lisibles d'une opération neuve : journal, fiche cuvée, Suivi d'élevage. Texte brut, échappé par l'appelant.
+function _copNouvLignes(op){
+  var d=(op&&op.data&&typeof op.data==='object')?op.data:{}, out=[], f=function(T,k){ return T.filter(function(x){ return x[0]===k; })[0]||null; };
+  if(op.type==='degustation'){
+    var e=f(_COP_DG_ETATS,d.etat), su=f(_COP_DG_SUITE,d.suite), l=[];
+    var sig=(Array.isArray(d.signaux)?d.signaux:[]).map(function(k){ var x=f(_COP_DG_SIG,k); return x?x[1]:null; }).filter(Boolean);
+    if(e) l.push(e[1]); if(sig.length) l.push(sig.join(', ')); if(su&&su[0]!=='rien') l.push('Suite : '+su[1].toLowerCase());
+    if(l.length) out.push(l.join(' \u00b7 '));
+    if(d.fut&&typeof d.fut==='object'){
+      var g=['Sur un fût']; if(d.fut.annee!=null&&d.fut.annee!=='') g.push(String(d.fut.annee)); if(d.fut.four) g.push(String(d.fut.four)); if(d.fut.ref) g.push(String(d.fut.ref));
+      var rp=String(d.fut.repere||'').trim(); out.push(g.join(' \u00b7 ')+(rp?' \u2014 '+rp:''));
+    }
+  } else if(op.type==='traitement'){
+    var n=f(_COP_TR_NAT,d.nature), l2=[];
+    if(n) l2.push(n[1]); if(d.produit) l2.push(String(d.produit));
+    if(d.dose!=null&&isFinite(Number(d.dose))) l2.push(_copNf(d.dose,2)+(d.dose_unit?' '+d.dose_unit:'')+(Number(d.volume_hl)>0?' \u00d7 '+_copNf(d.volume_hl)+' hL':''));
+    if(Number(d.qte)>0) l2.push('= '+_copQteTxt(Number(d.qte),d.qte_unite||'kg'));
+    if(l2.length) out.push(l2.join(' \u00b7 '));
+  } else if(op.type==='filtration'){
+    var l3=[];
+    if(d.ftype_lbl) l3.push(String(d.ftype_lbl));
+    if(d.seuil_um!=null&&isFinite(Number(d.seuil_um))) l3.push(_copNf(d.seuil_um,2)+' \u00b5m');
+    if(Number(d.volume_hl)>0) l3.push(_copNf(d.volume_hl)+' hL');
+    if(Number(d.perte_l)>0) l3.push('perte '+_copNf(d.perte_l,0)+' L'+(Number(d.volume_hl)>0?' ('+_copNf(Number(d.perte_l)/Number(d.volume_hl))+' %)':''));
+    if(l3.length) out.push(l3.join(' \u00b7 '));
+  }
+  return out;
 }
 
 function selCaveFml(v) {
@@ -1606,6 +1833,10 @@ async function saveCaveOp() {
     var nbFutsTotal=_copGetNbFuts();
     var sfTotal=sfMode==='fut'?sfNb*nbFutsTotal:sfNb;
     opData={grammes_pastille:sfG,mode:sfMode,nb_input:sfNb,nb_total:sfTotal,so2_total_g:sfTotal*sfG};
+  } else if(_caveOpType==='degustation'||_caveOpType==='traitement'||_caveOpType==='filtration'){
+    var _nd=_copNouvData(cuvees);   // ★ GESTES-1
+    if(!_nd) return;
+    opData=_nd;
   } else {
     opData={desc:((document.getElementById('cop-autre-desc')||{}).value||'').trim()};
   }
@@ -1625,6 +1856,7 @@ async function saveCaveOp() {
   window.closeOv(null,'ovCaveOp');
   _copResetPdfZone();
   renderCave();
+  if(_copDgSuivante){ _copDgSuivante=false; _copDgOuvrirSuivante(firstId); } // ★ GESTES-1
 }
 
 /* ★★★ FUT-CAP — LA FICHE GARDE CE QU'ELLE NE MONTRE PAS. Elle recopiait
@@ -1902,7 +2134,9 @@ function _copUpdateSoufreCalc() {
   if(!nbEl||!resEl) return;
   var nb=parseInt(nbEl.value);
   if(!nb){resEl.style.display='none';return;}
-  var nbFuts=_copGetNbFuts()||82;
+  var nbFuts=_copGetNbFuts();
+  // ★ GESTES-1 — l'aperçu comptait 82 fûts écrits en dur tant qu'aucune cuvée n'était cochée.
+  if(_copSoufreMode==='fut'&&!nbFuts){resEl.style.display='none';return;}
   var total=_copSoufreMode==='fut'?nb*nbFuts:nb;
   var so2=total*_copSoufreG;
   var pastEl=document.getElementById('cop-sf-res-past');
@@ -2026,7 +2260,7 @@ function renderCaveJournal() {
     el.innerHTML=_milNote+'<div class="cave-empty"><div class="cave-empty-ico">'+(_jFilter==='analyse'?'\ud83d\udd2c':'\ud83d\udccb')+'</div><div class="cave-empty-txt">Aucune op\u00e9ration'+(_caveMillFilter!=='tous'?' sur ce mill\u00e9sime':'')+'.</div></div>';
     return;
   }
-  var opMeta={ouillage:{ico:'seau',col:'#C0845A'},soutirage:{ico:'hautbas',col:'#5CB87A'},soufre:{ico:'eprouvette',col:'#4A9C50'},analyse:{ico:'microscope',col:'#4A9FC8'},assemblage:{ico:'fiole',col:'#8A5A38'},autre:{ico:'crayon',col:'#A0A8B8'}};
+  var opMeta={degustation:{ico:'verre',col:'#9B4F6E'},traitement:{ico:'fiole',col:'#B8963E'},filtration:{ico:'entonnoir',col:'#5B8FA8'},ouillage:{ico:'seau',col:'#C0845A'},soutirage:{ico:'hautbas',col:'#5CB87A'},soufre:{ico:'eprouvette',col:'#4A9C50'},analyse:{ico:'microscope',col:'#4A9FC8'},assemblage:{ico:'fiole',col:'#8A5A38'},autre:{ico:'crayon',col:'#A0A8B8'}};
   var monthNames=['Janvier','F\u00e9vrier','Mars','Avril','Mai','Juin','Juillet','Ao\u00fbt','Septembre','Octobre','Novembre','D\u00e9cembre'];
   var byMonth={}, order=[];
   filtered.forEach(function(o){
@@ -2321,8 +2555,8 @@ function openCuveeDetail(cuvId){
   // Journal
   if(allIt.length){
     html+='<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Journal</div>';
-    var tI={ouillage:'seau',soutirage:'rotation',soufre:'eprouvette',analyse:'microscope',retrait_fut:'\uD83D\uDEAA',assemblage:'fiole',autre:'crayon'};
-    var tL={ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',retrait_fut:'Retrait f\u00FBt',assemblage:'Assemblage',autre:'Autre'};
+    var tI={degustation:'verre',traitement:'fiole',filtration:'entonnoir',ouillage:'seau',soutirage:'rotation',soufre:'eprouvette',analyse:'microscope',retrait_fut:'\uD83D\uDEAA',assemblage:'fiole',autre:'crayon'};
+    var tL={degustation:'D\u00e9gustation',traitement:'Traitement',filtration:'Filtration',ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',retrait_fut:'Retrait f\u00FBt',assemblage:'Assemblage',autre:'Autre'};
     allIt.forEach(function(op){
       var ico=_mvIcon(tI[op.type]||'crayon',16),lbl=tL[op.type]||_caveTypeLabel(op.type);   // ROB-2 : jamais « undefined »
       html+='<div style="background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:11px;margin-bottom:7px;">';
@@ -2341,6 +2575,7 @@ function openCuveeDetail(cuvId){
         ? (op.data.litres+'\u00a0L vers\u00e9s dans '+_escHtml(op.data.vers_nom||'une autre cuv\u00e9e'))
         : (op.data.litres+'\u00a0L de '+_escHtml(op.data.de_nom||'une autre cuve')));
       if(op.type==='soufre'&&op.data&&op.data.grammes_pastille)det.push(op.data.grammes_pastille+'g \u00D7 '+op.data.nb_total+' = '+op.data.so2_total_g+' g SO\u2082');
+      if(op.type==='degustation'||op.type==='traitement'||op.type==='filtration') _copNouvLignes(op).forEach(function(x){det.push(_escHtml(x));}); // ★ GESTES-1
       if(op.type==='soutirage'&&op.data&&op.data.so2&&op.data.so2.mode!=='none'){var ss=op.data.so2;det.push('SO\u2082 '+ss.dose+' '+(ss.unite||'cL')+(ss.mode==='unique'?' dose unique':' \u00D7 '+ss.nb_doses));}
       if(op.type==='analyse'&&op._src==='op'&&op.data){
         if(op.data.so2_libre)det.push('SO\u2082 libre: '+op.data.so2_libre+' mg/L');
@@ -2479,9 +2714,9 @@ window.openOvCaveExport = function() {
   if(!isAdmin())return;
   _caveExpAllCuv=true;
   _caveExpCuvSel=new Set();
-  _caveExpTypes=new Set(['ouillage','soutirage','soufre','analyse','autre']);
+  _caveExpTypes=new Set(['ouillage','soutirage','soufre','analyse','degustation','traitement','filtration','autre']);
   _renderCaveExpCuvChips();
-  ['ouillage','soutirage','soufre','analyse','autre'].forEach(function(t){
+  ['ouillage','soutirage','soufre','analyse','degustation','traitement','filtration','autre'].forEach(function(t){
     var el=document.getElementById('cexp-type-'+t);if(el)el.checked=true;
   });
   var d=document.getElementById('cexp-date-deb');if(d)d.value='';
@@ -2578,13 +2813,14 @@ function generateCaveExport() {
       if(op.data.label)lines.push(op.data.label);
       if(op.data.fichier)lines.push(op.data.fichier);
     }
+    if(op.type==='degustation'||op.type==='traitement'||op.type==='filtration') _copNouvLignes(op).forEach(function(x){lines.push(x);}); // ★ GESTES-1
     if(op.notes)lines.push('<em>'+_escHtml(op.notes)+'</em>');
     return lines.map(function(l){return _escHtml(l.replace(/<em>|<\/em>/g,''));}).join('<br>');
   }
 
-  var typeColors={ouillage:'#7B4A1A',soutirage:'#1A5E36',soufre:'#1A5E1A',analyse:'#1D4E89',autre:'#444'};
-  var typeIcos={ouillage:'seau',soutirage:'rotation',soufre:'eprouvette',analyse:'microscope',autre:'crayon'};
-  var typeLabels={ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',autre:'Autre'};
+  var typeColors={ouillage:'#7B4A1A',soutirage:'#1A5E36',soufre:'#1A5E1A',analyse:'#1D4E89',degustation:'#7A3555',traitement:'#8A6A1E',filtration:'#2E6378',autre:'#444'};
+  var typeIcos={ouillage:'seau',soutirage:'rotation',soufre:'eprouvette',analyse:'microscope',degustation:'verre',traitement:'fiole',filtration:'entonnoir',autre:'crayon'};
+  var typeLabels={ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',degustation:'D\u00e9gustation',traitement:'Traitement',filtration:'Filtration',autre:'Autre'};
 
   function _opRow(op){
     var tc=typeColors[op.type]||'#444';
@@ -2621,8 +2857,8 @@ function generateCaveExport() {
     rows=all.map(_opRow).join('');
   }
 
-  var typeLabelsAll={ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',autre:'Autre'};
-  var typeFiltLbl=_caveExpTypes.size===5?'Tous types':Array.from(_caveExpTypes).map(function(t){return typeLabelsAll[t]||t;}).join(', ');
+  var typeLabelsAll={ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',degustation:'D\u00e9gustation',traitement:'Traitement',filtration:'Filtration',autre:'Autre'};
+  var typeFiltLbl=_caveExpTypes.size===8?'Tous types':Array.from(_caveExpTypes).map(function(t){return typeLabelsAll[t]||t;}).join(', ');
   var cuvFiltLbl=_caveExpAllCuv?'Toutes cuv\u00E9es':Array.from(_caveExpCuvSel).map(function(id){var c=(CAVE_ELEVAGE.cuvees||[]).find(function(x){return x.id===id;});return c?c.nom+(c.millesime?' '+c.millesime:''):id;}).join(', ');
   var perFiltLbl=(deb||fin)?((deb?_caveDateFr(deb):'-')+' \u2192 '+(fin?_caveDateFr(fin):'-')):'Toutes dates';
 
@@ -6909,6 +7145,7 @@ window._rfutSetGarder = _rfutSetGarder;
 var RM_FAMILLES = [
   {k:'enrichissement', lbl:'Enrichissement',      ico:'goutte'},
   {k:'sulfitage',      lbl:'Sulfitage',           ico:'eprouvette'},
+  {k:'acidite',        lbl:'Corrections d\u2019acidit\u00e9', ico:'goutte'},   // ★ GESTES-1
   {k:'intrant',        lbl:'Adjonctions',         ico:'fiole'},
   {k:'pratique',       lbl:'Pratiques de cave',   ico:'rotation'}
 ];
@@ -6930,10 +7167,13 @@ var RM_TYPES = {
   assemblage:      {fam:'pratique',       lbl:'Assemblage'},
   // Chai
   soufre:          {fam:'sulfitage',      lbl:'M\u00e8che / pastille de soufre'},
-  soutirage:       {fam:'pratique',       lbl:'Soutirage'}
+  soutirage:       {fam:'pratique',       lbl:'Soutirage'},
+  // ★ GESTES-1 (§239) — la famille d'un traitement suit sa nature : _rmTraitT
+  traitement:      {fam:'intrant',        lbl:'Traitement'},
+  filtration:      {fam:'pratique',       lbl:'Filtration'}
 };
 /* Volontairement HORS registre, et resumes en pied de document. */
-var RM_HORS = {ouillage:'Ouillages', analyse:'Analyses', retrait_fut:'Retraits de f\u00fbts', autre:'Autres'};
+var RM_HORS = {ouillage:'Ouillages', analyse:'Analyses', retrait_fut:'Retraits de f\u00fbts', degustation:'D\u00e9gustations', autre:'Autres'};
 
 function _rmNum(v){ var n = parseFloat(v); return isFinite(n) ? n : null; }
 function _rmF(n, d){
@@ -6966,6 +7206,12 @@ function _rmBornesLbl(c){
 
 /* ── Le detail lisible d'une manipulation ──────────────────────────
    Chaque ligne doit se comprendre SANS revenir a l'ecran de saisie. */
+/* ★ GESTES-1 (§239) — un traitement du Chai : sa famille au registre suit sa NATURE. */
+function _rmTraitT(d){
+  var n = (d && d.nature) || 'aut';
+  var L = {col:'Collage', sta:'Stabilisation', aci:'Correction d\u2019acidit\u00e9', tan:'Tanins, gomme', ens:'Ensemencement', aut:'Traitement'};
+  return {fam:(n === 'aci') ? 'acidite' : 'intrant', lbl:L[n] || 'Traitement'};
+}
 function _rmDetail(o){
   var d = [];
   switch(o.type){
@@ -7003,6 +7249,18 @@ function _rmDetail(o){
       if(o.volume_hl != null) d.push(_rmF(o.volume_hl) + ' hL trait\u00e9s'
                                      + (o.vol_src === 'estime' ? ' (estim\u00e9)' : ''));
       if(o.qte > 0)           d.push('soit ' + _rmF(o.qte, 3) + ' ' + (o.qte_unite || 'kg'));
+      break;
+    case 'traitement':   // ★ GESTES-1
+      if(o.produit)           d.push(o.produit);
+      if(o.dose != null)      d.push(_rmF(o.dose) + (o.dose_unit ? ' ' + o.dose_unit : ''));
+      if(o.volume_hl != null) d.push(_rmF(o.volume_hl) + ' hL trait\u00e9s');
+      if(o.qte > 0)           d.push('soit ' + _rmF(o.qte, 3) + ' ' + (o.qte_unite || 'kg'));
+      break;
+    case 'filtration':
+      if(o.ftype_lbl)         d.push(o.ftype_lbl);
+      if(o.seuil_um != null)  d.push(_rmF(o.seuil_um, 2) + ' \u00b5m');
+      if(o.volume_hl != null) d.push(_rmF(o.volume_hl) + ' hL');
+      if(o.perte_l > 0)       d.push('perte ' + _rmF(o.perte_l, 0) + ' L');
       break;
     case 'saignee':
       if(o.volume_hl != null) d.push(_rmF(o.volume_hl) + ' hL saign\u00e9s');
@@ -7076,6 +7334,7 @@ function _rmLignes(CAVE_VENDANGE, CAVE_ELEVAGE, campagne, millesime){
     if(campagne != null && _rmCampagne(o.date) !== campagne) return;
     var T = RM_TYPES[o.type];
     if(!T){ hors[o.type] = (hors[o.type]||0) + 1; return; }
+    if(o.type === 'traitement') T = _rmTraitT(o.data);   // ★ GESTES-1
     // ⚠ BUG CORRIGE, deuxieme occurrence du meme : le champ s'appelle
     // cuvees_ids (cuvee_id au singulier pour les operations anciennes).
     // « o.cuvees » ne matchait jamais : la colonne « contenant » du registre

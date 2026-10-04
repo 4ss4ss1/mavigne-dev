@@ -1,4 +1,6 @@
-// MA VIGNE — Service Worker v8.91
+// MA VIGNE — Service Worker v8.92
+// v8.92 (04/10/2026) — GESTES-1 (§239) : trois gestes au Chai (degustation, traitement, filtration) ; un fut precis pour une
+//   anomalie ; les traitements sortent du stock de La Reserve ; journal, fiche, Suivi d'elevage, registre. APP 8.16 -> 8.17.
 // v8.91 (04/10/2026) — ALIGN-3 (§238) : correctif Accueil — un bloc masque reapparaissait sur ordinateur (regle a ID
 //   #home-cols > .home-w plus forte que .home-w-off) ; l'oeil toujours un oeil, barre si masque. APP 8.15 -> 8.16.
 // v8.90 (04/10/2026) — ALIGN-2 (§237) : l'Accueil en rangees (grille, blocs de meme hauteur, pleine largeur, bloc seul
@@ -4303,7 +4305,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.91';
+const CACHE_NAME   = 'mavigne-v8.92';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4319,7 +4321,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.91 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.92 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4339,7 +4341,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.91 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.92 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

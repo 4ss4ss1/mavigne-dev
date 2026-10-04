@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **4 octobre 2026 (ALIGN-3)** — ★ **CORRECTIF : UN BLOC MASQUÉ RESTE MASQUÉ SUR L'ACCUEIL** (§238).
+> Nico (04/10, après ALIGN-2 en ligne) : les blocs masqués réapparaissaient une fois la personnalisation validée, l'ordre semblait
+> bousculé, « on ne voit pas l'œil ». Cause : `#home-cols > .home-w{display:flex}` (un ID) battait `.home-w.home-w-off{display:none}`
+> (une classe) — sur ordinateur seulement. L'état masqué est redit au niveau d'ID ; en édition, estompé. L'œil reste un œil, barré
+> quand le bloc est masqué (le panneau « interdit » ne se lisait pas comme un œil), titre et `aria-label` disent l'action.
+> ★ LEÇON : une règle de mise en page posée sur un ID doit redire les états cachés de ses enfants. Harnais `mv-harnais-align2` (+2, +2).
+> Marque `lots/ALIGN-3.json`. Base `657cb29`. **APP 8.15 → 8.16, SW 8.90 → 8.91** (visible).
+
 > ★ Consolidation : **4 octobre 2026 (ALIGN-2, avec ALIGN-1 non poussé)** — ★★ **L'ACCUEIL EN RANGÉES** (§237).
 > Suite de la maquette validée « c'est parfait » (§236). KIT-2 (grille) laissait des trous, KIT-5 (colonnes) n'alignait plus rien :
 > `#home-cols` redevient une grille, en RANGÉES PLEINES — même hauteur par rangée, carte qui remplit le bloc, pied collé en bas ;

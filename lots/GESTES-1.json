@@ -1,0 +1,25 @@
+{
+  "lot": "GESTES-1",
+  "section": "§239",
+  "base": "5a0d37efc538eed5a19aeb539b473e1fcb154b11",
+  "inclut": [],
+  "date": "2026-10-04",
+  "fichiers": {
+    ".mv-base": "c71d3df5def4625901b2941300ede3c6a4aaeb58cf260610846aaaa24134ee39",
+    "CLAUDE.md": "ee102a2282336231a088c85141766019a109b730a4d939881a5f55e391363c20",
+    "docs/claude/INDEX.md": "64e911d58241e64a572a8331a532ddf68e30b688c45b1321d2a2cabeb24b6573",
+    "docs/claude/chantiers-230-279.md": "a35b40cc8cec40f7cabe915ad6ae91ec5baeac0cc9e132bae1e295e9cc3195e7",
+    "docs/claude/journal.md": "c1fd9454557e9d09b60adab82bda2ab6cc00257170ed01ddbc1dd2de2e14435b",
+    "docs/claude/modules.md": "1da1261301ad42a1d1345268b3617eb6529b196524ec9d54156caf283ec27ce9",
+    "guide/08-cave.html": "e14170e95405586429130b4eea0a1a86753e555f348687903897d043c917924a",
+    "index.html": "50f7301078e72263de3943d41ddbc6859fe725d07e8e13f491786d4e129ebe00",
+    "public/sw.js": "208ad1fa744b043e4f1da5031899139d846dd6c9043faf506096bd9a717b2041",
+    "scripts/harnais-claude-md.mjs": "7d2f40244f5f9315e4c07f9635f216bb8a536f412ee7c9321f059656b390434f",
+    "scripts/mv-harnais-liste.mjs": "526bdeb0f873575f1d7026361138b527dace55948a8b8b889a5a67df970bf96d",
+    "src/cave.js": "ccaeb39803d09626081284072fcb77dfcf6ec33948332fa4486b62032e24ec1f",
+    "src/cuvier.js": "bcfa7950969d576fa275e464bb80b16564e562373aa5eded3c14c360ea7cdd8f",
+    "src/reserve.js": "da866b329fc7634859d7244b3ab3d748eb82393c3a2c38e900c47d286ce45a45",
+    "src/utils.js": "d87448fcd9c4d96abdb183d9650f9d3c0977b54d2811f86fcb8a5dccbf363900",
+    "scripts/mv-harnais-gestes.mjs": "d212abbf6d62b10f3604c74ffc684f34334d014e2182cd1bb29218c06be39c09"
+  }
+}

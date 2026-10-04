@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.16';
+export const APP_VERSION = '8.17';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -852,6 +852,14 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.17', d: '2026-10-04', items: [
+    { niv: 0, pour: ['cave'], emoji: 'verre', titre: 'Déguster, traiter, filtrer : trois gestes neufs au Chai',
+      desc: "Dans « Nouvelle opération », trois boutons de plus. <b>Dégustation</b> : une cuvée à la fois — ou un fût précis si une anomalie s’y montre —, comment il goûte, ce qu’on remarque, la suite à donner ; « Enregistrer et goûter la suivante » enchaîne les cuvées. "
+        + "<b>Traitement</b> : collage, stabilisation, acidité, tanins et gomme, ensemencement ; le produit vient de La Réserve, la quantité se calcule et sort du stock. "
+        + "<b>Filtration</b> : le type, le seuil, la perte. Tout arrive au journal, au Suivi d’élevage et au registre des manipulations ; « Autre » reste pour le reste." },
+    { niv: 0, pour: ['cave'], emoji: 'crayon', titre: 'Deux détails du formulaire de cave',
+      desc: "Les pastilles de cuvée retrouvent leur espace avant le point (« Village 2026 · 12 »), et l’aperçu des pastilles de soufre attend qu’une cuvée soit cochée au lieu de compter des fûts qui n’existent pas." },
+  ] },
   { v: '8.16', d: '2026-10-04', items: [
     { niv: 0, pour: ['tous'], emoji: 'oeil', titre: 'Accueil : un bloc masqué reste masqué',
       desc: "Sur ordinateur, un bloc masqué réapparaissait en quittant la personnalisation, et les rangées se décalaient. C’est corrigé. "
@@ -4536,6 +4544,9 @@ var MV_AIDE = {
       ['Les compteurs P et R', "pigeage et remontage. Un appui ajoute un, un appui long en retire un. Ils se posent sur le relevé du jour, comme dans la fiche de mesure. Le nom de qui fait la tournée se choisit en haut à droite et part sur chaque relevé : c’est ce qui répond à « qui a pigé ? » trois semaines plus tard."],
       ['L’intervention groupée', "le bouton + en bas à droite de la tournée : une opération, les cuves retenues (ou « Toutes »), une dose. Chaque cuve reçoit sa propre opération, calculée sur SON volume — jamais sur un volume commun. Chacune se corrige ensuite depuis sa cuve, comme si elle avait été saisie à la main."],
       ['La tournée s’enregistre toute seule', "une seule fois, une seconde après votre dernière frappe, pas à chaque chiffre tapé. Un « Enregistré » discret passe sous la barre. Si le réseau manque au fond du cuvier, l’écran le dit et garde votre saisie : elle repart dès que le téléphone accroche."],
+      ['Déguster, traiter, filtrer', "Le bouton « Nouvelle opération » du Chai propose huit gestes. Dégustation : une cuvée à la fois — ou un fût précis, désigné par son lot et un repère (numéro à la craie, emplacement), si une anomalie s’y montre — avec comment il goûte, ce qu’on remarque et la suite à donner ; « Enregistrer et goûter la suivante » passe à la cuvée suivante du millésime. "
+        + "Traitement : la nature (collage, stabilisation, acidité, tanins et gomme, ensemencement), le produit de La Réserve qui fixe l’unité de la dose, puis la dose ; le volume des cuvées choisies se remplit seul, la quantité se calcule et sort du stock comme les adjonctions du Cuvier. Filtration : le type, le seuil, la perte — notée, sans toucher au volume de la cuvée. "
+        + "Les trois arrivent au journal et au Suivi d’élevage ; traitement et filtration entrent au registre des manipulations, la dégustation y est comptée en pied."],
       ['Un millésime à la fois', "une opération porte sur une seule année. Changer de millésime en haut du formulaire vide la sélection : on ne mélange pas deux vins dans un même geste."],
       ['Le délai d’ouillage', "se règle pour tout le domaine, et se resserre millésime par millésime — un vin jeune se surveille de plus près."],
       ['Le parc à cuves', "se déclare une fois dans la roue crantée de la Cave, bloc Le Chai : un nom, une contenance en litres, une matière. La même cuve sert à vinifier au Cuvier puis à élever au Chai, et l’application sait laquelle est prise — dans les deux cas."],

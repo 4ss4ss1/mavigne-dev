@@ -4289,6 +4289,9 @@ function _vendIntrCalc(){
 }
 window._vendEstIntrant=_vendEstIntrant;
 window._vendIntrQte=_vendIntrQte;
+window._vendIntrUnite=_vendIntrUnite;     // ★ GESTES-1 : le Chai lit la MEME regle d'unite
+window._vendIntrUniteQ=_vendIntrUniteQ;
+window._vendIntrProds=_vendIntrProds;
 window._vendIntrQteTxt=_vendIntrQteTxt;
 window._vendIntrVol=_vendIntrVol;
 window._vendIntrProdChg=_vendIntrProdChg;

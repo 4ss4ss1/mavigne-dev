@@ -142,15 +142,23 @@ window._rsvPrixUSansPrix=_rsvPrixUSansPrix;
 //   produits deja crees, eux, ne bougent pas : aucune migration.
 function _consoCuvier(pid, exclId){
   var CV=window.CAVE_VENDANGE;
-  if(!pid||!CV||!CV.cuves_vinif) return 0;
+  if(!pid) return 0;
   var t=0;
-  CV.cuves_vinif.forEach(function(c){
+  if(CV&&CV.cuves_vinif) CV.cuves_vinif.forEach(function(c){
     ((c&&c.operations)||[]).forEach(function(o){
       if(!o||o.prod_id!==pid) return;
       if(exclId&&o.id===exclId) return;
       var q=parseFloat(o.qte);
       if(isFinite(q)&&q>0) t+=q;
     });
+  });
+  /* ★ GESTES-1 (§239) — les traitements du Chai sortent du MEME stock que les adjonctions du Cuvier. */
+  var CE=window.CAVE_ELEVAGE;
+  ((CE&&CE.operations)||[]).forEach(function(o){
+    if(!o||o.type!=='traitement'||!o.data||o.data.prod_id!==pid) return;
+    if(exclId&&o.id===exclId) return;
+    var q=parseFloat(o.data.qte);
+    if(isFinite(q)&&q>0) t+=q;
   });
   return t;
 }
@@ -834,7 +842,7 @@ function _rsvNegEstime(p){
     +' sur un volume estim\u00e9</b> \u2014 l\u2019\u00e9cart peut venir de l\u00e0 avant de venir d\u2019une facture.';
 }
 function _consoSrcLbl(p){
-  if(p.conso_src==='cuvier') return 'Consomm\u00e9 : adjonctions du Cuvier';
+  if(p.conso_src==='cuvier') return 'Consomm\u00e9 : adjonctions du Cuvier et traitements du Chai';
   if(p.conso_src==='cave_so2') return 'Consommé : opérations Cave (SO\u2082)';
   if(p.conso_src==='manual') return 'Consommé : saisie manuelle';
   return 'Consommé : registre phyto';

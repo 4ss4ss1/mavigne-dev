@@ -3,13 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **4 octobre 2026 (ALIGN-3)** — ★ **CORRECTIF : UN BLOC MASQUÉ RESTE MASQUÉ SUR L'ACCUEIL** (§238).
-> Nico (04/10, après ALIGN-2 en ligne) : les blocs masqués réapparaissaient une fois la personnalisation validée, l'ordre semblait
-> bousculé, « on ne voit pas l'œil ». Cause : `#home-cols > .home-w{display:flex}` (un ID) battait `.home-w.home-w-off{display:none}`
-> (une classe) — sur ordinateur seulement. L'état masqué est redit au niveau d'ID ; en édition, estompé. L'œil reste un œil, barré
-> quand le bloc est masqué (le panneau « interdit » ne se lisait pas comme un œil), titre et `aria-label` disent l'action.
-> ★ LEÇON : une règle de mise en page posée sur un ID doit redire les états cachés de ses enfants. Harnais `mv-harnais-align2` (+2, +2).
-> Marque `lots/ALIGN-3.json`. Base `657cb29`. **APP 8.15 → 8.16, SW 8.90 → 8.91** (visible).
+> Dernière consolidation : **4 octobre 2026 (GESTES-1, avec la note NOTE-DRM non poussée)** — ★★ **DÉGUSTER, TRAITER, FILTRER** (§239).
+> Benchmark des logiciels de cave puis maquette `maquette-cave-gestes-v1.html` validée « go avec les recos », plus une demande de Nico :
+> désigner UN FÛT quand une anomalie s'y montre (de base, la dégustation porte sur la cuvée). Trois types dans « Nouvelle opération » :
+> fût = lot + repère (aucun fût nominatif) ; traitement = produit de La Réserve, unité et quantité lues du Cuvier (frontière), sortie de
+> stock par `_consoCuvier` ; registre : famille par nature (`_rmTraitT`, « Corrections d'acidité »), filtration en pratiques, dégustation
+> en pied. Au passage : les 82 fûts en dur du soufre, l'espace avant « · » (entrée 10). DRM : backlog, entrée 43. Harnais `mv-harnais-gestes`
+> (neuf, 60 + 7/7). Marque `lots/GESTES-1.json`. Base `5a0d37e` (rejoué sur ALIGN-3). **APP 8.16 → 8.17, SW 8.91 → 8.92** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1819,6 +1819,13 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ GESTES-1 — CE QUI RESTE OUVERT (§239, posé le 04/10)
+
+1. **GESTES-2 (validé, non fait)** : la suite d'une dégustation dans « Ce qui vient » jusqu'au geste qui la solde (Soutirer, Analyser,
+   Assembler, Retirer le fût) ; « Prête pour la mise » lue par Pilotage › Cave (§20g). Aujourd'hui la suite est notée et affichée, sans rappel.
+2. **Lot 2 de la série cave (proposé)** : bâtonnage + rappel, méchage des fûts vides ; puis analyses complètes, mise en bouteille enrichie.
+3. **À regarder sur capture** : les huit boutons de type au téléphone (3 à 4 rangées).
+
 ### ⚠️ ALIGN-1 — CE QUI RESTE OUVERT (§236, posé le 04/10)
 
 1. **ALIGN-2, l'Accueil en rangées** : fait (§237) ; correctif ALIGN-3 (§238) — un bloc masqué réapparaissait sur ordinateur. À regarder à l'œil chez Nico sur ordinateur : les rangées, le bouton « Pleine
@@ -2697,6 +2704,11 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     ⚠️ **C'est le vrai sujet, et il est plus gros que l'entrée ne le disait** : la moitié des règles
     responsive a quitté la feuille de style. Les ramener à trois suppose d'abord de savoir où elles
     sont — et **le preflight ne le sait pas non plus**. **Après** le lot typographique, pas avant.
+43. ⚠️ **Registre d'entrées-sorties et DRM — un chantier à part, PAS MAINTENANT** (décision de Nico, 04/10 : *« je ne veux pas de
+    réglementaire […] je reste pour l'instant sur une application à but indicatif »*). **Vérifié : 0 occurrence** de `DRM`, `douane`,
+    `DGDDI` dans `src/` et `index.html` ; le registre l'écrit (« Ma Vigne prépare, l'exploitant déclare », `cave.js`). ⚠️⚠️ **Tant que
+    cette entrée est ouverte, aucun lot Cave n'ajoute de déclaration, de plafond ni de contrôle de conformité.** ★ Le jour où le chantier
+    s'ouvre, il rouvre le **stock de bouteilles** (abandonné, cf. « Rayés ») : une comptabilité matières suit aussi le vin en bouteille.
 
 
 ### ✅ Rayés du backlog
