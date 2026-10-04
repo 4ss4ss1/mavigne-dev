@@ -465,4 +465,6 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-photo.mjs --contre'],
   ['node scripts/mv-harnais-annonces.mjs'],           // ANN-1 (§225) : les quatre niveaux des nouveautés
   ['node scripts/mv-harnais-annonces.mjs --contre'],
+  ['node scripts/mv-harnais-prio.mjs'],               // PRIO-1 (§235) : la tâche du moment, une seule règle
+  ['node scripts/mv-harnais-prio.mjs --contre'],
 ];

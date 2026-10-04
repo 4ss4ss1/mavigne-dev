@@ -10,6 +10,7 @@
 | — | ⚖️ Les six règles d'or | `CLAUDE.md` |
 | — | 🖥️ Environnement de Nico | `CLAUDE.md` |
 | — | 💬 Communication | `CLAUDE.md` |
+| — | Historique descendu du §28 de `CLAUDE.md` (04/10/2026, PRIO-1 — plafond de lignes du cœur) | `docs/claude/journal.md` |
 | 1 | 1. Identité & contexte | `CLAUDE.md` |
 | 2 | 2. Inventaire fonctionnel — 10 modules | `CLAUDE.md` |
 | 3 | 3. Positionnement commercial | `CLAUDE.md` |
@@ -277,3 +278,4 @@
 | 232 | 232. ★★ RENOM-3 — L'ADMIN RENOMME, LA RÈGLE S'IMPOSE À TOUS LES APPAREILS (03/10 — `src/reglages.js` · `src… | `docs/claude/chantiers-230-279.md` |
 | 233 | 233. ★ KIT-5 — L'ACCUEIL SUR DEUX COLONNES, SANS TROUS (03/10 — `src/app.js` · `src/styles.css` · `guide/04… | `docs/claude/chantiers-230-279.md` |
 | 234 | 234. ★★ ANNEE-1 — PILOTAGE › L'ANNÉE, UN CADRE À LA FOIS (04/10 — `src/pilotage.js` · `src/utils.js` (APP, … | `docs/claude/chantiers-230-279.md` |
+| 235 | 235. ★★ PRIO-1 — LA TÂCHE DU MOMENT : UNE SEULE RÈGLE, D'APRÈS LES DATES DE TRAVAUX (04/10 — `src/app.js` ·… | `docs/claude/chantiers-230-279.md` |

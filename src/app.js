@@ -6568,34 +6568,34 @@ window.homeShortcut=homeShortcut;
 // la meme que le cout par parcelle du Pilotage).
 // ════════════════════════════════════════════════════════════════════════════
 
-// Tache « du moment » : la plus travaillee sur 15 jours, sinon la plus avancee
-// parmi celles qui restent ouvertes dans la periode consultee.
-function _mvPartTache(){
+// PRIO-1 (§235) — LA TACHE DU MOMENT, vue de « Ma part du chantier ». Elle suit LA regle commune
+// (_mvTacheDuMoment) : la priorite de son equipe (sinon la premiere), sinon la seule tache dans ses
+// dates de travaux, sinon la prochaine. Plusieurs taches en meme temps sans priorite : celle ou LA
+// PERSONNE a le plus travaille ces 15 derniers jours, a defaut la premiere par date. Avant : la plus
+// travaillee de TOUTE l'equipe, sinon la plus avancee, a egalite la premiere de la liste — la Taille,
+// quelle que soit la priorite fixee (Nico, 04/10). `out` (facultatif) recoit la regle jouee (out.M).
+function _mvPartTache(out){
   var lst=(typeof getTachesSaison==='function')?getTachesSaison():[];
   if(!lst.length)return null;
   var vn=(typeof _visuSaison==='function')?_visuSaison():((getSaisonActive()||{}).nom||'');
+  var sa=(window.SAISONS||[]).find(function(s){ return s&&s.nom===vn; })||((typeof getSaisonActive==='function')?getSaisonActive():null);
+  var M=_mvTacheDuMoment({saison:sa, noms:lst.map(function(t){ return t&&t.nom; })});
+  if(out)out.M=M;
+  if(!M||!M.taches.length)return null;
+  if(M.mode==='admin')return _prioDefaultTask(M.items);
+  if(M.mode!=='choix')return M.taches[0];
+  var me=(typeof currentUser!=='undefined'&&currentUser&&currentUser.nom)||'';
   var d15=_mvISO(new Date(Date.now()-15*86400000));
   var cnt={};
   JOURNAL.forEach(function(j){
-    if(!j||j.meteo||!j.tache||!j.date||j.date<d15)return;
+    if(!me||!j||j.meteo||!j.tache||!j.date||j.date<d15||M.taches.indexOf(j.tache)<0)return;
     if(vn&&typeof window._saisonForDate==='function'&&window._saisonForDate(j.date)!==vn)return;
+    if(j.qui!==me&&(j.membresEquipe||[]).indexOf(me)<0)return;
     cnt[j.tache]=(cnt[j.tache]||0)+1;
   });
-  var best=null,bestN=0;
-  lst.forEach(function(t){
-    var tw=TRAVAUX[t.nom]||{};
-    if((tw.pct||0)>=100)return;              // chantier fini : on ne le remet pas en avant
-    if(t.nom==='Arrachage'&&typeof _arrEquipeFiniePartout==='function'&&_arrEquipeFiniePartout())return;   // ARRACH-7 : la suite est au prestataire
-    var n=cnt[t.nom]||0;
-    if(n>bestN){bestN=n;best=t.nom;}
-  });
-  if(best)return best;
-  var open=lst.filter(function(t){var tw=TRAVAUX[t.nom]||{};
-    if(t.nom==='Arrachage'&&typeof _arrEquipeFiniePartout==='function'&&_arrEquipeFiniePartout())return false;   // ARRACH-7
-    return (tw.pct||0)<100;});
-  if(!open.length)return null;
-  open.sort(function(a,b){return ((TRAVAUX[b.nom]||{}).pct||0)-((TRAVAUX[a.nom]||{}).pct||0);});
-  return open[0].nom;
+  var best=M.taches[0],bestN=0;
+  M.taches.forEach(function(n){ if((cnt[n]||0)>bestN){ bestN=cnt[n]; best=n; } });
+  return best;
 }
 
 // Repartition de surf_done entre « moi » et « l'equipe », + reste et cadence.
@@ -6848,7 +6848,8 @@ function renderHomeMaPart(){
   var c=document.getElementById('home-mapart');
   if(!c)return;
   var wrap=document.querySelector('.home-w[data-w="mapart"]');
-  var tache=_mvPartTache();
+  var _pm={};
+  var tache=_mvPartTache(_pm);
   // PREP-1 (§134) : GUERETTECH n'est pas dans l'équipe, sa part serait toujours vide.
   if(!tache||window._mvPrepOn()){ if(wrap)wrap.style.display='none'; c.innerHTML=''; return; }
   if(wrap)wrap.style.display='';
@@ -6860,6 +6861,11 @@ function renderHomeMaPart(){
   var pThem=r.tot>0?(r.them/r.tot*100):0;
   var ha=function(v){return (Math.round((parseFloat(v)||0)*100)/100).toFixed(2).replace('.',',');};
   var titre=_escHtml(tNom(tache));
+  // PRIO-1 (§235) : la ligne sous le titre dit pourquoi cette tache, en deux ou trois mots.
+  var _M=_pm.M||null, _dt=(_M&&_M.dates&&_M.dates[tache])||null, raison='';
+  if(_M&&_M.mode==='admin') raison='priorit\u00e9 du moment';
+  else if(_M&&_M.mode==='prochaine'&&_dt&&_dt.debut) raison='d\u00e8s le '+_mvPartDate(new Date(_dt.debut+'T12:00:00'));
+  else if(_M&&_M.retard&&_M.retard[tache]) raison='en retard';
 
   if(_homeIsCompact('mapart')){
     c.innerHTML='<div class="mv-c"><div class="mv-hd"><div><div class="mv-t">'+titre+'</div>'
@@ -6870,7 +6876,7 @@ function renderHomeMaPart(){
 
   c.innerHTML='<div class="mv-c mv-c-clic hmp" onclick="goTo(\'parcelles\')">'
     +'<div class="mv-hd"><div><div class="mv-t">'+titre+'</div>'
-      +'<div class="mv-l" style="margin-top:2px">'+ha(r.done)+' ha faits sur '+ha(r.tot)+' ha</div></div>'
+      +'<div class="mv-l" style="margin-top:2px">'+ha(r.done)+' ha faits sur '+ha(r.tot)+' ha'+(raison?(' \u00b7 '+raison):'')+'</div></div>'
       +'<div class="mv-n">'+r.pct+'<span style="font-size:13px"> %</span></div></div>'
     +'<div class="hmp-bar" aria-hidden="true"><span class="mine" style="width:'+pMine.toFixed(1)+'%"></span>'
       +'<span class="them" style="width:'+pThem.toFixed(1)+'%"></span></div>'
@@ -8947,6 +8953,7 @@ function savePriority(){
   savePriorityData();
   notifyPriorityChange();
   renderParcelles();
+  _prioRedessine();
   var lbl=items.length?(String.fromCodePoint(0x2B50)+' Priorit\u00e9 : '+items.map(function(it){return (typeof tNom==='function'?tNom(it.t):it.t);}).join(' \u00B7 ')):(String.fromCodePoint(0x1F4CC)+' Message de priorit\u00e9 enregistr\u00e9');
   showToast(lbl,'#3D6B27');
 }
@@ -8963,6 +8970,17 @@ function clearPriority(){
   savePriorityData();
   notifyPriorityChange();
   renderParcelles();
+  _prioRedessine();
+}
+// PRIO-1 (§235) : la priorite se lit aussi sur l'Accueil (Ma part du chantier) et au Pilotage
+// (Aujourd'hui, Decider). Seul Parcelles se redessinait : une priorite fixee depuis la carte du
+// Pilotage n'y apparaissait qu'au rechargement.
+function _prioRedessine(){
+  try{ renderHomeMaPart(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_prioRedessine'); }
+  try{
+    var pg=document.querySelector('.page.active');
+    if(pg&&pg.id==='page-pilotage'&&typeof window.renderPilotage==='function') window.renderPilotage();
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_prioRedessine#2'); }
 }
 function savePriorityData(){
   // localStorage
@@ -12591,6 +12609,80 @@ function _prioDefaultTask(its){
   for(var i=0;i<its.length;i++){ if(me&&(its[i].equipe||[]).indexOf(me)>=0) return its[i].t; }
   return its[0].t;
 }
+// ════════════════════════════════════════════════════════════════════════════
+// PRIO-1 (§235, 04/10/2026) — LA TACHE DU MOMENT : UNE SEULE REGLE, TOUS LES ECRANS
+// ────────────────────────────────────────────────────────────────────────────
+// Avant : trois ecrans, trois regles. Pilotage › Aujourd'hui prenait la tache pas finie qui avait
+// le plus d'heures restantes (« pole long ») : la taille tout l'hiver, quoi que l'admin ait fixe.
+// Ma part du chantier prenait la plus travaillee sur 15 jours, sinon la plus avancee, sinon la
+// premiere de la liste. Seuls Parcelles et Decider lisaient la priorite fixee.
+// LA REGLE (Nico, 04/10) :
+//  · l'ORDRE vient des dates de travaux de la periode (saison.echeances, posees dans Reglages ›
+//    Domaine › Saisons ou dans la roue crantee du Pilotage) : chaque domaine a le sien, aucune
+//    chaine de taches en dur (chez lui : les reparations avant la taille) ;
+//  · la priorite fixee par l'admin passe toujours devant ; une priorite finie ne compte plus ;
+//  · sinon, une seule tache pas finie dans ses dates : c'est elle ;
+//    plusieurs en meme temps : l'APPLI NE CHOISIT PAS, c'est l'admin ;
+//    aucune : la prochaine, par date de debut ;
+//  · une tache pas finie dont la date de fin est passee reste dans la course, marquee en retard :
+//    elle peut donc creer un chevauchement ;
+//  · une tache sans dates a elle court sur toute la periode : elle chevauche tout.
+// Le moteur ne lit RIEN de global : tout arrive en parametre (harnais mv-harnais-prio).
+// Sortie : {mode:'admin'|'dates'|'choix'|'prochaine'|'aucune', taches:[noms], items:[{t,equipe}],
+//           retard:{nom:1}, dates:{nom:{debut,fin}}, enCours:[noms]}
+// ════════════════════════════════════════════════════════════════════════════
+function _mvPrioRegle(o){
+  o=o||{};
+  var auj=String(o.auj||''), vivantes={}, ordre=[];
+  (Array.isArray(o.taches)?o.taches:[]).forEach(function(t,i){
+    if(!t||!t.nom||t.fini||vivantes[t.nom])return;
+    var x={nom:t.nom, debut:String(t.debut||''), fin:String(t.fin||''), rang:i};
+    vivantes[t.nom]=x; ordre.push(x);
+  });
+  var parDate=function(a,b){ return a.debut<b.debut?-1:(a.debut>b.debut?1:a.rang-b.rang); };
+  var retard={};
+  var enCours=ordre.filter(function(t){
+    if(t.debut&&auj&&t.debut>auj)return false;          // pas encore dans ses dates
+    if(t.fin&&auj&&t.fin<auj)retard[t.nom]=1;            // fin passee, pas finie : reste en course
+    return true;
+  }).sort(parDate);
+  var R={mode:'aucune', taches:[], items:[], retard:retard, dates:vivantes,
+         enCours:enCours.map(function(t){ return t.nom; })};
+  var items=(Array.isArray(o.prios)?o.prios:[]).filter(function(it){ return it&&it.t&&vivantes[it.t]; });
+  if(items.length){ R.mode='admin'; R.items=items; R.taches=items.map(function(it){ return it.t; }); return R; }
+  if(enCours.length===1){ R.mode='dates'; R.taches=[enCours[0].nom]; return R; }
+  if(enCours.length>1){ R.mode='choix'; R.taches=R.enCours.slice(); return R; }
+  var proch=ordre.filter(function(t){ return t.debut&&auj&&t.debut>auj; }).sort(parDate);
+  if(proch.length){ R.mode='prochaine'; R.taches=[proch[0].nom]; }
+  return R;
+}
+// Rassemble ce que la regle lit, pour une periode. opt (tout facultatif) :
+//   saison : l'objet periode (defaut : la periode active) ;
+//   noms   : les taches a departager (defaut : celles de la periode) ;
+//   fini   : fini(nom) -> bool, la lecture « finie » de l'ecran appelant (defaut : TRAVAUX[nom].pct >= 100) ;
+//   auj    : 'AAAA-MM-JJ' (defaut : aujourd'hui, heure locale).
+// ★ L'arrachage dont la part de l'equipe est faite partout compte comme fini (ARRACH-7) : la suite
+//   est au prestataire, elle ne dispute rien a l'equipe.
+// ★ La priorite fixee ne vaut que pour la periode ACTIVE (CONFIG.tachesPrio.saison).
+function _mvTacheDuMoment(opt){
+  opt=opt||{};
+  try{
+    var act=(typeof getSaisonActive==='function')?getSaisonActive():null;
+    var sa=opt.saison||act||null;
+    var noms=Array.isArray(opt.noms)?opt.noms:((typeof getTachesSaison==='function')?getTachesSaison():[]).map(function(t){ return t&&t.nom; });
+    var ech=(sa&&sa.echeances&&typeof sa.echeances==='object'&&!Array.isArray(sa.echeances))?sa.echeances:{};
+    var finiBase=(typeof opt.fini==='function')?opt.fini:function(n){ var tw=(typeof TRAVAUX!=='undefined'&&TRAVAUX&&TRAVAUX[n])||{}; return (tw.pct||0)>=100; };
+    var arrFini=function(n){ return n==='Arrachage'&&typeof _arrEquipeFiniePartout==='function'&&_arrEquipeFiniePartout(); };
+    var taches=noms.filter(Boolean).map(function(n){
+      var e=ech[n]||{};
+      return {nom:n, fini:!!(finiBase(n)||arrFini(n)), debut:e.d1||(sa&&sa.debut)||'', fin:e.d2||(sa&&sa.fin)||''};
+    });
+    var prios=(sa&&act&&sa.nom===act.nom&&typeof _prioItems==='function')?_prioItems():[];
+    var auj=opt.auj||((typeof window._mvAujIso==='function')?window._mvAujIso():'');
+    return _mvPrioRegle({taches:taches, prios:prios, auj:auj});
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTacheDuMoment'); return null; }
+}
+window._mvTacheDuMoment=_mvTacheDuMoment;
 function _prioPick(i){
   var its=_prioItems(); var it=its[i]; if(!it) return;
   pTacheFilter=it.t; pCurStep=_pvSmartStep(it.t);

@@ -138,3 +138,35 @@ indicateurs : le cadre est une navigation. ⑥ Retirés, morts sans appelant : `
 affichait « Exercice » tout court depuis des semaines. Le graphe mensuel oubliait les fûts et les prestations (la somme des
 mois ≠ le total) ; les amendements prévus n'avaient pas de mois → `byM[k].achP` posé dans `_pexData`.
 **Pas vérifié** : le rendu à l'œil (ordinateur, téléphone) ; `npm run build`, `test:smoke`, `test:e2e`.
+
+## 235. ★★ PRIO-1 — LA TÂCHE DU MOMENT : UNE SEULE RÈGLE, D'APRÈS LES DATES DE TRAVAUX (04/10 — `src/app.js` · `src/pilotage.js` · `src/utils.js` (APP, WHATS_NEW, MV_INFO `pil.prio` + `pil.tournee`, MV_AIDE home + pilotage) · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `guide/05-saisons.html` · `guide/11-pilotage.html` · `scripts/mv-harnais-prio.mjs` (neuf) · `scripts/mv-harnais-arrach7.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `lots/PRIO-1.json` · **APP 8.12 → 8.13, SW 8.87 → 8.88**, base `a1286f4`)
+
+**La demande** (Nico, 04/10, deux captures) : « en tâche prioritaire, il y a toujours la taille » — la plus grosse en heures —, dans
+le Pilotage comme dans la Vigne, « quoi que je mette en autre tâche prioritaire » ; or certaines tâches ne peuvent se faire qu'une
+fois d'autres faites.
+**Mesuré dans le code** : trois écrans, trois règles. `_pilCkPrio` lisait `d.prio` = la tâche active aux plus d'heures restantes
+(« pôle long ») ; `_mvPartTache` = la plus travaillée sur 15 j par toute l'équipe, sinon la plus avancée, à égalité la première de
+la liste ; seuls Parcelles (`_prioItems`) et Décider (`_dzPrios`) lisaient la priorité fixée. Les fenêtres par tâche
+(`saison.echeances`) existaient mais ne servaient pas à ce choix. `savePriority` ne redessinait que Parcelles.
+**Arbitrage** : j'avais proposé un réglage « se fait après… » par tâche (une chaîne de dépendances) et une chaîne par défaut.
+**Écarté par Nico** : l'ordre est DÉJÀ dans les dates de travaux de la campagne, et chaque domaine a le sien — chez lui, les
+réparations avant la taille, puis, en période de taille, taille-tirage-brûlage seulement. Quand deux tâches se chevauchent, c'est
+l'admin qui décide. Donc ni chaîne en dur, ni réglage neuf : la règle lit ce que l'admin a déjà posé.
+**Fait** : moteur pur `_mvPrioRegle(o)` (aucune lecture globale) + collecteur `_mvTacheDuMoment(opt)` (app.js, exposé), rangés à
+côté de `_prioItems`. Priorité fixée (période active, tâche pas finie) → `admin` ; une seule tâche pas finie dans ses dates →
+`dates` ; plusieurs → `choix`, l'appli ne tranche pas ; aucune → `prochaine` ; une tâche pas finie dont la fin est passée reste en
+course, `retard`. Lecteurs : la carte d'Aujourd'hui (`_pilCkPrio`, `id="pil-prio"`, pastille `pil.prio`, bouton
+`data-diag="priorite"` → `openPriorityEdit`, admin seul) ; Ma part du chantier (`_mvPartTache(out)` : la priorité de son équipe ;
+en `choix`, la tâche où LA PERSONNE a le plus travaillé sur 15 j, plus toute l'équipe ; une ligne dit pourquoi) ; Décider
+(`_dzTachesDefaut` : en `choix`, toutes cochées, avec sa note). Le calcul `prio` de `_pilData` est retiré. `_prioRedessine` après
+`savePriority`/`clearPriority` : l'Accueil et le Pilotage suivent sans rechargement. Libellé de l'éditeur de période : « Dates de
+travaux estimées (elles donnent l'ordre des tâches et la tâche du moment) ». WHATS_NEW 8.13 : un « À vérifier » (niveau 2) pour
+l'admin — les dates de chaque tâche —, Ma part du chantier au Journal seul.
+**Harnais** `scripts/mv-harnais-prio.mjs` : 36 assertions sur les vraies fonctions branchées entre elles (moteur, collecteur, Ma
+part, carte, Décider, `_pilGo`), 14 contre-épreuves qui rougissent toutes. `mv-harnais-arrach7` suivi : le saut de l'arrachage fini
+pour l'équipe vit maintenant dans le collecteur, sa contre-épreuve vise la nouvelle ligne.
+**Trouvé en route** : le crayon de la pastille priorité de l'Accueil est caché dans les deux branches (`renderHome`) ; l'anneau doré
+(`_mvTachePrio`) suit la seule priorité fixée. Laissés tels quels (§28). Pour tenir le plafond du cœur, « La journée du 9 août »
+(historique du §28) est descendue dans `docs/claude/journal.md`.
+**Pas vérifié** : le rendu à l'œil (carte et bloc, ordinateur et téléphone) ; les dates de travaux réelles du domaine de référence ;
+`npm run build`, `test:smoke`, `test:e2e`.

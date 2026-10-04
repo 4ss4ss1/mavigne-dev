@@ -705,6 +705,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       <li>Une équipe peut être rattachée à chaque priorité</li>
       <li>Un ouvrier concerné arrive directement sur ses parcelles, filtre posé</li>
       <li>Plusieurs priorités peuvent coexister : chacun voit la sienne</li>
+      <li>Sans priorité fixée, <b>Ma part du chantier</b> suit la seule tâche dans ses dates de travaux ; si plusieurs se chevauchent, celle où vous avez le plus travaillé ces 15 derniers jours</li>
     </ul></div>
     <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-nuage"></use></svg> Météo du vignoble</h4><ul class="dot">
       <li>Prévision à 5 jours, calée sur le centre de vos parcelles</li>
@@ -945,6 +946,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg></span><div>Ce sont les <b>dates</b> de la saison qui rendent
   possibles le calcul de charge, l'ETP requis et les échéances par tâche du Pilotage. Une saison sans
   dates fonctionne, mais ces indicateurs restent muets.</div></div>
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div><b>Les dates de travaux de chaque tâche donnent l'ordre des tâches.</b>
+  En modifiant une saison (le crayon), « Dates de travaux estimées » pose une fenêtre par tâche — la roue crantée du Pilotage les règle aussi.
+  Sans priorité fixée par l'administrateur, la <b>tâche prioritaire</b> du Pilotage et <b>Ma part du chantier</b> suivent la seule tâche
+  dans ses dates ; quand plusieurs se chevauchent, l'application ne choisit pas : c'est l'administrateur qui fixe la priorité. Une tâche
+  sans dates à elle court sur toute la saison et chevauche toutes les autres.</div></div>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg> Les tâches et leurs heures par hectare</h3>
   <p>Les valeurs livrées par défaut suivent un <b>barème conventionnel régional</b>, choisi à
@@ -2838,7 +2844,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     y pèse son <b>effectif inscrit au contrat</b>, pas une ligne de tableau.</li>
     <li><b>Jours favorables</b> à venir, et <b>Traiter&nbsp;?</b> — la réponse du jour.</li>
     <li><b>À la vigne aujourd'hui</b> : présences réelles, absences déduites du planning.</li>
-    <li><b>Tâche prioritaire</b> en cours et <b>alertes</b> matériel, et la carte <b>Cave</b> — ce qui presse, un bouton.</li>
+    <li><b>Tâche prioritaire</b> : la priorité fixée par l'administrateur ; sans elle, la seule tâche dans ses dates de travaux.
+    Si plusieurs se chevauchent, la carte ne choisit pas : un bouton ouvre le choix de la priorité. Puis les <b>alertes</b>
+    matériel, et la carte <b>Cave</b> — ce qui presse, un bouton.</li>
   </ul>
   <p>La <b>Cadence équipe</b> porte une petite courbe : ses 14 derniers jours, chaque point étant la cadence des 7 jours
   précédents comparée au chiffre affiché (les 4 dernières semaines, le pointillé). La bande va de −30 % à +30 %. Sous le
@@ -2947,8 +2955,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   pour commencer.</b> Chaque case dit d'où vient sa valeur. En toucher une passe l'écran en
   <b>simulation</b>, où rien n'est enregistré ; « Valeurs réelles » revient au planning.</div></div>
   <ul class="dot">
-    <li><b>Le travail</b> : la priorité du moment, diffusée dans Vigne. Sans priorité, le travail qui a
-    le plus d'heures restantes — et l'écran le dit.</li>
+    <li><b>Le travail</b> : la priorité du moment, diffusée dans Vigne. Sans priorité, la seule tâche dans
+    ses dates de travaux ; si plusieurs se chevauchent, toutes sont cochées — et l'écran le dit.</li>
     <li><b>Le jour</b> : aujourd'hui s'il est travaillé au planning, sinon le prochain jour travaillé.
     Les flèches passent d'un jour travaillé à l'autre.</li>
     <li><b>L'équipe</b> : les personnes affectées à la priorité qui travaillent ce jour-là au planning.

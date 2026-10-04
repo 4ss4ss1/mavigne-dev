@@ -1,0 +1,27 @@
+{
+  "lot": "PRIO-1",
+  "section": "§235",
+  "base": "a1286f41760671068b5119dd4c468f7bef8c9f4a",
+  "inclut": [],
+  "date": "2026-10-04",
+  "fichiers": {
+    ".mv-base": "93a824165c5d4503dee675d388321e032cf298c6c948538f61339bc3244532bc",
+    "CLAUDE.md": "e5686280263f50e57d85aef619491416086a3db970d640ae721ab995eb4126c1",
+    "docs/claude/INDEX.md": "d7809d32fce9477cb33c59dde5a221c05b7b748f487789242edcabcf54f63db6",
+    "docs/claude/chantiers-230-279.md": "af57191dac0e414e5875421e774302583e07def436cb4f5449615d76a13e5f3b",
+    "docs/claude/journal.md": "fdb9041b17a809aaf0e1ce2a5fe1d7a5a215be4c9b3c8dfc0d35611bc9563cc6",
+    "docs/claude/modules.md": "7c813732d4e530edc3caa946a45d774b9fcbd8596bcd2edd8599c879d94a1e92",
+    "guide/04-vigne.html": "f4eade1452296e6531c72d3cfd9a6b34a34246b3a403edffdd1ac9f1ecb1dc35",
+    "guide/05-saisons.html": "93052c11614e10571af25b9560cba62380702198e907c82cc41a2f88f1d2f86d",
+    "guide/11-pilotage.html": "5a7bd1b7422e5d23ca2ecb51a4d2a02246da1f1305ee63807cb46be01ab18ed8",
+    "index.html": "a71266d0fca5025252e91fca52c8f9f6d95f598e39355953f915f395659b9413",
+    "public/sw.js": "9bbffde261521f8554e01cb6e9937e8e265654ddd7e9211171d2f7c5df0024d0",
+    "scripts/harnais-claude-md.mjs": "21b82db6ecee1824341f7904e98892df012a8fddde34af00d63ab5d17bf8f156",
+    "scripts/mv-harnais-arrach7.mjs": "7731178c6d9bac056fbb644218e81745a738623747d3dfec7ff8246721694cc7",
+    "scripts/mv-harnais-liste.mjs": "7633fdea2295e56fd038331ac4340f4c3276fbdbc934df144839c99c7eca4643",
+    "src/app.js": "4b5302252e21c8019ecfa37a6e010a9c25a18aef70ccbeccc906fdf76b28da40",
+    "src/pilotage.js": "91350cc46228095e52cfdc85057962d42a9bdabb94f7ebbf8c7be1dfaec71b25",
+    "src/utils.js": "2ef61c6f1ad795f7b189debc968f10f554f51122570537bfeee8dd942ea0566c",
+    "scripts/mv-harnais-prio.mjs": "5dcb954e1c0b83131b8d43b2585f4d86c2c6140b701f9bd8a5d4542ec044b961"
+  }
+}

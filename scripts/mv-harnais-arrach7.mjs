@@ -10,7 +10,7 @@ const APP = fs.readFileSync(path.join(R, 'src/app.js'), 'utf8');
 const sansCom = s => s.replace(/^\s*\/\/.*$/gm, '');
 function fn(src, sig) { const i = src.indexOf(sig); if (i < 0) throw new Error('introuvable : ' + sig); return src.slice(i, src.indexOf('\n}\n', i) + 3); }
 const BLK = sansCom(APP.slice(APP.indexOf('// ══════ ARRACH-3'), APP.indexOf('// ══════ ARRACHAGE —')));
-const EXTRA = sansCom(fn(APP, 'function getPCls(p){') + fn(APP, 'function _mvPartTache(){') + fn(APP, 'function _mvPartCalc(tache,nom){')
+const EXTRA = sansCom(fn(APP, 'function getPCls(p){') + fn(APP, 'function _mvPartTache(out){') + fn(APP, 'function _mvPrioRegle(o){') + fn(APP, 'function _mvTacheDuMoment(opt){') + fn(APP, 'function _prioDefaultTask(its){') + fn(APP, 'function _mvPartCalc(tache,nom){')
   + APP.match(/function _mvArrHors\(p,nom\)\{[^\n]*\n/)[0]);
 const RECALC = fn(APP, 'function recalcTravaux(nomTache){');
 
@@ -26,7 +26,7 @@ function monde(blk, extra) {
     getTachesSaison: () => [{ nom: 'Arrachage' }, { nom: 'Pré-taille' }],
     getTacheStatut: (p, n) => (p.taches[n] || 'Non démarré'),
     _visuSaison: () => '', getSaisonActive: () => ({}), pctColor: () => 'x', _mvExclu: () => false,
-    _mvISO: d => d.toISOString().slice(0, 10) };
+    _mvISO: d => d.toISOString().slice(0, 10), currentUser: { nom: 'Nico' }, _prioItems: () => [] };
   ctx._parcConcern = n => ctx.PARCELLES.filter(p => n === 'Arrachage' || p.statut !== 'Arrachee');
   ctx.window = ctx; vm.createContext(ctx);
   vm.runInContext(blk + '\n' + extra + '\nthis.__f={_arrFraction,_arrEquipeFinie,_arrEquipeFiniePartout,getPCls,_mvPartTache,_mvPartCalc};', ctx);
@@ -59,7 +59,7 @@ if (ko) process.exit(1);
 const D = [
   ['le prestataire compte comme l\u2019équipe', b => b.replace('return E.filter(function(e){return !e.presta;}).every(', 'return E.every('), e => e, r => r],
   ['la part faite oubliée dans la carte', b => b, e => e.replace('Math.round((nbDone+_arrPart)/totalSaison*100)', 'Math.round(nbDone/totalSaison*100)'), r => r],
-  ['« Ma part » ne saute plus l\u2019arrachage', b => b, e => e.replace("if(t.nom==='Arrachage'&&typeof _arrEquipeFiniePartout==='function'&&_arrEquipeFiniePartout())return;", '').replace("if(t.nom==='Arrachage'&&typeof _arrEquipeFiniePartout==='function'&&_arrEquipeFiniePartout())return false;", ''), r => r],
+  ['« Ma part » ne saute plus l\u2019arrachage', b => b, e => e.replace("var arrFini=function(n){ return n==='Arrachage'&&typeof _arrEquipeFiniePartout==='function'&&_arrEquipeFiniePartout(); };", 'var arrFini=function(n){ return false; };'), r => r],   // PRIO-1 (§235) : le saut vit dans la règle commune
   ['« Ma part » relit le statut du domaine', b => b, e => e.replace('? function(p){ return _arrEquipeFinie(p); }', "? function(p){ return getTacheStatut(p,tache)==='Valid\\u00e9'; }"), r => r],
   ['une parcelle vide déclarée finie partout', b => b.replace('return L.length>0&&L.every(_arrEquipeFinie);', 'return L.some(_arrEquipeFinie);'), e => e, r => r],
 ];

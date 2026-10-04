@@ -1221,6 +1221,11 @@ indissociables dont un **filet de tolérance** en tête de `switchCaveOng`.
 
 ## 20b. Pilotage
 
+★★ **PRIO-1 (§235) — LA TÂCHE PRIORITAIRE.** La carte d'Aujourd'hui (`_pilCkPrio`), Ma part du chantier (Accueil, `_mvPartTache`)
+et le travail coché par défaut de Décider (`_dzTachesDefaut`) lisent UNE règle, `window._mvTacheDuMoment` (app.js, moteur pur
+`_mvPrioRegle`) : priorité fixée → seule tâche dans ses dates (`saison.echeances`) → plusieurs : l'admin choisit, l'écran le dit →
+aucune : la prochaine. Le nombre d'heures ne décide jamais.
+
 > ⚠️ **REFONDU DEUX FOIS.** **§34** (12/08) a posé l'**axe de zoom**, la portée unique et le moteur
 > de diagnostic. **§42** (15/08) a traité ce que §34 n'avait pas touché : la **densité**, la
 > **hiérarchie typographique** et le **texte**. Ce qui suit décrit l'état d'arrivée des deux.

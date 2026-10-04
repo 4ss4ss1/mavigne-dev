@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **4 octobre 2026 (ANNEE-1)** — ★★ **PILOTAGE › L'ANNÉE, UN CADRE À LA FOIS** (§234).
+> Nico (04/10, capture) : l'onglet ne montrait que le pic des vendanges, affichait cinq chiffres pour un même exercice et posait
+> l'exercice en euros face à une année vigne en heures — le cycle FINI le 6/09. Maquette (canevas Design) validée : un seul cadre à
+> la fois — exercice comptable OU année vigne (`_mvCampagneBornes`, choix de Nico) — dans `_PIL_SCOPE` (`cadre` mémorisé, `recul`
+> NON) ; budget en euros = `_pexData` aux dates du cadre (dépensé / reste prévu / total) ; « Le renfort à prévoir » = photo des
+> manques (`_pilAnFenetres`), bouton vers Décider ; photos et fil d'Ariane suivent. Harnais `mv-harnais-annee` (neuf).
+> Marque `lots/ANNEE-1.json`. Base `70406bb`. **APP 8.11 → 8.12, SW 8.86 → 8.87** (visible).
+
 > ★ Consolidation : **3 octobre 2026 (RENOM-3 + KIT-5)** — ★★ **L'ADMIN RENOMME, LA RÈGLE S'IMPOSE À TOUS LES APPAREILS ; L'ACCUEIL SANS TROUS** (§232, §233).
 > RENOM-3 : un renommage (admin seul) devient une règle `CONFIG.renommages_taches` ({de, vers, quand, par}) que CHAQUE appareil
 > applique à chaque chargement et à chaque donnée reçue (`_mvAppliquerRenommages`, firebase.js) — dans l'ordre des dates ;
@@ -1535,3 +1543,42 @@
 >    Documents** et la **charte `MV_DOC`**. **À consigner par Nico.**
 > 6. ⚠️ **`rewrites` est absent du `firebase.json` lu** alors qu'`essai.html` poste vers
 >    `/api/lead` — à vérifier en ligne (§18b).
+
+---
+
+## Historique descendu du §28 de `CLAUDE.md` (04/10/2026, PRIO-1 — plafond de lignes du cœur)
+
+### ★★★ La journée du 9 août — trois chantiers
+
+**A. LE MATIN — L'ÉCART DE CADENCE D'ÉCONOMIE ÉTAIT FAUX D'UN FACTEUR 5** (§20b)
+`pilotage.js` seul, **aucun bump**, 28 assertions, preflight vert.
+⚠️ **Livré sans `WHATS_NEW`** alors que le client voyait le changement → **annoncé au bump suivant**.
+
+**B. L'APRÈS-MIDI — LE CHANTIER ACCOMPAGNEMENT, EN QUATRE LOTS** (§27)
+
+| Lot | Contenu | Fichiers | Bump |
+|---|---|---|---|
+| **a** | preflight **C22** + correctif du bug `ecf` de la visite guidée | `preflight.mjs` + `app.js` (+ `sw.js`) | **SW seul**, `WHATS_NEW = []` |
+| **b** | les **10 fiches `MV_AIDE` refaites** + le point d'aide dynamique | `utils.js` + `pilotage.js` + `index.html` + `sw.js` | **APP + SW** |
+| **c** | widget **« Mise en route »** sur l'accueil admin | `app.js` + `index.html` + `utils.js` + `sw.js` | **APP + SW** |
+| **d** | **guide découpé + générateur** puis corrections factuelles | `guide/` + `scripts/build-guide.mjs` + `public/guide.html` | **aucun** |
+
+★ Le `WHATS_NEW` du lot **b** annonce **aussi** le correctif de cadence du matin.
+✅ **Rayés** : « guide.html dit Côte de Nuits » · **MT-A**.
+
+**C. LE SOIR — LA RÉDUCTION DU TEMPS D'INSTALLATION, EN CINQ LOTS** (§18b)
+
+| Lot | Contenu | Fichiers | Bump |
+|---|---|---|---|
+| **1** | parcelles : noms alignés + commune par ligne | `admin-gt.js` | **aucun** |
+| **2** | comptes de l'équipe en lot + **correctif du tenant** | `admin-gt.js` + `firebase.js` | **aucun** |
+| **3** | périodes recopiées d'un domaine installé | `admin-gt.js` | **aucun** |
+| **4** | `submitMiseEnRoute` + le formulaire qui envoie + la reprise dans l'assistant | `functions/leads.js` + `public/mise-en-route.html` + `admin-gt.js` | **aucun** |
+| **5** | machines collées en liste + volume de fût | `admin-gt.js` | **aucun** |
+
+**Plus** la procédure `INSTALLER-UN-DOMAINE.md` et son PDF (§18c).
+**20 h → ~9 h sur le papier**, dont 14 h de clavier ramenées à ~4 h.
+✅ **DÉPLOYÉ.** ⚠️ **Mais le gain reste théorique : l'installation à blanc n'a pas été faite.**
+Les cinq lots sont en ligne, **aucun n'a encore servi de bout en bout**. Le « ~9 h » est un chiffre
+de papier tant qu'un slug jetable n'a pas été monté en entier (§18b, backlog technique n°1).
+✅ **Rayé** : CF `submitMiseEnRoute`.

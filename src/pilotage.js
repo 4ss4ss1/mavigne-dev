@@ -345,9 +345,8 @@ function _pilData(){
   var membres = _pilMembresActifs(_refDs);
   var nFinis  = _pilMbrFinis(_refDs).length;
 
-  // Tâche prioritaire : tâche en cours avec le plus d'heures restantes
-  var prio=null;
-  active.forEach(function(t){ if(!prio || (t.h_reste||0) > (prio.h_reste||0)) prio=t; });
+  // PRIO-1 (§235) : la tâche prioritaire n'est plus « la plus d'heures restantes » ; _pilCkPrio lit
+  //   la règle commune (window._mvTacheDuMoment, app.js).
 
   // Sessions tracteur : la plus récente + avancement (surface faite / surface totale)
   var sessions = (window.SESSIONS||[]).slice().filter(window._sessInSaison||function(){return true;});
@@ -438,7 +437,7 @@ function _pilData(){
   var domaine = window.DOMAINE_NOM || 'Domaine';
 
   return { data:data, active:active, done:done, totalReste:totalReste, totalTotal:totalTotal, hDone:hDone, gaugePct:gaugePct,
-           saison:saison, surfTot:surfTot, nActives:nActives, membres:membres, refDate:_refDs, nFinis:nFinis, prio:prio,
+           saison:saison, surfTot:surfTot, nActives:nActives, membres:membres, refDate:_refDs, nFinis:nFinis,
            sessions:sessions, lastSess:lastSess, sessAdv:sessAdv, cuvees:cuvees, traits:traits, meteo:meteo, domaine:domaine,
            tracs:tracs, nRepar:nRepar, gnr:gnr, ouAlerte:ouAlerte, presences:presences, nPresent:nPresent, nCp:nCp, nAbs:nAbs, nRecup:nRecup, nVchamp:nVchamp, presentChamp:presentChamp, presentFiches:presentFiches, nIndispoChamp:nIndispoChamp };
 }
@@ -2464,9 +2463,20 @@ function _dzPrios(){ var D=_PIL_OP_DATA; return _dzPrioItems().filter(function(i
 function _dzTachesDefaut(){
   var D=_PIL_OP_DATA, its=_dzPrios();
   if(its.length) return {t:[its[0].t],src:'prio'};
-  var auj=_dzAuj(), best=null;
-  D.tasks.forEach(function(x){ if(x.tot>0.05&&_dzOuvrable(x.nom,auj)&&(!best||x.tot>best.tot)) best=x; });
-  if(!best) D.tasks.forEach(function(x){ if(x.tot>0.05&&(!best||x.tot>best.tot)) best=x; });
+  // PRIO-1 (§235) : sans priorité fixée, LA règle commune (window._mvTacheDuMoment, app.js), la même que
+  //   la carte d'Aujourd'hui et Ma part du chantier. Plusieurs tâches dans leurs dates en même temps :
+  //   toutes cochées — l'appli ne choisit pas à la place de l'admin. Avant : le travail ouvert qui avait
+  //   le plus d'heures restantes.
+  var M=(typeof window._mvTacheDuMoment==='function')
+    ? window._mvTacheDuMoment({ saison:(typeof window._pilSaison==='function')?window._pilSaison():null,
+        noms:D.tasks.map(function(x){ return x.nom; }),
+        fini:function(n){ return !(D.byNom[n]&&D.byNom[n].tot>0.05); } })
+    : null;
+  var ok=M?M.taches.filter(function(n){ return D.byNom[n]&&D.byNom[n].tot>0.05; }):[];
+  if(ok.length&&M.mode!=='admin') return {t:(M.mode==='choix')?ok:[ok[0]],src:M.mode};
+  // Repli, si la règle ne rend rien de lisible : l'ancien choix.
+  var best=null;
+  D.tasks.forEach(function(x){ if(x.tot>0.05&&(!best||x.tot>best.tot)) best=x; });
   if(!best) best=D.tasks[0]||null;
   return {t:best?[best.nom]:[],src:'charge'};
 }
@@ -2636,6 +2646,9 @@ function _dzTravauxHtml(edit){
   if(autres.length&&(OP._autres||nA>0)) h+='<button class="pil-dz-more" data-op="autres">'+(OP._autres?'moins':'autres travaux ('+nA+')')+'</button>';
   h+='</div>';
   if(!its.length&&OP.tSrc==='charge') h+='<div class="pil-dz-note">Aucune priorit\u00e9 diffus\u00e9e\u00a0: c\u2019est le travail qui a le plus d\u2019heures restantes. <b>Vigne \u203a Priorit\u00e9 du moment</b> la fixe pour toute l\u2019\u00e9quipe.</div>';
+  if(!its.length&&OP.tSrc==='dates') h+='<div class="pil-dz-note">Aucune priorit\u00e9 fix\u00e9e\u00a0: c\u2019est la seule t\u00e2che dans ses dates de travaux. <b>Vigne \u203a Priorit\u00e9 du moment</b> la fixe pour toute l\u2019\u00e9quipe.</div>';
+  if(!its.length&&OP.tSrc==='choix') h+='<div class="pil-dz-note">'+OP.tasks.length+' t\u00e2ches sont dans leurs dates en m\u00eame temps\u00a0: toutes coch\u00e9es, l\u2019application ne choisit pas. <b>Vigne \u203a Priorit\u00e9 du moment</b> fixe la priorit\u00e9.</div>';
+  if(!its.length&&OP.tSrc==='prochaine') h+='<div class="pil-dz-note">Aucune t\u00e2che dans ses dates aujourd\u2019hui\u00a0: c\u2019est la prochaine qui est coch\u00e9e.</div>';
   if((OP.tasks||[]).length>1) h+='<div class="pil-dz-note">'+OP.tasks.length+' travaux coch\u00e9s\u00a0: faits sur chaque parcelle avant de passer \u00e0 la suivante.</div>';
   return h;
 }
@@ -4512,15 +4525,57 @@ function _pilCkTraiter(){
   return '<div class="pil-tile2" data-mvt="traiter"><div class="pil-t2h"><span class="ic">'+_pilIco('goutte')+'</span><span class="t">Traiter ?</span>'+_i+'</div>'
     +'<div class="pil-t2b"><div class="pil-big" style="color:'+bigCol+'">'+big+'</div>'+body+_pilProtHtml()+'</div></div>';   // PROT-1 (§218)
 }
+// ════════════════════════════════════════════════════════════════════════════
+// PRIO-1 (§235) — LA TÂCHE PRIORITAIRE SUIT LA RÈGLE COMMUNE (window._mvTacheDuMoment, app.js)
+// Avant : la tâche pas finie qui avait le plus d'heures restantes (« pôle long ») — la taille tout
+// l'hiver, quoi que l'admin ait fixé (Nico, 04/10). Maintenant : la priorité fixée par l'admin ; sinon
+// la seule tâche dans ses dates de travaux ; plusieurs en même temps → la carte NE CHOISIT PAS et
+// propose de fixer la priorité ; aucune → la prochaine, avec sa date. Les heures ne décident jamais.
+// ⚠️ `id="pil-prio"` est la cible de la pastille « Nouveau » (WHATS_NEW 8.13) : ne pas renommer.
+// ════════════════════════════════════════════════════════════════════════════
 function _pilCkPrio(d){
-  var p=d.prio;
-  if(!p) return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('cible')+'</span><span class="t">Tâche prioritaire</span></div><div class="pil-t2b"><div class="pil-t2s">aucune tâche en cours</div></div></div>';
-  var col=_pilPctColor(p.pct||0);
-  return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('cible')+'</span><span class="t">Tâche prioritaire</span></div>'
-    +'<div class="pil-t2b"><div class="pil-big">'+_pilEsc(_pilTnom(p.nom))+'</div>'
-    +'<div class="pil-t2s">'+_pilNum(p.h_reste)+' h restantes · <b style="color:var(--or)">pôle long</b></div>'
-    +'<div class="pil-gbar"><i style="width:'+Math.min(p.pct||0,100)+'%;background:'+col+'"></i></div>'
-    +'<div class="pil-t2s" style="margin-top:5px">'+(p.pct||0)+'% fait</div></div></div>';
+  var data=(d&&d.data)||[], byNom={};
+  data.forEach(function(t){ if(t&&t.nom) byNom[t.nom]=t; });
+  var M=(typeof window._mvTacheDuMoment==='function')
+    ? window._mvTacheDuMoment({ saison:(typeof window._pilSaison==='function')?window._pilSaison():null,
+        noms:data.map(function(t){ return t&&t.nom; }),
+        fini:function(n){ return !byNom[n]||(byNom[n].pct||0)>=100; } })
+    : null;
+  var _i=(typeof _mvInfoBtn==='function')?_mvInfoBtn('pil.prio'):'';
+  var H='<div class="pil-tile2" id="pil-prio"><div class="pil-t2h"><span class="ic">'+_pilIco('cible')+'</span><span class="t">Tâche prioritaire</span>'+_i+'</div>';
+  if(!M||!M.taches.length) return H+'<div class="pil-t2b"><div class="pil-t2s">aucune t\u00e2che en cours</div></div></div>';
+  var adm=(typeof window.isAdmin==='function')&&window.isAdmin();
+  var go=function(lbl){ return adm?'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="priorite">'+lbl+' \u203A</button></div>':''; };
+  var dt=function(n){ return (M.dates&&M.dates[n])||{}; };
+  if(M.mode==='choix'){
+    var lis=M.taches.slice(0,4).map(function(n){
+      var t=byNom[n]||{};
+      return '<div class="pil-t2s"><b>'+_pilEsc(_pilTnom(n))+'</b> \u00b7 '+(t.pct||0)+'\u00a0% fait \u00b7 '+_pilNum(t.h_reste||0)+'\u00a0h'
+        +(M.retard[n]?' \u00b7 <b style="color:var(--rouge)">en retard</b>':'')+'</div>';
+    }).join('');
+    var rest=M.taches.length-4;
+    return H+'<div class="pil-t2b"><div class="pil-big">\u00c0 choisir</div>'
+      +'<div class="pil-t2s">'+M.taches.length+' t\u00e2ches dans leurs dates en m\u00eame temps \u2014 '+(adm?'\u00e0 vous de fixer la priorit\u00e9':'l\u2019administrateur fixe la priorit\u00e9')+'</div>'
+      +lis+(rest>0?'<div class="pil-t2s">et '+rest+' autre'+(rest>1?'s':'')+'</div>':'')
+      +go('Choisir la priorit\u00e9')+'</div></div>';
+  }
+  var n=M.taches[0], t=byNom[n]||{}, e=dt(n), pq;
+  if(M.mode==='admin'){
+    var it=M.items[0]||{}, eq=(it.equipe||[]).filter(Boolean);
+    pq='priorit\u00e9 du moment, fix\u00e9e par l\u2019administrateur'+(eq.length?' \u00b7 '+_pilEsc(eq.join(', ')):'')
+      +(M.items.length>1?' \u00b7 aussi\u00a0: '+M.items.slice(1).map(function(x){ return _pilEsc(_pilTnom(x.t)); }).join(', '):'');
+  } else if(M.mode==='prochaine'){
+    pq='aucune t\u00e2che dans ses dates aujourd\u2019hui \u00b7 prochaine d\u00e8s le '+_pilFmtD(e.debut);
+  } else if(M.retard[n]){
+    pq='<b style="color:var(--rouge)">en retard</b>'+(e.fin?' \u00b7 fin pr\u00e9vue le '+_pilFmtD(e.fin):'');
+  } else {
+    pq='seule t\u00e2che dans ses dates'+(e.fin?' \u00b7 jusqu\u2019au '+_pilFmtD(e.fin):'');
+  }
+  return H+'<div class="pil-t2b"><div class="pil-big">'+_pilEsc(_pilTnom(n))+'</div>'
+    +'<div class="pil-t2s">'+pq+'</div>'
+    +'<div class="pil-gbar"><i style="width:'+Math.min(t.pct||0,100)+'%;background:'+_pilPctColor(t.pct||0)+'"></i></div>'
+    +'<div class="pil-t2s" style="margin-top:5px">'+(t.pct||0)+'\u00a0% fait \u00b7 '+_pilNum(t.h_reste||0)+' h restantes</div>'
+    +(M.mode==='admin'?go('Changer la priorit\u00e9'):'')+'</div></div>';
 }
 // ════════════════════════════════════════════════════════════════════════
 // TENS-1 (§215) — LA TENSION DE L'ÉQUIPE
@@ -11346,6 +11401,13 @@ window._pilGo = function(cible){
     if(cible==='an_cadres'){
       if(_PIL_TAB!=='an'){ _PIL_TAB='an'; _pilSaveTab('an'); renderPilotage(); }
       setTimeout(function(){ _pilFlash(document.getElementById('pil-an-cadres')); }, 240);
+      return;
+    }
+    // Cible INTERNE (PRIO-1, §235) : l'éditeur de la priorité du moment (administrateur), depuis la carte
+    //   « Tâche prioritaire » — quand plusieurs tâches sont dans leurs dates en même temps, ou pour la changer.
+    if(cible==='priorite'){
+      if(typeof window.openPriorityEdit==='function') window.openPriorityEdit();
+      else if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'diag: openPriorityEdit absent'});
       return;
     }
     // Cible INTERNE (INACTION-1, §218) : Décider, ou vit le simulateur de renfort.

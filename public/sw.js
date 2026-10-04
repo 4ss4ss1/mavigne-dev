@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v8.87
+// MA VIGNE — Service Worker v8.88
+// v8.88 (04/10/2026) — PRIO-1 (§235) : la tache du moment, une seule regle (Pilotage > Aujourd'hui, Ma part du chantier,
+//   Decider) d'apres les dates de travaux de la periode ; plusieurs taches en meme temps -> l'admin fixe la priorite ;
+//   _prioRedessine apres savePriority/clearPriority. APP 8.12 -> 8.13.
 // v8.87 (04/10/2026) — ANNEE-1 (§234) : Pilotage > L'annee, un cadre a la fois (exercice comptable ou annee vigne,
 //   _PIL_SCOPE.cadre/recul) ; budget en euros sur _pexData aux dates du cadre ; renfort a prevoir (photo des manques,
 //   bouton vers Decider) ; photos et fil d'Ariane suivent le cadre. APP 8.11 -> 8.12.
@@ -4293,7 +4296,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.87';
+const CACHE_NAME   = 'mavigne-v8.88';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4309,7 +4312,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.87 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.88 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4329,7 +4332,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.87 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.88 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

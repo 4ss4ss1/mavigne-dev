@@ -3,13 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **4 octobre 2026 (ANNEE-1)** — ★★ **PILOTAGE › L'ANNÉE, UN CADRE À LA FOIS** (§234).
-> Nico (04/10, capture) : l'onglet ne montrait que le pic des vendanges, affichait cinq chiffres pour un même exercice et posait
-> l'exercice en euros face à une année vigne en heures — le cycle FINI le 6/09. Maquette (canevas Design) validée : un seul cadre à
-> la fois — exercice comptable OU année vigne (`_mvCampagneBornes`, choix de Nico) — dans `_PIL_SCOPE` (`cadre` mémorisé, `recul`
-> NON) ; budget en euros = `_pexData` aux dates du cadre (dépensé / reste prévu / total) ; « Le renfort à prévoir » = photo des
-> manques (`_pilAnFenetres`), bouton vers Décider ; photos et fil d'Ariane suivent. Harnais `mv-harnais-annee` (neuf).
-> Marque `lots/ANNEE-1.json`. Base `70406bb`. **APP 8.11 → 8.12, SW 8.86 → 8.87** (visible).
+> Dernière consolidation : **4 octobre 2026 (PRIO-1)** — ★★ **LA TÂCHE DU MOMENT : UNE SEULE RÈGLE, D'APRÈS LES DATES DE TRAVAUX** (§235).
+> Nico (04/10, captures) : la « tâche prioritaire » restait la Taille quoi qu'il fixe — Pilotage = la tâche aux plus d'heures restantes
+> (« pôle long »), Ma part du chantier = la plus travaillée sur 15 j sinon la première de la liste ; seuls Parcelles et Décider lisaient
+> la priorité fixée. Règle tranchée par Nico : l'ordre vient des dates de travaux de la période (`saison.echeances`, chaque domaine le
+> sien) ; priorité fixée d'abord ; une seule tâche dans ses dates → elle ; plusieurs → l'admin choisit, jamais l'appli ; aucune → la
+> prochaine. Moteur pur `_mvPrioRegle` + collecteur `_mvTacheDuMoment` (app.js), lus par `_pilCkPrio`, `_mvPartTache`, `_dzTachesDefaut`.
+> Harnais `mv-harnais-prio` (neuf, 36 + 14/14). Marque `lots/PRIO-1.json`. Base `a1286f4`. **APP 8.12 → 8.13, SW 8.87 → 8.88** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1819,6 +1819,18 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ PRIO-1 — CE QUI RESTE OUVERT (§235, posé le 04/10)
+
+1. **À regarder chez Nico** : les dates de travaux de chaque tâche de l'hiver en cours — sans dates à elle, une tâche court sur
+   toute la période et chevauche tout, et la carte dira « À choisir » ; puis la carte Tâche prioritaire et Ma part du chantier sur
+   ses vraies données (ordinateur et téléphone). Aucun harnais ne lit une mise en page.
+2. **L'alignement de l'Accueil et du Pilotage** (Nico, 04/10 : « l'alignement n'est pas chouette », regarder ce que font les autres
+   logiciels) : recherche puis maquette, à valider avant intégration. C'est aussi la passe d'audit écran par écran (COH-1, point 4).
+3. **Le crayon de la pastille priorité de l'Accueil est toujours caché** (`renderHome` pose `display:none` dans les deux branches) :
+   la priorité se fixe depuis Parcelles, ou depuis le bouton de la carte du Pilotage. À trancher avec Nico.
+4. **L'anneau doré de la carte** (`_mvTachePrio`, utils.js) suit la seule priorité fixée, pas la règle des dates : laissé tel quel,
+   hors du périmètre annoncé à Nico.
+
 ### ⚠️ ANNEE-1 — CE QUI RESTE OUVERT (§234, posé le 04/10)
 
 1. **À regarder chez Nico** : L'année sur ses vraies données, ordinateur et téléphone — le cadre, les deux graphes coupés, les
@@ -2301,41 +2313,6 @@ aide décrit les anciens. **C'est la violation exacte de la Règle d'or n°4, é
 (pas de navigateur dans le bac à sable). ✅ **Ils sont déployés** — SW v6.42 et v6.43 sont dans le
 changelog du dépôt, et l'accompagnement les a rattrapés en v6.44.
 
-
-### ★★★ La journée du 9 août — trois chantiers
-
-**A. LE MATIN — L'ÉCART DE CADENCE D'ÉCONOMIE ÉTAIT FAUX D'UN FACTEUR 5** (§20b)
-`pilotage.js` seul, **aucun bump**, 28 assertions, preflight vert.
-⚠️ **Livré sans `WHATS_NEW`** alors que le client voyait le changement → **annoncé au bump suivant**.
-
-**B. L'APRÈS-MIDI — LE CHANTIER ACCOMPAGNEMENT, EN QUATRE LOTS** (§27)
-
-| Lot | Contenu | Fichiers | Bump |
-|---|---|---|---|
-| **a** | preflight **C22** + correctif du bug `ecf` de la visite guidée | `preflight.mjs` + `app.js` (+ `sw.js`) | **SW seul**, `WHATS_NEW = []` |
-| **b** | les **10 fiches `MV_AIDE` refaites** + le point d'aide dynamique | `utils.js` + `pilotage.js` + `index.html` + `sw.js` | **APP + SW** |
-| **c** | widget **« Mise en route »** sur l'accueil admin | `app.js` + `index.html` + `utils.js` + `sw.js` | **APP + SW** |
-| **d** | **guide découpé + générateur** puis corrections factuelles | `guide/` + `scripts/build-guide.mjs` + `public/guide.html` | **aucun** |
-
-★ Le `WHATS_NEW` du lot **b** annonce **aussi** le correctif de cadence du matin.
-✅ **Rayés** : « guide.html dit Côte de Nuits » · **MT-A**.
-
-**C. LE SOIR — LA RÉDUCTION DU TEMPS D'INSTALLATION, EN CINQ LOTS** (§18b)
-
-| Lot | Contenu | Fichiers | Bump |
-|---|---|---|---|
-| **1** | parcelles : noms alignés + commune par ligne | `admin-gt.js` | **aucun** |
-| **2** | comptes de l'équipe en lot + **correctif du tenant** | `admin-gt.js` + `firebase.js` | **aucun** |
-| **3** | périodes recopiées d'un domaine installé | `admin-gt.js` | **aucun** |
-| **4** | `submitMiseEnRoute` + le formulaire qui envoie + la reprise dans l'assistant | `functions/leads.js` + `public/mise-en-route.html` + `admin-gt.js` | **aucun** |
-| **5** | machines collées en liste + volume de fût | `admin-gt.js` | **aucun** |
-
-**Plus** la procédure `INSTALLER-UN-DOMAINE.md` et son PDF (§18c).
-**20 h → ~9 h sur le papier**, dont 14 h de clavier ramenées à ~4 h.
-✅ **DÉPLOYÉ.** ⚠️ **Mais le gain reste théorique : l'installation à blanc n'a pas été faite.**
-Les cinq lots sont en ligne, **aucun n'a encore servi de bout en bout**. Le « ~9 h » est un chiffre
-de papier tant qu'un slug jetable n'a pas été monté en entier (§18b, backlog technique n°1).
-✅ **Rayé** : CF `submitMiseEnRoute`.
 
 ### ★★★ Le 10 août — migration GitHub
 
