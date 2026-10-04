@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.17';
+export const APP_VERSION = '8.18';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -852,6 +852,16 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.18', d: '2026-10-04', items: [
+    { niv: 0, pour: ['tous'], emoji: 'valide', titre: '« Valider » ne reste plus bloqué quand le réseau traîne',
+      desc: "Depuis la fiche d’une parcelle (et depuis le journal), « Valider » attendait la météo de la tâche avant d’enregistrer : "
+        + "sur un réseau faible, la fenêtre restait ouverte et rien n’était écrit. La validation s’enregistre maintenant tout de suite ; "
+        + "la météo s’ajoute à l’entrée dès qu’elle arrive — ou pas, si le réseau ne répond pas." },
+    { niv: 0, pour: ['tous'], emoji: 'cadenas', titre: 'Sans réseau, l’écran de connexion dit la vérité',
+      desc: "Sans réseau, « Se connecter » affichait « Mot de passe incorrect », alors que le mot de passe n’avait même pas été vérifié. "
+        + "L’écran dit maintenant « Pas de connexion réseau » : la connexion en demande, réessayez quand le téléphone capte. "
+        + "Vos saisies en attente restent sur l’appareil." },
+  ] },
   { v: '8.17', d: '2026-10-04', items: [
     { niv: 0, pour: ['cave'], emoji: 'verre', titre: 'Déguster, traiter, filtrer : trois gestes neufs au Chai',
       desc: "Dans « Nouvelle opération », trois boutons de plus. <b>Dégustation</b> : une cuvée à la fois — ou un fût précis si une anomalie s’y montre —, comment il goûte, ce qu’on remarque, la suite à donner ; « Enregistrer et goûter la suivante » enchaîne les cuvées. "

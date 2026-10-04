@@ -1,0 +1,24 @@
+{
+  "lot": "VALID-1",
+  "section": "§242",
+  "base": "57a48b3fa113dae45812e8161a3a3652b6c01ba5",
+  "inclut": [],
+  "date": "2026-10-04",
+  "fichiers": {
+    ".mv-base": "82c6be7e9f658d53462f5d4cb02134732e3fd6f8e58f39744097dbc98d91242c",
+    "CLAUDE.md": "75efa35a643892418bd5f87de0ddb6e56a0b3c6cdae36d09eac52d51b92aa99e",
+    "audit-perf-ux.md": "6ee9ae0171f61cc4232065041a4146013d30dae874bfe674a36c0ae908031cc4",
+    "docs/claude/INDEX.md": "0d40c7aa4048a052bcde84a9513204fff7dda4234ed61511e8026034dbd05573",
+    "docs/claude/chantiers-230-279.md": "944729130a14a6205e0804596a72a9b92ef11993b1945c69face2227a0e1f1d8",
+    "docs/claude/journal.md": "acbf78403ba12e335a7f1363c00764390ac476402e1b3ebd155fdd647ce4fa96",
+    "docs/claude/modules.md": "e0157ad8582062a1e2d549cda01b3cefbe3ed1f3dc25309f3de0260793bfa4df",
+    "guide/01-demarrer.html": "480decf9ef1140a62bfc619212c2a26970e6ad03165b7dbd6b226aeac966beff",
+    "index.html": "aede4ef6fc66bcbbc30053cef30d92bfe548589de357130666b55469b829c92f",
+    "public/sw.js": "22f01c0f70f1d888edf9d6d5a3561449472bc025d5c56b216e3eb3fc05ce0a7a",
+    "scripts/harnais-claude-md.mjs": "f6337d76c3d6908948a4c314b86f39462d2681247289033ff29bee34d026619b",
+    "scripts/mv-harnais-liste.mjs": "3ab2e72dc9c9703ada9a4c797ad7a2644031b7638c0b099436e476e1647b22fa",
+    "src/app.js": "773cd1f3a4ffdc3a020fc0651ef748e54cfe17ad8438b846cd8bfce5727d770d",
+    "src/utils.js": "a8d462ce0da8242b210ec02631447eb347f2efa4c11029a25f8dabcaca4e81a6",
+    "scripts/mv-harnais-valid1.mjs": "baedcf5ba25126e47a5904035f6aa850e3be6aee385548697ccdefffa3ecfd06"
+  }
+}

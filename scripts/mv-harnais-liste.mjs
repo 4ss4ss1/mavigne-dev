@@ -475,4 +475,6 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-align.mjs --contre'],
   ['node scripts/mv-harnais-align2.mjs'],             // ALIGN-2 (§237) : l'Accueil en rangées
   ['node scripts/mv-harnais-align2.mjs --contre'],
+  ['node scripts/mv-harnais-valid1.mjs'],             // VALID-1 + LOGIN-1 (§242) : valider sans attendre la météo ; la connexion dit la vérité
+  ['node scripts/mv-harnais-valid1.mjs --contre'],
 ];

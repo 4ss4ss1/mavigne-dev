@@ -1,1 +1,1 @@
-c62f42912f22df09b68aeac840506b4792588783  # base : c62f429 — demo — lot AUDIT-PERF (§241) : l'audit vitesse, données, ergonomie terrain — aucun bump (documentation)
+57a48b3fa113dae45812e8161a3a3652b6c01ba5  # base : 57a48b3 — auditperfux — lot VALID-1 + LOGIN-1 (§242) : valider sans attendre la météo ; la connexion dit la vérité — APP 8.17 → 8.18 / SW 8.92 → 8.93

@@ -3408,10 +3408,13 @@ async function confirmLogin(){
       _loginErr = 'Compte introuvable. Contactez l\'administrateur.';
     } else if (e.code === 'auth/user-disabled') {
       _loginErr = 'Ce compte a été désactivé.';
-    } else if (e.code === 'auth/network-request-failed') {
+    } else if (e.code === 'auth/network-request-failed' || /^appCheck\//.test(String(e.code || '')) || !navigator.onLine) {
       // ★ BOOT-1 (§145) — avec du réseau, c'est le serveur (ou le jeton App Check de cette page) qui ne
       //   répond pas : « Pas de connexion réseau » mentait (§68h), et réessayer sans relancer échouait.
-      _loginErr = navigator.onLine ? 'Le serveur ne répond pas. Relancez l\u2019application, puis réessayez.' : 'Pas de connexion réseau.';
+      // ★★ LOGIN-1 (§242) — SANS RÉSEAU, C'EST APP CHECK QUI ÉCHOUE LE PREMIER (`appCheck/fetch-network-error`),
+      //   avant même que le mot de passe parte : ce code tombait dans le « Mot de passe incorrect. » par défaut.
+      //   Prouvé dans Chromium (§241). Un code appCheck/… ou un téléphone hors ligne = jamais le mot de passe.
+      _loginErr = navigator.onLine ? 'Le serveur ne répond pas. Relancez l\u2019application, puis réessayez.' : 'Pas de connexion réseau \u2014 réessayez quand le téléphone capte.';
       _loginRelancer = navigator.onLine;
     } else if (!e.code) {
       _loginErr = 'Connexion bloquée (extension navigateur ou VPN). Désactivez uBlock / MetaMask et réessayez.';
@@ -4466,7 +4469,13 @@ window._pluieLire=_pluieLire;
 window._pluieCharger=_pluieCharger;
 
 // Récupère la météo moyenne sur une plage de dates via Open-Meteo (daily)
+// ★ VALID-1 (§242) — L'APPEL MÉTÉO EST BORNÉ À 6 s. Avant, aucun délai : sur un réseau qui traîne (le cas courant
+//   au fond d'une parcelle), la feuille de validation restait ouverte sans rien écrire (prouvé dans Chromium, §241).
+//   Au-delà de 6 s, la fonction rend null : l'entrée vit sans météo, comme quand Open-Meteo est injoignable.
+var _MV_METEO_DELAI = 6000;
 async function fetchMeteoMoyenne(dateDebut, dateFin){
+  var _ctl = (typeof AbortController === 'function') ? new AbortController() : null;
+  var _minu = _ctl ? setTimeout(function(){ _ctl.abort(); }, _MV_METEO_DELAI) : 0;
   try{
     var today=_mvToday();
     // Même jour = aujourd'hui : réutiliser le cache courant
@@ -4479,7 +4488,7 @@ async function fetchMeteoMoyenne(dateDebut, dateFin){
     var url='https://api.open-meteo.com/v1/forecast?'+_ll
       +'&daily=temperature_2m_mean,temperature_2m_min,temperature_2m_max,windspeed_10m_max,precipitation_sum,weathercode'
       +'&timezone=Europe%2FParis&start_date='+dateDebut+'&end_date='+dateFin;
-    var r=await fetch(url);
+    var r=await fetch(url, _ctl ? { signal: _ctl.signal } : undefined);
     var d=await r.json();
     if(!d.daily||!d.daily.time)return null;
     var notNull=function(x){return x!==null&&x!==undefined;};
@@ -4505,7 +4514,24 @@ async function fetchMeteoMoyenne(dateDebut, dateFin){
   }catch(e){
     console.warn('[fetchMeteoMoyenne]',e);
     return null;
+  }finally{
+    if(_minu) clearTimeout(_minu);
   }
+}
+
+// ★ VALID-1 (§242) — LA MÉTÉO APRÈS COUP. Une validation s'écrit et se ferme TOUT DE SUITE ; la météo moyenne de la
+//   tâche arrive ensuite (ou jamais) et complète l'entrée, puis on enregistre de nouveau. Patron de pQuickValidate,
+//   avec une différence : l'entrée est RETROUVÉE PAR SON ID dans le journal du moment — entre-temps, une
+//   synchronisation a pu remplacer le tableau, et compléter l'objet d'origine ne servirait plus à rien.
+//   Une entrée annulée entre-temps (pQuickUndoEntry) n'est plus là : rien n'est écrit.
+function _mvMeteoApres(id, dateDebut, dateFin){
+  fetchMeteoMoyenne(dateDebut, dateFin).then(function(m){
+    if(!m) return;
+    var e=(window.JOURNAL||JOURNAL||[]).find(function(x){ return x && x.id===id; });
+    if(!e) return;
+    e.meteo_snapshot=m;
+    saveData('journal');
+  }).catch(function(err){ if(window._mvAvale) window._mvAvale(err,'app.js/_mvMeteoApres'); });
 }
 
 // ════ SAISON ACTIVE ════
@@ -9311,16 +9337,16 @@ async function confirmValidation(){
   var jEntry={id:Date.now().toString(16),date,parcelle:_validParcelle,tache:_validTache,qui:currentUser.nom,statut:'Validé',equipe,membresEquipe};
   if(quiHors)jEntry.quiHors=true;
   if(trous)jEntry.plantation_trous=trous;
-  // Météo moyenne sur la période de la tâche (du premier "En cours" à aujourd'hui)
+  // Météo moyenne sur la période de la tâche (du premier "En cours" à aujourd'hui) — VALID-1 (§242) : elle n'est
+  // plus ATTENDUE. L'entrée s'écrit et la feuille se ferme d'abord ; _mvMeteoApres complète l'entrée ensuite.
   var _mDeb=_findDebutTache(_validParcelle,_validTache,date)||date;
-  var _mSnap=await fetchMeteoMoyenne(_mDeb,date);
-  if(_mSnap)jEntry.meteo_snapshot=_mSnap;
   JOURNAL.unshift(_mvEqApplique(jEntry));
   recalcTravaux(_validTache);
   injectMeteoIfNeeded(date);
   saveData('parcelles'); saveData('journal'); saveData('travaux');
   document.getElementById('ovValidation').classList.remove('open');
   renderParcelles();computePStats();
+  _mvMeteoApres(jEntry.id,_mDeb,date);
   if(navigator.vibrate)navigator.vibrate(60);
   // ARRACH-6 : l'arrachage d'une vigne en place est fini → proposer de la déclarer arrachée.
   if(_validTache==='Arrachage'&&p.statut!=='Arrachee'&&isAdmin()&&_arrProposer(p.nom,date)) return;
@@ -9432,12 +9458,8 @@ async function saveJournalEntry(){
       }
     }
   }
-  // Météo moyenne si validation
-  if(statut==='Validé'){
-    var _mDeb=_findDebutTache(parcelle,tache,date)||date;
-    var _mSnap=await fetchMeteoMoyenne(_mDeb,date);
-    if(_mSnap)jEntry.meteo_snapshot=_mSnap;
-  }
+  // Météo moyenne si validation — VALID-1 (§242) : calculée d'abord, demandée APRÈS l'enregistrement (fin de fonction).
+  var _mDeb=(statut==='Validé')?(_findDebutTache(parcelle,tache,date)||date):'';
   JOURNAL.unshift(_mvEqApplique(jEntry));
   // Mettre à jour le statut de la parcelle si validé
   if(_jeEt&&statut==='Validé'){
@@ -9458,6 +9480,7 @@ async function saveJournalEntry(){
   document.getElementById('ovJournalEntry').classList.remove('open');
   renderJournalList();
   renderHome();
+  if(_mDeb) _mvMeteoApres(jEntry.id,_mDeb,date);
 }
 
 function injectMeteoIfNeeded(date){
@@ -12562,7 +12585,7 @@ function pQuickValidate(nom,evt){
   } else {
     _pvToast(label+' · '+nom+' · '+who, function(){pQuickUndoEntry(nom,task,prev,jid);});
   }
-  (async function(){try{var _d=_findDebutTache(nom,task,date)||date;var _m=await fetchMeteoMoyenne(_d,date);if(_m){jEntry.meteo_snapshot=_m;saveData('journal');}}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/undo'); }})();
+  try{ _mvMeteoApres(jid,_findDebutTache(nom,task,date)||date,date); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/pQuickValidate#meteo'); }   // VALID-1 (§242)
   var card=evt&&evt.target?evt.target.closest('.pcard'):null;
   if(!window.pShowDone&&card&&_pvCurDone(p,task)){
     card.classList.add('pv-removing');

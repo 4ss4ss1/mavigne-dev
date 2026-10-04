@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v8.92
+// MA VIGNE — Service Worker v8.93
+// v8.93 (04/10/2026) — VALID-1 + LOGIN-1 (§242) : « Valider » n'attend plus la meteo (ecrire d'abord, la meteo completer
+//   ensuite, borne 6 s, ici aussi : branche meteo du SW bornee) ; hors reseau, la connexion le dit au lieu de « Mot de
+//   passe incorrect ». APP 8.17 -> 8.18.
 // v8.92 (04/10/2026) — GESTES-1 (§239) : trois gestes au Chai (degustation, traitement, filtration) ; un fut precis pour une
 //   anomalie ; les traitements sortent du stock de La Reserve ; journal, fiche, Suivi d'elevage, registre. APP 8.16 -> 8.17.
 // v8.91 (04/10/2026) — ALIGN-3 (§238) : correctif Accueil — un bloc masque reapparaissait sur ordinateur (regle a ID
@@ -4305,7 +4308,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.92';
+const CACHE_NAME   = 'mavigne-v8.93';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4321,7 +4324,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.92 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.93 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4341,7 +4344,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.92 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.93 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
@@ -4437,21 +4440,31 @@ self.addEventListener('fetch', event => {
   // semaines — et une température de printemps un jour de canicule ne se voit pas comme
   // une panne, elle se voit comme un logiciel qui ment. Au-delà de MET_MAX_AGE on préfère
   // l'échec net : l'app sait dire « météo indisponible ».
+  // ★ VALID-1 (§242) — LE RÉSEAU D'ABORD, MAIS JAMAIS PLUS DE MET_DELAI. Sans borne, un réseau qui traîne
+  // gardait la page en attente (prouvé §241 : la validation attendait cet appel). Au-delà, on sert la copie
+  // (si elle a moins de 3 h) ou l'échec net ; la réponse tardive, si elle arrive, met quand même la copie à jour.
   if (url.hostname.includes('open-meteo.com')) {
     const MET_MAX_AGE = 3 * 60 * 60 * 1000;
+    const MET_DELAI = 6000;
     const metStale = (reason) => new Response('{"error":true,"reason":"'+reason+'"}',
       { status: 503, headers: { 'Content-Type': 'application/json' } });
+    const metReseau = fetch(event.request).then(r => {
+      if (r.ok) {
+        const h = new Headers(r.headers);
+        h.set('x-mv-cached-at', String(Date.now()));
+        r.clone().blob()
+          .then(b => caches.open(CACHE_NAME).then(c => c.put(event.request, new Response(b, { status: 200, headers: h }))))
+          .catch(e => { if (DEBUG) console.warn('[SW] météo non mise en cache', e); });
+      }
+      return r;
+    });
+    metReseau.catch(e => { if (DEBUG) console.warn('[SW] météo : réseau en échec', e); });
+    // La borne RÉSOUT (null), elle ne rejette pas : quand le réseau gagne, une borne qui rejetterait plus tard
+    // serait une promesse rejetée que personne n'écoute.
+    const metDelai = new Promise(res => setTimeout(() => res(null), MET_DELAI));
     event.respondWith(
-      fetch(event.request).then(r => {
-        if (r.ok) {
-          const h = new Headers(r.headers);
-          h.set('x-mv-cached-at', String(Date.now()));
-          r.clone().blob()
-            .then(b => caches.open(CACHE_NAME).then(c => c.put(event.request, new Response(b, { status: 200, headers: h }))))
-            .catch(e => { if (DEBUG) console.warn('[SW] météo non mise en cache', e); });
-        }
-        return r;
-      }).catch(() => caches.match(event.request).then(cached => {
+      Promise.race([metReseau, metDelai]).then(r => r || Promise.reject(new Error('delai')))
+      .catch(() => caches.match(event.request).then(cached => {
         if (!cached) return metStale('offline');
         const at = +(cached.headers.get('x-mv-cached-at') || 0);
         if (!at || (Date.now() - at) > MET_MAX_AGE) return metStale('stale');

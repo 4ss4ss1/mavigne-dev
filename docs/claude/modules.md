@@ -415,10 +415,13 @@ préservé**. ★ **Le formulaire d'essai du site fonctionne** : c'est par lui q
 - ★ **`TRAVAUX[tache]` contient l'avancement surfacique** : `pct`, `surf_done`, `surf_total`,
   `h_done`, `h_reste`. ⚠️ **Mais il est lié à la PÉRIODE active, pas à la campagne.**
 - ★ **Le statut « En cours »** écrit une entrée avec `date` et `ts_debut` ;
-  `_findDebutTache(parcelle, tache)` existe déjà.
-  ⚠️⚠️ **DÉFAUT DORMANT** : `_findDebutTache` prend le **minimum sur tout le journal SANS borne de
-  période** → à la 2ᵉ campagne d'une même tâche, `fetchMeteoMoyenne` moyennera sur des centaines de
-  jours (contre-épreuve : 398 jours au lieu de 2). Dormant chez MG aujourd'hui, pas absent.
+  `_findDebutTache(parcelle, tache, dateRef)` donne le premier « En cours » **de la même période**
+  (`_saisonForDate`, sinon `_mvCampagneDe`) — l'ancien défaut dormant (minimum sur tout le journal) est
+  corrigé depuis le 16/08 (backlog, entrée 4 rayée).
+- ★★ **VALID-1 (§242) — la météo moyenne de la tâche n'est plus attendue.** `confirmValidation`,
+  `saveJournalEntry` et `pQuickValidate` écrivent l'entrée, enregistrent et ferment d'abord ;
+  `_mvMeteoApres(id, début, fin)` la complète ensuite, retrouvée **par son id** dans le journal du moment.
+  `fetchMeteoMoyenne` est bornée à 6 s (`_MV_METEO_DELAI`), la branche météo du service worker aussi.
 
 ---
 

@@ -3,12 +3,12 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **4 octobre 2026 (AUDIT-PERF)** — ★★ **VITESSE, DONNÉES, ERGONOMIE TERRAIN : L'AUDIT MESURÉ** (§241).
-> Demande de Nico (04/10) : le niveau de Linear, Notion, Figma. Audit mesuré dans un vrai Chromium (build de prod, téléphone ×4),
-> `audit-perf-ux.md` à la racine, rien d'intégré. Deux défauts PROUVÉS : « Valider » de la feuille attend Open-Meteo sans limite avant
-> d'écrire (`confirmValidation`, `saveJournalEntry` ; `pQuickValidate` a le bon patron) ; hors réseau on n'entre pas et l'écran dit
-> « Mot de passe incorrect. » (`appCheck/fetch-network-error`). Aussi : voile imposé de 3,4 s, profils vides 18,6 s sur un réseau qui
-> traîne, gel de 0,6 s par validation reçue, journal plein vers 6 600 entrées. 13 lots proposés. §4 corrigé. Base `c62f429`. **Aucun bump**.
+> Dernière consolidation : **4 octobre 2026 (VALID-1 + LOGIN-1)** — ★★ **« VALIDER » N'ATTEND PLUS LA MÉTÉO ; SANS RÉSEAU, LA CONNEXION DIT LA VÉRITÉ** (§242).
+> Les deux défauts prouvés par l'audit (§241), « go » de Nico. `confirmValidation` et `saveJournalEntry` écrivent, enregistrent et ferment
+> AVANT tout appel réseau ; `_mvMeteoApres` complète l'entrée ensuite (retrouvée par id ; `pQuickValidate` y passe aussi) ; `fetchMeteoMoyenne`
+> et la branche météo du SW bornées à 6 s. `confirmLogin` : `appCheck/…` ou hors ligne → « Pas de connexion réseau », plus « Mot de passe
+> incorrect ». Rejoué dans Chromium sur le build : feuille fermée en moins d'1 s, message juste. Harnais `mv-harnais-valid1` (neuf, 31 + 10/10).
+> Guide 01 : se connecter demande du réseau. Marque `lots/VALID-1.json`. Base `57a48b3`. **APP 8.17 → 8.18, SW 8.92 → 8.93** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1820,7 +1820,7 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ### ⚠️ AUDIT-PERF — CE QUI RESTE OUVERT (§241, posé le 04/10)
 
-1. **Le plan est dans `audit-perf-ux.md`** (racine), rien d'intégré : d'abord VALID-1 et LOGIN-1 (petits, prouvés), puis VOILE-1 et PROFILS-1.
+1. **Le plan est dans `audit-perf-ux.md`** (racine). ✅ VALID-1 et LOGIN-1 faits (§242) — à regarder chez Nico : valider sur un réseau faible, se connecter en mode avion. Ensuite : VOILE-1 et PROFILS-1.
 2. **Décisions de Nico** : ENTREE-1 (entrer sans retaper le mot de passe — téléphones partagés ?), le premier appui qui « démarre » une tâche dans la fiche parcelle, PAQUET-1, DONNEES-1, IDS-1, GT-1.
 3. **À fournir par Nico** : `npm run taille -- ancienne.json recente.json` sur deux sauvegardes complètes — les vraies tailles et le mois de la limite.
 

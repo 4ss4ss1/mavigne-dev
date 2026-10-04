@@ -25,6 +25,9 @@ Unités : les tailles de paquet sont celles qu'affiche `vite build` (kB = 1 000 
 2. **Sans réseau, on ne peut pas entrer — et l'écran dit « Mot de passe incorrect. ».** Le mot de passe n'a même pas été
    vérifié : c'est App Check qui n'a pas pu obtenir son jeton.
 
+✅ **Les deux sont corrigés au lot VALID-1 + LOGIN-1 (§242, APP 8.18 · SW 8.93).** Le n° 2 ne fait que dire la vérité :
+entrer sans réseau reste le lot ENTREE-1.
+
 **Ce qui fait « lent » aujourd'hui, dans l'ordre :**
 
 1. **l'ouverture** : un voile de 3,4 s imposé, le mot de passe à chaque ouverture, et sur un réseau qui traîne, **la zone
@@ -314,8 +317,8 @@ un écran change, harnais et contre-épreuve, Règle d'or n° 4.
 
 | Ordre | Lot | Ce que ça change pour l'utilisateur | Effort | Risque | Décision |
 |---|---|---|---|---|---|
-| 1 | **VALID-1** | « Valider » ne bloque plus jamais : la feuille se ferme tout de suite, la météo complète l'entrée ensuite | ½ j | faible | — |
-| 2 | **LOGIN-1** | sans réseau, l'écran dit « pas de réseau », plus « mot de passe incorrect » | ¼ j | nul | — |
+| 1 | **VALID-1** ✅ fait (§242) | « Valider » ne bloque plus jamais : la feuille se ferme tout de suite, la météo complète l'entrée ensuite | ½ j | faible | — |
+| 2 | **LOGIN-1** ✅ fait (§242) | sans réseau, l'écran dit « pas de réseau », plus « mot de passe incorrect » | ¼ j | nul | — |
 | 3 | **VOILE-1** | l'appli s'ouvre 2 à 3 s plus tôt | ¼ j | nul | la durée du voile |
 | 4 | **PROFILS-1** | la tuile apparaît tout de suite, même sur un réseau qui traîne | ½ j | faible | — |
 | 5 | **ENTREE-1** | rouvrir l'appli, c'est être dedans, réseau ou pas | 1 à 2 j | moyen (sécurité) | **oui** : téléphones partagés ? |

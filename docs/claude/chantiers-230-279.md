@@ -401,3 +401,67 @@ de l'audit. L'essentiel :
 
 → CLAUDE.md §28 (bloc AUDIT-PERF) ; ce qui n'a pas été mesuré est listé au §6 de l'audit (vrai téléphone, vrai réseau,
 vraies tailles de documents, service worker dans la boucle de l'essai météo, Lighthouse).
+
+---
+
+## 242. ★★ VALID-1 + LOGIN-1 — « VALIDER » N'ATTEND PLUS LA MÉTÉO ; SANS RÉSEAU, LA CONNEXION DIT LA VÉRITÉ (04/10 — `src/app.js` · `public/sw.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `guide/01-demarrer.html` · `scripts/mv-harnais-valid1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `audit-perf-ux.md` · `docs/claude/modules.md` · `lots/VALID-1.json` · **APP 8.17 → 8.18, SW 8.92 → 8.93**, base `57a48b3`)
+
+### 242a. Les deux défauts — prouvés avant le lot (§241)
+
+① « Valider » de la feuille de validation (`confirmValidation`) et du formulaire du journal (`saveJournalEntry`, statut
+« Validé ») attendait `fetchMeteoMoyenne` — un appel à Open-Meteo **sans aucune borne** — avant d'écrire l'entrée et de
+fermer. Météo sans réponse : feuille ouverte, rien d'écrit à 30 s. Le pire cas n'était pas « pas de réseau » (l'appel échoue
+vite) mais **le réseau qui traîne**. ② Hors réseau, à froid, la connexion échoue d'abord sur App Check
+(`appCheck/fetch-network-error`) : ce code n'avait pas de branche dans `confirmLogin` et tombait dans « Mot de passe
+incorrect. ».
+
+### 242b. Ce qui change
+
+- **`fetchMeteoMoyenne`** : bornée à `_MV_METEO_DELAI` (6 s) par un `AbortController` ; au-delà, elle rend `null` — l'entrée
+  vit sans météo, comme quand Open-Meteo est injoignable.
+- **`_mvMeteoApres(id, début, fin)`** (neuve) : la météo après coup. L'entrée est retrouvée **par son id** dans le journal
+  du moment — une synchronisation a pu remplacer le tableau entre-temps — puis le journal est enregistré de nouveau ; une
+  entrée annulée entre-temps n'est plus là, rien n'est écrit.
+- **`confirmValidation`, `saveJournalEntry`** : écrire, enregistrer, fermer, puis `_mvMeteoApres`. Le début de la tâche
+  (`_findDebutTache`) est lu **avant** l'écriture, comme avant.
+- **`pQuickValidate`** (le bouton « Valider » de la carte) avait déjà le bon ordre ; il passe désormais par `_mvMeteoApres`
+  (avant : il complétait l'objet d'origine, perdu si le tableau avait été remplacé — lu dans le code au §241c).
+- **`sw.js`, branche météo** : le réseau d'abord, borné à `MET_DELAI` (6 s), puis la copie de moins de 3 h ou l'échec net ;
+  une réponse tardive met quand même la copie à jour.
+- **`confirmLogin` (LOGIN-1)** : `appCheck/…`, ou un téléphone hors ligne, ne disent plus jamais « Mot de passe
+  incorrect ». Hors ligne : « Pas de connexion réseau — réessayez quand le téléphone capte. » En ligne avec App Check en
+  échec : « Le serveur ne répond pas. Relancez l'application… » et le bouton pour relancer, comme `auth/network-request-failed`
+  depuis BOOT-1. Un vrai mauvais mot de passe dit toujours « Mot de passe incorrect. ».
+- **Guide, section 1** : « Se connecter demande du réseau » — c'était vrai avant le lot ; l'écran le dit maintenant, le guide
+  aussi.
+- **`WHATS_NEW` 8.18** : deux corrections, niveau 0, pour tous.
+
+### 242c. Mesuré
+
+- **`mv-harnais-valid1`** (neuf, dans la liste unique) : **31 assertions** sur les vraies fonctions d'`app.js` branchées entre
+  elles, et sur le **vrai `sw.js` chargé tel quel** (son gestionnaire fetch reçoit une requête Open-Meteo : sans réponse ni
+  copie → 503 à la borne ; avec une copie récente → la copie). **10/10 contre-épreuves** : l'attente remise dans la feuille,
+  puis dans le formulaire ; la borne retirée ; la météo écrite dans le journal d'avant la synchronisation ; une entrée annulée
+  réécrite ; l'ancien patron de la carte ; App Check renvoyé au mot de passe ; un autre code hors ligne renvoyé au mot de
+  passe ; le message sans consigne ; le service worker sans borne.
+- **Rejoué dans Chromium sur le build du lot** (la méthode du §241) : météo sans réponse → feuille **fermée** et entrée
+  **écrite** dès 1 s (avant : ouverte et rien à 30 s) ; ouverture à froid hors réseau → « Pas de connexion réseau — réessayez
+  quand le téléphone capte. » (avant : « Mot de passe incorrect. ») ; contre-épreuve connexion simulée réussie → l'appli entre.
+
+### 242d. Trouvé en route
+
+- **Une borne qui rejette laisse une promesse rejetée orpheline.** Première écriture du service worker :
+  `Promise.race([réseau, délai qui rejette])`. Quand le réseau gagne (le cas courant), le délai rejette 6 s plus tard sans que
+  personne l'écoute. Vu parce que la contre-épreuve « sans borne » a fait **planter** le harnais au lieu de le faire rougir.
+  La borne **résout** (`null`) et c'est le `.then` qui décide. ★ Patron à reprendre pour toute course à une borne.
+- **`docs/claude/modules.md` décrivait encore `_findDebutTache` comme sans borne de période** (« défaut dormant ») : corrigé
+  depuis le 16/08 (backlog, entrée 4 rayée). Section remise à jour, avec VALID-1.
+- **Deux écritures du journal par validation** quand la météo arrive (l'entrée, puis sa météo) : c'était déjà le cas de
+  `pQuickValidate` ; FUSION-1 fusionne la seconde comme la première.
+
+### 242e. Ouvert
+
+① **À regarder chez Nico, sur téléphone** : valider une tâche démarrée un autre jour avec un réseau faible (la fenêtre doit se
+fermer tout de suite) ; « Se connecter » en mode avion (le nouveau message). ② **LOGIN-1 dit la vérité, il n'ouvre pas la
+porte** : entrer sans réseau reste ENTREE-1 (décision de Nico sur les téléphones partagés). ③ La suite du plan :
+`audit-perf-ux.md` §5, puis VOILE-1 et PROFILS-1.

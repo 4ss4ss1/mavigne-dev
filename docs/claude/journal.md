@@ -8,6 +8,13 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **4 octobre 2026 (AUDIT-PERF)** — ★★ **VITESSE, DONNÉES, ERGONOMIE TERRAIN : L'AUDIT MESURÉ** (§241).
+> Demande de Nico (04/10) : le niveau de Linear, Notion, Figma. Audit mesuré dans un vrai Chromium (build de prod, téléphone ×4),
+> `audit-perf-ux.md` à la racine, rien d'intégré. Deux défauts PROUVÉS : « Valider » de la feuille attend Open-Meteo sans limite avant
+> d'écrire (`confirmValidation`, `saveJournalEntry` ; `pQuickValidate` a le bon patron) ; hors réseau on n'entre pas et l'écran dit
+> « Mot de passe incorrect. » (`appCheck/fetch-network-error`). Aussi : voile imposé de 3,4 s, profils vides 18,6 s sur un réseau qui
+> traîne, gel de 0,6 s par validation reçue, journal plein vers 6 600 entrées. 13 lots proposés. §4 corrigé. Base `c62f429`. **Aucun bump**.
+
 > ★ Consolidation : **4 octobre 2026 (DEMO-4)** — ★★ **LA DÉMO DU SITE : UN DOMAINE, QUATRE TÉLÉPHONES** (§240).
 > Demande du 03/10 (« comme Apple ou Google ») → maquette publiée, cinq tours de retouches, « go » le 04/10. `/demo.html`, page neuve du
 > site : le produit en vedette, « Quel téléphone prenez-vous en main ? », un parcours par rôle (gérant 8 scènes, ouvrier 7, tractoriste 6,

@@ -285,3 +285,4 @@
 | 239 | 239. ★★ GESTES-1 — DÉGUSTER, TRAITER, FILTRER : TROIS GESTES DU MAÎTRE DE CHAIS (04/10 — `index.html` · `sr… | `docs/claude/chantiers-230-279.md` |
 | 240 | 240. ★★ DEMO-4 — LA DÉMO DU SITE : UN DOMAINE, QUATRE TÉLÉPHONES (04/10 — `public/demo.html` (neuf) · `publ… | `docs/claude/chantiers-230-279.md` |
 | 241 | 241. ★★ AUDIT-PERF — VITESSE, DONNÉES, ERGONOMIE TERRAIN : L'AUDIT MESURÉ (04/10 — `audit-perf-ux.md` (neuf… | `docs/claude/chantiers-230-279.md` |
+| 242 | 242. ★★ VALID-1 + LOGIN-1 — « VALIDER » N'ATTEND PLUS LA MÉTÉO ; SANS RÉSEAU, LA CONNEXION DIT LA VÉRITÉ (0… | `docs/claude/chantiers-230-279.md` |
