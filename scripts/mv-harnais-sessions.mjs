@@ -58,6 +58,7 @@ const VARS = [/^var _CHR_CLE = .*$/m, /^var _CHR_CLE2 = .*$/m, /^var _CHR_HAUT =
 /* ── Le bac : le vrai moteur, une horloge, un stockage, deux sessions ── */
 const T0 = Date.UTC(2026, 8, 22, 6, 0, 0);
 const MIN = 60000;
+const SURF_UTILS = (lire('src/utils.js').match(/function _mvHaNum\(x\)\{[^\n]*\nwindow\._mvHaP=[^\n]*\nwindow\._mvHaT=[^\n]*\n/) || [''])[0];
 function bac(S, o = {}) {
   const horloge = { t: o.t0 || T0 };
   const RealDate = Date;
@@ -75,6 +76,8 @@ function bac(S, o = {}) {
     { id: 'B', activite: 'Broyage', date: '2026-09-22', statut: 'En cours', parcellesFaites: [], parcellesSkip: [] }];
   const CONFIG = { chrono_mode: o.chrono === false ? 'off' : 'on' };
   const w = { tracSessionId: 'A', CONFIG, currentUser: { nom: 'Nico' }, SESSIONS };
+  // KIT-4 (§229) : le Tracteur écrit ses surfaces par window._mvHaT / _mvHaP (utils.js) — les vrais, extraits.
+  vm.runInContext(SURF_UTILS, Object.assign(vm.createContext({ parseFloat, isFinite, String }), { window: w }));
   w.openConfirmDel = (titre, sub, cb, icone, bouton, couleur, alt) => { env.confirme = { titre, sub, cb, bouton, alt }; };
   const ctx = {
     window: w, SESSIONS, PARCELLES, CONFIG, Date: FDate, Math, JSON, Object, Array, Number, String, isNaN,

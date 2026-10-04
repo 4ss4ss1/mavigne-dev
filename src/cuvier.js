@@ -6521,7 +6521,7 @@ function _vendRendHistHtml(){
     }).join('');
     var span=d.rows.length>1?(d.rows[0].millesime+'–'+d.rows[d.rows.length-1].millesime):String(d.rows[0].millesime);
     html+='<div class="mvv-rh-p"><div class="mvv-rh-nm">'+_escHtml(d.nom||'')+'</div>'
-      +'<div class="mvv-rh-sub">'+d.rows.length+' millésime'+(d.rows.length>1?'s':'')+' · '+span+(d.surface>0?' · '+_mvF1(d.surface)+' ha':'')+'</div>'
+      +'<div class="mvv-rh-sub">'+d.rows.length+' millésime'+(d.rows.length>1?'s':'')+' · '+span+(d.surface>0?' · '+window._mvHaT(d.surface)+' ha':'')+'</div>'
       +'<div class="mvv-rh-years">'+rowsH+'</div></div>';
   });
   return html+'</div>';

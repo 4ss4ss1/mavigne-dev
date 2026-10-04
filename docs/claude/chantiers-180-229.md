@@ -2172,3 +2172,67 @@ dans le rapport de saison ; l'assertion vise désormais la ligne de la tuile). C
 ① À l'œil chez Nico : deux blocs de hauteurs inégales côte à côte laissent un blanc (l'ordre se règle en mode Personnaliser) ;
 le glisser-déposer d'une colonne à l'autre ; la liste des parcelles sur deux colonnes ; les chiffres droits. ② 3b et 3c du kit.
 ③ Deux fils livrent encore en parallèle (annonces / kit) : un seul à la fois, ou un push entre deux lots.
+
+## 228. ★ KIT-3 — LOT 3b DU KIT : LES BARRES DE LA VIGNE, DU PLANNING ET DU TRACTEUR (03/10 — `src/app.js` · `src/pilotage.js` · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-kit3.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · **APP 8.07 → 8.08, SW 8.82 → 8.83**, base `1d3a59b`)
+
+### 228a. Ce qui change
+
+- **Les barres de 3b au kit** (CSS, après les règles d'origine) : FINES 6 px en pilule — fiche rapide de la carte
+  (`.mq-barwrap`), cartes (`.pc-bar`), Accueil (`.hv2-prog-track`, `.hv2-bar-track`), historique (`.histo-col-bar`), Planning
+  (`.pl2-mc-track`), tracteur en cours (`.trac-encours-bar-track`), sessions (`.sc-btrack`) ; NORMALES 10 px — ma part du
+  chantier (`.hmp-bar`, 15 px avant), rendement de la tournée (`.pil-dz-rdt-bar`, 12 px). Les voiles blancs des fonds sombres
+  restent. Les familles qui ne sont pas des barres (bandeaux `p-focus`, `pv-team`, poignée `sd-trac-sheet`, liseré `jcard`…)
+  ne sont pas touchées.
+- **La couleur d'état** : la fiche rapide de la carte prend `cl.fill` (getPCls, KIT-1) au lieu du dégradé `cl.col`, et son %
+  n'est plus orange sous 75 % ; les sessions tracteur passent du dégradé acier au vert (fini) et de l'orange au doré (en cours)
+  — l'orange est la couleur du retard.
+- **Un cercle** : le donut de La campagne (`.pil-donut-s`, 184) et l'anneau d'Économie (`pec-svg`, 200) à 168 px, comme
+  l'anneau `pil-ring`. Leur viewBox ne change pas : le dessin se met à l'échelle.
+- **Point 4a — la journée des échéances** : `_pilEchCadence` (Échéances par tâche), sans présence mesurée au planning, lit
+  d'abord la journée du MODÈLE (`_pilJourModele` : moyenne des jours travaillés des 28 prochains jours de `capCum`) ; la
+  « journée de référence » (h_jour, 7 h) ne sert plus qu'en dernier recours — son libellé le dit.
+
+### 228b. Point 4b — « Dégraffage » : la réponse
+
+Réglages ne propose **aucun renommage de tâche** : seules les périodes se renomment (`_renamePeriode`, qui migre les clés
+d'avancement). Le nom d'une tâche est la CLÉ de tout son historique — `p.taches[nom]`, `p.tachesAll`, `JOURNAL[].tache`,
+`TRAVAUX[nom]`, la priorité, les fenêtres, les équipes du jour. Supprimer et recréer la tâche orphelinerait l'historique. Le
+corriger demande un lot « Renommer une tâche » avec migration, sur le modèle de `_renamePeriode`. Décision de Nico (§28).
+
+### 228c. Mesuré
+
+`mv-harnais-kit3.mjs` : **7 assertions**, dont les VRAIS `_pilJourModele` et `_pilEchCadence` exécutés (journée du modèle 5,6 h
+× 2 personnes = 11,2 h/j ; sans modèle, 7 h). Contre-épreuve **5/5**. Chaîne complète verte.
+
+### 228d. Ouvert
+
+① 3c : Cave, Cuvier, La Réserve (`mvc-gauge`, `mvc-health`, `vend-prog`, cercles de la Cave). ② Le tour écran par écran, avec
+les surfaces des autres modules. ③ Le renommage de tâche (228b). ④ À l'œil chez Nico : les barres et les cercles redimensionnés.
+
+## 229. ★ KIT-4 — LOT 3c DU KIT (CAVE, CUVIER) ET LES SURFACES DE TOUS LES MODULES (03/10 — `src/utils.js` · `src/phyto.js` · `src/tracteur.js` · `src/reglages.js` · `src/cuvier.js` · `src/styles.css` · `index.html` · `public/sw.js` · `scripts/mv-harnais-kit4.mjs` (neuf) · `scripts/mv-harnais-sessions.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · **APP 8.08 → 8.09, SW 8.83 → 8.84**, base `1d3a59b` — zip CUMULATIF avec KIT-3, §228, pas encore poussé)
+
+### 229a. Ce qui change
+
+- **Les surfaces, partout** : `window._mvHaP(x)` (une PARCELLE, 4 décimales — le centiare) et `window._mvHaT(x)` (un TOTAL, 2),
+  toujours à la virgule, lisant aussi « 0,1144 » (texte à virgule). Remplacent 17 écritures à la main : Traitement (6 — la
+  surface traitée du registre comprise), Tracteur (7 appels sur 5 lignes — avancement du domaine, chrono, listes de
+  parcelles), Réglages (4 — estimation d'heures, liste des parcelles, couverture du rapport), Cuvier (1, `_mvF1` à une
+  décimale). Plusieurs écrivaient « 1.25 ha » au POINT. La Cave garde `_vendHaTxt` (son formateur de vendange).
+- **La Cave et le Cuvier au kit** : jauges de la Cave (`.mvc-gauge-*`, `.mvc-health-track`), avancement de la vendange
+  (`.vend-prog-*`) en barres fines (6 px, pilule, piste gris-clair) ; le Cuvier injecte ses règles au chargement — les siennes
+  passent par `body …` : avancement des travaux (`.vt-prog-*`) en doré, plus le dégradé or → vert ; le niveau de cuve
+  (`.mvv-rh-fill`) en terre, la couleur du MESURÉ, plus le dégradé terre → or. La Réserve n'a pas de barre (`.mvr-fbar` est
+  une rangée de filtres).
+
+### 229b. Mesuré
+
+`mv-harnais-kit4.mjs` : **6 assertions** (les vrais formateurs exécutés, plus aucun motif d'écriture à la main dans les quatre
+modules, le compte exact des appels, les règles de la Cave et du Cuvier). Contre-épreuve **4/4** — la première version
+comptait 5 appels au Tracteur : il y en a 7 sur 5 lignes (`grep -c` compte des LIGNES). `mv-harnais-sessions` exécute le
+chrono du Tracteur dans une fenêtre factice : il reçoit les vrais `_mvHaP` / `_mvHaT`, extraits d'utils.js (31 vertes, contre-épreuve
+verte). Chaîne complète verte.
+
+### 229c. Ouvert
+
+① Le tour à l'œil chez Nico, écran par écran — en particulier la Cave et le Cuvier, que ces règles redessinent sans capture.
+② Les deux décisions : renommer une tâche (§228b), la garde contre les lots frères (§28, point 8).

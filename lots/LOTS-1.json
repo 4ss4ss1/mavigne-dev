@@ -1,0 +1,40 @@
+{
+  "lot": "LOTS-1",
+  "section": "§231",
+  "base": "1d3a59b42d86d82000947cb233c43b0704ef1dd5",
+  "inclut": [
+    "KIT-3",
+    "KIT-4",
+    "RENOM-1"
+  ],
+  "date": "2026-10-04",
+  "fichiers": {
+    ".mv-base": "09f0f2c41b4ff8eac424cfaaae5e67ed872e937955a61aeff02a75bf74769097",
+    "CLAUDE.md": "61c8875ecbcdc1fe375af54011e0ddf63c7b5dc0a6263fc4562fc14a27d86c90",
+    "docs/claude/INDEX.md": "07024a99d15ac79f8ea63163f1f19c0d79c63f496dab5095284c48db90cd1a59",
+    "docs/claude/chantiers-180-229.md": "6d7449afdc1aba5f880de981d801053156f814276922c36724f0200a5f0392f3",
+    "docs/claude/journal.md": "ed4a49b598eb28e4267ff58a77ecb9bfdca0fb71734a861a38411cbc13429a0e",
+    "guide/12-reglages.html": "b05ab8349f4686f3c3dcdb7f3304e964c7250045fef8842e905f583cf238cfc8",
+    "index.html": "7ec3c6568289c02bfa3ba3a1d2bbf1e2a6ca63964c69ecccdc619bcdc5fe6acc",
+    "public/guide.html": "483a951e39381893f15f985fa41513626b26bc9946868e1bce1427f844be169a",
+    "public/sw.js": "9461fb3b0fc7bf1e628fcaa85be594c1e2ee0c437a8579614e69d665fcd95db4",
+    "scripts/harnais-claude-md.mjs": "824a4c73f097c38e80a17c7b002cc9d0d33451e7e8939c3003d3abe08ccc038a",
+    "scripts/mv-harnais-liste.mjs": "4b74b598cddcd9a7add690cee40a493e9112c4a3ca9e7a6ae90f0f0e762f43ef",
+    "scripts/mv-harnais-sessions.mjs": "140cd87e34c70c9644f5f508e6bce5e66a4969bf73158dce71830c693f9d2cf5",
+    "src/app.js": "cd5e82f12d4d57572bf6aef1425ae908a845b9f2d87843744d63cfd7ef363155",
+    "src/cuvier.js": "8c35d7cbc1c910283a3193162dd648160c8afa1246387cdadc98396375c2dce9",
+    "src/phyto.js": "bb58f8ddd5f1e474ac0cf5d3e63e667941ec0448934b4e818a5c89df4da26c1d",
+    "src/pilotage.js": "bbfabd2d8b9744c9b006e7a5fd71a27e0ffc05dcdaa7643e5a24434d3089a557",
+    "src/reglages.js": "155791a5304461de7cbf19f531d6f34c529842188952e550e9e6d9b2c7fe8a09",
+    "src/styles.css": "c89747fa4eb232aafa0a266bd65f94260c75dd25c65e339ed35abba8ce60f0cf",
+    "src/tracteur.js": "c7c66963dfc62393d4969d2c66d4422edb437759fc62e7ac9fcf72c6bbc3c492",
+    "src/utils.js": "2de0843b8bb91dbc7c2f65a06d34190cccfb9829a524e932e7613518e05b94b3",
+    "docs/claude/chantiers-230-279.md": "5d484cfa8e8f5043975a5075ecab12a740eb3769960da12f9405a2a6206ad89c",
+    "scripts/mv-harnais-kit3.mjs": "fe55b4de65478788e5b9600ff53129c605a1ec448ff49140f106e5c3c1e2c71b",
+    "scripts/mv-harnais-kit4.mjs": "37feacb48a66b9620e9c572c94ac87a681b8dd4f92b8b88ff87faea6c55f288f",
+    "scripts/mv-harnais-lots.mjs": "b4d9e33cee3d08732bf064fc106746c60fecfd2b38424355a6abdd3003f4fd31",
+    "scripts/mv-harnais-renom.mjs": "9b9fae2028ae802fb3b7044ebb8f3d53e12e50a4aecd637dafd2a7a1771714f0",
+    "scripts/mv-lot-marque.mjs": "8ff7e3b31230961260bc5f5ac5c19e3f11d5f3f2ff356855b333ebb20e756502",
+    "scripts/mv-lots.mjs": "6332c01894f39bf2c5ebfb494c4e9619024471b0b25f4c468b21f279350ca8b9"
+  }
+}

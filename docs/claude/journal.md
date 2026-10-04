@@ -8,6 +8,28 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **3 octobre 2026 (KIT-4)** — ★ **LOT 3c DU KIT (CAVE, CUVIER) ET LES SURFACES DE TOUS LES MODULES** (§229).
+> `window._mvHaP` (parcelle, 4 décimales) et `window._mvHaT` (total, 2), toujours à la virgule, dans le Traitement, le Tracteur,
+> les Réglages et le Cuvier (17 surfaces écrites à la main, plusieurs au point). Barres de la Cave, de la vendange et du
+> Cuvier au kit ; le niveau de cuve en terre (le mesuré). ★ Zip CUMULATIF : il contient KIT-3 (§228), pas encore poussé.
+> Harnais `mv-harnais-kit4` (6, contre-épreuve 4/4). Base `1d3a59b`. **APP 8.08 → 8.09, SW 8.83 → 8.84** (visible).
+
+> ★ Consolidation : **3 octobre 2026 (KIT-3)** — ★ **LOT 3b DU KIT : LES BARRES DE LA VIGNE, DU PLANNING ET DU TRACTEUR** (§228).
+> Barres fines (6 px) et normales (10 px) en pilule, couleur d'état (fiche rapide de la carte : `cl.fill` ; sessions tracteur :
+> vert fini, doré en cours — plus l'orange du retard) ; un seul cercle (168 px). Point 4a : `_pilEchCadence` lit la journée du
+> MODÈLE du planning (`_pilJourModele`, capCum) avant la journée réglée (h_jour). Point 4b : « Dégraffage » ne se renomme pas —
+> le nom d'une tâche est la clé de tout son historique et Réglages n'a aucun renommage de tâche (seulement des périodes).
+> Harnais `mv-harnais-kit3` (7, contre-épreuve 5/5). Base `1d3a59b`. **APP 8.07 → 8.08, SW 8.82 → 8.83** (visible).
+
+> ★ Consolidation : **3 octobre 2026 (KIT-2)** — ★ **L'ACCUEIL ET LES PARCELLES SUR DEUX COLONNES ; LES CHIFFRES DROITS PARTOUT** (§227).
+> Sur les captures de Nico (PC, mode normal et Personnaliser) : `#page-home.active` en grille de deux colonnes à partir de
+> 1 024 px (les `.home-w` en sont les enfants directs ; le reste et le bloc épinglé en pleine largeur), `_homeDragMove` en
+> deux dimensions ; les cartes de parcelle (`.mv-c`, conteneur `#pList`, séparé des bandeaux) aussi sur deux colonnes. Chiffres
+> elzéviriens de la Cormorant (« I7% », « I9° ») → `body{font-variant-numeric:lining-nums}` (la sous-police garde `lnum`).
+> Tuiles « 17 % » / « 11,85 », barre de saison à l'état. Reconstruit sur `b6d2cd5` : la première livraison (base `c855567`)
+> doublait ANN-1b, poussé entre-temps avec les mêmes numéros. Harnais `mv-harnais-kit2` (11, contre-épreuve 6/6).
+> Base `b6d2cd5`. **APP 8.06 → 8.07, SW 8.81 → 8.82** (visible).
+
 > ★ Consolidation : **3 octobre 2026 (ANN-1b)** — ★ **LA GRANDE NOUVEAUTÉ QUI MONTRE LE CHEMIN DU JOURNAL** (§225g).
 > Demandé par Nico : un dernier Quoi de neuf, **majeur**, pour que tout le monde sache où lire les mises à jour. `WHATS_NEW` 8.06 :
 > un item `niv: 3, pour: ['tous']` → la grande fenêtre (la première du système ANN-1 : 8.04 et 8.05 n'avaient aucun niveau 3).

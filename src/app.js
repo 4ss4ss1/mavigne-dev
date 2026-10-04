@@ -10417,8 +10417,8 @@ function _mvMapQuickOpen(nom){
   var _e=document.getElementById('mq-nom'); if(_e)_e.textContent=p.nom;
   var _s=document.getElementById('mq-sub'); if(_s)_s.textContent=p.statut+' '+String.fromCodePoint(0x00b7)+' '+_pvSurfFr(p.surface)+' ha';
   var pe=document.getElementById('mq-pct');
-  if(pe){pe.textContent=cl.pct+'%';pe.style.color=(cl.pct===100?'var(--vert)':cl.pct>=75?'var(--or)':'var(--orange)');}
-  var bar=document.getElementById('mq-bar-fill'); if(bar){bar.style.width=cl.pct+'%';bar.style.background=cl.col;}
+  if(pe){pe.textContent=cl.pct+'\u00a0%';pe.style.color=(cl.pct===100?'var(--vert-med)':'var(--texte)');}   // KIT-3 : l'état, pas le pourcentage
+  var bar=document.getElementById('mq-bar-fill'); if(bar){bar.style.width=cl.pct+'%';bar.style.background=cl.fill;}   // KIT-3 : la couleur d'état de la carte (getPCls.fill)
   var stepLbl=(type!=='simple')?(' '+_pvStepLabel(task)+pCurStep):'';
   // ⚠️⚠️ ICI VIVAIT UN PLANTAGE. La ligne lisait `em`, identifiant DECLARE NULLE
   //   PART — ni dans cette fonction, ni en portee. Un module ESM est en mode

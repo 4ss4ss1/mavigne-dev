@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.07';
+export const APP_VERSION = '8.10';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -816,6 +816,12 @@ function _mvkRetards(cd){
   cd.taskWindows.forEach(function(w){ if(w && w.we!=null && o>=w.we) out[w.nom]=true; });
   return out;
 }
+// KIT-4 (§229) : UNE SURFACE S'ÉCRIT DE DEUX FAÇONS, DANS TOUS LES MODULES — une PARCELLE au centiare (4 décimales,
+//   la précision du cadastre), un TOTAL au centième (2), toujours avec la virgule. COH-1 l'avait fait pour la Vigne
+//   (_pvSurfFr) ; le Traitement, le Tracteur, les Réglages et le Cuvier écrivaient encore « 1.25 ha » au point.
+function _mvHaNum(x){ var v=parseFloat(String(x==null?'':x).replace(',','.')); return isFinite(v)?v:null; }
+window._mvHaP=function(x){ var v=_mvHaNum(x); return v==null?'':v.toFixed(4).replace('.',','); };
+window._mvHaT=function(x){ var v=_mvHaNum(x); return v==null?'':v.toFixed(2).replace('.',','); };
 window._mvkEtat=_mvkEtat; window._mvkDet=_mvkDet; window._mvkLigne=_mvkLigne;
 window._mvkAvancement=_mvkAvancement; window._mvkRetards=_mvkRetards;
 
@@ -846,6 +852,27 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.10', d: '2026-10-03', items: [
+    { niv: 0, pour: ['admin'], emoji: 'etiquette', titre: 'Renommer une tâche créée par votre domaine',
+      desc: "Dans <b>Réglages › Tâches</b>, la fenêtre « Modifier » (le crayon) d’une tâche créée par votre domaine propose « Renommer cette tâche ». Tout son historique suit le nouveau nom : "
+        + "l’avancement des parcelles, le journal, les périodes et leurs échéances, la priorité, les équipes du jour. Les tâches du catalogue ne se renomment pas." },
+  ] },
+  { v: '8.09', d: '2026-10-03', items: [
+    { niv: 0, pour: ['tous'], emoji: 'carte', titre: 'Les surfaces s’écrivent de la même façon dans tous les modules',
+      desc: "Le Traitement, le Tracteur, les Réglages et le Cuvier écrivaient encore certaines surfaces avec un point (« 1.25 ha »). "
+        + "Partout maintenant : une parcelle au centiare près (« 0,0870 ha »), un total au centième (« 11,85 ha »), avec la virgule." },
+    { niv: 0, pour: ['tous'], emoji: 'graphique', titre: 'La Cave et le Cuvier au même dessin',
+      desc: "Les jauges de la Cave, l’avancement de la vendange et des travaux du Cuvier prennent la barre commune de l’application. Le niveau d’une cuve garde sa couleur terre, celle des volumes mesurés." },
+  ] },
+  { v: '8.08', d: '2026-10-03', items: [
+    { niv: 0, pour: ['tous'], emoji: 'graphique', titre: 'Les barres de la Vigne, du Planning et du Tracteur au même dessin',
+      desc: "Les barres d’avancement de la fiche rapide de la carte, du Planning, des sessions tracteur et des cartes de l’Accueil ont maintenant la même épaisseur et la même forme que le reste de l’application. "
+        + "Leur couleur dit l’état : verte quand c’est fini, dorée en cours — une session tracteur en cours n’est plus orange, couleur réservée au retard. "
+        + "Les cercles du Pilotage ont tous la même taille." },
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Les échéances comptent la journée de votre planning',
+      desc: "Quand le planning ne mesure aucune présence récente, les <b>échéances par tâche</b> estimaient une journée de 7 h. Elles lisent maintenant la journée prévue par votre modèle de planning — plus courte l’hiver dans un domaine annualisé. "
+        + "La « journée de référence » des hypothèses ne sert plus qu’en dernier recours." },
+  ] },
   { v: '8.07', d: '2026-10-03', items: [
     { niv: 0, pour: ['tous'], emoji: 'carte', titre: 'Sur ordinateur, l’Accueil et les Parcelles passent sur deux colonnes',
       desc: "À partir de 1 024 px de large, les blocs de l’Accueil se rangent deux par deux, dans l’ordre que vous leur avez donné. "

@@ -247,6 +247,7 @@ export const GROUPES = {
 
 export const HARNAIS = [
   ['node scripts/mv-base.mjs'],
+  ['node scripts/mv-lots.mjs'],   // LOTS-1 (§231) : la garde des lots frères, juste après celle de la base
   ['node scripts/mv-harnais-portes.mjs'],
   ['node scripts/mv-harnais-portes.mjs --contre'],   // LISTE-1 (§190) : le câblage de la liste unique, et sa contre-épreuve
   ['node scripts/lint-cliquet.mjs', 'eslint-cliquet-anti'],
@@ -274,7 +275,15 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-kit1.mjs'],
   ['node scripts/mv-harnais-kit1.mjs --contre'],
   ['node scripts/mv-harnais-kit2.mjs'],
-  ['node scripts/mv-harnais-kit2.mjs --contre'],   // RENF-2 (§224) : le renfort en calendrier, sans heures sup   // COH-1 (§222) : un même chiffre, un même nom, une même surface partout
+  ['node scripts/mv-harnais-kit2.mjs --contre'],
+  ['node scripts/mv-harnais-kit3.mjs'],
+  ['node scripts/mv-harnais-kit3.mjs --contre'],
+  ['node scripts/mv-harnais-kit4.mjs'],
+  ['node scripts/mv-harnais-kit4.mjs --contre'],
+  ['node scripts/mv-harnais-renom.mjs'],
+  ['node scripts/mv-harnais-renom.mjs --contre'],
+  ['node scripts/mv-harnais-lots.mjs'],
+  ['node scripts/mv-harnais-lots.mjs --contre'],   // RENF-2 (§224) : le renfort en calendrier, sans heures sup   // COH-1 (§222) : un même chiffre, un même nom, une même surface partout
   ['node scripts/mv-harnais-equipes-jour.mjs'],
   ['node scripts/mv-harnais-kml-fusion.mjs'],
   ['node scripts/mv-harnais-effectif-periode.mjs'],

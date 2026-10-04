@@ -361,7 +361,7 @@ window._conducteursDispo=_conducteursDispo;
 // --- Traitement phytosanitaire : sélection parcelles (maj ciblée, préserve le scroll) ---
 function _tratParcAll(){return PARCELLES.filter(function(p){return p.statut!=='Arrachee';});}
 function _tratSurfSel(){return _trat.parcelles.reduce(function(s,nom){var p=PARCELLES.find(function(x){return x.nom===nom;});return s+(p?parseFloat(p.surface)||0:0);},0);}
-function _tratParcCountTxt(){return _trat.parcelles.length+' / '+_tratParcAll().length+' &#x2014; '+_tratSurfSel().toFixed(2)+' ha';}
+function _tratParcCountTxt(){return _trat.parcelles.length+' / '+_tratParcAll().length+' &#x2014; '+window._mvHaT(_tratSurfSel())+' ha';}
 function _tratParcRowsHtml(){var allParc=_tratParcAll();return allParc.map(function(p){
         var sel=_trat.parcelles.includes(p.nom);
         var abBadge=p.ab?'<span style="font-size:9px;background:rgba(64,192,128,0.15);color:#40C080;border-radius:5px;padding:1px 5px;font-weight:700;margin-left:5px">AB</span>':'';
@@ -369,7 +369,7 @@ function _tratParcRowsHtml(){var allParc=_tratParcAll();return allParc.map(funct
         return '<div onclick="window._tratToggleParc(\''+pnEsc+'\')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;margin-bottom:8px;cursor:pointer;background:'+(sel?'rgba(61,122,39,0.1)':'var(--bg-card)')+';border:1.5px solid '+(sel?'var(--vert)':'var(--gris)')+';min-height:52px">'
           +'<div style="width:22px;height:22px;border-radius:6px;background:'+(sel?'var(--vert)':'transparent')+';border:2px solid '+(sel?'var(--vert)':'var(--gris)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(sel?'<span style="color:#fff;font-size:13px;font-weight:700">&#x2713;</span>':'')+'</div>'
           +'<div style="flex:1"><div style="font-size:15px;font-family:\'Cormorant Garamond\',serif;font-weight:600;color:'+(sel?'var(--texte)':'var(--texte-doux)')+'">'+_escHtml(p.nom)+abBadge+'</div>'
-          +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+p.surface+' ha</div></div>'
+          +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+window._mvHaP(p.surface)+' ha</div></div>'
           +'<div style="font-size:13px;font-weight:700;color:'+(getPCls(p).pct===100?'var(--vert)':getPCls(p).pct>=75?'var(--or)':'var(--orange)')+'">'+getPCls(p).pct+'%</div>'
           +'</div>';
       }).join('');}
@@ -381,7 +381,7 @@ function _tratRenderParcList(){
   if(btn){var canNext2=_trat.parcelles.length>0;var surfSel=_tratSurfSel();
     if(canNext2){btn.removeAttribute('disabled');}else{btn.setAttribute('disabled','');}
     btn.style.background=canNext2?'var(--acier)':'var(--gris)';btn.style.color=canNext2?'#fff':'var(--texte-doux)';
-    btn.innerHTML='<span>'+(canNext2?'Continuer ('+_trat.parcelles.length+' parc. &#x00B7; '+surfSel.toFixed(2)+' ha)\u00a0\u2192':'S&#xe9;lectionner au moins 1 parcelle')+'</span>';}
+    btn.innerHTML='<span>'+(canNext2?'Continuer ('+_trat.parcelles.length+' parc. &#x00B7; '+window._mvHaT(surfSel)+' ha)\u00a0\u2192':'S&#xe9;lectionner au moins 1 parcelle')+'</span>';}
 }
 window._tratRenderParcList=_tratRenderParcList;
 function _tratCuBudgetHtml(){
@@ -536,7 +536,7 @@ function _tratRender(){
   } else {
     var rcells=[
       {l:'Conducteur',v:_trat.conducteur||'—'},
-      {l:'Surface traitée',v:surfSel.toFixed(2)+' ha'},
+      {l:'Surface traitée',v:window._mvHaT(surfSel)+' ha'},
       {l:'Mode',v:_trat.modeAb?'Agriculture Biologique (AB)':'Conventionnel'},
       {l:'DRAE max',v:maxDrae>0?maxDrae+'h':'Aucun'}
     ];
@@ -575,7 +575,7 @@ function _tratRender(){
           +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
           +'<div style="flex:1"><div style="font-size:13px;font-weight:700">'+_escHtml(p.nom)+abBadge+draeBadge+'</div>'
           +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">AMM '+(c.amm?_escHtml(c.amm):'—')+' &#x00B7; Dose : '+_escHtml(p.dose||c.dose||'—')+(p.dose_val!=null?' &#x00B7; <span style="color:#A56B3A;font-weight:600">'+p.dose_val+' '+_escHtml(p.dose_unit||'')+'</span>':'')+'</div>'
-          +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_trat.parcelles.length+' parc. &#x00B7; '+surfSel.toFixed(2)+' ha &#x00B7; '+_escHtml(_trat.conducteur||'—')+'</div>'
+          +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_trat.parcelles.length+' parc. &#x00B7; '+window._mvHaT(surfSel)+' ha &#x00B7; '+_escHtml(_trat.conducteur||'—')+'</div>'
           +stRow+hRow+'</div>'
           +'<div style="font-size:12px;font-weight:700;color:'+(c.dar>0?'var(--or)':'var(--vert)')+'">DAR '+(c.dar>0?c.dar+'j':'libre')+'</div>'
           +'</div></div>';
@@ -593,7 +593,7 @@ function _tratRender(){
       +(_trat.produits.length>0?'Continuer ('+_trat.produits.length+' produit'+(_trat.produits.length>1?'s':'')+')\u00a0\u2192':'Ajouter au moins 1 produit')+'</span></button>';
   } else if(step===2){
     mainBtn='<button id="trat-next-btn" onclick="window._tratNext()" '+(canNext2?'':'disabled')+' style="flex:2;padding:14px;border-radius:12px;border:none;background:'+(canNext2?'var(--acier)':'var(--gris)')+';color:'+(canNext2?'#fff':'var(--texte-doux)')+';font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;min-height:44px"><span>'
-      +(canNext2?'Continuer ('+_trat.parcelles.length+' parc. &#x00B7; '+surfSel.toFixed(2)+' ha)\u00a0\u2192':'S&#xe9;lectionner au moins 1 parcelle')+'</span></button>';
+      +(canNext2?'Continuer ('+_trat.parcelles.length+' parc. &#x00B7; '+window._mvHaT(surfSel)+' ha)\u00a0\u2192':'S&#xe9;lectionner au moins 1 parcelle')+'</span></button>';
   } else {
     mainBtn='<button onclick="window._tratSave()" style="flex:2;padding:14px;border-radius:12px;border:none;background:#2C6E29;color:#fff;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;min-height:44px"><span>&#x2713; Enregistrer</span></button>';
   }

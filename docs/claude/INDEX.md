@@ -270,3 +270,7 @@
 | 225 | 225. ★★ ANN-1 — LES NOUVEAUTÉS EN QUATRE NIVEAUX (03/10 — `src/utils.js` (APP, WHATS_NEW 8.03, bloc ANN-1, … | `docs/claude/chantiers-180-229.md` |
 | 226 | 226. ★★ KIT-1 — LE KIT GRAPHIQUE COMMUN, LOT 3a : ACCUEIL ET PILOTAGE (03/10 — `src/utils.js` · `src/app.js… | `docs/claude/chantiers-180-229.md` |
 | 227 | 227. ★ KIT-2 — L'ACCUEIL ET LES PARCELLES SUR DEUX COLONNES ; LES CHIFFRES DROITS PARTOUT (03/10 — `src/app… | `docs/claude/chantiers-180-229.md` |
+| 228 | 228. ★ KIT-3 — LOT 3b DU KIT : LES BARRES DE LA VIGNE, DU PLANNING ET DU TRACTEUR (03/10 — `src/app.js` · `… | `docs/claude/chantiers-180-229.md` |
+| 229 | 229. ★ KIT-4 — LOT 3c DU KIT (CAVE, CUVIER) ET LES SURFACES DE TOUS LES MODULES (03/10 — `src/utils.js` · `… | `docs/claude/chantiers-180-229.md` |
+| 230 | 230. ★★ RENOM-1 — RENOMMER UNE TÂCHE DU DOMAINE (03/10 — `src/reglages.js` · `index.html` (`#ovRenTache`) ·… | `docs/claude/chantiers-230-279.md` |
+| 231 | 231. ★★ LOTS-1 — LA GARDE DES LOTS FRÈRES (03/10 — `scripts/mv-lots.mjs` (neuf) · `scripts/mv-lot-marque.mj… | `docs/claude/chantiers-230-279.md` |

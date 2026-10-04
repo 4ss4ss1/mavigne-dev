@@ -1567,7 +1567,7 @@ function renderTracteur(){
     const hint=isEnc&&isTractoriste()?`<div class="scard-enc-hint">Tap pour enregistrer l'avancement →</div>`:'';
     return `<div class="scard${encCls}" ${clk}>`
       +`<div class="sc-hd"><div class="sc-info"><div class="mv-t" style="color:inherit">${_escHtml(s.activite)}</div><div class="sc-meta"><span class="sc-date">${_sessDates(s)}</span><span class="sc-cond">${_escHtml(s.conducteur)}</span>${tracBadge}${tracRepBadge}</div></div><div class="sc-right">${editBtn}${_mvBadge(s.statut, isEnc?'ambre':'vert')}<div class="mv-n" style="color:inherit;margin-top:4px">${pct}<span style="font-size:13px">%</span></div></div></div>`
-      +`<div class="sc-bwrap"><div class="sc-blbl"><span>Avancement domaine</span><span>${doneSurf.toFixed(2)}/${totalSurf.toFixed(2)} ha</span></div><div class="sc-btrack"><div class="sc-bfill ${isEnc?'sc-bfill-enc':''}" style="width:${pct}%"></div></div></div>`
+      +`<div class="sc-bwrap"><div class="sc-blbl"><span>Avancement domaine</span><span>${_escHtml(window._mvHaT(doneSurf))}/${_escHtml(window._mvHaT(totalSurf))} ha</span></div><div class="sc-btrack"><div class="sc-bfill ${isEnc?'sc-bfill-enc':''}" style="width:${pct}%"></div></div></div>`
       +(s.note?`<div style="padding:0 16px 12px;font-size:var(--pt-micro,11px);color:${isEnc?'rgba(255,255,255,0.45)':'var(--texte-doux)'}">« ${_escHtml(s.note)} »</div>`:'')
       +overrideAlert+hint
     +`</div>`;
@@ -2105,7 +2105,7 @@ function _renderChronoBar(){
       +'<div><div class="chr-run-st"><span class="chr-dot"></span>'
       +(al?'Chrono encore ouvert\u00a0?':'Mesure en cours')+'</div>'
       +'<div class="chr-run-p">'+_escHtml(_chrono.bloc.join(' + '))+'</div>'
-      +'<div class="chr-run-x">'+sf.toFixed(2)+' ha'
+      +'<div class="chr-run-x">'+window._mvHaT(sf)+' ha'
       +(_chrono.bloc.length>1?' \u00b7 bloc de '+_chrono.bloc.length:'')+(avant>0?' \u00b7 d\u00e9j\u00e0 '+_chrFmtDur(avant)+' avant':'')+'</div></div>'
       +'<button class="chr-mini" onclick="_chrInterrompre()">'+_mvIcon('pause',18)+'</button></div>'
       +'<div class="chr-run-t" id="chr-time">'+_chrFmtTimer(ms)+'</div>'
@@ -2323,7 +2323,7 @@ function renderSDParcelles(){
       return '<div class="sdp-row '+(skipped?'sdp-skip':'')+'" data-skip="1" data-nom="'+p.nom.replace(/"/g,'&quot;')+'">'
         +'<div class="sdp-check '+(skipped?'skip':'')+'">'+( skipped?'⊘':'')+'</div>'
         +'<div class="sdp-nom" style="'+(skipped?'color:#8B4A40;text-decoration:line-through;':'')+'">'+_escHtml(p.nom)+'</div>'
-        +'<div class="sdp-surf">'+p.surface+' ha</div>'
+        +'<div class="sdp-surf">'+window._mvHaP(p.surface)+' ha</div>'
         +'<button class="sdp-skip-btn '+(skipped?'active':'inactive')+'" data-action="skip" data-nom="'+p.nom.replace(/"/g,'&quot;')+'">'+(skipped?'Réactiver':'Désactiver')+'</button>'
       +'</div>';
     } else {
@@ -2337,7 +2337,7 @@ function renderSDParcelles(){
       return sep+'<div class="sdp-row '+(enCours?'sdp-live':(fait?(ecart?'sdp-done sdp-bar':'sdp-done'):''))+'" data-action="coche" data-nom="'+p.nom.replace(/"/g,'&quot;')+'" style="cursor:pointer">'
         +'<div class="sdp-check '+(enCours?'live':(fait?'on':''))+'">'+(enCours?_mvIcon('chrono',16):(fait?_mvIcon('check',16):''))+'</div>'
         +'<div style="flex:1;min-width:0"><div class="sdp-nom">'+_escHtml(p.nom)+'</div>'+dataHtml+'</div>'
-        +'<div class="sdp-surf">'+p.surface+' ha'+dist+'</div>'
+        +'<div class="sdp-surf">'+window._mvHaP(p.surface)+' ha'+dist+'</div>'
         +(chronoUi?_chrTag(s,p,fait,entryFaite):'')
       +'</div>';
     }
@@ -2543,7 +2543,7 @@ function renderSessionProgress(o){
   const reste=actives.filter(p=>!doneNoms.includes(p.nom)).length;
   const pct=reste===0?100:(totalSurf>0?Math.min(99,Math.floor(doneSurf/totalSurf*100)):0);
   const skipTxt=skipCount>0?` · ${skipCount} désactivée${skipCount>1?'s':''}` : '';
-  document.getElementById('sd-progress').textContent=`${doneSurf.toFixed(2)}/${totalSurf.toFixed(2)} ha · ${pct}%${skipTxt}`;
+  document.getElementById('sd-progress').textContent=`${window._mvHaT(doneSurf)}/${window._mvHaT(totalSurf)} ha · ${pct}%${skipTxt}`;
   document.getElementById('sd-bar').style.width=pct+'%';
   // SESS-1 : REGARDER une session ne la modifie plus. Avant, l'ouvrir recalculait son avancement
   // contre les parcelles d'AUJOURD'HUI, la faisait repasser « En cours » (date de fin effacée) dès

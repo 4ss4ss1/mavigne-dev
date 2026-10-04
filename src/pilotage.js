@@ -1010,6 +1010,17 @@ function _pilPanelPhyto(d){
 
 // ── Échéances par tâche (jours ouvrés de travail + fin de saison) ─────
 // Lecture seule. Réutilise calcHeures (h_reste/tâche) + _planTeamCadence (cadence réelle équipe).
+// KIT-3 (§228) : la journée d'une personne selon le MODÈLE du planning — moyenne des jours travaillés (capacité > 0)
+//   sur les 28 prochains jours de la période consultée (ou ses 28 premiers, si elle n'a pas commencé). 0 si rien.
+function _pilJourModele(){
+  try{
+    var cd=(typeof _rfCd==='function')?_rfCd():null; if(!cd||!cd.capCum||cd.spanS==null) return 0;
+    var t=new Date(), o=Math.round((Date.UTC(t.getFullYear(),t.getMonth(),t.getDate())-Date.UTC(2026,0,1))/86400000);
+    var C=cd.capCum, i0=Math.max(0,o-cd.spanS), s=0, n=0;
+    for(var k=i0;k<Math.min(C.length-1,i0+28);k++){ var h=C[k+1]-C[k]; if(h>0){ s+=h; n++; } }
+    return n?(s/n):0;
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilJourModele'); return 0; }
+}
 function _pilEchCadence(d){
   var cad=null;
   if(typeof window._planTeamCadence==='function'){
@@ -1018,7 +1029,10 @@ function _pilEchCadence(d){
   var cadH=(cad && cad.cadence>0)?cad.cadence:0, estim=false;
   // ★ Le repli pese l'effectif collectif (une equipe de 30 n'est pas une fiche) et
   //   lit la journee reglee du domaine, pas 7 ecrit en dur.
-  var hJ=_pecHJour();
+  // KIT-3 (§228) — Nico : « compter les heures prévues au planning ». Le repli lit d'abord la journée du MODÈLE
+  //   (moyenne des 28 prochains jours travaillés d'une personne, capCum de _chargeSaisonData) ; la journée réglée
+  //   (h_jour, 7 h par défaut) ne sert plus que si le planning ne dit rien.
+  var hJ=((typeof _pilJourModele==='function')?_pilJourModele():0)||_pecHJour();
   var nV=(d.membres||[]).reduce(function(a,m){
     return a + ((m&&!m.bureau)?((typeof window._mvEffDef==='function')?window._mvEffDef(m):1):0);
   },0);
@@ -7841,7 +7855,7 @@ function _pecDonutSvg(items,c1,c2){
   }
   // Seul graphe de l'ecran a garder une taille fixe : un anneau ne gagne rien a
   // s'elargir. width et height en dur, plafonnes par max-width — jamais etire.
-  return '<svg class="pec-svg" viewBox="0 0 200 200" width="200" height="200" style="max-width:210px;margin:0 auto" role="img" aria-label="R\u00e9partition du budget par poste, total '+_pilEsc(c1)+'">'
+  return '<svg class="pec-svg" viewBox="0 0 200 200" width="168" height="168" style="max-width:168px;margin:0 auto" role="img" aria-label="R\u00e9partition du budget par poste, total '+_pilEsc(c1)+'">'
     +paths
     +'<text x="100" y="97" text-anchor="middle" font-size="24" font-weight="600" font-family="Cormorant Garamond,serif" fill="var(--texte)">'+_pilEsc(c1)+'</text>'
     +'<text x="100" y="116" text-anchor="middle" font-size="11" fill="var(--texte-doux)">'+_pilEsc(c2)+'</text></svg>';
@@ -11801,7 +11815,7 @@ var _PEC_HYPO = {
                  sub:'facultatif \u2014 fermage, cave, amortissements, structure\u00a0: donne un <b>co\u00fbt complet indicatif</b>',
                  def:'aucune', unite:'\u20AC', step:'100', min:'0' },
   h_jour:      { ico:'\u23F1\uFE0F', tit:'Journ\u00e9e de r\u00e9f\u00e9rence',
-                 sub:'repli des <b>\u00e9ch\u00e9ances par t\u00e2che</b>, seulement quand le planning ne donne aucune pr\u00e9sence sur les quatre derni\u00e8res semaines',
+                 sub:'dernier repli des <b>\u00e9ch\u00e9ances par t\u00e2che</b> : sert seulement si le planning ne donne ni pr\u00e9sence mesur\u00e9e ni heures pr\u00e9vues',
                  def:'7', unite:'h / jour', step:'0.5', min:'1' }
 };
 function _pecHypoVal(key){

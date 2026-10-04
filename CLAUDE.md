@@ -3,14 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **3 octobre 2026 (KIT-2)** — ★ **L'ACCUEIL ET LES PARCELLES SUR DEUX COLONNES ; LES CHIFFRES DROITS PARTOUT** (§227).
-> Sur les captures de Nico (PC, mode normal et Personnaliser) : `#page-home.active` en grille de deux colonnes à partir de
-> 1 024 px (les `.home-w` en sont les enfants directs ; le reste et le bloc épinglé en pleine largeur), `_homeDragMove` en
-> deux dimensions ; les cartes de parcelle (`.mv-c`, conteneur `#pList`, séparé des bandeaux) aussi sur deux colonnes. Chiffres
-> elzéviriens de la Cormorant (« I7% », « I9° ») → `body{font-variant-numeric:lining-nums}` (la sous-police garde `lnum`).
-> Tuiles « 17 % » / « 11,85 », barre de saison à l'état. Reconstruit sur `b6d2cd5` : la première livraison (base `c855567`)
-> doublait ANN-1b, poussé entre-temps avec les mêmes numéros. Harnais `mv-harnais-kit2` (11, contre-épreuve 6/6).
-> Base `b6d2cd5`. **APP 8.06 → 8.07, SW 8.81 → 8.82** (visible).
+> Dernière consolidation : **3 octobre 2026 (RENOM-1 + LOTS-1)** — ★★ **RENOMMER UNE TÂCHE ; LA GARDE DES LOTS FRÈRES** (§230, §231).
+> RENOM-1 : `_renameTache` (reglages.js) migre toutes les clés d'une tâche du domaine (parcelles et chaque période, exclusions,
+> journal, périodes et échéances, TRAVAUX, passages, priorité, objectifs, équipes du jour) ; entrée dans la fenêtre « Modifier »
+> (`#ovRenTache`) ; les tâches du catalogue ne se renomment pas. LOTS-1 : chaque lot pose sa marque `lots/<LOT>.json`
+> (`scripts/mv-lot-marque.mjs`) ; `scripts/mv-lots.mjs`, juste après `mv-base`, refuse deux lots frères en attente de commit et
+> un fichier écrasé — **ligne 7 de la clôture de lot**. ★ Zip CUMULATIF : KIT-3 + KIT-4 (non poussés) + RENOM-1 + LOTS-1.
+> Harnais `mv-harnais-renom` (8, 5/5) et `mv-harnais-lots` (6, 4/4). Base `1d3a59b`. **APP 8.09 → 8.10, SW 8.84 → 8.85** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -315,7 +314,7 @@ vaut un lot plus petit dont l'aide est juste qu'un gros lot dont l'aide ment.
 > ### ⚠️⚠️⚠️ LA CLÔTURE DE LOT — À FAIRE AVANT D'ÉCRIRE « LIVRÉ », SANS EXCEPTION
 >
 > **Demandé explicitement par Nico le 24/08**, après trois lots d'affilée livrés sans guide ni
-> journal. Un lot n'est pas « fini » quand le code marche : il est fini quand **six** choses sont
+> journal. Un lot n'est pas « fini » quand le code marche : il est fini quand **sept** choses sont
 > faites. À dérouler dans l'ordre, et à **dire dans la réponse**, ligne par ligne — « fait » ou
 > « relu, rien à changer ». Un silence sur une ligne vaut oubli.
 >
@@ -327,6 +326,7 @@ vaut un lot plus petit dont l'aide est juste qu'un gros lot dont l'aide ment.
 > | 4 | **`MV_INFO`** du chiffre touché | `src/utils.js` | seulement si une méthode de calcul change |
 > | 5 | **`WHATS_NEW`** | `src/utils.js` | un bloc en tête (`d`), du point de vue de l'utilisateur, chaque item avec `niv` et `pour` |
 > | 6 | **`CLAUDE.md`** | ici | la section du lot, et **ce qui reste ouvert** |
+> | 7 | **La marque du lot** | `lots/<LOT>.json` | `node scripts/mv-lot-marque.mjs <LOT> --section §NNN [--inclut A,B]`, en DERNIER, juste avant le zip, qui la contient. `scripts/mv-lots.mjs` (en tête de `npm run check`) refuse deux lots frères collés sans commit entre eux, et un lot dont un fichier a été écrasé (§231) |
 >
 > ★★ **PUBLIER UNE PAGE DU SITE : `npm run site` AVANT `npm run build`** (29/09). Dès qu'un lot touche
 > `guide/*.html` **ou** une page de `public/` (`logiciel-vigne`, `essai`, `demarrage`, mentions…),
@@ -1841,27 +1841,23 @@ différents entre eux, et des heures sup apparaissent dans Décider › le renfo
    `w.cap` le modèle standard jour par jour (`_cap1`) ; le seul ajout fixe est le ×8/7 de `_rfSim` (`hMax/hJour`).
    ⚠️ Le modèle INTÉGRÉ dit 32 h en janvier-février (Nico : 28-29 h l'hiver, 39 h l'été) : vérifier chez lui que le modèle
    2027 est enregistré (sinon bandeau « Le modèle … a été replacé » dans le Planning).
-3. ◐ **Lot 3 — kit graphique + mise en page PC. 3a fait au §226 (KIT-1), l'Accueil et les Parcelles sur deux colonnes
-   au §227 (KIT-2)** ; restent 3b (Vigne hors Accueil, Planning, Tracteur) et 3c (Cave, Cuvier, La Réserve). Pour mémoire : Recommandation retenue : PAS d'option petit/grand par utilisateur ; un kit
+3. ✅ **Lot 3 — kit graphique + mise en page PC** : 3a au §226 (KIT-1), deux colonnes au §227 (KIT-2), 3b au §228 (KIT-3),
+   3c et les surfaces de tous les modules au §229 (KIT-4). Reste le tour à l'œil chez Nico, écran par écran. Pour mémoire : Recommandation retenue : PAS d'option petit/grand par utilisateur ; un kit
    (une barre en deux épaisseurs, un cadre en trois hauteurs, un seul style de grand chiffre, mêmes couleurs d'état) et un
    bouton « Agrandir » sur chaque graphique (il existe déjà sur la carte de Décider). Constat : une vingtaine de familles de
    barres dans `styles.css`, donuts et jauges chacun à sa taille, l'avancement par tâche dessiné deux fois (Accueil
    `htache-*`, Pilotage `pil-b*`). Mise en page : `.page{max-width:none}` au-delà de 1200 px (Accueil et Parcelles à
    1 900 px de large), `.pil-wrap` à 1 280. Maquette d'une page témoin d'abord.
 4. **La passe d'audit écran par écran** (téléphone et PC) promise à Nico : avec le lot 3.
-5. **« Dégraffage »** — tâche créée par le domaine (un seul f en français) : vérifier qu'un renommage dans Réglages ne casse
-   pas l'historique (le journal porte la clé `tache`) avant de le lui conseiller.
-6. **La journée de référence (7 h)** reste le repli de `_pilEchCadence` quand le planning ne mesure rien sur 28 jours : la
-   faire lire le modèle du planning (« compter les heures prévues au planning ») — avec le lot 2.
-7. **Surfaces hors Vigne** : `_pvSurfFr` ne couvre que `app.js` (liste, fiche, feuilles d'arrachage, bulles de carte). Les
-   autres modules écrivent encore la surface à leur façon — passe du lot 3.
+5. ✅ ~~« Dégraffage »~~ — « Go » de Nico (03/10) : `_renameTache` au §230. Reste à Nico de renommer la sienne (Réglages ›
+   Tâches › crayon › « Renommer cette tâche »).
+6. ✅ ~~La journée de référence (7 h)~~ — `_pilEchCadence` lit d'abord la journée du modèle du planning (§228).
+7. ✅ ~~Surfaces hors Vigne~~ — `window._mvHaP` / `_mvHaT` dans tous les modules (§229). La Cave garde `_vendHaTxt` (vendange).
 10. **RENF-2, à regarder chez Nico** (§224) : la carte sur ses vraies données — le calendrier de l'hiver, le plafond proposé
     (la semaine la plus longue de SON modèle), le coût de l'inaction qui monte (plus d'heure sup cachée). Le CDD est à
     35 h fixes, en dur (`c.hCdd`) : un réglage si un domaine en a besoin.
-8. **★ Une garde contre les lots frères** (§223) : deux lots bâtis sur la même base passent tous deux `mv-base`, et le
-   second collé écrase le premier. Piste : un fichier `.mv-lots` (liste des lots intégrés, en ajout seul) porté par chaque
-   zip ; `mv-base` refuse un zip dont la liste n'inclut pas celle du HEAD. **Décision de Nico.** En attendant : un seul fil
-   livre des fichiers complets à la fois, ou un push entre deux lots.
+8. ✅ ~~Une garde contre les lots frères~~ — « Go » de Nico (03/10) : marques `lots/<LOT>.json` + `scripts/mv-lots.mjs` (§231).
+   Limite : un fil qui ne pose pas de marque échappe à la règle de fratrie — CLAUDE.md la porte à tous les fils.
 9. ✅ **Lot 2 — maquette v2 validée par Nico (03/10), intégrée au §224** : en plus du calendrier, « Et sans renfort ? » — l'équipe seule avec
    des heures sup plafonnées (39 / 43 / 48 h ; défaut proposé : la semaine la plus longue du modèle du planning), leur coût
    aux taux du relevé (25 % jusqu'à la 43e heure, 50 % au-delà) et le retard qui reste ; plus « sans renfort ni heures sup ».

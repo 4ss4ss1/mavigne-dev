@@ -1,4 +1,11 @@
-// MA VIGNE — Service Worker v8.82
+// MA VIGNE — Service Worker v8.85
+// v8.85 (03/10/2026) — RENOM-1 (§230) : renommer une tache du domaine, toutes ses cles migrees (_renameTache) ;
+//   LOTS-1 (§231) : la garde des lots freres (scripts/mv-lots.mjs, marques lots/*.json). APP 8.09 -> 8.10.
+// v8.84 (03/10/2026) — KIT-4 (§229) : lot 3c du kit (Cave, Cuvier) et surfaces de tous les modules (_mvHaP / _mvHaT,
+//   virgule, 4 ou 2 decimales). APP 8.08 -> 8.09.
+// v8.83 (03/10/2026) — KIT-3 (§228) : lot 3b du kit — barres de la Vigne (fiche rapide, cartes), du Planning et du
+//   Tracteur aux deux epaisseurs et a la couleur d'etat ; cercles a 168 ; echeances : journee du modele du planning
+//   (_pilJourModele) avant la journee reglee. APP 8.07 -> 8.08.
 // v8.82 (03/10/2026) — KIT-2 (§227) : l'Accueil et les Parcelles sur deux colonnes a partir de 1024 px (glisser-deposer en x/y),
 //   chiffres alignes partout (lnum de la Cormorant), tuiles « 17 % » / « 11,85 », barre de saison a l'etat. APP 8.06 -> 8.07.
 // v8.81 (03/10/2026) — ANN-1b (§225g) : la grande nouveaute qui montre le chemin — WHATS_NEW 8.06 niveau 3 pour tous :
@@ -4280,7 +4287,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.82';
+const CACHE_NAME   = 'mavigne-v8.85';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4296,7 +4303,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.82 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.85 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4316,7 +4323,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.82 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.85 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

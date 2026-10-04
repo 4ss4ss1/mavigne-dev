@@ -1728,6 +1728,74 @@ function deleteTache(nom){
   window.openOvDanger('deleteTache');
 }
 
+// ══ RENOM-1 (§230) — RENOMMER UNE TÂCHE DU DOMAINE ══════════════════════════════════════════════════════
+// Nico (03/10) : « Dégraffage » s'écrit avec un seul f. Le nom d'une tâche est la CLÉ de tout son historique :
+//   p.taches[nom], p.tachesAll[période][nom], p.tachesExclues, JOURNAL[].tache, SAISONS[].taches et .echeances[nom],
+//   TRAVAUX[nom], SAISON_PASSAGES (CONFIG.saison_passages), CONFIG.tachesPrio.items[].t, CONFIG.objectifs_fin[nom],
+//   les équipes du jour. Supprimer puis recréer la tâche orphelinait tout. Sur le modèle de _renamePeriode : une
+//   seule fonction, un seul passage, toutes les clés. Seules les tâches CRÉÉES PAR LE DOMAINE se renomment — celles
+//   du catalogue portent des règles de l'application par leur nom (Arrachage, Relevage, Ebourgeonnage…).
+function _renTacheCustom(nom){ return !(window.TACHES_CATALOGUE||[]).some(function(c){ return c&&c.nom===nom; }); }
+function _renTacheErreur(oldN,newN){
+  var n=String(newN==null?'':newN).trim();
+  if(!(window.TACHES||[]).some(function(t){ return t&&t.nom===oldN; })) return 'Cette t\u00e2che n\u2019existe plus.';
+  if(!_renTacheCustom(oldN)) return 'Une t\u00e2che du catalogue ne se renomme pas : son nom porte des r\u00e8gles de l\u2019application.';
+  if(!n) return 'Le nouveau nom est vide.';
+  if(n.length>40) return 'Quarante caract\u00e8res au plus.';
+  if(/[.\/\[\]*`~#$\\"'<>]/.test(n)) return 'Ces signes ne sont pas permis dans un nom de t\u00e2che : . / [ ] * ` ~ # $ \\ " \' < >';
+  if(n===oldN) return 'C\u2019est d\u00e9j\u00e0 son nom.';
+  var low=n.toLowerCase();
+  if((window.TACHES||[]).some(function(t){ return t&&t.nom!==oldN&&String(t.nom).toLowerCase()===low; })) return 'Une autre t\u00e2che porte d\u00e9j\u00e0 ce nom.';
+  if((window.TACHES_CATALOGUE||[]).some(function(c){ return c&&(String(c.nom).toLowerCase()===low||String(c.label||'').toLowerCase()===low); }))
+    return 'Ce nom est celui d\u2019une t\u00e2che du catalogue.';
+  return '';
+}
+function _renameTache(oldN,newN){
+  if(!oldN||!newN||oldN===newN) return false;
+  var own=Object.prototype.hasOwnProperty;
+  var mv=function(o){ if(o&&typeof o==='object'&&!Array.isArray(o)&&own.call(o,oldN)){ if(!own.call(o,newN)) o[newN]=o[oldN]; delete o[oldN]; } };
+  var rl=function(a){ if(Array.isArray(a)) for(var i=0;i<a.length;i++){ if(a[i]===oldN) a[i]=newN; } };
+  (window.TACHES||[]).forEach(function(t){ if(t&&t.nom===oldN) t.nom=newN; });
+  (window.PARCELLES||[]).forEach(function(p){
+    if(!p) return;
+    mv(p.taches);
+    if(p.tachesAll&&typeof p.tachesAll==='object') Object.keys(p.tachesAll).forEach(function(k){ mv(p.tachesAll[k]); });
+    rl(p.tachesExclues);
+  });
+  (window.JOURNAL||[]).forEach(function(e){ if(e&&e.tache===oldN) e.tache=newN; });
+  (window.SAISONS||[]).forEach(function(s){ if(s){ rl(s.taches); mv(s.echeances); } });
+  mv(window.TRAVAUX); mv(window.SAISON_PASSAGES);
+  var cfg=window.CONFIG||{};
+  mv(cfg.saison_passages); mv(cfg.objectifs_fin);
+  if(cfg.tachesPrio&&Array.isArray(cfg.tachesPrio.items)) cfg.tachesPrio.items.forEach(function(it){ if(it&&it.t===oldN) it.t=newN; });
+  if(cfg.equipes_jour&&typeof cfg.equipes_jour==='object') Object.keys(cfg.equipes_jour).forEach(function(d){
+    (Array.isArray(cfg.equipes_jour[d])?cfg.equipes_jour[d]:[]).forEach(function(q){ if(q&&q.tache===oldN) q.tache=newN; if(q&&q.t===oldN) q.t=newN; });
+  });
+  return true;
+}
+function openRenTache(nom){
+  var b=document.getElementById('rtache-body'); if(!b) return;
+  var a=_escAttr(nom);
+  b.innerHTML='<div class="fl">Nouveau nom (actuel : '+_escHtml(nom)+')</div>'
+    +'<input type="text" class="fi" id="rtache-nom" maxlength="40" autocomplete="off" value="'+a+'">'
+    +'<div id="rtache-err" class="mv-l" style="color:var(--rouge);min-height:16px;margin-top:6px"></div>'
+    +'<div class="mv-l" style="margin:6px 0 14px">Tout l\u2019historique suit le nouveau nom : l\u2019avancement des parcelles, le journal, les p\u00e9riodes et leurs \u00e9ch\u00e9ances, la priorit\u00e9, les \u00e9quipes du jour. Faites-le quand les appareils de l\u2019\u00e9quipe sont synchronis\u00e9s.</div>'
+    +'<button type="button" class="mbtn verte" data-nom="'+a+'" onclick="saveRenTache(this.dataset.nom)">Renommer</button>';
+  window.openOv('ovRenTache');
+}
+function saveRenTache(oldN){
+  var inp=document.getElementById('rtache-nom'), err=document.getElementById('rtache-err');
+  var n=inp?String(inp.value||'').trim():'';
+  var m=_renTacheErreur(oldN,n);
+  if(m){ if(err) err.textContent=m; return; }
+  _renameTache(oldN,n);
+  ['taches','parcelles','journal','saisons','travaux'].forEach(function(k){ window.saveData(k); });
+  window.saveData('config','T\u00e2che renomm\u00e9e : '+n);
+  window.closeOv(null,'ovRenTache');
+  renderReglages();
+}
+window.openRenTache=openRenTache; window.saveRenTache=saveRenTache;
+
 function openEditHha(nom){
   var t=window.TACHES.find(function(x){return x.nom===nom;});
   if(!t)return;
@@ -1776,7 +1844,9 @@ function openEditHha(nom){
   }
   bodyHtml+='<button class="mbtn verte" onclick="saveEditHha(\''+nomEsc+'\')" style="margin-top:4px">'+_mvIcon('check',16)+' Enregistrer</button>'
     +'<button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux);margin-top:6px" onclick="window.closeOv(null,\'ovEditHha\')">Annuler</button>';
-  if(bodyEl)bodyEl.innerHTML=bodyHtml;
+  // RENOM-1 (§230) : renommer une tâche créée par le domaine — depuis sa fenêtre « Modifier ».
+  if(_renTacheCustom(t.nom)) bodyHtml+='<div style="margin-top:14px;text-align:center"><button type="button" class="mv-gh" data-nom="'+_escAttr(t.nom)+'" onclick="closeOv(null,\'ovEditHha\');openRenTache(this.dataset.nom)">'+_mvIcon('etiquette',16)+' Renommer cette t\u00e2che</button></div>';
+    if(bodyEl)bodyEl.innerHTML=bodyHtml;
   // iOS : setter .value explicitement après innerHTML
   if(t.type==='passages'){
     var planNb2=window.SAISON_PASSAGES[t.nom]||2;
@@ -1797,10 +1867,10 @@ function openEditHha(nom){
     if(elV){
       elV.value=t.hha;
       var hintEl=document.getElementById('ehha-est');
-      if(hintEl)hintEl.textContent='~'+Math.round(t.hha*surf)+'h estimées sur '+surf.toFixed(2)+'ha';
+      if(hintEl)hintEl.textContent='~'+Math.round(t.hha*surf)+'h estimées sur '+window._mvHaT(surf)+'\u00a0ha';
       elV.oninput=function(){
         var h=document.getElementById('ehha-est');
-        if(h)h.textContent='~'+Math.round((parseFloat(elV.value)||0)*surf)+'h estimées sur '+surf.toFixed(2)+'ha';
+        if(h)h.textContent='~'+Math.round((parseFloat(elV.value)||0)*surf)+'h estimées sur '+window._mvHaT(surf)+'\u00a0ha';
       };
     }
   }
@@ -5108,7 +5178,7 @@ function exportPDFPhyto(mode){
 </style></head><body>
 
 <div class="cover">
-  <div class="cover-l"><div class="cover-pic">${_mvIconInline('eprouvette',40)}</div><div class="cover-brand">Ma Vigne · Registre réglementaire</div><div class="cover-title">Registre Phytosanitaire</div><div class="cover-sub">${esc(annee)} · ${esc(window.DOMAINE_NOM||'Domaine')} · ${haTot.toFixed(2)} ha</div></div>
+  <div class="cover-l"><div class="cover-pic">${_mvIconInline('eprouvette',40)}</div><div class="cover-brand">Ma Vigne · Registre réglementaire</div><div class="cover-title">Registre Phytosanitaire</div><div class="cover-sub">${esc(annee)} · ${esc(window.DOMAINE_NOM||'Domaine')} · ${window._mvHaT(haTot)} ha</div></div>
   <div class="cover-meta">Généré le ${today.toLocaleDateString('fr-FR')}<br>Document confidentiel</div>
 </div>
 
@@ -6169,7 +6239,7 @@ function _renderCuivre(){
       return '<div onclick="window._cuToggleRow(this)" style="border:1px solid var(--gris);border-radius:13px;padding:12px 14px;background:var(--bg-card);cursor:pointer;margin-bottom:9px">'
         +'<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">'
         +'<div><div style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-sm,17px);font-weight:600">'+esc(r.p.nom)+'</div>'
-        +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+((r.p.commune&&r.p.commune.nom)?'&#x1F4CD; '+esc(r.p.commune.nom)+' &#x00B7; ':'')+(parseFloat(r.p.surface)||0).toFixed(2)+' ha</div></div>'
+        +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+((r.p.commune&&r.p.commune.nom)?'&#x1F4CD; '+esc(r.p.commune.nom)+' &#x00B7; ':'')+window._mvHaP(r.p.surface)+' ha</div></div>'
         +'<div style="font-size:16px;font-weight:700;white-space:nowrap;color:var('+col+')">'+r.shown.toFixed(2)+'<span style="font-size:var(--pt-micro,11px);font-weight:500;color:var(--texte-doux)"> kg Cu/ha</span></div>'
         +'</div>'
         +'<div style="position:relative;height:9px;border-radius:6px;background:var(--gris-clair);margin:10px 0 4px;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;border-radius:6px;width:'+pct+'%;background:var('+col+')"></div></div>'

@@ -5549,3 +5549,38 @@ body{font-variant-numeric:lining-nums;}
   #pList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--e-3,12px);align-items:start;}
   #pList > :not(.mv-c){grid-column:1/-1;}
 }
+
+/* ══ KIT-3 (§228) — lot 3b : les barres de la Vigne, du Planning et du Tracteur au kit ════════════════════════
+   Deux épaisseurs : FINE (6 px) dans une liste ou une carte, NORMALE (10 px) seule dans une carte ; rayon de pilule ;
+   piste gris-clair (voile blanc conservé sur les fonds sombres). La couleur dit l'ÉTAT : vert fini, doré en cours. */
+.pc-bar{height:6px;border-radius:3px;}
+.mq-barwrap{height:6px;border-radius:3px;}
+.mq-bar-fill{border-radius:3px;}
+.hv2-prog-track{height:6px;border-radius:3px;background:var(--gris-clair);}
+.hv2-bar-track{height:6px;border-radius:3px;}
+.hv2-bar-fill{border-radius:3px;}
+.hmp-bar{height:10px;border-radius:5px;}
+.histo-col-bar{height:6px;border-radius:3px;}
+.pl2-mc-track{height:6px;border-radius:3px;}
+.pl2-mc-fill{border-radius:3px;}
+.sc-btrack{border-radius:3px;}
+.sc-bfill{border-radius:3px;background:var(--vert-med);}
+.sc-bfill-enc{background:var(--or)!important;}
+.trac-encours-bar-track{height:6px;border-radius:3px;}
+.trac-encours-bar-fill{border-radius:3px;}
+.pil-gauge-track{border-radius:5px;}
+.pil-dz-rdt-bar{height:10px;border-radius:5px;}
+/* Un seul cercle : 168 px (le donut de La campagne était à 184, l'anneau d'Économie à 200). */
+.pil-donut-s{width:168px;height:168px;}
+
+/* ══ KIT-4 (§229) — lot 3c : la Cave et le Cuvier au kit ════════════════════════════════════════════════════
+   Mêmes épaisseurs (fine 6 px, pilule), piste gris-clair, couleur de sens : le PRÉVU / en cours en doré, le MESURÉ
+   (un niveau de cuve, des litres) en terre. Le Cuvier injecte ses propres règles au chargement : `body` les précède. */
+.mvc-gauge-track{height:6px;border-radius:3px;background:var(--gris-clair);}
+.mvc-gauge-fill{border-radius:3px;}
+.mvc-health-track{height:6px;border-radius:3px;}
+.vend-prog-track{height:6px;border-radius:3px;background:var(--gris-clair);}
+.vend-prog-fill{height:6px;border-radius:3px;background:var(--or);}
+body .vt-prog-bar{height:6px;border-radius:3px;}
+body .vt-prog-f{border-radius:3px;background:var(--or);}
+body .mvv-rh-fill{background:var(--terre,#8A5A38);}
