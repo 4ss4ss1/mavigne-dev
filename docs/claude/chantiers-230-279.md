@@ -216,3 +216,21 @@ largeur » en toutes lettres ; sa bordure passe sur `--gris-clair` (filet retenu
 exécutée, CSS, météo par secteur, index.html, boutons du mode édition), 10 contre-épreuves qui rougissent. `mv-harnais-kit2` suivi
 (grille en rangées au lieu des colonnes).
 **Pas vérifié** : le rendu à l'œil ; le glisser-déposer à la souris dans la grille ; `npm run build`, `test:smoke`, `test:e2e`.
+
+## 238. ★ ALIGN-3 — CORRECTIF : UN BLOC MASQUÉ RESTE MASQUÉ SUR L'ACCUEIL (04/10 — `src/styles.css` · `src/app.js` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE home) · `index.html` · `public/sw.js` · `scripts/mv-harnais-align2.mjs` · `scripts/harnais-claude-md.mjs` · `lots/ALIGN-3.json` · **APP 8.15 → 8.16, SW 8.90 → 8.91**, base `657cb29`)
+
+**Le signalement** (Nico, 04/10, ALIGN-2 en ligne) : sur l'Accueil, « tu as beau les cacher, ils réapparaissent une fois que c'est
+validé » ; l'ordre des encarts semble non respecté ; « on ne voit pas l'icône de l'œil ».
+**Cause, mesurée dans le CSS** : ALIGN-2 a posé `#home-cols > .home-w{display:flex;…}` dans le bloc ordinateur. Spécificité (1,1,0) :
+elle battait `.home-w.home-w-off{display:none}` (0,2,0). Sur ordinateur, un bloc masqué restait donc affiché hors personnalisation ;
+`_homeRangees`, lui, l'excluait des rangées : les blocs « seuls » s'étiraient au mauvais endroit — d'où l'ordre qui paraissait faux.
+Au téléphone, rien (la règle n'y existe pas) : le défaut ne se voyait que sur ordinateur, là où aucun harnais ne regarde.
+**L'œil** : le bouton affichait un œil sur un bloc visible et le panneau « interdit » sur un bloc masqué ; avec tous les blocs
+masqués revenus, Nico ne voyait plus d'œil. Il reste désormais un œil, barré (`.home-w-eye.off::after`) quand le bloc est masqué ;
+`title` et `aria-label` disent l'action (« Masquer ce bloc » / « Afficher ce bloc ») ; les boutons d'édition passent au-dessus
+du contenu (`z-index:5`).
+**Fait** : `#home-cols > .home-w.home-w-off{display:none}` et, en édition, `display:flex;opacity:0.45` — au niveau d'ID.
+★ **LEÇON** : une règle de mise en page posée sur un ID (`#home-cols > …{display:…}`) écrase les états cachés de ses enfants posés
+en classes ; il faut les redire au même niveau. Aucun harnais ne le voyait : `mv-harnais-align2` le garde maintenant (2 assertions,
+2 contre-épreuves de plus).
+**Pas vérifié** : le rendu à l'œil sur ordinateur ; `npm run build`, `test:smoke`, `test:e2e`.

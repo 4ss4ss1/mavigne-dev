@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **4 octobre 2026 (ALIGN-2, avec ALIGN-1 non poussé)** — ★★ **L'ACCUEIL EN RANGÉES** (§237).
+> Suite de la maquette validée « c'est parfait » (§236). KIT-2 (grille) laissait des trous, KIT-5 (colonnes) n'alignait plus rien :
+> `#home-cols` redevient une grille, en RANGÉES PLEINES — même hauteur par rangée, carte qui remplit le bloc, pied collé en bas ;
+> `_homeRangees` étire un bloc resté seul (voisin masqué, vide ou pleine largeur) ; `lay.large` + bouton « Pleine largeur » (ordinateur,
+> mode édition) ; « meteosect » né de « meteo5 » (migration : sa place et son état masqué), secteurs en UNE carte ; ordre par défaut
+> de la maquette. Harnais `mv-harnais-align2` (neuf), `mv-harnais-kit2` suivi. Zip CUMULATIF ALIGN-1 + ALIGN-2, marques `lots/ALIGN-1.json`
+> et `lots/ALIGN-2.json`. Base `3b9c695`. **APP 8.13 → 8.15, SW 8.88 → 8.90** (visible).
+
 > ★ Consolidation : **4 octobre 2026 (ALIGN-1)** — ★★ **LA DÉCISION DU JOUR : QUATRE TUILES BÂTIES PAREIL** (§236).
 > Nico (04/10, capture) : quatre cartes de même hauteur au Pilotage, contenu collé en haut, deux grands vides. Recherche (rangées de
 > même hauteur, le contenu s'adapte à la carte) puis maquette (canevas Design, Accueil + Pilotage + téléphone) validée « c'est

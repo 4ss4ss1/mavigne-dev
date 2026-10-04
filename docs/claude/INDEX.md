@@ -281,3 +281,4 @@
 | 235 | 235. ★★ PRIO-1 — LA TÂCHE DU MOMENT : UNE SEULE RÈGLE, D'APRÈS LES DATES DE TRAVAUX (04/10 — `src/app.js` ·… | `docs/claude/chantiers-230-279.md` |
 | 236 | 236. ★★ ALIGN-1 — LA DÉCISION DU JOUR : QUATRE TUILES BÂTIES PAREIL (04/10 — `src/pilotage.js` · `src/style… | `docs/claude/chantiers-230-279.md` |
 | 237 | 237. ★★ ALIGN-2 — L'ACCUEIL EN RANGÉES (04/10 — `src/app.js` · `src/styles.css` · `src/utils.js` (APP, WHAT… | `docs/claude/chantiers-230-279.md` |
+| 238 | 238. ★ ALIGN-3 — CORRECTIF : UN BLOC MASQUÉ RESTE MASQUÉ SUR L'ACCUEIL (04/10 — `src/styles.css` · `src/app… | `docs/claude/chantiers-230-279.md` |

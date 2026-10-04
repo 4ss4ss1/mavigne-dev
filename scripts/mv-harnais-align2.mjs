@@ -37,6 +37,8 @@ function suite(APP, CSS, HTML) {
   T('ordinateur : une grille de deux colonnes, les blocs d’une rangée étirés', /#home-cols\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\);column-gap:var\(--e-4,16px\);align-items:stretch;\}/.test(CSS) && !/#home-cols\{column-count/.test(CSS));
   T('un bloc pleine largeur ou seul prend la rangée', /#home-cols > \.home-w-large,#home-cols > \.home-w-seul\{grid-column:1\/-1;\}/.test(CSS));
   T('les cartes remplissent le bloc, leur pied collé en bas', /#home-cols #home-stat-card > \.hv2-card-pied\{margin-top:auto;\}/.test(CSS) && /#home-cols #home-mapart \.hmp-rest\{margin-top:auto;\}/.test(CSS) && /\.cm-wx-pied\{margin-top:auto;/.test(CSS));
+  T('ALIGN-3 : un bloc masqué reste masqué sur ordinateur (la règle à ID redit l’état), estompé en mode édition', /#home-cols > \.home-w\.home-w-off\{display:none;\}/.test(CSS) && /\.home-edit #home-cols > \.home-w\.home-w-off\{display:flex;opacity:0\.45;\}/.test(CSS));
+  T('ALIGN-3 : l’œil reste un œil, barré quand le bloc est masqué, et son titre dit l’action', /window\._mvSetIcon\(eye, 'oeil', 16\);eye\.type='button';eye\.classList\.toggle\('off',hidden\);/.test(APP) && /eye\.title=hidden\?'Afficher ce bloc':'Masquer ce bloc'/.test(APP) && /\.home-w-eye\.off::after\{/.test(CSS));
   T('le bouton ↔ est cliquable en mode édition, et absent au téléphone', /:not\(\.home-w-pin\):not\(\.home-w-larg\)\{pointer-events:none;\}/.test(CSS) && /@media \(max-width:1023px\)\{\.home-edit \.home-w-larg\{display:none;\}\}/.test(CSS));
   // la météo par secteur
   const MC = fn(APP, 'function renderHomeMeteoCommunes(){');
@@ -61,6 +63,8 @@ const DEF = [
   ['un bloc seul ne prend plus la rangée', a => a, c => c.replace('#home-cols > .home-w-large,#home-cols > .home-w-seul{grid-column:1/-1;}', '')],
   ['le pied de la carte de saison flotte', a => a, c => c.replace('#home-cols #home-stat-card > .hv2-card-pied{margin-top:auto;}', '')],
   ['le bouton ↔ n’est plus cliquable', a => a, c => c.replace(':not(.home-w-larg){pointer-events:none;}', '{pointer-events:none;}')],
+  ['ALIGN-3 : un bloc masqué réapparaît sur ordinateur', a => a, c => c.replace('#home-cols > .home-w.home-w-off{display:none;}', '')],
+  ['ALIGN-3 : l’œil redevient un panneau « interdit »', a => a.replace("window._mvSetIcon(eye, 'oeil', 16);", "window._mvSetIcon(eye, hidden?'interdit':'oeil', 16);"), c => c],
   ['les secteurs redeviennent cinq cartes', a => a.replace(`'<div class="mv-c cm-wx-carte">'`, `'<div>'`), c => c],
 ];
 let rg = 0;

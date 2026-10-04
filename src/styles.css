@@ -5579,6 +5579,11 @@ body{font-variant-numeric:lining-nums;}
      entière (_homeRangees). Maquette validée le 04/10. */
   #home-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--e-4,16px);align-items:stretch;}
   #home-cols > .home-w{display:flex;flex-direction:column;min-width:0;}
+  /* ALIGN-3 (§238) : la règle ci-dessus porte un ID — elle battait `.home-w.home-w-off{display:none}` (une classe) : un bloc
+     masqué réapparaissait sur ordinateur dès la personnalisation quittée, et les rangées se décalaient (Nico, 04/10). L'état
+     masqué est donc redit ici, au même niveau d'ID ; en mode édition, le bloc masqué reste visible, estompé. */
+  #home-cols > .home-w.home-w-off{display:none;}
+  .home-edit #home-cols > .home-w.home-w-off{display:flex;opacity:0.45;}
   #home-cols > .home-w-large,#home-cols > .home-w-seul{grid-column:1/-1;}
   .home-lbl-pc{display:block;}
   #home-cols .hv2-card-solo{margin-top:0;flex:1;display:flex;}
@@ -5652,3 +5657,10 @@ body .mvv-rh-fill{background:var(--terre,#8A5A38);}
 .home-w-larg{display:none;position:absolute;right:116px;top:8px;background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:10px;padding:var(--e-1,4px) var(--e-2,8px);font-size:var(--pt-txt,12.5px);cursor:pointer;min-width:44px;min-height:34px;z-index:3;color:var(--texte);}
 .home-w-larg.act{border-color:var(--or);}
 @media (max-width:1023px){.home-edit .home-w-larg{display:none;}}
+
+/* ═══ ALIGN-3 (§238) — L'ŒIL DIT L'ÉTAT ═══
+   Le bouton de masquage montrait un œil sur un bloc visible et un panneau « interdit » sur un bloc masqué : Nico ne
+   retrouvait plus « l'œil ». Désormais toujours un œil, BARRÉ quand le bloc est masqué ; le titre dit l'action. Les
+   boutons du mode édition passent au-dessus du contenu des cartes. */
+.home-w-eye.off::after{content:'';position:absolute;left:var(--e-2,8px);right:var(--e-2,8px);top:50%;height:2px;background:var(--rouge);border-radius:1px;transform:rotate(-35deg);pointer-events:none;}
+.home-w-eye,.home-w-size,.home-w-larg{z-index:5;}

@@ -3,13 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **4 octobre 2026 (ALIGN-2, avec ALIGN-1 non poussé)** — ★★ **L'ACCUEIL EN RANGÉES** (§237).
-> Suite de la maquette validée « c'est parfait » (§236). KIT-2 (grille) laissait des trous, KIT-5 (colonnes) n'alignait plus rien :
-> `#home-cols` redevient une grille, en RANGÉES PLEINES — même hauteur par rangée, carte qui remplit le bloc, pied collé en bas ;
-> `_homeRangees` étire un bloc resté seul (voisin masqué, vide ou pleine largeur) ; `lay.large` + bouton « Pleine largeur » (ordinateur,
-> mode édition) ; « meteosect » né de « meteo5 » (migration : sa place et son état masqué), secteurs en UNE carte ; ordre par défaut
-> de la maquette. Harnais `mv-harnais-align2` (neuf), `mv-harnais-kit2` suivi. Zip CUMULATIF ALIGN-1 + ALIGN-2, marques `lots/ALIGN-1.json`
-> et `lots/ALIGN-2.json`. Base `3b9c695`. **APP 8.13 → 8.15, SW 8.88 → 8.90** (visible).
+> Dernière consolidation : **4 octobre 2026 (ALIGN-3)** — ★ **CORRECTIF : UN BLOC MASQUÉ RESTE MASQUÉ SUR L'ACCUEIL** (§238).
+> Nico (04/10, après ALIGN-2 en ligne) : les blocs masqués réapparaissaient une fois la personnalisation validée, l'ordre semblait
+> bousculé, « on ne voit pas l'œil ». Cause : `#home-cols > .home-w{display:flex}` (un ID) battait `.home-w.home-w-off{display:none}`
+> (une classe) — sur ordinateur seulement. L'état masqué est redit au niveau d'ID ; en édition, estompé. L'œil reste un œil, barré
+> quand le bloc est masqué (le panneau « interdit » ne se lisait pas comme un œil), titre et `aria-label` disent l'action.
+> ★ LEÇON : une règle de mise en page posée sur un ID doit redire les états cachés de ses enfants. Harnais `mv-harnais-align2` (+2, +2).
+> Marque `lots/ALIGN-3.json`. Base `657cb29`. **APP 8.15 → 8.16, SW 8.90 → 8.91** (visible).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1821,7 +1821,7 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ### ⚠️ ALIGN-1 — CE QUI RESTE OUVERT (§236, posé le 04/10)
 
-1. **ALIGN-2, l'Accueil en rangées** : fait (§237). À regarder à l'œil chez Nico sur ordinateur : les rangées, le bouton « Pleine
+1. **ALIGN-2, l'Accueil en rangées** : fait (§237) ; correctif ALIGN-3 (§238) — un bloc masqué réapparaissait sur ordinateur. À regarder à l'œil chez Nico sur ordinateur : les rangées, le bouton « Pleine
    largeur » en mode édition, la météo par secteur en une carte, un bloc masqué qui laisse son voisin s'étirer.
 2. **À l'œil chez Nico** : la rangée de la décision du jour (ordinateur et téléphone), la carte « Protection restante » et son
    bouton, la tuile de la tension. Aucun harnais ne lit une mise en page.

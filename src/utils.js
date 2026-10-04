@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.15';
+export const APP_VERSION = '8.16';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -852,6 +852,11 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.16', d: '2026-10-04', items: [
+    { niv: 0, pour: ['tous'], emoji: 'oeil', titre: 'Accueil : un bloc masqué reste masqué',
+      desc: "Sur ordinateur, un bloc masqué réapparaissait en quittant la personnalisation, et les rangées se décalaient. C’est corrigé. "
+        + "En mode personnalisation, l’œil est barré sur un bloc masqué : touchez-le pour le réafficher." },
+  ] },
   { v: '8.15', d: '2026-10-04', items: [
     { niv: 0, pour: ['tous'], emoji: 'feuille', titre: 'L’Accueil rangé en rangées',
       desc: "Sur ordinateur, les blocs de l’Accueil vont par deux, en rangées : les deux blocs d’une rangée ont la même hauteur, leurs bas s’alignent. "
@@ -4412,7 +4417,7 @@ var MV_AIDE = {
       ['Une ligne « À vérifier »', "peut s’afficher sous les chiffres : un changement de l’application qui vous concerne — un chiffre qui bouge, un réglage à contrôler. Touchez-la pour le détail, « Vu » pour la ranger ; elle reste dans Réglages › Moi › Journal des nouveautés."],
       ['La mise en route', "n’apparaît que chez l’administrateur d’un domaine neuf : sept étapes qui se cochent en lisant ce qui est déjà enregistré, rien à pointer à la main. Le bloc s’efface tout seul quand tout est fait."],
       ['Ma part du chantier', "montre ce que vous avez fait vous-même sur la tâche du moment : la priorité de votre équipe ; sans priorité, la seule tâche dans ses dates de travaux ; si plusieurs se chevauchent, celle où vous avez le plus travaillé ces 15 derniers jours. La ligne sous le titre dit pourquoi. « Ma trace » ouvre le détail de votre campagne. Ce sont des hectares, jamais des heures, et rien n’est comparé entre collègues."],
-      ['Appui long puis glisser', "déplace un bloc ; l’œil le masque. Chacun règle son Accueil. Sur ordinateur, les blocs vont par deux, en rangées de même hauteur ; le bouton « Pleine largeur » met un bloc sur toute la rangée, et un bloc masqué laisse son voisin prendre toute la largeur."],
+      ['Appui long puis glisser', "déplace un bloc ; l’œil le masque, l’œil barré le réaffiche. Chacun règle son Accueil. Sur ordinateur, les blocs vont par deux, en rangées de même hauteur ; le bouton « Pleine largeur » met un bloc sur toute la rangée, et un bloc masqué laisse son voisin prendre toute la largeur."],
       ['La pastille de saison', "change la vue. Revenir sur une période passée ne touche pas à la période active."],
       ['Actualiser', "force une resynchronisation quand un chiffre semble figé."],
       ['Le voyant en haut de l’écran', "dit où en est la synchro. Orange avec «\u00a0Pas de synchro\u00a0»\u00a0: le téléphone a du réseau mais ne joint plus le serveur, et ne reçoit plus ce que les autres saisissent — touchez-le, puis «\u00a0Relancer l’application\u00a0». Au retour de veille, l’application vérifie d’elle-même et relit ce qui a changé."],

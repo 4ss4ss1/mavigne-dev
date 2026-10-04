@@ -1,1 +1,1 @@
-3b9c695360880756f7bd1413882b8e209adbd028  # base : 3b9c695 — majop (PRIO-1) — lots ALIGN-1 (§236) + ALIGN-2 (§237), zip cumulatif — APP 8.13 → 8.15 / SW 8.88 → 8.90
+657cb2945865d2c5be117c312f72e78f4fc3df7c  # base : 657cb29 — encarts (ALIGN-1 + ALIGN-2) — lot ALIGN-3 (§238) : un bloc masqué reste masqué — APP 8.15 → 8.16 / SW 8.90 → 8.91

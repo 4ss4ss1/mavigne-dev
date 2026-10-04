@@ -5784,7 +5784,9 @@ function _homeRenderGrips(lay){
       +'<button onclick="homeWidgetMove(\''+id+'\',1)"'+(idx>=lay.order.length-1?' disabled':'')+'>\u25BC</button>';
     el.appendChild(grip);
     var eye=document.createElement('button');eye.className='home-w-eye';
-    window._mvSetIcon(eye, hidden?'interdit':'oeil', 16);
+    // ALIGN-3 (§238) : toujours un œil, barré quand le bloc est masqué (le panneau « interdit » ne se lisait pas comme un œil).
+    window._mvSetIcon(eye, 'oeil', 16);eye.type='button';eye.classList.toggle('off',hidden);
+    eye.title=hidden?'Afficher ce bloc':'Masquer ce bloc';eye.setAttribute('aria-label',eye.title);
     eye.setAttribute('onclick','homeWidgetToggle(\''+id+'\')');
     el.appendChild(eye);
     // ALIGN-2 (§237) : demi ou pleine largeur, sur ordinateur (le bouton ne s'y montre qu'à partir de 1 024 px).
