@@ -64,6 +64,9 @@ function listDir(rel, ext) {
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir).filter(f => f.endsWith(ext)).map(f => `${rel}/${f}`).sort();
 }
+// ★★ GT-1 (§249) — le balisage GUERETTECH a quitté index.html pour deux fragments de gt.html (src/gt/*.html). Pour les
+//   contrôles qui cherchent des ids, des appels ou des caractères dans le HTML, ils font partie du corpus comme index.html.
+function htmlGT() { return listDir('src/gt', '.html').map(f => read(f) || '').join('\n'); }
 function lineOf(content, index) {
   return content.slice(0, index).split('\n').length;
 }
@@ -122,7 +125,7 @@ function checkSyntax() {
 //  C2 — Demi-surrogates isolés (cf. §7 : tronque le fichier à l'écriture).
 // ============================================================================
 function checkSurrogates() {
-  const files = [...listDir('src', '.js'), 'index.html', 'public/sw.js', 'public/manifest.json'];
+  const files = [...listDir('src', '.js'), 'index.html', ...listDir('src/gt', '.html'), 'public/sw.js', 'public/manifest.json'];
   for (const rel of files) {
     const c = read(rel);
     if (c == null) continue;
@@ -509,7 +512,7 @@ function ratchetCount(key, file, found, label, fix) {
 // ============================================================================
 function checkDeadIds() {
   const srcs = listDir('src', '.js');
-  const html = read('index.html') || '';
+  const html = (read('index.html') || '') + '\n' + htmlGT();   // GT-1 : les ids de la console vivent dans src/gt/*.html
   const allJs = srcs.map(f => read(f) || '').join('\n');
   const corpus = allJs + '\n' + html;
   // Un id peut être créé ailleurs qu'en id="…" : passé en argument d'un helper
@@ -611,7 +614,7 @@ function checkEmptyCatch() {
 // ============================================================================
 function checkDeadFunctions() {
   const srcs = listDir('src', '.js');
-  const corpus = srcs.map(f => read(f) || '').join('\n') + '\n' + (read('index.html') || '');
+  const corpus = srcs.map(f => read(f) || '').join('\n') + '\n' + (read('index.html') || '') + '\n' + htmlGT();   // GT-1 : onclick de la console
   // Deux pièges, tous deux rencontrés en vrai :
   //
   //  1. Une fonction exportée par `window.f = f` a TOUJOURS au moins deux mentions

@@ -83,11 +83,20 @@
         ]
       },
       {
-        "source": "@(/|/index.html)",
+        "source": "@(/|/index.html|/gt.html)",
         "headers": [
           {
             "key": "Cache-Control",
             "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/gt.html",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
           }
         ]
       },

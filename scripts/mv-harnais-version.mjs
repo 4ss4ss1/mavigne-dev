@@ -129,7 +129,9 @@ async function jouer(S, silencieux) {
     t('sw.js : /version.json jamais intercepté', /if \(url\.pathname === '\/version\.json'\) return;/.test(sw));
     const vis = sansCom(S.app);
     t('Retour ≥ _MV_RETOUR_H h ET rien en cours → activation douce', /if\(absent>=_MV_RETOUR_H\*3600000 && _mvRienEnCours\(\)\) _mvActiverMaj\(false\);/.test(vis));
-    t('Build : version.json publié après inject-precache', /"build": "vite build && node scripts\/inject-precache\.mjs && node scripts\/mv-version-json\.mjs"/.test(S.pkg));
+    /* GT-1 (§249) : le build fabrique d'abord gt.html (scripts/mv-gt-page.mjs) ; l'ordre qui compte ici est inchangé —
+       version.json APRÈS inject-precache. */
+    t('Build : version.json publié après inject-precache', /"build": "node scripts\/mv-gt-page\.mjs && vite build && node scripts\/inject-precache\.mjs && node scripts\/mv-version-json\.mjs"/.test(S.pkg));
     t('Hébergement : /version.json sans cache', /"source": "\/version\.json"[\s\S]{0,120}no-store/.test(S.fbj));
     t('Règles : « appareils » écrit par tout membre, forme { value } + map bornée', /docId == 'appareils'[\s\S]{0,160}shapeOk\(\)[\s\S]{0,80}value is map[\s\S]{0,80}size\(\) <= 200/.test(S.rules));
     t('utils : MV_FORMAT exporté et exposé', /export const MV_FORMAT = \d+;/.test(S.utils) && /window\.MV_FORMAT\s*= MV_FORMAT;/.test(S.utils));

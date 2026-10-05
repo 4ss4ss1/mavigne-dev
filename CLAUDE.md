@@ -3,12 +3,12 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **5 octobre 2026 (JOURNAL-1, zip cumulatif avec TEXTE-A non poussé)** — ★★ **LE JOURNAL EN 0,12 S** (§248).
-> `.dgroup{content-visibility:auto}` : un jour hors écran n'est ni mis en page ni peint ; place réservée par jour (`52 + lignes × 96` px,
-> `auto`). La règle CONTIENT le groupe : ombres (rembourrage 8 / 12 px + marges négatives) et marges qui ne traversent plus (écarts recalculés,
-> valeurs sur l'échelle --e-* : 20 entre jours, 20 avant « Voir plus », 36 en fin) — `mv-harnais-journal1` refait les comptes. ×4 : 336 → 122 ms.
-> Au pixel : identique (écart max 3/255). Marques `lots/JOURNAL-1.json` (inclut TEXTE-A), `lots/TEXTE-A.json`. Base `3cf9be9`. **APP 8.21 → 8.23, SW 8.96 → 8.98**.
-> Précédent : TEXTE-A (§247), les petits textes relevés (« jetons ») — archivé dans journal.md.
+> Dernière consolidation : **5 octobre 2026 (GT-1)** — ★★★ **LA CONSOLE GUERETTECH QUITTE L'APPLI DES CLIENTS** (§249). Elle est à **/gt.html**.
+> `index.html` = l'appli des clients, sans `admin-gt.js` ni le balisage GT (repères `MV-GT:CONNEXION` / `MV-GT:CONSOLE`). `gt.html` = la même appli +
+> `src/gt/connexion.html` + `src/gt/console.html`, entrée `src/gt.js` (app.js PUIS admin-gt.js) ; FABRIQUÉE par `scripts/mv-gt-page.mjs` à chaque
+> `npm run build` / `dev`, jamais éditée, ignorée par git. Précache sans le fichier de la console. Cinq appuis sur le logo (client) → /gt.html.
+> Harnais `mv-harnais-gt1`. Marque `lots/GT-1.json`. Base `7aa9ce7` (TEXTE-A et JOURNAL-1 poussés). **SW 8.98 → 8.99, APP 8.23 inchangé** (rien pour les clients).
+> Précédent : JOURNAL-1 (§248), le Journal en 0,12 s — archivé dans journal.md.
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -729,7 +729,7 @@ mavigne/
 │   ├── firebase.js         (COLLECTIONS, FB_REALTIME/FB_STATIC, _MV_GUARD_FLOORS, pull/listen/save,
 │   │                        ★ createAuthAccount — qui accepte un tenant EXPLICITE depuis le 09/08)
 │   ├── onboarding.js · taille-doc.js (★ TAILLE-2 §246 : la règle de taille Firestore, PURE, partagée avec npm run taille)
-│   ├── admin-gt.js         (★★ panneau GT + FICHE CLIENT + ASSISTANT D'INSTALLATION `_agtIns`
+│   ├── admin-gt.js         (★★ gt.html SEULEMENT — entrée src/gt.js, GT-1 §249 · panneau GT + FICHE CLIENT + ASSISTANT `_agtIns`
 │   │                        + création de comptes en lot `_agtLot` — cf. §18)
 │   ├── planning.js
 │   ├── reglages.js         (+ MV_DOCS / MV_DOCS_FAM : le hub Documents)
@@ -1820,7 +1820,7 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ### ⚠️ AUDIT-PERF — CE QUI RESTE OUVERT (§241, posé le 04/10)
 
-1. **Le plan est dans `audit-perf-ux.md`** (racine). ✅ VALID-1, LOGIN-1 (§242), VOILE-1, PROFILS-1 (§243), ENTREE-1 (§244), RENDU-1 (§245), TAILLE-2 (§246), TEXTE-A (§247), JOURNAL-1 (§248). Ensuite : GT-1.
+1. **Le plan est dans `audit-perf-ux.md`** (racine). ✅ VALID-1, LOGIN-1 (§242), VOILE-1, PROFILS-1 (§243), ENTREE-1 (§244), RENDU-1 (§245), TAILLE-2 (§246), TEXTE-A (§247), JOURNAL-1 (§248), GT-1 (§249) — tout le décidé du 04/10. Restent : DONNEES-1 (il faut une vraie sauvegarde), IDS-1, le lot B de TEXTE-A (réglage « Taille du texte »).
 2. **Tranché par Nico le 04/10** : ENTREE-1 = le mot de passe se retape comme d'habitude ET ouvre l'appli sans réseau (fait, §244) ; PAQUET-1 abandonné ; TEXTE-A en maquette ; GT-1 décidé ; le premier appui qui « démarre » dans la fiche parcelle est voulu.
 3. **À fournir par Nico** : `npm run taille -- "<sauvegarde complète>.json"` avec le VRAI chemin du fichier téléchargé (le 04/10, les noms d'exemple ont été tapés tels quels) — puis une seconde sauvegarde plus tard, pour le rythme.
 

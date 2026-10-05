@@ -119,9 +119,11 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
   /* 3. La roue sur les en-têtes ; plus de maison */
   T(nb(html, /_mvReglOpen\('vigne'\)/g) === 3, 'la roue de la Vigne est sur ses trois en-t\u00eates');
   T(nb(html, /_mvReglOpen\('tracteur'\)/g) === 1, 'la roue du Tracteur est sur son en-t\u00eate');
-  const gt = html.indexOf('id="page-admin-gt"');
+  /* GT-1 (§249) : le panneau GT (et son unique goHub) a quitté index.html pour src/gt/console.html (gt.html seulement). */
+  const gtConsole = readFileSync('src/gt/console.html', 'utf8');
   const hubs = [...html.matchAll(/goHub\(\)/g)].map(m => m.index);
-  T(hubs.length === 1 && hubs[0] > gt, 'un seul goHub dans index.html, celui du panneau GT', 'goHub : ' + hubs.length);
+  T(hubs.length === 0 && nb(gtConsole, /goHub\(\)/g) === 1 && /id="page-admin-gt"/.test(gtConsole),
+    'aucun goHub dans index.html ; le seul, celui du panneau GT, est dans la console de gt.html', 'goHub index : ' + hubs.length);
   T(!/goHub/.test(rsv), 'la R\u00e9serve n\u2019a plus de bouton maison');
   T(!/pil-back/.test(pil), 'le Pilotage n\u2019a plus son \u2302');
   T(nb(html, /<div class="mod-header-title">Vigne<\/div>/g) === 3, 'le titre dit \u00ab Vigne \u00bb sur les trois pages du module');

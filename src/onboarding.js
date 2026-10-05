@@ -583,14 +583,19 @@ function mvLandingGo() {
 // Déclenché par 5 taps rapides sur le logo (dans les 2s) — invisible aux utilisateurs
 var _gtTapCount = 0, _gtTapTimer = null;
 
+// ★★ GT-1 (§249) — le panneau de connexion GUERETTECH n'existe que dans gt.html. Dans l'appli des clients, les cinq
+//   appuis sur le logo envoient vers /gt.html ; dans gt.html, le panneau s'ouvre de lui-même, une fois.
+var _gtAutoVu = false;
 function initGTLoginTap() {
   var logo = document.getElementById('login-logo-tap');
+  if (document.getElementById('gt-login-panel') && !_gtAutoVu) { _gtAutoVu = true; showGTLoginPanel(); }
   if (!logo) return;
   logo.addEventListener('click', function() {
     _gtTapCount++;
     clearTimeout(_gtTapTimer);
     if (_gtTapCount >= 5) {
       _gtTapCount = 0;
+      if (!document.getElementById('gt-login-panel')) { location.href = '/gt.html'; return; }
       showGTLoginPanel();
       return;
     }

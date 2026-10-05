@@ -4,6 +4,9 @@ node_modules/
 # Build Vite
 dist/
 
+# GT-1 (§249) : fabriqué à chaque build par scripts/mv-gt-page.mjs (jamais édité à la main)
+gt.html
+
 # Environnement local
 .env
 .env.local

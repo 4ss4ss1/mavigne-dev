@@ -8,6 +8,13 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **5 octobre 2026 (JOURNAL-1, zip cumulatif avec TEXTE-A non poussé)** — ★★ **LE JOURNAL EN 0,12 S** (§248).
+> `.dgroup{content-visibility:auto}` : un jour hors écran n'est ni mis en page ni peint ; place réservée par jour (`52 + lignes × 96` px,
+> `auto`). La règle CONTIENT le groupe : ombres (rembourrage 8 / 12 px + marges négatives) et marges qui ne traversent plus (écarts recalculés,
+> valeurs sur l'échelle --e-* : 20 entre jours, 20 avant « Voir plus », 36 en fin) — `mv-harnais-journal1` refait les comptes. ×4 : 336 → 122 ms.
+> Au pixel : identique (écart max 3/255). Marques `lots/JOURNAL-1.json` (inclut TEXTE-A), `lots/TEXTE-A.json`. Base `3cf9be9`. **APP 8.21 → 8.23, SW 8.96 → 8.98**.
+> Précédent : TEXTE-A (§247), les petits textes relevés (« jetons ») — archivé dans journal.md.
+
 > ★ Consolidation : **5 octobre 2026 (TEXTE-A)** — ★★★ **LES PETITS TEXTES RELEVÉS** (§247), choisis par Nico sur maquette.
 > Maquette publiée (3 écrans réels, avant / jetons / plancher) → « jetons » : `--pt-micro` 11 → 12, `--pt-lbl` 10,5 → 11,5, `--pt-nano` 9,5 → 11.
 > Replis `var(--pt-*, Npx)` d'avant gardés EXPRÈS (impressions non jugées), sauf `pilotage.js` (règle de mv-harnais-echelle). 416 tailles à 12 / 11,5 px

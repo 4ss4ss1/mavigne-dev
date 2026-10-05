@@ -33,7 +33,8 @@ export default defineConfig({
     emptyOutDir: true,
 
     rollupOptions: {
-      input: { main: './index.html' },
+      // ★★ GT-1 (§249) — deux pages : l'appli des clients, et gt.html (FABRIQUÉ par scripts/mv-gt-page.mjs) qui y ajoute la console.
+      input: { main: './index.html', gt: './gt.html' },
     },
 
     chunkSizeWarningLimit: 800,

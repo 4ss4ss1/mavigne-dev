@@ -825,3 +825,60 @@ page (la pagination par 200 existait déjà, avec « Voir plus »). Aucune règl
 ① `content-visibility` : Safari 18 et plus (sur un iPhone plus ancien, la règle est ignorée — rien ne casse, rien ne gagne).
 ② Les autres longues listes (registre phyto, sessions tracteur) n'en ont pas besoin aujourd'hui (19 et 12 cartes) ; même
 recette le jour où elles grossissent. ③ Suite du plan : GT-1.
+
+---
+
+## 249. ★★★ GT-1 — LA CONSOLE GUERETTECH QUITTE L'APPLI DES CLIENTS (05/10 — `index.html` · `src/app.js` · `src/onboarding.js` · `src/gt.js` (neuf) · `src/gt/connexion.html` et `src/gt/console.html` (neufs, déplacés d'index.html) · `scripts/mv-gt-page.mjs` (neuf) · `scripts/inject-precache.mjs` · `vite.config.js` · `package.json` · `.gitignore` · `firebase.json` · `public/sw.js` · `scripts/preflight.mjs` · `scripts/mv-harnais-regl-module.mjs` · `scripts/mv-harnais-version.mjs` · `scripts/mv-harnais-gt1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `audit-perf-ux.md` · `lots/GT-1.json` · **SW 8.98 → 8.99, APP 8.23 inchangé**, base `7aa9ce7`)
+
+### 249a. La décision
+
+Plan §241, lot 13, décidé par Nico le 04/10, reformulé et confirmé (« go ») le 05/10 : la console GUERETTECH (domaines,
+abonnements, erreurs — `admin-gt.js`, 385 Ko de source, ≈ 250 Ko compilés) était une page cachée de l'appli des clients :
+téléchargée et chargée sur le téléphone de chaque ouvrier, alors qu'elle ne sert qu'à GUERETTECH. Elle sort.
+
+### 249b. Ce qui change
+
+- **Deux pages, un seul `index.html` à maintenir.** `index.html` reste l'appli des clients : `app.js` n'importe plus
+  `admin-gt.js` ; le panneau de connexion GUERETTECH et la page de la console (avec le verrou de session et la fenêtre
+  « nouveau domaine ») ont quitté le fichier, remplacés par deux repères (`MV-GT:CONNEXION`, `MV-GT:CONSOLE`).
+- **`gt.html` est FABRIQUÉE** par `scripts/mv-gt-page.mjs` : `index.html` + `src/gt/connexion.html` + `src/gt/console.html`,
+  entrée `src/gt.js` (`app.js` puis `admin-gt.js`), `noindex, nofollow` (la balise robots existante est remplacée), sans
+  manifeste d'installation, titre « Ma Vigne · GUERETTECH ». Chaque repère doit apparaître une fois exactement, sinon la
+  fabrique refuse. `npm run build` et `npm run dev` la fabriquent avant Vite ; ignorée par git (jamais éditée à la main).
+- **Vite construit les deux pages** (`input: { main, gt }`) : le code commun dans un même fichier, la console dans le sien,
+  que seule `gt.html` charge.
+- **Précache** (`inject-precache`, `precacheSansGT`) : les fichiers que `gt.html` charge et qu'`index.html` ne charge pas
+  sont exclus — un téléphone de client ne les télécharge jamais ; la page GT les reçoit à la première visite (le service
+  worker met en cache les `/assets/` demandés). Les fichiers chargés à la demande par le code restent précachés.
+- **Hébergement** : `/gt.html` sans cache (comme `index.html`) et `X-Robots-Tag: noindex, nofollow`.
+- **L'entrée GUERETTECH** : dans l'appli des clients, les cinq appuis sur le logo envoient vers `/gt.html` ; dans `gt.html`,
+  le panneau de connexion s'ouvre de lui-même (une fois). `goTo('admin-gt')` dans l'appli des clients renvoie vers
+  `/gt.html` (filet). **La préparation d'un domaine (PREP-1) reste dans `gt.html`** : même page, mêmes écrans normaux
+  (l'appli entière y est) — aucun passage de session d'une page à l'autre.
+- **`agtUpdateEssaiAccess`** (appelée par le parcours de démonstration) reste dans la console : elle n'agissait que sur la liste
+  des codes chargée PAR la console — chez un client, elle ne faisait déjà rien ; l'appel, gardé par `if(window…)`, se tait.
+- **Contrôles adaptés** : le preflight lit les fragments (`htmlGT()` : C2, C11, C15) ; `mv-harnais-regl-module` cherche le seul
+  `goHub` dans la console ; `mv-harnais-version` accepte la fabrique en tête de `npm run build`.
+
+### 249c. Mesuré
+
+- **Build** : `dist/index.html` → le code commun (≈ 3 657 Ko) et sa feuille de style, **rien de la console** (`agtSwitchTab`
+  absent du fichier commun) ; `dist/gt.html` → la même chose + le fichier de la console (≈ 260 Ko). Précache : le fichier de
+  la console exclu, le reste gardé.
+- **Chromium, sur le build** : appli des clients — seulement le code commun, aucune trace de la console (`renderAdminGT`
+  indéfinie, pas de balisage GT), 0 erreur ; cinq appuis sur le logo : `/` → `/gt.html` ; `gt.html` — console présente,
+  panneau de connexion ouvert seul, `renderAdminGT` et `agtPrepOuvrir` présentes, titre et robots corrects, 0 erreur.
+- **`mv-harnais-gt1`** (neuf) : **24 assertions** — la vraie fabrique (contenu, entrée, robots, manifeste, stabilité, REFUS sans
+  repère), le vrai précache (console exclue, commun et « à la demande » gardés, rien retiré sans gt.html), le vrai geste des
+  cinq appuis (client : renvoi ; gt.html : ouverture seule, une fois), Vite, npm, git, hébergement, preflight. **12/12
+  contre-épreuves.**
+
+### 249d. Ouvert
+
+① **À tester chez Nico, sur le vrai serveur** : se connecter sur `mavigneapp.fr/gt.html` (mot de passe + code reçu), ouvrir
+la console, préparer un domaine puis « Terminer ». ② **Ouvrir la console avec un faux compte GUERETTECH, sans serveur, fige
+la page** — dans le bac à sable seulement, et DÉJÀ avant ce lot (même essai sur `7aa9ce7`) : à regarder à part si cela se
+produit aussi hors ligne chez Nico. ③ Le code de connexion GUERETTECH (`confirmGTLogin`, second facteur) reste dans le code
+commun (onboarding.js, quelques Ko) — inatteignable depuis l'appli des clients ; le sortir aussi est possible plus tard.
+④ Hors `npm run check` et déjà en échec avant ce lot : la contre-épreuve « la fiche Pilotage promet à nouveau qu'on n'y écrit
+rien » de `mv-harnais-regl-module --contre`. ⑤ Restent du plan : DONNEES-1 (une vraie sauvegarde), IDS-1, le lot B de TEXTE-A.

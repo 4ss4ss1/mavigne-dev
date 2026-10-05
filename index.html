@@ -580,34 +580,7 @@
     <div style="text-align:center;margin-top:12px;color:rgba(255,255,255,0.4);font-size:var(--pt-micro,11px)">Notez-le quelque part&nbsp;: personne ne peut le relire, pas même votre responsable.</div>
   </div>
 
-  <!-- ══ Panneau login GUERETTECH — 5 taps logo ══ -->
-  <div id="gt-login-panel" style="display:none;width:100%;margin-top:20px">
-    <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:16px;padding:20px 18px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#8B5CF6,#6D28D9);display:flex;align-items:center;justify-content:center;font-size:13px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg></div>
-          <span style="color:#C4B5FD;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Admin GUERETTECH</span>
-        </div>
-        <button onclick="hideGTLoginPanel()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:5px 10px;color:rgba(255,255,255,0.4);font-size:var(--pt-micro,12px);cursor:pointer"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-croix"></use></svg></button>
-      </div>
-      <div class="login-label" style="color:rgba(196,181,253,0.7)">Email</div>
-      <input type="email" id="gt-login-email" class="login-input" placeholder="Email" autocomplete="off" autocorrect="off" autocapitalize="none" style="border-color:rgba(139,92,246,0.3)">
-      <div class="login-label" style="color:rgba(196,181,253,0.7);margin-top:10px">Mot de passe</div>
-      <input type="password" id="gt-login-pwd" class="login-input" placeholder="••••••••" autocomplete="current-password" style="border-color:rgba(139,92,246,0.3)">
-      <div id="gt-login-error" style="color:#FF8A80;font-size:var(--pt-micro,12px);margin-top:-8px;margin-bottom:10px;display:none"></div>
-      <button id="gt-login-btn" class="login-btn" onclick="confirmGTLogin()" style="background:linear-gradient(135deg,#7C3AED,#5B21B6);border:none;margin-top:14px">Connexion</button>
-
-      <!-- SEC-GT/2 — second facteur. autocomplete="one-time-code" fait proposer
-           le code par iOS depuis la notification, sans ouvrir la boîte mail. -->
-      <div id="gt-otp-box" style="display:none;margin-top:16px;border-top:1px solid rgba(139,92,246,0.2);padding-top:14px">
-        <div class="login-label" style="color:rgba(196,181,253,0.7)">Code re&#231;u par e-mail</div>
-        <input type="text" id="gt-otp-code" class="login-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" style="border-color:rgba(139,92,246,0.3);letter-spacing:.35em;text-align:center;font-family:monospace">
-        <div id="gt-otp-info" style="color:rgba(196,181,253,0.55);font-size:var(--pt-lbl,11.5px);margin-top:-4px;margin-bottom:6px"></div>
-        <button id="gt-otp-btn" class="login-btn" onclick="confirmGTOtp()" style="background:linear-gradient(135deg,#7C3AED,#5B21B6);border:none;margin-top:8px">Ouvrir la session</button>
-        <button onclick="gtOtpResend()" style="width:100%;background:none;border:none;color:rgba(196,181,253,0.45);font-size:var(--pt-lbl,11.5px);cursor:pointer;font-family:Outfit,sans-serif;padding:9px 0 0">Renvoyer un code</button>
-      </div>
-    </div>
-  </div>
+  <!-- MV-GT:CONNEXION — le panneau de connexion GUERETTECH vit dans src/gt/connexion.html (gt.html seulement, GT-1 §249) -->
 
   <!-- ══ Lien signalement (avant connexion) ══ -->
   <div style="text-align:center;margin-top:26px;width:100%">
@@ -1897,89 +1870,7 @@
 
 <div class="page" id="page-reserve"></div>
 
-<!-- ══════ PAGE ADMIN GUERETTECH ══════ -->
-<div class="page" id="page-admin-gt">
-  <div class="agt-hdr">
-    <div class="agt-hdr-inner">
-      <div class="agt-hdr-top">
-        <span class="mod-header-icon">&#x1F347;</span>
-        <div class="mod-header-titles">
-          <div class="agt-hdr-title">Ma Vigne &middot; Admin</div>
-          <div class="agt-hdr-name">Dashboard clients</div>
-        </div>
-        <div class="mvu-actions">
-          <button class="mod-home-btn" onclick="goHub()">&#x2302;</button>
-        </div>
-      </div>
-      <div class="agt-stats">
-        <div class="agt-stat"><div class="agt-sv" id="agt-sv0">&mdash;</div><div class="agt-sl">Clients</div></div>
-        <div style="width:1px;background:rgba(255,255,255,0.1);align-self:stretch;flex-shrink:0;margin:0 4px"></div>
-        <div class="agt-stat"><div class="agt-sv" id="agt-sv1">&mdash;</div><div class="agt-sl">Utilisateurs</div></div>
-        <div style="width:1px;background:rgba(255,255,255,0.1);align-self:stretch;flex-shrink:0;margin:0 4px"></div>
-        <div class="agt-stat"><div class="agt-sv" id="agt-sv2">&mdash;</div><div class="agt-sl">Parcelles</div></div>
-        <div style="width:1px;background:rgba(255,255,255,0.1);align-self:stretch;flex-shrink:0;margin:0 4px"></div>
-        <div class="agt-stat"><div class="agt-sv" id="agt-sv3">&mdash;</div><div class="agt-sl">Erreurs</div></div>
-      </div>
-    <div class="agt-tabs" id="agt-tabs">
-      <button class="agt-tab active" data-tab="radar" onclick="agtSwitchTab('radar')">Radar <span id="agt-radar-badge" style="display:none" class="agt-err-badge"></span></button>
-      <button class="agt-tab" data-tab="clients" onclick="agtSwitchTab('clients')">Clients</button>
-      <button class="agt-tab" data-tab="business" onclick="agtSwitchTab('business')">Business</button>
-      <button class="agt-tab" data-tab="incidents" onclick="agtSwitchTab('incidents')">Incidents <span id="agt-inc-badge" style="display:none" class="agt-err-badge"></span></button>
-      <button class="agt-tab" data-tab="leads" onclick="agtSwitchTab('leads')">Leads <span id="agt-lead-badge" style="display:none" class="agt-err-badge"></span></button>
-      <button class="agt-tab" data-tab="outils" onclick="agtSwitchTab('outils')">Outils</button>
-    </div>
-    </div>
-  </div>
-  <div class="agt-body" id="agt-body">
-    <div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.3);font-family:Outfit,sans-serif;font-size:13px">Chargement&hellip;</div>
-  </div>
-  <div class="agt-bottom-bar" id="agt-bottom-bar">
-    <div class="agt-bottom-inner">
-      <div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.4);display:flex;align-items:center;gap:8px;min-width:0"><span style="white-space:nowrap">&#x1F6E0; GUERETTECH</span><span id="agt-sess-timer" style="font-size:10px;color:rgba(255,255,255,0.28);white-space:nowrap"></span><button onclick="agtLockNow()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:3px 8px;color:rgba(255,255,255,0.5);font-size:10px;cursor:pointer;font-family:Outfit,sans-serif;white-space:nowrap">&#128274; Verrouiller</button></div>
-      <div id="agt-bottom-status" style="width:8px;height:8px;border-radius:50%;background:#22C55E;box-shadow:0 0 6px rgba(34,197,94,0.6)"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════ SEC-GT — VERROUILLAGE DE SESSION (inactivité) ══════
-     Hors du système .overlay/openOv : ce panneau doit rester au-dessus de TOUT,
-     y compris d'une fiche client ouverte, et ne se ferme pas au clic sur le fond.
-     Les six ids sont en dur ici — getElementById est donc légitime (C11). -->
-<div id="agt-lock" style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(10,5,8,0.96);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:24px;padding-bottom:calc(24px + env(safe-area-inset-bottom))">
-  <div style="width:100%;max-width:340px;background:#141824;border:1px solid rgba(196,181,253,0.2);border-radius:16px;padding:22px;text-align:center;font-family:Outfit,sans-serif">
-    <div style="font-size:30px;margin-bottom:10px">&#128274;</div>
-    <div style="font-size:15px;font-weight:600;color:#E8E8E0;margin-bottom:5px">Session verrouill&#233;e</div>
-    <div id="agt-lock-why" style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.4);line-height:1.6;margin-bottom:16px">Panneau GUERETTECH rest&#233; inactif. Saisissez votre mot de passe pour reprendre.</div>
-    <input id="agt-lock-pwd" type="password" autocomplete="current-password" placeholder="Mot de passe" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:10px;padding:11px 12px;color:#F0E8DC;font-size:16px;font-family:Outfit,sans-serif;box-sizing:border-box;margin-bottom:10px">
-    <div id="agt-lock-err" style="display:none;font-size:var(--pt-micro,12px);color:#FCA5A5;margin-bottom:10px"></div>
-    <button id="agt-lock-btn" onclick="agtUnlock()" style="width:100%;background:#C9A84C;border:none;border-radius:10px;padding:11px;color:#0C1A0A;font-size:13px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;margin-bottom:8px">D&#233;verrouiller</button>
-    <button onclick="agtLockOut()" style="width:100%;background:none;border:none;color:rgba(255,255,255,0.35);font-size:var(--pt-micro,12px);cursor:pointer;font-family:Outfit,sans-serif;padding:6px">Fermer la session</button>
-  </div>
-</div>
-
-<!-- ══════ OVERLAY NOUVEAU TENANT ══════ -->
-<div class="overlay" id="ovAddTenant" onclick="closeOv(event,'ovAddTenant')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-handle"></div>
-    <div class="modal-hd"><div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-outil"></use></svg> Nouveau client</div></div>
-    <div class="modal-body">
-      <p style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-bottom:16px;line-height:1.6">Choisissez un slug unique pour ce domaine. Il sera l&#39;identifiant Firestore et apparaîtra dans le lien d&#39;invitation.</p>
-      <label style="font-size:var(--pt-micro,12px);color:var(--texte-doux);font-weight:600;display:block;margin-bottom:6px">Slug du domaine</label>
-      <input class="ov-input" id="agt-slug-input" type="text" placeholder="ex : chateau-melin" style="font-family:monospace" oninput="agtSlugPreview(this.value)">
-      <div id="agt-link-preview" style="display:none;background:rgba(61,107,39,0.1);border:1px solid rgba(61,107,39,0.25);border-radius:8px;padding:8px 12px;font-size:var(--pt-micro,11px);color:#6BA34A;font-family:monospace;word-break:break-all;margin:8px 0 14px"></div>
-      <label style="font-size:var(--pt-micro,12px);color:var(--texte-doux);font-weight:600;display:block;margin:14px 0 6px">Formule</label>
-      <select class="ov-input" id="agt-plan-input">
-        <option value="essentiel">Essentiel — 29 €/mois (Vigne, Journal, Météo)</option>
-        <option value="vigneron">Vigneron — 49 €/mois (+ Tracteur, Phyto)</option>
-        <option value="domaine" selected>Domaine — 79 €/mois (tous les modules)</option>
-      </select>
-      <label style="font-size:var(--pt-micro,12px);color:var(--texte-doux);font-weight:600;display:block;margin:14px 0 6px">Essai (jours · 0 = aucun)</label>
-      <input class="ov-input" id="agt-trial-input" type="number" min="0" max="90" value="15">
-      <button class="mbtn verte" onclick="saveAddTenant()">Ajouter et copier le lien</button>
-      <button class="mbtn" onclick="closeOv(null,'ovAddTenant')">Annuler</button>
-    </div>
-  </div>
-</div>
+<!-- MV-GT:CONSOLE — la console GUERETTECH vit dans src/gt/console.html (gt.html seulement, GT-1 §249) -->
 
 <!-- ══════ PAGE PLANNING RH ══════ -->
 <div class="page" id="page-planning">

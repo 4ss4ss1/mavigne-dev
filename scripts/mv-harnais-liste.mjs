@@ -489,4 +489,6 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-textea.mjs --contre'],
   ['node scripts/mv-harnais-journal1.mjs'],           // JOURNAL-1 (§248) : seuls les jours visibles mis en page, au pixel près
   ['node scripts/mv-harnais-journal1.mjs --contre'],
+  ['node scripts/mv-harnais-gt1.mjs'],                // GT-1 (§249) : la console GUERETTECH hors de l'appli des clients (gt.html)
+  ['node scripts/mv-harnais-gt1.mjs --contre'],
 ];

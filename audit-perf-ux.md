@@ -329,7 +329,7 @@ un écran change, harnais et contre-épreuve, Règle d'or n° 4.
 | 10 | **JOURNAL-1** ✅ fait (§248) | le Journal s'affiche en moins de 150 ms : 336 → 122 ms (journal de 1 000) ; 15 000 entrées 349 → 140 ms (le reste : le calcul, DONNEES-1) ; au pixel près | ½ j | faible | — |
 | 11 | **DONNEES-1** | plus aucun document près de la limite, à 45 ha comme à 12 | 3 à 5 j | **élevé** | oui, après `npm run taille` |
 | 12 | **IDS-1** | renommer une parcelle ou un salarié devient sûr | 3 à 5 j | élevé | oui |
-| 13 | **GT-1** | la console GT quitte le téléphone des clients | 1 j | moyen | **décidé le 04/10** (à caler avec PREP-1) |
+| 13 | **GT-1** ✅ fait (§249) | la console GT quitte le téléphone des clients : gt.html (fabriquée), ≈ 250 Ko de moins chez chaque client, la préparation reste dans gt.html | 1 j | moyen | tranché |
 
 ### 5.1 Les premiers lots, en détail
 

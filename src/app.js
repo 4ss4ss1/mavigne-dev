@@ -23,7 +23,7 @@ function showSyncBadge(msg, color){
 // Exposer constantes démo sur window pour accès cross-module
 import './firebase.js';
 import './onboarding.js';
-import './admin-gt.js';
+// ★★ GT-1 (§249) — la console GUERETTECH (admin-gt.js) n'est PLUS importée ici : elle vit dans gt.html (entrée src/gt.js).
 import './cave.js';
 // ★ CUV-DEC (§164) — Le Cuvier, sorti de cave.js : JUSTE APRÈS lui (il lit le Chai par window).
 import './cuvier.js';
@@ -6241,6 +6241,8 @@ function goTo(page){
   // pour n'importe qui. Garde de première ligne, volontairement synchrone ; la
   // vérification RÉELLE (claim gtAdmin lu dans le jeton) est refaite par
   // renderAdminGT, qui refuse de construire quoi que ce soit sans elle.
+  // ★★ GT-1 (§249) — la console n'existe que dans gt.html : depuis l'appli des clients, on y est envoyé.
+  if(page==='admin-gt' && !document.getElementById('page-admin-gt')){ location.href='/gt.html'; return; }
   if(page==='admin-gt' && !(currentUser && currentUser._isGTAdmin===true)){
     if(window.showToast)showToast('Acc\u00e8s r\u00e9serv\u00e9','#C0392B');
     page=_landingPage().replace('page-','');
