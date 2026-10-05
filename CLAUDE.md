@@ -3,12 +3,12 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **4 octobre 2026 (VALID-1 + LOGIN-1)** — ★★ **« VALIDER » N'ATTEND PLUS LA MÉTÉO ; SANS RÉSEAU, LA CONNEXION DIT LA VÉRITÉ** (§242).
-> Les deux défauts prouvés par l'audit (§241), « go » de Nico. `confirmValidation` et `saveJournalEntry` écrivent, enregistrent et ferment
-> AVANT tout appel réseau ; `_mvMeteoApres` complète l'entrée ensuite (retrouvée par id ; `pQuickValidate` y passe aussi) ; `fetchMeteoMoyenne`
-> et la branche météo du SW bornées à 6 s. `confirmLogin` : `appCheck/…` ou hors ligne → « Pas de connexion réseau », plus « Mot de passe
-> incorrect ». Rejoué dans Chromium sur le build : feuille fermée en moins d'1 s, message juste. Harnais `mv-harnais-valid1` (neuf, 31 + 10/10).
-> Guide 01 : se connecter demande du réseau. Marque `lots/VALID-1.json`. Base `57a48b3`. **APP 8.17 → 8.18, SW 8.92 → 8.93** (visible).
+> Dernière consolidation : **4 octobre 2026 (TAILLE-2, zip cumulatif avec VOILE-1, ENTREE-1, RENDU-1 non poussés)** — ★★ **LA TAILLE AVANT L'ENVOI** (§246).
+> La règle de taille Firestore vit dans `src/taille-doc.js` (pur, partagé avec `npm run taille`, vérifié par son `--test`). Juste
+> avant chaque écriture (fusion, parcelles, écriture directe, file) : > 90 % → alerte silencieuse à la console GT, 1×/jour/doc/téléphone ;
+> > 1 Mio → rien ne part, rien en file : coffre + message clair. Refus de taille du serveur : même chemin, sans nouvel essai. Aucun bump
+> (firebase.js + module). Harnais `mv-harnais-taille2`. Marques `lots/TAILLE-2.json` (inclut les trois autres) et précédentes. Base `24aa425`.
+> **APP 8.18 → 8.21, SW 8.93 → 8.96** (les trois lots d'avant). Précédent : RENDU-1 (§245), l'écran ne se fige plus — archivé dans journal.md.
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -728,7 +728,7 @@ mavigne/
 │   │                        le moteur _mvFut*)
 │   ├── firebase.js         (COLLECTIONS, FB_REALTIME/FB_STATIC, _MV_GUARD_FLOORS, pull/listen/save,
 │   │                        ★ createAuthAccount — qui accepte un tenant EXPLICITE depuis le 09/08)
-│   ├── onboarding.js
+│   ├── onboarding.js · taille-doc.js (★ TAILLE-2 §246 : la règle de taille Firestore, PURE, partagée avec npm run taille)
 │   ├── admin-gt.js         (★★ panneau GT + FICHE CLIENT + ASSISTANT D'INSTALLATION `_agtIns`
 │   │                        + création de comptes en lot `_agtLot` — cf. §18)
 │   ├── planning.js
@@ -1820,9 +1820,9 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ### ⚠️ AUDIT-PERF — CE QUI RESTE OUVERT (§241, posé le 04/10)
 
-1. **Le plan est dans `audit-perf-ux.md`** (racine). ✅ VALID-1 et LOGIN-1 faits (§242) — à regarder chez Nico : valider sur un réseau faible, se connecter en mode avion. Ensuite : VOILE-1 et PROFILS-1.
-2. **Décisions de Nico** : ENTREE-1 (entrer sans retaper le mot de passe — téléphones partagés ?), le premier appui qui « démarre » une tâche dans la fiche parcelle, PAQUET-1, DONNEES-1, IDS-1, GT-1.
-3. **À fournir par Nico** : `npm run taille -- ancienne.json recente.json` sur deux sauvegardes complètes — les vraies tailles et le mois de la limite.
+1. **Le plan est dans `audit-perf-ux.md`** (racine). ✅ VALID-1, LOGIN-1 (§242), VOILE-1, PROFILS-1 (§243), ENTREE-1 (§244), RENDU-1 (§245), TAILLE-2 (§246). Ensuite : la maquette TEXTE-A, JOURNAL-1, GT-1.
+2. **Tranché par Nico le 04/10** : ENTREE-1 = le mot de passe se retape comme d'habitude ET ouvre l'appli sans réseau (fait, §244) ; PAQUET-1 abandonné ; TEXTE-A en maquette ; GT-1 décidé ; le premier appui qui « démarre » dans la fiche parcelle est voulu.
+3. **À fournir par Nico** : `npm run taille -- "<sauvegarde complète>.json"` avec le VRAI chemin du fichier téléchargé (le 04/10, les noms d'exemple ont été tapés tels quels) — puis une seconde sauvegarde plus tard, pour le rythme.
 
 ### ⚠️ GESTES-1 — CE QUI RESTE OUVERT (§239, posé le 04/10)
 

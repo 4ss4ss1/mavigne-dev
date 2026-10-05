@@ -8,6 +8,34 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **4 octobre 2026 (RENDU-1, zip cumulatif avec VOILE-1 et ENTREE-1 non poussés)** — ★★ **L'ÉCRAN NE SE FIGE PLUS** (§245).
+> Un document reçu ne redessine plus l'Accueil ET Parcelles aussitôt : `_mvRendreBientot` (firebase.js) accumule les clés et
+> redessine à l'image suivante la SEULE page affichée, une fois (`_MV_RENDU_PAGES`). Chromium ×4, collègue qui valide (3 documents) :
+> Accueil 324 → 140 ms, Parcelles 416 → 56, Journal 673 → 90 (journal de 1 000) ; à 15 000 entrées il reste la copie de la base. Harnais
+> `mv-harnais-rendu1`. Marques `lots/RENDU-1.json` (inclut VOILE-1, ENTREE-1), `lots/ENTREE-1.json`, `lots/VOILE-1.json`. Base `24aa425`.
+> **APP 8.18 → 8.21, SW 8.93 → 8.96** (trois lots). Précédent : ENTREE-1 (§244), se connecter sans réseau — archivé dans journal.md.
+
+> ★ Consolidation : **4 octobre 2026 (ENTREE-1, zip cumulatif avec VOILE-1 non poussé)** — ★★★ **SE CONNECTER SANS RÉSEAU, EN RETAPANT SON MOT DE PASSE** (§244).
+> Nico : « on peut se connecter même sans réseau (cave, mauvais signal) » — mal lu d'abord (j'avais conclu « le réseau reste requis »), corrigé.
+> Après chaque connexion réussie : empreinte PBKDF2 du mot de passe + uid + droits sur le téléphone (`mavigne_entree_v1_<domaine>`). Sans réseau
+> (ou réseau qui traîne > 8 s, ou App Check en échec) : empreinte + session du téléphone = on entre ; clés libérées selon `CLES` de la copie ; la
+> copie devient la base de fusion (sinon les parcelles en retard écrasaient un collègue) ; reprise au retour du signal. Harnais `mv-harnais-entree1`.
+> Marques `lots/ENTREE-1.json` (inclut VOILE-1) et `lots/VOILE-1.json`. Base `24aa425`. **APP 8.18 → 8.20, SW 8.93 → 8.95** (visible, deux lots).
+
+> ★ Consolidation : **4 octobre 2026 (VOILE-1 + PROFILS-1)** — ★★ **L'OUVERTURE : LE VOILE TANT QUE RIEN N'EST PRÊT, LES TUILES DE L'APPAREIL D'ABORD** (§243).
+> Voile : chorégraphie complète à la 1re ouverture de l'appareil seulement (`mavigne_voile_vu`), ensuite effacé dès que l'écran de connexion
+> montre quelque chose (≥ 600 ms, fondu 250 ms). Tuiles : `window._mvTuilesAppareil` appelée par `_fbLoad` AVANT ses attentes bornées ; branche
+> hors ligne gardée ; `_mvDemarrer` part à DOMContentLoaded (`load` attendait reCAPTCHA). Chromium, réseau sans réponse : tuile 18,5 s → ~1 s
+> (voir §243c). Décisions de Nico : ENTREE-1 redéfini (gestionnaire de mots de passe), PAQUET-1 abandonné, TEXTE-A maquette, GT-1 décidé. Harnais
+> `mv-harnais-voile1` (neuf). Marque `lots/VOILE-1.json`. Base `24aa425`. **APP 8.18 → 8.19, SW 8.93 → 8.94** (visible).
+
+> ★ Consolidation : **4 octobre 2026 (VALID-1 + LOGIN-1)** — ★★ **« VALIDER » N'ATTEND PLUS LA MÉTÉO ; SANS RÉSEAU, LA CONNEXION DIT LA VÉRITÉ** (§242).
+> Les deux défauts prouvés par l'audit (§241), « go » de Nico. `confirmValidation` et `saveJournalEntry` écrivent, enregistrent et ferment
+> AVANT tout appel réseau ; `_mvMeteoApres` complète l'entrée ensuite (retrouvée par id ; `pQuickValidate` y passe aussi) ; `fetchMeteoMoyenne`
+> et la branche météo du SW bornées à 6 s. `confirmLogin` : `appCheck/…` ou hors ligne → « Pas de connexion réseau », plus « Mot de passe
+> incorrect ». Rejoué dans Chromium sur le build : feuille fermée en moins d'1 s, message juste. Harnais `mv-harnais-valid1` (neuf, 31 + 10/10).
+> Guide 01 : se connecter demande du réseau. Marque `lots/VALID-1.json`. Base `57a48b3`. **APP 8.17 → 8.18, SW 8.92 → 8.93** (visible).
+
 > ★ Consolidation : **4 octobre 2026 (AUDIT-PERF)** — ★★ **VITESSE, DONNÉES, ERGONOMIE TERRAIN : L'AUDIT MESURÉ** (§241).
 > Demande de Nico (04/10) : le niveau de Linear, Notion, Figma. Audit mesuré dans un vrai Chromium (build de prod, téléphone ×4),
 > `audit-perf-ux.md` à la racine, rien d'intégré. Deux défauts PROUVÉS : « Valider » de la feuille attend Open-Meteo sans limite avant

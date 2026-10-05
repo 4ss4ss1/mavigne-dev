@@ -1,0 +1,38 @@
+{
+  "lot": "TAILLE-2",
+  "section": "§246",
+  "base": "24aa425490bd4f00021266abb94e2afbba441ad4",
+  "inclut": [
+    "VOILE-1",
+    "ENTREE-1",
+    "RENDU-1"
+  ],
+  "date": "2026-10-05",
+  "fichiers": {
+    ".mv-base": "ea099932249d6078e7d14425ae124e615ec5b49f1b7cc17f3228e3578389a965",
+    "CLAUDE.md": "16d858db3fad3c3e395399166249572d64a4ca4ea2f8528dbc736ae66fe74bcd",
+    "audit-perf-ux.md": "e800bc6b855a9179effb846e35a52f606ce92b62ef264c99e6ed0a97f2836a93",
+    "docs/claude/INDEX.md": "c2044fcbf1af49f86e108ec0371b8c7f9baa620e04e90d62d567c260076d110e",
+    "docs/claude/chantiers-230-279.md": "453bd5123ef885067dc0e9f1378b82cca9c13c4ae067b00db8144fc7d52f5b9a",
+    "docs/claude/journal.md": "bf492d525122ddcecc0f4c0003fa030994e328f5e8c52c605736c1a0f8ab7b04",
+    "guide/01-demarrer.html": "7c987ac91071a9000e2e57edf649ab503858f28e221161304766c862e4181bb9",
+    "index.html": "a08ba4c89f3264a795c8a1aa7b9d4bb5137c4d3153fe0049dd5b7744985b4bbf",
+    "public/sw.js": "a670d8e2dfbf59d0692e650d91aa7350437d8619fd1debf60ea798f3a669d6ed",
+    "scripts/harnais-claude-md.mjs": "b6db42cf7ba40bf9e460ba3ffc008656dabb4d5f19ff7e9b4e9e853f5be78068",
+    "scripts/mv-harnais-fusion-docs.mjs": "3179a5ea12bc3c38d3c5a59416cd1af816c624b88f093c16230fb08c094443b5",
+    "scripts/mv-harnais-liste.mjs": "f08d679fcbb4527025023a93fea5aabc85325c3c18fe485005fe9118cedef8b1",
+    "scripts/mv-harnais-prep.mjs": "8f8b2c36f36a3f9eb94a333995b0b3d48841ef1a76fbfd39f80aade08730858e",
+    "scripts/mv-harnais-reprise.mjs": "c2cb9d64bb98239fca305ab1e4a14b4a8a2845f072468881ce5915b9318b6124",
+    "scripts/mv-harnais-valid1.mjs": "36caa7e8f8ba7e87f44f9113674c0b2786b122fe20ffcb4a798585078c02db0c",
+    "scripts/mv-taille-docs.mjs": "045a87fbb05a2d8fc1fddf66af915ac866efd1a63b771c49c28b397f48eb6d69",
+    "scripts/typo-baseline.json": "e7900940477b25ffd443079ff4d90753ddb0184e90b8da7c60de0a2f8870ddca",
+    "src/app.js": "388c39597255a5698b645d4c569c4bbbc22d6fdcd3e25876e523e66dabbf7d2c",
+    "src/firebase.js": "5308b93cec780a3e341e8035a5c3b3b5f9fdaf786923b5ff89494ae9afed56ef",
+    "src/utils.js": "8e40e440cb2ef01355e5e5a318a885b9eadd7d959550b8bb55bed936fc7aec58",
+    "scripts/mv-harnais-entree1.mjs": "e710fedbe672b8bc0f32d5ed6d79b2d73ee38d89b32119c5d721b506406b050d",
+    "scripts/mv-harnais-rendu1.mjs": "a215022f6244cdb552ffc86856f7c5f23140462b3ee8b8c9067648d2881e7b69",
+    "scripts/mv-harnais-taille2.mjs": "16a07cc9954147e21ff66fa9e8dd557a1d48fb0b6310bae7ee49a2f5d463f8da",
+    "scripts/mv-harnais-voile1.mjs": "cfe314d44321322c3b263eb8f6769919ecf23d45219a8a0fd71ae01048cbfd8a",
+    "src/taille-doc.js": "c256a2ca032b182d95bea1c4c12feac9497e246bf3bf9e2785d3d3160b8956fc"
+  }
+}

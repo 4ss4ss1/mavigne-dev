@@ -1,0 +1,32 @@
+{
+  "lot": "RENDU-1",
+  "section": "§245",
+  "base": "24aa425490bd4f00021266abb94e2afbba441ad4",
+  "inclut": [
+    "VOILE-1",
+    "ENTREE-1"
+  ],
+  "date": "2026-10-04",
+  "fichiers": {
+    ".mv-base": "e063ba8ec6197d6f45d83a7907d236efb88fd8754edf957be766e60a4f7db74c",
+    "CLAUDE.md": "b7d12771f914528f37740da991ee091f617d44a10e662d5f7bec8d6f2c60029c",
+    "audit-perf-ux.md": "556de82429b1ac2260a42716feba86f780d0ffd0d36d591ef7b6e345068bac50",
+    "docs/claude/INDEX.md": "a85ac011f36fa906c8e197100b24429397b61ed89c3ad701fe0768767223be9f",
+    "docs/claude/chantiers-230-279.md": "ec632f138dfaeff855304cc6b5984202a57951ee940f4caf136019dd3f799797",
+    "docs/claude/journal.md": "5a5604723c131a03d36e13a133647582d3c1b5044f3d60402d2cdc552f537aa8",
+    "guide/01-demarrer.html": "7c987ac91071a9000e2e57edf649ab503858f28e221161304766c862e4181bb9",
+    "index.html": "a08ba4c89f3264a795c8a1aa7b9d4bb5137c4d3153fe0049dd5b7744985b4bbf",
+    "public/sw.js": "a670d8e2dfbf59d0692e650d91aa7350437d8619fd1debf60ea798f3a669d6ed",
+    "scripts/harnais-claude-md.mjs": "d7152d14ea97a8b860b3ad313b9a3e9bb654f8e1534a9ac8ddc000b4f1a0fb55",
+    "scripts/mv-harnais-liste.mjs": "eca3b348393910d9b6da2d23ce46d5864d382d79f5f202520b6a7f2f50cf1387",
+    "scripts/mv-harnais-prep.mjs": "8f8b2c36f36a3f9eb94a333995b0b3d48841ef1a76fbfd39f80aade08730858e",
+    "scripts/mv-harnais-reprise.mjs": "c2cb9d64bb98239fca305ab1e4a14b4a8a2845f072468881ce5915b9318b6124",
+    "scripts/mv-harnais-valid1.mjs": "36caa7e8f8ba7e87f44f9113674c0b2786b122fe20ffcb4a798585078c02db0c",
+    "src/app.js": "388c39597255a5698b645d4c569c4bbbc22d6fdcd3e25876e523e66dabbf7d2c",
+    "src/firebase.js": "dc50cb91332a7040dd31b5e115b0199f8659b496260d60e279481272f91a976d",
+    "src/utils.js": "8e40e440cb2ef01355e5e5a318a885b9eadd7d959550b8bb55bed936fc7aec58",
+    "scripts/mv-harnais-entree1.mjs": "e710fedbe672b8bc0f32d5ed6d79b2d73ee38d89b32119c5d721b506406b050d",
+    "scripts/mv-harnais-rendu1.mjs": "a215022f6244cdb552ffc86856f7c5f23140462b3ee8b8c9067648d2881e7b69",
+    "scripts/mv-harnais-voile1.mjs": "cfe314d44321322c3b263eb8f6769919ecf23d45219a8a0fd71ae01048cbfd8a"
+  }
+}

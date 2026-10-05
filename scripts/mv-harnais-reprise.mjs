@@ -575,8 +575,10 @@ function statiques(S) {
   r.push([!/window\.addEventListener\('load', function\(\)\{\s*\n\s*if\(typeof initTheme/.test(a), 'plus aucun démarrage suspendu à `load` seul']);
   const iA = a.indexOf('if (/INTERNAL ASSERTION FAILED/i.test(_rmsg)) {');
   r.push([iA >= 0 && a.slice(iA, iA + 400).indexOf("window._mvFsVerifier('assertion')") > 0, '★★ l’assertion interne est VÉRIFIÉE, plus supposée bénigne']);
-  const iC = a.indexOf("e.code === 'auth/network-request-failed'");
-  r.push([iC >= 0 && a.slice(iC, iC + 400).indexOf('_loginRelancer = navigator.onLine;') > 0
+  /* ENTREE-1 (§244) : le test « réseau » est calculé UNE fois en tête du catch (_reseau), avant la vérification de
+     l'empreinte ; la branche qui rédige le message vient plus loin. On lit donc la branche elle-même. */
+  const iR = a.indexOf("var _reseau = !!(e && (e.code === 'auth/network-request-failed'"), iC = a.indexOf('} else if (_reseau) {');
+  r.push([iR >= 0 && iC > iR && a.slice(iC, iC + 1400).indexOf('_loginRelancer = navigator.onLine;') > 0
     && a.indexOf('_loginErreur(_loginErr, _loginRelancer);') > 0, '★ connexion : avec du réseau, « le serveur ne répond pas » + relancer']);
   const iS = a.indexOf('window._loginRetryCount >= 4 ?');
   r.push([iS >= 0 && a.slice(iS, iS + 600).indexOf('onclick="_mvRecharger()"') > 0, 'le sablier de connexion propose la relance']);

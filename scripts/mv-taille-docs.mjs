@@ -31,32 +31,20 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const LIMITE = 1048576;
+// ★★ TAILLE-2 (§246) — la règle vit dans src/taille-doc.js, UN seul endroit : l'appli la joue avant chaque envoi, ce
+//   script la joue sur une sauvegarde, et --test (joué par check) la vérifie pour les deux.
+import { MV_LIMITE_DOC as LIMITE, mvOctetsTexte, mvOctetsValeur as tailleValeur, mvOctetsNom as tailleNom, mvOctetsDoc as tailleDoc } from '../src/taille-doc.js';
 const c = { g:s=>`\x1b[32m${s}\x1b[0m`, r:s=>`\x1b[31m${s}\x1b[0m`, y:s=>`\x1b[33m${s}\x1b[0m`, dim:s=>`\x1b[2m${s}\x1b[0m`, b:s=>`\x1b[1m${s}\x1b[0m` };
-const oct = s => Buffer.byteLength(String(s), 'utf8');
-
-function tailleValeur(v) {
-  if (v === null || v === undefined) return 1;
-  if (typeof v === 'boolean') return 1;
-  if (typeof v === 'number') return 8;
-  if (typeof v === 'string') return oct(v) + 1;
-  if (Array.isArray(v)) return v.reduce((s, x) => s + tailleValeur(x), 0);
-  if (typeof v === 'object') {
-    let s = 0;
-    for (const k of Object.keys(v)) s += oct(k) + 1 + tailleValeur(v[k]);
-    return s;
-  }
-  return 8;
-}
-const tailleNom = segments => segments.reduce((s, x) => s + oct(x) + 1, 0) + 16;
-const tailleDoc = (segments, champs) => tailleNom(segments) + tailleValeur(champs) + 32;
 
 // ── Auto-contrôle : l'exemple de la documentation Firestore ────────────────
 if (process.argv.includes('--test')) {
   const nom = tailleNom(['users', 'jeff', 'tasks', 'my_task_id']);
   const champs = tailleValeur({ type: 'Personal', done: false, priority: 1, description: 'Learn Cloud Firestore' });
   const doc = tailleDoc(['users', 'jeff', 'tasks', 'my_task_id'], { type: 'Personal', done: false, priority: 1, description: 'Learn Cloud Firestore' });
-  const ok = nom === 44 && champs === 71 && doc === 147
+  // Et l'octet UTF-8 compté sans tampon (taille-doc.js) doit dire exactement ce que dit Node, accents et emoji compris.
+  const textes = ['', 'a', 'é', 'Côte de Nuits', 'Gevrey-Chambertin · 2026', '\u{1F347} raisin', 'ok\uD800', '\uDC00x'];
+  const utf8 = textes.every(t => mvOctetsTexte(t) === Buffer.byteLength(t, 'utf8'));
+  const ok = nom === 44 && champs === 71 && doc === 147 && utf8
     && tailleValeur(['a', 'é']) === 5 && tailleValeur({ 'clé': [1, null, true] }) === 15;
   console.log('  ' + (ok ? c.g('✓') : c.r('✗')) + ' calcul Firestore : nom ' + nom + '/44, champs ' + champs + '/71, document ' + doc + '/147 octets');
   process.exit(ok ? 0 : 1);

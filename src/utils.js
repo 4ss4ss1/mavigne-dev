@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.18';
+export const APP_VERSION = '8.21';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -852,6 +852,22 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.21', d: '2026-10-04', items: [
+    { niv: 0, pour: ['tous'], emoji: 'chrono', titre: 'L’écran ne se fige plus quand un collègue valide',
+      desc: "Quand un collègue valide une tâche, seul l’écran que vous regardez se met à jour, une fois. Avant, toute la Vigne se redessinait à chaque fois." },
+  ] },
+  { v: '8.20', d: '2026-10-04', items: [
+    { niv: 0, pour: ['tous'], emoji: 'horsligne', titre: 'Se connecter sans réseau',
+      desc: "Au fond d’une cave ou dans une zone sans signal, si le téléphone a fermé l’appli : tapez votre mot de passe comme d’habitude, il ouvre l’appli même sans réseau. "
+        + "Il faut s’être déjà connecté une fois avec du réseau sur ce téléphone, et être la dernière personne à s’y être connectée. "
+        + "Ce que vous saisissez part dès le retour du signal." },
+  ] },
+  { v: '8.19', d: '2026-10-04', items: [
+    { niv: 0, pour: ['tous'], emoji: 'eclair', titre: 'L’appli s’ouvre plus vite',
+      desc: "Le logo animé de l’ouverture durait plus de trois secondes à chaque fois, même quand l’appli était prête. "
+        + "Il disparaît maintenant dès que l’écran est prêt ; l’animation complète ne se joue qu’à la première ouverture d’un téléphone. "
+        + "Et quand le réseau traîne, votre profil s’affiche tout de suite, depuis le téléphone, au lieu d’attendre le serveur." },
+  ] },
   { v: '8.18', d: '2026-10-04', items: [
     { niv: 0, pour: ['tous'], emoji: 'valide', titre: '« Valider » ne reste plus bloqué quand le réseau traîne',
       desc: "Depuis la fiche d’une parcelle (et depuis le journal), « Valider » attendait la météo de la tâche avant d’enregistrer : "

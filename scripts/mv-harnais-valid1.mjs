@@ -28,6 +28,7 @@ const BASE = {
   jour: sansCom(fn(APP, 'async function saveJournalEntry(){')),
   rapide: sansCom(fn(APP, 'function pQuickValidate(nom,evt){')),
   login: sansCom(fn(APP, 'async function confirmLogin(){')),
+  connexion: sansCom(fn(APP, 'function _mvConnexion(mail, mdp, m){')),   // ENTREE-1 (§244) : confirmLogin passe par elle
   erreur: sansCom(fn(APP, 'function _loginErreur(msg, relancer){')),
   sw: SW,
 };
@@ -73,6 +74,8 @@ function monde(B, o) {
     getTacheStatut: (p, t) => (p.taches || {})[t], _pvStepLabel: () => '', _pvToast() {}, pQuickUndoEntry() {}, _pvCurDone: () => false,
     _loginAwaitEmail: async () => 'compte.test', _mvLoadClaims: async () => {}, _mvMustChangePwd: () => false, _mvShowFirstPwd() {},
     _loginMemEcrire() {}, _mvSessArm() {}, _mvApresEntree() {},
+    // ENTREE-1 (§244) : l'entrée sans réseau a son propre harnais (mv-harnais-entree1) ; ici, aucune empreinte sur le téléphone.
+    _mvEmpreinteLire: () => null, _mvVerifierHorsReseau: async () => ({ r: 'premiere' }), _mvEntrerHorsReseau() {}, _mvSessionPoser() {}, _mvEmpreinteEcrire() {},
     firebase: { auth: () => ({ signInWithEmailAndPassword: async () => { throw { code: o.code || 'auth/invalid-credential' }; } }) },
   };
   ctx.window = ctx;
@@ -80,7 +83,7 @@ function monde(B, o) {
   ctx._mvAvale = (e, ou) => appels.avale.push(ou + ' : ' + ((e && e.message) || e));
   ctx.loginPendingIdx = 0;
   vm.createContext(ctx);
-  vm.runInContext([B.delai, B.meteo, B.apres, B.debut, B.valid, B.jour, B.rapide, B.login, B.erreur].join('\n'), ctx);
+  vm.runInContext([B.delai, B.meteo, B.apres, B.debut, B.valid, B.jour, B.rapide, B.login, B.connexion, B.erreur].join('\n'), ctx);
   return { ctx, els, minuteries, appels, libere: () => libere && libere() };
 }
 const valide = (c, parc) => c.ctx.JOURNAL.find(j => j.parcelle === parc && j.statut === 'Validé' && j.tache === 'Palissage');
@@ -174,7 +177,7 @@ async function suite(B) {
     return { t: m.els['login-pwd-error'].textContent, relance: m.els['login-pwd-error'].children.length > 0, btn: m.els['login-pwd-btn'] }; };
   let r = await msg('appCheck/fetch-network-error', true);
   T('hors réseau, App Check en échec : « Pas de connexion réseau », plus « Mot de passe incorrect »', /^Pas de connexion réseau/.test(r.t) && !/Mot de passe/.test(r.t));
-  T('… avec ce qu’il faut faire (réessayer quand le téléphone capte)', /réessayez quand le téléphone capte/.test(r.t));
+  T('… avec ce qu’il faut faire (la première connexion de ce téléphone demande du réseau ; réessayer quand il capte)', /première connexion sur ce téléphone/.test(r.t) && /Réessayez quand il capte/.test(r.t));
   r = await msg('appCheck/fetch-network-error', false);
   T('en ligne, App Check en échec : « Le serveur ne répond pas » et le bouton pour relancer', /^Le serveur ne répond pas/.test(r.t) && r.relance);
   r = await msg('auth/network-request-failed', true);
@@ -208,9 +211,9 @@ const DEF = [
   ['une validation annulée est réécrite quand même', B => ({ ...B, apres: B.apres.replace('    if(!e) return;', "    if(!e){ saveData('journal'); return; }") })],
   ['la carte complète l’objet d’origine (ancien patron)', B => ({ ...B, rapide: B.rapide.replace('try{ _mvMeteoApres(jid,_findDebutTache(nom,task,date)||date,date); }',
     "try{ (async function(){var _d=_findDebutTache(nom,task,date)||date;var _m=await fetchMeteoMoyenne(_d,date);if(_m){jEntry.meteo_snapshot=_m;saveData('journal');}})(); }") })],
-  ['App Check en échec retombe sur « Mot de passe incorrect »', B => ({ ...B, login: B.login.replace(" || /^appCheck\\//.test(String(e.code || '')) || !navigator.onLine)", ')') })],
-  ['hors réseau, un autre code retombe sur le mot de passe', B => ({ ...B, login: B.login.replace(" || !navigator.onLine) {", ') {') })],
-  ['le message hors réseau ne dit plus quoi faire', B => ({ ...B, login: B.login.replace('Pas de connexion réseau \\u2014 réessayez quand le téléphone capte.', 'Pas de connexion réseau.') })],
+  ['App Check en échec retombe sur « Mot de passe incorrect »', B => ({ ...B, login: B.login.replace(" || /^appCheck\\//.test(String(e.code || ''))", '') })],
+  ['hors réseau, un autre code retombe sur le mot de passe', B => ({ ...B, login: B.login.replace(' || !navigator.onLine;', ';') })],
+  ['le message hors réseau ne dit plus quoi faire', B => ({ ...B, login: B.login.replace('Pas de connexion réseau \\u2014 la première connexion sur ce téléphone en demande. Réessayez quand il capte.', 'Pas de connexion réseau.') })],
   ['le service worker attend de nouveau sans borne', B => ({ ...B, sw: B.sw.replace('Promise.race([metReseau, metDelai])', 'metReseau') })],
 ];
 let rg = 0;

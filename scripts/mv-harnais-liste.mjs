@@ -477,4 +477,12 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-align2.mjs --contre'],
   ['node scripts/mv-harnais-valid1.mjs'],             // VALID-1 + LOGIN-1 (§242) : valider sans attendre la météo ; la connexion dit la vérité
   ['node scripts/mv-harnais-valid1.mjs --contre'],
+  ['node scripts/mv-harnais-voile1.mjs'],             // VOILE-1 + PROFILS-1 (§243) : le voile tant que rien n'est prêt ; les tuiles de l'appareil d'abord
+  ['node scripts/mv-harnais-voile1.mjs --contre'],
+  ['node scripts/mv-harnais-entree1.mjs'],            // ENTREE-1 (§244) : se connecter sans réseau, en retapant son mot de passe
+  ['node scripts/mv-harnais-entree1.mjs --contre'],
+  ['node scripts/mv-harnais-rendu1.mjs'],             // RENDU-1 (§245) : un rendu, de la seule page affichée, par image
+  ['node scripts/mv-harnais-rendu1.mjs --contre'],
+  ['node scripts/mv-harnais-taille2.mjs'],            // TAILLE-2 (§246) : la taille mesurée avant d'envoyer, alerte à 70 %, refus clair
+  ['node scripts/mv-harnais-taille2.mjs --contre'],
 ];

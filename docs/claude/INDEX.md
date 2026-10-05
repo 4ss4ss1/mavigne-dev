@@ -286,3 +286,7 @@
 | 240 | 240. ★★ DEMO-4 — LA DÉMO DU SITE : UN DOMAINE, QUATRE TÉLÉPHONES (04/10 — `public/demo.html` (neuf) · `publ… | `docs/claude/chantiers-230-279.md` |
 | 241 | 241. ★★ AUDIT-PERF — VITESSE, DONNÉES, ERGONOMIE TERRAIN : L'AUDIT MESURÉ (04/10 — `audit-perf-ux.md` (neuf… | `docs/claude/chantiers-230-279.md` |
 | 242 | 242. ★★ VALID-1 + LOGIN-1 — « VALIDER » N'ATTEND PLUS LA MÉTÉO ; SANS RÉSEAU, LA CONNEXION DIT LA VÉRITÉ (0… | `docs/claude/chantiers-230-279.md` |
+| 243 | 243. ★★ VOILE-1 + PROFILS-1 — L'OUVERTURE : LE VOILE TANT QUE RIEN N'EST PRÊT, LES TUILES DE L'APPAREIL D'A… | `docs/claude/chantiers-230-279.md` |
+| 244 | 244. ★★★ ENTREE-1 — SE CONNECTER SANS RÉSEAU, EN RETAPANT SON MOT DE PASSE (04/10 — `src/app.js` · `src/fir… | `docs/claude/chantiers-230-279.md` |
+| 245 | 245. ★★ RENDU-1 — L'ÉCRAN NE SE FIGE PLUS QUAND UN COLLÈGUE VALIDE (04/10 — `src/firebase.js` · `src/utils.… | `docs/claude/chantiers-230-279.md` |
+| 246 | 246. ★★ TAILLE-2 — UN DOCUMENT QUI GROSSIT PRÉVIENT AVANT D'ÊTRE REFUSÉ (04/10 — `src/taille-doc.js` (neuf)… | `docs/claude/chantiers-230-279.md` |

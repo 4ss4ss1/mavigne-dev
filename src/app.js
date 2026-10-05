@@ -345,13 +345,39 @@ if(window.__MV_BOOT_T)clearTimeout(window.__MV_BOOT_T);
 try{sessionStorage.removeItem('mv_boot_retry');}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/loadData'); }
 
 // ════ SPLASH SCREEN ════
+// ★★ VOILE-1 (§243) — LE VOILE TANT QUE RIEN N'EST PRÊT, PAS PLUS. Avant : 2,2 s d'attente fixe, 0,9 s de lueur, 0,32 s
+//   de flash — 3,42 s imposées à CHAQUE ouverture, l'appli prête ou non (vers 5 s sur un téléphone moyen, mesuré §241).
+//   Désormais la chorégraphie complète n'est jouée qu'à la PREMIÈRE ouverture de l'appareil (_MV_VOILE_VU) ; ensuite le
+//   voile s'efface dès que l'écran de connexion montre quelque chose, ou que quelqu'un est entré — au plus tôt
+//   _MV_VOILE_MIN après le chargement (pas de clignotement), par un fondu de _MV_VOILE_FONDU. Le filet de 6 s reste.
+var _MV_VOILE_VU = 'mavigne_voile_vu', _MV_VOILE_MIN = 600, _MV_VOILE_FONDU = 250;
 (function(){
   const DUR_HOLD=2200, DUR_GLOW=900, DUR_FLASH=320;
   const title=document.getElementById('sp-title');
   const logo=document.getElementById('sp-logo-img');
   const flash=document.getElementById('sp-flash');
   const splash=document.getElementById('splash-screen');
-  setTimeout(function(){
+  var dejaVu=false;
+  try{ dejaVu = localStorage.getItem(_MV_VOILE_VU)==='1'; }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/voile#lecture'); }
+  if(dejaVu && splash){
+    var t0=Date.now(), parti=false;
+    var pret=function(){
+      if(window.currentUser) return true;
+      var ls=document.getElementById('login-screen'), pr=document.getElementById('login-profiles');
+      return !!((ls && ls.style.display==='none') || (pr && pr.children.length));
+    };
+    var effacer=function(){
+      if(parti) return; parti=true;
+      splash.style.transition='opacity '+_MV_VOILE_FONDU+'ms ease-out';
+      splash.style.opacity='0';
+      setTimeout(function(){ splash.style.display='none'; },_MV_VOILE_FONDU);
+    };
+    var guet=setInterval(function(){
+      if(parti || splash.style.display==='none'){ clearInterval(guet); return; }
+      if(Date.now()-t0>=_MV_VOILE_MIN && pret()){ clearInterval(guet); effacer(); }
+    },100);
+  } else setTimeout(function(){
     var start=null;
     function glowFrame(ts){
       if(!start)start=ts;
@@ -366,6 +392,8 @@ try{sessionStorage.removeItem('mv_boot_retry');}catch(e){ if(window._mvAvale) wi
         flash.style.transition='opacity '+DUR_FLASH+'ms ease-out';
         flash.style.opacity='1';
         setTimeout(function(){splash.style.display='none';},DUR_FLASH);
+        try{ localStorage.setItem(_MV_VOILE_VU,'1'); }   // VOILE-1 : la chorégraphie a été vue sur cet appareil
+        catch(err){ if(window._mvAvale) window._mvAvale(err,'app.js/voile#ecriture'); }
       }
     }
     requestAnimationFrame(glowFrame);
@@ -689,8 +717,13 @@ var _mvSnapWarnAt = 0;      // horodatage du dernier toast d'échec (anti-rafale
 
 // Le contenu de la snapshot. UNE seule définition : le flush différé doit écrire exactement
 // ce qu'écrivait l'ancien chemin synchrone, avec l'état le plus récent des variables.
+var _mvSnapCles = null;   // ENTREE-1 (§244) : les clés que la copie lue par loadData dit avoir reçues du serveur
 function _mvSnapPayload(){
   return {
+    // ENTREE-1 (§244) — la copie dit QUELLES clés venaient du serveur (ou en avaient eu la réponse) : seules celles-là
+    //   pourront être enregistrées après une entrée sans réseau (Couche 2 anti-perte : jamais un squelette).
+    CLES: { parcelles: !!(_mvKeyLoaded.parcelles || _mvKeySeen.parcelles), membres: !!(_mvKeyLoaded.membres || _mvKeySeen.membres),
+            saisons: !!(_mvKeyLoaded.saisons || _mvKeySeen.saisons) },
     PARCELLES:window.PARCELLES||PARCELLES, JOURNAL:window.JOURNAL||JOURNAL, SESSIONS:window.SESSIONS||SESSIONS,
     TRAVAUX:window.TRAVAUX||TRAVAUX, TRAITEMENTS:window.TRAITEMENTS||TRAITEMENTS, CATALOGUE:window.CATALOGUE||CATALOGUE,
     CONDUCTEURS:window.CONDUCTEURS||CONDUCTEURS, ACTIVITES:window.ACTIVITES||ACTIVITES,
@@ -825,6 +858,38 @@ function _fbSaveMuet(key, value) {
 }
 window._fbSaveMuet = _fbSaveMuet;
 
+// Les valeurs de chaque document, telles qu'en mémoire (sortie de saveData, ENTREE-1 §244). UNE liste : deux copies
+// divergeraient au premier document ajouté.
+function _mvValeursMemoire(){
+  // ⚠️ Gardée en table littérale (W) : mv-harnais-achats la lit dans le texte pour savoir quels documents saveData connaît.
+  const W = {
+    parcelles:   window.PARCELLES   || PARCELLES,
+    journal:     window.JOURNAL     || JOURNAL,
+    sessions:    window.SESSIONS    || SESSIONS,
+    travaux:     window.TRAVAUX     || TRAVAUX,
+    traitements: window.TRAITEMENTS || TRAITEMENTS,
+    catalogue:   window.CATALOGUE   || CATALOGUE,
+    conducteurs: window.CONDUCTEURS || CONDUCTEURS,
+    activites:   window.ACTIVITES   || ACTIVITES,
+    tracteurs_list: window.TRACTEURS_LIST || TRACTEURS_LIST,
+    entretiens:  window.ENTRETIENS  || ENTRETIENS,
+    reparateur:  window.REPARATEUR  || REPARATEUR,
+    reparateur_hist: window.REPARATEUR_HIST || REPARATEUR_HIST,
+    membres:     window.MEMBRES     || MEMBRES,
+    saisons:     window.SAISONS     || SAISONS,
+    taches:      window.TACHES      || TACHES,
+    historique:  window.HISTORIQUE  || HISTORIQUE,
+    cave_elevage: window.CAVE_ELEVAGE,
+    cave_vendange: window.CAVE_VENDANGE,
+    planning_templates: window.PLANNING_TEMPLATES,
+    planning_entries:   window.PLANNING_ENTRIES,
+    planning_acomptes:  window.PLANNING_ACOMPTES,
+    planning_hsup:      window.PLANNING_HSUP,
+    config:             window.CONFIG || CONFIG,
+  };
+  return W;
+}
+
 function saveData(keyHint, toastMsg, toastCoul) {
   if(window._MV_LOCKED){ if(window.showToast)showToast(window._mvPrepOn()?'Session GT terminée · plus rien n’est enregistré':'Essai terminé · lecture seule','#7A1020'); return; }
   // #wipe : VERROU DE CHARGEMENT (Couche 2 anti-perte) -- ne jamais persister l'etat memoire
@@ -863,31 +928,7 @@ function saveData(keyHint, toastMsg, toastCoul) {
   }
   if((keyHint==='parcelles'||!keyHint) && typeof _recalcSurfTotale==='function'){ try{ _recalcSurfTotale(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveData'); } }
   // Toujours lire depuis window.* (source de vérité après synchro Firebase)
-  const W = {
-    parcelles:   window.PARCELLES   || PARCELLES,
-    journal:     window.JOURNAL     || JOURNAL,
-    sessions:    window.SESSIONS    || SESSIONS,
-    travaux:     window.TRAVAUX     || TRAVAUX,
-    traitements: window.TRAITEMENTS || TRAITEMENTS,
-    catalogue:   window.CATALOGUE   || CATALOGUE,
-    conducteurs: window.CONDUCTEURS || CONDUCTEURS,
-    activites:   window.ACTIVITES   || ACTIVITES,
-    tracteurs_list: window.TRACTEURS_LIST || TRACTEURS_LIST,
-    entretiens:  window.ENTRETIENS  || ENTRETIENS,
-    reparateur:  window.REPARATEUR  || REPARATEUR,
-    reparateur_hist: window.REPARATEUR_HIST || REPARATEUR_HIST,
-    membres:     window.MEMBRES     || MEMBRES,
-    saisons:     window.SAISONS     || SAISONS,
-    taches:      window.TACHES      || TACHES,
-    historique:  window.HISTORIQUE  || HISTORIQUE,
-    cave_elevage: window.CAVE_ELEVAGE,
-    cave_vendange: window.CAVE_VENDANGE,
-    planning_templates: window.PLANNING_TEMPLATES,
-    planning_entries:   window.PLANNING_ENTRIES,
-    planning_acomptes:  window.PLANNING_ACOMPTES,
-    planning_hsup:      window.PLANNING_HSUP,
-    config:             window.CONFIG || CONFIG,
-  };
+  const W = _mvValeursMemoire();   // ENTREE-1 (§244) : la même liste sert aux bases de l'entrée sans réseau
 
   // ★★★ UNE CLE INCONNUE N'EST PAS « PAS DE CLE ».
   //   Sans ce garde-fou, `saveData('intrants')` (cle qui n'existe PAS dans W --
@@ -963,6 +1004,7 @@ function loadData() {
     const raw = localStorage.getItem(_lsk);
     if (!raw) return false;
     const d = JSON.parse(raw);
+    _mvSnapCles = (d && d.CLES && typeof d.CLES === 'object') ? d.CLES : null;   // ENTREE-1 : une copie d'avant n'en dit rien
     // LISTES-1 : le repli hors ligne passe par le même filtre que Firestore.
     Object.keys(_MV_LISTES_OBJETS).concat(Object.keys(_MV_SOUS_LISTES)).forEach(function(k){ var K=k.toUpperCase(); if(d[K]) d[K]=_mvListeObjets(k, d[K]); });
     if (d.PARCELLES)    { PARCELLES.length=0; d.PARCELLES.forEach(x=>PARCELLES.push(x)); }
@@ -1468,6 +1510,22 @@ function _loginRenderTuiles(){
   if(sous) sous.textContent = (seul >= 0) ? 'Bon retour' : 'Choisissez votre profil';
 }
 window._loginRenderTuiles = _loginRenderTuiles;
+
+// ★★ PROFILS-1 (§243) — LES TUILES DE L'APPAREIL, TOUT DE SUITE. Appelée par _fbLoad AVANT ses attentes réseau
+//   bornées (statut 5 s, profils 8 s, lecture directe 6 s) : sur un réseau qui ne répond pas, la zone des profils
+//   restait vide 18,6 s alors que le téléphone garde la liste (mesuré dans Chromium, §241). La liste du serveur les
+//   remplace en arrivant (_mvMembresServeur), tant que personne n'a touché une tuile.
+//   ⚠️ Mêmes portes qu'initLogin, dans le même ordre : la visite guidée et le domaine de démo ont leur propre écran.
+//   Rien sur l'appareil (nouveau téléphone, domaine neuf) : on rend false, et _fbLoad attend le serveur comme avant.
+window._mvTuilesAppareil = function(){
+  if(window.currentUser || (typeof window.loginPendingIdx==='number' && window.loginPendingIdx>=0)) return false;
+  if(sessionStorage.getItem('mavigne_demo_visite')==='1') return false;
+  if((localStorage.getItem('mavigne_tenant')||'')==='domaine-dupont') return false;
+  if(!loadData()) return false;
+  if(!(MEMBRES||[]).some(function(m){ return m && m.nom && m.statut!=='Inactif'; })) return false;
+  _loginRenderTuiles();
+  return true;
+};
 
 function initLogin(){
   if(window.initGTLoginTap) window.initGTLoginTap();
@@ -3255,6 +3313,129 @@ function _loginErreur(msg, relancer){
   return true;
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// ★★★ ENTREE-1 (§244) — SE CONNECTER SANS RÉSEAU, EN RETAPANT SON MOT DE PASSE
+// ════════════════════════════════════════════════════════════════════════════
+// Nico (04/10) : « on peut se connecter même sans réseau (cave, mauvais signal) » — le mot de passe se retape comme
+// d'habitude. Prouvé avant le lot (§241) : à froid et sans réseau, la connexion échouait TOUJOURS, car la connexion
+// Firebase demande le serveur, même quand la session est encore gardée sur le téléphone (persistance locale, voulue :
+// cf. _fbSessionOnly, réservée à GUERETTECH).
+// LE PRINCIPE. À chaque connexion RÉUSSIE avec du réseau — après la garde SEC-2, donc jamais un mot de passe provisoire —
+// le téléphone garde une EMPREINTE du mot de passe (PBKDF2-SHA-256, sel aléatoire, _MV_EMPREINTE_ITER tours ; jamais le
+// mot de passe), le compte (uid) et ses droits. Sans réseau, le mot de passe tapé est comparé à l'empreinte ; s'il
+// correspond ET que la session gardée sur le téléphone est celle de ce compte, on entre avec elle : lectures sur la copie
+// du téléphone, écritures dans la file, comme quand le réseau tombe en cours de journée.
+// TROIS LIMITES, ASSUMÉES : ① la première connexion sur un téléphone demande du réseau ; ② une empreinte par domaine et
+// par téléphone, celle de la DERNIÈRE personne connectée (Firebase ne garde qu'une session) ; ③ un mot de passe changé
+// ailleurs ouvre encore, sans réseau, jusqu'à la prochaine connexion avec réseau.
+// Ce qu'un voleur du téléphone y gagnerait : rien de plus que la session Firebase déjà gardée sur l'appareil.
+var _MV_EMPREINTE_ITER = 310000;
+var _MV_EMPREINTE_DROITS = ['tenant','adm','ro','plan','trial_until','demo','terms','off'];
+var _MV_ENTREE_LENTE = 8000;   // réseau qui traîne : au-delà, l'empreinte peut ouvrir (seulement si elle existe)
+function _mvEmpreinteCle(){ var t=''; try{ t=localStorage.getItem('mavigne_tenant')||''; }catch(e){ t=''; } return t ? 'mavigne_entree_v1_'+t : ''; }
+function _mvB64(buf){ var s='', b=new Uint8Array(buf); for(var i=0;i<b.length;i++) s+=String.fromCharCode(b[i]); return btoa(s); }
+function _mvDeB64(t){ var s=atob(String(t)), b=new Uint8Array(s.length); for(var i=0;i<s.length;i++) b[i]=s.charCodeAt(i); return b; }
+async function _mvEmpreinteCalc(mdp, sel, iter){
+  var c=window.crypto && window.crypto.subtle; if(!c) throw new Error('WebCrypto indisponible');
+  var k=await c.importKey('raw', new TextEncoder().encode(String(mdp)), 'PBKDF2', false, ['deriveBits']);
+  return _mvB64(await c.deriveBits({ name:'PBKDF2', salt:sel, iterations:iter, hash:'SHA-256' }, k, 256));
+}
+function _mvEmpreinteLire(){
+  try{
+    var k=_mvEmpreinteCle(); if(!k) return null;
+    var e=JSON.parse(localStorage.getItem(k)||'null');
+    return (e && e.v===1 && e.nom && e.uid && e.sel && e.emp && e.iter) ? e : null;
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvEmpreinteLire'); return null; }
+}
+function _mvEmpreinteEffacer(){
+  try{ var k=_mvEmpreinteCle(); if(k) localStorage.removeItem(k); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvEmpreinteEffacer'); }
+}
+// Sans attente : l'entrée ne patiente pas pour elle ; un échec est tracé, jamais levé.
+function _mvEmpreinteEcrire(m, mdp, fbUser){
+  try{
+    var k=_mvEmpreinteCle();
+    if(!k || !mdp || !fbUser || !fbUser.uid || !(window.crypto && window.crypto.subtle)) return Promise.resolve(false);
+    var sel=window.crypto.getRandomValues(new Uint8Array(16)), cl=window._MV_CLAIMS||{}, droits={};
+    _MV_EMPREINTE_DROITS.forEach(function(d){ if(cl[d]!==undefined) droits[d]=cl[d]; });
+    return _mvEmpreinteCalc(mdp, sel, _MV_EMPREINTE_ITER).then(function(emp){
+      localStorage.setItem(k, JSON.stringify({ v:1, nom:String(m.nom), uid:String(fbUser.uid), sel:_mvB64(sel), iter:_MV_EMPREINTE_ITER,
+        emp:emp, droits:droits, quand:Date.now() }));
+      return true;
+    }).catch(function(e){
+      if(window.logError) window.logError({level:'info', cat:'auth', msg:'Empreinte de connexion non écrite', detail:String((e&&e.message)||e)});
+      return false;
+    });
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvEmpreinteEcrire'); return Promise.resolve(false); }
+}
+function _mvEgal(a, b){ a=String(a); b=String(b); if(a.length!==b.length) return false; var d=0; for(var i=0;i<a.length;i++) d|=a.charCodeAt(i)^b.charCodeAt(i); return d===0; }
+// Le verdict, sans rien ouvrir : { r:'ok', u } · { r:'mdp' } · { r:'premiere' } · { r:'autre' } · { r:'erreur' }.
+async function _mvVerifierHorsReseau(m, mdp){
+  try{
+    var E=_mvEmpreinteLire();
+    if(!E) return { r:'premiere' };
+    if(String(E.nom)!==String(m && m.nom)) return { r:'autre' };
+    var emp=await _mvEmpreinteCalc(mdp, _mvDeB64(E.sel), E.iter);
+    if(!_mvEgal(emp, E.emp)) return { r:'mdp' };
+    var u=window._fbUtilisateurPret ? await window._fbUtilisateurPret(3000) : null;
+    if(!u) return { r:'premiere' };
+    if(String(u.uid)!==String(E.uid)) return { r:'autre' };
+    return { r:'ok', u:u, droits:E.droits||{} };
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvVerifierHorsReseau'); return { r:'erreur' }; }
+}
+// La session posée — UN chemin pour l'entrée normale et l'entrée sans réseau.
+function _mvSessionPoser(m, fbUser){
+  m._firebaseUser = fbUser;
+  currentUser = m;
+  window.currentUser = currentUser;
+  // UX-LOGIN — on retient le profil SEULEMENT ici, au succes definitif (pas au clic sur la tuile).
+  _loginMemEcrire(m.nom);
+  _loginVoirTous = false;
+  try{ _mvSessArm(fbUser && fbUser.uid); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvSessionPoser'); }
+  window.loginPendingIdx = -1;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('login-profiles').style.display = 'grid';
+  document.getElementById('login-pwd-panel').style.display = 'none';
+  document.getElementById('login-pwd-input').value = '';
+  document.body.style.background = 'var(--blanc)';
+  var b=document.getElementById('login-pwd-btn'); if(b){ b.disabled = false; b.textContent = 'Se connecter'; }
+}
+// Entrée sans réseau : la copie du téléphone devient la base de travail. Deux verrous de la session normale sont
+// réglés, sans rien affaiblir : ① Couche 2 anti-perte — ne sont libérées que les clés que la copie dit avoir reçues du
+// serveur (CLES) ; ② la base de fusion — sans elle, l'envoi des parcelles ferait gagner la copie du téléphone partout,
+// y compris sur ce qu'un collègue a validé entre-temps ; la base est la copie telle qu'elle est chargée (une clé déjà
+// en file garde sa première base, _queueSave).
+function _mvEntrerHorsReseau(m, v){
+  if(!window._MV_CLAIMS || !Object.keys(window._MV_CLAIMS).length) window._MV_CLAIMS = Object.assign({}, v.droits||{});
+  ['parcelles','membres','saisons'].forEach(function(k){ if(_mvSnapCles && _mvSnapCles[k]) _mvKeySeen[k] = true; });
+  if(window._fbBasesDepuisAppareil){
+    try{ window._fbBasesDepuisAppareil(_mvValeursMemoire()); }
+    catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvEntrerHorsReseau#bases'); }
+  }
+  window._mvEntreeHL = true;
+  _mvSessionPoser(m, v.u);
+  if(window.logError) window.logError({level:'info', cat:'auth', msg:'Entrée sans réseau (empreinte du téléphone)'});
+  _mvApresEntree();
+}
+// La connexion au serveur, bornée QUAND une empreinte existe : un réseau qui traîne (une barre au fond de la cave)
+// ne fait plus attendre plus de _MV_ENTREE_LENTE — l'empreinte peut ouvrir, la réponse tardive est ignorée.
+// Sans empreinte : exactement comme avant, on attend la réponse.
+function _mvConnexion(mail, mdp, m){
+  var sign = firebase.auth().signInWithEmailAndPassword(mail, mdp);
+  if(!_mvEmpreinteLire()) return sign;
+  var fini=false;
+  return new Promise(function(res, rej){
+    sign.then(function(c){ if(!fini){ fini=true; res(c); } }, function(e){ if(!fini){ fini=true; rej(e); } });
+    setTimeout(function(){
+      if(fini) return;
+      _mvVerifierHorsReseau(m, mdp).then(function(v){
+        if(fini || v.r!=='ok') return;        // la réponse est arrivée entre-temps, ou l'empreinte n'ouvre pas : on attend
+        fini=true; _mvEntrerHorsReseau(m, v); res({ _mvHL:true });
+      });
+    }, _MV_ENTREE_LENTE);
+  });
+}
+
 function selectProfile(idx){
   window.loginPendingIdx = idx;
   var m = MEMBRES[idx];
@@ -3353,13 +3534,18 @@ async function confirmLogin(){
   // perdu le réseau l'enverrait déranger son responsable pour rien.
   var _mail = await _loginAwaitEmail();
   if(!_mail) {
+    // ENTREE-1 (§244) : sans adresse (serveur injoignable), l'empreinte du téléphone peut encore ouvrir.
+    var _v0 = await _mvVerifierHorsReseau(m, saisi);
+    if(_v0.r === 'ok') { _mvEntrerHorsReseau(m, _v0); return; }
     btn.disabled = false;
     btn.textContent = 'Se connecter';
-    _loginErreur('Compte inaccessible — vérifiez votre connexion, puis réessayez. Si cela persiste, contactez votre responsable.', navigator.onLine);
+    _loginErreur(_v0.r === 'mdp' && !navigator.onLine ? 'Mot de passe incorrect.'
+      : 'Compte inaccessible — vérifiez votre connexion, puis réessayez. Si cela persiste, contactez votre responsable.', navigator.onLine);
     return;
   }
   try {
-    const cred = await firebase.auth().signInWithEmailAndPassword(_mail, saisi);
+    const cred = await _mvConnexion(_mail, saisi, m);
+    if (cred && cred._mvHL) return;   // ENTREE-1 : le réseau traînait, l'empreinte a ouvert
 
     // ── SEC-2 : premier login → changement de mot de passe obligatoire ──
     // Placé ICI, avant toute entrée : le compte est authentifié (la session existe) mais
@@ -3377,27 +3563,18 @@ async function confirmLogin(){
       }
     } catch(e) { /* claims illisibles (réseau) → on n'enferme personne dehors */ }
 
-    m._firebaseUser = cred.user;
-    currentUser = m;
-    window.currentUser = currentUser;
-    // UX-LOGIN — on retient le profil SEULEMENT ici, au succes definitif.
-    // Pas au clic sur la tuile : on garderait le nom de quelqu'un qui s'est trompe
-    // de profil et n'a jamais pu entrer. Pas non plus sur le chemin SEC-2 du premier
-    // mot de passe, qui sort par un `return` plus haut : ce login-la n'est pas fini.
-    _loginMemEcrire(m.nom);
-    _loginVoirTous = false;
-    try{ _mvSessArm(cred.user && cred.user.uid); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/confirmLogin'); }
+    // UX-LOGIN : le profil n'est retenu qu'ici, au succès définitif — pas au clic sur la tuile (on garderait le nom de
+    // quelqu'un qui s'est trompé de profil), pas sur le chemin SEC-2 ci-dessus (ce login-là n'est pas fini).
+    _mvSessionPoser(m, cred.user);
+    _mvEmpreinteEcrire(m, saisi, cred.user);   // ENTREE-1 (§244) : après la garde SEC-2, jamais le mot de passe provisoire
     if(DEBUG) console.log('Login Firebase OK:', m.nom, 'roles:', m.roles);
-    window.loginPendingIdx = -1;
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('login-profiles').style.display = 'grid';
-    document.getElementById('login-pwd-panel').style.display = 'none';
-    document.getElementById('login-pwd-input').value = '';
-    document.body.style.background = 'var(--blanc)';
-    btn.disabled = false;
-    btn.textContent = 'Se connecter';
     _mvApresEntree();
   } catch(e) {
+    // ★★★ ENTREE-1 (§244) — un échec de RÉSEAU passe d'abord par l'empreinte du téléphone (le bouton reste
+    //   « Connexion… » pendant la vérification) : si elle ouvre, on entre sans réseau.
+    var _reseau = !!(e && (e.code === 'auth/network-request-failed' || /^appCheck\//.test(String(e.code || '')))) || !navigator.onLine;
+    var _v = _reseau ? await _mvVerifierHorsReseau(m, saisi) : null;
+    if (_v && _v.r === 'ok') { _mvEntrerHorsReseau(m, _v); return; }
     btn.disabled = false;
     btn.textContent = 'Se connecter';
     var _loginErr = 'Mot de passe incorrect.';
@@ -3408,13 +3585,18 @@ async function confirmLogin(){
       _loginErr = 'Compte introuvable. Contactez l\'administrateur.';
     } else if (e.code === 'auth/user-disabled') {
       _loginErr = 'Ce compte a été désactivé.';
-    } else if (e.code === 'auth/network-request-failed' || /^appCheck\//.test(String(e.code || '')) || !navigator.onLine) {
+    } else if (_reseau) {
       // ★ BOOT-1 (§145) — avec du réseau, c'est le serveur (ou le jeton App Check de cette page) qui ne
       //   répond pas : « Pas de connexion réseau » mentait (§68h), et réessayer sans relancer échouait.
       // ★★ LOGIN-1 (§242) — SANS RÉSEAU, C'EST APP CHECK QUI ÉCHOUE LE PREMIER (`appCheck/fetch-network-error`),
       //   avant même que le mot de passe parte : ce code tombait dans le « Mot de passe incorrect. » par défaut.
       //   Prouvé dans Chromium (§241). Un code appCheck/… ou un téléphone hors ligne = jamais le mot de passe.
-      _loginErr = navigator.onLine ? 'Le serveur ne répond pas. Relancez l\u2019application, puis réessayez.' : 'Pas de connexion réseau \u2014 réessayez quand le téléphone capte.';
+      // ★★★ ENTREE-1 (§244) — et si l'empreinte n'a pas ouvert, le message dit POURQUOI.
+      _loginErr = navigator.onLine ? 'Le serveur ne répond pas. Relancez l\u2019application, puis réessayez.'
+        : (_v && _v.r === 'mdp') ? 'Mot de passe incorrect.'
+        : (_v && _v.r === 'premiere') ? 'Pas de connexion réseau \u2014 la première connexion sur ce téléphone en demande. Réessayez quand il capte.'
+        : 'Pas de connexion réseau \u2014 réessayez quand le téléphone capte.';
+      if (_v && _v.r === 'autre') _loginErr = 'Sans réseau, seule la dernière personne connectée sur ce téléphone peut entrer. Réessayez quand le téléphone capte.';
       _loginRelancer = navigator.onLine;
     } else if (!e.code) {
       _loginErr = 'Connexion bloquée (extension navigateur ou VPN). Désactivez uBlock / MetaMask et réessayez.';
@@ -3441,31 +3623,37 @@ function _mvApresEntree(){
     fetchMeteo();
     clearInterval(_meteoInterval); _meteoInterval = setInterval(fetchMeteo, 15 * 60 * 1000); // anti-empilement
     if(navigator.onLine && window._fbLoadAfterAuth) {
-      window._fbLoadAfterAuth().then(function() {
-        _migrateTachesV3();
-        _migrateTachesSaison();
-        window._dataReady = true;
-        if(window.fbNoterAppareil && currentUser) window.fbNoterAppareil(currentUser.nom);   // VER-1 : le parc d'appareils
-        applyVigneSaison();
-        var activePage = document.querySelector('.page.active');
-        var pid = activePage ? activePage.id : '';
-        if(pid === 'page-hub')       goHub();
-        if(pid === 'page-home')      renderHome();
-        if(pid === 'page-pilotage' && window.renderPilotage) _ensureLeaflet().then(function(){window.renderPilotage();}).catch(function(){window.renderPilotage();});
-        if(pid === 'page-parcelles') { renderParcelles(); computePStats(); }
-        if(pid === 'page-journal')   renderJournalList();
-        if(pid === 'page-tracteur')  renderTracteur();
-        if(pid === 'page-phyto')     renderPhyto();
-        if(pid === 'page-reglages')  window.renderReglages();
-        if(pid === 'page-cave'     && window.renderCave)     window.renderCave();
-        if(pid === 'page-reserve'  && window.renderReserve)  window.renderReserve();
-        if(pid === 'page-planning' && window.renderPlanning) window.renderPlanning();
-        if(window.checkWhatsNew) setTimeout(window.checkWhatsNew, 700);
-      }).catch(function(){ window._dataReady = true; });
+      window._fbLoadAfterAuth().then(_mvApresChargement).catch(function(){ window._dataReady = true; });
     } else {
-      window._dataReady = true;
+      // ENTREE-1 (§244) : sans réseau, la copie du téléphone est déjà en mémoire — l'écran se dessine tout de suite ;
+      //   au retour du signal, firebase.js lance la lecture et l'écoute (le gestionnaire « online »).
+      _mvApresChargement();
     }
 }
+// La suite d'une entrée, une fois les données disponibles — partagée par l'entrée normale, l'entrée sans réseau et le
+// retour du réseau après une entrée sans réseau (ENTREE-1, §244).
+function _mvApresChargement(){
+  _migrateTachesV3();
+  _migrateTachesSaison();
+  window._dataReady = true;
+  if(window.fbNoterAppareil && currentUser) window.fbNoterAppareil(currentUser.nom);   // VER-1 : le parc d'appareils
+  applyVigneSaison();
+  var activePage = document.querySelector('.page.active');
+  var pid = activePage ? activePage.id : '';
+  if(pid === 'page-hub')       goHub();
+  if(pid === 'page-home')      renderHome();
+  if(pid === 'page-pilotage' && window.renderPilotage) _ensureLeaflet().then(function(){window.renderPilotage();}).catch(function(){window.renderPilotage();});
+  if(pid === 'page-parcelles') { renderParcelles(); computePStats(); }
+  if(pid === 'page-journal')   renderJournalList();
+  if(pid === 'page-tracteur')  renderTracteur();
+  if(pid === 'page-phyto')     renderPhyto();
+  if(pid === 'page-reglages')  window.renderReglages();
+  if(pid === 'page-cave'     && window.renderCave)     window.renderCave();
+  if(pid === 'page-reserve'  && window.renderReserve)  window.renderReserve();
+  if(pid === 'page-planning' && window.renderPlanning) window.renderPlanning();
+  if(window.checkWhatsNew) setTimeout(window.checkWhatsNew, 700);
+}
+window._mvApresChargement = _mvApresChargement;
 
 // ════════════════════════════════════════════════════════════════════════════
 // ★★★ PREP-1 — LE MODE PRÉPARATION GUERETTECH (§134)
@@ -3713,6 +3901,8 @@ function logout(){
   // ⚠ Aucune déconnexion AUTOMATIQUE n'existe (vérifié : logout() n'a que deux
   // appelants, l'avatar et Réglages). Personne ne perd donc son souvenir tout seul.
   _loginMemOublier();
+  _mvEmpreinteEffacer();   // ENTREE-1 (§244) : une déconnexion volontaire efface aussi l'empreinte (poste partagé)
+  window._mvEntreeHL = false;
   _loginVoirTous = false;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('login-profiles').style.display = 'grid';
@@ -11856,6 +12046,10 @@ function _mvDemarrer(){
     if(window.updateNotifUI) window.updateNotifUI('denied');
   }
 }
+// ★ PROFILS-1 (§243) — LE DÉMARRAGE PART DÈS QUE LA PAGE EST LUE (DOMContentLoaded). `load` attend aussi le script
+//   reCAPTCHA : sur un réseau qui ne répond pas, il ne vient pas, et le filet de 2,5 s ci-dessous devenait un temps
+//   mort avant les tuiles (mesuré dans Chromium : première tuile à 3,6 s). `load` et le filet restent, pour le cas où.
+document.addEventListener('DOMContentLoaded', _mvDemarrer);
 window.addEventListener('load', _mvDemarrer);
 setTimeout(function(){
   if(_mvDemarre) return;

@@ -228,7 +228,11 @@ function statiques(S) {
     '★★ « Changer mon mot de passe » refusé avant d’ouvrir (il viserait le compte GT)']);
   const cl = fonction(S.app, 'confirmLogin', 'src/app.js'), ae = fonction(S.app, '_mvApresEntree', 'src/app.js');
   r.push([cl.indexOf('_mvApresEntree();') !== -1 && cl.indexOf('goHub();') === -1, '★ confirmLogin entre par _mvApresEntree']);
-  r.push([ae.indexOf('applyRoles();') !== -1 && ae.indexOf('_fbLoadAfterAuth') !== -1 && ae.indexOf('_migrateTachesV3();') !== -1,
+  /* ENTREE-1 (§244) : la suite chargée (migrations, rendu) a quitté _mvApresEntree pour _mvApresChargement, partagée avec
+     l'entrée sans réseau et le retour du signal ; la séquence reste complète, en deux fonctions. */
+  const ac = fonction(S.app, '_mvApresChargement', 'src/app.js');
+  r.push([ae.indexOf('applyRoles();') !== -1 && ae.indexOf('_fbLoadAfterAuth') !== -1 && ae.indexOf('_mvApresChargement') !== -1
+      && ac.indexOf('_migrateTachesV3();') !== -1,
     '_mvApresEntree porte la séquence d’entrée complète']);
   r.push([fonction(S.app, '_mvPrepBoot', 'src/app.js').indexOf('_mvApresEntree();') !== -1, '★ la préparation entre par le MÊME chemin']);
   r.push([fonction(S.app, '_mvSessCheck', 'src/app.js').indexOf('_mvPrepOn()') !== -1, 'la garde multi-onglet ignore la préparation']);

@@ -319,17 +319,17 @@ un écran change, harnais et contre-épreuve, Règle d'or n° 4.
 |---|---|---|---|---|---|
 | 1 | **VALID-1** ✅ fait (§242) | « Valider » ne bloque plus jamais : la feuille se ferme tout de suite, la météo complète l'entrée ensuite | ½ j | faible | — |
 | 2 | **LOGIN-1** ✅ fait (§242) | sans réseau, l'écran dit « pas de réseau », plus « mot de passe incorrect » | ¼ j | nul | — |
-| 3 | **VOILE-1** | l'appli s'ouvre 2 à 3 s plus tôt | ¼ j | nul | la durée du voile |
-| 4 | **PROFILS-1** | la tuile apparaît tout de suite, même sur un réseau qui traîne | ½ j | faible | — |
-| 5 | **ENTREE-1** | rouvrir l'appli, c'est être dedans, réseau ou pas | 1 à 2 j | moyen (sécurité) | **oui** : téléphones partagés ? |
-| 6 | **RENDU-1** | plus de gel quand un collègue valide ; un Accueil plus vif | 1 à 2 j | moyen | — |
-| 7 | **TAILLE-2** | un document qui grossit prévient **avant** d'être refusé | ½ j | nul | — |
-| 8 | **PAQUET-1** | 339 Ko de moins à lire à chaque ouverture | 1 j | faible | ton accord |
-| 9 | **TEXTE-A** | lisible au soleil et avec des gants (backlog 36 et 39) | 1 à 2 j | faible | maquette de 3 écrans |
+| 3 | **VOILE-1** ✅ fait (§243) | l'appli s'ouvre 2 à 3 s plus tôt | ¼ j | nul | décidé : chorégraphie complète à la 1re ouverture seulement |
+| 4 | **PROFILS-1** ✅ fait (§243) | la tuile apparaît tout de suite, même sur un réseau qui traîne | ½ j | faible | — |
+| 5 | **ENTREE-1** ✅ fait (§244) | décision du 04/10 : le mot de passe se retape comme d'habitude, et **ouvre l'appli même sans réseau** (empreinte gardée sur le téléphone, dernière personne connectée) | 1 à 2 j | moyen (sécurité) | tranché |
+| 6 | **RENDU-1** ✅ fait (§245) | plus de gel quand un collègue valide : seule la page affichée se redessine, une fois (Accueil allégé : à faire) | 1 à 2 j | moyen | — |
+| 7 | **TAILLE-2** ✅ fait (§246) | un document qui grossit prévient **avant** d'être refusé (alerte GT à 90 % — décision de Nico —, refus clair et saisie au coffre au-delà) | ½ j | nul | — |
+| 8 | ~~**PAQUET-1**~~ — abandonné | décision du 04/10 : le journal des nouveautés reste dans le paquet, comme aujourd'hui | — | — | tranché |
+| 9 | **TEXTE-A** | lisible au soleil et avec des gants (backlog 36 et 39) | 1 à 2 j | faible | **maquette d'abord** (demandée le 04/10) |
 | 10 | **JOURNAL-1** | le Journal s'affiche en moins de 150 ms | ½ j | faible | — |
 | 11 | **DONNEES-1** | plus aucun document près de la limite, à 45 ha comme à 12 | 3 à 5 j | **élevé** | oui, après `npm run taille` |
 | 12 | **IDS-1** | renommer une parcelle ou un salarié devient sûr | 3 à 5 j | élevé | oui |
-| 13 | **GT-1** | la console GT quitte le téléphone des clients | 1 j | moyen | oui (PREP-1) |
+| 13 | **GT-1** | la console GT quitte le téléphone des clients | 1 j | moyen | **décidé le 04/10** (à caler avec PREP-1) |
 
 ### 5.1 Les premiers lots, en détail
 
@@ -458,7 +458,8 @@ modifie jamais la valeur reçue, elle peut servir de base telle quelle. **À vé
 FUSION-1. Enfin, alléger `renderHome` (le prix fixe de 120 ms), carte par carte, avec la mesure Chromium pour juge.
 
 **TAILLE-2 — prévenir avant de refuser.** Dans `fbSave`, avant l'envoi : une estimation de la taille (la règle de
-`mv-taille-docs.mjs`), un `warning` journalisé au-delà de 70 % (il remonte à l'Admin GT, AVALE-2), et au-delà de 1 Mio un
+`mv-taille-docs.mjs`), un `warning` journalisé au-delà de 90 % (70 % au départ ; 90 % décidé par Nico le 04/10, le domaine de
+référence étant déjà vers 800 Ko), il remonte à l'Admin GT (AVALE-2), et au-delà de 1 Mio un
 refus clair à l'écran, au lieu d'un échec Firestore incompris.
 
 **PAQUET-1 — le journal des nouveautés hors du paquet.** Garder dans `utils.js` les blocs récents — jusqu'à la plus vieille

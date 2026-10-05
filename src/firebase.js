@@ -28,6 +28,7 @@ import { getStorage, ref as _storageRef, uploadBytesResumable, getDownloadURL, d
 import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/functions';
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import { deepClone } from './utils.js';
+import { MV_LIMITE_DOC, mvOctetsDoc } from './taille-doc.js';   // TAILLE-2 (§246) : la règle partagée avec npm run taille
 import {
   getAuth,
   connectAuthEmulator,
@@ -436,7 +437,7 @@ async function _flushQueue() {
   }
   if(DEBUG) console.log('[Sync] Vidage queue hors ligne :', keys);
   showSyncBadge('Synchronisation…', '#1A4A7A');
-  var success = true;
+  var success = true, _tropN = 0;   // TAILLE-2 : une clé trop grosse quitte la file (au coffre), et le dit
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
     try {
@@ -445,20 +446,24 @@ async function _flushQueue() {
         //   de la mise en file, et la mémoire mise à jour (elle dérive de la relecture, pas de la file).
         var _bmP = Array.isArray(_baseParcelles) ? deepClone(_baseParcelles) : deepClone(_offlineQueue[key]);
         var _pq = await _saveParcellesMerged(_offlineQueue[key], _mvBaseFile(key));
-        if (_pq && !_pq.__mvBlocked) _mvParcellesApres(_pq, _bmP);
+        if (_pq && _pq.__mvTrop) { _mvTropGros('parcelles', _offlineQueue[key], _pq.octets); _tropN++; }   // ★★ TAILLE-2
+        else if (_pq && !_pq.__mvBlocked) _mvParcellesApres(_pq, _bmP);
       } else if (_MV_FUSION_EXCLUES[key]) {
         if (await _mvBlockDestructive(key, _offlineQueue[key])) {
           // #wipe : ecriture destructrice en file -> on l'abandonne (pas de re-tentative en boucle)
           if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'flush ' + key + ' BLOQUE (anti-ecrasement) -- retire de la file' });
         } else {
-          await setDoc(fbDocRef(key), { value: _fbClone(key, _offlineQueue[key]) });
+          var _ecritQ = _fbClone(key, _offlineQueue[key]), _octQ = _mvTailleControle(key, _ecritQ);   // ★★ TAILLE-2
+          if (_octQ > MV_LIMITE_DOC) { _mvTropGros(key, _offlineQueue[key], _octQ); _tropN++; }
+          else await setDoc(fbDocRef(key), { value: _ecritQ });
         }
       } else {
         // ★★★ FUSION-1 (§146) — la valeur en file est FUSIONNÉE avec le serveur : ce que les autres ont
         //   saisi pendant l'absence reste. La mémoire, elle, dérive de la relecture de la reconnexion.
         var _bmF = (_mvBaseDe(key) !== undefined) ? deepClone(_fbBases[key]) : deepClone(_offlineQueue[key]);
         var _fq = await _mvSauverFusion(key, _offlineQueue[key], _mvBaseFile(key));
-        if (_fq && _fq.bloque) {
+        if (_fq && _fq.trop) { _mvTropGros(key, _offlineQueue[key], _fq.octets); _tropN++; }   // ★★ TAILLE-2
+        else if (_fq && _fq.bloque) {
           // #wipe : ecriture destructrice en file -> on l'abandonne (pas de re-tentative en boucle)
           if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'flush ' + key + ' BLOQUE (anti-ecrasement) -- retire de la file', detail:'cur=' + _fq.curN + ' new=' + _fq.newN });
         } else {
@@ -486,6 +491,13 @@ async function _flushQueue() {
         delete _offlineBases[key];
         continue;
       }
+      // ★★ TAILLE-2 (§246) — filet : refus de taille du serveur → au coffre, hors de la file (sinon renvoyé sans fin).
+      if (_mvErreurTaille(e)) {
+        _mvTropGros(key, _offlineQueue[key], _mvOctets(key, _offlineQueue[key])); _tropN++;
+        delete _offlineQueue[key];
+        delete _offlineBases[key];
+        continue;
+      }
       if(window.logError) window.logError({level:'warning',cat:'sync',msg:'Synchro échouée: '+key,detail:String(e)});
       success = false;
     }
@@ -500,7 +512,9 @@ async function _flushQueue() {
   if (Object.keys(_offlineQueue).length === 0) {
     try { localStorage.removeItem('mavigne_offline_queue_t'); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_flushQueue#t'); }
   }
-  if (success && keys.length > 0) {
+  if (_tropN) {
+    /* TAILLE-2 : le voyant garde « taille maximale atteinte » posé par _mvTropGros — « synchronisé » mentirait */
+  } else if (success && keys.length > 0) {
     showSyncBadge(+ keys.length + ' modif. synchronisée' + (keys.length > 1 ? 's' : ''), '#3D6B27');
   } else if (!success) {
     var nRest = Object.keys(_offlineQueue).length;
@@ -547,15 +561,26 @@ window.addEventListener('online', function () {
   if(DEBUG) console.log('[Réseau] Connexion rétablie');
   showSyncBadge('Connexion rétablie…', '#1A4A7A');
   if (typeof window._updateMapOfflineBanner === 'function') window._updateMapOfflineBanner();
+  // ★★ ENTREE-1 (§244) — après une entrée SANS réseau, rien n'écoute encore le serveur : au retour du signal, d'abord la
+  //   file (fusionnée avec sa base), puis la session complète — lecture, écoute, droits, et la suite d'entrée.
+  if (window.currentUser && window._mvEntreeHL && !window._authReady && typeof window._fbLoadAfterAuth === 'function') {
+    setTimeout(function () {
+      _flushQueue().catch(function (e) { if (window.logError) window.logError({ level:'warning', cat:'sync', msg:'Flush après entrée sans réseau échoué', detail:String(e) }); })
+        .then(function () { return window._fbLoadAfterAuth(); })
+        .then(function () {
+          if (!window._authReady) return;      // le serveur ne répond toujours pas : le prochain « online » reprendra
+          window._mvEntreeHL = false;
+          if (window._mvLoadClaims) window._mvLoadClaims(true).catch(function (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/online#droits'); });
+          if (typeof window._mvApresChargement === 'function') window._mvApresChargement();
+        }).catch(function (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/online#entree-hl'); });
+    }, 50);
+    return;
+  }
   setTimeout(function(){ _flushQueue().catch(function(e){ if(window.logError) window.logError({level:'warning',cat:'sync',msg:'Flush offline échoué',detail:String(e)}); }); }, 800);
   setTimeout(function () {
     fbPullAll().then(function () {
       showSyncBadge('Synchronisé', '#3D6B27');
-      if (window.currentUser) {
-        if (window.renderHome)     window.renderHome();
-        if (window.renderParcelles) window.renderParcelles();
-        if (window.computePStats)  window.computePStats();
-      }
+      if (window.currentUser) _mvRendreBientot('*');   // RENDU-1 (§245) : la page affichée, une fois
     }).catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'firebase.js/showSyncBadge'); });
   }, 2000);
 });
@@ -814,22 +839,9 @@ function _fbSubscribe(key) {
       if (typeof window._mvAppliquerRenommages === 'function' && /^(config|parcelles|journal|taches|saisons|travaux)$/.test(key)) window._mvAppliquerRenommages(key);
       _mvBaseNoter(key, _sv, _md);   // ★ FUSION-1 : la base suit ce qui descend du serveur
       if (window.currentUser) {
-        var p = document.querySelector('.page.active');
-        if (p) {
-          var pid = p.id;
-          if ((key==='parcelles'||key==='journal'||key==='travaux') &&
-              (pid==='page-home'||pid==='page-parcelles'||pid==='page-journal')) {
-            if (window.renderHome)        window.renderHome();
-            if (window.renderParcelles)   window.renderParcelles();
-            if (window.computePStats)     window.computePStats();
-            if (pid==='page-journal' && window.renderJournalList) window.renderJournalList();
-          }
-          if (key==='sessions' && pid==='page-tracteur' && window.renderTracteur) window.renderTracteur();
-          if (key==='sessions' && pid==='page-home'     && window.renderHome)     window.renderHome();
-          if ((key==='traitements'||key==='catalogue') && pid==='page-phyto' && window.renderPhyto) window.renderPhyto();
-          if ((key==='reparateur'||key==='entretiens'||key==='reparateur_hist')  && pid==='page-tracteur'  && window.renderTracteur) window.renderTracteur();
-          if ((key==='planning_templates'||key==='planning_entries'||key==='planning_hsup') && pid==='page-planning' && window.renderPlanning) window.renderPlanning();
-        }
+        // ★★ RENDU-1 (§245) — la page affichée se redessine à l'image suivante, une fois, quelles que soient les clés
+        //   reçues entre-temps (_mvRendreBientot). Avant : chaque document reçu redessinait aussitôt l'Accueil ET Parcelles.
+        if (typeof window._mvRendreBientot === 'function') window._mvRendreBientot(key);
         if (_duServeur) {
           showSyncBadge('Mis à jour', '#1A4A7A');
           setTimeout(function () { showSyncBadge('Synchronisé', '#3D6B27'); }, 1500);
@@ -843,6 +855,34 @@ function _fbSubscribe(key) {
     else _fbListenFailed(key, e);
   }
 }
+
+// ★★ RENDU-1 (§245) — UN RENDU, DE LA SEULE PAGE AFFICHÉE, PAR IMAGE. Avant : chaque document reçu redessinait
+//   l'Accueil ET Parcelles (et le Journal), affichés ou non ; une validation d'un collègue écrit parcelles, journal et
+//   travaux — jusqu'à trois vagues, de 0,26 à 0,6 s d'écran figé sur un téléphone moyen (mesuré §241). Désormais les clés
+//   reçues s'accumulent et, à l'image suivante, SEULE la page affichée se redessine, une fois. Une page cachée se
+//   redessine quand on y va (goTo le fait). La clé '*' (après une relecture complète) vaut pour toutes les pages.
+var _MV_RENDU_PAGES = {
+  'page-home':      { cles: ['parcelles', 'journal', 'travaux', 'sessions'], rendre: function () { if (window.renderHome) window.renderHome(); } },
+  'page-parcelles': { cles: ['parcelles', 'journal', 'travaux'], rendre: function () { if (window.renderParcelles) window.renderParcelles(); if (window.computePStats) window.computePStats(); } },
+  'page-journal':   { cles: ['parcelles', 'journal', 'travaux'], rendre: function () { if (window.renderJournalList) window.renderJournalList(); } },
+  'page-tracteur':  { cles: ['sessions', 'reparateur', 'entretiens', 'reparateur_hist'], rendre: function () { if (window.renderTracteur) window.renderTracteur(); } },
+  'page-phyto':     { cles: ['traitements', 'catalogue'], rendre: function () { if (window.renderPhyto) window.renderPhyto(); } },
+  'page-planning':  { cles: ['planning_templates', 'planning_entries', 'planning_hsup'], rendre: function () { if (window.renderPlanning) window.renderPlanning(); } },
+};
+var _mvRenduCles = {}, _mvRenduImage = 0;
+function _mvRendreBientot(key) {
+  _mvRenduCles[key] = true;
+  if (_mvRenduImage) return;
+  var planifier = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame : function (f) { return setTimeout(f, 16); };
+  _mvRenduImage = planifier(function () {
+    var cles = _mvRenduCles; _mvRenduCles = {}; _mvRenduImage = 0;   // remis à zéro AVANT le rendu : une panne n'enraye pas la suite
+    if (!window.currentUser) return;
+    var p = document.querySelector('.page.active'), P = p && _MV_RENDU_PAGES[p.id];
+    if (!P || !(cles['*'] || P.cles.some(function (k) { return cles[k]; }))) return;
+    try { P.rendre(); } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvRendreBientot'); }
+  }) || 1;
+}
+window._mvRendreBientot = _mvRendreBientot;
 
 function fbListen() {
   _fbUnsubAll(); // idempotent : purge tout listener précédent avant de re-souscrire
@@ -1052,7 +1092,7 @@ var _mvDeniedRetried = {};
 async function _retryAsync(fn, retries, delayMs) {
   for (var i = 0; i <= retries; i++) {
     try { return await fn(); } catch(e) {
-      if(i === retries || _isDenied(e)) throw e;   // SEC-1 : refus de droits -> inutile de retenter
+      if(i === retries || _isDenied(e) || _mvErreurTaille(e)) throw e;   // SEC-1 : refus de droits -> inutile de retenter ; TAILLE-2 : la taille non plus (7 s pour rien)
       await new Promise(function(res){ setTimeout(res, delayMs * Math.pow(2, i)); });
     }
   }
@@ -1289,6 +1329,58 @@ function _mvBaseMem(key) {
 // L'écriture fusionnée : relire, fusionner, garder (même règle que _mvBlockDestructive, sur le
 // résultat), écrire. Une transaction se rejoue d'elle-même si le document bouge entre la lecture et
 // l'écriture ; hors ligne, elle échoue — et fbSave met en file, avec sa base.
+// ════════════════════════════════════════════════════════════════════════════
+// ★★ TAILLE-2 (§246) — LA TAILLE EN OCTETS, MESURÉE AVANT D'ENVOYER
+// ════════════════════════════════════════════════════════════════════════════
+// Firestore refuse tout document au-delà de 1 Mio. Avant : le refus revenait après trois essais, la saisie partait en
+// file et y était renvoyée SANS FIN (voyant « en attente » pour toujours, aucune cause visible), et chaque saisie
+// suivante du même document s'y coinçait — pour le journal, toutes les validations du domaine.
+// Désormais la valeur EXACTEMENT écrite est mesurée juste avant l'écriture (règle partagée : taille-doc.js) :
+//   > 90 % → une alerte SILENCIEUSE (warning, silencieux) remonte à la console GUERETTECH, une fois par jour, par
+//            document et par téléphone. Le client ne voit rien : il n'y peut rien.
+//   > limite → rien ne part, rien ne reste en file : la saisie va au coffre (Réglages › Saisies non enregistrées),
+//            l'écran dit la vraie raison, une alerte remonte (error, silencieux).
+// Filet : le refus de taille du serveur lui-même (_mvErreurTaille) suit le même chemin.
+// 90 % et non 70 % : décision de Nico (04/10). Le domaine de référence est déjà vers 800 Ko (≈ 78 %) après des actions
+// pour alléger : à 70 %, l'alerte sonnerait chaque jour pour rien. À son rythme (limite atteinte dans ~2 ans), 90 % laisse
+// encore ~11 mois avant le blocage.
+var _MV_TAILLE_ALERTE = 0.90;
+var _mvTropDit = {};
+function _mvOctets(key, valeur) { return mvOctetsDoc(['mavigne_' + TENANT_ID, key], { value: valeur }); }
+function _mvTailleControle(key, valeurEcrite) {
+  var o = _mvOctets(key, valeurEcrite);
+  if (o > MV_LIMITE_DOC * _MV_TAILLE_ALERTE && o <= MV_LIMITE_DOC) _mvTailleAlerte(key, o);
+  return o;
+}
+function _mvTailleAlerte(key, o) {
+  try {
+    var jour = new Date().toISOString().slice(0, 10), vu = JSON.parse(localStorage.getItem('mavigne_taille_vu') || '{}'), k = TENANT_ID + '|' + key;
+    if (vu[k] === jour) return;
+    vu[k] = jour;
+    localStorage.setItem('mavigne_taille_vu', JSON.stringify(vu));
+  } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvTailleAlerte'); }
+  if (window.logError) window.logError({ level:'warning', cat:'taille', silencieux:true,
+    msg:'Document « ' + key + ' » à ' + Math.round(o / MV_LIMITE_DOC * 100) + ' % de la limite Firestore (' + Math.round(o / 1024) + ' Ko sur 1 024)',
+    detail:'octets=' + o + ' · domaine=' + TENANT_ID });
+}
+function _mvErreurTaille(e) {
+  return !!(e && e.code === 'invalid-argument' && /maximum allowed size|exceeds the maximum/i.test(String(e.message || '')));
+}
+function _mvTropGros(key, value, o) {
+  _mvStashDenied(key, value);
+  var lbl = _mvKeyLbl(key);
+  if (window.logError) window.logError({ level:'error', cat:'taille', silencieux:true,
+    msg:'Document plein : « ' + key + ' » (' + Math.round(o / 1024) + ' Ko sur 1 024) — rien n’est envoyé, saisie mise au coffre',
+    detail:'octets=' + o + ' · domaine=' + TENANT_ID });
+  showSyncBadge('Enregistrement impossible — ' + lbl + ' : taille maximale atteinte · saisie conservée', '#7A1020');
+  if (!_mvTropDit[key]) {
+    _mvTropDit[key] = true;
+    if (window.showToast) window.showToast('« ' + lbl + ' » a atteint sa taille maximale : la saisie n\u2019a pas pu \u00eatre enregistr\u00e9e. '
+      + 'Elle est conserv\u00e9e (R\u00e9glages \u203a Saisies non enregistr\u00e9es). Pr\u00e9venez GUERETTECH.', '#7A1020');
+  }
+  return { ok: false, trop: true, stashed: true, octets: o };
+}
+
 async function _mvSauverFusion(key, local, base) {
   var ref = fbDocRef(key);
   return runTransaction(db, async function (tx) {
@@ -1299,7 +1391,9 @@ async function _mvSauverFusion(key, local, base) {
       var curN = _mvDocSize(key, distant), newN = _mvDocSize(key, fusion);
       if (curN >= _MV_GUARD_FLOORS[key] && newN < curN * 0.5) return { bloque: true, curN: curN, newN: newN };
     }
-    tx.set(ref, { value: _fbClone(key, fusion) });
+    var _ecrit = _fbClone(key, fusion), _oct = _mvTailleControle(key, _ecrit);   // ★★ TAILLE-2 : ce qui serait écrit
+    if (_oct > MV_LIMITE_DOC) return { trop: true, octets: _oct };                // le serveur refuserait : rien ne part
+    tx.set(ref, { value: _ecrit });
     return { fusion: fusion, distant: distant !== undefined && !_mvEgal(fusion, local) };
   });
 }
@@ -1477,7 +1571,9 @@ async function _saveParcellesMerged(localValue, baseFile) {
       return { __mvBlocked: true, remoteProg: remoteProg, mergedProg: mergedProg };
     }
 
-    tx.set(ref, { value: deepClone(merged) });
+    var _ecritP = deepClone(merged), _octP = _mvTailleControle('parcelles', _ecritP);   // ★★ TAILLE-2
+    if (_octP > MV_LIMITE_DOC) return { __mvTrop: true, octets: _octP };
+    tx.set(ref, { value: _ecritP });
     return merged;
   });
 }
@@ -1543,6 +1639,7 @@ window.fbSave = async function (key, value) {
       // #wipe : peut renvoyer {__mvBlocked} si l'ecriture ferait disparaitre la progression
       var _pL0 = deepClone(value);
       var _pRes = await _retryAsync(function(){ return _saveParcellesMerged(_pL0); }, 3, 1000);
+      if (_pRes && _pRes.__mvTrop) return _mvTropGros('parcelles', value, _pRes.octets);   // ★★ TAILLE-2
       if (_pRes && _pRes.__mvBlocked) {
         if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'fbSave parcelles BLOQUE (anti-ecrasement)', detail:'remoteProg='+_pRes.remoteProg+' mergedProg='+_pRes.mergedProg });
         try { var _sH = await getDoc(fbDocRef('parcelles')); if (_sH.exists()) applyFbData('parcelles', _sH.data().value); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/fbSave'); }
@@ -1559,11 +1656,14 @@ window.fbSave = async function (key, value) {
         if (window.showToast) window.showToast('Ecriture ignoree : protection anti-perte de donnees', '#7A1020');
         return { ok: false, blocked: true };
       }
-      await _retryAsync(function(){ return setDoc(fbDocRef(key), { value: _fbClone(key, value) }); }, 3, 1000);
+      var _ecritX = _fbClone(key, value), _octX = _mvTailleControle(key, _ecritX);   // ★★ TAILLE-2 : écriture directe
+      if (_octX > MV_LIMITE_DOC) return _mvTropGros(key, value, _octX);
+      await _retryAsync(function(){ return setDoc(fbDocRef(key), { value: _ecritX }); }, 3, 1000);
     } else {
       // ★★★ FUSION-1 (§146) — relire, fusionner, écrire : ce qu'un autre appareil a ajouté reste.
       var _fL0 = deepClone(value), _fB0 = _mvBaseDe(key);
       var _fRes = await _retryAsync(function(){ return _mvSauverFusion(key, _fL0, _fB0); }, 3, 1000);
+      if (_fRes && _fRes.trop) return _mvTropGros(key, value, _fRes.octets);   // ★★ TAILLE-2
       if (_fRes && _fRes.bloque) {
         if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'fbSave ' + key + ' BLOQUE (anti-ecrasement)', detail:'cur=' + _fRes.curN + ' new=' + _fRes.newN });
         try { var _sH3 = await getDoc(fbDocRef(key)); if (_sH3.exists()) { applyFbData(key, _sH3.data().value); _mvBaseNoter(key, _sH3.data().value, _sH3.metadata); } } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/fbSave#fusion'); }
@@ -1625,6 +1725,8 @@ window.fbSave = async function (key, value) {
     //    d'attente vient deja de s'occuper. La trace reste dans le journal local et
     //    part avec « Signaler un probleme » ; c'est le badge de synchro qui parle a
     //    l'utilisateur, en francais et en disant la verite.
+    // ★★ TAILLE-2 (§246) — filet : le serveur a refusé pour la taille. Renvoyer ne changera rien : pas de file sans fin.
+    if (_mvErreurTaille(e)) return _mvTropGros(key, value, _mvOctets(key, value));
     if(window.logError) window.logError({level:'info',cat:'firebase',msg:'fbSave échoué (3 tentatives): '+key,detail:String(e)});
     _queueSave(key, value, _mvBaseMem(key));
     // Retenter bientôt même si on reste EN LIGNE (sinon la file ne se vide qu'au reload)
@@ -1917,6 +2019,39 @@ function _mvRosterTardif(p) {
   }, function (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvRosterTardif'); return false; });
 }
 
+// ★★ ENTREE-1 (§244) — la session gardée sur le téléphone, une fois l'état de connexion restauré (borné). Firebase la
+//   relit de son stockage local au démarrage, réseau ou pas ; onAuthStateChanged dit quand c'est fait.
+window._fbUtilisateurPret = function (ms) {
+  return new Promise(function (res) {
+    var fini = false, unsub = null;
+    var finir = function () {
+      if (fini) return; fini = true;
+      try { if (unsub) unsub(); } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_fbUtilisateurPret'); }
+      res(auth.currentUser || null);
+    };
+    try { unsub = onAuthStateChanged(auth, function () { finir(); }); } catch (e) { finir(); }
+    setTimeout(finir, ms || 3000);
+  });
+};
+// ★★ ENTREE-1 (§244) — après une entrée sans réseau, la BASE de fusion de chaque clé est la copie du téléphone telle
+//   qu'elle est chargée : l'état serveur dont la mémoire dérive. Jamais pour une clé déjà en file (sa première base fait
+//   foi, _queueSave), ni par-dessus une base déjà reçue du serveur dans cette session. Sans base, l'envoi des
+//   parcelles ferait gagner la copie du téléphone partout (base = serveur), y compris sur ce qu'un collègue a validé.
+window._fbBasesDepuisAppareil = function (valeurs) {
+  var n = 0;
+  _loadQueue();
+  Object.keys(valeurs || {}).forEach(function (key) {
+    var v = valeurs[key];
+    if (v === undefined || v === null) return;
+    if (Object.prototype.hasOwnProperty.call(_offlineQueue, key)) return;
+    if (key === 'parcelles') { if (!Array.isArray(_baseParcelles)) { _baseParcelles = deepClone(v); n++; } return; }
+    if (_MV_FUSION_EXCLUES[key] || _fbBases[key] !== undefined) return;
+    try { _fbBases[key] = deepClone(v); n++; }
+    catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_fbBasesDepuisAppareil'); }
+  });
+  return n;
+};
+
 // ── App Check : le script reCAPTCHA sans gestion d'échec ──
 // initializeAppCheck l'insère DE FAÇON SYNCHRONE (lu dans le SDK) : il est donc déjà dans la page
 // quand on arrive ici, et son échec s'écoute.
@@ -2171,6 +2306,13 @@ window._fbLoad = async function () {
       return;
     }
   }
+  // ★★ PROFILS-1 (§243) — LA TUILE DE L'APPAREIL D'ABORD. Les attentes qui suivent (statut 5 s, profils 8 s, lecture
+  //   directe 6 s) passaient AVANT la liste gardée sur le téléphone : réseau sans réponse = 18,6 s de zone vide (§241).
+  //   Les tuiles de l'appareil s'affichent ici, tout de suite ; la liste du serveur les remplace en arrivant, tant que
+  //   personne n'a touché une tuile (_mvTuileTouchee). Rien sur l'appareil → on continue exactement comme avant.
+  B.etape = 'profils-appareil';
+  try { if (typeof window._mvTuilesAppareil === 'function') window._mvTuilesAppareil(); }
+  catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_fbLoad#tuiles-appareil'); }
   // Routage registre PUBLIC : un domaine « en attente » (créé par GT, jamais configuré)
   // ouvre l'assistant d'onboarding sans dépendre d'une lecture authentifiée (la lecture de
   // mavigne_<slug>/membres ci-dessous échouerait sans session → page de login parasite).
@@ -2190,8 +2332,10 @@ window._fbLoad = async function () {
     if(DEBUG) console.log('[Offline] Démarrage hors ligne — chargement localStorage');
     _showOfflineQueueBadge();
     B.fin = true;
-    if (typeof window.loadData === 'function') window.loadData();
-    if (typeof window.initLogin === 'function') window.initLogin();
+    // ★ PROFILS-1 (§243) : les helpers GARDÉS. Les tuiles ont pu s'afficher avant l'attente du statut — si quelqu'un en a
+    //   touché une et tape son mot de passe, ni la mémoire ni l'écran ne doivent changer sous ses doigts.
+    _mvDonneesAppareil();
+    _mvProfilsAfficher();
     return;
   }
   showSyncBadge('⏳ Connexion…', '#B8913A');

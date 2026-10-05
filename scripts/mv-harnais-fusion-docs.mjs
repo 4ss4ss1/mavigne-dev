@@ -35,6 +35,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
+import { MV_LIMITE_DOC, mvOctetsDoc } from '../src/taille-doc.js';   // TAILLE-2 (§246) : la règle que firebase.js importe
 
 const CONTRE = process.argv.includes('--contre');
 const FB0 = readFileSync(new URL('../src/firebase.js', import.meta.url), 'utf8');
@@ -74,13 +75,15 @@ function affectation(src, nom) {
   throw new Error('accolade non fermée : window.' + nom);
 }
 const VARS = ['_MV_FUSION_EXCLUES', '_fbBases', '_offlineBases', '_MV_FILE_BASE_CLE', '_MV_GUARD_FLOORS',
-  '_mvFileMemSeule', '_mvFileAlerte', '_mvPersistDemande'];   // STOCK-1 (§180)
+  '_mvFileMemSeule', '_mvFileAlerte', '_mvPersistDemande',   // STOCK-1 (§180)
+  '_MV_TAILLE_ALERTE', '_mvTropDit'];                        // TAILLE-2 (§246)
 const FNS = ['_mvDeepEqual', '_mvIsObj', '_mvMerge3', '_mvMergeParcelles', '_mvEgal', '_mvCanon', '_mvFusion',
   '_mvFusionObjet', '_mvIdentite', '_mvClesListes', '_mvFusionListe', '_mvBaseNoter', '_mvBaseDe', '_mvBaseMem',
   '_mvSauverFusion', '_mvApresFusion', '_mvParcellesApres', '_entryHasProg', '_tachesBlockHasProg', '_mvParcProgCount',
   '_mvIntrantsCount', '_mvPaieCount', '_mvDocSize', '_mvBlockDestructive', '_saveParcellesMerged', '_fsNoNestedArrays',
   '_fbClone', 'applyFbData', '_mvBaseFile', '_mvBasesFileEcrire', '_mvFileDisqueKo', '_mvDemanderPersistance',   // STOCK-1
-  '_queueSave', '_loadQueue', '_flushQueue', '_retryAsync'];
+  '_queueSave', '_loadQueue', '_flushQueue', '_retryAsync',
+  '_mvOctets', '_mvTailleControle', '_mvTailleAlerte', '_mvErreurTaille', '_mvTropGros'];   // TAILLE-2 (§246)
 const bloc = src => VARS.map(n => blocVar(src, n)).join('\n') + '\n' + FNS.map(n => fonction(src, n)).join('\n')
   + '\n' + affectation(src, 'fbSave');
 
@@ -99,7 +102,7 @@ function monter(src, sc) {
   const S = {
     window: W, localStorage: _Stock(), navigator: { onLine: sc.horsLigne ? false : true }, console, Date, JSON, Math, Promise,
     setTimeout: (f) => { E.minuteurs = (E.minuteurs || 0) + 1; return 0; }, clearTimeout: () => {},
-    TENANT_ID: 'dom-test', DEBUG: false, db: {},
+    TENANT_ID: 'dom-test', DEBUG: false, db: {}, MV_LIMITE_DOC, mvOctetsDoc,   // TAILLE-2
     _offlineQueue: {}, _baseParcelles: sc.baseParcelles ? clone(sc.baseParcelles) : null,
     _ignoreNext: {}, _ignoreBefore: {}, _mvDeniedRetried: {}, _onlineRetryTO: null,
     deepClone: clone,

@@ -465,3 +465,250 @@ incorrect. ».
 fermer tout de suite) ; « Se connecter » en mode avion (le nouveau message). ② **LOGIN-1 dit la vérité, il n'ouvre pas la
 porte** : entrer sans réseau reste ENTREE-1 (décision de Nico sur les téléphones partagés). ③ La suite du plan :
 `audit-perf-ux.md` §5, puis VOILE-1 et PROFILS-1.
+
+---
+
+## 243. ★★ VOILE-1 + PROFILS-1 — L'OUVERTURE : LE VOILE TANT QUE RIEN N'EST PRÊT, LES TUILES DE L'APPAREIL D'ABORD (04/10 — `src/app.js` · `src/firebase.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-voile1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `audit-perf-ux.md` · `lots/VOILE-1.json` · **APP 8.18 → 8.19, SW 8.93 → 8.94**, base `24aa425`)
+
+### 243a. Le constat (§241) et les décisions de Nico
+
+Mesuré dans Chromium avant le lot : un voile de 3,42 s imposé à **chaque** ouverture (2,2 s d'attente fixe, 0,9 s de lueur,
+0,32 s de flash), l'appli prête ou non ; sur un réseau qui ne répond pas, la zone des profils **vide jusqu'à 18,6 s**, alors que
+le téléphone garde la liste. « go dans l'ordre de tes recos » (04/10), avec ses arbitrages sur la suite du plan : ENTREE-1 =
+« on retape le mot de passe sauf s'il est enregistré dans le navigateur » — ⚠️ **lu de travers ici** (j'en avais conclu « la
+connexion reste soumise au réseau ») : Nico voulait que le mot de passe retapé ouvre l'appli MÊME SANS RÉSEAU, corrigé au §244 ; PAQUET-1 abandonné (le journal des nouveautés reste dans le
+paquet) ; TEXTE-A en maquette ; GT-1 décidé ; le premier appui qui « démarre » une tâche dans la fiche parcelle est voulu.
+
+### 243b. Ce qui change
+
+- **Le voile** (bloc « SPLASH SCREEN » d'`app.js`) : la chorégraphie complète ne se joue qu'à la **première ouverture de
+  l'appareil** — elle pose `mavigne_voile_vu` en finissant. Ensuite, le voile s'efface dès que l'écran de connexion montre
+  quelque chose (une tuile, le chargement, le code de démo), qu'il a cédé la place, ou que quelqu'un est entré ; jamais avant
+  `_MV_VOILE_MIN` (600 ms, pas de clignotement), par un fondu de `_MV_VOILE_FONDU` (250 ms). Le filet de 6 s reste.
+- **`window._mvTuilesAppareil`** (neuve, `app.js`) : charge la copie de l'appareil (`loadData`) et dessine les tuiles
+  (`_loginRenderTuiles`) — seulement si personne n'est connecté, qu'aucune tuile n'est touchée, que ce n'est ni la visite guidée
+  ni le domaine de démo (les mêmes portes qu'`initLogin`, vérifiées par le harnais), et qu'il reste un profil actif.
+- **`_fbLoad`** l'appelle **après** le domaine et **avant** ses attentes bornées (statut, profils, lecture directe). La liste du
+  serveur remplace les tuiles en arrivant (`_mvMembresServeur`, `_mvProfilsAfficher`), tant que personne n'a touché une tuile.
+- **La branche hors ligne de `_fbLoad`** passe par les helpers gardés (`_mvDonneesAppareil`, `_mvProfilsAfficher`) au lieu de
+  `loadData()` + `initLogin()` nus : les tuiles pouvant désormais paraître avant l'attente du statut, quelqu'un peut déjà taper
+  son mot de passe quand elle arrive — ni la mémoire ni l'écran ne doivent changer sous ses doigts.
+- **`_mvDemarrer` part aussi à `DOMContentLoaded`.** Trouvé en mesurant (243d) : `load` attend le script reCAPTCHA, qui ne vient
+  pas sur un réseau sans réponse, et le filet de 2,5 s de BOOT-1 devenait un temps mort avant les tuiles. `load` et le filet
+  restent ; l'incident `load-tardif` ne se lèvera plus que si la page elle-même tarde à être lue.
+- **`WHATS_NEW` 8.19** : « L'appli s'ouvre plus vite », niveau 0, pour tous.
+
+### 243c. Mesuré
+
+- **`mv-harnais-voile1`** (neuf, dans la liste unique) : **21 assertions** — le vrai bloc du voile sur une horloge simulée
+  (première ouverture complète et marquée ; ouverture habituelle : rien avant 600 ms, fondu ensuite, le voile reste si rien
+  n'est prêt et le filet de 6 s le retire, il part quand quelqu'un entre, pas de lueur ni de flash), la vraie
+  `_mvTuilesAppareil` (appareil plein ou vide, profils inactifs, tuile touchée, connecté, visite guidée, domaine de démo, mêmes
+  portes qu'`initLogin`), l'ordre réel de `_fbLoad`, la branche hors ligne gardée, le démarrage à `DOMContentLoaded`.
+  **10/10 contre-épreuves.**
+- **Chromium, build du lot contre build d'avant** (390 × 844) :
+
+  | Ouverture à froid | Voile retiré | Première tuile |
+  |---|---|---|
+  | réseau sans réponse, habituelle | 4,7 s → **1,8 s** | 18,5 s → **1,0 s** |
+  | réseau sans réponse, 1re ouverture de l'appareil | 4,4 s → 4,6 s (voulu) | 18,6 s → **1,1 s** |
+  | hors réseau, habituelle | 4,6 s → **1,7 s** | 1,1 s → **0,9 s** |
+
+- **Contre-vérifiés sur le même build** : connexion hors réseau (« Pas de connexion réseau… », VALID-1 intact), connexion
+  simulée réussie (l'appli entre), connexion en ligne simulée puis navigation sur un domaine de 15 000 entrées : zéro erreur.
+
+### 243d. Trouvé en route
+
+- **Le temps mort de 2,5 s.** Première mesure après PROFILS-1 : tuile à 3,6 s au lieu de « tout de suite ». La cause n'était pas
+  dans `_fbLoad` mais avant lui : `_mvDemarrer` n'était branché que sur `load` (depuis toujours — BOOT-1 n'avait ajouté que le
+  filet de 2,5 s), et `load` attend le script reCAPTCHA. ★ **Une mesure qui ne colle pas à la promesse est une piste, pas un
+  bruit.**
+- **`ouvre.mjs`**, l'essai d'ouverture (voile et première tuile, réseau sans réponse ou hors réseau, première ouverture ou
+  habituelle) : non versionné, comme les autres scripts de mesure du bac à sable (§241).
+
+### 243e. Ouvert
+
+① **À regarder chez Nico, sur téléphone** : une ouverture normale (le voile doit partir dès que sa tuile est là) ; la toute
+première ouverture d'un téléphone neuf (l'animation complète, une fois). ② **Suite du plan, dans l'ordre** : ENTREE-1 (version
+gestionnaire de mots de passe), RENDU-1, TAILLE-2, la maquette TEXTE-A, JOURNAL-1, GT-1.
+
+---
+
+## 244. ★★★ ENTREE-1 — SE CONNECTER SANS RÉSEAU, EN RETAPANT SON MOT DE PASSE (04/10 — `src/app.js` · `src/firebase.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/01-demarrer.html` · `scripts/mv-harnais-entree1.mjs` (neuf) · `scripts/mv-harnais-valid1.mjs` · `scripts/mv-harnais-prep.mjs` · `scripts/mv-harnais-reprise.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `audit-perf-ux.md` · `lots/ENTREE-1.json` · **APP 8.19 → 8.20, SW 8.94 → 8.95**, base `24aa425`, **zip cumulatif avec VOILE-1 non poussé**)
+
+### 244a. La demande, et le contresens
+
+L'audit (§241) avait prouvé qu'à froid et sans réseau on ne pouvait pas entrer, même avec le bon mot de passe. Nico,
+sur ENTREE-1 : « on retape le mot de passe sauf si enregistré dans le navigateur ». **J'ai lu de travers** : j'en ai conclu
+que la connexion restait soumise au réseau, j'ai livré un formulaire pour gestionnaire de mots de passe et je l'ai écrit
+comme sa décision. Nico : « non, on a dit qu'on peut se connecter même sans réseau (cave, mauvais signal) » — puis, après
+explication, le choix explicite « pouvoir se connecter sans réseau ». Le zip du formulaire est abandonné (jamais poussé) ;
+le mot de passe se retape comme d'habitude. ★ **Leçon** : quand une décision tient en une phrase ambiguë, la reformuler en
+toutes lettres avant de bâtir — « tu veux dire X ou Y ? » coûte un tour, un contresens en coûte trois.
+
+### 244b. Ce qui change
+
+- **L'empreinte.** Après chaque connexion RÉUSSIE avec réseau — après la garde SEC-2, jamais un mot de passe provisoire —
+  `_mvEmpreinteEcrire` garde sur le téléphone (`mavigne_entree_v1_<domaine>`) : l'empreinte PBKDF2-SHA-256 du mot de passe
+  (sel aléatoire de 16 octets, `_MV_EMPREINTE_ITER` = 310 000 tours, WebCrypto), le nom, l'uid du compte et les droits utiles
+  hors réseau (`_MV_EMPREINTE_DROITS` : sans `gtAdmin`, `gts`, `mustpwd`). Jamais le mot de passe. Une seule empreinte par
+  domaine : celle de la dernière personne connectée. La déconnexion volontaire l'efface (poste partagé, SEC-5).
+- **La vérification** (`_mvVerifierHorsReseau`) : empreinte présente, au même nom, mot de passe concordant, et session Firebase
+  gardée sur le téléphone (`window._fbUtilisateurPret`, borné à 3 s) au même uid. Verdicts : ok · mdp · premiere · autre.
+- **Quand elle joue** : un échec de RÉSEAU de la connexion (`auth/network-request-failed`, `appCheck/…`, hors ligne), une
+  adresse introuvable faute de serveur, ou un réseau qui traîne — **8 s** (`_MV_ENTREE_LENTE`, `_mvConnexion`), seulement si une
+  empreinte existe ; la réponse tardive est ignorée. Sans empreinte, rien ne change.
+- **L'entrée** (`_mvEntrerHorsReseau`) : droits restaurés si le jeton ne les donne pas (sinon l'écran des conditions bloquait
+  l'admin) ; **Couche 2** — ne sont libérées que les clés que la copie dit avoir reçues du serveur (`CLES`, désormais écrit par
+  `_mvSnapPayload` et relu par `loadData` ; une copie d'avant le lot ne libère rien) ; **base de fusion** = la copie telle
+  qu'elle est chargée (`window._fbBasesDepuisAppareil` : jamais pour une clé déjà en file, jamais par-dessus une base du
+  serveur, jamais le KML) ; puis la même session que l'entrée normale (`_mvSessionPoser`, extraite de `confirmLogin`) et
+  `_mvApresEntree`, dont la branche hors ligne dessine maintenant l'écran (`_mvApresChargement`, la suite partagée).
+- **Le retour du signal** (gestionnaire `online` de firebase.js) : après une entrée sans réseau, d'abord la file, puis
+  `_fbLoadAfterAuth` (lecture, écoute), les droits et la suite d'entrée ; si le serveur ne répond toujours pas, le prochain
+  `online` reprend.
+- **Les messages** : sans empreinte → « la première connexion sur ce téléphone en demande » ; empreinte d'une autre personne
+  ou session d'un autre compte → « seule la dernière personne connectée sur ce téléphone peut entrer » ; sans réseau et
+  mauvais mot de passe → « Mot de passe incorrect. » — vrai cette fois, vérifié sur l'empreinte.
+- **Guide 01, `WHATS_NEW` 8.20** : « Se connecter sans réseau », avec les trois conditions.
+
+### 244c. Mesuré
+
+- **`mv-harnais-entree1`** (neuf) : **31 assertions** sur les vraies fonctions — l'empreinte réelle (PBKDF2 par le WebCrypto de
+  Node : jamais le mot de passe, 16 + 32 octets, droits filtrés ; rien au mot de passe provisoire ni au mauvais mot de passe) ;
+  l'entrée sans réseau et ses quatre refus ; la copie d'avant le lot ; le réseau qui traîne (borné, une seule entrée) ; les
+  bases ; **la vraie fusion des parcelles** : avec la copie pour base, ma validation ET celle d'un collègue sont gardées — sans
+  base, la copie en retard effaçait la taille du collègue ; les branchements. **12/12 contre-épreuves.**
+- **`mv-harnais-valid1`**, **`mv-harnais-prep`** et **`mv-harnais-reprise`** ajustés (confirmLogin passe par `_mvConnexion` ; la suite
+  d'entrée vit dans `_mvApresChargement` ; le test « réseau » est calculé une fois en tête du catch, `_reseau`) : verts,
+  contre-épreuves 10/10, 26/26 et 31/31. Le message garde sa forme d'origine, `_loginRelancer = navigator.onLine;`.
+- **Chromium, build du lot, processeur ×4** : connexion avec réseau → empreinte posée, sans le mot de passe, copie marquée
+  `CLES` ; **ouverture à froid sans réseau → entrée en 416 ms**, écran dessiné, une validation part en file AVEC la copie pour
+  base ; mauvais mot de passe → « Mot de passe incorrect. » ; une autre personne → « seule la dernière personne connectée… ».
+  La session gardée par le téléphone est simulée (le bac à sable n'en a pas de vraie). Non-régression : VALID-1, LOGIN-1
+  (message sans empreinte), VOILE-1 et PROFILS-1 intacts.
+
+### 244d. Trouvé en route
+
+- **Le défaut que la connexion sans réseau aurait réveillé.** La file prévoyait le « démarrage hors ligne » : sans base,
+  l'envoi fait l'union — juste pour une liste. Mais pour les **parcelles**, « sans base » veut dire base = serveur : la copie du
+  téléphone gagne alors PARTOUT, y compris sur ce qu'un collègue a validé entre-temps (prouvé par le harnais sur la vraie
+  `_mvMergeParcelles`). Inoffensif tant qu'on ne pouvait pas entrer sans réseau ; mortel dès qu'on le peut. D'où la base posée
+  depuis la copie à l'entrée.
+- **Un commentaire qui citait ce qu'il décrivait.** Le commentaire posé sur la table des documents de saveData contenait le
+  texte même que `mv-harnais-achats` cherche pour la lire : le harnais la trouvait… par le commentaire. Réécrit sans la
+  citation (§25 : un commentaire n'est jamais une preuve, ni une ancre).
+- **La Couche 2 aurait rendu l'entrée inutile** : `_mvKeySeen` n'est posé que par une réponse du serveur — après une entrée
+  sans réseau, une validation n'aurait jamais enregistré sa parcelle. D'où `CLES`, qui garde l'esprit du verrou (jamais un
+  squelette) au lieu de le lever.
+
+### 244e. Ouvert
+
+① **À regarder chez Nico, sur SON téléphone** — c'est la seule vraie preuve : se connecter une fois avec du réseau, fermer
+complètement l'appli, passer en mode avion, la rouvrir, taper son mot de passe → l'appli s'ouvre ; valider une tâche ; couper
+le mode avion → la validation part. ② **La vraie session Firebase gardée sur un vrai téléphone** et le retour du signal n'ont
+pas pu être joués dans le bac à sable (pas de serveur). ③ Une session révoquée côté serveur (mot de passe changé par
+l'administrateur) : au retour du signal, la reconnexion échoue — à observer. ④ Suite du plan : RENDU-1, TAILLE-2, la maquette
+TEXTE-A, JOURNAL-1, GT-1.
+
+---
+
+## 245. ★★ RENDU-1 — L'ÉCRAN NE SE FIGE PLUS QUAND UN COLLÈGUE VALIDE (04/10 — `src/firebase.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-rendu1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `audit-perf-ux.md` · `lots/RENDU-1.json` · **APP 8.20 → 8.21, SW 8.95 → 8.96**, base `24aa425`, **zip cumulatif avec VOILE-1 et ENTREE-1 non poussés**)
+
+### 245a. Le défaut (mesuré au §241)
+
+Chaque document reçu du serveur redessinait AUSSITÔT l'Accueil, Parcelles et ses statistiques (et la liste du Journal),
+que ces pages soient affichées ou non. Une validation d'un collègue écrit trois documents (parcelles, journal, travaux) :
+trois vagues de rendus complets, l'écran figé pendant ce temps.
+
+### 245b. Ce qui change
+
+`_mvRendreBientot(key)` (firebase.js) : les clés reçues s'accumulent ; à l'image suivante (`requestAnimationFrame`), SEULE
+la page affichée se redessine, une fois, si l'une des clés la concerne (`_MV_RENDU_PAGES` : Accueil ← parcelles, journal,
+travaux, sessions ; Parcelles ← parcelles, journal, travaux, avec ses statistiques ; Journal ← les mêmes, la liste seule ;
+Tracteur, Phyto, Planning ← leurs documents, comme avant). La clé `'*'` (après la relecture complète du retour réseau) vaut
+pour toutes les pages. L'horloge est remise à zéro AVANT le rendu : un rendu en panne est tracé (`_mvAvale`) et n'enraye
+pas le suivant. Une page cachée se redessine quand on y va — `goTo` le faisait déjà (home → renderHome, parcelles →
+renderParcelles + computePStats, journal → renderJournal). `_fbSubscribe` appelle par `window._mvRendreBientot` : le harnais
+REPRISE, qui exécute `_fbSubscribe` sans cette fonction, reste valide. Onglet en arrière-plan : `requestAnimationFrame` attend
+le retour, et ne dessine qu'une fois.
+
+### 245c. Mesuré
+
+- **Chromium, processeur ×4, un collègue valide** (trois documents reçus chacun dans sa tâche, comme `onSnapshot` ; avant =
+  build d'ENTREE-1 avec l'ancien gestionnaire rejoué tel quel ; après = build du lot) — écran occupé au total :
+
+| Page affichée | Journal | Avant | Après |
+|---|---|---|---|
+| Accueil | 1 000 | 324 ms | **140 ms** |
+| Parcelles | 1 000 | 416 ms | **56 ms** |
+| Journal | 1 000 | 673 ms | **90 ms** |
+| Accueil | 15 000 | 856 ms | **530 ms** |
+| Parcelles | 15 000 | 646 ms | **297 ms** |
+
+- **`mv-harnais-rendu1`** (neuf) : **15 assertions** sur la vraie fonction (horloge d'images simulée) — rien pendant la
+  réception, une fois à l'image suivante, aucune page cachée, chaque page avec ses seuls documents, `'*'`, personne de
+  connecté, deux images = deux rendus, une panne n'enraye rien, et les deux branchements. **6/6 contre-épreuves.**
+
+### 245d. Ouvert
+
+① **À 15 000 entrées, il reste ~0,3 à 0,4 s** dans la réception elle-même — la copie de la base de fusion (FUSION-1) et la
+conversion du document. La copie paresseuse (garder l'instantané, ne le convertir qu'au moment d'écrire) est possible mais
+touche le cœur de FUSION-1 : à mesurer et décider à part ; ce volume est à plusieurs années du domaine de référence.
+② **L'Accueil lui-même** coûte ~0,1 s à chaque rendu (≈ 30 cartes reconstruites) : l'alléger carte par carte reste à faire.
+③ Suite du plan : TAILLE-2, la maquette TEXTE-A, JOURNAL-1, GT-1.
+
+---
+
+## 246. ★★ TAILLE-2 — UN DOCUMENT QUI GROSSIT PRÉVIENT AVANT D'ÊTRE REFUSÉ (04/10 — `src/taille-doc.js` (neuf) · `src/firebase.js` · `scripts/mv-taille-docs.mjs` · `scripts/mv-harnais-taille2.mjs` (neuf) · `scripts/mv-harnais-fusion-docs.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/typo-baseline.json` · `scripts/harnais-claude-md.mjs` · `audit-perf-ux.md` · `lots/TAILLE-2.json` · **aucun bump** (firebase.js + un module qu'il importe), base `24aa425`, **zip cumulatif avec VOILE-1, ENTREE-1 et RENDU-1 non poussés**)
+
+### 246a. Le défaut (vérifié dans le code)
+
+Firestore refuse tout document au-delà de 1 Mio. Le refus revenait après trois essais (7 s) ; fbSave mettait la saisie en
+file (`_queueSave`), qui la renvoyait SANS FIN — voyant « en attente » pour toujours, aucune cause visible — et chaque saisie
+suivante du même document s'y coinçait : pour le journal, toutes les validations du domaine. Rien ne mesurait des octets
+(`_mvDocSize` compte des entrées pour la garde anti-écrasement ; seul `historique` avait sa garde, `_ARC_PLAFOND`).
+Annoncé de travers en fin du §245 (« une sauvegarde automatique ») et corrigé avant le travail : TAILLE-2 ne sauvegarde rien.
+
+### 246b. Ce qui change
+
+- **Une seule règle** : `src/taille-doc.js`, module PUR (ni window, ni Buffer) — `mvOctetsTexte` (UTF-8 sans tampon),
+  `mvOctetsValeur`, `mvOctetsNom`, `mvOctetsDoc`, `MV_LIMITE_DOC`. Importé par `firebase.js` ET par `scripts/mv-taille-docs.mjs`,
+  dont l'auto-contrôle `--test` (joué par check) rejoue l'exemple Firestore (147 octets) et compare l'UTF-8 à Node : si la règle
+  dérive, check rougit pour le script ET pour l'appli. Aucune copie.
+- **Mesuré sur ce qui serait écrit, juste avant l'écriture** : `_mvSauverFusion` (après la fusion), `_saveParcellesMerged`,
+  l'écriture directe de fbSave (KML, travaux) et les trois branches de `_flushQueue`. `_mvTailleControle(key, valeur)`.
+- **> 90 %** : `logError` warning **silencieux** (`cat:'taille'`) → console GUERETTECH, une fois par jour, par document et par
+  téléphone (`mavigne_taille_vu`). Le client ne voit rien. ★ **90 % et non 70 %, décision de Nico (04/10)** : le domaine de
+  référence est déjà vers 800 Ko (≈ 78 %) après des actions pour alléger, et la limite y est calculée à ~2 ans — à 70 %,
+  l'alerte sonnerait chaque jour pour rien ; à ce rythme (~9 Ko par mois), 90 % arrive dans ~13 mois et laisse ~11 mois.
+  Un domaine qui grossit trois fois plus vite aurait encore ~4 mois.
+- **> 1 Mio** : rien ne part, rien en file. `_mvTropGros` : la saisie au coffre (`_mvStashDenied` → Réglages › Saisies non
+  enregistrées), le voyant « taille maximale atteinte · saisie conservée », un message clair une fois par séance (« prévenez
+  GUERETTECH »), une erreur silencieuse à la console GT. La file ne finit plus sur « synchronisé » quand une clé en est sortie
+  pour cette raison.
+- **Le filet** : le refus de taille du serveur lui-même (`_mvErreurTaille` : `invalid-argument` + « maximum allowed size »)
+  suit le même chemin, dans fbSave comme dans la file — et `_retryAsync` ne le réessaie plus (7 s pour rien).
+
+### 246c. Mesuré
+
+- **`mv-harnais-taille2`** (neuf) : **24 assertions** sur la vraie règle et les vrais fbSave, fusion, parcelles et file, sur un
+  faux serveur à transactions (montage de `mv-harnais-fusion-docs`) — l'exemple Firestore ; 400 textes UTF-8 contre Node ; un
+  petit document ; ★ **vers 800 Ko, aucune alerte** ; l'alerte (silencieuse, une fois par jour, de nouveau le lendemain) ; au-delà (rien envoyé, rien en file, coffre, voyant
+  et message, alerte, message une fois) ; un document qui ne dépasse qu'APRÈS fusion ; parcelles ; KML ; la file ; le refus du
+  serveur dans fbSave et dans la file, sans nouvel essai ; une panne passagère toujours en file ; une seule règle.
+  **12/12 contre-épreuves** (dont : le seuil redescend à 70 %).
+- **`mv-harnais-fusion-docs`** : son montage reçoit les fonctions et la règle de TAILLE-2 — 29 vertes, 15/15 contre-épreuves.
+- **Le coût de la mesure** (Node) : 2 ms à 1 000 entrées, 8 ms à 15 000 — moins qu'UNE copie JSON du même journal (21 ms),
+  et fbSave en fait déjà au moins deux.
+- `npm run taille` sur une sauvegarde d'essai : inchangé (même affichage, même calcul).
+- **Cliquet de poids regravé** (`mv-harnais-typo --baseline`, `scripts/typo-baseline.json`) : `firebase.js` 164 → 175 Ko (+6,7 %)
+  au cumul de QUATRE lots non poussés (VOILE-1, ENTREE-1, RENDU-1, TAILLE-2), chacun sous les 5 %. La question du découpage
+  a été posée et tranchée dans le lot même : la règle de taille est sortie dans `taille-doc.js` ; le reste dépend des
+  internes de firebase.js (file, coffre, voyant). Seuls les poids changent dans la référence, aucun compte de tailles.
+
+### 246d. Ouvert
+
+① Le vrai remède reste **DONNEES-1** (découper les documents) : TAILLE-2 prévient et rend le blocage lisible, il ne l'empêche
+pas. ② Le coffre garde le document ENTIER au moment du refus (STASH-1) : il ne repartira pas tant que le document est trop gros.
+③ Suite du plan : la maquette TEXTE-A, JOURNAL-1, GT-1.
