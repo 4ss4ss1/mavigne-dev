@@ -8,6 +8,20 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **5 octobre 2026 (TEXTE-A)** — ★★★ **LES PETITS TEXTES RELEVÉS** (§247), choisis par Nico sur maquette.
+> Maquette publiée (3 écrans réels, avant / jetons / plancher) → « jetons » : `--pt-micro` 11 → 12, `--pt-lbl` 10,5 → 11,5, `--pt-nano` 9,5 → 11.
+> Replis `var(--pt-*, Npx)` d'avant gardés EXPRÈS (impressions non jugées), sauf `pilotage.js` (règle de mv-harnais-echelle). 416 tailles à 12 / 11,5 px
+> passent par les jetons (même rendu ; règle « pas de cran en dur »). Registre phyto : la ligne tient (noms raccourcis, « +N » à part).
+> Harnais `mv-harnais-textea`. Marque `lots/TEXTE-A.json`. Base `3cf9be9` (les quatre lots du 04/10 poussés). **APP 8.21 → 8.22, SW 8.96 → 8.97**.
+> Précédent : TAILLE-2 (§246), la taille avant l'envoi, alerte à 90 % — archivé dans journal.md.
+
+> ★ Consolidation : **4 octobre 2026 (TAILLE-2, zip cumulatif avec VOILE-1, ENTREE-1, RENDU-1 non poussés)** — ★★ **LA TAILLE AVANT L'ENVOI** (§246).
+> La règle de taille Firestore vit dans `src/taille-doc.js` (pur, partagé avec `npm run taille`, vérifié par son `--test`). Juste
+> avant chaque écriture (fusion, parcelles, écriture directe, file) : > 90 % → alerte silencieuse à la console GT, 1×/jour/doc/téléphone ;
+> > 1 Mio → rien ne part, rien en file : coffre + message clair. Refus de taille du serveur : même chemin, sans nouvel essai. Aucun bump
+> (firebase.js + module). Harnais `mv-harnais-taille2`. Marques `lots/TAILLE-2.json` (inclut les trois autres) et précédentes. Base `24aa425`.
+> **APP 8.18 → 8.21, SW 8.93 → 8.96** (les trois lots d'avant). Précédent : RENDU-1 (§245), l'écran ne se fige plus — archivé dans journal.md.
+
 > ★ Consolidation : **4 octobre 2026 (RENDU-1, zip cumulatif avec VOILE-1 et ENTREE-1 non poussés)** — ★★ **L'ÉCRAN NE SE FIGE PLUS** (§245).
 > Un document reçu ne redessine plus l'Accueil ET Parcelles aussitôt : `_mvRendreBientot` (firebase.js) accumule les clés et
 > redessine à l'image suivante la SEULE page affichée, une fois (`_MV_RENDU_PAGES`). Chromium ×4, collègue qui valide (3 documents) :

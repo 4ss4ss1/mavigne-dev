@@ -485,4 +485,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-rendu1.mjs --contre'],
   ['node scripts/mv-harnais-taille2.mjs'],            // TAILLE-2 (§246) : la taille mesurée avant d'envoyer, alerte à 70 %, refus clair
   ['node scripts/mv-harnais-taille2.mjs --contre'],
+  ['node scripts/mv-harnais-textea.mjs'],             // TEXTE-A (§247) : les trois petits crans relevés, la ligne du registre phyto
+  ['node scripts/mv-harnais-textea.mjs --contre'],
+  ['node scripts/mv-harnais-journal1.mjs'],           // JOURNAL-1 (§248) : seuls les jours visibles mis en page, au pixel près
+  ['node scripts/mv-harnais-journal1.mjs --contre'],
 ];

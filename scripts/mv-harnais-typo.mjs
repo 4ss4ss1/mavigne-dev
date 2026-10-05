@@ -49,8 +49,8 @@ const REGRAVE = process.argv.includes('--baseline');
    VERIFIER styles.css au lieu de lui faire confiance. */
 const BAREME = {
   '--pt-hero': 40, '--pt-xxl': 31, '--pt-xl': 27, '--pt-lg': 23, '--pt-md': 20,
-  '--pt-sm': 17, '--pt-base': 14, '--pt-txt': 12.5, '--pt-micro': 11,
-  '--pt-lbl': 10.5, '--pt-nano': 9.5
+  '--pt-sm': 17, '--pt-base': 14, '--pt-txt': 12.5, '--pt-micro': 12,
+  '--pt-lbl': 11.5, '--pt-nano': 11      /* TEXTE-A (§247) : 11 → 12, 10,5 → 11,5, 9,5 → 11 */
 };
 const PLANCHER = 12;          /* en-dessous, c'est du trop-petit */
 const PLAFOND_KO = 1024;      /* poids d'un module : au-dela, on decoupe */
@@ -74,7 +74,7 @@ const INJECTIONS = [
   { nom: 'du trop-petit ajoute',
     f: 'src/reglages.js', de: 'font-size:var(--pt-base,14px)', vers: 'font-size:8px' },
   { nom: 'un cran du bareme retire de :root',
-    f: 'src/styles.css', de: '--pt-nano:9.5px;', vers: '' },
+    f: 'src/styles.css', de: '--pt-nano:11px;', vers: '' },
 ];
 let injectes = 0;
 if (CONTRE) {

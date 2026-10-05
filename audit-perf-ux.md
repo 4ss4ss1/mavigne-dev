@@ -325,8 +325,8 @@ un écran change, harnais et contre-épreuve, Règle d'or n° 4.
 | 6 | **RENDU-1** ✅ fait (§245) | plus de gel quand un collègue valide : seule la page affichée se redessine, une fois (Accueil allégé : à faire) | 1 à 2 j | moyen | — |
 | 7 | **TAILLE-2** ✅ fait (§246) | un document qui grossit prévient **avant** d'être refusé (alerte GT à 90 % — décision de Nico —, refus clair et saisie au coffre au-delà) | ½ j | nul | — |
 | 8 | ~~**PAQUET-1**~~ — abandonné | décision du 04/10 : le journal des nouveautés reste dans le paquet, comme aujourd'hui | — | — | tranché |
-| 9 | **TEXTE-A** | lisible au soleil et avec des gants (backlog 36 et 39) | 1 à 2 j | faible | **maquette d'abord** (demandée le 04/10) |
-| 10 | **JOURNAL-1** | le Journal s'affiche en moins de 150 ms | ½ j | faible | — |
+| 9 | **TEXTE-A** ✅ fait (§247) | lisible au soleil : les trois jetons relevés, choisis par Nico sur maquette le 05/10 (« jetons », pas « plancher ») | 1 à 2 j | faible | tranché |
+| 10 | **JOURNAL-1** ✅ fait (§248) | le Journal s'affiche en moins de 150 ms : 336 → 122 ms (journal de 1 000) ; 15 000 entrées 349 → 140 ms (le reste : le calcul, DONNEES-1) ; au pixel près | ½ j | faible | — |
 | 11 | **DONNEES-1** | plus aucun document près de la limite, à 45 ha comme à 12 | 3 à 5 j | **élevé** | oui, après `npm run taille` |
 | 12 | **IDS-1** | renommer une parcelle ou un salarié devient sûr | 3 à 5 j | élevé | oui |
 | 13 | **GT-1** | la console GT quitte le téléphone des clients | 1 j | moyen | **décidé le 04/10** (à caler avec PREP-1) |

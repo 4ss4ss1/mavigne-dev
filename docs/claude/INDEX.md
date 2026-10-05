@@ -290,3 +290,5 @@
 | 244 | 244. ★★★ ENTREE-1 — SE CONNECTER SANS RÉSEAU, EN RETAPANT SON MOT DE PASSE (04/10 — `src/app.js` · `src/fir… | `docs/claude/chantiers-230-279.md` |
 | 245 | 245. ★★ RENDU-1 — L'ÉCRAN NE SE FIGE PLUS QUAND UN COLLÈGUE VALIDE (04/10 — `src/firebase.js` · `src/utils.… | `docs/claude/chantiers-230-279.md` |
 | 246 | 246. ★★ TAILLE-2 — UN DOCUMENT QUI GROSSIT PRÉVIENT AVANT D'ÊTRE REFUSÉ (04/10 — `src/taille-doc.js` (neuf)… | `docs/claude/chantiers-230-279.md` |
+| 247 | 247. ★★★ TEXTE-A — LES PETITS TEXTES RELEVÉS, CHOISIS SUR MAQUETTE (05/10 — `src/styles.css` · `src/tracteu… | `docs/claude/chantiers-230-279.md` |
+| 248 | 248. ★★ JOURNAL-1 — LE JOURNAL NE MET EN PAGE QUE LES JOURS QUI SE VOIENT (05/10 — `src/styles.css` · `src/… | `docs/claude/chantiers-230-279.md` |

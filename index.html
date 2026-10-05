@@ -264,7 +264,7 @@
 .hub-card:focus-visible,.mod-home-btn:focus-visible,.hub-bell-btn:focus-visible,.mvu-tab:focus-visible{outline:3px solid #6BA34A;outline-offset:2px;}
 
 /* ── Campagne : périodes libres, frise annuelle ── */
-.ns-note{font-size:11.5px;color:var(--texte-doux);background:var(--or-pale);border:1px solid rgba(194,161,77,0.3);border-radius:10px;padding:9px 11px;margin-top:10px;line-height:1.4}
+.ns-note{font-size:var(--pt-lbl,11.5px);color:var(--texte-doux);background:var(--or-pale);border:1px solid rgba(194,161,77,0.3);border-radius:10px;padding:9px 11px;margin-top:10px;line-height:1.4}
 .ns-note b{color:var(--terre)}
 .cmp-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:6px}
 .cmp-head .t{font-size:var(--pt-micro,11px);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--texte-med)}
@@ -277,12 +277,12 @@
 .cmp-scale em{font-style:normal;opacity:.6;margin-left:2px;font-size:8px}
 .cmp-scale i{position:absolute;bottom:0;width:1px;height:4px;background:var(--gris)}
 .cmp-scale i.y{height:7px;background:var(--or)}
-.cmp-arc-lien{display:flex;align-items:center;gap:9px;border:1px dashed var(--gris);border-radius:12px;padding:11px;font-size:12px;color:var(--texte-doux);margin-top:10px;line-height:1.4;cursor:pointer;background:var(--bg-card);min-height:44px}
+.cmp-arc-lien{display:flex;align-items:center;gap:9px;border:1px dashed var(--gris);border-radius:12px;padding:11px;font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:10px;line-height:1.4;cursor:pointer;background:var(--bg-card);min-height:44px}
 .cmp-arc-lien b{color:var(--terre)}
 .cmp-arc-lien .ic{font-size:var(--pt-sm,17px);flex-shrink:0}
 .cmp-arc-lien .ch{margin-left:auto;font-size:var(--pt-sm,17px);color:var(--gris)}
 /* Pilotage › Archives : une campagne par ligne, toutes sur l'axe 1er août → 31 juillet */
-.arc-intro{font-size:12px;color:var(--texte-doux);line-height:1.5;margin:0 0 12px;padding-left:11px;border-left:2px solid var(--or)}
+.arc-intro{font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5;margin:0 0 12px;padding-left:11px;border-left:2px solid var(--or)}
 .arc-intro b{color:var(--terre)}
 .arc-row{margin-bottom:10px}
 .arc-lab{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:3px}
@@ -331,7 +331,7 @@
 .cmp-seg b{font-size:var(--pt-lbl,10.5px);font-weight:700;color:#fff;padding:0 7px;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,0.3)}
 .cmp-seg.ovl{box-shadow:inset 0 0 0 2px var(--rouge)}
 .cmp-today{position:absolute;top:0;bottom:0;width:2px;background:var(--texte);z-index:3}
-.cmp-alert{display:flex;gap:8px;align-items:flex-start;border-radius:10px;padding:9px 11px;font-size:12px;line-height:1.45;margin-top:8px}
+.cmp-alert{display:flex;gap:8px;align-items:flex-start;border-radius:10px;padding:9px 11px;font-size:var(--pt-micro,12px);line-height:1.45;margin-top:8px}
 .cmp-alert .ic{font-weight:700;flex-shrink:0}
 .cmp-alert.warn{background:var(--orange-pale);color:#8A4210;border:1px solid #EBCBAA}
 .cmp-alert.bad{background:var(--rouge-pale);color:var(--rouge-tx,#A0291E);border:1px solid #E9C4BF}
@@ -341,26 +341,26 @@
 .per-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
 .per-id{flex:1;min-width:0;cursor:pointer}
 .per-nom{font-size:15px;font-weight:600;color:var(--texte);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-.per-meta{font-size:11.5px;color:var(--texte-doux);margin-top:1px}
+.per-meta{font-size:var(--pt-lbl,11.5px);color:var(--texte-doux);margin-top:1px}
 .per-badge{font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:20px;background:var(--vert-pale);color:var(--tag-green-tx,#2D5016)}
 .per-act{display:flex;gap:6px;flex-shrink:0}
 .per-act button{background:transparent;border:1.5px solid var(--gris);border-radius:9px;min-width:44px;min-height:44px;font-size:13px;cursor:pointer;color:var(--texte-doux);font-family:inherit}
 .per-act button.dgr{border-color:rgba(122,16,32,0.3);color:#7A1020}
 /* ── Config tâche (picker convention) ── */
-.tcfg-lbl{font-size:11.5px;font-weight:700;color:var(--texte-doux);margin:14px 0 7px;letter-spacing:.02em}
+.tcfg-lbl{font-size:var(--pt-lbl,11.5px);font-weight:700;color:var(--texte-doux);margin:14px 0 7px;letter-spacing:.02em}
 .tcfg-cnt{display:flex;gap:7px}
 .tcfg-cc{width:40px;height:38px;border:1.5px solid var(--gris);border-radius:10px;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;background:var(--bg-card);color:var(--texte-doux)}
 .tcfg-cc.on{border-color:var(--terre);background:var(--terre-pale);color:var(--terre-tx,#8A5A38)}
 .tcfg-hrow{display:flex;align-items:center;gap:9px;margin-bottom:9px;flex-wrap:wrap}
-.tcfg-k{font-size:12px;font-weight:700;color:var(--texte-med);min-width:30px}
+.tcfg-k{font-size:var(--pt-micro,12px);font-weight:700;color:var(--texte-med);min-width:30px}
 .tcfg-in{width:74px;padding:8px;border:1.5px solid var(--gris);border-radius:9px;font-family:inherit;font-size:var(--pt-base,14px);text-align:center;background:var(--bg-card);color:var(--texte)}
 .tcfg-u{font-size:var(--pt-micro,11px);color:var(--texte-doux)}
 .tcfg-co{font-size:var(--pt-micro,11px);color:var(--vert-med);font-weight:600;background:var(--vert-pale);border-radius:7px;padding:3px 8px}
 .tcfg-rst{font-size:var(--pt-micro,11px);color:var(--terre);background:transparent;border:1px solid var(--gris);border-radius:7px;padding:4px 8px;cursor:pointer;font-weight:600}
 .tcfg-mf{font-size:var(--pt-micro,11px);font-weight:700;color:var(--terre);visibility:hidden}
 .tcfg-mf.on{visibility:visible}
-.tcfg-tar{font-size:11.5px;color:var(--bleu,#4A9FC8);background:rgba(74,159,200,0.1);border:1px solid rgba(74,159,200,0.3);border-radius:10px;padding:9px 11px;margin:10px 0 6px;line-height:1.4}
-.tcfg-tr{font-size:11.5px;color:var(--terre-tx,#8A5A38);background:var(--terre-pale);border:1px solid rgba(138,90,56,0.3);border-radius:10px;padding:9px 11px;margin:10px 0 6px;line-height:1.4}
+.tcfg-tar{font-size:var(--pt-lbl,11.5px);color:var(--bleu,#4A9FC8);background:rgba(74,159,200,0.1);border:1px solid rgba(74,159,200,0.3);border-radius:10px;padding:9px 11px;margin:10px 0 6px;line-height:1.4}
+.tcfg-tr{font-size:var(--pt-lbl,11.5px);color:var(--terre-tx,#8A5A38);background:var(--terre-pale);border:1px solid rgba(138,90,56,0.3);border-radius:10px;padding:9px 11px;margin:10px 0 6px;line-height:1.4}
 
 /* ── Choix des tâches à la création de saison ── */
 .ns-taches-pick{display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto;border:1px solid var(--gris-clair);border-radius:11px;padding:7px}
@@ -537,9 +537,9 @@
     </div>
     <div class="login-label">Mot de passe</div>
     <input type="password" id="login-pwd-input" class="login-input" placeholder="Votre mot de passe" autocomplete="current-password">
-    <div id="login-pwd-error" style="color:#FF8A80;font-size:12px;margin-top:-8px;margin-bottom:10px;display:none"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-refus"></use></svg> Mot de passe incorrect</div>
+    <div id="login-pwd-error" style="color:#FF8A80;font-size:var(--pt-micro,12px);margin-top:-8px;margin-bottom:10px;display:none"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-refus"></use></svg> Mot de passe incorrect</div>
     <button class="login-btn" id="login-pwd-btn">Se connecter</button>
-    <div id="login-forgot-link" style="text-align:center;margin-top:14px;color:rgba(255,255,255,0.5);font-size:12px;cursor:pointer;text-decoration:underline" onclick="showForgotPanel()">Mot de passe oublié ?</div>
+    <div id="login-forgot-link" style="text-align:center;margin-top:14px;color:rgba(255,255,255,0.5);font-size:var(--pt-micro,12px);cursor:pointer;text-decoration:underline" onclick="showForgotPanel()">Mot de passe oublié ?</div>
     <div style="text-align:center;margin-top:22px;color:rgba(255,255,255,0.28);font-size:10px;line-height:1.6;padding:0 8px">Votre adresse email est utilisée uniquement pour votre identification.<br>Elle n'est ni partagée ni utilisée à d'autres fins.<br><span onclick="openMentionsLogin()" style="text-decoration:underline;cursor:pointer;color:rgba(255,255,255,0.4)">Mentions légales &amp; confidentialité</span></div>
   </div>
   <div id="login-forgot-panel" style="display:none;width:100%;margin-top:20px">
@@ -548,8 +548,8 @@
       <div style="color:white;font-size:15px;font-weight:600">Mot de passe oublié</div>
     </div>
     <div id="login-forgot-for" style="background:rgba(255,255,255,0.1);border-radius:12px;padding:11px 14px;color:white;font-size:var(--pt-base,14px);font-weight:600;margin-bottom:16px;text-align:center"></div>
-    <div id="login-forgot-error" style="color:#FF8A80;font-size:12px;margin-bottom:10px;display:none"></div>
-    <div id="login-forgot-ok" style="color:#A8E6A3;font-size:12px;margin-bottom:10px;padding:8px 0;display:none"></div>
+    <div id="login-forgot-error" style="color:#FF8A80;font-size:var(--pt-micro,12px);margin-bottom:10px;display:none"></div>
+    <div id="login-forgot-ok" style="color:#A8E6A3;font-size:var(--pt-micro,12px);margin-bottom:10px;padding:8px 0;display:none"></div>
     <div id="login-forgot-form">
       <div class="login-label">Votre adresse email</div>
       <input type="email" id="login-forgot-email" class="login-input" placeholder="email@domaine.fr" autocomplete="email">
@@ -569,13 +569,13 @@
   <div id="login-first-pwd-panel" style="display:none;width:100%;margin-top:20px">
     <div style="text-align:center;margin-bottom:6px;font-size:30px"><svg class="mv-ic" width="40" height="40" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cadenas"></use></svg></div>
     <div style="color:white;font-size:var(--pt-sm,17px);font-weight:600;text-align:center;margin-bottom:6px">Choisissez votre mot de passe</div>
-    <div style="color:rgba(255,255,255,0.55);font-size:12px;text-align:center;line-height:1.6;margin-bottom:16px;padding:0 4px">Celui qu'on vous a communiqué était provisoire. Choisissez-en un que vous êtes seul à connaître&nbsp;: il ne sera demandé à personne d'autre.</div>
+    <div style="color:rgba(255,255,255,0.55);font-size:var(--pt-micro,12px);text-align:center;line-height:1.6;margin-bottom:16px;padding:0 4px">Celui qu'on vous a communiqué était provisoire. Choisissez-en un que vous êtes seul à connaître&nbsp;: il ne sera demandé à personne d'autre.</div>
     <div id="login-fp-who" style="background:rgba(255,255,255,0.1);border-radius:12px;padding:11px 14px;color:white;font-size:var(--pt-base,14px);font-weight:600;margin-bottom:16px;text-align:center"></div>
     <div class="login-label">Nouveau mot de passe</div>
     <input type="password" id="login-fp-new" class="login-input" placeholder="8 caractères minimum" autocomplete="new-password">
     <div class="login-label">Confirmez</div>
     <input type="password" id="login-fp-confirm" class="login-input" placeholder="Répétez le mot de passe" autocomplete="new-password">
-    <div id="login-fp-error" style="color:#FF8A80;font-size:12px;margin-top:-8px;margin-bottom:10px;display:none"></div>
+    <div id="login-fp-error" style="color:#FF8A80;font-size:var(--pt-micro,12px);margin-top:-8px;margin-bottom:10px;display:none"></div>
     <button class="login-btn" id="login-fp-btn" onclick="_mvSubmitFirstPwd()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg> Enregistrer et continuer</button>
     <div style="text-align:center;margin-top:12px;color:rgba(255,255,255,0.4);font-size:var(--pt-micro,11px)">Notez-le quelque part&nbsp;: personne ne peut le relire, pas même votre responsable.</div>
   </div>
@@ -588,13 +588,13 @@
           <div style="width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#8B5CF6,#6D28D9);display:flex;align-items:center;justify-content:center;font-size:13px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg></div>
           <span style="color:#C4B5FD;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Admin GUERETTECH</span>
         </div>
-        <button onclick="hideGTLoginPanel()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:5px 10px;color:rgba(255,255,255,0.4);font-size:12px;cursor:pointer"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-croix"></use></svg></button>
+        <button onclick="hideGTLoginPanel()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:5px 10px;color:rgba(255,255,255,0.4);font-size:var(--pt-micro,12px);cursor:pointer"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-croix"></use></svg></button>
       </div>
       <div class="login-label" style="color:rgba(196,181,253,0.7)">Email</div>
       <input type="email" id="gt-login-email" class="login-input" placeholder="Email" autocomplete="off" autocorrect="off" autocapitalize="none" style="border-color:rgba(139,92,246,0.3)">
       <div class="login-label" style="color:rgba(196,181,253,0.7);margin-top:10px">Mot de passe</div>
       <input type="password" id="gt-login-pwd" class="login-input" placeholder="••••••••" autocomplete="current-password" style="border-color:rgba(139,92,246,0.3)">
-      <div id="gt-login-error" style="color:#FF8A80;font-size:12px;margin-top:-8px;margin-bottom:10px;display:none"></div>
+      <div id="gt-login-error" style="color:#FF8A80;font-size:var(--pt-micro,12px);margin-top:-8px;margin-bottom:10px;display:none"></div>
       <button id="gt-login-btn" class="login-btn" onclick="confirmGTLogin()" style="background:linear-gradient(135deg,#7C3AED,#5B21B6);border:none;margin-top:14px">Connexion</button>
 
       <!-- SEC-GT/2 — second facteur. autocomplete="one-time-code" fait proposer
@@ -602,16 +602,16 @@
       <div id="gt-otp-box" style="display:none;margin-top:16px;border-top:1px solid rgba(139,92,246,0.2);padding-top:14px">
         <div class="login-label" style="color:rgba(196,181,253,0.7)">Code re&#231;u par e-mail</div>
         <input type="text" id="gt-otp-code" class="login-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" style="border-color:rgba(139,92,246,0.3);letter-spacing:.35em;text-align:center;font-family:monospace">
-        <div id="gt-otp-info" style="color:rgba(196,181,253,0.55);font-size:11.5px;margin-top:-4px;margin-bottom:6px"></div>
+        <div id="gt-otp-info" style="color:rgba(196,181,253,0.55);font-size:var(--pt-lbl,11.5px);margin-top:-4px;margin-bottom:6px"></div>
         <button id="gt-otp-btn" class="login-btn" onclick="confirmGTOtp()" style="background:linear-gradient(135deg,#7C3AED,#5B21B6);border:none;margin-top:8px">Ouvrir la session</button>
-        <button onclick="gtOtpResend()" style="width:100%;background:none;border:none;color:rgba(196,181,253,0.45);font-size:11.5px;cursor:pointer;font-family:Outfit,sans-serif;padding:9px 0 0">Renvoyer un code</button>
+        <button onclick="gtOtpResend()" style="width:100%;background:none;border:none;color:rgba(196,181,253,0.45);font-size:var(--pt-lbl,11.5px);cursor:pointer;font-family:Outfit,sans-serif;padding:9px 0 0">Renvoyer un code</button>
       </div>
     </div>
   </div>
 
   <!-- ══ Lien signalement (avant connexion) ══ -->
   <div style="text-align:center;margin-top:26px;width:100%">
-    <button onclick="openReportLogin()" style="background:none;border:none;color:rgba(255,255,255,0.32);font-size:12px;text-decoration:underline;cursor:pointer;font-family:'Outfit',sans-serif">Un problème pour vous connecter ? Nous le signaler</button>
+    <button onclick="openReportLogin()" style="background:none;border:none;color:rgba(255,255,255,0.32);font-size:var(--pt-micro,12px);text-decoration:underline;cursor:pointer;font-family:'Outfit',sans-serif">Un problème pour vous connecter ? Nous le signaler</button>
   </div>
 
   <!-- ══ Modal signalement avant connexion (z-index > login-screen) ══ -->
@@ -619,9 +619,9 @@
     <div style="background:var(--bg-card);border-radius:20px 20px 0 0;margin-top:80px;padding:24px 20px calc(40px + env(safe-area-inset-bottom,0px))" onclick="event.stopPropagation()">
       <div style="width:36px;height:4px;background:#DDD;border-radius:2px;margin:0 auto 18px"></div>
       <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--texte);margin-bottom:6px"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-bogue"></use></svg> Signaler un problème</div>
-      <div style="font-size:12px;color:var(--texte-doux);line-height:1.5;margin-bottom:16px">Décrivez le souci rencontré avant connexion. Nous recevons votre message avec les informations techniques utiles.</div>
+      <div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5;margin-bottom:16px">Décrivez le souci rencontré avant connexion. Nous recevons votre message avec les informations techniques utiles.</div>
       <textarea id="login-report-text" rows="4" placeholder="Ex : impossible de me connecter, l'écran reste bloqué…" style="width:100%;box-sizing:border-box;border:1.5px solid var(--gris-clair);border-radius:12px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:var(--pt-base,14px);line-height:1.5;resize:vertical;min-height:96px;color:var(--texte);background:var(--bg-card)"></textarea>
-      <div id="login-report-status" style="display:none;font-size:12px;margin-top:10px"></div>
+      <div id="login-report-status" style="display:none;font-size:var(--pt-micro,12px);margin-top:10px"></div>
       <button id="login-report-send-btn" onclick="submitReportLogin()" style="display:block;width:100%;margin-top:14px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Envoyer</button>
       <button onclick="closeReportLogin()" style="display:block;width:100%;margin-top:8px;padding:12px;background:none;color:var(--texte-doux);border:none;font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer">Annuler</button>
     </div>
@@ -632,7 +632,7 @@
     <div style="background:var(--bg-card);border-radius:20px 20px 0 0;margin-top:60px;padding:24px 20px 44px;min-height:60vh" onclick="event.stopPropagation()">
       <div style="width:36px;height:4px;background:#DDD;border-radius:2px;margin:0 auto 20px"></div>
       <div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:#2D0B45;margin-bottom:20px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg> Mentions légales &amp; confidentialité</div>
-      <div style="font-family:'Outfit',sans-serif;font-size:12px;color:#2D0B45;line-height:1.7">
+      <div style="font-family:'Outfit',sans-serif;font-size:var(--pt-micro,12px);color:#2D0B45;line-height:1.7">
         <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Éditeur</div>
         <p style="margin:0 0 14px">Ma Vigne est une application développée et éditée par Nicolas GUERET.<br>Micro-entreprise <strong>GUERETTECH</strong> — SIRET : 98214811600022<br>Contact : <span style="color:#3D6B27">ngdevpro@gmail.com</span></p>
         <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Propriété intellectuelle</div>
@@ -648,7 +648,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v8.21</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v8.23</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -896,13 +896,13 @@
           <div style="flex:1">
             <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7A5C10;margin-bottom:3px">Priorité du moment</div>
             <div id="priority-text" style="font-size:13px;font-weight:600;color:#4A3A08;line-height:1.4"></div>
-            <div id="priority-task-row" style="display:none;margin-top:6px"><span id="priority-task-text" style="display:inline-block;background:#4A3A08;color:#FBE89A;font-size:12px;font-weight:700;border-radius:8px;padding:3px 10px"></span></div>
+            <div id="priority-task-row" style="display:none;margin-top:6px"><span id="priority-task-text" style="display:inline-block;background:#4A3A08;color:#FBE89A;font-size:var(--pt-micro,12px);font-weight:700;border-radius:8px;padding:3px 10px"></span></div>
           </div>
           <div id="priority-edit-btn" style="display:none;font-size:16px;cursor:pointer;color:#7A5C10" onclick="openPriorityEdit()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg></div>
         </div>
       </div>
       <div id="priority-empty" style="display:none;margin-bottom:12px">
-        <button onclick="openPriorityEdit()" style="width:100%;background:var(--bg-card);border:1.5px dashed var(--gris);border-radius:12px;padding:10px;font-size:12px;color:var(--texte-doux);cursor:pointer;font-family:'Outfit',sans-serif"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg> Définir une tâche prioritaire…</button>
+        <button onclick="openPriorityEdit()" style="width:100%;background:var(--bg-card);border:1.5px dashed var(--gris);border-radius:12px;padding:10px;font-size:var(--pt-micro,12px);color:var(--texte-doux);cursor:pointer;font-family:'Outfit',sans-serif"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg> Définir une tâche prioritaire…</button>
       </div>
       <div class="sbox"><span><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-loupe"></use></svg></span><input type="text" id="pSearch" placeholder="Rechercher une parcelle…"><span id="pSearch-clear" onclick="clearPSearch()" style="display:none;cursor:pointer;font-size:16px;color:var(--texte-doux);padding:2px 4px;line-height:1"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-croix"></use></svg></span></div>
       <div id="p-prox-bar" style="margin-bottom:8px"></div>
@@ -968,9 +968,9 @@
       <div class="modal-sub" id="dp-sub"></div>
       <div id="dp-readonly-banner" style="display:none"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-        <button id="dp-gps-btn" onclick="openGPS()" style="display:none;background:var(--bleu);color:white;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;align-items:center;gap:6px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg> Ouvrir dans GPS</button>
-        <button id="dp-map-btn" onclick="openInMap()" style="background:#1B2E1A;color:#6BA34A;border:1.5px solid rgba(107,163,74,0.35);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carte"></use></svg> Ouvrir dans carte</button>
-        <button id="dp-rep-btn" onclick="openRepPonct()" style="display:none;background:var(--orange-pale);color:var(--orange);border:1.5px solid rgba(184,90,26,0.4);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;align-items:center;gap:6px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-outil"></use></svg> Réparation ponctuelle</button>
+        <button id="dp-gps-btn" onclick="openGPS()" style="display:none;background:var(--bleu);color:white;border:none;border-radius:10px;padding:8px 14px;font-size:var(--pt-micro,12px);font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;align-items:center;gap:6px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg> Ouvrir dans GPS</button>
+        <button id="dp-map-btn" onclick="openInMap()" style="background:#1B2E1A;color:#6BA34A;border:1.5px solid rgba(107,163,74,0.35);border-radius:10px;padding:8px 14px;font-size:var(--pt-micro,12px);font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carte"></use></svg> Ouvrir dans carte</button>
+        <button id="dp-rep-btn" onclick="openRepPonct()" style="display:none;background:var(--orange-pale);color:var(--orange);border:1.5px solid rgba(184,90,26,0.4);border-radius:10px;padding:8px 14px;font-size:var(--pt-micro,12px);font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;align-items:center;gap:6px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-outil"></use></svg> Réparation ponctuelle</button>
       </div>
     </div>
     <div class="modal-body">
@@ -988,7 +988,7 @@
       <div id="dp-cepage-row" style="display:none;background:var(--gris-clair);border-radius:12px;padding:10px 14px;margin-bottom:14px">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase;font-weight:700;letter-spacing:0.5px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> Cépage</div>
-          <button id="dp-cepage-edit-btn" style="display:none;background:none;border:none;font-size:12px;color:var(--texte-doux);cursor:pointer;padding:3px 8px;border-radius:8px;font-family:inherit"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Modifier</button>
+          <button id="dp-cepage-edit-btn" style="display:none;background:none;border:none;font-size:var(--pt-micro,12px);color:var(--texte-doux);cursor:pointer;padding:3px 8px;border-radius:8px;font-family:inherit"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Modifier</button>
         </div>
         <div id="dp-cepage-val" style="font-size:15px;font-weight:600;color:var(--texte);margin-top:5px"></div>
       </div>
@@ -996,7 +996,7 @@
       <div id="dp-commune-row" style="display:none;background:var(--gris-clair);border-radius:12px;padding:10px 14px;margin-bottom:14px">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase;font-weight:700;letter-spacing:0.5px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg> Commune (météo)</div>
-          <button id="dp-commune-edit-btn" style="display:none;background:none;border:none;font-size:12px;color:var(--texte-doux);cursor:pointer;padding:3px 8px;border-radius:8px;font-family:inherit"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Modifier</button>
+          <button id="dp-commune-edit-btn" style="display:none;background:none;border:none;font-size:var(--pt-micro,12px);color:var(--texte-doux);cursor:pointer;padding:3px 8px;border-radius:8px;font-family:inherit"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Modifier</button>
         </div>
         <div id="dp-commune-val" style="margin-top:5px"></div>
       </div>
@@ -1402,7 +1402,7 @@
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v8.21</div>
+        <div class="mod-header-sub">Ma Vigne v8.23</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
       
@@ -1450,7 +1450,7 @@
           <span style="width:44px;height:44px;flex:none;border-radius:12px;background:#14110D;display:grid;place-items:center;font-size:22px"><svg class="mv-ic" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-drapeau"></use></svg></span>
           <span style="flex:1">
             <span style="display:block;font-weight:600;font-size:15px;color:#1C1813">Clôturer la campagne</span>
-            <span style="display:block;font-size:12px;color:#6B655C;margin-top:2px;line-height:1.35">Bilan, archivage, puis démarrage de la suivante — toute l&#39;équipe bascule ensemble.</span>
+            <span style="display:block;font-size:var(--pt-micro,12px);color:#6B655C;margin-top:2px;line-height:1.35">Bilan, archivage, puis démarrage de la suivante — toute l&#39;équipe bascule ensemble.</span>
           </span>
           <span style="margin-left:auto;color:#C9A84C;font-size:var(--pt-md,20px)">›</span>
         </button>
@@ -1510,7 +1510,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg></div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v8.21 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div class="ver-tag">Ma Vigne v8.23 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -1565,7 +1565,7 @@
         <input class="fi" id="edn-lat" type="number" step="0.00001" inputmode="decimal" placeholder="Latitude" style="flex:1">
         <input class="fi" id="edn-lon" type="number" step="0.00001" inputmode="decimal" placeholder="Longitude" style="flex:1">
       </div>
-      <button class="mbtn" onclick="ednUseCentroide()" style="margin-top:8px;background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux);font-size:12px;padding:8px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg> Centrer sur mes parcelles</button>
+      <button class="mbtn" onclick="ednUseCentroide()" style="margin-top:8px;background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux);font-size:var(--pt-micro,12px);padding:8px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg> Centrer sur mes parcelles</button>
       <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:6px;margin-bottom:14px">Laissez vide pour centrer automatiquement la météo sur vos parcelles géolocalisées. Renseignez ces champs pour forcer un point précis.</div>
       <button class="mbtn verte" onclick="saveEditDomNom()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg> Enregistrer</button>
       <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="closeOv(null,'ovEditDomNom')">Annuler</button>
@@ -1690,7 +1690,7 @@
         <div class="set-title" style="padding:0;margin:0"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-lien"></use></svg> Activités tracteur</div>
         <button onclick="openOvNouvelleActivite()" style="background:var(--vert);color:#fff;border:none;border-radius:8px;padding:6px 13px;font-family:&#39;Outfit&#39;,sans-serif;font-size:13px;font-weight:700;cursor:pointer;min-height:44px">+ Ajouter</button>
       </div>
-      <div style="font-size:12px;color:var(--texte-doux);padding:4px 16px 10px">Tracteur par défaut + champ de saisie optionnel lors de la validation.</div>
+      <div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);padding:4px 16px 10px">Tracteur par défaut + champ de saisie optionnel lors de la validation.</div>
       <div id="act-trac-list" style="background:var(--bg-card);border-radius:16px;padding:0 16px;margin:0 16px;box-shadow:var(--shadow-sm)"></div>
     </div>
   </div>
@@ -1949,11 +1949,11 @@
   <div style="width:100%;max-width:340px;background:#141824;border:1px solid rgba(196,181,253,0.2);border-radius:16px;padding:22px;text-align:center;font-family:Outfit,sans-serif">
     <div style="font-size:30px;margin-bottom:10px">&#128274;</div>
     <div style="font-size:15px;font-weight:600;color:#E8E8E0;margin-bottom:5px">Session verrouill&#233;e</div>
-    <div id="agt-lock-why" style="font-size:12px;color:rgba(255,255,255,0.4);line-height:1.6;margin-bottom:16px">Panneau GUERETTECH rest&#233; inactif. Saisissez votre mot de passe pour reprendre.</div>
+    <div id="agt-lock-why" style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.4);line-height:1.6;margin-bottom:16px">Panneau GUERETTECH rest&#233; inactif. Saisissez votre mot de passe pour reprendre.</div>
     <input id="agt-lock-pwd" type="password" autocomplete="current-password" placeholder="Mot de passe" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:10px;padding:11px 12px;color:#F0E8DC;font-size:16px;font-family:Outfit,sans-serif;box-sizing:border-box;margin-bottom:10px">
-    <div id="agt-lock-err" style="display:none;font-size:12px;color:#FCA5A5;margin-bottom:10px"></div>
+    <div id="agt-lock-err" style="display:none;font-size:var(--pt-micro,12px);color:#FCA5A5;margin-bottom:10px"></div>
     <button id="agt-lock-btn" onclick="agtUnlock()" style="width:100%;background:#C9A84C;border:none;border-radius:10px;padding:11px;color:#0C1A0A;font-size:13px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;margin-bottom:8px">D&#233;verrouiller</button>
-    <button onclick="agtLockOut()" style="width:100%;background:none;border:none;color:rgba(255,255,255,0.35);font-size:12px;cursor:pointer;font-family:Outfit,sans-serif;padding:6px">Fermer la session</button>
+    <button onclick="agtLockOut()" style="width:100%;background:none;border:none;color:rgba(255,255,255,0.35);font-size:var(--pt-micro,12px);cursor:pointer;font-family:Outfit,sans-serif;padding:6px">Fermer la session</button>
   </div>
 </div>
 
@@ -1963,17 +1963,17 @@
     <div class="modal-handle"></div>
     <div class="modal-hd"><div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-outil"></use></svg> Nouveau client</div></div>
     <div class="modal-body">
-      <p style="font-size:12px;color:var(--texte-doux);margin-bottom:16px;line-height:1.6">Choisissez un slug unique pour ce domaine. Il sera l&#39;identifiant Firestore et apparaîtra dans le lien d&#39;invitation.</p>
-      <label style="font-size:12px;color:var(--texte-doux);font-weight:600;display:block;margin-bottom:6px">Slug du domaine</label>
+      <p style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-bottom:16px;line-height:1.6">Choisissez un slug unique pour ce domaine. Il sera l&#39;identifiant Firestore et apparaîtra dans le lien d&#39;invitation.</p>
+      <label style="font-size:var(--pt-micro,12px);color:var(--texte-doux);font-weight:600;display:block;margin-bottom:6px">Slug du domaine</label>
       <input class="ov-input" id="agt-slug-input" type="text" placeholder="ex : chateau-melin" style="font-family:monospace" oninput="agtSlugPreview(this.value)">
       <div id="agt-link-preview" style="display:none;background:rgba(61,107,39,0.1);border:1px solid rgba(61,107,39,0.25);border-radius:8px;padding:8px 12px;font-size:var(--pt-micro,11px);color:#6BA34A;font-family:monospace;word-break:break-all;margin:8px 0 14px"></div>
-      <label style="font-size:12px;color:var(--texte-doux);font-weight:600;display:block;margin:14px 0 6px">Formule</label>
+      <label style="font-size:var(--pt-micro,12px);color:var(--texte-doux);font-weight:600;display:block;margin:14px 0 6px">Formule</label>
       <select class="ov-input" id="agt-plan-input">
         <option value="essentiel">Essentiel — 29 €/mois (Vigne, Journal, Météo)</option>
         <option value="vigneron">Vigneron — 49 €/mois (+ Tracteur, Phyto)</option>
         <option value="domaine" selected>Domaine — 79 €/mois (tous les modules)</option>
       </select>
-      <label style="font-size:12px;color:var(--texte-doux);font-weight:600;display:block;margin:14px 0 6px">Essai (jours · 0 = aucun)</label>
+      <label style="font-size:var(--pt-micro,12px);color:var(--texte-doux);font-weight:600;display:block;margin:14px 0 6px">Essai (jours · 0 = aucun)</label>
       <input class="ov-input" id="agt-trial-input" type="number" min="0" max="90" value="15">
       <button class="mbtn verte" onclick="saveAddTenant()">Ajouter et copier le lien</button>
       <button class="mbtn" onclick="closeOv(null,'ovAddTenant')">Annuler</button>
@@ -2234,7 +2234,7 @@
     <input type="date" class="fi ac" id="cop-date" oninput="_copUpdateOpDate()">
     <div class="fl">Cuvées</div>
     <div id="cop-mil-wrap" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px;"></div>
-    <div id="cop-mil-note" style="display:none;font-size:11.5px;color:var(--texte-doux);margin:-4px 0 9px;line-height:1.45;"></div>
+    <div id="cop-mil-note" style="display:none;font-size:var(--pt-lbl,11.5px);color:var(--texte-doux);margin:-4px 0 9px;line-height:1.45;"></div>
     <div id="cop-cuvees-wrap" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px;"></div>
     <div id="cop-cuvees-summary" style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--gris-clair);border-radius:10px;margin-bottom:4px;font-size:13px;color:var(--texte-leger);">Sélectionnez des cuvées</div>
     <div class="fl">Intervenants</div>
@@ -2306,7 +2306,7 @@
           <input type="number" class="fi" id="cop-so2-dose-u" placeholder="ex. 5" step="0.5" min="0" style="flex:1;margin-bottom:0;">
           <select class="fsel" id="cop-so2-unite-u" style="width:62px;margin-bottom:0;"><option value="cL">cL</option><option value="mL">mL</option></select>
         </div>
-        <div id="cop-so2-unique-date" style="font-size:12px;color:var(--texte-leger);margin-top:6px;"></div>
+        <div id="cop-so2-unique-date" style="font-size:var(--pt-micro,12px);color:var(--texte-leger);margin-top:6px;"></div>
       </div>
       <div id="cop-so2-f-recurrent" style="display:none;">
         <div style="padding:11px 12px;background:var(--gris-clair);border-radius:10px;margin-bottom:10px;">
@@ -2357,12 +2357,12 @@
           <div style="font-size:13px;font-weight:500;color:var(--texte);">Joindre un rapport PDF</div>
           <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);">Max&nbsp;10&nbsp;Mo</div>
         </div>
-        <div style="margin-left:auto;padding:5px 12px;border:1px solid rgba(192,132,90,0.5);border-radius:20px;font-size:12px;font-weight:500;color:#C0845A;">Choisir</div>
+        <div style="margin-left:auto;padding:5px 12px;border:1px solid rgba(192,132,90,0.5);border-radius:20px;font-size:var(--pt-micro,12px);font-weight:500;color:#C0845A;">Choisir</div>
       </div>
       <div id="cop-pdf-staged" style="display:none;border:1.5px solid rgba(74,156,80,0.4);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;background:rgba(74,156,80,0.05);">
         <span style="font-size:18px;">&#128196;</span>
         <div style="flex:1;min-width:0;">
-          <div id="cop-pdf-name" style="font-size:12px;font-weight:500;color:var(--texte);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+          <div id="cop-pdf-name" style="font-size:var(--pt-micro,12px);font-weight:500;color:var(--texte);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
           <div id="cop-pdf-size" style="font-size:var(--pt-micro,11px);color:var(--texte-doux);"></div>
         </div>
         <button onclick="window._copRemovePdf()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--texte-doux);padding:2px;min-width:28px;min-height:28px;">&#215;</button>
@@ -2443,8 +2443,8 @@
     </select>
     <div class="fl">FML (malo-lactique)</div>
     <div style="display:flex;gap:8px;margin-bottom:14px;">
-      <button id="cuv-fml-non" onclick="window._cuvToggle('fml','non')" style="flex:1;padding:10px 6px;border-radius:10px;border:1px solid var(--gris);font-size:12px;font-weight:600;cursor:pointer;min-height:44px;font-family:'Outfit',sans-serif;">Non termin&#xE9;e</button>
-      <button id="cuv-fml-ok" onclick="window._cuvToggle('fml','ok')" style="flex:1;padding:10px 6px;border-radius:10px;border:1px solid var(--gris);font-size:12px;font-weight:600;cursor:pointer;min-height:44px;font-family:'Outfit',sans-serif;">Termin&#xE9;e &#x2713;</button>
+      <button id="cuv-fml-non" onclick="window._cuvToggle('fml','non')" style="flex:1;padding:10px 6px;border-radius:10px;border:1px solid var(--gris);font-size:var(--pt-micro,12px);font-weight:600;cursor:pointer;min-height:44px;font-family:'Outfit',sans-serif;">Non termin&#xE9;e</button>
+      <button id="cuv-fml-ok" onclick="window._cuvToggle('fml','ok')" style="flex:1;padding:10px 6px;border-radius:10px;border:1px solid var(--gris);font-size:var(--pt-micro,12px);font-weight:600;cursor:pointer;min-height:44px;font-family:'Outfit',sans-serif;">Termin&#xE9;e &#x2713;</button>
     </div>
     <input type="hidden" id="cuv-fml-val" value="non">
     <input type="hidden" id="cuv-id">
@@ -2484,9 +2484,9 @@
     <div id="vrec-vinif-section">
       <div class="fl">Mode d&rsquo;&eacute;raflage</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
-        <button id="vrec-er-total" onclick="_vndSetEr('total')" style="padding:9px 13px;border-radius:9px;border:1px solid rgba(192,132,90,.4);background:rgba(192,132,90,.18);font-size:12px;font-weight:500;cursor:pointer;color:#C0845A;min-height:44px">&Eacute;raflage total</button>
-        <button id="vrec-er-partiel" onclick="_vndSetEr('partiel')" style="padding:9px 13px;border-radius:9px;border:1px solid rgba(192,132,90,.15);background:rgba(192,132,90,.04);font-size:12px;font-weight:500;cursor:pointer;color:rgba(240,232,220,.5);min-height:44px">Partiel</button>
-        <button id="vrec-er-entiere" onclick="_vndSetEr('entiere')" style="padding:9px 13px;border-radius:9px;border:1px solid rgba(192,132,90,.15);background:rgba(192,132,90,.04);font-size:12px;font-weight:500;cursor:pointer;color:rgba(240,232,220,.5);min-height:44px">Vendange enti&egrave;re</button>
+        <button id="vrec-er-total" onclick="_vndSetEr('total')" style="padding:9px 13px;border-radius:9px;border:1px solid rgba(192,132,90,.4);background:rgba(192,132,90,.18);font-size:var(--pt-micro,12px);font-weight:500;cursor:pointer;color:#C0845A;min-height:44px">&Eacute;raflage total</button>
+        <button id="vrec-er-partiel" onclick="_vndSetEr('partiel')" style="padding:9px 13px;border-radius:9px;border:1px solid rgba(192,132,90,.15);background:rgba(192,132,90,.04);font-size:var(--pt-micro,12px);font-weight:500;cursor:pointer;color:rgba(240,232,220,.5);min-height:44px">Partiel</button>
+        <button id="vrec-er-entiere" onclick="_vndSetEr('entiere')" style="padding:9px 13px;border-radius:9px;border:1px solid rgba(192,132,90,.15);background:rgba(192,132,90,.04);font-size:var(--pt-micro,12px);font-weight:500;cursor:pointer;color:rgba(240,232,220,.5);min-height:44px">Vendange enti&egrave;re</button>
       </div>
       <div id="vrec-er-pct-wrap" style="display:none">
         <div class="fl">% vendange enti&egrave;re conserv&eacute;</div>
@@ -2639,13 +2639,13 @@
         <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:13px;color:var(--texte-doux);">SO₂ pur total</span><span id="conv-res-total" style="font-size:16px;font-weight:700;">—</span></div>
         <div style="height:1px;background:rgba(74,159,200,0.2);margin:6px 0;"></div>
         <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:13px;color:var(--texte-doux);">Solution à <span id="conv-pct-lbl">5</span>%</span><span id="conv-res-cl" style="font-size:19px;font-weight:700;color:#4A9FC8;">—</span></div>
-        <div style="display:flex;justify-content:space-between;"><span></span><span id="conv-res-ml" style="font-size:12px;color:var(--texte-doux);">—</span></div>
+        <div style="display:flex;justify-content:space-between;"><span></span><span id="conv-res-ml" style="font-size:var(--pt-micro,12px);color:var(--texte-doux);">—</span></div>
       </div>
     </div>
     <div style="background:var(--gris-clair);border:1px solid var(--gris);border-radius:10px;padding:10px 14px;margin-top:14px;">
       <div style="font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--texte-doux);text-transform:uppercase;margin-bottom:4px;">Formule</div>
-      <div style="font-size:12px;font-family:monospace;color:var(--texte-doux);margin-bottom:2px;">g SO₂ = cL × concentration% ÷ 10</div>
-      <div style="font-size:12px;font-family:monospace;color:var(--texte-doux);">cL = g SO₂ × 10 ÷ concentration%</div>
+      <div style="font-size:var(--pt-micro,12px);font-family:monospace;color:var(--texte-doux);margin-bottom:2px;">g SO₂ = cL × concentration% ÷ 10</div>
+      <div style="font-size:var(--pt-micro,12px);font-family:monospace;color:var(--texte-doux);">cL = g SO₂ × 10 ÷ concentration%</div>
     </div>
   </div>
 </div></div>
@@ -2693,7 +2693,7 @@
   <div class="modal-body">
     <div style="display:flex;align-items:center;gap:9px;padding:8px 10px;background:rgba(192,132,90,0.07);border:1px solid rgba(192,132,90,0.2);border-radius:10px;margin-bottom:13px;">
       <span style="font-size:var(--pt-md,20px);"><svg class="mv-ic" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-document"></use></svg></span>
-      <span id="cana-filename" style="font-size:12px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--texte);"></span>
+      <span id="cana-filename" style="font-size:var(--pt-micro,12px);font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--texte);"></span>
       <span id="cana-filesize" style="font-size:var(--pt-micro,11px);color:var(--texte-doux);flex-shrink:0;"></span>
     </div>
     <!-- Toggle mode -->
@@ -2721,8 +2721,8 @@
     </div>
     <!-- Mode rattacher à une opération existante -->
     <div id="cana-section-link" style="display:none;">
-      <div style="font-size:12px;color:var(--texte-doux);margin-bottom:10px;line-height:1.5;">Tap sur une ou plusieurs opérations pour les sélectionner. Le PDF sera rattaché à chacune.</div>
-      <div id="cana-link-count" style="font-size:12px;font-weight:600;color:#C0845A;margin-bottom:8px;min-height:18px;"></div>
+      <div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-bottom:10px;line-height:1.5;">Tap sur une ou plusieurs opérations pour les sélectionner. Le PDF sera rattaché à chacune.</div>
+      <div id="cana-link-count" style="font-size:var(--pt-micro,12px);font-weight:600;color:#C0845A;margin-bottom:8px;min-height:18px;"></div>
       <div id="cana-link-op-list"></div>
       <input type="hidden" id="cana-link-op-id">
     </div>
@@ -2730,7 +2730,7 @@
   </div>
 </div></div>
 
-<div class="overlay" id="ovSession" onclick="closeOv(event,'ovSession')"><div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg> Nouvelle session</div><div class="modal-sub">Avancement calculé depuis les parcelles</div></div><div class="modal-body"><div class="fl">Activité</div><select class="fsel ac" id="s-act" onchange="onSessionActChange()"></select><div class="fl">Date de début</div><input type="date" class="fi ac" id="s-date"><div class="fl">Conducteur</div><div class="ppicker" id="s-cond-pick"></div><div class="fl" style="margin-top:14px">Tracteur utilisé <span id="s-trac-override-lbl" style="font-weight:400;color:var(--orange);font-size:var(--pt-micro,11px);display:none"></span></div><div id="s-trac-pick" style="margin-bottom:4px"></div><div id="s-trac-rep-alert" style="display:none;background:var(--rouge-pale);border:1px solid var(--rouge);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--rouge-tx,#A0291E);margin-bottom:14px"></div><input type="hidden" id="s-trac-id"><input type="hidden" id="s-trac-override" value="0"><div class="fl">Note</div><input type="text" class="fi ac" id="s-note" placeholder="Conditions, zone…"><button class="mbtn acre" onclick="saveSession()">Créer la session</button></div></div></div>
+<div class="overlay" id="ovSession" onclick="closeOv(event,'ovSession')"><div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg> Nouvelle session</div><div class="modal-sub">Avancement calculé depuis les parcelles</div></div><div class="modal-body"><div class="fl">Activité</div><select class="fsel ac" id="s-act" onchange="onSessionActChange()"></select><div class="fl">Date de début</div><input type="date" class="fi ac" id="s-date"><div class="fl">Conducteur</div><div class="ppicker" id="s-cond-pick"></div><div class="fl" style="margin-top:14px">Tracteur utilisé <span id="s-trac-override-lbl" style="font-weight:400;color:var(--orange);font-size:var(--pt-micro,11px);display:none"></span></div><div id="s-trac-pick" style="margin-bottom:4px"></div><div id="s-trac-rep-alert" style="display:none;background:var(--rouge-pale);border:1px solid var(--rouge);border-radius:10px;padding:10px 12px;font-size:var(--pt-micro,12px);color:var(--rouge-tx,#A0291E);margin-bottom:14px"></div><input type="hidden" id="s-trac-id"><input type="hidden" id="s-trac-override" value="0"><div class="fl">Note</div><input type="text" class="fi ac" id="s-note" placeholder="Conditions, zone…"><button class="mbtn acre" onclick="saveSession()">Créer la session</button></div></div></div>
 
 <div class="overlay" id="ovActivite" onclick="closeOv(event,'ovActivite')"><div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> Nouvelle activité tracteur</div></div><div class="modal-body">
   <div class="fl">Emoji + Nom</div>
@@ -2770,7 +2770,7 @@
 
 <div class="overlay" id="ovEditCond" onclick="closeOv(event,'ovEditCond')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="ec-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Modifier</div></div><input type="hidden" id="ec-nom"><div class="modal-body"><div class="fl">Statut</div><div class="ppicker" id="ec-st-pick"><div class="pchk" data-val="Formé" onclick="pickVal(this,'ec-st','acre')"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-valide"></use></svg> Formé</div><div class="pchk" data-val="En formation" onclick="pickVal(this,'ec-st','acre')"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-diplome"></use></svg> En formation</div><div class="pchk" data-val="Suspendu" onclick="pickVal(this,'ec-st','acre')"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pause"></use></svg> Suspendu</div></div><input type="hidden" id="ec-st"><button class="mbtn acre" onclick="saveEditCond()">Enregistrer</button><button class="mbtn-del" onclick="deleteCond()">Supprimer</button></div></div></div>
 
-<div class="overlay" id="ovEditSession" onclick="closeOv(event,'ovEditSession')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Modifier la session</div><div class="modal-sub">Admin uniquement</div></div><input type="hidden" id="es-id"><div class="modal-body"><div class="fl">Activité</div><select class="fsel ac" id="es-act"></select><div class="fl">Date de début</div><input type="date" class="fi ac" id="es-date"><div class="fl">Date de fin</div><input type="date" class="fi ac" id="es-datefin"><div class="fl">Conducteur</div><div class="ppicker" id="es-cond-pick"></div><input type="hidden" id="es-cond"><div class="fl">Statut</div><div class="ppicker" id="es-st-pick"><div class="pchk" data-val="Terminé" onclick="pickVal(this,'es-st','acre')"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-valide"></use></svg> Terminé</div><div class="pchk" data-val="En cours" onclick="pickVal(this,'es-st','acre')"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-rotation"></use></svg> En cours</div></div><input type="hidden" id="es-st" value="Terminé"><div class="fl">Avancement (%)</div><input type="number" class="fi ac" id="es-av" placeholder="100" min="0" max="100"><div class="fl" style="margin-top:8px">Tracteur utilisé <span id="es-trac-override-lbl" style="font-weight:400;color:var(--orange);font-size:var(--pt-micro,11px);display:none"></span></div><div id="es-trac-pick" style="margin-bottom:4px"></div><div id="es-trac-rep-alert" style="display:none;background:var(--rouge-pale);border:1px solid var(--rouge);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--rouge-tx,#A0291E);margin-bottom:10px"></div><input type="hidden" id="es-trac-id"><input type="hidden" id="es-trac-override" value="0"><div class="fl">Note</div><input type="text" class="fi ac" id="es-note" placeholder="Conditions, zone…"><button class="mbtn acre" onclick="saveEditSession()">Enregistrer</button><button class="mbtn-del" id="es-del-btn" onclick="confirmDeleteSession(this)"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg> Supprimer cette session</button></div></div></div>
+<div class="overlay" id="ovEditSession" onclick="closeOv(event,'ovEditSession')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Modifier la session</div><div class="modal-sub">Admin uniquement</div></div><input type="hidden" id="es-id"><div class="modal-body"><div class="fl">Activité</div><select class="fsel ac" id="es-act"></select><div class="fl">Date de début</div><input type="date" class="fi ac" id="es-date"><div class="fl">Date de fin</div><input type="date" class="fi ac" id="es-datefin"><div class="fl">Conducteur</div><div class="ppicker" id="es-cond-pick"></div><input type="hidden" id="es-cond"><div class="fl">Statut</div><div class="ppicker" id="es-st-pick"><div class="pchk" data-val="Terminé" onclick="pickVal(this,'es-st','acre')"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-valide"></use></svg> Terminé</div><div class="pchk" data-val="En cours" onclick="pickVal(this,'es-st','acre')"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-rotation"></use></svg> En cours</div></div><input type="hidden" id="es-st" value="Terminé"><div class="fl">Avancement (%)</div><input type="number" class="fi ac" id="es-av" placeholder="100" min="0" max="100"><div class="fl" style="margin-top:8px">Tracteur utilisé <span id="es-trac-override-lbl" style="font-weight:400;color:var(--orange);font-size:var(--pt-micro,11px);display:none"></span></div><div id="es-trac-pick" style="margin-bottom:4px"></div><div id="es-trac-rep-alert" style="display:none;background:var(--rouge-pale);border:1px solid var(--rouge);border-radius:10px;padding:8px 12px;font-size:var(--pt-micro,12px);color:var(--rouge-tx,#A0291E);margin-bottom:10px"></div><input type="hidden" id="es-trac-id"><input type="hidden" id="es-trac-override" value="0"><div class="fl">Note</div><input type="text" class="fi ac" id="es-note" placeholder="Conditions, zone…"><button class="mbtn acre" onclick="saveEditSession()">Enregistrer</button><button class="mbtn-del" id="es-del-btn" onclick="confirmDeleteSession(this)"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg> Supprimer cette session</button></div></div></div>
 
 <div class="overlay" id="ovEphyDetail" onclick="closeOv(event,'ovEphyDetail')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="oed-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eprouvette"></use></svg> Produit</div><div class="modal-sub" id="oed-sub"></div></div><div class="modal-body"><div id="oed-body"></div></div></div></div>
 <div class="overlay" id="ovTraitDetail" onclick="closeOv(event,'ovTraitDetail')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="otd-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eprouvette"></use></svg> Traitement</div><div class="modal-sub" id="otd-sub"></div></div><div class="modal-body"><div id="otd-body"></div><button class="mbtn-del" style="margin-top:18px" onclick="confirmDeleteTraitement()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg> Supprimer ce traitement</button></div></div></div>
@@ -2783,7 +2783,7 @@
     <div id="docs-list"></div>
   </div>
   <div id="docs-pane" style="display:none">
-    <button onclick="docsBack()" style="background:transparent;border:none;color:var(--texte-doux);font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;padding:8px 2px 12px;min-height:44px;cursor:pointer;display:block;text-align:left">‹ Tous les documents</button>
+    <button onclick="docsBack()" style="background:transparent;border:none;color:var(--texte-doux);font-family:'Outfit',sans-serif;font-size:var(--pt-micro,12px);font-weight:600;padding:8px 2px 12px;min-height:44px;cursor:pointer;display:block;text-align:left">‹ Tous les documents</button>
     <div id="docs-pane-mois" style="display:none">
       <div style="background:var(--rouge-pale);border-radius:14px;padding:14px 16px">
       <div style="font-size:13px;font-weight:700;color:var(--rouge);margin-bottom:12px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-imprimante"></use></svg> Rapport PDF mensuel</div>
@@ -2825,13 +2825,13 @@
     <div style="font-size:var(--pt-micro,11px);font-weight:700;color:var(--texte-doux);text-transform:uppercase;letter-spacing:1px;margin:18px 0 10px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg> Heures &amp; ETP — rapport de saison</div>
     <div style="background:var(--fond-module);border:1px solid var(--gris);border-radius:14px;overflow:hidden">
       <div style="padding:14px 16px;border-bottom:1px solid var(--gris)">
-        <div id="etp-season-lbl" style="font-size:12px;font-weight:600;color:var(--texte-doux)">Heures de la saison</div>
+        <div id="etp-season-lbl" style="font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux)">Heures de la saison</div>
         <div style="font-size:10px;color:var(--texte-doux);opacity:0.6;margin-top:2px">Historisé par saison · utilisé dans le rapport PDF</div>
         <select id="etp-season-sel" style="margin-top:10px;width:100%;background:var(--fond-module);border:1px solid var(--gris);border-radius:8px;color:var(--texte);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;padding:8px 10px"></select>
       </div>
       <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
         <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:12px;color:var(--texte-doux);flex:1">Heures dues (total saison)</span>
+          <span style="font-size:var(--pt-micro,12px);color:var(--texte-doux);flex:1">Heures dues (total saison)</span>
           <div style="display:flex;align-items:center;gap:6px">
             <input type="number" id="etp-h-dues" min="0" oninput="calcEtpLive()"
               style="width:72px;background:var(--fond-module);border:1px solid var(--gris);border-radius:8px;color:var(--texte);font-family:'Outfit',sans-serif;font-size:var(--pt-base,14px);font-weight:600;padding:7px 10px;text-align:right;-moz-appearance:textfield">
@@ -2839,7 +2839,7 @@
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:12px;color:var(--texte-doux);flex:1">Heures réelles travaillées</span>
+          <span style="font-size:var(--pt-micro,12px);color:var(--texte-doux);flex:1">Heures réelles travaillées</span>
           <div style="display:flex;align-items:center;gap:6px">
             <input type="number" id="etp-h-faites" min="0" oninput="calcEtpLive()"
               style="width:72px;background:var(--fond-module);border:1px solid var(--gris);border-radius:8px;color:var(--texte);font-family:'Outfit',sans-serif;font-size:var(--pt-base,14px);font-weight:600;padding:7px 10px;text-align:right;-moz-appearance:textfield">
@@ -2865,7 +2865,7 @@
     </div>
   </div>
   <input type="file" id="import-json-input" accept=".json,application/json" style="display:none" onchange="importJSON(this)">
-  <div id="export-feedback" style="display:none;margin-top:14px;background:var(--vert-pale);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--vert);font-weight:600"></div>
+  <div id="export-feedback" style="display:none;margin-top:14px;background:var(--vert-pale);border-radius:10px;padding:10px 14px;font-size:var(--pt-micro,12px);color:var(--vert);font-weight:600"></div>
 </div></div></div>
 
 <!-- Overlay détail session tracteur -->
@@ -2876,7 +2876,7 @@
     <div style="margin-top:10px;background:var(--acier-pale);border-radius:10px;padding:10px 14px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
         <div style="font-size:var(--pt-micro,11px);font-weight:700;color:var(--acier)" id="sd-progress">0/0 parcelles</div>
-        <button onclick="closeSessionDetail()" style="background:var(--acier);color:white;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer">Enregistrer</button>
+        <button onclick="closeSessionDetail()" style="background:var(--acier);color:white;border:none;border-radius:8px;padding:6px 14px;font-size:var(--pt-micro,12px);font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer">Enregistrer</button>
       </div>
       <div style="height:6px;background:rgba(0,0,0,0.1);border-radius:6px;overflow:hidden"><div id="sd-bar" style="height:100%;background:var(--acier);border-radius:6px;transition:width 0.2s;width:0%"></div></div>
     </div>
@@ -2893,7 +2893,7 @@
       </div>
       <div class="sd-trac-sheet-list" id="sd-trac-picker-list"></div>
       <div id="sd-trac-picker-warn" style="display:none" class="sd-trac-sheet-warn">
-        <div style="font-size:12px;color:#E07070;font-weight:600;margin-bottom:2px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg> Ce tracteur est en réparation</div>
+        <div style="font-size:var(--pt-micro,12px);color:#E07070;font-weight:600;margin-bottom:2px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg> Ce tracteur est en réparation</div>
         <div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4)" id="sd-picker-warn-txt"></div>
         <div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3);margin-top:4px">La session sera signalée dans les exports.</div>
       </div>
@@ -2906,7 +2906,7 @@
   <div class="modal-body" style="padding-top:8px">
     <div id="sd-chrono"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div id="sd-parc-lbl" style="font-size:12px;font-weight:700;color:var(--texte-doux)">Parcelles restantes</div>
+      <div id="sd-parc-lbl" style="font-size:var(--pt-micro,12px);font-weight:700;color:var(--texte-doux)">Parcelles restantes</div>
       <div style="display:flex;gap:6px">
         <div onclick="toggleSDSkipMode()" id="sd-skip-mode-btn" style="font-size:var(--pt-micro,11px);font-weight:600;color:#8B3A28;cursor:pointer;background:#F0D0C8;padding:4px 10px;border-radius:8px">⊘ Désactiver</div>
         <div onclick="toggleSDShowDone()" id="sd-show-done-btn" style="font-size:var(--pt-micro,11px);font-weight:600;color:var(--acier);cursor:pointer;background:var(--acier-pale);padding:4px 10px;border-radius:8px">Voir toutes</div>
@@ -2941,7 +2941,7 @@
     <div style="float:right;font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600" id="mq-pct"></div>
     <div class="modal-title" id="mq-nom"></div>
     <div class="modal-sub" id="mq-sub"></div>
-    <div id="mq-here" style="display:none;margin-top:8px;font-size:12px;font-weight:700;color:#2563EB">&#128205; Vous êtes ici</div>
+    <div id="mq-here" style="display:none;margin-top:8px;font-size:var(--pt-micro,12px);font-weight:700;color:#2563EB">&#128205; Vous êtes ici</div>
   </div>
   <div class="modal-body">
     <div class="mq-barwrap"><div class="mq-bar-fill" id="mq-bar-fill"></div></div>
@@ -2960,7 +2960,7 @@
     <div class="modal-sub" id="vp-parcelle"></div>
   </div>
   <div class="modal-body">
-    <div id="vp-temps-ecoule" style="display:none;background:var(--acier-pale);color:var(--acier-med);border-radius:10px;padding:8px 12px;font-size:12px;font-weight:600;font-family:'Outfit',sans-serif;margin-bottom:12px;text-align:center"></div>
+    <div id="vp-temps-ecoule" style="display:none;background:var(--acier-pale);color:var(--acier-med);border-radius:10px;padding:8px 12px;font-size:var(--pt-micro,12px);font-weight:600;font-family:'Outfit',sans-serif;margin-bottom:12px;text-align:center"></div>
     <div class="fl">Date du travail</div>
     <input type="date" class="fi" id="vp-date">
     <div class="fl">Réalisé par</div>
@@ -3075,8 +3075,8 @@
   <input type="password" class="fi" id="cpwd-new" placeholder="Nouveau mot de passe (min. 6 car.)" autocomplete="new-password">
   <div class="fl">Confirmer le nouveau mot de passe</div>
   <input type="password" class="fi" id="cpwd-confirm" placeholder="Répétez le nouveau mot de passe" autocomplete="new-password">
-  <div id="cpwd-error" style="display:none;color:var(--rouge-tx,#A0291E);font-size:12px;margin:-6px 0 10px;padding:8px 12px;background:var(--rouge-pale);border-radius:10px"></div>
-  <div id="cpwd-ok" style="display:none;color:var(--vert);font-size:12px;margin:-6px 0 10px;padding:8px 12px;background:var(--vert-pale);border-radius:10px"></div>
+  <div id="cpwd-error" style="display:none;color:var(--rouge-tx,#A0291E);font-size:var(--pt-micro,12px);margin:-6px 0 10px;padding:8px 12px;background:var(--rouge-pale);border-radius:10px"></div>
+  <div id="cpwd-ok" style="display:none;color:var(--vert);font-size:var(--pt-micro,12px);margin:-6px 0 10px;padding:8px 12px;background:var(--vert-pale);border-radius:10px"></div>
   <button class="mbtn verte" onclick="confirmChangePwd()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg> Enregistrer le nouveau mot de passe</button>
 </div></div></div>
 
@@ -3088,7 +3088,7 @@
     <div id="npw-val" style="font-family:'Outfit',system-ui,sans-serif;font-size:26px;font-weight:600;color:#C9A84C;letter-spacing:0.02em;word-break:break-all;line-height:1.3;-webkit-user-select:all;user-select:all"></div>
   </div>
   <button class="mbtn" id="npw-copy" onclick="_mvCopyNewPwd()" style="width:100%;margin:0 0 14px;background:var(--terre-pale,#F3EADF);color:var(--terre-tx,#8A5A38);border:1.5px solid var(--terre,#8A5A38)"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> Copier</button>
-  <div style="background:var(--tag-amber-bg,#fffbeb);border:1.5px solid #fcd34d;border-radius:12px;padding:12px 14px;font-size:12px;color:var(--tag-amber-tx,#92400e);line-height:1.65">
+  <div style="background:var(--tag-amber-bg,#fffbeb);border:1.5px solid #fcd34d;border-radius:12px;padding:12px 14px;font-size:var(--pt-micro,12px);color:var(--tag-amber-tx,#92400e);line-height:1.65">
     <b>Notez-le maintenant.</b> Il n'est enregistré nulle part et ne sera plus jamais affiché — ni ici, ni ailleurs.<br><br>
     Communiquez-le à la personne&nbsp;: elle devra choisir le sien à sa première connexion. En cas de perte, revenez sur sa fiche et réinitialisez.
   </div>
@@ -3099,8 +3099,8 @@
   <div id="fpwd-name-display" style="background:var(--vert-pale);border-radius:12px;padding:12px 16px;font-size:var(--pt-base,14px);font-weight:600;color:var(--vert);margin-bottom:16px;text-align:center"></div>
   <div class="fl">Adresse email du compte</div>
   <input type="email" class="fi" id="fpwd-email" placeholder="Votre email enregistré">
-  <div id="fpwd-error" style="display:none;color:var(--rouge-tx,#A0291E);font-size:12px;margin:-6px 0 10px;padding:8px 12px;background:var(--rouge-pale);border-radius:10px"></div>
-  <div id="fpwd-ok" style="display:none;color:var(--vert);font-size:12px;margin:-6px 0 10px;padding:8px 12px;background:var(--vert-pale);border-radius:10px"></div>
+  <div id="fpwd-error" style="display:none;color:var(--rouge-tx,#A0291E);font-size:var(--pt-micro,12px);margin:-6px 0 10px;padding:8px 12px;background:var(--rouge-pale);border-radius:10px"></div>
+  <div id="fpwd-ok" style="display:none;color:var(--vert);font-size:var(--pt-micro,12px);margin:-6px 0 10px;padding:8px 12px;background:var(--vert-pale);border-radius:10px"></div>
   <button class="mbtn verte" id="fpwd-send-btn" onclick="sendForgotPwd()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-enveloppe"></use></svg> Recevoir un lien de réinitialisation</button>
   <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-align:center;margin-top:8px">Le lien permet de choisir un nouveau mot de passe. Aucun mot de passe n'est envoyé par message.</div>
 </div></div></div>
@@ -3177,7 +3177,7 @@
     <div style="padding:4px 16px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--gris-clair)">
       <div>
         <div class="modal-title" style="font-size:var(--pt-sm,17px)">Fiches d'entretien</div>
-        <div style="font-size:12px;color:var(--texte-doux);font-family:'Outfit',sans-serif" id="ov-liste-fiches-count"></div>
+        <div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);font-family:'Outfit',sans-serif" id="ov-liste-fiches-count"></div>
       </div>
       <span class="sa sac" onclick="closeOv(null,'ovListeFiches');openOvEntretien()">+ Fiche</span>
     </div>
@@ -3228,7 +3228,7 @@
       <input type="text" class="fi ac" id="rep-four" placeholder="Ex : Garage Vitteaut" autocomplete="off" style="margin-bottom:14px">
       <div class="fl">Retour prévu <span style="font-weight:400;color:var(--texte-doux)">(optionnel)</span></div>
       <input type="date" class="fi ac" id="rep-retour" style="margin-bottom:6px">
-      <div style="background:var(--bleu-pale);border:1px solid var(--bleu);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--bleu-tx,#1A4A7A);margin-bottom:20px">
+      <div style="background:var(--bleu-pale);border:1px solid var(--bleu);border-radius:10px;padding:10px 12px;font-size:var(--pt-micro,12px);color:var(--bleu-tx,#1A4A7A);margin-bottom:20px">
         <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cloche"></use></svg> Si une date de retour est renseignée, vous recevrez une notification la <strong>veille</strong> et le <strong>jour J</strong> — et une alerte si la date est dépassée.
       </div>
       <button class="mbtn" style="background:var(--rouge);color:white;border-color:var(--rouge)" onclick="saveReparateur()">Confirmer — Chez le réparateur</button>
@@ -3332,7 +3332,7 @@
           <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);font-style:italic;margin-top:6px">Sera demandé parcelle par parcelle lors de la validation <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg></div>
           <label id="eat-champ-feeds-row" style="display:flex;align-items:flex-start;gap:8px;margin-top:12px;cursor:pointer">
             <input type="checkbox" id="eat-champ-feeds" style="width:18px;height:18px;margin-top:1px;accent-color:var(--vert);flex-shrink:0">
-            <span style="font-size:12px;color:var(--texte);line-height:1.35"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pousse"></use></svg> Alimente les <b>trous de plantation</b><br><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">Le nombre saisi définit la tâche Plantation (parcelles concernées + temps). Pour une activité Tarière.</span></span>
+            <span style="font-size:var(--pt-micro,12px);color:var(--texte);line-height:1.35"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pousse"></use></svg> Alimente les <b>trous de plantation</b><br><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">Le nombre saisi définit la tâche Plantation (parcelles concernées + temps). Pour une activité Tarière.</span></span>
           </label>
         </div>
       </div>
@@ -3418,10 +3418,10 @@
       <div class="sd-trac-sheet-sub" id="rb-sub"></div>
     </div>
     <div style="margin:14px 16px 4px;background:rgba(192,57,43,0.12);border:1px solid rgba(192,57,43,0.35);border-radius:12px;padding:12px 14px" id="rb-info"></div>
-    <div style="font-size:12px;color:rgba(255,255,255,0.4);padding:14px 20px 8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Choisir un autre tracteur</div>
+    <div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.4);padding:14px 20px 8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Choisir un autre tracteur</div>
     <div class="sd-trac-sheet-list" id="rb-trac-list"></div>
     <div id="rb-warn" style="display:none" class="sd-trac-sheet-warn">
-      <div style="font-size:12px;color:#E07070;font-weight:600;margin-bottom:2px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg> Ce tracteur est aussi en réparation</div>
+      <div style="font-size:var(--pt-micro,12px);color:#E07070;font-weight:600;margin-bottom:2px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg> Ce tracteur est aussi en réparation</div>
       <div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4)" id="rb-warn-txt"></div>
     </div>
     <div class="sd-trac-sheet-actions">
@@ -3439,7 +3439,7 @@
       <div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg> CGU &amp; Mentions légales</div>
       <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">Version 1.1 — Juin 2026 · Droit français</div>
     </div>
-    <div class="modal-body" style="font-size:12px;color:var(--texte);line-height:1.7">
+    <div class="modal-body" style="font-size:var(--pt-micro,12px);color:var(--texte);line-height:1.7">
 
       <div style="background:rgba(61,107,39,0.1);border:1px solid rgba(61,107,39,0.25);border-radius:10px;padding:10px 14px;margin:0 0 16px;font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.6">
         <strong style="color:var(--vert)">Contrat SaaS B2B</strong> — entre <strong>GUERETTECH</strong> (Prestataire) et tout domaine viticole abonné (Client). Toute utilisation du service vaut acceptation.
@@ -3684,7 +3684,7 @@
   <div class="modal-hd"><div class="modal-title">&#x1F6AA; Retrait de f&#xFB;t</div></div>
   <div class="modal-body">
     <div style="font-size:15px;font-weight:500;color:var(--texte);margin-bottom:2px;" id="rfut-cuv-nom"></div>
-    <div style="font-size:12px;color:var(--texte-doux);margin-bottom:14px;" id="rfut-cuv-info"></div>
+    <div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-bottom:14px;" id="rfut-cuv-info"></div>
     <div class="fl" id="rfut-annee-lbl">F&#xFB;t &#xE0; retirer</div>
     <div id="rfut-annees" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;"></div>
     <div class="fl">Nombre de f&#xFB;ts &#xE0; retirer</div>
@@ -3693,7 +3693,7 @@
       <div id="rfut-nb" style="flex:1;text-align:center;font-size:26px;font-weight:600;color:var(--texte);">1</div>
       <button onclick="window._retraitFutAdj(1)" style="width:40px;height:40px;border:1px solid var(--gris);border-radius:10px;font-size:var(--pt-md,20px);font-weight:500;background:var(--bg-card);cursor:pointer;color:var(--texte);flex-shrink:0;">+</button>
     </div>
-    <div id="rfut-calcul" style="font-size:12px;color:var(--texte-doux);text-align:center;margin-bottom:14px;min-height:16px;"></div>
+    <div id="rfut-calcul" style="font-size:var(--pt-micro,12px);color:var(--texte-doux);text-align:center;margin-bottom:14px;min-height:16px;"></div>
     <div class="fl">Raison</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">
       <button class="rfut-reason-btn sel" data-reason="vente" onclick="window._retraitFutSetRaison('vente',this)">Vente</button>
@@ -3717,7 +3717,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:12px;font-weight:600;">v8.21</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v8.23</span>
       </div>
     </div>
     <div class="modal-body">
@@ -3761,8 +3761,8 @@
     <div style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:22px;color:#7A1020;line-height:1.15">Votre essai est termin&#233;</div>
     <div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux,#726A5E);margin-top:8px;line-height:1.5">Vos donn&#233;es sont conserv&#233;es&nbsp;: vous pouvez tout consulter, seule la <b>saisie</b> est suspendue. Nicolas a &#233;t&#233; pr&#233;venu automatiquement et vous recontacte&nbsp;&#8212; il peut aussi vous rouvrir l&#39;&#233;criture pour quinze jours.</div>
     <button onclick="window._mvContactGo&&window._mvContactGo()" style="display:block;width:100%;font-family:'Outfit',sans-serif;font-size:var(--pt-base,14px);font-weight:600;color:#fff;background:#3D6B27;border:0;border-radius:11px;padding:13px;margin-top:16px;cursor:pointer;-webkit-tap-highlight-color:transparent">Continuer avec Ma Vigne</button>
-    <div style="margin-top:12px;font-size:12px;color:var(--texte,#2A2520)">Une question&nbsp;? <a id="mv-exp-mail" href="mailto:ngdevpro@gmail.com" style="color:#B8911F;text-decoration:none;font-weight:500">ngdevpro@gmail.com</a></div>
-    <div onclick="window._mvExpiredDismiss&&window._mvExpiredDismiss()" style="margin-top:14px;font-size:11.5px;color:var(--texte-doux,#726A5E);cursor:pointer;text-decoration:underline">Voir mes donn&#233;es en lecture seule</div>
+    <div style="margin-top:12px;font-size:var(--pt-micro,12px);color:var(--texte,#2A2520)">Une question&nbsp;? <a id="mv-exp-mail" href="mailto:ngdevpro@gmail.com" style="color:#B8911F;text-decoration:none;font-weight:500">ngdevpro@gmail.com</a></div>
+    <div onclick="window._mvExpiredDismiss&&window._mvExpiredDismiss()" style="margin-top:14px;font-size:var(--pt-lbl,11.5px);color:var(--texte-doux,#726A5E);cursor:pointer;text-decoration:underline">Voir mes donn&#233;es en lecture seule</div>
   </div>
 </div>
 <!-- Modal changement d'e-mail d'un membre (admin domaine hors essai / GT) -->
@@ -3776,7 +3776,7 @@
     <div class="modal-body">
       <label style="font-size:var(--pt-micro,11px);letter-spacing:.6px;text-transform:uppercase;color:#B8911F;font-weight:600;font-family:'Outfit',sans-serif">Nouvelle adresse e-mail</label>
       <input id="mv-email-input" type="email" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="nouvelle@adresse.fr" style="width:100%;font-family:'Outfit',sans-serif;font-size:16px;color:var(--texte);background:var(--bg-card);border:1px solid var(--line,#E7E1D5);border-radius:10px;padding:12px;margin-top:7px;outline:none" />
-      <div id="mv-email-msg" style="display:none;font-size:12px;margin-top:8px"></div>
+      <div id="mv-email-msg" style="display:none;font-size:var(--pt-micro,12px);margin-top:8px"></div>
       <div style="display:flex;gap:8px;margin-top:14px">
         <button id="mv-email-save" onclick="window._saveEmailModal&&window._saveEmailModal()" style="flex:1;font-family:'Outfit',sans-serif;font-size:var(--pt-base,14px);font-weight:600;color:#fff;background:#3D6B27;border:0;border-radius:10px;padding:12px;cursor:pointer;-webkit-tap-highlight-color:transparent">Enregistrer</button>
         <button onclick="window._closeEmailModal&&window._closeEmailModal()" style="font-family:'Outfit',sans-serif;font-size:var(--pt-base,14px);font-weight:500;color:var(--texte-doux,#726A5E);background:rgba(0,0,0,0.06);border:0;border-radius:10px;padding:12px 18px;cursor:pointer;-webkit-tap-highlight-color:transparent">Annuler</button>

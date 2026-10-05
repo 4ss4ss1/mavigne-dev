@@ -119,7 +119,7 @@ function openEphyDetail(amm){
   var usages = (p.usages||[]).map(function(u){
     return '<div class="oed-usage"><div class="oed-uh"><span class="oed-uc">'+_escHtml(u.cible)+'</span><span class="oed-ud">'+_escHtml(u.dose)+'</span></div>'
       + '<div class="oed-ur"><span>DAR : <b>'+(u.dar==='—'?'—':u.dar+' j')+'</b></span><span>ZNT : <b>'+(u.znt==='—'?'—':u.znt+' m')+'</b></span><span>Réentrée : <b>'+dreEffectif(p.drae,p.type,p.dreH,p.dreHc).txt+'</b></span></div></div>';
-  }).join('') || '<div style="font-size:12px;color:var(--texte-doux)">Aucun usage vigne listé.</div>';
+  }).join('') || '<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux)">Aucun usage vigne listé.</div>';
   var ments = (p.ment||[]).map(function(m){
     var cls = m==='AB'?'m-ab':(m==='Abeilles'?'m-dar':'m-znt');
     var lbl = m==='Abeilles'?(_mvIcon('abeille',16)+' Toxique abeilles')
@@ -129,7 +129,7 @@ function openEphyDetail(amm){
   document.getElementById('oed-title').textContent = p.nom;
   document.getElementById('oed-sub').textContent = 'N° AMM '+p.amm+' · '+p.type;
   var noms2Html = (p.noms2&&p.noms2.length)
-    ? '<div class="oed-box" style="grid-column:1/-1"><div class="oed-l">Aussi commercialisé sous</div><div class="oed-v" style="font-size:12px;line-height:1.5">'+p.noms2.map(function(n){return _escHtml(n);}).join(' · ')+'</div></div>'
+    ? '<div class="oed-box" style="grid-column:1/-1"><div class="oed-l">Aussi commercialisé sous</div><div class="oed-v" style="font-size:var(--pt-micro,12px);line-height:1.5">'+p.noms2.map(function(n){return _escHtml(n);}).join(' · ')+'</div></div>'
     : '';
   var _dreP=dreEffectif(p.drae,p.type,p.dreH,p.dreHc);
   var dreBox='';
@@ -149,15 +149,16 @@ function openEphyDetail(amm){
 
 window.applyEphy = function(){ if(_catSub==='ephy' && document.getElementById('catalogue-list-ephy')) ephyRender(); };
 
-function _phParcTxt(t){
+// TEXTE-A (§247) : en deux morceaux — les noms (qui peuvent se raccourcir à l'écran) et le « +N » (qui doit rester lisible).
+function _phParcParts(t){
   var act=(window.PARCELLES||[]).filter(function(p){return p.statut!=='Arrachee';});
   var tot=act.length;
   var a=t.parcelles;
-  if(typeof a==='string') return a;
-  if(!a||!a.length) return '';
-  if(tot && a.length>=tot) return 'Domaine entier ('+a.length+')';
-  if(a.length<=3) return a.join(', ');
-  return a.slice(0,3).join(', ')+' +'+(a.length-3);
+  if(typeof a==='string') return {noms:a, plus:''};
+  if(!a||!a.length) return {noms:'', plus:''};
+  if(tot && a.length>=tot) return {noms:'Domaine entier ('+a.length+')', plus:''};
+  if(a.length<=3) return {noms:a.join(', '), plus:''};
+  return {noms:a.slice(0,3).join(', '), plus:'+'+(a.length-3)};
 }
 function renderPhytoTrac(){
   const el=document.getElementById('traitements-list-trac');if(!el)return;
@@ -184,7 +185,7 @@ function renderPhytoTrac(){
     }
     const tc=TC[m.type]||'var(--texte-doux)', tb=TB[m.type]||'var(--gris-clair)';
     const emj='';
-    const parc=_phParcTxt(t);
+    const parcP=_phParcParts(t), parc=parcP.noms;
     const cond=t.conducteur||t.operateur||'';
     const meta3=(parc||cond);
     return `<div class="phyto-row" onclick="openTraitDetail(${idx})" style="background:var(--bg-card);border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--gris-clair);cursor:pointer">
@@ -198,7 +199,7 @@ function renderPhytoTrac(){
         ${darBadge}
         ${draeBadge}
       </div>
-      ${meta3?`<div style="display:flex;flex-wrap:wrap;gap:4px 12px;font-size:var(--pt-micro,11px);color:var(--texte-doux);align-items:center">${parc?'<span>'+_escHtml(parc)+'</span>':''}${cond?'<span>'+_escHtml(cond)+'</span>':''}<span style="margin-left:auto;color:var(--gris)">›</span></div>`:''}
+      ${meta3?`<div class="phyto-row-meta" style="display:flex;gap:12px;font-size:var(--pt-micro,11px);color:var(--texte-doux);align-items:center;min-width:0">${parc?'<span style="display:flex;gap:4px;min-width:0;flex:1 1 auto"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_escHtml(parc)+'</span>'+(parcP.plus?'<span style="flex-shrink:0;white-space:nowrap">'+_escHtml(parcP.plus)+'</span>':'')+'</span>':''}${cond?'<span style="flex-shrink:0;white-space:nowrap">'+_escHtml(cond)+'</span>':''}<span style="margin-left:auto;flex-shrink:0;color:var(--gris)">›</span></div>`:''}
     </div>`;
   }).join('');
 }
@@ -338,7 +339,7 @@ function renderRepBanner(){
       +'<span>'+titre+' — '+nbJ+'j</span>'
       +'<span style="font-size:var(--pt-micro,11px);font-weight:400;color:var(--texte-doux)">'+_fmtDate(rep.depuis)+'</span>'
     +'</div>'
-    +'<div style="font-size:12px;margin-bottom:4px">'+_escHtml(rep.motif)+'</div>'
+    +'<div style="font-size:var(--pt-micro,12px);margin-bottom:4px">'+_escHtml(rep.motif)+'</div>'
     +(retour?'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:12px">Retour prévu : <strong style="color:'+couleur+'">'+_fmtDate(retour)+'</strong>'+depasseInfo+'</div>':'<div style="margin-bottom:12px"></div>')
     +((isAdmin()||isTractoriste())?('<div class="rep-banner-btns">'
       +'<button class="rep-banner-btn" style="border:1.5px solid var(--vert);background:transparent;color:var(--vert)" onclick="retourReparateur()">Rentré</button>'
@@ -748,7 +749,7 @@ function _gnrNum(n){ return (Number(n)||0).toLocaleString('fr-FR'); }
 // FUS-2 : ce patron etait le seul juste du depot — il vit desormais dans utils.js.
 function _gnrTodayISO(){ return _mvToday(); }
 function _gnrField(id,label,val){
-  return '<div style="margin-bottom:8px"><div style="font-size:12px;color:var(--texte-doux);margin-bottom:3px">'+label+'</div>'
+  return '<div style="margin-bottom:8px"><div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-bottom:3px">'+label+'</div>'
     +'<input type="number" id="'+id+'" value="'+(val!=null&&val!==''?val:'')+'" min="0" inputmode="numeric" style="width:100%;padding:9px 11px;border:1.5px solid var(--gris);border-radius:9px;font-size:16px;font-family:inherit;background:var(--bg-card);color:var(--texte);box-sizing:border-box"></div>';
 }
 function _gnrCardHtml(){
@@ -768,7 +769,7 @@ function _gnrCardHtml(){
   if(_gnrAct==='appoint' && isAdmin()){
     var ga=g||{}, rest=Number(ga.niveau)||0, cap=Number(ga.capacite)||0;
     var fCss='width:100%;padding:9px 11px;border:1.5px solid var(--gris);border-radius:9px;font-size:16px;font-family:inherit;background:var(--bg-card);color:var(--texte);box-sizing:border-box';
-    var lCss='font-size:12px;color:var(--texte-doux);margin-bottom:3px';
+    var lCss='font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-bottom:3px';
     return '<div class="ent-resume-card" style="margin-bottom:12px">'
       +'<div style="font-size:13px;font-weight:600;color:var(--texte);margin-bottom:4px">Appoint de cuve</div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:10px">Livraison ou remplissage de la cuve du domaine. Le prix saisi ici alimente le coût du GNR dans Pilotage › Économie.</div>'
@@ -796,7 +797,7 @@ function _gnrCardHtml(){
   if(!g||!g.capacite){
     return '<div class="ent-resume-card" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">'
       +'<div><div style="font-size:13px;font-weight:600;color:var(--texte)">'+_mvIcon('carburant',16)+' Cuve GNR</div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">Non renseign\u00e9e</div></div>'
-      +(canEdit?'<button onclick="window.openGnrEdit()" style="padding:8px 14px;border:1px solid var(--acier);border-radius:8px;background:transparent;color:var(--acier);font-family:\'Outfit\',sans-serif;font-size:12px;font-weight:600;cursor:pointer;min-height:44px">Renseigner</button>':'')
+      +(canEdit?'<button onclick="window.openGnrEdit()" style="padding:8px 14px;border:1px solid var(--acier);border-radius:8px;background:transparent;color:var(--acier);font-family:\'Outfit\',sans-serif;font-size:var(--pt-micro,12px);font-weight:600;cursor:pointer;min-height:44px">Renseigner</button>':'')
       +'</div>';
   }
   var pc=Math.round((Number(g.niveau)||0)/(Number(g.capacite)||1)*100), low=(Number(g.niveau)||0)<=(Number(g.seuil)||0);
@@ -1004,7 +1005,7 @@ function renderEntretiens(){
     return '<div class="ent-resume-cell">'
       +'<div>'
         +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.2">'+fi.label+'</div>'
-        +'<div style="font-size:12px;font-weight:600;color:'+(ok?'var(--vert)':'var(--rouge)')+';margin-top:1px">'+(ok?_fmtDate(d):'Jamais')+'</div>'
+        +'<div style="font-size:var(--pt-micro,12px);font-weight:600;color:'+(ok?'var(--vert)':'var(--rouge)')+';margin-top:1px">'+(ok?_fmtDate(d):'Jamais')+'</div>'
       +'</div></div>';
   }).join('');
 
@@ -1013,7 +1014,7 @@ function renderEntretiens(){
   if(hasAnoActive){
     var rows=anomActives.map(function(f){
       return '<div class="ent-ano-row">'
-        +'<div style="font-size:12px;color:var(--texte);flex:1">'+f.anomalie+'</div>'
+        +'<div style="font-size:var(--pt-micro,12px);color:var(--texte);flex:1">'+f.anomalie+'</div>'
         +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">'+_fmtDate(f.date)+' · '+f.conducteur+'</div>'
       +'</div>';
     }).join('');
@@ -1033,7 +1034,7 @@ function renderEntretiens(){
         +'<div style="font-size:13px;font-weight:600;color:var(--texte)">Derniers contrôles</div>'
         +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">'+nbF+' fiche'+(nbF>1?'s':'')+nbAnoText+'</div>'
       +'</div>'
-      +'<button onclick="openListeFiches()" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--acier);background:transparent;color:var(--acier);font-size:12px;font-weight:600;font-family:\'Outfit\',sans-serif;cursor:pointer;min-height:44px">Voir tout →</button>'
+      +'<button onclick="openListeFiches()" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--acier);background:transparent;color:var(--acier);font-size:var(--pt-micro,12px);font-weight:600;font-family:\'Outfit\',sans-serif;cursor:pointer;min-height:44px">Voir tout →</button>'
     +'</div>'
     +'<div class="ent-resume-grid">'+gridHtml+'</div>'
     +anoBanner
@@ -1089,7 +1090,7 @@ function renderListeFiches(){
       var toggleLabel=traitee?'Anomalie traitée — appuyer pour annuler':'Marquer comme traitée';
       var toggleCls=traitee?'fiche-ano-toggle traite':'fiche-ano-toggle non-traite';
       anoHtml='<div class="fiche-ano-bloc">'
-        +'<div style="font-size:12px;color:var(--texte);display:flex;gap:6px;align-items:flex-start;margin-bottom:8px">'
+        +'<div style="font-size:var(--pt-micro,12px);color:var(--texte);display:flex;gap:6px;align-items:flex-start;margin-bottom:8px">'
           +_mvBadge(traitee?'Traitée':'Anomalie', traitee?'vert':'rouge')+'<span>'+_escHtml(f.anomalie)+'</span>'
         +'</div>'
         +'<button class="'+toggleCls+'" onclick="toggleAnomalieTraitee(\''+f.id+'\')">'+toggleLabel+'</button>'
@@ -1249,7 +1250,7 @@ function renderTracteurSet(){
     if(enR)badges+='<span style="font-size:9px;background:var(--rouge-pale);color:var(--rouge-tx,#A0291E);border-radius:5px;padding:1px 6px;margin-left:4px">En réparation</span>';
     return '<div class="trac-set-card"><div style="display:flex;align-items:center;gap:12px">'+dot
       +'<div><div style="display:flex;align-items:center;gap:4px"><span style="font-weight:700;font-size:var(--pt-base,14px)">'+_escHtml(t.nom)+'</span>'+badges+'</div>'
-      +'<div style="font-size:12px;color:var(--texte-doux);margin-top:2px">'+_escHtml(t.modele||'—')+'</div>'
+      +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:2px">'+_escHtml(t.modele||'—')+'</div>'
       +'<div style="font-size:var(--pt-micro,11px);color:'+couleurTracType(t.type)+';margin-top:2px">'+_escHtml(t.type)+'</div>'
     +'</div></div>'
     +'<button class="mv-gh" onclick="openEditTracteur(\''+t.id+'\')" title="Modifier" aria-label="Modifier">'+_mvIcon('crayon',18)+'</button>'
@@ -2728,7 +2729,7 @@ function _openRepBlock(actNom,defTracId){
   document.getElementById('rb-sub').textContent=(trac?trac.nom:'')+(trac&&trac.modele?' — '+trac.modele:'')+' est chez le réparateur';
   // Info répar
   var infoEl=document.getElementById('rb-info');
-  infoEl.innerHTML='<div style="font-size:12px;color:var(--rouge,#E07070);font-weight:600;margin-bottom:4px">'+_escHtml(rep.motif||'Réparation en cours')+'</div>'
+  infoEl.innerHTML='<div style="font-size:var(--pt-micro,12px);color:var(--rouge,#E07070);font-weight:600;margin-bottom:4px">'+_escHtml(rep.motif||'Réparation en cours')+'</div>'
     +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.45)">Depuis le '+_fmtDate(rep.depuis||'')+(rep.prevu_retour?' · Retour prévu le '+_fmtDate(rep.prevu_retour):'')+'</div>';
   // Liste alternatifs
   var eligible=actNom==='Traitement'
@@ -2743,7 +2744,7 @@ function _openRepBlock(actNom,defTracId){
     return '<div class="sd-trac-sheet-btn" data-tracid="'+t.id+'" onclick="_rbPick(this,\''+t.id+'\',\''+actNom+'\',\''+defTracId+'\')">'
       +'<div class="sd-trac-sheet-radio"></div>'
       +'<div style="flex:1;min-width:0">'
-        +'<div style="font-size:var(--pt-base,14px);font-weight:500;color:'+(rep2?'#E07070':'rgba(255,255,255,0.85)')+'">'+_escHtml(t.nom)+(t.modele?'<span style="font-weight:400;font-size:12px;margin-left:6px;color:rgba(255,255,255,0.4)">'+_escHtml(t.modele)+'</span>':'')+' </div>'
+        +'<div style="font-size:var(--pt-base,14px);font-weight:500;color:'+(rep2?'#E07070':'rgba(255,255,255,0.85)')+'">'+_escHtml(t.nom)+(t.modele?'<span style="font-weight:400;font-size:var(--pt-micro,12px);margin-left:6px;color:rgba(255,255,255,0.4)">'+_escHtml(t.modele)+'</span>':'')+' </div>'
         +'<div style="font-size:var(--pt-micro,11px);margin-top:2px;color:'+col+'">'+_escHtml(t.type)+(rep2?' · <span style="color:var(--rouge,#E07070)">En répar.</span>':'')+'</div>'
       +'</div>'
     +'</div>';
@@ -2876,7 +2877,7 @@ function openSdTracPicker(){
     return '<div class="sd-trac-sheet-btn'+(sel?' sel':'')+'" data-tracid="'+t.id+'" onclick="_sdPickTrac(this,\''+t.id+'\')">'
       +'<div class="sd-trac-sheet-radio"'+(sel?' style="border-color:var(--acier);background:var(--acier)"':'')+'>'+(sel?_mvIcon('check',16):'')+'</div>'
       +'<div style="flex:1;min-width:0">'
-        +'<div style="font-size:var(--pt-base,14px);font-weight:'+(sel?'700':'500')+';color:'+(rep?'#E07070':sel?'var(--acier)':'rgba(255,255,255,0.8)')+'">'+_escHtml(t.nom)+(t.modele?'<span style="font-weight:400;font-size:12px;margin-left:6px;color:rgba(255,255,255,0.4)">'+_escHtml(t.modele)+'</span>':'')+'</div>'
+        +'<div style="font-size:var(--pt-base,14px);font-weight:'+(sel?'700':'500')+';color:'+(rep?'#E07070':sel?'var(--acier)':'rgba(255,255,255,0.8)')+'">'+_escHtml(t.nom)+(t.modele?'<span style="font-weight:400;font-size:var(--pt-micro,12px);margin-left:6px;color:rgba(255,255,255,0.4)">'+_escHtml(t.modele)+'</span>':'')+'</div>'
         +'<div style="font-size:var(--pt-micro,11px);margin-top:2px;display:flex;gap:6px"><span style="color:'+col+'">'+t.type+'</span>'+(isDefaut?'<span style="color:rgba(255,255,255,0.3)">· Défaut '+actNom+'</span>':'')+(rep?'<span style="color:var(--rouge,#E07070)">· En répar.</span>':'')+'</div>'
       +'</div>'
       +(sel?'<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.4)">Actuel</span>':'')

@@ -25,8 +25,8 @@ const SRC = BRUT.split('\n').filter(l => !l.trimStart().startsWith('//')).join('
 const CSSNU = FEUILLE.replace(/\/\*[\s\S]*?\*\//g, '');
 
 const PAS = [['hero','40px'],['xxl','31px'],['xl','27px'],['lg','23px'],['md','20px'],
-             ['sm','17px'],['base','14px'],['txt','12.5px'],['micro','11px'],
-             ['lbl','10.5px'],['nano','9.5px']];
+             ['sm','17px'],['base','14px'],['txt','12.5px'],['micro','12px'],
+             ['lbl','11.5px'],['nano','11px']];   /* TEXTE-A (§247) : 11 → 12, 10,5 → 11,5, 9,5 → 11 */
 
 let ok = 0, ko = 0;
 const t = (nom, cond, detail) => {

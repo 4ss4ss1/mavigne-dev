@@ -558,7 +558,7 @@ function _agtBuildRadar(){
   if(!rows.length){
     h+='<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:26px;text-align:center">'
       +'<div style="font-size:13px;color:rgba(134,239,172,0.7);font-weight:600">Rien \u00e0 traiter aujourd\u2019hui.</div>'
-      +'<div style="font-size:11.5px;color:rgba(255,255,255,0.28);margin-top:5px">Aucune erreur critique, aucun signalement, aucune facture en retard.</div></div>';
+      +'<div style="font-size:var(--pt-lbl,11.5px);color:rgba(255,255,255,0.28);margin-top:5px">Aucune erreur critique, aucun signalement, aucune facture en retard.</div></div>';
   } else {
     var urgent=rows.some(function(r){ return r.c==='#EF4444'; });
     h+='<div style="background:'+(urgent?'rgba(239,68,68,0.05)':'rgba(255,255,255,0.04)')
@@ -766,7 +766,7 @@ function _agtCnxSection(slug){
     }
     h+='</div>';
     h+='<div style="text-align:right;flex-shrink:0">';
-    h+='<div style="font-size:12px;font-weight:600;color:'+rightCol+'">'+_escHtml(right)+'</div>';
+    h+='<div style="font-size:var(--pt-micro,12px);font-weight:600;color:'+rightCol+'">'+_escHtml(right)+'</div>';
     h+='<div style="font-size:10px;color:rgba(255,255,255,0.28);margin-top:2px">'+_escHtml(rightAbs)+'</div>';
     h+='</div>';
     h+='</div>';
@@ -791,15 +791,15 @@ function _agtFicheBiz(slug){
   var fs=_agtFacts(slug), du=_agtBizDu(slug), enc=_agtBizEnc(slug), inte=_agtInterne(slug);
   var c='';
   if(inte){
-    c='<div style="font-size:11.5px;color:rgba(255,255,255,0.3)">Domaine interne \u2014 hors facturation.</div>';
+    c='<div style="font-size:var(--pt-lbl,11.5px);color:rgba(255,255,255,0.3)">Domaine interne \u2014 hors facturation.</div>';
     return _agtFicheSec('Facturation', c);
   }
   c+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">';
-  c+='<span style="font-size:11.5px;font-weight:600;color:'+(du>0?'#F97316':'#86EFAC')+';background:rgba(255,255,255,0.05);border-radius:20px;padding:3px 9px">'
+  c+='<span style="font-size:var(--pt-lbl,11.5px);font-weight:600;color:'+(du>0?'#F97316':'#86EFAC')+';background:rgba(255,255,255,0.05);border-radius:20px;padding:3px 9px">'
     +(du>0?(_agtEur(du)+' \u00e0 encaisser'):'compte sold\u00e9')+'</span>';
-  if(enc>0) c+='<span style="font-size:11.5px;color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.04);border-radius:20px;padding:3px 9px">'+_agtEur(enc)+' encaiss\u00e9s</span>';
+  if(enc>0) c+='<span style="font-size:var(--pt-lbl,11.5px);color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.04);border-radius:20px;padding:3px 9px">'+_agtEur(enc)+' encaiss\u00e9s</span>';
   var _rm=_agtAboRemise(slug);
-  c+='<span style="font-size:11.5px;color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.04);border-radius:20px;padding:3px 9px">'+(_AGT_PLANL[_agtPlan(slug)]||'')+' \u00b7 '+_agtEur(_agtAboPrix(slug))+'/mois'+(_rm?(' \u00b7 '+_escHtml(_rm.motif||'remis\u00e9')):'')+'</span>';
+  c+='<span style="font-size:var(--pt-lbl,11.5px);color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.04);border-radius:20px;padding:3px 9px">'+(_AGT_PLANL[_agtPlan(slug)]||'')+' \u00b7 '+_agtEur(_agtAboPrix(slug))+'/mois'+(_rm?(' \u00b7 '+_escHtml(_rm.motif||'remis\u00e9')):'')+'</span>';
   c+='</div>';
   if(!fs.length){
     c+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.25)">Aucune ligne enregistr\u00e9e.</div>';
@@ -832,12 +832,12 @@ function _agtFicheIncid(t){
   var c='';
   if(!errs.length && !reps.length){
     var cnx=_agtConnexions[t.slug], d=cnx?_agtD(cnx.last):null;
-    c='<div style="font-size:11.5px;color:'+(d?'rgba(134,239,172,0.65)':'rgba(255,255,255,0.28)')+'">'
+    c='<div style="font-size:var(--pt-lbl,11.5px);color:'+(d?'rgba(134,239,172,0.65)':'rgba(255,255,255,0.28)')+'">'
       +(d?'Rien d\u2019ouvert \u00b7 derni\u00e8re connexion il y a '+_agtRelTime(d.toISOString())
          :'Rien d\u2019ouvert \u2014 mais aucune connexion enregistr\u00e9e, donc rien \u00e0 conclure')+'</div>';
     return _agtFicheSec('Incidents', c);
   }
-  if(reps.length) c+='<div style="font-size:11.5px;color:#F97316;font-weight:600;margin-bottom:6px">'+reps.length+' signalement'+(reps.length>1?'s':'')+' en attente</div>';
+  if(reps.length) c+='<div style="font-size:var(--pt-lbl,11.5px);color:#F97316;font-weight:600;margin-bottom:6px">'+reps.length+' signalement'+(reps.length>1?'s':'')+' en attente</div>';
   errs.slice(0,4).forEach(function(e){
     var m=_AGT_LVL[e.level]||_AGT_LVL.error;
     c+='<div style="display:flex;align-items:center;gap:7px;padding:3px 0;font-size:var(--pt-micro,11px);flex-wrap:wrap">';
@@ -854,7 +854,7 @@ function _agtFicheAcces(slug){
   var l=(_agtAccessLog||[]).filter(function(a){ return a.tenant===slug; });
   var c='';
   if(!l.length){
-    c='<div style="font-size:11.5px;color:rgba(255,255,255,0.28)">Aucun acc\u00e8s enregistr\u00e9.</div>';
+    c='<div style="font-size:var(--pt-lbl,11.5px);color:rgba(255,255,255,0.28)">Aucun acc\u00e8s enregistr\u00e9.</div>';
   } else {
     l.slice(0,5).forEach(function(a){
       c+='<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:var(--pt-micro,11px);flex-wrap:wrap">';
@@ -924,7 +924,7 @@ function _agtBuildClients(){
     h+='<div style="height:3px;background:rgba(255,255,255,0.06);border-radius:2px"><div style="height:100%;width:0%;background:linear-gradient(90deg,'+_AGT_SAISON+',#F5A0B5);border-radius:2px"></div></div>';
     h+='</div>';
     h+='</div>';
-    h+='<div style="font-size:12px;color:rgba(196,181,253,0.3);margin-top:4px;transform:'+(exp?'rotate(180deg)':'none')+';transition:transform .2s">▾</div>';
+    h+='<div style="font-size:var(--pt-micro,12px);color:rgba(196,181,253,0.3);margin-top:4px;transform:'+(exp?'rotate(180deg)':'none')+';transition:transform .2s">▾</div>';
     h+='</div>';
     // Mini stats
     h+='<div style="display:flex;border-top:1px solid rgba(255,255,255,0.05);padding:8px 0">';
@@ -1229,7 +1229,7 @@ function _agtErrSante(){
       +(i<_agtTenants.length-1?';border-bottom:1px solid rgba(255,255,255,0.05)':'')+'">';
     h+='<span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:'+col+'"></span>';
     h+='<span style="flex:1;min-width:130px;font-size:var(--pt-txt,12.5px);color:rgba(255,255,255,0.75)">'+_escHtml(t.nom)+'</span>';
-    h+='<span style="font-size:11.5px;font-weight:600;color:'+col+'">'+txt+'</span>';
+    h+='<span style="font-size:var(--pt-lbl,11.5px);font-weight:600;color:'+col+'">'+txt+'</span>';
     h+='<span style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.25);min-width:120px;text-align:right">'
       +(last?('derni\u00e8re '+_agtRelTime(last.toISOString())):'\u2014')
       +(cnxLast?(' \u00b7 vu '+_agtRelTime(cnxLast.toISOString())):'')+'</span>';
@@ -1317,7 +1317,7 @@ function _agtBuildErrors(){
     h+='<div style="display:flex;align-items:flex-start;gap:8px">';
     h+='<span style="flex-shrink:0;margin-top:1px;display:inline-flex">'+_mvIcon(m.icon,16)+'</span>';
     h+='<div style="flex:1;min-width:0">';
-    h+='<div style="color:#E8E8E0;font-size:12px;font-weight:600;line-height:1.45">'+_escHtml(g.msg)+'</div>';
+    h+='<div style="color:#E8E8E0;font-size:var(--pt-micro,12px);font-weight:600;line-height:1.45">'+_escHtml(g.msg)+'</div>';
 
     h+='<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;align-items:center">';
     if(g.n>1) h+='<span style="font-size:var(--pt-lbl,10.5px);font-weight:700;background:rgba(255,255,255,0.10);border-radius:5px;padding:1px 7px;color:#E8E8E0">\u00d7'+g.n+'</span>';
@@ -1372,7 +1372,7 @@ function _agtBuildErrors(){
 
   if(groupes.length>40) h+='<div style="text-align:center;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.25);padding:6px">'+(groupes.length-40)+' probl\u00e8me(s) de plus \u2014 affinez les filtres</div>';
   if(merged.some(function(e){ return e.resolved; })){
-    h+='<button onclick="agtPurgeErrors()" style="width:100%;margin-top:8px;background:rgba(239,68,68,0.06);border:1px dashed rgba(239,68,68,0.2);border-radius:10px;padding:10px;font-size:12px;color:rgba(252,165,165,0.4);cursor:pointer;font-family:Outfit,sans-serif">\uD83D\uDDD1\uFE0F Purger les erreurs r\u00e9solues</button>';
+    h+='<button onclick="agtPurgeErrors()" style="width:100%;margin-top:8px;background:rgba(239,68,68,0.06);border:1px dashed rgba(239,68,68,0.2);border-radius:10px;padding:10px;font-size:var(--pt-micro,12px);color:rgba(252,165,165,0.4);cursor:pointer;font-family:Outfit,sans-serif">\uD83D\uDDD1\uFE0F Purger les erreurs r\u00e9solues</button>';
   }
   return h;
 }
@@ -1662,7 +1662,7 @@ function agtOpenAddMembre(slug) {
     +'<input id="agt-add-pwd"   type="password" placeholder="Mot de passe \u2014 laissez vide pour le g\u00e9n\u00e9rer" autocomplete="new-password" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 14px;font-size:13px;color:#fff;font-family:Outfit,sans-serif;margin-bottom:10px;box-sizing:border-box">'
     +'<div style="margin-bottom:14px"><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:8px">R\u00f4les</div>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap">'+chipsHtml+'</div></div>'
-    +'<div id="agt-add-err" style="display:none;color:#EF4444;font-size:12px;margin-bottom:10px"></div>'
+    +'<div id="agt-add-err" style="display:none;color:#EF4444;font-size:var(--pt-micro,12px);margin-bottom:10px"></div>'
     +'<div style="display:flex;gap:8px">'
     +'<button onclick="agtRefreshMembres(\''+slug+'\')" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:rgba(255,255,255,0.5);font-size:13px;padding:11px;cursor:pointer;font-family:Outfit,sans-serif">Annuler</button>'
     +'<button id="agt-add-btn" onclick="agtSaveAddMembre(\''+slug+'\')" style="flex:2;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);border-radius:10px;color:#C4B5FD;font-size:13px;font-weight:600;padding:11px;cursor:pointer;font-family:Outfit,sans-serif">\u2713 Cr\u00e9er le compte</button>'
@@ -1841,10 +1841,10 @@ function _agtLotRender() {
   var cv = _agtLot.conv || _agtLotConv(_agtLot.exist, _agtLot.slug);
   var h = '<div style="padding:4px 0 16px">'
     + '<div style="font-size:13px;font-weight:600;color:rgba(196,181,253,0.7);margin-bottom:6px">\u2192 Toute l\u2019\u00e9quipe</div>'
-    + '<div style="font-size:12px;color:rgba(255,255,255,0.4);line-height:1.6;margin-bottom:12px">'
+    + '<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.4);line-height:1.6;margin-bottom:12px">'
     + 'Un membre par ligne. <b>Pr\u00e9nom</b>, ou <b>Pr\u00e9nom;r\u00f4le</b>, ou <b>Pr\u00e9nom;adresse;r\u00f4le</b>. '
     + 'Un collage depuis un tableur passe aussi. Sans r\u00f4le indiqu\u00e9\u00a0: ouvrier.</div>'
-    + '<div style="font-size:12px;color:#E0A46A;background:rgba(184,90,26,.10);border-left:3px solid #B85A1A;'
+    + '<div style="font-size:var(--pt-micro,12px);color:#E0A46A;background:rgba(184,90,26,.10);border-left:3px solid #B85A1A;'
     + 'border-radius:0 8px 8px 0;padding:9px 12px;margin-bottom:12px;line-height:1.55">'
     + 'Le DPA se signe <b>avant</b> la cr\u00e9ation des comptes des salari\u00e9s.</div>'
     + '<textarea id="agt-lot-txt" rows="7" placeholder="Paul;admin&#10;Lucie&#10;Marie;marie@domaine.fr;ouvrier tractoriste" '
@@ -1859,7 +1859,7 @@ function _agtLotRender() {
     + '<select id="agt-lot-dom" style="background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:8px;padding:7px 8px;font-size:16px;color:#fff;font-family:inherit">'
     + '<option value="mavigneapp.fr">mavigneapp.fr</option><option value="mavigne.app">mavigne.app</option></select>'
     + '</div>'
-    + '<div style="font-size:11.5px;color:rgba(255,255,255,0.3);margin-top:7px;line-height:1.5">'
+    + '<div style="font-size:var(--pt-lbl,11.5px);color:rgba(255,255,255,0.3);margin-top:7px;line-height:1.5">'
     + (cv.deduite ? 'Reprise des adresses d\u00e9j\u00e0 en place chez ce domaine.'
                   : 'Aucune adresse \u00e0 recopier\u00a0: le slug sert de d\u00e9part.')
     + ' Elles ne re\u00e7oivent aucun message.</div>'
@@ -1882,10 +1882,10 @@ function _agtLotRender() {
             return '<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;background:' + (_ROLE_COLORS[r] || '#555') + '22;color:' + (_ROLE_COLORS[r] || '#aaa') + '">' + E(r) + '</span>';
           }).join('')
         + '</div>'
-        + '<div style="font-size:11.5px;color:rgba(255,255,255,0.35);margin-top:2px">' + E(x.email)
+        + '<div style="font-size:var(--pt-lbl,11.5px);color:rgba(255,255,255,0.35);margin-top:2px">' + E(x.email)
         + (x.fictive && !x.bloque ? ' \u00b7 identifiant, pas une bo\u00eete' : '') + '</div>'
         + (x.bloque ? '' : _agtLotModsLigne(x.roles))
-        + (x.bloque ? '<div style="font-size:11.5px;color:#E0A46A;margin-top:3px">\u2298 ' + E(x.bloque) + '</div>' : '')
+        + (x.bloque ? '<div style="font-size:var(--pt-lbl,11.5px);color:#E0A46A;margin-top:3px">\u2298 ' + E(x.bloque) + '</div>' : '')
         + '</div>';
     });
     h += '</div>';
@@ -2049,15 +2049,15 @@ function agtLotPrint() {
   var html = '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Identifiants \u2014 '
     + E(_agtLot.slug) + '</title><link rel="stylesheet" href="/fonts/fonts.css">'
     + '<style>@page{size:A4 portrait;margin:16mm 14mm}'
-    + 'body{margin:0;background:#fff;color:#14110D;font-family:Outfit,system-ui,sans-serif;font-size:12px}'
+    + 'body{margin:0;background:#fff;color:#14110D;font-family:Outfit,system-ui,sans-serif;font-size:var(--pt-micro,12px)}'
     + 'h1{font-family:Cormorant Garamond,Georgia,serif;font-size:26px;margin:0 0 2px;font-weight:600}'
-    + '.s{color:#6E6456;font-size:12px;margin-bottom:16px}'
+    + '.s{color:#6E6456;font-size:var(--pt-micro,12px);margin-bottom:16px}'
     + 'table{width:100%;border-collapse:collapse}'
     + 'th{text-align:left;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:#6E6456;border-bottom:1px solid #C9A84C;padding:0 0 5px}'
     + 'td{padding:7px 8px 7px 0;border-bottom:1px solid #EDE7DA;vertical-align:top}'
-    + '.m{font-family:ui-monospace,Menlo,monospace;font-size:11.5px}'
+    + '.m{font-family:ui-monospace,Menlo,monospace;font-size:var(--pt-lbl,11.5px)}'
     + '.p{color:#7A4F2E;font-size:13px}'
-    + '.w{margin-top:16px;border-left:3px solid #B85A1A;background:#FBF3EC;padding:9px 12px;font-size:11.5px;line-height:1.55}'
+    + '.w{margin-top:16px;border-left:3px solid #B85A1A;background:#FBF3EC;padding:9px 12px;font-size:var(--pt-lbl,11.5px);line-height:1.55}'
     + 'tr{page-break-inside:avoid}</style></head><body>'
     + '<h1>Identifiants de connexion</h1><div class="s">' + E(_agtLot.slug) + ' \u00b7 remis le '
     + new Date().toLocaleDateString('fr-FR') + '</div>'
@@ -2136,7 +2136,7 @@ async function agtShowParcelles(slug) {
     var s=_ha(p.surface);
     return '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)'+(dim?';opacity:.45':'')+'">'
       +'<span style="font-size:13px;color:#fff;font-family:monospace'+(dim?';text-decoration:line-through':'')+'">'+_escHtml(p.nom||'—')+'</span>'
-      +(dim?'<span style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3)">arrachée</span>':'<span style="font-size:12px;color:rgba(196,181,253,0.6)">'+s+'</span>')
+      +(dim?'<span style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3)">arrachée</span>':'<span style="font-size:var(--pt-micro,12px);color:rgba(196,181,253,0.6)">'+s+'</span>')
       +'</div>';
   }
   var h = '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:10px">'+actives.length+' active'+(actives.length>1?'s':'')+(arrach.length?' · '+arrach.length+' arrachée'+(arrach.length>1?'s':''):'')+'</div>';
@@ -2189,7 +2189,7 @@ async function agtShowConfig(slug) {
     +'<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:6px">Onboarding terminé</div>'
     +'<div style="font-size:13px;color:'+(cfg.onboarding_done?'#3D6B27':'#C0392B')+';font-weight:600">'+(cfg.onboarding_done?'\u2705 Oui':'\u274C Non')+'</div></div>'
     +_agtCguHtml(cfg, slug)
-    +'<div id="agt-cfg-err" style="display:none;color:#EF4444;font-size:12px;margin-top:6px"></div>';
+    +'<div id="agt-cfg-err" style="display:none;color:#EF4444;font-size:var(--pt-micro,12px);margin-top:6px"></div>';
 }
 
 async function agtSaveConfig(slug) {
@@ -2222,7 +2222,7 @@ async function agtShowJournal(slug) {
     var qui = Array.isArray(e.qui) ? e.qui.join(', ') : (e.qui||'');
     h += '<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05)">'
       +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
-      +'<span style="font-size:12px;font-weight:600;color:#C4B5FD">'+_escHtml(e.date||'\u2014')+'</span>'
+      +'<span style="font-size:var(--pt-micro,12px);font-weight:600;color:#C4B5FD">'+_escHtml(e.date||'\u2014')+'</span>'
       +'<span style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px">'+_escHtml(e.tache||'\u2014')+'</span>'
       +'</div>'
       +(parcelles ? '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.45);margin-bottom:2px">\uD83C\uDF31 '+_escHtml(parcelles)+'</div>' : '')
@@ -2263,7 +2263,7 @@ async function agtShowErreurs(slug) {
       +'<div style="display:flex;align-items:flex-start;gap:8px">'
       
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:12px;font-weight:600;color:#E8E8E0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_escHtml(e.msg||'Erreur inconnue')+'</div>'
+      +'<div style="font-size:var(--pt-micro,12px);font-weight:600;color:#E8E8E0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_escHtml(e.msg||'Erreur inconnue')+'</div>'
       +'<div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">'
       +(e.page ? '<span style="font-size:10px;color:rgba(255,255,255,0.35)">'+_mvIcon('document',16)+' '+_escHtml(e.page)+'</span>' : '')
       +(e.user ? '<span style="font-size:10px;color:rgba(255,255,255,0.35)">\uD83D\uDC64 '+_escHtml(e.user)+'</span>' : '')
@@ -2389,10 +2389,10 @@ function _agtBuildEssais(){
   h+='<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:14px;margin-bottom:16px">';
   h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.45);font-weight:600;letter-spacing:.06em;margin-bottom:10px">+ G\u00e9n\u00e9rer un code d\'acc\u00e8s</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">';
-  h+='<div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin-bottom:4px">Nom prospect</div><input id="agt-essai-prospect" placeholder="ex: Dupont \u2014 Dom. Chablis" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 10px;color:#F0E8DC;font-size:12px;font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
-  h+='<div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin-bottom:4px">T\u00e9l\u00e9phone</div><input id="agt-essai-tel" placeholder="06 XX XX XX XX" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 10px;color:#F0E8DC;font-size:12px;font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
+  h+='<div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin-bottom:4px">Nom prospect</div><input id="agt-essai-prospect" placeholder="ex: Dupont \u2014 Dom. Chablis" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 10px;color:#F0E8DC;font-size:var(--pt-micro,12px);font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
+  h+='<div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin-bottom:4px">T\u00e9l\u00e9phone</div><input id="agt-essai-tel" placeholder="06 XX XX XX XX" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 10px;color:#F0E8DC;font-size:var(--pt-micro,12px);font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
   h+='</div>';
-  h+='<button onclick="agtCreateEssai()" style="background:#C9A84C;border:none;border-radius:10px;padding:9px 18px;color:#0C1A0A;font-size:12px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">G\u00e9n\u00e9rer le code</button>';
+  h+='<button onclick="agtCreateEssai()" style="background:#C9A84C;border:none;border-radius:10px;padding:9px 18px;color:#0C1A0A;font-size:var(--pt-micro,12px);font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">G\u00e9n\u00e9rer le code</button>';
   h+='</div>';
 
   // Liste essais actifs
@@ -2413,8 +2413,8 @@ function _agtBuildEssais(){
       h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3)">'+(t.telephone?'&#128222; '+_escHtml(t.telephone)+' &middot; ':'')+' '+t.usage_count+' acc\u00e8s'+(t.last_access?' &middot; dernier : '+_agtRelTime(t.last_access):'')+'</div>';
       h+='</div>';
       h+='<div style="display:flex;gap:6px;flex-shrink:0">';
-      h+='<button onclick="agtCopyEssaiCode(\''+_escAttr(t.code)+'\')" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.6);font-size:12px;cursor:pointer" title="Copier le code">&#128203;</button>';
-      h+='<button onclick="agtRevokeEssai(\''+_escAttr(t.id)+'\')" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:6px 10px;color:#FCA5A5;font-size:12px;cursor:pointer" title="R\u00e9voquer">&#128465;</button>';
+      h+='<button onclick="agtCopyEssaiCode(\''+_escAttr(t.code)+'\')" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.6);font-size:var(--pt-micro,12px);cursor:pointer" title="Copier le code">&#128203;</button>';
+      h+='<button onclick="agtRevokeEssai(\''+_escAttr(t.id)+'\')" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:6px 10px;color:#FCA5A5;font-size:var(--pt-micro,12px);cursor:pointer" title="R\u00e9voquer">&#128465;</button>';
       h+='</div>';
       h+='</div></div>';
     });
@@ -2425,10 +2425,10 @@ function _agtBuildEssais(){
     h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.2);letter-spacing:.06em;margin:12px 0 8px">Expir\u00e9s</div>';
     expires.forEach(function(t){
       h+='<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px;margin-bottom:6px;opacity:.55;display:flex;align-items:center;gap:10px">';
-      h+='<span style="font-family:monospace;font-size:12px;color:rgba(255,255,255,0.3)">'+_escHtml(t.code)+'</span>';
-      h+='<span style="flex:1;font-size:12px;color:rgba(255,255,255,0.3)">'+_escHtml(t.prospect||'')+'</span>';
+      h+='<span style="font-family:monospace;font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.3)">'+_escHtml(t.code)+'</span>';
+      h+='<span style="flex:1;font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.3)">'+_escHtml(t.prospect||'')+'</span>';
       h+='<span style="font-size:var(--pt-micro,11px);color:rgba(239,68,68,0.6)">expir\u00e9</span>';
-      h+='<button onclick="agtRevokeEssai(\''+_escAttr(t.id)+'\')" style="background:none;border:none;color:rgba(255,255,255,0.2);font-size:12px;cursor:pointer">&#128465;</button>';
+      h+='<button onclick="agtRevokeEssai(\''+_escAttr(t.id)+'\')" style="background:none;border:none;color:rgba(255,255,255,0.2);font-size:var(--pt-micro,12px);cursor:pointer">&#128465;</button>';
       h+='</div>';
     });
   }
@@ -2630,7 +2630,7 @@ function _agtKmlPlan(base, fiches) {
 function _agtBuildKml() {
   var h = '<div style="padding:0 0 20px">';
   h += '<div class="agt-section-title" style="margin-bottom:6px">Import KML</div>';
-  h += '<p style="font-size:12px;color:rgba(255,255,255,0.4);line-height:1.6;margin:0 0 16px">Charger les contours de parcelles d\'un domaine client depuis son fichier KML Google Earth. Un fichier partiel complète le parcellaire, il ne le remplace pas.</p>';
+  h += '<p style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.4);line-height:1.6;margin:0 0 16px">Charger les contours de parcelles d\'un domaine client depuis son fichier KML Google Earth. Un fichier partiel complète le parcellaire, il ne le remplace pas.</p>';
 
   // Sélecteur domaine — `selected` sur l'état, sinon agtRenderBody perd le choix
   h += '<div class="fl" style="color:rgba(255,255,255,0.5)">Domaine cible</div>';
@@ -2677,11 +2677,11 @@ function _agtBuildKml() {
 function _agtKmlEtatHtml() {
   var h = '';
   if (_agtKmlLu === 'load') {
-    return '<div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:11px 13px;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,0.45)">Lecture de la base…</div>';
+    return '<div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:11px 13px;margin-bottom:14px;font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.45)">Lecture de la base…</div>';
   }
   if (_agtKmlLu === 'err') {
     return '<div style="background:rgba(224,112,96,0.12);border:1px solid rgba(224,112,96,0.35);border-radius:10px;padding:11px 13px;margin-bottom:14px">'
-      + '<div style="font-size:12px;font-weight:700;color:#E07060;margin-bottom:4px">Base illisible</div>'
+      + '<div style="font-size:var(--pt-micro,12px);font-weight:700;color:#E07060;margin-bottom:4px">Base illisible</div>'
       + '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.55);line-height:1.6">Impossible de savoir ce que ce domaine contient déjà. Rien ne sera écrit tant que la lecture n\'aura pas abouti — rechoisissez le domaine pour réessayer.</div></div>';
   }
   if (_agtKmlLu !== 'ok') return '';
@@ -2694,12 +2694,12 @@ function _agtKmlEtatHtml() {
   //    un fichier partiel ferait donc disparaître les 46 contours du domaine de prod.
   if (!nb && _agtKmlSlug === 'marchand-grillot') {
     return '<div style="background:rgba(142,47,38,0.18);border:1px solid rgba(224,112,96,0.45);border-radius:10px;padding:12px 14px;margin-bottom:14px">'
-      + '<div style="font-size:12px;font-weight:700;color:#E88B7C;margin-bottom:5px">Ce domaine tire ses contours de l\'application</div>'
+      + '<div style="font-size:var(--pt-micro,12px);font-weight:700;color:#E88B7C;margin-bottom:5px">Ce domaine tire ses contours de l\'application</div>'
       + '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.6);line-height:1.65">Ses 46 contours sont intégrés au code, pas en base. Dès qu\'un contour est écrit ici, ce jeu intégré cesse d\'être lu et <b>seul le contenu du fichier reste visible sur la carte</b>. Pour ajouter une parcelle à ce domaine, chargez un fichier contenant <b>toutes</b> ses parcelles.</div></div>';
   }
 
   h += '<div style="background:rgba(74,159,200,0.10);border:1px solid rgba(74,159,200,0.26);border-radius:10px;padding:11px 13px;margin-bottom:14px">';
-  h += '<div style="font-size:12px;color:rgba(255,255,255,0.7)">';
+  h += '<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.7)">';
   h += nb ? ('<b style="color:#6FBEE0">' + nb + '</b> contour' + (nb > 1 ? 's' : '') + ' en base') : 'Aucun contour en base';
   h += ' · <b style="color:#6FBEE0">' + nf + '</b> fiche' + (nf > 1 ? 's' : '') + ' de parcelle';
   h += '</div>';
@@ -2717,7 +2717,7 @@ function _agtKmlApercuHtml() {
   // Le fichier lu
   h += '<div style="background:rgba(61,107,39,0.15);border:1px solid rgba(61,107,39,0.3);';
   h += 'border-radius:10px;padding:12px;margin-bottom:14px">';
-  h += '<div style="font-size:12px;font-weight:700;color:#6BA34A;margin-bottom:8px">';
+  h += '<div style="font-size:var(--pt-micro,12px);font-weight:700;color:#6BA34A;margin-bottom:8px">';
   h += _agtKmlPolygons.length + ' contour' + (_agtKmlPolygons.length > 1 ? 's' : '');
   h += ' — ' + _escHtml(_agtKmlFileName) + '</div>';
   h += '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.45);line-height:1.8;';
@@ -2729,7 +2729,7 @@ function _agtKmlApercuHtml() {
   h += '</div></div>';
 
   if (!_agtKmlSlug) {
-    h += '<div style="font-size:12px;color:rgba(255,255,255,0.4);padding:4px 0 10px">Choisissez un domaine cible pour voir ce que cette écriture va changer.</div>';
+    h += '<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.4);padding:4px 0 10px">Choisissez un domaine cible pour voir ce que cette écriture va changer.</div>';
     return h;
   }
   if (!lu) return h;
@@ -2772,7 +2772,7 @@ function _agtKmlApercuHtml() {
     h += p.fichesAcreer.map(function (x) { return _escHtml(x.name) + ' — ' + _agtGeoArea(x.pts).toFixed(2) + ' ha'; }).join(' · ');
     h += '<br>Sans sa fiche, une parcelle sort en gris sur la carte et n\'apparaît dans aucun écran. La surface est calculée sur le contour et reste modifiable dans Réglages.</div></div></label>';
   } else if (p.nouveaux.length) {
-    h += '<div style="background:rgba(74,159,200,0.10);border:1px solid rgba(74,159,200,0.26);border-radius:10px;padding:11px 13px;margin-bottom:10px;font-size:12px;color:rgba(255,255,255,0.55)">Les parcelles ajoutées ont déjà leur fiche dans ce domaine. Rien d\'autre à créer.</div>';
+    h += '<div style="background:rgba(74,159,200,0.10);border:1px solid rgba(74,159,200,0.26);border-radius:10px;padding:11px 13px;margin-bottom:10px;font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.55)">Les parcelles ajoutées ont déjà leur fiche dans ce domaine. Rien d\'autre à créer.</div>';
   }
 
   // Garde-fou du geste destructif
@@ -2808,7 +2808,7 @@ function _agtKmlModeBtn(m, titre, desc) {
 }
 
 function _agtKmlPill(txt, col, bg, bd) {
-  return '<span style="border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;'
+  return '<span style="border-radius:999px;padding:5px 12px;font-size:var(--pt-micro,12px);font-weight:600;'
     + 'color:' + col + ';background:' + bg + ';border:1px solid ' + bd + '">' + txt + '</span>';
 }
 
@@ -2928,12 +2928,12 @@ function agtDeleteTenant(slug){
     +'<div style="font-size:16px;font-weight:700;color:#fff">Supprimer le domaine</div>'
     +'</div>'
     +'<div style="font-size:var(--pt-txt,12.5px);line-height:1.55;color:rgba(255,255,255,0.6);margin-top:12px">Tu vas <b style="color:#FCA5A5">effacer définitivement</b> le domaine <b style="color:#FCA5A5">'+sg+'</b>. Cette action est <b style="color:#FCA5A5">irréversible</b>.</div>'
-    +'<div style="font-size:12px;color:rgba(255,255,255,0.5);background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.16);border-radius:11px;padding:11px 13px;margin:12px 0;line-height:1.7">Seront supprimés : tous les <b>comptes de connexion</b> des membres, parcelles, journal, sessions, traitements, planning, cave, tâches, saisons, config, et l\'entrée du registre.</div>'
+    +'<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.5);background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.16);border-radius:11px;padding:11px 13px;margin:12px 0;line-height:1.7">Seront supprimés : tous les <b>comptes de connexion</b> des membres, parcelles, journal, sessions, traitements, planning, cave, tâches, saisons, config, et l\'entrée du registre.</div>'
     +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin:14px 0 6px">Pour confirmer, tape le nom exact : <code style="background:rgba(255,255,255,0.08);padding:1px 7px;border-radius:4px;color:#C4B5FD;font-weight:600">'+sg+'</code></div>'
     +'<input id="agt-del-slug" type="text" autocomplete="off" placeholder="nom du domaine" oninput="agtDelCheck(\''+slug+'\')" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 13px;font-size:13px;color:#fff;font-family:Outfit,sans-serif;box-sizing:border-box">'
     +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin:14px 0 6px">Mot de passe de suppression</div>'
     +'<input id="agt-del-pwd" type="password" autocomplete="new-password" placeholder="••••••••" oninput="agtDelCheck(\''+slug+'\')" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 13px;font-size:13px;color:#fff;font-family:Outfit,sans-serif;box-sizing:border-box">'
-    +'<div id="agt-del-err" style="display:none;color:#FCA5A5;font-size:12px;margin-top:10px"></div>'
+    +'<div id="agt-del-err" style="display:none;color:#FCA5A5;font-size:var(--pt-micro,12px);margin-top:10px"></div>'
     +'<div style="display:flex;gap:9px;margin-top:18px">'
     +'<button onclick="document.getElementById(\'agt-deltenant-overlay\').remove()" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:11px;color:rgba(255,255,255,0.55);font-size:13px;font-weight:500;padding:12px;cursor:pointer;font-family:Outfit,sans-serif">Annuler</button>'
     +'<button id="agt-del-btn" disabled onclick="agtDeleteTenantConfirm(\''+slug+'\')" style="flex:1.7;border:none;border-radius:11px;color:#fff;font-size:13px;font-weight:700;padding:12px;cursor:not-allowed;font-family:Outfit,sans-serif;background:rgba(127,16,32,0.4);opacity:.55">Supprimer le domaine</button>'
@@ -3005,7 +3005,7 @@ function _fcArr(v){ return Array.isArray(v)?v:[]; }
 function _fcSecTitle(t){ return {dom:'Domaine',parcelles:'Parcelles & secteurs m\u00e9t\u00e9o',membres:'Membres & r\u00f4les',taches:'T\u00e2ches & heures/ha',tracteurs_list:'Tracteurs',saisons:'Saisons',abo:'Abonnement'}[t]||''; }
 function _fcCollLabel(c){ return {parcelles:'les parcelles',membres:'les membres',taches:'les t\u00e2ches',tracteurs_list:'les tracteurs',saisons:'les saisons'}[c]||c; }
 function _fcItemLabel(coll,i){ var a=_FC[coll]||[],o=a[i]||{}; if(coll==='membres') return o.nom||o.email||'ce membre'; return o.nom||'cet \u00e9l\u00e9ment'; }
-function _fcHint(html){ return '<div style="font-size:11.5px;color:rgba(255,255,255,0.4);line-height:1.6;margin:0 0 13px">'+html+'</div>'; }
+function _fcHint(html){ return '<div style="font-size:var(--pt-lbl,11.5px);color:rgba(255,255,255,0.4);line-height:1.6;margin:0 0 13px">'+html+'</div>'; }
 function _fcEmpty(txt){ return '<div style="text-align:center;padding:22px;color:rgba(255,255,255,0.25);font-size:var(--pt-txt,12.5px)">'+txt+'</div>'; }
 
 function _fcActiveCount(coll){ var a=_FC[coll]||[]; if(coll==='parcelles') return a.filter(function(p){return p.statut!=='Arrachee';}).length; return a.length; }
@@ -3064,7 +3064,7 @@ function _fcSecteursHtml(){
   var chips=Object.keys(m).map(function(k){ var lbl=(k==='__none__')?'\u2014 sans secteur':k; return '<span style="font-size:var(--pt-micro,11px);background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:6px 11px;color:rgba(255,255,255,0.6)"><b style="color:#fff">'+_escHtml(lbl)+'</b> \u00b7 '+m[k]+' parc.</span>'; }).join(' ');
   var badge=on?'background:rgba(61,107,39,0.18);border:1px solid rgba(61,107,39,0.4);color:#6BA34A':'background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4)';
   return '<div id="agt-fc-secteurs" style="background:linear-gradient(135deg,rgba(61,107,39,0.12),rgba(139,92,246,0.06));border:1px solid rgba(61,107,39,0.25);border-radius:13px;padding:13px;margin-top:14px">'
-    +'<div style="font-size:12px;font-weight:700;color:#A8D08A;display:flex;align-items:center;gap:8px">\uD83D\uDDFA\uFE0F Secteurs m\u00e9t\u00e9o <span style="font-size:10px;border-radius:999px;padding:2px 9px;font-weight:600;'+badge+'">'+(on?'cartes par secteur activ\u00e9es':'m\u00e9t\u00e9o unique du domaine')+'</span></div>'
+    +'<div style="font-size:var(--pt-micro,12px);font-weight:700;color:#A8D08A;display:flex;align-items:center;gap:8px">\uD83D\uDDFA\uFE0F Secteurs m\u00e9t\u00e9o <span style="font-size:10px;border-radius:999px;padding:2px 9px;font-weight:600;'+badge+'">'+(on?'cartes par secteur activ\u00e9es':'m\u00e9t\u00e9o unique du domaine')+'</span></div>'
     +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin-top:6px">'+keys.length+' commune'+(keys.length>1?'s':'')+' active'+(keys.length>1?'s':'')+' \u00b7 cartes empil\u00e9es sur l\'accueil d\u00e8s \u22652 communes.</div>'
     +'<div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:9px">'+chips+'</div></div>';
 }
@@ -3629,12 +3629,12 @@ function _agtInsCss() {
     '.agi-d:hover{background:rgba(255,255,255,.08)}',
     '.agi-d.on{border-color:rgba(201,168,76,.55);background:rgba(201,168,76,.1)}',
     '.agi-d b{display:block;font-weight:600;font-size:13.5px}',
-    '.agi-d span{display:block;font-size:11.5px;color:rgba(240,226,200,.45);margin-top:2px}',
+    '.agi-d span{display:block;font-size:var(--pt-lbl,11.5px);color:rgba(240,226,200,.45);margin-top:2px}',
     '.agi-vr{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}',
     '.agi-v{flex:1;min-width:110px;border:1px solid rgba(240,226,200,.12);border-radius:9px;',
     '  padding:8px 10px;background:rgba(255,255,255,.02);border-left:3px solid rgba(240,226,200,.25)}',
     '.agi-v.ok{border-left-color:#3D6B27}.agi-v.no{border-left-color:#B85A1A}',
-    '.agi-v .n{font-size:12px;font-weight:600}',
+    '.agi-v .n{font-size:var(--pt-micro,12px);font-weight:600}',
     '.agi-v .s{font-size:var(--pt-micro,11px);color:rgba(240,226,200,.45);margin-top:1px}',
     '.agi-v.ok .s{color:#9BC77E}.agi-v.no .s{color:#E0A46A}',
     '.agi-f{display:grid;grid-template-columns:130px 1fr;gap:9px 12px;align-items:center;margin-bottom:10px}',
@@ -3654,7 +3654,7 @@ function _agtInsCss() {
     '  width:100%;text-align:right}',
     '.agi-pd{background:none;border:none;color:rgba(240,226,200,.3);font-size:var(--pt-base,14px);cursor:pointer;',
     '  min-height:30px}',
-    '.agi-tot{display:flex;justify-content:space-between;font-size:12px;',
+    '.agi-tot{display:flex;justify-content:space-between;font-size:var(--pt-micro,12px);',
     '  color:rgba(240,226,200,.45);padding:8px 10px;background:rgba(255,255,255,.03)}',
     '.agi-b{background:rgba(255,255,255,.05);border:1px solid rgba(240,226,200,.12);color:#F0E2C8;',
     '  font-family:inherit;font-size:13px;border-radius:8px;padding:9px 14px;cursor:pointer;min-height:42px}',
@@ -3685,7 +3685,7 @@ function _agtInsCss() {
     '  font-family:inherit;font-size:16px}',
     '.agi-p2 select{flex:1 1 150px;min-width:0}',
     '.agi-p2 input{flex:0 1 130px;min-width:0}',
-    '.agi-p2 .o{font-size:11.5px;color:rgba(240,226,200,.3);white-space:nowrap;',
+    '.agi-p2 .o{font-size:var(--pt-lbl,11.5px);color:rgba(240,226,200,.3);white-space:nowrap;',
     '  overflow:hidden;text-overflow:ellipsis;flex:1 1 90px}',
     '.agi-ta{width:100%;box-sizing:border-box;min-height:86px;resize:vertical;',
     '  background:rgba(255,255,255,.05);border:1px solid rgba(240,226,200,.12);',
@@ -4379,7 +4379,7 @@ function _agtInsRender() {
       var nt = (p.taches || []).length, mal = (!p.nom || !p.debut || !p.fin || p.fin < p.debut);
       h += '<div class="agi-pw"><div class="agi-pr">';
       h += '<div><input type="text" class="agi-nm" data-pnom="' + i + '" onchange="agtInsPerNom(' + i + ',this)" onblur="agtInsPerNom(' + i + ',this)"></div>';
-      h += '<div style="font-size:12px;color:' + (nt ? 'rgba(240,226,200,.5)' : '#E0A46A') + ';text-align:right;cursor:pointer" onclick="agtInsPerTog(' + i + ')">'
+      h += '<div style="font-size:var(--pt-micro,12px);color:' + (nt ? 'rgba(240,226,200,.5)' : '#E0A46A') + ';text-align:right;cursor:pointer" onclick="agtInsPerTog(' + i + ')">'
         + nt + ' t\u00e2che' + (nt > 1 ? 's' : '') + '</div>';
       h += '<button class="agi-pd" onclick="agtInsPerDel(' + i + ')" title="Retirer">'+_mvIcon('croix',16)+'</button></div>';
       h += '<div class="agi-p2">'
@@ -4392,7 +4392,7 @@ function _agtInsRender() {
         dispo.forEach(function (t) {
           var on = (p.taches || []).indexOf(t) >= 0;
           h += '<button onclick="agtInsPerTache(' + i + ',\'' + _escAttr(t) + '\')" '
-            + 'style="border-radius:7px;padding:5px 9px;font-size:12px;cursor:pointer;font-family:inherit;'
+            + 'style="border-radius:7px;padding:5px 9px;font-size:var(--pt-micro,12px);cursor:pointer;font-family:inherit;'
             + 'border:1px solid ' + (on ? '#C9A84C' : 'rgba(240,226,200,.14)') + ';'
             + 'background:' + (on ? 'rgba(201,168,76,.16)' : 'transparent') + ';'
             + 'color:' + (on ? '#C9A84C' : 'rgba(240,226,200,.45)') + '">' + E(t) + '</button>';
@@ -5129,7 +5129,7 @@ function _agtBizG3(){
     var e=Math.max(0,_agtBizEnc(t.slug)), d=Math.max(0,_agtBizDu(t.slug));
     h+='<div style="margin-bottom:10px">';
     h+='<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px">';
-    h+='<span style="flex:1;min-width:0;font-size:12px;color:rgba(255,255,255,0.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_escHtml(t.nom)+'</span>';
+    h+='<span style="flex:1;min-width:0;font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_escHtml(t.nom)+'</span>';
     h+='<span style="font-size:var(--pt-micro,11px);font-weight:600;color:'+(d>0?'#F97316':'#86EFAC')+'">'+(d>0?(_agtEur(d)+' d\u00fb'):'sold\u00e9')+'</span>';
     h+='</div>';
     h+='<div style="display:flex;height:9px;border-radius:5px;overflow:hidden;background:rgba(255,255,255,0.05)">';
@@ -5397,7 +5397,7 @@ function _agtBuildBusiness(){
       _agtBizLeg('#C9A84C','Abonnement')+_agtBizLeg('#8B5CF6','Installation')+_agtBizLeg('#3B82F6','Heures')+_agtBizLeg('#C4B5FD','Geste'));
   var g3=_agtBizG3();
   h+=_agtBizCard('Solde par client','Ce qui est rentr\u00e9, ce qui reste d\u00fb.',
-      g3||'<div style="font-size:12px;color:rgba(255,255,255,0.2);padding:14px 0">Aucune ligne enregistr\u00e9e.</div>',
+      g3||'<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.2);padding:14px 0">Aucune ligne enregistr\u00e9e.</div>',
       g3?(_agtBizLeg('#86EFAC','Encaiss\u00e9')+_agtBizLeg('#F97316','\u00c0 encaisser')):'');
   h+='</div>';
 
@@ -5419,9 +5419,9 @@ function _agtBuildBusiness(){
     h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3);font-family:monospace;margin-top:2px">'+_escHtml(t.slug)+'</div>';
     h+='</div><div style="text-align:right">';
     h+= inte
-      ? '<div style="font-size:12px;color:rgba(255,255,255,0.35)">non factur\u00e9</div>'
+      ? '<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.35)">non factur\u00e9</div>'
       : ('<div style="font-size:15px;font-weight:600;color:#E8E8E0">'
-          +(rem?('<span style="font-size:12px;font-weight:400;color:rgba(255,255,255,0.3);text-decoration:line-through;margin-right:6px">'+_agtEur(plein)+'</span>'):'')
+          +(rem?('<span style="font-size:var(--pt-micro,12px);font-weight:400;color:rgba(255,255,255,0.3);text-decoration:line-through;margin-right:6px">'+_agtEur(plein)+'</span>'):'')
           +_agtEur(pr)+'<span style="font-size:var(--pt-micro,11px);opacity:.45">/mois</span></div>');
     h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-top:2px">'+(_AGT_PLANL[plan]||plan)+'</div>';
     if(rem) h+='<div style="font-size:var(--pt-lbl,10.5px);color:#C4B5FD;margin-top:2px">'+_escHtml(rem.motif||'')+'</div>';
@@ -5464,7 +5464,7 @@ function _agtBuildBusiness(){
           +(retrait?';margin-left:20px;border-left:2px solid rgba(196,181,253,0.25);padding-left:10px':'')+'">';
         o+='<span title="'+ty.lbl+'" style="width:17px;height:17px;border-radius:4px;flex-shrink:0;background:'+ty.col+';color:#0B0F14;font-size:var(--pt-nano,9.5px);font-weight:700;display:flex;align-items:center;justify-content:center">'+ty.ini+'</span>';
         o+='<div style="flex:1;min-width:150px">';
-        if(!retrait) o+='<div style="font-family:monospace;font-size:11.5px;color:'+(paye?'rgba(255,255,255,0.3)':'#E8C860')+'">'+_escHtml(f.ref||'')
+        if(!retrait) o+='<div style="font-family:monospace;font-size:var(--pt-lbl,11.5px);color:'+(paye?'rgba(255,255,255,0.3)':'#E8C860')+'">'+_escHtml(f.ref||'')
           +'<span style="font-family:Outfit,sans-serif;color:rgba(255,255,255,0.28);margin-left:7px">'+_agtDateFr(f.date)+'</span></div>';
         o+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35)'+(retrait?'':';margin-top:1px')+'">'+_escHtml(f.libelle||ty.lbl)
           +(geste?'':' \u00b7 \u00e9ch\u00e9ance '+_agtDateFr(_agtFEch(f))+(ret>0?' <b style="color:#FCA5A5">retard '+ret+' j</b>':''))+'</div>';
@@ -5489,7 +5489,7 @@ function _agtBuildBusiness(){
         if(g.gestes.length){
           var net=0;
           g.lignes.concat(g.gestes).forEach(function(k){ net+=(Number(fs[k].montant)||0); });
-          h+='<div style="display:flex;justify-content:flex-end;gap:10px;padding:2px 0 8px;font-size:11.5px;color:rgba(255,255,255,0.45)">'
+          h+='<div style="display:flex;justify-content:flex-end;gap:10px;padding:2px 0 8px;font-size:var(--pt-lbl,11.5px);color:rgba(255,255,255,0.45)">'
             +'<span>Net \u00e0 payer</span><b style="color:#E8E8E0">'+_agtEur(net)+'</b></div>';
         }
         h+='</div>';
@@ -5505,7 +5505,7 @@ function _agtBuildBusiness(){
         h+='</div>';
       }
       h+='</div>';
-      h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:9px;padding-top:9px;border-top:1px solid rgba(255,255,255,0.07);font-size:12px">'
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:9px;padding-top:9px;border-top:1px solid rgba(255,255,255,0.07);font-size:var(--pt-micro,12px)">'
         +'<span style="color:rgba(255,255,255,0.35)">Solde du compte</span>'
         +'<span style="font-weight:700;color:'+(duT>0?'#F97316':'#86EFAC')+'">'+(duT>0?(_agtEur(duT)+' \u00e0 encaisser'):'sold\u00e9')+'</span></div>';
     }
@@ -5525,19 +5525,19 @@ function _agtBuildBusiness(){
     h+='</div>';
     h+='<div id="agt-biz-cw'+i+'" style="display:none;margin-bottom:8px"><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">S\u2019applique \u00e0</div>'+_agtBizCibleSel(i,t.slug,'')+'</div>';
     h+='<div style="margin-bottom:9px"><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">Libell\u00e9</div><input id="agt-biz-lib'+i+'" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:16px;font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
-    h+='<button onclick="agtFactAdd('+i+')" style="background:#C9A84C;border:none;border-radius:8px;padding:9px 16px;color:#0C1A0A;font-size:12px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Enregistrer la ligne</button>';
+    h+='<button onclick="agtFactAdd('+i+')" style="background:#C9A84C;border:none;border-radius:8px;padding:9px 16px;color:#0C1A0A;font-size:var(--pt-micro,12px);font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Enregistrer la ligne</button>';
     h+='<div id="agt-biz-hint'+i+'" style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.3);line-height:1.6;margin-top:8px"></div>';
     h+='</div>';
 
     h+='<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">';
-    h+='<button onclick="agtBizForm('+i+')" style="background:none;border:none;color:rgba(196,181,253,0.55);font-size:11.5px;cursor:pointer;font-family:Outfit,sans-serif;padding:8px 0 0">+ Ajouter une ligne</button>';
-    if(fs.length>0) h+='<button onclick="agtBizReleve('+i+')" style="background:none;border:none;color:rgba(196,181,253,0.55);font-size:11.5px;cursor:pointer;font-family:Outfit,sans-serif;padding:8px 0 0">Relev\u00e9 de compte (PDF)</button>';
+    h+='<button onclick="agtBizForm('+i+')" style="background:none;border:none;color:rgba(196,181,253,0.55);font-size:var(--pt-lbl,11.5px);cursor:pointer;font-family:Outfit,sans-serif;padding:8px 0 0">+ Ajouter une ligne</button>';
+    if(fs.length>0) h+='<button onclick="agtBizReleve('+i+')" style="background:none;border:none;color:rgba(196,181,253,0.55);font-size:var(--pt-lbl,11.5px);cursor:pointer;font-family:Outfit,sans-serif;padding:8px 0 0">Relev\u00e9 de compte (PDF)</button>';
     h+='</div>';
     h+='</div>';
   });
 
   h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">';
-  h+='<button onclick="agtBizCsv()" style="background:rgba(201,168,76,0.14);border:1px solid rgba(201,168,76,0.3);border-radius:8px;padding:7px 13px;color:#E8C860;font-size:11.5px;cursor:pointer;font-family:Outfit,sans-serif">Exporter toutes les lignes en CSV</button>';
+  h+='<button onclick="agtBizCsv()" style="background:rgba(201,168,76,0.14);border:1px solid rgba(201,168,76,0.3);border-radius:8px;padding:7px 13px;color:#E8C860;font-size:var(--pt-lbl,11.5px);cursor:pointer;font-family:Outfit,sans-serif">Exporter toutes les lignes en CSV</button>';
   h+='</div>';
   return h;
 }
@@ -5704,7 +5704,7 @@ function _agtDocOuvrir(titre, corps){
   var d=new Date();
   var html='<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>'+titre+'</title><style>'
     +'@page{size:A4;margin:16mm}'
-    +'body{font-family:Georgia,\'Times New Roman\',serif;color:#1A1410;background:#fff;font-size:12px;line-height:1.6;margin:0}'
+    +'body{font-family:Georgia,\'Times New Roman\',serif;color:#1A1410;background:#fff;font-size:var(--pt-micro,12px);line-height:1.6;margin:0}'
     +'.wm{background:#F3E4C4;border:1px solid #D9BE7E;color:#6B4E10;border-radius:4px;padding:7px 11px;'
       +'font-size:var(--pt-lbl,10.5px);font-family:Arial,sans-serif;margin-bottom:20px;letter-spacing:.02em}'
     +'h1{font-size:var(--pt-md,20px);margin:0 0 4px;letter-spacing:.02em}'
@@ -5876,7 +5876,7 @@ function _agtBuildLeads(){
 
   function chip(f,l,n){
     var on=(_agtLeadFilter===f);
-    return '<button onclick="agtLeadFilter(\'' + f + '\')" style="background:'+(on?'rgba(196,181,253,0.15)':'rgba(255,255,255,0.05)')+';border:1px solid '+(on?'rgba(196,181,253,0.35)':'rgba(255,255,255,0.1)')+';border-radius:20px;padding:5px 12px;color:'+(on?'#C4B5FD':'rgba(255,255,255,0.45)')+';font-size:11.5px;cursor:pointer;font-family:Outfit,sans-serif;margin:0 6px 6px 0">'+l+' ('+n+')</button>';
+    return '<button onclick="agtLeadFilter(\'' + f + '\')" style="background:'+(on?'rgba(196,181,253,0.15)':'rgba(255,255,255,0.05)')+';border:1px solid '+(on?'rgba(196,181,253,0.35)':'rgba(255,255,255,0.1)')+';border-radius:20px;padding:5px 12px;color:'+(on?'#C4B5FD':'rgba(255,255,255,0.45)')+';font-size:var(--pt-lbl,11.5px);cursor:pointer;font-family:Outfit,sans-serif;margin:0 6px 6px 0">'+l+' ('+n+')</button>';
   }
   h+='<div style="margin-bottom:14px">';
   h+=chip('ouverts','\u00c0 traiter',cnt.nouveau+cnt.repondu+cnt.mer);
@@ -5898,7 +5898,7 @@ function _agtBuildLeads(){
     h+='<div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">';
     h+='<div style="flex:1;min-width:150px">';
     h+='<div style="font-size:var(--pt-base,14px);font-weight:600;color:#E8E8E0">'+_escHtml(l.domaine||'(sans nom)')+'</div>';
-    h+='<div style="font-size:11.5px;color:rgba(255,255,255,0.35);margin-top:3px">'
+    h+='<div style="font-size:var(--pt-lbl,11.5px);color:rgba(255,255,255,0.35);margin-top:3px">'
       +[_escHtml([l.ville,l.cp].filter(Boolean).join(' ')), _escHtml(l.region||''), l.surface?_escHtml(l.surface)+' ha':'' ]
         .filter(Boolean).join(' \u00b7 ')+'</div>';
     h+='</div>';
@@ -5907,7 +5907,7 @@ function _agtBuildLeads(){
     h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.25);margin-top:4px">'+_agtDateFr(l.createdAt)+'</div>';
     h+='</div></div>';
 
-    h+='<div style="font-size:11.5px;color:rgba(255,255,255,0.45);margin-top:8px;word-break:break-word">'
+    h+='<div style="font-size:var(--pt-lbl,11.5px);color:rgba(255,255,255,0.45);margin-top:8px;word-break:break-word">'
       +_mvIcon('enveloppe',16)+' '+_escHtml(l.email||'')+(l.tel?' \u00b7 '+_escHtml(l.tel):'')+'</div>';
 
     // ★ Le chemin se dedouble apres la mise en route : les REPONSES arrivent par la
@@ -5931,15 +5931,15 @@ function _agtBuildLeads(){
       if(lignes.length){
         h+='<div style="margin-top:10px;border-top:1px solid rgba(255,255,255,0.07);padding-top:9px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 12px">';
         lignes.forEach(function(x){
-          h+='<div style="font-size:11.5px;color:rgba(255,255,255,0.4)"><span style="color:rgba(255,255,255,0.25)">'+x[0]+'</span> \u00b7 '+_escHtml(String(x[1]))+'</div>';
+          h+='<div style="font-size:var(--pt-lbl,11.5px);color:rgba(255,255,255,0.4)"><span style="color:rgba(255,255,255,0.25)">'+x[0]+'</span> \u00b7 '+_escHtml(String(x[1]))+'</div>';
         });
         h+='</div>';
       }
       if(l.message){
-        h+='<div style="margin-top:9px;background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;font-size:12px;color:rgba(255,255,255,0.55);line-height:1.6;white-space:pre-wrap">'+_escHtml(l.message)+'</div>';
+        h+='<div style="margin-top:9px;background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.55);line-height:1.6;white-space:pre-wrap">'+_escHtml(l.message)+'</div>';
       }
       if(note){
-        h+='<div style="margin-top:8px;font-size:11.5px;color:#C4B5FD">'+_mvIcon('crayon',16)+' '+_escHtml(note)+'</div>';
+        h+='<div style="margin-top:8px;font-size:var(--pt-lbl,11.5px);color:#C4B5FD">'+_mvIcon('crayon',16)+' '+_escHtml(note)+'</div>';
       }
       h+='<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">';
       Object.keys(_AGT_LEADST).forEach(function(k){
@@ -5948,17 +5948,17 @@ function _agtBuildLeads(){
       });
       h+='</div>';
       h+='<div style="margin-top:9px;display:flex;gap:6px;flex-wrap:wrap">';
-      h+='<button onclick="agtLeadMail(\'' + id + '\')" style="background:#C9A84C;border:none;border-radius:8px;padding:7px 13px;color:#0C1A0A;font-size:11.5px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">R\u00e9pondre</button>';
-      h+='<button onclick="agtLeadCopy(\'' + id + '\')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:7px 13px;color:rgba(255,255,255,0.55);font-size:11.5px;cursor:pointer;font-family:Outfit,sans-serif">Copier l\u2019e-mail</button>';
-      h+='<button onclick="agtLeadNote(\'' + id + '\')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:7px 13px;color:rgba(255,255,255,0.55);font-size:11.5px;cursor:pointer;font-family:Outfit,sans-serif">Note</button>';
+      h+='<button onclick="agtLeadMail(\'' + id + '\')" style="background:#C9A84C;border:none;border-radius:8px;padding:7px 13px;color:#0C1A0A;font-size:var(--pt-lbl,11.5px);font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">R\u00e9pondre</button>';
+      h+='<button onclick="agtLeadCopy(\'' + id + '\')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:7px 13px;color:rgba(255,255,255,0.55);font-size:var(--pt-lbl,11.5px);cursor:pointer;font-family:Outfit,sans-serif">Copier l\u2019e-mail</button>';
+      h+='<button onclick="agtLeadNote(\'' + id + '\')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:7px 13px;color:rgba(255,255,255,0.55);font-size:var(--pt-lbl,11.5px);cursor:pointer;font-family:Outfit,sans-serif">Note</button>';
       if(l.mer){
         var _pjb=!!(_agtLeadSt[l._id]&&_agtLeadSt[l._id].pj);
-        h+='<button onclick="agtLeadPj(\'' + id + '\')" style="background:rgba(255,255,255,0.06);border:1px solid '+(_pjb?'rgba(134,239,172,0.4)':'rgba(232,200,96,0.4)')+';border-radius:8px;padding:7px 13px;color:'+(_pjb?'#86EFAC':'#E8C860')+';font-size:11.5px;cursor:pointer;font-family:Outfit,sans-serif">'+(_pjb?'\u2713 Pi\u00e8ces re\u00e7ues':'Pi\u00e8ces re\u00e7ues ?')+'</button>';
+        h+='<button onclick="agtLeadPj(\'' + id + '\')" style="background:rgba(255,255,255,0.06);border:1px solid '+(_pjb?'rgba(134,239,172,0.4)':'rgba(232,200,96,0.4)')+';border-radius:8px;padding:7px 13px;color:'+(_pjb?'#86EFAC':'#E8C860')+';font-size:var(--pt-lbl,11.5px);cursor:pointer;font-family:Outfit,sans-serif">'+(_pjb?'\u2713 Pi\u00e8ces re\u00e7ues':'Pi\u00e8ces re\u00e7ues ?')+'</button>';
       }
       h+='</div>';
     }
 
-    h+='<button onclick="agtLeadOpen(\'' + id + '\')" style="background:none;border:none;color:rgba(196,181,253,0.55);font-size:11.5px;cursor:pointer;font-family:Outfit,sans-serif;padding:8px 0 0">'+(ouvert?'\u2013 Replier':'+ D\u00e9tail')+'</button>';
+    h+='<button onclick="agtLeadOpen(\'' + id + '\')" style="background:none;border:none;color:rgba(196,181,253,0.55);font-size:var(--pt-lbl,11.5px);cursor:pointer;font-family:Outfit,sans-serif;padding:8px 0 0">'+(ouvert?'\u2013 Replier':'+ D\u00e9tail')+'</button>';
     h+='</div>';
   });
   return h;

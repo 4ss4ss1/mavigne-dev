@@ -3,12 +3,12 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **4 octobre 2026 (TAILLE-2, zip cumulatif avec VOILE-1, ENTREE-1, RENDU-1 non poussés)** — ★★ **LA TAILLE AVANT L'ENVOI** (§246).
-> La règle de taille Firestore vit dans `src/taille-doc.js` (pur, partagé avec `npm run taille`, vérifié par son `--test`). Juste
-> avant chaque écriture (fusion, parcelles, écriture directe, file) : > 90 % → alerte silencieuse à la console GT, 1×/jour/doc/téléphone ;
-> > 1 Mio → rien ne part, rien en file : coffre + message clair. Refus de taille du serveur : même chemin, sans nouvel essai. Aucun bump
-> (firebase.js + module). Harnais `mv-harnais-taille2`. Marques `lots/TAILLE-2.json` (inclut les trois autres) et précédentes. Base `24aa425`.
-> **APP 8.18 → 8.21, SW 8.93 → 8.96** (les trois lots d'avant). Précédent : RENDU-1 (§245), l'écran ne se fige plus — archivé dans journal.md.
+> Dernière consolidation : **5 octobre 2026 (JOURNAL-1, zip cumulatif avec TEXTE-A non poussé)** — ★★ **LE JOURNAL EN 0,12 S** (§248).
+> `.dgroup{content-visibility:auto}` : un jour hors écran n'est ni mis en page ni peint ; place réservée par jour (`52 + lignes × 96` px,
+> `auto`). La règle CONTIENT le groupe : ombres (rembourrage 8 / 12 px + marges négatives) et marges qui ne traversent plus (écarts recalculés,
+> valeurs sur l'échelle --e-* : 20 entre jours, 20 avant « Voir plus », 36 en fin) — `mv-harnais-journal1` refait les comptes. ×4 : 336 → 122 ms.
+> Au pixel : identique (écart max 3/255). Marques `lots/JOURNAL-1.json` (inclut TEXTE-A), `lots/TEXTE-A.json`. Base `3cf9be9`. **APP 8.21 → 8.23, SW 8.96 → 8.98**.
+> Précédent : TEXTE-A (§247), les petits textes relevés (« jetons ») — archivé dans journal.md.
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1820,7 +1820,7 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ### ⚠️ AUDIT-PERF — CE QUI RESTE OUVERT (§241, posé le 04/10)
 
-1. **Le plan est dans `audit-perf-ux.md`** (racine). ✅ VALID-1, LOGIN-1 (§242), VOILE-1, PROFILS-1 (§243), ENTREE-1 (§244), RENDU-1 (§245), TAILLE-2 (§246). Ensuite : la maquette TEXTE-A, JOURNAL-1, GT-1.
+1. **Le plan est dans `audit-perf-ux.md`** (racine). ✅ VALID-1, LOGIN-1 (§242), VOILE-1, PROFILS-1 (§243), ENTREE-1 (§244), RENDU-1 (§245), TAILLE-2 (§246), TEXTE-A (§247), JOURNAL-1 (§248). Ensuite : GT-1.
 2. **Tranché par Nico le 04/10** : ENTREE-1 = le mot de passe se retape comme d'habitude ET ouvre l'appli sans réseau (fait, §244) ; PAQUET-1 abandonné ; TEXTE-A en maquette ; GT-1 décidé ; le premier appui qui « démarre » dans la fiche parcelle est voulu.
 3. **À fournir par Nico** : `npm run taille -- "<sauvegarde complète>.json"` avec le VRAI chemin du fichier téléchargé (le 04/10, les noms d'exemple ont été tapés tels quels) — puis une seconde sauvegarde plus tard, pour le rythme.
 
@@ -2667,7 +2667,7 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     elle-même**, `--pt-nano` et `--pt-lbl` en tête. Deux lignes touchent alors 1 021 sites JS.
     ★★ **La vraie surprise est la répartition** : les deux tiers sont **dans les JS**, en HTML
     généré — un lot qui ne toucherait que `styles.css` ne réglerait qu'un quart du problème.
-    **Lot A : le plancher.** Les 277 sites sous 10 px remontés à 11 px minimum.
+    **Lot A : FAIT par les jetons (§247, 05/10 — choix de Nico sur maquette).** Il reste les tailles écrites en dur sous 12 px.
     ⚠️ **Pas une substitution aveugle** : certains 9 px sont des exposants ou des unités collées à
     un chiffre. **Maquette sur trois écrans d'abord** — accueil ouvrier, session tracteur, registre
     phyto — puis intégration au tableau motif → compte attendu.

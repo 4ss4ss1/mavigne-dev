@@ -1,0 +1,38 @@
+{
+  "lot": "JOURNAL-1",
+  "section": "§248",
+  "base": "3cf9be9fe1be0a0b8653107a88d61c0907c88fea",
+  "inclut": [
+    "TEXTE-A"
+  ],
+  "date": "2026-10-05",
+  "fichiers": {
+    ".mv-base": "37d44766c7051659bffd42d22515d480cba68e376f51f760f60bccc2c63608f4",
+    "CLAUDE.md": "7b95df85d6aa0097f1524c9a801d4188e50bb63510897ff478debf7fad65b26e",
+    "audit-perf-ux.md": "71c6891a49871f8fdeb89c1634598209daf54e53265a1040aa28d71300679670",
+    "docs/claude/INDEX.md": "34d9728fcf8b2295b17bd0407ada73e1bd56d872992c8e1530e705d3dea08449",
+    "docs/claude/chantiers-230-279.md": "35195fd6a3cc721a001f82435c1694d0c7bd6dc18ca6653f8251ed67309c92a4",
+    "docs/claude/journal.md": "defe05af6ccfbff5cc315353b9ced04c7f2f529323974f16e90245223d7f9002",
+    "index.html": "504677681428e8c5efccf201f54142a759d58715020e1e6cadfa360f0cd88973",
+    "public/sw.js": "c809eb50244c519da6dfc828223e18c76ceac27e650c18eccc099a76fb17b0b2",
+    "scripts/harnais-claude-md.mjs": "82060d02df79df597396dcec01a5526bfcd62614ced5e1e04d8d5b47e3d50673",
+    "scripts/mv-harnais-echelle.mjs": "b39fbf1daf313fffe951acb28ddbb3852894d329f3342de16be462f902e40fce",
+    "scripts/mv-harnais-liste.mjs": "a824cb55f5241bd7c340276e831c6095bce05890c1e7fa24e7ad6d8b18c426d1",
+    "scripts/mv-harnais-typo.mjs": "4bb7aadb4df487615bfb8e291956c534eb49632d6bd953652a524e1fd6361d50",
+    "scripts/typo-baseline.json": "9215613903692d96bd6d540534870a08cb2424803192a6d831e3145bdac4da16",
+    "src/admin-gt.js": "8c2048110c2bf16733236c3dc9c241ee132718b6f9efe4657f2ae882cda66cca",
+    "src/app.js": "e7193a7ce32c46e8175985ab013d2ee4dd2b85568302d1c0162d2f2521d78f68",
+    "src/cave.js": "a140462efd9af4604744b8e8929df1107160748c62b5a377fea9606bb979a07e",
+    "src/onboarding.js": "c53446925eacd6c0116f600bb899707e73fcac73feb127c7c36ded4a05bc2aee",
+    "src/phyto.js": "b5f38e06dd057a72e56ad4c56c8abde38ee20a0649cfd305a76419a1739b1be3",
+    "src/pilotage.js": "76b5ae8b5f181e791d11ce879007c0e773c7892f75b63c3f4d9c61b4ba400c80",
+    "src/planning.js": "8534c3ff798f6f2cd2f6135e52ec7378b19436d2ab81b4810b5ca52251658e04",
+    "src/reglages.js": "2edeaf293946f40884dba81c1d288824ad46d7230ec1d7b2c527aa1ba98c6cbf",
+    "src/reserve.js": "6b5f9d1de050182afc5617198ced338ba26b35fd2b37b1acfd728cad10f9d725",
+    "src/styles.css": "1ad948fd27b41fac13cb429ea9559c5aa6900bce5df80a0adcc6e84510a1f8c4",
+    "src/tracteur.js": "9ec2b89b5604597a94732e2e40e2bb79f1d2c21e88e07a86609fa0107f707ce4",
+    "src/utils.js": "b51a584ed32b4509a60ad7d1b2f9ef888ef6b28cc1ba8b0df7a373733ffbdc2e",
+    "scripts/mv-harnais-journal1.mjs": "16cae40d5a2ec0f974129f4d86aa4d99ca99f7d7bad16840e0445ee5d19770d8",
+    "scripts/mv-harnais-textea.mjs": "f2d3ab44d9ed6f567bb26f793fd5d0de4f6718ba420243185756f1aebc91fbc0"
+  }
+}

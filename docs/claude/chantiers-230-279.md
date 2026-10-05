@@ -712,3 +712,116 @@ Annoncé de travers en fin du §245 (« une sauvegarde automatique ») et corrig
 ① Le vrai remède reste **DONNEES-1** (découper les documents) : TAILLE-2 prévient et rend le blocage lisible, il ne l'empêche
 pas. ② Le coffre garde le document ENTIER au moment du refus (STASH-1) : il ne repartira pas tant que le document est trop gros.
 ③ Suite du plan : la maquette TEXTE-A, JOURNAL-1, GT-1.
+
+---
+
+## 247. ★★★ TEXTE-A — LES PETITS TEXTES RELEVÉS, CHOISIS SUR MAQUETTE (05/10 — `src/styles.css` · `src/tracteur.js` · `index.html` · `src/*.js` (tailles à 12 / 11,5 px → jetons) · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `scripts/mv-harnais-textea.mjs` (neuf) · `scripts/mv-harnais-typo.mjs` · `scripts/mv-harnais-echelle.mjs` · `scripts/typo-baseline.json` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `audit-perf-ux.md` · `lots/TEXTE-A.json` · **APP 8.21 → 8.22, SW 8.96 → 8.97**, base `3cf9be9`)
+
+### 247a. La maquette, puis la décision
+
+Nico voulait voir avant de choisir (04/10). Maquette publiée (artefact claude.ai) : trois écrans RÉELS de l'appli —
+accueil ouvrier, session tracteur, registre phyto — capturés au format téléphone dans Chromium (390 × 844, données fictives),
+chacun en trois états basculables au même endroit : **avant**, **jetons** (les trois crans relevés), **plancher** (en plus,
+tout texte encore sous 12 px forcé à 12). Comptés à l'écran, textes sous 12 px : accueil 26 → 15 → 0, tracteur 40 → 13 → 0,
+registre 51 → 13 → 0 ; sous 10 px : 0 dès les jetons. Constat de la maquette : dès les jetons, la ligne des parcelles du
+registre poussait la flèche à la ligne. Décision de Nico : **« jetons »**.
+
+### 247b. Ce qui change
+
+- **Les trois crans** (`:root` de styles.css) : `--pt-micro` 11 → **12**, `--pt-lbl` 10,5 → **11,5**, `--pt-nano` 9,5 → **11**.
+  Plus rien sous 11 px par les jetons (1 396 emplois).
+- **Les replis gardent les anciennes valeurs, EXPRÈS** : `var(--pt-micro,11px)` etc. ne servent que là où `:root` n'existe pas —
+  les fenêtres d'impression que construisent les modules. L'impression n'a pas été jugée sur maquette : elle ne bouge pas.
+  **Seule exception : `pilotage.js`** (qui n'imprime rien) — `mv-harnais-echelle` y exige que le repli redise la valeur du
+  pas : ses 76 replis passent à 12 / 11,5 / 11.
+- **416 tailles déjà écrites à 12 et 11,5 px** (310 + 106 dans src, 84 dans index.html) passent par `var(--pt-micro,12px)` et
+  `var(--pt-lbl,11.5px)` : MÊME rendu, à l'écran comme à l'impression (le repli porte leur valeur). Imposé par la règle B du
+  harnais typographique (aucune taille égale à un cran écrite en dur), et utile au futur réglage « Taille du texte » (lot B),
+  qui les entraînera avec l'échelle.
+- **Registre phyto** (`renderPhytoTrac`, tracteur.js) : la ligne parcelles · opérateur · flèche ne passe plus à la ligne (plus de
+  `flex-wrap`) ; les noms se raccourcissent par points de suspension, le « +N » reste à part et toujours lisible
+  (`_phParcParts` : noms / plus — mis bout à bout, le même texte qu'avant ; l'ancienne `_phParcTxt`, sans autre appelant, est
+  retirée : le preflight refuse une fonction sans appelant, §25.11).
+- `WHATS_NEW` 8.22, niveau 0. Rien au guide (il ne parle pas des tailles).
+
+### 247c. Mesuré
+
+- **Chromium, build du lot** (mêmes trois écrans) : textes sous 12 px à l'écran — accueil 15, tracteur 13, registre 14 ; **sous
+  10 px : 0** partout. Registre : 19 lignes, écart entre la flèche et les parcelles **0,0 px**, aucune ligne qui déborde, « +N »
+  visible 19/19, texte à 12 px.
+- **`mv-harnais-textea`** (neuf) : **13 assertions** — les crans, aucune redéfinition qui les écraserait, le barème du harnais
+  typographique, la vraie `_phParcParts`, la vraie carte `renderPhytoTrac`. **7/7 contre-épreuves.**
+- **`mv-harnais-typo`** : barème et injection alignés sur les nouveaux crans ; vert, contre-épreuve 3/4 assertions sur 4 défauts.
+  px en dur : 1 932 → **1 432** (−500). Cliquet regravé pour garder ce gain.
+
+### 247e. Trouvé en route
+
+- **Deux harnais portaient l'ancien barème** (`mv-harnais-typo`, `mv-harnais-echelle`) : alignés. Le second exige « chaque
+  repli redit la valeur du pas » — j'ai d'abord aligné les ~1 400 replis de TOUS les modules, avant de lire que sa règle ne
+  porte que sur `pilotage.js`. Conséquence évitée : les impressions auraient grossi, et le **relevé d'heures** (A4 de hauteur
+  fixe, `overflow:hidden`) aurait pu perdre « Fait le… » et les signatures en bas de page. Replis remis partout, sauf
+  Pilotage. ★ Leçon : lire la PORTÉE d'une règle de harnais (quels fichiers il lit) avant de l'appliquer à tout le dépôt.
+- **Le preflight refuse une fonction sans appelant** (§25.11) : `_phParcTxt`, remplacée par `_phParcParts`, retirée.
+
+### 247d. Ouvert
+
+① **Les tailles écrites en dur sous 12 px** restent (option « plancher » écartée) : badges de type à 10 px, quelques mentions.
+② **Lot B, le réglage « Taille du texte »** (Normal · Grand · Très grand, à côté de « Plein soleil ») : backlog 36.
+③ **Sans rapport avec la taille, vu sur la maquette** : sur l'accueil à 390 px, quand la météo s'affiche, le bouton « Aide » est
+déjà poussé au bord de l'écran. ④ `.val-toggle` à 44 px de haut (cible tactile, prévu au plan) : pas fait, pas montré sur maquette.
+⑤ Suite du plan : JOURNAL-1, GT-1.
+
+---
+
+## 248. ★★ JOURNAL-1 — LE JOURNAL NE MET EN PAGE QUE LES JOURS QUI SE VOIENT (05/10 — `src/styles.css` · `src/app.js` (renderJournalList) · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-journal1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `audit-perf-ux.md` · `lots/JOURNAL-1.json` · **APP 8.22 → 8.23, SW 8.97 → 8.98**, base `3cf9be9`, **zip cumulatif avec TEXTE-A non poussé**)
+
+### 248a. Le défaut (mesuré au §241)
+
+Le Journal calculait vite (≈ 50 ms) mais mettait 350 à 590 ms à s'afficher : la mise en page des 200 lignes de la première
+page (la pagination par 200 existait déjà, avec « Voir plus »). Aucune règle `content-visibility` dans l'appli.
+
+### 248b. Ce qui change
+
+- **`.dgroup{content-visibility:auto}`** : un jour (en-tête + lignes) hors écran n'est ni mis en page ni peint. Essais
+  comparés dans Chromium (×4, 200 lignes) : rien 289 ms · contenu des cartes seul 181 · ligne par ligne 169 · **jour par jour
+  94** — retenu.
+- **La place réservée** : `contain-intrinsic-size:auto` + une hauteur PAR JOUR posée par `renderJournalList`
+  (`52 + lignes × 96` px, d'après les hauteurs mesurées : en-tête 16 + 20 + 10, ligne ≈ 90 + 6, rembourrage du bas) — la page
+  garde à peu près sa longueur (24 419 → 25 599 px tant que les jours lointains ne sont pas dessinés) et le défilement ne saute
+  pas ; `auto` : une fois dessiné, la vraie taille fait foi.
+- **La règle CONTIENT le groupe, deux effets compensés** : ① les ombres des cartes (`--shadow-sm`, 8 px de flou) seraient
+  coupées au bord du groupe → rembourrage 8 px sur les côtés, 12 px en bas, rendu par des marges négatives ; ② les marges ne
+  traversent plus le groupe (16 px sur l'en-tête restent dedans) → la dernière ligne d'un jour perd sa marge (`.dgroup>.jitem:
+  last-child`, le rembourrage la remplace), marge basse −8 px (20 px entre deux jours), `:last-of-type` −4 px (20 px avant
+  « Voir plus »), `:last-child` 8 px (36 px en fin de liste). **Toutes ces valeurs sont sur l'échelle d'espacement** (`--e-*`) :
+  une première version à 10 / 6 / 2 px faisait monter le cliquet de `mv-harnais-echelle` (1 006 > 1 003), refaite.
+- `WHATS_NEW` 8.23, niveau 0.
+
+### 248c. Mesuré
+
+- **Chromium, processeur ×4, médiane de 5, avant et après alternés dans la même séance** — `goTo('journal')` jusqu'à l'image :
+  journal de 1 000 entrées **336 → 122 ms** (séance calme), **499–534 → 142–145 ms** (séance chargée) ; de 15 000 **349 → 140 ms**,
+  **460 → 227 ms** (chargée). Objectif du plan (< 150 ms) tenu à 1 000 entrées ; à 15 000, le reste est le CALCUL (filtrer et
+  grouper 15 000 entrées, 47–59 ms) — ce que DONNEES-1 traitera en découpant par campagne.
+- **Au pixel près**, mêmes données, mêmes contenus à l'écran (haut, milieu, fin avec « Voir plus ») : haut identique ; milieu à
+  1/255, fin à **3/255 au plus** par canal (la queue de l'ombre au-delà de 8 px, invisible). Écarts mesurés : 20 px entre deux
+  jours (7 sur 7), 20 px avant « Voir plus », 36 px en fin de liste sans bouton — identiques avant / après.
+- **`mv-harnais-journal1`** (neuf) : **10 assertions** qui relisent le CSS RÉEL (`.dgroup`, `.jitem`, `.dhead`, `.j-load-more-btn`,
+  `.timeline`, `--shadow-sm`) et refont les comptes (fusion des marges CSS 2.1 §8.3.1) — écarts, place des ombres, valeurs sur
+  l'échelle, réserve par jour. **9/9 contre-épreuves**, dont : la marge de la dernière ligne réapparaît ; une valeur hors
+  échelle revient.
+
+### 248e. Trouvé en route
+
+- **Le cliquet d'espacement** (`mv-harnais-echelle`) : 10, 6 et 2 px ne sont pas sur l'échelle (2, 4, 8, 12, 16…) — et les
+  écarts exacts demandaient un total « impair au pas de 4 » à cause des 6 px de marge des lignes. Solution : retirer la marge de
+  la DERNIÈRE ligne d'un jour, que le rembourrage remplace ; tout retombe sur l'échelle.
+- **Le preflight C24c** refuse une substitution `${…}` non protégée dans un gabarit HTML : la réserve passe par `Number(…)`.
+- ★ Méthode : la comparaison au pixel doit viser le MÊME contenu (aligner sur l'en-tête du jour, pas sur la boîte du groupe,
+  dont le bord bouge de 16 px quand la marge de l'en-tête reste dedans) — sinon on compare deux défilements.
+
+### 248d. Ouvert
+
+① `content-visibility` : Safari 18 et plus (sur un iPhone plus ancien, la règle est ignorée — rien ne casse, rien ne gagne).
+② Les autres longues listes (registre phyto, sessions tracteur) n'en ont pas besoin aujourd'hui (19 et 12 cartes) ; même
+recette le jour où elles grossissent. ③ Suite du plan : GT-1.

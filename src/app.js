@@ -1587,7 +1587,7 @@ function _initLoginDemo(){
     '<div style="text-align:center;margin-bottom:20px">'
     +'<div style="font-size:28px;margin-bottom:8px">&#127815;</div>'
     +'<div style="font-family:Cormorant Garamond,serif;font-size:18px;font-weight:600;color:var(--or);margin-bottom:4px">Accès démo</div>'
-    +'<div style="font-size:12px;color:var(--texte-doux);line-height:1.5">Entrez le code reçu par téléphone</div>'
+    +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5">Entrez le code reçu par téléphone</div>'
     +'</div>'
     +'<div style="margin-bottom:14px">'
     +'<div style="font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-doux);margin-bottom:6px;letter-spacing:.06em">CODE D&#39;ACCÈS</div>'
@@ -1598,7 +1598,7 @@ function _initLoginDemo(){
     +' oninput="this.value=this.value.toUpperCase()"'
     +' onkeydown="if(event.keyCode===13)confirmDemoCode()">'
     +'</div>'
-    +'<div id="demo-code-error" style="display:none;background:rgba(224,112,96,0.12);border:1px solid rgba(224,112,96,0.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#E07060;text-align:center"></div>'
+    +'<div id="demo-code-error" style="display:none;background:rgba(224,112,96,0.12);border:1px solid rgba(224,112,96,0.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:var(--pt-micro,12px);color:#E07060;text-align:center"></div>'
     +'<button onclick="confirmDemoCode()" style="width:100%;background:var(--or);color:#0C1A0A;border:none;border-radius:12px;padding:13px;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Accéder à la démo</button>'
     +'<div style="text-align:center;margin-top:14px;font-size:var(--pt-micro,11px);color:var(--texte-doux)">Code valable 30 jours &middot; <a href="tel:+33699424859" style="color:var(--or);text-decoration:none">06 99 42 48 59</a></div>';
 }
@@ -1684,7 +1684,7 @@ function _showDemoProfiles(){
   profiles.innerHTML =
     '<div style="text-align:center;margin-bottom:18px">'
     +'<div style="font-size:var(--pt-base,14px);font-weight:500;color:var(--or)">Bienvenue sur la démo</div>'
-    +'<div style="font-size:12px;color:var(--texte-doux);margin-top:4px">Choisissez un rôle à explorer</div>'
+    +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:4px">Choisissez un rôle à explorer</div>'
     +'</div>'
     +'<div id="_dpl"></div>'
     +'<div style="text-align:center;margin-top:10px;font-size:10px;color:rgba(255,255,255,0.15)">Essai 15 jours</div>';
@@ -2361,9 +2361,9 @@ var _mvtCss = `
 .mvtwc-grid{padding:13px 22px 6px;display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .mvtwc-cap{display:flex;align-items:flex-start;gap:9px;background:#fff;border:1px solid #E8E0D2;border-radius:12px;padding:10px 11px}
 .mvtwc-cap .ci{font-size:var(--pt-sm,17px);line-height:1.1;flex-shrink:0}
-.mvtwc-cap .ct{font-size:11.5px;font-weight:600;line-height:1.25;color:#2A2521}
+.mvtwc-cap .ct{font-size:var(--pt-lbl,11.5px);font-weight:600;line-height:1.25;color:#2A2521}
 .mvtwc-foot{padding:14px 22px calc(18px + env(safe-area-inset-bottom));position:sticky;bottom:0;background:linear-gradient(to top,#F1EADC 75%,transparent)}
-.mvtwc-note{text-align:center;font-size:11.5px;color:#6a5f52;margin-bottom:11px}
+.mvtwc-note{text-align:center;font-size:var(--pt-lbl,11.5px);color:#6a5f52;margin-bottom:11px}
 .mvtwc-go{display:block;width:100%;border:0;border-radius:14px;padding:15px;cursor:pointer;font-family:inherit;font-weight:600;font-size:15px;background:linear-gradient(135deg,#2a2118,#14110D);color:#f3ecdf;box-shadow:0 8px 22px rgba(20,17,13,.3)}
 .mvtwc-skip{display:block;width:100%;background:none;border:0;margin-top:8px;cursor:pointer;font-family:inherit;font-size:var(--pt-txt,12.5px);color:#6a5f52;text-decoration:underline;text-underline-offset:3px}
 #mvt{position:fixed;inset:0;z-index:100000;pointer-events:none;font-family:'Outfit',sans-serif}
@@ -2378,7 +2378,7 @@ var _mvtCss = `
 .mvt-btx{font-size:13.5px;line-height:1.45;margin-top:4px;color:#EFE6D2}
 .mvt-bh{font-size:10px;color:#9C8F79;margin-top:3px;line-height:1.35}
 .mvt-brow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:9px;min-height:34px}
-.mvt-miss{display:inline-flex;align-items:center;gap:7px;background:rgba(201,168,76,.14);border:1px solid rgba(201,168,76,.5);color:#E8C98A;border-radius:999px;padding:6px 12px;font-size:11.5px;font-weight:600}
+.mvt-miss{display:inline-flex;align-items:center;gap:7px;background:rgba(201,168,76,.14);border:1px solid rgba(201,168,76,.5);color:#E8C98A;border-radius:999px;padding:6px 12px;font-size:var(--pt-lbl,11.5px);font-weight:600}
 .mvt-hand{font-size:15px;animation:mvttap 1.1s ease-in-out infinite}
 @keyframes mvttap{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 .mvt-bnext{border:0;border-radius:11px;padding:9px 15px;cursor:pointer;font-family:inherit;font-weight:600;font-size:var(--pt-txt,12.5px);background:#D8BC72;color:#241D12;display:none}
@@ -2390,7 +2390,7 @@ var _mvtCss = `
 .mvt-chip{position:fixed;top:calc(10px + env(safe-area-inset-top));right:12px;z-index:100003;display:none;align-items:baseline;gap:7px;background:linear-gradient(150deg,#1C1813,#14110D);color:#F5EEDF;border-radius:999px;padding:7px 13px 7px 11px;border:1px solid rgba(201,168,76,.4);box-shadow:0 8px 20px rgba(20,17,13,.4);pointer-events:none;transition:transform .18s}
 .mvt-chip.on{display:inline-flex}
 .mvt-chip.zap{transform:scale(1.06)}
-.mvt-chip .ic{font-size:12px}
+.mvt-chip .ic{font-size:var(--pt-micro,12px)}
 .mvt-chip .v{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;color:#D8BC72;line-height:1;min-width:50px;text-align:right}
 .mvt-chip .l{font-size:9px;letter-spacing:.4px;text-transform:uppercase;color:#9C8F79}
 .mvt-fly{position:fixed;z-index:100004;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:18px;color:#3D6B27;background:#FBFAF6;border:1px solid #E8E0D2;border-radius:999px;padding:4px 11px;box-shadow:0 6px 16px rgba(20,17,13,.3);transition:transform .75s cubic-bezier(.3,.7,.3,1),opacity .75s;pointer-events:none}
@@ -2409,7 +2409,7 @@ var _mvtCss = `
 .mvt-add-eur{margin-top:13px;font-size:var(--pt-txt,12.5px);color:#D8CDB8}
 .mvt-add-plus{margin:16px auto 0;max-width:300px;text-align:left;border-top:1px solid rgba(245,238,223,.14);padding-top:12px}
 .mvt-add-plus .ph{font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#C2A14D}
-.mvt-add-pr{display:flex;gap:9px;margin-top:9px;font-size:12px;line-height:1.5;color:#D8CDB8}
+.mvt-add-pr{display:flex;gap:9px;margin-top:9px;font-size:var(--pt-micro,12px);line-height:1.5;color:#D8CDB8}
 .mvt-add-pr .pi{flex-shrink:0}
 .mvt-add-pr b{color:#F5EEDF;font-weight:600}
 .mvt-add-inst{margin:13px auto 0;max-width:300px;background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.42);border-radius:13px;padding:11px 13px;font-size:var(--pt-txt,12.5px);line-height:1.5;color:#EFE6D2}
@@ -2436,9 +2436,9 @@ var _mvtCss = `
 .mvt-ch-ic{font-size:22px;flex-shrink:0;width:30px;text-align:center}
 .mvt-ch-tx{flex:1;min-width:0}
 .mvt-ch-tx b{display:block;font-size:13.5px;font-weight:600;color:#2A2521;line-height:1.2}
-.mvt-ch-tx i{display:block;font-size:11.5px;font-style:normal;color:#76695a;line-height:1.35;margin-top:2px}
+.mvt-ch-tx i{display:block;font-size:var(--pt-lbl,11.5px);font-style:normal;color:#76695a;line-height:1.35;margin-top:2px}
 .mvt-ch-go{font-size:var(--pt-md,20px);color:#C2871E;flex-shrink:0;font-weight:600}
-.mvt-menu-note{font-size:11.5px;color:#6a5f52;text-align:center;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.28);border-radius:11px;padding:9px 11px;margin:8px 0 12px;line-height:1.4}
+.mvt-menu-note{font-size:var(--pt-lbl,11.5px);color:#6a5f52;text-align:center;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.28);border-radius:11px;padding:9px 11px;margin:8px 0 12px;line-height:1.4}
 .mvt-chbar{position:fixed;left:0;right:0;bottom:0;z-index:100006;background:linear-gradient(180deg,#1C1813,#14110D);border-top:2px solid transparent;border-image:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27) 1;box-shadow:0 -10px 30px rgba(10,8,5,.5);padding:11px 14px calc(11px + env(safe-area-inset-bottom));font-family:'Outfit',sans-serif}
 .mvt-chbar-in{display:flex;align-items:center;gap:12px;max-width:560px;margin:0 auto}
 .mvt-chbar-tx{flex:1;min-width:0;color:#f3ecdf}
@@ -4536,7 +4536,7 @@ async function fetchMeteo(){
       const gelIdx=_gelIdx;
       {
         const jrs=['ce soir','demain','après-demain','dans 3 jours','dans 4 jours'];
-        const alertDiv=document.getElementById('home-gel-alert')||(()=>{const el=document.createElement('div');el.id='home-gel-alert';el.style.cssText='margin:8px 16px 0;background:#FFF8E8;border:1px solid #F0D080;border-radius:12px;padding:9px 14px;font-size:12px;color:#7A5C10;display:flex;align-items:center;gap:8px;';const card=document.getElementById('home-stat-card');if(card&&card.parentNode)card.parentNode.insertBefore(el,card);return el;})();
+        const alertDiv=document.getElementById('home-gel-alert')||(()=>{const el=document.createElement('div');el.id='home-gel-alert';el.style.cssText='margin:8px 16px 0;background:#FFF8E8;border:1px solid #F0D080;border-radius:12px;padding:9px 14px;font-size:var(--pt-micro,12px);color:#7A5C10;display:flex;align-items:center;gap:8px;';const card=document.getElementById('home-stat-card');if(card&&card.parentNode)card.parentNode.insertBefore(el,card);return el;})();
         alertDiv.innerHTML=`${_mvIcon('alerte',16)} Risque de gel ${jrs[gelIdx]||''} (${Math.round(d.daily.temperature_2m_min[gelIdx])}°C)`;
       }
     }
@@ -5785,15 +5785,15 @@ function _mvReceiptRender(){
     var when=at?(at.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})+' \u00e0 '+at.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})):'\u2014';
     box.style.display='block';
     box.innerHTML='<div style="font-weight:600;color:var(--vert,#3D6B27);font-size:var(--pt-txt,12.5px);margin-bottom:4px">\u2713 Conditions accept\u00e9es</div>'
-      +'<div style="font-size:12px;color:var(--texte-doux,#726A5E);line-height:1.6">CGU v'+(t.c||'?')+' + DPA v'+(t.d||'?')+' \u00b7 le '+when+(t.r?(' \u00b7 r\u00e9f '+t.r):'')
+      +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux,#726A5E);line-height:1.6">CGU v'+(t.c||'?')+' + DPA v'+(t.d||'?')+' \u00b7 le '+when+(t.r?(' \u00b7 r\u00e9f '+t.r):'')
       // ⚠️ Dans la MÊME ligne (<br>) : un second <div style="font-size:…px"> ajoutait un px en dur (cliquet typo).
       +(dom?('<br>Accept\u00e9es pour le domaine par '+_escHtml((dom.signataire&&dom.signataire.nom)||'?')
         +((dom.signataire&&dom.signataire.fonction)?(' \u2014 '+_escHtml(dom.signataire.fonction)):'')):'')+'</div>';
     var _hasFill=false; try{ _hasFill=!!localStorage.getItem('mv_terms_fill'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvReceiptRender'); }
     if(_hasFill||window._MV_TERMS_FILL){
       box.innerHTML+='<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">'
-        +'<button onclick="window._mvTermsOpenDoc&&_mvTermsOpenDoc(\'dpa\')" style="flex:1;min-width:148px;font-family:\'Outfit\',sans-serif;font-weight:600;font-size:12px;color:var(--vert,#3D6B27);background:var(--bg-card,#FBFAF6);border:1px solid rgba(61,107,39,0.4);border-radius:9px;padding:9px 10px;cursor:pointer">&#128196; DPA sign\u00e9</button>'
-        +'<button onclick="window._mvTermsOpenDoc&&_mvTermsOpenDoc(\'cgv\')" style="flex:1;min-width:148px;font-family:\'Outfit\',sans-serif;font-weight:600;font-size:12px;color:var(--vert,#3D6B27);background:var(--bg-card,#FBFAF6);border:1px solid rgba(61,107,39,0.4);border-radius:9px;padding:9px 10px;cursor:pointer">&#128196; CGU sign\u00e9es</button>'
+        +'<button onclick="window._mvTermsOpenDoc&&_mvTermsOpenDoc(\'dpa\')" style="flex:1;min-width:148px;font-family:\'Outfit\',sans-serif;font-weight:600;font-size:var(--pt-micro,12px);color:var(--vert,#3D6B27);background:var(--bg-card,#FBFAF6);border:1px solid rgba(61,107,39,0.4);border-radius:9px;padding:9px 10px;cursor:pointer">&#128196; DPA sign\u00e9</button>'
+        +'<button onclick="window._mvTermsOpenDoc&&_mvTermsOpenDoc(\'cgv\')" style="flex:1;min-width:148px;font-family:\'Outfit\',sans-serif;font-weight:600;font-size:var(--pt-micro,12px);color:var(--vert,#3D6B27);background:var(--bg-card,#FBFAF6);border:1px solid rgba(61,107,39,0.4);border-radius:9px;padding:9px 10px;cursor:pointer">&#128196; CGU sign\u00e9es</button>'
         +'</div>';
     }
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvReceiptRender#2'); }
@@ -7038,7 +7038,7 @@ function _dmrInjectCss(){
     + '.dmr-tx{flex:1;min-width:0}'
     + '.dmr-t{font-size:var(--pt-base,14px);font-weight:600;color:var(--txt)}'
     + '.dmr-it.done .dmr-t{color:var(--txt-doux,#8A8072);font-weight:500}'
-    + '.dmr-f{font-size:12px;line-height:1.45;color:var(--txt-doux,#8A8072);margin-top:2px}'
+    + '.dmr-f{font-size:var(--pt-micro,12px);line-height:1.45;color:var(--txt-doux,#8A8072);margin-top:2px}'
     + '.dmr-ar{flex:0 0 auto;color:var(--or);font-size:16px;margin-top:1px}'
     + '.dmr-mini{font-size:13px;color:var(--txt-doux,#8A8072);padding:2px 2px 6px}'
     + '.dmr-cons{display:flex;align-items:flex-start;gap:10px;background:var(--or-pale);border:1px solid rgba(184,145,58,0.30);'
@@ -7934,14 +7934,14 @@ function _pvRenderOrdreBar(){
       +'<span style="font-size:var(--pt-sm,17px);flex-shrink:0"></span>'
       +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tournée du domaine · '+_escHtml(t)+'</div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_escHtml(sub)+'</div></div>'
-      +'<button onclick="pOrdreToggle()" style="border:none;background:var(--gris-clair);border-radius:9px;min-height:34px;padding:0 11px;font-size:12px;font-weight:600;color:var(--texte);cursor:pointer;font-family:inherit;flex-shrink:0">Tri normal</button></div>';
+      +'<button onclick="pOrdreToggle()" style="border:none;background:var(--gris-clair);border-radius:9px;min-height:34px;padding:0 11px;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte);cursor:pointer;font-family:inherit;flex-shrink:0">Tri normal</button></div>';
     return;
   }
   // Filtre « Toutes tâches » : une tournée existe mais on ne sait pas laquelle
   // appliquer. On le dit, et on donne l'accès en un tap.
   if(pTacheFilter==='toutes'){
     el.innerHTML='<div style="background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:12px;padding:8px 11px">'
-      +'<div style="font-size:11.5px;color:var(--texte-doux);margin-bottom:6px">Tournée définie pour :</div>'
+      +'<div style="font-size:var(--pt-lbl,11.5px);color:var(--texte-doux);margin-bottom:6px">Tournée définie pour :</div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
       +dispo.map(function(nm){
           return '<button onclick="setPTacheFilter(\''+_escAttr(nm)+'\')" style="border:1px solid var(--or);background:rgba(201,168,76,.12);color:var(--or);border-radius:20px;min-height:34px;padding:0 12px;font-size:var(--pt-txt,12.5px);font-weight:700;cursor:pointer;font-family:inherit">'+_mvIconTache(nm,16)+' '+_escHtml(nm)+'</button>';
@@ -8755,7 +8755,7 @@ function _dpRendInjectCss(){
   var s=document.createElement('style'); s.id='dp-rh-css';
   s.textContent=`
 .dprh-card{margin-top:14px;background:var(--bg-card,#FBFAF6);border:1px solid rgba(138,90,56,.14);border-radius:14px;padding:13px 14px}
-.dprh-head{font-size:12px;font-weight:700;letter-spacing:.02em;color:var(--terre,#8A5A38);display:flex;align-items:center;gap:7px;margin-bottom:11px}
+.dprh-head{font-size:var(--pt-micro,12px);font-weight:700;letter-spacing:.02em;color:var(--terre,#8A5A38);display:flex;align-items:center;gap:7px;margin-bottom:11px}
 .dprh-ico{font-size:15px}
 .dprh-surf{margin-left:auto;font-size:var(--pt-micro,11px);font-weight:500;color:var(--texte-doux,#5F5F5F)}
 .dprh-row{display:flex;align-items:center;gap:9px}
@@ -8769,7 +8769,7 @@ function _dpRendInjectCss(){
 .dprh-d.down{color:#B85A1A}
 .dprh-d.flat{color:var(--texte-doux,#5F5F5F)}
 .dprh-sub2{font-size:var(--pt-lbl,10.5px);color:var(--texte-doux,#5F5F5F);margin:3px 0 12px 55px}
-.dprh-empty{font-size:11.5px;color:var(--texte-doux,#5F5F5F);font-style:italic}
+.dprh-empty{font-size:var(--pt-lbl,11.5px);color:var(--texte-doux,#5F5F5F);font-style:italic}
 `;
   document.head.appendChild(s);
 }
@@ -8954,7 +8954,7 @@ function openDP(nom){
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           ${canEdit?`<button onclick="openNiveauxPanel('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="background:rgba(74,159,200,0.12);border:1px solid rgba(74,159,200,0.3);border-radius:8px;padding:7px 11px;font-size:var(--pt-micro,11px);font-weight:600;color:var(--acier-med);cursor:pointer;white-space:nowrap">${isOn?'✏ Modifier':'↑ Niveaux'}</button>`:''}
           ${canEdit&&stat!=='Non démarré'?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.08);border:1px solid rgba(184,90,26,0.28);border-radius:8px;padding:7px 9px;font-size:var(--pt-micro,11px);font-weight:600;color:#B85A1A;cursor:pointer" title="Annuler">↩</button>`:''}
-          ${canExcl&&!isOn?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:12px;cursor:pointer" title="Désactiver">${_mvIcon('croix',16)}</button>`:''}
+          ${canExcl&&!isOn?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:var(--pt-micro,12px);cursor:pointer" title="Désactiver">${_mvIcon('croix',16)}</button>`:''}
         </div>
       </div>`;
     }
@@ -8970,7 +8970,7 @@ function openDP(nom){
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           ${canEdit?`<button onclick="openPassagesPanel('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="background:rgba(90,156,74,0.1);border:1px solid rgba(90,156,74,0.28);border-radius:8px;padding:7px 11px;font-size:var(--pt-micro,11px);font-weight:600;color:var(--vert);cursor:pointer;white-space:nowrap">${isOn?'✏ Modifier':'▶ Passages'}</button>`:''}
           ${canEdit&&isOn&&isAdmin()?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.12);border:1px solid rgba(184,90,26,0.3);border-radius:8px;padding:7px 9px;font-size:var(--pt-micro,11px);font-weight:600;color:#B85A1A;cursor:pointer" title="Admin : tout annuler">↩</button>`:''}
-          ${canExcl&&!isOn?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:12px;cursor:pointer" title="Désactiver">${_mvIcon('croix',16)}</button>`:''}
+          ${canExcl&&!isOn?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:var(--pt-micro,12px);cursor:pointer" title="Désactiver">${_mvIcon('croix',16)}</button>`:''}
         </div>
       </div>`;
     }
@@ -8983,7 +8983,7 @@ function openDP(nom){
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
         ${canEdit?`<button onclick="tapTacheSimple('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}',this)" style="min-height:44px;padding:6px 11px;border-radius:8px;font-family:inherit;font-size:var(--pt-micro,11px);font-weight:700;cursor:${isOn?'default':'pointer'};border:1.5px solid ${isOn?'rgba(90,156,74,0.38)':isEnCours?'rgba(220,140,30,0.4)':'rgba(255,255,255,0.08)'};background:${isOn?'rgba(90,156,74,0.14)':isEnCours?'rgba(220,140,30,0.13)':'rgba(255,255,255,0.03)'};color:${isOn?'#6AB855':isEnCours?'#DCA030':'var(--texte-doux)'};white-space:nowrap">${isOn?'✓ Validé':isEnCours?'✓ Valider':'▶ Démarrer'}</button>`:`<span class="jst" style="font-size:10px;color:${isOn?'var(--vert)':isEnCours?'var(--or)':'var(--texte-doux)'}">${stat}</span>`}
         ${canEdit&&stat!=='Non démarré'?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.08);border:1px solid rgba(184,90,26,0.28);border-radius:8px;padding:6px 9px;font-size:13px;font-weight:600;color:#B85A1A;cursor:pointer" title="Annuler">↩</button>`:''}
-        ${canExcl&&!isOn&&!isEnCours?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:12px;cursor:pointer" title="Désactiver cette tâche pour cette parcelle">${_mvIcon('croix',16)}</button>`:''}
+        ${canExcl&&!isOn&&!isEnCours?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:var(--pt-micro,12px);cursor:pointer" title="Désactiver cette tâche pour cette parcelle">${_mvIcon('croix',16)}</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -10205,7 +10205,7 @@ function _renderNiveauxModal(){
   var savedDone=_relNivState(p).done;
   var body=document.getElementById('niv-body');
   if(!body)return;
-  var html='<p style="color:var(--texte-doux);font-size:12px;margin:0 0 12px">Tap 1 = commencé · tap 2 = validé (cascade) · ↩ pour annuler</p>';
+  var html='<p style="color:var(--texte-doux);font-size:var(--pt-micro,12px);margin:0 0 12px">Tap 1 = commencé · tap 2 = validé (cascade) · ↩ pour annuler</p>';
   html+='<div style="display:flex;gap:8px;margin-bottom:14px">';
   nivs.forEach(function(niv){
     var l=niv.num;
@@ -10230,11 +10230,11 @@ function _renderNiveauxModal(){
   if(cascadeUp.length>0){
     var topVal=_nivSelDone.slice().sort(function(a,b){return b-a;})[0];
     var skipMsg='N'+topVal+' valid\u00e9 \u2192 N'+cascadeUp.join('+N')+' auto-valid\u00e9'+(cascadeUp.length>1?'s':'');
-    html+='<div style="margin-bottom:10px;padding:9px 12px;border-radius:8px;background:rgba(74,159,200,0.08);border:1px solid rgba(74,159,200,0.22);color:var(--acier-med);font-size:12px;display:flex;gap:8px;align-items:flex-start"><span>&#9889;</span><span>'+skipMsg+'</span></div>';
+    html+='<div style="margin-bottom:10px;padding:9px 12px;border-radius:8px;background:rgba(74,159,200,0.08);border:1px solid rgba(74,159,200,0.22);color:var(--acier-med);font-size:var(--pt-micro,12px);display:flex;gap:8px;align-items:flex-start"><span>&#9889;</span><span>'+skipMsg+'</span></div>';
   }
   // Section override par parcelle
   html+='<div style="border-top:1px solid rgba(255,255,255,0.07);padding-top:14px;margin-top:4px">';
-  html+='<p style="color:var(--texte-doux);font-size:12px;margin:0 0 8px">Niveaux pr\u00e9vus pour cette parcelle :</p>';
+  html+='<p style="color:var(--texte-doux);font-size:var(--pt-micro,12px);margin:0 0 8px">Niveaux pr\u00e9vus pour cette parcelle :</p>';
   for(var _n=1;_n<=3;_n++){
     var _selN=(planNb===_n);
     var _isDef=(_n===planGlobal);
@@ -10393,7 +10393,7 @@ function _renderPassagesModal(){
   }
   html+='</div>';
   html+='<div style="border-top:1px solid rgba(255,255,255,0.07);padding-top:14px">';
-  html+='<p style="color:var(--texte-doux);font-size:12px;margin:0 0 8px">Passages prévus pour cette parcelle :</p>';
+  html+='<p style="color:var(--texte-doux);font-size:var(--pt-micro,12px);margin:0 0 8px">Passages prévus pour cette parcelle :</p>';
   for(var n=1;n<=3;n++){
     var selN=(planNb===n);
     var isDef=(n===planDef);
@@ -10643,7 +10643,7 @@ function initMap(){
     var n=g.parc.length;
     var ic=L.divIcon({className:'',iconSize:[28,28],iconAnchor:[14,14],html:'<div style="width:28px;height:28px;border-radius:50%;background:#C9A84C;color:#1C1813;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font:700 13px/1 system-ui,sans-serif;">'+n+'</div>'});
     L.marker([g.lat,g.lng],{icon:ic}).addTo(leafMap)
-      .bindPopup('<b>'+String.fromCodePoint(0x1F4CD)+' '+_escHtml(g.nom)+'</b><br><span style="color:var(--texte-doux,#888);font-size:12px;">'+n+' parcelle'+(n>1?'s':'')+' · commune (repère)</span><br>'+liste);
+      .bindPopup('<b>'+String.fromCodePoint(0x1F4CD)+' '+_escHtml(g.nom)+'</b><br><span style="color:var(--texte-doux,#888);font-size:var(--pt-micro,12px);">'+n+' parcelle'+(n>1?'s':'')+' · commune (repère)</span><br>'+liste);
     _mvFitBnds.push([g.lat,g.lng]);
   });
   // Recadrage : sur le vignoble si on a des points, sinon centre du domaine
@@ -10917,8 +10917,11 @@ function renderJournalList(){
       :`<div class="empty-state"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="6" width="40" height="46" rx="5" fill="none" stroke="var(--texte-doux)" stroke-width="1.8"/><rect x="16" y="18" width="24" height="2.5" rx="1.25" fill="var(--texte-doux)" opacity="0.3"/><rect x="16" y="24" width="17" height="2" rx="1" fill="var(--texte-doux)" opacity="0.2"/><rect x="16" y="30" width="21" height="2" rx="1" fill="var(--texte-doux)" opacity="0.2"/><circle cx="41" cy="41" r="9" fill="var(--fond)" stroke="var(--texte-doux)" stroke-width="1.8"/><line x1="41" y1="36.5" x2="41" y2="45.5" stroke="var(--texte-doux)" stroke-width="2" stroke-linecap="round"/><line x1="36.5" y1="41" x2="45.5" y2="41" stroke="var(--texte-doux)" stroke-width="2" stroke-linecap="round"/></svg></div><div class="et">Journal vide</div><div class="ed">Aucun travail enregistré pour cette saison. Les entrées apparaîtront ici au fil des journées.</div>${canWrite()?'<button class="empty-cta-v" onclick="openOv(\'ovJournalEntry\')">+ Ajouter un travail</button>':''}</div>`;
     return;
   }
+  // ★★ JOURNAL-1 (§248) — un jour hors écran n'est pas mis en page (content-visibility, styles.css) : sa place est RÉSERVÉE
+  //   à sa vraie hauteur estimée (en-tête 16 + 20 + 10, une ligne ≈ 90 + 6, rembourrage du bas), pour que la page garde sa
+  //   longueur et que le défilement ne saute pas quand les jours se dessinent. `auto` : une fois dessiné, la vraie taille fait foi.
   tl.innerHTML=Object.entries(grouped).map(([date,items])=>`
-    <div class="dgroup">
+    <div class="dgroup" style="contain-intrinsic-size:auto ${Number(52+items.length*96)}px">
       <div class="dhead"><div class="dline"></div><div class="dlabel">${fmtDate(date)}</div><div class="dcnt">${items.filter(r=>!r.meteo).length}</div><div class="dline"></div></div>
       ${items.map((r,i)=>{
         const hasNext=i<items.length-1;
@@ -11682,7 +11685,7 @@ function lancerExportEntretienPDF(){
     + '.resume-val{display:block;font-size:18px;font-weight:bold;color:#2A3547;}'
     + '.val-warn{color:#C0392B;}'
     + '.resume-lbl{display:block;font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}'
-    + '.section-sub{font-size:12px;font-weight:bold;color:#2A3547;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E8E4D9;}'
+    + '.section-sub{font-size:var(--pt-micro,12px);font-weight:bold;color:#2A3547;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E8E4D9;}'
     + '.fiche-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;overflow:hidden;break-inside:avoid;}'
     + '.fiche-bloc.has-anomalie{border-color:#F5B8B4;}'
     + '.fiche-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#F9F8F5;border-bottom:1px solid #E0DDD5;}'
@@ -13282,7 +13285,7 @@ tbody tr:nth-child(even){background:var(--bg-card)}
 .ent-date .d{font-size:15px;font-weight:800;line-height:1;color:var(--cave)}
 .ent-date .m{font-size:8.5px;text-transform:uppercase;color:var(--texte-doux);font-weight:600;margin-top:1px}
 .ent-body{flex:1}
-.ent-top{font-size:11.5px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ent-top{font-size:var(--pt-lbl,11.5px);font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .ent-checks{margin-top:4px;display:flex;gap:5px;flex-wrap:wrap}
 .ent-ck{font-size:9px;padding:1.5px 6px;border-radius:5px;background:var(--ok-bg);color:var(--ok);font-weight:600}
 .ent-ck.off{background:var(--ligne-2);color:#b3a89a;text-decoration:line-through}
@@ -13293,7 +13296,7 @@ tbody tr:nth-child(even){background:var(--bg-card)}
 .inc-item{background:var(--bg-card);border:1px solid var(--ligne);border-radius:0 9px 9px 0;padding:10px 13px;margin-bottom:8px;display:flex;justify-content:space-between;gap:12px;align-items:center}
 .inc-item.open{border-left:3px solid var(--warn);background:#FDF7EE}
 .inc-l .who{font-size:9px;color:var(--texte-doux);font-weight:600}
-.inc-l .motif{font-size:12px;font-weight:800;color:var(--cave);margin:2px 0}
+.inc-l .motif{font-size:var(--pt-micro,12px);font-weight:800;color:var(--cave);margin:2px 0}
 .inc-l .meta{font-size:var(--pt-nano,9.5px);color:#7c7264}
 .inc-r{flex-shrink:0;text-align:center;border-radius:8px;padding:6px 11px;font-weight:800;font-size:9px}
 .inc-r.done{background:var(--ok-bg);color:var(--ok)}
@@ -13327,7 +13330,7 @@ tbody tr:nth-child(even){background:var(--bg-card)}
 .ouv .av{width:26px;height:26px;border-radius:50%;color:#fff;font-size:var(--pt-micro,11px);font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 5px}
 .ouv .nm{font-size:var(--pt-nano,9.5px);font-weight:700}
 .ouv .hh{font-size:8.5px;color:var(--texte-doux);margin:3px 0}
-.ouv .etpv{font-size:12px;font-weight:800;color:var(--vert);border-top:1px solid var(--ligne-2);padding-top:4px;margin-top:3px}
+.ouv .etpv{font-size:var(--pt-micro,12px);font-weight:800;color:var(--vert);border-top:1px solid var(--ligne-2);padding-top:4px;margin-top:3px}
 .hs-band{background:linear-gradient(180deg,#F3EEE4,#EFE7D9);border:1px solid #E5DAC7;border-radius:10px;padding:11px 15px;margin-top:11px;display:flex;align-items:center;gap:14px}
 .hs-band .hs-v{font-size:24px;font-weight:800;color:var(--bordeaux)}
 .hs-band .hs-t b{font-weight:700}
@@ -13336,7 +13339,7 @@ tbody tr:nth-child(even){background:var(--bg-card)}
 .cave-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .cave-op{background:var(--bg-card);border:1px solid var(--ligne);border-radius:9px;padding:9px 12px;display:flex;gap:10px;align-items:center}
 .cave-op .ic{font-size:18px}
-.cave-op .t{font-size:11.5px;font-weight:700}
+.cave-op .t{font-size:var(--pt-lbl,11.5px);font-weight:700}
 .cave-op .s{font-size:var(--pt-nano,9.5px);color:var(--texte-doux)}
 /* ── Signatures + credit ── */
 .sig-row{display:flex;gap:50px;margin-top:34px}
@@ -13624,7 +13627,7 @@ function exportRapportSaison(seasonNom){
         +'<div style="font-size:var(--pt-micro,11px);opacity:.82;margin-top:2px">Pr\u00e9sence de l\u2019\u00e9quipe sur la saison ('+tag+')'+((worked>0)?(' \u00b7 dont '+f0(worked)+' h travaill\u00e9es'):'')+'</div></div>'
         +'<div style="margin-left:auto;text-align:right"><div style="font-size:18px;font-weight:800">'+etpEquipe+' ETP</div><div style="font-size:9px;opacity:.7;text-transform:uppercase;letter-spacing:.5px">\u00e9quipe</div></div></div>';
       var _seg=function(w,grad,txt){ return (w>0.5)?('<div style="width:'+w+'%;background:'+grad+';display:flex;align-items:center;justify-content:center;font-size:var(--pt-micro,11px);font-weight:700;color:#fff;white-space:nowrap;overflow:hidden">'+txt+'</div>'):''; };
-      etpBand+='<div style="font-size:12px;font-weight:600;color:var(--texte-doux);margin:16px 0 8px">O\u00f9 va la pr\u00e9sence</div>'
+      etpBand+='<div style="font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux);margin:16px 0 8px">O\u00f9 va la pr\u00e9sence</div>'
         +'<div style="display:flex;height:32px;border-radius:9px;overflow:hidden;border:1px solid var(--ligne)">'
         +_seg(wV,'linear-gradient(180deg,#5C8A3A,#3D6B27)','Vigne \u00b7 '+f0(vigneH)+' h')
         +_seg(wT,'linear-gradient(180deg,#6FB6D6,#4A9FC8)','Tracteur \u00b7 '+f0(tractH)+' h')
@@ -13640,11 +13643,11 @@ function exportRapportSaison(seasonNom){
       etpBand+='<div style="display:grid;grid-template-columns:1.3fr 1fr;gap:12px;margin-top:18px">'
         +'<div style="border:1px solid var(--ligne);border-radius:12px;padding:14px 16px;background:#fff">'
         +'<div style="font-size:var(--pt-micro,11px);font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--texte-doux)">Travaux vigne \u2014 avancement</div>'
-        +'<div style="display:flex;align-items:baseline;gap:9px;margin-top:8px"><span style="font-family:\'Cormorant Garamond\',serif;font-size:30px;font-weight:700;color:#3D6B27">'+_vpct+'\u00a0%</span><span style="font-size:12px;color:var(--texte-doux)">'+f0(sHd)+' h r\u00e9alis\u00e9es / '+f0(vigneH)+' h au total</span></div>'
+        +'<div style="display:flex;align-items:baseline;gap:9px;margin-top:8px"><span style="font-family:\'Cormorant Garamond\',serif;font-size:30px;font-weight:700;color:#3D6B27">'+_vpct+'\u00a0%</span><span style="font-size:var(--pt-micro,12px);color:var(--texte-doux)">'+f0(sHd)+' h r\u00e9alis\u00e9es / '+f0(vigneH)+' h au total</span></div>'
         +'<div style="height:9px;background:var(--ligne);border-radius:6px;overflow:hidden;margin-top:10px"><i style="display:block;height:100%;width:'+_vpct+'%;background:linear-gradient(90deg,#5C8A3A,#3D6B27);border-radius:6px"></i></div></div>'
         +'<div style="border:1px solid rgba(61,107,39,.22);border-radius:12px;padding:14px;background:linear-gradient(135deg,rgba(61,107,39,.08),rgba(194,135,30,.08));display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">'
         +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:38px;font-weight:700;color:#3D6B27;line-height:1">'+_etpS(vigneH)+'<span style="font-size:15px;color:#8A5A38"> ETP</span></div>'
-        +'<div style="font-size:12px;font-weight:600;margin-top:4px">ETP vigne</div><div style="font-size:10px;color:var(--texte-doux);margin-top:3px">pour les seuls travaux vigne</div></div></div>';
+        +'<div style="font-size:var(--pt-micro,12px);font-weight:600;margin-top:4px">ETP vigne</div><div style="font-size:10px;color:var(--texte-doux);margin-top:3px">pour les seuls travaux vigne</div></div></div>';
     } else {
       var hDues=Math.round(presPrev), hFaites=Math.round(worked), ecart=hFaites-hDues;
       var etpVf=hDues>0?(hFaites/hDues).toFixed(2):'\u2014';
