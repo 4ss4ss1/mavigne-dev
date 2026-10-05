@@ -882,3 +882,60 @@ produit aussi hors ligne chez Nico. ③ Le code de connexion GUERETTECH (`confir
 commun (onboarding.js, quelques Ko) — inatteignable depuis l'appli des clients ; le sortir aussi est possible plus tard.
 ④ Hors `npm run check` et déjà en échec avant ce lot : la contre-épreuve « la fiche Pilotage promet à nouveau qu'on n'y écrit
 rien » de `mv-harnais-regl-module --contre`. ⑤ Restent du plan : DONNEES-1 (une vraie sauvegarde), IDS-1, le lot B de TEXTE-A.
+
+## 250. ★★★ MOTIFS-1 — LES MOTIFS D'ABSENCE NE QUITTENT PLUS L'APPAREIL DE L'ADMIN (05/10 — `functions/planning-vues-calc.js` (neuf) · `functions/planning-vues.js` (neuf) · `functions/claims.js` (gtPlanningVues) · `functions/index.js` · `src/planning-vue.js` (neuf) · `src/firebase.js` · `src/app.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `firestore.rules` · `scripts/mv-harnais-motifs1.mjs` (neuf) · `scripts/mv-harnais-rules.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `guide/13-donnees.html` · `docs/claude/modules.md` · `.mv-base` · `lots/MOTIFS-1.json` · **APP 8.23 → 8.24, SW 8.99 → 9.00**, base `986a76d`)
+
+### 250a. La demande, et ce qu'elle a découvert
+
+Nico, 05/10 : les salariés doivent voir le planning du mois de leurs collègues (présent / absent), en lecture seule — **sans les
+motifs**. Maquette « Planning — vue salarié » faite, puis « go ». En la préparant, un constat mesuré : le planning COMPLET (« arrêt de
+travail », « absence injustifiée », commentaires), les heures sup et les acomptes partaient déjà sur le téléphone de CHAQUE membre —
+écoute temps réel (`FB_REALTIME`) et copie locale (`_mvSnapPayload`). Les règles le disaient « assumé, l'app en a besoin ». L'écran ne
+le montrait pas ; le téléphone le détenait. Nico : « il ne faut pas que les salariés voient les motifs d'absence de leurs collègues »
+→ ce lot d'abord, la vue d'équipe ensuite.
+
+### 250b. Ce qui change
+
+- **Serveur.** Deux déclencheurs Firestore — les premiers du projet (base eur3, fonctions europe-west1 : couple supporté par Eventarc) —
+  sur `{coll}/planning_entries` et `{coll}/membres`, fabriquent `planning_equipe` (l'équipe sans motif) et `planning_moi_<uid>` (les jours
+  complets d'un membre qui a un compte). Règle pure dans `planning-vues-calc.js`, en **liste blanche** : congé, récup, absence d'une
+  journée → `{absent:true, motif:'autre'}` ; retard, absence partielle, horaire modifié, chaleur, journée réduite → rien (jour au modèle :
+  présent) ; échange / extra → son horaire ; effectif d'une équipe collective → gardé. Une transaction relit le planning ; seules les vues
+  qui changent sont réécrites ; **rien n'est recréé** quand les membres ou le planning n'existent plus (gtDeleteTenant efface document par
+  document, et chaque effacement réveille un déclencheur). Rattrapage GT : `gtPlanningVues` (claims.js), par domaine ou pour tous.
+- **Règles.** `isAdminReadDoc` = `paie` + les trois documents du planning ; un membre lit `planning_equipe` et SA vue
+  (`'planning_moi_' + request.auth.uid`), l'admin les lit toutes ; `isVuePlanning` : aucune écriture client des vues (règle 3).
+- **Client.** `src/planning-vue.js` (pur) : `planVueComplete` (admin, GUERETTECH, préparation, démo — égal à `deriveAdm` sur les 32
+  combinaisons), `planComposer`, `planGarderLesMiens`. `firebase.js` : `_mvClesLues` (relecture ET écoute : les vues à la place des
+  trois documents), `_mvPlanRecevoir` (crochet en tête d'`applyFbData` : les vues se COMPOSENT en `planning_entries`, le reste de l'appli
+  ne voit aucune différence), `_fbPlanAssainir` (à l'entrée, avec ou sans réseau : la copie ne garde que SES jours, heures sup et acomptes
+  vidés, en place, copie locale réécrite par `window._mvSnapSave`, exposé par app.js), et la garde de `fbSave` (un téléphone en vue
+  salarié n'enregistre jamais le planning : il écraserait la version complète par la version sans motifs).
+
+### 250c. Les arbitrages
+
+- **Heures sup et acomptes : aucune copie.** « Mon mois » n'en lit aucun — mesuré : 100 fonctions atteintes depuis `_planRenderMon` et
+  `_planRenderHeader` (littéraux de chaîne exclus), aucune ne lit `PLANNING_HSUP` ni `PLANNING_ACOMPTES`.
+- **Pas un filtre à l'écran** : il laisse les données sur le téléphone. **Pas une dérivation par l'appareil de l'admin** : plusieurs
+  admins, file hors ligne, appareil éteint entre deux écritures — la copie divergerait ; et l'appareil ne connaît pas les identifiants
+  de comptes. Le serveur seul voit passer chaque écriture.
+- **Pas les seuls « effets » du motif (payé, assimilé…)** : « suspend + payé » désigne l'arrêt de travail à coup sûr. L'effet trahit le
+  motif — d'où « autre ».
+- **`motif:'autre'` plutôt que rien** : depuis NET-1, une absence SANS motif vaut « injustifiée » dans le moteur ; « autre » (non
+  précisée) est neutre et ne suggère rien.
+- **Les copies de secours locales d'avant le lot restent** : elles protègent d'une copie courante abîmée ; elles partent en trois jours
+  d'ouverture (`_MV_BK_MAX`).
+- **Les crochets passent par window** : `mv-harnais-taille2` et `mv-harnais-fusion-docs` jouent le vrai `fbSave` / `applyFbData` dans un
+  bac à sable qui ignore ces noms — un identifiant importé y aurait levé.
+
+### 250d. Mesuré
+
+- `mv-harnais-motifs1` (neuf) : **49 assertions** — la vraie règle serveur (cas écrits, 600 journées tirées au hasard, liste blanche,
+  « absent ⇔ congé, récup ou journée entière » réécrit à part), la fabrique sur un faux Firestore (idempotence, réécriture minimale, rien
+  dans un domaine supprimé, lots de 100), les déclencheurs (faux require), le rattrapage GT extrait et joué, le module client, le bloc de
+  firebase.js exécuté, le VRAI `fbSave`, le câblage, les règles. **14/14 contre-épreuves.**
+- `mv-harnais-rules` : **section P (17 cas)** et **3 contre-épreuves** neuves — 70 cas, 15 contre-épreuves, à jouer sur l'émulateur.
+
+### 250e. Ouvert
+
+Voir §28, « MOTIFS-1 — ce qui reste ouvert » : l'ordre de déploiement, `npm run test:rules`, le lot de la vue d'équipe, les limites.

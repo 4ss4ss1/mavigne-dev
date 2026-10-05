@@ -152,3 +152,5 @@ Object.assign(exports, require('./claims'));
 Object.assign(exports, require('./ephy'));
 // Auto-capture des demandes d'essai (formulaire public)
 Object.assign(exports, require('./leads'));
+// Vues du planning : l'équipe sans motif, et les jours de chacun (MOTIFS-1, §250)
+Object.assign(exports, require('./planning-vues'));

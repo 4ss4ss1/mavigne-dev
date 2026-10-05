@@ -25,6 +25,8 @@
      D. GUERETTECH : l'identité seule ne suffit pas (claim `gts` exigé et non expiré).
      E. Collections fermées : _gt_otp, leads, mail, _mv_signatures, ephy, registre public.
      F. Constats : écarts connus, AFFICHÉS mais non bloquants (décision de Nico en attente).
+     P. MOTIFS-1 (§250) : planning_entries, planning_hsup, planning_acomptes lus par l'admin seul ; la vue de
+        l'équipe par tout membre, la vue personnelle par son seul titulaire ; aucune écriture client des vues.
 
    ⚠️ LA CONTRE-ÉPREUVE REJOUE LE MOTEUR SUR DES RÈGLES FAUTIVES. Chaque faute est
      posée sur une COPIE EN MÉMOIRE du fichier (ancre trouvée EXACTEMENT une fois, sinon
@@ -87,6 +89,13 @@ const SEED = {
   'mavigne_a/paie':               { value: { taux: { X: 15 } } },
   'mavigne_a/membres':            { value: [{ nom: 'X' }] },
   'mavigne_a/config':             { value: { home_layout: ['a'], gnr: { l: 100 }, cp_mode: 'ouvrables' } },
+  'mavigne_a/planning_entries':   { value: { X: { 2026: { 9: { 5: { absent: true, motif: 'arret', comment: 'x' } } } } } },
+  'mavigne_a/planning_hsup':      { value: { X: { '2026-10': { paye: 2 } } } },
+  'mavigne_a/planning_acomptes':  { value: { X: { '2026-10': [{ date: '2026-10-02', montant: 100 }] } } },
+  'mavigne_a/planning_equipe':    { value: { X: { 2026: { 9: { 5: { absent: true, motif: 'autre' } } } } } },
+  'mavigne_a/planning_moi_u-ouv-a': { value: { nom: 'X', entries: {} } },
+  'mavigne_a/planning_moi_u-ro-a':  { value: { nom: 'Y', entries: {} } },
+  'mavigne_domaine-dupont/planning_entries': { value: {} },
   'mavigne_a/journal/sous/x':     { value: 1 },
   'mavigne_b/journal':            { value: [{ id: 2 }] },
   'mavigne_b/journal/sous/x':     { value: 1 },
@@ -168,6 +177,24 @@ const CAS = [
   ['E11','E','_mv_signatures : A lit sa preuve',                  'ouvrierA','get','_mv_signatures/a',null,true],
   ['E12','E','★ _mv_signatures : B ne lit pas celle de A',        'adminB','get','_mv_signatures/a',null,false],
   ['E13','E','★ _mv_signatures : A ne réécrit pas sa preuve',     'adminA','set','_mv_signatures/a',{ cgu: false },false],
+  // P. MOTIFS-1 (§250) — le planning de l'équipe : motifs, heures sup et acomptes chez l'admin
+  ['P01','P','★ un ouvrier ne lit PAS planning_entries (motifs)',          'ouvrierA','get','mavigne_a/planning_entries',null,false],
+  ['P02','P','★ un ouvrier ne lit PAS planning_hsup',                     'ouvrierA','get','mavigne_a/planning_hsup',null,false],
+  ['P03','P','★ un ouvrier ne lit PAS planning_acomptes',                 'ouvrierA','get','mavigne_a/planning_acomptes',null,false],
+  ['P04','P','★ un saisonnier (ro) ne lit PAS planning_entries',           'roA','get','mavigne_a/planning_entries',null,false],
+  ['P05','P','l\'admin lit planning_entries',                              'adminA','get','mavigne_a/planning_entries',null,true],
+  ['P06','P','l\'admin lit planning_acomptes',                             'adminA','get','mavigne_a/planning_acomptes',null,true],
+  ['P07','P','un ouvrier lit la vue de l\'équipe',                         'ouvrierA','get','mavigne_a/planning_equipe',null,true],
+  ['P08','P','un saisonnier (ro) lit la vue de l\'équipe',                 'roA','get','mavigne_a/planning_equipe',null,true],
+  ['P09','P','un ouvrier lit SA vue personnelle',                          'ouvrierA','get','mavigne_a/planning_moi_u-ouv-a',null,true],
+  ['P10','P','★ un ouvrier ne lit PAS la vue personnelle d\'un autre',     'ouvrierA','get','mavigne_a/planning_moi_u-ro-a',null,false],
+  ['P11','P','l\'admin lit la vue personnelle d\'un salarié',              'adminA','get','mavigne_a/planning_moi_u-ouv-a',null,true],
+  ['P12','P','★ un ouvrier n\'écrit PAS la vue de l\'équipe',              'ouvrierA','set','mavigne_a/planning_equipe',{ value: {} },false],
+  ['P13','P','★ l\'admin n\'écrit PAS la vue de l\'équipe (serveur seul)', 'adminA','set','mavigne_a/planning_equipe',{ value: {} },false],
+  ['P14','P','★ un ouvrier n\'écrit PAS sa vue personnelle',               'ouvrierA','set','mavigne_a/planning_moi_u-ouv-a',{ value: {} },false],
+  ['P15','P','★ un admin de B ne lit PAS la vue d\'équipe de A',           'adminB','get','mavigne_a/planning_equipe',null,false],
+  ['P16','P','la démo lit le planning de domaine-dupont (jeu fictif)',     'demo','get','mavigne_domaine-dupont/planning_entries',null,true],
+  ['P17','P','GUERETTECH en session lit planning_entries',                 'gtClaim','get','mavigne_a/planning_entries',null,true],
 ];
 
 /* F. CONSTATS — écarts connus entre une intention documentée et la règle réelle.
@@ -218,7 +245,8 @@ async function jouer(env, silencieux) {
   const res = {};
   let section = '';
   const TITRES = { A: 'A. Isolement entre domaines', B: 'B. Rôles', C: 'C. Démo',
-                   D: 'D. GUERETTECH — identité + session', E: 'E. Collections fermées ou publiques' };
+                   D: 'D. GUERETTECH — identité + session', E: 'E. Collections fermées ou publiques',
+                   P: 'P. MOTIFS-1 — le planning de l’équipe : motifs, heures sup et acomptes chez l’admin' };
   for (const [id, sec, lib, qui, op, chemin, data, attendu] of CAS) {
     if (!silencieux && sec !== section) { section = sec; console.log('\n' + c.b(TITRES[sec])); }
     if (op === 'set') await env.withSecurityRulesDisabled(async ctx => {
@@ -261,7 +289,13 @@ const MUT = [
   ['isAdminOnlyDoc : membres sort de la liste',
    "return d in ['membres', 'saisons',", "return d in ['saisons',", ['B06']],
   ['paie : la lecture n\'exige plus l\'admin',
-   "\n      allow read: if isMyTenant(collection) && docId != 'paie';\n", "\n      allow read: if isMyTenant(collection);\n", ['B09']],
+   "return d in ['paie', 'planning_entries', 'planning_hsup', 'planning_acomptes'];", "return d in ['planning_entries', 'planning_hsup', 'planning_acomptes'];", ['B09']],
+  ['MOTIFS-1 : les trois documents du planning redeviennent lisibles par tous',
+   "return d in ['paie', 'planning_entries', 'planning_hsup', 'planning_acomptes'];", "return d in ['paie'];", ['P01', 'P02', 'P03', 'P04']],
+  ['MOTIFS-1 : la vue personnelle d\'un autre devient lisible',
+   "(docId == 'planning_moi_' + request.auth.uid || isAdmin())", 'true', ['P10']],
+  ['MOTIFS-1 : les vues redeviennent inscriptibles par les membres',
+   "\n                   && !isVuePlanning(docId)", '', ['P12', 'P13', 'P14']],
   ['SEC-GT/2 : l\'identité suffit (gts oublié)',
    "\n             && request.auth.token.get('gts', 0) > request.time.toMillis();", ';', ['D01']],
   ['shapeOk : n\'importe quelle forme passe',

@@ -3,12 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **5 octobre 2026 (GT-1)** — ★★★ **LA CONSOLE GUERETTECH QUITTE L'APPLI DES CLIENTS** (§249). Elle est à **/gt.html**.
-> `index.html` = l'appli des clients, sans `admin-gt.js` ni le balisage GT (repères `MV-GT:CONNEXION` / `MV-GT:CONSOLE`). `gt.html` = la même appli +
-> `src/gt/connexion.html` + `src/gt/console.html`, entrée `src/gt.js` (app.js PUIS admin-gt.js) ; FABRIQUÉE par `scripts/mv-gt-page.mjs` à chaque
-> `npm run build` / `dev`, jamais éditée, ignorée par git. Précache sans le fichier de la console. Cinq appuis sur le logo (client) → /gt.html.
-> Harnais `mv-harnais-gt1`. Marque `lots/GT-1.json`. Base `7aa9ce7` (TEXTE-A et JOURNAL-1 poussés). **SW 8.98 → 8.99, APP 8.23 inchangé** (rien pour les clients).
-> Précédent : JOURNAL-1 (§248), le Journal en 0,12 s — archivé dans journal.md.
+> Dernière consolidation : **5 octobre 2026 (MOTIFS-1)** — ★★★ **LES MOTIFS D'ABSENCE NE QUITTENT PLUS L'APPAREIL DE L'ADMIN** (§250).
+> Règle de Nico : un salarié ne voit pas les motifs de ses collègues — et son téléphone ne les reçoit pas. `planning_entries`, `planning_hsup`,
+> `planning_acomptes` : lecture admin seule (`isAdminReadDoc`). Le serveur fabrique `planning_equipe` (l'équipe sans motif) et `planning_moi_<uid>`
+> (SES jours complets) — déclencheurs `functions/planning-vues.js`, règle pure `planning-vues-calc.js` ; un téléphone de salarié les compose
+> (`src/planning-vue.js`, `firebase.js/_mvClesLues`, garde de `fbSave`). Ordre : functions → `gtPlanningVues` → hosting → rules (§28).
+> Harnais `mv-harnais-motifs1` (49 + 14 contre-épreuves) et section P de `mv-harnais-rules`. Marque `lots/MOTIFS-1.json`. Base `986a76d`.
+> **APP 8.23 → 8.24, SW 8.99 → 9.00**. Précédent : GT-1 (§249), la console GUERETTECH dans gt.html — archivé dans journal.md.
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -823,7 +824,7 @@ npm run build && firebase deploy
 | **1 — smoke** | `npm run test:smoke` | l'app **boote** sans exception + 23 globals |
 | **2 — E2E local (DÉFAUT)** | `npm run test:e2e` | **login DOM réel + 10 pages + interactions** |
 | **2bis — E2E émulateurs** | `npm run test:e2e:emu` | + couche Firestore réelle — **BLOQUÉ SDK** |
-| ★ **RULES — règles Firestore** | `npm run test:rules` | `firestore.rules` **exécutées** sur l'émulateur : 53 requêtes + 12 contre-épreuves (§189). Java 21 requis ; **hors `npm run check`**, job CI `rules` |
+| ★ **RULES — règles Firestore** | `npm run test:rules` | `firestore.rules` **exécutées** sur l'émulateur : 70 requêtes + 15 contre-épreuves (§189, §250). Java 21 requis ; **hors `npm run check`**, job CI `rules` |
 
 ★★★ **AJOUTER UN CONTRÔLE = UNE LIGNE DANS `scripts/mv-harnais-liste.mjs`** (LISTE-1, §190), et sa contre-épreuve sur
 la ligne suivante. **Rien dans `package.json`, rien dans `ci.yml`** : `check` = `node scripts/mv-lanceur.mjs`, `prebuild` =
@@ -1260,6 +1261,15 @@ fait avant le lot** — voir §54a) ·
 `_mvKeyLoaded[key]` faux = la Couche 2 anti-perte refuse **toutes** les sauvegardes de cette clé.
 Symptôme : « je ne peux plus enregistrer », **aucune trace**.
 
+★★★ **MOTIFS-1 (§250) — L'EXCEPTION RAISONNÉE, ET SON ORDRE.** Depuis le 05/10, `planning_entries`, `planning_hsup` et
+`planning_acomptes` sont admin-only **en lecture** (`isAdminReadDoc`, avec `paie`). Règle de Nico : un salarié ne voit pas les
+motifs de ses collègues — et son téléphone ne les reçoit pas. Sans danger parce que, **dans cet ordre** : (1) le client cesse de
+les demander en vue salarié (`firebase.js/_mvClesLues` : il lit `planning_equipe` + `planning_moi_<uid>`, fabriqués par le serveur) ;
+(2) la Couche 2 ne garde que parcelles / membres / saisons ; (3) un salarié n'écrit jamais le planning (règle 1 + garde de `fbSave`) ;
+(4) la règle se ferme EN DERNIER (functions → `gtPlanningVues` → hosting → rules). **Toute future restriction de lecture suit ce
+patron : d'abord le client cesse de lire, ensuite seulement la règle se ferme.** ⚠️ Un rôle `pilotage` sans `admin` est en vue
+salarié : le Pilotage lui montre « absent » au lieu de « en arrêt » — cohérent avec `paie`, qui lui est déjà refusée.
+
 ⚠️ **`assertRealEmailForAdmin`** : les adresses factices sont bloquées pour un admin. Un nouveau
 claim ne prend effet **qu'après rechargement** (cache de jeton ~1 h).
 ⚠️⚠️ **Trois choses distinctes sur les adresses fictives** :
@@ -1270,7 +1280,7 @@ claim ne prend effet **qu'après rechargement** (cache de jeton ~1 h).
    son accès. ★ L'écran de création en lot le dit **avant** d'essayer.
 ⚠️ **Accorder `admin` expose les rémunérations des collègues** (`paie`) — à discuter avant.
 
-★★★ **Les règles se prouvent en les EXÉCUTANT (RULES-1, §189).** `mv-harnais-rules` joue 53 requêtes réelles
+★★★ **Les règles se prouvent en les EXÉCUTANT (RULES-1, §189).** `mv-harnais-rules` joue 70 requêtes réelles (dont 17 du planning de l'équipe, §250)
 sur l'émulateur (isolement entre domaines, `off`, `ro`, admin-only, `paie`, `config`, démo, session GT, collections
 fermées). **Toute modification de `firestore.rules` ajoute son cas ET sa contre-épreuve** — un contrôle qui LIT le
 fichier (preflight, `mv-harnais-droits`) voit qu'une ligne existe, jamais ce que le moteur en fait.
@@ -1818,6 +1828,26 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ MOTIFS-1 — CE QUI RESTE OUVERT (§250, posé le 05/10)
+
+1. **Déployer DANS CET ORDRE** : `firebase deploy --only functions:planningVuesEntrees,functions:planningVuesMembres,functions:gtPlanningVues`
+   (premiers déclencheurs Firestore du projet : la CLI peut demander d'activer Eventarc / Pub/Sub, puis un second essai quelques minutes
+   plus tard) → rattrapage depuis `/gt.html`, session ouverte, console : `await fbCallFn('gtPlanningVues', {}, { timeout: 300000 })` →
+   console Firestore : `planning_equipe` (aucun motif autre que « autre ») et des `planning_moi_<uid>` → `npm run site` → `npm run build`
+   → `firebase deploy --only hosting` → « Mon mois » regardé sur un téléphone de salarié → **seulement alors**
+   `firebase deploy --only firestore:rules`. Les règles avant l'appli : un téléphone pas encore à jour perdrait son planning.
+2. **`npm run test:rules` chez Nico** (ou le job CI `rules`) : 70 cas dont 17 P, 15 contre-épreuves dont 3 MOTIFS-1 — jamais joués côté
+   Claude (pas d'émulateur dans le bac à sable).
+3. **Lot suivant : la vue de l'équipe pour les salariés** (maquette « Planning — vue salarié », go du 05/10) : onglets Mon mois / L'équipe,
+   présent / absent sans motif (congés compris), ligne « Présents », absence d'une partie de journée = présent, mois en cours seulement.
+   Elle lit `PLANNING_ENTRIES` tel que composé : les collègues y sont déjà sans motif.
+4. **Limites assumées** : la vue personnelle d'un membre retiré n'est pas effacée (lisible par son seul compte, coupé par `off`) ; une fiche
+   Inactive sans date de contrat peut manquer aux listes d'un salarié pour une année où elle n'avait que des horaires saisis
+   (`_mvCompteSansDate` lit l'existence de l'année ; la vue d'équipe ne garde qu'absences, échanges et effectifs) ; les copies de secours
+   locales d'avant le lot partent en trois jours d'ouverture ; un rôle `pilotage` sans `admin` voit « absent » au lieu de « en arrêt ».
+5. **Un champ ajouté demain à une journée de planning** se décide aussi dans `functions/planning-vues-calc.js` (`CHAMPS_JOUR`, `vueJour`) :
+   tant qu'il n'y est pas, il ne sort pas vers les collègues (liste blanche, voulu).
+
 ### ⚠️ AUDIT-PERF — CE QUI RESTE OUVERT (§241, posé le 04/10)
 
 1. **Le plan est dans `audit-perf-ux.md`** (racine). ✅ VALID-1, LOGIN-1 (§242), VOILE-1, PROFILS-1 (§243), ENTREE-1 (§244), RENDU-1 (§245), TAILLE-2 (§246), TEXTE-A (§247), JOURNAL-1 (§248), GT-1 (§249) — tout le décidé du 04/10. Restent : DONNEES-1 (il faut une vraie sauvegarde), IDS-1, le lot B de TEXTE-A (réglage « Taille du texte »).
@@ -2265,74 +2295,10 @@ L'hypothèse en vigueur — la lecture seule dure — n'a jamais été confirmé
 - **Mesure d'audience** sur `essai.html` et la démo guidée.
 - **Les trois nombres dupliqués** (§14b) — vivre avec, ou générer l'un depuis l'autre.
 
-### ★★★ La journée du 11 août (suite) — la refonte du Planning, deux lots
+### ✅ Les journées du 11 août (refonte du Planning, audit, deux lots Tracteur) — descendues dans `docs/claude/journal.md`
 
-**Point de départ** : *« je trouve que planning est mal conçu, il y en a un peu partout, il faut
-parfois cliquer sur un membre parfois non. »* Diagnostic chiffré, puis maquette validée sur **une
-seule question posée à Nico** — le geste le plus fréquent porte-t-il sur une case ou sur plusieurs ?
-Réponse : « le geste = ta reco », donc **le tap coche**.
-
-**Lot 1 — le geste unique.** Le mode « Sélection multiple » supprimé, trois cochages ajoutés
-(colonne, ligne, vue), barre de sélection contextuelle, **trois feuilles fusionnées en une**, trois
-moteurs d'écriture sans DOM. **Un bug réel** : récup et chaleur en lot écrasaient les congés en
-silence. **Harnais 12/12 + contre-épreuve.**
-
-**Lot 2 — trois onglets** (`mois` / `gens` / `cadre`) avec table de migration, fin du doublon
-grille+synthèses, suppression du menu « Outils » et de la feuille « Anciens salariés », **et un
-défaut de modèle** : deux réglages du domaine logés dans la fiche d'un salarié. **C22 fait dans le
-lot** — 8 renvois périmés, `MV_AIDE`, `reglages.js`, guide régénéré.
-
-**Détail complet : §19a.** Fichiers : `index.html` · `planning.js` · `styles.css` · `utils.js` ·
-`reglages.js` · `sw.js` · `guide/10-planning.html` + `public/guide.html`. **Bump APP + SW aux deux
-lots.** ✅ **DÉPLOYÉ** (SW v6.45 et v6.46 lus dans le changelog du dépôt).
-
-⚠️ **`test:smoke` et `test:e2e` n'avaient PAS été passés au moment de la livraison** : Playwright ne
-peut pas télécharger Chromium dans le bac à sable. Preflight, les deux cliquets, `node --check`,
-build Rollup et le harnais des moteurs étaient verts. **C'est la première fois qu'un lot est parti
-avec les deux paliers navigateur non joués côté Claude — Nico les a passés de son côté avant de
-déployer.**
-
-### ★★★ La journée du 11 août — audit intégral, puis deux lots Tracteur
-
-**Versions au moment de ces deux lots : APP `5.93` · SW `6.43`.** ⚠️ **Trois versions ont suivi le
-même jour** — v6.44 (l'accompagnement rattrape les deux lots), v6.45 et v6.46 (Planning, lots 1 et
-2). **État réel du dépôt au commit `636630a` : APP `5.96` · SW `6.46`.**
-(À relire dans les fichiers, jamais depuis ici.)
-
-**A. L'AUDIT INTÉGRAL DE L'APP** — preflight vert, 55 376 lignes, 10 analyses statiques.
-Ce qui est **sain, vérifié** : handlers inline (20 types d'événements, 0 non exposé) · un seul
-`console.log` non gardé et c'est l'émulateur · **contraste 5,56 → 16,73:1, AA passé partout** ·
-7 « à venir » tous légitimes · `.pc-validate` à **60×60 px** · verrou Planning propre · 0 TODO.
-
-Ce qui ne l'est pas :
-
-| Constat | Chiffre |
-|---|---|
-| ★★★ **Tailles de police sous 12 px** | **1 625** — 1 204 en ligne + 421 CSS, soit **la moitié** de l'app, uniformément répartie. Le dock est à **9,5 px**, les doses phyto à **9 px**. « Plein soleil » ne change **que le contraste**. |
-| ★★ **Trou responsive 761–767 px** | `max-width:760px` vs `min-width:768px` : le corps reste à 430 px pendant que `.pil-hero` garde sa grille 2 colonnes |
-| ★★ **Quatre rendus de date concurrents** | 8 fonctions, dont **2 paires strictement identiques** (`_rmDate`/`_bcDate` dans le même fichier ; `_pOrdDateFr`/`_opDateFr` à l'octet près) |
-| ★★ **Aucun formateur de nombre central** | ~330 `toFixed` + 46 `toLocaleString`, `utils.js` n'en expose aucun |
-| ★ **Bloc de ré-export de 209 lignes** (`app.js`) | **111 lignes strictement inutiles** (le module expose déjà) + **5 noms morts** de l'ancien catalogue « Mes produits » |
-| ★ **Trois conventions d'exposition `window`** | dont la boucle `for..in` de `phyto.js`, **invisible au preflight** — le fichier le reconnaît lui-même en commentaire |
-| **333 `onclick` sur `<div>`** | pour 44 `aria-label` — non focusables clavier |
-
-**B. LE CHRONO TRACTEUR INVERSÉ** — v5.92, §31. `tracteur.js` + `index.html` + `styles.css` +
-`utils.js` + `sw.js`, **bump APP + SW**. Plus le branchement du **cliquet de vocabulaire**
-(`package.json` + `ci.yml`) : il était écrit le matin même et **aucun appelant ne l'exécutait**.
-C14 `tracteur.js` **5 → 4**, baseline regravée.
-
-**C. LE MODE DU JOUR** — v5.93, §32. `app.js` + `index.html` + `styles.css` + `utils.js` + `sw.js`,
-**bump APP + SW**. Deux `catch{}` vides refusés par C14 puis remplis avec `logError`.
-
-⚠️⚠️⚠️ **DETTE CONTRACTÉE LE JOUR MÊME : les fiches `MV_AIDE` du Tracteur n'ont été mises à jour
-pour AUCUN des deux lots.** Les deux écrans les plus utilisés du module ont changé de gestes et leur
-aide décrit les anciens. **C'est la violation exacte de la Règle d'or n°4, écrite le même jour.**
-→ **Premier point du backlog, avant tout nouveau lot.**
-
-⚠️ **Ni `npm run build`, ni le smoke, ni l'e2e n'avaient été lancés côté Claude** sur ces deux lots
-(pas de navigateur dans le bac à sable). ✅ **Ils sont déployés** — SW v6.42 et v6.43 sont dans le
-changelog du dépôt, et l'accompagnement les a rattrapés en v6.44.
-
+Historique livré et déployé, sans consigne : déplacé le 05/10 (MOTIFS-1) pour tenir le plafond du cœur. Les leçons qu'elles
+portaient vivent dans les règles d'or, §24, §25 et §19a (`docs/claude/modules.md`).
 
 ### ★★★ Le 10 août — migration GitHub
 

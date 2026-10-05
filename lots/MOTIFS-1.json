@@ -1,0 +1,31 @@
+{
+  "lot": "MOTIFS-1",
+  "section": "§250",
+  "base": "986a76df6205ae755a9bc1259dc1f76f1511ef76",
+  "inclut": [],
+  "date": "2026-10-05",
+  "fichiers": {
+    ".mv-base": "1b6cfc53b6a9887bdf8bd8fb52e0ebeeadd621d088c546a8554e2f054a486e56",
+    "CLAUDE.md": "712dfbfa0fa926134f0ea1595657d65f8c1b804b403d2a54e3d90e12759428d0",
+    "docs/claude/INDEX.md": "19cfdd2f10f05a2046594931da9027a16ecbfe8d01dc4721fa94a36297de4c05",
+    "docs/claude/chantiers-230-279.md": "850ea19532e8f48644b7445aa02e52ad7ec8dfe826407a92efc595ef07397769",
+    "docs/claude/journal.md": "7a46428b426244dc06ff3ddd2cbdb05718bf8c7ced2346a02dd44fde37df0456",
+    "docs/claude/modules.md": "1f84603b72a5e88bd478c11379b90e0552c38cd05058126e8b0df33c7419fb8d",
+    "firestore.rules": "bb3ba073e68159303d8f00b62c6dc94bb15e161ece3549711793c74599f40b23",
+    "functions/claims.js": "bb288cb395af06fb63fca759a005b4e0f6a904d3683a3955c912558835aea658",
+    "functions/index.js": "447ef714ea9d259952a1d2108430e47babdab983fcd0bebedb69bc0e5db1ba18",
+    "guide/13-donnees.html": "851bebee84ba98d605a2acd3dc2a931b32847304a3799f03a906b7d0ae1fe079",
+    "index.html": "3ce51023b2fa0494f914d76d5bd8cabf646f8e4650ae72e5ae4440a55548b943",
+    "public/sw.js": "1445a5bb19a22adbd2a2cdb99963520781cc16013bc42770421b6844b19a1508",
+    "scripts/harnais-claude-md.mjs": "d983579dbe8d111d9e29553bcd02290f48eb1fb139147c5e09d951b153d58377",
+    "scripts/mv-harnais-liste.mjs": "1ad8fbffe228f3001a650624c4b4ba66376a5ca351b0eaa4b63a36478497b464",
+    "scripts/mv-harnais-rules.mjs": "41fe1c7ba168a9541cf8440e92e4e591ad3d574860f9720b4cd52559ae98c562",
+    "src/app.js": "8bb3ede35ee0bae7ef8103bd9d6fc74ab84b758b1dfd55303febb450540c82b9",
+    "src/firebase.js": "ffeac3d422a9312e6ee2d8227243cb4dd6420073098f16067720b5198ad465ac",
+    "src/utils.js": "66525e749298991f03525b279bbf34a755f3a733d52ed1d7577006f776084b79",
+    "functions/planning-vues-calc.js": "e11e96908cecc554f3868e6947355fc6a6b7d34c87e872edfdbd10fb2cfffcc6",
+    "functions/planning-vues.js": "c3ee35741f3e51213210f3fdbc2da8f4a1ae2f5deb754e24817dc83c45bd1c23",
+    "scripts/mv-harnais-motifs1.mjs": "011d55a03e4b6dc622a7b2833c76fd651ebdff3df6138357706b6e1b880bb382",
+    "src/planning-vue.js": "fa86e72bac37a11006c597e3e6233b6da65c7a2c4f36685d8dd05204ff77a587"
+  }
+}

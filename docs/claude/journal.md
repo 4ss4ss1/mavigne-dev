@@ -8,6 +8,13 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **5 octobre 2026 (GT-1)** — ★★★ **LA CONSOLE GUERETTECH QUITTE L'APPLI DES CLIENTS** (§249). Elle est à **/gt.html**.
+> `index.html` = l'appli des clients, sans `admin-gt.js` ni le balisage GT (repères `MV-GT:CONNEXION` / `MV-GT:CONSOLE`). `gt.html` = la même appli +
+> `src/gt/connexion.html` + `src/gt/console.html`, entrée `src/gt.js` (app.js PUIS admin-gt.js) ; FABRIQUÉE par `scripts/mv-gt-page.mjs` à chaque
+> `npm run build` / `dev`, jamais éditée, ignorée par git. Précache sans le fichier de la console. Cinq appuis sur le logo (client) → /gt.html.
+> Harnais `mv-harnais-gt1`. Marque `lots/GT-1.json`. Base `7aa9ce7` (TEXTE-A et JOURNAL-1 poussés). **SW 8.98 → 8.99, APP 8.23 inchangé** (rien pour les clients).
+> Précédent : JOURNAL-1 (§248), le Journal en 0,12 s — archivé dans journal.md.
+
 > ★ Consolidation : **5 octobre 2026 (JOURNAL-1, zip cumulatif avec TEXTE-A non poussé)** — ★★ **LE JOURNAL EN 0,12 S** (§248).
 > `.dgroup{content-visibility:auto}` : un jour hors écran n'est ni mis en page ni peint ; place réservée par jour (`52 + lignes × 96` px,
 > `auto`). La règle CONTIENT le groupe : ombres (rembourrage 8 / 12 px + marges négatives) et marges qui ne traversent plus (écarts recalculés,
@@ -1686,3 +1693,77 @@
 Les cinq lots sont en ligne, **aucun n'a encore servi de bout en bout**. Le « ~9 h » est un chiffre
 de papier tant qu'un slug jetable n'a pas été monté en entier (§18b, backlog technique n°1).
 ✅ **Rayé** : CF `submitMiseEnRoute`.
+
+---
+
+## Historique descendu du §28 de CLAUDE.md (05/10/2026, MOTIFS-1 — plafond du cœur)
+
+> Archive, comme le reste de ce fichier : les versions et états « à faire » cités ici étaient vrais le jour où ils ont été écrits.
+
+### ★★★ La journée du 11 août (suite) — la refonte du Planning, deux lots
+
+**Point de départ** : *« je trouve que planning est mal conçu, il y en a un peu partout, il faut
+parfois cliquer sur un membre parfois non. »* Diagnostic chiffré, puis maquette validée sur **une
+seule question posée à Nico** — le geste le plus fréquent porte-t-il sur une case ou sur plusieurs ?
+Réponse : « le geste = ta reco », donc **le tap coche**.
+
+**Lot 1 — le geste unique.** Le mode « Sélection multiple » supprimé, trois cochages ajoutés
+(colonne, ligne, vue), barre de sélection contextuelle, **trois feuilles fusionnées en une**, trois
+moteurs d'écriture sans DOM. **Un bug réel** : récup et chaleur en lot écrasaient les congés en
+silence. **Harnais 12/12 + contre-épreuve.**
+
+**Lot 2 — trois onglets** (`mois` / `gens` / `cadre`) avec table de migration, fin du doublon
+grille+synthèses, suppression du menu « Outils » et de la feuille « Anciens salariés », **et un
+défaut de modèle** : deux réglages du domaine logés dans la fiche d'un salarié. **C22 fait dans le
+lot** — 8 renvois périmés, `MV_AIDE`, `reglages.js`, guide régénéré.
+
+**Détail complet : §19a.** Fichiers : `index.html` · `planning.js` · `styles.css` · `utils.js` ·
+`reglages.js` · `sw.js` · `guide/10-planning.html` + `public/guide.html`. **Bump APP + SW aux deux
+lots.** ✅ **DÉPLOYÉ** (SW v6.45 et v6.46 lus dans le changelog du dépôt).
+
+⚠️ **`test:smoke` et `test:e2e` n'avaient PAS été passés au moment de la livraison** : Playwright ne
+peut pas télécharger Chromium dans le bac à sable. Preflight, les deux cliquets, `node --check`,
+build Rollup et le harnais des moteurs étaient verts. **C'est la première fois qu'un lot est parti
+avec les deux paliers navigateur non joués côté Claude — Nico les a passés de son côté avant de
+déployer.**
+
+### ★★★ La journée du 11 août — audit intégral, puis deux lots Tracteur
+
+**Versions au moment de ces deux lots : APP `5.93` · SW `6.43`.** ⚠️ **Trois versions ont suivi le
+même jour** — v6.44 (l'accompagnement rattrape les deux lots), v6.45 et v6.46 (Planning, lots 1 et
+2). **État réel du dépôt au commit `636630a` : APP `5.96` · SW `6.46`.**
+(À relire dans les fichiers, jamais depuis ici.)
+
+**A. L'AUDIT INTÉGRAL DE L'APP** — preflight vert, 55 376 lignes, 10 analyses statiques.
+Ce qui est **sain, vérifié** : handlers inline (20 types d'événements, 0 non exposé) · un seul
+`console.log` non gardé et c'est l'émulateur · **contraste 5,56 → 16,73:1, AA passé partout** ·
+7 « à venir » tous légitimes · `.pc-validate` à **60×60 px** · verrou Planning propre · 0 TODO.
+
+Ce qui ne l'est pas :
+
+| Constat | Chiffre |
+|---|---|
+| ★★★ **Tailles de police sous 12 px** | **1 625** — 1 204 en ligne + 421 CSS, soit **la moitié** de l'app, uniformément répartie. Le dock est à **9,5 px**, les doses phyto à **9 px**. « Plein soleil » ne change **que le contraste**. |
+| ★★ **Trou responsive 761–767 px** | `max-width:760px` vs `min-width:768px` : le corps reste à 430 px pendant que `.pil-hero` garde sa grille 2 colonnes |
+| ★★ **Quatre rendus de date concurrents** | 8 fonctions, dont **2 paires strictement identiques** (`_rmDate`/`_bcDate` dans le même fichier ; `_pOrdDateFr`/`_opDateFr` à l'octet près) |
+| ★★ **Aucun formateur de nombre central** | ~330 `toFixed` + 46 `toLocaleString`, `utils.js` n'en expose aucun |
+| ★ **Bloc de ré-export de 209 lignes** (`app.js`) | **111 lignes strictement inutiles** (le module expose déjà) + **5 noms morts** de l'ancien catalogue « Mes produits » |
+| ★ **Trois conventions d'exposition `window`** | dont la boucle `for..in` de `phyto.js`, **invisible au preflight** — le fichier le reconnaît lui-même en commentaire |
+| **333 `onclick` sur `<div>`** | pour 44 `aria-label` — non focusables clavier |
+
+**B. LE CHRONO TRACTEUR INVERSÉ** — v5.92, §31. `tracteur.js` + `index.html` + `styles.css` +
+`utils.js` + `sw.js`, **bump APP + SW**. Plus le branchement du **cliquet de vocabulaire**
+(`package.json` + `ci.yml`) : il était écrit le matin même et **aucun appelant ne l'exécutait**.
+C14 `tracteur.js` **5 → 4**, baseline regravée.
+
+**C. LE MODE DU JOUR** — v5.93, §32. `app.js` + `index.html` + `styles.css` + `utils.js` + `sw.js`,
+**bump APP + SW**. Deux `catch{}` vides refusés par C14 puis remplis avec `logError`.
+
+⚠️⚠️⚠️ **DETTE CONTRACTÉE LE JOUR MÊME : les fiches `MV_AIDE` du Tracteur n'ont été mises à jour
+pour AUCUN des deux lots.** Les deux écrans les plus utilisés du module ont changé de gestes et leur
+aide décrit les anciens. **C'est la violation exacte de la Règle d'or n°4, écrite le même jour.**
+→ **Premier point du backlog, avant tout nouveau lot.**
+
+⚠️ **Ni `npm run build`, ni le smoke, ni l'e2e n'avaient été lancés côté Claude** sur ces deux lots
+(pas de navigateur dans le bac à sable). ✅ **Ils sont déployés** — SW v6.42 et v6.43 sont dans le
+changelog du dépôt, et l'accompagnement les a rattrapés en v6.44.

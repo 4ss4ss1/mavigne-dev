@@ -836,6 +836,7 @@ function _mvSnapSave(){
   if(_mvSnapT) clearTimeout(_mvSnapT);
   _mvSnapT = setTimeout(_mvSnapWrite, _MV_SNAP_MS);
 }
+window._mvSnapSave = _mvSnapSave;   // ★★ MOTIFS-1 (§250) : firebase.js réécrit la copie du téléphone après l'avoir assainie (vue salarié)
 
 // Annulation — obligatoire avant toute purge volontaire (cf. avertissement en tête de bloc).
 function _mvSnapCancel(){ if(_mvSnapT){ clearTimeout(_mvSnapT); _mvSnapT = null; } }
@@ -3616,6 +3617,7 @@ async function confirmLogin(){
 //   rattrapée exactement comme avant l'extraction.
 function _mvApresEntree(){
     applyRoles();
+    if(window._fbPlanAssainir) window._fbPlanAssainir();   // ★★ MOTIFS-1 (§250) : avant le premier dessin, avec ou sans réseau — la copie ne garde que ce qu'un salarié peut détenir
     if(window._mvApplyTrialGating)window._mvApplyTrialGating();
     if(window.applyDomNom) window.applyDomNom();
     goHub();

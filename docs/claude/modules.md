@@ -845,7 +845,9 @@ Un champ ajouté au code sans être ajouté ici est une dette : **le mettre à j
 ★★ **SCHEMA-1 — ce tableau est EXÉCUTÉ.** Toute journée passe par **`_pEntPose(nom,m,d,e)`**, qui la soumet à
 `_planEntreeProbleme(e)` : forme inconnue, champ hors forme ou valeur impossible → **refusée, rien d'écrit**, une trace
 `logError` (cat `planning`, **sans nom ni commentaire** : le journal est lu hors du domaine), et le moteur compte le jour
-en « ignoré ». **Ajouter un champ = l'ajouter ici, dans `_planEntreeProbleme` ET dans `mv-harnais-schema-planning`.**
+en « ignoré ». **Ajouter un champ = l'ajouter ici, dans `_planEntreeProbleme` ET dans `mv-harnais-schema-planning`.** ★ **MOTIFS-1 (§250) : ET le
+décider dans `functions/planning-vues-calc.js`** (`CHAMPS_JOUR` pour être reconnu, `vueJour` pour sortir vers les collègues) — sinon il
+reste chez l'admin.
 ⚠️ Le contrôle porte sur ce qu'on **écrit**, jamais sur le stock : une entrée ancienne n'est ni relue ni rejetée.
 Filet : `mv-harnais-schema-planning` (A. formes valides · B. refus · C. refus = rien d'écrit + trace anonyme ·
 D. **aucune écriture directe `_pEntEnsure(…)[d]=` hors de `_pEntPose`**) et sa contre-épreuve `--contre` (4 défauts).
@@ -868,6 +870,13 @@ hors déclaration · C. toute fonction qui pose l'année contient un `finally`) 
 | `planning_templates` | `[année][plId] → modèle` | `_pTplStore` / `_planGetTpl` |
 | `planning_hsup` | `[nom]['AAAA-MM'] → mois` · `[nom]['AAAA-dep'] → départ` | `_planHsupKey(m)` / `_planDepartKey()` (année = `_pY()`) |
 | `planning_acomptes` | `[nom]['AAAA-MM'] → [{date, montant, note}]` | `planSaveAcompte` |
+| `planning_equipe` | `[nom][année][mois][jour] → {absent:true, motif:'autre'}` · `{timing, remplacement:true}` · `{effectif}` | **le serveur seul** (MOTIFS-1, §250) — lu par tout membre |
+| `planning_moi_<uid>` | `{ nom, entries: <les jours COMPLETS de ce membre> }` | **le serveur seul** — lu par son titulaire et l'admin |
+
+★★ **MOTIFS-1 (§250) — trois documents lus par l'admin seul.** `planning_entries`, `planning_hsup`, `planning_acomptes` : un téléphone de
+salarié ne les lit ni ne les écoute ; il compose `planning_equipe` + SA `planning_moi_<uid>` en `PLANNING_ENTRIES` (`firebase.js`,
+`_mvPlanRecevoir`) ; ses `PLANNING_HSUP` / `PLANNING_ACOMPTES` restent vides — « Mon mois » n'en lit aucun (mesuré sur les 100 fonctions
+qu'il appelle). Un téléphone en vue salarié n'enregistre jamais ces trois documents (garde de `fbSave`).
 
 ⚠️ **Ancienne forme** sans année (`[nom][mois][jour]`, `[plId]`) : relue au chargement par `_planMigrateYears`, rangée
 sous `_MV_PLAN_BASE_YEAR` (2026). Ne jamais écrire dans cette forme.

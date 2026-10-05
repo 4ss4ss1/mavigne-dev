@@ -29,6 +29,7 @@ import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import { deepClone } from './utils.js';
 import { MV_LIMITE_DOC, mvOctetsDoc } from './taille-doc.js';   // TAILLE-2 (§246) : la règle partagée avec npm run taille
+import { PLAN_CLES_ADMIN, PLAN_CLE_EQUIPE, planCleMoi, planVueComplete, planComposer, planGarderLesMiens } from './planning-vue.js';   // ★★ MOTIFS-1 (§250) : ce qu'un téléphone de salarié reçoit du planning
 import {
   getAuth,
   connectAuthEmulator,
@@ -290,6 +291,9 @@ const COLLECTIONS = [
 //                litteral explicite) ni dans la snapshot localStorage de saveData
 //                (qui ne route pas cette cle) -> les remunerations ne descendent
 //                toujours jamais sur le disque de l'appareil.
+// ★★ MOTIFS-1 (§250) — planning_entries, planning_hsup et planning_acomptes sont AUSSI lisibles par l'admin seul depuis le
+//   05/10 : ils restent dans FB_REALTIME POUR L'ADMIN ; un téléphone de salarié ne les écoute pas (_mvClesLues) : il écoute
+//   planning_equipe et planning_moi_<uid>, et ne les écrit jamais (garde de fbSave).
 var FB_REALTIME = ['parcelles','journal','sessions','traitements','reparateur','reparateur_hist','entretiens','planning_templates','planning_entries','planning_acomptes','planning_hsup',
                    'intrants'];
 var FB_STATIC   = ['travaux','catalogue','conducteurs','activites',
@@ -605,6 +609,8 @@ var _baseParcelles = null;
 
 // ── applyFbData — proxy vers window + capture de la base parcelles ──
 function applyFbData(key, value) {
+  // ★★ MOTIFS-1 (§250) — les deux vues du planning ne sont pas des clés de l'appli : elles se COMPOSENT en planning_entries.
+  if (window._mvPlanRecevoir && window._mvPlanRecevoir(key, value)) return;
   if (key === 'parcelles' && Array.isArray(value)) _baseParcelles = deepClone(value);
   // kml_polygons : Firestore interdit les tableaux imbriques -> les points sont stockes
   // en objets {lat,lng} ; on reconstruit [[lat,lng],...] pour Leaflet (rendu inchange).
@@ -694,7 +700,12 @@ async function _pullKeys(keys, tag, respectIgnore) {
   return state;
 }
 
-async function fbPullAll()    { return _pullKeys(COLLECTIONS, 'fbPullAll', false); }
+async function fbPullAll() {
+  // ★★ MOTIFS-1 (§250) : en vue salarié, les deux vues du planning à la place des trois documents de l'admin.
+  var st = await _pullKeys(_mvClesLues(COLLECTIONS), 'fbPullAll', false);
+  _mvPlanApresLecture(st);
+  return st;
+}
 async function fbPullStatic() { return _pullKeys(FB_STATIC,   'fbPullStatic', true); }
 
 // PERF-1 (#2) — `known` = etat renvoye par le pull qui vient de lire cette meme cle.
@@ -886,8 +897,81 @@ window._mvRendreBientot = _mvRendreBientot;
 
 function fbListen() {
   _fbUnsubAll(); // idempotent : purge tout listener précédent avant de re-souscrire
-  FB_REALTIME.forEach(function (key) { _fbSubscribe(key); });
+  _mvClesLues(FB_REALTIME).forEach(function (key) { _fbSubscribe(key); });   // ★★ MOTIFS-1 : en vue salarié, les deux vues du planning
 }
+
+// ════════════════════════════════════════════════════════════════════════════════════════════════════════════
+// ★★ MOTIFS-1 (§250) — LE TÉLÉPHONE D'UN SALARIÉ NE REÇOIT NI LES MOTIFS, NI LES HEURES SUP, NI LES ACOMPTES DES AUTRES
+// ════════════════════════════════════════════════════════════════════════════════════════════════════════════
+// Règle de Nico (05/10/2026). Jusqu'ici planning_entries, planning_hsup et planning_acomptes partaient COMPLETS sur le
+// téléphone de chaque membre (écoute temps réel + copie locale) : l'écran ne montrait pas les motifs, le téléphone les
+// DÉTENAIT. Désormais (firestore.rules, isAdminReadDoc) ces trois documents ne sont lisibles que par l'admin ; un
+// téléphone de salarié lit à la place planning_equipe (l'équipe sans motif) et planning_moi_<uid> (SES jours complets),
+// fabriqués par le serveur (functions/planning-vues-calc.js), et les COMPOSE en planning_entries : le reste de l'appli
+// ne voit aucune différence. Qui a la vue complète : src/planning-vue.js (planVueComplete).
+// ⚠️ Les entrées de ce bloc passent par window (_mvPlanRecevoir, _mvPlanVueSalarie, _fbPlanAssainir) : les harnais qui
+//    jouent le vrai fbSave / applyFbData (taille2, fusion-docs) les trouvent absentes et n'en sont pas gênés.
+var _mvPlanEq;               // dernière vue de l'équipe reçue — undefined tant que rien n'est arrivé
+var _mvPlanMoi;              // dernière vue personnelle reçue
+var _mvPlanSession = null;   // pour qui la copie du téléphone a été assainie (une fois par personne, pas à chaque reprise)
+var _mvPlanManqueDit = false;
+function _mvPlanComplete() {
+  return planVueComplete(window.currentUser, !!(typeof window._mvPrepOn === 'function' && window._mvPrepOn()));
+}
+function _mvPlanCleMoi() { return planCleMoi(auth.currentUser ? auth.currentUser.uid : null); }
+// Les clés qu'un appareil lit (relecture) et écoute (temps réel) : en vue salarié, les deux vues à la place des trois
+// documents de l'admin. Un refus ne serait pas une panne (_pullKeys l'absorbe) — mais on ne les demande même plus.
+function _mvClesLues(cles) {
+  if (_mvPlanComplete()) return cles;
+  var out = cles.filter(function (k) { return PLAN_CLES_ADMIN.indexOf(k) < 0; });
+  out.push(PLAN_CLE_EQUIPE);
+  var m = _mvPlanCleMoi();
+  if (m) out.push(m);
+  return out;
+}
+// Après une relecture : une vue personnelle ABSENTE du serveur se signale une fois (journal du domaine → console GT).
+function _mvPlanApresLecture(st) {
+  if (_mvPlanManqueDit || _mvPlanComplete()) return;
+  var m = _mvPlanCleMoi();
+  if (m && st && st[m] === 'missing') {
+    _mvPlanManqueDit = true;
+    if (window.logError) window.logError({ level: 'info', cat: 'planning', msg: 'MOTIFS-1 · aucune vue personnelle du planning pour ce compte',
+      detail: 'planning_moi absent du serveur — rattrapage : gtPlanningVues (console GUERETTECH)' });
+  }
+}
+window._mvPlanVueSalarie = function (key) { return PLAN_CLES_ADMIN.indexOf(key) >= 0 && !_mvPlanComplete(); };
+// Réception d'une vue (relecture ou temps réel). true = c'était une vue : applyFbData s'arrête là.
+window._mvPlanRecevoir = function (key, value) {
+  var cm = _mvPlanCleMoi();
+  if (key !== PLAN_CLE_EQUIPE && !(cm && key === cm)) return false;
+  if (_mvPlanComplete()) return true;          // chez l'admin, une vue n'a rien à faire (aucune écoute ne la demande)
+  if (key === PLAN_CLE_EQUIPE) _mvPlanEq = value; else _mvPlanMoi = value;
+  var cu = window.currentUser, nom = cu ? cu.nom : '', E = window.PLANNING_ENTRIES || {};
+  var compose = planComposer(_mvPlanEq, _mvPlanMoi, nom ? E[nom] : undefined, nom);
+  if (typeof window.applyFbData === 'function') window.applyFbData('planning_entries', compose);
+  if (typeof window._mvSnapSave === 'function') window._mvSnapSave();   // la copie du téléphone suit (app.js)
+  if (window.currentUser) _mvRendreBientot('planning_entries');
+  return true;
+};
+// Avant toute lecture (entrée dans l'appli, avec ou sans réseau) : en vue salarié, la copie du téléphone ne garde que
+// les jours de la personne connectée ; heures sup et acomptes sont vidés. EN PLACE (planning.js tient les mêmes objets),
+// sans marquer les clés « lues » : ce n'est pas une réponse du serveur.
+window._fbPlanAssainir = function () {
+  var cu = window.currentUser;
+  if (!cu || _mvPlanComplete()) return;
+  var qui = TENANT_ID + '|' + (cu.nom || '');
+  if (_mvPlanSession === qui) return;
+  _mvPlanSession = qui; _mvPlanEq = undefined; _mvPlanMoi = undefined; _mvPlanManqueDit = false;
+  var E = window.PLANNING_ENTRIES;
+  if (E && typeof E === 'object') {
+    var garde = planGarderLesMiens(E, cu.nom);
+    Object.keys(E).forEach(function (k) { if (!Object.prototype.hasOwnProperty.call(garde, k)) delete E[k]; });
+  }
+  [window.PLANNING_HSUP, window.PLANNING_ACOMPTES].forEach(function (o) {
+    if (o && typeof o === 'object') Object.keys(o).forEach(function (k) { delete o[k]; });
+  });
+  if (typeof window._mvSnapSave === 'function') window._mvSnapSave();
+};
 
 // ── Retry exponentiel — 3 tentatives avec backoff 1s/2s/4s ──
 // SEC-1 : un refus de droits n'est PAS une panne transitoire. Le distinguer partout
@@ -1618,6 +1702,13 @@ window.fbSave = async function (key, value) {
     if (window.logError) window.logError({ level:'info', cat:'droits', msg:'Écriture non tentée (lecture seule) : ' + key });
     return { ok: false, denied: true, ro: true };
   }
+  // ★★ MOTIFS-1 (§250) — un téléphone en VUE SALARIÉ détient l'équipe SANS motifs : s'il enregistrait le planning, il
+  //   écraserait la version complète de l'admin par cette version appauvrie. On ne tente jamais. (Les règles refusent
+  //   déjà un non-admin ; la garde couvre le rôle qui vient de changer sur un jeton pas encore renouvelé.)
+  if (window._mvPlanVueSalarie && window._mvPlanVueSalarie(key)) {
+    if (window.logError) window.logError({ level:'info', cat:'droits', msg:'Écriture non tentée (planning, vue salarié) : ' + key });
+    return { ok: false, denied: true, vue: true };
+  }
   _ignoreNext[key]   = true;
   _ignoreBefore[key] = Date.now() + 4000;
   // ★★ VER-1 (§184) — une version PÉRIMÉE (format de données plus ancien que celui publié par le
@@ -1824,6 +1915,7 @@ window._fbLoadEphy = async function () {
 
 // ── _fbLoadAfterAuth ──
 window._fbLoadAfterAuth = async function () {
+  if (window._fbPlanAssainir) window._fbPlanAssainir();   // ★★ MOTIFS-1 (§250) : avant toute lecture, la copie ne garde que ce qu'un salarié peut détenir
   showSyncBadge('⏳ Chargement données…', '#B8913A');
   try {
     if(DEBUG) console.log('🔥 Pull complet post-auth');

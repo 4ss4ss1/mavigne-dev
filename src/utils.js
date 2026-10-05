@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.23';
+export const APP_VERSION = '8.24';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -852,6 +852,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.24', d: '2026-10-05', items: [
+    { niv: 0, pour: ['admin'], emoji: 'cadenas', titre: 'Les motifs d’absence ne quittent plus votre appareil',
+      desc: "Le téléphone d’un salarié ne reçoit plus les motifs d’absence, les commentaires, les heures sup ni les acomptes de ses collègues : seulement ses propres jours, et l’équipe sans aucun motif. Rien ne change pour vous, ni à l’écran des salariés." },
+  ] },
   { v: '8.23', d: '2026-10-05', items: [
     { niv: 0, pour: ['tous'], emoji: 'chrono', titre: 'Le journal s’ouvre plus vite',
       desc: "Le journal ne dessine plus que les jours visibles à l’écran : il s’affiche environ deux fois et demie plus vite sur un téléphone moyen." },

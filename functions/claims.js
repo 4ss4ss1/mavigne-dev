@@ -2329,3 +2329,40 @@ exports.mailQueueWatchdog = onSchedule(
     }
   }
 );
+
+// ══ MOTIFS-1 (§250) — RATTRAPAGE DES VUES DU PLANNING ═══════════════════════════════════════════════════
+// Fabrique planning_equipe et planning_moi_<uid> pour tous les domaines du registre (ou un seul : {tenant:'slug'}).
+// À lancer UNE fois après le déploiement des déclencheurs (functions/planning-vues.js), AVANT l'appli et les règles :
+// functions → ce rattrapage → hosting → rules. Ensuite, les déclencheurs suivent seuls.
+// Depuis /gt.html, session ouverte, console du navigateur :
+//   await fbCallFn('gtPlanningVues', {}, { timeout: 300000 })
+// Idempotent : une vue déjà à jour n'est pas réécrite (le rapport dit « 0 vue(s) écrite(s) »).
+exports.gtPlanningVues = onCall({ region: REGION, enforceAppCheck: true, timeoutSeconds: 300 }, async (request) => {
+  assertGtAdmin(request);
+  const only = String((request.data && request.data.tenant) || '').trim();
+  try {
+    const db = admin.firestore();
+    const { deriverDomaine } = require('./planning-vues-calc');
+    const report = { faits: [], ignores: [], erreurs: [] };
+    const reg = await db.doc('_guerettech/tenants').get();
+    const regData = reg.exists ? reg.data() : null;
+    const v = regData ? (regData.value !== undefined ? regData.value : regData) : null;
+    let slugs = (v && Array.isArray(v.slugs)) ? v.slugs : (Array.isArray(v) ? v : []);
+    if (only) slugs = slugs.filter((s) => s === only);
+    if (only && !slugs.length) throw new HttpsError('not-found', 'Domaine absent du registre : ' + only);
+    for (const slug of slugs) {
+      if (typeof slug !== 'string' || !/^[a-z0-9-]+$/.test(slug)) { report.erreurs.push('slug invalide: ' + JSON.stringify(slug)); continue; }
+      try {
+        const r = await deriverDomaine(db, admin.auth(), 'mavigne_' + slug);
+        if (r && r.ignore) report.ignores.push(slug + ' : ' + r.ignore);
+        else report.faits.push(slug + ' : ' + r.ecrits + ' vue(s) écrite(s), ' + r.personnes + ' personne(s) avec compte'
+          + (r.sansCompte ? ', ' + r.sansCompte + ' sans compte' : ''));
+      } catch (e) { report.erreurs.push(slug + ' : ' + (e && e.message ? e.message : String(e))); }
+    }
+    return report;
+  } catch (e) {
+    if (e instanceof HttpsError) throw e;
+    console.error('[gtPlanningVues]', e);
+    throw new HttpsError('internal', 'gtPlanningVues: ' + (e.message || String(e)));
+  }
+});

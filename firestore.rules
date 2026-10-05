@@ -117,6 +117,25 @@ service cloud.firestore {
                    'intrants', 'paie'];
     }
 
+    // ── MOTIFS-1 (§250) — documents LUS par l'administrateur seul ─────────────
+    // `paie` (SEC-1) et, depuis le 05/10/2026, les trois documents du planning qui portent ce qu'un
+    // collègue ne doit pas détenir : motifs d'absence et commentaires (planning_entries), heures sup
+    // (planning_hsup), acomptes (planning_acomptes). Règle de Nico : un salarié ne voit pas les motifs
+    // de ses collègues — et son téléphone ne les reçoit pas. Il lit à la place les deux vues ci-dessous.
+    // ⚠️ Restreindre la lecture d'une clé EXISTANTE (§8c) est sans danger ICI, et seulement dans cet ordre :
+    //   le client ne les demande plus en vue salarié (firebase.js/_mvClesLues) AVANT que cette règle ne
+    //   se ferme ; la Couche 2 anti-perte ne garde que parcelles / membres / saisons ; et un salarié
+    //   n'écrit jamais le planning (règle 1 + garde de fbSave).
+    function isAdminReadDoc(d) {
+      return d in ['paie', 'planning_entries', 'planning_hsup', 'planning_acomptes'];
+    }
+    // MOTIFS-1 — les vues du planning, écrites par le SERVEUR seul (functions/planning-vues.js) :
+    //   planning_equipe    → l'équipe sans motif ni commentaire, lisible par tout membre ;
+    //   planning_moi_<uid> → les jours complets d'UN salarié, lisibles par lui (et par l'admin).
+    function isVuePlanning(d) {
+      return d == 'planning_equipe' || d.matches('planning_moi_.*');
+    }
+
     // ── Validation de forme ───────────────────────────────────────────
     // 100 % des écritures client passent par fbSave/_saveParcellesMerged, qui écrivent
     // TOUJOURS exactement { value: … } (firebase.js). Un doc qui porte autre chose au
@@ -180,6 +199,7 @@ service cloud.firestore {
     // _mvKeyLoaded[key] reste faux, et la Couche 2 anti-perte refuse ensuite toute
     // sauvegarde de cette clé. Symptôme : « je ne peux plus enregistrer », sans trace.
     // Seule l'écriture change en v3.0 : elle passe du niveau collection au niveau document.
+    // ★★ MOTIFS-1 (§250) : une exception raisonnée — trois documents du planning passent en lecture admin (isAdminReadDoc).
     // ══════════════════════════════════════════════════════════════════
     match /{collection}/{docId} {
 
@@ -197,10 +217,15 @@ service cloud.firestore {
       //   • la Couche 2 ne garde que parcelles / membres / saisons.
       // Un non-admin reçoit un permission-denied absorbé par le catch level:'info'
       // de _pullKeys, et n'écrit jamais cette clé (aucun fbPushIfAbsent dessus).
+      // ★★ MOTIFS-1 (§250) — ET SAUF les trois documents du planning (isAdminReadDoc) : motifs, heures sup et acomptes ne
+      //   sont plus lisibles que par l'admin ; chaque membre lit planning_equipe et SA vue planning_moi_<uid> (l'admin
+      //   les lit toutes). Pourquoi c'est sans danger, et dans quel ordre : voir isAdminReadDoc.
       allow read: if isGtAdmin() && collection.matches('mavigne_.*');
       allow read: if isDemo() && collection == 'mavigne_domaine-dupont' && docId != 'paie';
-      allow read: if isMyTenant(collection) && docId != 'paie';
-      allow read: if isMyTenant(collection) && docId == 'paie' && isAdmin();
+      allow read: if isMyTenant(collection) && !isAdminReadDoc(docId) && !docId.matches('planning_moi_.*');
+      allow read: if isMyTenant(collection) && isAdminReadDoc(docId) && isAdmin();
+      allow read: if isMyTenant(collection) && docId.matches('planning_moi_.*')
+                  && (docId == 'planning_moi_' + request.auth.uid || isAdmin());
 
       // ── ÉCRITURE GT ADMIN (inchangée) ───────────────────────────────
       allow write: if isGtAdmin() && collection.matches('mavigne_.*');
@@ -228,6 +253,7 @@ service cloud.firestore {
       //    kml_polygons, error_log…) → règle inchangée : tout membre non-ro.
       allow write: if isMyTenant(collection)
                    && !isAdminOnlyDoc(docId) && docId != 'config'
+                   && !isVuePlanning(docId)
                    && canWrite()
                    && shapeOk() && countOk(docId);
 
@@ -261,8 +287,8 @@ service cloud.firestore {
       match /{sub=**} {
         allow read, write: if isGtAdmin() && collection.matches('mavigne_.*');
         allow read: if isDemo() && collection == 'mavigne_domaine-dupont' && docId != 'paie';
-        allow read: if isMyTenant(collection) && docId != 'paie';
-        allow read: if isMyTenant(collection) && docId == 'paie' && isAdmin();
+        allow read: if isMyTenant(collection) && !isAdminReadDoc(docId) && !docId.matches('planning_moi_.*');
+        allow read: if isMyTenant(collection) && (isAdminReadDoc(docId) || docId.matches('planning_moi_.*')) && isAdmin();
       }
     }
 

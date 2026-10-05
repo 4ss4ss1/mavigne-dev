@@ -491,4 +491,6 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-journal1.mjs --contre'],
   ['node scripts/mv-harnais-gt1.mjs'],                // GT-1 (§249) : la console GUERETTECH hors de l'appli des clients (gt.html)
   ['node scripts/mv-harnais-gt1.mjs --contre'],
+  ['node scripts/mv-harnais-motifs1.mjs'],            // MOTIFS-1 (§250) : motifs, heures sup et acomptes ne quittent plus l'appareil de l'admin
+  ['node scripts/mv-harnais-motifs1.mjs --contre'],
 ];

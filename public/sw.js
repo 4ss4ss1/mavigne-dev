@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v8.99
+// MA VIGNE — Service Worker v9.00
+// v9.00 (05/10/2026) — MOTIFS-1 (§250) : le telephone d'un salarie ne recoit plus les motifs d'absence, commentaires,
+//   heures sup ni acomptes des collegues — vues planning_equipe / planning_moi_<uid> fabriquees par le serveur et composees
+//   par firebase.js ; planning_entries / planning_hsup / planning_acomptes lus par l'admin seul (rules). APP 8.23 -> 8.24.
 // v8.99 (05/10/2026) — GT-1 (§249) : la console GUERETTECH quitte l'appli des clients (gt.html, entree src/gt.js, fabriquee
 //   par scripts/mv-gt-page.mjs) ; son fichier n'entre plus dans le precache (inject-precache). APP 8.23 inchange (rien de
 //   visible pour les clients).
@@ -4323,7 +4326,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.99';
+const CACHE_NAME   = 'mavigne-v9.00';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4339,7 +4342,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.99 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.00 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4359,7 +4362,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.99 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.00 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

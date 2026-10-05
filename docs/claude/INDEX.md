@@ -11,6 +11,7 @@
 | — | 🖥️ Environnement de Nico | `CLAUDE.md` |
 | — | 💬 Communication | `CLAUDE.md` |
 | — | Historique descendu du §28 de `CLAUDE.md` (04/10/2026, PRIO-1 — plafond de lignes du cœur) | `docs/claude/journal.md` |
+| — | Historique descendu du §28 de CLAUDE.md (05/10/2026, MOTIFS-1 — plafond du cœur) | `docs/claude/journal.md` |
 | 1 | 1. Identité & contexte | `CLAUDE.md` |
 | 2 | 2. Inventaire fonctionnel — 10 modules | `CLAUDE.md` |
 | 3 | 3. Positionnement commercial | `CLAUDE.md` |
@@ -293,3 +294,4 @@
 | 247 | 247. ★★★ TEXTE-A — LES PETITS TEXTES RELEVÉS, CHOISIS SUR MAQUETTE (05/10 — `src/styles.css` · `src/tracteu… | `docs/claude/chantiers-230-279.md` |
 | 248 | 248. ★★ JOURNAL-1 — LE JOURNAL NE MET EN PAGE QUE LES JOURS QUI SE VOIENT (05/10 — `src/styles.css` · `src/… | `docs/claude/chantiers-230-279.md` |
 | 249 | 249. ★★★ GT-1 — LA CONSOLE GUERETTECH QUITTE L'APPLI DES CLIENTS (05/10 — `index.html` · `src/app.js` · `sr… | `docs/claude/chantiers-230-279.md` |
+| 250 | 250. ★★★ MOTIFS-1 — LES MOTIFS D'ABSENCE NE QUITTENT PLUS L'APPAREIL DE L'ADMIN (05/10 — `functions/plannin… | `docs/claude/chantiers-230-279.md` |
