@@ -142,7 +142,7 @@ const EXPORTS = ['renderPlanning', '_pl2Board', '_pl2Synth', '_pl2Annual', '_pl2
   const utils = pathToFileURL(path.join(RACINE, 'src', 'utils.js')).href;
   const code = fs.readFileSync(CIBLE, 'utf8').replace("from './utils.js'", "from '" + utils + "'")
     + '\n;globalThis.__ROB={' + EXPORTS.map(n => n + ':(typeof ' + n + "==='function'?" + n + ':undefined)').join(',')
-    + ',_mois:function(m){planMonth=m;}};\n';
+    + ',_mois:function(m){planMonth=m;},_tab:function(t){planTab=t;}};\n';
   const f = path.join(os.tmpdir(), 'mv-rob-' + process.pid + '.mjs');
   fs.writeFileSync(f, code);
   try { await import(pathToFileURL(f).href); } finally { fs.unlinkSync(f); }
@@ -315,6 +315,9 @@ if (SECTION.includes('B')) {
       for (const nom of ['Nico', 'Équipe V']) for (const t of ['resume', 'jours', 'hsup', 'cp'])
         surf.push(['fiche ' + (nom === 'Nico' ? '' : 'collective ') + t, () => { R.openPlanFiche(nom); R.planFicheTab(t); return els['pf-body'].innerHTML; }]);
       for (const d of [1, 9, 13, 20, 28]) surf.push(['feuille du ' + d, () => { R.openPlanDayModal('Nico', d); }]);
+      // VUE-EQUIPE-1 (§251) : l'équipe du mois vue par un salarié, sur les mêmes données abîmées (rendue EN DERNIER : elle se cale sur le mois en cours).
+      surf.push(['vue équipe (salarié)', () => { const u = win.currentUser; win.currentUser = { nom: 'Nico', roles: ['ouvrier'] }; R._tab('eqmois');
+        try { R.renderPlanning(); return els['plan-body'] && els['plan-body'].innerHTML; } finally { win.currentUser = u; R._tab('mois'); R._mois(m); } }]);
       for (const [quoi, fn] of surf) { appels++; essai(quoi, s, m, fn); }
     }
   }

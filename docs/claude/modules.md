@@ -1110,8 +1110,9 @@ var _PLAN_VALID_TAB={mois:1,gens:1,cadre:1,moi:1};
 - **`cadre`** — l'ancien onglet caché `templates`, sans son bouton « ← Retour au planning » (un
   onglet n'a pas de retour).
 
-★ **L'ouvrier n'a plus d'onglets du tout** et tombe sur son mois : `renderPlanning` masque
-`#plan-tabs` entier. **Un onglet unique n'est pas un choix, c'est un décor.**
+★ ~~**L'ouvrier n'a plus d'onglets du tout**~~ — **depuis VUE-EQUIPE-1 (§251), le salarié a les deux siens** : **Mon mois** (par
+défaut) et **L'équipe** (clé `eqmois`, lecture seule : présent / absent sans motif, mois en cours) ; `renderPlanning` montre
+`.plan-tab-sal` et cache `.plan-tab-admin`. ⚠️ La clé n'est PAS `equipe` : ancienne clé migrée vers `mois` par `_PLAN_TAB_MIGR`. **Un onglet unique n'est pas un choix, c'est un décor.**
 ⚠️ **L'admin perd « Mon planning », et c'est voulu** : sa ligne est dans la grille comme tout le
 monde, sa fiche est dans « Les gens ». L'onglet faisait doublon avec sa propre ligne.
 

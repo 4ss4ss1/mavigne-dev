@@ -1,0 +1,25 @@
+{
+  "lot": "VUE-EQUIPE-1",
+  "section": "§251",
+  "base": "7f013fbab10852efc85a5107fbba58f7f00c9307",
+  "inclut": [],
+  "date": "2026-10-05",
+  "fichiers": {
+    ".mv-base": "290371a21d4f67bbe6dc97f00ff11ba9f04156f9d9c89ac832e1473394a9df30",
+    "CLAUDE.md": "7927119d50f0b4074e532f56f97bc22d8e410650084c0990aa36b3cfab9a5eb4",
+    "docs/claude/INDEX.md": "6447a2e9721ff9e716688244e0ff88dedb385fa00cfe09fac40a6ed4dbea0248",
+    "docs/claude/chantiers-230-279.md": "349c3226d4406228125ec97bdae6f18df974b1da1fa59dae72977a4597e08d2c",
+    "docs/claude/journal.md": "9fc0c0a43953a6d253772c2793998cdde1eaf0772b60463c1a0e21b1aba1195e",
+    "docs/claude/modules.md": "f4a05a9896946578b97aac2cfde135868fb10e0a1e9b5041d51019fa27866960",
+    "guide/10-planning.html": "99d8ebc92fa15d228e6ad853b349002a387789938de1105db43b69fab5d7ecd6",
+    "index.html": "0039425feb6c4347dcd3b93c10414a0b03fa1b75476f3bccbba74acb1ae777b6",
+    "public/sw.js": "82ee0d62a667b173899a2198be0945673fcbe7dde46625b38ce33993142f0ceb",
+    "scripts/harnais-claude-md.mjs": "4a2b9957408f2d9a2b5a6cb74c1ca5d256ed677e28b90862bef41e75e13dd033",
+    "scripts/mv-harnais-liste.mjs": "ac288ff41f5e20a7883d927daaba9c7b0377cb0bf4648325dd4cd7dbaf822181",
+    "scripts/mv-harnais-regl-module.mjs": "9e57e18b89367d83705fb90e9833562df4342d1be3b9b521631649b14500f00b",
+    "scripts/mv-harnais-robustesse-planning.mjs": "ce197b189e9e9abe07abecd85ce5af7d08bd5f7050f40ab81eb446f1d26446f7",
+    "src/planning.js": "9d9cbbbcc0e5dba0cbf9aa87ad49bf9522ccab906a0d5b8fc7330bc3398ef78c",
+    "src/utils.js": "f16abae5a3039bb088c6bdf61a892fe86548b1116664e5d577d5893976fdc5c2",
+    "scripts/mv-harnais-vueeq1.mjs": "cf73dae6eca5f6b1f126c2df495d55b2f60d9feb3f2edd1b6adadfa5cf47ffff"
+  }
+}

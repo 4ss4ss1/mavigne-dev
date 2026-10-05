@@ -295,3 +295,4 @@
 | 248 | 248. ★★ JOURNAL-1 — LE JOURNAL NE MET EN PAGE QUE LES JOURS QUI SE VOIENT (05/10 — `src/styles.css` · `src/… | `docs/claude/chantiers-230-279.md` |
 | 249 | 249. ★★★ GT-1 — LA CONSOLE GUERETTECH QUITTE L'APPLI DES CLIENTS (05/10 — `index.html` · `src/app.js` · `sr… | `docs/claude/chantiers-230-279.md` |
 | 250 | 250. ★★★ MOTIFS-1 — LES MOTIFS D'ABSENCE NE QUITTENT PLUS L'APPAREIL DE L'ADMIN (05/10 — `functions/plannin… | `docs/claude/chantiers-230-279.md` |
+| 251 | 251. ★★ VUE-EQUIPE-1 — L'ÉQUIPE DU MOIS, VUE PAR UN SALARIÉ (05/10 — `src/planning.js` · `index.html` (ongl… | `docs/claude/chantiers-230-279.md` |

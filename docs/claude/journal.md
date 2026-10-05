@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **5 octobre 2026 (MOTIFS-1)** — ★★★ **LES MOTIFS D'ABSENCE NE QUITTENT PLUS L'APPAREIL DE L'ADMIN** (§250).
+> Règle de Nico : un salarié ne voit pas les motifs de ses collègues — et son téléphone ne les reçoit pas. `planning_entries`, `planning_hsup`,
+> `planning_acomptes` : lecture admin seule (`isAdminReadDoc`). Le serveur fabrique `planning_equipe` (l'équipe sans motif) et `planning_moi_<uid>`
+> (SES jours complets) — déclencheurs `functions/planning-vues.js`, règle pure `planning-vues-calc.js` ; un téléphone de salarié les compose
+> (`src/planning-vue.js`, `firebase.js/_mvClesLues`, garde de `fbSave`). Ordre : functions → `gtPlanningVues` → hosting → rules (§28).
+> Harnais `mv-harnais-motifs1` (49 + 14 contre-épreuves) et section P de `mv-harnais-rules`. Marque `lots/MOTIFS-1.json`. Base `986a76d`.
+> **APP 8.23 → 8.24, SW 8.99 → 9.00**. Précédent : GT-1 (§249), la console GUERETTECH dans gt.html — archivé dans journal.md.
+
 > ★ Consolidation : **5 octobre 2026 (GT-1)** — ★★★ **LA CONSOLE GUERETTECH QUITTE L'APPLI DES CLIENTS** (§249). Elle est à **/gt.html**.
 > `index.html` = l'appli des clients, sans `admin-gt.js` ni le balisage GT (repères `MV-GT:CONNEXION` / `MV-GT:CONSOLE`). `gt.html` = la même appli +
 > `src/gt/connexion.html` + `src/gt/console.html`, entrée `src/gt.js` (app.js PUIS admin-gt.js) ; FABRIQUÉE par `scripts/mv-gt-page.mjs` à chaque

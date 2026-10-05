@@ -206,7 +206,7 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
   T(nb(html, /_mvReglOpen\('planning'\)/g) === 1, 'la roue du Planning est sur son en-t\u00eate');
   const iP = html.indexOf('id="ovReglPlanning"'), hP = html.indexOf('id="plan-cadre-host"'), dP = html.indexOf('id="regl-docs-planning"');
   T(iP > 0 && hP > iP && dP > hP && dP < html.indexOf('id="page-chat"'), 'la feuille du Planning porte l\u2019h\u00f4te du cadre puis les documents');
-  T(/var _PLAN_VALID_TAB=\{mois:1,gens:1,moi:1\};/.test(pln), '_PLAN_VALID_TAB ne conna\u00eet plus cadre');
+  T(/var _PLAN_VALID_TAB=\{mois:1,gens:1,moi:1,eqmois:1\};/.test(pln), '_PLAN_VALID_TAB ne conna\u00eet plus cadre');
   T(/cadre:'mois'/.test(pln) && /templates:'mois'/.test(pln), 'les cl\u00e9s m\u00e9moris\u00e9es cadre et templates atterrissent sur le mois');
   T(/if\(tab==='cadre'\)\{ if\(window\._mvReglOpen\) window\._mvReglOpen\('planning'\); return; \}/.test(pln), 'planSwitchTab(\'cadre\') ouvre la roue');
   T(!/planTab==='cadre'/.test(pln), 'plus aucune branche planTab===cadre');

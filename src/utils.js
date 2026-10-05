@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.24';
+export const APP_VERSION = '8.25';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -852,6 +852,12 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.25', d: '2026-10-05', items: [
+    { niv: 0, pour: ['salaries'], emoji: 'equipe', titre: 'L’équipe du mois dans le Planning',
+      desc: "Un nouvel onglet, L’équipe, montre qui est là jour par jour ce mois-ci : présent ou absent, sans jamais le motif — même un congé s’affiche « Abs ». Votre propre mois reste dans Mon mois." },
+    { niv: 0, pour: ['admin'], emoji: 'equipe', titre: 'Vos salariés voient qui est là',
+      desc: "Dans le Planning, chaque salarié a désormais un onglet L’équipe, en lecture seule : présent ou absent pour chacun, sur le mois en cours, sans motif, sans heures ni congés restants. Rien ne change dans vos écrans." },
+  ] },
   { v: '8.24', d: '2026-10-05', items: [
     { niv: 0, pour: ['admin'], emoji: 'cadenas', titre: 'Les motifs d’absence ne quittent plus votre appareil',
       desc: "Le téléphone d’un salarié ne reçoit plus les motifs d’absence, les commentaires, les heures sup ni les acomptes de ses collègues : seulement ses propres jours, et l’équipe sans aucun motif. Rien ne change pour vous, ni à l’écran des salariés." },
@@ -4542,7 +4548,8 @@ var MV_AIDE = {
   planning: {
     ico: 'calendrier', titre: 'Planning', ancre: 'planning',
     points: [
-      ['Deux onglets', ": Le mois, la grille de toute l’équipe. Les gens, une ligne par salarié et sa fiche. Un salarié qui n’est pas administrateur n’a pas d’onglets : il arrive sur son mois."],
+      ['Deux onglets', ": Le mois, la grille de toute l’équipe. Les gens, une ligne par salarié et sa fiche. Un salarié qui n’est pas administrateur a les deux siens : Mon mois, où il arrive comme avant, et L’équipe."],
+      ['L’équipe, côté salarié', "montre qui est là, jour par jour, sur le mois en cours : présent ou absent, jamais le motif — même un congé s’affiche « Abs » —, ni les heures, l’écart ou les congés des autres. Une absence d’une partie de la journée compte « présent ». Sa propre ligne est en tête ; la ligne Présents compte qui est là parmi ceux attendus ce jour-là (les équipes collectives n’y entrent pas). Lecture seule."],
       ['La roue crantée', "en haut à droite ouvre le cadre de l’année — modèles de semaine, coupure, convention, règle des congés, sort des heures sup — et les relevés à imprimer. Administrateur seulement."],
       ['Changer d’année', "se fait par les onglets au-dessus de la grille. Tant qu’aucun modèle n’est enregistré pour une année, sa grille est un report du modèle intégré, replacé sur les bons jours de la semaine. Un bandeau le dit et compte les jours qui restent à poser : une année n’a pas les mêmes semaines qu’une autre, et rien n’est ajouté à votre place."],
       ['Toucher une case', "la coche. Toucher le numéro du jour, en haut, coche toute l’équipe ce jour-là ; toucher un nom coche sa ligne ; toucher « Salarié », dans le coin, coche tout ce qui est affiché. Un deuxième appui décoche."],
@@ -4562,7 +4569,7 @@ var MV_AIDE = {
       ['Le relevé d’un seul salarié', "s’imprime au même endroit, en choisissant la personne et le mois : son mois jour par jour, ses contrats avec leurs coupures, ses congés payés, son compteur d’heures et son annualisation, avec les signatures. Le bouton PDF de sa fiche sort exactement le même document. À partir de septembre 2026, il commence par le cadre Pour la compta, puis chaque jour en colonnes Prévu, Fait et Absence ; une case note la date d’envoi à la compta. Il compte tout le mois, les jours à venir aux heures du planning, pour partir à la compta la dernière semaine ; il porte une retenue sur salaire ou des heures sup à payer, jamais les deux. Les anciens salariés y figurent aussi, marqués comme tels : un relevé est un document d’histoire."],
       ['Un ancien salarié', "reste compté dans les mois où il était sous contrat. Reculez d’un mois dans Les gens : il reprend sa ligne dans la liste, avec ses heures, et il disparaît de la section Anciens salariés ce mois-là. Passer une fiche en Inactif ferme son accès à l’application, cela n’efface aucune heure déjà faite."],
       ['Dimanches et jours fériés travaillés', "se majorent tout seuls — 50 % le dimanche, 100 % un jour férié, taux modifiables dans la roue crantée du Planning. Seules les heures réellement faites comptent : un férié chômé reste payé sans majoration, un congé ou une récup ne majorent rien, et un férié qui tombe un dimanche prend le taux le plus fort, jamais les deux — de même qu’une heure sup faite un dimanche. Non prévus au planning, ils comptent toujours en entier, en heures sup à leur taux, même quand la semaine a une absence. Prévus au planning, seule leur majoration est due — sauf si le domaine a choisi « Toujours des heures sup » dans la roue crantée : alors toutes leurs heures sont des heures sup, avant septembre aussi. Majoration seule : elle part en paie si vos heures sup se paient, au compteur si elles se récupèrent. En paie, elle couvre d’abord les absences du mois, les heures à rattraper et la récup prise : seul ce qu’il en reste se paie, et une feuille ne porte jamais une retenue à côté d’une majoration à payer. Elle ne compte pas dans les 1 607 h."],
-    ['Taux horaires et acomptes', ": administrateurs seulement, et jamais enregistrés sur l’appareil."]
+    ['Taux horaires, acomptes, heures sup et motifs d’absence', ": administrateurs seulement. Les taux ne sont jamais enregistrés sur un appareil ; le téléphone d’un salarié ne reçoit que ses propres jours, et l’équipe sans motif."]
     ]
   },
   cave: {

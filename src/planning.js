@@ -3077,7 +3077,9 @@ var PLAN_BG='#1C1A2E',PLAN_ACC='var(--plan-acc)',PLAN_ACC2='var(--plan-acc)';
 //   Tracteur et la Cave. Les clés mémorisées 'cadre' et 'templates' atterrissent
 //   sur le mois ; planSwitchTab('cadre') ouvre la roue — personne ne voit le vide.
 var _PLAN_TAB_MIGR={planning:'mois',equipe:'mois',tableau:'mois',saisie:'mois',templates:'mois',cadre:'mois'};
-var _PLAN_VALID_TAB={mois:1,gens:1,moi:1};
+var _PLAN_VALID_TAB={mois:1,gens:1,moi:1,eqmois:1};   // ★★ VUE-EQUIPE-1 (§251) : « eqmois » = l'equipe du mois, vue salarie.
+// ⚠️ PAS « equipe » : c'est une ANCIENNE cle d'onglet, migree vers « mois » par _PLAN_TAB_MIGR ci-dessus — la reprendre
+//   renvoyait le salarie sur Mon mois a chaque rendu (chaque donnee recue). Trouve par mv-harnais-vueeq1 (V2).
 
 function renderPlanning(){
   if(!window._dataReady){ var _pb=document.getElementById('plan-body'); if(_pb)_pb.innerHTML=window._mvSk('planning'); return; }
@@ -3086,13 +3088,16 @@ function renderPlanning(){
   _planMigrateYears();
   // Les deux onglets d'administration ; l'ouvrier n'en voit aucun et tombe
   // directement sur son mois — un onglet unique n'est pas un choix, c'est un décor.
+  // ★★ VUE-EQUIPE-1 (§251) : le salarie a desormais DEUX onglets a lui — Mon mois (comme avant, ouvert par defaut)
+  //   et L'equipe (lecture seule). Les deux onglets d'administration lui restent caches.
   var adm=isAdmin();
   document.querySelectorAll('.plan-tab-admin').forEach(function(t){t.style.display=adm?'':'none';});
+  document.querySelectorAll('.plan-tab-sal').forEach(function(t){t.style.display=adm?'none':'';});
   var tabsWrap=document.getElementById('plan-tabs');
-  if(tabsWrap)tabsWrap.style.display=adm?'':'none';
+  if(tabsWrap)tabsWrap.style.display='';
   if(_PLAN_TAB_MIGR[planTab])planTab=_PLAN_TAB_MIGR[planTab];
-  if(!adm)planTab='moi';
-  else if(!_PLAN_VALID_TAB[planTab]||planTab==='moi')planTab='mois';
+  if(!adm){ if(planTab!=='eqmois')planTab='moi'; }
+  else if(!_PLAN_VALID_TAB[planTab]||planTab==='moi'||planTab==='eqmois')planTab='mois';
   _planRenderHeader();
   _planRenderBody();
 }
@@ -3138,6 +3143,8 @@ function _planRenderHeader(){
         +'<div class="mvu-kpi"><div class="mvu-kpi-v" style="color:'+_col+'">'+_planFmtEtp(_etpM)+'</div><div class="mvu-kpi-l">ETP requis</div></div>'
         +_alertHtml;
     }
+  } else if(planTab==='eqmois'){
+    sb.innerHTML=_planEqSalKpis();   // VUE-EQUIPE-1 : presents / absents aujourd'hui, presents demain
   } else if(window.currentUser){
     var me=_planMbrs().find(function(m){return m.nom===window.currentUser.nom;});
     if(me){
@@ -3157,7 +3164,7 @@ function _planRenderHeader(){
 }
 
 function _planRenderBody(){
-  if(!isAdmin()){_planRenderMon();_pl2AbarSync();return;}
+  if(!isAdmin()){ if(planTab==='eqmois')_planRenderEqSal(); else _planRenderMon(); _pl2AbarSync(); return; }
   if(planTab==='gens')_planRenderGens();
   else _pl2RenderEquipe();
   _pl2AbarSync();
@@ -4011,6 +4018,148 @@ function _planRenderMon(){
   var me=window.currentUser?_planMbrs().find(function(m){return m.nom===window.currentUser.nom;}):null;
   if(!me){body.innerHTML='<div class="plan-empty">Connectez-vous pour voir votre planning.</div>';return;}
   body.innerHTML=_planBuildMonHtml(me,isAdmin());
+}
+
+// ════ ★★ VUE-EQUIPE-1 (§251) — L'EQUIPE DU MOIS, VUE PAR UN SALARIE (lecture seule) ════
+// Demande de Nico (05/10/2026), maquette « Planning — vue salarie » validee par « go » : chaque salarie voit qui est la
+// dans l'equipe, jour par jour, sur le mois EN COURS — present ou absent, JAMAIS le motif (meme un conge s'affiche
+// « Abs »), ni les heures, l'ecart ou les conges restants des autres. Une absence d'une partie de la journee compte
+// « present ». Sa ligne en tete ; la ligne Presents compte qui est la parmi ceux attendus ce jour-la (presents + absents ;
+// les equipes collectives n'y entrent pas : « x30 » noierait l'equipe).
+// ★ LE CLASSEMENT D'UN JOUR EST CELUI DE LA GRILLE DE L'ADMIN (_pl2Cell) : une seule definition de « ce jour-la ».
+// ⚠️ Rien ici ne lit ni n'ecrit un motif : _pl2Cell n'en rend aucun, et depuis MOTIFS-1 (§250) le telephone d'un salarie
+//    ne detient de toute facon que l'equipe sans motif (planning_equipe) et SES jours.
+var _plEqView='wk';   // 'wk' | 'mo'
+var _plEqWi=null;     // semaine affichee (null = celle d'aujourd'hui)
+var _PLEQ_PRES={'pl2c-w':1,'pl2c-up':1,'pl2c-dn':1,'pl2c-mod':1,'pl2c-heat':1,'pl2c-late':1};
+var _PLEQ_ABS={'pl2c-cp':1,'pl2c-rec':1,'pl2c-abs':1};
+// Le mois EN COURS, toujours (demande de Nico). Un salarie n'a pas de navigation de mois : ceci la verrouille.
+function _planEqMoisCourant(){
+  var t=new Date();
+  if(planMonth!==t.getMonth()||planYear!==t.getFullYear()){ planMonth=t.getMonth(); planYear=t.getFullYear(); _plEqWi=null; }
+}
+function _planEqEtat(mbr,plId,d,L){
+  var c=_pl2Cell(mbr,plId,d,L);
+  if(c.hc)return 'hc';
+  if(_PLEQ_ABS[c.cls])return 'abs';
+  if(_PLEQ_PRES[c.cls])return 'pres';
+  return 'rep';
+}
+function _planEqData(){
+  var L=_planLegal(),nb=_planDays(planMonth),cu=window.currentUser,moi=cu?cu.nom:'';
+  var mbrs=_pl2Actifs().slice();
+  mbrs.sort(function(a,b){ return (a.nom===moi?0:1)-(b.nom===moi?0:1); });   // SA ligne en tete, les autres dans l'ordre de la grille
+  return {nb:nb,lignes:mbrs.map(function(mbr){
+    var plId=_planPlId(mbr),jours={};
+    for(var d=1;d<=nb;d++)jours[d]=_planEqEtat(mbr,plId,d,L);
+    return {mbr:mbr,nom:mbr.nom,moi:mbr.nom===moi,coll:!!(window._mvEstCollectif&&window._mvEstCollectif(mbr)),jours:jours};
+  })};
+}
+// Presents ce jour-la parmi ceux qu'on attendait (presents + absents) : repos et hors contrat n'attendent personne.
+function _planEqCompte(data,d){
+  var p=0,n=0;
+  data.lignes.forEach(function(l){ if(l.coll)return; var e=l.jours[d]; if(e==='pres'){p++;n++;} else if(e==='abs')n++; });
+  return {p:p,n:n};
+}
+function _planEqSalKpis(){
+  _planEqMoisCourant();
+  var data=_planEqData(),t=new Date(),a=_planEqCompte(data,t.getDate());
+  var dem=new Date(t.getFullYear(),t.getMonth(),t.getDate()+1);
+  var b=(dem.getMonth()===planMonth)?_planEqCompte(data,dem.getDate()):{p:0,n:0};
+  var nAbs=a.n-a.p;
+  function k(v,l){ return '<div class="mvu-kpi"><div class="mvu-kpi-v">'+v+'</div><div class="mvu-kpi-l">'+l+'</div></div>'; }
+  return k(a.n?a.p+' sur '+a.n:'\u00b7','Pr\u00e9sents aujourd\u2019hui')
+    +k(a.n?String(nAbs):'\u00b7',nAbs>1?'Absents aujourd\u2019hui':'Absent aujourd\u2019hui')
+    +k(b.n?b.p+' sur '+b.n:'\u00b7','Pr\u00e9sents demain');
+}
+function _planEqInjectCss(){
+  if(document.getElementById('pleq-css'))return;
+  var st=document.createElement('style');st.id='pleq-css';
+  st.textContent='.pleq .pleq-ro{cursor:default}'
+    +'.pleq .pl2-nav-btn:disabled{opacity:.35;cursor:default;box-shadow:none}'
+    +'.pleq-chip{display:inline-flex;align-items:center;justify-content:center;gap:1px;min-width:32px;height:26px;padding:0 4px;box-sizing:border-box;border-radius:9px;font-weight:700;line-height:1;border:1px solid transparent}'
+    +'.pleq .pl2-mo .pleq-chip{min-width:26px;height:22px;padding:0 3px}'
+    +'.pleq-pres{background:var(--vert-pale);color:var(--vert-tx,#31601C);border-color:rgba(61,107,39,0.28)}'
+    +'.pleq-abs{background:var(--cave);color:var(--or-clair);font-size:var(--pt-micro,12px);letter-spacing:.02em}'
+    +'.pleq-chip sup{font-size:var(--pt-micro,12px);font-weight:700;opacity:.85;margin-left:1px}'
+    +'.pleq .pleq-moi{background:linear-gradient(var(--or-pale),var(--or-pale)),var(--bg-card)}'
+    +'.pleq .pleq-moicell:not(.pl2-we):not(.pl2-tdcol){background:rgba(194,161,77,0.08)}'
+    +'.pleq-vous{display:block;font-size:var(--pt-micro,12px);font-weight:600;color:var(--or-tx,#7A5E12)}'
+    +'.pleq-lg{color:var(--texte-doux)}'
+    +'.pl2-legend i.pleq-pres{background:var(--vert-pale);border:1px solid rgba(61,107,39,0.28)}'
+    +'.pl2-legend i.pleq-abs{background:var(--cave)}'
+    +'.pleq .pleq-totauj{color:var(--vert-tx,#31601C)}'
+    +'.pleq-note{display:flex;align-items:center;gap:var(--e-2,8px);margin-top:var(--e-3,12px);font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.4}';
+  document.head.appendChild(st);
+}
+function _planEqCols(mo,ws){
+  if(mo){ var a=[]; for(var d=1;d<=_planDays(planMonth);d++)a.push(d); return a; }
+  var w=ws[_plEqWi],c=[];
+  for(var j=0;j<7;j++){ var dt=new Date(w.mon); dt.setDate(w.mon.getDate()+j); c.push(dt.getMonth()===planMonth?dt.getDate():null); }
+  return c;
+}
+function _planEqSalHtml(){
+  _planEqMoisCourant();
+  var data=_planEqData(),mo=_plEqView==='mo',ws=_planMonthWeeks(planMonth);
+  if(_plEqWi==null||_plEqWi<0||_plEqWi>=ws.length)_plEqWi=_pl2WiDefault();
+  var cols=_planEqCols(mo,ws),lbl1,lbl2;
+  if(mo){ lbl1=PLAN_MOIS[planMonth]+' '+planYear; lbl2='Le mois en cours'; }
+  else{ var w=ws[_plEqWi],d0=w.days[0],d1=w.days[w.days.length-1]; lbl1='Semaine '+w.no; lbl2=d0+(d1!==d0?' \u2013 '+d1:'')+' '+PLAN_MOIS[planMonth].toLowerCase()+' '+planYear; }
+  var precOff=mo||_plEqWi<=0,suivOff=mo||_plEqWi>=ws.length-1;
+  var h='<div class="pleq"><div class="pl2-toolbar">'
+    +'<button class="pl2-nav-btn" onclick="planEqNav(-1)"'+(precOff?' disabled':'')+' aria-label="Semaine pr\u00e9c\u00e9dente">\u2039</button>'
+    +'<div class="pl2-nav-lbl"><span class="pl2-nav-l1">'+lbl1+'</span><span class="pl2-nav-l2">'+lbl2+'</span></div>'
+    +'<button class="pl2-nav-btn" onclick="planEqNav(1)"'+(suivOff?' disabled':'')+' aria-label="Semaine suivante">\u203a</button>'
+    +'<div class="pl2-seg"><button class="'+(mo?'':'on')+'" onclick="planEqVue(\'wk\')">Sem.</button><button class="'+(mo?'on':'')+'" onclick="planEqVue(\'mo\')">Mois</button></div>'
+  +'</div>';
+  h+='<div class="pl2-board"><div class="pl2-bwrap"><div class="pl2-grid'+(mo?' pl2-mo':' pl2-wk')+'" style="--nbc:'+cols.length+'">';
+  h+='<div class="pl2-corner pleq-ro">\u00c9quipe</div>';
+  cols.forEach(function(d){
+    if(d==null){h+='<div class="pl2-dh pl2-dh-out pleq-ro"><span class="pl2-dh-dow">&nbsp;</span><span class="pl2-dh-num">\u00b7</span></div>';return;}
+    var dow=_planDow(planMonth,d),we=(dow===0||dow===6),fer=_planFerie(planMonth,d);
+    h+='<div class="pl2-dh pleq-ro'+(we?' pl2-we':'')+(_pl2IsToday(d)?' pl2-today':'')+'"><span class="pl2-dh-dow">'+(mo?PLAN_JOURS[dow].charAt(0):PLAN_JOURS[dow])+'</span><span class="pl2-dh-num">'+d+'</span>'+(fer?'<span class="pl2-dh-fer" title="'+_escAttr(fer)+'"></span>':'')+'</div>';
+  });
+  data.lignes.forEach(function(l){
+    h+='<div class="pl2-name pleq-ro'+(l.moi?' pleq-moi':'')+'"><span class="pl2-ava" style="background:'+(l.mbr.couleur||'#3D6B27')+'">'+(l.coll?_mvIcon('equipe',16):_escHtml(l.nom.charAt(0)))+'</span>'
+      +'<span class="pl2-name-t"><span class="pl2-name-n">'+_escHtml(l.nom)+'</span>'+(l.moi?'<span class="pleq-vous">vous</span>':'')+'</span></div>';
+    cols.forEach(function(d){
+      if(d==null){h+='<div class="pl2-cell pl2-cell-out pleq-ro"></div>';return;}
+      var dow=_planDow(planMonth,d),we=(dow===0||dow===6),e=l.jours[d],chip;
+      if(e==='pres'){ var n=l.coll?_planEffN(l.mbr,planMonth,d):1; chip='<span class="pleq-chip pleq-pres" role="img" aria-label="Pr\u00e9sent">'+_mvIcon('check',16)+(n>1?'<sup>\u00d7'+n+'</sup>':'')+'</span>'; }
+      else if(e==='abs')chip='<span class="pleq-chip pleq-abs" title="Absent">Abs</span>';
+      else if(e==='hc')chip='<span class="pl2-chip pl2c-hc" aria-label="Hors contrat">\u2013</span>';
+      else chip='<span class="pl2-chip pl2c-off" aria-label="Repos">\u00b7</span>';
+      h+='<div class="pl2-cell pleq-ro'+(we?' pl2-we':'')+(_pl2IsToday(d)?' pl2-tdcol':'')+(l.moi?' pleq-moicell':'')+'">'+chip+'</div>';
+    });
+  });
+  h+='<div class="pl2-totl pleq-ro">Pr\u00e9sents</div>';
+  cols.forEach(function(d){
+    if(d==null){h+='<div class="pl2-tot">\u00b7</div>';return;}
+    var c=_planEqCompte(data,d);
+    h+='<div class="pl2-tot'+(_pl2IsToday(d)?' pleq-totauj':'')+'">'+(c.n?c.p+'/'+c.n:'\u00b7')+'</div>';
+  });
+  h+='</div></div><div class="pl2-legend">'
+    +'<span><i class="pleq-pres"></i> Pr\u00e9sent</span><span><i class="pleq-abs"></i> Absent</span>'
+    +'<span><span class="pleq-lg">\u00b7</span> Repos</span><span><i style="background:var(--or)"></i> F\u00e9ri\u00e9</span>'
+    +'<span><span class="pleq-lg">\u2013</span> Hors contrat</span>'
+  +'</div></div>';
+  h+='<div class="pleq-note">'+_mvIcon('cadenas',16)+'<span>Lecture seule. Le motif d\u2019une absence ne s\u2019affiche pas.</span></div></div>';
+  return h;
+}
+function _planRenderEqSal(){
+  var body=document.getElementById('plan-body');
+  if(!body)return;
+  _planEqInjectCss();
+  body.innerHTML=_planEqSalHtml();
+}
+function planEqVue(v){ _plEqView=(v==='mo')?'mo':'wk'; _planRenderEqSal(); }
+function planEqNav(dir){
+  if(_plEqView==='mo')return;   // le mois entier est deja a l'ecran — et on ne sort jamais du mois en cours
+  var ws=_planMonthWeeks(planMonth);
+  if(_plEqWi==null)_plEqWi=_pl2WiDefault();
+  var ni=_plEqWi+dir;
+  if(ni<0||ni>=ws.length)return;
+  _plEqWi=ni;_planRenderEqSal();
 }
 
 function _planBuildMonHtml(mbr,canEdit){
@@ -9092,6 +9241,8 @@ window.planCalcResult       = planCalcResult;
 // ── Grille équipe / fiche salarié / sélection / outils / chaleur ──
 window.pl2SetView           = pl2SetView;
 window.pl2Nav               = pl2Nav;
+window.planEqVue            = planEqVue;   // VUE-EQUIPE-1 (§251)
+window.planEqNav            = planEqNav;
 // ★ La sélection : quatre gestes de cochage, un seul état. planToggleMulti,
 //   planMultiApply, planMultiHeures, planMultiHApply, planMultiAbsApply et leurs
 //   satellites ont disparu avec le mode « Sélection multiple ».

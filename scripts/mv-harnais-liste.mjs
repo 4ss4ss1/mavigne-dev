@@ -493,4 +493,6 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-gt1.mjs --contre'],
   ['node scripts/mv-harnais-motifs1.mjs'],            // MOTIFS-1 (§250) : motifs, heures sup et acomptes ne quittent plus l'appareil de l'admin
   ['node scripts/mv-harnais-motifs1.mjs --contre'],
+  ['node scripts/mv-harnais-vueeq1.mjs'],             // VUE-EQUIPE-1 (§251) : l'équipe du mois vue par un salarié — présent / absent, jamais le motif
+  ['node scripts/mv-harnais-vueeq1.mjs --contre'],
 ];

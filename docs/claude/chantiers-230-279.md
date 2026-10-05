@@ -939,3 +939,44 @@ le montrait pas ; le téléphone le détenait. Nico : « il ne faut pas que les 
 ### 250e. Ouvert
 
 Voir §28, « MOTIFS-1 — ce qui reste ouvert » : l'ordre de déploiement, `npm run test:rules`, le lot de la vue d'équipe, les limites.
+
+## 251. ★★ VUE-EQUIPE-1 — L'ÉQUIPE DU MOIS, VUE PAR UN SALARIÉ (05/10 — `src/planning.js` · `index.html` (onglets) · `src/utils.js` (aide, APP, WHATS_NEW) · `public/sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-vueeq1.mjs` (neuf) · `scripts/mv-harnais-robustesse-planning.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/VUE-EQUIPE-1.json` · **APP 8.24 → 8.25, SW 9.00 → 9.01**, base `7f013fb`)
+
+### 251a. La demande et la maquette
+
+Nico, 05/10 : les salariés voient le planning du mois en cours, avec les présences et absences de leurs collègues, sans pouvoir rien
+modifier — et sans les motifs (le second point a d'abord donné MOTIFS-1, §250). Maquette « Planning — vue salarié » (canevas, trois
+écrans), validée par « go ». Décisions portées par la maquette : même un congé s'affiche « Abs » ; une absence d'une partie de la journée
+compte « présent » ; ni heures, ni écart, ni congés des autres ; sa ligne en tête ; « Présents » compte les présents parmi les attendus ;
+mois en cours seulement ; Mon mois reste l'onglet d'ouverture.
+
+### 251b. Ce qui change
+
+- **Deux onglets pour le salarié** (`.plan-tab-sal` dans `index.html`) : Mon mois (`moi`) et L'équipe (`eqmois`). Les deux onglets de
+  l'admin lui restent cachés ; `renderPlanning` montre désormais la barre à tout le monde.
+- **La vue** (`_planEqSalHtml`, `_planEqSalKpis`, `_planEqData`) reprend la grille de l'admin (classes `pl2-*`) en `<div>` sans geste :
+  aucune case, aucun nom, aucun jour ne réagit ; seules la navigation et la bascule semaine / mois. Pastilles neutres (`pleq-pres`,
+  `pleq-abs` — aucune couleur ne porte le motif : la liste des jours, elle, colore par effet de paie, et l'aurait trahi). CSS injecté
+  (`_planEqInjectCss`), tailles par jetons uniquement.
+- **Un jour se classe par `_pl2Cell`**, la cellule de la grille de l'admin : congé, récup, absence → absent ; heures, chaleur, retard ou
+  absence partielle (pl2c-late) → présent ; sans heures au modèle → repos ; hors contrat → « – ». Une seule définition de « ce jour-là ».
+- **Le mois en cours, verrouillé** (`_planEqMoisCourant`) ; flèches bornées aux semaines du mois, éteintes sur le mois entier.
+
+### 251c. Trouvé en route
+
+- ★★ **La clé `equipe` était déjà prise** — par une ANCIENNE clé d'onglet, migrée vers `mois` par `_PLAN_TAB_MIGR`. Avec elle, chaque
+  rendu (donc chaque donnée reçue) renvoyait le salarié sur Mon mois. Le premier passage du harnais l'a vu (V2) ; rien d'autre ne l'aurait
+  vu avant le terrain. ★ **Une clé neuve se cherche aussi dans les tables de migration**, pas seulement dans les clés valides.
+- Deux rouges du premier passage venaient du TEST : l'expression qui lisait la ligne « Présents » comptait aussi sa cellule de titre
+  (`pl2-totl` commence par `pl2-tot`) — 32 jours en octobre. Corrigé dans le harnais, pas dans le code.
+
+### 251d. Mesuré
+
+- `mv-harnais-vueeq1` (neuf) : **16 contrôles** sur le VRAI planning.js chargé dans Node, horloge au lundi 5 octobre 2026, données d'un
+  téléphone de salarié puis données complètes de l'admin (aucun motif à l'écran dans les deux cas) ; **8/8 contre-épreuves**, chacune dans
+  un processus à part.
+- `mv-harnais-robustesse-planning` : la vue salarié ajoutée aux surfaces du tirage au hasard (24 domaines × 12 mois) — vert.
+
+### 251e. Ouvert
+
+Voir §28, « VUE-EQUIPE-1 — ce qui reste ouvert ».

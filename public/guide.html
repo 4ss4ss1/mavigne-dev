@@ -2108,7 +2108,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   </div>
   <p class="lead">Le Planning gère les horaires réels de l'équipe, les congés, le compteur d'heures et
   les acomptes. C'est un module <b>réservé à l'administrateur</b> ; chaque salarié y voit son propre
-  mois, et rien d'autre.</p>
+  mois et, en lecture seule, qui est là dans l'équipe — jamais un motif d'absence.</p>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg> Deux onglets, et une roue crantée</h3>
   <ul class="dot">
@@ -2121,8 +2121,16 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     côté du mois. La roue porte aussi les <b>relevés à imprimer</b> : relevé mensuel, relevé d'un
     salarié, planning de l'année, planning de l'année d'un salarié, Heures &amp; ETP.</li>
   </ul>
-  <p>Un salarié qui n'est pas administrateur ne voit <b>aucun onglet</b> : il arrive directement sur
-  son mois.</p>
+  <p>Un salarié qui n'est pas administrateur a <b>deux onglets</b> : <b>Mon mois</b>, le sien, où il arrive comme
+  avant, et <b>L'équipe</b>.</p>
+
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-equipe"></use></svg> L'équipe, côté salarié</h3>
+  <p>Une grille en lecture seule, sur le <b>mois en cours</b> : pour chaque collègue, <b>présent</b> ou <b>absent</b>,
+  jour par jour, en semaine ou sur le mois entier. Jamais le motif — même un congé s'affiche « Abs » —, ni les
+  heures, ni l'écart, ni les congés restants des autres. Une absence d'une partie de la journée compte « présent ».
+  Sa propre ligne est en tête ; la ligne <b>Présents</b> compte, chaque jour, qui est là parmi ceux qui étaient
+  attendus (les équipes collectives n'y entrent pas). En haut, trois chiffres : présents aujourd'hui, absents
+  aujourd'hui, présents demain.</p>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-doigt"></use></svg> Cocher, puis agir</h3>
   <p>Dans <b>Le mois</b>, toucher une case la <b>coche</b>. Il n'y a pas de mode à activer avant.</p>

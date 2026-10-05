@@ -3,13 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **5 octobre 2026 (MOTIFS-1)** — ★★★ **LES MOTIFS D'ABSENCE NE QUITTENT PLUS L'APPAREIL DE L'ADMIN** (§250).
-> Règle de Nico : un salarié ne voit pas les motifs de ses collègues — et son téléphone ne les reçoit pas. `planning_entries`, `planning_hsup`,
-> `planning_acomptes` : lecture admin seule (`isAdminReadDoc`). Le serveur fabrique `planning_equipe` (l'équipe sans motif) et `planning_moi_<uid>`
-> (SES jours complets) — déclencheurs `functions/planning-vues.js`, règle pure `planning-vues-calc.js` ; un téléphone de salarié les compose
-> (`src/planning-vue.js`, `firebase.js/_mvClesLues`, garde de `fbSave`). Ordre : functions → `gtPlanningVues` → hosting → rules (§28).
-> Harnais `mv-harnais-motifs1` (49 + 14 contre-épreuves) et section P de `mv-harnais-rules`. Marque `lots/MOTIFS-1.json`. Base `986a76d`.
-> **APP 8.23 → 8.24, SW 8.99 → 9.00**. Précédent : GT-1 (§249), la console GUERETTECH dans gt.html — archivé dans journal.md.
+> Dernière consolidation : **5 octobre 2026 (VUE-EQUIPE-1)** — ★★ **L'ÉQUIPE DU MOIS, VUE PAR UN SALARIÉ** (§251).
+> Maquette « Planning — vue salarié » validée : le salarié a deux onglets, **Mon mois** (par défaut, inchangé) et **L'équipe** (clé `eqmois`,
+> lecture seule) — présent / absent jour par jour sur le mois EN COURS, jamais le motif (un congé = « Abs »), absence partielle = présent,
+> sa ligne en tête, « Présents » = présents parmi les attendus (collectives à part). Un jour se classe par `_pl2Cell`, comme la grille de
+> l'admin. ⚠️ Pas la clé `equipe` : ancienne clé migrée vers `mois` (trouvé par le harnais). Harnais `mv-harnais-vueeq1` (16 + 8 contre-épreuves),
+> surface ajoutée au tirage au hasard du Planning. Marque `lots/VUE-EQUIPE-1.json`. Base `7f013fb` (MOTIFS-1 poussé). **APP 8.24 → 8.25,
+> SW 9.00 → 9.01**. Précédent : MOTIFS-1 (§250), les motifs ne quittent plus l'appareil de l'admin — archivé dans journal.md.
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1828,6 +1828,14 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ VUE-EQUIPE-1 — CE QUI RESTE OUVERT (§251, posé le 05/10)
+
+1. **À regarder chez Nico, sur un téléphone de salarié** : les deux onglets, la grille en semaine et sur le mois, la ligne « Présents »,
+   « vous », la note de lecture seule, et en thème sombre. Aucun harnais ne lit une mise en page ; rendu non regardé côté Claude.
+2. **Le mois en cours seulement** (demande de Nico) : le 30, la semaine d'après n'est pas visible et « Présents demain » vaut « · » le dernier
+   jour du mois. À rouvrir si ça gêne à l'usage (mois en cours + suivant).
+3. Les équipes collectives s'affichent (×N) mais ne comptent pas dans « Présents » ; la visite guidée n'a pas de moment pour cet onglet.
+
 ### ⚠️ MOTIFS-1 — CE QUI RESTE OUVERT (§250, posé le 05/10)
 
 1. **Déployer DANS CET ORDRE** : `firebase deploy --only functions:planningVuesEntrees,functions:planningVuesMembres,functions:gtPlanningVues`
@@ -1838,9 +1846,7 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
    `firebase deploy --only firestore:rules`. Les règles avant l'appli : un téléphone pas encore à jour perdrait son planning.
 2. **`npm run test:rules` chez Nico** (ou le job CI `rules`) : 70 cas dont 17 P, 15 contre-épreuves dont 3 MOTIFS-1 — jamais joués côté
    Claude (pas d'émulateur dans le bac à sable).
-3. **Lot suivant : la vue de l'équipe pour les salariés** (maquette « Planning — vue salarié », go du 05/10) : onglets Mon mois / L'équipe,
-   présent / absent sans motif (congés compris), ligne « Présents », absence d'une partie de journée = présent, mois en cours seulement.
-   Elle lit `PLANNING_ENTRIES` tel que composé : les collègues y sont déjà sans motif.
+3. ✅ ~~**Lot suivant : la vue de l'équipe pour les salariés**~~ — fait au §251 (VUE-EQUIPE-1).
 4. **Limites assumées** : la vue personnelle d'un membre retiré n'est pas effacée (lisible par son seul compte, coupé par `off`) ; une fiche
    Inactive sans date de contrat peut manquer aux listes d'un salarié pour une année où elle n'avait que des horaires saisis
    (`_mvCompteSansDate` lit l'existence de l'année ; la vue d'équipe ne garde qu'absences, échanges et effectifs) ; les copies de secours
