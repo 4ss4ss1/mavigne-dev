@@ -7,7 +7,7 @@
   "src/app.js": {
     "dur": 153,
     "petit": 60,
-    "ko": 845
+    "ko": 847
   },
   "src/cave.js": {
     "dur": 29,
@@ -22,7 +22,17 @@
   "src/firebase.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 175
+    "ko": 184
+  },
+  "src/gt.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 1
+  },
+  "src/ids.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 5
   },
   "src/onboarding.js": {
     "dur": 4,
@@ -39,10 +49,15 @@
     "petit": 0,
     "ko": 858
   },
+  "src/planning-vue.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 4
+  },
   "src/planning.js": {
     "dur": 157,
     "petit": 91,
-    "ko": 650
+    "ko": 660
   },
   "src/reglages.js": {
     "dur": 157,
@@ -62,21 +77,21 @@
   "src/tracteur.js": {
     "dur": 35,
     "petit": 16,
-    "ko": 183
+    "ko": 182
   },
   "src/utils.js": {
     "dur": 6,
     "petit": 2,
-    "ko": 776
+    "ko": 778
   },
   "index.html": {
-    "dur": 176,
-    "petit": 38,
-    "ko": 362
+    "dur": 167,
+    "petit": 36,
+    "ko": 351
   },
   "src/styles.css": {
     "dur": 411,
     "petit": 90,
-    "ko": 484
+    "ko": 486
   }
 }

@@ -491,6 +491,10 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-journal1.mjs --contre'],
   ['node scripts/mv-harnais-gt1.mjs'],                // GT-1 (§249) : la console GUERETTECH hors de l'appli des clients (gt.html)
   ['node scripts/mv-harnais-gt1.mjs --contre'],
+  ['node scripts/mv-harnais-ids1.mjs'],               // IDS-1 lot 1 (§252) : identifiants permanents des parcelles, sans entrée ressuscitée
+  ['node scripts/mv-harnais-ids1.mjs --contre'],
+  ['node scripts/mv-harnais-ids1b.mjs'],              // IDS-1 lot 2 (§253) : le nom suit l'identifiant (renommage sans reprendre les écrans)
+  ['node scripts/mv-harnais-ids1b.mjs --contre'],
   ['node scripts/mv-harnais-motifs1.mjs'],            // MOTIFS-1 (§250) : motifs, heures sup et acomptes ne quittent plus l'appareil de l'admin
   ['node scripts/mv-harnais-motifs1.mjs --contre'],
   ['node scripts/mv-harnais-vueeq1.mjs'],             // VUE-EQUIPE-1 (§251) : l'équipe du mois vue par un salarié — présent / absent, jamais le motif

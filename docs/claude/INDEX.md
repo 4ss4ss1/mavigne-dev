@@ -296,3 +296,5 @@
 | 249 | 249. ★★★ GT-1 — LA CONSOLE GUERETTECH QUITTE L'APPLI DES CLIENTS (05/10 — `index.html` · `src/app.js` · `sr… | `docs/claude/chantiers-230-279.md` |
 | 250 | 250. ★★★ MOTIFS-1 — LES MOTIFS D'ABSENCE NE QUITTENT PLUS L'APPAREIL DE L'ADMIN (05/10 — `functions/plannin… | `docs/claude/chantiers-230-279.md` |
 | 251 | 251. ★★ VUE-EQUIPE-1 — L'ÉQUIPE DU MOIS, VUE PAR UN SALARIÉ (05/10 — `src/planning.js` · `index.html` (ongl… | `docs/claude/chantiers-230-279.md` |
+| 252 | 252. ★★ IDS-1, LOT 1 — CHAQUE PARCELLE A UN IDENTIFIANT PERMANENT (05/10 — `src/ids.js` (neuf) · `src/app.j… | `docs/claude/chantiers-230-279.md` |
+| 253 | 253. ★★ IDS-1, LOT 2 — LE NOM SUIT L'IDENTIFIANT (05/10 — `src/ids.js` · `src/app.js` (applyFbData, loadDat… | `docs/claude/chantiers-230-279.md` |

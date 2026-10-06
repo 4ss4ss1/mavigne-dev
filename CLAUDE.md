@@ -3,13 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **5 octobre 2026 (VUE-EQUIPE-1)** — ★★ **L'ÉQUIPE DU MOIS, VUE PAR UN SALARIÉ** (§251).
-> Maquette « Planning — vue salarié » validée : le salarié a deux onglets, **Mon mois** (par défaut, inchangé) et **L'équipe** (clé `eqmois`,
-> lecture seule) — présent / absent jour par jour sur le mois EN COURS, jamais le motif (un congé = « Abs »), absence partielle = présent,
-> sa ligne en tête, « Présents » = présents parmi les attendus (collectives à part). Un jour se classe par `_pl2Cell`, comme la grille de
-> l'admin. ⚠️ Pas la clé `equipe` : ancienne clé migrée vers `mois` (trouvé par le harnais). Harnais `mv-harnais-vueeq1` (16 + 8 contre-épreuves),
-> surface ajoutée au tirage au hasard du Planning. Marque `lots/VUE-EQUIPE-1.json`. Base `7f013fb` (MOTIFS-1 poussé). **APP 8.24 → 8.25,
-> SW 9.00 → 9.01**. Précédent : MOTIFS-1 (§250), les motifs ne quittent plus l'appareil de l'admin — archivé dans journal.md.
+> Dernière consolidation : **5 octobre 2026 (IDS-1, lot 2 — zip cumulatif avec le lot 1 non poussé)** — ★★ **LE NOM SUIT L'IDENTIFIANT** (§253).
+> Lot 1 (§252) : chaque parcelle et chaque entrée du journal reçoivent un `pid` déduit du nom (`src/ids.js`), posé par saveData, normalisé
+> des trois côtés dans les fusions. Lot 2 : au lieu de reprendre les 325 comparaisons de noms, le nom porté par une entrée est tenu À JOUR
+> d'après son `pid` (`mvNomsParPid`, `mvNomsJournal` — réception, chargement, écriture, fusion) : renommer une parcelle (lot 4) suffira, chaque
+> écran retrouvera son historique. Sans effet aujourd'hui. Harnais `mv-harnais-ids1`, `mv-harnais-ids1b`. Base `7a6a9ac`. **SW 9.01 → 9.03, APP 8.25.**
+> Précédent : VUE-EQUIPE-1 (§251, autre session) — archivé dans journal.md.
+> Taille : ≈ 13 octets par entrée (journal à 108 Ko, 10,5 %, chez le domaine de référence le 05/10 : négligeable).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---

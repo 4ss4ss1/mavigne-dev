@@ -8,6 +8,18 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **5 octobre 2026 (IDS-1, lot 1)** — ★★ **CHAQUE PARCELLE A UN IDENTIFIANT PERMANENT** (§252), choix de Nico (option A), livré en zip, remplacé avant d'être poussé par le zip cumulatif du lot 2 (§253).
+> `src/ids.js` : `mvPidDe(nom)` déduit du nom (deux téléphones posent le même) ; saveData pose `pid` sur les parcelles et les entrées du journal
+> d'une parcelle connue ; les deux fusions normalisent les trois côtés. Harnais `mv-harnais-ids1`. SW 9.01 → 9.02.
+
+> ★ Consolidation : **5 octobre 2026 (VUE-EQUIPE-1)** — ★★ **L'ÉQUIPE DU MOIS, VUE PAR UN SALARIÉ** (§251).
+> Maquette « Planning — vue salarié » validée : le salarié a deux onglets, **Mon mois** (par défaut, inchangé) et **L'équipe** (clé `eqmois`,
+> lecture seule) — présent / absent jour par jour sur le mois EN COURS, jamais le motif (un congé = « Abs »), absence partielle = présent,
+> sa ligne en tête, « Présents » = présents parmi les attendus (collectives à part). Un jour se classe par `_pl2Cell`, comme la grille de
+> l'admin. ⚠️ Pas la clé `equipe` : ancienne clé migrée vers `mois` (trouvé par le harnais). Harnais `mv-harnais-vueeq1` (16 + 8 contre-épreuves),
+> surface ajoutée au tirage au hasard du Planning. Marque `lots/VUE-EQUIPE-1.json`. Base `7f013fb` (MOTIFS-1 poussé). **APP 8.24 → 8.25,
+> SW 9.00 → 9.01**. Précédent : MOTIFS-1 (§250), les motifs ne quittent plus l'appareil de l'admin — archivé dans journal.md.
+
 > ★ Consolidation : **5 octobre 2026 (MOTIFS-1)** — ★★★ **LES MOTIFS D'ABSENCE NE QUITTENT PLUS L'APPAREIL DE L'ADMIN** (§250).
 > Règle de Nico : un salarié ne voit pas les motifs de ses collègues — et son téléphone ne les reçoit pas. `planning_entries`, `planning_hsup`,
 > `planning_acomptes` : lecture admin seule (`isAdminReadDoc`). Le serveur fabrique `planning_equipe` (l'équipe sans motif) et `planning_moi_<uid>`

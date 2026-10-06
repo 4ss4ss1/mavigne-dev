@@ -980,3 +980,89 @@ mois en cours seulement ; Mon mois reste l'onglet d'ouverture.
 ### 251e. Ouvert
 
 Voir §28, « VUE-EQUIPE-1 — ce qui reste ouvert ».
+
+---
+
+## 252. ★★ IDS-1, LOT 1 — CHAQUE PARCELLE A UN IDENTIFIANT PERMANENT (05/10 — `src/ids.js` (neuf) · `src/app.js` (saveData) · `src/firebase.js` (deux fusions) · `public/sw.js` · `scripts/mv-harnais-ids1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `audit-perf-ux.md` · `lots/IDS-1.json` · **SW 9.01 → 9.02, APP 8.25 inchangé**, base `7a6a9ac`)
+
+### 252a. La décision
+
+Plan §241, lot 12 : « renommer une parcelle ou un salarié devient sûr ». Deux chemins proposés à Nico le 05/10 —
+A, les vrais identifiants (l'audit) ; B, étendre aux parcelles le renommage des tâches (RENOM-3). L'objection de taille
+contre A (≈ 33 octets par entrée) est TOMBÉE avec la vraie mesure du jour (`npm run taille` sur la sauvegarde du 05/10 :
+journal 108 Ko, 10,5 % ; le plus gros document, `historique`, 192 Ko, 18,8 % — les « 800 Ko » étaient la taille du FICHIER
+de sauvegarde). Nico : « ta reco » → **A, en quatre lots, parcelles d'abord** (le planning, rangé par nom de salarié, est
+en chantier dans une autre session : §250, §251).
+
+### 252b. Ce qui change
+
+- **`src/ids.js`** (pur, comme `taille-doc.js`) : `mvPidDe(nom)` — l'identifiant est DÉDUIT DU NOM au moment où il est posé
+  (FNV-1a sur deux graines, ≈ 52 bits, `p` + au plus 11 caractères ; espaces autour et forme des accents sans effet) : deux
+  téléphones qui le posent en même temps posent le même — aucune course à arbitrer. Une fois posé, il ne bouge plus, même
+  si le nom change. `mvIdsParcelles`, `mvCarteParcelles` (nom → pid POSÉ, ou déduit), `mvIdsJournal` (seulement pour une
+  parcelle CONNUE ; un pid existant n'est jamais remplacé).
+- **Posé au seul passage de toutes les écritures** : `saveData` (parcelles, journal, ou tout) — aucun des écrivains du
+  journal n'est repris.
+- **Les deux fusions normalisent les TROIS côtés** (serveur, base, appareil) : `_mvSauverFusion` pour le journal,
+  `_saveParcellesMerged` pour les parcelles. Sans cela, poser un pid « modifiait » chaque ligne : une entrée SUPPRIMÉE
+  ailleurs serait revenue (« modifiée ici, supprimée là-bas : gardée », FUSION-1), et la fusion aurait vu des changements
+  partout. Les appels sont gardés par `typeof` : les harnais qui exécutent ces fusions sans le module restent valides.
+- **Personne ne lit encore `pid`** : aucun écran ne change. Lot 2 : les écrans retrouvent les liens par pid, par le nom à
+  défaut (325 comparaisons, module par module) ; lot 3 : les anciennes entrées des noms disparus ; lot 4 : renommer.
+
+### 252c. Mesuré
+
+- **`mv-harnais-ids1`** (neuf) : **14 assertions** — le vrai module (déterministe, 20 000 noms → 20 000 identifiants, espaces
+  et accents, un pid posé jamais remplacé même après un renommage, nom inconnu sans pid, idempotent) et les VRAIES fusions sur
+  un faux serveur à transactions : une entrée supprimée ailleurs **ne revient pas** ; une validation faite ailleurs est gardée
+  avec le pid ; une entrée et une parcelle écrites par un téléphone pas à jour reçoivent leur pid à la fusion ; le
+  branchement de saveData. **7/7 contre-épreuves**, dont : sans la normalisation des trois côtés, l'entrée supprimée revient.
+- Taille : ≈ 13 octets par entrée ; chez le domaine de référence (journal 108 Ko), négligeable.
+
+### 252d. Ouvert
+
+① Lot 2 — lire par `pid` (et par le nom à défaut) : les 325 comparaisons de noms, module par module, en commençant par la
+Vigne et le journal. ② Lot 3 — les entrées des noms disparus. ③ Lot 4 — le bouton « Renommer » qui ne change que
+l'étiquette. ④ Les salariés, après le chantier du planning. ⑤ Sessions tracteur, registre phyto, Chai et Cuvier portent aussi
+des noms de parcelles : à intégrer au lot 2 ou à part.
+
+---
+
+## 253. ★★ IDS-1, LOT 2 — LE NOM SUIT L'IDENTIFIANT (05/10 — `src/ids.js` · `src/app.js` (applyFbData, loadData, saveData) · `src/firebase.js` (fusion du journal) · `public/sw.js` · `scripts/mv-harnais-ids1b.mjs` (neuf) · `scripts/mv-harnais-ids1.mjs` · `scripts/typo-baseline.json` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `audit-perf-ux.md` · `lots/IDS-1B.json` · **SW 9.02 → 9.03, APP 8.25 inchangé**, base `7a6a9ac`, **zip cumulatif avec le lot 1 (§252) non poussé**)
+
+### 253a. Le chemin retenu
+
+Annoncé : « les écrans retrouvent les parcelles par leur identifiant » — 325 comparaisons de noms, module par module. Trouvé
+plus sûr, pour le même résultat : **le nom porté par chaque entrée est tenu à jour d'après son identifiant**. L'identifiant
+fait foi ; le nom de l'entrée n'est plus qu'une étiquette recopiée. Aucun des 325 lecteurs n'est touché : le jour où une
+parcelle est renommée (lot 4), ses entrées prennent le nouveau nom, et chaque écran — qui compare des noms — retrouve
+l'historique. Aujourd'hui sans effet : l'identifiant vient du même nom.
+
+### 253b. Ce qui change
+
+- **`mvNomsParPid(parcelles)`** : identifiant → nom actuel ; un identifiant porté par PLUSIEURS parcelles est écarté (jamais un
+  nom deviné). **`mvNomsJournal(journal, carte)`** : chaque entrée dont l'identifiant est connu prend le nom actuel ; sans
+  identifiant, ou identifiant inconnu (parcelle disparue), l'entrée garde son nom.
+- **Branchés partout où le journal arrive ou part** : `applyFbData` (réception du journal ou des parcelles, en mémoire),
+  `loadData` (copie du téléphone), `saveData` (avant l'écriture), et la fusion du journal — **des trois côtés**, comme les
+  identifiants au lot 1 : un nom remis à jour n'est pas une modification (sinon une entrée supprimée ailleurs revenait).
+- **Filet dans `mvIdsParcelles`** : deux parcelles qui partagent un identifiant (une fiche recopiée) — celle dont le nom le donne
+  le garde (sinon la première, dans l'ordre du document), les autres reçoivent celui de leur propre nom. Déterministe.
+- **Cliquet de poids regravé** (`typo-baseline.json`) : `firebase.js` 175 → 184 Ko — dont 12 lignes de ce lot ; le reste vient de
+  MOTIFS-1 (§250, autre session). Le code d'IDS-1 vit dans `src/ids.js` (pur).
+
+### 253c. Mesuré
+
+- **`mv-harnais-ids1b`** (neuf) : **14 assertions** — sans renommage, rien ne change ; après un renommage, chaque entrée prend le
+  nouveau nom (sans identifiant ou identifiant inconnu : inchangée ; idempotent) ; les lecteurs par nom retrouvent tout
+  l'historique ; un identifiant partagé n'impose aucun nom ; une fiche recopiée reçoit son propre identifiant ; la VRAIE fusion
+  après un renommage : une entrée supprimée ailleurs ne revient pas, une validation faite ailleurs est gardée sous le nouveau
+  nom, une entrée écrite plus tard par un téléphone resté hors ligne (ancien nom) prend le nouveau ; les trois branchements.
+  **7/7 contre-épreuves.** `mv-harnais-ids1` aligné (montage, branchement de saveData) : 14 vertes, 7/7.
+
+### 253d. Ouvert
+
+① Lot 4 — renommer une parcelle (le bouton, la règle du domaine si besoin, et les autres endroits qui gardent un nom de
+parcelle : priorités, objectifs, équipes du jour). ② Les autres registres qui portent des noms de parcelles — sessions
+tracteur, registre phyto, Chai et Cuvier, contours KML — recevront le même traitement (identifiant + nom qui suit).
+③ Les salariés, après le chantier du planning.

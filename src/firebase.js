@@ -29,6 +29,7 @@ import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import { deepClone } from './utils.js';
 import { MV_LIMITE_DOC, mvOctetsDoc } from './taille-doc.js';   // TAILLE-2 (§246) : la règle partagée avec npm run taille
+import { mvIdsParcelles, mvIdsJournal, mvCarteParcelles, mvNomsParPid, mvNomsJournal } from './ids.js';   // IDS-1 (§252, §253)
 import { PLAN_CLES_ADMIN, PLAN_CLE_EQUIPE, planCleMoi, planVueComplete, planComposer, planGarderLesMiens } from './planning-vue.js';   // ★★ MOTIFS-1 (§250) : ce qu'un téléphone de salarié reçoit du planning
 import {
   getAuth,
@@ -1470,6 +1471,15 @@ async function _mvSauverFusion(key, local, base) {
   return runTransaction(db, async function (tx) {
     var snap = await tx.get(ref);
     var distant = snap.exists() ? snap.data().value : undefined;
+    // ★★ IDS-1 (§252) — la même normalisation des TROIS côtés (serveur, base, appareil) : un identifiant posé n'est pas une
+    //   « modification ». Sans cela, une entrée supprimée ailleurs reviendrait (« modifiée ici, supprimée là-bas : gardée »)
+    //   et chaque ligne passerait pour retouchée. Déterministe : les trois côtés reçoivent le même pid pour la même entrée.
+    if (key === 'journal' && typeof mvIdsJournal === 'function') {
+      var _carte = mvCarteParcelles(window.PARCELLES || []), _noms = mvNomsParPid(window.PARCELLES || []);
+      mvIdsJournal(distant, _carte); mvIdsJournal(base, _carte); mvIdsJournal(local, _carte);
+      // IDS-1 lot 2 (§253) — le nom suit l'identifiant, des trois côtés aussi : un nom remis à jour n'est pas une modification.
+      mvNomsJournal(distant, _noms); mvNomsJournal(base, _noms); mvNomsJournal(local, _noms);
+    }
     var fusion = (distant === undefined) ? local : _mvFusion(base, local, distant);
     if (distant !== undefined && Object.prototype.hasOwnProperty.call(_MV_GUARD_FLOORS, key)) {
       var curN = _mvDocSize(key, distant), newN = _mvDocSize(key, fusion);
@@ -1645,6 +1655,8 @@ async function _saveParcellesMerged(localValue, baseFile) {
   return runTransaction(db, async function (tx) {
     var snap = await tx.get(ref);
     var remote = (snap.exists() && Array.isArray(snap.data().value)) ? snap.data().value : [];
+    // ★★ IDS-1 (§252) — les trois côtés reçoivent le même pid avant la fusion (même raison que pour le journal).
+    if (typeof mvIdsParcelles === 'function') { mvIdsParcelles(remote); mvIdsParcelles(base0); mvIdsParcelles(localValue); }
     var base = Array.isArray(base0) ? base0 : remote;
     var merged = _mvMergeParcelles(base, localValue, remote);
 

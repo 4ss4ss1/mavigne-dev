@@ -6,6 +6,7 @@
 
 // ── Feuille de style globale (extraite d'index.html — allègement réseau, cache-first) ──
 import './styles.css';
+import { mvIdsParcelles, mvIdsJournal, mvCarteParcelles, mvNomsParPid, mvNomsJournal } from './ids.js';   // IDS-1 (§252, §253) : identifiants permanents des parcelles
 // ── Import Firebase (doit être en tête — fournit window.firebase, fbSave, etc.) ──
 import { isAdmin, isTractoriste, isSaisonnier, canWrite,
          getRoleLabel, showToast, wmoDesc, wmoIcone, tNom,
@@ -223,6 +224,9 @@ function applyFbData(key, value) {
     if(key==='reparateur')    { REPARATEUR   = value; window.REPARATEUR   = REPARATEUR; }
     if(key==='reparateur_hist'){ REPARATEUR_HIST = value; window.REPARATEUR_HIST = REPARATEUR_HIST; }
   }
+  // ★★ IDS-1 lot 2 (§253) — à chaque réception du journal ou des parcelles, le nom porté par chaque entrée suit son identifiant
+  //   (en mémoire ; enregistré à la prochaine écriture). Aujourd'hui sans effet ; actif dès qu'une parcelle sera renommée.
+  if(key==='journal'||key==='parcelles'){ try{ mvNomsJournal(window.JOURNAL||JOURNAL, mvNomsParPid(window.PARCELLES||PARCELLES)); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/applyFbData#noms'); } }
   if(window._syncLocalVars) window._syncLocalVars();
   var _tracRelevant = {sessions:1, tracteurs_list:1, reparateur:1, activites:1};
   if(_tracRelevant[key] &&
@@ -927,6 +931,12 @@ function saveData(keyHint, toastMsg, toastCoul) {
     try{ window._ferSyncSessions(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveData _ferSyncSessions'); }
     finally{ window._ferSyncEnCours=false; }
   }
+  // ★★ IDS-1 (§252) — chaque parcelle porte un identifiant permanent (pid), chaque entrée du journal rattachée à une
+  //   parcelle connue porte le sien. Posés ICI, au seul passage de toutes les écritures : aucun écrivain à reprendre.
+  if(keyHint==='parcelles'||keyHint==='journal'||!keyHint){
+    try{ var _idsP=window.PARCELLES||PARCELLES, _idsJ=window.JOURNAL||JOURNAL; mvIdsParcelles(_idsP); mvIdsJournal(_idsJ, mvCarteParcelles(_idsP)); mvNomsJournal(_idsJ, mvNomsParPid(_idsP)); }
+    catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveData#ids'); }
+  }
   if((keyHint==='parcelles'||!keyHint) && typeof _recalcSurfTotale==='function'){ try{ _recalcSurfTotale(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveData'); } }
   // Toujours lire depuis window.* (source de vérité après synchro Firebase)
   const W = _mvValeursMemoire();   // ENTREE-1 (§244) : la même liste sert aux bases de l'entrée sans réseau
@@ -1010,6 +1020,7 @@ function loadData() {
     Object.keys(_MV_LISTES_OBJETS).concat(Object.keys(_MV_SOUS_LISTES)).forEach(function(k){ var K=k.toUpperCase(); if(d[K]) d[K]=_mvListeObjets(k, d[K]); });
     if (d.PARCELLES)    { PARCELLES.length=0; d.PARCELLES.forEach(x=>PARCELLES.push(x)); }
     if (d.JOURNAL)      { JOURNAL = d.JOURNAL; window.JOURNAL = JOURNAL; }
+    try{ mvNomsJournal(JOURNAL, mvNomsParPid(PARCELLES)); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/loadData#noms'); }   // IDS-1 lot 2 (§253)
     if (d.SESSIONS)     { SESSIONS = d.SESSIONS; window.SESSIONS = SESSIONS; }
     if (d.TRAVAUX)      { TRAVAUX = d.TRAVAUX; window.TRAVAUX = TRAVAUX; }
     if (d.TRAITEMENTS)  { TRAITEMENTS = d.TRAITEMENTS; window.TRAITEMENTS = TRAITEMENTS; }
