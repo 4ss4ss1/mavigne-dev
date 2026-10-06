@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.26';
+export const APP_VERSION = '8.27';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -852,6 +852,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.27', d: '2026-10-06', items: [
+    { niv: 0, pour: ['admin'], emoji: 'etiquette', titre: 'Les appellations, rangées dans la Cave',
+      desc: "Appellations et plafonds de rendement quittent Réglages › Domaine pour la roue crantée de la Cave, bloc « Le Millésime » : deux lignes qui résument, chacune ouvre sa fenêtre — les plafonds par millésime, et le rattachement des parcelles (celles sans appellation en tête)." },
+  ] },
   { v: '8.26', d: '2026-10-06', items: [
     { niv: 0, pour: ['admin'], emoji: 'crayon', titre: 'Renommer une parcelle',
       desc: "Dans la roue crantée de la Vigne › Parcelles & secteurs météo. La parcelle garde tout son historique : journal, sessions tracteur, registre phyto, vendanges, carte et tournées prennent le nouveau nom, y compris sur les téléphones restés hors ligne. Les archives des campagnes passées gardent l’ancien." },
@@ -4644,7 +4648,7 @@ var MV_AIDE = {
       ['Lire un jour dans le couloir', "un appui sur le graphe ouvre une étiquette : la valeur de votre cuve, la médiane du cuvage, l’écart entre les deux en toutes lettres, et le nombre de cuves prises en compte. Un jour où une cuve n’a pas été relevée, sa valeur est estimée entre ses deux relevés voisins et porte le signe ~ — jamais avant le premier relevé ni après le dernier."],
       ['Le rendement maximum de l\u2019appellation', "se pose par parcelle ET par millésime, en touchant une parcelle dans « La ligne de vie » — ou depuis la même carte du Pilotage. Le rendement annuel autorisé est fixé par arrêté, campagne par campagne : une valeur posée pour 2026 ne dit rien de 2025. Valider à vide retire celui d\u2019une année. Réservé à l\u2019administrateur."],
       ['Une valeur « héritée »', "vient de l\u2019ancien réglage, qui ne portait pas d\u2019année. Elle continue de servir partout où rien n\u2019est posé, et l\u2019écran le dit : elle n\u2019a été vérifiée contre l\u2019arrêté d\u2019aucune campagne. Poser le plafond du millésime la remplace pour cette année-là, sans toucher aux autres."],
-      ['L’appellation porte le plafond', "déclarez vos appellations dans Réglages › Domaine, posez leur rendement maximum pour chaque millésime, et rattachez-y vos parcelles. L’ordre est : le plafond de la parcelle s’il existe, sinon celui de son appellation, sinon l’ancien réglage sans année. Une saisie faite à la main n’est jamais défaite par un réglage général."],
+      ['L’appellation porte le plafond', "déclarez vos appellations dans la roue crantée de la Cave › Le Millésime › Appellations & plafonds, posez leur rendement maximum pour chaque millésime, et rattachez-y vos parcelles (« Rattachement des parcelles »). L’ordre est : le plafond de la parcelle s’il existe, sinon celui de son appellation, sinon l’ancien réglage sans année. Une saisie faite à la main n’est jamais défaite par un réglage général."],
       ['Poser un plafond, puis tous les autres', "après la première saisie, l\u2019application propose de porter la même valeur sur les parcelles du millésime qui n\u2019ont aucun plafond, en les nommant d\u2019abord. Celles qui en ont déjà un ne sont jamais touchées."],
       ['Votre rendement au pressoir', "se règle dans la roue crantée de la Cave, bloc Le Cuvier, en kilos de raisin par hectolitre. Tous les écrans qui transforment des raisins en volume s’en servent — la chaîne de la récolte à la bouteille comme le bilan de campagne."],
       ['Les analyses labo', "s’attachent en PDF à la cuvée. Les supprimer est réservé à l’administrateur."],

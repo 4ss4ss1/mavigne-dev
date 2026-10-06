@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **6 octobre 2026 (IDS-1, lot 4)** — ★★★ **RENOMMER UNE PARCELLE** (§254), dans la roue crantée de la Vigne (décision de Nico).
+> « Renommer est rare » : chaque module renomme ce qui lui appartient, dans SA roue crantée (Vigne : tâches, et maintenant parcelles). La parcelle
+> garde son `pid` ; `_renameParcelle` (reglages.js) réécrit le nom dans TOUS les registres — journal, sessions (parcellesFaites, parcelles,
+> parcelle), phyto, Chai/Cuvier (sans casse), fertilisation (parcs, man), carte (name), tournées — ; travaux recalculés ; archives inchangées.
+> Règle `CONFIG.renommages_parcelles` (RENOM-3) appliquée à chaque registre reçu ; ignorée si une AUTRE parcelle a repris l'ancien nom. Harnais
+> `mv-harnais-renom-parc` (la liste des registres). Base `1a1de45`. **APP 8.25 → 8.26, SW 9.03 → 9.04.** Précédent : IDS-1 lot 2 (§253) — journal.md.
+> Restent pour IDS-1 : les salariés (après le chantier du planning) ; « Renommer » dans les autres roues crantées si besoin.
+
 > ★ Consolidation : **5 octobre 2026 (IDS-1, lot 2 — zip cumulatif avec le lot 1 non poussé)** — ★★ **LE NOM SUIT L'IDENTIFIANT** (§253).
 > Lot 1 (§252) : chaque parcelle et chaque entrée du journal reçoivent un `pid` déduit du nom (`src/ids.js`), posé par saveData, normalisé
 > des trois côtés dans les fusions. Lot 2 : au lieu de reprendre les 325 comparaisons de noms, le nom porté par une entrée est tenu À JOUR

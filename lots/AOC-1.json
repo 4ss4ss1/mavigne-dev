@@ -1,0 +1,25 @@
+{
+  "lot": "AOC-1",
+  "section": "§255",
+  "base": "a6ea76f7cd80f538f01d39d3eb559edeedc9c4f9",
+  "inclut": [],
+  "date": "2026-10-06",
+  "fichiers": {
+    ".mv-base": "198a480baf902c9cb38276e9fe773a865411d64d170f8a23b533632672fddde2",
+    "CLAUDE.md": "bf6eadf254d632f2065b9e32b045fd91cf15938a665d43d486d7c2de7992882b",
+    "docs/claude/INDEX.md": "dc6d1c521a9fb62d03ab918c9cd2a37e05b01fbb264136e0bb627463a315526f",
+    "docs/claude/chantiers-230-279.md": "822fd7ee185a1a13b944d84622b915e523111fdd0e0d415a2179cedc47117b02",
+    "docs/claude/journal.md": "62344c4cd452848beb925d2843e4ccc1ca6843cf22e25b9bd776a6f30a026644",
+    "guide/08-cave.html": "5ac1bbf32ffc155096741742c717ade68e6062aa8e38ccb9cc95d32c5c21e8d0",
+    "index.html": "a982bab8ff276488c8d300340f55a4f9368da6310705334da875d1c5c57324f2",
+    "public/sw.js": "034459565422ccb0ba9243e01dcbff5f8aea3b4cb2f40a0f445e6550511c29eb",
+    "scripts/harnais-claude-md.mjs": "ff48e89848cf7e7fb05dde3c0608d775509dbced2066e437e83db352eaa21f6d",
+    "scripts/mv-harnais-cave-reglages.mjs": "62bb8385eef742f5a7e03b5bf2dc1ce94781d733550e2f93c0fa23ce901168a8",
+    "scripts/mv-harnais-liste.mjs": "a915ce06e4df37c6070bfa1ef63cd7ef8235e881375a501e86e96810fed56345",
+    "src/cave.js": "a5e462c415b708764b14b11ce1c656173e18ae4067bb36f9815e56bf6c9dfe1c",
+    "src/reglages.js": "c909fa53f1a91fb4a0d4951bdc1e33bd5e3f44ac95f95157482810ffe70db8ea",
+    "src/styles.css": "ce8ee838c3da14c2bbddc0069388199994f9f9aa151b21c3c83857c7c33193ee",
+    "src/utils.js": "4c55e5e6a4f4c1148d93776ad45eb7280ca935318471dac689d62a1ec74e8546",
+    "scripts/mv-harnais-aoc-cave.mjs": "ff000fa7435a95916802ab751eb459b652af78c79eaf90878642caeeb2086af5"
+  }
+}

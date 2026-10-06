@@ -3,13 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **6 octobre 2026 (IDS-1, lot 4)** — ★★★ **RENOMMER UNE PARCELLE** (§254), dans la roue crantée de la Vigne (décision de Nico).
-> « Renommer est rare » : chaque module renomme ce qui lui appartient, dans SA roue crantée (Vigne : tâches, et maintenant parcelles). La parcelle
-> garde son `pid` ; `_renameParcelle` (reglages.js) réécrit le nom dans TOUS les registres — journal, sessions (parcellesFaites, parcelles,
-> parcelle), phyto, Chai/Cuvier (sans casse), fertilisation (parcs, man), carte (name), tournées — ; travaux recalculés ; archives inchangées.
-> Règle `CONFIG.renommages_parcelles` (RENOM-3) appliquée à chaque registre reçu ; ignorée si une AUTRE parcelle a repris l'ancien nom. Harnais
-> `mv-harnais-renom-parc` (la liste des registres). Base `1a1de45`. **APP 8.25 → 8.26, SW 9.03 → 9.04.** Précédent : IDS-1 lot 2 (§253) — journal.md.
-> Restent pour IDS-1 : les salariés (après le chantier du planning) ; « Renommer » dans les autres roues crantées si besoin.
+> Dernière consolidation : **6 octobre 2026 (AOC-1)** — ★★ **LES APPELLATIONS QUITTENT RÉGLAGES › DOMAINE POUR LA ROUE CRANTÉE DE LA CAVE** (§255).
+> Choix de Nico sur deux maquettes (option B, puis « condenser ») : dans « Le Millésime », DEUX LIGNES qui résument (`_aocResumeHtml`), chacune
+> ouvre SA fenêtre — `ovAocPlafonds` (millésime, une ligne par appellation, « ⋯ ») et `ovAocRattach` (filtres, sans appellation en tête,
+> « Rattacher »/« Changer »). Actions inchangées (_aocAjouter…_aocSetParc) ; `_aocRenderCard` redessine lignes + fenêtre ouverte. `_caveGoAoc`
+> et `#aoc-card` n'existent plus. Réglages › Domaine : 2 188 → 1 293 px. Harnais `mv-harnais-aoc-cave`. Base `a6ea76f`. **APP 8.26 → 8.27, SW 9.04 → 9.05.**
+> Précédent : IDS-1 lot 4, renommer une parcelle (§254) — archivé dans journal.md.
+> Restent : les salariés (IDS-1, après le planning) ; le reste de Réglages › Domaine est rangé.
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---

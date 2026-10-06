@@ -5868,20 +5868,8 @@ function _caveOpenReglages(){
   renderCave();
 }
 
-// Les appellations et leurs plafonds sont un reglage du DOMAINE, pas de la
-// cave : on y va, on ne les recopie pas. Meme geste que _pilGo du Pilotage.
-function _caveGoAoc(){
-  if(window.goTo) window.goTo('reglages');
-  setTimeout(function(){
-    try{
-      if(typeof window.switchReglTab==='function') window.switchReglTab('domaine');
-      var el=document.getElementById('aoc-card'); if(!el) return;
-      el.scrollIntoView({behavior:'smooth',block:'center'});
-      el.style.transition='box-shadow .25s'; el.style.boxShadow='0 0 0 3px var(--or)';
-      setTimeout(function(){ el.style.boxShadow=''; },1400);
-    }catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'reglages/aoc',err:e}); }
-  },240);
-}
+// ★★ AOC-1 (§255) — _caveGoAoc (le renvoi vers Réglages › Domaine › #aoc-card) n'existe plus : les appellations vivent dans
+//   la roue crantée de la Cave, deux lignes (reglages.js, _aocResumeHtml) qui ouvrent leurs fenêtres.
 
 // Les documents de la cave : ceux du catalogue MV_DOCS dont le module est la
 // cave, plus le bilan de campagne et l'inventaire des futs, qui parlent d'elle.
@@ -5931,12 +5919,8 @@ function renderCaveReglagesCave(){
   // Le Cuvier et Le Chai ecrivent chacun dans leur hote, comme avant.
   renderVendParam();
   renderCaveReglages();
-  var mil=document.getElementById('cave-reg-mil');
-  if(mil) mil.innerHTML='<button type="button" class="creg-row" onclick="_caveGoAoc()">'
-    +'<span class="l"><span class="ic">'+_mvIcon('etiquette',16)+'</span>'
-    +'<span><span class="t">Appellations &amp; plafonds de rendement</span>'
-    +'<span class="d">Un r\u00e9glage du domaine, campagne par campagne</span></span></span>'
-    +'<span class="r">R\u00e9glages \u203a Domaine \u203a</span></button>';
+  // ★★ AOC-1 (§255) — les appellations VIVENT ici désormais : deux lignes qui résument (reglages.js), deux fenêtres.
+  if(typeof window._aocRenderCard==='function') window._aocRenderCard();
   var docs=document.getElementById('cave-reg-docs');
   if(docs) docs.innerHTML=_caveRegDocsHtml();
 }
@@ -7076,7 +7060,6 @@ window._caveParcHtml       = _caveParcHtml;
 window.renderCaveAujourdhui= renderCaveAujourdhui;
 window.renderCaveReglagesCave = renderCaveReglagesCave;
 window._caveOpenReglages   = _caveOpenReglages;
-window._caveGoAoc          = _caveGoAoc;
 // ★ Lus par le Pilotage (carte Cave, lot ③) : le verdict et l'agenda complet
 //   n'ont qu'UNE definition, et elle est ici.
 window._mlAgendaComplet    = _mlAgendaComplet;

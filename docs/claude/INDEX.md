@@ -299,3 +299,4 @@
 | 252 | 252. ★★ IDS-1, LOT 1 — CHAQUE PARCELLE A UN IDENTIFIANT PERMANENT (05/10 — `src/ids.js` (neuf) · `src/app.j… | `docs/claude/chantiers-230-279.md` |
 | 253 | 253. ★★ IDS-1, LOT 2 — LE NOM SUIT L'IDENTIFIANT (05/10 — `src/ids.js` · `src/app.js` (applyFbData, loadDat… | `docs/claude/chantiers-230-279.md` |
 | 254 | 254. ★★★ IDS-1, LOT 4 — RENOMMER UNE PARCELLE (06/10 — `src/reglages.js` · `src/firebase.js` · `index.html`… | `docs/claude/chantiers-230-279.md` |
+| 255 | 255. ★★ AOC-1 — LES APPELLATIONS DANS LA ROUE CRANTÉE DE LA CAVE : DEUX LIGNES, DEUX FENÊTRES (06/10 — `src… | `docs/claude/chantiers-230-279.md` |

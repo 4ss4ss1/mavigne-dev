@@ -1115,3 +1115,55 @@ les anciennes entrées) n'est plus nécessaire : le nom suit l'identifiant (§25
 ① **Les salariés** (après le chantier du planning) : comptes de connexion, planning, relevés, profil retenu, empreinte hors
 réseau. ② « Renommer » dans les autres roues crantées (tracteurs, activités…) si le besoin se présente. ③ Ranger
 Réglages › Domaine (lot à part, maquette d'abord).
+
+---
+
+## 255. ★★ AOC-1 — LES APPELLATIONS DANS LA ROUE CRANTÉE DE LA CAVE : DEUX LIGNES, DEUX FENÊTRES (06/10 — `src/reglages.js` · `src/cave.js` · `src/styles.css` · `index.html` (deux panneaux) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE) · `public/sw.js` · `guide/08-cave.html` · `scripts/mv-harnais-aoc-cave.mjs` (neuf) · `scripts/mv-harnais-cave-reglages.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `lots/AOC-1.json` · **APP 8.26 → 8.27, SW 9.04 → 9.05**, base `a6ea76f`)
+
+### 255a. La décision
+
+Nico (06/10) : Réglages › Domaine « il faudra le ranger ». Inventaire dans l'appli réelle : la carte « Appellations et
+plafonds de rendement » s'accrochait APRÈS la liste des périodes (`_aocRenderCard` → `insertBefore(saisons-list.nextSibling)`),
+coupant la gestion des périodes en deux (« + Nouvelle période » venait après elle). Deux options : A, une section à part dans
+Domaine ; **B, la roue crantée de la Cave** (où se fixent déjà les plafonds par parcelle) — **choisie**, selon sa règle « chaque
+module règle ce qui lui appartient ». Elle renverse CAVE-2 (« un réglage du domaine : on y va, on ne le recopie pas ») sans
+copie : une seule carte, à un seul endroit. Sur la première maquette, Nico : « condenser — on ne voit que ça » ; seconde
+maquette (deux lignes, deux fenêtres) : « parfait ».
+
+### 255b. Ce qui change
+
+- **Bloc « Le Millésime » de la roue crantée de la Cave** : deux lignes (`_aocResumeHtml`) — « Appellations & plafonds »
+  (nombre d'appellations, plafonds du millésime le plus récent) et « Rattachement des parcelles » (rattachées ; celles sans
+  appellation en orange ; arrachées non comptées). `renderCaveReglagesCave` appelle `_aocRenderCard`.
+- **`ovAocPlafonds`** : le millésime (les millésimes que la Cave connaît + l'année, comme avant), une ligne par appellation —
+  parcelles, plafond qu'on touche (`_aocSetMax`), « Poser le plafond » s'il manque, « ··· » (trois points médians : le « ⋯ »
+  de la maquette est HORS de la police, `mv-harnais-subset`) qui ouvre Renommer / Supprimer — et
+  « + Ajouter une appellation ».
+- **`ovAocRattach`** : des filtres qui comptent (toutes, chaque appellation, sans), les parcelles rangées par appellation, celles
+  sans appellation EN TÊTE ; « Rattacher » / « Changer » ouvre la liste des AUTRES appellations (+ « Aucune ») ; un choix
+  referme la liste (`_aocAttacher` — vu dans Chromium : elle restait ouverte sous la parcelle déplacée).
+- **Les actions ne changent pas** (`_aocAjouter`, `_aocRenommer`, `_aocSupprimer`, `_aocSetMax`, `_aocSetParc`) : elles
+  appellent toujours `_aocRenderCard`, devenu le point de rafraîchissement des deux lignes et de la fenêtre ouverte.
+- **Retirés** : l'accroche dans Réglages › Domaine, `_caveGoAoc` (le renvoi) et toute référence à `#aoc-card` (preflight C11).
+- Gabarit `.aoc-*` dans `styles.css` (espacements sur l'échelle ; rayons HORS des pas, 18/14/10 px : le cliquet des rayons
+  en dur de `mv-harnais-jetons` compte aussi le repli d'un appel `var(--r-lg,16px)`, et un jeton sans repli est refusé — piège
+  rencontré dans ce lot). Couleurs de texte : les jetons « -tx » sur leur fond pâle (`--vert-tx`, `--or-tx`, `--orange-tx`) et le
+  choix actif en vert pâle comme les puces de l'appli (`.ochip.active`) — le noir de la maquette écrivait en `--bg-card`, un
+  jeton de SURFACE refusé en couleur de texte par `mv-harnais-contraste` (et l'or sur or pâle manquait de contraste).
+  Guide 08 et fiche MV_AIDE : le nouvel emplacement.
+
+### 255c. Mesuré
+
+- **Chromium, sur le build** : Réglages › Domaine sans la carte, **2 188 → 1 293 px** (deux écrans et demi → un et demi) ;
+  « Le Millésime » : les deux lignes et leurs résumés ; la fenêtre des plafonds s'ouvre (2 lignes, 40 et 55 hL/ha) ; un
+  rattachement : « Sans · 1 » → « Sans · 0 », le résumé passe à « 10 parcelles rattachées » ; 0 erreur. Écrans conformes à la
+  maquette validée.
+- **`mv-harnais-aoc-cave`** (neuf) : **21 assertions** sur les vraies fonctions — résumés, état vide, fenêtre des plafonds
+  (millésime, lignes, plafond à poser, « ⋯ », changement de millésime), fenêtre du rattachement (filtres et comptes, sans
+  appellation en tête, « Changer » sans l'appellation actuelle, un choix referme la liste, filtre), rafraîchissement après une
+  action, et les branchements. **12/12 contre-épreuves.** `mv-harnais-cave-reglages` aligné (44/44).
+
+### 255d. Ouvert
+
+① Les millésimes proposés restent ceux que la Cave connaît, plus l'année : un plafond saisi pour un millésime que la Cave ne
+connaît pas n'apparaît pas (comportement d'avant, inchangé). ② IDS-1 — les salariés, après le chantier du planning.

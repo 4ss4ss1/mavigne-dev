@@ -6224,75 +6224,105 @@ window._aocSetParc=function(nomParc,nomAoc){
   _aocRenderCard();
 };
 
-function _aocRenderCard(){
-  if(typeof isAdmin==='function'&&!isAdmin()) return;
-  var host=document.getElementById('saisons-list'); if(!host||!host.parentNode) return;
-  var card=document.getElementById('aoc-card');
-  if(!card){
-    card=document.createElement('div'); card.id='aoc-card';
-    host.parentNode.insertBefore(card, host.nextSibling);
-  }
+// ════════════════════════════════════════════════════════════════════════════
+// ★★ AOC-1 (§255) — LES APPELLATIONS DANS LA ROUE CRANTÉE DE LA CAVE : DEUX LIGNES, DEUX FENÊTRES
+// ════════════════════════════════════════════════════════════════════════════
+// Choix de Nico sur maquette (06/10) : la carte quitte Réglages › Domaine (elle y coupait la gestion des périodes) et
+// rejoint la roue crantée de la Cave, bloc « Le Millésime » — CONDENSÉE : deux lignes qui résument (appellations et
+// plafonds ; rattachement des parcelles), chacune ouvre SA fenêtre. Les actions ne changent pas (_aocAjouter,
+// _aocRenommer, _aocSupprimer, _aocSetMax, _aocSetParc) : elles appellent toujours _aocRenderCard, qui redessine les
+// deux lignes et la fenêtre ouverte. Une seule carte, à un seul endroit : rien n'est recopié.
+var _aocMilSel=null, _aocOuvert='', _aocFiltre='', _aocChoix='';
+function _aocEsc(x){ return (typeof _escHtml==='function')?_escHtml(x):String(x==null?'':x); }
+function _aocAtt(x){ return (typeof _escAttr==='function')?_escAttr(x):String(x==null?'':x).replace(/'/g,'&#39;').replace(/"/g,'&quot;'); }
+function _aocActives(){ return (window.PARCELLES||[]).filter(function(p){ var s=String((p&&p.statut)||'').toLowerCase(); return p&&p.nom&&s!=='arrachée'&&s!=='arrachee'; }); }
+function _aocMax(a,m){ var v=null; ((a&&a.rdt_max_hist)||[]).forEach(function(x){ if(x&&String(x.mil)===String(m)) v=x.max; }); return v; }
+function _aocNb(v){ return String(v).replace('.',','); }
+// Les deux lignes du bloc « Le Millésime » (roue crantée de la Cave), avec leur résumé.
+function _aocResumeHtml(){
+  var A=_aocAll(), P=_aocActives(), m=(_aocMils()[0]);
+  var nAtt=P.filter(function(p){ return p.appellation&&_aocTrouve(p.appellation); }).length, sans=P.length-nAtt;
+  var vals=A.map(function(a){ return _aocMax(a,m); }).filter(function(v){ return v!=null; }).map(_aocNb);
+  var dA=!A.length?'Aucune appellation d\u00e9clar\u00e9e'
+    :(A.length+' appellation'+(A.length>1?'s':'')+(vals.length?(' \u00b7 plafond'+(vals.length>1?'s ':' ')+m+' : '+vals.join(' et ')+' hL/ha'):(' \u00b7 plafond '+m+' \u00e0 poser')));
+  var dR=!A.length?'D\u00e9clarez d\u2019abord une appellation'
+    :(nAtt+' parcelle'+(nAtt>1?'s':'')+' rattach\u00e9e'+(nAtt>1?'s':'')+(sans?(' \u00b7 <b style="color:var(--orange-tx,#9C4E14)">'+sans+' sans appellation</b>'):''));
+  var ligne=function(fn,ic,t,d){ return '<button type="button" class="creg-row" onclick="'+fn+'()"><span class="l"><span class="ic">'+_mvIcon(ic,16)+'</span><span><span class="t">'+t+'</span><span class="d">'+d+'</span></span></span><span class="r">\u203a</span></button>'; };
+  return ligne('openAocPlafonds','etiquette','Appellations &amp; plafonds',dA)+ligne('openAocRattach','carte','Rattachement des parcelles',dR);
+}
+// Fenêtre « Appellations & plafonds » : le millésime, une ligne par appellation, « ⋯ » pour renommer ou supprimer.
+function _aocPlafondsHtml(){
   var A=_aocAll(), mils=_aocMils();
-  var parcs=(window.PARCELLES||[]).filter(function(p){ return p&&p.nom&&String(p.statut||'').toLowerCase()!=='arrachée'&&String(p.statut||'').toLowerCase()!=='arrachee'; });
-  var esc=(typeof _escHtml==='function')?_escHtml:function(x){ return String(x==null?'':x); };
-  var att=(typeof _escAttr==='function')?_escAttr:function(x){ return String(x==null?'':x).replace(/'/g,'&#39;').replace(/"/g,'&quot;'); };
-  var lblCss='font-size:var(--pt-micro,11px);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--texte-doux);margin-bottom:6px';
-  var btnCss='min-width:36px;min-height:36px;border:1px solid var(--gris-clair);background:transparent;border-radius:9px;cursor:pointer;color:var(--texte-med);display:inline-flex;align-items:center;justify-content:center';
-
-  /* ⚠️ Habillage INLINE (comme les cartes des roues, reglages.js). Les classes
-     `mvc-*` sont posees par `_caveV2InjectCss` (cave.js) : arriver dans les
-     Reglages sans avoir ouvert la Cave rendrait cette carte SANS STYLE. */
-  var h='<div style="background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin:14px 0">'
-    +'<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--texte,#14110D);margin-bottom:3px">Appellations et plafonds de rendement</div>'
-    +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-bottom:12px">Le rendement maximum est fix\u00e9 <b>par arr\u00eat\u00e9, campagne par campagne</b>. D\u00e9clarez vos appellations, posez leur plafond pour chaque mill\u00e9sime, puis rattachez vos parcelles. Un plafond pos\u00e9 directement sur une parcelle (Cave \u203a Le mill\u00e9sime) reste <b>prioritaire</b> sur celui de son appellation.</div>'
-    +'<div style="height:3px;border-radius:3px;background:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27);margin-bottom:14px"></div>';
-
-  if(!A.length){
-    h+='<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);padding:10px 0">Aucune appellation d\u00e9clar\u00e9e. Tant qu\u2019il n\u2019y en a pas, chaque parcelle porte son propre plafond.</div>';
-  }
-  A.forEach(function(a){
-    var n=_aocParcelles(a.nom).length;
-    h+='<div style="border:1px solid var(--gris-clair);border-radius:11px;padding:11px 12px;margin-top:10px">'
-      +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
-      +'<b style="font-size:13.5px;color:var(--texte);flex:1;min-width:140px">'+esc(a.nom)+'</b>'
-      +'<span style="font-size:var(--pt-lbl,11.5px);color:var(--texte-doux)">'+n+' parcelle'+(n>1?'s':'')+'</span>'
-      +'<button title="Renommer" aria-label="Renommer" onclick="window._aocRenommer(\''+att(a.nom)+'\')" style="'+btnCss+'">'+_mvIcon('crayon',16)+'</button>'
-      +'<button title="Supprimer" aria-label="Supprimer" onclick="window._aocSupprimer(\''+att(a.nom)+'\')" style="'+btnCss+'">'+_mvIcon('corbeille',16)+'</button>'
-      +'</div>'
-      +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px">';
-    mils.forEach(function(m){
-      var v=null; (a.rdt_max_hist||[]).forEach(function(x){ if(x&&String(x.mil)===String(m)) v=x.max; });
-      h+='<button onclick="window._aocSetMax(\''+att(a.nom)+'\','+att(m)+')" '
-        +'style="border:1.5px solid '+(v!=null?'var(--vert-med)':'var(--gris-clair)')+';background:'+(v!=null?'rgba(91,155,58,.08)':'transparent')+';'
-        +'border-radius:9px;padding:6px 10px;font-family:inherit;font-size:var(--pt-micro,12px);color:var(--texte);cursor:pointer;min-height:36px">'
-        +'<b>'+m+'</b> \u00b7 '+(v!=null?(String(v).replace('.',',')+' hL/ha'):'\u2014')+'</button>';
-    });
-    h+='</div></div>';
-  });
-
-  h+='<button onclick="window._aocAjouter()" style="margin-top:12px;width:100%;min-height:44px;border:1.5px dashed var(--gris-clair);background:transparent;border-radius:11px;font-family:inherit;font-size:13px;color:var(--texte-med);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px">'+_mvIcon('plus',16)+' Ajouter une appellation</button>';
-
-  if(A.length&&parcs.length){
-    var opts=function(sel){
-      var o='<option value="">\u2014 aucune \u2014</option>';
-      A.forEach(function(a){ o+='<option value="'+att(a.nom)+'"'+(_aocNorm(sel)===_aocNorm(a.nom)?' selected':'')+'>'+esc(a.nom)+'</option>'; });
-      return o;
-    };
-    h+='<div style="height:1px;background:var(--gris-clair);margin:16px 0 12px"></div><div style="'+lblCss+'">Rattachement des parcelles</div>'
-      +'<div style="font-size:var(--pt-lbl,11.5px);color:var(--texte-doux);margin-bottom:9px">Une parcelle sans appellation garde le plafond qu\u2019on lui a pos\u00e9 directement, ou aucun.</div>'
-      +'<div style="max-height:340px;overflow:auto;border:1px solid var(--gris-clair);border-radius:11px">';
-    parcs.forEach(function(p,i){
-      h+='<div style="display:flex;align-items:center;gap:9px;padding:7px 10px'+(i?';border-top:1px solid var(--gris-clair)':'')+'">'
-        +'<span style="flex:1;min-width:0;font-size:var(--pt-txt,12.5px);color:var(--texte);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(p.nom)+'</span>'
-        +'<select onchange="window._aocSetParc(\''+att(p.nom)+'\',this.value)" '
-        +'style="max-width:180px;padding:5px 7px;border:1.5px solid var(--gris-clair);border-radius:8px;font-family:inherit;font-size:var(--pt-micro,12px);background:var(--bg-app);color:var(--texte)">'
-        +opts(p.appellation)+'</select></div>';
+  if(_aocMilSel==null||mils.indexOf(_aocMilSel)<0) _aocMilSel=mils[0];
+  var m=_aocMilSel, h='<div class="fl">Mill\u00e9sime</div><div class="aoc-seg">';
+  mils.slice().reverse().forEach(function(x){ h+='<button type="button" class="'+(x===m?'on':'')+'" onclick="_aocChoisirMil('+x+')">'+x+'</button>'; });
+  h+='</div>';
+  if(!A.length) h+='<div class="aoc-note" style="margin-bottom:12px">Aucune appellation d\u00e9clar\u00e9e. Tant qu\u2019il n\u2019y en a pas, chaque parcelle porte son propre plafond.</div>';
+  else {
+    h+='<div class="aoc-list">';
+    A.forEach(function(a){
+      var n=_aocParcelles(a.nom).length, v=_aocMax(a,m), q='\''+_aocAtt(a.nom)+'\'';
+      h+='<div class="aoc-row"><div class="aoc-n"><b>'+_aocEsc(a.nom)+'</b><span>'+n+' parcelle'+(n>1?'s':'')+'</span></div>'
+        +'<button type="button" class="aoc-pill'+(v==null?' vide':'')+'" onclick="window._aocSetMax('+q+','+m+')">'+(v==null?'Poser le plafond':(_aocNb(v)+' hL/ha'))+'</button>'
+        +'<button type="button" class="aoc-more" aria-label="Plus d\u2019actions" onclick="_aocBasculer('+q+')">\u00b7\u00b7\u00b7</button></div>';
+      if(_aocOuvert===a.nom) h+='<div class="aoc-tiroir"><button type="button" class="aoc-act" onclick="window._aocRenommer('+q+')">Renommer</button>'
+        +'<button type="button" class="aoc-act rouge" onclick="window._aocSupprimer('+q+')">Supprimer</button></div>';
     });
     h+='</div>';
   }
-  h+='</div>';
-  card.innerHTML=h;
+  h+='<button type="button" class="aoc-ajout" onclick="window._aocAjouter()">+ Ajouter une appellation</button>'
+    +'<div class="aoc-note">Le plafond se touche pour le modifier ; \u00ab \u00b7\u00b7\u00b7 \u00bb renomme ou supprime l\u2019appellation. Un plafond pos\u00e9 directement sur une parcelle (Cave \u203a Le mill\u00e9sime) reste prioritaire sur celui de son appellation.</div>';
+  return h;
 }
+// Fenêtre « Rattachement des parcelles » : filtres, parcelles rangées par appellation (sans appellation en tête).
+function _aocRattachHtml(){
+  var A=_aocAll(), P=_aocActives();
+  if(!A.length) return '<div class="aoc-note">D\u00e9clarez d\u2019abord une appellation (fen\u00eatre \u00ab Appellations &amp; plafonds \u00bb).</div>';
+  var de=function(p){ var a=p.appellation?_aocTrouve(p.appellation):null; return a?a.nom:''; };
+  var sans=P.filter(function(p){ return !de(p); });
+  var chip=function(cle,lbl,n){ return '<button type="button" class="'+(_aocFiltre===cle?'on':'')+'" onclick="_aocFiltrer(\''+_aocAtt(cle)+'\')">'+lbl+' \u00b7 '+n+'</button>'; };
+  var h='<div class="aoc-seg">'+chip('','Toutes',P.length);
+  A.forEach(function(a){ h+=chip(a.nom,_aocEsc(a.nom),P.filter(function(p){ return de(p)===a.nom; }).length); });
+  h+=chip('__sans__','Sans',sans.length)+'</div>';
+  var groupe=function(titre,liste){
+    if(!liste.length) return '';
+    var g='<div class="aoc-grp"><span>'+titre+'</span><span>'+liste.length+'</span></div><div class="aoc-list">';
+    liste.forEach(function(p){
+      var q='\''+_aocAtt(p.nom)+'\'', d=de(p);
+      g+='<div class="aoc-row"><div class="aoc-n"><b>'+_aocEsc(p.nom)+'</b><span>'+(p.surface?(_aocNb(p.surface)+' ha'):'')+(p.cepage?(' \u00b7 '+_aocEsc(p.cepage)):'')+'</span></div>'
+        +'<button type="button" class="aoc-act'+(d?'':' or')+'" onclick="_aocChoisirParc('+q+')">'+(d?'Changer':'Rattacher')+'</button></div>';
+      if(_aocChoix===p.nom){
+        g+='<div class="aoc-tiroir">';
+        A.forEach(function(a){ if(a.nom!==d) g+='<button type="button" class="aoc-act" onclick="_aocAttacher('+q+',\''+_aocAtt(a.nom)+'\')">'+_aocEsc(a.nom)+'</button>'; });
+        if(d) g+='<button type="button" class="aoc-act rouge" onclick="_aocAttacher('+q+',\'\')">Aucune</button>';
+        g+='</div>';
+      }
+    });
+    return g+'</div>';
+  };
+  if(!_aocFiltre||_aocFiltre==='__sans__') h+=groupe('Sans appellation',sans);
+  A.forEach(function(a){ if(!_aocFiltre||_aocFiltre===a.nom) h+=groupe(_aocEsc(a.nom),P.filter(function(p){ return de(p)===a.nom; })); });
+  h+='<div class="aoc-note">\u00ab Rattacher \u00bb et \u00ab Changer \u00bb ouvrent la liste des appellations. Une parcelle sans appellation garde le plafond qu\u2019on lui a pos\u00e9 directement, ou aucun.</div>';
+  return h;
+}
+function _aocEstOuverte(id){ var o=document.getElementById(id); return !!(o&&o.classList&&o.classList.contains('open')); }
+// LE point de rafraîchissement, appelé par toutes les actions : les deux lignes, et la fenêtre ouverte.
+function _aocRenderCard(){
+  if(typeof isAdmin==='function'&&!isAdmin()) return;
+  var mil=document.getElementById('cave-reg-mil'); if(mil) mil.innerHTML=_aocResumeHtml();
+  if(_aocEstOuverte('ovAocPlafonds')){ var b=document.getElementById('aocp-body'); if(b) b.innerHTML=_aocPlafondsHtml(); }
+  if(_aocEstOuverte('ovAocRattach')){ var c=document.getElementById('aocr-body'); if(c) c.innerHTML=_aocRattachHtml(); }
+}
+function openAocPlafonds(){ _aocOuvert=''; var b=document.getElementById('aocp-body'); if(b) b.innerHTML=_aocPlafondsHtml(); if(window.openOv) window.openOv('ovAocPlafonds'); }
+function openAocRattach(){ _aocChoix=''; var b=document.getElementById('aocr-body'); if(b) b.innerHTML=_aocRattachHtml(); if(window.openOv) window.openOv('ovAocRattach'); }
+function _aocChoisirMil(m){ _aocMilSel=Number(m); _aocOuvert=''; _aocRenderCard(); }
+function _aocBasculer(nom){ _aocOuvert=(_aocOuvert===nom)?'':nom; _aocRenderCard(); }
+function _aocFiltrer(cle){ _aocFiltre=cle||''; _aocChoix=''; _aocRenderCard(); }
+function _aocChoisirParc(nom){ _aocChoix=(_aocChoix===nom)?'':nom; _aocRenderCard(); }
+// Un choix fait referme la liste (vu dans Chromium : elle restait ouverte sous la parcelle déplacée).
+function _aocAttacher(nomParc, nomAoc){ _aocChoix=''; window._aocSetParc(nomParc, nomAoc); }
+window.openAocPlafonds=openAocPlafonds; window.openAocRattach=openAocRattach; window._aocChoisirMil=_aocChoisirMil;
+window._aocBasculer=_aocBasculer; window._aocFiltrer=_aocFiltrer; window._aocChoisirParc=_aocChoisirParc; window._aocAttacher=_aocAttacher;
 window._aocRenderCard=_aocRenderCard;
 
 // ═══════════════ Synthèse cuivre métal (bio) ═══════════════

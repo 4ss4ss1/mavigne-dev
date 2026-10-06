@@ -5682,3 +5682,27 @@ body .mvv-rh-fill{background:var(--terre,#8A5A38);}
    boutons du mode édition passent au-dessus du contenu des cartes. */
 .home-w-eye.off::after{content:'';position:absolute;left:var(--e-2,8px);right:var(--e-2,8px);top:50%;height:2px;background:var(--rouge);border-radius:1px;transform:rotate(-35deg);pointer-events:none;}
 .home-w-eye,.home-w-size,.home-w-larg{z-index:5;}
+
+/* ★★ AOC-1 (§255) — les appellations dans la roue crantée de la Cave : deux lignes qui résument, deux fenêtres qui gèrent.
+   Validé sur maquette par Nico (06/10). Espacements sur l'échelle --e-* (cliquet de mv-harnais-echelle). Couleurs de texte : les jetons « -tx » sur leur fond pâle (cliquet des contrastes), le choix actif en vert pâle comme les
+   puces de l'appli (.ochip.active). Rayons hors des pas (18, 14, 10 px) : le
+   cliquet des rayons en dur compte aussi le repli d'un appel de jeton, et un jeton sans repli est refusé. */
+.aoc-seg{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 12px}
+.aoc-seg button{font:600 var(--pt-txt,12.5px)/1 var(--sans,Outfit,sans-serif);padding:8px 12px;border-radius:18px;border:1px solid var(--gris-clair);background:var(--bg-card);color:var(--texte);cursor:pointer;min-height:36px}
+.aoc-seg button.on{background:var(--vert-pale);color:var(--vert-tx);border-color:var(--vert)}
+.aoc-list{background:var(--bg-card);border-radius:14px;box-shadow:var(--shadow-sm,0 1px 2px rgba(40,30,15,0.05),0 2px 8px rgba(40,30,15,0.07));overflow:hidden;margin-bottom:12px}
+.aoc-row{display:flex;align-items:center;gap:8px;padding:12px;border-top:1px solid var(--gris-clair)}
+.aoc-list>.aoc-row:first-child{border-top:0}
+.aoc-n{flex:1;min-width:0}
+.aoc-n b{display:block;font-size:var(--pt-base,14px);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.aoc-n span{font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.aoc-pill{font:600 var(--pt-txt,12.5px)/1 var(--sans,Outfit,sans-serif);padding:8px 12px;border-radius:10px;border:0;background:var(--vert-pale);color:var(--vert-tx);white-space:nowrap;cursor:pointer;min-height:36px}
+.aoc-pill.vide{background:var(--or-pale);color:var(--or-tx)}
+.aoc-act{font:600 var(--pt-txt,12.5px)/1 var(--sans,Outfit,sans-serif);padding:8px 12px;border-radius:10px;border:1px solid var(--gris-clair);background:var(--bg-card);color:var(--texte);white-space:nowrap;cursor:pointer;min-height:36px}
+.aoc-act.or{background:var(--or-pale);border-color:transparent;color:var(--or-tx)}
+.aoc-act.rouge{color:var(--rouge)}
+.aoc-more{width:36px;height:36px;border-radius:10px;border:1px solid var(--gris-clair);background:transparent;color:var(--texte-doux);display:grid;place-items:center;cursor:pointer;flex-shrink:0}
+.aoc-tiroir{display:flex;gap:8px;flex-wrap:wrap;padding:0 12px 12px}
+.aoc-grp{display:flex;justify-content:space-between;font-size:var(--pt-lbl,11.5px);letter-spacing:.12em;text-transform:uppercase;color:var(--terre);font-weight:600;margin:12px 2px 8px}
+.aoc-note{font-size:var(--pt-micro,12px);color:var(--texte-doux);margin:12px 2px 4px;line-height:1.45}
+.aoc-ajout{width:100%;min-height:44px;border:1.5px dashed var(--gris-clair);background:transparent;border-radius:14px;font:600 var(--pt-txt,12.5px)/1 var(--sans,Outfit,sans-serif);color:var(--texte);cursor:pointer}

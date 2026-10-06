@@ -112,14 +112,14 @@ function jouer(src, html, reg, ut, silencieux) {
     'la vue de la roue porte les quatre h\u00f4tes : Cuvier, Chai, mill\u00e9sime, documents');
   const rrc = extraire(src, 'renderCaveReglagesCave') || '';
   T(/renderVendParam\(\)/.test(rrc) && /renderCaveReglages\(\)/.test(rrc), 'la roue appelle les deux \u00e9crivains, elle ne les recopie pas');
-  T(/_caveGoAoc\(\)/.test(rrc), 'le mill\u00e9sime renvoie vers les appellations (_caveGoAoc)');
-  const goaoc = extraire(src, '_caveGoAoc') || '';
-  T(/goTo\('reglages'\)/.test(goaoc) && /switchReglTab\('domaine'\)/.test(goaoc) && /'aoc-card'/.test(goaoc), '_caveGoAoc va dans R\u00e9glages \u203a Domaine et \u00e9claire #aoc-card');
+  /* AOC-1 (§255) : les appellations VIVENT dans la roue (deux lignes, deux fenêtres) — plus de renvoi vers Réglages › Domaine. */
+  T(/window\._aocRenderCard\(\)/.test(rrc), 'le mill\u00e9sime re\u00e7oit les deux lignes des appellations (_aocRenderCard)');
+  T(!/_caveGoAoc|'aoc-card'/.test(src), 'plus de renvoi vers R\u00e9glages \u203a Domaine (_caveGoAoc, #aoc-card)');
   const sync = extraire(src, '_caveSyncSecTabs') || '';
   T(/cave-hdr-gear/.test(sync) && /caveSection==='reglages'/.test(sync), 'la roue dit quand on est chez elle (active)');
   const masques = (src.match(/'auj','reg'\]/g) || []).length;
   T(masques >= 4, 'toute liste qui masque Aujourd\u2019hui masque aussi la roue (' + masques + ' listes)');
-  for (const f of ['_caveOpenReglages', '_caveGoAoc', 'renderCaveReglagesCave'])
+  for (const f of ['_caveOpenReglages', 'renderCaveReglagesCave'])
     T(new RegExp('window\\.' + f + '\\s*=\\s*' + f).test(src), f + ' est sur window');
 
   console.log(silencieux ? '' : '\n  Les documents : un catalogue, pas deux');

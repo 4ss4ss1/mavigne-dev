@@ -497,6 +497,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-ids1b.mjs --contre'],
   ['node scripts/mv-harnais-renom-parc.mjs'],         // IDS-1 lot 4 (§254) : renommer une parcelle, tous les registres, règle du domaine
   ['node scripts/mv-harnais-renom-parc.mjs --contre'],
+  ['node scripts/mv-harnais-aoc-cave.mjs'],           // AOC-1 (§255) : les appellations dans la roue de la Cave (deux lignes, deux fenêtres)
+  ['node scripts/mv-harnais-aoc-cave.mjs --contre'],
   ['node scripts/mv-harnais-motifs1.mjs'],            // MOTIFS-1 (§250) : motifs, heures sup et acomptes ne quittent plus l'appareil de l'admin
   ['node scripts/mv-harnais-motifs1.mjs --contre'],
   ['node scripts/mv-harnais-vueeq1.mjs'],             // VUE-EQUIPE-1 (§251) : l'équipe du mois vue par un salarié — présent / absent, jamais le motif
