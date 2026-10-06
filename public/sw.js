@@ -1,4 +1,6 @@
-// MA VIGNE — Service Worker v9.03
+// MA VIGNE — Service Worker v9.04
+// v9.04 (06/10/2026) — IDS-1, lot 4 (§254) : renommer une parcelle (roue crantee de la Vigne, admin) — l'identifiant
+//   reste, le nom est reecrit dans tous les registres, regle du domaine pour les telephones restes hors ligne. APP 8.25 -> 8.26.
 // v9.03 (05/10/2026) — IDS-1, lot 2 (§253) : le nom porte par chaque entree du journal suit l'identifiant de sa parcelle
 //   (reception, chargement, ecriture, fusion) ; filet contre deux parcelles au meme identifiant. Sans effet tant qu'aucune
 //   parcelle n'est renommee. APP 8.25 inchange.
@@ -4334,7 +4336,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.03';
+const CACHE_NAME   = 'mavigne-v9.04';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4350,7 +4352,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.03 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.04 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4370,7 +4372,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.03 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.04 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

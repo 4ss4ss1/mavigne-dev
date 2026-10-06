@@ -848,7 +848,7 @@ function _fbSubscribe(key) {
       var _sv = snap.data().value;
       applyFbData(key, _sv);
       // RENOM-3 (§232) : une donnée reçue (d'un téléphone resté hors ligne, peut-être) repasse par les règles de renommage.
-      if (typeof window._mvAppliquerRenommages === 'function' && /^(config|parcelles|journal|taches|saisons|travaux)$/.test(key)) window._mvAppliquerRenommages(key);
+      if (typeof window._mvAppliquerRenommages === 'function' && /^(config|parcelles|journal|taches|saisons|travaux|sessions|traitements|cave_vendange|kml_polygons|intrants)$/.test(key)) window._mvAppliquerRenommages(key);   // + registres des parcelles (IDS-1 lot 4, §254)
       _mvBaseNoter(key, _sv, _md);   // ★ FUSION-1 : la base suit ce qui descend du serveur
       if (window.currentUser) {
         // ★★ RENDU-1 (§245) — la page affichée se redessine à l'image suivante, une fois, quelles que soient les clés

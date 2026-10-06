@@ -328,7 +328,7 @@ un écran change, harnais et contre-épreuve, Règle d'or n° 4.
 | 9 | **TEXTE-A** ✅ fait (§247) | lisible au soleil : les trois jetons relevés, choisis par Nico sur maquette le 05/10 (« jetons », pas « plancher ») | 1 à 2 j | faible | tranché |
 | 10 | **JOURNAL-1** ✅ fait (§248) | le Journal s'affiche en moins de 150 ms : 336 → 122 ms (journal de 1 000) ; 15 000 entrées 349 → 140 ms (le reste : le calcul, DONNEES-1) ; au pixel près | ½ j | faible | — |
 | 11 | **DONNEES-1** | plus aucun document près de la limite, à 45 ha comme à 12 | 3 à 5 j | **élevé** | oui, après `npm run taille` |
-| 12 | **IDS-1** — lots 1 et 2 ✅ (§252, §253) | renommer une parcelle ou un salarié devient sûr. Lot 1 : parcelles et journal reçoivent leur `pid`. Lot 2 : le nom porté par chaque entrée SUIT son `pid` (au lieu de reprendre les 325 comparaisons). Restent : renommer (lot 4), les autres registres (sessions, phyto, Chai), les salariés | 3 à 5 j | élevé | tranché (option A, parcelles d'abord) |
+| 12 | **IDS-1** — parcelles ✅ (§252, §253, §254) | renommer une parcelle est SÛR : identifiant permanent (lot 1), le nom suit l'identifiant (lot 2), « Renommer une parcelle » dans la roue crantée de la Vigne, tous les registres réécrits + règle du domaine (lot 4). Restent : les salariés (après le planning), les autres modules | 3 à 5 j | élevé | tranché |
 | 13 | **GT-1** ✅ fait (§249) | la console GT quitte le téléphone des clients : gt.html (fabriquée), ≈ 250 Ko de moins chez chaque client, la préparation reste dans gt.html | 1 j | moyen | tranché |
 
 ### 5.1 Les premiers lots, en détail

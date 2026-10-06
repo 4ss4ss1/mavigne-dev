@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **5 octobre 2026 (IDS-1, lot 2 — zip cumulatif avec le lot 1 non poussé)** — ★★ **LE NOM SUIT L'IDENTIFIANT** (§253).
+> Lot 1 (§252) : chaque parcelle et chaque entrée du journal reçoivent un `pid` déduit du nom (`src/ids.js`), posé par saveData, normalisé
+> des trois côtés dans les fusions. Lot 2 : au lieu de reprendre les 325 comparaisons de noms, le nom porté par une entrée est tenu À JOUR
+> d'après son `pid` (`mvNomsParPid`, `mvNomsJournal` — réception, chargement, écriture, fusion) : renommer une parcelle (lot 4) suffira, chaque
+> écran retrouvera son historique. Sans effet aujourd'hui. Harnais `mv-harnais-ids1`, `mv-harnais-ids1b`. Base `7a6a9ac`. **SW 9.01 → 9.03, APP 8.25.**
+> Précédent : VUE-EQUIPE-1 (§251, autre session) — archivé dans journal.md.
+> Taille : ≈ 13 octets par entrée (journal à 108 Ko, 10,5 %, chez le domaine de référence le 05/10 : négligeable).
+
 > ★ Consolidation : **5 octobre 2026 (IDS-1, lot 1)** — ★★ **CHAQUE PARCELLE A UN IDENTIFIANT PERMANENT** (§252), choix de Nico (option A), livré en zip, remplacé avant d'être poussé par le zip cumulatif du lot 2 (§253).
 > `src/ids.js` : `mvPidDe(nom)` déduit du nom (deux téléphones posent le même) ; saveData pose `pid` sur les parcelles et les entrées du journal
 > d'une parcelle connue ; les deux fusions normalisent les trois côtés. Harnais `mv-harnais-ids1`. SW 9.01 → 9.02.

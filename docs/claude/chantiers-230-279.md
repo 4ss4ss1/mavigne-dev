@@ -1066,3 +1066,52 @@ l'historique. Aujourd'hui sans effet : l'identifiant vient du même nom.
 parcelle : priorités, objectifs, équipes du jour). ② Les autres registres qui portent des noms de parcelles — sessions
 tracteur, registre phyto, Chai et Cuvier, contours KML — recevront le même traitement (identifiant + nom qui suit).
 ③ Les salariés, après le chantier du planning.
+
+---
+
+## 254. ★★★ IDS-1, LOT 4 — RENOMMER UNE PARCELLE (06/10 — `src/reglages.js` · `src/firebase.js` · `index.html` (ligne + panneau) · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `guide/12-reglages.html` · `scripts/mv-harnais-renom-parc.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `audit-perf-ux.md` · `lots/IDS-1D.json` · **APP 8.25 → 8.26, SW 9.03 → 9.04**, base `1a1de45`)
+
+### 254a. La décision
+
+Proposé : l'action dans la fiche de la parcelle, à côté de « Cépage » et « Arracher ». Nico (06/10) : renommer est RARE une
+fois le domaine installé — **dans la roue crantée du module**, « chaque module renomme ce qui lui appartient » ; c'est déjà là
+que se renomment les tâches. Réglages › Domaine reste à ranger, dans un lot à part (maquette d'abord). Le lot 3 (compléter
+les anciennes entrées) n'est plus nécessaire : le nom suit l'identifiant (§253).
+
+### 254b. Ce qui change
+
+- **La ligne « Renommer une parcelle »** — roue crantée de la Vigne › Parcelles & secteurs météo (administrateur : la roue
+  l'est) — ouvre `ovRenParcelle` : la parcelle (toutes, arrachées signalées) et le nouveau nom.
+- **Refusé** : vide, le même, plus de 60 caractères, un caractère de contrôle, le nom d'une AUTRE parcelle (même arrachée, sans
+  souci de casse), l'ancien nom d'une AUTRE parcelle (elle hériterait de son historique). Accepté : changer la seule casse.
+- **`_renameParcelle(ancien, nouveau, pid)`** réécrit le nom PARTOUT où il vit — la liste est celle du harnais : la parcelle (par
+  son pid ; elle le GARDE) ; le journal ; les sessions tracteur (`parcellesFaites` en texte ou `{nom}`, `parcelles`, `parcelle`) ;
+  le registre phyto (`parcelles`, liste ou texte) ; le Chai et le Cuvier (récoltes, analyses, cuves de vinification — saisie libre :
+  comparés sans casse ni espaces) ; la fertilisation (`INTRANTS.fertil` : `parcs`, `man`) ; les contours de la carte (`name`, sans
+  casse) ; les tournées (`CONFIG.ordre_passage_t`, `CONFIG.ordre_passage`). **Les travaux sont recalculés** (`recalcTravaux`),
+  jamais recopiés. **Les archives des campagnes passées gardent le nom de l'époque.** Idempotent (aucun compte deux fois).
+- **Une règle du domaine** (`CONFIG.renommages_parcelles` : ancien, nouveau, pid, date, auteur — le modèle de RENOM-3) :
+  `_mvAppliquerRenommages` l'applique, après les règles de tâches, à chaque chargement et à chaque registre reçu (`firebase.js`
+  passe désormais aussi sessions, phyto, Chai, carte, réserve) — ce qu'un téléphone resté hors ligne a saisi sous l'ancien nom
+  est réécrit. Un appareil d'admin enregistre ; un appareil d'ouvrier corrige en mémoire. **Garde-fou** : si une AUTRE parcelle
+  (autre pid) a repris l'ancien nom, la règle ne touche plus à rien.
+- **Enregistré** : parcelles, journal, travaux, sessions, phyto, Chai, réglages ; la réserve (`saveIntrants`) ; la carte
+  (`fbSave('kml_polygons')`, jamais vide).
+- `WHATS_NEW` 8.26 (admin), guide 12 (Réglages).
+
+### 254c. Mesuré
+
+- **`mv-harnais-renom-parc`** (neuf) : **28 assertions** sur les vraies fonctions de reglages.js et un domaine fictif qui porte le
+  nom dans TOUS les registres — chaque registre réécrit, les autres parcelles intactes, le pid gardé, les archives inchangées,
+  la règle posée, les travaux recalculés, tout enregistré ; refus (non-admin, vide, même, autre parcelle, ancien nom d'une
+  autre, longueur, contrôle) ; un autre téléphone applique la règle (saisie hors ligne comprise), sans boucle, admin enregistre,
+  ouvrier non ; une nouvelle parcelle qui reprend l'ancien nom épargnée ; les règles de tâches intactes ; la casse seule ; le
+  formulaire et les branchements. **14/14 contre-épreuves** (un registre oublié rougit).
+- `mv-harnais-renom` (tâches) : vert, contre-épreuves 9/9 — le tri de ses règles est resté à l'identique (sa contre-épreuve
+  le vise).
+
+### 254d. Ouvert
+
+① **Les salariés** (après le chantier du planning) : comptes de connexion, planning, relevés, profil retenu, empreinte hors
+réseau. ② « Renommer » dans les autres roues crantées (tracteurs, activités…) si le besoin se présente. ③ Ranger
+Réglages › Domaine (lot à part, maquette d'abord).

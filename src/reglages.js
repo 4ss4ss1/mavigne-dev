@@ -23,6 +23,7 @@
 import { isAdmin, showToast, _escHtml, _escAttr, deepClone, _swNotify, tNom, TABREV, getRoleLabel,
          _mvIcon, _mvIconInline, _mvIconTache, _mvIconTuile, _actIcone,
          _mvBadge } from './utils.js';
+import { mvIdsParcelles } from './ids.js';   // IDS-1 lot 4 (§254) : une parcelle renommée garde son identifiant
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if(DEBUG) console.log('[Ma Vigne] reglages.js chargé — ' + new Date().toISOString());
@@ -1826,16 +1827,136 @@ window.openRenTache=openRenTache; window.saveRenTache=saveRenTache;
 //   d'écriture ne couvrent pas tout), et la renvoient avec leur prochaine écriture.
 function _mvAppliquerRenommages(cle){
   var cfg=window.CONFIG||{}, L=Array.isArray(cfg.renommages_taches)?cfg.renommages_taches.slice():[];
-  if(!L.length) return 0;
+  var RP=Array.isArray(cfg.renommages_parcelles)?cfg.renommages_parcelles.slice():[];   // IDS-1 lot 4 (§254)
+  if(!L.length&&!RP.length) return 0;
+  var parDate=function(a,b){ return String((a&&a.quand)||'').localeCompare(String((b&&b.quand)||'')); };
   L.sort(function(a,b){ return String((a&&a.quand)||'').localeCompare(String((b&&b.quand)||'')); });
   var n=0;
   L.forEach(function(r){ if(r&&r.de&&r.vers&&r.de!==r.vers) n+=_renameTache(r.de,r.vers)||0; });
+  // ★★ IDS-1 lot 4 (§254) — les renommages de PARCELLES, même principe. Une règle ne touche plus à rien si son ancien nom
+  //   est désormais porté par une AUTRE parcelle (autre identifiant) : on ne lui prêterait pas l'historique d'une autre.
+  var nP=0;
+  RP.sort(parDate).forEach(function(r){
+    if(!r||!r.de||!r.vers||r.de===r.vers) return;
+    var autre=(window.PARCELLES||[]).some(function(p){ return p&&p.nom===r.de&&r.pid&&p.pid&&p.pid!==r.pid; });
+    if(!autre) nP+=_renameParcelle(r.de,r.vers,r.pid)||0;
+  });
+  if(nP>0) _rpTravaux();
+  n+=nP;
   if(n>0&&typeof window.isAdmin==='function'&&window.isAdmin()&&typeof window.saveData==='function'){
     ['taches','parcelles','journal','saisons','travaux','config'].forEach(function(k){ window.saveData(k); });
+    if(nP>0) _rpEnregistrerRegistres();
   }
   return n;
 }
 window._mvAppliquerRenommages=_mvAppliquerRenommages;
+
+// ════════════════════════════════════════════════════════════════════════════
+// ★★★ IDS-1, LOT 4 (§254) — RENOMMER UNE PARCELLE (roue crantée de la Vigne, administrateur)
+// ════════════════════════════════════════════════════════════════════════════
+// Nico (06/10) : renommer est RARE une fois le domaine installé — l'option vit dans la roue crantée du module (« chaque
+// module renomme ce qui lui appartient »), à côté du renommage des tâches. La parcelle GARDE son identifiant (§252) ; le
+// journal suit tout seul (le nom suit l'identifiant, §253). Les autres registres gardent le nom en clair : ils sont
+// réécrits ici, comme les tâches (RENOM-1), et le renommage devient une RÈGLE du domaine (CONFIG.renommages_parcelles,
+// comme RENOM-3) que chaque téléphone applique à ce qu'il reçoit — y compris ce qu'un téléphone resté hors ligne a saisi
+// sous l'ancien nom. Les archives des campagnes passées (historique) gardent le nom de l'époque : photos du passé.
+// OÙ VIT UN NOM DE PARCELLE (mv-harnais-renom-parc tient cette liste) : la parcelle ; le journal ; les sessions tracteur
+// (parcellesFaites — texte ou {nom} —, parcelles, parcelle) ; le registre phyto (parcelles) ; le Chai et le Cuvier
+// (récoltes, analyses, cuves de vinification — saisie libre possible : comparés sans casse ni espaces) ; la fertilisation
+// (INTRANTS.fertil : parcs, man) ; les contours de la carte (name, sans casse) ; les tournées (CONFIG.ordre_passage_t,
+// CONFIG.ordre_passage). Les travaux (TRAVAUX) sont recalculés.
+function _rpNorm(s){ return String(s==null?'':s).normalize('NFC').trim().toLowerCase(); }
+function _renameParcelle(oldN, newN, pid){
+  if(!oldN||!newN||oldN===newN) return 0;
+  var nb=0, o=_rpNorm(oldN), own=Object.prototype.hasOwnProperty;
+  var eq=function(x){ return x===oldN; };
+  var eqN=function(x){ return typeof x==='string'&&x!==newN&&_rpNorm(x)===o; };   // jamais compté deux fois (idempotent)
+  var rl=function(a,f){ if(!Array.isArray(a)) return; for(var i=0;i<a.length;i++){
+    if(typeof a[i]==='string'){ if(f(a[i])){ a[i]=newN; nb++; } }
+    else if(a[i]&&typeof a[i]==='object'&&typeof a[i].nom==='string'&&f(a[i].nom)){ a[i].nom=newN; nb++; } } };
+  var mvk=function(obj,f){ if(!obj||typeof obj!=='object'||Array.isArray(obj)) return;
+    Object.keys(obj).forEach(function(k){ if(k!==newN&&f(k)){ if(!own.call(obj,newN)) obj[newN]=obj[k]; delete obj[k]; nb++; } }); };
+  (window.PARCELLES||[]).forEach(function(p){ if(p&&p.nom===oldN&&(!pid||!p.pid||p.pid===pid)){ p.nom=newN; nb++; } });
+  (window.JOURNAL||[]).forEach(function(e){ if(e&&e.parcelle===oldN&&(!pid||!e.pid||e.pid===pid)){ e.parcelle=newN; nb++; } });
+  (window.SESSIONS||[]).forEach(function(s){ if(!s) return; rl(s.parcellesFaites,eq); rl(s.parcelles,eq); if(s.parcelle===oldN){ s.parcelle=newN; nb++; } });
+  (window.TRAITEMENTS||[]).forEach(function(t){ if(!t) return; if(t.parcelles===oldN){ t.parcelles=newN; nb++; } else rl(t.parcelles,eq); });
+  var V=window.CAVE_VENDANGE||{};
+  (V.recoltes||[]).forEach(function(r){ if(r&&eqN(r.parcelle)){ r.parcelle=newN; nb++; } });
+  (V.analyses||[]).forEach(function(a){ if(a&&eqN(a.parcelle)){ a.parcelle=newN; nb++; } });
+  (V.cuves_vinif||[]).forEach(function(c){ if(c) rl(c.parcelles,eqN); });
+  ((window.INTRANTS||{}).fertil||[]).forEach(function(op){ if(!op) return; rl(op.parcs,eq); mvk(op.man,eq); });
+  (window.KML_POLYGONS_DYNAMIC||[]).forEach(function(k){ if(k&&eqN(k.name)){ k.name=newN; nb++; } });
+  var cfg=window.CONFIG||{};
+  if(cfg.ordre_passage_t&&typeof cfg.ordre_passage_t==='object') Object.keys(cfg.ordre_passage_t).forEach(function(t){ var e=cfg.ordre_passage_t[t]; if(e) rl(e.ordre,eq); });
+  rl(cfg.ordre_passage,eq);
+  return nb;
+}
+// Les travaux portent des noms de parcelles : ils se recalculent (comme après une validation), jamais ne se recopient.
+function _rpTravaux(){
+  try{
+    var T=window.TRAVAUX;
+    if(T&&typeof T==='object'&&typeof window.recalcTravaux==='function'){
+      Object.keys(T).forEach(function(k){ delete T[k]; });
+      (window.TACHES||[]).forEach(function(t){ if(t&&t.nom) window.recalcTravaux(t.nom); });
+    }
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'reglages.js/_rpTravaux'); }
+}
+// Les registres hors saveData : la réserve (fertilisation) et la carte (jamais vide : garde KML de firebase.js).
+function _rpEnregistrerRegistres(){
+  ['sessions','traitements','cave_vendange'].forEach(function(k){ window.saveData(k); });
+  if(typeof window.saveIntrants==='function') window.saveIntrants();
+  var K=window.KML_POLYGONS_DYNAMIC;
+  if(Array.isArray(K)&&K.length&&typeof window.fbSave==='function') window.fbSave('kml_polygons',K);
+}
+function _renParcelleErreur(p, n){
+  if(!p) return 'Choisissez une parcelle.';
+  if(!n) return 'Le nouveau nom est vide.';
+  if(n.length>60) return '60 caract\u00e8res au plus.';
+  for(var _i=0;_i<n.length;_i++){ if(n.charCodeAt(_i)<32) return 'Caract\u00e8re non autoris\u00e9.'; }   // sans regex (ESLint no-control-regex)
+  if(n===p.nom) return 'C\u2019est d\u00e9j\u00e0 son nom.';
+  var k=_rpNorm(n);
+  if((window.PARCELLES||[]).some(function(x){ return x&&x!==p&&_rpNorm(x.nom)===k; })) return 'Une autre parcelle porte d\u00e9j\u00e0 ce nom.';
+  var RP=((window.CONFIG||{}).renommages_parcelles)||[];
+  if(RP.some(function(r){ return r&&_rpNorm(r.de)===k&&r.pid!==p.pid; })) return 'Ce nom a d\u00e9j\u00e0 \u00e9t\u00e9 port\u00e9 par une autre parcelle : choisissez-en un autre.';
+  return '';
+}
+function openRenParcelle(){
+  var b=document.getElementById('rparc-body'); if(!b) return;
+  var L=(window.PARCELLES||[]).filter(function(p){ return p&&p.nom; }).slice().sort(function(a,c){ return String(a.nom).localeCompare(String(c.nom),'fr'); });
+  b.innerHTML='<div class="fl">Parcelle</div>'
+    +'<select class="fsel" id="rparc-sel">'+L.map(function(p){ return '<option value="'+_escAttr(p.nom)+'">'+_escHtml(p.nom)+(p.statut==='Arrachee'?' (arrach\u00e9e)':'')+'</option>'; }).join('')+'</select>'
+    +'<div class="fl" style="margin-top:12px">Nouveau nom</div>'
+    +'<input type="text" class="fi" id="rparc-nom" maxlength="60" autocomplete="off">'
+    +'<div id="rparc-err" class="mv-l" style="color:var(--rouge);min-height:16px;margin-top:6px"></div>'
+    +'<div class="mv-l" style="margin:6px 0 14px">Le nouveau nom remplace l\u2019ancien partout \u2014 journal, sessions tracteur, registre phyto, vendanges et Cuvier, fertilisation, carte, tourn\u00e9es. Les archives des campagnes pass\u00e9es gardent l\u2019ancien.</div>'
+    +'<button type="button" class="mbtn verte" onclick="saveRenParcelle()">Renommer</button>';
+  window.openOv('ovRenParcelle');
+}
+function saveRenParcelle(){
+  var sel=document.getElementById('rparc-sel'), inp=document.getElementById('rparc-nom'), err=document.getElementById('rparc-err');
+  if(!(typeof window.isAdmin==='function'&&window.isAdmin())){ if(err) err.textContent='Seul un administrateur renomme une parcelle.'; return; }
+  var oldN=sel?String(sel.value||''):'', n=inp?String(inp.value||'').trim():'';
+  var P=window.PARCELLES||[];
+  mvIdsParcelles(P);                                   // l'identifiant d'abord : c'est lui qui reste
+  var p=P.find(function(x){ return x&&x.nom===oldN; });
+  var m=_renParcelleErreur(p,n);
+  if(m){ if(err) err.textContent=m; return; }
+  var cfg=window.CONFIG||(window.CONFIG={});
+  if(!Array.isArray(cfg.renommages_parcelles)) cfg.renommages_parcelles=[];
+  cfg.renommages_parcelles.push({ de:oldN, vers:n, pid:p.pid||'', quand:new Date().toISOString(), par:((window.currentUser&&window.currentUser.nom)||'') });
+  _renameParcelle(oldN,n,p.pid);
+  _rpTravaux();
+  ['parcelles','journal','travaux'].forEach(function(k){ window.saveData(k); });
+  _rpEnregistrerRegistres();
+  window.saveData('config','Parcelle renomm\u00e9e partout : '+n);
+  window.closeOv(null,'ovRenParcelle');
+  try{ var pg=document.querySelector('.page.active'), id=pg&&pg.id;
+    if(id==='page-parcelles'&&window.renderParcelles) window.renderParcelles();
+    else if(id==='page-home'&&window.renderHome) window.renderHome();
+    else if(id==='page-journal'&&window.renderJournalList) window.renderJournalList(); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'reglages.js/saveRenParcelle#rendu'); }
+}
+window.openRenParcelle=openRenParcelle; window.saveRenParcelle=saveRenParcelle;
 
 function openEditHha(nom){
   var t=window.TACHES.find(function(x){return x.nom===nom;});

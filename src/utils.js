@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.25';
+export const APP_VERSION = '8.26';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -852,6 +852,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.26', d: '2026-10-06', items: [
+    { niv: 0, pour: ['admin'], emoji: 'crayon', titre: 'Renommer une parcelle',
+      desc: "Dans la roue crantée de la Vigne › Parcelles & secteurs météo. La parcelle garde tout son historique : journal, sessions tracteur, registre phyto, vendanges, carte et tournées prennent le nouveau nom, y compris sur les téléphones restés hors ligne. Les archives des campagnes passées gardent l’ancien." },
+  ] },
   { v: '8.25', d: '2026-10-05', items: [
     { niv: 0, pour: ['salaries'], emoji: 'equipe', titre: 'L’équipe du mois dans le Planning',
       desc: "Un nouvel onglet, L’équipe, montre qui est là jour par jour ce mois-ci : présent ou absent, sans jamais le motif — même un congé s’affiche « Abs ». Votre propre mois reste dans Mon mois." },

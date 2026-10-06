@@ -495,6 +495,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-ids1.mjs --contre'],
   ['node scripts/mv-harnais-ids1b.mjs'],              // IDS-1 lot 2 (§253) : le nom suit l'identifiant (renommage sans reprendre les écrans)
   ['node scripts/mv-harnais-ids1b.mjs --contre'],
+  ['node scripts/mv-harnais-renom-parc.mjs'],         // IDS-1 lot 4 (§254) : renommer une parcelle, tous les registres, règle du domaine
+  ['node scripts/mv-harnais-renom-parc.mjs --contre'],
   ['node scripts/mv-harnais-motifs1.mjs'],            // MOTIFS-1 (§250) : motifs, heures sup et acomptes ne quittent plus l'appareil de l'admin
   ['node scripts/mv-harnais-motifs1.mjs --contre'],
   ['node scripts/mv-harnais-vueeq1.mjs'],             // VUE-EQUIPE-1 (§251) : l'équipe du mois vue par un salarié — présent / absent, jamais le motif

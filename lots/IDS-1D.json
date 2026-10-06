@@ -1,0 +1,24 @@
+{
+  "lot": "IDS-1D",
+  "section": "§254",
+  "base": "1a1de45b4b584acf631d2f6e95d556c02db8d8a9",
+  "inclut": [],
+  "date": "2026-10-06",
+  "fichiers": {
+    ".mv-base": "c473578fa4b6683e01be9f9c860cf251e256c7de93eed14c0dd70fa63f4d344d",
+    "CLAUDE.md": "eca1d7656c08de028a9ad8a549d57e0684423b823382a310d8608b8e387a0a7b",
+    "audit-perf-ux.md": "f462fe414c429118315004eecb132e0fa2aa823c62d4b84cf690d9158661928e",
+    "docs/claude/INDEX.md": "a98a1f94a0675c8bd232c00b08235bd6a08ab0ccdc65404a5f3e6e312cac66d2",
+    "docs/claude/chantiers-230-279.md": "109d128e59486504202b7e8dc84e594e22f5c1e926cb09c9745c40bff985958e",
+    "docs/claude/journal.md": "a4af1f63c5099639deed869c30284cb7cd3c069310740ae85abfa525b6b21447",
+    "guide/12-reglages.html": "0a81861e401b9f91ef458f1e36b9e4d4b30187297914c3162caa9115d96a636a",
+    "index.html": "a340d91ecec03de8bce2d0ed7783d82962d7b0fcf34e0c6aafa83354ddfc8e27",
+    "public/sw.js": "873caba7a3548e1f10f99db4fc83ceca4be3d93083c5e767909c89e6a0a4d43b",
+    "scripts/harnais-claude-md.mjs": "bf152dd2e73e0ae8d6399f4675a987773a7c7fda95acf800e1bb9e0164ea49bc",
+    "scripts/mv-harnais-liste.mjs": "e484e205d554af6ed02b37fa81b279d5ce455439612f1c8c5ebbb33e69461a01",
+    "src/firebase.js": "5c0c720692fd2ce47d58c706b39a3ddacb1827b9671112fd892d0a5d81b29b6d",
+    "src/reglages.js": "1a75029b32b773beb4f30f1a5631951f1291e76e70a873cfb3a02fa14632be62",
+    "src/utils.js": "4ada2582882c64061194c55b1a9d29c7f4bfbbc1679c99f661d60a9bfd1f5070",
+    "scripts/mv-harnais-renom-parc.mjs": "7dd7da9936822b4d05061daf912e6aff91c51c946ddb7e539f3690c23e2d3609"
+  }
+}
