@@ -168,25 +168,52 @@ window._ckChargeSvg = function(w, serie, m){
 var _CK_SV = { jours: 7, contrat: 30, pluie: 2, vent: 40 };
 function _ckJc(dt){ return dt.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }); }
 function _ckPlusJ(t, k){ return new Date(t.getFullYear(), t.getMonth(), t.getDate() + k); }
-window._ckSvMeteo = function(H, rows, now){
-  if(!H || !Array.isArray(H.time) || !Array.isArray(H.precip)) return [];
+// SECT-1 (§264) : SECTEUR PAR SECTEUR dès que le domaine en a plusieurs (relevé par commune de l'Accueil, _wxSecteurs) ;
+//   sinon les prévisions du domaine (METEO_HOURLY). Mêmes seuils. Si un brûlage n'est pas fini, on compte ses parcelles
+//   pas encore faites DANS les communes touchées (états du plan, AUJ-3) : « le brûlage attendra sur Brochon : 3 parcelles ».
+function _ckMeteoJour(h, iso){
+  var mm = 0, vent = 0, h0 = null, h1 = null, vu = false;
+  for(var i = 0; i < h.time.length; i++){
+    var s = String(h.time[i]); if(s.slice(0, 10) !== iso) continue;
+    vu = true;
+    var p = Number(h.precip[i]) || 0, w = Number(h.wind && h.wind[i]) || 0, hh = parseInt(s.slice(11, 13), 10);
+    mm += p; if(w > vent) vent = w;
+    if(p >= 0.2){ if(h0 === null) h0 = hh; h1 = hh + 1; }
+  }
+  return { vu: vu, mm: Math.round(mm * 10) / 10, vent: Math.round(vent), h0: h0, h1: h1 };
+}
+function _ckMm(v){ return String(v).replace('.', ',') + '\u202fmm'; }
+function _ckEt(l){ return l.join(', ').replace(/, ([^,]*)$/, ' et $1'); }
+window._ckSvMeteo = function(H, rows, now, secteurs, plan){
   var t = now || new Date(), out = [];
+  var sect = (secteurs || []).filter(function(s){ return s && s.nom && s.h && Array.isArray(s.h.time) && Array.isArray(s.h.precip); });
+  var brul = (rows || []).filter(function(r){ return r && /br[uû]l/i.test(String(r.nom || '')) && (r.pct || 0) < 100; })[0];
   [1, 2].forEach(function(k){
-    var dt = _ckPlusJ(t, k), iso = _ckIso(dt), mm = 0, vent = 0, h0 = null, h1 = null, vu = false;
-    for(var i = 0; i < H.time.length; i++){
-      var s = String(H.time[i]); if(s.slice(0, 10) !== iso) continue;
-      vu = true;
-      var p = Number(H.precip[i]) || 0, w = Number(H.wind && H.wind[i]) || 0, h = parseInt(s.slice(11, 13), 10);
-      mm += p; if(w > vent) vent = w;
-      if(p >= 0.2){ if(h0 === null) h0 = h; h1 = h + 1; }
+    var dt = _ckPlusJ(t, k), iso = _ckIso(dt), quand = k === 1 ? 'Demain' : _ckMaj1(dt.toLocaleDateString('fr-FR', { weekday: 'long' }));
+    if(sect.length){
+      var tou = [];
+      sect.forEach(function(s){ var j = _ckMeteoJour(s.h, iso); if(j.vu && (j.mm >= _CK_SV.pluie || j.vent >= _CK_SV.vent)) tou.push({ nom: s.nom, j: j }); });
+      if(!tou.length) return;
+      var pl = tou.filter(function(x){ return x.j.mm >= _CK_SV.pluie; }), ve = tou.filter(function(x){ return x.j.vent >= _CK_SV.vent; }), tt = '';
+      if(pl.length === 1) tt = 'Pluie annoncée sur ' + pl[0].nom + ' : ' + _ckMm(pl[0].j.mm) + (pl[0].j.h0 !== null ? ', de ' + pl[0].j.h0 + '\u00a0h à ' + pl[0].j.h1 + '\u00a0h' : '');
+      else if(pl.length > 1) tt = 'Pluie annoncée sur ' + _ckEt(pl.map(function(x){ return x.nom + ' (' + _ckMm(x.j.mm) + ')'; }));
+      if(ve.length) tt += (tt ? ' ; vent à ' : 'Vent annoncé à ') + Math.max.apply(null, ve.map(function(x){ return x.j.vent; })) + '\u202fkm/h sur ' + _ckEt(ve.map(function(x){ return x.nom; }));
+      var sous = 'Aucun chantier en cours ne craint ce temps.', prio = 2;
+      if(brul){
+        var com = tou.map(function(x){ return x.nom; });
+        var et = (plan && plan.parcs) ? window._ckPlanEtats(plan.parcs, plan.journal, brul.nom, _ckPlanDebut(plan.fen, brul.nom), false) : null;
+        var n = et ? plan.parcs.filter(function(p){ var e = p && et[p.nom]; return p && com.indexOf(String(p.commune || '').trim()) >= 0 && (e === 'afaire' || e === 'cours' || e === 'retard'); }).length : 0;
+        if(n){ prio = 1; sous = 'Le brûlage attendra un temps sec sur ' + _ckEt(com) + ' : ' + n + ' parcelle' + (n > 1 ? 's' : '') + ' pas encore faite' + (n > 1 ? 's' : '') + '.'; }
+      }
+      out.push({ cat: 'meteo', prio: prio, quand: quand, titre: tt, sous: sous });
+      return;
     }
-    mm = Math.round(mm * 10) / 10;
-    if(!vu || (mm < _CK_SV.pluie && vent < _CK_SV.vent)) return;
-    var brul = (rows || []).some(function(r){ return r && /br[uû]l/i.test(String(r.nom || '')) && (r.pct || 0) < 100; });
-    var t1 = mm >= _CK_SV.pluie ? 'Pluie annoncée : ' + String(mm).replace('.', ',') + '\u202fmm' + (h0 !== null ? ', de ' + h0 + '\u00a0h à ' + h1 + '\u00a0h' : '') : '';
-    if(vent >= _CK_SV.vent) t1 += (t1 ? ', vent à ' : 'Vent annoncé à ') + Math.round(vent) + '\u202fkm/h';
-    out.push({ cat: 'meteo', prio: brul ? 1 : 2, quand: k === 1 ? 'Demain' : _ckMaj1(dt.toLocaleDateString('fr-FR', { weekday: 'long' })),
-      titre: t1, sous: brul ? 'Le brûlage en cours attendra un temps sec.' : 'Aucun chantier en cours ne craint ce temps.' });
+    if(!H || !Array.isArray(H.time) || !Array.isArray(H.precip)) return;
+    var j = _ckMeteoJour(H, iso);
+    if(!j.vu || (j.mm < _CK_SV.pluie && j.vent < _CK_SV.vent)) return;
+    var t1 = j.mm >= _CK_SV.pluie ? 'Pluie annoncée : ' + _ckMm(j.mm) + (j.h0 !== null ? ', de ' + j.h0 + '\u00a0h à ' + j.h1 + '\u00a0h' : '') : '';
+    if(j.vent >= _CK_SV.vent) t1 += (t1 ? ', vent à ' : 'Vent annoncé à ') + j.vent + '\u202fkm/h';
+    out.push({ cat: 'meteo', prio: brul ? 1 : 2, quand: quand, titre: t1, sous: brul ? 'Le brûlage en cours attendra un temps sec.' : 'Aucun chantier en cours ne craint ce temps.' });
   });
   return out;
 };
@@ -215,16 +242,25 @@ window._ckSvAbsences = function(membres, PE, etatDe, now){
   });
   return out;
 };
-window._ckSvContrats = function(membres, now){
+window._ckSvContrats = function(membres, now, gains){
   var t = now || new Date(), auj = _ckIso(t), lim = _ckIso(_ckPlusJ(t, _CK_SV.contrat)), out = [];
   (membres || []).forEach(function(m){
     if(!m || m.statut === 'Inactif' || typeof m.fin_contrat !== 'string' || m.fin_contrat < auj || m.fin_contrat > lim) return;
     var p = m.fin_contrat.split('-');
     out.push({ cat: 'contrat', prio: 1, quand: _ckJc(new Date(+p[0], +p[1] - 1, +p[2])), titre: 'Fin du contrat de ' + m.nom,
-      sous: 'Le planning en tient compte dès cette date. Pour prolonger ou remplacer, simulez un renfort.', action: 'renfort' });
+      sous: _ckProlong(gains && gains[m.nom]), action: 'renfort' });
   });
   return out;
 };
+// PROL-1 (§265) : la phrase du gain d'une prolongation d'un mois (calculé dans pilotage.js par le simulateur de renfort).
+function _ckProlong(g){
+  if(!g) return 'Le planning en tient compte dès cette date. Pour prolonger ou remplacer, simulez un renfort.';
+  if(!(g.h >= 1) && !(g.taches >= 1)) return 'Le prolonger d’un mois ne changerait rien aux travaux de la campagne.';
+  var p = [];
+  if(g.h >= 1) p.push('éviterait ' + _ckNb(g.h) + '\u202fh de rattrapage' + (g.eur ? ' (env. ' + g.eur + ')' : ''));
+  if(g.taches >= 1) p.push('ramènerait ' + g.taches + ' tâche' + (g.taches > 1 ? 's' : '') + ' dans sa fenêtre');
+  return 'Le prolonger d’un mois ' + p.join(' et ') + '.';
+}
 window._ckSvRetards = function(rows, retards){
   var R = retards || {}, out = [];
   (rows || []).forEach(function(r){
@@ -412,9 +448,10 @@ window._ckAuj = function(o){
     + (mo.charge ? pan('id="ck-charge-pan"', 'Charge restante', 'pil.charge',
         (isFinite(reste) && d.totalReste != null ? _ckNb(reste) + '\u202fh à faire, photographiées chaque jour' : 'Photographiée chaque jour'),
         '<div id="ck-charge" class="ck-graphe"></div>') : '');
-  var sv = mo.savoir ? [].concat(window._ckSvMeteo(window.METEO_HOURLY || _ckMeteoCache(), d.data, new Date()),
+  var sv = mo.savoir ? [].concat(window._ckSvMeteo(window.METEO_HOURLY || _ckMeteoCache(), d.data, new Date(),
+        (typeof window._wxSecteurs === 'function' ? window._wxSecteurs() : null), { parcs: (o.parcs || window.PARCELLES || []), journal: o.journal, fen: o.fenetres }),
       window._ckSvAbsences(window.MEMBRES, window.PLANNING_ENTRIES, window._pilEtatEntree, new Date()),
-      window._ckSvContrats(window.MEMBRES, new Date()), window._ckSvRetards(d.data, o.retards)) : null;
+      window._ckSvContrats(window.MEMBRES, new Date(), o.prolong), window._ckSvRetards(d.data, o.retards)) : null;
   var cave = o.cave ? '<div class="pil-cks ck-sv-cave">' + o.cave + '</div>' : '';
   var droite = (sv ? pan('id="ck-savoir"', 'À savoir', 'pil.savoir', 'Ce qui peut changer la journée ou la semaine, visible de l’admin seulement',
         window._ckSavoirHtml(sv, (o.alertes || '') + cave)) : '')

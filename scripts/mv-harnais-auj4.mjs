@@ -50,7 +50,7 @@ function suite(S) {
   const css = S.css.slice(S.css.indexOf('AUJ-4 (§263) — LA BASCULE')).replace(/var\([^)]*\)/g, 'JETON');
   T('le style de la bascule ne passe que par les jetons', css.length > 200 && !/(?:margin|padding|gap)(?:-[a-z]+)?:[^;}]*\d+px/.test(css) && !/font-size:\s*\d/.test(css) && !/border-radius/.test(css));
   T('aide, guide et nouveauté (8.35, pastille sur la bascule)', S.uti.includes('La bascule <b>Terrain / Économie</b>') && S.guide.includes('La bascule <b>Terrain / Économie</b>')
-    && /export const APP_VERSION = '8\.35';/.test(S.uti) && /\{ v: '8\.35', d: '2026-10-07', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-bascule'/.test(S.uti));
+    && /\{ v: '8\.35', d: '2026-10-07', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-bascule'/.test(S.uti));
   return out;
 }
 function jouer(S) { try { return suite(S); } catch (e) { return [['plantage : ' + (e && e.message), false]]; } }

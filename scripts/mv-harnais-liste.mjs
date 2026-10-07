@@ -519,4 +519,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-auj3.mjs --contre'],
   ['node scripts/mv-harnais-auj4.mjs'],               // AUJ-4 (§263) : bascule Terrain / Économie (l'onglet Économie tel quel)
   ['node scripts/mv-harnais-auj4.mjs --contre'],
+  ['node scripts/mv-harnais-sect1.mjs'],              // SECT-1 (§264) : la météo par secteur dans « À savoir »
+  ['node scripts/mv-harnais-sect1.mjs --contre'],
+  ['node scripts/mv-harnais-prol1.mjs'],              // PROL-1 (§265) : ce qu'une prolongation de contrat ferait gagner
+  ['node scripts/mv-harnais-prol1.mjs --contre'],
 ];

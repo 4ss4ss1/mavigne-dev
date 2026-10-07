@@ -95,7 +95,7 @@ function suite(S) {
 
   const P = S.pil;
   T('_pilTabAuj confie au cockpit les morceaux qu\u2019il calcule déjà, sans en recalculer aucun',
-    /return window\._ckAuj\(\{ d:d, m:m, hero:_ckHero, inaction:_ckInac, kpis:kpis\.slice\(0,_ckK0\), cave:_ckCave, retards:_pilRetards\(\), fenetres:[^\n]*?, parcs:\(window\.PARCELLES\|\|\[\]\), budget:_ckBud, eco:_pilShow\('auj_eco'\), dec:dec, det:det, alertes:H\.slice\(_ckAl0\),/.test(P)
+    /return window\._ckAuj\(\{ d:d, m:m, hero:_ckHero, inaction:_ckInac, kpis:kpis\.slice\(0,_ckK0\), cave:_ckCave, retards:_pilRetards\(\), fenetres:[^\n]*?, parcs:\(window\.PARCELLES\|\|\[\]\), budget:_ckBud, eco:_pilShow\('auj_eco'\), (?:[a-z]+:[^,]+, )*dec:dec, det:det, alertes:H\.slice\(_ckAl0\),/.test(P)
     && /chantiers:\(_pilShow\('auj_chantiers'\)\?window\._mvkAvancement\(d\.data,_pilRetards\(\)\):''\)/.test(P)
     && /montrer:\{ resume:_pilShow\('auj_resume'\), charge:_pilShow\('auj_courbe'\), fil:_pilShow\('auj_fil'\), savoir:_pilShow\('auj_savoir'\), plan:_pilShow\('auj_plan'\) \}/.test(P));
   T('… et garde l\u2019ancien ordre si le cockpit manque ou plante (jamais d\u2019écran blanc)',

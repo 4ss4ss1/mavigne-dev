@@ -1562,3 +1562,55 @@ porte que la journée ; les prévisions heure par heure sur 5 jours (`METEO_HOUR
 - Dans le moteur économique (`_pecData`) : l'atterrissage de la campagne, le « dépensé face au fait », le coût à
   l'hectare par appellation — à décider avec Nico lors de la reprise de l'onglet Économie.
 - Détail météo par secteur (§261) ; gain d'une prolongation de contrat (§261).
+
+## 264. ★★ SECT-1 — LA MÉTÉO PAR SECTEUR DANS « À SAVOIR » (07/10 — `src/app.js` (`_wxCurrent`, `_wxDeuxJours`, `_wxFromApi`, `_WXCOM_V` 3, `window._wxSecteurs`) · `src/cockpit.js` (`_ckSvMeteo`) · `src/utils.js` (MV_INFO, APP, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` — APP 8.35 → 8.36 · SW 9.13 → 9.14 — base `8b77624`)
+
+### 264a. Pourquoi
+
+Suite convenue d'AUJ-2 (§261) : la météo d'abord au niveau du domaine, puis secteur par secteur. Le relevé par
+commune de l'Accueil (`fetchMeteoCommunes`, un appel par commune, dès deux communes) ne portait que la journée.
+
+### 264b. Ce qui change
+
+- **`_wxCurrent`** demande aussi `hourly=precipitation,windspeed_10m` sur `forecast_days=3` — le même appel, pas un
+  de plus. **`_wxDeuxJours`** garde les deux jours qui SUIVENT celui du relevé (reconnu par sa date dans la série,
+  `timezone=Europe/Paris`, pas par l'horloge du téléphone) ; `_wxFromApi` les range dans `wx.h`. Le reste du relevé
+  (température, pictogramme, probabilité du jour) est inchangé.
+- **`_WXCOM_V` passe à 3** : un relevé d'avant n'a pas `h` et ne se relit pas — l'Accueil refait ses appels une fois.
+- **`window._wxSecteurs()`** : la mémoire (`METEO_PAR_COMMUNE`) d'abord, sinon le cache du même domaine de moins de
+  12 h ; jamais d'appel réseau.
+- **`_ckSvMeteo`** : secteur par secteur quand il y en a (une ligne par jour : « Pluie annoncée sur Brochon : 6 mm,
+  de 8 h à 11 h », ou plusieurs communes avec leurs cumuls ; le vent fort dit où). Si un brûlage n'est pas fini, on
+  compte ses parcelles pas encore faites DANS les communes touchées (états du plan d'AUJ-3). Un seul secteur, ou pas
+  encore de relevé par commune : les prévisions du domaine, comme avant. Mêmes seuils (2 mm, 40 km/h).
+
+### 264c. Mesuré
+
+- **`mv-harnais-sect1`** (neuf) : l'appel, les deux jours gardés, la version du cache, le lecteur (mémoire, cache du
+  même domaine, âge), la règle par secteur et le repli sur le domaine, avec ses contre-épreuves.
+
+### 264d. Ouvert
+
+- Gain d'une prolongation de contrat (§261) ; ajouts au moteur économique (§263).
+
+## 265. ★★ PROL-1 — CE QU'UNE PROLONGATION DE CONTRAT FERAIT GAGNER (07/10 — `src/pilotage.js` (`_pilGainsProlong`, `_pilIsoJ`) · `src/cockpit.js` (`_ckSvContrats`, `_ckProlong`) · `src/utils.js` (MV_INFO, APP, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` — APP 8.36 → 8.37 · SW 9.14 → 9.15 — base `8b77624`, PAR-DESSUS SECT-1)
+
+### 265a. La règle
+
+Promis en AUJ-2 (§261) : un contrat qui finit dans les 30 jours dit ce qu'une prolongation ferait gagner.
+- **Même simulateur** que le coût de l'inaction et Décider › Renfort : `_rfPair(d).dec` → `_rfSim`.
+- **Prolonger d'un mois = une personne de plus**, des semaines qui suivent la fin du contrat (`_rfWOf(W, fin+1)`)
+  jusqu'à un mois après (`fin+30`), **à rendement plein** : elle connaît le travail, `c.rdt = 1` sur une COPIE du
+  contexte (le contexte partagé n'est jamais modifié).
+- **Le gain se dit dans les mesures du coût de l'inaction** : heures de rattrapage évitées (`induit`, avec les euros au
+  taux de l'équipe) et tâches ramenées dans leur fenêtre (`horsDelai`). Aucun gain : la phrase le dit. Pas de taux,
+  pas de campagne en cours : la phrase d'avant (« simulez un renfort »).
+- SECT-1 n'étant pas encore sur le dépôt, son zip contient les deux lots.
+
+### 265b. Mesuré
+
+- **`mv-harnais-prol1`** (neuf) sur les vraies fonctions, avec ses contre-épreuves ; `mv-harnais-sect1` suit la version.
+
+### 265c. Ouvert
+
+- Les ajouts au moteur économique (§263) ; la barre latérale et Ctrl K (refonte de l'interface).

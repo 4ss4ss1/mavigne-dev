@@ -308,3 +308,5 @@
 | 261 | 261. ★★ AUJ-2 — « À SAVOIR » : MÉTÉO, ABSENCES, CONTRATS, RETARDS, MATÉRIEL ET CAVE (07/10 — `src/cockpit.j… | `docs/claude/chantiers-230-279.md` |
 | 262 | 262. ★★ AUJ-3 — LE DOMAINE EN DIRECT : LES PARCELLES PAR APPELLATION, L'ÉTAT PAR TÂCHE (07/10 — `src/cockpi… | `docs/claude/chantiers-230-279.md` |
 | 263 | 263. ★★ AUJ-4 — LA BASCULE TERRAIN / ÉCONOMIE (07/10 — `src/cockpit.js` · `src/pilotage.js` (`window._pilTa… | `docs/claude/chantiers-230-279.md` |
+| 264 | 264. ★★ SECT-1 — LA MÉTÉO PAR SECTEUR DANS « À SAVOIR » (07/10 — `src/app.js` (`_wxCurrent`, `_wxDeuxJours`… | `docs/claude/chantiers-230-279.md` |
+| 265 | 265. ★★ PROL-1 — CE QU'UNE PROLONGATION DE CONTRAT FERAIT GAGNER (07/10 — `src/pilotage.js` (`_pilGainsProl… | `docs/claude/chantiers-230-279.md` |

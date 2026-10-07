@@ -4493,6 +4493,31 @@ function _pilProtHtml(){
 // mesure : affiché à part, avec son hypothèse. Lecture seule — un seul calcul,
 // celui de Décider, qu'on ne refait pas ici (même _rfPair, même _rfSim).
 // ════════════════════════════════════════════════════════════════════════
+// PROL-1 (§265) : ce qu'une prolongation d'UN MOIS ferait gagner, pour chaque contrat qui finit dans les 30 jours.
+//   Même simulateur que le coût de l'inaction et Décider › Renfort (_rfPair → _rfSim) : prolonger, c'est une personne
+//   de plus, À RENDEMENT PLEIN (elle connaît le travail : c.rdt = 1, sur une COPIE du contexte), des semaines qui
+//   suivent la fin du contrat jusqu'à un mois après. Le gain se dit dans les mesures du coût de l'inaction : les heures
+//   de rattrapage évitées et les tâches ramenées dans leur fenêtre. Sans taux, sans campagne en cours : rien.
+function _pilGainsProlong(d){
+  var out={};
+  try{
+    if(typeof _rfPair!=='function') return out;
+    // (ordre des conditions distinct de _pilCkInaction : la contre-épreuve de protection vise CELLE-LÀ, sans ambiguïté)
+    var P=_rfPair(d); if(!P||!P.dec||P.dec.noRate||P.fini) return out;
+    var ctx=P.dec, base=_rfSim(ctx,_rfProf(ctx,null)); if(!base) return out;
+    var ctx2=Object.assign({},ctx,{c:Object.assign({},ctx.c,{rdt:1})});
+    var t=new Date(), auj=_pilIsoJ(t,0), lim=_pilIsoJ(t,30), t0=Date.UTC(2026,0,1);
+    (window.MEMBRES||[]).forEach(function(m){
+      if(!m||m.statut==='Inactif'||typeof m.fin_contrat!=='string'||m.fin_contrat<auj||m.fin_contrat>lim) return;
+      var p=m.fin_contrat.split('-'), o=Math.round((Date.UTC(+p[0],+p[1]-1,+p[2])-t0)/86400000);
+      var r=_rfSim(ctx2,_rfProf(ctx2,{R:1,a:_rfWOf(ctx.W,o+1),b:_rfWOf(ctx.W,o+30)})); if(!r) return;
+      var h=Math.max(0,Math.round((base.induit||0)-(r.induit||0)));
+      out[m.nom]={ h:h, taches:Math.max(0,(base.horsDelai||0)-(r.horsDelai||0)), eur:(h&&ctx.rate)?_ecoEur(h*ctx.rate):'' };
+    });
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilGainsProlong'); }
+  return out;
+}
+function _pilIsoJ(t,k){ var x=new Date(t.getFullYear(),t.getMonth(),t.getDate()+k); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); }
 function _pilCkInaction(d){
   if(typeof _rfPair!=='function') return '';
   var P=_rfPair(d); if(!P||!P.dec||P.fini||P.dec.noRate) return '';
@@ -5183,7 +5208,7 @@ function _pilTabAuj(d){
   //   ou en erreur : l'ancien ordre, ci-dessous, s'affiche — l'écran ne reste jamais blanc.
   if(H && typeof window._ckAuj==='function'){
     try{
-      return window._ckAuj({ d:d, m:m, hero:_ckHero, inaction:_ckInac, kpis:kpis.slice(0,_ckK0), cave:_ckCave, retards:_pilRetards(), fenetres:((typeof _rfCd==='function'&&_rfCd())||{}).taskWindows||[], parcs:(window.PARCELLES||[]), budget:_ckBud, eco:_pilShow('auj_eco'), dec:dec, det:det, alertes:H.slice(_ckAl0),
+      return window._ckAuj({ d:d, m:m, hero:_ckHero, inaction:_ckInac, kpis:kpis.slice(0,_ckK0), cave:_ckCave, retards:_pilRetards(), fenetres:((typeof _rfCd==='function'&&_rfCd())||{}).taskWindows||[], parcs:(window.PARCELLES||[]), budget:_ckBud, eco:_pilShow('auj_eco'), prolong:_pilGainsProlong(d), dec:dec, det:det, alertes:H.slice(_ckAl0),
         chantiers:(_pilShow('auj_chantiers')?window._mvkAvancement(d.data,_pilRetards()):''),
         photos:_pilPhotoListe(), journal:(window.JOURNAL||[]),
         montrer:{ resume:_pilShow('auj_resume'), charge:_pilShow('auj_courbe'), fil:_pilShow('auj_fil'), savoir:_pilShow('auj_savoir'), plan:_pilShow('auj_plan') } });

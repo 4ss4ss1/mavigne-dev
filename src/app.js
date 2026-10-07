@@ -4216,6 +4216,17 @@ async function _ensureDomaineCommune(){
 // (2) La pastille d'en-tête interroge le modèle Météo-France (fetchMeteo) et les cartes
 //     de secteur le modèle par défaut : deux chiffres différents pour la même heure et
 //     le même lieu, sur le même écran. Même source désormais, repli sur le défaut.
+// SECT-1 (§264) : les deux jours qui SUIVENT celui du relevé, heure par heure (pluie, vent). Le premier jour de la
+//   série est celui du relevé (timezone=Europe/Paris) : on le reconnaît par sa date, pas par l'horloge du téléphone.
+function _wxDeuxJours(hr){
+  if(!hr||!Array.isArray(hr.time)||!hr.time.length) return null;
+  var j0=String(hr.time[0]).slice(0,10), o={time:[],precip:[],wind:[]};
+  for(var i=0;i<hr.time.length;i++){
+    var s=String(hr.time[i]); if(s.slice(0,10)===j0) continue;
+    o.time.push(s); o.precip.push(hr.precipitation?hr.precipitation[i]:null); o.wind.push(hr.windspeed_10m?hr.windspeed_10m[i]:null);
+  }
+  return o.time.length?o:null;
+}
 function _wxFromApi(d){
   if(!d||!d.current||typeof d.current.temperature_2m!=='number') return null;
   var dy=d.daily||{};
@@ -4225,14 +4236,16 @@ function _wxFromApi(d){
     tmin:(dy.temperature_2m_min&&dy.temperature_2m_min[0]!=null)?Math.round(dy.temperature_2m_min[0]):null,
     tmax:(dy.temperature_2m_max&&dy.temperature_2m_max[0]!=null)?Math.round(dy.temperature_2m_max[0]):null,
     pp:(dy.precipitation_probability_max&&dy.precipitation_probability_max[0]!=null)?dy.precipitation_probability_max[0]:null,
-    emoji:wmoIcone(d.current.weathercode), desc:wmoDesc(d.current.weathercode)
+    emoji:wmoIcone(d.current.weathercode), desc:wmoDesc(d.current.weathercode),
+    h:_wxDeuxJours(d.hourly)
   };
 }
 async function _wxCurrent(lat,lng){
   var base='https://api.open-meteo.com/v1/forecast?latitude='+lat.toFixed(4)+'&longitude='+lng.toFixed(4)
     +'&current=temperature_2m,weathercode,windspeed_10m,precipitation'
     +'&daily=temperature_2m_min,temperature_2m_max,precipitation_probability_max'
-    +'&timezone=Europe/Paris&forecast_days=1';
+    +'&hourly=precipitation,windspeed_10m'   // SECT-1 (§264) : pluie et vent heure par heure, pour « À savoir »
+    +'&timezone=Europe/Paris&forecast_days=3';
   var urls=[base+'&models=meteofrance_seamless', base];
   for(var i=0;i<urls.length;i++){
     try{
@@ -4259,7 +4272,7 @@ async function _wxCurrent(lat,lng){
 // domaine, le client voyait une journée inventée sur le seul secteur dont le nom
 // coïncidait, un ⏳ définitif sur tous les autres — et plus aucune requête, jamais.
 var _WXCOM_KEY='mavigne_meteocom_cache';
-var _WXCOM_V=2;
+var _WXCOM_V=3;   // SECT-1 (§264) : chaque secteur porte ses deux jours suivants (h) — les relevés d'avant se relisent pas
 var _WXCOM_MAXAGE=45*60*1000;
 function _wxTenant(){ try{ return localStorage.getItem('mavigne_tenant')||''; }catch(e){ return ''; } }
 function _wxCacheRead(groups){
@@ -4275,6 +4288,19 @@ function _wxCacheWrite(res){
   try{ localStorage.setItem(_WXCOM_KEY,JSON.stringify({v:_WXCOM_V,tenant:_wxTenant(),ts:Date.now(),data:res})); }
   catch(e){ if(window.logError) window.logError({level:'info',cat:'meteo',msg:'cache secteur non ecrit'}); }
 }
+// SECT-1 (§264) : les secteurs et leurs deux jours, pour « À savoir » (cockpit.js). La mémoire d'abord (relevé de
+//   l'Accueil), sinon le cache du même domaine, de moins de 12 h — une prévision à 48 h vieillit lentement. Jamais d'appel.
+window._wxSecteurs=function(){
+  var s=window.METEO_PAR_COMMUNE;
+  if(!s){
+    try{
+      var raw=JSON.parse(localStorage.getItem(_WXCOM_KEY)||'null');
+      if(raw&&raw.v===_WXCOM_V&&raw.data&&raw.tenant===_wxTenant()&&raw.ts&&(Date.now()-raw.ts)<12*3600*1000) s=raw.data;
+    }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_wxSecteurs'); }
+  }
+  return Object.keys(s||{}).map(function(k){ var x=s[k]||{}; return { nom:x.nom, h:(x.wx&&x.wx.h)||null }; })
+    .filter(function(x){ return x.nom&&x.h&&Array.isArray(x.h.time); });
+};
 function _wxAgeTxt(ts){
   if(!ts) return '';
   var m=Math.round((Date.now()-ts)/60000);

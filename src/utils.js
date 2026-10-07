@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.35';
+export const APP_VERSION = '8.37';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1035,6 +1035,14 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.37', d: '2026-10-07', items: [
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Prolonger un contrat : ce que ça change',
+      desc: "Dans « À savoir », un contrat qui finit dans le mois dit ce qu’une prolongation d’un mois éviterait : les heures de rattrapage et les tâches qui sortiraient de leur fenêtre, calculées comme le coût de l’inaction." },
+  ] },
+  { v: '8.36', d: '2026-10-07', items: [
+    { niv: 1, pour: ['admin'], cible: '#ck-savoir', emoji: 'pluie', titre: 'La météo, secteur par secteur',
+      desc: "« À savoir » dit maintenant sur quelles communes la pluie ou le vent tombera demain et après-demain, et combien de parcelles de brûlage devront y attendre un temps sec." },
+  ] },
   { v: '8.35', d: '2026-10-07', items: [
     { niv: 1, pour: ['admin'], cible: '#ck-bascule', emoji: 'euro', titre: 'Aujourd’hui, côté terrain ou côté argent',
       desc: "Au Pilotage › Aujourd’hui, une bascule Terrain / Économie : la même journée vue du terrain (fin prévue, plan, chantiers, fil) ou de l’argent (coût de l’inaction, budget, et tout l’onglet Économie, avec les mêmes chiffres)." },
@@ -5112,7 +5120,7 @@ export const MV_INFO = {
     'Chaque parcelle est une bande dont la largeur suit sa surface, à la même échelle pour tout le domaine ; elles sont rangées par appellation, puis par commune. C’est un schéma : la vraie carte reste dans Parcelles.',
     'La couleur dit l’état pour la tâche choisie : faite (validée depuis l’ouverture de sa fenêtre), en cours, à faire, en retard (fenêtre passée), arrachée. Les initiales marquent une équipe qui a commencé la parcelle aujourd’hui. Toucher une parcelle ouvre sa fiche.' ] },
   'pil.savoir': { t: 'À savoir', p: [
-    'Ce qui peut changer la journée ou la semaine : la pluie ou le vent des deux jours qui viennent (prévisions du domaine), les absences des sept prochains jours, les contrats qui finissent dans le mois, les tâches en retard, puis le matériel immobilisé et la cave.',
+    'Ce qui peut changer la journée ou la semaine : la pluie ou le vent des deux jours qui viennent, secteur par secteur quand le domaine s’étend sur plusieurs communes (avec les parcelles de brûlage qui devront attendre), les absences des sept prochains jours, les contrats qui finissent dans le mois (avec ce qu’une prolongation d’un mois ferait gagner), les tâches en retard, puis le matériel immobilisé et la cave.',
     'Le plus pressant d’abord. Les motifs d’absence ne sont visibles que de l’admin : le Pilotage lui est réservé.' ] },
   'pil.fil': { t: 'En direct', p: [
     'Les validations et les débuts de parcelle de la journée, du plus récent au plus ancien, dès qu’ils arrivent du journal. Une ligne neuve s’éclaire une fois.',

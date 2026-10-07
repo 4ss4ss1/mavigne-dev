@@ -1,4 +1,8 @@
-// MA VIGNE — Service Worker v9.13
+// MA VIGNE — Service Worker v9.15
+// v9.15 (07/10/2026) — PROL-1 (§265) : gain d'une prolongation d'un mois pour les contrats qui finissent (simulateur
+//   de renfort, une personne a rendement plein apres la fin du contrat). APP 8.36 -> 8.37.
+// v9.14 (07/10/2026) — SECT-1 (§264) : meteo par secteur dans « A savoir » — chaque commune rapporte ses deux jours
+//   suivants heure par heure (cache par commune v3), parcelles de brulage a attendre par commune. APP 8.35 -> 8.36.
 // v9.13 (07/10/2026) — AUJ-4 (§263) : bascule Terrain / Economie au cockpit d'Aujourd'hui — la vue Economie reprend
 //   l'onglet Economie tel quel (_pilTabEco), avec le cout de l'inaction et la tuile Budget. APP 8.34 -> 8.35.
 // v9.12 (07/10/2026) — AUJ-3 (§262) : le domaine en direct au cockpit d'Aujourd'hui — parcelles par appellation puis
@@ -4355,7 +4359,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.13';
+const CACHE_NAME   = 'mavigne-v9.15';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4371,7 +4375,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.13 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.15 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4391,7 +4395,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.13 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.15 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
