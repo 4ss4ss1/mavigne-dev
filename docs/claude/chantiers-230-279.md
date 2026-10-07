@@ -1167,3 +1167,74 @@ maquette (deux lignes, deux fenêtres) : « parfait ».
 
 ① Les millésimes proposés restent ceux que la Cave connaît, plus l'année : un plafond saisi pour un millésime que la Cave ne
 connaît pas n'apparaît pas (comportement d'avant, inchangé). ② IDS-1 — les salariés, après le chantier du planning.
+
+## 256. ★★ GNR-2 — LA CUVE GNR SE LIT DE NOUVEAU SUR TÉLÉPHONE : LE BLOC TRACTEUR A SA GRILLE (06/10 — `src/pilotage.js` · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-gnr2.mjs` (neuf) · `scripts/mv-harnais-gnr-mesure.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/GNR-2.json` · **APP 8.27 → 8.28, SW 9.05 → 9.06**, base `e3e719a`)
+
+### 256a. Le signalement, la cause
+
+Nico (06/10, capture de téléphone) : « revois la présentation sur portable (et aussi pc) pour la cuve gnr ». À l'écran : la carte Cuve GNR
+d'Aujourd'hui dans la colonne de gauche, la droite vide ; « 920 L après les travaux en cours » sur trois lignes ; « −199 » coupé en « −19 » ;
+aucune barre ; « 0625125 L » sous la cascade. **Reproduit à l'identique dans Chromium** sur la base (392 px : carte de 166 px, barre de 0 px,
+lignes qui débordent ; « 0625125 » est l'échelle « 0 · 625 · 1 250 L » écrasée dans une colonne de barre réduite à rien).
+**Cause, datée par l'historique** : la carte (GNR-M, §213, commit `1a75533`, 03/10) a été dessinée et regardée à 390 px quand `.pil-dec`
+donnait une seule colonne au téléphone ; ALIGN-1 (§236, commit `657cb29`, 04/10) a posé « `.pil-dec` par deux sous 600 px » pour les quatre
+tuiles du jour. Le bloc tracteur rendait `<div class="pil-dec pil-trx">` : la règle l'a pris aussi. La cascade réservait 104 + 46 px fixes
+et deux écarts de 8 : dans 134 px de contenu, plus rien pour la barre. Sur ordinateur, `auto-fit` avec une carte en `grid-column:1/-1`
+n'effondre aucune piste vide : la cuve tenait une piste sur quatre (276 px à 1 440 px), trois vides à sa droite.
+
+### 256b. Proposé, validé, ajusté
+
+Proposé à Nico et validé (« oui ») : téléphone et tablette, chaque carte du bloc sur toute la largeur, les quatre tuiles restant par deux ;
+ordinateur, la cuve à droite des travaux (deux tiers / un tiers), la révision sous la cuve ; dans la carte, le chiffre en grand, la phrase à
+côté, une cascade qui respire.
+**Ajusté au rendu** : posée sous la cuve, la révision étirait la carte des travaux à la hauteur des deux cartes de droite — ~300 px vides dans
+la carte de gauche à 1 280 px, le défaut même que Nico signalait le 04/10 (« deux grands vides »). Elle passe **dessous, sur toute la
+largeur** ; la cuve reste à droite des travaux dans tous les cas. Dit à Nico dans la livraison.
+
+### 256c. Ce qui change
+
+- **`_pilCkTracteur`** : `nCote` compte les cartes qui accompagnent les travaux ; le conteneur devient `pil-trx` (+ `pil-trx-cote1` /
+  `pil-trx-cote2` avec les travaux, `pil-trx-paire` pour révision + cuve sans travaux, rien pour une carte seule) ; cartes `pil-trx-rev` et
+  `pil-trx-cuve` (les travaux gardent `pil-trx-wide`). Titre de la cuve : `bigN` (« 920 L », `.pil-big`, couleur d'état) et `bigP`
+  (« après les travaux en cours » / « sous le seuil », `.pil-trx-vu`) dans `.pil-trx-v` — le patron du Renfort (`.rf2-v`), recopié en
+  classes propres plutôt qu'emprunté : une classe partagée est précisément la cause du défaut.
+- **`styles.css`** (bloc GNR-M) : `.pil-trx` a sa grille (une colonne, écart 16 px, 12 sous 600 px) ; `@media (min-width:1024px)` : cote1 et
+  cote2 en `minmax(0,2fr) minmax(0,1fr)`, travaux en colonne 1 rangée 1, cuve en colonne 2 rangée 1, révision `1/-1` rangée 2, paire en deux
+  colonnes. 1 024 px est le seuil « ordinateur » de KIT-2 (l'Accueil en deux colonnes) : aucun point de rupture neuf. Cascade `.pil-trx-cs` :
+  `minmax(96px,min(40%,176px)) minmax(0,1fr) 56px` (libellé à 40 % borné, barre élastique, litres sur 56 px). Marge du bloc sur l'échelle
+  (`--e-4`) : le 18 px recopié de `.pil-dec` faisait monter le cliquet d'espacement de `mv-harnais-echelle` (1 004 contre 1 003).
+- **Rien d'autre ne lit ces classes** (vérifié : ni la visite guidée, ni l'aide, ni le guide) ; `.pil-dec` et sa règle « par deux » restent
+  aux quatre tuiles — le contrôle d'ALIGN-1 est inchangé et vert. Guide, `MV_AIDE` et `MV_INFO` relus : ils décrivent le contenu, qui ne change
+  pas ; rien à réécrire.
+
+### 256d. Mesuré
+
+- **Chromium** (`@sparticuz/chromium`, §192b) : le VRAI `_pilCkTracteur` exécuté sur un domaine reconstitué d'après la capture (11,85 ha,
+  griffage lancé le 22/09, 4 parcelles désactivées, 6,63 ha à faire, 5,01 h/ha × 6 L/h, cuve 1 119 / 1 500, seuil 300), feuille, polices
+  et planche d'icônes réelles. Base et lot, 5 largeurs (360, 392, 834, 1 280, 1 440 px) × 4 cas (travaux + cuve ; travaux + révision + cuve
+  avec la ligne « conseillé » ; cuve seule sous le seuil ; révision + cuve sans travaux) : 40 rendus mesurés (largeur des cartes, barre,
+  libellés et litres coupés, axe qui se chevauche, titre sur une ligne) et regardés ; thème sombre au téléphone.
+  · 392 px — base : carte 166 px, barre 0, trois lignes qui débordent, titre sur 3 lignes ; lot : carte 344 px, barre 114 px, rien ne
+    déborde, titre sur une ligne. 360 px : barre 95 px, « Après les travaux » entier.
+  · 1 440 px — base : cuve 276 px sous des travaux pleine largeur ; lot : travaux 757 px et cuve 379 px côte à côte, même hauteur.
+    1 280 px, trois cartes : travaux et cuve (327 px de haut chacune), révision 1 152 px dessous.
+- **`mv-harnais-gnr2`** (neuf, branché) : **35 assertions** — le vrai bloc sur 6 combinaisons de cartes (classe, ordre et nom des cartes,
+  jamais `.pil-dec`, balises, titre vert ou orange) ; la feuille lue règle par règle avec son `@media` (aucune règle n'ouvre plusieurs
+  colonnes au bloc hors de `min-width:1024px`, mise en page ordinateur, barre d'au moins 80 px calculée pour une carte de 280 px — 96 px,
+  conforme aux 95 px mesurés). **13/13 contre-épreuves** rougissent, dont « par deux revient sur le téléphone » et « la tablette passe en
+  deux colonnes ».
+- **`mv-harnais-gnr-mesure`** : ses deux lectures du titre suivent le nouveau balisage (le chiffre puis la phrase, collés) — même sens ;
+  52 vertes, 14/14 contre-épreuves.
+
+### 256e. Leçons
+
+- ★★ **Une classe de mise en page partagée fait voyager les règles d'un bloc à l'autre** — consigne portée au §24 (CSS n°16).
+- ★★ **Un rendu regardé ne vaut que pour la mise en page du jour où on le regarde.** GNR-M avait été vu à 390 px, juste ; un lot du
+  lendemain, dans un autre écran, l'a cassé sans toucher une ligne de la carte, et aucun harnais ne regardait la grille. `mv-harnais-gnr2`
+  garde maintenant la règle qui l'aurait vu.
+- ★ **Le rendu a corrigé la proposition validée** (la révision sous la cuve) : une proposition en mots ne voit pas les hauteurs.
+
+### 256f. Ouvert
+
+① Le regard de Nico sur ses vraies données, téléphone et ordinateur (§28). ② Libellés longs coupés par des points de suspension (inchangé) ;
+tablette en paysage = mise en page de l'ordinateur.

@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **6 octobre 2026 (AOC-1)** — ★★ **LES APPELLATIONS QUITTENT RÉGLAGES › DOMAINE POUR LA ROUE CRANTÉE DE LA CAVE** (§255).
+> Choix de Nico sur deux maquettes (option B, puis « condenser ») : dans « Le Millésime », DEUX LIGNES qui résument (`_aocResumeHtml`), chacune
+> ouvre SA fenêtre — `ovAocPlafonds` (millésime, une ligne par appellation, « ⋯ ») et `ovAocRattach` (filtres, sans appellation en tête,
+> « Rattacher »/« Changer »). Actions inchangées (_aocAjouter…_aocSetParc) ; `_aocRenderCard` redessine lignes + fenêtre ouverte. `_caveGoAoc`
+> et `#aoc-card` n'existent plus. Réglages › Domaine : 2 188 → 1 293 px. Harnais `mv-harnais-aoc-cave`. Base `a6ea76f`. **APP 8.26 → 8.27, SW 9.04 → 9.05.**
+> Précédent : IDS-1 lot 4, renommer une parcelle (§254) — archivé dans journal.md.
+> Restent : les salariés (IDS-1, après le planning) ; le reste de Réglages › Domaine est rangé.
+
 > ★ Consolidation : **6 octobre 2026 (IDS-1, lot 4)** — ★★★ **RENOMMER UNE PARCELLE** (§254), dans la roue crantée de la Vigne (décision de Nico).
 > « Renommer est rare » : chaque module renomme ce qui lui appartient, dans SA roue crantée (Vigne : tâches, et maintenant parcelles). La parcelle
 > garde son `pid` ; `_renameParcelle` (reglages.js) réécrit le nom dans TOUS les registres — journal, sessions (parcellesFaites, parcelles,

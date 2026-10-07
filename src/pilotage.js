@@ -4965,7 +4965,7 @@ function _pilGmTraitementOption(T){
 }
 // ── Les cartes d'Aujourd'hui (section « Alertes matériel ») ──
 function _pilCkTracteur(d){
-  var T=_pilGmTravaux(), H='';
+  var T=_pilGmTravaux(), H='', nCote=0;   // GNR-2 (§256) : nCote = les cartes qui se projettent sur les travaux (révision, cuve)
   var trNom={}; (d.tracs||[]).forEach(function(t){ trNom[t.id]=t.nom; });
   // ① Les travaux en cours
   if(T.jobs.length){
@@ -5010,7 +5010,8 @@ function _pilCkTracteur(d){
     var ry=_pilGmRythme(t.id,d.refDate), rep='';
     if(ry&&t.revReste>0) rep='<div class="pil-t2s">Repère : au rythme mesuré de ce tracteur ('+_pilGmFr(ry)+' h par jour ouvré, 4 dernières semaines), environ '+Math.ceil(t.revReste/ry)+' jour'+(Math.ceil(t.revReste/ry)>1?'s':'')+' ouvré'+(Math.ceil(t.revReste/ry)>1?'s':'')+'.</div>';
     var leg=R.seq.map(function(j,k){ return '<span><i style="background:'+cols[k%3]+'"></i>'+_pilGmLibJob(j)+' \u00b7 '+_pilGmFr(j.h)+' h</span>'; }).join('');
-    H+='<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('cle')+'</span><span class="t">Révision \u00b7 '+_pilEsc(t.nom||'Tracteur')+'</span>'+_mvInfoBtn('pil.trxrev')+'</div>'
+    nCote++;
+    H+='<div class="pil-tile2 pil-trx-rev"><div class="pil-t2h"><span class="ic">'+_pilIco('cle')+'</span><span class="t">Révision \u00b7 '+_pilEsc(t.nom||'Tracteur')+'</span>'+_mvInfoBtn('pil.trxrev')+'</div>'
       +'<div class="pil-t2b"><div class="pil-big" style="color:'+col+'">'+big+'</div>'
       +'<div class="pil-t2s">'+(t.revReste>0?_pilNum(t.revReste)+' h avant la révision \u00b7 ':'')+_pilGmFr(R.tot)+' h en cours sur ce tracteur'+(R.dans?(' \u00b7 à '+Math.round(R.dans.pc*100)+' % de ce travail'):'')+(R.sansBareme?(' \u00b7 '+R.sansBareme+' travail sans barème'):'')+'</div>'
       +'<div class="pil-trx-carnet">'+seg+'</div>'
@@ -5043,11 +5044,14 @@ function _pilCkTracteur(d){
       var opt=_pilGmTraitementOption(T), apresT=null;
       if(opt){ apresT=apres-opt.l; lignes+='<div class="pil-trx-cs option"><span class="l">\u2212 '+_pilEsc(_pilTnom(opt.nom))+' (conseillé)</span><span class="k"><i class="m" style="left:'+x(Math.min(apres,apresT))+';width:'+w2(apres,apresT)+'"></i>'+u+'</span><span class="v">\u2212'+_pilNum(opt.l)+'</span></div>'
         +'<div class="pil-trx-cs tot option"><span class="l">Avec ce traitement</span><span class="k"><i class="'+(apresT<seuil?'b':'o')+'" style="left:0;width:'+w2(0,Math.max(0,apresT))+'"></i>'+u+'</span><span class="v">'+_pilNum(apresT)+' L</span></div>'; }
-      var bigG=avecL.length?(_pilNum(apres)+' L après les travaux en cours'):(_pilNum(niv)+' L, sous le seuil');
+      // GNR-2 (§256) : le chiffre en grand, la phrase à côté en plus petit (le patron du Renfort, .rf2-v). La phrase
+      //   entière en grand passait sur trois lignes dans une demi-colonne de téléphone (capture de Nico, 06/10).
+      var bigN=_pilNum(avecL.length?apres:niv)+' L', bigP=avecL.length?'après les travaux en cours':'sous le seuil';
       var mes=avecL.some(function(j){ return j.src==='mesure'; }), reg=avecL.some(function(j){ return j.src==='reglage'; });
       var srcTxt=mes&&reg?'conso mesurée, réglage pour un tracteur sans mesure':(mes?'conso mesurée de chaque tracteur':'conso du réglage ('+_pilGmFr(T.cfgLh)+' L/h)');
-      H+='<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('carburant')+'</span><span class="t">Cuve GNR</span>'+_mvInfoBtn('pil.trxgnr')+'</div>'
-        +'<div class="pil-t2b"><div class="pil-big" style="color:'+((bas||niv<=seuil)?'var(--orange)':'var(--vert-med)')+'">'+bigG+'</div>'
+      nCote++;
+      H+='<div class="pil-tile2 pil-trx-cuve"><div class="pil-t2h"><span class="ic">'+_pilIco('carburant')+'</span><span class="t">Cuve GNR</span>'+_mvInfoBtn('pil.trxgnr')+'</div>'
+        +'<div class="pil-t2b"><div class="pil-trx-v"><span class="pil-big" style="color:'+((bas||niv<=seuil)?'var(--orange)':'var(--vert-med)')+'">'+bigN+'</span><span class="pil-trx-vu">'+bigP+'</span></div>'
         +'<div class="pil-t2s">'+_pilNum(niv)+' L sur '+_pilNum(cap)+' \u00b7 seuil '+_pilNum(seuil)+' L'+(avecL.length?(' \u00b7 '+srcTxt):'')+(sansL?(' \u00b7 '+sansL+' travail sans barème, non compté'):'')
         +(opt?(' \u00b7 pointillé : '+_pilEsc(_pilTnom(opt.nom))+' conseillé ('+opt.nNu+' parcelle'+(opt.nNu>1?'s':'')+' à nu ou presque, fenêtre '+_pilEsc(opt.fen)+'), '+_pilGmFr(opt.h)+' h sur le domaine ('+opt.hhaSrc+'), pas encore lancé'):'')+'</div>'
         +'<div class="pil-trx-casc">'+lignes+'</div>'
@@ -5056,7 +5060,13 @@ function _pilCkTracteur(d){
         +'</div></div>';
     }
   }
-  return H?('<div class="pil-dec pil-trx">'+H+'</div>'):'';
+  // GNR-2 (§256) : le bloc a SA grille (styles.css), il ne partage plus `.pil-dec` avec la décision du jour — la règle
+  //   « par deux sous 600 px » d'ALIGN-1 (§236) visait les quatre tuiles et tassait la cuve en demi-colonne. Une carte par
+  //   ligne jusqu'à 1 023 px ; au-delà, les travaux à gauche (deux tiers), la cuve à droite, la révision dessous sur
+  //   toute la largeur. La classe dit combien de cartes accompagnent les travaux ; sans travaux, révision et cuve vont
+  //   par deux ; une carte seule prend toute la largeur.
+  var cls='pil-trx'+(T.jobs.length&&nCote?' pil-trx-cote'+nCote:(nCote===2?' pil-trx-paire':''));
+  return H?('<div class="'+cls+'">'+H+'</div>'):'';
 }
 // ── ③ Matériel : la consommation mesurée, tracteur par tracteur ──
 function _pilPanelConso(d){

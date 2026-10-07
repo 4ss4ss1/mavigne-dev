@@ -503,4 +503,6 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-motifs1.mjs --contre'],
   ['node scripts/mv-harnais-vueeq1.mjs'],             // VUE-EQUIPE-1 (§251) : l'équipe du mois vue par un salarié — présent / absent, jamais le motif
   ['node scripts/mv-harnais-vueeq1.mjs --contre'],
+  ['node scripts/mv-harnais-gnr2.mjs'],               // GNR-2 (§256) : la cuve GNR se lit sur téléphone (le bloc tracteur a sa grille)
+  ['node scripts/mv-harnais-gnr2.mjs --contre'],
 ];

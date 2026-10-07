@@ -1,0 +1,24 @@
+{
+  "lot": "GNR-2",
+  "section": "§256",
+  "base": "e3e719ae0f99772cc6775dd9df749ac264743ff5",
+  "inclut": [],
+  "date": "2026-10-06",
+  "fichiers": {
+    ".mv-base": "ed59fae00d9b2f3a2c99171729d109c7eb9b2767cfcd02c8f9a33ba1a5d6b73b",
+    "CLAUDE.md": "3e4a30c3f4a983cab480fbf3a2ff6b163c79c0441f191b670bd105960ef0353c",
+    "docs/claude/INDEX.md": "576382cf1ee052b039814ccae73c64b777f912af49759184c607fa4f95f97c24",
+    "docs/claude/chantiers-230-279.md": "1189606114532b67947a218b775da3bd95c9f278325de013da5daab1e8b63154",
+    "docs/claude/journal.md": "03d99e0e9cfe45add7c8b36c51db4a579986f39bc4f29fd13e2fdf393a181b9b",
+    "docs/claude/modules.md": "6d116787f72e8a8f12bb253e92890bdc6f22ab86298610a7097dceecefcf763a",
+    "index.html": "c5a4ff3e498acf967f18425439ebe371015c1d3612ecc7af3502c4ac6c93a118",
+    "public/sw.js": "7f8925fd36a292baad721263e4004e83207269be1f8d64a124799be9b68bd4c1",
+    "scripts/harnais-claude-md.mjs": "8c3f275600c41cc19501e6ac6f0d2b92d48817287ce2fd01c494e0fe972fd36c",
+    "scripts/mv-harnais-gnr-mesure.mjs": "77570b97ea13009a07c2a5be6b343926962c5452ed7c980a57ef48f8b54f13ad",
+    "scripts/mv-harnais-liste.mjs": "2bf2ce55b0c29b47f554a5aee10eeb7c5d3d48e475976b6618c891b6671384db",
+    "src/pilotage.js": "21595c53f81e61a79ec6f994c1679825032179d2e3a7460b4033987544b66b33",
+    "src/styles.css": "604458d2f95fbd5c552067beff501269cc132cbef0c39b7f63159fa726f4ef4e",
+    "src/utils.js": "a129712a3c24674276cc662faa9789e8a3ca3aac973157960ff409170cb7c0ec",
+    "scripts/mv-harnais-gnr2.mjs": "7e5efd031b929101da0e921c763e9d23a14ab57c5f8f810ebae3cc834fcbb86d"
+  }
+}

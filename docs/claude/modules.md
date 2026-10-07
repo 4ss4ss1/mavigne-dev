@@ -1236,6 +1236,10 @@ indissociables dont un **filet de tolérance** en tête de `switchCaveOng`.
 
 ## 20b. Pilotage
 
+★★ **GNR-2 (§256) — LE BLOC TRACTEUR A SA GRILLE.** `_pilCkTracteur` rend `.pil-trx` (plus `.pil-dec`, qui porte la règle « par deux »
+de la décision du jour) + `pil-trx-cote1|2` (les travaux et une ou deux cartes) ou `pil-trx-paire` (révision + cuve sans travaux) ;
+cartes `pil-trx-wide|rev|cuve`. Une colonne jusqu'à 1 023 px ; au-delà, travaux 2/3 + cuve 1/3, révision dessous sur toute la largeur.
+
 ★★ **ALIGN-2 (§237) — L'ACCUEIL EN RANGÉES.** `#home-cols` en grille, rangées pleines ; `_homeRangees` étire un bloc seul ;
 `lay.large` + bouton « Pleine largeur » ; bloc « meteosect » (secteurs en une carte). Voir §237.
 

@@ -3,13 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **6 octobre 2026 (AOC-1)** — ★★ **LES APPELLATIONS QUITTENT RÉGLAGES › DOMAINE POUR LA ROUE CRANTÉE DE LA CAVE** (§255).
-> Choix de Nico sur deux maquettes (option B, puis « condenser ») : dans « Le Millésime », DEUX LIGNES qui résument (`_aocResumeHtml`), chacune
-> ouvre SA fenêtre — `ovAocPlafonds` (millésime, une ligne par appellation, « ⋯ ») et `ovAocRattach` (filtres, sans appellation en tête,
-> « Rattacher »/« Changer »). Actions inchangées (_aocAjouter…_aocSetParc) ; `_aocRenderCard` redessine lignes + fenêtre ouverte. `_caveGoAoc`
-> et `#aoc-card` n'existent plus. Réglages › Domaine : 2 188 → 1 293 px. Harnais `mv-harnais-aoc-cave`. Base `a6ea76f`. **APP 8.26 → 8.27, SW 9.04 → 9.05.**
-> Précédent : IDS-1 lot 4, renommer une parcelle (§254) — archivé dans journal.md.
-> Restent : les salariés (IDS-1, après le planning) ; le reste de Réglages › Domaine est rangé.
+> Dernière consolidation : **6 octobre 2026 (GNR-2)** — ★★ **LA CUVE GNR SE LIT DE NOUVEAU SUR TÉLÉPHONE : LE BLOC TRACTEUR A SA GRILLE** (§256).
+> Capture de Nico (06/10) : la carte Cuve d'Aujourd'hui tassée en demi-colonne (barres à 0 px, « −19 », échelle « 0625125 L », titre sur trois
+> lignes, moitié droite vide). Cause : le bloc portait `.pil-dec`, où ALIGN-1 a posé « par deux sous 600 px » pour les quatre tuiles du jour.
+> Désormais `.pil-trx` seul : une colonne jusqu'à 1 023 px ; à partir de 1 024 px, travaux 2/3 + cuve 1/3, révision dessous sur toute la largeur
+> (`pil-trx-cote1/2`, `pil-trx-paire`, posées par `_pilCkTracteur`). Cascade élastique ; titre « 920 L » + phrase à côté (`.pil-trx-v`).
+> Rendu regardé dans Chromium avant/après (5 largeurs, 4 cas, thème sombre). Harnais `mv-harnais-gnr2`. Base `e3e719a`. **APP 8.27 → 8.28, SW 9.05 → 9.06.**
+> Précédent : AOC-1, les appellations dans la roue crantée de la Cave (§255) — archivé dans journal.md.
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---
@@ -1419,6 +1419,10 @@ regarder**. Une assertion verte n'a jamais montré un texte coupé en trois.
     `cop-chip-a` → **borner sur le guillemet fermant**.
 15. ★ **Un attribut `data-*` contenant un CHIFFRE** (`data-pd1`) doit être prévu par les sélecteurs
     ET par les stubs de test — vécu le 09/08, un stub trop restrictif faisait rougir du code juste.
+16. ★★ **Une classe de mise en page PARTAGÉE fait voyager les règles d'un bloc à l'autre** (GNR-2, §256). Le bloc tracteur portait
+    `.pil-dec` pour sa grille ; ALIGN-1 y a posé « par deux sous 600 px » pour les quatre tuiles du jour, et la cuve est passée en
+    demi-colonne sans qu'aucun harnais le voie. **Un bloc qui n'est pas ce que la classe nomme prend SA classe.** Même famille que
+    le `.cl` global (§192c) et le préfixe `mvs-` (n°5).
 
 ---
 
@@ -1828,6 +1832,14 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ GNR-2 — CE QUI RESTE OUVERT (§256, posé le 06/10)
+
+1. **À regarder chez Nico, sur ses vraies données** : la carte Cuve au téléphone (toute la largeur, titre sur une ligne, barres, échelle),
+   puis sur ordinateur les travaux et la cuve côte à côte, la révision dessous quand elle s'affiche. Côté Claude, le rendu a été regardé
+   sur des données reconstituées d'après sa capture (Chromium), pas sur les siennes.
+2. **Limites assumées** : un nom de travail long reste coupé par des points de suspension dans la cascade (la colonne s'élargit jusqu'à
+   176 px, elle ne passe pas à la ligne) ; une tablette en paysage (≥ 1 024 px) prend la mise en page de l'ordinateur.
+
 ### ⚠️ VUE-EQUIPE-1 — CE QUI RESTE OUVERT (§251, posé le 05/10)
 
 1. **À regarder chez Nico, sur un téléphone de salarié** : les deux onglets, la grille en semaine et sur le mois, la ligne « Présents »,
@@ -1938,7 +1950,7 @@ différents entre eux, et des heures sup apparaissent dans Décider › le renfo
    aux taux du relevé (25 % jusqu'à la 43e heure, 50 % au-delà) et le retard qui reste ; plus « sans renfort ni heures sup ».
 ### ⚠️ GNR-M ET LA SÉRIE « DENSIFIER LE PILOTAGE » — CE QUI RESTE OUVERT (§222, posé le 03/10)
 
-1. **À l'œil chez Nico, sur ses vraies données** : les trois cartes d'Aujourd'hui sur téléphone, la part chronométrée et les
+1. **À l'œil chez Nico, sur ses vraies données** : les trois cartes d'Aujourd'hui sur téléphone (mise en page reprise au §256), la part chronométrée et les
    intervalles écartés de la tuile Consommation mesurée. Aucun harnais ne lit ses pleins réels.
 2. **Les lots suivants de la maquette validée** (`maquette-pilotage-densite.html`), dans l'ordre recommandé :
    ✅ **SPARK** — fait au §214 pour la **seule Cadence** (`_mvGraphSpark` sur le moteur commun). ⚠️ **Question à Nico : un

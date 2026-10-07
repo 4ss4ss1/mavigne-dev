@@ -1,4 +1,6 @@
-// MA VIGNE — Service Worker v9.05
+// MA VIGNE — Service Worker v9.06
+// v9.06 (06/10/2026) — GNR-2 (§256) : la cuve GNR se lit de nouveau sur telephone — le bloc tracteur d'Aujourd'hui a sa
+//   propre grille (une carte par ligne sous 1 024 px ; au-dela, travaux 2/3 et cuve 1/3, revision dessous). APP 8.27 -> 8.28.
 // v9.05 (06/10/2026) — AOC-1 (§255) : les appellations quittent Reglages > Domaine pour la roue crantee de la Cave (deux
 //   lignes qui resument, deux fenetres : plafonds, rattachement). APP 8.26 -> 8.27.
 // v9.04 (06/10/2026) — IDS-1, lot 4 (§254) : renommer une parcelle (roue crantee de la Vigne, admin) — l'identifiant
@@ -4338,7 +4340,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.05';
+const CACHE_NAME   = 'mavigne-v9.06';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4354,7 +4356,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.05 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.06 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4374,7 +4376,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.05 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.06 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

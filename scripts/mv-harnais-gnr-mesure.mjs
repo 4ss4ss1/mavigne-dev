@@ -199,7 +199,8 @@ function scenarios(src, journal) {
     t('④ cartes : travaux, révision, cuve', H.includes('Travaux tracteur en cours') && H.includes('Révision · Bobard') && H.includes('Cuve GNR'));
     t('④ la session oubliée est signalée, une seule', (H.match(/aucune parcelle cochée depuis/g) || []).length === 1);
     const apres = 410 - (1.6 * 6) - 46.8 - (2.6 * 120 / 15.6) - (0.75 * 6);
-    t('④ la cuve après les travaux = 410 − Σ litres (' + Math.round(apres) + ' L)', H.includes(Math.round(apres).toLocaleString('fr-FR') + ' L après les travaux en cours'));
+    // GNR-2 (§256) : le chiffre en grand (.pil-big), la phrase à côté (.pil-trx-vu) — on lit les deux, collés, dans cet ordre.
+    t('④ la cuve après les travaux = 410 − Σ litres (' + Math.round(apres) + ' L), en grand, la phrase à côté', H.includes('>' + Math.round(apres).toLocaleString('fr-FR') + ' L</span><span class="pil-trx-vu">après les travaux en cours</span>'));
     t('④ le travail sans barème est dit, pas compté', H.includes('1 travail sans barème, non compté'));
     // TRAIT-CUVE (§221) : le traitement conseille, en pointille
     const lT = 2.6 * (2 / 1.5) * 6, apT = apres - lT;
@@ -224,7 +225,7 @@ function scenarios(src, journal) {
     const A2 = X._pilCkAlertes({ tracs: [{ id: 't1', nom: 'NH', revReste: 400 }], gnr: { capacite: 1500, niveau: 900, seuil: 300 } });
     t('④ rien en cours, rien d’immobilisé, cuve haute : la phrase de calme', A2.includes('Rien à signaler'));
     const A3 = X._pilCkAlertes({ tracs: [], gnr: { capacite: 1500, niveau: 250, seuil: 300 } });
-    t('④ sans travail, une cuve sous le seuil garde sa carte', A3.includes('250 L, sous le seuil') && !A3.includes('Rien à signaler'));
+    t('④ sans travail, une cuve sous le seuil garde sa carte', A3.includes('>250 L</span><span class="pil-trx-vu">sous le seuil</span>') && !A3.includes('Rien à signaler'));
     t('④ l’échelle suit le seuil quand il dépasse le niveau (300 L → 400 L)', A3.includes('<span>400 L</span>'));
     // la conso se calcule sur ENTRETIENS + SESSIONS : on recharge le monde pour la tuile
     const C2 = charger(src);
