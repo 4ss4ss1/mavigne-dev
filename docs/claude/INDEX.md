@@ -303,3 +303,5 @@
 | 256 | 256. ★★ GNR-2 — LA CUVE GNR SE LIT DE NOUVEAU SUR TÉLÉPHONE : LE BLOC TRACTEUR A SA GRILLE (06/10 — `src/pi… | `docs/claude/chantiers-230-279.md` |
 | 257 | 257. ★★★ IDS-1, SALARIÉS — RENOMMER UN SALARIÉ (07/10 — `src/reglages.js` · `src/app.js` (`_mvRefreshCurren… | `docs/claude/chantiers-230-279.md` |
 | 258 | 258. ★★ IDS-1, ACTIVITÉS — RENOMMER UNE ACTIVITÉ ; LES TRACTEURS, DÉJÀ SÛRS (07/10 — `src/reglages.js` · `s… | `docs/claude/chantiers-230-279.md` |
+| 259 | 259. ★★ MOUV-1 — LE SOCLE DU MOUVEMENT : JETONS, COUCHE D'ANIMATION, COURBES QUI SE DESSINENT, INFOBULLE QU… | `docs/claude/chantiers-230-279.md` |
+| 260 | 260. ★★★ AUJ-1 — LE COCKPIT D'AUJOURD'HUI, VUE TERRAIN (07/10 — `src/cockpit.js` (neuf) · `src/pilotage.js`… | `docs/claude/chantiers-230-279.md` |

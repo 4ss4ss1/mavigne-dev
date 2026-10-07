@@ -11,6 +11,8 @@ import fs from 'node:fs';
 
 const U    = fs.readFileSync('src/utils.js', 'utf8');
 const PIL  = fs.readFileSync('src/pilotage.js', 'utf8');
+/* AUJ-1 (§260) : le cockpit d'Aujourd'hui pose ses pastilles depuis son propre module. */
+const COCKPIT = fs.readFileSync('src/cockpit.js', 'utf8');
 /* ★ Lot CAVE-1 : la Cave pose sa propre pastille (cave.auj). Un corpus limite au
    Pilotage aurait dit « fiche orpheline » sur une pastille bien reelle. */
 const CAVE = fs.readFileSync('src/cave.js', 'utf8');
@@ -28,7 +30,7 @@ function corpsPil(nom){
   return '';
 }
 const nu = s => s.split('\n').filter(l => !l.trimStart().startsWith('//')).join('\n');
-const UNU = nu(U), PILNU = nu(PIL), CAVENU = nu(CAVE), REGLNU = nu(REGL);
+const UNU = nu(U), PILNU = nu(PIL), CAVENU = nu(CAVE), REGLNU = nu(REGL), CKNU = nu(COCKPIT);
 
 let ok = 0, ko = 0;
 const t = (nom, cond, detail) => {
@@ -79,8 +81,8 @@ t('les balises <b> sont refermees',
    litteralement, partout hors du dictionnaire — c'est vrai quelle que soit la
    facon dont elle est posee. */
 const HORS = [UNU.slice(0, UNU.indexOf('const MV_INFO = {')) + UNU.slice(UNU.indexOf('\n};', UNU.indexOf('const MV_INFO = {'))),
-              PILNU, CAVENU, REGLNU, HTML].join('\n');
-const posees = new Set([...[UNU, PILNU, CAVENU, REGLNU, HTML].join('\n')
+              PILNU, CKNU, CAVENU, REGLNU, HTML].join('\n');
+const posees = new Set([...[UNU, PILNU, CKNU, CAVENU, REGLNU, HTML].join('\n')
   .matchAll(/_mvInfoBtn\(\s*'([^']+)'|data-mvi="([^"]+)"/g)]
   .map(m => m[1] || m[2]).filter(x => x && !x.includes('+')));
 t('toute pastille posee a sa fiche', [...posees].every(k => cles.includes(k)),

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.30';
+export const APP_VERSION = '8.32';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -630,7 +630,7 @@ function _mvGraphTtCss(){
   var st = document.createElement('style');
   st.id = 'mv-graph-tt-css';
   st.textContent =
-    '.mvg-box{position:relative}'
+    '.mvg-box{position:relative;touch-action:pan-y pinch-zoom}'
     + '.mvg-hit{fill:transparent;cursor:pointer}'
     + '.mvg-tt{position:absolute;z-index:6;min-width:140px;max-width:230px;pointer-events:none;'
     + 'background:#241C16;color:#F5F1E8;border-radius:10px;padding:8px 10px;'
@@ -641,7 +641,10 @@ function _mvGraphTtCss(){
     + '.mvg-tt .r{display:flex;justify-content:space-between;gap:12px}'
     + '.mvg-tt .r i{font-style:normal;opacity:.72}'
     + '.mvg-tt .o{margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,.18);opacity:.9}'
-    + '@media print{.mvg-tt{display:none}}';
+    + '.mvg-guide{position:absolute;z-index:5;top:0;width:1px;margin-left:-.5px;background:var(--texte-doux,#8a8a80);'
+    + 'opacity:0;pointer-events:none;transition:opacity var(--mv-d1,.14s)}'
+    + '.mvg-guide.on{opacity:.55}'
+    + '@media print{.mvg-tt,.mvg-guide{display:none}}';
   document.head.appendChild(st);
 }
 
@@ -657,40 +660,83 @@ window._mvGraphTouch = function(box){
   tt.className = 'mvg-tt';
   box.appendChild(tt);
   box._mvTt = tt;
+  // MOUV-1 (§259) : le trait qui marque le point montré, recréé avec l'infobulle.
+  var gd = document.createElement('i');
+  gd.className = 'mvg-guide';
+  gd.setAttribute('aria-hidden', 'true');
+  box.appendChild(gd);
+  box._mvGd = gd;
+  box._mvHit = null;
   if(box._mvTtCable) return;
   box._mvTtCable = true;
   box.addEventListener('pointerdown', function(ev){
-    var t = box._mvTt; if(!t) return;
     var h = ev.target && ev.target.closest ? ev.target.closest('.mvg-hit') : null;
-    if(!h){ t.classList.remove('on'); return; }
-    var html = h.getAttribute('data-tt'); if(!html) return;
-    t.innerHTML = html;
-    t.classList.add('on');
-    // Le SVG est dessine en unites de viewBox ; la boite peut etre plus
-    // etroite. On ramene les coordonnees a l'echelle reelle, sinon l'infobulle
-    // se pose a cote du point sur un ecran qui a retreci.
-    var svg = box.querySelector('svg');
-    var k = (svg && svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width > 0)
-      ? (svg.clientWidth / svg.viewBox.baseVal.width) : 1;
-    if(!(k > 0)) k = 1;
-    var x = (parseFloat(h.getAttribute('data-x')) || 0) * k;
-    var y = (parseFloat(h.getAttribute('data-y')) || 0) * k;
-    t.style.left = '0px'; t.style.top = '0px';
-    var bw = box.clientWidth, tw = t.offsetWidth, th = t.offsetHeight;
-    var lx = Math.max(4, Math.min(Math.max(4, bw - tw - 4), x - tw / 2));
-    var ly = y - th - 12; if(ly < 2) ly = y + 14;   // jamais hors du cadre
-    t.style.left = lx + 'px'; t.style.top = ly + 'px';
+    // MOUV-1 : au doigt, l'infobulle suit tant que le doigt glisse (pointermove, plus bas).
+    box._mvTtDoigt = !!h && ev.pointerType !== 'mouse';
+    if(!h){ _mvGraphCache(box); return; }
+    _mvGraphMontre(box, h);
   });
+  // MOUV-1 (§259) — L'INFOBULLE SUIT : à la souris au survol, au doigt en glissant le long du graphe.
+  //   Le doigt garde la main sur la page : `touch-action:pan-y pinch-zoom` (style de la boîte) laisse
+  //   défiler à la verticale et zoomer à deux doigts ; seul le glissé horizontal promène l'infobulle.
+  //   Au doigt, la cible d'un pointermove reste l'élément du premier appui : on lit donc ce qui est
+  //   SOUS le doigt (elementFromPoint), pas ev.target.
+  box.addEventListener('pointermove', function(ev){
+    if(ev.pointerType !== 'mouse' && !box._mvTtDoigt) return;
+    var sous = document.elementFromPoint ? document.elementFromPoint(ev.clientX, ev.clientY) : ev.target;
+    var h = (sous && sous.closest) ? sous.closest('.mvg-hit') : null;
+    if(h && box.contains(h)){ if(h !== box._mvHit) _mvGraphMontre(box, h); }
+    else if(ev.pointerType === 'mouse') _mvGraphCache(box);
+  });
+  box.addEventListener('pointerup', function(){ box._mvTtDoigt = false; });
+  box.addEventListener('pointercancel', function(){ box._mvTtDoigt = false; });
+  box.addEventListener('pointerleave', function(ev){ if(ev.pointerType === 'mouse') _mvGraphCache(box); });
   if(!_mvTtGlobal){
     _mvTtGlobal = true;
     document.addEventListener('pointerdown', function(ev){
       for(var i = 0; i < _MV_GRAPHS.length; i++){
         var b = document.querySelector(_MV_GRAPHS[i].sel);
-        if(b && b._mvTt && !b.contains(ev.target)) b._mvTt.classList.remove('on');
+        if(b && b._mvTt && !b.contains(ev.target)) _mvGraphCache(b);
       }
     });
   }
 };
+
+// MOUV-1 (§259) : montrer / cacher — une seule écriture pour l'appui, le survol et le glissé.
+function _mvGraphMontre(box, h){
+  var t = box._mvTt; if(!t) return;
+  var html = h.getAttribute('data-tt'); if(!html) return;
+  box._mvHit = h;
+  t.innerHTML = html;
+  t.classList.add('on');
+  // Le SVG est dessine en unites de viewBox ; la boite peut etre plus
+  // etroite. On ramene les coordonnees a l'echelle reelle, sinon l'infobulle
+  // se pose a cote du point sur un ecran qui a retreci.
+  var svg = box.querySelector('svg');
+  var k = (svg && svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width > 0)
+    ? (svg.clientWidth / svg.viewBox.baseVal.width) : 1;
+  if(!(k > 0)) k = 1;
+  var x = (parseFloat(h.getAttribute('data-x')) || 0) * k;
+  var y = (parseFloat(h.getAttribute('data-y')) || 0) * k;
+  t.style.left = '0px'; t.style.top = '0px';
+  var bw = box.clientWidth, tw = t.offsetWidth, th = t.offsetHeight;
+  var lx = Math.max(4, Math.min(Math.max(4, bw - tw - 4), x - tw / 2));
+  var ly = y - th - 12; if(ly < 2) ly = y + 14;   // jamais hors du cadre
+  t.style.left = lx + 'px'; t.style.top = ly + 'px';
+  var g = box._mvGd;
+  if(g){
+    // Le trait couvre la hauteur du dessin : le <svg> peut suivre le bouton « Agrandir » (KIT-1).
+    g.style.left = x + 'px';
+    g.style.top = ((svg && svg.offsetTop) || 0) + 'px';
+    g.style.height = ((svg && svg.clientHeight) || box.clientHeight || 0) + 'px';
+    g.classList.add('on');
+  }
+}
+function _mvGraphCache(box){
+  if(box._mvTt) box._mvTt.classList.remove('on');
+  if(box._mvGd) box._mvGd.classList.remove('on');
+  box._mvHit = null;
+}
 
 // Une zone de touche : une colonne pleine hauteur, centree sur le point.
 // `x`/`y` sont les coordonnees du POINT (pour poser l'infobulle), `xa`/`xb`
@@ -704,6 +750,9 @@ window._mvGraphHit = function(c, x, y, xa, xb, tt){
 
 // ── Le registre : un graphe enregistre se repeint quand la largeur bouge ─────
 var _MV_GRAPHS = [], _mvGraphHooked = false, _mvGraphTimer = null;
+// MOUV-1 (§259) : les graphes déjà dessinés « en direct » dans la session. Contrairement à _MV_GRAPHS,
+//   ce registre n'oublie jamais (_mvGraphOublier ne le touche pas) : un écran redessiné ne rejoue pas le tracé.
+var _MV_TRACES = {};
 
 function _mvGraphDessine(e){
   var box = document.querySelector(e.sel);
@@ -736,6 +785,13 @@ function _mvGraphDessine(e){
   // CUVGR-3 : un graphe qui a emis des zones de touche recoit son infobulle.
   // Les autres ne passent meme pas la premiere ligne de _mvGraphTouch.
   if(window._mvGraphTouch) window._mvGraphTouch(box);
+  // MOUV-1 (§259) : la PREMIÈRE peinture d'un graphe dans la session dessine ses courbes mesurées (trait
+  //   de 2, plein : MV_GRAPH_TRAIT.mesure). Jamais au redimensionnement, jamais quand l'écran se redessine,
+  //   jamais sur un graphe caché — il se dessinera quand on le verra.
+  if(html && window._mvAnim && !_MV_TRACES[e.sel] && box.offsetParent !== null){
+    _MV_TRACES[e.sel] = 1;
+    window._mvAnim.tracer(box);
+  }
 }
 
 // Enregistre un graphe et le dessine tout de suite. Le selecteur doit etre
@@ -776,6 +832,133 @@ window._mvGraphOublier = function(prefixe){
 window._mvGraphRepeindre = function(){
   for(var i = 0; i < _MV_GRAPHS.length; i++) _mvGraphDessine(_MV_GRAPHS[i]);
 };
+
+// ══ MOUV-1 (§259) — LA COUCHE D'ANIMATION COMMUNE ═════════════════════════════════════════════════
+//   Nico (06/10) : un Pilotage « dynamique, professionnel et qui en jette » ; la maquette du cockpit est
+//   validée le 07/10. Tout ce qui bouge passe par ici, et c'est ici, une seule fois, que le mouvement se
+//   coupe quand le téléphone demande « moins d'animations ». Rien ne bouge sans raison : un chiffre
+//   défile parce qu'il a changé, une barre avance parce que le travail a avancé.
+//   Les durées viennent des jetons de styles.css (--mv-d1…d4) ; les fonctions ci-dessous prennent la
+//   même échelle en millisecondes. Chaque fonction accepte un élément absent (écran pas affiché) et ne
+//   lève jamais : une animation ratée ne doit pas casser l'écran qu'elle décore.
+window._mvAnim = (function(){
+  function reduit(){
+    try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+    catch(e){ return false; }
+  }
+  function maintenant(){ return (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now(); }
+  function image(f){ return (typeof requestAnimationFrame === 'function') ? requestAnimationFrame(f) : setTimeout(f, 16); }
+  function sortie(k){ return 1 - Math.pow(1 - k, 3); }
+  // tween : fn(k) reçoit l'avancement adouci, de 0 à 1, une fois par image. Fin immédiate (fn(1)) quand
+  //   le téléphone demande moins d'animations ou quand la durée est nulle.
+  function tween(dur, fn, ease){
+    if(typeof fn !== 'function') return;
+    var e = (typeof ease === 'function') ? ease : sortie;
+    if(reduit() || !(dur > 0)){ fn(1); return; }
+    var t0 = maintenant();
+    (function pas(){
+      var k = Math.min(1, (maintenant() - t0) / dur);
+      fn(e(k));
+      if(k < 1) image(pas);
+    })();
+  }
+  // compter : un chiffre défile de la valeur AFFICHÉE vers la nouvelle. La valeur affichée vit dans
+  //   data-v : un écran redessiné repart de ce qu'il montrait, pas de zéro. Un nouvel appel sur le même
+  //   élément prend la main (le défilement précédent s'arrête). `fmt` met en forme (défaut : entier fr-FR).
+  function compter(el, vers, fmt, dur){
+    if(!el || !isFinite(vers)) return;
+    var f = (typeof fmt === 'function') ? fmt : function(v){ return Math.round(v).toLocaleString('fr-FR'); };
+    var lu = el.getAttribute ? el.getAttribute('data-v') : null;
+    var de = (lu != null && isFinite(parseFloat(lu))) ? parseFloat(lu) : vers;
+    if(el.setAttribute) el.setAttribute('data-v', String(vers));
+    var jeton = el._mvCpt = (el._mvCpt || 0) + 1;
+    if(reduit() || de === vers || dur === 0){ el.textContent = f(vers); return; }
+    tween(dur > 0 ? dur : 900, function(k){ if(el._mvCpt === jeton) el.textContent = f(de + (vers - de) * k); });
+  }
+  // rouler : un texte qui change en roulant — l'ancien monte et s'efface, le nouveau arrive d'en dessous.
+  //   L'élément doit être une petite grille (display:inline-grid ; overflow:hidden) : les deux textes
+  //   partagent la même case le temps du roulement.
+  function rouler(el, txt){
+    if(!el) return;
+    txt = String(txt);
+    var cur = el.lastElementChild;
+    if(cur && cur.textContent === txt) return;
+    if(reduit() || !cur || typeof cur.animate !== 'function'){
+      el.textContent = '';
+      var s = document.createElement('span'); s.textContent = txt; el.appendChild(s);
+      return;
+    }
+    var n = document.createElement('span');
+    n.textContent = txt;
+    el.appendChild(n);
+    var vieux = cur.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: 'translateY(-75%)', opacity: 0 }],
+      { duration: 560, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' });
+    vieux.onfinish = function(){ if(cur.parentNode) cur.parentNode.removeChild(cur); };
+    n.animate([{ transform: 'translateY(75%)', opacity: 0 }, { transform: 'translateY(0)', opacity: 1 }],
+      { duration: 560, easing: 'cubic-bezier(.22,1,.36,1)' });
+  }
+  // noter / glisser : les deux temps d'une liste qui change (FLIP). noter() relève où sont les éléments ;
+  //   on change la liste ; glisser() fait partir chacun de son ancienne place vers la nouvelle.
+  function noter(els){
+    var r = [];
+    for(var i = 0; els && i < els.length; i++){
+      var el = els[i];
+      if(el && el.getBoundingClientRect) r.push([el, el.getBoundingClientRect().top]);
+    }
+    return r;
+  }
+  function glisser(places){
+    if(reduit() || !places) return;
+    for(var i = 0; i < places.length; i++){
+      var el = places[i][0];
+      if(!el || !el.isConnected || typeof el.animate !== 'function') continue;
+      var dy = places[i][1] - el.getBoundingClientRect().top;
+      if(Math.abs(dy) > 0.5) el.animate([{ transform: 'translateY(' + dy + 'px)' }, { transform: 'none' }],
+        { duration: 460, easing: 'cubic-bezier(.22,1,.36,1)' });
+    }
+  }
+  // reflet : un reflet passe une fois sur une barre qui vient d'avancer (classe .mv-reflet, styles.css).
+  function reflet(el){
+    if(!el || !el.classList || reduit()) return;
+    el.classList.remove('mv-reflet');
+    void el.offsetWidth;
+    el.classList.add('mv-reflet');
+    setTimeout(function(){ el.classList.remove('mv-reflet'); }, 1600);
+  }
+  // tracer : les courbes MESURÉES d'un dessin se tracent de gauche à droite. Une courbe mesurée, dans la
+  //   grammaire du kit (MV_GRAPH_TRAIT), c'est un trait d'au moins 1,8 (mesure = 2), plein (pas de
+  //   pointillé : le prévu et les seuils en ont un), sans remplissage (une aire n'est pas un trait), qui a
+  //   une couleur. La grille, le prévu, les seuils, les aires et les points ne bougent pas.
+  //   Rend le nombre de courbes animées (0 si rien à tracer, ou moins d'animations).
+  function estMesure(p){
+    var g = function(n){ return p.getAttribute ? p.getAttribute(n) : null; };
+    var fill = String(g('fill') || '').toLowerCase(), sw = parseFloat(g('stroke-width')), da = g('stroke-dasharray');
+    return fill === 'none' && sw >= 1.8 && (!da || da === 'none' || da === '0') && !!g('stroke');
+  }
+  function tracer(racine){
+    if(!racine || !racine.querySelectorAll || reduit()) return 0;
+    var els = racine.querySelectorAll('svg path, svg polyline'), n = 0;
+    for(var i = 0; i < els.length; i++){
+      var p = els[i];
+      if(!estMesure(p) || typeof p.animate !== 'function') continue;
+      var L = 0;
+      try { L = p.getTotalLength ? p.getTotalLength() : 0; } catch(e){ L = 0; }
+      if(!(L > 0)) continue;
+      p.style.strokeDasharray = L;
+      p.style.strokeDashoffset = L;
+      var a = p.animate([{ strokeDashoffset: L }, { strokeDashoffset: 0 }],
+        { duration: 1100, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' });
+      a.onfinish = (function(q, anim){ return function(){
+        q.style.strokeDasharray = ''; q.style.strokeDashoffset = '';
+        if(anim && anim.cancel) anim.cancel();
+      }; })(p, a);
+      n++;
+    }
+    return n;
+  }
+  return { reduit: reduit, tween: tween, compter: compter, rouler: rouler, noter: noter, glisser: glisser,
+    reflet: reflet, tracer: tracer, estMesure: estMesure };
+})();
 
 // ══ KIT-1 (§226) — LE KIT GRAPHIQUE COMMUN : LA LIGNE D'AVANCEMENT ═════════════════════════════════
 //   Une barre (fine dans une liste), une ligne (nom entier · barre · % · détail), un code de couleur : l'ÉTAT,
@@ -852,6 +1035,14 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.32', d: '2026-10-07', items: [
+    { niv: 1, pour: ['admin'], cible: '#ck-fil-pan', emoji: 'graphique', titre: 'Aujourd’hui se lit d’un coup d’œil',
+      desc: "Au Pilotage › Aujourd’hui : une phrase résume la journée, les chantiers en cours et la courbe de la charge restante ont leur place, et le fil « En direct » montre ce que l’équipe valide, dès que ça arrive. Tout ce qui s’affichait avant est toujours là." },
+  ] },
+  { v: '8.31', d: '2026-10-07', items: [
+    { niv: 0, pour: ['tous'], emoji: 'graphique', titre: 'Les graphiques prennent vie',
+      desc: "La première fois qu’un graphique s’affiche, sa courbe se dessine sous vos yeux. Faites glisser le doigt, ou passez la souris, le long d’un graphique : l’infobulle suit, avec un trait sur le jour montré. Rien ne bouge si votre téléphone demande moins d’animations." },
+  ] },
   { v: '8.30', d: '2026-10-07', items: [
     { niv: 0, pour: ['admin'], emoji: 'tracteur', titre: 'Renommer une activité du tracteur',
       desc: "Dans la fiche de l’activité (Tracteur › roue crantée › Activités) : toutes ses sessions prennent le nouveau nom, y compris sur les téléphones restés hors ligne. « Traitement » garde le sien, le registre phyto l’attend. Les tracteurs, eux, se renomment déjà dans leur fiche." },
@@ -4694,6 +4885,7 @@ var MV_AIDE = {
   pilotage: {
     ico: 'graphique', titre: 'Pilotage', ancre: 'pilotage',
     points: [
+      ['Aujourd’hui se lit d’un coup d’œil', ": une phrase résume la journée — la marge sur l’objectif, les heures à faire, les validations du jour. À gauche ce qui décide (fin prévue, décision du jour, chantiers, courbe de la charge restante), à droite ce qui arrive : le fil <b>En direct</b> de ce que l’équipe valide, puis les indicateurs et les alertes."],
       ['Presque tout se lit, cinq choses s’écrivent', ": les chiffres viennent du journal, du planning, des sessions tracteur et de la cave. Ce qui s’écrit ici est nommé : les prix des achats (Économie), l’ordre de passage (Décider), le mois d’ouverture de l’exercice comptable et celui de l’année vigne (roue crantée, Économie › Exercice), et ce que porte la roue crantée."],
       ['Vos deux années se règlent au même endroit', ": la roue crantée porte l’ouverture de l’<b>exercice comptable</b> — celui de votre bilan, fixé par votre comptable — et, juste dessous, le <b>cadre de votre campagne</b>, l’axe des Archives et du bilan de campagne. Une campagne est un cycle de production : ce qui la borne, c’est la <b>vendange</b>, et le mois n’en est que la traduction. L’écran dit où tombe la vôtre dans le cadre choisi — elle l’ouvre, elle la clôt, ou la borne la coupe en deux — et propose le mois qui suit la fin de vos vendanges. Le changer recadre des chiffres déjà affichés, jamais vos saisies."],
       ['La roue crantée', "en haut à droite ouvre ce qui se règle : objectifs de fin, fenêtres des tâches, hypothèses de calcul, IFT de référence — et le bilan de campagne à imprimer. Administrateur seulement."],
@@ -4904,6 +5096,12 @@ export const MV_INFO = {
     'Un <b>soutirage</b> se déclenche à la fin de la malo, pas à une date : la projection vient des valeurs d\u2019acide malique mesurées. Deux pentes sont calculées, la moyenne sur trois analyses projette la fin, les deux dernières détectent un blocage.'
   ] },
 
+  'pil.fil': { t: 'En direct', p: [
+    'Les validations et les débuts de parcelle de la journée, du plus récent au plus ancien, dès qu’ils arrivent du journal. Une ligne neuve s’éclaire une fois.',
+    'L’heure vient de l’enregistrement de la validation ; une ligne sans heure connue n’en affiche pas.' ] },
+  'pil.charge': { t: 'La charge restante', p: [
+    'Les heures qui restent au barème, une photo par jour (prise quand un administrateur ouvre le Pilotage), et aujourd’hui en direct.',
+    'Le pointillé prolonge jusqu’à la fin prévue, celle de la carte du haut ; le trait vertical marque votre objectif. Touchez ou survolez la courbe pour lire un jour.' ] },
   'pil.marge': { t: 'La date de fin, et la marge', p: [
     'La date r\u00e9pond \u00e0 une seule question : <b>si le planning et les contrats restent tels quels, quand tout est-il fini ?</b> Elle vient du m\u00eame simulateur que La campagne avec \u00ab aucun renfort \u00bb : chaque travail commence \u00e0 l\u2019ouverture de <b>sa fen\u00eatre</b> \u2014 pas au premier jour de la p\u00e9riode \u2014, les travaux ouverts en m\u00eame temps se <b>partagent l\u2019\u00e9quipe</b>, les heures de <b>tracteur</b> sont d\u00e9duites, et l\u2019\u00e9quipe est lue <b>jour par jour</b> dans le planning : horaire de chacun, cong\u00e9s, fermeture, contrats et dates de d\u00e9but, effectif d\u2019une \u00e9quipe collective.',
     '<b>Trois diff\u00e9rences avec La campagne, voulues.</b> La date est prise <b>aux heures normales</b> du planning, sans les heures suppl\u00e9mentaires que le simulateur s\u2019autorise quand il cherche un renfort. Un travail hors fen\u00eatre <b>n\u2019est pas rallong\u00e9</b> : le simulateur suppose +15 % par semaine de retard pour dimensionner un renfort, une date \u00ab si je ne touche rien \u00bb lit les heures telles quelles. Et l\u2019<b>\u00e9cart de cadence</b> mesur\u00e9, quand il est applicable, multiplie les heures restantes \u2014 La campagne raisonne au bar\u00e8me.',

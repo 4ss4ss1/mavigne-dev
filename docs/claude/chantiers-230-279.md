@@ -1334,3 +1334,127 @@ faire. Les **activités**, elles, sont désignées par leur NOM dans chaque sess
 ### 258d. Ouvert
 
 Rien de prévu pour IDS-1. « Renommer » ailleurs (produits, cuves…) si le besoin se présente ; le chat (§257d).
+
+## 259. ★★ MOUV-1 — LE SOCLE DU MOUVEMENT : JETONS, COUCHE D'ANIMATION, COURBES QUI SE DESSINENT, INFOBULLE QUI SUIT (07/10 — `src/styles.css` · `src/utils.js` (`_mvAnim`, kit graphique, APP, WHATS_NEW) · `index.html` · `public/sw.js` — APP 8.30 → 8.31 · SW 9.08 → 9.09 — base `5f9173c`)
+
+### 259a. Pourquoi
+
+Nico (06/10) : un Pilotage « dynamique, professionnel et qui en jette ». Maquette du cockpit « Aujourd'hui » validée en
+v2 le 07/10 (« tout est ok ») : bascule Terrain / Économie, « À savoir », domaine en direct par appellation, barre
+latérale. Décision : les outils actuels (JS natif, CSS pur) — React et Recharts écartés, mesure à l'appui (+774 Ko
+minifiés, +21 % du paquet, et des graphiques d'un second style : l'inverse de COH-1). Plan d'intégration en lots :
+MOUV-1, puis AUJ-1 à AUJ-4 ; la barre latérale (COQ-1) et Ctrl K (PAL-1) vont à la refonte de l'interface.
+MOUV-1 pose ce dont tous les lots suivants ont besoin, sans changer un seul texte d'écran.
+
+### 259b. Ce qui change
+
+- **Les jetons** (`styles.css`, `:root`, après les graisses de DS-0) : `--mv-d1` 140 ms (réponse à un geste),
+  `--mv-d2` 240 ms (petit changement d'état), `--mv-d3` 420 ms (un élément entre ou change de place), `--mv-d4` 900 ms
+  (un chiffre ou une barre se remplit) ; courbes `--mv-sortie`, `--mv-glisse`, `--mv-ressort`. Sous « moins
+  d'animations », les quatre durées tombent à 1 ms (bloc MOUV-1 en fin de fichier) : un écran qui les emploie s'arrête
+  net sans avoir à y penser. Un écran prend ces jetons, jamais une durée en dur.
+- **`window._mvAnim`** (`utils.js`, juste après `_mvGraphRepeindre`) : `reduit()`, `tween(dur, fn, ease)`,
+  `compter(el, vers, fmt, dur)` (défile depuis la valeur AFFICHÉE, gardée dans `data-v` — un écran redessiné repart de
+  ce qu'il montrait ; le dernier appel prend la main), `rouler(el, txt)` (un texte qui roule ; l'élément est une petite
+  grille), `noter(els)` / `glisser(places)` (une liste qui change, chacun glisse à sa place), `reflet(el)` (classe
+  `.mv-reflet`, un seul passage), `tracer(racine)`, `estMesure(p)`. Aucune ne lève ; toutes acceptent un élément absent.
+- **Les courbes mesurées se dessinent** à la PREMIÈRE peinture d'un graphe suivi (`_mvGraphDessine` →
+  `_mvAnim.tracer`). « Mesurée » suit la grammaire du kit (`MV_GRAPH_TRAIT`) : trait d'au moins 1,8, plein, sans
+  remplissage, coloré. La grille, le prévu (pointillé, même épais : cave.js en a un à 2,6), les seuils, les aires et les
+  points ne bougent pas. Le registre `_MV_TRACES` n'oublie jamais, contrairement à `_MV_GRAPHS` que `_mvGraphOublier`
+  purge : ni au redimensionnement, ni quand un écran se redessine. Un graphe caché (`offsetParent` nul) ne consomme pas
+  son tracé : il se dessinera quand on le verra.
+- **L'infobulle suit** (`_mvGraphTouch`) : à la souris au survol, au doigt en glissant (le doigt se pose d'abord sur un
+  point). Un trait (`.mvg-guide`) marque le point montré. Au doigt, la cible d'un `pointermove` reste l'élément du
+  premier appui : on lit ce qui est SOUS le doigt (`elementFromPoint`). La boîte prend `touch-action:pan-y
+  pinch-zoom` : défiler à la verticale et zoomer à deux doigts restent à la page. Montrer et cacher s'écrivent une seule
+  fois : `_mvGraphMontre`, `_mvGraphCache`.
+- APP 8.31, SW 9.09. WHATS_NEW au niveau 0 (le Journal seul), pour tous.
+
+### 259c. Ce qui ne change pas
+
+- Aucun texte d'écran, aucune donnée : l'aide (`MV_AIDE`), le guide et la démo guidée restent justes tels quels.
+- Les graphes sans zone de touche ne changent pas d'un octet côté toucher. Les petites courbes des photos (trait 1,6)
+  ne se tracent pas.
+- ⚠️ `touch-action` : une boîte de graphe ne se fait plus glisser à l'horizontale au doigt. Aucun graphe suivi ne déborde
+  (chacun est dessiné à la largeur de son conteneur, `_mvGraphW`) ; à surveiller si un graphe entre un jour dans une bande
+  qui défile de côté.
+
+### 259d. Mesuré
+
+- **`mv-harnais-mouv1`** (neuf) : **24 assertions** sur les vraies fonctions — jetons et « moins d'animations », chiffre
+  qui défile et arrive pile, reprise depuis la valeur affichée, dernier appel qui prend la main, tracé limité aux courbes
+  mesurées (2 sur 6, dont un pointillé épais écarté), courbe rendue intacte, tracé à la première peinture seulement,
+  graphe caché épargné, trait du point montré à l'échelle réelle, souris qui suit et s'éteint, doigt posé puis glissé,
+  doigt levé, style de la boîte, version et nouveauté. **10/10 contre-épreuves.**
+
+### 259e. Ouvert
+
+- **AUJ-1** — la vue Terrain d'Aujourd'hui dans un module neuf `src/cockpit.js`, importé juste après `pilotage.js`
+  (`pilotage.js` pèse 880 Ko, on découpe à 950). Il réutilise `_pilMargeCalc`, `_pilCockpitTimeline`, `_pilPhotosHtml`,
+  les tuiles de la décision du jour, `_mvTacheDuMoment`, `_mvEqJourRender`. Une validation redessine aujourd'hui tout le
+  Pilotage (`_prioRedessine` → `renderPilotage()`) : le cockpit aura sa mise à jour ciblée.
+- **AUJ-2** « À savoir » ; **AUJ-3** le domaine en direct, par appellation puis par commune (les parcelles n'ont pas de
+  champ lieu-dit), moteur de disposition partagé avec la vue 3D de La campagne ; **AUJ-4** la vue Économie, heures et
+  euros sur la même période (la campagne).
+- **COQ-1** (barre latérale) et **PAL-1** (Ctrl K) : dans la refonte de l'interface, communs à tous les modules.
+
+## 260. ★★★ AUJ-1 — LE COCKPIT D'AUJOURD'HUI, VUE TERRAIN (07/10 — `src/cockpit.js` (neuf) · `src/pilotage.js` (`_pilTabAuj`, « Choisir les indicateurs ») · `src/app.js` (import) · `src/styles.css` · `src/utils.js` (MV_INFO, MV_AIDE, APP, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` — APP 8.31 → 8.32 · SW 9.09 → 9.10 — base `5f9173c`, PAR-DESSUS MOUV-1)
+
+### 260a. Pourquoi, et ce qui a été tranché
+
+Deuxième lot du cockpit validé le 07/10. Exigence de Nico : **garder toutes les infos d'Aujourd'hui**. Le lot ne
+retire donc rien : il range les blocs existants et ajoute ce qui manquait pour lire la journée d'un coup d'œil.
+- **MOUV-1 (§259) n'était pas encore sur le dépôt** au moment du lot : AUJ-1 est bâti par-dessus et son zip contient
+  les deux. Règle du doute : la version monte encore (8.32 / 9.10), puisque 8.31 / 9.09 a pu être déployée.
+- **La bascule Terrain / Économie arrive avec AUJ-4**, pas ici : une bascule vers une vue vide serait en production
+  une promesse creuse. Les indicateurs économiques d'aujourd'hui (budget, cadence, coût de l'inaction) restent
+  visibles dans la vue Terrain jusque-là.
+- **`auj_charge` existait déjà** (l'indicateur « Charge restante ») : la courbe prend sa propre clé, `auj_courbe`.
+
+### 260b. Ce qui change
+
+- **`src/cockpit.js`** (neuf, importé juste après `pilotage.js` ; `reserve.js` reste dernier). Il ne lit RIEN de
+  l'intérieur de `pilotage.js` : `_pilTabAuj` lui passe ses morceaux tout calculés — la fin prévue et sa frise
+  (`_ckHero`), le coût de l'inaction (`_ckInac`), les indicateurs (`kpis`), la décision du jour (`dec`, `det`), les
+  alertes, les chantiers (`_mvkAvancement(d.data,_pilRetards())`, le même dessin que La campagne), les photos du jour
+  (`_pilPhotoListe()`) et le journal. Un seul moteur par chiffre.
+- **La mise en page** : une phrase de résumé, puis deux colonnes dès 1 100 px — à gauche ce qui décide (fin prévue,
+  inaction, décision du jour, chantiers, courbe), à droite ce qui arrive (fil En direct, indicateurs, alertes).
+- **Le résumé** (`_ckResumeHtml`) : la marge sur l'objectif, les heures à faire, les validations du jour. Ce qu'il
+  ne sait pas, il le tait (marge inconnue : rien ; jamais un zéro inventé).
+- **La courbe de la charge restante** (`_ckChargeSvg`) : les photos PHOTO-1 (60 jours au plus), aujourd'hui en
+  direct à la place de la photo du jour, le pointillé jusqu'à la fin prévue, le trait de l'objectif (étiquette sous
+  le bouton « Agrandir » du kit), trois repères de date sous l'axe (première photo, aujourd'hui, fin prévue), une zone
+  de touche par photo. Inscrite au kit (`_mvGraphSuivre`) : MOUV-1 la trace à sa première apparition et l'infobulle suit.
+  Moins de deux points : l'état vide du kit, jamais une ligne plate.
+- **Le fil En direct** (`_ckFilDonnees`, `_ckFilHtml`) : les validations et les débuts de parcelle du jour, du plus
+  récent au plus ancien, sans la météo. ⚠️ Une entrée du journal n'a pas de champ d'heure : son identifiant est
+  `Date.now()` en base 16 (app.js). On le relit seulement s'il a exactement cette forme ; sinon la ligne n'a pas
+  d'heure. Une équipe « a validé » au pluriel, les noms sont échappés.
+- **Le direct** : une validation redessine encore tout le Pilotage (`_prioRedessine`), mais le cockpit retient ce
+  qu'il montrait — les chiffres du résumé défilent depuis l'ancienne valeur (`_mvAnim.compter`), une ligne neuve du
+  fil s'éclaire une fois. Rien n'exige que les téléphones de l'équipe soient à jour.
+- **Repli** : si `_ckAuj` manque ou lève, l'ancien ordre s'affiche (`_mvAvale`) — jamais d'écran blanc.
+- « Choisir les indicateurs » : `auj_resume`, `auj_chantiers`, `auj_courbe`, `auj_fil`. MV_INFO `pil.fil`,
+  `pil.charge` ; un point dans MV_AIDE.pilotage ; un paragraphe dans le guide (§ Aujourd'hui). WHATS_NEW niveau 1,
+  pastille sur le fil (`#ck-fil-pan`), pour l'admin.
+
+### 260c. Mesuré
+
+- **`mv-harnais-auj1`** (neuf) : **28 assertions** sur le vrai `cockpit.js` — fil (jour seul, sans météo même dite
+  « Validé », ordre par l'heure de l'identifiant, identifiant mal formé sans heure, pluriel, échappement, éclairage
+  des seules lignes neuves, état vide), résumé (singulier, retard, pile, silence sur l'inconnu), courbe (photo du
+  jour remplacée par le direct, état vide, mesure en trait plein du kit, pointillé et objectif, zones de touche),
+  mise en page (tous les blocs d'avant présents, gauche/droite, bulles, après-dessin, masquage), branchement dans
+  `_pilTabAuj` et son repli, clés de « Choisir les indicateurs », ordre d'import, jetons seuls dans le style, aide,
+  guide, version. **14/14 contre-épreuves.**
+- `mv-harnais-mouv1` ajusté : la version courante n'est plus 8.31, sa nouveauté reste au Journal.
+
+### 260d. Ouvert
+
+- **AUJ-2** « À savoir » (météo par secteur et son effet sur les travaux, absences à venir, fins de contrat,
+  retards, matériel, cave) — il reprendra les alertes et la carte Cave d'ici.
+- **AUJ-3** le domaine en direct par appellation puis par commune ; **AUJ-4** la vue Économie ET la bascule — les
+  indicateurs économiques quittent alors la vue Terrain.
+- Une validation pourrait ne mettre à jour que le cockpit au lieu de tout le Pilotage : à mesurer avant de le faire.

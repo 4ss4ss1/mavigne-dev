@@ -105,6 +105,14 @@
        trancher (quatrieme pas, ou residu a resorber) demande une capture. */
   --fw-med:500; --fw-semi:600; --fw-bold:700;
 
+  /* ★ MOUV-1 (§259) — LE MOUVEMENT, UNE SEULE SOURCE : quatre durées, trois courbes.
+     d1 répond à un geste (appui, survol) · d2 un petit changement d'état · d3 un élément qui entre
+     ou change de place · d4 un chiffre ou une barre qui se remplit. « sortie » arrive et se pose,
+     « glisse » part et arrive, « ressort » confirme avec un léger rebond. Un écran prend ces jetons,
+     jamais une durée en dur ; « moins d'animations » les ramène à 1 ms (fin du fichier, MOUV-1). */
+  --mv-d1:140ms; --mv-d2:240ms; --mv-d3:420ms; --mv-d4:900ms;
+  --mv-sortie:cubic-bezier(.22,1,.36,1); --mv-glisse:cubic-bezier(.65,0,.35,1); --mv-ressort:cubic-bezier(.34,1.56,.64,1);
+
   /* LE FILET NEUTRE — une seule source, arbitree par le nombre :
      « 1px solid var(--gris-clair) » = 172 occurrences (+14 avec repli),
      « var(--gris) » = 71. --gris-clair mene de plus du double : il gagne.
@@ -5726,3 +5734,53 @@ body .mvv-rh-fill{background:var(--terre,#8A5A38);}
 .aoc-grp{display:flex;justify-content:space-between;font-size:var(--pt-lbl,11.5px);letter-spacing:.12em;text-transform:uppercase;color:var(--terre);font-weight:600;margin:12px 2px 8px}
 .aoc-note{font-size:var(--pt-micro,12px);color:var(--texte-doux);margin:12px 2px 4px;line-height:1.45}
 .aoc-ajout{width:100%;min-height:44px;border:1.5px dashed var(--gris-clair);background:transparent;border-radius:14px;font:600 var(--pt-txt,12.5px)/1 var(--sans,Outfit,sans-serif);color:var(--texte);cursor:pointer}
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   MOUV-1 (§259) — LE REFLET D'UNE BARRE QUI AVANCE, ET « MOINS D'ANIMATIONS »
+   _mvAnim.reflet(el) pose .mv-reflet le temps d'un passage. Sous « moins d'animations », les quatre
+   durées tombent à 1 ms : tout ce qui les emploie s'arrête net, sans qu'un écran ait à y penser.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+.mv-reflet{position:relative;overflow:hidden}
+.mv-reflet::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);transform:translateX(-100%);animation:mv-reflet 1.15s var(--mv-glisse) .2s 1}
+@keyframes mv-reflet{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+@media(prefers-reduced-motion:reduce){
+  :root{--mv-d1:1ms;--mv-d2:1ms;--mv-d3:1ms;--mv-d4:1ms}
+  .mv-reflet::after{animation:none;display:none}
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   AUJ-1 (§260) — LE COCKPIT D'AUJOURD'HUI, VUE TERRAIN (src/cockpit.js)
+   Les blocs d'avant gardent leur style (pil-hero, pil-dec, pil-cks…) : le cockpit ne fait que les
+   ranger. Une phrase en tête, puis deux colonnes dès 1 100 px : à gauche ce qui décide, à droite ce
+   qui arrive. Tout passe par les jetons (espacements, tailles de texte, couleurs, mouvement).
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+.ck-auj{display:flex;flex-direction:column;gap:var(--e-5,20px)}
+.ck-resume{margin:0;font:var(--fw-med,500) var(--pt-md,20px)/1.35 'Cormorant Garamond',Georgia,serif;color:var(--texte-med)}
+.ck-resume b{font-weight:var(--fw-semi,600);color:var(--texte);font-variant-numeric:lining-nums proportional-nums}
+.ck-cols{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--e-5,20px);align-items:start}
+.ck-main,.ck-side{display:flex;flex-direction:column;gap:var(--e-5,20px);min-width:0}
+.ck-main>.pil-sec-h{margin-bottom:calc(-1 * var(--e-3,12px))}
+@media(min-width:1100px){.ck-cols{grid-template-columns:minmax(0,2.2fr) minmax(300px,1fr)}}
+.ck-pan{padding:var(--e-4,16px) var(--e-5,20px)}
+.ck-main>.catpanel,.ck-side>.catpanel,.ck-main>.pil-cockpit-card,.ck-side>.pil-cockpit-card{margin-bottom:0}
+.ck-pan-hd{margin-bottom:var(--e-3,12px)}
+.ck-pan-t{display:flex;align-items:center;gap:var(--e-2,8px);margin:0;font:var(--fw-semi,600) var(--pt-lg,23px)/1.15 'Cormorant Garamond',Georgia,serif;color:var(--texte)}
+.ck-cadre{display:flex;align-items:center;gap:var(--e-2,8px);margin:var(--e-1,4px) 0 0;font-size:var(--pt-micro,12px);line-height:1.4;color:var(--texte-doux)}
+.ck-cadre::before{content:"";flex:none;width:14px;height:1px;background:var(--or)}
+.ck-vif{flex:none;width:8px;height:8px;border-radius:50%;background:var(--vert-med);animation:ck-respire 2.4s ease-out infinite}
+@keyframes ck-respire{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--vert-med) 55%,transparent)}70%,100%{box-shadow:0 0 0 7px transparent}}
+.ck-fil{list-style:none;margin:0;padding:0}
+.ck-ev{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:var(--e-3,12px);align-items:start;padding:var(--e-3,12px) var(--e-1,4px);border-top:1px solid var(--ligne,#ECE6DA)}
+.ck-ev:first-child{border-top:0}
+.ck-ev.neuf{animation:ck-neuf 2.8s var(--mv-sortie)}
+@keyframes ck-neuf{0%,15%{background:color-mix(in srgb,var(--or) 18%,transparent)}100%{background:transparent}}
+.ck-avs{display:inline-flex;padding-top:var(--e-0,2px)}
+.ck-av{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--cave);color:var(--or-clair);border:1.5px solid var(--or);font-size:var(--pt-nano,11px);font-weight:var(--fw-semi,600)}
+.ck-av+.ck-av{margin-left:calc(-1 * var(--e-2,8px))}
+.ck-ev-tx{display:flex;flex-direction:column;gap:var(--e-0,2px);min-width:0;font-size:var(--pt-base,14px);line-height:1.35;color:var(--texte)}
+.ck-ev-tx b{font-weight:var(--fw-semi,600)}
+.ck-ev-s{font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.ck-ev time{font-size:var(--pt-micro,12px);color:var(--texte-doux);white-space:nowrap}
+.ck-fil-vide{margin:0;font-size:var(--pt-txt,12.5px);line-height:1.5;color:var(--texte-doux)}
+.ck-graphe{min-height:160px}
+@media(prefers-reduced-motion:reduce){.ck-vif,.ck-ev.neuf{animation:none}}

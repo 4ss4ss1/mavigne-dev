@@ -509,4 +509,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-vueeq1.mjs --contre'],
   ['node scripts/mv-harnais-gnr2.mjs'],               // GNR-2 (§256) : la cuve GNR se lit sur téléphone (le bloc tracteur a sa grille)
   ['node scripts/mv-harnais-gnr2.mjs --contre'],
+  ['node scripts/mv-harnais-mouv1.mjs'],              // MOUV-1 (§259) : jetons du mouvement, _mvAnim, courbes qui se dessinent, infobulle qui suit
+  ['node scripts/mv-harnais-mouv1.mjs --contre'],
+  ['node scripts/mv-harnais-auj1.mjs'],               // AUJ-1 (§260) : le cockpit d'Aujourd'hui, vue Terrain (src/cockpit.js)
+  ['node scripts/mv-harnais-auj1.mjs --contre'],
 ];

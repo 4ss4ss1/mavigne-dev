@@ -5125,7 +5125,9 @@ function _pilTabAuj(d){
       +'</div></div>';
     cockpit+=_pilCockpitTimeline(m);
   }
+  var _ckHero=cockpit;   // AUJ-1 (§260) : la fin prévue et sa frise, rangées à part par le cockpit
   if(_pilShow('auj_inaction')) cockpit+=_pilCkInaction(d);   // INACTION-1 (§218)
+  var _ckInac=cockpit.slice(_ckHero.length);   // AUJ-1 : le coût de l'inaction, seul
   var kpis='';
   if(_pilShow('auj_charge')){
     var _ksC = (m.seasonJ==null) ? 'projection indisponible'
@@ -5163,7 +5165,19 @@ function _pilTabAuj(d){
   if(_pilShow('auj_tension')) det+=_pilCardTension(d);
   if(dec) H+='<div class="pil-sec-h">La décision du jour</div><div class="pil-dec">'+dec+'</div>';
   if(det) H+='<div class="pil-dec2">'+det+'</div>';
+  var _ckAl0=H.length;   // AUJ-1 (§260)
   if(_pilShow('auj_alertes')) H+='<div class="pil-sec-h">Alertes matériel</div>'+_pilCkAlertes(d);
+  // ★ AUJ-1 (§260) — LE COCKPIT : src/cockpit.js range ces mêmes morceaux (aucun recalculé) et ajoute le
+  //   résumé, les chantiers en cours, la courbe de la charge restante et le fil En direct. Module absent
+  //   ou en erreur : l'ancien ordre, ci-dessous, s'affiche — l'écran ne reste jamais blanc.
+  if(H && typeof window._ckAuj==='function'){
+    try{
+      return window._ckAuj({ d:d, m:m, hero:_ckHero, inaction:_ckInac, kpis:kpis, dec:dec, det:det, alertes:H.slice(_ckAl0),
+        chantiers:(_pilShow('auj_chantiers')?window._mvkAvancement(d.data,_pilRetards()):''),
+        photos:_pilPhotoListe(), journal:(window.JOURNAL||[]),
+        montrer:{ resume:_pilShow('auj_resume'), charge:_pilShow('auj_courbe'), fil:_pilShow('auj_fil') } });
+    }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#cockpit'); }
+  }
   return H || '<div class="pil-empty">Aucun indicateur affiché — activez-les via « Choisir les indicateurs ».</div>';
 }
 
@@ -10505,7 +10519,7 @@ function _pilTabCfm(d){
 
 // ── Personnalisation PAR ONGLET (visibilité des tuiles) ──
 var _PIL_PERSO_DEFS={
-  auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_tension','Tension équipe'],['auj_inaction','Coût de l’inaction'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_cave','La Cave \u2014 ce qui presse'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ? · fenêtre 5 jours'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave']],
+  auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_tension','Tension équipe'],['auj_inaction','Coût de l’inaction'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_cave','La Cave \u2014 ce qui presse'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ? · fenêtre 5 jours'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave'],['auj_resume','Le résumé du jour'],['auj_chantiers','Les chantiers en cours'],['auj_courbe','La courbe de la charge restante'],['auj_fil','En direct : le fil de l\'équipe']],
   an: [['an_budget','Le budget de l\'ann\u00e9e'],['an_frise','Le renfort \u00e0 pr\u00e9voir']],
   avc:[['avc_gauge','Jauge de saison'],['avc_bar','Avancement par tâche'],['avc_pie','Charge (donut)'],['avc_temps','Où va le temps de l\'équipe'],['avc_echeances','Échéances par tâche'],['avc_carte','Carte du domaine']],
   equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_conso','Consommation mesurée']],

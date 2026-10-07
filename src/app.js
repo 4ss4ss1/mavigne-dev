@@ -33,6 +33,7 @@ import './reglages.js';
 import './tracteur.js';
 import './phyto.js';
 import './pilotage.js';
+import './cockpit.js';   // AUJ-1 (§260) : le cockpit d'Aujourd'hui (pilotage.js approche 950 Ko)
 import './reserve.js';
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if(DEBUG) console.log('[Ma Vigne] app.js ' + (window.APP_VERSION ? 'v' + window.APP_VERSION : '') + ' chargé — ' + new Date().toISOString());
