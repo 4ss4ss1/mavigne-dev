@@ -62,8 +62,8 @@ function suite(S) {
   const P = S.pil;
   T('_pilTabAuj passe les fenêtres des tâches et les parcelles, et le plan se masque',
     P.includes("fenetres:((typeof _rfCd==='function'&&_rfCd())||{}).taskWindows||[], parcs:(window.PARCELLES||[])") && P.includes("plan:_pilShow('auj_plan')") && P.includes("['auj_plan','Le domaine en direct']"));
-  const css = S.css.slice(S.css.indexOf('AUJ-3 (§262) — LE DOMAINE EN DIRECT')).replace(/var\([^)]*\)/g, 'JETON');
-  T('le style du plan ne passe que par les jetons', css.length > 300 && !/(?:margin|padding|gap)(?:-[a-z]+)?:[^;}]*\d+px/.test(css) && !/font-size:\s*\d/.test(css));
+  // REF-1 (§266) : la feuille de cet ancien cockpit est remplacée par celle de la maquette validée, passée à la charte.
+  T('l\u2019ancienne feuille a laissé la place à celle de la maquette (REF-1)', S.css.includes('★★★ REF-1 (§266) — LE COCKPIT D\'AUJOURD\'HUI : LA FEUILLE DE LA MAQUETTE VALIDÉE') && !S.css.includes('AUJ-3 (§262) — LE DOMAINE EN DIRECT'));
   T('aide, bulle, guide et nouveauté (8.34, pastille sur le plan)', /'pil\.plan': \{ t: 'Le domaine en direct'/.test(S.uti) && S.guide.includes('<b>domaine en direct</b>')
     && /\{ v: '8\.34', d: '2026-10-07', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-plan'/.test(S.uti));
   return out;

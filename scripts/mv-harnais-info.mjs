@@ -161,9 +161,11 @@ for (const c of CARTES) {
 /* « Traiter ? » : la carte qui a absorbe la fenetre de traitement. Ce n'est pas
    une _pilTile — elle vit dans la grille .pil-dec du cockpit — donc on verifie
    les trois memes choses sous sa forme propre. */
-const CK = (() => { const i = PIL.indexOf('function _pilCkTraiter('); let d = 0, s = PIL.indexOf('{', i);
+const _corpsDe = nom => { const i = PIL.indexOf('function ' + nom + '('); let d = 0, s = PIL.indexOf('{', i);
   for (let k = s; k < PIL.length; k++) { if (PIL[k] === '{') d++; else if (PIL[k] === '}') { d--; if (!d) return PIL.slice(s, k + 1); } }
-  return ''; })();
+  return ''; };
+/* REF-1 (§266) : « Traiter ? » = son calcul (_pilTraiterCalc : fiche, cinq jours, dépliant) + sa tuile (_pilCkTraiter : le dessin). */
+const CK = _corpsDe('_pilTraiterCalc') + _corpsDe('_pilCkTraiter');
 t('« Traiter ? » existe', CK.length > 0);
 t('« Traiter ? » porte la fiche pil.traitement', CK.includes("_mvInfoBtn('pil.traitement')"));
 t('« Traiter ? » porte les cinq jours', CK.includes('_pilTreatRows(days)'));

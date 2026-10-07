@@ -34,6 +34,8 @@ import './tracteur.js';
 import './phyto.js';
 import './pilotage.js';
 import './cockpit.js';   // AUJ-1 (§260) : le cockpit d'Aujourd'hui (pilotage.js approche 950 Ko)
+import './cockpit-vue.js';   // REF-1 (§266) : la maquette validée du cockpit, montée avec le modèle réel
+import './coquille.js';   // COQ-1 + PAL-1 (§268) : la barre latérale et la recherche Ctrl K, sur ordinateur
 import './reserve.js';
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if(DEBUG) console.log('[Ma Vigne] app.js ' + (window.APP_VERSION ? 'v' + window.APP_VERSION : '') + ' chargé — ' + new Date().toISOString());
@@ -5494,7 +5496,7 @@ function _dockDef(){
 function _dockBuild(){
   var dock=document.getElementById('mv-dock'),inner=document.getElementById('mv-dock-inner'),sheet=document.getElementById('mv-dock-sheet-items');
   if(!dock||!inner) return;
-  if(!currentUser||currentUser._isGTAdmin){ dock.style.display='none'; return; }
+  if(!currentUser||currentUser._isGTAdmin){ dock.style.display='none'; if(window._railBuild) window._railBuild(); return; }
   dock.style.display='flex';
   var items=_dockDef();
   var pc=!!(window.matchMedia&&window.matchMedia('(min-width:768px)').matches);
@@ -5511,9 +5513,12 @@ function _dockBuild(){
   }
   var act=document.querySelector('.page.active');
   _dockSync(act?act.id.replace('page-',''):'');
+  if(window._railBuild) window._railBuild();   // COQ-1 (§268) : la barre latérale reprend les mêmes entrées, sur ordinateur
 }
 window._dockBuild=_dockBuild;
+window._dockDef=_dockDef;   // COQ-1 : la barre latérale et la recherche Ctrl K lisent les entrées du dock
 function _dockSync(page){
+  if(window._railSync) window._railSync(page);   // COQ-1 : l'entrée active de la barre latérale suit
   var inner=document.getElementById('mv-dock-inner'); if(!inner) return;
   var a=(page==='parcelles'||page==='journal')?'home':page;
   var bs=inner.querySelectorAll('.mv-dk');

@@ -1614,3 +1614,93 @@ Promis en AUJ-2 (§261) : un contrat qui finit dans les 30 jours dit ce qu'une p
 ### 265c. Ouvert
 
 - Les ajouts au moteur économique (§263) ; la barre latérale et Ctrl K (refonte de l'interface).
+
+## 266. ★★★ REF-1 — AUJOURD'HUI REPREND LA MAQUETTE VALIDÉE, MONTÉE AVEC LE MODÈLE RÉEL (07/10 — `src/cockpit-vue.js` (neuf) · `src/pilotage.js` (`_pilCk2Modele`, `_pilTraiterCalc`, branchement dans `_pilTabAuj`) · `src/app.js` (import) · `src/styles.css` (feuille REF-1 ; AUJ-1 à AUJ-4 retirées) · `src/utils.js` (MV_AIDE, APP, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` — APP 8.37 → 8.38 · SW 9.15 → 9.16 — base `52cebd8`)
+
+### 266a. Pourquoi
+
+Nico (07/10), après AUJ-1 à AUJ-4 : « c'est moche et plein de bug […] la maquette était parfaite, tu t'en es
+complètement éloigné ». L'erreur : ranger les anciennes cartes du Pilotage dans une nouvelle mise en page au lieu de
+reproduire la maquette. REF-1 reprend la maquette elle-même ; seules ses données changent.
+
+### 266b. Comment
+
+- **`src/cockpit-vue.js` EST la maquette** (`/home/claude/maquette/app1-3.js` de la session du 07/10) : outils, dessins,
+  mises à jour animées, infobulles, navigation, graphes, montage. Ses sections de démonstration (domaine, état, économie,
+  calculs) sont remplacées par un **adaptateur** qui remplit les MÊMES noms depuis un modèle V ; ses textes en dur (noms,
+  dates, « d'hiver », repères de mois, village du plan, congés de Noël) sont tous lus dans V. Retirés : la simulation, la
+  feuille de validation (toucher une parcelle ouvre SA fiche par `openSelParc` — un seul chemin d'écriture du journal), la
+  palette Ctrl K et la barre latérale (lots suivants). Le plan se dispose seul : une zone par appellation (rangées par
+  lignes, assez larges pour leur titre), un bloc par commune aux coins décalés, une bande par parcelle à sa surface.
+  L'entrée orchestrée ne se joue qu'une fois par session (`_ck2EntreeFaite`).
+- **`_pilCk2Modele(d, m)`** (pilotage.js) construit V avec les moteurs du Pilotage : `_pilMargeCalc` (fin, objectif,
+  marge), `_rfCd().taskWindows`, lignes de chantier (`h_done`/`h_total`, `pct`), présences du jour et `_pilTensData`,
+  journal du jour (fil, équipes), `_pilPhotoListe` (courbe), METEO_DAILY / METEO_HOURLY (5 jours), sources de « À savoir »
+  de cockpit.js (météo par secteur, absences, contrats et prolongation, retards) + matériel, `_pilTraiterCalc`
+  (« Traiter ? » séparé de son dessin : la tuile et le cockpit lisent le même calcul), `_mvTacheDuMoment`, `_pilDiag`
+  (points de conformité). Ce qu'on ne sait pas reste vide. L'économie (V.eco) vient au lot suivant : sans elle, ni
+  bascule, ni photo Budget, ni argent dans le résumé.
+- **`_pilTabAuj`** rend le squelette de la maquette et la monte (`_ck2Monter(V)`) ; l'ancien cockpit (AUJ) reste en repli.
+- **La feuille de la maquette passée à la charte** par un convertisseur (`/home/claude/ref1/convertir.py`) : rayons par
+  alias `--ck-r-*` (aucun px dans un border-radius), repli de chaque pas, espacements sur l'échelle DS-3 (2 à 40), anneau
+  jamais éteint, graisses 500/600/700, filet `--ligne`. ⚠️ Le convertisseur lit les jetons de l'appli dans la BASE (sans
+  la section REF-1) : relu sur la feuille déjà posée, il effaçait les jetons propres de la maquette (plan tout noir).
+
+### 266c. Mesuré
+
+- **`mv-harnais-ref1`** (neuf), sur le vrai `_pilCk2Modele` et le vrai `cockpit-vue.js`, avec ses contre-épreuves.
+- Les harnais AUJ-1 à AUJ-4 suivent : leur feuille est remplacée, l'import de `cockpit-vue.js` s'intercale.
+- Essai navigateur (module et feuille du dépôt, modèle sorti du vrai constructeur) : aucune erreur à 1440 et 390 px.
+
+### 266d. Ouvert
+
+- **REF-2** : la photo économique du jour (vue Économie de la maquette) depuis le moteur de l'onglet Économie.
+- **COQ-1** la barre latérale, **PAL-1** Ctrl K. Les mises à jour ciblées (`_ck2Maj`) au lieu de remonter la page.
+
+## 267. ★★ REF-2 — LA PHOTO ÉCONOMIQUE DU JOUR (07/10 — `src/pilotage.js` (`_pilCk2Eco`, `window._pilEcoExport`) · `src/cockpit-vue.js` (vue Économie de la maquette, sans chiffre de démonstration) · `src/utils.js` (MV_AIDE, APP, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` — APP 8.38 → 8.39 · SW 9.16 → 9.17 — base `52cebd8`, PAR-DESSUS REF-1)
+
+### 267a. Pourquoi, et la règle
+
+Nico (07/10) : la vue Économie d'Aujourd'hui n'est pas l'onglet Économie, c'est **la photo économique du jour** de la
+maquette. AUJ-4 recopiait l'onglet entier : retiré par REF-1. REF-2 branche la vue de la maquette sur **le moteur de
+l'onglet Économie** (`_pecData`) : mêmes chiffres, même période — jamais l'exercice en euros face à l'année vigne en heures.
+
+### 267b. Ce qui change
+
+- **`_pilCk2Eco(d, V)`** : budget, engagé, atterrissage (engagé + reste), main-d'œuvre (moB, moF, moR), postes (hors
+  main-d'œuvre), écart moyen au barème et cadence (`E.cad`), écart et heures réelles par tâche (`E.tasks` : ecE / fE, reH),
+  main-d'œuvre engagée à l'hectare par appellation (`E.pairs` agrégées par appellation), coût de l'inaction (`_rfSim`,
+  comme sa tuile), part du budget consommée au fil des jours (photos PHOTO-1, champ `cons`). Sans taux horaire
+  (`E.configured` faux) : null — ni bascule, ni photo Budget, ni argent dans le résumé.
+- **Les dessins de la vue Économie** ne gardent aucun chiffre de démonstration : cadence et coût de l'inaction lus dans le
+  modèle ; « par appellation » dit la main-d'œuvre ENGAGÉE à l'hectare et compare la plus chère à la moins chère, d'après
+  les heures validées (la phrase de la maquette sur « la pente et l'âge des vignes » était une hypothèse : retirée) ; pas de
+  petite courbe sans historique (plus jamais un tracé vide) ; deux étiquettes trop proches sur la frise ne se chevauchent
+  plus. **« Exporter pour la compta »** appelle l'export CSV de l'onglet Économie (`_pecExport('csv', _pecData())`).
+- **Le besoin d'heures par jour** (« il en faut N pour finir le … ») : les heures qui restent sur les jours ouvrés d'ici
+  l'objectif (`_pilCk2Modele`).
+- ⚠️ **Note REF-1** : `styles.css` a grossi de 43 Ko (la feuille de la maquette). Le cliquet de taille des modules
+  (`mv-harnais-typo`) a été regravé APRÈS avoir écarté le découpage : une feuille à part échapperait aux cliquets jetons,
+  échelle, contraste et typo. Seules les tailles de fichiers ont changé dans la référence.
+
+### 267c. Mesuré
+
+- **`mv-harnais-ref2`** (neuf), sur le vrai `_pilCk2Eco` et la vraie vue, avec ses contre-épreuves. Essai navigateur de
+  la vue Économie avec un jeu au format du moteur : aucune erreur.
+
+### 267d. Ouvert
+
+- **COQ-1** la barre latérale, **PAL-1** Ctrl K ; les mises à jour ciblées (`_ck2Maj`).
+
+## 268. ★★ COQ-1 + PAL-1 — LA BARRE LATÉRALE ET LA RECHERCHE CTRL K, SUR ORDINATEUR (07/10 — `src/coquille.js` (neuf) · `src/app.js` (`window._dockDef`, `_railBuild` dans `_dockBuild`, `_railSync` dans `_dockSync`, import) · `src/styles.css` (feuille COQ-1) · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` — APP 8.39 → 8.40 · SW 9.17 → 9.18 — base `52cebd8`, PAR-DESSUS REF-1 ET REF-2)
+
+- Nico (07/10) : « la barre latérale et Ctrl K, que sur PC ». Celles de la maquette, classes renommées en `mv-*`.
+- **La barre reprend les entrées du dock** (`_dockDef` : mêmes droits, mêmes modules vendus, Réglages jamais retiré) et sa
+  navigation (`_dockGo`), rangées en rubriques (Terrain, Organisation, Cave et réserve, Gestion) ; domaine en tête, la
+  personne connectée en bas ; repliable, choix gardé (`localStorage 'mv-rail'`). **À partir de 1 024 px** elle remplace le
+  dock ; téléphone et tablette gardent le dock (règle CSS sur `body.mv-avec-rail`).
+- **Ctrl K / ⌘K / « / »** (hors d'un champ, sur ordinateur, une fois connecté) : écrans, onglets du Pilotage, parcelles ;
+  le titre qui commence par la recherche d'abord, puis celui qui la contient, puis le sous-titre ; flèches, Entrée, Échap.
+- Feuille de la maquette passée à la charte (convertisseur REF-1) ; règles logées dans ses `@media` reprises ; badge et
+  petits textes du rail éclaircis ou assombris pour un contraste d'au moins 4,5.
+- **`mv-harnais-coq1`** (neuf). Ouvert : badges d'alerte dans la barre ; mises à jour ciblées du cockpit (`_ck2Maj`).

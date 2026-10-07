@@ -310,3 +310,6 @@
 | 263 | 263. ★★ AUJ-4 — LA BASCULE TERRAIN / ÉCONOMIE (07/10 — `src/cockpit.js` · `src/pilotage.js` (`window._pilTa… | `docs/claude/chantiers-230-279.md` |
 | 264 | 264. ★★ SECT-1 — LA MÉTÉO PAR SECTEUR DANS « À SAVOIR » (07/10 — `src/app.js` (`_wxCurrent`, `_wxDeuxJours`… | `docs/claude/chantiers-230-279.md` |
 | 265 | 265. ★★ PROL-1 — CE QU'UNE PROLONGATION DE CONTRAT FERAIT GAGNER (07/10 — `src/pilotage.js` (`_pilGainsProl… | `docs/claude/chantiers-230-279.md` |
+| 266 | 266. ★★★ REF-1 — AUJOURD'HUI REPREND LA MAQUETTE VALIDÉE, MONTÉE AVEC LE MODÈLE RÉEL (07/10 — `src/cockpit-… | `docs/claude/chantiers-230-279.md` |
+| 267 | 267. ★★ REF-2 — LA PHOTO ÉCONOMIQUE DU JOUR (07/10 — `src/pilotage.js` (`_pilCk2Eco`, `window._pilEcoExport… | `docs/claude/chantiers-230-279.md` |
+| 268 | 268. ★★ COQ-1 + PAL-1 — LA BARRE LATÉRALE ET LA RECHERCHE CTRL K, SUR ORDINATEUR (07/10 — `src/coquille.js`… | `docs/claude/chantiers-230-279.md` |

@@ -47,10 +47,9 @@ function suite(S) {
   const P = S.pil;
   T('pilotage.js expose l\u2019onglet Économie tel quel et passe la tuile Budget à part',
     P.includes('window._pilTabEco=function(d){ return _pilTabEco(d); };') && P.includes('var _ckBud=kpis.slice(_ckB0);') && P.includes("budget:_ckBud, eco:_pilShow('auj_eco'),") && P.includes("['auj_eco',"));
-  const css = S.css.slice(S.css.indexOf('AUJ-4 (§263) — LA BASCULE')).replace(/var\([^)]*\)/g, 'JETON');
-  T('le style de la bascule ne passe que par les jetons', css.length > 200 && !/(?:margin|padding|gap)(?:-[a-z]+)?:[^;}]*\d+px/.test(css) && !/font-size:\s*\d/.test(css) && !/border-radius/.test(css));
-  T('aide, guide et nouveauté (8.35, pastille sur la bascule)', S.uti.includes('La bascule <b>Terrain / Économie</b>') && S.guide.includes('La bascule <b>Terrain / Économie</b>')
-    && /\{ v: '8\.35', d: '2026-10-07', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-bascule'/.test(S.uti));
+  // REF-1 (§266) : la feuille de cet ancien cockpit est remplacée par celle de la maquette validée, passée à la charte.
+  T('l\u2019ancienne feuille a laissé la place à celle de la maquette (REF-1)', S.css.includes('★★★ REF-1 (§266) — LE COCKPIT D\'AUJOURD\'HUI : LA FEUILLE DE LA MAQUETTE VALIDÉE') && !S.css.includes('AUJ-4 (§263) — LA BASCULE'));
+  T('la nouveauté d\u2019AUJ-4 reste au Journal (8.35, pastille sur la bascule)', /\{ v: '8\.35', d: '2026-10-07', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-bascule'/.test(S.uti));
   return out;
 }
 function jouer(S) { try { return suite(S); } catch (e) { return [['plantage : ' + (e && e.message), false]]; } }

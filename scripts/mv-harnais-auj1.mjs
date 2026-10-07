@@ -104,11 +104,10 @@ function suite(S) {
   T('« Choisir les indicateurs » propose les quatre blocs neufs, et « Charge restante » garde sa clé à lui',
     ["['auj_resume',", "['auj_chantiers',", "['auj_courbe',", "['auj_fil',"].every(k => P.includes(k)) && (P.match(/\['auj_charge',/g) || []).length === 1);
   T('le module est importé juste après pilotage.js, et reserve.js reste dernier',
-    /import '\.\/pilotage\.js';\nimport '\.\/cockpit\.js';[^\n]*\nimport '\.\/reserve\.js';/.test(S.app));
+    /import '\.\/pilotage\.js';\nimport '\.\/cockpit\.js';[^\n]*\nimport '\.\/cockpit-vue\.js';[^\n]*\n(?:import '[^']+';[^\n]*\n)*import '\.\/reserve\.js';/.test(S.app));
   // Les jetons portent leur repli (règle du socle, mv-harnais-jetons) : on lit le style SANS les var(…).
-  const css = S.css.slice(S.css.indexOf('AUJ-1 (§260) — LE COCKPIT')).replace(/var\([^)]*\)/g, 'JETON');
-  T('le style du cockpit ne passe que par les jetons (espacements et tailles de texte)',
-    css.length > 500 && !/(?:margin|padding|gap)(?:-[a-z]+)?:[^;}]*\d+px/.test(css) && !/font-size:\s*\d/.test(css) && /\.ck-cols\{[^}]*\}/.test(css));
+  // REF-1 (§266) : la feuille de cet ancien cockpit est remplacée par celle de la maquette validée, passée à la charte.
+  T('l\u2019ancienne feuille a laissé la place à celle de la maquette (REF-1)', S.css.includes('★★★ REF-1 (§266) — LE COCKPIT D\'AUJOURD\'HUI : LA FEUILLE DE LA MAQUETTE VALIDÉE') && !S.css.includes('AUJ-1 (§260) — LE COCKPIT D\'AUJOURD\'HUI, VUE TERRAIN'));
   T('l\u2019aide, les bulles et le guide décrivent le nouvel écran', /'pil\.fil': \{ t: 'En direct'/.test(S.uti) && /'pil\.charge': \{ t: 'La charge restante'/.test(S.uti)
     && S.uti.includes('Aujourd’hui se lit d’un coup d’œil') && S.guide.includes('le fil <b>En direct</b> des validations'));
   T('la nouveauté d\u2019AUJ-1 reste au Journal (bloc 8.32, pastille sur le fil, pour l\u2019admin)',
@@ -133,8 +132,7 @@ if (CONTRE) {
     ['un bloc d\u2019avant oublié (les alertes, « À savoir » masqué)', 'ck', "(sv ? '' : (o.alertes || '') + (cave", "(sv ? '' : (cave"],
     ['plus de repli : écran blanc si le cockpit plante', 'pil', "    }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#cockpit'); }", "    }finally{}"],
     ['la courbe sur la clé de l\u2019indicateur', 'pil', "charge:_pilShow('auj_courbe')", "charge:_pilShow('auj_charge')"],
-    ['le module importé après reserve.js', 'app', "import './cockpit.js';   // AUJ-1 (§260) : le cockpit d'Aujourd'hui (pilotage.js approche 950 Ko)\nimport './reserve.js';", "import './reserve.js';\nimport './cockpit.js';"],
-    ['un espacement écrit à la main', 'css', '.ck-pan-hd{margin-bottom:var(--e-3,12px)}', '.ck-pan-hd{margin-bottom:12px}'],
+    ['le module du cockpit sorti de sa place (après pilotage.js)', 'app', "import './pilotage.js';\nimport './cockpit.js';", "import './pilotage.js';\nimport './reserve.js';\nimport './cockpit.js';"],
   ];
   let manques = 0;
   DEF.forEach(([nom, f, a, b]) => {

@@ -523,4 +523,10 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-sect1.mjs --contre'],
   ['node scripts/mv-harnais-prol1.mjs'],              // PROL-1 (§265) : ce qu'une prolongation de contrat ferait gagner
   ['node scripts/mv-harnais-prol1.mjs --contre'],
+  ['node scripts/mv-harnais-ref1.mjs'],               // REF-1 (§266) : Aujourd'hui reprend la maquette validée, montée avec le modèle réel
+  ['node scripts/mv-harnais-ref1.mjs --contre'],
+  ['node scripts/mv-harnais-ref2.mjs'],               // REF-2 (§267) : la photo économique du jour, depuis le moteur de l'onglet Économie
+  ['node scripts/mv-harnais-ref2.mjs --contre'],
+  ['node scripts/mv-harnais-coq1.mjs'],               // COQ-1 + PAL-1 (§268) : barre latérale et recherche Ctrl K, sur ordinateur
+  ['node scripts/mv-harnais-coq1.mjs --contre'],
 ];

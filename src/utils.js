@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.37';
+export const APP_VERSION = '8.40';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1035,6 +1035,18 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.40', d: '2026-10-07', items: [
+    { niv: 1, pour: ['tous'], cible: '#mv-dock', emoji: 'loupe', titre: 'Sur ordinateur : la barre latérale et Ctrl K',
+      desc: "Sur un écran d’ordinateur, les modules passent dans une barre à gauche (repliable), et Ctrl K ouvre une recherche : un écran, un onglet du Pilotage, une parcelle. Sur téléphone et tablette, rien ne change." },
+  ] },
+  { v: '8.39', d: '2026-10-07', items: [
+    { niv: 1, pour: ['admin'], cible: '#ck-verdict', emoji: 'euro', titre: 'La photo économique du jour',
+      desc: "Au Pilotage › Aujourd’hui, la bascule Terrain / Économie : l’atterrissage de la campagne, le coût à l’hectare, l’écart au barème, le dépensé face au fait, les postes, les appellations et les tâches — les mêmes chiffres que l’onglet Économie." },
+  ] },
+  { v: '8.38', d: '2026-10-07', items: [
+    { niv: 1, pour: ['admin'], cible: '#ck-verdict', emoji: 'graphique', titre: 'Aujourd’hui, comme la maquette',
+      desc: "Le Pilotage › Aujourd’hui reprend la maquette validée : la fin prévue et sa frise, la décision du jour, le domaine en direct avec les équipes sur leurs parcelles, les chantiers, la charge restante, « À savoir » avec la météo des cinq jours, et le fil de l’équipe — avec vos vraies données." },
+  ] },
   { v: '8.37', d: '2026-10-07', items: [
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Prolonger un contrat : ce que ça change',
       desc: "Dans « À savoir », un contrat qui finit dans le mois dit ce qu’une prolongation d’un mois éviterait : les heures de rattrapage et les tâches qui sortiraient de leur fenêtre, calculées comme le coût de l’inaction." },
@@ -4695,6 +4707,7 @@ var MV_AIDE = {
   home: {
     ico: 'feuille', titre: 'Accueil', ancre: 'vigne',
     points: [
+      ['Sur ordinateur', " : les modules sont dans la <b>barre à gauche</b> (repliable), et <b>Ctrl K</b> ouvre une recherche — une parcelle, un écran, un onglet du Pilotage. Sur téléphone et tablette, rien ne change."],
       ['La priorité du moment', "reste épinglée en haut : c’est ce que l’équipe attaque aujourd’hui."],
       ['Équipes du jour', "juste sous la priorité. L’administrateur la touche pour répartir les salariés en équipes <b>pour la journée</b> : chacun validera et démarrera avec son équipe, sans pouvoir la changer, et ne voit pas les autres. Rien de réglé, ou « Tout le monde ensemble » : l’application fait comme d’habitude. Le lendemain, tout repart à zéro. Un salarié voit ici son équipe du jour, quand il y en a une."],
       ['Une ligne « À vérifier »', "peut s’afficher sous les chiffres : un changement de l’application qui vous concerne — un chiffre qui bouge, un réglage à contrôler. Touchez-la pour le détail, « Vu » pour la ranger ; elle reste dans Réglages › Moi › Journal des nouveautés."],
@@ -4905,7 +4918,7 @@ var MV_AIDE = {
   pilotage: {
     ico: 'graphique', titre: 'Pilotage', ancre: 'pilotage',
     points: [
-      ['Aujourd’hui se lit d’un coup d’œil', ": une phrase résume la journée — la marge sur l’objectif, les heures à faire, les validations du jour. À gauche ce qui décide (fin prévue, décision du jour, chantiers, courbe de la charge restante), le <b>domaine en direct</b> (les parcelles par appellation, colorées selon la tâche choisie), et à droite ce qui arrive : <b>À savoir</b> (pluie ou vent des deux jours, absences, fins de contrat, retards, matériel, cave), le fil <b>En direct</b> de ce que l’équipe valide, puis les indicateurs. La bascule <b>Terrain / Économie</b>, en haut, montre la même journée côté argent : le coût de l’inaction, le budget et le contenu de l’onglet Économie."],
+      ['Aujourd’hui se lit d’un coup d’œil', ": une phrase résume la journée (l’avance ou le retard sur l’objectif, les points à anticiper). Viennent les photos du domaine, la <b>fin prévue</b> avec sa frise et votre objectif, la <b>décision du jour</b> en quatre tuiles, le <b>domaine en direct</b> (chaque parcelle colorée selon la tâche choisie, rangée par appellation, les équipes posées dessus ; toucher une parcelle ouvre sa fiche), les chantiers et la charge restante. Sur le côté, <b>À savoir</b> réunit la météo des cinq jours, la pluie ou le vent par secteur, les absences, les fins de contrat, les retards et le matériel ; dessous, le fil <b>En direct</b> de ce que l’équipe valide. La bascule <b>Terrain / Économie</b>, en haut, donne la photo économique du jour : l’atterrissage de la campagne, le coût à l’hectare, l’écart au barème, le dépensé face au fait, les postes, les appellations et les tâches — les chiffres de l’onglet Économie."],
       ['Presque tout se lit, cinq choses s’écrivent', ": les chiffres viennent du journal, du planning, des sessions tracteur et de la cave. Ce qui s’écrit ici est nommé : les prix des achats (Économie), l’ordre de passage (Décider), le mois d’ouverture de l’exercice comptable et celui de l’année vigne (roue crantée, Économie › Exercice), et ce que porte la roue crantée."],
       ['Vos deux années se règlent au même endroit', ": la roue crantée porte l’ouverture de l’<b>exercice comptable</b> — celui de votre bilan, fixé par votre comptable — et, juste dessous, le <b>cadre de votre campagne</b>, l’axe des Archives et du bilan de campagne. Une campagne est un cycle de production : ce qui la borne, c’est la <b>vendange</b>, et le mois n’en est que la traduction. L’écran dit où tombe la vôtre dans le cadre choisi — elle l’ouvre, elle la clôt, ou la borne la coupe en deux — et propose le mois qui suit la fin de vos vendanges. Le changer recadre des chiffres déjà affichés, jamais vos saisies."],
       ['La roue crantée', "en haut à droite ouvre ce qui se règle : objectifs de fin, fenêtres des tâches, hypothèses de calcul, IFT de référence — et le bilan de campagne à imprimer. Administrateur seulement."],

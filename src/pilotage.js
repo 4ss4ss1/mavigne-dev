@@ -4534,7 +4534,7 @@ function _pilCkInaction(d){
     +(ok?'':'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="renfort">Décider › le renfort \u203A</button></div>')
     +'</div>';
 }
-function _pilCkTraiter(){
+function _pilTraiterCalc(){
   // ALIGN-1 (§236) : quatre étages (verdict, raison, bande, pied) comme les trois autres tuiles. La
   //   bande montre la fenêtre sur les 24 heures ; le pied porte le dépliant des jours suivants. La
   //   protection restante a QUITTÉ cette tuile pour sa propre carte (_pilProtCarte, rangée .pil-dec2) :
@@ -4570,6 +4570,11 @@ function _pilCkTraiter(){
   var _i=(typeof _mvInfoBtn==='function')?_mvInfoBtn('pil.traitement'):'';
   // ⚠️ `data-mvt="traiter"` EST UN POINT D'ACCROCHE DE LA VISITE GUIDEE, au
   //   meme titre que `.pil-dec` et `.pil-cockpit-card` (§20b). Ne pas renommer.
+  return { big:big, bigCol:bigCol, rai:rai, ban:ban, pied:pied, _i:_i };
+}
+// REF-1 (§266) : la tuile garde son dessin ; le calcul est dans _pilTraiterCalc, que le cockpit lit aussi.
+function _pilCkTraiter(){
+  var X=_pilTraiterCalc(), big=X.big, bigCol=X.bigCol, rai=X.rai, ban=X.ban, pied=X.pied, _i=X._i;
   return '<div class="pil-tile2 pil-tz" data-mvt="traiter"><div class="pil-t2h"><span class="ic">'+_pilIco('goutte')+'</span><span class="t">Traiter ?</span>'+_i+'</div>'
     +'<div class="pil-t2b"><div class="pil-tz-big pil-big" style="color:'+bigCol+'">'+big+'</div>'
     +'<div class="pil-tz-rai pil-t2s">'+rai+'</div><div class="pil-tz-ban">'+ban+'</div><div class="pil-tz-pied">'+pied+'</div></div></div>';
@@ -5131,6 +5136,140 @@ function _pilPanelConso(d){
 }
 
 // ── Onglet AUJOURD'HUI (cockpit) ──
+// ★★★ REF-1 (§266) — LE MODÈLE DU COCKPIT, LU DANS LES MOTEURS DU PILOTAGE
+//   La maquette validée (07/10) tourne telle quelle dans src/cockpit-vue.js et lit un modèle V. Ce modèle se construit
+//   ICI, avec les mêmes moteurs que le reste du Pilotage : fin prévue (_pilMargeCalc), présences et tension de l'équipe,
+//   fenêtres des tâches (_rfCd), photos du jour, journal, parcelles, météo de l'Accueil, sources de « À savoir »
+//   (cockpit.js). Rien n'est recalculé à côté ; ce qu'on ne sait pas reste vide (jamais un chiffre inventé).
+function _pilCk2Modele(d, m){
+  var t0=new Date(), auj=_mvToday();
+  var isoD=function(x){ return x ? x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0') : null; };
+  var oIso=function(n){ var x=new Date(Date.UTC(2026,0,1)+n*86400000); return x.getUTCFullYear()+'-'+String(x.getUTCMonth()+1).padStart(2,'0')+'-'+String(x.getUTCDate()).padStart(2,'0'); };
+  var nomT=function(n){ return (typeof window.tNom==='function')?window.tNom(n):n; };
+  // (lettres accentuées ramenées une à une : pas de plage de diacritiques, hors du jeu de glyphes des polices)
+  var slug=function(n){ return String(n).toLowerCase().replace(/[àâä]/g,'a').replace(/[éèêë]/g,'e').replace(/[îï]/g,'i').replace(/[ôö]/g,'o').replace(/[ùûü]/g,'u').replace(/ç/g,'c').replace(/[^a-z0-9]+/g,''); };
+  var art=function(n){ var l=String(n).toLowerCase(); return /^[aeiouyhéèêâîô]/.test(l)?'l\u2019'+l:(/age$/.test(l)?'le '+l:'la '+l); };
+  var cd=(typeof _rfCd==='function'&&_rfCd())||{}, fen=cd.taskWindows||[], retards=_pilRetards();
+  var rows=(typeof window._ckPlanTaches==='function')?window._ckPlanTaches(d.data):(d.data||[]);
+  var taches=rows.map(function(r){
+    var w=fen.filter(function(x){ return x&&x.nom===r.nom; })[0], nom=nomT(r.nom);
+    return { id:slug(r.nom), cle:r.nom, nom:nom, art:art(nom), f:false, pct:Number(r.pct)||0,
+      hha:(r.surf_total>0&&r.h_total>0)?r.h_total/r.surf_total:0, hDone:(r.h_total>0)?(Number(r.h_done)||0):null, hTotal:(r.h_total>0)?Number(r.h_total):null,
+      debut:(w&&w.ws!=null)?oIso(w.ws):null, fin:(w&&w.we!=null)?oIso(w.we-1):null };
+  });
+  var PARC=(window.PARCELLES||[]).filter(function(p){ return p&&p.nom; });
+  var parcs=PARC.map(function(p){ return { nom:p.nom, ha:Number(p.surface)||0, appellation:p.appellation||'', commune:p.commune||'',
+    arr:/arrach/i.test(String(p.statut||'')), cepage:p.cepage||'' }; });
+  var J=window.JOURNAL||[], etats={};
+  taches.forEach(function(t){ etats[t.id]=(typeof window._ckPlanEtats==='function')?window._ckPlanEtats(PARC, J, t.cle, t.debut, !!retards[t.cle]):{}; });
+  // Présences du jour (les mêmes que la tuile « Présences ») et tension de chacun (moteur de la tuile « Tension »).
+  var LIB={ cp:'en congé', recup:'en récupération', maladie:'en arrêt', absent:'absent' };
+  var gens=(d.presences||[]).filter(function(p){ return p&&!p.bureau; }).map(function(p){ return { nom:p.nom, absent:p.etat!=='present', motif:LIB[p.etat]||'' }; });
+  var TS=null; try{ TS=_pilTensData(d); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#tens'); }
+  ((TS&&TS.rows)||[]).forEach(function(r){ var g=gens.filter(function(x){ return x.nom===r.nom; })[0]; if(g&&r.p>0) g.tens=Math.round((r.f||0)/r.p*100); });
+  var nPres=gens.filter(function(g){ return !g.absent; }).length, abs=gens.filter(function(g){ return g.absent; });
+  var absTxt=abs.length?(abs.slice(0,2).map(function(g){ return g.nom+' '+g.motif; }).join(', ')+(abs.length>2?' et '+(abs.length-2)+' autre'+(abs.length>3?'s':''):'')):'Toute l\u2019équipe est là';
+  // Le fil et les équipes sur le terrain : le journal du jour (fonctions de cockpit.js).
+  var fil=(typeof window._ckFilDonnees==='function')?window._ckFilDonnees(J, auj):[];
+  var qui=function(e){ var r=[]; [e.qui].concat(Array.isArray(e.membresEquipe)?e.membresEquipe:[]).forEach(function(n){ n=String(n||'').trim(); if(n&&r.indexOf(n)<0) r.push(n); }); return r; };
+  var tDe=function(n){ return taches.filter(function(x){ return x.cle===n; })[0]; };
+  var haDe=function(n){ var p=parcs.filter(function(x){ return x.nom===n; })[0]; return p?p.ha:0; };
+  var evts=[], sur={};
+  fil.slice().reverse().forEach(function(x){
+    var e=x.e, t=tDe(e.tache); if(!t) return; var n=qui(e);
+    var ev={ type:e.statut==='Validé'?'valide':'commence', noms:n.join(' et ')||'Quelqu\u2019un', ini:n.slice(0,2).map(function(c){ return c.charAt(0).toUpperCase(); }),
+      tache:t.id, parcelle:e.parcelle, ts:x.ts||t0.getTime(), h:e.statut==='Validé'?Math.round(haDe(e.parcelle)*t.hha*10)/10:0 };
+    evts.unshift(ev);
+    if(ev.type==='commence') sur[e.parcelle]=ev; else delete sur[e.parcelle];
+  });
+  var equipes=Object.keys(sur).map(function(k){ var v=sur[k]; return { noms:v.noms, ini:v.ini, tache:v.tache, parcelle:k, depuis:v.ts }; });
+  // La courbe : les photos du jour (PHOTO-1) et aujourd'hui en direct.
+  var ph=((typeof window._ckChargeSerie==='function')?window._ckChargeSerie(_pilPhotoListe(), d, auj):[]).map(function(x){ return { d:x.iso, reste:x.v }; });
+  var hT=d.totalTotal||0;
+  // La météo des cinq jours (Accueil) : pictogramme, températures, cumul de pluie, brûlage possible.
+  var MD=window.METEO_DAILY||null, MH=window.METEO_HOURLY||null, meteo=[];
+  var ICW=function(c){ c=Number(c); return c<=1?'soleil':c===2?'eclaircie':(c>=71&&c<=77)?'gel':(c>=51)?'pluie':'nuage'; };
+  var TXT={ soleil:'Ensoleillé', eclaircie:'Éclaircies', nuage:'Couvert', pluie:'Pluie', gel:'Gel ou neige' };
+  if(MD&&Array.isArray(MD.time)){
+    MD.time.slice(0,5).forEach(function(iso,k){
+      var mm=0; if(MH&&Array.isArray(MH.time)) MH.time.forEach(function(h,i){ if(String(h).slice(0,10)===iso) mm+=Number(MH.precip&&MH.precip[i])||0; });
+      mm=Math.round(mm); var dt=new Date(iso+'T12:00:00'), ic=ICW(MD.code&&MD.code[k]), we=dt.getDay()===0||dt.getDay()===6;
+      meteo.push({ j:k===0?'Auj.':dt.toLocaleDateString('fr-FR',{weekday:'short'}).replace(/^./,function(c){ return c.toUpperCase(); }),
+        ic:ic, tmax:Math.round(MD.tmax&&MD.tmax[k]), tmin:Math.round(MD.tmin&&MD.tmin[k]), mm:mm,
+        txt:TXT[ic]+(mm?' : '+mm+'\u202fmm':''), brul:we?0:(mm>=2?.5:1) });
+    });
+  }
+  // « À savoir » : les sources testées de cockpit.js, au format des lignes de la maquette.
+  var plan={ parcs:PARC, journal:J, fen:fen };
+  var sv=[];
+  try{
+    sv=[].concat(window._ckSvMeteo(MH, d.data, t0, (typeof window._wxSecteurs==='function'?window._wxSecteurs():null), plan),
+      window._ckSvAbsences(window.MEMBRES, window.PLANNING_ENTRIES, _pilEtatEntree, t0),
+      window._ckSvContrats(window.MEMBRES, t0, _pilGainsProlong(d)), window._ckSvRetards(d.data, retards));
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#savoir'); }
+  (d.tracs||[]).forEach(function(t){ if(t&&t.rep) sv.push({ cat:'materiel', prio:2, quand:'En réparation', titre:(t.nom||'Un tracteur')+' immobilisé', sous:(t.rep.motif||'Chez le réparateur.') }); });
+  var ACT={ contrat:{ action:'Simuler un renfort', onglet:'sim' }, retard:{ action:'Voir sur le plan', fn:'voirRetard' }, equipe:{ action:'Ouvrir le planning', module:'planning' } };
+  sv=sv.map(function(x){ var a=ACT[x.cat]||{}; return { cat:x.cat, prio:x.prio, quand:x.quand, titre:x.titre, sous:x.sous, action:a.action, onglet:a.onglet, fn:a.fn, module:a.module }; });
+  // La décision du jour : les mêmes moteurs que les quatre tuiles.
+  var tx=function(h){ return String(h==null?'':h).replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim(); };
+  var TR=null; try{ TR=_pilTraiterCalc(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#traiter'); }
+  var tm=(typeof window._mvTacheDuMoment==='function')?window._mvTacheDuMoment():null, pNom=tm?(typeof tm==='string'?tm:(tm.nom||tm.tache||tm.t||'')):'';
+  var pT=tDe(pNom);
+  var tensV=TS&&TS.rows&&TS.rows.length?(TS.nRouge?(TS.nRouge+' au-delà du maximum'):(TS.nSeuil?(TS.nSeuil+' personne'+(TS.nSeuil>1?'s':'')+' au seuil'):'Personne au seuil')):'';
+  var sem=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'], dd=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate());
+  var jeudi=new Date(dd); jeudi.setDate(dd.getDate()+3-((dd.getDay()+6)%7)); var s1=new Date(jeudi.getFullYear(),0,4);
+  var nSem=1+Math.round(((jeudi-s1)/86400000-3+((s1.getDay()+6)%7))/7);
+  var sais=d.saison&&d.saison.nom?String(d.saison.nom):'';
+  var saisonDe=/hiver/i.test(sais)?'d\u2019hiver':/printemps/i.test(sais)?'de printemps':/(été|ete)\b/i.test(sais)?'d\u2019été':/automne|vendange/i.test(sais)?'d\u2019automne':'de la saison';
+  var diag=[]; try{ diag=_pilDiag().filter(function(x){ return x&&x.touche&&x.touche.indexOf('cfm')>=0; }); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#cfm'); }
+  return {
+    auj:auj, debut:(taches.map(function(t){ return t.debut; }).filter(Boolean).sort()[0])||(ph[0]&&ph[0].d)||auj,
+    objectif:isoD(m&&m.obj), fin:isoD(m&&m.proj), marge:(m&&m.marge!=null)?m.marge:null,
+    dateTxt:sem[t0.getDay()].replace(/^./,function(c){ return c.toUpperCase(); })+' '+t0.getDate()+' '+t0.toLocaleDateString('fr-FR',{month:'long'})+', semaine '+nSem,
+    saisonDe:saisonDe, taches:taches, parcs:parcs, etats:etats, gens:gens, presents:nPres, effectifTotal:gens.length,
+    presTxt:nPres+' présent'+(nPres>1?'s':'')+(abs.length?', '+absTxt:''), absTxt:absTxt,
+    confN:diag.length, confTxt:diag.length?tx(diag[0].t||diag[0].txt||'Un point à régler'):'Rien à régler',
+    equipes:equipes, evts:evts, photos:ph, reste:d.totalReste||0, total:hT, hFait:d.hDone||0, hTotal:hT, pct:Number(d.gaugePct)||0,
+    capMoy:(m&&m.cadH)||0, besoin:(function(){ if(!(m&&m.obj)) return 0; var n=0, x=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()+1); while(x<=m.obj&&n<400){ if(x.getDay()%6) n++; x.setDate(x.getDate()+1); } return n?Math.round((d.totalReste||0)/n):0; })(),
+    meteo:meteo, savoir:sv,
+    decision:{ pres:{ v:nPres+' sur '+gens.length, raison:absTxt },
+      traiter:TR?{ v:tx(TR.big), raison:tx(TR.rai), bande:tx(TR.ban) }:{ v:'—', raison:'' },
+      prio:pT?{ v:pT.nom, raison:'La tâche du moment, réglée pour toute l\u2019équipe.' }:{ v:'—', raison:'' },
+      tension:{ v:tensV||'—', raison:tensV?'Travail effectif face au prévu, sur 14 jours.':'' } },
+    prio:pT?pT.id:null, sparkTrav:ph.slice(-14).map(function(x){ return hT?Math.round((hT-x.reste)/hT*1000)/10:0; }), eco:null
+  };
+}
+window._pilCk2Modele=_pilCk2Modele;
+// ★★ REF-2 (§267) — LA PHOTO ÉCONOMIQUE DU JOUR (la vue Économie de la maquette), lue dans _pecData : le MÊME moteur que
+//   l'onglet Économie, donc les mêmes chiffres et la même période. Pas de taux horaire (E.configured faux) : pas de photo,
+//   la bascule ne s'affiche pas. Le coût de l'inaction vient du simulateur de renfort (_rfPair → _rfSim), comme sa tuile.
+function _pilCk2Eco(d, V){
+  var E=null; try{ E=_pecData(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Eco'); }
+  if(!E||!E.configured) return null;
+  var T=E.tot||{}, budget=Number(E.budget)||0, dep=Number(E.engage)||0, att=dep+(Number(E.resteE)||0);
+  var tx=function(h){ return String(h==null?'':h).replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim(); };
+  var postes=(E.postes||[]).filter(function(p){ return p&&p.k!=='mo'; }).map(function(p){ var f=Number(p.fait)||0, b=Number(p.budget)||0;
+    return { id:p.k, nom:p.lab, note:tx(p.det), budget:b, dep:f, att:Math.max(f,b) }; });
+  // Par appellation : la main-d'œuvre ENGAGÉE à ce jour (paires parcelle × tâche du moteur), à l'hectare en production.
+  var parApp={}, haApp={};
+  (window.PARCELLES||[]).forEach(function(p){ if(!p||/arrach/i.test(String(p.statut||''))) return; var a=p.appellation||'Sans appellation'; haApp[a]=(haApp[a]||0)+(Number(p.surface)||0); });
+  var appDe={}; (window.PARCELLES||[]).forEach(function(p){ if(p&&!/arrach/i.test(String(p.statut||''))) appDe[p.nom]=p.appellation||'Sans appellation'; });   // les parcelles EN PRODUCTION, comme les hectares
+  (E.pairs||[]).forEach(function(x){ var a=appDe[x.parc]; if(a) parApp[a]=(parApp[a]||0)+(Number(x.eur)||0); });
+  var coutHaApp={}; Object.keys(haApp).forEach(function(a){ coutHaApp[a]=haApp[a]>0?Math.round((parApp[a]||0)/haApp[a]):0; });
+  // Par tâche : l'écart des heures réelles au barème (écart en euros du réalisé sur le fait, RÉAL-1).
+  var ecTache={}, hReelTache={}, hReel=0; (E.tasks||[]).forEach(function(t){ if(!t||!t.nom) return; if(t.ecE!=null&&t.fE>0) ecTache[t.nom]=t.ecE/t.fE; if(t.reH>0){ hReelTache[t.nom]=Math.round(t.reH); hReel+=t.reH; } });
+  var inac=null;
+  try{ if(typeof _rfPair==='function'){ var P2=_rfPair(d); if(P2&&P2.dec&&!P2.fini&&!P2.dec.noRate){ var r2=_rfSim(P2.dec,_rfProf(P2.dec,null)); if(r2) inac={ h:Math.round(r2.induit||0), eur:Math.round((r2.induit||0)*(P2.dec.rate||0)), horsDelai:r2.horsDelai||0 }; } } }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Eco#inaction'); }
+  var ph=(V.photos||[]), cons=(_pilPhotoListe()||[]).filter(function(x){ return x&&x.cons!=null; });
+  return { taux:Number(E.rate)||0, moBudget:Number(T.moB)||0, moDep:Number(T.moF)||0, moAtt:(Number(T.moF)||0)+(Number(T.moR)||0),
+    budget:budget, dep:dep, att:att, ecartMoy:(E.cad&&E.cad.ok&&E.cad.ecart!=null)?E.cad.ecart/100:0, cadence:(E.cad&&E.cad.hJour)||0,
+    postes:postes, coutHaApp:coutHaApp, ecTache:ecTache, hReelTache:hReelTache, hReel:Math.round(hReel), inaction:inac,
+    consParJour:cons.map(function(x){ return { d:x.d, cons:Number(x.cons)||0 }; }), sparkBud:cons.slice(-14).map(function(x){ return Number(x.cons)||0; }) };
+}
+window._pilCk2Eco=_pilCk2Eco;
+// L'export comptable du cockpit est celui de l'onglet Économie (même tableau CSV, même moteur).
+window._pilEcoExport=function(){ if(typeof _pecExport==='function') _pecExport('csv', _pecData()); };
 function _pilTabAuj(d){
   var m=_pilMargeCalc(d), admin=(typeof window.isAdmin==='function')&&window.isAdmin(), H='';
   // PHOTO-1 (§219) : la photo du jour, une fois, par l'admin, sur la periode active.
@@ -5203,6 +5342,12 @@ function _pilTabAuj(d){
   if(det) H+='<div class="pil-dec2">'+det+'</div>';
   var _ckAl0=H.length;   // AUJ-1 (§260)
   if(_pilShow('auj_alertes')) H+='<div class="pil-sec-h">Alertes matériel</div>'+_pilCkAlertes(d);
+  // ★★★ REF-1 (§266) : la maquette validée, montée avec le modèle réel (src/cockpit-vue.js). Repli : l'ancien cockpit.
+  if(typeof window._ck2Squelette==='function'&&typeof window._ck2Monter==='function'){
+    try{ var _V=_pilCk2Modele(d,m); _V.eco=_pilCk2Eco(d,_V); setTimeout(function(){ try{ window._ck2Monter(_V); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#ck2m'); } },0);
+      return window._ck2Squelette(); }
+    catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#ck2'); }
+  }
   // ★ AUJ-1 (§260) — LE COCKPIT : src/cockpit.js range ces mêmes morceaux (aucun recalculé) et ajoute le
   //   résumé, les chantiers en cours, la courbe de la charge restante et le fil En direct. Module absent
   //   ou en erreur : l'ancien ordre, ci-dessous, s'affiche — l'écran ne reste jamais blanc.

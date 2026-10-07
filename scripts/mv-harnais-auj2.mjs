@@ -74,8 +74,8 @@ function suite(S) {
     (P.match(/if\(e\.type==='cp'\) etat='cp';/g) || []).length === 1 && P.includes('var _ee=_pilEtatEntree(e), etat=_ee.etat, motif=_ee.motif;') && P.includes('window._pilEtatEntree=_pilEtatEntree;'));
   T('la Cave part des indicateurs vers l\u2019encart, les retards sont passés, l\u2019encart se masque',
     P.includes('kpis:kpis.slice(0,_ckK0), cave:_ckCave, retards:_pilRetards(),') && P.includes("savoir:_pilShow('auj_savoir')") && P.includes("['auj_savoir',"));
-  const css = S.css.slice(S.css.indexOf('AUJ-2 (§261) — « À SAVOIR »')).replace(/var\([^)]*\)/g, 'JETON');
-  T('le style de l\u2019encart ne passe que par les jetons', css.length > 300 && !/(?:margin|padding|gap)(?:-[a-z]+)?:[^;}]*\d+px/.test(css) && !/font-size:\s*\d/.test(css));
+  // REF-1 (§266) : la feuille de cet ancien cockpit est remplacée par celle de la maquette validée, passée à la charte.
+  T('l\u2019ancienne feuille a laissé la place à celle de la maquette (REF-1)', S.css.includes('★★★ REF-1 (§266) — LE COCKPIT D\'AUJOURD\'HUI : LA FEUILLE DE LA MAQUETTE VALIDÉE') && !S.css.includes('AUJ-2 (§261) — « À SAVOIR »'));
   T('aide, bulle, guide et nouveauté (8.33, pastille sur l\u2019encart)', /'pil\.savoir': \{ t: 'À savoir'/.test(S.uti) && S.guide.includes('<b>À savoir</b>')
     && /\{ v: '8\.33', d: '2026-10-07', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-savoir'/.test(S.uti));   // la version a avancé : on garde le bloc
   return out;
@@ -96,7 +96,6 @@ if (CONTRE) {
     ['le matériel perdu quand l\u2019encart est affiché', 'ck', "window._ckSavoirHtml(sv, (o.alertes || '') + cave)", "window._ckSavoirHtml(sv, '')"],
     ['l\u2019état du jour réécrit à côté', 'pil', 'var _ee=_pilEtatEntree(e), etat=_ee.etat, motif=_ee.motif;', "var etat='present', motif=''; if(e){ if(e.type==='cp') etat='cp'; }"],
     ['la Cave affichée deux fois', 'pil', 'kpis:kpis.slice(0,_ckK0), cave:_ckCave,', 'kpis:kpis, cave:_ckCave,'],
-    ['un espacement écrit à la main', 'css', '.ck-sv-cave{margin-top:var(--e-3,12px)}', '.ck-sv-cave{margin-top:12px}'],
   ];
   let manques = 0;
   DEF.forEach(([nom, f, a, b]) => {

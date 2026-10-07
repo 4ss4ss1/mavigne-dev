@@ -50,7 +50,7 @@ function suite(S) {
   T('sans gain, elle le dit ; sans calcul, la phrase d\u2019avant', C._ckSvContrats(m, now, z)[0].sous.includes('ne changerait rien') && C._ckSvContrats(m, now)[0].sous.includes('simulez un renfort'));
   T('_pilTabAuj passe les gains au cockpit, qui les donne à la ligne', S.pil.includes("prolong:_pilGainsProlong(d), dec:dec,") && S.ck.includes('window._ckSvContrats(window.MEMBRES, new Date(), o.prolong)'));
   T('aide, guide et nouveauté (8.37)', S.uti.includes('avec ce qu’une prolongation d’un mois ferait gagner') && S.guide.includes("avec ce qu'une prolongation d'un mois éviterait")
-    && /export const APP_VERSION = '8\.37';/.test(S.uti) && /\{ v: '8\.37', d: '2026-10-07', items: \[\n    \{ niv: 0, pour: \['admin'\]/.test(S.uti));
+    && /\{ v: '8\.37', d: '2026-10-07', items: \[\n    \{ niv: 0, pour: \['admin'\]/.test(S.uti));
   return out;
 }
 function jouer(S) { try { return suite(S); } catch (e) { return [['plantage : ' + (e && e.message), false]]; } }

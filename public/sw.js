@@ -1,4 +1,8 @@
-// MA VIGNE — Service Worker v9.15
+// MA VIGNE — Service Worker v9.18
+// v9.18 (07/10/2026) — COQ-1 + PAL-1 (§268) : barre laterale et recherche Ctrl K sur ordinateur (src/coquille.js). APP 8.39 -> 8.40.
+// v9.17 (07/10/2026) — REF-2 (§267) : la photo economique du jour (vue Economie de la maquette) depuis _pecData. APP 8.38 -> 8.39.
+// v9.16 (07/10/2026) — REF-1 (§266) : Aujourd'hui reprend la maquette validee (src/cockpit-vue.js), montee avec le modele
+//   reel (_pilCk2Modele) ; feuille de la maquette passee a la charte (remplace AUJ-1 a AUJ-4). APP 8.37 -> 8.38.
 // v9.15 (07/10/2026) — PROL-1 (§265) : gain d'une prolongation d'un mois pour les contrats qui finissent (simulateur
 //   de renfort, une personne a rendement plein apres la fin du contrat). APP 8.36 -> 8.37.
 // v9.14 (07/10/2026) — SECT-1 (§264) : meteo par secteur dans « A savoir » — chaque commune rapporte ses deux jours
@@ -4359,7 +4363,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.15';
+const CACHE_NAME   = 'mavigne-v9.18';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4375,7 +4379,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.15 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.18 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4395,7 +4399,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.15 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.18 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
