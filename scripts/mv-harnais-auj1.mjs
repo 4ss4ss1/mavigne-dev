@@ -95,9 +95,9 @@ function suite(S) {
 
   const P = S.pil;
   T('_pilTabAuj confie au cockpit les morceaux qu\u2019il calcule déjà, sans en recalculer aucun',
-    /return window\._ckAuj\(\{ d:d, m:m, hero:_ckHero, inaction:_ckInac, kpis:kpis, dec:dec, det:det, alertes:H\.slice\(_ckAl0\),/.test(P)
+    /return window\._ckAuj\(\{ d:d, m:m, hero:_ckHero, inaction:_ckInac, kpis:kpis\.slice\(0,_ckK0\), cave:_ckCave, retards:_pilRetards\(\), fenetres:[^\n]*?, parcs:\(window\.PARCELLES\|\|\[\]\), budget:_ckBud, eco:_pilShow\('auj_eco'\), dec:dec, det:det, alertes:H\.slice\(_ckAl0\),/.test(P)
     && /chantiers:\(_pilShow\('auj_chantiers'\)\?window\._mvkAvancement\(d\.data,_pilRetards\(\)\):''\)/.test(P)
-    && /montrer:\{ resume:_pilShow\('auj_resume'\), charge:_pilShow\('auj_courbe'\), fil:_pilShow\('auj_fil'\) \}/.test(P));
+    && /montrer:\{ resume:_pilShow\('auj_resume'\), charge:_pilShow\('auj_courbe'\), fil:_pilShow\('auj_fil'\), savoir:_pilShow\('auj_savoir'\), plan:_pilShow\('auj_plan'\) \}/.test(P));
   T('… et garde l\u2019ancien ordre si le cockpit manque ou plante (jamais d\u2019écran blanc)',
     /if\(H && typeof window\._ckAuj==='function'\)\{\n    try\{/.test(P) && /catch\(e\)\{ if\(window\._mvAvale\) window\._mvAvale\(e,'pilotage\.js\/_pilTabAuj#cockpit'\); \}/.test(P)
     && P.includes("if(_pilShow('auj_alertes')) H+='<div class=\"pil-sec-h\">Alertes matériel</div>'+_pilCkAlertes(d);"));
@@ -111,8 +111,8 @@ function suite(S) {
     css.length > 500 && !/(?:margin|padding|gap)(?:-[a-z]+)?:[^;}]*\d+px/.test(css) && !/font-size:\s*\d/.test(css) && /\.ck-cols\{[^}]*\}/.test(css));
   T('l\u2019aide, les bulles et le guide décrivent le nouvel écran', /'pil\.fil': \{ t: 'En direct'/.test(S.uti) && /'pil\.charge': \{ t: 'La charge restante'/.test(S.uti)
     && S.uti.includes('Aujourd’hui se lit d’un coup d’œil') && S.guide.includes('le fil <b>En direct</b> des validations'));
-  T('la version et sa nouveauté vont ensemble (8.32, pastille sur le fil, pour l\u2019admin)',
-    /export const APP_VERSION = '8\.32';/.test(S.uti) && /\{ v: '8\.32', d: '2026-10-07', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-fil-pan'/.test(S.uti));
+  T('la nouveauté d\u2019AUJ-1 reste au Journal (bloc 8.32, pastille sur le fil, pour l\u2019admin)',
+    /\{ v: '8\.32', d: '2026-10-07', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-fil-pan'/.test(S.uti));
   return out;
 }
 function jouer(S) { try { return suite(S); } catch (e) { return [['plantage : ' + (e && e.message), false]]; } }
@@ -130,7 +130,7 @@ if (CONTRE) {
     ['la photo du jour gardée à côté du direct', 'ck', "typeof x.reste === 'number' && x.d !== auj) s.push", "typeof x.reste === 'number') s.push"],
     ['une ligne plate au lieu de l\u2019état vide', 'ck', 'if(!serie || serie.length < 2){', 'if(!serie || serie.length < 1){'],
     ['la mesure tracée en pointillé (MOUV-1 ne la dessinerait plus)', 'ck', "'\" stroke-width=\"' + tr.mesure + '\" stroke-linejoin", "'\" stroke-width=\"' + tr.mesure + '\" stroke-dasharray=\"3 2\" stroke-linejoin"],
-    ['un bloc d\u2019avant oublié (les alertes)', 'ck', "    + (o.alertes || '');", "    + '';"],
+    ['un bloc d\u2019avant oublié (les alertes, « À savoir » masqué)', 'ck', "(sv ? '' : (o.alertes || '') + (cave", "(sv ? '' : (cave"],
     ['plus de repli : écran blanc si le cockpit plante', 'pil', "    }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#cockpit'); }", "    }finally{}"],
     ['la courbe sur la clé de l\u2019indicateur', 'pil', "charge:_pilShow('auj_courbe')", "charge:_pilShow('auj_charge')"],
     ['le module importé après reserve.js', 'app', "import './cockpit.js';   // AUJ-1 (§260) : le cockpit d'Aujourd'hui (pilotage.js approche 950 Ko)\nimport './reserve.js';", "import './reserve.js';\nimport './cockpit.js';"],

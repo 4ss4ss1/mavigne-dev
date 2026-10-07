@@ -1458,3 +1458,107 @@ retire donc rien : il range les blocs existants et ajoute ce qui manquait pour l
 - **AUJ-3** le domaine en direct par appellation puis par commune ; **AUJ-4** la vue Économie ET la bascule — les
   indicateurs économiques quittent alors la vue Terrain.
 - Une validation pourrait ne mettre à jour que le cockpit au lieu de tout le Pilotage : à mesurer avant de le faire.
+
+## 261. ★★ AUJ-2 — « À SAVOIR » : MÉTÉO, ABSENCES, CONTRATS, RETARDS, MATÉRIEL ET CAVE (07/10 — `src/cockpit.js` · `src/pilotage.js` (`_pilEtatEntree`, Cave, retards, « Choisir les indicateurs ») · `src/styles.css` · `src/utils.js` (MV_INFO, MV_AIDE, APP, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` — APP 8.32 → 8.33 · SW 9.10 → 9.11 — base `dd20754`)
+
+### 261a. Pourquoi, et les règles
+
+Nico (07/10) veut un encart « des choses importantes à savoir » : pluie demain sur un secteur, le brûlage qui devra
+attendre, untel en CP, en formation. Règles proposées puis validées (« suite ») ; décision : **la météo d'abord au
+niveau du domaine, le détail par secteur dans un lot suivant** — le cache par commune (`mavigne_meteocom_cache`) ne
+porte que la journée ; les prévisions heure par heure sur 5 jours (`METEO_HOURLY`, chargées par l'Accueil, cache
+`mavigne_meteohr_cache`) sont celles du domaine.
+- **Météo** : demain et après-demain ; pluie ≥ 2 mm sur le jour (avec la plage horaire) ou vent ≥ 40 km/h ; si un
+  brûlage n'est pas fini, la ligne dit qu'il attendra (priorité haute). Sans prévisions : rien, jamais d'invention.
+- **Absences** : les 7 jours qui viennent (aujourd'hui est dans la tuile « Présences ») ; la première plage de chaque
+  personne (congé, récup, arrêt, absence), avec le motif saisi s'il y en a un, sinon la date de retour.
+- **Contrats** : les fins dans les 30 jours (`fin_contrat`), avec le bouton « Simuler un renfort ».
+- **Retards** : fenêtre passée (`_mvkRetards`) ET tâche pas finie, avec son pourcentage et « Voir La campagne ».
+- **Matériel immobilisé et cave** : les blocs d'avant rangés au bas de l'encart ; « À savoir » masqué, ils reviennent
+  à leur place.
+
+### 261b. Ce qui change
+
+- **`_pilEtatEntree(e)`** (pilotage.js, exposé) : l'état d'une journée de planning écrit une seule fois ; `_pilData`
+  (présences du jour) et « À savoir » (absences à venir) le lisent. Le texte de la règle est inchangé.
+- `_pilTabAuj` passe au cockpit la Cave à part (`_ckCave`, retirée des indicateurs) et les retards (`_pilRetards()`).
+- **cockpit.js** : `_ckSvMeteo`, `_ckSvAbsences`, `_ckSvContrats`, `_ckSvRetards` (fonctions pures, testées seules),
+  `_ckSavoirHtml` (le plus pressant d'abord, textes échappés), l'encart en tête de la colonne de droite.
+- « Choisir les indicateurs » : `auj_savoir`. MV_INFO `pil.savoir` ; MV_AIDE et le guide décrivent l'encart.
+  WHATS_NEW niveau 1, pastille sur `#ck-savoir`, pour l'admin.
+- ⚠️ **Pas encore fait** : ce qu'une prolongation de contrat ferait gagner sur la fin prévue (le simulateur de renfort
+  ne prend pas encore une fin de contrat repoussée) ; le détail météo par secteur ; les traitements (ils ont la tuile
+  « Traiter ? »).
+
+### 261c. Mesuré
+
+- **`mv-harnais-auj2`** (neuf) : sources, rendu, branchement, style, aide et version sur les vraies fonctions, avec
+  ses contre-épreuves. `mv-harnais-auj1` suit l'appel élargi et la version 8.33.
+
+### 261d. Ouvert
+
+- Détail météo par secteur (appel par commune sur deux jours) ; gain d'une prolongation de contrat ; **AUJ-3** le
+  domaine en direct ; **AUJ-4** la vue Économie et la bascule.
+
+## 262. ★★ AUJ-3 — LE DOMAINE EN DIRECT : LES PARCELLES PAR APPELLATION, L'ÉTAT PAR TÂCHE (07/10 — `src/cockpit.js` · `src/pilotage.js` (fenêtres, parcelles, « Choisir les indicateurs ») · `src/styles.css` · `src/utils.js` (MV_INFO, MV_AIDE, APP, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` — APP 8.33 → 8.34 · SW 9.11 → 9.12 — base `dd20754`, PAR-DESSUS AUJ-2)
+
+### 262a. Ce qui a été tranché
+
+- **AUJ-2 n'était pas encore sur le dépôt** : AUJ-3 est bâti par-dessus, son zip contient les deux.
+- **Un schéma, pas une carte** : une bande par appellation (de la plus grande à la plus petite), les communes dedans
+  (les parcelles n'ont pas de champ lieu-dit), une bande par parcelle dont la largeur suit la surface À LA MÊME
+  ÉCHELLE POUR TOUT LE DOMAINE (rangée d'environ un quart du domaine, au moins 1,5 ha ; retour à la ligne au-delà).
+- **Toucher une parcelle ouvre sa fiche** (`openSelParc`) : on y valide par le chemin de toujours. Une feuille de
+  validation neuve aurait doublé le chemin d'écriture du journal — écarté.
+- **L'état vient du journal** : faite = une validation (ou « Terminé ») depuis l'ouverture de la fenêtre de la tâche
+  (`taskWindows`, passées par `_pilTabAuj`) ; en cours = un début sans validation après ; en retard = fenêtre passée
+  et pas faite ; arrachée = statut de la parcelle. Les tâches à passages ou à niveaux ne sont pas proposées.
+- **Équipes du jour** : les initiales sur une parcelle commencée aujourd'hui et pas encore validée.
+
+### 262b. Ce qui change
+
+- `cockpit.js` : `_ckPlanEtats`, `_ckPlanDispo`, `_ckPlanSvg`, `_ckPlanEquipes`, `_ckPlanTaches` (fonctions pures),
+  `_ckPlanCorps` (sélecteur de tâche, plan, légende chiffrée), `_ckPlanTache` (change de tâche sans redessiner tout le
+  Pilotage), `_ckPlanOuvrir`. Le panneau se place après la décision du jour ; l'avancement de chaque appellation (en
+  hectares faits) est écrit dans son en-tête.
+- `_pilTabAuj` passe `fenetres` (`_rfCd().taskWindows`) et `parcs`. « Choisir les indicateurs » : `auj_plan`.
+  MV_INFO `pil.plan` ; MV_AIDE et le guide décrivent le plan. WHATS_NEW niveau 1, pastille sur `#ck-plan`.
+
+### 262c. Mesuré
+
+- **`mv-harnais-auj3`** (neuf) sur les vraies fonctions, avec ses contre-épreuves ; `mv-harnais-auj2` suit la version.
+
+### 262d. Ouvert
+
+- Le moteur de disposition est prêt pour la vue 3D de La campagne (mêmes bandes, mêmes surfaces) ; la forme des
+  contours KML n'y est pas encore. **AUJ-4** : la vue Économie et la bascule.
+
+## 263. ★★ AUJ-4 — LA BASCULE TERRAIN / ÉCONOMIE (07/10 — `src/cockpit.js` · `src/pilotage.js` (`window._pilTabEco`, tuile Budget, « Choisir les indicateurs ») · `src/styles.css` · `src/utils.js` (MV_AIDE, APP, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` — APP 8.34 → 8.35 · SW 9.12 → 9.13 — base `dd20754`, PAR-DESSUS AUJ-2 ET AUJ-3)
+
+### 263a. Ce qui a été tranché
+
+- **AUJ-2 et AUJ-3 n'étaient pas encore sur le dépôt** : AUJ-4 est bâti par-dessus, son zip contient les trois.
+- **La vue Économie reprend l'onglet Économie TEL QUEL** (`_pilTabEco`, moteur `_pecData`) : aucun chiffre recalculé
+  dans le cockpit, et la période est celle de ce moteur — la règle de Nico (jamais l'exercice comptable en euros face
+  à l'année vigne en heures) se tient parce qu'il n'y a qu'un moteur. L'atterrissage, le « dépensé face au fait » et
+  les écarts par appellation de la maquette restent à construire DANS ce moteur (onglet Économie, après L'année).
+- Le coût de l'inaction et la tuile Budget quittent la vue Terrain pour la vue Économie ; vue Économie masquée
+  (`auj_eco`), ils reviennent sur le terrain.
+
+### 263b. Ce qui change
+
+- `cockpit.js` : `_ckBasculeHtml`, `_ckVue` (bascule sans redessiner le Pilotage ; la vue Économie se dessine au
+  premier passage, puis à chaque dessin tant qu'on y reste ; les graphes se repeignent à la bonne largeur), deux
+  conteneurs `.ck-vue` ; le choix tient le temps de la session.
+- `pilotage.js` : `window._pilTabEco` (le contenu de l'onglet, exposé), la tuile Budget capturée à part (`_ckBud`),
+  `eco:_pilShow('auj_eco')`. MV_AIDE et le guide décrivent la bascule ; WHATS_NEW niveau 1 sur `#ck-bascule`.
+
+### 263c. Mesuré
+
+- **`mv-harnais-auj4`** (neuf) avec ses contre-épreuves ; `mv-harnais-auj3` suit la version.
+
+### 263d. Ouvert
+
+- Dans le moteur économique (`_pecData`) : l'atterrissage de la campagne, le « dépensé face au fait », le coût à
+  l'hectare par appellation — à décider avec Nico lors de la reprise de l'onglet Économie.
+- Détail météo par secteur (§261) ; gain d'une prolongation de contrat (§261).

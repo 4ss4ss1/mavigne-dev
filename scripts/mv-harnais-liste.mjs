@@ -513,4 +513,10 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-mouv1.mjs --contre'],
   ['node scripts/mv-harnais-auj1.mjs'],               // AUJ-1 (§260) : le cockpit d'Aujourd'hui, vue Terrain (src/cockpit.js)
   ['node scripts/mv-harnais-auj1.mjs --contre'],
+  ['node scripts/mv-harnais-auj2.mjs'],               // AUJ-2 (§261) : « À savoir » — météo, absences, contrats, retards, matériel et cave
+  ['node scripts/mv-harnais-auj2.mjs --contre'],
+  ['node scripts/mv-harnais-auj3.mjs'],               // AUJ-3 (§262) : le domaine en direct (plan par appellation, état par tâche)
+  ['node scripts/mv-harnais-auj3.mjs --contre'],
+  ['node scripts/mv-harnais-auj4.mjs'],               // AUJ-4 (§263) : bascule Terrain / Économie (l'onglet Économie tel quel)
+  ['node scripts/mv-harnais-auj4.mjs --contre'],
 ];

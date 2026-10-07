@@ -5784,3 +5784,48 @@ body .mvv-rh-fill{background:var(--terre,#8A5A38);}
 .ck-fil-vide{margin:0;font-size:var(--pt-txt,12.5px);line-height:1.5;color:var(--texte-doux)}
 .ck-graphe{min-height:160px}
 @media(prefers-reduced-motion:reduce){.ck-vif,.ck-ev.neuf{animation:none}}
+
+/* AUJ-2 (§261) — « À SAVOIR » : une ligne par chose à anticiper, la plus pressante d'abord. */
+.ck-sv-l{list-style:none;margin:0;padding:0}
+.ck-sv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--e-3,12px);padding:var(--e-3,12px) 0;border-top:1px solid var(--ligne,#ECE6DA)}
+.ck-sv:first-child{border-top:0;padding-top:0}
+.ck-sv-ic{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--gris-clair);color:var(--texte-med);font-size:var(--pt-base,14px)}
+.ck-sv.fort .ck-sv-ic{background:var(--orange-pale);color:var(--orange-tx,#9C4E14)}
+.ck-sv-h{display:flex;align-items:baseline;justify-content:space-between;gap:var(--e-2,8px)}
+.ck-sv-h b{font-size:var(--pt-base,14px);font-weight:var(--fw-semi,600);line-height:1.35;color:var(--texte)}
+.ck-sv-q{flex:none;font-size:var(--pt-micro,12px);color:var(--texte-doux);white-space:nowrap}
+.ck-sv.fort .ck-sv-q{color:var(--orange-tx,#9C4E14);font-weight:var(--fw-semi,600)}
+.ck-sv-s{margin:var(--e-0,2px) 0 0;font-size:var(--pt-txt,12.5px);line-height:1.45;color:var(--texte-med)}
+.ck-sv-a{margin-top:var(--e-1,4px);padding:var(--e-1,4px) 0;border:0;background:none;color:var(--or-tx,#7A5E12);font-size:var(--pt-micro,12px);font-weight:var(--fw-semi,600);cursor:pointer}
+.ck-sv-cave{margin-top:var(--e-3,12px)}
+
+/* AUJ-3 (§262) — LE DOMAINE EN DIRECT : une bande par parcelle, la couleur de son état pour la tâche choisie. */
+.ck-pl-choix{display:flex;flex-wrap:wrap;gap:var(--e-1,4px);margin-bottom:var(--e-3,12px)}
+.ck-pl-t{padding:var(--e-1,4px) var(--e-3,12px);border:1px solid var(--ligne,#ECE6DA);background:transparent;color:var(--texte-med);font-size:var(--pt-txt,12.5px);font-weight:var(--fw-semi,600);cursor:pointer}
+.ck-pl-t[aria-pressed="true"]{background:var(--cave);color:var(--or-clair);border-color:var(--cave)}
+.ck-pl-boite{overflow-x:auto}
+.ck-pl-svg{display:block;width:100%;min-width:560px;height:auto}
+.ck-pl-app{font-weight:var(--fw-semi,600);fill:var(--texte)}
+.ck-pl-ha,.ck-pl-pc,.ck-pl-com{fill:var(--texte-doux);font-weight:var(--fw-med,500)}
+.ck-pl-com{font-style:italic}
+.ck-pl-p{stroke-width:1.5;cursor:pointer;transition:fill var(--mv-d3,.42s),stroke var(--mv-d3,.42s)}
+.ck-pl-p:focus-visible{stroke:var(--texte);stroke-width:3}
+.et-faite{fill:var(--vert-pale);stroke:var(--vert-med)}.et-cours{fill:var(--or-pale);stroke:var(--or)}
+.et-afaire{fill:var(--bg-card);stroke:var(--gris)}.et-retard{fill:var(--orange-pale);stroke:var(--orange)}
+.et-arr{fill:var(--gris-clair);stroke:var(--gris);stroke-dasharray:4 3;cursor:default}
+.ck-pl-eq circle{fill:var(--cave);stroke:var(--or);stroke-width:2}
+.ck-pl-eq text{fill:var(--or-clair);font-weight:var(--fw-semi,600)}
+.ck-pl-leg{display:flex;flex-wrap:wrap;gap:var(--e-2,8px) var(--e-4,16px);margin-top:var(--e-3,12px);font-size:var(--pt-micro,12px);color:var(--texte-med)}
+.ck-pl-l{display:inline-flex;align-items:center;gap:var(--e-1,4px)}
+.ck-pl-sw{display:inline-block;width:12px;height:12px;border:1.5px solid}
+.ck-pl-sw.et-faite{background:var(--vert-pale);border-color:var(--vert-med)}.ck-pl-sw.et-cours{background:var(--or-pale);border-color:var(--or)}
+.ck-pl-sw.et-afaire{background:var(--bg-card);border-color:var(--gris)}.ck-pl-sw.et-retard{background:var(--orange-pale);border-color:var(--orange)}
+.ck-pl-sw.et-arr{background:var(--gris-clair);border-color:var(--gris);border-style:dashed}
+
+/* AUJ-4 (§263) — LA BASCULE TERRAIN / ÉCONOMIE : deux vues de la même journée. */
+.ck-tete2{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--e-3,12px)}
+.ck-bascule{display:inline-flex;border:1px solid var(--ligne,#ECE6DA);background:var(--bg-card)}
+.ck-bascule button{padding:var(--e-2,8px) var(--e-4,16px);border:0;background:transparent;color:var(--texte-med);font-size:var(--pt-base,14px);font-weight:var(--fw-semi,600);cursor:pointer}
+.ck-bascule button[aria-selected="true"]{background:var(--cave);color:var(--or-clair)}
+.ck-eco{display:flex;flex-direction:column;gap:var(--e-5,20px)}
+.ck-eco>.pil-cockpit-card{margin-bottom:0}

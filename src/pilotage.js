@@ -325,6 +325,18 @@ function _pilMbrFinis(ds){
 }
 
 // ── Agrégation des données (lecture seule) ───────────────────────────
+// AUJ-2 (§261) : l'état d'une journée de planning, écrit UNE fois — les présences du jour (_pilData) et les
+//   absences à venir de « À savoir » (cockpit.js) le lisent ici.
+function _pilEtatEntree(e){
+  var etat='present', motif='';
+  if(e){
+    if(e.type==='cp') etat='cp';
+    else if(e.type==='recup') etat='recup';
+    else if(e.absent){ motif=e.comment||''; etat=/malad/i.test(motif)?'maladie':'absent'; }
+  }
+  return { etat:etat, motif:motif };
+}
+window._pilEtatEntree=_pilEtatEntree;
 function _pilData(){
   var ch = (typeof window.calcHeures==='function') ? window.calcHeures() : { data:[], totalReste:0, totalTotal:0 };
   var data = (ch && ch.data) || [];
@@ -400,12 +412,7 @@ function _pilData(){
   var presences = membres.map(function(m){
     var _by = (PE[m.nom] && PE[m.nom][_yNum]) || null;
     var e = (_by && _by[_mIdx] && _by[_mIdx][_dNum]) || null;
-    var etat='present', motif='';
-    if(e){
-      if(e.type==='cp') etat='cp';
-      else if(e.type==='recup') etat='recup';
-      else if(e.absent){ motif=e.comment||''; etat=/malad/i.test(motif)?'maladie':'absent'; }
-    }
+    var _ee=_pilEtatEntree(e), etat=_ee.etat, motif=_ee.motif;   // AUJ-2 : une seule écriture de l'état du jour
     // \u2605\u2605\u2605 LE POIDS DE LA FICHE VOYAGE AVEC ELLE.
     //   Une equipe COLLECTIVE (m.collectif, m.effectif = 26) est UNE fiche et
     //   VINGT-SIX personnes. _headWeek et capEquipe le savent depuis le 11/08
@@ -5148,10 +5155,14 @@ function _pilTabAuj(d){
       +'<div class="ks">'+_ksCad+'</div></div>';
   }
   if(_pilShow('auj_tension')) kpis+=_pilCkTension(d);
+  var _ckB0=kpis.length;   // AUJ-4 (§263) : la tuile Budget part dans la vue Économie
   if(_pilShow('auj_budget')) kpis+=_pilCkBudget();
+  var _ckBud=kpis.slice(_ckB0);
   if(_pilShow('auj_etp')) kpis+=_pilCkEtp(d);
   if(_pilShow('auj_jours')) kpis+=_pilCkJours();
+  var _ckK0=kpis.length;   // AUJ-2 (§261) : la Cave part dans « À savoir »
   if(_pilShow('auj_cave')) kpis+=_pilCkCave();
+  var _ckCave=kpis.slice(_ckK0);
   if(kpis) cockpit+='<div class="pil-cks">'+kpis+'</div>';
   if(cockpit) H+='<div class="pil-cockpit-card">'+cockpit+'</div>';
   // ALIGN-1 (§236) : la rangée du haut porte les quatre VERDICTS, bâtis pareil ; la rangée du dessous
@@ -5172,10 +5183,10 @@ function _pilTabAuj(d){
   //   ou en erreur : l'ancien ordre, ci-dessous, s'affiche — l'écran ne reste jamais blanc.
   if(H && typeof window._ckAuj==='function'){
     try{
-      return window._ckAuj({ d:d, m:m, hero:_ckHero, inaction:_ckInac, kpis:kpis, dec:dec, det:det, alertes:H.slice(_ckAl0),
+      return window._ckAuj({ d:d, m:m, hero:_ckHero, inaction:_ckInac, kpis:kpis.slice(0,_ckK0), cave:_ckCave, retards:_pilRetards(), fenetres:((typeof _rfCd==='function'&&_rfCd())||{}).taskWindows||[], parcs:(window.PARCELLES||[]), budget:_ckBud, eco:_pilShow('auj_eco'), dec:dec, det:det, alertes:H.slice(_ckAl0),
         chantiers:(_pilShow('auj_chantiers')?window._mvkAvancement(d.data,_pilRetards()):''),
         photos:_pilPhotoListe(), journal:(window.JOURNAL||[]),
-        montrer:{ resume:_pilShow('auj_resume'), charge:_pilShow('auj_courbe'), fil:_pilShow('auj_fil') } });
+        montrer:{ resume:_pilShow('auj_resume'), charge:_pilShow('auj_courbe'), fil:_pilShow('auj_fil'), savoir:_pilShow('auj_savoir'), plan:_pilShow('auj_plan') } });
     }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#cockpit'); }
   }
   return H || '<div class="pil-empty">Aucun indicateur affiché — activez-les via « Choisir les indicateurs ».</div>';
@@ -10332,6 +10343,8 @@ function _pecViewRevient(){
   return H;
 }
 
+// AUJ-4 (§263) : la vue Économie du cockpit affiche CE contenu, tel quel (un seul moteur : _pecData).
+window._pilTabEco=function(d){ return _pilTabEco(d); };
 function _pilTabEco(d){
   _pecCss();
   var E=_pecData();
@@ -10519,7 +10532,7 @@ function _pilTabCfm(d){
 
 // ── Personnalisation PAR ONGLET (visibilité des tuiles) ──
 var _PIL_PERSO_DEFS={
-  auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_tension','Tension équipe'],['auj_inaction','Coût de l’inaction'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_cave','La Cave \u2014 ce qui presse'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ? · fenêtre 5 jours'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave'],['auj_resume','Le résumé du jour'],['auj_chantiers','Les chantiers en cours'],['auj_courbe','La courbe de la charge restante'],['auj_fil','En direct : le fil de l\'équipe']],
+  auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_tension','Tension équipe'],['auj_inaction','Coût de l’inaction'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_cave','La Cave \u2014 ce qui presse'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ? · fenêtre 5 jours'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave'],['auj_resume','Le résumé du jour'],['auj_chantiers','Les chantiers en cours'],['auj_courbe','La courbe de la charge restante'],['auj_fil','En direct : le fil de l\'équipe'],['auj_savoir','À savoir : météo, absences, contrats, retards'],['auj_plan','Le domaine en direct'],['auj_eco','La vue Économie (bascule Terrain / Économie)']],
   an: [['an_budget','Le budget de l\'ann\u00e9e'],['an_frise','Le renfort \u00e0 pr\u00e9voir']],
   avc:[['avc_gauge','Jauge de saison'],['avc_bar','Avancement par tâche'],['avc_pie','Charge (donut)'],['avc_temps','Où va le temps de l\'équipe'],['avc_echeances','Échéances par tâche'],['avc_carte','Carte du domaine']],
   equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_conso','Consommation mesurée']],

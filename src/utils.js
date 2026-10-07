@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.32';
+export const APP_VERSION = '8.35';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1035,6 +1035,18 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.35', d: '2026-10-07', items: [
+    { niv: 1, pour: ['admin'], cible: '#ck-bascule', emoji: 'euro', titre: 'Aujourd’hui, côté terrain ou côté argent',
+      desc: "Au Pilotage › Aujourd’hui, une bascule Terrain / Économie : la même journée vue du terrain (fin prévue, plan, chantiers, fil) ou de l’argent (coût de l’inaction, budget, et tout l’onglet Économie, avec les mêmes chiffres)." },
+  ] },
+  { v: '8.34', d: '2026-10-07', items: [
+    { niv: 1, pour: ['admin'], cible: '#ck-plan', emoji: 'carte', titre: 'Le domaine en direct',
+      desc: "Au Pilotage › Aujourd’hui : toutes vos parcelles d’un coup d’œil, rangées par appellation puis par commune, la largeur de chacune selon sa surface, colorées selon la tâche choisie (faite, en cours, à faire, en retard). Les équipes du jour y apparaissent ; touchez une parcelle pour ouvrir sa fiche." },
+  ] },
+  { v: '8.33', d: '2026-10-07', items: [
+    { niv: 1, pour: ['admin'], cible: '#ck-savoir', emoji: 'pluie', titre: '« À savoir » prévient avant',
+      desc: "Au Pilotage › Aujourd’hui : la pluie ou le vent des deux jours qui viennent (et le brûlage qui attendra), les absences de la semaine, les contrats qui finissent dans le mois et les tâches en retard, avec le bouton pour agir. Le matériel immobilisé et la cave y sont rangés." },
+  ] },
   { v: '8.32', d: '2026-10-07', items: [
     { niv: 1, pour: ['admin'], cible: '#ck-fil-pan', emoji: 'graphique', titre: 'Aujourd’hui se lit d’un coup d’œil',
       desc: "Au Pilotage › Aujourd’hui : une phrase résume la journée, les chantiers en cours et la courbe de la charge restante ont leur place, et le fil « En direct » montre ce que l’équipe valide, dès que ça arrive. Tout ce qui s’affichait avant est toujours là." },
@@ -4885,7 +4897,7 @@ var MV_AIDE = {
   pilotage: {
     ico: 'graphique', titre: 'Pilotage', ancre: 'pilotage',
     points: [
-      ['Aujourd’hui se lit d’un coup d’œil', ": une phrase résume la journée — la marge sur l’objectif, les heures à faire, les validations du jour. À gauche ce qui décide (fin prévue, décision du jour, chantiers, courbe de la charge restante), à droite ce qui arrive : le fil <b>En direct</b> de ce que l’équipe valide, puis les indicateurs et les alertes."],
+      ['Aujourd’hui se lit d’un coup d’œil', ": une phrase résume la journée — la marge sur l’objectif, les heures à faire, les validations du jour. À gauche ce qui décide (fin prévue, décision du jour, chantiers, courbe de la charge restante), le <b>domaine en direct</b> (les parcelles par appellation, colorées selon la tâche choisie), et à droite ce qui arrive : <b>À savoir</b> (pluie ou vent des deux jours, absences, fins de contrat, retards, matériel, cave), le fil <b>En direct</b> de ce que l’équipe valide, puis les indicateurs. La bascule <b>Terrain / Économie</b>, en haut, montre la même journée côté argent : le coût de l’inaction, le budget et le contenu de l’onglet Économie."],
       ['Presque tout se lit, cinq choses s’écrivent', ": les chiffres viennent du journal, du planning, des sessions tracteur et de la cave. Ce qui s’écrit ici est nommé : les prix des achats (Économie), l’ordre de passage (Décider), le mois d’ouverture de l’exercice comptable et celui de l’année vigne (roue crantée, Économie › Exercice), et ce que porte la roue crantée."],
       ['Vos deux années se règlent au même endroit', ": la roue crantée porte l’ouverture de l’<b>exercice comptable</b> — celui de votre bilan, fixé par votre comptable — et, juste dessous, le <b>cadre de votre campagne</b>, l’axe des Archives et du bilan de campagne. Une campagne est un cycle de production : ce qui la borne, c’est la <b>vendange</b>, et le mois n’en est que la traduction. L’écran dit où tombe la vôtre dans le cadre choisi — elle l’ouvre, elle la clôt, ou la borne la coupe en deux — et propose le mois qui suit la fin de vos vendanges. Le changer recadre des chiffres déjà affichés, jamais vos saisies."],
       ['La roue crantée', "en haut à droite ouvre ce qui se règle : objectifs de fin, fenêtres des tâches, hypothèses de calcul, IFT de référence — et le bilan de campagne à imprimer. Administrateur seulement."],
@@ -5096,6 +5108,12 @@ export const MV_INFO = {
     'Un <b>soutirage</b> se déclenche à la fin de la malo, pas à une date : la projection vient des valeurs d\u2019acide malique mesurées. Deux pentes sont calculées, la moyenne sur trois analyses projette la fin, les deux dernières détectent un blocage.'
   ] },
 
+  'pil.plan': { t: 'Le domaine en direct', p: [
+    'Chaque parcelle est une bande dont la largeur suit sa surface, à la même échelle pour tout le domaine ; elles sont rangées par appellation, puis par commune. C’est un schéma : la vraie carte reste dans Parcelles.',
+    'La couleur dit l’état pour la tâche choisie : faite (validée depuis l’ouverture de sa fenêtre), en cours, à faire, en retard (fenêtre passée), arrachée. Les initiales marquent une équipe qui a commencé la parcelle aujourd’hui. Toucher une parcelle ouvre sa fiche.' ] },
+  'pil.savoir': { t: 'À savoir', p: [
+    'Ce qui peut changer la journée ou la semaine : la pluie ou le vent des deux jours qui viennent (prévisions du domaine), les absences des sept prochains jours, les contrats qui finissent dans le mois, les tâches en retard, puis le matériel immobilisé et la cave.',
+    'Le plus pressant d’abord. Les motifs d’absence ne sont visibles que de l’admin : le Pilotage lui est réservé.' ] },
   'pil.fil': { t: 'En direct', p: [
     'Les validations et les débuts de parcelle de la journée, du plus récent au plus ancien, dès qu’ils arrivent du journal. Une ligne neuve s’éclaire une fois.',
     'L’heure vient de l’enregistrement de la validation ; une ligne sans heure connue n’en affiche pas.' ] },

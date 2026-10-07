@@ -305,3 +305,6 @@
 | 258 | 258. ★★ IDS-1, ACTIVITÉS — RENOMMER UNE ACTIVITÉ ; LES TRACTEURS, DÉJÀ SÛRS (07/10 — `src/reglages.js` · `s… | `docs/claude/chantiers-230-279.md` |
 | 259 | 259. ★★ MOUV-1 — LE SOCLE DU MOUVEMENT : JETONS, COUCHE D'ANIMATION, COURBES QUI SE DESSINENT, INFOBULLE QU… | `docs/claude/chantiers-230-279.md` |
 | 260 | 260. ★★★ AUJ-1 — LE COCKPIT D'AUJOURD'HUI, VUE TERRAIN (07/10 — `src/cockpit.js` (neuf) · `src/pilotage.js`… | `docs/claude/chantiers-230-279.md` |
+| 261 | 261. ★★ AUJ-2 — « À SAVOIR » : MÉTÉO, ABSENCES, CONTRATS, RETARDS, MATÉRIEL ET CAVE (07/10 — `src/cockpit.j… | `docs/claude/chantiers-230-279.md` |
+| 262 | 262. ★★ AUJ-3 — LE DOMAINE EN DIRECT : LES PARCELLES PAR APPELLATION, L'ÉTAT PAR TÂCHE (07/10 — `src/cockpi… | `docs/claude/chantiers-230-279.md` |
+| 263 | 263. ★★ AUJ-4 — LA BASCULE TERRAIN / ÉCONOMIE (07/10 — `src/cockpit.js` · `src/pilotage.js` (`window._pilTa… | `docs/claude/chantiers-230-279.md` |
