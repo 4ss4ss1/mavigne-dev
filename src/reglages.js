@@ -1828,7 +1828,9 @@ window.openRenTache=openRenTache; window.saveRenTache=saveRenTache;
 function _mvAppliquerRenommages(cle){
   var cfg=window.CONFIG||{}, L=Array.isArray(cfg.renommages_taches)?cfg.renommages_taches.slice():[];
   var RP=Array.isArray(cfg.renommages_parcelles)?cfg.renommages_parcelles.slice():[];   // IDS-1 lot 4 (§254)
-  if(!L.length&&!RP.length) return 0;
+  var RM=Array.isArray(cfg.renommages_membres)?cfg.renommages_membres.slice():[];       // IDS-1 salariés (§257)
+  var RA=Array.isArray(cfg.renommages_activites)?cfg.renommages_activites.slice():[];   // IDS-1 activités (§258)
+  if(!L.length&&!RP.length&&!RM.length&&!RA.length) return 0;
   var parDate=function(a,b){ return String((a&&a.quand)||'').localeCompare(String((b&&b.quand)||'')); };
   L.sort(function(a,b){ return String((a&&a.quand)||'').localeCompare(String((b&&b.quand)||'')); });
   var n=0;
@@ -1843,9 +1845,28 @@ function _mvAppliquerRenommages(cle){
   });
   if(nP>0) _rpTravaux();
   n+=nP;
+  // ★★ IDS-1, salariés (§257) — les renommages de SALARIÉS, même principe. Une règle ne touche plus à rien si son ancien
+  //   nom est désormais porté par un AUTRE salarié (autre adresse) : on ne lui prête pas l'historique d'un autre.
+  var nM=0;
+  RM.sort(parDate).forEach(function(r){
+    if(!r||!r.de||!r.vers||r.de===r.vers) return;
+    var autre=(window.MEMBRES||[]).some(function(m){ return m&&m.nom===r.de&&r.email&&m.email&&String(m.email).toLowerCase()!==String(r.email).toLowerCase(); });
+    if(!autre) nM+=_renameMembre(r.de,r.vers,r.email)||0;
+  });
+  n+=nM;
+  // ★★ IDS-1 activités (§258) — les renommages d'ACTIVITÉS (Tracteur). Une activité n'a pas d'identifiant : une règle ne
+  //   touche plus à rien tant qu'une activité porte encore l'ancien nom (liste pas encore reçue, ou nom repris par une autre).
+  var nA=0;
+  RA.sort(parDate).forEach(function(r){
+    if(!r||!r.de||!r.vers||r.de===r.vers) return;
+    if(!(window.ACTIVITES||[]).some(function(a){ return a&&a.nom===r.de; })) nA+=_renameActivite(r.de,r.vers)||0;
+  });
+  n+=nA;
   if(n>0&&typeof window.isAdmin==='function'&&window.isAdmin()&&typeof window.saveData==='function'){
+    if(nA>0) window.saveData('sessions');
     ['taches','parcelles','journal','saisons','travaux','config'].forEach(function(k){ window.saveData(k); });
     if(nP>0) _rpEnregistrerRegistres();
+    if(nM>0) _rmEnregistrer();
   }
   return n;
 }
@@ -1957,6 +1978,158 @@ function saveRenParcelle(){
   catch(e){ if(window._mvAvale) window._mvAvale(e,'reglages.js/saveRenParcelle#rendu'); }
 }
 window.openRenParcelle=openRenParcelle; window.saveRenParcelle=saveRenParcelle;
+
+// ════════════════════════════════════════════════════════════════════════════
+// ★★★ IDS-1, SALARIÉS (§257) — RENOMMER UN SALARIÉ (fiche du salarié, Réglages › Équipe, administrateur)
+// ════════════════════════════════════════════════════════════════════════════
+// Nico (07/10) : « vas-y », l'autre session a fini le planning. Le COMPTE ne change pas : les droits tiennent à l'adresse et à
+// l'identifiant Firebase (règles, claims), jamais au nom ; le salarié garde son mot de passe. Le nom, lui, vit en clair dans
+// beaucoup de registres — ils sont réécrits ici, et le renommage devient une RÈGLE du domaine (CONFIG.renommages_membres)
+// que chaque téléphone applique à ce qu'il reçoit (saisies hors ligne comprises). Le téléphone du salarié renommé suit
+// (_mvRefreshCurrentUserRoles, app.js : nom de la session, empreinte de connexion hors réseau).
+// OÙ VIT UN NOM DE SALARIÉ (mv-harnais-renom-membre tient cette liste) : la fiche (par son adresse) ; le journal (qui,
+// membresEquipe) ; les sessions tracteur, les entretiens, les réparations (conducteur, qui, par) ; le registre phyto
+// (conducteur, operateur) ; la liste des conducteurs ; le Chai (opérations : operateur, intervenants ; analyses :
+// uploaded_by) ; le Cuvier (relevés de cuve : qui) ; les équipes du jour ; la mise en page de l'accueil par personne ; le mot
+// du mur (par) ; le planning (entrées, heures sup, acomptes : CLÉS par nom, déplacées) ; la paie (taux, historique, série :
+// clés par nom ; appoints GNR : par). Inchangés : les archives des campagnes passées, les documents déjà imprimés, et
+// l'historique du chat (les conversations privées sont rangées par noms — limite connue, §257).
+function _rmNorm(s){ return String(s==null?'':s).normalize('NFC').trim().toLowerCase(); }
+function _renameMembre(oldN, newN, email){
+  if(!oldN||!newN||oldN===newN) return 0;
+  var nb=0, own=Object.prototype.hasOwnProperty, em=String(email||'').toLowerCase();
+  var champ=function(o,k){ if(o&&o[k]===oldN){ o[k]=newN; nb++; } };
+  var liste=function(a){ if(!Array.isArray(a)) return; for(var i=0;i<a.length;i++){ if(a[i]===oldN){ a[i]=newN; nb++; } else if(a[i]&&typeof a[i]==='object'&&a[i].nom===oldN){ a[i].nom=newN; nb++; } } };
+  var cle=function(obj){ if(!obj||typeof obj!=='object'||Array.isArray(obj)||!own.call(obj,oldN)) return;
+    if(!own.call(obj,newN)) obj[newN]=obj[oldN]; delete obj[oldN]; nb++; };
+  // Un registre qui n'est pas une liste (vu dans Chromium : REPARATEUR_HIST est un objet par tracteur) est passé, jamais
+  // parcouru de force — un plantage ici laisserait un renommage à moitié fait.
+  var arr=function(x){ return Array.isArray(x)?x:[]; };
+  arr(window.MEMBRES).forEach(function(m){ if(m&&m.nom===oldN&&(!em||!m.email||String(m.email).toLowerCase()===em)){ m.nom=newN; nb++; } });
+  arr(window.JOURNAL).forEach(function(e){ if(!e) return; champ(e,'qui'); liste(e.membresEquipe); });
+  [window.SESSIONS, window.ENTRETIENS].forEach(function(L){ arr(L).forEach(function(x){ if(!x) return; champ(x,'conducteur'); champ(x,'qui'); champ(x,'par'); }); });   // l'historique des réparations ne porte aucun nom
+  arr(window.TRAITEMENTS).forEach(function(t){ if(!t) return; champ(t,'conducteur'); champ(t,'operateur'); });
+  liste(window.CONDUCTEURS);
+  var E=window.CAVE_ELEVAGE||{};
+  arr(E.operations).forEach(function(o){ if(!o) return; champ(o,'operateur'); liste(o.intervenants); });
+  arr(E.analyses).forEach(function(a){ if(a) champ(a,'uploaded_by'); });
+  arr((window.CAVE_VENDANGE||{}).cuves_vinif).forEach(function(c){ arr(c&&c.mesures_fa).forEach(function(m){ if(m) liste(m.qui); }); });
+  var cfg=window.CONFIG||{};
+  if(cfg.equipes_jour&&typeof cfg.equipes_jour==='object') Object.keys(cfg.equipes_jour).forEach(function(d){ arr(cfg.equipes_jour[d]).forEach(function(eq){ if(eq) liste(eq.m); }); });
+  cle(cfg.home_layout);
+  if(cfg.mur_mot) champ(cfg.mur_mot,'par');
+  cle(window.PLANNING_ENTRIES); cle(window.PLANNING_HSUP); cle(window.PLANNING_ACOMPTES);
+  var P=window.PAIE;
+  if(P&&typeof P==='object'){ cle(P.taux); cle(P.taux_hist); cle(P.taux_serie); arr(P.gnr_appoints).forEach(function(a){ if(a) champ(a,'par'); }); }
+  return nb;
+}
+// Tout ce qu'un renommage de salarié touche, enregistré (la paie par son propre chemin : admin seul, jamais sur l'appareil).
+function _rmEnregistrer(){
+  ['membres','journal','sessions','entretiens','traitements','conducteurs','cave_elevage','cave_vendange',
+   'planning_entries','planning_hsup','planning_acomptes'].forEach(function(k){ window.saveData(k); });
+  if(window.PAIE&&typeof window.PAIE==='object'&&typeof window.fbSave==='function') window.fbSave('paie',window.PAIE);
+}
+function _renMembreErreur(m, n){
+  if(!m) return 'Salari\u00e9 introuvable.';
+  if(!n) return 'Le nouveau nom est vide.';
+  if(n.length>60) return '60 caract\u00e8res au plus.';
+  for(var _i=0;_i<n.length;_i++){ if(n.charCodeAt(_i)<32) return 'Caract\u00e8re non autoris\u00e9.'; }
+  if(n===m.nom) return 'C\u2019est d\u00e9j\u00e0 son nom.';
+  var k=_rmNorm(n);
+  if((window.MEMBRES||[]).some(function(x){ return x&&x!==m&&_rmNorm(x.nom)===k; })) return 'Un autre salari\u00e9 porte d\u00e9j\u00e0 ce nom.';
+  var RM=((window.CONFIG||{}).renommages_membres)||[], em=String(m.email||'').toLowerCase();
+  if(RM.some(function(r){ return r&&_rmNorm(r.de)===k&&String(r.email||'').toLowerCase()!==em; })) return 'Ce nom a d\u00e9j\u00e0 \u00e9t\u00e9 port\u00e9 par un autre salari\u00e9 : choisissez-en un autre.';
+  return '';
+}
+function openRenMembre(){
+  var nom=(document.getElementById('em-nom')||{}).value||'', b=document.getElementById('rmem-body'); if(!b||!nom) return;
+  b.innerHTML='<div class="fl">Nom actuel</div><div class="mv-l" style="font-weight:600;margin-bottom:12px">'+_escHtml(nom)+'</div>'
+    +'<div class="fl">Nouveau nom</div><input type="text" class="fi" id="rmem-nom" maxlength="60" autocomplete="off" value="'+_escAttr(nom)+'">'
+    +'<div id="rmem-err" class="mv-l" style="color:var(--rouge);min-height:16px;margin-top:8px"></div>'
+    +'<div class="mv-l" style="margin:8px 0 16px">Tout son historique suit : journal, sessions tracteur, registre phyto, Chai et Cuvier, planning, heures sup, acomptes, paie. Son compte ne change pas \u2014 m\u00eame adresse, m\u00eame mot de passe. Les archives des campagnes pass\u00e9es, les documents d\u00e9j\u00e0 imprim\u00e9s et l\u2019historique du chat gardent l\u2019ancien nom.</div>'
+    +'<button type="button" class="mbtn verte" onclick="saveRenMembre()">Renommer</button>';
+  window.openOv('ovRenMembre');
+}
+function saveRenMembre(){
+  var inp=document.getElementById('rmem-nom'), err=document.getElementById('rmem-err');
+  if(!(typeof window.isAdmin==='function'&&window.isAdmin())){ if(err) err.textContent='Seul un administrateur renomme un salari\u00e9.'; return; }
+  var oldN=(document.getElementById('em-nom')||{}).value||'', n=inp?String(inp.value||'').trim():'';
+  var m=(window.MEMBRES||[]).find(function(x){ return x&&x.nom===oldN; });
+  var e=_renMembreErreur(m,n);
+  if(e){ if(err) err.textContent=e; return; }
+  var cfg=window.CONFIG||(window.CONFIG={});
+  if(!Array.isArray(cfg.renommages_membres)) cfg.renommages_membres=[];
+  cfg.renommages_membres.push({ de:oldN, vers:n, email:String(m.email||''), quand:new Date().toISOString(), par:((window.currentUser&&window.currentUser.nom)||'') });
+  _renameMembre(oldN,n,m.email);
+  _rmEnregistrer();
+  window.saveData('config','Salari\u00e9 renomm\u00e9 partout : '+n);
+  var h=document.getElementById('em-nom'); if(h) h.value=n;
+  var t=document.getElementById('em-title'); if(t) t.textContent=String(t.textContent||'').replace(oldN, n);   // le titre posé par editMembre, nom remplacé (aucun émoji ajouté : mv-harnais-icones)
+  window.closeOv(null,'ovRenMembre');
+  try{ if(typeof window.renderReglages==='function') window.renderReglages(); }
+  catch(x){ if(window._mvAvale) window._mvAvale(x,'reglages.js/saveRenMembre#rendu'); }
+}
+window.openRenMembre=openRenMembre; window.saveRenMembre=saveRenMembre;
+
+// ════════════════════════════════════════════════════════════════════════════
+// ★★ IDS-1, ACTIVITÉS (§258) — RENOMMER UNE ACTIVITÉ (fiche de l'activité, roue crantée du Tracteur, administrateur)
+// ════════════════════════════════════════════════════════════════════════════
+// Nico (07/10) : « renommer dans les autres roues crantées ». Les TRACTEURS se renomment déjà dans leur fiche : tout les
+// désigne par leur identifiant (tracteurId), rien ne garde leur nom. Les ACTIVITÉS, elles, sont désignées par leur NOM dans
+// chaque session (`activite`) : renommer réécrit les sessions, et devient une règle du domaine (CONFIG.renommages_activites)
+// pour les téléphones restés hors ligne. « Traitement » ne se renomme pas, et aucun autre nom ne le devient : le registre
+// phyto et le choix des tracteurs de traitement l'attendent mot pour mot (phyto.js, tracteur.js).
+function _raNorm(s){ return String(s==null?'':s).normalize('NFC').trim().toLowerCase(); }
+function _renameActivite(oldN, newN){
+  if(!oldN||!newN||oldN===newN) return 0;
+  var nb=0, arr=function(x){ return Array.isArray(x)?x:[]; };
+  arr(window.ACTIVITES).forEach(function(a){ if(a&&a.nom===oldN){ a.nom=newN; nb++; } });
+  arr(window.SESSIONS).forEach(function(s){ if(s&&s.activite===oldN){ s.activite=newN; nb++; } });
+  return nb;
+}
+function _renActiviteErreur(a, n){
+  if(!a) return 'Activit\u00e9 introuvable.';
+  if(a.nom==='Traitement') return '\u00ab Traitement \u00bb ne se renomme pas : le registre phyto l\u2019attend mot pour mot.';
+  if(!n) return 'Le nouveau nom est vide.';
+  if(n.length>40) return '40 caract\u00e8res au plus.';
+  for(var _i=0;_i<n.length;_i++){ if(n.charCodeAt(_i)<32) return 'Caract\u00e8re non autoris\u00e9.'; }
+  if(n===a.nom) return 'C\u2019est d\u00e9j\u00e0 son nom.';
+  var k=_raNorm(n);
+  if(k===_raNorm('Traitement')) return '\u00ab Traitement \u00bb est r\u00e9serv\u00e9 au registre phyto.';
+  if((window.ACTIVITES||[]).some(function(x){ return x&&x!==a&&_raNorm(x.nom)===k; })) return 'Une autre activit\u00e9 porte d\u00e9j\u00e0 ce nom.';
+  var RA=((window.CONFIG||{}).renommages_activites)||[];
+  if(RA.some(function(r){ return r&&_raNorm(r.de)===k&&_raNorm(r.vers)!==_raNorm(a.nom); })) return 'Ce nom a d\u00e9j\u00e0 \u00e9t\u00e9 port\u00e9 par une autre activit\u00e9 : choisissez-en un autre.';
+  return '';
+}
+function openRenActivite(){
+  var nom=(document.getElementById('eat-act-nom')||{}).value||'', b=document.getElementById('ract-body'); if(!b||!nom) return;
+  b.innerHTML='<div class="fl">Nom actuel</div><div class="mv-l" style="font-weight:600;margin-bottom:12px">'+_escHtml(nom)+'</div>'
+    +'<div class="fl">Nouveau nom</div><input type="text" class="fi" id="ract-nom" maxlength="40" autocomplete="off" value="'+_escAttr(nom)+'">'
+    +'<div id="ract-err" class="mv-l" style="color:var(--rouge);min-height:16px;margin-top:8px"></div>'
+    +'<div class="mv-l" style="margin:8px 0 16px">Toutes les sessions de cette activit\u00e9 prennent le nouveau nom, y compris celles saisies sur un t\u00e9l\u00e9phone rest\u00e9 hors ligne. Les archives des campagnes pass\u00e9es gardent l\u2019ancien.</div>'
+    +'<button type="button" class="mbtn verte" onclick="saveRenActivite()">Renommer</button>';
+  window.openOv('ovRenActivite');
+}
+function saveRenActivite(){
+  var inp=document.getElementById('ract-nom'), err=document.getElementById('ract-err');
+  if(!(typeof window.isAdmin==='function'&&window.isAdmin())){ if(err) err.textContent='Seul un administrateur renomme une activit\u00e9.'; return; }
+  var oldN=(document.getElementById('eat-act-nom')||{}).value||'', n=inp?String(inp.value||'').trim():'';
+  var a=(window.ACTIVITES||[]).find(function(x){ return x&&x.nom===oldN; });
+  var e=_renActiviteErreur(a,n);
+  if(e){ if(err) err.textContent=e; return; }
+  var cfg=window.CONFIG||(window.CONFIG={});
+  if(!Array.isArray(cfg.renommages_activites)) cfg.renommages_activites=[];
+  cfg.renommages_activites.push({ de:oldN, vers:n, quand:new Date().toISOString(), par:((window.currentUser&&window.currentUser.nom)||'') });
+  _renameActivite(oldN,n);
+  ['activites','sessions'].forEach(function(k){ window.saveData(k); });
+  window.saveData('config','Activit\u00e9 renomm\u00e9e partout : '+n);
+  var h=document.getElementById('eat-act-nom'); if(h) h.value=n;
+  var t=document.getElementById('eat-title'); if(t) t.textContent=n;
+  window.closeOv(null,'ovRenActivite');
+  try{ if(typeof window.renderTracteurSet==='function') window.renderTracteurSet(); }
+  catch(x){ if(window._mvAvale) window._mvAvale(x,'reglages.js/saveRenActivite#rendu'); }
+}
+window.openRenActivite=openRenActivite; window.saveRenActivite=saveRenActivite;
 
 function openEditHha(nom){
   var t=window.TACHES.find(function(x){return x.nom===nom;});

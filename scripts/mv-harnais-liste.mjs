@@ -499,6 +499,10 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-renom-parc.mjs --contre'],
   ['node scripts/mv-harnais-aoc-cave.mjs'],           // AOC-1 (§255) : les appellations dans la roue de la Cave (deux lignes, deux fenêtres)
   ['node scripts/mv-harnais-aoc-cave.mjs --contre'],
+  ['node scripts/mv-harnais-renom-membre.mjs'],        // IDS-1 salariés (§257) : renommer un salarié, tous les registres, planning et paie
+  ['node scripts/mv-harnais-renom-membre.mjs --contre'],
+  ['node scripts/mv-harnais-renom-act.mjs'],           // IDS-1 activités (§258) : renommer une activité ; les tracteurs, déjà sûrs
+  ['node scripts/mv-harnais-renom-act.mjs --contre'],
   ['node scripts/mv-harnais-motifs1.mjs'],            // MOTIFS-1 (§250) : motifs, heures sup et acomptes ne quittent plus l'appareil de l'admin
   ['node scripts/mv-harnais-motifs1.mjs --contre'],
   ['node scripts/mv-harnais-vueeq1.mjs'],             // VUE-EQUIPE-1 (§251) : l'équipe du mois vue par un salarié — présent / absent, jamais le motif

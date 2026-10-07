@@ -8,6 +8,22 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **7 octobre 2026 (IDS-1, salariés)** — ★★★ **RENOMMER UN SALARIÉ** (§257), dans sa fiche (Réglages › Équipe, admin).
+> Le COMPTE ne change pas (droits = adresse/uid, jamais le nom). `_renameMembre` (reglages.js) réécrit le nom dans TOUS les registres — journal
+> (qui, membresEquipe), sessions/entretiens/réparations, phyto (conducteur, operateur), conducteurs, Chai (operateur, intervenants, uploaded_by),
+> Cuvier (mesures_fa.qui), équipes du jour, home_layout, mur_mot — et DÉPLACE les clés par nom du planning (entrées, heures sup, acomptes) et de la
+> paie (taux, historique, série). Règle `CONFIG.renommages_membres` ; le téléphone du renommé suit (session, empreinte hors réseau). Limite : chat.
+> Harnais `mv-harnais-renom-membre` (sortie rapide qui ignorait ces règles ; Chromium : réparations = objet). Base `40c3be5`. **APP 8.29, SW 9.07.**
+> Précédent : **6 octobre 2026 (GNR-2)** — ★★ **LA CUVE GNR SE LIT DE NOUVEAU SUR TÉLÉPHONE : LE BLOC TRACTEUR A SA GRILLE** (§256). — archivé dans journal.md.
+
+> ★ Consolidation : **6 octobre 2026 (GNR-2)** — ★★ **LA CUVE GNR SE LIT DE NOUVEAU SUR TÉLÉPHONE : LE BLOC TRACTEUR A SA GRILLE** (§256).
+> Capture de Nico (06/10) : la carte Cuve d'Aujourd'hui tassée en demi-colonne (barres à 0 px, « −19 », échelle « 0625125 L », titre sur trois
+> lignes, moitié droite vide). Cause : le bloc portait `.pil-dec`, où ALIGN-1 a posé « par deux sous 600 px » pour les quatre tuiles du jour.
+> Désormais `.pil-trx` seul : une colonne jusqu'à 1 023 px ; à partir de 1 024 px, travaux 2/3 + cuve 1/3, révision dessous sur toute la largeur
+> (`pil-trx-cote1/2`, `pil-trx-paire`, posées par `_pilCkTracteur`). Cascade élastique ; titre « 920 L » + phrase à côté (`.pil-trx-v`).
+> Rendu regardé dans Chromium avant/après (5 largeurs, 4 cas, thème sombre). Harnais `mv-harnais-gnr2`. Base `e3e719a`. **APP 8.27 → 8.28, SW 9.05 → 9.06.**
+> Précédent : AOC-1, les appellations dans la roue crantée de la Cave (§255) — archivé dans journal.md.
+
 > ★ Consolidation : **6 octobre 2026 (AOC-1)** — ★★ **LES APPELLATIONS QUITTENT RÉGLAGES › DOMAINE POUR LA ROUE CRANTÉE DE LA CAVE** (§255).
 > Choix de Nico sur deux maquettes (option B, puis « condenser ») : dans « Le Millésime », DEUX LIGNES qui résument (`_aocResumeHtml`), chacune
 > ouvre SA fenêtre — `ovAocPlafonds` (millésime, une ligne par appellation, « ⋯ ») et `ovAocRattach` (filtres, sans appellation en tête,

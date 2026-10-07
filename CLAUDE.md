@@ -3,13 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **6 octobre 2026 (GNR-2)** — ★★ **LA CUVE GNR SE LIT DE NOUVEAU SUR TÉLÉPHONE : LE BLOC TRACTEUR A SA GRILLE** (§256).
-> Capture de Nico (06/10) : la carte Cuve d'Aujourd'hui tassée en demi-colonne (barres à 0 px, « −19 », échelle « 0625125 L », titre sur trois
-> lignes, moitié droite vide). Cause : le bloc portait `.pil-dec`, où ALIGN-1 a posé « par deux sous 600 px » pour les quatre tuiles du jour.
-> Désormais `.pil-trx` seul : une colonne jusqu'à 1 023 px ; à partir de 1 024 px, travaux 2/3 + cuve 1/3, révision dessous sur toute la largeur
-> (`pil-trx-cote1/2`, `pil-trx-paire`, posées par `_pilCkTracteur`). Cascade élastique ; titre « 920 L » + phrase à côté (`.pil-trx-v`).
-> Rendu regardé dans Chromium avant/après (5 largeurs, 4 cas, thème sombre). Harnais `mv-harnais-gnr2`. Base `e3e719a`. **APP 8.27 → 8.28, SW 9.05 → 9.06.**
-> Précédent : AOC-1, les appellations dans la roue crantée de la Cave (§255) — archivé dans journal.md.
+> Dernière consolidation : **7 octobre 2026 (IDS-1, activités — zip cumulatif avec IDS-1S non poussé)** — ★★ **RENOMMER UNE ACTIVITÉ** (§258).
+> Fiche de l'activité (roue crantée du Tracteur, admin) : `_renameActivite` réécrit ACTIVITES et `SESSIONS[].activite` (le seul endroit qui garde
+> ce nom) ; règle `CONFIG.renommages_activites`, ignorée tant qu'une activité porte encore l'ancien nom (pas d'identifiant) ; « Traitement » ne se
+> renomme pas et aucun nom ne le devient (phyto.js l'attend). Les TRACTEURS se renommaient déjà dans leur fiche : tout les désigne par `tracteurId`.
+> §257 (IDS-1S, non poussé) : renommer un salarié — fiche, tous les registres, clés du planning et de la paie déplacées, téléphone du renommé suit.
+> Harnais `mv-harnais-renom-act` (+ `mv-harnais-renom-membre`). Base `40c3be5`. **APP 8.28 → 8.30, SW 9.06 → 9.08.** Précédent : GNR-2 (§256).
+> Restent pour IDS-1 : rien de prévu — « Renommer » ailleurs si le besoin se présente ; le chat (conversations privées rangées par noms, §257).
 > Consolidations précédentes : `docs/claude/journal.md`.
 
 ---

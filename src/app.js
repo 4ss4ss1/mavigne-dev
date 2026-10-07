@@ -3942,6 +3942,14 @@ function _mvRefreshCurrentUserRoles(){
     var before=_sig(cu);
     cu.roles=m.roles.slice();
     cu.statut=m.statut;
+    // ★★ IDS-1 salariés (§257) — renommé par l'admin : la session prend le nouveau nom (retrouvée par l'ADRESSE), et
+    //   l'empreinte de connexion hors réseau aussi — sinon, sans réseau, sa tuile répondrait « une autre personne ».
+    if(m.nom&&cu.nom!==m.nom){
+      var _ancien=cu.nom; cu.nom=m.nom;
+      try{ var _E=_mvEmpreinteLire(), _k=_mvEmpreinteCle();
+        if(_E&&_k&&String(_E.nom)===String(_ancien)){ _E.nom=String(m.nom); localStorage.setItem(_k, JSON.stringify(_E)); } }
+      catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvRefreshCurrentUserRoles#empreinte'); }
+    }
     if(m.bureau!==undefined) cu.bureau=m.bureau;
     // Modules visibles : meme raison que les roles. currentUser est une reference
     // figee au login et applyFbData REMPLACE le tableau MEMBRES -> sans recopie,

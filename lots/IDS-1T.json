@@ -1,0 +1,32 @@
+{
+  "lot": "IDS-1T",
+  "section": "§258",
+  "base": "40c3be540f97ee4f0f9d9f01fdd3fb76f2a700ca",
+  "inclut": [
+    "IDS-1S"
+  ],
+  "date": "2026-10-07",
+  "fichiers": {
+    ".mv-base": "ceb8dd5c8328374fdea9c9e746163e1563260f3a9264c90176115dc9139a4e3d",
+    "CLAUDE.md": "335d171212d0a51a4012c0b4e060f52ee99261d6ce4ba2b5760b61eddbd42434",
+    "docs/claude/INDEX.md": "f1837c6a5eb33840f7a2255447f38a3cefb73dc2af342b0848219e0c1145ccb1",
+    "docs/claude/chantiers-230-279.md": "4a68d1f192a1ea200f3195c4644570ad6dcc70a1086bfdaf32a5c2c73fe563d3",
+    "docs/claude/journal.md": "8af8c6d682d163598fc1362095f75120a43d4207bee369374fdc7ef2b1b02ca8",
+    "guide/06-tracteur.html": "7b84c3ef87a77e97aaca86cf44087f1664895c29f97722a9928d5be73fc9859b",
+    "guide/12-reglages.html": "f420bd9648a6fc13c03d0e13a17ab7f7fd3aab97065fdac51d1d4097bfe11402",
+    "index.html": "039188c22a415b6adb04961aeda0647aeb1e6e07eae6df2e9b81a221c293a2e0",
+    "public/guide.html": "db114463302d83943163a99cfb2a7d668855c06670a6a205580de98bd0354acb",
+    "public/sitemap.xml": "f66a661c588224ac11087d93f3366bbd86f012895f05c87327739e861eebba2d",
+    "public/sw.js": "d8ffe3a5400e7b1bbe4264a8c1d3aa985fde5a6bbcf3d6e88897b80305a67f8c",
+    "scripts/harnais-claude-md.mjs": "d28b32aa0d843e08c72be4b6e110d4fb3f7dab606c8e541348856b9e09d4906a",
+    "scripts/mv-harnais-liste.mjs": "793324a75d0560b5b07731a536f442266ed87aea6757a83ef0a4c2689f34d678",
+    "scripts/mv-harnais-renom-parc.mjs": "87b2888b1693f183a63f681336f4464801f1e7a5222d403a7c0ec2ba0f25bdb5",
+    "scripts/typo-baseline.json": "db8cc9133209377e20f021e934e590ede3d9bc61a6a061cb51d2c155a5c9a598",
+    "src/app.js": "3564007e77fc0bc95d656349747f84afa29fabc49102e4648d59baecce5556ed",
+    "src/firebase.js": "4578ea62a9f4ac10d06ce5e2227137c623f18964916eda5c230075b4906d4d54",
+    "src/reglages.js": "e1b0d67bc9c4f37c3c33dbf945142181416667c49ab84570aeeaae9fc9dfc8e0",
+    "src/utils.js": "e7ebc0cd8fe034ef2eb47ac1d57b124243ba262efdee5e5164d5fcb71d285c51",
+    "scripts/mv-harnais-renom-act.mjs": "c7560f688ec02fa14d7e340c902cc719a5c7f219b4fb18b80771b5ce7d7eeaac",
+    "scripts/mv-harnais-renom-membre.mjs": "4cc396a0aa1fb2813139f302469d609c1be47aaf9591999f6eb7b8b7a95c502f"
+  }
+}

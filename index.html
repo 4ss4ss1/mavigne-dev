@@ -621,7 +621,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v8.28</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v8.30</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -1375,7 +1375,7 @@
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v8.28</div>
+        <div class="mod-header-sub">Ma Vigne v8.30</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
       
@@ -1483,7 +1483,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg></div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v8.28 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div class="ver-tag">Ma Vigne v8.30 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -1523,6 +1523,28 @@
       <div class="modal-sub">Son historique la suit : journal, tracteur, phyto, vendanges, carte</div>
     </div>
     <div class="modal-body" id="rparc-body"></div>
+  </div>
+</div>
+<!-- IDS-1 salariés (§257) — renommer un salarié (formulaire rempli par openRenMembre, reglages.js). -->
+<div class="overlay" id="ovRenMembre" onclick="closeOv(event,'ovRenMembre')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div class="modal-title">Renommer un salarié</div>
+      <div class="modal-sub">Son compte ne change pas, son historique le suit</div>
+    </div>
+    <div class="modal-body" id="rmem-body"></div>
+  </div>
+</div>
+<!-- IDS-1 activités (§258) — renommer une activité (formulaire rempli par openRenActivite, reglages.js). -->
+<div class="overlay" id="ovRenActivite" onclick="closeOv(event,'ovRenActivite')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div class="modal-title">Renommer une activité</div>
+      <div class="modal-sub">Ses sessions la suivent</div>
+    </div>
+    <div class="modal-body" id="ract-body"></div>
   </div>
 </div>
 <!-- AOC-1 (§255) — les deux fenêtres des appellations (roue crantée de la Cave › Le Millésime), remplies par reglages.js. -->
@@ -3046,7 +3068,7 @@
 
 <div class="overlay" id="ovMembre" onclick="closeOv(event,'ovMembre')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-personne"></use></svg> Nouveau membre</div></div><div class="modal-body"><div class="fl">Prénom</div><input type="text" class="fi" id="nm-nom" placeholder="Prénom"><div class="fl">Email</div><input type="email" class="fi" id="nm-email" placeholder="email@domaine.fr"><div class="fl">Mot de passe <span style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);font-weight:400">(laisser vide — recommandé)</span></div><input type="password" class="fi" id="nm-mdp" placeholder="Vide = généré automatiquement"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);margin:-6px 0 12px;line-height:1.5">Un mot de passe unique et facile à dire sera généré et affiché une seule fois. La personne le remplacera à sa première connexion.</div><div class="fl">Rôles</div><div class="roles-check" id="nm-roles"><div class="role-check-row"><span class="role-check-name"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg> Ouvrier</span><div class="role-chk on" id="rc-ouvrier" onclick="toggleRole('ouvrier')"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg></div></div><div class="role-check-row"><span class="role-check-name"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg> Tractoriste</span><div class="role-chk" id="rc-tractoriste" onclick="toggleRole('tractoriste')"></div></div><div class="role-check-row"><span class="role-check-name"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-ticket"></use></svg> Saisonnier</span><div class="role-chk" id="rc-saisonnier" onclick="toggleRole('saisonnier')"></div></div><div class="role-check-row"><span class="role-check-name"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> Pilotage</span><div class="role-chk" id="rc-pilotage" onclick="toggleRole('pilotage')"></div></div></div><div class="fl">Période (si saisonnier)</div><input type="text" class="fi" id="nm-periode" placeholder="Ex : Juin–Août 2026"><button class="mbtn verte" onclick="saveMembre()">Ajouter</button></div></div></div>
 
-<div class="overlay" id="ovEditMembre" onclick="closeOv(event,'ovEditMembre')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="em-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Modifier membre</div></div><input type="hidden" id="em-nom"><div class="modal-body"><div class="fl">Rôles</div><div class="roles-check" id="em-roles"></div><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel vert" data-val="Actif" onclick="pickVal(this,'em-statut','vert')"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-valide"></use></svg> Actif</div><div class="pchk" data-val="Inactif" onclick="pickVal(this,'em-statut','vert')"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pause"></use></svg> Inactif</div></div><input type="hidden" id="em-statut" value="Actif"><button class="mbtn verte" onclick="saveEditMembre()">Enregistrer</button><button class="mbtn-del" onclick="deleteMembre()">Supprimer</button></div></div></div>
+<div class="overlay" id="ovEditMembre" onclick="closeOv(event,'ovEditMembre')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="em-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Modifier membre</div></div><input type="hidden" id="em-nom"><div class="modal-body"><!-- IDS-1 salariés (§257) : renommer — admin (la fiche l'est). --><button type="button" class="mbtn" id="em-renommer" style="margin-bottom:12px" onclick="openRenMembre()">Renommer ce salarié</button><div class="fl">Rôles</div><div class="roles-check" id="em-roles"></div><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel vert" data-val="Actif" onclick="pickVal(this,'em-statut','vert')"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-valide"></use></svg> Actif</div><div class="pchk" data-val="Inactif" onclick="pickVal(this,'em-statut','vert')"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pause"></use></svg> Inactif</div></div><input type="hidden" id="em-statut" value="Actif"><button class="mbtn verte" onclick="saveEditMembre()">Enregistrer</button><button class="mbtn-del" onclick="deleteMembre()">Supprimer</button></div></div></div>
 
 <!-- ══════ ÉVÉNEMENT D'HISTORIQUE (fiche membre) ══════ -->
 <!-- Se superpose à ovEditMembre : openOv() empile les z-index tout seul. -->
@@ -3237,6 +3259,8 @@
     <div class="modal-hd"><div class="modal-title" id="eat-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Modifier l'activité</div><div class="modal-sub">Admin uniquement</div></div>
     <input type="hidden" id="eat-act-nom">
     <div class="modal-body">
+      <!-- IDS-1 activités (§258) : renommer — admin (la fiche l'est). -->
+      <button type="button" class="mbtn" id="eat-renommer" style="margin-bottom:12px" onclick="openRenActivite()">Renommer cette activité</button>
       <div class="fl">Tracteur par défaut</div>
       <div class="ppicker" id="eat-trac-pick"></div>
       <input type="hidden" id="eat-trac">
@@ -3644,7 +3668,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v8.28</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v8.30</span>
       </div>
     </div>
     <div class="modal-body">

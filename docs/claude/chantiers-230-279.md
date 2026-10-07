@@ -1238,3 +1238,99 @@ largeur** ; la cuve reste à droite des travaux dans tous les cas. Dit à Nico d
 
 ① Le regard de Nico sur ses vraies données, téléphone et ordinateur (§28). ② Libellés longs coupés par des points de suspension (inchangé) ;
 tablette en paysage = mise en page de l'ordinateur.
+
+---
+
+## 257. ★★★ IDS-1, SALARIÉS — RENOMMER UN SALARIÉ (07/10 — `src/reglages.js` · `src/app.js` (`_mvRefreshCurrentUserRoles`) · `src/firebase.js` · `index.html` (bouton + panneau) · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `guide/12-reglages.html` · `scripts/mv-harnais-renom-membre.mjs` (neuf) · `scripts/mv-harnais-renom-parc.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `lots/IDS-1S.json` · **APP 8.28 → 8.29, SW 9.06 → 9.07**, base `40c3be5`)
+
+### 257a. La décision
+
+Nico (07/10) : « vas-y on fait ça » — après confirmation que l'autre session a fini son chantier du planning (MOTIFS-1,
+VUE-EQUIPE-1). Le bouton vit dans la fiche du salarié (Réglages › Équipe), la « maison » de l'équipe, selon sa règle (chaque
+module renomme ce qui lui appartient). Le nom n'était pas modifiable jusqu'ici (`em-nom` caché) : rien ne cassait, rien ne
+se renommait.
+
+### 257b. Ce qui change
+
+- **Le compte ne change pas** : droits et règles tiennent à l'adresse et à l'uid (claims `tenant`, `adm`, `ro`, `off` ; vues
+  `planning_moi_<uid>`), jamais au nom ; même mot de passe.
+- **`_renameMembre(ancien, nouveau, adresse)`** réécrit le nom PARTOUT où il vit (la liste est celle du harnais) : la fiche (par
+  son adresse) ; le journal (`qui`, `membresEquipe`) ; sessions et entretiens (`conducteur`, `qui`, `par`) ; phyto
+  (`conducteur`, `operateur`) ; la liste des conducteurs ; le Chai (opérations : `operateur`, `intervenants` ; analyses :
+  `uploaded_by`) ; le Cuvier (`cuves_vinif[].mesures_fa[].qui`) ; `CONFIG.equipes_jour` ; `CONFIG.home_layout` (clé) ;
+  `CONFIG.mur_mot.par`. Il **DÉPLACE les clés par nom** du planning (`PLANNING_ENTRIES`, `PLANNING_HSUP`, `PLANNING_ACOMPTES`) et
+  de la paie (`taux`, `taux_hist`, `taux_serie` ; appoints GNR : `par`), sans écraser une valeur existante. Inchangés : les
+  archives des campagnes, les documents déjà imprimés.
+- **Règle du domaine** `CONFIG.renommages_membres` (ancien, nouveau, adresse, date, auteur), appliquée par
+  `_mvAppliquerRenommages` après tâches et parcelles, à chaque registre reçu (firebase.js : + membres, entretiens,
+  conducteurs, Chai, planning, paie). Garde-fou : un AUTRE salarié (autre adresse) qui a repris l'ancien nom
+  n'est jamais renommé. Admin : enregistre tout, la paie par `fbSave('paie')` (jamais sur l'appareil) ; ouvrier : mémoire.
+- **Le téléphone du salarié renommé** : `_mvRefreshCurrentUserRoles` (qui le retrouve par l'ADRESSE) pose le nouveau nom sur
+  la session et sur l'empreinte de connexion hors réseau (ENTREE-1 comparait les noms : sans cela, hors réseau, sa tuile
+  répondait « une autre personne »). Le mot de passe et l'empreinte elle-même ne bougent pas.
+- **Refusé** : non-admin, vide, le même, plus de 60 caractères, un caractère de contrôle, le nom d'un autre salarié (sans
+  casse), l'ancien nom d'un AUTRE salarié. Accepté : changer la seule casse.
+- `mv-harnais-renom-parc` : sa vérification de la liste des registres de firebase.js ne fige plus la chaîne (elle s'allonge).
+
+### 257c. Mesuré
+
+- **`mv-harnais-renom-membre`** (neuf) : sur les vraies fonctions et un domaine fictif qui porte le nom
+  dans TOUS les registres — chaque registre réécrit, clés du planning et de la paie déplacées sans perte, archives inchangées,
+  règle posée, tout enregistré (paie par son chemin) ; refus ; un autre téléphone applique la règle (saisie hors ligne
+  comprise), sans boucle, admin enregistre, ouvrier non ; un nouveau salarié au même nom épargné ; SON téléphone : session et
+  empreinte suivent. **28 assertions, 16/16 contre-épreuves.** **Défaut trouvé par le harnais avant livraison** : la sortie rapide de
+  `_mvAppliquerRenommages` (« aucune règle de tâche ni de parcelle → rien ») ignorait les règles des salariés — un autre
+  téléphone n'aurait jamais appliqué un renommage de salarié. **Et un second, vu dans Chromium sur le build** : l'historique
+  des réparations (`REPARATEUR_HIST`) est un OBJET par tracteur, pas une liste — le parcours plantait à mi-chemin (journal et
+  sessions renommés, planning non). Il ne porte d'ailleurs aucun nom : retiré ; tous les parcours passent par `arr()` (une
+  liste, ou rien) ; le harnais prend la forme réelle et une contre-épreuve le vérifie (16/16).
+- **Chromium, sur le build, par le vrai parcours** (fiche du salarié → « Renommer ce salarié » → Renommer) : la fiche renommée,
+  ses 29 entrées du journal et sa session suivent, son planning passe sous le nouveau nom (l'ancienne clé disparaît), le
+  titre de la fiche suit, la règle est posée ; 0 erreur.
+
+### 257d. Ouvert
+
+① **Le chat** : les conversations privées sont rangées par les deux noms (`_dmDoc(a, b)`), les messages portent `auteur` :
+après un renommage, une conversation privée repart à zéro sous le nouveau nom, l'ancienne reste sous l'ancien. À traiter si le
+besoin se présente. ② « Renommer » dans la roue crantée du Tracteur (tracteurs, activités) — le lot suivant.
+
+---
+
+## 258. ★★ IDS-1, ACTIVITÉS — RENOMMER UNE ACTIVITÉ ; LES TRACTEURS, DÉJÀ SÛRS (07/10 — `src/reglages.js` · `src/firebase.js` · `index.html` (bouton + panneau) · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `guide/06-tracteur.html` · `scripts/mv-harnais-renom-act.mjs` (neuf) · `scripts/mv-harnais-renom-membre.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `lots/IDS-1T.json` · **APP 8.29 → 8.30, SW 9.07 → 9.08**, base `40c3be5`, **zip cumulatif avec IDS-1S (§257) non poussé**)
+
+### 258a. Ce qui a été trouvé
+
+Nico (07/10) : « Renommer » dans les autres roues crantées (tracteurs, activités). Inventaire : les **tracteurs** se renomment
+DÉJÀ dans leur fiche (`saveEditTracteur` : `t.nom` est un champ modifiable) et rien ne garde leur nom — sessions et
+entretiens portent `tracteurId`, réparations rangées par `REPARATEUR_HIST[t.id]`, activités par `tracteurDefautId`. Rien à
+faire. Les **activités**, elles, sont désignées par leur NOM dans chaque session (`activite`, tracteur.js) ; leur fiche
+(`openEditActTrac`) ne permettait pas de le changer (`eat-act-nom` caché).
+
+### 258b. Ce qui change
+
+- **« Renommer cette activité »** dans sa fiche (roue crantée du Tracteur › Activités, admin) → `ovRenActivite`.
+- **`_renameActivite`** : ACTIVITES (`nom`) et `SESSIONS[].activite` — le seul endroit qui garde ce nom (les autres usages sont
+  des tables de correspondance en mémoire). Une TÂCHE du même nom (« Rognage ») dans le journal n'est jamais touchée.
+- **Règle du domaine** `CONFIG.renommages_activites`, appliquée à chaque registre reçu (firebase.js : + `activites`). Une
+  activité n'a pas d'identifiant : la règle ne touche à rien tant qu'une activité porte encore l'ancien nom (liste pas encore
+  reçue, ou nom repris) ; un appareil d'admin enregistre les sessions corrigées.
+- **« Traitement » ne se renomme pas, et aucun nom ne le devient** : le registre phyto crée ses sessions avec
+  `activite:'Traitement'` (phyto.js) et le choix des tracteurs de traitement l'attend mot pour mot (tracteur.js, reglages.js).
+- Refus : non-admin, vide, le même, plus de 40 caractères, un caractère de contrôle, le nom d'une autre activité (sans casse),
+  l'ancien nom d'une autre. Accepté : la seule casse.
+- `mv-harnais-renom-membre` : ses deux contre-épreuves qui visaient des chaînes allongées par ce lot sont réalignées (16/16).
+- **Cliquet de poids regravé** (`typo-baseline.json`) : `reglages.js` 449 → 476 Ko, cumul de quatre lots sur deux jours (renommer
+  une parcelle §254, les appellations §255, renommer un salarié §257, une activité §258), chacun sous les 5 %. Si le fichier
+  continue d'enfler, les renommages (parcelles, salariés, activités, règles) pourront sortir dans leur module à eux.
+
+### 258c. Mesuré
+
+- **`mv-harnais-renom-act`** (neuf) : **17 assertions** sur les vraies fonctions — l'activité et ses sessions, les autres
+  intactes, la tâche homonyme épargnée, la règle, tout enregistré ; refus (dont « Traitement » dans les deux sens) ; un autre
+  téléphone réécrit ses sessions (saisie hors ligne comprise), sans boucle, et ne touche à rien tant que la liste n'est pas
+  reçue ; les tracteurs déjà sûrs (nom modifiable, références par identifiant, aucun nom gardé) ; les branchements.
+  **9/9 contre-épreuves.**
+
+### 258d. Ouvert
+
+Rien de prévu pour IDS-1. « Renommer » ailleurs (produits, cuves…) si le besoin se présente ; le chat (§257d).

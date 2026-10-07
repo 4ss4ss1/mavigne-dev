@@ -1,0 +1,27 @@
+{
+  "lot": "IDS-1S",
+  "section": "§257",
+  "base": "40c3be540f97ee4f0f9d9f01fdd3fb76f2a700ca",
+  "inclut": [],
+  "date": "2026-10-07",
+  "fichiers": {
+    ".mv-base": "588cd534490d34b36fd5bd47e662ee42ea73c540ab5936021a1f76231d40cbd1",
+    "CLAUDE.md": "0e58a762b51b94e745e310b7c8f16e4c24258f2ea4ed4ffe147d3a1fab1769c9",
+    "docs/claude/INDEX.md": "75ea18e3b8026cf6b7707074f8d5e3e32a2e8525a60ad1b2602aeb6c1e34d457",
+    "docs/claude/chantiers-230-279.md": "a0b16de2d5ebac5dc4e9263f7c074873e8e2e87a95391767e4c6e65f45042fd2",
+    "docs/claude/journal.md": "a38c89f2fa4b3a60a332a1d178c8eb1375b9763c4d722a83f51c21ff4f96c207",
+    "guide/12-reglages.html": "f420bd9648a6fc13c03d0e13a17ab7f7fd3aab97065fdac51d1d4097bfe11402",
+    "index.html": "5ef054efc85792c40b9d21f42bd8f10b974e1dfa7c75bc35b2dacb2a8a8c32e9",
+    "public/guide.html": "af137dae10c0fcb550e7baadd0a6d4e686f5ad298669dc5dc374fef6a113969d",
+    "public/sitemap.xml": "f66a661c588224ac11087d93f3366bbd86f012895f05c87327739e861eebba2d",
+    "public/sw.js": "3af5de3cadc095b3c20d2a763c062a7e3ede075b32d7cfb331c71b8d75f743a7",
+    "scripts/harnais-claude-md.mjs": "5b5584bf4c40d0bcadf1dcd5b2c066b2d3b2932f2ab4814c369bdaa9f1bef441",
+    "scripts/mv-harnais-liste.mjs": "7a5f0cb212f706c1feee1f44c1faf49ff6b7807dd3dfaf49cdd2ff07b197a576",
+    "scripts/mv-harnais-renom-parc.mjs": "87b2888b1693f183a63f681336f4464801f1e7a5222d403a7c0ec2ba0f25bdb5",
+    "src/app.js": "3564007e77fc0bc95d656349747f84afa29fabc49102e4648d59baecce5556ed",
+    "src/firebase.js": "47775e862ac3f4aef27442f39a1dde197b54df8abaa5a43941816cacc3deba86",
+    "src/reglages.js": "5c5b670b0a9e64b1e51aacac1f201de5a39272f353ed41ffad2482cc6546a741",
+    "src/utils.js": "c32717a8dd983b439d91093203913f07d2ba5bb30e0888813acbe6113eda4c96",
+    "scripts/mv-harnais-renom-membre.mjs": "cd736b2b2464aa62efa332ea6cc313b0c39319b3cf0f2daeb2c97ceffdb30d87"
+  }
+}

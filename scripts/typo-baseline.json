@@ -7,12 +7,12 @@
   "src/app.js": {
     "dur": 153,
     "petit": 60,
-    "ko": 847
+    "ko": 848
   },
   "src/cave.js": {
     "dur": 29,
     "petit": 24,
-    "ko": 563
+    "ko": 562
   },
   "src/cuvier.js": {
     "dur": 0,
@@ -47,7 +47,7 @@
   "src/pilotage.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 858
+    "ko": 859
   },
   "src/planning-vue.js": {
     "dur": 0,
@@ -60,9 +60,9 @@
     "ko": 660
   },
   "src/reglages.js": {
-    "dur": 157,
+    "dur": 155,
     "petit": 86,
-    "ko": 449
+    "ko": 476
   },
   "src/reserve.js": {
     "dur": 19,
@@ -82,16 +82,16 @@
   "src/utils.js": {
     "dur": 6,
     "petit": 2,
-    "ko": 778
+    "ko": 780
   },
   "index.html": {
     "dur": 167,
     "petit": 36,
-    "ko": 351
+    "ko": 355
   },
   "src/styles.css": {
     "dur": 411,
     "petit": 90,
-    "ko": 486
+    "ko": 490
   }
 }

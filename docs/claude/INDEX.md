@@ -301,3 +301,5 @@
 | 254 | 254. ★★★ IDS-1, LOT 4 — RENOMMER UNE PARCELLE (06/10 — `src/reglages.js` · `src/firebase.js` · `index.html`… | `docs/claude/chantiers-230-279.md` |
 | 255 | 255. ★★ AOC-1 — LES APPELLATIONS DANS LA ROUE CRANTÉE DE LA CAVE : DEUX LIGNES, DEUX FENÊTRES (06/10 — `src… | `docs/claude/chantiers-230-279.md` |
 | 256 | 256. ★★ GNR-2 — LA CUVE GNR SE LIT DE NOUVEAU SUR TÉLÉPHONE : LE BLOC TRACTEUR A SA GRILLE (06/10 — `src/pi… | `docs/claude/chantiers-230-279.md` |
+| 257 | 257. ★★★ IDS-1, SALARIÉS — RENOMMER UN SALARIÉ (07/10 — `src/reglages.js` · `src/app.js` (`_mvRefreshCurren… | `docs/claude/chantiers-230-279.md` |
+| 258 | 258. ★★ IDS-1, ACTIVITÉS — RENOMMER UNE ACTIVITÉ ; LES TRACTEURS, DÉJÀ SÛRS (07/10 — `src/reglages.js` · `s… | `docs/claude/chantiers-230-279.md` |

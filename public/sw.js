@@ -1,4 +1,8 @@
-// MA VIGNE — Service Worker v9.06
+// MA VIGNE — Service Worker v9.08
+// v9.08 (07/10/2026) — IDS-1, activites (§258) : renommer une activite (fiche de l'activite, roue crantee du Tracteur, admin) —
+//   sessions reecrites, regle du domaine ; « Traitement » protege. APP 8.29 -> 8.30.
+// v9.07 (07/10/2026) — IDS-1, salaries (§257) : renommer un salarie (fiche, Reglages > Equipe, admin) — tous les registres,
+//   cles du planning et de la paie deplacees, regle du domaine, telephone du salarie (session, empreinte). APP 8.28 -> 8.29.
 // v9.06 (06/10/2026) — GNR-2 (§256) : la cuve GNR se lit de nouveau sur telephone — le bloc tracteur d'Aujourd'hui a sa
 //   propre grille (une carte par ligne sous 1 024 px ; au-dela, travaux 2/3 et cuve 1/3, revision dessous). APP 8.27 -> 8.28.
 // v9.05 (06/10/2026) — AOC-1 (§255) : les appellations quittent Reglages > Domaine pour la roue crantee de la Cave (deux
@@ -4340,7 +4344,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.06';
+const CACHE_NAME   = 'mavigne-v9.08';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4356,7 +4360,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.06 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.08 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4376,7 +4380,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.06 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.08 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

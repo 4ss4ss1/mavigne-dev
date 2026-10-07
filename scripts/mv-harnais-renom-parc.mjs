@@ -119,7 +119,9 @@ async function suite(B) {
   T('le formulaire propose toutes les parcelles, arrachées signalées, et ouvre son panneau', /Les Crais/.test(M.el['rparc-body'].innerHTML) && /Vieille Vigne \(arrachée\)/.test(M.el['rparc-body'].innerHTML) && M.E.ov.join() === 'ovRenParcelle');
   const sec = B.html.slice(B.html.indexOf('<div class="set-sec" id="set-sec-secteurs">'), B.html.indexOf('<div class="set-sec" id="regl-docs-vigne">'));
   T('la ligne vit dans la roue crantée de la Vigne (Parcelles & secteurs météo), son panneau existe', /onclick="openRenParcelle\(\)"/.test(sec) && /<div class="overlay" id="ovRenParcelle"/.test(B.html) && /id="rparc-body"/.test(B.html));
-  T('les données reçues de chaque registre repassent par les règles (firebase.js)', /\^\(config\|parcelles\|journal\|taches\|saisons\|travaux\|sessions\|traitements\|cave_vendange\|kml_polygons\|intrants\)\$/.test(B.fb));
+  /* §257 : la liste s'est allongée des registres des salariés — on vérifie que ceux des PARCELLES y sont tous. */
+  const regFb = (B.fb.match(/\/\^\(([a-z_|]+)\)\$\/\.test\(key\)\) window\._mvAppliquerRenommages\(key\)/) || [, ''])[1].split('|');
+  T('les données reçues de chaque registre repassent par les règles (firebase.js)', ['config', 'parcelles', 'journal', 'sessions', 'traitements', 'cave_vendange', 'kml_polygons', 'intrants'].every(k => regFb.includes(k)));
   return out;
 }
 async function joue(B) { try { return await suite(B); } catch (e) { return [['plantage : ' + (e && e.message), false]]; } }
@@ -142,7 +144,7 @@ const DEF = [
   ['la règle renomme aussi une nouvelle parcelle qui a repris l’ancien nom', B => ({ ...B, reg: B.reg.replace('if(!autre) nP+=_renameParcelle(r.de,r.vers,r.pid)||0;', 'nP+=_renameParcelle(r.de,r.vers,null)||0;') })],
   ['les travaux ne sont pas recalculés', B => ({ ...B, reg: B.reg.replace("  _renameParcelle(oldN,n,p.pid);\n  _rpTravaux();", "  _renameParcelle(oldN,n,p.pid);") })],
   ['la réserve n’est pas enregistrée', B => ({ ...B, reg: B.reg.replace("if(typeof window.saveIntrants==='function') window.saveIntrants();\n  var K=window.KML_POLYGONS_DYNAMIC;", "var K=window.KML_POLYGONS_DYNAMIC;") })],
-  ['les données reçues des registres ne repassent pas par les règles', B => ({ ...B, fb: B.fb.replace('|sessions|traitements|cave_vendange|kml_polygons|intrants)$/', ')$/') })],
+  ['les données reçues des registres ne repassent pas par les règles', B => ({ ...B, fb: B.fb.replace('|sessions|traitements|cave_vendange|kml_polygons|intrants|', '|') })],
 ];
 let rg = 0;
 for (const [n, f] of DEF) {
