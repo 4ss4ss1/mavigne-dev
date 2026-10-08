@@ -4012,6 +4012,14 @@ function _pilObjectifSet(iso){
   try{ if(typeof window.saveData==='function') window.saveData('config'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilObjectifSet'); }
   return true;
 }
+// PRO-1 (§269) : le bouton « Objectif » du cockpit (il affichait un message de démonstration au lieu de régler la date).
+window._pilObjectifRegler=function(iso){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(String(iso||''))) return false;
+  if(!_pilObjectifSet(iso)) return false;
+  _pilFillContent(_pilData());
+  if(window.showToast) window.showToast('Objectif mis à jour','#3D6B27');
+  return true;
+};
 
 // ── Jours ouvrés : objet Date + différence signée ──
 function _pilWdDateObj(n,from,chantier){
@@ -4539,7 +4547,7 @@ function _pilTraiterCalc(){
   //   bande montre la fenêtre sur les 24 heures ; le pied porte le dépliant des jours suivants. La
   //   protection restante a QUITTÉ cette tuile pour sa propre carte (_pilProtCarte, rangée .pil-dec2) :
   //   ses six lignes étiraient toute la rangée des quatre tuiles (Nico, capture du 04/10).
-  var days=_pilTreatDays(), big, bigCol, rai='', ban='', pied='';
+  var days=_pilTreatDays(), big, bigCol, rai='', ban='', pied='', fen=null, risque=false, prochaine='';
   if(days===undefined){ big='\u2014'; bigCol='var(--texte-doux)'; rai='pr\u00e9visions horaires indisponibles'; }
   else {
     var tj=(days||[]).filter(function(x){ return /aujourd/i.test(x.label); })[0] || (days&&days[0]);
@@ -4548,6 +4556,7 @@ function _pilTraiterCalc(){
       var risk=tj.leach||(tj.ppMax!=null&&tj.ppMax>=PIL_TREAT_PP_ALERT);
       rai='sec \u00b7 '+tj.wMax+' km/h \u00b7 '+tj.tMax+'\u00b0 \u00b7 meilleure fen\u00eatre du jour';
       var g0=Math.max(0,Math.min(24,+tj.start||0)), g1=Math.max(g0,Math.min(24,+tj.end||0));
+      fen={g0:g0, g1:g1}; risque=!!risk;   // PRO-1 (§269) : le cockpit dessine sa propre frise des 24 h
       ban='<div class="pil-tz-strip"><i style="left:'+(g0/24*100).toFixed(1)+'%;width:'+((g1-g0)/24*100).toFixed(1)+'%"></i></div>'
         +'<div class="pil-tz-ax pil-t2s"><span>0 h</span><span>12 h</span><span>24 h</span></div>'
         +(risk?'<div class="pil-t2s" style="color:var(--orange)">\u26A0 pluie ensuite \u2014 risque de lessivage</div>':'');
@@ -4555,6 +4564,7 @@ function _pilTraiterCalc(){
       big='Pas aujourd\u2019hui'; bigCol='var(--orange)';
       rai=(tj?('aucune fen\u00eatre \u00b7 '+tj.reason):'aucune fen\u00eatre claire');
       var nxt=(days||[]).filter(function(x){ return x.start!=null; })[0];
+      if(nxt) prochaine=nxt.label+' '+nxt.start+' h \u2192 '+nxt.end+' h';
       if(nxt) ban='<div class="pil-t2s" style="color:var(--vert-med)">prochaine : '+nxt.label+' '+nxt.start+'h\u2192'+nxt.end+'h</div>';
     }
     // \u2605 LES CINQ JOURS ARRIVENT ICI, DERRIERE UN DEPLIANT : fermé, il ne coûte qu'une ligne dans le
@@ -4570,7 +4580,7 @@ function _pilTraiterCalc(){
   var _i=(typeof _mvInfoBtn==='function')?_mvInfoBtn('pil.traitement'):'';
   // ⚠️ `data-mvt="traiter"` EST UN POINT D'ACCROCHE DE LA VISITE GUIDEE, au
   //   meme titre que `.pil-dec` et `.pil-cockpit-card` (§20b). Ne pas renommer.
-  return { big:big, bigCol:bigCol, rai:rai, ban:ban, pied:pied, _i:_i };
+  return { big:big, bigCol:bigCol, rai:rai, ban:ban, pied:pied, _i:_i, fen:fen, risque:risque, prochaine:prochaine };
 }
 // REF-1 (§266) : la tuile garde son dessin ; le calcul est dans _pilTraiterCalc, que le cockpit lit aussi.
 function _pilCkTraiter(){
@@ -4587,7 +4597,10 @@ function _pilCkTraiter(){
 // propose de fixer la priorité ; aucune → la prochaine, avec sa date. Les heures ne décident jamais.
 // ⚠️ `id="pil-prio"` est la cible de la pastille « Nouveau » (WHATS_NEW 8.13) : ne pas renommer.
 // ════════════════════════════════════════════════════════════════════════════
-function _pilCkPrio(d){
+// PRO-1 (§269) : la tâche du moment, lue UNE fois pour la tuile et pour le cockpit — avec la période, les tâches de
+//   l'écran et leur « finie ». Le cockpit appelait _mvTacheDuMoment() sans rien et lisait .nom/.tache/.t sur un moteur
+//   qui rend {mode, taches:[noms]} : la case « Tâche prioritaire » affichait toujours « — ».
+function _pilPrioDuJour(d){
   var data=(d&&d.data)||[], byNom={};
   data.forEach(function(t){ if(t&&t.nom) byNom[t.nom]=t; });
   var M=(typeof window._mvTacheDuMoment==='function')
@@ -4595,6 +4608,10 @@ function _pilCkPrio(d){
         noms:data.map(function(t){ return t&&t.nom; }),
         fini:function(n){ return !byNom[n]||(byNom[n].pct||0)>=100; } })
     : null;
+  return { M:M, byNom:byNom, data:data };
+}
+function _pilCkPrio(d){
+  var _pp=_pilPrioDuJour(d), data=_pp.data, byNom=_pp.byNom, M=_pp.M;
   var _i=(typeof _mvInfoBtn==='function')?_mvInfoBtn('pil.prio'):'';
   var H='<div class="pil-tile2 pil-tz" id="pil-prio"><div class="pil-t2h"><span class="ic">'+_pilIco('cible')+'</span><span class="t">Tâche prioritaire</span>'+_i+'</div>';
   if(!M||!M.taches.length) return H+'<div class="pil-t2b"><div class="pil-t2s">aucune t\u00e2che en cours</div></div></div>';
@@ -5106,32 +5123,45 @@ function _pilCkTracteur(d){
   return H?('<div class="'+cls+'">'+H+'</div>'):'';
 }
 // ── ③ Matériel : la consommation mesurée, tracteur par tracteur ──
+// ★ PRO-1 (§269) — Nico, capture du 08/10 : « ne fait pas pro du tout ». Trois lignes identiques « pas assez de pleins :
+//   réglage 6,0 L/h utilisé », chacune sur trois lignes de texte sous un tiret seul, et des graduations 0-3-6-9-12
+//   réparties à la largeur de leur texte — le « 6 » ne tombait pas sous le trait du réglage. Désormais : une phrase quand
+//   aucun tracteur n'est encore mesuré (ce qu'il faut, et ce qui sert en attendant) ; une ligne par tracteur (nom et ce
+//   qui est noté · la piste · la valeur sur une ligne) ; l'échelle posée en pourcentages, comme les points et les traits.
+//   Sans aucun intervalle noté nulle part, ni piste ni échelle : il n'y aurait rien à y lire.
 function _pilPanelConso(d){
   var tr=(d.tracs||[]); if(!tr.length) return '';
-  var cfgLh=_ecoCfg().conso, L=0, H=0, Hc=0, rows=[], mx=12;
+  var cfgLh=_ecoCfg().conso, L=0, H=0, Hc=0, mx=12, nMes=0, nIv=0;
   var C=tr.map(function(t){ var c=_pilGmConso(t.id); c.nom=t.nom; c.iv.forEach(function(v){ if(!v.ecarte&&v.lh>mx) mx=v.lh; }); return c; });
+  if(cfgLh>mx) mx=cfgLh;
   mx=Math.ceil(mx/3)*3;
-  C.forEach(function(c){
-    if(c.ok){ L+=c.L; H+=c.H; Hc+=c.Hc; }
+  var pc=function(v){ return (Math.max(0,Math.min(v,mx))/mx*100).toFixed(1)+'%'; };
+  var pl=function(n,s){ return n+' '+s+(n>1?'s':''); };
+  C.forEach(function(c){ if(c.ok){ L+=c.L; H+=c.H; Hc+=c.Hc; nMes++; } nIv+=c.iv.length; });
+  var regl=cfgLh>0?'<line x1="'+pc(cfgLh)+'" x2="'+pc(cfgLh)+'" y1="1" y2="23" class="g"/>':'';
+  var rows=C.map(function(c){
     var dots=c.iv.map(function(v){
-      if(v.ecarte) return '<circle cx="99%" cy="50%" r="5" class="e"><title>'+_pilNum(v.l)+' L sans aucune heure notée : écarté</title></circle>';
-      return '<circle cx="'+(Math.min(v.lh,mx)/mx*100).toFixed(1)+'%" cy="50%" r="'+Math.min(9,2.5+v.h/6).toFixed(1)+'" class="d"><title>'+_pilNum(v.l)+' L ÷ '+_pilGmFr(v.h)+' h = '+_pilGmFr(v.lh)+' L/h</title></circle>';
+      if(v.ecarte) return '<circle cx="99%" cy="12" r="4.5" class="e"><title>'+_pilNum(v.l)+' L sans aucune heure notée : écarté</title></circle>';
+      return '<circle cx="'+pc(v.lh)+'" cy="12" r="'+Math.min(8,2.5+v.h/6).toFixed(1)+'" class="d"><title>'+_pilNum(v.l)+' L \u00f7 '+_pilGmFr(v.h)+' h = '+_pilGmFr(v.lh)+' L/h</title></circle>';
     }).join('');
-    var moy=c.ok?'<line x1="'+(c.lh/mx*100).toFixed(1)+'%" x2="'+(c.lh/mx*100).toFixed(1)+'%" y1="2" y2="28" class="m"/>':'';
-    var regl=cfgLh>0?'<line x1="'+(Math.min(cfgLh,mx)/mx*100).toFixed(1)+'%" x2="'+(Math.min(cfgLh,mx)/mx*100).toFixed(1)+'%" y1="0" y2="30" class="g"/>':'';
-    var val=c.ok?('<b>'+_pilGmFr(c.lh)+'</b> L/h<span>'+c.nOk+' intervalle'+(c.nOk>1?'s':'')+' \u00b7 '+Math.round(c.Hc/c.H*100)+' % chrono</span>')
-               :('<b>—</b><span>pas assez de pleins : réglage '+_pilGmFr(cfgLh)+' L/h utilisé</span>');
-    rows.push('<div class="pil-trx-co"><span class="n">'+_pilEsc(c.nom||'Tracteur')+(c.nEc?('<span>'+c.nEc+' écarté'+(c.nEc>1?'s':'')+'</span>'):'')+(c.nSans?('<span>'+c.nSans+' plein'+(c.nSans>1?'s':'')+' sans litres</span>'):'')+'</span>'
-      +'<span class="s"><svg width="100%" height="30" aria-hidden="true"><line x1="0" x2="100%" y1="50%" y2="50%" class="t"/>'+regl+dots+moy+'</svg></span>'
-      +'<span class="v">'+val+'</span></div>');
-  });
-  var ax=''; for(var k=0;k<=mx;k+=mx/4) ax+='<span>'+_pilGmFr(k,k%1?1:0)+(k===mx?' L/h':'')+'</span>';
-  var body=rows.join('')+'<div class="pil-trx-co"><span></span><span class="s pil-trx-ax">'+ax+'</span><span></span></div>'
-    +'<div class="pil-trx-leg"><span><i class="d"></i>un intervalle plein \u2192 plein</span><span><i class="m"></i>moyenne pondérée</span><span><i class="g"></i>réglage actuel</span></div>';
+    var moy=c.ok?'<line x1="'+pc(c.lh)+'" x2="'+pc(c.lh)+'" y1="3" y2="21" class="m"/>':'';
+    var note=[]; if(c.nOk) note.push(pl(c.nOk,'intervalle')); if(c.nEc) note.push(pl(c.nEc,'écarté')); if(c.nSans) note.push(pl(c.nSans,'plein')+' sans litres');
+    var val=c.ok?('<b>'+_pilGmFr(c.lh)+'</b>\u00a0L/h<small>'+Math.round(c.Hc/c.H*100)+'\u00a0% chronométré</small>')
+      :('<span>réglage '+_pilGmFr(cfgLh)+'\u00a0L/h</span><small>pas encore mesuré</small>');
+    return '<li class="pil-cso-r'+(c.ok?'':' sans')+'"><span class="pil-cso-n">'+_pilEsc(c.nom||'Tracteur')+'<small>'+(note.length?note.join(' \u00b7 '):'aucun plein noté avec ses litres')+'</small></span>'
+      +'<span class="pil-cso-s"><svg width="100%" height="24" aria-hidden="true"><line x1="0" x2="100%" y1="12" y2="12" class="t"/>'+regl+dots+moy+'</svg></span>'
+      +'<span class="pil-cso-v">'+val+'</span></li>';
+  }).join('');
+  var ax=''; for(var k=0;k<=mx+1e-9;k+=mx/4) ax+='<span style="left:'+pc(k)+'">'+_pilGmFr(k,k%1?1:0)+(k>=mx-1e-9?'\u00a0L/h':'')+'</span>';
+  var msg=nMes?'':('<p class="pil-cso-msg">Aucun tracteur n\u2019a encore assez de pleins notés avec leurs litres pour être mesuré : il faut au moins '
+    +_PIL_GM_MIN_IV+' intervalles plein \u2192 plein et '+_PIL_GM_MIN_H+' heures notées entre eux. D\u2019ici là, les calculs de carburant prennent le réglage du Tracteur, '+_pilGmFr(cfgLh)+'\u00a0L/h.</p>');
+  var body='<div class="pil-cso'+(nIv?'':' compact')+'">'+msg+'<ul class="pil-cso-l">'+rows+'</ul>'
+    +'<div class="pil-cso-axr" aria-hidden="true"><span></span><span class="pil-cso-ax">'+ax+'</span><span></span></div>'
+    +'<div class="pil-trx-leg"><span><i class="d"></i>un intervalle plein \u2192 plein</span><span><i class="m"></i>moyenne pondérée</span><span><i class="g"></i>réglage actuel</span></div></div>';
   var flotte=H>0?L/H:null;
   return _pilTile('conso','#B85A1A','Consommation mesurée',
-    _pilStat(flotte!=null?_pilGmFr(flotte):'—',' L/h', null),
-    flotte!=null?('litres des pleins ÷ heures notées entre eux \u00b7 campagne \u00b7 '+Math.round(Hc/H*100)+' % des heures chronométrées'):'pas encore assez de pleins notés avec leurs litres',
+    _pilStat(flotte!=null?_pilGmFr(flotte):'—', flotte!=null?' L/h':'', null),
+    flotte!=null?('litres des pleins \u00f7 heures notées entre eux \u00b7 campagne \u00b7 '+Math.round(Hc/H*100)+' % des heures chronométrées'):('pas encore mesurée \u00b7 réglage '+_pilGmFr(cfgLh)+' L/h utilisé'),
     null, body, 'pil.conso');
 }
 
@@ -5213,8 +5243,16 @@ function _pilCk2Modele(d, m){
   // La décision du jour : les mêmes moteurs que les quatre tuiles.
   var tx=function(h){ return String(h==null?'':h).replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim(); };
   var TR=null; try{ TR=_pilTraiterCalc(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#traiter'); }
-  var tm=(typeof window._mvTacheDuMoment==='function')?window._mvTacheDuMoment():null, pNom=tm?(typeof tm==='string'?tm:(tm.nom||tm.tache||tm.t||'')):'';
-  var pT=tDe(pNom);
+  var admin=(typeof window.isAdmin==='function')&&window.isAdmin();
+  var PP=null; try{ PP=_pilPrioDuJour(d).M; }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#prio'); }
+  var pMode=(PP&&PP.mode)||'aucune', pNom=(PP&&PP.taches&&PP.taches[0])||'', pT=(pMode==='choix'||pMode==='aucune')?null:tDe(pNom);
+  var pDt=(PP&&PP.dates&&PP.dates[pNom])||{}, pEq=(PP&&PP.items&&PP.items[0]&&Array.isArray(PP.items[0].equipe))?PP.items[0].equipe.filter(Boolean):[];
+  var pRaison=pMode==='admin'?('Fixée par l\u2019administrateur'+(pEq.length?(', équipe : '+pEq.join(', ')):'')+'.')
+    :pMode==='dates'?((PP.retard&&PP.retard[pNom])?('En retard'+(pDt.fin?', sa fenêtre finissait le '+_pilFmtD(pDt.fin):'')+'.'):('Seule tâche dans ses dates'+(pDt.fin?', jusqu\u2019au '+_pilFmtD(pDt.fin):'')+'.'))
+    :pMode==='prochaine'?('Aucune tâche dans ses dates aujourd\u2019hui : elle commence le '+_pilFmtD(pDt.debut)+'.')
+    :pMode==='choix'?(PP.taches.length+' tâches dans leurs dates en même temps : '+(admin?'à vous de fixer la priorité.':'l\u2019administrateur fixe la priorité.'))
+    :'Aucune tâche en cours sur la période.';
+  pRaison=pRaison.replace(/\.\.$/, '.');   // « jusqu’au 30 nov.. » : la date abrégée porte déjà son point
   var tensV=TS&&TS.rows&&TS.rows.length?(TS.nRouge?(TS.nRouge+' au-delà du maximum'):(TS.nSeuil?(TS.nSeuil+' personne'+(TS.nSeuil>1?'s':'')+' au seuil'):'Personne au seuil')):'';
   var sem=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'], dd=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate());
   var jeudi=new Date(dd); jeudi.setDate(dd.getDate()+3-((dd.getDay()+6)%7)); var s1=new Date(jeudi.getFullYear(),0,4);
@@ -5233,10 +5271,10 @@ function _pilCk2Modele(d, m){
     capMoy:(m&&m.cadH)||0, besoin:(function(){ if(!(m&&m.obj)) return 0; var n=0, x=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()+1); while(x<=m.obj&&n<400){ if(x.getDay()%6) n++; x.setDate(x.getDate()+1); } return n?Math.round((d.totalReste||0)/n):0; })(),
     meteo:meteo, savoir:sv,
     decision:{ pres:{ v:nPres+' sur '+gens.length, raison:absTxt },
-      traiter:TR?{ v:tx(TR.big), raison:tx(TR.rai), bande:tx(TR.ban) }:{ v:'—', raison:'' },
-      prio:pT?{ v:pT.nom, raison:'La tâche du moment, réglée pour toute l\u2019équipe.' }:{ v:'—', raison:'' },
+      traiter:TR?{ v:tx(TR.big), raison:tx(TR.rai), fen:TR.fen||null, risque:!!TR.risque, prochaine:TR.prochaine||'' }:{ v:'—', raison:'' },
+      prio:{ v:pMode==='choix'?'À choisir':(pT?pT.nom:(pNom?nomT(pNom):'—')), raison:pRaison, mode:pMode, choix:pMode==='choix'?PP.taches.map(nomT):null },
       tension:{ v:tensV||'—', raison:tensV?'Travail effectif face au prévu, sur 14 jours.':'' } },
-    prio:pT?pT.id:null, sparkTrav:ph.slice(-14).map(function(x){ return hT?Math.round((hT-x.reste)/hT*1000)/10:0; }), eco:null
+    prio:pT?pT.id:null, admin:admin, sparkTrav:ph.slice(-14).map(function(x){ return hT?Math.round((hT-x.reste)/hT*1000)/10:0; }), eco:null
   };
 }
 window._pilCk2Modele=_pilCk2Modele;
@@ -5970,6 +6008,10 @@ function _pilTabPrs(d){
   if(_pilShow('prs_presences')) H+=_pilPanelPresences(d);
   if(_pilShow('prs_capacite')) H+=_pilPanelCapacite(d);
   H+='</div>';
+  // PRO-1 (§269) : la tension par personne vivait dans l'ancien Aujourd'hui ; la reprise de la maquette (REF-1) l'avait
+  //   retirée de tout l'écran, et « Voir le détail » du cockpit ne menait nulle part. Elle vit ici, avec les présences.
+  var _tc=_pilShow('auj_tension')?_pilCardTension(d):'';
+  if(_tc) H+='<div class="pil-tension-det" id="pil-tension-det">'+_tc+'</div>';
   return H;
 }
 
@@ -10619,6 +10661,9 @@ function _cfmDreEnd(ms){
 // ── Onglet CONFORMITÉ ──
 function _pilTabCfm(d){
   var H='<div class="pil-panels">', any=false;
+  // PRO-1 (§269) : la protection restante des parcelles vivait dans l'ancien Aujourd'hui ; REF-1 l'avait fait
+  //   disparaître de tout l'écran. Elle rejoint la Conformité, avec le cuivre et le délai de rentrée.
+  if(_pilShow('auj_traiter')){ var _pcar=_pilProtCarte(); if(_pcar){ H+=_pcar; any=true; } }
   // Cuivre
   if(_pilShow('cfm_cuivre')){
     any=true;
@@ -11658,6 +11703,12 @@ window._pilGo = function(cible){
     if(cible==='priorite'){
       if(typeof window.openPriorityEdit==='function') window.openPriorityEdit();
       else if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'diag: openPriorityEdit absent'});
+      return;
+    }
+    // Cible INTERNE (PRO-1, §269) : « Voir le détail » de la tension du cockpit — la carte par personne, dans L'équipe.
+    if(cible==='tension'){
+      if(_PIL_TAB!=='equ'){ _PIL_TAB='equ'; _pilSaveTab('equ'); renderPilotage(); }
+      setTimeout(function(){ _pilFlash(document.getElementById('pil-tension-det')); }, 260);
       return;
     }
     // Cible INTERNE (INACTION-1, §218) : Décider, ou vit le simulateur de renfort.

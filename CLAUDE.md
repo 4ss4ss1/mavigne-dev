@@ -3,14 +3,14 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **7 octobre 2026 (IDS-1, activités — zip cumulatif avec IDS-1S non poussé)** — ★★ **RENOMMER UNE ACTIVITÉ** (§258).
-> Fiche de l'activité (roue crantée du Tracteur, admin) : `_renameActivite` réécrit ACTIVITES et `SESSIONS[].activite` (le seul endroit qui garde
-> ce nom) ; règle `CONFIG.renommages_activites`, ignorée tant qu'une activité porte encore l'ancien nom (pas d'identifiant) ; « Traitement » ne se
-> renomme pas et aucun nom ne le devient (phyto.js l'attend). Les TRACTEURS se renommaient déjà dans leur fiche : tout les désigne par `tracteurId`.
-> §257 (IDS-1S, non poussé) : renommer un salarié — fiche, tous les registres, clés du planning et de la paie déplacées, téléphone du renommé suit.
-> Harnais `mv-harnais-renom-act` (+ `mv-harnais-renom-membre`). Base `40c3be5`. **APP 8.28 → 8.30, SW 9.06 → 9.08.** Précédent : GNR-2 (§256).
-> Restent pour IDS-1 : rien de prévu — « Renommer » ailleurs si le besoin se présente ; le chat (conversations privées rangées par noms, §257).
-> Consolidations précédentes : `docs/claude/journal.md`.
+> Dernière consolidation : **8 octobre 2026 (PRO-1)** — ★★ **LE PILOTAGE AU NIVEAU PRO, SUR ORDINATEUR COMME AU TÉLÉPHONE** (§269).
+> Nico (08/10, trois captures) : boutons morts (priorité, agrandir), consommation « pas pro du tout », PC cassé barre ouverte. Causes MESURÉES
+> dans Chromium (§269 : rendu de l'appli dans le bac à sable, recette écrite) : la barre faisait 269 px pour 244 réservés (box-sizing), six marges
+> négatives doublées par le convertisseur de REF-1 (« --16px »), le modèle du cockpit appelait `_mvTacheDuMoment()` sans rien et lisait un contrat
+> qui n'existe pas — le bouchon du harnais REF-1 ÉTAIT le défaut —, un observateur de largeur restait branché après la sortie d'Aujourd'hui.
+> Tension par personne → L'équipe & le matériel ; protection restante → Conformité. Harnais `mv-harnais-pro1` (27 + 13 contre-épreuves) ;
+> `prio`, `gnr-mesure`, `ref1` remis au vrai contrat. Base `1aeb055`. **APP 8.40 → 8.41, SW 9.18 → 9.19.** Précédent : COQ-1 + PAL-1 (§268).
+> ⚠️ Les lots MOUV-1 → COQ-1 (§259 à §268, 07/10) n'étaient pas montés dans cet en-tête : ils sont aux chantiers (`docs/claude/chantiers-230-279.md`).
 
 ---
 
@@ -1831,6 +1831,15 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ PRO-1 — CE QUI RESTE OUVERT (§269, posé le 08/10)
+
+1. **La frise des 24 h de « Traiter ? » n'a pas été vue à l'écran** : le domaine reconstitué n'avait pas de prévisions horaires. Le dessin
+   vient de `_pilTraiterCalc().fen` (harnais) — à regarder sur le vrai domaine un jour de fenêtre.
+2. **Trois colonnes seulement au-delà de 1 150 px de contenu** (`ranger`, seuil de la maquette) : à 1 440 px barre ouverte, Aujourd'hui
+   reste sur deux colonnes. Conforme à la maquette ; à regarder avec Nico sur un grand écran.
+3. **Le rendu du §269 a dû cliquer « Se connecter » par script et simuler `_mvLoadClaims`** : `scripts/e2e-local.mjs` fait un vrai clic
+   et ne simule que la connexion — à rejouer une fois (`npm run test:e2e`) avant de s'y fier.
 
 ### ⚠️ GNR-2 — CE QUI RESTE OUVERT (§256, posé le 06/10)
 

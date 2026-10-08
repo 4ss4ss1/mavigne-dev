@@ -14,7 +14,15 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&a
 const ico = (n, t) => (typeof window._mvIcon === 'function') ? window._mvIcon(n, t || 20) : '';
 const RUB = { home: 'Terrain', phyto: 'Terrain', tracteur: 'Terrain', planning: 'Organisation', cave: 'Cave et réserve', reserve: 'Cave et réserve', pilotage: 'Gestion', reglages: 'Gestion' };
 const ORDRE_RUB = ['Terrain', 'Organisation', 'Cave et réserve', 'Gestion'];
-const ONGLETS_PIL = [['auj', 'Aujourd’hui'], ['avc', 'La campagne'], ['equ', 'L’équipe et les tâches'], ['sim', 'Simuler'], ['eco', 'Économie'], ['an', 'L’année'], ['cfm', 'Conformité']];
+// PRO-1 (§269) : les onglets du Pilotage se LISENT dans _PIL_TABS (une liste écrite ici proposait « Simuler » et
+//   « L’équipe et les tâches », deux noms disparus de la barre ; Archives manquait). Repli : les noms du jour.
+const ONGLETS_PIL_REPLI = [['auj', 'Aujourd’hui'], ['an', 'L’année'], ['avc', 'La campagne'], ['equ', 'L’équipe & le matériel'], ['sim', 'Décider'], ['eco', 'Économie'], ['cfm', 'Conformité'], ['arc', 'Archives']];
+const ongletsPil = () => { const T = window._PIL_TABS; return Array.isArray(T) && T.length ? T.filter(t => Array.isArray(t) && t[0]).map(t => [t[0], String(t[2] || t[0]).replace(/'/g, '’')]) : ONGLETS_PIL_REPLI; };
+const MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || '');
+const TOUCHE = MAC ? '⌘ K' : 'Ctrl K';
+// PRO-1 : sous 1 200 px, la barre reste repliée d'office (le contenu garderait moins de 960 px) ; le choix de la
+//   personne reprend au-dessus. Déplier à la main reste possible à toute largeur.
+const MQ_LARGE = (typeof matchMedia === 'function') ? matchMedia('(min-width: 1200px)') : { matches: true, addEventListener() {} };
 
 // Les rubriques de la barre, dans l'ordre du dock à l'intérieur de chacune.
 window._railRubriques = function (items) {
@@ -31,20 +39,39 @@ function domaine() {
 window._railHtml = function (items, moi, dom) {
   const rub = window._railRubriques(items);
   return '<div class="mv-rail-dom"><img class="mv-rail-logo" src="/icon-192.png" alt=""><span class="mv-rail-lbl"><b>' + esc(dom.nom) + '</b><small>' + esc(dom.sous) + '</small></span></div>'
-    + '<button class="mv-rail-cherche" id="mv-rail-cherche" type="button" aria-label="Rechercher" data-tip="Rechercher, Ctrl K">' + ico('loupe', 18) + '<span class="mv-rail-lbl">Rechercher</span><kbd class="mv-rail-lbl">Ctrl K</kbd></button>'
+    + '<button class="mv-rail-cherche" id="mv-rail-cherche" type="button" aria-label="Rechercher" data-tip="Rechercher, ' + TOUCHE + '">' + ico('loupe', 18) + '<span class="mv-rail-lbl">Rechercher</span><kbd class="mv-rail-lbl">' + TOUCHE + '</kbd></button>'
     + rub.map(r => '<p class="mv-rail-sec"><span class="mv-rail-lbl">' + esc(r.nom) + '</span></p>' + r.items.map(x =>
       '<button class="mv-rail-b" type="button" data-page="' + esc(x.p) + '" data-tip="' + esc(x.l) + '" aria-label="' + esc(x.l) + '">' + ico(x.ic, 20)
       + '<span class="mv-rail-lbl">' + esc(x.l) + '</span>' + (x.p === 'pilotage' ? '<span class="mv-rail-vif" aria-hidden="true"></span>' : '') + '</button>').join('')).join('')
     + '<div class="mv-rail-bas"><div class="mv-rail-moi" data-tip="' + esc(moi.nom + ', ' + moi.role) + '"><span class="mv-rail-av">' + esc(moi.ini) + '</span>'
     + '<span class="mv-rail-lbl"><b>' + esc(moi.nom) + '</b><small>' + esc(moi.role) + '</small></span></div>'
-    + '<button class="mv-rail-plier" id="mv-rail-plier" type="button" aria-expanded="true" aria-label="Réduire la barre" data-tip="Déplier la barre">'
+    + '<button class="mv-rail-plier" id="mv-rail-plier" type="button" aria-expanded="true" aria-label="Réduire la barre" data-tip="Réduire la barre">'
     + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6l-6 6 6 6"/></svg><span class="mv-rail-lbl">Réduire</span></button></div>';
 };
-function ouvert() { try { const v = localStorage.getItem('mv-rail'); return v != null ? v === '1' : window.innerWidth >= 1500; } catch (e) { return window.innerWidth >= 1500; } }
+// Le geste de la personne, pour la session : un redimensionnement reconstruit la barre (_dockBuild) et ne doit pas
+// défaire un dépliage fait à la main sous 1 200 px.
+let manuel = null;
+function ouvert() {
+  if (manuel !== null) return manuel;
+  let v = null; try { v = localStorage.getItem('mv-rail'); } catch (e) { if (window._mvAvale) window._mvAvale(e, 'coquille.js/ouvert'); }
+  const choix = v != null ? v === '1' : window.innerWidth >= 1280;
+  return choix && MQ_LARGE.matches;
+}
+// PRO-1 (§269) : la page change de largeur pendant l'animation de la barre (0,4 s). Une fois la largeur posée, on
+//   prévient tout ce qui se recale sur un redimensionnement de fenêtre (carte des parcelles, graphiques, grilles) :
+//   plier la barre ne redimensionne pas la fenêtre, et ces écrans gardaient leur ancienne largeur.
+let basculeT = 0;
+function apresBascule() {
+  clearTimeout(basculeT);
+  basculeT = setTimeout(() => { try { window.dispatchEvent(new Event('resize')); } catch (e) { if (window._mvAvale) window._mvAvale(e, 'coquille.js/apresBascule'); } }, 460);
+}
 function plier(on, garder) {
+  const avant = document.body.classList.contains('mv-rail-ouvert');
   document.body.classList.toggle('mv-rail-ouvert', !!on);
+  if (avant !== !!on) apresBascule();
   const b = document.getElementById('mv-rail-plier');
-  if (b) { b.setAttribute('aria-expanded', String(!!on)); b.setAttribute('aria-label', on ? 'Réduire la barre' : 'Déplier la barre'); }
+  if (b) { b.setAttribute('aria-expanded', String(!!on)); b.setAttribute('aria-label', on ? 'Réduire la barre' : 'Déplier la barre'); b.setAttribute('data-tip', on ? 'Réduire la barre' : 'Déplier la barre'); }
+  if (garder) manuel = !!on;
   if (garder) { try { localStorage.setItem('mv-rail', on ? '1' : '0'); } catch (e) { if (window._mvAvale) window._mvAvale(e, 'coquille.js/plier'); /* stockage indisponible : le choix vaut pour la session */ } }
 }
 window._railBuild = function () {
@@ -75,7 +102,7 @@ const sansAccent = s => String(s || '').toLowerCase().replace(/[àâä]/g, 'a').
 window._palEntrees = function (items, parcs) {
   const e = [];
   (items || []).forEach(x => e.push({ g: 'Écrans', t: x.l, s: 'Ouvrir le module', ic: x.ic, go: { page: x.p } }));
-  if ((items || []).some(x => x.p === 'pilotage')) ONGLETS_PIL.forEach(([k, l]) => e.push({ g: 'Pilotage', t: l, s: 'Onglet du Pilotage', ic: 'graphique', go: { page: 'pilotage', tab: k } }));
+  if ((items || []).some(x => x.p === 'pilotage')) ongletsPil().forEach(([k, l]) => e.push({ g: 'Pilotage', t: l, s: 'Onglet du Pilotage', ic: 'graphique', go: { page: 'pilotage', tab: k } }));
   (parcs || []).forEach(p => { if (p && p.nom) e.push({ g: 'Parcelles', t: p.nom, s: [p.appellation, p.surface ? String(p.surface).replace('.', ',') + '\u202fha' : ''].filter(Boolean).join(', '), ic: 'feuille', go: { parc: p.nom } }); });
   return e;
 };
@@ -98,7 +125,7 @@ function palMonter() {
   p.setAttribute('role', 'dialog'); p.setAttribute('aria-modal', 'true'); p.setAttribute('aria-label', 'Rechercher dans Ma Vigne');
   p.innerHTML = '<div class="mv-pal-in">' + ico('loupe', 18) + '<input id="mv-pal-q" type="text" placeholder="Une parcelle, un écran, un onglet…" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="mv-pal-l" aria-autocomplete="list"><kbd>Échap</kbd></div>'
     + '<ul class="mv-pal-l" id="mv-pal-l" role="listbox" aria-label="Résultats"></ul>'
-    + '<div class="mv-pal-pied"><span><kbd>↑</kbd><kbd>↓</kbd> pour choisir</span><span><kbd>Entrée</kbd> pour ouvrir</span><span><kbd>Ctrl K</kbd> partout</span></div>';
+    + '<div class="mv-pal-pied"><span><kbd>↑</kbd><kbd>↓</kbd> pour choisir</span><span><kbd>Entrée</kbd> pour ouvrir</span><span><kbd>' + TOUCHE + '</kbd> partout</span></div>';
   document.body.appendChild(v); document.body.appendChild(p);
   v.addEventListener('click', window._palFermer);
   p.addEventListener('click', ev => { const li = ev.target.closest('.mv-pal-i'); if (li) lancer(+li.getAttribute('data-k')); });
@@ -145,4 +172,5 @@ document.addEventListener('keydown', ev => {
   if (ev.key === '/' && !champ && !ouverte) { ev.preventDefault(); window._palOuvrir(); }
 });
 if (MQ_PC.addEventListener) MQ_PC.addEventListener('change', () => { if (!MQ_PC.matches) window._palFermer(); });
+if (MQ_LARGE.addEventListener) MQ_LARGE.addEventListener('change', () => { manuel = null; if (document.body && document.body.classList.contains('mv-avec-rail')) plier(ouvert(), false); });
 })();

@@ -5926,7 +5926,7 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .ck-seg button{position:relative;z-index:1;flex:none;min-height:36px;padding:0 16px;border:0;border-radius:var(--ck-r-full);background:none;color:var(--texte-med);font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;white-space:nowrap;transition:color var(--mv-d2)}
 .ck-seg button[aria-selected="true"]{color:var(--texte)}
 .ck-seg-ind{position:absolute;z-index:0;top:3px;bottom:3px;left:3px;border-radius:var(--ck-r-full);background:var(--seg-ind);box-shadow:0 1px 3px rgba(0,0,0,.14),0 0 0 1px var(--ligne,#ECE6DA);transition:left var(--mv-d3) var(--mv-sortie),width var(--mv-d3) var(--mv-sortie)}
-.ck-carte{position:relative;margin:0 --16px;overflow-x:auto;overflow-y:hidden;background:var(--plan-fond,var(--plan-sol));border-top:1px solid var(--ligne,#ECE6DA);border-bottom:1px solid var(--ligne,#ECE6DA);scrollbar-width:thin;overscroll-behavior-x:contain}
+.ck-carte{position:relative;margin:0 -16px;overflow-x:auto;overflow-y:hidden;background:var(--plan-fond,var(--plan-sol));border-top:1px solid var(--ligne,#ECE6DA);border-bottom:1px solid var(--ligne,#ECE6DA);scrollbar-width:thin;overscroll-behavior-x:contain}
 .ck-carte-in{position:relative;width:100%;min-width:660px;aspect-ratio:1000/720}
 @media (min-width:700px){.ck-carte{margin:0;border:1px solid var(--ligne,#ECE6DA);border-radius:var(--ck-r-md);overflow:hidden}.ck-carte-in{min-width:0}}
 .ck-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -5958,7 +5958,7 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .ck-eq::before{content:"";position:absolute;inset:-5px;border-radius:var(--ck-r-full);border:1.5px solid #D8BC72;opacity:0;animation:halo 2.6s ease-out infinite}
 @keyframes halo{0%{opacity:.75;transform:scale(.92)}80%,100%{opacity:0;transform:scale(1.55)}}
 .ck-av{display:grid;place-items:center;flex:none;width:26px;height:26px;border-radius:50%;background:#1C1813;color:#F0E8D6;border:1.5px solid #D8BC72;font:600 var(--pt-nano,11px)/1 'Outfit',sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.30)}
-.ck-av+.ck-av,.ck-duo .ck-av+.ck-av{margin-left:--8px}
+.ck-av+.ck-av,.ck-duo .ck-av+.ck-av{margin-left:-8px}
 .ck-duo{display:inline-flex}
 .ck-onde{position:absolute;width:14px;height:14px;margin:-8px 0 0 -8px;border-radius:50%;border:2px solid var(--c,var(--or));pointer-events:none;opacity:0;animation:onde 1.3s var(--mv-sortie) forwards}
 .ck-onde.b{animation-delay:.2s}
@@ -5978,7 +5978,7 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 /* ═══ CHANTIERS — la ligne d’avancement du kit, en mouvement ═══ */
 .ck-ch-l{list-style:none;margin:0;padding:0}
 .ck-ch-l>li+li{box-shadow:inset 0 1px 0 var(--ligne,#ECE6DA)}
-.ck-ch{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;align-items:center;width:calc(100% + 16px);margin:2px --8px;padding:12px 8px;border:0;border-radius:var(--ck-r-md);background:transparent;text-align:left;cursor:pointer;transition:background-color var(--mv-d2)}
+.ck-ch{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;align-items:center;width:calc(100% + 16px);margin:2px -8px;padding:12px 8px;border:0;border-radius:var(--ck-r-md);background:transparent;text-align:left;cursor:pointer;transition:background-color var(--mv-d2)}
 .ck-ch.vue{background:var(--hover)}
 @media (hover:hover){.ck-ch:hover{background:var(--hover)}}
 .ck-ch-nom{display:flex;align-items:center;gap:8px;min-width:0;font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)}
@@ -6075,7 +6075,7 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .ck-met-br{width:20px;height:4px;border-radius:2px;background:var(--gris)}
 .ck-met-br.b1{background:var(--vert-med)}.ck-met-br.b05{background:linear-gradient(90deg,var(--gris) 50%,var(--vert-med) 50%)}
 .ck-met-leg{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin:8px 2px 2px;font-size:var(--pt-nano,11px);color:var(--texte-doux)}
-.ck-met-leg i{display:inline-block;width:14px;height:4px;margin-right:--8px;border-radius:2px;background:var(--vert-med)}
+.ck-met-leg i{display:inline-block;width:14px;height:4px;margin-right:-8px;border-radius:2px;background:var(--vert-med)}
 .ck-met-leg i.demi{background:linear-gradient(90deg,var(--gris) 50%,var(--vert-med) 50%)}
 .ck-sv-l{list-style:none;margin:8px 0 0;padding:0}
 .ck-sv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;padding:12px 0;box-shadow:inset 0 1px 0 var(--ligne,#ECE6DA)}
@@ -6098,8 +6098,8 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .ck-sv-l:not(.tout) .ck-sv:nth-child(n+6){display:none}
 
 /* ═══ LA DÉCISION DU JOUR — quatre tuiles aux étages alignés (ALIGN-1) ═══ */
-.ck-dz-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0 --16px -16px;border-top:1px solid var(--ligne,#ECE6DA)}
-@media (min-width:700px){.ck-dz-g{margin:0 -20px --20px}}
+.ck-dz-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0 -16px -16px;border-top:1px solid var(--ligne,#ECE6DA)}
+@media (min-width:700px){.ck-dz-g{margin:0 -20px -20px}}
 .ck-dz{display:flex;flex-direction:column;gap:4px;min-width:0;padding:16px}
 @media (min-width:700px){.ck-dz{padding:16px 20px}}
 .ck-dz:nth-child(odd){border-right:1px solid var(--ligne,#ECE6DA)}
@@ -6288,3 +6288,85 @@ body:not(.mv-rail-ouvert) .mv-rail [data-tip]:hover::after,body:not(.mv-rail-ouv
   body.mv-avec-rail.mv-rail-ouvert #app-root{padding-left:var(--mv-rail-w-ouvert)}
 }
 @media(max-width:1023.98px){.mv-pal,.mv-pal-voile{display:none !important}}
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   ★★ PRO-1 (§269) — LA BARRE LATÉRALE, LE COCKPIT, LA CONSOMMATION MESURÉE
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+/* La barre : ses marges et son filet COMPTENT dans sa largeur. Elle mesurait 269 px (244 + 2 × 12 + 1) pour 244 réservés
+   à gauche de la page, et 101 px repliée pour 76 : le bord gauche de chaque module passait dessous, le bas de la barre
+   sortait de l'écran (« Réduire » coupé) et le champ de recherche débordait. */
+.mv-rail,.mv-rail *,.mv-rail *::before,.mv-rail *::after{box-sizing:border-box}
+.mv-rail-plier svg{flex:none;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mv-rail-dom .mv-rail-lbl,.mv-rail-moi .mv-rail-lbl{min-width:0}
+.mv-rail-dom b,.mv-rail-dom small,.mv-rail-moi b,.mv-rail-moi small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Le cockpit : messages des cases vides */
+.ck-vide{margin:0;padding:8px 0 4px;font-size:var(--pt-txt,12.5px);line-height:1.5;color:var(--texte-doux)}
+.ck-vide[hidden]{display:none}
+.ck-fil-tout[hidden],.ck-sv-tout[hidden]{display:none}
+/* « Traiter ? » : la fenêtre du jour sur 24 heures */
+.ck-dz-fen{display:flex;flex-direction:column;gap:4px;width:100%}
+.ck-dz-fen-piste{position:relative;display:block;height:8px;border-radius:var(--ck-r-full);background:var(--hover)}
+.ck-dz-fen-piste i{position:absolute;top:0;bottom:0;border-radius:var(--ck-r-full);background:var(--vert-med)}
+.ck-dz-fen-ax{position:relative;display:block;height:16px;font-size:var(--pt-nano,11px);color:var(--texte-doux)}
+.ck-dz-fen-ax span{position:absolute;top:0;white-space:nowrap}
+.ck-dz-fen-ax span:nth-child(1){left:0}
+.ck-dz-fen-ax span:nth-child(2){left:50%;transform:translateX(-50%)}
+.ck-dz-fen-ax span:nth-child(3){right:0}
+.ck-dz-alerte{font-size:var(--pt-micro,12px);color:var(--orange)}
+.ck-dz-chips{display:flex;flex-wrap:wrap;gap:4px}
+.ck-dz-chips span{padding:2px 8px;border-radius:var(--ck-r-full);background:var(--hover);font-size:var(--pt-micro,12px);color:var(--texte-med)}
+.ck-dz-note{font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.ck-dz-b:empty{display:none}
+/* La frise de la fin prévue : les étiquettes qui se touchent cèdent la place */
+.ck-fr-bout.masque{visibility:hidden}
+.ck-fr-auj.gauche em{transform:translateX(-4px)}
+.ck-fr-auj.muet em{visibility:hidden}
+/* L'objectif : réglé par le sélecteur de date du système (champ invisible, posé contre le bouton) */
+.ck-v-act{position:relative}
+.ck-obj-in{position:absolute;left:0;bottom:0;width:1px;height:1px;padding:0;border:0;opacity:0;pointer-events:none}
+.ck-obj-lu{border-style:solid;border-color:var(--ligne,#ECE6DA);cursor:default}
+/* Les graphes se mettent à l'échelle pendant qu'une largeur change, au lieu de déborder */
+.ck-gr>svg{display:block;max-width:100%;height:auto}
+/* « Agrandir » : la courbe en grand, au-dessus de la page */
+.ck-agr{position:fixed;inset:0;z-index:85;display:grid;place-items:center;padding:16px}
+.ck-agr[hidden]{display:none}
+.ck-agr-voile{position:absolute;inset:0;background:rgba(10,8,6,.45);opacity:0;transition:opacity var(--mv-d2)}
+.ck-agr-p{position:relative;width:min(1180px,100%);max-height:calc(100dvh - 32px);overflow:auto;padding:20px;border-radius:var(--ck-r-lg);background:var(--bg-card);border:1px solid var(--ligne,#ECE6DA);box-shadow:var(--shadow-lg,0 4px 8px rgba(40,30,15,0.08),0 24px 56px rgba(40,30,15,0.18));opacity:0;transform:translateY(8px) scale(.99);transition:opacity var(--mv-d2),transform var(--mv-d3) var(--mv-sortie)}
+.ck-agr.ouvert .ck-agr-voile,.ck-agr.ouvert .ck-agr-p{opacity:1}
+.ck-agr.ouvert .ck-agr-p{transform:none}
+body.ck-agr-on{overflow:hidden}
+
+/* La consommation mesurée : une ligne par tracteur, l'échelle sous la piste */
+.pil-cso{display:flex;flex-direction:column}
+.pil-cso-msg{margin:0 0 8px;font-size:var(--pt-txt,12.5px);line-height:1.5;color:var(--texte-med)}
+.pil-cso-l{list-style:none;margin:0;padding:0}
+.pil-cso-r,.pil-cso-axr{display:grid;grid-template-columns:minmax(88px,150px) minmax(0,1fr) minmax(104px,auto);align-items:center;gap:4px 16px}
+.pil-cso-r{padding:8px 0;border-top:1px solid var(--ligne,#ECE6DA)}
+.pil-cso-n{min-width:0;font-size:var(--pt-base,14px);font-weight:600;color:var(--texte-med);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pil-cso-n small,.pil-cso-v small{display:block;font-size:var(--pt-nano,11px);font-weight:normal;color:var(--texte-doux);overflow:hidden;text-overflow:ellipsis}
+.pil-cso-s{display:block;min-width:0}
+.pil-cso-s svg{display:block;overflow:visible}
+.pil-cso-s svg .t{stroke:var(--gris-clair);stroke-width:6;stroke-linecap:round}
+.pil-cso-s svg .g{stroke:var(--orange);stroke-width:2;stroke-dasharray:3 2}
+.pil-cso-s svg .d{fill:var(--or);opacity:.6}
+.pil-cso-s svg .e{fill:none;stroke:var(--texte-doux)}
+.pil-cso-s svg .m{stroke:var(--texte);stroke-width:3}
+.pil-cso-v{text-align:right;white-space:nowrap;font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.pil-cso-v b{font-size:var(--pt-sm,17px);font-weight:600;color:var(--texte)}
+.pil-cso-r.sans .pil-cso-v span{color:var(--texte-med)}
+.pil-cso-axr{padding-top:4px}
+.pil-cso-ax{position:relative;display:block;height:16px;font-size:var(--pt-nano,11px);color:var(--texte-doux);font-variant-numeric:tabular-nums}
+.pil-cso-ax span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+.pil-cso-ax span:first-child{transform:none}
+.pil-cso-ax span:last-child{transform:translateX(-100%)}
+.pil-cso.compact .pil-cso-s,.pil-cso.compact .pil-cso-axr,.pil-cso.compact .pil-trx-leg{display:none}
+.pil-cso.compact .pil-cso-r{grid-template-columns:minmax(0,1fr) auto}
+@media (max-width:560px){
+  .pil-cso-r{grid-template-columns:minmax(0,1fr) auto;row-gap:8px}
+  .pil-cso-r .pil-cso-s{grid-column:1/-1;grid-row:2}
+  .pil-cso-axr{grid-template-columns:minmax(0,1fr)}
+  .pil-cso-axr>span:not(.pil-cso-ax){display:none}
+}
+/* La tension par personne, rangée sous les présences dans L'équipe & le matériel */
+.pil-tension-det{margin-top:16px}

@@ -8,6 +8,15 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **7 octobre 2026 (IDS-1, activités — zip cumulatif avec IDS-1S non poussé)** — ★★ **RENOMMER UNE ACTIVITÉ** (§258).
+> Fiche de l'activité (roue crantée du Tracteur, admin) : `_renameActivite` réécrit ACTIVITES et `SESSIONS[].activite` (le seul endroit qui garde
+> ce nom) ; règle `CONFIG.renommages_activites`, ignorée tant qu'une activité porte encore l'ancien nom (pas d'identifiant) ; « Traitement » ne se
+> renomme pas et aucun nom ne le devient (phyto.js l'attend). Les TRACTEURS se renommaient déjà dans leur fiche : tout les désigne par `tracteurId`.
+> §257 (IDS-1S, non poussé) : renommer un salarié — fiche, tous les registres, clés du planning et de la paie déplacées, téléphone du renommé suit.
+> Harnais `mv-harnais-renom-act` (+ `mv-harnais-renom-membre`). Base `40c3be5`. **APP 8.28 → 8.30, SW 9.06 → 9.08.** Précédent : GNR-2 (§256).
+> Restent pour IDS-1 : rien de prévu — « Renommer » ailleurs si le besoin se présente ; le chat (conversations privées rangées par noms, §257).
+> Consolidations précédentes : `docs/claude/journal.md`.
+
 > ★ Consolidation : **7 octobre 2026 (IDS-1, salariés)** — ★★★ **RENOMMER UN SALARIÉ** (§257), dans sa fiche (Réglages › Équipe, admin).
 > Le COMPTE ne change pas (droits = adresse/uid, jamais le nom). `_renameMembre` (reglages.js) réécrit le nom dans TOUS les registres — journal
 > (qui, membresEquipe), sessions/entretiens/réparations, phyto (conducteur, operateur), conducteurs, Chai (operateur, intervenants, uploaded_by),

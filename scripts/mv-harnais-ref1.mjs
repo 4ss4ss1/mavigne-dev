@@ -26,9 +26,16 @@ function modele(S) {
   ctx.window = ctx;
   Object.assign(ctx, { PARCELLES: P, JOURNAL, MEMBRES: [], PLANNING_ENTRIES: {}, METEO_HOURLY: null,
     METEO_DAILY: { time: [0, 1, 2, 3, 4].map(iso), code: [3, 61, 71, 2, 0], tmin: [1, 2, -3, 0, -1], tmax: [6, 5, 4, 7, 8] },
-    tNom: n => ({ Brulage: 'Brûlage' })[n] || n, _mvToday: () => iso(0), _mvTacheDuMoment: () => ({ nom: 'Taille' }) });
+    tNom: n => ({ Brulage: 'Brûlage' })[n] || n, _mvToday: () => iso(0),
+    // PRO-1 (§269) : le VRAI contrat du moteur — {mode, taches:[noms], dates, retard}. L'ancien bouchon rendait {nom},
+    //   c'est-à-dire le défaut lui-même : le modèle lisait .nom et le harnais lui donnait raison. Appelé sans la période
+    //   ni les tâches (l'appel nu de REF-1), il ne répond rien : le défaut ne peut plus passer.
+    _mvTacheDuMoment: o => (o && Array.isArray(o.noms) && typeof o.fini === 'function')
+      ? { mode: 'dates', taches: ['Taille'], items: [], dates: { Taille: { debut: iso(-40), fin: iso(47) } }, retard: {} }
+      : { mode: 'aucune', taches: [], items: [], dates: {}, retard: {} } });
   vm.createContext(ctx); vm.runInContext(S.ck, ctx);
-  vm.runInContext(fnDe(S.pil, 'function _pilEtatEntree(e){') + fnDe(S.pil, 'function _pilCk2Modele(d, m){') + `
+  vm.runInContext(fnDe(S.pil, 'function _pilEtatEntree(e){') + fnDe(S.pil, 'function _pilPrioDuJour(d){') + fnDe(S.pil, 'function _pilCk2Modele(d, m){') + `
+    function _pilFmtD(s){ return String(s || ''); }
     function _rfCd(){ return { taskWindows: [{ nom:'Taille', ws:${ord(-40)}, we:${ord(48)} }, { nom:'Brulage', ws:${ord(-8)}, we:${ord(48)} }] }; }
     function _pilRetards(){ return {}; }
     function _pilTensData(){ return { rows: [{ nom:'Jean', f:98, p:100 }], nRouge:0, nSeuil:0 }; }
@@ -52,7 +59,8 @@ function suite(S) {
   T('l\u2019état des parcelles par tâche, lu au journal (arrachée exclue)', V.etats.taille['Les Crais 1'] === 'faite' && V.etats.taille['Les Charmes'] === 'faite' && V.etats.taille['Les Crais 2'] === 'cours' && V.etats.taille['La Justice 6'] === 'arr');
   T('l\u2019équipe sur le terrain et le fil du jour (l\u2019heure lue dans l\u2019identifiant)', V.equipes.length === 1 && V.equipes[0].parcelle === 'Les Crais 2' && V.equipes[0].noms === 'Hugo et Léa'
     && V.evts.length === 3 && V.evts[0].type === 'commence' && V.evts[1].h === Math.round(.36 * 706 / 1.15 * 10) / 10   /* surface × barème (h_total / surf_total) */);
-  T('la décision du jour : « Traiter ? » et la tension lus dans leurs moteurs, sans balises', V.decision.traiter.raison === 'Hors saison' && V.decision.tension.v === 'Personne au seuil' && V.prio === 'taille');
+  T('la décision du jour : « Traiter ? » et la tension lus dans leurs moteurs, sans balises', V.decision.traiter.raison === 'Hors saison' && V.decision.tension.v === 'Personne au seuil' && V.prio === 'taille'
+    && V.decision.prio.v === 'Taille' && V.decision.prio.mode === 'dates' && /^Seule tâche dans ses dates/.test(V.decision.prio.raison));
   T('la météo des cinq jours, le matériel dans « À savoir », la conformité par les diagnostics', V.meteo.length === 5 && V.meteo[1].ic === 'pluie' && V.meteo[2].ic === 'gel'
     && V.savoir.some(x => x.cat === 'materiel' && x.titre === 'Fendt 208 immobilisé') && V.confN === 1 && V.confTxt === 'Registre à compléter');
   T('la saison dit « d\u2019hiver », la date dit le jour et la semaine ; pas d\u2019économie inventée', V.saisonDe === 'd’hiver' && /semaine \d+$/.test(V.dateTxt) && V.eco === null);
@@ -67,7 +75,7 @@ function suite(S) {
   T('_pilTabAuj monte la maquette avec le modèle réel, et garde l\u2019ancien cockpit en repli',
     S.pil.includes("try{ var _V=_pilCk2Modele(d,m); _V.eco=_pilCk2Eco(d,_V); setTimeout(function(){ try{ window._ck2Monter(_V); }") && S.pil.includes('return window._ck2Squelette(); }') && S.pil.includes('return window._ckAuj({')
     && S.pil.includes("catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#ck2'); }"));
-  T('« Traiter ? » : un seul calcul, lu par la tuile et par le cockpit', S.pil.includes('var X=_pilTraiterCalc(), big=X.big') && S.pil.includes('return { big:big, bigCol:bigCol, rai:rai, ban:ban, pied:pied, _i:_i };'));
+  T('« Traiter ? » : un seul calcul, lu par la tuile et par le cockpit', S.pil.includes('var X=_pilTraiterCalc(), big=X.big') && S.pil.includes('return { big:big, bigCol:bigCol, rai:rai, ban:ban, pied:pied, _i:_i, fen:fen, risque:risque, prochaine:prochaine };'));
   T('le module est importé après cockpit.js, reserve.js reste dernier', /import '\.\/cockpit\.js';[^\n]*\nimport '\.\/cockpit-vue\.js';[^\n]*\n(?:import '[^']+';[^\n]*\n)*import '\.\/reserve\.js';/.test(S.app));
   const css = S.css.slice(S.css.indexOf('★★★ REF-1 (§266)'));
   T('la feuille de la maquette est là, avec ses jetons propres, et l\u2019ancienne feuille est partie',
@@ -84,7 +92,8 @@ if (CONTRE) {
     ['les passages proposés comme tâches simples', 'pil', "var rows=(typeof window._ckPlanTaches==='function')?window._ckPlanTaches(d.data):(d.data||[]);", "var rows=(d.data||[]);"],
     ['le bureau compté dans l\u2019effectif', 'pil', "return p&&!p.bureau; }).map(function(p){ return { nom:p.nom, absent:p.etat!=='present'", "return !!p; }).map(function(p){ return { nom:p.nom, absent:p.etat!=='present'"],
     ['une équipe qui reste après sa validation', 'pil', "if(ev.type==='commence') sur[e.parcelle]=ev; else delete sur[e.parcelle];", "if(ev.type==='commence') sur[e.parcelle]=ev;"],
-    ['des balises dans la décision du jour', 'pil', "traiter:TR?{ v:tx(TR.big), raison:tx(TR.rai), bande:tx(TR.ban) }", "traiter:TR?{ v:TR.big, raison:TR.rai, bande:TR.ban }"],
+    ['des balises dans la décision du jour', 'pil', "traiter:TR?{ v:tx(TR.big), raison:tx(TR.rai), fen:", "traiter:TR?{ v:TR.big, raison:TR.rai, fen:"],
+    ['PRO-1 : la tâche du moment lue par l\u2019appel nu (toujours « — »)', 'pil', "PP=_pilPrioDuJour(d).M;", "PP=window._mvTacheDuMoment();"],
     ['une économie inventée', 'pil', "sparkTrav:ph.slice(-14).map(function(x){ return hT?Math.round((hT-x.reste)/hT*1000)/10:0; }), eco:null", "sparkTrav:[], eco:{}"],
     ['un nom de démonstration revenu', 'vue', "const maisons = []", "const maisons = []; const _demo = 'Marion'"],
     ['une feuille de validation neuve au toucher', 'vue', "if (p && !p.arr && typeof window.openSelParc === 'function') window.openSelParc(p.nom); }", "if (p) remplirFeuille(p); }"],

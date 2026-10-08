@@ -1704,3 +1704,59 @@ l'onglet Économie** (`_pecData`) : mêmes chiffres, même période — jamais l
 - Feuille de la maquette passée à la charte (convertisseur REF-1) ; règles logées dans ses `@media` reprises ; badge et
   petits textes du rail éclaircis ou assombris pour un contraste d'au moins 4,5.
 - **`mv-harnais-coq1`** (neuf). Ouvert : badges d'alerte dans la barre ; mises à jour ciblées du cockpit (`_ck2Maj`).
+
+## 269. ★★ PRO-1 — LE PILOTAGE AU NIVEAU PRO, SUR ORDINATEUR COMME AU TÉLÉPHONE (08/10 — `src/cockpit-vue.js` · `src/pilotage.js` (`_pilPrioDuJour`, `_pilCk2Modele`, `_pilTraiterCalc`, `_pilPanelConso`, `_pilTabPrs`, `_pilTabCfm`, `_pilGo('tension')`, `window._pilObjectifRegler`) · `src/coquille.js` · `src/styles.css` (six marges, feuille PRO-1) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · harnais `pro1` (neuf), `prio`, `gnr-mesure`, `ref1` — APP 8.40 → 8.41 · SW 9.18 → 9.19 — base `1aeb055`)
+
+**Demande (Nico, 08/10, trois captures de téléphone)** : « certains boutons ne fonctionnent pas (priorité, agrandir) ; la présentation
+de consommation ne fait pas pro du tout ; la présentation sur PC du Pilotage est complètement buggée, la barre latérale n'est pas bien
+automatisée quand on la plie et déplie, le reste de l'écran est cassé sur les modules quand pas pliée. Rien n'est pro, fais le tour et
+corrige tout. »
+
+**Les causes, mesurées — pas supposées.** L'appli a été RENDUE dans le bac à sable (recette ci-dessous) à 1 440, 1 280 et 390 px,
+barre ouverte et repliée, avec un domaine reconstitué (28 parcelles, 7 appellations, 4 salariés, une période d'hiver).
+
+| Symptôme | Cause | Correction |
+|---|---|---|
+| Modules « cassés » barre ouverte | `.mv-rail` en `content-box` : 244 + 2 × 12 + 1 = **269 px** pour 244 réservés (`#app-root` padding), 101 pour 76 repliée. Mesure : titres, KPI, « 6 étapes sur 7 », « Salarié » du planning, onglets SOUS la barre | `box-sizing:border-box` sur la barre et ses enfants. Mesuré après : bord droit 244 / 76, rien dessous |
+| Bas de la barre coupé, triangle noir géant en bas à gauche | même cause (100dvh + 24) ; la flèche « Réduire » : un `<svg>` sans taille ni `fill:none` (300 × 150, rempli de noir) | taille 20 px, trait |
+| « Pas bien automatisée » | plier ne redimensionne pas la fenêtre : graphes et carte gardaient leur largeur ; le cockpit ne redessinait ses courbes qu'au changement de DISPOSITION | `apresBascule()` : un `resize` une fois la largeur posée (460 ms), SEULEMENT si l'état change (sinon `_dockBuild` → `plier` → `resize` bouclait) ; `ranger()` redessine à toute largeur (140 ms après la dernière) ; sous 1 200 px la barre se replie d'office ; un dépliage manuel tient malgré `_dockBuild` (`manuel`, la session) |
+| Erreur à chaque sortie d'Aujourd'hui | l'observateur de largeur restait branché sur `#ck-page` disparu → `reading 'clientWidth'` ; « ResizeObserver loop » au pliage — les deux journalisés en ERREUR | `ranger()` se débranche sans page ; une mise en place par image (`rangerBientot`) |
+| « Agrandir » mort | `{}` : instruction vide | `agrandir(true)` : le tracé est DÉPLACÉ dans une boîte au-dessus de la page (identifiants uniques, survol et bulle suivent), Échap / voile / « Fermer » le ramènent |
+| « Changer la priorité » | `data-onglet="dec"` → onglet L'équipe & le matériel | `window.openPriorityEdit()` (admin) — l'ancienne carte faisait déjà ça |
+| Tâche prioritaire « — » + barre d'une autre tâche | `_mvTacheDuMoment()` appelée SANS la période ni les tâches, et lue en `.nom/.tache/.t` — le moteur rend `{mode, taches:[noms], dates, retard}`. Le bouchon de `mv-harnais-ref1` rendait `{nom}` : **il encodait le défaut** | `_pilPrioDuJour(d)`, un seul appel pour la tuile et le cockpit ; raison par mode (admin, dates, retard, prochaine, choix) ; la barre ne suit que la tâche nommée, « À choisir » montre les tâches en concurrence |
+| « ✓ 0 h12 h24 h » | la frise HTML de l'ancienne tuile aplatie en texte (`tx(TR.ban)`) | `_pilTraiterCalc` rend `fen:{g0,g1}`, `risque`, `prochaine` ; le cockpit dessine sa piste de 24 h |
+| Bouton « Objectif » | `data-toast` de la maquette, sans gestionnaire | sélecteur de date du système (`showPicker`), enregistré par `window._pilObjectifRegler` (même chemin que l'ancien champ d'en-tête) ; lecture seule hors admin |
+| Charge restante | graduations écrites pour la démonstration (0-2 500), `if (etroit && l === 'mars') return`, mois qui se chevauchent, zone mesurée partie de DEBUT (triangle, ou « barre » avec deux jours de photos), survol qui prêtait le chiffre du jour aux jours sans photo | `pasNet` (1 / 2 / 2,5 / 5 × 10ⁿ), mois espacés au pixel, zone depuis la première photo, « Pas de mesure ce jour-là » |
+| Plan illisible (titres de 5 px) | une zone sous 420 unités partait seule sur sa ligne ; 7 appellations → colonne de bandeaux, réduite au quart par `aspect-ratio:1000/720` | largeur minimale = celle du titre, le reste selon la surface, 3 par ligne au plus ; proportions du cadre posées sur `PLAN_H` |
+| Cases vides | frise météo vide + légende + « Tout voir (0) » ; « En direct » vide sans phrase | phrases ; « Tout voir » au-delà de 5 lignes, « Tout le fil » au-delà de 4 |
+| Six marges ignorées | le convertisseur de REF-1 a écrit `margin:0 --16px` (et 5 autres) : déclaration invalide, IGNORÉE — carte et décision ne débordaient plus jusqu'aux bords ; Chrome le signalait (« Custom state pseudo classes… :--8px ») | `-16px`, `-8px`, `-20px` |
+| Consommation « pas pro » | trois lignes « pas assez de pleins : réglage 6,0 L/h utilisé » sur trois lignes chacune, un tiret seul, axe en `space-between` (le « 6 » pas sous le trait) | refaite (`pil-cso-*`) : une phrase quand rien n'est mesurable (ce qu'il faut, ce qui sert en attendant), une ligne par tracteur, valeur sur une ligne, échelle posée en % comme points et traits ; sans aucun intervalle : ni piste ni échelle |
+| Vue Économie (vue après coup, §269 v2) | « à 21.27848101265823 € de l'heure » (taux brut dans « Par poste ») ; « 0 € sous le budget de 53 200 € » | taux arrondi au centime, en français ; « Dans le budget de… » sous 100 € d'écart |
+| Divers | « Nico ont validé », « 0 € sous le budget », « 30 nov.. », Ctrl K « Simuler » / « L'équipe et les tâches », squelette `<d<div … ck-tip>` + `';` affiché + un `</div>` de trop | accord, « dans le budget », point unique, onglets lus dans `_PIL_TABS` (⌘ K sur Mac), squelette réparé |
+
+**Deux cartes retrouvées.** REF-1 avait retiré de TOUT le Pilotage la tension par personne et la protection restante (rangée « det » de
+l'ancien Aujourd'hui) — Nico voulait « garder toutes les infos actuelles d'Aujourd'hui » (07/10). Tension → fin de L'équipe & le matériel
+(`#pil-tension-det`, cible de « Voir le détail » via `_pilGo('tension')`) ; protection → tête de Conformité.
+⚠️ **Le coût de l'inaction n'était PAS perdu** : REF-2 (§267) l'a posé dans la vue Économie du cockpit, comme la maquette (tuile « Coût
+de l'inaction » : « Rien à rattraper » ou « + N h, env. X € si rien n'est décidé »), nourri par `_pilCk2Eco` → `_rfPair`/`_rfSim`. La
+première version de ce § le disait sans écran, et la livraison l'annonçait « à trancher » : écrit après avoir cherché dans l'ancien
+`_pilTabAuj`, pas dans `_pilCk2Eco` ni dans `cockpit-vue.js`. Nico l'a corrigé sur une capture de la maquette (08/10). ★ Avant de
+déclarer une carte perdue, chercher son NOM dans les trois fichiers du cockpit (`pilotage.js`, `cockpit.js`, `cockpit-vue.js`) — c'est la règle
+« Vérifier ce qu'on cherche avant de conclure à l'absence » (§24, point 17), oubliée ; le guide, qui la plaçait encore « sous la marge », dit maintenant où elle est.
+
+**Recette : rendre l'appli dans le bac à sable** (le §192b le permettait, personne ne l'avait écrit pour l'appli entière).
+`npm ci --ignore-scripts` ; `npm i puppeteer-core@23 @sparticuz/chromium@131` dans un dossier À PART ; `node scripts/mv-gt-page.mjs` puis
+`npx vite --port 5199 --strictPort` **dans le même appel que le rendu** (un serveur lancé à part meurt entre deux appels). Dans la page :
+réseau coupé hors 127.0.0.1 (interception), `navigator.serviceWorker.register = () => new Promise(() => {})` (un objet sans `update()` casse
+`_mvDemarrer` → le bouton « Se connecter » n'est jamais branché), données par `window.applyFbData`, `window.initLogin()`, connexion simulée :
+`firebase.auth()` remplacé, `window._mvLoadClaims` et `_mvMustChangePwd` simulés, CLIC PAR SCRIPT sur la tuile puis sur « Se connecter »
+(`page.click` tombait à côté), feuille `#ovTerms{display:none!important}` (le domaine reconstitué n'a rien signé). Mesurer par script ce
+qui passe SOUS la barre (`getComputedStyle(rail)`, jamais `offsetParent` : la barre est `fixed`) et ce qui dépasse. ⚠️ Une capture pleine
+page ment sur les éléments fixes : regarder des captures d'écran normales, défilées.
+
+**Contrôles.** `mv-harnais-pro1` : 27 assertions (exécute `pasNet` et `_pilPanelConso` ; lit le reste) + 13 contre-épreuves. Remis au
+vrai contrat : `mv-harnais-prio` (extrait `_pilPrioDuJour`), `mv-harnais-gnr-mesure` (la carte refaite dit la même chose autrement),
+`mv-harnais-ref1` (bouchon `_mvTacheDuMoment` au vrai contrat, + une contre-épreuve « appel nu »). `mv-harnais-typo` regravé :
+`cockpit-vue.js` 82 → 94 Ko — question du découpage posée : non (un seul écran, sous 100 Ko). `mv-harnais-jetons` : une graisse 400 posée
+puis retirée (les pas sont 500 / 600 / 700). Les 283 commandes de `npm run check` jouées par tranches (une commande ne doit pas
+dépasser 5 minutes ici) : vertes.

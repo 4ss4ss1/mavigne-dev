@@ -230,7 +230,9 @@ function scenarios(src, journal) {
     // la conso se calcule sur ENTRETIENS + SESSIONS : on recharge le monde pour la tuile
     const C2 = charger(src);
     const P = C2.ctx._pilPanelConso({ tracs: [{ id: 't1', nom: 'NH' }, { id: 't2', nom: 'Bobard' }] });
-    t('④ tuile conso : 7,7 L/h mesurés pour t1, réglage dit pour t2', P.includes('<b>7,7</b> L/h') && P.includes('réglage 6,0 L/h utilisé'), P.slice(0, 200));
+    // PRO-1 (§269) : la carte est refaite (une ligne par tracteur, la valeur et son unité liées par une espace insécable) ;
+    //   le contrat ne change pas : la mesure de t1 est dite, et t2 dit qu'il tourne au réglage, pas encore mesuré.
+    t('④ tuile conso : 7,7 L/h mesurés pour t1, réglage dit pour t2', /<b>7,7<\/b>\s?L\/h/.test(P) && /réglage 6,0\sL\/h/.test(P) && P.includes('pas encore mesuré'), P.slice(0, 200));
     t('④ tuile conso : la flotte ne compte que les mesures crues (7,7)', P.includes('<b>7,7</b> L/h</span>') || P.includes('<b>7,7</b>'));
     t('④ tuile conso : aucun undefined / NaN', !/undefined|NaN/.test(P));
 

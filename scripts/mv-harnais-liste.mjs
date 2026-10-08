@@ -529,4 +529,6 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-ref2.mjs --contre'],
   ['node scripts/mv-harnais-coq1.mjs'],               // COQ-1 + PAL-1 (§268) : barre latérale et recherche Ctrl K, sur ordinateur
   ['node scripts/mv-harnais-coq1.mjs --contre'],
+  ['node scripts/mv-harnais-pro1.mjs'],               // PRO-1 (§269) : la barre à sa vraie largeur, les boutons du cockpit, la consommation refaite
+  ['node scripts/mv-harnais-pro1.mjs --contre'],
 ];

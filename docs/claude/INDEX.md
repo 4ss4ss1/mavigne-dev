@@ -313,3 +313,4 @@
 | 266 | 266. ★★★ REF-1 — AUJOURD'HUI REPREND LA MAQUETTE VALIDÉE, MONTÉE AVEC LE MODÈLE RÉEL (07/10 — `src/cockpit-… | `docs/claude/chantiers-230-279.md` |
 | 267 | 267. ★★ REF-2 — LA PHOTO ÉCONOMIQUE DU JOUR (07/10 — `src/pilotage.js` (`_pilCk2Eco`, `window._pilEcoExport… | `docs/claude/chantiers-230-279.md` |
 | 268 | 268. ★★ COQ-1 + PAL-1 — LA BARRE LATÉRALE ET LA RECHERCHE CTRL K, SUR ORDINATEUR (07/10 — `src/coquille.js`… | `docs/claude/chantiers-230-279.md` |
+| 269 | 269. ★★ PRO-1 — LE PILOTAGE AU NIVEAU PRO, SUR ORDINATEUR COMME AU TÉLÉPHONE (08/10 — `src/cockpit-vue.js` … | `docs/claude/chantiers-230-279.md` |

@@ -27,6 +27,7 @@ const BASE = {
   part: sansCom(fn(APP, 'function _mvPartTache(out){')),
   save: sansCom(fn(APP, 'function savePriority(){')),
   clear: sansCom(fn(APP, 'function clearPriority(){')),
+  prioJour: sansCom(fn(PIL, 'function _pilPrioDuJour(d){')),   // PRO-1 (§269) : la carte et le cockpit lisent la tâche du moment par elle
   carte: sansCom(fn(PIL, 'function _pilCkPrio(d){')),
   dz: sansCom(fn(PIL, 'function _dzTachesDefaut(){')),
   go: sansCom(PIL.slice(iGo, PIL.indexOf('\n};\n', iGo) + 4)),
@@ -53,7 +54,7 @@ function monde(B, o) {
     _pilEsc: s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'),
     _pilTnom: s => s, _pilNum: n => String(Math.round(Number(n) || 0)), _pilPctColor: () => '#3D6B27' };
   ctx.window = ctx; vm.createContext(ctx);
-  vm.runInContext([B.regle, B.moment, B.defaut, B.part, B.carte, B.dz, B.aux, B.go].join('\n'), ctx);
+  vm.runInContext([B.regle, B.moment, B.defaut, B.part, B.prioJour, B.carte, B.dz, B.aux, B.go].join('\n'), ctx);
   return ctx;
 }
 const sansDivDansBouton = h => { let i = 0; while ((i = h.indexOf('<button', i)) >= 0) { const j = h.indexOf('</button>', i); if (j < 0 || h.slice(i, j).indexOf('<div') >= 0) return false; i = j; } return true; };

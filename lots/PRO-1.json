@@ -1,0 +1,29 @@
+{
+  "lot": "PRO-1",
+  "section": "§269",
+  "base": "1aeb05586b3dcc84f4e1ffc1f732d9b7c0fe5ff4",
+  "inclut": [],
+  "date": "2026-10-08",
+  "fichiers": {
+    ".mv-base": "039a15e2822013057fd0e3f26d4acb922b0402a4c4ebccc9cf31c437356be232",
+    "CLAUDE.md": "8ad2e6cd9b6c89625c374d7da1119caabe11cc0c3847e0c974d0d996e922fc9c",
+    "docs/claude/INDEX.md": "84c346d79d436f00ee44986c2358e51719ffe1d78d17f946755cdd4e85583453",
+    "docs/claude/chantiers-230-279.md": "4748865b054aa514eaf7c522410115a44a900546a0b1078288edb18368abcaca",
+    "docs/claude/journal.md": "40106957481b27cc05d24964c8ae384a1da06400d34c523be09cb991fd3d81a4",
+    "guide/11-pilotage.html": "2789ce343fb2af9e670360b1494c3a49236a35105a1cb19b1088ee1ed3fedd74",
+    "index.html": "9ee68f8cbeac00679da38a8919b5a7989c321b1fa5628e16c8be85d0503a11ef",
+    "public/sw.js": "b38ffd8097f751b8d11b073d33574b59af91210684dbb88ff02bc6b585af2a64",
+    "scripts/harnais-claude-md.mjs": "3071c28f811f94a09cd69faaf3b149aa4f039c3f57dc290e87093587b3887b64",
+    "scripts/mv-harnais-gnr-mesure.mjs": "362c4b660d06203506a72fe9b6582000cf6c69b90cc38908234f85a9a3f52f64",
+    "scripts/mv-harnais-liste.mjs": "781633dbfb593f49d0f22be586257e5095e58582027cf1806b59b38aa221d200",
+    "scripts/mv-harnais-prio.mjs": "b3f0fe729a104e3c77832b3475039886564f7839d58ddb638ee34ad85f473084",
+    "scripts/mv-harnais-ref1.mjs": "8fdb782c19d7546e2093d8e93e3539b0174aaf57b0005a6da34b2568cedddeb5",
+    "scripts/typo-baseline.json": "b02bea86afd3fea894478a66a53a193b3ae4b27612ce0674808f2bb763aa666e",
+    "src/cockpit-vue.js": "741fbb7d85fe399ce5e7f4f713a31a8831e92b97220dc8255bef679652182b3a",
+    "src/coquille.js": "c6ab4170dc75044837f575ab42c160f7afd7ea083b8cb710f283e6c802b9ce46",
+    "src/pilotage.js": "9561e69f2963726bef668d14b849c5fd7129b8987977ab2407ad14b7b49c76e4",
+    "src/styles.css": "b42fd8ffa127f3d30ca97ccc9100837b57d3d95af192e47c1b088ff045c76c25",
+    "src/utils.js": "226bbaa36e85ee9877bfbe54654b5821ac20759f4ef21f08fd7d4c175c2b2957",
+    "scripts/mv-harnais-pro1.mjs": "6b43e6148d6de414e58489ff4633cd01061ab0cc4907c2110bb67458b4f039ff"
+  }
+}

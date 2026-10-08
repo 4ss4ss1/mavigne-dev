@@ -7,7 +7,7 @@
 // toujours), la palette Ctrl K et la barre latérale (lots suivants, pour toute l'appli).
 // La feuille de style de la maquette est passée à la charte (convertisseur REF-1) : section REF-1 de styles.css.
 // ═════════════════════════════════════════════════════════════════════════════════════════════════
-window._ck2Squelette = function () { return '<div class="ck2"><div class="ck-page ck-entree" id="ck-page"> <div class="ck-tete" id="ck-tete"></div> <section class="ck-photos" id="ck-photos" aria-label="Les quatre photos du domaine"></section> <div class="ck-vue ck-gt" id="ck-vue-terrain"> <div class="ck-col" id="ck-t-a"> <section class="ck-verdict" id="ck-verdict" aria-label="Fin prévue des travaux"></section> <section class="ck-decision ck-panneau" id="ck-decision" aria-label="La décision du jour"></section> <aside class="ck-fil ck-panneau" id="ck-fil" aria-label="Fil en direct"></aside> </div> <div class="ck-col" id="ck-t-b"> <section class="ck-plan ck-panneau" id="ck-plan" aria-label="Le domaine en direct"></section> <section class="ck-chant ck-panneau" id="ck-chant" aria-label="Chantiers d’hiver"></section> <section class="ck-courbe ck-panneau" id="ck-courbe" aria-label="Charge restante"></section> </div> <div class="ck-col ck-col-c" id="ck-t-c"> <section class="ck-savoir ck-panneau" id="ck-savoir" aria-label="À savoir"></section> </div> </div> <div class="ck-vue ck-ge" id="ck-vue-eco" hidden> <div class="ck-col" id="ck-e-a"> <section class="ck-ever ck-verdict" id="ck-ever" aria-label="Atterrissage de la campagne"></section> <section class="ck-ekpi" id="ck-ekpi" aria-label="Indicateurs économiques"></section> </div> <div class="ck-col" id="ck-e-b"> <section class="ck-echart ck-panneau" id="ck-echart" aria-label="Dépensé face au fait"></section> <section class="ck-etac ck-panneau" id="ck-etac" aria-label="Écart au barème par tâche"></section> </div> <div class="ck-col ck-col-c" id="ck-e-c"> <section class="ck-epos ck-panneau" id="ck-epos" aria-label="Par poste"></section> <section class="ck-eapp ck-panneau" id="ck-eapp" aria-label="Par appellation"></section> </div> </div> </div> </div><div class="ck-pop" id="ck-pop" role="note" hidden><p></p></div> <d<div class="ck-tip" id="ck-tip" aria-hidden="true"></div>\'; <div class="ck-sr" id="ck-annonce" aria-live="polite"></div></div>'; };
+window._ck2Squelette = function () { return '<div class="ck2"><div class="ck-page ck-entree" id="ck-page"> <div class="ck-tete" id="ck-tete"></div> <section class="ck-photos" id="ck-photos" aria-label="Les quatre photos du domaine"></section> <div class="ck-vue ck-gt" id="ck-vue-terrain"> <div class="ck-col" id="ck-t-a"> <section class="ck-verdict" id="ck-verdict" aria-label="Fin prévue des travaux"></section> <section class="ck-decision ck-panneau" id="ck-decision" aria-label="La décision du jour"></section> <aside class="ck-fil ck-panneau" id="ck-fil" aria-label="Fil en direct"></aside> </div> <div class="ck-col" id="ck-t-b"> <section class="ck-plan ck-panneau" id="ck-plan" aria-label="Le domaine en direct"></section> <section class="ck-chant ck-panneau" id="ck-chant" aria-label="Chantiers d’hiver"></section> <section class="ck-courbe ck-panneau" id="ck-courbe" aria-label="Charge restante"></section> </div> <div class="ck-col ck-col-c" id="ck-t-c"> <section class="ck-savoir ck-panneau" id="ck-savoir" aria-label="À savoir"></section> </div> </div> <div class="ck-vue ck-ge" id="ck-vue-eco" hidden> <div class="ck-col" id="ck-e-a"> <section class="ck-ever ck-verdict" id="ck-ever" aria-label="Atterrissage de la campagne"></section> <section class="ck-ekpi" id="ck-ekpi" aria-label="Indicateurs économiques"></section> </div> <div class="ck-col" id="ck-e-b"> <section class="ck-echart ck-panneau" id="ck-echart" aria-label="Dépensé face au fait"></section> <section class="ck-etac ck-panneau" id="ck-etac" aria-label="Écart au barème par tâche"></section> </div> <div class="ck-col ck-col-c" id="ck-e-c"> <section class="ck-epos ck-panneau" id="ck-epos" aria-label="Par poste"></section> <section class="ck-eapp ck-panneau" id="ck-eapp" aria-label="Par appellation"></section> </div> </div> </div> </div><div class="ck-pop" id="ck-pop" role="note" hidden><p></p></div> <div class="ck-sr" id="ck-annonce" aria-live="polite"></div>'; };
 /* Ma Vigne — maquette « Pilotage › Aujourd’hui », le cockpit vivant.
    Données de démonstration. L’architecture est celle de l’appli : des fonctions
    de dessin qui rendent du HTML, une petite couche d’animation commune (Anim),
@@ -126,7 +126,7 @@ let V = null;
 let AUJ, DEBUT, VISEE, XMAX, TACHES = [], T = {}, PREREQ = {}, GENS = [], EQ = {}, APPS = [], AIDX = {}, BLOCS = [],
   PLAN_H = 720, PARCS = [], PIDX = {}, HA_TOT = 0, ORDRE = {}, TOTAL = 0, YMAX = 500, TAUX = 0, MARGE_BUDGET = 0,
   POSTES = [], HIST = [], METEO = [], T0 = Date.now(), MIN = 60e3, NEXT_ID = 1, SPARK_TRAV = [], SPARK_BUD = [], SPARK_ECART = [];
-const S = { etats: {}, dates: {}, equipes: [], evts: [], vue: null, filtre: null, sel: null, onglet: 'auj', mode: 'terrain' };
+const S = { etats: {}, dates: {}, equipes: [], evts: [], vue: null, filtre: null, sel: null, onglet: 'auj', mode: 'terrain', svTout: false, filTout: false };
 const H_JOUR = 1;
 const effectif = () => (V ? V.presents : 0);
 const capacite = () => 0;
@@ -155,23 +155,27 @@ function disposer(parcs) {
     const c = p.commune || ''; if (!A.com[c]) { A.com[c] = []; A.ordre.push(c); } A.com[c].push(p);
   });
   ordre.sort((x, y) => apps[y].ha - apps[x].ha);
-  const tot = ordre.reduce((s, a) => s + Math.max(apps[a].ha, .05), 0) || 1;
-  const lignes = [], cap = tot / Math.max(1, Math.min(3, Math.ceil(ordre.length / 2)));
-  let cur = [], ha = 0;
-  const etroit = (lg) => { const hl = lg.reduce((s, x) => s + Math.max(apps[x].ha, .05), 0); return lg.some(x => (960 - 18 * (lg.length - 1)) * Math.max(apps[x].ha, .05) / hl < 420); };   // le titre d'une zone (nom, surface, avancement) tient sur une ligne
-  ordre.forEach(a => { const h = Math.max(apps[a].ha, .05); if (cur.length && (ha + h > cap * 1.15 || etroit(cur.concat([a])))) { lignes.push(cur); cur = []; ha = 0; } cur.push(a); ha += h; });
+  // PRO-1 (§269) : une zone a d'abord la largeur qu'il faut pour lire son titre (nom et surface, police de 20 unités),
+  //   puis sa part de la place qui reste, selon sa surface. Avant, une petite appellation voisine d'une grande passait
+  //   sous 420 unités et partait seule sur sa ligne : sept appellations faisaient une colonne de bandeaux, réduite au
+  //   quart dans son cadre — des titres de cinq pixels à l'écran.
+  const ESP = 18, LARG = 960;
+  const minW = a => Math.min(LARG, Math.max(240, Math.round(String(a).length * 11.5 + haTxt(apps[a].ha).length * 9.5 + 40)));
+  const lignes = []; let cur = [], som = 0;
+  ordre.forEach(a => { const m = minW(a); if (cur.length && (som + ESP + m > LARG || cur.length >= 3)) { lignes.push(cur); cur = []; som = 0; } som += (cur.length ? ESP : 0) + m; cur.push(a); });
   if (cur.length) lignes.push(cur);
   APPS = []; BLOCS = []; PARCS = [];
   let y = 44, k = 0;
   lignes.forEach(lg => {
-    const haL = lg.reduce((s, a) => s + Math.max(apps[a].ha, .05), 0);
+    const haL = lg.reduce((s, a) => s + Math.max(apps[a].ha, .05), 0), mins = lg.map(minW);
+    const libre = Math.max(0, LARG - ESP * (lg.length - 1) - mins.reduce((s, v) => s + v, 0));
     const nBlocs = Math.max(...lg.map(a => apps[a].ordre.length));
     const hZ = Math.round(Math.max(104, Math.min(300, 120 + nBlocs * 88)));
     let x = 20;
     lg.forEach((a, i) => {
-      const A = apps[a], w = (960 - 18 * (lg.length - 1)) * Math.max(A.ha, .05) / haL;
+      const A = apps[a], w = mins[i] + libre * Math.max(A.ha, .05) / haL;
       const id = 'a' + APPS.length;
-      APPS.push({ id, nom: a, ecart: 0, f: [x, y, w, hZ] });
+      APPS.push({ id, nom: a, ecart: 0, f: [x, y, w, hZ], minW: mins[i] });
       const nb = A.ordre.length, hb = (hZ - 38 - 14 * (nb - 1)) / nb;
       A.ordre.forEach((c, j) => {
         const x0 = x + 24, x1 = x + w - 24, y0 = y + 38 + j * (hb + 14), y1 = y0 + hb, o = (k++ % 3) * 3 - 3;
@@ -191,7 +195,7 @@ function disposer(parcs) {
         });
         b.cx = (P0[0] + P1[0] + P2[0] + P3[0]) / 4; b.cy = (P0[1] + P1[1] + P2[1] + P3[1]) / 4;
       });
-      x += w + 18;
+      x += w + ESP;
     });
     y += hZ + 44;
   });
@@ -376,8 +380,8 @@ function htmlVerdict(r) {
     + '<span class="ck-fr-mk ck-fr-fin"><em id="ck-fr-fin-l"></em></span>'
     + '<span class="ck-fr-mk ck-fr-visee"><em>Objectif, ' + dCourt(VISEE) + '</em></span>'
     + '<span class="ck-fr-bout">' + dCourt(DEBUT) + '</span></div>'
-    + '<div class="ck-v-act"><button class="ck-obj" type="button" data-toast="Dans l’appli, l’admin règle ici la date de l’objectif">'
-    + 'Objectif : tout fini le <b>' + dLong(VISEE) + '</b>' + ICO.crayon + '</button>'
+    + '<div class="ck-v-act">' + (V.admin ? '<button class="ck-obj" type="button" data-fn="objectif" aria-label="Changer la date de l’objectif">'
+    + 'Objectif : tout fini le <b>' + dLong(VISEE) + '</b>' + ICO.crayon + '</button>' : '<span class="ck-obj ck-obj-lu">Objectif : tout fini le <b>' + dLong(VISEE) + '</b></span>')
     + '<button class="ck-btn ck-btn-pri" type="button" data-onglet="sim">Simuler un renfort</button></div>';
 }
 
@@ -387,24 +391,28 @@ function savoirItems() {
 }
 
 function htmlSavoir(r) {
-  const met = '<div class="ck-met" role="list" aria-label="Météo des cinq prochains jours">' + METEO.map(m =>
+  const items = savoirItems(r);
+  // PRO-1 (§269) : une frise météo vide, sa légende et « Tout voir (0) » s'affichaient quand il n'y avait rien.
+  const met = !METEO.length ? '' : ('<div class="ck-met" role="list" aria-label="Météo des cinq prochains jours">' + METEO.map(m =>
     '<div class="ck-met-j' + (m.ic === 'pluie' ? ' alerte' : '') + '" role="listitem" title="' + esc(m.txt) + '">'
     + '<span class="ck-met-n">' + m.j + '</span>' + '<span class="ck-met-ic ic-' + m.ic + '">' + ICO[m.ic] + '</span>'
     + '<span class="ck-met-t"><b>' + m.tmax + '°</b> ' + m.tmin + '°</span>'
     + '<span class="ck-met-mm">' + (m.mm ? m.mm + '\u202fmm' : '\u00a0') + '</span>'
     + '<span class="ck-met-br b' + String(m.brul).replace('.', '') + '" title="' + (m.brul === 1 ? 'Brûlage possible' : m.brul ? 'Brûlage l’après-midi' : 'Non travaillé') + '"></span></div>').join('') + '</div>'
-    + '<p class="ck-met-leg"><i></i>brûlage possible <i class="demi"></i>l’après-midi seulement</p>';
-  const items = savoirItems(r).map(x => '<li class="ck-sv ck-sv-' + x.cat + (x.prio === 1 ? ' fort' : '') + '"' + (x.id ? ' id="' + x.id + '"' : '') + '>'
+    + '<p class="ck-met-leg"><i></i>brûlage possible <i class="demi"></i>l’après-midi seulement</p>');
+  const lis = items.map(x => '<li class="ck-sv ck-sv-' + x.cat + (x.prio === 1 ? ' fort' : '') + '"' + (x.id ? ' id="' + x.id + '"' : '') + '>'
     + '<span class="ck-sv-ic">' + ICO[x.ic] + '</span>'
     + '<div class="ck-sv-tx"><div class="ck-sv-h"><b>' + esc(x.titre) + '</b><span class="ck-sv-q">' + esc(x.quand) + '</span></div>'
     + '<p class="ck-sv-s">' + esc(x.sous) + '</p>'
     + (x.action ? '<button type="button" class="ck-sv-a"' + (x.onglet ? ' data-onglet="' + x.onglet + '"' : '') + (x.fn ? ' data-fn="' + x.fn + '"' : '')
-      + (x.module ? ' data-module="' + x.module + '"' : '') + (x.toast ? ' data-toast="' + esc(x.toast) + '"' : '') + '>' + x.action + '</button>' : '')
+      + (x.module ? ' data-module="' + x.module + '"' : '') + '>' + x.action + '</button>' : '')
     + '</div></li>').join('');
   return entete('À savoir', 'Ce qui peut changer la journée ou la semaine', 'savoir', null,
       '<span class="ck-prive" title="Les motifs d’absence ne sont visibles que de l’admin">' + ICO.cadenas + 'Admin</span>')
-    + met + '<ul class="ck-sv-l" id="ck-sv-l">' + items + '</ul>'
-    + '<button type="button" class="ck-btn ck-btn-ghost ck-btn-s ck-sv-tout" id="ck-sv-tout" aria-expanded="false">Tout voir (' + savoirItems(r).length + ')</button>';
+    + met + '<ul class="ck-sv-l' + (S.svTout ? ' tout' : '') + '" id="ck-sv-l">' + lis + '</ul>'
+    + (items.length ? '' : '<p class="ck-vide">Rien à signaler pour les jours qui viennent : ni absence, ni fin de contrat, ni retard, ni matériel immobilisé.</p>')
+    + (items.length > 5 ? '<button type="button" class="ck-btn ck-btn-ghost ck-btn-s ck-sv-tout" id="ck-sv-tout" aria-expanded="' + S.svTout + '">'
+      + (S.svTout ? 'Replier' : 'Tout voir (' + items.length + ')') + '</button>' : '');
 }
 
 function htmlDecision() {
@@ -412,17 +420,29 @@ function htmlDecision() {
   const presents = GENS.map(g => '<span class="ck-av-m' + (g.absent ? ' abs' : '') + '" title="' + esc(g.p + (g.absent ? ', ' + (g.motif || 'absent') : '')) + '">' + esc(g.p.charAt(0)) + '</span>').join('');
   const tens = GENS.filter(g => !g.absent && g.tens != null).map(g => '<span class="ck-tn" title="' + esc(g.p) + ' : ' + g.tens + '\u00a0%"><i style="height:' + Math.max(0, Math.min(100, (g.tens - 60) * 2.5)) + '%"'
     + (g.tens > 105 ? ' class="haut"' : '') + '></i><em>' + esc(g.p.charAt(0)) + '</em></span>').join('');
-  const dz = (t, v, raison, bande, pied) => '<div class="ck-dz"' + (t === 'Traiter ?' ? ' data-mvt="traiter"' : '') + '><div class="ck-dz-t">' + t + '</div><div class="ck-dz-v">' + esc(v) + '</div>'
+  const dz = (t, v, raison, bande, pied, attr) => '<div class="ck-dz"' + (attr || '') + '><div class="ck-dz-t">' + t + '</div><div class="ck-dz-v">' + esc(v) + '</div>'
     + '<p class="ck-dz-r">' + esc(raison) + '</p><div class="ck-dz-b">' + bande + '</div><div class="ck-dz-p">' + pied + '</div></div>';
   const p = D.pres || {}, tr = D.traiter || {}, pr = D.prio || {}, te = D.tension || {};
+  // PRO-1 (§269) : la fenêtre de traitement se DESSINE sur 24 heures. Avant, son dessin de l'ancienne tuile était
+  //   aplati en texte et les heures se collaient : « 0 h12 h24 h ».
+  let bTr = '';
+  if (tr.fen) bTr = '<span class="ck-dz-fen"><span class="ck-dz-fen-piste" role="img" aria-label="Fenêtre de traitement de ' + tr.fen.g0 + ' h à ' + tr.fen.g1 + ' h">'
+    + '<i style="left:' + (tr.fen.g0 / 24 * 100).toFixed(1) + '%;width:' + (Math.max(0, tr.fen.g1 - tr.fen.g0) / 24 * 100).toFixed(1) + '%"></i></span>'
+    + '<span class="ck-dz-fen-ax" aria-hidden="true"><span>0 h</span><span>12 h</span><span>24 h</span></span>'
+    + (tr.risque ? '<span class="ck-dz-alerte">Pluie ensuite : risque de lessivage</span>' : '') + '</span>';
+  else if (tr.prochaine) bTr = '<span class="ck-dz-calme">' + ICO.ok + 'Prochaine fenêtre : ' + esc(tr.prochaine) + '</span>';
+  // PRO-1 : la barre ne suit que la tâche NOMMÉE ; « À choisir » montre les tâches qui se disputent la place.
+  let bPr = '';
+  if (V.prio && T[V.prio]) bPr = '<span class="ck-dz-barre"><span class="ck-barre"><i class="b-cours" id="ck-dz-prio-i" style="width:0%"></i></span><span class="ck-dz-pc" id="ck-dz-prio-t"></span></span>';
+  else if (pr.choix && pr.choix.length) bPr = '<span class="ck-dz-chips">' + pr.choix.slice(0, 4).map(n => '<span>' + esc(n) + '</span>').join('') + (pr.choix.length > 4 ? '<span>+' + (pr.choix.length - 4) + '</span>' : '') + '</span>';
+  const piedPr = V.admin ? '<button type="button" class="ck-lien" data-fn="priorite">' + (pr.mode === 'choix' ? 'Choisir la priorité' : 'Changer la priorité') + '</button>'
+    : '<span class="ck-dz-note">L’administrateur fixe la priorité</span>';
   return entete('La décision du jour', 'Quatre questions, quatre réponses, un bouton chacune', 'decision')
     + '<div class="ck-dz-g">'
     + dz('Présences', p.v || '—', p.raison || '', '<span class="ck-avs">' + presents + '</span>', '<button type="button" class="ck-lien" data-module="planning">Ouvrir le planning</button>')
-    + dz('Traiter ?', tr.v || '—', tr.raison || '', '<span class="ck-dz-calme">' + ICO.ok + esc(tr.bande || '') + '</span>', '<button type="button" class="ck-lien" data-module="phyto">Registre phyto</button>')
-    + dz('Tâche prioritaire', pr.v || '—', pr.raison || '',
-      '<span class="ck-dz-barre"><span class="ck-barre"><i class="b-cours" id="ck-dz-prio-i" style="width:0%"></i></span><span class="ck-dz-pc" id="ck-dz-prio-t"></span></span>',
-      '<button type="button" class="ck-lien" data-onglet="dec">Changer la priorité</button>')
-    + dz('Tension de l’équipe', te.v || '—', te.raison || '', '<span class="ck-tns">' + tens + '</span>', '<button type="button" class="ck-lien" data-onglet="equ">Voir le détail</button>')
+    + dz('Traiter ?', tr.v || '—', tr.raison || '', bTr, '<button type="button" class="ck-lien" data-module="phyto">Registre phyto</button>', ' data-mvt="traiter"')
+    + dz('Tâche prioritaire', pr.v || '—', pr.raison || '', bPr, piedPr)
+    + dz('Tension de l’équipe', te.v || '—', te.raison || '', '<span class="ck-tns">' + tens + '</span>', te.v && te.v !== '—' ? '<button type="button" class="ck-lien" data-fn="tension">Voir le détail</button>' : '')
     + '</div>';
 }
 
@@ -434,7 +454,7 @@ function svgPlan() {
       + '<rect class="ck-zone-rail" x="' + (x + 14) + '" y="' + (y - 1.5) + '" width="' + (w - 28) + '" height="3" rx="1.5"/>'
       + '<rect class="ck-zone-prog" id="ck-zp-' + a.id + '" x="' + (x + 14) + '" y="' + (y - 1.5) + '" width="' + (w - 28) + '" height="3" rx="1.5"/>'
       + '<text class="ck-zone-nom" x="' + (x + 4) + '" y="' + (y - 12) + '">' + esc(a.nom) + '<tspan class="ck-zone-ha" dx="12">' + haTxt(ha) + '</tspan></text>'
-      + '<text class="ck-zone-pc" id="ck-zt-' + a.id + '" x="' + (x + w - 4) + '" y="' + (y - 12) + '" text-anchor="end"></text></g>';
+      + (w - (a.minW || 0) >= 150 ? '<text class="ck-zone-pc" id="ck-zt-' + a.id + '" x="' + (x + w - 4) + '" y="' + (y - 12) + '" text-anchor="end"></text>' : '') + '</g>';
   }).join('');
   const lieux = BLOCS.map(b => {
     const [P0, P1] = b.q, a = Math.atan2(P1[1] - P0[1], P1[0] - P0[0]) * 180 / Math.PI;
@@ -462,7 +482,7 @@ function htmlPlan() {
     + '<div class="ck-seg" role="tablist" aria-label="Tâche affichée sur le plan">'
     + TACHES.map(t => '<button type="button" role="tab" data-t="' + t.id + '" aria-selected="' + (t.id === S.vue) + '">' + esc(t.nom) + '</button>').join('')
     + '<span class="ck-seg-ind" aria-hidden="true"></span></div></header>'
-    + '<div class="ck-carte" id="ck-carte"><div class="ck-carte-in">' + svgPlan()
+    + '<div class="ck-carte" id="ck-carte"><div class="ck-carte-in" style="aspect-ratio:1000/' + Math.round(PLAN_H) + '">' + svgPlan()
     + '<div class="ck-calque" id="ck-calque"><div class="ck-etiq" id="ck-etiq" hidden><i></i><span></span></div></div></div></div>'
     + '<div class="ck-leg" role="group" aria-label="Filtrer le plan par état">'
     + LEG.map(([k, l]) => '<button type="button" class="ck-leg-i" data-f="' + k + '" aria-pressed="false"><i class="sw sw-' + k + '"></i>' + l + ' <b id="ck-leg-' + k + '" data-v="0">0</b></button>').join('')
@@ -492,7 +512,9 @@ function htmlChantiers(r) {
 function texteEv(e) {
   const p = PIDX[e.pid], tt = T[e.t];
   const qui = e.eq ? EQ[e.eq].noms : 'Vous';
-  const verbe = e.type === 'valide' ? (e.eq ? 'ont validé ' : 'avez validé ') : (e.eq ? 'ont commencé ' : 'avez commencé ');
+  // PRO-1 (§269) : « Nico ont validé » — le pluriel seulement quand ils sont plusieurs.
+  const pl = !!(e.eq && EQ[e.eq].ini && EQ[e.eq].ini.length > 1);
+  const verbe = e.type === 'valide' ? (e.eq ? (pl ? 'ont validé ' : 'a validé ') : 'avez validé ') : (e.eq ? (pl ? 'ont commencé ' : 'a commencé ') : 'avez commencé ');
   return { titre: qui + ' ' + verbe + tt.art, sous: e.type === 'valide' ? p.nom + ', ' + haTxt(p.ha) : p.nom };
 }
 function htmlEv(e) {
@@ -506,24 +528,31 @@ function htmlEv(e) {
 function htmlFil() {
   return '<header class="ck-p-hd"><div><h2 class="ck-titre-p"><span class="ck-pt-vif ck-pt-fil" aria-hidden="true"></span>En direct</h2>'
     + '<p class="ck-cadre">Ce que l’équipe valide et commence, au fil de la journée</p></div></header>'
-    + '<ol class="ck-fil-l" id="ck-fil-l">' + S.evts.map(htmlEv).join('') + '</ol>'
-    + '<button type="button" class="ck-btn ck-btn-ghost ck-btn-s ck-fil-tout" id="ck-fil-tout" aria-expanded="false">Tout le fil</button>';
+    + '<ol class="ck-fil-l' + (S.filTout ? ' tout' : '') + '" id="ck-fil-l">' + S.evts.map(htmlEv).join('') + '</ol>'
+    + '<p class="ck-vide" id="ck-fil-vide"' + (S.evts.length ? ' hidden' : '') + '>Rien encore aujourd’hui. Les validations et les débuts de chantier de l’équipe s’afficheront ici.</p>'
+    + '<button type="button" class="ck-btn ck-btn-ghost ck-btn-s ck-fil-tout" id="ck-fil-tout" aria-expanded="' + S.filTout + '"' + (S.evts.length > 4 ? '' : ' hidden') + '>' + (S.filTout ? 'Replier' : 'Tout le fil') + '</button>';
 }
 
 /* ── Les graphes — grammaire du kit (MV_GRAPH_COL) : la mesure en terre, le prévu en or,
    le fait en vert, le repère du jour en rouge, tout texte en texte-doux, une unité = un pixel. ── */
-function cadre(w, ymax) {
-  const etroit = w < 560, h = etroit ? 230 : 270;
+function cadre(w, ymax, grand) {
+  // PRO-1 (§269) : en grand (« Agrandir »), la hauteur suit l'écran.
+  const etroit = w < 560, h = grand ? Math.round(Math.max(300, Math.min(window.innerHeight * .62, w * .5))) : (etroit ? 230 : 270);
   const c = { w, h, etroit, padL: etroit ? 40 : 58, padR: 18, padT: 34, padB: 30, ymax };
   c.iw = w - c.padL - c.padR; c.ih = h - c.padT - c.padB;
   c.X = d => c.padL + (d - DEBUT) / (XMAX - DEBUT) * c.iw;
   c.Y = v => c.padT + c.ih * (1 - v / ymax);
   return c;
 }
+// PRO-1 (§269) : un pas rond (1, 2, 2,5 ou 5 × 10ⁿ). Les graduations étaient celles de la démonstration (0 à 2 500).
+function pasNet(max, n) {
+  const brut = Math.max(1, max) / Math.max(1, n), p = Math.pow(10, Math.floor(Math.log10(brut))), q = brut / p;
+  return (q <= 1 ? 1 : q <= 2 ? 2 : q <= 2.5 ? 2.5 : q <= 5 ? 5 : 10) * p;
+}
 const f1 = v => v.toFixed(1);
 function moisReperes() {
   const r = [[DEBUT, MOIS_C[DEBUT.getUTCMonth()]]];
-  for (let d = J(DEBUT.getUTCFullYear(), DEBUT.getUTCMonth() + 2, 1); d <= XMAX; d = J(d.getUTCFullYear(), d.getUTCMonth() + 2, 1)) { if ((d - r[r.length - 1][0]) / 864e5 >= 20) r.push([d, MOIS_C[d.getUTCMonth()]]); }
+  for (let d = J(DEBUT.getUTCFullYear(), DEBUT.getUTCMonth() + 2, 1); d <= XMAX; d = J(d.getUTCFullYear(), d.getUTCMonth() + 2, 1)) r.push([d, MOIS_C[d.getUTCMonth()]]);
   return r;
 }
 function axes(c, ticks, unite) {
@@ -532,20 +561,30 @@ function axes(c, ticks, unite) {
     s += '<line class="ck-c-gl" x1="' + c.padL + '" x2="' + (c.w - c.padR) + '" y1="' + f1(c.Y(v)) + '" y2="' + f1(c.Y(v)) + '"/>'
       + '<text class="ck-c-txt" x="' + (c.padL - 8) + '" y="' + f1(c.Y(v) + 4) + '" text-anchor="end">' + nb(v) + (v === ticks[ticks.length - 1] ? '\u202f' + unite : '') + '</text>';
   });
-  moisReperes().forEach(([d, l]) => {
-    if (c.etroit && l === 'mars') return;
-    s += '<text class="ck-c-txt" x="' + f1(c.X(d) + 2) + '" y="' + (c.h - c.padB + 18) + '">' + l + '</text>';
+  // PRO-1 (§269) : un mois n'a son étiquette que s'il laisse la place à sa voisine (« sept. » et « oct. » se
+  //   recouvraient au téléphone ; la maquette retirait « mars » en dur pour ses propres dates).
+  const ecart = c.etroit ? 30 : 38, L = moisReperes(); let der = -1e9;
+  L.forEach(([d, l], k) => {
+    const x = c.X(d);
+    if (x < c.padL - 1 || x > c.w - c.padR - 14) return;
+    if (k === 0 && L[1] && c.X(L[1][0]) - x < ecart) return;
+    if (x - der < ecart) return;
+    der = x;
+    s += '<text class="ck-c-txt" x="' + f1(x + 2) + '" y="' + (c.h - c.padB + 18) + '">' + l + '</text>';
   });
-  s += '<line class="ck-c-visee" x1="' + f1(c.X(VISEE)) + '" x2="' + f1(c.X(VISEE)) + '" y1="' + (c.padT - 8) + '" y2="' + (c.h - c.padB) + '"/>'
-    + '<text class="ck-c-txt" x="' + f1(c.X(VISEE)) + '" y="' + (c.padT - 14) + '" text-anchor="middle">objectif</text>'
-    + '<line class="ck-c-auj" x1="' + f1(c.X(AUJ)) + '" x2="' + f1(c.X(AUJ)) + '" y1="' + (c.padT - 8) + '" y2="' + (c.h - c.padB) + '"/>'
-    + '<text class="ck-c-txt" x="' + f1(c.X(AUJ)) + '" y="' + (c.padT - 14) + '" text-anchor="middle">aujourd’hui</text>';
+  const xv = c.X(VISEE), xa = c.X(AUJ), bord = x => x < c.padL + 36 ? 'start' : (x > c.w - c.padR - 36 ? 'end' : 'middle'), proches = Math.abs(xv - xa) < 84;
+  s += '<line class="ck-c-visee" x1="' + f1(xv) + '" x2="' + f1(xv) + '" y1="' + (c.padT - 8) + '" y2="' + (c.h - c.padB) + '"/>'
+    + '<text class="ck-c-txt" x="' + f1(xv) + '" y="' + (c.padT - (proches ? 26 : 14)) + '" text-anchor="' + bord(xv) + '">objectif</text>'
+    + '<line class="ck-c-auj" x1="' + f1(xa) + '" x2="' + f1(xa) + '" y1="' + (c.padT - 8) + '" y2="' + (c.h - c.padB) + '"/>'
+    + '<text class="ck-c-txt" x="' + f1(xa) + '" y="' + (c.padT - 14) + '" text-anchor="' + bord(xa) + '">aujourd’hui</text>';
   return s;
 }
 const G = { c: null, w: 0, reste: null, fin: null };
 function htmlCourbe(w) {
-  const c = cadre(w, YMAX); G.c = c; G.w = w;
-  let s = axes(c, c.etroit ? [0, 1000, 2000] : [0, 500, 1000, 1500, 2000, 2500], 'h');
+  const pas = pasNet(TOTAL, w < 560 ? 3 : 5), ymax = Math.max(pas, Math.ceil(TOTAL / pas) * pas), ticks = [];
+  for (let v = 0; v <= ymax + 1e-6; v += pas) ticks.push(v);
+  const c = cadre(w, ymax, G.grand); G.c = c; G.w = w;
+  let s = axes(c, ticks, 'h');
   s += '<path id="ck-c-aire" class="ck-c-aire"/><path id="ck-c-besoin" class="ck-c-besoin"/><path id="ck-c-proj" class="ck-c-proj"/>'
     + '<path id="ck-c-ligne" class="ck-c-ligne"/><circle id="ck-c-pt" class="ck-c-pt" r="4.5"/>'
     + '<g id="ck-c-fin"><rect class="ck-c-fin" x="-5" y="-5" width="10" height="10" rx="1.5" transform="rotate(45)"/><text id="ck-c-fin-l" class="ck-c-txt ck-c-fin-l" y="-13" text-anchor="middle"></text></g>'
@@ -556,16 +595,19 @@ function htmlCourbe(w) {
 }
 function dessinerCourbe(reste, fin) {
   const c = G.c; if (!c) return;
-  const pts = HIST.map(o => [c.X(o.d), c.Y(o.r)]);
+  const pts = HIST.filter(o => o.d < AUJ && o.d >= DEBUT).map(o => [c.X(o.d), c.Y(o.r)]);
   pts.push([c.X(AUJ), c.Y(reste)]);
-  const ligne = 'M' + pts.map(p => f1(p[0]) + ' ' + f1(p[1])).join('L');
+  const ligne = pts.length > 1 ? 'M' + pts.map(p => f1(p[0]) + ' ' + f1(p[1])).join('L') : '';
   const y0 = c.Y(0), xa = c.X(AUJ), ya = c.Y(reste), xf = c.X(fin), xv = c.X(VISEE);
   $('#ck-c-ligne').setAttribute('d', ligne);
-  $('#ck-c-aire').setAttribute('d', ligne + 'L' + f1(xa) + ' ' + f1(y0) + 'L' + f1(c.X(DEBUT)) + ' ' + f1(y0) + 'Z');
+  // PRO-1 (§269) : la zone mesurée part de la PREMIÈRE photo. Elle partait du début de la période : un grand triangle
+  //   (ou, avec deux jours de photos, une grosse barre verticale) là où rien n'a été mesuré.
+  $('#ck-c-aire').setAttribute('d', ligne ? 'M' + f1(pts[0][0]) + ' ' + f1(y0) + 'L' + ligne.slice(1) + 'L' + f1(xa) + ' ' + f1(y0) + 'Z' : '');
   $('#ck-c-proj').setAttribute('d', 'M' + f1(xa) + ' ' + f1(ya) + 'L' + f1(xf) + ' ' + f1(y0));
   $('#ck-c-besoin').setAttribute('d', 'M' + f1(xa) + ' ' + f1(ya) + 'L' + f1(xv) + ' ' + f1(y0));
   const pt = $('#ck-c-pt'); pt.setAttribute('cx', f1(xa)); pt.setAttribute('cy', f1(ya));
   $('#ck-c-fin').setAttribute('transform', 'translate(' + f1(xf) + ' ' + f1(y0) + ')');
+  const fl = $('#ck-c-fin-l'); if (fl) fl.setAttribute('text-anchor', xf > c.w - c.padR - 30 ? 'end' : 'middle');
 }
 
 /* ══ VUE ÉCONOMIE ══ */
@@ -626,7 +668,7 @@ function dessinerEChart(fait, dep, att, fin) {
   $('#ck-e-ld').textContent = nb(att) + '\u202f% du budget';
 }
 function htmlPostes(r) {
-  const lignes = [{ id: 'mo', nom: 'Main-d’œuvre', note: nb(r.hR) + ' h réelles, à ' + TAUX + '\u202f€ de l’heure', budget: r.moBudget, dep: r.moDep, att: r.moAtt }].concat(POSTES);
+  const lignes = [{ id: 'mo', nom: 'Main-d’œuvre', note: nb(r.hR) + ' h réelles, à ' + Number(TAUX || 0).toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + '\u202f€ de l’heure', budget: r.moBudget, dep: r.moDep, att: r.moAtt }].concat(POSTES);
   const max = Math.max(...lignes.map(l => Math.max(l.budget, l.att))) || 1;
   return entete('Par poste', 'Dépensé, et où chaque poste devrait atterrir', 'postes')
     + '<ul class="ck-po-l">' + lignes.map(l => {
@@ -673,8 +715,8 @@ const COUL = { faite: 'var(--et-faite-b)', cours: 'var(--et-cours-b)', afaire: '
 function majResume(r) {
   const n = savoirItems(r).filter(x => x.prio === 1).length;
   const temps = r.ecart > 0 ? r.ecart + ' jour' + (r.ecart > 1 ? 's' : '') + ' d’avance' : r.ecart < 0 ? -r.ecart + ' jours de retard' : 'pile à l’heure';
-  const argent = !V.eco ? '' : (r.sous >= 0 ? eur100(r.sous) + ' sous le budget' : eur100(-r.sous) + ' au-dessus du budget');
-  $('#ck-resume').innerHTML = '<b>' + maj1(temps) + '</b>, ' + (argent ? '<b>' + argent + '</b>, ' : '') + n + ' point' + (n > 1 ? 's' : '') + ' à anticiper.';
+  const argent = !(V.eco && r.budget > 0) ? '' : (Math.abs(r.sous) < 100 ? 'dans le budget' : r.sous > 0 ? eur100(r.sous) + ' sous le budget' : eur100(-r.sous) + ' au-dessus du budget');
+  $('#ck-resume').innerHTML = '<b>' + maj1(temps) + '</b>, ' + (argent ? '<b>' + argent + '</b>, ' : '') + (n ? n + ' point' + (n > 1 ? 's' : '') + ' à anticiper.' : 'rien à anticiper.');
 }
 function majVerdict(r) {
   Anim.rouler($('#ck-v-fin'), dLong(r.fin));
@@ -702,6 +744,11 @@ function majVerdict(r) {
   q('.ck-fr-fin').style.left = fi + '%';
   q('.ck-fr-visee').style.left = v + '%';
   q('.ck-fr-fin').classList.toggle('droite', fi > 70);
+  // PRO-1 (§269) : la date de début cède la place à « Aujourd’hui » quand ils se touchent, et « Aujourd’hui » à
+  //   l'objectif en fin de saison — les deux étiquettes du bas se recouvraient.
+  q('.ck-fr-bout').classList.toggle('masque', a < 16);
+  q('.ck-fr-auj').classList.toggle('gauche', a < 6);
+  q('.ck-fr-auj').classList.toggle('muet', v - a < 22 && v - a > -22);
   $('#ck-fr-fin-l').textContent = 'Fin prévue, ' + dCourt(r.fin);
 }
 function majPhotos(r) {
@@ -711,16 +758,17 @@ function majPhotos(r) {
   $('#ck-ph-bud-c').textContent = 'de la main-d’œuvre, pour ' + nb(r.pct) + '\u00a0% du travail fait';
 }
 function majSavoir(r) {
-  const l = $('#ck-sv-l');
-  const neuf = document.createElement('div');
-  neuf.innerHTML = htmlSavoir(r);
-  const nl = neuf.querySelector('#ck-sv-l');
-  if (l.dataset.h !== nl.innerHTML) { l.dataset.h = nl.innerHTML; l.innerHTML = nl.innerHTML; }
+  const box = $('#ck-savoir'); if (!box) return;
+  const h = htmlSavoir(r);
+  if (box.dataset.h !== h) { box.dataset.h = h; box.innerHTML = h; }
 }
 function majDecision(r) {
-  const x = r.t[V.prio && r.t[V.prio] ? V.prio : S.vue] || { pct: 0 };
-  $('#ck-dz-prio-i').style.width = x.pct.toFixed(2) + '%';
-  $('#ck-dz-prio-t').textContent = nb(x.pct) + '\u00a0%, ' + nb(x.hF) + ' / ' + nb(x.hT) + '\u202fh';
+  // PRO-1 (§269) : la barre suit la tâche prioritaire NOMMÉE, et elle seule (elle montrait la première tâche pas finie).
+  const id = V.prio && r.t[V.prio] ? V.prio : null, i = $('#ck-dz-prio-i'), tx = $('#ck-dz-prio-t');
+  if (!id || !i || !tx) return;
+  const x = r.t[id];
+  i.style.width = x.pct.toFixed(2) + '%';
+  tx.textContent = nb(x.pct) + '\u00a0%, ' + nb(x.hF) + ' / ' + nb(x.hT) + '\u202fh';
 }
 function majPlan(o = {}) {
   const t = S.vue;
@@ -738,7 +786,7 @@ function majPlan(o = {}) {
     const x = R.a[a.id];
     $('#ck-zp-' + a.id).style.transform = 'scaleX(' + (x.pct / 100).toFixed(4) + ')';
     $('#ck-zp-' + a.id).setAttribute('class', 'ck-zone-prog' + (x.pct >= 99.95 ? ' fini' : ''));
-    $('#ck-zt-' + a.id).textContent = T[t].nom + ' : ' + nb(x.pct) + '\u202f%';
+    const zt = $('#ck-zt-' + a.id); if (zt) zt.textContent = T[t].nom + ' : ' + nb(x.pct) + '\u202f%';
   });
   const tot = S.equipes.filter(e => e.parc).length, ici = S.equipes.filter(e => e.parc && e.tache === t).length;
   $('#ck-plan-cadre').textContent = (tot ? tot + ' équipe' + (tot > 1 ? 's' : '') + ' sur le terrain, ' + (ici ? ici + ' sur ' + T[t].art : 'aucune sur ' + T[t].art) : 'Aucune équipe sur le terrain') + ', parcelles rangées par appellation';
@@ -807,6 +855,7 @@ function majChantiers(r, o = {}) {
 }
 function majCourbe(r) {
   $('#ck-gr-cadre').textContent = nb(r.reste) + ' h à faire, ' + nb(r.capMoy) + ' h par jour en moyenne d’ici la fin';
+  const ca = $('#ck-agr-cadre'); if (ca) ca.textContent = $('#ck-gr-cadre').textContent;
   if (!G.c) return;
   const r0 = G.reste, f0 = G.fin, r1 = r.reste, f1v = r.fin;
   if (r0 === r1 && +f0 === +f1v) return;
@@ -836,11 +885,14 @@ function majFil() {
   });
   Anim.glisser(places);
   $$('.ck-ev', ol).slice(40).forEach(li => li.remove());
+  const vide = $('#ck-fil-vide'); if (vide) vide.hidden = S.evts.length > 0;
+  const tout = $('#ck-fil-tout'); if (tout) tout.hidden = S.evts.length <= 4;
 }
 function majEco(r) {
   if (!V.eco) return;
   Anim.rouler($('#ck-ev-att'), eur100(r.att));
-  $('#ck-ev-sous').textContent = (r.sous >= 0 ? eur100(r.sous) + ' sous le budget de ' : eur100(-r.sous) + ' au-dessus du budget de ') + eur100(r.budget);
+  // PRO-1 (§269) : « 0 € sous le budget de… » quand l'atterrissage tombe sur le budget
+  $('#ck-ev-sous').textContent = (Math.abs(r.sous) < 100 ? 'Dans le budget de ' : r.sous > 0 ? eur100(r.sous) + ' sous le budget de ' : eur100(-r.sous) + ' au-dessus du budget de ') + eur100(r.budget);
   const et = $('#ck-ev-etat');
   et.className = 'ck-etat ' + (r.sous >= 0 ? 'ok' : 'ko');
   et.textContent = r.sous >= 0 ? 'Sous le budget' : 'Au-dessus du budget';
@@ -991,7 +1043,6 @@ function choisirMode(m) {
     sv.forEach((el, k) => el.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 700, delay: 80 + k * 40, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' }));
   }
 }
-const ONGLETS = { auj: 'Aujourd’hui', an: '① L’année', camp: '② La campagne', equ: '③ L’équipe et les tâches', sim: '④ Simuler', cave: 'Cave', eco: 'Économie', conf: 'Conformité' };
 function choisirOnglet(k) {
   // Les onglets de la maquette sont ceux du Pilotage : on y va pour de vrai.
   const M = { camp: 'avc', equ: 'equ', sim: 'sim', eco: 'eco', conf: 'cfm', dec: 'equ', an: 'an' };
@@ -1053,7 +1104,16 @@ function suivreCourbe(ev) {
   const jour = jourSous(ev, c, svg);
   if (!jour) { cacherTip(); return; }
   let v, quoi;
-  if (jour < AUJ) { const h = HIST.find(o => +o.d === +jour); v = h ? h.r : G.reste; quoi = 'Reste mesuré'; }
+  if (jour < AUJ) {
+    const h = HIST.find(o => +o.d === +jour);
+    if (!h) {   // PRO-1 (§269) : pas de photo ce jour-là — on le dit, au lieu de prêter le chiffre d'aujourd'hui
+      $('#ck-c-gpt').style.opacity = 0; const gl0 = $('#ck-c-guide'), gx0 = c.X(jour);
+      gl0.setAttribute('x1', gx0); gl0.setAttribute('x2', gx0); gl0.style.opacity = 1;
+      tip.innerHTML = '<b>' + JOURS_C[jour.getUTCDay()] + ' ' + dCourt(jour) + '</b><span>Pas de mesure ce jour-là</span>';
+      placerTip(tip, c, gx0, c.padT + c.ih / 2); return;
+    }
+    v = h.r; quoi = 'Reste mesuré';
+  }
   else if (+jour === +AUJ) { v = G.reste; quoi = 'Reste aujourd’hui'; }
   else if (jour <= G.fin) { v = G.reste * (1 - (jour - AUJ) / (G.fin - AUJ)); quoi = 'Projection'; }
   else { v = 0; quoi = 'Travaux finis'; }
@@ -1101,17 +1161,78 @@ const RANGS = {
        moyen: [['ever', 'ekpi', 'epos'], ['echart', 'etac', 'eapp'], []],
        petit: [['ever', 'ekpi', 'echart', 'epos', 'eapp', 'etac'], [], []] },
 };
+let rangerRaf = 0, redimT = 0;
+function rangerBientot() { if (!rangerRaf) rangerRaf = requestAnimationFrame(() => { rangerRaf = 0; ranger(); }); }
 function ranger() {
-  const w = $('#ck-page').clientWidth - 2 * parseFloat(getComputedStyle($('#ck-page')).paddingLeft || 0);
+  const pg = $('#ck-page');
+  // PRO-1 (§269) : le cockpit a quitté l'écran (autre onglet, autre module) — l'observateur restait branché sur la
+  //   page disparue et plantait à chaque redimensionnement (« reading 'clientWidth' », journalisé en erreur).
+  if (!pg) { if (obs) { obs.disconnect(); obs = null; } return; }
+  const w = pg.clientWidth - 2 * parseFloat(getComputedStyle(pg).paddingLeft || 0);
   const taille = w >= 1150 ? 'large' : w >= 820 ? 'moyen' : 'petit';
-  if ($('#ck-page').dataset.taille === taille) return;
-  $('#ck-page').dataset.taille = taille;
-  ['t', 'e'].forEach(v => RANGS[v][taille].forEach((ids, k) => {
-    const col = $('#ck-' + v + '-' + 'abc'[k]);
-    ids.forEach(id => col.appendChild($('#ck-' + id)));
-  }));
-  redimCourbe(false); redimEChart(false);
-}function monter() {
+  if (pg.dataset.taille !== taille) {
+    pg.dataset.taille = taille;
+    ['t', 'e'].forEach(v => RANGS[v][taille].forEach((ids, k) => {
+      const col = $('#ck-' + v + '-' + 'abc'[k]); if (!col) return;
+      ids.forEach(id => { const el = $('#ck-' + id); if (el) col.appendChild(el); });
+    }));
+  }
+  // PRO-1 : les graphes suivent TOUTE nouvelle largeur (ils ne se redessinaient qu'au changement de disposition : la
+  //   barre latérale repliée ou dépliée les laissait trop larges ou trop étroits), une fois la largeur posée.
+  clearTimeout(redimT); redimT = setTimeout(() => { if ($('#ck-page')) { redimCourbe(false); redimEChart(false); } }, 140);
+}
+/* PRO-1 (§269) — « Agrandir » : la courbe en grand, au-dessus de la page. Le tracé est DÉPLACÉ, pas copié : ses
+   identifiants restent uniques, son survol et sa bulle le suivent. Échap, le voile ou « Fermer » le ramènent. */
+function agrandir(on) {
+  let boite = $('#ck-agr');
+  if (!on) {
+    if (!boite || boite.hidden) return;
+    const gr = boite.querySelector('#ck-gr'), leg = $('#ck-courbe .ck-gr-leg');
+    if (gr) { if (leg) leg.parentNode.insertBefore(gr, leg); else gr.remove(); }
+    boite.classList.remove('ouvert'); boite.hidden = true; G.grand = false; document.body.classList.remove('ck-agr-on');
+    redimCourbe(true);
+    const b = $('#ck-courbe [data-fn="agrandir"]'); if (b) b.focus();
+    return;
+  }
+  const gr = $('#ck-gr'); if (!gr) return;
+  if (!boite) {
+    boite = document.createElement('div'); boite.id = 'ck-agr'; boite.className = 'ck-agr'; boite.hidden = true;
+    boite.setAttribute('role', 'dialog'); boite.setAttribute('aria-modal', 'true'); boite.setAttribute('aria-label', 'Charge restante, en grand');
+    boite.innerHTML = '<div class="ck-agr-voile" data-fn="reduire"></div><div class="ck-agr-p ck2"><header class="ck-p-hd"><div><h2 class="ck-titre-p">Charge restante</h2>'
+      + '<p class="ck-cadre" id="ck-agr-cadre"></p></div><button type="button" class="ck-btn ck-btn-ghost ck-btn-s" data-fn="reduire">Fermer</button></header>'
+      + '<div class="ck-agr-slot"></div><div class="ck-gr-leg" aria-hidden="true"><span><i class="lg-mes"></i>Reste mesuré</span><span><i class="lg-proj"></i>Projection</span><span><i class="lg-bes"></i>Allure pour finir à l’objectif</span></div></div>';
+    document.body.appendChild(boite);
+    boite.addEventListener('click', ev => { if (ev.target.closest('[data-fn="reduire"]')) agrandir(false); });
+  }
+  const ca = $('#ck-gr-cadre'); $('#ck-agr-cadre').textContent = ca ? ca.textContent : '';
+  boite.querySelector('.ck-agr-slot').appendChild(gr);
+  boite.hidden = false; G.grand = true; document.body.classList.add('ck-agr-on');
+  redimCourbe(true);
+  requestAnimationFrame(() => boite.classList.add('ouvert'));
+  const f = boite.querySelector('button[data-fn="reduire"]'); if (f) f.focus();
+}
+// La boîte d'un montage précédent : on la vide sans rien redessiner (la page va être remontée).
+function agrandiOublier() {
+  const boite = $('#ck-agr'); if (!boite) return;
+  const gr = boite.querySelector('#ck-gr'); if (gr) gr.remove();
+  boite.classList.remove('ouvert'); boite.hidden = true; G.grand = false; document.body.classList.remove('ck-agr-on');
+}
+/* PRO-1 (§269) — la date de l'objectif se règle ici (admin), avec le sélecteur de date du téléphone ou de l'ordinateur.
+   L'enregistrement est celui du Pilotage (_pilObjectifRegler : même clé, même sauvegarde, même message). */
+function choisirObjectif(btn) {
+  if (!V.admin) return;
+  let inp = $('#ck-obj-in');
+  if (!inp) {
+    inp = document.createElement('input'); inp.type = 'date'; inp.id = 'ck-obj-in'; inp.className = 'ck-obj-in'; inp.tabIndex = -1;
+    inp.setAttribute('aria-label', 'Date de l’objectif');
+    btn.parentNode.appendChild(inp);
+    inp.addEventListener('change', () => { if (inp.value && typeof window._pilObjectifRegler === 'function') window._pilObjectifRegler(inp.value); });
+  }
+  inp.value = iso(VISEE);
+  try { if (typeof inp.showPicker === 'function') inp.showPicker(); else inp.focus(); }
+  catch (e) { inp.focus(); if (window._mvAvale) window._mvAvale(e, 'cockpit-vue.js/choisirObjectif'); }
+}
+function monter() {
   $('#ck-tete').innerHTML = htmlTete();
   $('#ck-photos').innerHTML = htmlPhotos(R);
   $('#ck-verdict').innerHTML = htmlVerdict(R);
@@ -1133,7 +1254,7 @@ function ranger() {
   $('#ck-eapp').innerHTML = htmlApps(R);
   $('#ck-etac').innerHTML = htmlTaches(R);
   G.reste = R.reste; G.fin = R.fin;
-  $('#ck-sv-l').dataset.h = $('#ck-sv-l').innerHTML;
+  $('#ck-savoir').dataset.h = htmlSavoir(R);
 }function entree() {
   const r = R;
   majResume(r); majVerdict(r); majDecision(r); majPlan(); majChantiers(r); majCourbe(r); majEco(r);
@@ -1188,7 +1309,16 @@ function brancher() {
     const fn = ev.target.closest('[data-fn]');
     if (fn && fn.dataset.fn === 'voirRetard') { voirRetard(); return; }
     if (fn && fn.dataset.fn === 'export') { if (typeof window._pilEcoExport === 'function') window._pilEcoExport(); return; }
-    if (fn && fn.dataset.fn === 'agrandir') { const i2 = (window._MV_GRAPHS || []).length; if (typeof window._mvGraphAgrandir === 'function' && i2 >= 0) {} return; }
+    // PRO-1 (§269) : « Agrandir » était branché sur une instruction vide ; « Changer la priorité » menait à l'onglet
+    //   L'équipe & le matériel au lieu d'ouvrir le choix de la priorité.
+    if (fn && fn.dataset.fn === 'agrandir') { agrandir(true); return; }
+    if (fn && fn.dataset.fn === 'priorite') {
+      if (typeof window.openPriorityEdit === 'function') window.openPriorityEdit();
+      else if (window.logError) window.logError({ level: 'info', cat: 'cockpit', msg: 'openPriorityEdit absent' });
+      return;
+    }
+    if (fn && fn.dataset.fn === 'tension') { if (typeof window._pilGo === 'function') window._pilGo('tension'); return; }
+    if (fn && fn.dataset.fn === 'objectif') { choisirObjectif(fn); return; }
     const og = ev.target.closest('[data-onglet]');
     if (og) { choisirOnglet(og.dataset.onglet); return; }
     const mod = ev.target.closest('[data-module]');
@@ -1197,10 +1327,15 @@ function brancher() {
     if (plus) {
       const l = plus.id === 'ck-fil-tout' ? $('#ck-fil-l') : $('#ck-sv-l'), on = !l.classList.contains('tout');
       l.classList.toggle('tout', on); plus.setAttribute('aria-expanded', String(on));
+      if (plus.id === 'ck-fil-tout') S.filTout = on; else S.svTout = on;
       plus.textContent = on ? 'Replier' : (plus.id === 'ck-fil-tout' ? 'Tout le fil' : 'Tout voir (' + savoirItems(R).length + ')');
     }
   });
-  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && document.getElementById('ck-pop')) fermerInfo(); });
+  document.addEventListener('keydown', ev => {
+    if (ev.key !== 'Escape') return;
+    const b = document.getElementById('ck-agr'); if (b && !b.hidden) { agrandir(false); return; }
+    if (document.getElementById('ck-pop')) fermerInfo();
+  });
 }
 function brancherPlan() {
   const svg = $('#ck-svg'); if (!svg || svg._ck) return; svg._ck = 1;
@@ -1217,11 +1352,12 @@ function brancherPlan() {
 function heures() { $$('.ck-ev time').forEach(t => { t.textContent = ilYa(+t.dataset.ts); }); }
 window._ck2Monter = function (v) {
   if (!document.getElementById('ck-page')) return;
+  agrandiOublier();
   charger(v); R = calc();
   G.reste = R.reste; G.fin = R.fin; GE.fin = R.fin;   // l'état des graphes : la maquette le prenait au chargement
   monter(); brancherPlan(); ranger();
   if (!branche) { brancher(); branche = true; setInterval(heures, 30000); }
-  if ('ResizeObserver' in window) { if (obs) obs.disconnect(); obs = new ResizeObserver(() => ranger()); obs.observe($('#ck-page')); }
+  if ('ResizeObserver' in window) { if (obs) obs.disconnect(); obs = new ResizeObserver(() => rangerBientot()); obs.observe($('#ck-page')); }
   placerInd($('.ck-seg [aria-selected="true"]'), $('.ck-seg-ind'));
   placerInd($('.ck-bascule [aria-selected="true"]'), $('.ck-bascule-ind'));
   SANS_MVT = !!window._ck2EntreeFaite; entree(); SANS_MVT = false; window._ck2EntreeFaite = true;
