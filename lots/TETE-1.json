@@ -1,0 +1,32 @@
+{
+  "lot": "TETE-1",
+  "section": "§272",
+  "base": "b80419d0f2f64bb3e2587a5b4f752dea1257f21c",
+  "inclut": [
+    "DS-4",
+    "COQ-2"
+  ],
+  "date": "2026-10-08",
+  "fichiers": {
+    "CLAUDE.md": "822aafaeffed13bc00627a346c53b6f54a56cbcc05c28103dd266612fa6f457e",
+    "docs/claude/INDEX.md": "9c4721804e927baae25ee667b3f0afd4bda4baac673f872edc1d2496b2745378",
+    "docs/claude/chantiers-230-279.md": "a65dc5d11656145d4b0b627b27d52cba90ce2e37e3fc8e1bd3182eda2f7b2957",
+    "docs/claude/journal.md": "ee418b1a58f4881684c1d41b507e0b146f71fa0c65dc21903b2c4f64bb3a1ab9",
+    "guide/01-demarrer.html": "96b2dea61478d5e031124f6a846a985d8a162772d3ff2a529776a5b0bd335540",
+    "index.html": "609a7ea68709f8d83761737c0e2154fd43e59bce15950f7f762f0b80a13038fa",
+    "public/sw.js": "91a04a38188b7364bf34a88e49ef820fb49ff8b8e736068aa2899d0fb74df877",
+    "scripts/mv-harnais-contraste.mjs": "1af144eace405a7e9f54f4f48a6678e169f6291cc368c2ccdbe1e8dbcea86027",
+    "scripts/mv-harnais-coq1.mjs": "81019052589da9cfc964e8086511cff2bc460c91c7be8899d1241bec793139a6",
+    "scripts/mv-harnais-jetons.mjs": "5f91521b08a2ae58e96e573cdbcbaabcf8bface2825bbfa49193278d02784f66",
+    "scripts/mv-harnais-liste.mjs": "45730298751860078bc48a761ad0b1bac1de19db723bbf2b9da2f8aad4a560b0",
+    "scripts/mv-harnais-ref1.mjs": "cb7df8a84050363c2567bc0a5e1bad7d73db96e4d53845677d415cacd6407f17",
+    "scripts/mv-jetons-baseline.json": "c991ce482bc585f84f63ea43a6df8365d3af5eeada38dfca35876a2f5d0e519a",
+    "scripts/typo-baseline.json": "3c0d8b1e290829664c2e8038de407def502b1a588454b2cfb62ad25fbaae55b2",
+    "src/cave.js": "fbd983cb8b8262da8ac7c7e1472c666ff819f8612e79955f540faea2b7baefb2",
+    "src/coquille.js": "535526e2f61ca80b982ddd9a54a970570cf8cac5918f4d6605c908ee25394a7f",
+    "src/styles.css": "dcbb8d054f4555d699feed5984cd9978295f4b92a26c338d701b688e58668619",
+    "src/utils.js": "4cad45624744335ce36f6d79d750f05cfcad32537b10367a798813bd8ed6669c",
+    "scripts/mv-harnais-coq2.mjs": "3f35f063424916b115311bf6b82e96ebe53f834be3f22b45ee0945c4df4f3e35",
+    "scripts/mv-harnais-tete1.mjs": "7fd818f220dc5d684c00b95f6bda0ac6de70a7182731a172ab331beb93fb26b4"
+  }
+}

@@ -256,7 +256,7 @@ function _reglStashOuvrir(){
     var t=document.createElement('div');
     t.style.cssText='flex:1;min-width:0';
     var t1=document.createElement('div');
-    t1.style.cssText='font-size:13px;font-weight:600';
+    t1.style.cssText='font-size:var(--pt-txt,13px);font-weight:600';
     t1.textContent=e.libelle;
     var t2=document.createElement('div');
     t2.style.cssText='font-size:var(--pt-lbl,10.5px);color:var(--texte-doux)';
@@ -419,7 +419,7 @@ function renderReglages(){
             +'<button class="sc-del-saison dgr" data-idx="'+i+'" title="Supprimer">'+_mvIcon('corbeille',16)+'</button>'
           +'</div>'
         +'</div>';
-      }).join('')+_cmpLienArchives()+'<button onclick="window._repairSessSaisons&&window._repairSessSaisons()" style="width:100%;margin-top:10px;padding:11px;border:1.5px solid var(--gris-clair);border-radius:11px;background:var(--bg-app);color:var(--texte-doux);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">'+_mvIcon('outil',16)+' Recaler les sessions tracteur sur leur saison</button>'+'<button onclick="window._mvRepairSaisonProg&&window._mvRepairSaisonProg()" style="width:100%;margin-top:8px;padding:11px;border:1.5px solid var(--gris-clair);border-radius:11px;background:var(--bg-app);color:var(--texte-doux);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">'+_mvIcon('rotation',16)+' Reconstruire l’avancement d’après le journal</button>';
+      }).join('')+_cmpLienArchives()+'<button onclick="window._repairSessSaisons&&window._repairSessSaisons()" style="width:100%;margin-top:10px;padding:11px;border:1.5px solid var(--gris-clair);border-radius:11px;background:var(--bg-app);color:var(--texte-doux);font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer">'+_mvIcon('outil',16)+' Recaler les sessions tracteur sur leur saison</button>'+'<button onclick="window._mvRepairSaisonProg&&window._mvRepairSaisonProg()" style="width:100%;margin-top:8px;padding:11px;border:1.5px solid var(--gris-clair);border-radius:11px;background:var(--bg-app);color:var(--texte-doux);font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer">'+_mvIcon('rotation',16)+' Reconstruire l’avancement d’après le journal</button>';
       sl.querySelectorAll('.sc-info').forEach(function(el){
         el.addEventListener('click',function(){activateSaison(window.SAISONS[+el.dataset.idx].nom);});
       });
@@ -596,7 +596,7 @@ function renderReglages(){
         }
         passHtml+='<div style="padding:10px 0;border-bottom:1px solid var(--gris-clair)">'
           +'<div style="display:flex;align-items:center;justify-content:space-between">'
-            +'<div style="font-size:13px;font-weight:600;color:var(--texte)">'+_mvIconTache(nom,16)+' '+nom+'</div>'
+            +'<div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">'+_mvIconTache(nom,16)+' '+nom+'</div>'
             +'<div style="display:flex;align-items:center;gap:3px"><span style="font-size:10px;color:var(--texte-doux);margin-right:2px">'+(taskCfg.type==='niveaux'?'niveaux':'passages')+' :</span>'+btnsSP+'</div>'
           +'</div>'
           +(subRows?'<div style="display:flex;flex-wrap:wrap;margin-top:5px">'+subRows+'</div>':'')
@@ -632,7 +632,7 @@ function renderReglages(){
       if(!_ab){_ab=document.createElement('div');_ab.id='contrats-alertes';ml.parentNode.insertBefore(_ab,ml);}
       if(_alertes.length>0){
         _ab.innerHTML='<div style="background:var(--tag-amber-bg,#fef3c7);border:1.5px solid #f59e0b;border-radius:12px;padding:12px 14px;margin-bottom:12px">'
-          +'<div style="font-size:13px;font-weight:600;color:var(--tag-amber-tx,#92400e);margin-bottom:8px">'+_mvIcon('alerte',16)+' Contrats \u00e0 renouveler ('+_alertes.length+')</div>'
+          +'<div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--tag-amber-tx,#92400e);margin-bottom:8px">'+_mvIcon('alerte',16)+' Contrats \u00e0 renouveler ('+_alertes.length+')</div>'
           +_alertes.map(function(m){
             var dateRef=_dsP(m.fin_contrat);
             var j=Math.round((dateRef-_toDay)/86400000);
@@ -640,7 +640,7 @@ function renderReglages(){
             var dateStr=dateRef?dateRef.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):''
             var urgent=j<=7;
             return'<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid #fcd34d;cursor:pointer" onclick="editMembre(\''+_escAttr(m.nom)+'\')">'  
-              +'<span style="font-size:13px;color:var(--tag-amber-tx,#78350f)">'+(m.couleur?'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+m.couleur+';margin-right:6px"></span>':'')+_escHtml(m.nom)+'</span>'
+              +'<span style="font-size:var(--pt-txt,13px);color:var(--tag-amber-tx,#78350f)">'+(m.couleur?'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+m.couleur+';margin-right:6px"></span>':'')+_escHtml(m.nom)+'</span>'
               +'<span style="font-size:var(--pt-micro,12px);font-weight:'+(urgent?'700':'500')+';color:'+(urgent?'#dc2626':'#92400e')+'">'+label+' '+dateStr+(j===0?' aujourd\'hui':j===1?' demain':' dans '+j+' j')+'</span>'
               +'</div>';
           }).join('')
@@ -678,7 +678,7 @@ function renderActTracList(){
   var el=document.getElementById('act-trac-list');
   if(!el)return;
   if(!window.ACTIVITES.length){
-    el.innerHTML='<div style="padding:16px;text-align:center;color:var(--texte-doux);font-size:13px">Aucune activité</div>';
+    el.innerHTML='<div style="padding:16px;text-align:center;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Aucune activité</div>';
     return;
   }
   var _rows=window.ACTIVITES.map(function(a,i){
@@ -714,7 +714,7 @@ function renderActTracList(){
 function _chrToggleHtml(){
   var o=!!(window.CONFIG&&window.CONFIG.chrono_mode==='on');
   return '<div style="display:flex;align-items:center;gap:12px;background:var(--gris-clair);border-radius:11px;padding:11px 13px;margin-bottom:10px">'
-    +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--texte)">'+_mvIcon('chrono',16)+' Chronometrer le temps reel</div>'
+    +'<div style="flex:1;min-width:0"><div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">'+_mvIcon('chrono',16)+' Chronometrer le temps reel</div>'
     +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px;line-height:1.4">Optionnel - dans une session, mesure le travail parcelle par parcelle. Sinon, le bareme ci-dessous prend le relais.</div></div>'
     +'<button onclick="_chronoSetMode('+(o?'false':'true')+')" style="flex-shrink:0;border:none;cursor:pointer;font-family:Outfit,sans-serif;font-weight:700;font-size:var(--pt-micro,12px);padding:8px 15px;border-radius:20px;min-height:40px;'+(o?'background:var(--vert);color:#fff':'background:var(--gris);color:var(--texte-doux)')+'">'+(o?'ON':'OFF')+'</button>'
   +'</div>';
@@ -1000,7 +1000,7 @@ function _emhNowHtml(m,last,adm,auj){
      +(annu?'Annualis\u00e9 \u00b7 plafond proratis\u00e9':'Pay\u00e9 \u00e0 l\u2019heure \u00b7 pas d\u2019annualisation')+'</span></div>'
    +'<div class="emh-dates">depuis le <b>'+_emhFmt(last.debut)+'</b>\u00a0\u00b7 '
      +(last.fin?('jusqu\u2019au <b>'+_emhFmt(last.fin)+'</b>'):'<b>sans terme</b>')+'</div>'
-   +'<div class="emh-row"><span>Grille horaire</span><b style="font-size:13px">'+_escHtml(last.grille||'standard')+'</b></div>'
+   +'<div class="emh-row"><span>Grille horaire</span><b style="font-size:var(--pt-txt,13px)">'+_escHtml(last.grille||'standard')+'</b></div>'
    +(adm?('<div class="emh-row"><span>Taux horaire charg\u00e9</span><b>'
      +((tx!=null&&tx>0)?(String(Math.round(tx*100)/100).replace('.',',')+'\u00a0\u20AC'):'\u2014')+'</b></div>'):'')
    +'</div>';
@@ -1177,7 +1177,7 @@ function saveSaison(){
    ══════════════════════════════════════════════════════════════════════════ */
 var _tn=null;
 var _TN_SEC='font-size:var(--pt-lbl,10.5px);font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--terre);margin:16px 2px 7px';
-var _TN_HINT='font-size:var(--pt-lbl,11.5px);color:var(--texte-doux);margin:9px 2px 6px;line-height:1.45';
+var _TN_HINT='font-size:var(--pt-lbl,12px);color:var(--texte-doux);margin:9px 2px 6px;line-height:1.45';
 var _TN_OPT='display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:11px;margin-bottom:6px;cursor:pointer;background:var(--bg-card);border:1px solid var(--gris)';
 
 function _tnLbl(){ return _tn.choix?((_tnCatOf(_tn.choix)||{}).label||_tn.choix):String(_tn.q||'').trim(); }
@@ -1235,7 +1235,7 @@ function _tnRender(){
           +'<span style="flex:none">'+_mvIconTache(c.nom,18)+'</span>'
           +'<span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600;color:var(--texte)">'+_escHtml(c.label||c.nom)+'</span>'
           +'<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:1px">'+info+(dj?' \u00b7 déjà au domaine':'')+'</span></span>'
-          +'<span style="font-size:var(--pt-sm,17px);color:var(--vert-med);flex:none">+</span></div>';
+          +'<span style="font-size:var(--pt-sm,16px);color:var(--vert-med);flex:none">+</span></div>';
       }).join('');
     }
     var exact=hits.some(function(c){return String(c.label||c.nom).toLowerCase()===ql||String(c.nom).toLowerCase()===ql;});
@@ -1243,7 +1243,7 @@ function _tnRender(){
       h+='<div style="'+_TN_OPT+';background:var(--terre-pale);border:1.5px dashed rgba(138,90,56,0.45)" onclick="window._tnLibre()">'
         +'<span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600;color:var(--terre-tx,#8A5A38)">Créer «\u00a0'+_escHtml(q)+'\u00a0»</span>'
         +'<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:1px">Travail du domaine, hors convention \u2014 au temps réel</span></span>'
-        +'<span style="font-size:var(--pt-sm,17px);color:var(--terre-tx,#8A5A38);flex:none">+</span></div>';
+        +'<span style="font-size:var(--pt-sm,16px);color:var(--terre-tx,#8A5A38);flex:none">+</span></div>';
     }
     if(!q) h+='<div style="'+_TN_HINT+'">Le nom que tu tapes n\u2019y est pas\u00a0? Le panneau proposera de créer le travail du domaine.</div>';
     h+='<div class="tcv-lnk" style="color:var(--terre);margin-top:4px" onclick="window._tnVoirBareme()">Voir le barème de la convention et vos écartements</div>';
@@ -1261,7 +1261,7 @@ function _tnRender(){
     +'<span style="flex:none">'+_mvIconTache(_tn.choix||'',18)+'</span>'
     +'<span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600;color:var(--texte)">'+_escHtml(_tnLbl())+'</span>'
     +'<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:1px">'+(_tn.libre?'Hors convention \u00b7 temps réel':'Travail de la convention')+'</span></span>'
-    +'<button style="flex:none;padding:6px 11px;border-radius:9px;border:1.5px solid var(--gris);background:transparent;font-family:inherit;font-size:var(--pt-lbl,11.5px);font-weight:600;color:var(--texte-doux);cursor:pointer" onclick="window._tnBack()">Changer</button></div>';
+    +'<button style="flex:none;padding:6px 11px;border-radius:9px;border:1.5px solid var(--gris);background:transparent;font-family:inherit;font-size:var(--pt-lbl,12px);font-weight:600;color:var(--texte-doux);cursor:pointer" onclick="window._tnBack()">Changer</button></div>';
   // ── Les heures ──
   h+='<div style="'+_TN_SEC+'">Les heures</div>';
   if(c&&c.trous){
@@ -1294,7 +1294,7 @@ function _tnRender(){
     var on=!!_tn.perSel[s.nom], d=_tn.dates[s.nom]||{}, cons=(_regPeriode()||{}).nom===s.nom;
     var row='<div style="display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:11px;cursor:pointer;background:'+(on?'var(--vert-pale)':'var(--bg-card)')+';border:1px solid '+(on?'rgba(61,107,39,0.32)':'var(--gris)')+'" onclick="window._tnTogPer(\''+_escAttr(s.nom)+'\')">'
       +'<span style="width:18px;height:18px;border-radius:5px;flex:none;border:1.5px solid '+(on?'var(--vert-med)':'var(--gris)')+';background:'+(on?'var(--vert-med)':'transparent')+';color:var(--bg-card);display:flex;align-items:center;justify-content:center">'+(on?_mvIcon('check',16):'')+'</span>'
-      +'<span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:600;color:var(--texte)">'+_escHtml(s.nom)+(cons?' '+_mvBadge('consultée','neutre'):'')+'</span>'
+      +'<span style="flex:1;min-width:0"><span style="display:block;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">'+_escHtml(s.nom)+(cons?' '+_mvBadge('consultée','neutre'):'')+'</span>'
       +'<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_escHtml(s.periode||((s.debut||'')+' \u2192 '+(s.fin||'')))+'</span></span></div>';
     if(on) row+='<div style="display:flex;align-items:center;gap:6px;padding:8px 2px 2px 38px">'
       +'<input type="date" class="fi" style="margin:0;flex:1;font-size:var(--pt-micro,12px);padding:7px 9px" value="'+_escAttr(d.d1||'')+'" onchange="window._tnDate(\''+_escAttr(s.nom)+'\',\'d1\',this.value)">'
@@ -2493,7 +2493,7 @@ function editMembre(nom){
     // fusionne les deux qu'à l'affichage, et seulement pour un administrateur.
     +'<div class="fl" style="margin-top:14px">Rattachement</div>'
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 12px">'
-    +'<div style="font-size:13px;color:var(--texte,#374151);font-weight:600">Bureau<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);font-weight:400;margin-top:1px;max-width:300px">Non compté dans la capacité de travail des vignes (calcul de charge).</div></div>'
+    +'<div style="font-size:var(--pt-txt,13px);color:var(--texte,#374151);font-weight:600">Bureau<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);font-weight:400;margin-top:1px;max-width:300px">Non compté dans la capacité de travail des vignes (calcul de charge).</div></div>'
     +'<div class="role-chk '+(m.bureau?'on':'')+'" id="em-bureau" onclick="toggleEmBureau(this)">'+(m.bureau?_mvIcon('check',16):'')+'</div>'
     +'</div>'
     // ── EQUIPE COLLECTIVE ──────────────────────────────────────────────
@@ -2503,12 +2503,12 @@ function editMembre(nom){
     // dit ce que cette fiche EST, pas ce qu'elle fait.
     +'<div class="fl" style="margin-top:14px">'+_mvIcon('equipe',16)+' \u00c9quipe collective</div>'
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 12px">'
-    +'<div style="font-size:13px;color:var(--texte,#374151);font-weight:600">Une ligne, plusieurs personnes<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);font-weight:400;margin-top:1px;max-width:300px">Pour la vendange ou un prestataire. Ni compteur des 1607\u00a0h, ni cong\u00e9s, ni heures sup, ni compte de connexion\u00a0: ce n\u2019est pas un salari\u00e9, c\u2019est une \u00e9quipe.</div></div>'
+    +'<div style="font-size:var(--pt-txt,13px);color:var(--texte,#374151);font-weight:600">Une ligne, plusieurs personnes<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);font-weight:400;margin-top:1px;max-width:300px">Pour la vendange ou un prestataire. Ni compteur des 1607\u00a0h, ni cong\u00e9s, ni heures sup, ni compte de connexion\u00a0: ce n\u2019est pas un salari\u00e9, c\u2019est une \u00e9quipe.</div></div>'
     +'<div class="role-chk '+(m.collectif?'on':'')+'" id="em-collectif" onclick="toggleEmCollectif(this)">'+(m.collectif?'\u2713':'')+'</div>'
     +'</div>'
     +'<div id="em-eff-wrap" style="display:'+(m.collectif?'block':'none')+'">'
       +'<div class="fl" style="margin-top:10px">Nombre de personnes par d\u00e9faut</div>'
-      +'<input type="number" id="em-effectif" min="1" max="999" step="1" inputmode="numeric" value="'+(m.effectif||1)+'" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:16px;outline:none;box-sizing:border-box;font-family:inherit">'
+      +'<input type="number" id="em-effectif" min="1" max="999" step="1" inputmode="numeric" value="'+(m.effectif||1)+'" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:var(--pt-sm,16px);outline:none;box-sizing:border-box;font-family:inherit">'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);margin:5px 2px 0;line-height:1.5">Se change jour par jour dans le Planning\u00a0: onglet <b>Le mois</b>, cocher les jours, puis \u{1F465}\u00a0Effectif. Pensez \u00e0 renseigner les dates de contrat pour que la ligne n\u2019apparaisse que pendant le chantier.</div>'
     +'</div>'
     // ── SEC-2 : l'admin du domaine dépanne son équipe lui-même ──────────
@@ -2601,7 +2601,7 @@ function _emhPick(nom){
   if(window.isAdmin&&window.isAdmin()) O.push(['taux','\u{1F4B6}','Changement de taux',
     'Les heures d\u00e9j\u00e0 travaill\u00e9es gardent l\u2019ancien taux.','var(--vert-med)',true]);
   var h='<div class="modal-hd"><div class="modal-title">Qu\u2019est-ce qui s\u2019est pass\u00e9\u00a0?</div></div>'
-   +'<div class="modal-body"><div style="font-size:var(--pt-lbl,11.5px);color:var(--texte-doux);line-height:1.45;margin-bottom:13px">'
+   +'<div class="modal-body"><div style="font-size:var(--pt-lbl,12px);color:var(--texte-doux);line-height:1.45;margin-bottom:13px">'
    +'Chaque \u00e9v\u00e9nement est dat\u00e9. L\u2019historique garde les deux versions, avant et apr\u00e8s.</div>';
   O.forEach(function(x){
     h+='<button type="button" class="emh-opt"'+(x[5]?(' onclick="_emhForm(\''+nomA+'\',\''+x[0]+'\')"'):' disabled')+'>'
@@ -3263,23 +3263,23 @@ function _clotOverlayHTML(ctx){
   var esc = _clotEsc(ctx.endNom);
   var reste = Math.max(0, 100 - (ctx.pct||0));
   var stat = function(v,l){ return '<div style="background:#FBFAF6;border:1px solid #E7E3DA;border-radius:12px;padding:12px 6px;text-align:center">'
-    + '<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:24px;color:#1C1813">'+v+'</div>'
+    + '<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-lg,24px);color:#1C1813">'+v+'</div>'
     + '<div style="font-size:9px;letter-spacing:.4px;text-transform:uppercase;color:#6B655C;margin-top:3px">'+l+'</div></div>'; };
   var prepOpts = (ctx.prepared||[]).map(function(s){ return '<option value="'+_clotEsc(s.nom)+'">'+_clotEsc(s.nom)+'</option>'; }).join('');
   var activateInner = (ctx.prepared && ctx.prepared.length)
     ? '<div style="margin-bottom:13px"><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Campagne déjà préparée</label>'
       + '<select id="clot-prep" onchange="window._clotSyncConfirm&&window._clotSyncConfirm()" style="width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid #E7E3DA;border-radius:10px;background:#fff;color:#1C1813">'+prepOpts+'</select></div>'
-      + '<div style="display:flex;gap:9px;align-items:flex-start;background:#eef4ea;border:1px solid rgba(61,107,39,.3);border-radius:12px;padding:12px 13px;font-size:var(--pt-txt,12.5px);line-height:1.45;color:#3f5233"><span>'+_mvIcon('check',16)+'</span><div>Cette campagne a déjà ses dates. Elle deviendra simplement la <b>campagne active</b> de l\'équipe.</div></div>'
-    : '<div style="display:flex;gap:9px;align-items:flex-start;background:#fbeede;border:1px solid rgba(184,90,26,.4);border-radius:12px;padding:12px 13px;font-size:var(--pt-txt,12.5px);line-height:1.45;color:#8a4516"><span>ℹ️</span><div>Aucune campagne préparée à l\'avance. Utilise <b>« Créer la prochaine »</b> ci-dessus.</div></div>';
+      + '<div style="display:flex;gap:9px;align-items:flex-start;background:#eef4ea;border:1px solid rgba(61,107,39,.3);border-radius:12px;padding:12px 13px;font-size:var(--pt-txt,13px);line-height:1.45;color:#3f5233"><span>'+_mvIcon('check',16)+'</span><div>Cette campagne a déjà ses dates. Elle deviendra simplement la <b>campagne active</b> de l\'équipe.</div></div>'
+    : '<div style="display:flex;gap:9px;align-items:flex-start;background:#fbeede;border:1px solid rgba(184,90,26,.4);border-radius:12px;padding:12px 13px;font-size:var(--pt-txt,13px);line-height:1.45;color:#8a4516"><span>ℹ️</span><div>Aucune campagne préparée à l\'avance. Utilise <b>« Créer la prochaine »</b> ci-dessus.</div></div>';
   var garde = ctx.warn
-    ? '<div style="display:flex;gap:9px;align-items:flex-start;background:#fbeede;border:1px solid rgba(184,90,26,.4);border-radius:12px;padding:12px 13px;margin-top:6px;font-size:var(--pt-txt,12.5px);line-height:1.45;color:#8a4516"><span>'+_mvIcon('alerte',16)+'</span><div><b>Il reste '+reste+'% de travail</b> sur '+esc+'. Tu peux clôturer quand même — l\'avancement restera consultable — mais vérifie que la campagne est bien terminée.</div></div>'
+    ? '<div style="display:flex;gap:9px;align-items:flex-start;background:#fbeede;border:1px solid rgba(184,90,26,.4);border-radius:12px;padding:12px 13px;margin-top:6px;font-size:var(--pt-txt,13px);line-height:1.45;color:#8a4516"><span>'+_mvIcon('alerte',16)+'</span><div><b>Il reste '+reste+'% de travail</b> sur '+esc+'. Tu peux clôturer quand même — l\'avancement restera consultable — mais vérifie que la campagne est bien terminée.</div></div>'
     : '';
 
   return ''
   + '<div id="ovCloture" style="position:fixed;inset:0;z-index:4000;background:#F2EFE7;display:flex;flex-direction:column;font-family:\'Outfit\',system-ui,sans-serif;color:#1C1813">'
     + '<div style="background:#14110D;color:#F0E2C8;padding:16px 16px 14px;position:relative;flex:none">'
       + '<div style="display:flex;align-items:center;gap:12px">'
-        + '<button onclick="window._clotClose&&window._clotClose()" style="background:rgba(255,255,255,.08);border:none;color:#F0E2C8;width:32px;height:32px;border-radius:9px;font-size:16px;cursor:pointer">'+_mvIcon('croix',16)+'</button>'
+        + '<button onclick="window._clotClose&&window._clotClose()" style="background:rgba(255,255,255,.08);border:none;color:#F0E2C8;width:32px;height:32px;border-radius:9px;font-size:var(--pt-sm,16px);cursor:pointer">'+_mvIcon('croix',16)+'</button>'
         + '<div id="clot-ttl" style="font-family:\'Cormorant Garamond\',serif;font-weight:600;font-size:var(--pt-md,20px)">Bilan de la campagne</div>'
       + '</div>'
       + '<div style="display:flex;gap:6px;margin-top:13px">'
@@ -3303,14 +3303,14 @@ function _clotOverlayHTML(ctx){
           + stat(ctx.nSess||0, 'Sessions tracteur')
           + stat(ctx.nTrait||0, 'Traitements phyto')
         + '</div>'
-        + '<div style="display:flex;gap:9px;align-items:flex-start;background:#F6EDD8;border:1px solid rgba(201,168,76,.35);border-radius:12px;padding:12px 13px;margin-top:15px;font-size:var(--pt-txt,12.5px);line-height:1.45;color:#5c4a1f"><span>'+_mvIcon('carton',16)+'</span><div>Cette campagne sera <b>archivée dans l\'Historique</b> (parcelles, journal, sessions tracteur, phyto) — consultable ensuite pour le comparatif N-1.</div></div>'
+        + '<div style="display:flex;gap:9px;align-items:flex-start;background:#F6EDD8;border:1px solid rgba(201,168,76,.35);border-radius:12px;padding:12px 13px;margin-top:15px;font-size:var(--pt-txt,13px);line-height:1.45;color:#5c4a1f"><span>'+_mvIcon('carton',16)+'</span><div>Cette campagne sera <b>archivée dans l\'Historique</b> (parcelles, journal, sessions tracteur, phyto) — consultable ensuite pour le comparatif N-1.</div></div>'
       + '</div>'
       + '<div id="clot-s2" style="display:none">'
         + '<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:22px;margin-bottom:4px">La prochaine campagne</div>'
-        + '<div style="font-size:13px;color:#6B655C;margin-bottom:16px;line-height:1.4">Crée la suivante, ou active une campagne déjà préparée à l\'avance.</div>'
+        + '<div style="font-size:var(--pt-txt,13px);color:#6B655C;margin-bottom:16px;line-height:1.4">Crée la suivante, ou active une campagne déjà préparée à l\'avance.</div>'
         + '<div style="display:flex;gap:8px;margin-bottom:16px">'
-          + '<button id="clot-seg-create" onclick="window._clotSeg&&window._clotSeg(\'create\')" style="flex:1;background:#14110D;color:#F0E2C8;border:1px solid #14110D;border-radius:11px;padding:11px 8px;font-family:inherit;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer">Créer la prochaine</button>'
-          + '<button id="clot-seg-activate" onclick="window._clotSeg&&window._clotSeg(\'activate\')" style="flex:1;background:#FBFAF6;color:#6B655C;border:1px solid #E7E3DA;border-radius:11px;padding:11px 8px;font-family:inherit;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer">Activer une préparée</button>'
+          + '<button id="clot-seg-create" onclick="window._clotSeg&&window._clotSeg(\'create\')" style="flex:1;background:#14110D;color:#F0E2C8;border:1px solid #14110D;border-radius:11px;padding:11px 8px;font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer">Créer la prochaine</button>'
+          + '<button id="clot-seg-activate" onclick="window._clotSeg&&window._clotSeg(\'activate\')" style="flex:1;background:#FBFAF6;color:#6B655C;border:1px solid #E7E3DA;border-radius:11px;padding:11px 8px;font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer">Activer une préparée</button>'
         + '</div>'
         + '<div id="clot-create" style="display:block">'
           + '<div style="margin-bottom:13px"><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Type de saison</label>'
@@ -3327,18 +3327,18 @@ function _clotOverlayHTML(ctx){
       + '</div>'
       + '<div id="clot-s3" style="display:none">'
         + '<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:22px;margin-bottom:4px">Confirmer la clôture</div>'
-        + '<div style="font-size:13px;color:#6B655C;margin-bottom:16px;line-height:1.4">Voici ce qui va se passer quand tu valides.</div>'
+        + '<div style="font-size:var(--pt-txt,13px);color:#6B655C;margin-bottom:16px;line-height:1.4">Voici ce qui va se passer quand tu valides.</div>'
         + '<div style="display:flex;align-items:stretch;margin-bottom:16px;border-radius:16px;overflow:hidden;border:1px solid #E7E3DA">'
-          + '<div style="flex:1;padding:18px 12px;text-align:center;background:#eef4ea"><div style="font-family:\'Cormorant Garamond\',serif;font-weight:600;font-size:16px;line-height:1.15">'+esc+'</div><div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:32px;color:#3D6B27;margin-top:6px">'+(ctx.pct||0)+'%</div><div style="font-size:10px;letter-spacing:.6px;text-transform:uppercase;margin-top:4px;color:#3f5233">'+_mvIcon('check',16)+' archivée</div></div>'
+          + '<div style="flex:1;padding:18px 12px;text-align:center;background:#eef4ea"><div style="font-family:\'Cormorant Garamond\',serif;font-weight:600;font-size:var(--pt-sm,16px);line-height:1.15">'+esc+'</div><div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-xxl,32px);color:#3D6B27;margin-top:6px">'+(ctx.pct||0)+'%</div><div style="font-size:10px;letter-spacing:.6px;text-transform:uppercase;margin-top:4px;color:#3f5233">'+_mvIcon('check',16)+' archivée</div></div>'
           + '<div style="width:40px;display:grid;place-items:center;background:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27);color:#fff;font-size:var(--pt-md,20px);font-weight:700">→</div>'
-          + '<div style="flex:1;padding:18px 12px;text-align:center;background:#14110D;color:#F0E2C8"><div id="clot-cf-new" style="font-family:\'Cormorant Garamond\',serif;font-weight:600;font-size:16px;line-height:1.15">'+_clotEsc(ctx.sug.nom)+'</div><div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:32px;color:#C9A84C;margin-top:6px">0%</div><div style="font-size:10px;letter-spacing:.6px;text-transform:uppercase;margin-top:4px;opacity:.85">démarre</div></div>'
+          + '<div style="flex:1;padding:18px 12px;text-align:center;background:#14110D;color:#F0E2C8"><div id="clot-cf-new" style="font-family:\'Cormorant Garamond\',serif;font-weight:600;font-size:var(--pt-sm,16px);line-height:1.15">'+_clotEsc(ctx.sug.nom)+'</div><div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-xxl,32px);color:#C9A84C;margin-top:6px">0%</div><div style="font-size:10px;letter-spacing:.6px;text-transform:uppercase;margin-top:4px;opacity:.85">démarre</div></div>'
         + '</div>'
-        + '<div style="background:linear-gradient(180deg,#f3f7ef,#eef4ea);border:1px solid rgba(61,107,39,.28);border-radius:13px;padding:14px 15px;margin-bottom:15px"><div style="font-weight:600;font-size:13.5px;color:#3D6B27;margin-bottom:5px">'+_mvIcon('pousse',16)+' Rien n\'est perdu</div><div style="font-size:var(--pt-txt,12.5px);line-height:1.5;color:#3f5233">Le 0% est un nouveau départ, pas une régression. L\'avancement de '+esc+' reste consultable via le sélecteur de saison et l\'Historique.</div></div>'
+        + '<div style="background:linear-gradient(180deg,#f3f7ef,#eef4ea);border:1px solid rgba(61,107,39,.28);border-radius:13px;padding:14px 15px;margin-bottom:15px"><div style="font-weight:600;font-size:13.5px;color:#3D6B27;margin-bottom:5px">'+_mvIcon('pousse',16)+' Rien n\'est perdu</div><div style="font-size:var(--pt-txt,13px);line-height:1.5;color:#3f5233">Le 0% est un nouveau départ, pas une régression. L\'avancement de '+esc+' reste consultable via le sélecteur de saison et l\'Historique.</div></div>'
         + '<div>'
-          + '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 2px;font-size:13px;line-height:1.4;border-bottom:1px solid #E7E3DA"><span style="color:#3D6B27;font-weight:700">'+_mvIcon('check',16)+'</span><div><b>'+esc+'</b> archivée — snapshot complet (parcelles, journal, sessions, phyto).</div></div>'
-          + '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 2px;font-size:13px;line-height:1.4;border-bottom:1px solid #E7E3DA"><span style="color:#3D6B27;font-weight:700">'+_mvIcon('check',16)+'</span><div><b id="clot-cf-new2">'+_clotEsc(ctx.sug.nom)+'</b> devient la campagne active de <b>toute l\'équipe</b>.</div></div>'
-          + '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 2px;font-size:13px;line-height:1.4;border-bottom:1px solid #E7E3DA"><span style="color:#3D6B27;font-weight:700">'+_mvIcon('check',16)+'</span><div>Les <b>travaux tracteur</b> de la campagne finie restent rangés dans leur saison — l\'accueil de la nouvelle démarre vierge.</div></div>'
-          + '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 2px;font-size:13px;line-height:1.4"><span style="color:#3D6B27;font-weight:700">'+_mvIcon('check',16)+'</span><div>Chaque membre bascule ensemble au prochain chargement de l\'app.</div></div>'
+          + '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 2px;font-size:var(--pt-txt,13px);line-height:1.4;border-bottom:1px solid #E7E3DA"><span style="color:#3D6B27;font-weight:700">'+_mvIcon('check',16)+'</span><div><b>'+esc+'</b> archivée — snapshot complet (parcelles, journal, sessions, phyto).</div></div>'
+          + '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 2px;font-size:var(--pt-txt,13px);line-height:1.4;border-bottom:1px solid #E7E3DA"><span style="color:#3D6B27;font-weight:700">'+_mvIcon('check',16)+'</span><div><b id="clot-cf-new2">'+_clotEsc(ctx.sug.nom)+'</b> devient la campagne active de <b>toute l\'équipe</b>.</div></div>'
+          + '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 2px;font-size:var(--pt-txt,13px);line-height:1.4;border-bottom:1px solid #E7E3DA"><span style="color:#3D6B27;font-weight:700">'+_mvIcon('check',16)+'</span><div>Les <b>travaux tracteur</b> de la campagne finie restent rangés dans leur saison — l\'accueil de la nouvelle démarre vierge.</div></div>'
+          + '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 2px;font-size:var(--pt-txt,13px);line-height:1.4"><span style="color:#3D6B27;font-weight:700">'+_mvIcon('check',16)+'</span><div>Chaque membre bascule ensemble au prochain chargement de l\'app.</div></div>'
         + '</div>'
       + '</div>'
     + '</div>'
@@ -3567,7 +3567,7 @@ function renderHistorique(){
   </div>`;
 
   if(!sA || !sB){
-    html += `<div style="padding:20px;text-align:center;color:var(--texte-doux);font-size:13px">Sélectionnez 2 saisons pour comparer</div>`;
+    html += `<div style="padding:20px;text-align:center;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Sélectionnez 2 saisons pour comparer</div>`;
     body.innerHTML = html;
     return;
   }
@@ -3857,7 +3857,7 @@ function _docsChip(txt,bg,col){
 function _docsRow(d,i,ok){
   return '<div onclick="'+(ok?'docsGo('+i+')':'')+'" style="display:flex;gap:11px;align-items:flex-start;background:var(--fond-module);border:1px solid var(--gris);border-radius:13px;padding:12px 13px;margin-bottom:9px;min-height:44px;'
     +(ok?'cursor:pointer':'opacity:.45')+'">'
-    +'<span style="width:38px;height:38px;flex:none;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:var(--pt-sm,17px);background:'+d.bg+'">'+d.ico+'</span>'
+    +'<span style="width:38px;height:38px;flex:none;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:var(--pt-sm,16px);background:'+d.bg+'">'+d.ico+'</span>'
     +'<span style="flex:1;min-width:0;display:block">'
       +'<span style="display:block;font-size:13.5px;font-weight:700;color:var(--texte);line-height:1.25">'+_docsEsc(d.t)+'</span>'
       +'<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.45;margin-top:3px">'+_docsEsc(d.s)+'</span>'
@@ -3867,7 +3867,7 @@ function _docsRow(d,i,ok){
         +(ok?'':_docsChip('\u{1F512} formule sup\u00e9rieure','var(--gris-clair)','var(--texte-doux)'))
       +'</span>'
     +'</span>'
-    +(ok?'<span style="align-self:center;font-size:var(--pt-sm,17px);color:var(--texte-doux);opacity:.5;flex:none">\u203a</span>':'')
+    +(ok?'<span style="align-self:center;font-size:var(--pt-sm,16px);color:var(--texte-doux);opacity:.5;flex:none">\u203a</span>':'')
     +'</div>';
 }
 function _docsRender(){
@@ -3883,7 +3883,7 @@ function _docsRender(){
   var fam=MV_DOCS_FAM.filter(function(f){return f.k===_docsFam;})[0]||MV_DOCS_FAM[0];
   var bord=_docsFam==='oblig'?'var(--rouge)':(_docsFam==='suivi'?'var(--or)':'var(--acier)');
   var fond=_docsFam==='oblig'?'var(--rouge-pale)':(_docsFam==='suivi'?'var(--or-pale)':'var(--acier-pale)');
-  intro.innerHTML='<div style="background:'+fond+';border-left:3px solid '+bord+';border-radius:12px;padding:11px 13px;font-size:var(--pt-lbl,11.5px);line-height:1.55;color:var(--texte);margin-bottom:12px">'
+  intro.innerHTML='<div style="background:'+fond+';border-left:3px solid '+bord+';border-radius:12px;padding:11px 13px;font-size:var(--pt-lbl,12px);line-height:1.55;color:var(--texte);margin-bottom:12px">'
     +fam.intro
     +(_docsFam==='oblig'?' <span style="display:inline-block;background:var(--rouge);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-top:4px">Fichier obligatoire au 01/01/2027</span>':'')
     +'</div>';
@@ -4212,7 +4212,7 @@ async function _docsRestOpen(){
 
   var dateTxt = meta.date ? new Date(meta.date).toLocaleString('fr-FR') : 'date inconnue';
   var h='<div style="background:var(--rouge-pale);border-radius:14px;padding:14px 16px">'
-    + '<div style="font-size:13px;font-weight:700;color:var(--rouge);margin-bottom:4px">Restaurer une sauvegarde</div>'
+    + '<div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--rouge);margin-bottom:4px">Restaurer une sauvegarde</div>'
     + '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin-bottom:12px">'
       + _docsEsc(_mvSauvEnCours.nom) + '<br>Sauvegarde du ' + _docsEsc(dateTxt)
       + (meta.domaine ? ' · ' + _docsEsc(meta.domaine) : '')
@@ -4267,7 +4267,7 @@ async function _docsRestOpen(){
     + 'La restauration écrit dans le domaine, pour tout le monde. L’application se recharge '
     + 'ensuite pour repartir sur les données restaurées.</div>'
     + '<button id="docs-rest-go" onclick="_docsRestGo()" style="background:var(--rouge);color:white;'
-    + 'border:none;border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;'
+    + 'border:none;border-radius:10px;padding:11px 18px;font-size:var(--pt-txt,13px);font-weight:600;'
     + 'font-family:\'Outfit\',sans-serif;width:100%;cursor:pointer;margin-top:10px">'
     + 'Restaurer ' + remplace.length + ' élément(s)</button>'
     + '</div>';
@@ -4340,7 +4340,7 @@ function showImportFeedback(msg,bg,color){
     // Toast flottant si l'overlay est fermé
     let toast=document.createElement('div');
     toast.textContent=msg;
-    toast.style.cssText=`position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:${bg};color:${color};border-radius:12px;padding:12px 20px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.15);max-width:340px;text-align:center;`;
+    toast.style.cssText=`position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:${bg};color:${color};border-radius:12px;padding:12px 20px;font-size:var(--pt-txt,13px);font-weight:600;font-family:'Outfit',sans-serif;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.15);max-width:340px;text-align:center;`;
     document.body.appendChild(toast);
     setTimeout(()=>toast.remove(),4000);
   }
@@ -4406,12 +4406,12 @@ var _JIV_CSS =
 +'@page{size:A4 portrait;margin:11mm}'
 +'.jiv-cov{background:#2A1A10;color:#fff;padding:22px 26px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}'
 +'.jiv-k{font-size:9px;letter-spacing:3px;text-transform:uppercase;opacity:.45;margin-bottom:5px}'
-+'.jiv-t{font-family:"Cormorant Garamond",Georgia,serif;font-size:var(--pt-xl,27px);font-weight:700;line-height:1.05}'
++'.jiv-t{font-family:"Cormorant Garamond",Georgia,serif;font-size:var(--pt-xl,28px);font-weight:700;line-height:1.05}'
 +'.jiv-s{opacity:.72;font-size:var(--pt-micro,12px);margin-top:4px}'
 +'.jiv-m{text-align:right;opacity:.55;font-size:10px;line-height:1.6}'
 +'.jiv-kpi{display:flex;gap:10px;padding:14px 26px 4px;flex-wrap:wrap}'
 +'.jiv-kc{flex:1;min-width:110px;border:1px solid #E3DFD4;border-radius:11px;padding:9px 12px}'
-+'.jiv-kv{font-family:"Cormorant Garamond",Georgia,serif;font-size:var(--pt-lg,23px);font-weight:700;color:#2A1A10;line-height:1.05}'
++'.jiv-kv{font-family:"Cormorant Garamond",Georgia,serif;font-size:var(--pt-lg,24px);font-weight:700;color:#2A1A10;line-height:1.05}'
 +'.jiv-kl{font-size:var(--pt-nano,9.5px);text-transform:uppercase;letter-spacing:.8px;color:#7A7A6A;font-weight:600;margin-top:2px}'
 +'.jiv-ks{font-size:var(--pt-nano,9.5px);color:#8A8A7A;margin-top:2px;line-height:1.35}'
 +'.jiv-sec{padding:16px 26px 0;break-inside:auto}'
@@ -4665,7 +4665,7 @@ function _jivChoix(F){
       +'<div class="ov-close" onclick="closeOv(null,\'ovJivExport\')">'+_mvIcon('croix',18)+'</div></div>'
       +'<div id="jiv-body" style="padding:0 20px 20px;overflow-y:auto;max-height:70vh"></div>'
       +'<div style="padding:0 20px 16px"><button class="mbtn" onclick="closeOv(null,\'ovJivExport\')" '
-      +'style="width:100%;font-family:Outfit,sans-serif;font-size:13px;padding:12px;border-radius:12px;'
+      +'style="width:100%;font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px);padding:12px;border-radius:12px;'
       +'border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-doux);cursor:pointer;'
       +'min-height:44px">Annuler</button></div></div>';
     document.body.appendChild(ov);
@@ -5132,7 +5132,7 @@ function exportPDFMois(){
   .cover{background:#1E3A12;color:white;padding:32px 40px;display:flex;justify-content:space-between;align-items:flex-end;}
   .cover-left{}
   .cover-brand{font-size:9px;letter-spacing:3px;text-transform:uppercase;opacity:0.5;margin-bottom:6px;}
-  .cover-title{font-size:28px;font-weight:700;margin-bottom:2px;}
+  .cover-title{font-size:var(--pt-xl,28px);font-weight:700;margin-bottom:2px;}
   .cover-sub{opacity:0.5;font-size:var(--pt-micro,11px);}
   .cover-right{text-align:right;}
   .cover-date{opacity:0.5;font-size:10px;}
@@ -5468,7 +5468,7 @@ function exportPDFPhyto(mode){
   body{font-family:'Outfit',system-ui,-apple-system,sans-serif;color:#1A1A14;background:white;font-size:var(--pt-micro,11px);}
   .cover{background:#2D0B45;color:white;padding:24px 30px 20px;position:relative;display:flex;align-items:flex-end;justify-content:space-between;}
   .cover-l{padding-top:30px;}
-  .cover-pic{font-size:28px;position:absolute;left:30px;top:20px;opacity:.9;}
+  .cover-pic{font-size:var(--pt-xl,28px);position:absolute;left:30px;top:20px;opacity:.9;}
   .cover-brand{font-size:9px;letter-spacing:3px;text-transform:uppercase;opacity:0.45;margin-bottom:5px;}
   .cover-title{font-size:25px;font-weight:700;letter-spacing:-0.5px;}
   .cover-sub{opacity:0.6;font-size:var(--pt-micro,12px);margin-top:3px;}
@@ -5711,7 +5711,7 @@ function _esBuildEch(){
   var base=(_esSaison&&_esSaison.echeances&&typeof _esSaison.echeances==='object'&&!Array.isArray(_esSaison.echeances))?_esSaison.echeances:{};
   _esEchTasks=Array.from(_esTachesSel||[]);
   if(!_esEchTasks.length){
-    host.innerHTML='<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);padding:4px 0">Aucune t\u00e2che pour cette p\u00e9riode \u2014 coche-les au-dessus.</div>';
+    host.innerHTML='<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);padding:4px 0">Aucune t\u00e2che pour cette p\u00e9riode \u2014 coche-les au-dessus.</div>';
     return;
   }
   host.innerHTML=_esEchTasks.map(function(tn,i){
@@ -6194,7 +6194,7 @@ var _ECO_ROW_CSS='display:flex;align-items:center;justify-content:space-between;
 function _ecoCarte(titre,sous,corps){
   return '<div style="background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin:14px 16px">'
     +'<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--texte,#14110D);margin-bottom:3px">'+titre+'</div>'
-    +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-bottom:12px">'+sous+'</div>'
+    +'<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);margin-bottom:12px">'+sous+'</div>'
     +corps+'</div>';
 }
 // Roue du Tracteur : la conso de référence, et l'état du prix du GNR (qui se
@@ -6207,15 +6207,15 @@ function _ecoRenderConsoCard(){
   var pmp=(window._mvPaieGnrPMP?window._mvPaieGnrPMP():0);
   var nApp=_paie().gnr_appoints.length;
   var gnrEtat = pmp>0
-    ? ('<span style="font-size:var(--pt-lbl,11.5px);font-weight:600;color:var(--vert,#3D6B27)">'+(Math.round(pmp*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2})+' \u20ac/L</span>'
+    ? ('<span style="font-size:var(--pt-lbl,12px);font-weight:600;color:var(--vert,#3D6B27)">'+(Math.round(pmp*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2})+' \u20ac/L</span>'
        +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+(nApp>0?('moyenne pond\u00e9r\u00e9e sur '+nApp+' appoint'+(nApp>1?'s':'')):'ancienne saisie manuelle')+'</div>')
-    : ('<span style="font-size:var(--pt-lbl,11.5px);font-weight:600;color:var(--orange,#B85A1A)">\u00e0 renseigner \u00e0 l\u2019appoint</span>');
+    : ('<span style="font-size:var(--pt-lbl,12px);font-weight:600;color:var(--orange,#B85A1A)">\u00e0 renseigner \u00e0 l\u2019appoint</span>');
   card.innerHTML=_ecoCarte('Carburant','Alimente le co\u00fbt GNR par parcelle et par session dans <b>Pilotage</b>.',
-     '<div style="'+_ECO_ROW_CSS+'"><div style="flex:1;min-width:180px"><div style="font-size:13.5px;color:var(--texte);font-weight:600">Consommation GNR moyenne</div><div style="font-size:var(--pt-lbl,11.5px);color:var(--texte-doux)">estime le GNR par heure de tracteur quand le compteur ne le dit pas</div></div>'
+     '<div style="'+_ECO_ROW_CSS+'"><div style="flex:1;min-width:180px"><div style="font-size:13.5px;color:var(--texte);font-weight:600">Consommation GNR moyenne</div><div style="font-size:var(--pt-lbl,12px);color:var(--texte-doux)">estime le GNR par heure de tracteur quand le compteur ne le dit pas</div></div>'
       +'<span style="display:inline-flex;align-items:center;gap:5px"><input type="number" min="0" step="0.5" value="'+conso+'" placeholder="6" onchange="window._ecoCfgSet(\'conso\',null,this.value)" style="'+_ECO_IN_CSS+'"><span style="font-size:var(--pt-micro,12px);color:var(--texte-doux)">L/h</span></span></div>'
     +'<div style="'+_ECO_ROW_CSS+';margin-top:12px;padding-top:12px;border-top:1px solid var(--gris-clair)">'+_mvIconTuile('carburant','or')+'<div style="flex:1;min-width:170px">'
       +'<div style="font-size:13.5px;color:var(--texte);font-weight:600">Prix du litre de GNR</div>'
-      +'<div style="font-size:var(--pt-lbl,11.5px);color:var(--texte-doux)">saisi \u00e0 chaque appoint de la cuve, onglet Sessions</div>'
+      +'<div style="font-size:var(--pt-lbl,12px);color:var(--texte-doux)">saisi \u00e0 chaque appoint de la cuve, onglet Sessions</div>'
       +'<div style="margin-top:3px">'+gnrEtat+'</div></div></div>');
 }
 // Roue du Pilotage : l'IFT de référence, base de l'onglet Conformité.
@@ -6225,15 +6225,15 @@ function _ecoRenderIftCard(){
   var cf=(window.CONFIG&&window.CONFIG.conformite)||{};
   var iftRef=(cf.ift_ref!=null&&Number(cf.ift_ref)>0)?cf.ift_ref:'';
   card.innerHTML=_ecoCarte('Conformit\u00e9','Base de l\u2019onglet <b>Conformit\u00e9</b> : passages phyto et IFT.',
-     '<div style="'+_ECO_ROW_CSS+'"><div style="flex:1;min-width:180px"><div style="font-size:13.5px;color:var(--texte);font-weight:600">'+_mvIcon('eprouvette',16)+' IFT de r\u00e9f\u00e9rence</div><div style="font-size:var(--pt-lbl,11.5px);color:var(--texte-doux)">la r\u00e9f\u00e9rence r\u00e9gionale \u00e0 laquelle vos passages se comparent</div></div>'
+     '<div style="'+_ECO_ROW_CSS+'"><div style="flex:1;min-width:180px"><div style="font-size:13.5px;color:var(--texte);font-weight:600">'+_mvIcon('eprouvette',16)+' IFT de r\u00e9f\u00e9rence</div><div style="font-size:var(--pt-lbl,12px);color:var(--texte-doux)">la r\u00e9f\u00e9rence r\u00e9gionale \u00e0 laquelle vos passages se comparent</div></div>'
       +'<span style="display:inline-flex;align-items:center;gap:5px"><input type="number" min="0" step="1" value="'+iftRef+'" placeholder="12" onchange="window._ecoCfgSet(\'ift\',null,this.value)" style="'+_ECO_IN_CSS+'"><span style="font-size:var(--pt-micro,12px);color:var(--texte-doux)">IFT</span></span></div>'
     // PROT-1 (§218) : les trois remanences, par mode d'action. Defauts sources (contact 10, penetrant 12, systemique 14 j).
     +[['contact','Contact','cuivre, soufre, folpel\u2026','10','jours','_j'],['penetrant','P\u00e9n\u00e9trant','cymoxanil, mandipropamid\u2026','12','jours','_j'],['systemique','Syst\u00e9mique','phosphonates, m\u00e9f\u00e9noxam\u2026','14','jours','_j'],['lessivage','Lessivage d\u2019un contact','pluie cumul\u00e9e depuis le traitement qui met un contact \u00e0 nu (la moiti\u00e9 part dans les 5 premiers mm)','20','mm','_mm']].map(function(r){
         var v=(cf['prot_'+r[0]+r[5]]!=null&&Number(cf['prot_'+r[0]+r[5]])>0)?cf['prot_'+r[0]+r[5]]:'';
-        return '<div style="'+_ECO_ROW_CSS+'"><div style="flex:1;min-width:180px"><div style="font-size:var(--pt-base,14px);color:var(--texte);font-weight:600">'+_mvIcon('bouclier',16)+' '+(r[0]==='lessivage'?r[1]:('R\u00e9manence '+r[1].toLowerCase()))+'</div><div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux)">'+r[2]+' \u2014 jours de protection apr\u00e8s un traitement ; lu par la carte \u00ab Traiter ? \u00bb</div></div>'
-          +'<span style="display:inline-flex;align-items:center;gap:5px"><input type="number" min="1" step="1" value="'+v+'" placeholder="'+r[3]+'" onchange="window._ecoCfgSet(\'prot\',\''+r[0]+'\',this.value)" style="'+_ECO_IN_CSS+'"><span style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux)">'+r[4]+'</span></span></div>';
+        return '<div style="'+_ECO_ROW_CSS+'"><div style="flex:1;min-width:180px"><div style="font-size:var(--pt-base,14px);color:var(--texte);font-weight:600">'+_mvIcon('bouclier',16)+' '+(r[0]==='lessivage'?r[1]:('R\u00e9manence '+r[1].toLowerCase()))+'</div><div style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">'+r[2]+' \u2014 jours de protection apr\u00e8s un traitement ; lu par la carte \u00ab Traiter ? \u00bb</div></div>'
+          +'<span style="display:inline-flex;align-items:center;gap:5px"><input type="number" min="1" step="1" value="'+v+'" placeholder="'+r[3]+'" onchange="window._ecoCfgSet(\'prot\',\''+r[0]+'\',this.value)" style="'+_ECO_IN_CSS+'"><span style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">'+r[4]+'</span></span></div>';
       }).join('')
-    +'<div style="font-size:var(--pt-lbl,11.5px);color:var(--texte-doux);margin-top:12px;line-height:1.5">Le co\u00fbt phyto par parcelle est calcul\u00e9 dans Pilotage depuis les <b>doses</b> (assistant de traitement) \u00d7 le <b>prix unitaire des intrants</b> (Pilotage \u203a \u00c9conomie \u203a Achats).</div>');
+    +'<div style="font-size:var(--pt-lbl,12px);color:var(--texte-doux);margin-top:12px;line-height:1.5">Le co\u00fbt phyto par parcelle est calcul\u00e9 dans Pilotage depuis les <b>doses</b> (assistant de traitement) \u00d7 le <b>prix unitaire des intrants</b> (Pilotage \u203a \u00c9conomie \u203a Achats).</div>');
 }
 window._ecoRenderIftCard=_ecoRenderIftCard;
 
@@ -6585,7 +6585,7 @@ function _renderCuivre(){
     body='<div style="text-align:center;padding:40px 16px;color:var(--texte-doux)">'
       +'<div style="font-size:34px;margin-bottom:10px">&#x1FA99;</div>'
       +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:19px;color:var(--texte);margin-bottom:6px">Aucun traitement cuivre chiffr\u00e9 pour '+year+'</div>'
-      +'<div style="font-size:13px;max-width:340px;margin:0 auto;line-height:1.6">Le cuivre m\u00e9tal (kg/ha) se renseigne sur chaque traitement cuivre dans l\'assistant (Tracteur &#x203A; Phyto &#x203A; nouveau traitement). La synth\u00e8se se remplit automatiquement au fil de la campagne.</div>'
+      +'<div style="font-size:var(--pt-txt,13px);max-width:340px;margin:0 auto;line-height:1.6">Le cuivre m\u00e9tal (kg/ha) se renseigne sur chaque traitement cuivre dans l\'assistant (Tracteur &#x203A; Phyto &#x203A; nouveau traitement). La synth\u00e8se se remplit automatiquement au fil de la campagne.</div>'
       +'</div>';
   } else {
     var kpis='<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:9px">'
@@ -6603,9 +6603,9 @@ function _renderCuivre(){
           +'<div style="display:flex;justify-content:space-between;font-size:var(--pt-micro,12px);padding:5px 0 0"><span style="color:var(--texte-doux)">Moyenne sur les ann\u00e9es suivies</span><span style="font-weight:700">'+r.roll.toFixed(2)+' kg/ha/an <span style="font-weight:500;color:var(--texte-doux)">sur '+_cuParcRollN(r.p.nom)+' an'+(_cuParcRollN(r.p.nom)>1?'n\u00e9es':'n\u00e9e')+'</span></span></div>':'');
       return '<div onclick="window._cuToggleRow(this)" style="border:1px solid var(--gris);border-radius:13px;padding:12px 14px;background:var(--bg-card);cursor:pointer;margin-bottom:9px">'
         +'<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">'
-        +'<div><div style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-sm,17px);font-weight:600">'+esc(r.p.nom)+'</div>'
+        +'<div><div style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-sm,16px);font-weight:600">'+esc(r.p.nom)+'</div>'
         +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+((r.p.commune&&r.p.commune.nom)?'&#x1F4CD; '+esc(r.p.commune.nom)+' &#x00B7; ':'')+window._mvHaP(r.p.surface)+' ha</div></div>'
-        +'<div style="font-size:16px;font-weight:700;white-space:nowrap;color:var('+col+')">'+r.shown.toFixed(2)+'<span style="font-size:var(--pt-micro,11px);font-weight:500;color:var(--texte-doux)"> kg Cu/ha</span></div>'
+        +'<div style="font-size:var(--pt-sm,16px);font-weight:700;white-space:nowrap;color:var('+col+')">'+r.shown.toFixed(2)+'<span style="font-size:var(--pt-micro,11px);font-weight:500;color:var(--texte-doux)"> kg Cu/ha</span></div>'
         +'</div>'
         +'<div style="position:relative;height:9px;border-radius:6px;background:var(--gris-clair);margin:10px 0 4px;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;border-radius:6px;width:'+pct+'%;background:var('+col+')"></div></div>'
         +'<div style="display:flex;justify-content:space-between;font-size:var(--pt-micro,11px);color:var(--texte-doux)"><span><b style="color:var('+st[1]+')">'+st[0]+'</b> &#x00B7; '+apps.length+' apport'+(apps.length>1?'s':'')+'</span><span>'+(r.ratio*100).toFixed(0)+'% du plafond</span></div>'
@@ -6628,7 +6628,7 @@ function _renderCuivre(){
       +'<span style="font-size:var(--pt-micro,12px);color:#C9C0AC">kg&#xA0;Cu/ha/an</span>'
       +'<span style="font-size:var(--pt-micro,11px);color:#8C8470;flex:1;min-width:180px">'+domHint+'</span>'
       +'</div></div>'
-      +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin:-4px 0 12px">Le plafond s\'applique <b>par hectare</b>. Touche une parcelle pour le d\u00e9tail des apports.</div>'
+      +'<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);margin:-4px 0 12px">Le plafond s\'applique <b>par hectare</b>. Touche une parcelle pour le d\u00e9tail des apports.</div>'
       +'<div>'+listHtml+'</div>'
       +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);background:var(--gris-clair);border-radius:10px;padding:10px 12px;margin-top:14px;line-height:1.55"><b>Lissage 7 ans.</b> La r\u00e8gle UE autorise '+_cuPlafond7()+'&#x202F;kg&#x202F;Cu/ha sur 7 ans ('+_cuPlafond()+' kg/ha/an en moyenne) : une ann\u00e9e peut d\u00e9passer 4 tant que la moyenne glissante reste sous le plafond. Bascule \u00ab Liss\u00e9 7 ans \u00bb pour la moyenne par parcelle, calcul\u00e9e sur les ann\u00e9es <b>couvertes par votre registre</b> \u2014 une ann\u00e9e sans cuivre \u00e0 l\u2019int\u00e9rieur de cette p\u00e9riode compte pour z\u00e9ro, les ann\u00e9es d\u2019avant votre premi\u00e8re trace ne comptent pas.</div>';
   }
@@ -6730,11 +6730,11 @@ function _tcvInjectCss(){
    +'.tcv-row.on{border-color:var(--vert-med);background:rgba(61,107,39,0.08)}'
    +'.tcv-nom{font-weight:700;font-size:13.5px;color:var(--texte)}'
    +'.tcv-sub{font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px}'
-   +'.tcv-h{font-size:13px;font-weight:800;color:var(--terre,#8A5A38);white-space:nowrap}'
+   +'.tcv-h{font-size:var(--pt-txt,13px);font-weight:800;color:var(--terre,#8A5A38);white-space:nowrap}'
    +'.tcv-tag{display:inline-block;font-size:9px;font-weight:700;border-radius:10px;padding:1px 7px;'
    +'margin-right:4px;background:rgba(61,107,39,0.14);color:var(--vert-med)}'
    +'.tcv-act{flex-shrink:0;width:30px;height:30px;border-radius:9px;display:flex;align-items:center;'
-   +'justify-content:center;font-size:var(--pt-sm,17px);font-weight:700;color:var(--vert-med);'
+   +'justify-content:center;font-size:var(--pt-sm,16px);font-weight:700;color:var(--vert-med);'
    +'background:rgba(61,107,39,0.10);border:1px solid rgba(61,107,39,0.22)}'
    +'.tcv-act.ok{background:transparent;border-color:transparent}'
    +'.tcv-sec{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;'
@@ -6895,8 +6895,8 @@ function _tcvRender(){
   },0);
 
   var head=mode
-    ? '<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-bottom:12px;line-height:1.5">Choisis le travail de la convention qui correspond à <b>'+esc(_tcvTache)+'</b>. La tâche garde son nom, ses saisons et ses h/ha — le rattachement sert de <b>référence</b>.</div>'
-    : '<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-bottom:12px;line-height:1.5">Les travaux du cycle de la vigne et leurs h/ha de référence.'+(admin?' Touche un travail pour l\'ajouter à la saison (ou revoir ses heures s\'il y est déjà).':'')+' Une tâche créée hors convention peut être rattachée depuis sa ligne dans Réglages.</div>';
+    ? '<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);margin-bottom:12px;line-height:1.5">Choisis le travail de la convention qui correspond à <b>'+esc(_tcvTache)+'</b>. La tâche garde son nom, ses saisons et ses h/ha — le rattachement sert de <b>référence</b>.</div>'
+    : '<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);margin-bottom:12px;line-height:1.5">Les travaux du cycle de la vigne et leurs h/ha de référence.'+(admin?' Touche un travail pour l\'ajouter à la saison (ou revoir ses heures s\'il y est déjà).':'')+' Une tâche créée hors convention peut être rattachée depuis sa ligne dans Réglages.</div>';
   if(mode&&!admin) head+='<div style="font-size:var(--pt-micro,12px);color:var(--bordeaux,#7A1020);margin-bottom:10px">Le rattachement est réservé à l\'administrateur.</div>';
 
   // Bandeau densite : le bareme vaut pour 10 000 pieds/ha. On dit d'ou vient le chiffre,
@@ -6917,7 +6917,7 @@ function _tcvRender(){
       +(on?'var(--vert-med)':'var(--gris-clair)')+';background:'+(on?'rgba(61,107,39,0.12)':'transparent')
       +';color:'+(on?'var(--vert-med)':'var(--texte-doux)')+'">'+esc(o.court||k)+'</span>';
   };
-  var barHtml='<div style="font-size:var(--pt-lbl,11.5px);line-height:1.5;border:1px solid var(--gris-clair);border-radius:10px;padding:9px 11px;margin-bottom:9px;background:var(--bg-card)">'
+  var barHtml='<div style="font-size:var(--pt-lbl,12px);line-height:1.5;border:1px solid var(--gris-clair);border-radius:10px;padding:9px 11px;margin-bottom:9px;background:var(--bg-card)">'
     +'<b>Barème de référence</b><div style="margin-top:5px">'
     +Object.keys(_BS).map(function(k){return _chip(k,_BS[k]);}).join('')+'</div>'
     +(_bar?('<div style="color:var(--texte-doux);margin-top:2px">'+esc(_bar.label)+'<br>'
@@ -6926,7 +6926,7 @@ function _tcvRender(){
     +'<div style="color:var(--texte-doux);margin-top:4px;opacity:0.85">Référence indicative : vos heures restent les vôtres.</div>'
     +'</div>';
 
-  var densHtml='<div style="font-size:var(--pt-lbl,11.5px);line-height:1.5;border:1px solid var(--gris-clair);border-radius:10px;padding:9px 11px;margin-bottom:12px;background:var(--bg-card)">'
+  var densHtml='<div style="font-size:var(--pt-lbl,12px);line-height:1.5;border:1px solid var(--gris-clair);border-radius:10px;padding:9px 11px;margin-bottom:12px;background:var(--bg-card)">'
     +'<b>Vos plantations</b> — '
     +(_dv ? (esc(String(_dv.ec_rang).replace('.',','))+' × '+esc(String(_dv.ec_pied).replace('.',','))+' m · <b>'+_dv.pieds+' pieds/ha</b>')
           : '<span style="color:var(--texte-doux)">non renseignées</span>')
@@ -7405,7 +7405,7 @@ function _docsReleveOpen(){
   var mSel = (typeof window._planReleveMois === 'function') ? window._planReleveMois() : 0;
   var an   = (typeof window._planReleveAn   === 'function') ? window._planReleveAn()   : new Date().getFullYear();
   host.innerHTML = '<div style="background:var(--phyto-pale);border-radius:14px;padding:14px 16px">'
-    + '<div style="font-size:13px;font-weight:700;color:var(--phyto-med,#7B6DB8);margin-bottom:12px">'
+    + '<div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--phyto-med,#7B6DB8);margin-bottom:12px">'
       + '\u{1F464} Relev\u00e9 individuel d\u2019un salari\u00e9</div>'
     + '<div class="fl" style="margin-top:0">Salari\u00e9</div>'
     + '<select class="fi" id="docs-rlv-nom" style="width:100%;margin-bottom:10px">'
@@ -7426,7 +7426,7 @@ function _docsReleveOpen(){
       + 'et l\u2019annualisation de l\u2019ann\u00e9e ' + an + '. Deux lignes de signature en bas de page. '
       + 'L\u2019ann\u00e9e est celle consult\u00e9e au Planning.</div>'
     + '<button onclick="_docsReleveGo()" style="background:var(--phyto-med,#7B6DB8);color:white;border:none;'
-      + 'border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;font-family:\'Outfit\',sans-serif;'
+      + 'border-radius:10px;padding:11px 18px;font-size:var(--pt-txt,13px);font-weight:600;font-family:\'Outfit\',sans-serif;'
       + 'width:100%;cursor:pointer">\u{1F5A8}\u{FE0F} \u00c9diter le relev\u00e9</button>'
     + '</div>';
   _docsPane('docs-pane-releve');
@@ -7473,7 +7473,7 @@ function _docsPlanNomOpen(){
   if(ans.indexOf(anDef) < 0) anDef = ans[ans.length - 1];
 
   host.innerHTML = '<div style="background:var(--phyto-pale);border-radius:14px;padding:14px 16px">'
-    + '<div style="font-size:13px;font-weight:700;color:var(--phyto-med,#7B6DB8);margin-bottom:12px">'
+    + '<div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--phyto-med,#7B6DB8);margin-bottom:12px">'
       + _mvIcon('calendrier',18) + ' Planning de l\u2019ann\u00e9e d\u2019un salari\u00e9</div>'
     + '<div class="fl" style="margin-top:0">Salari\u00e9</div>'
     + '<select class="fi" id="docs-pn-nom" style="width:100%;margin-bottom:10px">'
@@ -7494,7 +7494,7 @@ function _docsPlanNomOpen(){
       + 'les cong\u00e9s et les r\u00e9cup\u00e9rations d\u00e9j\u00e0 pos\u00e9s au calendrier y figurent, et le total '
       + 'distingue les heures faites au domaine de celles faites en formation.</div>'
     + '<button onclick="_docsPlanNomGo()" style="background:var(--phyto-med,#7B6DB8);color:white;border:none;'
-      + 'border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;font-family:\'Outfit\',sans-serif;'
+      + 'border-radius:10px;padding:11px 18px;font-size:var(--pt-txt,13px);font-weight:600;font-family:\'Outfit\',sans-serif;'
       + 'width:100%;cursor:pointer">\u00c9diter le planning</button>'
     + '</div>';
   _docsPane('docs-pane-plannom');

@@ -529,6 +529,60 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-ref2.mjs --contre'],
   ['node scripts/mv-harnais-coq1.mjs'],               // COQ-1 + PAL-1 (§268) : barre latérale et recherche Ctrl K, sur ordinateur
   ['node scripts/mv-harnais-coq1.mjs --contre'],
+  ['node scripts/mv-harnais-coq2.mjs'],               // COQ-2 (§271) : la barre, la recherche et le dock au dessin de la maquette v2
+  ['node scripts/mv-harnais-coq2.mjs --contre'],
+  ['node scripts/mv-harnais-tete1.mjs'],              // TETE-1 (§272) : en-têtes et onglets au dessin de la maquette v2
+  ['node scripts/mv-harnais-tete1.mjs --contre'],
+  ['node scripts/mv-harnais-parc1.mjs'],              // PARC-1 (§274) : les Parcelles sur ordinateur, liste + fiche (maquette v3)
+  ['node scripts/mv-harnais-parc1.mjs --contre'],
+  ['node scripts/mv-harnais-parc2.mjs'],              // PARC-2 (§275) : les cartes de travail du téléphone (maquette v3)
+  ['node scripts/mv-harnais-parc2.mjs --contre'],
+  ['node scripts/mv-harnais-acc1.mjs'],               // ACC-1 (§276) : l'Accueil en grille 12 colonnes, cadre commun, Personnaliser
+  ['node scripts/mv-harnais-acc1.mjs --contre'],
+  ['node scripts/mv-harnais-acc2.mjs'],               // ACC-2 (§277) : la priorité épinglée en carte, l'avancement au cadre neutre
+  ['node scripts/mv-harnais-acc2.mjs --contre'],
+  ['node scripts/mv-harnais-acc3.mjs'],               // ACC-3 (§278) : météo 5 jours et derniers travaux au dessin de la v4
+  ['node scripts/mv-harnais-acc3.mjs --contre'],
+  ['node scripts/mv-harnais-plan1.mjs'],              // PLAN-1 (§279) : le Planning « Le mois » au dessin de la maquette v5
+  ['node scripts/mv-harnais-plan1.mjs --contre'],
+  ['node scripts/mv-harnais-plan2.mjs'],              // PLAN-2 (§280) : Planning « Les gens » en liste + fiche
+  ['node scripts/mv-harnais-plan2.mjs --contre'],
+  ['node scripts/mv-harnais-plan3.mjs'],              // PLAN-3 (§281) : les feuilles du Planning et le récap annuel à la charte
+  ['node scripts/mv-harnais-plan3.mjs --contre'],
+  ['node scripts/mv-harnais-trac1.mjs'],              // TRAC-1 (§282) : les sessions du Tracteur en liste + fiche
+  ['node scripts/mv-harnais-trac1.mjs --contre'],
+  ['node scripts/mv-harnais-trac2.mjs'],              // TRAC-2 (§283) : l'Entretien du Tracteur sur deux colonnes
+  ['node scripts/mv-harnais-trac2.mjs --contre'],
+  ['node scripts/mv-harnais-trac3.mjs'],              // TRAC-3 (§284) : heures et GNR d'une session, bouton « Démarrer », fenêtres
+  ['node scripts/mv-harnais-trac3.mjs --contre'],
+  ['node scripts/mv-harnais-phyto1.mjs'],             // PHYTO-1 (§285) : le registre phyto en liste + fiche
+  ['node scripts/mv-harnais-phyto1.mjs --contre'],
+  ['node scripts/mv-harnais-phyto2.mjs'],             // PHYTO-2 (§286) : le catalogue E-Phy en liste + fiche
+  ['node scripts/mv-harnais-phyto2.mjs --contre'],
+  ['node scripts/mv-harnais-phyto3.mjs'],             // PHYTO-3 (§287) : la Fertilisation à la charte
+  ['node scripts/mv-harnais-phyto3.mjs --contre'],
+  ['node scripts/mv-harnais-cave1.mjs'],              // CAVE-1 (§288) : la Cave › Aujourd'hui et la bande à la charte
+  ['node scripts/mv-harnais-cave1.mjs --contre'],
+  ['node scripts/mv-harnais-cave2.mjs'],              // CAVE-2 (§289) : le Cuvier à la charte
+  ['node scripts/mv-harnais-cave2.mjs --contre'],
+  ['node scripts/mv-harnais-cave3.mjs'],              // CAVE-3 (§290) : le Chai en liste + fiche
+  ['node scripts/mv-harnais-cave3.mjs --contre'],
+  ['node scripts/mv-harnais-cave4.mjs'],              // CAVE-4 (§291) : le Millésime à la charte
+  ['node scripts/mv-harnais-cave4.mjs --contre'],
+  ['node scripts/mv-harnais-rsv1.mjs'],               // RSV-1 (§292) : la Réserve › Fûts à la charte
+  ['node scripts/mv-harnais-rsv1.mjs --contre'],
+  ['node scripts/mv-harnais-rsv2.mjs'],               // RSV-2 (§293) : la Réserve › Intrants à la charte
+  ['node scripts/mv-harnais-rsv2.mjs --contre'],
+  ['node scripts/mv-harnais-rsv3.mjs'],               // RSV-3 (§294) : le Bilan matière à la charte
+  ['node scripts/mv-harnais-rsv3.mjs --contre'],
+  ['node scripts/mv-harnais-rg1.mjs'],                // RG-1 (§295) : Réglages › Domaine à la charte
+  ['node scripts/mv-harnais-rg1.mjs --contre'],
+  ['node scripts/mv-harnais-rg2.mjs'],                // RG-2 (§296) : Réglages › Équipe et Moi à la charte
+  ['node scripts/mv-harnais-rg2.mjs --contre'],
+  ['node scripts/mv-harnais-coul1.mjs'],              // COUL-1 (§297) : teintes plus franches, fond un peu plus soutenu
+  ['node scripts/mv-harnais-coul1.mjs --contre'],
+  ['node scripts/mv-harnais-pil1.mjs'],               // PIL-1 (§298) : les sept onglets du Pilotage à la charte
+  ['node scripts/mv-harnais-pil1.mjs --contre'],
   ['node scripts/mv-harnais-pro1.mjs'],               // PRO-1 (§269) : la barre à sa vraie largeur, les boutons du cockpit, la consommation refaite
   ['node scripts/mv-harnais-pro1.mjs --contre'],
 ];

@@ -1566,7 +1566,7 @@ function initLogin(){
     window._loginRetryCount++;
     var _tenant = localStorage.getItem('mavigne_tenant') || '(absent)';
     profiles.style.display = 'block';
-    profiles.innerHTML = '<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.4);font-family:Outfit,sans-serif;font-size:13px;letter-spacing:.08em">'
+    profiles.innerHTML = '<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.4);font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px);letter-spacing:.08em">'
       + '<div style="margin-bottom:12px;animation:spin 1.2s linear infinite;display:inline-flex;color:var(--texte-doux)">'+_mvIcon('sablier',40)+'</div>'
       + '<div>Chargement… (' + window._loginRetryCount + ')</div>'
       + '<div style="margin-top:8px;font-size:10px;opacity:.5">tenant: ' + _tenant + '</div>'
@@ -1600,7 +1600,7 @@ function _initLoginDemo(){
   profiles.style.display = 'block';
   profiles.innerHTML =
     '<div style="text-align:center;margin-bottom:20px">'
-    +'<div style="font-size:28px;margin-bottom:8px">&#127815;</div>'
+    +'<div style="font-size:var(--pt-xl,28px);margin-bottom:8px">&#127815;</div>'
     +'<div style="font-family:Cormorant Garamond,serif;font-size:18px;font-weight:600;color:var(--or);margin-bottom:4px">Accès démo</div>'
     +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5">Entrez le code reçu par téléphone</div>'
     +'</div>'
@@ -1608,7 +1608,7 @@ function _initLoginDemo(){
     +'<div style="font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-doux);margin-bottom:6px;letter-spacing:.06em">CODE D&#39;ACCÈS</div>'
     +'<input id="demo-code-input" type="text" placeholder="ESSAI-XX-XXXX"'
     +' style="width:100%;background:rgba(184,145,58,0.08);border:1.5px solid rgba(184,145,58,0.3);border-radius:12px;'
-    +'padding:13px 16px;font-family:monospace;font-size:16px;color:var(--or);text-align:center;'
+    +'padding:13px 16px;font-family:monospace;font-size:var(--pt-sm,16px);color:var(--or);text-align:center;'
     +'letter-spacing:.1em;text-transform:uppercase;box-sizing:border-box"'
     +' oninput="this.value=this.value.toUpperCase()"'
     +' onkeydown="if(event.keyCode===13)confirmDemoCode()">'
@@ -1714,7 +1714,7 @@ function _showDemoProfiles(){
     var info = document.createElement('div');
     info.style.cssText = 'pointer-events:none';
     var nm = document.createElement('div');
-    nm.style.cssText = 'font-size:13px;font-weight:600;color:var(--texte)';
+    nm.style.cssText = 'font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)';
     nm.textContent = p.nom;
     var ds = document.createElement('div');
     ds.style.cssText = 'font-size:var(--pt-micro,11px);color:var(--texte-doux)';
@@ -2368,19 +2368,19 @@ var _mvtCss = `
 .mvtwc-top::before{content:'';position:absolute;top:-40px;right:-20px;width:150px;height:150px;border-radius:50%;background:rgba(201,168,76,.1)}
 .mvtwc-logo-img{position:absolute;top:14px;right:18px;width:50px;height:50px;object-fit:contain}
 .mvtwc-eye{font-size:var(--pt-lbl,10.5px);font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#C9A84C}
-.mvtwc-logo{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:#fff;line-height:1;margin-top:2px}
+.mvtwc-logo{font-family:'Cormorant Garamond',serif;font-size:var(--pt-xxl,32px);font-weight:600;color:#fff;line-height:1;margin-top:2px}
 .mvtwc-mid{padding:20px 22px 8px}
-.mvtwc-h{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;line-height:1.12;color:#2A2521}
-.mvtwc-sub{font-size:13px;color:#6a5f52;line-height:1.5;margin-top:9px}
+.mvtwc-h{font-family:'Cormorant Garamond',serif;font-size:var(--pt-lg,24px);font-weight:600;line-height:1.12;color:#2A2521}
+.mvtwc-sub{font-size:var(--pt-txt,13px);color:#6a5f52;line-height:1.5;margin-top:9px}
 .mvtwc-sub b{color:#8A5A38;font-weight:600}
 .mvtwc-grid{padding:13px 22px 6px;display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .mvtwc-cap{display:flex;align-items:flex-start;gap:9px;background:#fff;border:1px solid #E8E0D2;border-radius:12px;padding:10px 11px}
-.mvtwc-cap .ci{font-size:var(--pt-sm,17px);line-height:1.1;flex-shrink:0}
-.mvtwc-cap .ct{font-size:var(--pt-lbl,11.5px);font-weight:600;line-height:1.25;color:#2A2521}
+.mvtwc-cap .ci{font-size:var(--pt-sm,16px);line-height:1.1;flex-shrink:0}
+.mvtwc-cap .ct{font-size:var(--pt-lbl,12px);font-weight:600;line-height:1.25;color:#2A2521}
 .mvtwc-foot{padding:14px 22px calc(18px + env(safe-area-inset-bottom));position:sticky;bottom:0;background:linear-gradient(to top,#F1EADC 75%,transparent)}
-.mvtwc-note{text-align:center;font-size:var(--pt-lbl,11.5px);color:#6a5f52;margin-bottom:11px}
+.mvtwc-note{text-align:center;font-size:var(--pt-lbl,12px);color:#6a5f52;margin-bottom:11px}
 .mvtwc-go{display:block;width:100%;border:0;border-radius:14px;padding:15px;cursor:pointer;font-family:inherit;font-weight:600;font-size:15px;background:linear-gradient(135deg,#2a2118,#14110D);color:#f3ecdf;box-shadow:0 8px 22px rgba(20,17,13,.3)}
-.mvtwc-skip{display:block;width:100%;background:none;border:0;margin-top:8px;cursor:pointer;font-family:inherit;font-size:var(--pt-txt,12.5px);color:#6a5f52;text-decoration:underline;text-underline-offset:3px}
+.mvtwc-skip{display:block;width:100%;background:none;border:0;margin-top:8px;cursor:pointer;font-family:inherit;font-size:var(--pt-txt,13px);color:#6a5f52;text-decoration:underline;text-underline-offset:3px}
 #mvt{position:fixed;inset:0;z-index:100000;pointer-events:none;font-family:'Outfit',sans-serif}
 .mvt-mask{position:fixed;background:rgba(10,8,5,.7);pointer-events:auto;transition:left .28s ease,top .28s ease,width .28s ease,height .28s ease}
 #mvt-c{background:transparent}
@@ -2393,10 +2393,10 @@ var _mvtCss = `
 .mvt-btx{font-size:13.5px;line-height:1.45;margin-top:4px;color:#EFE6D2}
 .mvt-bh{font-size:10px;color:#9C8F79;margin-top:3px;line-height:1.35}
 .mvt-brow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:9px;min-height:34px}
-.mvt-miss{display:inline-flex;align-items:center;gap:7px;background:rgba(201,168,76,.14);border:1px solid rgba(201,168,76,.5);color:#E8C98A;border-radius:999px;padding:6px 12px;font-size:var(--pt-lbl,11.5px);font-weight:600}
+.mvt-miss{display:inline-flex;align-items:center;gap:7px;background:rgba(201,168,76,.14);border:1px solid rgba(201,168,76,.5);color:#E8C98A;border-radius:999px;padding:6px 12px;font-size:var(--pt-lbl,12px);font-weight:600}
 .mvt-hand{font-size:15px;animation:mvttap 1.1s ease-in-out infinite}
 @keyframes mvttap{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-.mvt-bnext{border:0;border-radius:11px;padding:9px 15px;cursor:pointer;font-family:inherit;font-weight:600;font-size:var(--pt-txt,12.5px);background:#D8BC72;color:#241D12;display:none}
+.mvt-bnext{border:0;border-radius:11px;padding:9px 15px;cursor:pointer;font-family:inherit;font-weight:600;font-size:var(--pt-txt,13px);background:#D8BC72;color:#241D12;display:none}
 .mvt-bnext.on{display:inline-block}
 .mvt-skip{font-size:var(--pt-micro,11px);color:#9C8F79;background:none;border:0;cursor:pointer;font-family:inherit;text-decoration:underline;text-underline-offset:3px;padding:0;flex-shrink:0}
 .mvt-dots{display:flex;gap:4px;align-items:center}
@@ -2413,24 +2413,24 @@ var _mvtCss = `
 .mvt-add::before{content:'';position:fixed;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27)}
 .mvt-add-in{max-width:360px;margin:0 auto}
 .mvt-add-eye{font-size:var(--pt-lbl,10.5px);font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#C2A14D}
-.mvt-add-td{font-size:13px;color:#C9BCA4;margin-top:10px}
+.mvt-add-td{font-size:var(--pt-txt,13px);color:#C9BCA4;margin-top:10px}
 .mvt-add-td b{color:#F5EEDF;font-weight:600}
 .mvt-add-big{font-family:'Cormorant Garamond',serif;font-size:46px;font-weight:700;color:#D8BC72;line-height:1;margin-top:14px}
-.mvt-add-sub{font-size:13px;color:#C9BCA4;margin-top:6px}
+.mvt-add-sub{font-size:var(--pt-txt,13px);color:#C9BCA4;margin-top:6px}
 .mvt-add-rows{margin:16px auto 0;max-width:300px;text-align:left}
-.mvt-add-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 2px;border-bottom:1px solid rgba(245,238,223,.12);font-size:var(--pt-txt,12.5px);color:#D8CDB8}
-.mvt-add-row i{font-style:normal;font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:#F5EEDF;white-space:nowrap}
+.mvt-add-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 2px;border-bottom:1px solid rgba(245,238,223,.12);font-size:var(--pt-txt,13px);color:#D8CDB8}
+.mvt-add-row i{font-style:normal;font-family:'Cormorant Garamond',serif;font-size:var(--pt-sm,16px);font-weight:700;color:#F5EEDF;white-space:nowrap}
 .mvt-add-hyp{font-size:var(--pt-lbl,10.5px);color:#9C8F79;line-height:1.55;margin-top:12px}
-.mvt-add-eur{margin-top:13px;font-size:var(--pt-txt,12.5px);color:#D8CDB8}
+.mvt-add-eur{margin-top:13px;font-size:var(--pt-txt,13px);color:#D8CDB8}
 .mvt-add-plus{margin:16px auto 0;max-width:300px;text-align:left;border-top:1px solid rgba(245,238,223,.14);padding-top:12px}
 .mvt-add-plus .ph{font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#C2A14D}
 .mvt-add-pr{display:flex;gap:9px;margin-top:9px;font-size:var(--pt-micro,12px);line-height:1.5;color:#D8CDB8}
 .mvt-add-pr .pi{flex-shrink:0}
 .mvt-add-pr b{color:#F5EEDF;font-weight:600}
-.mvt-add-inst{margin:13px auto 0;max-width:300px;background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.42);border-radius:13px;padding:11px 13px;font-size:var(--pt-txt,12.5px);line-height:1.5;color:#EFE6D2}
+.mvt-add-inst{margin:13px auto 0;max-width:300px;background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.42);border-radius:13px;padding:11px 13px;font-size:var(--pt-txt,13px);line-height:1.5;color:#EFE6D2}
 .mvt-add-inst b{color:#D8BC72}
 .mvt-add-cta{display:block;width:100%;max-width:300px;margin:18px auto 0;border:0;border-radius:14px;padding:14px;cursor:pointer;font-family:inherit;font-weight:700;font-size:14.5px;background:linear-gradient(135deg,#D8BC72,#C2A14D);color:#241D12;text-decoration:none;box-sizing:border-box}
-.mvt-add-ghost{display:block;width:100%;max-width:300px;margin:9px auto 0;border-radius:14px;padding:12px;cursor:pointer;font-family:inherit;font-weight:600;font-size:var(--pt-txt,12.5px);background:none;border:1px solid rgba(245,238,223,.3);color:#F5EEDF;box-sizing:border-box}
+.mvt-add-ghost{display:block;width:100%;max-width:300px;margin:9px auto 0;border-radius:14px;padding:12px;cursor:pointer;font-family:inherit;font-weight:600;font-size:var(--pt-txt,13px);background:none;border:1px solid rgba(245,238,223,.3);color:#F5EEDF;box-sizing:border-box}
 .mvt-add-sign{margin-top:15px;font-size:var(--pt-micro,11px);color:#9C8F79;line-height:1.5;font-style:italic}
 .mvt-more{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:0 0 16px}
 .mvt-more span{font-size:var(--pt-micro,11px);font-weight:600;color:#8A5A38;background:#F3EADF;border:1px solid #E8E0D2;border-radius:99px;padding:4px 10px}
@@ -2440,26 +2440,26 @@ var _mvtCss = `
 .mvt-menu-card{width:404px;max-width:100%;background:radial-gradient(circle at 50% 0%,#FCF7EC,#F1EADC 72%);border-radius:22px;box-shadow:0 30px 70px rgba(0,0,0,.5);padding:22px 20px calc(18px + env(safe-area-inset-bottom));max-height:94vh;overflow-y:auto}
 .mvt-menu-eye{font-size:var(--pt-lbl,10.5px);font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#C2871E;text-align:center}
 .mvt-menu-h{font-family:'Cormorant Garamond',serif;font-size:25px;font-weight:600;line-height:1.1;color:#2A2521;text-align:center;margin-top:4px}
-.mvt-menu-sub{font-size:var(--pt-txt,12.5px);color:#6a5f52;line-height:1.5;text-align:center;margin:8px 6px 4px}
+.mvt-menu-sub{font-size:var(--pt-txt,13px);color:#6a5f52;line-height:1.5;text-align:center;margin:8px 6px 4px}
 .mvt-ch-grid{display:flex;flex-direction:column;gap:8px;margin:14px 0 6px}
 .mvt-fam{display:flex;align-items:center;gap:8px;margin:14px 2px 2px;font-size:var(--pt-lbl,10.5px);font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:#8A5A38}
 .mvt-fam:first-child{margin-top:2px}
-.mvt-fam-ic{font-size:13px;letter-spacing:0}
+.mvt-fam-ic{font-size:var(--pt-txt,13px);letter-spacing:0}
 .mvt-fam-n{margin-left:auto;font-size:10px;font-weight:600;letter-spacing:0;color:#A99781;background:#F3EADF;border:1px solid #E8E0D2;border-radius:99px;padding:1px 7px}
 .mvt-ch{display:flex;align-items:center;gap:12px;text-align:left;width:100%;background:#fff;border:1px solid #E8E0D2;border-radius:14px;padding:12px 13px;cursor:pointer;font-family:inherit;transition:transform .08s ease,box-shadow .15s ease}
 .mvt-ch:hover{box-shadow:0 6px 18px rgba(20,17,13,.12);transform:translateY(-1px)}
 .mvt-ch-ic{font-size:22px;flex-shrink:0;width:30px;text-align:center}
 .mvt-ch-tx{flex:1;min-width:0}
 .mvt-ch-tx b{display:block;font-size:13.5px;font-weight:600;color:#2A2521;line-height:1.2}
-.mvt-ch-tx i{display:block;font-size:var(--pt-lbl,11.5px);font-style:normal;color:#76695a;line-height:1.35;margin-top:2px}
+.mvt-ch-tx i{display:block;font-size:var(--pt-lbl,12px);font-style:normal;color:#76695a;line-height:1.35;margin-top:2px}
 .mvt-ch-go{font-size:var(--pt-md,20px);color:#C2871E;flex-shrink:0;font-weight:600}
-.mvt-menu-note{font-size:var(--pt-lbl,11.5px);color:#6a5f52;text-align:center;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.28);border-radius:11px;padding:9px 11px;margin:8px 0 12px;line-height:1.4}
+.mvt-menu-note{font-size:var(--pt-lbl,12px);color:#6a5f52;text-align:center;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.28);border-radius:11px;padding:9px 11px;margin:8px 0 12px;line-height:1.4}
 .mvt-chbar{position:fixed;left:0;right:0;bottom:0;z-index:100006;background:linear-gradient(180deg,#1C1813,#14110D);border-top:2px solid transparent;border-image:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27) 1;box-shadow:0 -10px 30px rgba(10,8,5,.5);padding:11px 14px calc(11px + env(safe-area-inset-bottom));font-family:'Outfit',sans-serif}
 .mvt-chbar-in{display:flex;align-items:center;gap:12px;max-width:560px;margin:0 auto}
 .mvt-chbar-tx{flex:1;min-width:0;color:#f3ecdf}
-.mvt-chbar-tx b{display:block;font-size:13px;font-weight:600;line-height:1.2}
+.mvt-chbar-tx b{display:block;font-size:var(--pt-txt,13px);font-weight:600;line-height:1.2}
 .mvt-chbar-tx span{display:block;font-size:var(--pt-micro,11px);color:#cbb896;line-height:1.35;margin-top:2px}
-.mvt-chbar-btn{flex-shrink:0;font-family:inherit;font-weight:600;font-size:var(--pt-txt,12.5px);border:1px solid rgba(201,168,76,.5);background:rgba(201,168,76,.14);color:#E8C98A;border-radius:11px;padding:9px 13px;cursor:pointer;white-space:nowrap}
+.mvt-chbar-btn{flex-shrink:0;font-family:inherit;font-weight:600;font-size:var(--pt-txt,13px);border:1px solid rgba(201,168,76,.5);background:rgba(201,168,76,.14);color:#E8C98A;border-radius:11px;padding:9px 13px;cursor:pointer;white-space:nowrap}
 .mvt-chbar-btn:active{background:rgba(201,168,76,.26)}
 /* ★★★ LA BARRE NE MANGE PLUS L'ECRAN. Elle est la moitie du defaut de cadrage :
    plus elle est haute, moins il reste de place pour ce qu'on montre. Bornee a
@@ -2468,7 +2468,7 @@ var _mvtCss = `
 .mvt-bar-in{max-height:46vh;overflow-y:auto;overscroll-behavior:contain}
 @media (max-height:740px){
   .mvt-bar-in{padding:9px 14px calc(10px + env(safe-area-inset-bottom))}
-  .mvt-btx{font-size:var(--pt-txt,12.5px);line-height:1.38;margin-top:3px}
+  .mvt-btx{font-size:var(--pt-txt,13px);line-height:1.38;margin-top:3px}
   .mvt-bh{font-size:var(--pt-nano,9.5px);line-height:1.3}
   .mvt-brow{margin-top:7px;min-height:32px}
 }
@@ -4024,8 +4024,8 @@ function _mvSessShow(){
     + '<div style="display:flex;justify-content:center;margin-bottom:12px;color:#8A857A">'+_mvIcon('cle',40)+'</div>'
     + '<div style="font-family:Georgia,serif;font-size:26px;font-weight:600;color:#14110D;margin-bottom:10px;">Session interrompue</div>'
     + '<div style="font-size:15px;line-height:1.55;color:#4A463E;margin-bottom:18px;">La démonstration (ou une autre connexion) a remplacé ta session dans <b>ce navigateur</b>. Les modifications sont bloquées tant que la connexion à ton domaine n&#39;est pas rétablie.</div>'
-    + '<button id="mv-sess-recover" style="width:100%;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:600;color:#fff;background:#7A1020;cursor:pointer;">Se reconnecter à mon domaine</button>'
-    + '<div style="font-size:var(--pt-txt,12.5px);line-height:1.5;color:#8A857A;margin-top:14px;">Pour éviter cela, ouvre la démo en <b>navigation privée</b> ou dans un autre profil de navigateur.</div>'
+    + '<button id="mv-sess-recover" style="width:100%;border:none;border-radius:12px;padding:14px;font-size:var(--pt-sm,16px);font-weight:600;color:#fff;background:#7A1020;cursor:pointer;">Se reconnecter à mon domaine</button>'
+    + '<div style="font-size:var(--pt-txt,13px);line-height:1.5;color:#8A857A;margin-top:14px;">Pour éviter cela, ouvre la démo en <b>navigation privée</b> ou dans un autre profil de navigateur.</div>'
     + '</div>';
   document.body.appendChild(o);
   var b=document.getElementById('mv-sess-recover'); if(b) b.onclick=_mvSessRecover;
@@ -4379,7 +4379,7 @@ function renderHomeMeteoCommunes(){
   // ALIGN-2 (§237) : la météo par secteur a son propre bloc, et UNE carte. Moins de deux communes : le bloc s'efface (son
   //   voisin de rangée prend toute la largeur) et l'entrée « Communes » revient sous la météo 5 jours.
   var wrapS=document.querySelector('.home-w[data-w="meteosect"]'), bulkE=document.getElementById('home-cm-bulk');
-  if(groups.length<2){ c.innerHTML=''; if(wrapS)wrapS.style.display='none'; if(bulkE)bulkE.style.display=''; if(typeof _homeRangees==='function')_homeRangees(); return; }
+  if(groups.length<2){ c.innerHTML=''; if(wrapS)wrapS.style.display='none'; if(bulkE)bulkE.style.display=''; if(typeof _homeRangees==='function')_homeRangees(); _homeSpans(); return; }
   if(wrapS)wrapS.style.display=''; if(bulkE)bulkE.style.display='none';
   var store=window.METEO_PAR_COMMUNE, ts=window._MV_WXCOM_TS||0;
   // Un relevé en mémoire qui ne couvre pas tous les secteurs actuels est périmé :
@@ -4394,7 +4394,7 @@ function renderHomeMeteoCommunes(){
   groups.forEach(function(g){ html+=_wxStoreCard(g,store); });
   html+='</div><button type="button" class="cm-wx-pied" onclick="openCommunesBulk()">Communes &amp; m\u00e9t\u00e9o par secteur \u203A</button></div>';
   c.innerHTML=html;
-  if(typeof _homeRangees==='function')_homeRangees();
+  if(typeof _homeRangees==='function')_homeRangees(); _homeSpans();
 }
 
 // ════ AFFECTATION COMMUNE — édition d'une parcelle ════
@@ -5210,7 +5210,7 @@ function renderHeuresCard(containerId){
   c.innerHTML=`<div class="mv-hd" style="margin-bottom:14px">
       <div><div class="mv-l">Avancement par t\u00e2che</div>
         <div class="mv-t" style="margin-top:1px">${_escHtml(_visuSaison())}</div></div>
-      <div style="text-align:right;flex:none"><div class="mv-n">${totalReste}<span style="font-size:13px"> h</span></div>
+      <div style="text-align:right;flex:none"><div class="mv-n">${totalReste}<span style="font-size:var(--pt-txt,13px)"> h</span></div>
         <div class="mv-l">restantes</div></div></div>`
     +'<div class="mvk-liste">'+((typeof window._mvkAvancement==='function')?window._mvkAvancement(data,ret):'')+'</div>';
 }
@@ -5837,7 +5837,7 @@ function _mvReceiptRender(){
     var at=t.t?new Date(t.t):null;
     var when=at?(at.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})+' \u00e0 '+at.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})):'\u2014';
     box.style.display='block';
-    box.innerHTML='<div style="font-weight:600;color:var(--vert,#3D6B27);font-size:var(--pt-txt,12.5px);margin-bottom:4px">\u2713 Conditions accept\u00e9es</div>'
+    box.innerHTML='<div style="font-weight:600;color:var(--vert,#3D6B27);font-size:var(--pt-txt,13px);margin-bottom:4px">\u2713 Conditions accept\u00e9es</div>'
       +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux,#726A5E);line-height:1.6">CGU v'+(t.c||'?')+' + DPA v'+(t.d||'?')+' \u00b7 le '+when+(t.r?(' \u00b7 r\u00e9f '+t.r):'')
       // ⚠️ Dans la MÊME ligne (<br>) : un second <div style="font-size:…px"> ajoutait un px en dur (cliquet typo).
       +(dom?('<br>Accept\u00e9es pour le domaine par '+_escHtml((dom.signataire&&dom.signataire.nom)||'?')
@@ -6023,7 +6023,7 @@ function applyHomeLayout(){
   }
   _homeRenderGrips(lay);
   _homeDndInit();
-  _homeRangees();
+  _homeRangees(); _homeSpans();
 }
 function _homeRenderGrips(lay){
   var page=document.getElementById('page-home');if(!page)return;
@@ -6097,6 +6097,21 @@ function _homeRangees(){
     att=att?null:el;
   });
   if(att) att.classList.add('home-w-seul');
+}
+// ACC-1 (§276) : sur ordinateur, une grille de 12 colonnes (maquette v4). Deux blocs se partagent une rangée, 7 et 5
+//   colonnes puis 5 et 7 ; un bloc pleine largeur ou resté seul garde toute la rangée (classes de _homeRangees).
+//   ⚠️ Fonction à part, appelée juste après _homeRangees : le harnais ALIGN-2 extrait _homeRangees seule et vise sa fin.
+function _homeSpans(){
+  var cols=document.getElementById('home-cols'); if(!cols) return;
+  var paire=0, prem=null;
+  [].slice.call(cols.children).forEach(function(el){
+    if(!el.classList||!el.classList.contains('home-w')) return;
+    el.style.removeProperty('--hw-span');
+    if((el.classList.contains('home-w-off')&&!homeEditMode)||el.style.display==='none') return;
+    if(el.classList.contains('home-w-large')||el.classList.contains('home-w-seul')){ prem=null; return; }
+    if(!prem){ prem=el; return; }
+    var g=(paire%2)?[5,7]:[7,5]; prem.style.setProperty('--hw-span',String(g[0])); el.style.setProperty('--hw-span',String(g[1])); paire++; prem=null;
+  });
 }
 function homeWidgetLarge(id){
   var lay=getHomeLayout();var i=lay.large.indexOf(id);
@@ -6187,7 +6202,7 @@ function _homeDragEnd(){
   }
   saveHomeLayout(lay);
   _homeRenderGrips(lay);
-  _homeRangees();
+  _homeRangees(); _homeSpans();
   if(navigator.vibrate)navigator.vibrate(60);
   showToast('Ordre enregistr\u00e9','#3D6B27');
   _homeDrag=null;
@@ -6355,7 +6370,7 @@ function goTo(page){
         _ov = document.createElement('div');
         _ov.id = 'regl-wait-ov';
         _ov.style.cssText = 'position:absolute;inset:0;background:rgba(240,238,232,0.92);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;';
-        _ov.innerHTML = '<div style="display:flex;justify-content:center;color:var(--texte-doux)">'+_mvIcon('sablier',40)+'</div><div style="font-size:13px;color:var(--texte-med,#5F5F5F);font-family:Outfit,sans-serif">Chargement en cours...</div>';
+        _ov.innerHTML = '<div style="display:flex;justify-content:center;color:var(--texte-doux)">'+_mvIcon('sablier',40)+'</div><div style="font-size:var(--pt-txt,13px);color:var(--texte-med,#5F5F5F);font-family:Outfit,sans-serif">Chargement en cours...</div>';
         var pg = document.getElementById('page-reglages');
         if(pg) { pg.style.position='relative'; pg.appendChild(_ov); }
       }
@@ -6529,7 +6544,7 @@ function _showAppLoader() {
     el.style.cssText = 'position:fixed;inset:0;background:#F0EEE8;z-index:8000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
     el.innerHTML = '<div style="display:flex;justify-content:center;color:var(--texte-doux)">'+_mvIcon('raisin',40)+'</div>'
       + '<div style="width:36px;height:36px;border:3px solid rgba(61,107,39,0.2);border-top-color:#3D6B27;border-radius:50%;animation:spin 0.8s linear infinite"></div>'
-      + '<div style="font-family:Outfit,sans-serif;font-size:13px;color:var(--texte-med,#5F5F5F);font-weight:500">Chargement des données...</div>';
+      + '<div style="font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px);color:var(--texte-med,#5F5F5F);font-weight:500">Chargement des données...</div>';
     var root = document.getElementById('app-root') || document.body;
     root.appendChild(el);
   }
@@ -6560,6 +6575,49 @@ function showHomeLoader() {
     document.head.appendChild(s);
   }
 }
+
+// ACC-2 (§277) : LA PRIORITÉ ÉPINGLÉE AU DESSIN DE LA MAQUETTE V4 — la tâche du moment, son avancement, les parcelles à leur
+//   surface (fait, en cours, à faire ; un appui ouvre la parcelle) et, à droite sur ordinateur, les trois chiffres du domaine.
+//   Les éléments existants (pastille de priorité, équipes du jour, chiffres #home-kpis) gardent leurs fonctions et leurs
+//   identifiants : on les RANGE dans la carte, on ne les recrée pas. Sans tâche prioritaire, la carte montre la saison.
+function _homeSurf(p){ return parseFloat(String((p&&p.surface)||0).replace(',','.'))||0; }
+function _homeHa(x){ return (Math.round(x*100)/100).toFixed(2).replace('.',','); }
+function _homePrioCarte(){
+  var w=document.querySelector('#page-home .home-w[data-w="priorite"]'); if(!w)return;
+  w.classList.add('hpc');
+  var eq=document.getElementById('home-eqj-wrap');
+  var kp=document.getElementById('home-kpis'); if(kp&&kp.parentNode!==w)w.insertBefore(kp,eq||null);
+  var c=document.getElementById('home-prio-corps');
+  if(!c){ c=document.createElement('div'); c.id='home-prio-corps'; c.className='hpc-corps'; w.insertBefore(c,kp||eq||null); }
+  var its=(typeof _prioItems==='function')?_prioItems():[], t=its.length?its[0].t:'';
+  var act=(PARCELLES||[]).filter(function(p){return p&&p.statut!=='Arrachee';});
+  var etat=function(p){
+    if(t){ var st=getTacheStatut(p,t)||'Non d\u00e9marr\u00e9'; return st==='Valid\u00e9'?'fait':(st==='En cours'?'cours':'afaire'); }
+    var pc=getPCls(p).pct; return pc>=100?'fait':(pc>0?'cours':'afaire');
+  };
+  var surf=0,fait=0,pond=0;
+  act.forEach(function(p){ var sf=_homeSurf(p); surf+=sf; if(etat(p)==='fait')fait+=sf; pond+=getPCls(p).pct*sf; });
+  var pct=t?(surf?Math.round(fait/surf*100):0):(surf?Math.round(pond/surf):0);
+  var maxS=Math.max.apply(null,act.map(_homeSurf).concat([0.0001])), rang={fait:0,cours:1,afaire:2};
+  var mos=act.slice().sort(function(a,b){return rang[etat(a)]-rang[etat(b)]||_homeSurf(b)-_homeSurf(a);}).map(function(p){
+    return '<button type="button" class="hpc-p hpc-'+etat(p)+'" style="--s:'+Math.sqrt(_homeSurf(p)/maxS).toFixed(3)+'" data-nom="'+_escAttr(p.nom)+'" title="'+_escAttr(p.nom+', '+_pvSurfFr(p.surface)+' ha')+'" aria-label="'+_escAttr(p.nom)+'" onclick="openSelParc(this.dataset.nom)"></button>';
+  }).join('');
+  var meta=t?(_homeHa(fait)+'\u00a0ha faits sur '+_homeHa(surf)+'\u00a0ha'+((its[0].equipe&&its[0].equipe.length)?', \u00e9quipe\u00a0: '+_escHtml(its[0].equipe.join(', ')):''))
+            :(act.length+' parcelle'+(act.length>1?'s':'')+', '+_homeHa(surf)+'\u00a0ha');
+  // Sans tâche prioritaire, le pourcentage de la saison est déjà dans les chiffres de droite : la carte ne montre que les parcelles.
+  c.innerHTML=(t?'<div class="hpc-chiffres"><div class="hpc-pct">'+pct+'<small>\u00a0%</small></div>'
+    +'<div class="hpc-meta"><b>Priorit\u00e9 du moment\u00a0: '+_escHtml(tNom(t))+'</b><span>'+meta+'</span></div></div>'
+    +'<div class="hpc-bar"><i style="--p:'+pct+'%"></i></div>'
+    :'<div class="hpc-meta"><b>La saison, parcelle par parcelle</b><span>'+meta+'</span></div>')
+    +(act.length?'<div class="hpc-mos" aria-label="Les parcelles, \u00e0 leur surface">'+mos+'</div>'
+      +'<div class="hpc-leg"><span class="hpc-l-fait"><i></i>Fait</span><span class="hpc-l-cours"><i></i>En cours</span><span class="hpc-l-afaire"><i></i>\u00c0 faire</span></div>':'');
+}
+
+// ACC-3 (§278) : le jour d'une entrée de journal (« Aujourd'hui », « Hier », sinon la date) et son heure, lue dans l'identifiant
+//   (Date.now() en hexadécimal, puis « -qv » ou un autre suffixe) — vide quand l'identifiant ne la porte pas.
+function _hvIso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function _hvJour(iso){ var n=new Date(), h=new Date(n.getTime()-864e5); if(iso===_hvIso(n))return 'Aujourd\u2019hui'; if(iso===_hvIso(h))return 'Hier'; return fmtDate(iso); }
+function _hvHeure(r){ var m=/^([0-9a-f]{10,12})-/.exec(String((r&&r.id)||'')); if(!m)return ''; var d=new Date(parseInt(m[1],16)); return isNaN(d.getTime())?'':String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
 
 function renderHome(){
   applyHomeLayout();
@@ -6660,7 +6718,7 @@ function renderHome(){
   const tracNb=document.getElementById('hv2-trac-nb');
   // ⚠️ Le <span> reprend la taille de la charte : sans style ici, il heriterait
   //   du 22 px de .mv-n et « sessions » pese autant que le chiffre.
-  if(tracNb)tracNb.innerHTML=_sessVue.length+' <span style="font-size:13px">session'
+  if(tracNb)tracNb.innerHTML=_sessVue.length+' <span style="font-size:var(--pt-txt,13px)">session'
     +(_sessVue.length>1?'s':'')+'</span>';
 
   // Heures card
@@ -6671,26 +6729,26 @@ function renderHome(){
   const dt=document.getElementById('derniers-travaux');
   if(dt)dt.className='hv2-travaux mv-c';
   const recent=JOURNAL.filter(j=>!j.meteo).slice(0,4);
-  dt.innerHTML=recent.map(r=>{
+  // ACC-3 (§278) : le fil de la maquette v4 — les jours en intertitre, une ligne par travail : l'heure (lue dans l'identifiant
+  //   de l'entrée, qui naît d'un horodatage), les initiales, « qui a validé / a commencé la tâche sur la parcelle », l'état.
+  let _jPrec='';
+  dt.innerHTML=recent.length?recent.map(r=>{
     const isEq=r.equipe||r.qui==='Equipe';
     const quiAff=isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui})`:isEq?'Équipe':r.qui||'—';
     const isVal=r.statut==='Validé';
-    const dotCls=isVal?'hv2-dot-v':'hv2-dot-e';
-    const badgeCls=isVal?'bv2-v':'bv2-e';
-    return `<div class="mv-tr" onclick="goTo('journal')" style="cursor:pointer">
-      <div style="min-width:0">
-        <div class="mv-v" style="font-size:13.5px;font-weight:600;color:var(--texte)">${_escHtml(r.tache)}</div>
-        <div class="mv-l">${_escHtml(quiAff)} \u00b7 ${_escHtml(r.parcelle)} \u00b7 ${fmtDate(r.date)}</div>
-      </div>
-      ${_mvBadge(r.statut, isVal?'vert':'ambre')}
+    const jour=_hvJour(r.date), tete=(jour!==_jPrec)?`<div class="hv2-fil-jour">${_escHtml(jour)}</div>`:'';
+    _jPrec=jour;
+    const ini=String(r.qui||'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w.charAt(0).toUpperCase()).join('')||'?';
+    return tete+`<div class="hv2-fil" onclick="goTo('journal')">
+      <span class="hv2-fil-h">${_hvHeure(r)}</span><span class="hv2-fil-av">${_escHtml(ini)}</span>
+      <span class="hv2-fil-tx"><b>${_escHtml(quiAff)}</b> ${isVal?'a validé':'a commencé'} <b>${_escHtml(typeof tNom==='function'?tNom(r.tache):r.tache)}</b> sur <b>${_escHtml(r.parcelle)}</b></span>
+      ${isVal?'':_mvBadge('En cours','neutre')}
     </div>`;
-  }).join('');
-  // ⚠️ `dotCls` et `badgeCls` ne servent plus : la couleur vient du ton du badge.
-  //   On les laisse calcules au-dessus le temps que le journal passe aussi a la
-  //   charte — les supprimer ici obligerait a toucher deux fonctions pour rien.
+  }).join(''):'<div class="hv2-fil-vide">Aucun travail au journal pour l\u2019instant.</div>';
 
   // Nouveaux widgets personnalisables (v4.34)
   _renderHomeWidgets();
+  _homePrioCarte();   // ACC-2 (§277)
 }
 
 // ════ WIDGETS ACCUEIL v4.34 — Météo 5j · Ma semaine · Délai de rentrée · Raccourcis · Mini-carte ════
@@ -6701,7 +6759,7 @@ function _renderHomeWidgets(){
   try{renderHomeMaSemaine();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#2'); }
   try{renderHomeDRE();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#3'); }
   try{renderHomeRaccourcis();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#4'); }
-  try{_homeRangees();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#5'); }   // ALIGN-2 : un bloc a pu s'effacer
+  try{_homeRangees(); _homeSpans();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#5'); }   // ALIGN-2 : un bloc a pu s'effacer
 }
 
 // ── Météo 5 jours ──
@@ -6724,19 +6782,28 @@ function renderHomeMeteo5(){
     c.innerHTML='<div class="hm5-mini">'+_mvIcon(wmoIcone(md.code[0]),16)+' <b>'+t0+'</b> aujourd\u2019hui'+rainTxt+'</div>';
     return;
   }
-  var html='<div class="hm5">';
+  // ACC-3 (§278) : au dessin de la maquette v4 — le jour en tête (icône, maximum, ciel, minimum et risque de pluie), puis cinq
+  //   colonnes (jour, icône, maximum / minimum, une barre de pluie) et la note du premier jour pluvieux. La prévision donne une
+  //   PROBABILITÉ de pluie, pas des millimètres : la barre et la note disent un pourcentage.
+  var ciel=function(k){ k=+k; return k===0?'D\u00e9gag\u00e9':k<=2?'\u00c9claircies':k===3?'Couvert':(k===45||k===48)?'Brouillard':(k>=51&&k<=57)?'Bruine':(k>=61&&k<=67)?'Pluie':(k>=71&&k<=77)?'Neige':(k>=80&&k<=82)?'Averses':k>=95?'Orage':''; };
+  var jc=['Dim.','Lun.','Mar.','Mer.','Jeu.','Ven.','Sam.'], jl=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+  var html='<div class="hm5-now">'+_mvIcon(wmoIcone(md.code[0]),24)+'<div class="hm5-deg">'+(md.tmax[0]!=null?Math.round(md.tmax[0])+'\u00b0':'\u2014')+'</div>'
+    +'<div><div class="hm5-cond">'+ciel(md.code[0])+'</div><div class="hm5-det">'+(md.tmin[0]!=null?'Minimum '+Math.round(md.tmin[0])+'\u00b0':'')+((md.pp[0]||0)?', pluie '+md.pp[0]+'\u00a0%':'')+'</div></div></div>';
+  html+='<div class="hm5">';
   md.time.slice(0,5).forEach(function(dt,i){
     var d=new Date(dt+'T12:00:00');
     var gel=(md.tmin[i]!=null&&md.tmin[i]<3);
     html+='<div class="hm5-d'+(i===0?' today':'')+(gel?' gel':'')+'">'
-      +'<div class="hm5-n">'+(i===0?'Auj.':jn[d.getDay()])+'</div>'
+      +'<div class="hm5-n">'+(i===0?'Auj.':jc[d.getDay()])+'</div>'
       +'<div class="hm5-i">'+_mvIcon(wmoIcone(md.code[i]),20)+'</div>'
-      +'<div class="hm5-tx">'+(md.tmax[i]!=null?Math.round(md.tmax[i])+'\u00b0':'\u2014')+'</div>'
-      +'<div class="hm5-tn">'+(md.tmin[i]!=null?Math.round(md.tmin[i])+'\u00b0':'')+'</div>'
-      +'<div class="hm5-p">'+((md.pp[i]||0)>=30?(_mvIcon('goutte',16)+md.pp[i]+'%'):'')+'</div>'
+      +'<div class="hm5-t"><span class="hm5-tx">'+(md.tmax[i]!=null?Math.round(md.tmax[i])+'\u00b0':'\u2014')+'</span> <span class="hm5-tn">'+(md.tmin[i]!=null?Math.round(md.tmin[i])+'\u00b0':'')+'</span></div>'
+      +'<span class="hm5-pl" aria-hidden="true"><i style="--h:'+(md.pp[i]||0)+'%"></i></span>'
+      +'<div class="hm5-p">'+(md.pp[i]||0)+'\u00a0%</div>'
       +'</div>';
   });
-  c.innerHTML=html+'</div>';
+  html+='</div>';
+  for(var k=1;k<Math.min(5,md.time.length);k++){ if((md.pp[k]||0)>=50){ html+='<div class="hm5-note">'+_mvIcon('pluie',16)+'<span>Pluie probable '+jl[new Date(md.time[k]+'T12:00:00').getDay()]+'\u00a0: '+md.pp[k]+'\u00a0%.</span></div>'; break; } }
+  c.innerHTML=html;
 }
 
 // ── Ma semaine : interventions + heures estimées (surface × h/ha, ÷ équipe) ──
@@ -7094,8 +7161,8 @@ function _dmrInjectCss(){
     + '.dmr-t{font-size:var(--pt-base,14px);font-weight:600;color:var(--txt)}'
     + '.dmr-it.done .dmr-t{color:var(--txt-doux,#8A8072);font-weight:500}'
     + '.dmr-f{font-size:var(--pt-micro,12px);line-height:1.45;color:var(--txt-doux,#8A8072);margin-top:2px}'
-    + '.dmr-ar{flex:0 0 auto;color:var(--or);font-size:16px;margin-top:1px}'
-    + '.dmr-mini{font-size:13px;color:var(--txt-doux,#8A8072);padding:2px 2px 6px}'
+    + '.dmr-ar{flex:0 0 auto;color:var(--or);font-size:var(--pt-sm,16px);margin-top:1px}'
+    + '.dmr-mini{font-size:var(--pt-txt,13px);color:var(--txt-doux,#8A8072);padding:2px 2px 6px}'
     + '.dmr-cons{display:flex;align-items:flex-start;gap:10px;background:var(--or-pale);border:1px solid rgba(184,145,58,0.30);'
     +   'border-radius:12px;padding:11px 13px;cursor:pointer}'
     + '.dmr-cons .dmr-t{color:var(--or)}';
@@ -7200,7 +7267,7 @@ function renderHomeMaPart(){
   c.innerHTML='<div class="mv-c mv-c-clic hmp" onclick="goTo(\'parcelles\')">'
     +'<div class="mv-hd"><div><div class="mv-t">'+titre+'</div>'
       +'<div class="mv-l" style="margin-top:2px">'+ha(r.done)+' ha faits sur '+ha(r.tot)+' ha'+(raison?(' \u00b7 '+raison):'')+'</div></div>'
-      +'<div class="mv-n">'+r.pct+'<span style="font-size:13px"> %</span></div></div>'
+      +'<div class="mv-n">'+r.pct+'<span style="font-size:var(--pt-txt,13px)"> %</span></div></div>'
     +'<div class="hmp-bar" aria-hidden="true"><span class="mine" style="width:'+pMine.toFixed(1)+'%"></span>'
       +'<span class="them" style="width:'+pThem.toFixed(1)+'%"></span></div>'
     +'<div class="hmp-leg">'
@@ -7978,7 +8045,7 @@ function _pvRenderOrdreBar(){
   if(!dispo.length || !_pOrdPeriodeOK()){ el.innerHTML=''; el.style.display='none'; return; }
   el.style.display='';
   if(_pOrdOff()){
-    el.innerHTML='<button onclick="pOrdreToggle()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border:1.5px dashed var(--or);border-radius:12px;background:transparent;color:var(--or);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Reprendre la tournée du domaine</button>';
+    el.innerHTML='<button onclick="pOrdreToggle()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border:1.5px dashed var(--or);border-radius:12px;background:transparent;color:var(--or);font-size:var(--pt-txt,13px);font-weight:600;font-family:inherit;cursor:pointer">Reprendre la tournée du domaine</button>';
     return;
   }
   var t=_pOrdTache();
@@ -7986,8 +8053,8 @@ function _pvRenderOrdreBar(){
     var o=window._mvOrdreFor(t)||{}, n=_pOrdRangs.n||0, d=_pOrdDateFr(o.date);
     var sub=(n>0?(n+' parcelle'+(n>1?'s':'')+' à faire, dans l’ordre'):'tout est fait sur ce travail')+(d?(' · ordre du '+d):'');
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1.5px solid var(--or);border-radius:12px;padding:9px 12px">'
-      +'<span style="font-size:var(--pt-sm,17px);flex-shrink:0"></span>'
-      +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tournée du domaine · '+_escHtml(t)+'</div>'
+      +'<span style="font-size:var(--pt-sm,16px);flex-shrink:0"></span>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tournée du domaine · '+_escHtml(t)+'</div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_escHtml(sub)+'</div></div>'
       +'<button onclick="pOrdreToggle()" style="border:none;background:var(--gris-clair);border-radius:9px;min-height:34px;padding:0 11px;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte);cursor:pointer;font-family:inherit;flex-shrink:0">Tri normal</button></div>';
     return;
@@ -7996,10 +8063,10 @@ function _pvRenderOrdreBar(){
   // appliquer. On le dit, et on donne l'accès en un tap.
   if(pTacheFilter==='toutes'){
     el.innerHTML='<div style="background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:12px;padding:8px 11px">'
-      +'<div style="font-size:var(--pt-lbl,11.5px);color:var(--texte-doux);margin-bottom:6px">Tournée définie pour :</div>'
+      +'<div style="font-size:var(--pt-lbl,12px);color:var(--texte-doux);margin-bottom:6px">Tournée définie pour :</div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
       +dispo.map(function(nm){
-          return '<button onclick="setPTacheFilter(\''+_escAttr(nm)+'\')" style="border:1px solid var(--or);background:rgba(201,168,76,.12);color:var(--or);border-radius:20px;min-height:34px;padding:0 12px;font-size:var(--pt-txt,12.5px);font-weight:700;cursor:pointer;font-family:inherit">'+_mvIconTache(nm,16)+' '+_escHtml(nm)+'</button>';
+          return '<button onclick="setPTacheFilter(\''+_escAttr(nm)+'\')" style="border:1px solid var(--or);background:rgba(201,168,76,.12);color:var(--or);border-radius:20px;min-height:34px;padding:0 12px;font-size:var(--pt-txt,13px);font-weight:700;cursor:pointer;font-family:inherit">'+_mvIconTache(nm,16)+' '+_escHtml(nm)+'</button>';
         }).join('')
       +'</div></div>';
     return;
@@ -8017,9 +8084,9 @@ function _pvRenderProxBar(){
     var sub=_pProxHere?('Vous êtes sur '+_escHtml(_pProxHere)):'Plus proche en tête';
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1.5px solid #C0845A;border-radius:12px;padding:9px 12px">'
       +'<span style="width:11px;height:11px;border-radius:50%;background:#C0845A;flex-shrink:0"></span>'
-      +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--texte)">Trié par proximité</div>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">Trié par proximité</div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+sub+'</div></div>'
-      +'<button onclick="pToggleProximite()" style="border:none;background:var(--gris-clair);border-radius:9px;min-height:34px;padding:0 11px;font-size:13px;font-weight:600;color:var(--texte);cursor:pointer;font-family:inherit">'+_mvIcon('croix',16)+'</button></div>';
+      +'<button onclick="pToggleProximite()" style="border:none;background:var(--gris-clair);border-radius:9px;min-height:34px;padding:0 11px;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte);cursor:pointer;font-family:inherit">'+_mvIcon('croix',16)+'</button></div>';
   } else {
     el.innerHTML='<button onclick="pToggleProximite()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:none;border-radius:12px;background:#2B1A10;color:#F0E2C8;font-size:var(--pt-base,14px);font-weight:600;font-family:inherit;cursor:pointer">Trier par proximité</button>';
   }
@@ -8206,7 +8273,7 @@ function renderParcelles(){
           <div class="mv-l" style="margin-top:2px">${_pvSurfFr(p.surface)} ha${_cep?' \u00b7 '+_escHtml(_cep):''}</div>
         </div>
         <div style="text-align:right;flex:none">
-          <div class="mv-n" style="color:${cl.pct===100?'var(--vert-med)':'var(--texte)'}">${cl.pct}<span style="font-size:13px">&nbsp;%</span></div>
+          <div class="mv-n" style="color:${cl.pct===100?'var(--vert-med)':'var(--texte)'}">${cl.pct}<span style="font-size:var(--pt-txt,13px)">&nbsp;%</span></div>
           <div class="mv-l">${_pvCompte(cl)}</div>
         </div>
       </div>
@@ -8214,17 +8281,106 @@ function renderParcelles(){
       <div class="mv-ft" style="margin-top:12px;padding-top:11px">
         <div style="display:flex;gap:6px;flex-wrap:wrap;min-width:0">${_mvBadge(_etat[0],_etat[1])}${draeBadge}${_proxPill}</div>
       </div>`;
+    // PARC-1 (§274) : sur ordinateur, une ligne de la maquette v3 (mêmes gestes : _pvActions) et la fiche à droite.
+    if(_pDesk())return _pRow(p,cl,_etat,hasDrae?draeInfo:null,_proxPill,_cep);
     const _pvAct=(pTacheFilter!=='toutes')?_pvActions(p):'';
     if(_pvAct){
-      return `<div class="mv-c mv-c-clic pcard-qv${hasDrae?' mv-c-al':''}" data-nom="${_escAttr(p.nom)}" style="${_proxStyle}"><div class="pc-row"><div class="pc-left" onclick="openDP('${_escAttr(p.nom)}')">${_pvInner}</div>${_pvAct}</div></div>`;
+      // PARC-2 (§275) : au téléphone, une tâche choisie → la carte dit l'état de CETTE tâche ; le pourcentage revient sur « toutes ».
+      const _pvInnerT=_pCarteTache(p,hasDrae?draeInfo:null,_proxPill);
+      return `<div class="mv-c mv-c-clic pcard-qv${hasDrae?' mv-c-al':''}" data-nom="${_escAttr(p.nom)}" style="${_proxStyle}"><div class="pc-row"><div class="pc-left" onclick="openDP('${_escAttr(p.nom)}')">${_pvInnerT}</div>${_pvAct}</div></div>`;
     }
     return `<div class="mv-c mv-c-clic${hasDrae?' mv-c-al':''}" onclick="openDP('${_escAttr(p.nom)}')" style="${_proxStyle}">${_pvInner}</div>`;
   }).join('');
+  if(_pDesk())_pFicheSync(data);   // PARC-1 : AVANT les barres et la carte, pour laisser intacte la fin que vise mv-harnais-cible
   _pvRenderProxBar();
   _pvRenderOrdreBar();
   _pOrdMapSync();
   _pCibleMapSync();
 }
+
+
+// ── PARC-1 (§274) : SUR ORDINATEUR, LA LISTE ET LA FICHE DE LA MAQUETTE V3 ──
+// Rien ne change dans ce que fait l'écran : mêmes filtres, même tournée, mêmes gestes (_pvActions → pQuickStart,
+// pQuickValidate, pQuickUndo : le seul chemin d'écriture). Seul le dessin change à partir de 1 024 px : une ligne par
+// parcelle, la fiche de la parcelle choisie à droite, les flèches pour passer de l'une à l'autre, V pour valider.
+// ⚠️ La ligne garde la classe pcard-qv quand elle porte ses gestes : la visite guidée vise « .pcard-qv .pc-validate ».
+var _pSelNom='';
+var _P_MOIS=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
+function _pDesk(){ return !!(window.matchMedia&&window.matchMedia('(min-width:1024px)').matches); }
+function _pDateFr(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso||'')); return m?((+m[3])+'\u00a0'+_P_MOIS[+m[2]-1]):'\u2014'; }
+function _pDernier(nom,tache){ var d=''; (JOURNAL||[]).forEach(function(e){ if(e&&e.parcelle===nom&&e.tache===tache&&e.statut==='Valid\u00e9'&&String(e.date||'')>d)d=String(e.date); }); return d?_pDateFr(d):'\u2014'; }
+function _pEtatBadge(e){ return e==='fait'?_mvBadge('Fait','vert'):(e==='cours'?_mvBadge('En cours','neutre'):_mvBadge('\u00c0 faire','neutre')); }
+function _pEtatTache(p){ return _pvCurDone(p,pTacheFilter)?'fait':(_pvCurStarted(p,pTacheFilter)?'cours':'afaire'); }
+function _pRow(p,cl,etat,drae,prox,cep){
+  var tache=pTacheFilter!=='toutes', act=tache?_pvActions(p):'', sous, droite;
+  if(tache){
+    var e=_pEtatTache(p), lb=e==='fait'?'fait':(e==='cours'?'en cours':'pas commenc\u00e9');
+    sous='<div class="prow-s prow-'+e+'">'+_escHtml(tNom(pTacheFilter))+(_pvType(pTacheFilter)!=='simple'?' '+_escHtml(_pvStepLabel(pTacheFilter)+pCurStep):'')+', '+lb+'</div>';
+    droite=act;
+  } else {
+    sous='<div class="prow-s">'+_pvSurfFr(p.surface)+'\u00a0ha'+(cep?', '+_escHtml(cep):'')+'</div>';
+    droite='<span class="prow-pct">'+cl.pct+'\u00a0%</span><span class="prow-bar"><i class="'+(cl.pct===100?'ok':'')+'" style="--p:'+cl.pct+'%"></i></span>';
+  }
+  var b=(drae?_mvBadge('DRAE '+drae.heures+' h','rouge'):'')+(!tache&&etat[1]!=='neutre'?_mvBadge(etat[0],etat[1]):'')+(prox||'');
+  return '<div class="prow'+(act?' pcard-qv':'')+'" role="option" aria-selected="'+(p.nom===_pSelNom)+'" data-nom="'+_escAttr(p.nom)+'" onclick="_pSel(this.dataset.nom)">'
+    +'<div class="prow-g"><div class="prow-t">'+_pOrdPill(p.nom)+'<span class="prow-nom">'+_escHtml(p.nom)+'</span></div>'+sous+(b?'<div class="prow-b">'+b+'</div>':'')+'</div>'
+    +'<div class="prow-d" onclick="event.stopPropagation()">'+droite+'</div></div>';
+}
+// PARC-2 (§275) : le haut d'une carte de travail au téléphone (maquette v3) — rang, nom, état de la tâche choisie, badges.
+function _pCarteTache(p,drae,prox){
+  var e=_pEtatTache(p), lb=e==='fait'?'fait':(e==='cours'?'en cours':'pas commenc\u00e9');
+  var b=(drae?_mvBadge('DRAE '+drae.heures+' h','rouge'):'')+(prox||'');
+  return '<div class="mv-hd"><div style="min-width:0"><div class="mv-t mv-t-ord">'+_pOrdPill(p.nom)+'<span class="mv-t-nom">'+_escHtml(p.nom)+'</span></div>'
+    +'<div class="mv-l pcq-st pcq-'+e+'">'+_escHtml(tNom(pTacheFilter))+(_pvType(pTacheFilter)!=='simple'?' '+_escHtml(_pvStepLabel(pTacheFilter)+pCurStep):'')+', '+lb+'</div></div></div>'
+    +(b?'<div class="mv-ft pcq-b">'+b+'</div>':'');
+}
+function _pFicheHtml(p){
+  if(!p)return '<div class="pfx-vide"><b>Choisissez une parcelle</b><span>Sa fiche s\u2019ouvre ici. Les fl\u00e8ches haut et bas passent d\u2019une parcelle \u00e0 l\u2019autre'+(pTacheFilter!=='toutes'?', V valide':'')+'.</span></div>';
+  var cl=getPCls(p), drae=getDraeParcelle(p.nom), cep=(p.cepages&&p.cepages.length)?p.cepages.join(', '):(p.cepage||'');
+  var tags=[p.appellation,cep,_pvSurfFr(p.surface)+'\u00a0ha',p.commune].filter(Boolean).map(function(t){return '<span class="pfx-tag">'+_escHtml(String(t))+'</span>';}).join('');
+  var act=(pTacheFilter!=='toutes')?_pvActions(p):'';
+  var h='<div class="pfx-hd"><div class="pfx-id"><h2 class="pfx-t">'+_escHtml(p.nom)+'</h2><div class="pfx-tags">'+tags+'</div></div>'
+    +'<div class="pfx-act">'+act+'<button type="button" class="pfx-btn" onclick="openDP(\''+_escAttr(p.nom)+'\')">Fiche compl\u00e8te</button></div></div>';
+  if(drae)h+='<div class="pfx-drae"><b>D\u00e9lai de r\u00e9entr\u00e9e\u00a0: '+drae.heures+'\u00a0h</b> ('+_escHtml(drae.produit||'traitement')+'). Personne dans les rangs avant la fin du d\u00e9lai.</div>';
+  if(pTacheFilter!=='toutes')h+='<div class="pfx-tache"><span>'+_escHtml(tNom(pTacheFilter))+'</span>'+_pEtatBadge(_pEtatTache(p))+'</div>';
+  h+='<div class="pfx-kpis"><div class="pfx-kpi"><span class="l">Avancement de la campagne</span><span class="v">'+cl.pct+'<small>\u00a0%</small></span><span class="prow-bar"><i class="'+(cl.pct===100?'ok':'')+'" style="--p:'+cl.pct+'%"></i></span></div>'
+    +'<div class="pfx-kpi"><span class="l">T\u00e2ches</span><span class="v">'+_escHtml(_pvCompte(cl))+'</span></div>'
+    +'<div class="pfx-kpi"><span class="l">Surface</span><span class="v">'+_pvSurfFr(p.surface)+'<small>\u00a0ha</small></span></div></div>';
+  h+='<section class="pfx-sec"><div class="pfx-sec-t">Travaux de la campagne</div><table class="pfx-tbl"><thead><tr><th>T\u00e2che</th><th>\u00c9tat</th><th class="r">Dernier passage</th></tr></thead><tbody>'
+    +getTachesSaison().map(function(t){ var st=getTacheStatut(p,t.nom)||'Non d\u00e9marr\u00e9', e=st==='Valid\u00e9'?'fait':(st==='En cours'?'cours':'afaire');
+      return '<tr'+(t.nom===pTacheFilter?' class="pfx-cur"':'')+'><td>'+_escHtml(tNom(t.nom))+'</td><td>'+_pEtatBadge(e)+'</td><td class="r">'+_escHtml(_pDernier(p.nom,t.nom))+'</td></tr>'; }).join('')
+    +'</tbody></table></section>';
+  var j=(JOURNAL||[]).filter(function(e){return e&&e.parcelle===p.nom;}).sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''));}).slice(0,4);
+  h+='<section class="pfx-sec"><div class="pfx-sec-t">Derniers passages</div>'+(j.length?j.map(function(e){
+      return '<div class="pfx-fil"><span class="d">'+_escHtml(_pDateFr(e.date))+'</span><span class="tx"><b>'+_escHtml(tNom(e.tache||''))+'</b>'+(e.qui?', '+_escHtml(e.qui):'')+'</span><span class="s">'+_escHtml(e.statut||'')+'</span></div>'; }).join('')
+    :'<div class="pfx-rien">Aucun passage sur cette parcelle pour l\u2019instant.</div>')+'</section>';
+  return h;
+}
+function _pFicheSync(data){
+  var el=document.getElementById('p-fiche'); if(!el)return;
+  var noms=(data||[]).map(function(p){return p.nom;});
+  if(!_pSelNom||noms.indexOf(_pSelNom)<0)_pSelNom=noms[0]||'';
+  document.querySelectorAll('#pList .prow').forEach(function(r){ r.setAttribute('aria-selected',String(r.dataset.nom===_pSelNom)); });
+  el.innerHTML=_pFicheHtml(PARCELLES.find(function(x){return x.nom===_pSelNom;}));
+}
+function _pSel(nom){
+  if(!_pDesk()){ openDP(nom); return; }
+  _pSelNom=nom;
+  document.querySelectorAll('#pList .prow').forEach(function(r){ r.setAttribute('aria-selected',String(r.dataset.nom===nom)); });
+  var el=document.getElementById('p-fiche'); if(el)el.innerHTML=_pFicheHtml(PARCELLES.find(function(x){return x.nom===nom;}));
+}
+// Les flèches et V, seulement sur ordinateur, sur la page Parcelles, quand rien n'a le focus (ni champ, ni fenêtre).
+document.addEventListener('keydown',function(ev){
+  if(!_pDesk()||ev.ctrlKey||ev.metaKey||ev.altKey)return;
+  var pg=document.getElementById('page-parcelles'); if(!pg||!pg.classList.contains('active'))return;
+  if(ev.target&&ev.target!==document.body)return;
+  var rows=[].slice.call(document.querySelectorAll('#pList .prow')); if(!rows.length)return;
+  var i=rows.findIndex(function(r){return r.dataset.nom===_pSelNom;});
+  if(ev.key==='ArrowDown'||ev.key==='ArrowUp'){ ev.preventDefault(); var k=Math.max(0,Math.min(rows.length-1,i<0?0:i+(ev.key==='ArrowDown'?1:-1))); _pSel(rows[k].dataset.nom); rows[k].scrollIntoView({block:'nearest'}); }
+  else if((ev.key==='v'||ev.key==='V')&&i>=0){ var b=rows[i].querySelector('.pc-validate:not(.done)'); if(b){ ev.preventDefault(); b.click(); } }
+});
+if(window.matchMedia)window.matchMedia('(min-width:1024px)').addEventListener('change',function(){ if(window._dataReady)renderParcelles(); });
+window._pSel=_pSel;
 
 // ── Cépage ──
 var CEPAGES=['Pinot Noir','Chardonnay','Aligoté','Gamay','Pinot Gris','Pinot Blanc','Melon de Bourgogne','Autre'];
@@ -8722,7 +8878,7 @@ function _dpFillArrach(p){
       +(p.noteArrachage?('<div class="mv-l" style="margin-top:4px">'+_escHtml(p.noteArrachage)+'</div>'):'')
       +'<div class="mv-l" style="margin-top:4px">Elle ne compte plus dans les surfaces ni l\u2019avancement. Son historique est conserv\u00e9.</div>';
     if(adm&&surActive){
-      h+='<button type="button" id="dp-arrach-undo" style="margin-top:10px;background:transparent;border:1.5px solid var(--gris);border-radius:10px;padding:9px 14px;font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--texte-doux);font-family:inherit;cursor:pointer;min-height:44px">Remettre en exploitation</button>';
+      h+='<button type="button" id="dp-arrach-undo" style="margin-top:10px;background:transparent;border:1.5px solid var(--gris);border-radius:10px;padding:9px 14px;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte-doux);font-family:inherit;cursor:pointer;min-height:44px">Remettre en exploitation</button>';
     }
     row.innerHTML=h+'</div>';
     row.style.display='';
@@ -8741,7 +8897,7 @@ function _dpFillArrach(p){
     return;
   }
   if(!adm||!surActive){ row.style.display='none'; row.innerHTML=''; return; }
-  row.innerHTML='<button type="button" id="dp-arrach-btn" style="width:100%;margin-top:18px;background:transparent;border:1.5px solid rgba(184,32,48,0.45);border-radius:12px;padding:12px 14px;font-size:var(--pt-txt,12.5px);font-weight:700;color:var(--rouge-tx,#A0291E);font-family:inherit;cursor:pointer;min-height:44px">'
+  row.innerHTML='<button type="button" id="dp-arrach-btn" style="width:100%;margin-top:18px;background:transparent;border:1.5px solid rgba(184,32,48,0.45);border-radius:12px;padding:12px 14px;font-size:var(--pt-txt,13px);font-weight:700;color:var(--rouge-tx,#A0291E);font-family:inherit;cursor:pointer;min-height:44px">'
     +((typeof _mvIcon==='function')?_mvIcon('corbeille',16):'')+' Arracher cette parcelle\u2026</button>';
   row.style.display='';
   var b=document.getElementById('dp-arrach-btn'); if(b) b.onclick=function(){ openDPArrachage(); };
@@ -8817,14 +8973,14 @@ function _dpRendInjectCss(){
 .dprh-yr{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;font-size:18px;color:var(--texte,#2A241C);width:46px;flex-shrink:0}
 .dprh-bar{flex:1;height:8px;border-radius:5px;background:rgba(138,90,56,.1);overflow:hidden}
 .dprh-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--terre,#8A5A38),var(--or,#C9A84C))}
-.dprh-val{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;font-size:var(--pt-sm,17px);color:var(--bordeaux,#7A1020);width:98px;text-align:right;flex-shrink:0;line-height:1.05}
+.dprh-val{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;font-size:var(--pt-sm,16px);color:var(--bordeaux,#7A1020);width:98px;text-align:right;flex-shrink:0;line-height:1.05}
 .dprh-u{font-family:inherit;font-size:9px;color:var(--texte-doux,#5F5F5F);font-weight:400}
 .dprh-d{width:58px;text-align:right;flex-shrink:0;font-size:var(--pt-micro,11px);font-weight:700}
 .dprh-d.up{color:var(--vert-med,#3D6B27)}
 .dprh-d.down{color:#B85A1A}
 .dprh-d.flat{color:var(--texte-doux,#5F5F5F)}
 .dprh-sub2{font-size:var(--pt-lbl,10.5px);color:var(--texte-doux,#5F5F5F);margin:3px 0 12px 55px}
-.dprh-empty{font-size:var(--pt-lbl,11.5px);color:var(--texte-doux,#5F5F5F);font-style:italic}
+.dprh-empty{font-size:var(--pt-lbl,12px);color:var(--texte-doux,#5F5F5F);font-style:italic}
 `;
   document.head.appendChild(s);
 }
@@ -8919,9 +9075,9 @@ function openDP(nom){
   pe.style.cssText='float:right;font-family:"Cormorant Garamond",serif;font-size:38px;font-weight:600;color:'+(cl.pct===100?'var(--vert)':cl.pct>=75?'var(--or)':'var(--orange)');
   // ⚠️ innerHTML et non textContent : l'unite descend en petit, sinon « 0,42 ha »
   //   pese autant que le chiffre et la hierarchie a trois niveaux tombe a deux.
-  document.getElementById('dp-surf').innerHTML=p.surface+'<span style="font-size:13px"> ha</span>';
+  document.getElementById('dp-surf').innerHTML=p.surface+'<span style="font-size:var(--pt-txt,13px)"> ha</span>';
   var _dpNbt=document.getElementById('dp-nbt');
-  if(_dpNbt)_dpNbt.innerHTML=_pvNbFait(cl)+'<span style="font-size:13px">/'+cl.nbTotal+'</span>';
+  if(_dpNbt)_dpNbt.innerHTML=_pvNbFait(cl)+'<span style="font-size:var(--pt-txt,13px)">/'+cl.nbTotal+'</span>';
   var _dpBar=document.getElementById('dp-bar');
   if(_dpBar){_dpBar.style.width=cl.pct+'%';_dpBar.style.background=cl.fill;}
   // Heures restantes (hors tâches exclues)
@@ -8937,7 +9093,7 @@ function openDP(nom){
     var _dpTrous=(t.trous||t.nom==='Entreplantation');
     if(getTacheStatut(p,t.nom)!=='Validé')hReste+=_dpTrous?(((p.plantation_trous||0)>0)?(p.plantation_trous*_plantMinTrou()/60):0):((t.hha||0)*(parseFloat(p.surface)||0));
   });
-  document.getElementById('dp-hreste').innerHTML=Math.round(hReste)+'<span style="font-size:13px"> h</span>';
+  document.getElementById('dp-hreste').innerHTML=Math.round(hReste)+'<span style="font-size:var(--pt-txt,13px)"> h</span>';
   var _dpVS=(typeof _visuSaison==='function'?_visuSaison():((getSaisonActive()||{}).nom||''));
   var _dpRO=(typeof _mvOnActiveSaison==='function'&&!_mvOnActiveSaison());
   var _dpLbl=document.getElementById('dp-saison-label');
@@ -8962,10 +9118,10 @@ function openDP(nom){
       draeEl.style.display='block';
       draeEl.innerHTML='<div style="display:flex;gap:11px;align-items:flex-start">'
         +_mvIcon('alerte',20)
-        +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--rouge)">D\u00e9lai de r\u00e9entr\u00e9e en cours</div>'
+        +'<div style="flex:1;min-width:0"><div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--rouge)">D\u00e9lai de r\u00e9entr\u00e9e en cours</div>'
         +'<div class="mv-l" style="margin-top:3px">'+_escHtml(tLast.produit)+', trait\u00e9 le '+fmtDate(tLast.date)+'.</div></div>'
         +'<div style="text-align:right;flex:none"><div class="mv-n" style="color:var(--rouge)">'+draeRLast
-        +'<span style="font-size:13px"> h</span></div><div class="mv-l">restantes</div></div></div>';
+        +'<span style="font-size:var(--pt-txt,13px)"> h</span></div><div class="mv-l">restantes</div></div></div>';
     } else {
       draeEl.style.display='none';
     }
@@ -9002,7 +9158,7 @@ function openDP(nom){
       const hhaDetail=(t.niveaux||[]).map(n=>'N'+n.num+' '+n.hha+'h/ha').join(' · ');
       return `<div class="val-row mv-tr">
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600">${_escHtml(tNom(t.nom))}</div>
+          <div style="font-size:var(--pt-txt,13px);font-weight:600">${_escHtml(tNom(t.nom))}</div>
           <div style="font-size:10px;color:var(--texte-doux);margin-top:2px">${hhaDetail} · <span style="color:${statusColor};font-weight:600">${statusLabel}</span></div>
           <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">${badgesHtml}</div>
         </div>
@@ -9018,7 +9174,7 @@ function openDP(nom){
       const badgesHtml=_passBadgesHtml(p,t.nom);
       return `<div class="val-row mv-tr">
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600">${_escHtml(tNom(t.nom))}</div>
+          <div style="font-size:var(--pt-txt,13px);font-weight:600">${_escHtml(tNom(t.nom))}</div>
           <div style="font-size:10px;color:var(--texte-doux);margin-top:2px">${t.hha}h/ha/passage · ~${hEstim}h · <span style="color:${statusColor};font-weight:600">${statusLabel}</span></div>
           <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">${badgesHtml}</div>
         </div>
@@ -9037,7 +9193,7 @@ function openDP(nom){
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
         ${canEdit?`<button onclick="tapTacheSimple('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}',this)" style="min-height:44px;padding:6px 11px;border-radius:8px;font-family:inherit;font-size:var(--pt-micro,11px);font-weight:700;cursor:${isOn?'default':'pointer'};border:1.5px solid ${isOn?'rgba(90,156,74,0.38)':isEnCours?'rgba(220,140,30,0.4)':'rgba(255,255,255,0.08)'};background:${isOn?'rgba(90,156,74,0.14)':isEnCours?'rgba(220,140,30,0.13)':'rgba(255,255,255,0.03)'};color:${isOn?'#6AB855':isEnCours?'#DCA030':'var(--texte-doux)'};white-space:nowrap">${isOn?'✓ Validé':isEnCours?'✓ Valider':'▶ Démarrer'}</button>`:`<span class="jst" style="font-size:10px;color:${isOn?'var(--vert)':isEnCours?'var(--or)':'var(--texte-doux)'}">${stat}</span>`}
-        ${canEdit&&stat!=='Non démarré'?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.08);border:1px solid rgba(184,90,26,0.28);border-radius:8px;padding:6px 9px;font-size:13px;font-weight:600;color:#B85A1A;cursor:pointer" title="Annuler">↩</button>`:''}
+        ${canEdit&&stat!=='Non démarré'?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.08);border:1px solid rgba(184,90,26,0.28);border-radius:8px;padding:6px 9px;font-size:var(--pt-txt,13px);font-weight:600;color:#B85A1A;cursor:pointer" title="Annuler">↩</button>`:''}
         ${canExcl&&!isOn&&!isEnCours?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:var(--pt-micro,12px);cursor:pointer" title="Désactiver cette tâche pour cette parcelle">${_mvIcon('croix',16)}</button>`:''}
       </div>
     </div>`;
@@ -10274,7 +10430,7 @@ function _renderNiveauxModal(){
     var ico=_mvIcon(isSel?'check':isAuto?'cercle-pointille':isComm?'lecture':'cercle',16);
     var canCancel=(isSel||isComm)&&!isAuto;
     html+='<div style="flex:1;display:flex;flex-direction:column;gap:5px;">';
-    html+='<button onclick="_toggleNiv('+l+')" style="width:100%;padding:14px 0;border-radius:10px;font-family:inherit;cursor:'+(locked?'default':'pointer')+';border:1.5px solid '+brd+';background:'+bg+';color:'+col+';font-weight:700;font-size:16px;transition:all 0.15s;display:flex;flex-direction:column;align-items:center;gap:3px">'
+    html+='<button onclick="_toggleNiv('+l+')" style="width:100%;padding:14px 0;border-radius:10px;font-family:inherit;cursor:'+(locked?'default':'pointer')+';border:1.5px solid '+brd+';background:'+bg+';color:'+col+';font-weight:700;font-size:var(--pt-sm,16px);transition:all 0.15s;display:flex;flex-direction:column;align-items:center;gap:3px">'
       +'<span>'+ico+'</span><span style="font-size:9px;font-weight:700;letter-spacing:.06em;opacity:.75">N'+l+(isAuto?' auto':'')+'</span></button>';
     html+='<button onclick="_cancelNiv('+l+')" '+(canCancel?'':'disabled')+' style="width:100%;padding:5px 0;border-radius:7px;border:1px solid rgba(184,90,26,'+(canCancel?'0.25':'0.1')+');background:rgba(184,90,26,'+(canCancel?'0.06':'0.02')+');color:#B85A1A;font-size:var(--pt-micro,11px);font-family:inherit;cursor:'+(canCancel?'pointer':'default')+';font-weight:600;opacity:'+(canCancel?'1':'0.3')+'">↩ N'+l+'</button>';
     html+='</div>';
@@ -10295,7 +10451,7 @@ function _renderNiveauxModal(){
     var _isDef=(_n===planGlobal);
     html+='<div onclick="_setNivOv('+_n+')" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;margin-bottom:6px;cursor:pointer;background:'+(_selN?'rgba(192,132,90,0.07)':'rgba(255,255,255,0.02)')+';border:1px solid '+(_selN?'rgba(192,132,90,0.22)':'rgba(255,255,255,0.05)')+';transition:all 0.12s">'
       +'<span style="width:16px;height:16px;border-radius:50%;flex-shrink:0;border:2px solid '+(_selN?'var(--accent)':'rgba(255,255,255,0.2)')+';background:'+(_selN?'var(--accent)':'transparent')+';transition:all 0.12s"></span>'
-      +'<span style="color:'+(_selN?'var(--texte)':'var(--texte-doux)')+';font-size:13px">'+_n+' niveau'+(_n>1?'x':'')+(_isDef?' <span style="color:var(--texte-doux);font-size:var(--pt-micro,11px)">(d\u00e9faut saison)</span>':'')+'</span>'
+      +'<span style="color:'+(_selN?'var(--texte)':'var(--texte-doux)')+';font-size:var(--pt-txt,13px)">'+_n+' niveau'+(_n>1?'x':'')+(_isDef?' <span style="color:var(--texte-doux);font-size:var(--pt-micro,11px)">(d\u00e9faut saison)</span>':'')+'</span>'
       +'</div>';
   }
   if(_nivOv!==null&&_nivOv!==planGlobal){
@@ -10431,7 +10587,7 @@ function _renderPassagesModal(){
   var planNb=(_passOv!=null)?_passOv:planDef;
   var body=document.getElementById('pass-body');
   if(!body)return;
-  var html='<p style="color:var(--texte-doux);font-size:13px;margin:0 0 10px">Tap 1 = commencé · tap 2 = validé · tap 3 = sans effet</p>';
+  var html='<p style="color:var(--texte-doux);font-size:var(--pt-txt,13px);margin:0 0 10px">Tap 1 = commencé · tap 2 = validé · tap 3 = sans effet</p>';
   html+='<div style="display:flex;gap:8px;margin-bottom:16px">';
   for(var i=1;i<=planNb;i++){
     var va=_passSelDone.indexOf(i)>=0;
@@ -10442,7 +10598,7 @@ function _renderPassagesModal(){
     var ico=_mvIcon(va?'check':co?'lecture':'cercle',16);
     var cur=va?'default':'pointer';
     html+='<div style="flex:1;display:flex;flex-direction:column;gap:5px;">';
-    html+='<button onclick="_togglePass('+i+')" style="width:100%;padding:14px 0;border-radius:10px;font-family:inherit;cursor:'+cur+';border:1.5px solid '+brd+';background:'+bg+';color:'+col+';font-weight:700;font-size:16px;transition:all 0.15s;display:flex;flex-direction:column;align-items:center;gap:3px"><span>'+ico+'</span><span style="font-size:9px;font-weight:700;letter-spacing:.06em;opacity:.75">P'+i+'</span></button>';
+    html+='<button onclick="_togglePass('+i+')" style="width:100%;padding:14px 0;border-radius:10px;font-family:inherit;cursor:'+cur+';border:1.5px solid '+brd+';background:'+bg+';color:'+col+';font-weight:700;font-size:var(--pt-sm,16px);transition:all 0.15s;display:flex;flex-direction:column;align-items:center;gap:3px"><span>'+ico+'</span><span style="font-size:9px;font-weight:700;letter-spacing:.06em;opacity:.75">P'+i+'</span></button>';
     html+='<button onclick="_cancelPass('+i+')" '+(va||co?'':'disabled')+' style="width:100%;padding:5px 0;border-radius:7px;border:1px solid rgba(184,90,26,'+(va||co?'0.25':'0.1')+');background:rgba(184,90,26,'+(va||co?'0.06':'0.02')+');color:#B85A1A;font-size:var(--pt-micro,11px);font-family:inherit;cursor:'+(va||co?'pointer':'default')+';font-weight:600;opacity:'+(va||co?'1':'0.3')+'">↩ Annuler P'+i+'</button>';
     html+='</div>';
   }
@@ -10454,7 +10610,7 @@ function _renderPassagesModal(){
     var isDef=(n===planDef);
     html+='<div onclick="_setPassOv('+n+')" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;margin-bottom:6px;cursor:pointer;background:'+(selN?'rgba(192,132,90,0.07)':'rgba(255,255,255,0.02)')+';border:1px solid '+(selN?'rgba(192,132,90,0.22)':'rgba(255,255,255,0.05)')+';transition:all 0.12s">'
       +'<span style="width:16px;height:16px;border-radius:50%;flex-shrink:0;border:2px solid '+(selN?'var(--accent)':'rgba(255,255,255,0.2)')+';background:'+(selN?'var(--accent)':'transparent')+';transition:all 0.12s"></span>'
-      +'<span style="color:'+(selN?'var(--texte)':'var(--texte-doux)')+';font-size:13px">'+n+' passage'+(n>1?'s':'')+(isDef?' <span style=\"color:var(--texte-doux);font-size:var(--pt-micro,11px)\">(défaut saison)</span>':'')+'</span>'
+      +'<span style="color:'+(selN?'var(--texte)':'var(--texte-doux)')+';font-size:var(--pt-txt,13px)">'+n+' passage'+(n>1?'s':'')+(isDef?' <span style=\"color:var(--texte-doux);font-size:var(--pt-micro,11px)\">(défaut saison)</span>':'')+'</span>'
       +'</div>';
   }
   if(_passOv!==null&&_passOv!==planDef){
@@ -11670,7 +11826,7 @@ function ouvrirExportEntretien(){
       var col=couleurTracType(t.type);
       return '<label style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--gris-clair);cursor:pointer;min-height:44px">'
         +'<input type="checkbox" class="exp-ent-trac-cb" value="'+t.id+'" onchange="_updateExportSummary()" checked style="width:18px;height:18px;accent-color:'+col+';cursor:pointer">'
-        +'<div><div style="font-weight:600;font-size:13px">'+_escHtml(t.nom)+(t.traitementOnly?' <span style="font-size:9px;background:var(--orange-pale);color:var(--orange);border-radius:4px;padding:1px 5px">Traitement</span>':'')+'</div>'
+        +'<div><div style="font-weight:600;font-size:var(--pt-txt,13px)">'+_escHtml(t.nom)+(t.traitementOnly?' <span style="font-size:9px;background:var(--orange-pale);color:var(--orange);border-radius:4px;padding:1px 5px">Traitement</span>':'')+'</div>'
         +'<div style="font-size:var(--pt-micro,11px);color:'+col+'">'+_escHtml(t.modele||'—')+' · '+_escHtml(t.type)+'</div></div>'
       +'</label>';
     }).join('');
@@ -11730,7 +11886,7 @@ function lancerExportEntretienPDF(){
   var _entCss = ''
     + '.tracteur-section{margin-bottom:30px;}'
     + '.tracteur-title{display:flex;justify-content:space-between;align-items:flex-start;background:#2A3547;color:white;padding:12px 16px;border-radius:8px;margin-bottom:12px;}'
-    + '.tracteur-nom{font-size:16px;font-weight:bold;}'
+    + '.tracteur-nom{font-size:var(--pt-sm,16px);font-weight:bold;}'
     + '.tracteur-modele{font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;}'
     + '.tracteur-annee{font-size:22px;font-weight:bold;color:rgba(255,255,255,0.35);}'
     + '.badge-trait{font-size:9px;background:#E07B2A;color:white;border-radius:4px;padding:1px 6px;vertical-align:middle;font-weight:normal;margin-left:6px;}'
@@ -12222,8 +12378,8 @@ function _mvEcranPerime(j){
   ov.setAttribute('role','alertdialog'); ov.setAttribute('aria-modal','true');
   ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(15,19,25,.72);display:flex;align-items:center;justify-content:center;padding:24px';
   ov.innerHTML='<div style="max-width:380px;width:100%;background:var(--bg-card,#fff);color:var(--texte,#1a1a1a);border-radius:16px;padding:22px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.35)">'
-    +'<div style="font-size:var(--pt-sm,17px);font-weight:700;margin-bottom:8px">Mise \u00e0 jour obligatoire</div>'
-    +'<div style="font-size:var(--pt-txt,12.5px);line-height:1.55;color:var(--texte-med,#444);margin-bottom:16px">Une nouvelle version de Ma Vigne enregistre les donn\u00e9es autrement. '
+    +'<div style="font-size:var(--pt-sm,16px);font-weight:700;margin-bottom:8px">Mise \u00e0 jour obligatoire</div>'
+    +'<div style="font-size:var(--pt-txt,13px);line-height:1.55;color:var(--texte-med,#444);margin-bottom:16px">Une nouvelle version de Ma Vigne enregistre les donn\u00e9es autrement. '
     +'Pour ne rien \u00e9craser, cette version ne peut plus enregistrer&nbsp;: vos saisies sont <b>gard\u00e9es sur l\u2019appareil</b> et partiront apr\u00e8s la mise \u00e0 jour.</div>'
     +'<button id="mv-perime-btn" style="width:100%;min-height:44px;border:0;border-radius:12px;background:#3D6B27;color:#fff;font-family:inherit;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer">Mettre \u00e0 jour maintenant</button>'
     +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#777);margin-top:10px">Version install\u00e9e '+_escHtml(String(window.APP_VERSION||'?'))
@@ -12321,7 +12477,7 @@ async function refreshApp(){
   // PTR : seuil 120px (était 75) + départ touch dans la zone haute (Y<80px depuis le bord)
   // Évite les déclenchements accidentels en scrollant normalement
   var _sy=0,_startY=0,_act=false,_ind=null,PTR=120,START_ZONE=80;
-  function gi(){if(!_ind){_ind=document.createElement('div');_ind.style.cssText='position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-60px);z-index:9999;background:#3D6B27;color:#fff;border-radius:0 0 20px 20px;padding:8px 20px;font-size:13px;font-family:Outfit,sans-serif;font-weight:600;pointer-events:none;opacity:0;transition:opacity 0.1s;';document.body.appendChild(_ind);}return _ind;}
+  function gi(){if(!_ind){_ind=document.createElement('div');_ind.style.cssText='position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-60px);z-index:9999;background:#3D6B27;color:#fff;border-radius:0 0 20px 20px;padding:8px 20px;font-size:var(--pt-txt,13px);font-family:Outfit,sans-serif;font-weight:600;pointer-events:none;opacity:0;transition:opacity 0.1s;';document.body.appendChild(_ind);}return _ind;}
   document.addEventListener('touchstart',function(e){
     if(document.querySelector('.overlay.open'))return;
     var pg=document.querySelector('.page.active');
@@ -13261,7 +13417,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg-app);color:va
 .sec-head{display:flex;align-items:baseline;gap:12px;border-bottom:1.5px solid var(--cave);padding-bottom:8px;margin-bottom:14px}
 .sec-eyebrow{font-size:9px;letter-spacing:2.6px;text-transform:uppercase;color:var(--terre);font-weight:700;margin-bottom:2px}
 .sec-titles{flex:1}
-.sec-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;line-height:1;letter-spacing:.2px;color:var(--cave)}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:var(--pt-lg,24px);font-weight:700;line-height:1;letter-spacing:.2px;color:var(--cave)}
 .sec-title .acc{color:var(--acier-d)}
 .sec-title .cop{color:var(--terre)}
 .sec-count{font-size:var(--pt-micro,11px);font-weight:700;color:var(--texte-doux);white-space:nowrap;align-self:center;
@@ -13313,7 +13469,7 @@ tbody tr:nth-child(even){background:var(--bg-card)}
 .tcard.meca::before{background:var(--vert)}
 .tcard.hydro::before{background:var(--acier)}
 .tcard.rep::before{background:var(--warn)}
-.tc-nom{font-weight:800;font-size:var(--pt-txt,12.5px);display:flex;align-items:center;gap:6px}
+.tc-nom{font-weight:800;font-size:var(--pt-txt,13px);display:flex;align-items:center;gap:6px}
 .tc-mod{font-size:10px;color:var(--texte-doux);margin-bottom:8px}
 .tc-line{display:flex;justify-content:space-between;font-size:10px;padding:2.5px 0}
 .tc-line b{font-weight:700}
@@ -13328,7 +13484,7 @@ tbody tr:nth-child(even){background:var(--bg-card)}
 .gnr .g-body{flex:1}
 .gnr .g-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
 .gnr .g-lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.5);font-weight:600}
-.gnr .g-val{font-size:16px;font-weight:800}
+.gnr .g-val{font-size:var(--pt-sm,16px);font-weight:800}
 .gnr .g-val small{font-size:10px;color:rgba(255,255,255,.5);font-weight:600}
 .gnr .g-track{height:9px;background:rgba(255,255,255,.12);border-radius:5px;overflow:hidden;position:relative}
 .gnr .g-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--terre),var(--or))}
@@ -13340,7 +13496,7 @@ tbody tr:nth-child(even){background:var(--bg-card)}
 .ent-date .d{font-size:15px;font-weight:800;line-height:1;color:var(--cave)}
 .ent-date .m{font-size:8.5px;text-transform:uppercase;color:var(--texte-doux);font-weight:600;margin-top:1px}
 .ent-body{flex:1}
-.ent-top{font-size:var(--pt-lbl,11.5px);font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ent-top{font-size:var(--pt-lbl,12px);font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .ent-checks{margin-top:4px;display:flex;gap:5px;flex-wrap:wrap}
 .ent-ck{font-size:9px;padding:1.5px 6px;border-radius:5px;background:var(--ok-bg);color:var(--ok);font-weight:600}
 .ent-ck.off{background:var(--ligne-2);color:#b3a89a;text-decoration:line-through}
@@ -13387,14 +13543,14 @@ tbody tr:nth-child(even){background:var(--bg-card)}
 .ouv .hh{font-size:8.5px;color:var(--texte-doux);margin:3px 0}
 .ouv .etpv{font-size:var(--pt-micro,12px);font-weight:800;color:var(--vert);border-top:1px solid var(--ligne-2);padding-top:4px;margin-top:3px}
 .hs-band{background:linear-gradient(180deg,#F3EEE4,#EFE7D9);border:1px solid #E5DAC7;border-radius:10px;padding:11px 15px;margin-top:11px;display:flex;align-items:center;gap:14px}
-.hs-band .hs-v{font-size:24px;font-weight:800;color:var(--bordeaux)}
+.hs-band .hs-v{font-size:var(--pt-lg,24px);font-weight:800;color:var(--bordeaux)}
 .hs-band .hs-t b{font-weight:700}
 .hs-band .hs-t{font-size:var(--pt-micro,11px);color:#6a5f52}
 /* ── Cave ── */
 .cave-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .cave-op{background:var(--bg-card);border:1px solid var(--ligne);border-radius:9px;padding:9px 12px;display:flex;gap:10px;align-items:center}
 .cave-op .ic{font-size:18px}
-.cave-op .t{font-size:var(--pt-lbl,11.5px);font-weight:700}
+.cave-op .t{font-size:var(--pt-lbl,12px);font-weight:700}
 .cave-op .s{font-size:var(--pt-nano,9.5px);color:var(--texte-doux)}
 /* ── Signatures + credit ── */
 .sig-row{display:flex;gap:50px;margin-top:34px}
@@ -13406,7 +13562,7 @@ tbody tr:nth-child(even){background:var(--bg-card)}
 @media(max-width:640px){
   .kpi-strip,.summ,.etp-band{grid-template-columns:repeat(2,1fr)}
   .parc-grid,.ouv-grid,.cave-grid{grid-template-columns:1fr}
-  .cov-dom{font-size:32px} .sheet{margin:12px 8px}
+  .cov-dom{font-size:var(--pt-xxl,32px)} .sheet{margin:12px 8px}
   .cu-row .nm{width:100px}
 }
 @media print{
@@ -13677,8 +13833,8 @@ function exportRapportSaison(seasonNom){
     if(_rich){
       var tag=(presSrc==='manuel')?'\u270E saisie manuelle (R\u00e9glages)':'\uD83D\uDD17 depuis le Planning';
       etpBand='<div style="display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,#14110D,#1C1813);border-radius:12px;padding:16px 20px;color:#F2EFE7;position:relative;overflow:hidden;margin-bottom:4px">'
-        +'<div style="font-size:24px;opacity:.9">\uD83D\uDC65</div>'
-        +'<div><div style="font-family:\'Cormorant Garamond\',serif;font-size:32px;font-weight:700;line-height:1">'+f0(presPrev)+' <span style="font-size:15px;opacity:.7">h</span></div>'
+        +'<div style="font-size:var(--pt-lg,24px);opacity:.9">\uD83D\uDC65</div>'
+        +'<div><div style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xxl,32px);font-weight:700;line-height:1">'+f0(presPrev)+' <span style="font-size:15px;opacity:.7">h</span></div>'
         +'<div style="font-size:var(--pt-micro,11px);opacity:.82;margin-top:2px">Pr\u00e9sence de l\u2019\u00e9quipe sur la saison ('+tag+')'+((worked>0)?(' \u00b7 dont '+f0(worked)+' h travaill\u00e9es'):'')+'</div></div>'
         +'<div style="margin-left:auto;text-align:right"><div style="font-size:18px;font-weight:800">'+etpEquipe+' ETP</div><div style="font-size:9px;opacity:.7;text-transform:uppercase;letter-spacing:.5px">\u00e9quipe</div></div></div>';
       var _seg=function(w,grad,txt){ return (w>0.5)?('<div style="width:'+w+'%;background:'+grad+';display:flex;align-items:center;justify-content:center;font-size:var(--pt-micro,11px);font-weight:700;color:#fff;white-space:nowrap;overflow:hidden">'+txt+'</div>'):''; };
@@ -13688,7 +13844,7 @@ function exportRapportSaison(seasonNom){
         +_seg(wT,'linear-gradient(180deg,#6FB6D6,#4A9FC8)','Tracteur \u00b7 '+f0(tractH)+' h')
         +_seg(wA,'linear-gradient(180deg,#B98A5E,#8A5A38)','Autres \u00b7 '+f0(autresH)+' h')
         +'</div>';
-      var _lg=function(col,titre,val,pct,sub,etp){ return '<div style="display:flex;align-items:flex-start;gap:8px;flex:1;min-width:170px"><span style="width:11px;height:11px;border-radius:3px;background:'+col+';margin-top:3px;flex-shrink:0"></span><div><b style="font-size:var(--pt-txt,12.5px)">'+titre+' \u2014 '+f0(val)+' h ('+pct+'\u00a0%)</b><div style="color:var(--texte-doux);font-size:var(--pt-lbl,10.5px)">'+sub+'</div><div style="color:var(--texte-doux);font-size:var(--pt-lbl,10.5px);font-weight:600">\u2248 '+etp+' ETP</div></div></div>'; };
+      var _lg=function(col,titre,val,pct,sub,etp){ return '<div style="display:flex;align-items:flex-start;gap:8px;flex:1;min-width:170px"><span style="width:11px;height:11px;border-radius:3px;background:'+col+';margin-top:3px;flex-shrink:0"></span><div><b style="font-size:var(--pt-txt,13px)">'+titre+' \u2014 '+f0(val)+' h ('+pct+'\u00a0%)</b><div style="color:var(--texte-doux);font-size:var(--pt-lbl,10.5px)">'+sub+'</div><div style="color:var(--texte-doux);font-size:var(--pt-lbl,10.5px);font-weight:600">\u2248 '+etp+' ETP</div></div></div>'; };
       etpBand+='<div style="display:flex;gap:16px;margin-top:11px;flex-wrap:wrap">'
         +_lg('#3D6B27','Travaux vigne',vigneH,pctV,'au bar\u00e8me \u00ab travail \u00e0 la t\u00e2che \u00bb',_etpS(vigneH))
         +((tractH>0)?_lg('#4A9FC8','Tracteur',tractH,pctT,'estim\u00e9 au bar\u00e8me h/ha par passage',_etpS(tractH)):'')

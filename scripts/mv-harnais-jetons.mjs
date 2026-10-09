@@ -47,7 +47,7 @@ const EXEMPT_REDECL = [
 
 /* ══ LE SOCLE, tel qu'il doit être ══════════════════════════════════════════ */
 const SOCLE = [
-  ['--r-sm',    '8px'],   ['--r-md',   '12px'], ['--r-lg',  '16px'], ['--r-full', '999px'],
+  ['--r-xs',    '4px'],   ['--r-sm',    '6px'],   ['--r-md',    '8px'], ['--r-lg',  '12px'], ['--r-full', '999px'],
   ['--fw-med',  '500'],   ['--fw-semi', '600'], ['--fw-bold', '700'],
   ['--e-9',    '48px'],   ['--e-10',   '64px']
 ];
@@ -251,9 +251,12 @@ function controles(CSS, ref) {
      Le socle DÉCLARE ; il ne remappe pas 674 border-radius sans pouvoir
      regarder une seule capture — ce serait un pari, pas un lot. Ce qui est
      tenu, c'est que la dette ne grossisse plus. */
+  // DS-4 / COQ-2 (§270-271) : les pas sont devenus 4 / 6 / 8 / 12 / 999, et un repli var(--r-x,Npx) est la valeur du
+  //   jeton lui-même, pas un rayon écrit en dur. Mesure redéfinie, cliquet regravé sur elle (voir §271).
   const radDur = (NU.match(/border-radius\s*:\s*[^;}]+/g) || [])
+    .map(d => d.replace(/var\(--[a-z0-9-]+,\s*[^)]*\)/g, ''))
     .flatMap(d => (d.match(/(\d+)px/g) || []).map(v => parseInt(v)))
-    .filter(v => [8, 12, 16, 999].includes(v)).length;
+    .filter(v => [4, 6, 8, 12, 999].includes(v)).length;
   t(`les rayons en dur qui doublent un pas ne remontent pas (${radDur} ≤ ${ref.radDur})`,
     radDur <= ref.radDur);
   if (radDur < ref.radDur) R.push({ baisse: `rayons en dur : ${ref.radDur} → ${radDur}` });
@@ -330,7 +333,7 @@ function joue(CSS, silencieux) {
    (le CSS muté DIFFÈRE de l'original), et que l'assertion NOMMÉE rougit. */
 const MUTATIONS = [
   ['on retire --r-md de :root',
-    s => s.replace('--r-sm:8px; --r-md:12px;', '--r-sm:8px;'),
+    s => s.replace('--r-sm:6px; --r-md:8px;', '--r-sm:6px;'),
     'vaut 12px'],
   ['on change la valeur de --fw-semi',
     s => s.replace('--fw-semi:600;', '--fw-semi:650;'),
@@ -339,10 +342,10 @@ const MUTATIONS = [
     s => s.replace('--e-2:8px; --e-3:12px;', '--e-2:8px;'),
     '--e-0..--e-8 sont intacts'],
   ['--ligne n\'est plus redit que dans UN bloc sombre',
-    s => s.replace('    --ligne:var(--gris-clair,#2D2924);\n', ''),
+    s => s.replace('    --ligne:var(--gris-clair,#272624);\n', ''),
     'LES DEUX blocs sombres'],
   ['les deux blocs sombres divergent',
-    s => s.replace('    --shadow-lg:0 14px 56px rgba(0,0,0,0.70);',
+    s => s.replace('    --shadow-lg:0 20px 48px -10px rgba(0,0,0,.72),0 4px 12px -4px rgba(0,0,0,.50);',
                    '    --shadow-lg:0 10px 40px rgba(0,0,0,0.70);'),
     'la même chose'],
   ['--shadow-lg est déclaré deux fois dans :root',
@@ -356,10 +359,10 @@ const MUTATIONS = [
     s => s + '\n.zz-champ{outline:none;}\n',
     'après lui'],
   ['un appel du socle perd son repli',
-    s => s.replace('--radius-card:var(--r-lg,16px);', '--radius-card:var(--r-lg);'),
+    s => s.replace('--radius-card:var(--r-lg,12px);', '--radius-card:var(--r-lg);'),
     'sans repli'],
   ['un repli ment sur la valeur du pas',
-    s => s.replace('--radius-card:var(--r-lg,16px);', '--radius-card:var(--r-lg,14px);'),
+    s => s.replace('--radius-card:var(--r-lg,12px);', '--radius-card:var(--r-lg,14px);'),
     'redit la valeur'],
   /* ⚠️⚠️ CETTE MUTATION-CI A ÉTÉ FAUSSE AU PREMIER JET, ET C'EST LA TROISIÈME
      FOIS QUE CETTE FAMILLE DE FAUTE REVIENT (§53). Écrite « border-radius:50% »

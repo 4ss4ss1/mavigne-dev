@@ -3,15 +3,11 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **8 octobre 2026 (PRO-1)** — ★★ **LE PILOTAGE AU NIVEAU PRO, SUR ORDINATEUR COMME AU TÉLÉPHONE** (§269).
-> Nico (08/10, trois captures) : boutons morts (priorité, agrandir), consommation « pas pro du tout », PC cassé barre ouverte. Causes MESURÉES
-> dans Chromium (§269 : rendu de l'appli dans le bac à sable, recette écrite) : la barre faisait 269 px pour 244 réservés (box-sizing), six marges
-> négatives doublées par le convertisseur de REF-1 (« --16px »), le modèle du cockpit appelait `_mvTacheDuMoment()` sans rien et lisait un contrat
-> qui n'existe pas — le bouchon du harnais REF-1 ÉTAIT le défaut —, un observateur de largeur restait branché après la sortie d'Aujourd'hui.
-> Tension par personne → L'équipe & le matériel ; protection restante → Conformité. Harnais `mv-harnais-pro1` (27 + 13 contre-épreuves) ;
-> `prio`, `gnr-mesure`, `ref1` remis au vrai contrat. Base `1aeb055`. **APP 8.40 → 8.41, SW 9.18 → 9.19.** Précédent : COQ-1 + PAL-1 (§268).
-> ⚠️ Les lots MOUV-1 → COQ-1 (§259 à §268, 07/10) n'étaient pas montés dans cet en-tête : ils sont aux chantiers (`docs/claude/chantiers-230-279.md`).
-
+> Dernière consolidation : **8 octobre 2026 (PIL-1)** — ★ **LES SEPT ONGLETS DU PILOTAGE À LA CHARTE** (§298). Lot 29, **zip cumulatif DS-4 …
+> PIL-1 (§270 à §298), base `b80419d`, non poussés**. La revue de COUL-1 l'avait montré : seul « Aujourd'hui » (`.ck2`) était à la charte.
+> Habit seulement, recalé par `#page-pilotage` sur les composants `pil-` (portée et exercice, « à compléter », tuiles `pil-tile` / `pil-photo`,
+> titres sans capitales, chiffres en Outfit, segmentés `pil-seg` / `pil-anseg`, badges, jauge en `--ok`, puces et carte de Décider, protection,
+> archives) ; aucune règle ne vise `.ck2` (le harnais le vérifie). Harnais neuf `mv-harnais-pil1` (8 + 6). **APP 8.69 → 8.70, SW 9.47 → 9.48.**
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER

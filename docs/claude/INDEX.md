@@ -314,3 +314,32 @@
 | 267 | 267. ★★ REF-2 — LA PHOTO ÉCONOMIQUE DU JOUR (07/10 — `src/pilotage.js` (`_pilCk2Eco`, `window._pilEcoExport… | `docs/claude/chantiers-230-279.md` |
 | 268 | 268. ★★ COQ-1 + PAL-1 — LA BARRE LATÉRALE ET LA RECHERCHE CTRL K, SUR ORDINATEUR (07/10 — `src/coquille.js`… | `docs/claude/chantiers-230-279.md` |
 | 269 | 269. ★★ PRO-1 — LE PILOTAGE AU NIVEAU PRO, SUR ORDINATEUR COMME AU TÉLÉPHONE (08/10 — `src/cockpit-vue.js` … | `docs/claude/chantiers-230-279.md` |
+| 270 | 270. ★★ DS-4 — LA CHARTE DE LA MAQUETTE V2 : LES JETONS PARTOUT, LE COCKPIT HABILLÉ (08/10 — `src/styles.cs… | `docs/claude/chantiers-230-279.md` |
+| 271 | 271. ★★ COQ-2 — LA BARRE, LA RECHERCHE ET LE DOCK AU DESSIN DE LA MAQUETTE V2 (08/10 — `src/coquille.js` · … | `docs/claude/chantiers-230-279.md` |
+| 272 | 272. ★★ TETE-1 — LES EN-TÊTES ET LES ONGLETS AU DESSIN DE LA MAQUETTE V2 (08/10 — `src/styles.css` · `src/u… | `docs/claude/chantiers-230-279.md` |
+| 273 | 273. ★★ TYPO-2 — L'ÉCHELLE DE TEXTE DE LA MAQUETTE V2 (08/10 — `src/styles.css` · `index.html` · `src/*.js`… | `docs/claude/chantiers-230-279.md` |
+| 274 | 274. ★★ PARC-1 — LES PARCELLES SUR ORDINATEUR, EN LISTE + FICHE (MAQUETTE V3) (08/10 — `src/app.js` · `inde… | `docs/claude/chantiers-230-279.md` |
+| 275 | 275. ★★ PARC-2 — LES CARTES DE TRAVAIL DU TÉLÉPHONE AU DESSIN DE LA MAQUETTE V3 (08/10 — `src/app.js` · `sr… | `docs/claude/chantiers-230-279.md` |
+| 276 | 276. ★★ ACC-1 — L'ACCUEIL AU DESSIN DE LA MAQUETTE V4 : LA GRILLE, LE CADRE COMMUN, PERSONNALISER (08/10 — … | `docs/claude/chantiers-230-279.md` |
+| 277 | 277. ★★ ACC-2 — LA PRIORITÉ ÉPINGLÉE EN CARTE, L'AVANCEMENT DE LA SAISON AU CADRE NEUTRE (08/10 — `src/app.… | `docs/claude/chantiers-230-279.md` |
+| 278 | 278. ★★ ACC-3 — LA MÉTÉO 5 JOURS ET LES DERNIERS TRAVAUX AU DESSIN DE LA MAQUETTE V4 (08/10 — `src/app.js` … | `docs/claude/chantiers-230-279.md` |
+| 279 | 279. ★★ PLAN-1 — LE PLANNING « LE MOIS » AU DESSIN DE LA MAQUETTE V5 (08/10 — `src/styles.css` · `src/utils… | `docs/claude/chantiers-230-279.md` |
+| 280 | 280. ★★ PLAN-2 — PLANNING « LES GENS » EN LISTE + FICHE (08/10 — `src/planning.js` · `src/styles.css` · `sr… | `docs/claude/chantiers-280-329.md` |
+| 281 | 281. ★ PLAN-3 — LES FEUILLES DU PLANNING ET LE RÉCAPITULATIF ANNUEL À LA CHARTE (08/10 — `src/styles.css` ·… | `docs/claude/chantiers-280-329.md` |
+| 282 | 282. ★★ TRAC-1 — LES SESSIONS DU TRACTEUR EN LISTE + FICHE (MAQUETTE V6) (08/10 — `src/tracteur.js` · `inde… | `docs/claude/chantiers-280-329.md` |
+| 283 | 283. ★ TRAC-2 — L'ENTRETIEN DU TRACTEUR SUR DEUX COLONNES (MAQUETTE V6) (08/10 — `src/tracteur.js` · `src/s… | `docs/claude/chantiers-280-329.md` |
+| 284 | 284. ★★ TRAC-3 — LE TRACTEUR FINI : HEURES ET GNR, « DÉMARRER UNE SESSION », FENÊTRES (08/10 — `src/tracteu… | `docs/claude/chantiers-280-329.md` |
+| 285 | 285. ★★ PHYTO-1 — LE REGISTRE PHYTO EN LISTE + FICHE (MAQUETTE V7) (08/10 — `src/tracteur.js` · `src/phyto.… | `docs/claude/chantiers-280-329.md` |
+| 286 | 286. ★ PHYTO-2 — LE CATALOGUE E-PHY EN LISTE + FICHE (MAQUETTE V7) (08/10 — `src/tracteur.js` · `index.html… | `docs/claude/chantiers-280-329.md` |
+| 287 | 287. ★ PHYTO-3 — LA FERTILISATION À LA CHARTE (MAQUETTE V7) (08/10 — `src/styles.css` · `src/phyto.js` · `i… | `docs/claude/chantiers-280-329.md` |
+| 288 | 288. ★ CAVE-1 — LA CAVE › AUJOURD'HUI ET SA BANDE (MAQUETTE V8) (08/10 — `src/styles.css` · `src/utils.js` … | `docs/claude/chantiers-280-329.md` |
+| 289 | 289. ★ CAVE-2 — LE CUVIER À LA CHARTE (MAQUETTE V8) (08/10 — `src/styles.css` · `src/utils.js` (APP, WHATS_… | `docs/claude/chantiers-280-329.md` |
+| 290 | 290. ★★ CAVE-3 — LE CHAI EN LISTE + FICHE (MAQUETTE V8) (08/10 — `src/cave.js` · `index.html` · `src/styles… | `docs/claude/chantiers-280-329.md` |
+| 291 | 291. ★ CAVE-4 — LE MILLÉSIME À LA CHARTE (MAQUETTE V8) (08/10 — `src/styles.css` · `src/utils.js` (APP, WHA… | `docs/claude/chantiers-280-329.md` |
+| 292 | 292. ★ RSV-1 — LA RÉSERVE › FÛTS À LA CHARTE (MAQUETTE V9) (08/10 — `src/styles.css` · `src/utils.js` (APP,… | `docs/claude/chantiers-280-329.md` |
+| 293 | 293. ★ RSV-2 — LA RÉSERVE › INTRANTS À LA CHARTE (MAQUETTE V9) (08/10 — `src/styles.css` · `src/utils.js` (… | `docs/claude/chantiers-280-329.md` |
+| 294 | 294. ★ RSV-3 — LE BILAN MATIÈRE À LA CHARTE (MAQUETTE V9) (08/10 — `src/styles.css` · `src/utils.js` (APP, … | `docs/claude/chantiers-280-329.md` |
+| 295 | 295. ★ RG-1 — RÉGLAGES › DOMAINE À LA CHARTE (MAQUETTE V10) (08/10 — `src/styles.css` · `src/utils.js` (APP… | `docs/claude/chantiers-280-329.md` |
+| 296 | 296. ★★★ RG-2 — RÉGLAGES › ÉQUIPE ET MOI À LA CHARTE : FIN DE LA REFONTE UI (08/10 — `src/styles.css` · `sr… | `docs/claude/chantiers-280-329.md` |
+| 297 | 297. ★ COUL-1 — DES COULEURS PLUS FRANCHES, UN FOND UN PEU PLUS SOUTENU (08/10 — `src/styles.css` · `src/ut… | `docs/claude/chantiers-280-329.md` |
+| 298 | 298. ★ PIL-1 — LES SEPT ONGLETS DU PILOTAGE HORS « AUJOURD'HUI » À LA CHARTE (08/10 — `src/styles.css` · `s… | `docs/claude/chantiers-280-329.md` |

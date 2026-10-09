@@ -18,7 +18,7 @@ function fonction(src, nom) {
   for (let j = i; j < src.length; j++) { if (src[j] === '{') d++; else if (src[j] === '}' && --d === 0) return src.slice(m.index, j + 1); }
   throw new Error('accolade non fermée : ' + nom);
 }
-const CRANS = { '--pt-micro': 12, '--pt-lbl': 11.5, '--pt-nano': 11 };
+const CRANS = { '--pt-micro': 12, '--pt-lbl': 12, '--pt-nano': 11 };
 function suite(B) {
   const out = [], T = (n, ok) => out.push([n, !!ok]);
   const i = B.css.indexOf(':root'), j = B.css.indexOf('}', i), racine = B.css.slice(i, j), reste = B.css.slice(0, i) + B.css.slice(j);
@@ -29,7 +29,7 @@ function suite(B) {
   const ailleurs = [].concat((reste.match(redef) || []).map(() => 'styles.css'), (B.html.match(redef) || []).map(() => 'index.html'),
     ...Object.entries(B.modules).map(([f, s]) => (s.match(redef) || []).map(() => f)));
   T('aucune autre définition ne les écrase (styles.css hors :root, index.html, modules)', ailleurs.length === 0);
-  T('le harnais typographique porte le même barème', /'--pt-micro': 12,/.test(B.typo) && /'--pt-lbl': 11\.5, '--pt-nano': 11 /.test(B.typo));
+  T('le harnais typographique porte le même barème', /'--pt-micro': 12,/.test(B.typo) && /'--pt-lbl': 12, '--pt-nano': 11 /.test(B.typo));
   // La vraie carte du registre
   const parts = fonction(B.trac, '_phParcParts'), rend = fonction(B.trac, 'renderPhytoTrac');
   const NOMS = ['Les Grandes Vignes', 'Clos du Moulin', 'La Combe', 'Les Chaumes', 'En Champs', 'Le Pré de la Rue', 'Les Crais', 'La Justice', 'Les Seuvrées', 'Aux Corvées'];

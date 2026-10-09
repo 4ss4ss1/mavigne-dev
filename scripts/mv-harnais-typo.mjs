@@ -48,9 +48,9 @@ const REGRAVE = process.argv.includes('--baseline');
 /* Le bareme, tel que DS-0 l'a pose. Ecrit ici pour que le harnais puisse
    VERIFIER styles.css au lieu de lui faire confiance. */
 const BAREME = {
-  '--pt-hero': 40, '--pt-xxl': 31, '--pt-xl': 27, '--pt-lg': 23, '--pt-md': 20,
-  '--pt-sm': 17, '--pt-base': 14, '--pt-txt': 12.5, '--pt-micro': 12,
-  '--pt-lbl': 11.5, '--pt-nano': 11      /* TEXTE-A (§247) : 11 → 12, 10,5 → 11,5, 9,5 → 11 */
+  '--pt-hero': 40, '--pt-xxl': 32, '--pt-xl': 28, '--pt-lg': 24, '--pt-md': 20,
+  '--pt-sm': 16, '--pt-base': 14, '--pt-txt': 13, '--pt-micro': 12,
+  '--pt-lbl': 12, '--pt-nano': 11      /* TEXTE-A (§247) : 11 → 12, 10,5 → 11,5, 9,5 → 11 */
 };
 const PLANCHER = 12;          /* en-dessous, c'est du trop-petit */
 const PLAFOND_KO = 1024;      /* poids d'un module : au-dela, on decoupe */

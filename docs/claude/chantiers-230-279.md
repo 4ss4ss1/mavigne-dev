@@ -1760,3 +1760,345 @@ vrai contrat : `mv-harnais-prio` (extrait `_pilPrioDuJour`), `mv-harnais-gnr-mes
 `cockpit-vue.js` 82 → 94 Ko — question du découpage posée : non (un seul écran, sous 100 Ko). `mv-harnais-jetons` : une graisse 400 posée
 puis retirée (les pas sont 500 / 600 / 700). Les 283 commandes de `npm run check` jouées par tranches (une commande ne doit pas
 dépasser 5 minutes ici) : vertes.
+
+## 270. ★★ DS-4 — LA CHARTE DE LA MAQUETTE V2 : LES JETONS PARTOUT, LE COCKPIT HABILLÉ (08/10 — `src/styles.css` · `src/cave.js` · `index.html` · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `scripts/mv-harnais-jetons.mjs` · `scripts/mv-harnais-ref1.mjs` · `scripts/mv-harnais-contraste.mjs` · `lots/DS-4.json` · **APP 8.41 → 8.42, SW 9.19 → 9.20**, base `b80419d`)
+
+### 270a. D'où ça vient
+
+Nico (07/10) juge l'interface « fait-maison / jouet » pour des professionnels (références Linear, Stripe, Vercel) ; on reste en JS
+natif et CSS pur. Deux maquettes autonomes (hors dépôt) : `maquette-coquille-v1.html` puis `maquette-coquille-v2.html` (la v1 plus
+les lots du 07/10 : cockpit, barre, Ctrl K). Le cockpit de la v2 EST `src/cockpit-vue.js`, monté sur un modèle construit par les VRAIS
+moteurs (`_pilCk2Modele`, `_pilCk2Eco`, méthode des harnais REF-1 / REF-2) et habillé des jetons v1. Nico, 08/10 : « c'est parfait, je
+veux que ça colle exactement à la maquette ». Plan validé : jetons, puis coquille, cockpit, Parcelles, Accueil ; jetons appliqués à
+TOUTE l'appli dès ce lot (les écrans pas encore refaits prennent couleurs et arrondis, gardent leur mise en page).
+
+### 270b. Ce qui change
+
+- **Mêmes noms, valeurs de la maquette** : `--bg-app` `#F5F5F3`, `--bg-card` et `--blanc` blancs, `--gris-clair` (donc `--ligne`)
+  `#E7E6E2`, `--gris` `#D5D4CF`, `--texte*` neutres ; `--r-sm/md/lg` 6/8/12 (+ `--r-xs` 4) ; `--shadow-sm/md/lg` allégées (+ `--shadow-xs`).
+  Les deux blocs sombres redisent tout, à l'identique (noirs `#0D0D0C` / `#151514`).
+- **Rôles neufs** (aucun n'avait de nom) : `--bg-doux`, `--survol`, `--presse`, `--ligne-forte`, `--texte-pale`, `--accent*` (lie-de-vin
+  des grappes du logo), `--ok* / --attention* / --danger*`, `--encours`, `--piste`, `--inverse`, `--voile`, hauteurs `--h-*`, icônes
+  `--ic-*`, plans `--z-*`, `--font-ui / --font-titre`. MOUV-1 (`--mv-d1…d4`, courbes) gardé tel quel.
+- **Le cockpit habillé** : un bloc après la feuille REF-1 / PRO-1 renvoie ses couleurs propres (`--or`, `--vert-med`, `--terre`, `--et-*`,
+  `--plan-*`…) vers les rôles, passe ses titres en Outfit (le serif ne reste qu'à la marque et au nom de l'objet ouvert), retire le
+  fond dégradé et le reflet des barres. Aucune règle de REF-1 retirée.
+- Replis `var(--r-*,Npx)` recalés sur les nouvelles valeurs (même valeur que le jeton).
+
+### 270c. Mesuré
+
+- `mv-harnais-contraste` : le texte discret de la maquette (`#6E6C66` / `#8E8C86`) passait sous 4,5 sur les fonds `--gris-clair`
+  (36 appels, 4,20 en clair, 4,50 arrondi en sombre). Liste exacte obtenue en vidant `etat.code[thème].__detail` avant / après.
+  → `--texte-doux` cherché pas à pas : `#686660` (4,6 sur le gris, 5,7 sur blanc) et `#8F8D87` en sombre. Trois usages hérités sur fond
+  doré ou terre (`.mvc-jmilnote`, `.ns-note`, une règle de `styles.css`) passent en `--texte-med`. Écarts : retour au cliquet, 0 hausse.
+- Harnais au vert, contre-épreuves comprises : jetons, échelle, TEXTE-A, typo, contraste, KIT-1/2, COQ-1, REF-1/2, PRO-1, ALIGN-1/2 ;
+  preflight sans erreur ; chaîne `npm run check` jouée par tranches (voir la note de livraison).
+- **Rendu de la vraie appli** : `scripts/e2e-local.mjs` (données injectées, connexion DOM réelle) rejoué avec Playwright du dépôt et
+  le Chromium de `@sparticuz/chromium` (`executablePath`), dans un dossier à part : 16 captures avant / après (ordinateur, sombre,
+  téléphone), zéro erreur JS hors réseau coupé. Pixel lu : carte `#FBFAF6` → `#FFFFFF`.
+
+### 270d. Arbitrages
+
+- ⚠️ **L'échelle de texte de la maquette (13/16/24/28/32) n'est PAS dans ce lot** : posée, elle fait de 503 tailles écrites en dur
+  des « tailles égales à un cran » que `mv-harnais-typo` refuse. Les convertir en jetons (sans changer leur rendu) est un lot à part :
+  **TYPO-2**. L'échelle reste celle de TEXTE-A.
+- `--focus` était déjà pris (couleur, dans le cockpit) : l'anneau de la charte s'appelle `--focus-ombre` / `--focus-dedans`.
+- Dans `.ck2`, `--bg-app:inherit` et pas `var(--bg-app)` : un jeton qui se cite lui-même est invalide, tout ce qui le lit tomberait.
+- `mv-harnais-ref1` lit désormais la feuille REF-1 SANS le bloc DS-4 : sinon la contre-épreuve « sans les jetons propres » ne mordait
+  plus (le bloc d'habillage redonne `--et-faite`). Son repli attendu suit la valeur décidée (`--r-lg,12px`). Les motifs des
+  contre-épreuves de `mv-harnais-jetons` et `mv-harnais-contraste` suivent les nouvelles valeurs.
+
+### 270e. Ouvert
+
+TYPO-2 · COQ-2 (barre latérale, Ctrl K et dock au dessin de la v2 ; la barre en ligne reste sombre) · TETE-1 (en-têtes et onglets,
+panneau posé sur le fond) · Parcelles en liste + fiche · Accueil en grille · à l'œil chez Nico : les écrans hors maquette (Tracteur,
+Phyto, Cave, Planning) avec les nouvelles couleurs, en clair et en sombre.
+
+## 271. ★★ COQ-2 — LA BARRE, LA RECHERCHE ET LE DOCK AU DESSIN DE LA MAQUETTE V2 (08/10 — `src/coquille.js` · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/01-demarrer.html` · `scripts/mv-harnais-coq2.mjs` (neuf) · `scripts/mv-harnais-coq1.mjs` · `scripts/mv-harnais-jetons.mjs` · `scripts/mv-jetons-baseline.json` · `scripts/typo-baseline.json` · `scripts/mv-harnais-liste.mjs` · `lots/COQ-2.json` · **APP 8.42 → 8.43, SW 9.20 → 9.21**, base `b80419d`, **zip cumulatif avec DS-4 non poussé**)
+
+### 271a. Ce qui change
+
+- **La barre** (`_railHtml`) : la marque « Ma Vigne » en tête, le nom du domaine dessous (surface et effectif gardés en bulle) ;
+  la personne par ses deux initiales ; le bouton qui replie passe sur sa ligne, en icône de panneau (identifiant gardé).
+- **La recherche** : groupes de la maquette — « Aller à » (écrans, puis onglets du Pilotage avec « Pilotage » en sous-titre),
+  « Parcelles » (sous-titre : l'appellation), « Actions » (nouvelle entrée de journal, thème clair ou sombre gardé comme
+  `setThemeMode`, replier la barre). Sans rien taper : une action puis les écrans. Le classement de PAL-1 est inchangé. Le pied dit
+  « choisir, ouvrir, fermer ».
+- **La touche « [ »** replie ou déplie la barre, hors d'un champ, seulement quand la barre existe.
+- **Le bloc CSS COQ-2** (après les règles COQ-1, balisé `★ COQ-2` … `★ FIN COQ-2`) : aucune valeur en dur, chaque jeton d'échelle avec
+  son repli (règle DS-0). Barre sur `--bg-app` avec filet, écran ouvert en `--presse` + icône `--accent-texte`, plus de trait doré ;
+  recherche sur `--bg-card`, rayon `--r-lg`, ombre `--shadow-lg` ; dock blanc à filet, plus de dégradé, feuille « Plus » en tuiles.
+
+### 271b. Mesuré
+
+- `mv-harnais-coq2` (neuf, branché dans la liste) : 15 assertions — exécute `_palEntrees` et `_palTrier` extraites par leurs
+  accolades — et 11 contre-épreuves qui mordent. `mv-harnais-coq1` (8 + 4) et `mv-harnais-pro1` (27 + 13) verts.
+- Rendu de la vraie appli (méthode du §270c) : barre ouverte, repliée avec bulle, sombre ; recherche vide et « econ » ; dock et
+  feuille « Plus » au téléphone. Zéro erreur JS hors réseau coupé.
+
+### 271c. Arbitrages
+
+- **Largeurs gardées** (244 / 76) : PRO-1 a réglé la place de la barre au pixel ; la maquette dit 248 / 56. Écart assumé, à reprendre
+  avec TETE-1 si Nico le demande sur capture.
+- **La ligne de synchronisation** de la maquette n'est pas reprise : l'appli a déjà son indicateur ; un texte figé dans la barre
+  pourrait mentir. Les silhouettes de parcelle dans la recherche viendront avec le lot Parcelles.
+- ⚠️ **Le cliquet des rayons (`radDur`) comptait les replis** : `var(--r-md,8px)` passait pour un rayon écrit en dur, et ses pas
+  étaient ceux d'avant DS-4 (8 / 12 / 16 / 999). Mesure redéfinie (pas 4 / 6 / 8 / 12 / 999, replis retirés) et cliquet regravé à 234
+  sur cette mesure : ce n'est pas une hausse de dette, c'est une autre règle de mesure. `--r-xs` entre dans le socle du harnais.
+- La contre-épreuve « toutes les parcelles sans saisie » de COQ-1 suit la nouvelle liste vide ; son assertion « Écrans » devient
+  « Aller à ».
+- `mv-harnais-typo` : `src/coquille.js` passe de 15 à 16 Ko (+7 %, les actions de la recherche). Question du découpage posée :
+  non (un module de 16 Ko, une seule responsabilité, la coquille). Cliquet des tailles regravé (`--baseline`).
+
+### 271d. Ouvert
+
+TYPO-2 · TETE-1 (les en-têtes de module et le bandeau du Pilotage restent bruns ; onglets ; panneau posé sur le fond) · Parcelles ·
+Accueil · à l'œil chez Nico : la barre repliée sur un écran de 1 024 à 1 199 px.
+
+## 272. ★★ TETE-1 — LES EN-TÊTES ET LES ONGLETS AU DESSIN DE LA MAQUETTE V2 (08/10 — `src/styles.css` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-tete1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `lots/TETE-1.json` · **APP 8.43 → 8.44, SW 9.21 → 9.22**, base `b80419d`, **zip cumulatif avec DS-4 et COQ-2 non poussés**)
+
+### 272a. Ce qui change
+
+Un bloc CSS balisé `★ TETE-1` … `★ FIN TETE-1`, après celui de COQ-2, par jetons seulement (chaque jeton d'échelle avec son repli).
+Le balisage ne bouge pas : `.mod-header` (dix modules), `.mvc-hdr` (l'en-tête propre de la Cave), `.pil-mast` et `.pil-tabsbar`.
+- **En-têtes** sur `--bg-card`, un filet dessous ; la bande sombre sous le titre disparaît (`.mod-header-top` et `.mvc-hdr-top` portaient
+  en fond le dégradé brun et le filet « horizon », plus un halo en `::before`).
+- **Icône du module sans boîte**, titres en Outfit (le serif reste à la marque et au nom de l'objet ouvert), boutons d'en-tête en
+  icônes discrètes, pastille de saison et pastille de synchronisation sans fond sombre, action d'en-tête (« + Ajouter ») à l'accent.
+- **Onglets** soulignés, compacts, alignés à gauche, sans pastille ni icône ; **sous-onglets** en filtre segmenté.
+- **Bandeau du Pilotage** sur la surface : plus de halo ni de filet dégradé ; l'étiquette « Pilotage · temps réel » n'est plus en
+  capitales espacées ; le domaine en Outfit.
+- **Sur ordinateur avec la barre**, `#app-content-wrap` est un panneau posé sur le fond (filet, rayon, `overflow:clip` et pas
+  `hidden` : un conteneur `hidden` aurait cassé les barres collantes) ; la barre perd son filet pour ne pas doubler celui du panneau.
+
+### 272b. Mesuré
+
+- `mv-harnais-tete1` (neuf, branché) : 12 assertions, 10 contre-épreuves qui mordent. COQ-2, jetons, contrastes, typo, portes,
+  preflight au vert.
+- Rendu de la vraie appli (méthode du §270c), 16 écrans : ⚠️ **la première version laissait le titre noir sur la bande sombre** —
+  illisible sur Vigne, Tracteur, Cave, Planning ; seul le Pilotage était juste. La bande était le FOND de `.mod-header-top`, pas celui
+  de `.mod-header`. Trouvé à l'œil, aucune assertion ne l'aurait vu (§24). Corrigé, capturé de nouveau : en-têtes clairs partout.
+
+### 272c. Arbitrages
+
+- Les numéros des onglets du Pilotage (① L'année…) restent : ils disent le niveau de zoom, la maquette ne les montrait pas.
+- Le contenu des écrans (cartes, pastilles, compteurs) garde son dessin : il viendra écran par écran (Parcelles, Accueil…).
+
+### 272d. Ouvert
+
+TYPO-2 · Parcelles en liste + fiche · Accueil en grille · le contenu des autres modules · à l'œil chez Nico : les en-têtes en sombre,
+et le panneau posé sur un écran de 1 024 à 1 280 px.
+
+## 273. ★★ TYPO-2 — L'ÉCHELLE DE TEXTE DE LA MAQUETTE V2 (08/10 — `src/styles.css` · `index.html` · `src/*.js` (tailles et replis) · `src/gt/connexion.html` · `src/gt/console.html` · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `scripts/mv-harnais-echelle.mjs` · `scripts/mv-harnais-textea.mjs` · `scripts/mv-harnais-typo.mjs` · `scripts/mv-harnais-icones-contre.mjs` · `lots/TYPO-2.json` · **APP 8.44 → 8.45, SW 9.22 → 9.23**, base `b80419d`, **zip cumulatif avec DS-4, COQ-2, TETE-1 non poussés**)
+
+### 273a. Pourquoi c'était un lot à part
+
+DS-4 (§270d) n'avait pas pu poser l'échelle de la maquette : avec des crans à 13 / 16 / 24 / 28 / 32, 503 tailles écrites en dur
+devenaient « égales à un cran », ce que `mv-harnais-typo` refuse — à raison : une taille qui vaut un cran doit passer par lui.
+
+### 273b. Ce qui change
+
+- `:root` : `--pt-txt` 13, `--pt-lbl` 12, `--pt-sm` 16, `--pt-lg` 24, `--pt-xl` 28, `--pt-xxl` 32 (`hero`, `md`, `base`, `micro`, `nano` inchangés).
+- **508 `font-size:Npx` égales à un cran → `font-size:var(--pt-x,Npx)`**, au même pixel (index.html 83, admin-gt 99, styles 142,
+  phyto 32, planning 36, reglages 39, app 47, tracteur 19, et le reste). Le bloc `:root` n'est pas touché. Dans un document imprimé
+  ouvert à part (qui ne charge pas la feuille), le repli rend la même taille.
+- **750 replis** `var(--pt-x,ancienne)` → nouvelle valeur, dans `src/` et `index.html`.
+- Harnais : `mv-harnais-echelle` (pas), `mv-harnais-textea` (crans, et le barème qu'il lit dans typo), `mv-harnais-typo` (barème),
+  `mv-harnais-icones-contre` (motifs de ses contre-épreuves).
+
+### 273c. Mesuré
+
+- `mv-harnais-typo` : **0 taille exacte en dur** (503 avant), 7 vertes ; échelle, TEXTE-A (+ 7 contre-épreuves), jetons, contrastes verts.
+- Rendu de la vraie appli avant / après (Vigne, Planning, Tracteur, téléphone) : mêmes mises en page, textes d'un demi-point à un
+  point. Chaîne `npm run check` relancée en entier sur ce lot (voir la note de livraison).
+
+### 273d. Ouvert
+
+Parcelles en liste + fiche · Accueil en grille · le contenu des autres écrans · à l'œil chez Nico : les tableaux denses (Planning,
+Cave) avec le texte courant à 13 px.
+
+## 274. ★★ PARC-1 — LES PARCELLES SUR ORDINATEUR, EN LISTE + FICHE (MAQUETTE V3) (08/10 — `src/app.js` · `index.html` · `src/styles.css` · `src/utils.js` (aide, APP, WHATS_NEW) · `guide/04-vigne.html` · `public/sw.js` · `scripts/mv-harnais-parc1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `lots/PARC-1.json` · **APP 8.45 → 8.46, SW 9.23 → 9.24**, base `b80419d`, **zip cumulatif avec DS-4, COQ-2, TETE-1, TYPO-2 non poussés**)
+
+### 274a. Pourquoi une maquette v3 d'abord
+
+La v2 montrait les Parcelles en catalogue. Dans l'appli, c'est un écran de travail : on choisit la tâche, la liste ne garde que les
+parcelles à faire, dans l'ordre de la tournée, la parcelle commencée en tête, et chaque carte porte « Début » et « Valider » (la visite
+guidée les montre). Recopier la v2 aurait obligé l'équipe à ouvrir chaque parcelle pour valider — le piège d'AUJ-1 à l'envers. La v3
+(hors dépôt, `maquette-coquille-v3.html`) dessine ces gestes ; Nico l'a validée (« go »), avec les deux écarts proposés : le
+pourcentage ne s'affiche qu'avec « Toutes les tâches », les étapes des tâches à passages restent dans leur sous-filtre.
+
+### 274b. Ce qui change (ordinateur seulement, à partir de 1 024 px)
+
+- `index.html` : `<aside class="pfx" id="p-fiche">` juste après `#pList`, dans le contenu de la liste.
+- `renderParcelles` : `if(_pDesk())return _pRow(...)` AVANT le choix de la carte. `_pRow` dessine une ligne : rang de tournée, nom,
+  état de la tâche (ou surface et cépage), badges (DRAE, état, proximité), et à droite les gestes — `_pvActions(p)`, donc les mêmes
+  boutons et le même chemin d'écriture (`pQuickStart`, `pQuickValidate`, `pQuickUndo`). La ligne garde `pcard-qv` quand elle a ses
+  gestes : la visite guidée vise `.pcard-qv .pc-validate`.
+- `_pFicheSync(data)` à la fin de chaque rendu, AVANT les barres de proximité et de tournée et la synchro de la carte (sinon l'ancre de la
+  contre-épreuve de `mv-harnais-cible` « la carte ne se resynchronise plus » ne se pose plus — vu par la chaîne) : la sélection suit la liste affichée (la première si l'ancienne a disparu). `_pFicheHtml(p)` :
+  gestes, « Fiche complète » (→ `openDP`, tout le reste de la parcelle), délai de réentrée, état de la tâche choisie, avancement,
+  tâches, surface, travaux de la campagne (dernier passage lu dans `JOURNAL`), derniers passages.
+- Clavier : ↑ ↓ changent de parcelle, V valide la parcelle choisie — sur la page Parcelles, sur ordinateur, quand rien n'a le focus.
+  Passer d'un écran large à un étroit redessine la liste. `window._pSel` pour le `onclick` de la ligne.
+- CSS, bloc `★ PARC-1` … `★ FIN PARC-1`, par jetons : deux colonnes, fiche collante ; filtres d'état, tâches et Liste / Carte en
+  filtres segmentés ; priorité en bandeau fin ; « Trier par proximité » en bouton secondaire ; gestes compacts. Jeton neuf `--l-list`.
+- Aide (`MV_AIDE.parcelles`), guide (Vigne › Valider une tâche), nouveautés : la liste + fiche, les flèches, V.
+
+### 274c. Mesuré
+
+- `mv-harnais-parc1` (neuf, branché) : 13 assertions, 12 contre-épreuves qui mordent. Globaux, lint, preflight, jetons, typo,
+  contrastes, TETE-1 au vert.
+- Rendu de la vraie appli (méthode du §270c) : toutes les tâches, une tâche choisie, la flèche, la validation (la feuille « c'est fait »
+  existante s'ouvre, inchangée), le sombre, le téléphone (cartes inchangées). Zéro erreur JS.
+
+### 274d. Ouvert
+
+PARC-2 (téléphone : les cartes de travail au dessin de la v3) · les trois tuiles de compte (Finies, En cours, Arrachées) restent au-dessus
+des colonnes, la maquette mettait ces nombres dans les filtres · la barre d'équipe et la feuille « c'est fait » gardent leur dessin ·
+pas de silhouette de parcelle dans la ligne (l'appli n'expose pas les contours KML hors de la carte).
+
+## 275. ★★ PARC-2 — LES CARTES DE TRAVAIL DU TÉLÉPHONE AU DESSIN DE LA MAQUETTE V3 (08/10 — `src/app.js` · `src/styles.css` · `src/utils.js` (aide, APP, WHATS_NEW) · `guide/04-vigne.html` · `index.html` · `public/sw.js` · `scripts/mv-harnais-parc2.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `lots/PARC-2.json` · **APP 8.46 → 8.47, SW 9.24 → 9.25**, base `b80419d`, **zip cumulatif avec DS-4, COQ-2, TETE-1, TYPO-2, PARC-1 non poussés**)
+
+### 275a. Ce qui change (sous 1 024 px)
+
+- **La carte d'une tâche choisie** (`.pcard-qv`) : son haut devient `_pCarteTache(p, drae, prox)` — rang de tournée, nom, état de CETTE
+  tâche (« Réparation, pas commencé / en cours / fait », avec le passage pour une tâche à passages), badges DRAE et proximité. Le
+  pourcentage de campagne revient avec « Toutes les tâches » (carte inchangée). Toucher le haut de la carte ouvre toujours `openDP`.
+- **Les gestes en bas** : `_pvActions(p)`, inchangé (même chemin d'écriture), affiché en grille 1 / 2 — Début en secondaire, Valider à
+  l'accent — à la hauteur d'une ligne (56 px au doigt) ; un seul bouton pleine largeur quand la parcelle est commencée ; Fait en vert.
+- Filtres de tâche en segmenté qui défile, filtres d'état et Liste / Carte en segmentés, priorité en bandeau fin, « Trier par
+  proximité » en bouton secondaire. Dock : plus de cadre autour des icônes (vu sur la capture en sombre).
+- Aide (« Les deux gestes ») et guide (Vigne › Valider une tâche) : les gestes en bas de la carte, l'état à la place du pourcentage. La
+  visite guidée vise toujours `.pcard-qv .pc-validate` et dit « Touchez le ✓ » : rien à changer.
+
+### 275b. Mesuré
+
+- `mv-harnais-parc2` (neuf, branché) : 9 assertions, 9 contre-épreuves qui mordent. `mv-harnais-cible` (33 + 16 défauts détectés),
+  PARC-1, globaux, lint, échelle, jetons, icônes, typo, contrastes, nouveautés, preflight au vert ; chaîne complète (note de livraison).
+- Rendu de la vraie appli au téléphone : toutes les tâches, une tâche choisie (deux boutons), après « Début » (un seul Valider, et le
+  message existant « Réparation commencé »), le sombre. Zéro erreur JS.
+
+### 275c. Ouvert
+
+L'Accueil en grille (maquette v2) · le contenu des autres modules · la barre d'équipe et la feuille « c'est fait » gardent leur dessin.
+
+## 276. ★★ ACC-1 — L'ACCUEIL AU DESSIN DE LA MAQUETTE V4 : LA GRILLE, LE CADRE COMMUN, PERSONNALISER (08/10 — `src/app.js` · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW) · `guide/04-vigne.html` · `index.html` · `public/sw.js` · `scripts/mv-harnais-acc1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/typo-baseline.json` · `lots/ACC-1.json` · **APP 8.47 → 8.48, SW 9.25 → 9.26**, base `b80419d`, **zip cumulatif avec DS-4 … PARC-2 non poussés**)
+
+### 276a. D'où ça vient
+
+Le vrai Accueil a 12 blocs, une priorité épinglée et « Personnaliser » (ranger, masquer, compacte, pleine largeur, disposition du
+domaine) ; la maquette v2 n'en montrait que 6, fixes. Recopier la v2 aurait retiré 8 blocs et la personnalisation. La v4 (hors dépôt,
+`maquette-coquille-v4.html`) garde tout, sur une grille de 12 colonnes. Nico : « ok ». ACC-1 pose la grille, le cadre et Personnaliser ;
+ACC-2 redessinera les quatre blocs que la maquette dessine en propre.
+
+### 276b. Ce qui change
+
+- `_homeSpans()` (neuve) : sur les blocs visibles de `#home-cols`, deux blocs d'une rangée reçoivent `--hw-span` 7 et 5, puis 5 et 7 ;
+  un bloc `home-w-large` ou `home-w-seul` n'en reçoit pas (il garde `grid-column:1/-1`). ⚠️ Fonction À PART, appelée juste après
+  chacun des cinq appels de `_homeRangees()` : la première version vivait DANS `_homeRangees`, et `mv-harnais-align2` (qui extrait
+  cette fonction seule, la joue sur de faux éléments, et vise sa dernière ligne dans une contre-épreuve) a planté puis perdu une
+  contre-épreuve. Vu par la chaîne, corrigé en sortant le calcul.
+- CSS, bloc `★ ACC-1` … `★ FIN ACC-1`, par jetons : 12 colonnes à partir de 1 024 px ; titres de section en casse normale ; carte des
+  travaux mécaniques au cadre neutre ; Personnaliser — bandeau à l'accent pâle, contour pointillé, flèches et outils au dessin du kit,
+  état actif en `--presse`, bouton « disposition du domaine » secondaire.
+- **La projection des pistes du cockpit** (`.ck-fr-proj`, `.ck-fr-reste`) : un trait pointillé de 2 px au milieu de la piste au lieu de
+  blocs de 7 px sur toute sa hauteur. Avec la couleur neutre de DS-4, les blocs faisaient une rangée de carrés lourds (vu par Nico sur la
+  maquette en sombre). L'angle s'écrit `to right` : `90deg` compterait comme une valeur en dur.
+- Guide (Vigne) : les deux largeurs d'une rangée. Aide relue : rien n'y parle de colonnes. `mv-harnais-typo` : `styles.css` passe de
+  562 à 592 Ko depuis le dernier regravage (sept lots de charte) ; découpage de la feuille : pas dans ce plan, cliquet regravé.
+
+### 276c. Mesuré
+
+- `mv-harnais-acc1` (neuf, branché) : 11 assertions — dont `_homeSpans` jouée sur de faux blocs (« 7 5 5 7 - - - », un masqué ne compte
+  pas) — et 8 contre-épreuves. ALIGN-2 (18 + 12), globaux, lint, échelle, jetons, typo, contrastes, icônes, nouveautés, preflight.
+- Rendu de la vraie appli, Accueil normal et Personnaliser : rangées 7 / 5 puis 5 / 7, mêmes hauteurs, outils lisibles.
+
+### 276d. Ouvert
+
+ACC-2 : la priorité épinglée (tâche du moment, mosaïque, trois chiffres), la météo, l'avancement de la saison (encore vert) et les derniers
+travaux au dessin de la v4.
+
+## 277. ★★ ACC-2 — LA PRIORITÉ ÉPINGLÉE EN CARTE, L'AVANCEMENT DE LA SAISON AU CADRE NEUTRE (08/10 — `src/app.js` · `src/styles.css` · `src/utils.js` (aide, APP, WHATS_NEW) · `guide/04-vigne.html` · `index.html` · `public/sw.js` · `scripts/mv-harnais-acc2.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `lots/ACC-2.json` · **APP 8.48 → 8.49, SW 9.26 → 9.27**, base `b80419d`, **zip cumulatif avec DS-4 … ACC-1 non poussés**)
+
+### 277a. Ce qui change
+
+- `_homePrioCarte()` (neuve, appelée à la fin de `renderHome`) : le bloc `priorite` reçoit la classe `hpc` et devient une carte.
+  En tête, la pastille de priorité (texte, dépli, crayon : inchangés). Avec une tâche prioritaire (`_prioItems()[0]`) : son nom, son
+  pourcentage **pondéré par la surface** des parcelles validées, sa barre, l'équipe. Puis les parcelles non arrachées dessinées à leur
+  surface (côté proportionnel à la racine de la surface, comme la maquette), faites d'abord ; un appui ouvre la parcelle
+  (`openSelParc`). Sans tâche prioritaire : « La saison, parcelle par parcelle » — le pourcentage de la saison est déjà dans les chiffres.
+- Les chiffres du domaine `#home-kpis` et les équipes du jour sont DÉPLACÉS dans la carte (identifiants et mises à jour gardés), pas
+  recréés. Sur ordinateur, trois zones : titre / corps et chiffres en colonne / équipes ; au téléphone, tout en colonne.
+- « Avancement de la saison » (`#home-stat-card`) : fond vert et filet retirés, titres en Outfit, « changer » en bouton du kit. La barre
+  garde son doré (le guide le dit : vert fini, doré sinon).
+- Aide (`MV_AIDE.home`), guide (Vigne › Tâche prioritaire), nouveautés.
+
+### 277b. Mesuré
+
+- `mv-harnais-acc2` (neuf, branché) : 10 assertions — `_homePrioCarte` jouée sur un faux DOM avec et sans priorité (20 % pondéré, faites
+  d'abord, arrachée exclue, noms échappés, chiffres rangés) — et 9 contre-épreuves. ACC-1, ALIGN-2, globaux, lint, jetons, échelle, typo,
+  contrastes, icônes, nouveautés, preflight.
+- Rendu de la vraie appli : la carte sans priorité (données de test), en clair et en sombre ; l'avancement au cadre neutre. ⚠️ Le cas
+  « avec une priorité » n'a pas été VU à l'écran (les données de test n'en ont pas, et `_prioItems` ne se remplace pas de l'extérieur) :
+  il est prouvé par le harnais, pas par l'œil.
+
+### 277c. Ouvert
+
+ACC-3 : la météo 5 jours et les derniers travaux au dessin de la v4 — à faire avec des données de test qui portent une météo et un journal.
+
+## 278. ★★ ACC-3 — LA MÉTÉO 5 JOURS ET LES DERNIERS TRAVAUX AU DESSIN DE LA MAQUETTE V4 (08/10 — `src/app.js` · `src/styles.css` · `src/utils.js` (aide, APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-acc3.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `lots/ACC-3.json` · **APP 8.49 → 8.50, SW 9.27 → 9.28**, base `b80419d`, **zip cumulatif avec DS-4 … ACC-2 non poussés**)
+
+### 278a. Ce qui change
+
+- `renderHomeMeteo5` (version normale ; la compacte ne bouge pas) : le jour en tête — icône, maximum, ciel (libellé tiré du code WMO),
+  minimum et risque de pluie —, puis cinq colonnes à filet (jour, icône, maximum / minimum, barre de pluie, pourcentage) et la note du
+  premier jour au-delà de 50 %. ⚠️ `METEO_DAILY.pp` est une PROBABILITÉ : la maquette parlait de millimètres, l'appli dit des
+  pourcentages, partout (barre, chiffre, note, aide). Le gel garde sa classe.
+- Derniers travaux (`renderHome`) : le fil — un intertitre par jour (`_hvJour` : « Aujourd'hui », « Hier », sinon `fmtDate`), puis une
+  ligne par travail : l'heure (`_hvHeure` la lit dans l'identifiant, `Date.now()` en hexadécimal ; vide sinon), les initiales, « qui a
+  validé / a commencé la tâche sur la parcelle », « En cours » s'il y a lieu ; un appui ouvre le journal. Les quatre derniers, comme avant.
+- CSS, bloc `★ ACC-3` … `★ FIN ACC-3`, par jetons. Aide : « La météo 5 jours » (le risque, pas des millimètres) et « Derniers travaux ».
+
+### 278b. Mesuré
+
+- `mv-harnais-acc3` (neuf, branché) : 10 assertions — la vraie `renderHomeMeteo5` jouée sur une fausse prévision (en tête, cinq colonnes,
+  note du premier jour pluvieux, gel, compacte inchangée), les vrais `_hvJour` / `_hvHeure` — et 8 contre-épreuves.
+- Rendu de la vraie appli avec une météo et un journal de TEST injectés (les données de test n'en ont pas) : les deux blocs en clair et en
+  sombre. Chaîne complète (note de livraison).
+
+### 278c. Ouvert
+
+L'Accueil de la v4 est complet. Restent, écran par écran, les modules hors maquette (Tracteur, Phyto, Cave, Réserve, Planning, Réglages) :
+chacun mérite sa maquette avant intégration, comme les Parcelles et l'Accueil.
+
+## 279. ★★ PLAN-1 — LE PLANNING « LE MOIS » AU DESSIN DE LA MAQUETTE V5 (08/10 — `src/styles.css` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-plan1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `lots/PLAN-1.json` · **APP 8.50 → 8.51, SW 9.28 → 9.29**, base `b80419d`, **zip cumulatif avec DS-4 … ACC-3 non poussés**)
+
+### 279a. D'où ça vient
+
+Nico : « go » pour le Planning, avec la méthode des Parcelles. La maquette v5 (hors dépôt, `maquette-coquille-v5.html`) part de ce que
+porte l'écran réel (relevé sur la vraie appli : années, semaine / mois, cases, cocher un jour / un nom / tout, barre du bas, congés et
+chaleur sur une période, trois chiffres ; « Les gens »). Nico : « go ». PLAN-1 = « Le mois » ; PLAN-2 = « Les gens ».
+
+### 279b. Ce qui change (habit seulement)
+
+Bloc CSS `★ PLAN-1` … `★ FIN PLAN-1`, par jetons. `#plan-body` en flex qui passe à la ligne : l'année (segmenté), la période (flèches,
+titre) avec Semaine / Mois (segmenté), puis « Congés » et « Chaleur sur une période » tiennent sur une ligne, le reste en pleine largeur.
+Trois chiffres en bande fine. Grille sur une carte : en-têtes de jour sobres, aujourd'hui dans une pastille à l'accent, week-end teinté,
+noms avec avatar neutre ; cases à plat, teintées par type (`pl2c-up` vert, `pl2c-dn` ambre, `pl2c-cp` lie-de-vin, `pl2c-abs` rouge,
+`pl2c-rec` gris, `pl2c-heat` contour ambre), la légende suit ; case cochée (`pl2-selon`) cerclée à l'accent. Les puces spéciales
+(`pl2c-late`, `-mod`, `-brk`, `-hc`) gardent leur dessin. Barre du bas en sombre, « Heures » à l'accent. Colonne des noms élargie sur
+ordinateur seulement ; au téléphone, sans avatar.
+
+### 279c. Mesuré
+
+- `mv-harnais-plan1` (neuf, branché) : 12 assertions, 8 contre-épreuves.
+- Rendu de la vraie appli : semaine, mois, case cochée et barre du bas (ordinateur et téléphone), sombre ; ⚠️ types POSÉS À LA MAIN sur des
+  cases (les données de test n'en ont pas) : c'est ainsi qu'est apparu le défaut de spécificité — la base `:not():not()…` (1,5,0)
+  écrasait les teintes ; passée en `:where()`. Le cerclage et la chaleur passent en contour (`outline`) pour ne pas se battre avec la base.
+
+### 279d. Arbitrages et ouvert
+
+- L'appli garde « cocher, puis agir » pour une case comme pour plusieurs ; la v5 ouvrait un panneau pour une case seule (avec un réglage par
+  demi-heure). Changer ce geste toucherait la logique de sélection : pas dans un lot d'habit.
+- Les panneaux « Congés / Chaleur sur une période » et la feuille des heures gardent leur dessin. PLAN-2 : « Les gens » en liste + fiche.
+

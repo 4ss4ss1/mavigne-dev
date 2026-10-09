@@ -531,7 +531,7 @@ window.showPublicLanding = function () {
     + '<div style="font-size:var(--pt-micro,11px);font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:6px;letter-spacing:.06em">LIEN OU IDENTIFIANT DU DOMAINE</div>'
     + '<input class="mvl-input" type="text" placeholder="mavigneapp.fr/?tenant=…" autocomplete="off" autocapitalize="off" spellcheck="false"'
     + ' style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.15);border-radius:12px;'
-    + 'padding:13px 14px;font-size:16px;color:#F5EEDF;box-sizing:border-box"'
+    + 'padding:13px 14px;font-size:var(--pt-sm,16px);color:#F5EEDF;box-sizing:border-box"'
     + ' onkeydown="if(event.keyCode===13)mvLandingGo()">'
     + '<div class="mvl-err" style="display:none;font-size:var(--pt-micro,12px);color:#E07060;margin-top:8px"></div>'
     + '<button onclick="mvLandingGo()" style="width:100%;margin-top:12px;background:var(--or);color:#0C1A0A;border:none;'

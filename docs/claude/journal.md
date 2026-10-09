@@ -1836,3 +1836,233 @@ aide décrit les anciens. **C'est la violation exacte de la Règle d'or n°4, é
 ⚠️ **Ni `npm run build`, ni le smoke, ni l'e2e n'avaient été lancés côté Claude** sur ces deux lots
 (pas de navigateur dans le bac à sable). ✅ **Ils sont déployés** — SW v6.42 et v6.43 sont dans le
 changelog du dépôt, et l'accompagnement les a rattrapés en v6.44.
+
+
+> Dernière consolidation : **8 octobre 2026 (COUL-1)** — ★ **DES COULEURS PLUS FRANCHES, UN FOND UN PEU PLUS SOUTENU** (§297). Lot 28,
+> **zip cumulatif DS-4 … COUL-1 (§270 à §297), base `b80419d`, non poussés**. Nico : couleurs trop délavées, cartes pas assez détachées du fond
+> crème — « un petit peu plus, pas beaucoup ». Jetons seulement : fonds pâles un cran plus soutenus (clair .11 / .15 / .15 / .13, sombre .15 /
+> .17), teintes un peu plus franches (toujours ≥ 4,5 sur blanc), fond `#F0EEE9` (et le cockpit, qui recopiait le sien). ⚠️ Mesuré avant de
+> livrer : foncer `--gris-clair` (pour marquer les filets) faisait passer 36 paires « texte doux sur gris-clair » sous 4,5, et éclaircir la
+> carte sombre 2 paires phyto — les deux sont rendus ; `--ligne` reste branché sur `--gris-clair` (invariant DS-4). Harnais neuf
+> `mv-harnais-coul1` (7 + 5). **APP 8.68 → 8.69, SW 9.46 → 9.47.** ⚠️ Revue des onglets du Pilotage : seul « Aujourd'hui » est à la charte —
+> les sept autres (L'année, La campagne, L'équipe & le matériel, Décider, Économie, Conformité, Archives) gardent l'ancien dessin : lot à venir.
+
+> Dernière consolidation : **8 octobre 2026 (RG-2)** — ★★★ **FIN DE LA REFONTE UI : RÉGLAGES › ÉQUIPE ET MOI** (§296). Lot 27, **zip
+> cumulatif DS-4 … RG-2 (§270 à §296), base `b80419d`, jamais poussés** — Nico les poussera d'un coup sur son mode de test avant le
+> déploiement général. Tous les écrans ont pris la charte v2 (maquettes v1 à v10, hors dépôt), habit d'abord, liste + fiche là où un geste
+> ouvre une fiche à lire (Parcelles, Planning › Les gens, Sessions, Registre, Catalogue, Chai), jamais là où il ouvre un outil qui fige
+> (feuille de session, cuve) ou un formulaire (lot de fûts). RG-2 : membres en lignes dans une carte, rôles au kit (admin à l'accent),
+> alertes de contrat vides cachées, zone dangereuse en rouge, « Moi » par deux au large. Harnais neuf `mv-harnais-rg2` (7 + 7).
+> **APP 8.67 → 8.68, SW 9.45 → 9.46.** Précédent : RG-1 (§295). Chantier à prévoir : découper `styles.css` (cliquet regravé quatre fois).
+
+> Dernière consolidation : **8 octobre 2026 (RG-1)** — ★ **RÉGLAGES › DOMAINE À LA CHARTE (MAQUETTE V10)** (§295). Lot 26, **zip cumulatif
+> avec DS-4 … RSV-3 (§270 à §294) non poussés**. La v10 (hors dépôt) dessine les Réglages depuis l'écran réel ; Nico : « go ». RÈGLE : habit
+> seulement — aucun réglage, aucun enregistrement, aucun droit ne bouge. Carte d'identité claire, sections en cartes (`.set-sec > .set-title +
+> div`), titres en casse normale, lignes à filet, frise et boutons au kit ; au large, grille sur `#regl-view-domaine:not([style*="none"])` +
+> `!important` (`switchReglTab` écrit `display:block` en ligne), « Mon domaine » et « Données » côte à côte. Harnais neuf `mv-harnais-rg1`
+> (7 + 7). Base `b80419d`. **APP 8.66 → 8.67, SW 9.44 → 9.45.** Précédent : RSV-3 (§294). Reste RG-2 (Équipe et Moi) : fin de la refonte.
+
+> Dernière consolidation : **8 octobre 2026 (RSV-3)** — ★ **LE BILAN MATIÈRE À LA CHARTE : LA RÉSERVE DE LA V9 EST FINIE** (§294). Lot 25,
+> **zip cumulatif avec DS-4 … RSV-2 (§270 à §293) non poussés**. Habit seulement : les règles du bilan vivent dans `styles.css` (bloc ancien
+> l. ~4068) ; le bloc RSV-3 les recale par `#page-reserve` — en-tête clair (fin du noir cave), titre en Outfit, tableau du kit en chiffres
+> tabulaires, étiquettes au rayon du kit, note du contrôle bio sur fond doux. ⚠️ Le stock négatif passe par `td.mvr-neg` : `.mvr-neg` seul
+> perdait contre la couleur des cellules (vu sur capture). Harnais neuf `mv-harnais-rsv3` (6 + 6). Base `b80419d`. **APP 8.65 → 8.66, SW
+> 9.43 → 9.44.** Précédent : RSV-2 (§293). Restent les Réglages, maquette d'abord.
+
+> Dernière consolidation : **8 octobre 2026 (RSV-2)** — ★ **LA RÉSERVE › INTRANTS À LA CHARTE (MAQUETTE V9)** (§293). Lot 24, **zip
+> cumulatif avec DS-4 … RSV-1 (§270 à §292) non poussés**. Habit seulement : un intrant n'ouvre rien (sa carte porte stock, ouverture,
+> achats, consommé, mouvements) — pas de liste + fiche. Cartes neutres, nom et stock en Outfit ; la couleur du stock est écrite EN LIGNE
+> (`stCol` : terre ou rouge) : elle est lue par sélecteur d'attribut (`[style*="terre"]` → texte, `[style*="rouge"]` → danger), pas écrasée
+> à l'aveugle. Alerte de stock négatif en rouge pâle ; au large, cartes par deux (`.mvr-body:has(> .mvr-pcard)`). Harnais neuf
+> `mv-harnais-rsv2` (6 + 6). Base `b80419d`. **APP 8.64 → 8.65, SW 9.42 → 9.43.** Précédent : RSV-1 (§292).
+
+> Dernière consolidation : **8 octobre 2026 (RSV-1)** — ★ **LA RÉSERVE › FÛTS À LA CHARTE (MAQUETTE V9)** (§292). Lot 23, **zip cumulatif
+> avec DS-4 … CAVE-4 (§270 à §291) non poussés**. La v9 (hors dépôt) dessine la Réserve depuis l'écran réel (Fûts, Intrants, Bilan matière) ;
+> Nico : « go ». RSV-1 = habit : feuille injectée (`_rsvInjectCss`, `mvr-`) et cartes venues du Pilotage (`pcav-`) recalées par
+> `#page-reserve` ; parc sur fond clair, bande en trois cases, boutons et filtre au kit, fournisseurs et lots neutres ; au large, fin des
+> 760 px (`.mvr-body`) et lots par deux. Un lot s'ouvre toujours dans son FORMULAIRE (`_rsvOpenFut`, admin) : pas de liste + fiche.
+> Harnais neuf `mv-harnais-rsv1` (7 + 6). Base `b80419d`. **APP 8.63 → 8.64, SW 9.41 → 9.42.** Précédent : CAVE-4 (§291).
+
+> Dernière consolidation : **8 octobre 2026 (CAVE-4)** — ★ **LE MILLÉSIME À LA CHARTE : LA CAVE DE LA V8 EST FINIE** (§291). Lot 22,
+> **zip cumulatif avec DS-4 … CAVE-3 (§270 à §290) non poussés**. Habit seulement : les feuilles injectées du Millésime (`_mlInjectCss` :
+> `mlx-` ; `_pcavInjectCss` : `pcav-`) recalées par `#page-cave` — millésime choisi à l'accent (plus de noir et or), tuiles et verdict au fond
+> clair avec chiffres en Outfit, étiquettes en casse normale, cartes neutres, dépassement de rendement en rouge pâle, points et jauges par
+> les états. Harnais neuf `mv-harnais-cave4` (7 + 6). Base `b80419d`. **APP 8.62 → 8.63, SW 9.40 → 9.41.** Précédent : CAVE-3 (§290).
+> Restent la Réserve et les Réglages, maquette d'abord.
+
+> Dernière consolidation : **8 octobre 2026 (CAVE-3)** — ★★ **LE CHAI EN LISTE + FICHE (MAQUETTE V8)** (§290). Lot 21, **zip cumulatif
+> avec DS-4 … CAVE-2 (§270 à §289) non poussés**. La fiche d'une cuvée est une fiche d'information à boutons (pas un outil qui fige quelque
+> chose en se fermant) : elle passe à droite. `openCuveeDetail(cuvId, dans)` écrit dans `#chai-fiche` avec un conteneur ; au large, liste
+> affichée, TOUT appel y va — y compris le rafraîchissement après une opération (lignes 3299 / 3312). `_chaiSel` / `_chaiFicheSync` comme au
+> Catalogue. ⚠️ `switchCaveOng` écrit `display:block` en ligne sur la vue : la grille passe par `:not([style*="none"])` + `!important`.
+> Harnais neuf `mv-harnais-cave3` (8 + 7). Base `b80419d`. **APP 8.61 → 8.62, SW 9.39 → 9.40.** Précédent : CAVE-2 (§289).
+
+> Dernière consolidation : **8 octobre 2026 (CAVE-2)** — ★ **LE CUVIER À LA CHARTE (MAQUETTE V8)** (§289). Lot 20, **zip cumulatif avec
+> DS-4 … CAVE-1 (§270 à §288) non poussés**. Habit seulement : la feuille du Cuvier (classes `mvv-`, injectée) recalée par `#page-cave` —
+> cuves en lignes neutres (ouverte cerclée à l'accent), nom en Outfit, tri et filtres au kit (le filtre actif à l'accent, plus de terre),
+> alerte « à mesurer » en ambre, « Nouvelle cuve » à l'accent, « Fusionner » en secondaire ; au large, cuves par deux, la cuve ouverte sur
+> toute la largeur. ⚠️ Pas de liste + fiche : la cuve s'ouvre EN PLACE, son détail est l'outil de travail (relevés, cinétique, décuvage).
+> Harnais neuf `mv-harnais-cave2` (7 + 7). Base `b80419d`. **APP 8.60 → 8.61, SW 9.38 → 9.39.** Précédent : CAVE-1 (§288).
+
+> Dernière consolidation : **8 octobre 2026 (CAVE-1)** — ★ **LA CAVE › AUJOURD'HUI ET SA BANDE (MAQUETTE V8)** (§288). Lot 19,
+> **zip cumulatif avec DS-4 … PHYTO-3 (§270 à §287) non poussés**. La v8 (hors dépôt) dessine la Cave depuis l'écran réel (Aujourd'hui,
+> Cuvier, Chai, Millésime) ; Nico : « go », même règle que le Phyto (ce que l'appli tient déjà). CAVE-1 = habit : la vue injecte ses feuilles
+> (`_aujInjectCss`, `_mlInjectCss`), recalées par `#page-cave` ; bande en quatre cases, « Ce qui presse » en carte (phrase en Outfit, gravité
+> en filet et couleur), semaines en cartes ; au large, verdict à gauche sur plusieurs rangées, semaines à droite. Harnais neuf
+> `mv-harnais-cave1` (7 + 7). Base `b80419d`. **APP 8.59 → 8.60, SW 9.37 → 9.38.** Précédent : PHYTO-3 (§287). Suivent CAVE-2 à CAVE-4.
+
+> Dernière consolidation : **8 octobre 2026 (PHYTO-3)** — ★ **LA FERTILISATION À LA CHARTE : LE PHYTO DE LA V7 EST FINI** (§287).
+> Lot 18, **zip cumulatif avec DS-4 … PHYTO-2 (§270 à §286) non poussés**. L'onglet injecte sa propre feuille (`_ferCss`, classes `fer-*`) :
+> le bloc PHYTO-3 la recale sur les jetons par une spécificité plus forte (`:is(#page-phyto,#ovFerti,#ovFerParc)`), sans toucher au calcul
+> ni au cahier. Cartes par deux au large, la liste « ce qu'un contrôle va demander » sur toute la largeur (`:has(.fer-cf)`), « Imprimer le
+> cahier » à l'accent. `#ph-new-btn` passe par `_phytoFab` : « Saisir un amendement » sur la Fertilisation (admin seul). Harnais neuf
+> `mv-harnais-phyto3` (8 + 7). Base `b80419d`. **APP 8.58 → 8.59, SW 9.36 → 9.37.** Précédent : PHYTO-2 (§286).
+
+> Dernière consolidation : **8 octobre 2026 (PHYTO-2)** — ★ **LE CATALOGUE E-PHY EN LISTE + FICHE (MAQUETTE V7)** (§286). Lot 17,
+> **zip cumulatif avec DS-4 … PHYTO-1 (§270 à §285) non poussés**. La fiche EST le détail de l'appli : `openEphyDetail(amm, dans)` écrit
+> dans `#cat-fiche` quand on lui donne un conteneur, sans ouvrir de fenêtre (statut, délai de rentrée, substance, mentions, usages vigne,
+> « donnée indicative ») ; sans conteneur, la fenêtre comme avant. Sur ordinateur, `_catSel` choisit ; `_catFicheSync` suit la liste
+> filtrée (garde de type). Recherche, filtres et lignes au kit. Harnais neuf `mv-harnais-phyto2` (9 + 7). Base `b80419d`.
+> **APP 8.57 → 8.58, SW 9.35 → 9.36.** Précédent : PHYTO-1 (§285). Reste PHYTO-3 (fertilisation).
+
+> Dernière consolidation : **8 octobre 2026 (PHYTO-1)** — ★★ **LE REGISTRE PHYTO EN LISTE + FICHE (MAQUETTE V7)** (§285). Lot 16,
+> **zip cumulatif avec DS-4 … TRAC-3 (§270 à §284) non poussés**. Nico valide la v7 avec une règle : « ce que la loi oblige, comme de base
+> dans l'appli » — la fiche (`_phFicheHtml`) ne montre que les mentions déjà tenues (produit, AMM, type, date, dose, parcelles, opérateur,
+> réentrée et avant-récolte avec leur fin, ZNT, substance, cible), tait un champ absent, et ouvre le détail existant (`openTraitDetail`).
+> Bouton « Saisir un traitement » (droit : admin ou tractoriste). ⚠️ Corrigé au passage : le bouton « Démarrer une session » de TRAC-3 était
+> forcé visible au large (`display:inline-flex!important`), même sans le droit. Harnais neuf `mv-harnais-phyto1` (12 + 8). Base `b80419d`.
+> **APP 8.56 → 8.57, SW 9.34 → 9.35.** Précédent : TRAC-3 (§284). Restent PHYTO-2 (catalogue) et PHYTO-3 (fertilisation).
+
+> Dernière consolidation : **8 octobre 2026 (TRAC-3)** — ★★ **LE TRACTEUR FINI : HEURES ET GNR, « DÉMARRER », FENÊTRES** (§284). Lot 15,
+> **zip cumulatif avec DS-4 … TRAC-2 (§270 à §283) non poussés**. Nico : « finis le Tracteur avant de passer à la suite ». `_trMinutes(s)` :
+> le chrono quand il a mesuré la parcelle (`_chrMes` lit `mes` / `dmin` sur `parcellesFaites`, donc synchronisé avec la session), sinon le
+> barème (`_sessBaremeMin`) ; GNR = heures × `CONFIG.eco.conso_gnr_lh`, 6 L/h par défaut — la valeur du Pilotage (`_ecoCfg`). Fiche,
+> 4ᵉ chiffre de la bande (heures de la saison), bouton « Démarrer une session » sur ordinateur (le flottant se cache), fenêtres du Tracteur au kit.
+> Harnais neuf `mv-harnais-trac3` (9 + 8) ; TRAC-1 reçoit les vraies fonctions. Base `b80419d`. **APP 8.55 → 8.56, SW 9.33 → 9.34.**
+
+> Dernière consolidation : **8 octobre 2026 (TRAC-2)** — ★ **L'ENTRETIEN DU TRACTEUR SUR DEUX COLONNES (MAQUETTE V6)** (§283). Lot 14,
+> **zip cumulatif avec DS-4 … TRAC-1 (§270 à §282) non poussés**. `_trEntDock()` (appelée à la fin de `renderEntretiens` : changer de machine
+> ne repasse pas par `renderTracteur` — vu sur capture, la colonne de gauche restait vide) RANGE le filtre des machines et la carte de la cuve
+> dans `#ent-gauche` sur ordinateur et les rend au téléphone. Cartes et boutons à la charte. ⚠️ Les « fiches d'entretien » de l'appli sont des
+> CONTRÔLES (plein, huile, filtres, anomalie), pas les fiches chiffrées de la v6 : le résumé « Derniers contrôles » est gardé tel quel.
+> Harnais neuf `mv-harnais-trac2` (8 + 6). Base `b80419d`. **APP 8.54 → 8.55, SW 9.32 → 9.33.** Précédent : TRAC-1 (§282).
+
+> Dernière consolidation : **8 octobre 2026 (TRAC-1)** — ★★ **LES SESSIONS DU TRACTEUR EN LISTE + FICHE (MAQUETTE V6)** (§282).
+> Lot 13, **zip cumulatif avec DS-4 … PLAN-3 (§270 à §281) non poussés** (Nico poussera tout d'un coup sur son mode de test). La v6
+> (hors dépôt) dessine le Tracteur depuis l'écran réel ; Nico : « go », et précise : le GNR se calcule depuis le chrono, avec 6 L/h pour
+> qui ne relève pas. Sur ordinateur, toucher une session la CHOISIT : `_trFicheHtml` résume (avancement, surface pondérée, parcelles, note)
+> et porte le bouton vers la feuille de travail (`openSessionDetail`). ⚠️ La feuille ne se pose PAS à droite comme la fiche du Planning :
+> la fermer fige le chrono (`_chronoFinalizeOnClose`). Heures et GNR ne sont pas dans la fiche : le chrono vit par session, à tracer
+> d'abord. Harnais neuf `mv-harnais-trac1` (11 + 8). Base `b80419d`. **APP 8.53 → 8.54, SW 9.31 → 9.32.** Précédent : PLAN-3 (§281).
+
+> Dernière consolidation : **8 octobre 2026 (PLAN-3)** — ★ **LES FEUILLES DU PLANNING ET LE RÉCAP ANNUEL À LA CHARTE** (§281). Lot 12,
+> **zip cumulatif avec DS-4 … PLAN-2 (§270 à §280) non poussés** — onze lots en attente : à pousser. Habit seulement : les quatre feuilles
+> (`.pl2-sheet` : congés, chaleur, fiche ; `#ovPlanDay` et son `.plan-modal-hdr`) passent à l'en-tête clair, aux champs et boutons du kit
+> (principal à l'accent) ; le récap annuel en casse normale, le mois en cours à l'accent — repéré parce que sa barre n'est pas peinte en
+> `gris-clair` par `planning.js` (le harnais le garde). Harnais neuf `mv-harnais-plan3` (7 + 6). Base `b80419d`. **APP 8.52 → 8.53, SW
+> 9.30 → 9.31.** Précédent : PLAN-2 (§280). Le Planning de la v5 est complet ; restent les autres modules, maquette d'abord.
+
+> Dernière consolidation : **8 octobre 2026 (PLAN-2)** — ★★ **PLANNING « LES GENS » EN LISTE + FICHE** (§280, premier chantier de
+> `docs/claude/chantiers-280-329.md`). Lot 11 du plan, **zip cumulatif avec DS-4 … PLAN-1 (§270 à §279) non poussés**. La fiche est celle
+> de l'appli (`#ovPlanFiche`) : `_plGensDock()` la RANGE dans la page à droite de la liste sur « Les gens » à partir de 1 024 px, et la
+> rend à sa place ailleurs — aucune logique de fiche dupliquée. Lignes de liste, en-tête de fiche clair. Harnais neuf `mv-harnais-plan2`
+> (9 + 7), qui joue la vraie fonction sur un faux DOM. Base `b80419d`. **APP 8.51 → 8.52, SW 9.29 → 9.30.** Précédent : PLAN-1 (§279).
+
+> Dernière consolidation : **8 octobre 2026 (PLAN-1)** — ★★ **LE PLANNING « LE MOIS » AU DESSIN DE LA MAQUETTE V5** (§279).
+> Lot 10 du plan, **zip cumulatif avec DS-4 … ACC-3 (§270 à §278) non poussés**. La v5 (hors dépôt) dessine le Planning à partir de ce
+> que l'écran réel porte ; Nico : « go ». PLAN-1 ne change que l'habit (même balisage, mêmes gestes `planCellTap` / `planColTap` /
+> `planRowTap` / `planSelAll`, même barre du bas, mêmes périodes) : outils en une ligne (`#plan-body` en flex qui passe à la ligne),
+> chiffres en bande, grille à plat teintée par type. ⚠️ La base des cases passe par `:where()` : avec `:not()` en chaîne, sa
+> spécificité (1,5,0) écrasait toutes les teintes de type — vu sur capture en posant des types. Écart assumé : l'appli garde « cocher
+> puis agir » (une case comme plusieurs), la maquette ouvrait un panneau pour une case seule. Harnais neuf `mv-harnais-plan1` (12 + 8).
+> Base `b80419d`. **APP 8.50 → 8.51, SW 9.28 → 9.29.** Précédent : ACC-3 (§278). Reste : PLAN-2 (« Les gens » en liste + fiche).
+
+> Dernière consolidation : **8 octobre 2026 (ACC-3)** — ★★ **LA MÉTÉO 5 JOURS ET LES DERNIERS TRAVAUX AU DESSIN DE LA MAQUETTE V4** (§278).
+> Lot 9 du plan, **zip cumulatif avec DS-4 … ACC-2 (§270 à §277) non poussés** — l'Accueil de la v4 est complet. `renderHomeMeteo5` :
+> le jour en tête (maximum, ciel, minimum, risque), cinq colonnes à filet avec une barre de pluie, la note du premier jour au-delà de
+> 50 %. ⚠️ La prévision donne une PROBABILITÉ de pluie (`pp`), pas des millimètres : la barre, le chiffre, la note et l'aide disent un
+> pourcentage. Derniers travaux : un fil rangé par jour (« Aujourd'hui », « Hier », la date), l'heure lue dans l'identifiant (horodatage
+> hexadécimal), les initiales, « qui a validé / a commencé quoi, où ». Vu avec une météo et un journal de test injectés. Harnais neuf
+> `mv-harnais-acc3` (10 + 8). Base `b80419d`. **APP 8.49 → 8.50, SW 9.27 → 9.28.** Précédent : ACC-2 (§277).
+
+> Dernière consolidation : **8 octobre 2026 (ACC-2)** — ★★ **LA PRIORITÉ ÉPINGLÉE EN CARTE, L'AVANCEMENT AU CADRE NEUTRE** (§277).
+> Lot 8 du plan, **zip cumulatif avec DS-4 … ACC-1 (§270 à §276) non poussés**. `_homePrioCarte()` (appelée en fin de `renderHome`)
+> fait du bloc épinglé une carte : la pastille en tête (texte, dépli, crayon inchangés), la tâche du moment avec son pourcentage
+> pondéré par la surface, sa barre, et les parcelles dessinées à leur surface (fait, en cours, à faire ; un appui → `openSelParc`) ;
+> sans priorité, la saison parcelle par parcelle, sans pourcentage en double. Les chiffres `#home-kpis` et les équipes du jour sont
+> RANGÉS dans la carte, pas recréés. « Avancement de la saison » quitte son fond vert. Harnais neuf `mv-harnais-acc2` (10 + 9), qui joue la
+> vraie fonction avec et sans priorité. Base `b80419d`. **APP 8.48 → 8.49, SW 9.26 → 9.27.** Précédent : ACC-1 (§276).
+> Reste : ACC-3 (météo 5 jours, derniers travaux — à voir avec des données de test qui en portent).
+
+> Dernière consolidation : **8 octobre 2026 (ACC-1)** — ★★ **L'ACCUEIL AU DESSIN DE LA MAQUETTE V4 : GRILLE, CADRE, PERSONNALISER** (§276).
+> Lot 7 du plan, **zip cumulatif avec DS-4 … PARC-2 (§270 à §275) non poussés**. La maquette v4 garde les 12 blocs réels et Personnaliser
+> (Nico : « ok »). Sur ordinateur, `#home-cols` passe à 12 colonnes : `_homeSpans()` — fonction À PART, appelée après chaque
+> `_homeRangees()` dont le texte ne bouge pas (ALIGN-2 l'extrait et vise sa fin) — donne 7 / 5 puis 5 / 7 aux deux blocs d'une rangée.
+> Titres de bloc en casse normale, carte du tracteur au cadre neutre, outils de Personnaliser au dessin du kit. Et la projection des
+> pistes du cockpit (fin prévue, atterrissage) devient un fin pointillé : Nico avait vu, sur la maquette en sombre, une rangée de blocs
+> lourds. Harnais neuf `mv-harnais-acc1` (11 + 8). Base `b80419d`. **APP 8.47 → 8.48, SW 9.25 → 9.26.** Précédent : PARC-2 (§275).
+> Reste : ACC-2 (priorité épinglée avec mosaïque, météo, avancement de la saison, derniers travaux redessinés comme la v4).
+
+> Dernière consolidation : **8 octobre 2026 (PARC-2)** — ★★ **LES CARTES DE TRAVAIL DU TÉLÉPHONE AU DESSIN DE LA MAQUETTE V3** (§275).
+> Lot 6 du plan, **zip cumulatif avec DS-4, COQ-2, TETE-1, TYPO-2 et PARC-1 (§270 à §274) non poussés**. Sous 1 024 px : quand une tâche
+> est choisie, la carte dit l'état de CETTE tâche (`_pCarteTache` : rang, nom, « Réparation, en cours », DRAE, proximité) à la place du
+> pourcentage ; ses deux gestes (`_pvActions`, inchangés) passent en bas, en deux grands boutons 1 / 2 (56 px au doigt), un seul en
+> pleine largeur quand la parcelle est commencée. Filtres segmentés qui défilent, priorité en bandeau fin, dock sans cadre autour des
+> icônes (vu au sombre). Harnais neuf `mv-harnais-parc2` (9 + 9). Base `b80419d`. **APP 8.46 → 8.47, SW 9.24 → 9.25.**
+> Précédent : PARC-1 (§274). Restent : l'Accueil en grille, puis le contenu des autres modules.
+
+> Dernière consolidation : **8 octobre 2026 (PARC-1)** — ★★ **LES PARCELLES SUR ORDINATEUR, EN LISTE + FICHE** (§274).
+> Lot 5 du plan, **zip cumulatif avec DS-4, COQ-2, TETE-1 et TYPO-2 (§270 à §273) non poussés**. Nico valide la maquette v3 (« go ») :
+> les Parcelles restent un ÉCRAN DE TRAVAIL (tâche choisie, tournée, priorité, équipe, « Début » / « Valider » sur chaque parcelle) —
+> recopier la v2 (un catalogue) aurait sorti ces gestes de la liste. À partir de 1 024 px : `renderParcelles` dessine une ligne
+> (`_pRow`, mêmes gestes par `_pvActions`, classe `pcard-qv` gardée pour la visite guidée) et la fiche de la parcelle choisie
+> s'ouvre à droite (`#p-fiche`, `_pFicheHtml` : gestes, état de la tâche, DRAE, avancement, travaux, passages, « Fiche complète » →
+> `openDP`). Flèches ↑ ↓ et V, hors champ. Filtres et Liste / Carte en segmentés. Téléphone inchangé (PARC-2). Harnais neuf
+> `mv-harnais-parc1` (13 + 12). Base `b80419d`. **APP 8.45 → 8.46, SW 9.23 → 9.24.** Précédent : TYPO-2 (§273).
+
+> Dernière consolidation : **8 octobre 2026 (TYPO-2)** — ★★ **L'ÉCHELLE DE TEXTE DE LA MAQUETTE V2** (§273).
+> Lot 4 du plan, **zip cumulatif avec DS-4, COQ-2 et TETE-1 (§270 à §272) non poussés**. Les crans `--pt-*` prennent les valeurs de la
+> maquette, calées sur 4 px : `txt` 12,5 → 13, `lbl` 11,5 → 12 (rejoint `micro`), `sm` 17 → 16, `lg` 23 → 24, `xl` 27 → 28, `xxl` 31 → 32.
+> Le verrou qui bloquait DS-4 est levé dans le même lot : **508 tailles écrites en dur égales à un cran passent au jeton, au même
+> pixel** (`font-size:13px` → `var(--pt-txt,13px)`), et 750 replis suivent la nouvelle valeur. Harnais échelle, TEXTE-A et typo mis
+> aux crans décidés ; 0 taille exacte en dur. Rendu avant / après : rien ne bouge de place. Base `b80419d`.
+> **APP 8.44 → 8.45, SW 9.22 → 9.23.** Précédent : TETE-1 (§272). Restent : Parcelles (liste + fiche), Accueil (grille), le reste.
+
+> Dernière consolidation : **8 octobre 2026 (TETE-1)** — ★★ **LES EN-TÊTES ET LES ONGLETS AU DESSIN DE LA MAQUETTE V2** (§272).
+> Lot 3 du plan, **zip cumulatif avec DS-4 (§270) et COQ-2 (§271) non poussés**. Aucun balisage ne change : un bloc TETE-1, par
+> jetons, rhabille les dix `.mod-header` (et l'en-tête propre de la Cave, `.mvc-hdr`), le bandeau `.pil-mast` et la barre d'onglets du
+> Pilotage. La bande sombre sous le titre (`.mod-header-top`, dessinée en fond avec le filet « horizon ») disparaît ; icône sans
+> boîte ; titres en Outfit ; onglets soulignés, compacts, sans icône ; sous-onglets en filtre segmenté ; capitales espacées retirées.
+> Sur ordinateur avec la barre, `#app-content-wrap` devient un panneau posé sur le fond (`overflow:clip`, pour garder le collant).
+> ⚠️ Vu sur capture : la première version laissait le titre noir sur la bande sombre — illisible. Harnais neuf `mv-harnais-tete1`
+> (12 + 10 contre-épreuves). Base `b80419d`. **APP 8.43 → 8.44, SW 9.21 → 9.22.** Précédent : COQ-2 (§271).
+> Restent : TYPO-2, Parcelles (liste + fiche), Accueil (grille), le contenu des autres écrans.
+
+> Dernière consolidation : **8 octobre 2026 (COQ-2)** — ★★ **LA BARRE, LA RECHERCHE ET LE DOCK AU DESSIN DE LA MAQUETTE V2** (§271).
+> Lot 2 du plan « l'appli colle à la maquette v2 », **zip cumulatif avec DS-4 (§270) non poussé**. Les règles COQ-1 / PRO-1 restent
+> (place, largeurs 244 / 76, box-sizing) ; un bloc COQ-2, par jetons seulement, change l'habit : barre sur le fond neutre, marque en
+> tête et domaine dessous, écran ouvert marqué par l'accent seul, bouton de repli (icône de panneau) sur la ligne de la personne,
+> touche « [ ». La recherche range en « Aller à » (écrans puis onglets du Pilotage), « Parcelles », « Actions » (journal, thème
+> gardé, barre). Dock et feuille « Plus » à plat. Harnais neuf `mv-harnais-coq2` (15 + 11 contre-épreuves) ; COQ-1 et jetons
+> recalés (groupes, rayon `--r-xs`, cliquet des rayons redéfini sur les pas de DS-4 et regravé à 234). Base `b80419d`.
+> **APP 8.42 → 8.43, SW 9.20 → 9.21.** Précédent : DS-4 (§270). Restent : TYPO-2, TETE-1 (en-têtes et onglets), Parcelles, Accueil.
+
+> Dernière consolidation : **8 octobre 2026 (DS-4)** — ★★ **LA CHARTE DE LA MAQUETTE V2, DANS TOUTE L'APPLI** (§270).
+> Nico (08/10) valide la maquette de la coquille v2 (« c'est parfait ») et demande que l'appli y colle exactement ; lot 1 du plan :
+> les JETONS. Les noms existants gardent leur nom et prennent les valeurs de la maquette (fonds neutres, arrondis 6/8/12, ombres
+> légères, en clair et dans les DEUX blocs sombres) ; les rôles qui n'avaient pas de nom arrivent (accent lie-de-vin, ok / attention /
+> danger, survol, hauteurs, plans). Le cockpit est habillé par un bloc à part (renvois de ses couleurs propres, titres en Outfit),
+> sans retirer une règle de REF-1. Mesuré : 37 + 39 paires de contraste passées sous 4,5 (texte discret sur fonds gris) → 0, en
+> foncant juste assez --texte-doux. ⚠️ L'échelle de texte de la maquette (13/16/24/28/32) est REPORTÉE : 503 tailles en dur
+> tomberaient sur les nouveaux crans → lot TYPO-2. Base `b80419d`. **APP 8.41 → 8.42, SW 9.19 → 9.20.** Précédent : PRO-1 (§269).
+> Restent : TYPO-2, COQ-2 (barre latérale, Ctrl K, dock au dessin de la v2), TETE-1 (en-têtes et onglets), Parcelles, Accueil.
+
+> Dernière consolidation : **8 octobre 2026 (PRO-1)** — ★★ **LE PILOTAGE AU NIVEAU PRO, SUR ORDINATEUR COMME AU TÉLÉPHONE** (§269).
+> Nico (08/10, trois captures) : boutons morts (priorité, agrandir), consommation « pas pro du tout », PC cassé barre ouverte. Causes MESURÉES
+> dans Chromium (§269 : rendu de l'appli dans le bac à sable, recette écrite) : la barre faisait 269 px pour 244 réservés (box-sizing), six marges
+> négatives doublées par le convertisseur de REF-1 (« --16px »), le modèle du cockpit appelait `_mvTacheDuMoment()` sans rien et lisait un contrat
+> qui n'existe pas — le bouchon du harnais REF-1 ÉTAIT le défaut —, un observateur de largeur restait branché après la sortie d'Aujourd'hui.
+> Tension par personne → L'équipe & le matériel ; protection restante → Conformité. Harnais `mv-harnais-pro1` (27 + 13 contre-épreuves) ;
+> `prio`, `gnr-mesure`, `ref1` remis au vrai contrat. Base `1aeb055`. **APP 8.40 → 8.41, SW 9.18 → 9.19.** Précédent : COQ-1 + PAL-1 (§268).
+> ⚠️ Les lots MOUV-1 → COQ-1 (§259 à §268, 07/10) n'étaient pas montés dans cet en-tête : ils sont aux chantiers (`docs/claude/chantiers-230-279.md`).
+

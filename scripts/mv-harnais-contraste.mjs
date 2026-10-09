@@ -74,7 +74,7 @@ const INJECTIONS = [
      changeait rien, et la contre-epreuve annoncait une assertion muette. Le
      defaut n'etait pas dans le harnais, il etait dans l'injection — encore. */
   { nom: 'le thème sombre privé de sa couleur de texte (ses deux portes)',
-    f: 'src/styles.css', de: '--texte:#F0EFE9;--texte-med:#D0CEC6', vers: '--texte:#3A3830;--texte-med:#D0CEC6', global: true },
+    f: 'src/styles.css', de: '--texte:#EDECE9;--texte-med:#B4B2AC', vers: '--texte:#3A3830;--texte-med:#D0CEC6', global: true },
   { nom: 'une paire gris-sur-carte ajoutée à la feuille',
     f: 'src/styles.css', ajout: '\n.mv-injection-contraste{color:#C9C6BE;background:var(--bg-card);font-size:var(--pt-micro,11px)}\n' },
   { nom: 'un fond employé comme encre, ajouté dans un module',

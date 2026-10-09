@@ -77,9 +77,9 @@ function suite(S) {
     && S.pil.includes("catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#ck2'); }"));
   T('« Traiter ? » : un seul calcul, lu par la tuile et par le cockpit', S.pil.includes('var X=_pilTraiterCalc(), big=X.big') && S.pil.includes('return { big:big, bigCol:bigCol, rai:rai, ban:ban, pied:pied, _i:_i, fen:fen, risque:risque, prochaine:prochaine };'));
   T('le module est importé après cockpit.js, reserve.js reste dernier', /import '\.\/cockpit\.js';[^\n]*\nimport '\.\/cockpit-vue\.js';[^\n]*\n(?:import '[^']+';[^\n]*\n)*import '\.\/reserve\.js';/.test(S.app));
-  const css = S.css.slice(S.css.indexOf('★★★ REF-1 (§266)'));
+  const css = S.css.slice(S.css.indexOf('★★★ REF-1 (§266)'), S.css.indexOf('★ DS-4 (§270) — LE COCKPIT HABILLÉ') > 0 ? S.css.indexOf('★ DS-4 (§270) — LE COCKPIT HABILLÉ') : undefined);   // DS-4 : la feuille REF-1 seule, sans son habillage
   T('la feuille de la maquette est là, avec ses jetons propres, et l\u2019ancienne feuille est partie',
-    css.includes('.ck2{') && /--et-faite\s*:/.test(css) && /--ck-r-lg:var\(--r-lg,16px\)/.test(css) && !S.css.includes("AUJ-1 (§260) — LE COCKPIT D'AUJOURD'HUI, VUE TERRAIN"));
+    css.includes('.ck2{') && /--et-faite\s*:/.test(css) && /--ck-r-lg:var\(--r-lg,12px\)/.test(css) && !S.css.includes("AUJ-1 (§260) — LE COCKPIT D'AUJOURD'HUI, VUE TERRAIN"));
   T('la nouveauté de REF-1 reste au Journal (bloc 8.38, pastille sur la fin prévue)', /\{ v: '8\.38', d: '2026-10-07', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-verdict'/.test(S.uti));
   return out;
 }

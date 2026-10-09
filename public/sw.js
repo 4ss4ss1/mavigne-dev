@@ -1,4 +1,62 @@
-// MA VIGNE — Service Worker v9.19
+// MA VIGNE — Service Worker v9.48
+// v9.48 (08/10/2026) — PIL-1 (§298) : les sept onglets du Pilotage hors cockpit a la charte (composants pil- recales).
+//   APP 8.69 -> 8.70.
+// v9.47 (08/10/2026) — COUL-1 (§297) : teintes et fonds pales un cran plus francs, fond de page un peu plus soutenu.
+//   APP 8.68 -> 8.69.
+// v9.46 (08/10/2026) — RG-2 (§296) : Reglages > Equipe et Moi a la charte. Fin de la refonte UI (DS-4 a RG-2).
+//   APP 8.67 -> 8.68.
+// v9.45 (08/10/2026) — RG-1 (§295) : Reglages > Domaine a la charte (carte d'identite claire, sections en cartes, deux
+//   colonnes au large). APP 8.66 -> 8.67.
+// v9.44 (08/10/2026) — RSV-3 (§294) : le Bilan matiere a la charte (en-tete clair, tableau du kit, stock negatif en rouge).
+//   La Reserve de la maquette v9 est finie. APP 8.65 -> 8.66.
+// v9.43 (08/10/2026) — RSV-2 (§293) : la Reserve > Intrants a la charte (cartes neutres, stock en texte / rouge si negatif,
+//   cartes par deux au large). APP 8.64 -> 8.65.
+// v9.42 (08/10/2026) — RSV-1 (§292) : la Reserve > Futs a la charte (feuille mvr- recalee, pleine largeur au large, lots par
+//   deux). APP 8.63 -> 8.64.
+// v9.41 (08/10/2026) — CAVE-4 (§291) : le Millesime a la charte (feuilles mlx- et pcav- recalees sur les jetons). La Cave de
+//   la maquette v8 est finie. APP 8.62 -> 8.63.
+// v9.40 (08/10/2026) — CAVE-3 (§290) : le Chai en liste + fiche sur ordinateur (la fiche de l'appli ecrite dans la page),
+//   cartes et alerte a la charte. APP 8.61 -> 8.62.
+// v9.39 (08/10/2026) — CAVE-2 (§289) : le Cuvier a la charte (feuille mvv- recalee sur les jetons, cuves par deux au large).
+//   APP 8.60 -> 8.61.
+// v9.38 (08/10/2026) — CAVE-1 (§288) : la Cave › Aujourd'hui et sa bande a la charte (verdict en carte, semaines en cartes,
+//   deux colonnes au large). APP 8.59 -> 8.60.
+// v9.37 (08/10/2026) — PHYTO-3 (§287) : la Fertilisation a la charte (feuille fer-* recalee sur les jetons, cartes par deux,
+//   bouton Saisir un amendement). APP 8.58 -> 8.59.
+// v9.36 (08/10/2026) — PHYTO-2 (§286) : le catalogue E-Phy en liste + fiche sur ordinateur (le detail de l'appli ecrit dans
+//   la page), recherche et filtres au kit. APP 8.57 -> 8.58.
+// v9.35 (08/10/2026) — PHYTO-1 (§285) : le registre phyto en liste + fiche sur ordinateur (mentions deja tenues par l'appli),
+//   bouton Saisir un traitement, saisie au kit. APP 8.56 -> 8.57.
+// v9.34 (08/10/2026) — TRAC-3 (§284) : heures (chrono, sinon bareme) et GNR (conso reglee, 6 L/h par defaut) d'une session,
+//   4e chiffre de la bande, bouton Demarrer une session sur ordinateur, fenetres du Tracteur a la charte. APP 8.55 -> 8.56.
+// v9.33 (08/10/2026) — TRAC-2 (§283) : l'Entretien du Tracteur sur deux colonnes (machines et cuve a gauche), cartes et
+//   boutons a la charte. APP 8.54 -> 8.55.
+// v9.32 (08/10/2026) — TRAC-1 (§282) : les sessions du Tracteur en liste + fiche sur ordinateur (fiche resume, bouton vers
+//   la feuille de travail), chiffres en bande, filtres segmentes. APP 8.53 -> 8.54.
+// v9.31 (08/10/2026) — PLAN-3 (§281) : les feuilles du Planning (conges, chaleur, journee, fiche) et le recapitulatif
+//   annuel a la charte. APP 8.52 -> 8.53.
+// v9.30 (08/10/2026) — PLAN-2 (§280) : Planning « Les gens » en liste + fiche sur ordinateur (la fiche de l'appli rangee
+//   dans la page), lignes de liste, en-tete de fiche clair. APP 8.51 -> 8.52.
+// v9.29 (08/10/2026) — PLAN-1 (§279) : le Planning « Le mois » au dessin de la maquette v5 (outils en une ligne, chiffres en
+//   bande, grille a plat teintee par type, barre du bas sombre). APP 8.50 -> 8.51.
+// v9.28 (08/10/2026) — ACC-3 (§278) : meteo 5 jours (jour en tete, colonnes, risque de pluie) et derniers travaux (fil par
+//   jour) au dessin de la maquette v4. APP 8.49 -> 8.50.
+// v9.27 (08/10/2026) — ACC-2 (§277) : la priorite epinglee de l'Accueil en carte (tache, avancement, parcelles a leur
+//   surface, chiffres du domaine, equipes du jour) ; avancement de la saison au cadre neutre. APP 8.48 -> 8.49.
+// v9.26 (08/10/2026) — ACC-1 (§276) : l'Accueil en grille de 12 colonnes (7 / 5 en alternance), cadre commun des blocs,
+//   outils de Personnaliser au dessin du kit ; projection des pistes du cockpit en pointille fin. APP 8.47 -> 8.48.
+// v9.25 (08/10/2026) — PARC-2 (§275) : au telephone, les cartes de travail de la maquette v3 (gestes en bas, etat de la
+//   tache choisie), filtres segmentes ; dock sans cadre autour des icones. APP 8.46 -> 8.47.
+// v9.24 (08/10/2026) — PARC-1 (§274) : sur ordinateur, les Parcelles en liste + fiche (maquette v3), memes gestes,
+//   fleches et touche V, filtres segmentes. APP 8.45 -> 8.46.
+// v9.23 (08/10/2026) — TYPO-2 (§273) : l'echelle de texte de la maquette v2 (13 / 16 / 24 / 28 / 32, etiquette a 12) ;
+//   508 tailles ecrites en dur passees au jeton sans changer leur rendu, 750 replis recales. APP 8.44 -> 8.45.
+// v9.22 (08/10/2026) — TETE-1 (§272) : en-tetes de module et bandeau du Pilotage sur la surface, onglets soulignes,
+//   sous-onglets en filtre segmente, contenu pose en panneau a cote de la barre. APP 8.43 -> 8.44.
+// v9.21 (08/10/2026) — COQ-2 (§271) : la barre laterale, la recherche Ctrl K et le dock au dessin de la maquette v2 (fond neutre,
+//   marque en tete, bouton de repli sur la ligne de la personne, touche [, actions dans la recherche). APP 8.42 -> 8.43.
+// v9.20 (08/10/2026) — DS-4 (§270) : la charte de la maquette v2 (fonds neutres, arrondis 6/8/12, ombres légères, rôles accent et
+//   états), le cockpit Aujourd'hui habillé avec elle (renvois de couleurs, titres en Outfit). APP 8.41 -> 8.42.
 // v9.19 (08/10/2026) — PRO-1 (§269) : barre laterale a sa vraie largeur (contenu plus recouvert), cockpit (priorite, agrandir,
 //   objectif, courbe, plan, cases vides), consommation mesuree refaite, tension et protection retrouvees. APP 8.40 -> 8.41.
 // v9.18 (07/10/2026) — COQ-1 + PAL-1 (§268) : barre laterale et recherche Ctrl K sur ordinateur (src/coquille.js). APP 8.39 -> 8.40.
@@ -4365,7 +4423,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.19';
+const CACHE_NAME   = 'mavigne-v9.48';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4381,7 +4439,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.19 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.48 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4401,7 +4459,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.19 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.48 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

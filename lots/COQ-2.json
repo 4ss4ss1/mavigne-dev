@@ -1,0 +1,30 @@
+{
+  "lot": "COQ-2",
+  "section": "§271",
+  "base": "b80419d0f2f64bb3e2587a5b4f752dea1257f21c",
+  "inclut": [
+    "DS-4"
+  ],
+  "date": "2026-10-08",
+  "fichiers": {
+    "CLAUDE.md": "5cc6d33376b9a3627ae4507f0fe867be0e8b783de5b9a4eadea72f52f40b046d",
+    "docs/claude/INDEX.md": "8a5a92f6443d46fe5b3f4a7b07d24de479dd0b89bb73709198cf414471611dd7",
+    "docs/claude/chantiers-230-279.md": "27046905e3b1e6dd8d5c9c505e5ba44511168a71520a56618a618c7584c87ea9",
+    "docs/claude/journal.md": "9a1c37e09e74584c70ae717f90444b7f43b79d7691a3f7a00171b06b809cad8a",
+    "guide/01-demarrer.html": "96b2dea61478d5e031124f6a846a985d8a162772d3ff2a529776a5b0bd335540",
+    "index.html": "9a2f2ad413c02e01e63b2522ea9503cf2449b03f0f0a3f91ed446e5739119f04",
+    "public/sw.js": "cf7a4e2783baf50022b56202c09630d06e2b7484e7b9a22411585bbcfb89bdf6",
+    "scripts/mv-harnais-contraste.mjs": "1af144eace405a7e9f54f4f48a6678e169f6291cc368c2ccdbe1e8dbcea86027",
+    "scripts/mv-harnais-coq1.mjs": "81019052589da9cfc964e8086511cff2bc460c91c7be8899d1241bec793139a6",
+    "scripts/mv-harnais-jetons.mjs": "5f91521b08a2ae58e96e573cdbcbaabcf8bface2825bbfa49193278d02784f66",
+    "scripts/mv-harnais-liste.mjs": "d579cb8196aabd8d530146250cefd852da8810acf9fced49b413fe979fe3f4dd",
+    "scripts/mv-harnais-ref1.mjs": "cb7df8a84050363c2567bc0a5e1bad7d73db96e4d53845677d415cacd6407f17",
+    "scripts/mv-jetons-baseline.json": "c991ce482bc585f84f63ea43a6df8365d3af5eeada38dfca35876a2f5d0e519a",
+    "scripts/typo-baseline.json": "3c0d8b1e290829664c2e8038de407def502b1a588454b2cfb62ad25fbaae55b2",
+    "src/cave.js": "fbd983cb8b8262da8ac7c7e1472c666ff819f8612e79955f540faea2b7baefb2",
+    "src/coquille.js": "535526e2f61ca80b982ddd9a54a970570cf8cac5918f4d6605c908ee25394a7f",
+    "src/styles.css": "eaf8b41ca9e508f544d0bf585445018aec75baa199e1db8d5e35fdd32c13f655",
+    "src/utils.js": "569c0148150705747a14f145a7f5d3e8698046607724262b964a04b6b6a02856",
+    "scripts/mv-harnais-coq2.mjs": "3f35f063424916b115311bf6b82e96ebe53f834be3f22b45ee0945c4df4f3e35"
+  }
+}

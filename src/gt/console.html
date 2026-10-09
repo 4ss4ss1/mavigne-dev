@@ -34,7 +34,7 @@
     </div>
   </div>
   <div class="agt-body" id="agt-body">
-    <div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.3);font-family:Outfit,sans-serif;font-size:13px">Chargement&hellip;</div>
+    <div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.3);font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px)">Chargement&hellip;</div>
   </div>
   <div class="agt-bottom-bar" id="agt-bottom-bar">
     <div class="agt-bottom-inner">
@@ -53,9 +53,9 @@
     <div style="font-size:30px;margin-bottom:10px">&#128274;</div>
     <div style="font-size:15px;font-weight:600;color:#E8E8E0;margin-bottom:5px">Session verrouill&#233;e</div>
     <div id="agt-lock-why" style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.4);line-height:1.6;margin-bottom:16px">Panneau GUERETTECH rest&#233; inactif. Saisissez votre mot de passe pour reprendre.</div>
-    <input id="agt-lock-pwd" type="password" autocomplete="current-password" placeholder="Mot de passe" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:10px;padding:11px 12px;color:#F0E8DC;font-size:16px;font-family:Outfit,sans-serif;box-sizing:border-box;margin-bottom:10px">
+    <input id="agt-lock-pwd" type="password" autocomplete="current-password" placeholder="Mot de passe" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:10px;padding:11px 12px;color:#F0E8DC;font-size:var(--pt-sm,16px);font-family:Outfit,sans-serif;box-sizing:border-box;margin-bottom:10px">
     <div id="agt-lock-err" style="display:none;font-size:var(--pt-micro,12px);color:#FCA5A5;margin-bottom:10px"></div>
-    <button id="agt-lock-btn" onclick="agtUnlock()" style="width:100%;background:#C9A84C;border:none;border-radius:10px;padding:11px;color:#0C1A0A;font-size:13px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;margin-bottom:8px">D&#233;verrouiller</button>
+    <button id="agt-lock-btn" onclick="agtUnlock()" style="width:100%;background:#C9A84C;border:none;border-radius:10px;padding:11px;color:#0C1A0A;font-size:var(--pt-txt,13px);font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;margin-bottom:8px">D&#233;verrouiller</button>
     <button onclick="agtLockOut()" style="width:100%;background:none;border:none;color:rgba(255,255,255,0.35);font-size:var(--pt-micro,12px);cursor:pointer;font-family:Outfit,sans-serif;padding:6px">Fermer la session</button>
   </div>
 </div>

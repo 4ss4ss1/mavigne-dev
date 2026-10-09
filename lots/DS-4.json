@@ -1,0 +1,21 @@
+{
+  "lot": "DS-4",
+  "section": "§270",
+  "base": "b80419d0f2f64bb3e2587a5b4f752dea1257f21c",
+  "inclut": [],
+  "date": "2026-10-08",
+  "fichiers": {
+    "CLAUDE.md": "0ab9a75f077cfc3b42c6307f45f0a7e2731138a96ae4e247ae224bb56692df88",
+    "docs/claude/INDEX.md": "ed69b86a17cb9d1b81e5e6c8b2833abfe1cd96d9db346707ee936dfba140949c",
+    "docs/claude/chantiers-230-279.md": "4bb42575b0b4c1e9cb05224702bc16b49d31be8fb2d6f4edd3a6f4030a1d9eb9",
+    "docs/claude/journal.md": "e2d33e1ec1941eab3531f82c57f8bf80afce13fbc6e723e8eadda35bc476eda1",
+    "index.html": "031dbb7a25032f04002fcad4b892332eef2b82e128ea55dcc443a31ad135ac65",
+    "public/sw.js": "bcd6a8371d4d071d22ade245b62ba780297c96752d4906a621f691f8e164f035",
+    "scripts/mv-harnais-contraste.mjs": "1af144eace405a7e9f54f4f48a6678e169f6291cc368c2ccdbe1e8dbcea86027",
+    "scripts/mv-harnais-jetons.mjs": "fd6dea87b9cd9962c526baf435c2dff9fe213e66117c6347d93729bdbca14855",
+    "scripts/mv-harnais-ref1.mjs": "cb7df8a84050363c2567bc0a5e1bad7d73db96e4d53845677d415cacd6407f17",
+    "src/cave.js": "fbd983cb8b8262da8ac7c7e1472c666ff819f8612e79955f540faea2b7baefb2",
+    "src/styles.css": "c1b563dae8f465daae1c562de7e1e6473f747ef6de8fbf52f6f1df33c356a281",
+    "src/utils.js": "0ed24f821c27647bba6eadab3a11e2758853f907288c154c0d1bb4489dd5d00f"
+  }
+}

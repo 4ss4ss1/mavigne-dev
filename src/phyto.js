@@ -49,6 +49,11 @@ function _phytoSyncTabs(){
     var adm=false; try{ adm=(typeof window.isAdmin==='function'&&window.isAdmin()); }catch(e){ adm=false; }
     fab.style.display=(isFer?adm:(!isCat&&canW))?'flex':'none';
   }
+  // PHYTO-1 (§285) : sur le Registre, la page passe en liste + fiche (CSS .ph-reg-on) et « Saisir un traitement » se montre
+  //   pour qui peut saisir (le bouton flottant se cache sur ordinateur, CSS).
+  var _pg=document.getElementById('page-phyto'); if(_pg)_pg.classList.toggle('ph-reg-on',!(isCat||isFer));
+  // PHYTO-3 (§287) : le même bouton sert la Fertilisation (_phytoFab choisit selon l'onglet) — l'amendement est réservé à l'admin.
+  var _nb=document.getElementById('ph-new-btn'); if(_nb){ _nb.textContent=isFer?'Saisir un amendement':'Saisir un traitement'; _nb.style.display=(isCat?false:(isFer?isAdmin():(isAdmin()||isTractoriste())))?'':'none'; }
 }
 
 // Action utilisateur : bascule d'onglet (remplace les 3 boutons du bas de l'ancien panneau Tracteur).
@@ -80,7 +85,7 @@ function openCatDetail(nom){
       <div class="ov-hd"><div class="ov-title" id="ocd-title"></div><div class="ov-close" onclick="closeOv(null,'${ovId}')">${_mvIcon('croix',18)}</div></div>
       <div id="ocd-body" style="padding:0 20px 20px;overflow-y:auto;max-height:70vh"></div>
       <div style="padding:16px 20px">
-        <button class="mbtn" onclick="closeOv(null,'${ovId}')" style="width:100%;font-family:Outfit,sans-serif;font-size:13px;padding:12px;border-radius:12px;border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-doux);cursor:pointer">Fermer</button>
+        <button class="mbtn" onclick="closeOv(null,'${ovId}')" style="width:100%;font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px);padding:12px;border-radius:12px;border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-doux);cursor:pointer">Fermer</button>
       </div>
     </div>`;
     document.body.appendChild(ov);
@@ -96,7 +101,7 @@ function openCatDetail(nom){
       </div>
       <div style="background:var(--gris-clair);border-radius:12px;padding:12px">
         <div style="font-size:9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600">N° AMM</div>
-        <div style="font-size:13px;font-weight:700;margin-top:4px;font-family:monospace">${p.amm}</div>
+        <div style="font-size:var(--pt-txt,13px);font-weight:700;margin-top:4px;font-family:monospace">${p.amm}</div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
@@ -118,11 +123,11 @@ function openCatDetail(nom){
     </div>
     <div style="background:var(--gris-clair);border-radius:12px;padding:14px;margin-bottom:12px">
       <div style="font-size:9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600;margin-bottom:6px">Dose indicative</div>
-      <div style="font-size:16px;font-weight:700">${p.dose}</div>
+      <div style="font-size:var(--pt-sm,16px);font-weight:700">${p.dose}</div>
     </div>
     ${p.cible?`<div style="background:var(--vert-pale);border-radius:12px;padding:14px;margin-bottom:12px">
       <div style="font-size:9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600;margin-bottom:6px">Cibles</div>
-      <div style="font-size:13px;font-weight:600;color:var(--vert)">${p.cible}</div>
+      <div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--vert)">${p.cible}</div>
     </div>`:''}
     ${p.usage?`<div style="background:var(--tag-amber-bg,#FFF8E8);border:1.5px solid #E8C840;border-radius:12px;padding:14px">
       <div style="font-size:9px;text-transform:uppercase;color:var(--tag-amber-tx,#7A5C10);font-weight:600;margin-bottom:6px">Conditions d'emploi</div>
@@ -244,10 +249,10 @@ function _tratResultRow(m, section, i){
       :' <span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;background:rgba(192,57,43,0.18);color:#E07A6E">&#x26d4; Retir&#xe9;</span>'):'';
   return '<div onclick="window._tratPick('+i+')" style="display:flex;align-items:center;gap:9px;padding:10px 11px;border-radius:10px;cursor:pointer;margin-bottom:6px;background:'+(sel?'rgba(74,159,200,0.12)':'var(--bg-card)')+';border:1.5px solid '+(sel?'var(--acier-med)':'var(--gris)')+';'+(ko?'opacity:.6':'')+'">'
     +'<div style="flex:1;min-width:0">'
-    +'<div style="font-size:13px;font-weight:'+(isE?'600':'700')+';color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(T[m.type]||'')+' '+_escHtml(m.nom)+'</div>'
+    +'<div style="font-size:var(--pt-txt,13px);font-weight:'+(isE?'600':'700')+';color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(T[m.type]||'')+' '+_escHtml(m.nom)+'</div>'
     +'<div style="font-size:10px;color:var(--texte-doux);margin-top:1px">'+_escHtml(m.type||'')+(m.sub?' &#x00B7; '+_escHtml(m.sub):'')+'</div>'
     +'<div style="margin-top:4px;line-height:1.8">'+minis+stat+'</div>'
-    +'</div><span style="color:var(--acier-med);font-size:var(--pt-sm,17px);font-weight:700">+</span></div>';
+    +'</div><span style="color:var(--acier-med);font-size:var(--pt-sm,16px);font-weight:700">+</span></div>';
 }
 function _tratSelectedHtml(){
   var m=_trat.selMeta; if(!m) return '';
@@ -265,12 +270,12 @@ function _tratSelectedHtml(){
     +'<div style="background:var(--gris-clair);border-radius:8px;padding:7px;text-align:center"><div style="font-size:9px;color:var(--texte-doux);text-transform:uppercase;font-weight:600">DRE</div><div style="font-size:18px;font-weight:700;font-family:&#39;Cormorant Garamond&#39;,serif;color:'+((m.drae||0)>0?'var(--orange)':'var(--vert-med)')+'">'+(m.drae||0)+'h</div></div>'
     +'<div style="background:var(--gris-clair);border-radius:8px;padding:7px;text-align:center"><div style="font-size:9px;color:var(--texte-doux);text-transform:uppercase;font-weight:600">ZNT</div><div style="font-size:18px;font-weight:700;font-family:&#39;Cormorant Garamond&#39;,serif;color:'+(m.znt>5?'var(--rouge)':'var(--texte)')+'">'+(m.znt!=null?m.znt+'m':'&#8212;')+'</div></div>'
     +'</div>'
-    +'<input id="trat-dose-input" type="text" placeholder="'+ph+'" value="'+_escHtml(m.dose||'')+'" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px;margin-bottom:9px">'
+    +'<input id="trat-dose-input" type="text" placeholder="'+ph+'" value="'+_escHtml(m.dose||'')+'" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px);margin-bottom:9px">'
     +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">Dose/ha</span>'
-    +'<input id="trat-doseval-input" type="number" step="0.01" inputmode="decimal" placeholder="ex. 1.5" value="'+dvPre+'" style="flex:1;min-width:0;padding:9px 10px;border-radius:9px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px">'
-    +'<select id="trat-doseunit-input" style="padding:9px 8px;border-radius:9px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px">'+uOpts+'</select></div>'
+    +'<input id="trat-doseval-input" type="number" step="0.01" inputmode="decimal" placeholder="ex. 1.5" value="'+dvPre+'" style="flex:1;min-width:0;padding:9px 10px;border-radius:9px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px)">'
+    +'<select id="trat-doseunit-input" style="padding:9px 8px;border-radius:9px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px)">'+uOpts+'</select></div>'
     +'<div style="font-size:10px;color:var(--texte-doux);margin-bottom:9px;line-height:1.4">&#x1F4E6; Quantit&#xe9; r&#xe9;elle appliqu&#xe9;e &#8212; alimente le bilan mati&#xe8;re de La R&#xe9;serve.</div>'
-    +'<button onclick="window._tratAddSel()" style="width:100%;padding:12px;border-radius:10px;border:none;background:var(--acier);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;min-height:44px"><span>+ Ajouter ce produit</span></button>'
+    +'<button onclick="window._tratAddSel()" style="width:100%;padding:12px;border-radius:10px;border:none;background:var(--acier);color:#fff;font-size:var(--pt-txt,13px);font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;min-height:44px"><span>+ Ajouter ce produit</span></button>'
     +'</div>';
 }
 function _tratAddZoneHtml(){
@@ -320,7 +325,7 @@ function _tratCuFieldHtml(p,i){
   var hint=(pct!=null?'base ~'+pct+'% Cu, ajustable':'kg de cuivre m&#xe9;tal apport&#xe9;');
   return '<div style="margin-top:7px;display:flex;align-items:center;gap:8px;background:rgba(165,107,58,0.1);border:1px solid rgba(165,107,58,0.28);border-radius:8px;padding:6px 9px">'
     +'<span style="font-size:var(--pt-micro,11px);font-weight:700;color:#A56B3A;white-space:nowrap">&#x1FA99; Cuivre m&#xe9;tal</span>'
-    +'<input id="trat-cu-'+i+'" type="number" step="0.05" inputmode="decimal" value="'+v+'" oninput="window._tratSetCu('+i+',this.value)" style="width:74px;padding:5px 7px;border-radius:7px;border:1.5px solid rgba(165,107,58,0.4);background:var(--bg-card);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px;text-align:center">'
+    +'<input id="trat-cu-'+i+'" type="number" step="0.05" inputmode="decimal" value="'+v+'" oninput="window._tratSetCu('+i+',this.value)" style="width:74px;padding:5px 7px;border-radius:7px;border:1.5px solid rgba(165,107,58,0.4);background:var(--bg-card);color:var(--texte);font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px);text-align:center">'
     +'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">kg/ha</span>'
     +'<span style="font-size:10px;color:var(--texte-doux);flex:1;text-align:right">'+hint+'</span>'
     +'</div>';
@@ -367,10 +372,10 @@ function _tratParcRowsHtml(){var allParc=_tratParcAll();return allParc.map(funct
         var abBadge=p.ab?'<span style="font-size:9px;background:rgba(64,192,128,0.15);color:#40C080;border-radius:5px;padding:1px 5px;font-weight:700;margin-left:5px">AB</span>':'';
         var pnEsc=p.nom.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
         return '<div onclick="window._tratToggleParc(\''+pnEsc+'\')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;margin-bottom:8px;cursor:pointer;background:'+(sel?'rgba(61,122,39,0.1)':'var(--bg-card)')+';border:1.5px solid '+(sel?'var(--vert)':'var(--gris)')+';min-height:52px">'
-          +'<div style="width:22px;height:22px;border-radius:6px;background:'+(sel?'var(--vert)':'transparent')+';border:2px solid '+(sel?'var(--vert)':'var(--gris)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(sel?'<span style="color:#fff;font-size:13px;font-weight:700">&#x2713;</span>':'')+'</div>'
+          +'<div style="width:22px;height:22px;border-radius:6px;background:'+(sel?'var(--vert)':'transparent')+';border:2px solid '+(sel?'var(--vert)':'var(--gris)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(sel?'<span style="color:#fff;font-size:var(--pt-txt,13px);font-weight:700">&#x2713;</span>':'')+'</div>'
           +'<div style="flex:1"><div style="font-size:15px;font-family:\'Cormorant Garamond\',serif;font-weight:600;color:'+(sel?'var(--texte)':'var(--texte-doux)')+'">'+_escHtml(p.nom)+abBadge+'</div>'
           +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+window._mvHaP(p.surface)+' ha</div></div>'
-          +'<div style="font-size:13px;font-weight:700;color:'+(getPCls(p).pct===100?'var(--vert)':getPCls(p).pct>=75?'var(--or)':'var(--orange)')+'">'+getPCls(p).pct+'%</div>'
+          +'<div style="font-size:var(--pt-txt,13px);font-weight:700;color:'+(getPCls(p).pct===100?'var(--vert)':getPCls(p).pct>=75?'var(--or)':'var(--orange)')+'">'+getPCls(p).pct+'%</div>'
           +'</div>';
       }).join('');}
 function _tratRenderParcList(){
@@ -398,7 +403,7 @@ function _tratCuBudgetHtml(){
   var col=function(v){var r=v/CU_MAX;return r>1?'#C0392B':(r>=0.875?'#B8621A':(r>=0.75?'#C9A84C':'#3D7A27'));};
   var f1=function(v){return v.toFixed(1).replace('.',',');};
   var h='<div style="background:rgba(26,74,122,0.05);border:1.5px solid rgba(26,74,122,0.25);border-radius:12px;padding:14px;margin-bottom:14px">'
-    +'<div style="font-size:13px;font-weight:700;color:#1A4A7A;margin-bottom:3px">&#x1F535; Budget cuivre m&#xe9;tal &#x00B7; bio</div>'
+    +'<div style="font-size:var(--pt-txt,13px);font-weight:700;color:#1A4A7A;margin-bottom:3px">&#x1F535; Budget cuivre m&#xe9;tal &#x00B7; bio</div>'
     +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:12px">Plafond '+CU_MAX+'&#x202F;kg Cu/ha sur 7 ans ('+CU_AN+' kg/ha/an en moyenne). Ce traitement apporte <b style="color:#1A4A7A">+'+f1(add)+'&#x202F;kg/ha</b>.</div>';
   rows.forEach(function(r){
     var c=col(r.proj),pct=Math.min(100,r.proj/CU_MAX*100),pctNow=Math.min(100,r.cur/CU_MAX*100);
@@ -412,9 +417,9 @@ function _tratCuBudgetHtml(){
     +'</div>';
   });
   if(over.length){
-    h+='<div style="font-size:var(--pt-lbl,11.5px);color:var(--rouge);background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.25);border-radius:8px;padding:9px 11px;margin-top:4px;line-height:1.5">&#x26A0;&#xFE0F; D&#xe9;passement du plafond '+CU_MAX+'&#x202F;kg/ha sur '+over.length+' parcelle'+(over.length>1?'s':'')+' : '+_escHtml(over.map(function(r){return r.nom;}).join(', '))+'. Le traitement <b>reste enregistrable</b> &#x2014; le d&#xe9;passement est consign&#xe9; au registre ; v&#xe9;rifier la d&#xe9;rogation applicable.</div>';
+    h+='<div style="font-size:var(--pt-lbl,12px);color:var(--rouge);background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.25);border-radius:8px;padding:9px 11px;margin-top:4px;line-height:1.5">&#x26A0;&#xFE0F; D&#xe9;passement du plafond '+CU_MAX+'&#x202F;kg/ha sur '+over.length+' parcelle'+(over.length>1?'s':'')+' : '+_escHtml(over.map(function(r){return r.nom;}).join(', '))+'. Le traitement <b>reste enregistrable</b> &#x2014; le d&#xe9;passement est consign&#xe9; au registre ; v&#xe9;rifier la d&#xe9;rogation applicable.</div>';
   } else {
-    h+='<div style="font-size:var(--pt-lbl,11.5px);color:var(--vert);background:rgba(61,122,39,0.08);border:1px solid rgba(61,122,39,0.25);border-radius:8px;padding:9px 11px;margin-top:4px">&#x2705; Conforme &#x2014; toutes les parcelles restent sous '+CU_MAX+'&#x202F;kg/ha sur 7 ans.</div>';
+    h+='<div style="font-size:var(--pt-lbl,12px);color:var(--vert);background:rgba(61,122,39,0.08);border:1px solid rgba(61,122,39,0.25);border-radius:8px;padding:9px 11px;margin-top:4px">&#x2705; Conforme &#x2014; toutes les parcelles restent sous '+CU_MAX+'&#x202F;kg/ha sur 7 ans.</div>';
   }
   return h+'</div>';
 }
@@ -452,7 +457,7 @@ function _tratRender(){
           if(c.heureOblig||c.type==='Insecticide')warns+='<span style="font-size:10px;color:var(--or)">&#x1F550; horaires conseill&#xe9;s</span> ';
           if(c.drae>0)warns+='<span style="font-size:10px;color:var(--orange)">DRE '+c.drae+'h</span>';
           return '<div style="display:flex;align-items:center;gap:10px;background:var(--gris-clair);border-radius:10px;padding:10px 12px;margin-bottom:6px">'
-            +'<div style="flex:1"><div style="font-size:13px;font-weight:700">'+_escHtml(p.nom)+'</div>'
+            +'<div style="flex:1"><div style="font-size:var(--pt-txt,13px);font-weight:700">'+_escHtml(p.nom)+'</div>'
             +(p.dose?'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_escHtml(p.dose)+'</div>':'')
             +(p.dose_val!=null?'<div style="font-size:var(--pt-micro,11px);color:#A56B3A;font-weight:600">&#x1F4E6; '+p.dose_val+' '+_escHtml(p.dose_unit||'')+'</div>':'')
             +(warns?'<div style="margin-top:3px">'+warns+'</div>':'')+(c.type==='Cuivre'?_tratCuFieldHtml(p,i):'')+'</div>'
@@ -471,14 +476,14 @@ function _tratRender(){
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:8px">+ Ajouter un produit</div>'
       +'<div style="position:relative;margin-bottom:10px">'
       +'<span style="position:absolute;left:11px;top:11px;font-size:var(--pt-base,14px);pointer-events:none">&#x1F50D;</span>'
-      +'<input id="trat-q" type="text" oninput="window._tratSearch(this.value)" autocomplete="off" placeholder="Vos produits + catalogue E-Phy ANSES&#x2026;" value="'+_escHtml(_trat.q||'')+'" style="width:100%;padding:11px 12px 11px 34px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px">'
+      +'<input id="trat-q" type="text" oninput="window._tratSearch(this.value)" autocomplete="off" placeholder="Vos produits + catalogue E-Phy ANSES&#x2026;" value="'+_escHtml(_trat.q||'')+'" style="width:100%;padding:11px 12px 11px 34px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px)">'
       +'<button id="trat-q-clr" onclick="window._tratQClear()" style="position:absolute;right:6px;top:6px;width:30px;height:30px;border:none;background:transparent;color:var(--texte-doux);cursor:pointer;display:'+(_trat.q?'block':'none')+'"><span>&#x2715;</span></button>'
       +'</div>'
       +'<div id="trat-add-zone">'+_tratAddZoneHtml()+'</div>'
       +'</div>';
     var dateHtml='<div style="margin-bottom:14px">'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Date du traitement</div>'
-      +'<input id="trat-date" type="date" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px">'
+      +'<input id="trat-date" type="date" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px)">'
       +'</div>';
     var conds=_conducteursDispo().filter(function(c){return c.statut!=='Archivé';});
     var condHtml='<div style="margin-bottom:14px">'
@@ -486,7 +491,7 @@ function _tratRender(){
       +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
       +conds.map(function(c){
         var sel=_trat.conducteur===c.nom;
-        return '<div onclick="window._tratSetConducteur(\''+c.nom.replace(/'/g,"\\'")+'\')" style="padding:10px 16px;border-radius:10px;cursor:pointer;background:'+(sel?'var(--acier)':'var(--bg-card)')+';border:1.5px solid '+(sel?'var(--acier-med)':'var(--gris)')+';color:'+(sel?'#fff':'var(--texte-doux)')+';font-size:13px;font-weight:600;min-height:44px;display:flex;align-items:center">'+_escHtml(c.nom)+'</div>';
+        return '<div onclick="window._tratSetConducteur(\''+c.nom.replace(/'/g,"\\'")+'\')" style="padding:10px 16px;border-radius:10px;cursor:pointer;background:'+(sel?'var(--acier)':'var(--bg-card)')+';border:1.5px solid '+(sel?'var(--acier-med)':'var(--gris)')+';color:'+(sel?'#fff':'var(--texte-doux)')+';font-size:var(--pt-txt,13px);font-weight:600;min-height:44px;display:flex;align-items:center">'+_escHtml(c.nom)+'</div>';
       }).join('')+'</div></div>';
     /* ★ window.STADES_PHENO : la liste est déclarée dans app.js. Lue au nom nu,
        Rollup la renommait puis le tree-shaking la supprimait — ce bouton ouvrait
@@ -499,17 +504,17 @@ function _tratRender(){
     var rglHtml='<div style="background:rgba(74,158,224,0.05);border:1.5px solid rgba(74,158,224,0.2);border-radius:12px;padding:14px;margin-bottom:14px">'
       +'<div style="font-size:var(--pt-micro,12px);font-weight:700;color:var(--ink-info,#4A9EE0);margin-bottom:12px">&#x1F4CB; Champs r&#xe9;glementaires obligatoires</div>'
       +'<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">'+reqStadeLabel+'</div>'
-      +'<select id="trat-stade" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px;appearance:none">'
+      +'<select id="trat-stade" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px);appearance:none">'
       +'<option value="">S&#xe9;lectionner le stade&#x2026;</option>'+stadeOpts+'</select></div>'
       +'<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">'+reqHeureLabel+'</div>'
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
       +'<div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:4px">D&#xe9;but</div>'
-      +'<input id="trat-hd" type="time" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px"></div>'
+      +'<input id="trat-hd" type="time" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px)"></div>'
       +'<div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:4px">Fin</div>'
-      +'<input id="trat-hf" type="time" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px"></div>'
+      +'<input id="trat-hf" type="time" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px)"></div>'
       +'</div></div>'
       +'<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">DRE anticip&#xe9; (si rentr&#xe9;e avant d&#xe9;lai standard)</div>'
-      +'<input id="trat-dre" type="text" placeholder="Ex : 6h &#x2014; justification agronomique" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px"></div>'
+      +'<input id="trat-dre" type="text" placeholder="Ex : 6h &#x2014; justification agronomique" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px)"></div>'
       +'<div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Mode de production</div>'
       +'<div style="display:flex;gap:10px">'
       +'<div onclick="window._tratSetModeAb(false)" style="flex:1;padding:10px 12px;border-radius:10px;cursor:pointer;text-align:center;background:'+(!_trat.modeAb?'var(--acier)':'var(--bg-card)')+';border:1.5px solid '+(!_trat.modeAb?'var(--acier-med)':'var(--gris)')+';color:'+(!_trat.modeAb?'#fff':'var(--texte-doux)')+';font-size:var(--pt-micro,12px);font-weight:600;min-height:44px;display:flex;align-items:center;justify-content:center">&#x1F33E; Conventionnel</div>'
@@ -517,7 +522,7 @@ function _tratRender(){
       +'</div></div></div>';
     var noteHtml='<div style="margin-bottom:14px">'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Observations (optionnel)</div>'
-      +'<input id="trat-note" type="text" placeholder="Conditions m&#xe9;t&#xe9;o, stade v&#xe9;g&#xe9;tatif compl&#xe9;mentaire&#x2026;" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px">'
+      +'<input id="trat-note" type="text" placeholder="Conditions m&#xe9;t&#xe9;o, stade v&#xe9;g&#xe9;tatif compl&#xe9;mentaire&#x2026;" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px)">'
       +'</div>';
     bodyHtml=prodsHtml+addHtml+dateHtml+condHtml+rglHtml+noteHtml;
 
@@ -525,7 +530,7 @@ function _tratRender(){
   } else if(step===2){
     var allParc=PARCELLES.filter(function(p){return p.statut!=='Arrachee';});
     bodyHtml='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
-      +'<div id="trat-parc-count" style="font-size:13px;color:var(--texte-doux)">'+_tratParcCountTxt()+'</div>'
+      +'<div id="trat-parc-count" style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">'+_tratParcCountTxt()+'</div>'
       +'<div style="display:flex;gap:8px">'
       +'<button onclick="window._tratAllParc()" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--gris);background:transparent;color:var(--or);font-size:var(--pt-micro,12px);font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;min-height:44px"><span>Tout</span></button>'
       +'<button onclick="window._tratNoneParc()" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--gris);background:transparent;color:var(--texte-doux);font-size:var(--pt-micro,12px);cursor:pointer;font-family:Outfit,sans-serif;min-height:44px"><span>Aucune</span></button>'
@@ -547,7 +552,7 @@ function _tratRender(){
       return '<span style="font-size:var(--pt-micro,11px);background:var(--gris-clair);border-radius:6px;padding:3px 8px">'+_escHtml(nom)+'</span>';
     }).join(' ');
     var recapHtml='<div style="background:rgba(61,122,39,0.08);border:1.5px solid rgba(61,122,39,0.3);border-radius:12px;padding:14px;margin-bottom:14px">'
-      +'<div style="font-size:13px;font-weight:700;color:var(--vert);margin-bottom:10px">&#x1F33F; Traitement &#x00B7; '+fmtDate(_trat.date)+' &#x00B7; '+_escHtml(_trat.conducteur||'—')+'</div>'
+      +'<div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--vert);margin-bottom:10px">&#x1F33F; Traitement &#x00B7; '+fmtDate(_trat.date)+' &#x00B7; '+_escHtml(_trat.conducteur||'—')+'</div>'
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">'
       +rcells.map(function(f){
         return '<div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:8px 10px">'
@@ -573,7 +578,7 @@ function _tratRender(){
         var hRow=_trat.heureDebut?'<div style="font-size:var(--pt-micro,11px);color:var(--or);margin-top:2px">&#x1F550; '+_escHtml(_trat.heureDebut)+'–'+_escHtml(_trat.heureFin||'?')+'</div>':'';
         return '<div style="background:var(--bg-card);border:1.5px solid var(--gris);border-radius:10px;padding:12px 14px;margin-bottom:8px">'
           +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
-          +'<div style="flex:1"><div style="font-size:13px;font-weight:700">'+_escHtml(p.nom)+abBadge+draeBadge+'</div>'
+          +'<div style="flex:1"><div style="font-size:var(--pt-txt,13px);font-weight:700">'+_escHtml(p.nom)+abBadge+draeBadge+'</div>'
           +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">AMM '+(c.amm?_escHtml(c.amm):'—')+' &#x00B7; Dose : '+_escHtml(p.dose||c.dose||'—')+(p.dose_val!=null?' &#x00B7; <span style="color:#A56B3A;font-weight:600">'+p.dose_val+' '+_escHtml(p.dose_unit||'')+'</span>':'')+'</div>'
           +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_trat.parcelles.length+' parc. &#x00B7; '+window._mvHaT(surfSel)+' ha &#x00B7; '+_escHtml(_trat.conducteur||'—')+'</div>'
           +stRow+hRow+'</div>'
@@ -737,32 +742,32 @@ function openTraitDetail(idx){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
       <div style="background:var(--gris-clair);border-radius:12px;padding:12px">
         <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">Dose</div>
-        <div style="font-size:16px;font-weight:700;margin-top:4px">${m.dose||'—'}</div>
+        <div style="font-size:var(--pt-sm,16px);font-weight:700;margin-top:4px">${m.dose||'—'}</div>
       </div>
       <div style="background:var(--gris-clair);border-radius:12px;padding:12px">
         <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">N° AMM</div>
-        <div style="font-size:13px;font-weight:600;margin-top:4px;font-family:monospace">${m.amm||'—'}</div>
+        <div style="font-size:var(--pt-txt,13px);font-weight:600;margin-top:4px;font-family:monospace">${m.amm||'—'}</div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
       <div style="background:${darR>0?'var(--rouge-pale)':'var(--vert-pale)'};border-radius:12px;padding:12px">
         <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">DAR récolte</div>
-        <div style="font-size:16px;font-weight:700;margin-top:4px;color:${darR>0?'var(--rouge)':'var(--vert)'}">${darR!==null?(darR>0?darR+'j restants':'Libre'):'—'}</div>
+        <div style="font-size:var(--pt-sm,16px);font-weight:700;margin-top:4px;color:${darR>0?'var(--rouge)':'var(--vert)'}">${darR!==null?(darR>0?darR+'j restants':'Libre'):'—'}</div>
       </div>
       <div style="background:${_dre.na?'var(--gris-clair)':(draeR>0?'#FFF3CD':'var(--vert-pale)')};border-radius:12px;padding:12px">
         <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">Délai de réentrée</div>
-        <div style="font-size:16px;font-weight:700;margin-top:4px;color:${_dre.na?'var(--texte-doux)':(draeR>0?'#856404':'var(--vert)')}">${_dre.na?'Non concerné':(draeR>0?draeR+'h restantes':'Libre')}</div>
+        <div style="font-size:var(--pt-sm,16px);font-weight:700;margin-top:4px;color:${_dre.na?'var(--texte-doux)':(draeR>0?'#856404':'var(--vert)')}">${_dre.na?'Non concerné':(draeR>0?draeR+'h restantes':'Libre')}</div>
         ${_dre.defaut&&!_dre.na?'<div style="font-size:9px;color:var(--texte-doux);margin-top:3px">minimum réglementaire</div>':''}
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
       <div style="background:var(--gris-clair);border-radius:12px;padding:12px">
         <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">Substance active</div>
-        <div style="font-size:13px;font-weight:600;margin-top:4px">${_escHtml(m.sub||'—')}</div>
+        <div style="font-size:var(--pt-txt,13px);font-weight:600;margin-top:4px">${_escHtml(m.sub||'—')}</div>
       </div>
       <div style="background:var(--gris-clair);border-radius:12px;padding:12px">
         <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">ZNT</div>
-        <div style="font-size:16px;font-weight:700;margin-top:4px">${m.znt!=null?m.znt+' m':'—'}</div>
+        <div style="font-size:var(--pt-sm,16px);font-weight:700;margin-top:4px">${m.znt!=null?m.znt+' m':'—'}</div>
       </div>
     </div>
     ${t.note?`<div style="background:var(--gris-clair);border-radius:12px;padding:12px;font-size:var(--pt-micro,12px);color:var(--texte-doux);font-style:italic">${_escHtml(t.note)}</div>`:''}
@@ -1122,7 +1127,7 @@ function _phytoExportChoix(cible){
       <div class="ov-hd"><div class="ov-title" id="phx-title">Exporter le registre</div><div class="ov-close" onclick="closeOv(null,'${ovId}')">${_mvIcon('croix',18)}</div></div>
       <div id="phx-body" style="padding:0 20px 20px;overflow-y:auto;max-height:70vh"></div>
       <div style="padding:0 20px 16px">
-        <button class="mbtn" onclick="closeOv(null,'${ovId}')" style="width:100%;font-family:Outfit,sans-serif;font-size:13px;padding:12px;border-radius:12px;border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-doux);cursor:pointer;min-height:44px">Annuler</button>
+        <button class="mbtn" onclick="closeOv(null,'${ovId}')" style="width:100%;font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px);padding:12px;border-radius:12px;border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-doux);cursor:pointer;min-height:44px">Annuler</button>
       </div>
     </div>`;
     document.body.appendChild(ov);
@@ -1389,7 +1394,7 @@ function _ferCss(){
   +'.fer-str{font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F);text-align:right;max-width:50%;line-height:1.45}'
   +'.fer-c.ferme .fer-bd{display:none}.fer-bd{margin-top:10px}'
   +'.fer-h{font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F);line-height:1.5;margin-top:6px}'
-  +'.fer-box{background:var(--acier-pale,#ECF0F4);border-radius:12px;padding:10px 12px;margin-top:10px;font-size:var(--pt-txt,12.5px);line-height:1.55;color:var(--texte-med,#4A4A3A)}'
+  +'.fer-box{background:var(--acier-pale,#ECF0F4);border-radius:12px;padding:10px 12px;margin-top:10px;font-size:var(--pt-txt,13px);line-height:1.55;color:var(--texte-med,#4A4A3A)}'
   +'.fer-box b{color:var(--texte,#1A1A14)}.fer-box.or{background:var(--or-pale,#FAF3E0)}'
   +'.fer-box.al{background:var(--orange-pale,#FBF0E6);border-left:3px solid var(--orange,#B85A1A);color:var(--texte-med,#4A4A3A)}.fer-box.al b{color:var(--texte,#1A1A14)}'
   +'.fer-box.rg{background:var(--rouge-pale,#FAEAE8);border-left:3px solid var(--rouge,#A0291E);color:var(--texte-med,#4A4A3A)}.fer-box.rg b{color:var(--texte,#1A1A14)}'
@@ -1399,7 +1404,7 @@ function _ferCss(){
   +'.fer-rt{font-size:var(--pt-base,14px);font-weight:600;color:var(--texte,#1A1A14)}.fer-rs{font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F)}'
   +'.fer-pl{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--gris-clair,#ECE6DA);cursor:pointer;min-height:44px}'
   +'.fer-pl:last-child{border-bottom:0}'
-  +'.fer-ck{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--gris,#DED7C9);flex:none;display:grid;place-items:center;color:var(--vert-med,#3D6B27);font-size:var(--pt-txt,12.5px)}'
+  +'.fer-ck{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--gris,#DED7C9);flex:none;display:grid;place-items:center;color:var(--vert-med,#3D6B27);font-size:var(--pt-txt,13px)}'
   +'.fer-pl.on .fer-ck{background:var(--vert-pale,#EAF3E2);border-color:var(--vert-med,#3D6B27);color:var(--vert-med,#3D6B27)}'
   +'.fer-pv{text-align:right;font-variant-numeric:tabular-nums;flex:none;font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F);line-height:1.45}'
   +'.fer-pv b{font-size:var(--pt-base,14px);color:var(--texte,#1A1A14);display:block}'
@@ -1409,20 +1414,20 @@ function _ferCss(){
   +'.fer-chip.al{background:var(--orange-pale,#FBF0E6);color:var(--texte,#1A1A14);box-shadow:inset 0 0 0 1px var(--orange,#B85A1A)}.fer-chip.n{background:var(--gris-clair,#ECE6DA);color:var(--texte-med,#4A4A3A)}'
   +'.fer-kp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}'
   +'.fer-k{background:var(--blanc,#FBFAF6);border:1px solid var(--gris-clair,#ECE6DA);border-radius:12px;padding:10px 12px}'
-  +'.fer-kv{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:var(--pt-xl,27px);font-weight:600;line-height:1;font-variant-numeric:tabular-nums;color:var(--texte,#1A1A14)}'
+  +'.fer-kv{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:var(--pt-xl,28px);font-weight:600;line-height:1;font-variant-numeric:tabular-nums;color:var(--texte,#1A1A14)}'
   +'.fer-k.dim .fer-kv{color:var(--texte-doux,#5F5F5F)}.fer-kl{font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F);margin-top:4px}'
   +'.fer-wr{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--gris-clair,#ECE6DA)}.fer-wr:last-child{border-bottom:0}.fer-wr.off{opacity:.55}'
-  +'.fer-wr b{font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--texte,#1A1A14)}.fer-wr small{display:block;font-size:var(--pt-micro,11px);color:var(--texte-med,#4A4A3A);line-height:1.45;margin-top:2px}'
+  +'.fer-wr b{font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte,#1A1A14)}.fer-wr small{display:block;font-size:var(--pt-micro,11px);color:var(--texte-med,#4A4A3A);line-height:1.45;margin-top:2px}'
   +'.fer-seg{display:flex;background:var(--gris-clair,#ECE6DA);border-radius:999px;padding:3px;gap:2px}'
   +'.fer-seg button{flex:1;border:0;background:none;border-radius:999px;padding:8px 6px;font-family:inherit;font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-med,#4A4A3A);cursor:pointer;min-height:36px}'
   +'.fer-seg button.on{background:var(--bg-card,#fff);color:var(--texte,#1A1A14);box-shadow:0 1px 3px rgba(0,0,0,.12)}'
-  +'.fer-tr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--gris-clair,#ECE6DA);font-size:var(--pt-txt,12.5px)}'
+  +'.fer-tr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--gris-clair,#ECE6DA);font-size:var(--pt-txt,13px)}'
   +'.fer-tr:last-child{border-bottom:0}.fer-tr small{display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F)}'
   +'.fer-trk{height:6px;border-radius:99px;background:var(--gris-clair,#ECE6DA);overflow:hidden;margin:10px 0 4px}.fer-fil{height:100%;background:var(--vert-med,#3D6B27);border-radius:99px}'
   +'.fer-cf{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--gris-clair,#ECE6DA)}.fer-cf:last-child{border-bottom:0}'
   +'.fer-ic{width:24px;height:24px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:var(--pt-micro,11px);font-weight:700}'
   +'.fer-ic.ok{background:var(--vert-pale,#EAF3E2);color:var(--vert-med,#3D6B27)}.fer-ic.al{background:var(--orange-pale,#FBF0E6);color:var(--texte,#1A1A14);box-shadow:inset 0 0 0 1px var(--orange,#B85A1A)}.fer-ic.n{background:var(--gris-clair,#ECE6DA);color:var(--texte-med,#4A4A3A)}'
-  +'.fer-cf b{font-size:var(--pt-txt,12.5px);font-weight:600;display:block;color:var(--texte,#1A1A14)}.fer-cf small{font-size:var(--pt-micro,11px);color:var(--texte-med,#4A4A3A);line-height:1.45}'
+  +'.fer-cf b{font-size:var(--pt-txt,13px);font-weight:600;display:block;color:var(--texte,#1A1A14)}.fer-cf small{font-size:var(--pt-micro,11px);color:var(--texte-med,#4A4A3A);line-height:1.45}'
   +'.fer-lk{color:var(--phyto,#5B2D8E);font-weight:600;cursor:pointer;text-decoration:underline}';
   document.head.appendChild(st);
 }
@@ -1481,7 +1486,7 @@ function openOvFerti(){
     +'<div class="mvr-fl">Type au sens de la directive nitrates</div>'
     +'<select class="mvr-fi" id="fer-typ" onchange="_ferSet(\'prod.typ\',this.value)">'+typOpts+'</select>'
     +'<div class="fer-h" id="fer-typ-h"></div>'
-    +'<label class="fer-pl" style="border:0"><input type="checkbox" id="fer-ab" '+(P.ab?'checked':'')+' onchange="_ferSet(\'prod.ab\',this.checked)" style="width:20px;height:20px;accent-color:var(--vert-med,#3D6B27)"><span style="font-size:var(--pt-txt,12.5px)">Utilisable en agriculture biologique</span></label>'
+    +'<label class="fer-pl" style="border:0"><input type="checkbox" id="fer-ab" '+(P.ab?'checked':'')+' onchange="_ferSet(\'prod.ab\',this.checked)" style="width:20px;height:20px;accent-color:var(--vert-med,#3D6B27)"><span style="font-size:var(--pt-txt,13px)">Utilisable en agriculture biologique</span></label>'
     +'<div class="mvr-f2"><div>'+_ferIn('fer-dose','Dose conseill\u00e9e',F.dose,'t/ha','oninput="_ferSet(\'dose\',this.value)"')+'</div>'
       +'<div>'+_ferIn('fer-kg','Poids d\u2019un sac',F.kg,'kg','oninput="_ferSet(\'kg\',this.value)"')+'</div></div>'
     +'<div class="fer-box" id="fer-calcN"></div>'
@@ -1686,7 +1691,7 @@ function openFerParc(nom){
   _ferEnsureOv(); _ferPcNom=nom;
   document.getElementById('fer-pc-t').textContent=nom;
   document.getElementById('fer-pc-body').innerHTML=''
-    +'<label class="fer-pl" style="border:0;margin-top:0"><input type="checkbox" id="fer-pc-zv" '+(p.zv?'checked':'')+' style="width:20px;height:20px;accent-color:var(--phyto,#5B2D8E)"><span style="font-size:var(--pt-txt,12.5px)">En zone vuln\u00e9rable aux nitrates</span></label>'
+    +'<label class="fer-pl" style="border:0;margin-top:0"><input type="checkbox" id="fer-pc-zv" '+(p.zv?'checked':'')+' style="width:20px;height:20px;accent-color:var(--phyto,#5B2D8E)"><span style="font-size:var(--pt-txt,13px)">En zone vuln\u00e9rable aux nitrates</span></label>'
     +'<div class="fer-h" style="margin-top:0">Le classement peut ne couvrir qu\u2019une partie d\u2019une commune (par section cadastrale). La carte officielle est sur le site de la DREAL.</div>'
     +'<div class="mvr-fl">\u00celot PAC</div><input class="mvr-fi" id="fer-pc-ilot" type="text" autocomplete="off" placeholder="ex. \u00eelot 12" value="'+_escAttr(p.ilot||'')+'">'
     +'<div class="mvr-fl">Type de sol</div><input class="mvr-fi" id="fer-pc-sol" type="text" autocomplete="off" placeholder="ex. argilo-calcaire" value="'+_escAttr(p.sol||'')+'">'

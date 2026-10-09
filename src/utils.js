@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.41';
+export const APP_VERSION = '8.70';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -223,19 +223,19 @@ function _mvTriCss(){
    +'.mvz-ov.open .mvz-sh{transform:translateY(0)}'
    +'.mvz-sh *{box-sizing:border-box}'
    +'.mvz-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}'
-   +'.mvz-t{font-family:\'Cormorant Garamond\',Georgia,serif;font-weight:600;font-size:var(--pt-lg,23px);'
+   +'.mvz-t{font-family:\'Cormorant Garamond\',Georgia,serif;font-weight:600;font-size:var(--pt-lg,24px);'
      +'line-height:1.15;display:flex;align-items:center;gap:8px}'
    +'.mvz-x{background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.18);'
      +'color:var(--texte-doux,#5F5F5F);width:38px;height:38px;border-radius:10px;cursor:pointer;'
      +'flex-shrink:0;display:flex;align-items:center;justify-content:center}'
-   +'.mvz-sub{font-size:var(--pt-txt,12.5px);color:var(--texte-doux,#5F5F5F);line-height:1.5;margin-top:5px}'
+   +'.mvz-sub{font-size:var(--pt-txt,13px);color:var(--texte-doux,#5F5F5F);line-height:1.5;margin-top:5px}'
    +'.mvz-l{display:block;font-size:var(--pt-micro,11px);letter-spacing:.8px;text-transform:uppercase;'
      +'color:var(--texte-doux,#5F5F5F);font-weight:700;margin:15px 0 7px}'
    +'.mvz-l i{font-style:normal;font-weight:400;text-transform:none;letter-spacing:0}'
    +'.mvz-row{display:flex;flex-wrap:wrap;gap:6px}'
    +'.mvz-seg{display:flex;gap:6px}.mvz-seg .mvz-b{flex:1;text-align:center}'
    +'.mvz-b{border:1px solid rgba(138,90,56,.2);background:transparent;color:var(--texte-med,#4A4A3A);'
-     +'border-radius:10px;padding:9px 12px;font-size:var(--pt-txt,12.5px);font-weight:600;'
+     +'border-radius:10px;padding:9px 12px;font-size:var(--pt-txt,13px);font-weight:600;'
      +'cursor:pointer;font-family:inherit;min-height:40px}'
    +'.mvz-b.on{background:var(--cave,#14110D);border-color:var(--cave,#14110D);color:#F0E2C8}'
    +'.mvz-b[disabled]{opacity:.4;cursor:not-allowed;text-decoration:line-through}'
@@ -600,7 +600,7 @@ window._mvGraphVide = function(quoi, geste){
       '.mv-graph-vide{border:1px dashed var(--gris);border-radius:12px;'
       + 'background:var(--terre-pale);padding:20px 18px;text-align:center}'
       + '.mv-graph-vide .t{font-size:13.5px;font-weight:600;color:var(--terre);line-height:1.4}'
-      + '.mv-graph-vide .s{font-size:var(--pt-txt,12.5px);color:var(--texte-med);margin-top:4px;line-height:1.55}';
+      + '.mv-graph-vide .s{font-size:var(--pt-txt,13px);color:var(--texte-med);margin-top:4px;line-height:1.55}';
     document.head.appendChild(st);
   }
   return '<div class="mv-graph-vide"><div class="t">'
@@ -1035,6 +1035,128 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.70', d: '2026-10-08', items: [
+    { niv: 1, pour: ['admin'], emoji: 'graphique', titre: 'Pilotage : tous les onglets à la nouvelle charte',
+      desc: "L’année, La campagne, L’équipe & le matériel, Décider, Économie, Conformité et Archives prennent le dessin du cockpit « Aujourd’hui » : titres sans capitales ni pastilles dorées, chiffres dans la police de l’appli, boutons segmentés clairs, la jauge d’avancement en vert, l’exercice comptable et « choses à compléter » en couleurs d’état. Rien ne change dans les calculs." }
+  ] },
+  { v: '8.69', d: '2026-10-08', items: [
+    { niv: 0, pour: ['tous'], emoji: 'soleil', titre: 'Des couleurs plus franches, des cartes qui se détachent mieux',
+      desc: "Le vert, l’ambre, le rouge et la lie-de-vin, et surtout leurs fonds pâles (étiquettes, alertes, cases du Planning), sont un cran plus soutenus : on les voit mieux, sans que ce soit criard. Le fond crème des pages est un peu plus marqué, les cartes blanches s’en détachent davantage. Les textes gardent le même contraste de lecture." }
+  ] },
+  { v: '8.68', d: '2026-10-08', items: [
+    { niv: 0, pour: ['tous'], emoji: 'curseurs', titre: 'La nouvelle charte est en place sur toute l’appli',
+      desc: "Dernière étape : dans les Réglages, l’équipe tient dans une carte (rôles plus lisibles, l’admin en couleur, « Ajouter un membre » en couleur) et, sur ordinateur, les sections de « Moi » vont par deux ; la zone dangereuse reste bordée de rouge. Avec ce lot, tous les écrans de Ma Vigne ont pris la nouvelle charte — sans qu’aucun réglage, aucun calcul ni aucun droit n’ait changé en route." }
+  ] },
+  { v: '8.67', d: '2026-10-08', items: [
+    { niv: 1, pour: ['admin'], emoji: 'curseurs', titre: 'Réglages › Domaine passe à la charte',
+      desc: "La carte d’identité du domaine passe sur fond clair. Chaque section devient une carte au cadre clair, avec ses titres en casse normale ; sur ordinateur, « Mon domaine » et « Données » sont côte à côte, la campagne sur toute la largeur. Aucun réglage ne change : seul le dessin bouge." }
+  ] },
+  { v: '8.66', d: '2026-10-08', items: [
+    { niv: 1, pour: ['admin'], emoji: 'liste', titre: 'Réserve › Bilan matière passe à la charte : la Réserve est finie',
+      desc: "Le bilan matière quitte son en-tête noir pour une carte claire ; le tableau prend les filets et les titres de colonne de l’appli, les chiffres alignés, et un stock négatif reste en rouge. La note du contrôle bio passe sur fond doux. Rien ne change dans le tableau lui-même. Avec ce lot, toute la Réserve a pris la nouvelle charte." }
+  ] },
+  { v: '8.65', d: '2026-10-08', items: [
+    { niv: 1, pour: ['admin'], emoji: 'carton', titre: 'Réserve › Intrants passe à la charte',
+      desc: "Les cartes d’intrant prennent le cadre clair de l’appli. Le stock s’écrit dans la police de l’appli, en rouge s’il est négatif, et l’alerte de stock négatif passe en rouge pâle. Sur ordinateur, les cartes vont par deux. « Achat » est en couleur. Rien ne change dans les calculs ni dans le bilan." }
+  ] },
+  { v: '8.64', d: '2026-10-08', items: [
+    { niv: 1, pour: ['admin'], emoji: 'carton', titre: 'Réserve › Fûts passe à la charte',
+      desc: "La Réserve prend toute la largeur de l’écran sur ordinateur. La carte du parc passe sur fond clair, les chiffres tiennent en une bande, « Ajouter des fûts » est en couleur, le millésime choisi aussi. Les fournisseurs et leurs lots prennent le cadre clair de l’appli ; sur ordinateur, les lots d’un fournisseur vont par deux. Un lot s’ouvre toujours dans son formulaire." }
+  ] },
+  { v: '8.63', d: '2026-10-08', items: [
+    { niv: 1, pour: ['admin'], emoji: 'verre', titre: 'Cave › Le Millésime passe à la charte : la Cave est finie',
+      desc: "Le choix du millésime et de la vue passe en boutons de l’appli, le millésime choisi en couleur. Les tuiles face à l’an passé prennent un fond clair et leurs chiffres la police de l’appli ; un rendement au-delà du plafond reste en rouge. Rien ne change dans ce que le Millésime calcule. Avec ce lot, toute la Cave a pris la nouvelle charte." }
+  ] },
+  { v: '8.62', d: '2026-10-08', items: [
+    { niv: 0, pour: ['admin'], emoji: 'barrique', titre: 'Cave › Le Chai : la liste et la fiche côte à côte',
+      desc: "Sur ordinateur, toucher une cuvée ouvre sa fiche à droite de la liste, sans fenêtre : ouillage, dernière analyse, dernier soutirage, opérations et boutons. Après un ouillage ou une opération, la fiche se met à jour sur place. Les cartes prennent le cadre clair de l’appli, l’alerte d’ouillage passe en ambre, « Ouiller » et « Nouvelle cuvée » en couleur. Au téléphone, la fiche s’ouvre comme avant." }
+  ] },
+  { v: '8.61', d: '2026-10-08', items: [
+    { niv: 1, pour: ['admin'], emoji: 'cuve', titre: 'Cave › Le Cuvier passe à la charte',
+      desc: "Les cuves prennent le dessin de l’appli : lignes au cadre clair, la cuve ouverte cerclée en couleur, les filtres et le tri en boutons, l’alerte « cuves à mesurer » en ambre, « Nouvelle cuve » en couleur. Sur ordinateur, les cuves vont par deux et celle qu’on ouvre prend toute la largeur. La cuve s’ouvre toujours sur place, avec ses relevés et sa cinétique." }
+  ] },
+  { v: '8.60', d: '2026-10-08', items: [
+    { niv: 1, pour: ['admin'], emoji: 'verre', titre: 'Cave › Aujourd’hui passe à la charte',
+      desc: "Les quatre chiffres de la Cave tiennent en une bande. « Ce qui presse » devient une carte : sa phrase en grand, en couleur selon l’urgence, avec un filet sur le côté. Les semaines à venir sont des cartes, la semaine en cours cerclée en couleur ; sur ordinateur, « Ce qui presse » est à gauche et les semaines à droite. Rien ne change dans ce que la Cave calcule." }
+  ] },
+  { v: '8.59', d: '2026-10-08', items: [
+    { niv: 1, pour: ['admin'], emoji: 'pousse', titre: 'Phyto › Fertilisation passe à la charte',
+      desc: "Les cartes de la fertilisation (apports, azote de la campagne, ce qu’un contrôle va demander) prennent le dessin de l’appli ; sur ordinateur, elles vont par deux, et la liste du contrôle tient toute la largeur. « Saisir un amendement » est un bouton au-dessus des cartes, et « Imprimer le cahier » passe en couleur. Rien ne change dans ce que l’onglet calcule ni dans le cahier." }
+  ] },
+  { v: '8.58', d: '2026-10-08', items: [
+    { niv: 1, pour: ['tous'], emoji: 'eprouvette', titre: 'Phyto › Catalogue : la fiche E-Phy à côté de la liste',
+      desc: "Sur ordinateur, toucher un produit du catalogue ouvre sa fiche E-Phy à droite, sans fenêtre : statut, délai de rentrée, substance active, mentions, usages homologués sur la vigne, et le rappel que ces données sont indicatives. La recherche et les filtres prennent le dessin de l’appli. Au téléphone, la fiche s’ouvre comme avant." }
+  ] },
+  { v: '8.57', d: '2026-10-08', items: [
+    { niv: 0, pour: ['tous'], emoji: 'eprouvette', titre: 'Phyto : le registre en liste et fiche',
+      desc: "Sur ordinateur, toucher un traitement le choisit : sa fiche s’ouvre à droite avec les mentions du registre (produit, AMM, type, date, dose, parcelles, opérateur, réentrée et avant-récolte avec leur date de fin, ZNT). Une réentrée en cours s’affiche en rouge. « Saisir un traitement » devient un bouton au-dessus de la liste. Au téléphone, rien ne change." }
+  ] },
+  { v: '8.56', d: '2026-10-08', items: [
+    { niv: 0, pour: ['tous'], emoji: 'tracteur', titre: 'Tracteur : les heures et le GNR de chaque session',
+      desc: "La fiche d’une session dit ses heures de moteur — au chrono quand il a mesuré la parcelle, sinon au barème de l’activité — et le GNR consommé : ces heures fois la consommation réglée, 6 L par heure tant qu’elle ne l’est pas. La bande du haut compte les heures de la saison. Sur ordinateur, « Démarrer une session » est un bouton au-dessus de la liste ; la nouvelle session et la feuille de travail prennent le dessin de l’appli." }
+  ] },
+  { v: '8.55', d: '2026-10-08', items: [
+    { niv: 1, pour: ['tous'], emoji: 'outil', titre: 'Tracteur › Entretien sur deux colonnes',
+      desc: "Sur ordinateur, les machines (en liste) et la cuve de GNR passent à gauche, la prochaine révision, les derniers contrôles et la nouvelle fiche à droite. Les cartes prennent le cadre clair de l’appli, « Appoint de cuve » et « Nouvelle fiche d’entretien » sont en couleur, une anomalie non traitée borde sa carte de rouge. Au téléphone, l’ordre ne change pas." }
+  ] },
+  { v: '8.54', d: '2026-10-08', items: [
+    { niv: 0, pour: ['tous'], emoji: 'tracteur', titre: 'Tracteur : les sessions en liste et fiche',
+      desc: "Sur ordinateur, toucher une session la choisit : sa fiche s’ouvre à droite, avec l’avancement, la surface faite, les parcelles et la note, et un bouton pour ouvrir la feuille de travail (chrono, parcelles). Les filtres deviennent des boutons segmentés, la session en cours est cerclée en couleur, les chiffres tiennent en une bande. Au téléphone, un appui ouvre toujours la feuille." }
+  ] },
+  { v: '8.53', d: '2026-10-08', items: [
+    { niv: 1, pour: ['admin'], emoji: 'calendrier', titre: 'Les fenêtres du Planning passent à la charte',
+      desc: "« Congés sur une période », « Chaleur sur une période », la journée d’un salarié et sa fiche s’ouvrent avec un en-tête clair (plus de bande brune ni violette), des champs et des boutons comme dans le reste de l’appli, le bouton principal en couleur. Le récapitulatif annuel de l’équipe montre le mois en cours en couleur. Rien ne change dans ce que font ces fenêtres." }
+  ] },
+  { v: '8.52', d: '2026-10-08', items: [
+    { niv: 0, pour: ['admin'], emoji: 'equipe', titre: 'Planning › Les gens : la liste et la fiche côte à côte',
+      desc: "Sur ordinateur, « Les gens » montre la liste des salariés à gauche et la fiche de la personne choisie à droite, sans fenêtre par-dessus : Résumé, Jours, Compteur, Congés et acomptes, le mois, le relevé. Toucher une autre ligne change la fiche. Les lignes prennent le dessin des listes de l’appli, et l’en-tête de la fiche passe sur fond clair. Au téléphone, la fiche s’ouvre comme avant." }
+  ] },
+  { v: '8.51', d: '2026-10-08', items: [
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Le Planning prend la nouvelle charte',
+      desc: "Dans « Le mois », les outils tiennent sur une ligne (année, semaine ou mois, congés et chaleur sur une période), les trois chiffres en bande fine, et la grille sur une carte. Les cases sont à plat et teintées : vert pour des heures en plus, ambre en moins, lie-de-vin pour un congé, rouge pour une absence, gris pour une récup, contour ambre pour la chaleur. Aujourd’hui est marqué en couleur, la case cochée est cerclée, et la barre du bas passe en sombre. Les gestes ne changent pas." }
+  ] },
+  { v: '8.50', d: '2026-10-08', items: [
+    { niv: 0, pour: ['tous'], emoji: 'nuage', titre: 'La météo et les derniers travaux de l’Accueil, redessinés',
+      desc: "La météo 5 jours montre le jour en tête (température, ciel, minimum), puis cinq colonnes avec une barre de pluie sous chaque jour : c’est le risque de pluie, en pour cent. Une note signale le premier jour où il dépasse 50 %. Les derniers travaux deviennent un fil rangé par jour : l’heure, les initiales, qui a validé ou commencé quoi, et où." }
+  ] },
+  { v: '8.49', d: '2026-10-08', items: [
+    { niv: 0, pour: ['tous'], emoji: 'carte', titre: 'La priorité du moment devient une carte',
+      desc: "En haut de l’Accueil, la priorité tient dans une carte : la tâche du moment avec son pourcentage et sa barre, puis toutes les parcelles dessinées à leur surface, en vert quand c’est fait, en gris foncé quand c’est commencé. Un appui sur une parcelle l’ouvre. Les trois chiffres du domaine passent dans la carte, et les équipes du jour en pied. La carte « Avancement de la saison » quitte son fond vert." }
+  ] },
+  { v: '8.48', d: '2026-10-08', items: [
+    { niv: 0, pour: ['tous'], emoji: 'carte', titre: 'L’Accueil prend la grille de la nouvelle charte',
+      desc: "Sur ordinateur, les deux blocs d’une rangée ne sont plus de même largeur : l’un en prend un peu plus, et ça s’inverse d’une rangée à la suivante. Les titres des blocs quittent les capitales, la carte des travaux mécaniques passe au cadre clair, et les outils de « Personnaliser » prennent l’habit du reste de l’appli. Vos blocs, leur ordre et vos réglages ne changent pas." },
+    { niv: 1, pour: ['admin'], emoji: 'graphique', titre: 'Pilotage : la projection des deux pistes en pointillé fin',
+      desc: "Sur « Fin prévue des travaux » et « Atterrissage de la campagne », la partie prévue de la piste est un fin pointillé au milieu de la barre, au lieu d’une rangée de blocs : on distingue tout de suite ce qui est fait de ce qui est prévu." }
+  ] },
+  { v: '8.47', d: '2026-10-08', items: [
+    { niv: 0, pour: ['tous'], emoji: 'check', titre: 'Au téléphone, deux grands boutons en bas de chaque carte',
+      desc: "Quand une tâche est choisie, chaque carte de parcelle dit l’état de cette tâche (pas commencé, en cours, fait) et porte en bas « Début » et « Valider », en grand, pour le pouce. Une parcelle commencée ne garde que « Valider ». Les filtres deviennent des boutons segmentés qui défilent, et la priorité tient en un bandeau fin." }
+  ] },
+  { v: '8.46', d: '2026-10-08', items: [
+    { niv: 0, pour: ['tous'], emoji: 'carte', titre: 'Sur ordinateur, les Parcelles en liste et fiche',
+      desc: "Sur un écran large, la liste passe à gauche, une ligne par parcelle avec « Début » et « Valider », et la fiche de la parcelle choisie s’ouvre à droite : l’état de la tâche, les travaux de la campagne, les derniers passages, le délai de réentrée s’il y en a un. Les flèches haut et bas passent d’une parcelle à l’autre, la touche V valide. Les filtres deviennent des boutons segmentés. Sur téléphone, rien ne change." }
+  ] },
+  { v: '8.45', d: '2026-10-08', items: [
+    { niv: 1, pour: ['tous'], emoji: 'oeil', titre: 'Une échelle de texte plus régulière',
+      desc: "Les tailles de texte suivent maintenant une seule échelle, calée de 4 en 4 : le texte courant des listes gagne un demi-point, les étiquettes rejoignent les légendes, les grands chiffres et les titres de section prennent un point. Rien ne bouge de place." }
+  ] },
+  { v: '8.44', d: '2026-10-08', items: [
+    { niv: 0, pour: ['tous'], emoji: 'oeil', titre: 'Des en-têtes clairs et des onglets soulignés',
+      desc: "Le haut de chaque module passe sur fond clair : l’icône du module sans cadre, le titre dans la police de l’appli, les boutons discrets. Les onglets ne sont plus des pastilles : l’onglet ouvert est simplement souligné. Le bandeau du Pilotage prend le même habit. Sur ordinateur, le contenu se pose sur le fond comme un panneau, à côté de la barre." }
+  ] },
+  { v: '8.43', d: '2026-10-08', items: [
+    { niv: 0, pour: ['tous'], emoji: 'loupe', titre: 'Sur ordinateur, la barre et la recherche prennent la nouvelle charte',
+      desc: "La barre de gauche passe sur le fond clair de l’appli : la marque en tête, votre domaine dessous, l’écran ouvert marqué d’un seul trait de couleur. Le bouton à côté de votre nom, ou la touche « [ », la replie et la déplie. La recherche (Ctrl K ou « / ») range ses réponses en « Aller à », « Parcelles » et « Actions » : une nouvelle entrée de journal, le thème clair ou sombre, replier la barre." },
+    { niv: 1, pour: ['tous'], emoji: 'oeil', titre: 'Sur téléphone, la barre du bas est à plat',
+      desc: "Fond blanc, un simple filet en haut, l’écran ouvert en couleur. Le menu « Plus » montre les autres modules en tuiles." }
+  ] },
+  { v: '8.42', d: '2026-10-08', items: [
+    { niv: 0, pour: ['tous'], emoji: 'oeil', titre: 'Une charte plus sobre, dans toute l’appli',
+      desc: "Les fonds crème deviennent un blanc et un gris neutres, les arrondis sont plus fins, les ombres plus légères. La couleur ne sert plus qu’à deux choses : agir (une lie-de-vin, celle des grappes du logo) et dire l’état (vert fait, orange à surveiller, rouge en retard). Les textes discrets restent lisibles sur tous les fonds, en clair comme en sombre." },
+    { niv: 0, pour: ['admin'], emoji: 'graphique', titre: 'Aujourd’hui prend la même charte',
+      desc: "Le cockpit du Pilotage garde tout son contenu et ses gestes. Ses titres passent dans la police de l’appli, ses barres en cours sont gris foncé au lieu de doré, et le fond n’est plus dégradé." }
+  ] },
   { v: '8.41', d: '2026-10-08', items: [
     { niv: 0, pour: ['tous'], emoji: 'oeil', titre: 'Sur ordinateur, la barre latérale ne recouvre plus les écrans',
       desc: "Barre ouverte, le bord gauche de chaque module passait sous la barre — des titres et des chiffres coupés — et le bas de la barre sortait de l’écran. La barre a maintenant exactement la place qui lui est réservée. La replier ou la déplier recale les graphiques et la carte, et sous 1 200 pixels de large elle reste repliée d’office." },
@@ -3590,7 +3712,7 @@ function _wnIco(v) {
 function _wnRow(item, sep) {
   return '<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;' + sep + '">'
     + '<div style="width:32px;height:32px;background:var(--gris-clair);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;">' + _wnIco(item.emoji) + '</div>'
-    + '<div><div style="font-size:13px;font-weight:500;color:var(--texte);line-height:1.3;">' + item.titre + '</div>'
+    + '<div><div style="font-size:var(--pt-txt,13px);font-weight:500;color:var(--texte);line-height:1.3;">' + item.titre + '</div>'
     + '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px;line-height:1.5;">' + item.desc + '</div></div>'
     + '</div>';
 }
@@ -4720,7 +4842,7 @@ var MV_AIDE = {
     ico: 'feuille', titre: 'Accueil', ancre: 'vigne',
     points: [
       ['Sur ordinateur', " : les modules sont dans la <b>barre à gauche</b> (repliable), et <b>Ctrl K</b> ouvre une recherche — une parcelle, un écran, un onglet du Pilotage. Sur téléphone et tablette, rien ne change."],
-      ['La priorité du moment', "reste épinglée en haut : c’est ce que l’équipe attaque aujourd’hui."],
+      ['La priorité du moment', "reste épinglée en haut, dans une carte : la tâche que l’équipe attaque, son avancement, et les parcelles dessinées à leur surface (fait, en cours, à faire) — un appui sur l’une l’ouvre. Sans priorité, la carte montre la saison, parcelle par parcelle. Les trois chiffres du domaine sont à droite sur ordinateur, dessous au téléphone."],
       ['Équipes du jour', "juste sous la priorité. L’administrateur la touche pour répartir les salariés en équipes <b>pour la journée</b> : chacun validera et démarrera avec son équipe, sans pouvoir la changer, et ne voit pas les autres. Rien de réglé, ou « Tout le monde ensemble » : l’application fait comme d’habitude. Le lendemain, tout repart à zéro. Un salarié voit ici son équipe du jour, quand il y en a une."],
       ['Une ligne « À vérifier »', "peut s’afficher sous les chiffres : un changement de l’application qui vous concerne — un chiffre qui bouge, un réglage à contrôler. Touchez-la pour le détail, « Vu » pour la ranger ; elle reste dans Réglages › Moi › Journal des nouveautés."],
       ['La mise en route', "n’apparaît que chez l’administrateur d’un domaine neuf : sept étapes qui se cochent en lisant ce qui est déjà enregistré, rien à pointer à la main. Le bloc s’efface tout seul quand tout est fait."],
@@ -4731,6 +4853,8 @@ var MV_AIDE = {
       ['Le voyant en haut de l’écran', "dit où en est la synchro. Orange avec «\u00a0Pas de synchro\u00a0»\u00a0: le téléphone a du réseau mais ne joint plus le serveur, et ne reçoit plus ce que les autres saisissent — touchez-le, puis «\u00a0Relancer l’application\u00a0». Au retour de veille, l’application vérifie d’elle-même et relit ce qui a changé."],
       ['La roue crantée', "en haut à droite ouvre ce qui se règle une fois l’an pour la vigne — tâches et barème, écartements de plantation, secteurs météo — et les documents de la vigne. Administrateur seulement ; l’en-tête dit « Vigne » sur les trois onglets."],
       ['« Tu prends le tracteur aujourd’hui ? »', "se pose à la première ouverture du jour, à ceux qui sont à la fois ouvriers et tractoristes et seulement si une session tracteur est ouverte. La réponse tient la journée et se repose le lendemain. Elle range le menu du bas et choisit l’écran d’ouverture : elle ne change aucun de vos droits, et rien ne disparaît — le reste passe sous « Plus », où se trouve aussi le retour au terrain."],
+      ['La météo 5 jours', "le jour en tête, puis cinq colonnes. La barre et le chiffre sous chaque jour disent le <b>risque</b> de pluie — une probabilité, pas des millimètres ; la note signale le premier jour où il dépasse 50\u00a0%."],
+      ['Derniers travaux', "le fil des quatre derniers travaux du journal, rangés par jour : l’heure, qui, quoi, où. Un appui ouvre le journal."],
       ['La météo a besoin du réseau.', "Hors ligne, elle affiche la dernière prévision reçue."]
     ]
   },
@@ -4739,7 +4863,8 @@ var MV_AIDE = {
     points: [
       ['Les filtres du haut', "trient par état : finies, en cours, arrachées."],
       ['Sur chaque carte', "la surface au centiare près (0,0870 ha), le pourcentage, et le compte des tâches faites, qui suit la même règle : un arrachage à moitié fait compte pour une demie (« 1,5/2 tâches »)."],
-      ['La colonne de droite', "porte les deux gestes du terrain, sans ouvrir la parcelle : « Début » signale qu’on attaque, « Valider » que c’est fini. Une tâche à passages affiche en plus le passage en cours (P1, P2, N1…)."],
+      ['Les deux gestes', "« Début » signale qu’on attaque, « Valider » que c’est fini, sans ouvrir la parcelle : en bas de chaque carte au téléphone, au bout de chaque ligne sur ordinateur. Quand une tâche est choisie, la carte dit l’état de cette tâche à la place du pourcentage. Une tâche à passages affiche en plus le passage en cours (P1, P2, N1…)."],
+      ['Sur un ordinateur', "la liste passe à gauche, une ligne par parcelle avec ses deux gestes, et la fiche de la parcelle choisie s’ouvre à droite : l’état de la tâche, les travaux de la campagne, les derniers passages. Les flèches haut et bas passent d’une parcelle à l’autre, la touche V valide ; « Fiche complète » ouvre tout le reste."],
       ['Le numéro devant le nom', "est le rang de la tournée du domaine. Il n’apparaît que si une tournée est fixée, et les parcelles se rangent dans cet ordre."],
       ['Onglet Carte', ": les contours viennent de votre export PAC ou d’un fichier KML."],
       ['L’anneau doré qui respire', "sur la carte marque la parcelle <b>commencée et pas finie</b> pour le travail affiché\u00a0: celle où «\u00a0Début\u00a0» a été touché sans validation. S’il n’y en a aucune, il se pose sur la <b>prochaine à faire</b>, le n°\u00a01 de la tournée enregistrée. Sur «\u00a0toutes\u00a0», c’est la priorité du moment. Plusieurs parcelles commencées ont chacune leur anneau, et rien ne s’affiche sur une période archivée."],
@@ -4765,6 +4890,8 @@ var MV_AIDE = {
   tracteur: {
     ico: 'tracteur', titre: 'Tracteur', ancre: 'tracteur',
     points: [
+      ['Sur un ordinateur', "toucher une session la choisit : sa fiche s’ouvre à droite — avancement, surface, parcelles, note. Le bouton de la fiche ouvre la feuille de travail (chrono, parcelles), comme un appui au téléphone. Dans l’Entretien, les machines et la cuve de GNR passent à gauche, la révision et les derniers contrôles à droite."],
+      ['Heures et GNR d’une session', "les heures viennent du chrono quand il a mesuré la parcelle, sinon du barème de l’activité (h/ha × surface) ; la fiche dit lesquelles. Le GNR est ces heures fois la consommation réglée dans Réglages, 6 L par heure tant qu’elle ne l’est pas — la même valeur que le Pilotage. La bande du haut fait le total de la saison."],
       ['Une session \u00ab Amendement \u00bb', "coche la t\u00e2che \u00ab Amendement \u00bb de chaque parcelle faite, marqu\u00e9e \u00ab faite au tracteur \u00bb dans le journal. Le temps compt\u00e9 est celui de la session, pas une journ\u00e9e d\u2019\u00e9quipe. L\u2019amendement lui-m\u00eame se pr\u00e9pare dans Phyto \u203a Fertilisation."],
       ['Onglet Sessions', ": le travail fait avec la machine. Onglet Entretien : révisions, réparations, appoints de cuve."],
       ['Le parc', "s’affiche en pastilles sous les chiffres — toucher une machine filtre l’écran."],
@@ -4788,6 +4915,7 @@ var MV_AIDE = {
   phyto: {
     ico: 'eprouvette', titre: 'Phyto', ancre: 'phyto',
     points: [
+      ['Sur un ordinateur', "toucher un traitement le choisit : sa fiche s’ouvre à droite avec les mentions du registre — produit, AMM, type, date, dose, parcelles, opérateur, délais de réentrée et avant récolte, ZNT. « Ouvrir le traitement » mène au détail habituel, pour le modifier. « Saisir un traitement » est un bouton au-dessus de la liste. Dans le Catalogue, toucher un produit ouvre de la même façon sa fiche E-Phy à droite : statut, délai de rentrée, substance, mentions, usages vigne."],
       ['Le catalogue produits', "vient d’E-Phy (ANSES) et se met à jour tout seul chaque semaine."],
       ['Un traitement', "= des produits, les parcelles cochées et un conducteur. La surface se calcule seule."],
       ['Le bouton rond en bas \u00e0 droite', "ouvre un nouveau traitement sur l\u2019onglet Registre, un nouvel amendement sur l\u2019onglet Fertilisation (administrateur)."],
@@ -4804,7 +4932,7 @@ var MV_AIDE = {
   planning: {
     ico: 'calendrier', titre: 'Planning', ancre: 'planning',
     points: [
-      ['Deux onglets', ": Le mois, la grille de toute l’équipe. Les gens, une ligne par salarié et sa fiche. Un salarié qui n’est pas administrateur a les deux siens : Mon mois, où il arrive comme avant, et L’équipe."],
+      ['Deux onglets', ": Le mois, la grille de toute l’équipe. Les gens, une ligne par salarié et sa fiche — sur ordinateur, la fiche s’ouvre à droite de la liste, sur la première personne ; toucher une autre ligne la change. Un salarié qui n’est pas administrateur a les deux siens : Mon mois, où il arrive comme avant, et L’équipe."],
       ['L’équipe, côté salarié', "montre qui est là, jour par jour, sur le mois en cours : présent ou absent, jamais le motif — même un congé s’affiche « Abs » —, ni les heures, l’écart ou les congés des autres. Une absence d’une partie de la journée compte « présent ». Sa propre ligne est en tête ; la ligne Présents compte qui est là parmi ceux attendus ce jour-là (les équipes collectives n’y entrent pas). Lecture seule."],
       ['La roue crantée', "en haut à droite ouvre le cadre de l’année — modèles de semaine, coupure, convention, règle des congés, sort des heures sup — et les relevés à imprimer. Administrateur seulement."],
       ['Changer d’année', "se fait par les onglets au-dessus de la grille. Tant qu’aucun modèle n’est enregistré pour une année, sa grille est un report du modèle intégré, replacé sur les bons jours de la semaine. Un bandeau le dit et compte les jours qui restent à poser : une année n’a pas les mêmes semaines qu’une autre, et rien n’est ajouté à votre place."],
@@ -4831,6 +4959,7 @@ var MV_AIDE = {
   cave: {
     ico: 'verre', titre: 'Cave', ancre: 'cave',
     points: [
+      ['Le Chai sur un ordinateur', "toucher une cuvée la choisit : sa fiche s’ouvre à droite de la liste — ouillage, analyses, soutirage, opérations, et ses boutons. Après une opération, la fiche se met à jour sur place."],
       function () {
         return _mvAideSections('#cave-sec-tabs .mvu-tab', 'sections',
           "Aujourd’hui dit ce qui presse, Le Cuvier suit la vendange, Le Chai suit l’élevage, Le Millésime raconte le vin.");

@@ -24,9 +24,9 @@ const FEUILLE = readFileSync(CSS, 'utf8');
 const SRC = BRUT.split('\n').filter(l => !l.trimStart().startsWith('//')).join('\n');
 const CSSNU = FEUILLE.replace(/\/\*[\s\S]*?\*\//g, '');
 
-const PAS = [['hero','40px'],['xxl','31px'],['xl','27px'],['lg','23px'],['md','20px'],
-             ['sm','17px'],['base','14px'],['txt','12.5px'],['micro','12px'],
-             ['lbl','11.5px'],['nano','11px']];   /* TEXTE-A (§247) : 11 → 12, 10,5 → 11,5, 9,5 → 11 */
+const PAS = [['hero','40px'],['xxl','32px'],['xl','28px'],['lg','24px'],['md','20px'],
+             ['sm','16px'],['base','14px'],['txt','13px'],['micro','12px'],
+             ['lbl','12px'],['nano','11px']];   /* TYPO-2 (§273) : l'échelle de la maquette v2, calée sur 4 px */   /* TEXTE-A (§247) : 11 → 12, 10,5 → 11,5, 9,5 → 11 */
 
 let ok = 0, ko = 0;
 const t = (nom, cond, detail) => {

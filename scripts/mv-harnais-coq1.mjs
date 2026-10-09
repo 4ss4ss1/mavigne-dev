@@ -13,7 +13,7 @@ function suite(S) {
   const h = W._railHtml(ITEMS, { nom: '<b>Nico', ini: 'N', role: 'Administration' }, { nom: 'Marchand-Grillot', sous: '11,76 ha' });
   T('la barre : recherche, entrées avec leur icône, domaine, personne (noms échappés)', h.includes('id="mv-rail-cherche"') && h.includes('data-page="planning"') && h.includes('data-ic="calendrier"') && !h.includes('<b>Nico') && h.includes('&lt;b&gt;Nico'));
   const E = W._palEntrees(ITEMS, [{ nom: 'Les Crais 1', surface: .41, appellation: 'Gevrey' }, { nom: 'Clos des Crais', surface: .2 }]);
-  T('la recherche connaît les écrans, les onglets du Pilotage et les parcelles', E.some(x => x.g === 'Écrans' && x.t === 'Planning') && E.some(x => x.go.tab === 'eco') && E.some(x => x.go.parc === 'Les Crais 1'));
+  T('la recherche connaît les écrans, les onglets du Pilotage et les parcelles', E.some(x => x.g === 'Aller à' && x.t === 'Planning')   /* COQ-2 (§271) : groupes de la maquette v2 */ && E.some(x => x.go.tab === 'eco') && E.some(x => x.go.parc === 'Les Crais 1'));
   const r = W._palTrier(E, 'crai');
   T('le titre qui commence par la recherche passe avant celui qui la contient (accents ignorés)', r[0].t === 'Les Crais 1' || r[0].t === 'Clos des Crais') ;
   T('… et « écon » trouve l’onglet Économie', W._palTrier(E, 'écon').some(x => x.go.tab === 'eco'));
@@ -29,7 +29,7 @@ const res = jouer(SRC0); let ko = 0; res.forEach(([n, ok]) => { if (!ok) ko++; c
 console.log('\n' + (ko ? 'ROUGE ' + ko : 'VERT') + ' — ' + res.length + ' assertions, ' + ko + ' échec' + (ko > 1 ? 's' : ''));
 if (CONTRE) {
   const DEF = [['les noms non échappés', 'coq', "esc(moi.nom) + '</b><small>'", "moi.nom + '</b><small>'"],
-    ['toutes les parcelles sans saisie', 'coq', "if (!n) return entrees.filter(x => x.g !== 'Parcelles').slice(0, 12);", "if (!n) return entrees.slice(0, 12);"],
+    ['toutes les parcelles sans saisie', 'coq', "entrees.filter(x => x.g === 'Actions').slice(0, 1).concat(entrees.filter(x => x.g === 'Aller à' && !x.s))", 'entrees'],
     ['Ctrl K sur téléphone', 'coq', "if (!MQ_PC.matches || !window.currentUser) return;", "if (!window.currentUser) return;"],
     ['la barre qui ne suit plus l’écran actif', 'app', "if(window._railSync) window._railSync(page);", ""]];
   let m = 0; DEF.forEach(([nom, f, a, b]) => { const S = Object.assign({}, SRC0); if (S[f].split(a).length !== 2) { console.log('  ??  ' + nom); m++; return; } S[f] = S[f].replace(a, b); const rouge = jouer(S).some(x => !x[1]); if (!rouge) m++; console.log((rouge ? '  ok  rougit : ' : '  KO  reste vert : ') + nom); });
