@@ -559,3 +559,62 @@ cadrées », barres horizontale et verticale. Reformulés un par un, validés (�
 - **Pas vu** : les barres de Windows (navigateur de test à barres invisibles : le débordement est mesuré, pas regardé). Le « hors écran » du robot
   (35 fenêtres, avant comme après) vient d'une mesure prise pendant l'animation d'entrée des fenêtres : non concluant, ni dans un sens ni dans l'autre.
 
+## 301. ★★ FORME-1 — LE DOMAINE EN DIRECT AUX FORMES RÉELLES, COMPACT, AVEC LOUPE ; LA FORME EN HAUT DES FICHES ; L'ÉQUIPE DE CHAQUE PARCELLE EN COURS ; LE TOUCHER QUI OUVRE ENFIN LA FICHE (09/10)
+
+Lot 32, base `53a0530`. APP 8.71 → 8.72, SW 9.49 → 9.50.
+
+### 301a. La demande, et comment elle s'est précisée
+Nico (09/10) : « améliorer le rendu des petites images des parcelles, ce n'est pas assez qualitatif » ; « on est censé voir la forme de la parcelle, et j'ai un
+[object Object] » ; « un outil professionnel, pas un outil de démonstration pas fini ». Maquette v1 (vraies formes, même échelle, zones en cadres) → jugée trop
+grande ; sa piste : des miniatures, un zoom au survol, et « comment faire au téléphone ? ». Mesure avant de proposer : réduire l'échelle seule ne faisait
+descendre le plan que de 801 à 530 px (la place était prise par les cadres, les titres et les lignes de commune). Maquette v2 (une ligne de titre par appellation,
+ni cadre ni ligne de commune ; loupe au survol ; toucher → fiche avec la forme ; repli au téléphone) → « ok », puis « go ».
+
+### 301b. Ce qui a été fait
+- **`utils.js` — la forme, une seule lecture** (`_mvFormeDe`, `_mvParcContours`, `_mvParcForme`, `_mvFormeSvg`, `_mvParcFormeHtml`) : le contour `kml_polygons`
+  ([lat, lng]) passé en mètres, nord en haut, ramené à l'origine ; aire, sens des rangs (longueur du plus petit rectangle — un repère, dit dans l'aide), point le
+  plus loin des bords (l'équipe et l'onde s'y posent : une parcelle en équerre a son centre dehors). Gardée en mémoire par contour.
+- **`cockpit-vue.js` — le plan** : `preparerParcs` (une fois par chargement), `disposer(W)` à la largeur réelle (1 unité = 1 px) ; appellations en colonnes de
+  même largeur, chacune dans la moins haute, la plus grande sur toute la largeur au-delà du tiers des vignes ; une ligne de titre (deux si le nom ne tient pas
+  dans sa colonne, nom coupé d'un « … » en dernier recours) ; UNE échelle pour tout le domaine (part fixe de l'écran : 0,07 au large, 0,10 sous 600 px, 0,14 sur
+  une colonne sous 420 px) ; carré de surface en pointillé sans contour, et la note qui les nomme ; échelle en mètres et nord sous le plan ; repli au
+  téléphone (« Tout le plan ») ; redessin à chaque largeur (`ranger` → `dessinerPlan`) ; gestes délégués à `#ck-carte` (ils survivent au redessin).
+  Mesures (domaine reconstitué, 37 parcelles) : 393 px de haut dans la colonne de 453 px d'un écran de 1 280 (801 avec les bandes de REF-1), 601 px au
+  téléphone, replié à environ 370.
+- **La loupe** (survol, pointeur fin) : la forme en grand avec son échelle, le nom, la surface, l'appellation, la commune, le cépage, l'état et l'équipe. Au doigt,
+  pas de loupe : le toucher ouvre la fiche.
+- **Les fiches** : `openDP` remplit `#dp-forme` (en haut de la fiche, cachée sans contour) ; `_pFicheHtml` (fiche de droite des Parcelles, ordinateur) montre la
+  forme sous le nom. Motifs à préfixe propre (`dpf`, `pfxf`, `cklp`) : deux fiches peuvent coexister.
+
+### 301c. Les trois défauts trouvés en vérifiant
+1. **« [object Object] »** — `PARCELLES[].commune` est `{nom, lat, lng}` depuis la météo par secteur ; `_pilCk2Modele` la passait telle quelle, `disposer`
+   en faisait la clé de bloc (toutes les communes fondues en une) et l'étiquette ; `_pFicheHtml` en faisait une étiquette. Le modèle passe le NOM ; le plan lit
+   les deux formes (`nomCommune`).
+2. **La pastille et « en cours » lisaient deux journaux** — l'état : tout le journal depuis l'ouverture de la fenêtre ; l'équipe : le journal du jour (le fil).
+   Lecture unique `_ckPlanLire` (cockpit.js) → `_ckPlanEtats` (même sortie qu'avant) et `_ckPlanDebuts` (la ligne « En cours » de chaque parcelle en cours) ;
+   `_pilCk2Modele` en tire les équipes, avec le jour du début ; le cadre compte pareil ; une pastille commencée un autre jour passe en clair, la loupe dit
+   « commencée jeudi ». Filet dans `charger` : une parcelle en cours sans équipe en reçoit une, « Personne d'indiqué ». Le fil « En direct » reste du jour.
+   Le plan de secours (cockpit.js) suit la même règle (`_ckPlanInitiales` remplace `_ckPlanEquipes`).
+3. **Le toucher n'ouvrait rien** — `openSelParc(nom)` attend une TÂCHE à sélection (arrachage, désherbage, effeuillage) : appelée avec un nom de parcelle par le
+   plan (`ouvrirFeuille`), le plan de secours (`_ckPlanOuvrir`) et Ctrl K (`coquille.js`), elle rendait la main sans rien ouvrir (« Admin requis » hors admin).
+   Les trois appellent `openDP`. AUJ-3 et REF-1 avaient écrit « toucher une parcelle ouvre sa fiche (`openSelParc`) » : la doc et les harnais fixaient l'erreur.
+
+### 301d. Les harnais
+- **`mv-harnais-forme1.mjs`** (neuf, 25 assertions, 9 contre-épreuves) : moteur des formes exécuté (rectangle de 100 × 20 m, équerre, casse), lecture du journal
+  exécutée (début gardé après validation = rouge), `_pilCk2Modele` exécuté (équipe commencée HIER présente, commune en toutes lettres, contour transmis), mise en
+  page exécutée (même échelle, rapport 5 pour 1 gardé, aucun recouvrement, une colonne au téléphone), gestes et feuille lus.
+- **`mv-harnais-ref1.mjs`** : l'assertion « toucher une parcelle ouvre SA fiche » vise `openDP` ; ses contre-épreuves « équipe qui reste après sa validation »
+  (ancrée sur `_ckPlanDebuts`) et « nom de démonstration revenu » (le village mort `const maisons` est parti avec l'ancien dessin) ont changé d'ancre.
+- **`mv-harnais-auj3.mjs`** : `openDP` à la place d'`openSelParc` ; l'assertion des équipes lit `_ckPlanDebuts` (chaque parcelle en cours, et seulement elles) ;
+  sa contre-épreuve « équipe qui reste après sa validation » rougit grâce à un cas ajouté (commencée puis validée).
+- Rendu réel regardé (vrai `cockpit-vue.js`, vraie feuille, police Outfit) : ordinateur clair, sombre en animations réduites (37/37 parcelles visibles), 860 px,
+  téléphone tactile 390 px (replié, toucher → `openDP`, aucune loupe), zéro erreur JS.
+
+### 301e. ⚠️ Un nom déjà pris
+La première version appelait la lecture des contours `_mvParcGeo` : ce nom existait déjà dans `utils.js` — la POSITION d'une parcelle, lue par la
+carte, Phyto, les Réglages et la tournée (`_opGeo`). Le second `window._mvParcGeo =` écrasait le premier sans un mot. Deux harnais l'ont vu (rapport du
+vignoble : « ni position » ; robustesse du Pilotage : `NaN` dans Décider), pas la relecture. Renommée `_mvParcContours`. **Avant d'exposer un
+`window._mvX`, chercher le nom dans tout `src/`.**
+
+### 301f. Ce qui reste ouvert
+Voir §28 (FORME-1). Non fait : la forme dans les lignes de la liste Parcelles (piste de la maquette v3 de PARC-1, §274d) ; la carte de l'Accueil.

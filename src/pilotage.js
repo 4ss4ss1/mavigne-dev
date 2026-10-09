@@ -5188,8 +5188,11 @@ function _pilCk2Modele(d, m){
       debut:(w&&w.ws!=null)?oIso(w.ws):null, fin:(w&&w.we!=null)?oIso(w.we-1):null };
   });
   var PARC=(window.PARCELLES||[]).filter(function(p){ return p&&p.nom; });
-  var parcs=PARC.map(function(p){ return { nom:p.nom, ha:Number(p.surface)||0, appellation:p.appellation||'', commune:p.commune||'',
-    arr:/arrach/i.test(String(p.statut||'')), cepage:p.cepage||'' }; });
+  // ★ FORME-1 (§301) : la commune est rangée { nom, lat, lng } (météo par secteur) — le plan écrivait l'objet lui-même
+  //   (« [object Object] ») et fondait toutes les communes en une. Le contour part avec la parcelle (utils.js, _mvParcContours).
+  var parcs=PARC.map(function(p){ return { nom:p.nom, ha:Number(p.surface)||0, appellation:p.appellation||'',
+    commune:(p.commune&&typeof p.commune==='object')?String(p.commune.nom||''):String(p.commune||''),
+    arr:/arrach/i.test(String(p.statut||'')), cepage:p.cepage||'', geo:(typeof window._mvParcContours==='function')?window._mvParcContours(p.nom):[] }; });
   var J=window.JOURNAL||[], etats={};
   taches.forEach(function(t){ etats[t.id]=(typeof window._ckPlanEtats==='function')?window._ckPlanEtats(PARC, J, t.cle, t.debut, !!retards[t.cle]):{}; });
   // Présences du jour (les mêmes que la tuile « Présences ») et tension de chacun (moteur de la tuile « Tension »).
@@ -5199,20 +5202,27 @@ function _pilCk2Modele(d, m){
   ((TS&&TS.rows)||[]).forEach(function(r){ var g=gens.filter(function(x){ return x.nom===r.nom; })[0]; if(g&&r.p>0) g.tens=Math.round((r.f||0)/r.p*100); });
   var nPres=gens.filter(function(g){ return !g.absent; }).length, abs=gens.filter(function(g){ return g.absent; });
   var absTxt=abs.length?(abs.slice(0,2).map(function(g){ return g.nom+' '+g.motif; }).join(', ')+(abs.length>2?' et '+(abs.length-2)+' autre'+(abs.length>3?'s':''):'')):'Toute l\u2019équipe est là';
-  // Le fil et les équipes sur le terrain : le journal du jour (fonctions de cockpit.js).
+  // Le fil : le journal du jour (fonctions de cockpit.js). Les équipes : plus bas (FORME-1, §301).
   var fil=(typeof window._ckFilDonnees==='function')?window._ckFilDonnees(J, auj):[];
   var qui=function(e){ var r=[]; [e.qui].concat(Array.isArray(e.membresEquipe)?e.membresEquipe:[]).forEach(function(n){ n=String(n||'').trim(); if(n&&r.indexOf(n)<0) r.push(n); }); return r; };
   var tDe=function(n){ return taches.filter(function(x){ return x.cle===n; })[0]; };
   var haDe=function(n){ var p=parcs.filter(function(x){ return x.nom===n; })[0]; return p?p.ha:0; };
-  var evts=[], sur={};
+  var evts=[];
   fil.slice().reverse().forEach(function(x){
     var e=x.e, t=tDe(e.tache); if(!t) return; var n=qui(e);
     var ev={ type:e.statut==='Validé'?'valide':'commence', noms:n.join(' et ')||'Quelqu\u2019un', ini:n.slice(0,2).map(function(c){ return c.charAt(0).toUpperCase(); }),
       tache:t.id, parcelle:e.parcelle, ts:x.ts||t0.getTime(), h:e.statut==='Validé'?Math.round(haDe(e.parcelle)*t.hha*10)/10:0 };
     evts.unshift(ev);
-    if(ev.type==='commence') sur[e.parcelle]=ev; else delete sur[e.parcelle];
   });
-  var equipes=Object.keys(sur).map(function(k){ var v=sur[k]; return { noms:v.noms, ini:v.ini, tache:v.tache, parcelle:k, depuis:v.ts }; });
+  // ★ FORME-1 (§301) : l'équipe d'une parcelle en cours = ceux du « Début » qui la met en cours (le même journal, la même
+  //   fenêtre que l'état « en cours » : cockpit.js/_ckPlanDebuts), QUEL QUE SOIT LE JOUR. Avant : le journal du jour seul
+  //   — une parcelle commencée la veille restait « en cours » sans personne dessus, et le plan écrivait « aucune équipe ».
+  var equipes=[];
+  taches.forEach(function(t){
+    var deb=(typeof window._ckPlanDebuts==='function')?window._ckPlanDebuts(PARC, J, t.cle, t.debut):{};
+    Object.keys(deb).forEach(function(n){ var e=deb[n], q=qui(e);
+      equipes.push({ noms:q.join(' et ')||'Personne d\u2019indiqu\u00e9', ini:q.length?q.slice(0,2).map(function(c){ return c.charAt(0).toUpperCase(); }):['?'], tache:t.id, parcelle:n, depuis:String(e.date||auj) }); });
+  });
   // La courbe : les photos du jour (PHOTO-1) et aujourd'hui en direct.
   var ph=((typeof window._ckChargeSerie==='function')?window._ckChargeSerie(_pilPhotoListe(), d, auj):[]).map(function(x){ return { d:x.iso, reste:x.v }; });
   var hT=d.totalTotal||0;

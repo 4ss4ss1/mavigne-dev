@@ -11,7 +11,7 @@ function monde(S) {
   const ouverts = [];
   const ctx = { Math, Number, String, Array, Object, JSON, Date, Set, parseInt, isFinite, setTimeout: () => 0, localStorage: { getItem: () => null } };
   ctx.window = ctx; ctx._mvInfoBtn = k => '<button data-info="' + k + '">i</button>';
-  ctx.openSelParc = n => ouverts.push(n);
+  ctx.openDP = n => ouverts.push(n);   // FORME-1 (§301) : la fiche de la parcelle
   vm.createContext(ctx); vm.runInContext(S.ck, ctx);
   return { W: ctx, ouverts };
 }
@@ -56,7 +56,8 @@ function suite(S) {
     && !W._ckPlanSvg(W._ckPlanDispo([{ nom: '<b>x', surface: 1, appellation: 'A' }]), {}, {}, 'T').includes('<b>x'));
   W._ckPlanOuvrir({ getAttribute: () => 'Les Crais 2' });
   T('toucher une parcelle ouvre sa fiche, par le chemin de toujours', ouverts[0] === 'Les Crais 2' && svg.includes('onclick="_ckPlanOuvrir(this)"') && svg.includes('data-p="Les Crais 2"'));
-  T('les équipes : commencé aujourd\u2019hui et pas validé', JSON.stringify(W._ckPlanEquipes(J.filter(e => e.parcelle !== 'Les Charmes'), '2027-01-12')) === '{"Les Crais 2":"HL"}');
+  T('les équipes : chaque parcelle en cours a la ligne qui l\u2019a commencée, même un autre jour, et seulement elles (FORME-1, §301)', (() => { const et = W._ckPlanEtats(parcs, J, 'Taille', '2026-12-01', false), d = W._ckPlanDebuts(parcs, J, 'Taille', '2026-12-01'); const c = Object.keys(et).filter(n => et[n] === 'cours').sort().join(); return c.length > 0 && Object.keys(d).sort().join() === c && Object.values(d).every(e => e.statut === 'En cours')
+    && Object.keys(W._ckPlanDebuts([{ nom: 'X' }], [{ date: '2026-12-05', parcelle: 'X', tache: 'Taille', qui: 'H', statut: 'En cours' }, { date: '2026-12-06', parcelle: 'X', tache: 'Taille', qui: 'H', statut: 'Validé' }], 'Taille', '2026-12-01')).length === 0; })());
   T('ni passages ni niveaux dans le choix de la tâche', W._ckPlanTaches([{ nom: 'Taille' }, { nom: 'Rognage', type: 'passages' }, { nom: 'Liage', type: 'niveaux' }, { nom: 'Relevage' }, { nom: 'Pioche' }]).map(t => t.nom).join() === 'Taille');
   T('pas de surface : l\u2019état vide, jamais un plan faux', W._ckPlanDispo([{ nom: 'x', surface: 0 }]) === null);
   const P = S.pil;
@@ -81,7 +82,7 @@ if (CONTRE) {
     ['un plan qui déborde au lieu de passer à la ligne', 'ck', "if(x + w > _CK_PL.m + L + 0.01 && x > _CK_PL.m){ x = _CK_PL.m; y += _CK_PL.h + 30; }", ""],
     ['un nom non échappé', 'ck', "' data-p=\"' + _ckEsc(n) + '\"", "' data-p=\"' + n + '\""],
     ['les passages proposés au choix', 'ck', "!(t.type === 'niveaux' || t.type === 'passages' ||", "!("],
-    ['une équipe qui reste après sa validation', 'ck', "if(e.statut === 'Validé') { delete r[e.parcelle]; return; }", ""],
+    ['une équipe qui reste après sa validation', 'ck', "Object.keys(L.deb).forEach(function(n){ if(L.der[n] === 'cours') r[n] = L.deb[n]; });", "Object.keys(L.deb).forEach(function(n){ r[n] = L.deb[n]; });"],   // FORME-1 (§301) : l'équipe vient de _ckPlanDebuts
     ['les fenêtres oubliées par _pilTabAuj', 'pil', "fenetres:((typeof _rfCd==='function'&&_rfCd())||{}).taskWindows||[], ", ""],
   ];
   let manques = 0;

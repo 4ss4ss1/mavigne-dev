@@ -346,3 +346,4 @@
 | 298 | 298. ★ PIL-1 — LES SEPT ONGLETS DU PILOTAGE HORS « AUJOURD'HUI » À LA CHARTE (08/10 — `src/styles.css` · `s… | `docs/claude/chantiers-280-329.md` |
 | 299 | 299. ★ E2E-1 — LE TEST DE BOUT EN BOUT SUIT LE BOUTON « DÉMARRER UNE SESSION » (09/10 — `scripts/e2e-local.… | `docs/claude/chantiers-280-329.md` |
 | 300 | 300. ★★ CADRE-1 — CASES ET FENÊTRES DANS LEUR CADRE, BARRE SOUS LES FENÊTRES, « LES GENS » SANS GEL (09/10 … | `docs/claude/chantiers-280-329.md` |
+| 301 | 301. ★★ FORME-1 — LE DOMAINE EN DIRECT AUX FORMES RÉELLES, COMPACT, AVEC LOUPE ; LA FORME EN HAUT DES FICHE… | `docs/claude/chantiers-280-329.md` |

@@ -123,15 +123,15 @@ const ilYa = ts => {
    à partir des moteurs du Pilotage (fin prévue, photos du jour, journal, parcelles, présences, météo, économie).
    Les dessins ne changent pas : ils lisent les mêmes noms qu'avant. */
 let V = null;
-let AUJ, DEBUT, VISEE, XMAX, TACHES = [], T = {}, PREREQ = {}, GENS = [], EQ = {}, APPS = [], AIDX = {}, BLOCS = [],
-  PLAN_H = 720, PARCS = [], PIDX = {}, HA_TOT = 0, ORDRE = {}, TOTAL = 0, YMAX = 500, TAUX = 0, MARGE_BUDGET = 0,
+let AUJ, DEBUT, VISEE, XMAX, TACHES = [], T = {}, PREREQ = {}, GENS = [], EQ = {}, APPS = [], AIDX = {},
+  PLAN_H = 720, PLAN_W = 1000, PLAN_S = 1, PLAN_LARG = 0, HA_VIGNE = 0, PARCS = [], PIDX = {}, HA_TOT = 0, ORDRE = {}, TOTAL = 0, YMAX = 500, TAUX = 0, MARGE_BUDGET = 0,
   POSTES = [], HIST = [], METEO = [], T0 = Date.now(), MIN = 60e3, NEXT_ID = 1, SPARK_TRAV = [], SPARK_BUD = [], SPARK_ECART = [];
 const S = { etats: {}, dates: {}, equipes: [], evts: [], vue: null, filtre: null, sel: null, onglet: 'auj', mode: 'terrain', svTout: false, filTout: false };
 const H_JOUR = 1;
 const effectif = () => (V ? V.presents : 0);
 const capacite = () => 0;
-const dParc = p => 'M' + p.pts.map(q => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join('L') + 'Z';
-const pX = p => (p.cx / 10) + '%';
+const dParc = p => p.d || '';
+const pX = p => (p.cx / PLAN_W * 100) + '%';
 const pY = p => (p.cy / PLAN_H * 100) + '%';
 const coutParc = (pid, t) => PIDX[pid].ha * T[t].hha * (1 + (AIDX[PIDX[pid].app].ecart || 0)) * TAUX;
 const resteAu = () => (V ? V.reste : 0);
@@ -143,63 +143,107 @@ const etatVue = (t, pid) => {
 };
 function finPrevue() { return V && V.fin ? deIso(V.fin) : ajout(AUJ, 1); }
 
-// Le plan : une zone par appellation (de la plus grande à la plus petite), rangées par lignes ; dans chaque zone, un
-// bloc par commune ; dans chaque bloc, une bande par parcelle, sa largeur selon sa surface. Les blocs ont les coins
-// légèrement décalés, comme le plan dessiné de la maquette — un schéma, pas une carte.
-function disposer(parcs) {
-  const apps = {}, ordre = [];
-  parcs.forEach(p => {
-    const a = p.appellation || 'Sans appellation';
-    if (!apps[a]) { apps[a] = { nom: a, ha: 0, com: {}, ordre: [] }; ordre.push(a); }
+/* ★ FORME-1 (§301) — LE PLAN AUX FORMES RÉELLES, COMPACT. Chaque parcelle a la forme de son contour (utils.js,
+   _mvFormeDe : une seule lecture pour le plan, la loupe et les fiches), nord en haut, À LA MÊME ÉCHELLE pour tout le
+   domaine ; rangée par appellation (la plus grande d'abord), commune après commune, sans cadre ni ligne de commune.
+   Le dessin se fait à la largeur réelle du panneau (1 unité = 1 pixel) : les textes gardent leur taille, rien ne
+   défile de côté, le plan se redessine quand la largeur change (dessinerPlan). Mesuré sur 37 parcelles : 394 px de
+   haut sur ordinateur (801 avec les bandes de REF-1) ; 615 px au téléphone, replié à environ 370.
+   ⚠️ Avant : chaque zone d'une ligne avait la même hauteur — une parcelle de 0,31 ha sortait plus grande qu'une de
+   0,88 ha, le rapport des surfaces ne tenait qu'à l'intérieur d'une commune. Et la commune, rangée { nom, lat, lng }
+   depuis la météo par secteur, s'écrivait « [object Object] » au-dessus de chaque bloc (toutes fondues en une). */
+const POL_PL = { zone: '600 13px Outfit, system-ui, sans-serif', ha: '400 12px Outfit, system-ui, sans-serif', pc: '500 12px Outfit, system-ui, sans-serif' };
+const bornePl = (v, a, b) => Math.max(a, Math.min(b, v));
+const nomCommune = c => (c && typeof c === 'object') ? String(c.nom || '') : String(c || '');
+let CTX2D = null;
+function largeurTx(t, police) {
+  try { if (!CTX2D) CTX2D = document.createElement('canvas').getContext('2d'); CTX2D.font = police; return CTX2D.measureText(String(t)).width; }
+  catch (e) { if (window._mvAvale) window._mvAvale(e, 'cockpit-vue.js/largeurTx'); return String(t).length * 6.6; }
+}
+// Les appellations et leurs parcelles, une fois par chargement ; la place de chacune se calcule au dessin (disposer).
+function preparerParcs(parcs) {
+  const apps = {}, ordre = [], forme = typeof window._mvFormeDe === 'function' ? window._mvFormeDe : () => null;
+  PARCS = parcs.map((p, i) => {
+    const a = p.appellation || 'Sans appellation', c = nomCommune(p.commune);
+    if (!apps[a]) { apps[a] = { nom: a, ha: 0, com: {}, ordreC: [] }; ordre.push(a); }
     const A = apps[a]; if (!p.arr) A.ha += p.ha;
-    const c = p.commune || ''; if (!A.com[c]) { A.com[c] = []; A.ordre.push(c); } A.com[c].push(p);
+    if (!A.com[c]) { A.com[c] = []; A.ordreC.push(c); }
+    const P = { id: 'p' + i, nom: p.nom, ha: p.ha, commune: c, cep: p.cepage || '', arr: !!p.arr, f: forme(p.geo),
+      cote: Math.max(3, Math.sqrt(Math.max(p.ha, 0) * 1e4)), cx: 0, cy: 0, d: '', box: [0, 0, 0, 0] };
+    A.com[c].push(P); return P;
   });
-  ordre.sort((x, y) => apps[y].ha - apps[x].ha);
-  // PRO-1 (§269) : une zone a d'abord la largeur qu'il faut pour lire son titre (nom et surface, police de 20 unités),
-  //   puis sa part de la place qui reste, selon sa surface. Avant, une petite appellation voisine d'une grande passait
-  //   sous 420 unités et partait seule sur sa ligne : sept appellations faisaient une colonne de bandeaux, réduite au
-  //   quart dans son cadre — des titres de cinq pixels à l'écran.
-  const ESP = 18, LARG = 960;
-  const minW = a => Math.min(LARG, Math.max(240, Math.round(String(a).length * 11.5 + haTxt(apps[a].ha).length * 9.5 + 40)));
-  const lignes = []; let cur = [], som = 0;
-  ordre.forEach(a => { const m = minW(a); if (cur.length && (som + ESP + m > LARG || cur.length >= 3)) { lignes.push(cur); cur = []; som = 0; } som += (cur.length ? ESP : 0) + m; cur.push(a); });
-  if (cur.length) lignes.push(cur);
-  APPS = []; BLOCS = []; PARCS = [];
-  let y = 44, k = 0;
-  lignes.forEach(lg => {
-    const haL = lg.reduce((s, a) => s + Math.max(apps[a].ha, .05), 0), mins = lg.map(minW);
-    const libre = Math.max(0, LARG - ESP * (lg.length - 1) - mins.reduce((s, v) => s + v, 0));
-    const nBlocs = Math.max(...lg.map(a => apps[a].ordre.length));
-    const hZ = Math.round(Math.max(104, Math.min(300, 120 + nBlocs * 88)));
-    let x = 20;
-    lg.forEach((a, i) => {
-      const A = apps[a], w = mins[i] + libre * Math.max(A.ha, .05) / haL;
-      const id = 'a' + APPS.length;
-      APPS.push({ id, nom: a, ecart: 0, f: [x, y, w, hZ], minW: mins[i] });
-      const nb = A.ordre.length, hb = (hZ - 38 - 14 * (nb - 1)) / nb;
-      A.ordre.forEach((c, j) => {
-        const x0 = x + 24, x1 = x + w - 24, y0 = y + 38 + j * (hb + 14), y1 = y0 + hb, o = (k++ % 3) * 3 - 3;
-        const b = { id: 'b' + BLOCS.length, nom: c || a, app: id, commune: c, q: [[x0, y0 + 4 + o], [x1, y0 - 2 - o], [x1 + 4, y1], [x0 + 4, y1 + 2]] };
-        BLOCS.push(b);
-        const ps = A.com[c].slice().sort((p, q) => String(p.nom).localeCompare(String(q.nom), 'fr'));
-        const totB = ps.reduce((s, p) => s + Math.max(p.ha, .02), 0);
-        const [P0, P1, P2, P3] = b.q, Lp = (P, Q, t) => [lerp(P[0], Q[0], t), lerp(P[1], Q[1], t)];
-        let acc = 0;
-        ps.forEach(p => {
-          const s = Math.max(p.ha, .02), u0 = acc / totB, u1 = (acc + s) / totB; acc += s;
-          const tA = Lp(P0, P1, u0), tZ = Lp(P0, P1, u1), bZ = Lp(P3, P2, u1), bA = Lp(P3, P2, u0);
-          const larg = Math.hypot(tZ[0] - tA[0], tZ[1] - tA[1]), n = Math.max(2, Math.round(larg / 7.5)), rangs = [];
-          for (let r = 1; r < n; r++) { const u = lerp(u0, u1, r / n), h = Lp(P0, P1, u), bas = Lp(P3, P2, u); rangs.push([Lp(h, bas, .07), Lp(h, bas, .93)]); }
-          PARCS.push({ id: 'p' + PARCS.length, bloc: b.id, lieu: b.nom, app: id, commune: c, ha: p.ha, nom: p.nom, cep: p.cepage || '',
-            arr: !!p.arr, pts: [tA, tZ, bZ, bA], cx: (tA[0] + tZ[0] + bZ[0] + bA[0]) / 4, cy: (tA[1] + tZ[1] + bZ[1] + bA[1]) / 4, rangs });
-        });
-        b.cx = (P0[0] + P1[0] + P2[0] + P3[0]) / 4; b.cy = (P0[1] + P1[1] + P2[1] + P3[1]) / 4;
-      });
-      x += w + ESP;
-    });
-    y += hZ + 44;
+  ordre.sort((x, y) => apps[y].ha - apps[x].ha || x.localeCompare(y, 'fr'));
+  APPS = ordre.map((a, k) => {
+    const A = apps[a], id = 'a' + k;
+    const groupes = A.ordreC.map(c => ({ nom: c, parcs: A.com[c], ha: A.com[c].reduce((t, p) => t + (p.arr ? 0 : p.ha), 0) }))
+      .sort((g, h) => h.ha - g.ha || g.nom.localeCompare(h.nom, 'fr'));
+    groupes.forEach((g, r) => { g.rang = r; g.parcs.forEach(p => { p.app = id; }); });
+    return { id, nom: a, ha: A.ha, ecart: 0, groupes, f: [0, 0, 0, 0], tw: 0 };
   });
-  PLAN_H = Math.max(200, y - 20);
+  HA_VIGNE = PARCS.reduce((t, p) => t + (p.arr ? 0 : p.ha), 0);
+}
+// Les mesures du dessin, en pixels : une seule colonne, resserrée, sous 420 px de large (téléphone) ; deux colonnes au-delà
+// — la colonne du plan dans le cockpit fait environ 450 px sur un écran de 1 280.
+function mesuresPlan(W) { const p = W < 420; return { p, G: p ? 5 : 6, GZ: p ? 18 : 22, HT: 28, C: W >= 900 ? 3 : (p ? 1 : 2) }; }
+const dimsP = (p, s) => p.f ? [p.f.w * s, p.f.h * s] : [p.cote * s, p.cote * s];
+// Une appellation à la largeur w : ses parcelles par rangées, commune après commune (la plus grande d'abord), les plus
+// hautes d'abord dans chaque commune, centrées dans la hauteur de leur rangée.
+function rangerZone(z, w, s, K) {
+  const items = []; let y = z.ht || K.HT;
+  const it = [].concat(...z.groupes.map(g => g.parcs.map(p => { const d = dimsP(p, s); return { p, w: d[0], h: d[1], g: g.rang }; })))
+    .sort((a, b) => (a.g - b.g) || (b.h - a.h) || String(a.p.nom).localeCompare(String(b.p.nom), 'fr'));
+  let x = 0, rh = 0, row = [];
+  const vider = () => { row.forEach(o => { o.y = y + (rh - o.h) / 2; }); items.push(...row); y += rh + K.G; row = []; x = 0; rh = 0; };
+  it.forEach(o => { if (row.length && x + o.w > w + .5) vider(); o.x = x; x += o.w + K.G; if (o.h > rh) rh = o.h; row.push(o); });
+  if (row.length) vider();
+  return { h: y - K.G, items };
+}
+// Les appellations en colonnes de même largeur, chacune dans la colonne la moins haute : aucune ne garde de vide sous ses
+// parcelles. La plus grande prend toute la largeur quand elle porte plus du tiers des vignes.
+function plierPlan(W, s, K) {
+  const C = K.C, Wc = (W - (C - 1) * K.GZ) / C, places = [];
+  let y0 = 0, reste = APPS;
+  if (C > 1 && APPS.length > 1 && APPS[0].ha >= .36 * HA_VIGNE) {
+    APPS[0].ht = APPS[0].tw <= W ? K.HT : K.HT + 14;
+    const r = rangerZone(APPS[0], W, s, K); places.push({ z: APPS[0], x: 0, y: 0, w: W, h: r.h, r }); y0 = r.h + K.GZ; reste = APPS.slice(1);
+  }
+  const hc = new Array(C).fill(y0);
+  reste.forEach(z => {
+    z.ht = z.tw <= Wc ? K.HT : K.HT + 14;   // un titre trop long pour sa colonne passe sur deux lignes
+    const r = rangerZone(z, Wc, s, K); let k = 0;
+    for (let i = 1; i < C; i++) if (hc[i] < hc[k] - .5) k = i;
+    places.push({ z, x: k * (Wc + K.GZ), y: hc[k], w: Wc, h: r.h, r }); hc[k] += r.h + K.GZ;
+  });
+  return { H: Math.ceil(Math.max(0, ...places.map(o => o.y + o.h))), places };
+}
+// L'échelle (pixels par mètre) : les vignes couvrent une part fixe de l'écran (le double sur une seule colonne), quelle
+// que soit la taille du domaine ; aucune parcelle ne déborde de sa colonne ; deux écrans de haut au plus.
+function echellePlan(W, K) {
+  const A = Math.max(1, PARCS.reduce((t, p) => t + (p.f ? p.f.aire : p.cote * p.cote), 0));
+  const Wc = (W - (K.C - 1) * K.GZ) / K.C, maxW = Math.max(1, ...PARCS.map(p => p.f ? p.f.w : p.cote));
+  let s = Math.min(Math.sqrt((K.p ? .14 : W < 600 ? .10 : .07) * W * W / A), 1.6, Wc / maxW);
+  const Hmax = (K.p ? 3.4 : 2.2) * W;
+  if (plierPlan(W, s, K).H > Hmax) { let lo = s * .25, hi = s; for (let i = 0; i < 16; i++) { const m = (lo + hi) / 2; if (plierPlan(W, m, K).H <= Hmax) lo = m; else hi = m; } s = lo; }
+  return s;
+}
+function placerParc(p, ox, oy, s) {
+  if (p.f) {
+    const pts = p.f.rings.map(r => r.map(q => [ox + q[0] * s, oy + q[1] * s]));
+    p.d = pts.map(r => 'M' + r.map(q => f1(q[0]) + ' ' + f1(q[1])).join('L') + 'Z').join('');
+    p.cx = ox + p.f.pole.x * s; p.cy = oy + p.f.pole.y * s; p.box = [ox, oy, p.f.w * s, p.f.h * s];
+  } else {   // sans contour : un carré de sa surface, coins adoucis, en pointillé
+    const a = p.cote * s, r = Math.min(4, a / 5), x1 = ox + a, y1 = oy + a, A = ' ' + f1(r) + ' ' + f1(r) + ' 0 0 1 ';
+    p.d = 'M' + f1(ox + r) + ' ' + f1(oy) + 'H' + f1(x1 - r) + 'A' + A + f1(x1) + ' ' + f1(oy + r) + 'V' + f1(y1 - r) + 'A' + A + f1(x1 - r) + ' ' + f1(y1)
+      + 'H' + f1(ox + r) + 'A' + A + f1(ox) + ' ' + f1(y1 - r) + 'V' + f1(oy + r) + 'A' + A + f1(ox + r) + ' ' + f1(oy) + 'Z';
+    p.cx = ox + a / 2; p.cy = oy + a / 2; p.box = [ox, oy, a, a];
+  }
+}
+function disposer(W) {
+  const K = mesuresPlan(W);
+  APPS.forEach(z => { z.tw = largeurTx(z.nom, POL_PL.zone) + 8 + largeurTx(haTxt(z.ha), POL_PL.ha); });
+  const s = echellePlan(W, K), L = plierPlan(W, s, K);
+  PLAN_S = s; PLAN_W = W; PLAN_H = Math.max(40, L.H); PLAN_LARG = W;
+  L.places.forEach(o => { o.z.f = [o.x, o.y, o.w, o.h]; o.r.items.forEach(it => placerParc(it.p, o.x + it.x, o.y + it.y, s)); });
 }
 
 function charger(v) {
@@ -211,7 +255,7 @@ function charger(v) {
     debut: deIso(t.debut || v.debut || v.auj), fin: deIso(t.fin || v.objectif || v.auj), pct: t.pct || 0, hDone: t.hDone, hTotal: t.hTotal, cle: t.cle }));
   T = Object.fromEntries(TACHES.map(t => [t.id, t]));
   GENS = (v.gens || []).map(g => ({ p: g.nom, absent: !!g.absent, motif: g.motif || '', tens: g.tens || 100 }));
-  disposer(v.parcs || []);
+  preparerParcs(v.parcs || []); if (PLAN_LARG) disposer(PLAN_LARG);
   PIDX = Object.fromEntries(PARCS.map(p => [p.id, p]));
   AIDX = Object.fromEntries(APPS.map(a => [a.id, a]));
   HA_TOT = PARCS.filter(p => !p.arr).reduce((s, p) => s + p.ha, 0);
@@ -225,7 +269,14 @@ function charger(v) {
   });
   if (!S.vue || !T[S.vue]) S.vue = (v.prio && T[v.prio]) ? v.prio : ((TACHES.find(t => t.pct < 100) || TACHES[0] || {}).id || null);
   EQ = {}; S.equipes = []; S.evts = [];
-  (v.equipes || []).forEach((e, i) => { const id = 'e' + i; EQ[id] = { noms: e.noms, ini: e.ini }; if (parNom[e.parcelle] && T[e.tache]) S.equipes.push({ id, tache: e.tache, parc: parNom[e.parcelle], depuis: e.depuis || Date.now() }); });
+  (v.equipes || []).forEach((e, i) => { const id = 'e' + i; EQ[id] = { noms: e.noms, ini: e.ini }; if (parNom[e.parcelle] && T[e.tache]) S.equipes.push({ id, tache: e.tache, parc: parNom[e.parcelle], depuis: typeof e.depuis === 'string' ? e.depuis : iso(AUJ) }); });
+  // ★ FORME-1 (§301) : une parcelle en cours porte TOUJOURS une pastille (« en cours » et « une équipe dessus » sont une
+  //   seule lecture du journal, cockpit.js/_ckPlanDebuts) ; un début sans nom au journal le dit au lieu de disparaître.
+  TACHES.forEach(t => Object.keys(S.etats[t.id]).forEach(pid => {
+    if (S.etats[t.id][pid] !== 'cours' || S.equipes.some(e => e.tache === t.id && e.parc === pid)) return;
+    const id = 'e' + Object.keys(EQ).length; EQ[id] = { noms: 'Personne d’indiqué', ini: ['?'] };
+    S.equipes.push({ id, tache: t.id, parc: pid, depuis: iso(AUJ) });
+  }));
   (v.evts || []).forEach((e, i) => {
     const id = 'f' + i; EQ[id] = EQ[id] || { noms: e.noms, ini: e.ini };
     if (parNom[e.parcelle] && T[e.tache]) S.evts.push({ id: i + 1, type: e.type, eq: id, t: e.tache, pid: parNom[e.parcelle], h: e.h || 0, ts: e.ts || Date.now() });
@@ -290,7 +341,7 @@ const INFO = {
   conformite: 'Points du registre phyto et des documents obligatoires qui demandent une action de votre part.',
   savoir: 'Ce qui peut changer la journée ou la semaine : météo par secteur, absences, contrats, matériel, retards. Les motifs d’absence ne sont visibles que de l’admin.',
   decision: 'Les quatre questions de chaque matin, chacune avec sa réponse et le bouton pour agir.',
-  plan: 'Les parcelles sont rangées par appellation, puis par lieu-dit. Chaque parcelle prend la couleur de son état pour la tâche choisie ; le trait doré au-dessus de chaque appellation montre son avancement. C’est un schéma : la vraie carte reste dans Parcelles.',
+  plan: 'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine. Sa couleur dit l’état de la tâche choisie ; le trait sous chaque appellation, son avancement. Une parcelle en cours porte l’équipe qui l’a commencée, même un autre jour. Au survol, une loupe la montre en grand ; la toucher ouvre sa fiche. Les rangs dessinés sont un repère, pas le relevé des rangs ; une parcelle sans contour est un carré de sa surface, en pointillé.',
   courbe: 'Le reste mesuré vient de la photo prise chaque jour. La projection suit la capacité du planning. La ligne fine montre l’allure qu’il faudrait pour finir pile à l’objectif.',
   atterrissage: 'L’atterrissage additionne ce qui est dépensé et ce que coûtera le travail restant, au coût horaire de l’équipe et à l’écart au barème mesuré dans chaque appellation. Les autres postes suivent les factures saisies.',
   coutha: 'Atterrissage de la campagne, divisé par les hectares en production. Le prévu est le budget divisé de la même façon.',
@@ -447,33 +498,34 @@ function htmlDecision() {
 }
 
 function svgPlan() {
+  const K = mesuresPlan(PLAN_W), D = K.p ? 3 : 3.4, angles = new Set(), fa = typeof window._mvFormeAngle === 'function' ? window._mvFormeAngle : () => 90;
+  PARCS.forEach(p => { if (p.f && !p.arr) angles.add(fa(p.f.ang)); });
+  const defs = '<pattern id="ck-hach" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line class="ck-hach-l" x1="0" y1="0" x2="0" y2="7"/></pattern>'
+    + [...angles].map(k => '<pattern id="ck-rg-' + k + '" width="' + D + '" height="' + D + '" patternUnits="userSpaceOnUse" patternTransform="rotate(' + k + ')"><path class="ck-rg-l" d="M' + (D / 2) + ' 0V' + D + '"/></pattern>').join('');
+  const pcW = largeurTx('100 %', POL_PL.pc);
   const zones = APPS.map(a => {
-    const [x, y, w, h] = a.f;
-    const ha = PARCS.filter(p => p.app === a.id && !p.arr).reduce((s, p) => s + p.ha, 0);
-    return '<g class="ck-zone" data-app="' + a.id + '"><rect class="ck-zone-f" x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="14"/>'
-      + '<rect class="ck-zone-rail" x="' + (x + 14) + '" y="' + (y - 1.5) + '" width="' + (w - 28) + '" height="3" rx="1.5"/>'
-      + '<rect class="ck-zone-prog" id="ck-zp-' + a.id + '" x="' + (x + 14) + '" y="' + (y - 1.5) + '" width="' + (w - 28) + '" height="3" rx="1.5"/>'
-      + '<text class="ck-zone-nom" x="' + (x + 4) + '" y="' + (y - 12) + '">' + esc(a.nom) + '<tspan class="ck-zone-ha" dx="12">' + haTxt(ha) + '</tspan></text>'
-      + (w - (a.minW || 0) >= 150 ? '<text class="ck-zone-pc" id="ck-zt-' + a.id + '" x="' + (x + w - 4) + '" y="' + (y - 12) + '" text-anchor="end"></text>' : '') + '</g>';
+    const [x, y, w] = a.f, deux = (a.ht || K.HT) > K.HT, yR = y + (deux ? 33 : 19);
+    // Sur deux lignes : le nom (coupé d'un « … » s'il ne tient pas même seul, le nom entier au survol), puis la surface et l'avancement.
+    let nom = a.nom;
+    if (deux && largeurTx(nom, POL_PL.zone) > w) { while (nom.length > 3 && largeurTx(nom + '…', POL_PL.zone) > w) nom = nom.slice(0, -1); nom = nom.trimEnd() + '…'; }
+    return '<g class="ck-zone" data-app="' + a.id + '">'
+      + (deux
+        ? '<text class="ck-zone-nom" x="' + f1(x) + '" y="' + f1(y + 13) + '">' + esc(nom) + '<title>' + esc(a.nom) + '</title></text>'
+          + '<text class="ck-zone-ha" x="' + f1(x) + '" y="' + f1(y + 28) + '">' + haTxt(a.ha) + '</text>'
+          + '<text class="ck-zone-pc" id="ck-zt-' + a.id + '" x="' + f1(x + w) + '" y="' + f1(y + 28) + '" text-anchor="end"></text>'
+        : '<text class="ck-zone-nom" x="' + f1(x) + '" y="' + f1(y + 13) + '">' + esc(a.nom) + '<tspan class="ck-zone-ha" dx="8">' + haTxt(a.ha) + '</tspan></text>'
+          + (w - a.tw >= pcW + 12 ? '<text class="ck-zone-pc" id="ck-zt-' + a.id + '" x="' + f1(x + w) + '" y="' + f1(y + 13) + '" text-anchor="end"></text>' : ''))
+      + '<rect class="ck-zone-rail" x="' + f1(x) + '" y="' + f1(yR) + '" width="' + f1(w) + '" height="2" rx="1"/>'
+      + '<rect class="ck-zone-prog" id="ck-zp-' + a.id + '" x="' + f1(x) + '" y="' + f1(yR) + '" width="' + f1(w) + '" height="2" rx="1"/></g>';
   }).join('');
-  const lieux = BLOCS.map(b => {
-    const [P0, P1] = b.q, a = Math.atan2(P1[1] - P0[1], P1[0] - P0[0]) * 180 / Math.PI;
-    return '<text class="ck-lieu" transform="translate(' + (P0[0] + 2).toFixed(1) + ' ' + (P0[1] - 9).toFixed(1) + ') rotate(' + a.toFixed(2) + ')">' + esc(b.nom) + '</text>';
-  }).join('');
-  const clos = BLOCS.filter(b => b.clos).map(b => '<path class="ck-clos" d="M' + b.q.map(q => {
-    const dx = q[0] - b.cx, dy = q[1] - b.cy, n = Math.hypot(dx, dy);
-    return (q[0] + dx / n * 6).toFixed(1) + ' ' + (q[1] + dy / n * 6).toFixed(1);
-  }).join('L') + 'Z"/>').join('');
-  const maisons = []   /* REF-1 : le village de la démonstration n'a rien à faire sur un vrai domaine */
-    .map((m, k) => '<rect' + (k === 5 ? ' class="chai"' : '') + ' x="' + m[0] + '" y="' + m[1] + '" width="' + m[2] + '" height="' + m[3] + '" rx="1.5" transform="rotate(' + m[4] + ' ' + (m[0] + m[2] / 2) + ' ' + (m[1] + m[3] / 2) + ')"/>').join('');
-  const parcs = PARCS.map(p => '<path class="ck-pa et-' + etatVue(S.vue, p.id) + '" data-id="' + p.id + '" d="' + dParc(p) + '"'
+  const parcs = PARCS.map(p => '<path class="ck-pa et-' + etatVue(S.vue, p.id) + (p.f ? '' : ' sans-contour') + '" data-id="' + p.id + '" d="' + dParc(p) + '"'
     + (p.arr ? ' aria-label="' + esc(p.nom) + ', arrachée"' : ' tabindex="0" role="button" aria-label="' + esc(p.nom) + '"') + '/>').join('');
-  const rangs = PARCS.filter(p => !p.arr).map(p => p.rangs.map(l => '<line x1="' + l[0][0].toFixed(1) + '" y1="' + l[0][1].toFixed(1) + '" x2="' + l[1][0].toFixed(1) + '" y2="' + l[1][1].toFixed(1) + '"/>').join('')).join('');
-  return '<svg class="ck-svg" id="ck-svg" viewBox="0 0 1000 ' + PLAN_H + '" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Plan des parcelles, rangées par appellation">'
-    + '<defs><pattern id="ck-hach" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line class="ck-hach-l" x1="0" y1="0" x2="0" y2="7"/></pattern></defs>'
-    + '<g class="ck-zones">' + zones + '</g>'
-    + clos + '<g class="ck-lieux">' + lieux + '</g><g class="ck-parcs">' + parcs + '</g><g class="ck-rangs">' + rangs + '</g>'
-    + '<g id="ck-flash"></g><path id="ck-survol" d=""/><path id="ck-sel" d=""/></svg>';
+  const rangs = PARCS.filter(p => p.f && !p.arr).map(p => '<path class="ck-pr" id="ck-pr-' + p.id + '" d="' + dParc(p) + '" fill="url(#ck-rg-' + fa(p.f.ang) + ')"/>').join('');
+  // Une toute petite parcelle garde une cible de 24 px au doigt.
+  const cibles = PARCS.filter(p => p.box[2] < 24 && p.box[3] < 24).map(p => '<rect class="ck-pa-hit" data-id="' + p.id + '" x="' + f1(p.cx - 12) + '" y="' + f1(p.cy - 12) + '" width="24" height="24"/>').join('');
+  return '<svg class="ck-svg" id="ck-svg" viewBox="0 0 ' + PLAN_W + ' ' + PLAN_H + '" width="' + PLAN_W + '" height="' + PLAN_H + '" role="group" aria-label="Plan des parcelles à l’échelle, rangées par appellation">'
+    + '<defs>' + defs + '</defs><g class="ck-zones">' + zones + '</g><g class="ck-parcs">' + parcs + '</g><g id="ck-flash"></g>'
+    + '<g class="ck-rangs">' + rangs + '</g><g class="ck-cibles">' + cibles + '</g><path id="ck-survol" d=""/><path id="ck-sel" d=""/></svg>';
 }
 const LEG = [['faite', 'Faites'], ['cours', 'En cours'], ['afaire', 'À faire'], ['retard', 'En retard'], ['arr', 'Arrachée']];
 function htmlPlan() {
@@ -482,11 +534,52 @@ function htmlPlan() {
     + '<div class="ck-seg" role="tablist" aria-label="Tâche affichée sur le plan">'
     + TACHES.map(t => '<button type="button" role="tab" data-t="' + t.id + '" aria-selected="' + (t.id === S.vue) + '">' + esc(t.nom) + '</button>').join('')
     + '<span class="ck-seg-ind" aria-hidden="true"></span></div></header>'
-    + '<div class="ck-carte" id="ck-carte"><div class="ck-carte-in" style="aspect-ratio:1000/' + Math.round(PLAN_H) + '">' + svgPlan()
-    + '<div class="ck-calque" id="ck-calque"><div class="ck-etiq" id="ck-etiq" hidden><i></i><span></span></div></div></div></div>'
-    + '<div class="ck-leg" role="group" aria-label="Filtrer le plan par état">'
+    + '<div class="ck-carte" id="ck-carte"><div class="ck-carte-in" id="ck-carte-in"><div class="ck-svg-boite" id="ck-svg-boite"></div>'
+    + '<div class="ck-calque" id="ck-calque"></div></div></div>'
+    + '<button type="button" class="ck-plan-tout" id="ck-plan-tout" aria-expanded="false" hidden></button>'
+    + '<div class="ck-plan-pied"><div class="ck-leg" role="group" aria-label="Filtrer le plan par état">'
     + LEG.map(([k, l]) => '<button type="button" class="ck-leg-i" data-f="' + k + '" aria-pressed="false"><i class="sw sw-' + k + '"></i>' + l + ' <b id="ck-leg-' + k + '" data-v="0">0</b></button>').join('')
-    + '</div>';
+    + '</div><div class="ck-echelle" id="ck-echelle" aria-hidden="true"></div></div>'
+    + '<p class="ck-plan-note" id="ck-plan-note" hidden></p>';
+}
+// L'échelle et le nord sous le plan : la promesse « à l'échelle » se lit, elle ne se croit pas sur parole.
+function majEchelle() {
+  const el = $('#ck-echelle'); if (!el) return;
+  const pas = typeof window._mvFormePas === 'function' ? window._mvFormePas(PLAN_S, 56, 130) : 100, L = Math.round(pas * PLAN_S);
+  const lib = typeof window._mvFormeMetres === 'function' ? window._mvFormeMetres(pas) : pas + '\u202fm';
+  el.innerHTML = '<svg width="14" height="26" viewBox="0 0 14 26"><text class="ck-ech-t" x="7" y="5" text-anchor="middle" dominant-baseline="middle">N</text><path class="ck-ech-l" d="M7 25V12M4 15l3-3.5 3 3.5"/></svg>'
+    + '<svg width="' + (L + 2) + '" height="26" viewBox="0 0 ' + (L + 2) + ' 26"><text class="ck-ech-t" x="' + (L / 2 + 1) + '" y="10" text-anchor="middle" dominant-baseline="middle">' + lib + '</text>'
+    + '<path class="ck-ech-l" d="M1 19V24H' + (L + 1) + 'V19"/></svg>';
+}
+// Les parcelles sans contour : dessinées en carré de leur surface, et le plan le dit.
+function majNote() {
+  const el = $('#ck-plan-note'); if (!el) return;
+  const sans = PARCS.filter(p => !p.f), n = sans.length;
+  if (!n) { el.hidden = true; return; }
+  const noms = sans.map(p => p.nom), liste = n <= 3 ? (n === 1 ? noms[0] : noms.slice(0, -1).join(', ') + ' et ' + noms[n - 1]) : n + ' parcelles';
+  el.innerHTML = '<i aria-hidden="true"></i><span>' + (n === PARCS.length ? 'Aucun contour enregistré pour ce domaine : chaque parcelle est un carré de sa surface. Les contours se chargent à l’installation.'
+    : esc(liste) + (n > 1 ? ' n’ont' : ' n’a') + ' pas de contour : ' + (n > 1 ? 'dessinées' : 'dessinée') + ' en carré de ' + (n > 1 ? 'leur' : 'sa') + ' surface.') + '</span>';
+  el.hidden = false;
+}
+// Sur une seule colonne (téléphone), le plan se replie sous ses premières appellations ; « Tout le plan » ouvre le reste.
+function majPli() {
+  const c = $('#ck-carte'), b = $('#ck-plan-tout'); if (!c || !b) return;
+  let pli = 0;
+  if (mesuresPlan(PLAN_W).p) APPS.forEach((a, i) => { const bas = a.f[1] + a.f[3]; if (i === 0 || bas <= 380) pli = Math.max(pli, bas); });
+  if (!pli || PLAN_H <= pli + 80) { c.classList.remove('plie'); b.hidden = true; return; }
+  c.style.setProperty('--pli', Math.ceil(pli + 10) + 'px');
+  c.classList.toggle('plie', !S.planTout);
+  b.hidden = false; b.setAttribute('aria-expanded', String(!!S.planTout));
+  b.textContent = S.planTout ? 'Replier le plan' : 'Tout le plan (' + APPS.length + ' appellations)';
+}
+// Le dessin, à la largeur réelle : au montage, puis à chaque largeur nouvelle (ranger).
+function dessinerPlan(force) {
+  const boite = $('#ck-carte-in'), sb = $('#ck-svg-boite'); if (!boite || !sb) return;
+  const W = Math.round(boite.clientWidth); if (W < 120) return;
+  if (!force && Math.abs(W - PLAN_LARG) < 4 && sb.firstChild) return;
+  disposer(W);
+  sb.innerHTML = svgPlan();
+  majEchelle(); majNote(); majPli(); majPlan(); survoler(null);
 }
 
 function equipesHtml(t) {
@@ -494,7 +587,7 @@ function equipesHtml(t) {
   if (!eqs.length) return '';
   return '<span class="ck-ch-eq" title="' + esc(eqs.map(e => EQ[e.id].noms).join(', ')) + '"><span class="ck-pt-vif" aria-hidden="true"></span>'
     + eqs.map(e => '<span class="ck-duo">' + EQ[e.id].ini.map(i => '<span class="ck-av ck-av-s">' + i + '</span>').join('') + '</span>').join('')
-    + '<span class="ck-sr">' + eqs.length + ' équipe' + (eqs.length > 1 ? 's' : '') + ' sur le terrain</span></span>';
+    + '<span class="ck-sr">' + eqs.length + ' équipe' + (eqs.length > 1 ? 's' : '') + ' sur une parcelle en cours</span></span>';
 }
 function htmlChantiers(r) {
   return entete('Chantiers ' + V.saisonDe, 'Dans l’ordre des dates de la campagne')
@@ -771,48 +864,65 @@ function majDecision(r) {
   tx.textContent = nb(x.pct) + '\u00a0%, ' + nb(x.hF) + ' / ' + nb(x.hT) + '\u202fh';
 }
 function majPlan(o = {}) {
-  const t = S.vue;
+  const t = S.vue; if (!t || !T[t]) return;
   $$('.ck-pa').forEach(el => {
-    const id = el.dataset.id, e = etatVue(t, id);
-    const cls = 'ck-pa et-' + e + (S.filtre === e ? ' f-on' : '');
+    const id = el.dataset.id, p = PIDX[id]; if (!p) return;
+    const e = etatVue(t, id), on = S.filtre === e;
+    const cls = 'ck-pa et-' + e + (p.f ? '' : ' sans-contour') + (on ? ' f-on' : '');
     if (el.getAttribute('class') !== cls) el.setAttribute('class', cls);
-    if (!PIDX[id].arr) el.setAttribute('aria-label', PIDX[id].nom + ', ' + AIDX[PIDX[id].app].nom + ', ' + haTxt(PIDX[id].ha) + ', ' + T[t].nom.toLowerCase() + ' ' + libEtat(t, e));
+    const r = document.getElementById('ck-pr-' + id); if (r) r.classList.toggle('f-on', on);
+    if (!p.arr) el.setAttribute('aria-label', p.nom + ', ' + AIDX[p.app].nom + ', ' + haTxt(p.ha) + ', ' + T[t].nom.toLowerCase() + ' ' + libEtat(t, e));
   });
   majEquipes();
   const n = { faite: 0, cours: 0, afaire: 0, retard: 0, arr: 0 };
   PARCS.forEach(p => { n[etatVue(t, p.id)]++; });
   LEG.forEach(([k]) => Anim.compter($('#ck-leg-' + k), n[k], nb, 600));
   APPS.forEach(a => {
-    const x = R.a[a.id];
-    $('#ck-zp-' + a.id).style.transform = 'scaleX(' + (x.pct / 100).toFixed(4) + ')';
-    $('#ck-zp-' + a.id).setAttribute('class', 'ck-zone-prog' + (x.pct >= 99.95 ? ' fini' : ''));
-    const zt = $('#ck-zt-' + a.id); if (zt) zt.textContent = T[t].nom + ' : ' + nb(x.pct) + '\u202f%';
+    const x = R.a[a.id], zp = $('#ck-zp-' + a.id); if (!x || !zp) return;
+    zp.style.transform = 'scaleX(' + (x.pct / 100).toFixed(4) + ')';
+    zp.setAttribute('class', 'ck-zone-prog' + (x.pct >= 99.95 ? ' fini' : ''));
+    const zt = $('#ck-zt-' + a.id); if (zt) zt.textContent = nb(x.pct) + '\u202f%';   // la tâche est déjà dite par le sélecteur au-dessus
   });
-  const tot = S.equipes.filter(e => e.parc).length, ici = S.equipes.filter(e => e.parc && e.tache === t).length;
-  $('#ck-plan-cadre').textContent = (tot ? tot + ' équipe' + (tot > 1 ? 's' : '') + ' sur le terrain, ' + (ici ? ici + ' sur ' + T[t].art : 'aucune sur ' + T[t].art) : 'Aucune équipe sur le terrain') + ', parcelles rangées par appellation';
+  // ★ FORME-1 : le cadre lit la MÊME chose que les pastilles — une équipe par parcelle en cours, quel que soit le jour.
+  const ici = S.equipes.filter(e => e.parc && e.tache === t).length;
+  const autres = TACHES.filter(x => x.id !== t).map(x => ({ x, n: S.equipes.filter(e => e.parc && e.tache === x.id).length })).filter(z => z.n).map(z => z.n + ' sur ' + z.x.art);
+  $('#ck-plan-cadre').textContent = (ici ? ici + (ici > 1 ? ' équipes' : ' équipe') + ' sur ' + T[t].art : 'Aucune parcelle en cours sur ' + T[t].art)
+    + (autres.length ? ', ' + autres.join(', ') : '') + ', parcelles à l’échelle';
   if (o.onde) onde(o.onde.pid, o.onde.etat, o.onde.t);
-  if (S.sel) $('#ck-sel').setAttribute('d', dParc(PIDX[S.sel]));
+  const sel = $('#ck-sel'); if (sel) sel.setAttribute('d', S.sel && PIDX[S.sel] ? dParc(PIDX[S.sel]) : '');
+}
+const JOURS_L = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+// « commencée aujourd'hui », « hier », « jeudi » (dans la semaine), « le 2 janv. »
+function quand(d) {
+  if (!d || d >= iso(AUJ)) return 'commencée aujourd’hui';
+  const x = deIso(d), n = Math.round((AUJ - x) / 864e5);
+  if (n === 1) return 'commencée hier';
+  if (n < 7) return 'commencée ' + JOURS_L[x.getUTCDay()];
+  return 'commencée le ' + (x.getUTCDate() === 1 ? '1er' : x.getUTCDate()) + '\u00a0' + MOIS_C[x.getUTCMonth()];
 }
 function majEquipes() {
-  const calque = $('#ck-calque');
-  const vis = S.equipes.filter(e => e.parc && e.tache === S.vue);
+  const calque = $('#ck-calque'); if (!calque) return;
+  const vis = S.equipes.filter(e => e.parc && e.tache === S.vue), aujIso = iso(AUJ);
   $$('.ck-eq', calque).forEach(m => {
     if (m.classList.contains('part')) return;
     if (!vis.some(e => e.id === m.dataset.eq)) { m.classList.add('part'); setTimeout(() => m.remove(), 420); }
   });
   vis.forEach(e => {
-    const p = PIDX[e.parc], left = pX(p), top = pY(p);
+    // La pastille reste dans le plan, même sur une parcelle au bord ; commencée un autre jour, elle passe en clair.
+    const p = PIDX[e.parc], dx = 11 + 7.5 * (EQ[e.id].ini.length - 1);
+    const left = (bornePl(p.cx, dx + 2, PLAN_W - dx - 2) / PLAN_W * 100) + '%', top = (bornePl(p.cy, 13, PLAN_H - 13) / PLAN_H * 100) + '%';
     let m = calque.querySelector('.ck-eq[data-eq="' + e.id + '"]:not(.part)');
     if (!m) {
       m = document.createElement('div');
       m.className = 'ck-eq neuf';
       m.dataset.eq = e.id;
-      m.title = EQ[e.id].noms;
-      m.innerHTML = EQ[e.id].ini.map(i => '<span class="ck-av">' + i + '</span>').join('');
+      m.innerHTML = EQ[e.id].ini.map(i => '<span class="ck-av">' + esc(i) + '</span>').join('');
       m.style.left = left; m.style.top = top;
       calque.appendChild(m);
       requestAnimationFrame(() => requestAnimationFrame(() => m.classList.remove('neuf')));
     } else if (m.style.left !== left || m.style.top !== top) { m.style.left = left; m.style.top = top; }
+    m.classList.toggle('ancien', !!(e.depuis && e.depuis < aujIso));
+    m.title = EQ[e.id].noms + ', ' + quand(e.depuis);
   });
 }
 function onde(pid, etat, t) {
@@ -995,19 +1105,45 @@ function fermerInfo() {
   pop.classList.remove('ouvert');
   pop.hidden = true;
 }
-function survoler(pid) {
-  const et = $('#ck-etiq'), sv = $('#ck-survol');
-  const id = pid || S.sel;
-  if (!id) { et.hidden = true; sv.setAttribute('d', ''); return; }
-  const p = PIDX[id], e = etatVue(S.vue, id);
-  sv.setAttribute('d', pid ? dParc(p) : '');
-  et.style.left = pX(p);
-  et.style.top = pY(p);
-  et.style.setProperty('--c', COUL[e]);
-  et.querySelector('span').innerHTML = '<b>' + esc(p.nom) + '</b>\u2002' + haTxt(p.ha);
-  et.hidden = false;
+// ★ FORME-1 (§301) — LA LOUPE : au survol (souris), la parcelle en grand avec ce qu'il faut savoir. Au doigt, pas de
+//   loupe : le toucher ouvre la fiche, qui montre aussi la forme. Posée sur <body> (position fixe), jamais sous le doigt.
+let loupeId = null;
+const survolFin = () => matchMedia('(hover: hover) and (pointer: fine)').matches;
+function phraseEtat(t, pid) {
+  const e = etatVue(t, pid), eq = S.equipes.find(x => x.parc === pid && x.tache === t);
+  if (e === 'arr') return 'Arrachée';
+  return esc(T[t].nom) + ' ' + libEtat(t, e) + (e === 'cours' && eq ? ', ' + esc(EQ[eq.id].noms) + ', <em>' + quand(eq.depuis) + '</em>' : '');
 }
-
+function montrerLoupe(pid, x, y) {
+  const p = PIDX[pid]; if (!p || !document.getElementById('ck-page')) { cacherLoupe(); return; }
+  let lp = document.getElementById('ck-loupe');
+  if (!lp) { lp = document.createElement('div'); lp.id = 'ck-loupe'; lp.className = 'ck2 ck-loupe'; lp.setAttribute('role', 'tooltip'); lp.hidden = true; document.body.appendChild(lp); }
+  if (loupeId !== pid) {
+    loupeId = pid;
+    const e = etatVue(S.vue, pid), app = AIDX[p.app].nom;
+    const sous = [app, p.commune && app.toLowerCase().indexOf(p.commune.toLowerCase()) !== 0 ? p.commune : '', p.cep].filter(Boolean).join(', ');
+    const fo = p.f && typeof window._mvFormeSvg === 'function' ? window._mvFormeSvg(p.f, 272, 150, { etat: e, id: 'cklp' }) : '';
+    lp.innerHTML = '<div class="ck-lp-forme">' + (fo || '<p class="ck-lp-vide">Pas de contour enregistré : sur le plan, un carré de sa surface.</p>') + '</div>'
+      + '<div class="ck-lp-t"><b>' + esc(p.nom) + '</b><span>' + haTxt(p.ha) + '</span></div>'
+      + '<div class="ck-lp-s">' + esc(sous) + '</div>'
+      + '<div class="ck-lp-e"><i class="sw sw-' + e + '"></i><span>' + phraseEtat(S.vue, pid) + '</span></div>';
+  }
+  lp.hidden = false;
+  const w = lp.offsetWidth, h = lp.offsetHeight, vw = window.innerWidth, vh = window.innerHeight;
+  let left = x + 20; if (left + w > vw - 8) left = x - 20 - w;
+  lp.style.left = bornePl(left, 8, vw - w - 8) + 'px'; lp.style.top = bornePl(y - h / 2, 8, vh - h - 8) + 'px';
+  requestAnimationFrame(() => lp.classList.add('ouvert'));
+}
+function cacherLoupe() { const lp = document.getElementById('ck-loupe'); loupeId = null; if (lp) { lp.classList.remove('ouvert'); lp.hidden = true; } }
+function survoler(pid, ev) {
+  const sv = $('#ck-survol'); if (!sv) { cacherLoupe(); return; }
+  if (!pid) { sv.setAttribute('d', ''); cacherLoupe(); return; }
+  sv.setAttribute('d', dParc(PIDX[pid]));
+  if (!survolFin()) return;
+  if (ev && ev.clientX != null) { montrerLoupe(pid, ev.clientX, ev.clientY); return; }
+  const r = $('#ck-svg').getBoundingClientRect(), p = PIDX[pid];
+  montrerLoupe(pid, r.left + p.cx / PLAN_W * r.width, r.top + p.cy / PLAN_H * r.height);
+}
 /* ═══ 12. NAVIGATION : tâche du plan, bascule Terrain / Économie, onglets, thème, barre latérale ═══ */
 function placerInd(actif, ind) {
   if (!actif || !ind) return;
@@ -1021,7 +1157,7 @@ function choisirTache(t) {
   $$('.ck-seg [role="tab"]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.t === t)));
   placerInd($('.ck-seg [aria-selected="true"]'), $('.ck-seg-ind'));
   // La vague : les parcelles changent de couleur de gauche à droite.
-  if (!reduit()) $$('.ck-pa').forEach(el => { el.style.transitionDelay = Math.round(PIDX[el.dataset.id].cx / 1000 * 260) + 'ms'; });
+  if (!reduit()) $$('.ck-pa').forEach(el => { el.style.transitionDelay = Math.round(PIDX[el.dataset.id].cx / PLAN_W * 260) + 'ms'; });
   majPlan();
   majChantiers(R);
   setTimeout(() => $$('.ck-pa').forEach(el => { el.style.transitionDelay = ''; }), 900);
@@ -1150,7 +1286,9 @@ function cacherTip() {
 /* ═══ Ce que la maquette simulait, et que l'appli fait pour de vrai ═══ */
 let simOn = false, simTimer = 0;
 const PAL = [];
-function ouvrirFeuille(pid) { const p = PIDX[pid]; if (p && !p.arr && typeof window.openSelParc === 'function') window.openSelParc(p.nom); }
+// FORME-1 (§301) : la fiche de la parcelle, openDP. openSelParc est la feuille qui choisit les parcelles d'une TÂCHE
+//   (arrachage, désherbage, effeuillage) : appelée avec un nom de parcelle, elle ne s'ouvrait pas (« Admin requis » hors admin).
+function ouvrirFeuille(pid) { const p = PIDX[pid]; if (p && !p.arr) { cacherLoupe(); if (typeof window.openDP === 'function') window.openDP(p.nom); } }
 
 
 const RANGS = {
@@ -1161,7 +1299,7 @@ const RANGS = {
        moyen: [['ever', 'ekpi', 'epos'], ['echart', 'etac', 'eapp'], []],
        petit: [['ever', 'ekpi', 'echart', 'epos', 'eapp', 'etac'], [], []] },
 };
-let rangerRaf = 0, redimT = 0;
+let rangerRaf = 0, redimT = 0, redimPlanT = 0;
 function rangerBientot() { if (!rangerRaf) rangerRaf = requestAnimationFrame(() => { rangerRaf = 0; ranger(); }); }
 function ranger() {
   const pg = $('#ck-page');
@@ -1180,6 +1318,7 @@ function ranger() {
   // PRO-1 : les graphes suivent TOUTE nouvelle largeur (ils ne se redessinaient qu'au changement de disposition : la
   //   barre latérale repliée ou dépliée les laissait trop larges ou trop étroits), une fois la largeur posée.
   clearTimeout(redimT); redimT = setTimeout(() => { if ($('#ck-page')) { redimCourbe(false); redimEChart(false); } }, 140);
+  clearTimeout(redimPlanT); redimPlanT = setTimeout(() => { if ($('#ck-page')) dessinerPlan(false); }, 140);   // FORME-1 : le plan suit la largeur
 }
 /* PRO-1 (§269) — « Agrandir » : la courbe en grand, au-dessus de la page. Le tracé est DÉPLACÉ, pas copié : ses
    identifiants restent uniques, son survol et sa bulle le suivent. Échap, le voile ou « Fermer » le ramènent. */
@@ -1259,8 +1398,6 @@ function monter() {
   const r = R;
   majResume(r); majVerdict(r); majDecision(r); majPlan(); majChantiers(r); majCourbe(r); majEco(r);
   redimCourbe(true);
-  const carte = $('#ck-carte');
-  if (carte.scrollWidth > carte.clientWidth + 4) carte.scrollLeft = (carte.scrollWidth - carte.clientWidth) / 2;
   const fin = () => {
     Anim.compter($('#ck-ph-trav'), r.pct, nb, 1100);
     Anim.compter($('#ck-ph-eff'), V.presents, nb, 700);
@@ -1270,7 +1407,7 @@ function monter() {
   if (reduit()) { fin(); $('#ck-page').classList.remove('ck-entree'); return; }
   // Un seul moment orchestré : le plan se dessine de gauche à droite, les chiffres montent,
   // la courbe se trace. Ensuite, plus rien ne bouge sans raison.
-  $$('.ck-pa').forEach(el => { el.style.transitionDelay = Math.round(PIDX[el.dataset.id].cx / 1000 * 520) + 'ms'; });
+  $$('.ck-pa').forEach(el => { el.style.transitionDelay = Math.round(PIDX[el.dataset.id].cx / PLAN_W * 520) + 'ms'; });
   requestAnimationFrame(() => requestAnimationFrame(() => {
     $('#ck-page').classList.remove('ck-entree');
     setTimeout(fin, 160);
@@ -1287,6 +1424,7 @@ function monter() {
 /* ═══ 16. MONTAGE — dans l'onglet Aujourd'hui du Pilotage (REF-1, §266) ═══ */
 let R = null, branche = false, obs = null;
 function brancher() {
+  window.addEventListener('scroll', () => cacherLoupe(), { passive: true });   // FORME-1 : la loupe ne flotte pas pendant qu'on défile
   document.addEventListener('click', ev => {
     if (!document.getElementById('ck-page')) return;       // le cockpit n'est pas à l'écran
     const i = ev.target.closest('.ck-i');
@@ -1319,6 +1457,7 @@ function brancher() {
     }
     if (fn && fn.dataset.fn === 'tension') { if (typeof window._pilGo === 'function') window._pilGo('tension'); return; }
     if (fn && fn.dataset.fn === 'objectif') { choisirObjectif(fn); return; }
+    if (ev.target.closest('#ck-plan-tout')) { S.planTout = !S.planTout; majPli(); if (!S.planTout) $('#ck-plan').scrollIntoView({ behavior: reduit() ? 'auto' : 'smooth', block: 'start' }); return; }
     const og = ev.target.closest('[data-onglet]');
     if (og) { choisirOnglet(og.dataset.onglet); return; }
     const mod = ev.target.closest('[data-module]');
@@ -1338,13 +1477,18 @@ function brancher() {
   });
 }
 function brancherPlan() {
-  const svg = $('#ck-svg'); if (!svg || svg._ck) return; svg._ck = 1;
-  svg.addEventListener('pointerover', ev => { const pa = ev.target.closest('.ck-pa'); if (pa && !PIDX[pa.dataset.id].arr) survoler(pa.dataset.id); });
-  svg.addEventListener('pointerleave', () => survoler(null));
-  svg.addEventListener('click', ev => { const pa = ev.target.closest('.ck-pa'); if (pa) ouvrirFeuille(pa.dataset.id); });
-  svg.addEventListener('keydown', ev => { if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList && ev.target.classList.contains('ck-pa')) { ev.preventDefault(); ouvrirFeuille(ev.target.dataset.id); } });
-  svg.addEventListener('focusin', ev => { if (ev.target.classList && ev.target.classList.contains('ck-pa')) survoler(ev.target.dataset.id); });
-  svg.addEventListener('focusout', () => survoler(null));
+  // FORME-1 (§301) : les gestes du plan sont délégués à la carte, qui survit au redessin (le dessin suit la largeur).
+  const carte = $('#ck-carte');
+  if (carte && !carte._ck) {
+    carte._ck = 1;
+    const cible = ev => { const el = ev.target.closest && ev.target.closest('.ck-pa,.ck-pa-hit'); return el && PIDX[el.dataset.id] ? el.dataset.id : null; };
+    carte.addEventListener('pointerover', ev => { const id = cible(ev); if (id && ev.pointerType !== 'touch') survoler(id, ev); });
+    carte.addEventListener('pointerleave', () => survoler(null));
+    carte.addEventListener('click', ev => { const id = cible(ev); if (id) ouvrirFeuille(id); });
+    carte.addEventListener('keydown', ev => { if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList && ev.target.classList.contains('ck-pa')) { ev.preventDefault(); ouvrirFeuille(ev.target.dataset.id); } });
+    carte.addEventListener('focusin', ev => { if (ev.target.classList && ev.target.classList.contains('ck-pa')) survoler(ev.target.dataset.id); });
+    carte.addEventListener('focusout', () => survoler(null));
+  }
   // Les graphes suivent la souris (la maquette les branchait au montage de sa page).
   const gr = $('#ck-gr'); if (gr && !gr._ck) { gr._ck = 1; gr.addEventListener('pointermove', suivreCourbe); gr.addEventListener('pointerleave', cacherTip); }
   const egr = $('#ck-egr'); if (egr && !egr._ck) { egr._ck = 1; egr.addEventListener('pointermove', suivreEChart); egr.addEventListener('pointerleave', cacherTip); }
@@ -1355,7 +1499,7 @@ window._ck2Monter = function (v) {
   agrandiOublier();
   charger(v); R = calc();
   G.reste = R.reste; G.fin = R.fin; GE.fin = R.fin;   // l'état des graphes : la maquette le prenait au chargement
-  monter(); brancherPlan(); ranger();
+  cacherLoupe(); monter(); brancherPlan(); ranger(); dessinerPlan(true);
   if (!branche) { brancher(); branche = true; setInterval(heures, 30000); }
   if ('ResizeObserver' in window) { if (obs) obs.disconnect(); obs = new ResizeObserver(() => rangerBientot()); obs.observe($('#ck-page')); }
   placerInd($('.ck-seg [aria-selected="true"]'), $('.ck-seg-ind'));

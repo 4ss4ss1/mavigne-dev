@@ -69,7 +69,7 @@ function suite(S) {
   T('le module est la maquette, sans un texte de démonstration', ['function htmlVerdict(', 'function htmlSavoir(', 'function htmlDecision(', 'function svgPlan(', 'function htmlChantiers(', 'function dessinerCourbe(', 'function htmlFil('].every(k => vue.includes(k))
     && !/Marion|Fendt|Brochon|Certiphyto|semaine 2|Mardi 12|sur 7</.test(vue.replace(/window\._ck2Squelette[^\n]*\n/, '')));
   T('toucher une parcelle ouvre SA fiche (le chemin de validation de toujours), jamais une feuille neuve',
-    /function ouvrirFeuille\(pid\) \{ const p = PIDX\[pid\]; if \(p && !p\.arr && typeof window\.openSelParc === 'function'\) window\.openSelParc\(p\.nom\); \}/.test(vue) && !vue.includes('function surValider(pid'));
+    /function ouvrirFeuille\(pid\) \{ const p = PIDX\[pid\]; if \(p && !p\.arr\) \{ cacherLoupe\(\); if \(typeof window\.openDP === 'function'\) window\.openDP\(p\.nom\); \} \}/.test(vue) && !vue.includes('window.openSelParc')   /* FORME-1 (§301) : openSelParc = la feuille d'une TÂCHE */ && !vue.includes('function surValider(pid'));
   T('l\u2019entrée orchestrée ne se joue qu\u2019une fois par session', vue.includes('SANS_MVT = !!window._ck2EntreeFaite; entree(); SANS_MVT = false; window._ck2EntreeFaite = true;') && vue.includes('const reduit = () => MQ_REDUIT.matches || SANS_MVT;'));
   T('le squelette porte les blocs de la maquette et l\u2019accroche de la visite', ['id="ck-verdict"', 'id="ck-savoir"', 'id="ck-decision"', 'id="ck-plan"', 'id="ck-chant"', 'id="ck-courbe"', 'id="ck-fil"'].every(k => vue.includes(k)) && vue.includes('data-mvt=\\"traiter\\"') === false && vue.includes("' data-mvt=\"traiter\"'"));
   T('_pilTabAuj monte la maquette avec le modèle réel, et garde l\u2019ancien cockpit en repli',
@@ -91,12 +91,12 @@ if (CONTRE) {
   const DEF = [
     ['les passages proposés comme tâches simples', 'pil', "var rows=(typeof window._ckPlanTaches==='function')?window._ckPlanTaches(d.data):(d.data||[]);", "var rows=(d.data||[]);"],
     ['le bureau compté dans l\u2019effectif', 'pil', "return p&&!p.bureau; }).map(function(p){ return { nom:p.nom, absent:p.etat!=='present'", "return !!p; }).map(function(p){ return { nom:p.nom, absent:p.etat!=='present'"],
-    ['une équipe qui reste après sa validation', 'pil', "if(ev.type==='commence') sur[e.parcelle]=ev; else delete sur[e.parcelle];", "if(ev.type==='commence') sur[e.parcelle]=ev;"],
+    ['une équipe qui reste après sa validation', 'ck', "Object.keys(L.deb).forEach(function(n){ if(L.der[n] === 'cours') r[n] = L.deb[n]; });", "Object.keys(L.deb).forEach(function(n){ r[n] = L.deb[n]; });"],   // FORME-1 (§301) : l'équipe vient de _ckPlanDebuts
     ['des balises dans la décision du jour', 'pil', "traiter:TR?{ v:tx(TR.big), raison:tx(TR.rai), fen:", "traiter:TR?{ v:TR.big, raison:TR.rai, fen:"],
     ['PRO-1 : la tâche du moment lue par l\u2019appel nu (toujours « — »)', 'pil', "PP=_pilPrioDuJour(d).M;", "PP=window._mvTacheDuMoment();"],
     ['une économie inventée', 'pil', "sparkTrav:ph.slice(-14).map(function(x){ return hT?Math.round((hT-x.reste)/hT*1000)/10:0; }), eco:null", "sparkTrav:[], eco:{}"],
-    ['un nom de démonstration revenu', 'vue', "const maisons = []", "const maisons = []; const _demo = 'Marion'"],
-    ['une feuille de validation neuve au toucher', 'vue', "if (p && !p.arr && typeof window.openSelParc === 'function') window.openSelParc(p.nom); }", "if (p) remplirFeuille(p); }"],
+    ['un nom de démonstration revenu', 'vue', "const LEG = [['faite', 'Faites']", "const _demo = 'Marion'; const LEG = [['faite', 'Faites']"],   // FORME-1 (§301) : le village mort de REF-1 (const maisons) est parti avec l'ancien dessin
+    ['une feuille de validation neuve au toucher', 'vue', "if (typeof window.openDP === 'function') window.openDP(p.nom); } }", "remplirFeuille(p); } }"],
     ['l\u2019entrée rejouée à chaque dessin', 'vue', "SANS_MVT = !!window._ck2EntreeFaite; entree(); SANS_MVT = false; window._ck2EntreeFaite = true;", "entree();"],
     ['plus de repli : écran blanc si la maquette plante', 'pil', "    catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#ck2'); }\n", "    finally{}\n"],
     ['la feuille sans les jetons propres (plan tout noir)', 'css', '--et-faite:', '--xx-faite:'],

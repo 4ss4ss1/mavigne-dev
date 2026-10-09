@@ -294,22 +294,36 @@ function _ckMeteoCache(){
 //   Un SCHÉMA, pas une carte (la vraie reste dans Parcelles) : une bande par appellation, une bande par
 //   parcelle dont la LARGEUR SUIT LA SURFACE, à la même échelle pour tout le domaine — le rapport des
 //   surfaces se garde d'une appellation à l'autre. Chaque parcelle prend la couleur de son état pour la tâche
-//   choisie ; toucher une parcelle ouvre sa fiche (openSelParc) : on valide là, par le chemin de toujours.
+//   choisie ; toucher une parcelle ouvre sa fiche (openDP — FORME-1, §301) : on valide là, par le chemin de toujours.
 //   ⚠️ L'état vient du journal : faite = une validation depuis l'ouverture de la fenêtre de la tâche ;
 //   en cours = un début sans validation après ; en retard = fenêtre passée et pas faite ; arrachée = statut.
 //   Les tâches à passages ou à niveaux ne sont pas proposées : une validation n'y dit pas « fini ».
 var _CK_PL = { W: 1000, m: 16, h: 64, gap: 3, gapC: 14 };
-window._ckPlanEtats = function(parcs, journal, tache, debutIso, enRetard){
-  var etat = {}, der = {};
+// ★ FORME-1 (§301) : UNE lecture du journal pour l'état d'une parcelle ET pour ceux qui y travaillent. deb[parcelle] = la
+//   ligne « En cours » qui la met en cours (la dernière avant une validation). Avant, l'équipe venait du journal du JOUR seul :
+//   une parcelle commencée la veille restait « en cours » sans personne dessus, et le plan écrivait « aucune équipe ».
+function _ckPlanLire(parcs, journal, tache, debutIso){
+  var etat = {}, der = {}, deb = {};
   (parcs || []).forEach(function(p){ if(p && p.nom) etat[p.nom] = /arrach/i.test(String(p.statut || '')) ? 'arr' : 'afaire'; });
   (journal || []).slice().sort(function(a, b){ return String(a && a.date || '') < String(b && b.date || '') ? -1 : 1; }).forEach(function(e){
     if(!e || e.tache !== tache || !Object.prototype.hasOwnProperty.call(etat, e.parcelle) || etat[e.parcelle] === 'arr') return;
     if(debutIso && String(e.date || '') < debutIso) return;
     if(e.statut === 'Validé' || e.statut === 'Terminé') der[e.parcelle] = 'faite';
     else if(e.statut === 'En cours' && der[e.parcelle] !== 'faite') der[e.parcelle] = 'cours';
+    if(e.statut === 'En cours' && der[e.parcelle] === 'cours') deb[e.parcelle] = e;
   });
+  return { etat: etat, der: der, deb: deb };
+}
+window._ckPlanEtats = function(parcs, journal, tache, debutIso, enRetard){
+  var L = _ckPlanLire(parcs, journal, tache, debutIso), etat = L.etat, der = L.der;
   Object.keys(etat).forEach(function(n){ if(etat[n] !== 'arr') etat[n] = der[n] || (enRetard ? 'retard' : 'afaire'); });
   return etat;
+};
+// Les parcelles en cours et la ligne « En cours » de chacune : qui l'a commencée, et quel jour.
+window._ckPlanDebuts = function(parcs, journal, tache, debutIso){
+  var L = _ckPlanLire(parcs, journal, tache, debutIso), r = {};
+  Object.keys(L.deb).forEach(function(n){ if(L.der[n] === 'cours') r[n] = L.deb[n]; });
+  return r;
 };
 window._ckPlanDispo = function(parcs){
   var apps = {}, ordre = [];
@@ -363,16 +377,13 @@ window._ckPlanSvg = function(dispo, etats, eqs, tacheLib){
   });
   return '<svg class="ck-pl-svg" viewBox="0 0 ' + dispo.W + ' ' + f(dispo.H) + '" role="group" aria-label="Le domaine, parcelle par parcelle, rangé par appellation puis par commune">' + s + '</svg>';
 };
-// Les équipes sur le terrain : un début (En cours) aujourd'hui, pas encore validé. Initiales de l'équipe.
-window._ckPlanEquipes = function(journal, auj){
+// Les équipes du plan de secours : les initiales de ceux qui ont commencé chaque parcelle en cours, quel que soit le jour
+// (FORME-1, §301 : la même lecture que l'état ; avant, le journal du jour seul).
+function _ckPlanInitiales(deb){
   var r = {};
-  (journal || []).forEach(function(e){
-    if(!e || e.date !== auj || !e.parcelle) return;
-    if(e.statut === 'Validé') { delete r[e.parcelle]; return; }
-    if(e.statut === 'En cours') r[e.parcelle] = _ckQui(e).slice(0, 2).map(function(n){ return n.charAt(0).toUpperCase(); }).join('');
-  });
+  Object.keys(deb || {}).forEach(function(n){ r[n] = _ckQui(deb[n]).slice(0, 2).map(function(x){ return x.charAt(0).toUpperCase(); }).join('') || '?'; });
   return r;
-};
+}
 window._ckPlanTaches = function(rows){
   return (rows || []).filter(function(t){
     return t && t.nom && !(t.type === 'niveaux' || t.type === 'passages' || t.nom === 'Relevage' || t.nom === 'Ebourgeonnage' || t.nom === 'Pioche');
@@ -402,7 +413,7 @@ window._ckPlanCorps = function(){
     return '<span class="ck-pl-l"><i class="ck-pl-sw et-' + k + '"></i>' + _ckMaj1(_CK_PL_LIB[k]) + ' <b>' + n[k] + '</b></span>';
   }).join('');
   return '<div class="ck-pl-choix" role="group" aria-label="Tâche montrée sur le plan">' + choix + '</div>'
-    + '<div class="ck-pl-boite">' + window._ckPlanSvg(window._ckPlanDispo(P.parcs), etats, window._ckPlanEquipes(P.journal, _ckIso()), lib) + '</div>'
+    + '<div class="ck-pl-boite">' + window._ckPlanSvg(window._ckPlanDispo(P.parcs), etats, _ckPlanInitiales(window._ckPlanDebuts(P.parcs, P.journal, t.nom, _ckPlanDebut(P.fen, t.nom))), lib) + '</div>'
     + '<div class="ck-pl-leg">' + leg + '</div>';
 };
 window._ckPlanTache = function(el){
@@ -413,7 +424,7 @@ window._ckPlanTache = function(el){
 };
 window._ckPlanOuvrir = function(el){
   var n = el && el.getAttribute('data-p');
-  if(n && typeof window.openSelParc === 'function') window.openSelParc(n);
+  if(n && typeof window.openDP === 'function') window.openDP(n);   // FORME-1 (§301) : openSelParc attend une TÂCHE
 };
 
 // ── La mise en page : à gauche ce qui décide, à droite ce qui arrive ──────────────────────────────

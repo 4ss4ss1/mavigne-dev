@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.71';
+export const APP_VERSION = '8.72';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1035,6 +1035,19 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.72', d: '2026-10-09', items: [
+    { niv: 1, pour: ['admin'], cible: '#ck-plan', emoji: 'carte', titre: 'Le domaine en direct : chaque parcelle à sa forme',
+      desc: "Au Pilotage › Aujourd’hui, chaque parcelle a maintenant la forme de son contour, nord en haut, à la même échelle pour tout le domaine. Le plan est deux fois plus compact : une ligne par appellation, avec son avancement. "
+        + "Sur ordinateur, passez la souris sur une parcelle : une loupe la montre en grand, avec sa surface, son état et l’équipe. Au téléphone, le plan se replie sous ses premières appellations ; « Tout le plan » ouvre le reste." },
+    { niv: 1, pour: ['tous'], cible: '#dp-forme', emoji: 'raisin', titre: 'La forme de la parcelle dans sa fiche',
+      desc: "En haut de la fiche d’une parcelle, sa forme, tirée de son contour, avec une échelle en mètres. Sur ordinateur, elle s’affiche aussi dans la fiche de droite des Parcelles. Une parcelle sans contour n’en affiche pas." },
+    { niv: 0, pour: ['admin'], emoji: 'equipe', titre: 'Chaque parcelle en cours porte son équipe',
+      desc: "Une parcelle commencée un autre jour restait « en cours » sur le plan, sans pastille, et le plan écrivait « aucune équipe ». Elle porte désormais les initiales de ceux qui l’ont commencée ; la loupe dit depuis quand." },
+    { niv: 0, pour: ['tous'], emoji: 'doigt', titre: 'Choisir une parcelle ouvre bien sa fiche',
+      desc: "Depuis le plan du Pilotage et depuis la recherche (Ctrl K), choisir une parcelle n’ouvrait rien. Sa fiche s’ouvre maintenant." },
+    { niv: 0, pour: ['tous'], emoji: 'check', titre: 'La commune s’écrit en toutes lettres',
+      desc: "Dans le plan du Pilotage et dans la fiche de droite des Parcelles, la commune d’une parcelle rattachée à un secteur météo s’affichait « [object Object] ». Elle s’écrit maintenant en toutes lettres." },
+  ] },
   { v: '8.71', d: '2026-10-09', items: [
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Planning : « Les gens » ne fige plus l’appli',
       desc: "Sur ordinateur, en ouvrant « Les gens », tout se figeait sauf la fiche de droite : plus de clic sur la liste, les onglets ou la barre de gauche, plus de défilement — et le gel suivait sur le module ouvert ensuite. La fiche rangée à droite était encore traitée comme une fenêtre posée par-dessus la page. Elle ne l’est plus : la liste, la fiche et le reste de l’appli répondent normalement." },
@@ -4872,7 +4885,7 @@ var MV_AIDE = {
       ['Les filtres du haut', "trient par état : finies, en cours, arrachées."],
       ['Sur chaque carte', "la surface au centiare près (0,0870 ha), le pourcentage, et le compte des tâches faites, qui suit la même règle : un arrachage à moitié fait compte pour une demie (« 1,5/2 tâches »)."],
       ['Les deux gestes', "« Début » signale qu’on attaque, « Valider » que c’est fini, sans ouvrir la parcelle : en bas de chaque carte au téléphone, au bout de chaque ligne sur ordinateur. Quand une tâche est choisie, la carte dit l’état de cette tâche à la place du pourcentage. Une tâche à passages affiche en plus le passage en cours (P1, P2, N1…)."],
-      ['Sur un ordinateur', "la liste passe à gauche, une ligne par parcelle avec ses deux gestes, et la fiche de la parcelle choisie s’ouvre à droite : l’état de la tâche, les travaux de la campagne, les derniers passages. Les flèches haut et bas passent d’une parcelle à l’autre, la touche V valide ; « Fiche complète » ouvre tout le reste."],
+      ['Sur un ordinateur', "la liste passe à gauche, une ligne par parcelle avec ses deux gestes, et la fiche de la parcelle choisie s’ouvre à droite : sa forme, l’état de la tâche, les travaux de la campagne, les derniers passages. Les flèches haut et bas passent d’une parcelle à l’autre, la touche V valide ; « Fiche complète » ouvre tout le reste."],
       ['Le numéro devant le nom', "est le rang de la tournée du domaine. Il n’apparaît que si une tournée est fixée, et les parcelles se rangent dans cet ordre."],
       ['Onglet Carte', ": les contours viennent de votre export PAC ou d’un fichier KML."],
       ['L’anneau doré qui respire', "sur la carte marque la parcelle <b>commencée et pas finie</b> pour le travail affiché\u00a0: celle où «\u00a0Début\u00a0» a été touché sans validation. S’il n’y en a aucune, il se pose sur la <b>prochaine à faire</b>, le n°\u00a01 de la tournée enregistrée. Sur «\u00a0toutes\u00a0», c’est la priorité du moment. Plusieurs parcelles commencées ont chacune leur anneau, et rien ne s’affiche sur une période archivée."],
@@ -5067,7 +5080,7 @@ var MV_AIDE = {
   pilotage: {
     ico: 'graphique', titre: 'Pilotage', ancre: 'pilotage',
     points: [
-      ['Aujourd’hui se lit d’un coup d’œil', ": une phrase résume la journée (l’avance ou le retard sur l’objectif, les points à anticiper). Viennent les photos du domaine, la <b>fin prévue</b> avec sa frise et votre objectif, la <b>décision du jour</b> en quatre tuiles, le <b>domaine en direct</b> (chaque parcelle colorée selon la tâche choisie, rangée par appellation, les équipes posées dessus ; toucher une parcelle ouvre sa fiche), les chantiers et la charge restante. Sur le côté, <b>À savoir</b> réunit la météo des cinq jours, la pluie ou le vent par secteur, les absences, les fins de contrat, les retards et le matériel ; dessous, le fil <b>En direct</b> de ce que l’équipe valide. La bascule <b>Terrain / Économie</b>, en haut, donne la photo économique du jour : l’atterrissage de la campagne, le coût à l’hectare, l’écart au barème, le dépensé face au fait, la cadence de l’équipe, le coût de l’inaction, les postes, les appellations et les tâches — les chiffres de l’onglet Économie. « Agrandir » ouvre la courbe en grand ; « Changer la priorité » ouvre le choix de la tâche prioritaire ; la date de l’objectif se règle en touchant son bouton. La tension par personne se détaille dans L’équipe & le matériel, la protection restante dans Conformité."],
+      ['Aujourd’hui se lit d’un coup d’œil', ": une phrase résume la journée (l’avance ou le retard sur l’objectif, les points à anticiper). Viennent les photos du domaine, la <b>fin prévue</b> avec sa frise et votre objectif, la <b>décision du jour</b> en quatre tuiles, le <b>domaine en direct</b> (chaque parcelle à sa forme et à l’échelle, colorée selon la tâche choisie, rangée par appellation, l’équipe posée sur chaque parcelle en cours ; au survol, une loupe la montre en grand ; la toucher ouvre sa fiche), les chantiers et la charge restante. Sur le côté, <b>À savoir</b> réunit la météo des cinq jours, la pluie ou le vent par secteur, les absences, les fins de contrat, les retards et le matériel ; dessous, le fil <b>En direct</b> de ce que l’équipe valide. La bascule <b>Terrain / Économie</b>, en haut, donne la photo économique du jour : l’atterrissage de la campagne, le coût à l’hectare, l’écart au barème, le dépensé face au fait, la cadence de l’équipe, le coût de l’inaction, les postes, les appellations et les tâches — les chiffres de l’onglet Économie. « Agrandir » ouvre la courbe en grand ; « Changer la priorité » ouvre le choix de la tâche prioritaire ; la date de l’objectif se règle en touchant son bouton. La tension par personne se détaille dans L’équipe & le matériel, la protection restante dans Conformité."],
       ['Presque tout se lit, cinq choses s’écrivent', ": les chiffres viennent du journal, du planning, des sessions tracteur et de la cave. Ce qui s’écrit ici est nommé : les prix des achats (Économie), l’ordre de passage (Décider), le mois d’ouverture de l’exercice comptable et celui de l’année vigne (roue crantée, Économie › Exercice), et ce que porte la roue crantée."],
       ['Vos deux années se règlent au même endroit', ": la roue crantée porte l’ouverture de l’<b>exercice comptable</b> — celui de votre bilan, fixé par votre comptable — et, juste dessous, le <b>cadre de votre campagne</b>, l’axe des Archives et du bilan de campagne. Une campagne est un cycle de production : ce qui la borne, c’est la <b>vendange</b>, et le mois n’en est que la traduction. L’écran dit où tombe la vôtre dans le cadre choisi — elle l’ouvre, elle la clôt, ou la borne la coupe en deux — et propose le mois qui suit la fin de vos vendanges. Le changer recadre des chiffres déjà affichés, jamais vos saisies."],
       ['La roue crantée', "en haut à droite ouvre ce qui se règle : objectifs de fin, fenêtres des tâches, hypothèses de calcul, IFT de référence — et le bilan de campagne à imprimer. Administrateur seulement."],
@@ -5279,8 +5292,8 @@ export const MV_INFO = {
   ] },
 
   'pil.plan': { t: 'Le domaine en direct', p: [
-    'Chaque parcelle est une bande dont la largeur suit sa surface, à la même échelle pour tout le domaine ; elles sont rangées par appellation, puis par commune. C’est un schéma : la vraie carte reste dans Parcelles.',
-    'La couleur dit l’état pour la tâche choisie : faite (validée depuis l’ouverture de sa fenêtre), en cours, à faire, en retard (fenêtre passée), arrachée. Les initiales marquent une équipe qui a commencé la parcelle aujourd’hui. Toucher une parcelle ouvre sa fiche.' ] },
+    'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine : deux parcelles de même surface ont la même taille. Elles sont rangées par appellation ; le trait sous chaque appellation montre son avancement. Une parcelle sans contour est un carré de sa surface, en pointillé. La vraie carte reste dans Parcelles.',
+    'La couleur dit l’état pour la tâche choisie : faite (validée depuis l’ouverture de sa fenêtre), en cours, à faire, en retard (fenêtre passée), arrachée. Une parcelle en cours porte les initiales de ceux qui l’ont commencée, même un autre jour : foncées et cerclées si c’est aujourd’hui, claires sinon. Sur ordinateur, la souris sur une parcelle ouvre une loupe (sa forme en grand, son état, l’équipe) ; toucher une parcelle ouvre sa fiche. Au téléphone, « Tout le plan » déplie les appellations repliées.' ] },
   'pil.savoir': { t: 'À savoir', p: [
     'Ce qui peut changer la journée ou la semaine : la pluie ou le vent des deux jours qui viennent, secteur par secteur quand le domaine s’étend sur plusieurs communes (avec les parcelles de brûlage qui devront attendre), les absences des sept prochains jours, les contrats qui finissent dans le mois (avec ce qu’une prolongation d’un mois ferait gagner), les tâches en retard, puis le matériel immobilisé et la cave.',
     'Le plus pressant d’abord. Les motifs d’absence ne sont visibles que de l’admin : le Pilotage lui est réservé.' ] },
@@ -7812,6 +7825,137 @@ window.TABREV             = TABREV;
 window.TCLS               = TCLS;
 window.TEMJ               = TEMJ;
 window.COULEURS_MBR       = COULEURS_MBR;
+/* ★ FORME-1 (§301) — LA FORME D'UNE PARCELLE, TIRÉE DE SON CONTOUR. Une seule lecture pour le plan du cockpit
+   (« Le domaine en direct »), sa loupe et les deux fiches de parcelle. Le contour vient de kml_polygons
+   (window.KML_POLYGONS_DYNAMIC, en [lat, lng]) : passé en mètres, nord en haut, ramené à l'origine.
+   ⚠️ Le sens des rangs dessinés est un repère (la longueur du plus petit rectangle qui enferme la parcelle) : le contour
+   ne dit pas le vrai sens de plantation. En Côte-d'Or, la longueur d'une lanière suit la pente, les rangs aussi, le plus souvent. */
+var _MV_M_LAT = 110540, _MV_M_LNG = 111320, _MV_FORME_CACHE = {};
+function _mvFormeNettoyer(r){
+  var o = [];
+  (r || []).forEach(function(q){
+    if(!q || q.length < 2) return;
+    var a = +q[0], b = +q[1]; if(!isFinite(a) || !isFinite(b)) return;
+    var l = o[o.length - 1]; if(!l || Math.abs(l[0] - a) > 1e-10 || Math.abs(l[1] - b) > 1e-10) o.push([a, b]);
+  });
+  if(o.length > 2){ var f = o[0], z = o[o.length - 1]; if(Math.abs(f[0] - z[0]) < 1e-10 && Math.abs(f[1] - z[1]) < 1e-10) o.pop(); }
+  return o.length >= 3 ? o : null;
+}
+function _mvFormeAire(r){ var a = 0; for(var i = 0, j = r.length - 1; i < r.length; j = i++) a += (r[j][0] + r[i][0]) * (r[j][1] - r[i][1]); return Math.abs(a / 2); }
+function _mvFormeEnveloppe(pts){
+  var P = pts.slice().sort(function(a, b){ return a[0] - b[0] || a[1] - b[1]; }); if(P.length < 3) return P;
+  var cr = function(o, a, b){ return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); }, lo = [], up = [], i;
+  for(i = 0; i < P.length; i++){ while(lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], P[i]) <= 0) lo.pop(); lo.push(P[i]); }
+  for(i = P.length - 1; i >= 0; i--){ while(up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], P[i]) <= 0) up.pop(); up.push(P[i]); }
+  up.pop(); lo.pop(); return lo.concat(up);
+}
+// Le sens des rangs : la longueur du plus petit rectangle qui enferme la parcelle, en degrés (0 = vers l'est).
+function _mvFormeAxe(pts){
+  var H = _mvFormeEnveloppe(pts), best = null;
+  for(var i = 0; i < H.length; i++){
+    var a = H[i], b = H[(i + 1) % H.length], ang = Math.atan2(b[1] - a[1], b[0] - a[0]), c = Math.cos(ang), s = Math.sin(ang);
+    var u0 = Infinity, u1 = -Infinity, v0 = Infinity, v1 = -Infinity;
+    for(var k = 0; k < H.length; k++){ var u = H[k][0] * c + H[k][1] * s, v = -H[k][0] * s + H[k][1] * c; if(u < u0) u0 = u; if(u > u1) u1 = u; if(v < v0) v0 = v; if(v > v1) v1 = v; }
+    var L = u1 - u0, l = v1 - v0;
+    if(!best || L * l < best.A) best = { A: L * l, ang: L >= l ? ang : ang + Math.PI / 2 };
+  }
+  if(!best) return 90;
+  var d = best.ang * 180 / Math.PI; return ((d % 180) + 180) % 180;
+}
+function _mvFormeDedans(x, y, rings){
+  var o = false;
+  rings.forEach(function(r){ for(var i = 0, j = r.length - 1; i < r.length; j = i++){ var a = r[i], b = r[j]; if((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) o = !o; } });
+  return o;
+}
+function _mvFormeDist(x, y, rings){
+  var m = Infinity;
+  rings.forEach(function(r){ for(var i = 0, j = r.length - 1; i < r.length; j = i++){
+    var a = r[j], b = r[i], dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy;
+    var t = L2 ? Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / L2)) : 0, px = a[0] + t * dx - x, py = a[1] + t * dy - y, d = px * px + py * py;
+    if(d < m) m = d;
+  } });
+  return Math.sqrt(m);
+}
+// Le point le plus loin des bords : l'équipe et l'onde s'y posent (une parcelle en équerre a son centre hors d'elle).
+function _mvFormePole(rings, w, h){
+  var best = { x: w / 2, y: h / 2, r: -1 }, x0 = 0, y0 = 0, cw = w, ch = h;
+  for(var passe = 0; passe < 4; passe++){
+    for(var i = 0; i <= 12; i++) for(var j = 0; j <= 12; j++){
+      var x = x0 + cw * i / 12, y = y0 + ch * j / 12;
+      if(!_mvFormeDedans(x, y, rings)) continue;
+      var r = _mvFormeDist(x, y, rings); if(r > best.r) best = { x: x, y: y, r: r };
+    }
+    cw /= 3; ch /= 3; x0 = best.x - cw / 2; y0 = best.y - ch / 2;
+  }
+  if(best.r < 0){ var sx = 0, sy = 0, n = 0; rings.forEach(function(r){ r.forEach(function(q){ sx += q[0]; sy += q[1]; n++; }); }); best = { x: sx / n, y: sy / n, r: 0 }; }
+  return best;
+}
+// Un ou plusieurs anneaux [lat, lng] → { rings (mètres, ramenés à l'origine), w, h, aire (m²), ang (sens des rangs), pole },
+// ou null (pas de contour exploitable). Gardé en mémoire : le plan se recharge à chaque dessin du cockpit.
+function _mvFormeDe(geo){
+  var R = (geo || []).map(_mvFormeNettoyer).filter(Boolean); if(!R.length) return null;
+  var cle = R.map(function(r){ return r.length + ':' + r[0].join(',') + ':' + r[r.length - 1].join(','); }).join(';');
+  if(Object.prototype.hasOwnProperty.call(_MV_FORME_CACHE, cle)) return _MV_FORME_CACHE[cle];
+  var la = 0, n = 0; R.forEach(function(r){ r.forEach(function(q){ la += q[0]; n++; }); });
+  var kx = _MV_M_LNG * Math.cos(la / n * Math.PI / 180);
+  var M = R.map(function(r){ return r.map(function(q){ return [q[1] * kx, -q[0] * _MV_M_LAT]; }); }).filter(function(r){ return _mvFormeAire(r) > 4; });
+  var f = null;
+  if(M.length){
+    var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    M.forEach(function(r){ r.forEach(function(q){ if(q[0] < x0) x0 = q[0]; if(q[1] < y0) y0 = q[1]; if(q[0] > x1) x1 = q[0]; if(q[1] > y1) y1 = q[1]; }); });
+    M = M.map(function(r){ return r.map(function(q){ return [q[0] - x0, q[1] - y0]; }); });
+    var w = x1 - x0, h = y1 - y0, tous = [];
+    M.forEach(function(r){ tous = tous.concat(r); });
+    f = { rings: M, w: w, h: h, aire: M.reduce(function(t, r){ return t + _mvFormeAire(r); }, 0), ang: _mvFormeAxe(tous), pole: _mvFormePole(M, w, h) };
+  }
+  _MV_FORME_CACHE[cle] = f;
+  return f;
+}
+// Les contours d'une parcelle, par son nom (la même règle que la carte : sans tenir compte de la casse).
+function _mvParcContours(nom){
+  var n = String(nom == null ? '' : nom).toLowerCase();
+  return (window.KML_POLYGONS_DYNAMIC || []).filter(function(k){ return k && Array.isArray(k.pts) && String(k.name || '').toLowerCase() === n; }).map(function(k){ return k.pts; });
+}
+function _mvParcForme(nom){ var g = _mvParcContours(nom); return g.length ? _mvFormeDe(g) : null; }
+// Les rangs dessinés : un motif par angle, au pas de 5° (90 = rangs verticaux). L'échelle : 1, 2, 5, 10, 20, 25, 50 m…
+function _mvFormeAngle(a){ return ((Math.round((a - 90) / 5) * 5) % 180 + 180) % 180; }
+var _MV_FORME_PAS = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000];
+function _mvFormePas(k, mini, maxi){
+  var d = _MV_FORME_PAS.length - 1;
+  for(var i = 0; i < _MV_FORME_PAS.length; i++){ if(_MV_FORME_PAS[i] * k >= mini){ d = i; break; } }
+  if(_MV_FORME_PAS[d] * k > maxi && d > 0) d--;
+  return _MV_FORME_PAS[d];
+}
+function _mvFormeMetres(m){ return m >= 1000 ? (m / 1000) + '\u202fkm' : m + '\u202fm'; }
+// La forme en grand dans une boîte W×H : ses rangs, son état (classe et-…), une échelle en mètres. o.etat : faite, cours,
+// afaire, retard, arr ou neutre (défaut) ; o.id : préfixe des motifs, UNIQUE par endroit (deux fiches peuvent coexister).
+function _mvFormeSvg(f, W, H, o){
+  if(!f) return '';
+  o = o || {};
+  var m = 12, bas = 22, id = o.id || 'mvf', e = o.etat || 'neutre', arr = e === 'arr', r1 = function(v){ return (Math.round(v * 10) / 10).toString(); };
+  var k = Math.min((W - 2 * m) / Math.max(1, f.w), (H - 2 * m - bas) / Math.max(1, f.h));
+  var ox = (W - f.w * k) / 2, oy = (H - bas - f.h * k) / 2;
+  var d = f.rings.map(function(r){ return 'M' + r.map(function(q){ return r1(ox + q[0] * k) + ' ' + r1(oy + q[1] * k); }).join('L') + 'Z'; }).join('');
+  var dm = _mvFormePas(k, 36, 96), L = dm * k;
+  return '<svg class="mv-fo-svg" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" aria-hidden="true" focusable="false"><defs>'
+    + '<pattern id="' + id + '-r" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(' + _mvFormeAngle(f.ang) + ')"><path class="mv-fo-rg" d="M2 0V4"/></pattern>'
+    + (arr ? '<pattern id="' + id + '-h" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path class="mv-fo-h" d="M0 0V6"/></pattern>' : '') + '</defs>'
+    + '<path class="mv-fo et-' + e + '" d="' + d + '"' + (arr ? ' style="fill:url(#' + id + '-h)"' : '') + '/>'
+    + (arr ? '' : '<path class="mv-fo-r" d="' + d + '" fill="url(#' + id + '-r)"/>')
+    + '<path class="mv-fo-e" d="M' + m + ' ' + (H - 13) + 'V' + (H - 8) + 'H' + r1(m + L) + 'V' + (H - 13) + '"/>'
+    + '<text class="mv-fo-t" x="' + r1(m + L + 6) + '" y="' + (H - 8) + '">' + _mvFormeMetres(dm) + '</text></svg>';
+}
+// Le haut d'une fiche de parcelle : sa forme, ou rien quand elle n'a pas de contour.
+function _mvParcFormeHtml(nom, W, H, id){ return _mvFormeSvg(_mvParcForme(nom), W || 520, H || 180, { id: id || 'mvf' }); }
+window._mvFormeDe = _mvFormeDe;
+window._mvParcContours = _mvParcContours;   // ⚠️ PAS _mvParcGeo : ce nom existe déjà (la POSITION d'une parcelle, plus haut)
+window._mvParcForme = _mvParcForme;
+window._mvFormeAngle = _mvFormeAngle;
+window._mvFormePas = _mvFormePas;
+window._mvFormeMetres = _mvFormeMetres;
+window._mvFormeSvg = _mvFormeSvg;
+window._mvParcFormeHtml = _mvParcFormeHtml;
+/* ★ FIN FORME-1 */
 window.APP_VERSION        = APP_VERSION;
 
 // ★★ ÉQUIPES-1 (30/09/2026) — LES ÉQUIPES DU JOUR, POSÉES PAR L'ADMINISTRATEUR DEPUIS L'ACCUEIL.

@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **9 octobre 2026 (CADRE-1)** — ★★ **LE SOCLE DU COCKPIT VALAIT POUR TOUTE L'APPLI** (§300). Lot 31, base `9e9f030`.
+> Quatre retours de Nico après la refonte, chacun REPRODUIT dans un vrai navigateur avant d'être corrigé : (1) `*,*::before,*::after{box-sizing:inherit}`,
+> recopiée de la maquette du cockpit (07/10), mettait TOUTE l'appli en content-box — cases colorées du Planning de 72 px dans 67, **27 fenêtres sur 38**
+> plus larges que leur cadre → bornée à `.ck2` (0 sur 38 après) ; (2) la barre de sélection (560) passait devant la journée (500) dès que la page ne
+> s'anime pas → 450 ; (3) la fiche rangée de « Les gens » restait un `.overlay` : 130 éléments inertes, et le gel suivait sur le module suivant
+> (`#page-planning{display:grid}` sans `.active`) → elle devient `.pl2-rangee`. **APP 8.70 → 8.71, SW 9.48 → 9.49.**
+> ⚠️ Leçon : rendre aussi en « animations réduites » — l'animation d'entrée de `.page` cachait le défaut de z-index (§24, §300).
+
 > ★ Consolidation : **9 octobre 2026 (E2E-1)** — ★ **LE TEST DE BOUT EN BOUT SUIT LE BOUTON « DÉMARRER UNE SESSION »** (§299). Lot 30,
 > **Nico a poussé la refonte** (`646323e` « Refonte v870 », puis `34813db`) : ce lot part de `34813db`, zip de six fichiers. La CI de Nico (`npm run test:e2e`, qui ne fait PAS partie de
 > `npm run check`) échouait à « Action session » : le test cliquait la FAB `#trac-fab`, cachée au large depuis TRAC-3 (§284). Le test clique

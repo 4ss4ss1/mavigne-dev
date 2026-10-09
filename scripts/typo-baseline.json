@@ -17,12 +17,12 @@
   "src/cockpit-vue.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 95
+    "ko": 107
   },
   "src/cockpit.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 38
+    "ko": 39
   },
   "src/coquille.js": {
     "dur": 0,
@@ -62,7 +62,7 @@
   "src/pilotage.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 882
+    "ko": 883
   },
   "src/planning-vue.js": {
     "dur": 0,
@@ -72,7 +72,7 @@
   "src/planning.js": {
     "dur": 121,
     "petit": 91,
-    "ko": 663
+    "ko": 664
   },
   "src/reglages.js": {
     "dur": 116,
@@ -97,7 +97,7 @@
   "src/utils.js": {
     "dur": 5,
     "petit": 2,
-    "ko": 818
+    "ko": 832
   },
   "index.html": {
     "dur": 84,
@@ -107,6 +107,6 @@
   "src/styles.css": {
     "dur": 269,
     "petit": 90,
-    "ko": 675
+    "ko": 691
   }
 }

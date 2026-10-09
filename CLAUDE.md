@@ -3,13 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **9 octobre 2026 (CADRE-1)** — ★★ **LE SOCLE DU COCKPIT VALAIT POUR TOUTE L'APPLI** (§300). Lot 31, base `9e9f030`.
-> Quatre retours de Nico après la refonte, chacun REPRODUIT dans un vrai navigateur avant d'être corrigé : (1) `*,*::before,*::after{box-sizing:inherit}`,
-> recopiée de la maquette du cockpit (07/10), mettait TOUTE l'appli en content-box — cases colorées du Planning de 72 px dans 67, **27 fenêtres sur 38**
-> plus larges que leur cadre → bornée à `.ck2` (0 sur 38 après) ; (2) la barre de sélection (560) passait devant la journée (500) dès que la page ne
-> s'anime pas → 450 ; (3) la fiche rangée de « Les gens » restait un `.overlay` : 130 éléments inertes, et le gel suivait sur le module suivant
-> (`#page-planning{display:grid}` sans `.active`) → elle devient `.pl2-rangee`. **APP 8.70 → 8.71, SW 9.48 → 9.49.**
-> ⚠️ Leçon : rendre aussi en « animations réduites » — l'animation d'entrée de `.page` cachait le défaut de z-index (§24, §300).
+> Dernière consolidation : **9 octobre 2026 (FORME-1)** — ★★ **LE DOMAINE EN DIRECT AUX FORMES RÉELLES, ET LE TOUCHER QUI N'OUVRAIT RIEN** (§301). Lot 32, base `53a0530`.
+> Demande de Nico (maquette v1, puis v2 « plus compacte » validée, puis « go ») : chaque parcelle du plan à la forme de son contour, à la même échelle, compact
+> (394 px de haut au lieu de 801 sur 37 parcelles), loupe au survol, fiche au toucher avec la forme en haut. En vérifiant, TROIS défauts : (1) la commune, rangée
+> `{nom, lat, lng}`, s'écrivait « [object Object] » et fondait toutes les communes (plan et fiche Parcelles) ; (2) « en cours » lisait tout le journal, la pastille le
+> journal du JOUR — parcelle commencée la veille sans équipe, « aucune équipe » écrit à tort → une seule lecture (`_ckPlanDebuts`) ; (3) le plan et Ctrl K appelaient
+> `openSelParc` — la feuille des parcelles d'une TÂCHE — avec un nom de parcelle : rien ne s'ouvrait → `openDP`. **APP 8.71 → 8.72, SW 9.49 → 9.50.**
+> ⚠️ Leçon : un nom qui « sonne juste » (`openSelParc`, « ouvrir la sélection de parcelle ») n'est pas un contrat — lire ce que la fonction attend avant de l'appeler.
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1837,6 +1837,13 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ FORME-1 — CE QUI RESTE OUVERT (§301, posé le 09/10)
+
+1. **À regarder chez Nico, avec SES contours** (essais sur un domaine reconstitué) : PC (loupe, deux colonnes), téléphone (repli, toucher → fiche). Un contour dont le
+   nom diffère de la parcelle donne un carré de surface, et la note sous le plan le nomme. Le sens des rangs dessinés est un repère (plus petit rectangle).
+2. Vu, non touché : la carte « La saison, parcelle par parcelle » de l'Accueil dessine encore des carrés de surface (à trancher avec Nico) ; les règles CSS de
+   l'ancien plan (`.ck-etiq`, `.ck-lieu`, `.ck-clos`, `.ck-zone-f`) restent dans la feuille, sans objet.
 
 ### ⚠️ CADRE-1 — CE QUI RESTE OUVERT (§300, posé le 09/10)
 

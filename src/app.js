@@ -8337,10 +8337,13 @@ function _pCarteTache(p,drae,prox){
 function _pFicheHtml(p){
   if(!p)return '<div class="pfx-vide"><b>Choisissez une parcelle</b><span>Sa fiche s\u2019ouvre ici. Les fl\u00e8ches haut et bas passent d\u2019une parcelle \u00e0 l\u2019autre'+(pTacheFilter!=='toutes'?', V valide':'')+'.</span></div>';
   var cl=getPCls(p), drae=getDraeParcelle(p.nom), cep=(p.cepages&&p.cepages.length)?p.cepages.join(', '):(p.cepage||'');
-  var tags=[p.appellation,cep,_pvSurfFr(p.surface)+'\u00a0ha',p.commune].filter(Boolean).map(function(t){return '<span class="pfx-tag">'+_escHtml(String(t))+'</span>';}).join('');
+  var tags=[p.appellation,cep,_pvSurfFr(p.surface)+'\u00a0ha',(p.commune&&typeof p.commune==='object')?p.commune.nom:p.commune].filter(Boolean).map(function(t){return '<span class="pfx-tag">'+_escHtml(String(t))+'</span>';}).join('');
   var act=(pTacheFilter!=='toutes')?_pvActions(p):'';
   var h='<div class="pfx-hd"><div class="pfx-id"><h2 class="pfx-t">'+_escHtml(p.nom)+'</h2><div class="pfx-tags">'+tags+'</div></div>'
     +'<div class="pfx-act">'+act+'<button type="button" class="pfx-btn" onclick="openDP(\''+_escAttr(p.nom)+'\')">Fiche compl\u00e8te</button></div></div>';
+  // FORME-1 (§301) : la forme de la parcelle, tirée de son contour (utils.js) ; rien quand elle n'en a pas.
+  var _fo=(typeof window._mvParcFormeHtml==='function')?window._mvParcFormeHtml(p.nom,520,170,'pfxf'):'';
+  if(_fo)h+='<div class="mv-forme pfx-forme">'+_fo+'</div>';
   if(drae)h+='<div class="pfx-drae"><b>D\u00e9lai de r\u00e9entr\u00e9e\u00a0: '+drae.heures+'\u00a0h</b> ('+_escHtml(drae.produit||'traitement')+'). Personne dans les rangs avant la fin du d\u00e9lai.</div>';
   if(pTacheFilter!=='toutes')h+='<div class="pfx-tache"><span>'+_escHtml(tNom(pTacheFilter))+'</span>'+_pEtatBadge(_pEtatTache(p))+'</div>';
   h+='<div class="pfx-kpis"><div class="pfx-kpi"><span class="l">Avancement de la campagne</span><span class="v">'+cl.pct+'<small>\u00a0%</small></span><span class="prow-bar"><i class="'+(cl.pct===100?'ok':'')+'" style="--p:'+cl.pct+'%"></i></span></div>'
@@ -9042,6 +9045,8 @@ function openDP(nom){
   const p=PARCELLES.find(x=>x.nom===nom);if(!p)return;
   const cl=getPCls(p);
   document.getElementById('dp-nom').textContent=p.nom;
+  // FORME-1 (§301) : en haut de la fiche, la forme de la parcelle (son contour) ; cachée quand elle n'en a pas.
+  var _dpf=document.getElementById('dp-forme'); if(_dpf){ var _dph=(typeof window._mvParcFormeHtml==='function')?window._mvParcFormeHtml(p.nom,520,180,'dpf'):''; _dpf.innerHTML=_dph; _dpf.hidden=!_dph; }
   document.getElementById('dp-sub').textContent=`${p.statut==='Arrachee'?'Arrach\u00e9e':p.statut} · ${_pvSurfFr(p.surface)} ha`;
   _dpCurrentNom=nom;
   // Cépage (multi, entreplantation)

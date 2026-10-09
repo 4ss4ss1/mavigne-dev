@@ -7452,6 +7452,74 @@ body.ck-agr-on{overflow:hidden}
 .ck2 .ck-pt-fil{ background:var(--ok); }
 html .ck-agr-voile{ background:var(--voile); }
 
+/* ★ FORME-1 (§301) — LE PLAN AUX FORMES RÉELLES, COMPACT ; LA LOUPE ; LA FORME EN HAUT DES FICHES.
+   Les règles REF-1 du plan restent (carte à défilement, bandes, étiquette) : celles-ci les recouvrent sous .ck2. Le plan est
+   dessiné à la largeur réelle (1 unité = 1 pixel) : plus de largeur minimale, plus de rapport fixe, plus de défilement de côté. */
+.ck2 .ck-carte{margin:4px 0 0;overflow:visible;background:none;border:0;border-radius:0}
+.ck2 .ck-carte-in{min-width:0;aspect-ratio:auto}
+.ck2 .ck-svg{position:static;width:100%;height:auto;overflow:visible}
+.ck2 .ck-svg-boite{min-height:60px}
+.ck2 .ck-zone-nom{font:600 var(--pt-txt,13px) var(--font-ui);fill:var(--texte)}
+.ck2 .ck-zone-ha{font-size:var(--pt-micro,12px);font-weight:normal;fill:var(--texte-doux)}
+.ck2 .ck-zone-pc{font:500 var(--pt-micro,12px) var(--font-ui);fill:var(--texte-med);font-variant-numeric:tabular-nums}
+.ck2 .ck-zone-rail{fill:var(--ligne,#E7E6E2);opacity:1}
+.ck2 .ck-pa{stroke-width:1;stroke-opacity:1}
+.ck2 .ck-pa.et-afaire{fill:var(--bg-card)}
+.ck2 .ck-pa.et-cours{stroke-width:1.6}
+.ck2 .ck-pa.sans-contour{stroke-dasharray:4 3}
+.ck2 .ck-pa-hit{fill:transparent;cursor:pointer}
+.ck2 .ck-pr{pointer-events:none;transition:opacity .5s var(--mv-sortie)}
+.ck2 .ck-rg-l{stroke:var(--plan-rang);stroke-width:.8}
+.ck2 .ck-carte[data-filtre] .ck-pr:not(.f-on){opacity:.16}
+.ck2 #ck-sel{stroke:var(--accent);stroke-width:2}
+.ck2 .ck-carte.plie{max-height:var(--pli,360px);overflow:hidden}
+.ck2 .ck-carte.plie::after{content:"";position:absolute;left:0;right:0;bottom:0;height:64px;background:linear-gradient(to bottom,transparent,var(--bg-card));pointer-events:none}
+.ck2 .ck-plan-tout{align-self:flex-start;height:36px;margin-top:8px;padding:0 16px;border-radius:var(--ck-r-full);border:var(--bw,1px) solid var(--ligne,#E7E6E2);background:var(--bg-card);color:var(--texte);font-size:var(--pt-txt,13px);font-weight:var(--fw-med,500);cursor:pointer}
+.ck2 .ck-plan-tout[hidden]{display:none}
+.ck2 .ck-plan-pied{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;margin-top:12px}
+.ck2 .ck-plan-pied .ck-leg{margin-top:0}
+.ck2 .ck-echelle{display:flex;align-items:flex-end;gap:8px;margin-left:auto;color:var(--texte-doux);font-variant-numeric:tabular-nums}
+.ck2 .ck-echelle svg{display:block;overflow:visible}
+.ck2 .ck-ech-l{stroke:var(--texte-doux);stroke-width:1.2;fill:none}
+.ck2 .ck-ech-t{fill:var(--texte-doux);font:500 var(--pt-nano,11px) var(--font-ui)}
+.ck2 .ck-plan-note{display:flex;gap:8px;align-items:flex-start;margin:8px 0 0;font-size:var(--pt-micro,12px);line-height:1.45;color:var(--texte-doux)}
+.ck2 .ck-plan-note[hidden]{display:none}
+.ck2 .ck-plan-note i{flex:none;width:14px;height:10px;margin-top:4px;border:var(--bw,1px) dashed var(--texte-doux);border-radius:2px}
+.ck2 .ck-calque .ck-av{width:22px;height:22px}
+.ck2 .ck-calque .ck-av+.ck-av{margin-left:-8px}
+.ck2 .ck-eq.ancien::before{display:none}
+.ck2 .ck-eq.ancien .ck-av{background:var(--bg-card);color:var(--texte);border-color:var(--texte-doux)}
+.ck-loupe{position:fixed;z-index:400;width:296px;padding:12px;border-radius:var(--r-lg,12px);background:var(--bg-card);border:var(--bw,1px) solid var(--ligne,#E7E6E2);box-shadow:var(--shadow-md,0 6px 16px -4px rgba(20,18,14,.12));pointer-events:none;opacity:0;transform:translateY(4px) scale(.98);transition:opacity 140ms var(--mv-sortie),transform 220ms var(--mv-sortie)}
+.ck-loupe.ouvert{opacity:1;transform:none}
+.ck-loupe[hidden]{display:none}
+.ck-lp-forme{border-radius:var(--r-md,8px);background:var(--bg-doux)}
+.ck-lp-vide{margin:0;padding:24px 16px;font-size:var(--pt-micro,12px);color:var(--texte-doux);text-align:center}
+.ck-lp-t{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:8px}
+.ck-lp-t b{font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)}
+.ck-lp-t span{flex:none;font-size:var(--pt-txt,13px);color:var(--texte-med);font-variant-numeric:tabular-nums}
+.ck-lp-s{margin-top:4px;font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.ck-lp-e{display:flex;align-items:flex-start;gap:8px;margin-top:12px;padding-top:12px;border-top:var(--bw,1px) solid var(--ligne,#E7E6E2);font-size:var(--pt-txt,13px);line-height:1.4;color:var(--texte)}
+.ck-lp-e .sw{margin-top:4px}
+.ck-lp-e em{font-style:normal;color:var(--texte-doux)}
+/* La forme d'une parcelle (utils.js, _mvFormeSvg) : dans la loupe et en haut des deux fiches */
+.mv-forme{margin:0 0 12px;border-radius:var(--r-md,8px);background:var(--bg-doux);border:var(--bw,1px) solid var(--ligne,#E7E6E2)}
+.mv-forme[hidden]{display:none}
+.pfx-forme{margin:12px 0 0}
+.mv-fo-svg{display:block;width:100%;height:auto}
+.mv-fo{stroke-width:1.4;stroke-linejoin:round}
+.mv-fo.et-neutre,.mv-fo.et-afaire{fill:var(--bg-card);stroke:var(--texte-doux)}
+.mv-fo.et-faite{fill:var(--ok-doux);stroke:var(--ok)}
+.mv-fo.et-cours{fill:var(--presse);stroke:var(--encours);stroke-width:1.8}
+.mv-fo.et-retard{fill:var(--danger-doux);stroke:var(--danger)}
+.mv-fo.et-arr{stroke:var(--gris);stroke-dasharray:3 3}
+.mv-fo-rg{stroke:var(--ligne-forte);stroke-width:.9}
+.mv-fo-h{stroke:var(--gris);stroke-width:1.2}
+.mv-fo-r{pointer-events:none}
+.mv-fo-e{stroke:var(--texte-doux);stroke-width:1.2;fill:none}
+.mv-fo-t{fill:var(--texte-doux);font:500 var(--pt-nano,11px) var(--font-ui);font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){ .ck2 .ck-pr,.ck-loupe{transition:none} }
+/* ★ FIN FORME-1 */
+
 
 /* La consommation mesurée : une ligne par tracteur, l'échelle sous la piste */
 .pil-cso{display:flex;flex-direction:column}

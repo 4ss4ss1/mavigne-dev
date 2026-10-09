@@ -155,7 +155,7 @@ function rendre() {
 function lancer(k) {
   const x = PAL[k]; if (!x) return;
   window._palFermer();
-  if (x.go.parc) { if (typeof window.openSelParc === 'function') window.openSelParc(x.go.parc); return; }
+  if (x.go.parc) { if (typeof window.openDP === 'function') window.openDP(x.go.parc); return; }   // FORME-1 (§301) : la fiche ; openSelParc attend une TÂCHE
   if (x.go.act === 'journal') { window.openJournalEntry(); return; }
   if (x.go.act === 'theme') { const m = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; try { localStorage.setItem('mavigne_theme', m); } catch (e) { if (window._mvAvale) window._mvAvale(e, 'coquille.js/theme'); } window.applyTheme(m); return; }
   if (x.go.act === 'barre') { plier(!document.body.classList.contains('mv-rail-ouvert'), true); return; }

@@ -1,0 +1,31 @@
+{
+  "lot": "FORME-1",
+  "section": "§301",
+  "base": "53a0530cb972b29f68ebfe70eca21e12fb48c80a",
+  "inclut": [],
+  "date": "2026-10-09",
+  "fichiers": {
+    ".mv-base": "f0bdbaabaa0a588474a349886e441903cfabe44693d443da810524295ffd7df2",
+    "CLAUDE.md": "5dd617250e7f435d6c0a862df03cd2d34167e6dcb0496e1f6ada895c97694c8a",
+    "docs/claude/INDEX.md": "14043b502fc73777e3ae51fb59a2d2efb8441de6c56ea2c69988a3f2f869e7e9",
+    "docs/claude/chantiers-280-329.md": "642d564467f1295a4e852c43a2dfe7667942820d7fbaae00c1be725ae0971322",
+    "docs/claude/journal.md": "30648e4623db7ea346ee36474d8d78d13a94d1d76b8f150f3d06687000151bd2",
+    "guide/04-vigne.html": "a8bb6984369a0f259510b71b50184f1355303087c74e600d491f0f0ea425b90f",
+    "guide/11-pilotage.html": "82aaf669248898301f6f37413b66aa4006ad3c532a8ffeb33c4b8c38c8324efe",
+    "index.html": "a0c5c7b2837b2677b1a625f22b60bdc28198ef82c372207f03cd8ad4858efa43",
+    "public/sw.js": "c3501ee9ec0b1bdc3b762a53930663ab796d1ed230ad87c0bf2365023d82e57e",
+    "scripts/harnais-claude-md.mjs": "f767393e41b67ce0ce420268702d8428d18a6f2a0280df87beea7569fc8389af",
+    "scripts/mv-harnais-auj3.mjs": "55437a3d6738ad5d91a063c16d7878b4fe31583b262889152ac75336c52180d3",
+    "scripts/mv-harnais-liste.mjs": "6f35bd92593090c09a6a91b4541d860de1352c2b8d043a9a35ecec2c39ad9223",
+    "scripts/mv-harnais-ref1.mjs": "7230667a7cf2164ee9dbaa24b9029000c96b3ae140ba2f1c86406c18bb38f8f6",
+    "scripts/typo-baseline.json": "715e2dac4c4edaa1660cff2280fe9f05b7383fa7606ada019ed6245386812286",
+    "src/app.js": "8957b88fd896d9bac75dc2154469081caa6492a6299887cbbd2f10eba3b092d8",
+    "src/cockpit-vue.js": "a28c1bf386faca8ed5331d0d7152db7fee4bf8569d25ed5965513430c4e6535e",
+    "src/cockpit.js": "b25f0e5ef6edc2567024e9085f327a6c08778cac71c781c5b5c2bcf2f382bd3a",
+    "src/coquille.js": "c00f063571b60bd2f120010cca9f9951f888cc608eeb604c423cdf4ea7cc4f22",
+    "src/pilotage.js": "5dd22fe0f3c3654b110e04ccf411351ccc23324f2e2dd4a9f130fe3379a738a8",
+    "src/styles.css": "1bcdd33411319d2d9c48f38b330103e5bb14590cb70a2d86ec86a4a8221ed892",
+    "src/utils.js": "a99ce7a681604f086ece899602f3394439e0365ca33d291a0b7f06a4d0ea43df",
+    "scripts/mv-harnais-forme1.mjs": "0ae5446b4756a313f5886a89b105ebcac9cc31be4899ce354bf2535ffeacf035"
+  }
+}
