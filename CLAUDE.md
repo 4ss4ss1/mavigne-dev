@@ -3,12 +3,12 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **9 octobre 2026 (GF-3)** — ★ **DEUX LIGNES D'AIDE QUI CHEVAUCHAIENT LEUR CHAMP** (§304). Lot 35, base `9caff41` — ce zip contient aussi GF-2.
-> Capture de Nico : sous « Sucres au labo », la ligne d'aide mordait sur le champ. Mesuré sous Chromium sur le VRAI formulaire (index.html + styles.css) :
-> elle commençait 6 px DANS le champ — `margin-top:-6px`, recopié de la ligne de la densité, qui chevauchait déjà la sienne : `.fi` n'a pas de marge basse.
-> Les deux passent à `margin-top:6px` (écart mesuré : 6 px). **SW 9.51 → 9.52**, APP inchangé (8.73), rien à annoncer.
-> ⚠️ Leçon : la maquette portait `6px` écrit à la main ; l'intégration a recopié la ligne voisine. Le rendu d'une maquette ne prouve rien sur l'écran intégré :
-> regarder la feuille intégrée elle-même avant de livrer — c'est la seule chose qui voit un chevauchement (§24 : aucun harnais ne lit une mise en page).
+> Dernière consolidation : **9 octobre 2026 (BUILD-1)** — ★★ **LE BUILD NE JOUE PLUS LES CONTRÔLES UN PAR UN** (§305). Lot 36, base `53a99e6`.
+> Demande de Nico : « le déploiement est vraiment long ». Mesuré : 345 commandes = 612 s jouées une par une ; 10 font 82 % du temps, les contre-épreuves 67 %.
+> Le lanceur les joue désormais à plusieurs (autant que de cœurs), sorties dans l'ordre de la liste ; les 9 harnais qui écrivent dans le dépôt passent SEULS,
+> en tête (`SEULS`, gardé par le nouveau `mv-harnais-lanceur`). `auth1` attendait 60 s pour rien (un minuteur de `firebase.js`) : il sort quand il a fini.
+> Déploiement : `--only hosting` dès que le zip ne touche ni `functions/` ni les rules. **Aucun bump** (scripts et documentation seulement).
+> ⚠️ Leçon : le repérage automatique a trouvé 2 harnais écrivains (vignoble, entretien) que ma relecture à la main avait ratés — une variable nommée `tmp` m'avait suffi.
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -786,8 +786,12 @@ c'est ce qui rend possible le point d'aide dynamique (§27b).
 ## 6. Build & déploiement
 
 ```
-npm run build && firebase deploy
+npm run build && firebase deploy --only hosting     ← le zip ne touche que l'appli (le cas courant)
+npm run build && firebase deploy                    ← le zip touche aussi functions/ ou les rules
 ```
+- ★★ **BUILD-1 (§305) — la note de livraison donne TOUJOURS la commande exacte.** Vérifié dans le code de l'outil Firebase (`release/planner.ts`) : un
+  `firebase deploy` complet saute les fonctions inchangées, mais les analyse et republie les deux fichiers de rules ; et l'empreinte couvre TOUT `functions/` :
+  un seul fichier touché refait les 37 (d'où `--only functions:<nom>`).
 
 - ⚠️ **JAMAIS** de second `&& node scripts/inject-precache.mjs` : la 2ᵉ passe sort en `exit(1)` →
   **deploy annulé**. Le script est **idempotent**, il tourne déjà en `postbuild`.
@@ -827,6 +831,10 @@ npm run build && firebase deploy
 la ligne suivante. **Rien dans `package.json`, rien dans `ci.yml`** : `check` = `node scripts/mv-lanceur.mjs`, `prebuild` =
 `npm run check`, la CI joue le lanceur `--continuer`. `mv-harnais-portes` rougit si une seconde liste revient. Reprendre après
 un rouge : `node scripts/mv-lanceur.mjs --depuis <script>` ; un groupe seul : `--groupe <id>` ; voir la liste : `--liste`.
+★★★ **BUILD-1 (§305) — LE LANCEUR JOUE EN PARALLÈLE** : autant de commandes que de cœurs, sorties dans l'ordre de la liste ; `--un-par-un` (ou `MV_JOBS=1`) = l'ancien
+mode. Deux règles pour tout harnais neuf : **il SORT quand il a fini** (`process.exit`) — un minuteur du code testé le garde sinon en vie (vécu : `auth1`, 60 s à
+chaque build) ; **s'il écrit dans le dépôt** (un vrai fichier, ou un temporaire dans `src/` ou `scripts/`), **une ligne dans `SEULS`** (`mv-harnais-liste.mjs`) —
+`mv-harnais-lanceur` rougit sinon. Les SEULES passent en tête, une par une ; on ne tue jamais une commande en cours (cuvgr3 rend son fichier dans un `finally`).
 
 ★★ **GF-2 (§303) — LA CHAÎNE SE JOUE JUSQU'AU BOUT, ET SON RÉSUMÉ FAIT FOI.** Elle dépasse le temps d'un appel côté Claude : la lancer en
 arrière-plan (`nohup env TZ=Europe/Paris node scripts/mv-lanceur.mjs --continuer > /tmp/chaine.log 2>&1 &`) et lire sa dernière ligne. Le 09/10,
@@ -1841,6 +1849,11 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ BUILD-1 — CE QUI RESTE OUVERT (§305, posé le 09/10)
+- **Le chiffre de Nico** : la dernière ligne du lanceur donne le total et les 5 plus longues — à comparer à ses builds d'avant. · **Compilation Vite** (Terser, 2 passes) : mesurée §305f, à trancher par Nico.
+- **`recup --contre`** (134 s, 90 défauts, recharge tout `planning.js` à chaque défaut) = le plancher du parallèle : à alléger. · **`entree1`** : ~50 s d'attente VOULUE (WebCrypto, 350 ms par scénario), cachée par le parallèle.
+- Contre-épreuves en CI seulement : écarté pour l'instant (≈ 1 min de gain une fois en parallèle).
+
 ### ⚠️ GF-1 — CE QUI RESTE OUVERT (§302, posé le 09/10)
 
 1. **Deux réglages viennent de Claude, pas de Nico — à caler sur ses cuves** : « ça stagne » sous 5 % de baisse par jour (`_VEND_GF_STAGNE`) et
@@ -2199,19 +2212,7 @@ en dur et se lisent donc comme des succès.
 ⚠️ **L'audit n'a PAS pu vérifier l'état EN LIGNE** (bac à sable sans accès au domaine) : tout ce qui
 suit décrit **le dépôt**, pas la production. **Détail, preuves et règles nouvelles : §44.**
 
-### ✅ LA FUSION DE `pilotage.js` EST FAITE (commit `2e002ae`)
-
-**Le commit `banc` avait remplacé `src/pilotage.js` par un fichier d'une autre lignée** — 1 690
-lignes changées, 1 164 suppressions : `_mvInfoBtn` 28→0, `MV_INFO` 4→0, `_PIL_ST_V` 4→0,
-`_pecFiabCard` 4→0, `_pilTile` passé de 9 à 8 arguments. **Signature d'un fichier restauré depuis
-une sauvegarde, pas d'une décision** : `utils.js` gardait ses 11 fiches `MV_INFO` sans pastille où
-les poser, et la CI lançait toujours trois harnais devenus rouges.
-⚠️ **Les deux lignées ne se recouvraient pas** — `7a509b4` portait l'ergonomie sans
-`_PIL_CMP_RECOUV`, `c638402` la cadence sans l'ergonomie : **aucun n'était un sur-ensemble de
-l'autre**, il a fallu fusionner à la main. **Fait par Nico.** Vérifié : 9 660 lignes, les six
-marqueurs présents, `banc` + `garde-projection` + les trois harnais Pilotage tous verts.
-★ **La leçon** : quand un fichier maigrit de 600 lignes entre deux clones, **c'est le nombre de
-lignes qu'il faut regarder en premier** — pas le diff, qui noie le signal dans le bruit.
+### ✅ La fusion de `pilotage.js` (commit `2e002ae`) — descendue dans `docs/claude/journal.md` le 09/10 (BUILD-1, plafond du cœur)
 
 ### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §42
 

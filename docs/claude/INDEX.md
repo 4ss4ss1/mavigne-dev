@@ -14,6 +14,7 @@
 | — | Historique descendu du §28 de CLAUDE.md (05/10/2026, MOTIFS-1 — plafond du cœur) | `docs/claude/journal.md` |
 | — | Descendu du §28 de CLAUDE.md le 09/10/2026 (CADRE-1, plafond du cœur) | `docs/claude/journal.md` |
 | — | Descendu du §28 de CLAUDE.md le 09/10 (GF-1) — plafond du cœur, historique sans consigne | `docs/claude/journal.md` |
+| — | Descendu de `CLAUDE.md` §28 le 09/10 (BUILD-1, §305) — plafond du cœur | `docs/claude/journal.md` |
 | 1 | 1. Identité & contexte | `CLAUDE.md` |
 | 2 | 2. Inventaire fonctionnel — 10 modules | `CLAUDE.md` |
 | 3 | 3. Positionnement commercial | `CLAUDE.md` |
@@ -351,3 +352,4 @@
 | 302 | 302. ★★ GF-1 — LES SUCRES AU LABO PRENNENT LE RELAIS DE LA DENSITÉ (09/10 — `src/cuvier.js` · `src/cave.js`… | `docs/claude/chantiers-280-329.md` |
 | 303 | 303. ★ GF-2 — LE « ≈ » QUE LES POLICES NE SAVENT PAS DESSINER (09/10 — `src/cuvier.js` · `scripts/subset-ba… | `docs/claude/chantiers-280-329.md` |
 | 304 | 304. ★ GF-3 — DEUX LIGNES D'AIDE QUI CHEVAUCHAIENT LEUR CHAMP (09/10 — `index.html` · `public/sw.js` · `CLA… | `docs/claude/chantiers-280-329.md` |
+| 305 | 305. ★★ BUILD-1 — LE BUILD NE JOUE PLUS LES CONTRÔLES UN PAR UN (09/10 — `scripts/mv-lanceur.mjs` · `script… | `docs/claude/chantiers-280-329.md` |

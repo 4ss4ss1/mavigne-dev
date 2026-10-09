@@ -213,3 +213,7 @@ console.log('\n  AUTH-1 \u2014 une saisie n\'est jamais jetee\n  Cible : ' + CIB
 console.log('\n  ' + verts + ' vert(s) \u00b7 ' + rouges + ' rouge(s)');
 if (rouges) { console.log('  \u2717 AUTH-1 \u00c9CHOU\u00c9\n'); process.exit(1); }
 console.log('  \u2713 AUTH-1 OK\n');
+// BUILD-1 (§305) — SORTIR quand tout est dit. firebase.js arme un minuteur de 60 s (_mvDeniedRetried) dans
+// le bac a sable, avec le VRAI setTimeout : sans cette sortie, Node attendait 60 s pour rien a chaque build
+// (mesure : travail fini en 0,04 s, processus termine a 60,1 s). La branche rouge sortait deja (exit 1).
+process.exit(0);

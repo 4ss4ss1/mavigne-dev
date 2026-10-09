@@ -32,6 +32,12 @@
 
 export const GROUPES = {
 
+  // BUILD-1 (§305) : le lanceur fait tourner les controles EN PARALLELE. Ce harnais prouve, sur un
+  // faux executant, que les sorties sortent dans l'ordre de la liste, qu'une commande SEULE ne croise
+  // jamais une autre, qu'au premier rouge plus rien ne demarre (et que rien n'est tue) — et que tout
+  // script de la liste qui ecrit dans le depot est declare dans SEULS ou ECRIT_HORS_LISTE.
+  'lanceur-parallele': 'Lanceur — parallele, ordre de sortie, commandes seules',
+
   // C1–C22 : le filet anti-regression. Lecture seule, ~1 s.
   // (npm run build le relance en prebuild ; ici c'est pour echouer VITE
   //  et sur une etape NOMMEE, avant les 50 s de build.)
@@ -250,6 +256,8 @@ export const HARNAIS = [
   ['node scripts/mv-lots.mjs'],   // LOTS-1 (§231) : la garde des lots frères, juste après celle de la base
   ['node scripts/mv-harnais-portes.mjs'],
   ['node scripts/mv-harnais-portes.mjs --contre'],   // LISTE-1 (§190) : le câblage de la liste unique, et sa contre-épreuve
+  ['node scripts/mv-harnais-lanceur.mjs', 'lanceur-parallele'],   // BUILD-1 (§305) : le lanceur en parallele, et sa contre-epreuve
+  ['node scripts/mv-harnais-lanceur.mjs --contre'],
   ['node scripts/lint-cliquet.mjs', 'eslint-cliquet-anti'],
   ['node scripts/preflight.mjs', 'preflight'],
   ['node scripts/mv-harnais-globaux.mjs', 'globaux-un-nom-lu-existe-t'],
@@ -592,3 +600,39 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-pro1.mjs'],               // PRO-1 (§269) : la barre à sa vraie largeur, les boutons du cockpit, la consommation refaite
   ['node scripts/mv-harnais-pro1.mjs --contre'],
 ];
+
+/* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────
+   Le lanceur fait tourner les commandes À PLUSIEURS EN MÊME TEMPS. C'est sans danger tant qu'une
+   commande ne fait que LIRE le dépôt. Deux familles écrivent dedans :
+
+   SEULS — elles écrivent dans le dépôt PENDANT la liste. Le lanceur les joue EN PREMIER, une par
+   une, avant toutes les autres. Ajouter un harnais qui écrit dans src/, scripts/ ou un vrai fichier
+   = une ligne ici, avec sa raison. mv-harnais-lanceur rougit sinon. */
+export const SEULS = {
+  'scripts/mv-harnais-cuvgr3.mjs': "ses contre-epreuves reecrivent un VRAI fichier de src/ (cave, utils) le temps d'un essai, puis le rendent",
+  'scripts/mv-harnais-releve.mjs': 'ses contre-epreuves posent src/.mv-ko-rlv-N.js, que les controles qui listent src/ liraient',
+  'scripts/mv-harnais-fuseau.mjs': 'ses contre-epreuves posent src/.mv-ko-tz-N.js, que les controles qui listent src/ liraient',
+  'scripts/mv-harnais-vignoble.mjs': 'ses contre-epreuves posent src/.mv-ko-vgn-N.js (meme raison) — trouve par mv-harnais-lanceur a sa mise en service',
+  'scripts/mv-harnais-entretien.mjs': 'ses contre-epreuves posent src/.mv-ko-ent-N.js (meme raison) — idem',
+  'scripts/mv-harnais-gt1.mjs': 'charge ses modules depuis scripts/.mv-gt1-*.mjs, que harnais-claude-md compterait comme un script muet',
+  'scripts/mv-harnais-ids1.mjs': 'charge depuis scripts/.mv-ids1-*.mjs (meme raison)',
+  'scripts/mv-harnais-ids1b.mjs': 'charge depuis scripts/.mv-ids1b-*.mjs (meme raison)',
+  'scripts/mv-harnais-renom-parc.mjs': 'charge depuis scripts/.mv-renp-*.mjs (meme raison)',
+};
+
+/* ECRIT_HORS_LISTE — elles écrivent dans le dépôt, mais SEULEMENT sous un drapeau que la liste ne
+   passe jamais. mv-harnais-lanceur vérifie que la liste ne le passe pas (ou passe bien --check / --test). */
+export const ECRIT_HORS_LISTE = {
+  'scripts/preflight.mjs': '--baseline',
+  'scripts/mv-harnais-icones.mjs': '--baseline',
+  'scripts/mv-harnais-echelle.mjs': '--baseline',
+  'scripts/mv-harnais-jetons.mjs': '--baseline',
+  'scripts/mv-harnais-subset.mjs': '--baseline',
+  'scripts/mv-harnais-typo.mjs': '--baseline',
+  'scripts/mv-harnais-contraste.mjs': '--baseline',
+  'scripts/banc/banc.mjs': '--engraver',
+  'scripts/mv-claude-index.mjs': 'sans --check',
+  'scripts/build-guide.mjs': 'sans --check',
+  'scripts/mv-sitemap.mjs': 'sans --check',
+  'scripts/mv-version-json.mjs': 'sans --test',
+};

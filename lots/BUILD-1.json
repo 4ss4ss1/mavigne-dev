@@ -1,0 +1,19 @@
+{
+  "lot": "BUILD-1",
+  "section": "§305",
+  "base": "53a99e69c8296aa0b4219b37648ef0f2ee20bfa0",
+  "inclut": [],
+  "date": "2026-10-09",
+  "fichiers": {
+    ".mv-base": "999288fcd7de9ea153fe1c1d2d91be48be536087b83d33ccd9874439e36d0b1e",
+    "CLAUDE.md": "46d89b658d7af38575cb9f26a0759f1a79e3c7b465e9cd5c21ab4fd0d28cd1b4",
+    "docs/claude/INDEX.md": "a053504e0e35586158f8a9f45a0d9ff15888fb353fe5be0dd9eea329aa465504",
+    "docs/claude/chantiers-280-329.md": "5fe7b89e646c53d5376aecfb7af1fd27f93f56551750801556b5471d645752f6",
+    "docs/claude/journal.md": "30c2eb67359c8837b2b44681f8c5f58ccd334cc711592440b34d22da37024ccd",
+    "scripts/harnais-claude-md.mjs": "a9de9b66d20840d024714ce2191fdfe72478314d43bd95cf91dbad64b315709a",
+    "scripts/mv-harnais-auth1.mjs": "cdbc1c0f806b55e4f4adb79ad46a13054c2fe70049d1e0e7a3f1830cdbd6a696",
+    "scripts/mv-harnais-liste.mjs": "e78b504fc91044733c293e174368faf170f562bfcb0125206e35bd90c2ed54e1",
+    "scripts/mv-lanceur.mjs": "bb6d9cdcf41227e28454757a2b44252d8997de8e323a97ad7183ee8b55fdd180",
+    "scripts/mv-harnais-lanceur.mjs": "40f655a350514f86be97a2e1a63a6c4f4dfa81e9fc3a483610a79f31766c735f"
+  }
+}

@@ -712,3 +712,77 @@ d'`index.html`. Ce que la maquette prouvait (la feuille de style, les fonctions)
 
 ### 304c. Mesuré
 Chaîne complète rejouée commande par commande (`TZ=Europe/Paris`), codes retour relevés un à un : **345 commandes, 0 rouge — la contre-épreuve lente de mv-harnais-recup rejouée seule (212 s, 90 défauts détectés)**. Rendu de la feuille regardé.
+
+## 305. ★★ BUILD-1 — LE BUILD NE JOUE PLUS LES CONTRÔLES UN PAR UN (09/10 — `scripts/mv-lanceur.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/mv-harnais-lanceur.mjs` (neuf) · `scripts/mv-harnais-auth1.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-280-329.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/BUILD-1.json`)
+
+Demande de Nico : « il n'y a pas moyen que le déploiement soit plus rapide […] c'est vraiment long ». Objectif reformulé puis confirmé : raccourcir l'attente
+entre `npm run build && firebase deploy` et la mise en ligne, **sans retirer un seul contrôle** ni toucher au brouillage du code en ligne. Mesure d'abord,
+pistes chiffrées ensuite ; Nico a retenu : couper les attentes, jouer en parallèle, `--only hosting` (« Continuer »).
+
+### 305a. La mesure, avant tout plan
+Chaque commande de la liste chronométrée une par une, dans l'ordre du lanceur (bac à sable : 1 cœur Xeon 2,1 GHz) : **345 commandes = 612 s**. Médiane
+0,08 s ; les 295 commandes sous 0,5 s pèsent 32 s à elles toutes ; **10 commandes font 82 % du temps** : `recup --contre` 134-137 s, `icones-contre`
+62-65 s, `preflight` 62 s, `auth1` 60 s, `entree1 --contre` 51 s, `robustesse-planning` 22 + 44 s, `robustesse-pilotage` 7 + 33 s, `taille2 --contre`
+18 s. **Les contre-épreuves pèsent 411 s (67 %).** Temps réel contre temps de calcul (`time`) : `auth1` = 60,1 s pour 0,05 s de calcul,
+`entree1 --contre` = 50,6 s pour 4,9 s ; tous les autres gros contrôles calculent vraiment.
+
+### 305b. Les deux attentes
+- **`auth1`** : son travail finit en 0,04 s, puis Node attend. `firebase.js` arme `setTimeout(… delete _mvDeniedRetried[key] …, 60000)` dans le bac à
+  sable, avec le VRAI `setTimeout`. → `process.exit(0)` après la ligne verte (la branche rouge sortait déjà). −60 s ; rien de ce qui est testé ne change.
+- **`entree1`** : l'attente est VOULUE. `attendre(350)` par scénario, parce que l'empreinte du mot de passe (PBKDF2-SHA-256, 310 000 tours) se calcule
+  hors du fil JS : il faut du vrai temps. PBKDF2 mesuré à 48 ms ici, marge ×7. Pas touché : en parallèle, ses ~50 s d'attente n'occupent aucun cœur.
+  ⚠️ C'est l'attente que j'avais annoncée à Nico comme « même symptôme qu'auth1, cause à confirmer » : confirmée, et ce n'était PAS la même cause.
+
+### 305c. Le lanceur en parallèle — les arbitrages
+- **`jobs` = les cœurs** (`os.availableParallelism()`), `MV_JOBS=N` pour forcer. Un seul cœur, `MV_JOBS=1` ou `--un-par-un` = l'ancien code, tel quel.
+- **Sorties dans l'ordre de la liste** : chaque commande est capturée, puis écrite dès que toutes celles d'avant le sont. Le journal de la CI se lit comme
+  avant ; la ligne d'en-tête de chaque commande porte sa durée, et le résumé final les 5 plus longues.
+- **Les SEULES en tête, pas à leur place** : à leur place, il faudrait d'abord attendre la fin de la plus longue commande en cours (jusqu'à 134 s).
+  L'ordre d'exécution ne compte pas : aucune commande de la liste ne lit ce qu'une autre écrit (inventaire des écritures fait script par script).
+- **On ne tue jamais** : au premier rouge, plus rien ne démarre et ce qui tourne va au bout — `mv-harnais-cuvgr3` réécrit `src/cave*.js` ou
+  `src/utils.js` et ne les rend que dans son `finally`.
+- **Reprendre** : `--depuis` pointe la première commande rouge OU pas jouée, dans l'ordre de la liste (une SEULE rouge arrête tout avant la première
+  commande ordinaire : pointer le rouge ferait sauter celles d'avant).
+- ★ **Les plus longues d'abord** : le lanceur retient la durée de chaque commande (`node_modules/.cache/mv-lanceur-durees.json`, propre au poste,
+  jamais commité) et lance d'abord les plus longues au passage suivant (inconnue = en tête). Calcul à 4 cœurs : 174 s dans l'ordre de la liste, 140 s
+  ainsi — `recup --contre` est la 169ᵉ. Sans ce fichier (CI, premier build) : l'ordre de la liste.
+- ⚠️ **Le parallèle charge le processeur** : un harnais qui attend du VRAI temps (`entree1`, 350 ms pour un calcul de 48 ms) garde sa marge tant que
+  `jobs` ne dépasse pas les cœurs. `MV_JOBS` au-dessus des cœurs = à ses risques.
+
+### 305d. Ce que le repérage a trouvé
+`mv-harnais-lanceur` lit les appels d'écriture de chaque script de la liste et remonte la variable du chemin sur trois niveaux. À sa première exécution, il
+a rougi sur trois scripts : **`vignoble` et `entretien` écrivent vraiment `src/.mv-ko-vgn-N.js` / `src/.mv-ko-ent-N.js`** (comme `releve` et `fuseau`) —
+ma relecture à la main les avait classés « temporaires » parce que leur variable s'appelait `tmp` → SEULS. `icones-contre` était une fausse alerte : il
+copie DEPUIS le dépôt vers son `mkdtemp` → le repérage lit désormais la destination d'une copie (2ᵉ argument), et les deux côtés d'un renommage.
+Bilan : **9 scripts SEULS (13 commandes), 12 ECRIT_HORS_LISTE** (écrivent seulement sous `--baseline`, `--engraver`, ou sans `--check` / `--test`).
+★ **Une relecture à la main d'un inventaire de 205 scripts n'est pas un inventaire** : le contrôle a trouvé en une seconde ce que j'avais raté.
+
+### 305e. Le déploiement
+Vérifié dans le code de `firebase-tools` (`src/deploy/functions/release/planner.ts`, `prepare.ts`) : une fonction est sautée quand son empreinte
+(source empaquetée du dossier + variables d'environnement + secrets) égale celle en ligne et qu'elle n'est pas visée par `--only`. L'empaquetage couvre
+TOUT `functions/` : un seul fichier touché → les 37 repartent. Un `firebase deploy` complet charge aussi le code des fonctions pour les analyser, liste
+celles en ligne, et republie `firestore.rules` et `storage.rules`. Durée non mesurable d'ici (pas d'accès au compte de Nico).
+
+### 305f. La compilation Vite — mesurée
+Bac à sable (1 cœur), même entrée, sortie à part : `mv-gt-page` 0,1 s · **`vite build` 41,4 s** · `inject-precache` et `mv-version-json` 0,0 s.
+Sans compression, l'assemblage seul prend 11,0 s : **Terser (2 passes) coûte ~30 s**.
+
+| Variante | Durée | `.js` brut | gzip | noms internes lisibles |
+|---|---|---|---|---|
+| Terser 2 passes (en place) | 41,4 s | 4 203 099 o | 1 234 504 o | 1 422 |
+| Terser 1 passe | 33,2 s | 4 207 931 o (+0,1 %) | 1 239 359 o (+0,4 %) | 1 422 |
+| esbuild | 10,9 s | 4 397 755 o (+4,6 %) | 1 275 714 o (+3,3 %, +41 Ko) | 1 422 |
+| sans compression | 11,0 s | 6 141 002 o | 1 537 033 o | 4 595 |
+
+Les 1 422 noms qui restent lisibles sont ceux posés sur `window` : aucune compression ne les touche, le brouillage des noms est le même dans les trois
+cas. **Rien d'appliqué : décision de Nico.** ⚠️ esbuild n'a pas l'option `reserved` de Terser (`firebase`, `db`, `auth`) : à valider au smoke et à
+l'e2e avant de l'adopter.
+
+### 305g. Mesuré
+- Chronométrage commande par commande (305a) : 345 commandes, 612 s, un seul rouge, réel à ce moment-là (`mv-harnais-subset`, réglé depuis par GF-3).
+- `mv-harnais-lanceur` : 17 vertes ; contre-épreuve 11/11 défauts détectés. `mv-harnais-portes` vert. `auth1` : 27 vertes en 0,05 s.
+- Chaîne complète en parallèle, 4 à la fois sur 1 cœur (`TZ=Europe/Paris`, `--continuer`) : **347/347, 0 rouge, 594 s**. Sur un cœur, le parallèle ne
+  peut rien gagner : ce passage prouve la justesse, pas la vitesse — et `entree1` est resté vert avec 4 processus sur le même cœur.
+- Projection (durées mesurées, partage parfait supposé) : contrôles 552 s une par une → **140 s à 4 cœurs**, plancher `recup --contre` ; + Vite 41 s.
+- Chaîne rejouée sur l'état final du zip (marque posée, `.mv-base` armé) : **347/347, 0 rouge, 580 s** (4 à la fois sur 1 cœur).
+- ⚠️ **Pas vérifié** : la vitesse sur le PC de Nico (Windows, nombre de cœurs inconnu). La dernière ligne du lanceur la donne, avec les 5 plus longues.

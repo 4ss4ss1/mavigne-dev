@@ -8,6 +8,13 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **9 octobre 2026 (GF-3)** — ★ **DEUX LIGNES D'AIDE QUI CHEVAUCHAIENT LEUR CHAMP** (§304). Lot 35, base `9caff41` — ce zip contient aussi GF-2.
+> Capture de Nico : sous « Sucres au labo », la ligne d'aide mordait sur le champ. Mesuré sous Chromium sur le VRAI formulaire (index.html + styles.css) :
+> elle commençait 6 px DANS le champ — `margin-top:-6px`, recopié de la ligne de la densité, qui chevauchait déjà la sienne : `.fi` n'a pas de marge basse.
+> Les deux passent à `margin-top:6px` (écart mesuré : 6 px). **SW 9.51 → 9.52**, APP inchangé (8.73), rien à annoncer.
+> ⚠️ Leçon : la maquette portait `6px` écrit à la main ; l'intégration a recopié la ligne voisine. Le rendu d'une maquette ne prouve rien sur l'écran intégré :
+> regarder la feuille intégrée elle-même avant de livrer — c'est la seule chose qui voit un chevauchement (§24 : aucun harnais ne lit une mise en page).
+
 > Dernière consolidation : **9 octobre 2026 (GF-2)** — ★ **LE « ≈ » QUE LES POLICES NE SAVENT PAS DESSINER** (§303). Lot 34, base `9caff41`.
 > La CI de Nico a rougi sur GF-1 (§302) : `mv-harnais-subset` — la courbe des sucres étiquetait sa date estimée « ≈ 13/10 », et U+2248 n'est pas dans
 > le subset des polices. Remplacé par « vers le 13/10 ». Baseline du subset regravée à la baisse (272 → 271, `pilotage.js` 28 → 27), clé par clé. Aucun
@@ -2144,3 +2151,19 @@ pour ce document précis.
 
 **3 août 2026 — l'Urssaf a confirmé que Nico peut facturer.** La première facture définitive est
 partie à le signataire le second domaine (réf. MV-AAAA-NNNN).
+
+## Descendu de `CLAUDE.md` §28 le 09/10 (BUILD-1, §305) — plafond du cœur
+
+### ✅ LA FUSION DE `pilotage.js` EST FAITE (commit `2e002ae`)
+
+**Le commit `banc` avait remplacé `src/pilotage.js` par un fichier d'une autre lignée** — 1 690
+lignes changées, 1 164 suppressions : `_mvInfoBtn` 28→0, `MV_INFO` 4→0, `_PIL_ST_V` 4→0,
+`_pecFiabCard` 4→0, `_pilTile` passé de 9 à 8 arguments. **Signature d'un fichier restauré depuis
+une sauvegarde, pas d'une décision** : `utils.js` gardait ses 11 fiches `MV_INFO` sans pastille où
+les poser, et la CI lançait toujours trois harnais devenus rouges.
+⚠️ **Les deux lignées ne se recouvraient pas** — `7a509b4` portait l'ergonomie sans
+`_PIL_CMP_RECOUV`, `c638402` la cadence sans l'ergonomie : **aucun n'était un sur-ensemble de
+l'autre**, il a fallu fusionner à la main. **Fait par Nico.** Vérifié : 9 660 lignes, les six
+marqueurs présents, `banc` + `garde-projection` + les trois harnais Pilotage tous verts.
+★ **La leçon** : quand un fichier maigrit de 600 lignes entre deux clones, **c'est le nombre de
+lignes qu'il faut regarder en premier** — pas le diff, qui noie le signal dans le bruit.
