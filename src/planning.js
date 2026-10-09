@@ -5960,13 +5960,26 @@ function _plGensDock(){
   document.body.classList.toggle('pl-gens-dock',on);
   if(!on){
     if(ov.parentNode===pg&&_plFicheChez){ ov.classList.remove('open'); _plFicheChez.parent.insertBefore(ov,_plFicheChez.suivant); _planFicheNom=null; }
+    _plFicheFenetre(ov,true);   // CADRE-1 (§300) : rendue à sa place, elle redevient une fenêtre
     return;
   }
+  _plFicheFenetre(ov,false);   // CADRE-1 (§300) : rangée dans la page, elle n'est plus une fenêtre
   if(ov.parentNode!==pg){ _plFicheChez={ parent:ov.parentNode, suivant:ov.nextSibling }; pg.appendChild(ov); }
   var noms=[].slice.call(pg.querySelectorAll('#plan-body .pl2-mcard .pl2-mc-n')).map(function(n){return n.textContent.trim();});
   var cible=(_planFicheNom&&noms.indexOf(_planFicheNom)>=0)?_planFicheNom:noms[0];
   if(cible&&(cible!==_planFicheNom||!ov.classList.contains('open')))openPlanFiche(cible);
   _plGensMarque();
+}
+// ★ CADRE-1 (§300) — RANGÉE DANS LA PAGE, LA FICHE N'EST PLUS UNE FENÊTRE. Elle gardait sa classe .overlay : le verrou
+//   d'accessibilité (_mvOvSync, app.js) la prenait pour la fenêtre du dessus et rendait INERTE tout le reste — la liste, les
+//   onglets, la barre latérale —, bloquait le défilement, et ce gel suivait sur le module suivant (mesuré : 130 éléments
+//   inertes, un vrai clic sur une autre ligne sans effet). Rangée : .pl2-rangee à la place d'.overlay ; rendue : .overlay
+//   revient. _mvOvSync est rappelé, car une classe qui QUITTE .overlay n'est plus vue par l'observateur des fenêtres.
+function _plFicheFenetre(ov,fen){
+  var avant=ov.classList.contains('overlay');
+  if(fen){ ov.classList.add('overlay'); ov.classList.remove('pl2-rangee'); }
+  else { ov.classList.remove('overlay'); ov.classList.add('pl2-rangee'); }
+  if(avant!==!!fen&&window._mvOvSync)window._mvOvSync();
 }
 function _plGensMarque(){
   document.querySelectorAll('#plan-body .pl2-mcard').forEach(function(b){ var n=b.querySelector('.pl2-mc-n'), on=!!n&&n.textContent.trim()===_planFicheNom; b.classList.toggle('on',on); b.setAttribute('aria-current',on?'true':'false'); });

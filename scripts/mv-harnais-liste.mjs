@@ -549,6 +549,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-plan2.mjs --contre'],
   ['node scripts/mv-harnais-plan3.mjs'],              // PLAN-3 (§281) : les feuilles du Planning et le récap annuel à la charte
   ['node scripts/mv-harnais-plan3.mjs --contre'],
+  ['node scripts/mv-harnais-cadre1.mjs'],            // CADRE-1 (§300) : cases dans leur cadre, barre sous les fenêtres, fiche rangée sans gel
+  ['node scripts/mv-harnais-cadre1.mjs --contre'],
   ['node scripts/mv-harnais-trac1.mjs'],              // TRAC-1 (§282) : les sessions du Tracteur en liste + fiche
   ['node scripts/mv-harnais-trac1.mjs --contre'],
   ['node scripts/mv-harnais-trac2.mjs'],              // TRAC-2 (§283) : l'Entretien du Tracteur sur deux colonnes

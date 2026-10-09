@@ -2879,7 +2879,10 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pl2-ab-multi{background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte-med);}
 .pl2-ab-multi.on{background:var(--plan-acc);border-color:var(--plan-acc);color:#fff;}
 .pl2-ab-tools{background:var(--cave-2);color:#F0E2C8;border:1px solid rgba(194,161,77,0.4);}
-.pl2-mbar{position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:560;background:var(--cave-2);color:#F0E2C8;padding:12px 14px 14px;display:none;box-shadow:0 -8px 30px rgba(20,17,13,0.35);border-top:2px solid transparent;border-image:var(--horizon) 1;}
+/* ★ CADRE-1 (§300) : 450, SOUS les fenêtres (.overlay = 500). À 560, la barre passait DEVANT la fenêtre de la journée
+   dès que la page ne s'animait pas (réglage « animations réduites » de Windows) : l'animation d'entrée de .page, seule,
+   la tenait dessous. Rien entre 450 et 500 : le dock est à 90, la barre latérale à 35. */
+.pl2-mbar{position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:450;background:var(--cave-2);color:#F0E2C8;padding:12px 14px 14px;display:none;box-shadow:0 -8px 30px rgba(20,17,13,0.35);border-top:2px solid transparent;border-image:var(--horizon) 1;}
 .pl2-mbar.open{display:block;}
 .pl2-mbar-top{display:flex;align-items:center;gap:8px;max-width:560px;margin:0 auto 10px;font-size:var(--pt-txt,13px);font-weight:600;}
 .pl2-mbar-top #plan-mbar-lbl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -5829,7 +5832,12 @@ body .mvv-rh-fill{background:var(--terre,#8A5A38);}
   --btn-pri:#D8BC72;--btn-pri-tx:#1C1813}
 
 /* ═══ SOCLE ═══ */
-*,*::before,*::after{box-sizing:inherit}
+/* ★ CADRE-1 (§300) — BORNÉ AU COCKPIT. Recopiée telle quelle de la maquette (où .ck2 pose border-box et ses enfants en
+   héritent), la règle « *,*::before,*::after{box-sizing:inherit} » valait pour TOUTE l'appli : <html> ne pose rien, donc
+   tout héritait de content-box — la marge intérieure s'AJOUTAIT aux largeurs et hauteurs écrites. Mesuré le 09/10 : une
+   case colorée du Planning de 72 px dans une case de 67 (height:100% + 10 px de marge), des champs à width:100% plus
+   larges que leur fenêtre. Hors du cockpit, « *{box-sizing:border-box} » (le socle de l'appli) reprend la main. */
+.ck2 *,.ck2 *::before,.ck2 *::after{box-sizing:inherit}
 html{height:100%;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 40px);-webkit-text-size-adjust:100%}
 body{margin:0;min-height:100%;background:var(--bg-app);color:var(--texte);font:400 var(--pt-base,14px)/1.45 'Outfit',ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;transition:background-color var(--mv-d3)}
 button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
@@ -6766,7 +6774,7 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 #ovPlanFiche .pl2-ftabs .mvu-tab.on{ color:var(--texte)!important; }
 #ovPlanFiche .pl2-ed-x{ color:var(--texte-doux)!important; background:transparent!important; }
 @media (min-width:1024px){
-  body.pl-gens-dock #page-planning{ display:grid; grid-template-columns:minmax(0,1fr) var(--l-fiche,440px); column-gap:var(--e-4,16px); align-items:start; }
+  body.pl-gens-dock #page-planning.active{ display:grid; grid-template-columns:minmax(0,1fr) var(--l-fiche,440px); column-gap:var(--e-4,16px); align-items:start; }
   body.pl-gens-dock #page-planning > *{ grid-column:1; min-width:0; }
   body.pl-gens-dock #page-planning > .mod-header{ grid-column:1 / -1; }
   body.pl-gens-dock #page-planning > #ovPlanFiche{ grid-column:2; grid-row:2 / span 20; }
@@ -6781,19 +6789,19 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
    en-tête clair (plus de bande brune ni violette), champs du kit, note sur fond doux, bouton principal à l'accent, bouton
    secondaire du kit. Le récapitulatif annuel : titre en casse normale, barres neutres, le mois en cours à l'accent (repéré
    parce que sa barre n'est pas grise). Même balisage, mêmes gestes ; par jetons. */
-.overlay .pl2-sheet{ background:var(--bg-card)!important; box-shadow:var(--shadow-lg,0 16px 40px -8px rgba(20,18,14,.22),0 4px 10px -4px rgba(20,18,14,.10))!important; }
-.overlay .pl2-sh-hdr,.overlay .pl2-sh-hdr.pl2-sh-heat{ background:var(--bg-card)!important; color:var(--texte)!important; border-bottom:var(--bw) solid var(--ligne,#E7E6E2)!important; box-shadow:none!important; }
-.overlay .pl2-sh-hdr::before,.overlay .pl2-sh-hdr::after{ display:none!important; }
-.overlay .pl2-sh-grab{ background:var(--ligne-forte)!important; }
-.overlay .pl2-ed-d{ font-family:var(--font-titre)!important; color:var(--texte)!important; }
-.overlay .pl2-ed-s{ color:var(--texte-doux)!important; }
-.overlay .pl2-ed-x{ border:0!important; background:transparent!important; color:var(--texte-doux)!important; }
-.overlay .pl2-sh-hdr button:not(.pl2-ed-x){ border:var(--bw) solid var(--ligne-forte)!important; background:var(--bg-card)!important; color:var(--texte)!important; box-shadow:var(--shadow-xs)!important; }
-.overlay .pl2-sh-body input:not([type="checkbox"]):not([type="radio"]),.overlay .pl2-sh-body select{ border:var(--bw) solid var(--ligne-forte)!important; border-radius:var(--r-sm,6px)!important; background:var(--bg-card)!important; color:var(--texte)!important; font-family:var(--font-ui)!important; box-shadow:none!important; }
-.overlay .pl2-note{ border:0!important; border-radius:var(--r-sm,6px)!important; background:var(--bg-doux)!important; color:var(--texte-med)!important; }
-.overlay .pl2-ed-foot{ border-top:var(--bw) solid var(--ligne,#E7E6E2)!important; background:var(--bg-card)!important; }
-.overlay .pl2-ed-btn,.overlay .pl2-ed-heat{ border:0!important; border-radius:var(--r-sm,6px)!important; background:var(--accent)!important; color:var(--sur-accent)!important; font-weight:var(--fw-med,500)!important; box-shadow:var(--shadow-xs),var(--reflet)!important; }
-.overlay .pl2-ed-ghost{ border:var(--bw) solid var(--ligne-forte)!important; border-radius:var(--r-sm,6px)!important; background:var(--bg-card)!important; color:var(--texte)!important; box-shadow:var(--shadow-xs)!important; }
+:is(.overlay,.pl2-rangee) .pl2-sheet{ background:var(--bg-card)!important; box-shadow:var(--shadow-lg,0 16px 40px -8px rgba(20,18,14,.22),0 4px 10px -4px rgba(20,18,14,.10))!important; }
+:is(.overlay,.pl2-rangee) .pl2-sh-hdr,:is(.overlay,.pl2-rangee) .pl2-sh-hdr.pl2-sh-heat{ background:var(--bg-card)!important; color:var(--texte)!important; border-bottom:var(--bw) solid var(--ligne,#E7E6E2)!important; box-shadow:none!important; }
+:is(.overlay,.pl2-rangee) .pl2-sh-hdr::before,:is(.overlay,.pl2-rangee) .pl2-sh-hdr::after{ display:none!important; }
+:is(.overlay,.pl2-rangee) .pl2-sh-grab{ background:var(--ligne-forte)!important; }
+:is(.overlay,.pl2-rangee) .pl2-ed-d{ font-family:var(--font-titre)!important; color:var(--texte)!important; }
+:is(.overlay,.pl2-rangee) .pl2-ed-s{ color:var(--texte-doux)!important; }
+:is(.overlay,.pl2-rangee) .pl2-ed-x{ border:0!important; background:transparent!important; color:var(--texte-doux)!important; }
+:is(.overlay,.pl2-rangee) .pl2-sh-hdr button:not(.pl2-ed-x){ border:var(--bw) solid var(--ligne-forte)!important; background:var(--bg-card)!important; color:var(--texte)!important; box-shadow:var(--shadow-xs)!important; }
+:is(.overlay,.pl2-rangee) .pl2-sh-body input:not([type="checkbox"]):not([type="radio"]),:is(.overlay,.pl2-rangee) .pl2-sh-body select{ border:var(--bw) solid var(--ligne-forte)!important; border-radius:var(--r-sm,6px)!important; background:var(--bg-card)!important; color:var(--texte)!important; font-family:var(--font-ui)!important; box-shadow:none!important; }
+:is(.overlay,.pl2-rangee) .pl2-note{ border:0!important; border-radius:var(--r-sm,6px)!important; background:var(--bg-doux)!important; color:var(--texte-med)!important; }
+:is(.overlay,.pl2-rangee) .pl2-ed-foot{ border-top:var(--bw) solid var(--ligne,#E7E6E2)!important; background:var(--bg-card)!important; }
+:is(.overlay,.pl2-rangee) .pl2-ed-btn,:is(.overlay,.pl2-rangee) .pl2-ed-heat{ border:0!important; border-radius:var(--r-sm,6px)!important; background:var(--accent)!important; color:var(--sur-accent)!important; font-weight:var(--fw-med,500)!important; box-shadow:var(--shadow-xs),var(--reflet)!important; }
+:is(.overlay,.pl2-rangee) .pl2-ed-ghost{ border:var(--bw) solid var(--ligne-forte)!important; border-radius:var(--r-sm,6px)!important; background:var(--bg-card)!important; color:var(--texte)!important; box-shadow:var(--shadow-xs)!important; }
 #ovPlanDay .plan-modal-hdr{ background:var(--bg-card)!important; color:var(--texte)!important; border-bottom:var(--bw) solid var(--ligne,#E7E6E2)!important; box-shadow:none!important; }
 #ovPlanDay .plan-modal-hdr::before,#ovPlanDay .plan-modal-hdr::after{ display:none!important; }
 #ovPlanDay .pl2-ed-arr,#ovPlanDay .pl2-ms{ border:var(--bw) solid var(--ligne-forte)!important; background:var(--bg-card)!important; color:var(--texte)!important; box-shadow:none!important; }
@@ -6806,6 +6814,13 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 #page-planning .plan-bar-lbl{ font-weight:var(--fw-med,500)!important; color:var(--texte-doux)!important; }
 #page-planning .plan-bar-btn:has(.plan-bar-fill:not([style*="gris-clair"])) .plan-bar-lbl{ color:var(--accent-texte)!important; }
 /* ★ FIN PLAN-3 */
+/* ★ CADRE-1 (§300) — LA FICHE RANGÉE N'EST PAS UNE FENÊTRE. Sur « Les gens » au large, _plGensDock (planning.js) retire à
+   #ovPlanFiche sa classe .overlay et lui donne .pl2-rangee : plus rien de ce qui demande « une fenêtre est-elle ouverte ? »
+   (le verrou d'accessibilité qui rend le reste inerte et bloque le défilement, Échap, le retour, la mise à jour) ne la
+   compte. Les règles des feuilles (bloc PLAN-3) la suivent par :is(.overlay,.pl2-rangee). Fermée, elle se cache ici :
+   .overlay ne le fait plus pour elle. */
+#ovPlanFiche.pl2-rangee:not(.open){ display:none!important; }
+/* ★ FIN CADRE-1 */
 /* ★ TRAC-1 (§282) — LES SESSIONS DU TRACTEUR AU DESSIN DE LA MAQUETTE V6.
    Trois chiffres en bande, filtres conducteur et activité en segmentés, sessions en lignes de liste (la session en cours
    cerclée à l'accent), bouton flottant à l'accent. Sur ordinateur, deux colonnes : la liste et la fiche de la session

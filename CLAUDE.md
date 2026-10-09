@@ -3,11 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **9 octobre 2026 (E2E-1)** — ★ **LE TEST DE BOUT EN BOUT SUIT LE BOUTON « DÉMARRER UNE SESSION »** (§299). Lot 30,
-> **Nico a poussé la refonte** (`646323e` « Refonte v870 », puis `34813db`) : ce lot part de `34813db`, zip de six fichiers. La CI de Nico (`npm run test:e2e`, qui ne fait PAS partie de
-> `npm run check`) échouait à « Action session » : le test cliquait la FAB `#trac-fab`, cachée au large depuis TRAC-3 (§284). Le test clique
-> maintenant le geste VISIBLE (`#trac-new-btn` au large, la FAB à l'étroit). Test seulement : aucune version ne bouge (APP 8.70, SW 9.48).
-> ⚠️ Leçon : jouer aussi `npm run test:e2e` avant de livrer un lot qui cache ou remplace un bouton — la chaîne ne le fait pas.
+> Dernière consolidation : **9 octobre 2026 (CADRE-1)** — ★★ **LE SOCLE DU COCKPIT VALAIT POUR TOUTE L'APPLI** (§300). Lot 31, base `9e9f030`.
+> Quatre retours de Nico après la refonte, chacun REPRODUIT dans un vrai navigateur avant d'être corrigé : (1) `*,*::before,*::after{box-sizing:inherit}`,
+> recopiée de la maquette du cockpit (07/10), mettait TOUTE l'appli en content-box — cases colorées du Planning de 72 px dans 67, **27 fenêtres sur 38**
+> plus larges que leur cadre → bornée à `.ck2` (0 sur 38 après) ; (2) la barre de sélection (560) passait devant la journée (500) dès que la page ne
+> s'anime pas → 450 ; (3) la fiche rangée de « Les gens » restait un `.overlay` : 130 éléments inertes, et le gel suivait sur le module suivant
+> (`#page-planning{display:grid}` sans `.active`) → elle devient `.pl2-rangee`. **APP 8.70 → 8.71, SW 9.48 → 9.49.**
+> ⚠️ Leçon : rendre aussi en « animations réduites » — l'animation d'entrée de `.page` cachait le défaut de z-index (§24, §300).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1306,6 +1308,9 @@ ergonomie n'ont été trouvés qu'en **regardant une capture** :
 
 ★ **Corollaire de méthode** : après tout lot qui touche la mise en page, **produire un rendu et le
 regarder**. Une assertion verte n'a jamais montré un texte coupé en trois.
+★★★ **Et le regarder AUSSI en « animations réduites »** (`prefers-reduced-motion: reduce`, réglage Windows courant). L'animation
+d'entrée de `.page` fait de la page un contexte d'empilement : elle tenait la barre du Planning SOUS la fenêtre ; sans elle, la barre
+passait devant (CADRE-1, §300). Un défaut de z-index peut n'exister que chez qui a coupé les animations.
 
 **Build (JS / Rollup / IIFE)**
 1. Toute fonction appelée par un `onclick` injecté doit être exposée sur **`window.*`**.
@@ -1419,6 +1424,11 @@ regarder**. Une assertion verte n'a jamais montré un texte coupé en trois.
     `.pil-dec` pour sa grille ; ALIGN-1 y a posé « par deux sous 600 px » pour les quatre tuiles du jour, et la cuve est passée en
     demi-colonne sans qu'aucun harnais le voie. **Un bloc qui n'est pas ce que la classe nomme prend SA classe.** Même famille que
     le `.cl` global (§192c) et le préfixe `mvs-` (n°5).
+17. ★★★ **Une règle UNIVERSELLE (`*`, `html`, `body`, `button`) recopiée d'une maquette vaut pour TOUTE l'appli** (CADRE-1, §300).
+    Le socle du cockpit posait `*{box-sizing:inherit}` : tout est passé en content-box, 27 fenêtres sur 38 ont débordé. **La borner à la
+    racine du composant** (`.ck2 *`). `mv-harnais-cadre1` refuse un `box-sizing:inherit` hors de `.ck2` et une page affichée hors de `.active`.
+18. ★★ **Un `.overlay` rangé dans une page n'est plus une fenêtre : il quitte la classe `.overlay`** (`_plFicheFenetre`, §300). Sinon le
+    verrou A11Y-2 le prend pour la fenêtre du dessus et rend tout le reste inerte.
 
 ---
 
@@ -1827,6 +1837,16 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ CADRE-1 — CE QUI RESTE OUVERT (§300, posé le 09/10)
+
+1. **À regarder chez Nico, sur son PC** : la journée ouverte depuis la barre (la barre passe dessous), « Les gens » (clic sur une autre ligne,
+   défilement, puis un autre module), deux ou trois fenêtres de saisie (plus de barre horizontale). Ici, les barres de Windows n'ont pas pu être
+   imitées (navigateur de test à barres invisibles) : le débordement a été MESURÉ (largeur du contenu contre celle du cadre), pas regardé.
+2. **Le reste du socle du cockpit vaut toujours pour toute l'appli** (`body` — police et interligne 1,45 —, `button{font:inherit}`,
+   `:focus-visible`, `[hidden]`) : la refonte a été dessinée et validée par-dessus ; ne pas le défaire sans capture avant / après.
+3. Vu, non touché : dans le cockpit, des boutons `.ck-ch` dépassent leur parent de 8 px (avant comme après ce lot).
+4. Les cases grises « 7h » (heures saisies = prévu, `pl2c-mod`) gardent l'ancienne pastille, par choix de PLAN-1 (§279b) : à trancher avec Nico.
 
 ### ⚠️ PRO-1 — CE QUI RESTE OUVERT (§269, posé le 08/10)
 
@@ -2373,22 +2393,6 @@ partie à le signataire le second domaine (réf. MV-AAAA-NNNN).
    lieu de 28** compte tenu de sa taille — c'est ce qui rend le forfait tenable.
 ⚠️ **Détails à ne pas oublier pour ce client** : **volume de fût 225 L** · barème girondin ·
 40 parcelles sur plusieurs communes · noms de parcelles probablement différents du fichier.
-
-### ★ Livré antérieurement
-
-**7 août soir** — série MILLÉSIME (4 lots) + lot MALO + refonte de l'onglet Cave du Pilotage.
-**7 août matin** — Le millésime · parc à fûts · entonnage depuis le parc · registre des
-manipulations · bilan de campagne.
-**5 août** — `mvprint.py` retrouvé et archivé ; document d'instructions régénéré.
-**4 août** — niveaux sautés `_mvNivH` (−528 h chez MG) · plomberie `tcfgSave` + `_normalizeTaches` ·
-badge « votre valeur » · densité · barèmes régionaux · **DOCK rejoué** · MÉNAGE · **capacité
-réelle** · **grille d'installation tranchée** · le prospect Gironde + `mise-en-route.html` · **registre phyto
-CSV** · **vendange-couperet**.
-**1er au 3 août** — UX-1 · `firebase.json` · e2e +2 étapes · **écran d'accueil public** · téléphone
-corrigé · DEMO-3 · heures sup · **saisonniers dans l'historique** · **équipe collective** · refonte
-Économie · **carte d'ordre de passage** · Décider ×6 · Renfort ×5 · **vendange fantôme, 941 h**.
-**31 juillet** — nouveau SIRET, adresse et téléphone publiés, archivage des CGU/DPA signées.
-**30 juillet** — série UX-R1 → R5, zéro nouvelle collection.
 
 ### Backlog — commercial & administratif
 

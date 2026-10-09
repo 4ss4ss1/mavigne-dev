@@ -8,6 +8,12 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> ★ Consolidation : **9 octobre 2026 (E2E-1)** — ★ **LE TEST DE BOUT EN BOUT SUIT LE BOUTON « DÉMARRER UNE SESSION »** (§299). Lot 30,
+> **Nico a poussé la refonte** (`646323e` « Refonte v870 », puis `34813db`) : ce lot part de `34813db`, zip de six fichiers. La CI de Nico (`npm run test:e2e`, qui ne fait PAS partie de
+> `npm run check`) échouait à « Action session » : le test cliquait la FAB `#trac-fab`, cachée au large depuis TRAC-3 (§284). Le test clique
+> maintenant le geste VISIBLE (`#trac-new-btn` au large, la FAB à l'étroit). Test seulement : aucune version ne bouge (APP 8.70, SW 9.48).
+> ⚠️ Leçon : jouer aussi `npm run test:e2e` avant de livrer un lot qui cache ou remplace un bouton — la chaîne ne le fait pas.
+
 > ★ Consolidation : **7 octobre 2026 (IDS-1, activités — zip cumulatif avec IDS-1S non poussé)** — ★★ **RENOMMER UNE ACTIVITÉ** (§258).
 > Fiche de l'activité (roue crantée du Tracteur, admin) : `_renameActivite` réécrit ACTIVITES et `SESSIONS[].activite` (le seul endroit qui garde
 > ce nom) ; règle `CONFIG.renommages_activites`, ignorée tant qu'une activité porte encore l'ancien nom (pas d'identifiant) ; « Traitement » ne se
@@ -2072,3 +2078,20 @@ changelog du dépôt, et l'accompagnement les a rattrapés en v6.44.
 > `prio`, `gnr-mesure`, `ref1` remis au vrai contrat. Base `1aeb055`. **APP 8.40 → 8.41, SW 9.18 → 9.19.** Précédent : COQ-1 + PAL-1 (§268).
 > ⚠️ Les lots MOUV-1 → COQ-1 (§259 à §268, 07/10) n'étaient pas montés dans cet en-tête : ils sont aux chantiers (`docs/claude/chantiers-230-279.md`).
 
+## Descendu du §28 de CLAUDE.md le 09/10/2026 (CADRE-1, plafond du cœur)
+
+### ★ Livré antérieurement (historique d'août)
+
+**7 août soir** — série MILLÉSIME (4 lots) + lot MALO + refonte de l'onglet Cave du Pilotage.
+**7 août matin** — Le millésime · parc à fûts · entonnage depuis le parc · registre des
+manipulations · bilan de campagne.
+**5 août** — `mvprint.py` retrouvé et archivé ; document d'instructions régénéré.
+**4 août** — niveaux sautés `_mvNivH` (−528 h chez MG) · plomberie `tcfgSave` + `_normalizeTaches` ·
+badge « votre valeur » · densité · barèmes régionaux · **DOCK rejoué** · MÉNAGE · **capacité
+réelle** · **grille d'installation tranchée** · le prospect Gironde + `mise-en-route.html` · **registre phyto
+CSV** · **vendange-couperet**.
+**1er au 3 août** — UX-1 · `firebase.json` · e2e +2 étapes · **écran d'accueil public** · téléphone
+corrigé · DEMO-3 · heures sup · **saisonniers dans l'historique** · **équipe collective** · refonte
+Économie · **carte d'ordre de passage** · Décider ×6 · Renfort ×5 · **vendange fantôme, 941 h**.
+**31 juillet** — nouveau SIRET, adresse et téléphone publiés, archivage des CGU/DPA signées.
+**30 juillet** — série UX-R1 → R5, zéro nouvelle collection.

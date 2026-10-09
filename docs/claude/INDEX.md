@@ -12,6 +12,7 @@
 | — | 💬 Communication | `CLAUDE.md` |
 | — | Historique descendu du §28 de `CLAUDE.md` (04/10/2026, PRIO-1 — plafond de lignes du cœur) | `docs/claude/journal.md` |
 | — | Historique descendu du §28 de CLAUDE.md (05/10/2026, MOTIFS-1 — plafond du cœur) | `docs/claude/journal.md` |
+| — | Descendu du §28 de CLAUDE.md le 09/10/2026 (CADRE-1, plafond du cœur) | `docs/claude/journal.md` |
 | 1 | 1. Identité & contexte | `CLAUDE.md` |
 | 2 | 2. Inventaire fonctionnel — 10 modules | `CLAUDE.md` |
 | 3 | 3. Positionnement commercial | `CLAUDE.md` |
@@ -344,3 +345,4 @@
 | 297 | 297. ★ COUL-1 — DES COULEURS PLUS FRANCHES, UN FOND UN PEU PLUS SOUTENU (08/10 — `src/styles.css` · `src/ut… | `docs/claude/chantiers-280-329.md` |
 | 298 | 298. ★ PIL-1 — LES SEPT ONGLETS DU PILOTAGE HORS « AUJOURD'HUI » À LA CHARTE (08/10 — `src/styles.css` · `s… | `docs/claude/chantiers-280-329.md` |
 | 299 | 299. ★ E2E-1 — LE TEST DE BOUT EN BOUT SUIT LE BOUTON « DÉMARRER UNE SESSION » (09/10 — `scripts/e2e-local.… | `docs/claude/chantiers-280-329.md` |
+| 300 | 300. ★★ CADRE-1 — CASES ET FENÊTRES DANS LEUR CADRE, BARRE SOUS LES FENÊTRES, « LES GENS » SANS GEL (09/10 … | `docs/claude/chantiers-280-329.md` |

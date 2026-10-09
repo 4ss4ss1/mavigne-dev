@@ -13,8 +13,8 @@ const enDur = b => sansVar(b.replace(/\/\*[\s\S]*?\*\//g, '').replace(/@media[^{
 function suite(S) {
   const out = []; const T = (n, c) => out.push([n, !!c]); const B = bloc(S.css), dur = enDur(B);
   T('le bloc PLAN-3 est posé après PLAN-2, par jetons seulement (' + dur.length + ')', B.length > 3000 && S.css.indexOf('★ PLAN-3 (§281)') > S.css.indexOf('★ FIN PLAN-2') && dur.length === 0);
-  T('les en-têtes des feuilles sont clairs (feuilles communes, chaleur, journée)', B.includes('.overlay .pl2-sh-hdr,.overlay .pl2-sh-hdr.pl2-sh-heat{ background:var(--bg-card)!important;') && B.includes('#ovPlanDay .plan-modal-hdr{ background:var(--bg-card)!important;'));
-  T('les champs, la note et les boutons prennent le kit (principal à l’accent)', B.includes('.overlay .pl2-sh-body input:not([type="checkbox"]):not([type="radio"])') && B.includes('.overlay .pl2-note{') && B.includes('.overlay .pl2-ed-btn,.overlay .pl2-ed-heat{ border:0!important; border-radius:var(--r-sm,6px)!important; background:var(--accent)!important;'));
+  T('les en-têtes des feuilles sont clairs (feuilles communes, chaleur, journée)', B.includes(':is(.overlay,.pl2-rangee) .pl2-sh-hdr,:is(.overlay,.pl2-rangee) .pl2-sh-hdr.pl2-sh-heat{ background:var(--bg-card)!important;') && B.includes('#ovPlanDay .plan-modal-hdr{ background:var(--bg-card)!important;'));
+  T('les champs, la note et les boutons prennent le kit (principal à l’accent)', B.includes(':is(.overlay,.pl2-rangee) .pl2-sh-body input:not([type="checkbox"]):not([type="radio"])') && B.includes(':is(.overlay,.pl2-rangee) .pl2-note{') && B.includes(':is(.overlay,.pl2-rangee) .pl2-ed-btn,:is(.overlay,.pl2-rangee) .pl2-ed-heat{ border:0!important; border-radius:var(--r-sm,6px)!important; background:var(--accent)!important;'));
   T('le salarié choisi dans la journée est marqué à l’accent', B.includes('#ovPlanDay .pl2-ms.on{ border-color:var(--accent)!important;'));
   T('le récap annuel : titre en casse normale, le mois en cours (sa barre n’est pas grise) à l’accent', B.includes('#page-planning .plan-card-lbl{') && B.includes('text-transform:none!important;') && B.includes('#page-planning .plan-bar-fill:not([style*="gris-clair"]){ background:var(--accent)!important; }'));
   T('la règle du mois en cours tient : les autres mois sont peints en gris-clair par planning.js', S.pl.includes("background:'+(act?PLAN_ACC2:'var(--gris-clair)')+'"));
@@ -29,7 +29,7 @@ if (CONTRE) {
   const DEF = [
     ['une couleur écrite en dur dans le bloc', 'css', '#ovPlanDay .plan-modal-hdr{ background:var(--bg-card)!important;', '#ovPlanDay .plan-modal-hdr{ background:#2A2550!important;', 0],
     ['la journée garde sa bande violette', 'css', '#ovPlanDay .plan-modal-hdr{ background:var(--bg-card)!important;', '#ovPlanDay .plan-modal-hdr{ color:var(--texte)!important;', 1],
-    ['le bouton principal reste orange', 'css', '.overlay .pl2-ed-btn,.overlay .pl2-ed-heat{ border:0!important; border-radius:var(--r-sm,6px)!important; background:var(--accent)!important;', '.overlay .pl2-ed-btn,.overlay .pl2-ed-heat{ border:0!important; border-radius:var(--r-sm,6px)!important;', 2],
+    ['le bouton principal reste orange', 'css', ':is(.overlay,.pl2-rangee) .pl2-ed-btn,:is(.overlay,.pl2-rangee) .pl2-ed-heat{ border:0!important; border-radius:var(--r-sm,6px)!important; background:var(--accent)!important;', ':is(.overlay,.pl2-rangee) .pl2-ed-btn,:is(.overlay,.pl2-rangee) .pl2-ed-heat{ border:0!important; border-radius:var(--r-sm,6px)!important;', 2],
     ['le salarié choisi n’est plus marqué', 'css', '#ovPlanDay .pl2-ms.on{ border-color:var(--accent)!important;', '#ovPlanDay .pl2-ms.off{ border-color:var(--accent)!important;', 3],
     ['planning.js ne peint plus les autres mois en gris-clair', 'pl', "background:'+(act?PLAN_ACC2:'var(--gris-clair)')+'", "background:'+(act?PLAN_ACC2:'var(--gris)')+'", 5],
     ['le harnais sort de la liste', 'liste', "['node scripts/mv-harnais-plan3.mjs'],", '', 6]

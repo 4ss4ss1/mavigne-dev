@@ -23,7 +23,7 @@ function scene(S, tab, large, admin) {
   const doc = { getElementById: (id) => (id === 'page-planning' ? pg : id === 'ovPlanFiche' ? ov : null), body: { classList: cls(bodyCls) }, querySelectorAll: () => [] };
   const env = { fiche: null };
   const f = new Function('document', 'window', 'planTab', 'isAdmin', 'openPlanFiche', 'env',
-    'var _planFicheNom=env.fiche, _plFicheChez=null;\n' + fonction(S.pl, 'function _plGensDesk(){') + '\n' + fonction(S.pl, 'function _plGensMarque(){') + '\n' + fonction(S.pl, 'function _plGensDock(){')
+    'var _planFicheNom=env.fiche, _plFicheChez=null;\n' + fonction(S.pl, 'function _plGensDesk(){') + '\n' + fonction(S.pl, 'function _plGensMarque(){') + '\n' + fonction(S.pl, 'function _plFicheFenetre(') + '\n' + fonction(S.pl, 'function _plGensDock(){')
     + '\n_plGensDock(); var a={ dock: document.body.classList.contains("pl-gens-dock"), chez: document.getElementById("ovPlanFiche").parentNode.id || "corps" };'
     + '\nplanTab="mois"; _plGensDock(); a.retour = document.getElementById("ovPlanFiche").parentNode.id || "corps"; a.dock2 = document.body.classList.contains("pl-gens-dock"); return a;');
   const r = f(doc, { matchMedia: () => ({ matches: large }) }, tab, () => admin, (n) => { ouvert.push(n); ovCls.add('open'); env.fiche = n; }, env);
@@ -37,7 +37,7 @@ function suite(S) {
   T('au téléphone ou sur « Le mois », rien n’est rangé', b.dock === false && b.chez === 'corps' && c.dock === false && c.chez === 'corps');
   T('les accroches : rendu du corps, changement d’onglet, rendu de la fiche', S.pl.includes("  _pl2AbarSync();\n  _plGensDock();   // PLAN-2 (§280)\n}") && S.pl.includes("  _planRenderBody();\n  _plGensDock();   // PLAN-2 (§280)\n}") && S.pl.includes("  body.innerHTML=h;\n  _plGensMarque();   // PLAN-2 (§280)\n}"));
   T('le bloc PLAN-2 est posé après PLAN-1, par jetons seulement (' + dur.length + ')', B.length > 3000 && S.css.indexOf('★ PLAN-2 (§280)') > S.css.indexOf('★ FIN PLAN-1') && dur.length === 0);
-  T('deux colonnes sur « Les gens », la fiche collante dans la seconde', B.includes('body.pl-gens-dock #page-planning{ display:grid; grid-template-columns:minmax(0,1fr) var(--l-fiche,440px);') && B.includes('body.pl-gens-dock #ovPlanFiche.open{ position:sticky!important;'));
+  T('deux colonnes sur « Les gens », la fiche collante dans la seconde', B.includes('body.pl-gens-dock #page-planning.active{ display:grid; grid-template-columns:minmax(0,1fr) var(--l-fiche,440px);') && B.includes('body.pl-gens-dock #ovPlanFiche.open{ position:sticky!important;'));
   T('la ligne ouverte est marquée, l’en-tête de la fiche est clair', B.includes('#page-planning .pl2-mcard.on{ background:var(--accent-doux)!important; }') && B.includes('#ovPlanFiche .pl2-sh-hdr{ background:var(--bg-card)!important;'));
   T('l’aide dit la fiche à droite sur ordinateur', S.uti.includes('sur ordinateur, la fiche s’ouvre à droite de la liste'));
   T('ce harnais est branché dans la liste des contrôles', S.liste.includes("['node scripts/mv-harnais-plan2.mjs'],") && S.liste.includes("['node scripts/mv-harnais-plan2.mjs --contre'],"));

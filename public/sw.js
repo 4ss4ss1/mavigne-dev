@@ -1,4 +1,6 @@
-// MA VIGNE — Service Worker v9.48
+// MA VIGNE — Service Worker v9.49
+// v9.49 (09/10/2026) — CADRE-1 (§300) : socle box-sizing borne au cockpit (fenetres et cases du Planning dans leur cadre),
+//   barre de selection du Planning sous les fenetres, fiche rangee de « Les gens » hors des fenetres (plus de gel). APP 8.70 -> 8.71.
 // v9.48 (08/10/2026) — PIL-1 (§298) : les sept onglets du Pilotage hors cockpit a la charte (composants pil- recales).
 //   APP 8.69 -> 8.70.
 // v9.47 (08/10/2026) — COUL-1 (§297) : teintes et fonds pales un cran plus francs, fond de page un peu plus soutenu.
@@ -4423,7 +4425,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.48';
+const CACHE_NAME   = 'mavigne-v9.49';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4439,7 +4441,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.48 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.49 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4459,7 +4461,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.48 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.49 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -508,3 +508,54 @@ Joué ici (navigateur de test de version voisine) : « Action session » ✓. De
 vertes dans la CI de Nico, qui a internet. Leçon remontée dans la consolidation : jouer `npm run test:e2e` avant de livrer un lot qui cache ou
 remplace un bouton.
 
+## 300. ★★ CADRE-1 — CASES ET FENÊTRES DANS LEUR CADRE, BARRE SOUS LES FENÊTRES, « LES GENS » SANS GEL (09/10 — `src/styles.css` · `src/planning.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-cadre1.mjs` (neuf) · `scripts/mv-harnais-plan2.mjs` · `scripts/mv-harnais-plan3.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `.mv-base` · `lots/CADRE-1.json` · **APP 8.70 → 8.71, SW 9.48 → 9.49**, base `9e9f030`)
+
+### 300a. D'où ça vient
+
+Nico, 09/10, quatre retours avec captures après « Refonte v870 » : la barre noire du Planning par-dessus la fenêtre de la journée ; les cases
+colorées qui débordent de leur cadre ; « Les gens » qui fige tout sauf la fiche, et un gel « ailleurs, je ne sais plus où » ; des fenêtres « pas
+cadrées », barres horizontale et verticale. Reformulés un par un, validés (« ok », « oui »).
+
+### 300b. Mesuré AVANT de corriger (vraie appli, Chromium du bac à sable, 1920 × 1000)
+
+- **Recette du rendu** (hors dépôt, `/home/claude/chr`) : `@sparticuz/chromium` SANS `--single-process` (contextes perdus) ni `--hide-scrollbars` ;
+  service worker bloqué (il recharge la page à son installation) ; jeton simulé avec `terms:{c,d}` (sinon la porte CGU recouvre tout) ; données
+  injectées par `applyFbData` (7 salariés, octobre 2026). ⚠️ `elementFromPoint` saute les éléments `inert` : retirer `inert` le temps de la mesure.
+- **Cases** : puce `height:100%` de 62 px + 10 px de marge = 72 px dans une case de 67 (3 px au-dessus, 2 au-dessous). `box-sizing` calculé :
+  **content-box** sur la case comme sur la puce, contre le socle de l'appli (`*{box-sizing:border-box}`). Cause : `*,*::before,*::after{box-sizing:inherit}`,
+  socle de la maquette du cockpit recopié le 07/10 (`1aeb055`) — `<html>` ne pose rien, tout hérite de content-box. Inoffensif DANS `.ck2`, qui pose border-box.
+- **Fenêtres** : un robot ouvre tout bouton qui ouvre une fenêtre (37 vues, 60 boutons, 38 fenêtres). **27 plus larges que leur cadre**, de 4 à
+  34 px ; coupables : champs `.fi`, listes `.fsel`, zones de texte, boutons `.mbtn` à `width:100%` + marge.
+- **Barre** : z-index 560 contre 500 pour une fenêtre ouverte sans `openOv` (`_planSheetOpen`). Invisible d'ordinaire : l'animation d'entrée de
+  `.page` (opacité, `forwards`) fait de la page un contexte d'empilement qui tient la barre dessous. Reproduite à l'identique de la capture avec
+  `prefers-reduced-motion: reduce` (réglage Windows « Effets d'animation » coupé).
+- **Gel** : 130 éléments `inert`, défilement verrouillé, un vrai clic sur une autre ligne sans effet, molette sans effet. Après `goTo('parcelles')` :
+  `#page-planning` toujours `display:grid` (règle sans `.active`, §24 CSS n°1) et Parcelles inerte — c'est « l'autre endroit ».
+
+### 300c. Ce qui change, et les arbitrages
+
+- `styles.css` : socle du cockpit borné (`.ck2 *,.ck2 *::before,.ck2 *::after{box-sizing:inherit}`) ; `.pl2-mbar` à 450 ; `body.pl-gens-dock
+  #page-planning.active{display:grid…}` ; bloc PLAN-3 : 17 sélecteurs `:is(.overlay,.pl2-rangee)` (même spécificité) ; bloc `★ CADRE-1` :
+  `#ovPlanFiche.pl2-rangee:not(.open){display:none!important}`.
+- `planning.js` : `_plFicheFenetre(ov, fen)` — rangée, la fiche quitte `.overlay` pour `.pl2-rangee` ; rendue, `.overlay` revient ; `_mvOvSync`
+  rappelé, car une classe qui QUITTE `.overlay` n'est plus vue par l'observateur des fenêtres.
+- **Retirer la classe plutôt que filtrer les lectures** : une dizaine d'endroits demandent « une fenêtre est-elle ouverte ? » (`.overlay.open` :
+  verrou A11Y-2, Échap, retour, mise à jour, `_mvRechargeSure` de firebase.js). Un « rangé » oublié dans une lecture future regèlerait l'appli en
+  silence ; une règle de dessin oubliée, elle, se voit à l'écran.
+- **Le reste du socle du cockpit n'est PAS défait** (police et interligne de `body`, `button{font:inherit}`, `:focus-visible`, `[hidden]`) : la
+  refonte a été dessinée et validée par-dessus. Le défaire demanderait des captures avant / après, écran par écran.
+
+### 300d. Mesuré APRÈS
+
+- Cases : 49 puces, débordement maximal 0 px. Barre : 450 < 500, la fenêtre dessus, animations réduites comprises. « Les gens » : 0 inerte, pas
+  de verrou, le clic change la fiche, la molette défile, Échap ne ferme pas la fiche rangée ; après `goTo('parcelles')` : Planning caché, 0 inerte ;
+  au retour, deux colonnes ; au téléphone (390 px), la fiche redevient une vraie fenêtre (modale, 127 inertes).
+- Robot : **0 fenêtre sur 38** plus large que son cadre (27 avant). Pages : Parcelles 2 → 0 et Réglages 4 → 0 débordements ; Pilotage 4 → 4
+  (boutons `.ck-ch` du cockpit, hors du lot). Captures regardées : la semaine du Planning, la journée avec la barre, « Les gens », Réglages.
+- `mv-harnais-cadre1` (neuf, branché) : 10 assertions — dont la vraie `_plGensDock` sur un faux DOM et la règle générale « aucune page affichée
+  hors de `.active` » — et 8 contre-épreuves. `mv-harnais-plan2` extrait `_plFicheFenetre` et lit `.active` ; `mv-harnais-plan3` suit les sélecteurs.
+- `TZ=Europe/Paris npm run check` : **341 commandes, 0 rouge** (1 024 s). Sur la base, `mv-harnais-entree1` avait rougi UNE fois sous la charge
+  (navigateur et serveur lancés à côté), vert seul et vert ici : un contrôle sensible au temps, pas un défaut du code.
+- **Pas vu** : les barres de Windows (navigateur de test à barres invisibles : le débordement est mesuré, pas regardé). Le « hors écran » du robot
+  (35 fenêtres, avant comme après) vient d'une mesure prise pendant l'animation d'entrée des fenêtres : non concluant, ni dans un sens ni dans l'autre.
+

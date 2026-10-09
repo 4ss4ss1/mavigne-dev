@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.70';
+export const APP_VERSION = '8.71';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1035,6 +1035,14 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.71', d: '2026-10-09', items: [
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Planning : « Les gens » ne fige plus l’appli',
+      desc: "Sur ordinateur, en ouvrant « Les gens », tout se figeait sauf la fiche de droite : plus de clic sur la liste, les onglets ou la barre de gauche, plus de défilement — et le gel suivait sur le module ouvert ensuite. La fiche rangée à droite était encore traitée comme une fenêtre posée par-dessus la page. Elle ne l’est plus : la liste, la fiche et le reste de l’appli répondent normalement." },
+    { niv: 0, pour: ['tous'], emoji: 'curseurs', titre: 'Les fenêtres et les cases du Planning tiennent de nouveau dans leur cadre',
+      desc: "Depuis le 7 octobre, beaucoup de fenêtres ouvertes par un bouton étaient un peu plus larges que leur cadre — d’où des barres de défilement sur ordinateur —, et les cases colorées du Planning débordaient sur la ligne du dessus. Une règle de mise en page prévue pour le seul tableau de bord du Pilotage s’appliquait à toute l’appli : elle est remise à sa place." },
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Planning : la barre du bas ne cache plus la journée',
+      desc: "Quand les animations de l’ordinateur sont coupées, la barre noire du bas (Heures, Congé, Absence…) restait par-dessus la fenêtre de la journée ouverte depuis elle. Elle passe désormais dessous, comme sous toute fenêtre." },
+  ] },
   { v: '8.70', d: '2026-10-08', items: [
     { niv: 1, pour: ['admin'], emoji: 'graphique', titre: 'Pilotage : tous les onglets à la nouvelle charte',
       desc: "L’année, La campagne, L’équipe & le matériel, Décider, Économie, Conformité et Archives prennent le dessin du cockpit « Aujourd’hui » : titres sans capitales ni pastilles dorées, chiffres dans la police de l’appli, boutons segmentés clairs, la jauge d’avancement en vert, l’exercice comptable et « choses à compléter » en couleurs d’état. Rien ne change dans les calculs." }
