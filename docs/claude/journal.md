@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **9 octobre 2026 (FORME-1)** — ★★ **LE DOMAINE EN DIRECT AUX FORMES RÉELLES, ET LE TOUCHER QUI N'OUVRAIT RIEN** (§301). Lot 32, base `53a0530`.
+> Demande de Nico (maquette v1, puis v2 « plus compacte » validée, puis « go ») : chaque parcelle du plan à la forme de son contour, à la même échelle, compact
+> (394 px de haut au lieu de 801 sur 37 parcelles), loupe au survol, fiche au toucher avec la forme en haut. En vérifiant, TROIS défauts : (1) la commune, rangée
+> `{nom, lat, lng}`, s'écrivait « [object Object] » et fondait toutes les communes (plan et fiche Parcelles) ; (2) « en cours » lisait tout le journal, la pastille le
+> journal du JOUR — parcelle commencée la veille sans équipe, « aucune équipe » écrit à tort → une seule lecture (`_ckPlanDebuts`) ; (3) le plan et Ctrl K appelaient
+> `openSelParc` — la feuille des parcelles d'une TÂCHE — avec un nom de parcelle : rien ne s'ouvrait → `openDP`. **APP 8.71 → 8.72, SW 9.49 → 9.50.**
+> ⚠️ Leçon : un nom qui « sonne juste » (`openSelParc`, « ouvrir la sélection de parcelle ») n'est pas un contrat — lire ce que la fonction attend avant de l'appeler.
+
 > Dernière consolidation : **9 octobre 2026 (CADRE-1)** — ★★ **LE SOCLE DU COCKPIT VALAIT POUR TOUTE L'APPLI** (§300). Lot 31, base `9e9f030`.
 > Quatre retours de Nico après la refonte, chacun REPRODUIT dans un vrai navigateur avant d'être corrigé : (1) `*,*::before,*::after{box-sizing:inherit}`,
 > recopiée de la maquette du cockpit (07/10), mettait TOUTE l'appli en content-box — cases colorées du Planning de 72 px dans 67, **27 fenêtres sur 38**
@@ -2103,3 +2111,22 @@ corrigé · DEMO-3 · heures sup · **saisonniers dans l'historique** · **équi
 Économie · **carte d'ordre de passage** · Décider ×6 · Renfort ×5 · **vendange fantôme, 941 h**.
 **31 juillet** — nouveau SIRET, adresse et téléphone publiés, archivage des CGU/DPA signées.
 **30 juillet** — série UX-R1 → R5, zéro nouvelle collection.
+
+## Descendu du §28 de CLAUDE.md le 09/10 (GF-1) — plafond du cœur, historique sans consigne
+
+### ★★★ Le 10 août — migration GitHub
+
+Le code source de Ma Vigne vit désormais dans un dépôt **`4ss4ss1/mavigne-dev`**, public, sur
+GitHub Desktop côté Nico. **Ceci remplace le workflow d'upload pour la LECTURE du code** (Règle
+d'or n°1, « Environnement de Nico »). Pas un chantier fonctionnel — un changement d'outillage, mais
+le plus structurel depuis le début du projet : Claude clone/lit directement, Nico livre par
+commit+push au lieu d'upload/téléchargement.
+★ **Piste ouverte, pas encore faite** : committer ce document lui-même dans le dépôt (en
+`CLAUDE.md` à la racine) pour qu'il soit, lui aussi, lisible sans upload à chaque session. Tant que
+ce n'est pas fait, la procédure de régénération de la Règle d'or n°1 reste pleinement en vigueur
+pour ce document précis.
+
+### ✅ Le verrou administratif est levé
+
+**3 août 2026 — l'Urssaf a confirmé que Nico peut facturer.** La première facture définitive est
+partie à le signataire le second domaine (réf. MV-AAAA-NNNN).

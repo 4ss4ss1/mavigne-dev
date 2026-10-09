@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v9.50
+// MA VIGNE — Service Worker v9.51
+// v9.51 (09/10/2026) — GF-1 (§302) : les sucres au labo prennent le relais de la densite au Cuvier (champ du releve,
+//   courbe, verdict, « Declarer la FA finie », agenda, cahier de cuverie) ; seuil du vin sec 2 -> 0,2 g/L ; ligne du Chai
+//   d'un seul tenant ; releve corrige sans perdre la tournee. APP 8.72 -> 8.73.
 // v9.50 (09/10/2026) — FORME-1 (§301) : le domaine en direct aux formes reelles, compact, avec loupe ; la forme en haut des fiches ;
 //   une equipe sur chaque parcelle en cours ; choisir une parcelle ouvre sa fiche (plan, Ctrl K) ; commune en toutes lettres. APP 8.71 -> 8.72.
 // v9.49 (09/10/2026) — CADRE-1 (§300) : socle box-sizing borne au cockpit (fenetres et cases du Planning dans leur cadre),
@@ -4427,7 +4430,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.50';
+const CACHE_NAME   = 'mavigne-v9.51';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4443,7 +4446,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.50 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.51 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4463,7 +4466,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.50 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.51 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

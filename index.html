@@ -621,7 +621,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:var(--pt-txt,13px);margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v8.72</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v8.73</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -1383,7 +1383,7 @@
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v8.72</div>
+        <div class="mod-header-sub">Ma Vigne v8.73</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
       
@@ -1491,7 +1491,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg></div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v8.72 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div class="ver-tag">Ma Vigne v8.73 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -2525,9 +2525,14 @@
     <input type="date" class="fi ac" id="vm-date">
     <div class="fl">Densit&eacute; (g/L au mustim&egrave;tre)</div>
     <input type="number" class="fi ac" id="vm-densite" placeholder="ex. 1045" min="950" max="1120" step="1">
-    <div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-leger);margin-top:-6px;margin-bottom:10px">D&eacute;but FA &asymp;&nbsp;1080 &middot; Fin FA &asymp;&nbsp;990</div>
+    <div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-leger);margin-top:-6px;margin-bottom:10px">D&eacute;but FA &asymp;&nbsp;1080 &middot; Fin FA &asymp;&nbsp;990 &middot; facultative si vous notez le labo</div>
     <div class="fl">Temp&eacute;rature cuve (&deg;C)</div>
     <input type="number" class="fi ac" id="vm-temp" placeholder="ex. 28" min="10" max="40" step="0.5">
+    <!-- ★ GF-1 (§302) : le bulletin du labo, à la date du prélèvement -->
+    <div class="fl">Sucres au labo (g/L)</div>
+    <input type="number" class="fi ac" id="vm-gf" placeholder="ex. 0,8" min="0" max="60" step="0.01" inputmode="decimal">
+    <div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-leger);margin-top:-6px;margin-bottom:10px">Glucose + fructose, le chiffre du bulletin, &agrave; la date du pr&eacute;l&egrave;vement. Sec au labo&nbsp;: 0,2&nbsp;g/L ou moins.</div>
+    <div id="vm-chap"><!-- ★ GF-1 : masqué après le pressurage (openOvVendMesure) -->
     <div class="fl">Travail du chapeau</div>
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <div style="flex:1;background:var(--gris-clair);border-radius:10px;padding:10px;text-align:center">
@@ -2546,6 +2551,7 @@
           <button onclick="_vmAdjPig(1)" style="width:32px;height:32px;border-radius:8px;background:rgba(192,132,90,.12);border:1px solid rgba(192,132,90,.2);color:#C0845A;font-size:18px;cursor:pointer;">+</button>
         </div>
       </div>
+    </div>
     </div>
     <div class="fl">Note d&eacute;gustation (optionnel)</div>
     <input type="text" class="fi ac" id="vm-note" placeholder="Tanins, couleur, &eacute;quilibre, ar&ocirc;mes&hellip;">
@@ -3676,7 +3682,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v8.72</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v8.73</span>
       </div>
     </div>
     <div class="modal-body">

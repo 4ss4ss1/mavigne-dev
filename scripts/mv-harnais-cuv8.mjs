@@ -128,8 +128,10 @@ if (!CONTRE) {
     console.log('   12° → ' + s(12) + '  ·  13° → ' + s(13) + '  ·  14° → ' + s(14) + '  ·  15° → ' + s(15));
     pose(s(12) > s(13) && s(13) > s(14) && s(14) > s(15), 'le seuil est strictement décroissant');
     pose(Math.abs((s(12) - s(14)) - 2.2) < 0.4, '★ environ 1,1 point de densité par degré');
-    pose(s(12) > 994 && s(12) < 995.5, 'un moût à 12° est sec vers 995');
-    pose(s(14) > 992 && s(14) < 993.5, 'un moût à 14° est sec vers 992,7');
+    /* ★ GF-1 (§302) : le seuil passe de 2 à 0,2 g/L (« ce sont les seuils laboratoires », Nico) —
+       chaque repère descend d'environ 0,8 point : 994,9 -> 994,1 à 12°, 992,7 -> 991,9 à 14°. */
+    pose(s(12) > 993.6 && s(12) < 994.6, 'un moût à 12° est sec vers 994,1');
+    pose(s(14) > 991.4 && s(14) < 992.4, 'un moût à 14° est sec vers 991,9');
   }
 
   console.log('\n── 3 · LE DÉFAUT CORRIGÉ : 996 pour tout le monde ──');
@@ -140,9 +142,10 @@ if (!CONTRE) {
     pose(reste > 2, '★ à 995,5 un moût à 14° porte encore plus de 2 g/L');
     pose(d <= A._ML_D20_SEC, '   … or l’ancien seuil unique (996) l’aurait déclarée sèche');
     pose(d > A._vendDSec(c14), '★ avec son propre seuil, elle ne l’est pas');
-    const c11 = cuve(11, [1040, 1005, 995.5]);
-    pose(A._vendSucreRest(c11, 995.5) < 2 && 995.5 > A._vendDSec(c11) === false,
-      '★ et l’erreur joue dans l’autre sens : à 11° la même densité EST sèche');
+    /* ★ GF-1 : à 0,2 g/L, 995,5 n'est plus sec à 11° (0,9 g/L restants) — la démonstration passe à 10°. */
+    const c10 = cuve(10, [1040, 1005, 995.5]);
+    pose(A._vendSucreRest(c10, 995.5) < 0.2 && 995.5 > A._vendDSec(c10) === false,
+      '★ et l’erreur joue dans l’autre sens : à 10° la même densité EST sèche');
   }
 
   console.log('\n── 4 · rien à lire : repli sur le seuil général, et on le dit ──');
@@ -282,11 +285,11 @@ if (!CONTRE) {
     const p = A._mlProjFA(c, J(6));
     console.log('   état ' + p.etat + ' · seuil ' + (p.dSec != null ? p.dSec : A._vendDSec(c)));
     pose(p.etat !== 'sec', '★ à 995,5 sur un moût à 14°, la cuve n’est pas déclarée sèche');
-    const d = cuve(11, [1040, 1005, 995.5]);
+    const d = cuve(10, [1040, 1005, 995.5]);   // ★ GF-1 : 10°, plus 11° (seuil 0,2 g/L)
     d.statut_hist = [{ id: 's1', statut: 'fa', date: J(0) }];
     const q = A._mlProjFA(d, J(6));
     pose(q.etat === 'sec' && q.dSec === A._vendDSec(d),
-      'la même densité sur un moût à 11° l’est, et la projection porte son seuil');
+      'la même densité sur un moût à 10° l’est, et la projection porte son seuil');
   }
 }
 

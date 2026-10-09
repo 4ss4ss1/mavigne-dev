@@ -49,7 +49,9 @@ const NOMS = [
   '_mlD', '_mlIso', '_mlAuj', '_mlEcartJ', '_mlAMesurer',
   /* ★ VOL-1 — la jauge lit `_vendVolContenu` : les VRAIES fonctions, qui
      s'appuient sur les bouchons du prélude (_vendVolLoge, _vendCuvKgDom…). */
-  '_vendSortiesHl', '_vendVolContenu'
+  '_vendSortiesHl', '_vendVolContenu',
+  /* ★ GF-1 (§302) : la liste, la fiche et « à mesurer » lisent les sucres au labo — les VRAIES fonctions. */
+  '_vendGfF', '_vendGfAddJ', '_vendGfNum', '_vendMesGF', '_vendProjGF', '_vendGfAMesurer', '_vendGfPhrase', '_vendGfEtat', '_vendGfBloc'
 ];
 function extraire(nom) {
   const m = new RegExp('^function ' + nom + '\\s*\\(', 'm').exec(SRC);
@@ -73,7 +75,8 @@ function table(nom) {
   }
   console.error('point-virgule non trouvé : ' + nom); process.exit(1);
 }
-const BLOC = [...NOMS.map(extraire), ...['_VEND_STAT', '_VEND_STEPS'].map(table)]
+const BLOC = [...NOMS.map(extraire), ...['_VEND_STAT', '_VEND_STEPS',
+  '_VEND_GF_SEC', '_VEND_GF_BRUIT', '_VEND_GF_STAGNE', '_VEND_GF_CAD'].map(table)]   // ★ GF-1
   .sort((a, b) => a[0] - b[0]).map(x => x[1]).join('\n');
 
 const PRELUDE = `

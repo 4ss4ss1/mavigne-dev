@@ -618,3 +618,60 @@ vignoble : « ni position » ; robustesse du Pilotage : `NaN` dans Décider), pa
 
 ### 301f. Ce qui reste ouvert
 Voir §28 (FORME-1). Non fait : la forme dans les lignes de la liste Parcelles (piste de la maquette v3 de PARC-1, §274d) ; la carte de l'Accueil.
+
+## 302. ★★ GF-1 — LES SUCRES AU LABO PRENNENT LE RELAIS DE LA DENSITÉ (09/10 — `src/cuvier.js` · `src/cave.js` · `index.html` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Cave) · `public/sw.js` · `guide/08-cave.html` · `scripts/mv-harnais-gf.mjs` (neuf) · `scripts/mv-harnais-agenda.mjs` · `scripts/mv-harnais-cuv13.mjs` · `scripts/mv-harnais-cuv8.mjs` · `scripts/mv-harnais-robustesse-cave.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `.mv-base` · `lots/GF-1.json` · **APP 8.72 → 8.73, SW 9.50 → 9.51**, base `974a495`)
+
+### 302a. La demande
+Nico, 09/10 (dicté) : des vins encore en cuve parce que le glucose n'a pas fini de descendre « au 0,2 pour considérer sec » ; « ce n'est plus
+vraiment des densités qu'on prend, c'est une mesure qu'on envoie au labo — glucose et fructose, en g/L » ; il veut la noter, en voir la courbe et une
+tendance « du côté sec ou pas ». Puis : « 2 g/L est un ancien seuil, le vrai seuil est de 0,2 — ce sont les seuils laboratoires. » Maquette
+`maquette-sucres-labo-v1.html` publiée (artefact claude.ai : une page sur `styles.css`, écrans rendus par l'appli chargée dans Node, règle §225b),
+puis « go » sur les huit recommandations.
+
+### 302b. Le modèle
+- **La mesure vit sur le relevé** : `mesures_fa[].gf` (g/L), à la date du PRÉLÈVEMENT — même axe, même porte de correction, même tri que la densité.
+  Un relevé peut ne porter que `gf` (CUV-7 filtrait déjà `densite != null` partout où l'on calcule une densité). Densité OU labo : l'un suffit
+  (`saveVendMesure`). `_vendGfNum` lit la virgule : « 0,8 » d'une sauvegarde retouchée donnait `parseFloat` = 0, une cuve sèche à tort.
+- **Le verdict** `_vendProjGF` (`attente | une | descend | projete | stagne | remonte | seche`) : la mécanique de `_mlProjMalo` — pente des deux
+  dernières analyses pour DÉTECTER, des trois dernières pour PROJETER — mais **en proportion** : la fin d'une FA ralentit. Date dès 3 analyses (garde
+  de la FA et de la malo), demi-vie (« les sucres baissent de moitié en N jours »), marge 30 %. Seuil `_VEND_GF_SEC` = 0,2 **inclus**. Une hausse de
+  plus de 0,1 g/L (`_VEND_GF_BRUIT`) « remonte » et pose la question (pressurage, assemblage, échantillon) — **jamais « bloquée »** : à l'inverse du
+  malique, le sucre revient avec la presse (CUV-13).
+- **Le rythme** `_vendGfAMesurer`, UNE règle pour la liste (`_vendADue`) et l'agenda (`_mlAMesurer`) : suivie au labo, une cuve réclame une analyse
+  au-delà de 4 jours (`_VEND_GF_CAD`), rien quand elle est sèche ; sinon la règle d'une densité par jour.
+- **Les écrans** : la ligne de liste porte le chiffre labo EN TÊTE de sa sous-ligne (qui se coupe par la fin au téléphone) et l'état « Labo · baisse /
+  stagne / remonte » ou « Sèche au labo » ; la fiche porte `_vendGfBloc` sous la courbe de densité, courbe peinte par `_vendPeindreGraphes`
+  (`#mvg-gf-`, largeur vraie du conteneur), échelle logarithmique (autant de place à 4 → 2 qu'à 0,4 → 0,2), seuil en tireté, projection en pointillé
+  doré ; « Ce qui vient » (`window._vendGfAgenda`) : `labo` (sèche, à déclarer), `alerte` (stagne, remonte), `fa` (fin estimée), `decuvage` (pressurée
+  sèche) — et la densité n'y projette plus une cuve suivie au labo ; le cahier de cuverie prend la colonne « Labo g/L » (« Sucre g/L » devient
+  « Sucre est. ») et la courbe des sucres.
+- **Le seuil du vin sec** `_VEND_SEC_G` : 2 → 0,2 g/L. Le repère descend d'environ 0,8 point (13° : 993,8 → 993,0). Un seul « sec » dans l'appli.
+- **« Déclarer la FA finie »** (`openVendFaFin` / `saveVendFaFin`) : date proposée = celle de l'analyse qui dit sec, sinon aujourd'hui ; écrit
+  `fa_finie:true`, `fa_fin_date`, `fa_fin_gf` ; refusée avant le décuvage. Une seule porte par écran : dans le bloc du labo, ou dans la rangée des gestes
+  sans analyse. L'entrée `labo` de l'agenda ouvre la feuille.
+
+### 302c. Trouvé en route
+1. ★★★ **Une cuve décuvée « elle finira au chai » ne pouvait JAMAIS être déclarée finie** : seule la feuille de décuvage écrit `fa_finie`. La cuve
+   restait dans la tournée, « à mesurer » chaque jour, et sa cuvée gardait « attendez avant la malo ou le sulfitage ». Sans le geste, l'écran aurait
+   dit « sèche au labo » pendant que la cuvée disait « attendez ».
+2. ★★ **La ligne « Fermentation à finir » / « Mise en fût » du Chai se coupait en colonnes** — `.mvc-fa-line` en `display:flex`, chaque `<b>` un
+   item (§24). Vu au rendu de la maquette, sur le code d'origine. Le texte passe dans UN `span.mvc-fl-t`.
+3. ★★ **Corriger un relevé de la tournée effaçait `qui` et `tour`** : `saveVendMesure` reconstruisait l'objet de zéro (§24 n°12) → `Object.assign`.
+4. ★ **Un relevé sur une cuve pressurée enregistrait 2 remontages et 1 pigeage par défaut** : après le pressurage (ou le décuvage), `#vm-chap` est
+   masqué et les compteurs partent de 0.
+5. ★★★ **Le tirage au hasard de la Cave n'avait jamais posé un relevé de fermentation** : sa fabrique écrivait `mesures:`, l'appli lit
+   `mesures_fa`. Corrigé, relevés labo compris (nombre, vide, nul, « 0,8 ») : normal, `--long` (100 domaines) et contre-épreuve verts.
+6. **Deux harnais se montent un bac à sable par liste de fonctions** (agenda, CUV-13) : les VRAIES fonctions du labo y entrent (l'extracteur de
+   l'agenda apprend la forme `window.X = function(`). CUV-8 recale ses chiffres sur 0,2 g/L (994,1 à 12°, 991,9 à 14°), et sa démonstration
+   « l'erreur joue dans l'autre sens » passe de 11° à 10° : à 0,2 g/L, 995,5 n'est plus sec à 11° (0,9 g/L restants).
+7. `scripts/mv-harnais-cuvier-correction.mjs` ne démarre plus depuis CUV-DEC (§164) et n'est dans aucune chaîne : silencieux. Noté au §28.
+
+### 302d. Mesuré
+`mv-harnais-gf` : **41 vertes** ; contre-épreuve **14/14**, chaque défaut attrapé par SA règle (seuil inclus, 2 g/L, chiffre en tête, rythme de la
+liste et de l'agenda, virgule à l'enregistrement et à la lecture, chiffre non écrit, relevé reconstruit, déclaration, densité qui projette, span du
+Chai, chapeau, colonne du cahier). Preflight **0 erreur**, les 8 avertissements de la base (un numéro de ligne décalé). Chaîne complète
+(`mv-lanceur`, 345 commandes) par tranches, `TZ=Europe/Paris` : **verte**. La maquette a été regardée sous Chromium (téléphone clair et sombre,
+ordinateur) ; **l'appli construite, non** : `npm run build`, `test:smoke`, `test:e2e` restent à jouer chez Nico.
+
+### 302e. Ouvert
+Voir §28 (GF-1).

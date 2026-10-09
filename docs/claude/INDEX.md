@@ -13,6 +13,7 @@
 | — | Historique descendu du §28 de `CLAUDE.md` (04/10/2026, PRIO-1 — plafond de lignes du cœur) | `docs/claude/journal.md` |
 | — | Historique descendu du §28 de CLAUDE.md (05/10/2026, MOTIFS-1 — plafond du cœur) | `docs/claude/journal.md` |
 | — | Descendu du §28 de CLAUDE.md le 09/10/2026 (CADRE-1, plafond du cœur) | `docs/claude/journal.md` |
+| — | Descendu du §28 de CLAUDE.md le 09/10 (GF-1) — plafond du cœur, historique sans consigne | `docs/claude/journal.md` |
 | 1 | 1. Identité & contexte | `CLAUDE.md` |
 | 2 | 2. Inventaire fonctionnel — 10 modules | `CLAUDE.md` |
 | 3 | 3. Positionnement commercial | `CLAUDE.md` |
@@ -347,3 +348,4 @@
 | 299 | 299. ★ E2E-1 — LE TEST DE BOUT EN BOUT SUIT LE BOUTON « DÉMARRER UNE SESSION » (09/10 — `scripts/e2e-local.… | `docs/claude/chantiers-280-329.md` |
 | 300 | 300. ★★ CADRE-1 — CASES ET FENÊTRES DANS LEUR CADRE, BARRE SOUS LES FENÊTRES, « LES GENS » SANS GEL (09/10 … | `docs/claude/chantiers-280-329.md` |
 | 301 | 301. ★★ FORME-1 — LE DOMAINE EN DIRECT AUX FORMES RÉELLES, COMPACT, AVEC LOUPE ; LA FORME EN HAUT DES FICHE… | `docs/claude/chantiers-280-329.md` |
+| 302 | 302. ★★ GF-1 — LES SUCRES AU LABO PRENNENT LE RELAIS DE LA DENSITÉ (09/10 — `src/cuvier.js` · `src/cave.js`… | `docs/claude/chantiers-280-329.md` |

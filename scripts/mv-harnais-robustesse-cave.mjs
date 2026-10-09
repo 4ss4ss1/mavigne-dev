@@ -202,7 +202,10 @@ function domaine() {
   const cuves_vinif = [];
   for (let i = 0; i < Math.floor(rnd() * 5); i++) cuves_vinif.push({ id: 'k' + i, nom: 'Cuve ' + i, volume_hl: nombre(), statut: pick(['setup', 'mpf', 'ferm', 'fml', 'ecoule', 'decuvee', undefined, 'inconnu']),
     cuve_ref: pick([null, 'ref1']), parcelles: pick([P.slice(0, 2), [], null]), date_entree: unJour(), erasflage: pick(['total', undefined]), so2_g_hl: nombre(), levures: pick(['indigenes', 'selectionnees', undefined]),
-    mpf: pick([{ active: true, temp_c: 12, duree_j: 4 }, null, undefined]), mesures: pick([[{ date: unJour(), densite: 1080, temp: 24 }, { date: unJour(), densite: '1010' }], [], null, undefined]),
+    mpf: pick([{ active: true, temp_c: 12, duree_j: 4 }, null, undefined]), /* ★ GF-1 (§302) : la clé était `mesures` — l'application lit `mesures_fa` ; le tirage n'avait jamais posé un
+       seul relevé de fermentation. Les relevés labo (`gf`) y entrent : nombre, vide, nul, « 0,8 » d'une sauvegarde retouchée. */
+    mesures_fa: pick([[{ id: 'r1', date: unJour(), densite: 1080, temp_c: 24 }, { id: 'r2', date: unJour(), densite: '1010', gf: pick([1.2, null, '']) },
+      { id: 'r3', date: unJour(), gf: pick([0.18, '0,8', 2.4]) }], [], null, undefined]),
     vol_decuve_hl: pick([null, 18, '17']), recolte_ids: pick([recoltes.slice(0, 2).map(r => r.id), [], undefined]), fusion: pick([null, { dans: 'k0', le: unJour() }]), fusion_src: pick([undefined, ['k1']]),
     statut_hist: pick([[{ statut: 'ferm', le: unJour() }, { statut: 'fml', le: unJour() }], [], null, undefined]), vcuvee_id: pick(ids.concat([null])) });
   const ana = [];

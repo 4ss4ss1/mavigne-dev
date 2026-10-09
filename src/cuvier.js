@@ -314,6 +314,19 @@ button.mvv-reste-li{cursor:pointer}
 @media(prefers-reduced-motion:reduce){.mvv-chev{transition:none}}
 .mvv-det{padding:0 12px 12px 15px;border-top:1px solid var(--gris-clair,#ECE6DA)}
 .mvv-det-g{margin-top:11px}
+/* ★ GF-1 — le bloc des sucres au labo */
+.mvv-gf{margin-top:12px;background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.14);border-radius:12px;padding:10px 12px 12px}
+.mvv-gf-hd{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.mvv-gf-hd .t{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-size:var(--pt-md,20px);color:var(--texte,#1A1A14);line-height:1.1}
+.mvv-gf-hd .u{font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F)}
+.mvv-gf-g{margin-top:4px}
+.mvv-gf-v{font-size:var(--pt-txt,13px);line-height:1.5;color:var(--texte-med,#4A4A3A);margin-top:6px}
+.mvv-gf-v b{color:var(--texte,#1A1A14)}
+.mvv-gf-v.ok>b:first-child{color:var(--vert-med,#3D6B27)}
+.mvv-gf-v.due>b:first-child{color:#B0412C}
+.mvv-gf-n{font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F);margin-top:6px;line-height:1.5}
+.mvv-gf-b{width:100%;margin-top:10px}
+.mvv-gf-sub{font-weight:700;color:var(--terre,#8A5A38)}
 .mvv-3{display:flex;gap:6px;margin-top:10px}
 .mvv-3 .c{flex:1 1 0;min-width:0;background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.10);
   border-radius:9px;padding:8px 6px;text-align:center;overflow:hidden}
@@ -508,7 +521,13 @@ function _vendADecuver(c){
   var l=_vendLastMes(c);
   return !!l && _vendFaPct(c,_vendMesD20(l))>=90;
 }
-function _vendADue(c){ return _vendSuivie(c) && _vendStale(c)>=1; }
+function _vendADue(c){
+  if(!_vendSuivie(c)) return false;
+  /* ★ GF-1 : une cuve suivie au labo ne reclame plus une densite par jour. Meme
+     regle que l'agenda (_vendGfAMesurer) : une analyse attendue au-dela de 4 jours. */
+  var g=_vendGfAMesurer(c);
+  return g===null ? _vendStale(c)>=1 : g;
+}
 function _vendEstFusionnee(c){ return !!(c && c.fusion && c.fusion.vers); }
 
 var _VEND_FILS=[['toutes','Toutes'],['fa','En fermentation'],['due','\u00c0 mesurer'],
@@ -1015,7 +1034,10 @@ function _vendLigneHtml(c,canEdit){
      affaire classée. */
   var cls=_vendADue(c)?'due':(c.statut==='termine'?'fini':(act?'fa':''));
   var rep=_vendRepere(c);
-  var etat = _vendFaEnCours(c)    ? '<span class="mvv-etat due">D\u00e9cuv\u00e9e \u00b7 FA</span>'
+  /* ★ GF-1 : une cuve suivie au labo dit sa tendance a la place de son etape. */
+  var _gp=_vendSuivie(c)?_vendProjGF(c):{etat:'attente'};
+  var etat = (_gp.etat!=='attente') ? _vendGfEtat(_gp)
+    : _vendFaEnCours(c)    ? '<span class="mvv-etat due">D\u00e9cuv\u00e9e \u00b7 FA</span>'
     : c.statut==='termine'        ? '<span class="mvv-etat">D\u00e9cuv\u00e9e</span>'
     : c.statut==='setup'          ? '<span class="mvv-etat">Encuvage</span>'
     : _vendADue(c)                ? '<span class="mvv-etat due">'+stale+' j</span>'
@@ -1025,6 +1047,9 @@ function _vendLigneHtml(c,canEdit){
   if(c.parcelles&&c.parcelles.length) bits.push(_escHtml(c.parcelles.join(', ')));
   if(last&&last.densite!=null) bits.push(Math.round(_vendMesD20(last)));
   if(last&&last.temp_c!=null)  bits.push(_vendCuvF1(last.temp_c)+'\u00a0\u00b0C');
+  /* ★ GF-1 : le chiffre labo EN TETE — la sous-ligne se coupe par la fin sur un
+     telephone, et c'est LE chiffre de la cuve a ce stade. */
+  if(_gp.etat!=='attente') bits.unshift('<b class="mvv-gf-sub">'+_vendGfF(_gp.gf)+'\u00a0g/L</b>');
   var h='<div class="mvv-row '+cls+(ouv?' open':'')+'">'
     +'<button type="button" class="mvv-hd" aria-expanded="'+ouv+'" onclick="_vendBascOuv(\''+_escAttr(c.id)+'\')">'
     +(rep?'<span class="mvv-ref"><span class="mvv-ref-n">'+_escHtml(rep)+'</span>'
@@ -1058,6 +1083,7 @@ function _vendDetailHtml(c,canEdit){
   } else if(mes.length>=2){
     h+='<div class="mvv-det-g" id="mvg-fa-'+_mvgId(c.id)+'"></div>';
   }
+  h+=_vendGfBloc(c,canEdit);   // ★ GF-1 — les sucres au labo, sous la courbe de densite
   if(last){
     h+='<div class="mvv-3">'
       +'<div class="c"><div class="v">'+(_vendLastD(c)?Math.round(_vendMesD20(_vendLastD(c))):'\u2014')+'</div><div class="l">densit\u00e9 \u00e0 20\u00a0\u00b0C</div></div>'
@@ -1130,6 +1156,11 @@ function _vendDetailHtml(c,canEdit){
         +', fermentation \u00e0 finir au chai.</b> Vous l\u2019avez indiqu\u00e9 au d\u00e9cuvage\u00a0: '
         +'elle se termine en phase liquide. Continuez \u00e0 relever, c\u2019est la m\u00eame courbe.'
         +_fut+'</div>';
+    } else if(c.decuvage.fa_finie===true&&c.decuvage.fa_fin_date){
+      /* ★ GF-1 : finie au chai, declaree apres coup — la date et le chiffre restent. */
+      h+='<div class="mvv-detnote"><b>D\u00e9cuv\u00e9e le '+_vendFrDate(c.decuvage.date)
+        +', fermentation finie au chai le '+_vendFrDate(c.decuvage.fa_fin_date)+'</b>'
+        +(c.decuvage.fa_fin_gf!=null?(' (labo '+_vendGfF(c.decuvage.fa_fin_gf)+'\u00a0g/L)'):'')+'.'+_fut+'</div>';
     } else if(c.decuvage.fa_finie===true){
       h+='<div class="mvv-detnote"><b>D\u00e9cuv\u00e9e le '+_vendFrDate(c.decuvage.date)
         +'</b> \u2014 fermentation constat\u00e9e termin\u00e9e en cuve.'+_fut+'</div>';
@@ -1151,6 +1182,9 @@ function _vendDetailHtml(c,canEdit){
   if(canEdit && !_vendEstFusionnee(c)){
     h+='<div class="mvv-actrow" style="flex-wrap:wrap">';
     if(_vendMesurable(c)) h+='<button class="mvv-act2 dec" onclick="openOvVendMesure(\''+_escAttr(c.id)+'\')">Saisir une mesure</button>';
+    /* ★ GF-1 : sans analyse, le geste vit ici ; avec analyses, dans le bloc du labo. */
+    if(_vendFaEnCours(c)&&!_vendMesGF(c).length)
+      h+='<button class="mvv-act2" onclick="openVendFaFin(\''+_escAttr(c.id)+'\')">D\u00e9clarer la FA finie</button>';
     if(c.statut==='setup') h+='<button class="mvv-act2 dec" onclick="openOvVendCuve(\''+_escAttr(c.id)+'\')">D\u00e9marrer la fermentation</button>';
     if(c.statut!=='termine')
       h+='<button class="mvv-act2" onclick="openVendStat(\''+_escAttr(c.id)+'\')">Changer l\u2019\u00e9tape</button>';
@@ -1280,6 +1314,7 @@ function _vendCorpsHtml(){
 function _vendPeindreGraphes(){
   window._mvGraphOublier('#mvg-fa-');
   window._mvGraphOublier('#mvg-fm-');
+  window._mvGraphOublier('#mvg-gf-');
   var c=(CAVE_VENDANGE.cuves_vinif||[]).filter(function(x){ return x && x.id===_vendOuvert; })[0];
   if(c){
     var mes=_vendTriMes(c);
@@ -1287,6 +1322,10 @@ function _vendPeindreGraphes(){
       (function(cu){ window._mvGraphSuivre('#mvg-fm-'+_mvgId(cu.id), function(lg){ return _vendFermSvg(cu,lg); }); })(c);
     } else if(mes.length>=2){
       (function(cu){ window._mvGraphSuivre('#mvg-fa-'+_mvgId(cu.id), function(lg){ return _vendSparkline(cu.mesures_fa,cu.id,lg); }); })(c);
+    }
+    /* ★ GF-1 — la courbe des sucres au labo, des deux analyses. */
+    if(_vendMesGF(c).length>=2){
+      (function(cu){ window._mvGraphSuivre('#mvg-gf-'+_mvgId(cu.id), function(lg){ return _vendGfSvg(cu,lg); }); })(c);
     }
   }
   if(window._mvGraphRepeindre) window._mvGraphRepeindre();
@@ -1297,6 +1336,7 @@ function renderVendCuves() {
   window._mvGraphOublier('#mvg-fa-');
   window._mvGraphOublier('#mvg-fm-');
   window._mvGraphOublier('#mvg-cv-');
+  window._mvGraphOublier('#mvg-gf-');
   var toutes=CAVE_VENDANGE.cuves_vinif||[];
   var cuves=toutes.filter(function(c){ return c && !_vendEstFusionnee(c); });
   var canEdit=canWrite();
@@ -1866,7 +1906,10 @@ function openOvVendMesure(cuveId, mesureId) {
   if(titleEl) titleEl.textContent=(m?'Corriger le relevé \u2014 ':'Mesure FA \u2014 ')+(c?_escHtml(c.nom):'');
   // ⚠️ Prerempli a la correction, vide a la creation — jamais l'inverse, jamais
   // « ce qui trainait dans le DOM » (§20, defaut 3 : l'analyse rouverte).
-  _vmRem=m?(m.remontages||0):2; _vmPig=m?(m.pigeages||0):1;
+  /* ★ GF-1 : apres le pressurage il n'y a plus de chapeau. Le bloc disparait, et un
+     releve neuf n'invente plus 2 remontages et 1 pigeage par defaut. */
+  var _chap=!(c&&(_vendPressee(c)||_vendDecuvee(c)));
+  _vmRem=m?(m.remontages||0):(_chap?2:0); _vmPig=m?(m.pigeages||0):(_chap?1:0);
   var el;
   el=document.getElementById('vm-date'); if(el) el.value=(m&&m.date)||_mvToday();
   el=document.getElementById('vm-densite'); if(el) el.value=(m&&m.densite!=null)?m.densite:'';
@@ -1874,6 +1917,8 @@ function openOvVendMesure(cuveId, mesureId) {
   el=document.getElementById('vm-rem-val'); if(el) el.textContent=_vmRem;
   el=document.getElementById('vm-pig-val'); if(el) el.textContent=_vmPig;
   el=document.getElementById('vm-note'); if(el) el.value=(m&&m.note)||'';
+  el=document.getElementById('vm-gf'); if(el) el.value=(m&&_vendGfNum(m.gf)!=null)?_vendGfNum(m.gf):'';     // GF-1, pose en JS (§24 n°5)
+  el=document.getElementById('vm-chap'); if(el) el.style.display=_chap?'':'none';
   _vmInjectActions(_vmesureEditId);
   var ov=document.getElementById('ovVendMesure'); if(ov) ov.classList.add('open');
 }
@@ -1896,7 +1941,11 @@ function saveVendMesure() {
   if(!_vendGarde()) return;
   var cuveId=_vmesureCuveId; if(!cuveId) return;
   var densite=parseFloat((document.getElementById('vm-densite')||{}).value)||null;
-  if(!densite){showToast('Saisissez la densit\u00e9','#E07060');return;}
+  /* ★ GF-1 : un bulletin du labo est un releve. La densite n'est plus seule : l'une
+     ou l'autre suffit. La virgule francaise est acceptee, et 0 est une valeur. */
+  var _g=parseFloat(String((document.getElementById('vm-gf')||{}).value||'').replace(',','.'));
+  var gf=(isFinite(_g)&&_g>=0)?Math.round(_g*1000)/1000:null;
+  if(!densite&&gf==null){showToast('Saisissez la densit\u00e9 ou le r\u00e9sultat du labo','#E07060');return;}
   var date=(document.getElementById('vm-date')||{}).value||_mvToday();
   // ⚠️ `parseFloat(...)||null` avalait un 0 : une cuve a 0 °C perdait sa
   // temperature, donc sa correction de densite. Le zero est une valeur.
@@ -1908,8 +1957,12 @@ function saveVendMesure() {
   var cu=CAVE_VENDANGE.cuves_vinif[idx];
   if(!cu.mesures_fa) cu.mesures_fa=[];
   var editId=_vmesureEditId;
-  var mesure={id:editId||('vm_'+Date.now()),date:date,densite:densite,temp_c:tempC,remontages:_vmRem,pigeages:_vmPig,note:note};
   var pos=editId?cu.mesures_fa.findIndex(function(x){return x.id===editId;}):-1;
+  /* ⚠ §24 n°12 : on repart du releve existant. Reconstruit de zero, il perdait ce que
+     la tournee y avait ecrit (`qui`, `tour`) a la moindre correction (vu en GF-1). */
+  var mesure=Object.assign({}, pos!==-1?cu.mesures_fa[pos]:{},
+    {id:editId||('vm_'+Date.now()),date:date,densite:densite,temp_c:tempC,remontages:_vmRem,pigeages:_vmPig,note:note});
+  if(gf!=null) mesure.gf=gf; else delete mesure.gf;
   if(pos!==-1) cu.mesures_fa[pos]=mesure; else cu.mesures_fa.push(mesure);
   _vendTriMes(cu);            // la date vient peut-etre de changer : on range
   _vmesureEditId=null;
@@ -2007,6 +2060,7 @@ function _vendEnsureSheetCss(){
 .mvv-decrow{display:flex;justify-content:space-between;gap:10px;font-size:var(--pt-txt,13px);color:var(--texte-med,#4A4A3A);padding:7px 2px;border-top:1px solid rgba(138,90,56,.10)}
 .mvv-decrow .u{color:var(--texte-doux,#5F5F5F)}
 .mvc-fa-line{display:flex;align-items:center;gap:6px;margin:7px 0 2px;padding:6px 9px;border-radius:9px;background:rgba(200,106,78,.12);color:#A8452C;font-size:var(--pt-micro,11px);line-height:1.4}
+.mvc-fl-t{flex:1;min-width:0}   /* ★ GF-1 : le texte de la ligne en UN item (§24, display:flex) */
 .mvc-fut-line{display:flex;align-items:center;gap:6px;margin:7px 0 2px;padding:6px 9px;border-radius:9px;background:rgba(138,90,56,.08);color:var(--texte-med,#4A4A3A);font-size:var(--pt-micro,11px);line-height:1.4}
 .mvv-decfa{display:inline-block;margin-left:7px;padding:1px 7px;border-radius:8px;background:rgba(200,106,78,.14);color:#C86A4E;font-weight:700;font-size:var(--pt-nano,9.5px);letter-spacing:.3px;text-transform:uppercase}
 .mvv-histwrap{margin-top:10px;background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.10);border-radius:9px;padding:0 10px 6px}
@@ -2069,8 +2123,8 @@ function _vendSucre(d20){ if(d20==null) return 0; return Math.max(0,2.564*d20-25
    un millesime chaud, et refusait de declarer sec un vin a 1 g/L sur un
    millesime leger. Les DEUX erreurs, dans la meme constante.
 
-   ⚠ CE N'EST QU'UNE ESTIMATION. Le seul verdict est l'analyse : sucres
-     reducteurs sous 2 g/L. L'ecran ecrit « seuil estime », jamais « sec »
+   ⚠ CE N'EST QU'UNE ESTIMATION. Le seul verdict est l'analyse : glucose +
+     fructose sous 0,2 g/L (GF-1 : la saisie existe, _vendProjGF). L'ecran ecrit « seuil estime », jamais « sec »
      comme un fait mesure.
    ⚠⚠ LE DEGRE POTENTIEL N'EST JAMAIS INVENTE. Trois sources, dans cet ordre :
        1. le premier releve de la cuve, s'il est encore un mout (>= 1050) ;
@@ -2084,7 +2138,11 @@ function _vendSucre(d20){ if(d20==null) return 0; return Math.max(0,2.564*d20-25
 */
 var _VEND_SEC_A   = 1007.18;   // densite a sucre nul = A - B x degre potentiel
 var _VEND_SEC_B   = 1.101;
-var _VEND_SEC_G   = 2;         // g/L : le seuil oenologique du vin sec
+/* ★ GF-1 (§302) — 0,2 g/L, PLUS 2. Nico, 09/10 : « 2 grammes par litre, c'est un ancien
+   seuil ; le vrai seuil est de 0,2 — ce sont les seuils laboratoires. » Le repere
+   descend d'environ 0,8 point (un mout a 13 deg : 993,8 -> 993,0). Meme nombre que
+   le verdict des analyses (_VEND_GF_SEC) : un seul « sec » dans l'application. */
+var _VEND_SEC_G   = 0.2;       // g/L : le seuil labo du vin sec (glucose + fructose)
 var _VEND_D_MOUT  = 1050;      // en dessous, un releve n'est plus un mout
 /* La pente suit le reglage « sucre par degre » de la cave : la changer sans
    changer la pente ferait mentir les deux ecrans qui l'affichent. */
@@ -2124,7 +2182,7 @@ function _vendDZero(c){
   var dp=_vendDPot(c);
   return (dp==null)?null:(_VEND_SEC_A-_VEND_SEC_B*dp);
 }
-/* La densite a 20 C sous laquelle CETTE cuve est seche (2 g/L). */
+/* La densite a 20 C sous laquelle CETTE cuve est seche (0,2 g/L, GF-1). */
 function _vendDSec(c){
   var dz=_vendDZero(c);
   if(dz==null) return (_ML_D20_SEC||996);
@@ -4873,11 +4931,15 @@ function _vendDecuveesSection(list){
     var _dd=_vendDecD20(c);
     var fa=_vendFaEnCours(c) ? '<span class="mvv-decfa">FA au chai</span>'
       : (_dd!=null ? (' · mise en fût à '+Math.round(_dd)) : '');
+    if(!_vendFaEnCours(c)&&d.fa_fin_date) fa+=' · FA finie le '+_vendFrDate(d.fa_fin_date);   // ★ GF-1
     /* ★ CUV-11 : la série continue après le décuvage — on montre son dernier point,
        sinon il faut déplier chaque cuve pour savoir laquelle a été relevée. */
     var _ap=_vendMesD(c).filter(function(m){ return m.date>(d.date||''); });
     var _sv=_ap.length ? (' · relevée à '+Math.round(_vendMesD20(_ap[_ap.length-1]))
       +' le '+_vendFrDate(_ap[_ap.length-1].date)) : '';
+    /* ★ GF-1 : suivie au labo, c'est son dernier chiffre qui compte. */
+    var _gq=_vendFaEnCours(c)?_vendProjGF(c):null;
+    if(_gq&&_gq.etat!=='attente') _sv=' · labo '+_vendGfF(_gq.gf)+'\u00a0g/L le '+_vendFrDate(_gq.dernier);
     // ★ VOL-1 — le volume parti au Chai, plus la contenance de la cuve.
     var _vl=_vendVolLoge(c);
     return '<div class="mvv-decrow"><span>'+_escHtml(c.nom)+'</span><span class="u">'+(d.date?_vendFrDate(d.date):'')+' · '
@@ -5069,6 +5131,7 @@ window._vstSet              = _vstSet;
 window.saveVendStat         = saveVendStat;
 window._vendStatDel         = _vendStatDel;
 window.openVendDecuvage     = openVendDecuvage;
+window.saveVendFaFin        = saveVendFaFin;   // ★ GF-1 — onclick de la feuille
 window._vendDecAdj          = _vendDecAdj;
 window.saveVendDecuvage     = saveVendDecuvage;
 window.openVendOp           = openVendOp;
@@ -8420,9 +8483,272 @@ window._matAnnees  = _matAnnees;
    pas une copie. */
 window._vendFermSvg   = _vendFermSvg;
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   GF-1 (§302) — LES SUCRES AU LABO PRENNENT LE RELAIS DE LA DENSITE
+   ═══════════════════════════════════════════════════════════════════════════
+   Nico, 09/10 : « encore des vins en cuve, parce que le glucose n'a pas fini de
+   diminuer pour etre a 0,2 et considerer sec ; ce n'est plus vraiment des densites
+   qu'on prend, c'est une mesure qu'on envoie au labo — glucose et fructose, en g/L. »
+   ⚠ La mesure vit sur le RELEVE (`mesures_fa[].gf`), a la date du PRELEVEMENT : meme
+     axe des dates que la densite, meme porte de correction, meme tri. Un releve peut
+     ne porter que `gf` : tout ce qui calcule une densite filtre deja (CUV-7).
+   ⚠ La tendance reprend la mecanique de _mlProjMalo — pente des deux dernieres
+     analyses pour DETECTER, des trois dernieres pour PROJETER — mais en PROPORTION :
+     la fin d'une FA ralentit, elle ne perd pas des grammes a vitesse constante.
+     Sous 3 analyses, aucune date (meme garde que la FA et la malo).
+   ⚠ Une remontee n'est pas une erreur de saisie comme pour le malique : le
+     pressurage relargue du sucre (CUV-13). L'ecran pose la question.
+   ⚠ « Seche au labo » est une MESURE, pas une decision : la fin de FA reste
+     declaree par le vigneron (CUV-10) — au decuvage, ou par « Declarer la FA
+     finie » (openVendFaFin) pour une cuve qui finit au chai.
+   ⚠ Les deux reglages marques « a caler » viennent de Claude, pas de Nico. */
+var _VEND_GF_SEC    = 0.2;   // g/L — seuil labo du vin sec (glucose + fructose), Nico
+var _VEND_GF_BRUIT  = 0.1;   // g/L — une hausse plus petite n'est pas une remontee
+var _VEND_GF_STAGNE = 0.05;  // par jour — sous 5 % de baisse par jour, ca stagne (a caler)
+var _VEND_GF_CAD    = 4;     // jours — une cuve suivie au labo reclame une analyse au-dela (a caler)
+
+/* Un chiffre labo : deux decimales sous 10 g/L (0,18 ; 1,25), une au-dela. */
+function _vendGfF(v){
+  if(v==null||!isFinite(v)) return '\u2014';
+  var r=v<10?Math.round(v*100)/100:Math.round(v*10)/10;
+  return String(r).replace('.',',');
+}
+/* Ajouter des jours a une date ISO, sans fuseau. Meme calcul que _mlAddJ, qui vit
+   dans cave.js et ne passe pas la frontiere : de l'arithmetique de dates, pas une
+   regle metier (§25 n°16, second corollaire). */
+function _vendGfAddJ(iso,n){
+  var p=String(iso).split('-'), d=new Date(+p[0],+p[1]-1,+p[2]+n);
+  return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+}
+/* Un chiffre labo lu dans une donnee : la virgule francaise vaut un point. Le
+   formulaire ecrit un nombre ; une sauvegarde retouchee a la main peut porter
+   « 0,8 », et parseFloat('0,8') rend 0 — une cuve a 0,8 g/L passerait pour seche. */
+function _vendGfNum(v){
+  var n=parseFloat(String(v==null?'':v).replace(',','.'));
+  return isFinite(n)?n:null;
+}
+/* Les analyses d'une cuve, dans l'ordre des dates. Meme jour reanalyse : la
+   derniere saisie compte (meme regle que _mlMesMalo). */
+function _vendMesGF(c){
+  var src=((c&&c.mesures_fa)||[]).filter(function(m){
+    return m&&m.date&&_vendGfNum(m.gf)!=null; }).slice().sort(_vendTriDate);
+  var out=[];
+  src.forEach(function(m){
+    var x={date:m.date, val:_vendGfNum(m.gf), id:m.id};
+    if(out.length&&out[out.length-1].date===x.date) out[out.length-1]=x; else out.push(x);
+  });
+  return out;
+}
+/* Le verdict : attente | une | descend | projete | stagne | remonte | seche. */
+function _vendProjGF(c){
+  var m=_vendMesGF(c);
+  if(!m.length) return {etat:'attente', n:0, mesures:m};
+  var b=m[m.length-1], v=b.val, r={gf:v, dernier:b.date, n:m.length, mesures:m};
+  if(v<=_VEND_GF_SEC){ r.etat='seche'; return r; }
+  if(m.length<2){ r.etat='une'; return r; }
+  var a=m[m.length-2], j=_mlEcartJ(a.date,b.date)||1;
+  r.avant=a.val; r.depuis=a.date; r.jours=j;
+  if(b.val-a.val>_VEND_GF_BRUIT){ r.etat='remonte'; return r; }
+  var kRec=(a.val>0&&b.val>0)?Math.log(a.val/b.val)/j:0;
+  r.k=kRec;
+  if(!(kRec>=_VEND_GF_STAGNE)){ r.etat='stagne'; return r; }
+  if(m.length<3){ r.etat='descend'; return r; }
+  var p3=m.slice(-3), j3=_mlEcartJ(p3[0].date,p3[2].date)||1;
+  var kMoy=(p3[0].val>0&&p3[2].val>0)?Math.log(p3[0].val/p3[2].val)/j3:0;
+  if(!(kMoy>0)) kMoy=kRec;
+  var jr=Math.log(v/_VEND_GF_SEC)/kMoy;
+  if(!(jr>=0)||jr>60){ r.etat='descend'; return r; }
+  var jj=Math.max(1,Math.round(jr));
+  r.etat='projete'; r.k=kMoy; r.demi=Math.max(1,Math.round(Math.LN2/kMoy));
+  r.jr=jj; r.date=_vendGfAddJ(b.date,jj); r.marge=Math.max(1,Math.round(jr*0.3));
+  return r;
+}
+/* Le rythme d'une cuve suivie au labo. null = pas suivie au labo (la regle d'une
+   densite par jour s'applique) ; false = rien a reclamer ; true = une analyse est
+   attendue. UNE regle pour la liste (_vendADue) ET l'agenda (_mlAMesurer). */
+function _vendGfAMesurer(c, from){
+  var g=_vendMesGF(c); if(!g.length) return null;
+  if(_vendProjGF(c).etat==='seche') return false;
+  return _mlEcartJ(g[g.length-1].date, from||_mlAuj())>=_VEND_GF_CAD;
+}
+/* La phrase : le verdict d'abord, le chiffre ensuite. */
+function _vendGfPhrase(p){
+  var d=_vendFrDate, f=_vendGfF, j=function(n){ return n+'\u00a0jour'+(n>1?'s':''); };
+  switch(p.etat){
+    case 'seche':   return {cls:'ok', html:'<b>S\u00e8che au labo</b>\u00a0: '+f(p.gf)+'\u00a0g/L le '+d(p.dernier)
+                      +', sous le seuil de '+f(_VEND_GF_SEC)+'.'};
+    case 'projete': return {cls:'', html:'<b>En route vers le sec</b>\u00a0: '+f(p.gf)+'\u00a0g/L le '+d(p.dernier)
+                      +'. Les sucres baissent de moiti\u00e9 en '+j(p.demi)+' environ\u00a0: sec ('+f(_VEND_GF_SEC)
+                      +') vers le <b>'+d(p.date)+'</b>, \u00e0 '+j(p.marge)+' pr\u00e8s.'};
+    case 'descend': return {cls:'', html:'<b>\u00c7a descend</b>\u00a0: '+f(p.avant)+' \u2192 '+f(p.gf)+'\u00a0g/L en '
+                      +j(p.jours)+'. Une troisi\u00e8me analyse donnera une date.'};
+    case 'stagne':  return {cls:'due', html:'<b>\u00c7a stagne</b>\u00a0: '+f(p.avant)+' \u2192 '+f(p.gf)+'\u00a0g/L en '
+                      +j(p.jours)+'. \u00c0 contr\u00f4ler.'};
+    case 'remonte': return {cls:'due', html:'<b>\u00c7a remonte</b>\u00a0: '+f(p.avant)+' \u2192 '+f(p.gf)+'\u00a0g/L depuis le '
+                      +d(p.depuis)+'. Un pressurage ou un assemblage entre-temps\u00a0? Sinon, faites recontr\u00f4ler l\u2019\u00e9chantillon.'};
+    case 'une':     return {cls:'', html:'<b>Une analyse</b>\u00a0: '+f(p.gf)+'\u00a0g/L le '+d(p.dernier)
+                      +'. La deuxi\u00e8me dira la tendance.'};
+  }
+  return {cls:'', html:''};
+}
+/* L'etat de la ligne de liste. */
+function _vendGfEtat(p){
+  var t={seche:['ok','S\u00e8che au labo'], projete:['','Labo \u00b7 baisse'], descend:['','Labo \u00b7 baisse'],
+         stagne:['due','Labo \u00b7 stagne'], remonte:['due','Labo \u00b7 remonte'], une:['','Labo']}[p.etat];
+  return t ? ('<span class="mvv-etat'+(t[0]?' '+t[0]:'')+'">'+t[1]+'</span>') : '';
+}
+/* La courbe des sucres. Echelle qui donne autant de place a 4 -> 2 g/L qu'a
+   0,4 -> 0,2 : c'est la fin qu'on lit ici, et une echelle droite l'ecrase au sol.
+   Le kit commun (_mvGraphCadre, couleurs et traits) : rien d'invente. */
+function _vendGfSvg(cu, w){
+  var p=_vendProjGF(cu), m=p.mesures||[];
+  if(m.length<2) return '';
+  var et=window._mvGraphCadre(w,100).etroit;
+  var c=window._mvGraphCadre(w, et?178:196, {padL: et?40:50, padR: et?16:20, padT:26, padB: et?28:32, grad:0});
+  var W=c.w, pL=c.padL, pT=c.padT, iw=c.iw, ih=c.ih;
+  var d0=m[0].date, dN=m[m.length-1].date;
+  var fin=(p.etat==='projete'&&p.date>dN)?p.date:dN;
+  var nj=Math.max(1,_mlEcartJ(d0,fin));
+  var bord=Math.max(0.35, nj*0.05);
+  var X=function(iso){ return pL+(_mlEcartJ(d0,iso)+bord)/(nj+2*bord)*iw; };
+  var vmax=Math.max.apply(null,m.map(function(x){ return x.val; }));
+  var TICKS=[0.1,0.2,0.5,1,2,5,10,20,50];
+  var yHi=TICKS.filter(function(t){ return t>=vmax*1.3; })[0]||50, yLo=0.1;
+  var L=function(v){ return Math.log(Math.max(yLo,Math.min(yHi,v))); };
+  var Y=function(v){ return pT+ih-(L(v)-L(yLo))/(L(yHi)-L(yLo))*ih; };
+  var g='';
+  TICKS.filter(function(t){ return t>=yLo&&t<=yHi; }).forEach(function(t){
+    var y=Y(t);
+    g+='<line x1="'+pL+'" y1="'+y.toFixed(1)+'" x2="'+(W-c.padR)+'" y2="'+y.toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="'+c.trait.grille+'"/>'
+      +'<text x="'+(pL-7)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.axe+'" fill="'+c.col.texte+'">'+_vendGfF(t)+'</text>';
+  });
+  g+='<text x="'+(pL-7)+'" y="'+(pT-12)+'" text-anchor="end" font-size="'+c.txt.unite+'" fill="'+c.col.texte+'">g/L</text>';
+  var ys=Y(_VEND_GF_SEC);
+  g+='<line x1="'+pL+'" y1="'+ys.toFixed(1)+'" x2="'+(W-c.padR)+'" y2="'+ys.toFixed(1)+'" stroke="'+c.col.fait+'" stroke-width="'+c.trait.seuil+'" stroke-dasharray="5 4"/>'
+    +'<text x="'+(pL+6)+'" y="'+(ys+15).toFixed(1)+'" font-size="'+c.txt.mini+'" font-weight="700" fill="'+c.col.fait+'">'+_vendGfF(_VEND_GF_SEC)+' \u00b7 sec au labo</text>';
+  g+='<polyline points="'+m.map(function(x){ return X(x.date).toFixed(1)+','+Y(x.val).toFixed(1); }).join(' ')
+    +'" fill="none" stroke="'+c.col.mesure+'" stroke-width="'+c.trait.mesure+'" stroke-linejoin="round" stroke-linecap="round"/>';
+  var alerte=(p.etat==='stagne'||p.etat==='remonte');
+  if(alerte){
+    var a=m[m.length-2], b=m[m.length-1];
+    g+='<line x1="'+X(a.date).toFixed(1)+'" y1="'+Y(a.val).toFixed(1)+'" x2="'+X(b.date).toFixed(1)+'" y2="'+Y(b.val).toFixed(1)
+      +'" stroke="'+c.col.attention+'" stroke-width="'+(c.trait.mesure+0.5)+'" stroke-linecap="round"/>';
+  }
+  if(p.etat==='projete'){
+    var xa=X(dN), ya=Y(p.gf), xb=X(p.date);
+    g+='<line x1="'+xa.toFixed(1)+'" y1="'+ya.toFixed(1)+'" x2="'+xb.toFixed(1)+'" y2="'+ys.toFixed(1)+'" stroke="'+c.col.prevu+'" stroke-width="'+c.trait.prevu+'" stroke-dasharray="3 4" stroke-linecap="round"/>'
+      +'<circle cx="'+xb.toFixed(1)+'" cy="'+ys.toFixed(1)+'" r="4" fill="var(--bg-app,#F2EFE7)" stroke="'+c.col.prevu+'" stroke-width="1.6"/>'
+      +'<text x="'+xb.toFixed(1)+'" y="'+(ys-10).toFixed(1)+'" text-anchor="'+(xb>W-c.padR-34?'end':'middle')+'" font-size="'+c.txt.mini+'" font-weight="700" fill="'+c.col.prevu+'">\u2248 '+_vendFrDate(p.date)+'</text>';
+  }
+  m.forEach(function(x,k){
+    var cx=X(x.date), cy=Y(x.val), der=(k===m.length-1);
+    var col=(x.val<=_VEND_GF_SEC)?c.col.fait:((der&&alerte)?c.col.attention:c.col.mesure);
+    g+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="3.8" fill="'+col+'"/>'
+      +'<text x="'+cx.toFixed(1)+'" y="'+(cy-9).toFixed(1)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="700" fill="var(--texte,#2A241C)">'+_vendGfF(x.val)+'</text>';
+  });
+  var pas=et?Math.max(1,Math.ceil(nj/3)):Math.max(1,Math.ceil(nj/6));
+  for(var j=0;j<=nj;j+=pas){
+    var iso=_vendGfAddJ(d0,j);
+    g+='<text x="'+X(iso).toFixed(1)+'" y="'+(c.h-10)+'" text-anchor="middle" font-size="'+c.txt.axe+'" fill="'+c.col.texte+'">'+_vendFrDate(iso)+'</text>';
+  }
+  return window._mvGraphSvg(c, 'Sucres au labo de '+(cu.nom||'la cuve')+' : '+m.length+' analyses, de '
+    +_vendGfF(m[0].val)+' \u00e0 '+_vendGfF(p.gf)+' g/L.', g);
+}
+/* Le bloc de la fiche : titre, courbe (peinte par _vendPeindreGraphes, a la largeur
+   vraie du conteneur), verdict, geste. */
+function _vendGfBloc(c, canEdit){
+  var p=_vendProjGF(c);
+  if(p.etat==='attente') return '';
+  var ph=_vendGfPhrase(p);
+  var h='<div class="mvv-gf"><div class="mvv-gf-hd"><span class="t">Sucres au labo</span>'
+    +'<span class="u">glucose\u00a0+\u00a0fructose \u00b7 '+p.n+' analyse'+(p.n>1?'s':'')+'</span></div>';
+  if(p.n>=2) h+='<div class="mvv-gf-g" id="mvg-gf-'+_mvgId(c.id)+'"></div>';
+  h+='<div class="mvv-gf-v '+ph.cls+'">'+ph.html+'</div>';
+  if(p.etat==='seche'&&_vendPressee(c))
+    h+='<div class="mvv-gf-n">\u00ab\u00a0D\u00e9cuver\u00a0\u00bb l\u2019envoie au Chai\u00a0: la case \u00ab\u00a0termin\u00e9e en cuve\u00a0\u00bb y est d\u00e9j\u00e0 coch\u00e9e.</div>';
+  if(canEdit&&_vendFaEnCours(c))
+    h+='<button class="mvv-act2'+(p.etat==='seche'?' dec':'')+' mvv-gf-b" onclick="openVendFaFin(\''+_escAttr(c.id)+'\')">D\u00e9clarer la FA finie</button>';
+  return h+'</div>';
+}
+/* Les entrees de « Ce qui vient » (lues par _mlAgenda, cave.js). Une cuve suivie au
+   labo n'y a plus d'entree de densite : le labo a pris le relais. */
+/* ⚠ C15 : son seul appelant est dans cave.js — une declaration serait comptee MORTE
+   par le preflight, qui raisonne fichier par fichier (§6c). */
+window._vendGfAgenda = function(from){
+  var out=[], f=_vendGfF, d=_vendFrDate;
+  (CAVE_VENDANGE.cuves_vinif||[]).forEach(function(c){
+    if(!c||!_vendSuivie(c)) return;
+    var p=_vendProjGF(c); if(p.etat==='attente') return;
+    if(p.etat==='seche'){
+      if(_vendFaEnCours(c)) out.push({date:from, it:{kind:'labo', titre:c.nom, detail:f(p.gf)+'\u00a0g/L le '+d(p.dernier),
+        note:'fermentation \u00e0 d\u00e9clarer finie', ref:c.id}});
+      else out.push({date:from, it:{kind:'decuvage', titre:c.nom, detail:'s\u00e8che au labo \u00b7 '+f(p.gf)+'\u00a0g/L le '+d(p.dernier), ref:c.id}});
+    } else if(p.etat==='stagne'||p.etat==='remonte'){
+      out.push({date:from, it:{kind:'alerte', titre:c.nom, detail:'sucres au labo '+f(p.avant)+' \u2192 '+f(p.gf)+'\u00a0g/L en '+p.jours+'\u00a0j',
+        note:(p.etat==='stagne'?'\u00e7a stagne':'\u00e7a remonte')+' \u2014 \u00e0 contr\u00f4ler', urgence:'due', ref:c.id}});
+    } else if(p.etat==='projete'){
+      out.push({date:(p.date<from?from:p.date), it:{kind:'fa', titre:c.nom, detail:'sec au labo estim\u00e9 \u00b7 \u00b1\u00a0'+p.marge+'\u00a0j',
+        note:'labo '+f(p.gf)+'\u00a0g/L le '+d(p.dernier)+' \u00b7 les sucres baissent de moiti\u00e9 en '+p.demi+'\u00a0j', ref:c.id}});
+    }
+  });
+  return out;
+};
+/* ★ GF-1 — DECLARER LA FA FINIE, APRES COUP. Une cuve decuvee avec « elle finira au
+   chai » (fa_finie:false) le restait pour toujours : seule la feuille de decuvage
+   ecrit `fa_finie`. Elle restait dans la tournee, et sa cuvee gardait « attendez
+   avant la malo ou le sulfitage » — meme quand le labo dit sec.
+   ⚠ C'est le vigneron qui declare (CUV-10) : l'analyse propose la DATE (celle de la
+     derniere analyse si elle dit sec), rien ne se coche tout seul.
+   ⚠ La date et le chiffre restent ecrits (`fa_fin_date`, `fa_fin_gf`) : jamais un
+     « finie » sans date. */
+var _vendFaFinId=null;
+function openVendFaFin(cuveId){
+  if(!canWrite()) return;
+  var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){ return x&&x.id===cuveId; });
+  if(!c||!_vendFaEnCours(c)){ showToast('Cette cuve n\u2019a pas de fermentation \u00e0 finir','#B85A1A'); return; }
+  _vendFaFinId=cuveId;
+  var p=_vendProjGF(c), sec=(p.etat==='seche');
+  var note = sec ? ('Reprise de l\u2019analyse du '+_vendFrDate(p.dernier)+'\u00a0: '+_vendGfF(p.gf)+'\u00a0g/L. Changez la date si vous l\u2019avez constat\u00e9 un autre jour.')
+    : (p.etat==='attente' ? 'Aucune analyse labo sur cette cuve\u00a0: c\u2019est votre constat qui compte.'
+      : ('Derni\u00e8re analyse\u00a0: '+_vendGfF(p.gf)+'\u00a0g/L le '+_vendFrDate(p.dernier)+', au-dessus du seuil de '+_vendGfF(_VEND_GF_SEC)+'\u00a0g/L.'));
+  _vendSheet('<div class="mvv-sheet-hd"><div class="mvv-sheet-t">Fermentation finie</div>'
+    +'<button class="mv-gh mvv-sheet-x" onclick="_vendSheetClose()" title="Fermer" aria-label="Fermer">'+_mvIcon('croix',18)+'</button></div>'
+    +'<div class="mvv-sheet-sub">'+_escHtml(c.nom||'Cuve')+' \u00b7 d\u00e9cuv\u00e9e le '+_vendFrDate(c.decuvage.date)+', fermentation \u00e0 finir au chai.</div>'
+    +'<label class="mvv-flbl" for="vff-date">Finie le</label>'
+    +'<input id="vff-date" class="mvv-tin" type="date">'
+    +'<div class="mvv-fnote">'+note+'</div>'
+    +'<div class="mvv-detnote">La cuve quitte la tourn\u00e9e, et la cuv\u00e9e au Chai perd son avertissement. '
+    +(sec?'La date et le chiffre du labo restent \u00e9crits.':'La date reste \u00e9crite.')+'</div>'
+    +'<button class="mvv-save" style="margin-top:16px" onclick="saveVendFaFin()">Enregistrer</button>');
+  var el=document.getElementById('vff-date'); if(el) el.value=sec?p.dernier:_mlAuj();   // pose en JS (§24 n°5)
+}
+function saveVendFaFin(){
+  if(!_vendGarde()) return;
+  var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){ return x&&x.id===_vendFaFinId; });
+  if(!c||!_vendFaEnCours(c)) return;
+  var d=((document.getElementById('vff-date')||{}).value)||_mlAuj();
+  if(c.decuvage.date&&d<c.decuvage.date){ showToast('La fin ne peut pas pr\u00e9c\u00e9der le d\u00e9cuvage','#E07060'); return; }
+  var p=_vendProjGF(c);
+  c.decuvage.fa_finie=true;
+  c.decuvage.fa_fin_date=d;
+  if(p.etat==='seche') c.decuvage.fa_fin_gf=p.gf; else delete c.decuvage.fa_fin_gf;
+  _vendFaFinId=null;
+  window.CAVE_VENDANGE=CAVE_VENDANGE;
+  _vendFbSave('Fermentation d\u00e9clar\u00e9e finie','#3D6B27');
+  _vendSheetClose();
+  renderVendCuves();
+}
+
 // ══ LA FRONTIÈRE — ce que le Chai (cave.js) lit du Cuvier ═════════════════
 // ★ CUV-DEC (§164) — chacun de ces noms est lu par cave.js (au premier geste, jamais au
 //   chargement : cave.js est évalué AVANT ce fichier). Retirer une ligne : ReferenceError.
+window._vendProjGF = _vendProjGF;           // ★ GF-1 — la ligne de la cuvée au Chai
+window._vendGfF = _vendGfF;
+window._vendGfNum = _vendGfNum;             // ★ GF-1 — le cahier lit le chiffre comme la fiche                 // ★ GF-1 — le chiffre labo (Chai, cahier de cuverie)
+window._vendMesGF = _vendMesGF;             // ★ GF-1 — l'agenda laisse la densité à une cuve suivie au labo
+window._vendGfAMesurer = _vendGfAMesurer;   // ★ GF-1 — « à mesurer » de l'agenda, même règle que la liste
+window._vendGfSvg = _vendGfSvg;             // ★ GF-1 — la courbe des sucres du cahier de cuverie
+window.openVendFaFin = openVendFaFin;       // ★ GF-1 — onclick, et « Déclarer » depuis l'agenda
 window._vendInjectCss = _vendInjectCss;
 window._vendFrDate = _vendFrDate;
 window._vendFaPct = _vendFaPct;

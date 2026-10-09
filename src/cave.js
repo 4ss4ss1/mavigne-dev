@@ -894,15 +894,29 @@ function _caveFaLineHtml(c){
   var _sv=(_lm&&_lm.date>_dk)
     ? (' \u00b7 dernier relev\u00e9 <b>'+Math.round(_vendMesD20(_lm))+'</b> le '+_vendFrDate(_lm.date))
     : '';
-  if(_vendFaEnCours(src))
-    return '<div class="mvc-fa-line">'+_mvIcon('alerte',16)+' <b>Fermentation \u00e0 finir</b> \u2014 '
+  /* ★ GF-1 (§302) — LE LABO PREND LE RELAIS. Suivie au labo, la cuvee montre son
+     dernier chiffre ; quand il dit sec, la ligne dit ou se declare la fin. Apres la
+     declaration : la date et le chiffre, plus l'avertissement.
+     ⚠ §24 : la ligne est en display:flex — chaque <b> y faisait sa colonne, et
+       « Mise en fut a | 1003 | a 20 °C » se coupait deja en trois. Le texte passe
+       dans UN span (.mvc-fl-t). */
+  var _gp=_vendProjGF(src), _dc=src.decuvage||{};
+  if(_vendFaEnCours(src)){
+    if(_gp.etat==='seche') _sv=' \u00b7 <b>s\u00e8che au labo</b> ('+_vendGfF(_gp.gf)+'\u00a0g/L le '+_vendFrDate(_gp.dernier)
+      +') \u2014 \u00e0 d\u00e9clarer finie dans Le Cuvier';
+    else if(_gp.etat!=='attente') _sv=' \u00b7 labo <b>'+_vendGfF(_gp.gf)+'\u00a0g/L</b> le '+_vendFrDate(_gp.dernier)
+      +(_gp.etat==='projete'?(', sec vers le '+_vendFrDate(_gp.date)):'');
+    return '<div class="mvc-fa-line">'+_mvIcon('alerte',16)+'<span class="mvc-fl-t"><b>Fermentation \u00e0 finir</b> \u2014 '
       +_escHtml(src.nom||'la cuve')+' a \u00e9t\u00e9 d\u00e9cuv\u00e9e avant la fin de FA. '
-      +'Attendez qu\u2019elle soit finie avant de lancer la malo ou de sulfiter.'+_sv+'</div>';
+      +'Attendez qu\u2019elle soit finie avant de lancer la malo ou de sulfiter.'+_sv+'</span></div>';
+  }
+  if(_dc.fa_fin_date) _sv=' \u00b7 FA finie le '+_vendFrDate(_dc.fa_fin_date)
+    +(_dc.fa_fin_gf!=null?(' (labo '+_vendGfF(_dc.fa_fin_gf)+'\u00a0g/L)'):'');
   var d=_vendDecD20(src); if(d==null&&!_sv) return '';
-  return '<div class="mvc-fut-line">'+_mvIcon('eprouvette',16)
-    +(d!=null?(' Mise en f\u00fbt \u00e0 <b>'+Math.round(d)+'</b> \u00e0 20\u00a0\u00b0C \u00b7 goutte et presse assembl\u00e9es')
-            :' Suivi de densit\u00e9')
-    +_sv+'</div>';
+  return '<div class="mvc-fut-line">'+_mvIcon('eprouvette',16)+'<span class="mvc-fl-t">'
+    +(d!=null?('Mise en f\u00fbt \u00e0 <b>'+Math.round(d)+'</b> \u00e0 20\u00a0\u00b0C \u00b7 goutte et presse assembl\u00e9es')
+            :'Suivi de densit\u00e9')
+    +_sv+'</span></div>';
 }
 function _caveCuvCardHtml(c,w){
   var st=_caveState(c);
@@ -4675,6 +4689,7 @@ function _mlProjFA(c,now){
 function _mlAMesurer(from){
   return (CAVE_VENDANGE.cuves_vinif||[]).filter(function(c){
     if(!c||!_vendSuivie(c)) return false;
+    var g=_vendGfAMesurer(c,from); if(g!==null) return g;   // ★ GF-1 : suivie au labo, son rythme
     var l=_vendLastMes(c); if(!l) return true;
     return _mlEcartJ(l.date,from)>=1;
   }).map(function(c){
@@ -4702,7 +4717,9 @@ function _mlAgenda(from,nSem){
   });
   (CAVE_VENDANGE.cuves_vinif||[]).forEach(function(c){
     if(!c||!_vendIsActive(c)) return;
-    var p=_mlProjFA(c,from);
+    /* ★ GF-1 : suivie au labo, la densité ne projette plus rien — ses entrées viennent
+       de _vendGfAgenda. L'alerte de température, plus bas, reste. */
+    var p=_vendMesGF(c).length?{etat:'labo'}:_mlProjFA(c,from);
     if(p.etat==='normal'&&p.date) pousse(p.date,{kind:'fa', titre:c.nom,
       detail:'fin de fermentation estim\u00e9e \u00b7 \u00b1 '+p.marge+' j',
       note:'densit\u00e9 '+Math.round(p.d20)+' \u00b7 \u2212'+p.pente+' pts/j', ref:c.id});
@@ -4719,6 +4736,8 @@ function _mlAgenda(from,nSem){
       detail:lm.temp_c+' \u00b0C au dernier relev\u00e9', note:'temp\u00e9rature haute',
       urgence:'warn', ref:c.id});
   });
+  /* ★ GF-1 (§302) — les sucres au labo : la fin estimée, ce qui stagne ou remonte, ce qui est sec. */
+  _vendGfAgenda(from).forEach(function(x){ pousse(x.date,x.it); });
   _mlAMesurer(from).forEach(function(x){
     pousse(from,{kind:'mesure', titre:x.cuve.nom,
       detail:x.depuis>900?'aucun relev\u00e9':('dernier relev\u00e9 il y a '+x.depuis+' j'),
@@ -4726,7 +4745,7 @@ function _mlAgenda(from,nSem){
   });
   // Ordre d'affichage. ATTENTION : ne jamais ecrire (ordre[k]||9) — 'alerte' vaut
   // 0 et 0||9 rend 9, ce qui envoie l'alerte en DERNIER, sous les ouillages.
-  var ordre={alerte:0,mesure:1,fa:2,decuvage:3,demarrage:4,ouillage:5};
+  var ordre={alerte:0,labo:1,mesure:1,fa:2,decuvage:3,demarrage:4,ouillage:5};
   sem.forEach(function(s){
     s.items.sort(function(a,b){
       if(a.date!==b.date) return a.date<b.date?-1:1;
@@ -5112,7 +5131,7 @@ function _mlInjectCss(){
 var _ML_LBL={ouillage:'Ouiller', mesure:'Mesurer', fa:'Fin de fermentation',
   decuvage:'D\u00e9cuvage possible', alerte:'\u00c0 contr\u00f4ler',
   demarrage:'D\u00e9part en fermentation', soutirage:'Soutirer', malo:'Malo bloqu\u00e9e',
-  so2:'Dose de SO\u2082', fut:'Parc \u00e0 f\u00fbts'};
+  so2:'Dose de SO\u2082', fut:'Parc \u00e0 f\u00fbts', labo:'S\u00e8che au labo'};
 
 // Une ligne de l'agenda = un bouton vers le geste. L'icone vient du sprite
 // (cliquet des emojis), le verbe se lit a droite — jamais un chemin a retenir.
@@ -5147,6 +5166,12 @@ function _mlGo(kind,ref){
     if(isSaisonnier()){ showToast('Acc\u00e8s lecture seule','#B85A1A'); return; }
     caveSection='vendange'; _vendOngletCuves(); renderCave();
     openOvVendMesure(ref);
+    return;
+  }
+  if(kind==='labo'){   // ★ GF-1 : seche au labo, la fin de FA se declare
+    if(isSaisonnier()){ showToast('Acc\u00e8s lecture seule','#B85A1A'); return; }
+    caveSection='vendange'; _vendOngletCuves(); renderCave();
+    openVendFaFin(ref);
     return;
   }
   if(kind==='soutirage'){
@@ -5622,7 +5647,7 @@ function _mlAgendaComplet(from,nSem){
       note:'programm\u00e9e au soutirage', ref:d.ref});
   });
   // Meme regle d'ordre que _mlAgenda : jamais (ordre[k]||9), 'alerte' vaut 0.
-  var ordre={alerte:0,malo:0,mesure:1,soutirage:2,fa:3,decuvage:4,so2:5,demarrage:6,ouillage:7};
+  var ordre={alerte:0,malo:0,labo:1,mesure:1,soutirage:2,fa:3,decuvage:4,so2:5,demarrage:6,ouillage:7};
   sem.forEach(function(s){
     s.items.sort(function(a,b){
       if(a.date!==b.date) return a.date<b.date?-1:1;
@@ -5688,10 +5713,10 @@ function _mlVerdict(sem, ctx){
 }
 
 var _AUJ_ICO={ouillage:'goutte', mesure:'thermometre', fa:'sablier', decuvage:'cuve', alerte:'alerte',
-  demarrage:'flamme', soutirage:'barrique', malo:'eprouvette', so2:'fiole', fut:'barrique'};
+  demarrage:'flamme', soutirage:'barrique', malo:'eprouvette', so2:'fiole', fut:'barrique', labo:'eprouvette'};
 // Le verbe du geste — c'est lui qu'on lit a droite de la ligne, pas un chemin.
 var _AUJ_VERBE={ouillage:'Ouiller', mesure:'Relever', fa:'Voir', decuvage:'D\u00e9cuver', alerte:'Relever',
-  demarrage:'Voir', soutirage:'Soutirer', malo:'Voir', so2:'Doser', fut:'Le parc'};
+  demarrage:'Voir', soutirage:'Soutirer', malo:'Voir', so2:'Doser', fut:'Le parc', labo:'D\u00e9clarer'};
 
 function _aujInjectCss(){
   if(document.getElementById('mv-auj-css')) return;
@@ -9187,8 +9212,10 @@ var MV_CUVDOC_GRW = 640;   /* A4 portrait, marges 12 mm, corps 18 px : 667 px
 function _cuvDocGraph(c){
   var n = ((c && c.mesures_fa) || []).filter(function(m){
     return m && m.date && m.densite != null; }).length;
-  if(n < 3) return '';
-  return '<div class="cd-gr mvdoc-avoid">' + _vendFermSvg(c, MV_CUVDOC_GRW, { sansTouche:true }) + '</div>';
+  /* ★ GF-1 : sous la courbe de densite, celle des sucres au labo (deux analyses au moins). */
+  var g = (_vendMesGF(c).length >= 2) ? ('<div class="cd-gr mvdoc-avoid">' + _vendGfSvg(c, MV_CUVDOC_GRW) + '</div>') : '';
+  if(n < 3) return g;
+  return '<div class="cd-gr mvdoc-avoid">' + _vendFermSvg(c, MV_CUVDOC_GRW, { sansTouche:true }) + '</div>' + g;
 }
 
 /* ── TRI-3 — l'ordre du cahier de cuverie ──────────────────────────
@@ -9254,6 +9281,7 @@ function _cuvDoc(an, ctri){
         + '<td class="n">' + (d20 != null ? Math.round(d20) : '—') + '</td>'
         + '<td class="n">' + (m.temp_c != null ? _mvF1(m.temp_c) : '—') + '</td>'
         + '<td class="n">' + (d20 != null ? Math.round(_vendSucreRest(c,d20)) : '—') + '</td>'
+        + '<td class="n">' + (_vendGfNum(m.gf) != null ? _vendGfF(_vendGfNum(m.gf)) : '—') + '</td>'   // ★ GF-1
         + '<td class="n">' + (d20 != null ? _vendFaPct(c,d20) + ' %' : '—') + '</td>'
         + '<td class="n">' + (m.remontages || 0) + '</td>'
         + '<td class="n">' + (m.pigeages || 0) + '</td>'
@@ -9271,13 +9299,13 @@ function _cuvDoc(an, ctri){
     var grf = _cuvDocGraph(c);
     var tbl = mes.length
       ? ('<table><thead><tr><th>Date</th><th class="n">Densité</th><th class="n">à 20 °C</th>'
-          + '<th class="n">T °C</th><th class="n">Sucre g/L</th><th class="n">Avanc.</th>'
+          + '<th class="n">T °C</th><th class="n">Sucre est.</th><th class="n">Labo g/L</th><th class="n">Avanc.</th>'
           + '<th class="n">Rem.</th><th class="n">Pig.</th><th>Note</th></tr></thead><tbody>'
           + rows
           + '<tr class="tot"><td>' + mes.length + ' relevé' + (mes.length > 1 ? 's' : '') + '</td>'
           + '<td class="n">' + (dDeb != null ? Math.round(dDeb) : '—') + '</td>'
           + '<td class="n">' + (dFin != null ? Math.round(dFin) : '—') + '</td>'
-          + '<td colspan="3"></td>'
+          + '<td colspan="4"></td>'
           + '<td class="n">' + rem + '</td><td class="n">' + pig + '</td><td></td></tr>'
           + '</tbody></table>')
       : '<div class="cd-vide">Aucun relevé de fermentation sur cette cuve.</div>';

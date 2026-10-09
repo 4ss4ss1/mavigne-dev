@@ -50,15 +50,19 @@ const NOMS = ['_caveFutL', '_caveTonL', '_caveFutsL', '_caveCuvesBois', '_caveOu
   /* CUV-9 : _mlAMesurer passe par _vendSuivie — extrait, c'est le sujet. */
   '_vendEstFusionnee', '_vendDecuvee', '_vendFaEnCours', '_vendSuivie',
   /* CUV-13 : _vendSuivie lit _vendPressee (la cuve pressuree est reclamee). */
-  '_vendPressee'];
+  '_vendPressee',
+  /* ★ GF-1 (§302) : _mlAgenda et _mlAMesurer passent par les sucres au labo — extraits, pas bouchonnés. */
+  '_vendFrDate', '_vendGfF', '_vendGfAddJ', '_vendGfNum', '_vendMesGF', '_vendProjGF', '_vendGfAMesurer', '_vendGfAgenda'];
 
 function extraire(nom) {
-  const m = new RegExp('^function ' + nom + '\\s*\\(', 'm').exec(SRC);
+  /* ★ GF-1 : les trois formes (§6c) — `window.X = function(` se réécrit en déclaration. */
+  let m = new RegExp('^function ' + nom + '\\s*\\(', 'm').exec(SRC), win = false;
+  if (!m) { m = new RegExp('^window\\.' + nom + '\\s*=\\s*function\\s*\\(', 'm').exec(SRC); win = !!m; }
   if (!m) { console.error('ABSENTE de src/cave.js : ' + nom); process.exit(1); }
   let i = SRC.indexOf('{', m.index), d = 0;
   for (let j = i; j < SRC.length; j++) {
     if (SRC[j] === '{') d++;
-    else if (SRC[j] === '}' && --d === 0) return [m.index, SRC.slice(m.index, j + 1)];
+    else if (SRC[j] === '}' && --d === 0) return [m.index, win ? SRC.slice(m.index, j + 1).replace(new RegExp('^window\\.' + nom + '\\s*=\\s*function\\s*\\('), 'function ' + nom + '(') : SRC.slice(m.index, j + 1)];
   }
   console.error('accolade non ferm\u00e9e : ' + nom); process.exit(1);
 }
@@ -72,7 +76,9 @@ const BLOC = NOMS.map(extraire).sort((a, b) => a[0] - b[0]).map(x => x[1]).join(
    la fonction testée, si — et il n'y en a aucun. */
 function monter(ce, cv, mutation, seuilFn) {
   // FUT-CAP-2 : _mlOuillages passe par _caveFutsL, qui lit le reglage du domaine sur window.CONFIG.
-  const corps = 'var window = { CONFIG: {} };\n' + (mutation ? mutation(BLOC) : BLOC);
+  /* ★ GF-1 : les réglages du labo, lus dans le fichier (jamais retapés ici). */
+  const GF = (SRC.match(/^var _VEND_GF_\w+\s*=[^;]*;/gm) || []).join('\n');
+  const corps = 'var window = { CONFIG: {} };\n' + GF + '\n' + (mutation ? mutation(BLOC) : BLOC);
   return new Function('CAVE_ELEVAGE', 'CAVE_VENDANGE', '_mlSeuil', '_mlProjFA',
     '_mlNomCuvee', '_caveCuve', '_caveMat', '_vendMesD20', '_vendDSec',
     corps + '\nreturn {_mlOuillages,_mlAgenda,_mlVolParFut,_caveOuille,_mlAMesurer,_mlResumeSem};'

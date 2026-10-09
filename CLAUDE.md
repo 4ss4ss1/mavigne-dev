@@ -3,13 +3,13 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **9 octobre 2026 (FORME-1)** — ★★ **LE DOMAINE EN DIRECT AUX FORMES RÉELLES, ET LE TOUCHER QUI N'OUVRAIT RIEN** (§301). Lot 32, base `53a0530`.
-> Demande de Nico (maquette v1, puis v2 « plus compacte » validée, puis « go ») : chaque parcelle du plan à la forme de son contour, à la même échelle, compact
-> (394 px de haut au lieu de 801 sur 37 parcelles), loupe au survol, fiche au toucher avec la forme en haut. En vérifiant, TROIS défauts : (1) la commune, rangée
-> `{nom, lat, lng}`, s'écrivait « [object Object] » et fondait toutes les communes (plan et fiche Parcelles) ; (2) « en cours » lisait tout le journal, la pastille le
-> journal du JOUR — parcelle commencée la veille sans équipe, « aucune équipe » écrit à tort → une seule lecture (`_ckPlanDebuts`) ; (3) le plan et Ctrl K appelaient
-> `openSelParc` — la feuille des parcelles d'une TÂCHE — avec un nom de parcelle : rien ne s'ouvrait → `openDP`. **APP 8.71 → 8.72, SW 9.49 → 9.50.**
-> ⚠️ Leçon : un nom qui « sonne juste » (`openSelParc`, « ouvrir la sélection de parcelle ») n'est pas un contrat — lire ce que la fonction attend avant de l'appeler.
+> Dernière consolidation : **9 octobre 2026 (GF-1)** — ★★ **LES SUCRES AU LABO PRENNENT LE RELAIS DE LA DENSITÉ** (§302). Lot 33, base `974a495`.
+> Demande de Nico (maquette v1 publiée, puis « go ») : en fin de FA, l'analyse labo glucose + fructose (g/L) se note sur le relevé du Cuvier, trace sa
+> courbe sous la densité et dit où en est la cuve — en route vers le sec (date dès 3 analyses), ça stagne, ça remonte, sèche au labo (≤ 0,2 g/L). Nico :
+> « 2 g/L est un ancien seuil ; le vrai seuil est 0,2 » → le repère de densité suit (−0,8 point). En vérifiant, TROIS défauts : (1) une cuve décuvée
+> « finira au chai » ne pouvait JAMAIS être déclarée finie → « Déclarer la FA finie » ; (2) la ligne « Fermentation à finir » du Chai se coupait en colonnes
+> (§24, flex) ; (3) corriger un relevé de la tournée effaçait `qui`/`tour`. **APP 8.72 → 8.73, SW 9.50 → 9.51.**
+> ⚠️ Leçon : le tirage au hasard de la Cave écrivait ses relevés sous `mesures`, l'appli lit `mesures_fa` — il n'en avait jamais testé un seul. Un tirage se vérifie sur la CLÉ qu'il nourrit.
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1838,6 +1838,16 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ GF-1 — CE QUI RESTE OUVERT (§302, posé le 09/10)
+
+1. **Deux réglages viennent de Claude, pas de Nico — à caler sur ses cuves** : « ça stagne » sous 5 % de baisse par jour (`_VEND_GF_STAGNE`) et
+   une analyse réclamée tous les 4 jours (`_VEND_GF_CAD`). Son rythme d'envoi au labo n'a pas été donné.
+2. **Le repère de densité reste théorique** : sur 0,2 g/L il descend de 0,8 point, alors que les cuves du domaine sont sèches vers 997-998 au
+   densimètre. Les relevés portent désormais densité ET labo : un lot à part pourra caler le repère sur les cuves du domaine.
+3. **À regarder chez Nico, sur téléphone** : la feuille de relevé (champ labo, chapeau masqué après pressurage), le bloc et la courbe des sucres,
+   « Déclarer la FA finie », la ligne du Chai, le cahier de cuverie imprimé. Vérifiés par `mv-harnais-gf`, pas regardés sur ses données.
+4. **`scripts/mv-harnais-cuvier-correction.mjs` ne démarre plus** (il lit `src/cave.js` seul depuis CUV-DEC, §164) et n'est dans aucune chaîne.
+
 ### ⚠️ FORME-1 — CE QUI RESTE OUVERT (§301, posé le 09/10)
 
 1. **À regarder chez Nico, avec SES contours** (essais sur un domaine reconstitué) : PC (loupe, deux colonnes), téléphone (repli, toucher → fiche). Un contour dont le
@@ -2350,18 +2360,6 @@ L'hypothèse en vigueur — la lecture seule dure — n'a jamais été confirmé
 Historique livré et déployé, sans consigne : déplacé le 05/10 (MOTIFS-1) pour tenir le plafond du cœur. Les leçons qu'elles
 portaient vivent dans les règles d'or, §24, §25 et §19a (`docs/claude/modules.md`).
 
-### ★★★ Le 10 août — migration GitHub
-
-Le code source de Ma Vigne vit désormais dans un dépôt **`4ss4ss1/mavigne-dev`**, public, sur
-GitHub Desktop côté Nico. **Ceci remplace le workflow d'upload pour la LECTURE du code** (Règle
-d'or n°1, « Environnement de Nico »). Pas un chantier fonctionnel — un changement d'outillage, mais
-le plus structurel depuis le début du projet : Claude clone/lit directement, Nico livre par
-commit+push au lieu d'upload/téléchargement.
-★ **Piste ouverte, pas encore faite** : committer ce document lui-même dans le dépôt (en
-`CLAUDE.md` à la racine) pour qu'il soit, lui aussi, lisible sans upload à chaque session. Tant que
-ce n'est pas fait, la procédure de régénération de la Règle d'or n°1 reste pleinement en vigueur
-pour ce document précis.
-
 ### ⚠️ Lots encore non documentés ici
 
 Connus par le seul changelog de `sw.js`, **à consigner par Nico** :
@@ -2370,11 +2368,6 @@ Connus par le seul changelog de `sw.js`, **à consigner par Nico** :
   snapshot localStorage · le Chai qui s'ouvrait vide.
 - **09/08 matin** : le soutirage à source unique · le Cuvier repeint · le **hub Documents** ·
   la **charte `MV_DOC`**.
-
-### ✅ Le verrou administratif est levé
-
-**3 août 2026 — l'Urssaf a confirmé que Nico peut facturer.** La première facture définitive est
-partie à le signataire le second domaine (réf. MV-AAAA-NNNN).
 
 ### ★★ Le fait commercial : le prospect Gironde
 
