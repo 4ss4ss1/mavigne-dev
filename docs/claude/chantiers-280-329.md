@@ -486,3 +486,25 @@ Aucune règle ne vise `.ck2` ni une classe `ck-` : le cockpit reste tel que REF 
 vraie appli : les sept onglets en clair, L'année et Décider en sombre. Trois passes : la première a laissé les tuiles du haut de L'année (elles
 vivent dans `.pil-photos`, hors de `#pil-content`), la jauge, Décider, la protection et les archives — retrouvés par leur texte et recalés.
 
+## 299. ★ E2E-1 — LE TEST DE BOUT EN BOUT SUIT LE BOUTON « DÉMARRER UNE SESSION » (09/10 — `scripts/e2e-local.mjs` · `lots/E2E-1.json` · aucune version ne bouge ; base `34813db` — Nico a poussé la refonte DS-4 … PIL-1 en `646323e` « Refonte v870 » — **zip de six fichiers**)
+
+### 299a. Ce qui s'est passé
+
+La CI de Nico a joué `npm run test:e2e` sur le zip PIL-1 : 18 étapes vertes, une rouge — « Action session » : `page.click('#trac-fab')`
+attendait 8 s un bouton visible. Depuis TRAC-3 (§284), la FAB du Tracteur est cachée au large (`#trac-fab{ display:none!important }` à partir
+de 1 024 px) et remplacée par `#trac-new-btn` ; le test tourne en 1 280 × 720. La chaîne (`npm run check`, 339 commandes) ne joue pas ce test :
+le défaut n'a été vu que par la CI.
+
+### 299b. Ce qui change
+
+`e2e-local.mjs`, étape « Créer une session » : le test clique le geste VISIBLE — `#trac-new-btn` s'il est affiché (au large : il ouvre
+directement la nouvelle session), sinon la FAB (à l'étroit : elle ouvre le choix session / entretien) — et vérifie toujours qu'une fenêtre
+s'ouvre. Le message d'échec nomme le bouton cliqué.
+
+### 299c. Mesuré
+
+Joué ici (navigateur de test de version voisine) : « Action session » ✓. Deux autres lignes rougissent ici seulement — « Page home »
+(`_pluieCharger`) et « Action parcelle » (« Météo secteur injoignable ») — parce que ce bac à sable n'a pas accès au service météo ; elles sont
+vertes dans la CI de Nico, qui a internet. Leçon remontée dans la consolidation : jouer `npm run test:e2e` avant de livrer un lot qui cache ou
+remplace un bouton.
+

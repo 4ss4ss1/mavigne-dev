@@ -15,7 +15,7 @@
 //     rendus de modules, clics.
 //
 // Ce que ça couvre : login DOM réel → rendu de CHAQUE module → interactions
-// (changer de saison, clic réel sur la FAB #trac-fab → openNewSession, openDP).
+// (changer de saison, clic réel sur « Démarrer une session » — #trac-new-btn au large, la FAB #trac-fab à l'étroit —, openDP).
 // Ce que ça ne couvre PAS : la couche Firestore/claims réelle (réseau coupé ;
 // toutes les erreurs Firebase sont attendues et filtrées dans ce mode).
 //
@@ -225,12 +225,16 @@ async function main() {
       await page.waitForTimeout(800);
       // Un portail CGU/DPA a pu se rouvrir via _mvApplyTrialGating pendant la nav → le refermer.
       await page.evaluate(() => { try { if (window._mvTermsClose) window._mvTermsClose(); } catch (e) {} const t = document.getElementById('ovTerms'); if (t) t.style.display = 'none'; });
-      await page.click('#trac-fab', { timeout: 8000 });
+      // TRAC-3 (§284) : au large, le geste est le bouton « Démarrer une session » (#trac-new-btn) et la FAB se cache
+      //   (CSS) ; à l'étroit, c'est la FAB. On clique celui qui est VISIBLE — un clic réel dans les deux cas. (§299 : la
+      //   CI cliquait encore la FAB au large, cachée depuis TRAC-3 → « element is not visible ».)
+      const cible = await page.evaluate(() => { const b = document.getElementById('trac-new-btn'); return (b && b.offsetParent !== null) ? '#trac-new-btn' : '#trac-fab'; });
+      await page.click(cible, { timeout: 8000 });
       await page.waitForTimeout(900);
       const opened = await page.evaluate(() => !!document.querySelector('.overlay.open'));
-      if (!opened) hard('La FAB a été cliquée mais aucun overlay ne s\'est ouvert (openNewSession KO ?)');
+      if (!opened) hard(cible + ' a été cliqué mais aucun overlay ne s\'est ouvert (openNewSession / openTracAdd KO ?)');
       await page.evaluate(() => { document.querySelectorAll('.overlay.open').forEach((o) => { try { window.closeOv && window.closeOv(null, o.id); } catch (e) {} o.classList.remove('open'); }); });
-    } catch (e) { hard('Créer une session (#trac-fab → openNewSession) : ' + (e && e.message ? e.message : String(e))); }
+    } catch (e) { hard('Créer une session (#trac-new-btn au large, #trac-fab à l\'étroit) : ' + (e && e.message ? e.message : String(e))); }
 
     // b2) Barres d'onglets internes : une seule primitive .mvu-tab depuis la refonte
     //     de navigation, mais chaque module garde sa fonction de bascule. On les

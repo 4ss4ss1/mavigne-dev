@@ -1838,6 +1838,12 @@ aide décrit les anciens. **C'est la violation exacte de la Règle d'or n°4, é
 changelog du dépôt, et l'accompagnement les a rattrapés en v6.44.
 
 
+> Dernière consolidation : **8 octobre 2026 (PIL-1)** — ★ **LES SEPT ONGLETS DU PILOTAGE À LA CHARTE** (§298). Lot 29, **zip cumulatif DS-4 …
+> PIL-1 (§270 à §298), base `b80419d`, non poussés**. La revue de COUL-1 l'avait montré : seul « Aujourd'hui » (`.ck2`) était à la charte.
+> Habit seulement, recalé par `#page-pilotage` sur les composants `pil-` (portée et exercice, « à compléter », tuiles `pil-tile` / `pil-photo`,
+> titres sans capitales, chiffres en Outfit, segmentés `pil-seg` / `pil-anseg`, badges, jauge en `--ok`, puces et carte de Décider, protection,
+> archives) ; aucune règle ne vise `.ck2` (le harnais le vérifie). Harnais neuf `mv-harnais-pil1` (8 + 6). **APP 8.69 → 8.70, SW 9.47 → 9.48.**
+
 > Dernière consolidation : **8 octobre 2026 (COUL-1)** — ★ **DES COULEURS PLUS FRANCHES, UN FOND UN PEU PLUS SOUTENU** (§297). Lot 28,
 > **zip cumulatif DS-4 … COUL-1 (§270 à §297), base `b80419d`, non poussés**. Nico : couleurs trop délavées, cartes pas assez détachées du fond
 > crème — « un petit peu plus, pas beaucoup ». Jetons seulement : fonds pâles un cran plus soutenus (clair .11 / .15 / .15 / .13, sombre .15 /

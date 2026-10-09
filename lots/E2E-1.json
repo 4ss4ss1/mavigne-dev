@@ -1,0 +1,14 @@
+{
+  "lot": "E2E-1",
+  "section": "§299",
+  "base": "34813db3614f97c422b6c902c45fa318d9f5708f",
+  "inclut": [],
+  "date": "2026-10-09",
+  "fichiers": {
+    "CLAUDE.md": "c51106f67d2a506cffad54b96111715878631640ed4c66ecab788cee0a2ba12c",
+    "docs/claude/INDEX.md": "55604078c40b2002c500a690fd6f15c3c2cc0d87639685216d51c80ef22c4190",
+    "docs/claude/chantiers-280-329.md": "2a6bd3260fc40fbe3fd3d04e8290e79c97613842341fcd482f1d0cba3348f174",
+    "docs/claude/journal.md": "3ca50f71a49217b0eb891e821c2940dc32b3f8e3d786a7f91b24483e7ea43e44",
+    "scripts/e2e-local.mjs": "8ae8569aadc3da58db04a787fa182a5d6d62742dd5b8f56d1c1224414c74b83c"
+  }
+}

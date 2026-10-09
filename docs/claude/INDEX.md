@@ -343,3 +343,4 @@
 | 296 | 296. ★★★ RG-2 — RÉGLAGES › ÉQUIPE ET MOI À LA CHARTE : FIN DE LA REFONTE UI (08/10 — `src/styles.css` · `sr… | `docs/claude/chantiers-280-329.md` |
 | 297 | 297. ★ COUL-1 — DES COULEURS PLUS FRANCHES, UN FOND UN PEU PLUS SOUTENU (08/10 — `src/styles.css` · `src/ut… | `docs/claude/chantiers-280-329.md` |
 | 298 | 298. ★ PIL-1 — LES SEPT ONGLETS DU PILOTAGE HORS « AUJOURD'HUI » À LA CHARTE (08/10 — `src/styles.css` · `s… | `docs/claude/chantiers-280-329.md` |
+| 299 | 299. ★ E2E-1 — LE TEST DE BOUT EN BOUT SUIT LE BOUTON « DÉMARRER UNE SESSION » (09/10 — `scripts/e2e-local.… | `docs/claude/chantiers-280-329.md` |
