@@ -8,6 +8,12 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **9 octobre 2026 (GF-2)** — ★ **LE « ≈ » QUE LES POLICES NE SAVENT PAS DESSINER** (§303). Lot 34, base `9caff41`.
+> La CI de Nico a rougi sur GF-1 (§302) : `mv-harnais-subset` — la courbe des sucres étiquetait sa date estimée « ≈ 13/10 », et U+2248 n'est pas dans
+> le subset des polices. Remplacé par « vers le 13/10 ». Baseline du subset regravée à la baisse (272 → 271, `pilotage.js` 28 → 27), clé par clé. Aucun
+> bump : `cuvier.js` seul. ⚠️ Leçon : le rouge ÉTAIT dans mes journaux ; la chaîne jouée par tranches n'allait jamais jusqu'au résumé du lanceur, et un
+> relevé maison terminé par `head -20` l'a coupé. La chaîne se joue jusqu'au bout — en arrière-plan s'il le faut — et SON résumé fait foi (§6b).
+
 > Dernière consolidation : **9 octobre 2026 (GF-1)** — ★★ **LES SUCRES AU LABO PRENNENT LE RELAIS DE LA DENSITÉ** (§302). Lot 33, base `974a495`.
 > Demande de Nico (maquette v1 publiée, puis « go ») : en fin de FA, l'analyse labo glucose + fructose (g/L) se note sur le relevé du Cuvier, trace sa
 > courbe sous la densité et dit où en est la cuve — en route vers le sec (date dès 3 analyses), ça stagne, ça remonte, sèche au labo (≤ 0,2 g/L). Nico :

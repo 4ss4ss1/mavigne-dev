@@ -1,0 +1,21 @@
+{
+  "lot": "GF-3",
+  "section": "§304",
+  "base": "9caff4166287c0797979aa138c8cff948a2708f9",
+  "inclut": [
+    "GF-2"
+  ],
+  "date": "2026-10-09",
+  "fichiers": {
+    ".mv-base": "9a0f727dd9cc02b89fb465ea12c98d31529e0b0e8e062462450ef52ad7c7038f",
+    "CLAUDE.md": "52cbffa4d70e5b6d1785646dbc5b92cb9e0a6f44d9b75089178227146599f0e2",
+    "docs/claude/INDEX.md": "c0fe66b8cbe20efbb6ed4a6a423c6658991b79d45868af6518fded90b83345f2",
+    "docs/claude/chantiers-280-329.md": "3b86cca33a539e809e6f9eb67e41aa55fc061b545eb63a0e5b0a4e0bf9bd6d19",
+    "docs/claude/journal.md": "5e6ced362295b188b6d7203188ea20767a5b1f3ceb9730d2ddf11ee7a9c260ab",
+    "index.html": "b4485ad76e8d08f307b8b3b60ad6e27773e62c615896417a9c45c5014479f2c2",
+    "public/sw.js": "316049f0aaedf00a59b961fd13168ebd35c2b684e1220ec7372f2519236d9125",
+    "scripts/harnais-claude-md.mjs": "bbf38db458b99c2cecd4a5bdae89ea371e88c639ca9cd4252cb29c65211f889b",
+    "scripts/subset-baseline.json": "4cbc47afe2c22b742355ee38b4689f2c2489e277a26d7767aee3da32f736008c",
+    "src/cuvier.js": "73a32e23b06f07081a60e0ebb4e380729a0a53b40794bcb66b2caff948b4e4cf"
+  }
+}

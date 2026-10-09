@@ -3,11 +3,12 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **9 octobre 2026 (GF-2)** — ★ **LE « ≈ » QUE LES POLICES NE SAVENT PAS DESSINER** (§303). Lot 34, base `9caff41`.
-> La CI de Nico a rougi sur GF-1 (§302) : `mv-harnais-subset` — la courbe des sucres étiquetait sa date estimée « ≈ 13/10 », et U+2248 n'est pas dans
-> le subset des polices. Remplacé par « vers le 13/10 ». Baseline du subset regravée à la baisse (272 → 271, `pilotage.js` 28 → 27), clé par clé. Aucun
-> bump : `cuvier.js` seul. ⚠️ Leçon : le rouge ÉTAIT dans mes journaux ; la chaîne jouée par tranches n'allait jamais jusqu'au résumé du lanceur, et un
-> relevé maison terminé par `head -20` l'a coupé. La chaîne se joue jusqu'au bout — en arrière-plan s'il le faut — et SON résumé fait foi (§6b).
+> Dernière consolidation : **9 octobre 2026 (GF-3)** — ★ **DEUX LIGNES D'AIDE QUI CHEVAUCHAIENT LEUR CHAMP** (§304). Lot 35, base `9caff41` — ce zip contient aussi GF-2.
+> Capture de Nico : sous « Sucres au labo », la ligne d'aide mordait sur le champ. Mesuré sous Chromium sur le VRAI formulaire (index.html + styles.css) :
+> elle commençait 6 px DANS le champ — `margin-top:-6px`, recopié de la ligne de la densité, qui chevauchait déjà la sienne : `.fi` n'a pas de marge basse.
+> Les deux passent à `margin-top:6px` (écart mesuré : 6 px). **SW 9.51 → 9.52**, APP inchangé (8.73), rien à annoncer.
+> ⚠️ Leçon : la maquette portait `6px` écrit à la main ; l'intégration a recopié la ligne voisine. Le rendu d'une maquette ne prouve rien sur l'écran intégré :
+> regarder la feuille intégrée elle-même avant de livrer — c'est la seule chose qui voit un chevauchement (§24 : aucun harnais ne lit une mise en page).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER

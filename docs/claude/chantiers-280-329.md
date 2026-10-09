@@ -694,3 +694,21 @@ maison des rouges est un compteur maison — exactement ce que §25 n°12 interd
 ### 303c. Mesuré
 `mv-harnais-subset` vert après regravure (271 ≤ 271), contre-épreuve verte ; `mv-harnais-gf` 41 vertes. Chaîne complète jouée d'une traite
 (`TZ=Europe/Paris`), résumé du lanceur : **345 commandes, 0 rouge (codes retour relevés un à un)**.
+
+## 304. ★ GF-3 — DEUX LIGNES D'AIDE QUI CHEVAUCHAIENT LEUR CHAMP (09/10 — `index.html` · `public/sw.js` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-280-329.md` · `docs/claude/INDEX.md` · `scripts/harnais-claude-md.mjs` · `lots/GF-3.json` (inclut GF-2, non poussé) · **SW 9.51 → 9.52**, APP inchangé, base `9caff41`)
+
+### 304a. Le défaut, mesuré avant d'être corrigé
+Capture de Nico (09/10, 21 h 35) : sous « Sucres au labo (g/L) », la première ligne de l'aide passait sous le champ. Reproduit sous Chromium sur le
+VRAI formulaire — le bloc `#ovVendMesure` d'`index.html`, `src/styles.css`, les polices de `@fontsource` — en mesurant les boîtes : l'aide
+commençait **6 px dans le champ** (`top` de l'aide − `bottom` du champ = −6). Cause : `margin-top:-6px`, recopié de la ligne d'aide de la densité.
+Celle-ci chevauchait déjà son champ de 6 px : la règle `.fi` n'a aucune marge basse (`getComputedStyle` : 0 px), le −6 px suppose une marge qui
+n'existe pas. Une seule ligne, elle se voyait moins ; la nôtre, sur deux lignes, s'est vue. Les deux seules occurrences d'`index.html` passent à
+`margin-top:6px` : écart mesuré **6 px** sous la densité et sous les sucres (14 px sous la température, inchangé).
+
+### 304b. Pourquoi la maquette ne l'a pas montré
+La maquette de GF-1 portait sa propre ligne d'aide, écrite à la main avec `margin-top:6px` ; l'intégration a recopié la ligne voisine
+d'`index.html`. Ce que la maquette prouvait (la feuille de style, les fonctions) ne couvrait pas cette ligne-là. ★ **Après tout lot qui touche un
+écran, rendre l'écran INTÉGRÉ et le regarder** — pas la maquette : la mise en page est la seule chose qu'aucun harnais ne lit (§24).
+
+### 304c. Mesuré
+Chaîne complète rejouée commande par commande (`TZ=Europe/Paris`), codes retour relevés un à un : **345 commandes, 0 rouge — la contre-épreuve lente de mv-harnais-recup rejouée seule (212 s, 90 défauts détectés)**. Rendu de la feuille regardé.
