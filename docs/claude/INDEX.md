@@ -349,3 +349,4 @@
 | 300 | 300. ★★ CADRE-1 — CASES ET FENÊTRES DANS LEUR CADRE, BARRE SOUS LES FENÊTRES, « LES GENS » SANS GEL (09/10 … | `docs/claude/chantiers-280-329.md` |
 | 301 | 301. ★★ FORME-1 — LE DOMAINE EN DIRECT AUX FORMES RÉELLES, COMPACT, AVEC LOUPE ; LA FORME EN HAUT DES FICHE… | `docs/claude/chantiers-280-329.md` |
 | 302 | 302. ★★ GF-1 — LES SUCRES AU LABO PRENNENT LE RELAIS DE LA DENSITÉ (09/10 — `src/cuvier.js` · `src/cave.js`… | `docs/claude/chantiers-280-329.md` |
+| 303 | 303. ★ GF-2 — LE « ≈ » QUE LES POLICES NE SAVENT PAS DESSINER (09/10 — `src/cuvier.js` · `scripts/subset-ba… | `docs/claude/chantiers-280-329.md` |

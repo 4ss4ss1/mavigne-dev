@@ -8635,10 +8635,11 @@ function _vendGfSvg(cu, w){
       +'" stroke="'+c.col.attention+'" stroke-width="'+(c.trait.mesure+0.5)+'" stroke-linecap="round"/>';
   }
   if(p.etat==='projete'){
+    /* ⚠ GF-2 : « vers le », plus « ≈ » — U+2248 n'est pas dans le subset des polices (mv-harnais-subset). */
     var xa=X(dN), ya=Y(p.gf), xb=X(p.date);
     g+='<line x1="'+xa.toFixed(1)+'" y1="'+ya.toFixed(1)+'" x2="'+xb.toFixed(1)+'" y2="'+ys.toFixed(1)+'" stroke="'+c.col.prevu+'" stroke-width="'+c.trait.prevu+'" stroke-dasharray="3 4" stroke-linecap="round"/>'
       +'<circle cx="'+xb.toFixed(1)+'" cy="'+ys.toFixed(1)+'" r="4" fill="var(--bg-app,#F2EFE7)" stroke="'+c.col.prevu+'" stroke-width="1.6"/>'
-      +'<text x="'+xb.toFixed(1)+'" y="'+(ys-10).toFixed(1)+'" text-anchor="'+(xb>W-c.padR-34?'end':'middle')+'" font-size="'+c.txt.mini+'" font-weight="700" fill="'+c.col.prevu+'">\u2248 '+_vendFrDate(p.date)+'</text>';
+      +'<text x="'+xb.toFixed(1)+'" y="'+(ys-10).toFixed(1)+'" text-anchor="'+(xb>W-c.padR-44?'end':'middle')+'" font-size="'+c.txt.mini+'" font-weight="700" fill="'+c.col.prevu+'">vers le '+_vendFrDate(p.date)+'</text>';
   }
   m.forEach(function(x,k){
     var cx=X(x.date), cy=Y(x.val), der=(k===m.length-1);

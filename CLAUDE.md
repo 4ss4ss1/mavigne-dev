@@ -3,13 +3,11 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **9 octobre 2026 (GF-1)** — ★★ **LES SUCRES AU LABO PRENNENT LE RELAIS DE LA DENSITÉ** (§302). Lot 33, base `974a495`.
-> Demande de Nico (maquette v1 publiée, puis « go ») : en fin de FA, l'analyse labo glucose + fructose (g/L) se note sur le relevé du Cuvier, trace sa
-> courbe sous la densité et dit où en est la cuve — en route vers le sec (date dès 3 analyses), ça stagne, ça remonte, sèche au labo (≤ 0,2 g/L). Nico :
-> « 2 g/L est un ancien seuil ; le vrai seuil est 0,2 » → le repère de densité suit (−0,8 point). En vérifiant, TROIS défauts : (1) une cuve décuvée
-> « finira au chai » ne pouvait JAMAIS être déclarée finie → « Déclarer la FA finie » ; (2) la ligne « Fermentation à finir » du Chai se coupait en colonnes
-> (§24, flex) ; (3) corriger un relevé de la tournée effaçait `qui`/`tour`. **APP 8.72 → 8.73, SW 9.50 → 9.51.**
-> ⚠️ Leçon : le tirage au hasard de la Cave écrivait ses relevés sous `mesures`, l'appli lit `mesures_fa` — il n'en avait jamais testé un seul. Un tirage se vérifie sur la CLÉ qu'il nourrit.
+> Dernière consolidation : **9 octobre 2026 (GF-2)** — ★ **LE « ≈ » QUE LES POLICES NE SAVENT PAS DESSINER** (§303). Lot 34, base `9caff41`.
+> La CI de Nico a rougi sur GF-1 (§302) : `mv-harnais-subset` — la courbe des sucres étiquetait sa date estimée « ≈ 13/10 », et U+2248 n'est pas dans
+> le subset des polices. Remplacé par « vers le 13/10 ». Baseline du subset regravée à la baisse (272 → 271, `pilotage.js` 28 → 27), clé par clé. Aucun
+> bump : `cuvier.js` seul. ⚠️ Leçon : le rouge ÉTAIT dans mes journaux ; la chaîne jouée par tranches n'allait jamais jusqu'au résumé du lanceur, et un
+> relevé maison terminé par `head -20` l'a coupé. La chaîne se joue jusqu'au bout — en arrière-plan s'il le faut — et SON résumé fait foi (§6b).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -828,6 +826,10 @@ npm run build && firebase deploy
 la ligne suivante. **Rien dans `package.json`, rien dans `ci.yml`** : `check` = `node scripts/mv-lanceur.mjs`, `prebuild` =
 `npm run check`, la CI joue le lanceur `--continuer`. `mv-harnais-portes` rougit si une seconde liste revient. Reprendre après
 un rouge : `node scripts/mv-lanceur.mjs --depuis <script>` ; un groupe seul : `--groupe <id>` ; voir la liste : `--liste`.
+
+★★ **GF-2 (§303) — LA CHAÎNE SE JOUE JUSQU'AU BOUT, ET SON RÉSUMÉ FAIT FOI.** Elle dépasse le temps d'un appel côté Claude : la lancer en
+arrière-plan (`nohup env TZ=Europe/Paris node scripts/mv-lanceur.mjs --continuer > /tmp/chaine.log 2>&1 &`) et lire sa dernière ligne. Le 09/10,
+trois tranches relues par un script maison (`… | sort -u | head -20`) ont caché un KO de `mv-harnais-subset` : GF-1 est parti « vert », la CI a rougi.
 
 ⚠️ **`smoke.mjs` sert `dist/`** → il teste le **dernier build**, pas les sources.
 

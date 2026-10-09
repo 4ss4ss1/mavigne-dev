@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **9 octobre 2026 (GF-1)** — ★★ **LES SUCRES AU LABO PRENNENT LE RELAIS DE LA DENSITÉ** (§302). Lot 33, base `974a495`.
+> Demande de Nico (maquette v1 publiée, puis « go ») : en fin de FA, l'analyse labo glucose + fructose (g/L) se note sur le relevé du Cuvier, trace sa
+> courbe sous la densité et dit où en est la cuve — en route vers le sec (date dès 3 analyses), ça stagne, ça remonte, sèche au labo (≤ 0,2 g/L). Nico :
+> « 2 g/L est un ancien seuil ; le vrai seuil est 0,2 » → le repère de densité suit (−0,8 point). En vérifiant, TROIS défauts : (1) une cuve décuvée
+> « finira au chai » ne pouvait JAMAIS être déclarée finie → « Déclarer la FA finie » ; (2) la ligne « Fermentation à finir » du Chai se coupait en colonnes
+> (§24, flex) ; (3) corriger un relevé de la tournée effaçait `qui`/`tour`. **APP 8.72 → 8.73, SW 9.50 → 9.51.**
+> ⚠️ Leçon : le tirage au hasard de la Cave écrivait ses relevés sous `mesures`, l'appli lit `mesures_fa` — il n'en avait jamais testé un seul. Un tirage se vérifie sur la CLÉ qu'il nourrit.
+
 > Dernière consolidation : **9 octobre 2026 (FORME-1)** — ★★ **LE DOMAINE EN DIRECT AUX FORMES RÉELLES, ET LE TOUCHER QUI N'OUVRAIT RIEN** (§301). Lot 32, base `53a0530`.
 > Demande de Nico (maquette v1, puis v2 « plus compacte » validée, puis « go ») : chaque parcelle du plan à la forme de son contour, à la même échelle, compact
 > (394 px de haut au lieu de 801 sur 37 parcelles), loupe au survol, fiche au toucher avec la forme en haut. En vérifiant, TROIS défauts : (1) la commune, rangée

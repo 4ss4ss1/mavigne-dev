@@ -1,0 +1,17 @@
+{
+  "lot": "GF-2",
+  "section": "§303",
+  "base": "9caff4166287c0797979aa138c8cff948a2708f9",
+  "inclut": [],
+  "date": "2026-10-09",
+  "fichiers": {
+    ".mv-base": "9a0f727dd9cc02b89fb465ea12c98d31529e0b0e8e062462450ef52ad7c7038f",
+    "CLAUDE.md": "53118c600554c843b66f5dd709036ac813cf54c4aa89b4fc94fc365887ff4624",
+    "docs/claude/INDEX.md": "bb70bef88bd5be08c75d8650b59a89f43c04d57c73a9a94485e3c3e3e1b37252",
+    "docs/claude/chantiers-280-329.md": "b8417b5bedb311c3a15040e079eb4126a75cd79800d1c98018efc861c79b244a",
+    "docs/claude/journal.md": "0d445c2a0ac68043351cd7532cc9bbe543c256e55dcd92e7afc78ca4600c8f6f",
+    "scripts/harnais-claude-md.mjs": "a5a1a8425b4c73267474a2263443afcad4d6708f1e7a99c92121d7eedb2df91b",
+    "scripts/subset-baseline.json": "4cbc47afe2c22b742355ee38b4689f2c2489e277a26d7767aee3da32f736008c",
+    "src/cuvier.js": "73a32e23b06f07081a60e0ebb4e380729a0a53b40794bcb66b2caff948b4e4cf"
+  }
+}

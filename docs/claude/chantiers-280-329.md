@@ -675,3 +675,22 @@ ordinateur) ; **l'appli construite, non** : `npm run build`, `test:smoke`, `test
 
 ### 302e. Ouvert
 Voir §28 (GF-1).
+
+## 303. ★ GF-2 — LE « ≈ » QUE LES POLICES NE SAVENT PAS DESSINER (09/10 — `src/cuvier.js` · `scripts/subset-baseline.json` (regravée à la baisse) · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-280-329.md` · `docs/claude/INDEX.md` · `scripts/harnais-claude-md.mjs` · `.mv-base` · `lots/GF-2.json` · **aucun bump** : module JS seul, base `9caff41`)
+
+### 303a. Le rouge
+La CI de Nico sur `9caff41` (GF-1 poussé) : `mv-harnais-subset` en code 1 — « Aucun fichier ne remonte (hors subset) : src/cuvier.js 10→11 ».
+La courbe des sucres étiquetait la date estimée « ≈ 13/10 » ; U+2248 n'est pas dans le subset de Cormorant Garamond et d'Outfit (`/fonts/fonts.css`) :
+le signe serait sorti dans une police de repli, au milieu du graphe. Remplacé par « vers le 13/10 » — le mot de la phrase sous la courbe — et le seuil
+de bascule de l'ancre (`end` près du bord droit) porté de 34 à 44 px pour la longueur du libellé. Le total hors subset passe de 272 à 271 : la baseline
+est regravée APRÈS vérification clé par clé — deux baisses (`pilotage.js` 28 → 27, déjà acquise avant ce lot ; le total), aucune hausse.
+
+### 303b. Pourquoi GF-1 a été livré « vert »
+Le rouge était dans mes journaux (`[60/345] node scripts/mv-harnais-subset.mjs` … `1 ROUGE(S) sur 8`). La chaîne avait été jouée par tranches de
+295 s, aucune n'allait jusqu'au résumé du lanceur, et le relevé des rouges passait par un script maison terminé par `sort -u | head -20` : la ligne
+« 60 … » triait après « 144 … » et tombait hors des vingt. ★★ **Règle (au §6b) : la chaîne se joue jusqu'au bout et SON résumé fait foi.** Un relevé
+maison des rouges est un compteur maison — exactement ce que §25 n°12 interdit déjà pour le preflight.
+
+### 303c. Mesuré
+`mv-harnais-subset` vert après regravure (271 ≤ 271), contre-épreuve verte ; `mv-harnais-gf` 41 vertes. Chaîne complète jouée d'une traite
+(`TZ=Europe/Paris`), résumé du lanceur : **345 commandes, 0 rouge (codes retour relevés un à un)**.
