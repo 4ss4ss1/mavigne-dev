@@ -34,7 +34,7 @@ function modele(S) {
       ? { mode: 'dates', taches: ['Taille'], items: [], dates: { Taille: { debut: iso(-40), fin: iso(47) } }, retard: {} }
       : { mode: 'aucune', taches: [], items: [], dates: {}, retard: {} } });
   vm.createContext(ctx); vm.runInContext(S.ck, ctx);
-  vm.runInContext(fnDe(S.pil, 'function _pilEtatEntree(e){') + fnDe(S.pil, 'function _pilPrioDuJour(d){') + fnDe(S.pil, 'function _pilCk2Modele(d, m){') + `
+  vm.runInContext(fnDe(S.pil, 'function _pilEtatEntree(e){') + "window._mvEnContratLe = window._mvEnContratLe || function(){ return true; };\n" + fnDe(S.pil, 'function _pilPhotoIso(dt){') + fnDe(S.pil, 'function _pilPrevuLe(m, dt){') + fnDe(S.pil, 'function _pilJourDomaine(dt){') + fnDe(S.pil, 'function _pilMembresActifs(ds){') +    /* AUJ-5 (§307) : le modèle lit le planning (jours travaillés) */ fnDe(S.pil, 'function _pilPrioDuJour(d){') + fnDe(S.pil, 'function _pilCk2Modele(d, m){') + `
     function _pilFmtD(s){ return String(s || ''); }
     function _rfCd(){ return { taskWindows: [{ nom:'Taille', ws:${ord(-40)}, we:${ord(48)} }, { nom:'Brulage', ws:${ord(-8)}, we:${ord(48)} }] }; }
     function _pilRetards(){ return {}; }
@@ -90,7 +90,7 @@ console.log('\n' + (ko ? 'ROUGE ' + ko : 'VERT') + ' \u2014 ' + res.length + ' a
 if (CONTRE) {
   const DEF = [
     ['les passages proposés comme tâches simples', 'pil', "var rows=(typeof window._ckPlanTaches==='function')?window._ckPlanTaches(d.data):(d.data||[]);", "var rows=(d.data||[]);"],
-    ['le bureau compté dans l\u2019effectif', 'pil', "return p&&!p.bureau; }).map(function(p){ return { nom:p.nom, absent:p.etat!=='present'", "return !!p; }).map(function(p){ return { nom:p.nom, absent:p.etat!=='present'"],
+    ['le bureau compté dans l\u2019effectif', 'pil', "return p&&!p.bureau&&p.etat!=='repos'; }).map(function(p){ return { nom:p.nom, absent:p.etat!=='present'", "return !!p&&p.etat!=='repos'; }).map(function(p){ return { nom:p.nom, absent:p.etat!=='present'"],   // AUJ-5 : + repos
     ['une équipe qui reste après sa validation', 'ck', "Object.keys(L.deb).forEach(function(n){ if(L.der[n] === 'cours') r[n] = L.deb[n]; });", "Object.keys(L.deb).forEach(function(n){ r[n] = L.deb[n]; });"],   // FORME-1 (§301) : l'équipe vient de _ckPlanDebuts
     ['des balises dans la décision du jour', 'pil', "traiter:TR?{ v:tx(TR.big), raison:tx(TR.rai), fen:", "traiter:TR?{ v:TR.big, raison:TR.rai, fen:"],
     ['PRO-1 : la tâche du moment lue par l\u2019appel nu (toujours « — »)', 'pil', "PP=_pilPrioDuJour(d).M;", "PP=window._mvTacheDuMoment();"],

@@ -1,0 +1,32 @@
+{
+  "lot": "AUJ-5",
+  "section": "§307",
+  "base": "cd064312ad48125c7a86adf3dc042dc5fef602f3",
+  "inclut": [],
+  "date": "2026-10-10",
+  "fichiers": {
+    ".mv-base": "1c08df4bacb23b803a4e7949cdd46b04ed25be37d8c96d62cbe10273b199dad4",
+    "CLAUDE.md": "8068ac1a94981cfaf0f54e4a02e1e3adf36990da8c2c6da64f49345d8ba21f29",
+    "docs/claude/INDEX.md": "77c80863c3255bbfa685068f7cfd4fc0bdbfad376183c5fa8ea5066d1bda7a1d",
+    "docs/claude/chantiers-280-329.md": "1f5240674c9917b99bc31d331b9956fdae7370049ff89ae5595f2be9ad673240",
+    "docs/claude/journal.md": "275d14a826a2160dccc7da6b1f5cbdf2f9b633fb99148f0990e002a972f77320",
+    "guide/11-pilotage.html": "cb4ddf1d7be49e5fa05eb2623e90372680464fa73d1fe1ca6243602a1c0a5f66",
+    "index.html": "3d22b822b32ef09165510a2a01785f35b36aae4c87beed3778dc8d3121406434",
+    "public/sw.js": "44f46faa336eaa597936409e3cb0091688f58884b60e7da1ea55a97b5d469781",
+    "scripts/harnais-claude-md.mjs": "5bebbab3f970f09a77762f32dfc39e82ff0a3fa3ba1d74044f8858af229f6eca",
+    "scripts/mv-harnais-auj1.mjs": "3a04c173f253c49af73f718352202f48f5146f1969c8b8a99d1b9761700230a1",
+    "scripts/mv-harnais-auj2.mjs": "1819c98f228f3c20044b521d6af085f71aa8494c6f267dc586ae42a76946e831",
+    "scripts/mv-harnais-forme1.mjs": "71f1141bed0aa8e40a52a4dd7ee02d49b26200bcf934da374aaee51743e370d5",
+    "scripts/mv-harnais-liste.mjs": "c53af5286c8171708995eb149964a025b1269d653a2b61cdb5af9a74d6c57c69",
+    "scripts/mv-harnais-pro1.mjs": "0f5db8e6abaf5999ca3698d5af475bea1bffcacf45689257325020d19fd6e305",
+    "scripts/mv-harnais-ref1.mjs": "ec2d9c4fae3c094ac6466e0e67128e277c1f2fe6cce49c96c92f388e7d1d6283",
+    "scripts/typo-baseline.json": "f90819e1a852c2348ace5c080eab04bbf3d116ffa4c46485d46a11ddd3736ece",
+    "src/app.js": "4724cfbcdfa3f09eb87227f3124a17305c26ef3298128d9725d92f3f0b510850",
+    "src/cockpit-vue.js": "6e0d263bf687ae8d7046d243cc8fa678c2333fcb14ef631b6e928822d6d893f2",
+    "src/cockpit.js": "ba9a8343e50b140be37e6c7ba0cd7719aef74938526123dcdc3ea76a24e9599d",
+    "src/pilotage.js": "6b18453cb1aa7728fa38152382ed2d49850414e9e956d2374e5186249b75e07a",
+    "src/styles.css": "2f49251fadba9116813b252d1dd89e832cf0dc6a8f54423b35593476396c4ad3",
+    "src/utils.js": "c0fe7f6cd0f04d3ba23bb13e4448249b538c81f9f126693bb5d3cf48a03ac68c",
+    "scripts/mv-harnais-auj5.mjs": "b563468915c3bf0e2e0639b7119e4e9acfca3b2b100ecf06c1e63045aeab250c"
+  }
+}

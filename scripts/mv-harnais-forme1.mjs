@@ -54,7 +54,7 @@ function modele(S, geoStub) {
       : { mode: 'aucune', taches: [], items: [], dates: {}, retard: {} } });
   if (geoStub) ctx._mvParcContours = n => (n === 'Les Crais 2' ? [rect(100, 20)] : []);
   vm.createContext(ctx); vm.runInContext(S.ck, ctx);
-  vm.runInContext(fnDe(S.pil, 'function _pilEtatEntree(e){') + fnDe(S.pil, 'function _pilPrioDuJour(d){') + fnDe(S.pil, 'function _pilCk2Modele(d, m){') + `
+  vm.runInContext(fnDe(S.pil, 'function _pilEtatEntree(e){') + "window._mvEnContratLe = window._mvEnContratLe || function(){ return true; };\n" + fnDe(S.pil, 'function _pilPhotoIso(dt){') + fnDe(S.pil, 'function _pilPrevuLe(m, dt){') + fnDe(S.pil, 'function _pilJourDomaine(dt){') + fnDe(S.pil, 'function _pilMembresActifs(ds){') +    /* AUJ-5 (§307) : le modèle lit le planning (jours travaillés) */ fnDe(S.pil, 'function _pilPrioDuJour(d){') + fnDe(S.pil, 'function _pilCk2Modele(d, m){') + `
     function _pilFmtD(s){ return String(s || ''); }
     function _rfCd(){ return { taskWindows: [{ nom:'Taille', ws:${ord(-40)}, we:${ord(48)} }] }; }
     function _pilRetards(){ return {}; }

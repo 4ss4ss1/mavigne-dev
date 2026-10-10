@@ -3,14 +3,12 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **10 octobre 2026 (ARRACH-8)** — ★★ **LA PARCELLE ARRACHÉE AVANT L'APPLI, ET LES DÉFINITIONS D'UNE ANNULATION** (§306). Lot 37, base `cbfcb8e`.
-> Capture de Nico : une parcelle arrachée en janvier 2026, déclarée après coup — la fiche de droite des Parcelles mettait « À faire » sept tâches que la fiche
-> complète disait désactivées. Reformulé, confirmé (« oui »). Vérifié dans le code, CINQ défauts : (1) `_pFicheHtml` ignorait `_mvExclu` et `_mvArrHors` ; (2)
-> `_pDernier` lisait tout le journal, annulations et autres périodes comprises ; (3) `_mvSelTravaillees` ignorait les annulations (arrachage annulé = « 0/1 à faire ») ;
-> (4) déclarer avec une date d'avant la période validait l'arrachage DANS la période active ; (5) `dateArrachage` n'était lue par aucune règle : des passages saisis
-> après l'arrachage prenaient des heures au temps réel (mesuré : 15 % d'une journée, ou toutes les heures en attente). **APP 8.73 → 8.74, SW 9.52 → 9.53.**
-> ⚠️ Leçon : l'appli avait déjà TROIS façons de dire qu'une validation est annulée (CIBLE-1, temps réel, prestations), aucune avec les étapes ET la période. Une
-> quatrième, privée, aurait reproduit le défaut ailleurs : une définition commune (`_mvAnnulee`), et un harnais qui vérifie que les autres s'accordent avec elle.
+> Dernière consolidation : **10 octobre 2026 (AUJ-5)** — ★★ **AUJOURD'HUI REMIS À LA MAQUETTE, LE PLANNING FAIT FOI** (§307). Lot 38, base `cd06431` (ARRACH-8 poussé après coup : lot rejoué dessus).
+> Demande de Nico (10/10, dictée + capture de la maquette) : ouverture par rôle, « toujours se baser sur le planning » (jamais un retour un samedi, fin d'arrêt
+> maladie), phrase du Budget, polices, disposition de la maquette avec « À savoir » à droite ET collant, carte qui disparaît, pastille qui clignote, météo en couleurs.
+> Mesuré à la base (Chromium, 1 440 px, barre ouverte) : DEUX colonnes (1 138 px de contenu < 1 150), « À savoir » à gauche ; la page du Pilotage défilait seule
+> (`overflow-y:auto`) et la colonne collante ne collait jamais. Trouvé en route : `d.saison` est le NOM de la période (« Les travaux de la saison » pour tous) ;
+> la charte DS-4 avait rendu la météo grise. **APP 8.74 → 8.75, SW 9.53 → 9.54.** `npm run site` → `npm run build` → `firebase deploy --only hosting`.
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1851,6 +1849,13 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ AUJ-5 — CE QUI RESTE OUVERT (§307, posé le 10/10)
+1. **La carte qui disparaît n'a pas été reproduite** (base, Chromium : cinq onglets aller-retour, un autre module, une mise à jour des données — le plan revenait). Le
+   correctif (le plan observe SA case, réessaie une case sans largeur) couvre un dessin fait pendant que la vue est cachée. S'il revient : la suite exacte de gestes.
+2. **À regarder chez Nico, sur son PC** : trois colonnes et « À savoir » collant à sa largeur réelle ; la vue Économie et la tuile Budget (le domaine reconstitué
+   n'avait pas de taux horaire) ; la pastille un jour travaillé (rendu un samedi : fixe, voulu) ; un jour chômé, l'Effectif montre le prochain jour travaillé.
+3. Les photos d'avant le 10/10 n'ont pas de période (`p`) : toutes restent affichées jusqu'à leur sortie des 60 jours.
+
 ### ⚠️ ARRACH-8 — CE QUI RESTE OUVERT (§306, posé le 10/10)
 
 1. **Chez Nico, une fois déployé** : redéclarer la parcelle arrachée en janvier (fiche complète → « Arracher cette parcelle… », sa vraie date). La case
@@ -2326,23 +2331,11 @@ suit décrit **le dépôt**, pas la production. **Détail, preuves et règles no
   → **Correctif type, une ligne par script** : `new URL('../<chemin>', import.meta.url)` au lieu du
   chemin absolu, et `os.tmpdir()` pour les fichiers de contre-épreuve. Détail en **§44c**.
 
-### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §40
-
-1. **Ordre non négociable** :
-   `firebase deploy --only functions:gtRenewTrial,functions:trialWatch` **puis**
-   `npm run build && firebase deploy`. Pas de rules, pas de backfill.
-2. **`test:smoke` et `test:e2e` côté Nico** — jamais joués côté Claude (CDN Playwright injoignable).
-3. ✅ **`trialExp` de le domaine de référence et le second domaine vérifié** (14/08, Nico) — la première nuit,
-   `trialWatch` traite ce qu'elle trouve ; un `trialExp` résiduel chez un converti aurait déclenché
-   une relance chez lui.
-
 ### ✅ L'OFFRE DE LANCEMENT EST BORNÉE (14/08)
 
 **Réglé.** 15 jours, reconductibles une fois, puis lecture seule — cf. §14b et §40. C'était le point
 bloquant du devis le prospect Gironde depuis trois sessions. **Reste à trancher : ce qui se passe après J30.**
 L'hypothèse en vigueur — la lecture seule dure — n'a jamais été confirmée explicitement.
-
-### NOUVEAU AU BACKLOG (issu de §40)
 
 ### ⚠️⚠️ NOUVEAU AU BACKLOG (issu de §43 — 15/08)
 

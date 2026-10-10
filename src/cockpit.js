@@ -96,10 +96,11 @@ window._ckResumeHtml = function(m, d, nVal){
 };
 
 // ── La charge restante : les photos du jour (PHOTO-1), aujourd'hui en direct, puis la projection ──
-window._ckChargeSerie = function(photos, d, auj){
+// AUJ-5 (§307) : `per` (la période active) écarte une photo prise sur une autre période — chaque photo porte la sienne (p).
+window._ckChargeSerie = function(photos, d, auj, per){
   var s = [];
   (photos || []).forEach(function(x){
-    if(x && typeof x.d === 'string' && typeof x.reste === 'number' && x.d !== auj) s.push({ iso: x.d, v: x.reste });
+    if(x && typeof x.d === 'string' && typeof x.reste === 'number' && x.d !== auj && !(per && x.p && x.p !== per)) s.push({ iso: x.d, v: x.reste });
   });
   var live = Number(d && d.totalReste);
   if(d && d.totalReste != null && isFinite(live)) s.push({ iso: auj, v: Math.round(live) });
@@ -165,9 +166,11 @@ window._ckChargeSvg = function(w, serie, m){
 //     est lu par _pilEtatEntree, le même que les présences. Le Pilotage est réservé à l'admin.
 //   • contrats : les fins dans les 30 jours (fin_contrat). • retards : fenêtre passée et tâche pas finie.
 //   • matériel et cave : les blocs d'avant, rangés DANS l'encart (aucun recalculé).
-var _CK_SV = { jours: 7, contrat: 30, pluie: 2, vent: 40 };
+var _CK_SV = { jours: 7, contrat: 30, pluie: 2, vent: 40, loin: 62 };   // loin (AUJ-5) : jusqu'où chercher la fin d'une absence
 function _ckJc(dt){ return dt.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }); }
 function _ckPlusJ(t, k){ return new Date(t.getFullYear(), t.getMonth(), t.getDate() + k); }
+// AUJ-5 : le point final, sans doubler celui d'une date abrégée (« mar. 13 oct. », jamais « oct.. »).
+function _ckPt(s){ return /\.$/.test(s) ? s : s + '.'; }
 // SECT-1 (§264) : SECTEUR PAR SECTEUR dès que le domaine en a plusieurs (relevé par commune de l'Accueil, _wxSecteurs) ;
 //   sinon les prévisions du domaine (METEO_HOURLY). Mêmes seuils. Si un brûlage n'est pas fini, on compte ses parcelles
 //   pas encore faites DANS les communes touchées (états du plan, AUJ-3) : « le brûlage attendra sur Brochon : 3 parcelles ».
@@ -217,28 +220,51 @@ window._ckSvMeteo = function(H, rows, now, secteurs, plan){
   });
   return out;
 };
-window._ckSvAbsences = function(membres, PE, etatDe, now){
+// ★★ AUJ-5 (§307) — LE PLANNING FAIT FOI. Un jour où la personne n'est pas prévue au planning (week-end, jour sans heures au
+//   modèle) ne coupe plus une absence et ne sert jamais de jour de retour : avant, un congé du lundi au vendredi annonçait
+//   « De retour le samedi », et un congé de deux semaines s'arrêtait au premier week-end. `travaille(m, date)` est la question
+//   posée au planning (pilotage.js/_pilPrevuLe) ; sans elle, le samedi et le dimanche sont chômés. Une absence qui dépasse la
+//   semaine est suivie jusqu'à sa fin (62 jours au plus). Un arrêt maladie dit sa fin (Nico, 10/10).
+window._ckSvAbsences = function(membres, PE, etatDe, now, travaille){
   if(!PE || typeof etatDe !== 'function') return [];
-  var t = now || new Date(), out = [];
+  var t = now || new Date(), out = [], loin = _CK_SV.loin || 62;
+  var prevu = typeof travaille === 'function' ? travaille : function(m, dt){ var w = dt.getDay(); return w !== 0 && w !== 6; };
   (membres || []).forEach(function(m){
     if(!m || m.statut === 'Inactif' || m.bureau || !m.nom) return;
-    var pl = null;
-    for(var k = 1; k <= _CK_SV.jours; k++){
+    var etatLe = function(k){
       var dt = _ckPlusJ(t, k), by = PE[m.nom] && PE[m.nom][dt.getFullYear()];
       var e = by && by[dt.getMonth()] && by[dt.getMonth()][dt.getDate()];
-      var et = e ? etatDe(e) : { etat: 'present', motif: '' };
-      if(et.etat !== 'present'){
+      return e ? etatDe(e) : null;
+    };
+    var pl = null, k;
+    for(k = 1; k <= loin; k++){
+      if(!pl && k > _CK_SV.jours) break;                 // n'annonce que ce qui commence dans la semaine
+      var et = etatLe(k);
+      if(et && et.etat !== 'present'){
         if(!pl) pl = { etat: et.etat, motif: et.motif || '', debut: k, fin: k };
-        else if(pl.etat === et.etat && pl.fin === k - 1) pl.fin = k;
+        else if(pl.etat === et.etat) pl.fin = k;
         else break;
-      } else if(pl) break;
+      } else if(pl){
+        if(!prevu(m, _ckPlusJ(t, k))) continue;          // un jour non travaillé ne coupe pas l'absence
+        break;
+      }
     }
     if(!pl) return;
+    var ret = null, suite = null;                         // le retour : le premier jour travaillé au planning, sans absence
+    for(k = pl.fin + 1; k <= pl.fin + loin; k++){
+      var e2 = etatLe(k);
+      if(e2 && e2.etat !== 'present'){ suite = e2.etat; break; }   // une autre absence enchaîne : on le dit, pas « pas de retour »
+      if(prevu(m, _ckPlusJ(t, k))){ ret = _ckPlusJ(t, k); break; }
+    }
     var d0 = _ckPlusJ(t, pl.debut), d1 = _ckPlusJ(t, pl.fin);
     var lib = pl.etat === 'cp' ? 'en congé' : pl.etat === 'recup' ? 'en récupération' : pl.etat === 'maladie' ? 'en arrêt' : 'absent';
+    // Le motif (admin seulement) ne cache plus la date : « Formation CACES. De retour le ven. 16 oct. »
+    var fin = ret ? _ckPt('De retour le ' + _ckJc(ret)) : (suite ? _ckPt('Puis ' + ({ cp: 'en congé', recup: 'en récupération', maladie: 'en arrêt maladie' }[suite] || 'absent'))
+      : 'Pas de retour prévu au planning d’ici deux mois.');
+    var sous = pl.etat === 'maladie' ? _ckPt('Fin d’arrêt le ' + _ckJc(d1)) : (pl.motif ? _ckPt(pl.motif) + ' ' : '') + fin;
     out.push({ cat: 'equipe', prio: 2, titre: m.nom + ' ' + lib,
       quand: pl.debut === pl.fin ? (pl.debut === 1 ? 'Demain' : _ckJc(d0)) : 'Du ' + _ckJc(d0) + ' au ' + _ckJc(d1),
-      sous: pl.motif || (pl.fin < _CK_SV.jours ? 'De retour le ' + _ckJc(_ckPlusJ(t, pl.fin + 1)) + '.' : 'Toute la semaine qui vient.'), action: 'planning' });
+      sous: sous, action: 'planning' });
   });
   return out;
 };

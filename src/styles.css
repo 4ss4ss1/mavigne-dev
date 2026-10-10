@@ -7559,3 +7559,44 @@ html .ck-agr-voile{ background:var(--voile); }
 }
 /* La tension par personne, rangée sous les présences dans L'équipe & le matériel */
 .pil-tension-det{margin-top:16px}
+
+/* ★★ AUJ-5 (§307) — LE COCKPIT REMIS À LA MAQUETTE (Nico, 10/10, capture de la maquette validée à l'appui).
+   · Trois colonnes dès 1 000 px de contenu (1 150 avant : avec la barre latérale ouverte, un écran de 1 440 px passait en
+     deux colonnes et « À savoir » partait à gauche). Entre 760 et 1 000 px : le reste à gauche, « À savoir » à droite.
+   · « À savoir » reste visible quand on descend dans la page (sa colonne colle en haut, sa liste défile seule).
+   · Une seule échelle de texte : la phrase de fin prévue redescend de 40 à 28 px, titres de carte et réponses de la
+     décision à 20 px.
+   · La météo garde ses couleurs : la charte du cockpit (DS-4) rend --info et --or neutres, la météo a ses jetons à elle,
+     tirés des couleurs de l'appli au niveau de la racine (un var() se résout là où il est déclaré).
+   · La pastille de présence clignote, les jours travaillés au planning ; fixe si les animations sont coupées.
+   · La charge restante : un point par mesure, plus de zone remplie. */
+:root{--meteo-soleil:var(--or);--meteo-pluie:var(--bleu);--meteo-nuage:var(--texte-doux)}
+[data-taille="large"] .ck-gt{grid-template-columns:minmax(260px,4.3fr) minmax(0,6.8fr) minmax(280px,3.7fr)}
+[data-taille="moyen"] .ck-gt{grid-template-columns:minmax(0,1fr) minmax(280px,340px)}
+[data-taille="moyen"] .ck-gt>#ck-t-b{display:none}
+/* La page du Pilotage défilait « pour rien » (overflow-y:auto, sans hauteur bornée) : elle devenait le conteneur de défilement
+   et la colonne collante ne collait jamais (mesuré le 10/10 : -155 px après 700 px de défilement). Le cockpit la rend à la page. */
+#page-pilotage:has(.ck2){overflow-x:clip;overflow-y:visible}
+@media (min-width:760px){
+  [data-taille="large"] #ck-t-c,[data-taille="moyen"] #ck-t-c{position:sticky;top:var(--ck-colle,16px)}
+  [data-taille="large"] #ck-savoir,[data-taille="moyen"] #ck-savoir{max-height:calc(100dvh - var(--ck-colle,16px) - 24px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+}
+.ck2 .ck-v-phrase{max-width:16em;font-size:var(--pt-xl,28px);line-height:1.15}
+@media (max-width:699px){.ck2 .ck-v-phrase{font-size:var(--pt-lg,24px)}}
+.ck2 .ck-titre-p,.ck2 .ck-dz-v,.ck2 .ck-ek-calme{font-size:var(--pt-md,20px)}
+.ck2 .ck-met-ic .m-sol{stroke:var(--meteo-soleil);fill:color-mix(in srgb,var(--meteo-soleil) 30%,transparent)}
+.ck2 .ck-met-ic .m-rai{stroke:var(--meteo-soleil)}
+.ck2 .ck-met-ic .m-nuage,.ck2 .ck-sv-ic .m-nuage{stroke:var(--meteo-nuage);fill:color-mix(in srgb,var(--meteo-nuage) 16%,transparent)}
+.ck2 .ck-met-ic .m-eau,.ck2 .ck-met-ic .m-gel,.ck2 .ck-sv-ic .m-eau{stroke:var(--meteo-pluie)}
+.ck2 .ck-met-j.alerte{background:color-mix(in srgb,var(--meteo-pluie) 10%,transparent)}
+.ck2 .ck-met-mm{color:var(--meteo-pluie)}
+.ck2 .ck-sv-meteo .ck-sv-ic{background:color-mix(in srgb,var(--meteo-pluie) 12%,transparent)}
+.ck2 .ck-calque .ck-eq::before{display:none}
+.ck2 .ck-calque.vif .ck-eq::before{display:block;inset:-5px;border:2px solid var(--ok);animation:ck-presence 1.6s ease-out infinite}
+@keyframes ck-presence{0%{opacity:.9;transform:scale(.8)}75%,100%{opacity:0;transform:scale(1.6)}}
+@media (prefers-reduced-motion:reduce){.ck2 .ck-calque.vif .ck-eq::before{display:none}}
+.ck2 .ck-c-mes circle{fill:var(--bg-card);stroke:var(--terre);stroke-width:2}
+/* La colonne de gauche des trois colonnes fait 260 à 300 px : la décision du jour y passe sur une colonne (ses quatre
+   réponses se coupaient en deux lignes). La règle suit la LARGEUR DE LA COLONNE, pas celle de l'écran. */
+.ck2 #ck-t-a{container-type:inline-size}
+@container (max-width:360px){.ck2 .ck-dz-g{grid-template-columns:minmax(0,1fr)}.ck2 .ck-dz:nth-child(odd){border-right:0}.ck2 .ck-dz:nth-child(-n+3){border-bottom:1px solid var(--ligne,#ECE6DA)}}

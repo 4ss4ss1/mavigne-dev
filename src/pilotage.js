@@ -236,6 +236,8 @@ var _PIL_TAB_ROUE = 'param';
 function _pilTabKey(){ return 'mavigne_pil_tab_'+_pilTenant(); }
 function _pilLoadTab(){ try{ var t=localStorage.getItem(_pilTabKey()); if(t===_PIL_TAB_ROUE) t='auj'; if(_PIL_TAB_MIGR[t]) t=_PIL_TAB_MIGR[t]; if(_PIL_VALID_TAB[t]) return t; }catch(e){} return 'auj'; }
 function _pilSaveTab(t){ try{ localStorage.setItem(_pilTabKey(), t); }catch(e){} }
+// AUJ-5 (§307) : à l'ouverture de l'appli (app.js/goHub), le Pilotage repart sur Aujourd'hui.
+window._pilOuvrirAujourdhui=function(){ _PIL_TAB='auj'; _pilSaveTab('auj'); };
 // ── LE seul chemin pour changer d'onglet. Le clic sur #pil-tabs le traverse,
 //   et un appelant exterieur aussi. Options :
 //     silencieux : ne remonte pas la page (rendre au visiteur l'onglet qu'il
@@ -337,6 +339,28 @@ function _pilEtatEntree(e){
   return { etat:etat, motif:motif };
 }
 window._pilEtatEntree=_pilEtatEntree;
+// ★★ AUJ-5 (§307) — LE PLANNING FAIT FOI (Nico, 10/10 : « il faut toujours se baser sur le planning »).
+//   Un jour où le planning ne prévoit pas quelqu'un (week-end, jour sans heures au modèle), il n'est ni présent ni absent :
+//   il est AU REPOS. Avant, un jour sans saisie valait « présent » — un samedi, l'Effectif annonçait toute l'équipe, et
+//   « À savoir » faisait revenir les absents un samedi. La question est posée au planning lui-même : _planPrevuPersRange
+//   (la grille du modèle, contrat compris) et _planWorkPersRange (la saisie du jour : un samedi travaillé compte).
+//   Sans planning chargé : du lundi au vendredi.
+function _pilPrevuLe(m, dt){
+  if(!m || !dt) return false;
+  var d0=new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()), w=d0.getDay();
+  if(typeof window._planPrevuPersRange!=='function' || typeof window._planWorkPersRange!=='function') return w!==0 && w!==6;
+  try{ return (Number(window._planPrevuPersRange(m, d0, d0))||0)>0 || (Number(window._planWorkPersRange(m, d0, d0))||0)>0; }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilPrevuLe'); return w!==0 && w!==6; }
+}
+window._pilPrevuLe=_pilPrevuLe;
+// Le domaine travaille-t-il ce jour-là ? Oui dès qu'une personne hors bureau, sous contrat, y est prévue au planning.
+function _pilJourDomaine(dt){
+  if(!dt) return false;
+  var L=_pilMembresActifs(_pilPhotoIso(dt)).filter(function(m){ return m && !m.bureau; });
+  if(!L.length){ var w=dt.getDay(); return w!==0 && w!==6; }
+  return L.some(function(m){ return _pilPrevuLe(m, dt); });
+}
+window._pilJourDomaine=_pilJourDomaine;
 function _pilData(){
   var ch = (typeof window.calcHeures==='function') ? window.calcHeures() : { data:[], totalReste:0, totalTotal:0 };
   var data = (ch && ch.data) || [];
@@ -413,6 +437,7 @@ function _pilData(){
     var _by = (PE[m.nom] && PE[m.nom][_yNum]) || null;
     var e = (_by && _by[_mIdx] && _by[_mIdx][_dNum]) || null;
     var _ee=_pilEtatEntree(e), etat=_ee.etat, motif=_ee.motif;   // AUJ-2 : une seule écriture de l'état du jour
+    if(!_pilPrevuLe(m,_now)){ etat='repos'; motif=''; }   // AUJ-5 (§307) : pas prévu au planning ce jour-là — ni présent, ni absent
     // \u2605\u2605\u2605 LE POIDS DE LA FICHE VOYAGE AVEC ELLE.
     //   Une equipe COLLECTIVE (m.collectif, m.effectif = 26) est UNE fiche et
     //   VINGT-SIX personnes. _headWeek et capEquipe le savent depuis le 11/08
@@ -434,8 +459,8 @@ function _pilData(){
   // de _pilMembresActifs, qui filtre sur _mvEnContratLe. Confondre les deux, c'est
   // soit annoncer \u00ab 28 pr\u00e9sents sur 4 \u00bb, soit repartir une equipe de 26 comme
   // une seule paire de bras.
-  var nVchamp = presences.filter(function(p){ return !p.bureau; }).length;
-  var nIndispoChamp = presences.filter(function(p){ return !p.bureau && p.etat!=='present'; }).length;
+  var nVchamp = presences.filter(function(p){ return !p.bureau && p.etat!=='repos'; }).length;   // AUJ-5 : les gens prévus ce jour-là
+  var nIndispoChamp = presences.filter(function(p){ return !p.bureau && p.etat!=='present' && p.etat!=='repos'; }).length;
   var presentFiches = Math.max(0, nVchamp - nIndispoChamp);
   var presentChamp = presences.reduce(function(a,p){
     return a + ((!p.bureau && p.etat==='present') ? (p.eff||1) : 0);
@@ -446,8 +471,10 @@ function _pilData(){
   return { data:data, active:active, done:done, totalReste:totalReste, totalTotal:totalTotal, hDone:hDone, gaugePct:gaugePct,
            saison:saison, surfTot:surfTot, nActives:nActives, membres:membres, refDate:_refDs, nFinis:nFinis,
            sessions:sessions, lastSess:lastSess, sessAdv:sessAdv, cuvees:cuvees, traits:traits, meteo:meteo, domaine:domaine,
-           tracs:tracs, nRepar:nRepar, gnr:gnr, ouAlerte:ouAlerte, presences:presences, nPresent:nPresent, nCp:nCp, nAbs:nAbs, nRecup:nRecup, nVchamp:nVchamp, presentChamp:presentChamp, presentFiches:presentFiches, nIndispoChamp:nIndispoChamp };
+           tracs:tracs, nRepar:nRepar, gnr:gnr, ouAlerte:ouAlerte, presences:presences, nPresent:nPresent, nCp:nCp, nAbs:nAbs, nRecup:nRecup, nVchamp:nVchamp, presentChamp:presentChamp, presentFiches:presentFiches, nIndispoChamp:nIndispoChamp,
+           jourTravaille:(nVchamp>0 || !presences.some(function(p){ return !p.bureau; })), nRepos:presences.filter(function(p){ return !p.bureau && p.etat==='repos'; }).length };
 }
+window._pilData=_pilData;   // AUJ-5 (§307) : lu par mv-harnais-auj5
 
 
 // ── Données du donut selon la métrique choisie ───────────────────────
@@ -997,8 +1024,8 @@ function _pilPanelPresences(d){
   //   tort au pic ou a la moyenne, qui portent sur d'autres fenetres.
   var _abs=list.length;
   return _pilTile('presences','#C9A84C','Présences du jour',
-    _pilStat((d.presentFiches!=null?d.presentFiches:(d.nPresent||0))+'/'+(d.nVchamp!=null?d.nVchamp:((d.membres||[]).length)),' présents',null),
-    'au champ, aujourd\u2019hui \u00b7 hors bureau'+(_abs?(' \u00b7 '+_abs+' absence'+(_abs>1?'s':'')+' déclarée'+(_abs>1?'s':'')):''),
+    (d.jourTravaille===false)?_pilStat('\u2014','',null):_pilStat((d.presentFiches!=null?d.presentFiches:(d.nPresent||0))+'/'+(d.nVchamp!=null?d.nVchamp:((d.membres||[]).length)),' présents',null),
+    (d.jourTravaille===false)?'pas de travail prévu aujourd\u2019hui au planning':'au champ, aujourd\u2019hui \u00b7 hors bureau'+(_abs?(' \u00b7 '+_abs+' absence'+(_abs>1?'s':'')+' déclarée'+(_abs>1?'s':'')):''),
     null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.presences');
 }
 function _pilPanelPhyto(d){
@@ -1073,7 +1100,7 @@ function _pilPhotoEcrire(d){
   if(!sa||!sp||sa.nom!==sp.nom) return false;   // une archive consultee ne photographie rien
   var auj=_pilPhotoIso(new Date()), L=_pilPhotoListe();
   if(L.some(function(x){ return x&&x.d===auj; })) return false;
-  var ph={d:auj, reste:Math.round(Number(d.totalReste)||0)};
+  var ph={d:auj, reste:Math.round(Number(d.totalReste)||0), p:String(sp.nom||'')};   // AUJ-5 (§307) : la période de la photo
   var E=_pecData();
   if(E&&E.configured){ ph.cons=Math.round((Number(E.cons)||0)*10)/10; ph.avc=Math.round((Number(E.avc)||0)*10)/10; }
   var N=L.filter(function(x){ return x&&typeof x.d==='string'&&x.d<auj; }).concat([ph]);
@@ -4357,7 +4384,7 @@ function _pilCkJours(){
 
 // ── Tuiles « décision du jour » ──
 function _pilCkPres(d){
-  var ind=(d.presences||[]).filter(function(p){ return !p.bureau && p.etat!=='present'; });
+  var ind=(d.presences||[]).filter(function(p){ return !p.bureau && p.etat!=='present' && p.etat!=='repos'; });   // AUJ-5
   var chips=ind.slice(0,4).map(function(p){
     var lab=p.etat==='cp'?'\u2600\uFE0F '+p.nom+' · CP':p.etat==='recup'?'\u21BA '+p.nom+' · récup':p.etat==='maladie'?'\uD83E\uDD12 '+p.nom:'\u2715 '+p.nom;
     var bg=p.etat==='cp'?'var(--orange-pale)':p.etat==='recup'?'rgba(123,109,184,.14)':'var(--rouge-pale)';
@@ -4368,7 +4395,7 @@ function _pilCkPres(d){
   //   sur 4 \u00bb nomme les quatre lignes de l'equipe. Y mettre l'effectif pondere
   //   donnerait \u00ab 28 pr\u00e9sents sur 4 \u00bb. Le nombre de PERSONNES est ajoute en
   //   dessous, sous son propre nom, quand une equipe collective les separe.
-  var tot=(d.presences||[]).filter(function(p){return !p.bureau;}).length;
+  var tot=(d.presences||[]).filter(function(p){return !p.bureau && p.etat!=='repos';}).length;
   var pc=(d.presentFiches!=null?d.presentFiches:(d.presentChamp||0));
   var pers=(d.presentChamp!=null?d.presentChamp:pc);
   // ALIGN-1 (§236) : quatre étages comme les trois autres tuiles. La bande dit QUI : les absents
@@ -5197,11 +5224,28 @@ function _pilCk2Modele(d, m){
   taches.forEach(function(t){ etats[t.id]=(typeof window._ckPlanEtats==='function')?window._ckPlanEtats(PARC, J, t.cle, t.debut, !!retards[t.cle]):{}; });
   // Présences du jour (les mêmes que la tuile « Présences ») et tension de chacun (moteur de la tuile « Tension »).
   var LIB={ cp:'en congé', recup:'en récupération', maladie:'en arrêt', absent:'absent' };
-  var gens=(d.presences||[]).filter(function(p){ return p&&!p.bureau; }).map(function(p){ return { nom:p.nom, absent:p.etat!=='present', motif:LIB[p.etat]||'' }; });
+  var gens=(d.presences||[]).filter(function(p){ return p&&!p.bureau&&p.etat!=='repos'; }).map(function(p){ return { nom:p.nom, absent:p.etat!=='present', motif:LIB[p.etat]||'' }; });
+  // ★★ AUJ-5 (§307) : un jour sans travail au planning (week-end, jour chômé), l'Effectif et les Présences montrent le
+  //   PROCHAIN jour travaillé, et le disent. Les jours travaillés se lisent au planning (_pilJourDomaine), gardés ici.
+  var SEMJ=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'], ouvC={};
+  var ouv=function(x){ var k=_pilPhotoIso(x); if(!(k in ouvC)) ouvC[k]=_pilJourDomaine(x); return ouvC[k]; };
+  var repos=(d.jourTravaille===false), jEff=null;
+  if(repos){
+    for(var kj=1; kj<=14 && !jEff; kj++){ var xj=new Date(t0.getFullYear(), t0.getMonth(), t0.getDate()+kj); if(ouv(xj)) jEff=xj; }
+    if(jEff){
+      var PEj=window.PLANNING_ENTRIES||{};
+      gens=_pilMembresActifs(_pilPhotoIso(jEff)).filter(function(mb){ return mb && !mb.bureau && _pilPrevuLe(mb, jEff); }).map(function(mb){
+        var by=PEj[mb.nom]&&PEj[mb.nom][jEff.getFullYear()], e=(by&&by[jEff.getMonth()]&&by[jEff.getMonth()][jEff.getDate()])||null, ee=_pilEtatEntree(e);
+        return { nom:mb.nom, absent:ee.etat!=='present', motif:LIB[ee.etat]||'' };
+      });
+    } else gens=[];
+  }
+  var jNom=jEff?SEMJ[jEff.getDay()]:'';
   var TS=null; try{ TS=_pilTensData(d); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#tens'); }
   ((TS&&TS.rows)||[]).forEach(function(r){ var g=gens.filter(function(x){ return x.nom===r.nom; })[0]; if(g&&r.p>0) g.tens=Math.round((r.f||0)/r.p*100); });
   var nPres=gens.filter(function(g){ return !g.absent; }).length, abs=gens.filter(function(g){ return g.absent; });
-  var absTxt=abs.length?(abs.slice(0,2).map(function(g){ return g.nom+' '+g.motif; }).join(', ')+(abs.length>2?' et '+(abs.length-2)+' autre'+(abs.length>3?'s':''):'')):'Toute l\u2019équipe est là';
+  var absListe=abs.length?(abs.slice(0,2).map(function(g){ return g.nom+' '+g.motif; }).join(', ')+(abs.length>2?' et '+(abs.length-2)+' autre'+(abs.length>3?'s':''):'')):'';
+  var absTxt=repos?(jEff?('Repos aujourd\u2019hui \u00b7 '+jNom+' : '+(absListe||'toute l\u2019équipe')):'Pas de travail prévu au planning ces deux semaines'):(absListe||'Toute l\u2019équipe est là');
   // Le fil : le journal du jour (fonctions de cockpit.js). Les équipes : plus bas (FORME-1, §301).
   var fil=(typeof window._ckFilDonnees==='function')?window._ckFilDonnees(J, auj):[];
   var qui=function(e){ var r=[]; [e.qui].concat(Array.isArray(e.membresEquipe)?e.membresEquipe:[]).forEach(function(n){ n=String(n||'').trim(); if(n&&r.indexOf(n)<0) r.push(n); }); return r; };
@@ -5224,7 +5268,7 @@ function _pilCk2Modele(d, m){
       equipes.push({ noms:q.join(' et ')||'Personne d\u2019indiqu\u00e9', ini:q.length?q.slice(0,2).map(function(c){ return c.charAt(0).toUpperCase(); }):['?'], tache:t.id, parcelle:n, depuis:String(e.date||auj) }); });
   });
   // La courbe : les photos du jour (PHOTO-1) et aujourd'hui en direct.
-  var ph=((typeof window._ckChargeSerie==='function')?window._ckChargeSerie(_pilPhotoListe(), d, auj):[]).map(function(x){ return { d:x.iso, reste:x.v }; });
+  var ph=((typeof window._ckChargeSerie==='function')?window._ckChargeSerie(_pilPhotoListe(), d, auj, (typeof _pilSaison==='function'&&_pilSaison()&&_pilSaison().nom)||''):[]).map(function(x){ return { d:x.iso, reste:x.v }; });
   var hT=d.totalTotal||0;
   // La météo des cinq jours (Accueil) : pictogramme, températures, cumul de pluie, brûlage possible.
   var MD=window.METEO_DAILY||null, MH=window.METEO_HOURLY||null, meteo=[];
@@ -5233,7 +5277,7 @@ function _pilCk2Modele(d, m){
   if(MD&&Array.isArray(MD.time)){
     MD.time.slice(0,5).forEach(function(iso,k){
       var mm=0; if(MH&&Array.isArray(MH.time)) MH.time.forEach(function(h,i){ if(String(h).slice(0,10)===iso) mm+=Number(MH.precip&&MH.precip[i])||0; });
-      mm=Math.round(mm); var dt=new Date(iso+'T12:00:00'), ic=ICW(MD.code&&MD.code[k]), we=dt.getDay()===0||dt.getDay()===6;
+      mm=Math.round(mm); var dt=new Date(iso+'T12:00:00'), ic=ICW(MD.code&&MD.code[k]), we=!ouv(dt);   // AUJ-5 : chômé selon le planning, plus le seul week-end
       meteo.push({ j:k===0?'Auj.':dt.toLocaleDateString('fr-FR',{weekday:'short'}).replace(/^./,function(c){ return c.toUpperCase(); }),
         ic:ic, tmax:Math.round(MD.tmax&&MD.tmax[k]), tmin:Math.round(MD.tmin&&MD.tmin[k]), mm:mm,
         txt:TXT[ic]+(mm?' : '+mm+'\u202fmm':''), brul:we?0:(mm>=2?.5:1) });
@@ -5244,7 +5288,7 @@ function _pilCk2Modele(d, m){
   var sv=[];
   try{
     sv=[].concat(window._ckSvMeteo(MH, d.data, t0, (typeof window._wxSecteurs==='function'?window._wxSecteurs():null), plan),
-      window._ckSvAbsences(window.MEMBRES, window.PLANNING_ENTRIES, _pilEtatEntree, t0),
+      window._ckSvAbsences(window.MEMBRES, window.PLANNING_ENTRIES, _pilEtatEntree, t0, _pilPrevuLe),
       window._ckSvContrats(window.MEMBRES, t0, _pilGainsProlong(d)), window._ckSvRetards(d.data, retards));
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#savoir'); }
   (d.tracs||[]).forEach(function(t){ if(t&&t.rep) sv.push({ cat:'materiel', prio:2, quand:'En réparation', titre:(t.nom||'Un tracteur')+' immobilisé', sous:(t.rep.motif||'Chez le réparateur.') }); });
@@ -5267,8 +5311,15 @@ function _pilCk2Modele(d, m){
   var sem=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'], dd=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate());
   var jeudi=new Date(dd); jeudi.setDate(dd.getDate()+3-((dd.getDay()+6)%7)); var s1=new Date(jeudi.getFullYear(),0,4);
   var nSem=1+Math.round(((jeudi-s1)/86400000-3+((s1.getDay()+6)%7))/7);
-  var sais=d.saison&&d.saison.nom?String(d.saison.nom):'';
+  var sais=(typeof d.saison==='string')?(d.saison==='\u2014'?'':d.saison):((d.saison&&d.saison.nom)?String(d.saison.nom):'');   // AUJ-5 : d.saison est le NOM de la période — « de la saison » s'affichait toujours
   var saisonDe=/hiver/i.test(sais)?'d\u2019hiver':/printemps/i.test(sais)?'de printemps':/(été|ete)\b/i.test(sais)?'d\u2019été':/automne|vendange/i.test(sais)?'d\u2019automne':'de la saison';
+  // AUJ-5 : les jours travaillés du planning, d'aujourd'hui jusqu'à l'objectif ou la fin prévue (120 jours au plus) —
+  //   le besoin d'heures par jour se compte sur ces jours-là, et la courbe dit « non travaillé » d'après eux.
+  var borneJ=new Date(t0.getFullYear(), t0.getMonth(), t0.getDate()+120);
+  var jusq=[(m&&m.obj instanceof Date)?m.obj:null, (m&&m.proj instanceof Date)?m.proj:null].filter(Boolean).reduce(function(a,b){ return b>a?b:a; }, new Date(t0.getFullYear(), t0.getMonth(), t0.getDate()+7));
+  if(jusq>borneJ) jusq=borneJ;
+  var OUVL=[], xo=new Date(t0.getFullYear(), t0.getMonth(), t0.getDate());
+  while(xo<=jusq){ if(ouv(xo)) OUVL.push(_pilPhotoIso(xo)); xo.setDate(xo.getDate()+1); }
   var diag=[]; try{ diag=_pilDiag().filter(function(x){ return x&&x.touche&&x.touche.indexOf('cfm')>=0; }); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#cfm'); }
   return {
     auj:auj, debut:(taches.map(function(t){ return t.debut; }).filter(Boolean).sort()[0])||(ph[0]&&ph[0].d)||auj,
@@ -5278,12 +5329,14 @@ function _pilCk2Modele(d, m){
     presTxt:nPres+' présent'+(nPres>1?'s':'')+(abs.length?', '+absTxt:''), absTxt:absTxt,
     confN:diag.length, confTxt:diag.length?tx(diag[0].t||diag[0].txt||'Un point à régler'):'Rien à régler',
     equipes:equipes, evts:evts, photos:ph, reste:d.totalReste||0, total:hT, hFait:d.hDone||0, hTotal:hT, pct:Number(d.gaugePct)||0,
-    capMoy:(m&&m.cadH)||0, besoin:(function(){ if(!(m&&m.obj)) return 0; var n=0, x=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()+1); while(x<=m.obj&&n<400){ if(x.getDay()%6) n++; x.setDate(x.getDate()+1); } return n?Math.round((d.totalReste||0)/n):0; })(),
+    capMoy:(m&&m.cadH)||0, besoin:(function(){ if(!(m&&m.obj)) return 0; var n=0, x=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()+1); while(x<=m.obj&&n<400){ if(ouv(x)) n++; x.setDate(x.getDate()+1); } return n?Math.round((d.totalReste||0)/n):0; })(),
     meteo:meteo, savoir:sv,
-    decision:{ pres:{ v:nPres+' sur '+gens.length, raison:absTxt },
+    decision:{ pres:{ v:(jEff?(jNom.charAt(0).toUpperCase()+jNom.slice(1)+' : '):'')+nPres+' sur '+gens.length,
+        raison:repos?(jEff?('Pas de travail aujourd\u2019hui au planning. '+(absListe?absListe+'.':'Toute l\u2019équipe sera là.')):'Pas de travail prévu au planning ces deux semaines.'):absTxt },
       traiter:TR?{ v:tx(TR.big), raison:tx(TR.rai), fen:TR.fen||null, risque:!!TR.risque, prochaine:TR.prochaine||'' }:{ v:'—', raison:'' },
       prio:{ v:pMode==='choix'?'À choisir':(pT?pT.nom:(pNom?nomT(pNom):'—')), raison:pRaison, mode:pMode, choix:pMode==='choix'?PP.taches.map(nomT):null },
       tension:{ v:tensV||'—', raison:tensV?'Travail effectif face au prévu, sur 14 jours.':'' } },
+    jourTravaille:!repos, jourEff:jEff?_pilPhotoIso(jEff):null, ouvres:OUVL, ouvresDe:_pilPhotoIso(t0), ouvresA:_pilPhotoIso(jusq),
     prio:pT?pT.id:null, admin:admin, sparkTrav:ph.slice(-14).map(function(x){ return hT?Math.round((hT-x.reste)/hT*1000)/10:0; }), eco:null
   };
 }

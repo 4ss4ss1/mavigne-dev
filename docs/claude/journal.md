@@ -8,6 +8,15 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **10 octobre 2026 (ARRACH-8)** — ★★ **LA PARCELLE ARRACHÉE AVANT L'APPLI, ET LES DÉFINITIONS D'UNE ANNULATION** (§306). Lot 37, base `cbfcb8e`.
+> Capture de Nico : une parcelle arrachée en janvier 2026, déclarée après coup — la fiche de droite des Parcelles mettait « À faire » sept tâches que la fiche
+> complète disait désactivées. Reformulé, confirmé (« oui »). Vérifié dans le code, CINQ défauts : (1) `_pFicheHtml` ignorait `_mvExclu` et `_mvArrHors` ; (2)
+> `_pDernier` lisait tout le journal, annulations et autres périodes comprises ; (3) `_mvSelTravaillees` ignorait les annulations (arrachage annulé = « 0/1 à faire ») ;
+> (4) déclarer avec une date d'avant la période validait l'arrachage DANS la période active ; (5) `dateArrachage` n'était lue par aucune règle : des passages saisis
+> après l'arrachage prenaient des heures au temps réel (mesuré : 15 % d'une journée, ou toutes les heures en attente). **APP 8.73 → 8.74, SW 9.52 → 9.53.**
+> ⚠️ Leçon : l'appli avait déjà TROIS façons de dire qu'une validation est annulée (CIBLE-1, temps réel, prestations), aucune avec les étapes ET la période. Une
+> quatrième, privée, aurait reproduit le défaut ailleurs : une définition commune (`_mvAnnulee`), et un harnais qui vérifie que les autres s'accordent avec elle.
+
 > Dernière consolidation : **9 octobre 2026 (BUILD-1)** — ★★ **LE BUILD NE JOUE PLUS LES CONTRÔLES UN PAR UN** (§305). Lot 36, base `53a99e6`.
 > Demande de Nico : « le déploiement est vraiment long ». Mesuré : 345 commandes = 612 s jouées une par une ; 10 font 82 % du temps, les contre-épreuves 67 %.
 > Le lanceur les joue désormais à plusieurs (autant que de cœurs), sorties dans l'ordre de la liste ; les 9 harnais qui écrivent dans le dépôt passent SEULS,
@@ -2121,6 +2130,20 @@ changelog du dépôt, et l'accompagnement les a rattrapés en v6.44.
 > Tension par personne → L'équipe & le matériel ; protection restante → Conformité. Harnais `mv-harnais-pro1` (27 + 13 contre-épreuves) ;
 > `prio`, `gnr-mesure`, `ref1` remis au vrai contrat. Base `1aeb055`. **APP 8.40 → 8.41, SW 9.18 → 9.19.** Précédent : COQ-1 + PAL-1 (§268).
 > ⚠️ Les lots MOUV-1 → COQ-1 (§259 à §268, 07/10) n'étaient pas montés dans cet en-tête : ils sont aux chantiers (`docs/claude/chantiers-230-279.md`).
+
+## Descendu du §28 de CLAUDE.md le 10/10/2026 (AUJ-5, plafond du cœur)
+
+> Historique sans consigne : le chantier §40 est en ligne depuis la mi-août ; ses entrées « à déployer » étaient périmées (règle du §28, entrée 0a).
+
+### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §40
+
+1. **Ordre non négociable** :
+   `firebase deploy --only functions:gtRenewTrial,functions:trialWatch` **puis**
+   `npm run build && firebase deploy`. Pas de rules, pas de backfill.
+2. **`test:smoke` et `test:e2e` côté Nico** — jamais joués côté Claude (CDN Playwright injoignable).
+3. ✅ **`trialExp` de le domaine de référence et le second domaine vérifié** (14/08, Nico) — la première nuit,
+   `trialWatch` traite ce qu'elle trouve ; un `trialExp` résiduel chez un converti aurait déclenché
+   une relance chez lui.
 
 ## Descendu du §28 de CLAUDE.md le 09/10/2026 (CADRE-1, plafond du cœur)
 

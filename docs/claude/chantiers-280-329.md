@@ -845,3 +845,61 @@ Et en cherchant où lire une annulation : TROIS définitions existaient déjà �
 
 §28 « ARRACH-8 — CE QUI RESTE OUVERT » : le geste chez Nico, l'arrachage du 25/09 resté dans sa période, les trois définitions à faire converger, le « 0/0 ».
 ⚠️ Leçon : avant d'écrire une règle sur le journal, chercher comment l'appli la lit DÉJÀ — trois copies existaient ; une quatrième aurait reproduit le défaut.
+
+## 307. ★★ AUJ-5 — AUJOURD'HUI REMIS À LA MAQUETTE ; LE PLANNING FAIT FOI ; LE PILOTAGE S'OUVRE SUR AUJOURD'HUI (10/10 — `src/pilotage.js` · `src/cockpit.js` · `src/cockpit-vue.js` · `src/app.js` (`goHub`) · `src/styles.css` (feuille AUJ-5) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE, MV_INFO) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-auj5.mjs` (neuf) · `scripts/mv-harnais-auj1.mjs` · `scripts/mv-harnais-auj2.mjs` · `scripts/mv-harnais-forme1.mjs` · `scripts/mv-harnais-pro1.mjs` · `scripts/mv-harnais-ref1.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `scripts/typo-baseline.json` · `.mv-base` · `lots/AUJ-5.json` · **APP 8.74 → 8.75, SW 9.53 → 9.54**, base `cd06431`)
+
+### 307a. La demande
+Nico (10/10, dictée + capture de la maquette validée) : à l'ouverture, admin → Pilotage › Aujourd'hui, ouvrier et tractoriste → Accueil, ou Parcelles avec la
+tâche prioritaire ; « il faut toujours se baser sur le planning » (pas de travail le week-end, donc jamais un retour annoncé un samedi ; un arrêt maladie dit
+sa fin) ; la phrase du Budget « ne veut rien dire » ; des polices trop grandes, à uniformiser ; la carte des parcelles qui disparaît parfois au retour sur
+Aujourd'hui ; la pastille de présence qui clignote ; la disposition de la maquette, « À savoir » à droite ; la charge restante sans colonnes. Puis, à la
+reformulation (« oui ») : « À savoir » reste visible quand on descend, et la météo retrouve ses couleurs.
+
+### 307b. Ce qui a été fait
+- **Ouverture** : la règle par rôle existait (`_landingPage` / `_goLanding`). Seul écart : le Pilotage rouvrait sur l'onglet mémorisé (`mavigne_pil_tab_<domaine>`).
+  `goHub` (connexion, démo, fin d'installation) appelle `window._pilOuvrirAujourdhui` ; le retour arrière passe par `_goLanding` seul et garde l'onglet du
+  moment. Le mode « tracteur » du jour atterrit toujours sur Tracteur (dit à Nico, non contesté).
+- **Le planning fait foi** (`pilotage.js`) : `_pilPrevuLe(m, date)` pose la question au planning — `_planPrevuPersRange` (la grille du modèle, contrat compris)
+  ou `_planWorkPersRange` (un samedi travaillé compte) ; sans planning, lundi–vendredi. `_pilJourDomaine(date)` : une personne hors bureau prévue suffit.
+  Dans `_pilData`, quelqu'un que le planning ne prévoit pas est `repos`, ni présent ni absent (`nVchamp`, `nIndispoChamp`, `jourTravaille`, `nRepos`).
+  Un jour chômé, le cockpit montre le PROCHAIN jour travaillé (14 jours au plus) et le dit ; « Présences du jour » dit « pas de travail prévu ». Le brûlage de
+  la météo et le besoin d'heures par jour se comptent sur les jours du planning (`V.ouvres`, lu aussi par `estOuvre` dans le cockpit).
+- **« À savoir »** (`cockpit.js/_ckSvAbsences(…, travaille)`) : un jour non travaillé ne coupe plus une absence et ne sert jamais de retour ; l'absence est
+  suivie jusqu'à sa fin (`_CK_SV.loin`, 62 jours) ; arrêt maladie → « Fin d'arrêt le … » ; le motif (admin) ne cache plus la date (« Formation CACES. De retour
+  le ven. 16 oct. ») ; une autre absence qui enchaîne est dite (« Puis en récupération. ») au lieu d'un faux « pas de retour ».
+- **Disposition** (`ranger`, feuille AUJ-5) : trois colonnes dès 1 000 px de contenu (1 150 avant), colonnes de côté à 260 et 280 px au moins ; entre 760 et
+  1 000, le reste à gauche et « À savoir » à droite. « À savoir » colle en haut et sa liste défile seule ; `#page-pilotage:has(.ck2)` rend le défilement à la page.
+- **Polices** : phrase de fin prévue 40 → 28 px (24 au téléphone) ; titres de carte et réponses de la décision 24 → 20 px. La décision passe sur une colonne
+  quand SA colonne fait moins de 360 px (requête de conteneur sur `#ck-t-a`, pas sur l'écran).
+- **Budget** : « du budget main-d'œuvre dépensé, pour N % du travail fait » (aux deux endroits) ; `majPhotos` ne lève plus sans la tuile (pas de taux horaire).
+- **Carte** : `dessinerPlan` réessaie une case sans largeur (30 images) ; l'observateur de taille suit aussi `#ck-carte-in`.
+- **Pastille** : le halo existait, éteint pour toute équipe commencée un autre jour (`.ancien`) — en pratique presque jamais visible. Il clignote pour toutes
+  les équipes en cours, les jours travaillés au planning (`#ck-calque.vif`) ; fixe en animations réduites (dit à Nico).
+- **Charge restante** : plus de zone remplie, une ligne et un point par photo ; l'axe part de la première mesure (deux jours avant, jamais avant la période).
+  Chaque photo porte sa période (`p`) ; `_ckChargeSerie(…, per)` écarte celles d'une autre période.
+- **Météo** : jetons `--meteo-*` déclarés sur `:root` (un `var()` se résout là où il est déclaré : la charte du cockpit ne les atteint pas) ; soleil or, nuage
+  gris, pluie et gel bleus, par morceau d'icône (`m-sol`, `m-rai`, `m-nuage`, `m-eau`, `m-gel`).
+
+### 307c. Trouvé en route
+0. **Le lot a d'abord été construit sur `cbfcb8e`.** ARRACH-8 (§306, `cd06431`), poussé ensuite, portait les MÊMES numéros (APP 8.74, SW 9.53) et la
+   même section : livrés tels quels, les fichiers complets du premier zip l'auraient effacé de douze fichiers. Rejoué sur `cd06431` (fusion à trois voies
+   des changements, conflits résolus à la main : nouveautés, en-tête du service worker, documentation), renuméroté 8.75 / 9.54 / §307. Le premier zip est caduc.
+1. **`d.saison` est le NOM de la période** : `_pilCk2Modele` lisait `d.saison.nom` — « Les travaux de la saison » pour tout le monde, la phrase que Nico a lue.
+2. **La charte DS-4 (§270) avait rendu la météo grise** : `.ck2{--info:var(--texte-med); --or:var(--encours)}`.
+3. **La page du Pilotage était un conteneur de défilement** (`overflow-y:auto` sans hauteur bornée) : la colonne collante de la maquette ne collait jamais
+   (mesuré : −155 px après 700 px de défilement).
+4. **À la base, à 1 440 px barre ouverte : deux colonnes** (1 138 px de contenu) et « À savoir » à gauche — l'écart décrit par Nico, noté par PRO-1 (§269).
+5. **La carte qui disparaît n'a pas été reproduite** sur la base (1 440 px : cinq onglets aller-retour, un autre module, une mise à jour des données).
+
+### 307d. Mesuré
+- `mv-harnais-auj5` (neuf) : `_ckSvAbsences` exécuté (congé de deux semaines, retours, arrêt, motif, absence qui enchaîne, planning qui prévoit le samedi) ;
+  `_pilData` et `_pilCk2Modele` exécutés dans l'appli entière (`mv-app-node` : samedi chômé, prochain jour travaillé, jours du planning, brûlage, saison,
+  ouverture) ; le reste lu. Avec ses contre-épreuves.
+- Harnais suivis : `auj1` (filtre de période), `auj2` (le motif puis la date), `forme1` et `ref1` (nouvelles dépendances de `_pilCk2Modele`), `pro1` (plus de zone).
+- Rendu Chromium, domaine reconstitué un samedi (6 personnes dont une au bureau, un congé, un arrêt, 13 parcelles sans contour) : à 1 440 px barre ouverte,
+  trois colonnes, « À savoir » collé à 16 px après 700 px de défilement, la carte présente après onglets, module et données ; à 390 px, une colonne. Base au
+  même écran : deux colonnes. ⚠️ Non vus : la vue Économie (pas de taux horaire), la pastille un jour travaillé.
+- Chaîne complète (`TZ=Europe/Paris`, `--continuer`, une à la fois), d'abord sur `cbfcb8e` : 349 commandes, 2 rouges levés — `mv-harnais-typo` (`cockpit.js`
+  39 → 41 ko, +5 % : regravé, 41 ko ne justifient aucun découpage) et `build-guide --check`. **Rejouée sur l'état final (base `cd06431`, ARRACH-8 compris) :
+  351 commandes, 740 s, 1 rouge attendu** — `build-guide --check` : la page générée se refait par `npm run site`, jamais livrée ; régénérée ici, elle passe.
+- Voir §28 (AUJ-5) pour ce qui reste ouvert.

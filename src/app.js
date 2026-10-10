@@ -5918,7 +5918,10 @@ window._saveEmailModal=async function(){
 };
 // ════ fin FORMULES & ESSAI ════
 
-function goHub(){ try{applyVigneSaison();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/goHub'); } _goLanding(); }
+// ★ AUJ-5 (§307) — À L'OUVERTURE, LE PILOTAGE S'OUVRE SUR AUJOURD'HUI (Nico, 10/10). Il rouvrait sur le dernier onglet
+//   consulté, mémorisé sur l'appareil. goHub est l'entrée dans l'appli (connexion, démo, fin d'installation) ; le retour
+//   arrière passe par _goLanding seul et garde l'onglet du moment.
+function goHub(){ try{applyVigneSaison();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/goHub'); } try{ if(window._pilOuvrirAujourdhui) window._pilOuvrirAujourdhui(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/goHub#auj'); } _goLanding(); }
 
 
 // ════ MODE PLEIN SOLEIL (#6) — v4.36 ════

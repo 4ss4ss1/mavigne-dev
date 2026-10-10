@@ -45,7 +45,7 @@ function suite(S) {
   const par = n => ab.find(x => x.titre.startsWith(n));
   T('un congé sur trois jours : une ligne, la plage et le retour', !!par('Marion') && par('Marion').titre === 'Marion en congé'
     && par('Marion').quand.startsWith('Du ') && par('Marion').sous.startsWith('De retour le'));
-  T('une absence avec son motif ; aujourd\u2019hui n\u2019est pas compté (déjà dans « Présences »)', par('Thomas') && par('Thomas').sous === 'Formation Certiphyto' && !par('Thomas').quand.includes('12'));
+  T('une absence avec son motif ; aujourd\u2019hui n\u2019est pas compté (déjà dans « Présences »)', par('Thomas') && /^Formation Certiphyto\. (De retour le |Puis |Pas de retour)/.test(par('Thomas').sous) && !par('Thomas').quand.includes('12'));   // AUJ-5 (§307) : le motif, PUIS la date de retour
   T('le bureau et les fiches inactives n\u2019y sont pas ; la maladie se dit « en arrêt »', !par('Chloe') && !par('Ancien') && par('Paul').titre === 'Paul en arrêt');
   T('l\u2019état du jour est la règle commune (_pilEtatEntree)', W._pilEtatEntree({ type: 'recup' }).etat === 'recup' && W._pilEtatEntree(null).etat === 'present');
 
@@ -86,9 +86,9 @@ res.forEach(([n, ok]) => { if (!ok) ko++; console.log((ok ? '  ok  ' : '  KO  ')
 console.log('\n' + (ko ? 'ROUGE ' + ko : 'VERT') + ' \u2014 ' + res.length + ' assertions, ' + ko + ' échec' + (ko > 1 ? 's' : ''));
 if (CONTRE) {
   const DEF = [
-    ['la pluie dite à partir de 0 mm', 'ck', 'var _CK_SV = { jours: 7, contrat: 30, pluie: 2, vent: 40 };', 'var _CK_SV = { jours: 7, contrat: 30, pluie: 0, vent: 40 };'],
+    ['la pluie dite à partir de 0 mm', 'ck', 'var _CK_SV = { jours: 7, contrat: 30, pluie: 2, vent: 40, loin: 62 };', 'var _CK_SV = { jours: 7, contrat: 30, pluie: 0, vent: 40, loin: 62 };'],   // AUJ-5 : + loin
     ['un brûlage fini qui « attendra » encore', 'ck', "/br[uû]l/i.test(String(r.nom || '')) && (r.pct || 0) < 100", "/br[uû]l/i.test(String(r.nom || ''))"],
-    ['les absences du jour recomptées', 'ck', 'for(var k = 1; k <= _CK_SV.jours; k++){', 'for(var k = 0; k <= _CK_SV.jours; k++){'],
+    ['les absences du jour recomptées', 'ck', 'for(k = 1; k <= loin; k++){', 'for(k = 0; k <= loin; k++){'],   // AUJ-5 : la boucle suit l’absence jusqu’à sa fin (_CK_SV.loin)
     ['le bureau compté dans les absences', 'ck', "if(!m || m.statut === 'Inactif' || m.bureau || !m.nom) return;", "if(!m || m.statut === 'Inactif' || !m.nom) return;"],
     ['un contrat à 40 jours annoncé', 'ck', "m.fin_contrat < auj || m.fin_contrat > lim) return;", "m.fin_contrat < auj) return;"],
     ['une tâche finie dite en retard', 'ck', "if(!r || !R[r.nom] || (r.pct || 0) >= 100) return;", "if(!r || !R[r.nom]) return;"],

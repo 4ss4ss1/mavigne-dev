@@ -126,7 +126,7 @@ if (CONTRE) {
     ['les noms non échappés', 'ck', "_ckEsc(noms.join(' et ') || 'Quelqu’un')", "(noms.join(' et ') || 'Quelqu’un')"],
     ['tout qui s\u2019éclaire au premier dessin', 'ck', 'var neuf = vus && !vus.has(e.id);', 'var neuf = !vus || !vus.has(e.id);'],
     ['une marge inconnue lue comme zéro', 'ck', 'if(m && m.marge != null){', 'if(m){'],
-    ['la photo du jour gardée à côté du direct', 'ck', "typeof x.reste === 'number' && x.d !== auj) s.push", "typeof x.reste === 'number') s.push"],
+    ['la photo du jour gardée à côté du direct', 'ck', "typeof x.reste === 'number' && x.d !== auj && !(per", "typeof x.reste === 'number' && !(per"],   // AUJ-5 : + filtre de période
     ['une ligne plate au lieu de l\u2019état vide', 'ck', 'if(!serie || serie.length < 2){', 'if(!serie || serie.length < 1){'],
     ['la mesure tracée en pointillé (MOUV-1 ne la dessinerait plus)', 'ck', "'\" stroke-width=\"' + tr.mesure + '\" stroke-linejoin", "'\" stroke-width=\"' + tr.mesure + '\" stroke-dasharray=\"3 2\" stroke-linejoin"],
     ['un bloc d\u2019avant oublié (les alertes, « À savoir » masqué)', 'ck', "(sv ? '' : (o.alertes || '') + (cave", "(sv ? '' : (cave"],

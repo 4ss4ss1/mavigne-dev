@@ -102,9 +102,14 @@ const dCourt = d => jourN(d) + '\u00a0' + MOIS_C[d.getUTCMonth()];
 const dLong = d => jourN(d) + '\u00a0' + MOIS_L[d.getUTCMonth()];
 const FERIES = new Set();
 const CONGES_DE = J(2026, 12, 24), CONGES_A = J(2027, 1, 3);
+// AUJ-5 (§307) : les jours travaillés viennent du planning (V.ouvres, d'aujourd'hui à l'objectif) ; hors de cette plage,
+//   du lundi au vendredi.
+let OUV = null, OUV_DE = '', OUV_A = '';
 const estOuvre = d => {
+  const k = iso(d);
+  if (OUV && k >= OUV_DE && k <= OUV_A) return OUV.has(k);
   const w = d.getUTCDay();
-  if (w === 0 || w === 6 || FERIES.has(iso(d))) return false;
+  if (w === 0 || w === 6 || FERIES.has(k)) return false;
   return true;
 };
 const joursOuvres = (de, a) => { const r = []; for (let d = de; d <= a; d = ajout(d, 1)) if (estOuvre(d)) r.push(d); return r; };
@@ -286,6 +291,7 @@ function charger(v) {
   TOTAL = Math.max(v.total || 0, ...HIST.map(h => h.r), v.reste || 0, 1);
   YMAX = Math.ceil(TOTAL / 500) * 500;
   METEO = v.meteo || [];
+  OUV = Array.isArray(v.ouvres) ? new Set(v.ouvres) : null; OUV_DE = v.ouvresDe || ''; OUV_A = v.ouvresA || '';
   const e = v.eco || {};
   TAUX = e.taux || 0; POSTES = e.postes || [];
   // La ligne de budget du graphe « dépensé face au fait » : le budget main-d'œuvre du moteur (TOTAL heures × taux × (1 + marge)).
@@ -336,13 +342,13 @@ const pct1 = v => (v > 0 ? '+' : v < 0 ? '−' : '') + NF1.format(Math.abs(v)) +
 const INFO = {
   fin: 'La fin prévue prend les heures qui restent au barème et les retire, jour après jour, de la capacité inscrite au planning : contrats en cours, absences, formations et congés compris. Elle avance quand une parcelle est validée.',
   travaux: 'Heures du barème des parcelles validées, sur le total des tâches de la campagne. Une parcelle commencée ne compte qu’à sa validation.',
-  effectif: 'Personnes prévues au planning aujourd’hui, hors bureau. Les absences viennent du planning.',
+  effectif: 'Personnes prévues au planning aujourd’hui, hors bureau, et celles qui manquent (congé, arrêt, récupération). Un jour sans travail au planning — week-end, jour chômé —, la tuile montre le prochain jour travaillé et le dit.',
   budget: 'Part du budget main-d’œuvre de la campagne déjà dépensée, face à la part du travail faite. Dépenser moins vite qu’on n’avance, c’est être en avance.',
   conformite: 'Points du registre phyto et des documents obligatoires qui demandent une action de votre part.',
   savoir: 'Ce qui peut changer la journée ou la semaine : météo par secteur, absences, contrats, matériel, retards. Les motifs d’absence ne sont visibles que de l’admin.',
   decision: 'Les quatre questions de chaque matin, chacune avec sa réponse et le bouton pour agir.',
   plan: 'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine. Sa couleur dit l’état de la tâche choisie ; le trait sous chaque appellation, son avancement. Une parcelle en cours porte l’équipe qui l’a commencée, même un autre jour. Au survol, une loupe la montre en grand ; la toucher ouvre sa fiche. Les rangs dessinés sont un repère, pas le relevé des rangs ; une parcelle sans contour est un carré de sa surface, en pointillé.',
-  courbe: 'Le reste mesuré vient de la photo prise chaque jour. La projection suit la capacité du planning. La ligne fine montre l’allure qu’il faudrait pour finir pile à l’objectif.',
+  courbe: 'Le reste mesuré : un point par photo, prise chaque jour où un administrateur ouvre le Pilotage (60 jours gardés), puis le point du jour en direct. L’axe part de la première mesure. La projection suit la capacité du planning ; la ligne fine montre l’allure qu’il faudrait pour finir pile à l’objectif.',
   atterrissage: 'L’atterrissage additionne ce qui est dépensé et ce que coûtera le travail restant, au coût horaire de l’équipe et à l’écart au barème mesuré dans chaque appellation. Les autres postes suivent les factures saisies.',
   coutha: 'Atterrissage de la campagne, divisé par les hectares en production. Le prévu est le budget divisé de la même façon.',
   ecart: 'Heures réellement passées, face aux heures du barème, sur les parcelles validées. Au-dessus de zéro, l’équipe met plus longtemps que le barème.',
@@ -357,11 +363,11 @@ const SVG = (d, cls) => '<svg' + (cls ? ' class="' + cls + '"' : '') + ' viewBox
 const ICO = {
   chev: '<svg class="ck-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>',
   ok: SVG('<path d="M6 12.5l4 4 8-9"/>'),
-  nuage: SVG('<path d="M7 17.5a4.5 4.5 0 0 1 .6-9 5.5 5.5 0 0 1 10.3 2A3.5 3.5 0 0 1 17.5 17.5z"/>'),
-  pluie: SVG('<path d="M7 15a4.5 4.5 0 0 1 .6-9 5.5 5.5 0 0 1 10.3 2A3.5 3.5 0 0 1 17.5 15z"/><path d="M9 18l-1 2.5M13 18l-1 2.5M17 18l-1 2.5"/>'),
-  gel: SVG('<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9.6 4.6 12 7l2.4-2.4M9.6 19.4 12 17l2.4 2.4"/>'),
-  eclaircie: SVG('<circle cx="9" cy="8.5" r="3"/><path d="M9 2.6v1.3M3.1 8.5h1.3M4.8 4.3l.9.9M13.2 4.3l-.9.9"/><path d="M9.8 19.5a3.8 3.8 0 0 1 .5-7.6 4.6 4.6 0 0 1 8.6 1.7 2.9 2.9 0 0 1-.6 5.9z"/>'),
-  soleil: SVG('<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>'),
+  nuage: SVG('<path class="m-nuage" d="M7 17.5a4.5 4.5 0 0 1 .6-9 5.5 5.5 0 0 1 10.3 2A3.5 3.5 0 0 1 17.5 17.5z"/>'),
+  pluie: SVG('<path class="m-nuage" d="M7 15a4.5 4.5 0 0 1 .6-9 5.5 5.5 0 0 1 10.3 2A3.5 3.5 0 0 1 17.5 15z"/><path class="m-eau" d="M9 18l-1 2.5M13 18l-1 2.5M17 18l-1 2.5"/>'),
+  gel: SVG('<path class="m-gel" d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9.6 4.6 12 7l2.4-2.4M9.6 19.4 12 17l2.4 2.4"/>'),
+  eclaircie: SVG('<circle class="m-sol" cx="9" cy="8.5" r="3"/><path class="m-rai" d="M9 2.6v1.3M3.1 8.5h1.3M4.8 4.3l.9.9M13.2 4.3l-.9.9"/><path class="m-nuage" d="M9.8 19.5a3.8 3.8 0 0 1 .5-7.6 4.6 4.6 0 0 1 8.6 1.7 2.9 2.9 0 0 1-.6 5.9z"/>'),
+  soleil: SVG('<circle class="m-sol" cx="12" cy="12" r="4"/><path class="m-rai" d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>'),
   contrat: SVG('<path d="M7 3.5h7l4 4V20.5H6.5v-17z"/><path d="M14 3.5V8h4M9.5 12.5h5M9.5 16h3.5"/>'),
   retard: SVG('<circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/>'),
   materiel: SVG('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 0 5.4-5.4l-2.4 2.4-2.6-.6-.6-2.6z"/>'),
@@ -416,7 +422,7 @@ function htmlPhotos(r) {
     + tuile('effectif', 'Effectif', '<b class="ck-cpt" id="ck-ph-eff" data-v="0">0</b><small>\u202fsur ' + V.effectifTotal + '</small>', avs,
       esc(V.absTxt), 'equ', 'L’équipe et les tâches')
     + (V.eco ? tuile('budget', 'Budget', '<b class="ck-cpt" id="ck-ph-bud" data-v="0">0</b><small>\u202f%</small>', spark(SPARK_BUD, 'haut'),
-      '<span id="ck-ph-bud-c">de la main-d’œuvre, pour ' + nb(r.pct) + '\u00a0% du travail fait</span>', 'eco', 'Économie') : '')
+      '<span id="ck-ph-bud-c">du budget main-d’œuvre dépensé, pour ' + nb(r.pct) + '\u00a0% du travail fait</span>', 'eco', 'Économie') : '')
     + tuile('conformite', 'Conformité', '<b class="ck-cpt" id="ck-ph-conf" data-v="0">0</b><small>\u202f' + (V.confN > 1 ? 'points à régler' : 'point à régler') + '</small>',
       V.confN ? '' : okIc, esc(V.confTxt), 'conf', 'Conformité');
 }
@@ -573,9 +579,14 @@ function majPli() {
   b.textContent = S.planTout ? 'Replier le plan' : 'Tout le plan (' + APPS.length + ' appellations)';
 }
 // Le dessin, à la largeur réelle : au montage, puis à chaque largeur nouvelle (ranger).
+let planEssais = 0;
 function dessinerPlan(force) {
   const boite = $('#ck-carte-in'), sb = $('#ck-svg-boite'); if (!boite || !sb) return;
-  const W = Math.round(boite.clientWidth); if (W < 120) return;
+  const W = Math.round(boite.clientWidth);
+  // ★ AUJ-5 (§307) : la case du plan n'a pas encore sa largeur (onglet qui revient, page qui s'affiche) — on réessaie aux
+  //   images suivantes au lieu de laisser le plan vide jusqu'au prochain redimensionnement de la page.
+  if (W < 120) { if (planEssais++ < 30) requestAnimationFrame(() => dessinerPlan(true)); return; }
+  planEssais = 0;
   if (!force && Math.abs(W - PLAN_LARG) < 4 && sb.firstChild) return;
   disposer(W);
   sb.innerHTML = svgPlan();
@@ -628,12 +639,12 @@ function htmlFil() {
 
 /* ── Les graphes — grammaire du kit (MV_GRAPH_COL) : la mesure en terre, le prévu en or,
    le fait en vert, le repère du jour en rouge, tout texte en texte-doux, une unité = un pixel. ── */
-function cadre(w, ymax, grand) {
+function cadre(w, ymax, grand, x0) {
   // PRO-1 (§269) : en grand (« Agrandir »), la hauteur suit l'écran.
   const etroit = w < 560, h = grand ? Math.round(Math.max(300, Math.min(window.innerHeight * .62, w * .5))) : (etroit ? 230 : 270);
-  const c = { w, h, etroit, padL: etroit ? 40 : 58, padR: 18, padT: 34, padB: 30, ymax };
+  const c = { w, h, etroit, padL: etroit ? 40 : 58, padR: 18, padT: 34, padB: 30, ymax, D0: x0 || DEBUT };   // D0 (AUJ-5) : le début de l'axe
   c.iw = w - c.padL - c.padR; c.ih = h - c.padT - c.padB;
-  c.X = d => c.padL + (d - DEBUT) / (XMAX - DEBUT) * c.iw;
+  c.X = d => c.padL + (d - c.D0) / (XMAX - c.D0) * c.iw;
   c.Y = v => c.padT + c.ih * (1 - v / ymax);
   return c;
 }
@@ -643,9 +654,9 @@ function pasNet(max, n) {
   return (q <= 1 ? 1 : q <= 2 ? 2 : q <= 2.5 ? 2.5 : q <= 5 ? 5 : 10) * p;
 }
 const f1 = v => v.toFixed(1);
-function moisReperes() {
-  const r = [[DEBUT, MOIS_C[DEBUT.getUTCMonth()]]];
-  for (let d = J(DEBUT.getUTCFullYear(), DEBUT.getUTCMonth() + 2, 1); d <= XMAX; d = J(d.getUTCFullYear(), d.getUTCMonth() + 2, 1)) r.push([d, MOIS_C[d.getUTCMonth()]]);
+function moisReperes(d0 = DEBUT) {
+  const r = [[d0, MOIS_C[d0.getUTCMonth()]]];
+  for (let d = J(d0.getUTCFullYear(), d0.getUTCMonth() + 2, 1); d <= XMAX; d = J(d.getUTCFullYear(), d.getUTCMonth() + 2, 1)) r.push([d, MOIS_C[d.getUTCMonth()]]);
   return r;
 }
 function axes(c, ticks, unite) {
@@ -656,7 +667,7 @@ function axes(c, ticks, unite) {
   });
   // PRO-1 (§269) : un mois n'a son étiquette que s'il laisse la place à sa voisine (« sept. » et « oct. » se
   //   recouvraient au téléphone ; la maquette retirait « mars » en dur pour ses propres dates).
-  const ecart = c.etroit ? 30 : 38, L = moisReperes(); let der = -1e9;
+  const ecart = c.etroit ? 30 : 38, L = moisReperes(c.D0); let der = -1e9;
   L.forEach(([d, l], k) => {
     const x = c.X(d);
     if (x < c.padL - 1 || x > c.w - c.padR - 14) return;
@@ -673,13 +684,21 @@ function axes(c, ticks, unite) {
   return s;
 }
 const G = { c: null, w: 0, reste: null, fin: null };
+// AUJ-5 (§307) : l'axe de la charge restante part de la première mesure (deux jours avant), jamais avant la période ; sans
+//   photo, d'une semaine avant aujourd'hui. Il partait du début de la période : les quelques jours mesurés formaient une
+//   bande remplie, collée à « aujourd'hui » — la « colonne » que Nico a vue (10/10).
+function debutCourbe() {
+  const m = HIST.filter(o => o.d >= DEBUT && o.d < AUJ).reduce((a, o) => (!a || o.d < a ? o.d : a), null);
+  const d0 = m ? ajout(m, -2) : ajout(AUJ, -7);
+  return d0 > DEBUT ? d0 : DEBUT;
+}
 function htmlCourbe(w) {
   const pas = pasNet(TOTAL, w < 560 ? 3 : 5), ymax = Math.max(pas, Math.ceil(TOTAL / pas) * pas), ticks = [];
   for (let v = 0; v <= ymax + 1e-6; v += pas) ticks.push(v);
-  const c = cadre(w, ymax, G.grand); G.c = c; G.w = w;
+  const c = cadre(w, ymax, G.grand, debutCourbe()); G.c = c; G.w = w;
   let s = axes(c, ticks, 'h');
-  s += '<path id="ck-c-aire" class="ck-c-aire"/><path id="ck-c-besoin" class="ck-c-besoin"/><path id="ck-c-proj" class="ck-c-proj"/>'
-    + '<path id="ck-c-ligne" class="ck-c-ligne"/><circle id="ck-c-pt" class="ck-c-pt" r="4.5"/>'
+  s += '<path id="ck-c-besoin" class="ck-c-besoin"/><path id="ck-c-proj" class="ck-c-proj"/>'
+    + '<path id="ck-c-ligne" class="ck-c-ligne"/><g id="ck-c-mes" class="ck-c-mes"></g><circle id="ck-c-pt" class="ck-c-pt" r="4.5"/>'
     + '<g id="ck-c-fin"><rect class="ck-c-fin" x="-5" y="-5" width="10" height="10" rx="1.5" transform="rotate(45)"/><text id="ck-c-fin-l" class="ck-c-txt ck-c-fin-l" y="-13" text-anchor="middle"></text></g>'
     + '<line id="ck-c-guide" class="ck-c-guide" y1="' + c.padT + '" y2="' + (c.h - c.padB) + '"/><circle id="ck-c-gpt" class="ck-c-gpt" r="4"/>'
     + '<rect class="ck-c-zone" x="' + c.padL + '" y="0" width="' + c.iw + '" height="' + c.h + '"/>';
@@ -688,14 +707,14 @@ function htmlCourbe(w) {
 }
 function dessinerCourbe(reste, fin) {
   const c = G.c; if (!c) return;
-  const pts = HIST.filter(o => o.d < AUJ && o.d >= DEBUT).map(o => [c.X(o.d), c.Y(o.r)]);
+  const pts = HIST.filter(o => o.d < AUJ && o.d >= c.D0).map(o => [c.X(o.d), c.Y(o.r)]);
   pts.push([c.X(AUJ), c.Y(reste)]);
   const ligne = pts.length > 1 ? 'M' + pts.map(p => f1(p[0]) + ' ' + f1(p[1])).join('L') : '';
   const y0 = c.Y(0), xa = c.X(AUJ), ya = c.Y(reste), xf = c.X(fin), xv = c.X(VISEE);
   $('#ck-c-ligne').setAttribute('d', ligne);
-  // PRO-1 (§269) : la zone mesurée part de la PREMIÈRE photo. Elle partait du début de la période : un grand triangle
-  //   (ou, avec deux jours de photos, une grosse barre verticale) là où rien n'a été mesuré.
-  $('#ck-c-aire').setAttribute('d', ligne ? 'M' + f1(pts[0][0]) + ' ' + f1(y0) + 'L' + ligne.slice(1) + 'L' + f1(xa) + ' ' + f1(y0) + 'Z' : '');
+  // AUJ-5 (§307) : le reste mesuré est une LIGNE et un point par photo — plus de zone remplie jusqu'à zéro, qui formait
+  //   une colonne sur les quelques jours mesurés. Le point du jour est #ck-c-pt.
+  const mes = $('#ck-c-mes'); if (mes) mes.innerHTML = pts.slice(0, -1).map(p => '<circle cx="' + f1(p[0]) + '" cy="' + f1(p[1]) + '" r="3"/>').join('');
   $('#ck-c-proj').setAttribute('d', 'M' + f1(xa) + ' ' + f1(ya) + 'L' + f1(xf) + ' ' + f1(y0));
   $('#ck-c-besoin').setAttribute('d', 'M' + f1(xa) + ' ' + f1(ya) + 'L' + f1(xv) + ' ' + f1(y0));
   const pt = $('#ck-c-pt'); pt.setAttribute('cx', f1(xa)); pt.setAttribute('cy', f1(ya));
@@ -848,7 +867,7 @@ function majPhotos(r) {
   Anim.compter($('#ck-ph-trav'), r.pct);
   Anim.compter($('#ck-ph-bud'), r.budgetPct);
   $('#ck-ph-trav-c').textContent = nb(r.hF) + ' h faites sur ' + nb(r.hT) + ' h';
-  $('#ck-ph-bud-c').textContent = 'de la main-d’œuvre, pour ' + nb(r.pct) + '\u00a0% du travail fait';
+  const bc = $('#ck-ph-bud-c'); if (bc) bc.textContent = 'du budget main-d’œuvre dépensé, pour ' + nb(r.pct) + '\u00a0% du travail fait';   // AUJ-5 : sans taux horaire, la tuile n'existe pas
 }
 function majSavoir(r) {
   const box = $('#ck-savoir'); if (!box) return;
@@ -903,6 +922,8 @@ function quand(d) {
 function majEquipes() {
   const calque = $('#ck-calque'); if (!calque) return;
   const vis = S.equipes.filter(e => e.parc && e.tache === S.vue), aujIso = iso(AUJ);
+  // AUJ-5 (§307) : la pastille de présence clignote — toutes les équipes sur une parcelle en cours, un jour travaillé au planning.
+  calque.classList.toggle('vif', !!(V && V.jourTravaille !== false));
   $$('.ck-eq', calque).forEach(m => {
     if (m.classList.contains('part')) return;
     if (!vis.some(e => e.id === m.dataset.eq)) { m.classList.add('part'); setTimeout(() => m.remove(), 420); }
@@ -1223,7 +1244,7 @@ function redimEChart0(force) {
 function jourSous(ev, c, svg) {
   const rc = svg.getBoundingClientRect(), k = (ev.clientX - rc.left - c.padL) / c.iw;
   if (k < 0 || k > 1) return null;
-  const brut = new Date(+DEBUT + k * (XMAX - DEBUT));
+  const d0 = c.D0 || DEBUT, brut = new Date(+d0 + k * (XMAX - d0));
   return J(brut.getUTCFullYear(), brut.getUTCMonth() + 1, brut.getUTCDate() + (brut.getUTCHours() >= 12 ? 1 : 0));
 }
 function placerTip(tip, c, gx, gy) {
@@ -1293,7 +1314,7 @@ function ouvrirFeuille(pid) { const p = PIDX[pid]; if (p && !p.arr) { cacherLoup
 
 const RANGS = {
   t: { large: [['verdict', 'decision', 'fil'], ['plan', 'chant', 'courbe'], ['savoir']],
-       moyen: [['verdict', 'savoir', 'decision'], ['plan', 'fil', 'chant', 'courbe'], []],
+       moyen: [['verdict', 'decision', 'plan', 'chant', 'courbe', 'fil'], [], ['savoir']],   // AUJ-5 : « À savoir » reste à droite
        petit: [['verdict', 'savoir', 'decision', 'plan', 'fil', 'chant', 'courbe'], [], []] },
   e: { large: [['ever', 'ekpi'], ['echart', 'etac'], ['epos', 'eapp']],
        moyen: [['ever', 'ekpi', 'epos'], ['echart', 'etac', 'eapp'], []],
@@ -1307,7 +1328,7 @@ function ranger() {
   //   page disparue et plantait à chaque redimensionnement (« reading 'clientWidth' », journalisé en erreur).
   if (!pg) { if (obs) { obs.disconnect(); obs = null; } return; }
   const w = pg.clientWidth - 2 * parseFloat(getComputedStyle(pg).paddingLeft || 0);
-  const taille = w >= 1150 ? 'large' : w >= 820 ? 'moyen' : 'petit';
+  const taille = w >= 1000 ? 'large' : w >= 760 ? 'moyen' : 'petit';   // AUJ-5 : la maquette dès 1 000 px (1 150 avant)
   if (pg.dataset.taille !== taille) {
     pg.dataset.taille = taille;
     ['t', 'e'].forEach(v => RANGS[v][taille].forEach((ids, k) => {
@@ -1501,7 +1522,7 @@ window._ck2Monter = function (v) {
   G.reste = R.reste; G.fin = R.fin; GE.fin = R.fin;   // l'état des graphes : la maquette le prenait au chargement
   cacherLoupe(); monter(); brancherPlan(); ranger(); dessinerPlan(true);
   if (!branche) { brancher(); branche = true; setInterval(heures, 30000); }
-  if ('ResizeObserver' in window) { if (obs) obs.disconnect(); obs = new ResizeObserver(() => rangerBientot()); obs.observe($('#ck-page')); }
+  if ('ResizeObserver' in window) { if (obs) obs.disconnect(); obs = new ResizeObserver(() => rangerBientot()); obs.observe($('#ck-page')); const ci = $('#ck-carte-in'); if (ci) obs.observe(ci); }   // AUJ-5 : le plan suit aussi SA case
   placerInd($('.ck-seg [aria-selected="true"]'), $('.ck-seg-ind'));
   placerInd($('.ck-bascule [aria-selected="true"]'), $('.ck-bascule-ind'));
   SANS_MVT = !!window._ck2EntreeFaite; entree(); SANS_MVT = false; window._ck2EntreeFaite = true;

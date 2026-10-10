@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.74';
+export const APP_VERSION = '8.75';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1035,6 +1035,20 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.75', d: '2026-10-10', items: [
+    { niv: 1, pour: ['admin'], cible: '#ck-savoir', emoji: 'graphique', titre: 'Aujourd’hui retrouve la disposition de la maquette',
+      desc: "Sur ordinateur, Aujourd’hui s’affiche sur trois colonnes : la fin prévue et la décision du jour à gauche, le domaine en direct au centre, « À savoir » à droite — et « À savoir » reste visible quand vous descendez dans la page. "
+        + "Les tailles de texte sont harmonisées : la phrase de fin prévue n’écrase plus le reste. La météo retrouve ses couleurs, et la pastille de l’équipe clignote sur la carte les jours travaillés." },
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Le Pilotage suit le planning',
+      desc: "Un jour sans travail au planning (week-end, jour chômé), l’Effectif et les Présences montrent le prochain jour travaillé au lieu d’annoncer toute l’équipe. "
+        + "Dans « À savoir », un absent revient le premier jour où le planning le prévoit — plus jamais un samedi —, un congé de deux semaines tient sur une seule ligne, et un arrêt maladie dit sa date de fin. "
+        + "Le brûlage possible et les heures à faire par jour se comptent aussi sur les jours du planning." },
+    { niv: 0, pour: ['admin'], emoji: 'oeil', titre: 'À l’ouverture, le Pilotage s’ouvre sur Aujourd’hui',
+      desc: "Il rouvrait sur le dernier onglet consulté. Les ouvriers et tractoristes arrivent toujours sur l’Accueil, ou sur Parcelles avec la tâche prioritaire quand ils en ont une." },
+    { niv: 0, pour: ['admin'], emoji: 'graphique', titre: 'La charge restante et la tuile Budget se lisent mieux',
+      desc: "La courbe de la charge restante montre un point par mesure, sans la bande qui formait une colonne près d’« aujourd’hui ». "
+        + "La tuile Budget dit maintenant « du budget main-d’œuvre dépensé, pour N % du travail fait ». La carte des parcelles se redessine d’elle-même quand sa place change." },
+  ] },
   { v: '8.74', d: '2026-10-10', items: [
     { niv: 2, pour: ['admin'], emoji: 'raisin', titre: 'Une parcelle arrachée avant l’appli se déclare à sa vraie date',
       desc: "Déclarer arrachée une parcelle avec une date d’avant la période en cours ne valide plus rien : la case « Valider aussi le travail d’arrachage » disparaît, et la parcelle ne porte plus aucun travail dans cette période — ni « à faire », ni dans l’avancement. "
@@ -5108,7 +5122,7 @@ var MV_AIDE = {
   pilotage: {
     ico: 'graphique', titre: 'Pilotage', ancre: 'pilotage',
     points: [
-      ['Aujourd’hui se lit d’un coup d’œil', ": une phrase résume la journée (l’avance ou le retard sur l’objectif, les points à anticiper). Viennent les photos du domaine, la <b>fin prévue</b> avec sa frise et votre objectif, la <b>décision du jour</b> en quatre tuiles, le <b>domaine en direct</b> (chaque parcelle à sa forme et à l’échelle, colorée selon la tâche choisie, rangée par appellation, l’équipe posée sur chaque parcelle en cours ; au survol, une loupe la montre en grand ; la toucher ouvre sa fiche), les chantiers et la charge restante. Sur le côté, <b>À savoir</b> réunit la météo des cinq jours, la pluie ou le vent par secteur, les absences, les fins de contrat, les retards et le matériel ; dessous, le fil <b>En direct</b> de ce que l’équipe valide. La bascule <b>Terrain / Économie</b>, en haut, donne la photo économique du jour : l’atterrissage de la campagne, le coût à l’hectare, l’écart au barème, le dépensé face au fait, la cadence de l’équipe, le coût de l’inaction, les postes, les appellations et les tâches — les chiffres de l’onglet Économie. « Agrandir » ouvre la courbe en grand ; « Changer la priorité » ouvre le choix de la tâche prioritaire ; la date de l’objectif se règle en touchant son bouton. La tension par personne se détaille dans L’équipe & le matériel, la protection restante dans Conformité."],
+      ['Aujourd’hui se lit d’un coup d’œil', ": une phrase résume la journée (l’avance ou le retard sur l’objectif, les points à anticiper). Viennent les photos du domaine, la <b>fin prévue</b> avec sa frise et votre objectif, la <b>décision du jour</b> en quatre tuiles, le <b>domaine en direct</b> (chaque parcelle à sa forme et à l’échelle, colorée selon la tâche choisie, rangée par appellation, l’équipe posée sur chaque parcelle en cours, sa pastille qui clignote les jours travaillés ; au survol, une loupe la montre en grand ; la toucher ouvre sa fiche), les chantiers et la charge restante, un point par mesure. À droite sur ordinateur, <b>À savoir</b> réunit la météo des cinq jours, la pluie ou le vent par secteur, les absences, les fins de contrat, les retards et le matériel ; il y reste visible quand vous descendez dans la page. Le fil <b>En direct</b> montre ce que l’équipe valide. Tout ce qui parle des gens suit le <b>planning</b> : un jour sans travail, l’effectif et les présences montrent le prochain jour travaillé ; un absent revient le premier jour où le planning le prévoit, un arrêt maladie dit sa date de fin. La bascule <b>Terrain / Économie</b>, en haut, donne la photo économique du jour : l’atterrissage de la campagne, le coût à l’hectare, l’écart au barème, le dépensé face au fait, la cadence de l’équipe, le coût de l’inaction, les postes, les appellations et les tâches — les chiffres de l’onglet Économie. « Agrandir » ouvre la courbe en grand ; « Changer la priorité » ouvre le choix de la tâche prioritaire ; la date de l’objectif se règle en touchant son bouton. La tension par personne se détaille dans L’équipe & le matériel, la protection restante dans Conformité."],
       ['Presque tout se lit, cinq choses s’écrivent', ": les chiffres viennent du journal, du planning, des sessions tracteur et de la cave. Ce qui s’écrit ici est nommé : les prix des achats (Économie), l’ordre de passage (Décider), le mois d’ouverture de l’exercice comptable et celui de l’année vigne (roue crantée, Économie › Exercice), et ce que porte la roue crantée."],
       ['Vos deux années se règlent au même endroit', ": la roue crantée porte l’ouverture de l’<b>exercice comptable</b> — celui de votre bilan, fixé par votre comptable — et, juste dessous, le <b>cadre de votre campagne</b>, l’axe des Archives et du bilan de campagne. Une campagne est un cycle de production : ce qui la borne, c’est la <b>vendange</b>, et le mois n’en est que la traduction. L’écran dit où tombe la vôtre dans le cadre choisi — elle l’ouvre, elle la clôt, ou la borne la coupe en deux — et propose le mois qui suit la fin de vos vendanges. Le changer recadre des chiffres déjà affichés, jamais vos saisies."],
       ['La roue crantée', "en haut à droite ouvre ce qui se règle : objectifs de fin, fenêtres des tâches, hypothèses de calcul, IFT de référence — et le bilan de campagne à imprimer. Administrateur seulement."],
@@ -5644,7 +5658,7 @@ export const MV_INFO = {
   ] },
 
   'pil.presences': { t: 'Présences du jour', p: [
-    'Le compte est celui des personnes <b>au champ aujourd\u2019hui</b> : hors bureau, hors absents. Une équipe collective compte pour son effectif réel.',
+    'Le compte est celui des personnes <b>au champ aujourd\u2019hui</b> : hors bureau, hors absents. Une équipe collective compte pour son effectif réel. Une personne que le planning ne prévoit pas ce jour-là (week-end, jour sans heures au modèle) n\u2019est comptée ni présente ni absente ; un jour où personne n\u2019est prévu, la carte le dit.',
     'La source est le <b>planning</b>, jamais le journal. Le journal dit qui a travaillé sur quoi ; il ne dit pas combien d\u2019heures ni qui était là.',
     '<b>Ce chiffre ne se compare ni au pic ni à la moyenne</b> affichés ailleurs sur cet écran : ce sont d\u2019autres fenêtres. Le pic peut tomber dans onze mois.'
   ] },
