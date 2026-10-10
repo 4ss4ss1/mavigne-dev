@@ -6383,10 +6383,14 @@ function _ecoTvEvents(d0, d1){
             niv:nNiv, pass:nPass, trous:j.plantation_trous||null, p:p, dup:dup,
             etape:j.etape?String(j.etape):'', etapeLbl:j.etapeLbl?String(j.etapeLbl):'',
             hors:(j.qui && j.quiHors) ? String(j.qui) : '' };   // PAR-1 : décoché ce jour-là, il ne rejoint pas la journée du domaine
+    // ★ ARRACH-8 (§306) : un passage d'une AUTRE tâche saisi après l'arrachage de la parcelle est une erreur de saisie
+    //   (utils.js, _mvApresArrachage). Il reste un événement — une « Annulé » qui le vise doit le trouver —, mais il ne
+    //   prend aucune heure : la journée revient aux parcelles réellement travaillées.
+    if(typeof window._mvApresArrachage==='function' && window._mvApresArrachage(p,j)) e.horsArr=true;
     (byPair[k]=byPair[k]||[]).push(e);
     ev.push(e);
   });
-  return { ev:ev.filter(function(e){ return !e.annule; }), nHorsParc:nHorsParc };
+  return { ev:ev.filter(function(e){ return !e.annule && !e.horsArr; }), nHorsParc:nHorsParc };
 }
 // ★★ ENG-2 (24/09/2026) — LES JOURNÉES DE CAVE SORTENT DE LA VIGNE.
 //   Le planning dit combien d'heures, jamais où (vérifié : ni poste ni activité sur une

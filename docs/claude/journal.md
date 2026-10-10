@@ -8,6 +8,13 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **9 octobre 2026 (BUILD-1)** — ★★ **LE BUILD NE JOUE PLUS LES CONTRÔLES UN PAR UN** (§305). Lot 36, base `53a99e6`.
+> Demande de Nico : « le déploiement est vraiment long ». Mesuré : 345 commandes = 612 s jouées une par une ; 10 font 82 % du temps, les contre-épreuves 67 %.
+> Le lanceur les joue désormais à plusieurs (autant que de cœurs), sorties dans l'ordre de la liste ; les 9 harnais qui écrivent dans le dépôt passent SEULS,
+> en tête (`SEULS`, gardé par le nouveau `mv-harnais-lanceur`). `auth1` attendait 60 s pour rien (un minuteur de `firebase.js`) : il sort quand il a fini.
+> Déploiement : `--only hosting` dès que le zip ne touche ni `functions/` ni les rules. **Aucun bump** (scripts et documentation seulement).
+> ⚠️ Leçon : le repérage automatique a trouvé 2 harnais écrivains (vignoble, entretien) que ma relecture à la main avait ratés — une variable nommée `tmp` m'avait suffi.
+
 > Dernière consolidation : **9 octobre 2026 (GF-3)** — ★ **DEUX LIGNES D'AIDE QUI CHEVAUCHAIENT LEUR CHAMP** (§304). Lot 35, base `9caff41` — ce zip contient aussi GF-2.
 > Capture de Nico : sous « Sucres au labo », la ligne d'aide mordait sur le champ. Mesuré sous Chromium sur le VRAI formulaire (index.html + styles.css) :
 > elle commençait 6 px DANS le champ — `margin-top:-6px`, recopié de la ligne de la densité, qui chevauchait déjà la sienne : `.fi` n'a pas de marge basse.
@@ -2167,3 +2174,21 @@ l'autre**, il a fallu fusionner à la main. **Fait par Nico.** Vérifié : 9 660
 marqueurs présents, `banc` + `garde-projection` + les trois harnais Pilotage tous verts.
 ★ **La leçon** : quand un fichier maigrit de 600 lignes entre deux clones, **c'est le nombre de
 lignes qu'il faut regarder en premier** — pas le diff, qui noie le signal dans le bruit.
+
+## Descendu de `CLAUDE.md` §28 le 10/10 (ARRACH-8, §306) — plafond du cœur, historique sans consigne
+
+### ✅ Rayés du backlog
+
+~~Urssaf~~ · ~~facturer le second domaine~~ · ~~clé `"site"`~~ · ~~UX-1~~ · ~~SEC-3 CSP~~ · ~~e2e 10 pages~~
+· ~~`firestore.indexes.json`~~ · ~~niveaux `'Auto'`~~ · ~~plomberie des tâches~~ · ~~badge~~ ·
+~~densité~~ · ~~barèmes régionaux~~ · ~~lot DOCK~~ · ~~lot 2 des heures prévues~~ · ~~CSS mort
+Réserve~~ · ~~gardes mortes~~ · ~~recâbler Plein soleil~~ · ~~grille d'installation~~ ·
+~~reconstruire `mvprint.py`~~ · ~~le fût comme objet~~ · ~~l'entonnage depuis le parc~~ ·
+~~le registre des manipulations~~ · ~~le bilan de campagne~~ · ~~stock de bouteilles~~ (ABANDONNÉ) ·
+~~regraver `preflight-baseline.json`~~ · ~~refonte de l'onglet Cave du Pilotage~~ ·
+~~série MILLÉSIME~~ · ~~projection de fin de malo~~ · ~~CAD-1 / durée réelle~~ (**FERMÉ PAR LA
+MESURE**) · ~~écart de cadence faux d'un facteur 5~~ · ~~MT-A écartements sur l'accueil admin~~ ·
+~~« guide.html dit Côte de Nuits »~~ · ~~aide contextuelle périmée~~ · ~~guide public
+monolithique~~ · ★ ~~**CF `submitMiseEnRoute`**~~ · ★ ~~**création de comptes en lot**~~ ·
+★ ~~**alignement des noms de parcelles à l'installation**~~ · ★ ~~**accès manuel au code (upload à
+chaque session)**~~ — remplacé par le dépôt GitHub le 10/08.

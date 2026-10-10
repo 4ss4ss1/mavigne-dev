@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v9.52
+// MA VIGNE — Service Worker v9.53
+// v9.53 (10/10/2026) — ARRACH-8 (§306) : une parcelle arrachee avant l'appli se declare a sa vraie date (rien de valide dans la periode,
+//   plus aucun travail ensuite) ; passages d'apres l'arrachage hors du temps reel ; une annulation commune (etapes, periode) ; fiche de
+//   droite des Parcelles aux regles de la fiche complete. APP 8.73 -> 8.74.
 // v9.52 (09/10/2026) — GF-3 (§304) : les lignes d'aide sous « Densite » et « Sucres au labo » ne chevauchent plus leur champ
 //   (margin-top -6 -> 6 px : .fi n'a pas de marge basse). APP inchange (8.73), rien a annoncer.
 // v9.51 (09/10/2026) — GF-1 (§302) : les sucres au labo prennent le relais de la densite au Cuvier (champ du releve,
@@ -4432,7 +4435,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.52';
+const CACHE_NAME   = 'mavigne-v9.53';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4448,7 +4451,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.52 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.53 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4468,7 +4471,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.52 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.53 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

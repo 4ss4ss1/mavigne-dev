@@ -3,12 +3,14 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **9 octobre 2026 (BUILD-1)** — ★★ **LE BUILD NE JOUE PLUS LES CONTRÔLES UN PAR UN** (§305). Lot 36, base `53a99e6`.
-> Demande de Nico : « le déploiement est vraiment long ». Mesuré : 345 commandes = 612 s jouées une par une ; 10 font 82 % du temps, les contre-épreuves 67 %.
-> Le lanceur les joue désormais à plusieurs (autant que de cœurs), sorties dans l'ordre de la liste ; les 9 harnais qui écrivent dans le dépôt passent SEULS,
-> en tête (`SEULS`, gardé par le nouveau `mv-harnais-lanceur`). `auth1` attendait 60 s pour rien (un minuteur de `firebase.js`) : il sort quand il a fini.
-> Déploiement : `--only hosting` dès que le zip ne touche ni `functions/` ni les rules. **Aucun bump** (scripts et documentation seulement).
-> ⚠️ Leçon : le repérage automatique a trouvé 2 harnais écrivains (vignoble, entretien) que ma relecture à la main avait ratés — une variable nommée `tmp` m'avait suffi.
+> Dernière consolidation : **10 octobre 2026 (ARRACH-8)** — ★★ **LA PARCELLE ARRACHÉE AVANT L'APPLI, ET LES DÉFINITIONS D'UNE ANNULATION** (§306). Lot 37, base `cbfcb8e`.
+> Capture de Nico : une parcelle arrachée en janvier 2026, déclarée après coup — la fiche de droite des Parcelles mettait « À faire » sept tâches que la fiche
+> complète disait désactivées. Reformulé, confirmé (« oui »). Vérifié dans le code, CINQ défauts : (1) `_pFicheHtml` ignorait `_mvExclu` et `_mvArrHors` ; (2)
+> `_pDernier` lisait tout le journal, annulations et autres périodes comprises ; (3) `_mvSelTravaillees` ignorait les annulations (arrachage annulé = « 0/1 à faire ») ;
+> (4) déclarer avec une date d'avant la période validait l'arrachage DANS la période active ; (5) `dateArrachage` n'était lue par aucune règle : des passages saisis
+> après l'arrachage prenaient des heures au temps réel (mesuré : 15 % d'une journée, ou toutes les heures en attente). **APP 8.73 → 8.74, SW 9.52 → 9.53.**
+> ⚠️ Leçon : l'appli avait déjà TROIS façons de dire qu'une validation est annulée (CIBLE-1, temps réel, prestations), aucune avec les étapes ET la période. Une
+> quatrième, privée, aurait reproduit le défaut ailleurs : une définition commune (`_mvAnnulee`), et un harnais qui vérifie que les autres s'accordent avec elle.
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1849,6 +1851,18 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ ARRACH-8 — CE QUI RESTE OUVERT (§306, posé le 10/10)
+
+1. **Chez Nico, une fois déployé** : redéclarer la parcelle arrachée en janvier (fiche complète → « Arracher cette parcelle… », sa vraie date). La case
+   « Valider aussi » doit disparaître ; la fiche de droite dire « Arrachée le … » et « Plus aucun travail sur cette parcelle ». Vérifié par `mv-harnais-arrach8`, ni sur ses données ni dans un navigateur.
+2. **Si la période active a commencé après le 25/09**, l'arrachage validé ce jour-là sur cette parcelle reste vivant dans SA période : l'annulation d'octobre,
+   saisie dans une autre période, ne le vise pas (c'est ce que fait `annulerTache`). Il compte au temps réel du 25/09 — l'arrachage après la date reste permis
+   (souches, piquets). Aucun écran ne retire une saisie d'une période close.
+3. **Trois définitions d'une annulation subsistent** : `_mvAnnulee` (ARRACH-8 : étapes + période), `_mvDerniereValidee` (CIBLE-1, copie privée), `_ecoTvEvents` (retire la
+   DERNIÈRE clôture, sans période). D'accord dans le cas courant (`mv-harnais-arrach8`, I1-I2) ; à faire converger vers `_mvAnnulee`. `pQuickUndo` remet l'état sans
+   trace au journal : sa validation reste « Validé » pour les trois.
+4. **« 0/0 tâche »** sur une parcelle sans aucun travail dans la période (arrachée d'avant) : `_pvCompte` pourrait écrire un tiret.
+
 ### ⚠️ BUILD-1 — CE QUI RESTE OUVERT (§305, posé le 09/10)
 - **Le chiffre de Nico** : la dernière ligne du lanceur donne le total et les 5 plus longues — à comparer à ses builds d'avant. · **Compilation Vite** (Terser, 2 passes) : mesurée §305f, à trancher par Nico.
 - **`recup --contre`** (134 s, 90 défauts, recharge tout `planning.js` à chaque défaut) = le plancher du parallèle : à alléger. · **`entree1`** : ~50 s d'attente VOULUE (WebCrypto, 350 ms par scénario), cachée par le parallèle.
@@ -2712,22 +2726,6 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     cette entrée est ouverte, aucun lot Cave n'ajoute de déclaration, de plafond ni de contrôle de conformité.** ★ Le jour où le chantier
     s'ouvre, il rouvre le **stock de bouteilles** (abandonné, cf. « Rayés ») : une comptabilité matières suit aussi le vin en bouteille.
 
-
-### ✅ Rayés du backlog
-
-~~Urssaf~~ · ~~facturer le second domaine~~ · ~~clé `"site"`~~ · ~~UX-1~~ · ~~SEC-3 CSP~~ · ~~e2e 10 pages~~
-· ~~`firestore.indexes.json`~~ · ~~niveaux `'Auto'`~~ · ~~plomberie des tâches~~ · ~~badge~~ ·
-~~densité~~ · ~~barèmes régionaux~~ · ~~lot DOCK~~ · ~~lot 2 des heures prévues~~ · ~~CSS mort
-Réserve~~ · ~~gardes mortes~~ · ~~recâbler Plein soleil~~ · ~~grille d'installation~~ ·
-~~reconstruire `mvprint.py`~~ · ~~le fût comme objet~~ · ~~l'entonnage depuis le parc~~ ·
-~~le registre des manipulations~~ · ~~le bilan de campagne~~ · ~~stock de bouteilles~~ (ABANDONNÉ) ·
-~~regraver `preflight-baseline.json`~~ · ~~refonte de l'onglet Cave du Pilotage~~ ·
-~~série MILLÉSIME~~ · ~~projection de fin de malo~~ · ~~CAD-1 / durée réelle~~ (**FERMÉ PAR LA
-MESURE**) · ~~écart de cadence faux d'un facteur 5~~ · ~~MT-A écartements sur l'accueil admin~~ ·
-~~« guide.html dit Côte de Nuits »~~ · ~~aide contextuelle périmée~~ · ~~guide public
-monolithique~~ · ★ ~~**CF `submitMiseEnRoute`**~~ · ★ ~~**création de comptes en lot**~~ ·
-★ ~~**alignement des noms de parcelles à l'installation**~~ · ★ ~~**accès manuel au code (upload à
-chaque session)**~~ — remplacé par le dépôt GitHub le 10/08.
 
 ### Backlog juridique & contenu public
 

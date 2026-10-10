@@ -62,12 +62,12 @@ console.log(`\nARRACH-6 : ${ok} vertes, ${ko} rouges`);
 if (!CONTRE) process.exit(ko ? 1 : 0);
 if (ko) process.exit(1);
 const D = [
-  ['la case n\u2019est pas cochée d\u2019office', b => b.replace('  _ARRV.on=true;\n  _arrValideRowRendre(row);', '  _ARRV.on=false;\n  _arrValideRowRendre(row);')],
+  ['la case n\u2019est pas cochée d\u2019office', b => b.replace('  if(!parDate||_ARRV.avant) _ARRV.on=true;', '  if(!parDate||_ARRV.avant) _ARRV.on=false;')   /* ARRACH-8 : ancre suivie */],
   ['la case resservirait (double entrée)', b => b.replace("if(!_ARRV.on||!p) return false;\n  _ARRV.on=false;", "if(!_ARRV.on||!p) return false;")
                                                 .replace("if(typeof getTacheStatut==='function'&&getTacheStatut(p,'Arrachage')==='Valid\\u00e9') return false;", '')],
   ['la parcelle n\u2019est pas choisie pour la campagne', b => b.replace("    window._mvSelPose(p,'Arrachage',true);", '')],
   ['la proposition vise la dernière fiche ouverte', b => b.replace('  _dpCurrentNom=nom;\n', '')],
-  ['la date de la validation est perdue', b => b.replace("var d=document.getElementById('arr-date'); if(d&&date) d.value=date;", '')],
+  ['la date de la validation est perdue', b => b.replace("if(d&&date){ d.value=date;", "if(d&&date){")   /* ARRACH-8 : ancre suivie */],
 ];
 let rg = 0;
 D.forEach(([n, fb]) => {

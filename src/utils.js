@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.73';
+export const APP_VERSION = '8.74';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1035,6 +1035,16 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.74', d: '2026-10-10', items: [
+    { niv: 2, pour: ['admin'], emoji: 'raisin', titre: 'Une parcelle arrachée avant l’appli se déclare à sa vraie date',
+      desc: "Déclarer arrachée une parcelle avec une date d’avant la période en cours ne valide plus rien : la case « Valider aussi le travail d’arrachage » disparaît, et la parcelle ne porte plus aucun travail dans cette période — ni « à faire », ni dans l’avancement. "
+        + "Les passages d’un autre travail saisis par erreur après la date d’arrachage restent au journal, mais ne comptent plus : ils ne prennent plus d’heures dans le temps réel du Pilotage, qui rend la journée aux parcelles réellement travaillées. Les heures du Pilotage peuvent donc bouger un peu sur les périodes concernées." },
+    { niv: 0, pour: ['tous'], emoji: 'check', titre: 'La fiche de droite des Parcelles ne dit plus « À faire » pour une tâche désactivée',
+      desc: "Sur ordinateur, « Travaux de la campagne » mettait toutes les tâches de la période en « À faire », même celles désactivées sur la parcelle ou pas choisies pour la campagne : elles y sont maintenant grisées, comme dans la fiche complète. "
+        + "Une parcelle arrachée l’écrit en haut, avec sa date. « Dernier passage » ne montre plus une validation annulée ensuite, ni celle d’une autre période, et les derniers passages disent « Annulé ensuite » ou « Après l’arrachage »." },
+    { niv: 0, pour: ['admin'], emoji: 'check', titre: 'Un arrachage annulé ne garde plus la parcelle à arracher',
+      desc: "Une parcelle dont l’arrachage avait été validé puis annulé restait comptée dans l’arrachage de la campagne, et ne se décochait plus de la liste des parcelles choisies. Une validation annulée ensuite ne compte plus." }
+  ] },
   { v: '8.73', d: '2026-10-09', items: [
     { niv: 1, pour: ['cave'], cible: '#vm-gf', emoji: 'eprouvette', titre: 'Les sucres au labo prennent le relais de la densité',
       desc: "En fin de fermentation, la densité ne bouge presque plus : c’est l’analyse du labo — glucose + fructose, en g/L — qui dit si une cuve est sèche. "
@@ -4902,12 +4912,12 @@ var MV_AIDE = {
       ['Les filtres du haut', "trient par état : finies, en cours, arrachées."],
       ['Sur chaque carte', "la surface au centiare près (0,0870 ha), le pourcentage, et le compte des tâches faites, qui suit la même règle : un arrachage à moitié fait compte pour une demie (« 1,5/2 tâches »)."],
       ['Les deux gestes', "« Début » signale qu’on attaque, « Valider » que c’est fini, sans ouvrir la parcelle : en bas de chaque carte au téléphone, au bout de chaque ligne sur ordinateur. Quand une tâche est choisie, la carte dit l’état de cette tâche à la place du pourcentage. Une tâche à passages affiche en plus le passage en cours (P1, P2, N1…)."],
-      ['Sur un ordinateur', "la liste passe à gauche, une ligne par parcelle avec ses deux gestes, et la fiche de la parcelle choisie s’ouvre à droite : sa forme, l’état de la tâche, les travaux de la campagne, les derniers passages. Les flèches haut et bas passent d’une parcelle à l’autre, la touche V valide ; « Fiche complète » ouvre tout le reste."],
+      ['Sur un ordinateur', "la liste passe à gauche, une ligne par parcelle avec ses deux gestes, et la fiche de la parcelle choisie s’ouvre à droite : sa forme, l’état de la tâche, les travaux de la campagne — une tâche désactivée sur la parcelle y est grisée, comme dans la fiche complète —, les derniers passages. Les flèches haut et bas passent d’une parcelle à l’autre, la touche V valide ; « Fiche complète » ouvre tout le reste."],
       ['Le numéro devant le nom', "est le rang de la tournée du domaine. Il n’apparaît que si une tournée est fixée, et les parcelles se rangent dans cet ordre."],
       ['Onglet Carte', ": les contours viennent de votre export PAC ou d’un fichier KML."],
       ['L’anneau doré qui respire', "sur la carte marque la parcelle <b>commencée et pas finie</b> pour le travail affiché\u00a0: celle où «\u00a0Début\u00a0» a été touché sans validation. S’il n’y en a aucune, il se pose sur la <b>prochaine à faire</b>, le n°\u00a01 de la tournée enregistrée. Sur «\u00a0toutes\u00a0», c’est la priorité du moment. Plusieurs parcelles commencées ont chacune leur anneau, et rien ne s’affiche sur une période archivée."],
       ['La recherche', "accepte le nom du climat comme le lieu-dit."],
-      ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique. La déclarer arrachée valide aussi son <b>arrachage</b> (case cochée d’office) ; valider l’arrachage d’une vigne en place propose de la déclarer arrachée. Son avancement et sa fiche ne portent plus que l’<b>arrachage</b> : aucun autre travail ne s’y valide. Elle reste saisissable au journal pour son <b>arrachage</b>, en bas de la liste des parcelles, tant qu’elle est choisie pour la campagne."],
+      ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique. La déclarer arrachée valide aussi son <b>arrachage</b> (case cochée d’office), sauf si la date d’arrachage tombe avant la période en cours : elle passe alors « Arrachée » sans rien valider. Valider l’arrachage d’une vigne en place propose de la déclarer arrachée. Son avancement et sa fiche ne portent plus que l’<b>arrachage</b>, et plus rien du tout dans une période qui commence après son arrachage. Un passage d’un autre travail saisi après la date d’arrachage reste au journal mais ne compte plus, ni dans l’avancement ni dans le temps réel du Pilotage. Elle reste saisissable au journal pour son <b>arrachage</b>, en bas de la liste des parcelles, tant qu’elle est choisie pour la campagne."],
       ['L’arrachage en étapes', "quand l’administrateur l’a découpé (roue crantée, <b>Tâches</b>), la fiche de la parcelle montre une puce par étape : touchez-la pour la valider à sa date. Une étape <b>prestataire</b> se valide sans compter d’heures de l’équipe. L’avancement compte la part des étapes faites ; quand celles de l’équipe sont faites partout, <b>Ma part du chantier</b> passe au suivant. Au moment choisi, l’application propose de passer la parcelle en « Arrachée »."],
       ['Arrachage, désherbage manuel, effeuillage', "ne concernent que les parcelles <b>choisies pour la campagne</b>. L’administrateur les coche dans la roue crantée, <b>Tâches</b>, sur la ligne du travail, ou une par une dans la fiche de la parcelle. Une parcelle où le travail a déjà été saisi compte d’office. L’an prochain, la liste repart vide."],
       ['Valider pour l’équipe sans y être', "l’administrateur voit sa propre puce dans le groupe («\u00a0Moi\u00a0», «\u00a0Moi aussi dans les rangs\u00a0» sur la barre d’équipe)\u00a0: décochée, la validation reste signée de son nom mais ses heures ne vont pas à la parcelle. Le choix est retenu pour la tâche."],
@@ -7176,6 +7186,91 @@ function _mvCampNum(camp){
 // Couples parcelle × tâche saisis au journal pendant la campagne. Mémoire courte :
 // la clé suit la longueur du journal et ses deux bouts (une saisie s'ajoute en
 // tête, une annulation aussi).
+// ★★ ARRACH-8 (§306) — UNE SAISIE ANNULÉE ENSUITE NE COMPTE PLUS : la définition commune.
+//   « Annulé » (annulerTache) remet la tâche ENTIÈRE à zéro pour la période : il annule les saisies du couple
+//   parcelle × tâche faites AVANT lui, pendant la MÊME période. « Annulé » d'une étape d'arrachage
+//   (annulerArrEtape) n'annule que cette étape. « Avant » se lit sur l'heure de SAISIE (l'id = Date.now() en
+//   hexadécimal) : une annulation vise ce qui était saisi avant elle, y compris un passage antidaté ; sans heure
+//   lisible d'un côté, le jour tranche. La période est celle où la saisie a été FAITE : une annulation d'octobre
+//   ne touche pas la taille de l'hiver d'avant.
+//   C'est la règle de « la dernière parcelle validée » (CIBLE-1, _mvDerniereValidee), étendue aux étapes et
+//   bornée à la période. Le temps réel du Pilotage (pilotage.js, _ecoTvEvents) garde la sienne : il retire la
+//   DERNIÈRE clôture du couple (RÉAL-1). Les trois disent la même chose dans le cas courant (mv-harnais-arrach8).
+//   Vécu : un arrachage annulé deux fois restait « Dernier passage » de la fiche, et gardait la parcelle dans la
+//   sélection de l'arrachage (« 0/1 tâche » à faire).
+function _mvJHeure(j){
+  var m = /^([0-9a-f]{9,12})(?![0-9a-f])/i.exec(String((j && j.id) || ''));
+  var t = m ? parseInt(m[1], 16) : 0;
+  return (t > 1.5e12 && t < 4.1e12) ? t : 0;
+}
+// La période où une saisie a été FAITE : son heure de saisie, sinon son jour.
+function _mvJPer(t, d){
+  var f = (typeof _saisonForDate === 'function') ? _saisonForDate : window._saisonForDate;
+  if(typeof f !== 'function') return '';
+  if(t){ var x = new Date(t); d = x.getFullYear() + '-' + ('0' + (x.getMonth() + 1)).slice(-2) + '-' + ('0' + x.getDate()).slice(-2); }
+  return f(d) || '';
+}
+var _MV_ANNUL = null;
+function _mvAnnulIdx(){
+  var J = window.JOURNAL || [];
+  var k = J.length + '|' + ((J[0] && J[0].id) || '') + '|' + ((J[J.length - 1] && J[J.length - 1].id) || '');
+  if(_MV_ANNUL && _MV_ANNUL.k === k) return _MV_ANNUL.a;
+  var a = {};
+  for(var i = 0; i < J.length; i++){
+    var j = J[i];
+    if(!j || j.meteo || !j.parcelle || !j.tache || String(j.statut || '') !== 'Annul\u00e9') continue;
+    var t = _mvJHeure(j), d = String(j.date || '').slice(0, 10), c = String(j.parcelle) + '\u0000' + j.tache;
+    (a[c] = a[c] || []).push({ t: t, d: d, e: j.etape ? String(j.etape) : '', per: _mvJPer(t, d) });
+  }
+  _MV_ANNUL = { k: k, a: a };
+  return a;
+}
+function _mvAnnulee(j){
+  if(!j || !j.parcelle || !j.tache) return false;
+  var st = String(j.statut || '');
+  if(st !== 'Valid\u00e9' && st !== 'En cours') return false;
+  var L = _mvAnnulIdx()[String(j.parcelle) + '\u0000' + j.tache];
+  if(!L) return false;
+  var t = _mvJHeure(j), d = String(j.date || '').slice(0, 10), e = j.etape ? String(j.etape) : '', per = null;
+  for(var i = 0; i < L.length; i++){
+    var a = L[i];
+    if(a.e && a.e !== e) continue;                        // une étape annulée ne vise qu'elle
+    if(!((a.t && t) ? a.t > t : a.d >= d)) continue;      // saisie APRÈS l'annulation : elle compte
+    if(per === null) per = _mvJPer(t, d);
+    if(a.per === per) return true;                        // saisie pendant la même période
+  }
+  return false;
+}
+// ★★ ARRACH-8 (§306) — APRÈS SA DATE D'ARRACHAGE, UNE PARCELLE NE PORTE PLUS QUE L'ARRACHAGE.
+//   Deux lectures de p.dateArrachage (posée par saveArrachage), qui jusqu'ici ne servait qu'à l'affichage :
+//   · _mvApresArrachage(p, j) : une saisie de travail (Validé, En cours) d'une AUTRE tâche, datée après
+//     l'arrachage, est une erreur — vécu : une parcelle arrachée avant l'appli, déclarée après coup, portait des
+//     passages saisis entre-temps. Elle reste au journal (rien ne s'efface) mais ne compte plus : ni temps réel
+//     (_ecoTvEvents), ni « dernier passage ». Une « Annulé » n'est jamais écartée : elle doit trouver ce qu'elle vise.
+//   · _mvArrAvantPeriode(p) : arrachée AVANT le début de la période consultée → plus aucun travail dans cette
+//     période, même l'arrachage — sauf un arrachage en étapes entamé et pas fini (app.js, _arrEntame).
+//   Sans date d'arrachage (parcelle déclarée avant ARRACH-1), rien ne change.
+function _mvArrDate(p){
+  var d = String((p && p.dateArrachage) || '').slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : '';
+}
+window._mvApresArrachage = function(p, j){
+  if(!p || !j || p.statut !== 'Arrachee' || j.tache === 'Arrachage') return false;
+  var st = String(j.statut || '');
+  if(st !== 'Valid\u00e9' && st !== 'En cours') return false;
+  var a = _mvArrDate(p);
+  return !!a && String(j.date || '').slice(0, 10) > a;
+};
+function _mvArrAvantPeriode(p, vn){
+  if(!p || p.statut !== 'Arrachee') return false;
+  var a = _mvArrDate(p); if(!a) return false;
+  if(vn == null) vn = (typeof window._visuSaison === 'function') ? window._visuSaison()
+    : (((typeof window.getSaisonActive === 'function') ? window.getSaisonActive() : null) || {}).nom;
+  var s = _saisonObj(vn);
+  if(!s || !s.debut || a >= String(s.debut).slice(0, 10)) return false;
+  if(typeof window._arrEntame === 'function' && window._arrEntame(p)) return false;
+  return true;
+}
 var _MV_SEL_TRAV = null;
 function _mvSelTravaillees(camp){
   var c = _mvCampNum(camp);
@@ -7190,6 +7285,7 @@ function _mvSelTravaillees(camp){
     if(!d || d < b.d0 || d > b.d1) continue;
     var st = String(j.statut || '');
     if(st !== 'Valid\u00e9' && st !== 'En cours') continue;
+    if(_mvAnnulee(j)) continue;   // ★ ARRACH-8 : annulée ensuite, elle ne fait plus une parcelle « travaillée »
     m[String(j.parcelle) + '\u0000' + j.tache] = true;
   }
   _MV_SEL_TRAV = { k: k, m: m };
@@ -7199,9 +7295,10 @@ function _mvSelChoisie(p, nom, camp){
   var s = p && p.selCamp;
   return !!(s && typeof s === 'object' && !Array.isArray(s) && Number(s[nom]) === _mvCampNum(camp));
 }
-// Une parcelle arrachée ne reçoit plus que l'arrachage.
+// Une parcelle arrachée ne reçoit plus que l'arrachage — et plus rien du tout dans une période qui commence
+// après son arrachage (★ ARRACH-8, _mvArrAvantPeriode).
 function _mvSelEligible(p, nom){
-  return !!(p && p.nom != null && (p.statut !== 'Arrachee' || nom === 'Arrachage'));
+  return !!(p && p.nom != null && (p.statut !== 'Arrachee' || nom === 'Arrachage') && !_mvArrAvantPeriode(p));
 }
 function _mvTacheConcerne(p, nom, camp){
   if(!p) return false;
@@ -7274,6 +7371,8 @@ window._mvSelEligible     = _mvSelEligible;
 window._mvTacheConcerne   = _mvTacheConcerne;
 window._mvTacheExclue     = _mvTacheExclue;
 window._mvSelPose         = _mvSelPose;
+window._mvAnnulee         = _mvAnnulee;
+window._mvArrAvantPeriode = _mvArrAvantPeriode;
 window._mvSelResume       = _mvSelResume;
 
 // ════════════════════════════════════════════════════════════════════════════

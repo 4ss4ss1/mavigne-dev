@@ -8168,7 +8168,7 @@ function renderParcelles(){
     // Filtre par tâche : afficher seulement les parcelles où la tâche n'est pas encore Validé
     if(pTacheFilter!=='toutes'){
       // SEL-1 : une parcelle arrachée ne reste visible que sous « Arrachage », et seulement si elle est concernée.
-      if(p.statut==='Arrachee'&&pTacheFilter!=='Arrachage')return false; // jamais dans le filtre tâche
+      if(_mvArrHors(p,pTacheFilter))return false; // jamais dans le filtre tâche — ARRACH-8 : la règle de la fiche (arrachée avant la période : plus rien)
       if((typeof _mvExclu==='function')?_mvExclu(p,pTacheFilter):(p.tachesExclues||[]).includes(pTacheFilter))return false; // tâche désactivée (ou non choisie cette campagne, SEL-1)
       if(!window.pShowDone&&_pvCurDone(p,pTacheFilter))return false; // étape/tâche courante déjà faite (QV)
     }
@@ -8308,7 +8308,24 @@ var _pSelNom='';
 var _P_MOIS=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
 function _pDesk(){ return !!(window.matchMedia&&window.matchMedia('(min-width:1024px)').matches); }
 function _pDateFr(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso||'')); return m?((+m[3])+'\u00a0'+_P_MOIS[+m[2]-1]):'\u2014'; }
-function _pDernier(nom,tache){ var d=''; (JOURNAL||[]).forEach(function(e){ if(e&&e.parcelle===nom&&e.tache===tache&&e.statut==='Valid\u00e9'&&String(e.date||'')>d)d=String(e.date); }); return d?_pDateFr(d):'\u2014'; }
+// ★ ARRACH-8 (§306) : le dernier passage VALABLE, dans la période consultée. Une validation annulée ensuite ne
+//   compte plus (utils.js, _mvAnnulee), ni un passage d'une autre tâche saisi après l'arrachage
+//   (_mvApresArrachage). Avant : la dernière validation de TOUT le journal — un arrachage annulé deux fois
+//   restait « Dernier passage », et la taille de l'hiver d'avant s'affichait sous « Travaux de la campagne ».
+function _pDernier(nom,tache){
+  var d='', vn=(typeof _visuSaison==='function')?_visuSaison():((getSaisonActive()||{}).nom||'');
+  var p=(PARCELLES||[]).find(function(x){return x&&x.nom===nom;});
+  var ann=(typeof window._mvAnnulee==='function')?window._mvAnnulee:null, apr=(typeof window._mvApresArrachage==='function')?window._mvApresArrachage:null;
+  (JOURNAL||[]).forEach(function(e){
+    if(!e||e.meteo||e.parcelle!==nom||e.tache!==tache||e.statut!=='Valid\u00e9')return;
+    var ds=String(e.date||'').slice(0,10); if(!ds||ds<=d)return;
+    if(vn&&typeof window._saisonForDate==='function'&&window._saisonForDate(ds)!==vn)return;
+    if(ann&&ann(e))return;
+    if(apr&&p&&apr(p,e))return;
+    d=ds;
+  });
+  return d?_pDateFr(d):'\u2014';
+}
 function _pEtatBadge(e){ return e==='fait'?_mvBadge('Fait','vert'):(e==='cours'?_mvBadge('En cours','neutre'):_mvBadge('\u00c0 faire','neutre')); }
 function _pEtatTache(p){ return _pvCurDone(p,pTacheFilter)?'fait':(_pvCurStarted(p,pTacheFilter)?'cours':'afaire'); }
 function _pRow(p,cl,etat,drae,prox,cep){
@@ -8345,17 +8362,33 @@ function _pFicheHtml(p){
   var _fo=(typeof window._mvParcFormeHtml==='function')?window._mvParcFormeHtml(p.nom,520,170,'pfxf'):'';
   if(_fo)h+='<div class="mv-forme pfx-forme">'+_fo+'</div>';
   if(drae)h+='<div class="pfx-drae"><b>D\u00e9lai de r\u00e9entr\u00e9e\u00a0: '+drae.heures+'\u00a0h</b> ('+_escHtml(drae.produit||'traitement')+'). Personne dans les rangs avant la fin du d\u00e9lai.</div>';
+  // ★ ARRACH-8 (§306) : une parcelle arrachée le dit en haut de la fiche, avec sa date — la fiche complète le dit déjà.
+  if(p.statut==='Arrachee'){ var _ad=(typeof _arrFrDate==='function')?_arrFrDate(p.dateArrachage):'', _av=(typeof window._mvArrAvantPeriode==='function')&&window._mvArrAvantPeriode(p);
+    h+='<div class="pfx-arr"><b>'+(_ad?'Arrach\u00e9e le '+_escHtml(_ad):'Arrach\u00e9e')+'</b>'+(p.motifArrachage?' \u00b7 '+_escHtml(p.motifArrachage):'')+'. '+(_av?'Plus aucun travail \u00e0 y faire.':'Seul l\u2019arrachage s\u2019y valide encore.')+'</div>'; }
   if(pTacheFilter!=='toutes')h+='<div class="pfx-tache"><span>'+_escHtml(tNom(pTacheFilter))+'</span>'+_pEtatBadge(_pEtatTache(p))+'</div>';
   h+='<div class="pfx-kpis"><div class="pfx-kpi"><span class="l">Avancement de la campagne</span><span class="v">'+cl.pct+'<small>\u00a0%</small></span><span class="prow-bar"><i class="'+(cl.pct===100?'ok':'')+'" style="--p:'+cl.pct+'%"></i></span></div>'
     +'<div class="pfx-kpi"><span class="l">T\u00e2ches</span><span class="v">'+_escHtml(_pvCompte(cl))+'</span></div>'
     +'<div class="pfx-kpi"><span class="l">Surface</span><span class="v">'+_pvSurfFr(p.surface)+'<small>\u00a0ha</small></span></div></div>';
-  h+='<section class="pfx-sec"><div class="pfx-sec-t">Travaux de la campagne</div><table class="pfx-tbl"><thead><tr><th>T\u00e2che</th><th>\u00c9tat</th><th class="r">Dernier passage</th></tr></thead><tbody>'
-    +getTachesSaison().map(function(t){ var st=getTacheStatut(p,t.nom)||'Non d\u00e9marr\u00e9', e=st==='Valid\u00e9'?'fait':(st==='En cours'?'cours':'afaire');
+  // ★ ARRACH-8 (§306) : les MÊMES règles que la fiche complète (openDP) et que le « n/N tâches » juste au-dessus.
+  //   Une arrachée ne porte que l'arrachage (plus rien s'il est d'avant la période) ; une tâche désactivée sur la
+  //   parcelle, ou pas choisie pour la campagne (SEL-1), est grisée — jamais « À faire ». Avant : toutes les tâches
+  //   de la période, « À faire » sur une parcelle dont la fiche complète les disait désactivées.
+  var _tv=getTachesSaison().filter(function(t){ return !_mvArrHors(p,t.nom); });
+  h+='<section class="pfx-sec"><div class="pfx-sec-t">Travaux de la campagne</div>'+(_tv.length?'<table class="pfx-tbl"><thead><tr><th>T\u00e2che</th><th>\u00c9tat</th><th class="r">Dernier passage</th></tr></thead><tbody>'
+    +_tv.map(function(t){
+      if((typeof _mvExclu==='function')?_mvExclu(p,t.nom):(p.tachesExclues||[]).indexOf(t.nom)>=0)
+        return '<tr class="pfx-off'+(t.nom===pTacheFilter?' pfx-cur':'')+'"><td>'+_escHtml(tNom(t.nom))+'</td><td>'+_mvBadge((typeof window._mvTacheSel==='function'&&window._mvTacheSel(t.nom))?'Pas choisie':'Non applicable','neutre')+'</td><td class="r">\u2014</td></tr>';
+      var st=getTacheStatut(p,t.nom)||'Non d\u00e9marr\u00e9', e=st==='Valid\u00e9'?'fait':(st==='En cours'?'cours':'afaire');
       return '<tr'+(t.nom===pTacheFilter?' class="pfx-cur"':'')+'><td>'+_escHtml(tNom(t.nom))+'</td><td>'+_pEtatBadge(e)+'</td><td class="r">'+_escHtml(_pDernier(p.nom,t.nom))+'</td></tr>'; }).join('')
-    +'</tbody></table></section>';
+    +'</tbody></table>':'<div class="pfx-rien">'+(p.statut==='Arrachee'?'Plus aucun travail sur cette parcelle.':'Aucun travail pr\u00e9vu pour cette p\u00e9riode.')+'</div>')+'</section>';
   var j=(JOURNAL||[]).filter(function(e){return e&&e.parcelle===p.nom;}).sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''));}).slice(0,4);
+  // ★ ARRACH-8 : l'état EFFECTIF de chaque ligne — une validation annulée ensuite, ou un passage saisi après l'arrachage, le dit.
+  var _ann=(typeof window._mvAnnulee==='function')?window._mvAnnulee:null, _apr=(typeof window._mvApresArrachage==='function')?window._mvApresArrachage:null;
   h+='<section class="pfx-sec"><div class="pfx-sec-t">Derniers passages</div>'+(j.length?j.map(function(e){
-      return '<div class="pfx-fil"><span class="d">'+_escHtml(_pDateFr(e.date))+'</span><span class="tx"><b>'+_escHtml(tNom(e.tache||''))+'</b>'+(e.qui?', '+_escHtml(e.qui):'')+'</span><span class="s">'+_escHtml(e.statut||'')+'</span></div>'; }).join('')
+      var s=e.statut||'';
+      if(_ann&&(s==='Valid\u00e9'||s==='En cours')&&_ann(e))s='Annul\u00e9 ensuite';
+      else if(_apr&&_apr(p,e))s='Apr\u00e8s l\u2019arrachage';
+      return '<div class="pfx-fil"><span class="d">'+_escHtml(_pDateFr(e.date))+'</span><span class="tx"><b>'+_escHtml(tNom(e.tache||''))+'</b>'+(e.qui?', '+_escHtml(e.qui):'')+'</span><span class="s">'+_escHtml(s)+'</span></div>'; }).join('')
     :'<div class="pfx-rien">Aucun passage sur cette parcelle pour l\u2019instant.</div>')+'</section>';
   return h;
 }
@@ -8599,6 +8632,9 @@ function _arrEquipeFiniePartout(){
   var L=(typeof _parcConcern==='function')?_parcConcern('Arrachage'):[];
   return L.length>0&&L.every(_arrEquipeFinie);
 }
+// ★ ARRACH-8 (§306) : un arrachage en étapes COMMENCÉ et pas fini cette campagne. La suite reste à valider, même
+//   dans une période qui commence après la date d'arrachage (utils.js, _mvArrAvantPeriode).
+window._arrEntame = function(p){ if(!_arrActif()) return false; var n=_arrNbFaites(p); return n>0 && n<_arrCfg().etapes.length; };
 function _arrSyncTache(p){
   if(!p.taches) p.taches={};
   if(typeof _mvOnActiveSaison==='function'&&!_mvOnActiveSaison()) return;
@@ -8737,19 +8773,34 @@ function annulerArrEtape(){
 //   ① déclarer « Arrachée » propose de valider le travail dans la même feuille (coché d'office) ;
 //   ② valider l'arrachage (arrachage simple) sur une vigne en place propose de la déclarer arrachée.
 // Avec les étapes (ARRACH-3), ① renvoie aux étapes de la fiche et ② existe déjà (saveArrEtape).
-var _ARRV={on:false};
-function _arrValideRowMaj(p){
+var _ARRV={on:false,avant:false};
+// ★ ARRACH-8 (§306) : un arrachage daté d'AVANT la période en cours ne se valide pas dans cette période. L'état des
+//   tâches (p.taches) est celui de la période ACTIVE : y écrire un arrachage de janvier le comptait comme fait
+//   cette saison, et cochait la parcelle pour la campagne du jour (vécu : une parcelle arrachée avant l'appli).
+//   La parcelle passe « Arrachée », rien d'autre ; la feuille le dit, et l'écriture le refuse aussi.
+function _arrDateAvantPeriode(date){
+  var s=(typeof getSaisonActive==='function')?getSaisonActive():null;
+  return !!(date&&s&&s.debut&&String(date).slice(0,10)<String(s.debut).slice(0,10));
+}
+// parDate : rappel quand la date change — la case garde le choix de l'admin, sauf en revenant d'une date passée.
+function _arrValideRowMaj(p,parDate){
   var row=document.getElementById('arr-valide-row'); if(!row) return;
   var dans=(typeof getTachesSaison==='function')&&getTachesSaison().some(function(t){return t&&t.nom==='Arrachage';});
   var deja=(typeof getTacheStatut==='function')&&getTacheStatut(p,'Arrachage')==='Valid\u00e9';
   if(!dans||deja){ row.style.display='none'; row.innerHTML=''; _ARRV.on=false; return; }
   row.style.display='';
+  if(_arrDateAvantPeriode(((document.getElementById('arr-date')||{}).value)||'')){
+    _ARRV.on=false; _ARRV.avant=true;
+    row.innerHTML='<div class="mv-l" style="margin-top:12px">Date d\u2019avant la p\u00e9riode en cours\u00a0: la parcelle passe \u00ab\u00a0Arrach\u00e9e\u00a0\u00bb sans rien valider, et ne porte plus aucun travail dans cette p\u00e9riode.</div>';
+    return;
+  }
   if(_arrActif()){
-    _ARRV.on=false;
+    _ARRV.on=false; _ARRV.avant=false;
     row.innerHTML='<div class="mv-l" style="margin-top:12px">L\u2019arrachage est d\u00e9coup\u00e9 en \u00e9tapes : elles se valident dans la fiche de la parcelle, m\u00eame arrach\u00e9e.</div>';
     return;
   }
-  _ARRV.on=true;
+  if(!parDate||_ARRV.avant) _ARRV.on=true;
+  _ARRV.avant=false;
   _arrValideRowRendre(row);
 }
 function _arrValideRowRendre(row){
@@ -8765,6 +8816,7 @@ function _arrValideBascule(){
 function _arrValideAuPassage(p,date){
   if(!_ARRV.on||!p) return false;
   _ARRV.on=false;
+  if(_arrDateAvantPeriode(date)) return false;   // ★ ARRACH-8 : la garde est DANS l'écriture, pas seulement dans la feuille
   if(typeof getTacheStatut==='function'&&getTacheStatut(p,'Arrachage')==='Valid\u00e9') return false;
   _arrJournal({id:Date.now().toString(16)+'-ar',date:date,parcelle:p.nom,tache:'Arrachage',
                qui:currentUser.nom,statut:'Valid\u00e9',equipe:false,membresEquipe:[]});
@@ -8783,7 +8835,7 @@ function _arrProposer(nom,date){
   if(!p||p.statut==='Arrachee') return false;
   _dpCurrentNom=nom;
   openDPArrachage();
-  var d=document.getElementById('arr-date'); if(d&&date) d.value=date;
+  var d=document.getElementById('arr-date'); if(d&&date){ d.value=date; _arrValideRowMaj(p,true); }   // ARRACH-8 : la case suit la date proposée
   return true;
 }
 
@@ -8911,7 +8963,7 @@ function openDPArrachage(){
   var el;
   el=document.getElementById('arr-hidden-nom'); if(el) el.value=p.nom;
   el=document.getElementById('arr-parc-nom'); if(el) el.textContent=p.nom+' \u00b7 '+_pvSurfFr(p.surface)+' ha';
-  el=document.getElementById('arr-date'); if(el){ el.value=_arrIsoJour(); el.max=_arrIsoJour(); }
+  el=document.getElementById('arr-date'); if(el){ el.value=_arrIsoJour(); el.max=_arrIsoJour(); el.onchange=el.oninput=function(){ _arrValideRowMaj(p,true); }; }   // ARRACH-8 : la case suit la date
   el=document.getElementById('arr-motif');
   if(el) el.innerHTML=_ARR_MOTIFS.map(function(m){return '<option value="'+_escAttr(m)+'">'+_escHtml(m)+'</option>';}).join('');
   el=document.getElementById('arr-note'); if(el) el.value='';
@@ -9808,7 +9860,7 @@ function openJournalEntry(){
   // SEL-1 : une parcelle arrachée reste saisissable pour son ARRACHAGE (ramassage des souches, des
   //   piquets…) tant qu'elle est concernée cette campagne. Sans elle, ces heures attendaient au
   //   planning puis se versaient sur la prochaine parcelle validée ailleurs (§172).
-  var _jeArr=PARCELLES.filter(p=>p.statut==='Arrachee'&&typeof window._mvTacheConcerne==='function'&&window._mvTacheConcerne(p,'Arrachage'));
+  var _jeArr=PARCELLES.filter(p=>p.statut==='Arrachee'&&typeof window._mvTacheConcerne==='function'&&window._mvTacheConcerne(p,'Arrachage')&&!_mvArrHors(p,'Arrachage'));   // ARRACH-8 : pas une arrachée d'avant la période
   if(_jeArr.length) ps.innerHTML+='<optgroup label="Arrach\u00e9es \u2014 arrachage seulement">'+_jeArr.map(p=>`<option value="${_escHtml(p.nom)}">${_escHtml(p.nom)}</option>`).join('')+'</optgroup>';
   document.getElementById('je-date').value=_mvToday();
   var _jeD=document.getElementById('je-date');
@@ -9938,10 +9990,13 @@ function injectMeteoIfNeeded(date){
 //   trois parcelles arrachées affichaient « 50 % · 1/2 tâches » alors que l'arrachage y était à
 //   0 % — getPCls comptait les AUTRES travaux de la période sur une vigne qui n'existe plus, et la
 //   fiche laissait les valider. Une seule règle, lue par l'avancement, la fiche et chaque geste.
-function _mvArrHors(p,nom){ return !!(p && p.statut==='Arrachee' && nom!=='Arrachage'); }
+// ★ ARRACH-8 (§306) : et plus RIEN, même l'arrachage, dans une période qui commence après son arrachage
+//   (utils.js, _mvArrAvantPeriode — sauf un arrachage en étapes entamé et pas fini). Une seule ligne : trois
+//   harnais la lisent ainsi (AVC-ARR, ARRACH-7, COH-1).
+function _mvArrHors(p,nom){ return !!(p && p.statut==='Arrachee' && nom!=='Arrachage') || !!(nom==='Arrachage' && typeof window._mvArrAvantPeriode==='function' && window._mvArrAvantPeriode(p)); }
 function _mvArrRefus(p,nom){
   if(!_mvArrHors(p,nom)) return false;
-  showToast('Parcelle arrach\u00e9e : seul l\u2019arrachage s\u2019y valide','#B85A1A');
+  showToast(nom==='Arrachage'?'Parcelle arrach\u00e9e avant cette p\u00e9riode\u00a0: plus rien \u00e0 y valider':'Parcelle arrach\u00e9e : seul l\u2019arrachage s\u2019y valide','#B85A1A');
   return true;
 }
 function _mvExclu(p,nom,exclues){

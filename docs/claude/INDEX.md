@@ -15,6 +15,7 @@
 | — | Descendu du §28 de CLAUDE.md le 09/10/2026 (CADRE-1, plafond du cœur) | `docs/claude/journal.md` |
 | — | Descendu du §28 de CLAUDE.md le 09/10 (GF-1) — plafond du cœur, historique sans consigne | `docs/claude/journal.md` |
 | — | Descendu de `CLAUDE.md` §28 le 09/10 (BUILD-1, §305) — plafond du cœur | `docs/claude/journal.md` |
+| — | Descendu de `CLAUDE.md` §28 le 10/10 (ARRACH-8, §306) — plafond du cœur, historique sans consigne | `docs/claude/journal.md` |
 | 1 | 1. Identité & contexte | `CLAUDE.md` |
 | 2 | 2. Inventaire fonctionnel — 10 modules | `CLAUDE.md` |
 | 3 | 3. Positionnement commercial | `CLAUDE.md` |
@@ -353,3 +354,4 @@
 | 303 | 303. ★ GF-2 — LE « ≈ » QUE LES POLICES NE SAVENT PAS DESSINER (09/10 — `src/cuvier.js` · `scripts/subset-ba… | `docs/claude/chantiers-280-329.md` |
 | 304 | 304. ★ GF-3 — DEUX LIGNES D'AIDE QUI CHEVAUCHAIENT LEUR CHAMP (09/10 — `index.html` · `public/sw.js` · `CLA… | `docs/claude/chantiers-280-329.md` |
 | 305 | 305. ★★ BUILD-1 — LE BUILD NE JOUE PLUS LES CONTRÔLES UN PAR UN (09/10 — `scripts/mv-lanceur.mjs` · `script… | `docs/claude/chantiers-280-329.md` |
+| 306 | 306. ★★ ARRACH-8 — LA PARCELLE ARRACHÉE AVANT L'APPLI, DÉCLARÉE APRÈS COUP ; UNE ANNULATION COMMUNE (10/10 … | `docs/claude/chantiers-280-329.md` |

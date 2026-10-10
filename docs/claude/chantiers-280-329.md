@@ -786,3 +786,62 @@ l'e2e avant de l'adopter.
 - Projection (durées mesurées, partage parfait supposé) : contrôles 552 s une par une → **140 s à 4 cœurs**, plancher `recup --contre` ; + Vite 41 s.
 - Chaîne rejouée sur l'état final du zip (marque posée, `.mv-base` armé) : **347/347, 0 rouge, 580 s** (4 à la fois sur 1 cœur).
 - ⚠️ **Pas vérifié** : la vitesse sur le PC de Nico (Windows, nombre de cœurs inconnu). La dernière ligne du lanceur la donne, avec les 5 plus longues.
+
+## 306. ★★ ARRACH-8 — LA PARCELLE ARRACHÉE AVANT L'APPLI, DÉCLARÉE APRÈS COUP ; UNE ANNULATION COMMUNE (10/10 — `src/app.js` · `src/utils.js` (définitions communes, APP, WHATS_NEW, aide) · `src/pilotage.js` · `src/styles.css` · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-arrach8.mjs` (neuf) · `scripts/mv-harnais-arrach6.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-280-329.md` · `docs/claude/INDEX.md` · `lots/ARRACH-8.json` · **APP 8.73 → 8.74, SW 9.52 → 9.53**, base `cbfcb8e`)
+
+### 306a. La demande, et ce que le code disait
+
+Capture de Nico (09/10, vue ordinateur) : une parcelle arrachée en janvier 2026, avant que l'appli tourne, donc « Arrachée » dès l'installation, ses tâches
+désactivées. Des passages y avaient été saisis ensuite. Pour la redéclarer à sa vraie date avec le module d'arrachage, il l'a remise en exploitation. La fiche de
+droite disait alors « À faire » pour les sept tâches, « 0/1 tâche » juste au-dessus, et « Dernier passage » de l'arrachage au 25 sept. malgré deux « Annulé »
+du 9 oct. — pendant que la fiche complète disait les tâches désactivées. Objectif reformulé, confirmé (« oui »). Cinq défauts, tous lus dans le code :
+1. **`_pFicheHtml`** (PARC-1, §274) remplissait « Travaux de la campagne » avec `getTachesSaison()` brut : ni `_mvExclu` (tâche désactivée, SEL-1) ni `_mvArrHors`
+   (AVC-ARR) — que respectent `getPCls` (le « 0/1 ») et `openDP`. Deux lectures sur le même écran.
+2. **`_pDernier`** prenait la dernière validation de TOUT le journal : ni les annulations, ni la période consultée (§16 : « toute fonction qui croise tâches et
+   journal filtre sur `_visuSaison()` »).
+3. **`_mvSelTravaillees`** (SEL-1) ignorait les annulations : un arrachage validé puis annulé gardait la parcelle « travaillée », donc concernée, donc à faire.
+4. **`_arrValideAuPassage`** (ARRACH-6) écrivait la validation dans `p.taches` — l'état de la période ACTIVE — même datée de janvier, et cochait la parcelle pour la
+   campagne du jour.
+5. **`p.dateArrachage`** ne servait qu'à l'affichage. Aucune règle ne la lisait : les passages saisis après elle comptaient, et le temps réel (`_ecoTvEvents`, qui ne
+   filtre pas les arrachées, §205a) leur versait des heures.
+Et en cherchant où lire une annulation : TROIS définitions existaient déjà — `_mvDerniereValidee` (CIBLE-1 : tout ce qui a été saisi avant l'annulation),
+`_ecoTvEvents` (la DERNIÈRE clôture du couple), `_ecoPrestaByParc` (rejeu par étape) — aucune avec les étapes ET la période.
+
+### 306b. Les règles posées
+
+- **`_mvAnnulee(j)`** (utils.js, bloc SEL-1, exposée) : une « Annulé » annule les saisies du couple parcelle × tâche faites AVANT elle, PENDANT la même période ;
+  celle d'une étape n'annule que cette étape. « Avant » = l'heure de saisie (l'id hexadécimal, `_mvJHeure`), sinon le jour ; la période = celle où la saisie a
+  été FAITE (`_mvJPer`, `_saisonForDate`). C'est ce que remet à zéro `annulerTache` (l'état de la période active) : une validation antidatée de janvier saisie le
+  9 octobre est annulée, la taille de l'hiver d'avant ne l'est pas. Index mémorisé comme `_MV_SEL_TRAV` (longueur + ids des bouts). Lue par `_mvSelTravaillees`,
+  `_pDernier` et les derniers passages de la fiche.
+- **`window._mvApresArrachage(p, j)`** : une saisie de travail (Validé, En cours) d'une AUTRE tâche, datée après `dateArrachage`, est une erreur de saisie. Elle reste
+  au journal ; elle ne compte plus au temps réel (marquée `horsArr`, gardée dans `byPair` pour qu'une « Annulé » la trouve, retirée à la fin) ni au dernier passage.
+  L'arrachage lui-même reste permis après la date ; une « Annulé » n'est jamais écartée.
+- **`_mvArrAvantPeriode(p)`** : arrachée AVANT le début de la période consultée → plus aucun travail dans cette période, même l'arrachage — sauf un arrachage en
+  étapes entamé et pas fini (`window._arrEntame`, app.js). Lue par `_mvSelEligible` (donc `_parcConcern`, la sélection, l'avancement) et par `_mvArrHors`, restée
+  sur UNE ligne (AVC-ARR, ARRACH-7 et COH-1 la lisent ainsi) ; le filtre de la liste par tâche et le formulaire du journal passent par `_mvArrHors`. Sans date
+  d'arrachage (déclarée avant ARRACH-1), rien ne change.
+- **La feuille « Arracher »** : `_arrDateAvantPeriode(date)` — date d'avant le début de la période active → pas de case, une phrase le dit ; la garde est AUSSI dans
+  `_arrValideAuPassage`. La case suit la date (`onchange` posé par `openDPArrachage`, et `_arrProposer` après la date proposée) ; changer de date dans la période
+  garde le choix de l'admin (`_ARRV.avant`).
+- **La fiche de droite** : les règles d'`openDP` (désactivée → ligne grisée « Non applicable » ou « Pas choisie », `.pfx-off`) ; bandeau `.pfx-arr` « Arrachée le … »
+  (« Plus aucun travail à y faire » / « Seul l'arrachage s'y valide encore ») ; table vide → « Plus aucun travail sur cette parcelle. » ; derniers passages à l'état
+  effectif (« Annulé ensuite », « Après l'arrachage »). CSS par jetons, dans le bloc PARC-1.
+
+### 306c. Mesuré
+
+- **`mv-harnais-arrach8`** (neuf, branché, vert + contre) : 49 assertions sur les vraies fonctions (utils, app, moteur du temps réel exécuté), 18/18 contre-épreuves
+  qui mordent. **La mesure demandée** (moteur exécuté sans la règle) : une journée de 24 h où la taille est validée sur 0,5 ha et sur 0,087 ha arrachés → 3,56 h
+  (15 %) à la parcelle arrachée ; trois jours en attente puis la seule validation fautive → elle ramassait 24 h, la vraie parcelle 16. Le poids réel chez Nico
+  dépend de ses saisies : non mesurable d'ici.
+- Harnais existants relus et rejoués : `arrach6` (deux ancres de contre-épreuve suivies, 5/5), `avc-arr` 3/3, `arrach7` 5/5, `coh1` 12/12, `selection` 9/9,
+  `arrach3` 10/10, `valid1` 10/10, `parc1` 12/12, `cible` 16/16. Nouveautés exécutées (`mv-whatsnew-check`) : bloc 8.74, niveau 2 pour le chiffre qui bouge.
+- **Chaîne complète** (`mv-lanceur --continuer`, bac à sable à 1 cœur) : 349/349 commandes en 609 s, UN rouge, attendu — `build-guide --check` :
+  `public/guide.html` est dérivé de `guide/` et se régénère par `npm run site` (vérifié : vert après régénération ; le fichier n'est pas livré, §27a).
+- **Pas regardé dans un navigateur** : le Chromium de `@sparticuz/chromium` (méthode du §270c) n'est pas dans le bac à sable. Le rendu de la fiche est
+  vérifié par le harnais (HTML produit), pas à l'œil.
+
+### 306d. Ouvert
+
+§28 « ARRACH-8 — CE QUI RESTE OUVERT » : le geste chez Nico, l'arrachage du 25/09 resté dans sa période, les trois définitions à faire converger, le « 0/0 ».
+⚠️ Leçon : avant d'écrire une règle sur le journal, chercher comment l'appli la lit DÉJÀ — trois copies existaient ; une quatrième aurait reproduit le défaut.

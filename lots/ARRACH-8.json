@@ -1,0 +1,25 @@
+{
+  "lot": "ARRACH-8",
+  "section": "§306",
+  "base": "cbfcb8e788575cab80c8ba1faae9369701b21268",
+  "inclut": [],
+  "date": "2026-10-10",
+  "fichiers": {
+    ".mv-base": "e27368683b8291541440ec127c3dbd0a30272b0be8af11d6a095ead6f4d275d9",
+    "CLAUDE.md": "5ce16228e9c648a93e44eb0014ffce95c4342277d5d593575e3846054358c551",
+    "docs/claude/INDEX.md": "cee565e518efc54f5e3b66d4e687e360a4366743eab8e45fca2d667e1ca86896",
+    "docs/claude/chantiers-280-329.md": "01af5d3b60302a61eada521da395416dabd4e89b1f059e5ae8927cf963acd2dd",
+    "docs/claude/journal.md": "dcbd694ece2890969197fbc9a2a9f03944f6d37d1a74f1487b600430c0bde9ef",
+    "guide/04-vigne.html": "4af2ea14020ff702725674046681a969b3127269d3568bae91e6bdafd5beb16e",
+    "index.html": "2bfb0c86bec7f759ba5b2102e957da724bb0a9b65a48d8b78b1b89e71d75771c",
+    "public/sw.js": "4493be05b8f789592d4a1865c6d647f11f9923da736fa959faaa9b4e239aad04",
+    "scripts/harnais-claude-md.mjs": "3edd90e617ee53acd09dffa2f805c2426418837ad9c3d43e15ce9590f8c1838a",
+    "scripts/mv-harnais-arrach6.mjs": "6d9aff116b868938c38ce912ac77e42fd6f365bf5197d51838068a9db3aff43f",
+    "scripts/mv-harnais-liste.mjs": "85a7eb01af5413350feae44092442286c3ef74335a73a7744ec1169d12702a5b",
+    "src/app.js": "0355a1a9bfd0d3211270ddd00f6c7c23ca9c6e7419be49070588d3915387cfd2",
+    "src/pilotage.js": "9cd966e989cfc09cd37d3388ffeddc314609d3fe9ccc937466f4c129613a2553",
+    "src/styles.css": "561f6541de00436a249e555d7911dda61641876616c54dabfe7fb197658c161c",
+    "src/utils.js": "f7b8cfa5f55fa863bd22d481059253eb24cef3dc7862796928a0e8d3da1388cc",
+    "scripts/mv-harnais-arrach8.mjs": "6ff53d09b4e13a8abdb297e39fa05b1b442b132030e0f5eb29e979e9c439d698"
+  }
+}

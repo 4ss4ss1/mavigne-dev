@@ -6509,6 +6509,9 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
   #p-fiche .pfx-btn{ height:var(--h-sm); padding:0 var(--e-3,12px); border:var(--bw) solid var(--ligne-forte); border-radius:var(--r-sm,6px); background:var(--bg-card); color:var(--texte); font-family:var(--font-ui); font-size:var(--pt-txt,13px); font-weight:var(--fw-med,500); cursor:pointer; }
   #p-fiche .pfx-btn:hover{ background:var(--survol); }
   #p-fiche .pfx-drae{ margin:var(--e-4,16px) var(--e-5,20px) 0; padding:var(--e-3,12px); border-radius:var(--r-sm,6px); background:var(--danger-doux); color:var(--danger); font-size:var(--pt-txt,13px); line-height:var(--lh-texte); }
+  /* ★ ARRACH-8 (§306) : la parcelle arrachée le dit en haut de sa fiche ; une tâche désactivée sur elle est grisée. */
+  #p-fiche .pfx-arr{ margin:var(--e-4,16px) var(--e-5,20px) 0; padding:var(--e-3,12px); border-radius:var(--r-sm,6px); background:var(--survol); color:var(--texte-med); font-size:var(--pt-txt,13px); line-height:var(--lh-texte); }
+  #p-fiche .pfx-arr b{ font-weight:var(--fw-semi,600); color:var(--texte); }
   #p-fiche .pfx-tache{ display:flex; align-items:center; gap:var(--e-2,8px); padding:var(--e-3,12px) var(--e-5,20px); border-bottom:var(--bw) solid var(--ligne,#E7E6E2); font-size:var(--pt-txt,13px); color:var(--texte-doux); }
   #p-fiche .pfx-kpis{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border-bottom:var(--bw) solid var(--ligne,#E7E6E2); }
   #p-fiche .pfx-kpi{ display:flex; flex-direction:column; gap:var(--e-1,4px); padding:var(--e-4,16px) var(--e-5,20px); min-width:0; }
@@ -6525,6 +6528,8 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
   #p-fiche .pfx-tbl tr:last-child td{ border-bottom:0; }
   #p-fiche .pfx-tbl .r{ text-align:right; padding-right:0; color:var(--texte-doux); font-variant-numeric:tabular-nums; }
   #p-fiche .pfx-tbl tr.pfx-cur td{ background:var(--accent-doux); }
+  #p-fiche .pfx-tbl tr.pfx-off td{ color:var(--texte-doux); }
+  #p-fiche .pfx-tbl tr.pfx-off td:first-child{ text-decoration:line-through; }
   #p-fiche .pfx-fil{ display:grid; grid-template-columns:var(--h-row-2) minmax(0,1fr) auto; align-items:center; gap:var(--e-3,12px); min-height:var(--h-row); font-size:var(--pt-txt,13px); color:var(--texte-med); border-top:var(--bw) solid var(--ligne,#E7E6E2); }
   #p-fiche .pfx-fil:first-of-type{ border-top:0; }
   #p-fiche .pfx-fil .d,#p-fiche .pfx-fil .s{ font-size:var(--pt-micro,12px); color:var(--texte-doux); }

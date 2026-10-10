@@ -276,6 +276,7 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-avc-arr.mjs'],
   ['node scripts/mv-harnais-arrach6.mjs'],
   ['node scripts/mv-harnais-arrach7.mjs'],
+  ['node scripts/mv-harnais-arrach8.mjs'],   // ★ ARRACH-8 (§306) — l'arrachee d'avant l'appli, l'annulation commune
   ['node scripts/mv-harnais-coh1.mjs'],
   ['node scripts/mv-harnais-coh1.mjs --contre'],
   ['node scripts/mv-harnais-renf2.mjs'],
@@ -405,6 +406,7 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-avc-arr.mjs --contre'],
   ['node scripts/mv-harnais-arrach6.mjs --contre'],
   ['node scripts/mv-harnais-arrach7.mjs --contre'],
+  ['node scripts/mv-harnais-arrach8.mjs --contre'],
   ['node scripts/mv-harnais-equipes-jour.mjs --contre'],
   ['node scripts/mv-harnais-pic-avenir.mjs --contre', 'le-pic-a-venir-et-sa-contre'],
   ['node scripts/mv-harnais-icones-contre.mjs', 'le-jeu-dicones-et-sa-contre'],

@@ -59,7 +59,7 @@
   <h4>Valider une tâche</h4>
   <ul class="dot">
     <li>Le <b>bas de chaque carte</b> porte les deux gestes : <b>Début</b> pour signaler qu'on attaque la parcelle, <b>Valider</b> pour dire que c'est fini. Aucun des deux n'oblige à ouvrir la parcelle. Quand une tâche est choisie, la carte dit l'état de cette tâche à la place du pourcentage.</li>
-<li><b>Sur un ordinateur</b>, la liste passe à gauche et la fiche de la parcelle choisie s'ouvre à droite, avec sa forme et les mêmes boutons. Les flèches haut et bas passent d'une parcelle à l'autre, la touche V valide ; « Fiche complète » ouvre tout le reste.</li>
+<li><b>Sur un ordinateur</b>, la liste passe à gauche et la fiche de la parcelle choisie s'ouvre à droite, avec sa forme et les mêmes boutons. Les flèches haut et bas passent d'une parcelle à l'autre, la touche V valide ; « Fiche complète » ouvre tout le reste. Une tâche désactivée sur la parcelle y apparaît grisée, comme dans la fiche complète.</li>
     <li>Quand une <b>tournée</b> est fixée pour le domaine, un <b>numéro</b> apparaît devant chaque nom :
     c'est l'ordre de passage, et la liste se range dessus.</li>
     <li>Un bandeau <b>Équipe</b> mémorise qui travaille, pour enchaîner les parcelles sans tout resaisir.</li>
@@ -169,6 +169,10 @@
     La case <b>Valider aussi le travail d'arrachage</b>, cochée d'office, valide l'arrachage de la parcelle à la même date :
     inutile de la remettre en exploitation pour le valider. Dans l'autre sens, valider l'arrachage d'une vigne en place
     propose de la déclarer arrachée.
+    Une parcelle arrachée avant l'appli, ou déclarée longtemps après : indiquez sa vraie date. Si elle tombe avant la période
+    en cours, la case disparaît : la parcelle passe « Arrachée » sans rien valider, et ne porte plus aucun travail dans les
+    périodes qui commencent après son arrachage. Un passage d'un autre travail saisi par erreur après la date d'arrachage reste
+    au journal, mais ne compte plus — ni dans l'avancement, ni dans le temps réel du Pilotage.
     Une erreur ? Dans la même fiche, <b>Remettre en exploitation</b>.
     Le travail d'arrachage continue souvent après cette date (souches, piquets, fils) : tant que la parcelle est choisie
     pour l'arrachage de la campagne, elle reste proposée au journal, en bas de la liste, <b>pour l'arrachage seulement</b>.
