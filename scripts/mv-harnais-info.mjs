@@ -95,8 +95,12 @@ t('toute fiche est posee quelque part', cles.every(estPosee),
 t('la feuille #ovInfo existe dans index.html', /id="ovInfo"/.test(HTML));
 t('l\'hote #info-inner existe (sinon _mvInfoOpen sort sans rien faire)', /id="info-inner"/.test(HTML));
 t('le fond de la feuille ferme l\'overlay', /closeOv\(event,'ovInfo'\)/.test(HTML));
-t('_mvInfoOpen passe par openOv (Echap, retour arriere, empilement)',
-  /openOv\('ovInfo'\)/.test(UNU));
+/* ★ BULLE-1 (§314) : le « i » n'ouvre plus la feuille #ovInfo (elle reste aux nouveautes, d'ou les trois lignes
+   au-dessus) mais une bulle collee a lui. Sa mecanique a son harnais : mv-harnais-bulle1. Ici, la chaine seulement. */
+const _ouvre = (() => { const k = UNU.indexOf('export function _mvInfoOpen('); return k < 0 ? '' : UNU.slice(k, UNU.indexOf('\n}\n', k)); })();
+t('_mvInfoOpen ouvre la bulle (plus la feuille)', _ouvre.includes('_mvBulleOuvrir(') && !/openOv\(/.test(_ouvre));
+t('_mvBulleOuvrir et _mvBulleFermer sont exposes sur window (le cockpit en a besoin)',
+  /window\._mvBulleOuvrir\s*=/.test(UNU) && /window\._mvBulleFermer\s*=/.test(UNU));
 t('_mvInfoOpen et _mvInfoBtn sont exposes sur window',
   /window\._mvInfoOpen\s*=/.test(UNU) && /window\._mvInfoBtn\s*=/.test(UNU));
 t('un seul ecouteur, delegue sur le document', (UNU.match(/data-mvi\]/g) || []).length >= 1
@@ -115,7 +119,8 @@ t('une cle inconnue est tracee, pas avalee en silence',
 /* ══ 4. L'HABILLAGE ══ */
 t('.mv-i est stylee dans styles.css', /\.mv-i\{/.test(CSS));
 t('.mv-i a une cible tactile elargie (::after)', /\.mv-i::after\{/.test(CSS));
-t('.mvi-bd est stylee', /\.mvi-bd\{/.test(CSS));
+t('.mvi-bd est stylee (la feuille des nouveautes)', /\.mvi-bd\{/.test(CSS));
+t('la bulle des « i » est stylee (BULLE-1)', /\.mv-bulle\{/.test(CSS));
 
 /* ══ 5. LE TEXTE A BIEN QUITTE L'ECRAN — pas ete duplique ══
    Trois phrases pilotes : si elles sont encore dans le module ET dans la fiche,

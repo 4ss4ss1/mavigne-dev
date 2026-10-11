@@ -1233,3 +1233,77 @@ un peu la couleur du logo ». Reformulé, proposition validée (« oui »), maqu
 
 ### 313e. Ouvert
 §28 « RAIL-1 — CE QUI RESTE OUVERT ».
+
+## 314. ★★ BULLE-1 — CHAQUE « i » OUVRE UNE BULLE COLLÉE À LUI ; CELLE D'AUJOURD'HUI AVAIT PERDU SON STYLE (11/10 — `src/utils.js` (`_mvInfoOpen`, la bulle `_mvBulle*`, l'écouteur, `_mvInfoBtn`, APP, WHATS_NEW, MV_AIDE) · `src/cockpit-vue.js` (`btnI`, `ouvrirInfo`, squelette, Échap) · `src/styles.css` (bloc BULLE-1) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-bulle1.mjs` (neuf) · `scripts/mv-harnais-info.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-280-329.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/BULLE-1.json` · **APP 8.81 → 8.82, SW 9.60 → 9.61**, base `2e8fb78`)
+
+### 314a. Pourquoi
+Nico (11/10, dicté) : « le i de information […] ça ouvre un vieux texte en bas, dans pilotage. C'est pas du tout clair, c'est pas du tout net. Ce serait
+mieux d'ouvrir une infobulle. Bref, vérifiez aussi dans les autres modules ». Deux mécaniques sous la même phrase :
+- **Aujourd'hui** (`cockpit-vue.js`) : ses « i » (`.ck-i`, `data-info`) ouvraient `#ck-pop`, la bulle de la maquette — **zéro règle de style dans tout le
+  dépôt** : le convertisseur de REF-1 (§266b) l'avait laissée en route. `hidden` retiré, le `<p>` tombait dans le flux, à la fin de `.ck2` : le « vieux texte
+  en bas ». Le `left` / `top` posés par le code ne faisaient rien (position statique). Aucun harnais ne lit un rendu : REF-1 était vert.
+- **Partout ailleurs** : `data-mvi` → `_mvInfoOpen` → la feuille `#ovInfo` (§42c) — montée du bas sur un voile au téléphone, fenêtre au centre dès 768 px.
+  62 fiches : Pilotage 56, Cave 4, Réglages › Documents 2 (dont une DANS une fenêtre). Vigne, Tracteur, Phyto, Planning, Réserve : aucun « i ».
+- Les fiches sont longues : médiane 851 caractères (4 paragraphes), jusqu'à 3 313 (`pil.eco.temps`, 9 §) ; premier paragraphe : médiane 208, au plus 659.
+Validé (« go ») : une seule bulle, celle de la maquette, partout ; le premier paragraphe puis « Lire la suite » ; les Nouveautés gardent leur feuille ; pas
+de nouvelle maquette (c'est la bulle déjà validée).
+
+### 314b. Comment
+- **`_mvBulleOuvrir(ancre, fiche, o)` / `_mvBulleFermer(rendre)`** (utils.js, posées sur `window`) : un seul élément `#mv-bulle`, `position:fixed`, sur le
+  « i ». `_mvInfoOpen(cle, ancre, clavier)` lui passe la fiche (vivante d'abord) ; le cockpit lui passe son texte — `ouvrirInfo` tient en quatre lignes.
+- **Le moteur est pur, donc exécuté par le harnais** : `_mvBulleCalcul` (dessous ; sinon dessus ; sinon le plus grand côté, hauteur bornée et texte qui
+  défile — 12 px de marge, 10 px d'écart, pointe à 16 px au moins des coins), `_mvBulleParagraphes` (plus d'un paragraphe et plus de 480 caractères nus :
+  le premier, puis « Lire la suite »), `_mvBulleLargeur` (360 px fiche titrée, 320 phrase, 86 % de l'écran au plus).
+- **★★ La fenêtre hôte — A11Y-2.** `_mvInertOutside` rend inerte tout ce qui n'est pas la fenêtre du dessus. Posée sur `<body>`, une bulle ouverte depuis
+  une fenêtre serait visible et intouchable, et son clic tomberait sur le voile, qui ferme la fenêtre. Elle se pose donc DANS `closest('.overlay')` (une
+  `.overlay` couvre l'écran : les coordonnées fixes restent justes). Ailleurs sur `<body>` — jamais dans un parent transformé, qui deviendrait le repère du
+  `fixed`. Dans une couche fixe (tiroir 8910, feuille du Cuvier 9000) : z-index de la couche + 1 ; sinon `--z-tip` (800), au-dessus de la barre (35) et
+  du dock (90), sous les dialogues (9200). `mv-harnais-couches` ne la suit pas : ce n'est pas une surface d'accueil.
+- **★ Trouvé au banc, pas à la lecture.** Fermée, la bulle dormait sur `<body>` ; une fenêtre ouverte ensuite la marquait `inert` (`data-mv-inert`) ;
+  rouverte DANS la fenêtre, elle gardait la marque — « Lire la suite » ne répondait plus. Correctif double : fermée, elle quitte le document ; à
+  l'ouverture, une marque A11Y-2 restée sur elle s'efface.
+- **L'écouteur** (document, phase de capture) : `[data-mvi]` → la bulle, `stopPropagation` gardé (la tuile se replierait, §42c). Bulle ouverte : un
+  toucher dans la bulle y reste ; sur son « i », il la referme ; sur un `[data-bulle]` (les « i » du cockpit, qui ouvrent la bulle eux-mêmes), il la ferme
+  et passe — un seul toucher pour changer de « i » ; partout ailleurs, il la ferme ET s'arrête : la carte dessous ne se replie pas, l'onglet ne s'ouvre pas.
+  Échap (capture) : `preventDefault`, que `_mvOvKey` respecte — la bulle d'abord, la fenêtre au second ; le cockpit lit `defaultPrevented`, sinon
+  « Agrandir » se refermait avec.
+- **Elle suit son « i »** : défilement (capture ; pas celui de la bulle) et rotation → même côté, même hauteur ; « i » hors de l'écran → fermée. Une veille
+  (400 ms, bulle ouverte seulement) : fenêtre ouverte par-dessus → fermée ; écran redessiné → raccrochée au même « i » (`sig` : `[data-mvi="…"]` ou
+  `.ck-i[data-info="…"]`), introuvable ou en double → fermée ; « i » déplacé → suivi.
+- Clavier : Entrée ouvre et met le focus dans la bulle (`role=dialog`, nommée par son titre, sinon par le « i ») ; Tab hors de la bulle la ferme ; Échap
+  rend le focus au « i ». `aria-expanded` sur le « i », qui prend la couleur du survol tant que sa bulle est ouverte.
+- Préfixe : `.mvb-` est déjà pris par la Cave (`.mvb-card`…) → `.mv-bulle-*`, `data-bulle`, `data-bulle-suite`, `--mv-bulle-x`.
+- `#ovInfo` reste pour les Nouveautés (`_mvAnnFiche`, `openNouvJournal`), avec `.mvi-bd` / `.mvi-ic`. `#ck-pop`, `infoBtn` et `fermerInfo` quittent le cockpit.
+- En passant : « Explication manquante » disait « n'a pas encore ete ecrite », et la pastille s'annonçait « D'ou vient ce chiffre » : accentués.
+
+### 314c. Accompagnement
+- `MV_AIDE.pilotage`, « Le petit rond « i » » : « une fiche s'ouvre » → la bulle à côté, « Lire la suite », toucher ailleurs pour la refermer. Cave et
+  Réglages : aucune fiche ne décrit le « i » — relues, rien à changer.
+- Guide `11-pilotage.html`, même section : même correction. Visite guidée : aucun sélecteur ne vise un « i » — rien à changer. `MV_INFO` : aucune
+  méthode de calcul ne change — relu, rien à changer.
+- `WHATS_NEW` 8.82 : un item `niv` 0, `pour` tous.
+- Place dans le cœur (plafond 2 800) : trois lignes vides sous des titres du §28 (ARRACH-8, GF-1, FORME-1) ; rien n'est rayé.
+
+### 314d. Mesuré
+- `mv-harnais-bulle1` (neuf) : **45 vertes, 11 contre-épreuves sur 11** — le « i » renvoyé à la feuille, la bulle toujours sur `<body>`, toujours dessous,
+  débordant de l'écran, tout le texte d'un coup, le toucher à côté qui passe à travers, Échap qui ferme la fenêtre, la feuille de la bulle perdue (le
+  défaut d'origine), `#ck-pop` remis, l'Échap du cockpit, `data-bulle` oublié. Le moteur est exécuté ; l'écouteur, la feuille et le cockpit sont lus sans
+  leurs commentaires.
+- `mv-harnais-info` suit la chaîne (le « i » passe par la bulle ; `#ovInfo` reste aux Nouveautés) : 132 vertes. Verts sans changement : jetons 33,
+  échelle 29, typo 7, couches 14, contraste 9, TEXTE-A 13, REF-1 18, REF-2 14, PRO-1 27, AUJ-1 28, AUJ-5 23, AUJ-6 16, AUJ-7 24, AUJ-8 33, CADRE-1 10,
+  KIT-1 12, KIT-2 11, globaux, icônes, `mv-whatsnew-check` (bloc 8.82).
+- Preflight : 0 erreur, 8 avertissements, comme la base. `catch` vides : 1 → 1 (utils.js), 0 → 0 (cockpit-vue.js).
+- **Chromium** (`@sparticuz/chromium` ; banc hors dépôt : vraie feuille, vrai `utils.js`, vraies polices, A11Y-2 et le geste du cockpit rejoués) :
+  **32 vertes, zéro erreur JS**, à 390 × 844 en clair et 1440 × 900 en clair et en sombre — dessous à 10 px, pointe sous le « i » (± 2 px), au-dessus en
+  bas d'écran, « Lire la suite » déplié qui tient dans l'écran et défile, toucher à côté qui ne replie pas la carte, cockpit ↔ pastille en un toucher,
+  suivi au défilement puis fermeture hors écran, fenêtre (bulle dedans, non inerte, « Lire la suite » vivant ; voile et Échap : la bulle d'abord), clavier
+  (focus entré, puis rendu au « i »). ⚠️ Les deux rouges du premier passage venaient du BANC : le point « sur le voile » tombait sur la bulle dépliée,
+  puis le « i » touché la refermait. Le point a changé, pas le code (§25.20 : lequel des deux a tort).
+- **Chaîne complète** (`TZ=Europe/Paris`, `--continuer`) : **365 commandes, 684 s (une à la fois), 1 rouge, attendu** : `build-guide --check` — la page
+  `public/guide.html` est FABRIQUÉE et le lot change sa source. `npm run site` joué ici : vert, rien à réécrire au sitemap ; puis la page remise à l'état
+  du dépôt (on livre la source, jamais le fabriqué, §27d). Empreintes des 15 fichiers du lot identiques avant et après la chaîne.
+- Non vérifié : l'appli entière et les données de Nico (le cockpit n'a été vu qu'à travers son geste rejoué) ; un vrai téléphone ; `npm run build`,
+  `test:smoke`, `test:e2e` ; le déploiement.
+
+### 314e. Ouvert
+§28 « BULLE-1 — CE QUI RESTE OUVERT ».

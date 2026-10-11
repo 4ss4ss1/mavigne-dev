@@ -4690,7 +4690,7 @@ a[href^="mailto:"]{color:var(--or-tx);}
 .mva-fbtn:active{ background:var(--gris); }
 .mva-fbtn.mva-bug{ background:var(--orange-pale); border-color:rgba(184,90,26,0.35); color:var(--texte-med); }
 
-/* — La pastille « i » et sa feuille (#ovInfo) —
+/* — La pastille « i » (sa bulle : plus bas, BULLE-1 ; #ovInfo ne porte plus que les nouveautés) —
    Petite soeur de .mv-help-btn : meme famille, autre question. « ? Aide » dit
    CE QU'ON PEUT FAIRE sur un ecran ; « i » dit D'OU VIENT CE CHIFFRE, et se
    pose a cote du chiffre, jamais en tete de page.
@@ -4719,6 +4719,50 @@ a[href^="mailto:"]{color:var(--or-tx);}
 }
 .mvi-bd p:last-child{ margin-bottom:2px; }
 .mvi-bd b{ color:var(--texte); font-weight:600; }
+.mv-i[aria-expanded="true"]{ border-color:var(--terre); background:var(--or-pale); color:var(--terre); }
+
+/* — LA BULLE DES « i » (BULLE-1, §314) —
+   Une seule pour toute l'appli : les pastilles .mv-i (data-mvi) et les « i » du cockpit (.ck-i, data-bulle).
+   Posée par utils.js (_mvBulleOuvrir) sur <body>, ou DANS la fenêtre qui porte le « i » : A11Y-2 rend le reste
+   inerte. Position fixe calculée sur le « i » — dessous, au-dessus faute de place (data-cote), la pointe sous le
+   « i » (--mv-bulle-x). Le texte défile dans .mv-bulle-c quand la hauteur est bornée : la pointe vit sur la bulle
+   elle-même, hors de la zone qui défile, sinon elle serait rognée.
+   ⚠️ [hidden] redit : .mv-bulle pose display:flex, qui l'emporterait sur la feuille du navigateur.
+   ⚠️ Les durées passent par les jetons MOUV-1 : « moins d'animations » les ramène à 1 ms. */
+.mv-bulle{
+  position:fixed; left:0; top:0; z-index:var(--z-tip,800); box-sizing:border-box;
+  display:flex; flex-direction:column; max-width:calc(100vw - var(--e-6,24px));
+  background:var(--bg-card); color:var(--texte-med);
+  border:var(--bw,1px) solid var(--ligne,#E7E6E2); border-radius:var(--r-lg,12px);
+  box-shadow:var(--shadow-lg,0 16px 40px -8px rgba(20,18,14,.22),0 4px 10px -4px rgba(20,18,14,.10));
+  font-family:var(--font-ui,Outfit,system-ui,sans-serif); font-size:var(--pt-txt,13px); font-style:normal;
+  font-weight:var(--fw-reg,400); line-height:var(--lh-texte,1.5); letter-spacing:normal; text-align:left;
+  text-transform:none; white-space:normal;
+  opacity:0; transform:translateY(-4px) scale(.98); transform-origin:var(--mv-bulle-x,50%) 0;
+  transition:opacity var(--mv-d1,140ms) var(--mv-sortie,ease-out),transform var(--mv-d2,240ms) var(--mv-sortie,ease-out);
+}
+.mv-bulle[data-cote="haut"]{ transform:translateY(4px) scale(.98); transform-origin:var(--mv-bulle-x,50%) 100%; }
+.mv-bulle.ouvert{ opacity:1; transform:none; }
+.mv-bulle[hidden]{ display:none; }
+.mv-bulle:focus{ outline:none; }
+.mv-bulle:focus-visible{ box-shadow:var(--focus-ombre),var(--shadow-lg,0 16px 40px -8px rgba(20,18,14,.22),0 4px 10px -4px rgba(20,18,14,.10)); }
+.mv-bulle::before{
+  content:""; position:absolute; left:calc(var(--mv-bulle-x,50%) - 6px); width:10px; height:10px;
+  background:var(--bg-card); border:var(--bw,1px) solid var(--ligne,#E7E6E2); transform:rotate(45deg); pointer-events:none;
+}
+.mv-bulle[data-cote="bas"]::before{ top:-6px; border-right:0; border-bottom:0; }
+.mv-bulle[data-cote="haut"]::before{ bottom:-6px; border-left:0; border-top:0; }
+.mv-bulle-c{ flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:var(--e-3,12px) var(--e-4,16px); }
+.mv-bulle-c p{ margin:0 0 var(--e-2,8px); }
+.mv-bulle-c p:last-child{ margin-bottom:0; }
+.mv-bulle-t{ color:var(--texte); font-weight:var(--fw-semi,600); }
+.mv-bulle b{ color:var(--texte); font-weight:var(--fw-semi,600); }
+.mv-bulle-suite{
+  position:relative; flex:none; align-self:flex-start; margin:0 var(--e-4,16px) var(--e-3,12px); padding:0;
+  border:0; background:none; color:var(--accent-texte,#7A2850); font:inherit; font-weight:var(--fw-semi,600); cursor:pointer;
+}
+.mv-bulle-suite::after{ content:""; position:absolute; inset:-12px -8px; }
+.mv-bulle-suite:hover{ text-decoration:underline; }
 
 /* — LES ICONES (lot DS-1) —
    Un emoji se dessine autrement sur chaque systeme, ne s'aligne pas sur la

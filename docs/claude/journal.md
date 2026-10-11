@@ -8,6 +8,12 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **11 octobre 2026 (RAIL-1)** — ★ **LA BARRE LATÉRALE SUIT L'ORDRE DU DOCK, GARDÉE PAR THÈMES ; UN LOGO DESSINÉ POUR 28 PX** (§313). Lot 44, base `14d9d73`.
+> Nico (11/10, capture de la barre) : « l'ordre devrait être d'abord pilotage, après vigne, tracteur, phyto, cave, réserve, ensuite planning, et après réglage […] garder
+> l'organisation par thème […] mais en mieux. Et si tu peux renforcer un peu la couleur du logo ». Trouvé : le dock avait DÉJÀ cet ordre, la barre le défaisait en rangeant
+> par rubrique (« Gestion » en dernier) ; son logo était l'icône de l'appli réduite à 28 px — traits sous le pixel, jaune à 1,2:1 sur le fond clair. Pilotage en tête, Réglages au pied.
+> **APP 8.80 → 8.81, SW 9.59 → 9.60.** Déploiement : `npm run build` → `firebase deploy --only hosting` (deux images neuves dans `public/`, précachées par `sw.js`).
+
 > Rayés du §28 de `CLAUDE.md` le 11/10 (RAIL-1, plafond du cœur à 2 800 lignes) — trois points réglés, chacun raconté dans sa section : MOTIFS-1 n° 3
 > « ~~Lot suivant : la vue de l'équipe pour les salariés~~ — fait au §251 (VUE-EQUIPE-1) » ; SEL-1 n° 5 « ~~Le coût d'arrachage dans le Revient~~ — fait au §208
 > (Nico : il doit peser sur le prix de la bouteille) » ; REV-1 n° 4 « ~~ROB-2 : ajouter le Revient au tirage au hasard~~ — fait avec le Pilotage (28/09) :

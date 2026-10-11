@@ -3,11 +3,11 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **11 octobre 2026 (RAIL-1)** — ★ **LA BARRE LATÉRALE SUIT L'ORDRE DU DOCK, GARDÉE PAR THÈMES ; UN LOGO DESSINÉ POUR 28 PX** (§313). Lot 44, base `14d9d73`.
-> Nico (11/10, capture de la barre) : « l'ordre devrait être d'abord pilotage, après vigne, tracteur, phyto, cave, réserve, ensuite planning, et après réglage […] garder
-> l'organisation par thème […] mais en mieux. Et si tu peux renforcer un peu la couleur du logo ». Trouvé : le dock avait DÉJÀ cet ordre, la barre le défaisait en rangeant
-> par rubrique (« Gestion » en dernier) ; son logo était l'icône de l'appli réduite à 28 px — traits sous le pixel, jaune à 1,2:1 sur le fond clair. Pilotage en tête, Réglages au pied.
-> **APP 8.80 → 8.81, SW 9.59 → 9.60.** Déploiement : `npm run build` → `firebase deploy --only hosting` (deux images neuves dans `public/`, précachées par `sw.js`).
+> Dernière consolidation : **11 octobre 2026 (BULLE-1)** — ★ **CHAQUE « i » OUVRE UNE BULLE COLLÉE À LUI ; CELLE D'AUJOURD'HUI AVAIT PERDU SON STYLE** (§314). Lot 45, base `2e8fb78`.
+> Nico (11/10, dicté) : « le i de information […] ça ouvre un vieux texte en bas, dans pilotage. C'est pas du tout clair, c'est pas du tout net. Ce serait mieux d'ouvrir une
+> infobulle. […] vérifiez aussi dans les autres modules ». Trouvé : la bulle de la maquette (`#ck-pop`) n'avait AUCUNE règle de style depuis REF-1 — texte nu en bas de page ;
+> ailleurs (62 fiches : Pilotage 56, Cave 4, Documents 2), le « i » ouvrait la feuille `#ovInfo`. Une seule bulle (utils.js), posée DANS la fenêtre quand le « i » y vit (A11Y-2).
+> **APP 8.81 → 8.82, SW 9.60 → 9.61.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1849,6 +1849,9 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ BULLE-1 — CE QUI RESTE OUVERT (§314, posé le 11/10)
+1. **À regarder chez Nico, au téléphone et sur PC** : un « i » d'Aujourd'hui, un du Pilotage à fiche longue (« Lire la suite »), un de la Cave, et celui de Réglages › Documents › Journal des interventions (la bulle DANS la fenêtre). Vus dans Chromium sur un banc (vraie feuille, vrai `utils.js`, A11Y-2 et le geste du cockpit rejoués), pas dans l'appli entière : le branchement du cockpit est tenu par `mv-harnais-bulle1`. Un « i » collé au bord gauche sur ordinateur : la bulle peut passer sur la barre latérale (voulu, elle est au-dessus).
+
 ### ⚠️ RAIL-1 — CE QUI RESTE OUVERT (§313, posé le 11/10)
 1. **À regarder chez Nico, sur son PC** : la barre ouverte et repliée, en clair et en sombre, et le logo à sa vraie taille — rendus dans Chromium à 125 % (vrai `coquille.js`, vraie feuille, données fabriquées). Un admin en mode tracteur garde le Pilotage au-dessus de Terrain (le dock le range après Tracteur, Phyto, Vigne) : à trancher si ça gêne.
 
@@ -1875,7 +1878,6 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 2. Les photos d'avant le 10/10 n'ont pas de période (`p`) : toutes restent affichées jusqu'à leur sortie des 60 jours.
 
 ### ⚠️ ARRACH-8 — CE QUI RESTE OUVERT (§306, posé le 10/10)
-
 1. **Chez Nico, une fois déployé** : redéclarer la parcelle arrachée en janvier (fiche complète → « Arracher cette parcelle… », sa vraie date). La case
    « Valider aussi » doit disparaître ; la fiche de droite dire « Arrachée le … » et « Plus aucun travail sur cette parcelle ». Vérifié par `mv-harnais-arrach8`, ni sur ses données ni dans un navigateur.
 2. **Si la période active a commencé après le 25/09**, l'arrachage validé ce jour-là sur cette parcelle reste vivant dans SA période : l'annulation d'octobre,
@@ -1892,7 +1894,6 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 - Contre-épreuves en CI seulement : écarté pour l'instant (≈ 1 min de gain une fois en parallèle).
 
 ### ⚠️ GF-1 — CE QUI RESTE OUVERT (§302, posé le 09/10)
-
 1. **Deux réglages viennent de Claude, pas de Nico — à caler sur ses cuves** : « ça stagne » sous 5 % de baisse par jour (`_VEND_GF_STAGNE`) et
    une analyse réclamée tous les 4 jours (`_VEND_GF_CAD`). Son rythme d'envoi au labo n'a pas été donné.
 2. **Le repère de densité reste théorique** : sur 0,2 g/L il descend de 0,8 point, alors que les cuves du domaine sont sèches vers 997-998 au
@@ -1902,7 +1903,6 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 4. **`scripts/mv-harnais-cuvier-correction.mjs` ne démarre plus** (il lit `src/cave.js` seul depuis CUV-DEC, §164) et n'est dans aucune chaîne.
 
 ### ⚠️ FORME-1 — CE QUI RESTE OUVERT (§301, posé le 09/10)
-
 1. **À regarder chez Nico, avec SES contours** (essais sur un domaine reconstitué) : PC (loupe, deux colonnes), téléphone (repli, toucher → fiche). Un contour dont le
    nom diffère de la parcelle donne un carré de surface, et la note sous le plan le nomme. Le sens des rangs dessinés est un repère (plus petit rectangle).
 2. Vu, non touché : la carte « La saison, parcelle par parcelle » de l'Accueil dessine encore des carrés de surface (à trancher avec Nico) ; les règles CSS de

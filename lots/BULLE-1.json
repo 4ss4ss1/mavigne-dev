@@ -1,0 +1,24 @@
+{
+  "lot": "BULLE-1",
+  "section": "§314",
+  "base": "2e8fb7889ff0f5204bdbfec4caf1b4a2a8a6966d",
+  "inclut": [],
+  "date": "2026-10-11",
+  "fichiers": {
+    ".mv-base": "9f35e1bd054cefa2288da4f74cd4a67eb184f434a28acbcb27d4a185b018d9f9",
+    "CLAUDE.md": "55d5a6f5bd5b92cd34b995f37ce8306cf0654b2111b3af53e0a1f72a4c6d429f",
+    "docs/claude/INDEX.md": "1a2171a1dad0cb863a2675846edd57357aa9e9171ba04b4c83ac1f0d2d78487f",
+    "docs/claude/chantiers-280-329.md": "0bcd6fb0f08cd9693c4acc1095d04f8b317152a9f86603faade1794ffdae64e8",
+    "docs/claude/journal.md": "024e36998948fa02365167b8fe4bf7bc28c69287361a64b0b3c339541afe1b95",
+    "guide/11-pilotage.html": "dede49e8874af078e64797a903ff6ae46fed7a52ccd8c46d6ef2887d22e6ad99",
+    "index.html": "e9bc5e5910c65b0b1250ffa1704ea3d873643ed40ad9993030b440f51ef3a4ac",
+    "public/sw.js": "963c2928dda70c38b196fa27eba4f45ac50d1cb00938a4cc47c69bec50549d90",
+    "scripts/harnais-claude-md.mjs": "57f89431cfa0ccb6f19664151629613c763327d1fc1f733f3eed3d5d619f0c76",
+    "scripts/mv-harnais-info.mjs": "5847e6b517cf9964d1e5c65f2f7783149a45676528489e393c8801de97e10aec",
+    "scripts/mv-harnais-liste.mjs": "648a0151799e7d76c6dfaa788b0a639fd9c7da631dca65b2d7a1b8db099855c3",
+    "src/cockpit-vue.js": "f46ea617a7194f52a42bc1194e595a96fbf2ca855d8fd21a70f56950d45b1fff",
+    "src/styles.css": "1a5d59fece9c9feadc5a689c29f428b6e8dd92baa8c58c90fa045c90572312df",
+    "src/utils.js": "8338a805ce586a13386232d5364556a066966cf06fb2124cab183b70a1af920e",
+    "scripts/mv-harnais-bulle1.mjs": "39282d9f17bb7d6fe36e7d0d76e8056967dd709f088a475379d954bd8e912211"
+  }
+}

@@ -7,7 +7,7 @@
 // toujours), la palette Ctrl K et la barre latérale (lots suivants, pour toute l'appli).
 // La feuille de style de la maquette est passée à la charte (convertisseur REF-1) : section REF-1 de styles.css.
 // ═════════════════════════════════════════════════════════════════════════════════════════════════
-window._ck2Squelette = function () { return '<div class="ck2"><div class="ck-page ck-entree" id="ck-page"> <div class="ck-tete" id="ck-tete"></div> <section class="ck-photos" id="ck-photos" aria-label="Les quatre photos du domaine"></section> <div class="ck-vue ck-gt" id="ck-vue-terrain"> <div class="ck-col" id="ck-t-a"> <section class="ck-verdict" id="ck-verdict" aria-label="Fin prévue des travaux"></section> <section class="ck-decision ck-panneau" id="ck-decision" aria-label="La décision du jour"></section> <aside class="ck-fil ck-panneau" id="ck-fil" aria-label="Fil en direct"></aside> </div> <div class="ck-col" id="ck-t-b"> <section class="ck-plan ck-panneau" id="ck-plan" aria-label="Le domaine en direct"></section> <section class="ck-chant ck-panneau" id="ck-chant" aria-label="Chantiers d’hiver"></section> <section class="ck-courbe ck-panneau" id="ck-courbe" aria-label="Charge restante"></section> </div> <div class="ck-col ck-col-c" id="ck-t-c"> <section class="ck-savoir ck-panneau" id="ck-savoir" aria-label="À savoir"></section> </div> </div> <div class="ck-vue ck-ge" id="ck-vue-eco" hidden> <div class="ck-col" id="ck-e-a"> <section class="ck-ever ck-verdict" id="ck-ever" aria-label="Atterrissage de la campagne"></section> <section class="ck-ekpi" id="ck-ekpi" aria-label="Indicateurs économiques"></section> </div> <div class="ck-col" id="ck-e-b"> <section class="ck-echart ck-panneau" id="ck-echart" aria-label="Dépensé face au fait"></section> <section class="ck-etac ck-panneau" id="ck-etac" aria-label="Écart au barème par tâche"></section> </div> <div class="ck-col ck-col-c" id="ck-e-c"> <section class="ck-epos ck-panneau" id="ck-epos" aria-label="Par poste"></section> <section class="ck-eapp ck-panneau" id="ck-eapp" aria-label="Par appellation"></section> </div> </div> </div> </div><div class="ck-pop" id="ck-pop" role="note" hidden><p></p></div> <div class="ck-sr" id="ck-annonce" aria-live="polite"></div>'; };
+window._ck2Squelette = function () { return '<div class="ck2"><div class="ck-page ck-entree" id="ck-page"> <div class="ck-tete" id="ck-tete"></div> <section class="ck-photos" id="ck-photos" aria-label="Les quatre photos du domaine"></section> <div class="ck-vue ck-gt" id="ck-vue-terrain"> <div class="ck-col" id="ck-t-a"> <section class="ck-verdict" id="ck-verdict" aria-label="Fin prévue des travaux"></section> <section class="ck-decision ck-panneau" id="ck-decision" aria-label="La décision du jour"></section> <aside class="ck-fil ck-panneau" id="ck-fil" aria-label="Fil en direct"></aside> </div> <div class="ck-col" id="ck-t-b"> <section class="ck-plan ck-panneau" id="ck-plan" aria-label="Le domaine en direct"></section> <section class="ck-chant ck-panneau" id="ck-chant" aria-label="Chantiers d’hiver"></section> <section class="ck-courbe ck-panneau" id="ck-courbe" aria-label="Charge restante"></section> </div> <div class="ck-col ck-col-c" id="ck-t-c"> <section class="ck-savoir ck-panneau" id="ck-savoir" aria-label="À savoir"></section> </div> </div> <div class="ck-vue ck-ge" id="ck-vue-eco" hidden> <div class="ck-col" id="ck-e-a"> <section class="ck-ever ck-verdict" id="ck-ever" aria-label="Atterrissage de la campagne"></section> <section class="ck-ekpi" id="ck-ekpi" aria-label="Indicateurs économiques"></section> </div> <div class="ck-col" id="ck-e-b"> <section class="ck-echart ck-panneau" id="ck-echart" aria-label="Dépensé face au fait"></section> <section class="ck-etac ck-panneau" id="ck-etac" aria-label="Écart au barème par tâche"></section> </div> <div class="ck-col ck-col-c" id="ck-e-c"> <section class="ck-epos ck-panneau" id="ck-epos" aria-label="Par poste"></section> <section class="ck-eapp ck-panneau" id="ck-eapp" aria-label="Par appellation"></section> </div> </div> </div> </div><div class="ck-sr" id="ck-annonce" aria-live="polite"></div>'; };
 /* Ma Vigne — maquette « Pilotage › Aujourd’hui », le cockpit vivant.
    Données de démonstration. L’architecture est celle de l’appli : des fonctions
    de dessin qui rendent du HTML, une petite couche d’animation commune (Anim),
@@ -378,7 +378,7 @@ const ICO = {
   feuille: SVG('<path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19l7.5-7.5"/>'),
   euro: SVG('<circle cx="12" cy="12" r="8.5"/><path d="M15.2 9a3.8 3.8 0 1 0 0 6M7.5 11h5.5M7.5 13.2h5.5"/>'),
 };
-const btnI = (cle, lab) => '<button class="ck-i" type="button" data-info="' + cle + '" aria-label="' + esc(lab) + '" aria-expanded="false">i</button>';
+const btnI = (cle, lab) => '<button class="ck-i" type="button" data-info="' + cle + '" data-bulle="" aria-label="' + esc(lab) + '" aria-expanded="false">i</button>';
 const entete = (titre, cadre, info, idCadre, droite) => '<header class="ck-p-hd' + (droite ? ' serre' : '') + '"><div><h2 class="ck-titre-p">' + titre
   + (info ? btnI(info, 'Comment lire « ' + titre.replace(/<[^>]+>/g, '') + ' »') : '') + '</h2><p class="ck-cadre"' + (idCadre ? ' id="' + idCadre + '"' : '') + '>' + cadre + '</p></div>' + (droite || '') + '</header>';
 
@@ -1129,32 +1129,13 @@ function toast(o) {
   if (typeof window.showToast === 'function') window.showToast(t); else if (typeof window.toast === 'function') window.toast(t);
 }
 
-let infoBtn = null;
-function ouvrirInfo(btn) {
-  const pop = $('#ck-pop');
-  if (infoBtn === btn) { fermerInfo(); return; }
-  fermerInfo();
-  infoBtn = btn;
-  btn.setAttribute('aria-expanded', 'true');
-  pop.querySelector('p').textContent = INFO[btn.dataset.info] || '';
-  pop.hidden = false;
-  const b = btn.getBoundingClientRect(), pw = Math.min(320, window.innerWidth * .86);
-  pop.style.width = pw + 'px';
-  const ph = pop.offsetHeight;
-  let x = Math.max(12, Math.min(window.innerWidth - pw - 12, b.left + b.width / 2 - pw / 2));
-  let y = b.bottom + 10;
-  if (y + ph > window.innerHeight - 12) y = Math.max(12, b.top - ph - 10);
-  pop.style.left = x + 'px'; pop.style.top = y + 'px';
-  pop.style.setProperty('--ox', (b.left + b.width / 2 - x) + 'px');
-  pop.style.setProperty('--oy', (y > b.top ? '0px' : ph + 'px'));
-  requestAnimationFrame(() => pop.classList.add('ouvert'));
-}
-function fermerInfo() {
-  const pop = $('#ck-pop');
-  if (infoBtn) infoBtn.setAttribute('aria-expanded', 'false');
-  infoBtn = null;
-  pop.classList.remove('ouvert');
-  pop.hidden = true;
+/* ★ BULLE-1 (§314) — les « i » d'Aujourd'hui ouvrent LA bulle de l'appli (utils.js, _mvBulleOuvrir). Celle de la maquette
+   (#ck-pop) avait perdu ses règles au portage (REF-1, §266) : zéro style, le texte tombait nu en bas de la page. Il ne reste
+   ici que le texte : la position, la pointe, le toucher à côté, Échap et le défilement sont ceux de toute l'appli. */
+function ouvrirInfo(btn, clavier) {
+  if (typeof window._mvBulleOuvrir !== 'function') { if (window.logError) window.logError({ level: 'info', cat: 'cockpit', msg: '_mvBulleOuvrir absent' }); return; }
+  const k = btn.dataset.info;
+  window._mvBulleOuvrir(btn, { p: [esc(INFO[k] || '')] }, { sig: '.ck-i[data-info="' + k + '"]', clavier: !!clavier });
 }
 // ★ FORME-1 (§301) — LA LOUPE : au survol (souris), la parcelle en grand avec ce qu'il faut savoir. Au doigt, pas de
 //   loupe : le toucher ouvre la fiche, qui montre aussi la forme. Posée sur <body> (position fixe), jamais sous le doigt.
@@ -1497,8 +1478,7 @@ function brancher() {
   document.addEventListener('click', ev => {
     if (!document.getElementById('ck-page')) return;       // le cockpit n'est pas à l'écran
     const i = ev.target.closest('.ck-i');
-    if (i) { ev.stopPropagation(); ouvrirInfo(i); return; }
-    if (!ev.target.closest('#ck-pop')) fermerInfo();
+    if (i) { ev.stopPropagation(); ouvrirInfo(i, ev.detail === 0); return; }
     const mo = ev.target.closest('.ck-bascule [role="tab"]');
     if (mo) { choisirMode(mo.dataset.mode); return; }
     const seg = ev.target.closest('.ck-seg [role="tab"]');
@@ -1540,9 +1520,8 @@ function brancher() {
     }
   });
   document.addEventListener('keydown', ev => {
-    if (ev.key !== 'Escape') return;
+    if (ev.key !== 'Escape' || ev.defaultPrevented) return;     // BULLE-1 : ce premier Échap a refermé la bulle
     const b = document.getElementById('ck-agr'); if (b && !b.hidden) { agrandir(false); return; }
-    if (document.getElementById('ck-pop')) fermerInfo();
   });
 }
 function brancherPlan() {

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.81';
+export const APP_VERSION = '8.82';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1035,6 +1035,11 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.82', d: '2026-10-11', items: [
+    { niv: 0, pour: ['tous'], emoji: 'info', titre: 'Le « i » ouvre une bulle à côté du chiffre',
+      desc: "Dans le Pilotage, toucher un « i » d’Aujourd’hui faisait tomber son explication tout en bas de la page, sans mise en forme. Ailleurs, le « i » ouvrait une feuille par-dessus l’écran. "
+        + "Maintenant, chaque « i » de l’application ouvre une bulle juste à côté de lui : l’essentiel d’abord, et « Lire la suite » quand l’explication est longue. Touchez ailleurs, ou Échap sur ordinateur, pour la refermer." },
+  ] },
   { v: '8.81', d: '2026-10-11', items: [
     { niv: 0, pour: ['tous'], emoji: 'oeil', titre: 'Sur ordinateur, la barre de gauche suit l’ordre du téléphone',
       desc: "Le Pilotage passe en tête de la barre, pour qui y a accès, puis les modules rangés par thème : Terrain (Vigne, Tracteur, Phyto), Cave et réserve, Organisation (Planning). Réglages descend en bas, au-dessus de votre nom. "
@@ -3932,7 +3937,7 @@ function _mvAnnAttente(niv, base, vus, auj) {
 }
 
 // ── Niveau 2 : la carte « À vérifier » de l'Accueil. Une ligne, pas un bloc : l'étiquette,
-//    le titre, et « Vu ». Le détail s'ouvre au toucher, dans la feuille des « i ».
+//    le titre, et « Vu ». Le détail s'ouvre au toucher, dans la feuille des nouveautés (#ovInfo).
 function _mvAnnCarte(base, vus, auj) {
   var el = document.getElementById('home-annonce');
   if (!el) return;
@@ -3997,7 +4002,7 @@ function _mvNouvUsage(t) {
   }
 }
 
-// La fiche d'un item, dans la feuille des « i » (#ovInfo) : ouverte depuis la carte de
+// La fiche d'un item, dans la feuille des nouveautés (#ovInfo — les « i » l'ont quittée, BULLE-1) : ouverte depuis la carte de
 // l'Accueil ou depuis une pastille.
 function _mvAnnFiche(id) {
   var el = document.getElementById('info-inner');
@@ -5181,7 +5186,7 @@ var MV_AIDE = {
       ['Vos deux années se règlent au même endroit', ": la roue crantée porte l’ouverture de l’<b>exercice comptable</b> — celui de votre bilan, fixé par votre comptable — et, juste dessous, le <b>cadre de votre campagne</b>, l’axe des Archives et du bilan de campagne. Une campagne est un cycle de production : ce qui la borne, c’est la <b>vendange</b>, et le mois n’en est que la traduction. L’écran dit où tombe la vôtre dans le cadre choisi — elle l’ouvre, elle la clôt, ou la borne la coupe en deux — et propose le mois qui suit la fin de vos vendanges. Le changer recadre des chiffres déjà affichés, jamais vos saisies."],
       ['La roue crantée', "en haut à droite ouvre ce qui se règle : objectifs de fin, fenêtres des tâches, hypothèses de calcul, IFT de référence — et le bilan de campagne à imprimer. Administrateur seulement."],
       ['Les cartes arrivent repliées', ": chaque bloc montre son <b>chiffre</b> et la ligne qui dit sur quoi il a été calculé, même fermé — rien n’est caché. Touchez-en une pour voir son détail : elle s’ouvre en grand, et la précédente se referme, pour que les autres restent rangées côte à côte."],
-      ['Le petit rond « i » dit d’où vient un chiffre', ": touchez-le, une fiche s’ouvre et explique comment ce chiffre est calculé, sur quelle fenêtre, et ce qu’il ne dit pas. Ce qui <b>cadre</b> un chiffre — sa date, sa source, son périmètre — reste toujours affiché à côté de lui, en une ligne. C’est la méthode qui se range, jamais le cadre."],
+      ['Le petit rond « i » dit d’où vient un chiffre', ": touchez-le, une bulle s’ouvre juste à côté et explique comment ce chiffre est calculé, sur quelle fenêtre, et ce qu’il ne dit pas. Une explication longue commence par l’essentiel : « Lire la suite » déplie le reste dans la même bulle. Touchez ailleurs pour la refermer. Ce qui <b>cadre</b> un chiffre — sa date, sa source, son périmètre — reste toujours affiché à côté de lui, en une ligne. C’est la méthode qui se range, jamais le cadre."],
       ['La protection restante', ": sa propre carte, sous la décision du jour : combien de parcelles sont à nu et, pour les 5 plus urgentes, les jours de protection qui restent, d’après le dernier traitement du registre, trois rémanences par mode d’action et la pluie tombée depuis (un contact est à nu dès 20 mm, réglable, Réglages › Pilotage › Conformité). Le bouton montre les autres parcelles. La pousse n’est pas comptée."],
       ['Le coût de l’inaction', ": sous la marge, ce que le retard ajoute en heures et en euros si personne n’est ajouté, d’après le simulateur de renfort. Un modèle, pas une mesure ; le bouton mène à Décider."],
       ['La tension de l’équipe', ": le travail effectif de chacun sur 14 jours, face à ce que le planning prévoyait — jamais face au contrat. Au seuil : plus de 10 % au-dessus du prévu, ou une semaine au-delà de la moyenne autorisée. La carte du jour donne le verdict et la personne la plus chargée ; la carte du dessous, une ligne par personne. Le bouton ouvre le Planning."],
@@ -5865,7 +5870,7 @@ export const MV_INFO = {
 // ⚠️ `type="button"` : sans lui, un bouton dans un formulaire le soumet.
 export function _mvInfoBtn(cle) {
   return '<button type="button" class="mv-i" data-mvi="' + _escAttr(cle)
-       + '" aria-label="D\u2019ou vient ce chiffre"><span aria-hidden="true">i</span></button>';
+       + '" aria-label="D\u2019o\u00f9 vient ce chiffre" aria-expanded="false"><span aria-hidden="true">i</span></button>';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -6049,31 +6054,249 @@ export function _mvInfoSet(cle, fiche) {
   MV_INFO_LIVE[cle] = { t: fiche.t || MV_INFO[cle].t, p: fiche.p };
 }
 
-export function _mvInfoOpen(cle) {
-  var el = document.getElementById('info-inner');
-  if (!el) return;
+export function _mvInfoOpen(cle, ancre, clavier) {
   var f = MV_INFO_LIVE[cle] || MV_INFO[cle];
   if (!f) {
     // Une pastille morte est plus deroutante qu'une explication absente : on
     // ouvre quand meme, en le disant. Le harnais interdit ce cas en CI — s'il
     // arrive quand meme, il doit se voir, pas se taire.
     if (window.logError) window.logError({ level: 'info', cat: 'info', msg: 'MV_INFO : cle inconnue ' + cle });
-    f = { t: 'Explication manquante', p: ['Cette explication n\u2019a pas encore ete ecrite (' + _escHtml(String(cle)) + ').'] };
+    f = { t: 'Explication manquante', p: ['Cette explication n\u2019a pas encore \u00e9t\u00e9 \u00e9crite (' + _escHtml(String(cle)) + ').'] };
   }
-  var h = '<div class="modal-hd mva-hd">'
-        + '<span class="mva-hd-ic mvi-ic" aria-hidden="true">i</span>'
-        + '<div><div class="modal-title">' + _escHtml(f.t) + '</div>'
-        + '<div class="modal-sub">D\u2019o\u00f9 vient ce chiffre</div></div></div>'
-        + '<div class="mvi-bd">';
-  // Le texte des fiches est ECRIT ICI, jamais saisi : il porte ses propres <b>.
-  // Aucune donnee utilisateur ne traverse cette fonction (C19).
-  for (var i = 0; i < f.p.length; i++) h += '<p>' + f.p[i] + '</p>';
-  h += '</div><div class="mva-foot">'
-     + '<button type="button" class="mva-fbtn" id="mvi-ok">Compris</button></div>';
+  if (!ancre) {
+    // ★ BULLE-1 : la bulle se pose a cote de ce qu'elle explique. Sans le « i », elle ne sait pas ou : on le trace.
+    if (window.logError) window.logError({ level: 'info', cat: 'info', msg: 'MV_INFO : bulle sans ancre ' + cle });
+    return;
+  }
+  var sig = /^[\w.-]+$/.test(String(cle)) ? '[data-mvi="' + cle + '"]' : null;
+  _mvBulleOuvrir(ancre, f, { cle: cle, sig: sig, clavier: !!clavier });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LA BULLE — BULLE-1 (§314)
+// ═══════════════════════════════════════════════════════════════════════════
+// Nico (11/10) : « le i […] ca ouvre un vieux texte en bas […] ce serait mieux d'ouvrir une infobulle ».
+// DEUX DEFAUTS SOUS LA MEME PHRASE :
+//   · Pilotage › Aujourd'hui : ses « i » ouvraient la bulle de la maquette (#ck-pop), mais la feuille de la
+//     maquette avait perdu ses regles au portage (REF-1, §266) — zero regle pour elle dans tout le depot. Le
+//     texte tombait nu, a la fin de la page ;
+//   · partout ailleurs (56 fiches du Pilotage, 4 de la Cave, 2 des Documents), le « i » ouvrait une feuille
+//     (#ovInfo) : montee du bas sur un voile au telephone, fenetre au centre sur ordinateur.
+// UNE SEULE BULLE, DESORMAIS, pour toute l'appli : collee au « i » (dessous, au-dessus faute de place), avec
+// sa pointe. Une fiche longue montre son premier paragraphe ; « Lire la suite » la deplie sur place.
+// ⚠️⚠️ OU ELLE VIT : sur <body>, SAUF quand le « i » est dans une fenetre (.overlay). A11Y-2 (app.js,
+//   _mvInertOutside) rend INERTE tout ce qui n'est pas la fenetre du dessus : posee sur <body>, la bulle serait
+//   visible mais intouchable, et le toucher tomberait sur le voile — qui ferme la fenetre. Elle se pose donc
+//   DANS la fenetre (une .overlay couvre l'ecran : les coordonnees fixes restent justes).
+// ⚠️ JAMAIS DANS UN PARENT TRANSFORME (tiroir, feuille animee, .page) : un `transform` fait du parent le repere
+//   d'un `position:fixed`, et la bulle se poserait a cote. <body> ou la .overlay, rien d'autre. Au-dessus d'une
+//   couche fixe (tiroir, feuille du Cuvier), elle prend le z-index de la couche + 1 : toujours sous les dialogues.
+// ⚠️ UN TOUCHER A COTE FERME LA BULLE ET S'ARRETE LA : il n'ouvre pas en plus la carte qui etait dessous (une
+//   carte du Pilotage se replie au toucher). Un toucher sur un autre declencheur ([data-mvi], ou [data-bulle] :
+//   les « i » du cockpit, qui ouvrent la bulle eux-memes) ouvre le sien du premier coup.
+// ⚠️ ECHAP ferme la bulle AVANT la fenetre : preventDefault, que _mvOvKey (app.js) respecte.
+// ★ Le calcul de la position et le choix des paragraphes ne lisent pas le DOM : le harnais les EXECUTE
+//   (scripts/mv-harnais-bulle1.mjs). Le reste est de la colle, regardee au navigateur.
+var _MV_BULLE = { el: null, ancre: null, cle: null, sig: null, fiche: null, veille: 0, raf: 0, pos: null };
+var _MV_BULLE_COURT = 480;   // texte nu : en dessous, la fiche s'affiche entiere — « Lire la suite » pour 150 caracteres agace
+
+function _mvBulleNu(s) { return String(s == null ? '' : s).replace(/<[^>]+>/g, ''); }
+
+// Les paragraphes montres. Un seul, ou une fiche courte : tout. Sinon le premier, et « Lire la suite ».
+function _mvBulleParagraphes(p, tout) {
+  var l = Array.isArray(p) ? p : [];
+  var court = l.length < 2 || _mvBulleNu(l.join(' ')).length <= _MV_BULLE_COURT;
+  return (tout || court) ? { vus: l, suite: false } : { vus: l.slice(0, 1), suite: true };
+}
+
+// La largeur : 360 px pour une fiche titree (Pilotage, Cave, Documents), 320 pour une phrase (le cockpit, comme
+// la maquette) — jamais plus de 86 % de l'ecran.
+function _mvBulleLargeur(vw, titre) { return Math.min(titre ? 360 : 320, Math.round(vw * 0.86)); }
+
+// LA POSITION. a = le rectangle du « i » ({l,t,r,b}, coordonnees d'ecran), h = la hauteur du contenu, pw = la
+//   largeur. Dessous s'il tient ; sinon au-dessus s'il y tient ; sinon du cote le plus grand, hauteur bornee (le
+//   texte defile dans la bulle). `cote` impose un cote, `fige` garde la hauteur : on suit le « i » quand la page
+//   defile, sans faire sauter la bulle d'un bord a l'autre ni la retailler a chaque pas.
+function _mvBulleCalcul(a, vw, vh, pw, h, cote, fige) {
+  var M = 12, G = 10, MIN = 120;
+  var dessous = vh - a.b - G - M, dessus = a.t - G - M;
+  if (cote !== 'bas' && cote !== 'haut') cote = (h <= dessous || dessous >= dessus) ? 'bas' : 'haut';
+  var place = cote === 'bas' ? dessous : dessus;
+  var maxH = (!fige && h > place) ? Math.max(MIN, Math.floor(place)) : 0;
+  var hh = maxH ? Math.min(h, maxH) : h;
+  var cx = (a.l + a.r) / 2;
+  var x = Math.round(Math.max(M, Math.min(vw - pw - M, cx - pw / 2)));
+  var y = Math.round(cote === 'bas' ? a.b + G : a.t - G - hh);
+  var ox = Math.round(Math.max(16, Math.min(pw - 16, cx - x)));
+  return { cote: cote, x: x, y: y, maxH: maxH, ox: ox };
+}
+
+function _mvBulleEl() {
+  if (_MV_BULLE.el) return _MV_BULLE.el;
+  var el = document.createElement('div');
+  el.id = 'mv-bulle';
+  el.className = 'mv-bulle';
+  el.hidden = true;
+  el.setAttribute('role', 'dialog');
+  el.setAttribute('tabindex', '-1');
+  // Au clavier, quitter la bulle par Tab la referme (le toucher a cote, lui, passe par l'ecouteur du document).
+  el.addEventListener('focusout', function (e) {
+    var n = e.relatedTarget;
+    if (n && !el.contains(n) && n !== _MV_BULLE.ancre) _mvBulleFermer(false);
+  });
+  _MV_BULLE.el = el;
+  return el;
+}
+
+// Le contenu. Le texte d'une fiche est ECRIT dans le code (MV_INFO, INFO du cockpit), jamais saisi : il porte
+// ses propres <b> (C19 — la regle de l'ancienne feuille). Le titre, lui, est echappe.
+function _mvBulleRemplir(tout) {
+  var B = _MV_BULLE, el = B.el, f = B.fiche || {};
+  var r = _mvBulleParagraphes(f.p, tout);
+  var h = '<div class="mv-bulle-c">';
+  if (f.t) h += '<p class="mv-bulle-t" id="mv-bulle-t">' + _escHtml(f.t) + '</p>';
+  for (var i = 0; i < r.vus.length; i++) h += '<p>' + r.vus[i] + '</p>';
+  h += '</div>';
+  if (r.suite) h += '<button type="button" class="mv-bulle-suite" data-bulle-suite="1">Lire la suite</button>';
   el.innerHTML = h;
-  var b = document.getElementById('mvi-ok');
-  if (b) b.onclick = function () { if (window.closeOv) window.closeOv(null, 'ovInfo'); };
-  if (window.openOv) window.openOv('ovInfo');
+  if (f.t) { el.setAttribute('aria-labelledby', 'mv-bulle-t'); el.removeAttribute('aria-label'); }
+  else {
+    el.removeAttribute('aria-labelledby');
+    el.setAttribute('aria-label', (B.ancre && B.ancre.getAttribute('aria-label')) || 'Explication');
+  }
+}
+
+// La couche du « i » : dans un tiroir ou une feuille fixe, la bulle passe juste au-dessus (z-index + 1).
+function _mvBulleCouche(ancre) {
+  var z = 0, n = ancre.parentElement;
+  while (n && n !== document.body && n !== document.documentElement) {
+    var cs = window.getComputedStyle(n);
+    if (cs.position === 'fixed') { var v = parseInt(cs.zIndex, 10); if (v > z) z = v; }
+    n = n.parentElement;
+  }
+  return z;
+}
+
+// Pose la bulle sur le « i ». `garder` : on suit le « i » (meme cote, meme hauteur).
+function _mvBullePlacer(garder) {
+  var B = _MV_BULLE, el = B.el, a = B.ancre;
+  if (!el || !a) return;
+  var r = a.getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight;
+  var pw = _mvBulleLargeur(vw, !!(B.fiche && B.fiche.t));
+  el.style.width = pw + 'px';
+  if (!garder) el.style.maxHeight = '';
+  var c = _mvBulleCalcul({ l: r.left, t: r.top, r: r.right, b: r.bottom }, vw, vh, pw, el.offsetHeight,
+    garder ? el.getAttribute('data-cote') : null, !!garder);
+  if (c.maxH) el.style.maxHeight = c.maxH + 'px';
+  el.setAttribute('data-cote', c.cote);
+  el.style.left = c.x + 'px';
+  el.style.top = c.y + 'px';
+  el.style.setProperty('--mv-bulle-x', c.ox + 'px');
+  B.pos = { l: r.left, t: r.top };
+}
+
+export function _mvBulleOuvrir(ancre, fiche, o) {
+  if (!ancre || !fiche || typeof document === 'undefined') return;
+  o = o || {};
+  var B = _MV_BULLE;
+  if (B.ancre === ancre && B.el && !B.el.hidden) { _mvBulleFermer(false); return; }   // second toucher : referme
+  _mvBulleFermer(false);
+  var el = _mvBulleEl();
+  var hote = (ancre.closest && ancre.closest('.overlay')) || document.body;
+  if (el.parentNode !== hote) hote.appendChild(el);
+  // A11Y-2 a pu la marquer inerte (data-mv-inert) le temps qu'une fenetre s'ouvre sur une bulle encore posee sur la
+  //   page : la marque suivrait la bulle dans la fenetre, et « Lire la suite » ne repondrait plus. Elle s'efface ici.
+  if (el.hasAttribute('data-mv-inert')) { el.removeAttribute('inert'); el.removeAttribute('data-mv-inert'); }
+  var z = hote === document.body ? _mvBulleCouche(ancre) : 0;
+  el.style.zIndex = z >= 800 ? String(z + 1) : '';
+  B.ancre = ancre; B.cle = o.cle || null; B.sig = o.sig || null; B.fiche = fiche;
+  ancre.setAttribute('aria-expanded', 'true');
+  ancre.setAttribute('aria-controls', 'mv-bulle');
+  _mvBulleRemplir(false);
+  el.classList.remove('ouvert');
+  el.hidden = false;
+  _mvBullePlacer(false);
+  // La position est posee AVANT l'apparition : la bulle s'ouvre sur place, elle ne glisse pas depuis un coin.
+  requestAnimationFrame(function () { if (B.el === el && !el.hidden && B.ancre === ancre) el.classList.add('ouvert'); });
+  if (o.clavier) {
+    try { el.focus({ preventScroll: true }); }
+    catch (e) { if (window._mvAvale) window._mvAvale(e, 'utils.js/_mvBulleOuvrir'); }
+  }
+  _mvBulleVeiller();
+}
+
+export function _mvBulleFermer(rendre) {
+  var B = _MV_BULLE, el = B.el, a = B.ancre;
+  if (B.veille) { clearInterval(B.veille); B.veille = 0; }
+  if (B.raf) { cancelAnimationFrame(B.raf); B.raf = 0; }
+  B.ancre = null; B.cle = null; B.sig = null; B.fiche = null; B.pos = null;
+  if (a) { a.setAttribute('aria-expanded', 'false'); a.removeAttribute('aria-controls'); }
+  if (!el || el.hidden) return;
+  el.classList.remove('ouvert');
+  el.hidden = true;
+  el.innerHTML = '';
+  // Fermee, elle quitte le document : elle ne dort ni sur <body> (A11Y-2 la marquerait), ni dans une fenetre.
+  if (el.parentNode) el.parentNode.removeChild(el);
+  if (rendre && a && a.isConnected) {
+    try { a.focus({ preventScroll: true }); }
+    catch (e) { if (window._mvAvale) window._mvAvale(e, 'utils.js/_mvBulleFermer'); }
+  }
+}
+
+function _mvBulleSuite(clavier) {
+  var B = _MV_BULLE;
+  if (!B.el || B.el.hidden || !B.fiche) return;
+  _mvBulleRemplir(true);
+  _mvBullePlacer(false);
+  if (clavier) {   // le bouton vient de disparaitre : le focus revient a la bulle, pas au document
+    try { B.el.focus({ preventScroll: true }); }
+    catch (e) { if (window._mvAvale) window._mvAvale(e, 'utils.js/_mvBulleSuite'); }
+  }
+}
+
+// LA VEILLE, tant que la bulle est ouverte (deux fois par seconde, rien d'autre ne tourne).
+//   · une fenetre s'ouvre par-dessus une bulle posee sur la page : elle la cacherait — on la ferme ;
+//   · l'ecran se redessine (une validation arrive, la page se remonte) : le meme « i » est peut-etre revenu, on
+//     s'y raccroche ; introuvable, ou en double : on ferme ;
+//   · le « i » a bouge (un bloc s'est deplie au-dessus) : la bulle le suit.
+function _mvBulleVeiller() {
+  var B = _MV_BULLE;
+  if (B.veille) clearInterval(B.veille);
+  B.veille = setInterval(function () {
+    var a = B.ancre;
+    if (!a || !B.el || B.el.hidden) { clearInterval(B.veille); B.veille = 0; return; }
+    if (B.el.parentNode === document.body && document.querySelector('.overlay.open')) { _mvBulleFermer(false); return; }
+    if (!a.isConnected || !a.getClientRects().length) {
+      var n = B.sig ? document.querySelectorAll(B.sig) : [], vu = null, k = 0;
+      for (var i = 0; i < n.length; i++) if (n[i].getClientRects().length) { vu = n[i]; k++; }
+      if (k !== 1) { _mvBulleFermer(false); return; }
+      B.ancre = vu;
+      vu.setAttribute('aria-expanded', 'true');
+      vu.setAttribute('aria-controls', 'mv-bulle');
+      _mvBullePlacer(true);
+      return;
+    }
+    var r = a.getBoundingClientRect();
+    if (B.pos && (Math.abs(r.left - B.pos.l) > 1 || Math.abs(r.top - B.pos.t) > 1)) _mvBullePlacer(true);
+  }, 400);
+}
+
+// La page defile (ou l'ecran tourne) : la bulle suit son « i » ; s'il sort de l'ecran, elle se ferme. Un
+// defilement DANS la bulle (une fiche longue) ne compte pas.
+function _mvBulleDefile(e) {
+  var B = _MV_BULLE;
+  if (!B.ancre || !B.el || B.el.hidden) return;
+  var t = e && e.target;
+  if (t && t.nodeType === 1 && B.el.contains(t)) return;
+  if (B.raf) return;
+  B.raf = requestAnimationFrame(function () {
+    B.raf = 0;
+    var a = B.ancre;
+    if (!a || !B.el || B.el.hidden) return;
+    var r = a.getBoundingClientRect();
+    if (!a.isConnected || !a.getClientRects().length || r.bottom < 0 || r.top > window.innerHeight) { _mvBulleFermer(false); return; }
+    _mvBullePlacer(true);
+  });
 }
 
 // UN SEUL ECOUTEUR, pose une fois sur le document. Chaque module qui pose une
@@ -6081,14 +6304,39 @@ export function _mvInfoOpen(cle) {
 // ⚠️⚠️ `stopPropagation` est INDISPENSABLE : la pastille vit dans l'en-tete
 //   d'une tuile, et cet en-tete replie la tuile au clic. Sans lui, ouvrir la
 //   fiche fermerait l'ecran qu'on cherche a comprendre.
+// ★ BULLE-1 : le meme ecouteur tient la bulle ouverte (voir plus haut : le toucher a cote, [data-bulle]).
 if (typeof document !== 'undefined') {
   document.addEventListener('click', function (e) {
-    var b = e.target && e.target.closest ? e.target.closest('[data-mvi]') : null;
-    if (!b) return;
+    var t = e.target && e.target.closest ? e.target : null;
+    if (!t) return;
+    var B = _MV_BULLE, ouverte = !!(B.el && !B.el.hidden);
+    if (ouverte && B.el.contains(t)) {
+      if (t.closest('[data-bulle-suite]')) { e.preventDefault(); _mvBulleSuite(e.detail === 0); }
+      return;
+    }
+    var b = t.closest('[data-mvi]');
+    if (b) {
+      e.preventDefault();
+      e.stopPropagation();
+      _mvInfoOpen(b.getAttribute('data-mvi'), b, e.detail === 0);
+      return;
+    }
+    if (!ouverte) return;
+    if (B.ancre && B.ancre.contains(t)) { e.preventDefault(); e.stopPropagation(); _mvBulleFermer(false); return; }
+    _mvBulleFermer(false);
+    if (t.closest('[data-bulle]')) return;
     e.preventDefault();
     e.stopPropagation();
-    _mvInfoOpen(b.getAttribute('data-mvi'));
   }, true);
+  document.addEventListener('keydown', function (e) {
+    var B = _MV_BULLE;
+    if ((e.key !== 'Escape' && e.key !== 'Esc') || !B.el || B.el.hidden) return;
+    e.preventDefault();
+    var a = document.activeElement;
+    _mvBulleFermer(!!(a && (B.el.contains(a) || a === B.ancre)));
+  }, true);
+  document.addEventListener('scroll', _mvBulleDefile, { capture: true, passive: true });
+  window.addEventListener('resize', _mvBulleDefile, { passive: true });
 }
 
 // ════ EXPOSITION GLOBALE ════
@@ -6102,6 +6350,8 @@ window.MV_INFO            = MV_INFO;
 window._mvInfoOpen        = _mvInfoOpen;
 window._mvInfoSet         = _mvInfoSet;
 window._mvInfoBtn         = _mvInfoBtn;
+window._mvBulleOuvrir     = _mvBulleOuvrir;   // BULLE-1 : le cockpit (cockpit-vue.js) ouvre ses « i » par elle
+window._mvBulleFermer     = _mvBulleFermer;
 window._mvIcon            = _mvIcon;
 window._mvIconInline      = _mvIconInline;
 window._mvSetIcon         = _mvSetIcon;
