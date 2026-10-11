@@ -129,7 +129,7 @@ const ilYa = ts => {
    Les dessins ne changent pas : ils lisent les mêmes noms qu'avant. */
 let V = null;
 let AUJ, DEBUT, VISEE, XMAX, TACHES = [], T = {}, PREREQ = {}, GENS = [], EQ = {}, APPS = [], AIDX = {},
-  PLAN_H = 720, PLAN_W = 1000, PLAN_S = 1, PLAN_LARG = 0, HA_VIGNE = 0, PARCS = [], PIDX = {}, HA_TOT = 0, ORDRE = {}, TOTAL = 0, YMAX = 500, TAUX = 0, MARGE_BUDGET = 0,
+  PLAN_H = 720, PLAN_W = 1000, PLAN_S = 1, PLAN_LARG = 0, HA_VIGNE = 0, PARCS = [], PIDX = {}, HA_TOT = 0, ORDRE = {}, TOTAL = 0, YMAX = 500, TAUX = 0,
   POSTES = [], HIST = [], METEO = [], T0 = Date.now(), MIN = 60e3, NEXT_ID = 1, SPARK_TRAV = [], SPARK_BUD = [], SPARK_ECART = [];
 const S = { etats: {}, dates: {}, equipes: [], evts: [], vue: null, filtre: null, sel: null, onglet: 'auj', mode: 'terrain', svTout: false, filTout: false };
 const H_JOUR = 1;
@@ -294,11 +294,9 @@ function charger(v) {
   OUV = Array.isArray(v.ouvres) ? new Set(v.ouvres) : null; OUV_DE = v.ouvresDe || ''; OUV_A = v.ouvresA || '';
   const e = v.eco || {};
   TAUX = e.taux || 0; POSTES = e.postes || [];
-  // La ligne de budget du graphe « dépensé face au fait » : le budget main-d'œuvre du moteur (TOTAL heures × taux × (1 + marge)).
-  MARGE_BUDGET = (TAUX > 0 && TOTAL > 0 && e.moBudget) ? e.moBudget / (TOTAL * TAUX) - 1 : 0;
-  // Le dépensé au fil des jours : la part du budget consommée, photographiée chaque jour (PHOTO-1, champ cons).
-  const consDe = Object.fromEntries((e.consParJour || []).map(x => [x.d, x.cons]));
-  HIST.forEach(h => { const c = consDe[iso(h.d)]; h.c = c != null ? c / 100 * (e.moBudget || 0) : null; });
+  // ★★ AUJ-7 (§309) : le graphe « dépensé face au fait » lit deux courbes datées par le moteur (pilotage.js/_pilCk2Eco) — plus
+  //   les photos du jour, qui mêlaient tous les postes et ne commençaient qu'à la première photo.
+  SERIE_E = (e.serie || []).map(x => ({ d: deIso(x.d), dep: Number(x.dep) || 0, fait: Number(x.fait) || 0 })).filter(x => x.d && !isNaN(+x.d));
   APPS.forEach(a => { a.ecart = null; });
   SPARK_TRAV = v.sparkTrav || []; SPARK_BUD = e.sparkBud || []; SPARK_ECART = e.sparkEcart || [];
 }
@@ -323,10 +321,10 @@ function calc() {
   r.ecartMoy = (v.eco || {}).ecartMoy || 0;
   r.fin = finPrevue(); r.finPaul = r.fin;
   r.ecart = v.marge != null ? v.marge : Math.round((VISEE - r.fin) / 864e5);
-  r.capMoy = (v.eco && v.eco.cadence) || v.capMoy || 0; r.besoin = v.besoin || 0;
+  r.capMoy = v.capMoy || 0; r.besoin = v.besoin || 0;   // AUJ-7 : la cadence de l'ÉQUIPE (l'économie prêtait la journée de référence, 7 h)
   const e = v.eco || {};
   r.hR = e.hReel || 0;
-  r.moBudget = e.moBudget || 0; r.moDep = e.moDep || 0; r.moAtt = e.moAtt || 0;
+  r.moBudget = e.moBudget || 0; r.moDep = e.moDep || 0; r.moAtt = e.moAtt || 0; r.moH = e.moH || 0; r.cadAppl = !!e.cadAppl;   // AUJ-7
   r.budget = e.budget || 0; r.dep = e.dep || 0; r.att = e.att || 0; r.sous = r.budget - r.att;
   r.budgetPct = r.moBudget ? r.moDep / r.moBudget * 100 : 0;
   r.coutHa = HA_TOT ? r.att / HA_TOT : 0; r.coutHaPrevu = HA_TOT ? r.budget / HA_TOT : 0;
@@ -336,28 +334,28 @@ function calc() {
 /* ═══ 7. LES DESSINS — chacun rend du HTML, comme dans l’appli ═══ */
 const eur = v => nb(v) + '\u202f€';
 const eur100 = v => nb(Math.round(v / 100) * 100) + '\u202f€';
-const signe = v => (v > 0 ? '+' : v < 0 ? '−' : '') + nb(Math.abs(v));
+const signe = v => { const n = Math.round(v); return (n > 0 ? '+' : n < 0 ? '−' : '') + nb(Math.abs(n)); };   // AUJ-7 : arrondi AVANT le signe — jamais « −0 »
 const NF1 = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-const pct1 = v => (v > 0 ? '+' : v < 0 ? '−' : '') + NF1.format(Math.abs(v)) + '\u202f%';
+const pct1 = v => { const n = Math.round(v * 10) / 10; return (n > 0 ? '+' : n < 0 ? '−' : '') + NF1.format(Math.abs(n)) + '\u202f%'; };   // AUJ-7 : jamais « −0,0 % »
 const INFO = {
   fin: 'La fin prévue prend les heures qui restent au barème et les retire, jour après jour, de la capacité inscrite au planning : contrats en cours, absences, formations et congés compris. Elle avance quand une parcelle est validée.',
   travaux: 'Heures du barème des parcelles validées, sur le total des tâches de la campagne. Une parcelle commencée ne compte qu’à sa validation.',
   effectif: 'Personnes prévues au planning aujourd’hui, hors bureau, et celles qui manquent (congé, arrêt, récupération). Un jour sans travail au planning — week-end, jour chômé —, la tuile montre le prochain jour travaillé et le dit.',
-  budget: 'Part du budget main-d’œuvre de la campagne déjà dépensée, face à la part du travail faite. Dépenser moins vite qu’on n’avance, c’est être en avance.',
+  budget: 'Part du budget main-d’œuvre déjà payée — les heures du planning dans les rangs, hors travaux à l’heure (arrachage…) —, face à la part du travail faite au barème. Payer moins vite qu’on n’avance, c’est être en avance.',
   conformite: 'Points du registre phyto et des documents obligatoires qui demandent une action de votre part.',
   savoir: 'Ce qui peut changer la journée ou la semaine : météo par secteur, absences, contrats, matériel, retards. Les motifs d’absence ne sont visibles que de l’admin.',
   decision: 'Les quatre questions de chaque matin, chacune avec sa réponse et le bouton pour agir.',
   plan: 'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine. Sa couleur dit l’état de la tâche choisie ; le trait sous chaque appellation, son avancement. Une parcelle en cours porte l’équipe qui l’a commencée, même un autre jour. Au survol, une loupe la montre en grand ; la toucher ouvre sa fiche. Les rangs dessinés sont un repère, pas le relevé des rangs ; une parcelle sans contour est un carré de sa surface, en pointillé.',
   courbe: 'Le reste mesuré : une ligne relie la photo de chaque jour au point d’aujourd’hui, en direct. La photo est prise à la première ouverture du Pilotage par un administrateur, une fois les données arrivées (60 jours gardés) ; un jour sans photo est un trou. L’axe part de la première photo. La projection suit la capacité du planning ; la ligne fine montre l’allure qu’il faudrait pour finir pile à l’objectif.',
-  atterrissage: 'L’atterrissage additionne ce qui est dépensé et ce que coûtera le travail restant, au coût horaire de l’équipe et à l’écart au barème mesuré dans chaque appellation. Les autres postes suivent les factures saisies.',
-  coutha: 'Atterrissage de la campagne, divisé par les hectares en production. Le prévu est le budget divisé de la même façon.',
-  ecart: 'Heures réellement passées, face aux heures du barème, sur les parcelles validées. Au-dessus de zéro, l’équipe met plus longtemps que le barème.',
+  atterrissage: 'La fin projetée de l’onglet Économie : ce qui est déjà dépensé, plus le travail qui reste, compté au barème et corrigé de la cadence mesurée de l’équipe quand elle s’applique (sinon au barème seul). Tracteur, GNR et phyto suivent l’avancement ; les prestations et les travaux à l’heure comptent ce qu’ils ont coûté.',
+  coutha: 'L’atterrissage de la campagne, divisé par les hectares en production (une vigne arrachée n’en a plus). Le prévu est le budget, divisé de la même façon.',
+  ecart: 'Les heures passées dans les rangs (planning), moins le tracteur et les travaux à l’heure (arrachage, désherbage manuel… : rien au barème en face), face aux heures du barème du travail validé. Au-dessus de zéro, l’équipe met plus longtemps que le barème.',
   cadence: 'Heures de barème validées par jour travaillé, sur les quatre dernières semaines, face à l’allure qu’il faut tenir pour finir à l’objectif.',
   inaction: 'Ce que coûterait le retard si rien n’est décidé : le travail hors de sa fenêtre prend du temps en plus chaque semaine. C’est une hypothèse de calcul, pas une mesure.',
-  echart: 'Les deux courbes se lisent ensemble : tant que le dépensé reste sous le travail fait, la campagne coûte moins que prévu. Les pointillés prolongent jusqu’à la fin prévue.',
-  postes: 'Chaque barre est le budget du poste. La partie pleine est le dépensé ; le trait vertical est l’atterrissage prévu.',
-  apps: 'Le coût de la main-d’œuvre à l’hectare sur toute la campagne, corrigé de l’écart au barème mesuré dans chaque appellation.',
-  taches: 'Pour chaque tâche, l’écart entre heures réelles et barème sur les parcelles validées. À droite du zéro, l’équipe va moins vite que le barème.',
+  echart: 'Du début de la période à aujourd’hui : le budget main-d’œuvre payé (heures du planning, au jour où elles ont été faites, hors travaux à l’heure) et le travail fait au barème (à la date des validations). Tant que le payé reste sous le fait, la main-d’œuvre coûte moins que prévu. Les pointillés prolongent jusqu’à la fin prévue.',
+  postes: 'Main-d’œuvre : la barre est son budget, la partie pleine ce qui est payé, le trait la fin prévue ; à droite, l’écart prévu. Tracteur, GNR, phyto : leur prévu suit l’avancement ; à droite, ce qui reste à dépenser. Prestations et travaux à l’heure (arrachage…) : payés au réel, sans prévu.',
+  apps: 'Le barème du travail validé dans chaque appellation, au coût horaire de l’équipe, divisé par ses hectares en production. Une appellation sans travail validé ne se compare pas.',
+  taches: 'Pour chaque tâche au barème qui a du travail validé : l’écart entre les heures réellement versées et le barème. À droite du zéro, l’équipe va moins vite que le barème. Un travail à l’heure (arrachage…) n’a pas de barème : il a sa ligne dans « Par poste ».',
 };
 const SVG = (d, cls) => '<svg' + (cls ? ' class="' + cls + '"' : '') + ' viewBox="0 0 24 24" aria-hidden="true">' + d + '</svg>';
 const ICO = {
@@ -725,8 +723,8 @@ function dessinerCourbe(reste, fin) {
 /* ══ VUE ÉCONOMIE ══ */
 function htmlEVerdict(r) {
   return '<div class="ck-v-haut"><span class="ck-v-k">Atterrissage de la campagne</span><span class="ck-etat" id="ck-ev-etat"></span></div>'
-    + '<h2 class="ck-v-phrase">La campagne devrait coûter <span class="ck-roule" id="ck-ev-att"><span>' + eur100(r.att) + '</span></span>.</h2>'
-    + '<p class="ck-v-sous"><span id="ck-ev-sous"></span>, au rythme mesuré de l’équipe.' + btnI('atterrissage', 'Comment l’atterrissage est calculé') + '</p>'
+    + '<h2 class="ck-v-phrase">La campagne devrait coûter <span class="ck-roule" id="ck-ev-att"><span>' + eur(r.att) + '</span></span>.</h2>'
+    + '<p class="ck-v-sous"><span id="ck-ev-sous"></span>' + btnI('atterrissage', 'Comment l’atterrissage est calculé') + '</p>'
     + '<div class="ck-frise ck-frise-e" id="ck-efrise" aria-hidden="true">'
     + '<div class="ck-fr-piste"><i class="ck-fr-dep"></i><i class="ck-fr-reste"></i><i class="ck-fr-marge"></i></div>'
     + '<span class="ck-fr-mk ck-fr-mdep"><em id="ck-ef-dep"></em></span>'
@@ -749,68 +747,104 @@ function htmlEKpis(r) {
           ok ? 'les travaux tiennent dans leurs fenêtres' : 'env. ' + eur100(x.eur) + ' si rien n’est décidé' + (x.horsDelai ? ', ' + x.horsDelai + ' tâche' + (x.horsDelai > 1 ? 's' : '') + ' hors délai' : ''), 'inaction'); })()
     + '</div>';
 }
-const GE = { c: null, w: 0, fait: null, dep: null, att: null, fin: null };
+const GE = { c: null, w: 0, att: null, fin: null };
+// ★★ AUJ-7 (§309) — LE GRAPHE « DÉPENSÉ FACE AU FAIT », DATÉ PAR LE MOTEUR. Deux courbes en %, du début de la période à aujourd'hui,
+//   qui ne font que monter : le budget main-d'œuvre PAYÉ (heures du planning au jour où elles ont été faites, hors travaux à
+//   l'heure) et le travail FAIT au barème (à la date des validations). Plus d'aire verte entre les deux : elle formait des
+//   colonnes et ne disait rien (Nico, 10/10). L'échelle monte au-delà de 100 % quand la fin prévue dépasse le budget.
+let SERIE_E = [];
+const attPct = r => (r && r.moBudget ? r.moAtt / r.moBudget * 100 : 100);
+const finSerieE = () => SERIE_E[SERIE_E.length - 1] || { d: AUJ, fait: R ? R.pct : 0, dep: R ? R.budgetPct : 0 };   // sans planning : les chiffres du jour seuls
 function htmlEChart(w) {
-  const c = cadre(w, 100); GE.c = c; GE.w = w;
-  let s = axes(c, c.etroit ? [0, 50, 100] : [0, 25, 50, 75, 100], '%');
+  const at = attPct(R), ymax = Math.ceil(Math.max(100, at, ...SERIE_E.map(o => o.dep)) / 25) * 25;
+  const c = cadre(w, ymax); GE.c = c; GE.w = w;
+  const pas = (c.etroit || ymax > 150) ? 50 : 25, gr = []; for (let v = 0; v <= ymax + .01; v += pas) gr.push(v);
+  let s = axes(c, gr, '%');
   s += '<line class="ck-e-budget" x1="' + c.padL + '" x2="' + (c.w - c.padR) + '" y1="' + f1(c.Y(100)) + '" y2="' + f1(c.Y(100)) + '"/>'
-    + '<path id="ck-e-ecart" class="ck-e-ecart"/><path id="ck-e-pfait" class="ck-e-pfait"/><path id="ck-e-pdep" class="ck-e-pdep"/>'
+    + '<path id="ck-e-pfait" class="ck-e-pfait"/><path id="ck-e-pdep" class="ck-e-pdep"/>'
     + '<path id="ck-e-fait" class="ck-e-fait"/><path id="ck-e-dep" class="ck-e-dep"/>'
     + '<g id="ck-e-bout"><circle class="ck-e-bf" r="4.5"/><text class="ck-c-txt ck-e-lf" text-anchor="end" x="-9" y="4">100 % fait</text></g>'
     + '<g id="ck-e-bout2"><rect class="ck-c-fin" x="-5" y="-5" width="10" height="10" rx="1.5" transform="rotate(45)"/><text id="ck-e-ld" class="ck-c-txt ck-e-ld" text-anchor="end" x="-10" y="16"></text></g>'
     + '<line id="ck-e-guide" class="ck-c-guide" y1="' + c.padT + '" y2="' + (c.h - c.padB) + '"/>'
     + '<rect class="ck-c-zone" x="' + c.padL + '" y="0" width="' + c.iw + '" height="' + c.h + '"/>';
-  return '<svg viewBox="0 0 ' + c.w + ' ' + c.h + '" width="' + c.w + '" height="' + c.h + '" role="img" aria-label="Main-d’œuvre : part du budget dépensée face à la part du travail faite, puis projetées jusqu’à la fin prévue">' + s + '</svg>'
+  return '<svg viewBox="0 0 ' + c.w + ' ' + c.h + '" width="' + c.w + '" height="' + c.h + '" role="img" aria-label="Main-d’œuvre : part du budget payée face à la part du travail faite, du début de la période à aujourd’hui, puis projetées jusqu’à la fin prévue">' + s + '</svg>'
     + '<div class="ck-tip" id="ck-etip" aria-hidden="true"></div>';
 }
-function dessinerEChart(fait, dep, att, fin) {
+function dessinerEChart(at, fin) {
   const c = GE.c; if (!c || !$('#ck-e-fait')) return;   // AUJ-6 : la boîte d'un montage neuf est vide tant qu'elle n'est pas dessinée
-  const bud = TOTAL * (1 + MARGE_BUDGET) * TAUX;
-  const pf = HIST.map(o => [c.X(o.d), c.Y((TOTAL - o.r) / TOTAL * 100)]), pd = (HIST.some(o => o.c != null) ? HIST.filter(o => o.c != null) : [{ d: AUJ, c: R.moDep }]).map(o => [c.X(o.d), c.Y(o.c / bud * 100)]);
-  pf.push([c.X(AUJ), c.Y(fait)]); pd.push([c.X(AUJ), c.Y(dep)]);
-  const ch = pts => 'M' + pts.map(p => f1(p[0]) + ' ' + f1(p[1])).join('L');
-  $('#ck-e-fait').setAttribute('d', ch(pf));
-  $('#ck-e-dep').setAttribute('d', ch(pd));
-  $('#ck-e-ecart').setAttribute('d', ch(pf) + 'L' + pd.slice().reverse().map(p => f1(p[0]) + ' ' + f1(p[1])).join('L') + 'Z');
-  const xa = c.X(AUJ), xf = c.X(fin);
-  $('#ck-e-pfait').setAttribute('d', 'M' + f1(xa) + ' ' + f1(c.Y(fait)) + 'L' + f1(xf) + ' ' + f1(c.Y(100)));
-  $('#ck-e-pdep').setAttribute('d', 'M' + f1(xa) + ' ' + f1(c.Y(dep)) + 'L' + f1(xf) + ' ' + f1(c.Y(att)));
+  const pts = SERIE_E.filter(o => o.d >= c.D0 && o.d <= AUJ), z = finSerieE();
+  const ch = L => L.length > 1 ? 'M' + L.map(o => f1(o[0]) + ' ' + f1(o[1])).join('L') : '';
+  $('#ck-e-fait').setAttribute('d', ch(pts.map(o => [c.X(o.d), c.Y(o.fait)])));
+  $('#ck-e-dep').setAttribute('d', ch(pts.map(o => [c.X(o.d), c.Y(o.dep)])));
+  const xa = c.X(z.d), xf = c.X(fin);
+  $('#ck-e-pfait').setAttribute('d', 'M' + f1(xa) + ' ' + f1(c.Y(z.fait)) + 'L' + f1(xf) + ' ' + f1(c.Y(100)));
+  $('#ck-e-pdep').setAttribute('d', 'M' + f1(xa) + ' ' + f1(c.Y(z.dep)) + 'L' + f1(xf) + ' ' + f1(c.Y(at)));
   $('#ck-e-bout').setAttribute('transform', 'translate(' + f1(xf) + ' ' + f1(c.Y(100)) + ')');
-  $('#ck-e-bout2').setAttribute('transform', 'translate(' + f1(xf) + ' ' + f1(c.Y(att)) + ')');
-  $('#ck-e-ld').textContent = nb(att) + '\u202f% du budget';
+  $('#ck-e-bout2').setAttribute('transform', 'translate(' + f1(xf) + ' ' + f1(c.Y(at)) + ')');
+  const ld = $('#ck-e-ld'); ld.textContent = nb(at) + '\u202f% du budget'; ld.setAttribute('y', at > 100 ? -10 : 16);   // au-dessus du losange quand il passe le budget
 }
+// ★★ AUJ-7 (§309) — « PAR POSTE » NE DIT QUE CE QUI EST CALCULÉ. À droite : l'écart prévu de la main-d'œuvre et de toute la
+//   campagne (jamais « 0 » ni « −0 » : « au budget ») ; pour le tracteur, le GNR, le phyto : ce qui reste à dépenser d'après
+//   l'avancement ; pour les prestations et les travaux à l'heure : ce qu'ils ont coûté, sans prévu. Le trait de fin ne reste que
+//   sur la main-d'œuvre : sur les autres postes il tombait au bout du budget et ne disait rien (Nico, 10/10).
+const ecartTxt = v => { const n = Math.round(v); return n === 0 ? 'au budget' : signe(n) + '\u202f€'; };
+const tauxH = v => Number(v || 0).toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + '\u202f€';
+const echPoste = l => Math.max(l.budget, l.att || 0, l.dep) * 1.06 || 1;
+function lignePoste(l) {
+  const ech = echPoste(l), w = v => (v / ech * 100).toFixed(1) + '%';
+  let droite, cls = 'neutre', barre = '', gauche;
+  if (l.ref === 'ecart') {
+    droite = ecartTxt(l.att - l.budget); cls = Math.round(l.att - l.budget) <= 0 ? 'ok' : 'ko'; gauche = eur(l.dep) + ' sur ' + eur(l.budget);
+    barre = '<div class="ck-puce"><i class="bud" style="width:' + w(l.budget) + '"></i><i class="dep" id="ck-po-b-' + l.id + '" style="width:0%"></i><i class="att' + (Math.round(l.att - l.budget) > 0 ? ' ko' : '') + '" id="ck-po-a-' + l.id + '" style="left:' + w(l.att) + '"></i></div>';   // au-delà du budget, le trait passe en orange
+  } else if (l.ref === 'proj') {
+    droite = 'reste ' + eur(l.budget - l.dep); gauche = eur(l.dep) + ' sur ' + eur(l.budget) + ' prévus';
+    barre = '<div class="ck-puce"><i class="bud" style="width:' + w(l.budget) + '"></i><i class="dep" id="ck-po-b-' + l.id + '" style="width:0%"></i></div>';
+  } else {
+    droite = eur(l.dep); gauche = l.id === 'hb' ? 'payé à l’heure, sans barème' : l.id === 'pre' ? 'facturé, sans prévu' : 'pas encore de prévu';
+  }
+  return '<li class="ck-po" data-po="' + l.id + '"><div class="ck-po-h"><span class="n">' + esc(l.nom) + '</span><span class="ck-po-d ' + cls + '">' + esc(droite) + '</span></div>'
+    + barre + '<div class="ck-po-s"><span>' + esc(gauche) + '</span><span>' + esc(l.note || '') + '</span></div></li>';
+}
+const ligneMO = r => ({ id: 'mo', nom: 'Main-d’œuvre', ref: 'ecart', budget: r.moBudget, dep: r.moDep, att: r.moAtt,
+  note: r.moH > 0 ? nb(r.moH) + ' h dans les rangs, ' + tauxH(r.moDep / r.moH) + ' de l’heure' : '' });
 function htmlPostes(r) {
-  const lignes = [{ id: 'mo', nom: 'Main-d’œuvre', note: nb(r.hR) + ' h réelles, à ' + Number(TAUX || 0).toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + '\u202f€ de l’heure', budget: r.moBudget, dep: r.moDep, att: r.moAtt }].concat(POSTES);
-  const max = Math.max(...lignes.map(l => Math.max(l.budget, l.att))) || 1;
+  const et = Math.round(r.att - r.budget);
   return entete('Par poste', 'Dépensé, et où chaque poste devrait atterrir', 'postes')
-    + '<ul class="ck-po-l">' + lignes.map(l => {
-      const ec = l.att - l.budget, ech = Math.max(l.budget, l.att) * 1.06;
-      return '<li class="ck-po" data-po="' + l.id + '"><div class="ck-po-h"><span class="n">' + esc(l.nom) + '</span><span class="ck-po-d ' + (ec <= 0 ? 'ok' : 'ko') + '" id="ck-po-d-' + l.id + '">' + signe(ec) + '\u202f€</span></div>'
-        + '<div class="ck-puce"><i class="bud" style="width:' + (l.budget / ech * 100).toFixed(1) + '%"></i><i class="dep" id="ck-po-b-' + l.id + '" style="width:0%"></i>'
-        + '<i class="att" id="ck-po-a-' + l.id + '" style="left:' + (l.att / ech * 100).toFixed(1) + '%"></i></div>'
-        + '<div class="ck-po-s"><span id="ck-po-s-' + l.id + '">' + eur(l.dep) + ' sur ' + eur(l.budget) + '</span><span>' + esc(l.note) + '</span></div></li>';
-    }).join('')
-    + '<li class="ck-po ck-po-tot"><div class="ck-po-h"><span class="n">Toute la campagne</span><span class="ck-po-d ok" id="ck-po-d-tot"></span></div>'
-    + '<div class="ck-po-s"><span id="ck-po-s-tot"></span><span id="ck-po-a-tot"></span></div></li></ul>';
+    + '<ul class="ck-po-l">' + [ligneMO(r)].concat(POSTES).map(lignePoste).join('')
+    + '<li class="ck-po ck-po-tot"><div class="ck-po-h"><span class="n">Toute la campagne</span><span class="ck-po-d ' + (et <= 0 ? 'ok' : 'ko') + '" id="ck-po-d-tot">' + esc(ecartTxt(r.att - r.budget)) + '</span></div>'
+    + '<div class="ck-po-s"><span id="ck-po-s-tot">' + eur(r.dep) + ' dépensés sur ' + eur(r.budget) + '</span><span id="ck-po-a-tot">atterrissage ' + eur(r.att) + '</span></div></li></ul>';
+}
+// Les barres pleines s'élargissent après le montage (transition de la feuille).
+function majPostes(r) {
+  const fixe = l => { const ech = echPoste(l), b = $('#ck-po-b-' + l.id), a = $('#ck-po-a-' + l.id);
+    if (b) b.style.width = (l.dep / ech * 100).toFixed(2) + '%'; if (a) a.style.left = ((l.att || 0) / ech * 100).toFixed(2) + '%'; };
+  fixe(ligneMO(r)); POSTES.forEach(l => { if (l.ref === 'proj') fixe(l); });
 }
 function htmlApps(r) {
-  const max = Math.max(1, ...APPS.map(a => r.a[a.id].coutHa));
-  const tri = APPS.filter(a => r.a[a.id].coutHa > 0).sort((x, y) => r.a[y.id].coutHa - r.a[x.id].coutHa), hi = tri[0], lo = tri[tri.length - 1];
+  // AUJ-7 : une appellation sans hectare en production (sa seule vigne est arrachée) ne s'affiche plus ; sans travail validé,
+  //   elle dit « — » au lieu de « 0 €/ha » et sort de la comparaison.
+  const LA = APPS.filter(a => r.a[a.id] && r.a[a.id].ha > 0);
+  const max = Math.max(1, ...LA.map(a => r.a[a.id].coutHa));
+  const tri = LA.filter(a => r.a[a.id].coutHa > 0).sort((x, y) => r.a[y.id].coutHa - r.a[x.id].coutHa), hi = tri[0], lo = tri[tri.length - 1];
   return entete('Par appellation', 'Main-d’œuvre engagée à l’hectare, à ce jour', 'apps')
-    + '<ul class="ck-ap-l">' + APPS.map(a => {
-      const x = r.a[a.id];
-      return '<li class="ck-ap"><div class="ck-ap-h"><span class="n">' + esc(a.nom) + '</span><span class="v">' + nb(x.coutHa) + '\u202f€/ha</span></div>'
+    + '<ul class="ck-ap-l">' + LA.map(a => {
+      const x = r.a[a.id], v = x.coutHa > 0;
+      return '<li class="ck-ap"><div class="ck-ap-h"><span class="n">' + esc(a.nom) + '</span><span class="v">' + (v ? nb(x.coutHa) + '\u202f€/ha' : '—') + '</span></div>'
         + '<div class="ck-ap-b"><span class="ck-barre fine"><i class="b-terre" style="width:' + (x.coutHa / max * 100).toFixed(1) + '%"></i></span>'
         + (a.ecart != null ? '<span class="ck-ap-c ' + (a.ecart > 0.05 ? 'ko' : a.ecart < 0 ? 'ok' : '') + '">' + pct1(a.ecart * 100) + '</span>' : '') + '</div>'
-        + '<div class="ck-ap-s">' + haTxt(x.ha) + ' en production</div></li>';
+        + '<div class="ck-ap-s">' + haTxt(x.ha) + ' en production' + (v ? '' : ', aucun travail validé') + '</div></li>';
     }).join('') + '</ul>'
     + (hi && lo && hi !== lo && r.a[lo.id].coutHa > 0 ? '<p class="ck-ap-note">' + esc(hi.nom) + ' a demandé ' + nb((r.a[hi.id].coutHa / r.a[lo.id].coutHa - 1) * 100) + '\u00a0% de plus à l’hectare que ' + esc(lo.nom) + ', d’après les heures validées de la campagne.</p>' : '');
 }
+// AUJ-7 : seules les tâches AU BARÈME qui ont du travail validé. Un travail à l'heure (arrachage…) n'a pas de barème en face, une
+//   tâche pas commencée rien à comparer — elles s'affichaient à « 0,0 % », « 0 h de barème, 0 h réelles ».
+const tachesE = () => TACHES.filter(t => ((V && V.eco && V.eco.ecTache) || {})[t.cle || t.nom] != null);
 function htmlTaches(r) {
-  const B = 10;
-  return entete('Écart au barème, par tâche', 'Heures réelles face au barème, sur les parcelles validées', 'taches')
+  const B = 10, L = tachesE(), tete = entete('Écart au barème, par tâche', 'Heures réelles face au barème, sur les parcelles validées', 'taches');
+  if (!L.length) return tete + '<p class="ck-fil-vide">Aucun travail au barème validé pour l’instant : rien à comparer.</p>';
+  return tete
     + '<div class="ck-ta-ax" aria-hidden="true"><span>plus rapide</span><span>barème</span><span>plus lent</span></div>'
-    + '<ul class="ck-ta-l">' + TACHES.map(t => {
+    + '<ul class="ck-ta-l">' + L.map(t => {
       const x = r.t[t.id], e = x.ecart * 100, w = Math.min(B, Math.abs(e)) / B * 50;
       return '<li class="ck-ta" data-ta="' + t.id + '"><span class="ck-ta-n">' + esc(t.nom) + '</span>'
         + '<span class="ck-ta-b"><i class="ck-ta-zero"></i><i class="ck-ta-v ' + (e > 0 ? 'lent' : 'vite') + '" id="ck-ta-v-' + t.id + '" style="' + (e > 0 ? 'left:50%' : 'right:50%') + ';width:' + w.toFixed(1) + '%"></i></span>'
@@ -827,7 +861,7 @@ const COUL = { faite: 'var(--et-faite-b)', cours: 'var(--et-cours-b)', afaire: '
 function majResume(r) {
   const n = savoirItems(r).filter(x => x.prio === 1).length;
   const temps = r.ecart > 0 ? r.ecart + ' jour' + (r.ecart > 1 ? 's' : '') + ' d’avance' : r.ecart < 0 ? -r.ecart + ' jours de retard' : 'pile à l’heure';
-  const argent = !(V.eco && r.budget > 0) ? '' : (Math.abs(r.sous) < 100 ? 'dans le budget' : r.sous > 0 ? eur100(r.sous) + ' sous le budget' : eur100(-r.sous) + ' au-dessus du budget');
+  const e0 = Math.round(r.sous), argent = !(V.eco && r.budget > 0) ? '' : (e0 === 0 ? 'pile dans le budget' : e0 > 0 ? eur(e0) + ' sous le budget' : eur(-e0) + ' au-dessus du budget');   // AUJ-7 : à l'euro, comme partout
   $('#ck-resume').innerHTML = '<b>' + maj1(temps) + '</b>, ' + (argent ? '<b>' + argent + '</b>, ' : '') + (n ? n + ' point' + (n > 1 ? 's' : '') + ' à anticiper.' : 'rien à anticiper.');
 }
 function majVerdict(r) {
@@ -1021,12 +1055,15 @@ function majFil() {
 }
 function majEco(r) {
   if (!V.eco) return;
-  Anim.rouler($('#ck-ev-att'), eur100(r.att));
-  // PRO-1 (§269) : « 0 € sous le budget de… » quand l'atterrissage tombe sur le budget
-  $('#ck-ev-sous').textContent = (Math.abs(r.sous) < 100 ? 'Dans le budget de ' : r.sous > 0 ? eur100(r.sous) + ' sous le budget de ' : eur100(-r.sous) + ' au-dessus du budget de ') + eur100(r.budget);
+  Anim.rouler($('#ck-ev-att'), eur(r.att));
+  // ★ AUJ-7 (§309) : un seul arrondi, à l'euro, partout (la tête arrondissait à la centaine, « Par poste » à l'euro : le même
+  //   chiffre s'écrivait deux fois). La phrase dit sur quoi repose le travail qui reste : la cadence mesurée, ou le barème.
+  const e0 = Math.round(r.sous);
+  $('#ck-ev-sous').textContent = (e0 === 0 ? 'Pile dans le budget de ' : e0 > 0 ? eur(e0) + ' sous le budget de ' : eur(-e0) + ' au-dessus du budget de ') + eur(r.budget)
+    + (r.cadAppl ? ', au rythme mesuré de l’équipe.' : ', le travail restant compté au barème.');
   const et = $('#ck-ev-etat');
-  et.className = 'ck-etat ' + (r.sous >= 0 ? 'ok' : 'ko');
-  et.textContent = r.sous >= 0 ? 'Sous le budget' : 'Au-dessus du budget';
+  et.className = 'ck-etat ' + (e0 >= 0 ? 'ok' : 'ko');
+  et.textContent = e0 > 0 ? 'Sous le budget' : e0 === 0 ? 'Dans le budget' : 'Au-dessus du budget';
   const ech = Math.max(r.budget, r.att) * 1.04, f = v => Math.max(0, Math.min(100, v / ech * 100)), q = s => $('#ck-efrise ' + s);
   q('.ck-fr-dep').style.width = f(r.dep) + '%';
   q('.ck-fr-reste').style.left = f(r.dep) + '%';
@@ -1040,29 +1077,14 @@ function majEco(r) {
   q('.ck-fr-visee').style.left = f(r.budget) + '%';
   q('.ck-fr-fin').classList.toggle('droite', f(r.att) > 70);
   { const _pd = r.budget ? r.dep / Math.max(r.budget, r.att) : 0, _pb = r.budget ? r.budget / Math.max(r.budget, r.att) : 1;
-    $('#ck-ef-dep').textContent = Math.abs(_pb - _pd) < .4 ? '' : 'Dépensé, ' + eur100(r.dep); }   // REF-2 : deux étiquettes trop proches ne se chevauchent pas
-  $('#ck-ef-att').textContent = 'Atterrissage, ' + eur100(r.att);
-  $('#ck-ef-bud').textContent = 'Budget, ' + eur100(r.budget);
+    $('#ck-ef-dep').textContent = Math.abs(_pb - _pd) < .4 ? '' : 'Dépensé, ' + eur(r.dep); }   // REF-2 : deux étiquettes trop proches ne se chevauchent pas
+  $('#ck-ef-att').textContent = 'Atterrissage, ' + eur(r.att);
+  $('#ck-ef-bud').textContent = 'Budget, ' + eur(r.budget);
   Anim.compter($('#ck-ek-ha'), r.coutHa);
   $('#ck-ek-ec').textContent = pct1(r.ecartMoy * 100);
   $('#ck-ek-cad-c').textContent = 'il en faut ' + nb(r.besoin) + ' pour finir le ' + dLong(VISEE);
-  // Les postes : seule la main-d’œuvre bouge avec les validations.
-  const lignes = [{ id: 'mo', budget: r.moBudget, dep: r.moDep, att: r.moAtt }].concat(POSTES);
-  lignes.forEach(l => {
-    const ech2 = Math.max(l.budget, l.att) * 1.06, ec = l.att - l.budget;
-    $('#ck-po-b-' + l.id).style.width = (l.dep / ech2 * 100).toFixed(2) + '%';
-    $('#ck-po-a-' + l.id).style.left = (l.att / ech2 * 100).toFixed(2) + '%';
-    const d = $('#ck-po-d-' + l.id);
-    d.textContent = signe(ec) + '\u202f€';
-    d.className = 'ck-po-d ' + (ec <= 0 ? 'ok' : 'ko');
-    $('#ck-po-s-' + l.id).textContent = eur(l.dep) + ' sur ' + eur(l.budget);
-  });
-  const dt = $('#ck-po-d-tot');
-  dt.textContent = signe(r.att - r.budget) + '\u202f€';
-  dt.className = 'ck-po-d ' + (r.att <= r.budget ? 'ok' : 'ko');
-  $('#ck-po-s-tot').textContent = eur(r.dep) + ' dépensés sur ' + eur(r.budget);
-  $('#ck-po-a-tot').textContent = 'atterrissage ' + eur(r.att);
-  TACHES.forEach(t => {
+  majPostes(r);   // AUJ-7 : les textes sont posés au montage ; seules les barres pleines bougent
+  tachesE().forEach(t => {   // AUJ-7 : les seules tâches dessinées
     const x = r.t[t.id], e = x.ecart * 100, w = Math.min(10, Math.abs(e)) / 10 * 50;
     const v = $('#ck-ta-v-' + t.id);
     v.className = 'ck-ta-v ' + (e > 0 ? 'lent' : 'vite');
@@ -1078,11 +1100,12 @@ function majEco(r) {
 }
 function majEChart(r) {
   if (!GE.c) return;
-  const fa = r.hF / TOTAL * 100, de = r.moDep / r.moBudget * 100, at = r.moAtt / r.moBudget * 100;
-  const f0 = GE.fait != null ? GE.fait : fa, d0 = GE.dep != null ? GE.dep : de, a0 = GE.att != null ? GE.att : at, fin0 = GE.fin || r.fin;
-  GE.fait = fa; GE.dep = de; GE.att = at; GE.fin = r.fin;
-  if (S.mode !== 'eco') { dessinerEChart(fa, de, at, r.fin); return; }
-  Anim.tween(720, k => dessinerEChart(lerp(f0, fa, k), lerp(d0, de, k), lerp(a0, at, k), new Date(lerp(+fin0, +r.fin, k))));
+  const at = attPct(r);
+  if (at > GE.c.ymax + .5) { redimEChart(true); return; }   // AUJ-7 : la fin prévue sort du cadre — on le redessine plus haut
+  const a0 = GE.att != null ? GE.att : at, fin0 = GE.fin || r.fin;
+  GE.att = at; GE.fin = r.fin;
+  if (S.mode !== 'eco') { dessinerEChart(at, r.fin); return; }
+  Anim.tween(720, k => dessinerEChart(lerp(a0, at, k), new Date(lerp(+fin0, +r.fin, k))));
 }
 function majTout(o = {}) {
   R = calc();
@@ -1241,9 +1264,9 @@ function redimEChart0(force) {
   const w = Math.round(box.clientWidth);
   if (!w || (!force && Math.abs(w - GE.w) < 3 && box.querySelector('svg'))) return;
   box.innerHTML = htmlEChart(w);
-  const fa = R.hF / TOTAL * 100, de = R.moDep / R.moBudget * 100, at = R.moAtt / R.moBudget * 100;
-  GE.fait = fa; GE.dep = de; GE.att = at; GE.fin = R.fin;
-  dessinerEChart(fa, de, at, R.fin);
+  const at = attPct(R);
+  GE.att = at; GE.fin = R.fin;
+  dessinerEChart(at, R.fin);
 }
 function jourSous(ev, c, svg) {
   const rc = svg.getBoundingClientRect(), k = (ev.clientX - rc.left - c.padL) / c.iw;
@@ -1291,10 +1314,10 @@ function suivreEChart0(ev) {
   if (!c || !svg) return;
   const jour = jourSous(ev, c, svg);
   if (!jour) { cacherTip(); return; }
-  const bud = R.moBudget;
   let fa, de, quoi = '';
-  if (jour < AUJ) { const h = HIST.find(o => +o.d === +jour) || HIST[HIST.length - 1]; fa = (TOTAL - h.r) / TOTAL * 100; de = h.c / bud * 100; }
-  else if (jour <= GE.fin) { const k = (jour - AUJ) / Math.max(1, GE.fin - AUJ); fa = lerp(GE.fait, 100, k); de = lerp(GE.dep, GE.att, k); if (+jour > +AUJ) quoi = ', projection'; }
+  // AUJ-7 : jusqu'à aujourd'hui, la série datée (le dernier point connu à ce jour) ; ensuite, les projections.
+  if (+jour <= +AUJ) { const L = SERIE_E.filter(o => +o.d <= +jour), o = L[L.length - 1]; if (!o) { cacherTip(); return; } fa = o.fait; de = o.dep; }
+  else if (jour <= GE.fin) { const z = finSerieE(), k = (jour - AUJ) / Math.max(1, GE.fin - AUJ); fa = lerp(z.fait, 100, k); de = lerp(z.dep, GE.att, k); quoi = ', projection'; }
   else { fa = 100; de = GE.att; quoi = ', travaux finis'; }
   const gx = c.X(jour), gl = $('#ck-e-guide');
   gl.setAttribute('x1', gx); gl.setAttribute('x2', gx); gl.style.opacity = 1;
@@ -1424,7 +1447,7 @@ function monter() {
   $('#ck-ekpi').innerHTML = htmlEKpis(R);
   $('#ck-echart').innerHTML = entete('Main-d’œuvre : dépensé face au fait', 'Tant que le dépensé reste sous le fait, la campagne coûte moins que prévu', 'echart')
     + '<div class="ck-gr" id="ck-egr"></div>'
-    + '<div class="ck-gr-leg" aria-hidden="true"><span><i class="lg-fait"></i>Travail fait</span><span><i class="lg-mes"></i>Budget dépensé</span><span><i class="lg-ecart"></i>Avance sur le budget</span></div>';
+    + '<div class="ck-gr-leg" aria-hidden="true"><span><i class="lg-fait"></i>Travail fait</span><span><i class="lg-mes"></i>Budget dépensé</span></div>';
   $('#ck-epos').innerHTML = htmlPostes(R);
   $('#ck-eapp').innerHTML = htmlApps(R);
   $('#ck-etac').innerHTML = htmlTaches(R);

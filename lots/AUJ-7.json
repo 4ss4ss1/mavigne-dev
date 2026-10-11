@@ -1,0 +1,32 @@
+{
+  "lot": "AUJ-7",
+  "section": "§309",
+  "base": "b94659b0fec3bc45e6293ad2696e5d031c784e93",
+  "inclut": [],
+  "date": "2026-10-11",
+  "fichiers": {
+    ".mv-base": "bcd45e64cb85789925b2a8ce9f435d90f2afc1aba0209059386ed96ddfe60926",
+    "CLAUDE.md": "76f7e5602f2180b69941964882c0e18eeda9f1de1db0cec684a206452edaf3d4",
+    "docs/claude/INDEX.md": "99d7a15dc0cc14053be7420bcc12f2c309efef7d5d247118794bafc653ef3dc4",
+    "docs/claude/chantiers-280-329.md": "561513e69ef3bc96bc735cef9dde3dabdb888438c788b11e82d0c8ae50e5273e",
+    "docs/claude/journal.md": "f4b2f878c1b9fbd9d728b94c06922b91b33c547b477fb993c63e35f5ea7c867e",
+    "guide/11-pilotage.html": "9a3db331bdb97218e2d8669260eaf05f161f2f0672122465f50e4726609b8722",
+    "index.html": "17f56dac818353527a642f9ca225c82dbc50391e0d827adc06e27331d765d248",
+    "public/fonts/fonts.css": "b3dbe079a3f94dfdbe00ccf7b655c58d8132388aa75a726a9255b59bdb53574a",
+    "public/sw.js": "79c95721fd8beb7ea4fcec77f6df76b099cd7bfc5d7cb8986dd1ab7c8e01aa5f",
+    "scripts/banc/garde-projection.mjs": "ee24cbd093fb1509681afa7b1ead6ef59ff9c941a7d36baffaa8115c18a230e9",
+    "scripts/harnais-claude-md.mjs": "248c0ed8abadece030d0f437ef9975a57a576846b07b53c0e81dc82dd0534402",
+    "scripts/mv-harnais-arrach8.mjs": "b5c2b63f87de7dc3df86ad54a9d70d91f7bc26a1a38adcd5175a07cada9cb0fa",
+    "scripts/mv-harnais-liste.mjs": "16a197cc7bb933270552aca24555595a9d9d1f336136e661cc906dbf9362bfda",
+    "scripts/mv-harnais-pro1.mjs": "d87f7382c95fed79e734279cb8c8155434697869c81176b0399512b3c0eb1c84",
+    "scripts/mv-harnais-ref2.mjs": "c69d6819272d669d3d3731d909a98e8d4c590d7bfbe878bfbd709715f3a3c183",
+    "scripts/mv-harnais-temps-vigne.mjs": "e2f0a45ad22f1f0ab3eca88542f2ac7ee60a019af92baaaefc2670ace2eacf61",
+    "scripts/typo-baseline.json": "9f14d1d6b3cfb85bfdcc09ac68bfd56d14df2d41655690a00a23a698b6e86c0e",
+    "src/cockpit-vue.js": "b25aa54d0c7928c050c6f2f7c4f0509153755ac31e4e3f16cb108667e3ce683d",
+    "src/pilotage.js": "11344156e17d74a66e8c755263f77fe8c161a00b0d7c5b76cce94e481c4d4017",
+    "src/styles.css": "c5587c0ff90f3b8f5a287b6d4070c2bf7a9255c2b7db5aa8cfbcd1ec42ef689c",
+    "src/utils.js": "a6dd9eb5f12b530be2acceab6ce21074a320b62442061e9173875ebda5cfc5bc",
+    "public/fonts/espace-fine.woff2": "75713ef6344236a0fc0d162637f1ba3a53528962f675fecd1b4608571a6ee7ee",
+    "scripts/mv-harnais-auj7.mjs": "6e22d2e49e33310227c896f1f8dcc42429cf600fc2b7f60dc0402742203e3557"
+  }
+}

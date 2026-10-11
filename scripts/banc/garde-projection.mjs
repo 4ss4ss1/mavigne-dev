@@ -34,7 +34,9 @@ const sites = [
   ['facteur k de la date', /if\(E\.cad\.applic\)\{ k=1\+/],
   // ENG-2 (24/09) : l'engagé est réel, le reste de TRAVAIL se lit au barème (resteBar). La garde
   //   par cadAppl — l'intention de cette assertion — est inchangée.
-  ['budget projete', /var projFin = cadAppl \? \(engage \+ resteBar\*\(1\+ecart\)\)/],
+  // AUJ-7 (11/10) : la cadence ne touche plus que le reste de MAIN-D'ŒUVRE (T.moR) — le tracteur, le GNR et le phyto sont déjà
+  //   extrapolés à l'avancement. La garde par cadAppl — l'intention de cette assertion — est inchangée.
+  ['budget projete', /var projFin = cadAppl \? \(engage \+ resteBar \+ T\.moR\*ecart\)/],
   ['ligne de fin du graphe', /var pFin=\(E && E\.cad && E\.cad\.ok && E\.cad\.applic/],
   ['legende fin projetee', /E\.cad\.ok&&E\.cad\.applic&&Math\.abs\(E\.cad\.ecart\)>5\?'<span class="pec-lg">/],
   ['KPI budget accueil', /var ec=\(E\.cad\.ok&&E\.cad\.applic\)\?E\.cad\.ecart:null;/]

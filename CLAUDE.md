@@ -3,11 +3,11 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **11 octobre 2026 (AUJ-6)** — ★★ **LES DESSINS D'AUJOURD'HUI NE DISPARAISSENT PLUS ; « À SAVOIR » SOUS LES ONGLETS ; LA COURBE SANS TRAITS** (§308). Lot 39, base `373361c`.
-> Captures de Nico (10/10) : « À savoir » coupé (en haut et en descendant), « Nouveau » mal posé, charge restante « nulle » (« on arrête avec les colonnes ou lignes qui montent
-> et descendent »), « les images disparaissent parfois ». REPRODUIT dans Chromium sur la base (appli entière sous Vite, données injectées) : après un passage par Économie, le
-> montage suivant levait dans `majEco` (erreur avalée `pilotage.js/_pilTabAuj#ck2m`). Trouvé en route : la photo du jour partait AVANT l'arrivée des données (0 h, et toute la
-> configuration réécrite depuis la copie locale). **APP 8.75 → 8.76, SW 9.54 → 9.55.** `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+> Dernière consolidation : **11 octobre 2026 (AUJ-7)** — ★★ **LA VUE ÉCONOMIE D'AUJOURD'HUI SUR LES VRAIS CHIFFRES ; L'ARRACHAGE, TRAVAIL À L'HEURE** (§309). Lot 40, base `b94659b`.
+> Nico (11/10, capture de la maquette) : une seule police, plus d'aire verte, plus de « 0 € / −0 € » dans « Par poste », « on fait du pro » ; puis l'arrachage (« regarde les
+> conventions »). Rendu dans Chromium : l'atterrissage valait le budget PAR CONSTRUCTION (11 500 € affichés, 15 650 € projetés par le moteur), la main-d'œuvre « dépensée » était
+> le barème du fait, la « cadence de l'équipe » la journée de référence (7 h). Conventions : l'accord du 2 octobre 2023 laisse l'arrachage hors de la tâche, payé à l'heure. L'espace
+> fine U+202F n'est dans AUCUNE fonte. Validé par Nico : les travaux à l'heure sortent de l'écart de cadence. **APP 8.76 → 8.77, SW 9.55 → 9.56.** `npm run site` → `build` → `--only hosting`.
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1441,6 +1441,8 @@ passait devant (CADRE-1, §300). Un défaut de z-index peut n'exister que chez q
     racine du composant** (`.ck2 *`). `mv-harnais-cadre1` refuse un `box-sizing:inherit` hors de `.ck2` et une page affichée hors de `.active`.
 18. ★★ **Un `.overlay` rangé dans une page n'est plus une fenêtre : il quitte la classe `.overlay`** (`_plFicheFenetre`, §300). Sinon le
     verrou A11Y-2 le prend pour la fenêtre du dessus et rend tout le reste inerte.
+19. ★★ **Un `unicode-range` dit ce qu'une fonte PRÉTEND couvrir, pas ce qu'elle dessine** (AUJ-7, §309) : U+202F, l'espace des nombres en français, était dans la
+    plage et dans aucune des onze fontes — chaque appareil la prenait ailleurs, parfois de largeur nulle. Un caractère neuf se vérifie DANS la fonte (`fontTools`, `getBestCmap()`).
 
 ---
 
@@ -1849,6 +1851,11 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ AUJ-7 — CE QUI RESTE OUVERT (§309, posé le 11/10)
+1. **À regarder chez Nico, sur ses données et au téléphone** : la vue Économie et la tuile Budget, qui monte (le payé, plus le barème du fait). Vues dans Chromium sur un domaine reconstitué.
+2. **Le jour mêlé se partage à la SURFACE** entre arrachage et travaux au barème (aucun temps d'arrachage dans les conventions) ; plus fin, il faudrait lire les « Début ».
+3. Vu, non touché : « Par appellation » compare le barème du travail validé, pas le temps réel ; les heures d'un arrachage commencé restent « en attente » jusqu'à sa validation.
 
 ### ⚠️ AUJ-6 — CE QUI RESTE OUVERT (§308, posé le 11/10)
 1. **À regarder chez Nico, sur son PC** : « À savoir » sous les onglets en descendant, la pastille « Nouveau » entière, un passage par Économie puis une donnée qui arrive

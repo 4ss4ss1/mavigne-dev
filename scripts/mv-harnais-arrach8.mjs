@@ -70,7 +70,7 @@ function monde(S, o = {}) {
 
 // ── Le temps réel, moteur exécuté (méthode de mv-harnais-temps-vigne : extraction + prélude de stubs) ──
 const VOULUES = ['_ecoCaveJours', '_pexIso', '_pexD', '_pexIsoToMs2', '_pexIsoPlus', '_pexJourApres', '_opPassHha', '_opMinTrou',
-  '_ecoTvNivs', '_ecoTvDef', '_ecoTvBar', '_ecoTvEvents', '_ecoTempsVigne'];
+  '_ecoTvNivs', '_ecoTvDef', '_ecoTvAvecBareme', '_ecoTvBar', '_ecoTvEvents', '_ecoTempsVigne'];   // _ecoTvAvecBareme : AUJ-7 (§309)
 const PRELUDE = `
 var window = { PARCELLES:[], JOURNAL:[], MEMBRES:[], TACHES:[] };
 var HEURES = {}, COND = {}, PER = { nom:'Hiver', debut:'2026-01-05', fin:'2026-01-16' };

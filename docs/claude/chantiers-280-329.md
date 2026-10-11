@@ -939,3 +939,68 @@ blanche). « Continu », puis « Continuer » : exécution.
 - Chaîne complète (`TZ=Europe/Paris`), rejouée par tranches (la limite d'ici est de 300 s par commande) : **353 commandes, 959 s, 0 rouge** ; `build-guide --check` vert
   après régénération locale de la page (`npm run site`), jamais livrée.
 - ⚠️ Non vu : ses données, son écran. Voir §28 (AUJ-6).
+
+## 309. ★★ AUJ-7 — LA VUE ÉCONOMIE D'AUJOURD'HUI SUR LES VRAIS CHIFFRES ; L'ARRACHAGE, TRAVAIL À L'HEURE (11/10 — `src/pilotage.js` (`_ecoTvAvecBareme`, `_ecoTempsVigne`, `_pecData`, `_pilCk2Eco`) · `src/cockpit-vue.js` · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW, MV_INFO ×4, MV_AIDE) · `public/fonts/fonts.css` · `public/fonts/espace-fine.woff2` (neuf) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-auj7.mjs` (neuf) · `scripts/mv-harnais-ref2.mjs` · `scripts/mv-harnais-pro1.mjs` · `scripts/mv-harnais-arrach8.mjs` · `scripts/mv-harnais-temps-vigne.mjs` · `scripts/banc/garde-projection.mjs` · `scripts/typo-baseline.json` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/AUJ-7.json` · **APP 8.76 → 8.77, SW 9.55 → 9.56**, base `b94659b`)
+
+### 309a. La demande
+Nico (11/10, capture de la maquette validée) : la vue Économie d'Aujourd'hui doit suivre la maquette, avec une seule police ; l'aire verte du graphe « dépensé face au
+fait » et les « 0 € / −0 € » de « Par poste » « ne veulent rien dire » ; « on fait du pro ». Reformulation confirmée (« exact »), avec un ajout : « il y a aussi des
+problèmes avec l'arrachage (regarde les textes de conventions si besoin et trouve une solution) ». Une question posée : retirer les heures sans barème de l'écart de
+cadence (Nico avait dit le 23/09 de laisser l'écart comme il est, §172f ③). Réponse : « On suit ta recommandation ».
+
+### 309b. Ce que le rendu a montré (Chromium, appli entière sous Vite, domaine reconstitué : 13 parcelles, taux horaires, planning, arrachage en étapes dont un jour mêlé, prestataire, tracteur)
+1. **L'atterrissage valait le budget par construction.** REF-2 (§267) additionnait le dépensé et `E.resteE` (budget − engagé) : max(engagé, budget). D'où « Dans le budget »,
+   « 0 € » partout, et un coût à l'hectare égal à son prévu. Sur l'essai : 11 500 € affichés, 15 650 € projetés par le moteur (`E.projFin`).
+2. **La main-d'œuvre « dépensée » était le barème du fait** (`T.moF`), son atterrissage `T.moF + T.moR` = `T.moB` : écart toujours 0 ou −0 (résidu d'arrondi), et la tuile Budget
+   disait « 53 % dépensés pour 54 % faits » par construction (payé réel : 70 %). ENG-2 (§173) avait pourtant mis l'engagé sur les heures payées : l'adaptateur lisait l'ancienne grandeur.
+3. **« Cadence de l'équipe » = la journée de référence** : `_pilCk2Eco` rendait `cadence: E.cad.hJour` (7 h), qui écrasait `V.capMoy` — aussi sous la courbe de charge restante (Terrain).
+4. **Le graphe** lisait les photos du jour : la part de TOUT le budget (`cons`), quelques jours, un point du jour égal au fait, et une aire « avance » entre deux tracés décalés.
+5. **Les polices** : chiffres des tuiles à 32 px (700) au-dessus de la phrase (28 px, 600), lignes à 13 ou 14 px, valeurs en 600 ou 700. Et **U+202F** (l'espace des milliers et
+   avant « € », « % », « ha » en français) n'est dans aucune des onze fontes (vérifié avec fontTools) : prise ailleurs, parfois de largeur nulle — « 15099€ » à côté de « 6 820 € »,
+   et dans la capture de Nico « 2576€ sur 7980€ ». `mv-harnais-subset` lit les `unicode-range`, qui la déclaraient : il ne pouvait pas le voir.
+6. **L'arrachage** : (a) un jour où une étape d'arrachage et une clôture au barème partageaient la liste (PAR-1, prorata du barème), l'arrachage prenait 0 h — la réparation du jour
+   ramassait toute la journée, report compris (essai : 14 h d'arrachage au lieu de 29) ; (b) payé dans la main-d'œuvre, absent du budget : il mangeait le reste à engager ;
+   (c) dans l'écart de cadence : +41 % au lieu de +31 % ; (d) listé dans « Écart au barème, par tâche » à « 0 h de barème, 0,0 % » ; (e) « Bourgogne Aligoté, 0,00 ha ».
+
+### 309c. Les conventions
+L'accord collectif du 2 octobre 2023 relatif au travail à la tâche en viticulture (Côte-d'Or, Doubs, Jura, Nièvre, Haute-Saône, Yonne, Territoire de Belfort) et les accords de
+domaines qui le déclinent fixent les **travaux obligatoires** de la tâche (485 h/ha pour un temps plein de 3,31 ha), des options (remplacement des piquets : 10 h/ha, travaux de
+cave…) et des **heures en plus**, payées à l'heure. L'arrachage n'y figure pas : **aucun temps de référence à reprendre**. Le catalogue le disait déjà (« temps réel, hors
+barème », §205d : pas de barème par défaut). Conséquence retenue : un travail sans barème est un **travail à l'heure** — compté au réel, jamais comparé à un barème.
+
+### 309d. Ce qui change
+- **Moteur** (`pilotage.js`) : `_ecoTvAvecBareme(def)` ; dans `_ecoTempsVigne`, chaque clôture porte `hb` (sans barème) ; la journée d'une liste MÊLÉE se partage d'abord à la
+  surface entre travaux à l'heure et travaux au barème, puis comme avant (une liste d'un seul genre : identique, au caractère près) ; les euros des travaux à l'heure sont datés au
+  jour où les heures ont été faites (`byDHb`, accumulateur daté par personne) ; `barD` = barème clos par jour. Dans `_pecData` : `hbE`/`hbH`, budget et « barème du fait »
+  augmentés de `hbE` (son budget est son coût, comme une prestation), poste `hb` « Travaux à l'heure », main-d'œuvre vigne = `moReel − hbE`, écart de cadence sans `hbH`, écart
+  d'une parcelle sans ses heures à l'heure, `tvHorsE` sans eux (ils ont leur poste). **La cadence ne s'applique plus qu'au reste de main-d'œuvre** : le reste du tracteur, du GNR
+  et du phyto est déjà extrapolé à l'avancement ; le multiplier aussi faisait que l'écart de la campagne n'était pas la somme de ses lignes (47 € d'écart inexpliqué sur l'essai).
+- **Photo du cockpit** (`_pilCk2Eco`) : atterrissage = `E.projFin` ; main-d'œuvre payée (poste `mo`), son atterrissage = payé + `T.moR` × cadence ; postes avec une RÉFÉRENCE
+  (`proj` : extrapolé ; `cout` : prestations, travaux à l'heure ; `reel` : pas encore de prévu), un poste vide caché ; plus de `cadence` ; `serie` datée (payé en % du budget
+  main-d'œuvre, fait au barème ramené à l'avancement), deux courbes qui ne font que monter, le dernier point = les chiffres du jour.
+- **Affichage** (`cockpit-vue.js`) : signe posé APRÈS l'arrondi (montants, pourcentages : jamais « −0 ») ; un seul arrondi, à l'euro (tête, phrase, frise, « Par poste ») ; la
+  phrase dit sur quoi repose le reste (cadence mesurée, ou barème) ; « Par poste » : écart pour la main-d'œuvre et le total (« au budget » à zéro), « reste N € » pour un poste
+  extrapolé, le coût pour un poste au réel, trait de fin sur la seule main-d'œuvre (orange au-delà du budget) ; graphe sans aire, échelle au-delà de 100 % ; tâches comparables
+  seulement ; appellation sans hectare cachée, sans travail validé « — ». Fiches « i » réécrites (atterrissage, budget, coût à l'hectare, écart, graphe, postes, appellations, tâches).
+- **Polices** : chiffres des tuiles 24 px, lignes 14, total 16, une graisse forte (600) ; `espace-fine.woff2` (664 octets, un glyphe : U+202F, 0,13 cadratin) déclarée pour chacune
+  des onze fontes, APRÈS elles (pour ce caractère, c'est elle que le navigateur essaie d'abord) — vaut pour toute l'appli et les documents imprimés.
+
+### 309e. Mesuré
+- `mv-harnais-auj7` (neuf) : 24 vertes, 10 contre-épreuves sur 10. Moteur et photo EXÉCUTÉS dans l'appli entière (`mv-app-node`) sur un domaine au jour mêlé ; affichage, feuille
+  et polices lus. ⚠️ La première version de A1 ne mordait pas : l'auteure des validations (nommée) et une salariée non nommée donnaient déjà 28 h à l'arrachage la veille ; A1 vise
+  désormais l'étape du jour mêlé (« Souches »), seule à prendre 0 h sans la règle.
+- Rendu Chromium (1 440 px, barre ouverte), avant / après : 15 099 € projetés, « 2 985 € au-dessus du budget de 12 114 €, au rythme mesuré de l'équipe », main-d'œuvre +2 985 €
+  (6 820 € payés sur 9 767 €), tracteur « reste 112 € », prestations 1 450 €, travaux à l'heure 568 € (arrachage 29,3 h), total +2 985 €, cadence 28 h/j, écart +30,5 % ; espaces des
+  milliers visibles à toutes les graisses ; aucune erreur hors réseau coupé.
+- Remis au nouveau contrat, contre-épreuves comprises : `mv-harnais-ref2` (14 vertes, 7/7 : l'atterrissage EST la fin projetée, la main-d'œuvre est payée, la série datée ;
+  deux défauts neufs réinjectés), `mv-harnais-pro1` (27, 13/13 : « Pile dans le budget », le taux arrondi par `tauxH`), `mv-harnais-arrach8` (49, 18/18) et `mv-harnais-temps-vigne` (84,
+  30/30) extraient `_ecoTvAvecBareme`, et TV-1 suit la nouvelle forme du partage et de la projection ; `banc/garde-projection` (19) : la fin projetée reste gardée par la
+  cadence applicable. ⚠️ Premier passage de la chaîne : 4 rouges, tous de contrat (preflight C26 : `import()` d'un chemin dans le harnais neuf — `pathToFileURL` ; trois
+  harnais qui lisaient l'ancienne forme), aucun défaut de l'appli. `mv-harnais-typo` regravé, tailles seules : `cockpit-vue.js` 109 → 116 ko (+6 %, un seul écran sous 120 ko : pas de découpage), `pilotage.js`
+  889 → 898, `utils.js` 838 → 851, `styles.css` 694 → 697 ; `app.js` 868 → 873 vient des lots d'avant (fichier non touché ici). Rendu au téléphone (390 px) regardé.
+- **Chaîne complète** (`TZ=Europe/Paris`, `--continuer`, une à la fois), deuxième passage, d'une traite : **355 commandes, 507 s, 0 rouge** — `build-guide --check` vert
+  après régénération locale de la page (`npm run site`), jamais livrée.
+
+### 309f. Ouvert
+§28 « AUJ-7 — CE QUI RESTE OUVERT ». ⚠️ Leçon : un adaptateur qui « branche le moteur » doit lire la grandeur que l'écran NOMME — `resteE` (l'argent qui reste) n'est pas le
+travail qui reste, `moF` (le barème du fait) n'est pas le payé. Les deux erreurs donnaient des écrans propres, cohérents… et vides de sens, par construction.

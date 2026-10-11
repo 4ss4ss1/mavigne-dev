@@ -58,7 +58,7 @@ function extraire(src, nom) {
 const nu = s => s.split('\n').filter(l => !l.trimStart().startsWith('//')).join('\n');
 
 const VOULUES = ['_ecoCaveJours', '_pexIso', '_pexD', '_pexIsoToMs2', '_pexIsoPlus', '_pexJourApres', '_opPassHha', '_opMinTrou',
-  '_ecoTvNivs', '_ecoTvDef', '_ecoTvBar', '_ecoTvEvents', '_ecoTempsVigne'];
+  '_ecoTvNivs', '_ecoTvDef', '_ecoTvAvecBareme', '_ecoTvBar', '_ecoTvEvents', '_ecoTempsVigne'];   // _ecoTvAvecBareme : AUJ-7 (§309)
 
 /* Stubs : ils RENDENT des données. HEURES[nom][iso] = heures dans les rangs ce jour ;
    COND[nom][iso] = heures de conduite ; la période est en janvier 2026 (passée). */
@@ -339,7 +339,8 @@ function branchements(src) {
   const pd = extraire(L, '_pecData') || '', tl = extraire(L, '_pecTimeline') || '';
   R.push(['J1 · l\'engagé prend la main-d\'œuvre du planning', /var moReel = \(TVe && TVe\.ok\) \? TVe\.eur : T\.moF;/.test(pd)
     && /var engage = moReel \+ T\.tracF \+ T\.gnrF \+ T\.phyF;/.test(pd)]);
-  R.push(['J2 · la projection ajoute le reste de TRAVAIL au barème', /projFin = cadAppl \? \(engage \+ resteBar\*\(1\+ecart\)\) : \(engage \+ resteBar\)/.test(pd)]);
+  // AUJ-7 (§309) : la cadence ne touche plus que le reste de MAIN-D'ŒUVRE (T.moR) ; le reste de travail au barème s'ajoute toujours.
+  R.push(['J2 · la projection ajoute le reste de TRAVAIL au barème', /projFin = cadAppl \? \(engage \+ resteBar \+ T\.moR\*ecart\) : \(engage \+ resteBar\)/.test(pd)]);
   R.push(['J3 · le poste main-d\'œuvre vaut l\'engagé réel (le total des postes = l\'engagé)', /k:'mo',[^\n]*fait:moReel/.test(pd)]);
   R.push(['J4 · la courbe pose la main-d\'œuvre au jour payé', /E\.moSrc==='planning' && E\.tv && E\.tv\.byD/.test(tl)]);
   // RÉAL-1 (§188) : les tableaux Parcelles et Coût par travail lisent le RÉALISÉ payé, avec l'écart au barème du fait.
@@ -380,8 +381,9 @@ function executer(src) {
 
 /* ── Contre-épreuves ───────────────────────────────────────────────────── */
 const MUT = [
-  ['parts égales au lieu du prorata', 'var part=(Sb>0)?((e.b||0)/Sb):((S>0)?(e.surf/S):(1/L.length))', 'var part=1/L.length'],
-  ['PAR-1 : prorata de la surface au lieu du barème', 'var part=(Sb>0)?((e.b||0)/Sb):((S>0)?(e.surf/S):(1/L.length))', 'var part=(S>0)?(e.surf/S):(1/L.length)'],
+  // AUJ-7 (§309) : le partage passe d'abord entre travaux à l'heure et au barème (qH) ; sans travail à l'heure (ces scénarios), qH vaut 0.
+  ['parts égales au lieu du prorata', 'var part=e.hb ? qH*((SH>0)?(e.surf/SH):(1/nH)) : (1-qH)*((Sb>0)?((e.b||0)/Sb):((SB>0)?(e.surf/SB):(1/nB)))', 'var part=1/L.length'],
+  ['PAR-1 : prorata de la surface au lieu du barème', '(1-qH)*((Sb>0)?((e.b||0)/Sb):((SB>0)?(e.surf/SB):(1/nB)))', '(1-qH)*((SB>0)?(e.surf/SB):(1/nB))'],
   ['PAR-1 : un salarié non nommé ne rejoint plus la journée du domaine', 'if(!(L && L.length) && evJour[d] && !eqJour[d] && !(horsJour[d] && horsJour[d][m.nom])) L=evJour[d];', ''],
   ['PAR-1 : le décoché rejoint la journée du domaine', 'if(!(L && L.length) && evJour[d] && !eqJour[d] && !(horsJour[d] && horsJour[d][m.nom])) L=evJour[d];', 'if(!(L && L.length) && evJour[d] && !eqJour[d]) L=evJour[d];'],
   ['ÉQUIPES-1 : un jour d\'équipes garde la journée du domaine', 'if(!(L && L.length) && evJour[d] && !eqJour[d] && !(horsJour[d] && horsJour[d][m.nom])) L=evJour[d];', 'if(!(L && L.length) && evJour[d] && !(horsJour[d] && horsJour[d][m.nom])) L=evJour[d];'],

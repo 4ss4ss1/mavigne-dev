@@ -8,6 +8,12 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **11 octobre 2026 (AUJ-6)** — ★★ **LES DESSINS D'AUJOURD'HUI NE DISPARAISSENT PLUS ; « À SAVOIR » SOUS LES ONGLETS ; LA COURBE SANS TRAITS** (§308). Lot 39, base `373361c`.
+> Captures de Nico (10/10) : « À savoir » coupé (en haut et en descendant), « Nouveau » mal posé, charge restante « nulle » (« on arrête avec les colonnes ou lignes qui montent
+> et descendent »), « les images disparaissent parfois ». REPRODUIT dans Chromium sur la base (appli entière sous Vite, données injectées) : après un passage par Économie, le
+> montage suivant levait dans `majEco` (erreur avalée `pilotage.js/_pilTabAuj#ck2m`). Trouvé en route : la photo du jour partait AVANT l'arrivée des données (0 h, et toute la
+> configuration réécrite depuis la copie locale). **APP 8.75 → 8.76, SW 9.54 → 9.55.** `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+
 > Dernière consolidation : **10 octobre 2026 (AUJ-5)** — ★★ **AUJOURD'HUI REMIS À LA MAQUETTE, LE PLANNING FAIT FOI** (§307). Lot 38, base `cd06431` (ARRACH-8 poussé après coup : lot rejoué dessus).
 > Demande de Nico (10/10, dictée + capture de la maquette) : ouverture par rôle, « toujours se baser sur le planning » (jamais un retour un samedi, fin d'arrêt
 > maladie), phrase du Budget, polices, disposition de la maquette avec « À savoir » à droite ET collant, carte qui disparaît, pastille qui clignote, météo en couleurs.

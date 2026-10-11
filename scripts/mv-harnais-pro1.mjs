@@ -79,7 +79,8 @@ function jouer(S) {
   T('aucun undefined / NaN', !/undefined|NaN/.test(P0 + P1));
   // ⑨ La vue Économie : le coût de l'heure arrondi (« 21.27848101265823 € »), pas de « 0 € sous le budget »
   T('vue Économie : le coût de l’heure s’écrit arrondi, et un budget tenu se dit « dans le budget »',
-    !S.vue.includes("' h réelles, à ' + TAUX + '") && S.vue.includes("Math.abs(r.sous) < 100 ? 'Dans le budget de '"));
+    !S.vue.includes("' h réelles, à ' + TAUX + '") && S.vue.includes("e0 === 0 ? 'Pile dans le budget de '")   // AUJ-7 (§309) : un seul arrondi, à l'euro
+      && S.vue.includes("const tauxH = v => Number(v || 0).toLocaleString('fr-FR', { maximumFractionDigits: 2 })"));
   return out;
 }
 
@@ -99,7 +100,7 @@ if (CONTRE) {
     ['une marge doublée revient', 'css', '.ck-carte{position:relative;margin:0 -16px;', '.ck-carte{position:relative;margin:0 --16px;'],
     ['Ctrl K repropose « Simuler »', 'coq', "['sim', 'Décider']", "['sim', 'Simuler']"],
     ['l’échelle de la consommation répartie à la largeur du texte', 'pil', "ax+='<span style=\"left:'+pc(k)+'\">'", "ax+='<span>'"],
-    ['le coût de l’heure redevient brut (quatorze décimales)', 'vue', "' h réelles, à ' + Number(TAUX || 0).toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + '", "' h réelles, à ' + TAUX + '"],
+    ['le coût de l’heure redevient brut (quatorze décimales)', 'vue', "const tauxH = v => Number(v || 0).toLocaleString('fr-FR', { maximumFractionDigits: 2 })", "const tauxH = v => String(v"],   // AUJ-7 : la note de la main-d'œuvre passe par tauxH
     ['la tension par personne quitte L’équipe', 'pil', "if(_tc) H+='<div class=\"pil-tension-det\" id=\"pil-tension-det\">'+_tc+'</div>';", ''],
   ];
   let manques = 0;

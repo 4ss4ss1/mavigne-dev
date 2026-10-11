@@ -5355,26 +5355,64 @@ window._pilCk2Modele=_pilCk2Modele;
 function _pilCk2Eco(d, V){
   var E=null; try{ E=_pecData(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Eco'); }
   if(!E||!E.configured) return null;
-  var T=E.tot||{}, budget=Number(E.budget)||0, dep=Number(E.engage)||0, att=dep+(Number(E.resteE)||0);
+  var T=E.tot||{}, num=function(x){ x=Number(x); return isFinite(x)?x:0; };
   var tx=function(h){ return String(h==null?'':h).replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim(); };
-  var postes=(E.postes||[]).filter(function(p){ return p&&p.k!=='mo'; }).map(function(p){ var f=Number(p.fait)||0, b=Number(p.budget)||0;
-    return { id:p.k, nom:p.lab, note:tx(p.det), budget:b, dep:f, att:Math.max(f,b) }; });
+  var budget=num(E.budget), dep=num(E.engage);
+  // ★★★ AUJ-7 (§309) — L'ATTERRISSAGE EST LA FIN PROJETÉE DU MOTEUR (celle de l'onglet Économie) : ce qui est dépensé, plus le
+  //   travail qui reste au barème, corrigé de la cadence mesurée quand elle s'applique. REF-2 additionnait le dépensé et le
+  //   « reste à engager » (budget − dépensé) : tant qu'on était sous le budget, l'atterrissage VALAIT le budget — « Dans le
+  //   budget », « 0 € » et « −0 € » partout, par construction. Nico (10/10) : « ça ne veut rien dire ».
+  var cadAppl=!!(E.cad&&E.cad.applic), k=cadAppl?(1+num(E.cad.ecart)/100):1;
+  var att=num(E.projFin);
+  // La main-d'œuvre : ce qui a été PAYÉ (heures du planning dans les rangs, ENG-2), hors travaux à l'heure — plus le barème du
+  //   fait (REF-2 montrait le barème du fait : « dépensé » et « fait » égaux par construction). Son atterrissage : le payé, plus
+  //   le travail qui reste, à la cadence mesurée.
+  var Pk={}; (E.postes||[]).forEach(function(p){ if(p&&p.k) Pk[p.k]=p; });
+  var moDep=num(Pk.mo?Pk.mo.fait:T.moF), moBudget=num(T.moB), moAtt=moDep+num(T.moR)*k;
+  var tv=E.tv||null, moH=tv?Math.max(0, num(tv.hVigne)-num(E.hbH)):num(T.fH);
+  // Les autres postes : une RÉFÉRENCE seulement là où elle existe. Tracteur, GNR, phyto : extrapolés à l'avancement (« proj »),
+  //   ou rien encore (« reel », sous 15 % du travail fait) ; prestations et travaux à l'heure : leur coût (« cout »). Un poste
+  //   sans dépense ni référence ne s'affiche pas. Leur atterrissage est leur prévu (la cadence ne touche que la main-d'œuvre) :
+  //   la somme des lignes tombe sur la fin projetée, l'écart de la campagne sur celui de la main-d'œuvre.
+  var postes=(E.postes||[]).filter(function(p){ return p&&p.k!=='mo'; }).map(function(p){
+    var f=num(p.fait), b=num(p.budget), ref=(p.k==='pre'||p.k==='hb')?'cout':((p.proj&&b>f+0.5)?'proj':'reel');
+    return { id:p.k, nom:p.lab, note:tx(p.det), budget:b, dep:f, ref:ref, att:Math.max(f,b) };   // la cadence ne touche que la main-d'œuvre
+  }).filter(function(p){ return p.dep>0.5 || p.budget>0.5; });
   // Par appellation : la main-d'œuvre ENGAGÉE à ce jour (paires parcelle × tâche du moteur), à l'hectare en production.
   var parApp={}, haApp={};
   (window.PARCELLES||[]).forEach(function(p){ if(!p||/arrach/i.test(String(p.statut||''))) return; var a=p.appellation||'Sans appellation'; haApp[a]=(haApp[a]||0)+(Number(p.surface)||0); });
   var appDe={}; (window.PARCELLES||[]).forEach(function(p){ if(p&&!/arrach/i.test(String(p.statut||''))) appDe[p.nom]=p.appellation||'Sans appellation'; });   // les parcelles EN PRODUCTION, comme les hectares
   (E.pairs||[]).forEach(function(x){ var a=appDe[x.parc]; if(a) parApp[a]=(parApp[a]||0)+(Number(x.eur)||0); });
   var coutHaApp={}; Object.keys(haApp).forEach(function(a){ coutHaApp[a]=haApp[a]>0?Math.round((parApp[a]||0)/haApp[a]):0; });
-  // Par tâche : l'écart des heures réelles au barème (écart en euros du réalisé sur le fait, RÉAL-1).
+  // Par tâche : l'écart des heures réelles au barème (écart en euros du réalisé sur le fait, RÉAL-1). Seules les tâches AU BARÈME
+  //   qui ont du travail validé : un travail à l'heure (arrachage…) n'a pas de barème en face, un travail pas commencé rien à comparer.
   var ecTache={}, hReelTache={}, hReel=0; (E.tasks||[]).forEach(function(t){ if(!t||!t.nom) return; if(t.ecE!=null&&t.fE>0) ecTache[t.nom]=t.ecE/t.fE; if(t.reH>0){ hReelTache[t.nom]=Math.round(t.reH); hReel+=t.reH; } });
   var inac=null;
   try{ if(typeof _rfPair==='function'){ var P2=_rfPair(d); if(P2&&P2.dec&&!P2.fini&&!P2.dec.noRate){ var r2=_rfSim(P2.dec,_rfProf(P2.dec,null)); if(r2) inac={ h:Math.round(r2.induit||0), eur:Math.round((r2.induit||0)*(P2.dec.rate||0)), horsDelai:r2.horsDelai||0 }; } } }
   catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Eco#inaction'); }
-  var ph=(V.photos||[]), cons=(_pilPhotoListe()||[]).filter(function(x){ return x&&x.cons!=null; });
-  return { taux:Number(E.rate)||0, moBudget:Number(T.moB)||0, moDep:Number(T.moF)||0, moAtt:(Number(T.moF)||0)+(Number(T.moR)||0),
-    budget:budget, dep:dep, att:att, ecartMoy:(E.cad&&E.cad.ok&&E.cad.ecart!=null)?E.cad.ecart/100:0, cadence:(E.cad&&E.cad.hJour)||0,
+  // ★★ AUJ-7 — LE GRAPHE « DÉPENSÉ FACE AU FAIT », DATÉ PAR LE MOTEUR. Il lisait les photos du jour : la part de TOUT le budget
+  //   (pas de la main-d'œuvre), quelques jours seulement, un point du jour égal au fait par construction, et une aire verte entre
+  //   les deux. Désormais, du début de la période à aujourd'hui, deux courbes qui ne font que monter :
+  //   · le dépensé : les heures payées dans les rangs, au jour où elles ont été faites, moins celles des travaux à l'heure, en %
+  //     du budget main-d'œuvre — il finit sur le dépensé de « Par poste » ;
+  //   · le fait : le barème des clôtures du journal, cumulé à leur date, ramené à l'avancement du jour — il finit sur « Travaux ».
+  var serie=[], auj=_mvToday();
+  if(tv && moBudget>0){
+    var byD=tv.byD||{}, byH=tv.byDHb||{}, barD=tv.barD||{}, avcP=num(E.avc), totB=0;
+    Object.keys(barD).forEach(function(x){ if(x<=auj) totB+=num(barD[x]); });
+    var jours={}; [byD, barD].forEach(function(o){ Object.keys(o).forEach(function(x){ if(x>=String(tv.d0||'')&&x<=auj) jours[x]=1; }); });
+    jours[auj]=1; if(tv.d0) jours[String(tv.d0)]=1;
+    var cD=0, cB=0;
+    Object.keys(jours).sort().forEach(function(x){
+      cD+=Math.max(0, num(byD[x])-num(byH[x])); cB+=num(barD[x]);
+      serie.push({ d:x, dep:Math.round(cD/moBudget*1000)/10, fait:totB>0?Math.round(avcP*cB/totB*10)/10:(x===auj?Math.round(avcP*10)/10:0) });
+    });
+    if(serie.length){ var z=serie[serie.length-1]; z.dep=Math.round(moDep/moBudget*1000)/10; z.fait=Math.round(avcP*10)/10; }   // le point du jour = les chiffres du jour, au dixième
+  }
+  return { taux:num(E.rate), moBudget:moBudget, moDep:moDep, moAtt:moAtt, moH:moH, cadAppl:cadAppl,
+    budget:budget, dep:dep, att:att, ecartMoy:(E.cad&&E.cad.ok&&E.cad.ecart!=null)?E.cad.ecart/100:0,
     postes:postes, coutHaApp:coutHaApp, ecTache:ecTache, hReelTache:hReelTache, hReel:Math.round(hReel), inaction:inac,
-    consParJour:cons.map(function(x){ return { d:x.d, cons:Number(x.cons)||0 }; }), sparkBud:cons.slice(-14).map(function(x){ return Number(x.cons)||0; }) };
+    serie:serie, sparkBud:serie.slice(-14).map(function(x){ return x.dep; }) };
 }
 window._pilCk2Eco=_pilCk2Eco;
 // L'export comptable du cockpit est celui de l'onglet Économie (même tableau CSV, même moteur).
@@ -6366,6 +6404,16 @@ function _ecoTvDef(nom){
   for(var i=0;i<T.length;i++) if(T[i] && T[i].nom===nom) return T[i];
   return null;
 }
+// ★★ AUJ-7 (§309) — UN TRAVAIL SANS BARÈME EST UN TRAVAIL À L'HEURE. Arrachage, désherbage manuel, effeuillage, vendange :
+//   le catalogue les dit « temps réel, hors barème », et l'accord du 2 octobre 2023 (travail à la tâche en viticulture, Côte-d'Or
+//   et départements voisins) les laisse hors de la tâche — ils se paient à l'heure. Une tâche disparue du catalogue aussi.
+function _ecoTvAvecBareme(def){
+  if(!def) return false;
+  if(def.trous || def.type==='passages' || def.type==='niveaux') return true;
+  if(Array.isArray(def.niveaux) && def.niveaux.length) return true;
+  if(Array.isArray(def.passagesHha) && def.passagesHha.length) return true;
+  return Number(def.hha)>0;
+}
 // Heures de BAREME du travail clos par un evenement (surface x h/ha du niveau, du
 // passage ou de la tache) — la reference contre laquelle on lit le temps reel.
 function _ecoTvBar(p, def, ev){
@@ -6485,7 +6533,7 @@ function _ecoTempsVigne(win){
   var s=_w?null:((typeof window._pilSaison==='function')?window._pilSaison():null);
   var d0=_w?String(win.d0).slice(0,10):(s&&s.debut?String(s.debut).slice(0,10):''), d1=_w?String(win.d1).slice(0,10):(s&&s.fin?String(s.fin).slice(0,10):'');
   var _n=new Date(), auj=_pexIso(_n.getFullYear(),_n.getMonth(),_n.getDate());
-  var vide={ ok:false, pairs:{}, taches:[], parcs:{}, gens:[], hChamp:0, hTrac:0, hAff:0, hAtt:0, hCave:0, hVigne:0, eur:0, eAff:0, eAtt:0, byD:{}, nSansTaux:0, nEv:0, d0:d0, d1:d1 };
+  var vide={ ok:false, pairs:{}, taches:[], parcs:{}, gens:[], hChamp:0, hTrac:0, hAff:0, hAtt:0, hCave:0, hVigne:0, eur:0, eAff:0, eAtt:0, byD:{}, byDHb:{}, barD:{}, hHb:0, eHb:0, nSansTaux:0, nEv:0, d0:d0, d1:d1 };
   if(!/^\d{4}-\d{2}-\d{2}$/.test(d0) || !/^\d{4}-\d{2}-\d{2}$/.test(d1) || d1<d0) return vide;
   // ★ La periode doit avoir COMMENCE (piege de _pecCadPresence, §20b) : sinon la
   //   fenetre part a l'envers et tout sort a zero en silence.
@@ -6513,9 +6561,11 @@ function _ecoTempsVigne(win){
   // ★★ ÉQUIPES-1 : un jour avec des équipes posées par l'admin, la journée du domaine n'existe pas —
   //   chaque équipe garde ses parcelles, et quelqu'un hors de toute équipe garde ses heures pour SES
   //   validations (le cas « seul trois jours sur sa parcelle pendant que les autres valident »).
-  var evBy={}, evJour={}, horsJour={}, eqJour={};   // … · date -> 1 quand des équipes étaient posées
+  var evBy={}, evJour={}, horsJour={}, eqJour={}, barD={};   // … · date -> 1 quand des équipes étaient posées ; barD (AUJ-7) : barème clos par jour
   E.ev.forEach(function(e){
     e.b = e.dup ? 0 : _ecoTvBar(e.p, _ecoTvDef(e.tache), e);
+    e.hb = !_ecoTvAvecBareme(_ecoTvDef(e.tache));   // AUJ-7 : travail à l'heure
+    if(!e.hb && e.b>0) barD[e.date]=(barD[e.date]||0)+e.b;   // AUJ-7 : le « fait » daté du graphe Économie d'Aujourd'hui
     if(e.eqj) eqJour[e.date]=1;
     (evJour[e.date]=evJour[e.date]||[]).push(e);
     if(e.hors) (horsJour[e.date]=horsJour[e.date]||{})[e.hors]=1;
@@ -6528,7 +6578,7 @@ function _ecoTempsVigne(win){
   var cave=_ecoCaveJours(d0, fin);
   // Taux de repli pour une fiche sans taux : le taux moyen du domaine (celui du barème).
   var rate0=0; try{ rate0=Number(_ecoRate())||0; }catch(e){ rate0=0; }
-  var byD={}, eurT=0, nSansTaux=0;
+  var byD={}, byDHb={}, eurT=0, nSansTaux=0, hHb=0, eHb=0;   // byDHb, hHb, eHb (AUJ-7) : ce qui est allé aux travaux à l'heure
   var okPer=(typeof window._mvEnContratSurPeriode==='function');
   var mbrs=(window.MEMBRES||[]).filter(function(m){
     if(!m||!m.nom) return false;
@@ -6541,7 +6591,7 @@ function _ecoTempsVigne(win){
   mbrs.forEach(function(m){
     // RÉAL-1 : accE suit acc — les euros de ces heures, chacune à SON taux du jour, versés
     //   avec elles. Le réalisé d'un travail est donc ce que ses heures ont coûté, pas un taux moyen.
-    var acc=0, accE=0, g={nom:m.nom, hChamp:0, hTrac:0, hAff:0, hAtt:0, hCave:0, hVigne:0, eur:0, eAff:0, eAtt:0, nEv:0, dAtt:'', sansTaux:false};
+    var acc=0, accE=0, accL=[], g={nom:m.nom, hChamp:0, hTrac:0, hAff:0, hAtt:0, hCave:0, hVigne:0, eur:0, eAff:0, eAtt:0, nEv:0, dAtt:'', sansTaux:false};
     var cd=(tr.condH&&tr.condH[m.nom])||{}, cj=cave[m.nom]||{};
     for(var d=d0, guard=0; d<=fin && guard<800; d=_pexJourApres(d), guard++){
       var h=0;
@@ -6555,22 +6605,30 @@ function _ecoTempsVigne(win){
         // ENG-2 : l'euro engagé, au taux chargé de CE jour (une augmentation ne réécrit pas mars).
         var tx=0; try{ tx=(typeof window._mvPaieTauxEffAt==='function')?Number(window._mvPaieTauxEffAt(m,d))||0:0; }catch(e){ tx=0; }
         if(!(tx>0)){ tx=rate0; g.sansTaux=true; }
-        if(tx>0){ var eu=hv*tx; g.eur+=eu; eurT+=eu; byD[d]=(byD[d]||0)+eu; accE+=eu; }
+        if(tx>0){ var eu=hv*tx; g.eur+=eu; eurT+=eu; byD[d]=(byD[d]||0)+eu; accE+=eu; accL.push([d,eu]); }
       }
       var L=(evBy[m.nom]||{})[d];
       if(!(L && L.length) && evJour[d] && !eqJour[d] && !(horsJour[d] && horsJour[d][m.nom])) L=evJour[d];   // PAR-1 : la journée du domaine (pas un jour d'équipes)
       if(L && L.length && acc>0){
         // PAR-1 : prorata du BARÈME (règle de Nico). Barèmes tous nuls (revalidations seules) :
         // la surface ; surfaces nulles aussi : parts égales, plutôt que de perdre les heures.
-        var S=0, Sb=0; L.forEach(function(e){ S+=e.surf; Sb+=(e.b||0); });
+        // ★★ AUJ-7 (§309) — UN TRAVAIL À L'HEURE NE PERD PLUS SA JOURNÉE. Sans barème, sa part au prorata du barème valait 0 :
+        //   le jour où une clôture au barème partageait la liste (Nico valide l'étape d'arrachage ET la réparation de l'équipe),
+        //   elle ramassait tout — les jours d'arrachage accumulés compris. La journée se partage d'abord à la SURFACE entre
+        //   travaux à l'heure et travaux au barème, puis au barème entre ces derniers (PAR-1), à la surface entre les premiers.
+        //   Une liste d'un seul genre se partage exactement comme avant.
+        var S=0, Sb=0, SH=0, SB=0, nH=0, nB=0;
+        L.forEach(function(e){ S+=e.surf; if(e.hb){ SH+=e.surf; nH++; } else { SB+=e.surf; Sb+=(e.b||0); nB++; } });
+        var qH=(nH&&nB)?((S>0)?(SH/S):(nH/L.length)):(nH?1:0);
         L.forEach(function(e){
-          var part=(Sb>0)?((e.b||0)/Sb):((S>0)?(e.surf/S):(1/L.length)), v=acc*part;
+          var part=e.hb ? qH*((SH>0)?(e.surf/SH):(1/nH)) : (1-qH)*((Sb>0)?((e.b||0)/Sb):((SB>0)?(e.surf/SB):(1/nB))), v=acc*part;
           var k=e.parc+'\u0000'+e.tache;
-          var P=pairs[k]||(pairs[k]={parc:e.parc, tache:e.tache, h:0, eur:0, bar:0, surf:0, n:0, noms:{}});
+          var P=pairs[k]||(pairs[k]={parc:e.parc, tache:e.tache, h:0, eur:0, bar:0, surf:0, n:0, noms:{}, hb:!!e.hb});
           P.h+=v; P.eur+=accE*part; P.noms[m.nom]=1;
           if(e.etape){ var X=_etp(e); X.h+=v; X.eur+=accE*part; }
+          if(e.hb){ hHb+=v; eHb+=accE*part; accL.forEach(function(x){ byDHb[x[0]]=(byDHb[x[0]]||0)+x[1]*part; }); }   // AUJ-7 : au jour où l'heure a été faite
         });
-        g.hAff+=acc; g.eAff+=accE; g.nEv+=L.length; acc=0; accE=0; g.dAtt='';
+        g.hAff+=acc; g.eAff+=accE; g.nEv+=L.length; acc=0; accE=0; accL=[]; g.dAtt='';
       }
     }
     g.hAtt=acc; g.eAtt=accE;
@@ -6587,7 +6645,7 @@ function _ecoTempsVigne(win){
   E.ev.forEach(function(e){
     var k=e.parc+'\u0000'+e.tache, P=pairs[k];
     var b=e.dup ? 0 : _ecoTvBar(e.p, _ecoTvDef(e.tache), e);   // RÉAL-1 : une revalidation ne recompte pas le barème
-    if(!P){ P=pairs[k]={parc:e.parc, tache:e.tache, h:0, eur:0, bar:0, surf:0, n:0, noms:{}, sansH:true}; }
+    if(!P){ P=pairs[k]={parc:e.parc, tache:e.tache, h:0, eur:0, bar:0, surf:0, n:0, noms:{}, sansH:true, hb:!!e.hb}; }
     P.bar+=b; P.n++;
     if(!vus[k]){ P.surf=e.surf; vus[k]=1; }
     if(e.etape){ var X=_etp(e); if(!X.ps[e.parc]){ X.ps[e.parc]=1; X.surf+=e.surf; } }
@@ -6595,7 +6653,7 @@ function _ecoTempsVigne(win){
   var byT={}, parcs={};
   Object.keys(pairs).forEach(function(k){
     var P=pairs[k];
-    var t=byT[P.tache]||(byT[P.tache]={nom:P.tache, h:0, eur:0, bar:0, surf:0, nP:0, nSansH:0});
+    var t=byT[P.tache]||(byT[P.tache]={nom:P.tache, h:0, eur:0, bar:0, surf:0, nP:0, nSansH:0, hb:!!P.hb});
     t.h+=P.h; t.eur+=P.eur; t.bar+=P.bar; t.surf+=P.surf; t.nP++; if(!(P.h>0)) t.nSansH++;
     var q=parcs[P.parc]||(parcs[P.parc]={h:0,eur:0,bar:0});
     q.h+=P.h; q.eur+=P.eur; q.bar+=P.bar;
@@ -6610,7 +6668,7 @@ function _ecoTempsVigne(win){
   var _ordE=((window.CONFIG&&window.CONFIG.arrachage&&window.CONFIG.arrachage.etapes)||[]).map(function(x){ return x&&x.id; });
   var etapes=Object.keys(etp).map(function(id){ var x=etp[id]; x.hhaR=x.surf>0?x.h/x.surf:0; delete x.ps; return x; })
     .sort(function(a,b){ var ia=_ordE.indexOf(a.id), ib=_ordE.indexOf(b.id); return (ia<0?99:ia)-(ib<0?99:ib); });
-  var v={ ok:true, pairs:pairs, taches:taches, parcs:parcs, gens:gens, etapes:etapes,
+  var v={ ok:true, pairs:pairs, taches:taches, parcs:parcs, gens:gens, etapes:etapes, byDHb:byDHb, barD:barD, hHb:hHb, eHb:eHb,   // AUJ-7
           hChamp:T.hChamp, hTrac:T.hTrac, hAff:T.hAff, hAtt:T.hAtt, hCave:T.hCave, hVigne:T.hVigne,
           eur:eurT, eAff:T.eAff, eAtt:T.eAtt, byD:byD, nSansTaux:nSansTaux,
           nEv:E.ev.length, nHorsParc:E.nHorsParc, d0:d0, d1:d1, fin:fin };
@@ -6890,7 +6948,7 @@ function _ecoPhytoByParc(win){
 
 // Palette des postes — une couleur, un poste, partout (KPI, donut, barres, tableau).
 var _PEC_COL = { mo:'#8A5A38', trac:'#2C3E50', gnr:'#C2871E', phy:'#5B2D8E', ret:'#B85A1A', dep:'#1A4A7A',
-                 loc:'#1D6F8C', fut:'#6B4226', pre:'#4A6B3A' };   // pre : prestations (ARRACH-4)
+                 loc:'#1D6F8C', fut:'#6B4226', pre:'#4A6B3A', hb:'#7A6A3A' };   // pre : prestations (ARRACH-4) · hb : travaux à l'heure (AUJ-7)
 // ── LES ATELIERS — la DESTINATION de l'euro, pas sa nature ──────────────────
 // Economie trie par NATURE (salaire / carburant / achat / depense). L'atelier
 // est un SECOND AXE sur les MEMES euros : ou est parti l'argent, pas ce qu'on a
@@ -7740,9 +7798,16 @@ function _pecData(){
   var TVe=null; try{ TVe=_ecoTempsVigne(); }catch(e){ TVe=null; }
   var moReel = (TVe && TVe.ok) ? TVe.eur : T.moF;
   var moSrc  = (TVe && TVe.ok) ? 'planning' : 'bareme';
+  // ★★ AUJ-7 (§309) — LES TRAVAUX À L'HEURE ONT LEUR LIGNE, ET LEUR BUDGET EST CE QU'ILS ONT COÛTÉ. Arrachage, désherbage
+  //   manuel… (sans barème, payés à l'heure hors de la tâche — accord du 2 octobre 2023) : même règle que les prestations
+  //   (ARRACH-4). Avant, payés dans la main-d'œuvre mais absents du budget, ils mangeaient le « reste à engager », poussaient la
+  //   main-d'œuvre au-dessus du barème et la cadence vers « l'équipe est lente ».
+  var hbE=(TVe && TVe.ok) ? (Number(TVe.eHb)||0) : 0, hbH=(TVe && TVe.ok) ? (Number(TVe.hHb)||0) : 0;
+  budget += hbE;
   var engageBar = T.moF + T.tracF + T.gnrF + T.phyF;
   var engage = moReel + T.tracF + T.gnrF + T.phyF;
   engageBar += T.prestF; engage += T.prestF;   // ARRACH-4 : les prestations
+  engageBar += hbE;   // AUJ-7 : le « barème » d'un travail à l'heure est ce qu'il a coûté (déjà dans l'engagé, par moReel)
   var resteE = Math.max(0, budget-engage);
   // Le reste de TRAVAIL, lui, se lit au barème : c'est ce qu'il reste à faire, pas ce
   // qu'il reste d'argent. La projection l'utilise (ci-dessous).
@@ -7764,13 +7829,17 @@ function _pecData(){
   var tvByT = {};
   if(tvOk) (TVe.taches||[]).forEach(function(x){ tvByT[_friseNorm(x.nom)]=x; });
   var T_moRe=0;
+  // AUJ-7 : ce qu'une parcelle a reçu en travaux à l'heure (arrachage…) reste dans son réalisé, jamais dans son écart au barème.
+  var hbParc={};
+  if(tvOk) Object.keys(TVe.pairs||{}).forEach(function(k){ var Pq=TVe.pairs[k]; if(Pq&&Pq.hb) hbParc[Pq.parc]=(hbParc[Pq.parc]||0)+(Number(Pq.eur)||0); });
   rows.forEach(function(r){
     var q = tvOk ? (TVe.parcs[r.nom]||null) : null;
     r.moRe  = tvOk ? (q ? q.eur : 0) : r.moF;
     r.hRe   = q ? q.h : 0;
     r.engRe = r.moRe + r.tracF + r.gnrF + r.phyF;
     r.engRe += (r.prestF||0);   // ARRACH-4
-    r.ecE   = (tvOk && (r.moF>0 || r.moRe>0)) ? (r.moRe - r.moF) : null;
+    var _reB = r.moRe - (hbParc[r.nom]||0);   // AUJ-7
+    r.ecE   = (tvOk && (r.moF>0 || _reB>0.5)) ? (_reB - r.moF) : null;
     T_moRe += r.moRe;
   });
   T.moRe = T_moRe;
@@ -7817,7 +7886,7 @@ function _pecData(){
   var hJour=_pecHJour();
   var cadP=_pecCadPresence();
   var hBarC=T.fH;
-  var hReelC=cadP ? Math.max(0, cadP.h - T.tracH) : 0;
+  var hReelC=cadP ? Math.max(0, cadP.h - T.tracH - hbH) : 0;   // AUJ-7 : ni le tracteur, ni les travaux à l'heure (sans barème en face)
   var cadOk = (hBarC>0 && hReelC>0 && avc>=_PEC_CAD_AVC);
   var ecart = cadOk ? ((hReelC-hBarC)/hBarC) : 0;
   // ★★★ ESCALIER DE SOURCES — MARCHE 2 (backlog 7, §20b).
@@ -7860,12 +7929,15 @@ function _pecData(){
   // ENG-2 : ce qui est engagé (réel) + ce qu'il reste à faire (barème), corrigé de la
   //   cadence quand elle s'applique. Tant que l'engagé valait le barème du fait, la
   //   formule sans cadence retombait sur le budget — elle y retombe encore dans ce cas.
-  var projFin = cadAppl ? (engage + resteBar*(1+ecart)) : (engage + resteBar);
+  // ★ AUJ-7 (§309) : la cadence de l'ÉQUIPE ne s'applique qu'au reste de MAIN-D'ŒUVRE. Le reste du tracteur, du GNR et du phyto
+  //   est déjà extrapolé à l'avancement ; le multiplier aussi par le rythme des travaux à la main le comptait deux fois, et
+  //   « Par poste » ne tombait plus juste : l'écart de la campagne n'était pas la somme des écarts de ses lignes.
+  var projFin = cadAppl ? (engage + resteBar + T.moR*ecart) : (engage + resteBar);
 
   var postes = [
-    { k:'mo',   lab:'Main-d\u2019\u0153uvre vigne', col:_PEC_COL.mo,   fait:moReel,  budget:T.moB, proj:false,
+    { k:'mo',   lab:'Main-d\u2019\u0153uvre vigne', col:_PEC_COL.mo,   fait:moReel-hbE,  budget:T.moB, proj:false,
       det:(moSrc==='planning'
-        ? (_ecoH1(TVe.hVigne)+' h dans les rangs \u00b7 '+_ecoH1(T.fH)+' h de bar\u00e8me faites sur '+_ecoH1(T.bH))
+        ? (_ecoH1(TVe.hVigne-hbH)+' h dans les rangs \u00b7 '+_ecoH1(T.fH)+' h de bar\u00e8me faites sur '+_ecoH1(T.bH))
         : (_ecoH1(T.fH)+' h faites sur '+_ecoH1(T.bH)+' h de bar\u00e8me')) },
     { k:'trac', lab:'Conduite tracteur',            col:_PEC_COL.trac, fait:T.tracF, budget:tracB, proj:projOn, det:_ecoH1(T.tracH)+' h de sessions' },
     { k:'gnr',  lab:'Carburant GNR',                col:_PEC_COL.gnr,  fait:T.gnrF,  budget:gnrB,  proj:projOn, det:_pecGnrDet(T.gnrSrc,T.litres,T.gnrN,T.gnrNSansLitres,T.gnrCle,cfg.gnrL) },
@@ -7875,6 +7947,13 @@ function _pecData(){
   if(T.prestF>0 || T.prestN>0) postes.push({ k:'pre', lab:'Prestations', col:_PEC_COL.pre, fait:T.prestF, budget:T.prestF, proj:false,
     det:T.prestN+' \u00e9tape'+(T.prestN>1?'s':'')+' faite'+(T.prestN>1?'s':'')+' par un prestataire'
       +(T.prestSansPrix?(' \u00b7 '+T.prestSansPrix+' sans montant'):'') });
+  // AUJ-7 : les travaux à l'heure de la période (arrachage, désherbage manuel…), heures versées par le temps réel. Le poste
+  //   n'apparaît que s'il existe ; son budget est ce qu'il a coûté — il ne peut ni dépasser, ni « rester ».
+  if(hbE>0){
+    var _hbT=((TVe&&TVe.taches)||[]).filter(function(x){ return x&&x.hb&&x.h>0; });
+    postes.push({ k:'hb', lab:'Travaux \u00e0 l\u2019heure', col:_PEC_COL.hb, fait:hbE, budget:hbE, proj:false,
+      det:_hbT.map(function(x){ return ((typeof window.tNom==='function')?window.tNom(x.nom):x.nom)+' '+_ecoH1(x.h)+' h'; }).join(' \u00b7 ') });
+  }
 
   var tvVus = {};
   var tlist = tOrder.map(function(n){ var t=tasks[n];
@@ -7891,7 +7970,7 @@ function _pecData(){
   // Heures versées à un travail absent de la liste de la période (tâche retirée de la saison) :
   //   comptées dans l'engagé, montrées sous le tableau plutôt que perdues.
   var tvHorsE = 0;
-  if(tvOk) (TVe.taches||[]).forEach(function(x){ if(!tvVus[_friseNorm(x.nom)]) tvHorsE += x.eur; });
+  if(tvOk) (TVe.taches||[]).forEach(function(x){ if(!tvVus[_friseNorm(x.nom)] && !x.hb) tvHorsE += x.eur; });   // AUJ-7 : un travail à l'heure a son poste
 
   return {
     rows:rows, tasks:tlist, pairs:pairs, tot:T, postes:postes,
@@ -7900,14 +7979,14 @@ function _pecData(){
     avc:avcPct, cons:consPct, projOn:projOn,
     cad:{ hReel:hReelC, hBar:hBarC, ok:cadOk, applic:cadAppl, ecart:ecart*100, hJour:hJour,
           horsBornes:cadHors, kmin:_PEC_CAD_KMIN, kmax:_PEC_CAD_KMAX,
-          src:(cadSrc || (cadP?'planning':null)), hTrac:(cadHist?cadHist.hTrac:T.tracH), seuil:_PEC_CAD_AVC*100,
+          src:(cadSrc || (cadP?'planning':null)), hTrac:(cadHist?cadHist.hTrac:T.tracH), hHb:(cadHist?0:hbH), seuil:_PEC_CAD_AVC*100,
           d0:(cadHist?cadHist.d0:(cadP?cadP.d0:'')), d1:(cadHist?cadHist.d1:(cadP?cadP.d1:'')),
           nMbr:(cadHist?cadHist.nMbr:(cadP?cadP.n:0)),
           histoNom:(cadHist?cadHist.nom:'') },
     projFin:projFin,
     budget:budget, engage:engage, resteE:resteE, engageBar:engageBar, resteBar:resteBar,
     moReel:moReel, moSrc:moSrc, tv:((TVe&&TVe.ok)?TVe:null),
-    reOk:tvOk, engRe:(T.moRe + T.tracF + T.gnrF + T.phyF + T.prestF), ecRe:(tvOk ? (T.moRe - T.moF) : null),
+    reOk:tvOk, engRe:(T.moRe + T.tracF + T.gnrF + T.phyF + T.prestF), ecRe:(tvOk ? (T.moRe - hbE - T.moF) : null), hbE:hbE, hbH:hbH,
     reAttE:(tvOk ? (TVe.eAtt||0) : 0), reAttH:(tvOk ? (TVe.hAtt||0) : 0), reHorsE:tvHorsE,
     coutHaB:(T.surf>0?budget/T.surf:0), coutHaE:(T.surf>0?engage/T.surf:0),
     eurPlant:(T.plantH>0?T.plantE/Math.max(1,T.trous):0),

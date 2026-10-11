@@ -7608,3 +7608,16 @@ html .ck-agr-voile{ background:var(--voile); }
    (« Pauline / en / congé ») et la fin de la date était coupée par le bord de la liste (rendu à 1 440 px, barre ouverte). */
 .ck2 .ck-sv-h{flex-wrap:wrap;row-gap:0}
 .ck2 .ck-sv-q{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+/* ★★ AUJ-7 (§309) — LA VUE ÉCONOMIE D'AUJOURD'HUI À UNE SEULE ÉCHELLE (Nico, 10/10 : « uniformise la police »). Mesuré au rendu :
+   les chiffres des tuiles (32 px, gras 700) dépassaient la phrase principale (28 px, 600) ; noms de ligne à 13 ou 14 px, valeurs à
+   13 px en 600 ou 700 selon la carte, le total à 20 px. Désormais : phrase 28 · chiffres des tuiles 24 · titres de carte 20 ·
+   total 16 · noms et valeurs de ligne 14 · textes 12 et 13, une seule graisse forte (600), des chiffres alignés. Les tuiles du haut
+   (Travaux, Effectif, Budget, Conformité) suivent : ce sont les mêmes chiffres, sur les deux vues. Une valeur sans écart (reste à
+   dépenser, coût d'une prestation) s'écrit en neutre : le vert et l'orange restent aux écarts. */
+.ck2 .ck-ph-n{font-size:var(--pt-lg,24px);font-weight:600}
+.ck2 .ck-ph-n b{font-weight:inherit}
+.ck2 .ck-po-h .n,.ck2 .ck-ap-h .n,.ck2 .ck-ta-n{font-size:var(--pt-base,14px);font-weight:600}
+.ck2 .ck-po-d,.ck2 .ck-ap-h .v,.ck2 .ck-ta-e{font-size:var(--pt-base,14px);font-weight:600;font-variant-numeric:tabular-nums}
+.ck2 .ck-po-tot .n,.ck2 .ck-po-tot .ck-po-d{font-size:var(--pt-sm,16px);line-height:1.2}
+.ck2 .ck-po-d.neutre{color:var(--texte-med);font-weight:500}
+.ck2 .ck-puce .att.ko{background:var(--attention)}
