@@ -1096,6 +1096,11 @@ function _pilPhotoIso(dt){ return dt.getFullYear()+'-'+String(dt.getMonth()+1).p
 // Ecrit la photo du jour si elle manque. Rend true si une ecriture est partie.
 function _pilPhotoEcrire(d){
   if(!d||typeof window.isAdmin!=='function'||!window.isAdmin()||typeof window.saveData!=='function') return false;
+  // ★★ AUJ-6 (§308) : JAMAIS avant l'arrivée des données. L'admin atterrit sur Aujourd'hui AVANT la fin de la lecture (goHub
+  //   passe avant _fbLoadAfterAuth) : la photo notait la copie incomplète du téléphone — souvent 0 h, les traits verticaux de
+  //   la courbe (Nico, 10/10) — et ENREGISTRAIT toute la configuration du domaine avant d'avoir lu celle du serveur : un
+  //   réglage changé depuis un autre appareil pouvait être écrasé. Rien de prévu dans la période : rien à photographier.
+  if(!window._dataReady||!(Number(d.totalTotal)>0)||!isFinite(Number(d.totalReste))) return false;
   var sa=(typeof window.getSaisonActive==='function')?window.getSaisonActive():null, sp=_pilSaison();
   if(!sa||!sp||sa.nom!==sp.nom) return false;   // une archive consultee ne photographie rien
   var auj=_pilPhotoIso(new Date()), L=_pilPhotoListe();
@@ -1121,7 +1126,10 @@ function _pilSparkNOk(s){ var n=0; s.forEach(function(v){ if(v!=null) n++; }); r
 // Charge restante : ecart % a la premiere photo de la fenetre (il y a jusqu'a 14 j).
 // Descendre est favorable (mauvais : haut). Le point du jour = la charge en direct.
 function _pilSparkCharge(d){
-  var s=_pilPhotoSerie(function(x){ return (typeof x.reste==='number')?x.reste:null; }), ref=null;
+  // AUJ-6 (§308) : la petite courbe lit les mêmes photos sûres que la grande — une photo à 0 h (prise avant l'arrivée des
+  //   données) ou d'une autre période est un trou, pas une chute.
+  var per=(_pilSaison()&&_pilSaison().nom)||'';
+  var s=_pilPhotoSerie(function(x){ return (typeof x.reste==='number'&&x.reste>0&&(!per||x.p===per))?x.reste:null; }), ref=null;
   for(var i=0;i<s.length;i++){ if(s[i]!=null){ ref=s[i]; break; } }
   if(!(ref>0)) return null;
   var live=Number(d&&d.totalReste); if(isFinite(live)) s[13]=live;

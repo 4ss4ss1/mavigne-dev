@@ -7579,7 +7579,11 @@ html .ck-agr-voile{ background:var(--voile); }
 #page-pilotage:has(.ck2){overflow-x:clip;overflow-y:visible}
 @media (min-width:760px){
   [data-taille="large"] #ck-t-c,[data-taille="moyen"] #ck-t-c{position:sticky;top:var(--ck-colle,16px)}
-  [data-taille="large"] #ck-savoir,[data-taille="moyen"] #ck-savoir{max-height:calc(100dvh - var(--ck-colle,16px) - 24px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+  /* ★ AUJ-6 (§308) : la CARTE ne défile plus — elle coupait la pastille « Nouveau », posée 8 px au-dessus d'elle (Nico, 10/10).
+     Seule la liste défile ; --ck-colle est mesuré par cockpit-vue.js (ranger), sous les barres collantes du Pilotage. */
+  [data-taille="large"] #ck-savoir,[data-taille="moyen"] #ck-savoir{display:flex;flex-direction:column;max-height:calc(100dvh - var(--ck-colle,16px) - 24px);overflow:visible}
+  [data-taille="large"] #ck-savoir>*,[data-taille="moyen"] #ck-savoir>*{flex:none}
+  [data-taille="large"] #ck-savoir>#ck-sv-l,[data-taille="moyen"] #ck-savoir>#ck-sv-l{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 }
 .ck2 .ck-v-phrase{max-width:16em;font-size:var(--pt-xl,28px);line-height:1.15}
 @media (max-width:699px){.ck2 .ck-v-phrase{font-size:var(--pt-lg,24px)}}
@@ -7595,8 +7599,12 @@ html .ck-agr-voile{ background:var(--voile); }
 .ck2 .ck-calque.vif .ck-eq::before{display:block;inset:-5px;border:2px solid var(--ok);animation:ck-presence 1.6s ease-out infinite}
 @keyframes ck-presence{0%{opacity:.9;transform:scale(.8)}75%,100%{opacity:0;transform:scale(1.6)}}
 @media (prefers-reduced-motion:reduce){.ck2 .ck-calque.vif .ck-eq::before{display:none}}
-.ck2 .ck-c-mes circle{fill:var(--bg-card);stroke:var(--terre);stroke-width:2}
 /* La colonne de gauche des trois colonnes fait 260 à 300 px : la décision du jour y passe sur une colonne (ses quatre
    réponses se coupaient en deux lignes). La règle suit la LARGEUR DE LA COLONNE, pas celle de l'écran. */
 .ck2 #ck-t-a{container-type:inline-size}
 @container (max-width:360px){.ck2 .ck-dz-g{grid-template-columns:minmax(0,1fr)}.ck2 .ck-dz:nth-child(odd){border-right:0}.ck2 .ck-dz:nth-child(-n+3){border-bottom:1px solid var(--ligne,#ECE6DA)}}
+/* ★ AUJ-6 (§308) — « À savoir » ne coupe plus ses lignes : le nom et la date partagent la ligne s'il y a la place, sinon la date
+   passe dessous. La date ne rétrécissait jamais (nowrap) : dans une colonne étroite, le nom tombait sur trois lignes
+   (« Pauline / en / congé ») et la fin de la date était coupée par le bord de la liste (rendu à 1 440 px, barre ouverte). */
+.ck2 .ck-sv-h{flex-wrap:wrap;row-gap:0}
+.ck2 .ck-sv-q{max-width:100%;overflow:hidden;text-overflow:ellipsis}

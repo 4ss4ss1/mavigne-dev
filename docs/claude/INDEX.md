@@ -357,3 +357,4 @@
 | 305 | 305. ★★ BUILD-1 — LE BUILD NE JOUE PLUS LES CONTRÔLES UN PAR UN (09/10 — `scripts/mv-lanceur.mjs` · `script… | `docs/claude/chantiers-280-329.md` |
 | 306 | 306. ★★ ARRACH-8 — LA PARCELLE ARRACHÉE AVANT L'APPLI, DÉCLARÉE APRÈS COUP ; UNE ANNULATION COMMUNE (10/10 … | `docs/claude/chantiers-280-329.md` |
 | 307 | 307. ★★ AUJ-5 — AUJOURD'HUI REMIS À LA MAQUETTE ; LE PLANNING FAIT FOI ; LE PILOTAGE S'OUVRE SUR AUJOURD'HU… | `docs/claude/chantiers-280-329.md` |
+| 308 | 308. ★★ AUJ-6 — LES DESSINS D'AUJOURD'HUI NE DISPARAISSENT PLUS ; « À SAVOIR » SOUS LES ONGLETS ; LA CHARGE… | `docs/claude/chantiers-280-329.md` |

@@ -903,3 +903,39 @@ reformulation (« oui ») : « À savoir » reste visible quand on descend, et l
   39 → 41 ko, +5 % : regravé, 41 ko ne justifient aucun découpage) et `build-guide --check`. **Rejouée sur l'état final (base `cd06431`, ARRACH-8 compris) :
   351 commandes, 740 s, 1 rouge attendu** — `build-guide --check` : la page générée se refait par `npm run site`, jamais livrée ; régénérée ici, elle passe.
 - Voir §28 (AUJ-5) pour ce qui reste ouvert.
+
+## 308. ★★ AUJ-6 — LES DESSINS D'AUJOURD'HUI NE DISPARAISSENT PLUS ; « À SAVOIR » SOUS LES ONGLETS ; LA CHARGE RESTANTE SANS TRAITS (11/10 — `src/cockpit-vue.js` · `src/cockpit.js` (`_ckChargeSerie`) · `src/pilotage.js` (`_pilPhotoEcrire`, `_pilSparkCharge`) · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE, MV_INFO) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-auj6.mjs` (neuf) · `scripts/mv-harnais-auj5.mjs` · `scripts/mv-harnais-auj1.mjs` · `scripts/mv-harnais-pro1.mjs` · `scripts/mv-harnais-photo.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `.mv-base` · `lots/AUJ-6.json` · **APP 8.75 → 8.76, SW 9.54 → 9.55**, base `373361c`)
+
+### 308a. La demande
+Nico (10/10, huit captures) : « À savoir » découpé, et coupé quand on descend ; « Nouveau » mal posé ; « le graphique charge restante est nul, on a dit on arrête avec le visu
+de colonne ou de ligne qui montent et descendent, il faut que ce soit propre et pro » ; « les images disparaissent parfois » (plan vide sauf les titres d'appellation, courbe
+blanche). « Continu », puis « Continuer » : exécution.
+
+### 308b. Les causes — lues, puis REPRODUITES dans Chromium sur la base (appli entière sous Vite, données injectées par `applyFbData`, connexion simulée)
+1. **Les dessins disparus.** `G.c`/`GE.c` (cadres des graphes) et `S.mode` survivaient d'un montage à l'autre. Après un passage par Économie, le montage suivant (une donnée qui
+   arrive, un retour sur l'onglet) appelait `majEco` → `majEChart` → `dessinerEChart` dans une boîte neuve encore vide : `TypeError` sur `#ck-e-fait`, avalé
+   (`pilotage.js/_pilTabAuj#ck2m`, lu dans le rendu). L'entrée s'arrêtait avant de retirer `ck-entree` (parcelles à opacité 0, titres visibles : la capture) et avant
+   `redimCourbe(true)` ; ensuite `redimCourbe(false)` voyait la largeur du montage d'avant et ne dessinait rien. Correctifs : le montage remet à zéro G, GE, `S.mode` et
+   `S.filtre` (et revient sur Économie si on y était) ; chaque mise à jour de l'entrée est isolée ; la page se montre avant les compteurs ; une boîte cachée le dit
+   (`G.w = 0`), une boîte vide se redessine ; `dessinerCourbe`/`dessinerEChart` ne visent jamais une boîte pas dessinée. La règle générale est au §24 (Build n°22).
+2. **« À savoir » sous la barre d'onglets.** `top:var(--ck-colle,16px)` : `--ck-colle` n'était posé nulle part (AUJ-5 avait écrasé les 112 px de REF-1). Mesuré : barre
+   jusqu'à 59 px, carte collée à 16. `colleHaut()` (à chaque `ranger`) mesure le fil de portée et la barre d'onglets collants : 75 px, la carte sous la barre.
+3. **« Nouveau » coupé.** La pastille déborde de 8 px au-dessus de sa cible (`utils.js` le prévient) et AUJ-5 faisait défiler la CARTE (`overflow:auto`). La carte ne coupe
+   plus (colonne flex, `overflow:visible`) ; seule la liste défile. Mesuré : le haut de la pastille est bien la pastille (`elementFromPoint`).
+4. **Les traits verticaux.** `_pilPhotoEcrire` part du rendu d'Aujourd'hui, et l'admin y atterrit AVANT `_fbLoadAfterAuth` (`_mvApresEntree` → `goHub`) : la photo notait la
+   copie locale incomplète (0 h) et ENREGISTRAIT toute la configuration avant d'avoir lu celle du serveur — `saveData('config')` n'a pas le verrou de chargement, un réglage
+   fait sur un autre appareil pouvait être écrasé. Gardes : `_dataReady`, `totalTotal > 0`, reste lisible. À la lecture, `_ckChargeSerie` écarte la photo sans période dès
+   qu'on en connaît une, garde une valeur par jour, écarte un 0 suivi d'un reste plus haut ; plus de ronds (ils s'empilaient en « oooo » sur un axe de huit mois). La petite
+   courbe (`_pilSparkCharge`) suit les mêmes règles. Arbitrage : écarter les photos sans période plutôt que les deviner — la courbe repart du 10/10.
+5. **Trouvé au rendu.** Dans une colonne étroite, la date d'une absence ne rétrécissait jamais (`nowrap`) : le nom tombait sur trois lignes, la date était coupée. La ligne
+   passe à la ligne (`.ck2 .ck-sv-h{flex-wrap:wrap}`).
+
+### 308c. Mesuré
+- Rendu Chromium (1 440 px, barre latérale ouverte, horloge figée au samedi 10/10), base puis lot : ouverture, défilement de 700 px, Économie puis nouveau montage, montage
+  caché puis retour, courbe agrandie, téléphone 390 px. Base : pastille coupée, carte à 16 px sous une barre de 59, courbe en zigzag, puis `ck-entree` resté et courbe absente
+  après Économie. Lot : pastille entière, carte à 75 px, parcelles et courbe présentes dans les deux scénarios, courbe tracée sur les seules photos sûres.
+- `mv-harnais-auj6` (neuf) : 16 vertes, 12 contre-épreuves sur 12 ; `_ckChargeSerie`, `_pilPhotoEcrire` et `_pilSparkCharge` exécutés, le montage et la mise en page lus.
+  Suivis : `auj5` 23 (9/9), `photo` 17 (9/9, + deux scénarios et deux contre-épreuves), `pro1` 27 (13), `auj1` 28 (13, ancre suivie). Preflight : 0 erreur, 8 avertissements (base : idem).
+- Chaîne complète (`TZ=Europe/Paris`), rejouée par tranches (la limite d'ici est de 300 s par commande) : **353 commandes, 959 s, 0 rouge** ; `build-guide --check` vert
+  après régénération locale de la page (`npm run site`), jamais livrée.
+- ⚠️ Non vu : ses données, son écran. Voir §28 (AUJ-6).

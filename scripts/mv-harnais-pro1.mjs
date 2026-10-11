@@ -55,7 +55,7 @@ function jouer(S) {
     ctx.pasNet(2472, 5) === 500 && ctx.pasNet(2472, 3) === 1000 && ctx.pasNet(180, 4) === 50 && ctx.pasNet(0, 4) > 0);
   T('aucun mois n’est retiré en dur', !S.vue.includes("l === 'mars'"));
   // AUJ-5 (§307) : la zone remplie a disparu — sur les quelques jours mesurés, elle formait une colonne (Nico, 10/10).
-  T('la charge restante : un point par mesure, plus de zone remplie, l’axe depuis la première mesure', S.vue.includes("mes.innerHTML = pts.slice(0, -1).map(") && S.vue.includes('function debutCourbe()') && !S.vue.includes("$('#ck-c-aire')"));
+  T('la charge restante : une ligne (AUJ-6 : sans ronds), plus de zone remplie, l’axe depuis la première mesure', !S.vue.includes('ck-c-mes') && S.vue.includes('function debutCourbe()') && !S.vue.includes("$('#ck-c-aire')"));
   // ⑥ La feuille : la barre a la largeur qui lui est réservée, plus de marge négative doublée
   T('la barre latérale compte ses marges dans sa largeur (box-sizing)', S.css.includes('.mv-rail,.mv-rail *,.mv-rail *::before,.mv-rail *::after{box-sizing:border-box}'));
   T('la flèche « Réduire » a une taille (plus de grand triangle noir)', /\.mv-rail-plier svg\{[^}]*width:20px;height:20px;fill:none/.test(S.css));
@@ -94,7 +94,7 @@ if (CONTRE) {
     ['le cockpit lit la tâche du moment par l’appel nu', 'pil', 'PP=_pilPrioDuJour(d).M;', 'PP=window._mvTacheDuMoment();'],
     ['ranger() plante sur une page disparue', 'vue', "if (!pg) { if (obs) { obs.disconnect(); obs = null; } return; }", ''],
     ['le pas des graduations redevient fixe', 'vue', "return (q <= 1 ? 1 : q <= 2 ? 2 : q <= 2.5 ? 2.5 : q <= 5 ? 5 : 10) * p;", 'return 500;'],
-    ['la zone remplie revient', 'vue', "const mes = $('#ck-c-mes'); if (mes) mes.innerHTML = pts.slice(0, -1).map(", "$('#ck-c-aire').setAttribute('d', ''); const mes = $('#ck-c-mes'); if (mes) mes.innerHTML = pts.slice(0, -1).map("],
+    ['la zone remplie revient', 'vue', "$('#ck-c-ligne').setAttribute('d', ligne);", "$('#ck-c-ligne').setAttribute('d', ligne); $('#ck-c-aire').setAttribute('d', '');"],
     ['la barre perd box-sizing (269 px pour 244)', 'css', '.mv-rail,.mv-rail *,.mv-rail *::before,.mv-rail *::after{box-sizing:border-box}', '.mv-rail-x{box-sizing:border-box}'],
     ['une marge doublée revient', 'css', '.ck-carte{position:relative;margin:0 -16px;', '.ck-carte{position:relative;margin:0 --16px;'],
     ['Ctrl K repropose « Simuler »', 'coq', "['sim', 'Décider']", "['sim', 'Simuler']"],

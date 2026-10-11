@@ -29,6 +29,7 @@ function charger(src, o = {}) {
     SAISONS: [{ nom: '2026' }, { nom: '2025' }], _visuSaison: () => (o.visu || ''),
     getSaisonActive: () => ({ nom: '2026' }),
     isAdmin: () => o.admin !== false,
+    _dataReady: o.pret !== false,   // AUJ-6 (§308) : la photo attend l'arrivée des données
     saveData: k => { ecrits.push(k); },
     _pecData: () => (o.E || { configured: true, cons: 47.26, avc: 42.1 }),
   };
@@ -41,10 +42,12 @@ function scenarios(src, journal) {
   const t = (nom, cond, det) => { if (cond) { ok++; if (journal) console.log('  \x1b[32m✓\x1b[0m ' + nom); } else { ko++; if (journal) console.log('  \x1b[31m✗\x1b[0m ' + nom + (det != null ? '\n      → ' + det : '')); } };
   const proche = (a, b) => a != null && Math.abs(a - b) < 1e-9;
   try {
-    const X = charger(src), d = { totalReste: 1186.4 };
+    const X = charger(src), d = { totalReste: 1186.4, totalTotal: 2400 };
     t('première ouverture du jour : une écriture, une ligne {d, reste, cons, avc}', X._pilPhotoEcrire(d) === true && X.ecrits.length === 1 && X.ecrits[0] === 'config' && X.CONFIG.photo.length === 1 && X.CONFIG.photo[0].d === '2026-06-16' && X.CONFIG.photo[0].reste === 1186 && X.CONFIG.photo[0].cons === 47.3 && X.CONFIG.photo[0].avc === 42.1, JSON.stringify(X.CONFIG.photo));
-    t('seconde ouverture le même jour : rien (jamais réécrite)', X._pilPhotoEcrire({ totalReste: 999 }) === false && X.ecrits.length === 1 && X.CONFIG.photo[0].reste === 1186);
+    t('seconde ouverture le même jour : rien (jamais réécrite)', X._pilPhotoEcrire({ totalReste: 999, totalTotal: 2400 }) === false && X.ecrits.length === 1 && X.CONFIG.photo[0].reste === 1186);
     t('non admin : rien', charger(src, { admin: false })._pilPhotoEcrire(d) === false);
+    t('avant l’arrivée des données : rien (AUJ-6)', (() => { const Y = charger(src, { pret: false }); return Y._pilPhotoEcrire(d) === false && Y.ecrits.length === 0; })());
+    t('rien de prévu dans la période : rien (AUJ-6)', (() => { const Y = charger(src); return Y._pilPhotoEcrire({ totalReste: 0, totalTotal: 0 }) === false && Y.ecrits.length === 0; })());
     const Xa = charger(src, { visu: '2025' });
     t('archive consultée (2025 alors que 2026 est active) : rien', Xa._pilPhotoEcrire(d) === false && Xa.ecrits.length === 0);
     t('sans saveData : rien, sans planter', (() => { const Y = charger(src); Y.saveData = undefined; return Y._pilPhotoEcrire(d) === false; })());
@@ -59,7 +62,7 @@ function scenarios(src, journal) {
     t('une ligne datée dans le futur ou sans date est écartée', !L.some(x => x.d === '2026-06-20') && L.every(x => typeof x.d === 'string'));
     // les series
     const ph = [];
-    for (let k = 13; k >= 1; k--) if (k !== 5) ph.push({ d: iso(k), reste: 1500 - (13 - k) * 20, cons: 40 + (13 - k), avc: 40 + (13 - k) * 0.5 });
+    for (let k = 13; k >= 1; k--) if (k !== 5) ph.push({ d: iso(k), reste: 1500 - (13 - k) * 20, cons: 40 + (13 - k), avc: 40 + (13 - k) * 0.5, p: '2026' });   // AUJ-6 : la petite courbe ne lit que les photos de la période
     const Xs = charger(src, { photo: ph });
     const sC = Xs._pilSparkCharge({ totalReste: 1200 });
     t('charge : 14 points, écart à la première photo (1 500 h), le jour sans photo est un trou', sC && sC.length === 14 && proche(sC[0], 0) && sC[8] === null && proche(sC[1], -20 / 1500 * 100), JSON.stringify(sC));
@@ -67,7 +70,7 @@ function scenarios(src, journal) {
     const sB = Xs._pilSparkBudget({ configured: true, cons: 50, avc: 47 });
     t('budget : consommé − fait, en points ; aujourd’hui en direct (+3)', sB && proche(sB[0], 0) && proche(sB[12], 12 - 6) && proche(sB[13], 3) && sB[8] === null, JSON.stringify(sB));
     t('budget non configuré aujourd’hui : la série garde ses photos, le jour reste un trou', (() => { const s = Xs._pilSparkBudget({ configured: false }); return s && s[13] === null && proche(s[12], 6); })());
-    t('moins de deux photos : pas de courbe', charger(src)._pilSparkCharge({ totalReste: 1 }) === null && charger(src, { photo: [{ d: iso(3), reste: 100 }] })._pilSparkCharge({ totalReste: 90 }).length === 14 && charger(src)._pilSparkBudget({ configured: true, cons: 1, avc: 1 }) === null);
+    t('moins de deux photos : pas de courbe', charger(src)._pilSparkCharge({ totalReste: 1 }) === null && charger(src, { photo: [{ d: iso(3), reste: 100, p: '2026' }] })._pilSparkCharge({ totalReste: 90 }).length === 14 && charger(src)._pilSparkBudget({ configured: true, cons: 1, avc: 1 }) === null);
     t('dernier point lu = la dernière valeur connue', Xs._pilSparkDernier([1, null, 3, null]) === 3 && Xs._pilSparkDernier(null) === null);
     t('branché : écriture au rendu d’Aujourd’hui, courbes sur Charge restante et Budget', /try\{ _pilPhotoEcrire\(d\); \}/.test(src) && /_pilSparkCharge\(d\)/.test(src) && /_pilSparkBudget\(E\)/.test(src) && /mauvais:'haut',aria:'Charge restante/.test(src));
   } catch (e) { t('les scénarios s’exécutent sans planter', false, e.stack); }
@@ -83,6 +86,8 @@ const DEFAUTS = [
   ['le point du jour n’est plus en direct', "var live=Number(d&&d.totalReste); if(isFinite(live)) s[13]=live;", ''],
   ['un jour sans photo compte zéro', "out.push((typeof v==='number'&&isFinite(v))?v:null);", "out.push((typeof v==='number'&&isFinite(v))?v:0);"],
   ['le budget oublie le travail fait', "(x.cons-x.avc):null; });", "(x.cons):null; });"],
+  ['la photo part avant l’arrivée des données (AUJ-6)', "if(!window._dataReady||", "if("],
+  ['une période sans travail prévu est photographiée (AUJ-6)', "!(Number(d.totalTotal)>0)||", ""],
 ];
 let rougit = 0;
 for (const [nom, a, b] of DEFAUTS) {

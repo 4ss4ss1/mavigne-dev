@@ -8,6 +8,13 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **10 octobre 2026 (AUJ-5)** — ★★ **AUJOURD'HUI REMIS À LA MAQUETTE, LE PLANNING FAIT FOI** (§307). Lot 38, base `cd06431` (ARRACH-8 poussé après coup : lot rejoué dessus).
+> Demande de Nico (10/10, dictée + capture de la maquette) : ouverture par rôle, « toujours se baser sur le planning » (jamais un retour un samedi, fin d'arrêt
+> maladie), phrase du Budget, polices, disposition de la maquette avec « À savoir » à droite ET collant, carte qui disparaît, pastille qui clignote, météo en couleurs.
+> Mesuré à la base (Chromium, 1 440 px, barre ouverte) : DEUX colonnes (1 138 px de contenu < 1 150), « À savoir » à gauche ; la page du Pilotage défilait seule
+> (`overflow-y:auto`) et la colonne collante ne collait jamais. Trouvé en route : `d.saison` est le NOM de la période (« Les travaux de la saison » pour tous) ;
+> la charte DS-4 avait rendu la météo grise. **APP 8.74 → 8.75, SW 9.53 → 9.54.** `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+
 > Dernière consolidation : **10 octobre 2026 (ARRACH-8)** — ★★ **LA PARCELLE ARRACHÉE AVANT L'APPLI, ET LES DÉFINITIONS D'UNE ANNULATION** (§306). Lot 37, base `cbfcb8e`.
 > Capture de Nico : une parcelle arrachée en janvier 2026, déclarée après coup — la fiche de droite des Parcelles mettait « À faire » sept tâches que la fiche
 > complète disait désactivées. Reformulé, confirmé (« oui »). Vérifié dans le code, CINQ défauts : (1) `_pFicheHtml` ignorait `_mvExclu` et `_mvArrHors` ; (2)

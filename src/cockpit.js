@@ -97,14 +97,24 @@ window._ckResumeHtml = function(m, d, nVal){
 
 // ── La charge restante : les photos du jour (PHOTO-1), aujourd'hui en direct, puis la projection ──
 // AUJ-5 (§307) : `per` (la période active) écarte une photo prise sur une autre période — chaque photo porte la sienne (p).
+// ★★ AUJ-6 (§308) — la courbe ne trace plus que des photos sûres (Nico, 10/10 : « plus de lignes qui montent et descendent ») :
+//   · une photo SANS période (d'avant AUJ-5) ne dit pas de quelle période elle est : écartée dès qu'on en connaît une ;
+//   · un jour, une valeur (la dernière écrite) ; ni le jour même (le direct le remplace) ni un jour à venir ;
+//   · un 0 suivi d'un reste > 0 est impossible dans une période — le travail fait ne se défait pas : c'est une photo prise
+//     avant l'arrivée des données (les traits verticaux). Écarté.
 window._ckChargeSerie = function(photos, d, auj, per){
-  var s = [];
+  var parJour = {};
   (photos || []).forEach(function(x){
-    if(x && typeof x.d === 'string' && typeof x.reste === 'number' && x.d !== auj && !(per && x.p && x.p !== per)) s.push({ iso: x.d, v: x.reste });
+    if(!x || typeof x.d !== 'string' || typeof x.reste !== 'number' || !isFinite(x.reste) || x.d >= auj) return;
+    if(per && x.p !== per) return;
+    parJour[x.d] = x.reste;
   });
+  var s = Object.keys(parJour).sort().map(function(k){ return { iso: k, v: parJour[k] }; });
   var live = Number(d && d.totalReste);
   if(d && d.totalReste != null && isFinite(live)) s.push({ iso: auj, v: Math.round(live) });
-  s.sort(function(a, b){ return a.iso < b.iso ? -1 : (a.iso > b.iso ? 1 : 0); });
+  for(var i = s.length - 2; i >= 0; i--){
+    if(!(s[i].v > 0) && s.slice(i + 1).some(function(o){ return o.v > 0; })) s.splice(i, 1);
+  }
   return s;
 };
 function _ckDate(iso){ var p = iso.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }

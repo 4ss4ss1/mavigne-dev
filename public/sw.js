@@ -1,4 +1,6 @@
-// MA VIGNE — Service Worker v9.54
+// MA VIGNE — Service Worker v9.55
+// v9.55 (11/10/2026) — AUJ-6 (§308) : les dessins d'Aujourd'hui ne disparaissent plus (montage remis a zero, entree isolee), « A savoir » colle sous les
+//   onglets (hauteur mesuree), pastille Nouveau entiere, charge restante sans traits verticaux (photo apres l'arrivee des donnees, photos sures). APP 8.75 -> 8.76.
 // v9.54 (10/10/2026) — AUJ-5 (§307) : Aujourd'hui a la disposition de la maquette (3 colonnes des 1 000 px, « A savoir » a droite et collant),
 //   le planning fait foi (repos, retours, arret maladie, brulage), ouverture sur Aujourd'hui, courbe en points, meteo en couleurs. APP 8.74 -> 8.75.
 // v9.53 (10/10/2026) — ARRACH-8 (§306) : une parcelle arrachee avant l'appli se declare a sa vraie date (rien de valide dans la periode,
@@ -4437,7 +4439,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.54';
+const CACHE_NAME   = 'mavigne-v9.55';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4453,7 +4455,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.54 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.55 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4473,7 +4475,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.54 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.55 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

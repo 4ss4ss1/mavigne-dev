@@ -3,12 +3,11 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **10 octobre 2026 (AUJ-5)** — ★★ **AUJOURD'HUI REMIS À LA MAQUETTE, LE PLANNING FAIT FOI** (§307). Lot 38, base `cd06431` (ARRACH-8 poussé après coup : lot rejoué dessus).
-> Demande de Nico (10/10, dictée + capture de la maquette) : ouverture par rôle, « toujours se baser sur le planning » (jamais un retour un samedi, fin d'arrêt
-> maladie), phrase du Budget, polices, disposition de la maquette avec « À savoir » à droite ET collant, carte qui disparaît, pastille qui clignote, météo en couleurs.
-> Mesuré à la base (Chromium, 1 440 px, barre ouverte) : DEUX colonnes (1 138 px de contenu < 1 150), « À savoir » à gauche ; la page du Pilotage défilait seule
-> (`overflow-y:auto`) et la colonne collante ne collait jamais. Trouvé en route : `d.saison` est le NOM de la période (« Les travaux de la saison » pour tous) ;
-> la charte DS-4 avait rendu la météo grise. **APP 8.74 → 8.75, SW 9.53 → 9.54.** `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+> Dernière consolidation : **11 octobre 2026 (AUJ-6)** — ★★ **LES DESSINS D'AUJOURD'HUI NE DISPARAISSENT PLUS ; « À SAVOIR » SOUS LES ONGLETS ; LA COURBE SANS TRAITS** (§308). Lot 39, base `373361c`.
+> Captures de Nico (10/10) : « À savoir » coupé (en haut et en descendant), « Nouveau » mal posé, charge restante « nulle » (« on arrête avec les colonnes ou lignes qui montent
+> et descendent »), « les images disparaissent parfois ». REPRODUIT dans Chromium sur la base (appli entière sous Vite, données injectées) : après un passage par Économie, le
+> montage suivant levait dans `majEco` (erreur avalée `pilotage.js/_pilTabAuj#ck2m`). Trouvé en route : la photo du jour partait AVANT l'arrivée des données (0 h, et toute la
+> configuration réécrite depuis la copie locale). **APP 8.75 → 8.76, SW 9.54 → 9.55.** `npm run site` → `npm run build` → `firebase deploy --only hosting`.
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1403,6 +1402,8 @@ passait devant (CADRE-1, §300). Un défaut de z-index peut n'exister que chez q
     fichier Excel sortait 0 hL/ha pendant que les kilos, filtrés avec `String()`, étaient justes. **Comparer `String(a)===String(b)`
     dans la fonction qui filtre**, pas chez l'appelant ; et un harnais qui bouchonne une fonction doit avoir un frère qui
     joue l'appel réel — le défaut vivait dans la couture entre deux harnais verts.
+22. ★★ **UN ÉCRAN QUI SE REMONTE (HTML neuf, puis montage) REMET À ZÉRO L'ÉTAT DE SON MODULE** (AUJ-6, §308). Le cockpit gardait les cadres de ses graphes et sa bascule
+    d'un montage à l'autre : après Économie, le montage suivant dessinait dans une boîte vide, levait, et l'erreur avalée laissait la page à moitié montée.
 
 **CSS / HTML**
 1. **`display:flex|block` sur `#page-xxx` interdit.**
@@ -1849,9 +1850,14 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ AUJ-6 — CE QUI RESTE OUVERT (§308, posé le 11/10)
+1. **À regarder chez Nico, sur son PC** : « À savoir » sous les onglets en descendant, la pastille « Nouveau » entière, un passage par Économie puis une donnée qui arrive
+   (le plan et la courbe restent). Vu dans Chromium sur un domaine reconstitué, pas sur ses données ni à sa largeur d'écran.
+2. **La courbe repart du 10/10** : les photos sans période (d'avant AUJ-5) sont écartées ; une photo à 0 h suivie d'un reste plus haut aussi.
+3. Vu, non touché : le sélecteur de tâches du plan défile de côté sans indice (« Entreplantation » coupée au bord) ; à chaque montage, les parcelles reviennent en fondu (0,7 s).
+
 ### ⚠️ AUJ-5 — CE QUI RESTE OUVERT (§307, posé le 10/10)
-1. **La carte qui disparaît n'a pas été reproduite** (base, Chromium : cinq onglets aller-retour, un autre module, une mise à jour des données — le plan revenait). Le
-   correctif (le plan observe SA case, réessaie une case sans largeur) couvre un dessin fait pendant que la vue est cachée. S'il revient : la suite exacte de gestes.
+1. ~~La carte qui disparaît~~ — **reproduite et corrigée au §308 (AUJ-6)** : après un passage par Économie, le montage suivant levait dans `majEco`.
 2. **À regarder chez Nico, sur son PC** : trois colonnes et « À savoir » collant à sa largeur réelle ; la vue Économie et la tuile Budget (le domaine reconstitué
    n'avait pas de taux horaire) ; la pastille un jour travaillé (rendu un samedi : fixe, voulu) ; un jour chômé, l'Effectif montre le prochain jour travaillé.
 3. Les photos d'avant le 10/10 n'ont pas de période (`p`) : toutes restent affichées jusqu'à leur sortie des 60 jours.

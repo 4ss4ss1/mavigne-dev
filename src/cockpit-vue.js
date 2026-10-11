@@ -348,7 +348,7 @@ const INFO = {
   savoir: 'Ce qui peut changer la journée ou la semaine : météo par secteur, absences, contrats, matériel, retards. Les motifs d’absence ne sont visibles que de l’admin.',
   decision: 'Les quatre questions de chaque matin, chacune avec sa réponse et le bouton pour agir.',
   plan: 'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine. Sa couleur dit l’état de la tâche choisie ; le trait sous chaque appellation, son avancement. Une parcelle en cours porte l’équipe qui l’a commencée, même un autre jour. Au survol, une loupe la montre en grand ; la toucher ouvre sa fiche. Les rangs dessinés sont un repère, pas le relevé des rangs ; une parcelle sans contour est un carré de sa surface, en pointillé.',
-  courbe: 'Le reste mesuré : un point par photo, prise chaque jour où un administrateur ouvre le Pilotage (60 jours gardés), puis le point du jour en direct. L’axe part de la première mesure. La projection suit la capacité du planning ; la ligne fine montre l’allure qu’il faudrait pour finir pile à l’objectif.',
+  courbe: 'Le reste mesuré : une ligne relie la photo de chaque jour au point d’aujourd’hui, en direct. La photo est prise à la première ouverture du Pilotage par un administrateur, une fois les données arrivées (60 jours gardés) ; un jour sans photo est un trou. L’axe part de la première photo. La projection suit la capacité du planning ; la ligne fine montre l’allure qu’il faudrait pour finir pile à l’objectif.',
   atterrissage: 'L’atterrissage additionne ce qui est dépensé et ce que coûtera le travail restant, au coût horaire de l’équipe et à l’écart au barème mesuré dans chaque appellation. Les autres postes suivent les factures saisies.',
   coutha: 'Atterrissage de la campagne, divisé par les hectares en production. Le prévu est le budget divisé de la même façon.',
   ecart: 'Heures réellement passées, face aux heures du barème, sur les parcelles validées. Au-dessus de zéro, l’équipe met plus longtemps que le barème.',
@@ -698,7 +698,7 @@ function htmlCourbe(w) {
   const c = cadre(w, ymax, G.grand, debutCourbe()); G.c = c; G.w = w;
   let s = axes(c, ticks, 'h');
   s += '<path id="ck-c-besoin" class="ck-c-besoin"/><path id="ck-c-proj" class="ck-c-proj"/>'
-    + '<path id="ck-c-ligne" class="ck-c-ligne"/><g id="ck-c-mes" class="ck-c-mes"></g><circle id="ck-c-pt" class="ck-c-pt" r="4.5"/>'
+    + '<path id="ck-c-ligne" class="ck-c-ligne"/><circle id="ck-c-pt" class="ck-c-pt" r="4.5"/>'
     + '<g id="ck-c-fin"><rect class="ck-c-fin" x="-5" y="-5" width="10" height="10" rx="1.5" transform="rotate(45)"/><text id="ck-c-fin-l" class="ck-c-txt ck-c-fin-l" y="-13" text-anchor="middle"></text></g>'
     + '<line id="ck-c-guide" class="ck-c-guide" y1="' + c.padT + '" y2="' + (c.h - c.padB) + '"/><circle id="ck-c-gpt" class="ck-c-gpt" r="4"/>'
     + '<rect class="ck-c-zone" x="' + c.padL + '" y="0" width="' + c.iw + '" height="' + c.h + '"/>';
@@ -706,15 +706,15 @@ function htmlCourbe(w) {
     + '<div class="ck-tip" id="ck-tip" aria-hidden="true"></div>';
 }
 function dessinerCourbe(reste, fin) {
-  const c = G.c; if (!c) return;
+  const c = G.c; if (!c || !$('#ck-c-ligne')) return;   // AUJ-6 : jamais dans une boîte pas encore dessinée
   const pts = HIST.filter(o => o.d < AUJ && o.d >= c.D0).map(o => [c.X(o.d), c.Y(o.r)]);
   pts.push([c.X(AUJ), c.Y(reste)]);
   const ligne = pts.length > 1 ? 'M' + pts.map(p => f1(p[0]) + ' ' + f1(p[1])).join('L') : '';
   const y0 = c.Y(0), xa = c.X(AUJ), ya = c.Y(reste), xf = c.X(fin), xv = c.X(VISEE);
   $('#ck-c-ligne').setAttribute('d', ligne);
-  // AUJ-5 (§307) : le reste mesuré est une LIGNE et un point par photo — plus de zone remplie jusqu'à zéro, qui formait
-  //   une colonne sur les quelques jours mesurés. Le point du jour est #ck-c-pt.
-  const mes = $('#ck-c-mes'); if (mes) mes.innerHTML = pts.slice(0, -1).map(p => '<circle cx="' + f1(p[0]) + '" cy="' + f1(p[1]) + '" r="3"/>').join('');
+  // ★ AUJ-6 (§308) : le reste mesuré est une LIGNE seule, puis le point du jour (#ck-c-pt). Les ronds d'AUJ-5, un par photo,
+  //   s'empilaient en « oooo » sur les premiers jours d'un axe de huit mois, et des photos à 0 h (prises avant l'arrivée des
+  //   données) tiraient des traits verticaux : cockpit.js/_ckChargeSerie les écarte, pilotage.js/_pilPhotoEcrire ne les prend plus.
   $('#ck-c-proj').setAttribute('d', 'M' + f1(xa) + ' ' + f1(ya) + 'L' + f1(xf) + ' ' + f1(y0));
   $('#ck-c-besoin').setAttribute('d', 'M' + f1(xa) + ' ' + f1(ya) + 'L' + f1(xv) + ' ' + f1(y0));
   const pt = $('#ck-c-pt'); pt.setAttribute('cx', f1(xa)); pt.setAttribute('cy', f1(ya));
@@ -764,7 +764,7 @@ function htmlEChart(w) {
     + '<div class="ck-tip" id="ck-etip" aria-hidden="true"></div>';
 }
 function dessinerEChart(fait, dep, att, fin) {
-  const c = GE.c; if (!c) return;
+  const c = GE.c; if (!c || !$('#ck-e-fait')) return;   // AUJ-6 : la boîte d'un montage neuf est vide tant qu'elle n'est pas dessinée
   const bud = TOTAL * (1 + MARGE_BUDGET) * TAUX;
   const pf = HIST.map(o => [c.X(o.d), c.Y((TOTAL - o.r) / TOTAL * 100)]), pd = (HIST.some(o => o.c != null) ? HIST.filter(o => o.c != null) : [{ d: AUJ, c: R.moDep }]).map(o => [c.X(o.d), c.Y(o.c / bud * 100)]);
   pf.push([c.X(AUJ), c.Y(fait)]); pd.push([c.X(AUJ), c.Y(dep)]);
@@ -1223,9 +1223,12 @@ function voirRetard() {
 /* ═══ 15. LES GRAPHES : survol, largeur ═══ */
 function redimCourbe(force) {
   const box = $('#ck-gr');
-  if (!box || box.offsetParent === null) return;
+  // ★ AUJ-6 (§308) : une boîte cachée (page en arrière-plan) ne se dessine pas — et le DIT (G.w = 0) : revenue à l'écran, elle
+  //   se croyait déjà dessinée à sa largeur et restait vide. Une boîte vide se redessine toujours.
+  if (!box) return;
+  if (box.offsetParent === null) { G.w = 0; return; }
   const w = Math.round(box.clientWidth);
-  if (!w || (!force && Math.abs(w - G.w) < 3)) return;
+  if (!w || (!force && Math.abs(w - G.w) < 3 && box.querySelector('svg'))) return;
   box.innerHTML = htmlCourbe(w);
   dessinerCourbe(G.reste, G.fin);
   $('#ck-c-fin-l').textContent = dCourt(G.fin);
@@ -1233,9 +1236,10 @@ function redimCourbe(force) {
 function redimEChart(a) { if (!V.eco) return; return redimEChart0(a); }
 function redimEChart0(force) {
   const box = $('#ck-egr');
-  if (!box || box.offsetParent === null) return;
+  if (!box) return;
+  if (box.offsetParent === null) { GE.w = 0; return; }   // AUJ-6 : même règle que la charge restante
   const w = Math.round(box.clientWidth);
-  if (!w || (!force && Math.abs(w - GE.w) < 3)) return;
+  if (!w || (!force && Math.abs(w - GE.w) < 3 && box.querySelector('svg'))) return;
   box.innerHTML = htmlEChart(w);
   const fa = R.hF / TOTAL * 100, de = R.moDep / R.moBudget * 100, at = R.moAtt / R.moBudget * 100;
   GE.fait = fa; GE.dep = de; GE.att = at; GE.fin = R.fin;
@@ -1322,12 +1326,23 @@ const RANGS = {
 };
 let rangerRaf = 0, redimT = 0, redimPlanT = 0;
 function rangerBientot() { if (!rangerRaf) rangerRaf = requestAnimationFrame(() => { rangerRaf = 0; ranger(); }); }
+// ★ AUJ-6 (§308) : « À savoir » colle SOUS les barres collantes du Pilotage (le fil de portée, puis les onglets), à leur hauteur
+//   MESURÉE. À 16 px du haut (AUJ-5, --ck-colle jamais posé), il passait sous la barre d'onglets dès qu'on descendait (10/10).
+function colleHaut() {
+  let bas = 0;
+  $$('#page-pilotage .pil-portee, #page-pilotage .pil-tabsbar').forEach(el => {
+    const cs = getComputedStyle(el), h = el.getBoundingClientRect().height;
+    if (h && (cs.position === 'sticky' || cs.position === 'fixed')) bas = Math.max(bas, (parseFloat(cs.top) || 0) + h);
+  });
+  return Math.round(bas) + 16;
+}
 function ranger() {
   const pg = $('#ck-page');
   // PRO-1 (§269) : le cockpit a quitté l'écran (autre onglet, autre module) — l'observateur restait branché sur la
   //   page disparue et plantait à chaque redimensionnement (« reading 'clientWidth' », journalisé en erreur).
   if (!pg) { if (obs) { obs.disconnect(); obs = null; } return; }
   const w = pg.clientWidth - 2 * parseFloat(getComputedStyle(pg).paddingLeft || 0);
+  pg.style.setProperty('--ck-colle', colleHaut() + 'px');   // AUJ-6
   const taille = w >= 1000 ? 'large' : w >= 760 ? 'moyen' : 'petit';   // AUJ-5 : la maquette dès 1 000 px (1 150 avant)
   if (pg.dataset.taille !== taille) {
     pg.dataset.taille = taille;
@@ -1417,20 +1432,23 @@ function monter() {
   $('#ck-savoir').dataset.h = htmlSavoir(R);
 }function entree() {
   const r = R;
-  majResume(r); majVerdict(r); majDecision(r); majPlan(); majChantiers(r); majCourbe(r); majEco(r);
-  redimCourbe(true);
+  // ★★ AUJ-6 (§308) : chaque mise à jour est ISOLÉE. Une seule qui levait arrêtait l'entrée avant sa fin : la page gardait
+  //   « ck-entree » (parcelles à opacité 0, titres d'appellation visibles) et la charge restante n'était jamais tracée — les
+  //   dessins « qui disparaissent parfois » (Nico, 10/10 ; la cause qui levait : voir _ck2Monter).
+  [() => majResume(r), () => majVerdict(r), () => majDecision(r), () => majPlan(), () => majChantiers(r), () => majCourbe(r), () => majEco(r), () => redimCourbe(true)]
+    .forEach(f => { try { f(); } catch (e) { if (window._mvAvale) window._mvAvale(e, 'cockpit-vue.js/entree'); } });
   const fin = () => {
     Anim.compter($('#ck-ph-trav'), r.pct, nb, 1100);
     Anim.compter($('#ck-ph-eff'), V.presents, nb, 700);
     Anim.compter($('#ck-ph-bud'), r.budgetPct, nb, 1100);
     Anim.compter($('#ck-ph-conf'), V.confN || 0, nb, 0);
   };
-  if (reduit()) { fin(); $('#ck-page').classList.remove('ck-entree'); return; }
+  if (reduit()) { $('#ck-page').classList.remove('ck-entree'); fin(); return; }   // AUJ-6 : la page se montre d'abord
   // Un seul moment orchestré : le plan se dessine de gauche à droite, les chiffres montent,
   // la courbe se trace. Ensuite, plus rien ne bouge sans raison.
   $$('.ck-pa').forEach(el => { el.style.transitionDelay = Math.round(PIDX[el.dataset.id].cx / PLAN_W * 520) + 'ms'; });
   requestAnimationFrame(() => requestAnimationFrame(() => {
-    $('#ck-page').classList.remove('ck-entree');
+    const pg = $('#ck-page'); if (pg) pg.classList.remove('ck-entree');
     setTimeout(fin, 160);
     const l = $('#ck-c-ligne');
     if (l) {
@@ -1518,6 +1536,13 @@ function heures() { $$('.ck-ev time').forEach(t => { t.textContent = ilYa(+t.dat
 window._ck2Monter = function (v) {
   if (!document.getElementById('ck-page')) return;
   agrandiOublier();
+  // ★★ AUJ-6 (§308) — LA CAUSE DES DESSINS DISPARUS : un montage repart de zéro. Les cadres des graphes (G.c, GE.c) et la
+  //   bascule (S.mode) survivaient au montage précédent : après un passage par Économie, le montage suivant (une donnée qui
+  //   arrive, un retour sur l'onglet) redessinait le graphe Économie dans une boîte neuve encore vide — « #ck-e-fait »
+  //   absent, TypeError dans majEco, entrée arrêtée : parcelles invisibles, charge restante vide. Le squelette s'ouvre sur
+  //   Terrain sans filtre de légende ; on revient sur Économie si c'est là qu'on était.
+  const modeAvant = S.mode;
+  G.c = null; G.w = 0; GE.c = null; GE.w = 0; GE.fait = GE.dep = GE.att = null; S.mode = 'terrain'; S.filtre = null;
   charger(v); R = calc();
   G.reste = R.reste; G.fin = R.fin; GE.fin = R.fin;   // l'état des graphes : la maquette le prenait au chargement
   cacherLoupe(); monter(); brancherPlan(); ranger(); dessinerPlan(true);
@@ -1526,6 +1551,7 @@ window._ck2Monter = function (v) {
   placerInd($('.ck-seg [aria-selected="true"]'), $('.ck-seg-ind'));
   placerInd($('.ck-bascule [aria-selected="true"]'), $('.ck-bascule-ind'));
   SANS_MVT = !!window._ck2EntreeFaite; entree(); SANS_MVT = false; window._ck2EntreeFaite = true;
+  if (modeAvant === 'eco' && V.eco) { SANS_MVT = true; try { choisirMode('eco'); } finally { SANS_MVT = false; } }   // AUJ-6
 };
 window._ck2Maj = function (v) { if (!document.getElementById('ck-page')) return; charger(v); majTout({}); };
 })();

@@ -1,0 +1,29 @@
+{
+  "lot": "AUJ-6",
+  "section": "§308",
+  "base": "373361c21f86642290781e510b7dabf3c07b17ce",
+  "inclut": [],
+  "date": "2026-10-11",
+  "fichiers": {
+    ".mv-base": "d8eca724243c1814d411fdd3b0ec585485362283a723144d8a652e1793ef8222",
+    "CLAUDE.md": "5250dfccdaf8d54a8d8cc1c0aee2c3651baab8b4954b3226e8f7761eedb95637",
+    "docs/claude/INDEX.md": "53e416b329be6d0132a8661e5664abc3640b095eef5fe27035c7675ce2d61118",
+    "docs/claude/chantiers-280-329.md": "7148df2a60d89b3107ed9f4ac66a1a142b728944af0a8ba9cb16ca3a1f0abe96",
+    "docs/claude/journal.md": "a3fe21744d6bf0242b96460857f39321cacf2ffd7ac28c724fd15b9005c3aadb",
+    "guide/11-pilotage.html": "268f132850fd7c6100df8e30f4b9228a5392829b00fc3f54c74816f2992a879a",
+    "index.html": "0a3eafb0a0f4f782f7a3f5ffeb90dd86838622867e237c433df9d433a1319737",
+    "public/sw.js": "69f6134b11cf0ad123d738131a3a4e918c5ce3ee2a17c6d98b6c5f258f6aa87a",
+    "scripts/harnais-claude-md.mjs": "d500a320ab8f0d364004da352148af570f611e936c44ce0d3d625de7a1a2342f",
+    "scripts/mv-harnais-auj1.mjs": "5568fc3651731f5b2c3068ecff76ab2bbe9ca43773fe1e9e051e20e001aa5fda",
+    "scripts/mv-harnais-auj5.mjs": "4ecb69c8ee97265ad799677f52df186046162135f14d4390f73f9ed82ebcd9a0",
+    "scripts/mv-harnais-liste.mjs": "b0ca95f26aa954d07b56adba9856ba792a237d6590a83efa6786e6f56d597ce5",
+    "scripts/mv-harnais-photo.mjs": "71af01343f61873d01f8637b6ea9e7c60f3f0b1e8b79456f576a20763a9d8a16",
+    "scripts/mv-harnais-pro1.mjs": "dae2381582e6d6a8fbebf61e53c9c128886805adfb36a764fdf35624af69f53d",
+    "src/cockpit-vue.js": "b7ebe986b8c0f3783c9015347a85e17a1f6437978dd097c3eba70bfd37a0fff5",
+    "src/cockpit.js": "5af668fd909eb43b53564e7e1ee66030b343fc1604b359441c64997259651515",
+    "src/pilotage.js": "dc3c51ef66f4bbac3b8555428c5a4ab103b498bfdd25ef68ff93d5677f017f4e",
+    "src/styles.css": "80433d49f953cc4102980e0e2f02cb91aaffb18a56475092f93123f55e34c7cf",
+    "src/utils.js": "68f095240a441f7df61e621a6cfed61090e1af84c44ccbc817764f671ec8afd4",
+    "scripts/mv-harnais-auj6.mjs": "c105b9a1ddea19cf0f4315555abedf056dccd52e8ea7978e55d5cc5ebd94a588"
+  }
+}

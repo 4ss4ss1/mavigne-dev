@@ -75,7 +75,7 @@ function partieC(S, T) {
   T('C2 trois colonnes dès 1 000 px de contenu, « À savoir » à droite entre 760 et 1 000', vue.includes("const taille = w >= 1000 ? 'large' : w >= 760 ? 'moyen' : 'petit';") && vue.includes("moyen: [['verdict', 'decision', 'plan', 'chant', 'courbe', 'fil'], [], ['savoir']]"));
   T('C3 « À savoir » colle : la page du Pilotage n’est plus un conteneur de défilement', css.includes('#page-pilotage:has(.ck2){overflow-x:clip;overflow-y:visible}') && css.includes('[data-taille="large"] #ck-t-c,[data-taille="moyen"] #ck-t-c{position:sticky;'));
   T('C4 la carte se redessine : sa case est observée, et une case sans largeur est réessayée', vue.includes('if (ci) obs.observe(ci);') && /if \(W < 120\) \{ if \(planEssais\+\+ < 30\) requestAnimationFrame\(\(\) => dessinerPlan\(true\)\); return; \}/.test(vue));
-  T('C5 la charge restante en points : plus de zone remplie', !vue.includes("ck-c-aire") && vue.includes('<g id="ck-c-mes" class="ck-c-mes"></g>') && vue.includes("mes.innerHTML = pts.slice(0, -1).map("));
+  T('C5 la charge restante sans zone remplie (et depuis AUJ-6 sans ronds : une ligne)', !vue.includes("ck-c-aire") && !vue.includes('ck-c-mes') && vue.includes('<path id="ck-c-ligne" class="ck-c-ligne"/>'));
   T('C6 la tuile Budget se lit en clair', (vue.match(/du budget main-d’œuvre dépensé, pour /g) || []).length === 2 && !vue.includes('de la main-d’œuvre, pour'));
   T('C7 la météo a ses couleurs à elle, tirées de la racine', css.includes(':root{--meteo-soleil:var(--or);--meteo-pluie:var(--bleu);--meteo-nuage:var(--texte-doux)}') && vue.includes('class="m-sol"') && vue.includes('class="m-eau"') && vue.includes('class="m-nuage"'));
   T('C8 la pastille de présence clignote un jour travaillé, fixe si les animations sont coupées', vue.includes("calque.classList.toggle('vif', !!(V && V.jourTravaille !== false));") && css.includes('.ck2 .ck-calque.vif .ck-eq::before{display:block;') && css.includes('@media (prefers-reduced-motion:reduce){.ck2 .ck-calque.vif .ck-eq::before{display:none}}'));
@@ -104,7 +104,7 @@ if (!CONTRE) {
     ['le seuil des trois colonnes remonte à 1 150 px', S => ({ ...S, vue: remp(S.vue, 'w >= 1000 ?', 'w >= 1150 ?') })],
     ['la page du Pilotage redevient un conteneur de défilement', S => ({ ...S, css: remp(S.css, '#page-pilotage:has(.ck2){overflow-x:clip;overflow-y:visible}', '') })],
     ['goHub n’ouvre plus Aujourd’hui', S => ({ ...S, app: remp(S.app, " try{ if(window._pilOuvrirAujourdhui) window._pilOuvrirAujourdhui(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/goHub#auj'); }", '') })],
-    ['la zone remplie de la charge revient', S => ({ ...S, vue: remp(S.vue, '<g id="ck-c-mes" class="ck-c-mes"></g>', '<path id="ck-c-aire" class="ck-c-aire"/>') })],
+    ['la zone remplie de la charge revient', S => ({ ...S, vue: remp(S.vue, '<path id="ck-c-ligne" class="ck-c-ligne"/>', '<path id="ck-c-aire" class="ck-c-aire"/><path id="ck-c-ligne" class="ck-c-ligne"/>') })],
   ];
   let muettes = 0;
   for (const [lib, f] of DEF) {

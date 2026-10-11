@@ -567,6 +567,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-forme1.mjs --contre'],
   ['node scripts/mv-harnais-auj5.mjs'],              // AUJ-5 (§307) : le planning fait foi (repos, retours, brûlage), la disposition de la maquette, « À savoir » collant, la carte qui se redessine
   ['node scripts/mv-harnais-auj5.mjs --contre'],
+  ['node scripts/mv-harnais-auj6.mjs'],              // AUJ-6 (§308) : les dessins qui ne disparaissent plus (montage remis à zéro), « À savoir » sous les onglets, la courbe sans traits
+  ['node scripts/mv-harnais-auj6.mjs --contre'],
   ['node scripts/mv-harnais-trac1.mjs'],              // TRAC-1 (§282) : les sessions du Tracteur en liste + fiche
   ['node scripts/mv-harnais-trac1.mjs --contre'],
   ['node scripts/mv-harnais-trac2.mjs'],              // TRAC-2 (§283) : l'Entretien du Tracteur sur deux colonnes
