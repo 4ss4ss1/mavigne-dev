@@ -343,7 +343,7 @@ const INFO = {
   effectif: 'Personnes prévues au planning aujourd’hui, hors bureau, et celles qui manquent (congé, arrêt, récupération). Un jour sans travail au planning — week-end, jour chômé —, la tuile montre le prochain jour travaillé et le dit.',
   budget: 'Part du budget main-d’œuvre déjà payée — les heures du planning dans les rangs, hors travaux à l’heure (arrachage…) —, face à la part du travail faite au barème. Payer moins vite qu’on n’avance, c’est être en avance.',
   conformite: 'Points du registre phyto et des documents obligatoires qui demandent une action de votre part.',
-  savoir: 'Ce qui peut changer la journée ou la semaine : météo par secteur, absences, contrats, matériel, retards. Les motifs d’absence ne sont visibles que de l’admin.',
+  savoir: 'Ce qui peut changer la journée ou la semaine. Sous chaque jour : le risque de pluie (le plus haut de la journée), le cumul en millimètres et le vent le plus fort (vent moyen, sans les rafales). Dessous : la pluie ou le vent des deux jours qui viennent, secteur par secteur, et ce qui est en cours dans les communes touchées ; puis les absences, les contrats, les retards et le matériel. Les motifs d’absence ne sont visibles que de l’admin.',
   decision: 'Les quatre questions de chaque matin, chacune avec sa réponse et le bouton pour agir.',
   plan: 'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine. Sa couleur dit l’état de la tâche choisie ; le trait sous chaque appellation, son avancement. Une parcelle en cours porte l’équipe qui l’a commencée, même un autre jour. Au survol, une loupe la montre en grand ; la toucher ouvre sa fiche. Les rangs dessinés sont un repère, pas le relevé des rangs ; une parcelle sans contour est un carré de sa surface, en pointillé.',
   courbe: 'Le reste mesuré : une ligne relie la photo de chaque jour au point d’aujourd’hui, en direct. La photo est prise à la première ouverture du Pilotage par un administrateur, une fois les données arrivées (60 jours gardés) ; un jour sans photo est un trou. L’axe part de la première photo. La projection suit la capacité du planning ; la ligne fine montre l’allure qu’il faudrait pour finir pile à l’objectif.',
@@ -366,6 +366,7 @@ const ICO = {
   gel: SVG('<path class="m-gel" d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9.6 4.6 12 7l2.4-2.4M9.6 19.4 12 17l2.4 2.4"/>'),
   eclaircie: SVG('<circle class="m-sol" cx="9" cy="8.5" r="3"/><path class="m-rai" d="M9 2.6v1.3M3.1 8.5h1.3M4.8 4.3l.9.9M13.2 4.3l-.9.9"/><path class="m-nuage" d="M9.8 19.5a3.8 3.8 0 0 1 .5-7.6 4.6 4.6 0 0 1 8.6 1.7 2.9 2.9 0 0 1-.6 5.9z"/>'),
   soleil: SVG('<circle class="m-sol" cx="12" cy="12" r="4"/><path class="m-rai" d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>'),
+  vent: SVG('<path d="M3 8.5h10a2.5 2.5 0 1 0-2.5-2.5M3 12h15.5a2.5 2.5 0 1 1-2.5 2.5M3 15.5h7"/>'),   // AUJ-8 (§312) : la ligne du vent, sous chaque jour
   contrat: SVG('<path d="M7 3.5h7l4 4V20.5H6.5v-17z"/><path d="M14 3.5V8h4M9.5 12.5h5M9.5 16h3.5"/>'),
   retard: SVG('<circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/>'),
   materiel: SVG('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 0 5.4-5.4l-2.4 2.4-2.6-.6-.6-2.6z"/>'),
@@ -448,17 +449,23 @@ function savoirItems() {
 function htmlSavoir(r) {
   const items = savoirItems(r);
   // PRO-1 (§269) : une frise météo vide, sa légende et « Tout voir (0) » s'affichaient quand il n'y avait rien.
+  // ★ AUJ-8 (§312) : sous chaque jour, des FAITS — le risque de pluie (la barre et le %, le plus haut de la journée), le cumul,
+  //   le vent le plus fort —, plus de « brûlage possible » (Nico, 11/10 : « ce n'est pas à l'appli de décider »). Une valeur
+  //   inconnue laisse sa ligne vide, jamais un 0 inventé ; un jour non travaillé n'est pas grisé (Nico, 11/10).
+  const pc = v => Math.max(0, Math.min(100, Math.round(Number(v) || 0)));
   const met = !METEO.length ? '' : ('<div class="ck-met" role="list" aria-label="Météo des cinq prochains jours">' + METEO.map(m =>
     '<div class="ck-met-j' + (m.ic === 'pluie' ? ' alerte' : '') + '" role="listitem" title="' + esc(m.txt) + '">'
     + '<span class="ck-met-n">' + m.j + '</span>' + '<span class="ck-met-ic ic-' + m.ic + '">' + ICO[m.ic] + '</span>'
     + '<span class="ck-met-t"><b>' + m.tmax + '°</b> ' + m.tmin + '°</span>'
-    + '<span class="ck-met-mm">' + (m.mm ? m.mm + '\u202fmm' : '\u00a0') + '</span>'
-    + '<span class="ck-met-br b' + String(m.brul).replace('.', '') + '" title="' + (m.brul === 1 ? 'Brûlage possible' : m.brul ? 'Brûlage l’après-midi' : 'Non travaillé') + '"></span></div>').join('') + '</div>'
-    + '<p class="ck-met-leg"><i></i>brûlage possible <i class="demi"></i>l’après-midi seulement</p>');
+    + (m.pp != null ? '<span class="ck-met-pp" aria-hidden="true"><i style="width:' + pc(m.pp) + '%"></i></span><span class="ck-met-pc">' + pc(m.pp) + '\u00a0%</span>'
+      : '<span class="ck-met-pp vide" aria-hidden="true"></span><span class="ck-met-pc">\u00a0</span>')
+    + '<span class="ck-met-mm">' + (m.mm >= 0.5 ? String(m.mm).replace('.', ',') + '\u202fmm' : '\u00a0') + '</span>'
+    + '<span class="ck-met-v">' + (m.vent != null ? ICO.vent + '<span>' + Math.round(Number(m.vent) || 0) + '</span><span class="ck-met-vu">km/h</span>' : '\u00a0') + '</span></div>').join('') + '</div>'
+    + (METEO.some(m => m.pp != null) ? '<p class="ck-met-leg"><i></i>risque de pluie</p>' : ''));
   const lis = items.map(x => '<li class="ck-sv ck-sv-' + x.cat + (x.prio === 1 ? ' fort' : '') + '"' + (x.id ? ' id="' + x.id + '"' : '') + '>'
     + '<span class="ck-sv-ic">' + ICO[x.ic] + '</span>'
     + '<div class="ck-sv-tx"><div class="ck-sv-h"><b>' + esc(x.titre) + '</b><span class="ck-sv-q">' + esc(x.quand) + '</span></div>'
-    + '<p class="ck-sv-s">' + esc(x.sous) + '</p>'
+    + (x.sous ? '<p class="ck-sv-s">' + esc(x.sous) + '</p>' : '')   // AUJ-8 : rien en cours, rien d'écrit
     + (x.action ? '<button type="button" class="ck-sv-a"' + (x.onglet ? ' data-onglet="' + x.onglet + '"' : '') + (x.fn ? ' data-fn="' + x.fn + '"' : '')
       + (x.module ? ' data-module="' + x.module + '"' : '') + '>' + x.action + '</button>' : '')
     + '</div></li>').join('');

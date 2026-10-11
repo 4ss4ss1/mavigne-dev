@@ -8,6 +8,17 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Rayés du §28 de `CLAUDE.md` le 11/10 (AUJ-8, plafond du cœur à 2 800 lignes) — trois points réglés, chacun raconté dans sa section : AUJ-5 n° 1
+> « ~~La carte qui disparaît~~ — reproduite et corrigée au §308 (AUJ-6) : après un passage par Économie, le montage suivant levait dans `majEco` » ; COH-1 n° 6
+> « ~~La journée de référence (7 h)~~ — `_pilEchCadence` lit d'abord la journée du modèle du planning (§228) » ; COH-1 n° 7 « ~~Surfaces hors Vigne~~ —
+> `window._mvHaP` / `_mvHaT` dans tous les modules (§229). La Cave garde `_vendHaTxt` (vendange) ».
+
+> Dernière consolidation : **11 octobre 2026 (NOTIF-3)** — ★★ **UNE SEULE NOTIFICATION PAR JOUR TRAVAILLÉ, À LA PRISE DE POSTE DU PLANNING, ENVOYÉE PAR LE SERVEUR** (§311). Lot 42, base `717e3a2` (contient NOTIF-2).
+> Nico : « les notifications, on les reçoit vraiment de façon intempestive […] en avoir une le matin, à l'heure à laquelle on prend le travail, sur le téléphone ». Inventaire : priorité
+> et DAR toutes les heures appli ouverte, une notification à chaque version, rappels tracteur — rien appli fermée (`sw.js` sans `push`). Premier envoi serveur du projet : Web Push,
+> `functions/notif.js` (4 fonctions, 2 secrets) ; l'appli de l'admin publie heures et messages des 14 jours (`_planPrisesDePoste`, le calcul de l'écran). **APP 8.78 → 8.79, SW 9.57 → 9.58.**
+> Déploiement (§311f) : 2 secrets → `firebase deploy --only functions:notifCle,functions:notifAbonner,functions:notifHoraires,functions:notifMatin` → `npm run site` → `build` → `--only hosting`.
+
 > Dernière consolidation : **11 octobre 2026 (NOTIF-2)** — ★ **PLUS DE MESSAGE ORANGE « PROMESSE REJETÉE : SHOWNOTIFICATION » APRÈS UNE MISE À JOUR** (§310). Lot 41, base `717e3a2`.
 > Rapport d'erreur collé par Nico : 19 occurrences du 20/09 au 10/10, deux comptes, deux domaines. Datées par leurs identifiants : toujours un jour de mise en ligne ou le
 > lendemain matin, la première au lendemain de NOTIF-1 (`0bb80a5`, §158). `_swNotify` appelait `showNotification` sans garde ; sans permission, le rejet n'était rattrapé par rien

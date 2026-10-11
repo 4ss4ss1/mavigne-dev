@@ -1,4 +1,6 @@
-// MA VIGNE — Service Worker v9.58
+// MA VIGNE — Service Worker v9.59
+// v9.59 (11/10/2026) — AUJ-8 (§312) : « A savoir » sans verdict — la bande des cinq jours donne le risque de pluie, le cumul et le vent
+//   le plus fort (plus de « brulage possible ») ; les lignes disent ce qui est en cours dans les communes touchees. APP 8.79 -> 8.80.
 // v9.58 (11/10/2026) — NOTIF-3 (§311) : une seule notification par jour travaille, envoyee par le serveur a l'heure de prise de poste du planning
 //   (push + notificationclick ici) ; plus de priorite ni de DAR toutes les heures, plus de notification a chaque version. APP 8.78 -> 8.79.
 // v9.57 (11/10/2026) — NOTIF-2 (§310) : plus de message orange « Promesse rejetee : showNotification » apres une mise a jour — _swNotify ne notifie
@@ -4446,7 +4448,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.58';
+const CACHE_NAME   = 'mavigne-v9.59';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4462,7 +4464,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.58 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.59 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4482,7 +4484,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.58 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.59 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

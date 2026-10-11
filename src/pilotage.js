@@ -5278,17 +5278,23 @@ function _pilCk2Modele(d, m){
   // La courbe : les photos du jour (PHOTO-1) et aujourd'hui en direct.
   var ph=((typeof window._ckChargeSerie==='function')?window._ckChargeSerie(_pilPhotoListe(), d, auj, (typeof _pilSaison==='function'&&_pilSaison()&&_pilSaison().nom)||''):[]).map(function(x){ return { d:x.iso, reste:x.v }; });
   var hT=d.totalTotal||0;
-  // La météo des cinq jours (Accueil) : pictogramme, températures, cumul de pluie, brûlage possible.
+  // La météo des cinq jours (Accueil) : pictogramme, températures, risque de pluie, cumul, vent le plus fort.
+  // ★ AUJ-8 (§312) : des FAITS, plus de « brûlage possible » — Nico (11/10) : « ce n'est pas à l'appli de décider si oui ou
+  //   non il est possible de faire une tâche ». Cumul et vent : _ckMeteoJour (cockpit.js), le calcul des lignes d'« À savoir » ;
+  //   le risque est le plus haut de la journée (precipitation_probability_max). Une valeur absente reste absente (null), jamais
+  //   0. Un jour non travaillé n'est pas grisé (Nico, 11/10) : la bande dit le temps, le planning dit le travail.
   var MD=window.METEO_DAILY||null, MH=window.METEO_HOURLY||null, meteo=[];
   var ICW=function(c){ c=Number(c); return c<=1?'soleil':c===2?'eclaircie':(c>=71&&c<=77)?'gel':(c>=51)?'pluie':'nuage'; };
   var TXT={ soleil:'Ensoleillé', eclaircie:'Éclaircies', nuage:'Couvert', pluie:'Pluie', gel:'Gel ou neige' };
+  var MJ=(MH&&Array.isArray(MH.time)&&Array.isArray(MH.precip)&&typeof window._ckMeteoJour==='function')?window._ckMeteoJour:null;
   if(MD&&Array.isArray(MD.time)){
     MD.time.slice(0,5).forEach(function(iso,k){
-      var mm=0; if(MH&&Array.isArray(MH.time)) MH.time.forEach(function(h,i){ if(String(h).slice(0,10)===iso) mm+=Number(MH.precip&&MH.precip[i])||0; });
-      mm=Math.round(mm); var dt=new Date(iso+'T12:00:00'), ic=ICW(MD.code&&MD.code[k]), we=!ouv(dt);   // AUJ-5 : chômé selon le planning, plus le seul week-end
+      var jr=MJ?MJ(MH,String(iso)):null, mm=(jr&&jr.vu)?jr.mm:0, vent=(jr&&jr.vu)?jr.vent:null, ppB=MD.pp?MD.pp[k]:null;
+      var pp=(ppB!=null&&ppB!==''&&isFinite(Number(ppB)))?Math.max(0,Math.min(100,Math.round(Number(ppB)))):null;
+      var dt=new Date(iso+'T12:00:00'), ic=ICW(MD.code&&MD.code[k]);
       meteo.push({ j:k===0?'Auj.':dt.toLocaleDateString('fr-FR',{weekday:'short'}).replace(/^./,function(c){ return c.toUpperCase(); }),
-        ic:ic, tmax:Math.round(MD.tmax&&MD.tmax[k]), tmin:Math.round(MD.tmin&&MD.tmin[k]), mm:mm,
-        txt:TXT[ic]+(mm?' : '+mm+'\u202fmm':''), brul:we?0:(mm>=2?.5:1) });
+        ic:ic, tmax:Math.round(MD.tmax&&MD.tmax[k]), tmin:Math.round(MD.tmin&&MD.tmin[k]), mm:mm, pp:pp, vent:vent,
+        txt:TXT[ic]+(pp!=null?', risque de pluie '+pp+'\u00a0%':'')+(mm>=0.5?', '+String(mm).replace('.',',')+'\u202fmm':'')+(vent!=null?', vent jusqu\u2019à '+vent+'\u202fkm/h':'') });
     });
   }
   // « À savoir » : les sources testées de cockpit.js, au format des lignes de la maquette.

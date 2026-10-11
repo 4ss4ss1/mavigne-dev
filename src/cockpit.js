@@ -170,7 +170,7 @@ window._ckChargeSvg = function(w, serie, m){
 // ── À SAVOIR (AUJ-2, §261) : ce qui peut changer la journée ou la semaine ───────────────────────
 //   Règles validées par Nico le 07/10 :
 //   • météo : les deux jours qui viennent, AU NIVEAU DU DOMAINE (prévisions heure par heure de l'Accueil,
-//     METEO_HOURLY) ; pluie ≥ 2 mm sur un jour ou vent ≥ 40 km/h ; on dit si un brûlage en cours attendra.
+//     METEO_HOURLY) ; pluie ≥ 2 mm sur un jour ou vent ≥ 40 km/h ; ce qui est en cours là où ça tombe (AUJ-8, §312).
 //     Le détail par secteur viendra dans un lot suivant : le cache par commune ne porte que la journée.
 //   • absences : les 7 jours qui viennent (aujourd'hui est déjà dans la tuile « Présences ») ; l'état du jour
 //     est lu par _pilEtatEntree, le même que les présences. Le Pilotage est réservé à l'admin.
@@ -182,25 +182,57 @@ function _ckPlusJ(t, k){ return new Date(t.getFullYear(), t.getMonth(), t.getDat
 // AUJ-5 : le point final, sans doubler celui d'une date abrégée (« mar. 13 oct. », jamais « oct.. »).
 function _ckPt(s){ return /\.$/.test(s) ? s : s + '.'; }
 // SECT-1 (§264) : SECTEUR PAR SECTEUR dès que le domaine en a plusieurs (relevé par commune de l'Accueil, _wxSecteurs) ;
-//   sinon les prévisions du domaine (METEO_HOURLY). Mêmes seuils. Si un brûlage n'est pas fini, on compte ses parcelles
-//   pas encore faites DANS les communes touchées (états du plan, AUJ-3) : « le brûlage attendra sur Brochon : 3 parcelles ».
+//   sinon les prévisions du domaine (METEO_HOURLY). Mêmes seuils. Dessous : ce qui est en cours (_ckEnCours, AUJ-8).
 function _ckMeteoJour(h, iso){
-  var mm = 0, vent = 0, h0 = null, h1 = null, vu = false;
+  var mm = 0, vent = 0, vuV = false, h0 = null, h1 = null, vu = false;
   for(var i = 0; i < h.time.length; i++){
     var s = String(h.time[i]); if(s.slice(0, 10) !== iso) continue;
     vu = true;
-    var p = Number(h.precip[i]) || 0, w = Number(h.wind && h.wind[i]) || 0, hh = parseInt(s.slice(11, 13), 10);
+    var p = Number(h.precip[i]) || 0, wv = h.wind ? h.wind[i] : null, w = Number(wv) || 0, hh = parseInt(s.slice(11, 13), 10);
+    if(wv != null && isFinite(Number(wv))) vuV = true;
     mm += p; if(w > vent) vent = w;
     if(p >= 0.2){ if(h0 === null) h0 = hh; h1 = hh + 1; }
   }
-  return { vu: vu, mm: Math.round(mm * 10) / 10, vent: Math.round(vent), h0: h0, h1: h1 };
+  // AUJ-8 (§312) : un vent jamais relevé est inconnu (null), pas 0 km/h.
+  return { vu: vu, mm: Math.round(mm * 10) / 10, vent: vuV ? Math.round(vent) : null, h0: h0, h1: h1 };
 }
+// AUJ-8 : la bande des cinq jours (_pilCk2Modele) prend le même calcul que les lignes.
+window._ckMeteoJour = _ckMeteoJour;
 function _ckMm(v){ return String(v).replace('.', ',') + '\u202fmm'; }
 function _ckEt(l){ return l.join(', ').replace(/, ([^,]*)$/, ' et $1'); }
+// ★ AUJ-8 (§312) — CE QUI EST EN COURS LÀ OÙ IL PLEUT OU VENTE : un fait, jamais un verdict (« ce n'est pas à l'appli de décider »).
+//   Tâche du plan commencée au calendrier ce jour-là et pas finie ; ses parcelles pas encore faites dans les communes touchées.
+//   ⚠️ Commune rangée { nom, lat, lng } (FORME-1) : lue en texte, le compte par secteur valait toujours zéro.
+function _ckCommuneDe(p){
+  var c = p && p.commune;
+  return String((c && typeof c === 'object') ? (c.nom || '') : (c || '')).trim();
+}
+function _ckEnCours(rows, plan, iso, communes){
+  if(!plan || !Array.isArray(plan.parcs) || !plan.parcs.length) return [];
+  var dom = String(window._domaineCommuneNom || 'Domaine'), out = [];
+  var dans = function(p){ return !communes || communes.indexOf(_ckCommuneDe(p) || dom) >= 0; };
+  window._ckPlanTaches(rows).forEach(function(r){
+    if((Number(r.pct) || 0) >= 100) return;
+    var deb = _ckPlanDebut(plan.fen, r.nom);
+    if(!deb || deb > iso) return;
+    var et = window._ckPlanEtats(plan.parcs, plan.journal, r.nom, deb, false);
+    var n = plan.parcs.filter(function(p){ var e = p && et[p.nom]; return p && dans(p) && (e === 'afaire' || e === 'cours' || e === 'retard'); }).length;
+    if(n) out.push({ nom: r.nom, n: n, deb: deb });
+  });
+  return out.sort(function(a, b){ return a.deb < b.deb ? -1 : (a.deb > b.deb ? 1 : 0); });
+}
+function _ckEnCoursTxt(l, communes){
+  if(!l || !l.length) return '';
+  var s = function(n){ return n > 1 ? 's' : ''; };
+  var lib = function(n){ var x = String((typeof window.tNom === 'function') ? window.tNom(n) : n); return x.charAt(0).toLowerCase() + x.slice(1); };
+  var t = l.slice(0, 3).map(function(x, k){ return lib(x.nom) + ', ' + x.n + (k ? '' : ' parcelle' + s(x.n) + ' pas encore faite' + s(x.n)); }).join(' ; ');
+  var r = l.length - 3;
+  if(r > 0) t += ' ; et ' + r + ' autre' + s(r) + ' tâche' + s(r);
+  return 'En cours' + (communes && communes.length ? ' sur ' + _ckEt(communes) : '') + ' : ' + t + '.';
+}
 window._ckSvMeteo = function(H, rows, now, secteurs, plan){
   var t = now || new Date(), out = [];
   var sect = (secteurs || []).filter(function(s){ return s && s.nom && s.h && Array.isArray(s.h.time) && Array.isArray(s.h.precip); });
-  var brul = (rows || []).filter(function(r){ return r && /br[uû]l/i.test(String(r.nom || '')) && (r.pct || 0) < 100; })[0];
   [1, 2].forEach(function(k){
     var dt = _ckPlusJ(t, k), iso = _ckIso(dt), quand = k === 1 ? 'Demain' : _ckMaj1(dt.toLocaleDateString('fr-FR', { weekday: 'long' }));
     if(sect.length){
@@ -211,13 +243,9 @@ window._ckSvMeteo = function(H, rows, now, secteurs, plan){
       if(pl.length === 1) tt = 'Pluie annoncée sur ' + pl[0].nom + ' : ' + _ckMm(pl[0].j.mm) + (pl[0].j.h0 !== null ? ', de ' + pl[0].j.h0 + '\u00a0h à ' + pl[0].j.h1 + '\u00a0h' : '');
       else if(pl.length > 1) tt = 'Pluie annoncée sur ' + _ckEt(pl.map(function(x){ return x.nom + ' (' + _ckMm(x.j.mm) + ')'; }));
       if(ve.length) tt += (tt ? ' ; vent à ' : 'Vent annoncé à ') + Math.max.apply(null, ve.map(function(x){ return x.j.vent; })) + '\u202fkm/h sur ' + _ckEt(ve.map(function(x){ return x.nom; }));
-      var sous = 'Aucun chantier en cours ne craint ce temps.', prio = 2;
-      if(brul){
-        var com = tou.map(function(x){ return x.nom; });
-        var et = (plan && plan.parcs) ? window._ckPlanEtats(plan.parcs, plan.journal, brul.nom, _ckPlanDebut(plan.fen, brul.nom), false) : null;
-        var n = et ? plan.parcs.filter(function(p){ var e = p && et[p.nom]; return p && com.indexOf(String(p.commune || '').trim()) >= 0 && (e === 'afaire' || e === 'cours' || e === 'retard'); }).length : 0;
-        if(n){ prio = 1; sous = 'Le brûlage attendra un temps sec sur ' + _ckEt(com) + ' : ' + n + ' parcelle' + (n > 1 ? 's' : '') + ' pas encore faite' + (n > 1 ? 's' : '') + '.'; }
-      }
+      // ★ AUJ-8 (§312) : sous la ligne, un FAIT — ce qui est en cours dans les communes touchées —, jamais un verdict.
+      var com = tou.map(function(x){ return x.nom; }), ec = _ckEnCours(rows, plan, iso, com);
+      var sous = _ckEnCoursTxt(ec, com), prio = ec.length ? 1 : 2;
       out.push({ cat: 'meteo', prio: prio, quand: quand, titre: tt, sous: sous });
       return;
     }
@@ -226,7 +254,8 @@ window._ckSvMeteo = function(H, rows, now, secteurs, plan){
     if(!j.vu || (j.mm < _CK_SV.pluie && j.vent < _CK_SV.vent)) return;
     var t1 = j.mm >= _CK_SV.pluie ? 'Pluie annoncée : ' + _ckMm(j.mm) + (j.h0 !== null ? ', de ' + j.h0 + '\u00a0h à ' + j.h1 + '\u00a0h' : '') : '';
     if(j.vent >= _CK_SV.vent) t1 += (t1 ? ', vent à ' : 'Vent annoncé à ') + j.vent + '\u202fkm/h';
-    out.push({ cat: 'meteo', prio: brul ? 1 : 2, quand: quand, titre: t1, sous: brul ? 'Le brûlage en cours attendra un temps sec.' : 'Aucun chantier en cours ne craint ce temps.' });
+    var ecD = _ckEnCours(rows, plan, iso, null);
+    out.push({ cat: 'meteo', prio: ecD.length ? 1 : 2, quand: quand, titre: t1, sous: _ckEnCoursTxt(ecD, null) });
   });
   return out;
 };
@@ -316,7 +345,7 @@ window._ckSavoirHtml = function(items, extra){
     var a = x.action && _CK_SV_ACT[x.action];
     return '<li class="ck-sv ck-sv-' + x.cat + (x.prio === 1 ? ' fort' : '') + '"><span class="ck-sv-ic" aria-hidden="true">' + (_CK_SV_IC[x.cat] || '\u2022') + '</span>'
       + '<div class="ck-sv-tx"><div class="ck-sv-h"><b>' + _ckEsc(x.titre) + '</b><span class="ck-sv-q">' + _ckEsc(x.quand) + '</span></div>'
-      + '<p class="ck-sv-s">' + _ckEsc(x.sous) + '</p>'
+      + (x.sous ? '<p class="ck-sv-s">' + _ckEsc(x.sous) + '</p>' : '')   // AUJ-8 : rien en cours, rien d'écrit
       + (a ? '<button type="button" class="ck-sv-a" onclick="' + a[1] + '">' + a[0] + '</button>' : '') + '</div></li>';
   }).join('');
   return (li ? '<ul class="ck-sv-l">' + li + '</ul>' : '<p class="ck-fil-vide">Rien à signaler pour les jours qui viennent.</p>') + (extra || '');

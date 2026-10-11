@@ -3,11 +3,11 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **11 octobre 2026 (NOTIF-3)** — ★★ **UNE SEULE NOTIFICATION PAR JOUR TRAVAILLÉ, À LA PRISE DE POSTE DU PLANNING, ENVOYÉE PAR LE SERVEUR** (§311). Lot 42, base `717e3a2` (contient NOTIF-2).
-> Nico : « les notifications, on les reçoit vraiment de façon intempestive […] en avoir une le matin, à l'heure à laquelle on prend le travail, sur le téléphone ». Inventaire : priorité
-> et DAR toutes les heures appli ouverte, une notification à chaque version, rappels tracteur — rien appli fermée (`sw.js` sans `push`). Premier envoi serveur du projet : Web Push,
-> `functions/notif.js` (4 fonctions, 2 secrets) ; l'appli de l'admin publie heures et messages des 14 jours (`_planPrisesDePoste`, le calcul de l'écran). **APP 8.78 → 8.79, SW 9.57 → 9.58.**
-> Déploiement (§311f) : 2 secrets → `firebase deploy --only functions:notifCle,functions:notifAbonner,functions:notifHoraires,functions:notifMatin` → `npm run site` → `build` → `--only hosting`.
+> Dernière consolidation : **11 octobre 2026 (AUJ-8)** — ★★ **« À SAVOIR » DONNE DES FAITS, PLUS DE VERDICT : RISQUE DE PLUIE, CUMUL ET VENT SOUS CHAQUE JOUR** (§312). Lot 43, base `2469c5a`.
+> Nico (11/10, capture de la bande) : « enlève la tâche de brûlage ici, ce n'est pas à l'appli de décider si oui ou non il est possible de faire une tâche » ; proposé : le vent, le risque de pluie
+> ou rien — « oui rajoute la probabilité de pluie aussi », puis « les jours non travaillés ne doivent pas être grisés ». Trouvé : la barre ne lisait que la pluie (la demi-barre « l'après-midi » dès 2 mm,
+> sans l'heure) ; par secteur, le compte du brûlage valait TOUJOURS zéro (commune `{ nom, lat, lng }` lue comme un texte). Dessous : ce qui est en cours là où il pleut, sans verdict.
+> **APP 8.79 → 8.80, SW 9.58 → 9.59.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1849,6 +1849,9 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ AUJ-8 — CE QUI RESTE OUVERT (§312, posé le 11/10)
+1. **À regarder chez Nico, au téléphone et sur PC** : la bande (barre et % du risque de pluie, mm, vent) et une ligne « En cours sur … » sur SES données — vues dans Chromium à 300, 340 (sombre), 358 et 420 px sur des données fabriquées. Le vent est le plus fort des 24 h, nuit comprise (vent moyen, sans rafales) ; une tâche sans fenêtre dans la campagne n'est jamais dite « en cours ».
+
 ### ⚠️ NOTIF-3 — CE QUI RESTE OUVERT (§311, posé le 11/10 ; reprend NOTIF-2, §310)
 1. **D'abord les deux secrets et l'ordre de déploiement (§311f).** **À regarder chez Nico** : Réglages › Moi › Notifications sur chaque téléphone (iPhone : appli installée), le message du jour travaillé suivant à la prise de poste, les journaux de `notifMatin` ; plus de message orange à la mise en ligne (NOTIF-2) — marquer les 19 rapports traités. Jamais testé sur un vrai téléphone. Les lignes tracteur et DAR suivent la DERNIÈRE publication de l'admin (son enregistrement, ou sa première ouverture du jour) ; 14 jours sans admin = plus d'envoi ; rien après 20 h 45 ; changer la paire de clés désabonne tout le monde.
 
@@ -1864,10 +1867,9 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 3. Vu, non touché : le sélecteur de tâches du plan défile de côté sans indice (« Entreplantation » coupée au bord) ; à chaque montage, les parcelles reviennent en fondu (0,7 s).
 
 ### ⚠️ AUJ-5 — CE QUI RESTE OUVERT (§307, posé le 10/10)
-1. ~~La carte qui disparaît~~ — **reproduite et corrigée au §308 (AUJ-6)** : après un passage par Économie, le montage suivant levait dans `majEco`.
-2. **À regarder chez Nico, sur son PC** : trois colonnes et « À savoir » collant à sa largeur réelle ; la vue Économie et la tuile Budget (le domaine reconstitué
+1. **À regarder chez Nico, sur son PC** : trois colonnes et « À savoir » collant à sa largeur réelle ; la vue Économie et la tuile Budget (le domaine reconstitué
    n'avait pas de taux horaire) ; la pastille un jour travaillé (rendu un samedi : fixe, voulu) ; un jour chômé, l'Effectif montre le prochain jour travaillé.
-3. Les photos d'avant le 10/10 n'ont pas de période (`p`) : toutes restent affichées jusqu'à leur sortie des 60 jours.
+2. Les photos d'avant le 10/10 n'ont pas de période (`p`) : toutes restent affichées jusqu'à leur sortie des 60 jours.
 
 ### ⚠️ ARRACH-8 — CE QUI RESTE OUVERT (§306, posé le 10/10)
 
@@ -2028,8 +2030,6 @@ différents entre eux, et des heures sup apparaissent dans Décider › le renfo
 4. **La passe d'audit écran par écran** (téléphone et PC) promise à Nico : avec le lot 3.
 5. ✅ ~~« Dégraffage »~~ — §230 (la migration) + §232 (la règle de l'admin, imposée à chaque appareil à sa synchronisation).
    Reste à Nico de renommer la sienne (Réglages › Tâches › crayon › « Renommer cette tâche ») — l'équipe n'a rien à faire.
-6. ✅ ~~La journée de référence (7 h)~~ — `_pilEchCadence` lit d'abord la journée du modèle du planning (§228).
-7. ✅ ~~Surfaces hors Vigne~~ — `window._mvHaP` / `_mvHaT` dans tous les modules (§229). La Cave garde `_vendHaTxt` (vendange).
 10. **RENF-2, à regarder chez Nico** (§224) : la carte sur ses vraies données — le calendrier de l'hiver, le plafond proposé
     (la semaine la plus longue de SON modèle), le coût de l'inaction qui monte (plus d'heure sup cachée). Le CDD est à
     35 h fixes, en dur (`c.hCdd`) : un réglage si un domaine en a besoin.

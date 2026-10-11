@@ -1120,3 +1120,56 @@ selon le rôle ; les heures publiées par l'appli de l'admin. Réponses : « Con
 3. `npm run site` → `npm run build` → `firebase deploy --only hosting`.
 4. Sur chaque téléphone : Réglages › Moi › Notifications → Autoriser → une notification « Notifications activées » confirme. Ensuite : le jour travaillé suivant,
    « Bonjour <prénom> » à la prise de poste ; console › Functions › notifMatin › Journaux : « [NOTIF-3] … : N envoyé(s) ».
+
+## 312. ★★ AUJ-8 — « À SAVOIR » DONNE DES FAITS, PLUS DE VERDICT ; RISQUE DE PLUIE, CUMUL ET VENT SOUS CHAQUE JOUR (11/10 — `src/cockpit.js` (`_ckMeteoJour`, `_ckCommuneDe`, `_ckEnCours`, `_ckEnCoursTxt`, `_ckSvMeteo`, `_ckSavoirHtml`) · `src/pilotage.js` (`_pilCk2Modele`) · `src/cockpit-vue.js` (`htmlSavoir`, `INFO.savoir`, `ICO.vent`) · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW, MV_INFO) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-auj8.mjs` (neuf) · `scripts/mv-harnais-auj2.mjs` · `scripts/mv-harnais-auj5.mjs` · `scripts/mv-harnais-sect1.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-280-329.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/AUJ-8.json` · **APP 8.79 → 8.80, SW 9.58 → 9.59**, base `2469c5a`)
+
+### 312a. La demande
+Nico (11/10, capture de la bande des cinq jours d'« À savoir ») : « enlève la tâche de brûlage ici, ce n'est pas à l'appli de décider si oui ou non il est
+possible de faire une tâche. mettre autre chose, propose ». Reformulé, puis trois propositions : le vent ; le risque de pluie (une barre, comme la météo de
+l'Accueil) ; rien. Et la même question pour les lignes du dessous (« Le brûlage attendra un temps sec », « Aucun chantier en cours ne craint ce temps ») : les
+faits seuls, et ce qui est en cours dans la commune touchée, sans verdict. Réponses : « oui rajoute la probabilité de pluie aussi » ; « non les jours non
+travaillés ne doivent pas être grisés » (proposé pour garder ce que portait la barre) ; « Continuer ».
+
+### 312b. Trouvé en route
+- La barre ne lisait que la pluie : `brul: chômé ? 0 : (mm >= 2 ? .5 : 1)`. La demi-barre « l'après-midi seulement » s'affichait dès 2 mm dans la journée,
+  sans lire l'heure ; le vent n'entrait jamais.
+- ★★ **Par secteur, le compte des parcelles de brûlage valait TOUJOURS zéro en production.** La commune d'une parcelle est rangée `{ nom, lat, lng }`
+  (FORME-1, §301) et `_ckSvMeteo` la comparait par `String(p.commune)` — « [object Object] ». La ligne disait donc toujours « Aucun chantier en cours ne
+  craint ce temps ». `mv-harnais-sect1` passait des communes en texte : vert sur une forme que l'appli n'écrit pas (§24 n° 20).
+- En octobre, un brûlage dont la fenêtre ouvre en décembre comptait déjà comme « pas fini » (`pct < 100`, aucune date lue).
+- Tout ce qu'il fallait était déjà chargé : `METEO_DAILY.pp` (le risque, le plus haut de la journée), `METEO_HOURLY.wind` et `.precip`. Aucun appel de plus.
+
+### 312c. Le dessin, et ce qui a été écarté
+- **La bande** : sous chaque jour, une barre qui se remplit au risque de pluie et son %, le cumul (dès 0,5 mm, une décimale, comme les lignes), le vent le
+  plus fort de la journée (vent moyen à 10 m, `windspeed_10m` : les rafales ne sont pas demandées). Cumul et vent viennent de `_ckMeteoJour`, désormais
+  exposée : la bande et les lignes disent le MÊME chiffre. Une valeur inconnue reste vide — `_ckMeteoJour` rend `vent: null` quand aucun vent n'est relevé
+  (avant : 0). Légende d'un seul axe (§24 CSS n° 13) : « risque de pluie ».
+- **Écarté : griser le jour non travaillé** — proposé, refusé par Nico : la bande dit le temps, le planning dit le travail.
+- **Les lignes** : titres inchangés (les faits). Dessous, `_ckEnCours` : les tâches du plan (`_ckPlanTaches`), commencées au calendrier de la campagne CE
+  jour-là (`_ckPlanDebut` ≤ jour) et pas finies ; leurs parcelles pas encore faites (états du plan) dans les communes touchées — toutes, au niveau du
+  domaine. Une parcelle sans commune compte dans le secteur du domaine (`window._domaineCommuneNom`, comme `_communesActives`). Ordre de la campagne,
+  trois tâches au plus puis « et N autres tâches ». Rien en cours : aucune phrase — les deux rendus (`htmlSavoir`, `_ckSavoirHtml`) n'écrivent plus de
+  `<p>` vide. Rang 1 (le « quand » en or) seulement quand quelque chose est en cours là où ça tombe : un classement, pas un verdict.
+- **Écarté** : une tâche sans fenêtre dans la campagne n'est jamais dite « en cours » (rien d'inventé) ; le seuil réglementaire du vent pour traiter
+  (3 Beaufort) n'est pas tracé : ce serait encore décider à la place de l'admin.
+- **Petit téléphone** (vu dans Chromium) : à 300 px de carte, les vitesses se chevauchaient. « km/h » passe dessous pour les cinq jours à la fois (requête
+  de conteneur `ck-met`, 290 px) — jamais pour un seul, sinon les colonnes ne s'alignent plus. À 340, 358 et 420 px, tout tient sur une ligne.
+
+### 312d. Mesuré
+- `mv-harnais-auj8` (neuf) : **33 vertes, 17 contre-épreuves sur 17**. `cockpit.js` exécuté (communes en objet, fenêtre pas ouverte, tâche finie, arrachée,
+  passages, secteur du domaine, plus de trois tâches, aucun verdict, phrase vide) ; `_pilCk2Modele` dans l'appli entière (`mv-app-node` : même cumul et
+  même vent que les lignes, jour par jour ; risque arrondi et borné ; rien d'inventé sans prévision) ; la vraie `htmlSavoir` extraite et exécutée ; textes
+  et feuille lus.
+- `mv-harnais-auj2`, `mv-harnais-sect1`, `mv-harnais-auj5` : leurs assertions du brûlage réécrites (sect1 garde des communes en texte : les deux formes
+  sont couvertes) ; verts, contre-épreuves comprises.
+- Preflight : 0 erreur, 8 avertissements, comme la base. `mv-harnais-typo` a vu `cockpit.js` enfler de plus de 5 % (41 → 44 ko) : commentaires
+  raccourcis (l'arbitrage vit ici), 43 ko, vert — référence non regravée.
+- Chromium (`@sparticuz/chromium`, la vraie `htmlSavoir`, la vraie feuille, les vraies polices), à 300, 340 (sombre), 358 et 420 px : débordement mesuré
+  colonne par colonne — aucun.
+- Fiche `MV_AIDE` du Pilotage relue : « la météo des cinq jours » reste vrai, rien à changer. Visite guidée : aucun sélecteur de la bande.
+- **Chaîne complète** (`TZ=Europe/Paris`, `--continuer`) : **361 commandes, 719 s (une à la fois : un seul cœur ici), 0 rouge**. Le guide a été
+  régénéré pour `build-guide --check`, puis remis : `public/guide.html` ne part pas dans le zip (`npm run site` le refait).
+- Non vérifié : les données de Nico, un vrai téléphone.
+
+### 312e. Ouvert
+§28 « AUJ-8 — CE QUI RESTE OUVERT ».

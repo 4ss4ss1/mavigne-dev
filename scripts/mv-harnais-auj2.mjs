@@ -29,10 +29,10 @@ function suite(S) {
   const brul = [{ nom: 'Brulage', pct: 40 }];
   const m1 = W._ckSvMeteo(H, brul, now);
   T('pluie de demain : le cumul et la plage horaire (6 mm, de 8 h à 11 h)', m1.length === 2 && m1[0].quand === 'Demain' && m1[0].titre === 'Pluie annoncée : 6\u202fmm, de 8\u00a0h à 11\u00a0h');
-  T('un brûlage pas fini : la ligne dit qu\u2019il attendra, et passe en tête', m1[0].prio === 1 && m1[0].sous.includes('brûlage en cours attendra'));
+  T('AUJ-8 (§312) : plus de verdict — sans plan de la campagne, la ligne dit la pluie et rien dessous', m1[0].prio === 2 && m1[0].sous === '');
   T('vent fort d\u2019après-demain, sans pluie : il est dit seul', /^Vent annoncé à 45\u202fkm\/h$/.test(m1[1].titre) && m1[1].quand === 'Jeudi');
   const m2 = W._ckSvMeteo(H, [{ nom: 'Brulage', pct: 100 }], now);
-  T('aucun chantier sensible en cours : ligne d\u2019information', m2[0].prio === 2 && m2[0].sous.includes('Aucun chantier'));
+  T('AUJ-8 : une tâche finie n\u2019écrit rien sous la ligne (plus de « Aucun chantier… »)', m2[0].prio === 2 && m2[0].sous === '' && !JSON.stringify(m2).includes('craint'));
   const faible = { time: H.time.slice(0, 24), precip: H.precip.slice(0, 24).map(v => v ? 0.5 : 0), wind: H.wind.slice(0, 24) };
   T('sous les seuils (1,5 mm, vent 15 km/h) : rien', W._ckSvMeteo(faible, brul, now).length === 0);
   T('sans prévisions : rien, jamais d\u2019invention', W._ckSvMeteo(undefined, brul, now).length === 0 && W._ckSvMeteo({ time: [], precip: [] }, brul, now).length === 0);
@@ -87,7 +87,7 @@ console.log('\n' + (ko ? 'ROUGE ' + ko : 'VERT') + ' \u2014 ' + res.length + ' a
 if (CONTRE) {
   const DEF = [
     ['la pluie dite à partir de 0 mm', 'ck', 'var _CK_SV = { jours: 7, contrat: 30, pluie: 2, vent: 40, loin: 62 };', 'var _CK_SV = { jours: 7, contrat: 30, pluie: 0, vent: 40, loin: 62 };'],   // AUJ-5 : + loin
-    ['un brûlage fini qui « attendra » encore', 'ck', "/br[uû]l/i.test(String(r.nom || '')) && (r.pct || 0) < 100", "/br[uû]l/i.test(String(r.nom || ''))"],
+    ['un verdict revenu sous la ligne du domaine (AUJ-8)', 'ck', "sous: _ckEnCoursTxt(ecD, null) });", "sous: 'Aucun chantier en cours ne craint ce temps.' });"],
     ['les absences du jour recomptées', 'ck', 'for(k = 1; k <= loin; k++){', 'for(k = 0; k <= loin; k++){'],   // AUJ-5 : la boucle suit l’absence jusqu’à sa fin (_CK_SV.loin)
     ['le bureau compté dans les absences', 'ck', "if(!m || m.statut === 'Inactif' || m.bureau || !m.nom) return;", "if(!m || m.statut === 'Inactif' || !m.nom) return;"],
     ['un contrat à 40 jours annoncé', 'ck', "m.fin_contrat < auj || m.fin_contrat > lim) return;", "m.fin_contrat < auj) return;"],

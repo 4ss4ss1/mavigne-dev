@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.79';
+export const APP_VERSION = '8.80';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1035,6 +1035,11 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.80', d: '2026-10-11', items: [
+    { niv: 1, pour: ['admin'], cible: '#ck-savoir', emoji: 'pluie', titre: 'La météo d’« À savoir » donne des faits, plus de verdict',
+      desc: "La barre « brûlage possible » disparaît : ce n’est pas à l’application de décider si un travail peut se faire. Sous chaque jour, la météo donne maintenant le risque de pluie, le cumul en millimètres et le vent le plus fort de la journée. "
+        + "Les lignes de pluie et de vent disent ce qui est en cours dans les communes touchées — la tâche et ses parcelles pas encore faites —, sans conclure à votre place. Sur un domaine à plusieurs communes, elles disaient toujours « Aucun chantier en cours ne craint ce temps », même avec du brûlage à finir : ce compte par commune est réparé." },
+  ] },
   { v: '8.79', d: '2026-10-11', items: [
     { niv: 2, pour: ['tous'], emoji: 'cloche', titre: 'Une seule notification par jour, à votre prise de poste',
       desc: "Les notifications arrivaient n’importe quand : la priorité et les délais avant récolte toutes les heures tant que l’application restait ouverte, une notification à chaque mise à jour — et rien du tout l’application fermée. "
@@ -5381,7 +5386,7 @@ export const MV_INFO = {
     'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine : deux parcelles de même surface ont la même taille. Elles sont rangées par appellation ; le trait sous chaque appellation montre son avancement. Une parcelle sans contour est un carré de sa surface, en pointillé. La vraie carte reste dans Parcelles.',
     'La couleur dit l’état pour la tâche choisie : faite (validée depuis l’ouverture de sa fenêtre), en cours, à faire, en retard (fenêtre passée), arrachée. Une parcelle en cours porte les initiales de ceux qui l’ont commencée, même un autre jour : foncées et cerclées si c’est aujourd’hui, claires sinon. Sur ordinateur, la souris sur une parcelle ouvre une loupe (sa forme en grand, son état, l’équipe) ; toucher une parcelle ouvre sa fiche. Au téléphone, « Tout le plan » déplie les appellations repliées.' ] },
   'pil.savoir': { t: 'À savoir', p: [
-    'Ce qui peut changer la journée ou la semaine : la pluie ou le vent des deux jours qui viennent, secteur par secteur quand le domaine s’étend sur plusieurs communes (avec les parcelles de brûlage qui devront attendre), les absences des sept prochains jours, les contrats qui finissent dans le mois (avec ce qu’une prolongation d’un mois ferait gagner), les tâches en retard, puis le matériel immobilisé et la cave.',
+    'Ce qui peut changer la journée ou la semaine. Sous chaque jour de la météo : le risque de pluie (le plus haut de la journée), le cumul en millimètres et le vent le plus fort (vent moyen, sans les rafales). Puis la pluie ou le vent des deux jours qui viennent, secteur par secteur quand le domaine s’étend sur plusieurs communes, avec ce qui est en cours dans les communes touchées — un fait, jamais un verdict : c’est à vous de juger si un travail peut se faire. Enfin les absences des sept prochains jours, les contrats qui finissent dans le mois (avec ce qu’une prolongation d’un mois ferait gagner), les tâches en retard, le matériel immobilisé et la cave.',
     'Le plus pressant d’abord. Les motifs d’absence ne sont visibles que de l’admin : le Pilotage lui est réservé.' ] },
   'pil.fil': { t: 'En direct', p: [
     'Les validations et les débuts de parcelle de la journée, du plus récent au plus ancien, dès qu’ils arrivent du journal. Une ligne neuve s’éclaire une fois.',

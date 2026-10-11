@@ -6110,11 +6110,19 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .ck-met-t{font-size:var(--pt-micro,12px);color:var(--texte-doux);white-space:nowrap}
 .ck-met-t b{font-weight:600;color:var(--texte)}
 .ck-met-mm{min-height:14px;font-size:var(--pt-nano,11px);font-weight:600;color:var(--info)}
-.ck-met-br{width:20px;height:4px;border-radius:2px;background:var(--gris)}
-.ck-met-br.b1{background:var(--vert-med)}.ck-met-br.b05{background:linear-gradient(90deg,var(--gris) 50%,var(--vert-med) 50%)}
+/* ★ AUJ-8 (§312) : sous chaque jour, des faits — le risque de pluie (la barre et le %), le cumul, le vent le plus fort. Plus de
+   « brûlage possible » : ce n'est pas à l'appli de décider si un travail peut se faire (Nico, 11/10). Aucun jour grisé. */
+.ck-met-pp{position:relative;display:block;width:28px;height:4px;margin-top:4px;border-radius:2px;background:var(--piste);overflow:hidden}
+.ck-met-pp i{position:absolute;top:0;bottom:0;left:0;border-radius:inherit;background:var(--info)}
+.ck-met-pp.vide{background:transparent}
+.ck-met-pc{min-height:14px;font-size:var(--pt-nano,11px);color:var(--texte-doux);font-variant-numeric:tabular-nums}
+.ck-met-v{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:0 2px;max-width:100%;min-height:14px;font-size:var(--pt-nano,11px);text-align:center;color:var(--texte-doux);font-variant-numeric:tabular-nums}
+.ck-met-vu{white-space:nowrap}   /* colonne étroite : « km/h » passe dessous au lieu de chevaucher la colonne voisine */
+.ck-met{container:ck-met / inline-size}
+@container ck-met (max-width:290px){.ck-met-vu{flex-basis:100%}}   /* petit téléphone : « km/h » dessous pour les cinq jours, jamais pour un seul */
+.ck-met-v svg{flex:none;width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .ck-met-leg{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin:8px 2px 2px;font-size:var(--pt-nano,11px);color:var(--texte-doux)}
-.ck-met-leg i{display:inline-block;width:14px;height:4px;margin-right:-8px;border-radius:2px;background:var(--vert-med)}
-.ck-met-leg i.demi{background:linear-gradient(90deg,var(--gris) 50%,var(--vert-med) 50%)}
+.ck-met-leg i{display:inline-block;width:14px;height:4px;margin-right:-8px;border-radius:2px;background:var(--info)}
 .ck-sv-l{list-style:none;margin:8px 0 0;padding:0}
 .ck-sv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;padding:12px 0;box-shadow:inset 0 1px 0 var(--ligne,#ECE6DA)}
 .ck-sv:first-child{box-shadow:none}
@@ -7594,6 +7602,7 @@ html .ck-agr-voile{ background:var(--voile); }
 .ck2 .ck-met-ic .m-eau,.ck2 .ck-met-ic .m-gel,.ck2 .ck-sv-ic .m-eau{stroke:var(--meteo-pluie)}
 .ck2 .ck-met-j.alerte{background:color-mix(in srgb,var(--meteo-pluie) 10%,transparent)}
 .ck2 .ck-met-mm{color:var(--meteo-pluie)}
+.ck2 .ck-met-pp i,.ck2 .ck-met-leg i{background:var(--meteo-pluie)}   /* AUJ-8 (§312) : la barre du risque de pluie, à la couleur de la pluie */
 .ck2 .ck-sv-meteo .ck-sv-ic{background:color-mix(in srgb,var(--meteo-pluie) 12%,transparent)}
 .ck2 .ck-calque .ck-eq::before{display:none}
 .ck2 .ck-calque.vif .ck-eq::before{display:block;inset:-5px;border:2px solid var(--ok);animation:ck-presence 1.6s ease-out infinite}

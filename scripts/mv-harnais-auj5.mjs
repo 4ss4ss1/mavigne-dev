@@ -60,7 +60,8 @@ async function partieB(S, T) {
   T('B1 samedi sans travail au planning : personne n’est présent, la journée est chômée', d.jourTravaille === false && d.nVchamp === 0 && d.presences.filter(p => !p.bureau).every(p => p.etat === 'repos'));
   T('B2 le cockpit montre le prochain jour travaillé et le dit', V.jourTravaille === false && V.jourEff === '2026-10-12' && /^Lundi : 3 sur 5/.test(V.decision.pres.v) && /^Repos aujourd’hui · lundi : /.test(V.absTxt));
   T('B3 les jours travaillés viennent du planning (lundi oui, samedi et dimanche non)', Array.isArray(V.ouvres) && V.ouvres.includes('2026-10-12') && !V.ouvres.includes('2026-10-11') && !V.ouvres.includes('2026-10-17'));
-  T('B4 le brûlage suit le planning : chômé samedi et dimanche, possible lundi', V.meteo.length === 3 && V.meteo[0].brul === 0 && V.meteo[1].brul === 0 && V.meteo[2].brul === 1);
+  T('B4 AUJ-8 (§312) : la bande dit le temps, pas le travail — plus de brûlage, aucun jour grisé ; sans prévision heure par heure ni risque, rien d’inventé',
+    V.meteo.length === 3 && V.meteo.every(m => !('brul' in m) && !('chome' in m) && m.pp === null && m.vent === null && m.mm === 0));
   T('B5 la phrase de fin prévue nomme la saison de la période (« d’automne »)', V.saisonDe === 'd’automne');
   setAuj([2026, 9, 12]); d = G._pilData();
   const et = n => (d.presences.find(p => p.nom === n) || {}).etat;

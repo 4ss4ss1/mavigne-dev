@@ -14,6 +14,7 @@ function monde(S, stock) {
   const ctx = { Math, Number, String, Array, Object, JSON, Date, Set, parseInt, isFinite, setTimeout: () => 0,
     localStorage: { getItem: () => stock || null }, wmoIcone: () => 'soleil', wmoDesc: () => 'Beau' };
   ctx.window = ctx; ctx._wxTenant = () => 'mg';
+  ctx.tNom = n => (n === 'Brulage' ? 'Brûlage' : n);   // AUJ-8 : le libellé affiché (TLIB, utils.js)
   vm.createContext(ctx);
   vm.runInContext("var _WXCOM_KEY='mavigne_meteocom_cache';\n" + (S.app.match(/var _WXCOM_V=\d+;/) || [''])[0] + '\n'
     + bloc(S.app, 'function _wxDeuxJours(hr){', '\n}\n') + bloc(S.app, 'function _wxFromApi(d){', '\n}\n') + bloc(S.app, 'window._wxSecteurs=function(){', '\n};\n')
@@ -43,11 +44,11 @@ function suite(S) {
   const h2 = serie('', ['2027-01-13', '2027-01-14'], (k, h) => [k === 0 && h >= 9 && h <= 10 ? 0.5 : 0, 10]);   // Gevrey : 1 mm demain, sous le seuil
   const sects = [{ nom: 'Brochon', h: { time: dj.time, precip: dj.precip, wind: dj.wind } }, { nom: 'Gevrey-Chambertin', h: { time: h2.time, precip: h2.precipitation, wind: h2.windspeed_10m } }];
   const plan = { parcs: [{ nom: 'Les Charmes', commune: 'Brochon' }, { nom: 'Vignois', commune: 'Brochon' }, { nom: 'Les Crais', commune: 'Gevrey-Chambertin' }],
-    journal: [{ date: '2027-01-05', parcelle: 'Les Charmes', tache: 'Brulage', statut: 'Validé' }], fen: [] };
+    journal: [{ date: '2027-01-05', parcelle: 'Les Charmes', tache: 'Brulage', statut: 'Validé' }], fen: [{ nom: 'Brulage', ws: 343, we: 441 }] };   // AUJ-8 : fenêtre du 10/12 au 17/03
   const m1 = W._ckSvMeteo(null, [{ nom: 'Brulage', pct: 40 }], now, sects, plan);
   T('un secteur touché : la commune, le cumul, la plage horaire', m1[0].quand === 'Demain' && m1[0].titre === 'Pluie annoncée sur Brochon : 6\u202fmm, de 8\u00a0h à 11\u00a0h');
-  T('le brûlage attendra sur la commune touchée, avec ses parcelles pas encore faites (la faite ne compte pas, Gevrey non plus)',
-    m1[0].prio === 1 && m1[0].sous === 'Le brûlage attendra un temps sec sur Brochon : 1 parcelle pas encore faite.');
+  T('AUJ-8 (§312) : sous la ligne, ce qui est en cours sur la commune touchée — la tâche et ses parcelles pas encore faites (la faite ne compte pas, Gevrey non plus) ; plus de verdict',
+    m1[0].prio === 1 && m1[0].sous === 'En cours sur Brochon : brûlage, 1 parcelle pas encore faite.');
   T('le vent fort dit où il souffle', /^Vent annoncé à 45\u202fkm\/h sur Brochon$/.test(m1[1].titre));
   const plus = sects.map(s => s.nom === 'Gevrey-Chambertin' ? { nom: s.nom, h: { time: s.h.time, precip: s.h.precip.map(v => v * 2), wind: s.h.wind } } : s);
   T('plusieurs secteurs : chacun avec son cumul', W._ckSvMeteo(null, [], now, plus, plan)[0].titre === 'Pluie annoncée sur Brochon (6\u202fmm) et Gevrey-Chambertin (2\u202fmm)');
@@ -74,7 +75,7 @@ if (CONTRE) {
     ['un cache trop vieux relu', 'app', "&&raw.ts&&(Date.now()-raw.ts)<12*3600*1000) s=raw.data;", ") s=raw.data;"],
     ['la prévision du domaine qui passe devant les secteurs', 'ck', "      out.push({ cat: 'meteo', prio: prio, quand: quand, titre: tt, sous: sous });\n      return;\n    }\n    if(!H", "      out.push({ cat: 'meteo', prio: prio, quand: quand, titre: tt, sous: sous });\n    }\n    if(!H"],
     ['les parcelles faites comptées', 'ck', "(e === 'afaire' || e === 'cours' || e === 'retard')", "e !== 'arr'"],
-    ['les communes non touchées comptées', 'ck', "return p && com.indexOf(String(p.commune || '').trim()) >= 0 && (", "return p && ("],
+    ['les communes non touchées comptées', 'ck', "return p && dans(p) && (", "return p && ("],
   ];
   let manques = 0;
   DEF.forEach(([nom, f, a, b]) => {
