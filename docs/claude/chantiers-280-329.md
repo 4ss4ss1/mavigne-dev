@@ -1173,3 +1173,63 @@ travaillés ne doivent pas être grisés » (proposé pour garder ce que portait
 
 ### 312e. Ouvert
 §28 « AUJ-8 — CE QUI RESTE OUVERT ».
+
+## 313. ★ RAIL-1 — LA BARRE LATÉRALE SUIT L'ORDRE DU DOCK, GARDÉE PAR THÈMES ; UN LOGO DESSINÉ POUR 28 PX (11/10 — `src/coquille.js` (`RUB`, `ORDRE_RUB`, `TETE` / `PIED`, `_railRubriques`, `_railHtml`) · `src/styles.css` (bloc RAIL-1) · `public/logo-barre.png` · `public/logo-barre-sombre.png` (neufs) · `public/sw.js` (précache) · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `scripts/mv-harnais-rail1.mjs` (neuf) · `scripts/mv-harnais-coq1.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/typo-baseline.json` · `scripts/harnais-claude-md.mjs` · `lots/RAIL-1.json` · **APP 8.80 → 8.81, SW 9.59 → 9.60**, base `14d9d73`)
+
+### 313a. La demande
+Nico (11/10, capture de la barre, message dicté) : « l'ordre devrait être d'abord pilotage, après vigne, tracteur, phyto, cave, réserve, ensuite planning, et
+après réglage. Vois si tu peux garder l'organisation par thème, terrain, organisation, cave et réserve, et gestion […] mais en mieux. Et si tu peux renforcer
+un peu la couleur du logo ». Reformulé, proposition validée (« oui »), maquette rendue (avant / après, clair et sombre, ouverte et repliée), « go ».
+
+### 313b. Trouvé en route
+- **Le dock avait DÉJÀ cet ordre** (`_dockDef`, app.js : Pilotage, Vigne, Tracteur, Phyto, Cave, Réserve, Planning, Réglages). La barre le défaisait :
+  `_railRubriques` regroupait par rubrique dans l'ordre fixe de `ORDRE_RUB` (Terrain, Organisation, Cave et réserve, Gestion), et le Pilotage, rangé dans
+  « Gestion », finissait en bas. Rien à changer côté dock : c'est la barre qui le suit maintenant.
+- **Le logo de la barre était `icon-192.png` réduit à 28 px** (`--h-sm`). Ses traits font 4 à 7 px sur 512 : 0,3 px à l'écran. Le lie-de-vin virait au
+  rose, et le jaune d'origine (#EBDF52) est à 1,2:1 sur le fond clair (#F0EEE9) — le G et le T disparaissaient. Vu sur la capture de Nico (écran à 125 %).
+
+### 313c. Le dessin, et ce qui a été écarté
+- **L'ordre** : le Pilotage en tête, seul, sans titre (`TETE`) ; puis Terrain (Vigne, Tracteur, Phyto), Cave et réserve, Organisation (Planning) ;
+  Réglages au pied (`PIED`), dans `.mv-rail-bas`, au-dessus de la personne. « Gestion » disparaît : ses deux entrées sont aux deux bouts. Dans un thème,
+  l'ordre reste celui du dock. Un module que `RUB` ne connaît pas rejoint « Organisation » (avant : « Gestion »). Repliée, un trait sépare les thèmes.
+- `_railRubriques` rend `{ tete, rub, pied }` au lieu d'une liste : seuls `_railHtml` et `mv-harnais-coq1` la lisaient.
+- **Mode tracteur** : le dock met Tracteur, Phyto, Vigne en tête ; la barre garde le Pilotage au-dessus (il n'existe que pour l'admin), et Terrain
+  s'ouvre sur ces trois-là. Écart assumé, noté au §28.
+- **Le logo** : un dessin à part, `public/logo-barre.png` (clair) et `public/logo-barre-sombre.png`, 112 px (4 fois les 28 px affichés). Fabriqué hors
+  dépôt depuis `logo-gt.png` (512 px) : traits de la grappe épaissis de 6 px et lettres de 4 px (dilatation sur un disque), anneau de 5 px vidé autour des
+  lettres (la séparation que faisait le noir de l'icône), couleurs reposées. En clair : grappe `#7A2850` (= `--accent`, « la lie-de-vin des grappes du
+  logo », DS-4), lettres `#E2BC1C`. En sombre : grappe `#B4467C` (3,8:1 sur #0D0D0C, là où l'accent sombre #8A3560 ne fait que 2,6) et jaune d'origine
+  `#F0E040`. Posé en FOND par la feuille, avec les mêmes sélecteurs que les deux blocs sombres (forcé ; automatique sauf clair forcé) : une `<img>` ne
+  suit pas le thème, un fond si — et un fond absent ne laisse pas d'icône cassée.
+- **L'icône de l'appli (`icon-192.png`) ne change pas** : manifeste, `apple-touch-icon`, notifications.
+- **Précache** : les deux dessins rejoignent `SHELL_STATIC`, la barre garde son logo hors réseau. ⚠️ Le précache est atomique : les deux fichiers doivent
+  être en ligne avec ce `sw.js` (ils partent dans `public/`, donc dans le même `firebase deploy --only hosting`).
+- **Écarté** : le logo à 32 px (non demandé) ; la tuile noire de l'icône (plus qu'« un peu ») ; un SVG retracé (le trait à la main s'y perdait) ;
+  une image en data: dans la feuille (des octets illisibles dans `styles.css`, que les harnais qui lisent la feuille auraient dû apprendre à sauter).
+- **Accompagnement** : le guide (`01-demarrer.html` : une barre « qui reprend exactement les entrées du bas de l'écran ») et la fiche `MV_AIDE` de
+  l'Accueil (« les modules sont dans la barre à gauche ») restent vrais — relus, rien à changer. Visite guidée : aucun sélecteur de la barre.
+  `WHATS_NEW` : un item `niv` 0, `pour` tous.
+
+### 313d. Mesuré
+- `mv-harnais-rail1` (neuf) : **16 vertes, 9 contre-épreuves sur 9**. Le vrai `_dockDef` d'app.js est exécuté (administrateur, salarié sans
+  Pilotage, mode tracteur) et la vraie barre rendue : même ordre que le dock ; un module inconnu rejoint « Organisation ». Les deux PNG sont décodés
+  (sans dépendance) : couverture 20 % contre 9 % pour l'icône, lie-de-vin et or proches des couleurs voulues ; le précache est lu. Contre-épreuves :
+  le dock réordonné sans la barre, le Pilotage rangé dans un thème, Réglages remonté, Cave après Organisation, un module perdu, l'icône pâle remise,
+  le sombre automatique oublié, les dessins hors précache.
+- `mv-harnais-coq1` : l'assertion des rubriques suit le nouveau retour (`{ tete, rub, pied }`) ; 8 vertes, 4 contre-épreuves. `coq2` (15), `pro1` (27),
+  `tete1` (12) verts sans changement.
+- `mv-harnais-typo` : `coquille.js` 16 → 17 ko — +481 octets, +2,9 % ; le cliquet compte des ko arrondis, d'où le « +6 % ». Découpage : non (17 ko,
+  une seule responsabilité, comme au §271). Référence regravée pour CETTE seule ligne (une ligne au diff de `scripts/typo-baseline.json`) : un
+  `--baseline` complet effaçait aussi la mémoire de sept autres fichiers restés sous les 5 % (cockpit 41 → 43, reglages 476 → 482, utils 851 → 856…).
+- Preflight : 0 erreur, 8 avertissements, comme la base. `WHATS_NEW` exécuté en Node : tête 8.81 = `APP_VERSION`, ordre strict, 0 doublon ; le récap
+  depuis 8.80 rend un bloc, depuis 8.75 six, depuis 8.81 et 9.00 rien.
+- Chromium (`@sparticuz/chromium`, le vrai `coquille.js`, la vraie feuille, les vraies polices, échelle 1,25 comme l'écran de Nico) : ouverte et
+  repliée, clair et sombre, zéro erreur JS ; le bon dessin dans les quatre cas de thème (clair forcé sur système sombre, automatique sombre,
+  automatique clair, sombre forcé), 28 × 28 px, aucun débordement.
+- **Chaîne complète** (`TZ=Europe/Paris`, `--continuer`) : **363 commandes, 673 s (une à la fois), 0 rouge**. Empreintes des 17 fichiers du lot
+  identiques avant et après (aucune commande « seule » n'a laissé de trace). ⚠️ Une première passe, lancée en fin de tour, s'était arrêtée à la
+  commande 171 avec le tour : un processus de fond ne survit pas d'un tour à l'autre. Rejouée en entier dans le tour de la livraison.
+- Non vérifié : l'écran et les données de Nico ; `npm run build`, `test:smoke`, `test:e2e` ; le déploiement.
+
+### 313e. Ouvert
+§28 « RAIL-1 — CE QUI RESTE OUVERT ».

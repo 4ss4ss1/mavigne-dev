@@ -8,6 +8,17 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Rayés du §28 de `CLAUDE.md` le 11/10 (RAIL-1, plafond du cœur à 2 800 lignes) — trois points réglés, chacun raconté dans sa section : MOTIFS-1 n° 3
+> « ~~Lot suivant : la vue de l'équipe pour les salariés~~ — fait au §251 (VUE-EQUIPE-1) » ; SEL-1 n° 5 « ~~Le coût d'arrachage dans le Revient~~ — fait au §208
+> (Nico : il doit peser sur le prix de la bouteille) » ; REV-1 n° 4 « ~~ROB-2 : ajouter le Revient au tirage au hasard~~ — fait avec le Pilotage (28/09) :
+> `mv-harnais-robustesse-pilotage` rend Économie › Revient (`rev`) sur les deux axes, à chaque domaine tiré ».
+
+> Dernière consolidation : **11 octobre 2026 (AUJ-8)** — ★★ **« À SAVOIR » DONNE DES FAITS, PLUS DE VERDICT : RISQUE DE PLUIE, CUMUL ET VENT SOUS CHAQUE JOUR** (§312). Lot 43, base `2469c5a`.
+> Nico (11/10, capture de la bande) : « enlève la tâche de brûlage ici, ce n'est pas à l'appli de décider si oui ou non il est possible de faire une tâche » ; proposé : le vent, le risque de pluie
+> ou rien — « oui rajoute la probabilité de pluie aussi », puis « les jours non travaillés ne doivent pas être grisés ». Trouvé : la barre ne lisait que la pluie (la demi-barre « l'après-midi » dès 2 mm,
+> sans l'heure) ; par secteur, le compte du brûlage valait TOUJOURS zéro (commune `{ nom, lat, lng }` lue comme un texte). Dessous : ce qui est en cours là où il pleut, sans verdict.
+> **APP 8.79 → 8.80, SW 9.58 → 9.59.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+
 > Rayés du §28 de `CLAUDE.md` le 11/10 (AUJ-8, plafond du cœur à 2 800 lignes) — trois points réglés, chacun raconté dans sa section : AUJ-5 n° 1
 > « ~~La carte qui disparaît~~ — reproduite et corrigée au §308 (AUJ-6) : après un passage par Économie, le montage suivant levait dans `majEco` » ; COH-1 n° 6
 > « ~~La journée de référence (7 h)~~ — `_pilEchCadence` lit d'abord la journée du modèle du planning (§228) » ; COH-1 n° 7 « ~~Surfaces hors Vigne~~ —

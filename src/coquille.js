@@ -12,8 +12,10 @@
 const MQ_PC = (typeof matchMedia === 'function') ? matchMedia('(min-width: 1024px)') : { matches: false, addEventListener() {} };
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const ico = (n, t) => (typeof window._mvIcon === 'function') ? window._mvIcon(n, t || 20) : '';
-const RUB = { home: 'Terrain', phyto: 'Terrain', tracteur: 'Terrain', planning: 'Organisation', cave: 'Cave et réserve', reserve: 'Cave et réserve', pilotage: 'Gestion', reglages: 'Gestion' };
-const ORDRE_RUB = ['Terrain', 'Organisation', 'Cave et réserve', 'Gestion'];
+// RAIL-1 (§313) : l'ordre du dock, gardé par thèmes — le Pilotage en tête et Réglages au pied, hors rubrique.
+const RUB = { home: 'Terrain', phyto: 'Terrain', tracteur: 'Terrain', cave: 'Cave et réserve', reserve: 'Cave et réserve', planning: 'Organisation' };
+const ORDRE_RUB = ['Terrain', 'Cave et réserve', 'Organisation'];
+const TETE = 'pilotage', PIED = 'reglages';
 // PRO-1 (§269) : les onglets du Pilotage se LISENT dans _PIL_TABS (une liste écrite ici proposait « Simuler » et
 //   « L’équipe et les tâches », deux noms disparus de la barre ; Archives manquait). Repli : les noms du jour.
 const ONGLETS_PIL_REPLI = [['auj', 'Aujourd’hui'], ['an', 'L’année'], ['avc', 'La campagne'], ['equ', 'L’équipe & le matériel'], ['sim', 'Décider'], ['eco', 'Économie'], ['cfm', 'Conformité'], ['arc', 'Archives']];
@@ -24,11 +26,11 @@ const TOUCHE = MAC ? '⌘ K' : 'Ctrl K';
 //   personne reprend au-dessus. Déplier à la main reste possible à toute largeur.
 const MQ_LARGE = (typeof matchMedia === 'function') ? matchMedia('(min-width: 1200px)') : { matches: true, addEventListener() {} };
 
-// Les rubriques de la barre, dans l'ordre du dock à l'intérieur de chacune.
+// Les rubriques de la barre, dans l'ordre du dock à l'intérieur de chacune ; la tête et le pied à part (RAIL-1).
 window._railRubriques = function (items) {
-  const g = {};
-  (items || []).forEach(x => { const r = RUB[x.p] || 'Gestion'; (g[r] = g[r] || []).push(x); });
-  return ORDRE_RUB.filter(r => g[r]).map(r => ({ nom: r, items: g[r] }));
+  const g = {}, tete = [], pied = [];
+  (items || []).forEach(x => { if (x.p === TETE) tete.push(x); else if (x.p === PIED) pied.push(x); else { const r = RUB[x.p] || 'Organisation'; (g[r] = g[r] || []).push(x); } });
+  return { tete, rub: ORDRE_RUB.filter(r => g[r]).map(r => ({ nom: r, items: g[r] })), pied };
 };
 function domaine() {
   const C = window.CONFIG || {}, P = window.PARCELLES || [], M = window.MEMBRES || [];
@@ -37,13 +39,15 @@ function domaine() {
   return { nom: C.domaine_nom || window.DOMAINE_NOM || 'Ma Vigne', sous: (ha ? ha.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '\u202fha' : '') + (n ? (ha ? ', ' : '') + n + ' personne' + (n > 1 ? 's' : '') : '') };
 }
 window._railHtml = function (items, moi, dom) {
-  const rub = window._railRubriques(items);
-  return '<div class="mv-rail-dom"><img class="mv-rail-logo" src="/icon-192.png" alt=""><span class="mv-rail-lbl"><b>Ma Vigne</b><small title="' + esc(dom.sous) + '">' + esc(dom.nom) + '</small></span></div>'
+  const R = window._railRubriques(items);
+  const bouton = x => '<button class="mv-rail-b" type="button" data-page="' + esc(x.p) + '" data-tip="' + esc(x.l) + '" aria-label="' + esc(x.l) + '">' + ico(x.ic, 20)
+    + '<span class="mv-rail-lbl">' + esc(x.l) + '</span>' + (x.p === 'pilotage' ? '<span class="mv-rail-vif" aria-hidden="true"></span>' : '') + '</button>';
+  // RAIL-1 : le logo, dessiné pour 28 px, est posé par la feuille selon le thème (l'icône de l'appli y pâlissait).
+  return '<div class="mv-rail-dom"><span class="mv-rail-logo" aria-hidden="true"></span><span class="mv-rail-lbl"><b>Ma Vigne</b><small title="' + esc(dom.sous) + '">' + esc(dom.nom) + '</small></span></div>'
     + '<button class="mv-rail-cherche" id="mv-rail-cherche" type="button" aria-label="Rechercher" data-tip="Rechercher, ' + TOUCHE + '">' + ico('loupe', 18) + '<span class="mv-rail-lbl">Rechercher</span><kbd class="mv-rail-lbl">' + TOUCHE + '</kbd></button>'
-    + rub.map(r => '<p class="mv-rail-sec"><span class="mv-rail-lbl">' + esc(r.nom) + '</span></p>' + r.items.map(x =>
-      '<button class="mv-rail-b" type="button" data-page="' + esc(x.p) + '" data-tip="' + esc(x.l) + '" aria-label="' + esc(x.l) + '">' + ico(x.ic, 20)
-      + '<span class="mv-rail-lbl">' + esc(x.l) + '</span>' + (x.p === 'pilotage' ? '<span class="mv-rail-vif" aria-hidden="true"></span>' : '') + '</button>').join('')).join('')
-    + '<div class="mv-rail-bas"><div class="mv-rail-moi"><span class="mv-rail-av" data-tip="' + esc(moi.nom + ', ' + moi.role) + '">' + esc(moi.ini) + '</span>'
+    + R.tete.map(bouton).join('')
+    + R.rub.map(r => '<p class="mv-rail-sec"><span class="mv-rail-lbl">' + esc(r.nom) + '</span></p>' + r.items.map(bouton).join('')).join('')
+    + '<div class="mv-rail-bas">' + R.pied.map(bouton).join('') + '<div class="mv-rail-moi"><span class="mv-rail-av" data-tip="' + esc(moi.nom + ', ' + moi.role) + '">' + esc(moi.ini) + '</span>'
     + '<span class="mv-rail-lbl"><b>' + esc(moi.nom) + '</b><small>' + esc(moi.role) + '</small></span>'
     + '<button class="mv-rail-plier" id="mv-rail-plier" type="button" aria-expanded="true" aria-label="Réduire la barre" data-tip="Réduire ou déplier, touche [">'
     + '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg></button></div></div>';

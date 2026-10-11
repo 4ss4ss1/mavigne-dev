@@ -3,11 +3,11 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **11 octobre 2026 (AUJ-8)** — ★★ **« À SAVOIR » DONNE DES FAITS, PLUS DE VERDICT : RISQUE DE PLUIE, CUMUL ET VENT SOUS CHAQUE JOUR** (§312). Lot 43, base `2469c5a`.
-> Nico (11/10, capture de la bande) : « enlève la tâche de brûlage ici, ce n'est pas à l'appli de décider si oui ou non il est possible de faire une tâche » ; proposé : le vent, le risque de pluie
-> ou rien — « oui rajoute la probabilité de pluie aussi », puis « les jours non travaillés ne doivent pas être grisés ». Trouvé : la barre ne lisait que la pluie (la demi-barre « l'après-midi » dès 2 mm,
-> sans l'heure) ; par secteur, le compte du brûlage valait TOUJOURS zéro (commune `{ nom, lat, lng }` lue comme un texte). Dessous : ce qui est en cours là où il pleut, sans verdict.
-> **APP 8.79 → 8.80, SW 9.58 → 9.59.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+> Dernière consolidation : **11 octobre 2026 (RAIL-1)** — ★ **LA BARRE LATÉRALE SUIT L'ORDRE DU DOCK, GARDÉE PAR THÈMES ; UN LOGO DESSINÉ POUR 28 PX** (§313). Lot 44, base `14d9d73`.
+> Nico (11/10, capture de la barre) : « l'ordre devrait être d'abord pilotage, après vigne, tracteur, phyto, cave, réserve, ensuite planning, et après réglage […] garder
+> l'organisation par thème […] mais en mieux. Et si tu peux renforcer un peu la couleur du logo ». Trouvé : le dock avait DÉJÀ cet ordre, la barre le défaisait en rangeant
+> par rubrique (« Gestion » en dernier) ; son logo était l'icône de l'appli réduite à 28 px — traits sous le pixel, jaune à 1,2:1 sur le fond clair. Pilotage en tête, Réglages au pied.
+> **APP 8.80 → 8.81, SW 9.59 → 9.60.** Déploiement : `npm run build` → `firebase deploy --only hosting` (deux images neuves dans `public/`, précachées par `sw.js`).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1849,6 +1849,9 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ RAIL-1 — CE QUI RESTE OUVERT (§313, posé le 11/10)
+1. **À regarder chez Nico, sur son PC** : la barre ouverte et repliée, en clair et en sombre, et le logo à sa vraie taille — rendus dans Chromium à 125 % (vrai `coquille.js`, vraie feuille, données fabriquées). Un admin en mode tracteur garde le Pilotage au-dessus de Terrain (le dock le range après Tracteur, Phyto, Vigne) : à trancher si ça gêne.
+
 ### ⚠️ AUJ-8 — CE QUI RESTE OUVERT (§312, posé le 11/10)
 1. **À regarder chez Nico, au téléphone et sur PC** : la bande (barre et % du risque de pluie, mm, vent) et une ligne « En cours sur … » sur SES données — vues dans Chromium à 300, 340 (sombre), 358 et 420 px sur des données fabriquées. Le vent est le plus fort des 24 h, nuit comprise (vent moyen, sans rafales) ; une tâche sans fenêtre dans la campagne n'est jamais dite « en cours ».
 
@@ -1950,12 +1953,11 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
    `firebase deploy --only firestore:rules`. Les règles avant l'appli : un téléphone pas encore à jour perdrait son planning.
 2. **`npm run test:rules` chez Nico** (ou le job CI `rules`) : 70 cas dont 17 P, 15 contre-épreuves dont 3 MOTIFS-1 — jamais joués côté
    Claude (pas d'émulateur dans le bac à sable).
-3. ✅ ~~**Lot suivant : la vue de l'équipe pour les salariés**~~ — fait au §251 (VUE-EQUIPE-1).
-4. **Limites assumées** : la vue personnelle d'un membre retiré n'est pas effacée (lisible par son seul compte, coupé par `off`) ; une fiche
+3. **Limites assumées** : la vue personnelle d'un membre retiré n'est pas effacée (lisible par son seul compte, coupé par `off`) ; une fiche
    Inactive sans date de contrat peut manquer aux listes d'un salarié pour une année où elle n'avait que des horaires saisis
    (`_mvCompteSansDate` lit l'existence de l'année ; la vue d'équipe ne garde qu'absences, échanges et effectifs) ; les copies de secours
    locales d'avant le lot partent en trois jours d'ouverture ; un rôle `pilotage` sans `admin` voit « absent » au lieu de « en arrêt ».
-5. **Un champ ajouté demain à une journée de planning** se décide aussi dans `functions/planning-vues-calc.js` (`CHAMPS_JOUR`, `vueJour`) :
+4. **Un champ ajouté demain à une journée de planning** se décide aussi dans `functions/planning-vues-calc.js` (`CHAMPS_JOUR`, `vueJour`) :
    tant qu'il n'y est pas, il ne sort pas vers les collègues (liste blanche, voulu).
 
 ### ⚠️ AUDIT-PERF — CE QUI RESTE OUVERT (§241, posé le 04/10)
@@ -2067,7 +2069,6 @@ différents entre eux, et des heures sup apparaissent dans Décider › le renfo
 3. ✅ ~~Double saisie de la facture~~ — garde croisée au §208. ⚠️ Limite écrite : sans n° de facture, rien ne prouve le doublon ;
    le nom « prestation / main-d'œuvre / arrachage » est refusé dans La Réserve, mais un intrant au nom anodin passerait.
 4. **Le bouton « Début »** écrit encore un arrachage « En cours » sans étape (sans effet sur les heures ni l'argent).
-5. ✅ ~~Le coût d'arrachage dans le Revient~~ — fait au §208 (Nico : il doit peser sur le prix de la bouteille).
 
 ### ⚠️ FERTI-3 — CE QUI RESTE OUVERT SUR L'AMENDEMENT (§202-203, posé le 02/10)
 1. ✅ **Le budget prévu des achats** : FAIT au §203 (`achP`, retiré dès la facture chiffrée).
@@ -2085,8 +2086,6 @@ différents entre eux, et des heures sup apparaissent dans Décider › le renfo
    fiche a suffi pour ce lot ; le soustraire exigerait un planning d'activités qui n'existe pas.
 3. **`_pecRevData` est appelé par la Synthèse ET par Revient** : `_ecoTempsVigne` n'a qu'une case de cache, les deux fenêtres
    (période et cycle) se chassent. Coût non mesuré sur un vrai domaine — à regarder si l'onglet rame.
-4. ✅ ~~**ROB-2** : ajouter le Revient au tirage au hasard~~ — **fait avec le Pilotage (28/09)** : `mv-harnais-robustesse-pilotage` rend
-   Économie › Revient (`rev`) sur les deux axes, à chaque domaine tiré.
 
 ### ⚠️ RULES-1 — LE PREMIER RUN RÉEL, PUIS DEUX ÉCARTS À TRANCHER (§189, posé le 27/09)
 

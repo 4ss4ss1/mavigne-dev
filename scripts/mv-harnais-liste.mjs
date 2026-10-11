@@ -577,6 +577,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-notif3.mjs --contre'],
   ['node scripts/mv-harnais-auj8.mjs'],              // AUJ-8 (§312) : « À savoir » donne des faits — risque de pluie, cumul et vent sous chaque jour, ce qui est en cours dans les communes touchées, plus de brûlage
   ['node scripts/mv-harnais-auj8.mjs --contre'],
+  ['node scripts/mv-harnais-rail1.mjs'],             // RAIL-1 (§313) : la barre latérale dans l'ordre du dock (Pilotage en tête, Réglages au pied) et son logo dessiné pour 28 px
+  ['node scripts/mv-harnais-rail1.mjs --contre'],
   ['node scripts/mv-harnais-trac1.mjs'],              // TRAC-1 (§282) : les sessions du Tracteur en liste + fiche
   ['node scripts/mv-harnais-trac1.mjs --contre'],
   ['node scripts/mv-harnais-trac2.mjs'],              // TRAC-2 (§283) : l'Entretien du Tracteur sur deux colonnes

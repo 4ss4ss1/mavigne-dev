@@ -1,4 +1,6 @@
-// MA VIGNE — Service Worker v9.59
+// MA VIGNE — Service Worker v9.60
+// v9.60 (11/10/2026) — RAIL-1 (§313) : la barre laterale suit l'ordre du dock — Pilotage en tete, puis Terrain, Cave et reserve,
+//   Organisation, Reglages au pied ; son logo est un dessin a part pour 28 px (logo-barre.png, logo-barre-sombre.png), precache ici. APP 8.80 -> 8.81.
 // v9.59 (11/10/2026) — AUJ-8 (§312) : « A savoir » sans verdict — la bande des cinq jours donne le risque de pluie, le cumul et le vent
 //   le plus fort (plus de « brulage possible ») ; les lignes disent ce qui est en cours dans les communes touchees. APP 8.79 -> 8.80.
 // v9.58 (11/10/2026) — NOTIF-3 (§311) : une seule notification par jour travaille, envoyee par le serveur a l'heure de prise de poste du planning
@@ -4448,13 +4450,14 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.59';
+const CACHE_NAME   = 'mavigne-v9.60';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
 // Fichiers mis en cache à l'install
 // Note : manifest.json retiré — désormais généré dynamiquement par le SW (start_url par tenant)
-const SHELL_STATIC = ['./icon-192.png', './icon-512.png', './logo-gt.png', './boot.js'];
+// RAIL-1 (§313) : les deux dessins du logo de la barre latérale — elle garde son logo hors réseau.
+const SHELL_STATIC = ['./icon-192.png', './icon-512.png', './logo-gt.png', './logo-barre.png', './logo-barre-sombre.png', './boot.js'];
 // Liste des assets Vite hashés du build courant — injectée dans dist/sw.js par
 // scripts/inject-precache.mjs (npm run build). Vide en dev (placeholder).
 const PRECACHE_ASSETS = [/*__MV_PRECACHE__*/];
@@ -4464,7 +4467,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.59 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.60 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4484,7 +4487,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.59 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.60 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

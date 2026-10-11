@@ -9,7 +9,7 @@ const ITEMS = [{ p: 'pilotage', ic: 'graphique', l: 'Pilotage' }, { p: 'home', i
 function suite(S) {
   const out = []; const T = (n, c) => out.push([n, !!c]); const W = monde(S);
   const rub = W._railRubriques(ITEMS);
-  T('les entrées du dock, rangées en rubriques, dans l’ordre du dock', rub.map(r => r.nom).join() === 'Terrain,Organisation,Gestion' && rub[2].items.map(x => x.p).join() === 'pilotage,reglages');
+  T('les entrées du dock, rangées en rubriques, dans l’ordre du dock (RAIL-1, §313 : le Pilotage en tête, Réglages au pied)', rub.tete.map(x => x.p).join() === 'pilotage' && rub.rub.map(r => r.nom).join() === 'Terrain,Organisation' && rub.pied.map(x => x.p).join() === 'reglages');
   const h = W._railHtml(ITEMS, { nom: '<b>Nico', ini: 'N', role: 'Administration' }, { nom: 'Marchand-Grillot', sous: '11,76 ha' });
   T('la barre : recherche, entrées avec leur icône, domaine, personne (noms échappés)', h.includes('id="mv-rail-cherche"') && h.includes('data-page="planning"') && h.includes('data-ic="calendrier"') && !h.includes('<b>Nico') && h.includes('&lt;b&gt;Nico'));
   const E = W._palEntrees(ITEMS, [{ nom: 'Les Crais 1', surface: .41, appellation: 'Gevrey' }, { nom: 'Clos des Crais', surface: .2 }]);

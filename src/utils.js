@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.80';
+export const APP_VERSION = '8.81';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1035,6 +1035,11 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.81', d: '2026-10-11', items: [
+    { niv: 0, pour: ['tous'], emoji: 'oeil', titre: 'Sur ordinateur, la barre de gauche suit l’ordre du téléphone',
+      desc: "Le Pilotage passe en tête de la barre, pour qui y a accès, puis les modules rangés par thème : Terrain (Vigne, Tracteur, Phyto), Cave et réserve, Organisation (Planning). Réglages descend en bas, au-dessus de votre nom. "
+        + "Le logo en tête de barre, pâle à cette taille, est redessiné avec un trait plus épais et des couleurs plus franches, en clair comme en sombre. Sur téléphone et tablette, rien ne change." },
+  ] },
   { v: '8.80', d: '2026-10-11', items: [
     { niv: 1, pour: ['admin'], cible: '#ck-savoir', emoji: 'pluie', titre: 'La météo d’« À savoir » donne des faits, plus de verdict',
       desc: "La barre « brûlage possible » disparaît : ce n’est pas à l’application de décider si un travail peut se faire. Sous chaque jour, la météo donne maintenant le risque de pluie, le cumul en millimètres et le vent le plus fort de la journée. "

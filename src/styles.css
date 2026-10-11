@@ -6411,6 +6411,16 @@ body #mv-dock-sheet{ background:var(--bg-card); border-radius:var(--r-lg,12px) v
 body #mv-dock-sheet .mv-sg{ border:var(--bw) solid var(--ligne,#E7E6E2); border-radius:var(--r-md,8px); background:var(--bg-card); color:var(--texte-med); }
 body #mv-dock-sheet .mv-sg .mv-sg-ic{ background:none; color:var(--texte-doux); }
 /* ★ FIN COQ-2 */
+/* ★ RAIL-1 (§313) — LE LOGO DE LA BARRE, DESSINÉ POUR 28 PX ; LE PILOTAGE EN TÊTE.
+   L'icône de l'appli réduite à 28 px pâlissait : ses traits (4 à 7 px sur 512) passaient sous le pixel et le jaune, à 1,2:1 sur le
+   fond clair, disparaissait. Un dessin à part, traits épaissis : grappe lie-de-vin (l'accent) et lettres jaune doré en clair ; grappe
+   plus vive et jaune d'origine en sombre. Mêmes sélecteurs que les deux blocs sombres (forcé ; automatique sauf clair forcé). */
+body .mv-rail .mv-rail-logo{ background:url(/logo-barre.png) center / contain no-repeat; }
+:root[data-theme="dark"] body .mv-rail .mv-rail-logo{ background-image:url(/logo-barre-sombre.png); }
+@media(prefers-color-scheme:dark){ :root:not([data-theme="light"]) body .mv-rail .mv-rail-logo{ background-image:url(/logo-barre-sombre.png); } }
+/* La tête (Pilotage, sans titre) prend un peu d'air sous la recherche ; le pied (Réglages) vit dans .mv-rail-bas. */
+body .mv-rail .mv-rail-cherche + .mv-rail-b{ margin-top:var(--e-1,4px); }
+/* ★ FIN RAIL-1 */
 /* ★ TETE-1 (§272) — LES EN-TÊTES ET LES ONGLETS AU DESSIN DE LA MAQUETTE V2.
    Même balisage partout (les dix .mod-header, le bandeau et la barre d'onglets du Pilotage) : ce bloc ne change que
    l'habit, par jetons. En-têtes sur la surface, un filet dessous ; l'icône du module sans boîte ; titres en Outfit ;
