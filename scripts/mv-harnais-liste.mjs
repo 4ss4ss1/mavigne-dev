@@ -571,6 +571,10 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-auj6.mjs --contre'],
   ['node scripts/mv-harnais-auj7.mjs'],              // AUJ-7 (§309) : la vue Économie d'Aujourd'hui sur les vrais chiffres (fin projetée, main-d'œuvre payée), l'arrachage travail à l'heure, l'espace fine
   ['node scripts/mv-harnais-auj7.mjs --contre'],
+  ['node scripts/mv-harnais-notif2.mjs'],            // NOTIF-2 (§310) : une notification ne part que si l'appareil l'autorise ; un refus avalé avec son nom, jamais affiché
+  ['node scripts/mv-harnais-notif2.mjs --contre'],
+  ['node scripts/mv-harnais-notif3.mjs'],            // NOTIF-3 (§311) : une seule notification par jour travaillé, à la prise de poste du planning (serveur + appli + sw.js)
+  ['node scripts/mv-harnais-notif3.mjs --contre'],
   ['node scripts/mv-harnais-trac1.mjs'],              // TRAC-1 (§282) : les sessions du Tracteur en liste + fiche
   ['node scripts/mv-harnais-trac1.mjs --contre'],
   ['node scripts/mv-harnais-trac2.mjs'],              // TRAC-2 (§283) : l'Entretien du Tracteur sur deux colonnes

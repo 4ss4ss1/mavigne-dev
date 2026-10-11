@@ -6,7 +6,7 @@
 // ════════════════════════════════════
 
 import { isAdmin, isTractoriste, isSaisonnier, canWrite,
-         showToast, _escHtml, _escAttr, tNom, logError, _swNotify, dreEffectif
+         showToast, _escHtml, _escAttr, tNom, logError, dreEffectif
 , _mvBadge, _mvIcon, _actIcone, _mvSetIcon } from './utils.js';
 
 // ── Flag debug (console.log silencieux en prod — manquait après extraction du module) ──
@@ -493,7 +493,6 @@ function saveReparateur(){
   _closeOv(null,'ovReparateur');
   renderTracTabs();
   renderRepBanner();
-  checkRepNotifications();
   showToast('Tracteur signalé chez le réparateur','#E07B2A');
 }
 
@@ -537,38 +536,13 @@ function saveReporter(){
   _saveData('reparateur');
   _closeOv(null,'ovReporter');
   renderRepBanner();
-  checkRepNotifications();
   showToast('Date de retour mise à jour','#E07B2A');
 }
 
 // Ouvrir l'overlay reporter en pré-remplissant la date actuelle
 
-// ════ NOTIFICATIONS RÉPARATEUR ════
-// Vérifie au lancement et après chaque modif : veille/jourJ/dépassement (1× chacun)
-// _swNotify — centralisé dans utils.js (Patch 3)
-function checkRepNotifications(){
-  if(!('Notification' in window)||Notification.permission!=='granted')return;
-  var today=todayStr();
-  TRACTEURS_LIST.forEach(function(t){
-    var rep=REPARATEUR[t.id];
-    if(!rep||!rep.prevu_retour)return;
-    var retour=rep.prevu_retour;
-    var veille=addDays(retour,-1);
-    var key='mavigne_notif_rep_'+t.id;
-    var last=localStorage.getItem(key)||'';
-    var nom=t.nom+(t.modele?' ('+t.modele+')':'');
-    if(today===veille&&last!=='veille_'+retour){
-      _swNotify('Ma Vigne',{body:nom+' — retour prévu demain ('+_fmtDate(retour)+')',icon:'icon-192.png',tag:'rep_veille_'+t.id});
-      localStorage.setItem(key,'veille_'+retour);
-    } else if(today===retour&&last!=='jour_'+retour){
-      _swNotify('Ma Vigne',{body:nom+' — retour prévu aujourd\'hui !',icon:'icon-192.png',tag:'rep_jour_'+t.id});
-      localStorage.setItem(key,'jour_'+retour);
-    } else if(today>retour&&last!=='depasse_'+retour){
-      _swNotify('Ma Vigne',{body:nom+' — retour prévu dépassé ('+_fmtDate(retour)+')',icon:'icon-192.png',tag:'rep_depasse_'+t.id});
-      localStorage.setItem(key,'depasse_'+retour);
-    }
-  });
-}
+// ★ NOTIF-3 (§311) — les rappels de retour du réparateur (veille, jour J, dépassement) ne partent plus de cet appareil
+//   à n'importe quelle heure : ils sont une ligne du message du matin (reglages.js/_mvNotifLignes).
 
 // ════ ENTRETIEN ════
 
@@ -3273,7 +3247,6 @@ window.saveReparateur = saveReparateur;
 window.retourReparateur = retourReparateur;
 window.saveReporter = saveReporter;
 // window._swNotify — exposé par utils.js (Patch 3)
-window.checkRepNotifications = checkRepNotifications;
 window.openOvEntretien = openOvEntretien;
 window.toggleEntBtn = toggleEntBtn;
 window.confirmEntretien = confirmEntretien;

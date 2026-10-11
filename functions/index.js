@@ -154,3 +154,6 @@ Object.assign(exports, require('./ephy'));
 Object.assign(exports, require('./leads'));
 // Vues du planning : l'équipe sans motif, et les jours de chacun (MOTIFS-1, §250)
 Object.assign(exports, require('./planning-vues'));
+
+// ★ NOTIF-3 (§311) : la notification du matin, à l'heure de prise de poste (notifCle, notifAbonner, notifHoraires, notifMatin).
+Object.assign(exports, require('./notif'));

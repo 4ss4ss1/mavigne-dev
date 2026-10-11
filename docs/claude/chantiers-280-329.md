@@ -1004,3 +1004,119 @@ barème », §205d : pas de barème par défaut). Conséquence retenue : un trav
 ### 309f. Ouvert
 §28 « AUJ-7 — CE QUI RESTE OUVERT ». ⚠️ Leçon : un adaptateur qui « branche le moteur » doit lire la grandeur que l'écran NOMME — `resteE` (l'argent qui reste) n'est pas le
 travail qui reste, `moF` (le barème du fait) n'est pas le payé. Les deux erreurs donnaient des écrans propres, cohérents… et vides de sens, par construction.
+
+## 310. ★ NOTIF-2 — PLUS DE MESSAGE ORANGE « PROMESSE REJETÉE : SHOWNOTIFICATION » ; LA GARDE VIT DANS `_swNotify` (11/10 — `src/utils.js` (`_swNotify`, APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-notif2.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/preflight-baseline.json` (regravée à la baisse) · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-280-329.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/NOTIF-2.json` · **APP 8.77 → 8.78, SW 9.56 → 9.57**, base `717e3a2`)
+
+### 310a. La demande
+Nico (11/10) colle un rapport de l'écran d'erreurs : « Promesse rejetée : Failed to execute 'showNotification' on 'ServiceWorkerRegistration': No notification permission has
+been granted for this origin. », niveau error, catégorie runtime, 19 occurrences non traitées du 20/09 au 10/10, deux domaines, deux comptes, écrans « — », cave, pilotage,
+planning ; la trace jointe vient du canal de prévisualisation `test-refonte`. Diagnostic reformulé, confirmé (« C'est tout à fait ça »), avec une seconde demande (310e).
+
+### 310b. Le diagnostic, mesuré avant d'écrire
+- **L'effet** : `logError` niveau `error` → toast orange « ⚠️ Promesse rejetée : … » à l'écran, et une entrée au journal du domaine. Rien d'autre ne casse : le nouveau service
+  worker est déjà installé quand la notification est tentée.
+- **La cause** : NOTIF-1 (§158) appelle `_swNotify('Mise à jour Ma Vigne', …)` au `statechange → installed`, gardé par `controller` seulement. `_swNotify` passait par
+  `reg.showNotification()` sans tester la permission ; sans elle, Chrome REJETTE la promesse, rien ne la rattrapait → `unhandledrejection` → branche générique. Le §158e ① le
+  disait (« ne vérifie pas explicitement la permission ») ; il ne disait pas que l'appel de NOTIF-1 était le SEUL sans garde à lui : DAR et priorité (`checkNotifAlerts`,
+  `notifyPriorityChange`), test d'activation (`sendTestNotif`, appelé après `granted`) et rappels tracteur (`checkRepNotifications`) testent tous `Notification.permission`.
+- **La preuve par les dates** : les identifiants du rapport sont des horodatages (`Date.now()_xxxx`). En heure de Paris : la première le 20/09 à 10 h 06, au lendemain de NOTIF-1
+  (`0bb80a5`, poussé le 19/09 à 20 h 56) ; chacune tombe un jour où le changelog de `sw.js` date une version, ou le lendemain matin (01/10, après les quatre versions du 30/09) ;
+  quatre le 09/10. Aucune avant.
+- Vu en route : iOS Safari hors écran d'accueil n'a pas d'API `Notification` ; l'ancien code y tentait quand même `showNotification` (même rejet).
+
+### 310c. Ce qui change
+- `_swNotify` (`utils.js`) : `return` si l'API manque ou si `Notification.permission !== 'granted'` — la garde vit DANS la fonction, pour tous les appelants présents et futurs ;
+  `.then(function(reg){ return reg.showNotification(…); })` puis `.catch` → `_mvAvale(e, 'utils.js/_swNotify')` (permission retirée entre la garde et l'envoi) ; le `catch(e){}`
+  vide du repli `new Notification` (interdit sur Android) passe en `_mvAvale(e, 'utils.js/_swNotify#new')` : C14 de `utils.js` 2 → 1.
+- ⚠️ **Le `return` dans le `.then` est la moitié du correctif** : sans lui, le rejet de `showNotification` n'est pas chaîné et échappe au `.catch` (contre-épreuve 3).
+- Là où les notifications sont autorisées, rien ne change ; ailleurs, plus rien ne part — c'était déjà le choix du §158e ②.
+- `WHATS_NEW` 8.78 : un item niveau 0, pour tous (le message était visible de tous). Aucun écran ne change : fiche `MV_AIDE` Réglages et `guide/12-reglages.html` relues, rien à
+  changer ; visite guidée non concernée.
+- `CLAUDE.md` §8 corrigé : il disait la mise à jour « actuellement FORCÉE » (`skipWaiting` + rechargement), faux depuis MAJ-1 (§157) et VER-1 (§184). Deux lignes au lieu de cinq,
+  ce qui a aussi fait la place de ce lot sous le plafond du cœur.
+
+### 310d. Mesuré
+- `mv-harnais-notif2` (neuf) : `_swNotify` EXTRAITE du vrai fichier et exécutée sur huit appareils (permission jamais donnée, refusée, API absente, accordée, retirée entre la garde
+  et l'envoi, sans service worker, constructeur interdit, ni l'un ni l'autre), en comptant les rejets NON GÉRÉS (`process.on('unhandledRejection')`) ; et lu : un seul
+  `.showNotification(` et un seul `new Notification(` dans `src/`, ceux de `_swNotify`. **10 vertes, 6 contre-épreuves sur 6.** Rejoué sur la base : 5 rouges, dont A1 qui
+  reproduit exactement le rapport (1 envoi, 1 rejet non géré).
+- Preflight : 0 erreur ; C14 `utils.js` 2 → 1 → référence regravée, prouvée clé par clé : la seule valeur qui bouge est cette baisse. La référence datait du 03/10 : sept
+  modules nés depuis (`cockpit`, `cockpit-vue`, `coquille`, `gt`, `ids`, `planning-vue`, `taille-doc`) y entrent, tous à zéro.
+- `WHATS_NEW` exécuté en Node (tête = `APP_VERSION`, 365 blocs en ordre strict, aucun doublon) ; `mv-whatsnew-check` vert.
+- **Chaîne complète** (`TZ=Europe/Paris`, `--continuer`) : **357 commandes, 778 s (une à la fois dans le bac à sable), 0 rouge** — dont `mv-harnais-notif2` et sa contre-épreuve.
+- Non vérifié : un vrai téléphone (Android, iPhone) et Chrome de bureau — le harnais imite le refus de Chrome, il ne l'est pas.
+
+### 310e. Ouvert — la demande suivante (NOTIF-3)
+Nico : « les notifications, on les reçoit vraiment de façon intempestive. L'idée, c'est d'en avoir une […] le matin à 7 heures ou à 8 heures, en fonction de l'heure à laquelle
+on prend le travail […] sur le téléphone ». Inventaire : la priorité saisie est renotifiée toutes les heures tant que l'appli tourne (`scheduleNotifCheck` →
+`setInterval(checkNotifAlerts, 3600000)`), chaque traitement à 1–3 jours de son DAR aussi ; « Nouvelle priorité » sur l'appareil même qui l'enregistre ; « Mise à jour » à chaque
+version (trente le 08/10) alors que VER-1 met déjà l'appli à jour au retour ; les rappels tracteur ; Réglages promet des « alertes gel » qu'aucun code n'envoie. **Tout part de
+l'appli ouverte** : `sw.js` n'a ni `push` ni `notificationclick`, rien ne peut arriver à 7 h appli fermée (le §158b avait écarté l'envoi serveur). Le planning connaît l'heure :
+`_planRetardBornes(mbr, m, d).t0` (saisie du jour > code D/M/A > horaire du mois). Proposé, reformulé, réponse « Continuer » : couper les répétitions ; un envoi serveur (Web Push,
+fonction planifiée au quart d'heure) à la prise de poste, les seuls jours travaillés ; contenu priorité, retour tracteur, DAR selon le rôle ; les heures publiées par l'appli de
+l'admin à chaque enregistrement du planning — le même calcul que l'écran, jamais une seconde source d'horaire côté serveur ; activation une fois par téléphone (iPhone : appli sur
+l'écran d'accueil, iOS 16.4 ou plus). À prévoir : la clé privée d'envoi en secret Firebase, jamais dans ce dépôt public ; un planificateur de plus (combien en existent déjà :
+à confirmer — au-delà de trois, environ 0,10 $/mois chacun).
+
+## 311. ★★ NOTIF-3 — UNE SEULE NOTIFICATION PAR JOUR TRAVAILLÉ, À L'HEURE DE PRISE DE POSTE, ENVOYÉE PAR LE SERVEUR (11/10 — `functions/notif.js` (neuf) · `functions/notif-calc.js` (neuf) · `functions/index.js` · `functions/package.json` · `functions/package-lock.json` (`web-push`) · `src/reglages.js` · `src/planning.js` (`_planPrisesDePoste`) · `src/firebase.js` (`fbSave`) · `src/app.js` · `src/tracteur.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/12-reglages.html` · `scripts/mv-harnais-notif3.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-280-329.md` · `docs/claude/INDEX.md` · `lots/NOTIF-3.json` · **APP 8.78 → 8.79, SW 9.57 → 9.58**, base `717e3a2`, contient NOTIF-2 (§310), non poussé)
+
+### 311a. La demande
+Nico (11/10, dictée) : « les notifications, on les reçoit vraiment de façon intempestive. L'idée, c'est d'en avoir une […] le matin à 8 heures ou à 7 heures, en fonction
+de l'heure à laquelle on prend le travail. Il faut qu'au moment où sur le planning il y a une heure de prise de poste, la notification soit envoyée à cette heure-ci sur le
+téléphone ». Reformulé (inventaire au §310e), proposé : couper les répétitions ; un envoi serveur à la prise de poste, les seuls jours travaillés ; priorité, tracteur et DAR
+selon le rôle ; les heures publiées par l'appli de l'admin. Réponses : « Continuer », puis « suite ».
+
+### 311b. Le dessin, et ce qui a été écarté
+- **Envoi serveur obligatoire** : à 7 h l'appli est fermée, et rien dans un navigateur ne réveille une page à heure fixe (les déclencheurs horaires de notification n'ont
+  jamais été publiés ; la synchronisation périodique choisit son heure, au mieux une fois par 12 h). Web Push standard (clés VAPID, `web-push` côté fonctions) plutôt que
+  Firebase Cloud Messaging : aucun SDK de plus dans l'appli, aucun domaine de plus dans la CSP — `pushManager.subscribe` parle au service d'envoi du navigateur.
+- **Le serveur ne recalcule pas le planning.** L'heure de prise de poste a déjà une définition, `_planRetardBornes` (saisie du jour > code D/M/A > horaire du mois), avec
+  modèles, contrats et absences dans `planning.js`. La recopier dans `functions/` aurait fait deux sources d'horaire (§24, n° 18). L'appli de l'admin — seule à lire tout le
+  planning depuis MOTIFS-1 — publie les heures ET les lignes des 14 jours à venir (`notifHoraires`) : à chaque enregistrement (`fbSave` → `_mvNotifPlanifier`, regroupé à
+  20 s ; le planning s'écrit aussi par `fbSave` direct, pas seulement par `saveData`) et à la première ouverture du jour. Le serveur choisit et envoie, rien d'autre.
+- **Le membre d'un abonnement** vient de l'adresse VÉRIFIÉE du jeton, cherchée dans `membres` (même lien que planning-vues) — jamais d'un nom envoyé par le téléphone : on
+  recevrait sinon l'heure et la priorité d'un collègue.
+- **Collections réservées au serveur** (`mv_notif_abos`, `mv_notif_horaires`) : hors du motif `mavigne_*`, aucune règle de `firestore.rules` ne les ouvre, en lecture comme
+  en écriture. Aucune règle à toucher, aucune clé dans `COLLECTIONS` (rien de C12/C13 ni de la Couche 2).
+- **Adresses d'envoi** limitées aux services des navigateurs (FCM, Mozilla, Apple, Windows) : un abonnement forgé ne fait pas poster le serveur ailleurs.
+- **Gardé** : un message même sans rien de particulier (« Bonne journée ! ») — Nico a demandé « en avoir une » chaque matin travaillé.
+
+### 311c. Ce qui change
+- `functions/notif-calc.js` (pur) : `abonnementValide`, `publicationValide` (31 jours, 300 noms, 6 lignes de 160 caractères), `membreDuCompte`, `parisDe` (Paris, au quart
+  d'heure), `planDuQuart` (prise de poste dans [ce quart d'heure, le suivant) : 07:10 part à 07:00, jamais après ; jamais deux fois le même jour, `dernier`), `message`.
+- `functions/notif.js` : `notifCle` (la clé publique sort d'un secret : aucune clé dans ce dépôt public), `notifAbonner`, `notifHoraires` (claim `adm` exigé), `notifMatin`
+  (`*/15 4-20 * * *`, Europe/Paris ; 404/410 → abonnement retiré). App Check sur les trois appels.
+- `src/reglages.js` : section réécrite — `_mvNotifAbonner` (une fois par jour, ou au toucher), `_mvNotifLignes`, `_mvNotifPublier`, `window._mvNotifPlanifier`,
+  `window._mvNotifDemarrage` ; `checkNotifAlerts`, `scheduleNotifCheck`, `notifyPriorityChange` retirées ; iPhone hors écran d'accueil : un message dit comment installer.
+- `src/planning.js` : `window._planPrisesDePoste(nbJours)` — rien hors contrat, à 0 h, en congé, en récupération, absent toute la journée ; absent en début de journée : l'heure
+  de retour. `src/firebase.js` : `fbSave` appelle `_mvNotifPlanifier` (après le cas démo, avant les droits ; contrat de `mv-harnais-reseau` tenu).
+- `src/app.js` : plus de notification à chaque version, `_mvNotifDemarrage` au démarrage, import `_swNotify` retiré. `src/tracteur.js` : `checkRepNotifications` retirée (le
+  retour du réparateur est une ligne du matin), import retiré.
+- `public/sw.js` : `push` (toujours une notification visible, sous `waitUntil`) et `notificationclick` (remet l'appli devant, ou l'ouvre).
+- `index.html` : « Alertes gel, DAR, validations » → « Un message chaque jour travaillé, à la prise de poste » (aucune alerte gel n'a jamais existé). `guide/12-reglages.html` :
+  la ligne Notifications dit ce qu'elle fait. `WHATS_NEW` 8.79 : niveau 2, pour tous — chaque téléphone doit activer une fois.
+- Fiches `MV_AIDE` Réglages et Tracteur relues : aucune ne parlait des notifications, rien à changer. Visite guidée non concernée.
+
+### 311d. Mesuré
+- `mv-harnais-notif3` (neuf) : **27 vertes, 13 contre-épreuves sur 13**. Calcul serveur exécuté (été, hiver, quart d'heure, déjà servi, autre domaine, absent) ; `notif.js`
+  exécuté avec un faux `require` (Firestore, web-push, secrets) : droits, membre lu sur l'adresse vérifiée, 410 → retiré, passage rejoué → rien ; `_mvNotifLignes` et
+  `_planPrisesDePoste` exécutées sur des bouchons qui LISENT leurs arguments.
+- ⚠️ **Trouvé par le harnais** : la première écriture de `_planPrisesDePoste` comparait les heures en texte AVANT de les mettre sur deux chiffres — « 7:00 » < « 09:30 » est
+  faux en texte : absent jusqu'à 9 h 30, on recevait son message à 7 h. Corrigé (`hm()` d'abord) ; la contre-épreuve vise la ligne neuve.
+- Preflight : 0 erreur, aucun compteur ne bouge. Verts : `mv-harnais-globaux`, `lint-cliquet`, `mv-harnais-reseau`, `mv-harnais-confidentialite`, `mv-whatsnew-check`,
+  `mv-harnais-typo`, `lint-vocabulaire`, `mv-harnais-annonces`, `mv-harnais-lanceur`, et `mv-harnais-notif2` (un seul `showNotification` dans `src/`).
+- **Chaîne complète** (`TZ=Europe/Paris`, `--continuer`) : **359 commandes, 777 s, 1 rouge — `mv-lots`, attendu** : la marque de NOTIF-2 voyait ses fichiers changer tant que celle de NOTIF-3 (`--inclut NOTIF-2`) n'était pas posée ; rejoué après la marque : vert. `build-guide --check` vert sur la page régénérée en local (`npm run site`), jamais livrée.
+- Non vérifié : un vrai téléphone (Android, iPhone installé), un vrai envoi (les secrets n'existent pas encore), le planificateur réel.
+
+### 311e. Ouvert
+§28 « NOTIF-3 — CE QUI RESTE OUVERT ».
+
+### 311f. Le déploiement — les secrets, puis l'ordre
+1. Une fois : `npx web-push generate-vapid-keys` (affiche une clé publique et une clé privée), puis depuis `mavigne-dev\` : `firebase functions:secrets:set VAPID_PUBLIQUE`
+   (coller la publique) et `firebase functions:secrets:set VAPID_PRIVE` (coller la privée). La CLI peut proposer d'activer Secret Manager : oui. La clé privée ne va JAMAIS
+   dans le dépôt ni dans une conversation. Changer la paire plus tard désabonne tous les téléphones.
+2. `firebase deploy --only functions:notifCle,functions:notifAbonner,functions:notifHoraires,functions:notifMatin` — AVANT l'appli (sinon les téléphones appellent des
+   fonctions absentes ; sans dégât, ils réessaient le lendemain). Un planificateur de plus ; aucune règle, aucun backfill.
+3. `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+4. Sur chaque téléphone : Réglages › Moi › Notifications → Autoriser → une notification « Notifications activées » confirme. Ensuite : le jour travaillé suivant,
+   « Bonjour <prénom> » à la prise de poste ; console › Functions › notifMatin › Journaux : « [NOTIF-3] … : N envoyé(s) ».

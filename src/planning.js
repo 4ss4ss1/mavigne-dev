@@ -888,6 +888,35 @@ window._planSurAnnee=function(yr,fn){
   var _sv=_planCtxYear; _planCtxYear=(yr!=null?yr:_sv);
   try{ return fn(); } finally { _planCtxYear=_sv; }
 };
+// ★ NOTIF-3 (§311) — L'HEURE DE PRISE DE POSTE DE CHACUN, JOUR PAR JOUR, POUR LA NOTIFICATION DU MATIN.
+//   Lue par reglages.js/_mvNotifPublier (l'appli de l'administrateur, seule à lire tout le planning depuis MOTIFS-1).
+//   Une seule définition de l'heure, celle de l'écran : _planRetardBornes (saisie du jour > code D/M/A > horaire du mois).
+//   Rien hors contrat, un jour à 0 h, en congé, en récupération ou absent toute la journée ; absent en début de
+//   journée (absence sur une partie du jour qui couvre la prise de poste) : l'heure de retour.
+window._planPrisesDePoste=function(nbJours,depuis){
+  var out={}, base=depuis?new Date(depuis):new Date(); base.setHours(12,0,0,0);
+  var mbrs=_planMbrs(), n=Math.max(1,Math.min(31,parseInt(nbJours,10)||14));
+  var hm=function(h){ var x=/^(\d{1,2}):(\d{2})$/.exec(h||''); return x?(x[1].length<2?'0':'')+x[1]+':'+x[2]:''; };
+  for(var k=0;k<n;k++){
+    var dt=new Date(base.getTime()); dt.setDate(base.getDate()+k);
+    var Y=dt.getFullYear(), m=dt.getMonth(), d=dt.getDate(), jour={};
+    window._planSurAnnee(Y,function(){
+      mbrs.forEach(function(mbr){
+        if(!mbr||!mbr.nom||!_planJourCouvert(mbr,m,d)) return;
+        var e=_pEntDay(mbr.nom,m,d);
+        if(e&&(e.type==='cp'||e.type==='recup')) return;
+        if(e&&e.absent&&!_planAbsPartiel(e)&&e.motif!=='retard') return;
+        if(!(_planDayH(_planPlId(mbr),m,d,e,Y)>0)) return;
+        var t0=hm(_planRetardBornes(mbr,m,d).t0), de=hm(e&&e.abs_de), fa=hm(e&&e.abs_a);
+        if(!t0) return;
+        if(e&&e.absent&&_planAbsPartiel(e)&&de&&fa&&de<=t0&&t0<fa) t0=fa;   // comparées une fois sur deux chiffres (« 7:00 » < « 09:30 » est faux en texte)
+        jour[mbr.nom]=t0;
+      });
+    });
+    out[Y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0')]=jour;
+  }
+  return out;
+};
 function _planInContract(mbr,m,d){
   // Retourne true si le jour d du mois m est dans la période de contrat du membre
   // Comparaison sur chaînes YYYY-MM-DD (tri lexicographique = tri chronologique)

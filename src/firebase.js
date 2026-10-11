@@ -1701,6 +1701,9 @@ window.fbSave = async function (key, value) {
     if (typeof showSyncBadge === 'function') showSyncBadge('Sauvegardé', '#3D6B27');
     return { ok: true, local: true };
   }
+  // ★ NOTIF-3 (§311) — un enregistrement de l'administrateur (planning, priorité, tracteur, traitement…) republie les
+  //   heures de prise de poste et les messages du matin, vingt secondes après le dernier d'une série (reglages.js).
+  if (window._mvNotifPlanifier) { try { window._mvNotifPlanifier(key); } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbSave#notif'); } }
   // ★★ DROITS-1 (§185) — un rôle en lecture seule (claim `ro`, deriveRo) n'a le droit d'écrire AUCUN
   //   de ces documents : les règles refusent tout. Avant, l'appli tentait quand même (écran resté
   //   actif, migration au chargement…), prenait le refus, mettait la valeur au coffre et affichait

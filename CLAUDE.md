@@ -3,11 +3,11 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **11 octobre 2026 (AUJ-7)** — ★★ **LA VUE ÉCONOMIE D'AUJOURD'HUI SUR LES VRAIS CHIFFRES ; L'ARRACHAGE, TRAVAIL À L'HEURE** (§309). Lot 40, base `b94659b`.
-> Nico (11/10, capture de la maquette) : une seule police, plus d'aire verte, plus de « 0 € / −0 € » dans « Par poste », « on fait du pro » ; puis l'arrachage (« regarde les
-> conventions »). Rendu dans Chromium : l'atterrissage valait le budget PAR CONSTRUCTION (11 500 € affichés, 15 650 € projetés par le moteur), la main-d'œuvre « dépensée » était
-> le barème du fait, la « cadence de l'équipe » la journée de référence (7 h). Conventions : l'accord du 2 octobre 2023 laisse l'arrachage hors de la tâche, payé à l'heure. L'espace
-> fine U+202F n'est dans AUCUNE fonte. Validé par Nico : les travaux à l'heure sortent de l'écart de cadence. **APP 8.76 → 8.77, SW 9.55 → 9.56.** `npm run site` → `build` → `--only hosting`.
+> Dernière consolidation : **11 octobre 2026 (NOTIF-3)** — ★★ **UNE SEULE NOTIFICATION PAR JOUR TRAVAILLÉ, À LA PRISE DE POSTE DU PLANNING, ENVOYÉE PAR LE SERVEUR** (§311). Lot 42, base `717e3a2` (contient NOTIF-2).
+> Nico : « les notifications, on les reçoit vraiment de façon intempestive […] en avoir une le matin, à l'heure à laquelle on prend le travail, sur le téléphone ». Inventaire : priorité
+> et DAR toutes les heures appli ouverte, une notification à chaque version, rappels tracteur — rien appli fermée (`sw.js` sans `push`). Premier envoi serveur du projet : Web Push,
+> `functions/notif.js` (4 fonctions, 2 secrets) ; l'appli de l'admin publie heures et messages des 14 jours (`_planPrisesDePoste`, le calcul de l'écran). **APP 8.78 → 8.79, SW 9.57 → 9.58.**
+> Déploiement (§311f) : 2 secrets → `firebase deploy --only functions:notifCle,functions:notifAbonner,functions:notifHoraires,functions:notifMatin` → `npm run site` → `build` → `--only hosting`.
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1203,11 +1203,8 @@ et un caractère absent sort en **carré noir** que l'extraction de texte ne voi
 - `boot.js` précaché : si `__MV_BOOTED` absent après 10 s → rechargement auto, puis « Réessayer ».
   ⚠️ `__MV_BOOTED` est posé **dès l'évaluation d'`app.js`** : il ne couvre PAS un `_fbLoad` bloqué. C'est
   `_mvBootGarde` (filet à 15 s) et les attentes bornées de `_fbLoad` qui le font (§145).
-- **Mise à jour actuellement FORCÉE** par trois mécanismes cumulés : `skipWaiting()`,
-  `clients.claim()`, et `location.reload()` sur `controllerchange`.
-  ⚠️ Le chemin « reload poli » via `_swUpdatePending` est **du code mort**.
-- ★ **Piste étudiée (non livrée)** : retirer `skipWaiting()` automatique, afficher un **bandeau** et
-  utiliser le `postMessage({type:'SKIP_WAITING'})` **déjà présent**. Niveau 1, par appareil.
+- ★ **Mise à jour : plus jamais forcée en cours d'usage** (MAJ-1, §157). `skipWaiting` ne part que sur le message `MV_ACTIVER` (VER-1, §184 : retour au premier plan après ≥ 4 h,
+  ou écran « Mise à jour obligatoire ») ; `controllerchange` recharge, en filet. `_swUpdatePending` reste du code mort. NOTIF-1 (§158) ne notifie que si l'appareil l'autorise (§310).
 
 ## 8b. En-têtes HTTP, CSP & cache
 
@@ -1851,6 +1848,9 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ NOTIF-3 — CE QUI RESTE OUVERT (§311, posé le 11/10 ; reprend NOTIF-2, §310)
+1. **D'abord les deux secrets et l'ordre de déploiement (§311f).** **À regarder chez Nico** : Réglages › Moi › Notifications sur chaque téléphone (iPhone : appli installée), le message du jour travaillé suivant à la prise de poste, les journaux de `notifMatin` ; plus de message orange à la mise en ligne (NOTIF-2) — marquer les 19 rapports traités. Jamais testé sur un vrai téléphone. Les lignes tracteur et DAR suivent la DERNIÈRE publication de l'admin (son enregistrement, ou sa première ouverture du jour) ; 14 jours sans admin = plus d'envoi ; rien après 20 h 45 ; changer la paire de clés désabonne tout le monde.
 
 ### ⚠️ AUJ-7 — CE QUI RESTE OUVERT (§309, posé le 11/10)
 1. **À regarder chez Nico, sur ses données et au téléphone** : la vue Économie et la tuile Budget, qui monte (le payé, plus le barème du fait). Vues dans Chromium sur un domaine reconstitué.

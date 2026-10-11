@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.77';
+export const APP_VERSION = '8.79';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1035,6 +1035,17 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.79', d: '2026-10-11', items: [
+    { niv: 2, pour: ['tous'], emoji: 'cloche', titre: 'Une seule notification par jour, à votre prise de poste',
+      desc: "Les notifications arrivaient n’importe quand : la priorité et les délais avant récolte toutes les heures tant que l’application restait ouverte, une notification à chaque mise à jour — et rien du tout l’application fermée. "
+        + "Maintenant, un seul message par jour travaillé, envoyé sur votre téléphone à l’heure de prise de poste inscrite au planning, même application fermée : la priorité qui vous concerne et, pour l’administrateur et le tractoriste, un tracteur qui revient du réparateur ou un délai avant récolte qui se termine. Rien les jours de repos, de congé ou d’arrêt. "
+        + "<b>À faire une fois sur chaque téléphone</b> : Réglages › Moi › Notifications. Sur iPhone, depuis Ma Vigne installée sur l’écran d’accueil." },
+  ] },
+  { v: '8.78', d: '2026-10-11', items: [
+    { niv: 0, pour: ['tous'], emoji: 'cloche', titre: 'Plus de message d’erreur en anglais après une mise à jour',
+      desc: "Sur un appareil où les notifications ne sont pas activées, un message orange s’affichait parfois à l’ouverture de l’application, juste après une mise à jour : « Promesse rejetée : Failed to execute 'showNotification'… ». "
+        + "Rien n’était perdu : l’application essayait de vous annoncer la mise à jour par une notification que l’appareil refusait. Elle n’essaie plus sans votre accord, et le message ne s’affiche plus." },
+  ] },
   { v: '8.77', d: '2026-10-11', items: [
     { niv: 2, pour: ['admin'], emoji: 'euro', titre: 'La vue Économie d’Aujourd’hui dit enfin où va la campagne',
       desc: "Elle annonçait « Dans le budget » et des « 0 € » à chaque ligne : sa fin de campagne valait le budget tant qu’on était dessous, et la main-d’œuvre « dépensée » était le barème du travail fait, pas les heures payées. "
@@ -4534,11 +4545,23 @@ function _escAttr(s) {
 function deepClone(v) { return JSON.parse(JSON.stringify(v)); }
 
 // ── Notification via SW (mobile-safe) — implémentation unique (ex-doublons reglages.js + tracteur.js) ──
+// ★ NOTIF-2 (§310) — RIEN SANS LA PERMISSION, ET UN REFUS NE S'AFFICHE JAMAIS.
+//   `reg.showNotification` REJETTE sa promesse quand l'appareil n'a pas autorisé les notifications. Rien ne
+//   rattrapait ce rejet : le gestionnaire global l'affichait en orange (« Promesse rejetée : Failed to execute
+//   'showNotification'… ») et l'envoyait au journal du domaine. Remonté du terrain : 19 fois du 20/09 au
+//   10/10, toujours le jour d'une mise en ligne ou le lendemain matin — l'appel de NOTIF-1 (§158), le seul
+//   sans garde (§158e ①). La garde vit ICI, pour tous les appelants présents et futurs : un appelant qui
+//   oublie la sienne ne peut plus rien casser. Un refus qui arrive quand même (permission retirée entre la
+//   garde et l'envoi, `new Notification` interdit sur Android) est avalé avec son nom, jamais affiché.
+//   ⚠️ Le `return` dans le `.then` compte : sans lui, le rejet de showNotification échappe au `.catch`.
 function _swNotify(title, opts) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
   if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-    navigator.serviceWorker.ready.then(function(reg){ reg.showNotification(title, opts); });
-  } else if ('Notification' in window && Notification.permission === 'granted') {
-    try { new Notification(title, opts); } catch(e){}
+    navigator.serviceWorker.ready
+      .then(function(reg){ return reg.showNotification(title, opts); })
+      .catch(function(e){ if (window._mvAvale) window._mvAvale(e, 'utils.js/_swNotify'); });
+  } else {
+    try { new Notification(title, opts); } catch(e){ if (window._mvAvale) window._mvAvale(e, 'utils.js/_swNotify#new'); }
   }
 }
 window._swNotify = _swNotify;

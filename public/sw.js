@@ -1,4 +1,8 @@
-// MA VIGNE — Service Worker v9.56
+// MA VIGNE — Service Worker v9.58
+// v9.58 (11/10/2026) — NOTIF-3 (§311) : une seule notification par jour travaille, envoyee par le serveur a l'heure de prise de poste du planning
+//   (push + notificationclick ici) ; plus de priorite ni de DAR toutes les heures, plus de notification a chaque version. APP 8.78 -> 8.79.
+// v9.57 (11/10/2026) — NOTIF-2 (§310) : plus de message orange « Promesse rejetee : showNotification » apres une mise a jour — _swNotify ne notifie
+//   que si l'appareil l'autorise, et un refus est avale avec son nom (_mvAvale), jamais affiche. APP 8.77 -> 8.78.
 // v9.56 (11/10/2026) — AUJ-7 (§309) : la vue Economie d'Aujourd'hui sur les vrais chiffres (atterrissage = fin projetee du moteur, main-d'oeuvre payee,
 //   cadence de l'equipe, courbes datees sans aire verte, plus de 0/-0 EUR, une seule echelle de texte) ; l'arrachage = travail a l'heure (partage
 //   de la journee, poste « Travaux a l'heure », hors de l'ecart de cadence). APP 8.76 -> 8.77.
@@ -4442,7 +4446,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.56';
+const CACHE_NAME   = 'mavigne-v9.58';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4458,7 +4462,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.56 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.58 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4478,7 +4482,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.56 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.58 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
@@ -4683,3 +4687,26 @@ async function flushOfflineQueue() {
   const clients = await self.clients.matchAll({ type: 'window' });
   clients.forEach(c => c.postMessage({ type: 'FLUSH_OFFLINE_QUEUE' }));
 }
+
+// ★ NOTIF-3 (§311) — LA NOTIFICATION DU MATIN, ENVOYÉE PAR LE SERVEUR (functions/notif.js, à la prise de poste).
+//   Chrome exige une notification VISIBLE pour chaque message reçu (userVisibleOnly) : on en montre toujours une,
+//   même si le contenu est illisible. La toucher remet l'appli devant, ou l'ouvre.
+self.addEventListener('push', (event) => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (e) { d = {}; }
+  const titre = (typeof d.titre === 'string' && d.titre) ? d.titre : 'Ma Vigne';
+  event.waitUntil(self.registration.showNotification(titre, {
+    body: typeof d.corps === 'string' ? d.corps : '',
+    icon: 'icon-192.png', badge: 'icon-192.png',
+    tag: typeof d.tag === 'string' ? d.tag : 'mv-matin',
+    data: { url: typeof d.url === 'string' ? d.url : '/' }
+  }));
+});
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/';
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((liste) => {
+    for (const c of liste) { if ('focus' in c) return c.focus(); }
+    return self.clients.openWindow ? self.clients.openWindow(url) : undefined;
+  }));
+});

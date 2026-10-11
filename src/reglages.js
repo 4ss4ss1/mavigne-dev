@@ -3044,64 +3044,141 @@ async function sendForgotPwd() {
   }
 }
 // ════ NOTIFICATIONS ════
+// ★★ NOTIF-3 (§311, 11/10/2026) — UNE SEULE NOTIFICATION PAR JOUR TRAVAILLÉ, À L'HEURE DE PRISE DE POSTE.
+//   Nico : « les notifications, on les reçoit vraiment de façon intempestive ». Avant : la priorité et chaque DAR
+//   proche toutes les heures tant que l'appli tournait (checkNotifAlerts), « Nouvelle priorité » sur l'appareil même
+//   qui l'enregistrait, une notification à chaque version, les rappels tracteur — et RIEN appli fermée.
+//   Maintenant le serveur envoie (functions/notif.js, tous les quarts d'heure) ; ce téléphone s'abonne
+//   (_mvNotifAbonner) ; l'appli de l'administrateur publie les heures et les lignes des quatorze jours à venir
+//   (_mvNotifPublier), calculées ICI avec le planning de l'écran (_planPrisesDePoste) — jamais refaites au serveur.
+var _MV_NOTIF_JOURS = 14;
+function _mvNotifJour(dt){ var d=dt||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function _mvNotifLs(k,v){
+  try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'reglages.js/_mvNotifLs'); }
+  return null;
+}
+function _mvNotifCle(b64){
+  var p='='.repeat((4-b64.length%4)%4), s=atob((b64+p).replace(/-/g,'+').replace(/_/g,'/')), a=new Uint8Array(s.length);
+  for(var i=0;i<s.length;i++) a[i]=s.charCodeAt(i);
+  return a;
+}
+function _mvNotifPossible(){ return ('serviceWorker' in navigator)&&('PushManager' in window)&&('Notification' in window); }
+// Abonne CE téléphone et le fait connaître du serveur — une fois par jour suffit (un abonnement peut changer).
+function _mvNotifAbonner(force){
+  if(!_mvNotifPossible()||Notification.permission!=='granted'||typeof window.fbCallFn!=='function') return Promise.resolve(false);
+  var auj=_mvNotifJour();
+  if(!force&&_mvNotifLs('mavigne_notif_abo')===auj) return Promise.resolve(true);
+  return navigator.serviceWorker.ready.then(function(reg){
+    return reg.pushManager.getSubscription().then(function(sub){
+      if(sub) return sub;
+      return window.fbCallFn('notifCle',{}).then(function(r){
+        if(!r||!r.cle) throw new Error('clé d’envoi absente du serveur');
+        return reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:_mvNotifCle(r.cle)});
+      });
+    });
+  }).then(function(sub){
+    return window.fbCallFn('notifAbonner',{abo:JSON.parse(JSON.stringify(sub))});
+  }).then(function(){ _mvNotifLs('mavigne_notif_abo',auj); return true; })
+  .catch(function(e){ if(window._mvAvale) window._mvAvale(e,'reglages.js/_mvNotifAbonner'); return false; });
+}
+// Les lignes du message d'une personne, pour un jour : la priorité qui la concerne ; pour l'administrateur et le
+// tractoriste, un tracteur qui revient du réparateur et la fin d'un délai avant récolte (DAR) — ce que
+// checkNotifAlerts et checkRepNotifications envoyaient avant, à n'importe quelle heure.
+function _mvNotifLignes(mbr,iso){
+  var l=[], cfg=window.CONFIG||{};
+  var items=(cfg.tachesPrio&&Array.isArray(cfg.tachesPrio.items))?cfg.tachesPrio.items:[];
+  var miens=items.filter(function(it){ var eq=(it&&Array.isArray(it.equipe))?it.equipe:[]; return it&&it.t&&(!eq.length||eq.indexOf(mbr.nom)>=0); })
+    .map(function(it){ return tNom(it.t); });
+  if(miens.length) l.push('Priorité : '+miens.join(' · '));
+  var msg=String(window.priorityMessage||'').trim();
+  if(msg) l.push(msg);
+  var R=Array.isArray(mbr.roles)?mbr.roles:(mbr.role?[mbr.role]:[]);
+  if(R.indexOf('admin')<0&&R.indexOf('tractoriste')<0) return l.slice(0,6);
+  var j=new Date(iso+'T12:00:00'), demain=_mvNotifJour(new Date(j.getTime()+86400000)), REP=window.REPARATEUR||{};
+  (window.TRACTEURS_LIST||[]).forEach(function(t){
+    var rep=t&&REP[t.id]; if(!rep||!rep.prevu_retour) return;
+    var nom=t.nom+(t.modele?' ('+t.modele+')':''), r=String(rep.prevu_retour).slice(0,10);
+    if(r===demain) l.push(nom+' : retour du réparateur prévu demain');
+    else if(r===iso) l.push(nom+' : retour du réparateur prévu aujourd’hui');
+    else if(r<iso) l.push(nom+' : retour du réparateur en retard');
+  });
+  var vus={};
+  (window.TRAITEMENTS||[]).forEach(function(t){
+    var p=t&&(window.CATALOGUE||[]).find(function(c){ return c&&c.nom===t.produit; });
+    if(!p||!(p.dar>0)||!t.date||vus[t.produit]) return;
+    var td=new Date(String(t.date).slice(0,10)+'T12:00:00'); if(isNaN(td)) return;
+    var reste=Math.max(0,p.dar-Math.round((j-td)/86400000));
+    if(reste>0&&reste<=3){ vus[t.produit]=1; l.push('DAR '+t.produit+' : récolte possible dans '+reste+' j'); }
+  });
+  return l.slice(0,6);
+}
+// Publie les heures de prise de poste et les lignes des quatorze jours qui viennent — administrateur seulement.
+function _mvNotifPublier(force){
+  if(!isAdmin()||typeof window.fbCallFn!=='function'||typeof window._planPrisesDePoste!=='function') return Promise.resolve(false);
+  var auj=_mvNotifJour();
+  if(!force&&_mvNotifLs('mavigne_notif_pub')===auj) return Promise.resolve(true);
+  var jours={};
+  try{
+    var heures=window._planPrisesDePoste(_MV_NOTIF_JOURS), parNom={};
+    (window.MEMBRES||[]).forEach(function(m){ if(m&&m.nom) parNom[m.nom]=m; });
+    Object.keys(heures).forEach(function(iso){
+      jours[iso]={};
+      Object.keys(heures[iso]).forEach(function(nom){ jours[iso][nom]={h:heures[iso][nom], l:_mvNotifLignes(parNom[nom]||{nom:nom},iso)}; });
+    });
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'reglages.js/_mvNotifPublier#calcul'); return Promise.resolve(false); }
+  return window.fbCallFn('notifHoraires',{jours:jours}).then(function(){ _mvNotifLs('mavigne_notif_pub',auj); return true; })
+    .catch(function(e){ if(window._mvAvale) window._mvAvale(e,'reglages.js/_mvNotifPublier'); return false; });
+}
+// Après chaque enregistrement de l'administrateur (planning, priorité, tracteur, traitement…) : une publication,
+// vingt secondes après le dernier d'une série. Appelé par fbSave (firebase.js).
+var _mvNotifMinuteur=null;
+window._mvNotifPlanifier=function(){
+  if(!isAdmin()) return;
+  clearTimeout(_mvNotifMinuteur);
+  _mvNotifMinuteur=setTimeout(function(){ _mvNotifPublier(true); },20000);
+};
+// Au démarrage, quand les données sont là : l'abonnement de ce téléphone, puis la publication du jour (administrateur).
+window._mvNotifDemarrage=function(){
+  var n=0;
+  (function attendre(){
+    if(!window._dataReady||!window.currentUser){ if(++n<120) setTimeout(attendre,2000); return; }
+    _mvNotifAbonner(false);
+    _mvNotifPublier(false);
+  })();
+};
 function requestNotifications(){
-  if(!('Notification' in window)){
-    showToast('Notifications non supportées par ce navigateur','#B85A1A');return;
-  }
-  if(Notification.permission==='granted'){
-    updateNotifUI('granted');
-    sendTestNotif();
+  if(!_mvNotifPossible()){
+    var ios=/iPhone|iPad|iPod/.test(navigator.userAgent||'');
+    showToast(ios?'Sur iPhone : installez d’abord Ma Vigne sur l’écran d’accueil (Partager › Sur l’écran d’accueil), puis activez les notifications depuis l’appli installée'
+      :'Notifications non supportées par ce navigateur','#B85A1A');
     return;
   }
   if(Notification.permission==='denied'){
     showToast('Notifications bloquées · à réactiver dans les réglages du navigateur','#B85A1A');
     updateNotifUI('denied');return;
   }
-  Notification.requestPermission().then(perm=>{
-    updateNotifUI(perm);
-    if(perm==='granted'){
-      sendTestNotif();
-      scheduleNotifCheck();
-    }
-  });
+  var activer=function(){
+    updateNotifUI('granted');
+    _mvNotifAbonner(true).then(function(ok){
+      if(ok) sendTestNotif();
+      else showToast('Notifications autorisées, mais l’inscription n’a pas abouti · réessayez avec du réseau','#B85A1A');
+    });
+  };
+  if(Notification.permission==='granted'){ activer(); return; }
+  Notification.requestPermission().then(function(perm){ updateNotifUI(perm); if(perm==='granted') activer(); });
 }
 function updateNotifUI(perm){
   const sub=document.getElementById('notif-status');
   const arr=document.getElementById('notif-arr');
   if(!sub)return;
-  if(perm==='granted'){sub.textContent='Activées — alertes gel, DAR et priorités';if(arr)window._mvSetIcon(arr,'check',14);}
+  if(perm==='granted'){sub.textContent='Activées — un message chaque jour travaillé, à la prise de poste';if(arr)window._mvSetIcon(arr,'check',14);}
   else if(perm==='denied'){sub.textContent='Bloquées par le navigateur';if(arr)window._mvSetIcon(arr,'croix',14);}
-  else{sub.textContent='Alertes gel, DAR, validations';}
+  else{sub.textContent='Un message chaque jour travaillé, à la prise de poste';}
 }
 // _swNotify — centralisé dans utils.js (Patch 3)
 function sendTestNotif(){
-  _swNotify('Ma Vigne',{body:'Notifications activées ! Vous recevrez les alertes gel, DAR et priorités.',icon:'icon-192.png'});
-}
-function scheduleNotifCheck(){
-  setInterval(checkNotifAlerts,3600000);
-  checkNotifAlerts();
-}
-function checkNotifAlerts(){
-  if(Notification.permission!=='granted')return;
-  const today=new Date();
-  // Alertes DAR
-  window.TRAITEMENTS.forEach(t=>{
-    const prod=window.CATALOGUE.find(p=>p.nom===t.produit);
-    if(!prod||prod.dar===0)return;
-    const darR=Math.max(0,prod.dar-Math.floor((today-new Date(t.date))/86400000));
-    if(darR>0&&darR<=3){
-      _swNotify('DAR Ma Vigne',{body:`${t.produit} : ${darR}j avant récolte possible`,icon:'icon-192.png'});
-    }
-  });
-  // Alerte priorité du moment (si définie)
-  if(window.priorityMessage&&window.priorityMessage.trim()){
-    _swNotify('Priorité Ma Vigne',{body:window.priorityMessage,icon:'icon-192.png'});
-  }
-}
-// Appelé après savePriority() pour notifier si activé
-function notifyPriorityChange(){
-  if(Notification.permission!=='granted'||!window.priorityMessage)return;
-  _swNotify('Nouvelle priorité',{body:window.priorityMessage,icon:'icon-192.png'});
+  _swNotify('Ma Vigne',{body:'Notifications activées : un message chaque jour travaillé, à votre heure de prise de poste.',icon:'icon-192.png'});
 }
 // ════ window.HISTORIQUE MULTI-window.SAISONS ════
 
@@ -5869,9 +5946,6 @@ window.openMentionsLogin     = openMentionsLogin;
 window.requestNotifications  = requestNotifications;
 window.updateNotifUI         = updateNotifUI;
 window.sendTestNotif         = sendTestNotif;
-window.scheduleNotifCheck    = scheduleNotifCheck;
-window.checkNotifAlerts      = checkNotifAlerts;
-window.notifyPriorityChange  = notifyPriorityChange;
 window.archiveSaisonActive   = archiveSaisonActive;
 window.renderHistorique      = renderHistorique;
 window.histoSelectA          = histoSelectA;

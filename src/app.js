@@ -12,7 +12,7 @@ import { isAdmin, isTractoriste, isSaisonnier, canWrite,
          getRoleLabel, showToast, wmoDesc, wmoIcone, tNom,
          applyTheme, setThemeMode, initTheme, logError, _closeCriticalOverlay, _escHtml, _escAttr,
          GT_ADMIN_EMAIL, DEMO_TENANT, DEMO_FIREBASE_EMAIL, DEMO_FIREBASE_PWD, dreEffectif,
-         _mvBadge, _mvIcon, _mvIconTache, _mvIconInline, _actIcone, _swNotify,
+         _mvBadge, _mvIcon, _mvIconTache, _mvIconInline, _actIcone,
 } from './utils.js';
 // ★ SYNC-1 (26/09/2026) — passer par window.showSyncBadge, jamais par l'import de utils.js.
 //   app.js enveloppe window.showSyncBadge pour piloter le POINT de synchro ; l'import
@@ -9490,7 +9490,6 @@ function savePriority(){
   _prioEqSeeded={}; // re-appliquer les equipes affectees sur cet appareil
   document.getElementById('ovPriority').classList.remove('open');
   savePriorityData();
-  notifyPriorityChange();
   renderParcelles();
   _prioRedessine();
   var lbl=items.length?(String.fromCodePoint(0x2B50)+' Priorit\u00e9 : '+items.map(function(it){return (typeof tNom==='function'?tNom(it.t):it.t);}).join(' \u00B7 ')):(String.fromCodePoint(0x1F4CC)+' Message de priorit\u00e9 enregistr\u00e9');
@@ -9507,7 +9506,6 @@ function clearPriority(){
   _prioEqSeeded={};
   document.getElementById('ovPriority').classList.remove('open');
   savePriorityData();
-  notifyPriorityChange();
   renderParcelles();
   _prioRedessine();
 }
@@ -12317,11 +12315,11 @@ function _mvDemarrer(){
   });
   if('Notification' in window&&Notification.permission==='granted'){
     if(window.updateNotifUI) window.updateNotifUI('granted');
-    if(window.scheduleNotifCheck) window.scheduleNotifCheck();
-    checkRepNotifications();
   } else if('Notification' in window&&Notification.permission==='denied'){
     if(window.updateNotifUI) window.updateNotifUI('denied');
   }
+  // ★ NOTIF-3 (§311) : l'abonnement de ce téléphone et la publication du jour, quand les données sont là.
+  if(window._mvNotifDemarrage) window._mvNotifDemarrage();
 }
 // ★ PROFILS-1 (§243) — LE DÉMARRAGE PART DÈS QUE LA PAGE EST LUE (DOMContentLoaded). `load` attend aussi le script
 //   reCAPTCHA : sur un réseau qui ne répond pas, il ne vient pas, et le filet de 2,5 s ci-dessous devenait un temps
@@ -12346,18 +12344,15 @@ if ('serviceWorker' in navigator) {
       // en attente et prend le relais tout seul au prochain lancement, sans
       // interrompre la session en cours.
       reg.update().catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvHushRejet#4'); });
-      // Suivi + notification (NOTIF-1, §158) : détecte l'installation d'une nouvelle
-      // version, sans rien forcer. Ne notifie que si une AUTRE version tournait déjà
-      // (navigator.serviceWorker.controller non nul) — jamais au tout premier install.
+      // Suivi (NOTIF-1, §158) : détecte l'installation d'une nouvelle version, sans rien forcer.
+      // ★ NOTIF-3 (§311) : plus de notification à chaque version — trente certains jours, et VER-1 (§184) met déjà
+      //   l'appli à jour au retour. La seule notification est celle du matin, envoyée par le serveur.
       reg.addEventListener('updatefound', function(){
         var inst = reg.installing;
         if(!inst) return;
         inst.addEventListener('statechange', function(){
           if(inst.state !== 'installed') return;
           if(DEBUG) console.log('[SW] Nouvelle version installée, en attente (prendra effet au prochain lancement)');
-          if(navigator.serviceWorker.controller) {
-            _swNotify('Mise à jour Ma Vigne', {body:'Fermez et rouvrez l\'application pour l\'installer.', icon:'icon-192.png', tag:'maj_dispo'});
-          }
         });
       });
       if ('sync' in reg) {

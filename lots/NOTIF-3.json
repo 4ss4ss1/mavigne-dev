@@ -1,0 +1,35 @@
+{
+  "lot": "NOTIF-3",
+  "section": "§311",
+  "base": "717e3a23526a39263799b2315d5b71cb2d41570a",
+  "inclut": [
+    "NOTIF-2"
+  ],
+  "date": "2026-10-11",
+  "fichiers": {
+    ".mv-base": "add1cf62f2fbe487e665c340bbdf97f48565bab28409968d93b7d27af0c1f50b",
+    "CLAUDE.md": "a84ae5cf273c81a0fdfc118f6762780a7128da9ca2eef899cc8f396d1fdb60e6",
+    "docs/claude/INDEX.md": "aa7763f4540d786edf1929d5a0108c90f6cc1d85c394b14c5df8fd4bf9d8f324",
+    "docs/claude/chantiers-280-329.md": "4553552ae07441c449711ef54aaee316a0159dcb0737759c4eb2aedb8c4fe47c",
+    "docs/claude/journal.md": "0841b3227f29926047fbbffbd4212c6d3f2f3430faecfb682e405f1c3513b339",
+    "functions/index.js": "350383f15fc1d0d2e0751009a6f53fed0ae53244b1a8f817d2ac677999467d10",
+    "functions/package-lock.json": "1be490e14376112c1c6ae2998a5b51bdc133d7d041b0dc9bdd6449ceda548f7a",
+    "functions/package.json": "be4915be046b1b05859cf5998fcbc62877f61d4fa12d76a5a4b8b877851b8965",
+    "guide/12-reglages.html": "858eefd074e4f51d9377bbf1df296462f2c1cc8ca543b8271552989645365e43",
+    "index.html": "bf8e03473035ba37be0be2f338510f6d9d848750a8de8d3f0fb56181f743d704",
+    "public/sw.js": "598a8d40ef18f3d7b8ea2803c0ca76addab3f501bc5e1ef5045a27d00ac577e3",
+    "scripts/harnais-claude-md.mjs": "f5f4c2de33f2505fa701263cd99323722d2932349cc1a72322634ab08c7df818",
+    "scripts/mv-harnais-liste.mjs": "7b87365d29d9ecc6de8fc4deddda4e2380331ae6058f7326ea87edc98bc9ef58",
+    "scripts/preflight-baseline.json": "84ea4526a4ac984c6a90f547af8b6e0c3744a817e04554301b8437e9e3be00fd",
+    "src/app.js": "41da061e757014f50b5270a6030a17b15f5062b7611bdfa2b2da02d51d868d83",
+    "src/firebase.js": "ba2b0d45b80de7bb48e29b9d21e61504efd621e38197ea59becb0a39d7fbdded",
+    "src/planning.js": "5032d9572fef24695c0d0bc82f9e5337afc6cdfd870b3e25421d0c83d7e8908e",
+    "src/reglages.js": "284a4dd292141a7478a8d8f34cce2acbf4073d5859a013957aa9673b2ca81d36",
+    "src/tracteur.js": "3e423b3885fe7ea85d6a8d2fe4f2a9f0d49f2b2fc0593399d342ab7497f2c3b6",
+    "src/utils.js": "e35837eced5b188368c74325c40bd9b0e3b8983c6afd7466a4699aa7e73adc1f",
+    "functions/notif-calc.js": "9145ecd0f41019b03ef833bcd757417e87f6833db994021cbd6e5a0517e77414",
+    "functions/notif.js": "471825fc8da1af7486535a59420752265075373a9cb3056fb8e34d6440b5a5a2",
+    "scripts/mv-harnais-notif2.mjs": "6909f63a8945e5ca467c8d4108d7e3b41ca6bcdd1a803a89b0a02dfccfdd34a9",
+    "scripts/mv-harnais-notif3.mjs": "ffc31973655a88166d5b21e1a4982a300e9a056373605c520390bc7239d88fd4"
+  }
+}

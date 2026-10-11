@@ -8,6 +8,18 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **11 octobre 2026 (NOTIF-2)** — ★ **PLUS DE MESSAGE ORANGE « PROMESSE REJETÉE : SHOWNOTIFICATION » APRÈS UNE MISE À JOUR** (§310). Lot 41, base `717e3a2`.
+> Rapport d'erreur collé par Nico : 19 occurrences du 20/09 au 10/10, deux comptes, deux domaines. Datées par leurs identifiants : toujours un jour de mise en ligne ou le
+> lendemain matin, la première au lendemain de NOTIF-1 (`0bb80a5`, §158). `_swNotify` appelait `showNotification` sans garde ; sans permission, le rejet n'était rattrapé par rien
+> (§158e ①). Garde et refus avalé avec son nom, DANS `_swNotify` (tous les appelants). Demande suivante, reformulée, « Continuer » : UNE notification par jour, à la prise de poste (§28).
+> **APP 8.77 → 8.78, SW 9.56 → 9.57.** `npm run build` → `firebase deploy --only hosting`.
+
+> Dernière consolidation : **11 octobre 2026 (AUJ-7)** — ★★ **LA VUE ÉCONOMIE D'AUJOURD'HUI SUR LES VRAIS CHIFFRES ; L'ARRACHAGE, TRAVAIL À L'HEURE** (§309). Lot 40, base `b94659b`.
+> Nico (11/10, capture de la maquette) : une seule police, plus d'aire verte, plus de « 0 € / −0 € » dans « Par poste », « on fait du pro » ; puis l'arrachage (« regarde les
+> conventions »). Rendu dans Chromium : l'atterrissage valait le budget PAR CONSTRUCTION (11 500 € affichés, 15 650 € projetés par le moteur), la main-d'œuvre « dépensée » était
+> le barème du fait, la « cadence de l'équipe » la journée de référence (7 h). Conventions : l'accord du 2 octobre 2023 laisse l'arrachage hors de la tâche, payé à l'heure. L'espace
+> fine U+202F n'est dans AUCUNE fonte. Validé par Nico : les travaux à l'heure sortent de l'écart de cadence. **APP 8.76 → 8.77, SW 9.55 → 9.56.** `npm run site` → `build` → `--only hosting`.
+
 > Dernière consolidation : **11 octobre 2026 (AUJ-6)** — ★★ **LES DESSINS D'AUJOURD'HUI NE DISPARAISSENT PLUS ; « À SAVOIR » SOUS LES ONGLETS ; LA COURBE SANS TRAITS** (§308). Lot 39, base `373361c`.
 > Captures de Nico (10/10) : « À savoir » coupé (en haut et en descendant), « Nouveau » mal posé, charge restante « nulle » (« on arrête avec les colonnes ou lignes qui montent
 > et descendent »), « les images disparaissent parfois ». REPRODUIT dans Chromium sur la base (appli entière sous Vite, données injectées) : après un passage par Économie, le
