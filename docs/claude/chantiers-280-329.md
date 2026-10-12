@@ -1307,3 +1307,45 @@ de nouvelle maquette (c'est la bulle déjà validée).
 
 ### 314e. Ouvert
 §28 « BULLE-1 — CE QUI RESTE OUVERT ».
+
+## 315. ★ FORME-2 — LA CARTE DE L'ACCUEIL DESSINE CHAQUE PARCELLE À SA FORME ; LE TOUCHER Y OUVRE ENFIN LA FICHE (11/10 — `src/app.js` (`_homeForme`, `_homePrioCarte`) · `src/styles.css` (bloc FORME-2) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Accueil) · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-forme2.mjs` (neuf) · `scripts/mv-harnais-acc2.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-280-329.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/FORME-2.json` · **APP 8.82 → 8.83, SW 9.61 → 9.62**, base `6e06158`)
+
+### 315a. La demande
+Nico (11/10) : « Dans Vigne, il faut la forme des parcelles dans l'accueil de la même taille que les carrés actuellement, ça pourrait être bien. » C'est le point laissé
+ouvert par FORME-1 (§301f, « la carte de l'Accueil »). Reformulé avant le travail (sa préférence) : la vraie forme à la place de chaque rectangle, sans agrandir la carte,
+une seule échelle, chaque forme à la surface de son rectangle, mêmes couleurs, même ordre ; une parcelle sans contour garde son rectangle ; pas de maquette (le dessin est
+celui du cockpit, déjà validé), une capture à la livraison. Réponse : « oui ».
+
+### 315b. Ce qui a été fait
+- **`_homeForme(f, r)`** (app.js) : le contour lu par `_mvFormeDe` (mètres, nord en haut) et la taille de l'ancien rectangle. Celui-ci faisait `--h-row-2 × √r` de large
+  au format 8/5, jamais moins d'un tiers : sa surface valait 5/8 × r en parts de `--h-row-2`², plancher 1/9. La forme garde cette surface et prend les proportions du
+  contour : `--fw × --fh = 5/8 × r`, `--fw / --fh = w / h`. Aucun pixel dans le JS : la feuille calcule `calc(var(--h-row-2) * var(--fw))`, le dessin suit son `viewBox`.
+- ★ **La taille suit la surface DÉCLARÉE, pas l'aire du contour.** C'est ce que pèse le pourcentage de la carte ; le contour ne donne que les proportions. Écart voulu
+  avec le plan du cockpit (FORME-1), qui dessine l'aire du contour : sur l'Accueil, un contour mal tracé ne grossit ni ne rétrécit une parcelle.
+- **Sans contour** : le rectangle d'avant, en pointillé (`.hpc-sans`) SEULEMENT quand le domaine a des contours ; un domaine qui n'en a aucun ne change pas (sinon des
+  pointillés partout chez un client neuf). Le titre dit « pas de contour enregistré », le mot du cockpit. Un tracé illisible (deux points, `NaN`) ne dessine rien.
+- **Le toucher** : `openDP` au lieu d'`openSelParc` (§315c ①).
+- **`#home-prio-mos`** : la mosaïque porte un id, la pastille « Nouveau » (niveau 1) s'y pose. `mv-whatsnew-check` exige un `id="…"` LITTÉRAL dans les sources : un
+  `c.id='…'` posé en JS n'y compte pas — d'où la mosaïque, et pas `#home-prio-corps`.
+
+### 315c. Trouvé en route
+1. **Le toucher ne faisait rien depuis ACC-2 (§277).** `openSelParc(nom)` attend une tâche à sélection (`_mvTacheSel`) : avec un nom de parcelle, elle rendait la main
+   (un salarié lisait « Admin requis »). FORME-1 l'avait corrigé dans le cockpit (§301c ③), pas ici. **Et `mv-harnais-acc2` exigeait l'erreur**
+   (`onclick="openSelParc(this.dataset.nom)"`) : troisième harnais à figer ce même défaut, après REF-1 et AUJ-3.
+2. **« La même taille » n'est pas « la même hauteur de carte ».** Mesuré dans Chromium (vrais fichiers, domaine fabriqué de 38 parcelles dont 36 avec contour, lanières
+   de 90 à 320 m sur 12 à 42) : chaque forme a la surface de son rectangle (écart ≤ 0,2 %), mais la mosaïque passe de 145 à 187 px au téléphone (la carte de 411 à 453),
+   de 58 à 78 px sur ordinateur (la carte : +5 px, la colonne des chiffres fixe sa hauteur). Une lanière occupe une boîte plus large que sa surface, et chaque rangée
+   prend la hauteur de sa forme la plus haute. Dit à Nico, avec le levier (un facteur dans `_homeForme`).
+3. Une lanière de 12 m de large devient un trait de 3 à 5 px : c'est sa forme, à cette taille. La prise du doigt reste d'au moins `--e-4` (`min-width`, `min-height`).
+
+### 315d. Les harnais et le rendu
+- **`mv-harnais-forme2.mjs`** (neuf, 21 assertions, 11 contre-épreuves) : le VRAI bloc FORME-1 d'utils.js et les VRAIES `_homeForme` / `_homePrioCarte` dans un `vm` —
+  proportions (100 × 20 m → 5 pour 1), surface de l'ancien rectangle (≤ 1 %), plancher, deux morceaux, équerre, casse du nom, sans contour (pointillé, titre), contour
+  illisible, point `NaN`, échappement, `openDP` sur les sept, ordre, ni `undefined` ni `NaN`, domaine sans contour inchangé, utils.js absent ; la feuille (jetons seuls,
+  spécificité, format 8/5 levé, trait d'un pixel), l'aide, le guide, les nouveautés, la liste. Rouge sur l'app.js d'avant (15 échecs).
+- **`mv-harnais-acc2.mjs`** : `openDP` exigé, `openSelParc` refusé ; le contexte reçoit `window` (un domaine sans contour) et `_homeForme`.
+- **Rendu regardé** (Chromium, vraie feuille, polices Outfit) : téléphone clair et sombre, ordinateur ; zéro erreur JS, aucune forme hors de la carte.
+- Non vérifié : les contours de Nico ; un vrai téléphone ; `npm run build`, `test:smoke`, `test:e2e` ; le déploiement.
+
+### 315e. Ouvert
+§28 « FORME-2 — CE QUI RESTE OUVERT ».

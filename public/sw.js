@@ -1,4 +1,6 @@
-// MA VIGNE — Service Worker v9.61
+// MA VIGNE — Service Worker v9.62
+// v9.62 (11/10/2026) — FORME-2 (§315) : la carte du haut de l'Accueil dessine chaque parcelle a la forme de son contour (app.js, _homeForme),
+//   a la surface de son ancien rectangle ; sans contour, le rectangle reste, en pointille. Toucher une parcelle ouvre sa fiche (openDP). APP 8.82 -> 8.83.
 // v9.61 (11/10/2026) — BULLE-1 (§314) : chaque « i » ouvre une bulle collee a lui (utils.js, _mvBulleOuvrir) — Aujourd'hui, dont la bulle
 //   de la maquette n'avait plus de style (texte nu en bas de page), comme le reste (feuille #ovInfo) ; « Lire la suite » pour une fiche longue. APP 8.81 -> 8.82.
 // v9.60 (11/10/2026) — RAIL-1 (§313) : la barre laterale suit l'ordre du dock — Pilotage en tete, puis Terrain, Cave et reserve,
@@ -4452,7 +4454,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.61';
+const CACHE_NAME   = 'mavigne-v9.62';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4469,7 +4471,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.61 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.62 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4489,7 +4491,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.61 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.62 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

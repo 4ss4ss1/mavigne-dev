@@ -3,11 +3,11 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **11 octobre 2026 (BULLE-1)** — ★ **CHAQUE « i » OUVRE UNE BULLE COLLÉE À LUI ; CELLE D'AUJOURD'HUI AVAIT PERDU SON STYLE** (§314). Lot 45, base `2e8fb78`.
-> Nico (11/10, dicté) : « le i de information […] ça ouvre un vieux texte en bas, dans pilotage. C'est pas du tout clair, c'est pas du tout net. Ce serait mieux d'ouvrir une
-> infobulle. […] vérifiez aussi dans les autres modules ». Trouvé : la bulle de la maquette (`#ck-pop`) n'avait AUCUNE règle de style depuis REF-1 — texte nu en bas de page ;
-> ailleurs (62 fiches : Pilotage 56, Cave 4, Documents 2), le « i » ouvrait la feuille `#ovInfo`. Une seule bulle (utils.js), posée DANS la fenêtre quand le « i » y vit (A11Y-2).
-> **APP 8.81 → 8.82, SW 9.60 → 9.61.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+> Dernière consolidation : **11 octobre 2026 (FORME-2)** — ★ **LA CARTE DE L'ACCUEIL DESSINE CHAQUE PARCELLE À SA FORME ; LE TOUCHER Y OUVRE ENFIN LA FICHE** (§315). Lot 46, base `6e06158`.
+> Nico (11/10) : « Dans Vigne, il faut la forme des parcelles dans l'accueil de la même taille que les carrés actuellement ». Fait : chaque forme garde la surface de son
+> rectangle (surface déclarée, proportions du contour) ; sans contour, le rectangle reste, en pointillé. Trouvé : le toucher appelait `openSelParc`, qui ne fait rien d'un nom
+> de parcelle — et `mv-harnais-acc2` l'exigeait. Mesuré (Chromium, 38 parcelles fabriquées) : au téléphone la mosaïque passe de 145 à 187 px, la surface de chaque forme ne bouge pas.
+> **APP 8.82 → 8.83, SW 9.61 → 9.62.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1849,6 +1849,9 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ FORME-2 — CE QUI RESTE OUVERT (§315, posé le 11/10)
+1. **À regarder chez Nico, sur SES contours, au téléphone et sur PC** : la carte du haut de l'Accueil — vue dans Chromium sur un domaine fabriqué (38 parcelles), pas sur ses données. Au téléphone la mosaïque grandit (145 → 187 px) : si c'est trop, un seul facteur dans `_homeForme` la ramène, au prix de formes plus petites que les anciens rectangles. Une lanière fine devient un trait ; en sombre, « à faire » reste pâle (même jeton qu'avant, `--ligne-forte`).
+
 ### ⚠️ BULLE-1 — CE QUI RESTE OUVERT (§314, posé le 11/10)
 1. **À regarder chez Nico, au téléphone et sur PC** : un « i » d'Aujourd'hui, un du Pilotage à fiche longue (« Lire la suite »), un de la Cave, et celui de Réglages › Documents › Journal des interventions (la bulle DANS la fenêtre). Vus dans Chromium sur un banc (vraie feuille, vrai `utils.js`, A11Y-2 et le geste du cockpit rejoués), pas dans l'appli entière : le branchement du cockpit est tenu par `mv-harnais-bulle1`. Un « i » collé au bord gauche sur ordinateur : la bulle peut passer sur la barre latérale (voulu, elle est au-dessus).
 
@@ -1905,7 +1908,7 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 ### ⚠️ FORME-1 — CE QUI RESTE OUVERT (§301, posé le 09/10)
 1. **À regarder chez Nico, avec SES contours** (essais sur un domaine reconstitué) : PC (loupe, deux colonnes), téléphone (repli, toucher → fiche). Un contour dont le
    nom diffère de la parcelle donne un carré de surface, et la note sous le plan le nomme. Le sens des rangs dessinés est un repère (plus petit rectangle).
-2. Vu, non touché : la carte « La saison, parcelle par parcelle » de l'Accueil dessine encore des carrés de surface (à trancher avec Nico) ; les règles CSS de
+2. ✅ ~~La carte « La saison, parcelle par parcelle » de l'Accueil dessine encore des carrés de surface~~ — fait au §315 (FORME-2). Vu, non touché : les règles CSS de
    l'ancien plan (`.ck-etiq`, `.ck-lieu`, `.ck-clos`, `.ck-zone-f`) restent dans la feuille, sans objet.
 
 ### ⚠️ CADRE-1 — CE QUI RESTE OUVERT (§300, posé le 09/10)
@@ -2062,8 +2065,6 @@ différents entre eux, et des heures sup apparaissent dans Décider › le renfo
 
 ### ⚠️ SEL-1 / ARRACH-3 à 5 — CE QUI RESTE OUVERT (§205-208, posé le 02/10)
 
-1. ✅ ~~ARRACH-3~~ — fait au §206. ✅ ~~Formulaire du journal, montant prestataire, arrachée au tableau des parcelles~~ — faits
-   au §207.
 2. **À regarder chez Nico** : l'avancement de l'Effeuillage et du Désherbage sur la campagne en cours, juste après le
    déploiement — les parcelles déjà saisies doivent compter d'office ; les autres, plus.
 3. ✅ ~~Double saisie de la facture~~ — garde croisée au §208. ⚠️ Limite écrite : sans n° de facture, rien ne prouve le doublon ;
@@ -2071,7 +2072,6 @@ différents entre eux, et des heures sup apparaissent dans Décider › le renfo
 4. **Le bouton « Début »** écrit encore un arrachage « En cours » sans étape (sans effet sur les heures ni l'argent).
 
 ### ⚠️ FERTI-3 — CE QUI RESTE OUVERT SUR L'AMENDEMENT (§202-203, posé le 02/10)
-1. ✅ **Le budget prévu des achats** : FAIT au §203 (`achP`, retiré dès la facture chiffrée).
 2. ✅ **La session « Amendement » valide la tâche** : FAIT au §204 (`auTracteur`, écarté du temps vigne). ⚠️ À voir
    si d'autres activités tracteur doivent un jour cocher LEUR tâche : le mécanisme est écrit pour l'amendement seul.
 3. **Calendrier d'épandage vigne** non contrôlé (grille régionale en couleurs, dates par type non lues). Seul le type 0

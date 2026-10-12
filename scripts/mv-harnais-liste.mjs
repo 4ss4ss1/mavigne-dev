@@ -581,6 +581,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-rail1.mjs --contre'],
   ['node scripts/mv-harnais-bulle1.mjs'],            // BULLE-1 (§314) : chaque « i » ouvre une bulle collée à lui — position, « Lire la suite », fenêtre hôte, toucher à côté, Échap, cockpit
   ['node scripts/mv-harnais-bulle1.mjs --contre'],
+  ['node scripts/mv-harnais-forme2.mjs'],            // FORME-2 (§315) : les parcelles de la carte de l'Accueil à leur vraie forme, à la surface de leur ancien rectangle ; l'appui ouvre la fiche
+  ['node scripts/mv-harnais-forme2.mjs --contre'],
   ['node scripts/mv-harnais-trac1.mjs'],              // TRAC-1 (§282) : les sessions du Tracteur en liste + fiche
   ['node scripts/mv-harnais-trac1.mjs --contre'],
   ['node scripts/mv-harnais-trac2.mjs'],              // TRAC-2 (§283) : l'Entretien du Tracteur sur deux colonnes

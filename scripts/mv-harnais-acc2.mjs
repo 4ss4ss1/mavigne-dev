@@ -2,6 +2,9 @@
 //   node scripts/mv-harnais-acc2.mjs           → doit être vert
 //   node scripts/mv-harnais-acc2.mjs --contre  → chaque défaut réinjecté doit rougir
 // Joue la VRAIE _homePrioCarte (extraite par ses accolades) sur un faux DOM et de fausses parcelles, avec et sans priorité.
+// FORME-2 (§315) : le domaine joué ici n'a aucun contour (window._mvParcForme rend null) — les rectangles d'avant, pleins ;
+//   les formes ont leur harnais (mv-harnais-forme2). Un appui ouvre la fiche (openDP) : ce harnais fixait openSelParc, qui
+//   attend une tâche à sélection et ne faisait rien d'un nom de parcelle — la même erreur que REF-1 et AUJ-3 (§301c).
 import fs from 'fs'; import path from 'path';
 import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -19,17 +22,17 @@ function jouerCarte(S, avecPrio) {
   const doc = { querySelector: () => w, getElementById: (id) => (id === 'home-kpis' ? kp : id === 'home-eqj-wrap' ? eq : id === 'home-prio-corps' ? corps.v : null), createElement: () => el('home-prio-corps') };
   const P = [{ nom: 'Les Crais', surface: '0,5', statut: 'En cours' }, { nom: 'Bel <Air>', surface: '2', statut: 'En cours' }, { nom: 'Arrachée', surface: '1', statut: 'Arrachee' }];
   const ST = { 'Les Crais': 'Validé', 'Bel <Air>': 'En cours' };
-  const ctx = new Function('document', 'PARCELLES', '_prioItems', 'getTacheStatut', 'getPCls', 'tNom', '_escAttr', '_escHtml', '_pvSurfFr',
-    fonction(S.app, 'function _homeSurf(p){') + '\n' + fonction(S.app, 'function _homeHa(x){') + '\n' + fonction(S.app, 'function _homePrioCarte(){') + '\n_homePrioCarte(); return document.getElementById(\'home-prio-corps\');');
+  const ctx = new Function('document', 'PARCELLES', '_prioItems', 'getTacheStatut', 'getPCls', 'tNom', '_escAttr', '_escHtml', '_pvSurfFr', 'window',
+    fonction(S.app, 'function _homeSurf(p){') + '\n' + fonction(S.app, 'function _homeHa(x){') + '\n' + fonction(S.app, 'function _homeForme(f,r){') + '\n' + fonction(S.app, 'function _homePrioCarte(){') + '\n_homePrioCarte(); return document.getElementById(\'home-prio-corps\');');
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  const c = ctx(doc, P, () => (avecPrio ? [{ t: 'Chaussage', equipe: ['Lucas', 'Inès'] }] : []), (p) => ST[p.nom], (p) => ({ pct: p.nom === 'Les Crais' ? 100 : 40 }), (t) => t, esc, esc, (s) => s);
+  const c = ctx(doc, P, () => (avecPrio ? [{ t: 'Chaussage', equipe: ['Lucas', 'Inès'] }] : []), (p) => ST[p.nom], (p) => ({ pct: p.nom === 'Les Crais' ? 100 : 40 }), (t) => t, esc, esc, (s) => s, { _mvParcForme: () => null });
   return { html: c ? c.innerHTML : '', kpRange: kp.parentNode === w };
 }
 function suite(S) {
   const out = []; const T = (n, c) => out.push([n, !!c]); const B = bloc(S.css), dur = enDur(B);
   let a = { html: '' }, b = { html: '' }; try { a = jouerCarte(S, true); b = jouerCarte(S, false); } catch (e) { a = { html: 'plantage ' + e.message }; }
   T('avec une priorité : la tâche, son pourcentage pondéré par la surface (20 %), la barre, l’équipe', a.html.includes('Priorit\u00e9 du moment\u00a0: Chaussage') && a.html.includes('<div class="hpc-pct">20<small>') && a.html.includes('<div class="hpc-bar"><i style="--p:20%">') && a.html.includes('\u00e9quipe\u00a0: Lucas, In\u00e8s'));
-  T('les parcelles à leur surface, faites d’abord, arrachée exclue, noms échappés, un appui ouvre la parcelle', a.html.indexOf('hpc-fait') > -1 && a.html.indexOf('hpc-fait') < a.html.indexOf('hpc-cours') && !a.html.includes('Arrach\u00e9e') && a.html.includes('Bel &lt;Air&gt;') && !a.html.includes('Bel <Air>') && a.html.includes('onclick="openSelParc(this.dataset.nom)"'));
+  T('les parcelles à leur surface, faites d’abord, arrachée exclue, noms échappés, un appui ouvre sa fiche (openDP, FORME-2)', a.html.indexOf('hpc-fait') > -1 && a.html.indexOf('hpc-fait') < a.html.indexOf('hpc-cours') && !a.html.includes('Arrach\u00e9e') && a.html.includes('Bel &lt;Air&gt;') && !a.html.includes('Bel <Air>') && a.html.includes('onclick="openDP(this.dataset.nom)"') && !a.html.includes('openSelParc'));
   T('sans priorité : la saison parcelle par parcelle, sans pourcentage en double', b.html.includes('La saison, parcelle par parcelle') && !b.html.includes('hpc-pct') && b.html.includes('2 parcelles, 2,50\u00a0ha'));
   T('les chiffres du domaine (#home-kpis) sont rangés dans la carte, pas recréés', a.kpRange === true && S.app.includes("var kp=document.getElementById('home-kpis'); if(kp&&kp.parentNode!==w)w.insertBefore(kp,eq||null);"));
   T('renderHome appelle la carte à la fin', S.app.includes('  _renderHomeWidgets();\n  _homePrioCarte();   // ACC-2 (§277)\n}'));

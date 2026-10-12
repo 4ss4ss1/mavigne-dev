@@ -8,6 +8,16 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **11 octobre 2026 (BULLE-1)** — ★ **CHAQUE « i » OUVRE UNE BULLE COLLÉE À LUI ; CELLE D'AUJOURD'HUI AVAIT PERDU SON STYLE** (§314). Lot 45, base `2e8fb78`.
+> Nico (11/10, dicté) : « le i de information […] ça ouvre un vieux texte en bas, dans pilotage. C'est pas du tout clair, c'est pas du tout net. Ce serait mieux d'ouvrir une
+> infobulle. […] vérifiez aussi dans les autres modules ». Trouvé : la bulle de la maquette (`#ck-pop`) n'avait AUCUNE règle de style depuis REF-1 — texte nu en bas de page ;
+> ailleurs (62 fiches : Pilotage 56, Cave 4, Documents 2), le « i » ouvrait la feuille `#ovInfo`. Une seule bulle (utils.js), posée DANS la fenêtre quand le « i » y vit (A11Y-2).
+> **APP 8.81 → 8.82, SW 9.60 → 9.61.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+
+> Rayés du §28 de `CLAUDE.md` le 11/10 (FORME-2, plafond du cœur à 2 800 lignes) — deux points réglés, chacun raconté dans sa section : SEL-1 n° 1
+> « ~~ARRACH-3~~ — fait au §206. ~~Formulaire du journal, montant prestataire, arrachée au tableau des parcelles~~ — faits au §207 » ; FERTI-3 n° 1
+> « ~~Le budget prévu des achats~~ : FAIT au §203 (`achP`, retiré dès la facture chiffrée) ».
+
 > Dernière consolidation : **11 octobre 2026 (RAIL-1)** — ★ **LA BARRE LATÉRALE SUIT L'ORDRE DU DOCK, GARDÉE PAR THÈMES ; UN LOGO DESSINÉ POUR 28 PX** (§313). Lot 44, base `14d9d73`.
 > Nico (11/10, capture de la barre) : « l'ordre devrait être d'abord pilotage, après vigne, tracteur, phyto, cave, réserve, ensuite planning, et après réglage […] garder
 > l'organisation par thème […] mais en mieux. Et si tu peux renforcer un peu la couleur du logo ». Trouvé : le dock avait DÉJÀ cet ordre, la barre le défaisait en rangeant

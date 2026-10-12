@@ -6580,11 +6580,24 @@ function showHomeLoader() {
 }
 
 // ACC-2 (§277) : LA PRIORITÉ ÉPINGLÉE AU DESSIN DE LA MAQUETTE V4 — la tâche du moment, son avancement, les parcelles à leur
-//   surface (fait, en cours, à faire ; un appui ouvre la parcelle) et, à droite sur ordinateur, les trois chiffres du domaine.
+//   surface (fait, en cours, à faire ; un appui ouvre sa fiche) et, à droite sur ordinateur, les trois chiffres du domaine.
 //   Les éléments existants (pastille de priorité, équipes du jour, chiffres #home-kpis) gardent leurs fonctions et leurs
 //   identifiants : on les RANGE dans la carte, on ne les recrée pas. Sans tâche prioritaire, la carte montre la saison.
 function _homeSurf(p){ return parseFloat(String((p&&p.surface)||0).replace(',','.'))||0; }
 function _homeHa(x){ return (Math.round(x*100)/100).toFixed(2).replace('.',','); }
+// FORME-2 (§315) : LA PARCELLE À SA FORME, À LA TAILLE DE SON RECTANGLE D'AVANT. f = utils.js/_mvFormeDe (le contour en mètres,
+//   nord en haut, ramené à l'origine) ; r = sa surface sur la plus grande. Le rectangle d'avant faisait --h-row-2 × √r de large
+//   au format 8/5, jamais moins d'un tiers (16 px sur 48) : sa surface valait 5/8 × r, plancher 1/9 de r. La forme garde cette
+//   surface et prend les proportions du contour : --fw × --fh = 5/8 × r, --fw / --fh = largeur / hauteur (des parts de
+//   --h-row-2 — aucun pixel écrit ici). Une même surface déclarée donne donc une même aire, partout sur la carte. Le dessin suit
+//   son viewBox, en mètres arrondis au décimètre. Rend null sans contour exploitable : la carte garde alors le rectangle.
+function _homeForme(f,r){
+  if(!f||!(f.w>0)||!(f.h>0)||!Array.isArray(f.rings)||!f.rings.length) return null;
+  var a=f.w/f.h, s=0.625*Math.max(r>0?r:0,1/9), x=function(v){ return String(Math.round(v*10)/10); };
+  var d=f.rings.map(function(q){ return 'M'+q.map(function(z){ return x(z[0])+' '+x(z[1]); }).join('L')+'Z'; }).join('');
+  if(!/^[0-9MLZ .-]+$/.test(d)) return null;   // un point illisible (NaN) : pas de dessin plutôt qu'un dessin faux
+  return { fw:Math.sqrt(s*a).toFixed(3), fh:Math.sqrt(s/a).toFixed(3), vb:'0 0 '+x(f.w)+' '+x(f.h), d:d };
+}
 function _homePrioCarte(){
   var w=document.querySelector('#page-home .home-w[data-w="priorite"]'); if(!w)return;
   w.classList.add('hpc');
@@ -6602,8 +6615,16 @@ function _homePrioCarte(){
   act.forEach(function(p){ var sf=_homeSurf(p); surf+=sf; if(etat(p)==='fait')fait+=sf; pond+=getPCls(p).pct*sf; });
   var pct=t?(surf?Math.round(fait/surf*100):0):(surf?Math.round(pond/surf):0);
   var maxS=Math.max.apply(null,act.map(_homeSurf).concat([0.0001])), rang={fait:0,cours:1,afaire:2};
+  // FORME-2 (§315) : chaque parcelle à la forme de son contour (_homeForme) ; sans contour, le rectangle d'avant — en
+  //   pointillé quand le domaine a des contours (le nom ne correspond à aucun : la même règle que le plan du cockpit), plein
+  //   quand il n'en a aucun (rien ne change pour lui). Un appui ouvre SA fiche (openDP) : openSelParc attend une tâche à
+  //   sélection et rendait la main sans rien ouvrir — le défaut que FORME-1 (§301c) a corrigé dans le cockpit, pas ici.
+  var lireForme=(typeof window._mvParcForme==='function')?window._mvParcForme:function(){ return null; };
+  var avecContours=act.some(function(p){ return !!lireForme(p.nom); });
   var mos=act.slice().sort(function(a,b){return rang[etat(a)]-rang[etat(b)]||_homeSurf(b)-_homeSurf(a);}).map(function(p){
-    return '<button type="button" class="hpc-p hpc-'+etat(p)+'" style="--s:'+Math.sqrt(_homeSurf(p)/maxS).toFixed(3)+'" data-nom="'+_escAttr(p.nom)+'" title="'+_escAttr(p.nom+', '+_pvSurfFr(p.surface)+' ha')+'" aria-label="'+_escAttr(p.nom)+'" onclick="openSelParc(this.dataset.nom)"></button>';
+    var r=_homeSurf(p)/maxS, f=_homeForme(lireForme(p.nom),r), lib=p.nom+', '+_pvSurfFr(p.surface)+' ha';
+    return '<button type="button" class="hpc-p'+(f?' hpc-fo':(avecContours?' hpc-sans':''))+' hpc-'+etat(p)+'" style="'+(f?'--fw:'+f.fw+';--fh:'+f.fh:'--s:'+Math.sqrt(r).toFixed(3))+'" data-nom="'+_escAttr(p.nom)+'" title="'+_escAttr((f||!avecContours)?lib:lib+', pas de contour enregistr\u00e9')+'" aria-label="'+_escAttr(p.nom)+'" onclick="openDP(this.dataset.nom)">'
+      +(f?'<svg viewBox="'+f.vb+'" aria-hidden="true" focusable="false"><path d="'+f.d+'"/></svg>':'')+'</button>';
   }).join('');
   var meta=t?(_homeHa(fait)+'\u00a0ha faits sur '+_homeHa(surf)+'\u00a0ha'+((its[0].equipe&&its[0].equipe.length)?', \u00e9quipe\u00a0: '+_escHtml(its[0].equipe.join(', ')):''))
             :(act.length+' parcelle'+(act.length>1?'s':'')+', '+_homeHa(surf)+'\u00a0ha');
@@ -6612,7 +6633,7 @@ function _homePrioCarte(){
     +'<div class="hpc-meta"><b>Priorit\u00e9 du moment\u00a0: '+_escHtml(tNom(t))+'</b><span>'+meta+'</span></div></div>'
     +'<div class="hpc-bar"><i style="--p:'+pct+'%"></i></div>'
     :'<div class="hpc-meta"><b>La saison, parcelle par parcelle</b><span>'+meta+'</span></div>')
-    +(act.length?'<div class="hpc-mos" aria-label="Les parcelles, \u00e0 leur surface">'+mos+'</div>'
+    +(act.length?'<div class="hpc-mos" id="home-prio-mos" aria-label="Les parcelles, \u00e0 leur forme et \u00e0 leur surface">'+mos+'</div>'
       +'<div class="hpc-leg"><span class="hpc-l-fait"><i></i>Fait</span><span class="hpc-l-cours"><i></i>En cours</span><span class="hpc-l-afaire"><i></i>\u00c0 faire</span></div>':'');
 }
 

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.82';
+export const APP_VERSION = '8.83';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1035,6 +1035,14 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.83', d: '2026-10-11', items: [
+    { niv: 1, pour: ['vigne'], cible: '#home-prio-mos', emoji: 'carte', titre: 'L’Accueil dessine chaque parcelle à sa forme',
+      desc: "Dans la carte du haut de l’Accueil, les parcelles étaient de petits rectangles : on ne reconnaissait pas ses vignes d’un coup d’œil. "
+        + "Chacune a maintenant la forme de son contour, nord en haut, avec la même surface que son ancien rectangle. Les couleurs ne changent pas : vert, c’est fait ; gris foncé, c’est commencé. "
+        + "Une parcelle dont le contour n’est pas enregistré garde son rectangle, en pointillé." },
+    { niv: 0, pour: ['vigne'], emoji: 'doigt', titre: 'Toucher une parcelle de l’Accueil ouvre sa fiche',
+      desc: "Dans cette même carte, toucher une parcelle n’ouvrait rien, et un salarié lisait « Admin requis ». Sa fiche s’ouvre maintenant." },
+  ] },
   { v: '8.82', d: '2026-10-11', items: [
     { niv: 0, pour: ['tous'], emoji: 'info', titre: 'Le « i » ouvre une bulle à côté du chiffre',
       desc: "Dans le Pilotage, toucher un « i » d’Aujourd’hui faisait tomber son explication tout en bas de la page, sans mise en forme. Ailleurs, le « i » ouvrait une feuille par-dessus l’écran. "
@@ -4963,7 +4971,7 @@ var MV_AIDE = {
     ico: 'feuille', titre: 'Accueil', ancre: 'vigne',
     points: [
       ['Sur ordinateur', " : les modules sont dans la <b>barre à gauche</b> (repliable), et <b>Ctrl K</b> ouvre une recherche — une parcelle, un écran, un onglet du Pilotage. Sur téléphone et tablette, rien ne change."],
-      ['La priorité du moment', "reste épinglée en haut, dans une carte : la tâche que l’équipe attaque, son avancement, et les parcelles dessinées à leur surface (fait, en cours, à faire) — un appui sur l’une l’ouvre. Sans priorité, la carte montre la saison, parcelle par parcelle. Les trois chiffres du domaine sont à droite sur ordinateur, dessous au téléphone."],
+      ['La priorité du moment', "reste épinglée en haut, dans une carte : la tâche que l’équipe attaque, son avancement, et les parcelles dessinées à leur forme (leur contour, nord en haut) et à leur surface (fait, en cours, à faire) — un appui sur l’une ouvre sa fiche. Une parcelle dont le contour n’est pas enregistré reste un rectangle, en pointillé. Sans priorité, la carte montre la saison, parcelle par parcelle. Les trois chiffres du domaine sont à droite sur ordinateur, dessous au téléphone."],
       ['Équipes du jour', "juste sous la priorité. L’administrateur la touche pour répartir les salariés en équipes <b>pour la journée</b> : chacun validera et démarrera avec son équipe, sans pouvoir la changer, et ne voit pas les autres. Rien de réglé, ou « Tout le monde ensemble » : l’application fait comme d’habitude. Le lendemain, tout repart à zéro. Un salarié voit ici son équipe du jour, quand il y en a une."],
       ['Une ligne « À vérifier »', "peut s’afficher sous les chiffres : un changement de l’application qui vous concerne — un chiffre qui bouge, un réglage à contrôler. Touchez-la pour le détail, « Vu » pour la ranger ; elle reste dans Réglages › Moi › Journal des nouveautés."],
       ['La mise en route', "n’apparaît que chez l’administrateur d’un domaine neuf : sept étapes qui se cochent en lisant ce qui est déjà enregistré, rien à pointer à la main. Le bloc s’efface tout seul quand tout est fait."],

@@ -6710,6 +6710,18 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
   #page-home .hpc #home-eqj-wrap{ grid-area:eq; }
 }
 /* ★ FIN ACC-2 */
+/* ★ FORME-2 (§315) — LES PARCELLES DE LA CARTE DE L'ACCUEIL À LEUR VRAIE FORME. Le bouton porte le contour de sa parcelle
+   (app.js, _homeForme), nord en haut, à la surface de son rectangle d'avant : la taille vient de --fw et --fh (des parts de
+   --h-row-2), la couleur des mêmes jetons que le rectangle. Le bouton ne dessine plus rien lui-même (ni cadre, ni fond, ni format
+   8/5) ; il garde une prise d'au moins --e-4 pour le doigt. Sans contour, le rectangle reste, en pointillé (.hpc-sans).
+   Par jetons seulement. */
+#page-home .hpc-mos .hpc-p.hpc-fo{ display:inline-flex; align-items:center; justify-content:center; width:auto; min-width:var(--e-4,16px); min-height:var(--e-4,16px); max-width:100%; aspect-ratio:auto; border:0; border-radius:var(--r-xs,4px); background:transparent; }
+#page-home .hpc-fo svg{ display:block; width:calc(var(--h-row-2) * var(--fw)); height:calc(var(--h-row-2) * var(--fh)); max-width:100%; overflow:visible; }
+#page-home .hpc-fo path{ fill:var(--bg-card); stroke:var(--ligne-forte); stroke-width:var(--bw); stroke-linejoin:round; vector-effect:non-scaling-stroke; }
+#page-home .hpc-fo.hpc-fait path{ fill:var(--ok-doux); stroke:var(--ok); }
+#page-home .hpc-fo.hpc-cours path{ fill:var(--presse); stroke:var(--encours); }
+#page-home .hpc-mos .hpc-p.hpc-sans{ border-style:dashed; }
+/* ★ FIN FORME-2 */
 /* ★ ACC-3 (§278) — LA MÉTÉO 5 JOURS ET LES DERNIERS TRAVAUX AU DESSIN DE LA MAQUETTE V4.
    Météo : le jour en tête, cinq colonnes à filet, une barre de pluie (la prévision donne une probabilité), la note du premier
    jour pluvieux. Derniers travaux : le fil — les jours en intertitre, l'heure, les initiales, « qui a validé quoi, où ». Par
