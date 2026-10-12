@@ -13,9 +13,9 @@ const fnDe = (s, sig) => { const i = s.indexOf(sig); if (i < 0) throw new Error(
 const J0 = new Date(), iso = k => { const d = new Date(J0.getFullYear(), J0.getMonth(), J0.getDate() + k); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 const ord = k => Math.round((Date.UTC(J0.getFullYear(), J0.getMonth(), J0.getDate() + k) - Date.UTC(2026, 0, 1)) / 864e5);
 function modele(S) {
-  const P = [{ nom: 'Les Crais 1', surface: .41, appellation: 'Gevrey-Chambertin', commune: 'Gevrey-Chambertin', statut: 'Active' },
-    { nom: 'Les Crais 2', surface: .38, appellation: 'Gevrey-Chambertin', commune: 'Gevrey-Chambertin', statut: 'Active' },
-    { nom: 'Les Charmes', surface: .36, appellation: 'Côte de Nuits-Villages', commune: 'Brochon', statut: 'Active' },
+  const P = [{ nom: 'Les Crais 1', surface: .41, appellation: 'Gevrey-Chambertin', commune: 'Gevrey-Chambertin', statut: 'Active', taches: { Taille: 'Validé' } },
+    { nom: 'Les Crais 2', surface: .38, appellation: 'Gevrey-Chambertin', commune: 'Gevrey-Chambertin', statut: 'Active', taches: { Taille: 'En cours' } },
+    { nom: 'Les Charmes', surface: .36, appellation: 'Côte de Nuits-Villages', commune: 'Brochon', statut: 'Active', taches: { Taille: 'Validé' } },
     { nom: 'La Justice 6', surface: .30, appellation: 'Gevrey-Chambertin', commune: 'Brochon', statut: 'Arrachée' }];
   const hex = t => Math.floor(t).toString(16), now = Date.now();
   const JOURNAL = [{ id: hex(now - 864e5 * 9), date: iso(-9), parcelle: 'Les Crais 1', tache: 'Taille', qui: 'Jean', statut: 'Validé' },
@@ -56,7 +56,7 @@ function suite(S) {
     V.taches.map(t => t.id).join() === 'taille,brulage' && V.taches[0].debut === iso(-40) && V.taches[0].fin === iso(47) && V.taches[0].hDone === 449 && V.taches[1].nom === 'Brûlage');
   T('la fin prévue, l\u2019objectif et la marge viennent de _pilMargeCalc', V.fin === iso(43) && V.objectif === iso(48) && V.marge === 5);
   T('les présences du jour, sans le bureau ; le motif dit l\u2019absence', V.presents === 2 && V.effectifTotal === 3 && V.absTxt === 'Marion en congé' && V.decision.pres.v === '2 sur 3');
-  T('l\u2019état des parcelles par tâche, lu au journal (arrachée exclue)', V.etats.taille['Les Crais 1'] === 'faite' && V.etats.taille['Les Charmes'] === 'faite' && V.etats.taille['Les Crais 2'] === 'cours' && V.etats.taille['La Justice 6'] === 'arr');
+  T('l\u2019état des parcelles par tâche, lu sur la fiche (ETAT-1, §320 ; arrachée exclue)', V.etats.taille['Les Crais 1'] === 'faite' && V.etats.taille['Les Charmes'] === 'faite' && V.etats.taille['Les Crais 2'] === 'cours' && V.etats.taille['La Justice 6'] === 'arr');
   T('l\u2019équipe sur le terrain et le fil du jour (l\u2019heure lue dans l\u2019identifiant)', V.equipes.length === 1 && V.equipes[0].parcelle === 'Les Crais 2' && V.equipes[0].noms === 'Hugo et Léa'
     && V.evts.length === 3 && V.evts[0].type === 'commence' && V.evts[1].h === Math.round(.36 * 706 / 1.15 * 10) / 10   /* surface × barème (h_total / surf_total) */);
   T('la décision du jour : « Traiter ? » et la tension lus dans leurs moteurs, sans balises', V.decision.traiter.raison === 'Hors saison' && V.decision.tension.v === 'Personne au seuil' && V.prio === 'taille'
@@ -91,7 +91,7 @@ if (CONTRE) {
   const DEF = [
     ['les passages proposés comme tâches simples', 'pil', "var rows=(typeof window._ckPlanTaches==='function')?window._ckPlanTaches(d.data):(d.data||[]);", "var rows=(d.data||[]);"],
     ['le bureau compté dans l\u2019effectif', 'pil', "return p&&!p.bureau&&p.etat!=='repos'; }).map(function(p){ return { nom:p.nom, absent:p.etat!=='present'", "return !!p&&p.etat!=='repos'; }).map(function(p){ return { nom:p.nom, absent:p.etat!=='present'"],   // AUJ-5 : + repos
-    ['une équipe qui reste après sa validation', 'ck', "Object.keys(L.deb).forEach(function(n){ if(L.der[n] === 'cours') r[n] = L.deb[n]; });", "Object.keys(L.deb).forEach(function(n){ r[n] = L.deb[n]; });"],   // FORME-1 (§301) : l'équipe vient de _ckPlanDebuts
+    ['une équipe qui reste après sa validation', 'ck', "if(!e || e.tache !== tache || e.statut !== 'En cours' || etat[e.parcelle] !== 'cours') return;", "if(!e || e.tache !== tache || e.statut !== 'En cours') return;"],   // ETAT-1 (§320) : l'équipe des seules parcelles en cours
     ['des balises dans la décision du jour', 'pil', "traiter:TR?{ v:tx(TR.big), raison:tx(TR.rai), fen:", "traiter:TR?{ v:TR.big, raison:TR.rai, fen:"],
     ['PRO-1 : la tâche du moment lue par l\u2019appel nu (toujours « — »)', 'pil', "PP=_pilPrioDuJour(d).M;", "PP=window._mvTacheDuMoment();"],
     ['une économie inventée', 'pil', "sparkTrav:ph.slice(-14).map(function(x){ return hT?Math.round((hT-x.reste)/hT*1000)/10:0; }), eco:null", "sparkTrav:[], eco:{}"],

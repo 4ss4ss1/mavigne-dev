@@ -435,36 +435,50 @@ function _ckMeteoCache(){
 //   parcelle dont la LARGEUR SUIT LA SURFACE, à la même échelle pour tout le domaine — le rapport des
 //   surfaces se garde d'une appellation à l'autre. Chaque parcelle prend la couleur de son état pour la tâche
 //   choisie ; toucher une parcelle ouvre sa fiche (openDP — FORME-1, §301) : on valide là, par le chemin de toujours.
-//   ⚠️ L'état vient du journal : faite = une validation depuis l'ouverture de la fenêtre de la tâche ;
-//   en cours = un début sans validation après ; en retard = fenêtre passée et pas faite ; arrachée = statut.
+//   ★★ ETAT-1 (§320) : l'état vient du STATUT de la parcelle dans la période, celui de sa fiche (faite = validée, en cours =
+//   commencée) ; en retard = fenêtre passée et pas faite ; arrachée = statut. Le journal ne dit plus que qui y travaille.
 //   Les tâches à passages ou à niveaux ne sont pas proposées : une validation n'y dit pas « fini ».
 var _CK_PL = { W: 1000, m: 16, h: 64, gap: 3, gapC: 14 };
-// ★ FORME-1 (§301) : UNE lecture du journal pour l'état d'une parcelle ET pour ceux qui y travaillent. deb[parcelle] = la
-//   ligne « En cours » qui la met en cours (la dernière avant une validation). Avant, l'équipe venait du journal du JOUR seul :
-//   une parcelle commencée la veille restait « en cours » sans personne dessus, et le plan écrivait « aucune équipe ».
-function _ckPlanLire(parcs, journal, tache, debutIso){
-  var etat = {}, der = {}, deb = {};
-  (parcs || []).forEach(function(p){ if(p && p.nom) etat[p.nom] = /arrach/i.test(String(p.statut || '')) ? 'arr' : 'afaire'; });
-  (journal || []).slice().sort(function(a, b){ return String(a && a.date || '') < String(b && b.date || '') ? -1 : 1; }).forEach(function(e){
-    if(!e || e.tache !== tache || !Object.prototype.hasOwnProperty.call(etat, e.parcelle) || etat[e.parcelle] === 'arr') return;
-    if(debutIso && String(e.date || '') < debutIso) return;
-    if(e.statut === 'Validé' || e.statut === 'Terminé') der[e.parcelle] = 'faite';
-    else if(e.statut === 'En cours' && der[e.parcelle] !== 'faite') der[e.parcelle] = 'cours';
-    if(e.statut === 'En cours' && der[e.parcelle] === 'cours') deb[e.parcelle] = e;
-  });
-  return { etat: etat, der: der, deb: deb };
+// ★★ ETAT-1 (§320) — LE STATUT D'UNE TÂCHE SUR UNE PARCELLE, LU COMME SA FICHE (app.js/getTacheStatut : la période consultée,
+//   celle du Pilotage). Repli, fonction absente (harnais, ordre de chargement) : le statut écrit de la période active.
+function _ckPlanStatut(p, tache){
+  if(typeof window.getTacheStatut === 'function') return String(window.getTacheStatut(p, tache) || '');
+  var s = p && p.taches && p.taches[tache];
+  return typeof s === 'string' ? s : '';
 }
-window._ckPlanEtats = function(parcs, journal, tache, debutIso, enRetard){
-  var L = _ckPlanLire(parcs, journal, tache, debutIso), etat = L.etat, der = L.der;
-  Object.keys(etat).forEach(function(n){ if(etat[n] !== 'arr') etat[n] = der[n] || (enRetard ? 'retard' : 'afaire'); });
+// ★ FORME-1 (§301) : UNE lecture pour l'état d'une parcelle ET pour ceux qui y travaillent. deb[parcelle] = la ligne « En cours »
+//   qui la met en cours. Avant FORME-1, l'équipe venait du journal du JOUR seul : une parcelle commencée la veille restait « en
+//   cours » sans personne dessus, et le plan écrivait « aucune équipe ».
+// ★★ ETAT-1 (§320) : l'ÉTAT vient du statut de la parcelle (o.statut, sinon _ckPlanStatut) — faite = validée, en cours =
+//   commencée ; un arrachage fini pour l'équipe (app.js/_mvAuPrestataire) est « faite », la suite revient au prestataire. Le
+//   journal ne dit plus que QUI : la dernière ligne « En cours » de la période [debutIso, o.fin], le même jour départagé par
+//   l'heure du début. Avant, l'état venait du journal : sans borne pour une tâche sans fenêtre (debutIso null — entreplantation
+//   sans trou, travaux sans barème : une validation d'une saison passée peignait la parcelle « faite ») et sourd aux annulations
+//   (↩ écrit « Annulé », « remis » n'écrit rien). Nico (12/10) : « Entreplantation fait » sur le plan, « À faire » sur la fiche.
+function _ckPlanLire(parcs, journal, tache, debutIso, o){
+  var etat = {}, deb = {}, lire = (o && typeof o.statut === 'function') ? o.statut : _ckPlanStatut;
+  var fin = (o && o.fin) ? String(o.fin) : '', presta = (typeof window._mvAuPrestataire === 'function') ? window._mvAuPrestataire : null;
+  (parcs || []).forEach(function(p){
+    if(!p || !p.nom) return;
+    if(/arrach/i.test(String(p.statut || ''))){ etat[p.nom] = 'arr'; return; }
+    var s = lire(p, tache);
+    etat[p.nom] = s === 'Validé' ? 'faite' : (s === 'En cours' ? ((presta && presta(p, tache)) ? 'faite' : 'cours') : 'afaire');
+  });
+  (journal || []).forEach(function(e){
+    if(!e || e.tache !== tache || e.statut !== 'En cours' || etat[e.parcelle] !== 'cours') return;
+    var d = String(e.date || ''), c = deb[e.parcelle], dc = c ? String(c.date || '') : '';
+    if((debutIso && d < debutIso) || (fin && d > fin)) return;
+    if(!c || d > dc || (d === dc && (Number(e.ts_debut) || 0) > (Number(c.ts_debut) || 0))) deb[e.parcelle] = e;
+  });
+  return { etat: etat, deb: deb };
+}
+window._ckPlanEtats = function(parcs, journal, tache, debutIso, enRetard, o){
+  var etat = _ckPlanLire(parcs, journal, tache, debutIso, o).etat;
+  if(enRetard) Object.keys(etat).forEach(function(n){ if(etat[n] === 'afaire') etat[n] = 'retard'; });
   return etat;
 };
 // Les parcelles en cours et la ligne « En cours » de chacune : qui l'a commencée, et quel jour.
-window._ckPlanDebuts = function(parcs, journal, tache, debutIso){
-  var L = _ckPlanLire(parcs, journal, tache, debutIso), r = {};
-  Object.keys(L.deb).forEach(function(n){ if(L.der[n] === 'cours') r[n] = L.deb[n]; });
-  return r;
-};
+window._ckPlanDebuts = function(parcs, journal, tache, debutIso, o){ return _ckPlanLire(parcs, journal, tache, debutIso, o).deb; };
 window._ckPlanDispo = function(parcs){
   var apps = {}, ordre = [];
   (parcs || []).forEach(function(p){
@@ -535,6 +549,12 @@ function _ckPlanDebut(fen, nom){
   var d = new Date(Date.UTC(2026, 0, 1) + w.ws * 86400000);
   return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0');
 }
+// ★ ETAT-1 (§320) : la période du Pilotage (pilotage.js/_pilSaison : la période consultée) — ses bornes disent où chercher qui a
+//   commencé une parcelle en cours. Les dates de la tâche (_ckPlanDebut) ne servent plus qu'à « commencée au calendrier ».
+function _ckPlanPeriode(){
+  var s = (typeof window._pilSaison === 'function') ? window._pilSaison() : null;
+  return { debut: (s && s.debut) ? String(s.debut).slice(0, 10) : null, fin: (s && s.fin) ? String(s.fin).slice(0, 10) : '' };
+}
 window._ckPlanCorps = function(){
   var P = _CK.plan; if(!P) return '';
   var taches = window._ckPlanTaches(P.rows);
@@ -542,7 +562,7 @@ window._ckPlanCorps = function(){
   var t = taches.filter(function(x){ return x.nom === _CK.tachePlan; })[0] || taches.filter(function(x){ return (x.pct || 0) < 100; })[0] || taches[0];
   _CK.tachePlan = t.nom;
   var lib = (typeof window.tNom === 'function') ? window.tNom(t.nom) : t.nom;
-  var etats = window._ckPlanEtats(P.parcs, P.journal, t.nom, _ckPlanDebut(P.fen, t.nom), !!(P.retards || {})[t.nom]);
+  var per = _ckPlanPeriode(), etats = window._ckPlanEtats(P.parcs, P.journal, t.nom, per.debut, !!(P.retards || {})[t.nom], per);   // ETAT-1 (§320)
   var n = { faite: 0, cours: 0, afaire: 0, retard: 0, arr: 0 };
   Object.keys(etats).forEach(function(k){ n[etats[k]]++; });
   var choix = taches.map(function(x){
@@ -553,7 +573,7 @@ window._ckPlanCorps = function(){
     return '<span class="ck-pl-l"><i class="ck-pl-sw et-' + k + '"></i>' + _ckMaj1(_CK_PL_LIB[k]) + ' <b>' + n[k] + '</b></span>';
   }).join('');
   return '<div class="ck-pl-choix" role="group" aria-label="Tâche montrée sur le plan">' + choix + '</div>'
-    + '<div class="ck-pl-boite">' + window._ckPlanSvg(window._ckPlanDispo(P.parcs), etats, _ckPlanInitiales(window._ckPlanDebuts(P.parcs, P.journal, t.nom, _ckPlanDebut(P.fen, t.nom))), lib) + '</div>'
+    + '<div class="ck-pl-boite">' + window._ckPlanSvg(window._ckPlanDispo(P.parcs), etats, _ckPlanInitiales(window._ckPlanDebuts(P.parcs, P.journal, t.nom, per.debut, per)), lib) + '</div>'
     + '<div class="ck-pl-leg">' + leg + '</div>';
 };
 window._ckPlanTache = function(el){

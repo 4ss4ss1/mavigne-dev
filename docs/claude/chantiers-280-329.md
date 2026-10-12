@@ -1539,3 +1539,60 @@ L'appli construite, non : `npm run build`, `test:smoke`, `test:e2e` chez Nico.
 4. **Pas repris** : les champs neufs (TAV, sucres, AT, pH) dans l'export du journal et le Suivi d'élevage imprimé ; un bouton vers la fiche depuis une cuve
    du Cuvier qui n'a encore aucun rapport.
 
+## 320. ★★ ETAT-1 — LE PLAN DU COCKPIT LIT L'ÉTAT DE LA FICHE ; LE JOURNAL NE DIT PLUS QUE QUI (12/10 — `src/cockpit.js` (`_ckPlanStatut` neuf, `_ckPlanLire`, `_ckPlanEtats`, `_ckPlanDebuts`, `_ckPlanPeriode` neuf, `_ckPlanCorps`) · `src/pilotage.js` (`_pilCk2Modele`) · `src/cockpit-vue.js` (`S.presta`, `charger`, `phraseEtat`, `INFO.plan`) · `src/app.js` (`_mvDebutsSuivent`) · `src/utils.js` (APP, WHATS_NEW, MV_INFO `pil.plan`, MV_AIDE Pilotage) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-etat1.mjs` (neuf) · `scripts/mv-harnais-auj3.mjs` · `scripts/mv-harnais-forme1.mjs` · `scripts/mv-harnais-ref1.mjs` · `scripts/mv-harnais-auj8.mjs` · `scripts/mv-harnais-sect1.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-280-329.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/ETAT-1.json` · **APP 8.87 → 8.88, SW 9.66 → 9.67**, base `e937d3a`)
+
+### 320a. D'où ça vient
+Nico (12/10, deux captures de la refonte) : « explique pourquoi le pilotage me met une parcelle en entreplantation fait alors que ce n'est pas le cas et il n'y a
+jamais eu de tache entreplantation sur cette parcelle pour le moment ». La loupe du plan disait « Entreplantation fait » ; la fiche de la même parcelle,
+« Tarière · aucun trou · À faire ». Diagnostic donné (deux causes, vérifiées sur la vraie fonction), reformulé — le plan doit dire exactement ce que dit la fiche —,
+« oui », puis « Continuer ».
+
+### 320b. Les causes, lues dans le code
+1. **Le plan avait sa propre lecture de l'état** (`_ckPlanLire`, AUJ-3 §262, reprise au §301) : une ligne « Validé » ou « Terminé » au journal = « faite », bornée par
+   l'ouverture de la fenêtre de la tâche (`t.debut`, passé par `_pilCk2Modele`). La fiche, la liste des Parcelles et l'avancement des chantiers lisent `getTacheStatut`
+   (le statut de la période) : deux définitions d'une même chose, deux écrans qui se contredisaient.
+2. **Pas de fenêtre, pas de borne.** `_chargeSaisonData` ne garde que les tâches à `h>0` (noté par CHANT-1) : l'entreplantation sans trou compté pèse 0 h, les travaux
+   sans barème aussi. `t.debut` valait `null`, et `if(debutIso && …)` laissait passer tout le journal, toutes saisons.
+3. **Sourd aux annulations.** `annulerTache` (↩) écrit une ligne « Annulé » que la lecture ignorait ; `pQuickUndo` (« remis ») n'écrit rien et laisse la ligne
+   « Validé ». Mesuré sur la vraie fonction, journaux fabriqués : validée au printemps sans borne → « faite » ; la même avec le début de l'hiver → « à faire » ; validée
+   puis annulée → « faite ». Les données de Nico n'ont pas été lues : laquelle des deux causes a joué chez lui est à confirmer (son Journal, puces de la tâche et de la parcelle).
+
+### 320c. Ce qui a été fait
+- **`_ckPlanLire`** (cockpit.js) : l'état vient du statut (`o.statut`, sinon `_ckPlanStatut` → `window.getTacheStatut`, repli `p.taches` de la période active) — faite =
+  « Validé », en cours = « En cours » ; arrachée = statut de la parcelle, d'abord ; en retard = à faire, fenêtre passée. L'équipe : la dernière ligne « En cours » de la
+  période `[debutIso, o.fin]`, le même jour départagé par `ts_debut`, pour une parcelle en cours seulement. Plus de tri du journal : un seul passage.
+- **La borne de l'équipe est la PÉRIODE** (`_pilSaison`, la période consultée, comme `getTacheStatut`), plus la fenêtre : une parcelle commencée avant l'ouverture de sa
+  fenêtre était « à faire » sur le plan (sa ligne tombait sous la borne) ; elle est en cours, avec son équipe. `_pilCk2Modele` passe `perD` / `perO` ; le plan de
+  secours (`_ckPlanCorps`) lit `_ckPlanPeriode`. `_ckPlanDebut` ne sert plus qu'à `_ckEnCours` (« commencée au calendrier »).
+- **Arrachage en étapes** : `_arrSyncTache` écrit « En cours » dès une étape faite. La lecture du journal donnait « faite » dès la première étape validée (noté par
+  ARRACH-9) ; le statut seul aurait donné « en cours » à une parcelle finie pour l'équipe, avec « Personne d'indiqué ». ★ Arbitré : fini pour l'équipe
+  (`window._mvAuPrestataire`, la lecture d'ARRACH-9) = « faite » sur le plan, comme la ligne verte du chantier (CHANT-1) ; le modèle publie `presta`, la loupe dit
+  « Arrachage fait pour l'équipe, la suite au prestataire ». Une étape sur trois = en cours.
+- **`_mvDebutsSuivent`** (« Changer », DIRECT-1) passe son lecteur : le statut de la période ACTIVE (`p.taches`) — `getTacheStatut` suit la période consultée, et
+  « Changer » complète les débuts de la période active.
+- `_ckEnCours` (« En cours sur … » d'À savoir) suit sans changer d'appel : une parcelle validée puis annulée y redevient « pas encore faite ».
+
+### 320d. Trouvé en route
+1. **Cinq harnais figeaient l'ancienne règle** : auj3 (« faite depuis l'ouverture de la fenêtre », « faite par « Terminé » »), forme1 et ref1 (parcelles sans statut,
+   l'état « lu au journal »), auj8 et sect1 (« la faite ne compte pas » : faite par le journal). Leurs parcelles portent désormais le statut de la fiche ; quatre
+   contre-épreuves visaient des lignes disparues (`der`, `L.deb`) : réécrites sur la nouvelle lecture (une validation au journal qui repeint la parcelle, une équipe hors
+   des parcelles en cours, une arrachée qui suit sa fiche). auj8 A10 garde des parcelles sans statut : « rien de fait » se dit désormais par la fiche, plus par un journal vide.
+2. **CLAUDE.md était à 2 799 lignes** (plafond 2 800) : le récit de ROB-2 (terminé le 29/09, 49 lignes) descend dans `journal.md` ; ses deux consignes restent au §28.
+3. Le harnais neuf prend un nom de parcelle neutre : aucun nom réel avec sa surface dans un dépôt public.
+4. **Le dépôt a bougé pendant le lot.** LABO-1 (une autre conversation, poussé à 18 h 56) avait pris APP 8.87, SW 9.66 et le numéro §319 — ceux d'ETAT-1. Vu au
+   contrôle de fraîcheur, juste avant le zip (`git fetch`, règle d'or n°1) : le zip construit sur `aad1c16` retiré des sorties, ETAT-1 rejoué sur `e937d3a` → §320,
+   APP 8.88, SW 9.67. Les fichiers que LABO-1 ne touchait pas sont repris tels quels ; les dix partagés (`utils.js`, `index.html`, `sw.js`, la liste, le compteur, la
+   base, la documentation) ont reçu les gestes du lot rejoués, puis la chaîne a été rejouée. ★ La consolidation de DIRECT-1 avait été rangée par LABO-1 en FIN de
+   `journal.md`, pas en tête : laissée où elle est.
+
+### 320e. Les harnais
+- **`mv-harnais-etat1.mjs`** (neuf, 28 assertions, 16 contre-épreuves) : `cockpit.js` entier (état, équipe, bornes, départage, retard, arrachée, prestataire, lecteur en
+  option), les VRAIS `getTacheStatut` / `_tachesFor` (période consultée), le VRAI `_mvDebutsSuivent`, le VRAI modèle (`_pilCk2Modele` : la tâche sans fenêtre, l'équipe
+  d'avant la fenêtre, `presta`), la VRAIE phrase de la loupe, le VRAI plan de secours ; l'aide, le guide, la nouveauté.
+- Mis à jour : auj3, forme1, ref1, auj8, sect1, contre-épreuves comprises. La chaîne complète (les 377 commandes de `mv-harnais-liste.mjs`, LABO-1 compris) jouée
+  par tranches au premier plan sur `e937d3a` — un appel de l'outil coupe à 300 s et le bac à sable n'a qu'un cœur : 376 vertes ; `mv-harnais-recup.mjs --contre` coupée
+  par la limite de 150 s par commande, sans un rouge (le Planning, que le lot ne touche pas).
+- Non vérifié : un rendu dans un navigateur ; les données de Nico ; `npm run build`, `test:smoke`, `test:e2e` ; le déploiement.
+
+### 320f. Ouvert
+§28 « ETAT-1 — CE QUI RESTE OUVERT ».

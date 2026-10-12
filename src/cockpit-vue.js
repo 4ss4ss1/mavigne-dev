@@ -131,7 +131,7 @@ let V = null;
 let AUJ, DEBUT, VISEE, XMAX, TACHES = [], T = {}, PREREQ = {}, GENS = [], EQ = {}, APPS = [], AIDX = {},
   PLAN_H = 720, PLAN_W = 1000, PLAN_S = 1, PLAN_LARG = 0, HA_VIGNE = 0, PARCS = [], PIDX = {}, HA_TOT = 0, ORDRE = {}, TOTAL = 0, YMAX = 500, TAUX = 0,
   POSTES = [], HIST = [], METEO = [], T0 = Date.now(), MIN = 60e3, NEXT_ID = 1, SPARK_TRAV = [], SPARK_BUD = [], SPARK_ECART = [];
-const S = { etats: {}, dates: {}, equipes: [], evts: [], trac: [], vue: null, filtre: null, sel: null, onglet: 'auj', mode: 'terrain', svTout: false, filTout: false };
+const S = { etats: {}, presta: {}, dates: {}, equipes: [], evts: [], trac: [], vue: null, filtre: null, sel: null, onglet: 'auj', mode: 'terrain', svTout: false, filTout: false };
 const H_JOUR = 1;
 const effectif = () => (V ? V.presents : 0);
 const capacite = () => 0;
@@ -271,6 +271,8 @@ function charger(v) {
     PARCS.forEach(p => { if (!p.arr) S.etats[t.id][p.id] = 'afaire'; });
     const et = (v.etats && v.etats[t.id]) || {};
     Object.keys(et).forEach(n => { const pid = parNom[n]; if (pid && !PIDX[pid].arr && et[n] !== 'arr') S.etats[t.id][pid] = et[n] === 'retard' ? 'afaire' : et[n]; });
+    // ★ ETAT-1 (§320) : les parcelles d'arrachage finies pour l'équipe — faites sur le plan, la suite au prestataire (la loupe le dit).
+    S.presta[t.id] = {}; ((v.presta && v.presta[t.id]) || []).forEach(n => { const pid = parNom[n]; if (pid) S.presta[t.id][pid] = true; });
   });
   if (!S.vue || !T[S.vue]) S.vue = (v.prio && T[v.prio]) ? v.prio : ((TACHES.find(t => t.pct < 100 && !t.eqFini) || TACHES[0] || {}).id || null);
   EQ = {}; S.equipes = []; S.evts = [];
@@ -349,7 +351,7 @@ const INFO = {
   conformite: 'Points du registre phyto et des documents obligatoires qui demandent une action de votre part.',
   savoir: 'Ce qui peut changer la journée ou la semaine. Sous chaque jour : le risque de pluie (le plus haut de la journée), le cumul en millimètres et le vent le plus fort (vent moyen, sans les rafales). Dessous : la pluie ou le vent des deux jours qui viennent, secteur par secteur, et ce qui est en cours dans les communes touchées ; puis les absences, les contrats, les retards et le matériel. Les motifs d’absence ne sont visibles que de l’admin.',
   decision: 'Les quatre questions de chaque matin, chacune avec sa réponse et le bouton pour agir.',
-  plan: 'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine. Sa couleur dit l’état de la tâche choisie ; le trait sous chaque appellation, son avancement. Une parcelle en cours porte l’équipe qui l’a commencée, même un autre jour. Au survol, une loupe la montre en grand ; la toucher ouvre sa fiche. Les rangs dessinés sont un repère, pas le relevé des rangs ; une parcelle sans contour est un carré de sa surface, en pointillé.',
+  plan: 'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine. Sa couleur dit l’état de la tâche choisie, celui de sa fiche pour la période : faite une fois validée, en cours une fois commencée ; un arrachage fini pour l’équipe est fait, la suite au prestataire. Le trait sous chaque appellation dit son avancement. Une parcelle en cours porte l’équipe qui l’a commencée, même un autre jour. Au survol, une loupe la montre en grand ; la toucher ouvre sa fiche. Les rangs dessinés sont un repère, pas le relevé des rangs ; une parcelle sans contour est un carré de sa surface, en pointillé.',
   fil: 'En ce moment : chaque parcelle en cours, avec l’équipe qui l’a commencée et depuis quand — même un autre jour —, puis le tracteur en marche ou en pause. Aujourd’hui : les validations, les débuts de parcelle et le travail au tracteur de la journée (parcelles finies, avec le temps mesuré au chrono ; session ouverte ; traitement), du plus récent au plus ancien. L’équipe passe d’abord ; celui qui a saisi n’y figure que s’il était dans les rangs.',
   courbe: 'Le reste mesuré : une ligne relie la photo de chaque jour au point d’aujourd’hui, en direct. La photo est prise à la première ouverture du Pilotage par un administrateur, une fois les données arrivées (60 jours gardés) ; un jour sans photo est un trou. L’axe part de la première photo. La projection suit la capacité du planning ; la ligne fine montre l’allure qu’il faudrait pour finir pile à l’objectif.',
   atterrissage: 'La fin projetée de l’onglet Économie : ce qui est déjà dépensé, plus le travail qui reste, compté au barème et corrigé de la cadence mesurée de l’équipe quand elle s’applique (sinon au barème seul). Tracteur, GNR et phyto suivent l’avancement ; les prestations et les travaux à l’heure comptent ce qu’ils ont coûté.',
@@ -1204,6 +1206,7 @@ const survolFin = () => matchMedia('(hover: hover) and (pointer: fine)').matches
 function phraseEtat(t, pid) {
   const e = etatVue(t, pid), eq = S.equipes.find(x => x.parc === pid && x.tache === t);
   if (e === 'arr') return 'Arrachée';
+  if (e === 'faite' && (S.presta[t] || {})[pid]) return esc(T[t].nom) + ' ' + libEtat(t, e) + ' pour l’équipe, la suite au prestataire';   // ETAT-1 (§320)
   return esc(T[t].nom) + ' ' + libEtat(t, e) + (e === 'cours' && eq ? ', ' + esc(EQ[eq.id].noms) + ', <em>' + quand(eq.depuis) + '</em>' : '');
 }
 function montrerLoupe(pid, x, y) {

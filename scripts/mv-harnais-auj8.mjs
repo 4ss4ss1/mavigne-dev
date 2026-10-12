@@ -51,7 +51,9 @@ function partieA(S, T) {
   // fenêtres en jours depuis le 01/01/2026 : Taille 02/12, Brûlage 10/12, Réparation 01/11 (finie), Tirage 16/01 (pas ouverte le 13)
   const fen = [{ nom: 'Taille', ws: 335, we: 441 }, { nom: 'Brulage', ws: 343, we: 441 }, { nom: 'Reparation', ws: 304, we: 340 }, { nom: 'Tirage', ws: 380, we: 441 }, { nom: 'Ebourgeonnage', ws: 300, we: 441 }];
   const rows = [{ nom: 'Taille', pct: 40 }, { nom: 'Brulage', pct: 20 }, { nom: 'Reparation', pct: 100 }, { nom: 'Tirage', pct: 0 }, { nom: 'Ebourgeonnage', pct: 0, type: 'passages' }];
-  const plan = { parcs, journal, fen };
+  // ETAT-1 (§320) : « faite » et « en cours » viennent de la fiche (taches) ; le journal ne dit plus que qui.
+  const parcsF = parcs.map(p => p.nom === 'Les Charmes' ? Object.assign({ taches: { Brulage: 'Validé' } }, p) : (p.nom === 'Vignois' ? Object.assign({ taches: { Taille: 'En cours' } }, p) : p));
+  const plan = { parcs: parcsF, journal, fen };
   const m1 = W._ckSvMeteo(null, rows, now, sect(brochon, gevrey), plan);
   T('A3 la pluie par secteur garde son titre (le fait)', m1[0] && m1[0].quand === 'Demain' && m1[0].titre === 'Pluie annoncée sur Brochon : 6\u202fmm, de 8\u00a0h à 11\u00a0h');
   T('A4 dessous, ce qui est en cours sur la commune touchée, dans l’ordre de la campagne — commune rangée en objet, arrachée, faite, finie, pas ouverte et passages exclus',

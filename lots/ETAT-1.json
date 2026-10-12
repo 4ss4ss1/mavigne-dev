@@ -1,0 +1,30 @@
+{
+  "lot": "ETAT-1",
+  "section": "§320",
+  "base": "e937d3a09b16d29bbf36ba1c9612d3eed31fd6c8",
+  "inclut": [],
+  "date": "2026-10-12",
+  "fichiers": {
+    ".mv-base": "0e711fe0dea3ed1b135b1207d63499f8db8d121495eefcf63b211cae6e999244",
+    "CLAUDE.md": "d96c98bb119c5a1eba6094876302c12830ecfe4d84024e7c3378e456d8ac5865",
+    "docs/claude/INDEX.md": "8cb825b9531d1c48ebb6d41526bdb29c2fe7a591e66daee673e55238fa80a205",
+    "docs/claude/chantiers-280-329.md": "fd45b6b58a0f6f718f70a6f43a3082172bb599761779abe295a4dfac2d5b4df5",
+    "docs/claude/journal.md": "bbfa06a245789c6d78c534109b6a6e9907ce2de166ab5b820a60465a327450bf",
+    "guide/11-pilotage.html": "23ecea7eb99d6f6bcb165924c6b8b82458d7f8e8d0a8ff950e2a40c1daa65851",
+    "index.html": "143aa9b3a627c648bfc7cc1430be48cc13a30cc6026876fda623a4e76f2a1a62",
+    "public/sw.js": "cb7bb2f2f9e6a36f72f2ad2725ffe54e549fffb478083c55b3269af60d46d70f",
+    "scripts/harnais-claude-md.mjs": "6d63c48f1d1705b47f9777a556b680c31f8ad87f08b2d071133ab6b17c3a5ac2",
+    "scripts/mv-harnais-auj3.mjs": "6b7d1d6e92be62ae5b7abd3fcedfe66850375e3963274d96a3745a4fedde916f",
+    "scripts/mv-harnais-auj8.mjs": "dbe6361fea0fd49432e34e32e16de220737e1e2ee919140ce4d151be2278a75d",
+    "scripts/mv-harnais-forme1.mjs": "7cd0cf182a0dc3d033d3d4d462ec7267098b6525ee18e89569542200950aef5c",
+    "scripts/mv-harnais-liste.mjs": "bca02bcf18e71d6e5ca848a026608f7f56f7d9da59fce4a2464ea625d0d0bb51",
+    "scripts/mv-harnais-ref1.mjs": "0925189f7b9c6d393f307ee2e099ca4c587ffdf3a13c8c2c09d04c49e3688198",
+    "scripts/mv-harnais-sect1.mjs": "39986979cf7d1e109acbd750465d4b6562c1728ad0a7659b832d7d4d06ca3a8a",
+    "src/app.js": "2673e255058f223715c0b014272c38d59ed041204926e2c2c294c825550e7333",
+    "src/cockpit-vue.js": "c2030bb01f1366879a36fc9b521965d94fbdcacd11b8bf052047953fa0495f1d",
+    "src/cockpit.js": "283aaad1bbcca68dc6f1a21e2b95dab85a26249a64f4e5b97508f075033f660e",
+    "src/pilotage.js": "8aa1d7bca915e800d802a406a121b0b070e19e7aebbce4b1e01838d391f196ed",
+    "src/utils.js": "7659fa790011b3eb4920894bfa309346d42aa16ac3e04fe59b49c0251b8119b3",
+    "scripts/mv-harnais-etat1.mjs": "3b6ddb112aabdb8d17b1190e37caf4f05ec179a6975b2d7dadfccb94b8936bd4"
+  }
+}

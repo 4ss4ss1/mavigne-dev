@@ -12930,7 +12930,7 @@ function _mvDebutsSuivent(task){
     var me=currentUser&&currentUser.nom, g=_mvGroupeTache(task);
     if(!me||!g.equipe||typeof window._ckPlanDebuts!=='function') return faits;
     var sa=(typeof getSaisonActive==='function')?getSaisonActive():null, d0=(sa&&sa.debut)?String(sa.debut).slice(0,10):null;
-    var deb=window._ckPlanDebuts(PARCELLES, JOURNAL, task, d0);
+    var deb=window._ckPlanDebuts(PARCELLES, JOURNAL, task, d0, { statut:function(p,t){ var s=p&&p.taches&&p.taches[t]; return typeof s==='string'?s:''; } });   // ETAT-1 (§320) : le statut de la période ACTIVE (p.taches), celle des débuts complétés ici
     Object.keys(deb).forEach(function(n){
       var e=deb[n], p=PARCELLES.find(function(x){ return x&&x.nom===n; });
       if(!e||e.qui!==me||(Array.isArray(e.membresEquipe)&&e.membresEquipe.length)) return;

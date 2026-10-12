@@ -38,8 +38,8 @@ function lecture(S) {
 }
 function modele(S, geoStub) {
   const P = [{ nom: 'Les Crais 1', surface: .41, appellation: 'Gevrey-Chambertin', commune: { nom: 'Gevrey-Chambertin', lat: 47.22, lng: 4.96 }, statut: 'Active' },
-    { nom: 'Les Crais 2', surface: .38, appellation: 'Gevrey-Chambertin', commune: { nom: 'Gevrey-Chambertin', lat: 47.22, lng: 4.96 }, statut: 'Active' },
-    { nom: 'Les Charmes', surface: .36, appellation: 'Côte de Nuits-Villages', commune: { nom: 'Brochon', lat: 47.24, lng: 4.97 }, statut: 'Active' }];
+    { nom: 'Les Crais 2', surface: .38, appellation: 'Gevrey-Chambertin', commune: { nom: 'Gevrey-Chambertin', lat: 47.22, lng: 4.96 }, statut: 'Active', taches: { Taille: 'En cours' } },
+    { nom: 'Les Charmes', surface: .36, appellation: 'Côte de Nuits-Villages', commune: { nom: 'Brochon', lat: 47.24, lng: 4.97 }, statut: 'Active', taches: { Taille: 'Validé' } }];
   const hex = t => Math.floor(t).toString(16), now = Date.now();
   // Les Crais 2 commencée HIER par Hugo et Léa, pas validée ; Les Charmes commencée puis validée aujourd'hui.
   const JOURNAL = [{ id: hex(now - 864e5), date: iso(-1), parcelle: 'Les Crais 2', tache: 'Taille', qui: 'Hugo', membresEquipe: ['Hugo', 'Léa'], statut: 'En cours' },
@@ -104,12 +104,12 @@ function suite(S) {
   T('sans contour, la fiche ne dessine rien', U._mvFormeSvg(null, 300, 150) === '' && U._mvParcFormeHtml('Inconnue') === '');
   // ② Une lecture du journal pour l'état ET pour l'équipe (cockpit.js)
   const W = lecture(S);
-  const parcs = [{ nom: 'A' }, { nom: 'B' }, { nom: 'C' }, { nom: 'D', statut: 'Arrachee' }];
+  const parcs = [{ nom: 'A', taches: { Taille: 'En cours' } }, { nom: 'B', taches: { Taille: 'Validé' } }, { nom: 'C', taches: { Taille: 'Validé' } }, { nom: 'D', statut: 'Arrachee', taches: { Taille: 'Validé' } }];   // ETAT-1 (§320) : l’état vient de la fiche
   const J = [{ date: '2027-01-10', parcelle: 'A', tache: 'Taille', qui: 'Hugo', membresEquipe: ['Hugo', 'Léa'], statut: 'En cours' },
     { date: '2027-01-11', parcelle: 'B', tache: 'Taille', qui: 'Jean', statut: 'En cours' }, { date: '2027-01-11', parcelle: 'B', tache: 'Taille', qui: 'Jean', statut: 'Validé' },
     { date: '2027-01-05', parcelle: 'C', tache: 'Taille', qui: 'Jean', statut: 'Validé' }, { date: '2027-01-11', parcelle: 'C', tache: 'Taille', qui: 'Jean', statut: 'En cours' }];
   const et = W._ckPlanEtats(parcs, J, 'Taille', '2027-01-01', false), deb = W._ckPlanDebuts(parcs, J, 'Taille', '2027-01-01');
-  T('l’état ne change pas : en cours, faite, faite (un début après une validation ne la défait pas), arrachée', et.A === 'cours' && et.B === 'faite' && et.C === 'faite' && et.D === 'arr');
+  T('ETAT-1 (§320) : l’état vient de la fiche — en cours, faite, faite (un début au journal après la validation ne la défait pas), arrachée', et.A === 'cours' && et.B === 'faite' && et.C === 'faite' && et.D === 'arr');
   T('chaque parcelle en cours a sa ligne de début — même commencée un autre jour —, et seulement elles', Object.keys(deb).join() === 'A' && deb.A.date === '2027-01-10' && deb.A.qui === 'Hugo');
   // ③ Le modèle du cockpit (pilotage.js)
   const V = modele(S, true);
@@ -147,8 +147,8 @@ res.forEach(([n, ok]) => { if (!ok) ko++; console.log((ok ? '  ok  ' : '  KO  ')
 console.log('\n' + (ko ? 'ROUGE ' + ko : 'VERT') + ' \u2014 ' + res.length + ' assertions, ' + ko + ' échec' + (ko > 1 ? 's' : ''));
 if (CONTRE) {
   const DEF = [
-    ['l’équipe lue au journal du jour seul (le défaut signalé)', 'pil', "window._ckPlanDebuts(PARC, J, t.cle, t.debut)", "window._ckPlanDebuts(PARC, J.filter(function(e){ return e.date===auj; }), t.cle, t.debut)"],
-    ['le début gardé après la validation', 'ck', "Object.keys(L.deb).forEach(function(n){ if(L.der[n] === 'cours') r[n] = L.deb[n]; });", "Object.keys(L.deb).forEach(function(n){ r[n] = L.deb[n]; });"],
+    ['l’équipe lue au journal du jour seul (le défaut signalé)', 'pil', "window._ckPlanDebuts(PARC, J, t.cle, perD, perO)", "window._ckPlanDebuts(PARC, J.filter(function(e){ return e.date===auj; }), t.cle, perD, perO)"],
+    ['le début gardé après la validation', 'ck', "if(!e || e.tache !== tache || e.statut !== 'En cours' || etat[e.parcelle] !== 'cours') return;", "if(!e || e.tache !== tache || e.statut !== 'En cours') return;"],   // ETAT-1 (§320) : l'équipe des seules parcelles en cours
     ['la commune passée telle quelle', 'pil', "commune:(p.commune&&typeof p.commune==='object')?String(p.commune.nom||''):String(p.commune||''),", "commune:p.commune||'',"],
     ['lat et lng inversées dans la projection', 'uti', "return [q[1] * kx, -q[0] * _MV_M_LAT];", "return [q[0] * kx, -q[1] * _MV_M_LAT];"],
     ['la place réservée sans la forme (un carré pour toutes)', 'vue', "const dimsP = (p, s) => p.f ? [p.f.w * s, p.f.h * s] : [p.cote * s, p.cote * s];", "const dimsP = (p, s) => [p.cote * s, p.cote * s];"],

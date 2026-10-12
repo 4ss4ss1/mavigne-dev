@@ -18,6 +18,7 @@
 | — | Descendu de `CLAUDE.md` §28 le 09/10 (BUILD-1, §305) — plafond du cœur | `docs/claude/journal.md` |
 | — | Descendu de `CLAUDE.md` §28 le 10/10 (ARRACH-8, §306) — plafond du cœur, historique sans consigne | `docs/claude/journal.md` |
 | — | Descendu du §28 de CLAUDE.md — 12/10/2026 (DIRECT-1, plafond du cœur) | `docs/claude/journal.md` |
+| — | Descendu du §28 de CLAUDE.md — 12/10/2026 (ETAT-1, plafond du cœur) | `docs/claude/journal.md` |
 | 1 | 1. Identité & contexte | `CLAUDE.md` |
 | 2 | 2. Inventaire fonctionnel — 10 modules | `CLAUDE.md` |
 | 3 | 3. Positionnement commercial | `CLAUDE.md` |
@@ -370,3 +371,4 @@
 | 317 | 317. ★ ARRACH-9 — L'ARRACHAGE FINI POUR L'ÉQUIPE QUITTE « À FAIRE » ET LES CARTES DE L'ÉQUIPE (12/10 — `src… | `docs/claude/chantiers-280-329.md` |
 | 318 | 318. ★★★ DIRECT-1 — « DÉBUT » ENREGISTRE L'ÉQUIPE ; « EN DIRECT » DIT QUI EST OÙ, TRACTEUR COMPRIS (12/10 —… | `docs/claude/chantiers-280-329.md` |
 | 319 | 319. ★★ LABO-1 — LES RAPPORTS DU LABO : UNE FICHE PAR ENVOI, CHAQUE CHIFFRE À SA PLACE (12/10 — `src/cave.j… | `docs/claude/chantiers-280-329.md` |
+| 320 | 320. ★★ ETAT-1 — LE PLAN DU COCKPIT LIT L'ÉTAT DE LA FICHE ; LE JOURNAL NE DIT PLUS QUE QUI (12/10 — `src/c… | `docs/claude/chantiers-280-329.md` |

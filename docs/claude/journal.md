@@ -8,6 +8,10 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **12 octobre 2026 (LABO-1)** — ★ **LES RAPPORTS DU LABO : UNE FICHE PAR ENVOI, CHAQUE CHIFFRE À SA PLACE, RIEN NE S'EFFACE** (§319). Lot 50, base `aad1c16`. Nico (12/10, dicté) : une fiche par envoi au labo, l'appli range chaque chiffre ; ressaisir la même date ou le même n° de rapport ne doit rien effacer. Maquette `maquette-fiche-labo-v1` validée (« Ok go », trois recommandations).
+> Pas de collection neuve : une ligne du Chai EST une analyse (`op.labo=1`, champs historiques gardés), une ligne du Cuvier vit dans `cuve.labo[]`, son glucose sur un relevé (GF-1). `_laboLignes` / `_laboPlan` / `_laboAppliquer` (cave.js, sans DOM) ; fenêtre `#ovLabo` ; blocs « Au labo » ; `_vendDpLabo` (cuvier.js) en tête de `_vendDPot`.
+> **APP 8.86 → 8.87, SW 9.65 → 9.66.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+
 > Dernière consolidation : **12 octobre 2026 (ARRACH-9)** — ★ **L'ARRACHAGE FINI POUR L'ÉQUIPE QUITTE « À FAIRE » ET LES CARTES DE L'ÉQUIPE** (§317). Lot 48, base `f293f54`. Nico (12/10) : « elle ne doit plus apparaître dans les listes des parcelles à faire » ; reformulé (hors de « À faire » pour tous, visible sous « Toutes », plus « commencée » sur les cartes), « Continuer » puis « suite ».
 > Une lecture, `_arrAuPrestataire` (app.js) : Parcelles (filtre, rang, état « Au prestataire », puce, liste vide), carte de l'Accueil, anneau des cartes, tournée. PAS `_mvTacheEtat` ni `_pvCurDone` : le bouton Fait / Annuler et l'étape du prestataire, dans la fiche, ne bougent pas.
 > **APP 8.84 → 8.85, SW 9.63 → 9.64.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
@@ -2309,3 +2313,56 @@ chaque session)**~~ — remplacé par le dépôt GitHub le 10/08.
 > Dernière consolidation : **12 octobre 2026 (DIRECT-1)** — ★ **« DÉBUT » ENREGISTRE L'ÉQUIPE ; « EN DIRECT » DIT QUI EST OÙ, TRACTEUR COMPRIS** (§318). Lot 49, base `db178db`. Nico (12/10, captures) : « l'équipe est bien programmée mais c'est encore moi d'indiqué dessus », « il n'y a personne en direct », puis « aujourd'hui j'étais sur le tracteur, j'aimerais bien que ça apparaisse » ; reformulé, « Oui », puis « Continuez ».
 > Les deux « Début » n'écrivaient que leur auteur (« Valider » écrivait le groupe) : `_mvDebutLigne` (app.js) ; « Changer » donne l'équipe aux parcelles en cours commencées sans groupe (`_mvDebutsSuivent`). Le cockpit lit `_ckQui` (l'équipe d'abord, « sans moi » respecté) et `_ckTracJour` (cockpit.js : la session et sa boîte noire) ; « En ce moment » en tête du fil (cockpit-vue.js).
 > **APP 8.85 → 8.86, SW 9.64 → 9.65.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+
+## Descendu du §28 de CLAUDE.md — 12/10/2026 (ETAT-1, plafond du cœur)
+
+> Programme terminé le 29/09 ; ses deux consignes (`_MV_LISTES_OBJETS`, le chargeur partagé `scripts/mv-app-node.mjs`) restent au §28 du cœur.
+
+### ★ ROB-2 — LE TIRAGE AU HASARD, MODULE PAR MODULE (§191, posé le 27/09)
+
+Seul le Planning passe au tirage au hasard (`mv-harnais-robustesse-planning`). Demande de Nico : *« vérifie partout »*.
+✅ **Pilotage fait le 28/09** : `mv-harnais-robustesse-pilotage` charge l'**application entière** dans Node (app.js et ses
+modules dans l'ordre réel, sans CSS ni Firebase ; ★ `window` **est** `globalThis`, sinon les noms posés par `window.X =`
+et lus nus ailleurs n'existent pas), pose les données par **`applyFbData`** (le vrai chemin — écrire `window.X` laisserait
+app.js sur ses copies internes), et rend les 8 onglets + les 6 vues d'Économie × 2 axes sur 12 domaines tirés au hasard
+(`--long` : 100). ★ Une erreur **avalée** (`_mvAvale`, niveau info) compte comme un plantage. 4 contre-épreuves.
+✅ **LISTES-1 (28/09, SW 8.47)** : le tirage y glisse aussi des éléments nuls DANS les listes. Ils faisaient tomber toute la
+page (`_pilData` sur un tracteur nul, **`_parcConcern` d'app.js** sur une parcelle nulle). Corrigé en UN point : **`applyFbData`
+et `loadData` écartent des 13 listes d'objets** (`_MV_LISTES_OBJETS`) tout ce qui n'est pas une fiche, avec une trace
+`LISTES-1` (clé + types, jamais le contenu). Section C du harnais, et contre-épreuve sur une copie d'app.js (`MV_ROB_APP`).
+★ **Une nouvelle liste d'objets = l'ajouter à `_MV_LISTES_OBJETS`.**
+✅ **Cave/Cuvier fait le 28/09** : `mv-harnais-robustesse-cave` — 11 vues (Aujourd'hui, Réglages, Millésime ×2, Chai ×3,
+Cuvier ×4) + la fiche de chaque cuvée, 12 domaines (`--long` : 100, 1 200 rendus), 5 contre-épreuves. ★ Le chargeur de
+l'application entière est **partagé** : `scripts/mv-app-node.mjs` (`chargerApp({remplace})`) — ★ ses doublures (`logError`,
+`_mvAvale`…) se posent **APRÈS** le chargement, sinon utils.js les écrase sans bruit. Trouvé et corrigé : une cuvée nulle
+faisait tomber le Chai → **LISTES-1 étendu aux listes rangées dans un document** (`_MV_SOUS_LISTES`, SW 8.48) ; trois
+« undefined / NaN » d'affichage dans `cave.js` (type d'opération absent ×2, ligne de soufre incomplète, millésime d'une date
+illisible). ⚠️ **Tirages essayés et RETIRÉS** : un lot de fûts sans année ou nul, une cuvée sans id — aucun chemin
+d'écriture ne les produit ; durcir chaque lecteur contre eux serait du code pour un cas qui n'existe pas.
+✅ **Tracteur fait le 28/09** : `mv-harnais-robustesse-tracteur` — Sessions, Entretien, réglages du parc, liste des fiches,
+fiche de chaque tracteur (pour CHAQUE tracteur sélectionné), détail et modification de chaque session ; 5 contre-épreuves,
+dont deux qui retirent les correctifs eux-mêmes. Corrigé dans `tracteur.js` : « undefined% d'avancement » (session d'avant),
+« Tracteur dédié undefined », « date · undefined », type de tracteur absent, et **`data-defid="undefined"` sur toute activité
+sans tracteur par défaut — un cas NORMAL en production**. ★ `REPARATEUR_HIST` est un **objet** `{idTracteur:[périodes]}`, pas
+une liste : retiré de `_MV_LISTES_OBJETS`, et le générateur du Pilotage le tirait en liste (corrigé). ★ `REPARATEUR[id]=null`
+est écrit par la suppression d'un tracteur : le tirage le garde. ⚠️ Retirés du tirage, faute de chemin d'écriture : une
+immobilisation sans date de départ (le formulaire l'exige), un pointage de chronomètre dont l'instant n'est pas un nombre.
+✅ **Réserve faite le 28/09** : `mv-harnais-robustesse-reserve` — Fûts (millésime courant, tous, 2024), Intrants, Bilan
+matière, saisies (achat, inventaire, séparation, nouveau lot), fiche de chaque lot, le parc et le registre qu'emprunte la Cave,
+et **4 documents imprimables** (lus par une doublure de `_mvDocOpen` qui garde ce qu'on lui passe). 4 contre-épreuves. Trouvé :
+un fût nul faisait tomber les Fûts, le parc de la Cave et le document → **LISTES-1 étendu au document INTRANTS** (SW 8.50).
+⚠️ `fut_four`, `fut_ref`, `achat_four` sont des listes de **noms** (textes) : hors du filtre. Retiré du tirage : un intrant sans
+catégorie ou sans unité (deux listes déroulantes, jamais vides).
+✅ **Accueil/Vigne/Journal faits le 29/09** : `mv-harnais-robustesse-accueil` — Accueil, Vigne (toutes, tâche simple, à
+passages, à niveaux), Journal (tous, un ouvrier, une tâche, une parcelle), fiche + panneaux passages/niveaux de chaque
+parcelle, le mur, la saisie, l'équipe du jour ; 4 contre-épreuves dont une qui retire le correctif. ★★ **Vrai défaut de
+production trouvé** : la fiche d'une parcelle affichait **« NaN h » restantes** dès que la période portait l'Entreplantation
+(liste de tâches par défaut) — tâche « à trous » sans barème à l'hectare, `undefined × surface` sur une parcelle sans trous.
+Corrigé dans `openDP` (SW 8.52). ★★ **Et un second, trouvé en relisant l'entrée 26 du backlog** : activer une tâche « en temps
+réel » du catalogue (Arrachage, Désherbage, Effeuillage, Vendange — **aucun barème `hha`**) affichait **« NaN h » au total de
+l'Accueil** (`calcHeures`, branche des tâches simples). `t.hha || 0` comme les branches passages/niveaux. Le tirage de l'Accueil
+active désormais ces tâches au hasard (et celui du Pilotage aussi, sans qu'il ait montré le défaut). ⚠️ Retirés du tirage : surface en texte (les deux créateurs
+font `parseFloat`), entrée de journal sans date, météo sans `emoji`/`wind` (trois écrivains, toujours complets).
+Même patron, un lot par module, dans cet ordre : ~~**Pilotage**~~ · ~~**Cave/Cuvier**~~ ·
+~~**Tracteur**~~ · ~~**Réserve**~~ · ~~**Accueil/Journal**~~ (`app.js`). ★ **ROB-2 TERMINÉ le 29/09.** À chaque fois : données abîmées ET formes d'avant de ce que le
+module enregistre (instantanés, archives), toutes ses surfaces, rouge sur exception ou « undefined »/« NaN » affiché.

@@ -20,10 +20,10 @@ function suite(S) {
   const { W, ouverts } = monde(S);
   const parcs = [
     { nom: 'Clos Prieur 1', surface: 0.33, appellation: 'Gevrey-Chambertin 1er cru', commune: 'Gevrey-Chambertin' },
-    { nom: 'Les Crais 1', surface: 0.41, appellation: 'Gevrey-Chambertin', commune: 'Gevrey-Chambertin' },
-    { nom: 'Les Crais 2', surface: 0.38, appellation: 'Gevrey-Chambertin', commune: 'Gevrey-Chambertin' },
-    { nom: 'Les Charmes', surface: 0.36, appellation: 'Côte de Nuits-Villages', commune: 'Brochon' },
-    { nom: 'La Justice 6', surface: 0.30, appellation: 'Gevrey-Chambertin', commune: 'Gevrey-Chambertin', statut: 'Arrachée' },
+    { nom: 'Les Crais 1', surface: 0.41, appellation: 'Gevrey-Chambertin', commune: 'Gevrey-Chambertin', taches: { Taille: 'Validé' } },
+    { nom: 'Les Crais 2', surface: 0.38, appellation: 'Gevrey-Chambertin', commune: 'Gevrey-Chambertin', taches: { Taille: 'En cours' } },
+    { nom: 'Les Charmes', surface: 0.36, appellation: 'Côte de Nuits-Villages', commune: 'Brochon', taches: { Taille: 'Validé' } },   // ETAT-1 (§320) : l’état vient de la fiche
+    { nom: 'La Justice 6', surface: 0.30, appellation: 'Gevrey-Chambertin', commune: 'Gevrey-Chambertin', statut: 'Arrachée', taches: { Taille: 'Validé' } },
     { nom: 'Sans surface', surface: 0, appellation: 'Bourgogne' },
   ];
   const J = [
@@ -38,8 +38,9 @@ function suite(S) {
     { date: '2027-01-12', parcelle: 'Les Crais 1', tache: 'Taille', statut: 'Validé', qui: 'Jean' },   // commencée puis validée : plus d'équipe dessus
   ];
   const e1 = W._ckPlanEtats(parcs, J, 'Taille', '2026-12-01', false);
-  T('faite depuis l\u2019ouverture de la fenêtre (une validation de novembre ne compte pas pour la saison)', e1['Les Crais 1'] === 'faite' && W._ckPlanEtats(parcs, J.slice(0, 1), 'Taille', '2026-12-01', false)['Les Crais 1'] === 'afaire');
-  T('en cours, faite par « Terminé », la tâche d\u2019à côté ignorée', e1['Les Crais 2'] === 'cours' && e1['Les Charmes'] === 'faite' && e1['Clos Prieur 1'] === 'afaire');
+  T('ETAT-1 (§320) : l\u2019état vient de la fiche, pas du journal — sans statut, une validation au journal ne fait rien ; validée sur la fiche, faite même sans ligne au journal', e1['Les Crais 1'] === 'faite'
+    && W._ckPlanEtats(parcs.map(p => Object.assign({}, p, { taches: {} })), J, 'Taille', '2026-12-01', false)['Les Crais 1'] === 'afaire' && W._ckPlanEtats(parcs, [], 'Taille', '2026-12-01', false)['Les Crais 1'] === 'faite');
+  T('en cours, faite, la tâche d\u2019à côté ignorée (statuts de la fiche)', e1['Les Crais 2'] === 'cours' && e1['Les Charmes'] === 'faite' && e1['Clos Prieur 1'] === 'afaire');
   T('arrachée reste arrachée, même avec une validation', e1['La Justice 6'] === 'arr');
   T('fenêtre passée : ce qui n\u2019est pas fait est en retard', W._ckPlanEtats(parcs, J, 'Taille', '2026-12-01', true)['Clos Prieur 1'] === 'retard');
   const D = W._ckPlanDispo(parcs);
@@ -57,7 +58,7 @@ function suite(S) {
   W._ckPlanOuvrir({ getAttribute: () => 'Les Crais 2' });
   T('toucher une parcelle ouvre sa fiche, par le chemin de toujours', ouverts[0] === 'Les Crais 2' && svg.includes('onclick="_ckPlanOuvrir(this)"') && svg.includes('data-p="Les Crais 2"'));
   T('les équipes : chaque parcelle en cours a la ligne qui l\u2019a commencée, même un autre jour, et seulement elles (FORME-1, §301)', (() => { const et = W._ckPlanEtats(parcs, J, 'Taille', '2026-12-01', false), d = W._ckPlanDebuts(parcs, J, 'Taille', '2026-12-01'); const c = Object.keys(et).filter(n => et[n] === 'cours').sort().join(); return c.length > 0 && Object.keys(d).sort().join() === c && Object.values(d).every(e => e.statut === 'En cours')
-    && Object.keys(W._ckPlanDebuts([{ nom: 'X' }], [{ date: '2026-12-05', parcelle: 'X', tache: 'Taille', qui: 'H', statut: 'En cours' }, { date: '2026-12-06', parcelle: 'X', tache: 'Taille', qui: 'H', statut: 'Validé' }], 'Taille', '2026-12-01')).length === 0; })());
+    && Object.keys(W._ckPlanDebuts([{ nom: 'X', taches: { Taille: 'Validé' } }], [{ date: '2026-12-05', parcelle: 'X', tache: 'Taille', qui: 'H', statut: 'En cours' }, { date: '2026-12-06', parcelle: 'X', tache: 'Taille', qui: 'H', statut: 'Validé' }], 'Taille', '2026-12-01')).length === 0; })());
   T('ni passages ni niveaux dans le choix de la tâche', W._ckPlanTaches([{ nom: 'Taille' }, { nom: 'Rognage', type: 'passages' }, { nom: 'Liage', type: 'niveaux' }, { nom: 'Relevage' }, { nom: 'Pioche' }]).map(t => t.nom).join() === 'Taille');
   T('pas de surface : l\u2019état vide, jamais un plan faux', W._ckPlanDispo([{ nom: 'x', surface: 0 }]) === null);
   const P = S.pil;
@@ -75,14 +76,14 @@ res.forEach(([n, ok]) => { if (!ok) ko++; console.log((ok ? '  ok  ' : '  KO  ')
 console.log('\n' + (ko ? 'ROUGE ' + ko : 'VERT') + ' \u2014 ' + res.length + ' assertions, ' + ko + ' échec' + (ko > 1 ? 's' : ''));
 if (CONTRE) {
   const DEF = [
-    ['les validations d\u2019avant la fenêtre comptées', 'ck', "if(debutIso && String(e.date || '') < debutIso) return;", ''],
-    ['un début qui efface une validation', 'ck', "else if(e.statut === 'En cours' && der[e.parcelle] !== 'faite') der[e.parcelle] = 'cours';", "else if(e.statut === 'En cours') der[e.parcelle] = 'cours';"],
-    ['une arrachée repeinte par une validation', 'ck', "Object.keys(etat).forEach(function(n){ if(etat[n] !== 'arr') etat[n] =", "Object.keys(etat).forEach(function(n){ etat[n] ="],
+    ['ETAT-1 : l\u2019état ne lit plus la fiche', 'ck', "var s = lire(p, tache);", "var s = '';"],
+    ['ETAT-1 : une validation au journal repeint la parcelle (le défaut signalé)', 'ck', "  (journal || []).forEach(function(e){\n    if(!e || e.tache !== tache || e.statut !== 'En cours'", "  (journal || []).forEach(function(e){ if(e && e.tache === tache && e.statut === 'Validé' && etat[e.parcelle] && etat[e.parcelle] !== 'arr') etat[e.parcelle] = 'faite'; });\n  (journal || []).forEach(function(e){\n    if(!e || e.tache !== tache || e.statut !== 'En cours'"],
+    ['une arrachée repeinte par son statut', 'ck', "if(/arrach/i.test(String(p.statut || ''))){ etat[p.nom] = 'arr'; return; }", ""],
     ['chaque appellation à sa propre échelle', 'ck', "var w = Math.max(10, Number(p.surface) * k);", "var w = Math.max(10, Number(p.surface) / A.ha * L);"],
     ['un plan qui déborde au lieu de passer à la ligne', 'ck', "if(x + w > _CK_PL.m + L + 0.01 && x > _CK_PL.m){ x = _CK_PL.m; y += _CK_PL.h + 30; }", ""],
     ['un nom non échappé', 'ck', "' data-p=\"' + _ckEsc(n) + '\"", "' data-p=\"' + n + '\""],
     ['les passages proposés au choix', 'ck', "!(t.type === 'niveaux' || t.type === 'passages' ||", "!("],
-    ['une équipe qui reste après sa validation', 'ck', "Object.keys(L.deb).forEach(function(n){ if(L.der[n] === 'cours') r[n] = L.deb[n]; });", "Object.keys(L.deb).forEach(function(n){ r[n] = L.deb[n]; });"],   // FORME-1 (§301) : l'équipe vient de _ckPlanDebuts
+    ['une équipe qui reste après sa validation', 'ck', "if(!e || e.tache !== tache || e.statut !== 'En cours' || etat[e.parcelle] !== 'cours') return;", "if(!e || e.tache !== tache || e.statut !== 'En cours') return;"],   // ETAT-1 (§320) : l'équipe des seules parcelles en cours
     ['les fenêtres oubliées par _pilTabAuj', 'pil', "fenetres:((typeof _rfCd==='function'&&_rfCd())||{}).taskWindows||[], ", ""],
   ];
   let manques = 0;

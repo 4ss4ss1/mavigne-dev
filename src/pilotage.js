@@ -5232,8 +5232,17 @@ function _pilCk2Modele(d, m){
   var parcs=PARC.map(function(p){ return { nom:p.nom, ha:Number(p.surface)||0, appellation:p.appellation||'',
     commune:(p.commune&&typeof p.commune==='object')?String(p.commune.nom||''):String(p.commune||''),
     arr:/arrach/i.test(String(p.statut||'')), cepage:p.cepage||'', geo:(typeof window._mvParcContours==='function')?window._mvParcContours(p.nom):[] }; });
-  var J=window.JOURNAL||[], etats={};
-  taches.forEach(function(t){ etats[t.id]=(typeof window._ckPlanEtats==='function')?window._ckPlanEtats(PARC, J, t.cle, t.debut, !!retards[t.cle]):{}; });
+  // ★★ ETAT-1 (§320) : l'état d'une parcelle = son statut dans la période, celui de sa fiche (cockpit.js/_ckPlanLire) ; le journal ne
+  //   dit plus que qui l'a commencée, cherché dans toute la période. Avant : t.debut, l'ouverture de la fenêtre de la tâche — null pour
+  //   une tâche sans fenêtre (entreplantation sans trou, travaux sans barème) : tout le journal, toutes saisons, comptait.
+  var SA=(typeof _pilSaison==='function')?_pilSaison():null, perD=(SA&&SA.debut)?String(SA.debut).slice(0,10):null, perO={ fin:(SA&&SA.fin)?String(SA.fin).slice(0,10):'' };
+  var J=window.JOURNAL||[], etats={}, presta={};
+  taches.forEach(function(t){
+    etats[t.id]=(typeof window._ckPlanEtats==='function')?window._ckPlanEtats(PARC, J, t.cle, perD, !!retards[t.cle], perO):{};
+    // ETAT-1 : un arrachage fini pour l'équipe est « fait » sur le plan ; la loupe ajoute que la suite revient au prestataire.
+    var pr=(typeof window._mvAuPrestataire==='function')?PARC.filter(function(p){ return etats[t.id][p.nom]==='faite'&&window._mvAuPrestataire(p,t.cle); }).map(function(p){ return p.nom; }):[];
+    if(pr.length) presta[t.id]=pr;
+  });
   // Présences du jour (les mêmes que la tuile « Présences ») et tension de chacun (moteur de la tuile « Tension »).
   var LIB={ cp:'en congé', recup:'en récupération', maladie:'en arrêt', absent:'absent' };
   var gens=(d.presences||[]).filter(function(p){ return p&&!p.bureau&&p.etat!=='repos'; }).map(function(p){ return { nom:p.nom, absent:p.etat!=='present', motif:LIB[p.etat]||'' }; });
@@ -5280,11 +5289,11 @@ function _pilCk2Modele(d, m){
     evts.unshift(ev);
   });
   // ★ FORME-1 (§301) : l'équipe d'une parcelle en cours = ceux du « Début » qui la met en cours (le même journal, la même
-  //   fenêtre que l'état « en cours » : cockpit.js/_ckPlanDebuts), QUEL QUE SOIT LE JOUR. Avant : le journal du jour seul
+  //   période que l'état « en cours » — ETAT-1, §320 : cockpit.js/_ckPlanDebuts), QUEL QUE SOIT LE JOUR. Avant : le journal du jour seul
   //   — une parcelle commencée la veille restait « en cours » sans personne dessus, et le plan écrivait « aucune équipe ».
   var equipes=[];
   taches.forEach(function(t){
-    var deb=(typeof window._ckPlanDebuts==='function')?window._ckPlanDebuts(PARC, J, t.cle, t.debut):{};
+    var deb=(typeof window._ckPlanDebuts==='function')?window._ckPlanDebuts(PARC, J, t.cle, perD, perO):{};
     Object.keys(deb).forEach(function(n){ var e=deb[n], q=qui(e);
       equipes.push({ noms:etN(q)||'Personne d\u2019indiqu\u00e9', ini:q.length?q.slice(0,2).map(function(c){ return c.charAt(0).toUpperCase(); }):['?'], tache:t.id, parcelle:n, depuis:String(e.date||auj) }); });
   });
@@ -5364,7 +5373,7 @@ function _pilCk2Modele(d, m){
     auj:auj, debut:(taches.map(function(t){ return t.debut; }).filter(Boolean).sort()[0])||(ph[0]&&ph[0].d)||auj,
     objectif:isoD(m&&m.obj), fin:isoD(m&&m.proj), marge:(m&&m.marge!=null)?m.marge:null,
     dateTxt:sem[t0.getDay()].replace(/^./,function(c){ return c.toUpperCase(); })+' '+t0.getDate()+' '+t0.toLocaleDateString('fr-FR',{month:'long'})+', semaine '+nSem,
-    saisonDe:saisonDe, taches:taches, parcs:parcs, etats:etats, gens:gens, presents:nPres, effectifTotal:gens.length,
+    saisonDe:saisonDe, taches:taches, parcs:parcs, etats:etats, presta:presta, gens:gens, presents:nPres, effectifTotal:gens.length,
     presTxt:nPres+' présent'+(nPres>1?'s':'')+(abs.length?', '+absTxt:''), absTxt:absTxt,
     confN:diag.length, confTxt:diag.length?tx(diag[0].t||diag[0].txt||'Un point à régler'):'Rien à régler',
     equipes:equipes, evts:evts, tracCours:tracCours, photos:ph, reste:d.totalReste||0, total:hT, hFait:d.hDone||0, hTotal:hT, pct:Number(d.gaugePct)||0,

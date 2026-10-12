@@ -43,7 +43,7 @@ function suite(S) {
   const now = new Date(2027, 0, 12, 9, 0);
   const h2 = serie('', ['2027-01-13', '2027-01-14'], (k, h) => [k === 0 && h >= 9 && h <= 10 ? 0.5 : 0, 10]);   // Gevrey : 1 mm demain, sous le seuil
   const sects = [{ nom: 'Brochon', h: { time: dj.time, precip: dj.precip, wind: dj.wind } }, { nom: 'Gevrey-Chambertin', h: { time: h2.time, precip: h2.precipitation, wind: h2.windspeed_10m } }];
-  const plan = { parcs: [{ nom: 'Les Charmes', commune: 'Brochon' }, { nom: 'Vignois', commune: 'Brochon' }, { nom: 'Les Crais', commune: 'Gevrey-Chambertin' }],
+  const plan = { parcs: [{ nom: 'Les Charmes', commune: 'Brochon', taches: { Brulage: 'Validé' } },   /* ETAT-1 (§320) : faite sur la fiche */ { nom: 'Vignois', commune: 'Brochon' }, { nom: 'Les Crais', commune: 'Gevrey-Chambertin' }],
     journal: [{ date: '2027-01-05', parcelle: 'Les Charmes', tache: 'Brulage', statut: 'Validé' }], fen: [{ nom: 'Brulage', ws: 343, we: 441 }] };   // AUJ-8 : fenêtre du 10/12 au 17/03
   const m1 = W._ckSvMeteo(null, [{ nom: 'Brulage', pct: 40 }], now, sects, plan);
   T('un secteur touché : la commune, le cumul, la plage horaire', m1[0].quand === 'Demain' && m1[0].titre === 'Pluie annoncée sur Brochon : 6\u202fmm, de 8\u00a0h à 11\u00a0h');
