@@ -3,9 +3,9 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **12 octobre 2026 (ARRACH-9)** — ★ **L'ARRACHAGE FINI POUR L'ÉQUIPE QUITTE « À FAIRE » ET LES CARTES DE L'ÉQUIPE** (§317). Lot 48, base `f293f54`. Nico (12/10) : « elle ne doit plus apparaître dans les listes des parcelles à faire » ; reformulé (hors de « À faire » pour tous, visible sous « Toutes », plus « commencée » sur les cartes), « Continuer » puis « suite ».
-> Une lecture, `_arrAuPrestataire` (app.js) : Parcelles (filtre, rang, état « Au prestataire », puce, liste vide), carte de l'Accueil, anneau des cartes, tournée. PAS `_mvTacheEtat` ni `_pvCurDone` : le bouton Fait / Annuler et l'étape du prestataire, dans la fiche, ne bougent pas.
-> **APP 8.84 → 8.85, SW 9.63 → 9.64.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+> Dernière consolidation : **12 octobre 2026 (DIRECT-1)** — ★ **« DÉBUT » ENREGISTRE L'ÉQUIPE ; « EN DIRECT » DIT QUI EST OÙ, TRACTEUR COMPRIS** (§318). Lot 49, base `db178db`. Nico (12/10, captures) : « l'équipe est bien programmée mais c'est encore moi d'indiqué dessus », « il n'y a personne en direct », puis « aujourd'hui j'étais sur le tracteur, j'aimerais bien que ça apparaisse » ; reformulé, « Oui », puis « Continuez ».
+> Les deux « Début » n'écrivaient que leur auteur (« Valider » écrivait le groupe) : `_mvDebutLigne` (app.js) ; « Changer » donne l'équipe aux parcelles en cours commencées sans groupe (`_mvDebutsSuivent`). Le cockpit lit `_ckQui` (l'équipe d'abord, « sans moi » respecté) et `_ckTracJour` (cockpit.js : la session et sa boîte noire) ; « En ce moment » en tête du fil (cockpit-vue.js).
+> **APP 8.85 → 8.86, SW 9.64 → 9.65.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -836,6 +836,8 @@ chaque build) ; **s'il écrit dans le dépôt** (un vrai fichier, ou un temporai
 ★★ **GF-2 (§303) — LA CHAÎNE SE JOUE JUSQU'AU BOUT, ET SON RÉSUMÉ FAIT FOI.** Elle dépasse le temps d'un appel côté Claude : la lancer en
 arrière-plan (`nohup env TZ=Europe/Paris node scripts/mv-lanceur.mjs --continuer > /tmp/chaine.log 2>&1 &`) et lire sa dernière ligne. Le 09/10,
 trois tranches relues par un script maison (`… | sort -u | head -20`) ont caché un KO de `mv-harnais-subset` : GF-1 est parti « vert », la CI a rougi.
+★ **DIRECT-1 (§318) — si l'arrière-plan meurt avec l'appel** (12/10 : `nohup`, puis `setsid`, coupés à la fin de l'appel, `npm ci` compris) : jouer la liste `HARNAIS`
+de `mv-harnais-liste.mjs` par tranches au premier plan, en notant le code retour de chaque commande ; un rouge en 0 s accuse d'abord `node_modules`.
 
 ⚠️ **`smoke.mjs` sert `dist/`** → il teste le **dernier build**, pas les sources.
 
@@ -1847,6 +1849,9 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ DIRECT-1 — CE QUI RESTE OUVERT (§318, posé le 12/10)
+1. **À regarder chez Nico, au téléphone et sur PC** : Parcelles › Réparation › « Changer » puis la même équipe → dans Aujourd'hui, Pasquier des Chenes passe de « N » à l'équipe ; un « Début » neuf ; « En direct » un jour de tracteur (en marche, en pause, parcelle finie, fin de journée). Aucun rendu dans un navigateur ici. **Vu, non touché** : « sans moi » reste ignoré par « Ma part du chantier » (`_mvPartCalc`), le mur (`_mvMurData`) et Ma trace ; le fil de secours (`_ckFilHtml`) n'a ni « En ce moment » ni tracteur ; un chrono laissé ouvert reste « en cours » jusqu'à « Fin de journée » ; la pastille du plan ne montre que deux initiales (une équipe de quatre : « VS »).
+
 ### ⚠️ ARRACH-9 — CE QUI RESTE OUVERT (§317, posé le 12/10)
 1. **À regarder chez Nico, au téléphone** : Parcelles › Arrachage en « À faire » (une parcelle démontée ne doit plus y être) puis « Toutes » (badge « Au prestataire », la fiche valide l'étape du prestataire) ; la carte de l'Accueil si l'arrachage est la priorité. Vu, non touché : le plan du cockpit lit le journal (une étape validée = « faite ») ; un ouvrier peut valider l'étape du prestataire depuis la fiche, comme avant.
 
@@ -2355,12 +2360,6 @@ L'hypothèse en vigueur — la lecture seule dure — n'a jamais été confirmé
 
 ### ⚠️⚠️ NOUVEAU AU BACKLOG (issu de §43 — 15/08)
 
-- ✅ ~~**Refondre l'export JSON**~~ — **FAIT le 13/09, §124 (SAUV-1).** L'entrée disait
-  « 8 clés sur 27 » ; le compte exact était **8 sur 26**, et le vrai défaut n'était pas l'export
-  mais la **restauration**, qui réécrivait la fiche membre tronquée par-dessus l'historique des
-  contrats. L'export dérive désormais de `COLLECTIONS` — c'était bien l'argument de l'entrée, et
-  il était juste. ★ *Une entrée de backlog qui nomme la bonne cause peut quand même sous-estimer
-  le dégât : celle-ci parlait d'un fichier incomplet, pas d'une perte de données.*
 - ⚠️⚠️ **Vérifier la persistance cloud tenant par tenant** — le code est bon, l'existence des
   documents chez chaque client n'est pas prouvée. Procédure : **§43g**.
 - ⚠️ **La marge en jours n'est surveillée par aucun test** — bloqué par l'export. **§43f**.

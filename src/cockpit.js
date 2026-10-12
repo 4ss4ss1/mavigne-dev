@@ -40,12 +40,17 @@ function _ckTs(e){
   var t = parseInt(id, 16);
   return (t > 1500000000000 && t < Date.now() + 86400000) ? t : null;
 }
-// Qui : celui qui a validé, puis son équipe, sans doublon.
+// Qui travaille sur une ligne du journal — ★ DIRECT-1 (§318) : l'équipe d'abord, dans son ordre ; celui qui a saisi ensuite, s'il
+//   n'y est pas déjà et s'il était dans les rangs. « Sans moi » (quiHors, TV-2) : il n'y figure pas — comme pour le temps passé
+//   (_ecoTempsVigne) et le journal des interventions. Sans équipe : l'auteur seul. Nico (12/10) : « l'équipe est bien
+//   programmée mais c'est encore moi d'indiqué dessus ».
 function _ckQui(e){
-  var l = [e && e.qui].concat((e && Array.isArray(e.membresEquipe)) ? e.membresEquipe : []), r = [];
-  for(var i = 0; i < l.length; i++){ var n = String(l[i] || '').trim(); if(n && r.indexOf(n) < 0) r.push(n); }
+  var q = String((e && e.qui) || '').trim(), r = [];
+  ((e && Array.isArray(e.membresEquipe)) ? e.membresEquipe : []).forEach(function(x){ var n = String(x || '').trim(); if(n && r.indexOf(n) < 0) r.push(n); });
+  if(q && r.indexOf(q) < 0 && !(e.quiHors && r.length)) r.push(q);
   return r;
 }
+window._ckQui = _ckQui;
 function _ckQuand(ts, now){
   if(ts == null) return '';
   var min = Math.round(((now || Date.now()) - ts) / 60000);
@@ -74,10 +79,79 @@ window._ckFilHtml = function(items, vus, now){
     var avs = noms.slice(0, 2).map(function(n){ return '<span class="ck-av">' + _ckEsc(n.charAt(0).toUpperCase()) + '</span>'; }).join('');
     var neuf = vus && !vus.has(e.id);
     return '<li class="ck-ev' + (neuf ? ' neuf' : '') + '"><span class="ck-avs" aria-hidden="true">' + avs + '</span>'
-      + '<span class="ck-ev-tx"><span><b>' + _ckEsc(noms.join(' et ') || 'Quelqu’un') + '</b> ' + verbe + ' <b>' + _ckEsc(e.tache) + '</b></span>'
+      + '<span class="ck-ev-tx"><span><b>' + _ckEsc(_ckEt(noms) || 'Quelqu’un') + '</b> ' + verbe + ' <b>' + _ckEsc(e.tache) + '</b></span>'
       + '<span class="ck-ev-s">' + _ckEsc(e.parcelle) + '</span></span>'
       + '<time>' + _ckQuand(it.ts, now) + '</time></li>';
   }).join('') + '</ol>';
+};
+
+// ── ★★ DIRECT-1 (§318) — LE TRACTEUR DANS « EN DIRECT » ────────────────────────────────────────────────────────────
+//   Nico (12/10) : « aujourd'hui j'étais sur le tracteur, j'aimerais bien que ça apparaisse ». Tout est déjà partagé entre les
+//   téléphones : la session (conducteur, activité, date) et sa boîte noire (`trace`, SESS-1 §168 : chaque geste et son heure,
+//   gardés 3 jours dans le document de la session). Le chrono, lui, vit sur l'appareil : on ne le lit pas.
+//   Rend, pour le jour `auj` : evts — 'trac' (une parcelle ou un bloc fini, ses minutes quand la mesure en a), 'trac-debut' (la
+//   session ouverte ce jour-là), 'traite' (un traitement : l'assistant phyto écrit une session type:'traitement') ; cours — le
+//   conducteur sur une parcelle en ce moment, ou en pause. Une parcelle décochée dans la journée sort de l'événement qui la
+//   portait ; sans aucun geste du jour, les parcelles finies ce jour-là (leur heure de fin, t1) font foi.
+function _ckJourDe(t){ var n = Number(t); return (isFinite(n) && n > 1500000000000) ? _ckIso(new Date(n)) : ''; }
+function _ckTsSession(s){
+  var m = /^trat_(\d{12,14})$/.exec(String((s && s.id) || ''));
+  if(m){ var t = Number(m[1]); return (t > 1500000000000 && t < Date.now() + 86400000) ? t : null; }
+  return _ckTs(s);
+}
+function _ckHeureLe(auj, hhmm){
+  var m = /^(\d{1,2})[:h](\d{2})/.exec(String(hhmm || '').trim()), p = String(auj || '').split('-');
+  if(!m || p.length !== 3) return null;
+  var d = new Date(+p[0], +p[1] - 1, +p[2], +m[1], +m[2]);
+  return isNaN(d.getTime()) ? null : d.getTime();
+}
+function _ckParcs(p){ return String(p || '').split(' + ').map(function(x){ return x.trim(); }).filter(Boolean); }
+window._ckTracJour = function(sessions, auj, o){
+  var evts = [], cours = [], tracs = (o && Array.isArray(o.tracs)) ? o.tracs : [];
+  (Array.isArray(sessions) ? sessions : []).forEach(function(s){
+    if(!s || typeof s !== 'object') return;
+    var qui = String(s.conducteur || '').trim(), act = String(s.activite || '').trim(), t0 = _ckTsSession(s);
+    if(s.type === 'traitement'){
+      if(String(s.date || '').slice(0, 10) !== auj) return;
+      var tsT = _ckHeureLe(auj, s.heureFin) || _ckHeureLe(auj, s.heureDebut) || ((t0 && _ckJourDe(t0) === auj) ? t0 : null);
+      evts.push({ k: 'traite', qui: qui, act: act || 'Traitement', parcs: (Array.isArray(s.parcelles) ? s.parcelles : []).filter(Boolean).map(String), m: null, ts: tsT });
+      return;
+    }
+    var tr = (Array.isArray(s.trace) ? s.trace : []).filter(function(y){ return y && _ckJourDe(y.t) === auj; });
+    for(var i = tr.length - 1; i >= 0 && !qui; i--) qui = String(tr[i].u || '').trim();
+    if(String(s.date || '').slice(0, 10) === auj){
+      var tn = (tracs.filter(function(x){ return x && x.id === s.tracteurId; })[0] || {}).nom || '';
+      evts.push({ k: 'trac-debut', qui: qui, act: act, parcs: [], m: null, trac: String(tn), ts: (t0 && _ckJourDe(t0) === auj) ? t0 : (tr.length ? Number(tr[0].t) : null) });
+    }
+    var faits = [], bloc = [], tB = null, pause = false, tP = null, pBloc = [];
+    tr.forEach(function(y){
+      var e = String(y.e || ''), ps = _ckParcs(y.p), t = Number(y.t);
+      if(e === 'fin'){ if(ps.length) faits.push({ parcs: ps, m: (typeof y.m === 'number' && y.m > 0) ? y.m : null, ts: t }); bloc = []; tB = null; }
+      else if(e === 'coche' || e === 'retabli'){ if(ps.length) faits.push({ parcs: ps, m: null, ts: t }); }
+      else if(e === 'decoche'){ ps.forEach(function(n){ for(var j = faits.length - 1; j >= 0; j--){ var k = faits[j].parcs.indexOf(n); if(k >= 0){ faits[j].parcs.splice(k, 1); return; } } }); }
+      else if(e === 'debut' || e === 'reprise'){ bloc = ps; tB = t; pause = false; }
+      else if(e === 'ajout'){ ps.forEach(function(n){ if(bloc.indexOf(n) < 0) bloc.push(n); }); }
+      else if(e === 'reprend'){ pause = false; if(ps.length){ bloc = ps; tB = t; } }
+      else if(e === 'interrompt'){ pBloc = ps.length ? ps : bloc; bloc = []; tB = null; pause = true; tP = t; }
+      else if(e === 'dejeuner'){ pBloc = []; bloc = []; tB = null; pause = true; tP = t; }
+      else if(e === 'finjour' || e === 'ferme'){ bloc = []; tB = null; pause = false; }
+    });
+    if(!tr.length){
+      var grp = {};
+      (Array.isArray(s.parcellesFaites) ? s.parcellesFaites : []).forEach(function(x){
+        if(!x || typeof x !== 'object' || _ckJourDe(x.t1) !== auj) return;
+        var n = String(x.nom || '').trim(); if(n) (grp[x.t1] = grp[x.t1] || []).push(n);
+      });
+      Object.keys(grp).forEach(function(k){ faits.push({ parcs: grp[k], m: null, ts: Number(k) }); });
+    }
+    faits.forEach(function(f){ if(f.parcs.length) evts.push({ k: 'trac', qui: qui, act: act, parcs: f.parcs, m: f.m, ts: f.ts }); });
+    if(s.statut === 'Terminé') return;
+    if(bloc.length) cours.push({ qui: qui, act: act, parcs: bloc, ts: tB, pause: false });
+    else if(pause) cours.push({ qui: qui, act: act, parcs: pBloc, ts: tP, pause: true });
+  });
+  evts.sort(function(a, b){ return (b.ts || 0) - (a.ts || 0); });
+  cours.sort(function(a, b){ return (b.ts || 0) - (a.ts || 0); });
+  return { evts: evts, cours: cours };
 };
 
 // ── Le résumé : une phrase, rien que des chiffres déjà calculés ───────────────────────────────────
@@ -200,6 +274,7 @@ function _ckMeteoJour(h, iso){
 window._ckMeteoJour = _ckMeteoJour;
 function _ckMm(v){ return String(v).replace('.', ',') + '\u202fmm'; }
 function _ckEt(l){ return l.join(', ').replace(/, ([^,]*)$/, ' et $1'); }
+window._ckEt = _ckEt;   // DIRECT-1 (§318) : « Victor, Shana et Alicia » — le modèle du cockpit (pilotage.js) en a besoin
 // ★ AUJ-8 (§312) — CE QUI EST EN COURS LÀ OÙ IL PLEUT OU VENTE : un fait, jamais un verdict (« ce n'est pas à l'appli de décider »).
 //   Tâche du plan commencée au calendrier ce jour-là et pas finie ; ses parcelles pas encore faites dans les communes touchées.
 //   ⚠️ Commune rangée { nom, lat, lng } (FORME-1) : lue en texte, le compte par secteur valait toujours zéro.

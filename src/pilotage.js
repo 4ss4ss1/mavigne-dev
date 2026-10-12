@@ -5260,13 +5260,22 @@ function _pilCk2Modele(d, m){
   var absTxt=repos?(jEff?('Repos aujourd\u2019hui \u00b7 '+jNom+' : '+(absListe||'toute l\u2019équipe')):'Pas de travail prévu au planning ces deux semaines'):(absListe||'Toute l\u2019équipe est là');
   // Le fil : le journal du jour (fonctions de cockpit.js). Les équipes : plus bas (FORME-1, §301).
   var fil=(typeof window._ckFilDonnees==='function')?window._ckFilDonnees(J, auj):[];
-  var qui=function(e){ var r=[]; [e.qui].concat(Array.isArray(e.membresEquipe)?e.membresEquipe:[]).forEach(function(n){ n=String(n||'').trim(); if(n&&r.indexOf(n)<0) r.push(n); }); return r; };
+  // ★ DIRECT-1 (§318) : qui travaille = cockpit.js/_ckQui (l'équipe d'abord, l'auteur s'il était dans les rangs — « sans moi »
+  //   le retire). Le repli applique la même règle (mv-harnais-direct1) ; les noms s'écrivent « A, B et C ».
+  var qui=function(e){
+    if(typeof window._ckQui==='function') return window._ckQui(e);
+    var q=String((e&&e.qui)||'').trim(), r=[];
+    ((e&&Array.isArray(e.membresEquipe))?e.membresEquipe:[]).forEach(function(x){ var n=String(x||'').trim(); if(n&&r.indexOf(n)<0) r.push(n); });
+    if(q&&r.indexOf(q)<0&&!(e.quiHors&&r.length)) r.push(q);
+    return r;
+  };
+  var etN=function(l){ return (typeof window._ckEt==='function')?window._ckEt(l):l.join(' et '); };
   var tDe=function(n){ return taches.filter(function(x){ return x.cle===n; })[0]; };
   var haDe=function(n){ var p=parcs.filter(function(x){ return x.nom===n; })[0]; return p?p.ha:0; };
   var evts=[];
   fil.slice().reverse().forEach(function(x){
     var e=x.e, t=tDe(e.tache); if(!t) return; var n=qui(e);
-    var ev={ type:e.statut==='Validé'?'valide':'commence', noms:n.join(' et ')||'Quelqu\u2019un', ini:n.slice(0,2).map(function(c){ return c.charAt(0).toUpperCase(); }),
+    var ev={ type:e.statut==='Validé'?'valide':'commence', noms:etN(n)||'Quelqu\u2019un', ini:n.slice(0,2).map(function(c){ return c.charAt(0).toUpperCase(); }),
       tache:t.id, parcelle:e.parcelle, ts:x.ts||t0.getTime(), h:e.statut==='Validé'?Math.round(haDe(e.parcelle)*t.hha*10)/10:0 };
     evts.unshift(ev);
   });
@@ -5277,8 +5286,20 @@ function _pilCk2Modele(d, m){
   taches.forEach(function(t){
     var deb=(typeof window._ckPlanDebuts==='function')?window._ckPlanDebuts(PARC, J, t.cle, t.debut):{};
     Object.keys(deb).forEach(function(n){ var e=deb[n], q=qui(e);
-      equipes.push({ noms:q.join(' et ')||'Personne d\u2019indiqu\u00e9', ini:q.length?q.slice(0,2).map(function(c){ return c.charAt(0).toUpperCase(); }):['?'], tache:t.id, parcelle:n, depuis:String(e.date||auj) }); });
+      equipes.push({ noms:etN(q)||'Personne d\u2019indiqu\u00e9', ini:q.length?q.slice(0,2).map(function(c){ return c.charAt(0).toUpperCase(); }):['?'], tache:t.id, parcelle:n, depuis:String(e.date||auj) }); });
   });
+  // ★★ DIRECT-1 (§318) : le tracteur du jour (cockpit.js/_ckTracJour : la session et sa boîte noire). Ses événements se mêlent au
+  //   fil, à leur heure ; le conducteur en marche ou en pause va dans « En ce moment », au-dessus. Nico (12/10) : « aujourd'hui
+  //   j'étais sur le tracteur, j'aimerais bien que ça apparaisse ».
+  var TJ={ evts:[], cours:[] };
+  try{ if(typeof window._ckTracJour==='function') TJ=window._ckTracJour(window.SESSIONS||[], auj, { tracs:window.TRACTEURS_LIST||[] }); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#trac'); }
+  var ini2=function(l){ return l.length?l.slice(0,2).map(function(c){ return c.charAt(0).toUpperCase(); }):['?']; };
+  TJ.evts.forEach(function(x){ var n=x.qui?[x.qui]:[];
+    evts.push({ type:x.k, noms:n[0]||'Quelqu\u2019un', ini:ini2(n), act:x.act||'', parcs:x.parcs||[], m:(typeof x.m==='number')?x.m:null, trac:x.trac||'', ts:(typeof x.ts==='number')?x.ts:null }); });
+  evts.sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
+  var tracCours=TJ.cours.map(function(x){ var n=x.qui?[x.qui]:[];
+    return { noms:n[0]||'Quelqu\u2019un', ini:ini2(n), act:x.act||'', parcs:x.parcs||[], ts:(typeof x.ts==='number')?x.ts:null, pause:!!x.pause }; });
   // La courbe : les photos du jour (PHOTO-1) et aujourd'hui en direct.
   var ph=((typeof window._ckChargeSerie==='function')?window._ckChargeSerie(_pilPhotoListe(), d, auj, (typeof _pilSaison==='function'&&_pilSaison()&&_pilSaison().nom)||''):[]).map(function(x){ return { d:x.iso, reste:x.v }; });
   var hT=d.totalTotal||0;
@@ -5346,7 +5367,7 @@ function _pilCk2Modele(d, m){
     saisonDe:saisonDe, taches:taches, parcs:parcs, etats:etats, gens:gens, presents:nPres, effectifTotal:gens.length,
     presTxt:nPres+' présent'+(nPres>1?'s':'')+(abs.length?', '+absTxt:''), absTxt:absTxt,
     confN:diag.length, confTxt:diag.length?tx(diag[0].t||diag[0].txt||'Un point à régler'):'Rien à régler',
-    equipes:equipes, evts:evts, photos:ph, reste:d.totalReste||0, total:hT, hFait:d.hDone||0, hTotal:hT, pct:Number(d.gaugePct)||0,
+    equipes:equipes, evts:evts, tracCours:tracCours, photos:ph, reste:d.totalReste||0, total:hT, hFait:d.hDone||0, hTotal:hT, pct:Number(d.gaugePct)||0,
     capMoy:(m&&m.cadH)||0, besoin:(function(){ if(!(m&&m.obj)) return 0; var n=0, x=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()+1); while(x<=m.obj&&n<400){ if(ouv(x)) n++; x.setDate(x.getDate()+1); } return n?Math.round((d.totalReste||0)/n):0; })(),
     meteo:meteo, savoir:sv,
     decision:{ pres:{ v:(jEff?(jNom.charAt(0).toUpperCase()+jNom.slice(1)+' : '):'')+nPres+' sur '+gens.length,

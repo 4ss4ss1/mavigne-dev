@@ -6088,6 +6088,11 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .ck-fil{display:flex;flex-direction:column}
 .ck-pt-fil{width:8px;height:8px;margin-right:8px;background:#7CCB55;animation-name:respire}
 .ck-fil-l{list-style:none;margin:0 -4px;padding:0;flex:1;min-height:0;overflow:auto;overscroll-behavior:contain}
+/* DIRECT-1 (§318) — « En ce moment » (parcelles en cours, tracteur en marche) au-dessus du fil du jour */
+.ck-fil-c{list-style:none;margin:0 -4px;padding:0}
+.ck-fil-sec{margin:12px 0 0;font-size:var(--pt-nano,11px);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--texte-doux)}
+.ck-fil-sec[hidden]{display:none}
+.ck-ev-cours .ck-ev-tag{white-space:nowrap}
 .ck-ev{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:start;gap:12px;padding:12px 4px;border-radius:10px;box-shadow:inset 0 1px 0 var(--ligne,#ECE6DA)}
 .ck-ev:first-child{box-shadow:none}
 .ck-ev.neuf{animation:neuf 2.8s var(--mv-sortie)}

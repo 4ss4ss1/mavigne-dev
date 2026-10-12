@@ -587,6 +587,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-chant1.mjs --contre'],
   ['node scripts/mv-harnais-arrach9.mjs'],           // ARRACH-9 (§317) : la parcelle d'arrachage au prestataire quitte « À faire » et les cartes de l'équipe
   ['node scripts/mv-harnais-arrach9.mjs --contre'],
+  ['node scripts/mv-harnais-direct1.mjs'],           // DIRECT-1 (§318) : « Début » enregistre l'équipe, « sans moi » dans le cockpit, « En direct » : en ce moment, puis la journée, tracteur compris
+  ['node scripts/mv-harnais-direct1.mjs --contre'],
   ['node scripts/mv-harnais-trac1.mjs'],              // TRAC-1 (§282) : les sessions du Tracteur en liste + fiche
   ['node scripts/mv-harnais-trac1.mjs --contre'],
   ['node scripts/mv-harnais-trac2.mjs'],              // TRAC-2 (§283) : l'Entretien du Tracteur sur deux colonnes

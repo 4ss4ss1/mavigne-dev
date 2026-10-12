@@ -131,7 +131,7 @@ let V = null;
 let AUJ, DEBUT, VISEE, XMAX, TACHES = [], T = {}, PREREQ = {}, GENS = [], EQ = {}, APPS = [], AIDX = {},
   PLAN_H = 720, PLAN_W = 1000, PLAN_S = 1, PLAN_LARG = 0, HA_VIGNE = 0, PARCS = [], PIDX = {}, HA_TOT = 0, ORDRE = {}, TOTAL = 0, YMAX = 500, TAUX = 0,
   POSTES = [], HIST = [], METEO = [], T0 = Date.now(), MIN = 60e3, NEXT_ID = 1, SPARK_TRAV = [], SPARK_BUD = [], SPARK_ECART = [];
-const S = { etats: {}, dates: {}, equipes: [], evts: [], vue: null, filtre: null, sel: null, onglet: 'auj', mode: 'terrain', svTout: false, filTout: false };
+const S = { etats: {}, dates: {}, equipes: [], evts: [], trac: [], vue: null, filtre: null, sel: null, onglet: 'auj', mode: 'terrain', svTout: false, filTout: false };
 const H_JOUR = 1;
 const effectif = () => (V ? V.presents : 0);
 const capacite = () => 0;
@@ -284,9 +284,13 @@ function charger(v) {
   }));
   (v.evts || []).forEach((e, i) => {
     const id = 'f' + i; EQ[id] = EQ[id] || { noms: e.noms, ini: e.ini };
+    // ★ DIRECT-1 (§318) : le tracteur n'a ni tâche du plan ni parcelle unique — il garde son activité, ses parcelles, ses minutes.
+    if (EV_TRAC[e.type]) { S.evts.push({ id: i + 1, type: e.type, eq: id, act: String(e.act || ''), parcs: Array.isArray(e.parcs) ? e.parcs.map(String) : [], m: typeof e.m === 'number' ? e.m : null, trac: String(e.trac || ''), ts: typeof e.ts === 'number' ? e.ts : null }); return; }
     if (parNom[e.parcelle] && T[e.tache]) S.evts.push({ id: i + 1, type: e.type, eq: id, t: e.tache, pid: parNom[e.parcelle], h: e.h || 0, ts: e.ts || Date.now() });
   });
   NEXT_ID = S.evts.length + 1;
+  // ★ DIRECT-1 : le tracteur en marche (ou en pause) — « En ce moment », au-dessus du fil, avec les parcelles en cours (S.equipes).
+  S.trac = (v.tracCours || []).map((x, i) => { const id = 't' + i; EQ[id] = { noms: String(x.noms || ''), ini: Array.isArray(x.ini) && x.ini.length ? x.ini : ['?'] }; return { id, act: String(x.act || ''), parcs: Array.isArray(x.parcs) ? x.parcs.map(String) : [], ts: typeof x.ts === 'number' ? x.ts : null, pause: !!x.pause }; });
   HIST = (v.photos || []).map(x => ({ d: deIso(x.d), r: x.reste, c: x.cout || 0 }));
   TOTAL = Math.max(v.total || 0, ...HIST.map(h => h.r), v.reste || 0, 1);
   YMAX = Math.ceil(TOTAL / 500) * 500;
@@ -346,6 +350,7 @@ const INFO = {
   savoir: 'Ce qui peut changer la journée ou la semaine. Sous chaque jour : le risque de pluie (le plus haut de la journée), le cumul en millimètres et le vent le plus fort (vent moyen, sans les rafales). Dessous : la pluie ou le vent des deux jours qui viennent, secteur par secteur, et ce qui est en cours dans les communes touchées ; puis les absences, les contrats, les retards et le matériel. Les motifs d’absence ne sont visibles que de l’admin.',
   decision: 'Les quatre questions de chaque matin, chacune avec sa réponse et le bouton pour agir.',
   plan: 'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine. Sa couleur dit l’état de la tâche choisie ; le trait sous chaque appellation, son avancement. Une parcelle en cours porte l’équipe qui l’a commencée, même un autre jour. Au survol, une loupe la montre en grand ; la toucher ouvre sa fiche. Les rangs dessinés sont un repère, pas le relevé des rangs ; une parcelle sans contour est un carré de sa surface, en pointillé.',
+  fil: 'En ce moment : chaque parcelle en cours, avec l’équipe qui l’a commencée et depuis quand — même un autre jour —, puis le tracteur en marche ou en pause. Aujourd’hui : les validations, les débuts de parcelle et le travail au tracteur de la journée (parcelles finies, avec le temps mesuré au chrono ; session ouverte ; traitement), du plus récent au plus ancien. L’équipe passe d’abord ; celui qui a saisi n’y figure que s’il était dans les rangs.',
   courbe: 'Le reste mesuré : une ligne relie la photo de chaque jour au point d’aujourd’hui, en direct. La photo est prise à la première ouverture du Pilotage par un administrateur, une fois les données arrivées (60 jours gardés) ; un jour sans photo est un trou. L’axe part de la première photo. La projection suit la capacité du planning ; la ligne fine montre l’allure qu’il faudrait pour finir pile à l’objectif.',
   atterrissage: 'La fin projetée de l’onglet Économie : ce qui est déjà dépensé, plus le travail qui reste, compté au barème et corrigé de la cadence mesurée de l’équipe quand elle s’applique (sinon au barème seul). Tracteur, GNR et phyto suivent l’avancement ; les prestations et les travaux à l’heure comptent ce qu’ils ont coûté.',
   coutha: 'L’atterrissage de la campagne, divisé par les hectares en production (une vigne arrachée n’en a plus). Le prévu est le budget, divisé de la même façon.',
@@ -621,7 +626,47 @@ function htmlChantiers(r) {
     }).join('') + '</ul>';
 }
 
+// ═══ DIRECT-1 (§318) — LE TRACTEUR ET « EN CE MOMENT » DANS LE FIL ═══
+// Nico (12/10) : « il n'y a personne en direct », puis « aujourd'hui j'étais sur le tracteur, j'aimerais bien que ça apparaisse ».
+// Le modèle (pilotage.js/_pilCk2Modele, lu dans cockpit.js/_ckTracJour) donne les événements du tracteur mêlés au fil, et le
+// tracteur en marche ; les parcelles en cours sont celles des pastilles (S.equipes, la même lecture).
+// ⚠️ Aucun article devant l'activité : les noms sont libres (« Labour », « Semis »…), « le » ou « la » serait parfois faux.
+const EV_TRAC = { trac: 1, 'trac-debut': 1, traite: 1 };
+const dureeTxt = m => { const r = Math.max(1, Math.round(m)); if (r < 60) return r + '\u00a0min'; const h = Math.floor(r / 60), x = r % 60; return h + '\u00a0h' + (x ? '\u00a0' + String(x).padStart(2, '0') : ''); };
+const listeTxt = l => l.length > 1 ? l.slice(0, -1).join(', ') + ' et ' + l[l.length - 1] : (l[0] || '');
+function texteTrac(e) {
+  const qui = (e.eq && EQ[e.eq] && EQ[e.eq].noms) || 'Quelqu’un', act = e.act ? maj1(e.act) : 'Tracteur', n = e.parcs.length;
+  if (e.type === 'traite') return { titre: qui + ' a traité', sous: n > 2 ? n + '\u00a0parcelles' : (listeTxt(e.parcs) || act) };
+  if (e.type === 'trac-debut') return { titre: qui + ' a pris le tracteur', sous: act + (e.trac ? ', ' + e.trac : '') };
+  return { titre: qui + ' a fini ' + (n > 1 ? n + '\u00a0parcelles' : (e.parcs[0] || 'une parcelle')),
+    sous: act + ' au tracteur' + (n > 1 ? '\u00a0: ' + listeTxt(e.parcs) : '') + (e.m ? ', ' + dureeTxt(e.m) : '') };
+}
+// « En ce moment » : les parcelles en cours (commencée le plus récemment d'abord), puis le tracteur en marche ou en pause.
+function coursItems() {
+  const v = S.equipes.filter(e => e.parc && PIDX[e.parc] && T[e.tache]).slice()
+    .sort((a, b) => String(b.depuis || '').localeCompare(String(a.depuis || '')));
+  return v.map(e => ({ k: 'v', e })).concat(S.trac.map(x => ({ k: 't', e: x })));
+}
+function htmlCoursLi(c) {
+  const eq = EQ[c.e.id] || { noms: '', ini: ['?'] }, anonyme = !eq.noms || (eq.ini.length === 1 && eq.ini[0] === '?');
+  const ic = '<span class="ck-duo">' + eq.ini.map(i => '<span class="ck-av">' + esc(i) + '</span>').join('') + '</span>';
+  let t, s, tag = 'En cours';
+  if (c.k === 'v') {
+    const p = PIDX[c.e.parc], tt = T[c.e.tache];
+    t = anonyme ? maj1(tt.art) + ' en cours' : eq.noms + ' sur ' + tt.art;
+    s = p.nom + ', ' + quand(c.e.depuis) + (anonyme ? ', personne d’indiqué' : '');
+  } else {
+    t = (anonyme ? 'Quelqu’un' : eq.noms) + ' au tracteur';
+    s = [c.e.act ? maj1(c.e.act) : 'Tracteur', listeTxt(c.e.parcs), c.e.ts ? (c.e.pause ? 'en pause depuis ' : 'depuis ') + heureTxt(c.e.ts) : (c.e.pause ? 'en pause' : '')].filter(Boolean).join(', ');
+    if (c.e.pause) tag = 'En pause';
+  }
+  return '<li class="ck-ev ck-ev-cours"><span class="ck-ev-ic">' + ic + '</span><span class="ck-ev-tx"><span class="ck-ev-t">' + esc(t) + '</span>'
+    + '<span class="ck-ev-s">' + esc(s) + '</span></span><span class="ck-ev-d"><span class="ck-ev-tag">' + tag + '</span></span></li>';
+}
+const videFil = n => n ? 'Rien de validé ni de commencé aujourd’hui pour l’instant.'
+  : 'Rien encore aujourd’hui. Les parcelles en cours, les validations, les débuts de chantier et le tracteur s’afficheront ici.';
 function texteEv(e) {
+  if (EV_TRAC[e.type]) return texteTrac(e);   // DIRECT-1 (§318)
   const p = PIDX[e.pid], tt = T[e.t];
   const qui = e.eq ? EQ[e.eq].noms : 'Vous';
   // PRO-1 (§269) : « Nico ont validé » — le pluriel seulement quand ils sont plusieurs.
@@ -631,18 +676,25 @@ function texteEv(e) {
 }
 function htmlEv(e) {
   const tx = texteEv(e);
-  const ic = e.eq ? '<span class="ck-duo">' + EQ[e.eq].ini.map(i => '<span class="ck-av">' + i + '</span>').join('') + '</span>'
+  const ic = e.eq ? '<span class="ck-duo">' + EQ[e.eq].ini.map(i => '<span class="ck-av">' + esc(i) + '</span>').join('') + '</span>'
     : '<span class="ck-ic-rond ck-ic-vous">' + ICO.ok + '</span>';
+  // DIRECT-1 (§318) : une ligne sans heure connue (un tracteur sans geste daté) n'en affiche pas — jamais « il y a 489 000 h ».
   return '<li class="ck-ev ck-ev-' + e.type + '" data-id="' + e.id + '"><span class="ck-ev-ic">' + ic + '</span>'
     + '<span class="ck-ev-tx"><span class="ck-ev-t">' + esc(tx.titre) + '</span><span class="ck-ev-s">' + esc(tx.sous) + (e.par === 'vous' && e.eq ? ', validé par vous' : '') + '</span></span>'
-    + '<span class="ck-ev-d"><time data-ts="' + e.ts + '">' + ilYa(e.ts) + '</time>' + (e.type === 'valide' ? '<span class="ck-ev-h">+' + nb(e.h) + '\u202fh</span>' : '') + '</span></li>';
+    + '<span class="ck-ev-d">' + (e.ts ? '<time data-ts="' + e.ts + '">' + ilYa(e.ts) + '</time>' : '') + (e.type === 'valide' ? '<span class="ck-ev-h">+' + nb(e.h) + '\u202fh</span>' : '') + '</span></li>';
 }
+// ★ DIRECT-1 (§318) : « En ce moment » (qui est où : parcelles en cours, tracteur), puis la journée. Nico (12/10) : « il n'y a
+//   personne en direct » — le fil ne lisait que le journal du jour, une équipe sur une parcelle commencée la veille n'y était pas.
 function htmlFil() {
-  return '<header class="ck-p-hd"><div><h2 class="ck-titre-p"><span class="ck-pt-vif ck-pt-fil" aria-hidden="true"></span>En direct</h2>'
-    + '<p class="ck-cadre">Ce que l’équipe valide et commence, au fil de la journée</p></div></header>'
+  const C = coursItems(), n = S.evts.length;
+  return '<header class="ck-p-hd"><div><h2 class="ck-titre-p"><span class="ck-pt-vif ck-pt-fil" aria-hidden="true"></span>En direct' + btnI('fil', 'Comment lire « En direct »') + '</h2>'
+    + '<p class="ck-cadre">Qui est où en ce moment, et ce que l’équipe fait aujourd’hui</p></div></header>'
+    + '<p class="ck-fil-sec" id="ck-fil-sec-c"' + (C.length ? '' : ' hidden') + '>En ce moment</p>'
+    + '<ul class="ck-fil-c" id="ck-fil-c">' + C.map(htmlCoursLi).join('') + '</ul>'
+    + '<p class="ck-fil-sec" id="ck-fil-sec-j"' + (C.length ? '' : ' hidden') + '>Aujourd’hui</p>'
     + '<ol class="ck-fil-l' + (S.filTout ? ' tout' : '') + '" id="ck-fil-l">' + S.evts.map(htmlEv).join('') + '</ol>'
-    + '<p class="ck-vide" id="ck-fil-vide"' + (S.evts.length ? ' hidden' : '') + '>Rien encore aujourd’hui. Les validations et les débuts de chantier de l’équipe s’afficheront ici.</p>'
-    + '<button type="button" class="ck-btn ck-btn-ghost ck-btn-s ck-fil-tout" id="ck-fil-tout" aria-expanded="' + S.filTout + '"' + (S.evts.length > 4 ? '' : ' hidden') + '>' + (S.filTout ? 'Replier' : 'Tout le fil') + '</button>';
+    + '<p class="ck-vide" id="ck-fil-vide"' + (n ? ' hidden' : '') + '>' + videFil(C.length) + '</p>'
+    + '<button type="button" class="ck-btn ck-btn-ghost ck-btn-s ck-fil-tout" id="ck-fil-tout" aria-expanded="' + S.filTout + '"' + (n > 4 ? '' : ' hidden') + '>' + (S.filTout ? 'Replier' : 'Tout le fil') + '</button>';
 }
 
 /* ── Les graphes — grammaire du kit (MV_GRAPH_COL) : la mesure en terre, le prévu en or,
@@ -1062,6 +1114,11 @@ function majFil() {
   $$('.ck-ev', ol).slice(40).forEach(li => li.remove());
   const vide = $('#ck-fil-vide'); if (vide) vide.hidden = S.evts.length > 0;
   const tout = $('#ck-fil-tout'); if (tout) tout.hidden = S.evts.length <= 4;
+  // DIRECT-1 (§318) : « En ce moment » se redessine en entier — quelques lignes, lues comme les pastilles.
+  const C = coursItems(), cl = $('#ck-fil-c');
+  if (cl) cl.innerHTML = C.map(htmlCoursLi).join('');
+  ['#ck-fil-sec-c', '#ck-fil-sec-j'].forEach(q => { const x = $(q); if (x) x.hidden = !C.length; });
+  if (vide) vide.textContent = videFil(C.length);
 }
 function majEco(r) {
   if (!V.eco) return;

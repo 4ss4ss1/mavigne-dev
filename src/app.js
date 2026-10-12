@@ -9432,7 +9432,7 @@ function marquerEnCours(nomParcelle,nomTache,btn){
   } else {
     p.taches[nomTache]='En cours';
     const today=_mvToday();
-    JOURNAL.unshift(_mvEqApplique({id:Date.now().toString(16),date:today,parcelle:nomParcelle,tache:nomTache,qui:currentUser.nom,statut:'En cours',equipe:false,ts_debut:Date.now()}));
+    JOURNAL.unshift(_mvEqApplique(_mvDebutLigne({id:Date.now().toString(16),date:today,parcelle:nomParcelle,tache:nomTache,qui:currentUser.nom,statut:'En cours',equipe:false,ts_debut:Date.now()},nomTache)));   // DIRECT-1 (§318) : le groupe de la tâche, comme Valider
     injectMeteoIfNeeded(today);
     saveData('journal');
   }
@@ -12904,6 +12904,45 @@ function _eqtHors(task){ if(!_eqtLoaded)_eqtLoad(); if(!_mvMoiAdmin()) return fa
 function _eqtSetHors(task,v){ if(!_eqtLoaded)_eqtLoad(); var h=(EQUIPE_TACHE.__hors&&typeof EQUIPE_TACHE.__hors==='object'&&!Array.isArray(EQUIPE_TACHE.__hors))?EQUIPE_TACHE.__hors:{}; if(v) h[task]=1; else delete h[task]; EQUIPE_TACHE.__hors=h; _eqtSave(); }
 function _eqtFor(task){ if(!_eqtLoaded)_eqtLoad(); var _dj=_mvEqJourMoi(); if(_dj) return _eqtClean(_dj);   /* ÉQUIPES-1 : l'équipe du jour d'abord */ var t=(EQUIPE_TACHE[task]!==undefined)?EQUIPE_TACHE[task]:(EQUIPE_TACHE.__default||[]); return _eqtClean(t); }
 function _eqtSet(task,team){ if(!_eqtLoaded)_eqtLoad(); team=_eqtClean(team); EQUIPE_TACHE[task]=team; _eqtPushRecent(team); _eqtSave(); }
+// ★★ DIRECT-1 (§318) — « DÉBUT » ENREGISTRE L'ÉQUIPE, COMME « VALIDER ».
+//   Nico (12/10) : « l'équipe est bien programmée mais c'est encore moi d'indiqué dessus ». « Valider » (pQuickValidate)
+//   écrivait le groupe de la barre « Équipe sur … » (_eqtFor : l'équipe du jour d'abord, sinon celle de la tâche) et le
+//   « sans moi » (_eqtHors, TV-2) ; les deux « Début » (pQuickStart, marquerEnCours) n'écrivaient que leur auteur : la
+//   parcelle en cours portait sa seule pastille dans le cockpit. Même lecture que pQuickValidate (mv-harnais-direct1).
+function _mvGroupeTache(task){
+  var t=_eqtFor(task), eq=t.length>0;
+  return { equipe:eq, membresEquipe:eq?t.slice():[], quiHors:!!(eq&&_eqtHors(task)) };
+}
+// La ligne « En cours » d'un début reçoit le groupe de sa tâche ; l'équipe du jour passe ensuite par _mvEqApplique.
+function _mvDebutLigne(e,task){
+  var g=_mvGroupeTache(task);
+  e.equipe=g.equipe; e.membresEquipe=g.membresEquipe;
+  if(g.quiHors) e.quiHors=true;
+  return e;
+}
+// ★ DIRECT-1 — « Changer » l'équipe d'une tâche la donne aussi aux parcelles EN COURS de cette tâche que l'on a commencées
+//   soi-même SANS groupe noté (avant ce lot : tout début de l'admin). Jamais un groupe déjà écrit (on ne sait pas qui y était),
+//   jamais le début d'un autre, jamais avant la période active ; le jour et l'heure du début ne bougent pas. La lecture est
+//   celle des pastilles du cockpit (cockpit.js/_ckPlanDebuts). Rend les parcelles mises à jour.
+function _mvDebutsSuivent(task){
+  var faits=[];
+  try{
+    var me=currentUser&&currentUser.nom, g=_mvGroupeTache(task);
+    if(!me||!g.equipe||typeof window._ckPlanDebuts!=='function') return faits;
+    var sa=(typeof getSaisonActive==='function')?getSaisonActive():null, d0=(sa&&sa.debut)?String(sa.debut).slice(0,10):null;
+    var deb=window._ckPlanDebuts(PARCELLES, JOURNAL, task, d0);
+    Object.keys(deb).forEach(function(n){
+      var e=deb[n], p=PARCELLES.find(function(x){ return x&&x.nom===n; });
+      if(!e||e.qui!==me||(Array.isArray(e.membresEquipe)&&e.membresEquipe.length)) return;
+      if(!p||!p.taches||p.taches[task]!=='En cours') return;
+      e.equipe=true; e.membresEquipe=g.membresEquipe.slice();
+      if(g.quiHors) e.quiHors=true; else delete e.quiHors;
+      faits.push(n);
+    });
+    if(faits.length) saveData('journal');
+  }catch(err){ if(window._mvAvale) window._mvAvale(err,'app.js/_mvDebutsSuivent'); }
+  return faits;
+}
 
 function _pvDef(nom){return (TACHES||[]).find(function(t){return t.nom===nom;});}
 function _pvType(nom){var d=_pvDef(nom);return (d&&d.type)?d.type:'simple';}
@@ -13020,7 +13059,9 @@ function _pvApplyTeam(team){
   }
   _eqtSet(pTacheFilter,team);closeOv(null,'ovPTeam');_pvRenderTeamBar();
   var t=_eqtClean(team),tl=(typeof tNom==='function')?tNom(pTacheFilter):pTacheFilter;
-  showToast((t.length?t.join(', '):'Seul')+' → '+tl,'#3D6B27');
+  var _suit=_mvDebutsSuivent(pTacheFilter);   // DIRECT-1 (§318) : ses parcelles en cours sans groupe noté prennent cette équipe
+  showToast((t.length?t.join(', '):'Seul')+' → '+tl+(_suit.length?(' \u00b7 aussi sur '+_suit.join(', ')):''),'#3D6B27');
+  if(_suit.length){ renderParcelles(); computePStats(); }
 }
 function savePTeamJour(){_pvApplyTeam(_pvTeamSel.slice());}
 
@@ -13132,7 +13173,7 @@ function pQuickStart(nom,evt){
   if(type==='simple'){
     if((p.taches[task]||'Non d\u00e9marr\u00e9')!=='Non d\u00e9marr\u00e9'){renderParcelles();return;}
     p.taches[task]='En cours';
-    JOURNAL.unshift(_mvEqApplique({id:Date.now().toString(16),date:date,parcelle:nom,tache:task,qui:currentUser.nom,statut:'En cours',equipe:false,ts_debut:Date.now()}));
+    JOURNAL.unshift(_mvEqApplique(_mvDebutLigne({id:Date.now().toString(16),date:date,parcelle:nom,tache:task,qui:currentUser.nom,statut:'En cours',equipe:false,ts_debut:Date.now()},task)));   // DIRECT-1 (§318) : le groupe de la tâche, comme Valider
     injectMeteoIfNeeded(date);
     saveData('journal');
   } else {

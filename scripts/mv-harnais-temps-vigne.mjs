@@ -361,7 +361,7 @@ function branchements(src) {
     && /if\(!_mvMoiAdmin\(\)\) return false;/.test(extraire(A, '_mvQuiHors') || '')]);
   R.push(['H2 · la puce « Moi » n\'a pas de data-nom (jamais ramassée comme membre)', /class="pchk mbr-moi[^`]*data-moi="1"/.test(A) && !/mbr-moi[^`]*data-nom=/.test(A)]);
   const nQH = (A.match(/\.quiHors=true/g) || []).length;
-  R.push(['H3 · les cinq chemins d\'écriture posent quiHors (panneau, journal, niveaux, passages, un appui)', nQH === 5, nQH]);
+  R.push(['H3 · les sept chemins d\'écriture posent quiHors (panneau, journal, niveaux, passages, un appui ; « Début » et « Changer », DIRECT-1 §318)', nQH === 7, nQH]);
   const nRef = (A.match(/Personne dans le groupe : cochez qui a travaill/g) || []).length;
   R.push(['H4 · un groupe vide sans le validateur est refusé (quatre panneaux)', nRef === 4, nRef]);
   R.push(['H5 · niveaux et passages refusent AVANT toute mutation', /function confirmNiveaux\(\)\{\s*if\(_mvValidBlocked\(\)\)return;\s*var _nivEq=/.test(A)

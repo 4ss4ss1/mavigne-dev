@@ -1427,3 +1427,58 @@ fiche, plus « commencée » sur les cartes, lot à part après le tri) ; répon
 
 ### 317e. Ouvert
 §28 « ARRACH-9 — CE QUI RESTE OUVERT ».
+
+## 318. ★★★ DIRECT-1 — « DÉBUT » ENREGISTRE L'ÉQUIPE ; « EN DIRECT » DIT QUI EST OÙ, TRACTEUR COMPRIS (12/10 — `src/app.js` · `src/cockpit.js` · `src/cockpit-vue.js` · `src/pilotage.js` · `src/utils.js` (MV_AIDE ×2, MV_INFO, WHATS_NEW) · `src/styles.css` · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `guide/11-pilotage.html` · `scripts/mv-harnais-direct1.mjs` (neuf) · `scripts/mv-harnais-auj1.mjs` · `scripts/mv-harnais-temps-vigne.mjs` · `scripts/typo-baseline.json` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · APP 8.85 → **8.86** · SW 9.64 → **9.65** · base `db178db`)
+
+### 318a. D'où ça vient
+Nico (12/10, cinq captures, la refonte sur son canal) : « l'équipe est bien programmée mais c'est encore moi d'indiqué dessus. De plus il n'y a personne en direct. Il ne faut
+aucun bug. » Pasquier des Chenes, en cours sur la réparation, portait « N » dans le plan et dans « Chantiers d'hiver », alors que le bandeau « Équipe sur Réparation » disait
+Victor, Shana, Alicia, Pauline ; « En direct » écrivait « Rien encore aujourd'hui ». Diagnostic posé, reformulé, « Oui » — et : « aujourd'hui j'étais sur le tracteur,
+j'aimerais bien que ça apparaisse ». Puis « Continuez ».
+
+### 318b. Les causes, lues dans le code
+1. **Les deux « Début » n'écrivaient que leur auteur.** `pQuickStart` (la carte) et `marquerEnCours` (« Démarrer » de la fiche) posaient `{qui, statut:'En cours',
+   equipe:false}` ; `pQuickValidate` écrivait le groupe de la barre (`_eqtFor` : l'équipe du jour d'abord, sinon celle de la tâche) et « sans moi » (`_eqtHors`). L'équipe du
+   jour ne jouait pas non plus : `_mvEqApplique` ne la donne qu'à ceux qui en font partie, et l'admin n'y était pas.
+2. **« En direct » ne lisait que le journal du jour** (`_ckFilDonnees`, voulu au §301 : « le fil reste du jour »). La parcelle avait été commencée un autre jour — sa
+   pastille était en clair, la classe `ancien` — et rien n'était validé : panneau vide, équipe dans les rangs.
+3. **Le cockpit ignorait « sans moi »** : `_ckQui` (cockpit.js) et le `qui` de `_pilCk2Modele` mettaient l'auteur en tête, `quiHors` ou pas — contrairement à
+   `_ecoTempsVigne`, `_ecoEquipeByParc` et `_jivQui` (TV-2, §172).
+
+### 318c. Ce qui a été fait
+- **`_mvGroupeTache` / `_mvDebutLigne`** (app.js) : la règle de `pQuickValidate`, appliquée aux deux « Début » avant `_mvEqApplique` (le compte des écritures du journal
+  ne bouge pas). `pQuickValidate` n'est pas réécrit : le harnais vérifie la même sortie.
+- **`_mvDebutsSuivent`** (app.js), appelé par `_pvApplyTeam` (« Changer ») : les parcelles EN COURS de la tâche que l'auteur a commencées SANS groupe noté (avant ce lot :
+  tout début de l'admin) reçoivent l'équipe choisie, « sans moi » compris. Lecture : `_ckPlanDebuts` depuis le début de la période active, plus
+  `p.taches[tâche]==='En cours'`. Jamais un groupe déjà écrit, jamais le début d'un autre ; `date` et `ts_debut` intacts ; le toast le dit (« … aussi sur … »).
+  ★ Arbitré : PAS de réécriture automatique au chargement — un début fait seul exprès ne se distingue pas d'un début d'avant ce lot.
+- **`_ckQui`** (cockpit.js, exposée) : l'équipe d'abord, dans son ordre ; l'auteur ensuite s'il n'y est pas déjà et s'il était dans les rangs. Les fixtures « Hugo et
+  Léa » (auteur dans sa propre liste) gardent leur ordre. `_pilCk2Modele` la lit (repli : la même règle) ; les noms s'écrivent « A, B et C » (`_ckEt`, exposée).
+- **`_ckTracJour`** (cockpit.js) : pour le jour, depuis `window.SESSIONS` (partagé) — les blocs finis (`trace` « fin » et ses minutes ; « coche », « retabli » ;
+  « decoche » retire), la session ouverte ce jour-là (heure de l'identifiant), les traitements (session `type:'traitement'`, heure de fin). En ce moment : le dernier geste
+  du jour ouvre un bloc (« debut », « reprise », « ajout », « reprend » avec parcelle) ou une pause (« interrompt », « dejeuner ») ; « fin », « finjour », « ferme »
+  ferment ; une session « Terminé » n'est jamais en cours. Sans geste du jour : les `parcellesFaites` dont `t1` tombe ce jour-là. Le chrono de l'appareil n'est pas lu.
+- **cockpit-vue.js** : « En ce moment » (les parcelles en cours de `S.equipes` — la lecture des pastilles —, puis le tracteur) au-dessus de « Aujourd'hui » ; les
+  événements du tracteur gardent leur place sans tâche du plan (`EV_TRAC`) ; un « i » (`INFO.fil`) ; `majFil` redessine « En ce moment ». Aucun article devant
+  l'activité — les noms sont libres (« Labour », « Semis ») : « Nico a fini Les Perrières · Griffage au tracteur, 45 min », « Nico a pris le tracteur », « Nico a traité ».
+
+### 318d. Trouvé en route
+1. **`ilYa(null)`** : une ligne sans heure aurait écrit « il y a 489 000 h ». L'ancien fil n'en avait pas (le journal donnait toujours une heure, au pire
+   « maintenant ») ; le tracteur peut en avoir une sans heure — elle n'en affiche pas.
+2. **Les initiales du fil n'étaient pas échappées** (`EQ[…].ini` posé tel quel dans `htmlEv`) : `esc` ajouté.
+3. **`mv-harnais-auj1`** figeait la phrase du guide (« le fil En direct des validations ») : il lit la nouvelle.
+4. **`mv-harnais-temps-vigne` H3 comptait les chemins qui posent « sans moi »** (`.quiHors=true` dans app.js) : cinq → sept (« Début » et « Changer »). Suivi.
+5. **Le cliquet de taille** (`mv-harnais-typo`, +5 % par lot) : cockpit.js et cockpit-vue.js le passent. Question du découpage posée : la lecture du tracteur est un moteur
+   pur du cockpit, comme `_ckPlanLire` ou `_ckSvMeteo` ; un module de plus pour quelques ko coûterait un import et une place dans l'ordre fixe d'app.js. Regravé.
+
+### 318e. Les harnais
+- **`mv-harnais-direct1.mjs`** (neuf, 51 assertions, 19 contre-épreuves) : `cockpit.js` entier exécuté (`_ckQui`, `_ckEt`, le fil de secours, `_ckTracJour` sur 16
+  scénarios : bloc, pause, reprise, déjeuner, fin de journée, décoche, veille, repli `t1`, traitement, session terminée) ; les VRAIS `pQuickStart`, `marquerEnCours`,
+  `_mvEqApplique`, `_mvDebutsSuivent` ; le VRAI `texteTrac` ; le modèle, la feuille, l'aide, le guide, les nouveautés.
+- Rejoués : auj1 (mis à jour), auj3, forme1, ref1, ref2, pro1, equipes-jour, chant1, auj5, auj7, auj8, valid1, avc-arr, prep, arrach9, bulle1, info ; la chaîne
+  complète rejouée commande par commande (373 ; le lanceur ne tient pas dans un appel ici) : 9 rouges au premier passage — 5 faute d'eslint et
+  d'espree (installation coupée), le guide non régénéré (`npm run site`), H3 et le cliquet de taille ci-dessus —, tous verts ensuite.
+- Non vérifié : un rendu dans un navigateur ; les données de Nico ; `npm run build`, `test:smoke`, `test:e2e` ; le déploiement.
+
+### 318f. Ouvert
+§28 « DIRECT-1 — CE QUI RESTE OUVERT ».

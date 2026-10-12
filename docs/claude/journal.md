@@ -8,6 +8,10 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **12 octobre 2026 (ARRACH-9)** — ★ **L'ARRACHAGE FINI POUR L'ÉQUIPE QUITTE « À FAIRE » ET LES CARTES DE L'ÉQUIPE** (§317). Lot 48, base `f293f54`. Nico (12/10) : « elle ne doit plus apparaître dans les listes des parcelles à faire » ; reformulé (hors de « À faire » pour tous, visible sous « Toutes », plus « commencée » sur les cartes), « Continuer » puis « suite ».
+> Une lecture, `_arrAuPrestataire` (app.js) : Parcelles (filtre, rang, état « Au prestataire », puce, liste vide), carte de l'Accueil, anneau des cartes, tournée. PAS `_mvTacheEtat` ni `_pvCurDone` : le bouton Fait / Annuler et l'étape du prestataire, dans la fiche, ne bougent pas.
+> **APP 8.84 → 8.85, SW 9.63 → 9.64.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+
 > Dernière consolidation : **12 octobre 2026 (CHANT-1)** — ★ **LES CHANTIERS SE RANGENT PAR DATE DE DÉBUT ; L'ARRACHAGE FINI POUR L'ÉQUIPE EN TÊTE DES TERMINÉS** (§316). Lot 47, base `a664ba0`.
 > Nico (12/10, dicté) : « ils doivent apparaître dans l'ordre de commencement […] peu importe la date de fin », les terminés en bas ; l'arrachage fini pour l'équipe « doit être la première des terminées ». Trouvé : les trois listes (Aujourd'hui, Accueil, La campagne) suivaient l'ordre du catalogue des Réglages — le sous-titre « Dans l'ordre des dates de la
 > campagne » mentait. Une règle (`_mvOrdreChantiers`, utils.js) et sa lecture (`_mvChantiersCtx`, app.js). Ouvert : l'arrachage dans les listes de parcelles (lot suivant), les tâches sans barème sans fenêtre.
@@ -2289,3 +2293,14 @@ MESURE**) · ~~écart de cadence faux d'un facteur 5~~ · ~~MT-A écartements su
 monolithique~~ · ★ ~~**CF `submitMiseEnRoute`**~~ · ★ ~~**création de comptes en lot**~~ ·
 ★ ~~**alignement des noms de parcelles à l'installation**~~ · ★ ~~**accès manuel au code (upload à
 chaque session)**~~ — remplacé par le dépôt GitHub le 10/08.
+
+## Descendu du §28 de CLAUDE.md — 12/10/2026 (DIRECT-1, plafond du cœur)
+
+> Des entrées FAITES (barrées) du backlog, gardées ici pour mémoire.
+
+- ✅ ~~**Refondre l'export JSON**~~ — **FAIT le 13/09, §124 (SAUV-1).** L'entrée disait
+  « 8 clés sur 27 » ; le compte exact était **8 sur 26**, et le vrai défaut n'était pas l'export
+  mais la **restauration**, qui réécrivait la fiche membre tronquée par-dessus l'historique des
+  contrats. L'export dérive désormais de `COLLECTIONS` — c'était bien l'argument de l'entrée, et
+  il était juste. ★ *Une entrée de backlog qui nomme la bonne cause peut quand même sous-estimer
+  le dégât : celle-ci parlait d'un fichier incomplet, pas d'une perte de données.*

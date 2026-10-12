@@ -1,0 +1,30 @@
+{
+  "lot": "DIRECT-1",
+  "section": "§318",
+  "base": "db178db519e24d091decbc10c7d1b8611a7dd9e6",
+  "inclut": [],
+  "date": "2026-10-12",
+  "fichiers": {
+    ".mv-base": "bca2dffaa4dd4bd305c8967ebebf18f166c05ce79376b78a9d9a7bb9cc86e784",
+    "CLAUDE.md": "dde0936e7ec9e28c0110fe80b8fbf622d4f29f918148f15772b5b9c8b40a96cb",
+    "docs/claude/INDEX.md": "03b6efcece8a1e8c8151b770864fcd91acb9db713692abad716c0043302c015b",
+    "docs/claude/chantiers-280-329.md": "95d55b51f90da7a904f03b6ffdc41a2c32d6900dd98ff615d55fe3347bb1ba34",
+    "docs/claude/journal.md": "256e947b8f5cf26938a11fa6a15ce3dbd2988523e0373d19623f170c3dcc8cb4",
+    "guide/04-vigne.html": "5eb2214dfa0674812005b2e03ec7d6090d6036d57133879da48d88a0a6511dfa",
+    "guide/11-pilotage.html": "97a3a099f3d87c7a6079b3f380b3cc37e3663c5971c3f00d638d4ce10aaee5aa",
+    "index.html": "8d26fb005555605d4c4ba911f7086a12df49156225ae4e7c8511b532a96ae00d",
+    "public/sw.js": "4be15c4aeee5e7125ae20b6c570cdca18b2f417645332687682edc148490fa60",
+    "scripts/harnais-claude-md.mjs": "6ea1529dc23e94b8041e450ab23b8058f1917e2b36dd75d6f48f34a290bffc90",
+    "scripts/mv-harnais-auj1.mjs": "2ace911f5130ddae258d1eb59c50f90cabe26077bd79a55109ea63f352c90b2e",
+    "scripts/mv-harnais-liste.mjs": "d5ba51375ba77d595ab7d648d9ce454512ad56666a6095da5cbd9463e467d4c2",
+    "scripts/mv-harnais-temps-vigne.mjs": "2a9e57da30ab06955bc34c3ce607243e50e87f281bedb809b1cd6cbe67b9db79",
+    "scripts/typo-baseline.json": "f7cac033f32341ad539882abc8652cfc84d240a52d7b4292cf6feb705d993875",
+    "src/app.js": "0f3c246c91450787a24434fea331d040cc3b966184cb2dfed5ccf89f4132a194",
+    "src/cockpit-vue.js": "b8412ac93d785d0785ef6911109fb958979b05b2bb56b55492d33e5a76c09dae",
+    "src/cockpit.js": "08f727af766408948527641d53a299ca4a17fa9028e5a85edfdbef99889f011f",
+    "src/pilotage.js": "1b80644228d0c7713023f082097d347b7de722268b36aaf24dad67d787113060",
+    "src/styles.css": "cc4752878c98f6fa495467d975fd41c4209b7fa9cfc8f2098574c23fd67d5e4e",
+    "src/utils.js": "57ce28687068a25fb6b59c09e5c9b009c937520c021bd44e124dc07f219f9eb3",
+    "scripts/mv-harnais-direct1.mjs": "dd22ffca0475355942338840a1a56ff8de90a385d78cf0654ff325b94895efe1"
+  }
+}

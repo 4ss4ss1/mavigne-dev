@@ -109,7 +109,7 @@ function suite(S) {
   // REF-1 (§266) : la feuille de cet ancien cockpit est remplacée par celle de la maquette validée, passée à la charte.
   T('l\u2019ancienne feuille a laissé la place à celle de la maquette (REF-1)', S.css.includes('★★★ REF-1 (§266) — LE COCKPIT D\'AUJOURD\'HUI : LA FEUILLE DE LA MAQUETTE VALIDÉE') && !S.css.includes('AUJ-1 (§260) — LE COCKPIT D\'AUJOURD\'HUI, VUE TERRAIN'));
   T('l\u2019aide, les bulles et le guide décrivent le nouvel écran', /'pil\.fil': \{ t: 'En direct'/.test(S.uti) && /'pil\.charge': \{ t: 'La charge restante'/.test(S.uti)
-    && S.uti.includes('Aujourd’hui se lit d’un coup d’œil') && S.guide.includes('le fil <b>En direct</b> des validations'));
+    && S.uti.includes('Aujourd’hui se lit d’un coup d’œil') && S.guide.includes('le fil <b>En direct</b> : en haut, qui est où en ce moment'));
   T('la nouveauté d\u2019AUJ-1 reste au Journal (bloc 8.32, pastille sur le fil, pour l\u2019admin)',
     /\{ v: '8\.32', d: '2026-10-07', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-fil-pan'/.test(S.uti));
   return out;
@@ -123,7 +123,7 @@ if (CONTRE) {
     ['le fil qui garde la météo', 'ck', "if(!e || e.date !== auj || e.meteo || !e.tache", "if(!e || e.date !== auj || !e.tache"],
     ['une heure inventée pour un identifiant quelconque', 'ck', "if(typeof id !== 'string' || !/^[0-9a-f]{10,12}$/.test(id)) return null;", "if(typeof id !== 'string') return null;"],
     ['une équipe au singulier', 'ck', "(pl ? 'ont validé' : 'a validé')", "'a validé'"],
-    ['les noms non échappés', 'ck', "_ckEsc(noms.join(' et ') || 'Quelqu’un')", "(noms.join(' et ') || 'Quelqu’un')"],
+    ['les noms non échappés', 'ck', "_ckEsc(_ckEt(noms) || 'Quelqu’un')", "(_ckEt(noms) || 'Quelqu’un')"],   // DIRECT-1 (§318) : ancre suivie (« A, B et C »)
     ['tout qui s\u2019éclaire au premier dessin', 'ck', 'var neuf = vus && !vus.has(e.id);', 'var neuf = !vus || !vus.has(e.id);'],
     ['une marge inconnue lue comme zéro', 'ck', 'if(m && m.marge != null){', 'if(m){'],
     ['la photo du jour gardée à côté du direct', 'ck', " || x.d >= auj) return;", ") return;"],   // AUJ-5 : + filtre de période ; AUJ-6 : ancre suivie (_ckChargeSerie réécrite)
