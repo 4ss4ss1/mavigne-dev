@@ -92,7 +92,7 @@ function jouer(src, html, reg, ut, silencieux) {
   console.log(silencieux ? '' : '\n  Les onglets du Chai');
   const sc = extraire(src, 'switchCaveOng') || '';
   const ong = (sc.match(/var ONGLETS\s*=\s*\[([^\]]*)\]/) || [])[1] || '';
-  T(ong.replace(/['\s]/g, '') === 'cuv,journal,bouteille', 'ONGLETS du Chai : cuv, journal, bouteille', ong);
+  T(ong.replace(/['\s]/g, '') === 'cuv,journal,bouteille,labo', 'ONGLETS du Chai : cuv, journal, bouteille, labo (LABO-2)', ong);
   T(/tab==='reglages'[^\n]*_caveOpenReglages\(\)/.test(sc) && /tab==='divers'/.test(sc), 'switchCaveOng(\'reglages\') et (\'divers\') ouvrent la roue');
   T(!/tab==='reglages'\)\s*renderCaveReglages\(\)/.test(sc), 'le Chai ne rend plus ses r\u00e9glages en onglet');
   T(!/mvc-tbtn-reglages/.test(html) && !/id="mvc-view-reglages"/.test(html), 'index.html : l\u2019onglet et la vue R\u00e9glages du Chai ont disparu');
@@ -177,7 +177,7 @@ if (CONTRE) {
     ['la tol\u00e9rance de switchVendOng(\'param\') retir\u00e9e',
       s => s.replace("if(tab==='param'){ _caveOpenReglages(); return; }", ''), HTMLNU, REGNU],
     ['\'reglages\' remis dans les ONGLETS du Chai',
-      s => s.replace("var ONGLETS = ['cuv','journal','bouteille'];", "var ONGLETS = ['cuv','journal','reglages','bouteille'];"), HTMLNU, REGNU],
+      s => s.replace("var ONGLETS = ['cuv','journal','bouteille','labo'];", "var ONGLETS = ['cuv','journal','reglages','bouteille','labo'];"), HTMLNU, REGNU],
     ['le filtre des documents oublie le bilan',
       s => s.replace("d.mod==='cave'||d.act==='bilan'||d.act==='futs'", "d.mod==='cave'||d.act==='futs'"), HTMLNU, REGNU],
     ['MV_DOCS n\u2019est plus expos\u00e9 par reglages.js',

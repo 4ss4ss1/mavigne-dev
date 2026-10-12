@@ -10,10 +10,9 @@
 //  cuve), les lecteurs historiques (malo, sucres, repère sec), la purge des PDF et les écrans passent
 //  par leur vrai chemin.
 //
-//    node scripts/mv-harnais-labo.mjs            → les assertions (L1…L30)
+//    node scripts/mv-harnais-labo.mjs            → les assertions (L1…L32)
 //    node scripts/mv-harnais-labo.mjs --contre   → chaque défaut réinjecté dans une COPIE doit rougir,
 //                                                   par SA règle (la base doit d'abord être verte)
-//    MV_LABO_SNAP=<dossier> node scripts/mv-harnais-labo.mjs → écrit aussi les trois écrans en HTML
 //  Jamais déployé (scripts/) → aucun bump.
 // ═══════════════════════════════════════════════════════════════════════════
 import fs from 'node:fs';
@@ -212,14 +211,12 @@ async function essais() {
 
   // ── E. Les écrans ───────────────────────────────────────────────────────────
   reposer();
-  const SNAP = process.env.MV_LABO_SNAP || '', CSS = [];
-  if (SNAP) { const gid = G.document.getElementById; G.document.getElementById = id => (id === 'mv-labo-css' && !CSS.length) ? null : gid.call(G.document, id);
-    G.document.head.appendChild = el => { if (el && el.textContent) CSS.push(el.textContent); return el; }; }
   const root = () => (els['lbo-root'] && els['lbo-root'].innerHTML) || '';
   const snaps = {};
-  G.openLabo(); const liste = root(); snaps.liste = liste;
-  essai('L22', 'la liste des rapports : une fiche par date, les lignes et leurs chiffres', () =>
-    (liste.indexOf('Rapports du labo') > -1 && liste.indexOf('Mardi 6\u00a0octobre') > -1 && liste.indexOf('Rapport n\u00b0\u00a026-1186') > -1
+  const onglet = () => (els['mvc-body-labo'] && els['mvc-body-labo'].innerHTML) || '';
+  G.switchCaveOng('labo'); const liste = onglet(); snaps.liste = liste;
+  essai('L22', 'l’onglet « Labo » : une fiche par date, les lignes et leurs chiffres, « Saisir un rapport » en tête', () =>
+    (liste.indexOf('id="lbo-saisir"') > -1 && liste.indexOf('Mardi 6\u00a0octobre') > -1 && liste.indexOf('Rapport n\u00b0\u00a026-1186') > -1
       && liste.indexOf('ancienne saisie, commune à 2 cuvées') > -1 && liste.indexOf('Saisir un rapport') > -1) || liste.slice(0, 400));
   G.openLabo({ date: '2026-10-06' }); const fiche0 = root();
   essai('L23', 'la même date rouvre la fiche : bandeau, lignes déjà saisies, analyses demandées', () =>
@@ -238,9 +235,10 @@ async function essais() {
       && verif.indexOf('Case laissée vide : la valeur déjà saisie reste') > -1 && /id="lbo-save"[^>]*disabled/.test(verif)) || verif.slice(0, 500));
   G._laboChoix(0, 0, 'b');
   await G._laboEnregistrer();
-  const apres = root();
-  essai('L26', 'enregistrer : la volatile prise, le glucose de la cuve posé, retour à la liste', () =>
-    (op('opL').data.av === 0.45 && op('opL').data.so2_total === 52 && cuve('vc3').mesures_fa.some(m => m.gf === 0.2 && m.gf_lt) && apres.indexOf('Rapports du labo') > -1) || J({ av: op('opL').data.av, mes: cuve('vc3').mesures_fa }));
+  const fenetre = root(); G.switchCaveOng('labo'); const apres = onglet();
+  essai('L26', 'enregistrer : la volatile prise, le glucose posé ; la fenêtre se vide, l’onglet montre la fiche touchée en surbrillance', () =>
+    (op('opL').data.av === 0.45 && op('opL').data.so2_total === 52 && cuve('vc3').mesures_fa.some(m => m.gf === 0.2 && m.gf_lt) && fenetre === '' && apres.indexOf('lbo-fiche flash') > -1)
+      || J({ av: op('opL').data.av, fenetre: fenetre.slice(0, 80), flash: apres.indexOf('flash') }));
   essai('L27', 'un nom de cuvée est échappé, et aucun <div> dans un <button>', () => {
     G.openLabo({ nouveau: true }); const h = root();
     return (h.indexOf('&lt;b&gt;Sale&lt;/b&gt;') > -1 && h.indexOf('<b>Sale</b>') < 0 && !/<button[^>]*>(?:(?!<\/button>)[\s\S])*<div/.test(h)) || 'nom brut ou <div> dans un bouton';
@@ -257,16 +255,21 @@ async function essais() {
     G.openOvCaveOp('opL');
     return root().indexOf('Compléter la fiche du 6\u00a0octobre') > -1 || root().slice(0, 200);
   });
+  essai('L31', 'index.html : l’onglet « Labo » avant le Journal, sa vue, et plus de zone dans le Journal', () => {
+    const html = fs.readFileSync(path.join(RACINE, 'index.html'), 'utf8'), cave = fs.readFileSync(path.join(RACINE, 'src', 'cave.js'), 'utf8');
+    const iL = html.indexOf('id="mvc-tbtn-labo" onclick="switchCaveOng(\'labo\')"'), iJ = html.indexOf('id="mvc-tbtn-journal"');
+    return (iL > -1 && iL < iJ && html.indexOf('id="mvc-body-labo"') > -1 && html.indexOf('mvc-journal-upload') < 0 && /var ONGLETS = \[[^\]]*'labo'/.test(cave)) || ('labo ' + iL + ' journal ' + iJ);
+  });
+  essai('L32', 'le filtre millésime du Chai s’applique à l’onglet (et dit ce qu’il écarte)', () => {
+    if (typeof G._caveSetMill !== 'function') return '_caveSetMill introuvable';
+    G._caveSetMill('2026'); G.switchCaveOng('labo'); const h = onglet(); G._caveSetMill('tous');
+    return (h.indexOf('Millésime 2026 seul') > -1 && h.indexOf('26-0988') > -1 && h.indexOf('26-1186') < 0 && /\d rapports? d’un autre millésime/.test(h)) || h.slice(0, 300);
+  });
   essai('L30', 'propreté : ni « undefined » ni « NaN », rien d’avalé en silence', () => {
     const s = [].concat(sale(liste), sale(fiche0), sale(fiche), sale(verif), sale(apres));
     return (!s.length && !JOURNAL_ERR.length) || (s.slice(0, 2).join(' | ') + ' ' + JOURNAL_ERR.slice(0, 2).map(o => o.msg || o.cat).join(' | '));
   });
 
-  if (SNAP) {
-    fs.mkdirSync(SNAP, { recursive: true });
-    for (const [k, h] of Object.entries(snaps)) fs.writeFileSync(path.join(SNAP, k + '.html'), h);
-    fs.writeFileSync(path.join(SNAP, 'labo.css'), CSS.join('\n'));
-  }
   console.log('\n  ' + (ko.length ? rouge(ok + ' vertes, ' + ko.length + ' rouges') : vert(ok + ' vertes, 0 rouge')) + '\n');
   process.exit(ko.length ? 1 : 0);
 }
@@ -283,12 +286,14 @@ function contre() {
     ['C7', 'l’ancien formulaire rouvre une analyse née d’une fiche (et l’écraserait)', 'cave.js', "    if(_lop&&_lop.type==='analyse'&&_lop.labo&&typeof window.openLabo==='function'){ window.openLabo({date:_lop.date}); return; } }", '    }', 'L29'],
     ['C8', 'deux valeurs différentes : la nouvelle écrase sans demander', 'cave.js', "else it.choix.push({t:'val', k:a.k, a:o, b:n}); }", 'else it.ajout.push(a.k); }', 'L6'],
     ['C9', '« Le passer au 8 oct. » ne déplace rien', 'cave.js', "    var date=(rep.date==='b')?F.date:m.date;", '    var date=m.date;', 'L15'],
+    ['C11', 'l’onglet « Labo » n’est plus dans la liste des onglets du Chai', 'cave.js', "  var ONGLETS = ['cuv','journal','bouteille','labo'];", "  var ONGLETS = ['cuv','journal','bouteille'];", 'L22'],
+    ['C12', 'après l’enregistrement, la fiche touchée n’est plus mise en surbrillance', 'cave.js', '_LBO.P=null; _LBO.flash=ds.length?ds[ds.length-1]:null;\n', '_LBO.P=null;\n', 'L26'],
     ['C10', 'le « < » du bulletin se perd à l’écriture', 'cave.js', '  LABO_ANA.forEach(function(a){ var o=vals[a.k]; if(o){ d[a.op]=o.v; if(o.lt) lt[a.k]=true; } });', '  LABO_ANA.forEach(function(a){ var o=vals[a.k]; if(o){ d[a.op]=o.v; } });', 'L11'],
   ];
   const run = env => spawnSync(process.execPath, [path.join(ICI, 'mv-harnais-labo.mjs')],
     { cwd: RACINE, env: Object.assign({}, process.env, env), encoding: 'utf8', timeout: 180000 });
   console.log('\n── LABO-1 — contre-épreuves : chaque défaut réinjecté doit mordre, par sa règle ──\n');
-  const b = run({ MV_LABO_REMPLACE: '', MV_LABO_SNAP: '' });
+  const b = run({ MV_LABO_REMPLACE: '' });
   if (b.status !== 0) { console.log(rouge('  ✗ la base n’est pas verte — contre-épreuve sans valeur')); console.log(String(b.stdout).slice(-800)); process.exit(1); }
   let vus = 0;
   for (const [id, nom, fic, sain, abime, attendu] of DEFAUTS) {
@@ -297,7 +302,7 @@ function contre() {
     if (n !== 1) { console.log('  ' + rouge('!! ') + id + ' ' + nom + ' — injection morte (' + n + ' occurrence(s) du code sain)'); continue; }
     const tmp = path.join(os.tmpdir(), 'mv-labo-' + id + '-' + fic);
     fs.writeFileSync(tmp, src.replace(sain, abime));
-    const r = run({ MV_LABO_REMPLACE: JSON.stringify({ [fic]: tmp }), MV_LABO_SNAP: '' });
+    const r = run({ MV_LABO_REMPLACE: JSON.stringify({ [fic]: tmp }) });
     fs.rmSync(tmp, { force: true });                // la référence n'est jamais touchée : on abîme une COPIE
     const out = String(r.stdout || '');
     const mord = r.status !== 0 && out.indexOf('[' + attendu + ']') > -1;

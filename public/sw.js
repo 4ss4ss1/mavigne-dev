@@ -1,4 +1,6 @@
-// MA VIGNE — Service Worker v9.67
+// MA VIGNE — Service Worker v9.68
+// v9.68 (12/10/2026) — LABO-2 (§321) : les rapports du labo ont leur onglet « Labo » dans Le Chai (a cote de Cuvees, Bouteilles, Journal) ;
+//   la zone du Journal disparait ; le filtre millesime s'y applique (cave.js, index.html, utils.js). Reconstruit sur ETAT-1. APP 8.88 -> 8.89.
 // v9.67 (12/10/2026) — ETAT-1 (§320) : le plan du cockpit (« Le domaine en direct ») lit l'etat de la fiche de chaque parcelle pour la periode
 //   (getTacheStatut) : une validation annulee ou d'une saison passee ne peint plus une parcelle « faite » ; le journal ne dit plus que qui l'a commencee,
 //   cherche dans toute la periode ; arrachage fini pour l'equipe = fait, la loupe le dit (cockpit.js, pilotage.js, cockpit-vue.js, app.js, utils.js). APP 8.87 -> 8.88.
@@ -4467,7 +4469,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.67';
+const CACHE_NAME   = 'mavigne-v9.68';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4484,7 +4486,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.67 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.68 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4504,7 +4506,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.67 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.68 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

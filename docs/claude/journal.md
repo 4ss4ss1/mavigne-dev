@@ -2366,3 +2366,7 @@ font `parseFloat`), entrée de journal sans date, météo sans `emoji`/`wind` (t
 Même patron, un lot par module, dans cet ordre : ~~**Pilotage**~~ · ~~**Cave/Cuvier**~~ ·
 ~~**Tracteur**~~ · ~~**Réserve**~~ · ~~**Accueil/Journal**~~ (`app.js`). ★ **ROB-2 TERMINÉ le 29/09.** À chaque fois : données abîmées ET formes d'avant de ce que le
 module enregistre (instantanés, archives), toutes ses surfaces, rouge sur exception ou « undefined »/« NaN » affiché.
+
+> Dernière consolidation : **12 octobre 2026 (ETAT-1)** — ★ **LE PLAN DU COCKPIT LIT L'ÉTAT DE LA FICHE ; LE JOURNAL NE DIT PLUS QUE QUI** (§320). Lot 51, base `e937d3a`. Nico (12/10, deux captures) : « explique pourquoi le pilotage me met une parcelle en entreplantation fait alors que ce n'est pas le cas » ; diagnostic, reformulé, « oui », puis « Continuer ».
+> Le plan relisait le journal (`_ckPlanLire`) : sans borne pour une tâche sans fenêtre (`t.debut` nul — entreplantation sans trou, travaux sans barème), sourd aux annulations. L'état vient désormais de `getTacheStatut` (la fiche, la période du Pilotage) ; l'équipe, de la dernière ligne « En cours » de la période. Arrachage fini pour l'équipe = fait, la loupe le dit (`presta`).
+> **APP 8.87 → 8.88, SW 9.66 → 9.67.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).

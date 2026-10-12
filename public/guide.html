@@ -1638,8 +1638,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <ul class="dot">
     <li><b>Cuvées</b> : liste des vins en élevage, avec leur statut et leur millésime.
     Une cuvée peut tenir des <b>fûts</b>, une <b>cuve</b>, ou les deux à la fois.</li>
-    <li><b>Le filtre millésime</b> est <b>sous les onglets</b> et vaut pour les trois : cuvées, journal,
-    bouteilles. Il n'apparaît que si le chai contient plus d'un millésime. Un millésime entièrement
+    <li><b>Le filtre millésime</b> est <b>sous les onglets</b> et vaut pour les quatre : cuvées, bouteilles,
+    labo, journal. Il n'apparaît que si le chai contient plus d'un millésime. Un millésime entièrement
     embouteillé reste proposé — ses bouteilles et ses opérations existent — mais sans compteur de
     cuvées, parce qu'un « 0 » se lirait comme une absence. Il n'agit pas sur les quatre chiffres du
     haut, qui restent ceux de la cave entière.</li>
@@ -1649,7 +1649,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     silence. Elles restent visibles sur « Tous ».</li>
     <li><b>Analyses SO₂</b> avec un <b>convertisseur intégré</b> : grammes, pastilles, dilution.
     Il évite l'erreur de calcul classique entre liquide et pastille.</li>
-    <li><b>Pièces jointes</b> : un bulletin d'analyse en PDF peut être rattaché à une opération, ou à son rapport dans « Rapports du labo ».</li>
+    <li><b>Pièces jointes</b> : un bulletin d'analyse en PDF peut être rattaché à une opération, ou à son rapport, dans l'onglet <b>Labo</b>.</li>
     <li><b>Mise en bouteille</b> : clôture le suivi de la cuvée et fige le millésime.</li>
     <li><b>Alerte d'ouillage</b> réglable de 3 à 30 jours — <span class="path">Cave › roue crantée › Le Chai</span>.
     Le délai peut être <b>resserré millésime par millésime</b> : un vin jeune se surveille de plus près.
@@ -1657,7 +1657,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   </ul>
 
   <h4>Les rapports du labo</h4>
-<p>Le Chai &rsaquo; Journal &rsaquo; <b>Rapports du labo</b> réunit les bulletins par date d'envoi : <b>une fiche par envoi</b>, une ligne par rapport. On la remplit une fois, l'application range chaque chiffre sur sa cuvée.</p>
+<p>L'onglet <b>Labo</b> du Chai, à côté de Cuvées, Bouteilles et Journal, réunit les bulletins par date d'envoi : <b>une fiche par envoi</b>, une ligne par rapport. On la remplit une fois, l'application range chaque chiffre sur sa cuvée.</p>
 <ul class="dot">
 <li><b>La fiche</b> — la date du prélèvement, le laboratoire, les <b>analyses demandées</b> (TAV, degré probable, glucose + fructose, volatile, acidité totale, pH, SO<sub>2</sub> libre et total, malique), reprises de la fiche précédente. Puis les échantillons : la cuve au Cuvier tant qu'elle fermente, la cuvée au Chai en élevage, avec le n° de rapport, le n° d'échantillon et le PDF. La couleur et l'appellation se lisent sur les parcelles ; « &lt; 0,1 » s'écrit tel quel.</li>
 <li><b>Avant d'enregistrer</b> — l'écran montre où va chaque chiffre : le glucose d'une cuve sur sa courbe des sucres, le malique d'une cuvée sur sa malo, le SO<sub>2</sub> libre sur sa courbe, le reste dans le bloc « Au labo ».</li>

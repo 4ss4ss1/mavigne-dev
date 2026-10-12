@@ -1,0 +1,23 @@
+{
+  "lot": "LABO-2",
+  "section": "§321",
+  "base": "b2f3ef434d4afc669a6265a885378358ff1aa6df",
+  "inclut": [],
+  "date": "2026-10-12",
+  "fichiers": {
+    ".mv-base": "facddd29cbe7e6e80f159072518b984f4cc4d41e35bfc999f7067955f9d91c6e",
+    "CLAUDE.md": "5ce8f208c389617201b941b757db3e2073c5468d78729f27091e5f6b2491f3de",
+    "docs/claude/INDEX.md": "44fe334f5c780f9623d47acb52fd32593fdae9ce7cb0b666e81191bce42cef31",
+    "docs/claude/chantiers-280-329.md": "5acdae698ebe5741a1fce1653665e974769467d840e0102f7c3bbc60f2321d50",
+    "docs/claude/journal.md": "58a1b0fa4820077bae05146d51da5ce973946cf88dfeea893b933b450b12c4b4",
+    "guide/08-cave.html": "a4c1df8dbf63a7e1705794781e36a97f8f86fc00eb260c84f660383d74200411",
+    "index.html": "e6bee1d855019431bdcb92e25731d7bfd4731ea6b79e808d5029739b8a4230a4",
+    "public/sw.js": "02a79b783f23f98fff08ca6c372f4c7f24cf8887b63d86da6cfa033a5968c498",
+    "scripts/harnais-claude-md.mjs": "1e19d61c08b7deb633e7581e7134d769020d61b9242aabffe7bc5ddb787d61f5",
+    "scripts/mv-harnais-cave-reglages.mjs": "2227cfab069cc9c772a99a913513568767fd8614ea462395a793d64eda6e6f79",
+    "scripts/mv-harnais-etat1.mjs": "99f4529d7452bedf44a764c3a562b1c3593bf5ded4eabea9f427a0688519a80a",
+    "scripts/mv-harnais-labo.mjs": "44f2080ddfb98ded9ce53f45985cadd839ca0adad8379c4f2aa1104f21a4cc5b",
+    "src/cave.js": "fe11edb23e1524123a56eb824367acf863f661973b13a8e4137bd535f7add1e2",
+    "src/utils.js": "1e1190e6bf25b8411e219dfde3ce7f76543b8e55c09995be80a95e9ed6e85c1d"
+  }
+}

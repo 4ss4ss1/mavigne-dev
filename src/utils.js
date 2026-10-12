@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.88';
+export const APP_VERSION = '8.89';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1055,13 +1055,18 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.89', d: '2026-10-12', items: [
+    { niv: 1, pour: ['cave'], cible: '#lbo-saisir', emoji: 'microscope', titre: 'Les rapports du labo ont leur onglet',
+      desc: "Ils étaient rangés dans le Journal du Chai, derrière un filtre. Ils ont maintenant leur onglet, « Labo », à côté de Cuvées, Bouteilles et Journal : les fiches par date, « Saisir un rapport » en tête, et le filtre millésime du Chai s’y applique. "
+        + "Le bouton « Analyse » de Nouvelle opération ouvre toujours une fiche neuve ; une fois enregistrée, vous revenez sur l’onglet, la fiche touchée en surbrillance." },
+  ] },
   { v: '8.88', d: '2026-10-12', items: [
     { niv: 0, pour: ['admin'], emoji: 'carte', titre: 'Le domaine en direct suit la fiche de chaque parcelle',
       desc: "Dans Pilotage › Aujourd’hui, le plan pouvait montrer une parcelle faite alors que sa fiche disait « À faire » : une validation annulée y comptait encore, et, pour une tâche sans dates dans la campagne (l’entreplantation sans trou compté, l’arrachage), une validation d’une saison passée aussi. "
         + "Le plan lit maintenant l’état de la fiche, pour la période : une parcelle y est faite une fois validée, en cours une fois commencée. Un arrachage fini pour l’équipe reste fait, et la loupe dit que la suite revient au prestataire." },
   ] },
   { v: '8.87', d: '2026-10-12', items: [
-    { niv: 1, pour: ['cave'], cible: '#mvc-journal-upload', emoji: 'microscope', titre: 'Les rapports du labo : une fiche par envoi, chaque chiffre à sa place',
+    { niv: 1, pour: ['cave'], cible: '#lbo-saisir', emoji: 'microscope', titre: 'Les rapports du labo : une fiche par envoi, chaque chiffre à sa place',
       desc: "Saisir un bulletin du labo prenait une analyse par cuvée, et le TAV, le degré probable, le glucose + fructose d’un vin en élevage ou l’acidité totale n’avaient pas de case. "
         + "Dans Le Chai › Journal, « Rapports du labo » ouvre une fiche par envoi : la date du prélèvement, les analyses demandées (reprises de la fiche précédente), puis une ligne par rapport — n° de rapport, n° d’échantillon, la cuvée au Chai ou la cuve au Cuvier, et son PDF. "
         + "Avant d’enregistrer, l’écran montre où va chaque chiffre. Ressaisir la même date ou le même n° de rapport complète la fiche : une case vide n’efface rien, deux valeurs différentes se choisissent. Le bouton « Analyse » de Nouvelle opération ouvre la même fiche." },
@@ -5153,7 +5158,7 @@ var MV_AIDE = {
           "Aujourd’hui dit ce qui presse, Le Cuvier suit la vendange, Le Chai suit l’élevage, Le Millésime raconte le vin.");
       },
       ['Aujourd’hui', "est l’écran d’arrivée de la Cave. En tête, le verdict : ce qui ne peut pas attendre, dans l’ordre — une fermentation qui ralentit, une malo bloquée, des cuves sans relevé depuis hier ou avant, du raisin à rentrer, des fûts à ouiller, une malo finie à soutirer, une dose de SO\u2082 programmée. Dessous, les quatre semaines à venir, et ce qui n’a pas de date (les fûts en fin de vie). Chaque ligne est un bouton qui ouvre le geste. Tout vient de ce qui est déjà saisi, rien de plus à remplir."],
-      ['Les quatre chiffres du haut', "sont ceux de la cave entière, les mêmes sur les quatre onglets : hL en cuve (une estimation d’après les kilos tant que rien n’est décuvé, marquée ≈), fûts en vin, lignes à faire cette semaine, tonnes rentrées. La ligne sous la bande dit sur quel millésime ils sont calculés. Le filtre millésime du Chai agit sur ses trois onglets — cuvées, journal, bouteilles — mais pas sur la bande."],
+      ['Les quatre chiffres du haut', "sont ceux de la cave entière, les mêmes sur les quatre onglets : hL en cuve (une estimation d’après les kilos tant que rien n’est décuvé, marquée ≈), fûts en vin, lignes à faire cette semaine, tonnes rentrées. La ligne sous la bande dit sur quel millésime ils sont calculés. Le filtre millésime du Chai agit sur ses quatre onglets — cuvées, bouteilles, labo, journal — mais pas sur la bande."],
       ['La roue crantée', "en haut à droite réunit ce qu’on règle une fois l’an : les réglages du Cuvier (poids par caisse, rendement jus, base du rendement, correction d’un poids déjà saisi, clients vrac), ceux du Chai (alerte d’ouillage, contenance d’un fût, convertisseur SO\u2082, parc à cuves), le renvoi vers les appellations et leurs plafonds, et les documents de la cave. Aucun onglet du quotidien ne porte plus de réglage."],
       ['Les onglets du Cuvier', "suivent la vendange dans l’ordre où elle se fait : Maturités à la vigne, Récoltes, Cuves, puis Tournée — le geste quotidien, en bout de chaîne. « Cuves » est l’ancien onglet « Cuvier » ; « Maturités » est l’ancien « Analyses » — ce sont les contrôles de maturité à la vigne, à ne pas confondre avec les analyses labo du Chai. On arrive toujours sur « Cuves » : on n’atterrit pas dans un écran de saisie."],
       ['Lire un relevé sur la courbe', "un appui sur la courbe de fermentation ouvre une étiquette : la date, la densité à 20 °C, la température, les pigeages et remontages, l’opération et la note de ce jour-là. Toute la colonne au-dessus du point répond — inutile de viser. Un appui à côté la referme. La liste des relevés, sous le graphe, reste la source complète : c’est elle qu’un lecteur d’écran lit, l’étiquette est une commodité au doigt."],
@@ -5166,7 +5171,7 @@ var MV_AIDE = {
         + "Traitement : la nature (collage, stabilisation, acidité, tanins et gomme, ensemencement), le produit de La Réserve qui fixe l’unité de la dose, puis la dose ; le volume des cuvées choisies se remplit seul, la quantité se calcule et sort du stock comme les adjonctions du Cuvier. Filtration : le type, le seuil, la perte — notée, sans toucher au volume de la cuvée. "
         + "Les trois arrivent au journal et au Suivi d’élevage ; traitement et filtration entrent au registre des manipulations, la dégustation y est comptée en pied."],
       ['Un millésime à la fois', "une opération porte sur une seule année. Changer de millésime en haut du formulaire vide la sélection : on ne mélange pas deux vins dans un même geste."],
-      ['Les rapports du labo', "Le Chai › Journal › « Rapports du labo » : une fiche par envoi au labo. La date du prélèvement, les analyses demandées — reprises de la fiche précédente —, puis une ligne par rapport : n° de rapport, n° d’échantillon, la cuvée au Chai ou la cuve au Cuvier. La couleur et l’appellation se lisent sur ses parcelles ; « < 0,1 » s’écrit tel quel ; un PDF par rapport. Avant d’enregistrer, l’écran montre où va chaque chiffre : le glucose d’une cuve qui fermente sur sa courbe des sucres, le malique d’une cuvée sur sa malo, le reste dans son bloc « Au labo »."],
+      ['Les rapports du labo', "Le Chai › onglet « Labo » : une fiche par envoi au labo. La date du prélèvement, les analyses demandées — reprises de la fiche précédente —, puis une ligne par rapport : n° de rapport, n° d’échantillon, la cuvée au Chai ou la cuve au Cuvier. La couleur et l’appellation se lisent sur ses parcelles ; « < 0,1 » s’écrit tel quel ; un PDF par rapport. Avant d’enregistrer, l’écran montre où va chaque chiffre : le glucose d’une cuve qui fermente sur sa courbe des sucres, le malique d’une cuvée sur sa malo, le reste dans son bloc « Au labo »."],
       ['Rien ne s’efface', "la même date rouvre la fiche, et un n° de rapport déjà saisi est reconnu, même tapé à une autre date. Une case laissée vide ne retire rien ; deux valeurs différentes pour la même analyse, une autre date ou une autre cuvée pour le même rapport : c’est vous qui choisissez. Pour corriger, « Compléter » le rapport dans sa fiche et prendre la nouvelle valeur ; l’administrateur peut aussi le « Retirer »."],
       ['Au labo', "la fiche d’une cuvée porte la courbe de chaque analyse dès deux rapports, ceux de la cuve d’où elle vient compris ; une cuve du Cuvier a le même bloc, son glucose gardant sa courbe des sucres. Le degré probable d’un rapport devient la première source du repère « vin sec » de la cuve."],
       ['Le délai d’ouillage', "se règle pour tout le domaine, et se resserre millésime par millésime — un vin jeune se surveille de plus près."],

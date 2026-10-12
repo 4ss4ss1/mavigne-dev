@@ -1308,7 +1308,7 @@ function switchCaveOng(tab) {
   // Les QUATRE onglets du Chai, definis UNE seule fois : le filet ci-dessous et la
   // boucle d'affichage doivent parler de la meme liste (deux definitions du meme
   // concept dans un module = incoherence garantie entre deux ecrans).
-  var ONGLETS = ['cuv','journal','bouteille'];
+  var ONGLETS = ['cuv','journal','bouteille','labo'];   // ★ LABO-2 (§321) : le labo a son onglet
   // Les reglages du Chai sont dans la roue crantee (lot CAVE-2) : les anciennes
   // cles y atterrissent.
   if(tab==='divers'||tab==='reglages'){ _caveOpenReglages(); return; }
@@ -1329,6 +1329,7 @@ function switchCaveOng(tab) {
   if(tab==='cuv') renderCaveCuvees();
   else if(tab==='journal') renderCaveJournal();
   else if(tab==='bouteille') renderCaveBouteille();
+  else if(tab==='labo') renderCaveLabo();
 }
 
 
@@ -2322,8 +2323,6 @@ function renderCaveJournal() {
 function setCaveJFilter(f) {
   _jFilter=f;
   document.querySelectorAll('.mvc-jf').forEach(function(b){b.classList.toggle('active',b.dataset.f===f);});
-  var upEl=document.getElementById('mvc-journal-upload');
-  if(upEl) upEl.style.display=(f==='analyse'||f==='tous')?'':'none';
   renderCaveJournal();
 }
 
@@ -4132,6 +4131,7 @@ function _caveSetMill(m){
   // Les TROIS vues suivent le filtre : repeindre celle qui est a l'ecran.
   if(caveTab==='journal') renderCaveJournal();
   else if(caveTab==='bouteille') renderCaveBouteille();
+  else if(caveTab==='labo') renderCaveLabo();   // ★ LABO-2 : le quatrième onglet suit aussi le filtre
   else renderCaveCuvees();
   _caveMilBarRender();
   // Sans ce rappel, les chiffres du bandeau restaient sur la cave entiere
@@ -9928,6 +9928,7 @@ function _laboCss(){
   if(document.getElementById('mv-labo-css')) return;
   var s=document.createElement('style'); s.id='mv-labo-css';
   s.textContent=''
+  +'.lbo-page{padding:var(--e-3,12px) var(--e-4,16px) var(--e-6,24px);max-width:760px}'
   +'.lbo-modal .modal-body{padding:var(--e-3,12px) var(--e-4,16px) var(--e-6,24px)}'
   +'.lbo-hd{display:flex;align-items:flex-start;gap:var(--e-2,8px);padding:var(--e-3,12px) var(--e-4,16px) var(--e-3,12px);border-bottom:1px solid var(--gris-clair)}'
   +'.lbo-hd-t{flex:1;min-width:0}'
@@ -10053,20 +10054,37 @@ function _laboHd(back, titre, sous){
   h+='<div class="lbo-titre">'+_escHtml(titre)+'</div>'+(sous?'<div class="lbo-sous">'+sous+'</div>':'')+'</div></div>';
   return h;
 }
+/* ★ LABO-2 (§321) — LES RAPPORTS DU LABO ONT LEUR ONGLET. Nico, 12/10 : « il faut le mettre à côté de Cuvées, Bouteilles,
+   Journal. C'est un truc important, il ne faut pas le cacher dans un sous-onglet. » La liste est la page de l'onglet « Labo »
+   (#mvc-body-labo) ; la fiche et la vérification restent dans la fenêtre #ovLabo. Le filtre millésime du Chai la suit, comme
+   les trois autres onglets : une ligne du Chai par le millésime de sa cuvée, une ligne du Cuvier par l'année de sa cuve. */
+function _laboMil(x){
+  if(x.lieu==='cuvier'){ var cv=_laboCuveDe(x.cid); return cv&&typeof _cuvAn==='function'?String(_cuvAn(cv)||''):''; }
+  var v=_laboCuveeDe(x.cid); return (v&&v.millesime!=null)?String(v.millesime):'';
+}
+function renderCaveLabo(){
+  var el=document.getElementById('mvc-body-labo'); if(!el) return;
+  if(!window._dataReady){ el.innerHTML=window._mvSk('chai'); return; }
+  _laboCss();
+  el.innerHTML=_laboVueListe();
+  _LBO.flash=null;
+}
 function _laboVueListe(){
-  var L=_laboLignes(), par={}, dates=[];
+  var mf=(typeof _caveMillFilter!=='undefined'&&_caveMillFilter)?String(_caveMillFilter):'tous', cache=0;
+  var L=_laboLignes().filter(function(x){ if(mf==='tous') return true; if(_laboMil(x)===mf) return true; cache++; return false; }), par={}, dates=[];
   L.forEach(function(x){ if(!x.date) return; if(!par[x.date]){ par[x.date]=[]; dates.push(x.date); } par[x.date].push(x); });
   dates.sort(function(a,b){ return a<b?1:-1; });
   var peut=_laboPeut();
-  var h=_laboHd('', 'Rapports du labo', 'Le Chai et Le Cuvier \u00b7 une fiche par envoi au labo');
-  h+='<div class="modal-body"><p class="lbo-intro">Chaque rapport se range seul sur sa cuvée : ses courbes, la projection de la malo et le suivi des sucres le lisent.</p>';
-  if(peut) h+='<button class="lbo-btn" onclick="window._laboNouveau()">'+_mvIcon('plus',18)+'Saisir un rapport</button>';
-  if(!dates.length) h+='<div class="lbo-vide">Aucun rapport du labo pour l’instant.</div>';
+  var h='<div class="lbo-page">';
+  if(mf!=='tous') h+='<div class="mvc-jmilnote">Millésime '+_escHtml(mf)+' seul'+(cache?' \u00b7 '+cache+' rapport'+(cache>1?'s':'')+' d’un autre millésime, visible'+(cache>1?'s':'')+' sur « Tous »':'')+'</div>';
+  h+='<p class="lbo-intro">Une fiche par envoi au labo. Chaque rapport se range seul sur sa cuvée ou sa cuve : ses courbes, la projection de la malo et le suivi des sucres le lisent.</p>';
+  if(peut) h+='<button class="lbo-btn" id="lbo-saisir" onclick="window.openLabo({nouveau:true})">'+_mvIcon('plus',18)+'Saisir un rapport</button>';
+  if(!dates.length) h+='<div class="lbo-vide">'+(cache?'Aucun rapport du labo sur ce millésime.':'Aucun rapport du labo pour l’instant.')+'</div>';
   dates.forEach(function(d){
     var ls=par[d], nom='';
     ls.forEach(function(x){ if(!nom&&x.nom) nom=x.nom; });
     h+='<div class="lbo-fiche'+(_LBO.flash===d?' flash':'')+'">'
-      +'<button class="lbo-fh" '+(peut?'onclick="window._laboOuvrirDate(\''+_escAttr(d)+'\')"':'disabled')+' aria-label="'+_escAttr((peut?'Compléter la fiche du ':'Fiche du ')+_laboDateLongue(d))+'">'
+      +'<button class="lbo-fh" '+(peut?'onclick="window.openLabo({date:\''+_escAttr(d)+'\'})"':'disabled')+' aria-label="'+_escAttr((peut?'Compléter la fiche du ':'Fiche du ')+_laboDateLongue(d))+'">'
       +'<span><span class="lbo-fd">'+_escHtml(_laboDateJour(d))+'</span><span class="lbo-fl">'+_escHtml(nom||'Laboratoire non précisé')+'</span></span>'
       +'<span class="lbo-fn">'+ls.length+' rapport'+(ls.length>1?'s':'')+'</span></button>';
     ls.forEach(function(x){
@@ -10112,7 +10130,7 @@ function _laboHint(raw,a){
 }
 function _laboVueFiche(){
   var F=_LBO.F, L=_laboLignes(), ex=L.filter(function(x){ return x.date===F.date; });
-  var h=_laboHd('Rapports du labo', ex.length?'Compléter la fiche du '+_laboDateLongue(F.date):'Nouveau rapport',
+  var h=_laboHd('Labo', ex.length?'Compléter la fiche du '+_laboDateLongue(F.date):'Nouveau rapport',
     _escHtml(ex.length?(ex.length+' rapport'+(ex.length>1?'s':'')+' déjà enregistré'+(ex.length>1?'s':'')):'Une fiche par envoi au labo'));
   h+='<div class="modal-body">';
   h+='<label class="fl" for="lbo-date">Date du prélèvement</label><input class="fi" type="date" id="lbo-date" max="'+_escAttr(_laboAuj())+'" onchange="window._laboDate(this)">';
@@ -10276,9 +10294,8 @@ function _laboVueItem(it){
 }
 function _laboRender(){
   var el=document.getElementById('lbo-root'); if(!el) return;
-  var h=(_LBO.vue==='fiche'&&_LBO.F)?_laboVueFiche():((_LBO.vue==='verif'&&_LBO.P)?_laboVueVerif():_laboVueListe());
-  el.innerHTML=h;
-  _LBO.flash=null;
+  /* ★ LABO-2 : la fenêtre ne montre plus que la fiche et la vérification ; la liste est l'onglet « Labo ». */
+  el.innerHTML=(_LBO.vue==='verif'&&_LBO.P)?_laboVueVerif():((_LBO.vue==='fiche'&&_LBO.F)?_laboVueFiche():'');
   /* ⚠️ §24 n°5 : les valeurs se posent EN JS, jamais en attribut — un champ de date iOS
      ignore value="…" posé par innerHTML, et une valeur tapée garde sa forme (« 0, »). */
   if(_LBO.vue==='fiche'&&_LBO.F){
@@ -10299,7 +10316,8 @@ window.openLabo = function(o){
   _LBO.P=null; _LBO.envoi=false;
   if(o.date&&_laboPeut()){ _LBO.F=_laboFormDate(o.date); _LBO.vue='fiche'; }
   else if(o.nouveau&&_laboPeut()){ _LBO.F=_laboFormNeuf(); _LBO.vue='fiche'; }
-  else { _LBO.F=null; _LBO.vue='liste'; }
+  else { _LBO.F=_laboPeut()?_laboFormNeuf():null; _LBO.vue=_LBO.F?'fiche':'liste'; }
+  if(!_LBO.F) return;
   _laboRender();
   if(typeof window.openOv==='function') window.openOv('ovLabo');
   else { var ov=document.getElementById('ovLabo'); if(ov) ov.classList.add('open'); }
@@ -10308,12 +10326,10 @@ window._laboDepuisOp = function(){
   if(typeof window.closeOv==='function') window.closeOv(null,'ovCaveOp');
   window.openLabo({nouveau:true});
 };
-window._laboNouveau = function(){ _LBO.F=_laboFormNeuf(); _LBO.vue='fiche'; _LBO.P=null; _laboRender(); };
-window._laboOuvrirDate = function(d){ _LBO.F=_laboFormDate(d); _LBO.vue='fiche'; _LBO.P=null; _laboRender(); };
 window._laboRetour = function(){
-  if(_LBO.vue==='verif'){ _LBO.vue='fiche'; _LBO.P=null; }
-  else { _LBO.vue='liste'; _LBO.F=null; _LBO.P=null; }
-  _laboRender();
+  if(_LBO.vue==='verif'){ _LBO.vue='fiche'; _LBO.P=null; _laboRender(); return; }
+  _LBO.vue='liste'; _LBO.F=null; _LBO.P=null;                        // la fiche se referme sur l'onglet « Labo »
+  if(typeof window.closeOv==='function') window.closeOv(null,'ovLabo');
 };
 window._laboDate = function(el){ if(!_LBO.F||!el||!el.value) return; _LBO.F.date=el.value; _laboRender(); };
 window._laboNom = function(el){ if(_LBO.F&&el) _LBO.F.nom=el.value; };
@@ -10424,6 +10440,7 @@ window._laboEnregistrer = async function(){
   _cavePdfPurge(avant);
   var ds=Object.keys(r.dates).sort();
   _LBO.envoi=false; _LBO.vue='liste'; _LBO.F=null; _LBO.P=null; _LBO.flash=ds.length?ds[ds.length-1]:null;
+  if(typeof window.closeOv==='function') window.closeOv(null,'ovLabo');   // ★ LABO-2 : retour sur l'onglet, la fiche touchée en surbrillance
   _laboRender();
   try{ renderCave(); }catch(e){ if(window.logError) window.logError({level:'info', cat:'cave', msg:'LABO-1 : Chai non redessiné après enregistrement', detail:String(e&&e.message||e)}); }
 };

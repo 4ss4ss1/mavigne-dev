@@ -1596,3 +1596,31 @@ jamais eu de tache entreplantation sur cette parcelle pour le moment ». La loup
 
 ### 320f. Ouvert
 §28 « ETAT-1 — CE QUI RESTE OUVERT ».
+
+## 321. ★ LABO-2 — LES RAPPORTS DU LABO ONT LEUR ONGLET (12/10 — `src/cave.js` · `index.html` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Cave) · `public/sw.js` · `guide/08-cave.html` · `scripts/mv-harnais-labo.mjs` · `scripts/mv-harnais-cave-reglages.mjs` · `scripts/mv-harnais-etat1.mjs` (G4) · `scripts/harnais-claude-md.mjs` · **bump APP + SW**, base `b2f3ef4` — reconstruit sur ETAT-1 (§320), qui avait pris les mêmes numéros sur la même base)
+
+### 321a. La demande
+Nico, 12/10 (dicté), après la réponse « Le Chai › Journal › Rapports du labo » à « comment j'ajoute une fiche ? » : « il ne faut pas le cacher dans un
+sous-onglet, il faut le mettre à côté de Cuvées, Bouteilles, Journal. C'est un truc important. » Reformulé (un onglet du Chai, la liste en page, la zone du
+Journal retirée, « Analyse » de Nouvelle opération gardé), « oui ».
+
+### 321b. Ce qui change
+- `ONGLETS` du Chai : `['cuv','journal','bouteille','labo']`. Bouton `#mvc-tbtn-labo` (icône microscope) posé avant Journal dans index.html ; Bouteilles
+  s'insère toujours juste après Cuvées (`_caveEnsureBtlTab`) : l'ordre est Cuvées · Bouteilles · Labo · Journal. Vue `#mvc-view-labo` / `#mvc-body-labo`.
+- `renderCaveLabo()` écrit la liste (`_laboVueListe`, sans en-tête de fenêtre). « Saisir un rapport » (`#lbo-saisir`) et chaque date ouvrent la fiche dans
+  `#ovLabo` par `openLabo`. La fenêtre ne porte plus que la fiche et la vérification (`_laboRender`) : « Labo » (le retour) la referme ; « Enregistrer » la
+  referme et la vide ; la date touchée s'allume au prochain rendu de l'onglet (`_LBO.flash`). `_laboNouveau` / `_laboOuvrirDate` retirés (plus d'appelant).
+- Le filtre millésime du Chai s'applique, comme aux trois autres onglets : une ligne du Chai par le millésime de sa cuvée, une ligne du Cuvier par l'année de
+  sa cuve (`_laboMil`) ; `_caveSetMill` repeint l'onglet ; la page dit combien de rapports elle écarte (même arbitrage que le journal, CAVE-6).
+- La zone « Rapports du labo » du Journal disparaît, avec sa bascule dans `setCaveJFilter` (sinon C11 : un `getElementById` sans élément). Le champ caché
+  de l'ancien import « PDF seul » reste (§319g).
+- L'annonce 8.87 visait `#mvc-journal-upload` : recalée sur `#lbo-saisir` — une cible qui n'existe plus ne pose sa pastille nulle part. L'annonce 8.88 dit
+  le déménagement. MV_AIDE et le guide : « l'onglet Labo », et le filtre millésime « vaut pour les quatre ».
+
+### 321c. Mesuré
+`mv-harnais-labo` : **32 vertes** (L22 l'onglet, L26 la fenêtre vidée et la surbrillance, L31 index.html, L32 le filtre) ; contre-épreuve **12/12** (C11
+l'onglet retiré de la liste, C12 la surbrillance perdue). `mv-harnais-cave-reglages` apprend la quatrième entrée de `ONGLETS` (règle et contre-épreuve
+vertes). Preflight : 0 erreur, 9 avertissements (inchangé). Chaîne (`mv-harnais-liste`, 375 commandes) rejouée sur la base `b2f3ef4` par tranches au premier plan, `TZ=Europe/Paris`, code retour noté pour chacune (règle DIRECT-1). Un rouge réparé en route : **`mv-harnais-etat1` G4** exigeait le bloc 8.88 d'ETAT-1 « en tête » et `APP_VERSION === '8.88'` — vrai jusqu'au lot suivant seulement ; la règle garde ce qui compte (le bloc 8.88 présent, son niveau, son public, APP au moins 8.88), règle et contre-épreuve vertes. `mv-harnais-entree1` rouge sous 8 exécutants en parallèle, **vert seul** (contre-épreuve verte) ; `build-guide --check` vert après régénération locale (`public/guide.html` non livré). **Non conclu ici** : `mv-harnais-recup --contre`, coupé à 300 s par le bac à sable — Planning, que ce lot ne touche pas ; à confirmer par la CI.
+
+### 321d. Ouvert
+§28 « LABO-1 et LABO-2 — CE QUI RESTE OUVERT ».

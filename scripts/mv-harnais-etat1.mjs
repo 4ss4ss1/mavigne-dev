@@ -173,8 +173,12 @@ function suite(S) {
   T('G3 l’aide, la bulle du plan et le guide disent que la couleur suit la fiche',
     S.uti.includes('celui de la fiche de la parcelle pour la période : faite (validée ; une annulation la remet à faire)') && S.uti.includes('colorée selon son état sur sa fiche pour la tâche choisie')
     && S.vue.includes('celui de sa fiche pour la période : faite une fois validée') && S.guide.includes('colorée selon son état sur sa fiche pour la tâche choisie'));
-  T('G4 la nouveauté : bloc 8.88 en tête, niveau 0 (Journal), pour l’admin', /export const APP_VERSION = '8\.88';/.test(S.uti)
-    && S.uti.includes("export const WHATS_NEW = [\n  { v: '8.88', d: '2026-10-12', items: [\n    { niv: 0, pour: ['admin'], emoji: 'carte', titre: 'Le domaine en direct suit la fiche de chaque parcelle',"));
+  /* ★ LABO-2 (§321) : « en tête » ne tient que jusqu'au lot suivant, qui pose son bloc au-dessus et relève APP. La règle garde ce
+     qui compte : le bloc 8.88 existe, avec son niveau et son public, et APP n'est pas redescendu sous 8.88. */
+  T('G4 la nouveauté : bloc 8.88 présent, niveau 0 (Journal), pour l’admin ; APP au moins 8.88', (() => {
+      const v = (S.uti.match(/export const APP_VERSION = '(\d+)\.(\d+)';/) || []).slice(1).map(Number);
+      return v.length === 2 && (v[0] > 8 || (v[0] === 8 && v[1] >= 88)); })()
+    && S.uti.includes("  { v: '8.88', d: '2026-10-12', items: [\n    { niv: 0, pour: ['admin'], emoji: 'carte', titre: 'Le domaine en direct suit la fiche de chaque parcelle',"));
   return out;
 }
 
