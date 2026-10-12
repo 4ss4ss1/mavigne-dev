@@ -2030,7 +2030,7 @@ var _PIL_SIM=null;
 function _dzDernierFait(t){ var d=window._mvDerniereValidee([t], _opGeoOK); return d?d.p:null; }
 function _dzRowsTache(t){
   var def=_opTaskDef(t); if(!def) return [];
-  var act=_opParcActive().filter(function(p){ return _opApplic(p,def)&&_opParcReste(p,def)>0.05; }), ord=[], saved=_opSavedTask(t);
+  var act=_opParcActive().filter(function(p){ return _opApplic(p,def)&&_opParcReste(p,def)>0.05&&!(typeof window._mvAuPrestataire==='function'&&window._mvAuPrestataire(p,t)); }), ord=[], saved=_opSavedTask(t);
   if(saved){ var by={}; act.forEach(function(p){ by[p.nom]=p; }); saved.forEach(function(n){ if(by[n]){ ord.push(by[n]); delete by[n]; } }); act.forEach(function(p){ if(by[p.nom]) ord.push(p); }); }
   else {
     var geo=act.filter(_opGeoOK), no=act.filter(function(p){ return !_opGeoOK(p); }), st=_dzDernierFait(t);
@@ -2229,7 +2229,7 @@ function _opDern(garde){ var T=(_PIL_OP&&_PIL_OP.tasks)||[]; return T.length?win
 function _opCibles(rows){
   var T=(_PIL_OP&&_PIL_OP.tasks)||[];
   if(!rows||!rows.length||!T.length||!window._mvVueActive()) return [];
-  var comm=rows.filter(function(r){ return r.geo && T.some(function(t){ return window._mvTacheEtat(r.p,t)==='commencee'; }); });
+  var comm=rows.filter(function(r){ return r.geo && T.some(function(t){ return window._mvTacheEtat(r.p,t)==='commencee'&&!(typeof window._mvAuPrestataire==='function'&&window._mvAuPrestataire(r.p,t)); }); });
   if(comm.length) return comm.map(function(r){ return r.p; });
   for(var i=0;i<rows.length;i++){ if(rows[i].geo) return [rows[i].p]; }
   return [];

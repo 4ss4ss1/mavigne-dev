@@ -8,6 +8,11 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **12 octobre 2026 (CHANT-1)** — ★ **LES CHANTIERS SE RANGENT PAR DATE DE DÉBUT ; L'ARRACHAGE FINI POUR L'ÉQUIPE EN TÊTE DES TERMINÉS** (§316). Lot 47, base `a664ba0`.
+> Nico (12/10, dicté) : « ils doivent apparaître dans l'ordre de commencement […] peu importe la date de fin », les terminés en bas ; l'arrachage fini pour l'équipe « doit être la première des terminées ». Trouvé : les trois listes (Aujourd'hui, Accueil, La campagne) suivaient l'ordre du catalogue des Réglages — le sous-titre « Dans l'ordre des dates de la
+> campagne » mentait. Une règle (`_mvOrdreChantiers`, utils.js) et sa lecture (`_mvChantiersCtx`, app.js). Ouvert : l'arrachage dans les listes de parcelles (lot suivant), les tâches sans barème sans fenêtre.
+> **APP 8.83 → 8.84, SW 9.62 → 9.63.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+
 > Dernière consolidation : **11 octobre 2026 (FORME-2)** — ★ **LA CARTE DE L'ACCUEIL DESSINE CHAQUE PARCELLE À SA FORME ; LE TOUCHER Y OUVRE ENFIN LA FICHE** (§315). Lot 46, base `6e06158`.
 > Nico (11/10) : « Dans Vigne, il faut la forme des parcelles dans l'accueil de la même taille que les carrés actuellement ». Fait : chaque forme garde la surface de son
 > rectangle (surface déclarée, proportions du contour) ; sans contour, le rectangle reste, en pointillé. Trouvé : le toucher appelait `openSelParc`, qui ne fait rien d'un nom

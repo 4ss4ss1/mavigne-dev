@@ -198,13 +198,14 @@ if (CONTRE) {
       f => f(jeu('En cours'), { ord: ORD })[0] === 'B-Corbeaux',
       'la commenc\u00e9e retombe au rang 3 de la tourn\u00e9e'],
     ['la table invers\u00e9e d\u2019avant',
-      s => s.replace('const ca=_pvCurStarted(a,pTacheFilter)?0:1, cb=_pvCurStarted(b,pTacheFilter)?0:1;',
-                     'const ca=_pvCurStarted(a,pTacheFilter)?1:0, cb=_pvCurStarted(b,pTacheFilter)?1:0;'),
+      // ARRACH-9 (§317) : la ligne porte maintenant la parcelle au prestataire — ancre suivie, même défaut (la table inversée).
+      s => s.replace("const ca=(_pvCurStarted(a,pTacheFilter)&&!(pTacheFilter==='Arrachage'&&_pvAuPresta(a,pTacheFilter)))?0:1, cb=(_pvCurStarted(b,pTacheFilter)&&!(pTacheFilter==='Arrachage'&&_pvAuPresta(b,pTacheFilter)))?0:1;",
+                     "const ca=(_pvCurStarted(a,pTacheFilter)&&!(pTacheFilter==='Arrachage'&&_pvAuPresta(a,pTacheFilter)))?1:0, cb=(_pvCurStarted(b,pTacheFilter)&&!(pTacheFilter==='Arrachage'&&_pvAuPresta(b,pTacheFilter)))?1:0;"),
       f => f(jeu('En cours'), { prox: true })[0] === 'B-Corbeaux',
       'commenc\u00e9 = 1 : la parcelle repart en dernier'],
     ['l\u2019\u00e9tat relu \u00e0 la main au lieu de _pvCurStarted',
-      s => s.replace('_pvCurStarted(a,pTacheFilter)?0:1', "(_tachesFor(a)[pTacheFilter]==='En cours')?0:1")
-            .replace('_pvCurStarted(b,pTacheFilter)?0:1', "(_tachesFor(b)[pTacheFilter]==='En cours')?0:1"),
+      s => s.replace("(_pvCurStarted(a,pTacheFilter)&&!(pTacheFilter==='Arrachage'&&_pvAuPresta(a,pTacheFilter)))?0:1", "(_tachesFor(a)[pTacheFilter]==='En cours')?0:1")
+            .replace("(_pvCurStarted(b,pTacheFilter)&&!(pTacheFilter==='Arrachage'&&_pvAuPresta(b,pTacheFilter)))?0:1", "(_tachesFor(b)[pTacheFilter]==='En cours')?0:1"),
       f => f(jeuNiv, { tache: 'Relevage', step: 1, ord: { ok: true, rang: { 'D-Justice': 2, 'E-Perriere': 1 } } })[0] === 'D-Justice',
       'les niveaux redeviennent invisibles au tri']
   ];

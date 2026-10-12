@@ -242,7 +242,7 @@ const DEFAUTS = [
   { nom: 'une seule parcelle commencée est montrée', f: 'utils',
     de: "ps: comm, tache: T };", vers: 'ps: comm.slice(0, 1), tache: T };' },
   { nom: 'la prochaine ne saute pas les parcelles finies', f: 'utils',
-    de: "if(p && window._mvTacheEtat(p, T) !== 'finie')", vers: 'if(p)' },
+    de: "if(p && window._mvTacheEtat(p, T) !== 'finie' && !presta(p))", vers: 'if(p && !presta(p))' },   // ARRACH-9 (§317) : ancre suivie, même défaut
   { nom: 'l\'ordre de la tournée est ignoré (première parcelle venue)', f: 'utils',
     de: '  var o = (typeof window._mvOrdreFor === \'function\') ? window._mvOrdreFor(T) : null;\n  if(!o) return null;\n',
     vers: '  var o = { ordre: act.map(function(p){ return p.nom; }) };\n' },

@@ -585,6 +585,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-forme2.mjs --contre'],
   ['node scripts/mv-harnais-chant1.mjs'],            // CHANT-1 (§316) : les chantiers par date de début, les terminés en bas, l'arrachage fini pour l'équipe en tête des terminés
   ['node scripts/mv-harnais-chant1.mjs --contre'],
+  ['node scripts/mv-harnais-arrach9.mjs'],           // ARRACH-9 (§317) : la parcelle d'arrachage au prestataire quitte « À faire » et les cartes de l'équipe
+  ['node scripts/mv-harnais-arrach9.mjs --contre'],
   ['node scripts/mv-harnais-trac1.mjs'],              // TRAC-1 (§282) : les sessions du Tracteur en liste + fiche
   ['node scripts/mv-harnais-trac1.mjs --contre'],
   ['node scripts/mv-harnais-trac2.mjs'],              // TRAC-2 (§283) : l'Entretien du Tracteur sur deux colonnes

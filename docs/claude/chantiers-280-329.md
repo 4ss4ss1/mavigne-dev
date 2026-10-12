@@ -1390,3 +1390,40 @@ la première des terminées ». Et l'équipe ne doit plus la voir dans les liste
 
 ### 316e. Ouvert
 §28 « CHANT-1 — CE QUI RESTE OUVERT ».
+
+## 317. ★ ARRACH-9 — L'ARRACHAGE FINI POUR L'ÉQUIPE QUITTE « À FAIRE » ET LES CARTES DE L'ÉQUIPE (12/10 — `src/app.js` (`_arrAuPrestataire`, `_pvAuPresta`, `window._mvAuPrestataire`, `_arrPrestaEnAttente`, `_pvVideTitre` / `_pvVideTexte`, `_pEtatTache` / `_pEtatLib` / `_pEtatBadge`, `renderParcelles`, `_pRow`, `_pCarteTache`, la fiche, `_homePrioCarte`) · `src/utils.js` (`_mvCibleCarte`, APP, WHATS_NEW, MV_AIDE Parcelles) · `src/pilotage.js` (`_dzRowsTache`, l'anneau de la tournée) · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-arrach9.mjs` (neuf) · `scripts/mv-harnais-chant1.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-280-329.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/ARRACH-9.json` · **APP 8.84 → 8.85, SW 9.63 → 9.64**, base `f293f54`)
+
+### 317a. La demande
+Nico (12/10, avec CHANT-1) : la part du prestataire ne compte pas pour l'équipe ; une fois ses étapes faites, l'arrachage « ne doit plus apparaître dans les listes des
+parcelles à faire ». Vérifié avant de proposer (§316c ②) : `_arrStatutTache` laisse « En cours » la parcelle démontée, `_mvTacheEtat` la dit « commencée », Parcelles la garde
+dans « À faire » et la met EN TÊTE. Reformulé avec une recommandation (hors de « À faire » pour tous, visible sous « Toutes » pour valider l'étape du prestataire depuis la
+fiche, plus « commencée » sur les cartes, lot à part après le tri) ; réponses : « Continuer », puis « suite » une fois CHANT-1 poussé.
+
+### 317b. Ce qui a été fait
+- **`_arrAuPrestataire(p)`** (bloc ARRACH-3) : découpage actif, pas validée en entier, toutes les étapes NON prestataire faites (`_arrEquipeFinie`). Sans étape d'équipe, la
+  parcelle est au prestataire d'emblée. `window._mvAuPrestataire(p, T)` la lit pour l'arrachage seulement (utils.js, pilotage.js).
+- **Parcelles** : hors de « À faire » (filtre), plus en tête comme « commencée », rangée avec les faites sous « Toutes » ; l'état écrit « fini pour l'équipe, au prestataire »
+  (habit de « fait » : `prow-fait`, `pcq-fait`, aucune règle de feuille neuve) ; badge « Au prestataire » dans la fiche ; la puce « Arrachage » rejoint les tâches finies quand
+  l'équipe a fini partout ; la liste vide dit « Arrachage fini pour l'équipe — la suite est au prestataire » au lieu de « terminé sur toutes les parcelles » (faux).
+- **Les cartes et la tournée** : la carte de l'Accueil la compte faite (vue de l'équipe), l'anneau des cartes (`_mvCibleCarte`) ne la prend ni « commencée » ni « prochaine »,
+  la tournée de Décider (`_dzRowsTache`) ne la propose plus, son anneau non plus.
+- ★ **Volontairement PAS dans `_mvTacheEtat` ni `_pvCurDone`** : ils décident du bouton du rail (« Fait » + Annuler sur une parcelle finie). Une parcelle au prestataire
+  garde « Valider », qui ouvre la fiche (ARRACH-3) : c'est là que l'étape du prestataire se valide.
+
+### 317c. Trouvé en route
+1. **CHANT-1 avait figé la TÊTE des nouveautés** (`^export const WHATS_NEW = [\n  { v: '8.84'`) : rouge dès ce lot, qui prépend 8.85. Corrigé : le harnais lit son BLOC.
+   Règle pour tout harnais : vérifier le bloc de sa version, jamais sa place en tête.
+2. **Deux harnais exécutent la vraie `_homePrioCarte` sans le bloc ARRACH-3** (forme2, acc2) : un appel nu à `_pvAuPresta` y levait (13 et 4 rouges). La lecture ne court
+   que pour l'arrachage (`t==='Arrachage'&&…`), ce qui est aussi le sens de la règle ; leurs mondes restent justes.
+3. Le plan du cockpit n'avait pas le défaut : `_ckPlanLire` lit le journal, et une étape validée y est « Validé » → « faite ».
+
+### 317d. Les harnais
+- **`mv-harnais-arrach9.mjs`** (neuf, 22 assertions, 11 contre-épreuves) : le VRAI bloc ARRACH-3 (démontage fait, rien de fait, validée, sans découpage, tout au prestataire,
+  parcelle absente), les VRAIES `_pEtatTache` / `_pEtatLib` / `_pEtatBadge`, la liste vide (arrachage, autre tâche échappée, sans parcelle au prestataire), la VRAIE
+  `_mvCibleCarte` (avec et sans la lecture), le branchement de Parcelles, de l'Accueil et de la tournée, le bouton Fait / Annuler intact, l'aide, le guide, les nouveautés.
+- Rejoués : arrach3, arrach6, arrach7, arrach8, avc-arr, forme2, acc2, kit1, coh1, chant1, prio, cible, selection, valid1, parc1, parc2, whatsnew, globaux, cliquets ;
+  preflight 0 erreur. La chaîne complète : voir la note de livraison.
+- Non vérifié : les données de Nico ; un rendu dans un navigateur ; `npm run build`, `test:smoke`, `test:e2e` ; le déploiement.
+
+### 317e. Ouvert
+§28 « ARRACH-9 — CE QUI RESTE OUVERT ».

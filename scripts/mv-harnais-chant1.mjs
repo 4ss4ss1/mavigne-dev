@@ -109,7 +109,8 @@ function suite(S) {
     && S.uti.includes('les chantiers (à faire ou en cours en haut, par date de début ; les terminés en bas)') && S.uti.includes('la tâche se range en tête des terminées, en vert'));
   T('le guide aussi (Vigne et Pilotage)', () => S.g04.includes('rangé par date de début, ce qui reste à faire en haut') && S.g04.includes('en tête des tâches finies, en vert')
     && S.g11.includes('par date de début ; les terminés en bas') && S.g11.includes("l'arrachage fini pour l'équipe passe en tête des terminées"));
-  T('les nouveautés l\u2019annoncent en tête', () => { const i = S.uti.indexOf('export const WHATS_NEW = ['); return /^export const WHATS_NEW = \[\n  \{ v: '8\.84'/.test(S.uti.slice(i)) && S.uti.indexOf('Les chantiers se rangent par date de début') - i < 600; });
+  // ARRACH-9 (§317) : le BLOC 8.84, pas la tête du tableau — figer la tête faisait rougir ce harnais au lot suivant.
+  T('les nouveautés l\u2019annoncent (bloc 8.84)', () => { const i = S.uti.indexOf("{ v: '8.84', d: '2026-10-12', items: ["), j = S.uti.indexOf("{ v: '8.83'", i); return i > 0 && j > i && S.uti.slice(i, j).includes('Les chantiers se rangent par date de début'); });
   return out;
 }
 let ok = 0, ko = 0;

@@ -6608,7 +6608,8 @@ function _homePrioCarte(){
   var its=(typeof _prioItems==='function')?_prioItems():[], t=its.length?its[0].t:'';
   var act=(PARCELLES||[]).filter(function(p){return p&&p.statut!=='Arrachee';});
   var etat=function(p){
-    if(t){ var st=getTacheStatut(p,t)||'Non d\u00e9marr\u00e9'; return st==='Valid\u00e9'?'fait':(st==='En cours'?'cours':'afaire'); }
+    if(t){ if(t==='Arrachage'&&_pvAuPresta(p,t)) return 'fait';   // ARRACH-9 : fait pour l'équipe (lu pour l'arrachage seulement)
+      var st=getTacheStatut(p,t)||'Non d\u00e9marr\u00e9'; return st==='Valid\u00e9'?'fait':(st==='En cours'?'cours':'afaire'); }
     var pc=getPCls(p).pct; return pc>=100?'fait':(pc>0?'cours':'afaire');
   };
   var surf=0,fait=0,pond=0;
@@ -8152,8 +8153,8 @@ function renderParcelles(){
   const tachesSaisonF=getTachesSaison();
   const parcActivesFilt=PARCELLES.filter(p=>p.statut!=='Arrachee');
   const tachesSaisonFSorted=[...tachesSaisonF].sort((a,b)=>{
-    const doneA=parcActivesFilt.length>0&&parcActivesFilt.every(p=>getTacheStatut(p,a.nom)==='Validé')?1:0;
-    const doneB=parcActivesFilt.length>0&&parcActivesFilt.every(p=>getTacheStatut(p,b.nom)==='Validé')?1:0;
+    const doneA=(a.nom==='Arrachage'&&_arrEquipeFiniePartout())||parcActivesFilt.length>0&&parcActivesFilt.every(p=>getTacheStatut(p,a.nom)==='Validé')?1:0;
+    const doneB=(b.nom==='Arrachage'&&_arrEquipeFiniePartout())||parcActivesFilt.length>0&&parcActivesFilt.every(p=>getTacheStatut(p,b.nom)==='Validé')?1:0;
     return doneA-doneB;
   });
   // Verrouillage du filtre tâche pour l'équipe quand une tâche prioritaire est active
@@ -8194,7 +8195,7 @@ function renderParcelles(){
       // SEL-1 : une parcelle arrachée ne reste visible que sous « Arrachage », et seulement si elle est concernée.
       if(_mvArrHors(p,pTacheFilter))return false; // jamais dans le filtre tâche — ARRACH-8 : la règle de la fiche (arrachée avant la période : plus rien)
       if((typeof _mvExclu==='function')?_mvExclu(p,pTacheFilter):(p.tachesExclues||[]).includes(pTacheFilter))return false; // tâche désactivée (ou non choisie cette campagne, SEL-1)
-      if(!window.pShowDone&&_pvCurDone(p,pTacheFilter))return false; // étape/tâche courante déjà faite (QV)
+      if(!window.pShowDone&&(_pvCurDone(p,pTacheFilter)||(pTacheFilter==='Arrachage'&&_pvAuPresta(p,pTacheFilter))))return false;   // ARRACH-9 : au prestataire = faite pour l'équipe ; // étape/tâche courante déjà faite (QV)
     }
     return true;
   });
@@ -8217,7 +8218,7 @@ function renderParcelles(){
     //     elle ne voyait pas les taches a passages ni a niveaux : _tachesFor(p)[t] y rend
     //     un OBJET, donc ordre[objet] vaut undefined, ramene a 0 des DEUX cotes.
     if(pTacheFilter!=='toutes'){
-      const ca=_pvCurStarted(a,pTacheFilter)?0:1, cb=_pvCurStarted(b,pTacheFilter)?0:1;
+      const ca=(_pvCurStarted(a,pTacheFilter)&&!(pTacheFilter==='Arrachage'&&_pvAuPresta(a,pTacheFilter)))?0:1, cb=(_pvCurStarted(b,pTacheFilter)&&!(pTacheFilter==='Arrachage'&&_pvAuPresta(b,pTacheFilter)))?0:1;   // ARRACH-9
       if(ca!==cb)return ca-cb;
     }
     if(_pProxPos){
@@ -8238,7 +8239,7 @@ function renderParcelles(){
       // Ce qui reste a faire avant ce qui est fait. Les commencees sont deja passees en
       // tete plus haut. Meme lecture que le filtre « A faire » (_pvCurDone) : l'ecran ne
       // peut plus dire une chose et le tri une autre, et l'etape courante compte enfin.
-      const da=_pvCurDone(a,pTacheFilter)?1:0, db=_pvCurDone(b,pTacheFilter)?1:0;
+      const da=(_pvCurDone(a,pTacheFilter)||(pTacheFilter==='Arrachage'&&_pvAuPresta(a,pTacheFilter)))?1:0, db=(_pvCurDone(b,pTacheFilter)||(pTacheFilter==='Arrachage'&&_pvAuPresta(b,pTacheFilter)))?1:0;   // ARRACH-9
       if(da!==db)return da-db;
     }
     const pa=getPCls(a).pct, pb=getPCls(b).pct;
@@ -8248,7 +8249,7 @@ function renderParcelles(){
   const cont=document.getElementById('pList');
   if(!data.length){
     const msg=pTacheFilter!=='toutes'
-      ?`<div class="empty-state"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="28,4 50,16 50,44 28,56 6,44 6,16" fill="none" stroke="var(--texte-doux)" stroke-width="1.8"/><polyline points="18,28 25,35 38,21" stroke="var(--texte-doux)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="et">${pTacheFilter} terminé</div><div class="ed">Cette tâche est terminée sur toutes les parcelles de la saison !</div></div>`
+      ?`<div class="empty-state"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="28,4 50,16 50,44 28,56 6,44 6,16" fill="none" stroke="var(--texte-doux)" stroke-width="1.8"/><polyline points="18,28 25,35 38,21" stroke="var(--texte-doux)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="et">${_pvVideTitre(pTacheFilter)}</div><div class="ed">${_pvVideTexte(pTacheFilter)}</div></div>`
       :`<div class="empty-state"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="10" width="18" height="18" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><rect x="32" y="10" width="18" height="18" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><rect x="6" y="34" width="18" height="14" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><rect x="32" y="34" width="18" height="14" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><line x1="14" y1="5" x2="42" y2="53" stroke="var(--texte-doux)" stroke-width="2" stroke-linecap="round" opacity="0.65"/></svg></div><div class="et">Aucun résultat</div><div class="ed">Aucune parcelle ne correspond aux filtres actifs.</div></div>`;
     cont.innerHTML=msg;return;
   }
@@ -8350,13 +8351,15 @@ function _pDernier(nom,tache){
   });
   return d?_pDateFr(d):'\u2014';
 }
-function _pEtatBadge(e){ return e==='fait'?_mvBadge('Fait','vert'):(e==='cours'?_mvBadge('En cours','neutre'):_mvBadge('\u00c0 faire','neutre')); }
-function _pEtatTache(p){ return _pvCurDone(p,pTacheFilter)?'fait':(_pvCurStarted(p,pTacheFilter)?'cours':'afaire'); }
+function _pEtatBadge(e){ return e==='fait'?_mvBadge('Fait','vert'):e==='presta'?_mvBadge('Au prestataire','neutre'):(e==='cours'?_mvBadge('En cours','neutre'):_mvBadge('\u00c0 faire','neutre')); }
+function _pEtatTache(p){ return _pvCurDone(p,pTacheFilter)?'fait':(_pvAuPresta(p,pTacheFilter)?'presta':(_pvCurStarted(p,pTacheFilter)?'cours':'afaire')); }   // ARRACH-9 : 'presta'
+// ARRACH-9 : ce que dit la ligne ; « au prestataire » prend l'habit de « fait » (prow-fait, pcq-fait), sans règle de feuille neuve.
+function _pEtatLib(e){ return e==='fait'?'fait':(e==='presta'?'fini pour l\u2019\u00e9quipe, au prestataire':(e==='cours'?'en cours':'pas commenc\u00e9')); }
 function _pRow(p,cl,etat,drae,prox,cep){
   var tache=pTacheFilter!=='toutes', act=tache?_pvActions(p):'', sous, droite;
   if(tache){
-    var e=_pEtatTache(p), lb=e==='fait'?'fait':(e==='cours'?'en cours':'pas commenc\u00e9');
-    sous='<div class="prow-s prow-'+e+'">'+_escHtml(tNom(pTacheFilter))+(_pvType(pTacheFilter)!=='simple'?' '+_escHtml(_pvStepLabel(pTacheFilter)+pCurStep):'')+', '+lb+'</div>';
+    var e=_pEtatTache(p), lb=_pEtatLib(e);
+    sous='<div class="prow-s prow-'+(e==='presta'?'fait':e)+'">'+_escHtml(tNom(pTacheFilter))+(_pvType(pTacheFilter)!=='simple'?' '+_escHtml(_pvStepLabel(pTacheFilter)+pCurStep):'')+', '+lb+'</div>';
     droite=act;
   } else {
     sous='<div class="prow-s">'+_pvSurfFr(p.surface)+'\u00a0ha'+(cep?', '+_escHtml(cep):'')+'</div>';
@@ -8369,10 +8372,10 @@ function _pRow(p,cl,etat,drae,prox,cep){
 }
 // PARC-2 (§275) : le haut d'une carte de travail au téléphone (maquette v3) — rang, nom, état de la tâche choisie, badges.
 function _pCarteTache(p,drae,prox){
-  var e=_pEtatTache(p), lb=e==='fait'?'fait':(e==='cours'?'en cours':'pas commenc\u00e9');
+  var e=_pEtatTache(p), lb=_pEtatLib(e);
   var b=(drae?_mvBadge('DRAE '+drae.heures+' h','rouge'):'')+(prox||'');
   return '<div class="mv-hd"><div style="min-width:0"><div class="mv-t mv-t-ord">'+_pOrdPill(p.nom)+'<span class="mv-t-nom">'+_escHtml(p.nom)+'</span></div>'
-    +'<div class="mv-l pcq-st pcq-'+e+'">'+_escHtml(tNom(pTacheFilter))+(_pvType(pTacheFilter)!=='simple'?' '+_escHtml(_pvStepLabel(pTacheFilter)+pCurStep):'')+', '+lb+'</div></div></div>'
+    +'<div class="mv-l pcq-st pcq-'+(e==='presta'?'fait':e)+'">'+_escHtml(tNom(pTacheFilter))+(_pvType(pTacheFilter)!=='simple'?' '+_escHtml(_pvStepLabel(pTacheFilter)+pCurStep):'')+', '+lb+'</div></div></div>'
     +(b?'<div class="mv-ft pcq-b">'+b+'</div>':'');
 }
 function _pFicheHtml(p){
@@ -8402,7 +8405,7 @@ function _pFicheHtml(p){
     +_tv.map(function(t){
       if((typeof _mvExclu==='function')?_mvExclu(p,t.nom):(p.tachesExclues||[]).indexOf(t.nom)>=0)
         return '<tr class="pfx-off'+(t.nom===pTacheFilter?' pfx-cur':'')+'"><td>'+_escHtml(tNom(t.nom))+'</td><td>'+_mvBadge((typeof window._mvTacheSel==='function'&&window._mvTacheSel(t.nom))?'Pas choisie':'Non applicable','neutre')+'</td><td class="r">\u2014</td></tr>';
-      var st=getTacheStatut(p,t.nom)||'Non d\u00e9marr\u00e9', e=st==='Valid\u00e9'?'fait':(st==='En cours'?'cours':'afaire');
+      var st=getTacheStatut(p,t.nom)||'Non d\u00e9marr\u00e9', e=_pvAuPresta(p,t.nom)?'presta':(st==='Valid\u00e9'?'fait':(st==='En cours'?'cours':'afaire'));   // ARRACH-9
       return '<tr'+(t.nom===pTacheFilter?' class="pfx-cur"':'')+'><td>'+_escHtml(tNom(t.nom))+'</td><td>'+_pEtatBadge(e)+'</td><td class="r">'+_escHtml(_pDernier(p.nom,t.nom))+'</td></tr>'; }).join('')
     +'</tbody></table>':'<div class="pfx-rien">'+(p.statut==='Arrachee'?'Plus aucun travail sur cette parcelle.':'Aucun travail pr\u00e9vu pour cette p\u00e9riode.')+'</div>')+'</section>';
   var j=(JOURNAL||[]).filter(function(e){return e&&e.parcelle===p.nom;}).sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''));}).slice(0,4);
@@ -8656,6 +8659,21 @@ function _arrEquipeFiniePartout(){
   var L=(typeof _parcConcern==='function')?_parcConcern('Arrachage'):[];
   return L.length>0&&L.every(_arrEquipeFinie);
 }
+// ★ ARRACH-9 (§317) — LA PARCELLE AU PRESTATAIRE. L'équipe a fait toutes SES étapes, il ne reste que celles du prestataire :
+//   pour l'équipe, la parcelle est faite. Nico (12/10) : « elle ne doit plus apparaître dans les listes des parcelles à faire ».
+//   Lue par les listes et les cartes de l'équipe — Parcelles (« À faire », le rang, l'état écrit), la carte de l'Accueil, l'anneau
+//   des cartes, la tournée de Décider. PAS par _mvTacheEtat ni _pvCurDone : ils décident aussi du bouton Fait / Annuler, et
+//   l'étape du prestataire doit rester validable depuis la fiche. Une parcelle validée en entier n'est plus « au prestataire ».
+function _arrAuPrestataire(p){
+  if(!p||!_arrActif()||getTacheStatut(p,'Arrachage')==='Valid\u00e9') return false;   // validée en entier : finie, tout court
+  return _arrEquipeFinie(p);
+}
+function _pvAuPresta(p,T){ return T==='Arrachage'&&_arrAuPrestataire(p); }
+window._mvAuPrestataire=function(p,T){ return _pvAuPresta(p,T); };
+// Au moins une parcelle attend le prestataire : la liste « À faire » vide ne dit pas « terminé sur toutes les parcelles ».
+function _arrPrestaEnAttente(){ var L=(typeof _parcConcern==='function')?_parcConcern('Arrachage'):[]; return L.some(_arrAuPrestataire); }
+function _pvVideTitre(T){ return (T==='Arrachage'&&_arrPrestaEnAttente())?'Arrachage fini pour l\u2019\u00e9quipe':_escHtml(tNom(T))+' termin\u00e9'; }
+function _pvVideTexte(T){ return (T==='Arrachage'&&_arrPrestaEnAttente())?'La suite est au prestataire. \u00ab\u00a0Toutes\u00a0\u00bb montre les parcelles.':'Cette tâche est terminée sur toutes les parcelles de la saison !'; }
 // ★ ARRACH-8 (§306) : un arrachage en étapes COMMENCÉ et pas fini cette campagne. La suite reste à valider, même
 //   dans une période qui commence après la date d'arrachage (utils.js, _mvArrAvantPeriode).
 window._arrEntame = function(p){ if(!_arrActif()) return false; var n=_arrNbFaites(p); return n>0 && n<_arrCfg().etapes.length; };

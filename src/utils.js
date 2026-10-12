@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.84';
+export const APP_VERSION = '8.85';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1055,6 +1055,11 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.85', d: '2026-10-12', items: [
+    { niv: 0, pour: ['vigne'], emoji: 'carte', titre: 'L’arrachage fini pour l’équipe quitte « À faire »',
+      desc: "Dans Parcelles, filtré sur l’arrachage, une parcelle où l’équipe avait fait toutes ses étapes restait « commencée », en tête de la liste « À faire », alors que la suite revient au prestataire. "
+        + "Elle quitte maintenant « À faire » : « Toutes » la montre, marquée « Au prestataire », et sa fiche permet toujours de valider l’étape du prestataire. La carte de l’Accueil, l’anneau des cartes et la tournée ne la comptent plus comme commencée." },
+  ] },
   { v: '8.84', d: '2026-10-12', items: [
     { niv: 0, pour: ['tous'], emoji: 'graphique', titre: 'Les chantiers se rangent par date de début',
       desc: "Dans Pilotage › Aujourd’hui (« Chantiers de la saison »), dans Pilotage › La campagne et dans la carte « Avancement par tâche » de l’Accueil, les tâches suivaient l’ordre de la liste des Réglages, pas leurs dates. "
@@ -5031,7 +5036,8 @@ var MV_AIDE = {
       ['Arrachage, désherbage manuel, effeuillage', "ne concernent que les parcelles <b>choisies pour la campagne</b>. L’administrateur les coche dans la roue crantée, <b>Tâches</b>, sur la ligne du travail, ou une par une dans la fiche de la parcelle. Une parcelle où le travail a déjà été saisi compte d’office. L’an prochain, la liste repart vide."],
       ['Valider pour l’équipe sans y être', "l’administrateur voit sa propre puce dans le groupe («\u00a0Moi\u00a0», «\u00a0Moi aussi dans les rangs\u00a0» sur la barre d’équipe)\u00a0: décochée, la validation reste signée de son nom mais ses heures ne vont pas à la parcelle. Le choix est retenu pour la tâche."],
       ['L’état du vignoble', "s’imprime depuis la roue crantée de la Vigne, bloc Documents : toutes vos parcelles sur une page, avec la surface, le cépage, la commune, l’avancement, le dernier travail, le dernier rendement — et la liste de ce qui reste à renseigner."],
-      ['Le fichier Excel des parcelles', "se prend au même endroit : une ligne par parcelle, avec la surface, l’avancement, chaque tâche et le rendement du millésime choisi en hL/ha — mesuré ou estimé, c’est écrit à côté. Avant de le télécharger, vous choisissez l’ordre : par nom (A → Z ou Z → A) ou par rendement (le plus fort ou le plus faible d’abord). Une parcelle sans récolte part en fin de liste."]
+      ['Le fichier Excel des parcelles', "se prend au même endroit : une ligne par parcelle, avec la surface, l’avancement, chaque tâche et le rendement du millésime choisi en hL/ha — mesuré ou estimé, c’est écrit à côté. Avant de le télécharger, vous choisissez l’ordre : par nom (A → Z ou Z → A) ou par rendement (le plus fort ou le plus faible d’abord). Une parcelle sans récolte part en fin de liste."],
+      ['L’arrachage au prestataire', "dans la liste filtrée sur l’arrachage : dès que l’équipe a fait toutes ses étapes sur une parcelle, celle-ci quitte « À faire » — la suite est au prestataire. « Toutes » la montre, marquée « Au prestataire » ; l’étape du prestataire se valide depuis sa fiche. Elle ne compte plus comme commencée sur la carte de l’Accueil, l’anneau des cartes ni la tournée."]
     ]
   },
   journal: {
@@ -6837,14 +6843,15 @@ window._mvCibleCarte = function(T){
     return p && p.nom && p.statut !== 'Arrachee' &&
       !((typeof window._mvTacheExclue === 'function') ? window._mvTacheExclue(p, T) : ((p.tachesExclues || []).indexOf(T) >= 0));   // SEL-1
   });
-  var comm = act.filter(function(p){ return window._mvTacheEtat(p, T) === 'commencee'; });
+  var presta = function(p){ return typeof window._mvAuPrestataire === 'function' && window._mvAuPrestataire(p, T); };   // ARRACH-9 : faite pour l'équipe
+  var comm = act.filter(function(p){ return window._mvTacheEtat(p, T) === 'commencee' && !presta(p); });
   if(comm.length) return { etat: 'commencee', ps: comm, tache: T };
   var o = (typeof window._mvOrdreFor === 'function') ? window._mvOrdreFor(T) : null;
   if(!o) return null;
   var par = {}; act.forEach(function(p){ par[p.nom] = p; });
   for(var i = 0; i < o.ordre.length; i++){
     var p = par[o.ordre[i]];
-    if(p && window._mvTacheEtat(p, T) !== 'finie') return { etat: 'prochaine', ps: [p], tache: T };
+    if(p && window._mvTacheEtat(p, T) !== 'finie' && !presta(p)) return { etat: 'prochaine', ps: [p], tache: T };
   }
   return null;
 };
