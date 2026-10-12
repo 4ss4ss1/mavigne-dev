@@ -1349,3 +1349,44 @@ celui du cockpit, déjà validé), une capture à la livraison. Réponse : « ou
 
 ### 315e. Ouvert
 §28 « FORME-2 — CE QUI RESTE OUVERT ».
+
+## 316. ★ CHANT-1 — LES CHANTIERS SE RANGENT PAR DATE DE DÉBUT ; L'ARRACHAGE FINI POUR L'ÉQUIPE EN TÊTE DES TERMINÉS (12/10 — `src/utils.js` (`_mvOrdreChantiers` neuf, `_mvkAvancement`, APP, WHATS_NEW, MV_AIDE Accueil et Pilotage) · `src/app.js` (`_mvChantiersCtx` neuf) · `src/pilotage.js` (`_pilCk2Modele`) · `src/cockpit-vue.js` (`charger`, `calc`, `suiteFen`, `htmlChantiers`, `majChantiers`) · `src/cockpit.js` (sous-titre du repli) · `src/styles.css` (`.mvk-note`) · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `guide/11-pilotage.html` · `scripts/mv-harnais-chant1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-280-329.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/CHANT-1.json` · **APP 8.83 → 8.84, SW 9.62 → 9.63**, base `a664ba0`)
+
+### 316a. La demande
+Nico (12/10, dicté) : les chantiers de la saison « doivent apparaître dans l'ordre de commencement » — celui du 1er septembre avant celui du 15, « peu importe la date de fin » ; une
+fois terminés, en bas ; en haut, ceux à faire ou en cours. Reformulé avant le travail (sa préférence), avec ce qui était prévu en plus : « terminé » = 100 %, un chantier en retard reste
+en haut, les terminés rangés entre eux par date de début, la même règle à l'Accueil (« Avancement par tâche ») et dans Pilotage › La campagne. Réponse : « C'est tout à fait ça ».
+Puis, pour l'arrachage : la part du prestataire ne compte pas pour l'équipe, « elle n'est pas à mettre en avant pour l'équipe », mais l'administrateur doit la voir — « ça doit être
+la première des terminées ». Et l'équipe ne doit plus la voir dans les listes de parcelles à faire (§316c ②, lot suivant).
+
+### 316b. Ce qui a été fait
+- **`_mvOrdreChantiers(rows, ctx)`** (utils.js, bloc KIT-1, exposée) : trois groupes — 0 à faire ou en cours (en retard compris), 1 fini pour l'équipe (`equipeFinie`, pas à 100 %),
+  2 terminé (100 %) ; dans un groupe la date de début, puis l'ordre reçu. Pure : `ctx = { debut, defaut, equipeFinie }`. Sans contexte, les terminés descendent quand même.
+- **`_mvChantiersCtx(sa)`** (app.js, à côté de `_mvTacheDuMoment`, exposée) : la période consultée par défaut (celle de `calcHeures` ; le Pilotage passe `_pilSaison()`, celle de
+  `_rfCd`). `debut[nom]` = le `start` de la fenêtre de `_chargeSaisonData`, **la date que la ligne du cockpit affiche** : l'ordre ne peut pas contredire la ligne. `defaut` = le début
+  de la période. `equipeFinie.Arrachage` = `_arrEquipeFiniePartout()` (ARRACH-7).
+- **Les trois listes** : `_mvkAvancement` range par la règle (Accueil, La campagne, et le repli du cockpit) ; `_pilCk2Modele` range ses tâches avant de les construire et pose
+  `eqFini`. La signature `_mvkAvancement(rows,retards)` et ses appels ne bougent pas (kit1 et coh1 les lisent au caractère près).
+- **L'arrachage fini pour l'équipe** : vert, son vrai pourcentage, « la suite au prestataire » — sous la ligne dans le kit (`.mvk-note`, une ligne à part : la grille de chaque
+  ligne garde ses colonnes), dans la fenêtre dans le cockpit (`suiteFen`, au montage comme à la mise à jour). Le plan ne le prend plus comme tâche par défaut.
+- Le sous-titre « Dans l'ordre des dates de la campagne » (cockpit et repli) devient « Par date de début, les terminés en bas ».
+
+### 316c. Trouvé en route
+1. **Le sous-titre mentait depuis REF-1.** `getTachesSaison` filtre le catalogue `TACHES` dans SON ordre (Réglages) ; ni `calcHeures`, ni le modèle, ni le kit ne triaient.
+2. **L'arrachage dans les listes de parcelles.** `_arrStatutTache` laisse « En cours » une parcelle dont l'équipe a fini ses étapes : `_mvTacheEtat` la dit « commencée », le filtre
+   « À faire » la garde et le tri de Parcelles la met en tête. ARRACH-7 ne l'avait retirée que de « Ma part du chantier » et du choix de la priorité. Reformulé à Nico, lot suivant.
+3. **Les tâches sans barème n'ont pas de fenêtre** : `_chargeSaisonData` ne pousse dans `taskDet` que `h>0`. Leur ligne du cockpit montre `v.debut` (le premier chantier) et
+   l'objectif, même avec des échéances. Les dater toucherait `etatVue` (le plan) et « fenêtre passée » : écarté de ce lot, au §28.
+4. **Deux lectures des dates** : PRIO-1 lit l'échéance, sinon toute la période ; le cockpit, l'échéance, sinon la fenêtre par défaut (`_MV_TASK_WIN`). L'ordre suit le cockpit.
+
+### 316d. Les harnais
+- **`mv-harnais-chant1.mjs`** (neuf, 32 assertions, 13 contre-épreuves) : la VRAIE règle sur l'exemple de Nico, la fin ignorée, les terminés en bas, le retard en haut,
+  l'arrachage (fini pour l'équipe, à 100 %, pas fini), l'égalité, sans fenêtre, sans contexte, une entrée qui n'est pas une liste ; le VRAI kit (ordre, vert à 50 %, la mention une
+  fois, le retard des autres, sans app.js) ; le VRAI `_mvChantiersCtx` (le début et pas la fin, période consultée, période en argument, période inconnue, l'arrachage, une panne) ; la
+  ligne `suiteFen` exécutée ; le branchement du modèle et du cockpit, la feuille, l'aide, le guide, les nouveautés. Aucune écriture dans le dépôt.
+- Relus et rejoués : kit1, coh1, auj1, auj5, auj7, auj8, ref1, ref2, forme1, forme2, pro1, prio, arrach7, acc2, whatsnew, typo, jetons, échelle, contraste, info ; preflight
+  0 erreur.
+- Non vérifié : les données de Nico ; un rendu dans un navigateur ; `npm run build`, `test:smoke`, `test:e2e` ; le déploiement.
+
+### 316e. Ouvert
+§28 « CHANT-1 — CE QUI RESTE OUVERT ».

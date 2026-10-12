@@ -520,7 +520,7 @@ window._ckAuj = function(o){
     + (o.det ? '<div class="pil-dec2">' + o.det + '</div>' : '')
     + (mo.plan ? pan('id="ck-plan"', 'Le domaine en direct', 'pil.plan', 'Rangé par appellation puis par commune ; touchez une parcelle pour ouvrir sa fiche',
         '<div id="ck-plan-corps">' + window._ckPlanCorps() + '</div>') : '')
-    + (o.chantiers ? pan('id="ck-chantiers"', 'Les chantiers en cours', null, 'Dans l’ordre des dates de la campagne', o.chantiers) : '')
+    + (o.chantiers ? pan('id="ck-chantiers"', 'Les chantiers en cours', null, 'Par date de début, les terminés en bas', o.chantiers) : '')
     + (mo.charge ? pan('id="ck-charge-pan"', 'Charge restante', 'pil.charge',
         (isFinite(reste) && d.totalReste != null ? _ckNb(reste) + '\u202fh à faire, photographiées chaque jour' : 'Photographiée chaque jour'),
         '<div id="ck-charge" class="ck-graphe"></div>') : '');

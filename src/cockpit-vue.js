@@ -257,7 +257,7 @@ function charger(v) {
   const fin = v.fin ? deIso(v.fin) : VISEE;
   XMAX = ajout(fin > VISEE ? fin : VISEE, 5);
   TACHES = (v.taches || []).map(t => ({ id: t.id, nom: t.nom, art: t.art || t.nom.toLowerCase(), f: !!t.f, hha: t.hha || 0,
-    debut: deIso(t.debut || v.debut || v.auj), fin: deIso(t.fin || v.objectif || v.auj), pct: t.pct || 0, hDone: t.hDone, hTotal: t.hTotal, cle: t.cle }));
+    debut: deIso(t.debut || v.debut || v.auj), fin: deIso(t.fin || v.objectif || v.auj), pct: t.pct || 0, hDone: t.hDone, hTotal: t.hTotal, cle: t.cle, eqFini: !!t.eqFini }));
   T = Object.fromEntries(TACHES.map(t => [t.id, t]));
   GENS = (v.gens || []).map(g => ({ p: g.nom, absent: !!g.absent, motif: g.motif || '', tens: g.tens || 100 }));
   preparerParcs(v.parcs || []); if (PLAN_LARG) disposer(PLAN_LARG);
@@ -272,7 +272,7 @@ function charger(v) {
     const et = (v.etats && v.etats[t.id]) || {};
     Object.keys(et).forEach(n => { const pid = parNom[n]; if (pid && !PIDX[pid].arr && et[n] !== 'arr') S.etats[t.id][pid] = et[n] === 'retard' ? 'afaire' : et[n]; });
   });
-  if (!S.vue || !T[S.vue]) S.vue = (v.prio && T[v.prio]) ? v.prio : ((TACHES.find(t => t.pct < 100) || TACHES[0] || {}).id || null);
+  if (!S.vue || !T[S.vue]) S.vue = (v.prio && T[v.prio]) ? v.prio : ((TACHES.find(t => t.pct < 100 && !t.eqFini) || TACHES[0] || {}).id || null);
   EQ = {}; S.equipes = []; S.evts = [];
   (v.equipes || []).forEach((e, i) => { const id = 'e' + i; EQ[id] = { noms: e.noms, ini: e.ini }; if (parNom[e.parcelle] && T[e.tache]) S.equipes.push({ id, tache: e.tache, parc: parNom[e.parcelle], depuis: typeof e.depuis === 'string' ? e.depuis : iso(AUJ) }); });
   // ★ FORME-1 (§301) : une parcelle en cours porte TOUJOURS une pastille (« en cours » et « une équipe dessus » sont une
@@ -307,7 +307,7 @@ function calc() {
     let haF = 0, haT = 0;
     PARCS.forEach(p => { if (p.arr) return; haT += p.ha; if (S.etats[t.id][p.id] === 'faite') haF += p.ha; });
     const pct = t.pct != null ? t.pct : (haT ? haF / haT * 100 : 0);
-    const etat = pct >= 99.95 ? 'fait' : (AUJ > t.fin ? 'retard' : 'cours');
+    const etat = (pct >= 99.95 || t.eqFini) ? 'fait' : (AUJ > t.fin ? 'retard' : 'cours');   // CHANT-1 : fini pour l’équipe = vert
     const ecT = ((V.eco || {}).ecTache || {})[t.cle || t.nom], hRt = ((V.eco || {}).hReelTache || {})[t.cle || t.nom];
     r.t[t.id] = { haF, haT, hF: t.hDone != null ? t.hDone : haF * t.hha, hT: t.hTotal != null ? t.hTotal : haT * t.hha, hR: hRt || 0, pct, etat, ecart: ecT != null ? ecT : 0 };
   });
@@ -605,15 +605,18 @@ function equipesHtml(t) {
     + eqs.map(e => '<span class="ck-duo">' + EQ[e.id].ini.map(i => '<span class="ck-av ck-av-s">' + i + '</span>').join('') + '</span>').join('')
     + '<span class="ck-sr">' + eqs.length + ' équipe' + (eqs.length > 1 ? 's' : '') + ' sur une parcelle en cours</span></span>';
 }
+// ★ CHANT-1 (§316) : la liste arrive rangée par le modèle (pilotage.js, _mvOrdreChantiers) — à faire ou en cours par date de
+//   début, l'arrachage fini pour l'équipe, puis les terminés. Ce que la fenêtre ajoute : passée sans être fini, ou la suite au prestataire.
+const suiteFen = (t, x) => x.etat === 'retard' ? ', fenêtre passée' : ((t.eqFini && x.pct < 99.95) ? ', la suite au prestataire' : '');
 function htmlChantiers(r) {
-  return entete('Chantiers ' + V.saisonDe, 'Dans l’ordre des dates de la campagne')
+  return entete('Chantiers ' + V.saisonDe, 'Par date de début, les terminés en bas')
     + '<ul class="ck-ch-l">' + TACHES.map(t => {
       const x = r.t[t.id];
       return '<li><button type="button" class="ck-ch' + (t.id === S.vue ? ' vue' : '') + '" data-t="' + t.id + '" aria-label="Afficher ' + esc(t.art) + ' sur le plan">'
         + '<span class="ck-ch-nom">' + esc(t.nom) + '<span class="ck-ch-eqw">' + equipesHtml(t.id) + '</span></span>'
         + '<span class="ck-ch-pct t-' + x.etat + '"><b data-v="0">0</b>\u202f%</span>'
         + '<span class="ck-barre"><i class="b-' + x.etat + '" style="width:0%"></i></span>'
-        + '<span class="ck-ch-fen">du ' + dCourt(t.debut) + ' au ' + dCourt(t.fin) + '<span class="ck-ch-ret">' + (x.etat === 'retard' ? ', fenêtre passée' : '') + '</span></span>'
+        + '<span class="ck-ch-fen">du ' + dCourt(t.debut) + ' au ' + dCourt(t.fin) + '<span class="ck-ch-ret">' + suiteFen(t, x) + '</span></span>'
         + '<span class="ck-ch-det"><b class="ck-ch-hf" data-v="0">0</b> / ' + nb(x.hT) + '\u202fh</span></button></li>';
     }).join('') + '</ul>';
 }
@@ -1019,7 +1022,7 @@ function majChantiers(r, o = {}) {
     pc.className = 'ck-ch-pct t-' + x.etat;
     Anim.compter(pc.querySelector('b'), x.pct);
     Anim.compter(row.querySelector('.ck-ch-hf'), x.hF);
-    row.querySelector('.ck-ch-ret').textContent = x.etat === 'retard' ? ', fenêtre passée' : '';
+    row.querySelector('.ck-ch-ret').textContent = suiteFen(t, x);
     const eqw = row.querySelector('.ck-ch-eqw'), html = equipesHtml(t.id);
     if (eqw.dataset.h !== html) { eqw.dataset.h = html; eqw.innerHTML = html; }
     row.classList.toggle('vue', S.vue === t.id);

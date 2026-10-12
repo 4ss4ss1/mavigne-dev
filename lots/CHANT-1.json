@@ -1,0 +1,27 @@
+{
+  "lot": "CHANT-1",
+  "section": "§316",
+  "base": "a664ba0e21a9b6265e6e410397471b6738a8cdcb",
+  "inclut": [],
+  "date": "2026-10-12",
+  "fichiers": {
+    ".mv-base": "fe440c91f663044b8d24c9aa0b869204544f96ae2cd20f0f0dfba9ae503575ca",
+    "CLAUDE.md": "edc46581a28a4e25e3ffc1ca19e25aeb031aa1bfcc2d9fe4581ced8db2280fbe",
+    "docs/claude/INDEX.md": "26b9b3b7e27c7d6e6e100e7840169be107e2aeb8d445ff5b31ee2415a8879762",
+    "docs/claude/chantiers-280-329.md": "c0dc1d7e401326c4508f790c9d7f5021f5f0954fb0d4fe011bb3f3d4dd1a4e5a",
+    "docs/claude/journal.md": "bb5a771d4892d36d4bbf2a740122369d509554d813dec2e622520f92ff0cfd93",
+    "guide/04-vigne.html": "66535e0f6f5421182a75ddbc426fca8d46c17af91657db83f32f4a64fe34b491",
+    "guide/11-pilotage.html": "11088dda20e8c4f9c0e15cc3956da974eb9c1c8f22fe8051340ac9f944c06d8b",
+    "index.html": "d6379d7027d5f716e5d1c1a6c57062eeee35cb1dcc9fc35e9db7d152dd63b48f",
+    "public/sw.js": "9ac0ea13bcb1a666a94fde0453ce2452b8bac74f5db56516bb04f23576edb2d9",
+    "scripts/harnais-claude-md.mjs": "99581851e75f91f6b1650142527c693f1a68b275bc23fe7e5dfb1581e1540627",
+    "scripts/mv-harnais-liste.mjs": "9680d35ad5c60c849875ce32565dc6ea11d9d134b362691f5187645b5722db40",
+    "src/app.js": "061de4f359f36bf496947606947b23022f8bf20be695b520ac8542eaadf714c7",
+    "src/cockpit-vue.js": "8708a489b18eddc1517e9ecba0d81286089a544de6ff9dcd03934ef6119fd61a",
+    "src/cockpit.js": "5126795b20bcb22e7c14bde41d2ce6bcee52dce70f9175f6d5ca4e435f208491",
+    "src/pilotage.js": "59405160b03a54c66a18421325240b343865fabd958733344b79643173fd9cc1",
+    "src/styles.css": "2f7320a3ad6e59cf076cfe274d306a3e720154c985408315d343f718d5360a58",
+    "src/utils.js": "0637252f8b879105a2d81eb2d4254c7b1372c6c03e5bfe5a9df06a7b976e49cc",
+    "scripts/mv-harnais-chant1.mjs": "669ebc23a6e1d3b5216ca6d3efbf41b8445d24b3d61fd5b51a5dae7fa1e75ab5"
+  }
+}

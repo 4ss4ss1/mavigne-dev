@@ -5216,9 +5216,13 @@ function _pilCk2Modele(d, m){
   var art=function(n){ var l=String(n).toLowerCase(); return /^[aeiouyhéèêâîô]/.test(l)?'l\u2019'+l:(/age$/.test(l)?'le '+l:'la '+l); };
   var cd=(typeof _rfCd==='function'&&_rfCd())||{}, fen=cd.taskWindows||[], retards=_pilRetards();
   var rows=(typeof window._ckPlanTaches==='function')?window._ckPlanTaches(d.data):(d.data||[]);
+  // ★ CHANT-1 (§316) : les chantiers dans l'ordre commun (utils.js, _mvOrdreChantiers), les dates lues dans la même période
+  //   que les fenêtres affichées (_pilSaison, comme _rfCd) ; l'arrachage fini pour l'équipe porte eqFini (vert, en tête des terminés).
+  var OC=(typeof window._mvChantiersCtx==='function')?window._mvChantiersCtx(_pilSaison()):null, EQF=(OC&&OC.equipeFinie)||{};
+  if(typeof window._mvOrdreChantiers==='function') rows=window._mvOrdreChantiers(rows, OC);
   var taches=rows.map(function(r){
     var w=fen.filter(function(x){ return x&&x.nom===r.nom; })[0], nom=nomT(r.nom);
-    return { id:slug(r.nom), cle:r.nom, nom:nom, art:art(nom), f:false, pct:Number(r.pct)||0,
+    return { id:slug(r.nom), cle:r.nom, nom:nom, art:art(nom), f:false, pct:Number(r.pct)||0, eqFini:!!EQF[r.nom]&&(Number(r.pct)||0)<100,
       hha:(r.surf_total>0&&r.h_total>0)?r.h_total/r.surf_total:0, hDone:(r.h_total>0)?(Number(r.h_done)||0):null, hTotal:(r.h_total>0)?Number(r.h_total):null,
       debut:(w&&w.ws!=null)?oIso(w.ws):null, fin:(w&&w.we!=null)?oIso(w.we-1):null };
   });

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.83';
+export const APP_VERSION = '8.84';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -981,10 +981,30 @@ function _mvkLigne(nom,pct,etat,det,sous){
     +'<span class="mvk-barre"><i class="mvk-'+etat+'" style="width:'+p+'%"></i></span>'
     +'<span class="pct mvk-t-'+etat+'">'+p+'\u00a0%</span><span class="det">'+det+'</span></div>';
 }
+// ★ CHANT-1 (§316) — L'ORDRE DES CHANTIERS, UNE SEULE RÈGLE. Nico (12/10) : « ils doivent apparaître dans l'ordre de leur
+//   date de commencement […] peu importe la date de fin », puis les terminés en bas ; l'arrachage fini pour l'équipe, lui,
+//   « doit être la première des terminées ». Trois groupes : 0 = à faire ou en cours (en retard compris), 1 = fini pour
+//   l'équipe (equipeFinie, pas à 100 %), 2 = terminé (100 %). Dans un groupe : la date de début, puis l'ordre reçu (celui du
+//   catalogue des Réglages). La règle ne lit rien de global : ctx = { debut:{nom:'AAAA-MM-JJ'}, defaut, equipeFinie:{nom:1} },
+//   rassemblé par app.js (_mvChantiersCtx). Lue par _mvkAvancement (Accueil, Pilotage › La campagne) et par le cockpit
+//   (pilotage.js, _pilCk2Modele) : les trois listes ne peuvent plus se contredire.
+function _mvOrdreChantiers(rows,ctx){
+  var c=ctx||{}, deb=c.debut||{}, eq=c.equipeFinie||{}, def=String(c.defaut||'');
+  var groupe=function(t){ var p=Number(t&&t.pct)||0; return p>=100?2:((t&&eq[t.nom])?1:0); };
+  return (Array.isArray(rows)?rows:[]).map(function(t,i){ return { t:t, i:i, g:groupe(t), d:String((t&&deb[t.nom])||def) }; })
+    .sort(function(a,b){ return (a.g-b.g)||(a.d<b.d?-1:(a.d>b.d?1:0))||(a.i-b.i); })
+    .map(function(x){ return x.t; });
+}
+// CHANT-1 : les lignes dans l'ordre commun ; l'arrachage fini pour l'équipe en vert, son vrai %, et une mention dessous.
 function _mvkAvancement(rows,retards){
   var R=retards||{};
-  return (rows||[]).map(function(t){
-    var late=!!R[t.nom], h=_mvkLigne(_escHtml(tNom(t.nom)), t.pct||0, _mvkEtat(t.pct||0,late), _mvkDet(t), false);
+  var C=(typeof window!=='undefined'&&typeof window._mvChantiersCtx==='function')?window._mvChantiersCtx():null;
+  var EQ=(C&&C.equipeFinie)||{};
+  var L=(typeof _mvOrdreChantiers==='function')?_mvOrdreChantiers(rows,C):(Array.isArray(rows)?rows:[]);
+  return L.map(function(t){
+    var eqf=!!EQ[t.nom]&&(Number(t.pct)||0)<100, late=!eqf&&!!R[t.nom];
+    var h=_mvkLigne(_escHtml(tNom(t.nom)), t.pct||0, eqf?'fait':_mvkEtat(t.pct||0,late), _mvkDet(t), false);
+    if(eqf) h+='<div class="mvk-note">Fini pour l’équipe, la suite au prestataire</div>';
     var niv=(t.type==='niveaux'||t.nom==='Relevage'), pas=(t.type==='passages'||t.nom==='Ebourgeonnage'||t.nom==='Pioche');
     if(t.detail && t.detail.length>1 && (niv||pas)){
       h+=t.detail.map(function(s){ return _mvkLigne((niv?'N':'P')+_mvkNb(s.num), s.pct||0, _mvkEtat(s.pct||0,late), _mvkDet(s), true); }).join('');
@@ -1006,7 +1026,7 @@ function _mvHaNum(x){ var v=parseFloat(String(x==null?'':x).replace(',','.')); r
 window._mvHaP=function(x){ var v=_mvHaNum(x); return v==null?'':v.toFixed(4).replace('.',','); };
 window._mvHaT=function(x){ var v=_mvHaNum(x); return v==null?'':v.toFixed(2).replace('.',','); };
 window._mvkEtat=_mvkEtat; window._mvkDet=_mvkDet; window._mvkLigne=_mvkLigne;
-window._mvkAvancement=_mvkAvancement; window._mvkRetards=_mvkRetards;
+window._mvkAvancement=_mvkAvancement; window._mvkRetards=_mvkRetards; window._mvOrdreChantiers=_mvOrdreChantiers;
 
 // ══ KIT-1 (§226) — « AGRANDIR » : chaque graphe suivi (_mvGraphSuivre) porte ce bouton ; le même dessin
 //   s'ouvre dans #ovGraph (openOv : Échap, retour arrière, empilement), redessiné à la largeur de la feuille.
@@ -1035,6 +1055,13 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.84', d: '2026-10-12', items: [
+    { niv: 0, pour: ['tous'], emoji: 'graphique', titre: 'Les chantiers se rangent par date de début',
+      desc: "Dans Pilotage › Aujourd’hui (« Chantiers de la saison »), dans Pilotage › La campagne et dans la carte « Avancement par tâche » de l’Accueil, les tâches suivaient l’ordre de la liste des Réglages, pas leurs dates. "
+        + "Elles se rangent maintenant par date de début : ce qui reste à faire ou est en cours en haut, les tâches terminées en bas." },
+    { niv: 0, pour: ['tous'], emoji: 'engrenage', titre: 'L’arrachage fini pour l’équipe passe en tête des terminées',
+      desc: "Quand l’équipe a fini ses étapes d’arrachage sur toutes les parcelles et que la suite revient au prestataire, la tâche se range en tête des tâches terminées, en vert, avec son vrai pourcentage et la mention « la suite au prestataire »." },
+  ] },
   { v: '8.83', d: '2026-10-11', items: [
     { niv: 1, pour: ['vigne'], cible: '#home-prio-mos', emoji: 'carte', titre: 'L’Accueil dessine chaque parcelle à sa forme',
       desc: "Dans la carte du haut de l’Accueil, les parcelles étaient de petits rectangles : on ne reconnaissait pas ses vignes d’un coup d’œil. "
@@ -4976,6 +5003,7 @@ var MV_AIDE = {
       ['Une ligne « À vérifier »', "peut s’afficher sous les chiffres : un changement de l’application qui vous concerne — un chiffre qui bouge, un réglage à contrôler. Touchez-la pour le détail, « Vu » pour la ranger ; elle reste dans Réglages › Moi › Journal des nouveautés."],
       ['La mise en route', "n’apparaît que chez l’administrateur d’un domaine neuf : sept étapes qui se cochent en lisant ce qui est déjà enregistré, rien à pointer à la main. Le bloc s’efface tout seul quand tout est fait."],
       ['Ma part du chantier', "montre ce que vous avez fait vous-même sur la tâche du moment : la priorité de votre équipe ; sans priorité, la seule tâche dans ses dates de travaux ; si plusieurs se chevauchent, celle où vous avez le plus travaillé ces 15 derniers jours. La ligne sous le titre dit pourquoi. « Ma trace » ouvre le détail de votre campagne. Ce sont des hectares, jamais des heures, et rien n’est comparé entre collègues."],
+      ['Avancement par tâche', "range les tâches par date de début : ce qui reste à faire ou est en cours en haut, les tâches finies en bas. L’arrachage que l’équipe a fini partout passe en tête des finies, en vert, avec « la suite au prestataire »."],
       ['Appui long puis glisser', "déplace un bloc ; l’œil le masque, l’œil barré le réaffiche. Chacun règle son Accueil. Sur ordinateur, les blocs vont par deux, en rangées de même hauteur ; le bouton « Pleine largeur » met un bloc sur toute la rangée, et un bloc masqué laisse son voisin prendre toute la largeur."],
       ['La pastille de saison', "change la vue. Revenir sur une période passée ne touche pas à la période active."],
       ['Actualiser', "force une resynchronisation quand un chiffre semble figé."],
@@ -5189,7 +5217,7 @@ var MV_AIDE = {
   pilotage: {
     ico: 'graphique', titre: 'Pilotage', ancre: 'pilotage',
     points: [
-      ['Aujourd’hui se lit d’un coup d’œil', ": une phrase résume la journée (l’avance ou le retard sur l’objectif, les points à anticiper). Viennent les photos du domaine, la <b>fin prévue</b> avec sa frise et votre objectif, la <b>décision du jour</b> en quatre tuiles, le <b>domaine en direct</b> (chaque parcelle à sa forme et à l’échelle, colorée selon la tâche choisie, rangée par appellation, l’équipe posée sur chaque parcelle en cours, sa pastille qui clignote les jours travaillés ; au survol, une loupe la montre en grand ; la toucher ouvre sa fiche), les chantiers et la charge restante (une ligne relie la photo de chaque jour au point d’aujourd’hui). À droite sur ordinateur, <b>À savoir</b> réunit la météo des cinq jours, la pluie ou le vent par secteur, les absences, les fins de contrat, les retards et le matériel ; il y reste visible quand vous descendez dans la page. Le fil <b>En direct</b> montre ce que l’équipe valide. Tout ce qui parle des gens suit le <b>planning</b> : un jour sans travail, l’effectif et les présences montrent le prochain jour travaillé ; un absent revient le premier jour où le planning le prévoit, un arrêt maladie dit sa date de fin. La bascule <b>Terrain / Économie</b>, en haut, donne la photo économique du jour : l’atterrissage de la campagne, le coût à l’hectare, l’écart au barème, le dépensé face au fait, la cadence de l’équipe, le coût de l’inaction, les postes, les appellations et les tâches — les chiffres de l’onglet Économie ; l’atterrissage y est la fin projetée, et l’arrachage (comme les autres travaux sans barème) a sa ligne « Travaux à l’heure ». « Agrandir » ouvre la courbe en grand ; « Changer la priorité » ouvre le choix de la tâche prioritaire ; la date de l’objectif se règle en touchant son bouton. La tension par personne se détaille dans L’équipe & le matériel, la protection restante dans Conformité."],
+      ['Aujourd’hui se lit d’un coup d’œil', ": une phrase résume la journée (l’avance ou le retard sur l’objectif, les points à anticiper). Viennent les photos du domaine, la <b>fin prévue</b> avec sa frise et votre objectif, la <b>décision du jour</b> en quatre tuiles, le <b>domaine en direct</b> (chaque parcelle à sa forme et à l’échelle, colorée selon la tâche choisie, rangée par appellation, l’équipe posée sur chaque parcelle en cours, sa pastille qui clignote les jours travaillés ; au survol, une loupe la montre en grand ; la toucher ouvre sa fiche), les chantiers (à faire ou en cours en haut, par date de début ; les terminés en bas) et la charge restante (une ligne relie la photo de chaque jour au point d’aujourd’hui). À droite sur ordinateur, <b>À savoir</b> réunit la météo des cinq jours, la pluie ou le vent par secteur, les absences, les fins de contrat, les retards et le matériel ; il y reste visible quand vous descendez dans la page. Le fil <b>En direct</b> montre ce que l’équipe valide. Tout ce qui parle des gens suit le <b>planning</b> : un jour sans travail, l’effectif et les présences montrent le prochain jour travaillé ; un absent revient le premier jour où le planning le prévoit, un arrêt maladie dit sa date de fin. La bascule <b>Terrain / Économie</b>, en haut, donne la photo économique du jour : l’atterrissage de la campagne, le coût à l’hectare, l’écart au barème, le dépensé face au fait, la cadence de l’équipe, le coût de l’inaction, les postes, les appellations et les tâches — les chiffres de l’onglet Économie ; l’atterrissage y est la fin projetée, et l’arrachage (comme les autres travaux sans barème) a sa ligne « Travaux à l’heure ». « Agrandir » ouvre la courbe en grand ; « Changer la priorité » ouvre le choix de la tâche prioritaire ; la date de l’objectif se règle en touchant son bouton. La tension par personne se détaille dans L’équipe & le matériel, la protection restante dans Conformité."],
       ['Presque tout se lit, cinq choses s’écrivent', ": les chiffres viennent du journal, du planning, des sessions tracteur et de la cave. Ce qui s’écrit ici est nommé : les prix des achats (Économie), l’ordre de passage (Décider), le mois d’ouverture de l’exercice comptable et celui de l’année vigne (roue crantée, Économie › Exercice), et ce que porte la roue crantée."],
       ['Vos deux années se règlent au même endroit', ": la roue crantée porte l’ouverture de l’<b>exercice comptable</b> — celui de votre bilan, fixé par votre comptable — et, juste dessous, le <b>cadre de votre campagne</b>, l’axe des Archives et du bilan de campagne. Une campagne est un cycle de production : ce qui la borne, c’est la <b>vendange</b>, et le mois n’en est que la traduction. L’écran dit où tombe la vôtre dans le cadre choisi — elle l’ouvre, elle la clôt, ou la borne la coupe en deux — et propose le mois qui suit la fin de vos vendanges. Le changer recadre des chiffres déjà affichés, jamais vos saisies."],
       ['La roue crantée', "en haut à droite ouvre ce qui se règle : objectifs de fin, fenêtres des tâches, hypothèses de calcul, IFT de référence — et le bilan de campagne à imprimer. Administrateur seulement."],
@@ -5213,7 +5241,7 @@ var MV_AIDE = {
       ['Les onglets vont du large au fin', ": l’année, puis la campagne, puis l’équipe et le matériel, puis la décision. Après le trait, ce sont des écrans de détail — on y arrive aussi en touchant un des trois chiffres."],
       ['La carte du domaine se lit de cinq façons', " : l’avancement, les jours depuis le dernier traitement, le cépage, les passages phyto face à votre référence, le coût engagé à l’hectare. La légende suit la vue ; une parcelle sans donnée reste grise."],
       ['La campagne', "montre l’avancement, mais aussi — sous « Où va le temps de l’équipe » — comment la présence se partage entre vigne, tracteur et le reste, avec la frise prévu/réel, la courbe par semaine et l’écart. Ces blocs parlent d’une campagne ; ce qui manquera en personnes d’ici la fin de l’année, lui, se lit dans « L’année »."],
-      ['Une tâche sans barème à l’hectare', "— arrachage, désherbage manuel, entreplantation sans trous saisis — ne prévoit pas d’heures : dans « Avancement par tâche », elle s’avance en <b>surface</b> faite sur surface concernée, la même part que sur la liste des parcelles."],
+      ['Une tâche sans barème à l’hectare', "— arrachage, désherbage manuel, entreplantation sans trous saisis — ne prévoit pas d’heures : dans « Avancement par tâche », elle s’avance en <b>surface</b> faite sur surface concernée, la même part que sur la liste des parcelles. Quand l’équipe a fini ses étapes d’arrachage partout, la tâche se range en tête des terminées, en vert, avec « la suite au prestataire »."],
       ['Deux périodes qui se chevauchent', "ne comptent rien deux fois : les heures suivent les tâches, et une tâche n’appartient qu’à une seule période. Sur les jours communs, la frise hachure le fond en violet — il y a deux barres au même endroit, on lit la plus haute."],
       ['Une fenêtre de tâche s’arrête le jour écrit', " : fin au 25 avril, le 25 travaille. Et les heures se répartissent au prorata des jours <b>travaillables</b> : une semaine de ponts en reçoit moins, les semaines pleines récupèrent le reste."],
       ['Le marqueur « hors période »', "dans la roue crantée, fenêtres des tâches, veut dire qu’une fenêtre enregistrée ne tombe pas dans cette période. La fenêtre par défaut s’applique à la place, et l’écran le dit au lieu d’écraser tout le travail sur un seul jour."],

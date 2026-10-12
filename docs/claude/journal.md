@@ -8,6 +8,12 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **11 octobre 2026 (FORME-2)** — ★ **LA CARTE DE L'ACCUEIL DESSINE CHAQUE PARCELLE À SA FORME ; LE TOUCHER Y OUVRE ENFIN LA FICHE** (§315). Lot 46, base `6e06158`.
+> Nico (11/10) : « Dans Vigne, il faut la forme des parcelles dans l'accueil de la même taille que les carrés actuellement ». Fait : chaque forme garde la surface de son
+> rectangle (surface déclarée, proportions du contour) ; sans contour, le rectangle reste, en pointillé. Trouvé : le toucher appelait `openSelParc`, qui ne fait rien d'un nom
+> de parcelle — et `mv-harnais-acc2` l'exigeait. Mesuré (Chromium, 38 parcelles fabriquées) : au téléphone la mosaïque passe de 145 à 187 px, la surface de chaque forme ne bouge pas.
+> **APP 8.82 → 8.83, SW 9.61 → 9.62.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+
 > Dernière consolidation : **11 octobre 2026 (BULLE-1)** — ★ **CHAQUE « i » OUVRE UNE BULLE COLLÉE À LUI ; CELLE D'AUJOURD'HUI AVAIT PERDU SON STYLE** (§314). Lot 45, base `2e8fb78`.
 > Nico (11/10, dicté) : « le i de information […] ça ouvre un vieux texte en bas, dans pilotage. C'est pas du tout clair, c'est pas du tout net. Ce serait mieux d'ouvrir une
 > infobulle. […] vérifiez aussi dans les autres modules ». Trouvé : la bulle de la maquette (`#ck-pop`) n'avait AUCUNE règle de style depuis REF-1 — texte nu en bas de page ;

@@ -13245,6 +13245,29 @@ function _mvTacheDuMoment(opt){
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTacheDuMoment'); return null; }
 }
 window._mvTacheDuMoment=_mvTacheDuMoment;
+// ★ CHANT-1 (§316) — CE QUE LIT L'ORDRE DES CHANTIERS (_mvOrdreChantiers, utils.js), pour une période (défaut : la période
+//   consultée, celle de calcHeures et du Pilotage) :
+//   · debut[nom] : le premier jour de la fenêtre de la tâche, CELLE QUE LE COCKPIT AFFICHE (_chargeSaisonData : l'échéance
+//     saisie pour la période, sinon la fenêtre par défaut) — l'ordre ne peut pas contredire les dates de la ligne ;
+//   · defaut : le début de la période. Une tâche sans fenêtre (sans barème : vendange, arrachage…) court sur toute la
+//     période — la lecture de PRIO-1 (_mvTacheDuMoment) ;
+//   · equipeFinie : l'arrachage fini pour l'équipe partout (ARRACH-7) — il passe en tête des terminées.
+function _mvChantiersCtx(sa){
+  var out={debut:{}, defaut:'', equipeFinie:{}};
+  try{
+    if(!sa){
+      var vn=_visuSaison();
+      sa=((window.SAISONS||[]).filter(function(s){ return s&&s.nom===vn; })[0])||((typeof getSaisonActive==='function')?getSaisonActive():null);
+    }
+    if(!sa) return out;
+    out.defaut=String(sa.debut||'');
+    var cd=(sa.debut&&sa.fin&&typeof window._chargeSaisonData==='function')?window._chargeSaisonData(sa):null;
+    ((cd&&cd.taskWindows)||[]).forEach(function(w){ if(w&&w.nom&&w.start) out.debut[w.nom]=String(w.start); });
+    if(typeof _arrEquipeFiniePartout==='function'&&_arrEquipeFiniePartout()) out.equipeFinie['Arrachage']=true;
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvChantiersCtx'); }
+  return out;
+}
+window._mvChantiersCtx=_mvChantiersCtx;
 function _prioPick(i){
   var its=_prioItems(); var it=its[i]; if(!it) return;
   pTacheFilter=it.t; pCurStep=_pvSmartStep(it.t);

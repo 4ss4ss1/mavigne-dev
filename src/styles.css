@@ -5659,6 +5659,8 @@ button.pil-dz-set{cursor:pointer;width:100%;}
 .mvk-barre i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;}
 .mvk-fait{background:var(--vert-med);}.mvk-cours{background:var(--or);}.mvk-retard{background:var(--orange);}.mvk-alerte{background:var(--rouge);}
 .mvk-t-fait{color:var(--vert-med);}.mvk-t-cours{color:var(--texte);}.mvk-t-retard{color:var(--orange);}.mvk-t-alerte{color:var(--rouge);}
+/* CHANT-1 (§316) : sous l'arrachage fini pour l'équipe, la mention « la suite au prestataire ». */
+.mvk-note{margin:0 0 var(--e-1,4px);font-size:var(--pt-micro,11px);color:var(--texte-doux);}
 @media (max-width:480px){
   .mvk-ligne{grid-template-columns:minmax(0,1fr) 44px;}
   .mvk-ligne .mvk-barre{grid-column:1/-1;grid-row:2;}

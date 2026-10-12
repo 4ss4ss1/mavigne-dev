@@ -704,7 +704,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> Avancement</h4><ul class="dot">
       <li>Pourcentage d'avancement de la saison en cours</li>
       <li>Nombre de parcelles actives et surface totale</li>
-      <li>Avancement détaillé par tâche, avec accès au détail</li>
+      <li>Avancement détaillé par tâche, avec accès au détail : rangé par date de début, ce qui reste à faire en haut, les tâches finies en bas</li>
       <li>Plusieurs affichages successifs : touchez les points sous la carte pour changer</li>
     </ul></div>
     <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg> Tâche prioritaire</h4><ul class="dot">
@@ -880,7 +880,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     Ensuite, la fiche de la parcelle montre une puce par étape : touchez-la pour la valider à sa date. La saisie <b>+ Journal</b> demande aussi l'étape. Les heures de
     chaque étape se lisent dans le Pilotage, Économie, sous la ligne Arrachage du temps réel. L'avancement compte la part
     des étapes faites (démontage fait, ramassage au prestataire : la moitié) ; dès que les étapes de l'équipe sont faites
-    partout, <b>Ma part du chantier</b> passe au chantier suivant — la suite est l'affaire du prestataire. Seul l'<b>administrateur</b>
+    partout, <b>Ma part du chantier</b> passe au chantier suivant — la suite est l'affaire du prestataire. Dans l'avancement par tâche, l'arrachage se range alors en tête des tâches finies, en vert, avec son vrai pourcentage et la mention « la suite au prestataire ». Seul l'<b>administrateur</b>
     règle les étapes et annule une étape validée. Aucune étape cochée : l'arrachage se valide en une seule fois.</div></details>
   <details><summary>L'arrachage, le désherbage manuel ou l'effeuillage ne concernent que quelques parcelles</summary>
     <div class="dbody">Ces trois travaux se font sur des parcelles choisies, et pas les mêmes d'une année à l'autre.
@@ -2865,7 +2865,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   </ul>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-boussole"></use></svg> Aujourd'hui</h3>
-<p>Une phrase résume la journée : l'avance ou le retard sur l'objectif, et les points à anticiper. Viennent ensuite les photos du domaine, la <b>fin prévue</b> avec sa frise et votre objectif, la <b>décision du jour</b> en quatre tuiles, le <b>domaine en direct</b> (chaque parcelle à sa forme et à l'échelle, colorée selon la tâche choisie, rangée par appellation, l'équipe posée sur chaque parcelle en cours ; sur ordinateur, la souris sur une parcelle ouvre une loupe ; touchez une parcelle pour ouvrir sa fiche), les chantiers en cours et la courbe de la charge restante. Sur le côté, <b>À savoir</b> réunit la météo des cinq jours (sous chaque jour : le risque de pluie, le cumul en millimètres et le vent le plus fort — des faits : c'est à vous de juger si un travail peut se faire), la pluie ou le vent secteur par secteur si le domaine s'étend sur plusieurs communes, avec ce qui est en cours dans les communes touchées, les absences, les contrats qui finissent dans le mois avec ce qu'une prolongation d'un mois éviterait, les retards et le matériel immobilisé ; dessous, le fil <b>En direct</b> des validations de l'équipe. La bascule <b>Terrain / Économie</b>, en haut, donne la photo économique du jour (atterrissage, coût à l'hectare, écart au barème, dépensé face au fait, postes, appellations, tâches), avec les chiffres de l'onglet Économie ; elle paraît dès qu'un taux horaire est renseigné.
+<p>Une phrase résume la journée : l'avance ou le retard sur l'objectif, et les points à anticiper. Viennent ensuite les photos du domaine, la <b>fin prévue</b> avec sa frise et votre objectif, la <b>décision du jour</b> en quatre tuiles, le <b>domaine en direct</b> (chaque parcelle à sa forme et à l'échelle, colorée selon la tâche choisie, rangée par appellation, l'équipe posée sur chaque parcelle en cours ; sur ordinateur, la souris sur une parcelle ouvre une loupe ; touchez une parcelle pour ouvrir sa fiche), les chantiers (ceux à faire ou en cours en haut, par date de début ; les terminés en bas) et la courbe de la charge restante. Sur le côté, <b>À savoir</b> réunit la météo des cinq jours (sous chaque jour : le risque de pluie, le cumul en millimètres et le vent le plus fort — des faits : c'est à vous de juger si un travail peut se faire), la pluie ou le vent secteur par secteur si le domaine s'étend sur plusieurs communes, avec ce qui est en cours dans les communes touchées, les absences, les contrats qui finissent dans le mois avec ce qu'une prolongation d'un mois éviterait, les retards et le matériel immobilisé ; dessous, le fil <b>En direct</b> des validations de l'équipe. La bascule <b>Terrain / Économie</b>, en haut, donne la photo économique du jour (atterrissage, coût à l'hectare, écart au barème, dépensé face au fait, postes, appellations, tâches), avec les chiffres de l'onglet Économie ; elle paraît dès qu'un taux horaire est renseigné.
   L'<b>atterrissage</b> y est la fin projetée de l'onglet Économie : ce qui est dépensé, plus le travail qui reste, à la cadence
   mesurée de l'équipe. La main-d'œuvre compte les heures payées du planning. Dans « Par poste », un écart n'est écrit que pour la
   main-d'œuvre et toute la campagne ; le tracteur, le GNR et le phyto disent ce qui reste à dépenser, et l'<b>arrachage</b> — comme
@@ -2929,6 +2929,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> La campagne</h3>
   <ul class="dot">
     <li><b>Jauge de saison</b> et <b>avancement par tâche</b>, avec comparatif de l'année précédente.
+    Les tâches s'y rangent comme sur Aujourd'hui : par date de début, les terminées en bas ; l'arrachage fini pour l'équipe passe en tête des terminées, avec la mention « la suite au prestataire ».
     Une tâche sans heures prévues à l'hectare (arrachage, désherbage manuel) s'y lit en <b>surface</b>
     faite sur surface concernée — la même part que sur la liste des parcelles.</li>
     <li><b>Agrandir</b> : chaque graphique porte ce bouton ; le même dessin s'ouvre en grand, à la largeur de

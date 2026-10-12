@@ -3,11 +3,10 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **11 octobre 2026 (FORME-2)** — ★ **LA CARTE DE L'ACCUEIL DESSINE CHAQUE PARCELLE À SA FORME ; LE TOUCHER Y OUVRE ENFIN LA FICHE** (§315). Lot 46, base `6e06158`.
-> Nico (11/10) : « Dans Vigne, il faut la forme des parcelles dans l'accueil de la même taille que les carrés actuellement ». Fait : chaque forme garde la surface de son
-> rectangle (surface déclarée, proportions du contour) ; sans contour, le rectangle reste, en pointillé. Trouvé : le toucher appelait `openSelParc`, qui ne fait rien d'un nom
-> de parcelle — et `mv-harnais-acc2` l'exigeait. Mesuré (Chromium, 38 parcelles fabriquées) : au téléphone la mosaïque passe de 145 à 187 px, la surface de chaque forme ne bouge pas.
-> **APP 8.82 → 8.83, SW 9.61 → 9.62.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+> Dernière consolidation : **12 octobre 2026 (CHANT-1)** — ★ **LES CHANTIERS SE RANGENT PAR DATE DE DÉBUT ; L'ARRACHAGE FINI POUR L'ÉQUIPE EN TÊTE DES TERMINÉS** (§316). Lot 47, base `a664ba0`.
+> Nico (12/10, dicté) : « ils doivent apparaître dans l'ordre de commencement […] peu importe la date de fin », les terminés en bas ; l'arrachage fini pour l'équipe « doit être la première des terminées ». Trouvé : les trois listes (Aujourd'hui, Accueil, La campagne) suivaient l'ordre du catalogue des Réglages — le sous-titre « Dans l'ordre des dates de la
+> campagne » mentait. Une règle (`_mvOrdreChantiers`, utils.js) et sa lecture (`_mvChantiersCtx`, app.js). Ouvert : l'arrachage dans les listes de parcelles (lot suivant), les tâches sans barème sans fenêtre.
+> **APP 8.83 → 8.84, SW 9.62 → 9.63.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1849,6 +1848,10 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ CHANT-1 — CE QUI RESTE OUVERT (§316, posé le 12/10)
+1. **L'arrachage dans les listes de parcelles — le lot suivant** (reformulé le 12/10, « Continuer » reçu) : une parcelle où l'équipe a fini ses étapes reste « En cours » (`_arrStatutTache`), donc dans « À faire » de Parcelles › Arrachage, et EN TÊTE (`_pvCurStarted`). Recommandé : hors de « À faire » pour tous, visible sous « Toutes » (l'étape du prestataire se valide depuis la fiche), plus « commencée » sur les cartes. ⚠️ `_mvTacheEtat` décide aussi du bouton Fait / Annuler.
+2. **Les tâches sans barème n'ont pas de fenêtre** (`_chargeSaisonData` ne garde que `h>0`) : leur ligne du cockpit montre le premier chantier et l'objectif, même avec des échéances ; le tri les compte au début de la période ; les dater touche `etatVue` et « fenêtre passée ». **À regarder chez Nico** : les trois listes sur ses données, téléphone et PC (aucun rendu navigateur ici). Vu, non touché : PRIO-1 date sans échéance par toute la période, l'ordre par la fenêtre par défaut ; les puces de Parcelles se rangent « finie ou non ».
+
 ### ⚠️ FORME-2 — CE QUI RESTE OUVERT (§315, posé le 11/10)
 1. **À regarder chez Nico, sur SES contours, au téléphone et sur PC** : la carte du haut de l'Accueil — vue dans Chromium sur un domaine fabriqué (38 parcelles), pas sur ses données. Au téléphone la mosaïque grandit (145 → 187 px) : si c'est trop, un seul facteur dans `_homeForme` la ramène, au prix de formes plus petites que les anciens rectangles. Une lanière fine devient un trait ; en sombre, « à faire » reste pâle (même jeton qu'avant, `--ligne-forte`).
 
@@ -2378,10 +2381,7 @@ L'hypothèse en vigueur — la lecture seule dure — n'a jamais été confirmé
 - **Mesure d'audience** sur `essai.html` et la démo guidée.
 - **Les trois nombres dupliqués** (§14b) — vivre avec, ou générer l'un depuis l'autre.
 
-### ✅ Les journées du 11 août (refonte du Planning, audit, deux lots Tracteur) — descendues dans `docs/claude/journal.md`
-
-Historique livré et déployé, sans consigne : déplacé le 05/10 (MOTIFS-1) pour tenir le plafond du cœur. Les leçons qu'elles
-portaient vivent dans les règles d'or, §24, §25 et §19a (`docs/claude/modules.md`).
+### ✅ Les journées du 11 août (refonte du Planning, audit, deux lots Tracteur) — descendues dans `docs/claude/journal.md` le 05/10 (MOTIFS-1, plafond du cœur) ; leurs leçons vivent dans les règles d'or, §24, §25 et §19a (`docs/claude/modules.md`)
 
 ### ⚠️ Lots encore non documentés ici
 
