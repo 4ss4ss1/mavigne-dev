@@ -1084,6 +1084,9 @@ function _vendDetailHtml(c,canEdit){
     h+='<div class="mvv-det-g" id="mvg-fa-'+_mvgId(c.id)+'"></div>';
   }
   h+=_vendGfBloc(c,canEdit);   // ★ GF-1 — les sucres au labo, sous la courbe de densite
+  /* ★ LABO-1 (§319) — les autres chiffres du labo (TAV, degré probable, volatile, acidité, pH…),
+     posés par la fiche « Rapports du labo » du Chai. Le glucose garde SON bloc, juste au-dessus. */
+  if(typeof window!=='undefined'&&typeof window._laboCuveHtml==='function') h+=window._laboCuveHtml(c);   // (bacs à sable sans window : CUV-13)
   if(last){
     h+='<div class="mvv-3">'
       +'<div class="c"><div class="v">'+(_vendLastD(c)?Math.round(_vendMesD20(_vendLastD(c))):'\u2014')+'</div><div class="l">densit\u00e9 \u00e0 20\u00a0\u00b0C</div></div>'
@@ -1315,6 +1318,7 @@ function _vendPeindreGraphes(){
   window._mvGraphOublier('#mvg-fa-');
   window._mvGraphOublier('#mvg-fm-');
   window._mvGraphOublier('#mvg-gf-');
+  window._mvGraphOublier('#mvg-lbc-');   // ★ LABO-1
   var c=(CAVE_VENDANGE.cuves_vinif||[]).filter(function(x){ return x && x.id===_vendOuvert; })[0];
   if(c){
     var mes=_vendTriMes(c);
@@ -1327,6 +1331,7 @@ function _vendPeindreGraphes(){
     if(_vendMesGF(c).length>=2){
       (function(cu){ window._mvGraphSuivre('#mvg-gf-'+_mvgId(cu.id), function(lg){ return _vendGfSvg(cu,lg); }); })(c);
     }
+    if(typeof window._laboCuvePeindre==='function') window._laboCuvePeindre(c);   // ★ LABO-1 — les courbes du bloc « Au labo »
   }
   if(window._mvGraphRepeindre) window._mvGraphRepeindre();
 }
@@ -1337,6 +1342,7 @@ function renderVendCuves() {
   window._mvGraphOublier('#mvg-fm-');
   window._mvGraphOublier('#mvg-cv-');
   window._mvGraphOublier('#mvg-gf-');
+  window._mvGraphOublier('#mvg-lbc-');   // ★ LABO-1
   var toutes=CAVE_VENDANGE.cuves_vinif||[];
   var cuves=toutes.filter(function(c){ return c && !_vendEstFusionnee(c); });
   var canEdit=canWrite();
@@ -2164,12 +2170,27 @@ function _vendChaptDeg(c){
     return s+((d>0)?d:0);
   },0);
 }
-/* Le degre potentiel du mout avant FA, chaptalisation comprise. null = inconnu. */
+/* ★ LABO-1 (§319) — le degré probable du labo : la mesure la plus juste du moût, donc la PREMIÈRE
+   source. Le plus ancien rapport qui le porte (au fil de la fermentation, un « degré probable »
+   ne dit plus que ce qui reste à faire). null = aucun rapport ne le porte. */
+function _vendDpLabo(c){
+  var best=null;
+  ((c&&Array.isArray(c.labo))?c.labo:[]).forEach(function(e){
+    if(!e||!e.date||!e.vals||typeof e.vals!=='object') return;
+    var o=e.vals.dp, v=_vendGfNum(o&&typeof o==='object'?o.v:o);
+    if(v==null||!(v>0)) return;
+    if(!best||String(e.date)<best.d) best={d:String(e.date), v:v};
+  });
+  return best?best.v:null;
+}
+/* Le degre potentiel du mout avant FA, chaptalisation comprise. null = inconnu.
+   Trois sources, dans cet ordre : le degré probable du labo (LABO-1), le premier relevé s'il
+   est encore un moût, les contrôles de maturité des parcelles de la cuve. */
 function _vendDPot(c){
   if(!c) return null;
   var spd=_vendCfg().sucre_par_degre||16.83;
-  var base=null, d0=_vendD0(c);
-  if(d0!=null&&d0>=_VEND_D_MOUT) base=_vendSucre(d0)/spd;
+  var base=_vendDpLabo(c), d0=(base==null)?_vendD0(c):null;
+  if(base==null&&d0!=null&&d0>=_VEND_D_MOUT) base=_vendSucre(d0)/spd;
   if(base==null&&typeof _cmpVigne==='function'){
     var vg=null; try{ vg=_cmpVigne(c); }catch(e){ vg=null; }
     if(vg&&vg.suc>0) base=vg.suc/spd;
@@ -2193,7 +2214,7 @@ function _vendDSec(c){
 function _vendDSecTxt(c){
   var dp=_vendDPot(c), d=_vendDSec(c);
   return (Math.round(d*10)/10).toString().replace('.',',')
-    +(dp==null?' (seuil g\u00e9n\u00e9ral)':' (mo\u00fbt \u00e0 '+(Math.round(dp*10)/10).toString().replace('.',',')+'\u00b0)');
+    +(dp==null?' (seuil g\u00e9n\u00e9ral)':' (mo\u00fbt \u00e0 '+(Math.round(dp*10)/10).toString().replace('.',',')+'\u00b0'+(_vendDpLabo(c)!=null?' au labo':'')+')');
 }
 /* Le sucre encore fermentescible a cette densite, DANS CETTE CUVE. */
 function _vendSucreRest(c,d20){
@@ -8774,6 +8795,7 @@ window._vendSucreRest = _vendSucreRest;
 window._vendDecuvee = _vendDecuvee;
 window._vendFaEnCours = _vendFaEnCours;
 window._vendSuivie = _vendSuivie;
+window._vendRepere = _vendRepere;           // ★ LABO-1 (§319) — « Cuve 3 » dans la fiche du labo
 window._vendDecD20 = _vendDecD20;
 window._recKg = _recKg;
 window._recCaisses = _recCaisses;

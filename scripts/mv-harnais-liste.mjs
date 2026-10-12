@@ -328,6 +328,7 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-robustesse-pilotage.mjs'],
   ['node scripts/mv-harnais-robustesse-cave.mjs'],
   ['node scripts/mv-harnais-gf.mjs'],   // ★ GF-1 (§302) — les sucres au labo
+  ['node scripts/mv-harnais-labo.mjs'],   // ★ LABO-1 (§319) — les rapports du labo : rien ne s'efface
   ['node scripts/mv-harnais-robustesse-tracteur.mjs'],
   ['node scripts/mv-harnais-robustesse-reserve.mjs'],
   ['node scripts/mv-harnais-robustesse-accueil.mjs'],
@@ -427,6 +428,7 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-robustesse-pilotage.mjs --contre'],
   ['node scripts/mv-harnais-robustesse-cave.mjs --contre'],
   ['node scripts/mv-harnais-gf.mjs --contre'],
+  ['node scripts/mv-harnais-labo.mjs --contre'],
   ['node scripts/mv-harnais-robustesse-tracteur.mjs --contre'],
   ['node scripts/mv-harnais-robustesse-reserve.mjs --contre'],
   ['node scripts/mv-harnais-robustesse-accueil.mjs --contre'],

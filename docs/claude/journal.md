@@ -2304,3 +2304,8 @@ chaque session)**~~ — remplacé par le dépôt GitHub le 10/08.
   contrats. L'export dérive désormais de `COLLECTIONS` — c'était bien l'argument de l'entrée, et
   il était juste. ★ *Une entrée de backlog qui nomme la bonne cause peut quand même sous-estimer
   le dégât : celle-ci parlait d'un fichier incomplet, pas d'une perte de données.*
+
+
+> Dernière consolidation : **12 octobre 2026 (DIRECT-1)** — ★ **« DÉBUT » ENREGISTRE L'ÉQUIPE ; « EN DIRECT » DIT QUI EST OÙ, TRACTEUR COMPRIS** (§318). Lot 49, base `db178db`. Nico (12/10, captures) : « l'équipe est bien programmée mais c'est encore moi d'indiqué dessus », « il n'y a personne en direct », puis « aujourd'hui j'étais sur le tracteur, j'aimerais bien que ça apparaisse » ; reformulé, « Oui », puis « Continuez ».
+> Les deux « Début » n'écrivaient que leur auteur (« Valider » écrivait le groupe) : `_mvDebutLigne` (app.js) ; « Changer » donne l'équipe aux parcelles en cours commencées sans groupe (`_mvDebutsSuivent`). Le cockpit lit `_ckQui` (l'équipe d'abord, « sans moi » respecté) et `_ckTracJour` (cockpit.js : la session et sa boîte noire) ; « En ce moment » en tête du fil (cockpit-vue.js).
+> **APP 8.85 → 8.86, SW 9.64 → 9.65.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).

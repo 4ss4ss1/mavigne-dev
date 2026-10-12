@@ -3,9 +3,9 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **12 octobre 2026 (DIRECT-1)** — ★ **« DÉBUT » ENREGISTRE L'ÉQUIPE ; « EN DIRECT » DIT QUI EST OÙ, TRACTEUR COMPRIS** (§318). Lot 49, base `db178db`. Nico (12/10, captures) : « l'équipe est bien programmée mais c'est encore moi d'indiqué dessus », « il n'y a personne en direct », puis « aujourd'hui j'étais sur le tracteur, j'aimerais bien que ça apparaisse » ; reformulé, « Oui », puis « Continuez ».
-> Les deux « Début » n'écrivaient que leur auteur (« Valider » écrivait le groupe) : `_mvDebutLigne` (app.js) ; « Changer » donne l'équipe aux parcelles en cours commencées sans groupe (`_mvDebutsSuivent`). Le cockpit lit `_ckQui` (l'équipe d'abord, « sans moi » respecté) et `_ckTracJour` (cockpit.js : la session et sa boîte noire) ; « En ce moment » en tête du fil (cockpit-vue.js).
-> **APP 8.85 → 8.86, SW 9.64 → 9.65.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+> Dernière consolidation : **12 octobre 2026 (LABO-1)** — ★ **LES RAPPORTS DU LABO : UNE FICHE PAR ENVOI, CHAQUE CHIFFRE À SA PLACE, RIEN NE S'EFFACE** (§319). Lot 50, base `aad1c16`. Nico (12/10, dicté) : une fiche par envoi au labo, l'appli range chaque chiffre ; ressaisir la même date ou le même n° de rapport ne doit rien effacer. Maquette `maquette-fiche-labo-v1` validée (« Ok go », trois recommandations).
+> Pas de collection neuve : une ligne du Chai EST une analyse (`op.labo=1`, champs historiques gardés), une ligne du Cuvier vit dans `cuve.labo[]`, son glucose sur un relevé (GF-1). `_laboLignes` / `_laboPlan` / `_laboAppliquer` (cave.js, sans DOM) ; fenêtre `#ovLabo` ; blocs « Au labo » ; `_vendDpLabo` (cuvier.js) en tête de `_vendDPot`.
+> **APP 8.86 → 8.87, SW 9.65 → 9.66.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1849,6 +1849,7 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ LABO-1 — CE QUI RESTE OUVERT (§319, posé le 12/10) : **à regarder chez Nico** (Le Chai › Journal › « Rapports du labo », PC et téléphone : fiche neuve, même date ressaisie, n° retapé à une autre date, « Au labo ») ; le poids de `cave.js` (découpage en `src/labo.js`) ; l'ancien import « PDF seul » sans porte ; champs neufs hors export et Suivi d'élevage — détail au §319g.
 ### ⚠️ DIRECT-1 — CE QUI RESTE OUVERT (§318, posé le 12/10)
 1. **À regarder chez Nico, au téléphone et sur PC** : Parcelles › Réparation › « Changer » puis la même équipe → dans Aujourd'hui, Pasquier des Chenes passe de « N » à l'équipe ; un « Début » neuf ; « En direct » un jour de tracteur (en marche, en pause, parcelle finie, fin de journée). Aucun rendu dans un navigateur ici. **Vu, non touché** : « sans moi » reste ignoré par « Ma part du chantier » (`_mvPartCalc`), le mur (`_mvMurData`) et Ma trace ; le fil de secours (`_ckFilHtml`) n'a ni « En ce moment » ni tracteur ; un chrono laissé ouvert reste « en cours » jusqu'à « Fin de journée » ; la pastille du plan ne montre que deux initiales (une équipe de quatre : « VS »).
 

@@ -51,7 +51,7 @@ const NOMS = [
      s'appuient sur les bouchons du prélude (_vendVolLoge, _vendCuvKgDom…). */
   '_vendSortiesHl', '_vendVolContenu',
   /* ★ GF-1 (§302) : la liste, la fiche et « à mesurer » lisent les sucres au labo — les VRAIES fonctions. */
-  '_vendGfF', '_vendGfAddJ', '_vendGfNum', '_vendMesGF', '_vendProjGF', '_vendGfAMesurer', '_vendGfPhrase', '_vendGfEtat', '_vendGfBloc'
+  '_vendGfF', '_vendGfAddJ', '_vendGfNum', '_vendDpLabo', '_vendMesGF', '_vendProjGF', '_vendGfAMesurer', '_vendGfPhrase', '_vendGfEtat', '_vendGfBloc'
 ];
 function extraire(nom) {
   const m = new RegExp('^function ' + nom + '\\s*\\(', 'm').exec(SRC);

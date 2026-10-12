@@ -369,3 +369,4 @@
 | 316 | 316. ★ CHANT-1 — LES CHANTIERS SE RANGENT PAR DATE DE DÉBUT ; L'ARRACHAGE FINI POUR L'ÉQUIPE EN TÊTE DES TE… | `docs/claude/chantiers-280-329.md` |
 | 317 | 317. ★ ARRACH-9 — L'ARRACHAGE FINI POUR L'ÉQUIPE QUITTE « À FAIRE » ET LES CARTES DE L'ÉQUIPE (12/10 — `src… | `docs/claude/chantiers-280-329.md` |
 | 318 | 318. ★★★ DIRECT-1 — « DÉBUT » ENREGISTRE L'ÉQUIPE ; « EN DIRECT » DIT QUI EST OÙ, TRACTEUR COMPRIS (12/10 —… | `docs/claude/chantiers-280-329.md` |
+| 319 | 319. ★★ LABO-1 — LES RAPPORTS DU LABO : UNE FICHE PAR ENVOI, CHAQUE CHIFFRE À SA PLACE (12/10 — `src/cave.j… | `docs/claude/chantiers-280-329.md` |

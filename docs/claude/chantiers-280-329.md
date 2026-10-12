@@ -1482,3 +1482,60 @@ j'aimerais bien que ça apparaisse ». Puis « Continuez ».
 
 ### 318f. Ouvert
 §28 « DIRECT-1 — CE QUI RESTE OUVERT ».
+
+## 319. ★★ LABO-1 — LES RAPPORTS DU LABO : UNE FICHE PAR ENVOI, CHAQUE CHIFFRE À SA PLACE (12/10 — `src/cave.js` · `src/cuvier.js` · `index.html` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Cave) · `public/sw.js` · `guide/08-cave.html` · `scripts/mv-harnais-labo.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/typo-baseline.json` (poids regravé) · `scripts/harnais-claude-md.mjs` · **bump APP + SW**, base `aad1c16`)
+
+### 319a. La demande
+Nico, 12/10 (dicté) : le bulletin porte la date, le n° de l'échantillon, l'appellation, la couleur, le millésime, puis ce que le vigneron a demandé (TAV,
+degré probable, glucose + fructose, volatile…). Une date d'envoi concerne plusieurs cuvées : une fiche, et l'appli range chaque chiffre ; ressaisir par
+erreur la même date ou le même n° de rapport ne doit rien effacer — « c'est plutôt long et fastidieux ». Reformulé, « oui » ; maquette
+`maquette-fiche-labo-v1` (artefact claude.ai, interactive, données fictives, trois scénarios) ; « Ok go » sur les trois recommandations : la date du
+PRÉLÈVEMENT ; les deux portes actuelles ouvrent la fiche ; les neuf analyses.
+
+### 319b. Le modèle — pas de collection neuve, chaque ligne dans sa maison (§10-11)
+- **Chai** : une ligne = une opération `type:'analyse'` sur UNE cuvée, `op.labo=1`. Champs historiques gardés (`so2_libre`, `so2_total`, `av`, `malique`,
+  `fml`) : journal, dernière analyse, courbe du SO₂, `_mlProjMalo`, Pilotage, registre lisent sans changer. Neufs : `tav`, `dp`, `gf`, `at`, `ph`, `lt`
+  (les « < »), `rapport`, `ech`, `labo_nom`, `saisie`. `last_analyse` de la cuvée suit.
+- **Cuvier** : une ligne = une entrée de `cuve.labo[]` ; son glucose vit sur un relevé de `mesures_fa` (GF-1), relié par `labo_id` / `mes_id` — le relevé
+  de densité du même jour s'il n'a pas de glucose, sinon un relevé `labo_cree` (retiré avec la ligne s'il ne porte rien d'autre). Une seule vérité par chiffre.
+- Un glucose saisi au Cuvier sans fiche est une ligne (`src:'mes'`) : la fiche du même jour le complète au lieu d'en écrire un second.
+- Trois moteurs sans DOM : `_laboLignes` (la lecture unique), `_laboPlan` (la règle), `_laboAppliquer` (l'écriture).
+
+### 319c. La règle « rien ne s'efface »
+Un rapport se reconnaît à son n° (toutes dates, toutes cibles), sinon à sa cuvée dans la fiche du jour. Case vide : rien ne bouge (`garde`). Valeur
+différente, autre date, autre cible, autre n° d'échantillon, autre malo : un CHOIX, et « Enregistrer » attend qu'il soit fait. Une ancienne analyse commune à
+plusieurs cuvées reste en lecture (`lecture:true`) : ses chiffres sont partagés, une ligne neuve s'écrit à côté. Corriger = « Compléter » puis « Prendre » ;
+« Retirer » (admin) passe par `openConfirmDel` et PDF-1. « Pas de FML » et la date de fin de malo d'une ancienne analyse survivent à la fusion.
+
+### 319d. Les écrans, et ce qu'ils nourrissent
+`#ovLabo` (index.html, rendu dans `#lbo-root`) : la liste par date, la fiche, « Avant d'enregistrer » (la destination de chaque chiffre). Portes : la zone du
+Journal (`#mvc-journal-upload`), « Analyse » de Nouvelle opération (`_laboDepuisOp`), et `openOvCaveOp` sur une analyse `labo` — l'ancien formulaire
+reconstruit `opData` et effacerait TAV, sucres et n°. Bloc « Au labo » : fiche cuvée (`_laboCuveeHtml`, sans le SO₂ libre qui a sa courbe, la cuve
+d'origine comprise) et fiche cuve (`window._laboCuveHtml`, sans le glucose qui a son bloc) ; courbes `#mvg-lbo-` / `#mvg-lbc-` par `_mvGraphSuivre`.
+`_vendDpLabo` (le plus ancien degré probable) passe en tête de `_vendDPot` ; `_vendDSecTxt` dit « au labo ». `_cavePdfRefs` voit `cuve.labo[]`.
+Valeurs posées en JS après `innerHTML` (§24 n°5). Préfixe CSS `lbo-`, CSS injectée `#mv-labo-css`.
+
+### 319e. Trouvé en route
+1. ★★ **L'ancien formulaire, rouvert sur une analyse de fiche, l'aurait écrasée** (famille du défaut n°3 du §20h) : redirigé vers la fiche (contre-épreuve C7).
+2. ★ **« SO₂ »** : U+2082 n'est pas dans le subset des polices (§303) — `SO<sub>2</sub>` dans le HTML, « SO2 » dans le texte pur et les étiquettes d'accès.
+3. **Le poids de `cave.js`** : 566 → 635 ko (+12 %). Cliquet `mv-harnais-typo` regravé APRÈS vérification clé par clé : trois poids de modules (cave, cuvier,
+   utils), aucune autre valeur. La question du découpage est posée au §28.
+4. C24b : trois constantes posées dans des `onclick` sans `_escAttr` — échappées. Une graisse 400 (hors des trois pas) remontait le cliquet des jetons : 500.
+5. La règle DIRECT-1 a servi : la chaîne meurt avec l'appel (300 s) — jouée par tranches au premier plan, codes retour notés un à un.
+
+### 319f. Mesuré
+`mv-harnais-labo` : **30 vertes** ; contre-épreuve **10/10**, chaque défaut par sa règle. Voisins verts : `mv-harnais-gf`, `-cuvier`, `-globaux`,
+`-cave-auj`, `-jetons`, `-subset`, `-icones`, `-typo`. Preflight : 0 erreur. Chaîne (`mv-harnais-liste`, 375 commandes) jouée par tranches au premier plan, `TZ=Europe/Paris`, code retour noté pour chacune (règle DIRECT-1) : rouges trouvés et réparés en route — `mv-harnais-cuv8` et `-cuv13` (bacs à sable par liste : `_vendDpLabo` ajouté, garde `typeof window`), `mv-harnais-pres` (garde `typeof CAVE_VENDANGE` dans `_cavePdfRefs`), `build-guide --check` (vert après `node scripts/build-guide.mjs`, `public/guide.html` non livré) ; `mv-harnais-entree1` rouge sous 8 exécutants en parallèle, **vert seul** (31/31, contre-épreuve verte). Les deux gardes, posées en cours de chaîne, n'ajoutent qu'un `typeof` ; les harnais qu'elles touchent ont été rejoués après coup. **Non conclu ici** : `mv-harnais-recup --contre`, coupé deux fois à 300 s par le bac à sable (sa partie jouée : défauts détectés) — Planning, que ce lot ne touche pas ; à confirmer par la CI. Écrans : liste, fiche et vérification produits par l'appli
+chargée dans Node, rendus sous Chromium à 430 px avec les polices du projet — aucun débordement mesuré, icônes absentes du rendu (sprite hors Node).
+L'appli construite, non : `npm run build`, `test:smoke`, `test:e2e` chez Nico.
+
+### 319g. Ouvert (résumé sur une ligne au §28, plafond du cœur)
+1. **À regarder chez Nico, au téléphone et sur PC** : une fiche neuve (deux cuvées, une cuve), la même date ressaisie, un n° de rapport retapé à une autre
+   date ; « Au labo » dans la fiche cuvée et dans la fiche cuve. Rendu ici : les trois écrans de la fenêtre, pas l'appli construite.
+2. **Le poids de `cave.js`** (566 → 635 ko) : LABO-1 lit une douzaine d'internes du Chai (PDF-1, cuvées, `CAVE_*`) ; le sortir en `src/labo.js` demande
+   une frontière comme CUV-DEC (§164) — un lot à part.
+3. **L'ancien import « PDF seul »** (`_onCaveAnaFileChange`, `ovCaveAna`) n'a plus de porte : une ligne de fiche peut ne porter qu'un PDF. Gardé parce que
+   `mv-harnais-cave-auj` l'exige — purge à décider, harnais compris.
+4. **Pas repris** : les champs neufs (TAV, sucres, AT, pH) dans l'export du journal et le Suivi d'élevage imprimé ; un bouton vers la fiche depuis une cuve
+   du Cuvier qui n'a encore aucun rapport.
+

@@ -1421,7 +1421,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     pas quel jour elles sont entrées dans leur étape actuelle, et la date d'encuvage ne le dit pas.
     La frise écrit un <b>tiret</b> plutôt qu'une date fausse. Posez-la à la main si vous la connaissez.</li>
       <li><b>Le repère de densité, et ce qu'il ne fait pas.</b> Chaque cuve porte un repère de vin
-    sec calculé sur le <b>degré potentiel de son moût</b> — lu sur votre premier relevé s'il a été
+    sec calculé sur le <b>degré potentiel de son moût</b> — lu sur le <b>degré probable d'un rapport du labo</b> s'il y en a un, sinon sur votre premier relevé s'il a été
     pris avant le départ en fermentation, sinon sur vos contrôles de maturité ; une
     <b>chaptalisation datée</b> l'abaisse. Le détail de la cuve écrit où il est et d'où il vient.
     <b>Il ne déclenche rien</b> : ni « finie », ni une entrée dans la tournée. C'est un repère de
@@ -1649,15 +1649,24 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     silence. Elles restent visibles sur « Tous ».</li>
     <li><b>Analyses SO₂</b> avec un <b>convertisseur intégré</b> : grammes, pastilles, dilution.
     Il évite l'erreur de calcul classique entre liquide et pastille.</li>
-    <li><b>Pièces jointes</b> : un bulletin d'analyse en PDF peut être rattaché à une opération.</li>
+    <li><b>Pièces jointes</b> : un bulletin d'analyse en PDF peut être rattaché à une opération, ou à son rapport dans « Rapports du labo ».</li>
     <li><b>Mise en bouteille</b> : clôture le suivi de la cuvée et fige le millésime.</li>
     <li><b>Alerte d'ouillage</b> réglable de 3 à 30 jours — <span class="path">Cave › roue crantée › Le Chai</span>.
     Le délai peut être <b>resserré millésime par millésime</b> : un vin jeune se surveille de plus près.
     Sans réglage propre, un millésime suit le délai général du domaine — rien ne change tant que vous n'y touchez pas.</li>
   </ul>
 
+  <h4>Les rapports du labo</h4>
+<p>Le Chai &rsaquo; Journal &rsaquo; <b>Rapports du labo</b> réunit les bulletins par date d'envoi : <b>une fiche par envoi</b>, une ligne par rapport. On la remplit une fois, l'application range chaque chiffre sur sa cuvée.</p>
+<ul class="dot">
+<li><b>La fiche</b> — la date du prélèvement, le laboratoire, les <b>analyses demandées</b> (TAV, degré probable, glucose + fructose, volatile, acidité totale, pH, SO<sub>2</sub> libre et total, malique), reprises de la fiche précédente. Puis les échantillons : la cuve au Cuvier tant qu'elle fermente, la cuvée au Chai en élevage, avec le n° de rapport, le n° d'échantillon et le PDF. La couleur et l'appellation se lisent sur les parcelles ; « &lt; 0,1 » s'écrit tel quel.</li>
+<li><b>Avant d'enregistrer</b> — l'écran montre où va chaque chiffre : le glucose d'une cuve sur sa courbe des sucres, le malique d'une cuvée sur sa malo, le SO<sub>2</sub> libre sur sa courbe, le reste dans le bloc « Au labo ».</li>
+<li><b>Rien ne s'efface</b> — la même date rouvre la fiche ; un n° de rapport déjà saisi est reconnu, même tapé à une autre date. Une case vide ne retire rien ; deux valeurs différentes, une autre date ou une autre cuvée pour le même rapport : c'est vous qui choisissez. Corriger = « Compléter » puis prendre la nouvelle valeur ; l'administrateur peut « Retirer » un rapport.</li>
+<li><b>Au labo</b> — la fiche d'une cuvée trace la courbe de chaque analyse dès deux rapports, ceux de la cuve d'où elle vient compris ; une cuve du Cuvier a le même bloc. Le degré probable d'un rapport devient la première source du repère de vin sec de la cuve.</li>
+</ul>
+<p>Les analyses saisies avant ce changement restent lisibles telles quelles ; une ancienne analyse commune à plusieurs cuvées ne se complète pas — une ligne neuve s'écrit à côté.</p>
   <h4>Déguster, traiter, filtrer</h4>
-<p>Le bouton <b>Nouvelle opération</b> du Chai propose, à côté de l'ouillage, du soutirage, du soufre et des analyses, trois gestes :</p>
+<p>Le bouton <b>Nouvelle opération</b> du Chai propose, à côté de l'ouillage, du soutirage et du soufre, trois gestes (le bouton <b>Analyse</b>, lui, ouvre la fiche « Rapports du labo », ci-dessus) :</p>
 <ul class="dot">
 <li><b>Dégustation</b> — une cuvée à la fois. De base, elle porte sur la cuvée ; si une anomalie se montre sur <b>un fût précis</b>, on le désigne par son lot (année, tonnelier) et un repère (numéro à la craie, emplacement) — les fûts ne sont pas suivis un par un. On note comment il goûte, ce qu'on remarque, et la suite à donner. <b>Enregistrer et goûter la suivante</b> enchaîne les cuvées du millésime.</li>
 <li><b>Traitement</b> — collage, stabilisation, acidité, tanins et gomme, ensemencement. Le produit vient de La Réserve et fixe l'unité de la dose ; le volume des cuvées choisies se remplit seul ; la quantité se calcule et sort du stock, comme les adjonctions du Cuvier.</li>
@@ -1794,7 +1803,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   d'état n'est pas connue, et l'application préfère ne rien dessiner plutôt qu'une date inventée.</div></div>
   <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eprouvette"></use></svg></span><div><b>Les sucres au labo.</b>
   En fin de fermentation, la densité ne bouge presque plus : notez le résultat du labo — <b>glucose + fructose</b>,
-  en g/L — dans « Saisir une mesure », à la date du prélèvement ; la densité y devient facultative. Sous la courbe de
+  en g/L — dans « Saisir une mesure » ou dans un <b>rapport du labo</b>, à la date du prélèvement ; dans la mesure, la densité devient facultative. Sous la courbe de
   densité, la fiche trace alors la <b>courbe des sucres</b>, avec le seuil des labos (<b>0,2&nbsp;g/L</b>) en tireté, et dit
   où en est la cuve : en route vers le sec (une date estimée dès trois analyses), ça stagne, ça remonte, ou sèche au
   labo. La ligne de la cuve porte le dernier chiffre. Une cuve suivie au labo réclame une analyse tous les 4 jours, plus

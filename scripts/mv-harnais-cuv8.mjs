@@ -30,7 +30,7 @@ const NOMS = [
   '_vendTriDate', '_vendTriMes', '_vendLastMes', '_vendLastD', '_vendIsActive',
   '_vendEstFusionnee', '_vendHist', '_vendStatIdx', '_vendStatDeb',
   '_vendCorrTerm', '_vendD20', '_vendMesD20', '_vendSucre',
-  '_vendSucPente', '_vendMesD', '_vendD0', '_vendChaptDeg', '_vendDPot',
+  '_vendSucPente', '_vendMesD', '_vendD0', '_vendChaptDeg', '_vendGfNum', '_vendDpLabo', '_vendDPot',   // ★ LABO-1 : le degré probable du labo
   '_vendDZero', '_vendDSec', '_vendDSecTxt', '_vendSucreRest', '_vendFaPct',
   '_vendDecuvee', '_vendFaEnCours', '_vendJourSec', '_vendSuivie', '_vendMesurable', '_vendDecD20',
   '_vendPressee',   /* CUV-13 : lu par _vendSuivie et _vendMesurable */

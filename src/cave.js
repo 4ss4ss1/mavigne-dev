@@ -94,6 +94,11 @@ function _cavePdfRefs(){
   var S={};
   (CAVE_ELEVAGE.operations||[]).forEach(function(o){ if(o&&o.data&&o.data.pdf_path) S[o.data.pdf_path]=1; });
   (CAVE_ELEVAGE.analyses||[]).forEach(function(a){ if(a&&a.storage_path) S[a.storage_path]=1; });
+  // ★ LABO-1 (§319) — le PDF d'un rapport du labo posé sur une cuve du Cuvier vit dans cuve.labo[] :
+  //   sans cette ligne, retirer une analyse du Chai purgerait un PDF qu'une cuve cite encore.
+  ((typeof CAVE_VENDANGE!=='undefined'&&CAVE_VENDANGE&&CAVE_VENDANGE.cuves_vinif)||[]).forEach(function(c){   // (bacs à sable sans le Cuvier : PRES)
+    (c&&Array.isArray(c.labo)?c.labo:[]).forEach(function(e){ if(e&&e.pdf_path) S[e.pdf_path]=1; });
+  });
   return S;
 }
 function _cavePdfPurge(avant){
@@ -1010,6 +1015,7 @@ function _caveJDet(op){
     if(op.data.av) chips+='<span class="mvc-tag mvc-tag-av">AV '+op.data.av+' g/L</span>';
     if(op.data.malique!=null) chips+='<span class="mvc-tag mvc-tag-av">Malique '+op.data.malique+' g/L</span>';
     if(op.data.fml){var fc=op.data.fml==='ok'?'mvc-tag-fmlok':op.data.fml==='cours'?'mvc-tag-fmlc':'mvc-tag-fmlno';chips+='<span class="mvc-tag '+fc+'">'+_caveFmlLabel(op.data.fml)+'</span>';}
+    _laboOpResume(op).forEach(function(t){ chips+='<span class="mvc-tag mvc-tag-av">'+t+'</span>'; });   // ★ LABO-1
     if(chips) h+='<div class="mvc-jtags">'+chips+'</div>';
     if(op.data.pdf_url){
       h+='<div class="mvc-jpdf">'+_mvIcon('document',16)+' <span class="mvc-jpdf-nm">'+_escHtml(op.data.pdf_nom||'analyse.pdf')+'</span><button onclick="window.open(\''+_escAttr(op.data.pdf_url)+'\',\'_blank\')" class="mvc-jpdf-btn">Ouvrir</button></div>';
@@ -1369,6 +1375,10 @@ function renderCaveCuvees() {
 
 function openOvCaveOp(opId) {
   if(isSaisonnier()){showToast('Acc\u00E8s lecture seule','#B85A1A');return;}
+  // ★ LABO-1 (§319) — une analyse née d'une fiche du labo se corrige DANS sa fiche : l'ancien formulaire
+  //   reconstruit opData en entier et ignore TAV, sucres, n° de rapport… il les effacerait (§20, défaut n°3).
+  if(opId){ var _lop=(CAVE_ELEVAGE.operations||[]).find(function(o){ return o&&o.id===opId; });
+    if(_lop&&_lop.type==='analyse'&&_lop.labo&&typeof window.openLabo==='function'){ window.openLabo({date:_lop.date}); return; } }
   var actives=CAVE_ELEVAGE.cuvees.filter(function(c){return c.statut!=='embouteille';});
   if(!actives.length) {
     if(typeof isAdmin==='function'&&isAdmin()){showToast('Cr\u00e9ez d\'abord une cuv\u00e9e','#C0845A');openOvCavee();}
@@ -2591,6 +2601,7 @@ function openCuveeDetail(cuvId,dans){
   if(spark) window._mvGraphSuivre('#mvg-so2-'+_mvgId(cuvId), function(lg){ return _caveSparkSO2(cuvId,lg); });
   if(spark) spark='<div id="mvg-so2-'+_mvgId(cuvId)+'"></div>';
   if(spark)html+='<div style="background:var(--bg-card);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:11px;margin-bottom:12px;"><div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">'+'\u00C9volution SO\u2082 libre (mg/L)</div>'+spark+'</div>';
+  html+=_laboCuveeHtml(cuv);   // ★ LABO-1 (§319) — « Au labo » : TAV, sucres, volatile, acidité, pH, malique, SO2 total
   // Journal
   if(allIt.length){
     html+='<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Journal</div>';
@@ -2621,6 +2632,7 @@ function openCuveeDetail(cuvId,dans){
         if(op.data.so2_total)det.push('SO\u2082 total: '+op.data.so2_total+' mg/L');
         if(op.data.av)det.push('Ac. volatile: '+op.data.av+' g/L');
         if(op.data.fml&&op.data.fml!=='none'){var ffl={cours:'FML en cours',ok:'FML termin\u00E9e',non:'Pas de FML'};if(ffl[op.data.fml])det.push(ffl[op.data.fml]);}
+        _laboOpResume(op).forEach(function(t){ det.push(t); });   // ★ LABO-1
       }
       if(op.type==='retrait_fut'&&op.data){var _anFut=op.data.annee_fut?(op.data.annee_fut>=new Date().getFullYear()?'neuf':op.data.annee_fut)+' \u00B7 ':'';det.push(op.data.nb_futs+' f\u00FBt'+(op.data.nb_futs>1?'s':'')+' '+_anFut+'retir\u00E9'+(op.data.nb_futs>1?'s':'')+' \u2014 '+(op.data.raison_lbl||''));}
       if(det.length)html+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:5px;line-height:1.5;">'+det.join(' \u00B7 ')+'</div>';
@@ -9484,6 +9496,941 @@ window._cuvMatSvg = function(w){
 window._caveBilanChaine  = _caveBilanChaine;
 window._caveBtlGraphSvg  = _caveBtlGraphSvg;
 window._mlMesMalo     = _mlMesMalo;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ★★ LABO-1 (§319) — LES RAPPORTS DU LABO : UNE FICHE PAR ENVOI, CHAQUE CHIFFRE À SA PLACE
+   ═══════════════════════════════════════════════════════════════════════════
+   Nico, 12/10 (dicté) : le bulletin du labo porte la date, le n° de l'échantillon, l'appellation,
+   la couleur, le millésime, puis ce que le vigneron a demandé (TAV, degré probable, glucose +
+   fructose, volatile…). Une date d'envoi concerne souvent plusieurs cuvées : on remplit UNE fiche,
+   l'application range chaque chiffre sur sa cuvée. Ressaisir par erreur la même date ou le même
+   n° de rapport ne doit rien effacer. Maquette `maquette-fiche-labo-v1` validée (« Ok go ») avec
+   les trois recommandations : la date retenue est celle du PRÉLÈVEMENT ; « Analyse » (Nouvelle
+   opération) et la zone d'import du Journal ouvrent la fiche ; les neuf analyses de la maquette.
+
+   ★★★ LE MODÈLE : PAS DE COLLECTION NEUVE, CHAQUE LIGNE VIT DANS SA MAISON (§10-11).
+   · Une ligne sur une cuvée du Chai EST une opération `type:'analyse'` (une cuvée par ligne) : les
+     lecteurs historiques (journal, dernière analyse, courbe du SO₂, malo, Pilotage, registre) la
+     lisent sans changer. Champs historiques gardés (so2_libre, so2_total, av, malique, fml) ; champs
+     neufs : tav, dp, gf, at, ph, lt (les « < »), rapport, ech, labo_nom, saisie. `op.labo = 1`.
+   · Une ligne sur une cuve du Cuvier vit dans `cuve.labo[]` (nouvelle liste, lue par ce bloc seul).
+     Son glucose + fructose, LUI, vit sur un relevé de `mesures_fa` (GF-1) relié par `labo_id` /
+     `mes_id` : la courbe des sucres, le verdict et l'agenda le lisent comme avant. Une seule vérité
+     par chiffre — jamais deux copies d'une même valeur.
+   · Un relevé portant un glucose saisi au Cuvier (sans fiche) compte comme une ligne : la fiche du
+     même jour le reconnaît et le complète au lieu d'en écrire un second.
+   ★★ LA RÈGLE « RIEN NE S'EFFACE » (_laboPlan) : un rapport se reconnaît à son n° (toutes dates,
+     toutes cuvées) ; sans n°, à sa cuvée dans la fiche du jour. Une case vide ne retire rien ; une
+     valeur différente se CHOISIT ; une autre date ou une autre cuvée pour le même n° se choisit aussi.
+     Une ancienne analyse commune à plusieurs cuvées reste en lecture : on ne la complète pas (ses
+     chiffres sont partagés) — une ligne neuve s'écrit à côté.
+   Moteurs sans DOM (_laboLignes, _laboPlan, _laboAppliquer) : c'est ce qui les rend vérifiables
+   (mv-harnais-labo). */
+
+var LABO_ANA=[
+  {k:'tav',  op:'tav',       h:'TAV',                     t:'TAV',                ch:'TAV',                   court:'TAV',                 long:'Titre alcoométrique (TAV)', u:'% vol', mn:1, mx:2, lo:5,   hi:17},
+  {k:'dp',   op:'dp',        h:'Degré probable',          t:'Degré probable',     ch:'Degré probable',        court:'Degré prob.',         long:'Degré probable',            u:'% vol', mn:1, mx:2, lo:8,   hi:17},
+  {k:'gf',   op:'gf',        h:'Glucose + fructose',      t:'Glucose + fructose', ch:'Gluc. + fruct.',        court:'G+F',                 long:'Glucose + fructose',        u:'g/L',   mn:1, mx:2, lo:0,   hi:300},
+  {k:'av',   op:'av',        h:'Volatile',                t:'Volatile',           ch:'Volatile',              court:'AV',                  long:'Acidité volatile',          u:'g/L',   mn:2, mx:2, lo:0,   hi:1.5},
+  {k:'at',   op:'at',        h:'Acidité totale',          t:'Acidité totale',     ch:'Acidité totale',        court:'AT',                  long:'Acidité totale',            u:'g/L',   mn:1, mx:2, lo:2,   hi:10},
+  {k:'ph',   op:'ph',        h:'pH',                      t:'pH',                 ch:'pH',                    court:'pH',                  long:'pH',                        u:'',      mn:2, mx:2, lo:2.8, hi:4.2},
+  {k:'so2l', op:'so2_libre', h:'SO<sub>2</sub> libre',    t:'SO2 libre',          ch:'SO<sub>2</sub> libre',  court:'SO<sub>2</sub> L',   long:'SO<sub>2</sub> libre',      u:'mg/L',  mn:0, mx:0, lo:0,   hi:100},
+  {k:'so2t', op:'so2_total', h:'SO<sub>2</sub> total',    t:'SO2 total',          ch:'SO<sub>2</sub> total',  court:'SO<sub>2</sub> T',   long:'SO<sub>2</sub> total',      u:'mg/L',  mn:0, mx:0, lo:0,   hi:250},
+  {k:'mal',  op:'malique',   h:'Malique',                 t:'Malique',            ch:'Malique',               court:'Malique',             long:'Acide malique',             u:'g/L',   mn:1, mx:2, lo:0,   hi:8}
+];
+var LABO_MALO={'':'pas dit', cours:'en cours', ok:'terminée'};
+var _LBO={vue:'liste', F:null, P:null, flash:null, envoi:false};
+
+function _laboAna(k){ for(var i=0;i<LABO_ANA.length;i++){ if(LABO_ANA[i].k===k) return LABO_ANA[i]; } return null; }
+/* Un nombre lu comme on l'écrit sur le bulletin : « 0,42 » vaut 0,42 (GF-1 : « 0,8 » lu 0 rendait une cuve sèche). */
+function _laboNum(v){
+  if(v===null||v===undefined||v===''||typeof v==='object'||typeof v==='boolean') return null;
+  var n=parseFloat(String(v).replace(',','.'));
+  return isFinite(n)?n:null;
+}
+/* La saisie : « 0,42 », « 0.42 », « < 0,1 ». null = case vide ; {err:true} = pas un nombre. */
+function _laboLit(raw){
+  var s=String(raw==null?'':raw).trim(); if(!s) return null;
+  var lt=false;
+  if(s.charAt(0)==='<'){ lt=true; s=s.slice(1).trim(); }
+  s=s.replace(/\s/g,'').replace(',','.').replace(/[^0-9.]/g,'');
+  if(!/^(\d+\.?\d*|\.\d+)$/.test(s)) return {err:true};
+  var v=parseFloat(s); if(!isFinite(v)) return {err:true};
+  return lt?{v:v, lt:true}:{v:v};
+}
+function _laboFmtN(v,a){
+  var mx=a?a.mx:2, mn=a?a.mn:0, p=Math.pow(10,mx), s=String(Math.round(v*p)/p);
+  var i=s.indexOf('.'), dec=(i<0)?0:(s.length-i-1);
+  if(dec<mn) s+=(i<0?'.':'')+'0000'.slice(0,mn-dec);
+  return s.replace('.',',');
+}
+function _laboFmt(o,a){ return o?((o.lt?'<\u00a0':'')+_laboFmtN(o.v,a)):'\u2014'; }
+function _laboFmtU(o,a){ return _laboFmt(o,a)+(a&&a.u?'\u00a0'+a.u:''); }
+function _laboEq(a,b){ return !!a&&!!b&&Math.abs(a.v-b.v)<1e-9&&!!a.lt===!!b.lt; }
+function _laboNorm(s){ return String(s==null?'':s).replace(/\s+/g,'').toUpperCase(); }
+function _laboAuj(){ return (typeof _mvToday==='function')?_mvToday():new Date().toISOString().slice(0,10); }
+function _laboQui(){ return (window.currentUser&&window.currentUser.nom)?String(window.currentUser.nom):''; }
+function _laboPeut(){ return (typeof canWrite==='function')?!!canWrite():!isSaisonnier(); }
+function _laboId(p){ return p+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+var _LBO_MOIS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+var _LBO_JOURS=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+function _laboD(iso){ var p=String(iso||'').split('-'); return p.length===3?new Date(+p[0],+p[1]-1,+p[2],12):null; }
+function _laboDateLongue(iso){ var d=_laboD(iso); return d&&!isNaN(d)?d.getDate()+'\u00a0'+_LBO_MOIS[d.getMonth()]:String(iso||''); }
+function _laboDateJour(iso){
+  var d=_laboD(iso); if(!d||isNaN(d)) return String(iso||'');
+  var t=_LBO_JOURS[d.getDay()]+' '+d.getDate()+'\u00a0'+_LBO_MOIS[d.getMonth()];
+  if(String(iso).slice(0,4)!==_laboAuj().slice(0,4)) t+=' '+d.getFullYear();
+  return t.charAt(0).toUpperCase()+t.slice(1);
+}
+
+/* ── Les cibles : les cuves suivies au Cuvier, les cuvées vivantes du Chai ── */
+function _laboNomCuvee(c){ var n=String((c&&c.nom)||'Cuvée'), m=(c&&c.millesime!=null)?String(c.millesime):''; return (m&&n.indexOf(m)<0)?n+' '+m:n; }
+function _laboNomCuve(c){ var n=String((c&&c.nom)||'Cuve'), m=(typeof _cuvAn==='function')?_cuvAn(c):''; return (m&&n.indexOf(m)<0)?n+' '+m:n; }
+function _laboCuveDe(id){ var L=(CAVE_VENDANGE&&CAVE_VENDANGE.cuves_vinif)||[]; for(var i=0;i<L.length;i++){ if(L[i]&&String(L[i].id)===String(id)) return L[i]; } return null; }
+function _laboCuveeDe(id){ var L=(CAVE_ELEVAGE&&CAVE_ELEVAGE.cuvees)||[]; for(var i=0;i<L.length;i++){ if(L[i]&&String(L[i].id)===String(id)) return L[i]; } return null; }
+function _laboRepere(c){ var r=(typeof _vendRepere==='function')?_vendRepere(c):''; return r?'Cuve '+r:''; }
+/* Le nom affiché d'une cible, quel que soit son état (une cuvée embouteillée garde ses rapports). */
+function _laboNomCible(lieu,id){
+  if(lieu==='cuvier'){ var c=_laboCuveDe(id); return c?_laboNomCuve(c):'Cuve retirée'; }
+  var v=_laboCuveeDe(id); return v?_laboNomCuvee(v):'Cuvée retirée';
+}
+/* Couleur et appellation : rien à saisir, on les lit sur les parcelles (comme l'assemblage, ASM-1). */
+function _laboOrigine(lieu,id){
+  var cv=(lieu==='cuvier')?_laboCuveDe(id):((typeof _caveCuveSource==='function')?_caveCuveSource(_laboCuveeDe(id)):null);
+  if(!cv) return '';
+  var coul={}, parts=[];
+  (Array.isArray(cv.parcelles)?cv.parcelles:[]).forEach(function(p){ var x=(typeof _parcCoul==='function')?_parcCoul(p):'?'; coul[x]=1; });
+  var ks=Object.keys(coul);
+  if(ks.length===1&&ks[0]==='r') parts.push('Rouge'); else if(ks.length===1&&ks[0]==='b') parts.push('Blanc');
+  var aoc=(typeof _asmAocsCuve==='function')?_asmAocsCuve(cv):[];
+  if(aoc.length) parts.push(aoc.join(', '));
+  return parts.join(' \u00b7 ');
+}
+function _laboCibles(){
+  var out=[];
+  ((CAVE_VENDANGE&&CAVE_VENDANGE.cuves_vinif)||[]).forEach(function(c){
+    if(!c||typeof c!=='object'||!c.id) return;
+    if(typeof _vendEstFusionnee==='function'&&_vendEstFusionnee(c)) return;
+    var suivie=(typeof _vendSuivie==='function')?_vendSuivie(c):false;
+    if(!(suivie||c.statut==='setup'||c.statut==='mpf'||c.statut==='fa')) return;
+    out.push({id:String(c.id), lieu:'cuvier', nom:_laboNomCuve(c), sous:_laboRepere(c)||'En cuve', mil:(typeof _cuvAn==='function')?_cuvAn(c):''});
+  });
+  ((CAVE_ELEVAGE&&CAVE_ELEVAGE.cuvees)||[]).forEach(function(c){
+    if(!c||typeof c!=='object'||!c.id||c.statut==='embouteille') return;
+    out.push({id:String(c.id), lieu:'chai', nom:_laboNomCuvee(c), sous:(typeof _caveContenantsStr==='function'&&_caveContenantsStr(c))||'En élevage', mil:(c.millesime!=null)?String(c.millesime):''});
+  });
+  return out;
+}
+
+/* ── Les lignes : TOUT ce que la cave sait des analyses, sous une seule forme ── */
+function _laboValsOp(d){
+  var vals={}, lt=(d&&d.lt&&typeof d.lt==='object')?d.lt:{};
+  LABO_ANA.forEach(function(a){ var v=_laboNum(d[a.op]); if(v!=null) vals[a.k]=lt[a.k]?{v:v, lt:true}:{v:v}; });
+  return vals;
+}
+function _laboPdfDe(o){ return (o&&o.pdf_url)?{url:String(o.pdf_url), path:String(o.pdf_path||''), nom:String(o.pdf_nom||'rapport.pdf'), taille:+o.pdf_taille||0}:null; }
+function _laboLignes(){
+  var out=[];
+  ((CAVE_ELEVAGE&&CAVE_ELEVAGE.operations)||[]).forEach(function(op){
+    if(!op||typeof op!=='object'||op.type!=='analyse') return;
+    var ids=(Array.isArray(op.cuvees_ids)&&op.cuvees_ids.length)?op.cuvees_ids:(op.cuvee_id?[op.cuvee_id]:[]);
+    var d=(op.data&&typeof op.data==='object')?op.data:{};
+    var vals=_laboValsOp(d), malo=(d.fml==='cours'||d.fml==='ok')?d.fml:'';
+    ids.forEach(function(cid){
+      if(cid==null||cid==='') return;
+      out.push({src:'op', ref:op, cid:String(cid), lieu:'chai', date:String(op.date||''), rapport:String(d.rapport||''), ech:String(d.ech||''),
+        nom:String(d.labo_nom||''), saisie:String(d.saisie||''), vals:vals, malo:malo, pdf:_laboPdfDe(d), lecture:ids.length>1, nb:ids.length,
+        id:'op:'+op.id+':'+cid});
+    });
+  });
+  ((CAVE_VENDANGE&&CAVE_VENDANGE.cuves_vinif)||[]).forEach(function(c){
+    if(!c||typeof c!=='object'||!c.id) return;
+    var mes=(Array.isArray(c.mesures_fa)?c.mesures_fa:[]).filter(function(m){ return m&&typeof m==='object'; });
+    var lies={};
+    (Array.isArray(c.labo)?c.labo:[]).forEach(function(e){
+      if(!e||typeof e!=='object'||!e.id) return;
+      var vals={}, src=(e.vals&&typeof e.vals==='object')?e.vals:{};
+      LABO_ANA.forEach(function(a){
+        if(a.k==='gf') return;
+        var o=src[a.k], v=_laboNum(o&&typeof o==='object'?o.v:o);
+        if(v!=null) vals[a.k]=(o&&o.lt)?{v:v, lt:true}:{v:v};
+      });
+      var m=null;
+      if(e.mes_id) for(var i=0;i<mes.length;i++){ if(mes[i].id===e.mes_id){ m=mes[i]; break; } }
+      if(m){ lies[m.id]=1; var g=_laboNum(m.gf); if(g!=null) vals.gf=m.gf_lt?{v:g, lt:true}:{v:g}; }
+      out.push({src:'cuve', ref:e, cuve:c, mes:m, cid:String(c.id), lieu:'cuvier', date:String(e.date||''), rapport:String(e.rapport||''), ech:String(e.ech||''),
+        nom:String(e.nom||''), saisie:String(e.saisie||''), vals:vals, malo:'', pdf:_laboPdfDe(e), lecture:false, nb:1, id:'cuve:'+c.id+':'+e.id});
+    });
+    mes.forEach(function(m){
+      if(lies[m.id]||!m.date) return;
+      var g=_laboNum(m.gf); if(g==null) return;
+      out.push({src:'mes', ref:m, cuve:c, mes:m, cid:String(c.id), lieu:'cuvier', date:String(m.date), rapport:'', ech:'', nom:'', saisie:'',
+        vals:{gf:m.gf_lt?{v:g, lt:true}:{v:g}}, malo:'', pdf:null, lecture:false, nb:1, id:'mes:'+c.id+':'+m.id});
+    });
+  });
+  return out;
+}
+
+/* ── La règle « rien ne s'efface » — moteur pur : la fiche F, les lignes existantes ── */
+function _laboTrouve(L, F, lignes, pris){
+  var r=_laboNorm(L.rapport), i, x;
+  if(r){ for(i=0;i<lignes.length;i++){ x=lignes[i]; if(!x.lecture&&!pris[x.id]&&_laboNorm(x.rapport)===r) return {m:x, par:'rapport'}; } }
+  for(i=0;i<lignes.length;i++){
+    x=lignes[i];
+    if(x.lecture||pris[x.id]||x.date!==F.date||x.cid!==String(L.cid)||x.lieu!==L.lieu) continue;
+    if(!_laboNorm(x.rapport)||!r) return {m:x, par:'cuvee'};
+  }
+  return null;
+}
+function _laboPlan(F, lignes){
+  var items=[], pris={}, utiles=0;
+  (F.lignes||[]).forEach(function(L){
+    var vals=L.vals||{};
+    var aDire=Object.keys(vals).length||L.malo||L.pdf||L.pdfFile;
+    if(!aDire) return;
+    utiles++;
+    var t=_laboTrouve(L, F, lignes, pris), m=t?t.m:null;
+    if(m) pris[m.id]=1;
+    var it={L:L, m:m, par:t?t.par:'', ajout:[], identique:[], garde:[], autres:[], choix:[], statut:'nouveau'};
+    if(m){
+      if(m.date!==F.date) it.choix.push({t:'date', a:m.date, b:F.date});
+      if(m.cid!==String(L.cid)||m.lieu!==L.lieu) it.choix.push({t:'cible', a:{lieu:m.lieu, id:m.cid}, b:{lieu:L.lieu, id:String(L.cid)}});
+      var e=String(L.ech||'').trim();
+      if(e&&m.ech&&_laboNorm(e)!==_laboNorm(m.ech)) it.choix.push({t:'ech', a:m.ech, b:e});
+      LABO_ANA.forEach(function(a){
+        var n=vals[a.k]||null, o=m.vals[a.k]||null, dem=(F.demande||[]).indexOf(a.k)>=0;
+        if(!n&&o){ if(dem) it.garde.push(a.k); else it.autres.push(a.k); }
+        else if(n&&!o) it.ajout.push(a.k);
+        else if(n&&o){ if(_laboEq(n,o)) it.identique.push(a.k); else it.choix.push({t:'val', k:a.k, a:o, b:n}); }
+      });
+      if(L.malo&&m.malo&&L.malo!==m.malo) it.choix.push({t:'malo', a:m.malo, b:L.malo});
+      var neuf=it.ajout.length||it.choix.length||(L.malo&&!m.malo)||((L.pdf||L.pdfFile)&&!m.pdf)
+        ||(_laboNorm(L.rapport)&&!_laboNorm(m.rapport))||(e&&!m.ech)||(String(F.nom||'').trim()&&!m.nom);
+      it.statut=neuf?'complete':'inchange';
+    } else {
+      LABO_ANA.forEach(function(a){ if(vals[a.k]) it.ajout.push(a.k); });
+    }
+    items.push(it);
+  });
+  var fiche=lignes.some(function(x){ return x.date===F.date; });
+  return {fiche:fiche, items:items, ignores:(F.lignes||[]).length-utiles};
+}
+
+/* ── Écrire une ligne dans sa maison ── */
+function _laboOpData(vals, malo, date, meta){
+  var d={so2_libre:null, so2_total:null, av:null, malique:null, fml:malo||'none', fml_date:(malo==='ok')?date:null};
+  var lt={};
+  LABO_ANA.forEach(function(a){ var o=vals[a.k]; if(o){ d[a.op]=o.v; if(o.lt) lt[a.k]=true; } });
+  if(Object.keys(lt).length) d.lt=lt;
+  d.rapport=meta.rapport||''; d.ech=meta.ech||''; d.labo_nom=meta.nom||''; d.saisie=meta.saisie||'';
+  if(meta.pdf){ d.pdf_url=meta.pdf.url; d.pdf_path=meta.pdf.path; d.pdf_nom=meta.pdf.nom; d.pdf_taille=meta.pdf.taille; }
+  return d;
+}
+function _laboGfOter(cuve, m){
+  if(!cuve||!m) return;
+  delete m.gf; delete m.gf_lt; delete m.labo_id;
+  if(m.labo_cree&&m.densite==null&&m.temp_c==null&&Array.isArray(cuve.mesures_fa)){
+    cuve.mesures_fa=cuve.mesures_fa.filter(function(x){ return x!==m; });
+  }
+}
+/* Le glucose d'une cuve va sur un relevé (GF-1) : celui de la ligne, sinon le relevé du même jour
+   qui n'en porte pas encore (la densité du matin et le labo du même prélèvement), sinon un neuf. */
+function _laboGfPoser(cuve, date, o, entreeId){
+  if(!Array.isArray(cuve.mesures_fa)) cuve.mesures_fa=[];
+  var mes=cuve.mesures_fa, m=null, i;
+  if(entreeId) for(i=0;i<mes.length;i++){ if(mes[i]&&mes[i].labo_id===entreeId){ m=mes[i]; break; } }
+  if(m&&m.date!==date){ var v0=m; _laboGfOter(cuve, v0); m=null; mes=cuve.mesures_fa; }
+  if(!m) for(i=0;i<mes.length;i++){ if(mes[i]&&mes[i].date===date&&_laboNum(mes[i].gf)==null&&!mes[i].labo_id){ m=mes[i]; break; } }
+  if(!m){ var q=_laboQui(); m={id:_laboId('vm_lb'), date:date, qui:q?[q]:[], labo_cree:true}; mes.push(m); }
+  m.gf=o.v; if(o.lt) m.gf_lt=true; else delete m.gf_lt;
+  if(entreeId) m.labo_id=entreeId;
+  return m;
+}
+function _laboCreer(lieu, cid, date, vals, malo, meta){
+  if(lieu==='chai'){
+    var q=_laboQui();
+    var op={id:_laboId('op_'), type:'analyse', date:date, cuvee_id:String(cid), cuvees_ids:[String(cid)], operateur:q, intervenants:q?[q]:[],
+      notes:'', labo:1, data:_laboOpData(vals, malo, date, meta)};
+    if(!Array.isArray(CAVE_ELEVAGE.operations)) CAVE_ELEVAGE.operations=[];
+    CAVE_ELEVAGE.operations.push(op);
+    var cv=_laboCuveeDe(cid); if(cv&&(!cv.last_analyse||String(cv.last_analyse)<date)) cv.last_analyse=date;
+    return 'elevage';
+  }
+  var cuve=_laboCuveDe(cid); if(!cuve) return '';
+  var e={id:_laboId('lab_'), date:date, rapport:meta.rapport||'', ech:meta.ech||'', nom:meta.nom||'', saisie:meta.saisie||'', par:_laboQui(), vals:{}};
+  LABO_ANA.forEach(function(a){ if(a.k!=='gf'&&vals[a.k]) e.vals[a.k]=vals[a.k].lt?{v:vals[a.k].v, lt:true}:{v:vals[a.k].v}; });
+  if(meta.pdf){ e.pdf_url=meta.pdf.url; e.pdf_path=meta.pdf.path; e.pdf_nom=meta.pdf.nom; e.pdf_taille=meta.pdf.taille; }
+  if(!Array.isArray(cuve.labo)) cuve.labo=[];
+  cuve.labo.push(e);
+  if(vals.gf){ var m=_laboGfPoser(cuve, date, vals.gf, e.id); e.mes_id=m.id; }
+  return 'vendange';
+}
+/* Retirer une ligne de sa maison (geste exprès : « Retirer », ou une ligne qui change de cuvée). */
+function _laboOter(x){
+  if(!x) return '';
+  if(x.src==='op'){
+    CAVE_ELEVAGE.operations=(CAVE_ELEVAGE.operations||[]).filter(function(o){ return o!==x.ref; });
+    return 'elevage';
+  }
+  if(x.src==='cuve'){
+    var c=x.cuve; if(c&&Array.isArray(c.labo)) c.labo=c.labo.filter(function(e){ return e!==x.ref; });
+    if(x.mes) _laboGfOter(c, x.mes);
+    return 'vendange';
+  }
+  if(x.src==='mes'){ _laboGfOter(x.cuve, x.mes); return 'vendange'; }
+  return '';
+}
+/* Appliquer le plan : rien ne s'efface, chaque choix tranché est respecté. Rend ce qui a bougé. */
+function _laboAppliquer(P, F){
+  var r={elevage:false, vendange:false, nouv:0, comp:0, dates:{}};
+  var tag=function(k){ if(k==='elevage') r.elevage=true; else if(k==='vendange') r.vendange=true; };
+  var meta0={nom:String(F.nom||'').trim(), saisie:_laboAuj()};
+  (P.items||[]).forEach(function(it){
+    var L=it.L, rapport=String(L.rapport||'').trim(), ech=String(L.ech||'').trim();
+    if(!it.m){
+      tag(_laboCreer(L.lieu, L.cid, F.date, L.vals||{}, L.malo||'', {rapport:rapport, ech:ech, nom:meta0.nom, saisie:meta0.saisie, pdf:L.pdf||null}));
+      r.nouv++; r.dates[F.date]=1; return;
+    }
+    var m=it.m, rep={};
+    it.choix.forEach(function(c){ rep[c.t+(c.k?':'+c.k:'')]=c.rep; });
+    var vals={}; Object.keys(m.vals).forEach(function(k){ vals[k]=m.vals[k]; });
+    it.ajout.forEach(function(k){ vals[k]=L.vals[k]; });
+    it.choix.forEach(function(c){ if(c.t==='val'&&c.rep==='b') vals[c.k]=c.b; });
+    var date=(rep.date==='b')?F.date:m.date;
+    var malo=m.malo||''; if(L.malo&&(!m.malo||rep.malo==='b')) malo=L.malo;
+    var meta={rapport:m.rapport||rapport, ech:(rep.ech==='b')?ech:(m.ech||ech), nom:m.nom||meta0.nom, saisie:m.saisie||meta0.saisie, pdf:m.pdf||L.pdf||null};
+    var cible=(rep.cible==='b')?{lieu:L.lieu, id:String(L.cid)}:{lieu:m.lieu, id:m.cid};
+    r.dates[date]=1;
+    if(it.statut==='inchange'&&rep.date!=='b'&&rep.cible!=='b') return;
+    r.comp++;
+    if(rep.cible==='b'){
+      tag(_laboOter(m)); tag(_laboCreer(cible.lieu, cible.id, date, vals, malo, meta)); return;
+    }
+    if(m.src==='op'){
+      var op=m.ref; op.date=date; op.labo=1;
+      var d=(op.data&&typeof op.data==='object')?op.data:(op.data={});
+      var nd=_laboOpData(vals, malo, date, meta);
+      if(!malo&&d.fml==='non') nd.fml='non';                                   // « pas de FML », déclaré à l'ancienne : on le garde
+      if(malo==='ok'&&m.malo==='ok'&&d.fml_date) nd.fml_date=d.fml_date;       // la date de fin déjà constatée ne bouge pas
+      Object.keys(nd).forEach(function(k){ d[k]=nd[k]; });
+      if(!nd.lt) delete d.lt;
+      if(!meta.pdf){ delete d.pdf_url; delete d.pdf_path; delete d.pdf_nom; delete d.pdf_taille; }
+      var cv=_laboCuveeDe(m.cid); if(cv&&(!cv.last_analyse||String(cv.last_analyse)<date)) cv.last_analyse=date;
+      tag('elevage'); return;
+    }
+    var cuve=m.cuve, e;
+    if(m.src==='mes'){
+      e={id:_laboId('lab_'), date:date, rapport:meta.rapport, ech:meta.ech, nom:meta.nom, saisie:meta.saisie, par:_laboQui(), vals:{}};
+      if(!Array.isArray(cuve.labo)) cuve.labo=[];
+      cuve.labo.push(e);
+      m.mes.labo_id=e.id; e.mes_id=m.mes.id;
+      if(m.mes.date!==date&&vals.gf){ var g0=vals.gf; _laboGfOter(cuve, m.mes); var mm=_laboGfPoser(cuve, date, g0, e.id); e.mes_id=mm.id; }
+    } else e=m.ref;
+    e.date=date; e.rapport=meta.rapport; e.ech=meta.ech; e.nom=meta.nom; if(!e.saisie) e.saisie=meta.saisie;
+    e.vals={};
+    LABO_ANA.forEach(function(a){ if(a.k!=='gf'&&vals[a.k]) e.vals[a.k]=vals[a.k].lt?{v:vals[a.k].v, lt:true}:{v:vals[a.k].v}; });
+    if(meta.pdf&&!e.pdf_url){ e.pdf_url=meta.pdf.url; e.pdf_path=meta.pdf.path; e.pdf_nom=meta.pdf.nom; e.pdf_taille=meta.pdf.taille; }
+    if(vals.gf){ var mg=_laboGfPoser(cuve, date, vals.gf, e.id); e.mes_id=mg.id; }
+    tag('vendange');
+  });
+  return r;
+}
+
+/* ── Les séries d'une cuvée ou d'une cuve (les blocs « Au labo ») ── */
+function _laboSerie(lignes){
+  var S={};
+  lignes.slice().sort(function(a,b){ return a.date<b.date?-1:(a.date>b.date?1:0); }).forEach(function(x){
+    if(!x.date) return;
+    Object.keys(x.vals).forEach(function(k){
+      var arr=S[k]||(S[k]=[]), o=x.vals[k];
+      if(arr.length&&arr[arr.length-1].d===x.date) arr[arr.length-1]={d:x.date, o:o};   // même jour : la dernière saisie compte
+      else arr.push({d:x.date, o:o});
+    });
+  });
+  return S;
+}
+function _laboCourbe(pts, w, a, col){
+  var c=window._mvGraphCadre(w,86,{padL:10,padR:10,padT:20,padB:22});
+  var W=c.w, H=c.h, pX=c.padL, pY=c.padT, iW=c.iw, iH=c.ih;
+  var ts=pts.map(function(p){ var d=_laboD(p.d); return d?d.getTime():0; }), t0=ts[0], sp=Math.max(1,ts[ts.length-1]-t0);
+  var vs=pts.map(function(p){ return p.o.v; }), mn=Math.min.apply(null,vs), mx=Math.max.apply(null,vs);
+  if(mx-mn<1e-9){ var e=Math.max(0.5,Math.abs(mx)*0.1); mn-=e; mx+=e; }
+  var P=pts.map(function(p,i){ return {x:pX+(ts[i]-t0)/sp*iW, y:pY+(1-(p.o.v-mn)/(mx-mn))*iH}; });
+  var ligne=P.map(function(p,i){ return (i?'L':'M')+p.x.toFixed(1)+' '+p.y.toFixed(1); }).join(' ');
+  var g='<path d="'+ligne+' L'+P[P.length-1].x.toFixed(1)+' '+(H-c.padB)+' L'+P[0].x.toFixed(1)+' '+(H-c.padB)+' Z" fill="'+col+'" fill-opacity="0.10"/>';
+  g+='<path d="'+ligne+'" fill="none" stroke="'+col+'" stroke-width="'+c.trait.prevu+'" stroke-linejoin="round" stroke-linecap="round"/>';
+  P.forEach(function(p,i){ g+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="3" fill="'+(pts[i].o.lt?'var(--bg-card)':col)+'" stroke="'+col+'" stroke-width="1.5"/>'; });
+  var p0=P[0], p1=P[P.length-1];
+  g+='<text x="'+p0.x.toFixed(1)+'" y="'+Math.max(c.txt.mini+2,p0.y-7).toFixed(1)+'" fill="'+c.col.texte+'" font-size="'+c.txt.mini+'" text-anchor="start">'+_escHtml(_laboFmt(pts[0].o,a))+'</text>';
+  g+='<text x="'+p1.x.toFixed(1)+'" y="'+Math.max(c.txt.mini+2,p1.y-7).toFixed(1)+'" fill="'+col+'" font-size="'+c.txt.mini+'" font-weight="600" text-anchor="end">'+_escHtml(_laboFmt(pts[pts.length-1].o,a))+'</text>';
+  g+='<text x="'+pX+'" y="'+(H-6)+'" fill="'+c.col.texte+'" font-size="'+c.txt.mini+'" text-anchor="start">'+_escHtml(_caveDateFr(pts[0].d))+'</text>';
+  g+='<text x="'+(W-pX)+'" y="'+(H-6)+'" fill="'+c.col.texte+'" font-size="'+c.txt.mini+'" text-anchor="end">'+_escHtml(_caveDateFr(pts[pts.length-1].d))+'</text>';
+  return window._mvGraphSvg(c, a.t+' : '+pts.length+' analyses, de '+_laboFmtU(pts[0].o,a)+' à '+_laboFmtU(pts[pts.length-1].o,a)+'.', g);
+}
+/* Le bloc « Au labo » : un chiffre par analyse, et sa courbe dès deux rapports. */
+function _laboBlocHtml(S, pref, id, sauf){
+  var ks=LABO_ANA.filter(function(a){ return S[a.k]&&S[a.k].length&&(sauf||[]).indexOf(a.k)<0; });
+  if(!ks.length) return '';
+  var h='<div class="lbo-bloc"><div class="lbo-bloc-hd">Au labo<span>chaque point est un rapport</span></div>';
+  ks.forEach(function(a){
+    var pts=S[a.k], der=pts[pts.length-1];
+    h+='<div class="lbo-bl"><div class="lbo-bl-hd"><span class="lbo-bl-k">'+a.long+'</span>'
+      +'<span class="lbo-bl-v">'+_escHtml(_laboFmt(der.o,a))+(a.u?'<small>'+_escHtml(a.u)+'</small>':'')+'</span></div>'
+      +'<div class="lbo-bl-d">'+pts.length+' rapport'+(pts.length>1?'s':'')+' \u00b7 dernier le '+_escHtml(_caveDateFr(der.d))+'</div>'
+      +(pts.length>=2?'<div class="lbo-bl-g" id="mvg-'+pref+'-'+a.k+'-'+_mvgId(id)+'"></div>':'')+'</div>';
+  });
+  return h+'</div>';
+}
+function _laboBlocPeindre(S, pref, id, sauf, col){
+  LABO_ANA.forEach(function(a){
+    if((sauf||[]).indexOf(a.k)>=0||!S[a.k]||S[a.k].length<2) return;
+    (function(pts,an){ window._mvGraphSuivre('#mvg-'+pref+'-'+an.k+'-'+_mvgId(id), function(lg){ return _laboCourbe(pts, lg, an, col); }); })(S[a.k], a);
+  });
+}
+/* La cuvée du Chai : ses analyses, et celles de la cuve d'où elle vient (la suite du même vin). */
+function _laboSerieCuvee(cuv){
+  var src=(typeof _caveCuveSource==='function')?_caveCuveSource(cuv):null;
+  var L=_laboLignes().filter(function(x){ return (x.lieu==='chai'&&x.cid===String(cuv.id))||(src&&x.lieu==='cuvier'&&x.cid===String(src.id)); });
+  return _laboSerie(L);
+}
+function _laboCuveeHtml(cuv){
+  _laboCss();
+  window._mvGraphOublier('#mvg-lbo-');
+  var S=_laboSerieCuvee(cuv);
+  _laboBlocPeindre(S, 'lbo', cuv.id, ['so2l'], 'var(--terre)');
+  return _laboBlocHtml(S, 'lbo', cuv.id, ['so2l']);
+}
+/* La cuve du Cuvier : ses analyses sauf le glucose, qui a son bloc (GF-1). Appelée par cuvier.js. */
+window._laboCuveHtml = function(c){
+  if(!c) return '';
+  _laboCss();
+  var S=_laboSerie(_laboLignes().filter(function(x){ return x.lieu==='cuvier'&&x.cid===String(c.id); }));
+  return _laboBlocHtml(S, 'lbc', c.id, ['gf']);
+};
+window._laboCuvePeindre = function(c){
+  if(!c) return;
+  var S=_laboSerie(_laboLignes().filter(function(x){ return x.lieu==='cuvier'&&x.cid===String(c.id); }));
+  _laboBlocPeindre(S, 'lbc', c.id, ['gf'], 'var(--ink-info)');
+};
+/* Ce que le journal ajoute aux analyses : les champs neufs et le n° du rapport. */
+function _laboOpResume(op){
+  var d=(op&&op.data&&typeof op.data==='object')?op.data:{}, lt=(d.lt&&typeof d.lt==='object')?d.lt:{}, out=[];
+  if(d.rapport) out.push('Rapport n\u00b0\u00a0'+_escHtml(d.rapport));
+  ['tav','dp','gf','at','ph'].forEach(function(k){
+    var a=_laboAna(k), v=_laboNum(d[a.op]);
+    if(v!=null) out.push(a.court+' '+_escHtml(_laboFmtU(lt[k]?{v:v, lt:true}:{v:v}, a)));
+  });
+  return out;
+}
+
+/* ── L'écran : la liste, la fiche, la vérification ── */
+function _laboCss(){
+  if(document.getElementById('mv-labo-css')) return;
+  var s=document.createElement('style'); s.id='mv-labo-css';
+  s.textContent=''
+  +'.lbo-modal .modal-body{padding:var(--e-3,12px) var(--e-4,16px) var(--e-6,24px)}'
+  +'.lbo-hd{display:flex;align-items:flex-start;gap:var(--e-2,8px);padding:var(--e-3,12px) var(--e-4,16px) var(--e-3,12px);border-bottom:1px solid var(--gris-clair)}'
+  +'.lbo-hd-t{flex:1;min-width:0}'
+  +'.lbo-ret{display:inline-flex;align-items:center;gap:var(--e-1,4px);min-height:36px;margin:0 0 var(--e-1,4px) calc(-1 * var(--e-2,8px));padding:0 var(--e-2,8px);border:0;border-radius:var(--r-md,8px);background:none;font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;color:var(--accent-texte,#7A2850);cursor:pointer}'
+  +'.lbo-titre{font-family:\'Cormorant Garamond\',Georgia,serif;font-weight:600;font-size:var(--pt-lg,24px);line-height:1.1;color:var(--texte)}'
+  +'.lbo-sous{margin-top:var(--e-1,4px);font-size:var(--pt-micro,12px);color:var(--texte-doux)}'
+  +'.lbo-intro{font-size:var(--pt-txt,13px);line-height:1.5;color:var(--texte-med);margin:0 0 var(--e-3,12px)}'
+  +'.lbo-btn{display:flex;align-items:center;justify-content:center;gap:var(--e-2,8px);width:100%;min-height:48px;padding:0 var(--e-4,16px);border:0;border-radius:var(--r-lg,12px);background:var(--accent,#7A2850);color:var(--sur-accent,#fff);font-family:inherit;font-size:var(--pt-sm,16px);font-weight:700;cursor:pointer}'
+  +'.lbo-btn[disabled]{background:var(--gris-clair);color:var(--texte-doux);cursor:not-allowed}'
+  +'.lbo-btn2{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;margin-top:var(--e-2,8px);border:1.5px solid var(--gris);border-radius:var(--r-lg,12px);background:var(--bg-card);font-family:inherit;font-size:var(--pt-base,14px);font-weight:600;color:var(--texte);cursor:pointer}'
+  +'.lbo-fiche{margin-top:var(--e-3,12px);background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:var(--r-lg,12px);overflow:hidden}'
+  +'.lbo-fiche.flash{box-shadow:0 0 0 3px var(--anneau,rgba(122,40,80,.42))}'
+  +'.lbo-fh{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--e-2,8px);width:100%;padding:var(--e-3,12px);border:0;background:none;font-family:inherit;text-align:left;color:inherit;cursor:pointer}'
+  +'.lbo-fh[disabled]{cursor:default}'
+  +'.lbo-fd{display:block;font-family:\'Cormorant Garamond\',Georgia,serif;font-weight:700;font-size:var(--pt-md,20px);line-height:1.1;color:var(--texte)}'
+  +'.lbo-fl{display:block;margin-top:2px;font-size:var(--pt-micro,12px);color:var(--texte-doux)}'
+  +'.lbo-fn{flex:none;padding:2px var(--e-2,8px);border:1px solid var(--gris-clair);border-radius:999px;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-med)}'
+  +'.lbo-l{display:flex;align-items:flex-start;gap:var(--e-2,8px);padding:var(--e-2,8px) var(--e-3,12px);border-top:1px solid var(--gris-clair)}'
+  +'.lbo-lt{flex:1;min-width:0}'
+  +'.lbo-ln{display:flex;align-items:center;gap:6px;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)}'
+  +'.lbo-lm{display:block;margin:2px 0 0 14px;font-size:var(--pt-micro,12px);color:var(--texte-doux)}'
+  +'.lbo-pt{flex:none;width:8px;height:8px;border-radius:50%;background:var(--terre,#8A5A38)}'
+  +'.lbo-pt.cuvier{background:var(--ink-info,#4A9FC8)}'
+  +'.lbo-vals{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 0 14px}'
+  +'.lbo-v{padding:2px 6px;border:1px solid var(--gris-clair);border-radius:6px;background:var(--bg-app);font-size:var(--pt-micro,12px);color:var(--texte-med);white-space:nowrap}'
+  +'.lbo-v b{font-weight:600;color:var(--texte)}'
+  +'.lbo-mini{flex:none;min-height:34px;padding:0 var(--e-2,8px);border:1.5px solid var(--gris);border-radius:var(--r-md,8px);background:var(--bg-card);font-family:inherit;font-size:var(--pt-micro,12px);font-weight:600;color:var(--accent-texte,#7A2850);cursor:pointer}'
+  +'.lbo-mini.ret{color:var(--danger,#C2381B)}'
+  +'.lbo-mini+.lbo-mini{margin-top:var(--e-1,4px)}'
+  +'.lbo-acts{display:flex;flex-direction:column;flex:none}'
+  +'.lbo-band{margin-top:var(--e-3,12px);padding:var(--e-2,8px) var(--e-3,12px);border-radius:var(--r-md,8px);background:var(--ok-doux,rgba(35,122,71,.15));font-size:var(--pt-txt,13px);line-height:1.5;color:var(--texte)}'
+  +'.lbo-deja{margin-top:var(--e-1,4px);border:1px dashed var(--gris);border-radius:var(--r-lg,12px);background:var(--bg-app);overflow:hidden}'
+  +'.lbo-deja .lbo-l:first-child{border-top:0}'
+  +'.lbo-aide{margin-top:var(--e-2,8px);font-size:var(--pt-micro,12px);line-height:1.45;color:var(--texte-doux)}'
+  +'.lbo-chips{display:flex;flex-wrap:wrap;gap:6px}'
+  +'.lbo-chip{min-height:36px;padding:var(--e-1,4px) var(--e-3,12px);border:1.5px solid var(--gris);border-radius:999px;background:var(--bg-card);font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte-doux);cursor:pointer}'
+  +'.lbo-chip[aria-pressed="true"]{border-color:var(--accent,#7A2850);background:var(--accent-doux,rgba(122,40,80,.11));color:var(--accent-texte,#7A2850)}'
+  +'.lbo-grp{display:flex;align-items:center;gap:6px;margin-top:var(--e-3,12px);font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-med)}'
+  +'.lbo-pick{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}'
+  +'.lbo-pk{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:52px;padding:var(--e-2,8px) 30px var(--e-2,8px) var(--e-3,12px);border:1.5px solid var(--gris-clair);border-radius:var(--r-lg,12px);background:var(--bg-card);font-family:inherit;text-align:left;color:inherit;cursor:pointer}'
+  +'.lbo-pk b{font-size:var(--pt-txt,13px);font-weight:600;line-height:1.2;color:var(--texte)}'
+  +'.lbo-pk small{font-size:var(--pt-micro,12px);color:var(--texte-doux)}'
+  +'.lbo-pk .n{position:absolute;top:6px;right:6px;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--accent,#7A2850);color:var(--sur-accent,#fff);font-size:var(--pt-nano,11px);font-weight:700;line-height:20px;text-align:center}'
+  +'.lbo-vide{margin-top:var(--e-3,12px);padding:var(--e-3,12px);border:1.5px dashed var(--gris);border-radius:var(--r-lg,12px);font-size:var(--pt-txt,13px);line-height:1.5;color:var(--texte-doux);text-align:center}'
+  +'.lbo-ech{margin-top:var(--e-3,12px);padding:var(--e-3,12px);background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:var(--r-lg,12px)}'
+  +'.lbo-eh{display:flex;align-items:flex-start;gap:6px}'
+  +'.lbo-en{font-family:\'Cormorant Garamond\',Georgia,serif;font-weight:700;font-size:var(--pt-md,20px);line-height:1.15;color:var(--texte)}'
+  +'.lbo-em{display:flex;align-items:center;gap:6px;margin-top:2px;font-size:var(--pt-micro,12px);color:var(--texte-doux)}'
+  +'.lbo-x{flex:none;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;margin:-4px -8px 0 0;border:0;border-radius:var(--r-md,8px);background:none;color:var(--texte-doux);cursor:pointer}'
+  +'.lbo-duo{display:grid;grid-template-columns:1fr 1fr;gap:var(--e-2,8px);margin-top:var(--e-2,8px)}'
+  +'.lbo-lab{display:block;margin-bottom:4px;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-med)}'
+  +'.lbo-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--e-2,8px);margin-top:var(--e-3,12px);padding-top:var(--e-3,12px);border-top:1px solid var(--gris-clair)}'
+  +'.lbo-val{position:relative;display:block}'
+  +'.lbo-val .fi{padding-right:48px}'
+  +'.lbo-u{position:absolute;top:50%;right:10px;transform:translateY(-50%);font-size:var(--pt-micro,12px);color:var(--texte-doux);pointer-events:none}'
+  +'.lbo-hint{display:block;margin-top:4px;font-size:var(--pt-micro,12px);line-height:1.35;color:var(--attention,#A15C00)}'
+  +'.lbo-hint:empty{display:none}'
+  +'.lbo-hint.err{color:var(--danger,#C2381B)}'
+  +'.fi.lbo-err{border-color:var(--danger,#C2381B)}'
+  +'.lbo-note{margin-top:var(--e-2,8px);padding:var(--e-2,8px) var(--e-3,12px);border-radius:var(--r-md,8px);background:var(--bleu-pale,#E8F0FA);font-size:var(--pt-micro,12px);line-height:1.45;color:var(--texte-med)}'
+  +'.lbo-note b{color:var(--texte)}'
+  +'.lbo-seg{display:flex;gap:4px;padding:3px;border-radius:var(--r-lg,12px);background:var(--gris-clair)}'
+  +'.lbo-seg button{flex:1;min-height:38px;border:0;border-radius:var(--r-md,8px);background:none;font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte-doux);cursor:pointer}'
+  +'.lbo-seg button[aria-pressed="true"]{background:var(--bg-card);color:var(--texte)}'
+  +'.lbo-lien{display:inline-flex;align-items:center;gap:6px;min-height:36px;margin-top:var(--e-2,8px);padding:0;border:0;background:none;font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;color:var(--accent-texte,#7A2850);cursor:pointer}'
+  +'.lbo-pdf{display:flex;align-items:center;gap:var(--e-2,8px);margin-top:var(--e-2,8px);padding:var(--e-1,4px) var(--e-1,4px) var(--e-1,4px) var(--e-3,12px);border:1px solid var(--gris-clair);border-radius:var(--r-md,8px);background:var(--bg-app);font-size:var(--pt-micro,12px)}'
+  +'.lbo-pdf span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+  +'.lbo-foot{position:sticky;bottom:0;margin:var(--e-4,16px) calc(-1 * var(--e-4,16px)) 0;padding:var(--e-3,12px) var(--e-4,16px) calc(var(--e-3,12px) + env(safe-area-inset-bottom,0px));background:var(--bg-card);border-top:1px solid var(--gris-clair)}'
+  +'.lbo-res{font-size:var(--pt-base,14px);line-height:1.5;color:var(--texte)}'
+  +'.lbo-choix{margin-top:var(--e-2,8px);padding:var(--e-3,12px);border:1.5px solid var(--attention,#A15C00);border-radius:var(--r-lg,12px);background:var(--attention-doux,rgba(161,92,0,.15))}'
+  +'.lbo-cq{font-size:var(--pt-base,14px);font-weight:600;line-height:1.35;color:var(--texte)}'
+  +'.lbo-cc{margin-top:2px;font-size:var(--pt-micro,12px);line-height:1.45;color:var(--texte-med)}'
+  +'.lbo-opts{display:grid;grid-template-columns:1fr 1fr;gap:var(--e-2,8px);margin-top:var(--e-2,8px)}'
+  +'.lbo-opt{min-height:50px;padding:var(--e-1,4px) var(--e-2,8px);border:1.5px solid var(--gris);border-radius:var(--r-md,8px);background:var(--bg-card);font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;line-height:1.25;color:var(--texte);cursor:pointer}'
+  +'.lbo-opt small{display:block;margin-top:2px;font-size:var(--pt-nano,11px);font-weight:500;color:var(--texte-doux)}'
+  +'.lbo-opt[aria-pressed="true"]{border-color:var(--accent,#7A2850);background:var(--accent,#7A2850);color:var(--sur-accent,#fff)}'
+  +'.lbo-opt[aria-pressed="true"] small{color:inherit}'
+  +'.lbo-rv{margin-top:var(--e-2,8px);padding:var(--e-3,12px) var(--e-3,12px) var(--e-1,4px);background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:var(--r-lg,12px)}'
+  +'.lbo-rvh{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--e-2,8px);padding-bottom:6px}'
+  +'.lbo-pill{flex:none;padding:2px var(--e-2,8px);border-radius:999px;font-size:var(--pt-nano,11px);font-weight:700;white-space:nowrap}'
+  +'.lbo-pill.nouveau{background:var(--ok-doux,rgba(35,122,71,.15));color:var(--ok,#237A47)}'
+  +'.lbo-pill.complete{background:var(--accent-doux,rgba(122,40,80,.11));color:var(--accent-texte,#7A2850)}'
+  +'.lbo-pill.inchange{border:1px solid var(--gris-clair);color:var(--texte-doux)}'
+  +'.lbo-rl{display:grid;grid-template-columns:1fr auto;gap:1px var(--e-2,8px);padding:var(--e-2,8px) 0;border-top:1px solid var(--gris-clair)}'
+  +'.lbo-rk{font-size:var(--pt-txt,13px);color:var(--texte)}'
+  +'.lbo-rv2{font-size:var(--pt-base,14px);font-weight:600;text-align:right;color:var(--texte);white-space:nowrap}'
+  +'.lbo-rd{grid-column:1/-1;font-size:var(--pt-micro,12px);line-height:1.4;color:var(--texte-doux)}'
+  +'.lbo-rl.muet .lbo-rk,.lbo-rl.muet .lbo-rv2{font-weight:500;color:var(--texte-doux)}'
+  +'.lbo-rl.att .lbo-rv2,.lbo-rl.att .lbo-rd{color:var(--attention,#A15C00)}'
+  +'.lbo-leg{display:flex;flex-wrap:wrap;gap:6px var(--e-3,12px);margin-top:var(--e-3,12px);font-size:var(--pt-micro,12px);color:var(--texte-doux)}'
+  +'.lbo-leg span{display:inline-flex;align-items:center;gap:6px}'
+  +'.lbo-nw{white-space:nowrap}'
+  +'.lbo-bloc{margin:0 0 var(--e-3,12px);padding:var(--e-3,12px);background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:var(--r-lg,12px)}'
+  +'.lbo-bloc-hd{display:flex;align-items:baseline;justify-content:space-between;gap:var(--e-2,8px);font-family:\'Cormorant Garamond\',Georgia,serif;font-weight:600;font-size:var(--pt-md,20px);color:var(--texte)}'
+  +'.lbo-bloc-hd span{font-family:inherit;font-size:var(--pt-micro,12px);font-weight:500;color:var(--texte-doux)}'
+  +'.lbo-bl{padding:var(--e-2,8px) 0;border-top:1px solid var(--gris-clair)}'
+  +'.lbo-bl:first-of-type{border-top:0}'
+  +'.lbo-bl-hd{display:flex;align-items:baseline;justify-content:space-between;gap:var(--e-2,8px)}'
+  +'.lbo-bl-k{font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)}'
+  +'.lbo-bl-v{font-family:\'Cormorant Garamond\',Georgia,serif;font-weight:700;font-size:var(--pt-lg,24px);line-height:1;color:var(--texte);white-space:nowrap;font-variant-numeric:lining-nums}'
+  +'.lbo-bl-v small{margin-left:3px;font-family:inherit;font-size:var(--pt-micro,12px);font-weight:500;color:var(--texte-doux)}'
+  +'.lbo-bl-d{margin-top:2px;font-size:var(--pt-micro,12px);color:var(--texte-doux)}'
+  +'.lbo-bl-g{margin-top:6px}';
+  document.head.appendChild(s);
+}
+function _laboNw(t){ return '<span class="lbo-nw">'+_escHtml(t)+'</span>'; }
+function _laboPills(vals){
+  var h=''; LABO_ANA.forEach(function(a){ var o=vals[a.k]; if(o) h+='<span class="lbo-v">'+a.court+' <b>'+_escHtml(_laboFmt(o,a))+'</b></span>'; });
+  return h;
+}
+function _laboMeta(x){
+  var p=[];
+  p.push(x.rapport?_laboNw('Rapport n\u00b0\u00a0'+x.rapport):'Sans n\u00b0 de rapport');
+  if(x.ech) p.push(_laboNw('échantillon '+x.ech));
+  if(x.lieu==='cuvier'&&x.cuve&&_laboRepere(x.cuve)) p.push(_escHtml(_laboRepere(x.cuve)));
+  if(x.lecture) p.push('ancienne saisie, commune à '+x.nb+' cuvées');
+  if(x.pdf) p.push('PDF joint');
+  return p.join(' \u00b7 ');
+}
+function _laboHd(back, titre, sous){
+  var h='<div class="lbo-hd"><div class="lbo-hd-t">';
+  if(back) h+='<button class="lbo-ret" onclick="window._laboRetour()">'+_mvIcon('gauche',16)+_escHtml(back)+'</button>';
+  h+='<div class="lbo-titre">'+_escHtml(titre)+'</div>'+(sous?'<div class="lbo-sous">'+sous+'</div>':'')+'</div></div>';
+  return h;
+}
+function _laboVueListe(){
+  var L=_laboLignes(), par={}, dates=[];
+  L.forEach(function(x){ if(!x.date) return; if(!par[x.date]){ par[x.date]=[]; dates.push(x.date); } par[x.date].push(x); });
+  dates.sort(function(a,b){ return a<b?1:-1; });
+  var peut=_laboPeut();
+  var h=_laboHd('', 'Rapports du labo', 'Le Chai et Le Cuvier \u00b7 une fiche par envoi au labo');
+  h+='<div class="modal-body"><p class="lbo-intro">Chaque rapport se range seul sur sa cuvée : ses courbes, la projection de la malo et le suivi des sucres le lisent.</p>';
+  if(peut) h+='<button class="lbo-btn" onclick="window._laboNouveau()">'+_mvIcon('plus',18)+'Saisir un rapport</button>';
+  if(!dates.length) h+='<div class="lbo-vide">Aucun rapport du labo pour l’instant.</div>';
+  dates.forEach(function(d){
+    var ls=par[d], nom='';
+    ls.forEach(function(x){ if(!nom&&x.nom) nom=x.nom; });
+    h+='<div class="lbo-fiche'+(_LBO.flash===d?' flash':'')+'">'
+      +'<button class="lbo-fh" '+(peut?'onclick="window._laboOuvrirDate(\''+_escAttr(d)+'\')"':'disabled')+' aria-label="'+_escAttr((peut?'Compléter la fiche du ':'Fiche du ')+_laboDateLongue(d))+'">'
+      +'<span><span class="lbo-fd">'+_escHtml(_laboDateJour(d))+'</span><span class="lbo-fl">'+_escHtml(nom||'Laboratoire non précisé')+'</span></span>'
+      +'<span class="lbo-fn">'+ls.length+' rapport'+(ls.length>1?'s':'')+'</span></button>';
+    ls.forEach(function(x){
+      h+='<div class="lbo-l"><div class="lbo-lt"><div class="lbo-ln"><i class="lbo-pt'+(x.lieu==='cuvier'?' cuvier':'')+'"></i>'+_escHtml(_laboNomCible(x.lieu,x.cid))+'</div>'
+        +'<span class="lbo-lm">'+_laboMeta(x)+'</span><div class="lbo-vals">'+_laboPills(x.vals)+'</div></div></div>';
+    });
+    h+='</div>';
+  });
+  return h+'</div>';
+}
+function _laboFormNeuf(date){
+  var L=_laboLignes(), der=null;
+  L.forEach(function(x){ if(x.date&&(!der||x.date>der)) der=x.date; });
+  var dem=[], nom='';
+  if(der) L.forEach(function(x){ if(x.date!==der) return; if(!nom&&x.nom) nom=x.nom; Object.keys(x.vals).forEach(function(k){ if(dem.indexOf(k)<0) dem.push(k); }); });
+  if(!dem.length) dem=['tav','gf','av'];
+  return {date:date||_laboAuj(), nom:nom, demande:LABO_ANA.map(function(a){ return a.k; }).filter(function(k){ return dem.indexOf(k)>=0; }), repris:der, lignes:[]};
+}
+function _laboFormDate(date){
+  var F=_laboFormNeuf(date), dem={};
+  _laboLignes().forEach(function(x){ if(x.date===date) Object.keys(x.vals).forEach(function(k){ dem[k]=1; }); });
+  if(Object.keys(dem).length){ F.demande=LABO_ANA.map(function(a){ return a.k; }).filter(function(k){ return dem[k]; }); F.repris=null; }
+  F.nom='';
+  return F;
+}
+function _laboLigneNeuve(lieu, cid){ return {lieu:lieu, cid:String(cid), rapport:'', ech:'', raw:{}, vals:{}, malo:'', pdf:null, pdfFile:null}; }
+/* Ce que l'appli reconnaît déjà, pendant qu'on tape : même règle que _laboPlan. */
+function _laboApercu(L){
+  var t=_laboTrouve(L, _LBO.F, _laboLignes(), {});
+  if(!t) return '';
+  var m=t.m, nm=_escHtml(_laboNomCible(m.lieu,m.cid)), s;
+  if(t.par==='cuvee') s='<b>'+nm+'</b> a déjà un rapport dans cette fiche'+(m.rapport?' ('+_laboNw('n\u00b0\u00a0'+m.rapport)+')':'')+' : vos chiffres le complètent.';
+  else s=_laboNw('Rapport n\u00b0\u00a0'+m.rapport)+' déjà saisi'+(m.date!==_LBO.F.date?' au '+_escHtml(_laboDateLongue(m.date)):'')+', sur <b>'+nm+'</b> : vos chiffres le complètent.';
+  if(m.date!==_LBO.F.date) s+=' Vous indiquez le '+_escHtml(_laboDateLongue(_LBO.F.date))+' : on vous demandera quelle date garder.';
+  if(m.cid!==String(L.cid)||m.lieu!==L.lieu) s+=' Vous l’avez mis sur '+_escHtml(_laboNomCible(L.lieu,L.cid))+' : on vous demandera laquelle garder.';
+  return s;
+}
+function _laboHint(raw,a){
+  var o=_laboLit(raw); if(!o) return null;
+  if(o.err) return {err:true, txt:'Un nombre, par exemple 0,42 (ou < 0,1).'};
+  if(o.v<a.lo||o.v>a.hi) return {txt:'Valeur inhabituelle : la virgule est-elle à sa place ?'};
+  return null;
+}
+function _laboVueFiche(){
+  var F=_LBO.F, L=_laboLignes(), ex=L.filter(function(x){ return x.date===F.date; });
+  var h=_laboHd('Rapports du labo', ex.length?'Compléter la fiche du '+_laboDateLongue(F.date):'Nouveau rapport',
+    _escHtml(ex.length?(ex.length+' rapport'+(ex.length>1?'s':'')+' déjà enregistré'+(ex.length>1?'s':'')):'Une fiche par envoi au labo'));
+  h+='<div class="modal-body">';
+  h+='<label class="fl" for="lbo-date">Date du prélèvement</label><input class="fi" type="date" id="lbo-date" max="'+_escAttr(_laboAuj())+'" onchange="window._laboDate(this)">';
+  var noms={}; L.forEach(function(x){ if(x.nom) noms[x.nom]=1; });
+  h+='<label class="fl" for="lbo-nom">Laboratoire <span style="text-transform:none;letter-spacing:0;font-weight:500">(facultatif)</span></label>'
+    +'<input class="fi" id="lbo-nom" list="lbo-noms" autocomplete="off" placeholder="Le labo habituel" oninput="window._laboNom(this)">'
+    +'<datalist id="lbo-noms">'+Object.keys(noms).map(function(n){ return '<option value="'+_escAttr(n)+'"></option>'; }).join('')+'</datalist>';
+  if(ex.length){
+    h+='<div class="lbo-band">Une fiche existe déjà pour le '+_escHtml(_laboDateLongue(F.date))+'. <b>Ce que vous ajoutez la complète</b> : rien de ce qui est déjà saisi ne s’efface.</div>';
+    h+='<div class="fl">Déjà dans cette fiche</div><div class="lbo-deja">';
+    var adm=(typeof isAdmin==='function'&&isAdmin());
+    ex.forEach(function(x){
+      h+='<div class="lbo-l"><div class="lbo-lt"><div class="lbo-ln"><i class="lbo-pt'+(x.lieu==='cuvier'?' cuvier':'')+'"></i>'+_escHtml(_laboNomCible(x.lieu,x.cid))+'</div>'
+        +'<span class="lbo-lm">'+_laboMeta(x)+'</span><div class="lbo-vals">'+_laboPills(x.vals)+'</div></div>';
+      if(!x.lecture){
+        h+='<div class="lbo-acts"><button class="lbo-mini" onclick="window._laboCompleter(\''+_escAttr(x.id)+'\')">Compléter</button>'
+          +(adm?'<button class="lbo-mini ret" onclick="window._laboRetirer(\''+_escAttr(x.id)+'\')">Retirer</button>':'')+'</div>';
+      }
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+  h+='<div class="fl" id="lbo-ana-l">Analyses demandées</div><div class="lbo-chips" role="group" aria-labelledby="lbo-ana-l">';
+  LABO_ANA.forEach(function(a){ h+='<button class="lbo-chip" aria-pressed="'+(F.demande.indexOf(a.k)>=0)+'" onclick="window._laboAnaBasc(\''+_escAttr(a.k)+'\')">'+a.h+'</button>'; });
+  h+='</div><p class="lbo-aide">Chaque échantillon reçoit ces cases. Une case laissée vide veut dire : pas mesuré.'
+    +(F.repris?' Demande reprise de la fiche du '+_escHtml(_laboDateLongue(F.repris))+'.':'')+'</p>';
+  h+='<div class="fl">Échantillons envoyés</div>';
+  var cibles=_laboCibles(), grp=[];
+  var cuvs=cibles.filter(function(t){ return t.lieu==='cuvier'; });
+  if(cuvs.length) grp.push(['cuvier','Au Cuvier, en fermentation',cuvs]);
+  var mils={}; cibles.forEach(function(t){ if(t.lieu==='chai') (mils[t.mil]=mils[t.mil]||[]).push(t); });
+  Object.keys(mils).sort(function(a,b){ return a<b?1:-1; }).forEach(function(m){ grp.push(['chai','Au Chai'+(m?', '+m:''),mils[m]]); });
+  if(!grp.length) h+='<div class="lbo-vide">Aucune cuve en fermentation ni cuvée en élevage.</div>';
+  grp.forEach(function(g){
+    h+='<div class="lbo-grp"><i class="lbo-pt'+(g[0]==='cuvier'?' cuvier':'')+'"></i>'+_escHtml(g[1])+'</div><div class="lbo-pick">';
+    g[2].forEach(function(t){
+      var n=F.lignes.filter(function(x){ return x.lieu===t.lieu&&x.cid===t.id; }).length;
+      h+='<button class="lbo-pk" onclick="window._laboAjout(\''+_escAttr(t.lieu)+'\',\''+_escAttr(t.id)+'\')" aria-label="'+_escAttr('Ajouter un échantillon de '+t.nom)+'"><b>'+_escHtml(t.nom)+'</b><small>'+_escHtml(t.sous)+'</small>'
+        +(n?'<span class="n">'+n+'</span>':'')+'</button>';
+    });
+    h+='</div>';
+  });
+  if(!F.lignes.length) h+='<div class="lbo-vide">Touchez les cuvées envoyées au labo : une ligne par rapport.</div>';
+  F.lignes.forEach(function(x,i){ h+=_laboVueLigne(x,i); });
+  h+='<div class="lbo-foot"><button class="lbo-btn" onclick="window._laboVerifier()">Vérifier avant d’enregistrer</button></div></div>';
+  return h;
+}
+function _laboVueLigne(L,i){
+  var F=_LBO.F, ori=_laboOrigine(L.lieu,L.cid), ap=_laboApercu(L);
+  var cible=(L.lieu==='cuvier')?_laboCuveDe(L.cid):null;
+  var h='<div class="lbo-ech" role="group" aria-label="'+_escAttr('Échantillon '+(i+1)+', '+_laboNomCible(L.lieu,L.cid))+'"><div class="lbo-eh"><div class="lbo-lt">'
+    +'<div class="lbo-en">'+_escHtml(_laboNomCible(L.lieu,L.cid))+'</div>'
+    +'<div class="lbo-em"><i class="lbo-pt'+(L.lieu==='cuvier'?' cuvier':'')+'"></i>'+_escHtml(L.lieu==='cuvier'?((cible&&_laboRepere(cible))?_laboRepere(cible)+' \u00b7 ':'')+'Le Cuvier, en fermentation':'Le Chai, en élevage')+'</div>'
+    +(ori?'<div class="lbo-em">'+_escHtml(ori)+'</div>':'')+'</div>'
+    +'<button class="lbo-x" onclick="window._laboOteLigne('+i+')" aria-label="Retirer cet échantillon">'+_mvIcon('croix',18)+'</button></div>';
+  h+='<div class="lbo-duo"><label><span class="lbo-lab">N° de rapport</span><input class="fi" id="lbo-r-'+i+'" data-i="'+i+'" autocomplete="off" placeholder="—" oninput="window._laboRap(this)"></label>'
+    +'<label><span class="lbo-lab">N° d’échantillon</span><input class="fi" id="lbo-e-'+i+'" data-i="'+i+'" autocomplete="off" placeholder="—" oninput="window._laboEch(this)"></label></div>';
+  h+='<div class="lbo-note" id="lbo-m-'+i+'"'+(ap?'':' style="display:none"')+'>'+ap+'</div>';
+  var ks=LABO_ANA.filter(function(a){ return F.demande.indexOf(a.k)>=0; });
+  if(ks.length){
+    h+='<div class="lbo-grid">';
+    ks.forEach(function(a){
+      var hi=_laboHint(L.raw[a.k],a), er=!!(hi&&hi.err);
+      h+='<label><span class="lbo-lab">'+a.ch+'</span><span class="lbo-val"><input class="fi'+(er?' lbo-err':'')+'" id="lbo-v-'+i+'-'+a.k+'" data-i="'+i+'" data-k="'+a.k+'" inputmode="decimal" autocomplete="off" placeholder="—"'
+        +' aria-label="'+_escAttr(a.t+(a.u?' en '+a.u:''))+'" aria-describedby="lbo-h-'+i+'-'+a.k+'" oninput="window._laboVal(this)"><span class="lbo-u">'+_escHtml(a.u)+'</span></span>'
+        +'<span class="lbo-hint'+(er?' err':'')+'" id="lbo-h-'+i+'-'+a.k+'">'+(hi?_escHtml(hi.txt):'')+'</span></label>';
+    });
+    h+='</div>';
+  } else h+='<p class="lbo-aide">Choisissez au moins une analyse demandée.</p>';
+  if(L.lieu==='chai'&&F.demande.indexOf('mal')>=0){
+    h+='<div style="margin-top:var(--e-3,12px)"><span class="lbo-lab" id="lbo-ml-'+i+'">La malo, d’après ce rapport</span><div class="lbo-seg" role="group" aria-labelledby="lbo-ml-'+i+'">';
+    [['','Pas dit'],['cours','En cours'],['ok','Terminée']].forEach(function(o){
+      h+='<button aria-pressed="'+(L.malo===o[0])+'" onclick="window._laboMalo('+i+',\''+_escAttr(o[0])+'\')">'+o[1]+'</button>';
+    });
+    h+='</div></div>';
+  }
+  if(L.pdfFile) h+='<div class="lbo-pdf">'+_mvIcon('document',16)+'<span>'+_escHtml(L.pdfFile.name||'rapport.pdf')+'</span><button class="lbo-x" style="margin:0" onclick="window._laboPdfOte('+i+')" aria-label="Retirer le PDF">'+_mvIcon('croix',16)+'</button></div>';
+  else h+='<label class="lbo-lien">'+_mvIcon('lien',16)+'Joindre le PDF du rapport<input type="file" accept="application/pdf" style="display:none" data-i="'+i+'" onchange="window._laboPdf(this)"></label>';
+  return h+'</div>';
+}
+function _laboCibleItem(it){
+  var c=null; it.choix.forEach(function(x){ if(x.t==='cible') c=x; });
+  if(!it.m) return {lieu:it.L.lieu, id:String(it.L.cid)};
+  return (c&&c.rep==='b')?{lieu:it.L.lieu, id:String(it.L.cid)}:{lieu:it.m.lieu, id:it.m.cid};
+}
+function _laboDest(lieu,k){
+  if(lieu==='cuvier'){
+    if(k==='gf') return 'Courbe des sucres de la cuve, au Cuvier';
+    if(k==='dp') return 'Degré potentiel de la cuve : il cale le repère « sec »';
+    return 'Bloc « Au labo » de la cuve';
+  }
+  if(k==='so2l') return 'Courbe du SO2 libre de la cuvée';
+  if(k==='mal') return 'Projection de fin de malo, et Pilotage \u203a Cave';
+  return 'Bloc « Au labo » de la cuvée';
+}
+function _laboRl(k,v,d,cls){
+  return '<div class="lbo-rl'+(cls?' '+cls:'')+'"><span class="lbo-rk">'+k+'</span><span class="lbo-rv2">'+_escHtml(v)+'</span>'+(d?'<span class="lbo-rd">'+(cls?'':'\u203a ')+_escHtml(d)+'</span>':'')+'</div>';
+}
+function _laboVueVerif(){
+  var P=_LBO.P, F=_LBO.F, nAj=0, nDeja=0, nCh=0, reste=0;
+  P.items.forEach(function(it){ nAj+=it.ajout.length; nDeja+=it.identique.length+it.garde.length; nCh+=it.choix.length; it.choix.forEach(function(c){ if(!c.rep) reste++; }); });
+  var neuve=!P.fiche&&P.items.some(function(it){ return !it.m||it.choix.some(function(c){ return c.t==='date'&&c.rep==='b'; }); });
+  var sous=P.fiche?'Fiche du '+_laboDateLongue(F.date)+', complétée':(neuve?'Nouvelle fiche du '+_laboDateLongue(F.date):(P.items.length>1?'Complète des rapports déjà saisis':'Complète un rapport déjà saisi'));
+  var h=_laboHd('La fiche', 'Avant d’enregistrer', _escHtml(sous));
+  h+='<div class="modal-body"><p class="lbo-res">'+P.items.length+' rapport'+(P.items.length>1?'s':'')+' : '+nAj+' chiffre'+(nAj>1?'s':'')+' ajouté'+(nAj>1?'s':'')
+    +(nDeja?', '+nDeja+' déjà là':'')+(nCh?', '+nCh+' choix à faire':'')+'.</p>';
+  if(P.ignores) h+='<p class="lbo-aide">'+(P.ignores===1?'Un échantillon sans chiffre n’est pas repris.':P.ignores+' échantillons sans chiffre ne sont pas repris.')+'</p>';
+  if(nCh){
+    h+='<div class="fl">À choisir</div>';
+    P.items.forEach(function(it,ii){ it.choix.forEach(function(c,ci){ h+=_laboVueChoix(it,c,ii,ci); }); });
+  }
+  h+='<div class="fl">Où va chaque chiffre</div>';
+  P.items.forEach(function(it){ h+=_laboVueItem(it); });
+  h+='<div class="lbo-leg"><span><i class="lbo-pt cuvier"></i>Le Cuvier, cuve en fermentation</span><span><i class="lbo-pt"></i>Le Chai, vin en élevage</span></div>';
+  h+='<div class="lbo-foot"><button class="lbo-btn" id="lbo-save" onclick="window._laboEnregistrer()"'+(reste?' disabled':'')+'>'
+    +(reste?'Faites '+(reste>1?'les '+reste+' choix':'le choix')+' ci-dessus':'Enregistrer')+'</button>'
+    +'<button class="lbo-btn2" onclick="window._laboRetour()">Revenir à la fiche</button></div></div>';
+  return h;
+}
+function _laboVueChoix(it,c,ii,ci){
+  var m=it.m, nm=_laboNomCible(m.lieu,m.cid), ref=m.rapport?_laboNw('rapport n\u00b0\u00a0'+m.rapport):'sans n\u00b0 de rapport', q, d, oa, ob, a;
+  if(c.t==='val'){
+    a=_laboAna(c.k); q=a.long+' \u00b7 '+_escHtml(nm); d='Deux valeurs pour la même analyse ('+ref+').';
+    oa=['Garder '+_laboFmtU(c.a,a), m.saisie?'saisi le '+_caveDateFr(m.saisie):'déjà saisi']; ob=['Prendre '+_laboFmtU(c.b,a),'cette saisie'];
+  } else if(c.t==='date'){
+    q=_laboNw('Rapport n\u00b0\u00a0'+m.rapport)+' \u00b7 '+_escHtml(nm); d=_escHtml('Il est rangé au '+_laboDateLongue(c.a)+'. Vous indiquez le '+_laboDateLongue(c.b)+'.');
+    oa=['Le laisser au '+_laboDateLongue(c.a),'la date déjà saisie']; ob=['Le passer au '+_laboDateLongue(c.b),'la date de cette fiche'];
+  } else if(c.t==='cible'){
+    var na=_laboNomCible(c.a.lieu,c.a.id), nb=_laboNomCible(c.b.lieu,c.b.id);
+    q=_laboNw('Rapport n\u00b0\u00a0'+m.rapport); d=_escHtml('Il était rangé sur '+na+'. Vous l’avez mis sur '+nb+'.');
+    oa=['Garder '+na,'la cuvée déjà saisie']; ob=['Mettre sur '+nb,'cette saisie'];
+  } else if(c.t==='ech'){
+    q='N° d’échantillon \u00b7 '+_escHtml(nm); d='Deux numéros pour le même rapport ('+ref+').';
+    oa=['Garder '+c.a,'déjà saisi']; ob=['Prendre '+c.b,'cette saisie'];
+  } else {
+    q='La malo \u00b7 '+_escHtml(nm); d='Ce rapport ne dit pas la même chose que le précédent.';
+    oa=['Garder « '+LABO_MALO[c.a]+' »','déjà saisi']; ob=['Prendre « '+LABO_MALO[c.b]+' »','cette saisie'];
+  }
+  return '<div class="lbo-choix" role="group"><div class="lbo-cq">'+q+'</div><div class="lbo-cc">'+d+'</div><div class="lbo-opts">'
+    +'<button class="lbo-opt" aria-pressed="'+(c.rep==='a')+'" onclick="window._laboChoix('+ii+','+ci+',\'a\')">'+_escHtml(oa[0])+'<small>'+_escHtml(oa[1])+'</small></button>'
+    +'<button class="lbo-opt" aria-pressed="'+(c.rep==='b')+'" onclick="window._laboChoix('+ii+','+ci+',\'b\')">'+_escHtml(ob[0])+'<small>'+_escHtml(ob[1])+'</small></button></div></div>';
+}
+function _laboVueItem(it){
+  var L=it.L, t=_laboCibleItem(it), lbl={nouveau:'Nouveau', complete:'Complété', inchange:'Inchangé'}[it.statut]||'';
+  var r=String(L.rapport||'').trim()||(it.m&&it.m.rapport)||'';
+  var h='<div class="lbo-rv"><div class="lbo-rvh"><div class="lbo-lt"><div class="lbo-ln"><i class="lbo-pt'+(t.lieu==='cuvier'?' cuvier':'')+'"></i>'+_escHtml(_laboNomCible(t.lieu,t.id))+'</div>'
+    +'<span class="lbo-lm">'+(r?_laboNw('Rapport n\u00b0\u00a0'+r):'Sans n\u00b0 de rapport')+'</span></div><span class="lbo-pill '+it.statut+'">'+lbl+'</span></div>';
+  LABO_ANA.forEach(function(a){
+    var k=a.k, ch=null;
+    it.choix.forEach(function(x){ if(x.t==='val'&&x.k===k) ch=x; });
+    if(it.ajout.indexOf(k)>=0) h+=_laboRl(a.long, _laboFmtU(L.vals[k],a), _laboDest(t.lieu,k), '');
+    else if(ch) h+=ch.rep?_laboRl(a.long, _laboFmtU(ch.rep==='a'?ch.a:ch.b,a), ch.rep==='a'?'Valeur déjà saisie, gardée':_laboDest(t.lieu,k), ch.rep==='a'?'muet':'')
+                         :_laboRl(a.long, 'à choisir', 'Deux valeurs : voir « À choisir »', 'att');
+    else if(it.identique.indexOf(k)>=0) h+=_laboRl(a.long, _laboFmtU(L.vals[k],a), 'Déjà là, identique', 'muet');
+    else if(it.garde.indexOf(k)>=0) h+=_laboRl(a.long, _laboFmtU(it.m.vals[k],a), 'Case laissée vide : la valeur déjà saisie reste', 'muet');
+  });
+  if(it.autres.length) h+=_laboRl('Déjà au rapport, non redemandé', '', it.autres.map(function(k){ var a=_laboAna(k); return a.t+' '+_laboFmt(it.m.vals[k],a); }).join(' \u00b7 '), 'muet');
+  if(L.malo&&(!it.m||!it.m.malo)) h+=_laboRl('La malo', LABO_MALO[L.malo], t.lieu==='chai'?'Étiquette malo de la cuvée':'', '');
+  if(L.pdfFile&&(!it.m||!it.m.pdf)) h+=_laboRl('PDF du rapport', 'joint', 'S’ouvre depuis le journal et la fiche de la cuvée', '');
+  return h+'</div>';
+}
+function _laboRender(){
+  var el=document.getElementById('lbo-root'); if(!el) return;
+  var h=(_LBO.vue==='fiche'&&_LBO.F)?_laboVueFiche():((_LBO.vue==='verif'&&_LBO.P)?_laboVueVerif():_laboVueListe());
+  el.innerHTML=h;
+  _LBO.flash=null;
+  /* ⚠️ §24 n°5 : les valeurs se posent EN JS, jamais en attribut — un champ de date iOS
+     ignore value="…" posé par innerHTML, et une valeur tapée garde sa forme (« 0, »). */
+  if(_LBO.vue==='fiche'&&_LBO.F){
+    var F=_LBO.F, d=document.getElementById('lbo-date'); if(d) d.value=F.date;
+    var n=document.getElementById('lbo-nom'); if(n) n.value=F.nom||'';
+    F.lignes.forEach(function(L,i){
+      var r=document.getElementById('lbo-r-'+i); if(r) r.value=L.rapport||'';
+      var e=document.getElementById('lbo-e-'+i); if(e) e.value=L.ech||'';
+      LABO_ANA.forEach(function(a){ var v=document.getElementById('lbo-v-'+i+'-'+a.k); if(v) v.value=L.raw[a.k]||''; });
+    });
+  }
+}
+
+/* ── Les gestes (onclick / oninput : exposés sur window, §24 n°1) ── */
+window.openLabo = function(o){
+  o=o||{};
+  _laboCss();
+  _LBO.P=null; _LBO.envoi=false;
+  if(o.date&&_laboPeut()){ _LBO.F=_laboFormDate(o.date); _LBO.vue='fiche'; }
+  else if(o.nouveau&&_laboPeut()){ _LBO.F=_laboFormNeuf(); _LBO.vue='fiche'; }
+  else { _LBO.F=null; _LBO.vue='liste'; }
+  _laboRender();
+  if(typeof window.openOv==='function') window.openOv('ovLabo');
+  else { var ov=document.getElementById('ovLabo'); if(ov) ov.classList.add('open'); }
+};
+window._laboDepuisOp = function(){
+  if(typeof window.closeOv==='function') window.closeOv(null,'ovCaveOp');
+  window.openLabo({nouveau:true});
+};
+window._laboNouveau = function(){ _LBO.F=_laboFormNeuf(); _LBO.vue='fiche'; _LBO.P=null; _laboRender(); };
+window._laboOuvrirDate = function(d){ _LBO.F=_laboFormDate(d); _LBO.vue='fiche'; _LBO.P=null; _laboRender(); };
+window._laboRetour = function(){
+  if(_LBO.vue==='verif'){ _LBO.vue='fiche'; _LBO.P=null; }
+  else { _LBO.vue='liste'; _LBO.F=null; _LBO.P=null; }
+  _laboRender();
+};
+window._laboDate = function(el){ if(!_LBO.F||!el||!el.value) return; _LBO.F.date=el.value; _laboRender(); };
+window._laboNom = function(el){ if(_LBO.F&&el) _LBO.F.nom=el.value; };
+window._laboAnaBasc = function(k){
+  var F=_LBO.F; if(!F) return;
+  var i=F.demande.indexOf(k); if(i>=0) F.demande.splice(i,1); else F.demande.push(k);
+  F.demande=LABO_ANA.map(function(a){ return a.k; }).filter(function(x){ return F.demande.indexOf(x)>=0; });
+  _laboRender();
+};
+window._laboAjout = function(lieu,id){ if(!_LBO.F) return; _LBO.F.lignes.push(_laboLigneNeuve(lieu,id)); _laboRender(); };
+window._laboOteLigne = function(i){ if(!_LBO.F) return; _LBO.F.lignes.splice(i,1); _laboRender(); };
+window._laboCompleter = function(id){
+  var F=_LBO.F; if(!F) return;
+  var x=_laboLignes().filter(function(l){ return l.id===id; })[0]; if(!x) return;
+  var L=_laboLigneNeuve(x.lieu,x.cid); L.rapport=x.rapport||''; L.ech=x.ech||'';
+  F.lignes.push(L); _laboRender();
+  var el=document.getElementById('lbo-r-'+(F.lignes.length-1)); if(el&&el.scrollIntoView) el.scrollIntoView({block:'center'});
+};
+window._laboRetirer = function(id){
+  if(!(typeof isAdmin==='function'&&isAdmin())) return;
+  var x=_laboLignes().filter(function(l){ return l.id===id; })[0]; if(!x||x.lecture) return;
+  var go=function(){
+    var avant=_cavePdfRefs();
+    var k=_laboOter(x);
+    var paires={}; if(k==='elevage'){ window.CAVE_ELEVAGE=CAVE_ELEVAGE; paires.cave_elevage=CAVE_ELEVAGE; } else if(k==='vendange'){ window.CAVE_VENDANGE=CAVE_VENDANGE; paires.cave_vendange=CAVE_VENDANGE; }
+    window.fbSaveToast(paires,'Rapport retiré','#3D6B27');
+    _cavePdfPurge(avant);
+    _laboRender();
+    try{ renderCave(); }catch(e){ if(window.logError) window.logError({level:'info', cat:'cave', msg:'LABO-1 : Chai non redessiné après retrait', detail:String(e&&e.message||e)}); }
+  };
+  if(typeof window.openConfirmDel==='function') window.openConfirmDel('Retirer ce rapport ?','Ses chiffres quittent '+_laboNomCible(x.lieu,x.cid)+' et ses courbes.',go,null,'Retirer');
+};
+window._laboRap = function(el){
+  var F=_LBO.F, i=+el.getAttribute('data-i'); if(!F||!F.lignes[i]) return;
+  F.lignes[i].rapport=el.value;
+  var m=document.getElementById('lbo-m-'+i), t=_laboApercu(F.lignes[i]);
+  if(m){ m.innerHTML=t; m.style.display=t?'':'none'; }
+};
+window._laboEch = function(el){ var F=_LBO.F, i=+el.getAttribute('data-i'); if(F&&F.lignes[i]) F.lignes[i].ech=el.value; };
+window._laboVal = function(el){
+  var F=_LBO.F, i=+el.getAttribute('data-i'), k=el.getAttribute('data-k'), a=_laboAna(k); if(!F||!F.lignes[i]||!a) return;
+  F.lignes[i].raw[k]=el.value;
+  var hi=_laboHint(el.value,a), er=!!(hi&&hi.err), hEl=document.getElementById('lbo-h-'+i+'-'+k);
+  if(hEl){ hEl.textContent=hi?hi.txt:''; hEl.className='lbo-hint'+(er?' err':''); }
+  if(el.classList) el.classList.toggle('lbo-err', er);
+};
+window._laboMalo = function(i,v){ var F=_LBO.F; if(F&&F.lignes[i]){ F.lignes[i].malo=v; _laboRender(); } };
+window._laboPdf = function(input){
+  var F=_LBO.F, i=+input.getAttribute('data-i'), f=input.files&&input.files[0]; input.value='';
+  if(!F||!F.lignes[i]||!f) return;
+  if(f.type!=='application/pdf'){ showToast('Seuls les PDF sont acceptés','#E07060'); return; }
+  if(f.size>10*1024*1024){ showToast('PDF trop lourd \u2014 10\u00a0Mo au plus','#E07060'); return; }
+  F.lignes[i].pdfFile=f; _laboRender();
+};
+window._laboPdfOte = function(i){ var F=_LBO.F; if(F&&F.lignes[i]){ F.lignes[i].pdfFile=null; _laboRender(); } };
+window._laboVerifier = function(){
+  var F=_LBO.F; if(!F) return;
+  if(!F.date){ showToast('Indiquez la date du prélèvement','#E07060'); return; }
+  var err=false;
+  F.lignes.forEach(function(L){
+    L.vals={};
+    LABO_ANA.forEach(function(a){
+      if(F.demande.indexOf(a.k)<0) return;
+      var o=_laboLit(L.raw[a.k]);
+      if(o&&o.err) err=true; else if(o) L.vals[a.k]=o;
+    });
+  });
+  if(err){ showToast('Une case ne contient pas un nombre : corrigez-la avant de continuer','#E07060'); return; }
+  var P=_laboPlan(F, _laboLignes());
+  if(!P.items.length){ showToast('Ajoutez au moins un échantillon avec un chiffre','#E07060'); return; }
+  _LBO.P=P; _LBO.vue='verif'; _laboRender();
+};
+window._laboChoix = function(ii,ci,r){
+  var P=_LBO.P; if(!P||!P.items[ii]||!P.items[ii].choix[ci]) return;
+  P.items[ii].choix[ci].rep=r; _laboRender();
+};
+window._laboEnregistrer = async function(){
+  var P=_LBO.P, F=_LBO.F; if(!P||!F||_LBO.envoi) return;
+  var reste=0; P.items.forEach(function(it){ it.choix.forEach(function(c){ if(!c.rep) reste++; }); });
+  if(reste) return;
+  _LBO.envoi=true;
+  var btn=document.getElementById('lbo-save');
+  try{
+    for(var i=0;i<P.items.length;i++){
+      var L=P.items[i].L;
+      if(!L.pdfFile||L.pdf) continue;
+      if(typeof window.fbUploadAnalyse!=='function') throw new Error('envoi indisponible');
+      if(btn){ btn.disabled=true; btn.textContent='Envoi du PDF\u2026'; }
+      var res=await window.fbUploadAnalyse(L.pdfFile,function(p){ if(btn) btn.textContent='Envoi du PDF\u2026 '+p+'%'; });
+      L.pdf={url:res.url, path:res.storage_path, nom:L.pdfFile.name, taille:L.pdfFile.size};
+    }
+  }catch(e){
+    _LBO.envoi=false;
+    if(btn){ btn.disabled=false; btn.textContent='Enregistrer'; }
+    showToast('Le PDF n’est pas parti : rien n’est enregistré','#E07060');
+    if(window.logError) window.logError({level:'warning', cat:'cave', msg:'LABO-1 : envoi du PDF', detail:String(e&&e.message||e)});
+    return;
+  }
+  var avant=_cavePdfRefs();
+  var r=_laboAppliquer(P, F);
+  var paires={};
+  if(r.elevage){ window.CAVE_ELEVAGE=CAVE_ELEVAGE; paires.cave_elevage=CAVE_ELEVAGE; }
+  if(r.vendange){ window.CAVE_VENDANGE=CAVE_VENDANGE; paires.cave_vendange=CAVE_VENDANGE; }
+  var parts=[];
+  if(r.nouv) parts.push(r.nouv+' rapport'+(r.nouv>1?'s ajoutés':' ajouté'));
+  if(r.comp) parts.push(r.comp+' rapport'+(r.comp>1?'s complétés':' complété'));
+  window.fbSaveToast(paires, parts.length?'Enregistré : '+parts.join(', '):'Rien de nouveau : tout était déjà saisi', '#3D6B27');
+  _cavePdfPurge(avant);
+  var ds=Object.keys(r.dates).sort();
+  _LBO.envoi=false; _LBO.vue='liste'; _LBO.F=null; _LBO.P=null; _LBO.flash=ds.length?ds[ds.length-1]:null;
+  _laboRender();
+  try{ renderCave(); }catch(e){ if(window.logError) window.logError({level:'info', cat:'cave', msg:'LABO-1 : Chai non redessiné après enregistrement', detail:String(e&&e.message||e)}); }
+};
+window._laboLignes = _laboLignes;
+window._laboPlan = _laboPlan;
+window._laboAppliquer = _laboAppliquer;
+
 
 // ══ LA FRONTIÈRE — ce que Le Cuvier (cuvier.js) lit du Chai ═════════════════
 // ★ CUV-DEC (§164) — chacun de ces noms est lu par cuvier.js, chargé juste après ce
