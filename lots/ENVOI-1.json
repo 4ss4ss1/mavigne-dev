@@ -1,0 +1,30 @@
+{
+  "lot": "ENVOI-1",
+  "section": "§326",
+  "base": "e159c01ed1ea6dab274438b1fe167616f42adc51",
+  "inclut": [],
+  "date": "2026-10-13",
+  "fichiers": {
+    ".mv-base": "3c11b38458a62aede507494c730265d111390a4f72ece3ab58d20a6bfbd2c287",
+    "CLAUDE.md": "88121a5b9c9590988791acf0c7fb283ce83f29d5bd0b4d8194159304e97d6efa",
+    "docs/claude/INDEX.md": "e1634f9412ade8d69411b5efc1391ee98744b7858cd174e7b5a6417e9c9f4488",
+    "docs/claude/chantiers-280-329.md": "552a71392f28098e85aa84614b0a2ac8286dc6e8b41a4a243a8575b3cc60bc88",
+    "docs/claude/journal.md": "5c7bbef9ce660216e855c8d5046db4014073c1754f6c6702be1f45e0f7d7c963",
+    "index.html": "22049a5ff2a25b0b61a3d565d05f3e68b4712961a2de663ba352b67ef1dfd964",
+    "public/sw.js": "198f17f13379edeaf1941b119b3c21874f9462bdd7ea391a7dc35c9f2dcb6073",
+    "scripts/harnais-claude-md.mjs": "e242bff2bdc7a59b5bfe282d873fad7ae9f5d6e5242015af4a0724215727737b",
+    "scripts/mv-harnais-auth1.mjs": "761b9cb678958c4ba00974332f7c107c7c96fb12a12a537cdfa28c28dff29392",
+    "scripts/mv-harnais-fusion-docs.mjs": "e36ad4b2fcdc25e4f976735da377bb03abc8c567cbe93563cfebbcaeb827213d",
+    "scripts/mv-harnais-ids1.mjs": "39d67f7f383e70b82a20554e18c1824499692437f8be97e37dc94159928d2684",
+    "scripts/mv-harnais-ids1b.mjs": "c41180fdb05f9327277ff2f48ef0e09bd0f5d134b264f3e3d2fe4978500be0a4",
+    "scripts/mv-harnais-liste.mjs": "672bbf5b2de886a5690ef187982fde219160671136d8b73e5ec788239082f4a9",
+    "scripts/mv-harnais-prep.mjs": "c3918b4da669544bb39665e08a780df29026f6c05c3e8b5ee7d7b8d260a57d8d",
+    "scripts/mv-harnais-reseau.mjs": "2d91a10edc0b813d9a326c485a3ceebc4bd68cf29ff26ed7ff816539672746ca",
+    "scripts/mv-harnais-stock.mjs": "b739419027176e0ea0a226e9cde510301acf1c7e604cac83234726ee8c745ebe",
+    "scripts/mv-harnais-taille2.mjs": "79c83d628bfb7d594c2bb1c1a634cc54c2c046072a0b065ec1b0f1162c3d2c6a",
+    "scripts/typo-baseline.json": "a47692e10dcc9dd28bc0b12c1e8708bea5478298bf8f1af0de42f65162035f42",
+    "src/firebase.js": "b58c829398d5379720b65b3da380d59febc93e9e65df495cf538c6578803d3f7",
+    "src/utils.js": "c63790c67b94a26378d3ef2ebb51137ca23c7dbb2d8edb4c9e2a91f0461c3a7b",
+    "scripts/mv-harnais-envoi.mjs": "62778e8e1c5b796613cfde75ddee9099d538c55bcb736bc0e430438bd9e210d6"
+  }
+}

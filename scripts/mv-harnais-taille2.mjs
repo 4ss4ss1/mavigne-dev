@@ -33,12 +33,15 @@ function blocVar(src, nom) {
   throw new Error('accolade non fermée : ' + nom);
 }
 const VARS = ['_MV_FUSION_EXCLUES', '_fbBases', '_offlineBases', '_MV_FILE_BASE_CLE', '_MV_GUARD_FLOORS', '_mvFileMemSeule', '_mvFileAlerte',
-  '_mvPersistDemande', '_MV_TAILLE_ALERTE', '_mvTropDit'];
+  '_mvPersistDemande', '_MV_TAILLE_ALERTE', '_mvTropDit', '_MV_PAGE', '_MV_ENVOI_PFX', '_MV_ENVOI_MAX_MS', '_MV_ENVOI_LENT', '_mvEnvoiDernier', '_mvEnvoiN', '_mvFlushP'];
 const FNS = ['_mvDeepEqual', '_mvIsObj', '_mvMerge3', '_mvMergeParcelles', '_mvEgal', '_mvCanon', '_mvFusion', '_mvFusionObjet', '_mvIdentite',
   '_mvClesListes', '_mvFusionListe', '_mvBaseNoter', '_mvBaseDe', '_mvBaseMem', '_mvSauverFusion', '_mvApresFusion', '_mvParcellesApres',
   '_entryHasProg', '_tachesBlockHasProg', '_mvParcProgCount', '_mvIntrantsCount', '_mvPaieCount', '_mvDocSize', '_mvBlockDestructive',
   '_saveParcellesMerged', '_fsNoNestedArrays', '_fbClone', 'applyFbData', '_mvBaseFile', '_mvBasesFileEcrire', '_mvFileDisqueKo',
   '_mvDemanderPersistance', '_queueSave', '_loadQueue', '_flushQueue', '_retryAsync',
+  '_mvViderFile', '_mvBorne', '_mvEnvoiCle', '_mvEnvoiNoter', '_mvEnvoiFini', '_mvErrLent', '_mvEnvoiBorne',
+  '_mvFileFusionner', '_mvEnvoisRepris', '_mvFileParDessus', '_mvFileBloquee', '_mvFbSaveServeur',   // ENVOI-1 (§326)
+ 
   '_mvOctets', '_mvTailleControle', '_mvTailleAlerte', '_mvErreurTaille', '_mvTropGros'];
 const bloc = src => VARS.map(n => blocVar(src, n)).join('\n') + '\n' + FNS.map(n => fonction(src, n)).join('\n') + '\n' + affectation(src, 'fbSave');
 const clone = v => (v === undefined ? undefined : JSON.parse(JSON.stringify(v)));
@@ -150,7 +153,7 @@ const DEF = [
   ['l’alerte des 90 % part à chaque envoi', { fb: s => s.replace('if (vu[k] === jour) return;', '') }],
   ['un document trop gros repart en file', { fb: s => s.replace('if (_fRes && _fRes.trop) return _mvTropGros(key, value, _fRes.octets);', 'if (_fRes && _fRes.trop) { _queueSave(key, value, _mvBaseMem(key)); return { ok:false, queued:true }; }') }],
   ['la saisie trop grosse n’est plus mise au coffre', { fb: s => s.replace('function _mvTropGros(key, value, o) {\n  _mvStashDenied(key, value);', 'function _mvTropGros(key, value, o) {') }],
-  ['la file trop grosse annonce « synchronisé »', { fb: s => s.replace('  if (_tropN) {\n', '  if (false) {\n') }],
+  ['la file trop grosse annonce « synchronisé »', { fb: s => s.replace('  if (_tropN || _coffreN) {\n', '  if (false) {\n') }],   // ENVOI-1 (§326) : le coffre de la garde s'y ajoute
   ['le refus de taille du serveur n’est plus reconnu', { fb: s => s.replace("return !!(e && e.code === 'invalid-argument' &&", "return !!(false && e.code === 'invalid-argument' &&") }],
   ['un refus de taille est réessayé (7 s)', { fb: s => s.replace('if(i === retries || _isDenied(e) || _mvErreurTaille(e)) throw e;', 'if(i === retries || _isDenied(e)) throw e;') }],
   ['les parcelles ne sont plus mesurées', { fb: s => s.replace("if (_octP > MV_LIMITE_DOC) return { __mvTrop: true, octets: _octP };", '') }],

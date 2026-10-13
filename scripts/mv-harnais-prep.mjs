@@ -150,7 +150,7 @@ async function entre(mut) { const M = monterApp(mut); drapeau(M); await M._mvPre
 
 /* ══ 2 · firebase.js ══ */
 const blocFb = S => fonction(S.utils, '_mvPrepOn', 'src/utils.js') + '\n'
-  + ['_loadQueue', '_queueSave', '_flushQueue', '_mvPrepTenant', '_mvBaseFile', '_mvBasesFileEcrire', '_mvFileDisqueKo', '_mvDemanderPersistance'].map(n => fonction(S.fb, n, 'src/firebase.js')).join('\n') + '\n'
+  + ['_loadQueue', '_queueSave', '_flushQueue', '_mvViderFile', '_mvPrepTenant', '_mvBaseFile', '_mvBasesFileEcrire', '_mvFileDisqueKo', '_mvDemanderPersistance'].map(n => fonction(S.fb, n, 'src/firebase.js')).join('\n') + '\n'
   + ['_fbQueueTenant', '_plan'].map(n => affectation(S.fb, n, 'src/firebase.js')).join('\n');
 const BLOC_FB = blocFb(SRC);
 const PRELUDE_FB = STOCK + `
@@ -180,6 +180,11 @@ function _isDenied(){ return false; }
 async function _mvTokenAlive(){ return true; }
 function _mvStashDenied(){}
 function showSyncBadge(t){ E.badge = String(t); }
+// ENVOI-1 (§326) — un seul vidage à la fois, envois bornés, reprise des envois interrompus : éprouvés par mv-harnais-envoi.
+var _mvFlushP = null;
+function _mvEnvoisRepris(){ return 0; }
+function _mvEnvoiBorne(p){ return p; }
+function _mvFileBloquee(){}
 function _showOfflineQueueBadge(){}
 `;
 const RETOUR_FB = `

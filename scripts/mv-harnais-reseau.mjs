@@ -47,14 +47,22 @@ const sansCommentaires = (txt) => txt
 
 // ── Decoupe du corps de fbSave dans le texte reel de firebase.js ──
 function corpsFbSave(src) {
+  const corps = (i) => {
+    let d = 0, debut = src.indexOf('{', i), fin = -1;
+    for (let k = debut; k < src.length; k++) {
+      if (src[k] === '{') d++;
+      else if (src[k] === '}') { d--; if (d === 0) { fin = k; break; } }
+    }
+    return fin < 0 ? null : src.slice(debut, fin + 1);
+  };
   const i = src.indexOf('window.fbSave = async function');
   if (i < 0) return null;
-  let d = 0, debut = src.indexOf('{', i), fin = -1;
-  for (let k = debut; k < src.length; k++) {
-    if (src[k] === '{') d++;
-    else if (src[k] === '}') { d--; if (d === 0) { fin = k; break; } }
-  }
-  return fin < 0 ? null : src.slice(debut, fin + 1);
+  const a = corps(i);
+  // ENVOI-1 (§326) : la partie « serveur » de fbSave vit dans _mvFbSaveServeur — même contrat, mêmes règles.
+  const j = src.indexOf('async function _mvFbSaveServeur(');
+  if (a === null || j < 0) return a;
+  const b = corps(j);
+  return b === null ? null : a + '\n' + b;
 }
 
 // ══ Les regles, chacune jouable sur un texte quelconque (pour la contre-epreuve) ══

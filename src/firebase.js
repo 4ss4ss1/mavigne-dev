@@ -376,6 +376,150 @@ function _queueSave(key, value, base) {
   _showOfflineQueueBadge();
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// ★★★ ENVOI-1 (§326) — UNE SAISIE N'EST JAMAIS SEULEMENT « EN ROUTE » : ELLE EST SUR LE DISQUE
+// ════════════════════════════════════════════════════════════════════════════
+// Vécu le 13/10/2026 (Tracteur, Android, appli 8.85) : réseau affiché, serveur muet — le carnet de
+// l'appareil porte « serveur injoignable » ×2, un démarrage lent, puis une relance manuelle. Les
+// parcelles faites au tracteur, marquées enregistrées, avaient disparu après la relance. Trois trous :
+//   1. fbSave attendait la réponse du serveur AVANT de mettre la saisie en file (la file ne servait
+//      qu'en cas d'échec). Pendant l'attente — sans fin sur un réseau fantôme, §145h ③ « non traité » —,
+//      la saisie n'était nulle part sur le disque : la relance l'effaçait, puis la relecture du serveur
+//      remplaçait la copie du téléphone. → fbSave NOTE la valeur sur le disque avant de partir
+//      (_mvEnvoiNoter : une entrée par page et par clé) et ne l'efface qu'arrivée, en file ou au coffre
+//      (_mvEnvoiFini). Ce qu'une page morte avait en route est repris en file par _loadQueue
+//      (_mvEnvoisRepris), FUSIONNÉ avec ce qui y attend déjà.
+//   2. Après une relance, la relecture du serveur s'appliquait SANS la file : l'écran ne montrait plus
+//      les saisies en attente, et la saisie suivante REMPLAÇAIT la valeur en file (une valeur par
+//      document). → toute donnée reçue du serveur passe par la file (_mvFileParDessus, applyFbData) :
+//      la mémoire = le serveur + ce qui attend.
+//   3. Une saisie en file que la garde anti-écrasement refusait était JETÉE, et le coffre ne gardait
+//      qu'une valeur par document. → au coffre (_mvFileBloquee), et le coffre fusionne.
+// Et une écriture n'attend plus le serveur au-delà de _MV_ENVOI_MAX_MS : elle part en file (le voyant
+// le dit) et l'écriture restée en route est annulée avant d'écrire (_mvEnvoiBorne, le jeton).
+// ⚠️ Ces entrées ne s'effacent qu'arrivées, en file ou au coffre — jamais à la déconnexion (même règle
+//   que la file : effacer une écriture en attente, c'est la perdre).
+var _MV_PAGE = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+var _MV_ENVOI_PFX = 'mavigne_envoi:';
+var _MV_ENVOI_MAX_MS = 20000;
+var _MV_ENVOI_LENT = { __mvLent: true };
+var _mvEnvoiDernier = {};
+var _mvEnvoiN = 0;
+function _mvEnvoiCle(key) { return _MV_ENVOI_PFX + _MV_PAGE + ':' + key; }
+// Avant de partir : la valeur et sa base sur le disque. Rend le numéro de cet envoi.
+function _mvEnvoiNoter(key, value, base) {
+  var n = ++_mvEnvoiN;
+  _mvEnvoiDernier[key] = n;
+  try {
+    localStorage.setItem(_mvEnvoiCle(key), JSON.stringify({ t: Date.now(), tenant: TENANT_ID || '', b: (base === undefined) ? null : base, v: value }));
+  } catch (e) {
+    // Disque plein : la saisie ne vit qu'en mémoire le temps de l'envoi — on le dit (même message que STOCK-1).
+    _mvFileDisqueKo(key, e);
+  }
+  return n;
+}
+// Arrivée (serveur, file ou coffre) : l'entrée s'efface — sauf si un envoi plus récent de la même clé
+// est parti entre-temps : c'est lui qui la porte désormais (sa valeur contient celle-ci).
+function _mvEnvoiFini(key, n) {
+  if (_mvEnvoiDernier[key] !== n) return;
+  delete _mvEnvoiDernier[key];
+  try { localStorage.removeItem(_mvEnvoiCle(key)); }
+  catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvEnvoiFini'); }
+}
+function _mvErrLent() {
+  var e = new Error('ENVOI-1 : le serveur n\u2019a pas r\u00e9pondu en ' + Math.round(_MV_ENVOI_MAX_MS / 1000) + ' s');
+  e.code = 'mv/lent';
+  return e;
+}
+// Une écriture bornée : au-delà de _MV_ENVOI_MAX_MS, le jeton est annulé — l'écriture restée en route
+// n'écrira plus (_mvSauverFusion, _saveParcellesMerged et _retryAsync le lisent) — et l'appelant reçoit
+// « mv/lent » : fbSave met en file, le vidage garde en file.
+function _mvEnvoiBorne(p, jeton) {
+  return _mvBorne(p, _MV_ENVOI_MAX_MS, _MV_ENVOI_LENT).then(function (r) {
+    if (r === _MV_ENVOI_LENT) { if (jeton) jeton.annule = true; throw _mvErrLent(); }
+    return r;
+  });
+}
+// Une valeur rejoint la file SANS rien retirer de ce qui y attend déjà. La base reste la première (même
+// règle que _queueSave) ; sans base, l'union. Ce qui ne peut pas fusionner part au coffre.
+function _mvFileFusionner(key, value, base) {
+  if (!Object.prototype.hasOwnProperty.call(_offlineQueue, key)) {
+    _offlineQueue[key] = value;
+    var _baseDeja = Object.prototype.hasOwnProperty.call(_offlineBases, key);   // une base déjà là reste la première
+    if (!_baseDeja) _offlineBases[key] = (base === undefined) ? null : base;
+    return;
+  }
+  var q = _offlineQueue[key], b = _mvBaseFile(key);
+  try {
+    if (key === 'parcelles') _offlineQueue[key] = (Array.isArray(q) && Array.isArray(value)) ? _mvMergeParcelles(Array.isArray(b) ? b : q, value, q) : value;
+    else if (_MV_FUSION_EXCLUES[key]) _offlineQueue[key] = value;     // KML, travaux : un remplacement voulu, le plus récent
+    else _offlineQueue[key] = _mvFusion(b, value, q);
+  } catch (e) {
+    _mvStashDenied(key, value);
+    if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvFileFusionner');
+  }
+}
+// Les envois qu'une AUTRE page avait en route (relancée, fermée, tuée par le téléphone) : en file. La
+// file s'écrit d'abord, les entrées ne s'effacent qu'ensuite — une coupure entre les deux rejouerait la
+// fusion, sans rien perdre. Une entrée d'un autre domaine (préparation GUERETTECH) attend ce domaine.
+function _mvEnvoisRepris() {
+  var cles = [], repris = [];
+  try {
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf(_MV_ENVOI_PFX) === 0 && k.indexOf(_MV_ENVOI_PFX + _MV_PAGE + ':') !== 0) cles.push(k);
+    }
+  } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvEnvoisRepris'); return 0; }
+  cles.forEach(function (k) {
+    var o = null;
+    try { o = JSON.parse(localStorage.getItem(k) || 'null'); }
+    catch (e) { o = null; if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvEnvoisRepris#lire'); }
+    if (!o || o.v === undefined || o.v === null) return;              // illisible : laissée sur le disque, jamais effacée
+    if ((o.tenant || '') !== (TENANT_ID || '')) return;
+    var reste = k.slice(_MV_ENVOI_PFX.length), key = reste.slice(reste.indexOf(':') + 1);
+    if (!key) return;
+    _mvFileFusionner(key, o.v, (o.b === null) ? undefined : o.b);
+    repris.push(k);
+  });
+  if (!repris.length) return 0;
+  var ecrit = true;
+  try { localStorage.setItem('mavigne_offline_queue', JSON.stringify(_offlineQueue)); }
+  catch (e) { ecrit = false; Object.keys(_offlineQueue).forEach(function (q) { _mvFileDisqueKo(q, e); }); }
+  _mvBasesFileEcrire();
+  try { localStorage.setItem('mavigne_offline_queue_t', TENANT_ID || ''); }
+  catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvEnvoisRepris#t'); }
+  if (ecrit) repris.forEach(function (k) {
+    try { localStorage.removeItem(k); }
+    catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvEnvoisRepris#effacer'); }
+  });
+  if (window.logError) window.logError({ level: 'info', cat: 'sync', msg: 'ENVOI-1 \u00b7 ' + repris.length + ' envoi(s) interrompu(s) repris en file', detail: repris.join(', ') });
+  return repris.length;
+}
+// La mémoire = le serveur + ce qui attend en file. Toute donnée reçue du serveur passe par ici
+// (applyFbData) : l'écran montre les saisies en attente, et la prochaine écriture les porte. C'est la
+// même fusion que celle que fera l'envoi de la file.
+function _mvFileParDessus(key, value) {
+  if (value === undefined || value === null || !Object.prototype.hasOwnProperty.call(_offlineQueue, key)) return value;
+  var q = _offlineQueue[key];
+  if (q === undefined || q === null) return value;
+  try {
+    var b = _mvBaseFile(key);
+    if (key === 'parcelles') return (Array.isArray(q) && Array.isArray(value)) ? _mvMergeParcelles(Array.isArray(b) ? b : value, deepClone(q), value) : value;
+    if (_MV_FUSION_EXCLUES[key]) return deepClone(q);
+    return _mvFusion(b, deepClone(q), value);
+  } catch (e) {
+    if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvFileParDessus');
+    return value;
+  }
+}
+// Une saisie en file que la garde anti-écrasement refuse : au coffre (Réglages › Saisies non
+// enregistrées), plus jamais jetée.
+function _mvFileBloquee(key, value, detail) {
+  _mvStashDenied(key, value);
+  if (window.logError) window.logError({ level: 'critical', cat: 'guard', msg: 'flush ' + key + ' BLOQUE (anti-ecrasement) -- retire de la file, saisie mise au coffre', detail: detail || '' });
+  showSyncBadge('Envoi bloqu\u00e9 (protection) \u2014 ' + _mvKeyLbl(key) + ' \u00b7 saisie conserv\u00e9e', '#7A1020');
+}
+
 // ── Badge persistant : nombre de modifications en attente de synchro ──
 function _showOfflineQueueBadge() {
   // ⚠️ « Hors ligne » n'est vrai que si le telephone est reellement coupe. Une ecriture
@@ -426,10 +570,19 @@ function _loadQueue() {
     _offlineQueue[k] = memQ[k];
     if (memB && Object.prototype.hasOwnProperty.call(memB, k)) _offlineBases[k] = memB[k];
   });
+  _mvEnvoisRepris();   // ★★★ ENVOI-1 (§326) : ce qu'une page morte avait en route rejoint la file, fusionné
 }
 
+// ★ ENVOI-1 (§326) — UN SEUL VIDAGE À LA FOIS. Sur un réseau fantôme, le minuteur de 30 s en relançait un
+//   par-dessus le précédent, chacun renvoyant les mêmes documents. Un appel pendant un vidage attend celui-ci.
+var _mvFlushP = null;
 async function _flushQueue() {
   if (window._MV_PERIME) return;   // VER-1 : la file part avec le code à jour, jamais avec le périmé
+  if (_mvFlushP) return _mvFlushP;
+  _mvFlushP = _mvViderFile().finally(function () { _mvFlushP = null; });
+  return _mvFlushP;
+}
+async function _mvViderFile() {
   _loadQueue();
   var keys = Object.keys(_offlineQueue);
   if (keys.length === 0) return;
@@ -443,40 +596,43 @@ async function _flushQueue() {
   if(DEBUG) console.log('[Sync] Vidage queue hors ligne :', keys);
   showSyncBadge('Synchronisation…', '#1A4A7A');
   var success = true, _tropN = 0;   // TAILLE-2 : une clé trop grosse quitte la file (au coffre), et le dit
+  var _coffreN = 0;                 // ★ ENVOI-1 : une clé refusée par la garde quitte la file pour le coffre, et le dit
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
+    // ★ ENVOI-1 (§326) — ce qui part. Seule CETTE valeur quitte la file : une saisie mise en file PENDANT
+    //   l'envoi y reste (l'ancien code effaçait la clé sans regarder). Chaque envoi est borné (_mvEnvoiBorne).
+    var _envoye = _offlineQueue[key], _sortie = true, _jetonQ = { annule: false };
     try {
       if (key === 'parcelles') {
         // #1 : fusion a la reconnexion (ne pas ecraser le travail des autres) — ★ FUSION-1 : avec la base
         //   de la mise en file, et la mémoire mise à jour (elle dérive de la relecture, pas de la file).
         var _bmP = Array.isArray(_baseParcelles) ? deepClone(_baseParcelles) : deepClone(_offlineQueue[key]);
-        var _pq = await _saveParcellesMerged(_offlineQueue[key], _mvBaseFile(key));
-        if (_pq && _pq.__mvTrop) { _mvTropGros('parcelles', _offlineQueue[key], _pq.octets); _tropN++; }   // ★★ TAILLE-2
-        else if (_pq && !_pq.__mvBlocked) _mvParcellesApres(_pq, _bmP);
+        var _pq = await _mvEnvoiBorne(_saveParcellesMerged(_offlineQueue[key], _mvBaseFile(key), _jetonQ), _jetonQ);
+        if (_pq && _pq.__mvTrop) { _mvTropGros('parcelles', _envoye, _pq.octets); _tropN++; }   // ★★ TAILLE-2
+        else if (_pq && _pq.__mvBlocked) { _mvFileBloquee('parcelles', _envoye, 'remoteProg=' + _pq.remoteProg + ' mergedProg=' + _pq.mergedProg); _coffreN++; }   // ★ ENVOI-1 : au coffre
+        else if (_pq) _mvParcellesApres(_pq, _bmP);
       } else if (_MV_FUSION_EXCLUES[key]) {
-        if (await _mvBlockDestructive(key, _offlineQueue[key])) {
-          // #wipe : ecriture destructrice en file -> on l'abandonne (pas de re-tentative en boucle)
-          if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'flush ' + key + ' BLOQUE (anti-ecrasement) -- retire de la file' });
+        if (await _mvEnvoiBorne(_mvBlockDestructive(key, _offlineQueue[key]), _jetonQ)) {
+          // #wipe : ecriture destructrice en file -> elle quitte la file (pas de re-tentative en boucle) ; ★ ENVOI-1 : pour le coffre
+          _mvFileBloquee(key, _envoye, ''); _coffreN++;
         } else {
-          var _ecritQ = _fbClone(key, _offlineQueue[key]), _octQ = _mvTailleControle(key, _ecritQ);   // ★★ TAILLE-2
-          if (_octQ > MV_LIMITE_DOC) { _mvTropGros(key, _offlineQueue[key], _octQ); _tropN++; }
-          else await setDoc(fbDocRef(key), { value: _ecritQ });
+          var _ecritQ = _fbClone(key, _envoye), _octQ = _mvTailleControle(key, _ecritQ);   // ★★ TAILLE-2
+          if (_octQ > MV_LIMITE_DOC) { _mvTropGros(key, _envoye, _octQ); _tropN++; }
+          else await _mvEnvoiBorne(setDoc(fbDocRef(key), { value: _ecritQ }), _jetonQ);
         }
       } else {
         // ★★★ FUSION-1 (§146) — la valeur en file est FUSIONNÉE avec le serveur : ce que les autres ont
         //   saisi pendant l'absence reste. La mémoire, elle, dérive de la relecture de la reconnexion.
         var _bmF = (_mvBaseDe(key) !== undefined) ? deepClone(_fbBases[key]) : deepClone(_offlineQueue[key]);
-        var _fq = await _mvSauverFusion(key, _offlineQueue[key], _mvBaseFile(key));
-        if (_fq && _fq.trop) { _mvTropGros(key, _offlineQueue[key], _fq.octets); _tropN++; }   // ★★ TAILLE-2
+        var _fq = await _mvEnvoiBorne(_mvSauverFusion(key, _offlineQueue[key], _mvBaseFile(key), _jetonQ), _jetonQ);
+        if (_fq && _fq.trop) { _mvTropGros(key, _envoye, _fq.octets); _tropN++; }   // ★★ TAILLE-2
         else if (_fq && _fq.bloque) {
-          // #wipe : ecriture destructrice en file -> on l'abandonne (pas de re-tentative en boucle)
-          if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'flush ' + key + ' BLOQUE (anti-ecrasement) -- retire de la file', detail:'cur=' + _fq.curN + ' new=' + _fq.newN });
+          // #wipe : ecriture destructrice en file -> elle quitte la file (pas de re-tentative en boucle) ; ★ ENVOI-1 : pour le coffre
+          _mvFileBloquee(key, _envoye, 'cur=' + _fq.curN + ' new=' + _fq.newN); _coffreN++;
         } else {
           _mvApresFusion(key, _fq.fusion, _bmF);
         }
       }
-      delete _offlineQueue[key];
-      delete _offlineBases[key];
     } catch (e) {
       // SEC-1 : idem fbSave — un refus de droits reste refusé. On l'abandonne (comme le
       // fait déjà la garde anti-écrasement) pour ne pas coincer la file à vie.
@@ -487,24 +643,24 @@ async function _flushQueue() {
         var _aliveQ = await _mvTokenAlive();
         if (!_aliveQ) {
           if (window.logError) window.logError({ level:'info', cat:'sync', msg:'Jeton non rafraîchi — ' + key + ' reste en file', detail:String(e) });
-          success = false;
-          continue;
+          success = false; _sortie = false;
+        } else {
+          _mvStashDenied(key, _envoye);
+          if (window.logError) window.logError({ level:'error', cat:'sync', msg:'Écriture refusée (droits) : ' + key + ' — retirée de la file, saisie conservée', detail:String(e) });
         }
-        _mvStashDenied(key, _offlineQueue[key]);
-        if (window.logError) window.logError({ level:'error', cat:'sync', msg:'Écriture refusée (droits) : ' + key + ' — retirée de la file, saisie conservée', detail:String(e) });
-        delete _offlineQueue[key];
-        delete _offlineBases[key];
-        continue;
       }
       // ★★ TAILLE-2 (§246) — filet : refus de taille du serveur → au coffre, hors de la file (sinon renvoyé sans fin).
-      if (_mvErreurTaille(e)) {
-        _mvTropGros(key, _offlineQueue[key], _mvOctets(key, _offlineQueue[key])); _tropN++;
-        delete _offlineQueue[key];
-        delete _offlineBases[key];
-        continue;
+      else if (_mvErreurTaille(e)) {
+        _mvTropGros(key, _envoye, _mvOctets(key, _envoye)); _tropN++;
+      } else {
+        // ★ ENVOI-1 : sans réponse dans la borne (« mv/lent »), la clé reste en file sans message — le voyant dit « en attente »
+        if(window.logError) window.logError({level:(e && e.code === 'mv/lent') ? 'info' : 'warning',cat:'sync',msg:'Synchro échouée: '+key,detail:String(e)});
+        success = false; _sortie = false;
       }
-      if(window.logError) window.logError({level:'warning',cat:'sync',msg:'Synchro échouée: '+key,detail:String(e)});
-      success = false;
+    }
+    if (_sortie) {
+      if (_offlineQueue[key] === _envoye) { delete _offlineQueue[key]; delete _offlineBases[key]; }
+      else success = false;   // ★ ENVOI-1 : une saisie plus récente attend : elle partira au prochain vidage
     }
   }
   try {
@@ -517,8 +673,8 @@ async function _flushQueue() {
   if (Object.keys(_offlineQueue).length === 0) {
     try { localStorage.removeItem('mavigne_offline_queue_t'); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_flushQueue#t'); }
   }
-  if (_tropN) {
-    /* TAILLE-2 : le voyant garde « taille maximale atteinte » posé par _mvTropGros — « synchronisé » mentirait */
+  if (_tropN || _coffreN) {
+    /* TAILLE-2 / ENVOI-1 : le voyant garde le message du coffre (_mvTropGros, _mvFileBloquee) — « synchronisé » mentirait */
   } else if (success && keys.length > 0) {
     showSyncBadge(+ keys.length + ' modif. synchronisée' + (keys.length > 1 ? 's' : ''), '#3D6B27');
   } else if (!success) {
@@ -623,6 +779,7 @@ function applyFbData(key, value) {
       }) };
     });
   }
+  value = _mvFileParDessus(key, value);   // ★★★ ENVOI-1 (§326) : ce qui attend en file reste visible (et dans la prochaine écriture)
   if (typeof window.applyFbData === 'function') {
     window.applyFbData(key, value);
   }
@@ -1035,7 +1192,16 @@ function _mvStashDenied(key, value) {
   try {
     var raw = localStorage.getItem(_MV_STASH_KEY);
     var st  = raw ? (JSON.parse(raw) || {}) : {};
-    st[key] = { at: Date.now(), value: value };
+    // ★ ENVOI-1 (§326) — le coffre FUSIONNE : une deuxième saisie refusée pour le même document ne remplace plus
+    //   la première (sans base : l'union — rien de ce qui y était ne disparaît). KML : un remplacement voulu.
+    var v = value;
+    if (st[key] && st[key].value !== undefined && st[key].value !== null && value !== undefined && value !== null) {
+      try {
+        if (key === 'parcelles') v = _mvMergeParcelles(st[key].value, value, st[key].value);
+        else if (key !== 'kml_polygons') v = _mvFusion(undefined, value, st[key].value);
+      } catch (e2) { v = value; if (window._mvAvale) window._mvAvale(e2, 'firebase.js/_mvStashDenied#fusion'); }
+    }
+    st[key] = { at: Date.now(), value: v };
     localStorage.setItem(_MV_STASH_KEY, JSON.stringify(st));
   } catch (e) {
     if (window.logError) window.logError({ level:'info', cat:'sync', msg:'Coffre des saisies refusées indisponible', detail:String(e) });
@@ -1174,10 +1340,12 @@ window.fbToastApres = function (etat, msg, coul) {
 // Garde de recursion : apres un jeton rafraichi on retente UNE fois, pas deux.
 var _mvDeniedRetried = {};
 
-async function _retryAsync(fn, retries, delayMs) {
+async function _retryAsync(fn, retries, delayMs, jeton) {
   for (var i = 0; i <= retries; i++) {
+    if (jeton && jeton.annule) throw _mvErrLent();   // ★ ENVOI-1 : l'envoi a dépassé sa borne — on ne relance plus
     try { return await fn(); } catch(e) {
       if(i === retries || _isDenied(e) || _mvErreurTaille(e)) throw e;   // SEC-1 : refus de droits -> inutile de retenter ; TAILLE-2 : la taille non plus (7 s pour rien)
+      if (jeton && jeton.annule) throw e;   // ★ ENVOI-1 : l'envoi a dépassé sa borne — on ne relance plus
       await new Promise(function(res){ setTimeout(res, delayMs * Math.pow(2, i)); });
     }
   }
@@ -1466,10 +1634,11 @@ function _mvTropGros(key, value, o) {
   return { ok: false, trop: true, stashed: true, octets: o };
 }
 
-async function _mvSauverFusion(key, local, base) {
+async function _mvSauverFusion(key, local, base, jeton) {
   var ref = fbDocRef(key);
   return runTransaction(db, async function (tx) {
     var snap = await tx.get(ref);
+    if (jeton && jeton.annule) throw _mvErrLent();   // ★ ENVOI-1 : la réponse arrive après la borne — la saisie est déjà en file, on n'écrit pas
     var distant = snap.exists() ? snap.data().value : undefined;
     // ★★ IDS-1 (§252) — la même normalisation des TROIS côtés (serveur, base, appareil) : un identifiant posé n'est pas une
     //   « modification ». Sans cela, une entrée supprimée ailleurs reviendrait (« modifiée ici, supprimée là-bas : gardée »)
@@ -1649,11 +1818,12 @@ async function _mvBlockDestructive(key, value) {
 // Sauvegarde parcelles transactionnelle : lit le serveur frais, fusionne, ecrit, met la base a jour.
 // ★ FUSION-1 (§146) — `baseFile` : la base de la mise en file (sinon la base courante). La base n'est
 //   plus posée DANS la transaction : c'est _mvParcellesApres, après, qui la pose avec la mémoire.
-async function _saveParcellesMerged(localValue, baseFile) {
+async function _saveParcellesMerged(localValue, baseFile, jeton) {
   var ref = fbDocRef('parcelles');
   var base0 = (baseFile !== undefined) ? baseFile : _baseParcelles;
   return runTransaction(db, async function (tx) {
     var snap = await tx.get(ref);
+    if (jeton && jeton.annule) throw _mvErrLent();   // ★ ENVOI-1 : même règle que _mvSauverFusion
     var remote = (snap.exists() && Array.isArray(snap.data().value)) ? snap.data().value : [];
     // ★★ IDS-1 (§252) — les trois côtés reçoivent le même pid avant la fusion (même raison que pour le journal).
     if (typeof mvIdsParcelles === 'function') { mvIdsParcelles(remote); mvIdsParcelles(base0); mvIdsParcelles(localValue); }
@@ -1738,43 +1908,65 @@ window.fbSave = async function (key, value) {
     _queueSave(key, value, _mvBaseMem(key));
     return { ok: false, queued: true, offline: true };
   }
+  // ★★★ ENVOI-1 (§326) — la valeur est sur le disque AVANT de partir ; elle n'en sort qu'arrivée, en file ou au
+  //   coffre. Une relance, une coupure, le téléphone qui tue l'appli pendant l'envoi : _loadQueue la reprend.
+  var _envoi = _mvEnvoiNoter(key, value, _mvBaseMem(key));
+  var _res;
+  try { _res = await _mvFbSaveServeur(key, value); }
+  catch (e) {
+    // Filet : fbSave ne rejette jamais (contrat ci-dessus). Une panne imprévue laisse la saisie en file.
+    if (window.logError) window.logError({ level:'info', cat:'firebase', msg:'fbSave : erreur impr\u00e9vue \u2014 mise en file : ' + key, detail:String(e) });
+    _queueSave(key, value, _mvBaseMem(key));
+    _res = { ok: false, queued: true };
+  }
+  _mvEnvoiFini(key, _envoi);
+  return _res;
+};
+// ★★★ ENVOI-1 (§326) — la partie « serveur » de fbSave, même contrat : un ÉTAT, jamais un rejet. Chaque écriture
+//   est bornée (_mvEnvoiBorne) : sans réponse dans la borne, elle part en file, et l'écriture restée en route est
+//   annulée avant d'écrire (le jeton). Une écriture que la garde anti-écrasement refuse va au coffre.
+async function _mvFbSaveServeur(key, value) {
+  var _jeton = { annule: false };
   var _msgOk = 'Sauvegardé';
   try {
     if (key === 'parcelles') {
       // #1 : fusion 3-way transactionnelle (fin du last-write-wins sur le point chaud terrain)
       // #wipe : peut renvoyer {__mvBlocked} si l'ecriture ferait disparaitre la progression
       var _pL0 = deepClone(value);
-      var _pRes = await _retryAsync(function(){ return _saveParcellesMerged(_pL0); }, 3, 1000);
+      var _pRes = await _mvEnvoiBorne(_retryAsync(function(){ return _saveParcellesMerged(_pL0, undefined, _jeton); }, 3, 1000, _jeton), _jeton);
       if (_pRes && _pRes.__mvTrop) return _mvTropGros('parcelles', value, _pRes.octets);   // ★★ TAILLE-2
       if (_pRes && _pRes.__mvBlocked) {
         if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'fbSave parcelles BLOQUE (anti-ecrasement)', detail:'remoteProg='+_pRes.remoteProg+' mergedProg='+_pRes.mergedProg });
+        _mvStashDenied('parcelles', value);   // ★ ENVOI-1 : rien n'est jeté — au coffre
         try { var _sH = await getDoc(fbDocRef('parcelles')); if (_sH.exists()) applyFbData('parcelles', _sH.data().value); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/fbSave'); }
         if (typeof showSyncBadge === 'function') showSyncBadge('\ud83d\udee1\ufe0f Sauvegarde ignoree (protection)', '#B5621A');
-        if (window.showToast) window.showToast('Ecriture ignoree : protection anti-perte de donnees', '#7A1020');
+        if (window.showToast) window.showToast('Enregistrement bloqu\u00e9 par la protection anti-perte \u2014 votre saisie est gard\u00e9e (R\u00e9glages \u203a Saisies non enregistr\u00e9es)', '#7A1020');
         return { ok: false, blocked: true };
       }
       if (_mvParcellesApres(_pRes, _pL0) !== 'rien') _msgOk = 'Sauvegardé — fusionné avec un autre appareil';
     } else if (_MV_FUSION_EXCLUES[key]) {
       // #wipe : garde generique anti-ecrasement (lecture-avant-ecriture)
-      if (await _mvBlockDestructive(key, value)) {
+      if (await _mvEnvoiBorne(_mvBlockDestructive(key, value), _jeton)) {
+        _mvStashDenied(key, value);   // ★ ENVOI-1 : rien n'est jeté — au coffre
         try { var _sH2 = await getDoc(fbDocRef(key)); if (_sH2.exists()) applyFbData(key, _sH2.data().value); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/fbSave#2'); }
         if (typeof showSyncBadge === 'function') showSyncBadge('\ud83d\udee1\ufe0f Sauvegarde ignoree (protection)', '#B5621A');
-        if (window.showToast) window.showToast('Ecriture ignoree : protection anti-perte de donnees', '#7A1020');
+        if (window.showToast) window.showToast('Enregistrement bloqu\u00e9 par la protection anti-perte \u2014 votre saisie est gard\u00e9e (R\u00e9glages \u203a Saisies non enregistr\u00e9es)', '#7A1020');
         return { ok: false, blocked: true };
       }
       var _ecritX = _fbClone(key, value), _octX = _mvTailleControle(key, _ecritX);   // ★★ TAILLE-2 : écriture directe
       if (_octX > MV_LIMITE_DOC) return _mvTropGros(key, value, _octX);
-      await _retryAsync(function(){ return setDoc(fbDocRef(key), { value: _ecritX }); }, 3, 1000);
+      await _mvEnvoiBorne(_retryAsync(function(){ return setDoc(fbDocRef(key), { value: _ecritX }); }, 3, 1000, _jeton), _jeton);
     } else {
       // ★★★ FUSION-1 (§146) — relire, fusionner, écrire : ce qu'un autre appareil a ajouté reste.
       var _fL0 = deepClone(value), _fB0 = _mvBaseDe(key);
-      var _fRes = await _retryAsync(function(){ return _mvSauverFusion(key, _fL0, _fB0); }, 3, 1000);
+      var _fRes = await _mvEnvoiBorne(_retryAsync(function(){ return _mvSauverFusion(key, _fL0, _fB0, _jeton); }, 3, 1000, _jeton), _jeton);
       if (_fRes && _fRes.trop) return _mvTropGros(key, value, _fRes.octets);   // ★★ TAILLE-2
       if (_fRes && _fRes.bloque) {
         if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'fbSave ' + key + ' BLOQUE (anti-ecrasement)', detail:'cur=' + _fRes.curN + ' new=' + _fRes.newN });
+        _mvStashDenied(key, value);   // ★ ENVOI-1 : rien n'est jeté — au coffre
         try { var _sH3 = await getDoc(fbDocRef(key)); if (_sH3.exists()) { applyFbData(key, _sH3.data().value); _mvBaseNoter(key, _sH3.data().value, _sH3.metadata); } } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/fbSave#fusion'); }
         if (typeof showSyncBadge === 'function') showSyncBadge('Sauvegarde ignorée (protection)', '#B5621A');
-        if (window.showToast) window.showToast('Ecriture ignoree : protection anti-perte de donnees', '#7A1020');
+        if (window.showToast) window.showToast('Enregistrement bloqu\u00e9 par la protection anti-perte \u2014 votre saisie est gard\u00e9e (R\u00e9glages \u203a Saisies non enregistr\u00e9es)', '#7A1020');
         return { ok: false, blocked: true };
       }
       _mvApresFusion(key, _fRes.fusion, _fL0);
@@ -1839,7 +2031,7 @@ window.fbSave = async function (key, value) {
     if (navigator.onLine) { clearTimeout(_onlineRetryTO); _onlineRetryTO = setTimeout(function(){ _flushQueue().catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'firebase.js/fbSave#4'); }); }, 5000); }
     return { ok: false, queued: true, code: (e && e.code) || '' };
   }
-};
+}
 
 // ── Migration noms de tâches (one-shot) ──
 function _migrateTaskNames() {
@@ -2236,8 +2428,10 @@ function _mvSaisieEnCours() {
   return t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT' || a.isContentEditable === true;
 }
 window._mvSaisieEnCours = _mvSaisieEnCours;
-// Relancer ne perd rien de ce qui est ENREGISTRÉ (la file vit dans localStorage, Firestore garde ses
-// écritures en attente sur l'appareil) — mais perdrait une fenêtre de saisie ouverte.
+// Relancer ne perd rien de ce qui est ENREGISTRÉ : la file vit dans localStorage, et une écriture encore en route
+// y a son entrée depuis ENVOI-1 (§326, _mvEnvoiNoter). ⚠️ Avant, ce commentaire disait « Firestore garde ses écritures
+// en attente » : FAUX pour une transaction, qui n'entre dans sa file qu'au commit. Une relance perdrait encore une
+// fenêtre de saisie ouverte.
 function _mvRechargeSure() {
   if (_mvSaisieEnCours()) return false;
   return !document.querySelector('.overlay.open, .mvv-ov.open');

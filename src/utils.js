@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.93';
+export const APP_VERSION = '8.94';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1056,6 +1056,13 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.94', d: '2026-10-13', items: [
+    { niv: 2, pour: ['tous'], emoji: 'rotation', titre: 'Une saisie enregistrée ne se perd plus, même en relançant l’appli',
+      desc: "Quand le téléphone affichait du réseau mais que le serveur ne répondait pas, une saisie restait en attente sans être gardée sur le téléphone : relancer l’application à ce moment-là l’effaçait. Et après une relance, les saisies encore en attente n’apparaissaient plus, puis la saisie suivante les remplaçait. "
+        + "Maintenant, chaque saisie est gardée sur le téléphone avant de partir. Relancée, fermée ou coupée par le téléphone, l’application la retrouve, l’affiche et l’envoie dès que le serveur répond. Après 20 secondes sans réponse, l’indicateur en haut de l’écran passe à « En attente »." },
+    { niv: 0, pour: ['admin'], emoji: 'cadenas', titre: 'La protection anti-perte garde votre saisie au lieu de la jeter',
+      desc: "Quand la protection contre l’écrasement des données refusait un envoi resté en attente, la saisie était retirée sans être gardée. Elle va maintenant dans Réglages › Saisies non enregistrées, avec les précédentes : une deuxième saisie refusée ne remplace plus la première." },
+  ] },
   { v: '8.93', d: '2026-10-13', items: [
     { niv: 0, pour: ['admin'], emoji: 'carte', titre: 'Désactiver une tâche sur plusieurs parcelles d’un coup, pour la période',
       desc: "Pour qu’une tâche comme la réparation ne concerne pas toutes les parcelles, il fallait ouvrir chaque fiche. Dans la roue crantée de la Vigne, « Tâches », la ligne de chaque travail ouvre maintenant la liste des parcelles : tout y est coché, décochez celles qui ne le feront pas, puis « Enregistrer » ; « Tout cocher » et « Tout décocher » vont plus vite. "
@@ -5070,7 +5077,7 @@ var MV_AIDE = {
       ['Appui long puis glisser', "déplace un bloc ; l’œil le masque, l’œil barré le réaffiche. Chacun règle son Accueil. Sur ordinateur, les blocs vont par deux, en rangées de même hauteur ; le bouton « Pleine largeur » met un bloc sur toute la rangée, et un bloc masqué laisse son voisin prendre toute la largeur."],
       ['La pastille de saison', "change la vue. Revenir sur une période passée ne touche pas à la période active."],
       ['Actualiser', "force une resynchronisation quand un chiffre semble figé."],
-      ['Le voyant en haut de l’écran', "dit où en est la synchro. Orange avec «\u00a0Pas de synchro\u00a0»\u00a0: le téléphone a du réseau mais ne joint plus le serveur, et ne reçoit plus ce que les autres saisissent — touchez-le, puis «\u00a0Relancer l’application\u00a0». Au retour de veille, l’application vérifie d’elle-même et relit ce qui a changé."],
+      ['Le voyant en haut de l’écran', "dit où en est la synchro. Orange avec «\u00a0Pas de synchro\u00a0»\u00a0: le téléphone a du réseau mais ne joint plus le serveur, et ne reçoit plus ce que les autres saisissent — touchez-le, puis «\u00a0Relancer l’application\u00a0». Au retour de veille, l’application vérifie d’elle-même et relit ce qui a changé. Relancer ne fait rien perdre\u00a0: les saisies en attente restent sur le téléphone, s’affichent et partent dès que le serveur répond."],
       ['La roue crantée', "en haut à droite ouvre ce qui se règle une fois l’an pour la vigne — tâches et barème, écartements de plantation, secteurs météo — et les documents de la vigne. Administrateur seulement ; l’en-tête dit « Vigne » sur les trois onglets."],
       ['« Tu prends le tracteur aujourd’hui ? »', "se pose à la première ouverture du jour, à ceux qui sont à la fois ouvriers et tractoristes et seulement si une session tracteur est ouverte. La réponse tient la journée et se repose le lendemain. Elle range le menu du bas et choisit l’écran d’ouverture : elle ne change aucun de vos droits, et rien ne disparaît — le reste passe sous « Plus », où se trouve aussi le retour au terrain."],
       ['La météo 5 jours', "le jour en tête, puis cinq colonnes. La barre et le chiffre sous chaque jour disent le <b>risque</b> de pluie — une probabilité, pas des millimètres ; la note signale le premier jour où il dépasse 50\u00a0%."],

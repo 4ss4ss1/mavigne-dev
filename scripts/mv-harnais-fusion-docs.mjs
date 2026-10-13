@@ -76,13 +76,16 @@ function affectation(src, nom) {
 }
 const VARS = ['_MV_FUSION_EXCLUES', '_fbBases', '_offlineBases', '_MV_FILE_BASE_CLE', '_MV_GUARD_FLOORS',
   '_mvFileMemSeule', '_mvFileAlerte', '_mvPersistDemande',   // STOCK-1 (§180)
-  '_MV_TAILLE_ALERTE', '_mvTropDit'];                        // TAILLE-2 (§246)
+  '_MV_TAILLE_ALERTE', '_mvTropDit', '_MV_PAGE', '_MV_ENVOI_PFX', '_MV_ENVOI_MAX_MS', '_MV_ENVOI_LENT', '_mvEnvoiDernier', '_mvEnvoiN', '_mvFlushP'];                        // TAILLE-2 (§246)
 const FNS = ['_mvDeepEqual', '_mvIsObj', '_mvMerge3', '_mvMergeParcelles', '_mvEgal', '_mvCanon', '_mvFusion',
   '_mvFusionObjet', '_mvIdentite', '_mvClesListes', '_mvFusionListe', '_mvBaseNoter', '_mvBaseDe', '_mvBaseMem',
   '_mvSauverFusion', '_mvApresFusion', '_mvParcellesApres', '_entryHasProg', '_tachesBlockHasProg', '_mvParcProgCount',
   '_mvIntrantsCount', '_mvPaieCount', '_mvDocSize', '_mvBlockDestructive', '_saveParcellesMerged', '_fsNoNestedArrays',
   '_fbClone', 'applyFbData', '_mvBaseFile', '_mvBasesFileEcrire', '_mvFileDisqueKo', '_mvDemanderPersistance',   // STOCK-1
   '_queueSave', '_loadQueue', '_flushQueue', '_retryAsync',
+  '_mvViderFile', '_mvBorne', '_mvEnvoiCle', '_mvEnvoiNoter', '_mvEnvoiFini', '_mvErrLent', '_mvEnvoiBorne',
+  '_mvFileFusionner', '_mvEnvoisRepris', '_mvFileParDessus', '_mvFileBloquee', '_mvFbSaveServeur',   // ENVOI-1 (§326)
+ 
   '_mvOctets', '_mvTailleControle', '_mvTailleAlerte', '_mvErreurTaille', '_mvTropGros'];   // TAILLE-2 (§246)
 const bloc = src => VARS.map(n => blocVar(src, n)).join('\n') + '\n' + FNS.map(n => fonction(src, n)).join('\n')
   + '\n' + affectation(src, 'fbSave');
@@ -472,7 +475,7 @@ if (CONTRE) {
     'if (!Object.prototype.hasOwnProperty.call(_offlineBases, key)) _offlineBases[key] = (base === undefined) ? null : base;',
     '_offlineBases[key] = (base === undefined) ? null : base;', ESSAIS.filePremiereBase);
   await mord('★★★ l’envoi fusionne avec la relecture de la reconnexion (efface l’ordinateur)', 
-    'var _fq = await _mvSauverFusion(key, _offlineQueue[key], _mvBaseFile(key));', 'var _fq = await _mvSauverFusion(key, _offlineQueue[key], _mvBaseDe(key));', ESSAIS.fileEnvoi);
+    '_mvSauverFusion(key, _offlineQueue[key], _mvBaseFile(key), _jetonQ)', '_mvSauverFusion(key, _offlineQueue[key], _mvBaseDe(key), _jetonQ)', ESSAIS.fileEnvoi);
   await mord('★★ la mémoire se réécrit sous un champ actif', 
     "  if (_mvSaisieEnCours()) return 'differe';\n  var courant = window[key.toUpperCase()];", '  var courant = window[key.toUpperCase()];', ESSAIS.champActif);
   await mord('★★★ ce qui est saisi pendant l’écriture est écrasé par le résultat', 
@@ -481,7 +484,7 @@ if (CONTRE) {
     "      if (_mvParcellesApres(_pRes, _pL0) !== 'rien') _msgOk = 'Sauvegardé — fusionné avec un autre appareil';",
     '      _baseParcelles = deepClone(_pRes);', ESSAIS.parcellesDormant);
   await mord('★★ la file des parcelles oublie sa base', 
-    'var _pq = await _saveParcellesMerged(_offlineQueue[key], _mvBaseFile(key));', 'var _pq = await _saveParcellesMerged(_offlineQueue[key]);', ESSAIS.parcellesFile);
+    '_saveParcellesMerged(_offlineQueue[key], _mvBaseFile(key), _jetonQ)', '_saveParcellesMerged(_offlineQueue[key], undefined, _jetonQ)', ESSAIS.parcellesFile);
   await mord('★★ la base prend un instantané en attente d’écriture', 
     'if (_MV_FUSION_EXCLUES[key] || value === undefined || (md && md.hasPendingWrites)) return false;',
     'if (_MV_FUSION_EXCLUES[key] || value === undefined) return false;', ESSAIS.baseEnAttente);

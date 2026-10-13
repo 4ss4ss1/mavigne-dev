@@ -59,6 +59,7 @@ function monter(S) {
     persist: () => { E.persistAppels++; return Promise.resolve(true); } } };
   const code = 'var window=W; var TENANT_ID="t"; var _offlineQueue={}; var _offlineBases={}; var _MV_FILE_BASE_CLE="mavigne_offline_queue_base";'
     + 'var _mvFileMemSeule={}; var _mvFileAlerte=false; var _mvPersistDemande=false; function _showOfflineQueueBadge(){}\n'
+    + 'function _mvEnvoisRepris(){ return 0; }\n'   // ENVOI-1 (§326) : la reprise des envois interrompus — éprouvée par mv-harnais-envoi
     + parts.join('\n')
     + '\nreturn { W:W, queue:_queueSave, load:_loadQueue, q:function(){ return _offlineQueue; }, b:function(){ return _offlineBases; } };';
   const M = new Function('W', 'localStorage', 'navigator', code)(W, localStorage, navigator);
@@ -109,7 +110,7 @@ async function jouer(S, silencieux) {
     t('Le résultat est exposé pour le diagnostic', M.W._mvStockagePersistant === true);
 
     titre('E. La fin de _flushQueue (code lu)');
-    const fl = bloc(sansCom(S.fb), 'async function _flushQueue(') || '';
+    const fl = bloc(sansCom(S.fb), 'async function _mvViderFile(') || '';   // ENVOI-1 (§326) : le corps du vidage
     t('Disque accepté → marques remises à zéro', /localStorage\.setItem\('mavigne_offline_queue', JSON\.stringify\(_offlineQueue\)\);\s*_mvFileMemSeule = \{\};/.test(fl));
     t('Disque refusé → ce qui reste est marqué « mémoire »', /Object\.keys\(_offlineQueue\)\.forEach\(function \(k\) \{ _mvFileDisqueKo\(k, e\); \}\)/.test(fl));
     t('_flushQueue relit toujours par _loadQueue (qui garde la mémoire)', /_loadQueue\(\);/.test(fl));

@@ -3,9 +3,9 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **13 octobre 2026 (RETRAIT-1)** — ★★ **UNE TÂCHE SE DÉSACTIVE SUR DES PARCELLES POUR LA PÉRIODE, D'UN COUP** (§325). Lot 56, base `7db0cd3`. Nico (13/10, dicté) : « je veux pouvoir retirer une tâche sur une parcelle, mais en sélection multiple » (réparations, arrachage) ; reformulé (la feuille de l'arrachage, tout coché d'office), « exactement ça », puis « en hiver certaines vignes à réparer, au printemps d'autres : par période, telles qu'elles ont été définies, pas une campagne annuelle ».
-> `p.horsPer = { <période> : [tâches] }` (utils.js, bloc RETRAIT-1) : `_mvTacheConcerne` le lit pour la période consultée, `_mvConcernePer` pour une période passée (`surfFn`). La feuille `ovSelParc` sert aussi aux tâches ordinaires (`openPerParc`), ouverte par la ligne du travail dans la roue crantée ; la croix de la fiche vaut pour la période ; un retrait d'avant (`p.tachesExclues`) reste valable partout et se change en retraits période par période quand on le réactive (`_mvPerRemet`). L'arrachage, le désherbage manuel et l'effeuillage restent à la campagne (SEL-1). Trouvé en route : la clé de L'année ne comptait que le nombre de retraits. ★ Rebâti sur TOURNEE-1 (§324) : la première livraison, posée sur `083fdb5`, avait été collée après TOURNEE-1 (commit `7db0cd3`) et en avait écrasé les fichiers communs — `harnais-claude-md` l'a vu (« titre disparu », « script muet »).
-> **APP 8.91 → 8.92, SW 9.70 → 9.71.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+> Dernière consolidation : **13 octobre 2026 (ENVOI-1)** — ★★★ **UNE SAISIE ENREGISTRÉE NE SE PERD PLUS, MÊME RELANCÉE EN ROUTE** (§326). Lot 57, base `e159c01` (construit d'abord sur `083fdb5`, rejoué sur TOURNEE-1 et RETRAIT-1). Nico (13/10, dicté, au tracteur) : la synchro ne passait pas, « pourtant tout était bien enregistré » ; à une autre parcelle, l'appli a dit de redémarrer ; après la relance, les parcelles d'avant avaient disparu — « ce genre d'erreur ne doit jamais arriver ». Carnet de l'appareil (Android, 8.85) : serveur injoignable ×2 alors qu'en ligne, démarrage lent, relance manuelle. Reformulé, journal envoyé, « continuez ».
+> Reproduit sur le code d'avant : fbSave attendait le serveur AVANT de mettre en file (§145h ③ « non traité ») — la relance pendant l'attente effaçait la saisie ; après relance, la relecture s'appliquait sans la file et la saisie suivante remplaçait la valeur en file ; le vidage effaçait sans regarder ; sa garde jetait. Désormais : entrée d'envoi sur le disque avant de partir (`_mvEnvoiNoter`, reprise par `_loadQueue` → `_mvEnvoisRepris`, fusionnée), mémoire = serveur + file (`_mvFileParDessus` dans `applyFbData`), envois bornés à 20 s avec annulation (`_mvEnvoiBorne`), un seul vidage (`_mvViderFile`) qui ne retire que ce qu'il a envoyé, garde → coffre (`_mvFileBloquee`), coffre qui fusionne.
+> **APP 8.93 → 8.94, SW 9.72 → 9.73.** Déploiement : `npm run build` → `firebase deploy --only hosting` (le guide ne change pas).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -223,6 +223,7 @@ chose est faite ou en attente — dans les deux sens.
 | ★★★ **`PIL_TREAT_DAYS` existe** | **je l'ai inventée.** `node --check` ne voit pas un identifiant inconnu : seule l'exécution l'aurait levé |
 | ★★ **`A8` du harnais d'audit est un cliquet** | c'était un cliquet **à l'envers** : il rougissait quand on AJOUTAIT un bouton de redirection |
 | ★★★ **« INTERNAL ASSERTION FAILED » est bénin, « le pull getDoc réussit »** (commentaire d'`app.js`) | **le SDK met sa file hors service** : toute lecture, écriture, écoute suivante échoue — et la trace partait par ce même Firestore (§145) |
+| ★★★ **« Relancer ne perd rien… Firestore garde ses écritures en attente »** (`_mvRechargeSure`, et la fenêtre du voyant) | **une transaction n'entre dans la file de Firestore qu'à son commit** : la saisie qui attendait le serveur disparaissait à la relance — vécu au tracteur (§326) |
 
 À l'inverse, l'audit trouve régulièrement du **travail déjà fait** encore listé au backlog.
 
@@ -1851,6 +1852,11 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ ENVOI-1 — CE QUI RESTE OUVERT (§326, posé le 13/10)
+1. **À vérifier chez Nico, au téléphone, en vrai** : des parcelles au tracteur là où le réseau s'affiche sans que le serveur réponde, voyant orange, puis « Relancer l'application » : après la relance, elles restent affichées et partent quand le serveur répond (« En attente » au-delà de 20 s). Vérifié par `mv-harnais-envoi` (12 essais, 13 contre-épreuves, vraies fonctions de `firebase.js`), la perte reproduite sur le code d'avant ; ni navigateur, ni vrai Firestore.
+2. **Les téléphones doivent prendre la 8.94** : celui de Nico tournait en 8.85 le 13/10. Regarder le parc (Admin GT) après le déploiement : un téléphone resté sur une ancienne version garde l'ancien défaut.
+3. **Ouvert, sans perte** : une ligne supprimée pendant qu'une ancienne valeur attend en file peut revenir (la fusion garde ce qu'un côté a ajouté) ; le coffre renvoie un document entier (STASH-1, inchangé) ; la borne de 20 s est un choix, à resserrer sur pièces.
 
 ### ⚠️ RETRAIT-1 — CE QUI RESTE OUVERT (§325, posé le 13/10)
 1. **À regarder chez Nico, sur PC et au téléphone** : roue crantée › Tâches, la ligne sous la Réparation ; la feuille (tout coché, « Tout décocher », une parcelle commencée qui ne se décoche pas, une parcelle désactivée avant le lot marquée « désactivée pour toutes les périodes ») ; puis la liste de l'équipe filtrée sur la Réparation, la fiche (« Désactivée pour cette période »), Pilotage › Aujourd'hui et L'année sans recharger. Vérifié par `mv-harnais-retrait1` sur les vraies fonctions ; ni navigateur ni ses données. Revoir aussi TOURNEE-1 (§324), que la première livraison de ce lot avait écrasée : « Tournée définie pour » ne propose que les tournées utiles.

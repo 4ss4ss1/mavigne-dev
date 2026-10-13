@@ -41,12 +41,15 @@ function blocVar(src, nom) {
   throw new Error('accolade non fermée : ' + nom);
 }
 const VARS = ['_MV_FUSION_EXCLUES', '_fbBases', '_offlineBases', '_MV_FILE_BASE_CLE', '_MV_GUARD_FLOORS', '_mvFileMemSeule', '_mvFileAlerte',
-  '_mvPersistDemande', '_MV_TAILLE_ALERTE', '_mvTropDit'];
+  '_mvPersistDemande', '_MV_TAILLE_ALERTE', '_mvTropDit', '_MV_PAGE', '_MV_ENVOI_PFX', '_MV_ENVOI_MAX_MS', '_MV_ENVOI_LENT', '_mvEnvoiDernier', '_mvEnvoiN', '_mvFlushP'];
 const FNS = ['_mvDeepEqual', '_mvIsObj', '_mvMerge3', '_mvMergeParcelles', '_mvEgal', '_mvCanon', '_mvFusion', '_mvFusionObjet', '_mvIdentite',
   '_mvClesListes', '_mvFusionListe', '_mvBaseNoter', '_mvBaseDe', '_mvBaseMem', '_mvSauverFusion', '_mvApresFusion', '_mvParcellesApres',
   '_entryHasProg', '_tachesBlockHasProg', '_mvParcProgCount', '_mvIntrantsCount', '_mvPaieCount', '_mvDocSize', '_mvBlockDestructive',
   '_saveParcellesMerged', '_fsNoNestedArrays', '_fbClone', 'applyFbData', '_mvBaseFile', '_mvBasesFileEcrire', '_mvFileDisqueKo',
   '_mvDemanderPersistance', '_queueSave', '_loadQueue', '_flushQueue', '_retryAsync',
+  '_mvViderFile', '_mvBorne', '_mvEnvoiCle', '_mvEnvoiNoter', '_mvEnvoiFini', '_mvErrLent', '_mvEnvoiBorne',
+  '_mvFileFusionner', '_mvEnvoisRepris', '_mvFileParDessus', '_mvFileBloquee', '_mvFbSaveServeur',   // ENVOI-1 (§326)
+ 
   '_mvOctets', '_mvTailleControle', '_mvTailleAlerte', '_mvErreurTaille', '_mvTropGros'];
 const bloc = src => VARS.map(n => blocVar(src, n)).join('\n') + '\n' + FNS.map(n => fonction(src, n)).join('\n') + '\n' + affectation(src, 'fbSave');
 const clone = v => (v === undefined ? undefined : JSON.parse(JSON.stringify(v)));

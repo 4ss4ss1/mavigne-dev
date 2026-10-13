@@ -31,6 +31,8 @@ const bAlive    = bloc('async function _mvTokenAlive() {', '\n}\n', bIsDenied.fi
 const bStash    = bloc("var _MV_STASH_KEY = 'mavigne_denied_stash';", '\n}\n', bAlive.fin);
 const bLbl      = bloc('var _MV_KEYLBL = {', '\nfunction _mvKeyLbl(k) { return _MV_KEYLBL[k] || k; }', bStash.fin);
 const bSave     = bloc('window.fbSave = async function (key, value) {', '\n};\n', bLbl.fin);
+// ENVOI-1 (§326) : la partie « serveur » de fbSave (refus, jeton, coffre) vit dans _mvFbSaveServeur.
+const bServeur  = bloc('async function _mvFbSaveServeur(key, value) {', '\n}\n', bSave.fin);
 
 // ── Bac de test ─────────────────────────────────────────────────────────────
 function bac(scenario) {
@@ -84,6 +86,8 @@ function bac(scenario) {
       return Promise.resolve();
     },
     _retryAsync: async (fn) => fn(),   // le retry interne n'est pas l'objet du test
+    // ENVOI-1 (§326) — l'entrée d'envoi sur le disque et la borne de 20 s : éprouvées par mv-harnais-envoi.
+    _mvEnvoiNoter: () => 1, _mvEnvoiFini: () => {}, _mvEnvoiBorne: (p) => p,
     // FUSION-1 (§146) — une clé fusionnée s'écrit par transaction (_mvSauverFusion) et non plus par
     // setDoc. La fusion est éprouvée par mv-harnais-fusion-docs ; ici, seul compte le REFUS : la
     // transaction passe par le même faux serveur que setDoc, avec les mêmes refus.
@@ -102,7 +106,7 @@ function bac(scenario) {
   vm.createContext(sandbox);
   vm.runInContext(
     [bIsDenied.txt, bAlive.txt, bStash.txt, bLbl.txt,
-     'var _mvDeniedRetried = {};', bSave.txt].join('\n'),
+     'var _mvDeniedRetried = {};', bSave.txt, bServeur.txt].join('\n'),
     sandbox
   );
   // le coffre reel ecrit dans localStorage : on le relit a la fin

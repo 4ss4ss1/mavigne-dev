@@ -7,22 +7,22 @@
   "src/app.js": {
     "dur": 105,
     "petit": 60,
-    "ko": 882
+    "ko": 893
   },
   "src/cave.js": {
     "dur": 28,
     "petit": 24,
-    "ko": 635
+    "ko": 636
   },
   "src/cockpit-vue.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 123
+    "ko": 126
   },
   "src/cockpit.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 49
+    "ko": 51
   },
   "src/coquille.js": {
     "dur": 0,
@@ -37,7 +37,7 @@
   "src/firebase.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 184
+    "ko": 198
   },
   "src/gt.js": {
     "dur": 0,
@@ -62,7 +62,7 @@
   "src/pilotage.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 901
+    "ko": 904
   },
   "src/planning-vue.js": {
     "dur": 0,
@@ -72,12 +72,12 @@
   "src/planning.js": {
     "dur": 121,
     "petit": 91,
-    "ko": 666
+    "ko": 667
   },
   "src/reglages.js": {
     "dur": 116,
     "petit": 86,
-    "ko": 482
+    "ko": 483
   },
   "src/reserve.js": {
     "dur": 16,
@@ -97,16 +97,16 @@
   "src/utils.js": {
     "dur": 5,
     "petit": 2,
-    "ko": 880
+    "ko": 895
   },
   "index.html": {
-    "dur": 84,
+    "dur": 83,
     "petit": 36,
-    "ko": 358
+    "ko": 359
   },
   "src/styles.css": {
     "dur": 269,
     "petit": 90,
-    "ko": 704
+    "ko": 705
   }
 }

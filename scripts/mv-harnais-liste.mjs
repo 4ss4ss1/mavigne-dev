@@ -234,6 +234,11 @@ export const GROUPES = {
   // stockage persistant demande. Vraies fonctions de firebase.js ; 5 contre-epreuves.
   'file-hors-ligne-et-stockage': 'Harnais — file hors ligne et stockage persistant (STOCK-1)',
 
+  // ENVOI-1 (§326) : une saisie partie vers le serveur est notee sur le disque ; une relance pendant
+  // l'envoi ne la perd plus ; apres relance l'ecran montre ce qui attend ; le vidage ne retire que ce qu'il a
+  // envoye ; ce que la garde refuse va au coffre, qui fusionne. Vraies fonctions de firebase.js ; 13 contre-epreuves.
+  'envoi-jamais-perdu': 'Harnais — une saisie enregistree ne se perd plus, meme relancee en route (ENVOI-1)',
+
   // HORLOGE-1 (§181) : aujourd'hui / campagne / exercice a 10 instants pieges (heure de Paris, horloge figee) et
   // semaine ISO du planning 2024-2030 sous 4 fuseaux. Le harnais se relance en fils, un par fuseau.
   'dates-pieges-et-changement': 'Harnais — dates pieges et changement d\'heure (HORLOGE-1)',
@@ -454,6 +459,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-arch.mjs --contre', 'archive-de-campagne-et'],
   ['node scripts/mv-harnais-stock.mjs', 'file-hors-ligne-et-stockage'],
   ['node scripts/mv-harnais-stock.mjs --contre', 'file-hors-ligne-et-stockage'],
+  ['node scripts/mv-harnais-envoi.mjs', 'envoi-jamais-perdu'],
+  ['node scripts/mv-harnais-envoi.mjs --contre', 'envoi-jamais-perdu'],
   ['node scripts/mv-harnais-horloge.mjs', 'dates-pieges-et-changement'],
   ['node scripts/mv-harnais-horloge.mjs --contre', 'dates-pieges-et-changement'],
   ['node scripts/mv-harnais-etiquettes.mjs', 'etiquettes-de-la-frise-et-de'],

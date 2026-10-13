@@ -377,3 +377,4 @@
 | 323 | 323. ★ DATES-1 — LES DATES DE TRAVAUX VALENT POUR TOUTES LES TÂCHES, BARÈME OU PAS (13/10 — `src/planning.j… | `docs/claude/chantiers-280-329.md` |
 | 324 | 324. ★ TOURNEE-1 — « TOURNÉE DÉFINIE POUR » NE PROPOSE PLUS QUE LES TOURNÉES UTILES ; UNE TÂCHE FINIE N'APP… | `docs/claude/chantiers-280-329.md` |
 | 325 | 325. ★★ RETRAIT-1 — UNE TÂCHE SE DÉSACTIVE SUR DES PARCELLES POUR LA PÉRIODE, D'UN COUP (13/10 — `src/utils… | `docs/claude/chantiers-280-329.md` |
+| 326 | 326. ★★★ ENVOI-1 — UNE SAISIE ENREGISTRÉE NE SE PERD PLUS, MÊME RELANCÉE EN ROUTE (13/10 — `src/firebase.js… | `docs/claude/chantiers-280-329.md` |
