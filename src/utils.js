@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.90';
+export const APP_VERSION = '8.91';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1012,11 +1012,12 @@ function _mvkAvancement(rows,retards){
     return h;
   }).join('');
 }
-// Les tâches EN RETARD : leur fenêtre est passée (taskWindows de _chargeSaisonData, fin EXCLUSIVE `we`).
+// Les tâches EN RETARD : leur fenêtre est passée (fin EXCLUSIVE `we`). ★ DATES-1 (§323) : les dates de TOUTES les tâches de la
+//   période (taskDates de _chargeSaisonData : une tâche sans barème a aussi les siennes) ; repli sur taskWindows (planning.js d'avant).
 function _mvkRetards(cd){
-  var out={}; if(!cd||!cd.taskWindows) return out;
+  var out={}, W=cd?(Array.isArray(cd.taskDates)?cd.taskDates:cd.taskWindows):null; if(!W) return out;
   var t=new Date(), o=Math.round((Date.UTC(t.getFullYear(),t.getMonth(),t.getDate())-Date.UTC(2026,0,1))/86400000);
-  cd.taskWindows.forEach(function(w){ if(w && w.we!=null && o>=w.we) out[w.nom]=true; });
+  W.forEach(function(w){ if(w && w.we!=null && o>=w.we) out[w.nom]=true; });
   return out;
 }
 // KIT-4 (§229) : UNE SURFACE S'ÉCRIT DE DEUX FAÇONS, DANS TOUS LES MODULES — une PARCELLE au centiare (4 décimales,
@@ -1055,6 +1056,13 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.91', d: '2026-10-13', items: [
+    { niv: 0, pour: ['tous'], emoji: 'calendrier', titre: 'Les dates de travaux valent aussi pour les tâches sans barème',
+      desc: "L’arrachage, l’entreplantation sans trou compté, le désherbage manuel ou l’effeuillage n’ont pas d’heures au barème : les dates que vous leur donnez dans la saison (Réglages, « Dates de travaux estimées ») n’étaient pas lues. Dans Pilotage › Aujourd’hui, leur ligne affichait les dates du premier chantier et de l’objectif, et ces tâches se rangeaient en tête des chantiers, comme dans Pilotage › La campagne et dans « Avancement par tâche » de l’Accueil. "
+        + "Elles prennent maintenant vos dates : l’ordre des chantiers les suit, et une tâche dont les dates sont passées sans qu’elle soit finie est dite en retard, comme les autres. L’arrachage fini pour l’équipe reste vert : la suite revient au prestataire." },
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'L’année suit vos dates de travaux sans recharger l’appli',
+      desc: "Après un changement des dates de travaux d’une saison, dans Réglages ou dans la roue crantée du Pilotage, L’année (ses graphiques et le renfort) et les photos du haut du Pilotage gardaient les anciennes dates jusqu’au rechargement de l’appli. Elles suivent maintenant tout de suite." },
+  ] },
   { v: '8.90', d: '2026-10-12', items: [
     { niv: 0, pour: ['admin'], emoji: 'carte', titre: 'Le domaine en direct : les parcelles pas concernées en fantôme',
       desc: "Dans Pilotage › Aujourd’hui, une parcelle où la tâche affichée est désactivée sur sa fiche (« Non applicable sur cette parcelle »), ou pas choisie pour la campagne pour l’arrachage, le désherbage et l’effeuillage, s’affichait « à faire », puis « en retard », et comptait dans les chiffres. "

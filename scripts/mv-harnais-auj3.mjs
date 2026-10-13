@@ -63,7 +63,7 @@ function suite(S) {
   T('pas de surface : l\u2019état vide, jamais un plan faux', W._ckPlanDispo([{ nom: 'x', surface: 0 }]) === null);
   const P = S.pil;
   T('_pilTabAuj passe les fenêtres des tâches et les parcelles, et le plan se masque',
-    P.includes("fenetres:((typeof _rfCd==='function'&&_rfCd())||{}).taskWindows||[], parcs:(window.PARCELLES||[])") && P.includes("plan:_pilShow('auj_plan')") && P.includes("['auj_plan','Le domaine en direct']"));
+    P.includes("fenetres:(function(c){ return (Array.isArray(c.taskDates)?c.taskDates:c.taskWindows)||[]; })((typeof _rfCd==='function'&&_rfCd())||{}), parcs:(window.PARCELLES||[])") && P.includes("plan:_pilShow('auj_plan')") && P.includes("['auj_plan','Le domaine en direct']"));
   // REF-1 (§266) : la feuille de cet ancien cockpit est remplacée par celle de la maquette validée, passée à la charte.
   T('l\u2019ancienne feuille a laissé la place à celle de la maquette (REF-1)', S.css.includes('★★★ REF-1 (§266) — LE COCKPIT D\'AUJOURD\'HUI : LA FEUILLE DE LA MAQUETTE VALIDÉE') && !S.css.includes('AUJ-3 (§262) — LE DOMAINE EN DIRECT'));
   T('aide, bulle, guide et nouveauté (8.34, pastille sur le plan)', /'pil\.plan': \{ t: 'Le domaine en direct'/.test(S.uti) && S.guide.includes('<b>domaine en direct</b>')
@@ -84,7 +84,7 @@ if (CONTRE) {
     ['un nom non échappé', 'ck', "' data-p=\"' + _ckEsc(n) + '\"", "' data-p=\"' + n + '\""],
     ['les passages proposés au choix', 'ck', "!(t.type === 'niveaux' || t.type === 'passages' ||", "!("],
     ['une équipe qui reste après sa validation', 'ck', "if(!e || e.tache !== tache || e.statut !== 'En cours' || etat[e.parcelle] !== 'cours') return;", "if(!e || e.tache !== tache || e.statut !== 'En cours') return;"],   // ETAT-1 (§320) : l'équipe des seules parcelles en cours
-    ['les fenêtres oubliées par _pilTabAuj', 'pil', "fenetres:((typeof _rfCd==='function'&&_rfCd())||{}).taskWindows||[], ", ""],
+    ['les fenêtres oubliées par _pilTabAuj', 'pil', "fenetres:(function(c){ return (Array.isArray(c.taskDates)?c.taskDates:c.taskWindows)||[]; })((typeof _rfCd==='function'&&_rfCd())||{}), ", ""],
   ];
   let manques = 0;
   DEF.forEach(([nom, f, a, b]) => {

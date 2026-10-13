@@ -543,7 +543,13 @@ function _pilRenderBar(d){
   if(!(d.data||[]).length){ host.innerHTML='<div class="pil-empty">Aucune tâche pour la saison active</div>'; return; }
   host.innerHTML='<div class="mvk-liste">'+window._mvkAvancement(d.data,_pilRetards())+'</div>';
 }
-function _pilRetards(){ return (typeof window._mvkRetards==='function')?window._mvkRetards(_rfCd()):{}; }
+// ★ DATES-1 (§323) : l'arrachage a désormais ses dates. Fini pour l'équipe (la suite au prestataire), il n'est pas « en retard » :
+//   sa ligne est verte (CHANT-1), « À savoir » ne doit pas le dire en retard.
+function _pilRetards(){
+  var r=(typeof window._mvkRetards==='function')?window._mvkRetards(_rfCd()):{};
+  if(r.Arrachage&&typeof window._arrEquipeFiniePartout==='function'&&window._arrEquipeFiniePartout()) delete r.Arrachage;
+  return r;
+}
 function _pilSaison(){
   var v=(typeof window._visuSaison==='function')?window._visuSaison():'';
   if(v && window.SAISONS){ var f=window.SAISONS.find(function(s){return s&&s.nom===v;}); if(f) return f; }
@@ -1456,7 +1462,9 @@ function _pilAnnuelData(){
       +':'+((t.saisons||[]).join('.')||(t.saison||''));
   }
   var _cfgTW=(window.CONFIG&&window.CONFIG.task_windows)||{};
-  var key=pers.map(function(p){return p.nom+'|'+p.debut+'|'+p.fin+'|'+((p.taches||[]).join('.'));}).join(';')
+  // ★ DATES-1 (§323) : les DATES DE TRAVAUX de chaque période (échéances : Réglages ou roue crantée du Pilotage) entrent dans la clé.
+  //   Sans elles, L'année et les photos gardaient les anciennes dates jusqu'au rechargement — le gel que ce bloc décrit.
+  var key=pers.map(function(p){return p.nom+'|'+p.debut+'|'+p.fin+'|'+((p.taches||[]).join('.'))+'|'+JSON.stringify(p.echeances||{});}).join(';')
     +'#'+(window.MEMBRES||[]).map(_annSigM).join(';')
     +'#'+(window.PARCELLES||[]).map(_annSigP).join(';')
     +'#'+(window.TACHES||[]).map(_annSigT).join(';')
@@ -1547,6 +1555,7 @@ function _pilAnnuelData(){
   _PIL_ANN=out; _PIL_ANNK=key;
   return out;
 }
+window._pilAnnuelData=_pilAnnuelData;   // DATES-1 (§323) : lue par mv-harnais-dates1 (la mémoire suit les dates de travaux)
 function _pilAnnPer(nom){
   var a=_PIL_ANN; if(!a||nom==null) return null;
   for(var i=0;i<a.pers.length;i++){ if(a.pers[i].nom===nom) return a.pers[i]; }
@@ -5214,14 +5223,19 @@ function _pilCk2Modele(d, m){
   // (lettres accentuées ramenées une à une : pas de plage de diacritiques, hors du jeu de glyphes des polices)
   var slug=function(n){ return String(n).toLowerCase().replace(/[àâä]/g,'a').replace(/[éèêë]/g,'e').replace(/[îï]/g,'i').replace(/[ôö]/g,'o').replace(/[ùûü]/g,'u').replace(/ç/g,'c').replace(/[^a-z0-9]+/g,''); };
   var art=function(n){ var l=String(n).toLowerCase(); return /^[aeiouyhéèêâîô]/.test(l)?'l\u2019'+l:(/age\b/.test(l)?'le '+l:'la '+l); };   // HORS-1 (§322) : « le désherbage manuel » — un mot en -age suivi d'un autre reste masculin
-  var cd=(typeof _rfCd==='function'&&_rfCd())||{}, fen=cd.taskWindows||[], retards=_pilRetards();
+  // ★ DATES-1 (§323) : les dates des lignes, du plan et d'« À savoir » = celles de TOUTES les tâches de la période (taskDates) : une
+  //   tâche sans barème (arrachage, entreplantation sans trou compté…) prend enfin les dates réglées dans la période, au lieu du premier
+  //   chantier et de l'objectif. Repli sur taskWindows (planning.js d'avant ce lot).
+  var cd=(typeof _rfCd==='function'&&_rfCd())||{}, fen=(Array.isArray(cd.taskDates)?cd.taskDates:cd.taskWindows)||[], retards=_pilRetards();
   var rows=(typeof window._ckPlanTaches==='function')?window._ckPlanTaches(d.data):(d.data||[]);
   // ★ CHANT-1 (§316) : les chantiers dans l'ordre commun (utils.js, _mvOrdreChantiers), les dates lues dans la même période
   //   que les fenêtres affichées (_pilSaison, comme _rfCd) ; l'arrachage fini pour l'équipe porte eqFini (vert, en tête des terminés).
   var OC=(typeof window._mvChantiersCtx==='function')?window._mvChantiersCtx(_pilSaison()):null, EQF=(OC&&OC.equipeFinie)||{};
   if(typeof window._mvOrdreChantiers==='function') rows=window._mvOrdreChantiers(rows, OC);
+  var debH=[];   // DATES-1 : le début de la campagne (courbe, frise de la fin prévue) reste celui des tâches AU BARÈME, comme avant
   var taches=rows.map(function(r){
     var w=fen.filter(function(x){ return x&&x.nom===r.nom; })[0], nom=nomT(r.nom);
+    if(w&&w.ws!=null&&w.h!==0) debH.push(oIso(w.ws));
     return { id:slug(r.nom), cle:r.nom, nom:nom, art:art(nom), f:false, pct:Number(r.pct)||0, eqFini:!!EQF[r.nom]&&(Number(r.pct)||0)<100, sel:(typeof window._mvTacheSel==='function')&&!!window._mvTacheSel(r.nom),
       hha:(r.surf_total>0&&r.h_total>0)?r.h_total/r.surf_total:0, hDone:(r.h_total>0)?(Number(r.h_done)||0):null, hTotal:(r.h_total>0)?Number(r.h_total):null,
       debut:(w&&w.ws!=null)?oIso(w.ws):null, fin:(w&&w.we!=null)?oIso(w.we-1):null };
@@ -5370,7 +5384,7 @@ function _pilCk2Modele(d, m){
   while(xo<=jusq){ if(ouv(xo)) OUVL.push(_pilPhotoIso(xo)); xo.setDate(xo.getDate()+1); }
   var diag=[]; try{ diag=_pilDiag().filter(function(x){ return x&&x.touche&&x.touche.indexOf('cfm')>=0; }); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#cfm'); }
   return {
-    auj:auj, debut:(taches.map(function(t){ return t.debut; }).filter(Boolean).sort()[0])||(ph[0]&&ph[0].d)||auj,
+    auj:auj, debut:(debH.sort()[0])||(ph[0]&&ph[0].d)||auj,
     objectif:isoD(m&&m.obj), fin:isoD(m&&m.proj), marge:(m&&m.marge!=null)?m.marge:null,
     dateTxt:sem[t0.getDay()].replace(/^./,function(c){ return c.toUpperCase(); })+' '+t0.getDate()+' '+t0.toLocaleDateString('fr-FR',{month:'long'})+', semaine '+nSem,
     saisonDe:saisonDe, taches:taches, parcs:parcs, etats:etats, presta:presta, gens:gens, presents:nPres, effectifTotal:gens.length,
@@ -5540,7 +5554,8 @@ function _pilTabAuj(d){
   //   ou en erreur : l'ancien ordre, ci-dessous, s'affiche — l'écran ne reste jamais blanc.
   if(H && typeof window._ckAuj==='function'){
     try{
-      return window._ckAuj({ d:d, m:m, hero:_ckHero, inaction:_ckInac, kpis:kpis.slice(0,_ckK0), cave:_ckCave, retards:_pilRetards(), fenetres:((typeof _rfCd==='function'&&_rfCd())||{}).taskWindows||[], parcs:(window.PARCELLES||[]), budget:_ckBud, eco:_pilShow('auj_eco'), prolong:_pilGainsProlong(d), dec:dec, det:det, alertes:H.slice(_ckAl0),
+      // ★ DATES-1 (§323) : les fenêtres d'« À savoir » (cockpit de secours) = les dates de toutes les tâches de la période (taskDates).
+      return window._ckAuj({ d:d, m:m, hero:_ckHero, inaction:_ckInac, kpis:kpis.slice(0,_ckK0), cave:_ckCave, retards:_pilRetards(), fenetres:(function(c){ return (Array.isArray(c.taskDates)?c.taskDates:c.taskWindows)||[]; })((typeof _rfCd==='function'&&_rfCd())||{}), parcs:(window.PARCELLES||[]), budget:_ckBud, eco:_pilShow('auj_eco'), prolong:_pilGainsProlong(d), dec:dec, det:det, alertes:H.slice(_ckAl0),
         chantiers:(_pilShow('auj_chantiers')?window._mvkAvancement(d.data,_pilRetards()):''),
         photos:_pilPhotoListe(), journal:(window.JOURNAL||[]),
         montrer:{ resume:_pilShow('auj_resume'), charge:_pilShow('auj_courbe'), fil:_pilShow('auj_fil'), savoir:_pilShow('auj_savoir'), plan:_pilShow('auj_plan') } });

@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v9.69
+// MA VIGNE — Service Worker v9.70
+// v9.70 (13/10/2026) — DATES-1 (§323) : les dates de travaux d'une periode valent aussi pour les taches sans bareme (arrachage, entreplantation
+//   sans trou compte, desherbage, effeuillage) — ligne, ordre et retard des chantiers (planning.js taskDates, pilotage.js, app.js, utils.js) ;
+//   la memoire de L'annee suit les dates de travaux (pilotage.js). index.html. APP 8.90 -> 8.91.
 // v9.69 (12/10/2026) — HORS-1 (§322) : une parcelle ou la tache est desactivee (fiche « Non applicable ») ou pas choisie pour la campagne n'est plus « a faire »
 //   dans Le domaine en direct ni sur la carte de l'Accueil : fantome pale, hors des compteurs et de l'avancement (cockpit.js, cockpit-vue.js, pilotage.js,
 //   app.js, styles.css, utils.js, index.html). APP 8.89 -> 8.90.
@@ -4472,7 +4475,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.69';
+const CACHE_NAME   = 'mavigne-v9.70';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4489,7 +4492,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.69 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.70 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4509,7 +4512,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.69 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.70 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -8,6 +8,10 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **12 octobre 2026 (HORS-1)** — ★ **LA PARCELLE PAS CONCERNÉE PAR LA TÂCHE AFFICHÉE DEVIENT UN FANTÔME** (§322). Lot 53, base `e887a26`. Nico (12/10, dicté) : « dans le pilotage, toutes les parcelles sont indiquées pour des tâches qui ne les concernent pas, qui ont été désactivées ; elles sont indiquées à faire, ce qui est faux » ; reformulé, choix « fantôme » (contour pâle, à sa place, hors des comptes) plutôt que « retirées du plan ».
+> `_ckPlanLire` lit `window._mvTacheConcerne` (la règle de la fiche et de l'avancement) → état `hors` ; le plan (contour pâle, sans rangs, ligne « Pas concernées » seulement s'il y en a, % d'appellation sur les seules concernées, tiret sinon), la loupe (la raison), le plan de secours, « En cours sur … » d'À savoir et la carte « Priorité du moment » de l'Accueil suivent. Trouvé en route : « la désherbage manuel » (`art`, `/age\b/`).
+> **APP 8.89 → 8.90, SW 9.68 → 9.69.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+
 > Dernière consolidation : **12 octobre 2026 (LABO-2)** — ★ **LES RAPPORTS DU LABO ONT LEUR ONGLET DANS LE CHAI** (§321). Lot 52, base `b2f3ef4` (reconstruit sur ETAT-1 : la première version, bâtie sur `e937d3a`, prenait les mêmes numéros). Nico (12/10, dicté) : « il ne faut pas le cacher dans un sous-onglet, il faut le mettre à côté de Cuvées, Bouteilles, Journal — c'est un truc important » ; reformulé, « oui ».
 > `ONGLETS` du Chai + `'labo'` (ordre Cuvées · Bouteilles · Labo · Journal) ; `renderCaveLabo` écrit la liste en page, filtre millésime compris ; la fenêtre `#ovLabo` ne garde que la fiche et la vérification ; la zone du Journal disparaît ; l'annonce 8.87 recalée sur `#lbo-saisir`.
 > **APP 8.88 → 8.89, SW 9.67 → 9.68.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).

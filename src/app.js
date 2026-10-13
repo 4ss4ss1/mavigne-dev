@@ -8660,6 +8660,8 @@ function _arrEquipeFiniePartout(){
   var L=(typeof _parcConcern==='function')?_parcConcern('Arrachage'):[];
   return L.length>0&&L.every(_arrEquipeFinie);
 }
+// ★ DATES-1 (§323) : lue par le Pilotage (pilotage.js/_pilRetards) — l'arrachage fini pour l'équipe n'est pas « en retard ».
+window._arrEquipeFiniePartout=_arrEquipeFiniePartout;
 // ★ ARRACH-9 (§317) — LA PARCELLE AU PRESTATAIRE. L'équipe a fait toutes SES étapes, il ne reste que celles du prestataire :
 //   pour l'équipe, la parcelle est faite. Nico (12/10) : « elle ne doit plus apparaître dans les listes des parcelles à faire ».
 //   Lue par les listes et les cartes de l'équipe — Parcelles (« À faire », le rang, l'état écrit), la carte de l'Accueil, l'anneau
@@ -13322,7 +13324,9 @@ function _mvChantiersCtx(sa){
     if(!sa) return out;
     out.defaut=String(sa.debut||'');
     var cd=(sa.debut&&sa.fin&&typeof window._chargeSaisonData==='function')?window._chargeSaisonData(sa):null;
-    ((cd&&cd.taskWindows)||[]).forEach(function(w){ if(w&&w.nom&&w.start) out.debut[w.nom]=String(w.start); });
+    // ★ DATES-1 (§323) : les dates de TOUTES les tâches de la période (taskDates : une tâche sans barème a aussi les siennes) ;
+    //   repli sur taskWindows (planning.js d'avant ce lot).
+    ((cd&&(Array.isArray(cd.taskDates)?cd.taskDates:cd.taskWindows))||[]).forEach(function(w){ if(w&&w.nom&&w.start) out.debut[w.nom]=String(w.start); });
     if(typeof _arrEquipeFiniePartout==='function'&&_arrEquipeFiniePartout()) out.equipeFinie['Arrachage']=true;
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvChantiersCtx'); }
   return out;

@@ -1556,6 +1556,10 @@ function _chargeSaisonData_(s){
   function surfFn(nm){ return (window.PARCELLES||[]).filter(function(p){return p&&p.statut!=='Arrachee'&&((typeof window._mvTacheConcerne==='function')?window._mvTacheConcerne(p,nm):((p.tachesExclues||[]).indexOf(nm)<0));}).reduce(function(a,p){return a+(parseFloat(p.surface)||0);},0); }
   var pg=window.SAISON_PASSAGES||{};
   var charge=0, taskDet=[];
+  // ★ DATES-1 (§323) : TOUTES les tâches de la période, heures au barème ou pas (taskAll). Une tâche sans heures (arrachage,
+  //   entreplantation sans trou compté, désherbage, effeuillage) n'entre pas dans la charge, mais elle a des dates : celles que
+  //   l'admin lui donne dans la période (Réglages), sinon la fenêtre par défaut. taskDet garde les MÊMES objets.
+  var taskAll=[];
   TAC.forEach(function(t){
     if(!t)return;
     if(!_inSaison(t))return;
@@ -1569,7 +1573,9 @@ function _chargeSaisonData_(s){
     } else {
       h=(parseFloat(t.hha)||0)*mult*(surfFn(t.nom)||0);
     }
-    if(h>0){ charge+=h; taskDet.push({nom:t.nom,h:h}); }
+    var tk={nom:t.nom,h:(h>0?h:0)};   // DATES-1 : le même objet dans les deux listes
+    taskAll.push(tk);
+    if(h>0){ charge+=h; taskDet.push(tk); }
   });
   var tpl=_planGetTpl('standard');
   // capMonth ANNEE-AWARE (annee, index mois 0-11). Le template est un motif annuel repetitif
@@ -1647,7 +1653,10 @@ function _chargeSaisonData_(s){
   var _ech=(s&&s.echeances&&typeof s.echeances==='object')?s.echeances:{};
   // Capacite 1 ETP d'un jour (ordinal) selon le template — base de l'etalement prorata-capacite.
   function _cap1(o){ var dt=new Date(Date.parse('2026-01-01T00:00:00')+o*86400000); var mo=_planGetTpl('standard',dt.getFullYear())[dt.getMonth()]||{}; var hv=mo[String(dt.getDate())]; return hv!=null?(parseFloat(hv)||0):0; }
-  var taskWindows=taskDet.map(function(t){
+  // ★ DATES-1 (§323) : la règle des dates d'une tâche, UNE fois — échéance de la période, sinon CONFIG.task_windows, sinon la
+  //   fenêtre par défaut. Les fenêtres des tâches au barème (taskWindows : l'étalement des heures) et les dates de toutes les
+  //   tâches (taskDates) sortent de cette même fonction : deux règles finiraient par se contredire.
+  function _fenTache(t){
     var key=_mvTaskNorm(t.nom), ws, we, custom=false;
     // 1) echeances de la saison (dates saisies dans « Modifier la periode ») en PRIORITE
     // ★★★ UNE FENETRE QUI NE RENCONTRE PAS LA PERIODE N'EST PAS UNE FENETRE.
@@ -1695,7 +1704,11 @@ function _chargeSaisonData_(s){
     var winCap=0; for(var _d=Math.round(ws);_d<Math.round(we);_d++) winCap+=_cap1(_d);
     var s0=(ws-spanS)/spanLen, s1=(we-spanS)/spanLen;
     return {nom:t.nom,h:t.h,s0:s0,s1:s1,ws:ws,we:we,winCap:winCap,start:_ford(ws),end:_ford(we-1),custom:custom,horsPeriode:hors};
-  });
+  }
+  var taskWindows=taskDet.map(_fenTache);
+  // DATES-1 : une tâche au barème reprend SA fenêtre (le même objet) ; les autres reçoivent la leur, sans heure (h:0). Rien
+  //   n'entre dans la charge, la frise ni le renfort : ils ne lisent que taskWindows.
+  var taskDates=taskAll.map(function(tk){ var k=taskDet.indexOf(tk); return k>=0?taskWindows[k]:_fenTache(tk); });
   // Heures de t etalees au PRORATA DE LA CAPACITE sur [a,b) : une semaine de feries (capacite ~0)
   // recoit proportionnellement moins de travail -> plus de pic « fantome ». Repli uniforme si winCap==0.
   function _taskHoursIn(t,a,b){ a=Math.max(t.ws,a); b=Math.min(t.we,b); if(b<=a)return 0;
@@ -1932,7 +1945,7 @@ function _chargeSaisonData_(s){
     if(w.need>peakReq){ peakReq=w.need; peakWeek=w; peakMonth=w.m; peakPres=w.head||0; }
     if(w.need>(w.head||0)+0.05) anyShort=true;
   });
-  return {saison:s.nom,debut:s.debut,fin:s.fin,spanS:spanS,spanE:spanE,capCum:capCum,capRCum:capRCum,charge:charge,tasks:taskDet,months:months,capRefTotal:capRefTotal,etpCible:etpCible,capEquipe:capEquipe,etpDispo:etpDispo,nMbr:mbrs.length,taskWindows:taskWindows,weeks:weeks,capPresentTotal:capPresentTotal,etpPresent:etpPresent,peakReq:peakReq,peakMonth:peakMonth,peakWeek:peakWeek,peakPres:peakPres,anyShort:anyShort};
+  return {saison:s.nom,debut:s.debut,fin:s.fin,spanS:spanS,spanE:spanE,capCum:capCum,capRCum:capRCum,charge:charge,tasks:taskDet,months:months,capRefTotal:capRefTotal,etpCible:etpCible,capEquipe:capEquipe,etpDispo:etpDispo,nMbr:mbrs.length,taskWindows:taskWindows,taskDates:taskDates,weeks:weeks,capPresentTotal:capPresentTotal,etpPresent:etpPresent,peakReq:peakReq,peakMonth:peakMonth,peakWeek:peakWeek,peakPres:peakPres,anyShort:anyShort};
 }
 window._chargeSaisonData=_chargeSaisonData;
 // \u2605\u2605 LA MEME LECTURE, DEPUIS LES AUTRES MODULES.

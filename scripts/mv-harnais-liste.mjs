@@ -595,6 +595,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-etat1.mjs --contre'],
   ['node scripts/mv-harnais-hors1.mjs'],             // HORS-1 (§322) : la parcelle pas concernée par la tâche (désactivée, pas choisie) en fantôme — plan, plan de secours, À savoir, carte de l'Accueil
   ['node scripts/mv-harnais-hors1.mjs --contre'],
+  ['node scripts/mv-harnais-dates1.mjs'],            // DATES-1 (§323) : les dates de travaux valent pour toutes les tâches, barème ou pas (ligne, ordre, retard, À savoir) ; la mémoire de L'année suit les dates
+  ['node scripts/mv-harnais-dates1.mjs --contre'],
   ['node scripts/mv-harnais-trac1.mjs'],              // TRAC-1 (§282) : les sessions du Tracteur en liste + fiche
   ['node scripts/mv-harnais-trac1.mjs --contre'],
   ['node scripts/mv-harnais-trac2.mjs'],              // TRAC-2 (§283) : l'Entretien du Tracteur sur deux colonnes
