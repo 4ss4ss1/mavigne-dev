@@ -1057,10 +1057,11 @@ if(typeof document!=='undefined' && document.addEventListener){
 
 export const WHATS_NEW = [
   { v: '8.92', d: '2026-10-13', items: [
-    { niv: 0, pour: ['tous'], emoji: 'route', titre: 'La tournée ne propose plus les travaux finis',
-      desc: "Sur Parcelles, en «\u00a0Toutes tâches\u00a0», l’encart «\u00a0Tournée définie pour\u00a0» proposait encore un travail terminé, ou d’une autre campagne — les vendanges en plein hiver. Il ne garde maintenant que les travaux de la campagne en cours où il reste au moins une parcelle à faire, et disparaît quand il n’y en a plus, comme «\u00a0Reprendre la tournée du domaine\u00a0». "
-        + "En passant d’un travail à un travail terminé, la barre de la tournée précédente restait affichée au-dessus du message «\u00a0… terminé\u00a0» : elle suit maintenant le travail choisi, et un travail terminé ne porte plus de numéros de tournée. "
-        + "Les tournées enregistrées dans Décider ne sont pas effacées : celle des vendanges reviendra avec sa campagne." },
+    { niv: 0, pour: ['admin'], emoji: 'carte', titre: 'Désactiver une tâche sur plusieurs parcelles d’un coup, pour la période',
+      desc: "Pour qu’une tâche comme la réparation ne concerne pas toutes les parcelles, il fallait ouvrir chaque fiche. Dans la roue crantée de la Vigne, « Tâches », la ligne de chaque travail ouvre maintenant la liste des parcelles : tout y est coché, décochez celles qui ne le feront pas, puis « Enregistrer » ; « Tout cocher » et « Tout décocher » vont plus vite. "
+        + "Le choix vaut pour la période consultée : à la période suivante, toutes repartent concernées — l’hiver et le printemps peuvent avoir des parcelles différentes. Une parcelle où la tâche est commencée reste concernée." },
+    { niv: 0, pour: ['tous'], emoji: 'check', titre: 'La croix d’une tâche, sur la fiche d’une parcelle, vaut pour la période',
+      desc: "Cette croix désactivait la tâche sur la parcelle pour toujours. Elle ne la désactive plus que pour la période consultée, et « Réactiver » la remet pour cette période. Une tâche désactivée avant cette mise à jour le reste pour toutes les périodes, jusqu’à ce que vous la réactiviez." },
   ] },
   { v: '8.91', d: '2026-10-13', items: [
     { niv: 0, pour: ['tous'], emoji: 'calendrier', titre: 'Les dates de travaux valent aussi pour les tâches sans barème',
@@ -5078,13 +5079,14 @@ var MV_AIDE = {
       ['Sur chaque carte', "la surface au centiare près (0,0870 ha), le pourcentage, et le compte des tâches faites, qui suit la même règle : un arrachage à moitié fait compte pour une demie (« 1,5/2 tâches »)."],
       ['Les deux gestes', "« Début » signale qu’on attaque, « Valider » que c’est fini, sans ouvrir la parcelle : en bas de chaque carte au téléphone, au bout de chaque ligne sur ordinateur. Quand une tâche est choisie, la carte dit l’état de cette tâche à la place du pourcentage. Une tâche à passages affiche en plus le passage en cours (P1, P2, N1…). Les deux enregistrent l’équipe de la barre « Équipe sur … », « sans moi » compris : c’est elle que le Pilotage pose sur la parcelle en cours. Changer l’équipe d’une tâche la donne aussi aux parcelles en cours que vous avez commencées sans équipe notée."],
       ['Sur un ordinateur', "la liste passe à gauche, une ligne par parcelle avec ses deux gestes, et la fiche de la parcelle choisie s’ouvre à droite : sa forme, l’état de la tâche, les travaux de la campagne — une tâche désactivée sur la parcelle y est grisée, comme dans la fiche complète —, les derniers passages. Les flèches haut et bas passent d’une parcelle à l’autre, la touche V valide ; « Fiche complète » ouvre tout le reste."],
-      ['Le numéro devant le nom', "est le rang de la tournée du domaine. Il n’apparaît que si une tournée est fixée et qu’il reste une parcelle à faire sur ce travail ; les parcelles se rangent alors dans cet ordre. Sur «\u00a0Toutes tâches\u00a0», l’encart «\u00a0Tournée définie pour\u00a0» ouvre d’un appui chaque travail qui en a une : seulement ceux de la campagne en cours où il reste une parcelle à faire."],
+      ['Le numéro devant le nom', "est le rang de la tournée du domaine. Il n’apparaît que si une tournée est fixée, et les parcelles se rangent dans cet ordre."],
       ['Onglet Carte', ": les contours viennent de votre export PAC ou d’un fichier KML."],
       ['L’anneau doré qui respire', "sur la carte marque la parcelle <b>commencée et pas finie</b> pour le travail affiché\u00a0: celle où «\u00a0Début\u00a0» a été touché sans validation. S’il n’y en a aucune, il se pose sur la <b>prochaine à faire</b>, le n°\u00a01 de la tournée enregistrée. Sur «\u00a0toutes\u00a0», c’est la priorité du moment. Plusieurs parcelles commencées ont chacune leur anneau, et rien ne s’affiche sur une période archivée."],
       ['La recherche', "accepte le nom du climat comme le lieu-dit."],
       ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique. La déclarer arrachée valide aussi son <b>arrachage</b> (case cochée d’office), sauf si la date d’arrachage tombe avant la période en cours : elle passe alors « Arrachée » sans rien valider. Valider l’arrachage d’une vigne en place propose de la déclarer arrachée. Son avancement et sa fiche ne portent plus que l’<b>arrachage</b>, et plus rien du tout dans une période qui commence après son arrachage. Un passage d’un autre travail saisi après la date d’arrachage reste au journal mais ne compte plus, ni dans l’avancement ni dans le temps réel du Pilotage. Elle reste saisissable au journal pour son <b>arrachage</b>, en bas de la liste des parcelles, tant qu’elle est choisie pour la campagne."],
       ['L’arrachage en étapes', "quand l’administrateur l’a découpé (roue crantée, <b>Tâches</b>), la fiche de la parcelle montre une puce par étape : touchez-la pour la valider à sa date. Une étape <b>prestataire</b> se valide sans compter d’heures de l’équipe. L’avancement compte la part des étapes faites ; quand celles de l’équipe sont faites partout, <b>Ma part du chantier</b> passe au suivant. Au moment choisi, l’application propose de passer la parcelle en « Arrachée »."],
       ['Arrachage, désherbage manuel, effeuillage', "ne concernent que les parcelles <b>choisies pour la campagne</b>. L’administrateur les coche dans la roue crantée, <b>Tâches</b>, sur la ligne du travail, ou une par une dans la fiche de la parcelle. Une parcelle où le travail a déjà été saisi compte d’office. L’an prochain, la liste repart vide."],
+      ['Une tâche qui ne se fait pas partout', "(une réparation, un pliage…) concerne toutes les parcelles, sauf celles où on la désactive <b>pour la période</b>. L’administrateur en désactive plusieurs d’un coup dans la roue crantée, <b>Tâches</b> : la ligne du travail ouvre la liste, tout y est coché, décochez celles qui ne la feront pas (« Tout décocher » quand il en reste peu à garder). Une seule se règle aussi depuis sa fiche, avec la croix. À la période suivante, toutes repartent concernées : l’hiver et le printemps peuvent avoir des parcelles différentes. Une parcelle où la tâche est commencée reste concernée."],
       ['Valider pour l’équipe sans y être', "l’administrateur voit sa propre puce dans le groupe («\u00a0Moi\u00a0», «\u00a0Moi aussi dans les rangs\u00a0» sur la barre d’équipe)\u00a0: décochée, la validation reste signée de son nom mais ses heures ne vont pas à la parcelle. Le choix est retenu pour la tâche."],
       ['L’état du vignoble', "s’imprime depuis la roue crantée de la Vigne, bloc Documents : toutes vos parcelles sur une page, avec la surface, le cépage, la commune, l’avancement, le dernier travail, le dernier rendement — et la liste de ce qui reste à renseigner."],
       ['Le fichier Excel des parcelles', "se prend au même endroit : une ligne par parcelle, avec la surface, l’avancement, chaque tâche et le rendement du millésime choisi en hL/ha — mesuré ou estimé, c’est écrit à côté. Avant de le télécharger, vous choisissez l’ordre : par nom (A → Z ou Z → A) ou par rendement (le plus fort ou le plus faible d’abord). Une parcelle sans récolte part en fin de liste."],
@@ -5490,7 +5492,7 @@ export const MV_INFO = {
 
   'pil.plan': { t: 'Le domaine en direct', p: [
     'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine : deux parcelles de même surface ont la même taille. Elles sont rangées par appellation ; le trait sous chaque appellation montre son avancement. Une parcelle sans contour est un carré de sa surface, en pointillé. La vraie carte reste dans Parcelles.',
-    'La couleur dit l’état pour la tâche choisie, celui de la fiche de la parcelle pour la période : faite (validée ; une annulation la remet à faire), en cours (commencée), à faire, en retard (fenêtre passée), arrachée. Une parcelle où la tâche est désactivée sur sa fiche — ou pas choisie pour la campagne, pour l’arrachage, le désherbage et l’effeuillage — reste à sa place en contour pâle : ni à faire ni en retard, elle a sa ligne « Pas concernées » dans la légende et ne compte pas dans l’avancement de son appellation (un tiret quand aucune n’est concernée). Un arrachage fini pour l’équipe est fait : la loupe dit que la suite revient au prestataire. Une parcelle en cours porte les initiales de ceux qui l’ont commencée, même un autre jour : foncées et cerclées si c’est aujourd’hui, claires sinon. Sur ordinateur, la souris sur une parcelle ouvre une loupe (sa forme en grand, son état, l’équipe) ; toucher une parcelle ouvre sa fiche. Au téléphone, « Tout le plan » déplie les appellations repliées.' ] },
+    'La couleur dit l’état pour la tâche choisie, celui de la fiche de la parcelle pour la période : faite (validée ; une annulation la remet à faire), en cours (commencée), à faire, en retard (fenêtre passée), arrachée. Une parcelle où la tâche est désactivée sur sa fiche ou dans la liste de la tâche — ou pas choisie pour la campagne, pour l’arrachage, le désherbage et l’effeuillage — reste à sa place en contour pâle : ni à faire ni en retard, elle a sa ligne « Pas concernées » dans la légende et ne compte pas dans l’avancement de son appellation (un tiret quand aucune n’est concernée). Un arrachage fini pour l’équipe est fait : la loupe dit que la suite revient au prestataire. Une parcelle en cours porte les initiales de ceux qui l’ont commencée, même un autre jour : foncées et cerclées si c’est aujourd’hui, claires sinon. Sur ordinateur, la souris sur une parcelle ouvre une loupe (sa forme en grand, son état, l’équipe) ; toucher une parcelle ouvre sa fiche. Au téléphone, « Tout le plan » déplie les appellations repliées.' ] },
   'pil.savoir': { t: 'À savoir', p: [
     'Ce qui peut changer la journée ou la semaine. Sous chaque jour de la météo : le risque de pluie (le plus haut de la journée), le cumul en millimètres et le vent le plus fort (vent moyen, sans les rafales). Puis la pluie ou le vent des deux jours qui viennent, secteur par secteur quand le domaine s’étend sur plusieurs communes, avec ce qui est en cours dans les communes touchées — un fait, jamais un verdict : c’est à vous de juger si un travail peut se faire. Enfin les absences des sept prochains jours, les contrats qui finissent dans le mois (avec ce qu’une prolongation d’un mois ferait gagner), les tâches en retard, le matériel immobilisé et la cave.',
     'Le plus pressant d’abord. Les motifs d’absence ne sont visibles que de l’admin : le Pilotage lui est réservé.' ] },
@@ -7720,7 +7722,7 @@ function _mvSelEligible(p, nom){
 }
 function _mvTacheConcerne(p, nom, camp){
   if(!p) return false;
-  if(!_mvTacheSel(nom)) return (p.tachesExclues || []).indexOf(nom) < 0;
+  if(!_mvTacheSel(nom)) return (p.tachesExclues || []).indexOf(nom) < 0 && !(p.horsPer && _mvHorsPer(p, nom));   // ★ RETRAIT-1 (§324) : ou désactivée pour la période consultée
   var c = _mvCampNum(camp);
   if(_mvSelChoisie(p, nom, c)) return true;
   return !!_mvSelTravaillees(c)[String(p.nom) + '\u0000' + nom];
@@ -7792,6 +7794,88 @@ window._mvSelPose         = _mvSelPose;
 window._mvAnnulee         = _mvAnnulee;
 window._mvArrAvantPeriode = _mvArrAvantPeriode;
 window._mvSelResume       = _mvSelResume;
+
+// ════════════════════════════════════════════════════════════════════════════
+// ★★ RETRAIT-1 (§324) — UNE TÂCHE ORDINAIRE SE DÉSACTIVE SUR UNE PARCELLE POUR UNE PÉRIODE
+//
+// Nico (13/10, dicté) : « en hiver, je peux avoir certaines vignes à réparer ; au printemps, d'autres. Il faut que ce
+// soit par période, telles qu'elles ont été définies, pas une campagne annuelle » — et en retirer plusieurs d'un coup,
+// « faire parcelle par parcelle, c'est très long ».
+//
+// Règle : une tâche ordinaire (toutes sauf l'arrachage, le désherbage manuel et l'effeuillage, SEL-1) concerne toutes
+// les parcelles, sauf
+//   ① un retrait posé AVANT ce lot (p.tachesExclues) — il valait pour TOUTES les périodes, et il le garde ;
+//   ② un retrait pour la période lue : p.horsPer[nom de la période] contient la tâche.
+// À la période suivante, rien n'est retiré : chaque période a sa liste, sans remise à zéro ni tâche planifiée.
+// ⚠️ _mvTacheConcerne lit la période CONSULTÉE (_visuSaison) : celle de la fiche (p.taches / _tachesFor) et de la roue
+//   crantée. Une fonction qui reçoit une période en argument passe par _mvConcernePer (planning.js, _chargeSaisonData_).
+//   Les deux disent la même chose sur la période consultée (mv-harnais-retrait1, A3).
+// ⚠️ Remettre la tâche sur une parcelle retirée avant ce lot change ce retrait en retraits sur chacune des AUTRES
+//   périodes du domaine (_mvPerRemet) : les périodes passées ne bougent pas. Sans geste, l'ancien retrait reste tel quel.
+// ⚠️ Le nom de la période est une CLÉ, comme p.tachesAll : il suit un renommage (reglages.js, _renamePeriode) ; le nom
+//   de la tâche suit le sien (reglages.js, _renameTache). Rien n'est écrit en base ici : l'appelant sauve.
+// ════════════════════════════════════════════════════════════════════════════
+function _mvPerRef(per){
+  if(per != null && String(per) !== '') return String(per);
+  var vn = '';
+  try{
+    vn = (typeof window._visuSaison === 'function') ? (window._visuSaison() || '') : '';
+    if(!vn){ var sa = (typeof window.getSaisonActive === 'function') ? (window.getSaisonActive() || {}) : {}; vn = sa.nom || ''; }
+  }catch(e){ if(window._mvAvale) window._mvAvale(e, 'utils.js/_mvPerRef'); }
+  return String(vn || '');
+}
+function _mvHorsPer(p, nom, per){
+  var h = p && p.horsPer;
+  if(!h || typeof h !== 'object' || Array.isArray(h)) return false;
+  var L = h[_mvPerRef(per)];
+  return Array.isArray(L) && L.indexOf(nom) >= 0;
+}
+// La règle de _mvTacheConcerne, pour une période passée en argument.
+function _mvConcernePer(p, nom, per){
+  if(!p) return false;
+  if(_mvTacheSel(nom)) return _mvTacheConcerne(p, nom);
+  return (p.tachesExclues || []).indexOf(nom) < 0 && !_mvHorsPer(p, nom, per);
+}
+// Désactive (on) ou remet (!on) la tâche pour UNE période. Refuse une tâche à la sélection et une période vide.
+function _mvHorsPose(p, nom, on, per){
+  if(!p || !nom || _mvTacheSel(nom)) return false;
+  var k = _mvPerRef(per); if(!k) return false;
+  var h = (p.horsPer && typeof p.horsPer === 'object' && !Array.isArray(p.horsPer)) ? Object.assign({}, p.horsPer) : {};
+  var L = Array.isArray(h[k]) ? h[k].filter(function(x){ return x !== nom; }) : [];
+  if(on) L.push(nom);
+  if(L.length) h[k] = L; else delete h[k];
+  if(Object.keys(h).length) p.horsPer = h; else delete p.horsPer;
+  return true;
+}
+// Remet la tâche sur la parcelle pour la période. Un retrait d'avant RETRAIT-1 (p.tachesExclues) valait pour toutes les
+// périodes : il devient un retrait sur chacune des AUTRES périodes du domaine, puis disparaît — l'historique ne bouge pas.
+function _mvPerRemet(p, nom, per){
+  if(!p || !nom || _mvTacheSel(nom)) return false;
+  var k = _mvPerRef(per); if(!k) return false;
+  var ex = Array.isArray(p.tachesExclues) ? p.tachesExclues : [];
+  if(ex.indexOf(nom) >= 0){
+    (window.SAISONS || []).forEach(function(s){ if(s && s.nom && String(s.nom) !== k) _mvHorsPose(p, nom, true, s.nom); });
+    p.tachesExclues = ex.filter(function(x){ return x !== nom; });
+  }
+  _mvHorsPose(p, nom, false, k);
+  return true;
+}
+// Résumé pour la roue crantée : parcelles concernées sur les parcelles possibles (une arrachée ne l'est pas), hectares.
+function _mvPerResume(nom, per){
+  var k = _mvPerRef(per), n = 0, N = 0, ha = 0;
+  (window.PARCELLES || []).forEach(function(p){
+    if(!_mvSelEligible(p, nom)) return;
+    N++;
+    if(_mvConcernePer(p, nom, k)){ n++; ha += parseFloat(p.surface) || 0; }
+  });
+  return { n: n, N: N, ha: Math.round(ha * 100) / 100, per: k };
+}
+window._mvPerRef          = _mvPerRef;
+window._mvHorsPer         = _mvHorsPer;
+window._mvConcernePer     = _mvConcernePer;
+window._mvHorsPose        = _mvHorsPose;
+window._mvPerRemet        = _mvPerRemet;
+window._mvPerResume       = _mvPerResume;
 
 // ════════════════════════════════════════════════════════════════════════════
 // ★★★ LES FENETRES D'UNE ANNEE — la liste unique que lisent les documents

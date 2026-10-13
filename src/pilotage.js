@@ -1454,7 +1454,7 @@ function _pilAnnuelData(){
   }
   function _annSigP(p){
     if(!p) return '';
-    return (p.statut||'')+':'+(p.surface||0)+':'+((p.tachesExclues||[]).length)+':'+JSON.stringify(p.selCamp||'');   // SEL-1
+    return (p.statut||'')+':'+(p.surface||0)+':'+JSON.stringify(p.tachesExclues||[])+':'+JSON.stringify(p.selCamp||'')+':'+JSON.stringify(p.horsPer||'');   // SEL-1 · RETRAIT-1 (§324) : le contenu des désactivations, celles de chaque période comprises
   }
   function _annSigT(t){
     if(!t) return '';

@@ -597,8 +597,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-hors1.mjs --contre'],
   ['node scripts/mv-harnais-dates1.mjs'],            // DATES-1 (§323) : les dates de travaux valent pour toutes les tâches, barème ou pas (ligne, ordre, retard, À savoir) ; la mémoire de L'année suit les dates
   ['node scripts/mv-harnais-dates1.mjs --contre'],
-  ['node scripts/mv-harnais-tournee1.mjs'],          // TOURNEE-1 (§324) : « Tournée définie pour » ne propose que les tournées utiles (campagne en cours, une parcelle à faire) ; une tâche finie n'applique plus sa tournée ; la liste vide redessine la barre
-  ['node scripts/mv-harnais-tournee1.mjs --contre'],
+  ['node scripts/mv-harnais-retrait1.mjs'],          // RETRAIT-1 (§324) : une tâche ordinaire désactivée sur des parcelles pour la période — règle, feuille, croix, renommages, L'année
+  ['node scripts/mv-harnais-retrait1.mjs --contre'],
   ['node scripts/mv-harnais-trac1.mjs'],              // TRAC-1 (§282) : les sessions du Tracteur en liste + fiche
   ['node scripts/mv-harnais-trac1.mjs --contre'],
   ['node scripts/mv-harnais-trac2.mjs'],              // TRAC-2 (§283) : l'Entretien du Tracteur sur deux colonnes

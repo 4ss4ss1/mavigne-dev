@@ -534,6 +534,17 @@ function renderReglages(){
         selHtml='<div class="tcv-lnk" data-selp-t="'+nomEsc+'" onclick="event.stopPropagation();window.openSelParc(this.getAttribute(\'data-selp-t\'))" style="color:var(--vert-med)">'+_srTxt+'</div>';
         convHtml+=selHtml;   // même emplacement, sous la ligne de la convention
       }
+      // ★ RETRAIT-1 (§324) : une tâche ordinaire se désactive sur des parcelles POUR LA PÉRIODE consultée (celle du titre
+      //   « Tâches — … »), dans la même feuille (app.js, openPerParc). La ligne dit combien la font, sur combien.
+      if(!(window._mvTacheSel&&window._mvTacheSel(t.nom))&&window._mvPerResume&&window.openPerParc){
+        var _pr=window._mvPerResume(t.nom);
+        if(_pr.N){
+          var _prHa=String(_pr.ha).replace('.',',');
+          var _prTxt=(_pr.n>=_pr.N)?('Toutes les parcelles \u00b7 '+_prHa+' ha \u2014 Retirer des parcelles')
+            :(_pr.n?(_pr.n+' parcelle'+(_pr.n>1?'s':'')+' sur '+_pr.N+' \u00b7 '+_prHa+' ha \u2014 Modifier'):'Aucune parcelle cette p\u00e9riode \u2014 Modifier');
+          convHtml+='<div class="tcv-lnk" data-perp-t="'+nomEsc+'" onclick="event.stopPropagation();window.openPerParc(this.getAttribute(\'data-perp-t\'))" style="color:var(--vert-med)">'+_prTxt+'</div>';
+        }
+      }
       // ★ ARRACH-3 : l'arrachage se découpe en étapes choisies par l'admin (app.js, openArrCfg).
       if(t.nom==='Arrachage'&&window.openArrCfg){
         var _arR=(typeof window._arrResume==='function')?window._arrResume():'';
@@ -1779,6 +1790,7 @@ function _renameTache(oldN,newN){
     mvFus(p.taches);
     if(p.tachesAll&&typeof p.tachesAll==='object') Object.keys(p.tachesAll).forEach(function(k){ mvFus(p.tachesAll[k]); });
     rl(p.tachesExclues);
+    if(p.horsPer&&typeof p.horsPer==='object'&&!Array.isArray(p.horsPer)) Object.keys(p.horsPer).forEach(function(k){ rl(p.horsPer[k]); });   // RETRAIT-1 (§324)
   });
   (window.JOURNAL||[]).forEach(function(e){ if(e&&e.tache===oldN){ e.tache=newN; nb++; } });
   (window.SAISONS||[]).forEach(function(s){ if(s){ rl(s.taches); mv(s.echeances); } });
@@ -5824,6 +5836,9 @@ function _renamePeriode(oldN,newN){
       p.tachesAll[newN]=p.tachesAll[oldN]; delete p.tachesAll[oldN];
     }
     if(p._tachesSaison===oldN) p._tachesSaison=newN;
+    if(p.horsPer&&typeof p.horsPer==='object'&&!Array.isArray(p.horsPer)&&Object.prototype.hasOwnProperty.call(p.horsPer,oldN)){   // RETRAIT-1 (§324) : les désactivations de la période suivent son nom
+      var _hp=Object.assign({},p.horsPer); _hp[newN]=_hp[oldN]; delete _hp[oldN]; p.horsPer=_hp;
+    }
   });
   (window.SESSIONS||[]).forEach(function(x){ if(x&&x.saison===oldN) x.saison=newN; });
   (window.HISTORIQUE||[]).forEach(function(x){ if(x&&x.saisonNom===oldN) x.saisonNom=newN; });

@@ -8028,13 +8028,11 @@ function pOrdreToggle(){ try{ localStorage.setItem(_pOrdKey(), _pOrdOff()?'0':'1
 // ★ CIBLE-1 (§163) : la même question sert l'anneau des cartes — une seule réponse, `_mvVueActive` (utils.js).
 function _pOrdPeriodeOK(){ return window._mvVueActive(); }
 // Tâche dont la tournée s'applique — la tâche affichée, rien d'autre.
-// ★ TOURNEE-1 (§324) : et seulement si elle a encore une parcelle à faire (`_pOrdUtile`, plus bas). Une tâche finie garde sa
-//   tournée enregistrée, mais l'écran ne s'en sert plus : ni barre, ni numéros, ni tri par la tournée.
 function _pOrdTache(){
   if(_pOrdOff()||!_pOrdPeriodeOK()) return '';
   if(pTacheFilter==='toutes') return '';
   if(typeof window._mvOrdreFor!=='function') return '';
-  return (window._mvOrdreFor(pTacheFilter) && _pOrdUtile(pTacheFilter)) ? pTacheFilter : '';
+  return window._mvOrdreFor(pTacheFilter) ? pTacheFilter : '';
 }
 function _pOrdCalc(noms){
   var t=_pOrdTache();
@@ -8067,40 +8065,19 @@ function _pOrdMapSync(){
     try{ item.tooltip.setContent(_pOrdMapLabel(nm)); }catch(e){ if(window.logError)window.logError({level:'info',cat:'tournee',msg:'etiquette carte'}); }
   });
 }
-// ★ TOURNEE-1 (§324) — UNE TOURNÉE ENCORE UTILE. Nico (13/10, capture de Parcelles sur « Toutes tâches ») : sous
-//   « Tournée définie pour : », Dégraffage (terminé) et Vendange (pas sur cette campagne d'hiver) restaient proposés.
-//   L'encart listait toutes les tournées enregistrées dans Décider (`_mvOrdreTaches`, CONFIG.ordre_passage_t), sans
-//   regarder ni la campagne ni l'avancement. Utile = la tâche est dans la campagne affichée (`getTachesSaison`) ET une
-//   parcelle au moins y reste « À faire », par la règle même du filtre tâche de renderParcelles : ni arrachée hors de
-//   sa tâche (`_mvArrHors`), ni désactivée ou pas choisie (`_mvExclu`), ni faite à l'étape en cours (`_pvCurDone`), ni
-//   au prestataire (`_pvAuPresta`, ARRACH-9) — la puce mène à cette liste, elle ne peut pas promettre une liste vide.
-//   Lue par l'encart (ses puces, « Reprendre la tournée du domaine ») et par `_pOrdTache` (la tâche affichée).
-//   ⚠️ La même règle est écrite deux fois (ici et dans le filtre, que deux harnais lisent au caractère près) :
-//     `mv-harnais-tournee1` compare, sur l'appli entière, chaque puce à la VRAIE liste filtrée de sa tâche, et exige
-//     que les deux règles appellent les mêmes fonctions — une condition ajoutée d'un seul côté le fait rougir.
-//   Rien n'est effacé : la tournée reste enregistrée et revient avec sa tâche (les vendanges, l'été).
-function _pOrdUtile(T){
-  if(!T) return false;
-  if(!getTachesSaison().some(function(t){ return !!t && t.nom===T; })) return false;
-  return PARCELLES.some(function(p){ return !!p && !_mvArrHors(p,T) && !_mvExclu(p,T) && !_pvCurDone(p,T) && !(T==='Arrachage'&&_pvAuPresta(p,T)); });
-}
 function _pvRenderOrdreBar(){
   var el=document.getElementById('p-ordre-bar'); if(!el) return;
   var dispo=(typeof window._mvOrdreTaches==='function')?window._mvOrdreTaches():[];
   if(!dispo.length || !_pOrdPeriodeOK()){ el.innerHTML=''; el.style.display='none'; return; }
-  var utiles=dispo.filter(_pOrdUtile);   // TOURNEE-1 (§324) : les tournées encore utiles, les seules que l'encart propose.
   el.style.display='';
   if(_pOrdOff()){
-    if(!utiles.length){ el.innerHTML=''; el.style.display='none'; return; }   // TOURNEE-1 : plus rien à reprendre
     el.innerHTML='<button onclick="pOrdreToggle()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border:1.5px dashed var(--or);border-radius:12px;background:transparent;color:var(--or);font-size:var(--pt-txt,13px);font-weight:600;font-family:inherit;cursor:pointer">Reprendre la tournée du domaine</button>';
     return;
   }
   var t=_pOrdTache();
   if(t){
     var o=window._mvOrdreFor(t)||{}, n=_pOrdRangs.n||0, d=_pOrdDateFr(o.date);
-    // TOURNEE-1 (§324) : une tâche finie n'arrive plus ici (`_pOrdTache`). n = 0 veut dire qu'il reste à faire, mais qu'aucune
-    //   parcelle de la tournée n'est dans la liste (hors tournée, ou cachée par la recherche) : « tout est fait » aurait menti.
-    var sub=(n>0?(n+' parcelle'+(n>1?'s':'')+' à faire, dans l’ordre'):'aucune parcelle de la tournée dans la liste')+(d?(' · ordre du '+d):'');
+    var sub=(n>0?(n+' parcelle'+(n>1?'s':'')+' à faire, dans l’ordre'):'tout est fait sur ce travail')+(d?(' · ordre du '+d):'');
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1.5px solid var(--or);border-radius:12px;padding:9px 12px">'
       +'<span style="font-size:var(--pt-sm,16px);flex-shrink:0"></span>'
       +'<div style="flex:1;min-width:0"><div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tournée du domaine · '+_escHtml(t)+'</div>'
@@ -8110,12 +8087,11 @@ function _pvRenderOrdreBar(){
   }
   // Filtre « Toutes tâches » : une tournée existe mais on ne sait pas laquelle
   // appliquer. On le dit, et on donne l'accès en un tap.
-  // TOURNEE-1 (§324) : seulement les tournées encore utiles ; aucune → pas d'encart.
-  if(pTacheFilter==='toutes'&&utiles.length){
+  if(pTacheFilter==='toutes'){
     el.innerHTML='<div style="background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:12px;padding:8px 11px">'
       +'<div style="font-size:var(--pt-lbl,12px);color:var(--texte-doux);margin-bottom:6px">Tournée définie pour :</div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
-      +utiles.map(function(nm){
+      +dispo.map(function(nm){
           return '<button onclick="setPTacheFilter(\''+_escAttr(nm)+'\')" style="border:1px solid var(--or);background:rgba(201,168,76,.12);color:var(--or);border-radius:20px;min-height:34px;padding:0 12px;font-size:var(--pt-txt,13px);font-weight:700;cursor:pointer;font-family:inherit">'+_mvIconTache(nm,16)+' '+_escHtml(nm)+'</button>';
         }).join('')
       +'</div></div>';
@@ -8276,11 +8252,7 @@ function renderParcelles(){
     const msg=pTacheFilter!=='toutes'
       ?`<div class="empty-state"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="28,4 50,16 50,44 28,56 6,44 6,16" fill="none" stroke="var(--texte-doux)" stroke-width="1.8"/><polyline points="18,28 25,35 38,21" stroke="var(--texte-doux)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="et">${_pvVideTitre(pTacheFilter)}</div><div class="ed">${_pvVideTexte(pTacheFilter)}</div></div>`
       :`<div class="empty-state"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="10" width="18" height="18" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><rect x="32" y="10" width="18" height="18" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><rect x="6" y="34" width="18" height="14" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><rect x="32" y="34" width="18" height="14" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><line x1="14" y1="5" x2="42" y2="53" stroke="var(--texte-doux)" stroke-width="2" stroke-linecap="round" opacity="0.65"/></svg></div><div class="et">Aucun résultat</div><div class="ed">Aucune parcelle ne correspond aux filtres actifs.</div></div>`;
-    cont.innerHTML=msg;
-    // TOURNEE-1 (§324) : la tournée suit la tâche affichée, liste vide comprise. Ce retour sautait la barre, les numéros de la
-    //   carte et l'anneau : passer à une tâche finie laissait la tournée de la tâche d'avant au-dessus de « … terminé ».
-    _pvRenderOrdreBar(); _pOrdMapSync(); _pCibleMapSync();
-    return;
+    cont.innerHTML=msg;return;
   }
   cont.innerHTML=data.map(p=>{
     const cl=getPCls(p);
@@ -8433,7 +8405,7 @@ function _pFicheHtml(p){
   h+='<section class="pfx-sec"><div class="pfx-sec-t">Travaux de la campagne</div>'+(_tv.length?'<table class="pfx-tbl"><thead><tr><th>T\u00e2che</th><th>\u00c9tat</th><th class="r">Dernier passage</th></tr></thead><tbody>'
     +_tv.map(function(t){
       if((typeof _mvExclu==='function')?_mvExclu(p,t.nom):(p.tachesExclues||[]).indexOf(t.nom)>=0)
-        return '<tr class="pfx-off'+(t.nom===pTacheFilter?' pfx-cur':'')+'"><td>'+_escHtml(tNom(t.nom))+'</td><td>'+_mvBadge((typeof window._mvTacheSel==='function'&&window._mvTacheSel(t.nom))?'Pas choisie':'Non applicable','neutre')+'</td><td class="r">\u2014</td></tr>';
+        return '<tr class="pfx-off'+(t.nom===pTacheFilter?' pfx-cur':'')+'"><td>'+_escHtml(tNom(t.nom))+'</td><td>'+_mvBadge((typeof window._mvTacheSel==='function'&&window._mvTacheSel(t.nom))?'Pas choisie':((typeof window._mvHorsPer==='function'&&window._mvHorsPer(p,t.nom))?'Pas cette p\u00e9riode':'Non applicable'),'neutre')+'</td><td class="r">\u2014</td></tr>';
       var st=getTacheStatut(p,t.nom)||'Non d\u00e9marr\u00e9', e=_pvAuPresta(p,t.nom)?'presta':(st==='Valid\u00e9'?'fait':(st==='En cours'?'cours':'afaire'));   // ARRACH-9
       return '<tr'+(t.nom===pTacheFilter?' class="pfx-cur"':'')+'><td>'+_escHtml(tNom(t.nom))+'</td><td>'+_pEtatBadge(e)+'</td><td class="r">'+_escHtml(_pDernier(p.nom,t.nom))+'</td></tr>'; }).join('')
     +'</tbody></table>':'<div class="pfx-rien">'+(p.statut==='Arrachee'?'Plus aucun travail sur cette parcelle.':'Aucun travail pr\u00e9vu pour cette p\u00e9riode.')+'</div>')+'</section>';
@@ -8554,6 +8526,7 @@ function openSelParc(nom){
   if(typeof window._mvTacheSel!=='function'||!window._mvTacheSel(nom)) return;
   var camp=window._mvCampRef();
   _SELP={nom:nom,camp:camp,sel:{},trav:{}};
+  var _it=document.getElementById('selp-intro'); if(_it) _it.textContent=_SELP_INTRO.sel;   // RETRAIT-1 (§324) : la feuille sert aussi aux tâches ordinaires (openPerParc)
   var T=window._mvSelTravaillees(camp);
   (PARCELLES||[]).forEach(function(p){
     if(!p||p.nom==null) return;
@@ -8580,11 +8553,12 @@ function _mvSelRows(){
       h+='<div class="fl" style="margin-top:12px">'+_escHtml(cm||'Sans commune')+'</div><div class="ppicker">';
       cur=cm;
     } else if(!parComm && cur===null){ h+='<div class="ppicker">'; cur=cm; }
+    var _per=_SELP.mode==='per';   // RETRAIT-1 (§324) : une tâche ordinaire, pour la période — même ligne, autre titre, autre mention
     var tr=!!_SELP.trav[p.nom], on=tr||!!_SELP.sel[p.nom];
     var arr=(p.statut==='Arrachee')?' \u00b7 arrach\u00e9e':'';
     h+='<div class="pchk'+(on?' sel vert':'')+'" data-selp-n="'+_escAttr(p.nom)+'" onclick="_mvSelPick(this)"'
-      +(tr?' title="D\u00e9j\u00e0 travaill\u00e9e cette campagne" style="opacity:.75"':'')+'>'
-      +_escHtml(p.nom)+' <span style="font-weight:400">'+_escHtml(String(p.surface||0))+' ha'+arr+(tr?' \u00b7 faite':'')+'</span></div>';
+      +(tr?' title="'+(_per?'Commenc\u00e9e cette p\u00e9riode':'D\u00e9j\u00e0 travaill\u00e9e cette campagne')+'" style="opacity:.75"':'')+'>'
+      +_escHtml(p.nom)+' <span style="font-weight:400">'+_escHtml(String(p.surface||0))+' ha'+arr+(tr?(_per?' \u00b7 commenc\u00e9e':' \u00b7 faite'):'')+((_per&&!on&&_SELP.leg&&_SELP.leg[p.nom])?' \u00b7 d\u00e9sactiv\u00e9e pour toutes les p\u00e9riodes':'')+'</span></div>';
   });
   if(cur!==null) h+='</div>';
   if(!L.length) h='<div class="mv-l" style="margin-top:10px">Aucune parcelle ne correspond.</div>';
@@ -8596,15 +8570,77 @@ function _mvSelRows(){
   });
   var tot=document.getElementById('selp-tot');
   if(tot) tot.textContent=n?(n+' parcelle'+(n>1?'s':'')+' \u00b7 '+(Math.round(ha*100)/100).toLocaleString('fr-FR')+' ha'):'Aucune parcelle coch\u00e9e';
+  if(tot&&_SELP.mode==='per'){ var _nP=(PARCELLES||[]).filter(function(p){ return window._mvSelEligible(p,_SELP.nom); }).length; tot.textContent=n+' parcelle'+(n>1?'s':'')+' sur '+_nP+' \u00b7 '+(Math.round(ha*100)/100).toLocaleString('fr-FR')+' ha'; }   // RETRAIT-1
 }
 function _mvSelPick(el){
   var n=el&&el.getAttribute('data-selp-n'); if(n==null) return;
+  if(_SELP.mode==='per'&&_SELP.trav[n]){ showToast('Commenc\u00e9e cette p\u00e9riode : elle reste concern\u00e9e','#B85A1A'); return; }   // RETRAIT-1
   if(_SELP.trav[n]){ showToast('D\u00e9j\u00e0 travaill\u00e9e cette campagne : elle reste concern\u00e9e','#B85A1A'); return; }
   if(_SELP.sel[n]) delete _SELP.sel[n]; else _SELP.sel[n]=true;
   _mvSelRows();
 }
+// ★★ RETRAIT-1 (§324) — LA MÊME FEUILLE POUR UNE TÂCHE ORDINAIRE, PAR PÉRIODE (ADMIN). Nico (13/10) : retirer la réparation de
+//   plusieurs parcelles d'un coup, et pas les mêmes l'hiver et au printemps. La période est la période CONSULTÉE (celle du titre
+//   « Tâches — … » de la roue crantée). Tout est coché d'office ; on décoche celles qui ne la feront pas. Une parcelle où la tâche
+//   est commencée dans la période reste cochée (la fiche cache aussi sa croix). Une parcelle désactivée avant ce lot
+//   (p.tachesExclues : toutes les périodes) part décochée et le dit ; la cocher la remet pour la période (utils.js, _mvPerRemet).
+var _SELP_INTRO={
+  sel:'Touchez les parcelles concern\u00e9es cette campagne. L\u2019an prochain, la liste repart vide. Une parcelle d\u00e9j\u00e0 travaill\u00e9e est coch\u00e9e d\u2019office et le reste.',
+  per:'Toutes les parcelles font cette t\u00e2che : touchez celles qui ne la feront pas pendant cette p\u00e9riode. \u00c0 la p\u00e9riode suivante, toutes repartent coch\u00e9es. Une parcelle o\u00f9 la t\u00e2che est commenc\u00e9e reste coch\u00e9e.'
+};
+function openPerParc(nom){
+  if(typeof isAdmin!=='function'||!isAdmin()){ showToast('Admin requis','#B85A1A'); return; }
+  if(!nom||typeof window._mvTacheSel!=='function'||window._mvTacheSel(nom)||typeof window._mvConcernePer!=='function') return;
+  var per=window._mvPerRef();
+  if(!per){ showToast('Aucune p\u00e9riode consult\u00e9e','#B85A1A'); return; }
+  _SELP={mode:'per',nom:nom,per:per,camp:0,sel:{},trav:{},leg:{}};
+  (PARCELLES||[]).forEach(function(p){
+    if(!p||p.nom==null) return;
+    var conc=window._mvConcernePer(p,nom,per), st=getTacheStatut(p,nom);
+    if(conc) _SELP.sel[p.nom]=true;
+    if(conc&&(st==='Valid\u00e9'||st==='En cours')) _SELP.trav[p.nom]=true;   // commencée dans la période : reste cochée
+    if((p.tachesExclues||[]).indexOf(nom)>=0) _SELP.leg[p.nom]=true;
+  });
+  var ti=document.getElementById('selp-titre'); if(ti) ti.textContent=_mvSelLabel(nom);
+  var su=document.getElementById('selp-sub'); if(su) su.textContent='Parcelles concern\u00e9es \u00b7 '+per;
+  var it=document.getElementById('selp-intro'); if(it) it.textContent=_SELP_INTRO.per;
+  var qq=document.getElementById('selp-q'); if(qq) qq.value='';
+  _mvSelRows();
+  openOv('ovSelParc');
+}
+// Tout cocher / tout décocher les parcelles AFFICHÉES (la recherche borne le geste). Une parcelle verrouillée — travaillée cette
+// campagne, commencée cette période — ne bouge pas.
+function _mvSelTous(on){
+  _mvSelListe().forEach(function(p){
+    if(_SELP.trav[p.nom]) return;
+    if(on) _SELP.sel[p.nom]=true; else delete _SELP.sel[p.nom];
+  });
+  _mvSelRows();
+}
+// N'écrit que ce qui change : décochée et concernée → désactivée pour la période ; cochée et pas concernée → remise.
+function _mvPerSave(){
+  var nom=_SELP.nom, per=_SELP.per;
+  if(!nom||!per||typeof window._mvHorsPose!=='function'||window._mvTacheSel(nom)) return;
+  var n=0;
+  (PARCELLES||[]).forEach(function(p){
+    if(!p||p.nom==null||!window._mvSelEligible(p,nom)) return;
+    var veut=!!_SELP.sel[p.nom]||!!_SELP.trav[p.nom], est=window._mvConcernePer(p,nom,per);
+    if(veut&&!est) window._mvPerRemet(p,nom,per);
+    else if(!veut&&est) window._mvHorsPose(p,nom,true,per);
+    if(veut) n++;
+  });
+  if(typeof recalcTravaux==='function') recalcTravaux(nom);
+  window.TRAVAUX=TRAVAUX;
+  saveData('parcelles');
+  if(typeof closeOv==='function') closeOv(null,'ovSelParc');
+  try{ renderParcelles(); computePStats(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPerSave'); }
+  if(typeof renderHomeCard==='function'){ try{ renderHomeCard(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPerSave#2'); } }
+  if(typeof window.renderReglages==='function'){ try{ window.renderReglages(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPerSave#3'); } }
+  showToast(_mvSelLabel(nom)+' : '+n+' parcelle'+(n>1?'s':'')+' \u00b7 '+per,'#3D6B27');
+}
 function saveSelParc(){
   if(!isAdmin()){ showToast('Admin requis','#B85A1A'); return; }
+  if(_SELP.mode==='per') return _mvPerSave();   // RETRAIT-1 (§324) : une tâche ordinaire, pour la période consultée
   var nom=_SELP.nom; if(!nom||!window._mvTacheSel(nom)) return;
   var n=0;
   (PARCELLES||[]).forEach(function(p){
@@ -9275,7 +9311,7 @@ function openDP(nom){
       return `<div class="val-row mv-tr" style="opacity:.45">
         <div style="flex:1">
           <div class="mv-v" style="font-size:13.5px;font-weight:600;color:var(--texte-doux);text-decoration:line-through">${_escHtml(tNom(t.nom))}</div>
-          <div class="mv-l">${_escHtml(_isSel?'Pas choisie pour cette campagne':'Non applicable sur cette parcelle')}</div>
+          <div class="mv-l">${_escHtml(_isSel?'Pas choisie pour cette campagne':((typeof window._mvHorsPer==='function'&&window._mvHorsPer(p,t.nom))?'D\u00e9sactiv\u00e9e pour cette p\u00e9riode':'Non applicable sur cette parcelle'))}</div>
         </div>
         ${canExcl?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="background:var(--gris-clair);border:none;border-radius:8px;padding:5px 10px;font-size:10px;font-weight:600;color:var(--texte-doux);cursor:pointer;white-space:nowrap;margin-left:10px">Réactiver</button>`:''}
       </div>`;
@@ -9295,7 +9331,7 @@ function openDP(nom){
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           ${canEdit?`<button onclick="openNiveauxPanel('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="background:rgba(74,159,200,0.12);border:1px solid rgba(74,159,200,0.3);border-radius:8px;padding:7px 11px;font-size:var(--pt-micro,11px);font-weight:600;color:var(--acier-med);cursor:pointer;white-space:nowrap">${isOn?'✏ Modifier':'↑ Niveaux'}</button>`:''}
           ${canEdit&&stat!=='Non démarré'?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.08);border:1px solid rgba(184,90,26,0.28);border-radius:8px;padding:7px 9px;font-size:var(--pt-micro,11px);font-weight:600;color:#B85A1A;cursor:pointer" title="Annuler">↩</button>`:''}
-          ${canExcl&&!isOn?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:var(--pt-micro,12px);cursor:pointer" title="Désactiver">${_mvIcon('croix',16)}</button>`:''}
+          ${canExcl&&!isOn?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:var(--pt-micro,12px);cursor:pointer" title="${_isSel?'D\u00e9sactiver pour la campagne':'D\u00e9sactiver pour cette p\u00e9riode'}">${_mvIcon('croix',16)}</button>`:''}
         </div>
       </div>`;
     }
@@ -9311,7 +9347,7 @@ function openDP(nom){
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           ${canEdit?`<button onclick="openPassagesPanel('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="background:rgba(90,156,74,0.1);border:1px solid rgba(90,156,74,0.28);border-radius:8px;padding:7px 11px;font-size:var(--pt-micro,11px);font-weight:600;color:var(--vert);cursor:pointer;white-space:nowrap">${isOn?'✏ Modifier':'▶ Passages'}</button>`:''}
           ${canEdit&&isOn&&isAdmin()?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.12);border:1px solid rgba(184,90,26,0.3);border-radius:8px;padding:7px 9px;font-size:var(--pt-micro,11px);font-weight:600;color:#B85A1A;cursor:pointer" title="Admin : tout annuler">↩</button>`:''}
-          ${canExcl&&!isOn?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:var(--pt-micro,12px);cursor:pointer" title="Désactiver">${_mvIcon('croix',16)}</button>`:''}
+          ${canExcl&&!isOn?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:var(--pt-micro,12px);cursor:pointer" title="${_isSel?'D\u00e9sactiver pour la campagne':'D\u00e9sactiver pour cette p\u00e9riode'}">${_mvIcon('croix',16)}</button>`:''}
         </div>
       </div>`;
     }
@@ -9324,7 +9360,7 @@ function openDP(nom){
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
         ${canEdit?`<button onclick="tapTacheSimple('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}',this)" style="min-height:44px;padding:6px 11px;border-radius:8px;font-family:inherit;font-size:var(--pt-micro,11px);font-weight:700;cursor:${isOn?'default':'pointer'};border:1.5px solid ${isOn?'rgba(90,156,74,0.38)':isEnCours?'rgba(220,140,30,0.4)':'rgba(255,255,255,0.08)'};background:${isOn?'rgba(90,156,74,0.14)':isEnCours?'rgba(220,140,30,0.13)':'rgba(255,255,255,0.03)'};color:${isOn?'#6AB855':isEnCours?'#DCA030':'var(--texte-doux)'};white-space:nowrap">${isOn?'✓ Validé':isEnCours?'✓ Valider':'▶ Démarrer'}</button>`:`<span class="jst" style="font-size:10px;color:${isOn?'var(--vert)':isEnCours?'var(--or)':'var(--texte-doux)'}">${stat}</span>`}
         ${canEdit&&stat!=='Non démarré'?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.08);border:1px solid rgba(184,90,26,0.28);border-radius:8px;padding:6px 9px;font-size:var(--pt-txt,13px);font-weight:600;color:#B85A1A;cursor:pointer" title="Annuler">↩</button>`:''}
-        ${canExcl&&!isOn&&!isEnCours?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:var(--pt-micro,12px);cursor:pointer" title="Désactiver cette tâche pour cette parcelle">${_mvIcon('croix',16)}</button>`:''}
+        ${canExcl&&!isOn&&!isEnCours?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:var(--pt-micro,12px);cursor:pointer" title="${_isSel?'D\u00e9sactiver pour la campagne':'D\u00e9sactiver pour cette p\u00e9riode'}">${_mvIcon('croix',16)}</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -9435,6 +9471,11 @@ function toggleExcluTache(nomParcelle,nomTache){
     var _on=!window._mvTacheConcerne(p,nomTache);
     window._mvSelPose(p,nomTache,_on);
     if(!_on&&window._mvTacheConcerne(p,nomTache)) showToast('D\u00e9j\u00e0 travaill\u00e9e cette campagne : elle reste concern\u00e9e','#B85A1A');
+  } else if(typeof window._mvHorsPose==='function'&&typeof window._mvPerRemet==='function'){
+    // ★ RETRAIT-1 (§324) : la croix désactive la tâche sur la parcelle POUR LA PÉRIODE consultée ; « Réactiver » la remet pour
+    //   cette période (un retrait d'avant ce lot, qui valait partout, devient un retrait sur chacune des autres périodes).
+    if(window._mvTacheConcerne(p,nomTache)) window._mvHorsPose(p,nomTache,true);
+    else window._mvPerRemet(p,nomTache);
   } else {
   if(!p.tachesExclues)p.tachesExclues=[];
   const idx=p.tachesExclues.indexOf(nomTache);
@@ -10072,12 +10113,13 @@ function _mvArrRefus(p,nom){
 }
 function _mvExclu(p,nom,exclues){
   if(typeof window._mvTacheSel==='function' && window._mvTacheSel(nom)) return window._mvTacheExclue(p,nom);
+  if(typeof window._mvHorsPer==='function' && window._mvHorsPer(p,nom)) return true;   // ★ RETRAIT-1 (§324) : désactivée pour la période consultée
   return (exclues||p.tachesExclues||[]).includes(nom);
 }
 function _parcConcern(nomTache){
   if(typeof window._mvTacheSel==='function' && window._mvTacheSel(nomTache))
     return PARCELLES.filter(p=>window._mvSelEligible(p,nomTache) && window._mvTacheConcerne(p,nomTache));
-  return PARCELLES.filter(p=>p.statut!=='Arrachee' && !((p.tachesExclues||[]).includes(nomTache)));
+  return PARCELLES.filter(p=>p.statut!=='Arrachee' && !((p.tachesExclues||[]).includes(nomTache)) && !(typeof window._mvHorsPer==='function' && window._mvHorsPer(p,nomTache)));   // ★ RETRAIT-1 (§324) : et pas désactivée pour la période
 }
 function _surfConcern(nomTache){
   return _parcConcern(nomTache).reduce((s,p)=>s+(parseFloat(p.surface)||0),0);
@@ -12793,6 +12835,8 @@ async function refreshApp(){
   if (typeof _mvSelRows !== "undefined") window._mvSelRows = _mvSelRows;
   if (typeof _mvSelPick !== "undefined") window._mvSelPick = _mvSelPick;
   if (typeof saveSelParc !== "undefined") window.saveSelParc = saveSelParc;
+  if (typeof openPerParc !== "undefined") window.openPerParc = openPerParc;   // RETRAIT-1
+  if (typeof _mvSelTous !== "undefined") window._mvSelTous = _mvSelTous;
   if (typeof openArrEtape !== "undefined") window.openArrEtape = openArrEtape;   // ARRACH-3
   if (typeof saveArrEtape !== "undefined") window.saveArrEtape = saveArrEtape;
   if (typeof annulerArrEtape !== "undefined") window.annulerArrEtape = annulerArrEtape;

@@ -753,9 +753,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Le <b>bas de chaque carte</b> porte les deux gestes : <b>Début</b> pour signaler qu'on attaque la parcelle, <b>Valider</b> pour dire que c'est fini. Aucun des deux n'oblige à ouvrir la parcelle. Les deux enregistrent l'équipe du bandeau <b>Équipe</b>, « sans moi » compris : c'est elle que le Pilotage pose sur la parcelle en cours. Quand une tâche est choisie, la carte dit l'état de cette tâche à la place du pourcentage.</li>
 <li><b>Sur un ordinateur</b>, la liste passe à gauche et la fiche de la parcelle choisie s'ouvre à droite, avec sa forme et les mêmes boutons. Les flèches haut et bas passent d'une parcelle à l'autre, la touche V valide ; « Fiche complète » ouvre tout le reste. Une tâche désactivée sur la parcelle y apparaît grisée, comme dans la fiche complète.</li>
     <li>Quand une <b>tournée</b> est fixée pour le domaine, un <b>numéro</b> apparaît devant chaque nom :
-    c'est l'ordre de passage, et la liste se range dessus — tant qu'il reste une parcelle à faire sur ce travail. Sur « Toutes tâches », l'encart <b>Tournée définie
-    pour</b> ouvre d'un appui chaque travail qui en a une : seulement ceux de la campagne en cours où il reste
-    une parcelle à faire.</li>
+    c'est l'ordre de passage, et la liste se range dessus.</li>
     <li>Un bandeau <b>Équipe</b> mémorise qui travaille, pour enchaîner les parcelles sans tout resaisir. Changer l'équipe d'une tâche la donne aussi aux parcelles en cours que vous avez commencées sans équipe notée.</li>
     <li>Un message <b>« Annuler »</b> s'affiche quelques secondes après chaque validation.</li>
     <li>Les tâches <b>à passages</b> (Ébourgeonnage, Pioche) se valident en deux fois : P1 puis P2.</li>
@@ -891,6 +889,16 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     On peut aussi le faire parcelle par parcelle, depuis sa fiche. Seules les parcelles choisies comptent dans
     l'avancement de ce travail. Une parcelle où il a déjà été saisi au journal compte d'office.
     Le choix vaut pour la <b>campagne</b> : l'an prochain, la liste repart vide. Réservé à l'<b>administrateur</b>.</div></details>
+  <details><summary>Une tâche ne se fait pas sur toutes les parcelles (réparation, pliage…)</summary>
+    <div class="dbody">Une tâche ordinaire concerne toutes les parcelles, sauf celles où vous la désactivez <b>pour la période</b>.
+    Dans la roue crantée, <b>Tâches</b>, la ligne du travail indique combien de parcelles la font ; touchez-la pour ouvrir la
+    liste. Tout y est coché : décochez les parcelles qui ne la feront pas pendant la période consultée, puis <b>Enregistrer</b>.
+    <b>Tout cocher</b> et <b>Tout décocher</b> vont plus vite ; la recherche les limite aux parcelles affichées. Une seule
+    parcelle se règle aussi depuis sa fiche, avec la croix de la tâche (<b>Réactiver</b> la remet). À la période suivante,
+    toutes repartent concernées : l'hiver et le printemps peuvent avoir des parcelles différentes. Une parcelle où la tâche
+    est commencée reste concernée. Une tâche désactivée sur une parcelle avant cette mise à jour l'est pour toutes les
+    périodes, et la liste le signale : la cocher la remet pour la période consultée, sans toucher aux périodes passées.
+    La liste est réservée à l'<b>administrateur</b>.</div></details>
   <details><summary>L'avancement ne bouge pas alors que j'ai validé</summary>
     <div class="dbody">Vérifiez la <b>saison consultée</b> en haut de l'écran : vous regardez peut-être
     une autre saison que celle où vous avez validé. Vérifiez ensuite l'indicateur de synchronisation :
@@ -902,7 +910,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <ul class="dot">
     <li><b>Tâches</b> : heures par hectare, passages prévus par saison, temps par trou de
     l'entreplantation, création de tâches propres au domaine. Pour l'arrachage, le désherbage manuel
-    et l'effeuillage, la ligne du travail ouvre la liste des <b>parcelles choisies pour la campagne</b>.</li>
+    et l'effeuillage, la ligne du travail ouvre la liste des <b>parcelles choisies pour la campagne</b>. Pour les autres travaux, elle ouvre la liste des parcelles <b>concernées pendant la période</b> : tout y est coché, décochez celles qui ne le feront pas.</li>
     <li><b>Ajouter une tâche</b> se fait par un seul bouton, <em aria-hidden="true">+ Nouvelle tâche</em>.
     Tapez le nom du travail : s'il figure dans la convention, il vous est proposé avec ses heures de
     référence ; sinon, le panneau vous propose de créer votre travail à vous, au temps réel. Dans le

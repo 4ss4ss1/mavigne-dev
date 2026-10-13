@@ -202,9 +202,9 @@ function suite(S) {
       run("S.vue = 'eff'; S.filtre = 'hors'; ELS['#ck-carte'].dataset.filtre = 'hors'; LEGB.forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.f === 'hors' ? 'true' : 'false'); }); R = calc(); majPlan();");
       return btnH().hidden === true && C.S.filtre === null && !('filtre' in C.ELS['#ck-carte'].dataset) && C.LEGB.every(b => b.attrs['aria-pressed'] === 'false')
         && !/\bet-hors\b/.test(C.PATHS[1].attrs.class) && C.ELS['#ck-pr-p1']._c.hors === undefined; });
-    T('D7 la loupe dit pourquoi : « désactivée sur sa fiche », ou « pas choisie pour cette campagne » pour une tâche à la sélection ; les autres comme avant', () => {
+    T('D7 la loupe dit pourquoi : « désactivée sur cette parcelle », ou « pas choisie pour cette campagne » pour une tâche à la sélection ; les autres comme avant', () => {
       run("S.vue = 'taille'; S.etats.eff.p2 = 'hors';");
-      return C.phraseEtat('taille', 'p1') === 'Pas concernée par la taille (désactivée sur sa fiche)' && C.phraseEtat('eff', 'p2') === 'Pas concernée par l’effeuillage (pas choisie pour cette campagne)'
+      return C.phraseEtat('taille', 'p1') === 'Pas concernée par la taille (désactivée sur cette parcelle)' && C.phraseEtat('eff', 'p2') === 'Pas concernée par l’effeuillage (pas choisie pour cette campagne)'
         && C.phraseEtat('taille', 'p0') === 'Taille faite'; });
   }
   // ── E. la VRAIE carte de l'Accueil (app.js)

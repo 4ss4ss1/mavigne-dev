@@ -1081,8 +1081,12 @@
       <div class="modal-sub" id="selp-sub"></div>
     </div>
     <div class="modal-body">
-      <div class="mv-l">Touchez les parcelles concernées cette campagne. L'an prochain, la liste repart vide. Une parcelle déjà travaillée est cochée d'office et le reste.</div>
+      <div class="mv-l" id="selp-intro">Touchez les parcelles concernées cette campagne. L'an prochain, la liste repart vide. Une parcelle déjà travaillée est cochée d'office et le reste.</div>
       <input type="search" class="fi" id="selp-q" placeholder="Chercher une parcelle" oninput="_mvSelRows()" style="margin-top:10px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <button type="button" class="mvr-btn mvr-btn-o" style="flex:none;padding:8px 12px" onclick="_mvSelTous(true)">Tout cocher</button>
+        <button type="button" class="mvr-btn mvr-btn-o" style="flex:none;padding:8px 12px" onclick="_mvSelTous(false)">Tout décocher</button>
+      </div>
       <div id="selp-rows"></div>
       <div class="mv-l" id="selp-tot" style="margin-top:12px;font-weight:600"></div>
       <button class="mbtn" style="margin-top:18px" onclick="saveSelParc()">Enregistrer</button>

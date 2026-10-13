@@ -1,0 +1,27 @@
+{
+  "lot": "RETRAIT-1",
+  "section": "§324",
+  "base": "083fdb53f2d21ded07ee76dfc3d3818d09035072",
+  "inclut": [],
+  "date": "2026-10-13",
+  "fichiers": {
+    ".mv-base": "0182441001ad69f32f353380487dbe0865bb0094425eb9ebdac629d0ff8a411f",
+    "CLAUDE.md": "6b758b5bb00f832aaaca427c0f9b3b05912609011d4988e61224f6cb5fa654a8",
+    "docs/claude/INDEX.md": "0a4e671185a97c8c7c25fd4798b35029790be3e58afc035e965cee53a0464226",
+    "docs/claude/chantiers-280-329.md": "a03761d05bd01e3d90677771852021f4f40c674aa86adadbeee453ca5548d937",
+    "docs/claude/journal.md": "fc69ccf19ede817a4e42963c90ca797c1e475fc16adf1face58e929d606864d7",
+    "guide/04-vigne.html": "c175648e371fd6d4f5c491f8bf83501a4ad305b6998303fb66de0accfed492af",
+    "index.html": "3120ee832a833969dadb21fcf8e07ddd32765298e9a893de9639d803adf0228d",
+    "public/sw.js": "1726f82a0bd3f58b9654166d568d24b6a90ac65bed4cb644baf321c18cd3ca37",
+    "scripts/harnais-claude-md.mjs": "689aa2cdc0e31f4193adc95ea2f4a233f7fa733c203101711a12161c7b21c2a9",
+    "scripts/mv-harnais-hors1.mjs": "358bfda737c6d77950e7df591d002dcf67caf0e08cf110016afa37ab6e3d029f",
+    "scripts/mv-harnais-liste.mjs": "f2252a37cf86d7e98a99205ce0cb61f59835636a68258b0c43618ebfaf7ea7cc",
+    "src/app.js": "08bb470d2ed91ac3059395d56e14bb647f64f6c2eb14e0d0fa3ae81899cbd48b",
+    "src/cockpit-vue.js": "9f6e55db1cdb0b9e7427bc91893b9b287e58dcc18037741cdb253a05b23441c0",
+    "src/pilotage.js": "29590f1a65a0dea7af77ae993b30cd34c11c5621b20ef99dff684981759fc801",
+    "src/planning.js": "56c623e23b1b8da57fa9ed4fb315d347707c4557fc8d75fd05f256b0090aff23",
+    "src/reglages.js": "81072123978764cfe99e3252040c2494cdeca900de2a55670728996aeb59de8b",
+    "src/utils.js": "76176c772110c53aa99d1b56c778abf4d4072afbb4d36de12e301b4e24ebbe79",
+    "scripts/mv-harnais-retrait1.mjs": "796fe91b57abdea0e160d03343ff622021dd1636c78379f971577e82ddab6157"
+  }
+}

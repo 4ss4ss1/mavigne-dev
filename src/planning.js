@@ -1553,7 +1553,9 @@ function _chargeSaisonData_(s){
     return !!(t.anytime || (t.saisons&&t.saisons.length ? t.saisons.indexOf(ns)>=0 : (t.saison===ns||ns.indexOf(t.saison)>=0)));
   }
   // surface concernee = parcelles non arrachees et non exclues pour la tache (repro de _surfConcern, non expose)
-  function surfFn(nm){ return (window.PARCELLES||[]).filter(function(p){return p&&p.statut!=='Arrachee'&&((typeof window._mvTacheConcerne==='function')?window._mvTacheConcerne(p,nm):((p.tachesExclues||[]).indexOf(nm)<0));}).reduce(function(a,p){return a+(parseFloat(p.surface)||0);},0); }
+  // ★ RETRAIT-1 (§324) : une tâche ordinaire désactivée sur une parcelle POUR UNE PÉRIODE se lit avec la période passée en
+  //   argument (s.nom), jamais la consultée : L'année et le comparateur d'Archives rejouent chaque période.
+  function surfFn(nm){ return (window.PARCELLES||[]).filter(function(p){return p&&p.statut!=='Arrachee'&&((typeof window._mvTacheConcerne==='function')?((typeof window._mvConcernePer==='function')?window._mvConcernePer(p,nm,s.nom):window._mvTacheConcerne(p,nm)):((p.tachesExclues||[]).indexOf(nm)<0));}).reduce(function(a,p){return a+(parseFloat(p.surface)||0);},0); }
   var pg=window.SAISON_PASSAGES||{};
   var charge=0, taskDet=[];
   // ★ DATES-1 (§323) : TOUTES les tâches de la période, heures au barème ou pas (taskAll). Une tâche sans heures (arrachage,
