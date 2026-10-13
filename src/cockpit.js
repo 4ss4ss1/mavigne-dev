@@ -458,9 +458,14 @@ function _ckPlanStatut(p, tache){
 function _ckPlanLire(parcs, journal, tache, debutIso, o){
   var etat = {}, deb = {}, lire = (o && typeof o.statut === 'function') ? o.statut : _ckPlanStatut;
   var fin = (o && o.fin) ? String(o.fin) : '', presta = (typeof window._mvAuPrestataire === 'function') ? window._mvAuPrestataire : null;
+  // ★ HORS-1 (§322) : la tâche désactivée sur la parcelle — sa fiche dit « Non applicable sur cette parcelle », ou « Pas choisie pour
+  //   cette campagne » pour l'arrachage, le désherbage et l'effeuillage (utils.js/_mvTacheConcerne : la règle de la fiche et de
+  //   l'avancement) — est « hors » : ni à faire ni en retard, elle ne compte nulle part. Avant, elle restait « à faire ». Nico (12/10).
+  var conc = (typeof window._mvTacheConcerne === 'function') ? window._mvTacheConcerne : null;
   (parcs || []).forEach(function(p){
     if(!p || !p.nom) return;
     if(/arrach/i.test(String(p.statut || ''))){ etat[p.nom] = 'arr'; return; }
+    if(conc && !conc(p, tache)){ etat[p.nom] = 'hors'; return; }
     var s = lire(p, tache);
     etat[p.nom] = s === 'Validé' ? 'faite' : (s === 'En cours' ? ((presta && presta(p, tache)) ? 'faite' : 'cours') : 'afaire');
   });
@@ -509,17 +514,18 @@ window._ckPlanDispo = function(parcs){
   });
   return { W: _CK_PL.W, H: y, k: k, bandes: bandes };
 };
-var _CK_PL_LIB = { faite: 'faite', cours: 'en cours', afaire: 'à faire', retard: 'en retard', arr: 'arrachée' };
+var _CK_PL_LIB = { faite: 'faite', cours: 'en cours', afaire: 'à faire', retard: 'en retard', arr: 'arrachée', hors: 'pas concernée' };
 function _ckHa(v){ return Number(v).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '\u202fha'; }
 window._ckPlanSvg = function(dispo, etats, eqs, tacheLib){
   if(!dispo) return window._mvGraphVide ? window._mvGraphVide('Le domaine en direct', 'Il se dessine dès que les parcelles ont une surface.') : '';
   var f = function(v){ return (Math.round(v * 10) / 10).toString(); }, s = '';
   dispo.bandes.forEach(function(b){
     // Les hectares EN PRODUCTION : une parcelle arrachée se dessine (hachurée) mais ne compte ni dans la surface ni dans l'avancement.
-    var hf = 0, hp = 0;
-    b.strips.forEach(function(st){ var e = etats[st.p.nom]; if(e !== 'arr') hp += Number(st.p.surface); if(e === 'faite') hf += Number(st.p.surface); });
+    // HORS-1 (§322) : hc = les hectares concernés par la tâche (ni arrachés ni « hors ») — le pourcentage ne compte qu'eux ; aucun : un tiret.
+    var hf = 0, hp = 0, hc = 0;
+    b.strips.forEach(function(st){ var e = etats[st.p.nom], sf = Number(st.p.surface); if(e !== 'arr') hp += sf; if(e !== 'arr' && e !== 'hors') hc += sf; if(e === 'faite') hf += sf; });
     s += '<text class="ck-pl-app" x="' + _CK_PL.m + '" y="' + b.hdr + '" font-size="20">' + _ckEsc(b.nom) + '<tspan class="ck-pl-ha" dx="10" font-size="17">' + _ckHa(hp) + '</tspan></text>'
-      + '<text class="ck-pl-pc" x="' + (_CK_PL.W - _CK_PL.m) + '" y="' + b.hdr + '" text-anchor="end" font-size="17">' + _ckEsc(tacheLib) + ' : ' + Math.round(hp ? hf / hp * 100 : 0) + '\u202f%</text>';
+      + '<text class="ck-pl-pc" x="' + (_CK_PL.W - _CK_PL.m) + '" y="' + b.hdr + '" text-anchor="end" font-size="17">' + _ckEsc(tacheLib) + ' : ' + (hc ? Math.round(hf / hc * 100) + '\u202f%' : '\u2014') + '</text>';
     b.strips.forEach(function(st){
       var n = st.p.nom, e = etats[n] || 'afaire', lib = n + ', ' + _ckHa(st.p.surface) + ', ' + String(tacheLib).toLowerCase() + ' ' + _CK_PL_LIB[e];
       if(st.commune) s += '<text class="ck-pl-com" x="' + f(st.x) + '" y="' + (st.y - 8) + '" font-size="16">' + _ckEsc(st.commune) + '</text>';
@@ -563,13 +569,13 @@ window._ckPlanCorps = function(){
   _CK.tachePlan = t.nom;
   var lib = (typeof window.tNom === 'function') ? window.tNom(t.nom) : t.nom;
   var per = _ckPlanPeriode(), etats = window._ckPlanEtats(P.parcs, P.journal, t.nom, per.debut, !!(P.retards || {})[t.nom], per);   // ETAT-1 (§320)
-  var n = { faite: 0, cours: 0, afaire: 0, retard: 0, arr: 0 };
+  var n = { faite: 0, cours: 0, afaire: 0, retard: 0, arr: 0, hors: 0 };
   Object.keys(etats).forEach(function(k){ n[etats[k]]++; });
   var choix = taches.map(function(x){
     var l = (typeof window.tNom === 'function') ? window.tNom(x.nom) : x.nom;
     return '<button type="button" class="ck-pl-t" data-t="' + _ckEsc(x.nom) + '" aria-pressed="' + (x.nom === t.nom) + '" onclick="_ckPlanTache(this)">' + _ckEsc(l) + '</button>';
   }).join('');
-  var leg = ['faite', 'cours', 'afaire', 'retard', 'arr'].filter(function(k){ return n[k]; }).map(function(k){
+  var leg = ['faite', 'cours', 'afaire', 'retard', 'arr', 'hors'].filter(function(k){ return n[k]; }).map(function(k){
     return '<span class="ck-pl-l"><i class="ck-pl-sw et-' + k + '"></i>' + _ckMaj1(_CK_PL_LIB[k]) + ' <b>' + n[k] + '</b></span>';
   }).join('');
   return '<div class="ck-pl-choix" role="group" aria-label="Tâche montrée sur le plan">' + choix + '</div>'

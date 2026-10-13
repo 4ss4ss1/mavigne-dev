@@ -5213,7 +5213,7 @@ function _pilCk2Modele(d, m){
   var nomT=function(n){ return (typeof window.tNom==='function')?window.tNom(n):n; };
   // (lettres accentuées ramenées une à une : pas de plage de diacritiques, hors du jeu de glyphes des polices)
   var slug=function(n){ return String(n).toLowerCase().replace(/[àâä]/g,'a').replace(/[éèêë]/g,'e').replace(/[îï]/g,'i').replace(/[ôö]/g,'o').replace(/[ùûü]/g,'u').replace(/ç/g,'c').replace(/[^a-z0-9]+/g,''); };
-  var art=function(n){ var l=String(n).toLowerCase(); return /^[aeiouyhéèêâîô]/.test(l)?'l\u2019'+l:(/age$/.test(l)?'le '+l:'la '+l); };
+  var art=function(n){ var l=String(n).toLowerCase(); return /^[aeiouyhéèêâîô]/.test(l)?'l\u2019'+l:(/age\b/.test(l)?'le '+l:'la '+l); };   // HORS-1 (§322) : « le désherbage manuel » — un mot en -age suivi d'un autre reste masculin
   var cd=(typeof _rfCd==='function'&&_rfCd())||{}, fen=cd.taskWindows||[], retards=_pilRetards();
   var rows=(typeof window._ckPlanTaches==='function')?window._ckPlanTaches(d.data):(d.data||[]);
   // ★ CHANT-1 (§316) : les chantiers dans l'ordre commun (utils.js, _mvOrdreChantiers), les dates lues dans la même période
@@ -5222,7 +5222,7 @@ function _pilCk2Modele(d, m){
   if(typeof window._mvOrdreChantiers==='function') rows=window._mvOrdreChantiers(rows, OC);
   var taches=rows.map(function(r){
     var w=fen.filter(function(x){ return x&&x.nom===r.nom; })[0], nom=nomT(r.nom);
-    return { id:slug(r.nom), cle:r.nom, nom:nom, art:art(nom), f:false, pct:Number(r.pct)||0, eqFini:!!EQF[r.nom]&&(Number(r.pct)||0)<100,
+    return { id:slug(r.nom), cle:r.nom, nom:nom, art:art(nom), f:false, pct:Number(r.pct)||0, eqFini:!!EQF[r.nom]&&(Number(r.pct)||0)<100, sel:(typeof window._mvTacheSel==='function')&&!!window._mvTacheSel(r.nom),
       hha:(r.surf_total>0&&r.h_total>0)?r.h_total/r.surf_total:0, hDone:(r.h_total>0)?(Number(r.h_done)||0):null, hTotal:(r.h_total>0)?Number(r.h_total):null,
       debut:(w&&w.ws!=null)?oIso(w.ws):null, fin:(w&&w.we!=null)?oIso(w.we-1):null };
   });

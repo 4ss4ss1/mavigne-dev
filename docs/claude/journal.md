@@ -8,6 +8,10 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **12 octobre 2026 (LABO-2)** — ★ **LES RAPPORTS DU LABO ONT LEUR ONGLET DANS LE CHAI** (§321). Lot 52, base `b2f3ef4` (reconstruit sur ETAT-1 : la première version, bâtie sur `e937d3a`, prenait les mêmes numéros). Nico (12/10, dicté) : « il ne faut pas le cacher dans un sous-onglet, il faut le mettre à côté de Cuvées, Bouteilles, Journal — c'est un truc important » ; reformulé, « oui ».
+> `ONGLETS` du Chai + `'labo'` (ordre Cuvées · Bouteilles · Labo · Journal) ; `renderCaveLabo` écrit la liste en page, filtre millésime compris ; la fenêtre `#ovLabo` ne garde que la fiche et la vérification ; la zone du Journal disparaît ; l'annonce 8.87 recalée sur `#lbo-saisir`.
+> **APP 8.88 → 8.89, SW 9.67 → 9.68.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+
 > Dernière consolidation : **12 octobre 2026 (LABO-1)** — ★ **LES RAPPORTS DU LABO : UNE FICHE PAR ENVOI, CHAQUE CHIFFRE À SA PLACE, RIEN NE S'EFFACE** (§319). Lot 50, base `aad1c16`. Nico (12/10, dicté) : une fiche par envoi au labo, l'appli range chaque chiffre ; ressaisir la même date ou le même n° de rapport ne doit rien effacer. Maquette `maquette-fiche-labo-v1` validée (« Ok go », trois recommandations).
 > Pas de collection neuve : une ligne du Chai EST une analyse (`op.labo=1`, champs historiques gardés), une ligne du Cuvier vit dans `cuve.labo[]`, son glucose sur un relevé (GF-1). `_laboLignes` / `_laboPlan` / `_laboAppliquer` (cave.js, sans DOM) ; fenêtre `#ovLabo` ; blocs « Au labo » ; `_vendDpLabo` (cuvier.js) en tête de `_vendDPot`.
 > **APP 8.86 → 8.87, SW 9.65 → 9.66.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).

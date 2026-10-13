@@ -6729,6 +6729,19 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 #page-home .hpc-fo.hpc-cours path{ fill:var(--presse); stroke:var(--encours); }
 #page-home .hpc-mos .hpc-p.hpc-sans{ border-style:dashed; }
 /* ★ FIN FORME-2 */
+/* ★ HORS-1 (§322) — LA PARCELLE PAS CONCERNÉE PAR LA TÂCHE AFFICHÉE : UN FANTÔME. La tâche est désactivée sur sa fiche (« Non
+   applicable sur cette parcelle ») ou pas choisie pour la campagne (arrachage, désherbage, effeuillage). Elle garde sa place sur le
+   plan du cockpit et sur la carte de l'Accueil — le dessin ne change pas de forme d'une tâche à l'autre —, sans fond, au trait le
+   plus pâle, sans les rangs ; elle ne compte ni dans « à faire » ni dans l'avancement. Par jetons seulement. */
+.ck2 .ck-pa.et-hors{fill:transparent;stroke:var(--ligne,#E7E6E2)}
+.ck2 .ck-pr.hors,.ck2 .ck-carte[data-filtre] .ck-pr.hors{opacity:0}
+.ck-leg-i[hidden]{display:none}
+.sw-hors{background:transparent;box-shadow:inset 0 0 0 var(--bw-2) var(--ligne-forte);opacity:.5}
+.mv-fo.et-hors{fill:var(--bg-card);stroke:var(--ligne-forte)}
+#page-home .hpc-p.hpc-hors{border-color:var(--ligne,#E7E6E2);background:transparent}
+#page-home .hpc-fo.hpc-hors path{fill:transparent;stroke:var(--ligne,#E7E6E2)}
+#page-home .hpc-leg .hpc-l-hors i{border-color:var(--ligne,#E7E6E2);background:transparent}
+/* ★ FIN HORS-1 */
 /* ★ ACC-3 (§278) — LA MÉTÉO 5 JOURS ET LES DERNIERS TRAVAUX AU DESSIN DE LA MAQUETTE V4.
    Météo : le jour en tête, cinq colonnes à filet, une barre de pluie (la prévision donne une probabilité), la note du premier
    jour pluvieux. Derniers travaux : le fil — les jours en intertitre, l'heure, les initiales, « qui a validé quoi, où ». Par

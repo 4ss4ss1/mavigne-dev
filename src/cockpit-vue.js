@@ -257,7 +257,7 @@ function charger(v) {
   const fin = v.fin ? deIso(v.fin) : VISEE;
   XMAX = ajout(fin > VISEE ? fin : VISEE, 5);
   TACHES = (v.taches || []).map(t => ({ id: t.id, nom: t.nom, art: t.art || t.nom.toLowerCase(), f: !!t.f, hha: t.hha || 0,
-    debut: deIso(t.debut || v.debut || v.auj), fin: deIso(t.fin || v.objectif || v.auj), pct: t.pct || 0, hDone: t.hDone, hTotal: t.hTotal, cle: t.cle, eqFini: !!t.eqFini }));
+    debut: deIso(t.debut || v.debut || v.auj), fin: deIso(t.fin || v.objectif || v.auj), pct: t.pct || 0, hDone: t.hDone, hTotal: t.hTotal, sel: !!t.sel, cle: t.cle, eqFini: !!t.eqFini }));   // HORS-1 (§322) : sel = tâche à la sélection — la loupe dit pourquoi une parcelle n'est pas concernée
   T = Object.fromEntries(TACHES.map(t => [t.id, t]));
   GENS = (v.gens || []).map(g => ({ p: g.nom, absent: !!g.absent, motif: g.motif || '', tens: g.tens || 100 }));
   preparerParcs(v.parcs || []); if (PLAN_LARG) disposer(PLAN_LARG);
@@ -311,7 +311,7 @@ function calc() {
   const v = V, r = { t: {}, a: {}, hF: v.hFait || 0, hT: v.hTotal || 0, hR: 0, moDep: 0, moReste: 0 };
   TACHES.forEach(t => {
     let haF = 0, haT = 0;
-    PARCS.forEach(p => { if (p.arr) return; haT += p.ha; if (S.etats[t.id][p.id] === 'faite') haF += p.ha; });
+    PARCS.forEach(p => { if (p.arr || S.etats[t.id][p.id] === 'hors') return; haT += p.ha; if (S.etats[t.id][p.id] === 'faite') haF += p.ha; });   // HORS-1 : une parcelle pas concernée ne compte pas
     const pct = t.pct != null ? t.pct : (haT ? haF / haT * 100 : 0);
     const etat = (pct >= 99.95 || t.eqFini) ? 'fait' : (AUJ > t.fin ? 'retard' : 'cours');   // CHANT-1 : fini pour l’équipe = vert
     const ecT = ((V.eco || {}).ecTache || {})[t.cle || t.nom], hRt = ((V.eco || {}).hReelTache || {})[t.cle || t.nom];
@@ -319,8 +319,11 @@ function calc() {
   });
   APPS.forEach(a => {
     const ps = PARCS.filter(p => p.app === a.id && !p.arr), ha = ps.reduce((s, p) => s + p.ha, 0);
-    const haF = S.vue ? ps.filter(p => S.etats[S.vue][p.id] === 'faite').reduce((s, p) => s + p.ha, 0) : 0;
-    r.a[a.id] = { ha, pct: ha ? haF / ha * 100 : 0, coutHa: ((v.eco || {}).coutHaApp || {})[a.nom] || 0 };
+    // ★ HORS-1 (§322) : l'avancement d'une appellation ne compte que ses parcelles concernées par la tâche affichée ; aucune : null (un
+    //   tiret). ha reste la surface en production (Par appellation, vue Économie).
+    const pc = S.vue ? ps.filter(p => S.etats[S.vue][p.id] !== 'hors') : ps, haC = pc.reduce((s, p) => s + p.ha, 0);
+    const haF = S.vue ? pc.filter(p => S.etats[S.vue][p.id] === 'faite').reduce((s, p) => s + p.ha, 0) : 0;
+    r.a[a.id] = { ha, pct: haC ? haF / haC * 100 : null, coutHa: ((v.eco || {}).coutHaApp || {})[a.nom] || 0 };
   });
   r.pct = v.pct != null ? v.pct : (r.hT ? r.hF / r.hT * 100 : 0);
   r.reste = v.reste || 0;
@@ -351,7 +354,7 @@ const INFO = {
   conformite: 'Points du registre phyto et des documents obligatoires qui demandent une action de votre part.',
   savoir: 'Ce qui peut changer la journée ou la semaine. Sous chaque jour : le risque de pluie (le plus haut de la journée), le cumul en millimètres et le vent le plus fort (vent moyen, sans les rafales). Dessous : la pluie ou le vent des deux jours qui viennent, secteur par secteur, et ce qui est en cours dans les communes touchées ; puis les absences, les contrats, les retards et le matériel. Les motifs d’absence ne sont visibles que de l’admin.',
   decision: 'Les quatre questions de chaque matin, chacune avec sa réponse et le bouton pour agir.',
-  plan: 'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine. Sa couleur dit l’état de la tâche choisie, celui de sa fiche pour la période : faite une fois validée, en cours une fois commencée ; un arrachage fini pour l’équipe est fait, la suite au prestataire. Le trait sous chaque appellation dit son avancement. Une parcelle en cours porte l’équipe qui l’a commencée, même un autre jour. Au survol, une loupe la montre en grand ; la toucher ouvre sa fiche. Les rangs dessinés sont un repère, pas le relevé des rangs ; une parcelle sans contour est un carré de sa surface, en pointillé.',
+  plan: 'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine. Sa couleur dit l’état de la tâche choisie, celui de sa fiche pour la période : faite une fois validée, en cours une fois commencée ; un arrachage fini pour l’équipe est fait, la suite au prestataire. Une parcelle où la tâche est désactivée sur sa fiche, ou pas choisie pour la campagne (arrachage, désherbage, effeuillage), reste à sa place en contour pâle : ni à faire ni en retard, elle ne compte pas dans l’avancement. Le trait sous chaque appellation dit son avancement. Une parcelle en cours porte l’équipe qui l’a commencée, même un autre jour. Au survol, une loupe la montre en grand ; la toucher ouvre sa fiche. Les rangs dessinés sont un repère, pas le relevé des rangs ; une parcelle sans contour est un carré de sa surface, en pointillé.',
   fil: 'En ce moment : chaque parcelle en cours, avec l’équipe qui l’a commencée et depuis quand — même un autre jour —, puis le tracteur en marche ou en pause. Aujourd’hui : les validations, les débuts de parcelle et le travail au tracteur de la journée (parcelles finies, avec le temps mesuré au chrono ; session ouverte ; traitement), du plus récent au plus ancien. L’équipe passe d’abord ; celui qui a saisi n’y figure que s’il était dans les rangs.',
   courbe: 'Le reste mesuré : une ligne relie la photo de chaque jour au point d’aujourd’hui, en direct. La photo est prise à la première ouverture du Pilotage par un administrateur, une fois les données arrivées (60 jours gardés) ; un jour sans photo est un trou. L’axe part de la première photo. La projection suit la capacité du planning ; la ligne fine montre l’allure qu’il faudrait pour finir pile à l’objectif.',
   atterrissage: 'La fin projetée de l’onglet Économie : ce qui est déjà dépensé, plus le travail qui reste, compté au barème et corrigé de la cadence mesurée de l’équipe quand elle s’applique (sinon au barème seul). Tracteur, GNR et phyto suivent l’avancement ; les prestations et les travaux à l’heure comptent ce qu’ils ont coûté.',
@@ -545,7 +548,7 @@ function svgPlan() {
     + '<defs>' + defs + '</defs><g class="ck-zones">' + zones + '</g><g class="ck-parcs">' + parcs + '</g><g id="ck-flash"></g>'
     + '<g class="ck-rangs">' + rangs + '</g><g class="ck-cibles">' + cibles + '</g><path id="ck-survol" d=""/><path id="ck-sel" d=""/></svg>';
 }
-const LEG = [['faite', 'Faites'], ['cours', 'En cours'], ['afaire', 'À faire'], ['retard', 'En retard'], ['arr', 'Arrachée']];
+const LEG = [['faite', 'Faites'], ['cours', 'En cours'], ['afaire', 'À faire'], ['retard', 'En retard'], ['arr', 'Arrachée'], ['hors', 'Pas concernées']];
 function htmlPlan() {
   return '<header class="ck-p-hd"><div><h2 class="ck-titre-p">Le domaine en direct' + btnI('plan', 'Comment lire le plan') + '</h2>'
     + '<p class="ck-cadre" id="ck-plan-cadre"></p></div>'
@@ -556,7 +559,7 @@ function htmlPlan() {
     + '<div class="ck-calque" id="ck-calque"></div></div></div>'
     + '<button type="button" class="ck-plan-tout" id="ck-plan-tout" aria-expanded="false" hidden></button>'
     + '<div class="ck-plan-pied"><div class="ck-leg" role="group" aria-label="Filtrer le plan par état">'
-    + LEG.map(([k, l]) => '<button type="button" class="ck-leg-i" data-f="' + k + '" aria-pressed="false"><i class="sw sw-' + k + '"></i>' + l + ' <b id="ck-leg-' + k + '" data-v="0">0</b></button>').join('')
+    + LEG.map(([k, l]) => '<button type="button" class="ck-leg-i" data-f="' + k + '" aria-pressed="false"' + (k === 'hors' ? ' hidden' : '') + '><i class="sw sw-' + k + '"></i>' + l + ' <b id="ck-leg-' + k + '" data-v="0">0</b></button>').join('')
     + '</div><div class="ck-echelle" id="ck-echelle" aria-hidden="true"></div></div>'
     + '<p class="ck-plan-note" id="ck-plan-note" hidden></p>';
 }
@@ -919,8 +922,8 @@ function htmlTaches(r) {
 
 /* ═══ 8. LES MISES À JOUR — ciblées, animées, jamais un écran redessiné en entier ═══ */
 
-const libEtat = (t, e) => ({ faite: T[t].f ? 'faite' : 'fait', cours: 'en cours', afaire: 'à faire', retard: 'en retard', arr: 'arrachée' }[e]);
-const COUL = { faite: 'var(--et-faite-b)', cours: 'var(--et-cours-b)', afaire: 'var(--texte-doux)', retard: 'var(--et-retard-b)', arr: 'var(--texte-doux)' };
+const libEtat = (t, e) => ({ faite: T[t].f ? 'faite' : 'fait', cours: 'en cours', afaire: 'à faire', retard: 'en retard', arr: 'arrachée', hors: 'pas concernée' }[e]);
+const COUL = { faite: 'var(--et-faite-b)', cours: 'var(--et-cours-b)', afaire: 'var(--texte-doux)', retard: 'var(--et-retard-b)', arr: 'var(--texte-doux)', hors: 'var(--texte-doux)' };
 
 function majResume(r) {
   const n = savoirItems(r).filter(x => x.prio === 1).length;
@@ -982,23 +985,30 @@ function majDecision(r) {
 }
 function majPlan(o = {}) {
   const t = S.vue; if (!t || !T[t]) return;
+  // ★ HORS-1 (§322) : compter d'abord — la ligne « Pas concernées » de la légende n'existe que s'il y en a, et un filtre posé
+  //   dessus tombe avec elle (on ne relâche pas un bouton caché).
+  const n = { faite: 0, cours: 0, afaire: 0, retard: 0, arr: 0, hors: 0 };
+  PARCS.forEach(p => { n[etatVue(t, p.id)]++; });
+  if (S.filtre === 'hors' && !n.hors) {
+    S.filtre = null; $$('.ck-leg-i').forEach(b => b.setAttribute('aria-pressed', 'false'));
+    const c = $('#ck-carte'); if (c) delete c.dataset.filtre;
+  }
   $$('.ck-pa').forEach(el => {
     const id = el.dataset.id, p = PIDX[id]; if (!p) return;
     const e = etatVue(t, id), on = S.filtre === e;
     const cls = 'ck-pa et-' + e + (p.f ? '' : ' sans-contour') + (on ? ' f-on' : '');
     if (el.getAttribute('class') !== cls) el.setAttribute('class', cls);
-    const r = document.getElementById('ck-pr-' + id); if (r) r.classList.toggle('f-on', on);
-    if (!p.arr) el.setAttribute('aria-label', p.nom + ', ' + AIDX[p.app].nom + ', ' + haTxt(p.ha) + ', ' + T[t].nom.toLowerCase() + ' ' + libEtat(t, e));
+    const r = document.getElementById('ck-pr-' + id); if (r) { r.classList.toggle('f-on', on); r.classList.toggle('hors', e === 'hors'); }   // HORS-1 : pas de rangs sur un fantôme
+    if (!p.arr) el.setAttribute('aria-label', p.nom + ', ' + AIDX[p.app].nom + ', ' + haTxt(p.ha) + ', ' + (e === 'hors' ? 'pas concernée par ' + T[t].art : T[t].nom.toLowerCase() + ' ' + libEtat(t, e)));
   });
   majEquipes();
-  const n = { faite: 0, cours: 0, afaire: 0, retard: 0, arr: 0 };
-  PARCS.forEach(p => { n[etatVue(t, p.id)]++; });
   LEG.forEach(([k]) => Anim.compter($('#ck-leg-' + k), n[k], nb, 600));
+  const bh = $('.ck-leg-i[data-f="hors"]'); if (bh) bh.hidden = !n.hors;   // HORS-1 : la ligne n'existe que s'il y en a
   APPS.forEach(a => {
     const x = R.a[a.id], zp = $('#ck-zp-' + a.id); if (!x || !zp) return;
-    zp.style.transform = 'scaleX(' + (x.pct / 100).toFixed(4) + ')';
-    zp.setAttribute('class', 'ck-zone-prog' + (x.pct >= 99.95 ? ' fini' : ''));
-    const zt = $('#ck-zt-' + a.id); if (zt) zt.textContent = nb(x.pct) + '\u202f%';   // la tâche est déjà dite par le sélecteur au-dessus
+    zp.style.transform = 'scaleX(' + ((x.pct || 0) / 100).toFixed(4) + ')';
+    zp.setAttribute('class', 'ck-zone-prog' + (x.pct != null && x.pct >= 99.95 ? ' fini' : ''));
+    const zt = $('#ck-zt-' + a.id); if (zt) zt.textContent = x.pct == null ? '\u2014' : nb(x.pct) + '\u202f%';   // la tâche est déjà dite par le sélecteur au-dessus
   });
   // ★ FORME-1 : le cadre lit la MÊME chose que les pastilles — une équipe par parcelle en cours, quel que soit le jour.
   const ici = S.equipes.filter(e => e.parc && e.tache === t).length;
@@ -1206,6 +1216,7 @@ const survolFin = () => matchMedia('(hover: hover) and (pointer: fine)').matches
 function phraseEtat(t, pid) {
   const e = etatVue(t, pid), eq = S.equipes.find(x => x.parc === pid && x.tache === t);
   if (e === 'arr') return 'Arrachée';
+  if (e === 'hors') return 'Pas concernée par ' + esc(T[t].art) + (T[t].sel ? ' (pas choisie pour cette campagne)' : ' (désactivée sur sa fiche)');   // HORS-1 (§322)
   if (e === 'faite' && (S.presta[t] || {})[pid]) return esc(T[t].nom) + ' ' + libEtat(t, e) + ' pour l’équipe, la suite au prestataire';   // ETAT-1 (§320)
   return esc(T[t].nom) + ' ' + libEtat(t, e) + (e === 'cours' && eq ? ', ' + esc(EQ[eq.id].noms) + ', <em>' + quand(eq.depuis) + '</em>' : '');
 }

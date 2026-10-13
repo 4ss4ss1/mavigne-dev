@@ -6608,14 +6608,15 @@ function _homePrioCarte(){
   var its=(typeof _prioItems==='function')?_prioItems():[], t=its.length?its[0].t:'';
   var act=(PARCELLES||[]).filter(function(p){return p&&p.statut!=='Arrachee';});
   var etat=function(p){
+    if(t&&typeof window._mvTacheConcerne==='function'&&!window._mvTacheConcerne(p,t)) return 'hors';   // HORS-1 (§322) : tâche désactivée sur la parcelle ou pas choisie pour la campagne — sa fiche le dit
     if(t){ if(t==='Arrachage'&&_pvAuPresta(p,t)) return 'fait';   // ARRACH-9 : fait pour l'équipe (lu pour l'arrachage seulement)
       var st=getTacheStatut(p,t)||'Non d\u00e9marr\u00e9'; return st==='Valid\u00e9'?'fait':(st==='En cours'?'cours':'afaire'); }
     var pc=getPCls(p).pct; return pc>=100?'fait':(pc>0?'cours':'afaire');
   };
-  var surf=0,fait=0,pond=0;
-  act.forEach(function(p){ var sf=_homeSurf(p); surf+=sf; if(etat(p)==='fait')fait+=sf; pond+=getPCls(p).pct*sf; });
+  var surf=0,fait=0,pond=0,nHors=0;
+  act.forEach(function(p){ var sf=_homeSurf(p), e=etat(p); if(e==='hors'){ nHors++; } else surf+=sf; if(e==='fait')fait+=sf; pond+=getPCls(p).pct*sf; });   // HORS-1 : une parcelle pas concernée ne compte ni dans les hectares ni dans le pourcentage
   var pct=t?(surf?Math.round(fait/surf*100):0):(surf?Math.round(pond/surf):0);
-  var maxS=Math.max.apply(null,act.map(_homeSurf).concat([0.0001])), rang={fait:0,cours:1,afaire:2};
+  var maxS=Math.max.apply(null,act.map(_homeSurf).concat([0.0001])), rang={fait:0,cours:1,afaire:2,hors:3};
   // FORME-2 (§315) : chaque parcelle à la forme de son contour (_homeForme) ; sans contour, le rectangle d'avant — en
   //   pointillé quand le domaine a des contours (le nom ne correspond à aucun : la même règle que le plan du cockpit), plein
   //   quand il n'en a aucun (rien ne change pour lui). Un appui ouvre SA fiche (openDP) : openSelParc attend une tâche à
@@ -6623,8 +6624,8 @@ function _homePrioCarte(){
   var lireForme=(typeof window._mvParcForme==='function')?window._mvParcForme:function(){ return null; };
   var avecContours=act.some(function(p){ return !!lireForme(p.nom); });
   var mos=act.slice().sort(function(a,b){return rang[etat(a)]-rang[etat(b)]||_homeSurf(b)-_homeSurf(a);}).map(function(p){
-    var r=_homeSurf(p)/maxS, f=_homeForme(lireForme(p.nom),r), lib=p.nom+', '+_pvSurfFr(p.surface)+' ha';
-    return '<button type="button" class="hpc-p'+(f?' hpc-fo':(avecContours?' hpc-sans':''))+' hpc-'+etat(p)+'" style="'+(f?'--fw:'+f.fw+';--fh:'+f.fh:'--s:'+Math.sqrt(r).toFixed(3))+'" data-nom="'+_escAttr(p.nom)+'" title="'+_escAttr((f||!avecContours)?lib:lib+', pas de contour enregistr\u00e9')+'" aria-label="'+_escAttr(p.nom)+'" onclick="openDP(this.dataset.nom)">'
+    var e=etat(p), r=_homeSurf(p)/maxS, f=_homeForme(lireForme(p.nom),r), lib=p.nom+', '+_pvSurfFr(p.surface)+' ha'+(e==='hors'?', pas concern\u00e9e':'');   // HORS-1 : le titre le dit
+    return '<button type="button" class="hpc-p'+(f?' hpc-fo':(avecContours?' hpc-sans':''))+' hpc-'+e+'" style="'+(f?'--fw:'+f.fw+';--fh:'+f.fh:'--s:'+Math.sqrt(r).toFixed(3))+'" data-nom="'+_escAttr(p.nom)+'" title="'+_escAttr((f||!avecContours)?lib:lib+', pas de contour enregistr\u00e9')+'" aria-label="'+_escAttr(p.nom)+'" onclick="openDP(this.dataset.nom)">'
       +(f?'<svg viewBox="'+f.vb+'" aria-hidden="true" focusable="false"><path d="'+f.d+'"/></svg>':'')+'</button>';
   }).join('');
   var meta=t?(_homeHa(fait)+'\u00a0ha faits sur '+_homeHa(surf)+'\u00a0ha'+((its[0].equipe&&its[0].equipe.length)?', \u00e9quipe\u00a0: '+_escHtml(its[0].equipe.join(', ')):''))
@@ -6635,7 +6636,7 @@ function _homePrioCarte(){
     +'<div class="hpc-bar"><i style="--p:'+pct+'%"></i></div>'
     :'<div class="hpc-meta"><b>La saison, parcelle par parcelle</b><span>'+meta+'</span></div>')
     +(act.length?'<div class="hpc-mos" id="home-prio-mos" aria-label="Les parcelles, \u00e0 leur forme et \u00e0 leur surface">'+mos+'</div>'
-      +'<div class="hpc-leg"><span class="hpc-l-fait"><i></i>Fait</span><span class="hpc-l-cours"><i></i>En cours</span><span class="hpc-l-afaire"><i></i>\u00c0 faire</span></div>':'');
+      +'<div class="hpc-leg"><span class="hpc-l-fait"><i></i>Fait</span><span class="hpc-l-cours"><i></i>En cours</span><span class="hpc-l-afaire"><i></i>\u00c0 faire</span>'+(nHors?'<span class="hpc-l-hors"><i></i>Pas concern\u00e9es</span>':'')+'</div>':'');
 }
 
 // ACC-3 (§278) : le jour d'une entrée de journal (« Aujourd'hui », « Hier », sinon la date) et son heure, lue dans l'identifiant

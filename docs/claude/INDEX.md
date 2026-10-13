@@ -373,3 +373,4 @@
 | 319 | 319. ★★ LABO-1 — LES RAPPORTS DU LABO : UNE FICHE PAR ENVOI, CHAQUE CHIFFRE À SA PLACE (12/10 — `src/cave.j… | `docs/claude/chantiers-280-329.md` |
 | 320 | 320. ★★ ETAT-1 — LE PLAN DU COCKPIT LIT L'ÉTAT DE LA FICHE ; LE JOURNAL NE DIT PLUS QUE QUI (12/10 — `src/c… | `docs/claude/chantiers-280-329.md` |
 | 321 | 321. ★ LABO-2 — LES RAPPORTS DU LABO ONT LEUR ONGLET (12/10 — `src/cave.js` · `index.html` · `src/utils.js`… | `docs/claude/chantiers-280-329.md` |
+| 322 | 322. ★ HORS-1 — LA PARCELLE PAS CONCERNÉE PAR LA TÂCHE AFFICHÉE : UN FANTÔME (12/10 — `src/cockpit.js` (`_c… | `docs/claude/chantiers-280-329.md` |

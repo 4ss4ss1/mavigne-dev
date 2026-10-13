@@ -1,0 +1,27 @@
+{
+  "lot": "HORS-1",
+  "section": "§322",
+  "base": "e887a263bd55b43c96ece5947094b241a83b1a24",
+  "inclut": [],
+  "date": "2026-10-12",
+  "fichiers": {
+    ".mv-base": "abfcf8d589fa2bd94da9c47f8a033c567d411c1ade9fad4548eebaae46d7e90e",
+    "CLAUDE.md": "007f0f1e8d6ecb7faf89c42f050b7eba885cb8a3dc8c9784b25d35abcb14092a",
+    "docs/claude/INDEX.md": "fe02ecd24b86ba9439e6970c81c42b763393cfcc4db28528b05393f0de0a9664",
+    "docs/claude/chantiers-280-329.md": "4491e119a0b8fc29876f6fb43a6aa9f9c970f12f3e0e85a719e948c46bdf89b7",
+    "docs/claude/journal.md": "8e6c2b05c22e3dcf81e2df8c0433d6a06af5cd1c66a1c2bb5e92460ed1a4cbc0",
+    "guide/04-vigne.html": "863dbea03810f9469f05537dff8b9be3f5340c3bf75f38049062b4b4a3eaef03",
+    "guide/11-pilotage.html": "001c97ef490f2a639ab32ca1849f3037dc7e5a8aa454cec81234cc86b994e6dd",
+    "index.html": "805505f259adff9d2f85e506deb0be215e49f8ed85e53edb40f53a801775d259",
+    "public/sw.js": "d0a20f40107869b5d04192abc00ae0544f4b4c67f09423aac8a093b13923f629",
+    "scripts/harnais-claude-md.mjs": "cd7815a64dabaae3f51381cc21c18d0be04cc388bb6f31c7c990b02f41e4c859",
+    "scripts/mv-harnais-liste.mjs": "c6567b2b3e47c77b95dd4a820765b07cf7e7dbe5cec67d1d03de6217269513ee",
+    "src/app.js": "afb9e35fac226536b89553b8441ac7595e845d55c7db484e37db14f4d8303f20",
+    "src/cockpit-vue.js": "104794ccb5b4ffb749eb63e33909088ee5311a5880200bafdf595576967f564e",
+    "src/cockpit.js": "0e86a2fef0dec492e7ee97316c90c7281565b5291ed234fbe18bd88b1f9381ed",
+    "src/pilotage.js": "6d73d008b7db32386bf156f0d9a156f6ebc9a8867cd8a20ba958b6cf37fe1df6",
+    "src/styles.css": "2918877779ed72ce1cf8759bcd44f59370faf427a8f47b5a38cdadd000e699ba",
+    "src/utils.js": "e9510c72a97bce39ea1f5f734215d9f08a2afaac992f0854f9c7c789731a5457",
+    "scripts/mv-harnais-hors1.mjs": "d12d2599af3bc9946f99657a7f251e1b3de10a026afef0411fe63deb3cb1970f"
+  }
+}

@@ -593,6 +593,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-direct1.mjs --contre'],
   ['node scripts/mv-harnais-etat1.mjs'],             // ETAT-1 (§320) : le plan du cockpit lit l'état de la fiche (annulations, saisons passées, tâches sans fenêtre) ; le journal ne dit plus que qui
   ['node scripts/mv-harnais-etat1.mjs --contre'],
+  ['node scripts/mv-harnais-hors1.mjs'],             // HORS-1 (§322) : la parcelle pas concernée par la tâche (désactivée, pas choisie) en fantôme — plan, plan de secours, À savoir, carte de l'Accueil
+  ['node scripts/mv-harnais-hors1.mjs --contre'],
   ['node scripts/mv-harnais-trac1.mjs'],              // TRAC-1 (§282) : les sessions du Tracteur en liste + fiche
   ['node scripts/mv-harnais-trac1.mjs --contre'],
   ['node scripts/mv-harnais-trac2.mjs'],              // TRAC-2 (§283) : l'Entretien du Tracteur sur deux colonnes

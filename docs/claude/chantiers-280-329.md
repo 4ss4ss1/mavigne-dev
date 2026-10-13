@@ -1624,3 +1624,62 @@ vertes). Preflight : 0 erreur, 9 avertissements (inchangé). Chaîne (`mv-harnai
 
 ### 321d. Ouvert
 §28 « LABO-1 et LABO-2 — CE QUI RESTE OUVERT ».
+
+## 322. ★ HORS-1 — LA PARCELLE PAS CONCERNÉE PAR LA TÂCHE AFFICHÉE : UN FANTÔME (12/10 — `src/cockpit.js` (`_ckPlanLire`, `_CK_PL_LIB`, `_ckPlanSvg`, `_ckPlanCorps`) · `src/cockpit-vue.js` (`charger`, `calc`, `LEG`, `libEtat`, `COUL`, `majPlan`, `phraseEtat`, `INFO.plan`) · `src/pilotage.js` (`_pilCk2Modele` : `art`, `sel`) · `src/app.js` (`_homePrioCarte`) · `src/styles.css` (bloc HORS-1) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Pilotage et Accueil, MV_INFO `pil.plan`) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `guide/04-vigne.html` · `scripts/mv-harnais-hors1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-280-329.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/HORS-1.json` · **APP 8.89 → 8.90, SW 9.68 → 9.69**, base `e887a26`)
+
+### 322a. La demande
+Nico (12/10, dicté) : « dans le pilotage, toutes les parcelles sont indiquées pour des tâches qui ne les concernent pas, qui ont été désactivées ; elles sont
+indiquées à faire, ce qui est faux ; il serait bien de les désactiver de l'affichage ». Reformulé (sa préférence) : le plan « Le domaine en direct » ne montre
+pour une tâche que les parcelles où elle est active ; la carte « Priorité du moment » de l'Accueil a le même trou. Un choix posé : retirer la parcelle (un trou
+dans le plan, ou un plan qui se réarrange à chaque tâche) ou la garder à sa place en fantôme. Recommandé et retenu : « fantôme ». Sans maquette (un état de
+plus sur un dessin validé), un rendu regardé à la livraison.
+
+### 322b. La cause, lue dans le code
+- `_ckPlanLire` (cockpit.js, ETAT-1 §320) lisait le statut de la fiche, jamais l'exclusion : toute parcelle non arrachée partait « à faire », « en retard »
+  après la fenêtre. La règle existait déjà : `utils.js/_mvTacheConcerne` (SEL-1) — `p.tachesExclues` pour les tâches ordinaires (fiche : « Non applicable sur
+  cette parcelle »), la sélection de la campagne pour l'arrachage, le désherbage et l'effeuillage (« Pas choisie pour cette campagne »), une parcelle
+  travaillée pendant la campagne restant concernée. C'est celle de la fiche (`_mvExclu`) et de l'avancement (`_parcConcern`).
+- Effets en chaîne : la légende (« À faire »), le trait et le % de chaque appellation (dénominateur), « En cours sur … » d'À savoir (`_ckEnCours` : « N parcelles
+  pas encore faites »), le plan de secours. La carte de l'Accueil (`_homePrioCarte`) avait sa propre lecture, avec le même trou : pourcentage et hectares.
+- Noté « vu, non touché » à la fin d'ETAT-1 (« il faudrait un état « non concernée » »).
+
+### 322c. Ce qui a été fait
+- **Un état de plus, à la source** : `_ckPlanLire` → `hors` quand `window._mvTacheConcerne(p, tache)` est faux, après « arrachée », avant le statut — la fiche
+  dit « Non applicable » même sur une tâche validée avant d'être désactivée : le plan aussi. `_ckPlanEtats` ne le change pas en retard ; `_ckPlanDebuts` ne lui
+  donne pas d'équipe ; `_ckEnCours` ne le compte plus (il ne comptait que à faire, en cours, en retard). Fonction absente (harnais, ordre de chargement) : la
+  lecture d'avant, sans plantage.
+- **La vue** (cockpit-vue.js) : `calc` retire les `hors` de l'avancement d'une tâche et de celui d'une appellation (`pct` null quand aucune n'est concernée :
+  un tiret et un trait vide ; `ha` reste la surface en production, lue par « Par appellation ») ; `majPlan` compte d'abord, pose `et-hors` et la classe `hors`
+  sur les rangs, montre la ligne « Pas concernées » seulement s'il y en a (elle naît `hidden`) et relâche un filtre posé dessus quand elle disparaît ; la
+  loupe dit « Pas concernée par la taille (désactivée sur sa fiche) » ou « … (pas choisie pour cette campagne) » — le modèle publie `sel` par tâche.
+- **La feuille** (bloc HORS-1, jetons seulement) : sans fond, trait `--ligne` (le plus pâle), rangs à opacité 0 même sous un filtre, pastille de légende,
+  forme de la loupe ; la carte de l'Accueil (forme et rectangle sans contour).
+- **L'Accueil** : `_homePrioCarte` lit la même règle (priorité fixée seulement : sans priorité, la saison n'a pas de tâche) ; un fantôme rangé en dernier, hors
+  du pourcentage et des hectares, « pas concernée » dans son titre, une légende « Pas concernées » seulement s'il y en a.
+- Aide : MV_AIDE Pilotage et Accueil, MV_INFO `pil.plan`, la bulle du cockpit (`INFO.plan`), les deux pages du guide ; `WHATS_NEW` 8.90 au niveau 0 (Journal).
+
+### 322d. Trouvé en route
+1. **« la désherbage manuel »** : `art` (`_pilCk2Modele`) donnait « le » aux seuls mots finissant par -age ; « Désherbage manuel » ne finit pas par -age. La
+   phrase neuve de la loupe en aurait hérité, le cadre du plan l'écrivait déjà (« Aucune parcelle en cours sur la désherbage manuel »). `/age\b/`.
+2. **Deux harnais lisaient des lignes que le lot touchait** : CHANT-1 (la fin de la ligne `TACHES` de `charger`, `cle: t.cle, eqFini: !!t.eqFini }));`) et
+   l'ancre d'une contre-épreuve d'ACC-2 (`aria-label` de la carte). Arbitré : le code garde leur forme (`sel` posé avant `cle` ; l'`aria-label` reste le nom,
+   le titre dit « pas concernée »), plutôt que de réécrire deux harnais d'autres lots pour un mot.
+3. **`mv-harnais-jetons`** : un appel de `--ligne` sans son repli (`var(--ligne,#E7E6E2)`, le repli redit la valeur) ; la pastille passe par `--bw-2`.
+4. Le plan de secours (`_ckPlanSvg`) n'a aucune règle `.ck-pl-*` dans `styles.css` : vu, non touché (§28).
+
+### 322e. Les harnais et le rendu
+- **`mv-harnais-hors1.mjs`** (neuf, 31 assertions, 23 contre-épreuves) : la VRAIE règle (`_mvTacheSel`, `_mvSelChoisie`, `_mvTacheConcerne`, deux doublures qui
+  lisent leurs arguments), `cockpit.js` entier (états, retard, sélection, équipe, fonction absente, « En cours sur … », plan de secours), le VRAI modèle
+  (`_pilCk2Modele` : `hors`, `sel`, l'article), les VRAIS `calc` / `majPlan` / `phraseEtat` sur un faux DOM qui garde ce qu'on y écrit, la VRAIE
+  `_homePrioCarte` (ordre, titre, pourcentage, hectares, légende, sans règle, sans priorité), la feuille (jetons seuls), l'aide, le guide, la nouveauté, la
+  liste. Rouge sur le code d'avant (23 sur 31).
+- **La chaîne** (`mv-harnais-liste.mjs`, 379 commandes) jouée au premier plan par tranches, `TZ=Europe/Paris`, code retour noté pour chacune : rouges trouvés et
+  réparés (jetons, CHANT-1, ACC-2 en contre-épreuve, harnais-claude-md avant cette section) ; `mv-harnais-recup.mjs --contre` coupé à 150 s par le bac à sable
+  (Planning, que le lot ne touche pas — à confirmer par la CI).
+- **Rendu** (Chromium de `@sparticuz/chromium`, banc hors dépôt : vraie feuille, polices du projet, animations réduites, formes fabriquées) : en clair comme
+  en sombre, « pas concernée » se distingue de « à faire » (sans rangs, trait plus pâle) ; la ligne de légende cachée ne s'affiche pas ; la carte de l'Accueil
+  montre le fantôme ; zéro erreur JS. Non regardé : les données de Nico, l'appli entière, un vrai téléphone ; `npm run build`, `test:smoke`, `test:e2e` ; le
+  déploiement.
+
+### 322f. Ouvert
+§28 « HORS-1 — CE QUI RESTE OUVERT ».
