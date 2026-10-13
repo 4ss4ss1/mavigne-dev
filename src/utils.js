@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.92';
+export const APP_VERSION = '8.93';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1056,12 +1056,18 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
-  { v: '8.92', d: '2026-10-13', items: [
+  { v: '8.93', d: '2026-10-13', items: [
     { niv: 0, pour: ['admin'], emoji: 'carte', titre: 'Désactiver une tâche sur plusieurs parcelles d’un coup, pour la période',
       desc: "Pour qu’une tâche comme la réparation ne concerne pas toutes les parcelles, il fallait ouvrir chaque fiche. Dans la roue crantée de la Vigne, « Tâches », la ligne de chaque travail ouvre maintenant la liste des parcelles : tout y est coché, décochez celles qui ne le feront pas, puis « Enregistrer » ; « Tout cocher » et « Tout décocher » vont plus vite. "
         + "Le choix vaut pour la période consultée : à la période suivante, toutes repartent concernées — l’hiver et le printemps peuvent avoir des parcelles différentes. Une parcelle où la tâche est commencée reste concernée." },
     { niv: 0, pour: ['tous'], emoji: 'check', titre: 'La croix d’une tâche, sur la fiche d’une parcelle, vaut pour la période',
       desc: "Cette croix désactivait la tâche sur la parcelle pour toujours. Elle ne la désactive plus que pour la période consultée, et « Réactiver » la remet pour cette période. Une tâche désactivée avant cette mise à jour le reste pour toutes les périodes, jusqu’à ce que vous la réactiviez." },
+  ] },
+  { v: '8.92', d: '2026-10-13', items: [
+    { niv: 0, pour: ['tous'], emoji: 'route', titre: 'La tournée ne propose plus les travaux finis',
+      desc: "Sur Parcelles, en «\u00a0Toutes tâches\u00a0», l’encart «\u00a0Tournée définie pour\u00a0» proposait encore un travail terminé, ou d’une autre campagne — les vendanges en plein hiver. Il ne garde maintenant que les travaux de la campagne en cours où il reste au moins une parcelle à faire, et disparaît quand il n’y en a plus, comme «\u00a0Reprendre la tournée du domaine\u00a0». "
+        + "En passant d’un travail à un travail terminé, la barre de la tournée précédente restait affichée au-dessus du message «\u00a0… terminé\u00a0» : elle suit maintenant le travail choisi, et un travail terminé ne porte plus de numéros de tournée. "
+        + "Les tournées enregistrées dans Décider ne sont pas effacées : celle des vendanges reviendra avec sa campagne." },
   ] },
   { v: '8.91', d: '2026-10-13', items: [
     { niv: 0, pour: ['tous'], emoji: 'calendrier', titre: 'Les dates de travaux valent aussi pour les tâches sans barème',
@@ -5079,7 +5085,7 @@ var MV_AIDE = {
       ['Sur chaque carte', "la surface au centiare près (0,0870 ha), le pourcentage, et le compte des tâches faites, qui suit la même règle : un arrachage à moitié fait compte pour une demie (« 1,5/2 tâches »)."],
       ['Les deux gestes', "« Début » signale qu’on attaque, « Valider » que c’est fini, sans ouvrir la parcelle : en bas de chaque carte au téléphone, au bout de chaque ligne sur ordinateur. Quand une tâche est choisie, la carte dit l’état de cette tâche à la place du pourcentage. Une tâche à passages affiche en plus le passage en cours (P1, P2, N1…). Les deux enregistrent l’équipe de la barre « Équipe sur … », « sans moi » compris : c’est elle que le Pilotage pose sur la parcelle en cours. Changer l’équipe d’une tâche la donne aussi aux parcelles en cours que vous avez commencées sans équipe notée."],
       ['Sur un ordinateur', "la liste passe à gauche, une ligne par parcelle avec ses deux gestes, et la fiche de la parcelle choisie s’ouvre à droite : sa forme, l’état de la tâche, les travaux de la campagne — une tâche désactivée sur la parcelle y est grisée, comme dans la fiche complète —, les derniers passages. Les flèches haut et bas passent d’une parcelle à l’autre, la touche V valide ; « Fiche complète » ouvre tout le reste."],
-      ['Le numéro devant le nom', "est le rang de la tournée du domaine. Il n’apparaît que si une tournée est fixée, et les parcelles se rangent dans cet ordre."],
+      ['Le numéro devant le nom', "est le rang de la tournée du domaine. Il n’apparaît que si une tournée est fixée et qu’il reste une parcelle à faire sur ce travail ; les parcelles se rangent alors dans cet ordre. Sur «\u00a0Toutes tâches\u00a0», l’encart «\u00a0Tournée définie pour\u00a0» ouvre d’un appui chaque travail qui en a une : seulement ceux de la campagne en cours où il reste une parcelle à faire."],
       ['Onglet Carte', ": les contours viennent de votre export PAC ou d’un fichier KML."],
       ['L’anneau doré qui respire', "sur la carte marque la parcelle <b>commencée et pas finie</b> pour le travail affiché\u00a0: celle où «\u00a0Début\u00a0» a été touché sans validation. S’il n’y en a aucune, il se pose sur la <b>prochaine à faire</b>, le n°\u00a01 de la tournée enregistrée. Sur «\u00a0toutes\u00a0», c’est la priorité du moment. Plusieurs parcelles commencées ont chacune leur anneau, et rien ne s’affiche sur une période archivée."],
       ['La recherche', "accepte le nom du climat comme le lieu-dit."],
@@ -7722,7 +7728,7 @@ function _mvSelEligible(p, nom){
 }
 function _mvTacheConcerne(p, nom, camp){
   if(!p) return false;
-  if(!_mvTacheSel(nom)) return (p.tachesExclues || []).indexOf(nom) < 0 && !(p.horsPer && _mvHorsPer(p, nom));   // ★ RETRAIT-1 (§324) : ou désactivée pour la période consultée
+  if(!_mvTacheSel(nom)) return (p.tachesExclues || []).indexOf(nom) < 0 && !(p.horsPer && _mvHorsPer(p, nom));   // ★ RETRAIT-1 (§325) : ou désactivée pour la période consultée
   var c = _mvCampNum(camp);
   if(_mvSelChoisie(p, nom, c)) return true;
   return !!_mvSelTravaillees(c)[String(p.nom) + '\u0000' + nom];
@@ -7796,7 +7802,7 @@ window._mvArrAvantPeriode = _mvArrAvantPeriode;
 window._mvSelResume       = _mvSelResume;
 
 // ════════════════════════════════════════════════════════════════════════════
-// ★★ RETRAIT-1 (§324) — UNE TÂCHE ORDINAIRE SE DÉSACTIVE SUR UNE PARCELLE POUR UNE PÉRIODE
+// ★★ RETRAIT-1 (§325) — UNE TÂCHE ORDINAIRE SE DÉSACTIVE SUR UNE PARCELLE POUR UNE PÉRIODE
 //
 // Nico (13/10, dicté) : « en hiver, je peux avoir certaines vignes à réparer ; au printemps, d'autres. Il faut que ce
 // soit par période, telles qu'elles ont été définies, pas une campagne annuelle » — et en retirer plusieurs d'un coup,

@@ -1,8 +1,12 @@
-// MA VIGNE — Service Worker v9.71
-// v9.71 (13/10/2026) — RETRAIT-1 (§324) : une tache ordinaire (reparation, taille...) se desactive sur des parcelles POUR LA PERIODE consultee : d'un coup
+// MA VIGNE — Service Worker v9.72
+// v9.72 (13/10/2026) — RETRAIT-1 (§325) : une tache ordinaire (reparation, taille...) se desactive sur des parcelles POUR LA PERIODE consultee : d'un coup
 //   dans la feuille de l'arrachage, ouverte par la ligne du travail (roue crantee, Taches ; tout coche d'office, Tout cocher / Tout decocher), ou une par
 //   une avec la croix de la fiche ; la periode suivante repart toute concernee (p.horsPer). L'annee lit les desactivations de chaque periode (utils.js,
-//   app.js, reglages.js, planning.js, pilotage.js, cockpit-vue.js). index.html. APP 8.91 -> 8.92.
+//   app.js, reglages.js, planning.js, pilotage.js, cockpit-vue.js). index.html. APP 8.92 -> 8.93.
+// v9.71 (13/10/2026) — TOURNEE-1 (§324) : sur Parcelles en « Toutes taches », « Tournee definie pour » ne propose plus que les taches de la campagne
+//   en cours ou il reste une parcelle a faire (plus un travail termine, ni les vendanges en hiver) ; « Reprendre la tournee » suit ; une tache finie
+//   n'applique plus sa tournee, et une liste vide ne garde plus la barre de la tache d'avant (app.js). Les tournees enregistrees ne sont pas effacees.
+//   utils.js, index.html, guide/04-vigne.html. APP 8.91 -> 8.92.
 // v9.70 (13/10/2026) — DATES-1 (§323) : les dates de travaux d'une periode valent aussi pour les taches sans bareme (arrachage, entreplantation
 //   sans trou compte, desherbage, effeuillage) — ligne, ordre et retard des chantiers (planning.js taskDates, pilotage.js, app.js, utils.js) ;
 //   la memoire de L'annee suit les dates de travaux (pilotage.js). index.html. APP 8.90 -> 8.91.
@@ -4479,7 +4483,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.71';
+const CACHE_NAME   = 'mavigne-v9.72';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4496,7 +4500,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.71 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.72 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4516,7 +4520,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.71 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.72 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

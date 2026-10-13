@@ -534,7 +534,7 @@ function renderReglages(){
         selHtml='<div class="tcv-lnk" data-selp-t="'+nomEsc+'" onclick="event.stopPropagation();window.openSelParc(this.getAttribute(\'data-selp-t\'))" style="color:var(--vert-med)">'+_srTxt+'</div>';
         convHtml+=selHtml;   // même emplacement, sous la ligne de la convention
       }
-      // ★ RETRAIT-1 (§324) : une tâche ordinaire se désactive sur des parcelles POUR LA PÉRIODE consultée (celle du titre
+      // ★ RETRAIT-1 (§325) : une tâche ordinaire se désactive sur des parcelles POUR LA PÉRIODE consultée (celle du titre
       //   « Tâches — … »), dans la même feuille (app.js, openPerParc). La ligne dit combien la font, sur combien.
       if(!(window._mvTacheSel&&window._mvTacheSel(t.nom))&&window._mvPerResume&&window.openPerParc){
         var _pr=window._mvPerResume(t.nom);
@@ -1790,7 +1790,7 @@ function _renameTache(oldN,newN){
     mvFus(p.taches);
     if(p.tachesAll&&typeof p.tachesAll==='object') Object.keys(p.tachesAll).forEach(function(k){ mvFus(p.tachesAll[k]); });
     rl(p.tachesExclues);
-    if(p.horsPer&&typeof p.horsPer==='object'&&!Array.isArray(p.horsPer)) Object.keys(p.horsPer).forEach(function(k){ rl(p.horsPer[k]); });   // RETRAIT-1 (§324)
+    if(p.horsPer&&typeof p.horsPer==='object'&&!Array.isArray(p.horsPer)) Object.keys(p.horsPer).forEach(function(k){ rl(p.horsPer[k]); });   // RETRAIT-1 (§325)
   });
   (window.JOURNAL||[]).forEach(function(e){ if(e&&e.tache===oldN){ e.tache=newN; nb++; } });
   (window.SAISONS||[]).forEach(function(s){ if(s){ rl(s.taches); mv(s.echeances); } });
@@ -5836,7 +5836,7 @@ function _renamePeriode(oldN,newN){
       p.tachesAll[newN]=p.tachesAll[oldN]; delete p.tachesAll[oldN];
     }
     if(p._tachesSaison===oldN) p._tachesSaison=newN;
-    if(p.horsPer&&typeof p.horsPer==='object'&&!Array.isArray(p.horsPer)&&Object.prototype.hasOwnProperty.call(p.horsPer,oldN)){   // RETRAIT-1 (§324) : les désactivations de la période suivent son nom
+    if(p.horsPer&&typeof p.horsPer==='object'&&!Array.isArray(p.horsPer)&&Object.prototype.hasOwnProperty.call(p.horsPer,oldN)){   // RETRAIT-1 (§325) : les désactivations de la période suivent son nom
       var _hp=Object.assign({},p.horsPer); _hp[newN]=_hp[oldN]; delete _hp[oldN]; p.horsPer=_hp;
     }
   });

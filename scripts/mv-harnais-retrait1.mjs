@@ -1,4 +1,4 @@
-// HARNAIS — RETRAIT-1 (§324) : une tâche ordinaire se désactive sur des parcelles POUR LA PÉRIODE.
+// HARNAIS — RETRAIT-1 (§325) : une tâche ordinaire se désactive sur des parcelles POUR LA PÉRIODE.
 //   node scripts/mv-harnais-retrait1.mjs           → doit être vert
 //   node scripts/mv-harnais-retrait1.mjs --contre  → chaque défaut réinjecté doit rougir
 // Exécute les VRAIES fonctions extraites (commentaires retirés) : la règle (utils.js, blocs SEL-1 et RETRAIT-1), la feuille,
@@ -28,7 +28,7 @@ function extraire(S) {
     fn(S.ut, 'function _mvCampagneBornes(c){'), fn(S.ut, 'function _saisonObj(nom){'),
     'function _mvAujIso(){ return window.__AUJ; }',
     bloc(S.ut, 'var MV_TACHES_SEL', 'window._mvSelResume       = _mvSelResume;', 'SEL-1'),
-    bloc(S.ut, '// ★★ RETRAIT-1 (§324) — UNE TÂCHE ORDINAIRE', 'window._mvPerResume       = _mvPerResume;', 'RETRAIT-1'),
+    bloc(S.ut, '// ★★ RETRAIT-1 (§325) — UNE TÂCHE ORDINAIRE', 'window._mvPerResume       = _mvPerResume;', 'RETRAIT-1'),
   ].join('\n');
   const APP = bloc(S.app, '// ══════ SEL-1', 'function saveSelParc(){', 'feuille')
     + fn(S.app, 'function saveSelParc(){').slice('function saveSelParc(){'.length)
@@ -139,7 +139,7 @@ function suite(X) {
   T('F1 index.html : l’en-tête nommé, « Tout cocher » et « Tout décocher »', () => HTML.includes('id="selp-intro"') && HTML.includes('onclick="_mvSelTous(true)"') && HTML.includes('onclick="_mvSelTous(false)"'));
   T('F2 app.js expose openPerParc et _mvSelTous', () => ['openPerParc', '_mvSelTous'].every(n => SRC.app.includes('window.' + n + ' = ' + n)));
   T('F3 la roue crantée ouvre la feuille d’une tâche ordinaire', () => SRC.reg.includes('window.openPerParc(') && SRC.reg.includes('window._mvPerResume('));
-  T('F4 l’aide, le guide et la nouveauté le disent', () => SRC.ut.includes('Une tâche qui ne se fait pas partout') && G04.includes('Une tâche ne se fait pas sur toutes les parcelles') && /v: '8\.92'[\s\S]{0,400}plusieurs parcelles/.test(SRC.ut));
+  T('F4 l’aide, le guide et la nouveauté le disent', () => SRC.ut.includes('Une tâche qui ne se fait pas partout') && G04.includes('Une tâche ne se fait pas sur toutes les parcelles') && /v: '8\.93'[\s\S]{0,400}plusieurs parcelles/.test(SRC.ut));
   return out;
 }
 let ok = 0, ko = 0;

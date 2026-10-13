@@ -375,4 +375,5 @@
 | 321 | 321. ★ LABO-2 — LES RAPPORTS DU LABO ONT LEUR ONGLET (12/10 — `src/cave.js` · `index.html` · `src/utils.js`… | `docs/claude/chantiers-280-329.md` |
 | 322 | 322. ★ HORS-1 — LA PARCELLE PAS CONCERNÉE PAR LA TÂCHE AFFICHÉE : UN FANTÔME (12/10 — `src/cockpit.js` (`_c… | `docs/claude/chantiers-280-329.md` |
 | 323 | 323. ★ DATES-1 — LES DATES DE TRAVAUX VALENT POUR TOUTES LES TÂCHES, BARÈME OU PAS (13/10 — `src/planning.j… | `docs/claude/chantiers-280-329.md` |
-| 324 | 324. ★★ RETRAIT-1 — UNE TÂCHE SE DÉSACTIVE SUR DES PARCELLES POUR LA PÉRIODE, D'UN COUP (13/10 — `src/utils… | `docs/claude/chantiers-280-329.md` |
+| 324 | 324. ★ TOURNEE-1 — « TOURNÉE DÉFINIE POUR » NE PROPOSE PLUS QUE LES TOURNÉES UTILES ; UNE TÂCHE FINIE N'APP… | `docs/claude/chantiers-280-329.md` |
+| 325 | 325. ★★ RETRAIT-1 — UNE TÂCHE SE DÉSACTIVE SUR DES PARCELLES POUR LA PÉRIODE, D'UN COUP (13/10 — `src/utils… | `docs/claude/chantiers-280-329.md` |
