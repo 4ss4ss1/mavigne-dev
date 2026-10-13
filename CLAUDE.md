@@ -3,9 +3,9 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **13 octobre 2026 (DATES-1)** — ★ **LES DATES DE TRAVAUX VALENT POUR TOUTES LES TÂCHES, BARÈME OU PAS** (§323). Lot 54, base `90656ab`. Nico (13/10, trois captures) : « Les dates de réglages ne se mettent pas à jour lors d'un changement dans réglage » — l'Entreplantation (01/11 → 15/12) et l'Arrachage (10/09 → 10/10) affichaient « du 10 sept. au 31 mars » dans Pilotage › Aujourd'hui et passaient en tête des listes ; reformulé (pas d'heures au barème, donc pas de fenêtre), « oui ».
-> `_chargeSaisonData` rend `taskDates` : toutes les tâches de la période, par la même règle (`_fenTache`) que `taskWindows`, sans heure pour celles sans barème. Les lecteurs de DATES y passent (lignes, plan et À savoir du cockpit, `_mvChantiersCtx`, `_mvkRetards`, cockpit de secours) ; les moteurs d'HEURES restent sur `taskWindows`. Trouvé en route : la clé de la mémoire de L'année (`_PIL_ANN`) ignorait les échéances — L'année et les photos restaient sur les anciennes dates jusqu'au rechargement ; l'arrachage fini pour l'équipe sort des retards (`_pilRetards`).
-> **APP 8.90 → 8.91, SW 9.69 → 9.70.** Déploiement : `npm run build` → `firebase deploy --only hosting` (le guide ne change pas).
+> Dernière consolidation : **13 octobre 2026 (TOURNEE-1)** — ★ **« TOURNÉE DÉFINIE POUR » NE PROPOSE PLUS QUE LES TOURNÉES UTILES** (§324). Lot 55, base `083fdb5`. Nico (13/10, capture de Parcelles sur « Toutes tâches », dicté) : « vendange et dégrafage, étant donné que ce sont des tâches qui sont déjà terminées, ce serait bien qu'ils n'apparaissent plus dans l'ordre de priorité de la tournée — de plus que vendange n'est pas sur cette campagne » ; reformulé (n'y garder que les travaux de la campagne en cours qui ont encore une parcelle « À faire », sans rien effacer), « go ».
+> `_pOrdUtile(T)` (app.js) : la tâche est dans `getTachesSaison()` ET une parcelle passe le filtre « À faire » de la liste (`_mvArrHors`, `_mvExclu`, `_pvCurDone`, `_pvAuPresta`). Elle filtre les puces, cache « Reprendre la tournée du domaine » quand rien ne sert, et `_pOrdTache` l'exige : une tâche finie n'a plus ni barre, ni numéros, ni tri par la tournée. Trouvé en route : une liste vide sortait de `renderParcelles` avant la barre — passer de Taille à une tâche finie laissait « Tournée du domaine · Taille » au-dessus de « … terminé » ; « tout est fait sur ce travail » ne pouvait plus être vrai (→ « aucune parcelle de la tournée dans la liste »).
+> **APP 8.91 → 8.92, SW 9.70 → 9.71.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -65,6 +65,9 @@ n'existe pas, cloner avant toute autre chose.** Si le dossier existe déjà dans
 mais que Nico vient de dire avoir poussé un changement, `git pull` avant de faire confiance au
 contenu — **c'est le même principe de fraîcheur que pour `/mnt/project`, sur une mécanique
 différente.**
+★ **Vécu le 13/10 — un clone qui PERSISTE peut porter le travail d'un tour interrompu.** Après le `git pull`, `git status --short` :
+des fichiers modifiés que ce tour n'a pas écrits ne sont ni le dépôt ni une livraison — ils se relisent ligne à ligne, comme un
+upload ; un commentaire y était faux (§324c).
 ★★★ **VÉCU LE 13 AOÛT — LA FRAÎCHEUR SE RE-MESURE AVANT *CHAQUE LIVRAISON*, PAS UNE FOIS PAR
 SESSION.** Clone à **07:33**, quatre lots livrés en **fichiers complets** jusqu'à **20:31**. Entre
 les deux, **six commits** poussés par Nico (le chantier CONTRATS, §37). L'intégration a écrasé ce
@@ -1848,6 +1851,9 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ TOURNEE-1 — CE QUI RESTE OUVERT (§324, posé le 13/10)
+1. **À regarder chez Nico, au téléphone et sur PC** : Parcelles sur « Toutes tâches » (l'encart sans Dégraffage ni Vendange) ; une puce ; une tâche finie choisie dans la rangée des tâches (ni barre ni numéros, en « À faire » comme en « Toutes ») ; « Tri normal » puis « Reprendre la tournée du domaine ». Vérifié sur l'appli entière dans Node (`mv-harnais-tournee1`), pas dans un navigateur ni sur ses données. **Vu, non touché** : en « Toutes », la barre d'une tâche en cours compte les parcelles faites dans « N parcelles à faire » (`_pOrdRangs` numérote les parcelles affichées) ; une liste vide ne rappelle toujours pas `_pFicheSync` (la fiche de droite sur ordinateur) ; une tâche dont les parcelles restantes sont toutes hors de sa tournée garde sa puce, et sa barre dit « aucune parcelle de la tournée dans la liste ».
 
 ### ⚠️ DATES-1 — CE QUI RESTE OUVERT (§323, posé le 13/10)
 1. **À regarder chez Nico, sur PC et au téléphone** : Pilotage › Aujourd'hui (l'Arrachage du 10 sept. au 10 oct., « fenêtre passée » tant que l'équipe n'a pas fini ; l'Entreplantation du 1er nov. au 15 déc., après la Réparation), l'ordre d'« Avancement par tâche » à l'Accueil et de La campagne ; puis une date changée dans Réglages : L'année suit sans recharger. Vérifié par `mv-harnais-dates1` dans l'appli entière, sur un domaine fabriqué ; ni ses données ni un navigateur. **Vu, non touché** : la clé de `_PIL_ANN` semble ignorer encore le modèle du planning, les trous d'entreplantation et la fiche « Non applicable » (à confirmer) ; le Paramétrage de la roue crantée ne liste que les tâches au barème (les autres se datent dans Réglages) ; PRIO-1 lit l'échéance, sinon toute la période, le cockpit l'échéance, sinon la fenêtre par défaut (§316c ④) ; une vendange sans barème reste invisible à `out.vend` (L'année, Économie › Revient).

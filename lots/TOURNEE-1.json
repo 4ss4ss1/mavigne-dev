@@ -1,0 +1,23 @@
+{
+  "lot": "TOURNEE-1",
+  "section": "§324",
+  "base": "083fdb53f2d21ded07ee76dfc3d3818d09035072",
+  "inclut": [],
+  "date": "2026-10-13",
+  "fichiers": {
+    ".mv-base": "0182441001ad69f32f353380487dbe0865bb0094425eb9ebdac629d0ff8a411f",
+    "CLAUDE.md": "27b8fa5a0951d519fd863461e683f929530926b74b182e80708d7fff8e8e41d2",
+    "docs/claude/INDEX.md": "23de5d6e928163ac6e2ed6d46cffb21266b5b8c450466fa8a610ac1e36f1c7f9",
+    "docs/claude/chantiers-280-329.md": "32c3b85bb350df9e73035ca4aa997314a46bde0f5ee846d9601123ed137af63e",
+    "docs/claude/journal.md": "fc69ccf19ede817a4e42963c90ca797c1e475fc16adf1face58e929d606864d7",
+    "guide/04-vigne.html": "ed1d4822537c9b59e30a623f15f0c948372b843d3a36407b64790007c129d9ed",
+    "index.html": "286e46865395599f4c9fbeaf034553b557fc388c4ec81c37e63b4fd0440056c6",
+    "public/sw.js": "7582d108780377e4bbd443530208d7bcc0fc7f9627c958c43ec025c5654cebab",
+    "scripts/harnais-claude-md.mjs": "f4367de57eae9a7ddc9dba4f78b1cffa147ed6a6c3b623be516c2132dcfbf622",
+    "scripts/mv-harnais-cible.mjs": "821f1136e45234560ee24523bdd7e50f3fba51f85d06cf67e3b99f7e9fffb172",
+    "scripts/mv-harnais-liste.mjs": "d7163974cad177c0932c40e32c9141ae27c847e5b467b84310e980014bed93ec",
+    "src/app.js": "50c59e35d8e27ee0c3a51faac9bea9ee8d5c1e80772dacd2f2cbf208d1567abe",
+    "src/utils.js": "dc9a3bb694696450bf39e0a36827243b34162ee367a4939fc1dfce077b2b58f6",
+    "scripts/mv-harnais-tournee1.mjs": "497b9e29871d2ec379137c1a1b799741fa7312a12a9a762fad23318a4a7f2c39"
+  }
+}

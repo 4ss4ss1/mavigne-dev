@@ -8028,11 +8028,13 @@ function pOrdreToggle(){ try{ localStorage.setItem(_pOrdKey(), _pOrdOff()?'0':'1
 // ★ CIBLE-1 (§163) : la même question sert l'anneau des cartes — une seule réponse, `_mvVueActive` (utils.js).
 function _pOrdPeriodeOK(){ return window._mvVueActive(); }
 // Tâche dont la tournée s'applique — la tâche affichée, rien d'autre.
+// ★ TOURNEE-1 (§324) : et seulement si elle a encore une parcelle à faire (`_pOrdUtile`, plus bas). Une tâche finie garde sa
+//   tournée enregistrée, mais l'écran ne s'en sert plus : ni barre, ni numéros, ni tri par la tournée.
 function _pOrdTache(){
   if(_pOrdOff()||!_pOrdPeriodeOK()) return '';
   if(pTacheFilter==='toutes') return '';
   if(typeof window._mvOrdreFor!=='function') return '';
-  return window._mvOrdreFor(pTacheFilter) ? pTacheFilter : '';
+  return (window._mvOrdreFor(pTacheFilter) && _pOrdUtile(pTacheFilter)) ? pTacheFilter : '';
 }
 function _pOrdCalc(noms){
   var t=_pOrdTache();
@@ -8065,19 +8067,40 @@ function _pOrdMapSync(){
     try{ item.tooltip.setContent(_pOrdMapLabel(nm)); }catch(e){ if(window.logError)window.logError({level:'info',cat:'tournee',msg:'etiquette carte'}); }
   });
 }
+// ★ TOURNEE-1 (§324) — UNE TOURNÉE ENCORE UTILE. Nico (13/10, capture de Parcelles sur « Toutes tâches ») : sous
+//   « Tournée définie pour : », Dégraffage (terminé) et Vendange (pas sur cette campagne d'hiver) restaient proposés.
+//   L'encart listait toutes les tournées enregistrées dans Décider (`_mvOrdreTaches`, CONFIG.ordre_passage_t), sans
+//   regarder ni la campagne ni l'avancement. Utile = la tâche est dans la campagne affichée (`getTachesSaison`) ET une
+//   parcelle au moins y reste « À faire », par la règle même du filtre tâche de renderParcelles : ni arrachée hors de
+//   sa tâche (`_mvArrHors`), ni désactivée ou pas choisie (`_mvExclu`), ni faite à l'étape en cours (`_pvCurDone`), ni
+//   au prestataire (`_pvAuPresta`, ARRACH-9) — la puce mène à cette liste, elle ne peut pas promettre une liste vide.
+//   Lue par l'encart (ses puces, « Reprendre la tournée du domaine ») et par `_pOrdTache` (la tâche affichée).
+//   ⚠️ La même règle est écrite deux fois (ici et dans le filtre, que deux harnais lisent au caractère près) :
+//     `mv-harnais-tournee1` compare, sur l'appli entière, chaque puce à la VRAIE liste filtrée de sa tâche, et exige
+//     que les deux règles appellent les mêmes fonctions — une condition ajoutée d'un seul côté le fait rougir.
+//   Rien n'est effacé : la tournée reste enregistrée et revient avec sa tâche (les vendanges, l'été).
+function _pOrdUtile(T){
+  if(!T) return false;
+  if(!getTachesSaison().some(function(t){ return !!t && t.nom===T; })) return false;
+  return PARCELLES.some(function(p){ return !!p && !_mvArrHors(p,T) && !_mvExclu(p,T) && !_pvCurDone(p,T) && !(T==='Arrachage'&&_pvAuPresta(p,T)); });
+}
 function _pvRenderOrdreBar(){
   var el=document.getElementById('p-ordre-bar'); if(!el) return;
   var dispo=(typeof window._mvOrdreTaches==='function')?window._mvOrdreTaches():[];
   if(!dispo.length || !_pOrdPeriodeOK()){ el.innerHTML=''; el.style.display='none'; return; }
+  var utiles=dispo.filter(_pOrdUtile);   // TOURNEE-1 (§324) : les tournées encore utiles, les seules que l'encart propose.
   el.style.display='';
   if(_pOrdOff()){
+    if(!utiles.length){ el.innerHTML=''; el.style.display='none'; return; }   // TOURNEE-1 : plus rien à reprendre
     el.innerHTML='<button onclick="pOrdreToggle()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border:1.5px dashed var(--or);border-radius:12px;background:transparent;color:var(--or);font-size:var(--pt-txt,13px);font-weight:600;font-family:inherit;cursor:pointer">Reprendre la tournée du domaine</button>';
     return;
   }
   var t=_pOrdTache();
   if(t){
     var o=window._mvOrdreFor(t)||{}, n=_pOrdRangs.n||0, d=_pOrdDateFr(o.date);
-    var sub=(n>0?(n+' parcelle'+(n>1?'s':'')+' à faire, dans l’ordre'):'tout est fait sur ce travail')+(d?(' · ordre du '+d):'');
+    // TOURNEE-1 (§324) : une tâche finie n'arrive plus ici (`_pOrdTache`). n = 0 veut dire qu'il reste à faire, mais qu'aucune
+    //   parcelle de la tournée n'est dans la liste (hors tournée, ou cachée par la recherche) : « tout est fait » aurait menti.
+    var sub=(n>0?(n+' parcelle'+(n>1?'s':'')+' à faire, dans l’ordre'):'aucune parcelle de la tournée dans la liste')+(d?(' · ordre du '+d):'');
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1.5px solid var(--or);border-radius:12px;padding:9px 12px">'
       +'<span style="font-size:var(--pt-sm,16px);flex-shrink:0"></span>'
       +'<div style="flex:1;min-width:0"><div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tournée du domaine · '+_escHtml(t)+'</div>'
@@ -8087,11 +8110,12 @@ function _pvRenderOrdreBar(){
   }
   // Filtre « Toutes tâches » : une tournée existe mais on ne sait pas laquelle
   // appliquer. On le dit, et on donne l'accès en un tap.
-  if(pTacheFilter==='toutes'){
+  // TOURNEE-1 (§324) : seulement les tournées encore utiles ; aucune → pas d'encart.
+  if(pTacheFilter==='toutes'&&utiles.length){
     el.innerHTML='<div style="background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:12px;padding:8px 11px">'
       +'<div style="font-size:var(--pt-lbl,12px);color:var(--texte-doux);margin-bottom:6px">Tournée définie pour :</div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
-      +dispo.map(function(nm){
+      +utiles.map(function(nm){
           return '<button onclick="setPTacheFilter(\''+_escAttr(nm)+'\')" style="border:1px solid var(--or);background:rgba(201,168,76,.12);color:var(--or);border-radius:20px;min-height:34px;padding:0 12px;font-size:var(--pt-txt,13px);font-weight:700;cursor:pointer;font-family:inherit">'+_mvIconTache(nm,16)+' '+_escHtml(nm)+'</button>';
         }).join('')
       +'</div></div>';
@@ -8252,7 +8276,11 @@ function renderParcelles(){
     const msg=pTacheFilter!=='toutes'
       ?`<div class="empty-state"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="28,4 50,16 50,44 28,56 6,44 6,16" fill="none" stroke="var(--texte-doux)" stroke-width="1.8"/><polyline points="18,28 25,35 38,21" stroke="var(--texte-doux)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="et">${_pvVideTitre(pTacheFilter)}</div><div class="ed">${_pvVideTexte(pTacheFilter)}</div></div>`
       :`<div class="empty-state"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="10" width="18" height="18" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><rect x="32" y="10" width="18" height="18" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><rect x="6" y="34" width="18" height="14" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><rect x="32" y="34" width="18" height="14" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><line x1="14" y1="5" x2="42" y2="53" stroke="var(--texte-doux)" stroke-width="2" stroke-linecap="round" opacity="0.65"/></svg></div><div class="et">Aucun résultat</div><div class="ed">Aucune parcelle ne correspond aux filtres actifs.</div></div>`;
-    cont.innerHTML=msg;return;
+    cont.innerHTML=msg;
+    // TOURNEE-1 (§324) : la tournée suit la tâche affichée, liste vide comprise. Ce retour sautait la barre, les numéros de la
+    //   carte et l'anneau : passer à une tâche finie laissait la tournée de la tâche d'avant au-dessus de « … terminé ».
+    _pvRenderOrdreBar(); _pOrdMapSync(); _pCibleMapSync();
+    return;
   }
   cont.innerHTML=data.map(p=>{
     const cl=getPCls(p);

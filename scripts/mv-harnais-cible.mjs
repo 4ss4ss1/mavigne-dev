@@ -184,7 +184,10 @@ function appelants(S) {
   R.push(['carte Parcelles : anciens anneaux retirés, tâche affichée sinon priorité, plusieurs anneaux',
     /removeLayer/.test(pd) && /pTacheFilter/.test(pd) && /_mvTachePrio\(\)/.test(pd)
       && /_mvCibleCarte\(/.test(pd) && /c\.ps\.forEach/.test(pd)]);
-  const trois = ['initMap', 'refreshMapColors', 'renderParcelles'].filter(f => /_pCibleMapSync\(\)/.test(corps(S.app, f)));
+  // ★ TOURNEE-1 (§324) : renderParcelles rappelle aussi _pCibleMapSync dans sa sortie « liste vide ». Ce qui compte ici est l'appel
+  //   de FIN, après la liste dessinée : une simple présence resterait verte sans lui (la contre-épreuve plus bas était devenue muette).
+  const FIN = { renderParcelles: /_pCibleMapSync\(\);\s*\}$/ };
+  const trois = ['initMap', 'refreshMapColors', 'renderParcelles'].filter(f => (FIN[f] || /_pCibleMapSync\(\)/).test(corps(S.app, f)));
   R.push(['carte Parcelles resynchronisée aux trois moments (création, couleurs, rendu) : ' + trois.length + '/3',
     trois.length === 3]);
   R.push(['l\'écran Vigne lit le MÊME état que les cartes (`_pvCurDone`, `_pvCurStarted`)',
