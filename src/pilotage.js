@@ -2304,58 +2304,6 @@ function _opParcelles(){
   _PIL_OP.order=out.map(function(p){return p.nom;});
   return out.map(function(p){ return { p:p, nom:p.nom, s:parseFloat(p.surface)||0, reste:Math.round(_opParcResteM(p)*10)/10, pct:_opParcPctM(p), geo:_opGeoOK(p), emos:_opParcTaskNb(p) }; });
 }
-// « Enregistre » ne vaut que si CHAQUE tache cochee porte exactement cet ordre :
-// cocher deux travaux dont l'un seulement est a jour doit se voir.
-function _opDirty(){
-  var cur=(_PIL_OP&&_PIL_OP.order)||[], ts=(_PIL_OP&&_PIL_OP.tasks)||[];
-  var todo={}; _opActTodo().forEach(function(p){ todo[p.nom]=1; });
-  var cf=cur.filter(function(n){return todo[n];});
-  if(!cf.length) return 'empty';
-  if(!ts.length) return 'unsaved';
-  var tous=true, aucun=true;
-  ts.forEach(function(t){
-    var s=_opSavedTask(t);
-    if(!s){ tous=false; return; }
-    aucun=false;
-    if(s.filter(function(n){return todo[n];}).join('|')!==cf.join('|')) tous=false;
-  });
-  if(tous) return 'saved';
-  return aucun?'unsaved':'modified';
-}
-function _opSaveOrder(){
-  if(!_opCanEdit()) return;
-  if(!window.PARCELLES || !window.PARCELLES.length){ if(window.showToast) window.showToast('Donn\u00e9es non charg\u00e9es','#B85A1A'); return; }
-  var ts=(_PIL_OP&&_PIL_OP.tasks)||[];
-  if(!ts.length){ if(window.showToast) window.showToast('Choisissez au moins un travail','#B85A1A'); return; }
-  var ordre=_opParcelles().map(function(x){return x.nom;});
-  var d=new Date(), iso=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
-  var par=(window.currentUser&&window.currentUser.nom)||'';
-  // Object.assign : on repart de la carte existante au lieu de la reconstruire,
-  // sinon enregistrer une tache effacerait les tournees des autres.
-  var m=Object.assign({}, _opOrdMap());
-  ts.forEach(function(t){ m[t]={ordre:ordre.slice(), date:iso, par:par}; });
-  window.CONFIG=window.CONFIG||{};
-  window.CONFIG.ordre_passage_t=m;
-  if(typeof window.saveData==='function') window.saveData('config');
-  // Message HONNETE : config est lu au demarrage (FB_STATIC, pas de temps reel),
-  // la tournee arrive donc a la prochaine ouverture de l'app, pas dans la seconde.
-  if(window.showToast) window.showToast('Tourn\u00e9e enregistr\u00e9e \u00b7 '+ts.map(_opTNom).join(', ')+' \u2014 visible par l\u2019\u00e9quipe \u00e0 sa prochaine ouverture','#3D6B27');
-  _pilOpRefresh();
-}
-// Publier sans pouvoir depublier : une tournee d'aout piloterait encore l'ecran
-// en octobre. Retire la tournee des SEULES taches cochees.
-function _opClearOrder(){
-  if(!_opCanEdit()) return;
-  var ts=(_PIL_OP&&_PIL_OP.tasks)||[];
-  var m=Object.assign({}, _opOrdMap()), n=0;
-  ts.forEach(function(t){ if(m[t]){ delete m[t]; n++; } });
-  if(!n){ if(window.showToast) window.showToast('Aucune tourn\u00e9e diffus\u00e9e sur ce travail','#B85A1A'); return; }
-  window.CONFIG=window.CONFIG||{};
-  window.CONFIG.ordre_passage_t=m;
-  if(typeof window.saveData==='function') window.saveData('config');
-  if(window.showToast) window.showToast('Tourn\u00e9e retir\u00e9e \u00b7 '+ts.map(_opTNom).join(', ')+' \u2014 l\u2019\u00e9quipe revient au tri habituel','#B85A1A');
-  _pilOpRefresh();
-}
 // Ce qui est REELLEMENT diffuse, tout en bas de l'ecran de rangement.
 function _opDiffusHtml(){
   var m=_opOrdMap();
@@ -2872,10 +2820,13 @@ function _dzTriHtml(C,edit){
   var sp=C.sp, opts='<option value="">D\u00e9part\u00a0: '+((sp&&sp.auto)?('auto \u2014 '+(sp.src==='journal'?'derni\u00e8re faite\u00a0: '+_pilEsc(sp.p.nom):'centre du vignoble')):'auto')+'</option>';
   _opParcActive().filter(_opGeoOK).forEach(function(p){ opts+='<option value="'+_pilEsc(p.nom)+'"'+((_PIL_OP._startNom===p.nom)?' selected':'')+'>D\u00e9part\u00a0: '+_pilEsc(p.nom)+'</option>'; });
   h+='<select id="pil-op-start" class="pil-dz-sel" aria-label="D\u00e9part de la tourn\u00e9e">'+opts+'</select>';
-  var dirty=_opDirty(), can=(dirty==='modified'||dirty==='unsaved'), nS=0;
-  (_PIL_OP.tasks||[]).forEach(function(t){ if(_opSavedTask(t)) nS++; });
-  var pill=(dirty==='saved')?'<span class="pil-dz-pill ok">\u2713 enregistr\u00e9e</span>':(dirty==='empty'?'<span class="pil-dz-pill no">rien \u00e0 ordonner</span>':'<span class="pil-dz-pill mod">\u25cf '+(dirty==='unsaved'?'non enregistr\u00e9e':'modifi\u00e9e')+'</span>');
-  h+='<div class="pil-dz-save"><button class="go" data-op="save"'+(can?'':' disabled')+'>'+_mvIcon('envoyer',16)+'Enregistrer la tourn\u00e9e</button>'+pill+(nS?'<button class="rm" data-op="clear">Retirer</button>':'')+'</div>';
+  // ★ TRN-1 (§330) — la tournée se règle dans la roue crantée de la Vigne (Nico, 14/10) : Décider la SUIT et ne l'écrit
+  //   plus. Les tris ci-dessus restent un essai à l'écran ; rien ne part chez l'équipe d'ici.
+  var trn=null; (_PIL_OP.tasks||[]).some(function(t){ trn=(typeof window._mvTourneeDe==='function')?window._mvTourneeDe(t):null; return !!trn; });
+  var trnM=trn?/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(trn.date||'')):null, trnD=trnM?(trnM[3]+'/'+trnM[2]):'';
+  h+='<div class="pil-dz-save"><span class="pil-dz-trn">'+_mvIcon('route',16)+(trn?('Tourn\u00e9e \u00ab\u00a0'+_pilEsc(trn.nom)+'\u00a0\u00bb'+(trnD?(' \u00b7 r\u00e9gl\u00e9e le '+trnD):'')):'Aucune tourn\u00e9e pour ce travail')+'</span>'
+    +(_opCanEdit()?'<button class="go" data-op="trn">'+_mvIcon('crayon',16)+(trn?'Modifier la tourn\u00e9e':'Cr\u00e9er une tourn\u00e9e')+'</button>':'')+'</div>'
+    +'<p class="pil-dz-essai">Les tris ci-dessus sont un essai\u00a0: rien n\u2019est enregistr\u00e9 ici. La tourn\u00e9e se r\u00e8gle dans la roue crant\u00e9e de la Vigne.</p>';
   return h+'<div class="pil-dz-dif">'+_opDiffusHtml()+'</div>';
 }
 function _dzSlot(i){ return '<button class="pil-dz-slot" data-op="drop" data-i="'+i+'"><i></i><span>\u21b3 INS\u00c9RER ICI</span><i></i></button>'; }
@@ -3192,8 +3143,8 @@ function _pilOpAction(el){
       OP.order=rest2.slice(0,ii).concat(pk2.names,rest2.slice(ii)); }
     OP._pick=null; }
   else if(op==='cancel'){ OP._pick=null; }
-  else if(op==='save'){ OP._pick=null; _opSaveOrder(); return; }
-  else if(op==='clear'){ OP._pick=null; _opClearOrder(); return; }
+  else if(op==='trn'){ OP._pick=null; var t0=''; (OP.tasks||[]).some(function(t){ if(typeof window._mvTourneeDe==='function'&&window._mvTourneeDe(t)){ t0=t; return true; } return false; }); if(!t0) t0=(OP.tasks||[])[0]||''; if(typeof window._trnOuvrirPourTache==='function') window._trnOuvrirPourTache(t0,'decider'); return; }
+  
   _pilOpRefresh();
 }
 function _opInit(d){
@@ -12851,3 +12802,5 @@ window._pilSetTab     = function(t, silencieux){ return _pilSetTab(t, {silencieu
 window.openPilotage   = function(){ if(window.goTo) window.goTo('pilotage'); else renderPilotage(); };
 
 export { renderPilotage };
+// TRN-1 (§330) : une tournée enregistrée dans la roue crantée redessine Décider s'il est à l'écran.
+window.addEventListener('mv-tournees', function(){ if(document.getElementById('pil-op-start')) _pilOpRefresh(); });

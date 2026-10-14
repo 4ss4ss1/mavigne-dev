@@ -197,7 +197,7 @@ const CONTRES = [
   ['app.js : l\u2019arrachage au prestataire compte comme « à faire » pour l\u2019équipe', () => sub('app', " && !(T==='Arrachage'&&_pvAuPresta(p,T)); });", '; });')],
   ['app.js : « Reprendre la tournée du domaine » reste quand plus rien ne sert', () => sub('app', "    if(!utiles.length){ el.innerHTML=''; el.style.display='none'; return; }   // TOURNEE-1 : plus rien à reprendre\n", '')],
   ['app.js : un encart vide (« Tournée définie pour : » sans puce)', () => sub('app', "if(pTacheFilter==='toutes'&&utiles.length){", "if(pTacheFilter==='toutes'){")],
-  ['app.js : la tâche affichée finie garde sa tournée (barre, numéros)', () => sub('app', "return (window._mvOrdreFor(pTacheFilter) && _pOrdUtile(pTacheFilter)) ? pTacheFilter : '';", "return window._mvOrdreFor(pTacheFilter) ? pTacheFilter : '';")],
+  ['app.js : la tâche affichée finie garde sa tournée (barre, numéros)', () => sub('app', "return (_pOrdLire(pTacheFilter) && _pOrdUtile(pTacheFilter)) ? pTacheFilter : '';", "return _pOrdLire(pTacheFilter) ? pTacheFilter : '';")],
   ['app.js : la liste vide ne redessine plus la barre (celle de la tâche d\u2019avant reste)', () => sub('app', '    _pvRenderOrdreBar(); _pOrdMapSync(); _pCibleMapSync();\n', '')],
   ['app.js : la liste vide ne remet plus les numéros de la carte', () => sub('app', '    _pvRenderOrdreBar(); _pOrdMapSync(); _pCibleMapSync();\n', '    _pvRenderOrdreBar(); _pCibleMapSync();\n')],
   ['app.js : la liste vide ne remet plus l\u2019anneau', () => sub('app', '    _pvRenderOrdreBar(); _pOrdMapSync(); _pCibleMapSync();\n', '    _pvRenderOrdreBar(); _pOrdMapSync();\n')],

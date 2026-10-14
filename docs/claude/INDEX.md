@@ -381,3 +381,5 @@
 | 327 | 327. ★★ MAJ-2 — LA MISE À JOUR NE TRAÎNE PLUS : MOMENTS CALMES, BARRE, GESTE (14/10 — `src/app.js` (bloc SE… | `docs/claude/chantiers-280-329.md` |
 | 328 | 328. ★ DIRECT-2 — « EN DIRECT » DONNE LE VRAI JOUR DE DÉBUT D'UN ARRACHAGE, ET N'INVENTE PLUS « AUJOURD'HUI… | `docs/claude/chantiers-280-329.md` |
 | 329 | 329. ★★ TETE-2 — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR LES DIX VUES (14/10 — `src/styles.css` (blo… | `docs/claude/chantiers-280-329.md` |
+| 330 | 330. ★★ TRN-1 — LES TOURNÉES, RÉGLÉES UNE FOIS DANS LA ROUE CRANTÉE DE LA VIGNE (14/10 — `src/tournees.js` … | `docs/claude/chantiers-330-379.md` |
+| 331 | 331. ★★ TRN-2 — UNE TOURNÉE PAR ÉQUIPE, ET LA TOURNÉE AVANT LA PROXIMITÉ (14/10 — `src/utils.js` (`_mvTourn… | `docs/claude/chantiers-330-379.md` |

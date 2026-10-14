@@ -1,0 +1,33 @@
+{
+  "lot": "TRN-2",
+  "section": "§331",
+  "base": "93cc7374682c843d9b2dad528aab3ca70cfe9873",
+  "inclut": [
+    "TRN-1"
+  ],
+  "date": "2026-10-14",
+  "fichiers": {
+    ".mv-base": "8cb6d23ded249f0fc7359d62f55eafa9517a6b4f48d802f61535fc004d0bfa11",
+    "CLAUDE.md": "3f971fba62334106e4f1ce7b1995c89d8d5b638b03d932d8be7f6cb92e4965ae",
+    "docs/claude/INDEX.md": "52253e037797ece8da17efd059acbafe81898443ac7a54548d10e85ce3dc7d81",
+    "guide/04-vigne.html": "3795f32f57625ebaf9627a39488343cc70eea6ed2558df6c67bbd26ecf293f7a",
+    "guide/11-pilotage.html": "d72c6cbfd0eb8441580fbba96953998ec2d89886c71650a45eb913953a376062",
+    "index.html": "7bd1cc2404d9fa0660c18849f300c55c48fdbec13e67dce0c6aca201a6dec254",
+    "public/guide.html": "6e1e9b36afae0547917e2403362fa51697a74478918b1da03c79437ef270b46d",
+    "public/sw.js": "2489a30395af117296b12a2e8035fcfd37d3fae552684d1d669402337e7baf6e",
+    "scripts/mv-harnais-cible.mjs": "98a89ed6affd871f251994cd641f8bc5fb511b705c0cfb6f1502b62cf46e6678",
+    "scripts/mv-harnais-equipes-jour.mjs": "0840b3aec033d5f9d55194959b9fef7b8ad7e6f0254994e617f4667ba799924e",
+    "scripts/mv-harnais-liste.mjs": "f470eaa81bf815bbacf6afb2d91553c06791a030aba8b9520912381c44d92fb0",
+    "scripts/mv-harnais-tournee1.mjs": "5f55cc795b1d58441b9792e4830b19161bcff93e6dd76061249b6d3628f6d8d9",
+    "scripts/typo-baseline.json": "0d6865c6af48a90393a304c9a0b2225b946b33b4b9e2c9246c09494de11b2962",
+    "src/app.js": "99221d0b5456689f7a35402f577bfd0cf268276faaf57f64b9e7ad1e7d9de9d8",
+    "src/pilotage.js": "cbe8fc6429038f0684f7a9b771a2ac4e02e0c91a0b95e21da2c6b532bb91c906",
+    "src/reglages.js": "77d2f1ec9477b5a296fde222561c6b884cef106e1187a930d71a11234535f8f5",
+    "src/styles.css": "ab27c9e2c64ca6590a92d5435b347c9f66df091744f4c51ada38fa036e5b0fc5",
+    "src/utils.js": "dfc41a878106560d328725d9ef9bcde54b41b664cd407b0abd84d3293eb644e5",
+    "docs/claude/chantiers-330-379.md": "6fa6ae10f4a9c8c7de913b5e4fe8ff3eac60914915926fb7eca0dd3edd1845a2",
+    "scripts/mv-harnais-trn1.mjs": "1f351d087097952af96bb4b6b6733335b1cb99f416eb1405e9ed19b9a885c60f",
+    "scripts/mv-harnais-trn2.mjs": "53a03d5f1c497f15edc5f0fc04c1e599acb0c2e8607d7ad7099d2c62777ecccb",
+    "src/tournees.js": "cc91a65323d29ccf5af801091c440419055289b620662485ccd6d27096b2eabb"
+  }
+}

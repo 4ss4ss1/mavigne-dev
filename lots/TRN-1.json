@@ -1,0 +1,27 @@
+{
+  "lot": "TRN-1",
+  "section": "§330",
+  "base": "93cc7374682c843d9b2dad528aab3ca70cfe9873",
+  "inclut": [],
+  "date": "2026-10-14",
+  "fichiers": {
+    ".mv-base": "8cb6d23ded249f0fc7359d62f55eafa9517a6b4f48d802f61535fc004d0bfa11",
+    "CLAUDE.md": "c4e748d76369257065e6aff3d4b20768fdd98569e7c49ae261e9922b9d474e9e",
+    "docs/claude/INDEX.md": "99a8a1866e9e305733cfedcae119ee39f12a142177c512d147fd7d2ed4c6b23e",
+    "guide/04-vigne.html": "0bcaee0a93b28c7f4c567c08f1740728825e63e2b966e3a69db9261f123fb809",
+    "guide/11-pilotage.html": "d72c6cbfd0eb8441580fbba96953998ec2d89886c71650a45eb913953a376062",
+    "index.html": "33ce5b8da4a8a97addd899b2e73f7e91f2954d7dd0ca6585acb45056afc2eb77",
+    "public/guide.html": "cdc3040b71c8fce868cfeee3d03c0ec5dce6b002b59f73c52c18b74f343d29f5",
+    "public/sw.js": "131f86ed1d47c53a03fb3781e14254068640db681c0b67be74c60fa8b1a1fd31",
+    "scripts/mv-harnais-liste.mjs": "9d95ab7fd3f169ee7aefbc4c516bd14831ffc3d3adcaa2cf51899bf2626c8b87",
+    "scripts/typo-baseline.json": "0d6865c6af48a90393a304c9a0b2225b946b33b4b9e2c9246c09494de11b2962",
+    "src/app.js": "3cdb496fdd813670f7d25f5694c66c1e503a484957fa7f5cc17db4a3862d1b34",
+    "src/pilotage.js": "cbe8fc6429038f0684f7a9b771a2ac4e02e0c91a0b95e21da2c6b532bb91c906",
+    "src/reglages.js": "77d2f1ec9477b5a296fde222561c6b884cef106e1187a930d71a11234535f8f5",
+    "src/styles.css": "17f3637566e865f9ea867acba8877122dc1ed432f5cb1bfb0dc3bb90c8373a61",
+    "src/utils.js": "db4e1cb55aa0fdb45d9941cfc687e8c09809c9b7ec3241308c8637dce17e7996",
+    "docs/claude/chantiers-330-379.md": "77d1200cbe7582168f4319dcc9b78558d6a75fda1feb65d69cc47c53c731d7f5",
+    "scripts/mv-harnais-trn1.mjs": "1f351d087097952af96bb4b6b6733335b1cb99f416eb1405e9ed19b9a885c60f",
+    "src/tournees.js": "cc91a65323d29ccf5af801091c440419055289b620662485ccd6d27096b2eabb"
+  }
+}

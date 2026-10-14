@@ -1,4 +1,10 @@
-// MA VIGNE — Service Worker v9.76
+// MA VIGNE — Service Worker v9.78
+// v9.78 (14/10/2026) — TRN-2 (§331) : une tournée par équipe du jour (CONFIG.equipes_jour[jour][i].t, lue par
+//   _mvOrdreMoi pour la personne connectée) ; la tournée passe devant le tri par proximité chez l'équipe. utils.js,
+//   app.js, styles.css, index.html.
+// v9.77 (14/10/2026) — TRN-1 (§330) : les tournées se règlent dans la roue crantée de la Vigne (CONFIG.tournees, ordre
+//   en pid) ; Parcelles suit la tournée choisie, Décider la lit sans l'écrire. tournees.js (nouveau), reglages.js, utils.js, app.js, pilotage.js,
+//   styles.css, index.html.
 // v9.76 (14/10/2026) — TETE-2 (§329) : un seul modele d'en-tete sur les 10 vues ; la ligne du jour (saison, date ou meteo, « ? Aide ») ne passe
 //   plus a la ligne ; meteo et aide aux couleurs du theme (le creme du bandeau brun restait sur fond blanc), temperature en Outfit ; le Pilotage
 //   pose un vrai .mod-header (pilotage.js) ; date courte partagee (utils.js _mvDateCourte). styles.css (bloc TETE-2), app.js, index.html,
@@ -4497,7 +4503,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.76';
+const CACHE_NAME   = 'mavigne-v9.78';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4514,7 +4520,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.76 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.78 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4534,7 +4540,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.76 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.78 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

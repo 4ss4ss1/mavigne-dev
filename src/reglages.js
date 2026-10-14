@@ -24,6 +24,7 @@ import { isAdmin, showToast, _escHtml, _escAttr, deepClone, _swNotify, tNom, TAB
          _mvIcon, _mvIconInline, _mvIconTache, _mvIconTuile, _actIcone,
          _mvBadge } from './utils.js';
 import { mvIdsParcelles } from './ids.js';   // IDS-1 lot 4 (§254) : une parcelle renommée garde son identifiant
+import { _trnSectionRender } from './tournees.js';   // TRN-1 (§330) : la section « Tournées » de la roue crantée de la Vigne
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if(DEBUG) console.log('[Ma Vigne] reglages.js chargé — ' + new Date().toISOString());
@@ -447,6 +448,7 @@ function renderReglages(){
     // Tâches
     // Source unique : la liste portée par la période consultée (et non plus le 1er mot de son nom).
     document.getElementById('taches-saison-label').textContent=(window._visuSaison?window._visuSaison():window.getSaisonActive().nom);
+    _trnSectionRender();   // TRN-1 (§330) : la section « Tournées » de la roue crantée
     const tachesList=document.getElementById('taches-config-list');
     const tachesFiltrees=window.getTachesSaison();
     _tcvInjectCss();

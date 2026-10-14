@@ -38,7 +38,7 @@ function monde(src, { admin = false, moi = 'Victor', config = {} } = {}) {
   vm.runInContext(`
     var currentUser = { nom: ${JSON.stringify(moi)} };
     var CONFIG = window.CONFIG;
-    var _EQJ_SEL = {};
+    var _EQJ_SEL = {}, _EQJ_TRN = {};   // TRN-2 (§331) : la tournée de chaque équipe, état du module comme _EQJ_SEL
     function _mvMoiAdmin(){ return ${admin ? 'true' : 'false'}; }
     function _mvToday(){ return '2026-09-30'; }
     function _mvISO(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -120,7 +120,7 @@ const executer = src => scenarios(src).concat(branchements(src));
 const MUT = [
   ['le salarié n\'est plus forcé', 'app', "    if(!_mvMoiAdmin()){\n      e.equipe=autres.length>0;", "    if(false){\n      e.equipe=autres.length>0;"],
   ['la correction de l\'admin est écrasée', 'app', "    } else if(!(Array.isArray(e.membresEquipe) && e.membresEquipe.length)){", "    } else {"],
-  ['tableaux de tableaux enregistrés', 'app', "return {m:t.slice()};", "return t.slice();"],
+  ['tableaux de tableaux enregistrés', 'app', "var o={m:t.slice()};", "var o=t.slice();"],   // TRN-2 (§331) : l'objet porte aussi la tournée de l'équipe
   ['les vieilles journées ne sont plus retirées', 'app', "if(k<limIso) delete E[k];", ""],
   ['un salarié peut enregistrer', 'app', "function saveEqJour(){\n  if(!_mvMoiAdmin()) return;", "function saveEqJour(){\n"],
   ['une écriture oublie l\'équipe du jour (passages)', 'app', "JOURNAL.unshift(_mvEqApplique(_jeP));", "JOURNAL.unshift(_jeP);"],

@@ -8030,7 +8030,22 @@ function pToggleProximite(){
    ═══════════════════════════════════════════════════════════════════ */
 var _pOrdRangs={rang:{},n:0,ok:false,hors:0};
 function _pOrdKey(){ try{ return 'mavigne_ordre_off_'+(localStorage.getItem('mavigne_tenant')||''); }catch(e){ return 'mavigne_ordre_off_'; } }
-function _pOrdOff(){ try{ return localStorage.getItem(_pOrdKey())==='1'; }catch(e){ return false; } }
+// TRN-1 (§330) : l'équipe suit la tournée choisie par l'administrateur — « Tri normal » n'existe que pour lui, et une
+//   préférence posée avant sur le téléphone d'un ouvrier ne l'en sort plus.
+function _pOrdOff(){ if(!isAdmin()) return false; try{ return localStorage.getItem(_pOrdKey())==='1'; }catch(e){ return false; } }
+// TRN-1 (§330) : « Modifier » (administrateur) ouvre la tournée du travail affiché, dans l'éditeur de la roue crantée.
+// TRN-1 (§330) : le nom de la tournée n'apparaît que s'il dit autre chose que le travail (« Hiver » pour le Tirage) ; une
+//   tournée qui porte le nom de son travail garde « Tournée du domaine · Taille ». Comparaison sans accents ni casse.
+function _pOrdNomTournee(o,t){ var n=function(x){ return String(x||'').normalize('NFD').replace(/\p{M}/gu,'').toLowerCase().trim(); }; return (o&&o.nom&&n(o.nom)!==n(t))?o.nom:''; }
+function _pOrdModifier(){ var o=_pOrdLire(pTacheFilter); if(o&&o.id&&typeof window._trnOuvrir==='function') window._trnOuvrir(o.id,'parcelles'); else if(typeof window._trnOuvrirPourTache==='function') window._trnOuvrirPourTache(pTacheFilter,'parcelles'); }
+// TRN-2 (§331) : sur Parcelles, la tournée de l'équipe du jour de la personne connectée passe d'abord (_mvOrdreMoi).
+function _pOrdLire(t){ return (typeof window._mvOrdreMoi==='function') ? window._mvOrdreMoi(t) : window._mvOrdreFor(t); }
+function _pOrdTitre(o,t){ if(o&&o.equipe&&o.nom) return 'Tournée « '+_escHtml(o.nom)+' » · votre équipe'; var n=_pOrdNomTournee(o,t); return n?('Tournée « '+_escHtml(n)+' » · '+_escHtml(t)):('Tournée du domaine · '+_escHtml(t)); }
+// TRN-2 (§331) : quand le travail affiché suit une tournée, l'équipe n'a plus le tri par proximité — l'ordre est celui de
+//   l'administrateur ; lui le garde. Un tri déjà actif chez un ouvrier est ignoré tant que la tournée s'applique.
+function _pProxBloque(){ return !_mvMoiAdmin() && !!_pOrdTache(); }
+window._pOrdModifier=_pOrdModifier;
+window.addEventListener('mv-tournees', function(){ if(document.getElementById('p-ordre-bar')) renderParcelles(); });
 function pOrdreToggle(){ try{ localStorage.setItem(_pOrdKey(), _pOrdOff()?'0':'1'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'tournee',msg:'preference tri non memorisee'}); } renderParcelles(); }
 // Une tournée décrit le travail d'AUJOURD'HUI : consulter une archive ne doit
 // pas réorganiser l'écran avec elle.
@@ -8043,11 +8058,11 @@ function _pOrdTache(){
   if(_pOrdOff()||!_pOrdPeriodeOK()) return '';
   if(pTacheFilter==='toutes') return '';
   if(typeof window._mvOrdreFor!=='function') return '';
-  return (window._mvOrdreFor(pTacheFilter) && _pOrdUtile(pTacheFilter)) ? pTacheFilter : '';
+  return (_pOrdLire(pTacheFilter) && _pOrdUtile(pTacheFilter)) ? pTacheFilter : '';
 }
 function _pOrdCalc(noms){
   var t=_pOrdTache();
-  _pOrdRangs=(t && typeof window._mvOrdreRangs==='function') ? window._mvOrdreRangs(t,noms) : {rang:{},n:0,ok:false,hors:0};
+  _pOrdRangs=(t && typeof window._mvOrdreRangs==='function') ? window._mvOrdreRangs(t,noms,true) : {rang:{},n:0,ok:false,hors:0};
   return _pOrdRangs;
 }
 function _pOrdRang(nom){ var r=(_pOrdRangs&&_pOrdRangs.rang)?_pOrdRangs.rang[nom]:null; return (r>0)?r:null; }
@@ -8106,15 +8121,15 @@ function _pvRenderOrdreBar(){
   }
   var t=_pOrdTache();
   if(t){
-    var o=window._mvOrdreFor(t)||{}, n=_pOrdRangs.n||0, d=_pOrdDateFr(o.date);
+    var o=_pOrdLire(t)||{}, n=_pOrdRangs.n||0, d=_pOrdDateFr(o.date);
     // TOURNEE-1 (§324) : une tâche finie n'arrive plus ici (`_pOrdTache`). n = 0 veut dire qu'il reste à faire, mais qu'aucune
     //   parcelle de la tournée n'est dans la liste (hors tournée, ou cachée par la recherche) : « tout est fait » aurait menti.
     var sub=(n>0?(n+' parcelle'+(n>1?'s':'')+' à faire, dans l’ordre'):'aucune parcelle de la tournée dans la liste')+(d?(' · ordre du '+d):'');
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1.5px solid var(--or);border-radius:12px;padding:9px 12px">'
       +'<span style="font-size:var(--pt-sm,16px);flex-shrink:0"></span>'
-      +'<div style="flex:1;min-width:0"><div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tournée du domaine · '+_escHtml(t)+'</div>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_pOrdTitre(o,t)+'</div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_escHtml(sub)+'</div></div>'
-      +'<button onclick="pOrdreToggle()" style="border:none;background:var(--gris-clair);border-radius:9px;min-height:34px;padding:0 11px;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte);cursor:pointer;font-family:inherit;flex-shrink:0">Tri normal</button></div>';
+      +(isAdmin()?('<button onclick="_pOrdModifier()" class="p-ord-modif" aria-label="Modifier la tournée">'+_mvIcon('crayon',16)+'<span>Modifier</span></button>'+'<button onclick="pOrdreToggle()" style="border:none;background:var(--gris-clair);border-radius:9px;min-height:34px;padding:0 11px;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte);cursor:pointer;font-family:inherit;flex-shrink:0">Tri normal</button>'):'')+'</div>';
     return;
   }
   // Filtre « Toutes tâches » : une tournée existe mais on ne sait pas laquelle
@@ -8135,6 +8150,8 @@ function _pvRenderOrdreBar(){
 function _pvRenderProxBar(){
   var el=document.getElementById('p-prox-bar');
   if(!el)return;
+  if(_pProxBloque()){ el.innerHTML=''; el.style.display='none'; return; }   // TRN-2 (§331)
+  el.style.display='';
   if(_pProxLoading){
     el.innerHTML='<button disabled style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:none;border-radius:12px;background:var(--gris-clair);color:var(--texte-doux);font-size:var(--pt-base,14px);font-weight:600;font-family:inherit">Localisation…</button>';
     return;
@@ -8235,6 +8252,9 @@ function renderParcelles(){
   });
   // Rangs de la tournee : calcules sur l'ensemble AFFICHE, avant le tri.
   _pOrdCalc(_dataF.map(function(p){return p.nom;}));
+  // TRN-2 (§331) : chez l'équipe, une tournée passe devant la proximité — le tri GPS est suspendu le temps du tri,
+  //   sans perdre la position (le comparateur garde `if(_pProxPos)`, que mv-harnais-vigne-tri lit au caractère près).
+  const _proxGarde=_pProxPos; if(_pProxPos&&_pProxBloque()) _pProxPos=null;
   const data=_dataF.sort((a,b)=>{
     // Parcelles arrachées toujours en dernier
     const arrA=a.statut==='Arrachee'?1:0, arrB=b.statut==='Arrachee'?1:0;
@@ -8280,6 +8300,7 @@ function renderParcelles(){
     if(pa!==pb)return pa-pb;
     return a.nom.localeCompare(b.nom,'fr');
   });
+  _pProxPos=_proxGarde;   // TRN-2 : la position revient pour la barre et le prochain rendu
   const cont=document.getElementById('pList');
   if(!data.length){
     const msg=pTacheFilter!=='toutes'
@@ -9839,7 +9860,7 @@ function _mvEqUi(prefix){
   }catch(err){ if(window._mvAvale) window._mvAvale(err,'app.js/_mvEqUi'); }
 }
 // ── La carte de l'Accueil et son réglage ──
-var _EQJ_SEL={};
+var _EQJ_SEL={}, _EQJ_TRN={};   // TRN-2 (§331) : _EQJ_TRN[n° d'équipe] = id de sa tournée
 function _mvEqMembres(){ return (MEMBRES||[]).filter(function(m){ return m && m.nom && m.statut!=='Inactif' && !m.bureau; }); }
 function _mvEqJourRender(){
   var w=document.getElementById('home-eqj-wrap'), tx=document.getElementById('home-eqj-txt');
@@ -9859,8 +9880,9 @@ function _mvEqJourRender(){
 function openEqJour(){
   if(!_mvMoiAdmin()) return;
   var iso=_mvToday(), T=window._mvEqJour(iso)||[];
-  _EQJ_SEL={};
+  _EQJ_SEL={}; _EQJ_TRN={};
   T.forEach(function(t,i){ t.forEach(function(n){ _EQJ_SEL[n]=i+1; }); });
+  _mvEqBrut(iso).forEach(function(t,i){ if(t.t) _EQJ_TRN[i+1]=String(t.t); });
   var d=document.getElementById('eqj-date');
   if(d){ var p=iso.split('-'); d.textContent='Aujourd\u2019hui, '+p[2]+'/'+p[1]+'/'+p[0]; }
   _mvEqRows();
@@ -9868,23 +9890,43 @@ function openEqJour(){
 }
 function _mvEqRows(){
   var c=document.getElementById('eqj-rows'); if(!c) return;
-  c.innerHTML=_mvEqMembres().map(function(m){
+  var h=_mvEqMembres().map(function(m){
     var cur=_EQJ_SEL[m.nom]||0;
     var ch=[0,1,2,3].map(function(k){
       return '<div class="pchk'+(cur===k?' sel vert':'')+'" data-eqj-n="'+_escAttr(m.nom)+'" data-eqj-k="'+k+'" onclick="_mvEqPick(this)">'+(k?('\u00c9quipe '+k):'Aucune')+'</div>';
     }).join('');
     return '<div class="fl" style="margin-top:10px">'+_escHtml(m.nom)+'</div><div class="ppicker">'+ch+'</div>';
   }).join('');
+  // ★ TRN-2 (§331) : la tournée de chaque équipe du jour — par défaut, celle du travail.
+  var T=(typeof window._mvTourneesLues==='function')?window._mvTourneesLues():[], ks=[];
+  Object.keys(_EQJ_SEL).forEach(function(n){ var k=_EQJ_SEL[n]; if(k>0&&ks.indexOf(k)<0) ks.push(k); });
+  ks.sort();
+  if(T.length&&ks.length){
+    h+='<div class="fl eqj-trn-tit">La tourn\u00e9e de chaque \u00e9quipe</div>';
+    ks.forEach(function(k){
+      var cur=_EQJ_TRN[k]||'';
+      h+='<label class="eqj-trn"><span>\u00c9quipe '+k+'</span><select data-eqj-k="'+k+'" onchange="_mvEqTrn(this)" aria-label="Tourn\u00e9e de l\u2019\u00e9quipe '+k+'"><option value="">Celle du travail</option>'
+        +T.map(function(t){ return '<option value="'+_escAttr(t.id)+'"'+(t.id===cur?' selected':'')+'>'+_escHtml(t.nom)+'</option>'; }).join('')+'</select></label>';
+    });
+  }
+  c.innerHTML=h;
+}
+function _mvEqTrn(el){ var k=parseInt(el.getAttribute('data-eqj-k'),10)||0; if(!k) return; if(el.value) _EQJ_TRN[k]=el.value; else delete _EQJ_TRN[k]; }
+window._mvEqTrn=_mvEqTrn;
+// Les équipes du jour telles qu'écrites (objets {m, t}), dans l'ordre et avec le filtre de _mvEqJour (utils.js).
+function _mvEqBrut(iso){
+  var E=(window.CONFIG||{}).equipes_jour, L=(E&&typeof E==='object'&&!Array.isArray(E))?E[String(iso||'').slice(0,10)]:null;
+  return Array.isArray(L)?L.filter(function(t){ return t&&Array.isArray(t.m)&&t.m.some(function(n){ return n!=null&&n!==''; }); }):[];
 }
 function _mvEqPick(el){
   var n=el.getAttribute('data-eqj-n'), k=parseInt(el.getAttribute('data-eqj-k'),10)||0;
   if(k) _EQJ_SEL[n]=k; else delete _EQJ_SEL[n];
   _mvEqRows();
 }
-function _mvEqEcrire(iso, teams){
+function _mvEqEcrire(iso, teams, trn){
   var cfg=window.CONFIG||{};
   var E=(cfg.equipes_jour && typeof cfg.equipes_jour==='object' && !Array.isArray(cfg.equipes_jour)) ? Object.assign({},cfg.equipes_jour) : {};
-  if(teams && teams.length) E[iso]=teams.map(function(t){ return {m:t.slice()}; }); else delete E[iso];
+  if(teams && teams.length) E[iso]=teams.map(function(t,i){ var o={m:t.slice()}; if(trn&&trn[i]) o.t=String(trn[i]); return o; }); else delete E[iso];
   // Deux ans gardés : le coût relit les journées passées (période consultée, cycle du millésime).
   var lim=new Date(iso+'T12:00:00'); lim.setDate(lim.getDate()-730);
   var limIso=_mvISO(lim);
@@ -9897,15 +9939,16 @@ function _mvEqApres(msg){
   closeOv(null,'ovEqJour');
   _mvEqJourRender();
   if(typeof _pvRenderTeamBar==='function'){ try{ _pvRenderTeamBar(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvEqApres'); } }
+  try{ window.dispatchEvent(new CustomEvent('mv-tournees')); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvEqApres/tournees'); }   // TRN-2 : Parcelles suit la tournée de l'équipe
   showToast(msg,'#3D6B27');
 }
 function saveEqJour(){
   if(!_mvMoiAdmin()) return;
   var by={};
   Object.keys(_EQJ_SEL).forEach(function(n){ var k=_EQJ_SEL[n]; if(k>0) (by[k]=by[k]||[]).push(n); });
-  var teams=Object.keys(by).sort().map(function(k){ return by[k]; });
+  var cles=Object.keys(by).sort(), teams=cles.map(function(k){ return by[k]; });
   if(!teams.length){ clearEqJour(); return; }
-  _mvEqEcrire(_mvToday(), teams);
+  _mvEqEcrire(_mvToday(), teams, cles.map(function(k){ return _EQJ_TRN[k]||''; }));   // TRN-2 : la tournée de chaque équipe
   _mvEqApres(teams.length+' \u00e9quipe'+(teams.length>1?'s':'')+' pour aujourd\u2019hui');
 }
 function clearEqJour(){

@@ -28,13 +28,15 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.97';
+export const APP_VERSION = '8.99';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
 //   dont le format est plus bas arrête d'écrire et demande la mise à jour (app.js, _mvVerifierVersion).
 //   Nico n'a rien à faire : la publication et le blocage sont automatiques (décision du 27/09).
-export const MV_FORMAT = 1;
+//   2 = TRN-1 (§330, 14/10) : CONFIG.tournees (une tournée = nom, travaux, ordre en pid).
+//   3 = TRN-2 (§331, 14/10) : CONFIG.equipes_jour[jour][i].t (la tournée de l'équipe du jour).
+export const MV_FORMAT = 3;
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -1056,6 +1058,24 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.99', d: '2026-10-14', items: [
+    { niv: 1, pour: ['admin'], cible: '#home-eqj-wrap', emoji: 'equipe', titre: 'Une tournée par équipe',
+      desc: "Dans «\u00a0Équipes du jour\u00a0», sous les noms, choisissez la tournée de chaque équipe — par défaut, celle du travail. "
+        + "Toute la journée, chaque salarié voit ses parcelles numérotées dans l’ordre de son équipe." },
+    { niv: 0, pour: ['tous'], emoji: 'route', titre: 'La tournée passe aussi devant le tri par proximité',
+      desc: "Quand un travail suit une tournée, l’équipe ne voit plus «\u00a0Trier par proximité\u00a0» : l’ordre est celui que l’administrateur a choisi. Lui garde ce tri." },
+  ] },
+  { v: '8.98', d: '2026-10-14', items: [
+    { niv: 2, pour: ['admin'], emoji: 'route', titre: 'Les tournées se règlent dans la roue crantée de la Vigne',
+      desc: "Vigne › roue crantée › <b>Tournées</b> : un nom, l’ordre de toutes vos parcelles, et les travaux qui la suivent — la taille, le tirage, les travaux au tracteur… "
+        + "On range en glissant la poignée, par le menu d’une parcelle, en touchant la carte dans l’ordre, ou d’un coup avec «\u00a0Ranger automatiquement\u00a0». "
+        + "Vos tournées d’avant y sont déjà, une par travail : renommez-les, et regroupez les travaux qui partagent le même ordre." },
+    { niv: 0, pour: ['tous'], emoji: 'nombre', titre: 'L’équipe suit la tournée choisie par l’administrateur',
+      desc: "Sur Parcelles, la barre porte le nom de la tournée, et «\u00a0Tri normal\u00a0» n’est plus proposé à l’équipe : c’est l’administrateur qui décide de l’ordre. "
+        + "Lui garde «\u00a0Modifier\u00a0», qui ouvre la tournée du travail affiché." },
+    { niv: 0, pour: ['admin'], emoji: 'curseurs', titre: 'Décider ne range plus la tournée',
+      desc: "Les tris de Pilotage › Décider restent des essais à l’écran ; la tournée se règle maintenant à un seul endroit, et Décider la suit. «\u00a0Modifier la tournée\u00a0» y mène." },
+  ] },
   { v: '8.97', d: '2026-10-14', items: [
     { niv: 0, pour: ['tous'], emoji: 'oeil', titre: 'Des en-têtes lisibles, rangés pareil sur tous les écrans',
       desc: "En haut du Pilotage, la météo et le bouton d’aide se voyaient à peine (texte clair sur fond clair), et sur l’Accueil la saison et la date s’étalaient sur plusieurs lignes. "
@@ -5086,7 +5106,7 @@ var MV_AIDE = {
     points: [
       ['Sur ordinateur', " : les modules sont dans la <b>barre à gauche</b> (repliable), et <b>Ctrl K</b> ouvre une recherche — une parcelle, un écran, un onglet du Pilotage. Sur téléphone et tablette, rien ne change."],
       ['La priorité du moment', "reste épinglée en haut, dans une carte : la tâche que l’équipe attaque, son avancement, et les parcelles dessinées à leur forme (leur contour, nord en haut) et à leur surface (fait, en cours, à faire) — un appui sur l’une ouvre sa fiche. Une parcelle dont le contour n’est pas enregistré reste un rectangle, en pointillé. Une parcelle où la tâche est désactivée, ou pas choisie pour la campagne, reste en contour pâle, en dernier, et ne compte pas dans l’avancement. Sans priorité, la carte montre la saison, parcelle par parcelle. Les trois chiffres du domaine sont à droite sur ordinateur, dessous au téléphone."],
-      ['Équipes du jour', "juste sous la priorité. L’administrateur la touche pour répartir les salariés en équipes <b>pour la journée</b> : chacun validera et démarrera avec son équipe, sans pouvoir la changer, et ne voit pas les autres. Rien de réglé, ou « Tout le monde ensemble » : l’application fait comme d’habitude. Le lendemain, tout repart à zéro. Un salarié voit ici son équipe du jour, quand il y en a une."],
+      ['Équipes du jour', "juste sous la priorité. L’administrateur la touche pour répartir les salariés en équipes <b>pour la journée</b> : chacun validera et démarrera avec son équipe, sans pouvoir la changer, et ne voit pas les autres. Sous les noms, il peut aussi choisir la tournée de chaque équipe : par défaut, celle du travail. Rien de réglé, ou « Tout le monde ensemble » : l’application fait comme d’habitude. Le lendemain, tout repart à zéro. Un salarié voit ici son équipe du jour, quand il y en a une."],
       ['Une ligne « À vérifier »', "peut s’afficher sous les chiffres : un changement de l’application qui vous concerne — un chiffre qui bouge, un réglage à contrôler. Touchez-la pour le détail, « Vu » pour la ranger ; elle reste dans Réglages › Moi › Journal des nouveautés."],
       ['La mise en route', "n’apparaît que chez l’administrateur d’un domaine neuf : sept étapes qui se cochent en lisant ce qui est déjà enregistré, rien à pointer à la main. Le bloc s’efface tout seul quand tout est fait."],
       ['Ma part du chantier', "montre ce que vous avez fait vous-même sur la tâche du moment : la priorité de votre équipe ; sans priorité, la seule tâche dans ses dates de travaux ; si plusieurs se chevauchent, celle où vous avez le plus travaillé ces 15 derniers jours. La ligne sous le titre dit pourquoi. « Ma trace » ouvre le détail de votre campagne. Ce sont des hectares, jamais des heures, et rien n’est comparé entre collègues."],
@@ -5109,7 +5129,8 @@ var MV_AIDE = {
       ['Sur chaque carte', "la surface au centiare près (0,0870 ha), le pourcentage, et le compte des tâches faites, qui suit la même règle : un arrachage à moitié fait compte pour une demie (« 1,5/2 tâches »)."],
       ['Les deux gestes', "« Début » signale qu’on attaque, « Valider » que c’est fini, sans ouvrir la parcelle : en bas de chaque carte au téléphone, au bout de chaque ligne sur ordinateur. Quand une tâche est choisie, la carte dit l’état de cette tâche à la place du pourcentage. Une tâche à passages affiche en plus le passage en cours (P1, P2, N1…). Les deux enregistrent l’équipe de la barre « Équipe sur … », « sans moi » compris : c’est elle que le Pilotage pose sur la parcelle en cours. Changer l’équipe d’une tâche la donne aussi aux parcelles en cours que vous avez commencées sans équipe notée."],
       ['Sur un ordinateur', "la liste passe à gauche, une ligne par parcelle avec ses deux gestes, et la fiche de la parcelle choisie s’ouvre à droite : sa forme, l’état de la tâche, les travaux de la campagne — une tâche désactivée sur la parcelle y est grisée, comme dans la fiche complète —, les derniers passages. Les flèches haut et bas passent d’une parcelle à l’autre, la touche V valide ; « Fiche complète » ouvre tout le reste."],
-      ['Le numéro devant le nom', "est le rang de la tournée du domaine. Il n’apparaît que si une tournée est fixée et qu’il reste une parcelle à faire sur ce travail ; les parcelles se rangent alors dans cet ordre. Sur «\u00a0Toutes tâches\u00a0», l’encart «\u00a0Tournée définie pour\u00a0» ouvre d’un appui chaque travail qui en a une : seulement ceux de la campagne en cours où il reste une parcelle à faire."],
+      ['Le numéro devant le nom', "est le rang de la parcelle dans la tournée que l’administrateur a choisie pour ce travail (roue crantée de la Vigne › Tournées). Il n’apparaît que si le travail suit une tournée et qu’il reste une parcelle à faire sur ce travail ; les parcelles se rangent alors dans cet ordre. L’équipe n’a rien à régler. Sur «\u00a0Toutes tâches\u00a0», l’encart «\u00a0Tournée définie pour\u00a0» ouvre d’un appui chaque travail qui en a une : seulement ceux de la campagne en cours où il reste une parcelle à faire."],
+      ['Les tournées', "se règlent dans la roue crantée de la Vigne, par l’administrateur : un nom, l’ordre de toutes les parcelles du domaine, et les travaux qui la suivent — un travail n’en suit qu’une. On range en glissant la poignée, par le menu d’une parcelle (premier, monter, descendre, dernier, placer après), en touchant la carte dans l’ordre, ou d’un coup avec «\u00a0Ranger automatiquement\u00a0». Sur la barre de la tournée, «\u00a0Modifier\u00a0» ouvre celle du travail affiché. Une tournée enregistrée arrive chez l’équipe à sa prochaine ouverture de l’application. Une équipe du jour peut suivre sa propre tournée (Équipes du jour, sur l’Accueil). Quand le travail suit une tournée, le tri par proximité n’est proposé qu’à l’administrateur."],
       ['Onglet Carte', ": les contours viennent de votre export PAC ou d’un fichier KML."],
       ['L’anneau doré qui respire', "sur la carte marque la parcelle <b>commencée et pas finie</b> pour le travail affiché\u00a0: celle où «\u00a0Début\u00a0» a été touché sans validation. S’il n’y en a aucune, il se pose sur la <b>prochaine à faire</b>, le n°\u00a01 de la tournée enregistrée. Sur «\u00a0toutes\u00a0», c’est la priorité du moment. Plusieurs parcelles commencées ont chacune leur anneau, et rien ne s’affiche sur une période archivée."],
       ['La recherche', "accepte le nom du climat comme le lieu-dit."],
@@ -5310,7 +5331,7 @@ var MV_AIDE = {
     ico: 'graphique', titre: 'Pilotage', ancre: 'pilotage',
     points: [
       ['Aujourd’hui se lit d’un coup d’œil', ": une phrase résume la journée (l’avance ou le retard sur l’objectif, les points à anticiper). Viennent les photos du domaine, la <b>fin prévue</b> avec sa frise et votre objectif, la <b>décision du jour</b> en quatre tuiles, le <b>domaine en direct</b> (chaque parcelle à sa forme et à l’échelle, colorée selon son état sur sa fiche pour la tâche choisie, en contour pâle quand cette tâche y est désactivée, rangée par appellation, l’équipe posée sur chaque parcelle en cours, sa pastille qui clignote les jours travaillés ; au survol, une loupe la montre en grand ; la toucher ouvre sa fiche), les chantiers (à faire ou en cours en haut, par date de début ; les terminés en bas) et la charge restante (une ligne relie la photo de chaque jour au point d’aujourd’hui). À droite sur ordinateur, <b>À savoir</b> réunit la météo des cinq jours, la pluie ou le vent par secteur, les absences, les fins de contrat, les retards et le matériel ; il y reste visible quand vous descendez dans la page. Le fil <b>En direct</b> montre d’abord qui est où en ce moment — chaque parcelle en cours avec son équipe et depuis quand, le tracteur en marche ou en pause —, puis la journée : validations, débuts, parcelles finies au tracteur avec le temps mesuré, traitements ; l’équipe passe d’abord, et celui qui a saisi n’y figure que s’il était dans les rangs. Tout ce qui parle des gens suit le <b>planning</b> : un jour sans travail, l’effectif et les présences montrent le prochain jour travaillé ; un absent revient le premier jour où le planning le prévoit, un arrêt maladie dit sa date de fin. La bascule <b>Terrain / Économie</b>, en haut, donne la photo économique du jour : l’atterrissage de la campagne, le coût à l’hectare, l’écart au barème, le dépensé face au fait, la cadence de l’équipe, le coût de l’inaction, les postes, les appellations et les tâches — les chiffres de l’onglet Économie ; l’atterrissage y est la fin projetée, et l’arrachage (comme les autres travaux sans barème) a sa ligne « Travaux à l’heure ». « Agrandir » ouvre la courbe en grand ; « Changer la priorité » ouvre le choix de la tâche prioritaire ; la date de l’objectif se règle en touchant son bouton. La tension par personne se détaille dans L’équipe & le matériel, la protection restante dans Conformité."],
-      ['Presque tout se lit, cinq choses s’écrivent', ": les chiffres viennent du journal, du planning, des sessions tracteur et de la cave. Ce qui s’écrit ici est nommé : les prix des achats (Économie), l’ordre de passage (Décider), le mois d’ouverture de l’exercice comptable et celui de l’année vigne (roue crantée, Économie › Exercice), et ce que porte la roue crantée."],
+      ['Presque tout se lit, quatre choses s’écrivent', ": les chiffres viennent du journal, du planning, des sessions tracteur et de la cave. Ce qui s’écrit ici est nommé : les prix des achats (Économie), le mois d’ouverture de l’exercice comptable et celui de l’année vigne (roue crantée, Économie › Exercice), et ce que porte la roue crantée."],
       ['Vos deux années se règlent au même endroit', ": la roue crantée porte l’ouverture de l’<b>exercice comptable</b> — celui de votre bilan, fixé par votre comptable — et, juste dessous, le <b>cadre de votre campagne</b>, l’axe des Archives et du bilan de campagne. Une campagne est un cycle de production : ce qui la borne, c’est la <b>vendange</b>, et le mois n’en est que la traduction. L’écran dit où tombe la vôtre dans le cadre choisi — elle l’ouvre, elle la clôt, ou la borne la coupe en deux — et propose le mois qui suit la fin de vos vendanges. Le changer recadre des chiffres déjà affichés, jamais vos saisies."],
       ['La roue crantée', "en haut à droite ouvre ce qui se règle : objectifs de fin, fenêtres des tâches, hypothèses de calcul, IFT de référence — et le bilan de campagne à imprimer. Administrateur seulement."],
       ['Les cartes arrivent repliées', ": chaque bloc montre son <b>chiffre</b> et la ligne qui dit sur quoi il a été calculé, même fermé — rien n’est caché. Touchez-en une pour voir son détail : elle s’ouvre en grand, et la précédente se referme, pour que les autres restent rangées côte à côte."],
@@ -5337,7 +5358,7 @@ var MV_AIDE = {
       ['Deux périodes qui se chevauchent', "ne comptent rien deux fois : les heures suivent les tâches, et une tâche n’appartient qu’à une seule période. Sur les jours communs, la frise hachure le fond en violet — il y a deux barres au même endroit, on lit la plus haute."],
       ['Une fenêtre de tâche s’arrête le jour écrit', " : fin au 25 avril, le 25 travaille. Et les heures se répartissent au prorata des jours <b>travaillables</b> : une semaine de ponts en reçoit moins, les semaines pleines récupèrent le reste."],
       ['Le marqueur « hors période »', "dans la roue crantée, fenêtres des tâches, veut dire qu’une fenêtre enregistrée ne tombe pas dans cette période. La fenêtre par défaut s’applique à la place, et l’écran le dit au lieu d’écraser tout le travail sur un seul jour."],
-      ['Décider', "— l’onglet s’appelait <b>Simuler</b>, mais la tournée qu’on y enregistre part sur l’écran de toute l’équipe : c’est le seul endroit du Pilotage qui change ce que les autres voient. Trois cartes : <b>la tournée du jour</b> (jusqu’où l’équipe ira, dans quel ordre), <b>qui fait quoi</b> (l’équipe répartie entre les priorités) et <b>le renfort</b> (combien de saisonniers, et quand — aux heures du planning, sans heures sup, avec « Et sans renfort ? » pour comparer)."],
+      ['Décider', "— trois cartes, trois simulations : rien ne s’y enregistre. <b>La tournée du jour</b> suit l’ordre de la tournée que l’administrateur a choisie pour le travail (roue crantée de la Vigne › Tournées) ; ses tris sont un essai à l’écran. <b>Qui fait quoi</b> répartit l’équipe entre les priorités, et <b>le renfort</b> dit combien de saisonniers, et quand — aux heures du planning, sans heures sup, avec « Et sans renfort ? » pour comparer."],
       ['La tournée part du planning', " : le travail en priorité, le prochain jour travaillé, l’équipe affectée à la priorité et présente ce jour-là (congés et récup retirés), ses heures et sa coupure. Les trajets se calculent entre chaque parcelle et la suivante. Chaque case dit d’où vient sa valeur ; en toucher une passe l’écran en simulation, « Valeurs réelles » revient au planning."],
       ['L’anneau doré qui respire', "marque la parcelle commencée et pas finie, sinon la prochaine à faire\u00a0: sur la carte du domaine pour la priorité du moment, sur celle de la tournée pour les travaux cochés — c’est son n°\u00a01. Le départ de la tournée, lui, reste la dernière parcelle validée, sauf si vous en choisissez un autre."],
       ['Le rendement de la tournée', ": sous le résultat, la part du temps de l’équipe passée sur les parcelles face aux trajets, le coût de l’équipe et le revient à l’hectare. La même tournée « au plus proche » est calculée à côté, pour comparer ; un bouton prend cet ordre."],
@@ -6795,51 +6816,121 @@ window._mvParcGeo = function(o){
 };
 
 // ══════════════════════════════════════════════════════════════════
-// TOURNÉE (ordre de passage) — SOURCE UNIQUE
+// TOURNÉES (ordre de passage) — SOURCE UNIQUE — ★★ TRN-1 (§330)
 // ──────────────────────────────────────────────────────────────────
-// L'ordre est rangé dans Pilotage › Décider et lu par l'écran Vigne. Il est
-// stocké PAR TÂCHE : une équipe qui tourne d'un travail à l'autre doit voir
-// le parcours DU TRAVAIL diffusé, pas un ordre global qui ne veut rien dire.
-//   CONFIG.ordre_passage_t = { '<tâche>': { ordre:[noms], date:'AAAA-MM-JJ', par:'nom' } }
-// L'ancien CONFIG.ordre_passage (tableau global) n'est plus écrit ; pilotage.js
-// s'en sert encore comme GRAINE pour ne pas perdre un rangement déjà fait.
-// Ces helpers vivent ici parce que deux fichiers en ont besoin (app.js pour le
-// tri et les numéros, pilotage.js pour l'édition) : deux copies du calcul =
-// deux réponses possibles à « quel est le rang de cette parcelle ».
-// ⚠️ `config` est lu au démarrage (FB_STATIC, pas de temps réel) : une tournée
-//    enregistrée arrive chez l'équipe à sa PROCHAINE OUVERTURE de l'app.
+// Nico (14/10) : c'est l'ADMINISTRATEUR qui fait les tournées, une fois (hiver, été, taille, tracteur…), et qui
+// décide de celle que l'équipe suit ; l'équipe n'a qu'à valider. Une tournée = un nom, l'ordre COMPLET des
+// parcelles du domaine, et les travaux qui la suivent. Un travail n'en suit qu'une. Réglée dans la roue crantée
+// de la Vigne (tournees.js), plus dans Décider.
+//   CONFIG.tournees = [ { id, nom, taches:[noms], ordre:[pid], date:'AAAA-MM-JJ', par:'nom' } ]
+// ★ L'ordre est rangé par IDENTIFIANT (pid, IDS-1) : renommer une parcelle ne touche pas la tournée.
+// ★ Lecture inchangée pour tous les écrans : _mvOrdreFor(tâche) rend toujours des NOMS (Parcelles, carte, anneau,
+//   Tracteur, Décider). Une parcelle ajoutée après coup n'a pas de rang : elle passe après.
+// ★ Compatibilité : l'enregistrement réécrit aussi CONFIG.ordre_passage_t (noms, par tâche), lu par Décider et par
+//   les appareils pas encore à jour. Sans CONFIG.tournees, les tournées d'avant (une par tâche) se lisent comme des
+//   tournées portant le nom de leur tâche : rien n'est perdu, rien n'est réécrit avant le premier enregistrement.
+//   Dès que CONFIG.tournees existe (même vide), il fait seul foi : l'ancienne carte n'est plus jamais relue.
+// ⚠️ `config` est lu au démarrage (FB_STATIC, pas de temps réel) : une tournée enregistrée arrive chez l'équipe à
+//    sa PROCHAINE OUVERTURE de l'app.
 // ══════════════════════════════════════════════════════════════════
 window._mvOrdreMap = function(){
   var m = (window.CONFIG||{}).ordre_passage_t;
   return (m && typeof m === 'object' && !Array.isArray(m)) ? m : {};
 };
-// Tournée d'une tâche, ou null. Aucun repli sur l'ancien tableau global :
-// celui-ci avait été rangé pour un jeu de tâches inconnu, l'appliquer à toutes
-// serait afficher un parcours qu'on ne peut pas justifier.
+// Les tournées telles que les écrans les lisent (ordre en pid). Celles d'avant TRN-1 portent `ancienne:true`.
+window._mvTourneesLues = function(){
+  var C = window.CONFIG || {};
+  if (Array.isArray(C.tournees)) return C.tournees.filter(function(t){ return t && Array.isArray(t.ordre) && Array.isArray(t.taches); });
+  var m = window._mvOrdreMap(), by = {}, out = [];
+  (window.PARCELLES||[]).forEach(function(p){ if(p && p.nom && p.pid) by[p.nom] = p.pid; });
+  Object.keys(m).forEach(function(t){
+    var e = m[t]; if(!e || !Array.isArray(e.ordre) || !e.ordre.length) return;
+    var nom = t; try{ if(typeof tNom === 'function') nom = tNom(t); }catch(err){ nom = t; }
+    out.push({ id:'h-'+t, nom:nom, taches:[t], ordre:e.ordre.map(function(n){ return by[n] || ('n:'+n); }), date:e.date||'', par:e.par||'', ancienne:true });
+  });
+  return out;
+};
+// La tournée que suit une tâche, ou null.
+window._mvTourneeDe = function(tache){
+  if(!tache || typeof window._mvTourneesLues !== 'function') return null;
+  var T = window._mvTourneesLues();
+  for (var i = 0; i < T.length; i++) if (T[i].taches.indexOf(tache) >= 0) return T[i];
+  return null;
+};
+// Tournée d'une tâche, en NOMS, ou null. Aucun repli sur l'ancien tableau global : celui-ci avait été rangé pour un
+// jeu de tâches inconnu, l'appliquer à toutes serait afficher un parcours qu'on ne peut pas justifier.
+// L'ordre d'une tournée, en NOMS de parcelles (pid ou « n:nom » résolus ; une parcelle disparue est sautée).
+window._mvTourneeNoms = function(t){
+  var by = {}, noms = [], vus = {};
+  (window.PARCELLES||[]).forEach(function(p){ if(!p || !p.nom) return; if(p.pid) by[p.pid] = p; by['n:'+p.nom] = p; });
+  (t && t.ordre || []).forEach(function(id){ var p = by[id]; if(p && !vus[p.nom]){ vus[p.nom] = 1; noms.push(p.nom); } });
+  return noms;
+};
 window._mvOrdreFor = function(tache){
   if(!tache) return null;
+  var t = (typeof window._mvTourneeDe === 'function') ? window._mvTourneeDe(tache) : null;
+  if(t){
+    var noms = window._mvTourneeNoms(t);
+    return noms.length ? { tache:tache, ordre:noms, date:t.date||'', par:t.par||'', nom:t.nom||'', id:t.id||'' } : null;
+  }
+  if(Array.isArray((window.CONFIG||{}).tournees)) return null;
   var e = window._mvOrdreMap()[tache];
   if(e && Array.isArray(e.ordre) && e.ordre.length){
     return { tache:tache, ordre:e.ordre.slice(), date:e.date||'', par:e.par||'' };
   }
   return null;
 };
-// Tâches qui ont une tournée diffusée, dans l'ordre du catalogue de saison.
+// Tâches qui suivent une tournée, dans l'ordre du catalogue de saison.
 window._mvOrdreTaches = function(){
-  var m = window._mvOrdreMap();
-  var ok = Object.keys(m).filter(function(k){ var e=m[k]; return e && Array.isArray(e.ordre) && e.ordre.length; });
+  var ok = [];
+  if(typeof window._mvTourneesLues === 'function'){
+    window._mvTourneesLues().forEach(function(t){ if(t.ordre.length) t.taches.forEach(function(x){ if(x && ok.indexOf(x) < 0) ok.push(x); }); });
+  } else {
+    var m = window._mvOrdreMap();
+    ok = Object.keys(m).filter(function(k){ var e=m[k]; return e && Array.isArray(e.ordre) && e.ordre.length; });
+  }
   var ref = [];
   try{ ref = ((typeof window.getTachesSaison==='function') ? window.getTachesSaison() : (window.TACHES||[])).map(function(t){ return t.nom; }); }catch(e){ ref = []; }
   var rank = {}; ref.forEach(function(n,i){ rank[n]=i; });
   return ok.sort(function(a,b){ var ra=(rank[a]==null?9999:rank[a]), rb=(rank[b]==null?9999:rank[b]); return (ra-rb) || String(a).localeCompare(String(b),'fr'); });
 };
+// ★★ TRN-2 (§331) — UNE TOURNÉE PAR ÉQUIPE. Nico (14/10) : fermer « une tournée par équipe ». Les équipes vivent au
+//   jour (ÉQUIPES-1, CONFIG.equipes_jour) : l'administrateur y choisit, pour chaque équipe, une tournée — sinon celle
+//   du travail. { m:['Victor','Shana'], t:'<id de tournée>' }. Lu pour la PERSONNE CONNECTÉE sur ses écrans de
+//   terrain (Parcelles : liste, numéros, barre, carte, anneau) ; Décider et le Tracteur gardent la tournée du travail.
+window._mvTourneeEquipe = function(nom, iso){
+  var E = (window.CONFIG||{}).equipes_jour;
+  if(nom==null || !E || typeof E !== 'object' || Array.isArray(E)) return '';
+  var L = E[String(iso||'').slice(0,10)];
+  if(!Array.isArray(L)) return '';
+  for (var i = 0; i < L.length; i++){
+    var t = L[i];
+    if(t && Array.isArray(t.m) && t.m.map(String).indexOf(String(nom)) >= 0) return t.t ? String(t.t) : '';
+  }
+  return '';
+};
+window._mvOrdreMoi = function(tache){
+  if(!tache) return null;
+  var moi = window.currentUser && window.currentUser.nom, iso;
+  if(typeof window._mvToday === 'function') iso = window._mvToday();
+  else { var d = new Date(); iso = d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+  var id = moi ? window._mvTourneeEquipe(moi, iso) : '';
+  if(id && typeof window._mvTourneesLues === 'function'){
+    var t = window._mvTourneesLues().filter(function(x){ return x.id === id; })[0];
+    if(t){
+      var noms = window._mvTourneeNoms(t);
+      if(noms.length) return { tache:tache, ordre:noms, date:t.date||'', par:t.par||'', nom:t.nom||'', id:t.id||'', equipe:true };
+    }
+  }
+  return window._mvOrdreFor(tache);
+};
 // NUMÉROTATION VIVANTE : le rang est recalculé sur les parcelles réellement
 // affichées → 1, 2, 3… sans trou quand une parcelle est terminée. C'est déjà ce
 // que fait Pilotage (_opParcelles reprojette l'ordre sur ce qui reste à faire).
 // Une parcelle absente de la tournée n'a pas de rang : elle passe après.
-window._mvOrdreRangs = function(tache, noms){
+window._mvOrdreRangs = function(tache, noms, moi){   // moi : la tournée de l'équipe du jour d'abord (TRN-2)
   var out = { rang:{}, n:0, ok:false, hors:0 };
-  var o = window._mvOrdreFor(tache);
+  var o = (moi && typeof window._mvOrdreMoi === 'function') ? window._mvOrdreMoi(tache) : window._mvOrdreFor(tache);
   if(!o) return out;
   out.ok = true;
   var vus = {}; (noms||[]).forEach(function(n){ if(n) vus[n]=1; });
@@ -6941,7 +7032,7 @@ window._mvCibleCarte = function(T){
   var presta = function(p){ return typeof window._mvAuPrestataire === 'function' && window._mvAuPrestataire(p, T); };   // ARRACH-9 : faite pour l'équipe
   var comm = act.filter(function(p){ return window._mvTacheEtat(p, T) === 'commencee' && !presta(p); });
   if(comm.length) return { etat: 'commencee', ps: comm, tache: T };
-  var o = (typeof window._mvOrdreFor === 'function') ? window._mvOrdreFor(T) : null;
+  var o = (typeof window._mvOrdreMoi === 'function') ? window._mvOrdreMoi(T) : ((typeof window._mvOrdreFor === 'function') ? window._mvOrdreFor(T) : null);   // TRN-2 : la tournée de son équipe
   if(!o) return null;
   var par = {}; act.forEach(function(p){ par[p.nom] = p; });
   for(var i = 0; i < o.ordre.length; i++){

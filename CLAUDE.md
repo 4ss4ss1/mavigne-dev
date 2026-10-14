@@ -732,6 +732,7 @@ mavigne/
 │   │                        + création de comptes en lot `_agtLot` — cf. §18)
 │   ├── planning.js
 │   ├── reglages.js         (+ MV_DOCS / MV_DOCS_FAM : le hub Documents)
+│   ├── tournees.js         (TRN-1 §330 : l'éditeur des tournées et sa section de la roue crantée ; importé par reglages.js)
 │   ├── cave.js             (Chai + Le millésime + Aujourd'hui + registre + bilan de campagne
 │   │                        + le moteur MILLÉSIME : _copMil*, _caveSeuilOu, _mlProjMalo)
 │   ├── cuvier.js           (★ CUV-DEC, §164 — Le Cuvier : réceptions, cuves, relevés, décuvage,
@@ -1853,6 +1854,10 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ TRN-1 et TRN-2 — CE QUI RESTE OUVERT (§330, §331, posé le 14/10)
+1. **À regarder chez Nico, sur PC et au téléphone, en clair et en sombre** : Vigne › roue crantée › Tournées (les tournées d'avant déjà là) et l'éditeur (glisser, menu d'une ligne, « Placer après… », « Ranger automatiquement », carte et « Tracer sur la carte », Annuler / Rétablir, « L'équipe la suit pour », Enregistrer) ; Parcelles (« Tournée « … » », « Modifier ») et Décider (« Modifier la tournée ») ; Accueil › Équipes du jour (une tournée pour une équipe), puis le téléphone d'un salarié de cette équipe (« · votre équipe », plus de « Trier par proximité » ; l'administrateur garde ce tri).
+2. **`MV_FORMAT` passe à 3** (2 avec TRN-1, 3 avec TRN-2) : un appareil en retard arrête d'écrire jusqu'à sa mise à jour (automatique, VER-1) — à suivre dans le parc d'appareils de l'Admin GT le jour du déploiement. Les deux points de conception laissés par TRN-1 sont fermés par TRN-2 (§331).
 
 ### ⚠️ TETE-2 — CE QUI RESTE OUVERT (§329, posé le 14/10)
 1. **À regarder chez Nico, téléphone et PC, clair et sombre** : les dix en-têtes — la ligne du jour sur une ligne, le « ? » rond au téléphone, la météo qui porte « mer. 14 oct. » (Accueil, Pilotage), le cas « Hors ligne ». Vu sur la vraie appli (Vite, données injectées, météo simulée) à 360 / 390 / 1 280 px, 0 débordement mesuré ; pas sur son téléphone (taille de texte d'Android).
