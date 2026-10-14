@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v9.78
+// MA VIGNE — Service Worker v9.79
+// v9.79 (14/10/2026) — SANSREC-1 (§332) : « pas de récolte cette année » — une parcelle en place que l'on ne vendange pas quitte
+//   « Encore sur pied », Le millésime et le Revient (la Vendange désactivée sur elle pour chaque période de l'année qui la porte,
+//   par la feuille de RETRAIT-1 ouverte depuis le Cuvier). utils.js, app.js, index.html (et cuvier.js, pilotage.js).
 // v9.78 (14/10/2026) — TRN-2 (§331) : une tournée par équipe du jour (CONFIG.equipes_jour[jour][i].t, lue par
 //   _mvOrdreMoi pour la personne connectée) ; la tournée passe devant le tri par proximité chez l'équipe. utils.js,
 //   app.js, styles.css, index.html.
@@ -4503,7 +4506,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.78';
+const CACHE_NAME   = 'mavigne-v9.79';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4520,7 +4523,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.78 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.79 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4540,7 +4543,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.78 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.79 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

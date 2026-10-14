@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.99';
+export const APP_VERSION = '9.00';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,14 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.00', d: '2026-10-14', items: [
+    { niv: 1, pour: ['admin'], cible: '#mvv-reste-q', emoji: 'raisin', titre: 'Une parcelle qui ne sera pas récoltée cette année',
+      desc: "Une parcelle condamnée à l’arrachage, grêlée ou trop jeune restait «\u00a0encore sur pied\u00a0» dans Le Cuvier, Le millésime et le Revient : pour l’en sortir, il fallait la déclarer arrachée. "
+        + "En bas de la carte «\u00a0Encore sur pied\u00a0», touchez «\u00a0Une parcelle ne sera pas récoltée ?\u00a0» et décochez-la. Elle reste dans le domaine, une ligne la nomme, et «\u00a0Modifier\u00a0» la remet. L’an prochain, tout repart normalement." },
+    { niv: 0, pour: ['admin'], emoji: 'bouteille', titre: 'Le Revient ne compte plus de bouteilles sur une vigne non récoltée',
+      desc: "Une parcelle sans récolte prenait la moyenne de ses millésimes passés : le Revient annonçait des bouteilles qui n’existeront pas, et restait «\u00a0probable\u00a0». "
+        + "Déclarée sans récolte, elle sort du rendement et des bouteilles, ne bloque plus le «\u00a0constaté\u00a0», et son coût de l’année se répartit sur les autres vignes. Une note le dit sous les trois chiffres." },
+  ] },
   { v: '8.99', d: '2026-10-14', items: [
     { niv: 1, pour: ['admin'], cible: '#home-eqj-wrap', emoji: 'equipe', titre: 'Une tournée par équipe',
       desc: "Dans «\u00a0Équipes du jour\u00a0», sous les noms, choisissez la tournée de chaque équipe — par défaut, celle du travail. "
@@ -5137,7 +5145,7 @@ var MV_AIDE = {
       ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique. La déclarer arrachée valide aussi son <b>arrachage</b> (case cochée d’office), sauf si la date d’arrachage tombe avant la période en cours : elle passe alors « Arrachée » sans rien valider. Valider l’arrachage d’une vigne en place propose de la déclarer arrachée. Son avancement et sa fiche ne portent plus que l’<b>arrachage</b>, et plus rien du tout dans une période qui commence après son arrachage. Un passage d’un autre travail saisi après la date d’arrachage reste au journal mais ne compte plus, ni dans l’avancement ni dans le temps réel du Pilotage. Elle reste saisissable au journal pour son <b>arrachage</b>, en bas de la liste des parcelles, tant qu’elle est choisie pour la campagne."],
       ['L’arrachage en étapes', "quand l’administrateur l’a découpé (roue crantée, <b>Tâches</b>), la fiche de la parcelle montre une puce par étape : touchez-la pour la valider à sa date. Une étape <b>prestataire</b> se valide sans compter d’heures de l’équipe. L’avancement compte la part des étapes faites ; quand celles de l’équipe sont faites partout, <b>Ma part du chantier</b> passe au suivant. Au moment choisi, l’application propose de passer la parcelle en « Arrachée »."],
       ['Arrachage, désherbage manuel, effeuillage', "ne concernent que les parcelles <b>choisies pour la campagne</b>. L’administrateur les coche dans la roue crantée, <b>Tâches</b>, sur la ligne du travail, ou une par une dans la fiche de la parcelle. Une parcelle où le travail a déjà été saisi compte d’office. L’an prochain, la liste repart vide."],
-      ['Une tâche qui ne se fait pas partout', "(une réparation, un pliage…) concerne toutes les parcelles, sauf celles où on la désactive <b>pour la période</b>. L’administrateur en désactive plusieurs d’un coup dans la roue crantée, <b>Tâches</b> : la ligne du travail ouvre la liste, tout y est coché, décochez celles qui ne la feront pas (« Tout décocher » quand il en reste peu à garder). Une seule se règle aussi depuis sa fiche, avec la croix. À la période suivante, toutes repartent concernées : l’hiver et le printemps peuvent avoir des parcelles différentes. Une parcelle où la tâche est commencée reste concernée."],
+      ['Une tâche qui ne se fait pas partout', "(une réparation, un pliage…) concerne toutes les parcelles, sauf celles où on la désactive <b>pour la période</b>. L’administrateur en désactive plusieurs d’un coup dans la roue crantée, <b>Tâches</b> : la ligne du travail ouvre la liste, tout y est coché, décochez celles qui ne la feront pas (« Tout décocher » quand il en reste peu à garder). Une seule se règle aussi depuis sa fiche, avec la croix. À la période suivante, toutes repartent concernées : l’hiver et le printemps peuvent avoir des parcelles différentes. Une parcelle où la tâche est commencée reste concernée. Désactiver la <b>Vendange</b> sur une parcelle veut dire qu’elle ne sera pas récoltée cette année : la Cave et le Revient le lisent aussi, et Le Cuvier ouvre la même liste depuis «\u00a0Encore sur pied\u00a0»."],
       ['Valider pour l’équipe sans y être', "l’administrateur voit sa propre puce dans le groupe («\u00a0Moi\u00a0», «\u00a0Moi aussi dans les rangs\u00a0» sur la barre d’équipe)\u00a0: décochée, la validation reste signée de son nom mais ses heures ne vont pas à la parcelle. Le choix est retenu pour la tâche."],
       ['L’état du vignoble', "s’imprime depuis la roue crantée de la Vigne, bloc Documents : toutes vos parcelles sur une page, avec la surface, le cépage, la commune, l’avancement, le dernier travail, le dernier rendement — et la liste de ce qui reste à renseigner."],
       ['Le fichier Excel des parcelles', "se prend au même endroit : une ligne par parcelle, avec la surface, l’avancement, chaque tâche et le rendement du millésime choisi en hL/ha — mesuré ou estimé, c’est écrit à côté. Avant de le télécharger, vous choisissez l’ordre : par nom (A → Z ou Z → A) ou par rendement (le plus fort ou le plus faible d’abord). Une parcelle sans récolte part en fin de liste."],
@@ -5288,7 +5296,7 @@ var MV_AIDE = {
       ['Tanins, enzymes et bentonite', "se posent sur une cuve comme les autres opérations, mais le produit se choisit dans La Réserve : c’est ce qui permet de sortir la quantité du stock toute seule. L’unité de dose suit le produit — g/hL pour ce qui se pèse, mL/hL pour ce qui se verse. Sans produit choisi, l’opération s’enregistre quand même, hors bilan matière, et l’écran le dit."],
       ['La quantité se calcule sur un volume, et ce volume dit d’où il vient', "tant que la cuve n’est pas décuvée, c’est le volume <b>estimé d’après ses caisses</b>, à la règle du Cuvier, saignées déduites — jamais sa contenance : la saisie affiche « volume estimé », et le registre imprime « (estimé) ». Cela vaut pour la chaptalisation, le SO<sub>2</sub>, les tanins, enzymes et bentonite, dans la feuille comme dans l’intervention groupée. Sans caisse rattachée, rien n’est inventé : la case reste vide. Corriger le volume à la main reste possible, et se voit."],
       ['Un stock négatif n’empêche jamais d’enregistrer', "le tanin est déjà dans la cuve : refuser la saisie parce qu’une facture manque ferait mentir le suivi pour protéger la comptabilité. L’écart part dans La Réserve, qui le nomme et le garde jusqu’à régularisation."],
-      ['Encore sur pied', "en haut de l\u2019écran Récoltes, les parcelles actives qui n\u2019ont aucune récolte saisie sur la campagne, la plus mûre en premier d\u2019après vos analyses. Une parcelle arrachée n\u2019y figure pas ; une parcelle sans surface renseignée, si. Toucher une ligne ouvre la nouvelle récolte avec la parcelle déjà choisie. Un nom de parcelle absent du parcellaire est signalé sous la carte : c\u2019est ce qui explique un compte qui semble faux."],
+      ['Encore sur pied', "en haut de l\u2019écran Récoltes, les parcelles actives qui n\u2019ont aucune récolte saisie sur la campagne, la plus mûre en premier d\u2019après vos analyses. Une parcelle arrachée n\u2019y figure pas ; une parcelle sans surface renseignée, si. Toucher une ligne ouvre la nouvelle récolte avec la parcelle déjà choisie. Un nom de parcelle absent du parcellaire est signalé sous la carte : c\u2019est ce qui explique un compte qui semble faux. Une parcelle qu’on ne vendangera pas cette année (condamnée à l’arrachage, grêlée…) : l’administrateur touche «\u00a0Une parcelle ne sera pas récoltée ?\u00a0» en bas de la carte et la décoche. Elle quitte la carte, Le millésime et le Revient, mais reste dans le domaine ; une ligne «\u00a0Pas de récolte cette année\u00a0» la nomme, et «\u00a0Modifier\u00a0» la remet."],
       ['Le millésime', "a deux onglets. La ligne de vie : quatre chiffres en tête, le parcours du vin de la benne à la bouteille, le rendement de chaque parcelle face à son plafond, d’où vient chaque cuvée, et face à l’an dernier. Les courbes : un couloir qui va de la cuve la plus lente à la plus rapide, sa médiane en pointillé, et par-dessus la ou les deux cuves que vous choisissez dans la bande de pastilles. Quinze traits nommés tenaient sur le cahier de cuverie imprimé, pas sur un téléphone. C’est le seul écran de ce nom — celui du Pilotage est rentré ici."],
       ['La chaîne De la récolte à la bouteille', "dans Le millésime, onglet Les courbes, et au Chai, onglet Bouteilles : les kilos d’après les caisses, puis ces kilos à la règle du Cuvier (en cuve, estimés, saignées déduites), puis le volume <b>réellement entonné</b> — le volume décuvé que vous avez mesuré —, puis les bouteilles. Jamais la contenance de la cuve, jamais la taille des fûts. Sous chaque étape, son <b>kg/hL</b> : les kilos récoltés divisés par ses hectolitres — l’écart entre votre règle et l’entonné dit s’il faut la revoir. Le vin d’une autre cuve versé pour compléter un fût s’empile en pointillé et n’entre pas dans le calcul. Tant que le volume entonné n’est pas saisi, l’étape reste en pointillé : « Saisir le volume entonné », sur la carte, ouvre la saisie de la cuve décuvée."],
       ['Un fût entamé se complète', "quand le volume décuvé <b>mesuré</b> est plus petit que les fûts remplis, la carte de la cuvée le dit — « 1 fût entamé, il attend 30 L » — et Le Chai compte le vin réel. Touchez-le (sur la carte, ou dans la fiche, ligne des fûts) : choisissez d’où vient le vin — une cuve du Cuvier, même pas encore décuvée, ou une cuvée du Chai — et combien, jamais plus que ce qui manque. Le vin prélevé dans une cuve du Cuvier sort de ce qu’elle contient mais reste dans le rendement de ses parcelles. La fiche garde la composition ; une ligne « Assemblage » va au journal et au registre des manipulations. La supprimer défait tout. L’application ne tranche pas ce que la réglementation permet : elle écrit la part d’une autre appellation ou d’un autre millésime. Si les fûts sont en réalité pleins — des fûts comptés en trop, une mesure faite autrement —, « Mes fûts sont pleins — corriger ce qui manque » le dit : c’est une correction, rien ne part au registre."],
@@ -5368,7 +5376,7 @@ var MV_AIDE = {
       ['La carte de fiabilité d’Économie', ": elle relit la liste du bandeau <b>« à compléter »</b> — mêmes lignes, mêmes mots, mêmes boutons — et n’en garde que ce qui met un <b>poste de ce budget à zéro</b> : un taux horaire, le prix du GNR, une dose. Ce n’est pas « un peu bas » : c’est zéro, et le budget affiché n’est qu’un plancher. La puce « N remarques » en dessous ouvre tout ce qui n’empêche pas un calcul mais change sa lecture."],
       ['Économie', "compare un budget de barème à ce qui est engagé — les heures réellement passées dans les rangs au planning, validées ou non —, sur la <b>période consultée</b> — le coût d’un bilan entier se lit dans sa sous-vue <b>Exercice</b>. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire. Dans <b>Postes & travaux</b>, le <b>temps réel</b> de chaque travail — les heures du planning versées aux parcelles validées, au prorata de la surface — se lit à côté du h/ha du barème."],
       ['Économie › Exercice', "coupe l’année <b>au jour</b> : l’<b>engagé</b> (ce qui est sorti) à gauche d’aujourd’hui, le <b>prévu</b> (les salaires que la grille du planning annonce, et les amendements chiffrés pas encore facturés) hachuré à droite, et le total à la clôture qui dit qu’il contient du prévu. Contre l’an dernier, la comparaison se fait <b>aux mêmes jours</b>, pas dix mois de grille contre douze mois payés."],
-      ['Économie › Revient', "répond à trois questions pour le millésime : combien de vin, combien de bouteilles, combien coûte chacune à la vigne. Tout se lit sur le <b>cycle</b> du millésime, d’une vendange à la suivante. Tant qu’une parcelle n’est pas récoltée, son rendement est la moyenne de ses millésimes connus — jamais le plafond — et les chiffres sont marqués <b>probable</b>. Le tableau se lit par appellation ; touchez une ligne pour voir ses parcelles. Deux réglages dans la roue crantée : les pertes d’élevage, et vos autres charges de l’année pour un coût complet indicatif."],
+      ['Économie › Revient', "répond à trois questions pour le millésime : combien de vin, combien de bouteilles, combien coûte chacune à la vigne. Tout se lit sur le <b>cycle</b> du millésime, d’une vendange à la suivante. Tant qu’une parcelle n’est pas récoltée, son rendement est la moyenne de ses millésimes connus — jamais le plafond — et les chiffres sont marqués <b>probable</b>. Le tableau se lit par appellation ; touchez une ligne pour voir ses parcelles. Deux réglages dans la roue crantée : les pertes d’élevage, et vos autres charges de l’année pour un coût complet indicatif. Une parcelle déclarée sans récolte cette année (Le Cuvier, «\u00a0Encore sur pied\u00a0») ne compte ni rendement ni bouteilles, et son coût se répartit sur les autres vignes."],
       ['La carte de verdict d’Économie', ": elle dit en une phrase où vous en êtes, et pose les boutons pour agir — voir quel travail dérape, ouvrir le barème. Quand la cadence affichée vient de la campagne précédente, une ligne sous le texte le dit, avec le nom de cette campagne. Le <b>comment</b> du calcul est derrière son petit « i »."],
       ['L’écart de cadence cherche sa source dans un ordre', ", et dit toujours laquelle il a trouvée. D’abord <b>la période en cours</b>, dès 40 % de barème réalisé. Sinon <b>la même période de la campagne précédente</b>, si elle est archivée — la ligne porte alors un <b>↩</b> et nomme la campagne : cet écart-là <b>se lit, il ne s’applique pas</b> au budget ni à la date de fin. Même règle quand le facteur sort de [0,5 ; 3] : un trou de saisie n’est pas une cadence, l’écran le dit. Sinon rien, et l’écran l’écrit plutôt que d’afficher un chiffre inventé."],
       ['Conformité', "suit le cuivre sur sept ans, le nombre de passages, le <b>registre phyto</b> et les délais de rentrée en cours. Le registre était rangé dans « L’équipe &amp; le matériel » alors qu’il lit exactement les mêmes traitements que « Passages phyto » : il est désormais juste en dessous, en détail de ce total."],
@@ -5733,6 +5741,7 @@ export const MV_INFO = {
 
   'pil.eco.revient': { t: 'Le revient d’un millésime', p: [
     '<b>Arrachage et prestations</b> (ARRACH-5) : une prestation sur une vigne en place va \u00e0 cette vigne ; ce qu\u2019une vigne <b>arrach\u00e9e</b> a co\u00fbt\u00e9 sur le cycle (tracteur, phyto, prestataire) se r\u00e9partit \u00e0 la surface sur les vignes en place \u2014 elle ne donne pas de vin, le domaine en porte la charge. Les heures de l\u2019\u00e9quipe pass\u00e9es \u00e0 arracher \u00e9taient d\u00e9j\u00e0 dans la main-d\u2019\u0153uvre.',
+    '<b>Pas de récolte cette année</b> (SANSREC-1) : une parcelle en place sans récolte saisie, dont la Vendange est désactivée pour chaque période de l’année qui la porte (Le Cuvier, «\u00a0Encore sur pied\u00a0»), ne donne pas de vin. Elle sort du rendement et des bouteilles, ne bloque pas le «\u00a0constaté\u00a0», et ce qu’elle a coûté sur le cycle se répartit poste par poste, à la surface, sur les autres vignes en place.',
     'Ce sont les <b>coûts de culture</b> : ce qu’il a fallu pour amener le raisin jusqu’au bout du rang. <b>Ni vinification, ni fûts, ni mise, ni foncier, ni amortissement</b> — ces postes-là ne passent pas par Ma Vigne. Le chiffre est un <b>plancher</b>.',
     'Tout se lit sur le <b>cycle du millésime</b> : du lendemain de la dernière récolte de l’an passé à la fin de la vendange. Pas sur la période consultée — un coût de dix jours divisé par une récolte entière ne veut rien dire. Sans récolte saisie l’an passé, le cycle part <b>un an avant sa fin</b>, et l’écran le dit.',
     'Le coût reprend ce que la campagne appelle l’<b>engagé</b> : les heures payées dans les rangs au planning (bureau, tracteur et journées de cave retirés), la conduite du tracteur, le carburant et les produits phyto. Tant que la vendange est à venir, s’y ajoute la <b>main-d’œuvre prévue</b> au planning jusqu’à sa fin prévue — le chiffre est alors marqué <b>projeté</b>.',
@@ -5743,7 +5752,8 @@ export const MV_INFO = {
     'Chaque parcelle prend le meilleur chiffre disponible, dans cet ordre : <b>d’abord, récolté cette année</b> (le volume de la Cave, mesuré ou estimé au kg/hL) · <b>sinon, la moyenne de ses millésimes connus</b> (jusqu’à trois) · <b>sinon, la moyenne constatée cette année dans son appellation</b> · sinon <b>aucune estimation</b>, et la parcelle est comptée à part.',
     'Le <b>plafond de l’appellation</b> n’est jamais pris comme prévision : c’est un maximum réglementaire, pas ce que la vigne donnera. Il sert de repère dans la jauge.',
     'Le hL/ha est rapporté à la <b>parcelle entière</b>, comme dans la Cave. Les bouteilles, elles, ne comptent que la <b>part du domaine</b> : le raisin vendu en sort, et la part du coût qu’il porte aussi, au prorata des kilos. Une parcelle pas encore récoltée est comptée entièrement pour le domaine.',
-    'Une parcelle sans estimation sort des bouteilles <b>et</b> de leur coût : diviser son coût par les bouteilles des autres gonflerait leur prix.'
+    'Une parcelle sans estimation sort des bouteilles <b>et</b> de leur coût : diviser son coût par les bouteilles des autres gonflerait leur prix.',
+    'Une parcelle <b>sans récolte cette année</b> n’est pas une parcelle sans estimation : elle ne donnera rien. Elle reste dans son appellation, marquée «\u00a0pas de récolte\u00a0», hors du hL/ha et des bouteilles, et son coût est réparti sur les autres vignes plutôt que retiré.'
   ] },
 
   'pil.eco.revconv': { t: 'Du raisin à la bouteille', p: [
@@ -8006,6 +8016,52 @@ window._mvConcernePer     = _mvConcernePer;
 window._mvHorsPose        = _mvHorsPose;
 window._mvPerRemet        = _mvPerRemet;
 window._mvPerResume       = _mvPerResume;
+
+// ════════════════════════════════════════════════════════════════════════════
+// ★★ SANSREC-1 (§332) — « PAS DE RÉCOLTE CETTE ANNÉE » : UNE PARCELLE EN PLACE QU'ON NE VENDANGE PAS.
+// Nico (14/10) : une parcelle promise à l'arrachage, rendue impropre à la récolte avant les vendanges, restait « encore sur
+// pied » dans la Cave et au Revient ; la seule porte de sortie était de la déclarer arrachée. Un seul fait, déjà stocké, lu
+// partout : la Vendange désactivée sur la parcelle (RETRAIT-1 : p.horsPer, ou un retrait d'avant, p.tachesExclues) pour CHAQUE
+// période de l'année qui porte la vendange. Aucun champ neuf : la Vigne (avancement, planning, L'année) le lisait déjà.
+//   · _mvEstVendange(nom) : la tâche de vendange — le drapeau t.couperet d'abord, sinon le nom « Vendange(s) » à l'égalité
+//     STRICTE, sur le nom normalisé par _mvNormTache (même règle que _rfEstCouperet, pilotage.js : « Vendanges vertes » est de
+//     l'éclaircissage). Deux définitions de « la vendange » subsistent : à faire converger.
+//   · _mvVendangePers(mil) : { nom, pers } — la tâche et les périodes qui la portent dans l'année civile mil (le millésime).
+//   · _mvSansRecolte(p, mil, V) : vrai si la parcelle, en place, n'est concernée par la vendange dans AUCUNE de ces périodes.
+//     Une récolte saisie l'emporte toujours : c'est au lecteur de le vérifier (_vendResteARentrer, _pecRevData).
+//   Sans période qui porte la vendange cette année-là, rien n'est « sans récolte » : la question ne se pose pas.
+function _mvEstVendange(nom){
+  var t = (window.TACHES || []).find(function(x){ return x && x.nom === nom; });
+  if(t && t.couperet === true) return true;
+  var k = _mvNormTache(nom);
+  return k === 'vendange' || k === 'vendanges';
+}
+function _mvVendangePers(mil){
+  var a = String(mil), d0 = a + '-01-01', d1 = a + '-12-31', out = { nom: '', pers: [] };
+  (window.SAISONS || []).forEach(function(s){
+    if(!s || !s.nom || !s.debut || !s.fin) return;
+    if(String(s.fin).slice(0, 10) < d0 || String(s.debut).slice(0, 10) > d1) return;
+    var L = _saisonTaches(s.nom);
+    if(!Array.isArray(L)) return;
+    for(var i = 0; i < L.length; i++){
+      if(!_mvEstVendange(L[i])) continue;
+      if(!out.nom) out.nom = L[i];
+      if(L[i] === out.nom) out.pers.push(s.nom);
+      break;
+    }
+  });
+  return out;
+}
+function _mvSansRecolte(p, mil, V){
+  if(!p || p.nom == null || p.statut === 'Arrachee') return false;
+  V = V || _mvVendangePers(mil);
+  if(!V || !V.nom || !V.pers || !V.pers.length) return false;
+  for(var i = 0; i < V.pers.length; i++){ if(_mvConcernePer(p, V.nom, V.pers[i])) return false; }
+  return true;
+}
+window._mvEstVendange     = _mvEstVendange;
+window._mvVendangePers    = _mvVendangePers;
+window._mvSansRecolte     = _mvSansRecolte;
 
 // ════════════════════════════════════════════════════════════════════════════
 // ★★★ LES FENETRES D'UNE ANNEE — la liste unique que lisent les documents

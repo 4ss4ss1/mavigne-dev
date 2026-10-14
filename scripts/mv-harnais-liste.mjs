@@ -619,6 +619,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-trn1.mjs --contre'],
   ['node scripts/mv-harnais-trn2.mjs'],             // TRN-2 (§331) : une tournée par équipe du jour (lue pour la personne connectée, gardée à l'enregistrement, relue alignée) ; la tournée passe devant la proximité chez l'équipe
   ['node scripts/mv-harnais-trn2.mjs --contre'],
+  ['node scripts/mv-harnais-sansrec1.mjs'],          // SANSREC-1 (§332) : « pas de récolte cette année » — règle, Encore sur pied, feuille de récolte, Revient
+  ['node scripts/mv-harnais-sansrec1.mjs --contre'],
   ['node scripts/mv-harnais-retrait1.mjs'],          // RETRAIT-1 (§325) : une tâche ordinaire désactivée sur des parcelles pour la période — règle, feuille, croix, renommages, L'année
   ['node scripts/mv-harnais-retrait1.mjs --contre'],
   ['node scripts/mv-harnais-direct2.mjs'],           // DIRECT-2 (§328) : « En direct » donne le vrai jour de début d'un arrachage en étapes (sa première étape validée) ; un jour inconnu ne s'écrit plus « aujourd'hui »

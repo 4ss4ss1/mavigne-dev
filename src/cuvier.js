@@ -198,6 +198,16 @@ button.mvv-reste-li{cursor:pointer}
   border-top:1px solid rgba(138,90,56,.10)}
 .mvv-reste-ft.warn{color:var(--orange-tx,#9C4E14)}
 .mvv-reste.tout .mvv-reste-ic{color:var(--vert-tx,#31601C)}
+/* ★ SANSREC-1 (§332) — « Une parcelle ne sera pas récoltée ? » (admin) et la ligne « Pas de récolte cette année ». Texte enveloppé
+   dans un <span> : la ligne est un flex, un <b> nu y ferait sa propre colonne (§24). */
+.mvv-reste-q{display:flex;align-items:center;gap:8px;width:100%;padding:12px 14px;background:none;border:0;
+  border-top:1px solid rgba(138,90,56,.10);font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;
+  color:var(--terre,#8A5A38);text-align:left;min-height:48px;cursor:pointer}
+.mvv-reste-sr{display:flex;align-items:center;gap:8px;padding:2px 4px 2px 14px;border-top:1px solid rgba(138,90,56,.10)}
+.mvv-reste-srt{flex:1;min-width:0;font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F);line-height:1.45;padding:10px 0}
+.mvv-reste-srt b{font-weight:600;color:var(--texte-med,#4A4A3A)}
+.mvv-reste-srb{flex-shrink:0;min-height:44px;padding:0 10px;background:none;border:0;font-family:inherit;
+  font-size:var(--pt-txt,13px);font-weight:600;color:var(--terre,#8A5A38);cursor:pointer}
 .mvv-fab{margin:16px 0 0;padding:2px 0}
 .mvv-fab-btn{width:100%;padding:14px;border-radius:14px;border:none;font-size:var(--pt-base,14px);font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;cursor:pointer;background:linear-gradient(180deg,var(--or,#C2A14D),#B8952F);color:#241B08;box-shadow:0 3px 12px rgba(194,161,77,.25);min-height:44px}
 .mvv-fab-btn:active{transform:translateY(1px)}
@@ -822,16 +832,23 @@ function _vendResteARentrer(mil){
   });
   var tj=Date.parse(_mvToday());
   var lignes=[];
+  /* ★ SANSREC-1 (§332) : une parcelle en place que l'on ne vendangera pas cette année (la Vendange désactivée sur elle pour
+     chaque période de l'année qui la porte, utils.js/_mvSansRecolte) n'est pas « encore sur pied ». Elle part dans `sans`,
+     que la carte nomme ; une récolte saisie l'emporte toujours (le test `faites` passe avant). Le millésime, Pilotage › Cave et
+     le Revient lisent ces mêmes lignes. Sans la règle (harnais, module seul), rien ne change. */
+  var sans=[], _V=(typeof window._mvVendangePers==='function'&&typeof window._mvSansRecolte==='function')?window._mvVendangePers(mil):null;
   actives.forEach(function(p){
     var nom=String(p.nom).trim(), k=_vendResteCle(nom);
     if(faites[k]) return;
+    if(_V&&_V.pers.length&&window._mvSansRecolte(p,mil,_V)){ sans.push({p:p, nom:nom, ha:parseFloat(p.surface)||0}); return; }
     var a=der[k]||null;
     var ceps=(p.cepages&&p.cepages.length)?p.cepages:(p.cepage?[p.cepage]:[]);
     lignes.push({p:p, nom:nom, ha:parseFloat(p.surface)||0, cep:ceps.join(' · '),
       ana:a, suc:a?_matSuc(a):null, jours:a?_matJours(a.date,tj):null});
   });
   lignes.sort(_vendResteCmp);
-  return {lignes:lignes, inconnues:Object.keys(inconnues).sort(function(a,b){
+  sans.sort(function(x,y){ return x.nom.localeCompare(y.nom,'fr'); });
+  return {lignes:lignes, sans:sans, vend:_V, inconnues:Object.keys(inconnues).sort(function(a,b){
     return a.localeCompare(b,'fr'); })};
 }
 
@@ -868,6 +885,17 @@ function _vendResteHtml(){
   var nAct=_vendResteActives().length;
   if(!nAct) return '';                       // parcellaire vide : rien à comparer
   var mil=_mlCampagne(), r=_vendResteARentrer(mil), l=r.lignes;
+  /* ★ SANSREC-1 (§332) : la ligne « Pas de récolte cette année », lue par tous ; l'administrateur la règle d'ici (« Modifier »,
+     ou « Une parcelle ne sera pas récoltée ? » tant qu'il n'y en a aucune) — la feuille de RETRAIT-1 (app.js, openRecParc),
+     limitée aux parcelles encore sur pied. La question ne s'affiche que si une période de l'année porte la vendange. */
+  var sans=r.sans||[], adm=(typeof isAdmin==='function'&&isAdmin()), sr='';
+  if(sans.length){
+    var haS=sans.reduce(function(s,e){return s+e.ha;},0);
+    sr='<div class="mvv-reste-sr"><span class="mvv-reste-srt">Pas de récolte cette année : '
+      +(sans.length<=3?sans.map(function(e){return '<b>'+_escHtml(e.nom)+'</b>';}).join(', '):('<b>'+sans.length+' parcelles</b>'))
+      +(haS>0?(' · '+_mvF1(haS)+' ha'):'')+'</span>'
+      +(adm?('<button type="button" class="mvv-reste-srb" onclick="openRecParc('+Number(mil)+')">Modifier</button>'):'')+'</div>';
+  }
   var pied=r.inconnues.length
     ? ('<div class="mvv-reste-ft warn">Hors parcellaire : <b>'
         +r.inconnues.map(function(n){return _escHtml(n);}).join(', ')
@@ -877,9 +905,9 @@ function _vendResteHtml(){
     return '<div class="mvv-reste tout"><div class="mvv-reste-hd">'
       +'<span class="mvv-reste-ic">'+_mvIcon('check',18)+'</span>'
       +'<span class="mvv-reste-t">Tout est rentré</span>'
-      +'<span class="mvv-reste-n"><b>'+nAct+'</b>parcelle'+(nAct>1?'s':'')+'</span></div>'
-      +'<div class="mvv-reste-ft">Campagne '+mil+' : chaque parcelle active porte au moins une récolte.</div>'
-      +pied+'</div>';
+      +'<span class="mvv-reste-n"><b>'+(nAct-sans.length)+'</b>parcelle'+((nAct-sans.length)>1?'s':'')+'</span></div>'
+      +'<div class="mvv-reste-ft">Campagne '+mil+' : chaque parcelle '+(sans.length?'à récolter':'active')+' porte au moins une récolte.</div>'
+      +sr+pied+'</div>';
   }
   var ha=l.reduce(function(s,e){return s+e.ha;},0);
   var ouv=(_vendResteOuv==null)?(l.length<=_VEND_RESTE_MAX):!!_vendResteOuv;
@@ -915,8 +943,11 @@ function _vendResteHtml(){
         +'<span class="mvv-reste-r">'+droite+'</span>'
         +'</'+tg+'>';
     });
-    h+='<div class="mvv-reste-ft">Campagne '+mil+' · parcelles actives sans aucune récolte saisie, '
+    h+='<div class="mvv-reste-ft">Campagne '+mil+' · parcelles '+(sans.length?'à récolter':'actives')+' sans aucune récolte saisie, '
       +'la plus mûre en premier'+(canEdit?'. Touchez-en une pour peser sa première benne.':'.')+'</div>';
+    if(sans.length) h+=sr;
+    else if(adm&&r.vend&&r.vend.pers&&r.vend.pers.length)
+      h+='<button type="button" id="mvv-reste-q" class="mvv-reste-q" onclick="openRecParc('+Number(mil)+')">'+_mvIcon('carte',16)+'Une parcelle ne sera pas récoltée ?</button>';
   }
   return h+pied+'</div>';
 }

@@ -7215,6 +7215,8 @@ function _pecCss(){
   +'.prv-src.r{background:var(--vert-pale);color:var(--vert-med)}'
   +'.prv-src.h,.prv-src.m{background:var(--tag-amber-bg);color:var(--tag-amber-tx)}'
   +'.prv-src.n{background:var(--gris-clair);color:var(--texte-doux)}'
+  +'.prv-src.x{background:var(--tag-orange-bg);color:var(--orange-tx)}'   /* SANSREC-1 : pas de récolte cette année */
+  +'.prv-rep{color:var(--texte-doux)}'
   +'.prv-flux{display:flex;flex-wrap:wrap;align-items:stretch}'
   +'.prv-fx{flex:1;min-width:120px;padding:10px 12px;border:1px solid var(--gris-clair);border-radius:12px}'
   +'.prv-fx .l{font-size:var(--pt-nano,11px);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--texte-doux)}'
@@ -7409,6 +7411,26 @@ function _pecRevCouts(cy, auj, parc){
   }
   return out;
 }
+// ★ SANSREC-1 (§332) — LE COÛT D'UNE VIGNE NON RÉCOLTÉE SE REPORTE SUR LES AUTRES. Une parcelle en place que l'on ne vendange pas
+//   cette année (sans récolte saisie, la Vendange désactivée pour chaque période de l'année qui la porte : _vendResteARentrer().sans)
+//   ne donne pas de vin ; ce qu'elle a coûté sur le cycle, poste par poste, se répartit à la SURFACE sur les autres vignes en place —
+//   même règle qu'une arrachée (ARRACH-5), sauf que les postes restent les leurs (c'est de la culture, pas de l'arrachage).
+//   C.by est modifié en place ; rend { eur, n, ha, noms }. Aucune autre vigne : rien n'est déplacé (et rien n'est compté).
+function _pecRevReport(C, parc, SR){
+  var out={ eur:0, n:0, ha:0, noms:[] }, POST=['mo','trac','gnr','phy','pre'], surfA=0;
+  parc.forEach(function(p){ if(!SR[p.nom]&&C.by[p.nom]) surfA+=parseFloat(p.surface)||0; });
+  if(!(surfA>0)) return out;
+  parc.forEach(function(p){
+    var b=SR[p.nom]?C.by[p.nom]:null; if(!b) return;
+    out.n++; out.noms.push(p.nom); out.ha+=parseFloat(p.surface)||0;
+    POST.forEach(function(x){
+      var v=Number(b[x])||0; b[x]=0; if(!v) return;
+      out.eur+=v;
+      parc.forEach(function(q){ if(!SR[q.nom]&&C.by[q.nom]) C.by[q.nom][x]=(Number(C.by[q.nom][x])||0)+v*((parseFloat(q.surface)||0)/surfA); });
+    });
+  });
+  return out;
+}
 // Les rendements d'un millésime, par nom de parcelle — _mlRendements, la source de
 // la Cave (escalier des volumes VD-3). On la lit, on ne la refait pas.
 function _pecRevRdtMap(m){
@@ -7472,9 +7494,17 @@ function _pecRevCalc(P, pertes){
     if(p.rec&&p.surf>0&&p.rec.hlTot>0){ var q=moy[p.aoc]||(moy[p.aoc]={hl:0,ha:0}); q.hl+=p.rec.hlTot; q.ha+=p.surf; }
   });
   var T={ ha:0, haAvec:0, haSans:0, nSans:0, hl:0, domHl:0, cols:0, cout:0, coutDom:0, coutSans:0,
-          coutVendu:0, kgVendu:0, kgPese:0, nR:0, n:0, po:{mo:0, trac:0, gnr:0, phy:0, pre:0} };
+          coutVendu:0, kgVendu:0, kgPese:0, nR:0, n:0, haX:0, nX:0, po:{mo:0, trac:0, gnr:0, phy:0, pre:0} };
   var G={}, ordre=[];
+  function grp(a){ var g=G[a]; if(!g){ g=G[a]={ aoc:a, ha:0, haAvec:0, hl:0, domHl:0, cols:0, coutDom:0, est:false, nR:0, n:0, maxs:[], rows:[] }; ordre.push(a); } return g; }
   var rows=P.map(function(p){
+    if(p.sansRec){   // ★ SANSREC-1 (§332) : pas de récolte cette année — ni rendement, ni bouteilles, hors « constaté » ; son coût est déjà reporté
+      var rx={ nom:p.nom, aoc:p.aoc, surf:p.surf, max:p.max, src:'x', hlha:null, hl:0, domHl:0, share:1, cols:0, cout:0, coutDom:0, eurCol:null };
+      var gx=grp(p.aoc); gx.ha+=p.surf; gx.rows.push(rx);
+      if(p.max!=null && gx.maxs.indexOf(p.max)<0) gx.maxs.push(p.max);
+      T.ha+=p.surf; T.haX+=p.surf; T.nX++;
+      return rx;
+    }
     var src='n', hlha=null, hlTot=0, domHl=0, share=1;
     if(p.rec && ((p.rec.hlTot>0)||(p.rec.kg>0))){
       src='r'; hlTot=p.rec.hlTot||0; hlha=(p.surf>0)?(hlTot/p.surf):null;
@@ -7491,8 +7521,7 @@ function _pecRevCalc(P, pertes){
     var r={ nom:p.nom, aoc:p.aoc, surf:p.surf, max:p.max, src:src, hlha:hlha, hl:hlTot, domHl:domHl, share:share,
             cols:avec?domHl*k:0, cout:cout, coutDom:avec?cout*share:0 };
     r.eurCol=(r.cols>0)?(r.coutDom/r.cols):null;
-    var g=G[p.aoc];
-    if(!g){ g=G[p.aoc]={ aoc:p.aoc, ha:0, haAvec:0, hl:0, domHl:0, cols:0, coutDom:0, est:false, nR:0, n:0, maxs:[], rows:[] }; ordre.push(p.aoc); }
+    var g=grp(p.aoc);
     g.ha+=p.surf; g.n++; g.rows.push(r);
     if(p.max!=null && g.maxs.indexOf(p.max)<0) g.maxs.push(p.max);
     T.ha+=p.surf; T.n++; T.cout+=cout;
@@ -7525,16 +7554,22 @@ function _pecRevData(mil){
   var C=_pecRevCouts(cy, auj, parc);
   var RD={};
   for(var m=M;m>=M-3;m--) RD[m]=_pecRevRdtMap(m);
+  // ★ SANSREC-1 (§332) : les parcelles « pas de récolte cette année » — la liste du Cuvier, une seule source (une récolte saisie
+  //   l'en sort d'elle-même) ; leur coût se reporte sur les autres vignes avant le calcul.
+  var SR={}, RR=null;
+  try{ RR=(typeof window._vendResteARentrer==='function')?window._vendResteARentrer(M):null; }catch(e){ RR=null; }
+  ((RR&&RR.sans)||[]).forEach(function(e){ if(e&&e.p&&e.p.nom!=null) SR[e.p.nom]=1; });
+  var REP=_pecRevReport(C, parc, SR);
   var P=parc.map(function(p){
     var o=RD[M][p.nom]||null, hist=[];
     for(var m2=M-1;m2>=M-3;m2--){ var h=_pecRevHistHa(p,m2,RD,kgHl); if(h!=null&&h>0) hist.push(h); }
     var mx=null; try{ mx=(typeof window._vendRdtMax==='function')?window._vendRdtMax(p,M).max:null; }catch(e){ mx=null; }
     return { nom:p.nom, surf:parseFloat(p.surface)||0, aoc:_pecRevAoc(p), max:mx,
-             cout:C.by[p.nom], rec:o?_pecRevRec(o,p,kgHl):null, hist:hist };
+             cout:C.by[p.nom], rec:o?_pecRevRec(o,p,kgHl):null, hist:hist, sansRec:!!SR[p.nom] };
   });
   var pm=_pecRevPertesMes(M), pertes=pm?pm.pct:_pecRevPertesCfg();
   var R=_pecRevCalc(P, pertes);
-  R.mil=M; R.cy=cy; R.couts=C; R.kgHl=kgHl; R.pertes=pertes; R.pertesMes=pm; R.auj=auj;
+  R.mil=M; R.cy=cy; R.couts=C; R.kgHl=kgHl; R.pertes=pertes; R.pertesMes=pm; R.auj=auj; R.rep=REP;
   R.autres=_pecRevAutres(); R.mils=_pecRevMils();
   return R;
 }
@@ -10607,7 +10642,7 @@ function _pecRevMax(g){
   var a=g.maxs[0], b=g.maxs[g.maxs.length-1];
   return (a===b)?_pilNum(a):(_pilNum(a)+'\u2013'+_pilNum(b));
 }
-var _PEC_REV_SRC={ r:'r\u00e9colt\u00e9e', h:'moy. de ses mill\u00e9simes', m:'moy. de l\u2019appellation', n:'sans estimation' };
+var _PEC_REV_SRC={ r:'r\u00e9colt\u00e9e', h:'moy. de ses mill\u00e9simes', m:'moy. de l\u2019appellation', n:'sans estimation', x:'pas de r\u00e9colte' };   // x : SANSREC-1
 function _pecViewRevient(){
   var R=null;
   try{ R=_pecRevData(); }catch(e){ R=null; if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'revient',err:e}); }
@@ -10615,7 +10650,7 @@ function _pecViewRevient(){
     +'<div class="pec-cs">le calcul n\u2019a pas abouti '+_mvInfoBtn('pil.eco.revient')+'</div></div></div>';
   var T=R.tot, C=R.couts, cy=R.cy, H='';
   var haR=0; R.rows.forEach(function(r){ if(r.src==='r') haR+=r.surf; });
-  var pctR=(T.ha>0)?Math.round(haR/T.ha*100):0;
+  var haP=T.ha-(T.haX||0), pctR=(haP>0)?Math.round(haR/haP*100):0;   // SANSREC-1 : une vigne sans récolte n'est pas « à récolter »
   var projete=(C.tot.prevu>0);
 
   // ① Le millésime, son cycle, et les trois chiffres
@@ -10627,6 +10662,7 @@ function _pecViewRevient(){
   }
   var cadre='cycle du '+_pecRevDt(cy.d0)+' au '+_pecRevDt(cy.d1)
     +' \u00b7 '+(R.etat==='cons'?'tout est r\u00e9colt\u00e9':(pctR+' % r\u00e9colt\u00e9'))
+    +(T.nX?(' \u00b7 '+T.nX+' parcelle'+(T.nX>1?'s':'')+' sans r\u00e9colte'):'')
     +' \u00b7 co\u00fbts de <b>culture</b> seulement';
   var sR=(T.hlha!=null)?(_pilNum(T.hl)+' hL sur '+_pilHa(T.haAvec)+' ha'):'aucun rendement connu';
   var cols=(R.etat==='cons')?T.cols:(Math.round(T.cols/100)*100);
@@ -10641,6 +10677,7 @@ function _pecViewRevient(){
     +'<div class="pec-kpis">'
     +'<div class="pec-k"><div class="l">Rendement'+_pecRevEtat(R)+'</div><div class="v">'
       +(T.hlha!=null?_pecRevF1(T.hlha):'\u2014')+'<small> hL/ha</small></div><div class="s">'+sR
+      +(T.haX>0?('<br>'+_pilHa(T.haX)+' ha sans r\u00e9colte cette ann\u00e9e, hors rendement'):'')
       +(T.haSans>0?('<br>'+_pilHa(T.haSans)+' ha sans estimation, compt\u00e9s \u00e0 part'):'')+'</div></div>'
     +'<div class="pec-k"><div class="l">Bouteilles'+_pecRevEtat(R)+'</div><div class="v">'
       +(T.cols>0?((R.etat==='cons'?'':'\u2248\u00a0')+_pilNum(cols)):'\u2014')+'</div><div class="s">'+sB+'</div></div>'
@@ -10654,6 +10691,8 @@ function _pecViewRevient(){
   if(cy.src1==='auj') notes.push('Fin de vendange non dat\u00e9e\u00a0: le co\u00fbt s\u2019arr\u00eate \u00e0 aujourd\u2019hui.');
   if(!C.tvOk) notes.push('Main-d\u2019\u0153uvre non chiffr\u00e9e\u00a0: le planning ne dit encore rien de ce cycle.');
   if(C.arrEur>0) notes.push('Vignes arrach\u00e9es\u00a0: '+_pecEurK(C.arrEur)+' de tracteur, phyto et prestations sur '+C.nArr+' parcelle'+(C.nArr>1?'s':'')+', r\u00e9partis \u00e0 la surface sur les vignes en place.');
+  if(R.rep&&R.rep.n>0) notes.push('Pas de r\u00e9colte cette ann\u00e9e\u00a0: '+(R.rep.n<=3?R.rep.noms.map(function(n){ return _pilEsc(n); }).join(', '):(R.rep.n+' parcelles'))
+    +', '+_pilHa(R.rep.ha)+' ha.'+(R.rep.eur>0?(' '+(R.rep.n>1?'Leurs ':'Ses ')+_pecEurK(R.rep.eur)+' de culture sont r\u00e9partis \u00e0 la surface sur les autres vignes.'):''));   // SANSREC-1
   if(C.nSansTaux>0) notes.push(C.nSansTaux+' salari\u00e9'+(C.nSansTaux>1?'s':'')+' sans taux horaire, compt\u00e9'+(C.nSansTaux>1?'s':'')+' au taux moyen.');
   if(notes.length) H+='<div class="pec-cb"><div class="pec-note">'+notes.join('<br>')+'</div></div>';
   if(R.etat==='vide') H+='<div class="pec-cb"><div class="pec-acts" style="margin-top:0"><button class="pec-btn" data-pec="cave" data-v="vendange"><span>'+_mvIcon('raisin',16)+'</span> Saisir les r\u00e9coltes au Cuvier</button></div></div>';
@@ -10680,7 +10719,7 @@ function _pecViewRevient(){
         +'<td style="text-align:right">'+(r.hlha!=null?_pecRevF1(r.hlha):'\u2014')+'</td>'
         +'<td class="prv-hs" style="text-align:right;color:var(--texte-doux)">'+(r.max!=null?_pilNum(r.max):'\u2014')+'</td>'
         +'<td style="text-align:right">'+(r.cols>0?_pilNum(r.cols):'\u2014')+'</td>'
-        +'<td style="text-align:right">'+(r.eurCol!=null?(_pecRevE2(r.eurCol)+' \u20AC'):'\u2014')+'</td></tr>';
+        +'<td style="text-align:right">'+(r.src==='x'?'<span class="prv-rep">co\u00fbt r\u00e9parti</span>':(r.eurCol!=null?(_pecRevE2(r.eurCol)+' \u20AC'):'\u2014'))+'</td></tr>';
     });
   });
   tb+='<tr class="prv-tot"><td>Domaine</td><td class="prv-hs" style="text-align:right">'+_pilHa(T.ha)+' ha</td>'

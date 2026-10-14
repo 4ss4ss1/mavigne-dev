@@ -383,3 +383,4 @@
 | 329 | 329. ★★ TETE-2 — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR LES DIX VUES (14/10 — `src/styles.css` (blo… | `docs/claude/chantiers-280-329.md` |
 | 330 | 330. ★★ TRN-1 — LES TOURNÉES, RÉGLÉES UNE FOIS DANS LA ROUE CRANTÉE DE LA VIGNE (14/10 — `src/tournees.js` … | `docs/claude/chantiers-330-379.md` |
 | 331 | 331. ★★ TRN-2 — UNE TOURNÉE PAR ÉQUIPE, ET LA TOURNÉE AVANT LA PROXIMITÉ (14/10 — `src/utils.js` (`_mvTourn… | `docs/claude/chantiers-330-379.md` |
+| 332 | 332. ★★ SANSREC-1 — « PAS DE RÉCOLTE CETTE ANNÉE » : UNE PARCELLE EN PLACE QU'ON NE VENDANGE PAS SORT D'« E… | `docs/claude/chantiers-330-379.md` |

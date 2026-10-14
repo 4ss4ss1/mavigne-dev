@@ -8572,7 +8572,8 @@ function _mvSelLabel(nom){
 function _mvSelListe(){
   var q=String(((document.getElementById('selp-q')||{}).value)||'').trim().toLowerCase();
   return (PARCELLES||[]).filter(function(p){
-    return window._mvSelEligible(p,_SELP.nom) && (!q || String(p.nom).toLowerCase().indexOf(q)>=0);
+    return window._mvSelEligible(p,_SELP.nom) && (!q || String(p.nom).toLowerCase().indexOf(q)>=0)
+      && (_SELP.mode!=='rec' || !!(_SELP.liste&&_SELP.liste[p.nom]));   // SANSREC-1 (§332) : la récolte ne montre que les parcelles encore sur pied
   }).slice().sort(function(a,b){
     var ca=(a.commune&&a.commune.nom)||'', cb=(b.commune&&b.commune.nom)||'';
     if(ca!==cb){ if(!ca) return 1; if(!cb) return -1; return ca.localeCompare(cb,'fr'); }
@@ -8612,11 +8613,12 @@ function _mvSelRows(){
       cur=cm;
     } else if(!parComm && cur===null){ h+='<div class="ppicker">'; cur=cm; }
     var _per=_SELP.mode==='per';   // RETRAIT-1 (§325) : une tâche ordinaire, pour la période — même ligne, autre titre, autre mention
+    var _rec=_SELP.mode==='rec';   // SANSREC-1 (§332) : la récolte de l'année — surface à la française, « pas de récolte » sur une décochée
     var tr=!!_SELP.trav[p.nom], on=tr||!!_SELP.sel[p.nom];
     var arr=(p.statut==='Arrachee')?' \u00b7 arrach\u00e9e':'';
     h+='<div class="pchk'+(on?' sel vert':'')+'" data-selp-n="'+_escAttr(p.nom)+'" onclick="_mvSelPick(this)"'
-      +(tr?' title="'+(_per?'Commenc\u00e9e cette p\u00e9riode':'D\u00e9j\u00e0 travaill\u00e9e cette campagne')+'" style="opacity:.75"':'')+'>'
-      +_escHtml(p.nom)+' <span style="font-weight:400">'+_escHtml(String(p.surface||0))+' ha'+arr+(tr?(_per?' \u00b7 commenc\u00e9e':' \u00b7 faite'):'')+((_per&&!on&&_SELP.leg&&_SELP.leg[p.nom])?' \u00b7 d\u00e9sactiv\u00e9e pour toutes les p\u00e9riodes':'')+'</span></div>';
+      +(tr?' title="'+(_per?'Commenc\u00e9e cette p\u00e9riode':(_rec?'Vendange commenc\u00e9e':'D\u00e9j\u00e0 travaill\u00e9e cette campagne'))+'" style="opacity:.75"':'')+'>'
+      +_escHtml(p.nom)+' <span style="font-weight:400">'+(_rec?_mvRecHa(p.surface):_escHtml(String(p.surface||0)))+' ha'+arr+(tr?((_per||_rec)?' \u00b7 commenc\u00e9e':' \u00b7 faite'):'')+((_rec&&!on)?' \u00b7 pas de r\u00e9colte':'')+((_per&&!on&&_SELP.leg&&_SELP.leg[p.nom])?' \u00b7 d\u00e9sactiv\u00e9e pour toutes les p\u00e9riodes':'')+'</span></div>';
   });
   if(cur!==null) h+='</div>';
   if(!L.length) h='<div class="mv-l" style="margin-top:10px">Aucune parcelle ne correspond.</div>';
@@ -8629,10 +8631,20 @@ function _mvSelRows(){
   var tot=document.getElementById('selp-tot');
   if(tot) tot.textContent=n?(n+' parcelle'+(n>1?'s':'')+' \u00b7 '+(Math.round(ha*100)/100).toLocaleString('fr-FR')+' ha'):'Aucune parcelle coch\u00e9e';
   if(tot&&_SELP.mode==='per'){ var _nP=(PARCELLES||[]).filter(function(p){ return window._mvSelEligible(p,_SELP.nom); }).length; tot.textContent=n+' parcelle'+(n>1?'s':'')+' sur '+_nP+' \u00b7 '+(Math.round(ha*100)/100).toLocaleString('fr-FR')+' ha'; }   // RETRAIT-1
+  if(tot&&_SELP.mode==='rec'){   // SANSREC-1 (§332) : à récolter sur la liste, puis ce qui ne le sera pas
+    var _nL=0, _nA=0, _nS=0, _haS=0;
+    (PARCELLES||[]).forEach(function(p){
+      if(!p||!_SELP.liste||!_SELP.liste[p.nom]) return;
+      _nL++;
+      if(_SELP.trav[p.nom]||_SELP.sel[p.nom]) _nA++; else { _nS++; _haS+=parseFloat(p.surface)||0; }
+    });
+    tot.textContent=_nA+' parcelle'+(_nA>1?'s':'')+' \u00e0 r\u00e9colter sur '+_nL+(_nS?(' \u00b7 '+_nS+' sans r\u00e9colte, '+(Math.round(_haS*100)/100).toLocaleString('fr-FR')+' ha'):'');
+  }
 }
 function _mvSelPick(el){
   var n=el&&el.getAttribute('data-selp-n'); if(n==null) return;
   if(_SELP.mode==='per'&&_SELP.trav[n]){ showToast('Commenc\u00e9e cette p\u00e9riode : elle reste concern\u00e9e','#B85A1A'); return; }   // RETRAIT-1
+  if(_SELP.mode==='rec'&&_SELP.trav[n]){ showToast('Vendange commenc\u00e9e : elle reste \u00e0 r\u00e9colter','#B85A1A'); return; }   // SANSREC-1
   if(_SELP.trav[n]){ showToast('D\u00e9j\u00e0 travaill\u00e9e cette campagne : elle reste concern\u00e9e','#B85A1A'); return; }
   if(_SELP.sel[n]) delete _SELP.sel[n]; else _SELP.sel[n]=true;
   _mvSelRows();
@@ -8644,7 +8656,8 @@ function _mvSelPick(el){
 //   (p.tachesExclues : toutes les périodes) part décochée et le dit ; la cocher la remet pour la période (utils.js, _mvPerRemet).
 var _SELP_INTRO={
   sel:'Touchez les parcelles concern\u00e9es cette campagne. L\u2019an prochain, la liste repart vide. Une parcelle d\u00e9j\u00e0 travaill\u00e9e est coch\u00e9e d\u2019office et le reste.',
-  per:'Toutes les parcelles font cette t\u00e2che : touchez celles qui ne la feront pas pendant cette p\u00e9riode. \u00c0 la p\u00e9riode suivante, toutes repartent coch\u00e9es. Une parcelle o\u00f9 la t\u00e2che est commenc\u00e9e reste coch\u00e9e.'
+  per:'Toutes les parcelles font cette t\u00e2che : touchez celles qui ne la feront pas pendant cette p\u00e9riode. \u00c0 la p\u00e9riode suivante, toutes repartent coch\u00e9es. Une parcelle o\u00f9 la t\u00e2che est commenc\u00e9e reste coch\u00e9e.',
+  rec:'Toutes les parcelles encore sur pied sont \u00e0 r\u00e9colter. Touchez celles qui ne le seront pas cette ann\u00e9e : elles quittent \u00ab\u00a0Encore sur pied\u00a0\u00bb, le Mill\u00e9sime et le Revient, mais restent dans le domaine. L\u2019an prochain, toutes repartent coch\u00e9es.'   // SANSREC-1
 };
 function openPerParc(nom){
   if(typeof isAdmin!=='function'||!isAdmin()){ showToast('Admin requis','#B85A1A'); return; }
@@ -8662,6 +8675,42 @@ function openPerParc(nom){
   var ti=document.getElementById('selp-titre'); if(ti) ti.textContent=_mvSelLabel(nom);
   var su=document.getElementById('selp-sub'); if(su) su.textContent='Parcelles concern\u00e9es \u00b7 '+per;
   var it=document.getElementById('selp-intro'); if(it) it.textContent=_SELP_INTRO.per;
+  var qq=document.getElementById('selp-q'); if(qq) qq.value='';
+  _mvSelRows();
+  openOv('ovSelParc');
+}
+// ★★ SANSREC-1 (§332) — LA MÊME FEUILLE POUR LA RÉCOLTE DE L'ANNÉE (ADMIN), OUVERTE DEPUIS LE CUVIER (« Encore sur pied »).
+//   Nico (14/10) : une parcelle rendue impropre à la récolte avant les vendanges restait « encore sur pied » ; la déclarer arrachée
+//   était la seule porte. La feuille ne montre que les parcelles encore sur pied et celles déjà « sans récolte » ; cochée = à récolter.
+//   Décocher désactive la Vendange sur la parcelle pour CHAQUE période de l'année qui la porte (utils.js, _mvVendangePers) : c'est
+//   le fait que lisent la Vigne (RETRAIT-1), la Cave et le Revient (_mvSansRecolte). Une parcelle où la vendange est commencée dans
+//   l'une de ces périodes reste à récolter, comme une tâche commencée reste concernée.
+function _mvRecHa(s){ var v=parseFloat(String(s==null?'':s).replace(',','.')); return isFinite(v)?(Math.round(v*100)/100).toLocaleString('fr-FR'):_escHtml(String(s||0)); }
+// Le statut d'une tâche simple dans une période donnée : p.taches pour la période ACTIVE, p.tachesAll pour les autres (§16).
+function _mvStatutPer(p,nom,per){
+  var act=(((typeof getSaisonActive==='function')?getSaisonActive():null)||{}).nom||'';
+  var t=(per===act)?p.taches:((p.tachesAll&&typeof p.tachesAll==='object')?p.tachesAll[per]:null);
+  var s=(t&&typeof t==='object'&&!Array.isArray(t))?t[nom]:null;
+  return (typeof s==='string')?s:'Non d\u00e9marr\u00e9';
+}
+function openRecParc(mil){
+  if(typeof isAdmin!=='function'||!isAdmin()){ showToast('Admin requis','#B85A1A'); return; }
+  if(mil==null&&typeof window._mlCampagne==='function') mil=window._mlCampagne();
+  var V=(typeof window._mvVendangePers==='function')?window._mvVendangePers(mil):null;
+  if(!V||!V.nom||!V.pers.length){ showToast('Aucune p\u00e9riode de '+mil+' ne porte la vendange','#B85A1A'); return; }
+  var R=(typeof window._vendResteARentrer==='function')?window._vendResteARentrer(mil):null;
+  if(!R){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'openRecParc : _vendResteARentrer absent'}); return; }
+  _SELP={mode:'rec',nom:V.nom,pers:V.pers.slice(),mil:mil,camp:0,sel:{},trav:{},leg:{},liste:{}};
+  (R.lignes||[]).forEach(function(e){ if(e&&e.p&&e.p.nom!=null){ _SELP.liste[e.p.nom]=1; _SELP.sel[e.p.nom]=true; } });
+  (R.sans||[]).forEach(function(e){ if(e&&e.p&&e.p.nom!=null) _SELP.liste[e.p.nom]=1; });
+  (PARCELLES||[]).forEach(function(p){
+    if(!p||p.nom==null||!_SELP.liste[p.nom]) return;
+    var comm=V.pers.some(function(per){ var st=_mvStatutPer(p,V.nom,per); return st==='Valid\u00e9'||st==='En cours'; });
+    if(comm){ _SELP.trav[p.nom]=true; _SELP.sel[p.nom]=true; }   // vendange commencée : reste à récolter
+  });
+  var ti=document.getElementById('selp-titre'); if(ti) ti.textContent='R\u00e9colte '+mil;
+  var su=document.getElementById('selp-sub'); if(su) su.textContent='Parcelles \u00e0 r\u00e9colter \u00b7 '+V.pers.join(', ');
+  var it=document.getElementById('selp-intro'); if(it) it.textContent=_SELP_INTRO.rec;
   var qq=document.getElementById('selp-q'); if(qq) qq.value='';
   _mvSelRows();
   openOv('ovSelParc');
@@ -8696,9 +8745,36 @@ function _mvPerSave(){
   if(typeof window.renderReglages==='function'){ try{ window.renderReglages(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPerSave#3'); } }
   showToast(_mvSelLabel(nom)+' : '+n+' parcelle'+(n>1?'s':'')+' \u00b7 '+per,'#3D6B27');
 }
+// SANSREC-1 (§332) : décochée → la Vendange désactivée sur la parcelle pour chaque période de l'année qui la porte ; cochée → remise.
+//   N'écrit que ce qui change, période par période (_mvConcernePer) ; la garde admin est dans saveSelParc, avant l'aiguillage.
+function _mvRecSave(){
+  var nom=_SELP.nom, P=_SELP.pers||[];
+  if(!nom||!P.length||!_SELP.liste||typeof window._mvHorsPose!=='function'||typeof window._mvPerRemet!=='function') return;
+  var nS=0;
+  (PARCELLES||[]).forEach(function(p){
+    if(!p||p.nom==null||!_SELP.liste[p.nom]) return;
+    var veut=!!_SELP.sel[p.nom]||!!_SELP.trav[p.nom];
+    P.forEach(function(per){
+      var est=window._mvConcernePer(p,nom,per);
+      if(veut&&!est) window._mvPerRemet(p,nom,per);
+      else if(!veut&&est) window._mvHorsPose(p,nom,true,per);
+    });
+    if(!veut) nS++;
+  });
+  if(typeof recalcTravaux==='function') recalcTravaux(nom);
+  window.TRAVAUX=TRAVAUX;
+  saveData('parcelles');
+  if(typeof closeOv==='function') closeOv(null,'ovSelParc');
+  try{ renderParcelles(); computePStats(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvRecSave'); }
+  if(typeof renderHomeCard==='function'){ try{ renderHomeCard(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvRecSave#2'); } }
+  try{ var _pg=document.querySelector('.page.active'); if(_pg&&_pg.id==='page-cave'&&typeof window.renderCave==='function') window.renderCave(); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvRecSave#3'); }
+  showToast('R\u00e9colte '+_SELP.mil+' : '+(nS?(nS+' parcelle'+(nS>1?'s':'')+' sans r\u00e9colte'):'toutes les parcelles \u00e0 r\u00e9colter'),'#3D6B27');
+}
 function saveSelParc(){
   if(!isAdmin()){ showToast('Admin requis','#B85A1A'); return; }
   if(_SELP.mode==='per') return _mvPerSave();   // RETRAIT-1 (§325) : une tâche ordinaire, pour la période consultée
+  if(_SELP.mode==='rec') return _mvRecSave();   // SANSREC-1 (§332) : la récolte de l'année, depuis le Cuvier
   var nom=_SELP.nom; if(!nom||!window._mvTacheSel(nom)) return;
   var n=0;
   (PARCELLES||[]).forEach(function(p){
@@ -13178,6 +13254,7 @@ async function refreshApp(){
   if (typeof saveSelParc !== "undefined") window.saveSelParc = saveSelParc;
   if (typeof openPerParc !== "undefined") window.openPerParc = openPerParc;   // RETRAIT-1
   if (typeof _mvSelTous !== "undefined") window._mvSelTous = _mvSelTous;
+  if (typeof openRecParc !== "undefined") window.openRecParc = openRecParc;   // SANSREC-1
   if (typeof openArrEtape !== "undefined") window.openArrEtape = openArrEtape;   // ARRACH-3
   if (typeof saveArrEtape !== "undefined") window.saveArrEtape = saveArrEtape;
   if (typeof annulerArrEtape !== "undefined") window.annulerArrEtape = annulerArrEtape;

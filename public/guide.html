@@ -908,6 +908,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     toutes repartent concernées : l'hiver et le printemps peuvent avoir des parcelles différentes. Une parcelle où la tâche
     est commencée reste concernée. Une tâche désactivée sur une parcelle avant cette mise à jour l'est pour toutes les
     périodes, et la liste le signale : la cocher la remet pour la période consultée, sans toucher aux périodes passées.
+    Désactiver la <b>Vendange</b> sur une parcelle veut dire qu'elle ne sera pas récoltée cette année : la Cave (<b>Encore
+    sur pied</b>, Le millésime) et le Revient la comptent à part, et Le Cuvier ouvre la même liste depuis <b>Encore sur pied</b>.
     La liste est réservée à l'<b>administrateur</b>.</div></details>
   <details><summary>L'avancement ne bouge pas alors que j'ai validé</summary>
     <div class="dbody">Vérifiez la <b>saison consultée</b> en haut de l'écran : vous regardez peut-être
@@ -1402,7 +1404,10 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
         campagne, avec surface, cépage et dernière analyse de maturité — <b>la plus mûre en
         premier</b>. Toucher une ligne ouvre la nouvelle récolte, parcelle déjà choisie. Une parcelle
         arrachée n'y figure pas ; une parcelle sans surface renseignée, si. Un nom de parcelle absent
-        du parcellaire est signalé sous la carte.</li>
+        du parcellaire est signalé sous la carte. Une parcelle qu'on ne vendangera pas cette année (condamnée à
+        l'arrachage, grêlée…) : l'administrateur touche <b>Une parcelle ne sera pas récoltée ?</b> en bas de la carte et la
+        décoche ; elle quitte la carte, Le millésime et le Revient, et une ligne <b>Pas de récolte cette année</b> la nomme
+        (<b>Modifier</b> la remet).</li>
       <li>Comparaison d'un millésime à l'autre, parcelle par parcelle</li>
     </ul></div>
     <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-hautbas"></use></svg> Cuves</h4><ul class="dot">
@@ -2786,7 +2791,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Probable, puis constaté.</b> Tant qu'une parcelle n'est pas récoltée, elle prend la moyenne
     de ses millésimes connus, sinon la moyenne constatée cette année dans son appellation. Le
     <b>plafond</b> de l'appellation n'est jamais pris comme prévision : il sert de repère dans la jauge.
-    Quand tout est rentré, les chiffres passent à « constaté ».</li>
+    Quand tout est rentré, les chiffres passent à « constaté ». Une parcelle déclarée <b>sans récolte cette année</b> (Le Cuvier, <b>Encore sur pied</b>) n'en fait pas partie : ni rendement ni
+    bouteilles, et son coût se répartit à la surface sur les autres vignes.</li>
     <li><b>Par appellation.</b> Touchez une ligne : ses parcelles se déplient, chacune avec la source de
     son rendement. Une parcelle sans aucune estimation est comptée à part, hors bouteilles et hors coût.</li>
     <li><b>Les bouteilles de la Cave.</b> Les kilos deviennent des hectolitres au kg/hL du Cuvier, moins

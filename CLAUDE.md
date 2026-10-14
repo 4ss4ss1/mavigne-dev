@@ -3,9 +3,9 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **14 octobre 2026 (TETE-2)** — ★★ **UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR LES DIX VUES** (§329). Lot 60, base `457c1c2`. Nico (14/10, deux captures du téléphone, dicté) : « revoir les mises en page des écritures, les contrastes, les polices […] du clair sur du clair […] les textes ne sont pas forcément tous bien calés ». Reformulé, périmètre « toutes les vues », maquette validée (« c'est très bien comme sur la maquette »).
-> Cause lue dans le code : TETE-1 (§272) avait repeint le bandeau du Pilotage du brun au blanc sans sa météo ni son aide, restées crème ; la pastille de saison avait une hauteur fixe sans « insécable » (« Hiver / 2026 / - / 2027 »). Désormais : partout deux rangées — l'identité, puis la ligne du jour (saison, date — ou la météo qui porte la date courte —, « ? Aide », un « ? » rond au téléphone) ; le Pilotage pose un vrai `.mod-header` (`_pilHdrHtml`) ; bloc `★ TETE-2` en fin de `styles.css` ; `window._mvDateCourte` (utils.js) ; sous-titres sans la saison. Maquette = la vraie feuille de l'appli + le bloc, intégration identique.
-> **APP 8.96 → 8.97, SW 9.75 → 9.76.** Déploiement : `npm run build` → `firebase deploy --only hosting` (le guide ne change pas).
+> Dernière consolidation : **14 octobre 2026 (SANSREC-1)** — ★★ **« PAS DE RÉCOLTE CETTE ANNÉE » : UNE PARCELLE EN PLACE QU'ON NE VENDANGE PAS SORT D'« ENCORE SUR PIED », DU MILLÉSIME ET DU REVIENT** (§332). Base `8336681` (TRN-2). Nico (14/10) : une parcelle promise à l'arrachage, rendue impropre à la récolte avant les vendanges, restait « en attente d'être vendangée » ; sans code, seule « Arracher cette parcelle… » l'en sortait. Reformulé, maquette (toile Design, quatre écrans) validée (« Continuer »).
+> Un seul fait, déjà stocké, lu partout : la Vendange désactivée sur la parcelle (RETRAIT-1 : `p.horsPer`, ou `tachesExclues`) pour CHAQUE période de l'année qui la porte — `_mvSansRecolte` (utils.js). Le Cuvier (`_vendResteARentrer().sans`, la ligne « Pas de récolte cette année », la question « Une parcelle ne sera pas récoltée ? »), la feuille de RETRAIT-1 en mode récolte (`openRecParc`), le Revient (`_pecRevReport` : coût reporté à la surface, poste par poste ; branche `x` de `_pecRevCalc`).
+> **APP 8.99 → 9.00, SW 9.78 → 9.79.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1855,6 +1855,10 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ SANSREC-1 — CE QUI RESTE OUVERT (§332, posé le 14/10)
+1. **À regarder chez Nico, au téléphone puis sur PC** : Cave › Le Cuvier › Récoltes — « Une parcelle ne sera pas récoltée ? » en pied d'« Encore sur pied » (admin), la feuille « Récolte 2026 » (décocher, « Enregistrer »), puis « Tout est rentré » et la ligne « Pas de récolte cette année · Modifier » ; Le millésime ; Pilotage › Économie › Revient (« constaté », la note, la pastille, « coût réparti ») ; la fiche de la parcelle (Vendange « Pas cette période »). Vérifié par `mv-harnais-sansrec1` (vraies fonctions, 31 vérifications, 12 contre-épreuves) ; ni navigateur ni ses données.
+2. **Vu, non touché** : deux définitions de « la vendange » (`_mvEstVendange`, utils.js ; `_rfEstCouperet`, pilotage.js) ; une vendange renommée sans le drapeau `couperet` n'est pas reconnue (la question ne s'affiche pas) ; la feuille garde dans ses autres modes ses surfaces brutes (« 0.42 ») et son « Enregistrer » sans couleur (`mbtn` seule) ; le chevron d'« Encore sur pied » pointe à gauche une fois ouvert.
+
 ### ⚠️ TRN-1 et TRN-2 — CE QUI RESTE OUVERT (§330, §331, posé le 14/10)
 1. **À regarder chez Nico, sur PC et au téléphone, en clair et en sombre** : Vigne › roue crantée › Tournées (les tournées d'avant déjà là) et l'éditeur (glisser, menu d'une ligne, « Placer après… », « Ranger automatiquement », carte et « Tracer sur la carte », Annuler / Rétablir, « L'équipe la suit pour », Enregistrer) ; Parcelles (« Tournée « … » », « Modifier ») et Décider (« Modifier la tournée ») ; Accueil › Équipes du jour (une tournée pour une équipe), puis le téléphone d'un salarié de cette équipe (« · votre équipe », plus de « Trier par proximité » ; l'administrateur garde ce tri).
 2. **`MV_FORMAT` passe à 3** (2 avec TRN-1, 3 avec TRN-2) : un appareil en retard arrête d'écrire jusqu'à sa mise à jour (automatique, VER-1) — à suivre dans le parc d'appareils de l'Admin GT le jour du déploiement. Les deux points de conception laissés par TRN-1 sont fermés par TRN-2 (§331).
@@ -2251,8 +2255,6 @@ en dur et se lisent donc comme des succès.
 ⚠️ **L'audit n'a PAS pu vérifier l'état EN LIGNE** (bac à sable sans accès au domaine) : tout ce qui
 suit décrit **le dépôt**, pas la production. **Détail, preuves et règles nouvelles : §44.**
 
-### ✅ La fusion de `pilotage.js` (commit `2e002ae`) — descendue dans `docs/claude/journal.md` le 09/10 (BUILD-1, plafond du cœur)
-
 ### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §42
 
 1. **`npm run lint` et ESLint** — **jamais joués côté Claude de tout le chantier** (`node_modules`
@@ -2379,8 +2381,6 @@ L'hypothèse en vigueur — la lecture seule dure — n'a jamais été confirmé
   avant technique : est-ce un frein ou une serrure ?
 - **Mesure d'audience** sur `essai.html` et la démo guidée.
 - **Les trois nombres dupliqués** (§14b) — vivre avec, ou générer l'un depuis l'autre.
-
-### ✅ Les journées du 11 août (refonte du Planning, audit, deux lots Tracteur) — descendues dans `docs/claude/journal.md` le 05/10 (MOTIFS-1, plafond du cœur) ; leurs leçons vivent dans les règles d'or, §24, §25 et §19a (`docs/claude/modules.md`)
 
 ### ⚠️ Lots encore non documentés ici
 

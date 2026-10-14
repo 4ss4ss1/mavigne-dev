@@ -1,0 +1,25 @@
+{
+  "lot": "SANSREC-1",
+  "section": "§332",
+  "base": "8336681f9b2405c41c894fd45052f5da704b7020",
+  "inclut": [],
+  "date": "2026-10-14",
+  "fichiers": {
+    ".mv-base": "568fe383fa83d7d3166dd3f599ecd062ad1ea0adeaa2f2a2781dde3d4019ea14",
+    "CLAUDE.md": "f2d9ec51c35a10dac7298b5192773d4e6253e5669f8a1ad0ef40f96adf0a6280",
+    "docs/claude/INDEX.md": "4f80c9c85e8b64630ebb8a2a7a7b0ddf9e1d4f71dbc8465e6a5693bbe9ac0854",
+    "docs/claude/chantiers-330-379.md": "d268c5d5864a4729c580731807e113d96a32340a6bf4c6d0d19570f28063084a",
+    "docs/claude/journal.md": "faa6285d29ba7f3fc64c48d782eb8895cb4588947ae9830a182df803772fd26f",
+    "guide/04-vigne.html": "b560820f0f7e7ad895a5389a2fc5c03501621541af4713ca535c6fb181469b2b",
+    "guide/08-cave.html": "b13c240d21822c73e60d6d495545be78d2434983371a2da7644195a45e402247",
+    "guide/11-pilotage.html": "17e307328c1213c21f1eb764afa21177509945ec22a8c0c2c4fbe590378f23ed",
+    "index.html": "319f652df543d9ca8f9ec5ad9c05878ea279ac2391935bfdb24b7544634024cf",
+    "public/sw.js": "fb49670681d2a96ca04d06c3a028a7fce429901b597572682ab6b9cedc7d03aa",
+    "scripts/mv-harnais-liste.mjs": "2e9d89373c72e39c036b9b56d151a33b20bb413e6105984bbc7c601ad28dfa47",
+    "src/app.js": "1a9cde981ac19d57f07b9722cc8630ed8702c8a42688f4307c9887d52254f2d4",
+    "src/cuvier.js": "84d95629296859e6378bc2de5072b033eca949bcfc3ea10a84769bf3f4313d9d",
+    "src/pilotage.js": "ac5f74dd8267829ae53999a501f7d22abd1cec3f0dbb27ad3f2e09c1a88b3ea0",
+    "src/utils.js": "d67ebb48ac7edbdccfd24039564f97c4add1c9be15e29a853fce72fb3587060e",
+    "scripts/mv-harnais-sansrec1.mjs": "4a89c633f69d8c8039a91289a884e485fb6f7d7e1e09317e6cb0e3bdde0fe7d2"
+  }
+}
