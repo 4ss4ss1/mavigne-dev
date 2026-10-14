@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v9.74
+// MA VIGNE — Service Worker v9.75
+// v9.75 (14/10/2026) — DIRECT-2 (§328) : « En direct » (Pilotage > Aujourd'hui) n'ecrit plus « commencee aujourd'hui » sur un arrachage en etapes
+//   commence avant : le jour du debut est celui de la premiere etape validee de la campagne (app.js _arrDebut, pilotage.js _pilCk2Modele) ;
+//   jour inconnu = aucune date (cockpit-vue.js : quand, le filet « Personne d'indique », la pastille, la loupe). utils.js (WHATS_NEW). APP 8.95 -> 8.96.
 // v9.74 (13/10/2026) — MAJ-2 (§327) : la version telechargee s'installe aux moments calmes (appli passee en arriere-plan, ou retour
 //   avant le premier geste, rien en cours) — plus de seuil de 4 h ; message MV_ACTIVER_CALME : skipWaiting seulement si aucune autre
 //   fenetre de l'appli n'est affichee ; barre « Nouvelle version prete », carte de la barre laterale, Reglages > Moi > Mise a jour,
@@ -4490,7 +4493,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.74';
+const CACHE_NAME   = 'mavigne-v9.75';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4507,7 +4510,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.74 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.75 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4527,7 +4530,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.74 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.75 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

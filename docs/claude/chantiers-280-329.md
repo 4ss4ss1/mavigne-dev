@@ -1850,3 +1850,35 @@ Nico (13/10, dicté) : « il faudrait forcer les mises à jour… indiquer qu'un
 
 ### 327g. Ouvert
 §28 « MAJ-2 — CE QUI RESTE OUVERT ».
+
+## 328. ★ DIRECT-2 — « EN DIRECT » DONNE LE VRAI JOUR DE DÉBUT D'UN ARRACHAGE, ET N'INVENTE PLUS « AUJOURD'HUI » (14/10 — `src/app.js` (`window._arrDebut` neuf) · `src/pilotage.js` (`_pilCk2Modele` : `depuis`) · `src/cockpit-vue.js` (`charger` : la ligne des équipes et le filet « Personne d'indiqué » ; `quand`, `htmlCoursLi`, `majEquipes`, `phraseEtat`, `INFO.fil`) · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-direct2.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `scripts/preflight-baseline.json` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-280-329.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/DIRECT-2.json` · **APP 8.95 → 8.96, SW 9.74 → 9.75**, base `7eb7e82`)
+
+### 328a. D'où ça vient
+Nico (14/10, capture du téléphone, Pilotage › Aujourd'hui › En direct) : « Soucis sur la date de commencement de arrachage qui n'est pas aujourd'hui ». Quatre lignes « L'arrachage en cours — <parcelle>, commencée aujourd'hui, personne d'indiqué », en tête d'« En ce moment », au-dessus de l'équipe sur la réparation (commencée le 6 oct.). Cause lue dans le code, reformulée avec la proposition — le jour de la première étape validée cette campagne ; jour inconnu = aucune date ; « Personne d'indiqué » reste —, « Oui, c'est ça, relis les fichiers il y a eu des mises à jour » (MAJ-2, poussé pendant la reformulation : travail repris sur `7eb7e82`), puis « Continuer ».
+
+### 328b. La cause, lue dans le code
+1. **Une étape d'arrachage n'écrit pas de « Début ».** `saveArrEtape` (et « + Journal », ARRACH-4) écrit une ligne « Validé » portant `etape` ; `_arrSyncTache` passe la parcelle « En cours » dès une étape sur N. Depuis ETAT-1 (§320), l'état du plan vient de ce statut : la parcelle est en cours. Mais l'équipe et son jour viennent de `_ckPlanDebuts`, qui ne lit que les lignes « En cours » de la période : rien.
+2. **Le filet posait la date du jour.** `charger` (cockpit-vue.js, FORME-1 §301) donne à toute parcelle en cours sans équipe une pastille « Personne d'indiqué », avec `depuis: iso(AUJ)`. Sans effet visible tant que rien n'écrivait ce jour ; depuis DIRECT-1 (§318), « En ce moment » l'écrit (`quand`) et trie dessus : « commencée aujourd'hui », et en tête. La loupe (`phraseEtat`) et le titre de la pastille le disaient aussi, et la pastille restait vive (« commencée un autre jour, elle passe en clair »).
+3. **Trois endroits inventaient le même jour** : le filet, `quand` (un jour absent rendait « commencée aujourd'hui ») et la ligne des équipes du modèle dans `charger` (repli `iso(AUJ)`).
+
+### 328c. Ce qui a été fait
+- **`window._arrDebut(p)`** (app.js, à côté de `_arrEntame`) : le jour de la première étape faite de la campagne (`_arrEtat` : la campagne de référence), parmi les étapes du réglage (comme `_arrStatutTache`), ramené au jour, format vérifié ; `''` sans étape faite ou arrachage non découpé. Une étape annulée (`annulerArrEtape`) est retirée de l'état et ne compte plus — la lecture du journal aurait dû apparier la ligne « Validé », qui reste, et la ligne « Annulé ».
+- **`_pilCk2Modele`** publie `depuis = { <tâche> : { <parcelle> : 'AAAA-MM-JJ' } }` pour les parcelles EN COURS sans équipe du modèle (aucun « Début » dans la période) : l'arrachage seul, un jour ≤ aujourd'hui, même d'avant la période (ARRACH-8). Une parcelle qui a son « Début » garde son équipe et son jour. `equipes` ne change pas (`mv-harnais-forme1` compte ses entrées).
+- **cockpit-vue.js** : le filet lit `v.depuis`, sinon `''` ; la ligne des équipes du modèle aussi ; `quand('')` = rien ; « En ce moment », la loupe et le titre de la pastille s'assemblent sans virgule orpheline ; un jour inconnu passe la pastille en clair (`!(e.depuis >= aujIso)` : seul un début d'aujourd'hui reste vif) ; la bulle « i » d'« En direct » ajoute « Un arrachage en étapes compte depuis sa première étape validée. »
+- **Arbitré** : pas de « qui » pour les étapes (Nico : « Personne d'indiqué » reste) ; pas de recherche au journal pour les autres tâches — le statut d'une tâche simple repart à chaque période, et un « Début » d'avant la période n'est pas l'équipe de la période (ETAT-1) : un jour inconnu se tait plutôt que de deviner.
+- Accompagnement : la fiche `MV_AIDE` du Pilotage et `guide/11-pilotage.html` disent « chaque parcelle en cours avec son équipe et depuis quand » — relues, toujours vraies, rien à changer. `MV_INFO` : aucune méthode de calcul touchée. La nouveauté (8.96) : niveau 0, Journal, pour l'admin.
+
+### 328d. Trouvé en route
+1. **MAJ-2 poussé pendant la reformulation** (14/10, 07 h 32) : `git pull` avant d'écrire, numéros pris à la suite (APP 8.96, SW 9.75, §328) ; rien à rejouer.
+2. **Une contre-épreuve aveugle au premier passage** : retirer la condition « l'arrachage seul » ne rougissait rien — aucune parcelle du scénario n'avait une autre tâche en cours ET des étapes. Le scénario a reçu une taille en cours sur une parcelle d'arrachage (B4).
+3. **Les noms de la capture ne vont pas dans le dépôt** : le harnais prend des noms de parcelles et des prénoms neutres (règle d'ETAT-1).
+4. Vu, non touché : `_pilCk2Modele` garde `depuis:String(e.date||auj)` pour une ligne « Début » sans date (les deux « Début », `pQuickStart` et `marquerEnCours`, datent toujours) ; la ligne d'une étape porte `qui` et `membresEquipe` (`_mvEqApplique`), sans la règle de groupe de DIRECT-1 (`_mvGroupeTache`).
+5. **La référence du preflight regravée** : C24c (`src/app.js`) 82 → 81, une baisse laissée par MAJ-2 — le lot n'ajoute ni ne retire aucune substitution `${…}` (diff : 0). Preuve clé par clé : aucune hausse ; les deux fichiers de NOTIF-3 (`functions/notif.js`, `functions/notif-calc.js`) entrent à zéro dans C25.
+
+### 328e. Les harnais
+- **`mv-harnais-direct2.mjs`** (neuf, 27 vérifications, 17 contre-épreuves) : le VRAI `_arrDebut` (avec `_arrCfg`, `_arrActif`, `_arrEtat`), le VRAI `_pilCk2Modele` sur `cockpit.js` entier (première étape dans le désordre, « Début » prioritaire, autre campagne, jour futur, parcelle au prestataire, taille d'une parcelle d'arrachage, équipes inchangées), les VRAIS `quand`, filet de `charger` et ligne des équipes, `htmlCoursLi`, `coursItems`, `phraseEtat` et `majEquipes` (faux calque) ; la bulle, la nouveauté, le branchement. L'ancien `quand` réinjecté : 4 rouges ; l'ancien filet : 1.
+- La chaîne complète (`node scripts/mv-lanceur.mjs --continuer`, `TZ=Europe/Paris`), jouée d'un trait en arrière-plan sur `7eb7e82` + le lot (le processus a survécu aux appels, cette fois) : **391/391 commandes, 0 rouge**, 1 038 s à un cœur. Puis la référence regravée (328d ⑤) : preflight 0 erreur, 8 avertissements. Fichiers du lot comparés à leur copie après la chaîne : intacts.
+- Non vérifié : un navigateur ; les données de Nico ; `npm run build`, `test:smoke`, `test:e2e` ; le déploiement.
+
+### 328f. Ouvert
+§28 « DIRECT-2 — CE QUI RESTE OUVERT ».

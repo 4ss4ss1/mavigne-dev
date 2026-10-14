@@ -3,9 +3,9 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **14 octobre 2026 (MAJ-2)** — ★★ **LA MISE À JOUR NE TRAÎNE PLUS : MOMENTS CALMES, BARRE, GESTE** (§327). Lot 58, base `68529dd`. Nico (13/10, dicté) : « il faudrait forcer les mises à jour… parfois il y a des retards de version et ça ne se met pas à jour ». Reformulé (cause lue dans le code : seuil de 4 h, retour raté quand la version n'avait pas fini de s'installer, file non vide bloquante, plus aucun signal depuis NOTIF-3), « fais une maquette, je veux ce qu'il y a de mieux », maquette validée (« c'est parfait », texte blanc dans les boutons de couleur), « go ». Le téléphone de Nico tournait en 8.85 le 13/10 (§326).
-> Une version téléchargée s'installe aux **moments calmes** — appli passée en arrière-plan, ou retour avant le premier geste — si rien n'est en cours (fenêtre, champ actif, envoi en route ; une saisie EN FILE ne bloque plus, ENVOI-1) : `_mvMajCalme` → `MV_ACTIVER_CALME`, que `sw.js` n'honore que si aucune autre fenêtre de l'appli n'est affichée. Sinon la barre « Nouvelle version prête » au-dessus du dock, la carte en bas de la barre latérale (pastille repliée), orange après 24 h ; le geste ouvre le rideau (l'écran de démarrage « Mise à jour », repris par `boot.js`) puis « Ma Vigne est à jour · version » ; Réglages › Moi › Mise à jour cherche à la main ; `version.json` annonce une autre version → recherche. Le piège de VER-1 tenu (`_mvMajFinInstall`). Écran obligatoire à la charte DS-4.
-> **APP 8.94 → 8.95, SW 9.73 → 9.74.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+> Dernière consolidation : **14 octobre 2026 (DIRECT-2)** — ★ **« EN DIRECT » DONNE LE VRAI JOUR DE DÉBUT D'UN ARRACHAGE, ET N'INVENTE PLUS « AUJOURD'HUI »** (§328). Lot 59, base `7eb7e82`. Nico (14/10, capture du téléphone) : « Soucis sur la date de commencement de arrachage qui n'est pas aujourd'hui » — quatre lignes « L'arrachage en cours … commencée aujourd'hui, personne d'indiqué » en tête d'« En ce moment ». Cause lue dans le code, reformulée avec la proposition (le jour de la première étape validée ; jour inconnu = aucune date ; « Personne d'indiqué » reste), « Oui, c'est ça » (MAJ-2 poussé entre-temps : repris sur `7eb7e82`), « Continuer ».
+> Une étape d'arrachage met la parcelle en cours (`_arrSyncTache`) sans écrire de « Début » : `_ckPlanDebuts` ne trouve rien, et le filet « Personne d'indiqué » de `charger` (FORME-1, §301) posait `iso(AUJ)` — visible depuis qu'« En ce moment » (DIRECT-1) écrit le jour et trie dessus. Désormais `window._arrDebut` (app.js : la première étape de la campagne) → `_pilCk2Modele` publie `depuis` (parcelles en cours sans « Début ») → le filet le lit ; jour inconnu = vide, `quand('')` n'écrit rien (la ligne, la loupe, le titre de la pastille, qui passe en clair).
+> **APP 8.95 → 8.96, SW 9.74 → 9.75.** Déploiement : `npm run build` → `firebase deploy --only hosting` (le guide ne change pas).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -842,6 +842,7 @@ arrière-plan (`nohup env TZ=Europe/Paris node scripts/mv-lanceur.mjs --continue
 trois tranches relues par un script maison (`… | sort -u | head -20`) ont caché un KO de `mv-harnais-subset` : GF-1 est parti « vert », la CI a rougi.
 ★ **DIRECT-1 (§318) — si l'arrière-plan meurt avec l'appel** (12/10 : `nohup`, puis `setsid`, coupés à la fin de l'appel, `npm ci` compris) : jouer la liste `HARNAIS`
 de `mv-harnais-liste.mjs` par tranches au premier plan, en notant le code retour de chaque commande ; un rouge en 0 s accuse d'abord `node_modules`.
+★ **DIRECT-2 (§328) — le 14/10, l'arrière-plan a survécu aux appels** (`setsid nohup … &`, suivi par `pgrep` et la fin du journal) : la chaîne d'un trait, 1 038 s. Essayer d'abord ; les tranches si le processus disparaît. Rien de lourd à côté (un seul cœur) : un preflight lancé en parallèle a dépassé les 300 s de l'appel.
 
 ⚠️ **`smoke.mjs` sert `dist/`** → il teste le **dernier build**, pas les sources.
 
@@ -1851,6 +1852,10 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ DIRECT-2 — CE QUI RESTE OUVERT (§328, posé le 14/10)
+1. **À regarder chez Nico, au téléphone et sur PC** : Pilotage › Aujourd'hui › En direct — les parcelles d'arrachage de sa capture disent « commencée le … », le jour de leur première étape (la fiche le montre : « Étape validée le … »), et passent sous les parcelles commencées après ; la loupe du plan dit le même jour, la pastille est en clair. Vérifié par `mv-harnais-direct2` (vraies fonctions, 27 vérifications, 17 contre-épreuves) ; ni navigateur, ni ses données. Une parcelle en cours sans aucune étape cette campagne ni « Début » (« remis », ligne effacée) s'affiche désormais sans date : c'est voulu.
+2. **Vu, non touché** : « Personne d'indiqué » reste pour un arrachage en étapes (Nico, 14/10), alors que la ligne d'une étape porte `qui` et `membresEquipe` (`_mvEqApplique`, sans la règle de groupe de DIRECT-1) ; `_pilCk2Modele` garde `String(e.date||auj)` pour une ligne « Début » sans date (les deux « Début » datent toujours).
 
 ### ⚠️ MAJ-2 — CE QUI RESTE OUVERT (§327, posé le 14/10)
 1. **La 8.94 → 8.95 passe encore par l'ANCIENNE règle** : le code qui tourne pendant ce passage est celui de la 8.94 (retour après 4 h, ou fermeture complète). Les moments calmes valent à partir de la mise à jour SUIVANTE. Après ce déploiement, fermer complètement l'appli sur les téléphones de l'équipe accélère le passage ; regarder le parc (Admin GT).

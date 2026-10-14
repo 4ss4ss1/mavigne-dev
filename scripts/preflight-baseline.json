@@ -1,6 +1,6 @@
 {
   "_note": "Reference du cliquet anti-regression du preflight (C11/C14/C15/C16/C18/C19/C23/C24/C25). Regraver : node scripts/preflight.mjs --baseline. Elle ne doit que DESCENDRE.",
-  "generated": "2026-10-11",
+  "generated": "2026-10-14",
   "C11_dead_ids": {
     "src/admin-gt.js": [],
     "src/app.js": [],
@@ -187,7 +187,7 @@
   },
   "C24c_interpolation_nue": {
     "src/admin-gt.js": 0,
-    "src/app.js": 82,
+    "src/app.js": 81,
     "src/cave.js": 0,
     "src/cockpit-vue.js": 0,
     "src/cockpit.js": 0,
@@ -212,6 +212,8 @@
     "functions/ephy.js": [],
     "functions/index.js": [],
     "functions/leads.js": [],
+    "functions/notif-calc.js": [],
+    "functions/notif.js": [],
     "functions/planning-vues-calc.js": [],
     "functions/planning-vues.js": [],
     "functions/diag-ephy.cjs": []
@@ -224,6 +226,8 @@
       "submitLead",
       "submitMiseEnRoute"
     ],
+    "functions/notif-calc.js": [],
+    "functions/notif.js": [],
     "functions/planning-vues-calc.js": [],
     "functions/planning-vues.js": [],
     "functions/diag-ephy.cjs": []

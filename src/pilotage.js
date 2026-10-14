@@ -5311,6 +5311,21 @@ function _pilCk2Modele(d, m){
     Object.keys(deb).forEach(function(n){ var e=deb[n], q=qui(e);
       equipes.push({ noms:etN(q)||'Personne d\u2019indiqu\u00e9', ini:q.length?q.slice(0,2).map(function(c){ return c.charAt(0).toUpperCase(); }):['?'], tache:t.id, parcelle:n, depuis:String(e.date||auj) }); });
   });
+  // ★ DIRECT-2 (§328) : le jour du début d'une parcelle EN COURS SANS ligne « Début » dans la période. C'est l'arrachage en étapes :
+  //   une étape validée met la parcelle en cours (app.js/_arrSyncTache) sans écrire de « Début » ; son jour est celui de la première
+  //   étape de la campagne (app.js/_arrDebut, même avant la période — ARRACH-8). Nico (14/10) : « En direct » écrivait « commencée
+  //   aujourd'hui » — sans date, le cockpit prenait celle du jour (cockpit-vue.js, le filet « Personne d'indiqué »). Jour inconnu
+  //   (« remis » sans début, ligne effacée) : absent, et le cockpit n'écrit aucune date. Les équipes ne changent pas : pas de « qui » ici.
+  var depuis={};
+  taches.forEach(function(t){
+    var ec=etats[t.id]||{}, D={}, n=0;
+    PARC.forEach(function(p){
+      if(ec[p.nom]!=='cours'||equipes.some(function(e){ return e.tache===t.id&&e.parcelle===p.nom; })) return;
+      var d0=(t.cle==='Arrachage'&&typeof window._arrDebut==='function')?String(window._arrDebut(p)||''):'';
+      if(/^\d{4}-\d{2}-\d{2}$/.test(d0)&&d0<=auj){ D[p.nom]=d0; n++; }
+    });
+    if(n) depuis[t.id]=D;
+  });
   // ★★ DIRECT-1 (§318) : le tracteur du jour (cockpit.js/_ckTracJour : la session et sa boîte noire). Ses événements se mêlent au
   //   fil, à leur heure ; le conducteur en marche ou en pause va dans « En ce moment », au-dessus. Nico (12/10) : « aujourd'hui
   //   j'étais sur le tracteur, j'aimerais bien que ça apparaisse ».
@@ -5390,7 +5405,7 @@ function _pilCk2Modele(d, m){
     saisonDe:saisonDe, taches:taches, parcs:parcs, etats:etats, presta:presta, gens:gens, presents:nPres, effectifTotal:gens.length,
     presTxt:nPres+' présent'+(nPres>1?'s':'')+(abs.length?', '+absTxt:''), absTxt:absTxt,
     confN:diag.length, confTxt:diag.length?tx(diag[0].t||diag[0].txt||'Un point à régler'):'Rien à régler',
-    equipes:equipes, evts:evts, tracCours:tracCours, photos:ph, reste:d.totalReste||0, total:hT, hFait:d.hDone||0, hTotal:hT, pct:Number(d.gaugePct)||0,
+    equipes:equipes, depuis:depuis, evts:evts, tracCours:tracCours, photos:ph, reste:d.totalReste||0, total:hT, hFait:d.hDone||0, hTotal:hT, pct:Number(d.gaugePct)||0,
     capMoy:(m&&m.cadH)||0, besoin:(function(){ if(!(m&&m.obj)) return 0; var n=0, x=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()+1); while(x<=m.obj&&n<400){ if(ouv(x)) n++; x.setDate(x.getDate()+1); } return n?Math.round((d.totalReste||0)/n):0; })(),
     meteo:meteo, savoir:sv,
     decision:{ pres:{ v:(jEff?(jNom.charAt(0).toUpperCase()+jNom.slice(1)+' : '):'')+nPres+' sur '+gens.length,

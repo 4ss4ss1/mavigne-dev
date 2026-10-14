@@ -615,6 +615,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-tournee1.mjs --contre'],
   ['node scripts/mv-harnais-retrait1.mjs'],          // RETRAIT-1 (§325) : une tâche ordinaire désactivée sur des parcelles pour la période — règle, feuille, croix, renommages, L'année
   ['node scripts/mv-harnais-retrait1.mjs --contre'],
+  ['node scripts/mv-harnais-direct2.mjs'],           // DIRECT-2 (§328) : « En direct » donne le vrai jour de début d'un arrachage en étapes (sa première étape validée) ; un jour inconnu ne s'écrit plus « aujourd'hui »
+  ['node scripts/mv-harnais-direct2.mjs --contre'],
   ['node scripts/mv-harnais-trac1.mjs'],              // TRAC-1 (§282) : les sessions du Tracteur en liste + fiche
   ['node scripts/mv-harnais-trac1.mjs --contre'],
   ['node scripts/mv-harnais-trac2.mjs'],              // TRAC-2 (§283) : l'Entretien du Tracteur sur deux colonnes

@@ -276,13 +276,17 @@ function charger(v) {
   });
   if (!S.vue || !T[S.vue]) S.vue = (v.prio && T[v.prio]) ? v.prio : ((TACHES.find(t => t.pct < 100 && !t.eqFini) || TACHES[0] || {}).id || null);
   EQ = {}; S.equipes = []; S.evts = [];
-  (v.equipes || []).forEach((e, i) => { const id = 'e' + i; EQ[id] = { noms: e.noms, ini: e.ini }; if (parNom[e.parcelle] && T[e.tache]) S.equipes.push({ id, tache: e.tache, parc: parNom[e.parcelle], depuis: typeof e.depuis === 'string' ? e.depuis : iso(AUJ) }); });
+  (v.equipes || []).forEach((e, i) => { const id = 'e' + i; EQ[id] = { noms: e.noms, ini: e.ini }; if (parNom[e.parcelle] && T[e.tache]) S.equipes.push({ id, tache: e.tache, parc: parNom[e.parcelle], depuis: typeof e.depuis === 'string' ? e.depuis : '' }); });   // DIRECT-2 (§328) : jamais « aujourd'hui » par défaut
   // ★ FORME-1 (§301) : une parcelle en cours porte TOUJOURS une pastille (« en cours » et « une équipe dessus » sont une
   //   seule lecture du journal, cockpit.js/_ckPlanDebuts) ; un début sans nom au journal le dit au lieu de disparaître.
   TACHES.forEach(t => Object.keys(S.etats[t.id]).forEach(pid => {
     if (S.etats[t.id][pid] !== 'cours' || S.equipes.some(e => e.tache === t.id && e.parc === pid)) return;
     const id = 'e' + Object.keys(EQ).length; EQ[id] = { noms: 'Personne d’indiqué', ini: ['?'] };
-    S.equipes.push({ id, tache: t.id, parc: pid, depuis: iso(AUJ) });
+    // ★ DIRECT-2 (§328) : le jour du début vient du modèle (v.depuis — pour un arrachage en étapes, sa première étape validée) ;
+    //   inconnu, il reste vide. Avant : la date du jour, et « En direct » écrivait « commencée aujourd'hui » sur des arrachages
+    //   commencés des semaines plus tôt, en tête d'« En ce moment ». Nico (14/10).
+    const dj = ((v.depuis || {})[t.id] || {})[PIDX[pid].nom];
+    S.equipes.push({ id, tache: t.id, parc: pid, depuis: typeof dj === 'string' ? dj : '' });
   }));
   (v.evts || []).forEach((e, i) => {
     const id = 'f' + i; EQ[id] = EQ[id] || { noms: e.noms, ini: e.ini };
@@ -355,7 +359,7 @@ const INFO = {
   savoir: 'Ce qui peut changer la journée ou la semaine. Sous chaque jour : le risque de pluie (le plus haut de la journée), le cumul en millimètres et le vent le plus fort (vent moyen, sans les rafales). Dessous : la pluie ou le vent des deux jours qui viennent, secteur par secteur, et ce qui est en cours dans les communes touchées ; puis les absences, les contrats, les retards et le matériel. Les motifs d’absence ne sont visibles que de l’admin.',
   decision: 'Les quatre questions de chaque matin, chacune avec sa réponse et le bouton pour agir.',
   plan: 'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine. Sa couleur dit l’état de la tâche choisie, celui de sa fiche pour la période : faite une fois validée, en cours une fois commencée ; un arrachage fini pour l’équipe est fait, la suite au prestataire. Une parcelle où la tâche est désactivée sur sa fiche ou dans la liste de la tâche, ou pas choisie pour la campagne (arrachage, désherbage, effeuillage), reste à sa place en contour pâle : ni à faire ni en retard, elle ne compte pas dans l’avancement. Le trait sous chaque appellation dit son avancement. Une parcelle en cours porte l’équipe qui l’a commencée, même un autre jour. Au survol, une loupe la montre en grand ; la toucher ouvre sa fiche. Les rangs dessinés sont un repère, pas le relevé des rangs ; une parcelle sans contour est un carré de sa surface, en pointillé.',
-  fil: 'En ce moment : chaque parcelle en cours, avec l’équipe qui l’a commencée et depuis quand — même un autre jour —, puis le tracteur en marche ou en pause. Aujourd’hui : les validations, les débuts de parcelle et le travail au tracteur de la journée (parcelles finies, avec le temps mesuré au chrono ; session ouverte ; traitement), du plus récent au plus ancien. L’équipe passe d’abord ; celui qui a saisi n’y figure que s’il était dans les rangs.',
+  fil: 'En ce moment : chaque parcelle en cours, avec l’équipe qui l’a commencée et depuis quand — même un autre jour —, puis le tracteur en marche ou en pause. Un arrachage en étapes compte depuis sa première étape validée. Aujourd’hui : les validations, les débuts de parcelle et le travail au tracteur de la journée (parcelles finies, avec le temps mesuré au chrono ; session ouverte ; traitement), du plus récent au plus ancien. L’équipe passe d’abord ; celui qui a saisi n’y figure que s’il était dans les rangs.',
   courbe: 'Le reste mesuré : une ligne relie la photo de chaque jour au point d’aujourd’hui, en direct. La photo est prise à la première ouverture du Pilotage par un administrateur, une fois les données arrivées (60 jours gardés) ; un jour sans photo est un trou. L’axe part de la première photo. La projection suit la capacité du planning ; la ligne fine montre l’allure qu’il faudrait pour finir pile à l’objectif.',
   atterrissage: 'La fin projetée de l’onglet Économie : ce qui est déjà dépensé, plus le travail qui reste, compté au barème et corrigé de la cadence mesurée de l’équipe quand elle s’applique (sinon au barème seul). Tracteur, GNR et phyto suivent l’avancement ; les prestations et les travaux à l’heure comptent ce qu’ils ont coûté.',
   coutha: 'L’atterrissage de la campagne, divisé par les hectares en production (une vigne arrachée n’en a plus). Le prévu est le budget, divisé de la même façon.',
@@ -659,7 +663,7 @@ function htmlCoursLi(c) {
   if (c.k === 'v') {
     const p = PIDX[c.e.parc], tt = T[c.e.tache];
     t = anonyme ? maj1(tt.art) + ' en cours' : eq.noms + ' sur ' + tt.art;
-    s = p.nom + ', ' + quand(c.e.depuis) + (anonyme ? ', personne d’indiqué' : '');
+    s = [p.nom, quand(c.e.depuis), anonyme ? 'personne d’indiqué' : ''].filter(Boolean).join(', ');   // DIRECT-2 : sans jour connu, pas de date
   } else {
     t = (anonyme ? 'Quelqu’un' : eq.noms) + ' au tracteur';
     s = [c.e.act ? maj1(c.e.act) : 'Tracteur', listeTxt(c.e.parcs), c.e.ts ? (c.e.pause ? 'en pause depuis ' : 'depuis ') + heureTxt(c.e.ts) : (c.e.pause ? 'en pause' : '')].filter(Boolean).join(', ');
@@ -1020,8 +1024,10 @@ function majPlan(o = {}) {
 }
 const JOURS_L = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 // « commencée aujourd'hui », « hier », « jeudi » (dans la semaine), « le 2 janv. »
+// ★ DIRECT-2 (§328) : jour inconnu = rien. Un jour absent valait « commencée aujourd'hui » : c'était inventer une date.
 function quand(d) {
-  if (!d || d >= iso(AUJ)) return 'commencée aujourd’hui';
+  if (!d) return '';
+  if (d >= iso(AUJ)) return 'commencée aujourd’hui';
   const x = deIso(d), n = Math.round((AUJ - x) / 864e5);
   if (n === 1) return 'commencée hier';
   if (n < 7) return 'commencée ' + JOURS_L[x.getUTCDay()];
@@ -1050,8 +1056,9 @@ function majEquipes() {
       calque.appendChild(m);
       requestAnimationFrame(() => requestAnimationFrame(() => m.classList.remove('neuf')));
     } else if (m.style.left !== left || m.style.top !== top) { m.style.left = left; m.style.top = top; }
-    m.classList.toggle('ancien', !!(e.depuis && e.depuis < aujIso));
-    m.title = EQ[e.id].noms + ', ' + quand(e.depuis);
+    // DIRECT-2 (§328) : un jour inconnu n'est pas « aujourd'hui » — la pastille passe en clair, son titre n'a pas de date.
+    m.classList.toggle('ancien', !(e.depuis && e.depuis >= aujIso));
+    m.title = [EQ[e.id].noms, quand(e.depuis)].filter(Boolean).join(', ');
   });
 }
 function onde(pid, etat, t) {
@@ -1218,7 +1225,8 @@ function phraseEtat(t, pid) {
   if (e === 'arr') return 'Arrachée';
   if (e === 'hors') return 'Pas concernée par ' + esc(T[t].art) + (T[t].sel ? ' (pas choisie pour cette campagne)' : ' (désactivée sur cette parcelle)');   // HORS-1 (§322)
   if (e === 'faite' && (S.presta[t] || {})[pid]) return esc(T[t].nom) + ' ' + libEtat(t, e) + ' pour l’équipe, la suite au prestataire';   // ETAT-1 (§320)
-  return esc(T[t].nom) + ' ' + libEtat(t, e) + (e === 'cours' && eq ? ', ' + esc(EQ[eq.id].noms) + ', <em>' + quand(eq.depuis) + '</em>' : '');
+  const q = (e === 'cours' && eq) ? quand(eq.depuis) : '';   // DIRECT-2 (§328) : sans jour connu, la loupe ne date pas
+  return esc(T[t].nom) + ' ' + libEtat(t, e) + (e === 'cours' && eq ? ', ' + esc(EQ[eq.id].noms) + (q ? ', <em>' + q + '</em>' : '') : '');
 }
 function montrerLoupe(pid, x, y) {
   const p = PIDX[pid]; if (!p || !document.getElementById('ck-page')) { cacherLoupe(); return; }

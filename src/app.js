@@ -8773,6 +8773,20 @@ function _pvVideTexte(T){ return (T==='Arrachage'&&_arrPrestaEnAttente())?'La su
 // ★ ARRACH-8 (§306) : un arrachage en étapes COMMENCÉ et pas fini cette campagne. La suite reste à valider, même
 //   dans une période qui commence après la date d'arrachage (utils.js, _mvArrAvantPeriode).
 window._arrEntame = function(p){ if(!_arrActif()) return false; var n=_arrNbFaites(p); return n>0 && n<_arrCfg().etapes.length; };
+// ★ DIRECT-2 (§328) — LE JOUR OÙ L'ARRACHAGE A COMMENCÉ SUR LA PARCELLE : celui de sa première étape validée cette campagne
+//   (p.arrEtapes.f[…].d, posé par saveArrEtape et par « + Journal »). Une étape n'écrit pas de « Début » : faute de date, « En direct »
+//   (Pilotage › Aujourd'hui) écrivait « commencée aujourd'hui » sur des arrachages commencés des semaines plus tôt. Nico (14/10).
+//   Lu par pilotage.js/_pilCk2Modele. Rend '' sans étape faite ou arrachage non découpé. Une étape annulée est retirée de l'état :
+//   elle ne compte plus. Seules les étapes du réglage comptent, comme pour le statut (_arrStatutTache).
+window._arrDebut = function(p){
+  if(!p||!_arrActif()) return '';
+  var f=_arrEtat(p), m='';
+  _arrCfg().etapes.forEach(function(e){
+    var d=(f[e.id]&&f[e.id].d)?String(f[e.id].d).slice(0,10):'';
+    if(/^\d{4}-\d{2}-\d{2}$/.test(d)&&(!m||d<m)) m=d;
+  });
+  return m;
+};
 function _arrSyncTache(p){
   if(!p.taches) p.taches={};
   if(typeof _mvOnActiveSaison==='function'&&!_mvOnActiveSaison()) return;
