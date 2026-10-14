@@ -11277,28 +11277,24 @@ function _pilTabsHtml(tab){
   return h;
 }
 function _pilHdrHtml(d){
-  return '<header class="pil-mast"><div class="pil-mast-orb"></div><div class="pil-mast-in">'
-    +'<div class="pil-mast-id"><div class="pil-eyebrow"><span class="pil-syncdot"></span>Pilotage \u00b7 temps r\u00e9el</div>'
-    +'<div class="pil-dom" id="pil-dom-nom">'+_pilEsc(d.domaine)+'</div></div>'
-    +'<div class="pil-mast-right">'
-    +'<div class="pil-cell pil-saison"><div class="s1">P\u00e9riode</div><div class="s2" id="pil-saison">'+_pilEsc(d.saison)+'</div></div>'
-    +'<div class="pil-msep"></div>'
-    +'<div class="pil-cell"><div class="s1">Vignoble</div><div class="s2 alt">'+d.nActives+' parcelles \u00b7 '+_pilHa(d.surfTot)+' ha</div></div>'
-    +'<div class="pil-msep"></div>'
-    +'<div class="pil-meteo" id="pil-meteo" style="'+(d.meteo?'':'display:none')+'"></div>'
+  // ★ TETE-2 (§329) — LE PILOTAGE PREND LE MODÈLE COMMUN DES EN-TÊTES. Le bandeau brun (« .pil-mast », texte crème) avait
+  //   été repeint en clair par TETE-1 sans sa météo ni son aide : crème sur blanc. Il devient un vrai .mod-header — icône,
+  //   « Pilotage », le domaine en sous-titre (le vignoble à côté, caché au téléphone), la roue — puis la ligne du jour des
+  //   autres modules : la période, la date ou la météo (qui porte alors la date courte), « ? Aide » au bout.
+  //   Plus d'hôte dédié pour l'aide : _mvInjectHelpBtn trouve cette .mod-meta-row comme partout (renderPilotage la rappelle).
+  //   Les ids lus ailleurs restent : #pil-dom-nom, #pil-saison, #pil-meteo (_pilRenderMeteo), #pil-regl-gear (_pilBind).
+  return '<div class="mod-header h-pilotage">'
+    +'<div class="mod-header-top"><span class="mod-header-icon">'+_mvIcon('graphique',20)+'</span>'
+    +'<div class="mod-header-titles"><div class="mod-header-title">Pilotage</div>'
+    +'<div class="mod-header-sub" id="pil-dom-nom">'+_pilEsc(d.domaine)+'<span class="pil-vgn"> \u00b7 '+d.nActives+' parcelles \u00b7 '+_pilHa(d.surfTot)+' ha</span></div></div>'
     // La roue crantée du module (lot NAV-3) : ce qui se règle, et le bilan de campagne.
-    +(((typeof window.isAdmin==='function')&&window.isAdmin())?'<button class="pil-icon mv-regl-gear" id="pil-regl-gear" title="R\u00e9glages" aria-label="R\u00e9glages et documents du Pilotage">'+_mvIcon('engrenage',18)+'</button>':'')
-    +'</div></div>'
-    // Hote de la pastille « ? Aide » : _mvInjectHelpBtn() cible strictement
-    // « .mod-header .mod-meta-row ». Pilotage est le SEUL module dont la page
-    // est un conteneur vide rempli en JS -> il n'en avait aucune, et sa fiche
-    // MV_AIDE.pilotage etait donc ecrite mais inatteignable. On pose un hote
-    // DEDIE plutot que la classe .mod-header sur .pil-mast : le bloc UI-4
-    // (styles.css) impose background/border/padding/box-shadow en !important
-    // sur .mod-header et masque ses pseudo-elements — le masthead serait
-    // repeint en clair sous son texte creme et perdrait son filet horizon.
-    +'<div class="mod-header pil-metahost"><div class="mod-meta-row"></div></div>'
-    +'</header>';
+    +(((typeof window.isAdmin==='function')&&window.isAdmin())?'<button class="mod-home-btn mv-regl-gear" id="pil-regl-gear" title="R\u00e9glages" aria-label="R\u00e9glages et documents du Pilotage">'+_mvIcon('engrenage',18)+'</button>':'')
+    +'</div>'
+    +'<div class="mod-meta-row mvu-meta'+(d.meteo?' mvu-avec-meteo':'')+'">'
+    +'<div class="hv2-saison-pill"><span class="hv2-dot"></span>&nbsp;<span id="pil-saison">'+_pilEsc(d.saison)+'</span></div>'
+    +'<div class="hv2-sep"></div><div class="hv2-date" data-mv-date></div>'
+    +'<div class="hv2-meteo-mini" id="pil-meteo" style="'+(d.meteo?'':'display:none')+'"></div>'
+    +'</div></div>';
 }
 function _pilSkeleton(d,tab){
   // L'onglet Économie n'a pas de roue crantée : ses trois sous-vues remplacent la
@@ -12515,9 +12511,13 @@ function _pilBindParam(d){
 
 // ── Météo (chip header) ──
 function _pilRenderMeteo(d){
+  // ★ TETE-2 (§329) : la pastille partagée avec l'Accueil (classes .hv2-meteo-mini-*) ; quand la météo est là, elle porte
+  //   la date courte et la ligne du jour masque la date longue (classe mvu-avec-meteo).
   var el=document.getElementById('pil-meteo'); if(!el) return;
-  if(!d.meteo){ el.style.display='none'; return; }
+  var row=el.parentElement;
+  if(!d.meteo){ el.style.display='none'; if(row) row.classList.remove('mvu-avec-meteo'); return; }
   el.style.display='';
+  if(row) row.classList.add('mvu-avec-meteo');
 // ⚠️ Le cache meteo d'AVANT ce lot contient un emoji, celui d'apres un nom
 //   d'icone. On tranche sur la forme, sinon l'en-tete affiche « nuage » en
 //   toutes lettres — ce qui est exactement ce qui est arrive en production.
@@ -12525,10 +12525,11 @@ function _pilRenderMeteo(d){
     var x=String(v==null?'':v);
     return /^[a-z][a-z0-9-]*$/.test(x) ? _mvIcon(x,20) : (x||_mvIcon('nuage',20));
   }
-  var jrs=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
-  var now=new Date(); var dateStr=jrs[now.getDay()]+' '+now.getDate()+' '+['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'][now.getMonth()];
-  el.innerHTML='<span class="ico">'+_pilMeteoIco(d.meteo.emoji)+'</span><span class="t">'+(d.meteo.temp!=null?d.meteo.temp+'°':'—')+'</span>'
-    + '<span class="sub">'+(d.meteo.wind!=null?('vent '+d.meteo.wind+' km/h'):'')+'<br>'+dateStr+'</span>';
+  var jour=(typeof window._mvDateCourte==='function')?window._mvDateCourte(new Date()):'';
+  el.innerHTML='<span class="hv2-meteo-mini-ico">'+_pilMeteoIco(d.meteo.emoji)+'</span>'
+    +'<span class="hv2-meteo-mini-temp">'+(d.meteo.temp!=null?d.meteo.temp+'\u00b0':'\u2014')+'</span>'
+    +'<span class="hv2-meteo-mini-txt"><span class="hv2-meteo-mini-desc">'+(d.meteo.wind!=null?('vent '+d.meteo.wind+' km/h'):'')+'</span>'
+    +'<span class="hv2-meteo-mini-jour">'+_pilEsc(jour)+'</span></span>';
 }
 
 // ── Remplissage du contenu de l'onglet courant ──
@@ -12827,6 +12828,9 @@ function renderPilotage(){
   _pilBind();
   // Idempotent : ne fait rien si la pastille est deja posee.
   if(typeof window._mvInjectHelpBtn==='function') window._mvInjectHelpBtn();
+  // ★ TETE-2 : la ligne du jour reçoit la date (data-mv-date) et l'en-tête son voyant de synchro, comme les autres modules.
+  if(typeof window._mvMetaSync==='function') window._mvMetaSync();
+  if(typeof window._syncEnsureDots==='function'){ window._syncEnsureDots(); if(typeof window._syncRefresh==='function') window._syncRefresh(); }
   if(!window._dataReady){ setTimeout(function(){ var p=document.querySelector('.page.active'); if(p&&p.id==='page-pilotage'){ try{ _pilFillContent(_pilData()); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/renderPilotage'); } } }, 800); }
 }
 

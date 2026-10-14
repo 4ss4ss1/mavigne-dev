@@ -3,9 +3,9 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **14 octobre 2026 (DIRECT-2)** — ★ **« EN DIRECT » DONNE LE VRAI JOUR DE DÉBUT D'UN ARRACHAGE, ET N'INVENTE PLUS « AUJOURD'HUI »** (§328). Lot 59, base `7eb7e82`. Nico (14/10, capture du téléphone) : « Soucis sur la date de commencement de arrachage qui n'est pas aujourd'hui » — quatre lignes « L'arrachage en cours … commencée aujourd'hui, personne d'indiqué » en tête d'« En ce moment ». Cause lue dans le code, reformulée avec la proposition (le jour de la première étape validée ; jour inconnu = aucune date ; « Personne d'indiqué » reste), « Oui, c'est ça » (MAJ-2 poussé entre-temps : repris sur `7eb7e82`), « Continuer ».
-> Une étape d'arrachage met la parcelle en cours (`_arrSyncTache`) sans écrire de « Début » : `_ckPlanDebuts` ne trouve rien, et le filet « Personne d'indiqué » de `charger` (FORME-1, §301) posait `iso(AUJ)` — visible depuis qu'« En ce moment » (DIRECT-1) écrit le jour et trie dessus. Désormais `window._arrDebut` (app.js : la première étape de la campagne) → `_pilCk2Modele` publie `depuis` (parcelles en cours sans « Début ») → le filet le lit ; jour inconnu = vide, `quand('')` n'écrit rien (la ligne, la loupe, le titre de la pastille, qui passe en clair).
-> **APP 8.95 → 8.96, SW 9.74 → 9.75.** Déploiement : `npm run build` → `firebase deploy --only hosting` (le guide ne change pas).
+> Dernière consolidation : **14 octobre 2026 (TETE-2)** — ★★ **UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR LES DIX VUES** (§329). Lot 60, base `457c1c2`. Nico (14/10, deux captures du téléphone, dicté) : « revoir les mises en page des écritures, les contrastes, les polices […] du clair sur du clair […] les textes ne sont pas forcément tous bien calés ». Reformulé, périmètre « toutes les vues », maquette validée (« c'est très bien comme sur la maquette »).
+> Cause lue dans le code : TETE-1 (§272) avait repeint le bandeau du Pilotage du brun au blanc sans sa météo ni son aide, restées crème ; la pastille de saison avait une hauteur fixe sans « insécable » (« Hiver / 2026 / - / 2027 »). Désormais : partout deux rangées — l'identité, puis la ligne du jour (saison, date — ou la météo qui porte la date courte —, « ? Aide », un « ? » rond au téléphone) ; le Pilotage pose un vrai `.mod-header` (`_pilHdrHtml`) ; bloc `★ TETE-2` en fin de `styles.css` ; `window._mvDateCourte` (utils.js) ; sous-titres sans la saison. Maquette = la vraie feuille de l'appli + le bloc, intégration identique.
+> **APP 8.96 → 8.97, SW 9.75 → 9.76.** Déploiement : `npm run build` → `firebase deploy --only hosting` (le guide ne change pas).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1443,6 +1443,7 @@ passait devant (CADRE-1, §300). Un défaut de z-index peut n'exister que chez q
 18. ★★ **Un `.overlay` rangé dans une page n'est plus une fenêtre : il quitte la classe `.overlay`** (`_plFicheFenetre`, §300). Sinon le
     verrou A11Y-2 le prend pour la fenêtre du dessus et rend tout le reste inerte.
 19. ★★ **Un `unicode-range` dit ce qu'une fonte PRÉTEND couvrir, pas ce qu'elle dessine** (AUJ-7, §309) : U+202F, l'espace des nombres en français, était dans la
+20. ★★ **Un habillage qui repeint un FOND repeint aussi les ENCRES de tout ce qu'il contient** (TETE-2, §329). TETE-1 a passé le bandeau du Pilotage du brun au blanc et foncé titre, période, vignoble — pas la météo ni l'aide, restées crème : invisibles en clair, justes en sombre. Aucun harnais ne lit une couleur posée par une autre règle : seul le rendu des deux thèmes l'a montré.
     plage et dans aucune des onze fontes — chaque appareil la prenait ailleurs, parfois de largeur nulle. Un caractère neuf se vérifie DANS la fonte (`fontTools`, `getBestCmap()`).
 
 ---
@@ -1852,6 +1853,10 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ TETE-2 — CE QUI RESTE OUVERT (§329, posé le 14/10)
+1. **À regarder chez Nico, téléphone et PC, clair et sombre** : les dix en-têtes — la ligne du jour sur une ligne, le « ? » rond au téléphone, la météo qui porte « mer. 14 oct. » (Accueil, Pilotage), le cas « Hors ligne ». Vu sur la vraie appli (Vite, données injectées, météo simulée) à 360 / 390 / 1 280 px, 0 débordement mesuré ; pas sur son téléphone (taille de texte d'Android).
+2. **Vu, non touché** : la CSS du bandeau brun (`.pil-mast*` dans `styles.css` et `_pilCssV2`, lue par `mv-harnais-tete1`) est sans emploi ; sous-titres coupés quand un badge est là (Cave « Domaine … », Phyto) ; couleurs du badge « Admin » écrites en ligne (`reglages.js`, `index.html`), neutralisées par le bloc. La chaîne `npm run check` n'a pas été jouée jusqu'au bout ici (159/393 puis 74 contrôles choisis) : `npm run build` la rejoue.
 
 ### ⚠️ DIRECT-2 — CE QUI RESTE OUVERT (§328, posé le 14/10)
 1. **À regarder chez Nico, au téléphone et sur PC** : Pilotage › Aujourd'hui › En direct — les parcelles d'arrachage de sa capture disent « commencée le … », le jour de leur première étape (la fiche le montre : « Étape validée le … »), et passent sous les parcelles commencées après ; la loupe du plan dit le même jour, la pastille est en clair. Vérifié par `mv-harnais-direct2` (vraies fonctions, 27 vérifications, 17 contre-épreuves) ; ni navigateur, ni ses données. Une parcelle en cours sans aucune étape cette campagne ni « Début » (« remis », ligne effacée) s'affiche désormais sans date : c'est voulu.

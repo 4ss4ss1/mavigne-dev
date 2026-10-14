@@ -4091,8 +4091,16 @@ function _renderMeteoMini(emoji,temp,wind,isCache){
   mini.style.display='flex';
   mini.style.opacity=isCache?'0.7':'1';
   if(icoEl)window._mvSetIcon(icoEl, emoji, 22);
-  if(tempEl)tempEl.textContent=temp+'°C';
-  if(descEl)descEl.textContent='Vent '+wind+' km/h';
+  if(tempEl)tempEl.textContent=temp+'°';
+  if(descEl)descEl.textContent='vent '+wind+' km/h';
+  _meteoMiniJour(mini);
+}
+// ★ TETE-2 (§329) — la pastille porte la date courte (« mer. 14 oct. ») et la ligne du jour masque alors la date longue :
+//   au téléphone, saison + date + météo + aide ne tenaient pas sur une ligne (« Hiver / 2026 / - / 2027 »).
+function _meteoMiniJour(mini){
+  const jourEl=document.getElementById('hv2-mini-jour');
+  if(jourEl&&typeof window._mvDateCourte==='function')jourEl.textContent=window._mvDateCourte(new Date());
+  if(mini&&mini.parentElement)mini.parentElement.classList.add('mvu-avec-meteo');
 }
 // ════ LOCALISATION DU DOMAINE (météo) ════
 // Priorité : (1) coordonnées réglées manuellement (Réglages, geo_manual) ;
@@ -4617,7 +4625,7 @@ async function fetchMeteo(){
       } else {
         // Badge vide offline
         const mini=document.getElementById('hv2-meteo-mini');
-        if(mini){mini.style.display='flex';document.getElementById('hv2-mini-ico').textContent='';document.getElementById('hv2-mini-temp').textContent='—';document.getElementById('hv2-mini-desc').textContent='Hors ligne';}
+        if(mini){mini.style.display='flex';document.getElementById('hv2-mini-ico').textContent='';document.getElementById('hv2-mini-temp').textContent='—';document.getElementById('hv2-mini-desc').textContent='Hors ligne';_meteoMiniJour(mini);}
       }
     }catch(e2){ if(window._mvAvale) window._mvAvale(e2,'app.js/fetchMeteo#6'); }
   }
@@ -6679,9 +6687,9 @@ function renderHome(){
     elSurf.textContent=surfTot>0?surfTot.toFixed(2).replace('.',','):'—';   // KIT-2 : « 11,85 », plus « 11.85 »
   }
 
-  // Sub line Accueil
+  // Sous-titre de l'Accueil — ★ TETE-2 : plus la saison, déjà dans sa pastille juste dessous (le sous-titre la coupait)
   var sub=document.getElementById('hv2-header-sub');
-  if(sub)sub.textContent=_visuSaison();
+  if(sub)sub.textContent='Tableau de bord';
 
   // Carte stat domaine — mode mémorisé (v4.34)
   homeCardMode=_homeLoadCardMode();
@@ -7926,7 +7934,7 @@ function computePStats(){
   document.getElementById('pc-a').textContent=a;
   const pcBadge=document.getElementById('pc-badge');
   if(pcBadge)pcBadge.textContent=(c+e+r)+' actives';
-  document.getElementById('p-saison-sub').textContent=`${c+e+r} actives · ${_visuSaison()}`;
+  document.getElementById('p-saison-sub').textContent='Parcelles';   // ★ TETE-2 : le compte est dans le badge, la saison dans la ligne du jour
   if(typeof _updateSaisonSelector==='function')_updateSaisonSelector();
 }
 /* ── Tri des parcelles par proximité GPS (lecture seule, tous rôles) ── */
@@ -11316,7 +11324,7 @@ function renderJournalList(){
   document.getElementById('js-tot').textContent=tot;
   document.getElementById('js-val').textContent=val;
   document.getElementById('js-e').textContent=enc;
-  document.getElementById('j-sub').textContent=`${tot} entrées · ${_visuSaison()}`;
+  document.getElementById('j-sub').textContent=`${tot} entrée${tot>1?'s':''}`;   // ★ TETE-2 : la saison est dans la ligne du jour
   if(typeof _updateSaisonSelector==='function')_updateSaisonSelector();
   // Pill filtres actifs
   var _jFiltres=[];

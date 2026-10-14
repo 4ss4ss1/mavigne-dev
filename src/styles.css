@@ -7786,3 +7786,50 @@ body:not(.mv-rail-ouvert) .mv-maj-mini{display:flex}
 .mv-perime-b:disabled{opacity:var(--o-off,.45);cursor:default}
 .mv-perime-v{margin-top:var(--e-2,8px);font-size:var(--pt-micro,12px);color:var(--texte-doux)}
 /* ★ FIN MAJ-2 */
+
+/* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.
+   Deux rangées partout, Pilotage compris (pilotage.js pose désormais un vrai .mod-header) : l'identité (icône, titre,
+   sous-titre, gestes du module) puis la ligne du jour (saison, date — ou la météo, qui porte alors la date courte —,
+   « ? Aide » au bout). Chaque morceau tient sur sa ligne (plus de « Hiver / 2026 / - / 2027 »), les trois pastilles ont
+   la même hauteur, la météo et l'aide prennent les couleurs du thème (elles gardaient le crème du bandeau brun d'avant
+   TETE-1 : crème sur blanc), la température passe en Outfit à chiffres droits. Mesuré sur la maquette validée : aucune
+   ligne du jour ne déborde sur les 10 vues, à 360, 390 et 1 280 px, clair et sombre. Par jetons, chacun avec son repli.
+   ⚠️ Posé EN FIN de feuille, comme dans la maquette : il passe après TETE-1 et tout ce qui le précède. */
+/* — L'identité : tout à la hauteur des boutons ; la pastille de synchro ne dépasse plus (cible tactile gardée à 44 px) — */
+body .mod-header .mv-syncdot{ position:relative; height:var(--h-ctl,32px)!important; min-height:var(--h-ctl,32px)!important; min-width:var(--h-ctl,32px); padding:0 var(--e-2,8px)!important; justify-content:center; border-radius:var(--r-full,999px)!important; }
+body .mod-header .mv-syncdot.synced{ width:var(--h-ctl,32px); padding:0!important; }
+body .mod-header .mv-syncdot::after{ content:''; position:absolute; inset:calc(var(--e-1,4px) * -1.5); }
+body .mod-header .mod-header-action{ display:inline-flex; align-items:center; justify-content:center; align-self:center; min-height:0!important; line-height:var(--lh-serre,1.15); white-space:nowrap; }
+body .mod-header #regl-role-badge.mod-header-badge{ color:var(--texte-med)!important; background:var(--survol)!important; border:0!important; }
+/* — La ligne du jour — */
+body .mod-header .mod-meta-row{ flex-wrap:nowrap; align-items:center; gap:var(--e-2,8px); min-height:var(--h-sm,28px); }
+body .mod-header .mod-meta-row > *{ flex-shrink:0; }
+body .mod-header .hv2-saison-pill{ height:var(--h-sm,28px)!important; gap:var(--e-1,4px); }
+body .mod-header .hv2-saison-pill > span,body .mod-header .hv2-meteo-mini,body .mod-header .mv-help-btn{ white-space:nowrap; }
+body .mod-header .hv2-sc-chev{ display:inline-flex; margin-left:0; opacity:1; color:var(--texte-doux); }
+body .mod-header .hv2-sc-chev svg{ width:var(--ic-sm,16px); height:var(--ic-sm,16px); }
+body .mod-header .hv2-sep{ width:var(--e-1,4px); height:var(--e-1,4px); background:var(--ligne-forte)!important; }
+body .mod-header .hv2-date{ flex-shrink:1!important; min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-weight:var(--fw-reg,400)!important; color:var(--texte-doux)!important; }
+body .mod-header .mod-meta-row.mvu-avec-meteo > .hv2-date,body .mod-header .mod-meta-row.mvu-avec-meteo > .hv2-sep{ display:none!important; }
+body .mod-header .hv2-meteo-mini{ height:var(--h-sm,28px); padding:0 var(--e-2,8px)!important; gap:var(--e-1,4px)!important; background:var(--survol)!important; border:0!important; border-radius:var(--r-xs,4px)!important; -webkit-backdrop-filter:none; backdrop-filter:none!important; color:var(--texte-med); }
+body .mod-header .hv2-meteo-mini-ico{ display:inline-flex; color:var(--texte-doux); }
+body .mod-header .hv2-meteo-mini-ico svg{ width:var(--ic-sm,16px); height:var(--ic-sm,16px); }
+body .mod-header .hv2-meteo-mini-ico use[href="#ic-soleil"]{ color:var(--attention); }
+body .mod-header .hv2-meteo-mini-ico use[href="#ic-pluie"],body .mod-header .hv2-meteo-mini-ico use[href="#ic-orage"],body .mod-header .hv2-meteo-mini-ico use[href="#ic-neige"]{ color:var(--bleu); }
+body .mod-header .hv2-meteo-mini-temp{ font-family:var(--font-ui)!important; font-size:var(--pt-txt,13px)!important; font-weight:var(--fw-semi,600)!important; color:var(--texte)!important; font-variant-numeric:lining-nums tabular-nums; line-height:1; }
+body .mod-header .hv2-meteo-mini-txt{ display:flex; flex-direction:column; justify-content:center; gap:var(--e-0,2px); }
+body .mod-header .hv2-meteo-mini-desc,body .mod-header .hv2-meteo-mini-jour{ font-size:var(--pt-nano,11px)!important; color:var(--texte-doux)!important; margin:0!important; line-height:1; }
+body .mod-header .mv-help-btn{ height:var(--h-sm,28px); min-height:0; padding:0 var(--e-2,8px) 0 var(--e-1,4px)!important; gap:var(--e-1,4px); background:transparent!important; border:var(--bw,1px) solid var(--ligne-forte)!important; border-radius:var(--r-full,999px)!important; color:var(--texte-med)!important; font-family:var(--font-ui); font-size:var(--pt-micro,12px)!important; font-weight:var(--fw-med,500)!important; }
+body .mod-header .mv-help-btn:hover{ background:var(--survol)!important; color:var(--texte)!important; }
+body .mod-header .mv-help-btn:active{ background:var(--presse)!important; }
+body .mod-header .mv-help-btn .mvh-q{ width:var(--ic-sm,16px); height:var(--ic-sm,16px); background:var(--texte-med)!important; color:var(--sur-inverse)!important; font-size:var(--pt-nano,11px); }
+/* — Au téléphone : « ? » seul (aria-label garde « Aide sur cet écran »), le vignoble du Pilotage sous-entendu — */
+@media (max-width:600px){
+  body .mod-header .mv-help-btn{ width:var(--h-sm,28px); padding:0!important; justify-content:center; font-size:0!important; gap:0; }
+  body .mod-header .mv-help-btn .mvh-q{ background:transparent!important; color:var(--texte-med)!important; font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); }
+  body .mod-header .pil-vgn{ display:none; }
+}
+/* — Pilotage : la barre de portée sous l'en-tête. Le fil d'Ariane pouvait rétrécir sous son libellé (min-width:0) et passer
+     SOUS « N choses à compléter » ; il garde sa largeur, le bouton passe à la ligne s'il le faut. — */
+body #page-pilotage .pil-portee .pil-crumb{ min-width:auto; }
+/* ★ FIN TETE-2 */

@@ -255,7 +255,7 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
   T(/window\._pilParamOpen=function\(\)\{/.test(pil) && /closest\('\[data-diag\]'\)/.test(pil.slice(pil.indexOf('window._pilParamOpen=function'), pil.indexOf('window._pilParamOpen=function')+900)),
     '_pilParamOpen est expos\u00e9 et d\u00e9l\u00e8gue les boutons \u00ab \u00e0 compl\u00e9ter \u00bb de la feuille');
   T(/if\(_pa==='param'\)\{ if\(window\._mvReglOpen\) window\._mvReglOpen\('pilotage'\); return; \}/.test(pil), 'le raccourci Param\u00e9trage de l\u2019\u00c9conomie ouvre la roue');
-  T(/id="pil-regl-gear"/.test(pil) && /window\.isAdmin\(\)\)\?'<button class="pil-icon mv-regl-gear" id="pil-regl-gear"/.test(pil), 'la roue est dans l\u2019en-t\u00eate du Pilotage, admin seulement');
+  T(/id="pil-regl-gear"/.test(pil) && /window\.isAdmin\(\)\)\?'<button class="mod-home-btn mv-regl-gear" id="pil-regl-gear"/.test(pil), 'la roue est dans l\u2019en-t\u00eate du Pilotage, admin seulement');
   T(/gearR\.onclick=function\(\)\{ if\(window\._mvReglOpen\) window\._mvReglOpen\('pilotage'\); \}/.test(pil), '\u2026 et elle est branch\u00e9e');
   T(!/_pilOpenParam/.test(pil) && !/_pilOpenParam/.test(reg), '_pilOpenParam (l\u2019ancien saut Domaine \u2192 Param\u00e9trage) n\u2019existe plus');
   T(/pilotage:\s*\{\s*ov:'ovReglPilotage'/.test(app) && /else if\(mod==='pilotage'\)\{ if\(window\._pilParamOpen\) window\._pilParamOpen\(\); \}/.test(app), 'la roue du Pilotage rend par _pilParamOpen');

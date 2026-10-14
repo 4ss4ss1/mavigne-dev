@@ -1882,3 +1882,37 @@ Nico (14/10, capture du téléphone, Pilotage › Aujourd'hui › En direct) : �
 
 ### 328f. Ouvert
 §28 « DIRECT-2 — CE QUI RESTE OUVERT ».
+
+## 329. ★★ TETE-2 — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR LES DIX VUES (14/10 — `src/styles.css` (bloc `★ TETE-2` en fin de feuille) · `src/pilotage.js` (`_pilHdrHtml`, `_pilRenderMeteo`, `renderPilotage`) · `src/app.js` (`_renderMeteoMini`, `_meteoMiniJour` neuf, la météo hors ligne, trois sous-titres) · `src/utils.js` (`window._mvDateCourte` neuf, APP, WHATS_NEW) · `index.html` (la pastille météo à deux lignes, versions) · `public/sw.js` · `scripts/mv-harnais-tete2.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/mv-harnais-regl-module.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-280-329.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/TETE-2.json` · **APP 8.96 → 8.97, SW 9.75 → 9.76**, base `457c1c2`)
+
+### 329a. D'où ça vient
+Nico (14/10, deux captures du téléphone, dicté) : « revoir les mises en page des écritures, et puis les contrastes, les polices, regarde au niveau des bandeaux […] du clair sur du clair, on ne voit pas très bien […] les textes ne sont pas forcément tous bien calés ». Captures : Vigne › Accueil (pastille de saison sur quatre lignes, date sur trois, météo grise à texte blanc, « Aide » coupé au bord) et Pilotage (météo et « Aide » presque invisibles, roue seule sur sa ligne, « Aide » sur une ligne à lui). « Ne fais rien tout de suite », puis périmètre « toutes les vues », puis « go » ; maquette validée : « c'est très bien comme sur la maquette ».
+
+### 329b. La cause, lue dans le code
+1. **Le Pilotage avait gardé l'encre du brun.** `.pil-mast` était dessiné sombre (texte `#F0E2C8`). TETE-1 (§272) l'a passé sur `--bg-card` et a foncé `.pil-dom`, `.pil-cell .s1/.s2` — pas `.pil-meteo .t/.sub` (crème, en Cormorant) ni `.pil-metahost .mv-help-btn` (la « variante sombre » de l'aide) : crème sur blanc. En sombre, tout était juste — d'où le défaut invisible à qui regarde le thème sombre.
+2. **L'Accueil** : `.hv2-meteo-mini` gardait sa peau d'en-tête sombre (`rgba(0,0,0,.20)`, texte blanc) ; `.hv2-saison-pill` avait une hauteur fixe (`--h-badge`) sans `white-space:nowrap` — le texte débordait la pastille ; la ligne (saison + date + météo + aide) ne tenait pas à 390 px, « Aide » sortait de l'écran.
+3. **Deux modèles d'en-tête** : neuf `.mod-header` dans `index.html`, et le Pilotage à part (`.pil-mast` + un hôte dédié pour l'aide), avec la période et la date présentées autrement.
+
+### 329c. La maquette, et pourquoi elle ne peut pas mentir
+Publiée en page (artefact), elle embarque la **vraie** `styles.css`, les CSS injectées par les modules et l'en-tête de chaque vue **tel que l'appli le rend** (balisage relevé dans la vraie appli : serveur Vite, données injectées, connexion DOM réelle, réseau coupé — méthode du §270c, Chromium de §192b), plus le bloc proposé, posé EN FIN de feuille. Bascules Avant / Après, Clair / Sombre. L'intégration reprend ce bloc tel quel, au même rang : ce que Nico a validé est ce qui part.
+
+### 329d. Ce qui a été fait
+- **Un seul modèle** : partout l'identité (icône, titre, sous-titre, gestes du module) puis la **ligne du jour** — la saison, la date, ou la météo quand on la connaît (Accueil, Pilotage) qui porte alors la date courte, et « ? Aide » au bout. Au téléphone (≤ 600 px) l'aide est un « ? » rond : le mot reste dans `aria-label` (« Aide sur cet écran »).
+- **Le Pilotage pose un vrai `.mod-header`** (`_pilHdrHtml`) : « Pilotage », le domaine en sous-titre (« · N parcelles · S ha » à côté, caché au téléphone), la roue (admin), puis la ligne du jour. Ids gardés (`#pil-dom-nom`, `#pil-saison`, `#pil-meteo`, `#pil-regl-gear`) ; la roue prend la classe des autres (`mod-home-btn`) ; `renderPilotage` rappelle `_mvMetaSync` (la date) et `_syncEnsureDots` + `_syncRefresh` (le voyant, absent du bandeau jusqu'ici).
+- **Une pastille météo partagée** (`.hv2-meteo-mini-*`) : icône colorée (soleil en `--attention`, pluie en `--bleu`), température en Outfit à chiffres droits, deux lignes « vent N km/h » / « mer. 14 oct. ». La date courte vient de `window._mvDateCourte` (utils.js) — le Pilotage formait la sienne de son côté. La classe `mvu-avec-meteo` de la ligne masque alors la date longue (Accueil : `_meteoMiniJour`, y compris hors ligne ; Pilotage : `_pilRenderMeteo`).
+- **Le bloc `★ TETE-2`**, par jetons avec repli : ligne sans retour, morceaux insécables, trois pastilles à `--h-sm` ; voyant de synchro à `--h-ctl` (cible gardée à 44 px) ; « + Ajouter » recentré ; badge « Admin » lisible ; le fil d'Ariane de la barre de portée ne passe plus sous « N choses à compléter » (`min-width:auto`).
+- **Sous-titres** : l'Accueil dit « Tableau de bord », Parcelles « Parcelles » (le compte reste au badge), le Journal « N entrée(s) » (0 au singulier) — la saison, déjà dans sa pastille, coupait la ligne.
+
+### 329e. Mesuré
+- `scripts/mv-harnais-tete2.mjs` (neuf, branché) : 17 assertions dont quatre EXÉCUTENT le code (`_pilHdrHtml` avec le vrai `_pilEsc`, `_pilRenderMeteo`, `_renderMeteoMini` + `_meteoMiniJour`, `_mvDateCourte` sur trois jours), 17 contre-épreuves qui mordent. Deux fautes du harnais avant la première verte, aucune du code : `_pilEsc` porte `/\"/g` (un guillemet dans une expression régulière fausse un découpage aux accolades : prise à la ligne), et une date née dans le contexte `vm` n'est pas une `Date` du harnais (`instanceof` faux : `Object.prototype.toString`).
+- `mv-harnais-contraste` a rougi sur le premier jet : `color:var(--bg-card)` (un jeton de surface en encre) pour le « ? » → `--sur-inverse`. `mv-harnais-regl-module` suit la nouvelle classe de la roue. Preflight 0 erreur (8 avertissements, ceux de la base).
+- Rendu de la vraie appli intégrée (réponse Open-Meteo simulée : le vrai chemin `_renderMeteoMini` et le cache lu par le Pilotage), 10 vues × clair / sombre × 390 / 1 280 px, plus 360 px sur la maquette : 0 ligne du jour qui déborde, 0 erreur JS.
+- Chaîne `npm run check` (un cœur) : 159/393 en 280 s, puis 74 contrôles choisis parmi les 234 restants (en-têtes, cockpit, typo, jetons, versions, nouveautés…) : verts, hors `harnais-claude-md` (le script neuf pas encore nommé) réglé par ce document.
+
+### 329f. Arbitrages
+- **La date dans la météo, le « ? » seul au téléphone** : à 360 px, saison + date + météo + « ? Aide » ne tiennent pas (mesuré : 376 px pour 332). Retenu sur maquette par Nico. Sur ordinateur, « ? Aide » reste écrit.
+- **La météo reste où elle était** (Accueil, Pilotage) : la mettre dans chaque en-tête demandait de nouvelles lectures de données, sans demande.
+- **La CSS du bandeau brun n'est pas purgée** (§25.15 : pas de purge de CSS sur une lecture statique) ; elle ne vise plus rien.
+
+### 329g. Ouvert
+§28 « TETE-2 — CE QUI RESTE OUVERT ».

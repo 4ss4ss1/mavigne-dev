@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.96';
+export const APP_VERSION = '8.97';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1056,6 +1056,12 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.97', d: '2026-10-14', items: [
+    { niv: 0, pour: ['tous'], emoji: 'oeil', titre: 'Des en-têtes lisibles, rangés pareil sur tous les écrans',
+      desc: "En haut du Pilotage, la météo et le bouton d’aide se voyaient à peine (texte clair sur fond clair), et sur l’Accueil la saison et la date s’étalaient sur plusieurs lignes. "
+        + "Tous les écrans ont maintenant le même en-tête : le nom de l’écran, puis une ligne avec la saison, la date — ou la météo du jour, qui porte alors la date — et l’aide au bout. "
+        + "Au téléphone, l’aide est le bouton rond « ? » ; sur ordinateur, « ? Aide » reste écrit." },
+  ] },
   { v: '8.96', d: '2026-10-14', items: [
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'En direct donne le vrai jour de début d’un arrachage',
       desc: "Dans Pilotage › Aujourd’hui, « En direct » écrivait « commencée aujourd’hui » sur des parcelles d’arrachage commencées bien avant, et les mettait en tête de « En ce moment ». "
@@ -6530,6 +6536,14 @@ window._mvInjectHelpBtn   = _mvInjectHelpBtn;
    y compris le marquage « · consultée » porté par la classe .consult.
    Les vues rendues en JS (Le Chai) rappellent window._mvMetaSync() après
    injection : l'observateur ne surveille que la source, pas les copies.       */
+/* ★ TETE-2 (§329) — LA DATE COURTE DES PASTILLES MÉTÉO (Accueil, Pilotage) : « mer. 14 oct. ». La date longue de la ligne
+   du jour (« Mercredi 14 octobre ») reste écrite par app.js et recopiée par _mvMetaSync. Une seule écriture pour les deux
+   pastilles : le Pilotage formait la sienne de son côté (« mercredi 14 oct. »). */
+window._mvDateCourte = function (d) {
+  d = d || new Date();
+  return ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'][d.getDay()] + ' ' + d.getDate() + ' '
+    + ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'][d.getMonth()];
+};
 function _mvMetaSync() {
   var src = document.getElementById('saison-badge-home');
   var dat = document.getElementById('hv2-date');
