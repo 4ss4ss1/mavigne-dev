@@ -19,8 +19,8 @@
      D. _agtFicheAppareils (admin-gt.js, exécutée) : « bloquée » si format plus bas,
         version ancienne signalée, noms échappés.
      E. Code lu : fbSave met en file quand périmé ; _flushQueue ne part pas ; sw.js active
-        sur MV_ACTIVER et ne met pas /version.json en cache ; le retour ≥ _MV_RETOUR_H h
-        n'active que si rien n'est en cours ; build, en-tête sans cache, règle Firestore.
+        sur MV_ACTIVER et ne met pas /version.json en cache ; le moment calme
+        (MAJ-2, §327) n'active que si rien n'est en cours ; build, en-tête sans cache, règle Firestore.
    ⚠️ Contre-épreuves en mémoire, garde d'injection. CHEMINS : fileURLToPath (20/08).
    ─────────────────────────────────────────────────────────────────────────── */
 import fs from 'node:fs';
@@ -84,11 +84,12 @@ async function jouer(S, silencieux) {
     if (!rc) throw new Error('extraction _mvRienEnCours');
     const rien = (o) => new Function('document', 'window', rc + '\nreturn _mvRienEnCours();')(
       { querySelector: () => (o.ov ? {} : null), activeElement: o.champ ? { tagName: 'INPUT' } : { tagName: 'BODY' } },
-      { _offlineQueueCount: () => o.file || 0 });
+      { _offlineQueueCount: () => o.file || 0, _mvEnvoisEnCours: () => o.route || 0 });
     t('Rien d\u2019ouvert → oui', rien({}) === true);
     t('Une fenêtre ouverte → non', rien({ ov: 1 }) === false);
     t('Un champ actif → non', rien({ champ: 1 }) === false);
-    t('Une saisie en file → non', rien({ file: 2 }) === false);
+    t('Une saisie en file → oui (MAJ-2 §327 : elle repart après la relance)', rien({ file: 2 }) === true);
+    t('Un envoi en route → non (MAJ-2 §327)', rien({ route: 1 }) === false);
 
     titre('C. Le parc d\u2019appareils');
     const na = bloc(S.fb, 'window.fbNoterAppareil = async function'), id = bloc(S.fb, 'function _mvIdAppareil(');
@@ -125,10 +126,10 @@ async function jouer(S, silencieux) {
     const fl = bloc(sansCom(S.fb), 'async function _flushQueue(') || '';
     t('_flushQueue : ne part pas tant que la version est périmée', /^async function _flushQueue\(\) \{\s*if \(window\._MV_PERIME\) return;/.test(fl));
     const sw = sansCom(S.sw);
-    t('sw.js : MV_ACTIVER → skipWaiting (seule activation)', /event\.data\?\.type === 'MV_ACTIVER'\) self\.skipWaiting\(\)/.test(sw) && (sw.match(/skipWaiting\(/g) || []).length === 1);
+    t('sw.js : MV_ACTIVER → skipWaiting ; seule autre activation : MV_ACTIVER_CALME (MAJ-2)', /event\.data\?\.type === 'MV_ACTIVER'\) self\.skipWaiting\(\)/.test(sw) && (sw.match(/skipWaiting\(/g) || []).length === 2 && /event\.data\?\.type === 'MV_ACTIVER_CALME'/.test(sw));
     t('sw.js : /version.json jamais intercepté', /if \(url\.pathname === '\/version\.json'\) return;/.test(sw));
     const vis = sansCom(S.app);
-    t('Retour ≥ _MV_RETOUR_H h ET rien en cours → activation douce', /if\(absent>=_MV_RETOUR_H\*3600000 && _mvRienEnCours\(\)\) _mvActiverMaj\(false\);/.test(vis));
+    t('Moment calme (MAJ-2 §327) : _mvMajCalme n\u2019active que si rien n\u2019est en cours', /function _mvMajCalme\(moment\)\{[\s\S]{0,120}if\(!_mvRienEnCours\(\)\) return false;/.test(vis));
     /* GT-1 (§249) : le build fabrique d'abord gt.html (scripts/mv-gt-page.mjs) ; l'ordre qui compte ici est inchangé —
        version.json APRÈS inject-precache. */
     t('Build : version.json publié après inject-precache', /"build": "node scripts\/mv-gt-page\.mjs && vite build && node scripts\/inject-precache\.mjs && node scripts\/mv-version-json\.mjs"/.test(S.pkg));
@@ -151,7 +152,7 @@ const MUT = [
   ['la file part avec le code périmé', S => muter(S, 'fb', "  if (window._MV_PERIME) return;   // VER-1", "  // VER-1")],
   ['VER-2 : on parse de nouveau une page HTML comme du JSON', S => muter(S, 'app', "    if(!/json/i.test(r.headers.get('content-type')||'')) return;\n", "")],
   ['même format = périmé (bloque chaque déploiement)', S => muter(S, 'app', "if(fmt>0 && fmt>(Number(window.MV_FORMAT)||0))", "if(fmt>0 && fmt>=(Number(window.MV_FORMAT)||0))")],
-  ['l\u2019activation au retour ignore ce qui est en cours', S => muter(S, 'app', "if(absent>=_MV_RETOUR_H*3600000 && _mvRienEnCours())", "if(absent>=_MV_RETOUR_H*3600000)")],
+  ['l\u2019activation douce ignore ce qui est en cours (MAJ-2)', S => muter(S, 'app', "if(!_mvRienEnCours()) return false;", "if(false) return false;")],
   ['le parc écrase au lieu de fusionner', S => muter(S, 'fb', "await setDoc(fbDocRef('appareils'), { value: ligne }, { merge: true });", "await setDoc(fbDocRef('appareils'), { value: ligne });")],
   ['sw.js n\u2019active plus sur demande', S => muter(S, 'sw', "  if (event.data?.type === 'MV_ACTIVER') self.skipWaiting();", "")],
 ];

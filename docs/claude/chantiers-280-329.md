@@ -1808,3 +1808,45 @@ Carnet de l'appareil (Android 10, Chrome, appli 8.85), heures de Paris : 09 h 07
 
 ### 326g. Ouvert
 §28 « ENVOI-1 — CE QUI RESTE OUVERT ».
+
+## 327. ★★ MAJ-2 — LA MISE À JOUR NE TRAÎNE PLUS : MOMENTS CALMES, BARRE, GESTE (14/10 — `src/app.js` (bloc SERVICE WORKER réécrit : `_mvMajSuivre`, `_mvMajNouvelle`, `_mvMajChercher`, `_mvMajFinInstall`, `_mvMajCalme`, `_mvMajLancer`, `_mvMajRecharger`, `_mvMajRideau`, `_mvMajPeindre`, `_mvMajRailHtml`, `_mvMajAnnoncer`, `_mvMajBoutonReglages` ; `_mvRienEnCours`, `_mvEcranPerime`, `_mvVerifierVersion`, `_dockBuild`) · `public/sw.js` (`MV_ACTIVER_CALME`) · `public/boot.js` · `src/coquille.js` · `src/firebase.js` (`_mvEnvoisEnCours`) · `src/styles.css` (bloc MAJ-2) · `index.html` (Réglages › Moi › Mise à jour) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Réglages) · `guide/01-demarrer.html`, `guide/14-depannage.html` · `scripts/mv-harnais-maj2.mjs` (neuf), `scripts/mv-harnais-version.mjs`)
+
+### 327a. La demande
+Nico (13/10, dicté) : « il faudrait forcer les mises à jour… indiquer qu'une mise à jour est disponible, l'appliquer, parce que parfois il y a des retards de version et ça ne se met pas à jour ». Reformulé (objectif : chaque téléphone vite sur la dernière version, un message qui l'installe d'un appui ; cause lue dans le code), puis « fais une maquette, je veux ce qu'il y a de mieux ». Maquette (toile Design : un prototype à jouer et huit écrans) : « c'est parfait », texte blanc dans les boutons de couleur (défaut de la maquette, corrigé). « go ».
+
+### 327b. Ce qui ne marchait pas (lu dans le code de la 8.94)
+- VER-1 (§184) n'activait la version en attente qu'au retour après ≥ 4 h d'absence (`_MV_RETOUR_H`) : un téléphone utilisé toute la journée n'y arrivait que le lendemain.
+- Au retour, `_mvActiverMaj(false)` appelait `reg.update()` puis lisait `reg.waiting` : `update()` rend la main dès que le nouveau worker est EN installation, avant « installed ». Une version déployée pendant l'absence était ratée, puis attendait le retour suivant de plus de 4 h.
+- « Rien en cours » exigeait une file VIDE : sans réseau, une saisie en file retenait la mise à jour toute la journée.
+- Depuis NOTIF-3 (§311), aucun signal : ni notification, ni rien à l'écran. Un ordinateur laissé ouvert ne cherchait jamais.
+- Constat : le téléphone de Nico tournait en 8.85 le 13/10 (§326).
+
+### 327c. La règle
+1. **Moments calmes** — une version téléchargée s'installe quand l'appli passe en arrière-plan (`visibilitychange` → `hidden` : le rechargement ne se voit pas), ou au retour AVANT le premier geste, derrière le rideau. Condition : `_mvRienEnCours()` — aucune fenêtre (`.overlay.open`, `.mvv-ov.open`), aucun champ actif (contenteditable compris), aucun envoi EN ROUTE (`_mvEnvoisEnCours`, firebase.js). Une saisie EN FILE ne bloque plus : la file vit sur le disque et repart après la relance (FUSION-1, ENVOI-1). Plus de seuil de 4 h.
+2. **Pas sous les doigts d'un autre onglet** — l'activation douce passe par `MV_ACTIVER_CALME` : `sw.js` regarde toutes les fenêtres de l'appli (`includeUncontrolled` : le worker en attente ne contrôle personne) et n'active que si aucune AUTRE n'est affichée. Refus → 4 s sans changement de contrôleur, la page relâche (rideau fermé, marque retirée) ; la barre reste.
+3. **Pas raté** — `_mvMajSuivre` écoute `updatefound` → `statechange` : une version qui FINIT de s'installer s'annonce (`_mvMajNouvelle`) et s'installe aussitôt si l'appli est cachée. `_mvMajChercher` attend la fin de l'installation (`_mvMajFinInstall`, 15 s au plus) avant de conclure.
+4. **Au retour** : version déjà là → installation derrière le rideau ; pas encore là → recherche ; la barre l'annoncera et elle s'installera au prochain passage en arrière-plan. Jamais d'installation au milieu de l'utilisation.
+5. **La barre** (téléphone, tablette) : « Nouvelle version prête · Mettre à jour » juste au-dessus du dock, toute la barre se touche, seulement quand le dock est affiché ; le contenu, les boutons flottants (Tracteur, Phyto) et le toast remontent de 44 px. **Ordinateur** : une carte en bas de la barre latérale (logement `#mv-rail-maj` posé par `_railHtml`), une pastille avec bulle quand elle est repliée. **Orange** après 24 h (`_MV_MAJ_RETARD_MS`, depuis `mv_maj_depuis` ; l'épisode finit au démarrage sans version en attente) : « En attente depuis hier ».
+6. **Le geste** : bouton → « Mise à jour… » → le rideau (l'écran de démarrage : noir, logo, « Ma Vigne », « Mise à jour ») → `_mvActiverMaj(true)` (`MV_ACTIVER`) → `controllerchange` → rechargement. `mv_maj_faite` (sessionStorage) est posé avant : `boot.js` met « Mise à jour » sous le titre de l'écran de démarrage, puis `_mvMajAnnoncer` dit « Ma Vigne est à jour · version » une fois cet écran parti (au retour si l'installation s'est faite en arrière-plan) ; rien si la version n'a pas changé.
+7. **`controllerchange`** → `_mvMajRecharger` : tout de suite si le rideau est ouvert ou l'appli cachée, ou si rien n'est en cours ; sinon un moment calme, 30 s au plus.
+8. **La recherche** : au démarrage, à chaque retour, quand `version.json` (lu toutes les 30 min, VER-1) annonce une autre version que l'installée (`_mvMajVersionServeur` : l'ordinateur resté ouvert), et à la main dans Réglages › Moi › Mise à jour (« Rechercher » → « Recherche… » → « Version x · à jour », ou « Version y prête » et « Mettre à jour »).
+9. **L'écran obligatoire** (format changé, VER-1) prend la charte DS-4 : tuile, bouton à l'accent (plus de vert en dur), nombre de saisies gardées sur l'appareil (`_offlineQueueCount`), rideau au clic. Sa couche passe de 99999 (en ligne) à 9150 dans la feuille : la règle UI-Z (`mv-harnais-couches`) veut les surfaces sous le plancher modal (9200) — une fenêtre de dialogue déjà ouverte et la porte CGU passent devant ; ce qui s'y saisit part en file (périmé), rien ne se perd.
+
+### 327d. Arbitrages
+- **Pas de blocage au bout de quelques jours** sans changement de format : il arrêterait un salarié en pleine journée pour une version sans risque (proposé, non retenu ; l'écran obligatoire reste réservé au format).
+- **Une seule couleur pour agir** (DS-4) : barre teintée lie-de-vin, bouton à l'accent ; l'orange (attention) pour le retard. Les barres pâles gardent un texte foncé.
+- **Pas de lien « Nouveautés » dans le toast** : les niveaux d'ANN-1 s'en chargent.
+- **Le geste passe outre les autres onglets** (`MV_ACTIVER`) : voulu ; ils se rechargent à leur prochain moment calme (`_mvMajRecharger`, 30 s au plus).
+
+### 327e. Les harnais
+- `mv-harnais-maj2` (neuf) : 45 verts sur les vraies fonctions d'`app.js` (bouchons : stockage, service worker, document), 11 contre-épreuves qui rougissent toutes.
+- `mv-harnais-version` (VER-1) adapté : la file ne bloque plus, l'envoi en route bloque ; le câblage lu suit `_mvMajCalme` ; `sw.js` porte deux `skipWaiting` (MV_ACTIVER, MV_ACTIVER_CALME).
+
+### 327f. Mesuré
+- La liste entière (`mv-harnais-liste`, 389 commandes) jouée commande par commande sur l'état livré : 389 vertes. `build-guide --check` rougit tant que `public/guide.html` n'est pas régénéré — vert après `npm run site` (la séquence de déploiement) ; `mv-harnais-recup --contre` joué seul (231 s, plus long que la borne du lanceur maison).
+- Rouges trouvés par la liste et corrigés : tailles d'icônes hors échelle (22, 12 → 24, 16), `outline:none` sur la barre (l'anneau de focus commun suffit), replis manquants (`--shadow-lg`, `--shadow-sm`, `--ls-serre`), graisse 300 du rideau (→ 400), marge 28 px hors échelle (→ 32), rembourrage des pages (→ un `::after` de 44 px), couche de l'écran obligatoire (→ 9150).
+- `npm run build --ignore-scripts` vert ; `dist/version.json` : app 8.95, format 1 (pas de « mise à jour obligatoire ») ; `dist/sw.js` : `mavigne-v9.74`, `MV_ACTIVER_CALME` présent.
+- Non vérifié : un navigateur, un vrai service worker, un téléphone (iOS : une appli cachée peut être gelée aussitôt) ; `test:smoke`, `test:e2e` ; le déploiement.
+
+### 327g. Ouvert
+§28 « MAJ-2 — CE QUI RESTE OUVERT ».

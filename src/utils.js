@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '8.94';
+export const APP_VERSION = '8.95';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1056,6 +1056,12 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '8.95', d: '2026-10-14', items: [
+    { niv: 1, pour: ['tous'], cible: '#regl-maj-row', emoji: 'rotation', titre: 'L’application se met à jour toute seule, sans attendre',
+      desc: "Une nouvelle version pouvait attendre des jours avant de s’installer : il fallait fermer complètement l’application, ou la laisser plusieurs heures en arrière-plan. "
+        + "Maintenant, elle s’installe dès que vous quittez l’application ou que vous y revenez, si rien n’est en cours. Sinon, une barre « Nouvelle version prête » s’affiche au-dessus du menu (sur ordinateur, en bas de la barre de gauche) : un appui, quelques secondes. "
+        + "Réglages › Moi › Mise à jour vérifie à la main." },
+  ] },
   { v: '8.94', d: '2026-10-13', items: [
     { niv: 2, pour: ['tous'], emoji: 'rotation', titre: 'Une saisie enregistrée ne se perd plus, même en relançant l’appli',
       desc: "Quand le téléphone affichait du réseau mais que le serveur ne répondait pas, une saisie restait en attente sans être gardée sur le téléphone : relancer l’application à ce moment-là l’effaçait. Et après une relance, les saisies encore en attente n’apparaissaient plus, puis la saisie suivante les remplaçait. "
@@ -5349,6 +5355,7 @@ var MV_AIDE = {
         return _mvAideSections('#regl-tabs-row .mvu-tab', 'onglets',
           "Ce qui n’appartient à aucun module : le domaine, l’équipe, votre compte.");
       },
+      ['La mise à jour', "se fait toute seule : quand vous quittez l’application ou que vous y revenez, si aucune fenêtre n’est ouverte et que rien n’est en cours de saisie. Sinon, une barre « Nouvelle version prête » s’affiche au-dessus du menu (sur ordinateur, en bas de la barre de gauche) : un appui, quelques secondes. Ici, Moi › Application › Mise à jour vérifie à la main."],
       ['Les réglages de la Vigne et du Tracteur', "ne sont plus ici : chaque module les règle chez lui, par la roue crantée de son en-tête — tâches, barème et plantations pour la Vigne, parc, activités et chrono pour le Tracteur. La Cave fait pareil depuis peu."],
       ['Vos écartements', "ramènent les heures conseillées à votre densité réelle. Sans eux, le barème suppose 10 000 pieds à l’hectare — vos heures à vous, elles, ne bougent jamais."],
       ['Le barème de référence', "se choisit par région dans l’écran du barème, ouvert depuis « + Nouvelle tâche » par le lien « Voir le barème de la convention et vos écartements » : la Bourgogne ou la Gironde pour l’instant, chacune avec son texte source et sa date. C’est une référence, pas une règle : en changer ne modifie aucune de vos valeurs."],

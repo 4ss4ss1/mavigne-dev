@@ -3,9 +3,9 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **13 octobre 2026 (ENVOI-1)** — ★★★ **UNE SAISIE ENREGISTRÉE NE SE PERD PLUS, MÊME RELANCÉE EN ROUTE** (§326). Lot 57, base `e159c01` (construit d'abord sur `083fdb5`, rejoué sur TOURNEE-1 et RETRAIT-1). Nico (13/10, dicté, au tracteur) : la synchro ne passait pas, « pourtant tout était bien enregistré » ; à une autre parcelle, l'appli a dit de redémarrer ; après la relance, les parcelles d'avant avaient disparu — « ce genre d'erreur ne doit jamais arriver ». Carnet de l'appareil (Android, 8.85) : serveur injoignable ×2 alors qu'en ligne, démarrage lent, relance manuelle. Reformulé, journal envoyé, « continuez ».
-> Reproduit sur le code d'avant : fbSave attendait le serveur AVANT de mettre en file (§145h ③ « non traité ») — la relance pendant l'attente effaçait la saisie ; après relance, la relecture s'appliquait sans la file et la saisie suivante remplaçait la valeur en file ; le vidage effaçait sans regarder ; sa garde jetait. Désormais : entrée d'envoi sur le disque avant de partir (`_mvEnvoiNoter`, reprise par `_loadQueue` → `_mvEnvoisRepris`, fusionnée), mémoire = serveur + file (`_mvFileParDessus` dans `applyFbData`), envois bornés à 20 s avec annulation (`_mvEnvoiBorne`), un seul vidage (`_mvViderFile`) qui ne retire que ce qu'il a envoyé, garde → coffre (`_mvFileBloquee`), coffre qui fusionne.
-> **APP 8.93 → 8.94, SW 9.72 → 9.73.** Déploiement : `npm run build` → `firebase deploy --only hosting` (le guide ne change pas).
+> Dernière consolidation : **14 octobre 2026 (MAJ-2)** — ★★ **LA MISE À JOUR NE TRAÎNE PLUS : MOMENTS CALMES, BARRE, GESTE** (§327). Lot 58, base `68529dd`. Nico (13/10, dicté) : « il faudrait forcer les mises à jour… parfois il y a des retards de version et ça ne se met pas à jour ». Reformulé (cause lue dans le code : seuil de 4 h, retour raté quand la version n'avait pas fini de s'installer, file non vide bloquante, plus aucun signal depuis NOTIF-3), « fais une maquette, je veux ce qu'il y a de mieux », maquette validée (« c'est parfait », texte blanc dans les boutons de couleur), « go ». Le téléphone de Nico tournait en 8.85 le 13/10 (§326).
+> Une version téléchargée s'installe aux **moments calmes** — appli passée en arrière-plan, ou retour avant le premier geste — si rien n'est en cours (fenêtre, champ actif, envoi en route ; une saisie EN FILE ne bloque plus, ENVOI-1) : `_mvMajCalme` → `MV_ACTIVER_CALME`, que `sw.js` n'honore que si aucune autre fenêtre de l'appli n'est affichée. Sinon la barre « Nouvelle version prête » au-dessus du dock, la carte en bas de la barre latérale (pastille repliée), orange après 24 h ; le geste ouvre le rideau (l'écran de démarrage « Mise à jour », repris par `boot.js`) puis « Ma Vigne est à jour · version » ; Réglages › Moi › Mise à jour cherche à la main ; `version.json` annonce une autre version → recherche. Le piège de VER-1 tenu (`_mvMajFinInstall`). Écran obligatoire à la charte DS-4.
+> **APP 8.94 → 8.95, SW 9.73 → 9.74.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1207,8 +1207,7 @@ et un caractère absent sort en **carré noir** que l'extraction de texte ne voi
 - `boot.js` précaché : si `__MV_BOOTED` absent après 10 s → rechargement auto, puis « Réessayer ».
   ⚠️ `__MV_BOOTED` est posé **dès l'évaluation d'`app.js`** : il ne couvre PAS un `_fbLoad` bloqué. C'est
   `_mvBootGarde` (filet à 15 s) et les attentes bornées de `_fbLoad` qui le font (§145).
-- ★ **Mise à jour : plus jamais forcée en cours d'usage** (MAJ-1, §157). `skipWaiting` ne part que sur le message `MV_ACTIVER` (VER-1, §184 : retour au premier plan après ≥ 4 h,
-  ou écran « Mise à jour obligatoire ») ; `controllerchange` recharge, en filet. `_swUpdatePending` reste du code mort. NOTIF-1 (§158) ne notifie que si l'appareil l'autorise (§310).
+- ★ **Mise à jour : jamais sous les doigts, mais elle ne traîne plus** (MAJ-1 §157, VER-1 §184, MAJ-2 §327). `skipWaiting` ne part que sur `MV_ACTIVER` (le geste : écran obligatoire, barre « Nouvelle version prête », carte de la barre latérale, Réglages › Moi › Mise à jour) ou `MV_ACTIVER_CALME` (moment calme : appli passée en arrière-plan ou retour avant le premier geste, rien en cours — refusé si une autre fenêtre de l'appli est affichée). Plus de seuil de 4 h. `controllerchange` → `_mvMajRecharger` (rideau ouvert ou appli cachée : tout de suite ; sinon un moment calme, 30 s au plus). `_swUpdatePending` reste du code mort.
 
 ## 8b. En-têtes HTTP, CSP & cache
 
@@ -1852,6 +1851,11 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ MAJ-2 — CE QUI RESTE OUVERT (§327, posé le 14/10)
+1. **La 8.94 → 8.95 passe encore par l'ANCIENNE règle** : le code qui tourne pendant ce passage est celui de la 8.94 (retour après 4 h, ou fermeture complète). Les moments calmes valent à partir de la mise à jour SUIVANTE. Après ce déploiement, fermer complètement l'appli sur les téléphones de l'équipe accélère le passage ; regarder le parc (Admin GT).
+2. **À regarder chez Nico, en vrai** : téléphone — appli ouverte, déployer, passer à une autre appli puis revenir : la nouvelle version est là (« Ma Vigne est à jour · … ») ; une fiche ouverte en partant : elle attend, la barre « Nouvelle version prête » s'affiche ; un appui → écran de démarrage « Mise à jour ». Ordinateur — onglet laissé ouvert : la carte apparaît en bas de la barre latérale (30 min au plus) ; deux fenêtres affichées côte à côte : pas d'installation douce. Réglages › Moi › Mise à jour › « Rechercher ». Vérifié par `mv-harnais-maj2` (vraies fonctions, bouchons) ; ni navigateur, ni vrai service worker.
+3. **Ouvert** : après le rechargement, l'appli repart sur son premier écran (comme une relance), pas sur l'écran où l'on était ; iOS peut geler une appli cachée tout de suite — l'installation se fait alors au retour (écran de démarrage 2 s).
 
 ### ⚠️ ENVOI-1 — CE QUI RESTE OUVERT (§326, posé le 13/10)
 1. **À vérifier chez Nico, au téléphone, en vrai** : des parcelles au tracteur là où le réseau s'affiche sans que le serveur réponde, voyant orange, puis « Relancer l'application » : après la relance, elles restent affichées et partent quand le serveur répond (« En attente » au-delà de 20 s). Vérifié par `mv-harnais-envoi` (12 essais, 13 contre-épreuves, vraies fonctions de `firebase.js`), la perte reproduite sur le code d'avant ; ni navigateur, ni vrai Firestore.

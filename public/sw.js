@@ -1,4 +1,8 @@
-// MA VIGNE — Service Worker v9.73
+// MA VIGNE — Service Worker v9.74
+// v9.74 (13/10/2026) — MAJ-2 (§327) : la version telechargee s'installe aux moments calmes (appli passee en arriere-plan, ou retour
+//   avant le premier geste, rien en cours) — plus de seuil de 4 h ; message MV_ACTIVER_CALME : skipWaiting seulement si aucune autre
+//   fenetre de l'appli n'est affichee ; barre « Nouvelle version prete », carte de la barre laterale, Reglages > Moi > Mise a jour,
+//   ecran obligatoire a la charte (app.js, coquille.js, firebase.js, styles.css, utils.js, index.html, boot.js, guide). APP 8.94 -> 8.95.
 // v9.73 (13/10/2026) — ENVOI-1 (§326) : une saisie partie vers le serveur est notee sur le telephone AVANT de partir et reprise apres une relance ;
 //   apres relance, ce qui attend en file reste affiche ; envois bornes a 20 s ; le vidage ne retire que ce qu'il a envoye, un seul a la fois ;
 //   la garde anti-ecrasement met au coffre, qui fusionne (firebase.js). utils.js (WHATS_NEW, MV_AIDE). index.html. APP 8.93 -> 8.94.
@@ -4486,7 +4490,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.73';
+const CACHE_NAME   = 'mavigne-v9.74';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4503,7 +4507,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.73 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.74 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4523,7 +4527,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.73 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.74 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
@@ -4712,6 +4716,16 @@ self.addEventListener('message', event => {
   // après une longue absence sans rien en cours (app.js, _mvActiverMaj). MAJ-1 reste la règle :
   // rien d'autre n'envoie ce message, aucune activation n'est forcée pendant l'utilisation.
   if (event.data?.type === 'MV_ACTIVER') self.skipWaiting();
+  // MAJ-2 (§327) : activation DOUCE — app.js l'envoie a un moment calme (appli passee en arriere-plan, ou retour avant
+  // le premier geste, rien en cours). On n'active que si aucune AUTRE fenetre de l'appli n'est affichee : un onglet
+  // visible ailleurs peut etre en pleine saisie. Le worker en attente ne controle personne : includeUncontrolled.
+  if (event.data?.type === 'MV_ACTIVER_CALME') {
+    var src = event.source && event.source.id;
+    event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (cs) {
+      var autreVue = cs.some(function (c) { return c.id !== src && c.visibilityState === 'visible'; });
+      if (!autreVue) return self.skipWaiting();
+    }));
+  }
   // Mise à jour du tenant courant dans le cache persistant
   if (event.data?.type === 'SET_TENANT') {
     var tenant = event.data.tenant;

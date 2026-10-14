@@ -9,6 +9,14 @@
 // ════════════════════════════════════════════════════════════════════
 (function () {
   'use strict';
+  // MAJ-2 (§327) : la page se recharge pour une mise a jour (app.js a pose mv_maj_faite juste avant) — l'ecran de
+  // demarrage dit « Mise a jour » au lieu de sa phrase habituelle, dans la continuite du rideau d'app.js.
+  try {
+    if (sessionStorage.getItem('mv_maj_faite')) {
+      var spSub = document.getElementById('sp-sub');
+      if (spSub) spSub.textContent = 'Mise \u00e0 jour';
+    }
+  } catch (e) { window.__MV_BOOT_MAJ = String(e); }
   var DELAY = 10000;
 
   window.__MV_BOOT_T = setTimeout(function () {

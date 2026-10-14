@@ -426,6 +426,8 @@ function _mvEnvoiFini(key, n) {
   try { localStorage.removeItem(_mvEnvoiCle(key)); }
   catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvEnvoiFini'); }
 }
+// ★ MAJ-2 (§327) : un envoi EN ROUTE retient la mise à jour douce (app.js, _mvRienEnCours) — 20 s au plus.
+window._mvEnvoisEnCours = function () { return Object.keys(_mvEnvoiDernier).length; };
 function _mvErrLent() {
   var e = new Error('ENVOI-1 : le serveur n\u2019a pas r\u00e9pondu en ' + Math.round(_MV_ENVOI_MAX_MS / 1000) + ' s');
   e.code = 'mv/lent';

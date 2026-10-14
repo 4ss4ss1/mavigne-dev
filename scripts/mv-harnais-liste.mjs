@@ -239,6 +239,11 @@ export const GROUPES = {
   // envoye ; ce que la garde refuse va au coffre, qui fusionne. Vraies fonctions de firebase.js ; 13 contre-epreuves.
   'envoi-jamais-perdu': 'Harnais — une saisie enregistree ne se perd plus, meme relancee en route (ENVOI-1)',
 
+  // MAJ-2 (§327) : la version telechargee s'installe aux moments calmes (arriere-plan, retour avant le premier geste),
+  // jamais avec une fenetre ouverte, un champ actif ou un envoi en route ; la barre, la carte, le toast ; sw.js refuse si
+  // une autre fenetre est affichee ; le piege de VER-1 (installation pas finie). Vraies fonctions d'app.js ; 11 contre-epreuves.
+  'maj-moments-calmes': 'Harnais — la mise a jour ne traine plus : moments calmes, barre, geste (MAJ-2)',
+
   // HORLOGE-1 (§181) : aujourd'hui / campagne / exercice a 10 instants pieges (heure de Paris, horloge figee) et
   // semaine ISO du planning 2024-2030 sous 4 fuseaux. Le harnais se relance en fils, un par fuseau.
   'dates-pieges-et-changement': 'Harnais — dates pieges et changement d\'heure (HORLOGE-1)',
@@ -461,6 +466,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-stock.mjs --contre', 'file-hors-ligne-et-stockage'],
   ['node scripts/mv-harnais-envoi.mjs', 'envoi-jamais-perdu'],
   ['node scripts/mv-harnais-envoi.mjs --contre', 'envoi-jamais-perdu'],
+  ['node scripts/mv-harnais-maj2.mjs', 'maj-moments-calmes'],
+  ['node scripts/mv-harnais-maj2.mjs --contre', 'maj-moments-calmes'],
   ['node scripts/mv-harnais-horloge.mjs', 'dates-pieges-et-changement'],
   ['node scripts/mv-harnais-horloge.mjs --contre', 'dates-pieges-et-changement'],
   ['node scripts/mv-harnais-etiquettes.mjs', 'etiquettes-de-la-frise-et-de'],

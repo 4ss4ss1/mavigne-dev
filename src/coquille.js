@@ -47,6 +47,8 @@ window._railHtml = function (items, moi, dom) {
     + '<button class="mv-rail-cherche" id="mv-rail-cherche" type="button" aria-label="Rechercher" data-tip="Rechercher, ' + TOUCHE + '">' + ico('loupe', 18) + '<span class="mv-rail-lbl">Rechercher</span><kbd class="mv-rail-lbl">' + TOUCHE + '</kbd></button>'
     + R.tete.map(bouton).join('')
     + R.rub.map(r => '<p class="mv-rail-sec"><span class="mv-rail-lbl">' + esc(r.nom) + '</span></p>' + r.items.map(bouton).join('')).join('')
+    // MAJ-2 (§327) : la carte « Nouvelle version prête » (pastille barre repliée), peinte par app.js (_mvMajPeindre).
+    + '<div class="mv-rail-maj-slot" id="mv-rail-maj">' + (typeof window._mvMajRailHtml === 'function' ? window._mvMajRailHtml() : '') + '</div>'
     + '<div class="mv-rail-bas">' + R.pied.map(bouton).join('') + '<div class="mv-rail-moi"><span class="mv-rail-av" data-tip="' + esc(moi.nom + ', ' + moi.role) + '">' + esc(moi.ini) + '</span>'
     + '<span class="mv-rail-lbl"><b>' + esc(moi.nom) + '</b><small>' + esc(moi.role) + '</small></span>'
     + '<button class="mv-rail-plier" id="mv-rail-plier" type="button" aria-expanded="true" aria-label="Réduire la barre" data-tip="Réduire ou déplier, touche [">'

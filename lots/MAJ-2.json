@@ -1,0 +1,28 @@
+{
+  "lot": "MAJ-2",
+  "section": "§327",
+  "base": "68529dd62d5be6461b3699f75cc553cd9fb6e39f",
+  "inclut": [],
+  "date": "2026-10-14",
+  "fichiers": {
+    ".mv-base": "2145c565324986cd012a659f17e0f06c3db8799c2041fafbb4e12dc8057299ed",
+    "CLAUDE.md": "9ead6bebd0214cbd6df8363f96e00a36fe44afd42eea799e0021103ea5e5de7c",
+    "docs/claude/INDEX.md": "9599878906db2599ff694c4d6bbaa5a7e67f9071a9ffaf7492c16b8fa1c4361e",
+    "docs/claude/chantiers-280-329.md": "cb55410bb0b7936616ae3a9fff07e2ccc04e1aaeb9afc3760c4f3b768f411789",
+    "docs/claude/journal.md": "92c00c3d02c21b8eb9d3428e34bc8bb5ccd3c87b7c863526dddaa1729043fd9d",
+    "guide/01-demarrer.html": "baa651d9f87df72d1b0789b99dcda6037292c648f17d98592334ef668ae606ab",
+    "guide/14-depannage.html": "49b22eb749b9ead6c4d95d1fe39001a2cc381823121b983d205b9200ca6b5598",
+    "index.html": "29c342094be5af18ee98ffd8e5d054a09e6e24f819e49a892d1b915868cdc704",
+    "public/boot.js": "0a25ff428d73e73c6652cf0c98933d7104bfc0354b65abfea1d67fa433d8e5c8",
+    "public/sw.js": "048bb54de74eb695958cd01b27c8fc73adbf31365cebb70590cd5fae45255dee",
+    "scripts/harnais-claude-md.mjs": "166ce9e9767fcb2de5589439e899fb044813cef365af31c506661c1bf5032a04",
+    "scripts/mv-harnais-liste.mjs": "f9ab917cce79e9c5a9fac0e6742805518611cb15b82d742250eea7980f8a2f73",
+    "scripts/mv-harnais-maj2.mjs": "377df13b69155f12357cadd7b14a1bd14502c279759b761d5371bd4103a33e96",
+    "scripts/mv-harnais-version.mjs": "ddf6058c023b77f32fcf0340b3b123067b38f449c2a62f701a6ccf9546ecd385",
+    "src/app.js": "03ae2caa0547eac9e45f1a77735b5da1865c4a0382c9fea50988c6be9065e3fa",
+    "src/coquille.js": "cff323b91f2a03e757c17841ca25c3aa2b8ec1754f16d5495727e3f9db2420df",
+    "src/firebase.js": "1a78a3e71ab6a2743c4ea59630baf091546e56d028c359a775984a3edd4ffe58",
+    "src/styles.css": "86d712b3f80741f695ae2fa892844a9130f2a8029e13ae60410b8abe70759cf9",
+    "src/utils.js": "3299f747d327a298c26d27f4048ada15fb7b0e07109062ec8e7f12f58f54f997"
+  }
+}

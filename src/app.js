@@ -5494,6 +5494,7 @@ function _dockDef(){
   return it;
 }
 function _dockBuild(){
+  setTimeout(function(){ if(window._mvMajPeindre) window._mvMajPeindre(); }, 0);   // MAJ-2 (§327) : la barre suit le dock
   var dock=document.getElementById('mv-dock'),inner=document.getElementById('mv-dock-inner'),sheet=document.getElementById('mv-dock-sheet-items');
   if(!dock||!inner) return;
   if(!currentUser||currentUser._isGTAdmin){ dock.style.display='none'; if(window._railBuild) window._railBuild(); return; }
@@ -12475,26 +12476,27 @@ setTimeout(function(){
 
 // ════ SERVICE WORKER ════
 // ── Enregistrement Service Worker (PWA offline) ──
+// ★★ MAJ-2 (13/10/2026, §327) — LA MISE À JOUR NE TRAÎNE PLUS.
+//   MAJ-1 (§157) : jamais de rechargement sous les doigts. VER-1 (§184) activait au retour, mais seulement après
+//   ≥ 4 h d'absence ET si la version avait déjà fini de se télécharger : reg.update() rend la main AVANT la fin de
+//   l'installation, le retour la ratait, puis plus rien jusqu'au lendemain. Le téléphone de Nico tournait en 8.85
+//   le 13/10 (§326). Désormais :
+//   1. MOMENTS CALMES — une version téléchargée s'installe quand l'appli passe en arrière-plan (le rechargement ne
+//      se voit pas) ou au retour, avant le premier geste, si rien n'est en cours (_mvRienEnCours). Plus de seuil
+//      de 4 h. Le service worker n'active que si aucune AUTRE fenêtre de l'appli n'est affichée (MV_ACTIVER_CALME).
+//   2. LA BARRE — sinon « Nouvelle version prête » au-dessus du dock, une carte en bas de la barre latérale, une
+//      pastille quand elle est repliée ; orange après un jour d'attente (_MV_MAJ_RETARD_MS).
+//   3. LE GESTE — un appui : le rideau (l'écran de démarrage « Mise à jour »), puis « Ma Vigne est à jour ».
+//   4. LA RECHERCHE — au démarrage, à chaque retour, quand version.json annonce une autre version (lu toutes les
+//      30 min), et à la main : Réglages › Moi › Mise à jour.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('./sw.js').then(function(reg) {
       if(DEBUG) console.log('[SW] Enregistré :', reg.scope);
-      // Vérifier une mise à jour à chaque chargement : téléchargement + mise en
-      // cache seulement — plus de skip forcé (MAJ-1, §157) : le nouveau SW reste
-      // en attente et prend le relais tout seul au prochain lancement, sans
-      // interrompre la session en cours.
-      reg.update().catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvHushRejet#4'); });
-      // Suivi (NOTIF-1, §158) : détecte l'installation d'une nouvelle version, sans rien forcer.
-      // ★ NOTIF-3 (§311) : plus de notification à chaque version — trente certains jours, et VER-1 (§184) met déjà
-      //   l'appli à jour au retour. La seule notification est celle du matin, envoyée par le serveur.
-      reg.addEventListener('updatefound', function(){
-        var inst = reg.installing;
-        if(!inst) return;
-        inst.addEventListener('statechange', function(){
-          if(inst.state !== 'installed') return;
-          if(DEBUG) console.log('[SW] Nouvelle version installée, en attente (prendra effet au prochain lancement)');
-        });
-      });
+      // MAJ-2 : une version qui attend, ou qui finit de s'installer, s'annonce et s'installe au prochain moment
+      // calme. Plus de skip forcé (MAJ-1).
+      _mvMajSuivre(reg);
+      _mvMajChercher();
       if ('sync' in reg) {
         reg.sync.register('mavigne-sync').catch(function(e) {
           console.warn('[SW] Background Sync non dispo :', e);
@@ -12505,35 +12507,19 @@ if ('serviceWorker' in navigator) {
       if(typeof logError === 'function') logError({level:'warning',cat:'runtime',msg:'Service Worker non enregistré',detail:String(err)});
     });
 
-    // controllerchange : filet de sécurité si un nouveau SW prend malgré tout le
-    // contrôle en cours de session (ex. plusieurs onglets ouverts). Depuis le
-    // retrait du skip forcé (MAJ-1, §157), ne se déclenche plus au déploiement
-    // normal : en usage courant (une seule instance), la mise à jour n'apparaît
-    // qu'au prochain lancement de l'appli, jamais pendant l'utilisation.
-    // Pas de guard : fonctionne aussi en navigation privée (SW vierge au premier lancement)
-    // Safe : après rechargement le SW est déjà actif, pas de nouveau controllerchange
+    // controllerchange : la nouvelle version a pris la main (le geste, un moment calme, un autre onglet) → recharger.
+    // MAJ-2 : sans rideau ouvert et l'appli affichée, on attend un moment calme (30 s au plus) — jamais sous les doigts.
+    // Safe : après rechargement le SW est déjà actif, pas de nouveau controllerchange.
     var _swReloadDone = false;
     navigator.serviceWorker.addEventListener('controllerchange', function() {
       if (_swReloadDone) return;
       _swReloadDone = true;
-      if(DEBUG) console.log('[SW] Nouveau contrôleur — rechargement (filet de sécurité)');
-      _swReload();
-    });
-
-    // Vérifier mises à jour SW à chaque retour au premier plan (fix PWA icône Android)
-    document.addEventListener('visibilitychange', function() {
-      if (document.visibilityState === 'visible') {
-        navigator.serviceWorker.getRegistration().then(function(reg) {
-          if (reg) reg.update().catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvHushRejet#5'); });
-        }).catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvHushRejet#6'); });
-      }
+      if(DEBUG) console.log('[SW] Nouveau contrôleur — rechargement');
+      _mvMajRecharger();
     });
   });
 }
-// _swReload() ne sert plus qu'au filet de sécurité controllerchange ci-dessus
-// (MAJ-1, §157) : le cas normal (déploiement pendant que l'appli tourne) ne
-// déclenche plus aucun rechargement — la nouvelle version prend le relais
-// toute seule au prochain lancement.
+// _swReload() : le rechargement lui-même, appelé par _mvMajRecharger (MAJ-2).
 window._swUpdatePending = false;
 function _swReload() {
   if(DEBUG) console.log('[SW] Rechargement (nouveau SW déjà en contrôle)');
@@ -12541,21 +12527,16 @@ function _swReload() {
 }
 
 // ════ ★★ VER-1 (27/09/2026, §184) — LES VERSIONS PÉRIMÉES ════
-// MAJ-1 (§157) a voulu qu'aucune mise à jour ne s'impose PENDANT l'utilisation : le nouveau SW
-// attend le prochain lancement complet. Mais une PWA jamais fermée garde l'ancien code des jours
-// et écrit avec. Trois gestes, décidés par Nico le 27/09 :
-//   1. VERSION PLANCHER AUTOMATIQUE — le build publie /version.json { app, format } (MV_FORMAT,
-//      utils.js). Un appareil dont le format est plus bas passe « périmé » : fbSave n'écrit plus
-//      (file hors ligne), un écran demande la mise à jour. Nico n'a rien à régler.
-//   2. MISE À JOUR AU RETOUR — revenue au premier plan après ≥ _MV_RETOUR_H heures, l'appli active
-//      la version en attente et recharge, seulement si rien n'est en cours (aucune fenêtre ouverte,
-//      aucun champ actif, rien dans la file). Pendant l'utilisation, rien ne change (esprit MAJ-1).
+// MAJ-1 (§157) a voulu qu'aucune mise à jour ne s'impose PENDANT l'utilisation. Mais une PWA jamais fermée garde
+// l'ancien code des jours et écrit avec. Trois gestes, décidés par Nico le 27/09 :
+//   1. VERSION PLANCHER AUTOMATIQUE — le build publie /version.json { app, format } (MV_FORMAT, utils.js). Un
+//      appareil dont le format est plus bas passe « périmé » : fbSave n'écrit plus (file hors ligne), un écran
+//      demande la mise à jour. Nico n'a rien à régler.
+//   2. MISE À JOUR AU RETOUR — remplacée par MAJ-2 (§327, plus bas) : plus de seuil de 4 h, les moments calmes.
 //   3. LE PARC — fbNoterAppareil (firebase.js), appelé après l'entrée ; affiché dans l'Admin GT.
-// L'activation passe par le message MV_ACTIVER (sw.js → skipWaiting), envoyé UNIQUEMENT par le
-// bouton de l'écran de mise à jour ou par le retour après une longue absence ; le rechargement est
-// fait par le filet controllerchange existant.
-var _MV_RETOUR_H = 4;
-var _mvCacheDepuis = 0, _mvVerDerniere = 0;
+// L'activation passe par MV_ACTIVER (le geste : écran obligatoire, barre, carte, Réglages) ou MV_ACTIVER_CALME
+// (moment calme, MAJ-2) ; le rechargement est fait par controllerchange (_mvMajRecharger).
+var _mvVerDerniere = 0;
 window._MV_PERIME = false;
 function _mvActiverMaj(force){
   var recharger=function(){ try{ window.location.reload(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvActiverMaj#reload'); } };
@@ -12569,22 +12550,26 @@ function _mvActiverMaj(force){
   }).catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvActiverMaj'); if(force) recharger(); });
 }
 window._mvActiverMaj=_mvActiverMaj;
+// ★ MAJ-2 (§327) : l'écran obligatoire à la charte DS-4 (feuille, bloc MAJ-2) — tuile, bouton à l'accent, le
+//   nombre de saisies gardées sur l'appareil ; le clic ouvre le rideau comme les autres gestes.
 function _mvEcranPerime(j){
   if(document.getElementById('mv-perime-ov')) return;
+  var n=(typeof window._offlineQueueCount==='function') ? (window._offlineQueueCount()||0) : 0;
   var ov=document.createElement('div');
   ov.id='mv-perime-ov';
-  ov.setAttribute('role','alertdialog'); ov.setAttribute('aria-modal','true');
-  ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(15,19,25,.72);display:flex;align-items:center;justify-content:center;padding:24px';
-  ov.innerHTML='<div style="max-width:380px;width:100%;background:var(--bg-card,#fff);color:var(--texte,#1a1a1a);border-radius:16px;padding:22px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.35)">'
-    +'<div style="font-size:var(--pt-sm,16px);font-weight:700;margin-bottom:8px">Mise \u00e0 jour obligatoire</div>'
-    +'<div style="font-size:var(--pt-txt,13px);line-height:1.55;color:var(--texte-med,#444);margin-bottom:16px">Une nouvelle version de Ma Vigne enregistre les donn\u00e9es autrement. '
-    +'Pour ne rien \u00e9craser, cette version ne peut plus enregistrer&nbsp;: vos saisies sont <b>gard\u00e9es sur l\u2019appareil</b> et partiront apr\u00e8s la mise \u00e0 jour.</div>'
-    +'<button id="mv-perime-btn" style="width:100%;min-height:44px;border:0;border-radius:12px;background:#3D6B27;color:#fff;font-family:inherit;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer">Mettre \u00e0 jour maintenant</button>'
-    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#777);margin-top:10px">Version install\u00e9e '+_escHtml(String(window.APP_VERSION||'?'))
+  ov.setAttribute('role','alertdialog'); ov.setAttribute('aria-modal','true'); ov.setAttribute('aria-labelledby','mv-perime-t');
+  ov.innerHTML='<div class="mv-perime-carte">'
+    +'<div class="mv-perime-ic">'+_mvIcon('rotation',24)+'</div>'
+    +'<div class="mv-perime-t" id="mv-perime-t">Mise \u00e0 jour obligatoire</div>'
+    +'<p class="mv-perime-p">Une nouvelle version de Ma Vigne enregistre les donn\u00e9es autrement. Pour ne rien \u00e9craser, celle-ci n\u2019enregistre plus.</p>'
+    +(n>0 ? ('<div class="mv-perime-garde">'+_mvIcon('bouclier',16)+'<span><b>'+n+' saisie'+(n>1?'s':'')+'</b> gard\u00e9e'+(n>1?'s':'')
+      +' sur l\u2019appareil. Elle'+(n>1?'s partiront':' partira')+' juste apr\u00e8s la mise \u00e0 jour.</span></div>') : '')
+    +'<button type="button" id="mv-perime-btn" class="mv-perime-b">Mettre \u00e0 jour maintenant</button>'
+    +'<div class="mv-perime-v">Version install\u00e9e '+_escHtml(String(window.APP_VERSION||'?'))
     +(j&&j.app?(' \u00b7 disponible '+_escHtml(String(j.app))):'')+'</div></div>';
   document.body.appendChild(ov);
   var b=document.getElementById('mv-perime-btn');
-  if(b) b.addEventListener('click', function(){ b.disabled=true; b.textContent='Installation\u2026'; _mvActiverMaj(true); });
+  if(b) b.addEventListener('click', function(){ b.disabled=true; b.textContent='Mise \u00e0 jour\u2026'; _mvMajMarquer(); _mvMajRideau(); _mvActiverMaj(true); });
 }
 function _mvPasserPerime(j){
   if(window._MV_PERIME) return;
@@ -12606,25 +12591,288 @@ async function _mvVerifierVersion(){
     var j=await r.json();
     var fmt=parseInt(j&&j.format,10);
     if(fmt>0 && fmt>(Number(window.MV_FORMAT)||0)) _mvPasserPerime(j);
+    // ★ MAJ-2 (§327) : une autre version annoncée → la chercher (un ordinateur resté ouvert ne la verrait jamais).
+    if(j && j.app && String(j.app)!==String(window.APP_VERSION||'') && window._mvMajVersionServeur) window._mvMajVersionServeur(String(j.app));
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvVerifierVersion'); }
 }
 window._mvVerifierVersion=_mvVerifierVersion;
 function _mvRienEnCours(){
-  if(document.querySelector('.overlay.open')) return false;
+  if(document.querySelector('.overlay.open, .mvv-ov.open')) return false;
   var a=document.activeElement;
-  if(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return false;
-  if(typeof window._offlineQueueCount==='function' && window._offlineQueueCount()>0) return false;
+  if(a && (/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || a.isContentEditable===true)) return false;
+  // ★ MAJ-2 (§327) : une saisie EN FILE ne bloque plus — elle vit sur le disque et repart après (FUSION-1, ENVOI-1).
+  //   Un envoi EN ROUTE attend sa fin (20 s au plus, _MV_ENVOI_MAX_MS) : la relance le reprendrait, rien ne presse.
+  if(typeof window._mvEnvoisEnCours==='function' && window._mvEnvoisEnCours()>0) return false;
   return true;
 }
+
+// ════ ★★ MAJ-2 (13/10/2026, §327) — LES MOMENTS CALMES, LA BARRE, LE GESTE ════
+var _MV_MAJ_RETARD_MS = 24*3600000;     // au-delà, « En attente depuis hier » : la barre passe à l'orange
+var _MV_MAJ_DEPUIS = 'mv_maj_depuis';   // localStorage : depuis quand une version attend (session jamais fermée)
+var _MV_MAJ_FAITE = 'mv_maj_faite';     // sessionStorage : posé juste avant le rechargement (boot.js, _mvMajAnnoncer)
+var _mvMajReg = null, _mvMajInstalle = false, _mvMajChange = false, _mvMajRideauOuvert = false;
+var _mvMajCherche = false, _mvMajVerifieeA = 0, _mvMajDispo = '';
+// Une version ATTEND : une mise à jour, pas la toute première installation (il faut un contrôleur).
+function _mvMajPrete(){
+  return !!(_mvMajReg && _mvMajReg.waiting && navigator.serviceWorker && navigator.serviceWorker.controller);
+}
+function _mvMajRetard(depuis, maintenant){
+  var d = Number(depuis) || 0;
+  return d > 0 && (maintenant - d) >= _MV_MAJ_RETARD_MS;
+}
+function _mvMajDepuis(){
+  try{ return Number(localStorage.getItem(_MV_MAJ_DEPUIS)) || 0; }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvMajDepuis'); return 0; }
+}
+function _mvMajNoterDepuis(attend){
+  try{
+    if(!attend) localStorage.removeItem(_MV_MAJ_DEPUIS);
+    else if(!localStorage.getItem(_MV_MAJ_DEPUIS)) localStorage.setItem(_MV_MAJ_DEPUIS, String(Date.now()));
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvMajNoterDepuis'); }
+}
+function _mvMajMarquer(){
+  try{ if(!sessionStorage.getItem(_MV_MAJ_FAITE)) sessionStorage.setItem(_MV_MAJ_FAITE, JSON.stringify({ de: String(window.APP_VERSION || ''), t: Date.now() })); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvMajMarquer'); }
+}
+function _mvMajDemarquer(){
+  try{ sessionStorage.removeItem(_MV_MAJ_FAITE); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvMajDemarquer'); }
+}
+function _mvMajToast(m, couleur){
+  var f = (typeof showToast === 'function') ? showToast : window.showToast;
+  if(f) f(m, couleur);
+}
+// Le suivi : une version qui attend déjà, ou qui FINIT de s'installer (le piège de VER-1), s'annonce.
+function _mvMajSuivre(reg){
+  _mvMajReg = reg;
+  if(!reg.waiting) _mvMajNoterDepuis(false);   // rien n'attend : l'épisode précédent est fini
+  reg.addEventListener('updatefound', function(){
+    var inst = reg.installing;
+    if(!inst) return;
+    inst.addEventListener('statechange', function(){
+      if(inst.state === 'installed' && navigator.serviceWorker.controller) _mvMajNouvelle();
+    });
+  });
+  if(reg.waiting) _mvMajNouvelle(); else _mvMajPeindre();
+}
+// Une version est là : on la note, on l'affiche ; l'appli est cachée et rien n'est en cours → elle s'installe.
+function _mvMajNouvelle(){
+  if(!_mvMajPrete()) return;
+  _mvMajNoterDepuis(true);
+  _mvMajPeindre();
+  if(document.visibilityState === 'hidden') _mvMajCalme('cache');
+}
+// reg.update() rend la main AVANT la fin de l'installation : attendre « installed » (ou l'abandon), ms au plus.
+function _mvMajFinInstall(ms){
+  var inst = _mvMajReg && _mvMajReg.installing;
+  if(!inst) return Promise.resolve();
+  return new Promise(function(res){
+    var fini = false, fin = function(){ if(!fini){ fini = true; res(); } };
+    inst.addEventListener('statechange', function(){ if(inst.state !== 'installing') fin(); });
+    setTimeout(fin, ms);
+  });
+}
+function _mvMajChercher(){
+  if(!_mvMajReg) return Promise.resolve(false);
+  _mvMajVerifieeA = Date.now();
+  return Promise.resolve().then(function(){ return _mvMajReg.update(); })
+    .catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvHushRejet#5'); })
+    .then(function(){ return _mvMajFinInstall(15000); })
+    .then(function(){ _mvMajPeindre(); return _mvMajPrete(); });
+}
+window._mvMajVersionServeur = function(v){
+  _mvMajDispo = v;
+  if(!_mvMajPrete() && Date.now() - _mvMajVerifieeA > 60000) _mvMajChercher(); else _mvMajPeindre();
+};
+// Le moment calme. 'cache' : l'appli vient de passer en arrière-plan ; 'retour' : elle revient, avant le premier
+// geste (le rideau d'abord). Le service worker vérifie encore qu'aucune autre fenêtre n'est affichée.
+function _mvMajCalme(moment){
+  if(_mvMajInstalle || !_mvMajPrete()) return false;
+  if(!_mvRienEnCours()) return false;
+  _mvMajInstalle = true;
+  _mvMajMarquer();
+  if(moment === 'retour') _mvMajRideau();
+  try{ _mvMajReg.waiting.postMessage({ type: 'MV_ACTIVER_CALME' }); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvMajCalme'); }
+  // Refus (une autre fenêtre est affichée) : sans changement de contrôleur, on relâche — la barre reste.
+  setTimeout(function(){
+    if(_mvMajChange) return;
+    _mvMajInstalle = false; _mvMajRideauFermer(); _mvMajDemarquer(); _mvMajPeindre();
+  }, 4000);
+  return true;
+}
+// Le geste (barre, carte, pastille, Réglages) : « Mise à jour… », le rideau, puis MV_ACTIVER (voulu : même si un
+// autre onglet est ouvert, il se rechargera à son prochain moment calme).
+function _mvMajLancer(){
+  if(_mvMajInstalle) return;
+  _mvMajInstalle = true;
+  _mvMajMarquer();
+  _mvMajPeindre();
+  setTimeout(function(){ _mvMajRideau(); _mvActiverMaj(true); }, 350);
+}
+window._mvMajLancer = _mvMajLancer;
+function _mvMajRecharger(){
+  _mvMajChange = true;
+  _mvMajMarquer();
+  var essais = 0;
+  var go = function(){
+    if(_mvMajRideauOuvert || document.visibilityState === 'hidden' || _mvRienEnCours() || essais >= 30){ _swReload(); return; }
+    essais++; setTimeout(go, 1000);
+  };
+  go();
+}
+// Le rideau : l'écran de démarrage (#splash-screen) avec « Mise à jour » — boot.js le reprend après le rechargement.
+function _mvMajRideau(){
+  if(document.getElementById('mv-maj-rideau')) return;
+  var r = document.createElement('div');
+  r.id = 'mv-maj-rideau';
+  r.setAttribute('role', 'status'); r.setAttribute('aria-live', 'polite');
+  r.innerHTML = '<img class="mv-maj-r-logo" src="logo-gt.png" alt="">'
+    + '<div class="mv-maj-r-t">Ma Vigne</div><div class="mv-maj-r-s">Mise \u00e0 jour</div>'
+    + '<div class="mv-maj-r-p" aria-hidden="true"><i></i></div>';
+  document.body.appendChild(r);
+  _mvMajRideauOuvert = true;
+}
+function _mvMajRideauFermer(){
+  var r = document.getElementById('mv-maj-rideau');
+  if(r && r.parentNode) r.parentNode.removeChild(r);
+  _mvMajRideauOuvert = false;
+}
+function _mvMajIlYa(t){
+  var s = Math.max(0, Math.round((Date.now() - t) / 1000));
+  if(s < 60) return '\u00e0 l\u2019instant';
+  if(s < 3600) return 'il y a ' + Math.round(s / 60) + '\u00a0min';
+  return 'il y a ' + Math.round(s / 3600) + '\u00a0h';
+}
+function _mvMajCta(){
+  return _mvMajInstalle ? '<span class="mv-maj-spin" aria-hidden="true"></span>Mise \u00e0 jour\u2026' : 'Mettre \u00e0 jour';
+}
+// La carte de la barre latérale et sa pastille (barre repliée) — posée dans le logement de coquille.js (_railHtml).
+function _mvMajRailHtml(){
+  if(!_mvMajPrete()) return '';
+  var retard = _mvMajRetard(_mvMajDepuis(), Date.now());
+  var titre = retard ? 'En attente depuis hier' : 'Nouvelle version pr\u00eate';
+  return '<div class="mv-maj-carte' + (retard ? ' retard' : '') + '">'
+    + '<div class="mv-maj-carte-t">' + _mvIcon(retard ? 'alerte' : 'rotation', 16) + '<span><b>' + titre + '</b>'
+    + '<small>Elle s\u2019installe en quelques secondes.</small></span></div>'
+    + '<button type="button" class="mv-maj-carte-b" data-mv-maj="1">' + _mvMajCta() + '</button></div>'
+    + '<button type="button" class="mv-maj-mini' + (retard ? ' retard' : '') + '" data-mv-maj="1" data-tip="Mettre \u00e0 jour Ma Vigne"'
+    + ' aria-label="' + titre + ', mettre \u00e0 jour">' + _mvIcon('rotation', 18) + '<span class="mv-maj-pt" aria-hidden="true"></span></button>';
+}
+window._mvMajRailHtml = _mvMajRailHtml;
+function _mvMajPeindre(){
+  var prete = _mvMajPrete();
+  var retard = prete && _mvMajRetard(_mvMajDepuis(), Date.now());
+  // 1. Téléphone, tablette : la barre au-dessus du dock, seulement quand le dock est affiché.
+  var dock = document.getElementById('mv-dock');
+  var dockVu = !!(dock && dock.offsetHeight > 0 && getComputedStyle(dock).display !== 'none');
+  var b = document.getElementById('mv-maj-barre');
+  if(prete && dockVu){
+    if(!b){
+      b = document.createElement('button');
+      b.type = 'button'; b.id = 'mv-maj-barre';
+      b.setAttribute('data-mv-maj', '1');
+      document.body.appendChild(b);
+    }
+    b.className = retard ? 'retard' : '';
+    b.style.bottom = dock.offsetHeight + 'px';
+    b.innerHTML = _mvIcon(retard ? 'alerte' : 'rotation', 16)
+      + '<span class="mv-maj-barre-t">' + (retard ? 'En attente depuis hier' : 'Nouvelle version pr\u00eate') + '</span>'
+      + '<span class="mv-maj-cta">' + _mvMajCta() + '</span>';
+    b.hidden = false;
+    document.body.classList.add('mv-maj-barre');
+  } else {
+    if(b) b.hidden = true;
+    document.body.classList.remove('mv-maj-barre');
+  }
+  // 2. Ordinateur : la carte de la barre latérale.
+  var slot = document.getElementById('mv-rail-maj');
+  if(slot) slot.innerHTML = _mvMajRailHtml();
+  // 3. Réglages › Moi › Mise à jour.
+  _mvMajPeindreReglages(prete);
+}
+window._mvMajPeindre = _mvMajPeindre;
+function _mvMajPeindreReglages(prete){
+  var etat = document.getElementById('regl-maj-etat'), quand = document.getElementById('regl-maj-quand'), btn = document.getElementById('regl-maj-btn');
+  if(!etat || !btn) return;
+  if(prete){
+    etat.className = 'sr-sub mv-maj-etat-pret';
+    etat.textContent = _mvMajDispo ? ('Version ' + _mvMajDispo + ' pr\u00eate') : 'Nouvelle version pr\u00eate';
+    if(quand) quand.textContent = 'Elle s\u2019installe en quelques secondes.';
+    btn.className = 'mv-maj-btn mv-maj-btn-pri';
+    btn.innerHTML = _mvMajCta();
+  } else {
+    etat.className = 'sr-sub mv-maj-etat-ok';
+    etat.innerHTML = _mvIcon('check', 16) + '<span>Version ' + _escHtml(String(window.APP_VERSION || '')) + ' \u00b7 \u00e0 jour</span>';
+    if(quand) quand.textContent = _mvMajVerifieeA ? ('V\u00e9rifi\u00e9e ' + _mvMajIlYa(_mvMajVerifieeA)) : '';
+    btn.className = 'mv-maj-btn';
+    btn.textContent = _mvMajCherche ? 'Recherche\u2026' : 'Rechercher';
+  }
+  btn.disabled = !!(_mvMajInstalle || _mvMajCherche);
+}
+// Réglages › Moi › Mise à jour : « Rechercher » à la main, ou « Mettre à jour » quand une version attend.
+window._mvMajBoutonReglages = function(){
+  if(_mvMajPrete()){ _mvMajLancer(); return; }
+  if(_mvMajCherche) return;
+  if(!navigator.onLine){ _mvMajToast('Hors ligne\u00a0: recherche impossible', '#7A4F2E'); return; }
+  _mvMajCherche = true; _mvMajPeindre();
+  _mvVerDerniere = 0; _mvVerifierVersion();
+  _mvMajChercher().then(function(prete){
+    _mvMajCherche = false; _mvMajPeindre();
+    if(!prete) _mvMajToast('Ma Vigne est \u00e0 jour', '#3D6B27');
+  });
+};
+// Après le rechargement : « Ma Vigne est à jour · version », une fois l'écran de démarrage parti (ou au retour, si
+// l'installation s'est faite en arrière-plan). Rien si la version n'a pas changé.
+function _mvMajAnnoncer(){
+  var brut = null;
+  try{ brut = sessionStorage.getItem(_MV_MAJ_FAITE); sessionStorage.removeItem(_MV_MAJ_FAITE); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvMajAnnoncer'); }
+  if(!brut) return false;
+  var de = '';
+  try{ de = String((JSON.parse(brut) || {}).de || ''); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvMajAnnoncer#lire'); }
+  var v = String(window.APP_VERSION || '');
+  if(!v || de === v) return false;
+  var dire = function(){ _mvMajToast('Ma Vigne est \u00e0 jour \u00b7 ' + v, '#3D6B27'); };
+  var n = 0;
+  var attendre = function(){
+    if(document.visibilityState !== 'visible'){
+      var f = function(){
+        if(document.visibilityState !== 'visible') return;
+        document.removeEventListener('visibilitychange', f);
+        setTimeout(attendre, 400);
+      };
+      document.addEventListener('visibilitychange', f);
+      return;
+    }
+    var sp = document.getElementById('splash-screen');
+    var parti = !sp || sp.isConnected === false || sp.style.display === 'none' || sp.style.opacity === '0';
+    if(parti || n >= 40){ setTimeout(dire, 300); return; }
+    n++; setTimeout(attendre, 250);
+  };
+  attendre();
+  return true;
+}
+// Le geste, d'où qu'il vienne (barre, carte, pastille) : un seul écouteur.
+document.addEventListener('click', function(e){
+  var t = (e.target && e.target.closest) ? e.target.closest('[data-mv-maj]') : null;
+  if(!t) return;
+  e.preventDefault();
+  _mvMajLancer();
+});
 document.addEventListener('visibilitychange', function(){
-  if(document.visibilityState==='hidden'){ _mvCacheDepuis=Date.now(); return; }
-  var absent=_mvCacheDepuis ? (Date.now()-_mvCacheDepuis) : 0;
-  _mvCacheDepuis=0;
+  if(document.visibilityState === 'hidden'){ _mvMajCalme('cache'); return; }
   _mvVerifierVersion();
-  if(absent>=_MV_RETOUR_H*3600000 && _mvRienEnCours()) _mvActiverMaj(false);
+  // Au retour, avant le premier geste : une version DÉJÀ téléchargée s'installe derrière le rideau. Pas encore là :
+  // on la cherche ; la barre l'annoncera, et elle s'installera au prochain passage en arrière-plan.
+  if(!_mvMajCalme('retour')) _mvMajChercher();
 });
 setTimeout(_mvVerifierVersion, 8000);
 setInterval(_mvVerifierVersion, 30*60*1000);
+setInterval(function(){ if(document.visibilityState === 'visible') _mvMajPeindre(); }, 10*60*1000);
+window.addEventListener('resize', function(){ if(document.getElementById('mv-maj-barre')) _mvMajPeindre(); });
+_mvMajAnnoncer();
 
 
 // ★ REPRISE-1 (§145) — après une relecture au retour de veille : repeindre l'écran ouvert, sauf si l'on
