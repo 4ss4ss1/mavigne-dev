@@ -431,10 +431,18 @@
   <p>Cette section ne demande <b>qu'une seule saisie</b>, le plafond de rendement : tout le reste s'y
   déduit de ce qui est déjà enregistré au Cuvier et au Chai. L'agenda des quatre semaines, qui s'y
   trouvait, est dans <b>Aujourd'hui</b>.</p>
+  <p>Elle s'ouvre sur une <b>tête commune</b> : l'année (les boutons à droite changent de millésime),
+  son état — en cours, en élevage, en bouteille — et ses quatre chiffres. Puis <b>quatre vues</b> :</p>
   <ul class="dot">
-    <li><b>La ligne de vie</b> : le parcours du vin de la benne à la bouteille, avec les pertes
-    chiffrées entre chaque étape, puis le rendement de chaque parcelle face au maximum de
-    l'appellation.</li>
+    <li><b>Ensemble</b> : ce qu'il faut surveiller (un volume entonné à mesurer, une parcelle au-dessus
+    du maximum, ce qui reste sur pied, les cuves en fermentation), le parcours du vin de la benne à la
+    bouteille avec les pertes chiffrées, les cuvées en un coup d'œil et les repères du millésime.</li>
+    <li><b>Parcelles</b> : le rendement de chaque parcelle face au maximum de l'appellation, du plus haut
+    au plus bas, avec des filtres — au-dessus du maximum, vendues, encore sur pied.</li>
+    <li><b>Cuvées</b> : la liste, puis la fiche de chaque cuvée — ses quatre étapes, d'où elle vient,
+    ses dates et ses contenants. Sur ordinateur, la liste à gauche et la fiche à droite.</li>
+    <li><b>Courbes</b> : maturités, densités, températures et malo, côte à côte sur ordinateur, une à
+    la fois au téléphone.</li>
   </ul>
 
   <h4 style="margin-top:22px">{ic:balance} Le rendement maximum de l'appellation</h4>
@@ -558,7 +566,7 @@
   montre la page entière, comme elle sortira de l'imprimante, et se zoome avec deux doigts.</p>
 
   <h4 style="margin-top:22px">{ic:graphique} Les courbes — comparer, pas consulter</h4>
-  <p>Les autres écrans de la Cave répondent sur <b>une</b> cuve. Celui-ci — l'onglet <b>Les courbes</b> du
+  <p>Les autres écrans de la Cave répondent sur <b>une</b> cuve. Celui-ci — la vue <b>Courbes</b> du
   millésime — les met <b>côte à côte</b>. Rien ne s'y saisit : c'est un écran de comparaison, pas de relevé.</p>
   <p>Le parcours d'un vin s'y lit en quatre temps, et <b>chaque temps a son propre jour zéro</b>,
   écrit en toutes lettres à côté de son titre. La vigne compte sur le calendrier, la cuve compte
@@ -593,15 +601,18 @@
       <li>Une cuvée sans date d'entonnage n'apparaît pas — le premier relevé n'en tient pas lieu</li>
     </ul></div>
     <div class="card"><h4>{ic:bouteille} De la récolte à la bouteille</h4><ul class="dot">
-      <li><b>Récolte</b> : les kilos d'après vos caisses</li>
-      <li><b>En cuve</b> : ces kilos à la règle du Cuvier, saignées déduites — jamais la contenance de
-        la cuve</li>
-      <li><b>Entonné</b> : le volume décuvé que vous avez <b>mesuré</b> — jamais la taille des fûts. Sans
-        mesure, l'étape reste en pointillé, et « Saisir le volume entonné » ouvre la saisie</li>
-      <li><b>Bouteilles</b> : ce qui a été tiré, une fois la cuvée embouteillée</li>
-      <li>Sous chaque étape, son <b>kg/hL</b> : 135 en cuve (votre règle), 192 entonné (ce que le
-        pressoir a donné)… L'écart dit s'il faut revoir la règle</li>
-      <li>Un fût complété par une autre cuve : l'apport s'empile en pointillé, hors du kg/hL</li>
+      <li>Dans la vue <b>Cuvées</b> : chaque cuvée du millésime a sa fiche — les cuves pas encore
+        décuvées, la récolte sans cuve et le raisin vendu compris</li>
+      <li><b>Récolte</b> : les kilos d'après vos caisses</li>
+      <li><b>En cuve</b> : ces kilos à la règle du Cuvier, saignées et vin versé à une autre cuve déduits —
+        jamais la contenance de la cuve</li>
+      <li><b>Entonné</b> : le volume décuvé que vous avez <b>mesuré</b> — jamais la taille des fûts. Sans
+        mesure, l'étape reste en pointillé, et « Saisir le volume entonné » ouvre la saisie</li>
+      <li><b>Bouteilles</b> : ce qui a été tiré, une fois la cuvée embouteillée</li>
+      <li>Sous chaque étape mesurée, son <b>kg/hL</b> : 192 entonné quand votre règle dit 135…
+        L'écart dit s'il faut revoir la règle. En rouge, ce que chaque étape a perdu</li>
+      <li>Un fût complété par une autre cuve : l'apport s'empile en pointillé, hors du kg/hL</li>
+      <li>Une cuvée sans récolte saisie au Cuvier n'a pas de chaîne : sa ligne dit ce que le Chai en sait</li>
     </ul></div>
   </div>
   <div class="note tip"><span class="ni" aria-hidden="true">{ic:doigt}</span><div>Sur un calendrier,

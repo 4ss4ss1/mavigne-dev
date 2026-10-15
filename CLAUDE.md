@@ -3,9 +3,8 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **14 octobre 2026 (LARG-1)** — ★ **SUR ORDINATEUR, TOUS LES MODULES À LA LARGEUR DU PILOTAGE ET DE LA VIGNE : 1 200 PX CENTRÉS** (§334). Base `710c664` (BRUIT-1, poussé en parallèle sur la même base : LARG-1 rebâti dessus, §334). Nico (14/10, trois captures du PC) : « les écrans de pilotage et de vigne ne sont pas à la même largeur que les autres écrans […] il faut qu'ils soient tous comme pilotage et vigne ». Reformulé, confirmé : « oui (fais une maquette pour planning) », « Continuer », puis « A » sur la maquette du Planning.
-> La règle de KIT-1 (§226) ne bornait que `#page-home`, `#page-parcelles` et `#page-pilotage` (« les autres modules aux lots 3b/3c », jamais faits) : elle porte aussi le Journal, le Tracteur, Phyto, la Cave, la Réserve, le Planning et Réglages ; la barre d'onglets de la Réserve (760 px centrés) part du bord. Le Planning est passé par une maquette (toile Design, captures de la vraie appli) : Nico a choisi « A », borné comme les autres — sur « Les gens », la liste passe de 826 à 744 px à 1 536. Mesuré dans la vraie appli (Chromium, 1 280 / 1 536 / 1 920 px, clair et sombre) ; garde neuve `mv-harnais-larg1`. Trouvé par la chaîne de 1 h du matin : un vrai défaut du Cuvier, en ligne (`_vendSince` compte en heure universelle, §334f).
-> **APP 9.00 → 9.01, SW 9.79 → 9.80.** Déploiement : `npm run build` → `firebase deploy --only hosting` (le guide ne change pas).
+> Dernière consolidation : **15 octobre 2026 (RANGE-1)** — ★★ **LE MILLÉSIME RANGÉ : UNE TÊTE ET QUATRE VUES, LA CHAÎNE DE CHAQUE CUVÉE** (§335). Base `04baf84` (LARG-1). Nico (15/10) : « tout est les uns au-dessus des autres, ce n'est pas rangé… nous sommes une application pro ». Reformulé, recherche (vintrace, InnoVint, règles des tableaux de bord), maquette (toile Design, ordinateur et téléphone), « parfait ». Absorbe CHAINE-1 (livré sur `379e4b9`, jamais appliqué : ne pas le coller). Une tête (`#ml-head`, `_mlHead` : l'année, son état, le choix de l'année, `_mlTuiles`), puis quatre vues : Ensemble (`_mlRenderVie` : À surveiller, le parcours, les cuvées, les repères, face à N-1 ; deux colonnes à partir de 1 024 px), Parcelles (`_mlRenderParc` : trié, filtres), Cuvées (`_mlRenderCuv` : liste + fiche, la chaîne `_pcrbCvLignes` / `_pcrbCvCellules`), Courbes (grille de quatre cartes, une à la fois au téléphone).
+> L'ancienne carte « une seule cuvée » (`_pcrbChaine`, `_PCRB_CH`) et `_mlOrigine` sont retirées ; « D'où vient chaque cuvée » vit dans la fiche. `cave.js` 636 → 667 ko, sous le cliquet des 5 %. **APP 9.01 → 9.02, SW 9.80 → 9.81.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -488,7 +487,6 @@ déduire : deux fois le 11/08, la réponse a retourné le dessin (parcelles élo
 parcelle impossible ; journées homogènes → le mode collant redevient bon).
 
 ---
-
 
 ## 💬 Communication
 
@@ -1855,6 +1853,9 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ RANGE-1 — CE QUI RESTE OUVERT (§335, posé le 15/10)
+1. **À regarder chez Nico, au téléphone puis sur PC, en clair et en sombre** : Cave › Le millésime, la tête et les quatre vues — aucun navigateur ici. **Vu, non touché** : les courbes ne suivent pas l'année choisie (elles lisent les cuves en cours ; la vue le dit) ; `cave.js` est à 667 ko — le prochain gros lot de la Cave pose d'abord la question du découpage (§335e).
+
 ### ⚠️ LARG-1 — CE QUI RESTE OUVERT (§334, posé le 14/10)
 1. **À regarder chez Nico, sur son PC** : chaque module au même endroit que le Pilotage, les onglets de la Réserve, et « Les gens » du Planning, où la liste passe de 826 à 744 px (de 1 210 à 744 px à 1 920) — mesuré dans Chromium sur des données fabriquées, pas sur les siennes ni à sa largeur exacte. **Vu, non touché** : le premier onglet du Pilotage part 24 px plus à droite que celui des autres modules (`.pil-tabsbar`) ; l'onglet « Labo » de la Cave garde son texte sur 760 px, à gauche (`.lbo-page`) ; `#page-chat` (sans appelant) reste exempté.
 2. **Hors lot, trouvé par la chaîne — la date du jour en heure universelle (§334f)** : `_vendSince` (`cuvier.js`) lit « AAAA-MM-JJ » à minuit UTC ; à Paris, de minuit à 2 h l'été (1 h l'hiver), une cuve relevée la veille n'est pas « à mesurer » et un relevé du jour compte −1 jour — en ligne, `mv-harnais-cuv13` rougit dans cette fenêtre. `mv-harnais-reste-a-rentrer` y rougit aussi, par la faute de son décor (`toISOString`). `mv-harnais-ref1` a rougi une fois à 1 h, non reproduit. Correctif à décider par Nico, dans un lot à part.
@@ -2731,7 +2732,6 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     `DGDDI` dans `src/` et `index.html` ; le registre l'écrit (« Ma Vigne prépare, l'exploitant déclare », `cave.js`). ⚠️⚠️ **Tant que
     cette entrée est ouverte, aucun lot Cave n'ajoute de déclaration, de plafond ni de contrôle de conformité.** ★ Le jour où le chantier
     s'ouvre, il rouvre le **stock de bouteilles** (abandonné, cf. « Rayés ») : une comptabilité matières suit aussi le vin en bouteille.
-
 
 ### Backlog juridique & contenu public
 

@@ -243,7 +243,8 @@ const T = {
   D13: ['la mise en bouteille fige les étapes, sans la contenance', (A, S) => {
     const f = code(S.cave, '_caveBtlConfirmYes'); return f.includes('entonneHl:ch.entonneHl') && !f.includes('cuveHl'); }],
   D14: ['la carte des courbes compte l’entonné MESURÉ et propose de le saisir', (A, S) => {
-    const f = code(S.cave, '_pcrbChaine');
+    // ★ RANGE-1 (§335) : la chaine vit dans la fiche d'une cuvee (vue Cuvees) ; la regle, dans les cases.
+    const f = code(S.cave, '_mlCuvFicheHtml') + code(S.cave, '_pcrbCvCellules');
     return f.includes("ch.entonneSrc==='mesure'") && f.includes('_vendDvolCorriger') && !f.includes('cuveHl'); }],
   D15: ['la saisie ouverte depuis Le millésime repeint l’écran d’où l’on vient', (A, S) =>
     code(S.cave, '_vendDvolCorriger').includes("if(_caveSectionAct()==='vendange'||typeof renderCave!=='function') renderVendCuves(); else renderCave();")],   // ★ CUV-DEC (§164) : la section se lit par le Chai

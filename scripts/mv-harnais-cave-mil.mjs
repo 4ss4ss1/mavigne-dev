@@ -84,17 +84,19 @@ function jouer(cave, pil, rsv, ut, html, css, silencieux) {
   T(/auj_cave:1/.test(pil) && /\['auj_cave','La Cave/.test(pil), 'la carte est un panneau param\u00e9trable (auj_cave)');
   T(/\.pil-ck-btn\{/.test(css), 'le bouton de la carte a son style');
 
-  L('Le millesime a deux onglets');
+  L('Le millesime : une tete et quatre vues (RANGE-1)');
   T(/id="ml-tab-vie" onclick="_mlSetTab\('vie'\)"/.test(html) && /id="ml-tab-crb" onclick="_mlSetTab\('crb'\)"/.test(html), 'La ligne de vie et Les courbes dans #ml-tabs-row');
+  T(/id="ml-tab-parc" onclick="_mlSetTab\('parc'\)"/.test(html) && /id="ml-tab-cuv" onclick="_mlSetTab\('cuv'\)"/.test(html) && /id="ml-head"/.test(html), 'RANGE-1 : Parcelles et Cuv\u00e9es dans #ml-tabs-row, la t\u00eate dans #ml-head');
   const rcm = extraire(cave, 'renderCaveMillesime') || '';
   T(/_mlTab==='crb'\)\{[\s\S]{0,400}_pcavVueCourbes\(c\)[\s\S]{0,300}_pcrbPose\(\)/.test(rcm), 'les courbes se posent apr\u00e8s le HTML (_pcrbPose)');
   const rc = extraire(cave, 'renderCave') || '';
   T(/_mvGraphOublier\('#pcrb-g-'\)/.test(rc), 'la famille de graphes est oubli\u00e9e d\u00e8s qu\u2019on quitte les courbes');
   const vie = extraire(cave, '_mlRenderVie') || '';
-  T(/h\+=_mlTuiles\(ch\);/.test(vie), 'La ligne de vie ouvre sur les quatre tuiles');
+  T(/_mlTuiles\(ch\)/.test(extraire(cave, '_mlHead') || '') && /hd\.innerHTML=ch\?_mlHead\(mil,ch,d\)/.test(rcm), 'RANGE-1 : la t\u00eate du mill\u00e9sime porte les quatre tuiles, sur les quatre vues');
+  T(/_mlBlocFlux\(ch\)/.test(vie) && /_mlBlocVeille\(mil,d\)/.test(vie), 'RANGE-1 : la vue Ensemble pose le parcours et \u00ab \u00c0 surveiller \u00bb');
   T(/_pcavN1\(\{mil:mil, milAff:mil\}, mil\)/.test(vie), 'et se ferme sur face \u00e0 N-1');
   const st = extraire(cave, '_mlSetTab') || '';
-  T(/t==='venir'/.test(st) && /_mlTab=\(t==='crb'\)\?'crb':'vie'/.test(st), '_mlSetTab : venir \u2192 Aujourd\u2019hui, sinon vie|crb');
+  T(/t==='venir'/.test(st) && /_mlTab=\(t==='crb'\|\|t==='parc'\|\|t==='cuv'\)\?t:'vie'/.test(st), '_mlSetTab : venir \u2192 Aujourd\u2019hui, sinon vie|parc|cuv|crb');
   const ctx = extraire(cave, '_pcavCtx') || '';
   T(/^function _pcavCtx\(\)\{/.test(ctx) && /_caveSeuilGlobal\(\)/.test(ctx), '_pcavCtx ne d\u00e9pend plus du Pilotage (seuil via _caveSeuilGlobal)');
 

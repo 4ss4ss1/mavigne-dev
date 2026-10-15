@@ -621,6 +621,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-trn2.mjs --contre'],
   ['node scripts/mv-harnais-sansrec1.mjs'],          // SANSREC-1 (§332) : « pas de récolte cette année » — règle, Encore sur pied, feuille de récolte, Revient
   ['node scripts/mv-harnais-sansrec1.mjs --contre'],
+  ['node scripts/mv-harnais-range1.mjs'],            // RANGE-1 (§335) : Le millésime rangé — la tête, les quatre vues, la chaîne de chaque cuvée (ex-CHAINE-1)
+  ['node scripts/mv-harnais-range1.mjs --contre'],
   ['node scripts/mv-harnais-larg1.mjs'],             // LARG-1 (§334) : une seule largeur sur ordinateur — chaque page bornée par la règle, ou exemptée avec sa raison
   ['node scripts/mv-harnais-larg1.mjs --contre'],
   ['node scripts/mv-harnais-retrait1.mjs'],          // RETRAIT-1 (§325) : une tâche ordinaire désactivée sur des parcelles pour la période — règle, feuille, croix, renommages, L'année

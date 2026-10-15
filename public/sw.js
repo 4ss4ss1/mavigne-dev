@@ -1,4 +1,6 @@
-// MA VIGNE — Service Worker v9.80
+// MA VIGNE — Service Worker v9.81
+// v9.81 (15/10/2026) — RANGE-1 (§335) : Le millésime rangé — une tête (l’année, son état, les tuiles) et quatre vues
+//   (Ensemble, Parcelles, Cuvées, Courbes) ; chaque cuvée du millésime a sa fiche. index.html, utils.js (et cave.js).
 // v9.80 (14/10/2026) — LARG-1 (§334) : sur ordinateur, une seule largeur — la règle des 1 200 px centrés (KIT-1, qui ne
 //   bornait que l'Accueil, les Parcelles et le Pilotage) porte aussi le Journal, le Tracteur, Phyto, la Cave, la Réserve, le
 //   Planning (maquette validée) et Réglages ; les onglets de la Réserve partent du bord. styles.css, utils.js, index.html.
@@ -4509,7 +4511,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.80';
+const CACHE_NAME   = 'mavigne-v9.81';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4526,7 +4528,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.80 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.81 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4546,7 +4548,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.80 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.81 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
