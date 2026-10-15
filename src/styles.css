@@ -8051,6 +8051,29 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .mv-pq-zone:empty{display:none}
 .mv-pq-zone .mv-pq{margin-left:0}
 
+/* ARRIVEE-2 (§338) — l'arrivée de l'ouvrier sur sa priorité, resserrée : les tuiles de chiffres s'effacent (leurs nombres passent
+   sur les filtres d'état), l'état et Liste/Carte tiennent sur une ligne, la prochaine parcelle porte « Prochaine ».
+   La classe `p-arrivee` est posée par renderParcelles quand la priorité est verrouillée (`_prioLocked`). */
+.fchip-n{display:none}
+.p-arrivee .fchip-n{display:inline;margin-left:var(--e-1,4px);font-weight:700}
+.p-arrivee #parc-kpis{display:none}
+#page-parcelles.p-arrivee .frow{flex-wrap:nowrap;overflow-x:auto;max-width:calc(100% - 170px);vertical-align:middle}   /* les marges de TETE-1 comptées : 16 + état + 16 + Liste/Carte */
+#page-parcelles.p-arrivee .tabs2{vertical-align:middle}
+.pc-prochaine{display:inline-block;margin:0 0 0 var(--e-2,8px);vertical-align:middle;padding:0 var(--e-2,8px);border-radius:var(--r-full,999px);background:var(--or-pale);border:1px solid var(--or);color:var(--texte);font:700 var(--pt-micro,11px)/1.6 'Outfit',sans-serif}
+
+/* ARRIVEE-3 (§339) — le niveau et l'équipe sur une seule ligne, sous la barre « Priorité du moment » : le niveau sans son
+   intitulé (N1 N2 N3 se lisent seuls), l'équipe par ses pastilles (initiales) et « Changer », qui ouvre les noms.
+   Les cibles gardent leurs 44 px. Une tâche sans niveau rend #p-subsel-wrap vide : l'équipe reprend alors toute la ligne. */
+#page-parcelles.p-arrivee #p-subsel-wrap{display:inline-block;vertical-align:middle;max-width:60%}
+#page-parcelles.p-arrivee .pv-subsel-lbl{display:none}
+#page-parcelles.p-arrivee .pv-subsel{padding:var(--e-0,2px) var(--e-2,8px) var(--e-0,2px) var(--e-4,16px)}
+#page-parcelles.p-arrivee #p-team-bar{display:inline-block;vertical-align:middle;width:calc(40% - 8px)}
+#page-parcelles.p-arrivee #p-subsel-wrap:empty+#p-team-bar{display:block;width:auto}
+#page-parcelles.p-arrivee .pv-team-bar{margin:0 var(--e-4,16px) 0 0;padding:var(--e-2,8px);gap:var(--e-1,4px)}
+#page-parcelles.p-arrivee #p-subsel-wrap:empty+#p-team-bar .pv-team-bar{margin:0 var(--e-4,16px) var(--e-2,8px)}
+#page-parcelles.p-arrivee .pv-team-info,#page-parcelles.p-arrivee .pv-team-ico{display:none}   /* les pastilles (initiales) disent l'équipe ; les noms sont dans « Changer » */
+#page-parcelles.p-arrivee #p-subsel-wrap:empty+#p-team-bar .pv-team-info{display:block}
+
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.
    Deux rangées partout, Pilotage compris (pilotage.js pose désormais un vrai .mod-header) : l'identité (icône, titre,
    sous-titre, gestes du module) puis la ligne du jour (saison, date — ou la météo, qui porte alors la date courte —,

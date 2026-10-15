@@ -8,6 +8,14 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **15 octobre 2026 (ARRIVEE-2)** — ★★ **L’ARRIVÉE DE L’OUVRIER SUR SA PRIORITÉ, RESSERRÉE : PREMIER « VALIDER » DE 800 À 605 PX** (§338). Base `303c66a` (« pourquoi » : POURQUOI-1 et ARRIVEE-1 poussés).
+> Chez l’ouvrier dont la priorité est verrouillée (`_prioLocked`, classe `p-arrivee`) : la priorité dite une fois (le bandeau ne garde que le message de l’admin), les trois tuiles effacées avec leurs nombres sur les filtres « Finies », « En cours », « Arrachées », l’état et Liste/Carte sur une ligne, la marque « Prochaine » sur la première parcelle à valider. L’admin ne voit aucun changement. Mesuré au navigateur, 375 × 667.
+> **APP 9.04 → 9.05, SW 9.83 → 9.84.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change), puis le tuto Search Console.
+
+> Dernière consolidation : **15 octobre 2026 (ARRIVEE-1)** — ★★ **CHEZ L’OUVRIER, LA VIGNE A DEUX ONGLETS : ACCUEIL ET PARCELLES** (§337). Base `372df98`, cumulatif avec POURQUOI-1 (§336, jamais poussé : le zip ARRIVEE-1 le contient). Nico (14/10) : « l’ouvrier n’a même pas à accéder au journal ».
+> Une seule question, `_mvJournalOuvert` (app.js : admin ou pilotage), posée partout : les deux onglets Journal et les liens de l’Accueil (`applyRoles`), la navigation (`goTo`, `switchVigneOng` → Parcelles), les raccourcis « + Journal » et « Valider ». « Ma semaine » mène à « Ma trace ». Vu au navigateur, compte ouvrier et compte admin.
+> **APP 9.03 → 9.04, SW 9.82 → 9.83.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+
 > Dernière consolidation : **15 octobre 2026 (POURQUOI-1)** — ★★ **« POURQUOI ON LE FAIT » : UNE PASTILLE OUVRE LA FICHE DE CHAQUE TÂCHE, LÀ OÙ LE GESTE A LIEU** (§336). Base `372df98` (RANGE-1 et sa reprise). Contient aussi les décisions des maquettes (bloc GRATIF-0 du §28, l’entrée 44 du backlog), jamais poussées jusqu’ici. Nico (15/10) : « les petites informations de pourquoi on fait telle tâche, c’est hyper important », puis « go ».
 > Trente-sept fiches (`MV_POURQUOI`, `utils.js`) — la vigne, le tracteur, le cuvier, le chai — et des « Le saviez-tu ? », ouvertes dans la bulle des fiches « i » par la pastille `_mvPqBtn` : priorité du moment et feuille de validation (Parcelles), fiche d’une session (Tracteur), « Nouvelle opération » (Cave).
 > **APP 9.02 → 9.03, SW 9.81 → 9.82.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).

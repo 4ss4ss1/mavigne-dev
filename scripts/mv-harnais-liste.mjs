@@ -392,6 +392,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-pourquoi.mjs --contre', 'pourquoi-une-fiche-par-tache'],
   ['node scripts/mv-harnais-arrivee1.mjs', 'arrivee-deux-onglets'],   // ARRIVEE-1 (§337) : chez l'ouvrier, la Vigne a deux onglets
   ['node scripts/mv-harnais-arrivee1.mjs --contre', 'arrivee-deux-onglets'],
+  ['node scripts/mv-harnais-arrivee2.mjs', 'arrivee-deux-onglets'],   // ARRIVEE-2 (§338) : l'arrivée de l'ouvrier sur sa priorité, resserrée
+  ['node scripts/mv-harnais-arrivee2.mjs --contre', 'arrivee-deux-onglets'],
   ['node scripts/mv-harnais-pil-coherence.mjs'],
   ['node scripts/mv-harnais-axe.mjs'],
   ['node scripts/mv-harnais-sauvegarde.mjs'],

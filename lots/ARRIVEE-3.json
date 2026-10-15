@@ -1,0 +1,24 @@
+{
+  "lot": "ARRIVEE-3",
+  "section": "§339",
+  "base": "303c66acab7ef09c2d088e3c85b910b206d11dbe",
+  "inclut": [
+    "ARRIVEE-2"
+  ],
+  "date": "2026-10-15",
+  "fichiers": {
+    ".mv-base": "bdaa74d39ee12d00f959fd6905551abbc81013507025f44b70eed0a6603f86e7",
+    "CLAUDE.md": "24d7e52b59f3bce574ce054348a3ca0e85c94a8cd8d86b1e70b11b4b78e944bc",
+    "docs/claude/INDEX.md": "d848a3d8f7e8b1cbce6a3d2278817eb53dd1599ab00932fe027f6c6091720c50",
+    "docs/claude/chantiers-330-379.md": "6022631e40b200e44c65a21fdcb61c609545cde927653d2da89c7730ce79f0d1",
+    "docs/claude/journal.md": "7bcf0aef6fa270da5752999abd41b26b89694e847d9649c8a5a0035d35a5d49a",
+    "guide/04-vigne.html": "1d78483a39384b3991af38e3ca9d0ed8186efe78def72f6adb4991157735cb49",
+    "index.html": "5b7072685fcffcca7eba9cb488cb78059294d7aca24c2e28ddfc830db6791b2b",
+    "public/sw.js": "f3b0e30beea8a0eb234be6990820f237eb59918108bc1faf58a7c4222e73b98f",
+    "scripts/mv-harnais-liste.mjs": "9876aab7bf8cce817f48527fc2e9977a0382355ea3be274387fd495cbccfffe6",
+    "src/app.js": "814bf7672f82aa8471308eddb7af54f05c61cdea31df6478a1e01eef4191fc27",
+    "src/styles.css": "208c27a05e6504651d4084326c21d7643c330d8bf333327af62e292f97e2d28a",
+    "src/utils.js": "14640c3784c45821ddad1e6fa30526272f039850c40b45256680e5fa12f7a8a9",
+    "scripts/mv-harnais-arrivee2.mjs": "185c339dee0b3bc035dcb1fb8690ff3f9b002be4f177ac9272eb1c72c9af8521"
+  }
+}

@@ -3,9 +3,9 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **15 octobre 2026 (ARRIVEE-1)** — ★★ **CHEZ L’OUVRIER, LA VIGNE A DEUX ONGLETS : ACCUEIL ET PARCELLES** (§337). Base `372df98`, cumulatif avec POURQUOI-1 (§336, jamais poussé : le zip ARRIVEE-1 le contient). Nico (14/10) : « l’ouvrier n’a même pas à accéder au journal ».
-> Une seule question, `_mvJournalOuvert` (app.js : admin ou pilotage), posée partout : les deux onglets Journal et les liens de l’Accueil (`applyRoles`), la navigation (`goTo`, `switchVigneOng` → Parcelles), les raccourcis « + Journal » et « Valider ». « Ma semaine » mène à « Ma trace ». Vu au navigateur, compte ouvrier et compte admin.
-> **APP 9.03 → 9.04, SW 9.82 → 9.83.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+> Dernière consolidation : **15 octobre 2026 (ARRIVEE-3)** — ★★ **LA PROCHAINE PARCELLE TIENT DANS LE PREMIER ÉCRAN : PREMIER « VALIDER » DE 800 À 530 PX** (§339). Base `303c66a` (POURQUOI-1 et ARRIVEE-1 poussés), cumulatif avec ARRIVEE-2 (§338, jamais poussé : le zip ARRIVEE-3 le contient).
+> Chez l’ouvrier sur sa priorité (classe `p-arrivee`), le niveau et l’équipe tiennent sur une ligne sous la barre « Priorité du moment » : le niveau sans son intitulé, l’équipe à ses pastilles d’initiales et « Changer » ; une tâche sans niveau rend la ligne à l’équipe. Les cibles gardent leurs 44 px. Que du style (`styles.css`), aucun JavaScript neuf. Mesuré au navigateur, 375 × 667.
+> **APP 9.05 → 9.06, SW 9.84 → 9.85.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change), puis le tuto Search Console.
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1858,10 +1858,12 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
-### ⚠️ ARRIVEE-1 — CE QUI RESTE OUVERT (§337, posé le 15/10)
-1. **ARRIVEE-2 — l’arrivée sur Parcelles resserrée** (maquette ERGO-0) : la priorité affichée deux fois, six à sept rangées de
-   commandes avant la première parcelle, le premier « Valider » loin du haut au téléphone. Pas touché ici.
-2. **À regarder chez Nico** : un vrai compte ouvrier au téléphone — deux onglets, « Ma trace » sous « Ma semaine ».
+### ⚠️ ARRIVEE-1 à ARRIVEE-3 — CE QUI RESTE OUVERT (§337 à §339, posé le 15/10)
+1. **Mesuré à 375 × 667, sans tournée** : premier « Valider » de 800 à 530 px, au-dessus du dock. **Pas mesuré avec une tournée
+   active** : chez l’ouvrier, la barre de la tournée remplace alors « Trier par proximité » (TRN-2) — à regarder au domaine.
+2. **Le bouton « Filtres » de la maquette n’est pas fait** (le tri — tournée, proximité, normal — dans un seul bouton) : l’objectif
+   mesuré est atteint sans lui ; à décider après l’avoir vu.
+3. **À regarder chez Nico** : un vrai compte ouvrier au téléphone — deux onglets, « Ma trace », « Prochaine », niveau et équipe.
 
 ### ⚠️ POURQUOI-1 — CE QUI RESTE OUVERT (§336, posé le 15/10)
 1. **À regarder chez Nico, au téléphone puis sur PC, en clair et en sombre** : la pastille « Pourquoi ? » à côté de la tâche choisie ou de la priorité
@@ -1872,7 +1874,7 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 3. **Pas encore posées** : le Cuvier (remontage, pigeage, délestage, saignée, chaptalisation ont leur fiche, sans pastille), la mise en
    bouteille, et les activités du tracteur sans fiche (broyage…), qui n’affichent rien — c’est voulu.
 
-### ⚠️ GRATIF-0 et ERGO-0 — MAQUETTES DE L’OUVRIER ET DÉCISIONS DE NICO (posé le 15/10 ; intégrés : POURQUOI-1 §336, ARRIVEE-1 §337)
+### ⚠️ GRATIF-0 et ERGO-0 — MAQUETTES DE L’OUVRIER ET DÉCISIONS DE NICO (posé le 15/10 ; intégrés : POURQUOI-1 §336, ARRIVEE-1 §337, ARRIVEE-2 §338, ARRIVEE-3 §339)
 
 Maquettes livrées dans la conversation, non versionnées : `maquette-ergo.html` (arrivée de l’ouvrier, Accueil, Journal côté admin)
 et `maquette-gratification.html` (petites victoires, jalons, fêtes rares, saison, tractoriste, cave, premières fois, 37 fiches).

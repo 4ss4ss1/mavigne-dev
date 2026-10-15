@@ -390,3 +390,5 @@
 | 335 | 335. ★★ RANGE-1 — LE MILLÉSIME RANGÉ : UNE TÊTE ET QUATRE VUES, LA CHAÎNE DE CHAQUE CUVÉE (15/10 — `src/cav… | `docs/claude/chantiers-330-379.md` |
 | 336 | 336. ★★ POURQUOI-1 — « POURQUOI ON LE FAIT » : UNE PASTILLE OUVRE LA FICHE DE CHAQUE TÂCHE, LÀ OÙ LE GESTE … | `docs/claude/chantiers-330-379.md` |
 | 337 | 337. ★★ ARRIVEE-1 — CHEZ L’OUVRIER, LA VIGNE A DEUX ONGLETS : ACCUEIL ET PARCELLES (15/10 — `src/app.js` (`… | `docs/claude/chantiers-330-379.md` |
+| 338 | 338. ★★ ARRIVEE-2 — L’ARRIVÉE DE L’OUVRIER SUR SA PRIORITÉ, RESSERRÉE : PREMIER « VALIDER » DE 800 À 605 PX… | `docs/claude/chantiers-330-379.md` |
+| 339 | 339. ★★ ARRIVEE-3 — LA PROCHAINE PARCELLE TIENT DANS LE PREMIER ÉCRAN : PREMIER « VALIDER » DE 800 À 530 PX… | `docs/claude/chantiers-330-379.md` |

@@ -1,4 +1,6 @@
-// MA VIGNE — Service Worker v9.83
+// MA VIGNE — Service Worker v9.85
+// v9.85 (15/10/2026) — ARRIVEE-3 (§339) : chez l’ouvrier sur sa priorité, le niveau et l’équipe sur une ligne — la prochaine parcelle tient dans le premier écran. styles.css, utils.js, index.html.
+// v9.84 (15/10/2026) — ARRIVEE-2 (§338) : l’arrivée de l’ouvrier sur sa priorité, resserrée — priorité dite une fois, tuiles effacées (nombres sur les filtres), « Prochaine ». app.js, utils.js, index.html, styles.css.
 // v9.83 (15/10/2026) — ARRIVEE-1 (§337) : chez l’ouvrier, la Vigne a deux onglets (Accueil, Parcelles) ; ni « + Journal » ni « Valider » à l’Accueil. app.js, utils.js, index.html.
 // v9.82 (15/10/2026) — POURQUOI-1 (§336) : une pastille « Pourquoi ? » ouvre la fiche de chaque tâche (vigne, tracteur, cave). utils.js, app.js, tracteur.js, cave.js, index.html, styles.css.
 // v9.81 (15/10/2026) — RANGE-1 (§335) : Le millésime rangé — une tête (l’année, son état, les tuiles) et quatre vues
@@ -4513,7 +4515,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.83';
+const CACHE_NAME   = 'mavigne-v9.85';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4530,7 +4532,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.83 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.85 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4550,7 +4552,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.83 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.85 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

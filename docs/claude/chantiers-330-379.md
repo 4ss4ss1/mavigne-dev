@@ -275,3 +275,43 @@ Maquette ERGO-0, décisions de Nico : l’ouvrier dont l’équipe porte la prio
 
 ### 337d. Ce qui n’a pas été vérifié
 - Un vrai compte ouvrier sur un vrai téléphone (§28).
+
+## 338. ★★ ARRIVEE-2 — L’ARRIVÉE DE L’OUVRIER SUR SA PRIORITÉ, RESSERRÉE : PREMIER « VALIDER » DE 800 À 605 PX (15/10 — `src/app.js` (`renderParcelles` : la classe `p-arrivee`, le bandeau ; `_pProchaineMarque` neuf ; `computePStats`) · `src/styles.css` (le bloc ARRIVEE-2, avant TETE-2) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Parcelles) · `index.html` (`#pf-n-c`, `#pf-n-e`, `#pf-n-a`, les quatre versions) · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-arrivee2.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-330-379.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/ARRIVEE-2.json` · **APP 9.04 → 9.05, SW 9.83 → 9.84**, base `303c66a`)
+
+### 338a. La demande
+Maquette ERGO-0, écran 1 : « le premier Valider est à 886 px du haut… après dix rangées » ; « la priorité est dite une fois » ; « les trois tuiles de chiffres quittent cet écran » ; « la parcelle suivante est marquée Prochaine ». « Suite » de Nico (15/10) après ARRIVEE-1.
+
+### 338b. Mesuré avant de toucher
+Au navigateur, 375 × 667, ouvrier de l’équipe prioritaire, sans tournée : en-tête 178 px, tuiles 79, état 32, Liste/Carte 32, bandeau de priorité 60, recherche 42, « Trier par proximité » 32, barre « Priorité du moment » 93, niveau 52, équipe 57 ; premier « Valider » à **800 px**.
+
+### 338c. Ce qui est fait — seulement quand la priorité est verrouillée (`_prioLocked` : ouvrier, pas l’admin)
+- **La classe `p-arrivee`** sur `#page-parcelles`, posée par `renderParcelles` : tout le resserrement passe par elle, l’admin ne voit rien changer.
+- **La priorité dite une fois** : le bandeau garde le message de l’admin (`priorityMessage`) et s’efface sans message ; la barre « Priorité du moment » des filtres porte la tâche.
+- **Les tuiles** s’effacent ; leurs nombres passent sur les filtres d’état (`#pf-n-c`, `#pf-n-e`, `#pf-n-a`, remplis par `computePStats`).
+- **L’état et Liste/Carte sur une ligne** : les deux étaient déjà `inline-flex` (TETE-1) ; il manquait une largeur qui compte leurs marges.
+- **« Prochaine »** (`_pProchaineMarque`) : la première parcelle à valider dans l’ordre affiché, sur la ligne du nom (la carte ne grandit pas). ⚠️ Appelée avant `_pFicheSync`, jamais en fin de `renderParcelles` : `mv-harnais-cible` tient cette fin.
+
+### 338d. Ce qui a été vérifié
+- `scripts/mv-harnais-arrivee2.mjs` : 8 assertions et 3 contre-épreuves (le bandeau qui répète la priorité, « Prochaine » posée en fin de fonction, les tuiles effacées pour tous). `mv-harnais-cible` reste vert.
+- **Au navigateur** : ouvrier — classe posée, tuiles cachées, une seule « Prochaine », premier « Valider » à **605 px** ; admin — rien ne change (tuiles visibles, aucune marque).
+
+### 338e. Ce qui reste
+- ARRIVEE-3 (§28) : le niveau et l’équipe dans la barre, le tri dans « Filtres ».
+
+## 339. ★★ ARRIVEE-3 — LA PROCHAINE PARCELLE TIENT DANS LE PREMIER ÉCRAN : PREMIER « VALIDER » DE 800 À 530 PX (15/10 — `src/styles.css` (le bloc ARRIVEE-3, avant TETE-2) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Parcelles) · `index.html` (les quatre versions) · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-arrivee2.mjs` (étendu) · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-330-379.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/ARRIVEE-3.json` · **APP 9.05 → 9.06, SW 9.84 → 9.85**, base `303c66a`, cumulatif avec ARRIVEE-2)
+
+### 339a. La demande
+Finir l’écran 1 de la maquette ERGO-0 (« un seul bandeau, avec le niveau, l’équipe et la tournée ») pour que le premier « Valider » soit dans le premier écran. « Suite » de Nico (15/10). Après ARRIVEE-2, il restait à 605 px, sous le dock (vers 600 px) d’un écran de 375 × 667.
+
+### 339b. Ce qui est fait — que du style, à l’arrivée seulement (`#page-parcelles.p-arrivee`)
+- **Le niveau et l’équipe sur une ligne** : `#p-subsel-wrap` et `#p-team-bar` passent en `inline-block` (60 % et 40 %). Le niveau perd son intitulé (« N1 N2 N3 » se lisent seuls) ; l’équipe se lit à ses pastilles d’initiales, « Changer » ouvre les noms (`openPTeamJour`, inchangé).
+- **Une tâche sans niveau** (`_pvRenderSubsel` vide le conteneur) : `:empty + #p-team-bar` rend la ligne entière à l’équipe, noms compris.
+- **Les cibles gardent leurs 44 px** (décision du 03/10 : pas de changement de taille des boutons).
+- Pourquoi du style plutôt que de déplacer les nœuds : `renderParcelles` réécrit `#p-tache-filter-row` à chaque rendu ; un nœud déplacé dedans y serait détruit, et `_pvRenderSubsel` / `_pvRenderTeamBar` ne le retrouveraient plus.
+
+### 339c. Ce qui a été vérifié
+- `scripts/mv-harnais-arrivee2.mjs`, étendu : 11 assertions, 4 contre-épreuves (dont « le niveau remis sur sa propre ligne »).
+- **Au navigateur**, ouvrier de l’équipe prioritaire, 375 × 667 : premier « Valider » à **530 px**, la carte « Prochaine » entière au-dessus du dock.
+
+### 339d. Ce qui reste (§28)
+- La mesure avec une tournée active ; le bouton « Filtres » de la maquette, à décider.

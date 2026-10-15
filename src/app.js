@@ -7930,6 +7930,18 @@ function getPCls(p){
   if(pct>=75)return{a:'ava-a',d:'da',cl:'pa',col:_gc,fill:_fk,pct,nbDone,nbTotal:totalSaison,part:_arrPart};
   return{a:'ava-r',d:'dr',cl:'pr',col:_gc,fill:_fk,pct,nbDone,nbTotal:totalSaison,part:_arrPart};
 }
+// ★ ARRIVEE-2 (§338) — « Prochaine » : chez l'ouvrier sur sa priorité, la première parcelle qu'il peut valider, dans l'ordre
+//   affiché (celui de la tournée quand elle s'applique), porte la marque. C'est elle qu'il valide, sans la chercher (NN/g n°6).
+//   Posée après le rendu des cartes, retirée à chaque rendu : jamais deux marques, jamais chez l'admin.
+function _pProchaineMarque(on){
+  var l=document.getElementById('pwrapliste'); if(!l) return;
+  l.querySelectorAll('.pc-prochaine').forEach(function(x){ x.remove(); });
+  if(!on) return;
+  var v=l.querySelector('.pc-validate'); if(!v) return;
+  var row=v.closest('.pc-row'), left=row&&row.querySelector('.pc-left'); if(!left) return;
+  var b=document.createElement('span'); b.className='pc-prochaine'; b.textContent='Prochaine';
+  (left.firstElementChild||left).appendChild(b);   // sur la ligne du nom : la carte ne grandit pas
+}
 function computePStats(){
   let c=0,e=0,r=0,a=0;
   PARCELLES.forEach(p=>{
@@ -7939,6 +7951,7 @@ function computePStats(){
   document.getElementById('pc-c').textContent=c;
   document.getElementById('pc-e').textContent=e;
   document.getElementById('pc-a').textContent=a;
+  [['pf-n-c',c],['pf-n-e',e],['pf-n-a',a]].forEach(function(x){ var el=document.getElementById(x[0]); if(el) el.textContent=x[1]; });   // ★ ARRIVEE-2 (§338) : les nombres des tuiles, sur les filtres d'état
   const pcBadge=document.getElementById('pc-badge');
   if(pcBadge)pcBadge.textContent=(c+e+r)+' actives';
   document.getElementById('p-saison-sub').textContent='Parcelles';   // ★ TETE-2 : le compte est dans le badge, la saison dans la ligne du jour
@@ -8185,6 +8198,7 @@ function renderParcelles(){
   var _prioTaskOK=_prioIts.length>0;
   var _prioActive=!!(priorityMessage||_prioTaskOK);
   var _prioLocked=_prioTaskOK&&!isAdmin()&&!_prioOverride;
+  var _pgParc=document.getElementById('page-parcelles'); if(_pgParc) _pgParc.classList.toggle('p-arrivee',!!_prioLocked);   // ★ ARRIVEE-2 (§338) : l'arrivée de l'ouvrier sur sa priorité, resserrée (styles.css)
   const pb=document.getElementById('priority-banner');
   const pe=document.getElementById('priority-empty');
   const editBtn=document.getElementById('priority-edit-btn');
@@ -8203,6 +8217,9 @@ function renderParcelles(){
       } else { pTaskRow.style.display='none'; }
     }
     if(editBtn)editBtn.style.display=isAdmin()?'block':'none';
+    // ★ ARRIVEE-2 (§338) — la priorité est dite UNE fois : chez l'ouvrier sur sa priorité, la barre « Priorité du moment »
+    //   des filtres la porte déjà ; le bandeau ne garde que le message de l'admin, et s'efface sans message.
+    if(_prioLocked){ if(pTaskRow)pTaskRow.style.display='none'; if(!priorityMessage)pb.style.display='none'; }
   } else {
     pb.style.display='none';
     if(pe)pe.style.display=isAdmin()?'block':'none';
@@ -8382,6 +8399,7 @@ function renderParcelles(){
     }
     return `<div class="mv-c mv-c-clic${hasDrae?' mv-c-al':''}" onclick="openDP('${_escAttr(p.nom)}')" style="${_proxStyle}">${_pvInner}</div>`;
   }).join('');
+  _pProchaineMarque(_prioLocked);   // ★ ARRIVEE-2 (§338) : « Prochaine », avant les barres — la fin de la fonction reste intacte (mv-harnais-cible)
   if(_pDesk())_pFicheSync(data);   // PARC-1 : AVANT les barres et la carte, pour laisser intacte la fin que vise mv-harnais-cible
   _pvRenderProxBar();
   _pvRenderOrdreBar();

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.04';
+export const APP_VERSION = '9.06';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,16 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.06', d: '2026-10-15', items: [
+    { niv: 1, pour: ['salaries'], emoji: 'carte', titre: 'La prochaine parcelle tient dans le premier écran',
+      desc: "Sur votre priorité, le niveau (N1, N2, N3) et l’équipe tiennent maintenant sur une seule ligne, sous la barre dorée : l’équipe se lit à ses pastilles, « Changer » ouvre les noms. "
+        + "Au téléphone, la prochaine parcelle et son bouton « Valider » apparaissent sans faire défiler." },
+  ] },
+  { v: '9.05', d: '2026-10-15', items: [
+    { niv: 1, pour: ['salaries'], emoji: 'carte', titre: 'L’arrivée sur votre priorité, resserrée',
+      desc: "Quand vous arrivez dans les Parcelles sur la priorité du moment, elle n’est plus annoncée deux fois. Les trois tuiles de chiffres laissent leurs nombres aux filtres « Finies » et « En cours », qui partagent leur ligne avec Liste et Carte. "
+        + "La prochaine parcelle à valider, dans l’ordre affiché, porte la marque « Prochaine »." },
+  ] },
   { v: '9.04', d: '2026-10-15', items: [
     { niv: 1, pour: ['admin', 'salaries'], emoji: 'carte', titre: 'Chez l’ouvrier, la Vigne va à l’essentiel',
       desc: "Un ouvrier valide depuis les Parcelles : l’onglet Journal, et les raccourcis « + Journal » et « Valider » de l’Accueil, disparaissent de son écran. « Ma semaine » mène à « Ma trace », qui garde l’historique de son travail. "
@@ -5154,6 +5164,7 @@ var MV_AIDE = {
   parcelles: {
     ico: 'carte', titre: 'Mes Parcelles', ancre: 'vigne',
     points: [
+      ['L’arrivée sur votre priorité', " : la priorité du moment n’est annoncée qu’une fois, dans la barre dorée ; dessous, le niveau et l’équipe tiennent sur une ligne (l’équipe à ses pastilles, « Changer » ouvre les noms). Les nombres « Finies » et « En cours » sont sur les filtres, et la prochaine parcelle à valider porte la marque « Prochaine »."],
       ['Pourquoi ?', " : la pastille <b>« Pourquoi ? »</b>, à côté de la tâche choisie (ou de la priorité du moment) et dans la feuille de validation, ouvre la fiche de la tâche : quand on la fait, pourquoi, ce que ça change pour le vin."],
       ['Les filtres du haut', "trient par état : finies, en cours, arrachées."],
       ['Sur chaque carte', "la surface au centiare près (0,0870 ha), le pourcentage, et le compte des tâches faites, qui suit la même règle : un arrachage à moitié fait compte pour une demie (« 1,5/2 tâches »)."],
