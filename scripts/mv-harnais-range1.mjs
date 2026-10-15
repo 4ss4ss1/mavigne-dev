@@ -212,7 +212,7 @@ const T = {
   B2: ['« À surveiller » : le volume à mesurer, la parcelle au-dessus du maximum, les cuves en fermentation', A => {
     avec(A); const d = A._pcrbCvLignes(2026), h = A._mlBlocVeille(2026, d); A.__droit(false); const h2 = A._mlBlocVeille(2026, d);
     return h.includes('<span class="mlv-n">3</span>') && h.includes("_vendDvolCorriger('cv4')") && sp(h).includes('D\u00e9cuv\u00e9e le 5 oct.')
-      && sp(h).includes('44,2 hL/ha, au-dessus du maximum de l\u2019appellation (40).') && h.includes("_mlSetParcF('dessus')")
+      && sp(h).includes('44,2 hL/ha mesur\u00e9s, au-dessus du maximum de l\u2019appellation (40).') && h.includes("_mlSetParcF('dessus')")
       && h.includes('2 cuves en fermentation') && h.includes('Aux Murgers, Charmes-Combotte.') && h.includes('Tout est rentr\u00e9')
       && !h2.includes('_vendDvolCorriger(') && h2.includes("_mlSetCuv('cv:cv4')"); }],
   B3: ['les repères : premières et dernière récoltes, les décuvages dans l’ordre, aujourd’hui', A => {

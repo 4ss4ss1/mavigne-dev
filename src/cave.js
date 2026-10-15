@@ -5329,8 +5329,8 @@ function _mlRenderVie(){
 
 /* ── RANGE-1 (§335) — LE MILLESIME : UNE TETE (annee, etat, tuiles) ET QUATRE VUES (maquette validee).
    Rien de neuf n'est calcule : chaque bloc relit une fonction qui existait. */
-var _ML_MOIS=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
-function _mlJourCourt(iso){
+function _mlJourCourt(iso){   // _ML_MOIS : declare plus haut (Ce qui vient), le meme
+
   var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso||'')); if(!m) return '';
   var j=parseInt(m[3],10);
   return (j===1?'1er':String(j))+'\u00a0'+_ML_MOIS[parseInt(m[2],10)-1];
@@ -5441,7 +5441,7 @@ function _mlBlocVeille(mil,d){
   var rd=[]; try{ rd=_mlRendements(mil); }catch(e){ _pcavLog('rdt',e); }
   rd.forEach(function(r){
     if(!r.depasse) return;
-    it.push({ton:'rouge', t:r.parcelle.nom, x:(r.statut==='mesure'?'':'\u2248\u00a0')+_mvF1(r.hlHa)+' hL/ha, au-dessus du maximum de l\u2019appellation ('+_mvF1(r.max)+').',
+    it.push({ton:'rouge', t:r.parcelle.nom, x:_mvF1(r.hlHa)+' hL/ha '+(r.statut==='mesure'?'mesur\u00e9s':'estim\u00e9s')+', au-dessus du maximum de l\u2019appellation ('+_mvF1(r.max)+').',
       a:['Voir les parcelles','_mlSetParcF(\'dessus\')']});
   });
   var reste=[]; try{ reste=_mlResteARentrer(mil); }catch(e){ _pcavLog('reste',e); }
@@ -5544,7 +5544,7 @@ function _mlCuvFicheHtml(g,l){
   var ecrit=(typeof canWrite==='function'&&canWrite()&&_pcavHasW('_vendDvolCorriger'));
   var cv=l.cuveId?(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){ return x&&x.id===l.cuveId; }):null, cu=l.cuvee||null;
   var i=_mlCuvInfo(g,l), ch=l.ch||{};
-  var h='<button type="button" class="mlc-ret" onclick="_mlCuvRetour()">\u2190 Toutes les cuv\u00e9es</button>'
+  var h='<button type="button" class="mlc-ret" onclick="_mlCuvRetour()">'+_mvIcon('gauche',16)+' Toutes les cuv\u00e9es</button>'
     +'<div class="mlc-fh"><div class="mlc-ft"><h3>'+_escHtml(l.nom)+'</h3><span>'+_escHtml(l.sous||'')+'</span></div>'
     +'<span class="mlc-pill '+g.cle+'">'+i.etat+'</span>'+(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.cuvees'):'')+'</div>';
   var cells=_pcrbCvCellules(ch,l.sorties,l.prelev,l.decuvee&&!(ch.entonneHl!=null&&ch.entonneSrc==='mesure'),MV_CV_FICHE);
