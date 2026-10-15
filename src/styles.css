@@ -8043,6 +8043,14 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .eqj-trn select{flex:1;min-width:0;height:var(--h-row-2,48px);padding:0 var(--e-3,12px);border:var(--bw,1px) solid var(--ligne,#E7E6E2);border-radius:var(--r-md,8px);background:var(--bg-card);color:var(--texte);font-family:inherit;font-size:var(--pt-sm,16px)}
 .trn-moins-i{display:block;width:12px;height:2px;border-radius:1px;background:currentColor}
 
+/* POURQUOI-1 (§336) — la pastille « Pourquoi ? » : elle ouvre la fiche de la tâche dans la bulle des fiches « i ».
+   Taille alignée sur la pastille « i » (décision du 26/09, §176d : les petites cibles restent). */
+.mv-pq{display:inline-flex;align-items:center;margin:0 0 0 var(--e-1,4px);padding:var(--e-0,2px) var(--e-3,12px);border-radius:var(--r-full,999px);border:1px solid var(--or);background:var(--or-pale);color:var(--texte);font:600 var(--pt-micro,11px)/1.2 'Outfit',sans-serif;cursor:pointer;vertical-align:middle;-webkit-tap-highlight-color:transparent}
+.mv-pq:focus-visible{outline:2px solid var(--or);outline-offset:var(--e-0,2px)}
+.mv-pq-zone{margin-top:var(--e-2,8px)}
+.mv-pq-zone:empty{display:none}
+.mv-pq-zone .mv-pq{margin-left:0}
+
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.
    Deux rangées partout, Pilotage compris (pilotage.js pose désormais un vrai .mod-header) : l'identité (icône, titre,
    sous-titre, gestes du module) puis la ligne du jour (saison, date — ou la météo, qui porte alors la date courte —,

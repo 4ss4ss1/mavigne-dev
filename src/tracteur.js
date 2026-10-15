@@ -2314,6 +2314,7 @@ function openSessionDetail(id){
   if(!s.parcellesSkip)s.parcellesSkip=[];
   const amap=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
   document.getElementById('sd-titre').textContent=s.activite;
+  var _sdPq=document.getElementById('sd-pq');if(_sdPq)_sdPq.innerHTML=window._mvPqBtn?window._mvPqBtn(s.activite,'trac'):'';   // POURQUOI-1 (§336)
   document.getElementById('sd-meta').textContent=`${_fmtDate(s.date)} · ${s.conducteur||''}`;   // ROB-2 : jamais « undefined »
   renderSDTracEncart();
   closeSdTracPicker();

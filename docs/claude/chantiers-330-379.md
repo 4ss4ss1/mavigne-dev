@@ -233,3 +233,45 @@ Nico (15/10) : dans Le millésime, « je n'ai qu'une seule parcelle de la récol
 
 ### 335g. Ouvert
 §28 « RANGE-1 — CE QUI RESTE OUVERT ».
+
+## 336. ★★ POURQUOI-1 — « POURQUOI ON LE FAIT » : UNE PASTILLE OUVRE LA FICHE DE CHAQUE TÂCHE, LÀ OÙ LE GESTE A LIEU (15/10 — `src/utils.js` (`MV_POURQUOI`, `MV_SAVIEZ`, `MV_PQ_ALIAS`, `_mvPqSlug`, `_mvPqResout`, `_mvPqCle`, `_mvPqBtn`, l'enregistrement `pqt.<slug>` dans `MV_INFO` ; APP, WHATS_NEW, MV_AIDE Parcelles, Tracteur et Cave) · `src/app.js` (la barre « Priorité du moment », `openValidationPanel`) · `src/tracteur.js` (`openSessionDetail`) · `src/cave.js` (`selCaveOpType`) · `index.html` (`#vp-pq`, `#sd-pq`, `#cop-pq`, les quatre versions) · `src/styles.css` (`.mv-pq`) · `public/sw.js` · `guide/04-vigne.html`, `guide/06-tracteur.html`, `guide/08-cave.html` · `scripts/mv-harnais-pourquoi.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-330-379.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/POURQUOI-1.json` · **APP 9.02 → 9.03, SW 9.81 → 9.82**, base `372df98` ; porte aussi les décisions des maquettes, GRATIF-0 au §28)
+
+### 336a. La demande
+Les maquettes ERGO-0 et GRATIF (03 → 15/10, bloc GRATIF-0 du §28). Nico, 15/10 : « les petites informations de pourquoi on fait telle tâche ou telle tâche, c'est hyper important : ça aide tout le monde à ouvrir un petit peu l'appli, à valider ce qu'ils sont en train de faire, à discuter entre eux » — puis « go ». Premier lot de l'intégration, choisi pour cette raison.
+
+### 336b. Ce qui est fait
+- **Le catalogue** `MV_POURQUOI` : 37 fiches `{d, n, q, p, v}` — 17 de la vigne (les tâches de `TACHES_CATALOGUE`, plus le relevage et le dégraffage), 6 du tracteur, 5 du cuvier, 9 du chai — et `MV_SAVIEZ`, six faits pour la vigne et six pour la cave, choisis selon le jour. Écrits pour tous les domaines clients : rien de propre à une région.
+- **La résolution** `_mvPqResout(libellé, contexte)` : sans accents ni espaces, un alias par contexte (« traitement » : la vigne au tracteur, le vin en cave), un pluriel toléré. Un libellé sans fiche ne pose rien : pas de pastille morte.
+- **La bulle** : les fiches entrent dans `MV_INFO` sous `pqt.<slug>` au chargement ; la pastille porte `data-mvi`, donc l'écouteur délégué et la bulle des fiches « i » font le reste (BULLE-1). Quatre paragraphes : Quand, Pourquoi, Pour le vin, Le saviez-tu.
+- **Les points de pose** : dans les Parcelles, la barre « Priorité du moment » quand elle est verrouillée, sinon la rangée des tâches à côté de la tâche choisie (l'admin) — `_mvPqBtn(pTacheFilter,'vigne')` ; la feuille de validation (`#vp-pq`), la fiche d'une session tracteur (`#sd-pq`), « Nouvelle opération » de la cave au choix du type (`#cop-pq`).
+- **Le style** `.mv-pq` : la taille de la pastille « i » (décision du 26/09, §176d), des couleurs par jetons.
+- ⚠️ **Rebâti sur `372df98`** : le lot était écrit sur `2c16613`, où RANGE-1 laissait deux rouges à `npm run check` (`_ML_MOIS` déclarée deux fois, un « ← » hors sprite). Corrigés ici d'abord, puis par la reprise de RANGE-1 poussée entre-temps : la correction de ce lot a été retirée, celle de la reprise gardée.
+
+### 336c. Ce qui a été vérifié
+- `scripts/mv-harnais-pourquoi.mjs` : 21 assertions (le catalogue exécuté ; la couverture du catalogue des tâches, des types d'opération du Chai et des activités du tracteur ; aucun HTML dans les textes ; la forme des clés ; les points de pose ; le style) et 3 contre-épreuves (une fiche retirée, du HTML glissé, l'alias de cave retiré).
+- `mv-harnais-info` (132/0) et `mv-harnais-bulle1` (45/0) restent verts. ⚠️ L'attribut `data-mvi` de la pastille se construit en deux morceaux : écrit en dur avec une clé calculée, le contrôle statique de mv-harnais-info l'aurait pris pour une fiche manquante.
+- Preflight : 0 erreur. ⚠️ Vécu : le service worker porte sa version à **quatre** endroits — l'en-tête, `CACHE_NAME` et deux `console.log` ; le preflight a rougi sur les deux derniers.
+- `npm run check` : voir la note de livraison.
+
+### 336d. Ce qui n'a pas été vérifié
+- Aucun rendu dans un navigateur avec les données d'un vrai domaine : c'est le premier point du §28.
+
+## 337. ★★ ARRIVEE-1 — CHEZ L’OUVRIER, LA VIGNE A DEUX ONGLETS : ACCUEIL ET PARCELLES (15/10 — `src/app.js` (`_mvJournalOuvert` neuf ; `applyRoles`, `goTo`, `switchVigneOng`, `renderHomeRaccourcis`) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Accueil) · `index.html` (`#home-trv-tout`, `#home-msem-journal`, `#home-msem-trace`, les quatre versions) · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-arrivee1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-330-379.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/ARRIVEE-1.json` · **APP 9.03 → 9.04, SW 9.82 → 9.83**, base `372df98`, cumulatif avec POURQUOI-1)
+
+### 337a. La demande
+Maquette ERGO-0, décisions de Nico : l’ouvrier dont l’équipe porte la priorité arrive sur les Parcelles, déjà réglées (vérifié : `_goLanding` lit `_prioForMember`) ; « si oui enlève le valider de l’accueil », « enlève noter au journal » (13/10) ; « l’ouvrier n’a même pas à accéder au journal » (14/10). Deuxième lot de l’intégration ; l’arrivée sur Parcelles resserrée devient ARRIVEE-2.
+
+### 337b. Ce qui est fait
+- **Une seule question** : `_mvJournalOuvert()` — vraie pour l’admin et le pilotage, fausse pour l’ouvrier, le tractoriste et le saisonnier. Lue sur les rôles du membre, comme `canSeePilotage`.
+- **Les onglets et les liens** (`applyRoles`) : les deux onglets « Journal » (`#vng-ong-journal`, `#vng-ong-journal-p`) et « Tout voir » des derniers travaux sont cachés chez l’ouvrier ; dans « Ma semaine », « Journal › » laisse la place à « Ma trace › ».
+- **La navigation** : `goTo('journal')` et `switchVigneOng('journal')` mènent aux Parcelles chez l’ouvrier — un lien du fil des derniers travaux, la recherche Ctrl K, une adresse.
+- **Les raccourcis de l’Accueil** : ni « + Journal » ni « Valider » chez l’ouvrier ; « Ma trace » reste, et « Session » pour le tractoriste.
+- **L’aide, le guide, le Quoi de neuf** : un point « Chez un ouvrier » dans la fiche de l’Accueil, une carte dans le guide de la Vigne, une nouveauté pour l’admin et l’ouvrier.
+
+### 337c. Ce qui a été vérifié
+- `scripts/mv-harnais-arrivee1.mjs` : 11 assertions — `_mvJournalOuvert` EXÉCUTÉE sur huit jeux de rôles, puis ses usages — et 3 contre-épreuves (le tractoriste qui retrouve le Journal, la garde de `goTo` retirée, « Valider » revenu à l’Accueil).
+- **Au navigateur** (Chromium, au téléphone) : compte ouvrier — onglets Journal et « Tout voir » cachés, « Ma trace › » sous « Ma semaine », un seul raccourci « Ma trace », `goTo('journal')` ouvre les Parcelles ; compte admin — tout est là, `goTo('journal')` ouvre le Journal.
+- `npm run check` : voir la note de livraison.
+
+### 337d. Ce qui n’a pas été vérifié
+- Un vrai compte ouvrier sur un vrai téléphone (§28).

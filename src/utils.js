@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.02';
+export const APP_VERSION = '9.04';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,16 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.04', d: '2026-10-15', items: [
+    { niv: 1, pour: ['admin', 'salaries'], emoji: 'carte', titre: 'Chez l’ouvrier, la Vigne va à l’essentiel',
+      desc: "Un ouvrier valide depuis les Parcelles : l’onglet Journal, et les raccourcis « + Journal » et « Valider » de l’Accueil, disparaissent de son écran. « Ma semaine » mène à « Ma trace », qui garde l’historique de son travail. "
+        + "L’administrateur et le pilotage gardent le Journal." },
+  ] },
+  { v: '9.03', d: '2026-10-15', items: [
+    { niv: 1, pour: ['tous'], emoji: 'feuille', titre: 'Pourquoi on le fait : chaque tâche s’explique',
+      desc: "Une pastille « Pourquoi ? » apparaît là où le geste a lieu : à côté de la tâche choisie dans les Parcelles (ou de la priorité du moment) et dans la feuille de validation, dans la fiche d’une session du tracteur, et au choix d’une opération de cave. "
+        + "Elle dit quand on fait la tâche, pourquoi, et ce que ça change pour le vin, avec un « Le saviez-tu ? ». Trente-sept fiches, de la taille à la mise en bouteille." },
+  ] },
   { v: '9.02', d: '2026-10-15', items: [
     { niv: 1, pour: ['admin', 'cave'], cible: '#ml-tab-cuv', emoji: 'bouteille', titre: 'Le millésime, rangé : une tête et quatre vues',
       desc: "Le millésime empilait tout sur une seule colonne. Il s’ouvre maintenant sur l’année, son état et ses chiffres, puis quatre vues : Ensemble (ce qu’il faut surveiller, le parcours du vin, les repères), Parcelles, Cuvées et Courbes. "
@@ -5122,6 +5132,7 @@ var MV_AIDE = {
   home: {
     ico: 'feuille', titre: 'Accueil', ancre: 'vigne',
     points: [
+      ['Chez un ouvrier', " : la Vigne a deux onglets, Accueil et Parcelles. On valide depuis les Parcelles ; le Journal reste à l’administrateur et au pilotage. « Ma semaine » mène à « Ma trace », l’historique de votre travail."],
       ['Sur ordinateur', " : les modules sont dans la <b>barre à gauche</b> (repliable), et <b>Ctrl K</b> ouvre une recherche — une parcelle, un écran, un onglet du Pilotage. Sur téléphone et tablette, rien ne change."],
       ['La priorité du moment', "reste épinglée en haut, dans une carte : la tâche que l’équipe attaque, son avancement, et les parcelles dessinées à leur forme (leur contour, nord en haut) et à leur surface (fait, en cours, à faire) — un appui sur l’une ouvre sa fiche. Une parcelle dont le contour n’est pas enregistré reste un rectangle, en pointillé. Une parcelle où la tâche est désactivée, ou pas choisie pour la campagne, reste en contour pâle, en dernier, et ne compte pas dans l’avancement. Sans priorité, la carte montre la saison, parcelle par parcelle. Les trois chiffres du domaine sont à droite sur ordinateur, dessous au téléphone."],
       ['Équipes du jour', "juste sous la priorité. L’administrateur la touche pour répartir les salariés en équipes <b>pour la journée</b> : chacun validera et démarrera avec son équipe, sans pouvoir la changer, et ne voit pas les autres. Sous les noms, il peut aussi choisir la tournée de chaque équipe : par défaut, celle du travail. Rien de réglé, ou « Tout le monde ensemble » : l’application fait comme d’habitude. Le lendemain, tout repart à zéro. Un salarié voit ici son équipe du jour, quand il y en a une."],
@@ -5143,6 +5154,7 @@ var MV_AIDE = {
   parcelles: {
     ico: 'carte', titre: 'Mes Parcelles', ancre: 'vigne',
     points: [
+      ['Pourquoi ?', " : la pastille <b>« Pourquoi ? »</b>, à côté de la tâche choisie (ou de la priorité du moment) et dans la feuille de validation, ouvre la fiche de la tâche : quand on la fait, pourquoi, ce que ça change pour le vin."],
       ['Les filtres du haut', "trient par état : finies, en cours, arrachées."],
       ['Sur chaque carte', "la surface au centiare près (0,0870 ha), le pourcentage, et le compte des tâches faites, qui suit la même règle : un arrachage à moitié fait compte pour une demie (« 1,5/2 tâches »)."],
       ['Les deux gestes', "« Début » signale qu’on attaque, « Valider » que c’est fini, sans ouvrir la parcelle : en bas de chaque carte au téléphone, au bout de chaque ligne sur ordinateur. Quand une tâche est choisie, la carte dit l’état de cette tâche à la place du pourcentage. Une tâche à passages affiche en plus le passage en cours (P1, P2, N1…). Les deux enregistrent l’équipe de la barre « Équipe sur … », « sans moi » compris : c’est elle que le Pilotage pose sur la parcelle en cours. Changer l’équipe d’une tâche la donne aussi aux parcelles en cours que vous avez commencées sans équipe notée."],
@@ -5175,6 +5187,7 @@ var MV_AIDE = {
   tracteur: {
     ico: 'tracteur', titre: 'Tracteur', ancre: 'tracteur',
     points: [
+      ['Pourquoi ?', " : dans la fiche d’une session, la pastille <b>« Pourquoi ? »</b> sous l’activité explique pourquoi on la fait : rognage, labour, tarière, engrais, ensemencement, traitements."],
       ['Sur un ordinateur', "toucher une session la choisit : sa fiche s’ouvre à droite — avancement, surface, parcelles, note. Le bouton de la fiche ouvre la feuille de travail (chrono, parcelles), comme un appui au téléphone. Dans l’Entretien, les machines et la cuve de GNR passent à gauche, la révision et les derniers contrôles à droite."],
       ['Heures et GNR d’une session', "les heures viennent du chrono quand il a mesuré la parcelle, sinon du barème de l’activité (h/ha × surface) ; la fiche dit lesquelles. Le GNR est ces heures fois la consommation réglée dans Réglages, 6 L par heure tant qu’elle ne l’est pas — la même valeur que le Pilotage. La bande du haut fait le total de la saison."],
       ['Une session \u00ab Amendement \u00bb', "coche la t\u00e2che \u00ab Amendement \u00bb de chaque parcelle faite, marqu\u00e9e \u00ab faite au tracteur \u00bb dans le journal. Le temps compt\u00e9 est celui de la session, pas une journ\u00e9e d\u2019\u00e9quipe. L\u2019amendement lui-m\u00eame se pr\u00e9pare dans Phyto \u203a Fertilisation."],
@@ -5244,6 +5257,7 @@ var MV_AIDE = {
   cave: {
     ico: 'verre', titre: 'Cave', ancre: 'cave',
     points: [
+      ['Pourquoi ?', " : dans <b>Nouvelle opération</b>, la pastille <b>« Pourquoi ? »</b> sous les types explique le geste choisi : ouillage, soutirage, soufre, traitement, filtration, dégustation, analyse."],
       ['Le Chai sur un ordinateur', "toucher une cuvée la choisit : sa fiche s’ouvre à droite de la liste — ouillage, analyses, soutirage, opérations, et ses boutons. Après une opération, la fiche se met à jour sur place."],
       function () {
         return _mvAideSections('#cave-sec-tabs .mvu-tab', 'sections',
@@ -6046,6 +6060,137 @@ export function _mvInfoBtn(cle) {
   return '<button type="button" class="mv-i" data-mvi="' + _escAttr(cle)
        + '" aria-label="D\u2019o\u00f9 vient ce chiffre" aria-expanded="false"><span aria-hidden="true">i</span></button>';
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// POURQUOI ON LE FAIT — lot POURQUOI-1 (§336)
+// ═══════════════════════════════════════════════════════════════════════════
+// Une fiche par tâche de la vigne, activité du tracteur et opération du cuvier
+// ou du chai : quand on la fait, pourquoi, ce que ça change pour le vin, et un
+// « Le saviez-tu ? ». Elle s'ouvre dans la bulle des fiches « i » (même écouteur
+// délégué sur [data-mvi], même bulle) depuis la pastille « Pourquoi ? », posée là
+// où le geste a lieu : la priorité du moment, la feuille de validation, la fiche
+// d'une session tracteur, le choix d'une opération de cave.
+// Nico (15/10) : « les petites informations de pourquoi on fait telle tâche,
+// c'est hyper important : ça aide tout le monde à ouvrir l'appli, à valider ce
+// qu'ils sont en train de faire, à discuter entre eux ».
+// ⚠️ Les textes sont du CODE, jamais une saisie : la bulle les rend en HTML (C19).
+//   La réécriture par l'admin (POURQUOI-2) devra échapper ce qu'elle injecte.
+// ⚠️ Un libellé sans fiche ne pose RIEN : pas de pastille morte.
+// ⚠️ Les clés vivent dans MV_INFO sous `pqt.<slug>` (la forme qu'exige le harnais
+//   des fiches « i ») ; elles y sont ajoutées au chargement, hors du littéral :
+//   le contrôle propre à ce catalogue est scripts/mv-harnais-pourquoi.mjs.
+// ⚠️ Écrits pour tous les domaines clients : rien de propre à une région ici.
+// ── POURQUOI-1 : début du bloc exécutable (lu et joué tel quel par le harnais) ──
+const MV_POURQUOI = {
+  // ── La vigne ──
+  taille:          { d: 'vigne', n: 'Taille', q: 'En hiver, quand la vigne est au repos.', p: 'On choisit les bois qui porteront les grappes (en Guyot, une baguette et un courson) et on règle la charge de chaque pied.', v: 'Le rendement se décide ici : moins de bourgeons, des raisins plus concentrés.' },
+  tirage:          { d: 'vigne', n: 'Tirage', q: 'Juste après la taille.', p: 'On retire des fils les sarments coupés, pour libérer le palissage.', v: 'Un rang propre, une vigne qui repart sans être gênée.' },
+  brulage:         { d: 'vigne', n: 'Brûlage', q: 'Pendant ou après le tirage.', p: 'On brûle ou on broie les sarments tirés : ils ne restent pas dans la parcelle avec les maladies qu’ils peuvent porter.', v: 'Une parcelle saine au départ de la saison.' },
+  arrachage:       { d: 'vigne', n: 'Arrachage', q: 'Quand une vigne est trop vieille ou trop malade.', p: 'On retire les ceps et leurs racines, puis on laisse le sol se reposer avant de replanter.', v: 'On prépare les vignes des prochaines décennies.' },
+  plantation:      { d: 'vigne', n: 'Plantation', q: 'De la fin de l’hiver au printemps.', p: 'On plante une parcelle neuve, avec un plant choisi pour le sol et l’appellation.', v: 'Une jeune vigne donne ses premières récoltes après environ trois ans.' },
+  entreplantation: { d: 'vigne', n: 'Entreplantation', q: 'Au printemps, surtout.', p: 'On remplace un à un les pieds morts ou manquants d’une vigne en place, dans les trous percés à la tarière.', v: 'La parcelle reste complète et garde ses vieilles vignes autour des jeunes.' },
+  reparation:      { d: 'vigne', n: 'Réparation', q: 'Avant que la vigne pousse.', p: 'On change les piquets cassés, on retend et on rattache les fils.', v: 'Un palissage solide tiendra le feuillage tout l’été.' },
+  pliage:          { d: 'vigne', n: 'Pliage', q: 'Avant le débourrement.', p: 'On courbe la baguette taillée et on l’attache au fil porteur.', v: 'Des rameaux bien répartis, des grappes à bonne hauteur.' },
+  ebourgeonnage:   { d: 'vigne', n: 'Ébourgeonnage', q: 'Quand les pousses sortent, en plusieurs passages.', p: 'On enlève les pousses en trop (les doubles, celles du tronc) pour ne garder que les bons rameaux.', v: 'Moins de grappes, mieux nourries, et un feuillage aéré.' },
+  pioche:          { d: 'vigne', n: 'Pioche', q: 'Au printemps, en plusieurs passages.', p: 'On travaille la terre au pied des ceps, là où la machine ne passe pas : l’herbe part sans produit et le sol respire.', v: 'La vigne garde l’eau et la nourriture pour elle.' },
+  relevage:        { d: 'vigne', n: 'Relevage', q: 'Quand les rameaux dépassent les fils.', p: 'On remonte les fils releveurs pour guider les rameaux vers le haut.', v: 'Le feuillage prend le soleil et l’air circule : moins de maladies.' },
+  accolage:        { d: 'vigne', n: 'Accolage', q: 'Au fil de la pousse.', p: 'On range à la main les rameaux qui s’échappent, entre les fils.', v: 'Une haie bien droite, exposée au soleil.' },
+  palissage:       { d: 'vigne', n: 'Palissage', q: 'De la fin du printemps à l’été.', p: 'On fixe la végétation dans les fils, avec des agrafes, pour qu’elle tienne debout jusqu’aux vendanges.', v: 'Des grappes aérées, moins de pourriture, et les machines passent.' },
+  desherbage:      { d: 'vigne', n: 'Désherbage', q: 'Quand l’herbe repart.', p: 'On limite l’herbe sous le rang, qui prend à la vigne son eau et son azote.', v: 'Une vigne qui ne manque pas d’eau en été.' },
+  effeuillage:     { d: 'vigne', n: 'Effeuillage', q: 'Avant la véraison.', p: 'On retire quelques feuilles autour des grappes, souvent côté soleil du matin : l’air passe, la lumière arrive.', v: 'Moins de pourriture, une maturité plus régulière.' },
+  vendange:        { d: 'vigne', n: 'Vendange', q: 'Quand le raisin a trouvé son équilibre entre sucre et acidité.', p: 'On cueille et on trie, parcelle par parcelle.', v: 'Tout ce qui a été fait dans l’année se retrouve dans la caisse.' },
+  degraffage:      { d: 'vigne', n: 'Dégraffage', q: 'Après les vendanges.', p: 'On retire les agrafes posées l’été pour libérer les fils avant la taille.', v: 'La taille d’hiver commence sur un rang dégagé.' },
+  // ── Le tracteur ──
+  rognage:         { d: 'vigne', n: 'Rognage', q: 'En été.', p: 'On coupe le haut des rameaux qui dépassent : l’air circule, la vigne garde sa force pour les grappes, le rang reste praticable.', v: 'Des raisins mieux nourris, une parcelle saine.' },
+  traitements:     { d: 'vigne', n: 'Traitements', q: 'Selon la météo et les risques.', p: 'On protège la vigne du mildiou et de l’oïdium, au bon moment et à la bonne dose. Tout est noté au registre.', v: 'Une récolte protégée.' },
+  labour:          { d: 'vigne', n: 'Labour', q: 'À l’automne et au printemps.', p: 'On travaille la terre entre les rangs : on butte les pieds à l’automne pour les protéger du froid, on les débutte au printemps.', v: 'Un sol vivant, aéré, qui boit mieux la pluie.' },
+  tariere:         { d: 'vigne', n: 'Tarière', q: 'Avant une plantation ou une entreplantation.', p: 'On perce les trous où iront les jeunes plants.', v: 'Les vignes de demain, au bon endroit.' },
+  ensemencement:   { d: 'vigne', n: 'Ensemencement', q: 'À l’automne ou au printemps, entre les rangs.', p: 'On sème un couvert, de céréales ou de légumineuses, qui protège le sol de l’érosion et nourrit sa vie ; les légumineuses apportent de l’azote.', v: 'Un sol vivant, une vigne mieux équilibrée.' },
+  engrais:         { d: 'vigne', n: 'Engrais', q: 'À la fin de l’hiver ou au printemps, selon les analyses de sol.', p: 'On rend au sol ce que la vigne lui a pris, à la dose décidée d’après les analyses.', v: 'Une vigne nourrie sans excès : des raisins équilibrés.' },
+  // ── Le cuvier ──
+  remontage:       { d: 'cave', n: 'Remontage', q: 'Pendant la fermentation, une ou plusieurs fois par jour.', p: 'On pompe le jus du bas de la cuve et on l’arrose sur le chapeau de marc : il en tire la couleur et les tanins, aère les levures et égalise la température.', v: 'La couleur et la structure du vin.' },
+  pigeage:         { d: 'cave', n: 'Pigeage', q: 'Pendant la fermentation.', p: 'On enfonce le chapeau de marc dans le jus, au pigeou ou à la main.', v: 'Une extraction douce, plus fine.' },
+  delestage:       { d: 'cave', n: 'Délestage', q: 'Pendant la fermentation.', p: 'On vide le jus dans une autre cuve, puis on le reverse sur le marc : une extraction plus franche, et de l’air pour les levures.', v: 'Plus de couleur, des tanins plus souples.' },
+  saignee:         { d: 'cave', n: 'Saignée', q: 'Au début de la cuvaison.', p: 'On tire une partie du jus pour concentrer le reste : plus de peaux pour moins de jus. Le jus tiré peut faire un rosé.', v: 'Un vin plus concentré.' },
+  chaptalisation:  { d: 'cave', n: 'Chaptalisation', q: 'Pendant la fermentation, les années où le raisin manque de maturité.', p: 'On ajoute du sucre au moût, dans les limites de la réglementation, pour atteindre le degré visé.', v: 'L’équilibre en alcool, même une année fraîche.' },
+  // ── Le chai ──
+  soutirage:       { d: 'cave', n: 'Soutirage', q: 'Pendant l’élevage, quand le vin a déposé.', p: 'On transvase le vin pour le séparer de ses lies, le dépôt du fond, et on l’aère un peu au passage.', v: 'Un vin plus net, plus limpide.' },
+  ouillage:        { d: 'cave', n: 'Ouillage', q: 'Régulièrement, pendant l’élevage.', p: 'Le vin s’évapore à travers le bois : c’est la « part des anges ». On remplit les fûts à ras, car un fût qui n’est pas plein laisse l’air abîmer le vin.', v: 'Un vin protégé de l’oxydation.' },
+  soufre:          { d: 'cave', n: 'Soufre', q: 'Au fil de l’élevage, d’après les analyses.', p: 'Un peu de soufre protège le vin de l’oxydation et des bactéries. La dose est mesurée et notée.', v: 'Un vin stable, qui vieillit bien.' },
+  collage:         { d: 'cave', n: 'Traitement du vin', q: 'Avant la mise, si le vin en a besoin.', p: 'On ajoute une colle, de l’albumine par exemple, ou un produit autorisé, pour clarifier ou stabiliser le vin.', v: 'Un vin limpide, plus souple.' },
+  filtration:      { d: 'cave', n: 'Filtration', q: 'Juste avant la mise, si le domaine filtre.', p: 'On fait passer le vin à travers un filtre pour retirer les dernières particules.', v: 'Un vin limpide et stable en bouteille.' },
+  assemblage:      { d: 'cave', n: 'Assemblage', q: 'Avant la mise.', p: 'On réunit des vins de plusieurs fûts ou cuves pour composer la cuvée.', v: 'L’équilibre et la signature de la cuvée.' },
+  degustation:     { d: 'cave', n: 'Dégustation', q: 'Régulièrement, pendant l’élevage.', p: 'On goûte les vins pour suivre leur évolution et décider des soins : soutirer, ouiller, mettre en bouteille.', v: 'Chaque décision part du goût.' },
+  analyse:         { d: 'cave', n: 'Analyses', q: 'Aux moments clés de la vinification et de l’élevage.', p: 'Le laboratoire mesure l’alcool, l’acidité, le soufre et l’avancée de la fermentation malolactique.', v: 'Des décisions prises sur des chiffres.' },
+  miseenbouteille: { d: 'cave', n: 'Mise en bouteille', q: 'Quand l’élevage est fini.', p: 'On met le vin en bouteille au bon moment, à l’abri de l’air.', v: 'Le vin quitte le domaine tel qu’on l’a voulu.' },
+};
+const MV_SAVIEZ = {
+  vigne: [
+    'Au printemps, la vigne « pleure » : la sève coule aux plaies de taille, signe qu’elle se réveille.',
+    'Le débourrement, c’est le moment où le bourgeon s’ouvre et laisse sortir les premières feuilles.',
+    'La véraison, c’est quand le raisin change de couleur et commence à mûrir pour de bon.',
+    'Entre la floraison et la vendange, on compte environ cent jours.',
+    'Une vigne peut produire pendant plus de cinquante ans ; les vieilles vignes donnent moins de raisin, souvent plus concentré.',
+    'Les racines d’une vieille vigne peuvent descendre à plusieurs mètres pour chercher l’eau.',
+  ],
+  cave: [
+    'La « part des anges », c’est le vin qui s’évapore à travers le bois des fûts. L’ouillage la remplace.',
+    'Une pièce bourguignonne contient 228 litres, soit environ 300 bouteilles ; une barrique bordelaise, 225 litres.',
+    'Le fût laisse passer un tout petit peu d’oxygène : c’est ce qui fait mûrir le vin pendant l’élevage.',
+    'La fermentation malolactique change l’acide malique, piquant, en acide lactique, plus doux : le vin s’assouplit.',
+    'Autrefois, on pigeait avec les pieds. Quelques domaines le font encore.',
+    'Les lies fines laissées sur un vin blanc lui donnent du gras ; on les remue au bâton : c’est le bâtonnage.',
+  ],
+};
+// Un même mot peut dire deux gestes : « traitement » au tracteur protège la
+// vigne, en cave il clarifie le vin. Le contexte tranche.
+const MV_PQ_ALIAS = {
+  vigne: {},
+  trac: { traitement: 'traitements', semis: 'ensemencement', epandage: 'engrais', fertilisation: 'engrais' },
+  cave: { traitement: 'collage', traitements: 'collage', sulfitage: 'soufre', analyses: 'analyse', mise: 'miseenbouteille', embouteillage: 'miseenbouteille' },
+};
+function _mvPqSlug(libelle) {
+  return String(libelle == null ? '' : libelle).normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+function _mvPqResout(libelle, ctx) {
+  var s = _mvPqSlug(libelle);
+  if (!s) return null;
+  var al = MV_PQ_ALIAS[ctx] || {};
+  if (al[s]) s = al[s];
+  if (MV_POURQUOI[s]) return s;
+  if (s.length > 3 && s.charAt(s.length - 1) === 's' && MV_POURQUOI[s.slice(0, -1)]) return s.slice(0, -1);
+  return null;
+}
+// ── POURQUOI-1 : fin du bloc exécutable ──
+export function _mvPqCle(libelle, ctx) {
+  var s = _mvPqResout(libelle, ctx);
+  return s ? 'pqt.' + s : null;
+}
+// ⚠️ L'attribut se construit en deux morceaux : le contrôle statique de
+//   mv-harnais-info relève les `data-mvi` écrits en dur, et une clé calculée
+//   y passerait pour une fiche manquante.
+export function _mvPqBtn(libelle, ctx) {
+  var s = _mvPqResout(libelle, ctx);
+  if (!s) return '';
+  var att = 'data-mvi=' + '"pqt.' + s + '"';
+  return '<button type="button" class="mv-pq" ' + att + ' aria-label="Pourquoi on le fait : ' + _escAttr(MV_POURQUOI[s].n)
+       + '" aria-expanded="false">Pourquoi\u00a0?</button>';
+}
+(function _mvPqDeclare() {
+  var debut = new Date(new Date().getFullYear(), 0, 0);
+  var jour = Math.floor((Date.now() - debut.getTime()) / 86400000);
+  Object.keys(MV_POURQUOI).forEach(function (s, k) {
+    var f = MV_POURQUOI[s], sv = MV_SAVIEZ[f.d] || MV_SAVIEZ.vigne;
+    MV_INFO['pqt.' + s] = { t: f.n, p: [
+      '<b>Quand</b> — ' + f.q,
+      '<b>Pourquoi</b> — ' + f.p,
+      '<b>Pour le vin</b> — ' + f.v,
+      '<i>Le saviez-tu\u00a0?</i> ' + sv[(jour + k) % sv.length],
+    ] };
+  });
+})();
+window._mvPqBtn = _mvPqBtn;
+window._mvPqCle = _mvPqCle;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // LES ICONES — lot DS-1

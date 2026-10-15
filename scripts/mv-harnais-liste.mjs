@@ -32,6 +32,11 @@
 
 export const GROUPES = {
 
+  // POURQUOI-1 (§336) : le catalogue « Pourquoi on le fait » couvre chaque tâche, activité et opération ; ses pastilles sont posées.
+  'pourquoi-une-fiche-par-tache': 'Pourquoi on le fait — une fiche par tâche, posée là où le geste a lieu',
+  // ARRIVEE-1 (§337) : qui a le Journal — une seule question, posée partout.
+  'arrivee-deux-onglets': 'Arrivée de l’ouvrier — deux onglets, ni « + Journal » ni « Valider » à l’Accueil',
+
   // BUILD-1 (§305) : le lanceur fait tourner les controles EN PARALLELE. Ce harnais prouve, sur un
   // faux executant, que les sorties sortent dans l'ordre de la liste, qu'une commande SEULE ne croise
   // jamais une autre, qu'au premier rouge plus rien ne demarre (et que rien n'est tue) — et que tout
@@ -383,6 +388,10 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-fusion-docs.mjs --contre', 'fusion-des-documents-entre'],
   ['node scripts/mv-harnais-toast-honnete.mjs'],
   ['node scripts/mv-harnais-info.mjs', 'echelle-pastille-i-carte-a'],
+  ['node scripts/mv-harnais-pourquoi.mjs', 'pourquoi-une-fiche-par-tache'],   // POURQUOI-1 (§336) : une fiche par tâche, posée là où le geste a lieu
+  ['node scripts/mv-harnais-pourquoi.mjs --contre', 'pourquoi-une-fiche-par-tache'],
+  ['node scripts/mv-harnais-arrivee1.mjs', 'arrivee-deux-onglets'],   // ARRIVEE-1 (§337) : chez l'ouvrier, la Vigne a deux onglets
+  ['node scripts/mv-harnais-arrivee1.mjs --contre', 'arrivee-deux-onglets'],
   ['node scripts/mv-harnais-pil-coherence.mjs'],
   ['node scripts/mv-harnais-axe.mjs'],
   ['node scripts/mv-harnais-sauvegarde.mjs'],

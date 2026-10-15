@@ -19,6 +19,7 @@
 | — | Descendu de `CLAUDE.md` §28 le 10/10 (ARRACH-8, §306) — plafond du cœur, historique sans consigne | `docs/claude/journal.md` |
 | — | Descendu du §28 de CLAUDE.md — 12/10/2026 (DIRECT-1, plafond du cœur) | `docs/claude/journal.md` |
 | — | Descendu du §28 de CLAUDE.md — 12/10/2026 (ETAT-1, plafond du cœur) | `docs/claude/journal.md` |
+| — | Backlog rayé, descendu du cœur le 15/10 (règle 4 : l’historique descend, jamais une consigne) | `docs/claude/journal.md` |
 | 1 | 1. Identité & contexte | `CLAUDE.md` |
 | 2 | 2. Inventaire fonctionnel — 10 modules | `CLAUDE.md` |
 | 3 | 3. Positionnement commercial | `CLAUDE.md` |
@@ -387,3 +388,5 @@
 | 333 | 333. ★ BRUIT-1 — LE E2E LOCAL TOMBAIT SUR « STOCKAGE PERSISTANT REFUSÉ » : UN BRUIT D'ENVIRONNEMENT, PAS UN… | `docs/claude/chantiers-330-379.md` |
 | 334 | 334. ★ LARG-1 — SUR ORDINATEUR, TOUS LES MODULES À LA MÊME LARGEUR : 1 200 PX CENTRÉS, COMME LE PILOTAGE ET… | `docs/claude/chantiers-330-379.md` |
 | 335 | 335. ★★ RANGE-1 — LE MILLÉSIME RANGÉ : UNE TÊTE ET QUATRE VUES, LA CHAÎNE DE CHAQUE CUVÉE (15/10 — `src/cav… | `docs/claude/chantiers-330-379.md` |
+| 336 | 336. ★★ POURQUOI-1 — « POURQUOI ON LE FAIT » : UNE PASTILLE OUVRE LA FICHE DE CHAQUE TÂCHE, LÀ OÙ LE GESTE … | `docs/claude/chantiers-330-379.md` |
+| 337 | 337. ★★ ARRIVEE-1 — CHEZ L’OUVRIER, LA VIGNE A DEUX ONGLETS : ACCUEIL ET PARCELLES (15/10 — `src/app.js` (`… | `docs/claude/chantiers-330-379.md` |

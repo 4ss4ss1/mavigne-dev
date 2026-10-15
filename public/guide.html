@@ -708,6 +708,16 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       <li>Avancement détaillé par tâche, avec accès au détail : rangé par date de début, ce qui reste à faire en haut, les tâches finies en bas</li>
       <li>Plusieurs affichages successifs : touchez les points sous la carte pour changer</li>
     </ul></div>
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-journal"></use></svg> Chez l'ouvrier : Accueil et Parcelles</h4><ul class="dot">
+      <li>Un ouvrier a deux onglets, <b>Accueil</b> et <b>Parcelles</b> : il valide depuis les Parcelles</li>
+      <li>L'onglet <b>Journal</b> et les raccourcis « + Journal » et « Valider » restent à l'administrateur et au pilotage</li>
+      <li>« Ma semaine » mène à <b>« Ma trace »</b>, l'historique de son travail</li>
+    </ul></div>
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg> Pourquoi on le fait</h4><ul class="dot">
+      <li>La pastille <b>« Pourquoi ? »</b> apparaît dans les Parcelles à côté de la tâche choisie (ou de la priorité du moment), et dans la feuille de validation d'une tâche</li>
+      <li>Elle ouvre la fiche de la tâche : <b>quand</b> on la fait, <b>pourquoi</b>, et ce que ça change <b>pour le vin</b>, avec un « Le saviez-tu ? »</li>
+      <li>Une fiche par tâche de l'année, de la taille au dégraffage</li>
+    </ul></div>
     <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg> Tâche prioritaire</h4><ul class="dot">
       <li>La carte du haut de l'Accueil indique la tâche du moment décidée par l'administrateur, son avancement, et les parcelles dessinées à leur forme (leur contour, nord en haut) et à leur surface : en vert ce qui est fait, en gris foncé ce qui est commencé. Une parcelle dont le contour n'est pas enregistré reste un rectangle en pointillé. Un appui sur une parcelle ouvre sa fiche. Une parcelle où la tâche est désactivée reste en contour pâle et ne compte pas dans l'avancement</li>
       <li>Une équipe peut être rattachée à chaque priorité</li>
@@ -1131,6 +1141,10 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-outil"></use></svg> Entretien</h3>
   <div class="cards">
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg> Pourquoi on le fait</h4><ul class="dot">
+      <li>Dans la fiche d'une session, la pastille <b>« Pourquoi ? »</b> sous l'activité ouvre sa fiche : quand, pourquoi, ce que ça change pour le vin</li>
+      <li>Rognage, labour, tarière, engrais, ensemencement, traitements : une activité sans fiche n'affiche pas de pastille</li>
+    </ul></div>
     <div class="card"><h4>Cuve GNR</h4><ul class="dot">
       <li>La cuve est celle <b>du domaine</b>, pas d'un tracteur en particulier</li>
       <li><b>Faire un plein</b> décompte le niveau et crée la fiche d'entretien correspondante</li>
@@ -1690,6 +1704,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 <li><b>Au labo</b> — la fiche d'une cuvée trace la courbe de chaque analyse dès deux rapports, ceux de la cuve d'où elle vient compris ; une cuve du Cuvier a le même bloc. Le degré probable d'un rapport devient la première source du repère de vin sec de la cuve.</li>
 </ul>
 <p>Les analyses saisies avant ce changement restent lisibles telles quelles ; une ancienne analyse commune à plusieurs cuvées ne se complète pas — une ligne neuve s'écrit à côté.</p>
+  <h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-barrique"></use></svg> Pourquoi ce geste ?</h4>
+<p>Dans <b>Nouvelle opération</b>, la pastille <b>« Pourquoi ? »</b> sous les types explique le geste choisi — ouillage, soutirage, soufre, traitement, filtration, dégustation, analyse : quand on le fait, pourquoi, et ce que ça change pour le vin, avec un « Le saviez-tu ? » sur la cave.</p>
   <h4>Déguster, traiter, filtrer</h4>
 <p>Le bouton <b>Nouvelle opération</b> du Chai propose, à côté de l'ouillage, du soutirage et du soufre, trois gestes (le bouton <b>Analyse</b>, lui, ouvre la fiche « Rapports du labo », ci-dessus) :</p>
 <ul class="dot">

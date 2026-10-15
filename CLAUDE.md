@@ -3,8 +3,9 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **15 octobre 2026 (RANGE-1)** — ★★ **LE MILLÉSIME RANGÉ : UNE TÊTE ET QUATRE VUES, LA CHAÎNE DE CHAQUE CUVÉE** (§335). Base `04baf84` (LARG-1). Nico (15/10) : « tout est les uns au-dessus des autres, ce n'est pas rangé… nous sommes une application pro ». Reformulé, recherche (vintrace, InnoVint, règles des tableaux de bord), maquette (toile Design, ordinateur et téléphone), « parfait ». Absorbe CHAINE-1 (livré sur `379e4b9`, jamais appliqué : ne pas le coller). Une tête (`#ml-head`, `_mlHead` : l'année, son état, le choix de l'année, `_mlTuiles`), puis quatre vues : Ensemble (`_mlRenderVie` : À surveiller, le parcours, les cuvées, les repères, face à N-1 ; deux colonnes à partir de 1 024 px), Parcelles (`_mlRenderParc` : trié, filtres), Cuvées (`_mlRenderCuv` : liste + fiche, la chaîne `_pcrbCvLignes` / `_pcrbCvCellules`), Courbes (grille de quatre cartes, une à la fois au téléphone).
-> L'ancienne carte « une seule cuvée » (`_pcrbChaine`, `_PCRB_CH`) et `_mlOrigine` sont retirées ; « D'où vient chaque cuvée » vit dans la fiche. `cave.js` 636 → 667 ko, sous le cliquet des 5 %. **APP 9.01 → 9.02, SW 9.80 → 9.81.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+> Dernière consolidation : **15 octobre 2026 (ARRIVEE-1)** — ★★ **CHEZ L’OUVRIER, LA VIGNE A DEUX ONGLETS : ACCUEIL ET PARCELLES** (§337). Base `372df98`, cumulatif avec POURQUOI-1 (§336, jamais poussé : le zip ARRIVEE-1 le contient). Nico (14/10) : « l’ouvrier n’a même pas à accéder au journal ».
+> Une seule question, `_mvJournalOuvert` (app.js : admin ou pilotage), posée partout : les deux onglets Journal et les liens de l’Accueil (`applyRoles`), la navigation (`goTo`, `switchVigneOng` → Parcelles), les raccourcis « + Journal » et « Valider ». « Ma semaine » mène à « Ma trace ». Vu au navigateur, compte ouvrier et compte admin.
+> **APP 9.03 → 9.04, SW 9.82 → 9.83.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -364,6 +365,10 @@ mot est exact.
 | « bump le SW » | « change le numéro de version dans `sw.js` — sinon les clients gardent l'ancienne version » |
 | « l'ancre du patch n'a pas matché » | « je n'ai pas retrouvé le bout de code à modifier » |
 | « mémoïsation », « idempotent », « CRLF » | dire ce que ça FAIT, pas comment ça s'appelle |
+
+★★ **Tout geste inhabituel demandé à Nico se livre avec son tuto pas à pas** (Nico, 15/10) : Search Console, console
+Firebase, le réglage d’un service, une commande qu’il ne tape pas d’habitude — où aller, où cliquer, quoi coller, ce qu’il
+doit voir à la fin. « Demander l’indexation » sans le chemin ne suffit pas.
 
 - **Un terme technique par explication, maximum**, et toujours suivi de ce qu'il veut dire.
 - **Toujours dire l'effet AVANT la cause.** « Le guide en ligne montre l'ancien texte » d'abord ;
@@ -1853,6 +1858,42 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ ARRIVEE-1 — CE QUI RESTE OUVERT (§337, posé le 15/10)
+1. **ARRIVEE-2 — l’arrivée sur Parcelles resserrée** (maquette ERGO-0) : la priorité affichée deux fois, six à sept rangées de
+   commandes avant la première parcelle, le premier « Valider » loin du haut au téléphone. Pas touché ici.
+2. **À regarder chez Nico** : un vrai compte ouvrier au téléphone — deux onglets, « Ma trace » sous « Ma semaine ».
+
+### ⚠️ POURQUOI-1 — CE QUI RESTE OUVERT (§336, posé le 15/10)
+1. **À regarder chez Nico, au téléphone puis sur PC, en clair et en sombre** : la pastille « Pourquoi ? » à côté de la tâche choisie ou de la priorité
+   du moment (Parcelles), dans la feuille de validation, dans la fiche d’une session tracteur, sous les types de « Nouvelle opération », et la
+   bulle qui s’ouvre. Aucun navigateur ici n’a rendu ces écrans avec les données d’un vrai domaine.
+2. **POURQUOI-2 — l’admin réécrit les fiches** : rien n’est saisissable aujourd’hui, les textes sont du code (C19). La saisie devra
+   être échappée avant d’entrer dans la bulle.
+3. **Pas encore posées** : le Cuvier (remontage, pigeage, délestage, saignée, chaptalisation ont leur fiche, sans pastille), la mise en
+   bouteille, et les activités du tracteur sans fiche (broyage…), qui n’affichent rien — c’est voulu.
+
+### ⚠️ GRATIF-0 et ERGO-0 — MAQUETTES DE L’OUVRIER ET DÉCISIONS DE NICO (posé le 15/10 ; intégrés : POURQUOI-1 §336, ARRIVEE-1 §337)
+
+Maquettes livrées dans la conversation, non versionnées : `maquette-ergo.html` (arrivée de l’ouvrier, Accueil, Journal côté admin)
+et `maquette-gratification.html` (petites victoires, jalons, fêtes rares, saison, tractoriste, cave, premières fois, 37 fiches).
+1. **Décisions de Nico** : taille du texte et des boutons, pas pour le moment (03/10) ; l’Accueil de l’ouvrier n’a ni « Valider » ni
+   « Noter au journal » : il arrive sur Parcelles avec la priorité (vérifié : `_goLanding` lit `_prioForMember`) ; pas d’onglet Journal
+   chez l’ouvrier (14/10, intégré : ARRIVEE-1) ; ni bravos, ni classement, ni record de vitesse, ni jalon sur les traitements ou les quantités épandues.
+   **Appli professionnelle** : un trait d’humour, jamais de ridicule. Écartés le 15/10 : bilan du saisonnier, compteur d’équipe,
+   « vendange du vendangeur », diplôme imprimé. **Plus tard** : l’album photo de la saison (idée gardée, pas maintenant).
+2. **Paliers** : ouvertures et validations 1, 10, 25, 50, 100, 250, 500, 1 000 ; sessions tracteur 1 à 250 ; trous de tarière
+   (conducteur et coéquipier) 1, 10, 100, 250, 500, 1 000, 2 000, 5 000, 10 000 ; hectares d’ensemencement et d’engrais (conducteur et
+   coéquipier) 1, 5, 10, 25, 50, 100, 250, 500 ; ouillages 1 à 250, soutirages 1 à 50. Le palier 1 de chaque compteur est une
+   « première fois » (frise « Ton parcours au domaine »). Fête rare : parcelle ou tournée bouclée, jalon atteint.
+3. **« Pourquoi on le fait » : hyper important** (Nico, 15/10 : ça fait ouvrir l’appli, valider, discuter). Une fiche par tâche : le
+   catalogue, relevage, dégraffage, tracteur, cuvier, chai (37), plus des « Le saviez-tu ? ». Textes par défaut, réécrits par l’admin,
+   affichés là où le geste a lieu — livré par POURQUOI-1 (§336) ; la réécriture par l’admin, c’est POURQUOI-2.
+4. **Cave** : chaque opération du Chai garde ses `intervenants` (`cave.js`) : ceux que l’admin a notés le voient (« Ta présence est
+   notée », avec le pourquoi). Le Cuvier ne note pas les présents : à ajouter. Le coéquipier d’une activité à deux : backlog n°44.
+5. **Garder les récompenses d’un téléphone à l’autre** : un document `jalons_<uid>` par personne, que lui seul lit et écrit (pas l’admin).
+   L’exclure de la lecture et de l’écriture générales de `firestore.rules` (comme `planning_moi_`), règle propriétaire ouverte aux
+   comptes en lecture seule (comme `appareils`). Un jalon gagné reste gagné.
+
 ### ⚠️ RANGE-1 — CE QUI RESTE OUVERT (§335, posé le 15/10)
 1. **À regarder chez Nico, au téléphone puis sur PC, en clair et en sombre** : Cave › Le millésime, la tête et les quatre vues — aucun navigateur ici. **Vu, non touché** : les courbes ne suivent pas l'année choisie (elles lisent les cuves en cours ; la vue le dit) ; `cave.js` est à 667 ko — le prochain gros lot de la Cave pose d'abord la question du découpage (§335e).
 
@@ -2468,12 +2509,6 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
    baseline a été **regravée** sur une diminution réelle (un `catch{}` vide parti avec
    `_paieHistTxt`). Sans elle, le prochain preflight avertit sans raison — et un avertissement
    qu'on apprend à ignorer est un cliquet mort.
-0a-bis. ✅ ~~**UNE LIGNE D'`utils.js` EN ATTENTE D'UNE DÉCISION DE DONNÉE**~~ — **FAITE, vérifié
-   le 16/08.** `_mvEnContratSurPeriode` (désormais **utils.js l.2936**, plus l.2449) porte
-   `if(!P.length) return true;`, précédé du commentaire de convention en dix lignes qui explique
-   *pourquoi* le statut n'entre pas dans la réponse. Le blocage de donnée était levé dès le 14/08 —
-   Nico a supprimé la fiche `Pilotage` (§39g). **L'entrée décrivait donc un travail fait depuis
-   deux jours au moment de la consolidation du 15/08 : elle aurait dû partir avec §39.**
 0a-ter. ★★★ **COMPTER LES ETP BUREAU — orientation produit, 14/08.** Nico :
    *« je veux compter aussi les ETP bureaux pour pouvoir budgéter au plus près de la réalité (on
    fera ça sur une prochaine mise à jour) »*. ⚠️ **Ce n'est pas un simple retrait du filtre** :
@@ -2521,11 +2556,6 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
    fin de §33. Coût annuel **par date**, part d'une campagne **par tâche**, et le **reste**
    (vinification, entretien, temps mort) qui n'est lisible **qu'avec un taux de saisie**.
    ⚠️ Le journal ne stocke **pas d'heures** : le croisement passe par les heures payées du jour.
-0e. ~~**Deux compteurs de 1607 h**~~ — ✅ **FAIT le 14/08** (APP 6.14 · SW 6.67).
-   `_planAnnuCard` pose une carte compacte par **contrat soldé dans l'année civile**, au-dessus du
-   compteur courant : dates, heures faites, plafond proratisé. Borné par `_planSurContrat(ctr,…)`,
-   qui contraint `_planInContractCtr` aux dates du contrat passé. **Affichage seul, aucun calcul
-   touché** (§19, §33).
 0f. ★ **Resserrer la fin de la période *Vendanges*** — elle court au 30/09 alors que le travail
    s'arrête le 06/09. Le pic n'est plus faussé, mais la moyenne « sur la période » reste diluée
    sur trois semaines vides.
@@ -2547,31 +2577,13 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
    `INSTALLER-UN-DOMAINE.md`). Les lots sont déployés ; **le « 20 h → ~9 h » n'a jamais été vérifié.**
    ⚠️ **Un essai consomme un identifiant** : `onboardTenant` refuse un domaine déjà peuplé. Prendre
    un nom jetable, **jamais `chateau-garraud`**.
-2. ✅ ~~**Vérifier si un `rewrite` existe en ligne**~~ — **RAYÉ, vérifié le 16/08.** Les **deux**
-   sont dans `firebase.json` : `/api/lead` (l.19) et `/api/mise-en-route` (l.26), sous la clé
-   `rewrites` ouverte l.17. Le ZÉRO du 11/08 était juste **à cette date** ; ils ont été ajoutés
-   depuis, sans que l'entrée soit relue. ★ `harnais-claude-md` le vérifie déjà à chaque passage.
-3. ~~**Fusionner les deux écrans de congés**~~ — ✅ **FAIT le 14/08** (APP 6.14 · SW 6.67).
-   `openPlanCP(fromSel)` est le point d'entrée unique ; `openPlanCPSel` est supprimée, son
-   exposition `window` retirée, le bouton de la barre de sélection appelle `openPlanCP(true)`.
-   La 5ᵉ feuille est ramenée à 4 (§19a).
 4. ✅ ~~**Corriger `_findDebutTache`**~~ — **RAYÉ, vérifié le 16/08.** La fonction est passée en
    `app.js:3572` et **porte désormais ses bornes** : elle résout la période par `_saisonForDate`,
    retombe sur `_mvCampagneDe`, et en dernier recours sur le jour même. Le `reduce` ne s'applique
    plus qu'à `ok`, filtré par `dans(j.date)`. ⚠️ **L'entrée citait `app.js:3116` — un numéro de
    ligne de backlog vieillit encore plus vite qu'un chiffre** (§44b).
-5. ✅ ~~**Breakpoint 760 → 767.98**~~ — **RAYÉ, vérifié le 16/08.** `styles.css` porte
-   `@media(max-width:767.98px)` ; le trou 761–767 est bouché. La seule occurrence restante de `760`
-   est `@media(min-width:768px){ .mvr-body{max-width:760px} }` — **une largeur de corps, pas un
-   point de rupture** : ne pas la « corriger », elle est juste. ★ L'entrée attendait un go qui
-   n'était plus nécessaire.
 6. ★ **Découper `demarrage.html`** sur le modèle du guide — **938 lignes, monolithique** (§27d).
    ✅ La section **Données** est faite : `guide/13-donnees.html` existe (7,5 ko).
-7. ~~**Escalier de sources pour la cadence**~~ — ✅ **FAIT le 14/08** (APP 6.14 · SW 6.67), §41.
-   `_pecCadHisto()` remplit la marche 2 : sous le seuil d'avancement, l'écran reprend la **même
-   période de la campagne précédente**. `hBar` vient du snapshot (`stats.hFaites`), `hReel` se
-   **recalcule** sur `PLANNING_ENTRIES` — clé par année, jamais purgé. **Quatre points d'affichage
-   annoncent la source.** Harnais : 28 assertions, 5 contre-épreuves.
 8. ✅ ~~**Purger le calcul de pic mort dans `_rfCtx`**~~ — **FAIT, vérifié le 16/08.**
    `pilotage.js:3193` porte le commentaire de purge : *« `pic` était calculé ici et renvoyé dans le
    contexte […] après vérification (`grep '.pic'` = 0 consommateur) »*. ⚠️ **Ne pas confondre avec
@@ -2579,10 +2591,6 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
    l.1841 et l.4427 — ceux-là sont utiles.
    ⚠️ **Effet de bord jamais consigné** : `mv-harnais-portee` exige encore *« le pic est calculé »*
    et **rougit sur quatre assertions à cause de cette purge réussie** (§44c).
-9. ~~**Pondérer `_ecoRate` par les heures**~~ — ✅ **FAIT le 14/08** (APP 6.14 · SW 6.67).
-   Moyenne pondérée par les heures annuelles du gabarit (`window._planGetRefH` sur 12 mois).
-   ★ **Repli sur `h=1` si le planning n'est pas chargé** — résultat identique à l'ancien, donc
-   aucune régression possible sur un domaine sans données de planning.
 10. ★ **Chip de cuvée `Village 2026· 12`, sans espace avant le point médian.** ⚠️ **Non retrouvé au
     grep le 11/08** — soit corrigé entre-temps, soit le motif de recherche est mauvais.
     **Varier le motif avant de conclure** (règle vécue avec `mvprint.py` et DOCK).
@@ -2599,13 +2607,6 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     le plus vendeur du parcours. **Renuméroter n'est pas le travail — l'ajouter l'est.**
 14. ★ **Le Cuvier n'enregistre pas d'intervenant** là où le Chai le fait — **`cave.js:6290` le dit
     à l'écran** (« la colonne reste vide pour celles-ci »). Le défaut est assumé, pas corrigé.
-15. ✅ ~~**`.cave-tabs`**~~ — **RAYÉ ENTIÈREMENT, vérifié le 16/08.** Les deux barres mortes sont
-    purgées (`index.html:1745` porte le commentaire) **et la règle CSS orpheline est partie aussi** :
-    `grep cave-tabs styles.css` = **0**. L'entrée ne gardait qu'un reliquat déjà traité.
-16. ✅ ~~**`_pl2Annual` vs `_planGetRefH`**~~ — **RAYÉ, vérifié le 28/09 : déjà corrigé depuis le socle (`6756111`).**
-    `_pl2Annual_` somme `_planSummary(m,mi).ref`, bornée au contrat comme la carte du salarié. Les six lecteurs
-    restants de `_planGetRefH` veulent bien le MODÈLE nu (total annuel du modèle, capacité 1 ETP, éditeur de
-    modèle, replis de Réglages et de Pilotage) — ce n'est pas la même question.
 17. **Terminologie heures sup** : « Solde cumulé » (`planning.js:2319`) vs « Reste à prendre »
     (`l.4322`) — **les deux libellés coexistent, vérifié**.
 17b. ★ **Le nom d'un salarié, dans la grille, coche sa ligne** et n'ouvre plus sa fiche (§19a).
@@ -2628,10 +2629,6 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     (`mavigne_meteohr_cache`). **Ce qui manque n'est pas la donnée, c'est son exploitation.**
     L'historique reste irrécupérable rétroactivement.
 22. **DRY surface** — ⚠️ **21 sommes à la main au 16/08** (22 au 11/08, 32 à l'origine).
-23. ✅ ~~**UI d'activation d'essai client**~~ — **RAYÉ, vérifié le 16/08.** L'écran existe :
-    `admin-gt.js:1299` lit `agt-trial-input`, borne la valeur à `[0, 90]` (l.1301) et l'écrit dans
-    `clients[slug]` (l.1310) ; la pastille de récap l'affiche l.2886. **Posé par le chantier §40
-    sans que l'entrée soit relue.**
 24. ✅ ~~**Fusion de fûts à l'ÉDITION**~~ — **FAIT, vérifié le 16/08.** `_futSameLot(x, four, ref,
     annee)` compare fournisseur + référence + millésime en tolérant casse et espaces ; `_rsvSaveFut`
     cherche le doublon et fait `dup.qte = (parseInt(dup.qte)||0) + qte` au lieu de pousser une
@@ -2713,11 +2710,6 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     `_canModule` (`app.js:3860`, socle en `admin-gt.js:2664`) = formule ∧ masquage manuel, le rôle
     n'entre nulle part.**
     ⚠️ **Gain direct sur le prospect Gironde : 12 personnes × 7 arbitrages.** À faire **avant** l'installation.
-41. ✅ ~~**44 occurrences de `var(--texte-doux,#8B8175)`**~~ — **RAYÉ, vérifié le 16/08 :
-    0 occurrence** dans `src/*.js`, `styles.css` et `index.html`. Le repli fautif à 3,66:1 a
-    disparu — **par quel lot, on ne sait pas** : aucun `WHATS_NEW` ne le mentionne. ★ **C'est le
-    bon cas de figure quand même** : un défaut parti sans trace vaut mieux qu'un défaut tracé qui
-    reste, mais ça rappelle qu'un audit ne se remplace pas par un changelog.
 42. ⚠️⚠️ **Points de rupture responsive — QUATORZE, pas neuf** (re-compté le 16/08, `@media` de
     `styles.css` **ET** des JS) : **360, 400, 430, 520, 560, 600, 640, 700, 767.98, 768, 880, 900,
     980, 1200.** Le `760` est devenu `767.98` (entrée 5, ✅).
@@ -2732,6 +2724,10 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     `DGDDI` dans `src/` et `index.html` ; le registre l'écrit (« Ma Vigne prépare, l'exploitant déclare », `cave.js`). ⚠️⚠️ **Tant que
     cette entrée est ouverte, aucun lot Cave n'ajoute de déclaration, de plafond ni de contrôle de conformité.** ★ Le jour où le chantier
     s'ouvre, il rouvre le **stock de bouteilles** (abandonné, cf. « Rayés ») : une comptabilité matières suit aussi le vin en bouteille.
+44. ★★ **Le coéquipier dans une session tracteur** (demande de Nico, 15/10) : il se choisit **au moment où l’on choisit l’activité**
+    (`openNewSession`, `tracteur.js`), pour la **Tarière**, l’**Ensemencement** et l’**Engrais** — un drapeau sur l’activité, comme le
+    `champCustom` de la Tarière. Il compte pour ses jalons (« trous à deux »). **Vérifié le 15/10** : aucun « équipier » dans `src/` ;
+    Ensemencement et Engrais ne sont pas des activités du tracteur (« engrais » ne vit que dans Phyto › Fertilisation) : à créer.
 
 ### Backlog juridique & contenu public
 

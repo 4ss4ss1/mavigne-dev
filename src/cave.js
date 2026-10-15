@@ -1507,6 +1507,7 @@ function openOvCaveOp(opId) {
 
 function selCaveOpType(type) {
   _caveOpType=type;
+  var _copPq=document.getElementById('cop-pq');if(_copPq)_copPq.innerHTML=window._mvPqBtn?window._mvPqBtn(type,'cave'):'';   // POURQUOI-1 (§336)
   ['ouillage','soutirage','soufre','analyse','degustation','traitement','filtration','autre'].forEach(function(t) {
     var btn=document.getElementById('cot-'+t);
     if(btn) btn.classList.toggle('sel',t===type);

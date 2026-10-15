@@ -4049,6 +4049,11 @@ function applyRoles(){
   if(currentUser&&currentUser._isGTAdmin){
     return;
   }
+  // ★ ARRIVEE-1 (§337) — chez l'ouvrier, la Vigne n'a que deux onglets, l'Accueil ne renvoie plus au Journal,
+  //   et « Ma semaine » mène à « Ma trace ».
+  var _jOk=_mvJournalOuvert();
+  ['vng-ong-journal','vng-ong-journal-p','home-trv-tout','home-msem-journal'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display=_jOk?'':'none'; });
+  var _msT=document.getElementById('home-msem-trace'); if(_msT) _msT.style.display=_jOk?'none':'';
   // Tracteur readonly banner
   const isReadOnly=!isTractoriste();
   // Export PDF entretien masqué pour non-admins
@@ -6315,6 +6320,7 @@ window.addEventListener('popstate', function(){
 
 // ════ NAVIGATION ════
 function goTo(page){
+  if(page==='journal'&&!_mvJournalOuvert()) page='parcelles';   // ARRIVEE-1 (§337) : pas de Journal chez l'ouvrier, il valide depuis les Parcelles
   // SEC-GT — le panneau GUERETTECH n'est atteignable que par le compte GUERETTECH.
   // Cette page n'est PAS couverte par _mvPageGated (qui ne connaît que les modules
   // vendus) : sans cette garde, goTo('admin-gt') tapé en console ouvrait la coquille
@@ -6961,8 +6967,9 @@ function renderHomeRaccourcis(){
   var btns=[];
   // ⚠️ Un raccourci EST un bouton d'action : c'est l'un des trois cas ou
   //   l'icone reste legitime. Elle vient du sprite, plus d'un emoji.
-  if(typeof canWrite==='function'&&canWrite())btns.push({i:'crayon',l:'+ Journal',a:'journal'});
-  btns.push({i:'check',l:'Valider',a:'valider'});
+  // ★ ARRIVEE-1 (§337) : chez l'ouvrier, ni « + Journal » ni « Valider » — il arrive sur les Parcelles et y valide.
+  if(_mvJournalOuvert()&&typeof canWrite==='function'&&canWrite())btns.push({i:'crayon',l:'+ Journal',a:'journal'});
+  if(_mvJournalOuvert())btns.push({i:'check',l:'Valider',a:'valider'});
   btns.push({i:'liste',l:'Ma trace',a:'trace'});
   if(typeof isTractoriste==='function'&&isTractoriste())btns.push({i:'tracteur',l:'Session',a:'session'});
   c.style.gridTemplateColumns='repeat('+btns.length+',1fr)';
@@ -8224,12 +8231,12 @@ function renderParcelles(){
           +(_mine?' <span class="pft-me">'+String.fromCodePoint(0x1F464)+' Toi</span>':'')
           +'</span>';
       }).join('');
-      tfRow.innerHTML='<div class="p-focus-bar"><span class="p-focus-lbl">'+_tgt+' Priorit\u00e9 du moment</span>'+_chipsP+'<button class="p-focus-all" onclick="_prioShowAll()">Voir toutes les t\u00e2ches</button></div>';
+      tfRow.innerHTML='<div class="p-focus-bar"><span class="p-focus-lbl">'+_tgt+' Priorit\u00e9 du moment</span>'+_chipsP+(window._mvPqBtn?window._mvPqBtn(pTacheFilter,'vigne'):'')+'<button class="p-focus-all" onclick="_prioShowAll()">Voir toutes les t\u00e2ches</button></div>';
     } else {
     var showDoneBtn=pTacheFilter!=='toutes'?`<div class="ptfchip${window.pShowDone?' active ac':''}" onclick="window.pShowDone=!window.pShowDone;renderParcelles()" style="margin-left:auto;flex-shrink:0;border-style:dashed">${window.pShowDone?'Toutes':'À faire'}</div>`:'';
     var backPrio=(_prioTaskOK&&!isAdmin()&&_prioOverride)?'<div class="ptfchip pfc-back" onclick="_prioBackToPriority()">\u2190 Priorit\u00e9</div>':'';
     tfRow.innerHTML=backPrio+`<div class="ptfchip${pTacheFilter==='toutes'?' active':''}" data-t="toutes" onclick="setPTacheFilter('toutes',this)">Toutes tâches</div>`
-      +tachesSaisonFSorted.map(t=>`<div class="ptfchip${pTacheFilter===t.nom?' active':''}" data-t="${_escAttr(t.nom)}" onclick="setPTacheFilter('${_escAttr(t.nom)}',this)">${_escHtml(tNom(t.nom))}</div>`).join('')
+      +tachesSaisonFSorted.map(t=>`<div class="ptfchip${pTacheFilter===t.nom?' active':''}" data-t="${_escAttr(t.nom)}" onclick="setPTacheFilter('${_escAttr(t.nom)}',this)">${_escHtml(tNom(t.nom))}</div>`+(pTacheFilter===t.nom&&window._mvPqBtn?window._mvPqBtn(t.nom,'vigne'):'')).join('')   // POURQUOI-1 (§336) : la pastille suit la tâche choisie
       +showDoneBtn;
     }
   }
@@ -9820,6 +9827,7 @@ function openValidationPanel(nomParcelle,nomTache,btn){
   _validParcelle=nomParcelle;_validTache=nomTache;_validBtn=btn;
   document.getElementById('vp-titre').textContent=nomTache;
   document.getElementById('vp-parcelle').textContent=nomParcelle;
+  var _vpPq=document.getElementById('vp-pq');if(_vpPq)_vpPq.innerHTML=window._mvPqBtn?window._mvPqBtn(nomTache,'vigne'):'';   // POURQUOI-1 (§336)
   document.getElementById('vp-date').value=_mvToday();
   // Reset mode Seul
   document.querySelectorAll('#vp-equipe-pick .pchk').forEach((el,i)=>{el.classList.toggle('sel',i===0);el.classList.toggle('vert',i===0);});
@@ -13350,7 +13358,18 @@ async function refreshApp(){
   };
 })();
 
+// ★ ARRIVEE-1 (§337) — QUI A LE JOURNAL. Nico (14/10) : « l'ouvrier n'a même pas à accéder au journal » :
+//   tout ce qu'il y faisait passe par les Parcelles (« Début », la feuille de validation avec sa date, son
+//   équipe et sa note, ↩) et son historique reste dans « Ma trace ». Le Journal reste à l'admin et au pilotage.
+//   ⚠️ Une seule question, posée partout (onglets, navigation, raccourcis, liens de l'Accueil) : ne pas relire
+//   les rôles à la main ailleurs. Lue sur les rôles du membre, comme canSeePilotage.
+function _mvJournalOuvert(){
+  var r=(window.currentUser&&window.currentUser.roles)||[];
+  return r.indexOf('admin')>=0||r.indexOf('pilotage')>=0;
+}
+window._mvJournalOuvert=_mvJournalOuvert;
 function switchVigneOng(dest){
+  if(dest==='journal'&&!_mvJournalOuvert()) dest='parcelles';   // ARRIVEE-1 : pas de Journal chez l'ouvrier
   // Synchroniser les onglets dans les 3 headers vigne (home/parcelles/journal)
   ['','p','j'].forEach(function(sfx){
     ['home','parcelles','journal'].forEach(function(o){

@@ -1,0 +1,26 @@
+{
+  "lot": "POURQUOI-1",
+  "section": "§336",
+  "base": "372df98be01099516eef83c474ef5fb2c1bf648a",
+  "inclut": [],
+  "date": "2026-10-15",
+  "fichiers": {
+    ".mv-base": "86f9471e3c4ce81b455029cd74b3d02479a8e4690943691e55c2f6df2168586c",
+    "CLAUDE.md": "8f9ab5609c019ca738a9289f5512eaab96a8bd76fcde7c3b6f64781e70c02195",
+    "docs/claude/INDEX.md": "0af75cff2843747f8f907dd3629779635a3335aa3c5d1d64ffd20f03901afcab",
+    "docs/claude/chantiers-330-379.md": "867c0b414daaa81550655bfd7a308a06e72b6bb5f7ce73ae67a63fdfc815f36b",
+    "docs/claude/journal.md": "f96112afbdb4538e6e3c2b8f16757d5346117f1e15b3c080ba1f0e45abe29ba4",
+    "guide/04-vigne.html": "eb53f11497be5331de45b0553449634b4604c6163c237508c45bd8fb766efd07",
+    "guide/06-tracteur.html": "3b9e6416aa1decbc0373c9db41d2c1409cb5723ed61a05ce3a36f04aa1bf9878",
+    "guide/08-cave.html": "007133abfa9261f5c8933fad215c606628e580bcbc88b168c7f8845232b64715",
+    "index.html": "3d9723bc9c03b42eeab6fa98b2adbc836f839e9ab73da5b12726c3e4e6735661",
+    "public/sw.js": "f5249f646ad7505399a9f4d644e4df6a3a734efb3d783104583f72e69eda67bb",
+    "scripts/mv-harnais-liste.mjs": "84c0a6deaae19f8511e39832d607de7db4843fb2e67c0b884546f59b0e9cfc04",
+    "src/app.js": "888546e37f1b61081e2cc6430a42e31c90701dc61b49223fe04b041f0e51224d",
+    "src/cave.js": "4864a3fcfac992be70528c0cb4d491987cbc60578c51474e035aca927da8f998",
+    "src/styles.css": "fc1170531eff0f8f991e7191e85e36cb7ea3e85d5096b6016815e2714e711e59",
+    "src/tracteur.js": "45604e6aad637f36a9d08e1be40a2ebeafb5a6c95bc3b0e50e7a40ba22038815",
+    "src/utils.js": "55ae74c4f99cf1a927633b0c7fde5af8efacfcd43bbc81ea77bef0486e7a61ee",
+    "scripts/mv-harnais-pourquoi.mjs": "5134f0ac46209a7b5c24c195c9ae0122ad9a932e68bc95a041e9d946d0fa8300"
+  }
+}

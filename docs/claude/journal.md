@@ -8,6 +8,13 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **15 octobre 2026 (POURQUOI-1)** — ★★ **« POURQUOI ON LE FAIT » : UNE PASTILLE OUVRE LA FICHE DE CHAQUE TÂCHE, LÀ OÙ LE GESTE A LIEU** (§336). Base `372df98` (RANGE-1 et sa reprise). Contient aussi les décisions des maquettes (bloc GRATIF-0 du §28, l’entrée 44 du backlog), jamais poussées jusqu’ici. Nico (15/10) : « les petites informations de pourquoi on fait telle tâche, c’est hyper important », puis « go ».
+> Trente-sept fiches (`MV_POURQUOI`, `utils.js`) — la vigne, le tracteur, le cuvier, le chai — et des « Le saviez-tu ? », ouvertes dans la bulle des fiches « i » par la pastille `_mvPqBtn` : priorité du moment et feuille de validation (Parcelles), fiche d’une session (Tracteur), « Nouvelle opération » (Cave).
+> **APP 9.02 → 9.03, SW 9.81 → 9.82.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+
+> Dernière consolidation : **15 octobre 2026 (RANGE-1)** — ★★ **LE MILLÉSIME RANGÉ : UNE TÊTE ET QUATRE VUES, LA CHAÎNE DE CHAQUE CUVÉE** (§335). Base `04baf84` (LARG-1). Nico (15/10) : « tout est les uns au-dessus des autres, ce n'est pas rangé… nous sommes une application pro ». Reformulé, recherche (vintrace, InnoVint, règles des tableaux de bord), maquette (toile Design, ordinateur et téléphone), « parfait ». Absorbe CHAINE-1 (livré sur `379e4b9`, jamais appliqué : ne pas le coller). Une tête (`#ml-head`, `_mlHead` : l'année, son état, le choix de l'année, `_mlTuiles`), puis quatre vues : Ensemble (`_mlRenderVie` : À surveiller, le parcours, les cuvées, les repères, face à N-1 ; deux colonnes à partir de 1 024 px), Parcelles (`_mlRenderParc` : trié, filtres), Cuvées (`_mlRenderCuv` : liste + fiche, la chaîne `_pcrbCvLignes` / `_pcrbCvCellules`), Courbes (grille de quatre cartes, une à la fois au téléphone).
+> L'ancienne carte « une seule cuvée » (`_pcrbChaine`, `_PCRB_CH`) et `_mlOrigine` sont retirées ; « D'où vient chaque cuvée » vit dans la fiche. `cave.js` 636 → 667 ko, sous le cliquet des 5 %. **APP 9.01 → 9.02, SW 9.80 → 9.81.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+
 > Dernière consolidation : **14 octobre 2026 (LARG-1)** — ★ **SUR ORDINATEUR, TOUS LES MODULES À LA LARGEUR DU PILOTAGE ET DE LA VIGNE : 1 200 PX CENTRÉS** (§334). Base `710c664` (BRUIT-1, poussé en parallèle sur la même base : LARG-1 rebâti dessus, §334). Nico (14/10, trois captures du PC) : « les écrans de pilotage et de vigne ne sont pas à la même largeur que les autres écrans […] il faut qu'ils soient tous comme pilotage et vigne ». Reformulé, confirmé : « oui (fais une maquette pour planning) », « Continuer », puis « A » sur la maquette du Planning.
 > La règle de KIT-1 (§226) ne bornait que `#page-home`, `#page-parcelles` et `#page-pilotage` (« les autres modules aux lots 3b/3c », jamais faits) : elle porte aussi le Journal, le Tracteur, Phyto, la Cave, la Réserve, le Planning et Réglages ; la barre d'onglets de la Réserve (760 px centrés) part du bord. Le Planning est passé par une maquette (toile Design, captures de la vraie appli) : Nico a choisi « A », borné comme les autres — sur « Les gens », la liste passe de 826 à 744 px à 1 536. Mesuré dans la vraie appli (Chromium, 1 280 / 1 536 / 1 920 px, clair et sombre) ; garde neuve `mv-harnais-larg1`. Trouvé par la chaîne de 1 h du matin : un vrai défaut du Cuvier, en ligne (`_vendSince` compte en heure universelle, §334f).
 > **APP 9.00 → 9.01, SW 9.79 → 9.80.** Déploiement : `npm run build` → `firebase deploy --only hosting` (le guide ne change pas).
@@ -2419,3 +2426,57 @@ module enregistre (instantanés, archives), toutes ses surfaces, rouge sur excep
 > Dernière consolidation : **12 octobre 2026 (ETAT-1)** — ★ **LE PLAN DU COCKPIT LIT L'ÉTAT DE LA FICHE ; LE JOURNAL NE DIT PLUS QUE QUI** (§320). Lot 51, base `e937d3a`. Nico (12/10, deux captures) : « explique pourquoi le pilotage me met une parcelle en entreplantation fait alors que ce n'est pas le cas » ; diagnostic, reformulé, « oui », puis « Continuer ».
 > Le plan relisait le journal (`_ckPlanLire`) : sans borne pour une tâche sans fenêtre (`t.debut` nul — entreplantation sans trou, travaux sans barème), sourd aux annulations. L'état vient désormais de `getTacheStatut` (la fiche, la période du Pilotage) ; l'équipe, de la dernière ligne « En cours » de la période. Arrachage fini pour l'équipe = fait, la loupe le dit (`presta`).
 > **APP 8.87 → 8.88, SW 9.66 → 9.67.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change).
+
+## Backlog rayé, descendu du cœur le 15/10 (règle 4 : l’historique descend, jamais une consigne)
+
+> Entrées faites et vérifiées en août, retirées de `CLAUDE.md` §28 pour faire place au bloc GRATIF-0. Leur numéro d’origine est gardé.
+
+0e. ~~**Deux compteurs de 1607 h**~~ — ✅ **FAIT le 14/08** (APP 6.14 · SW 6.67).
+   `_planAnnuCard` pose une carte compacte par **contrat soldé dans l'année civile**, au-dessus du
+   compteur courant : dates, heures faites, plafond proratisé. Borné par `_planSurContrat(ctr,…)`,
+   qui contraint `_planInContractCtr` aux dates du contrat passé. **Affichage seul, aucun calcul
+   touché** (§19, §33).
+3. ~~**Fusionner les deux écrans de congés**~~ — ✅ **FAIT le 14/08** (APP 6.14 · SW 6.67).
+   `openPlanCP(fromSel)` est le point d'entrée unique ; `openPlanCPSel` est supprimée, son
+   exposition `window` retirée, le bouton de la barre de sélection appelle `openPlanCP(true)`.
+   La 5ᵉ feuille est ramenée à 4 (§19a).
+7. ~~**Escalier de sources pour la cadence**~~ — ✅ **FAIT le 14/08** (APP 6.14 · SW 6.67), §41.
+   `_pecCadHisto()` remplit la marche 2 : sous le seuil d'avancement, l'écran reprend la **même
+   période de la campagne précédente**. `hBar` vient du snapshot (`stats.hFaites`), `hReel` se
+   **recalcule** sur `PLANNING_ENTRIES` — clé par année, jamais purgé. **Quatre points d'affichage
+   annoncent la source.** Harnais : 28 assertions, 5 contre-épreuves.
+9. ~~**Pondérer `_ecoRate` par les heures**~~ — ✅ **FAIT le 14/08** (APP 6.14 · SW 6.67).
+   Moyenne pondérée par les heures annuelles du gabarit (`window._planGetRefH` sur 12 mois).
+   ★ **Repli sur `h=1` si le planning n'est pas chargé** — résultat identique à l'ancien, donc
+   aucune régression possible sur un domaine sans données de planning.
+5. ✅ ~~**Breakpoint 760 → 767.98**~~ — **RAYÉ, vérifié le 16/08.** `styles.css` porte
+   `@media(max-width:767.98px)` ; le trou 761–767 est bouché. La seule occurrence restante de `760`
+   est `@media(min-width:768px){ .mvr-body{max-width:760px} }` — **une largeur de corps, pas un
+   point de rupture** : ne pas la « corriger », elle est juste. ★ L'entrée attendait un go qui
+   n'était plus nécessaire.
+2. ✅ ~~**Vérifier si un `rewrite` existe en ligne**~~ — **RAYÉ, vérifié le 16/08.** Les **deux**
+   sont dans `firebase.json` : `/api/lead` (l.19) et `/api/mise-en-route` (l.26), sous la clé
+   `rewrites` ouverte l.17. Le ZÉRO du 11/08 était juste **à cette date** ; ils ont été ajoutés
+   depuis, sans que l'entrée soit relue. ★ `harnais-claude-md` le vérifie déjà à chaque passage.
+15. ✅ ~~**`.cave-tabs`**~~ — **RAYÉ ENTIÈREMENT, vérifié le 16/08.** Les deux barres mortes sont
+    purgées (`index.html:1745` porte le commentaire) **et la règle CSS orpheline est partie aussi** :
+    `grep cave-tabs styles.css` = **0**. L'entrée ne gardait qu'un reliquat déjà traité.
+23. ✅ ~~**UI d'activation d'essai client**~~ — **RAYÉ, vérifié le 16/08.** L'écran existe :
+    `admin-gt.js:1299` lit `agt-trial-input`, borne la valeur à `[0, 90]` (l.1301) et l'écrit dans
+    `clients[slug]` (l.1310) ; la pastille de récap l'affiche l.2886. **Posé par le chantier §40
+    sans que l'entrée soit relue.**
+41. ✅ ~~**44 occurrences de `var(--texte-doux,#8B8175)`**~~ — **RAYÉ, vérifié le 16/08 :
+    0 occurrence** dans `src/*.js`, `styles.css` et `index.html`. Le repli fautif à 3,66:1 a
+    disparu — **par quel lot, on ne sait pas** : aucun `WHATS_NEW` ne le mentionne. ★ **C'est le
+    bon cas de figure quand même** : un défaut parti sans trace vaut mieux qu'un défaut tracé qui
+    reste, mais ça rappelle qu'un audit ne se remplace pas par un changelog.
+0a-bis. ✅ ~~**UNE LIGNE D'`utils.js` EN ATTENTE D'UNE DÉCISION DE DONNÉE**~~ — **FAITE, vérifié
+   le 16/08.** `_mvEnContratSurPeriode` (désormais **utils.js l.2936**, plus l.2449) porte
+   `if(!P.length) return true;`, précédé du commentaire de convention en dix lignes qui explique
+   *pourquoi* le statut n'entre pas dans la réponse. Le blocage de donnée était levé dès le 14/08 —
+   Nico a supprimé la fiche `Pilotage` (§39g). **L'entrée décrivait donc un travail fait depuis
+   deux jours au moment de la consolidation du 15/08 : elle aurait dû partir avec §39.**
+16. ✅ ~~**`_pl2Annual` vs `_planGetRefH`**~~ — **RAYÉ, vérifié le 28/09 : déjà corrigé depuis le socle (`6756111`).**
+    `_pl2Annual_` somme `_planSummary(m,mi).ref`, bornée au contrat comme la carte du salarié. Les six lecteurs
+    restants de `_planGetRefH` veulent bien le MODÈLE nu (total annuel du modèle, capacité 1 ETP, éditeur de
+    modèle, replis de Réglages et de Pilotage) — ce n'est pas la même question.
