@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.00';
+export const APP_VERSION = '9.01';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,11 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.01', d: '2026-10-14', items: [
+    { niv: 0, pour: ['tous'], emoji: 'carre', titre: 'Sur ordinateur, tous les modules à la même largeur',
+      desc: "Sur un grand écran, l’Accueil, les Parcelles et le Pilotage restaient au centre, mais le Journal, le Tracteur, Phyto, la Cave, la Réserve, le Planning et Réglages prenaient toute la largeur : l’écran changeait de largeur d’un module à l’autre. "
+        + "Ils suivent maintenant la même colonne centrée ; sur «\u00a0Les gens\u00a0» du Planning, la liste et la fiche s’y partagent la place. Les onglets de la Réserve partent du bord, comme ailleurs. Au téléphone et sur un petit écran d’ordinateur, rien ne change." },
+  ] },
   { v: '9.00', d: '2026-10-14', items: [
     { niv: 1, pour: ['admin'], cible: '#mvv-reste-q', emoji: 'raisin', titre: 'Une parcelle qui ne sera pas récoltée cette année',
       desc: "Une parcelle condamnée à l’arrachage, grêlée ou trop jeune restait «\u00a0encore sur pied\u00a0» dans Le Cuvier, Le millésime et le Revient : pour l’en sortir, il fallait la déclarer arrachée. "

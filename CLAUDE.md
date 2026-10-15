@@ -3,9 +3,9 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **14 octobre 2026 (BRUIT-1)** — ★ **LE E2E LOCAL TOMBAIT SUR UN BRUIT D'ENVIRONNEMENT : « Stockage persistant refusé par le navigateur »** (§333). Base `379e4b9` (SANSREC-1 poussé). La CI de SANSREC-1 : `test:e2e` rouge sur « Action dock », un seul message, au niveau INFO.
-> Cause lue dans le code : une écriture du parcours échoue (réseau Firebase coupé) et part en file après trois tentatives ; la première mise en file demande la persistance (STOCK-1, `firebase.js/_mvDemanderPersistance`), que Chromium sans tête refuse ; `logError` l'écrit en `console.error`, et le e2e l'impute à l'étape en cours. SANSREC-1 n'ajoute aucune écriture au parcours (son seul `saveData` est derrière « Enregistrer » de la feuille). Le motif rejoint `BENIGN` (`scripts/e2e-local.mjs`).
-> **Aucun bump** (un script et la doc). Pas de déploiement : commit, push, et la CI rejoue le e2e — c'est elle qui confirmera.
+> Dernière consolidation : **14 octobre 2026 (LARG-1)** — ★ **SUR ORDINATEUR, TOUS LES MODULES À LA LARGEUR DU PILOTAGE ET DE LA VIGNE : 1 200 PX CENTRÉS** (§334). Base `710c664` (BRUIT-1, poussé en parallèle sur la même base : LARG-1 rebâti dessus, §334). Nico (14/10, trois captures du PC) : « les écrans de pilotage et de vigne ne sont pas à la même largeur que les autres écrans […] il faut qu'ils soient tous comme pilotage et vigne ». Reformulé, confirmé : « oui (fais une maquette pour planning) », « Continuer », puis « A » sur la maquette du Planning.
+> La règle de KIT-1 (§226) ne bornait que `#page-home`, `#page-parcelles` et `#page-pilotage` (« les autres modules aux lots 3b/3c », jamais faits) : elle porte aussi le Journal, le Tracteur, Phyto, la Cave, la Réserve, le Planning et Réglages ; la barre d'onglets de la Réserve (760 px centrés) part du bord. Le Planning est passé par une maquette (toile Design, captures de la vraie appli) : Nico a choisi « A », borné comme les autres — sur « Les gens », la liste passe de 826 à 744 px à 1 536. Mesuré dans la vraie appli (Chromium, 1 280 / 1 536 / 1 920 px, clair et sombre) ; garde neuve `mv-harnais-larg1`. Trouvé par la chaîne de 1 h du matin : un vrai défaut du Cuvier, en ligne (`_vendSince` compte en heure universelle, §334f).
+> **APP 9.00 → 9.01, SW 9.79 → 9.80.** Déploiement : `npm run build` → `firebase deploy --only hosting` (le guide ne change pas).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1855,6 +1855,9 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ LARG-1 — CE QUI RESTE OUVERT (§334, posé le 14/10)
+1. **À regarder chez Nico, sur son PC** : chaque module au même endroit que le Pilotage, les onglets de la Réserve, et « Les gens » du Planning, où la liste passe de 826 à 744 px (de 1 210 à 744 px à 1 920) — mesuré dans Chromium sur des données fabriquées, pas sur les siennes ni à sa largeur exacte. **Vu, non touché** : le premier onglet du Pilotage part 24 px plus à droite que celui des autres modules (`.pil-tabsbar`) ; l'onglet « Labo » de la Cave garde son texte sur 760 px, à gauche (`.lbo-page`) ; `#page-chat` (sans appelant) reste exempté.
+2. **Hors lot, trouvé par la chaîne — la date du jour en heure universelle (§334f)** : `_vendSince` (`cuvier.js`) lit « AAAA-MM-JJ » à minuit UTC ; à Paris, de minuit à 2 h l'été (1 h l'hiver), une cuve relevée la veille n'est pas « à mesurer » et un relevé du jour compte −1 jour — en ligne, `mv-harnais-cuv13` rougit dans cette fenêtre. `mv-harnais-reste-a-rentrer` y rougit aussi, par la faute de son décor (`toISOString`). `mv-harnais-ref1` a rougi une fois à 1 h, non reproduit. Correctif à décider par Nico, dans un lot à part.
 ### ⚠️ SANSREC-1 — CE QUI RESTE OUVERT (§332, posé le 14/10)
 1. **À regarder chez Nico, au téléphone puis sur PC** : Cave › Le Cuvier › Récoltes — « Une parcelle ne sera pas récoltée ? » en pied d'« Encore sur pied » (admin), la feuille « Récolte 2026 » (décocher, « Enregistrer »), puis « Tout est rentré » et la ligne « Pas de récolte cette année · Modifier » ; Le millésime ; Pilotage › Économie › Revient (« constaté », la note, la pastille, « coût réparti ») ; la fiche de la parcelle (Vendange « Pas cette période »). Vérifié par `mv-harnais-sansrec1` (vraies fonctions, 31 vérifications, 12 contre-épreuves) ; ni navigateur ni ses données.
 2. **Vu, non touché** : deux définitions de « la vendange » (`_mvEstVendange`, utils.js ; `_rfEstCouperet`, pilotage.js) ; une vendange renommée sans le drapeau `couperet` n'est pas reconnue (la question ne s'affiche pas) ; la feuille garde dans ses autres modes ses surfaces brutes (« 0.42 ») et son « Enregistrer » sans couleur (`mbtn` seule) ; le chevron d'« Encore sur pied » pointe à gauche une fois ouvert.
@@ -2168,7 +2171,6 @@ plus élevé ou alors laisser le choix lors de la demande »* — ce n'est pas u
 ne règle pas l'ordre ; le choix paiement/repos relève de l'accord collectif ou de l'employeur, jamais du salarié seul. À faire : un
 réglage de domaine (défaut : le plus élevé), et le choix de l'employeur au moment de la demande.
 
-### ✅ ROB-2 — le tirage au hasard, module par module (§191) — TERMINÉ le 29/09 ; le récit descendu dans `docs/claude/journal.md` le 12/10 (ETAT-1, plafond du cœur)
 ★ **Une nouvelle liste d'objets = l'ajouter à `_MV_LISTES_OBJETS`** (LISTES-1). ★ Le chargeur de l'application entière est partagé (`scripts/mv-app-node.mjs`, `chargerApp({remplace})`) : ses doublures (`logError`, `_mvAvale`…) se posent **APRÈS** le chargement, sinon utils.js les écrase sans bruit.
 
 ### ⚠️ QUESTION OUVERTE — L'ÉCART DE CADENCE ET LE TEMPS RÉEL (§172f ③, posée le 23/09)

@@ -5678,10 +5678,15 @@ button.pil-dz-set{cursor:pointer;width:100%;}
    largeur d'un « 0 » et laisse un trou : « 12 % » se lisait « I 2 % ». La chasse fixe reste aux colonnes. */
 .pil-th-stat b,.pil-big,.pil-ck .kv,.pil-kval,.pil-gauge-pct,.pil-ring-mid .pc,.pil-verdict .vbig,.pil-donut-c1,.pil-trx-co .v b,
 .hv2-card-val,.hv2-trac-val,.histo-col-pct,.hmsem-v,.pc-pct,.hc-total-val,.mvc-kpi-num,.pil-dom{font-variant-numeric:lining-nums proportional-nums;letter-spacing:0;}
-/* La largeur sur grand écran : une seule, 1 200 px (Accueil, Parcelles, Pilotage — les autres modules aux lots 3b/3c). */
+/* La largeur sur grand écran : une seule, 1 200 px, centrée. KIT-1 (§226) l'avait posée sur l'Accueil, les Parcelles et le
+   Pilotage en laissant « les autres modules aux lots 3b/3c », qui ne l'ont jamais fait : sur un écran large, le Journal, le
+   Tracteur, Phyto, la Cave, la Réserve, le Planning et Réglages prenaient toute la largeur, et l'écran changeait de largeur
+   d'un module à l'autre (LARG-1, §334). Le Planning suit, sur maquette validée par Nico : sur « Les gens », la liste et la
+   fiche rangée (440 px, PLAN-2 §280) se partagent la colonne.
+   Une page ajoutée demain se range ici : `mv-harnais-larg1` rougit si une page de index.html n'est ni bornée ni exemptée. */
 :root{--page-max:1200px;}
 .pil-wrap{max-width:var(--page-max,1200px);}
-@media (min-width:1200px){ #page-home,#page-parcelles,#page-pilotage{max-width:var(--page-max,1200px);margin-left:auto;margin-right:auto;} }
+@media (min-width:1200px){ #page-home,#page-parcelles,#page-journal,#page-pilotage,#page-tracteur,#page-phyto,#page-cave,#page-reserve,#page-planning,#page-reglages{max-width:var(--page-max,1200px);margin-left:auto;margin-right:auto;} }
 
 /* ══ KIT-2 (§227) ═══════════════════════════════════════════════════════════════════════════════════
    1. LES CHIFFRES ALIGNÉS PARTOUT. La Cormorant servie (public/fonts, sous-police latin) dessine par défaut des
@@ -7311,6 +7316,9 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 @media (min-width:1024px){
   /* .mvr-body tenait la Réserve sur 760 px au milieu de l'écran : au large, elle prend la largeur, comme les autres modules. */
   #page-reserve .mvr-body{ max-width:none; }
+  /* LARG-1 (§334) : sa barre d'onglets, elle, restait sur 760 px centrés — « Fûts » partait 220 px plus à droite que le
+     premier onglet des autres modules. Elle part maintenant du bord de la page, comme partout. */
+  #page-reserve .mvr-tabs{ max-width:none; }
   #page-reserve .mvr-sgpad{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--e-2,8px); align-items:start; }
 }
 /* ★ FIN RSV-1 */

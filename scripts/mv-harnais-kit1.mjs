@@ -68,8 +68,10 @@ function suite(S) {
   const css = S.css;
   T('les grands chiffres en chiffres proportionnels (« 12 % », plus « I 2 % »)', /\.pil-th-stat b,[^{]*\{font-variant-numeric:lining-nums proportional-nums;letter-spacing:0;\}/.test(css)
     && css.lastIndexOf('proportional-nums') > css.indexOf('.pil-th-stat b{'));
-  T('une largeur sur grand écran (1 200 px) pour l\u2019Accueil, les Parcelles et le Pilotage',
-    /@media \(min-width:1200px\)\{ #page-home,#page-parcelles,#page-pilotage\{max-width:var\(--page-max,1200px\)/.test(css)
+  // LARG-1 (§334) : la règle porte désormais tous les modules ; KIT-1 garde SES trois pages, mv-harnais-larg1 garde le reste.
+  const regle = (css.match(/@media \(min-width:1200px\)\{ ((?:#page-[a-z0-9-]+,)*#page-[a-z0-9-]+)\{max-width:var\(--page-max,1200px\);/) || [])[1] || '';
+  T('une largeur sur grand écran (1 200 px) pour l\u2019Accueil, les Parcelles et le Pilotage (et les autres modules, LARG-1)',
+    ['home', 'parcelles', 'pilotage'].every(p => regle.split(',').includes('#page-' + p))
     && css.lastIndexOf('.pil-wrap{max-width:var(--page-max,1200px);}') > css.indexOf('.pil-wrap{max-width:1280px'));
   return out;
 }
@@ -85,7 +87,7 @@ const D = [
   ['la fenêtre du jour n\u2019est plus « passée »', sub('uti', 'o>=w.we', 'o>w.we')],
   ['« Agrandir » disparaît', sub('uti', 'var agr = (html && e.agr !== false)', 'var agr = (false && e.agr !== false)')],
   ['la barre des parcelles revient au dégradé', sub('app', 'fill:_fk,', 'fill:_gc,', true)],
-  ['les pages s\u2019étirent de nouveau', sub('css', '#page-home,#page-parcelles,#page-pilotage{max-width:var(--page-max,1200px)', '#page-home{max-width:none')],
+  ['les pages s\u2019étirent de nouveau', sub('css', '#page-home,#page-parcelles,#page-journal,#page-pilotage,', '#page-journal,')],
 ];
 let rg = 0;
 D.forEach(([n, f]) => {
