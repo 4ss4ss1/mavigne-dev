@@ -1,0 +1,15 @@
+{
+  "lot": "BRUIT-1",
+  "section": "§333",
+  "base": "379e4b9ed681f226030728c1fd9371cbb00f3fce",
+  "inclut": [],
+  "date": "2026-10-15",
+  "fichiers": {
+    ".mv-base": "3a5b3f65ffe29edd93c129a2a660768b69120e13d58b40e50958bfbd91dab5bc",
+    "CLAUDE.md": "b7150e20b7f3477f0fcdfd38c5ea57c6f809c09362d49b7d765d3498b281bb98",
+    "docs/claude/INDEX.md": "1d84e140cc4d11624a302d1497d02d0b1f98ff67d34c015019072d9d3ae8f76a",
+    "docs/claude/chantiers-330-379.md": "1312458a0664ad1e04e8dfde4ad0abe9ce5e58db6936ef9c1327c5da88228595",
+    "docs/claude/journal.md": "5047aec1cb74387295d3806431c9c2097719b768eff91b8d0d209f8cc2b1865c",
+    "scripts/e2e-local.mjs": "7395a92d9b52c8c1b0db7157e86ac23cd443439a30efb98318650778d3a918e6"
+  }
+}

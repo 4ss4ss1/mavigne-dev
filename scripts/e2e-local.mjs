@@ -86,6 +86,11 @@ const BENIGN = [
   /Access to (fetch|XMLHttpRequest)|CORS/i, /Quota/i, /permission-denied/i,
   /Service Worker non enregistr/i, /reading 'scope'/i, /ServiceWorker/i,
   /navigator\.vibrate/i, /hasn't tapped/i, /chromestatus/i,
+  // ★ BRUIT-1 (§333) — Chromium sans tête REFUSE le stockage persistant (ni installée, ni usage). La demande part à la
+  //   première écriture mise en file (STOCK-1, firebase.js/_mvDemanderPersistance) : ici toute écriture finit en file,
+  //   le réseau Firebase étant coupé. Le refus est journalisé au niveau INFO (logError → console.error) plusieurs
+  //   secondes après l'écriture, dans l'étape qui tourne à ce moment-là (« Action dock » en CI, 14/10). Environnement.
+  /Stockage persistant refus/i,
 ];
 const isBenign = (t) => BENIGN.some((re) => re.test(t || ''));
 
