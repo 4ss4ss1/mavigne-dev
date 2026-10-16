@@ -116,8 +116,12 @@ T('aucun demi-surrogate isolé', bad === 0, bad + ' isolé(s)');
 // Le récap cumulatif, joué et non suppose.
 if (WN.length > 1) {
   const prec = WN[1].v;
-  T('depuis ' + prec + ' → le seul bloc ' + WN[0].v,
-    since(prec).length === 1 && since(prec)[0].v === WN[0].v, since(prec).map(b => b.v).join(','));
+  if (WN[0].items && WN[0].items.length)
+    T('depuis ' + prec + ' → le seul bloc ' + WN[0].v,
+      since(prec).length === 1 && since(prec)[0].v === WN[0].v, since(prec).map(b => b.v).join(','));
+  else   // ★ JALONS-2B (§342) : une version purement technique déclare items: [] (CLAUDE.md, règle de WHATS_NEW) — rien à annoncer
+    T('depuis ' + prec + ' → rien, ' + WN[0].v + ' est purement technique',
+      since(prec).length === 0, since(prec).map(b => b.v).join(','));
 }
 const vieux = WN[Math.min(WN.length - 1, 8)].v;
 T('depuis ' + vieux + ' → récap cumulatif (' + since(vieux).length + ' blocs)',

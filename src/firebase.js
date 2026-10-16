@@ -3285,6 +3285,32 @@ window.fbNoterAppareil = async function (nom) {
   } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbNoterAppareil'); return false; }
 };
 
+// ★★ JALONS-1 (§340) — LES JALONS D'UNE PERSONNE : mavigne_{slug}/jalons_<uid>, qu'elle seule lit et écrit (règle 6 de
+//   firestore.rules), lecture seule comprise : un saisonnier gagne aussi les siens. Ni l'admin du domaine, ni un collègue.
+//   Hors COLLECTIONS : ni écoute temps réel, ni copie locale partagée. Jamais en démo ni en mode préparation.
+//   setDoc merge : deux appareils de la même personne ajoutent leurs jalons sans s'écraser.
+function _mvJalonsCle() { var u = auth && auth.currentUser; return (u && u.uid) ? ('jalons_' + u.uid) : null; }
+function _mvJalonsPermis() { return !!TENANT_ID && TENANT_ID !== 'domaine-dupont' && !(window._mvPrepOn && window._mvPrepOn()); }
+// ★★ JALONS-2B (§342) — une lecture refusée (les règles des jalons pas encore publiées : un canal de prévisualisation
+//   partage la base et les règles de la production) ou impossible (hors réseau, rien en cache) N'EST PAS « aucun jalon » :
+//   { ok:false }, et le calcul s'arrête. Seul un document absent, lu pour de vrai, vaut { ok:true, value:null }.
+window.fbLireJalons = async function () {
+  try {
+    if (!_mvJalonsPermis()) return { ok: false };
+    var k = _mvJalonsCle(); if (!k) return { ok: false };
+    var snap = await getDoc(fbDocRef(k));
+    return { ok: true, value: snap.exists() ? (snap.data().value || null) : null };
+  } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbLireJalons'); return { ok: false }; }
+};
+window.fbEcrireJalons = async function (v) {
+  try {
+    if (!_mvJalonsPermis()) return false;
+    var k = _mvJalonsCle(); if (!k || !v || typeof v !== 'object') return false;
+    await setDoc(fbDocRef(k), { value: v }, { merge: true });
+    return true;
+  } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbEcrireJalons'); return false; }
+};
+
 window.fbAppendError = async function(entry) {
   try {
     var ref = fbDocRef('error_log');

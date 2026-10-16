@@ -386,7 +386,7 @@ async function suite(SRC) {
   await T('R1', 'règles : lus par l’admin seul = paie + planning_entries + planning_hsup + planning_acomptes',
     () => /function isAdminReadDoc\(d\) \{\s*return d in \['paie', 'planning_entries', 'planning_hsup', 'planning_acomptes'\];\s*\}/.test(RU));
   await T('R2', 'règles : la lecture d’un membre exclut ces documents et les vues personnelles (racine ET sous-collections) ; l’ancienne forme a disparu', () =>
-    RU.split("allow read: if isMyTenant(collection) && !isAdminReadDoc(docId) && !docId.matches('planning_moi_.*');").length - 1 === 2
+    RU.split("allow read: if isMyTenant(collection) && !isAdminReadDoc(docId) && !docId.matches('planning_moi_.*') && !docId.matches('jalons_.*');").length - 1 === 2   /* JALONS-1 (§340) : + les jalons */
     && !/isMyTenant\(collection\) && docId != 'paie'/.test(RU));
   await T('R3', 'règles : SA vue personnelle (ou l’admin) ; les vues ne s’écrivent pas depuis un téléphone (règle 3)', () =>
     /docId\.matches\('planning_moi_\.\*'\)\s*&& \(docId == 'planning_moi_' \+ request\.auth\.uid \|\| isAdmin\(\)\)/.test(RU)

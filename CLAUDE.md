@@ -3,9 +3,9 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **15 octobre 2026 (ARRIVEE-3)** — ★★ **LA PROCHAINE PARCELLE TIENT DANS LE PREMIER ÉCRAN : PREMIER « VALIDER » DE 800 À 530 PX** (§339). Base `303c66a` (POURQUOI-1 et ARRIVEE-1 poussés), cumulatif avec ARRIVEE-2 (§338, jamais poussé : le zip ARRIVEE-3 le contient).
-> Chez l’ouvrier sur sa priorité (classe `p-arrivee`), le niveau et l’équipe tiennent sur une ligne sous la barre « Priorité du moment » : le niveau sans son intitulé, l’équipe à ses pastilles d’initiales et « Changer » ; une tâche sans niveau rend la ligne à l’équipe. Les cibles gardent leurs 44 px. Que du style (`styles.css`), aucun JavaScript neuf. Mesuré au navigateur, 375 × 667.
-> **APP 9.05 → 9.06, SW 9.84 → 9.85.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change), puis le tuto Search Console.
+> Dernière consolidation : **16 octobre 2026 (JALONS-2B)** — ★★ **CORRECTIF DES JALONS : UNE LECTURE REFUSÉE OU IMPOSSIBLE N’EST PAS « AUCUN JALON »** (§342). Base `5552168`, cumulatif avec JALONS-2 et JALONS-1 (§341, §340, jamais poussés : le zip JALONS-2B les contient).
+> Trouvé en répondant à Nico sur le canal « refonte » (les règles et la base y sont celles de la production) : sans règles `jalons_`, ou hors réseau, `fbLireJalons` rendait `null` comme pour un document absent — tout jalon repassait pour nouveau à chaque validation, et sa date d’origine était réécrite au retour du réseau. Désormais `{ ok:false }` arrête le calcul, et seule la différence est écrite (jamais de table vide en fusion).
+> **APP 9.08 → 9.09, SW 9.87 → 9.88** (9.06 → 9.09 avec JALONS-1 et 2). Canal « refonte » : `npm run site` → `npm run build` → `firebase hosting:channel:deploy refonte` ; les règles partent au déploiement général (§28).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1858,6 +1858,20 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ JALONS-1, JALONS-2 et JALONS-2B — CE QUI RESTE OUVERT (§340 à §342, posé le 15/10)
+0. **Le canal « refonte » partage la base et les règles de la production** (Nico, 16/10 : tout passe par `hosting:channel:deploy
+   refonte` jusqu’au déploiement général). Sans les lignes `jalons_` en production, la lecture des jalons est refusée : depuis
+   JALONS-2B, rien ne s’affiche ni ne s’écrit. Les règles partent au déploiement général — ou avant, après comparaison des règles en
+   ligne avec celles du dépôt (`firebase deploy --only firestore:rules` publie le fichier ENTIER, pas seulement les jalons).
+1. **Les règles n’ont pas tourné sur le moteur ici** (l’émulateur ne se télécharge pas depuis ce bac à sable) : les cas B18 à B25
+   de `mv-harnais-rules` les jouent dans la CI (job `rules`) ou chez Nico (`npm run test:rules`, Java présent). À lire au push.
+2. **L’annonce ne suit que la feuille de validation** (`confirmValidation`) : une validation en lot ou une entrée de journal
+   gagne son jalon en silence, et il apparaît dans « Mes jalons » à la connexion suivante.
+3. **Le reste du plan GRATIF** : couper les fêtes (Réglages › Moi), la frise des premières fois, la saison en images, la carte du
+   domaine, du rang à la bouteille, la présence notée au Chai (CAVE-1), le coéquipier (COEQ-1, backlog n°44).
+4. **Plus tard (décision de Nico, 15/10)** : la page de confidentialité (`public/confidentialite.html`) devra parler des jalons et
+   du compteur d’ouvertures (donnée nouvelle, propre à la personne). Pas dans ce lot : « on fera la mise à jour à un autre moment ».
+
 ### ⚠️ ARRIVEE-1 à ARRIVEE-3 — CE QUI RESTE OUVERT (§337 à §339, posé le 15/10)
 1. **Mesuré à 375 × 667, sans tournée** : premier « Valider » de 800 à 530 px, au-dessus du dock. **Pas mesuré avec une tournée
    active** : chez l’ouvrier, la barre de la tournée remplace alors « Trier par proximité » (TRN-2) — à regarder au domaine.
@@ -1874,7 +1888,7 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 3. **Pas encore posées** : le Cuvier (remontage, pigeage, délestage, saignée, chaptalisation ont leur fiche, sans pastille), la mise en
    bouteille, et les activités du tracteur sans fiche (broyage…), qui n’affichent rien — c’est voulu.
 
-### ⚠️ GRATIF-0 et ERGO-0 — MAQUETTES DE L’OUVRIER ET DÉCISIONS DE NICO (posé le 15/10 ; intégrés : POURQUOI-1 §336, ARRIVEE-1 §337, ARRIVEE-2 §338, ARRIVEE-3 §339)
+### ⚠️ GRATIF-0 et ERGO-0 — MAQUETTES DE L’OUVRIER ET DÉCISIONS DE NICO (posé le 15/10 ; intégrés : POURQUOI-1 §336, ARRIVEE-1 §337, ARRIVEE-2 §338, ARRIVEE-3 §339, JALONS-1 §340, JALONS-2 §341, JALONS-2B §342)
 
 Maquettes livrées dans la conversation, non versionnées : `maquette-ergo.html` (arrivée de l’ouvrier, Accueil, Journal côté admin)
 et `maquette-gratification.html` (petites victoires, jalons, fêtes rares, saison, tractoriste, cave, premières fois, 37 fiches).
@@ -2013,8 +2027,6 @@ et `maquette-gratification.html` (petites victoires, jalons, fêtes rares, saiso
 ### ⚠️ FORME-1 — CE QUI RESTE OUVERT (§301, posé le 09/10)
 1. **À regarder chez Nico, avec SES contours** (essais sur un domaine reconstitué) : PC (loupe, deux colonnes), téléphone (repli, toucher → fiche). Un contour dont le
    nom diffère de la parcelle donne un carré de surface, et la note sous le plan le nomme. Le sens des rangs dessinés est un repère (plus petit rectangle).
-2. ✅ ~~La carte « La saison, parcelle par parcelle » de l'Accueil dessine encore des carrés de surface~~ — fait au §315 (FORME-2). Vu, non touché : les règles CSS de
-   l'ancien plan (`.ck-etiq`, `.ck-lieu`, `.ck-clos`, `.ck-zone-f`) restent dans la feuille, sans objet.
 
 ### ⚠️ CADRE-1 — CE QUI RESTE OUVERT (§300, posé le 09/10)
 
@@ -2120,7 +2132,6 @@ et `maquette-gratification.html` (petites victoires, jalons, fêtes rares, saiso
 
 Nico, 03/10 (cinq captures) : l'arrachage n'est pas compté partout, les cartes débordent sur PC, les graphiques sont trop
 différents entre eux, et des heures sup apparaissent dans Décider › le renfort. Découpage validé avec lui : trois lots.
-1. ✅ ~~Lot 1 — corrections sans maquette~~ — fait au §222.
 2. ✅ **Lot 2 — fait au §224 (RENF-2).** Pour mémoire, la demande : Nico : le renfort doit dire combien de saisonniers il faut sur une période,
    JUSTEMENT pour que l'équipe n'en fasse pas. Capacité = heures du planning, rien de plus (`hMax = hJour`, comme la fin
    prévue — décision du 10/09) ; plus de part « Heures sup » au coût ni au verdict ; la réponse devient un CALENDRIER
@@ -2138,13 +2149,9 @@ différents entre eux, et des heures sup apparaissent dans Décider › le renfo
    `htache-*`, Pilotage `pil-b*`). Mise en page : `.page{max-width:none}` au-delà de 1200 px (Accueil et Parcelles à
    1 900 px de large), `.pil-wrap` à 1 280. Maquette d'une page témoin d'abord.
 4. **La passe d'audit écran par écran** (téléphone et PC) promise à Nico : avec le lot 3.
-5. ✅ ~~« Dégraffage »~~ — §230 (la migration) + §232 (la règle de l'admin, imposée à chaque appareil à sa synchronisation).
-   Reste à Nico de renommer la sienne (Réglages › Tâches › crayon › « Renommer cette tâche ») — l'équipe n'a rien à faire.
 10. **RENF-2, à regarder chez Nico** (§224) : la carte sur ses vraies données — le calendrier de l'hiver, le plafond proposé
     (la semaine la plus longue de SON modèle), le coût de l'inaction qui monte (plus d'heure sup cachée). Le CDD est à
     35 h fixes, en dur (`c.hCdd`) : un réglage si un domaine en a besoin.
-8. ✅ ~~Une garde contre les lots frères~~ — « Go » de Nico (03/10) : marques `lots/<LOT>.json` + `scripts/mv-lots.mjs` (§231).
-   Limite : un fil qui ne pose pas de marque échappe à la règle de fratrie — CLAUDE.md la porte à tous les fils.
 9. ✅ **Lot 2 — maquette v2 validée par Nico (03/10), intégrée au §224** : en plus du calendrier, « Et sans renfort ? » — l'équipe seule avec
    des heures sup plafonnées (39 / 43 / 48 h ; défaut proposé : la semaine la plus longue du modèle du planning), leur coût
    aux taux du relevé (25 % jusqu'à la 43e heure, 50 % au-delà) et le retard qui reste ; plus « sans renfort ni heures sup ».
@@ -2638,11 +2645,6 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     l'intention du code au-dessous, plus un manque. ★★ **Piège de méthode** : *un commentaire qui
     décrit un défaut ne disparaît pas quand le défaut est corrigé.* Ne jamais conclure à l'absence
     en lisant un commentaire ; lire la fonction (règle vécue avec `mvprint.py` et DOCK).
-25. ✅ ~~**Ancien catalogue « Mes produits »**~~ — **RAYÉ. 0 occurrence dans tout `src/`.**
-    Le backlog annonçait « 5 fichiers à arbitrer » : il n'y a plus rien à arbitrer.
-26. ✅ ~~**Vérifier les autres tâches `anytime:true`**~~ — **re-vérifié le 29/09, et deux défauts en sortaient** : aucune des
-    cinq n'a de barème `hha` ; l'Entreplantation faisait « NaN h » dans la fiche parcelle (`openDP`), les quatre « en temps réel »
-    faisaient « NaN h » au total de l'Accueil (`calcHeures`). Corrigés (SW 8.52), gardés par `mv-harnais-robustesse-accueil`.
 27. ★ **Variantes girondines** — le barème régional **existe** et `app.js:1062` nomme déjà le Médoc,
     le guyot double et les vignes de plus de 20 ans. **Reste la vérification documentaire :
     qu'aucun avenant postérieur à 2021 n'a révisé ces temps** (§30a).
@@ -2669,8 +2671,6 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     ⚠️ **La surveillance sans seuil ne surveille rien** : trois audits de suite ont écrit « à
     surveiller » et le chiffre a monté trois fois. → **Poser un plafond dans le preflight** (700 ko ?)
     ou **retirer l'entrée** — les deux valent mieux qu'une veille qui ne déclenche jamais.
-35. ✅ ~~**Committer ce document dans le dépôt**~~ — **FAIT.** `CLAUDE.md` est à la racine et se lit
-    par `git clone`. C'est ce qui rend cet audit possible sans upload.
 36. ★★★ **L'ÉCHELLE TYPOGRAPHIQUE — le plus gros effet client du backlog** (audit du 11/08,
     re-mesuré le 16/08).
     ⚠️ **1 593 sites sous 12 px** (153 dans `index.html` + 419 dans `styles.css` + **1 021 dans les

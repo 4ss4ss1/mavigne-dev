@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.06';
+export const APP_VERSION = '9.09';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,17 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.09', d: '2026-10-16', items: [] },   // JALONS-2B (§342) : correctif des jalons (lecture refusée ou impossible, écriture des seuls nouveaux) — rien de visible
+  { v: '9.08', d: '2026-10-15', items: [
+    { niv: 1, pour: ['tous'], emoji: 'etoile', titre: 'Vos jalons s’affichent',
+      desc: "Quand une validation vous fait atteindre un jalon, la feuille qui suit le dit : « Nouveau jalon », avec un mot pour l’occasion. "
+        + "Dans « Ma trace », « Mes jalons » montre ceux que vous avez gagnés et les trois prochains, avec le chemin qui reste. Vous seul les voyez." },
+  ] },
+  { v: '9.07', d: '2026-10-15', items: [
+    { niv: 0, pour: ['tous'], emoji: 'liste', titre: 'Vos jalons commencent à se compter',
+      desc: "Ma Vigne retient désormais, pour chacun et pour lui seul, ses jalons : validations, kilomètres de rangs, sessions de tracteur, trous de tarière, ouillages… L’administrateur n’y a pas accès. "
+        + "Ils s’afficheront dans une prochaine version ; ceux que vous atteignez d’ici là sont gardés, avec leur date." },
+  ] },
   { v: '9.06', d: '2026-10-15', items: [
     { niv: 1, pour: ['salaries'], emoji: 'carte', titre: 'La prochaine parcelle tient dans le premier écran',
       desc: "Sur votre priorité, le niveau (N1, N2, N3) et l’équipe tiennent maintenant sur une seule ligne, sous la barre dorée : l’équipe se lit à ses pastilles, « Changer » ouvre les noms. "
@@ -5142,6 +5153,7 @@ var MV_AIDE = {
   home: {
     ico: 'feuille', titre: 'Accueil', ancre: 'vigne',
     points: [
+      ['Mes jalons', " : dans « Ma trace », ceux que vous avez gagnés et les trois prochains. Quand une validation vous en fait atteindre un, la feuille qui suit l’annonce. Vous seul les voyez."],
       ['Chez un ouvrier', " : la Vigne a deux onglets, Accueil et Parcelles. On valide depuis les Parcelles ; le Journal reste à l’administrateur et au pilotage. « Ma semaine » mène à « Ma trace », l’historique de votre travail."],
       ['Sur ordinateur', " : les modules sont dans la <b>barre à gauche</b> (repliable), et <b>Ctrl K</b> ouvre une recherche — une parcelle, un écran, un onglet du Pilotage. Sur téléphone et tablette, rien ne change."],
       ['La priorité du moment', "reste épinglée en haut, dans une carte : la tâche que l’équipe attaque, son avancement, et les parcelles dessinées à leur forme (leur contour, nord en haut) et à leur surface (fait, en cours, à faire) — un appui sur l’une ouvre sa fiche. Une parcelle dont le contour n’est pas enregistré reste un rectangle, en pointillé. Une parcelle où la tâche est désactivée, ou pas choisie pour la campagne, reste en contour pâle, en dernier, et ne compte pas dans l’avancement. Sans priorité, la carte montre la saison, parcelle par parcelle. Les trois chiffres du domaine sont à droite sur ordinateur, dessous au téléphone."],

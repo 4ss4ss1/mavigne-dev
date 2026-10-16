@@ -220,12 +220,14 @@ service cloud.firestore {
       // ★★ MOTIFS-1 (§250) — ET SAUF les trois documents du planning (isAdminReadDoc) : motifs, heures sup et acomptes ne
       //   sont plus lisibles que par l'admin ; chaque membre lit planning_equipe et SA vue planning_moi_<uid> (l'admin
       //   les lit toutes). Pourquoi c'est sans danger, et dans quel ordre : voir isAdminReadDoc.
-      allow read: if isGtAdmin() && collection.matches('mavigne_.*');
+      allow read: if isGtAdmin() && collection.matches('mavigne_.*') && !docId.matches('jalons_.*');   // JALONS-1 : les jalons ne regardent que la personne
       allow read: if isDemo() && collection == 'mavigne_domaine-dupont' && docId != 'paie';
-      allow read: if isMyTenant(collection) && !isAdminReadDoc(docId) && !docId.matches('planning_moi_.*');
+      allow read: if isMyTenant(collection) && !isAdminReadDoc(docId) && !docId.matches('planning_moi_.*') && !docId.matches('jalons_.*');
       allow read: if isMyTenant(collection) && isAdminReadDoc(docId) && isAdmin();
       allow read: if isMyTenant(collection) && docId.matches('planning_moi_.*')
                   && (docId == 'planning_moi_' + request.auth.uid || isAdmin());
+      // ★★ JALONS-1 (§340) — les jalons d'UNE personne : elle seule les lit (pas l'admin du domaine, pas GUERETTECH).
+      allow read: if isMyTenant(collection) && docId == 'jalons_' + request.auth.uid;
 
       // ── ÉCRITURE GT ADMIN (inchangée) ───────────────────────────────
       allow write: if isGtAdmin() && collection.matches('mavigne_.*');
@@ -254,6 +256,7 @@ service cloud.firestore {
       allow write: if isMyTenant(collection)
                    && !isAdminOnlyDoc(docId) && docId != 'config'
                    && !isVuePlanning(docId)
+                   && !docId.matches('jalons_.*')
                    && canWrite()
                    && shapeOk() && countOk(docId);
 
@@ -278,6 +281,16 @@ service cloud.firestore {
                    && request.resource.data.value is list
                    && request.resource.data.value.size() <= 100;
 
+      // 6. ★★ JALONS-1 (§340) — les jalons d'UNE personne : elle seule les écrit, lecture seule comprise (un saisonnier
+      //    gagne aussi les siens) ; ni l'admin, ni un collègue (la règle 3 les exclut). Forme { value: map } bornée ;
+      //    pas d'effacement (request.resource absent → shapeOk faux). Jamais en démo.
+      allow write: if isMyTenant(collection)
+                   && docId == 'jalons_' + request.auth.uid
+                   && request.auth.token.get('demo', false) != true
+                   && shapeOk()
+                   && request.resource.data.value is map
+                   && request.resource.data.value.size() <= 20;
+
       // ── Sous-collections éventuelles (profondeur ≥ 3) ───────────────
       // Aucune n'existe aujourd'hui sous un tenant. Ce bloc ne fait que PRÉSERVER
       // à l'identique la portée récursive de l'ancien {document=**} : lecture pour
@@ -287,7 +300,7 @@ service cloud.firestore {
       match /{sub=**} {
         allow read, write: if isGtAdmin() && collection.matches('mavigne_.*');
         allow read: if isDemo() && collection == 'mavigne_domaine-dupont' && docId != 'paie';
-        allow read: if isMyTenant(collection) && !isAdminReadDoc(docId) && !docId.matches('planning_moi_.*');
+        allow read: if isMyTenant(collection) && !isAdminReadDoc(docId) && !docId.matches('planning_moi_.*') && !docId.matches('jalons_.*');
         allow read: if isMyTenant(collection) && (isAdminReadDoc(docId) || docId.matches('planning_moi_.*')) && isAdmin();
       }
     }

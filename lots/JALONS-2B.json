@@ -1,0 +1,31 @@
+{
+  "lot": "JALONS-2B",
+  "section": "§342",
+  "base": "5552168a9215766eff574e4a4d2b53951b36fe94",
+  "inclut": [
+    "JALONS-2",
+    "JALONS-1"
+  ],
+  "date": "2026-10-16",
+  "fichiers": {
+    ".mv-base": "f48a1d2f08938d0132e9a4569d6c275a8caa05b40e043ced1aaca4ac6acbeee8",
+    "CLAUDE.md": "a6b81d114f5fb81ead46d2e07071cda02d52ec2e0b4b34609497fc7706ef0722",
+    "docs/claude/INDEX.md": "c7014c4fd844fdf4514ae4afa91ef6116f5c652977e7961a3a368460e4e496c3",
+    "docs/claude/chantiers-330-379.md": "e3eaceba038262eabc180d85825968719c9c539347a31b0592661420b0592861",
+    "docs/claude/journal.md": "f95a4fb0d10afd6f5ad7874d5e22a4320e1c06d69a06e95d59cc80c30bae9a50",
+    "firestore.rules": "f4ea02fa228739b597516e5e667d40ff6e154dca86b9969d0035a5d17efd9f06",
+    "guide/04-vigne.html": "7a214234a754c900dbbf9ffdb4988950a83a0d86915a80d535a22858e1ac4e63",
+    "index.html": "89662beb6c5822478310dc183d4e6e7077dffdb3c7e7f22adf3c3e36c44242ae",
+    "public/sw.js": "e7de85ccea993360f0248bac02d4fbeb1615f64c913d154f10a44d81a17bc54d",
+    "scripts/mv-harnais-liste.mjs": "4013c19f6aeeb7d5a396e6edf50d1d3b374a19aa825f7729efa763d68ca7209b",
+    "scripts/mv-harnais-motifs1.mjs": "dc4e6d187eb13b360ca9bf72eea35428fd66f97c9da6e4ab2f24595bfdba42bb",
+    "scripts/mv-harnais-rules.mjs": "95fa238a783dd034e9846c5bf75ef8c23267c020fc465a491f5e8e0822dc8f36",
+    "scripts/mv-whatsnew-check.mjs": "d180a881b4be06c57e9a813e9cc6ed71efd8fc43439dbfb2fa775f1ebeeba3b6",
+    "src/app.js": "46375226343b6c42cd97c2be8b2c37363585a81bb229690d7b662abc92b1c5cc",
+    "src/firebase.js": "52b666412aaf56b4e1ee1a015fecc4fb288e1cc25962831265135fb162b0a8af",
+    "src/styles.css": "53476ec62e90d4a66c60a23ed1d8c81206b56aef7c227418a9409e46ed2da4c8",
+    "src/utils.js": "ba61a3658aec1831af282f16cac819ba47ae9a8775d208faab8b1e512a554c20",
+    "scripts/mv-harnais-jalons.mjs": "c09f924b45b95c50bd3eb7bf012b5bfbca5e7185a3f7b3bbfdd09872ef60a2e7",
+    "src/jalons.js": "6bc969fb679f2cc9def0693d1a4c414a3cbd974e8e0b95992e32b9cf63d1535b"
+  }
+}

@@ -36,6 +36,7 @@ import './pilotage.js';
 import './cockpit.js';   // AUJ-1 (§260) : le cockpit d'Aujourd'hui (pilotage.js approche 950 Ko)
 import './cockpit-vue.js';   // REF-1 (§266) : la maquette validée du cockpit, montée avec le modèle réel
 import './coquille.js';   // COQ-1 + PAL-1 (§268) : la barre latérale et la recherche Ctrl K, sur ordinateur
+import './jalons.js';   // JALONS-1 (§340) : le calcul des jalons et leur mémoire (rien n'est montré avant JALONS-2)
 import './reserve.js';
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if(DEBUG) console.log('[Ma Vigne] app.js ' + (window.APP_VERSION ? 'v' + window.APP_VERSION : '') + ' chargé — ' + new Date().toISOString());
@@ -3653,6 +3654,7 @@ function _mvApresChargement(){
   _migrateTachesSaison();
   window._dataReady = true;
   if(window.fbNoterAppareil && currentUser) window.fbNoterAppareil(currentUser.nom);   // VER-1 : le parc d'appareils
+  if(window._mvJalonsSync && currentUser) window._mvJalonsSync();   // JALONS-1 (§340) : compte l'ouverture, recalcule et retient les jalons de la personne
   applyVigneSaison();
   var activePage = document.querySelector('.page.active');
   var pid = activePage ? activePage.id : '';
@@ -7420,6 +7422,7 @@ function renderMaTrace(){
       +'Chaque parcelle validée et chaque entrée de journal alimentent cette page.</div>';
   }
 
+  if(typeof window._mvJalonsSection==='function') h+=window._mvJalonsSection();   // ★★ JALONS-2 (§341) : « Mes jalons »
   if(typeof _mvMurVisible==='function'&&_mvMurVisible()){
     h+='<button class="mtr-go" onclick="openMur()"><span>Le domaine cette semaine'
       +'<span class="sub">Ce que toute l\'équipe a fait</span></span><span class="arw">\u203a</span></button>';
@@ -10114,6 +10117,9 @@ async function confirmValidation(){
   renderParcelles();computePStats();
   _mvMeteoApres(jEntry.id,_mDeb,date);
   if(navigator.vibrate)navigator.vibrate(60);
+  // ★★ JALONS-2 (§341) : la validation peut faire gagner un jalon — recalcul (il n'écrit que si quelque chose change),
+  //   puis l'annonce dans la feuille d'après validation, ouverte juste en dessous.
+  if(window._mvJalonsSync) window._mvJalonsSync().then(function(r){ if(r&&r.nouveaux&&r.nouveaux.length&&window._mvJalonsAnnonce) window._mvJalonsAnnonce(r.nouveaux); });
   // ARRACH-6 : l'arrachage d'une vigne en place est fini → proposer de la déclarer arrachée.
   if(_validTache==='Arrachage'&&p.statut!=='Arrachee'&&isAdmin()&&_arrProposer(p.nom,date)) return;
   _mvdsOpen({tache:_validTache,parcelle:_validParcelle,surf:p.surface,

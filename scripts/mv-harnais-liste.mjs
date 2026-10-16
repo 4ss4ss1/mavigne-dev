@@ -36,6 +36,8 @@ export const GROUPES = {
   'pourquoi-une-fiche-par-tache': 'Pourquoi on le fait — une fiche par tâche, posée là où le geste a lieu',
   // ARRIVEE-1 (§337) : qui a le Journal — une seule question, posée partout.
   'arrivee-deux-onglets': 'Arrivée de l’ouvrier — deux onglets, ni « + Journal » ni « Valider » à l’Accueil',
+  // JALONS-1 (§340) : le calcul joué sur des données inventées ; les règles écrites (le moteur réel les joue dans mv-harnais-rules).
+  'jalons-calcul-et-memoire': 'Jalons — le calcul, la fusion qui n’enlève rien, les ouvertures, le document de la personne',
 
   // BUILD-1 (§305) : le lanceur fait tourner les controles EN PARALLELE. Ce harnais prouve, sur un
   // faux executant, que les sorties sortent dans l'ordre de la liste, qu'une commande SEULE ne croise
@@ -394,6 +396,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-arrivee1.mjs --contre', 'arrivee-deux-onglets'],
   ['node scripts/mv-harnais-arrivee2.mjs', 'arrivee-deux-onglets'],   // ARRIVEE-2 (§338) : l'arrivée de l'ouvrier sur sa priorité, resserrée
   ['node scripts/mv-harnais-arrivee2.mjs --contre', 'arrivee-deux-onglets'],
+  ['node scripts/mv-harnais-jalons.mjs', 'jalons-calcul-et-memoire'],   // JALONS-1 (§340) : le calcul des jalons et leur mémoire
+  ['node scripts/mv-harnais-jalons.mjs --contre', 'jalons-calcul-et-memoire'],
   ['node scripts/mv-harnais-pil-coherence.mjs'],
   ['node scripts/mv-harnais-axe.mjs'],
   ['node scripts/mv-harnais-sauvegarde.mjs'],

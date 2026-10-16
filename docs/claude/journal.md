@@ -8,6 +8,18 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **15 octobre 2026 (JALONS-2)** — ★★ **LES JALONS S’AFFICHENT : « NOUVEAU JALON » APRÈS UNE VALIDATION, « MES JALONS » DANS « MA TRACE »** (§341). Base `5552168`, cumulatif avec JALONS-1 (§340, jamais poussé : le zip JALONS-2 le contient).
+> Les mots de chaque palier (`MV_JALONS_PHRASES`, `_mvJalonLibelle`), les prochains paliers (`_mvJalonsProchains`) ; `confirmValidation` recalcule (`_mvJalonsSync`) puis `_mvJalonsAnnonce` pose « Nouveau jalon » sous le titre de la feuille d’après validation (résumé au-delà de trois) ; `renderMaTrace` montre « Mes jalons » (`_mvJalonsSection`). Vu au navigateur.
+> **APP 9.07 → 9.08, SW 9.86 → 9.87** (9.06 → 9.08 avec JALONS-1). Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting,firestore:rules` (les règles de JALONS-1, et le guide change).
+
+> Dernière consolidation : **15 octobre 2026 (JALONS-1)** — ★★ **LE CALCUL DES JALONS ET LEUR MÉMOIRE : UN DOCUMENT PAR PERSONNE, QU’ELLE SEULE LIT ET ÉCRIT** (§340). Base `5552168` (« arrivee » : ARRIVEE-2 et ARRIVEE-3 poussés).
+> `src/jalons.js` (neuf) calcule à la connexion (`_mvApresChargement`) les compteurs de la personne — validations, km de rangs, pieds, sessions, km enjambés, trous de tarière, hectares d’engrais et de semis, ouillages, soutirages, dégustations, années, ouvertures (une par demi-journée) — et retient les jalons atteints dans `jalons_<uid>` (fusion, jamais de retrait). `firestore.rules` : lecture et écriture par la personne seule, lecture seule comprise ; ni l’admin, ni GUERETTECH, ni un collègue. Rien d’affiché avant JALONS-2.
+> **APP 9.06 → 9.07, SW 9.85 → 9.86.** Déploiement : `npm run build` → `firebase deploy --only hosting,firestore:rules` (⚠️ les RÈGLES changent ; le guide, non).
+
+> Dernière consolidation : **15 octobre 2026 (ARRIVEE-3)** — ★★ **LA PROCHAINE PARCELLE TIENT DANS LE PREMIER ÉCRAN : PREMIER « VALIDER » DE 800 À 530 PX** (§339). Base `303c66a` (POURQUOI-1 et ARRIVEE-1 poussés), cumulatif avec ARRIVEE-2 (§338, jamais poussé : le zip ARRIVEE-3 le contient).
+> Chez l’ouvrier sur sa priorité (classe `p-arrivee`), le niveau et l’équipe tiennent sur une ligne sous la barre « Priorité du moment » : le niveau sans son intitulé, l’équipe à ses pastilles d’initiales et « Changer » ; une tâche sans niveau rend la ligne à l’équipe. Les cibles gardent leurs 44 px. Que du style (`styles.css`), aucun JavaScript neuf. Mesuré au navigateur, 375 × 667.
+> **APP 9.05 → 9.06, SW 9.84 → 9.85.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change), puis le tuto Search Console.
+
 > Dernière consolidation : **15 octobre 2026 (ARRIVEE-2)** — ★★ **L’ARRIVÉE DE L’OUVRIER SUR SA PRIORITÉ, RESSERRÉE : PREMIER « VALIDER » DE 800 À 605 PX** (§338). Base `303c66a` (« pourquoi » : POURQUOI-1 et ARRIVEE-1 poussés).
 > Chez l’ouvrier dont la priorité est verrouillée (`_prioLocked`, classe `p-arrivee`) : la priorité dite une fois (le bandeau ne garde que le message de l’admin), les trois tuiles effacées avec leurs nombres sur les filtres « Finies », « En cours », « Arrachées », l’état et Liste/Carte sur une ligne, la marque « Prochaine » sur la première parcelle à valider. L’admin ne voit aucun changement. Mesuré au navigateur, 375 × 667.
 > **APP 9.04 → 9.05, SW 9.83 → 9.84.** Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting` (le guide change), puis le tuto Search Console.
@@ -2488,3 +2500,17 @@ module enregistre (instantanés, archives), toutes ses surfaces, rouge sur excep
     `_pl2Annual_` somme `_planSummary(m,mi).ref`, bornée au contrat comme la carte du salarié. Les six lecteurs
     restants de `_planGetRefH` veulent bien le MODÈLE nu (total annuel du modèle, capacité 1 ETP, éditeur de
     modèle, replis de Réglages et de Pilotage) — ce n'est pas la même question.
+26. ✅ ~~**Vérifier les autres tâches `anytime:true`**~~ — **re-vérifié le 29/09, et deux défauts en sortaient** : aucune des
+    cinq n'a de barème `hha` ; l'Entreplantation faisait « NaN h » dans la fiche parcelle (`openDP`), les quatre « en temps réel »
+    faisaient « NaN h » au total de l'Accueil (`calcHeures`). Corrigés (SW 8.52), gardés par `mv-harnais-robustesse-accueil`.
+35. ✅ ~~**Committer ce document dans le dépôt**~~ — **FAIT.** `CLAUDE.md` est à la racine et se lit
+    par `git clone`. C'est ce qui rend cet audit possible sans upload.
+25. ✅ ~~**Ancien catalogue « Mes produits »**~~ — **RAYÉ. 0 occurrence dans tout `src/`.**
+    Le backlog annonçait « 5 fichiers à arbitrer » : il n'y a plus rien à arbitrer.
+1. ✅ ~~Lot 1 — corrections sans maquette~~ — fait au §222.
+5. ✅ ~~« Dégraffage »~~ — §230 (la migration) + §232 (la règle de l'admin, imposée à chaque appareil à sa synchronisation).
+   Reste à Nico de renommer la sienne (Réglages › Tâches › crayon › « Renommer cette tâche ») — l'équipe n'a rien à faire.
+8. ✅ ~~Une garde contre les lots frères~~ — « Go » de Nico (03/10) : marques `lots/<LOT>.json` + `scripts/mv-lots.mjs` (§231).
+   Limite : un fil qui ne pose pas de marque échappe à la règle de fratrie — CLAUDE.md la porte à tous les fils.
+2. ✅ ~~La carte « La saison, parcelle par parcelle » de l'Accueil dessine encore des carrés de surface~~ — fait au §315 (FORME-2). Vu, non touché : les règles CSS de
+   l'ancien plan (`.ck-etiq`, `.ck-lieu`, `.ck-clos`, `.ck-zone-f`) restent dans la feuille, sans objet.

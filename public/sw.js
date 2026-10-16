@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v9.85
+// MA VIGNE — Service Worker v9.88
+// v9.88 (16/10/2026) — JALONS-2B (§342) : une lecture des jalons refusée ou impossible arrête le calcul ; seuls les jalons nouveaux sont écrits. jalons.js, firebase.js.
+// v9.87 (15/10/2026) — JALONS-2 (§341) : « Nouveau jalon » dans la feuille d’après validation, « Mes jalons » dans « Ma trace ». jalons.js, app.js, styles.css, utils.js.
+// v9.86 (15/10/2026) — JALONS-1 (§340) : le calcul des jalons et leur mémoire (jalons_<uid>, lu et écrit par la personne seule). jalons.js (neuf), firebase.js, app.js, firestore.rules.
 // v9.85 (15/10/2026) — ARRIVEE-3 (§339) : chez l’ouvrier sur sa priorité, le niveau et l’équipe sur une ligne — la prochaine parcelle tient dans le premier écran. styles.css, utils.js, index.html.
 // v9.84 (15/10/2026) — ARRIVEE-2 (§338) : l’arrivée de l’ouvrier sur sa priorité, resserrée — priorité dite une fois, tuiles effacées (nombres sur les filtres), « Prochaine ». app.js, utils.js, index.html, styles.css.
 // v9.83 (15/10/2026) — ARRIVEE-1 (§337) : chez l’ouvrier, la Vigne a deux onglets (Accueil, Parcelles) ; ni « + Journal » ni « Valider » à l’Accueil. app.js, utils.js, index.html.
@@ -4515,7 +4518,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.85';
+const CACHE_NAME   = 'mavigne-v9.88';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4532,7 +4535,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.85 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.88 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4552,7 +4555,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.85 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.88 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

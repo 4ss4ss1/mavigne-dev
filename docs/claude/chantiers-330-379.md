@@ -315,3 +315,61 @@ Finir l’écran 1 de la maquette ERGO-0 (« un seul bandeau, avec le niveau, l�
 
 ### 339d. Ce qui reste (§28)
 - La mesure avec une tournée active ; le bouton « Filtres » de la maquette, à décider.
+
+## 340. ★★ JALONS-1 — LE CALCUL DES JALONS ET LEUR MÉMOIRE : UN DOCUMENT PAR PERSONNE, QU’ELLE SEULE LIT ET ÉCRIT (15/10 — `src/jalons.js` (neuf : `MV_JALONS_SERIES`, `_mvJalonsCompteurs`, `_mvJalonsAtteints`, `_mvJalonsFusion`, `_mvJalonsOuverture`, `_mvJalonsSync`) · `src/firebase.js` (`fbLireJalons`, `fbEcrireJalons`, `_mvJalonsCle`, `_mvJalonsPermis`) · `src/app.js` (l’import, l’accroche dans `_mvApresChargement`) · `firestore.rules` (lecture générale, GUERETTECH et sous-collections sans les jalons ; lecture par la personne ; règle 3 sans les jalons ; règle 6 neuve) · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-jalons.mjs` (neuf) · `scripts/mv-harnais-rules.mjs` (cas B18 à B25) · `scripts/mv-harnais-motifs1.mjs` · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/*` · `.mv-base` · `lots/JALONS-1.json` · **APP 9.06 → 9.07, SW 9.85 → 9.86**, base `5552168`)
+
+### 340a. La demande
+Le plan de l’intégration (bloc GRATIF-0 du §28) : JALONS-1, « le calcul des jalons et le document `jalons_<uid>`, avec ses règles Firestore et le harnais qui les vérifie ». « Suite » de Nico (15/10). Décisions qui le cadrent : pas de classement, de vitesse ni de quantité épandue ; un jalon gagné reste gagné ; le document est lu et écrit par la personne seule, sans l’admin, lecture seule comprise ; une ouverture au plus par demi-journée.
+
+### 340b. Ce qui est fait
+- **Le calcul** (`_mvJalonsCompteurs`, bloc exécutable sans `window`) : validations (les siennes et celles de son équipe, sans doublon, sans « Annulé »), km de rangs et pieds (surface × écartements du domaine, `_mvVigne`, part de chacun quand on est à plusieurs), premier hectare par tâche, sessions finies du conducteur, km enjambés, trous de tarière (le champ « Trous » des parcelles cochées), hectares d’engrais et de semis, ouillages, soutirages et dégustations où il est noté (et l’ancien « opérateur »), années depuis le début du contrat, ouvertures.
+- **Les séries** (`MV_JALONS_SERIES`) : les paliers de Nico — tarière 1 à 10 000 en neuf paliers, ouvertures et validations 1 à 1 000, engrais et semis 1 à 500 ha, ouillages 1 à 250, soutirages 1 à 50, sessions 1 à 250…
+- **La mémoire** : `jalons_<uid>` = `{ value: { v, ouv: { n, dern }, gagnes: { "val.10": "2026-10-15", … } } }`, écrit en fusion (`setDoc merge`) et seulement si quelque chose change. Jamais en démo ni en mode préparation. Hors `COLLECTIONS` : ni écoute, ni copie partagée.
+- **Les règles** : la personne lit et écrit SES jalons (règle 6, lecture seule comprise) ; la lecture générale, GUERETTECH et les sous-collections les excluent ; la règle 3 ne les écrit pas pour un autre.
+- **Le Quoi de neuf** le dit : chacun a ses jalons, que lui seul voit ; ils s’afficheront dans une prochaine version.
+
+### 340c. Ce qui a été vérifié
+- `scripts/mv-harnais-jalons.mjs` : 23 assertions (le calcul joué sur un petit domaine inventé, la fusion, les ouvertures, le document, les règles écrites) et 4 contre-épreuves.
+- **Au navigateur**, compte ouvrier, lecture et écriture simulées : l’ouverture comptée, un ancien jalon gardé avec sa date, les nouveaux datés.
+- `mv-harnais-motifs1` suit la ligne de lecture qui porte maintenant l’exclusion des jalons.
+
+### 340d. Ce qui n’a pas été vérifié
+- Les règles sur le moteur réel : cas B18 à B25, dans la CI ou par `npm run test:rules` (§28).
+
+### 340e. Laissé pour plus tard
+- La page de confidentialité : Nico (15/10), « ne rajoute rien dans la confidentialité, on fera la mise à jour à un autre moment » (§28).
+
+## 341. ★★ JALONS-2 — LES JALONS S’AFFICHENT : « NOUVEAU JALON » APRÈS UNE VALIDATION, « MES JALONS » DANS « MA TRACE » (15/10 — `src/jalons.js` (`MV_JALONS_PHRASES`, `_mvJalNb`, `_mvJalonLibelle`, `_mvJalonsProchains`, `_mvJalDateFr` dans le bloc exécutable ; `_mvJalonsAnnonce`, `_mvJalonsSection`) · `src/app.js` (`confirmValidation`, `renderMaTrace`) · `src/styles.css` (le bloc JALONS-2, avant TETE-2) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Accueil) · `index.html` · `public/sw.js` · `guide/04-vigne.html` (carte « Vos jalons ») · `scripts/mv-harnais-jalons.mjs` (étendu) · `CLAUDE.md` · `docs/claude/*` · `.mv-base` · `lots/JALONS-2.json` · **APP 9.07 → 9.08, SW 9.86 → 9.87**, base `5552168`, cumulatif avec JALONS-1)
+
+### 341a. La demande
+Le plan GRATIF : JALONS-2, l’affichage. « Suite » de Nico (15/10). Constat avant d’écrire : la feuille d’après validation (`_mvdsOpen`) fait déjà la « petite victoire » (le domaine avance de x %, la parcelle suivante) et la fête rare (« Chantier terminé ») — il manquait le jalon.
+
+### 341b. Ce qui est fait
+- **Les mots** : un titre et une phrase par palier de chaque série (`MV_JALONS_PHRASES`, `_mvJalonLibelle`), sobres ; nombres à l’espace insécable de la police (`_mvJalNb`), ni « œ » ni « … » (le sous-ensemble de la police embarquée).
+- **L’annonce** : `confirmValidation` relance `_mvJalonsSync` (il n’écrit que si quelque chose change) ; s’il y a du nouveau, `_mvJalonsAnnonce` pose « Nouveau jalon » sous le titre de la feuille (`.mvds-s`, ou `.mvds-fin-s` pour « Chantier terminé »). Plus de trois d’un coup : une seule ligne qui renvoie à « Ma trace ». Sans feuille ouverte : un message. ⚠️ Tout en `textContent` : un nom de tâche ne passe jamais par `innerHTML`.
+- **« Mes jalons »** dans « Ma trace » (`_mvJalonsSection`) : combien, les trois derniers avec leur date, les trois prochains avec une barre (du plus proche au plus lointain, `_mvJalonsProchains`).
+
+### 341c. Ce qui a été vérifié
+- `scripts/mv-harnais-jalons.mjs`, étendu : 32 assertions et 5 contre-épreuves (dont « un palier sans phrase »).
+- **Au navigateur**, compte ouvrier, lecture et écriture simulées : à la connexion, « Première ouverture » et « Un an au domaine » ; dans la vraie feuille d’après validation, « Nouveau jalon · Première validation » sous « Champ Franc, c’est fait », et cinq d’un coup en une ligne ; « Mes jalons » dans « Ma trace ».
+- ⚠️ Vécu : un repli de jeton doit redire la valeur du pas — `--r-md` vaut 8 px, `--r-lg` 12 px (`mv-harnais-jetons`).
+
+### 341d. Ce qui reste (§28)
+- L’annonce après une validation en lot ou une entrée de journal ; le reste du plan GRATIF.
+
+## 342. ★★ JALONS-2B — CORRECTIF DES JALONS : UNE LECTURE REFUSÉE OU IMPOSSIBLE N’EST PAS « AUCUN JALON » (16/10 — `src/firebase.js` (`fbLireJalons` rend `{ ok, value }`) · `src/jalons.js` (`_mvJalonsSync` : arrêt sur lecture refusée, écriture de la seule différence) · `src/utils.js` (APP, WHATS_NEW technique) · `index.html` · `public/sw.js` · `scripts/mv-harnais-jalons.mjs` (la synchronisation jouée en entier) · `scripts/mv-whatsnew-check.mjs` (une version purement technique) · `CLAUDE.md` · `docs/claude/*` · `.mv-base` · `lots/JALONS-2B.json` · **APP 9.08 → 9.09, SW 9.87 → 9.88**, base `5552168`, cumulatif avec JALONS-2 et JALONS-1)
+
+### 342a. La question de Nico
+« En ce moment, toutes les nouvelles mises à jour, je les mets sur Firebase Channel refonte pour tester, et je ferai le vrai déploiement général une fois que tout ça sera fini. Est-ce que ça pose un problème ? » — Réponse : oui pour les règles. Un canal de prévisualisation ne porte que l’hébergement ; la base Firestore et ses règles sont celles de la production, communes à tous les canaux.
+
+### 342b. Le défaut trouvé en répondant
+`fbLireJalons` rendait `null` pour un document absent ET pour une lecture refusée (règles `jalons_` absentes de la production, donc dans « refonte ») ou impossible (hors réseau, rien en cache). `_mvJalonsSync` partait alors de zéro : tout jalon repassait pour nouveau à chaque validation (« 5 nouveaux jalons » à répétition), et l’écriture en fusion de la table entière réécrivait les dates d’origine au retour du réseau.
+
+### 342c. Ce qui est fait
+- `fbLireJalons` : `{ ok:true, value }` (value `null` si le document n’existe pas, lu pour de vrai) ; `{ ok:false }` pour un refus, une erreur, la démo ou le mode préparation.
+- `_mvJalonsSync` : `ok:false` → rien d’annoncé, rien d’écrit. L’écriture n’envoie que les jalons nouveaux (`gagnes` limité à la différence) — et rien du tout quand il n’y en a pas : ⚠️ **en fusion (`setDoc … { merge: true }`), une table vide REMPLACE la table entière**.
+- `mv-whatsnew-check` accepte une version purement technique (`items: []`), comme le prévoit la règle de WHATS_NEW ; 9.09 en est une.
+
+### 342d. Ce qui a été vérifié
+- `scripts/mv-harnais-jalons.mjs` : 37 assertions — dont `_mvJalonsSync` joué en entier avec un faux `window` : lecture refusée, document absent, date déjà posée, même demi-journée — et 8 contre-épreuves (dont la lecture refusée prise pour « aucun jalon », la table entière renvoyée, la table vide envoyée).
+- ⚠️ Vécu dans le harnais : un `import()` d’une adresse `data:` identique renvoie le module déjà chargé (avec l’ancien faux `window`) — chaque essai porte sa marque ; et une contre-épreuve qui plante ne compte plus pour « vue ».

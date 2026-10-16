@@ -8074,6 +8074,20 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
 #page-parcelles.p-arrivee .pv-team-info,#page-parcelles.p-arrivee .pv-team-ico{display:none}   /* les pastilles (initiales) disent l'équipe ; les noms sont dans « Changer » */
 #page-parcelles.p-arrivee #p-subsel-wrap:empty+#p-team-bar .pv-team-info{display:block}
 
+/* JALONS-2 (§341) — « Nouveau jalon » dans la feuille d'après validation, et « Mes jalons » dans « Ma trace ». */
+.mvds-jal{display:flex;gap:var(--e-2,8px);align-items:flex-start;margin:var(--e-2,8px) 0;padding:var(--e-2,8px) var(--e-3,12px);border-radius:var(--r-lg,12px);background:var(--or-pale);border:1px solid var(--or);color:var(--texte);text-align:left}
+.mvds-jal .mv-ic{flex:none;color:var(--or);margin-top:var(--e-0,2px)}
+.mvds-jal b{display:block;font-size:var(--pt-micro,11px);letter-spacing:.06em;text-transform:uppercase}
+.mvds-jal-t{display:block;font-weight:700}
+.mvds-jal i{display:block;color:var(--texte-doux)}
+.mtr-jal-n{margin-bottom:var(--e-2,8px)}
+.mtr-jal-row{display:flex;justify-content:space-between;gap:var(--e-2,8px);padding:var(--e-1,4px) 0}
+.mtr-jal-d{color:var(--texte-doux);white-space:nowrap}
+.mtr-jal-sub{margin-top:var(--e-2,8px);font-size:var(--pt-micro,11px);letter-spacing:.06em;text-transform:uppercase;color:var(--texte-doux)}
+.mtr-jal-bar{height:var(--e-1,4px);border-radius:var(--r-full,999px);background:var(--gris-clair);overflow:hidden;margin-bottom:var(--e-1,4px)}
+.mtr-jal-bar i{display:block;height:100%;background:var(--or)}
+.mtr-jal-vide{color:var(--texte-doux)}
+
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.
    Deux rangées partout, Pilotage compris (pilotage.js pose désormais un vrai .mod-header) : l'identité (icône, titre,
    sous-titre, gestes du module) puis la ligne du jour (saison, date — ou la météo, qui porte alors la date courte —,
