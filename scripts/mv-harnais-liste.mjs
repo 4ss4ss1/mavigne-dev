@@ -406,6 +406,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-arrivee1.mjs --contre', 'arrivee-deux-onglets'],
   ['node scripts/mv-harnais-arrivee2.mjs', 'arrivee-deux-onglets'],   // ARRIVEE-2 (§338) : l'arrivée de l'ouvrier sur sa priorité, resserrée
   ['node scripts/mv-harnais-arrivee2.mjs --contre', 'arrivee-deux-onglets'],
+  ['node scripts/mv-harnais-arrivee4.mjs', 'arrivee-deux-onglets'],   // ARRIVEE-4 (§355) : le bouton « Filtres »
+  ['node scripts/mv-harnais-arrivee4.mjs --contre', 'arrivee-deux-onglets'],
   ['node scripts/mv-harnais-jalons.mjs', 'jalons-calcul-et-memoire'],   // JALONS-1 (§340) : le calcul des jalons et leur mémoire
   ['node scripts/mv-harnais-jalons.mjs --contre', 'jalons-calcul-et-memoire'],
   ['node scripts/mv-harnais-coeq1.mjs', 'coequipier-tracteur'],   // COEQ-1 (§343) : le coéquipier, choisi avec l'activité

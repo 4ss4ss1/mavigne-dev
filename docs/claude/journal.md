@@ -8,6 +8,10 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **17 octobre 2026 (COMPTE-2)** — **UNE ENTREPLANTATION VALIDÉE PAR LE JOURNAL ÉCRIT SES PIEDS** (§354). Base `c988bf5` (COMPTE-1 poussé).
+> `saveJournalEntry` passe par `_cptAuValider` comme « Valider » : l’entrée porte les trous prévus, et le temps réalisé du Pilotage les lit. Vérifié au passage : il n’existe pas de validation en lot dans la Vigne. Un repérage tapé au Journal ne demande pas le compte (feuille des comptes).
+> **Pas de bump** (module JS seul : `src/app.js`), pas d’annonce. Canal « refonte » : `npm run build` → `firebase hosting:channel:deploy refonte`.
+
 > Dernière consolidation : **17 octobre 2026 (COMPTE-1)** — ★★ **LES PIEDS MARQUÉS CHIFFRENT L’ENTREPLANTATION, ET UNE TÂCHE COCHÉE EN MODIFIANT UNE PÉRIODE ENTRE DANS LE DOMAINE** (§353, §352). Base `c05f624`, cumulatif avec TACHEPER-1 (§352, jamais poussé : le zip COMPTE-1 le contient).
 > `src/comptes.js` (neuf) : le compte sur la parcelle (`p.trous_marques`), donné par qui valide une tâche réglée « Demander le nombre de pieds marqués » (le pavé `#ovCompte`) ou par l’admin pour toutes les parcelles (`#ovComptes`, « Saisir les comptes ») ; trous prévus = le plus grand des deux (marqués, trous de la parcelle), lus par `_plantParcTrous` partout ; comptée à zéro = hors entreplantation ; tarière préremplie. TACHEPER-1 : `_perAssureTaches`, écrivain unique de la création et de la modification d’une période, et réparation à l’ouverture chez un admin.
 > **APP 9.18 → 9.19, SW 9.97 → 9.98.** Canal « refonte » : `npm run site` → `npm run build` → `firebase hosting:channel:deploy refonte` (aucune règle ne change).

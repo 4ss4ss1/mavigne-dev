@@ -3,9 +3,9 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **17 octobre 2026 (COMPTE-2)** — **UNE ENTREPLANTATION VALIDÉE PAR LE JOURNAL ÉCRIT SES PIEDS** (§354). Base `c988bf5` (COMPTE-1 poussé).
-> `saveJournalEntry` passe par `_cptAuValider` comme « Valider » : l’entrée porte les trous prévus, et le temps réalisé du Pilotage les lit. Vérifié au passage : il n’existe pas de validation en lot dans la Vigne. Un repérage tapé au Journal ne demande pas le compte (feuille des comptes).
-> **Pas de bump** (module JS seul : `src/app.js`), pas d’annonce. Canal « refonte » : `npm run build` → `firebase hosting:channel:deploy refonte`.
+> Dernière consolidation : **17 octobre 2026 (ARRIVEE-4)** — ★ **LE BOUTON « FILTRES » À L’ARRIVÉE DE L’OUVRIER** (§355). Base `3abce32` (COMPTE-2 poussé ; SAISONIMG-1 et les huit lots d’avant poussés en `c05f624`).
+> Maquette montrée et validée par Nico le 17/10 (« Oui, go »). Chez l’ouvrier sur sa priorité (`p-arrivee`), la recherche partage sa ligne avec « Filtres » et Carte (`.p-srow`) ; la rangée des états, Liste/Carte (sauf sur la carte) et « Trier par proximité » se rangent. La feuille `#ovPFiltres` actionne les leviers d’avant (`pFilter`, `pShowDone`, `pToggleProximite`) ; la tournée de l’admin garde la main (TRN-2). Premier « Valider » : 530 → 448 px. Vu au navigateur.
+> **APP 9.19 → 9.20, SW 9.98 → 9.99.** Canal « refonte » : `npm run site` → `npm run build` → `firebase hosting:channel:deploy refonte` (aucune règle ne change).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1879,7 +1879,7 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 ### ⚠️ ARRIVEE-1 à ARRIVEE-3 — CE QUI RESTE OUVERT (§337 à §339, posé le 15/10)
 1. **Mesuré à 375 × 667, sans tournée** : premier « Valider » de 800 à 530 px, au-dessus du dock. **Pas mesuré avec une tournée
    active** : chez l’ouvrier, la barre de la tournée remplace alors « Trier par proximité » (TRN-2) — à regarder au domaine.
-2. **Le bouton « Filtres » de la maquette n’est pas fait** (le tri — tournée, proximité, normal — dans un seul bouton) : l’objectif
+2. **Le bouton « Filtres » est fait : ARRIVEE-4 (§355), 17/10** — ce qui suit est la note d’origine. ~~Pas fait~~ (le tri — tournée, proximité, normal — dans un seul bouton) : l’objectif
    mesuré est atteint sans lui ; à décider après l’avoir vu.
 3. **À regarder chez Nico** : un vrai compte ouvrier au téléphone — deux onglets, « Ma trace », « Prochaine », niveau et équipe.
 

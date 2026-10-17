@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v9.98
+// MA VIGNE — Service Worker v9.99
+// v9.99 (17/10/2026) — ARRIVEE-4 (§355) : le bouton « Filtres » à l’arrivée de l’ouvrier (états, ordre, carte dans une feuille). app.js, index.html, styles.css, utils.js.
 // v9.98 (17/10/2026) — COMPTE-1 (§353) : les pieds marqués chiffrent l’entreplantation (pavé, feuille des comptes, tarière préremplie) ; TACHEPER-1 (§352) : une tâche cochée en modifiant une période entre dans le domaine. comptes.js (neuf), app.js, reglages.js, pilotage.js, tracteur.js, utils.js, index.html, styles.css.
 // v9.97 (16/10/2026) — SAISONIMG-1 (§351) : « Ma saison en images », six cartes et un PDF, depuis « Ma trace ». jalons.js, app.js, index.html, styles.css, utils.js.
 // v9.96 (16/10/2026) — CARTEDOM-1 (§350) : « La carte de votre saison » dans « Ma trace », un SVG sans fond de carte. jalons.js, app.js, styles.css, utils.js.
@@ -4528,7 +4529,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.98';
+const CACHE_NAME   = 'mavigne-v9.99';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4545,7 +4546,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.98 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.99 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4565,7 +4566,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.98 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.99 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

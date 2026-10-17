@@ -8045,6 +8045,50 @@ function _pProxDetectHere(pos){
   }
   return null;
 }
+// ★ ARRIVEE-4 (§355) — LE BOUTON « FILTRES » (maquette vue et validée par Nico le 17/10) : chez l'ouvrier sur sa priorité
+//   (`p-arrivee`), la rangée Toutes/Finies/En cours/Arrachées, Liste/Carte et « Trier par proximité » se rangent dans une
+//   feuille. Les mêmes leviers qu'avant, sans rien de neuf derrière : `pFilter`, `window.pShowDone` (le « À faire » d'une
+//   tâche), `pToggleProximite`, `switchPTab`. La tournée de l'admin garde la main : quand elle s'applique, la proximité
+//   reste cachée (TRN-2) et l'ouvrier ne peut pas la couper (`_pOrdOff` : admin seul) — la feuille la dit, sans choix.
+function _pFxEtat(f, showDone){ return f==='complet'?'finies':(f==='avance'?'encours':(f==='arrachee'?'arrachees':(showDone?'toutes':'afaire'))); }
+function _pFxActifs(etat, prox){ return (etat!=='afaire'?1:0)+(prox?1:0); }
+function _pFxBadge(){
+  var b=document.getElementById('p-fx-badge'); if(!b) return;
+  var n=_pFxActifs(_pFxEtat(pFilter,!!window.pShowDone), !!_pProxPos);
+  if(n>0){ b.textContent=String(n); b.hidden=false; } else { b.textContent=''; b.hidden=true; }
+}
+function _pFxRender(){
+  var box=document.getElementById('p-fx-corps'); if(!box) return;
+  var et=_pFxEtat(pFilter,!!window.pShowDone);
+  var nb=function(id){ var e=document.getElementById(id); var t=e?String(e.textContent||'').trim():''; return t?'<b>'+_escHtml(t)+'</b>':''; };
+  var chip=function(v,lab,n){ return '<button type="button" class="p-fx-chip'+(et===v?' on':'')+'" data-v="'+_escAttr(v)+'" onclick="_pFxAfficher(this.dataset.v)">'+lab+(n||'')+'</button>'; };
+  var h='<div class="p-fx-k">Afficher</div><div class="p-fx-chips">'
+    +chip('afaire','À faire')+chip('toutes','Toutes')+chip('finies','Finies',nb('pf-n-c'))+chip('encours','En cours',nb('pf-n-e'))+chip('arrachees','Arrachées',nb('pf-n-a'))+'</div>';
+  h+='<div class="p-fx-k">Ordre</div>';
+  var opt=function(v,lab,sub,on){ return '<button type="button" class="p-fx-opt'+(on?' on':'')+'" data-v="'+_escAttr(v)+'" onclick="_pFxOrdre(this.dataset.v)"><span class="p-fx-rd" aria-hidden="true"></span><span>'+lab+'<small>'+sub+'</small></span></button>'; };
+  if(_pProxBloque()){
+    h+='<div class="p-fx-opt on p-fx-fixe"><span class="p-fx-rd" aria-hidden="true"></span><span>Tournée du domaine<small>l’ordre choisi par l’admin pour cette tâche</small></span></div>';
+  } else {
+    h+=opt('prox','Par proximité','la parcelle la plus proche de vous d’abord',!!_pProxPos)+opt('normal','Ordre normal','l’ordre des parcelles du domaine',!_pProxPos);
+  }
+  var n=document.querySelectorAll('#pwrapliste .pc-row').length;   // une ligne .pc-row par carte de parcelle (la carte : .mv-c)
+  h+='<div class="p-fx-act"><button type="button" onclick="_pFxRemettre()">Tout remettre</button><button type="button" class="p" onclick="closeOv(null,\'ovPFiltres\')">Voir '+n+' parcelle'+(n>1?'s':'')+'</button></div>';
+  box.innerHTML=h;
+}
+function openPFiltres(){ _pFxRender(); if(typeof openOv==='function') openOv('ovPFiltres'); }
+function _pFxAfficher(v){
+  var f={finies:'complet',encours:'avance',arrachees:'arrachee'}[v]||'toutes';
+  pFilter=f; window.pShowDone=(v==='toutes');   // la tâche prioritaire reste : on ne remet pas pTacheFilter à « toutes »
+  document.querySelectorAll('.fchip').forEach(function(x){ x.classList.toggle('active', x.dataset.filter===f); });
+  renderParcelles(); _pFxRender();
+}
+function _pFxOrdre(v){
+  if(_pProxBloque()) return;
+  if((v==='prox')!==!!_pProxPos) pToggleProximite();   // la position se demande au téléphone ; le rendu suit
+  setTimeout(_pFxRender, 50);
+}
+function _pFxRemettre(){ if(_pProxPos) pToggleProximite(); _pFxAfficher('afaire'); }
+window.openPFiltres=openPFiltres; window._pFxAfficher=_pFxAfficher; window._pFxOrdre=_pFxOrdre; window._pFxRemettre=_pFxRemettre;
 function pToggleProximite(){
   if(_pProxPos){ _pProxPos=null; _pProxHere=null; renderParcelles(); return; }
   if(!navigator.geolocation){ showToast('Position indisponible sur cet appareil','#C0392B'); return; }
@@ -8231,7 +8275,8 @@ function renderParcelles(){
   var _prioTaskOK=_prioIts.length>0;
   var _prioActive=!!(priorityMessage||_prioTaskOK);
   var _prioLocked=_prioTaskOK&&!isAdmin()&&!_prioOverride;
-  var _pgParc=document.getElementById('page-parcelles'); if(_pgParc) _pgParc.classList.toggle('p-arrivee',!!_prioLocked);   // ★ ARRIVEE-2 (§338) : l'arrivée de l'ouvrier sur sa priorité, resserrée (styles.css)
+  var _pgParc=document.getElementById('page-parcelles'); if(_pgParc) _pgParc.classList.toggle('p-arrivee',!!_prioLocked);
+  _pFxBadge();   // ★ ARRIVEE-4 (§355) : la pastille du bouton « Filtres »   // ★ ARRIVEE-2 (§338) : l'arrivée de l'ouvrier sur sa priorité, resserrée (styles.css)
   const pb=document.getElementById('priority-banner');
   const pe=document.getElementById('priority-empty');
   const editBtn=document.getElementById('priority-edit-btn');

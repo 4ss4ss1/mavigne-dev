@@ -564,3 +564,20 @@ Le « à confirmer » laissé par COMPTE-1 (§353) : deux chemins ne demandaient
 
 ### 354c. Ce qui a été vérifié
 - `scripts/mv-harnais-compte1.mjs` : 28 assertions ; contre-épreuves 5 sur 5 (les trois des règles, et deux de câblage qui mutent `app.js` : le Journal qui oublie les pieds, « Annuler » qui ne remet plus le compte).
+
+## 355. ★ ARRIVEE-4 — LE BOUTON « FILTRES » À L’ARRIVÉE DE L’OUVRIER (17/10 — `src/app.js` (`_pFxEtat`, `_pFxActifs`, `_pFxBadge`, `_pFxRender`, `openPFiltres`, `_pFxAfficher`, `_pFxOrdre`, `_pFxRemettre` ; `renderParcelles` : la pastille) · `index.html` (`.p-srow`, `#p-fx-btn`, le bouton Carte, `#ovPFiltres`, les versions) · `src/styles.css` (le bloc ARRIVEE-4, avant TETE-2) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Parcelles) · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-arrivee4.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/*` · `.mv-base` · `lots/ARRIVEE-4.json` · **APP 9.19 → 9.20, SW 9.98 → 9.99**, base `3abce32`)
+
+### 355a. La demande
+La maquette ERGO-0 (§28) proposait un bouton « Filtres » ; Nico a voulu le voir (17/10) : trois captures posées dans la vraie page (aujourd’hui, proposé, la feuille ouverte). Réponse : « Oui, go ».
+
+### 355b. Ce qui est fait — à l’arrivée seulement (`#page-parcelles.p-arrivee`, ouvrier sur sa priorité)
+- **Une ligne** : la recherche (qui se rétrécit), « Filtres » (icône curseurs, une pastille quand un filtre s’écarte du départ) et un bouton Carte. Hors arrivée, la ligne s’efface (`display:contents`) et les deux boutons sont cachés : l’admin garde ses rangées.
+- **Rangés** : la rangée Toutes/Finies/En cours/Arrachées, « Trier par proximité », et Liste/Carte — sauf sur la carte, pour pouvoir revenir (`.tabs2:not(:has(#tbc.active))`).
+- **La feuille** (`#ovPFiltres`) : Afficher — À faire (le départ : `pFilter` « toutes » sans `pShowDone`), Toutes (`pShowDone`), Finies, En cours, Arrachées avec leurs nombres ; Ordre — par proximité ou normal (`pToggleProximite`), ou, quand la tournée de l’admin s’applique, « Tournée du domaine » seule et sans choix (TRN-2 : la proximité reste cachée ; `_pOrdOff` est réservé à l’admin) ; « Tout remettre » et « Voir N parcelles ». Rien de neuf derrière : les mêmes leviers qu’avant. La tâche prioritaire reste (on ne remet pas `pTacheFilter` à « toutes », contrairement aux puces d’état).
+- Les valeurs des puces passent par `data-v` (C24b).
+
+### 355c. Ce qui a été vérifié
+- `scripts/mv-harnais-arrivee4.mjs` : 10 assertions (les états et la pastille exécutés, la priorité gardée, la tournée qui garde la main, la ligne, la feuille, le CSS) et 3 contre-épreuves ; ARRIVEE-1 et ARRIVEE-2 restent verts.
+- **Au navigateur** (375 × 667, ouvrier sur sa priorité) : la ligne recherche + Filtres + Carte, les trois rangées cachées, premier « Valider » à 448 px (530 avant) ; la feuille : « À faire » choisi, proximité / normal, « Voir 2 parcelles » ; « Toutes » → pastille « 1 », la priorité reste ; « Tout remettre » → pastille effacée ; sur la carte, Liste/Carte revient.
+- ⚠️ **Vu par la liste complète** : `mv-harnais-contraste` — la puce choisie prenait la surface (`--bg-card`) comme couleur de texte, et la pastille (texte normal sur or plein) tombait en thème sombre. Désormais : puce et pastille en or pâle avec `--or-tx`, « Voir N parcelles » à l’accent de la charte (`--accent`, `--sur-accent` ; `--btn-pri` n’existe que dans le cockpit, vu à l’écran) — lisibles en clair comme en sombre.
+- ⚠️ L’environnement avait été remis à zéro : dépôt recloné, outils du navigateur réinstallés, script de mesure récupéré depuis la transcription.

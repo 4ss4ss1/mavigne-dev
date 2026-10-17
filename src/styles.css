@@ -8189,6 +8189,32 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .cpt-opt .mv-l{display:block;margin-top:4px}
 .cpt-lnk{padding:0;border:0;background:transparent;color:var(--accent-texte);font-family:inherit;font-size:inherit;font-weight:600;cursor:pointer;text-decoration:underline}
 /* ★ FIN COMPTE-1 */
+/* ★ ARRIVEE-4 (§355) — « Filtres » : hors arrivée, la ligne s'efface (display:contents) et les boutons sont cachés ; à
+   l'arrivée, la rangée des états, Liste/Carte (sauf sur la carte, pour revenir) et « Trier par proximité » se rangent. */
+.p-srow{display:contents}
+.p-fx-btn{display:none}
+#page-parcelles.p-arrivee .p-srow{display:flex;gap:var(--e-2,8px);align-items:center;margin-bottom:var(--e-3,12px)}
+#page-parcelles.p-arrivee .p-srow .sbox{flex:1 1 auto;min-width:0;margin:0}
+#page-parcelles.p-arrivee .p-srow .sbox input{min-width:0;width:100%}
+#page-parcelles.p-arrivee .p-fx-btn{display:inline-flex;align-items:center;gap:var(--e-1,4px);min-height:44px;padding:0 var(--e-3,12px);border-radius:var(--r-lg,12px);border:1px solid var(--gris-clair);background:var(--bg-card);color:var(--texte);font:600 var(--pt-txt,13px)/1 'Outfit',sans-serif;position:relative;flex:none;cursor:pointer}
+#page-parcelles.p-arrivee .frow,#page-parcelles.p-arrivee #p-prox-bar{display:none!important}
+#page-parcelles.p-arrivee .tabs2:not(:has(#tbc.active)){display:none}
+.p-fx-badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 var(--e-1,4px);border-radius:var(--r-full,999px);background:var(--or-pale);border:1px solid var(--or);color:var(--or-tx);font:700 var(--pt-nano,11px)/18px 'Outfit',sans-serif;text-align:center}
+.p-fx-corps{padding:0 var(--e-4,16px) var(--e-4,16px)}
+.p-fx-k{margin:var(--e-3,12px) 0 var(--e-2,8px);font-size:var(--pt-nano,11px);letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--texte-doux)}
+.p-fx-chips{display:flex;flex-wrap:wrap;gap:var(--e-2,8px)}
+.p-fx-chip{min-height:40px;padding:0 var(--e-3,12px);border-radius:var(--r-full,999px);border:1px solid var(--gris-clair);background:transparent;color:var(--texte);font:600 var(--pt-txt,13px)/1 'Outfit',sans-serif;cursor:pointer}
+.p-fx-chip.on{background:var(--or-pale);border-color:var(--or);color:var(--or-tx)}   /* pas de surface en couleur de texte (mv-harnais-contraste) */
+.p-fx-chip b{margin-left:var(--e-1,4px)}
+.p-fx-opt{display:flex;width:100%;align-items:center;gap:var(--e-3,12px);min-height:48px;padding:var(--e-2,8px) 0;border:0;border-bottom:1px solid var(--gris-clair);background:transparent;color:var(--texte);text-align:left;font:500 var(--pt-base,14px)/1.3 'Outfit',sans-serif;cursor:pointer}
+.p-fx-opt small{display:block;color:var(--texte-doux);font-size:var(--pt-micro,12px)}
+.p-fx-rd{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--gris-clair)}
+.p-fx-opt.on .p-fx-rd{border:6px solid var(--or)}
+.p-fx-fixe{cursor:default}
+.p-fx-act{display:flex;gap:var(--e-2,8px);margin-top:var(--e-4,16px)}
+.p-fx-act button{flex:1;min-height:44px;border-radius:var(--r-lg,12px);border:1px solid var(--gris-clair);background:transparent;color:var(--texte);font:600 var(--pt-base,14px)/1 'Outfit',sans-serif;cursor:pointer}
+.p-fx-act button.p{background:var(--accent);border-color:var(--accent);color:var(--sur-accent)}   /* l'accent de la charte et son texte (définis à la racine, en clair comme en sombre ; --btn-pri ne vit que dans le cockpit) */
+
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.
    Deux rangées partout, Pilotage compris (pilotage.js pose désormais un vrai .mod-header) : l'identité (icône, titre,
    sous-titre, gestes du module) puis la ligne du jour (saison, date — ou la météo, qui porte alors la date courte —,

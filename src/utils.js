@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.19';
+export const APP_VERSION = '9.20';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,11 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.20', d: '2026-10-17', items: [
+    { niv: 1, pour: ['vigne'], emoji: 'curseurs', titre: 'Un bouton « Filtres » pour une liste plus courte',
+      desc: "Quand vous arrivez sur votre priorité, la recherche partage sa ligne avec « Filtres » et la carte. « Filtres » ouvre une feuille : afficher les parcelles à faire, toutes, les finies, en cours ou arrachées ; l’ordre par proximité ou l’ordre normal — ou la tournée du domaine quand l’admin en a choisi une. "
+        + "Une pastille sur le bouton dit quand un filtre est actif. La première parcelle à valider remonte d’autant." },
+  ] },
   { v: '9.19', d: '2026-10-17', items: [
     { niv: 1, pour: ['tous'], emoji: 'pousse', titre: 'Les pieds marqués chiffrent l’entreplantation',
       desc: "Beaucoup de domaines marquent les pieds à remplacer avant de passer la tarière. Ce compte entre maintenant dans l’appli : en validant une tâche de repérage réglée pour le demander, un pavé de gros chiffres demande combien de pieds sont marqués sur la parcelle. "
@@ -5234,6 +5239,7 @@ var MV_AIDE = {
   parcelles: {
     ico: 'carte', titre: 'Mes Parcelles', ancre: 'vigne',
     points: [
+      ['Filtres', " : sur votre priorité, le bouton à côté de la recherche range l’affichage (à faire, toutes, finies, en cours, arrachées) et l’ordre (proximité, normal, ou la tournée de l’admin) ; une pastille dit qu’un filtre est actif."],
       ['L’arrivée sur votre priorité', " : la priorité du moment n’est annoncée qu’une fois, dans la barre dorée ; dessous, le niveau et l’équipe tiennent sur une ligne (l’équipe à ses pastilles, « Changer » ouvre les noms). Les nombres « Finies » et « En cours » sont sur les filtres, et la prochaine parcelle à valider porte la marque « Prochaine »."],
       ['Pourquoi ?', " : la pastille <b>« Pourquoi ? »</b>, à côté de la tâche choisie (ou de la priorité du moment) et dans la feuille de validation, ouvre la fiche de la tâche : quand on la fait, pourquoi, ce que ça change pour le vin."],
       ['Les filtres du haut', "trient par état : finies, en cours, arrachées."],
