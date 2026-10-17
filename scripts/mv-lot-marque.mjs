@@ -11,6 +11,11 @@ const a = process.argv.slice(2), lot = a[0];
 if (!lot || !/^[A-Z0-9][A-Z0-9+_-]*$/.test(lot)) { console.error('usage : node scripts/mv-lot-marque.mjs <LOT> [--section §NNN] [--inclut A,B]'); process.exit(2); }
 const opt = k => { const i = a.indexOf(k); return i > 0 ? a[i + 1] : ''; };
 const git = (...x) => execFileSync('git', x, { cwd: R, encoding: 'utf8' });
+// ★ PRESENCE-1 (§344) — un nom de lot déjà commité ne se reprend pas : sa marque serait écrasée en silence.
+//   Vécu : PRESENCE-1 s'est d'abord appelé CAVE-1, déjà pris par le lot du §288 — sa marque et son harnais écrasés, puis remis.
+let dejaPris = false;
+try { execFileSync('git', ['cat-file', '-e', 'HEAD:lots/' + lot + '.json'], { cwd: R, stdio: 'ignore' }); dejaPris = true; } catch (e) { dejaPris = false; }
+if (dejaPris) { console.error('le nom ' + lot + ' est déjà pris par un lot commité (lots/' + lot + '.json) : choisis un autre nom'); process.exit(3); }
 const base = git('rev-parse', 'HEAD').trim();
 const lignes = git('status', '--porcelain', '-uall').split('\n').filter(Boolean);
 const fichiers = {};

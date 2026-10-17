@@ -38,6 +38,12 @@ export const GROUPES = {
   'arrivee-deux-onglets': 'Arrivée de l’ouvrier — deux onglets, ni « + Journal » ni « Valider » à l’Accueil',
   // JALONS-1 (§340) : le calcul joué sur des données inventées ; les règles écrites (le moteur réel les joue dans mv-harnais-rules).
   'jalons-calcul-et-memoire': 'Jalons — le calcul, la fusion qui n’enlève rien, les ouvertures, le document de la personne',
+  // COEQ-1 (§343) : le réglage « à deux » des activités et le coéquipier d'une session.
+  'coequipier-tracteur': 'Coéquipier — choisi avec l’activité du tracteur (tarière, ensemencement, engrais)',
+  // PRESENCE-1 (§344) : les opérations du Chai où la personne est notée, la carte de l'Accueil.
+  'presence-notee-chai': 'Présence notée — les opérations du Chai où l’admin vous a coché, avec le pourquoi du geste',
+  // PREMIERES-1 (§345) : la frise du parcours au domaine, sur les vraies dates.
+  'premieres-fois': 'Premières fois — la frise du parcours au domaine, sur les vraies dates',
 
   // BUILD-1 (§305) : le lanceur fait tourner les controles EN PARALLELE. Ce harnais prouve, sur un
   // faux executant, que les sorties sortent dans l'ordre de la liste, qu'une commande SEULE ne croise
@@ -398,6 +404,22 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-arrivee2.mjs --contre', 'arrivee-deux-onglets'],
   ['node scripts/mv-harnais-jalons.mjs', 'jalons-calcul-et-memoire'],   // JALONS-1 (§340) : le calcul des jalons et leur mémoire
   ['node scripts/mv-harnais-jalons.mjs --contre', 'jalons-calcul-et-memoire'],
+  ['node scripts/mv-harnais-coeq1.mjs', 'coequipier-tracteur'],   // COEQ-1 (§343) : le coéquipier, choisi avec l'activité
+  ['node scripts/mv-harnais-coeq1.mjs --contre', 'coequipier-tracteur'],
+  ['node scripts/mv-harnais-presence1.mjs', 'presence-notee-chai'],   // PRESENCE-1 (§344) : « Ta présence est notée »
+  ['node scripts/mv-harnais-presence1.mjs --contre', 'presence-notee-chai'],
+  ['node scripts/mv-harnais-premieres1.mjs', 'premieres-fois'],   // PREMIERES-1 (§345) : « Vos premières fois »
+  ['node scripts/mv-harnais-premieres1.mjs --contre', 'premieres-fois'],
+  ['node scripts/mv-harnais-presence2.mjs', 'presence-notee-chai'],   // PRESENCE-2 (§346) : « Qui était là » au Cuvier
+  ['node scripts/mv-harnais-presence2.mjs --contre', 'presence-notee-chai'],
+  ['node scripts/mv-harnais-fetes1.mjs', 'jalons-calcul-et-memoire'],   // FETES-1 (§347) : « Annoncer mes jalons » se coupe
+  ['node scripts/mv-harnais-fetes1.mjs --contre', 'jalons-calcul-et-memoire'],
+  ['node scripts/mv-harnais-rangbout1.mjs', 'premieres-fois'],   // RANGBOUT-1 (§349) : « Du rang à la bouteille »
+  ['node scripts/mv-harnais-rangbout1.mjs --contre', 'premieres-fois'],
+  ['node scripts/mv-harnais-cartedom1.mjs', 'premieres-fois'],   // CARTEDOM-1 (§350) : « La carte de votre saison »
+  ['node scripts/mv-harnais-cartedom1.mjs --contre', 'premieres-fois'],
+  ['node scripts/mv-harnais-saisonimg1.mjs', 'premieres-fois'],   // SAISONIMG-1 (§351) : « Ma saison en images »
+  ['node scripts/mv-harnais-saisonimg1.mjs --contre', 'premieres-fois'],
   ['node scripts/mv-harnais-pil-coherence.mjs'],
   ['node scripts/mv-harnais-axe.mjs'],
   ['node scripts/mv-harnais-sauvegarde.mjs'],

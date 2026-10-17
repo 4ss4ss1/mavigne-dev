@@ -3,9 +3,9 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **16 octobre 2026 (JALONS-2B)** — ★★ **CORRECTIF DES JALONS : UNE LECTURE REFUSÉE OU IMPOSSIBLE N’EST PAS « AUCUN JALON »** (§342). Base `5552168`, cumulatif avec JALONS-2 et JALONS-1 (§341, §340, jamais poussés : le zip JALONS-2B les contient).
-> Trouvé en répondant à Nico sur le canal « refonte » (les règles et la base y sont celles de la production) : sans règles `jalons_`, ou hors réseau, `fbLireJalons` rendait `null` comme pour un document absent — tout jalon repassait pour nouveau à chaque validation, et sa date d’origine était réécrite au retour du réseau. Désormais `{ ok:false }` arrête le calcul, et seule la différence est écrite (jamais de table vide en fusion).
-> **APP 9.08 → 9.09, SW 9.87 → 9.88** (9.06 → 9.09 avec JALONS-1 et 2). Canal « refonte » : `npm run site` → `npm run build` → `firebase hosting:channel:deploy refonte` ; les règles partent au déploiement général (§28).
+> Dernière consolidation : **16 octobre 2026 (SAISONIMG-1)** — ★★ **« MA SAISON EN IMAGES » : SIX CARTES ET UN PDF — LE PLAN GRATIF EST AU BOUT** (§351). Base `d29f619`, cumulatif avec CARTEDOM-1, RANGBOUT-1, PRESENCE-2B, FETES-1, PRESENCE-2, PREMIERES-1, PRESENCE-1 et COEQ-1 (§350 à §343, jamais poussés : le zip SAISONIMG-1 les contient).
+> `jalons.js` : `_mvSaisonImages` (exécutable) bâtit six cartes depuis les calculs déjà là — sa part en hectares, jours, km, pieds ; la parcelle de cœur ; ses gestes ; le tracteur et la cave ; les premières fois et jalons DE la saison ; les vins, puis « Merci ». « Ma trace » › « Ma saison en images » (`#ovSaisonImg`, cartes à faire défiler) ; « Enregistrer en PDF » passe par `_mvDocOpen`. Vu au navigateur.
+> **APP 9.17 → 9.18, SW 9.96 → 9.97.** Canal « refonte » : `npm run site` → `npm run build` → `firebase hosting:channel:deploy refonte` (aucune règle ne change).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -324,7 +324,7 @@ vaut un lot plus petit dont l'aide est juste qu'un gros lot dont l'aide ment.
 > | 4 | **`MV_INFO`** du chiffre touché | `src/utils.js` | seulement si une méthode de calcul change |
 > | 5 | **`WHATS_NEW`** | `src/utils.js` | un bloc en tête (`d`), du point de vue de l'utilisateur, chaque item avec `niv` et `pour` |
 > | 6 | **`CLAUDE.md`** | ici | la section du lot, et **ce qui reste ouvert** |
-> | 7 | **La marque du lot** | `lots/<LOT>.json` | `node scripts/mv-lot-marque.mjs <LOT> --section §NNN [--inclut A,B]`, en DERNIER, juste avant le zip, qui la contient. `scripts/mv-lots.mjs` (en tête de `npm run check`) refuse deux lots frères collés sans commit entre eux, et un lot dont un fichier a été écrasé (§231) |
+> | 7 | **La marque du lot** | `lots/<LOT>.json` | `node scripts/mv-lot-marque.mjs <LOT> --section §NNN [--inclut A,B]`, en DERNIER, juste avant le zip, qui la contient. ⚠️ Un nom de lot déjà commité est refusé, et un harnais « neuf » se vérifie absent de `scripts/` avant d’être écrit (PRESENCE-1, §344). `scripts/mv-lots.mjs` (en tête de `npm run check`) refuse deux lots frères collés sans commit entre eux, et un lot dont un fichier a été écrasé (§231) |
 >
 > ★★ **PUBLIER UNE PAGE DU SITE : `npm run site` AVANT `npm run build`** (29/09). Dès qu'un lot touche
 > `guide/*.html` **ou** une page de `public/` (`logiciel-vigne`, `essai`, `demarrage`, mentions…),
@@ -1867,8 +1867,8 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
    de `mv-harnais-rules` les jouent dans la CI (job `rules`) ou chez Nico (`npm run test:rules`, Java présent). À lire au push.
 2. **L’annonce ne suit que la feuille de validation** (`confirmValidation`) : une validation en lot ou une entrée de journal
    gagne son jalon en silence, et il apparaît dans « Mes jalons » à la connexion suivante.
-3. **Le reste du plan GRATIF** : couper les fêtes (Réglages › Moi), la frise des premières fois, la saison en images, la carte du
-   domaine, du rang à la bouteille, la présence notée au Chai (CAVE-1), le coéquipier (COEQ-1, backlog n°44).
+3. **Le plan GRATIF est au bout** (16/10) : la saison en images (SAISONIMG-1, §351), la carte du
+   domaine (CARTEDOM-1, §350) ; faits aussi : du rang à la bouteille (RANGBOUT-1, §349), le coéquipier (COEQ-1, §343), la présence notée au Chai (PRESENCE-1, §344) et au Cuvier (PRESENCE-2, §346), les premières fois (PREMIERES-1, §345), l’annonce qui se coupe (FETES-1, §347).
 4. **Plus tard (décision de Nico, 15/10)** : la page de confidentialité (`public/confidentialite.html`) devra parler des jalons et
    du compteur d’ouvertures (donnée nouvelle, propre à la personne). Pas dans ce lot : « on fera la mise à jour à un autre moment ».
 
@@ -1888,7 +1888,7 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 3. **Pas encore posées** : le Cuvier (remontage, pigeage, délestage, saignée, chaptalisation ont leur fiche, sans pastille), la mise en
    bouteille, et les activités du tracteur sans fiche (broyage…), qui n’affichent rien — c’est voulu.
 
-### ⚠️ GRATIF-0 et ERGO-0 — MAQUETTES DE L’OUVRIER ET DÉCISIONS DE NICO (posé le 15/10 ; intégrés : POURQUOI-1 §336, ARRIVEE-1 §337, ARRIVEE-2 §338, ARRIVEE-3 §339, JALONS-1 §340, JALONS-2 §341, JALONS-2B §342)
+### ⚠️ GRATIF-0 et ERGO-0 — MAQUETTES DE L’OUVRIER ET DÉCISIONS DE NICO (posé le 15/10 ; intégrés : POURQUOI-1 §336, ARRIVEE-1 §337, ARRIVEE-2 §338, ARRIVEE-3 §339, JALONS-1 §340, JALONS-2 §341, JALONS-2B §342, COEQ-1 §343, PRESENCE-1 §344, PREMIERES-1 §345, PRESENCE-2 §346, FETES-1 §347, PRESENCE-2B §348, RANGBOUT-1 §349, CARTEDOM-1 §350, SAISONIMG-1 §351)
 
 Maquettes livrées dans la conversation, non versionnées : `maquette-ergo.html` (arrivée de l’ouvrier, Accueil, Journal côté admin)
 et `maquette-gratification.html` (petites victoires, jalons, fêtes rares, saison, tractoriste, cave, premières fois, 37 fiches).
@@ -1905,7 +1905,7 @@ et `maquette-gratification.html` (petites victoires, jalons, fêtes rares, saiso
    catalogue, relevage, dégraffage, tracteur, cuvier, chai (37), plus des « Le saviez-tu ? ». Textes par défaut, réécrits par l’admin,
    affichés là où le geste a lieu — livré par POURQUOI-1 (§336) ; la réécriture par l’admin, c’est POURQUOI-2.
 4. **Cave** : chaque opération du Chai garde ses `intervenants` (`cave.js`) : ceux que l’admin a notés le voient (« Ta présence est
-   notée », avec le pourquoi). Le Cuvier ne note pas les présents : à ajouter. Le coéquipier d’une activité à deux : backlog n°44.
+   notée », avec le pourquoi — livré, PRESENCE-1 §344). Le Cuvier aussi, depuis PRESENCE-2 §346 (« Qui était là »). Coéquipier : COEQ-1 §343.
 5. **Garder les récompenses d’un téléphone à l’autre** : un document `jalons_<uid>` par personne, que lui seul lit et écrit (pas l’admin).
    L’exclure de la lecture et de l’écriture générales de `firestore.rules` (comme `planning_moi_`), règle propriétaire ouverte aux
    comptes en lecture seule (comme `appareils`). Un jalon gagné reste gagné.
@@ -2690,7 +2690,7 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     phyto — puis intégration au tableau motif → compte attendu.
     **Lot B : le réglage « Taille du texte ».** Les sites de 10 à 11,5 px convertis en variables
     CSS pilotées par un attribut `data-fs` sur `#app-root`, **jumeau exact de `data-hicontrast`**.
-    Trois crans : Normal · Grand · Très grand, dans Réglages › Application, sous « Plein soleil ».
+    Trois crans : Normal · Grand · Très grand, dans Réglages › Moilication, sous « Plein soleil ».
     ⚠️ **Ne PAS passer par un `zoom` CSS global** (qui serait une ligne) : il agrandirait aussi la
     carte Leaflet, les overlays `position:fixed` et la largeur du corps bornée à 430 px — le risque
     porterait sur l'écran le plus utilisé.
@@ -2726,10 +2726,7 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     `DGDDI` dans `src/` et `index.html` ; le registre l'écrit (« Ma Vigne prépare, l'exploitant déclare », `cave.js`). ⚠️⚠️ **Tant que
     cette entrée est ouverte, aucun lot Cave n'ajoute de déclaration, de plafond ni de contrôle de conformité.** ★ Le jour où le chantier
     s'ouvre, il rouvre le **stock de bouteilles** (abandonné, cf. « Rayés ») : une comptabilité matières suit aussi le vin en bouteille.
-44. ★★ **Le coéquipier dans une session tracteur** (demande de Nico, 15/10) : il se choisit **au moment où l’on choisit l’activité**
-    (`openNewSession`, `tracteur.js`), pour la **Tarière**, l’**Ensemencement** et l’**Engrais** — un drapeau sur l’activité, comme le
-    `champCustom` de la Tarière. Il compte pour ses jalons (« trous à deux »). **Vérifié le 15/10** : aucun « équipier » dans `src/` ;
-    Ensemencement et Engrais ne sont pas des activités du tracteur (« engrais » ne vit que dans Phyto › Fertilisation) : à créer.
+44. ✅ ~~**Le coéquipier dans une session tracteur**~~ — FAIT par COEQ-1 (§343, 16/10) : choisi avec l’activité, réglage « Se fait à deux ».
 
 ### Backlog juridique & contenu public
 

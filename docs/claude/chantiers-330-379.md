@@ -373,3 +373,148 @@ Le plan GRATIF : JALONS-2, l’affichage. « Suite » de Nico (15/10). Constat a
 ### 342d. Ce qui a été vérifié
 - `scripts/mv-harnais-jalons.mjs` : 37 assertions — dont `_mvJalonsSync` joué en entier avec un faux `window` : lecture refusée, document absent, date déjà posée, même demi-journée — et 8 contre-épreuves (dont la lecture refusée prise pour « aucun jalon », la table entière renvoyée, la table vide envoyée).
 - ⚠️ Vécu dans le harnais : un `import()` d’une adresse `data:` identique renvoie le module déjà chargé (avec l’ancien faux `window`) — chaque essai porte sa marque ; et une contre-épreuve qui plante ne compte plus pour « vue ».
+
+## 343. ★★ COEQ-1 — LE COÉQUIPIER, CHOISI AVEC L’ACTIVITÉ DU TRACTEUR (16/10 — `src/tracteur.js` (`_mvActCoeq`, `_sessCoeqRender`, `pickCoeq` ; `openNewSession`, `onSessionActChange`, `pickCond`, `saveSession`, `openSessionDetail`) · `src/reglages.js` (`openEditActTrac`, `saveEditActTrac`, le badge « À deux ») · `src/jalons.js` (le coéquipier compte) · `index.html` (`#s-coeq-wrap`, `#s-coeq-pick`, `#eat-coeq`, les versions) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Tracteur) · `public/sw.js` · `guide/06-tracteur.html` · `scripts/mv-harnais-coeq1.mjs` (neuf) · `scripts/mv-harnais-jalons.mjs` · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/*` · `.mv-base` · `lots/COEQ-1.json` · **APP 9.09 → 9.10, SW 9.88 → 9.89**, base `d29f619`)
+
+### 343a. La demande
+Nico, 15/10 : « Pour le coéquipier de la tarière, mets dans CLAUDE.md de le mettre en place au moment de la sélection de l’activité sur le tracteur. Idem pour l’ensemencement et l’engrais » (backlog n°44). « Suite » le 16/10.
+
+### 343b. Ce qui est fait
+- **Le réglage** : `_mvActCoeq(act)` — `act.coequipier === true` ou `false` si l’admin a décidé ; sinon d’office pour tarière, ensemencement, semis, engrais (sans accents ni majuscules). Aucune donnée réécrite : les domaines existants l’ont sans migration.
+- **La nouvelle session** : sous « Conducteur », une zone « Coéquipier » (`#s-coeq-wrap`), affichée seulement pour une activité à deux ; « Personne » d’office, puis les membres actifs sauf le conducteur ; elle suit l’ouverture, le changement d’activité et le changement de conducteur.
+- **L’enregistrement** : `coequipier` n’est posé que s’il porte un nom (⚠️ Firestore refuse `undefined`).
+- **La fiche** : « 12 juin · Marc et Léo ».
+- **L’éditeur d’activité** : la case « Se fait à deux » (`#eat-coeq`), lue et écrite ; la liste des activités montre le badge « À deux ».
+- **Les jalons** : le coéquipier compte ses trous de tarière et ses hectares de semis et d’engrais ; les sessions et les km enjambés restent au conducteur.
+
+### 343c. Ce qui a été vérifié
+- `scripts/mv-harnais-coeq1.mjs` : 11 assertions (`_mvActCoeq` exécutée sur des activités inventées, puis le câblage) et 3 contre-épreuves. `mv-harnais-jalons` : le coéquipier compte ses trous. `mv-harnais-sessions`, `mv-harnais-fusion-docs` et `mv-harnais-champ` restent verts.
+- **Au navigateur** : le rognage sans zone ; la tarière avec « Personne, Léo, … » (ni le conducteur, ni un membre inactif) ; la session enregistrée porte `coequipier: "Léo"` ; la fiche affiche « 12 Juin · Nico E2E et Léo ».
+
+### 343d. Ce qui reste
+- Les présents du Cuvier (remontages, pigeages) : avec PRESENCE-1, la présence notée (§28, bloc GRATIF-0).
+- Changer le coéquipier d’une session déjà commencée : pas prévu ici.
+
+## 344. ★★ PRESENCE-1 — « TA PRÉSENCE EST NOTÉE » : LES OPÉRATIONS DU CHAI OÙ L’ADMIN A COCHÉ LA PERSONNE, SUR SON ACCUEIL (16/10 — `src/jalons.js` (`_mvCaveNotees`, `_mvCaveTypeLib`, `_mvCaveQuand` dans le bloc exécutable ; `_mvCaveNoteRender`, `_mvCaveNoteVu`, `_mvJalEnc`) · `src/utils.js` (`_mvPqTexte` ; APP, WHATS_NEW, MV_AIDE Accueil et Cave) · `src/app.js` (`renderHome`) · `index.html` (`#home-cave-note`, la phrase sous `#cop-int-wrap`, les versions) · `src/styles.css` (le bloc CAVE-1, avant TETE-2) · `public/sw.js` · `guide/04-vigne.html`, `guide/08-cave.html` · `scripts/mv-harnais-presence1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/mv-lot-marque.mjs` (refuse un nom déjà pris) · `CLAUDE.md` · `docs/claude/*` · `.mv-base` · `lots/PRESENCE-1.json` · **APP 9.10 → 9.11, SW 9.89 → 9.90**, base `d29f619`, cumulatif avec COEQ-1)
+
+### 344a. La demande
+Nico, 15/10 : « les ouvriers qui ont été sélectionnés pour les travaux de cave […] soient aussi gratifiés de leur action et qu’ils en aient connaissance, comme quoi l’admin a bien noté leur présence » ; puis « le saviez-tu aussi pour la cave […] indiquer le pourquoi » (maquette GRATIF, partie cave). « Suite » le 16/10.
+
+### 344b. Ce qui est fait
+- **Le choix** (`_mvCaveNotees`, exécutable) : les opérations du Chai où la personne est intervenante (ou l’ancien « opérateur »), saisies par quelqu’un d’autre (on ne se signale pas à soi-même), des trois derniers jours, les plus récentes d’abord, deux au plus.
+- **La carte** en tête de l’Accueil de la Vigne : « Nico vous a noté sur l’ouillage d’hier, au Chai : Clos Bas 2025, En Champs 2025 — avec Jean-Noël », puis « Pourquoi ? » tiré de la fiche du geste (`_mvPqTexte`). « Vu » la range sur ce téléphone (localStorage, une commodité).
+- **Le Chai** : sous les intervenants, une phrase dit à l’admin que les cochés le verront.
+- Les jalons du Chai (ouillages, soutirages, dégustations) comptaient déjà ces intervenants (JALONS-1).
+
+### 344c. Ce qui a été vérifié
+- `scripts/mv-harnais-presence1.mjs` : 16 assertions (le choix joué sur un Chai inventé — par un autre, trois jours, ni demain, ni soi-même, l’ancienne forme — les mots, la carte, « Vu », le câblage) et 3 contre-épreuves.
+- **Au navigateur**, compte ouvrier : une carte (l’ouillage d’hier ; ni le soutirage d’il y a onze jours, ni la dégustation qu’il a saisie), le pourquoi de l’ouillage, et « Vu » qui la range au vrai clic.
+- ⚠️ **Vécu : « Vu » ne faisait rien au clic.** L’identifiant était mis entre guillemets dans le code de l’attribut, puis passé au repli d’échappement — qui EFFAÇAIT les guillemets (`_escHtml` n’est pas exposé sur `window`) : `_mvCaveNoteVu(op1)`, une erreur muette. Désormais l’identifiant passe par `data-id`, et le repli `_mvJalEnc` encode au lieu d’effacer (aussi dans « Mes jalons »). Le harnais le tient.
+
+- ⚠️ **Vécu : une collision de noms.** Le lot s’appelait d’abord CAVE-1 — nom déjà pris par le lot du §288 (la Cave › Aujourd’hui). Son harnais `mv-harnais-cave1.mjs` a été écrasé par le nouveau, et sa marque `lots/CAVE-1.json` aussi ; le contrôle du câblage (`mv-harnais-portes`, « aucune commande en double ») l’a vu. Les deux fichiers sont remis tels qu’au dépôt ; le lot devient PRESENCE-1 et son harnais `mv-harnais-presence1.mjs`. **`mv-lot-marque.mjs` refuse désormais un nom de lot déjà commité** (`git cat-file -e HEAD:lots/<LOT>.json`).
+
+### 344d. Ce qui reste
+- Les présents du Cuvier : les remontages et pigeages sont des compteurs sur les mesures de fermentation, sans personne ; à ajouter au formulaire de mesure.
+
+## 345. ★★ PREMIERES-1 — « VOS PREMIÈRES FOIS » : LA FRISE DU PARCOURS AU DOMAINE, SUR LES VRAIES DATES (16/10 — `src/jalons.js` (`_mvPremieresFois` dans le bloc exécutable ; `_mvPremieresSection`) · `src/app.js` (`renderMaTrace`) · `src/styles.css` (le bloc PREMIERES-1, avant TETE-2) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Accueil) · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-premieres1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/*` · `.mv-base` · `lots/PREMIERES-1.json` · **APP 9.11 → 9.12, SW 9.90 → 9.91**, base `d29f619`, cumulatif avec PRESENCE-1 et COEQ-1)
+
+### 345a. La demande
+Nico, 15/10 : « on garde juste les premières fois […] je crois que logiquement, elles sont déjà dans les compteurs, étant donné qu’on a mis un à chaque compteur […] Donc oui, on développe bien sûr les premières fois » (maquette GRATIF, « Ton parcours au domaine »). « Suite » le 16/10.
+
+### 345b. Ce qui est fait
+- **Le calcul** (`_mvPremieresFois`, exécutable, sans `window`) : les premières fois **recalculées sur les données**, avec leurs vraies dates — les jalons de JALONS-1 ne sont datés que depuis le 15/10, jour où l’appli a commencé à les remarquer. Arrivée (début du contrat), première validation (la tâche par son nom affiché, la parcelle), première taille, première vendange, première plantation (ou entreplantation), premier hectare et premier kilomètre de rangs (le jour où le cumul de SA part passe le cap — à plusieurs, chacun sa part), première session au volant (comme conducteur), premier trou de tarière (conducteur ou coéquipier, « avec » l’autre), premiers ouillage, soutirage, dégustation où il est noté, un an au domaine. Une validation défaite (« Annulé ») n’est pas une première fois.
+- **Ce qui vient** : la première vendange, la première taille, l’anniversaire avec sa date.
+- **La frise** dans « Ma trace », au-dessus de « Mes jalons » : un point par première fois, celles qui viennent en pointillé.
+
+### 345c. Ce qui a été vérifié
+- `scripts/mv-harnais-premieres1.mjs` : 17 assertions (la frise jouée sur un domaine inventé) et 3 contre-épreuves (l’« Annulé » compté, la part de chacun oubliée, la frise en désordre).
+- **Au navigateur**, compte ouvrier : « Arrivée au domaine 01/03/2025 · Un an au domaine 01/03/2026 · Première validation 16/03/2026 · Ébourgeonnage, Clos Bas · Premier hectare · Premier ouillage 24/05/2026 », puis « Première vendange au domaine — à venir », « Première taille — à venir ».
+
+## 346. ★★ PRESENCE-2 — « QUI ÉTAIT LÀ » AU CUVIER : LA PRÉSENCE NOTÉE AU TRAVAIL DU CHAPEAU (16/10 — `src/cuvier.js` (`_vmIntRender` ; `openOvVendMesure`, `saveVendMesure`) · `src/jalons.js` (`_mvCuvierNotees`, `_mvChapeauLib` dans le bloc exécutable ; la carte de l’Accueil ; la frise) · `index.html` (`#vm-int-pick`, la phrase, les versions) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Cave) · `public/sw.js` · `guide/08-cave.html` · `scripts/mv-harnais-presence2.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/*` · `.mv-base` · `lots/PRESENCE-2.json` · **APP 9.12 → 9.13, SW 9.91 → 9.92**, base `d29f619`, cumulatif avec PREMIERES-1, PRESENCE-1 et COEQ-1)
+
+### 346a. La demande
+Nico, 15/10 : « les ouvriers sélectionnés pour les travaux de cave, pour l’ouillage, le soutirage, enfin un petit peu tout ce qui se fait en cave » soient « gratifiés de leur action et qu’ils en aient connaissance ». PRESENCE-1 couvrait le Chai ; restait le Cuvier, en pleine vinification à cette date. « Suite » le 16/10.
+
+### 346b. Ce qui est fait
+- **Le relevé d’une cuve** (`ovVendMesure`) : sous les remontages et les pigeages, « Qui était là » — les membres actifs, plusieurs possibles ; un ancien coché reste visible à la correction. Le bloc disparaît avec le chapeau (après le pressurage), comme avant.
+- **L’enregistrement** : `intervenants` et `par` (qui les a notés) seulement s’il y a des noms ; sinon ils sont retirés (jamais de tableau vide, jamais `undefined`). Le relevé repart de l’existant (§24 n°12) : `qui` et `tour` de la tournée restent. ⚠️ **Corrigé par PRESENCE-2B (§348)** : le champ est désormais `qui`, celui de la tournée — `intervenants` était un doublon.
+- **La carte « Ta présence est notée »** mêle le Chai et le Cuvier, deux au plus : « Nico vous a noté sur 2 remontages et 1 pigeage d’hier, au Cuvier : Cuve 4 », puis le pourquoi du remontage (ou du pigeage, s’il n’y a que des pigeages). Seulement les relevés notés par un autre, avec du travail de chapeau, des trois derniers jours.
+- **La frise** : le premier remontage et le premier pigeage où la personne était là, avec la cuve.
+
+### 346c. Ce qui a été vérifié
+- `scripts/mv-harnais-presence2.mjs` : 11 assertions (les relevés joués sur des cuves inventées, la frise, le relevé, la carte) et 3 contre-épreuves.
+- Les harnais du Cuvier inscrits restent verts (cuv7, cuv8, cuv13, cuvdoc, cuvgr3, cuvier). `mv-harnais-cuvier-correction` rougit déjà sur la base (il cherche `_vendTriDate` dans cave.js) et n’est pas dans la liste des contrôles.
+- **Au navigateur** : le relevé de la Cuve 4 propose les membres ; enregistré avec l’ouvrier coché : `intervenants: ["Ouvrier E2E"]`, `par: "Nico E2E"` ; vue par l’ouvrier, la carte « … 2 remontages et 1 pigeage d’hier, au Cuvier : Cuve 4 », avec le pourquoi du remontage.
+
+## 347. ★ FETES-1 — « ANNONCER MES JALONS » SE COUPE (16/10 — `src/jalons.js` (`_mvFetesCle`, `_mvFetesOn`, `_mvFetesPeindre`, `toggleFetes` ; `_mvJalonsAnnonce`) · `src/app.js` (l’état peint au démarrage) · `src/reglages.js` (`switchReglTab`) · `index.html` (`#regl-fetes-row`, les versions) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Accueil) · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-fetes1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/*` · `.mv-base` · `lots/FETES-1.json` · **APP 9.13 → 9.14, SW 9.92 → 9.93**, base `d29f619`, cumulatif avec PRESENCE-2, PREMIERES-1, PRESENCE-1 et COEQ-1)
+
+### 347a. La demande
+Décision de Nico (maquette GRATIF, 15/10) : « Fête rare (parcelle bouclée, jalon atteint) — se coupe dans Réglages › Moi » ; et Wharton (Mollick & Rothbard) : un jeu choisi motive, un jeu imposé démotive. « Suite » le 16/10.
+
+### 347b. Ce qui est fait
+- **La seule fête qui soit à moi** est la ligne « Nouveau jalon » d’après validation (JALONS-2) ; la feuille « Chantier terminé » (DONE-1) est un bilan, sans animation : elle reste.
+- **Le réglage** : Réglages › Moi › Mon compte, « Annoncer mes jalons » (activé d’office), sous « Changer mon mot de passe » — l’onglet s’affiche « Moi » (son identifiant est `app`, `#regl-view-app`). Rangé sur CE téléphone (localStorage, `mv_fetes_<domaine>_<personne>`), comme « Plein soleil ».
+- **Coupé** : `_mvJalonsAnnonce` se tait (rien d’inséré, pas de message). Les jalons se comptent quand même et restent dans « Ma trace ».
+
+### 347c. Ce qui a été vérifié
+- `scripts/mv-harnais-fetes1.mjs` : 8 assertions (`_mvFetesOn` et `toggleFetes` exécutées avec un faux localStorage ; la ligne ; l’état peint) et 2 contre-épreuves.
+- **Au navigateur** : la ligne « Activé » → un clic → « Coupé » ; feuille d’après validation ouverte : aucune ligne « Nouveau jalon » ; rallumé : la ligne revient.
+
+## 348. ★ PRESENCE-2B — « QUI » : UN SEUL CHAMP POUR QUI ÉTAIT LÀ AU CUVIER, CELUI DE LA TOURNÉE (16/10 — `src/cuvier.js` (`openOvVendMesure`, `saveVendMesure`, `_vtEcrire`) · `src/jalons.js` (`_mvCuvierNotees`, la frise, la carte) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Cave) · `index.html` · `public/sw.js` · `guide/08-cave.html` · `scripts/mv-harnais-presence2.mjs` · `CLAUDE.md` · `docs/claude/*` · `.mv-base` · `lots/PRESENCE-2B.json` · **APP 9.14 → 9.15, SW 9.93 → 9.94**, base `d29f619`, cumulatif avec FETES-1 à COEQ-1)
+
+### 348a. Le défaut, trouvé en préparant « du rang à la bouteille »
+La tournée du Cuvier (§24, CUV-7) écrit déjà qui était là dans le relevé : `m.qui = _VT_WHO.slice()` et `m.tour = true` (`_vtEcrire`), et la relit pour se préremplir. PRESENCE-2 (§346) avait ouvert un second champ, `intervenants`, pour la même chose — deux vérités sur le même relevé, et les relevés de la tournée restaient hors de « Ta présence est notée ».
+
+### 348b. Ce qui est fait
+- **Le relevé** écrit `qui` (préremplie depuis `qui`, ou l’ancien `intervenants`), avec `par` ; l’ancien champ est retiré à l’enregistrement.
+- **La tournée** note `par` : la personne connectée qui l’a faite — elle ne se signale pas à elle-même.
+- **La carte et la frise** lisent `qui` (l’ancien champ relu, pour un essai fait dans « refonte » avant ce lot) ; un relevé de tournée se dit « … au Cuvier (la tournée) ».
+
+### 348c. Ce qui a été vérifié
+- `scripts/mv-harnais-presence2.mjs` : 13 assertions — dont `qui` qui fait foi, l’ancien champ relu, sa propre tournée exclue, la tournée qui note `par` — et 4 contre-épreuves (dont « l’ancien champ seul lu, la tournée oubliée »). Les harnais du Cuvier restent verts.
+- ⚠️ Leçon : avant d’ajouter un champ, chercher si un écran voisin n’écrit pas déjà la même chose (ici la tournée).
+- ⚠️ **Vu par la liste complète** : `mv-harnais-gf` (G27, « corriger un relevé de la tournée garde qui l’a pris », §24 n°12) a rougi — sans le bloc du chapeau à l’écran, l’enregistrement effaçait `qui`. Désormais `qui` n’est touché que si le choix était sous les yeux (`_vmChoix`) ; une contre-épreuve le tient dans `mv-harnais-presence2`.
+
+## 349. ★★ RANGBOUT-1 — DU RANG À LA BOUTEILLE : « LES VINS DE VOTRE TRAVAIL » (16/10 — `src/jalons.js` (`_mvRangBouteille` dans le bloc exécutable ; `_mvRangBouteilleSection`) · `src/app.js` (`renderMaTrace`) · `src/styles.css` (le bloc RANGBOUT-1, avant TETE-2) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Accueil) · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-rangbout1.mjs` (neuf) · `scripts/mv-harnais-premieres1.mjs` · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/*` · `.mv-base` · `lots/RANGBOUT-1.json` · **APP 9.15 → 9.16, SW 9.94 → 9.95**, base `d29f619`, cumulatif avec PRESENCE-2B à COEQ-1)
+
+### 349a. La demande
+Maquette GRATIF validée par Nico (15/10) : « Du rang à la bouteille (millésime des parcelles travaillées) ». « Suite » le 16/10.
+
+### 349b. Ce qui est fait
+- **La chaîne** (`_mvRangBouteille`, exécutable, sans `window`) : celle que la Cave construit déjà pour un millésime (`_pcrbCvLignes`, cave.js) — la récolte d’une parcelle (`recoltes[].parcelle`, `cuve_id`) → la cuve (`cuves_vinif`) → la cuvée du décuvage (`decuvage.cuvee_id`, `CAVE_ELEVAGE.cuvees`). Le vin est la cuvée (« en élevage », « en bouteille » si `statut === 'embouteille'`), ou la cuve tant qu’elle n’est pas décuvée (« en cuve »).
+- **Le millésime d’un travail** : l’année de la vendange qui suit — novembre et décembre comptent pour le millésime suivant (la taille). Seules les validations de la personne (la sienne ou à plusieurs), pas les « Annulé ».
+- **La section** dans « Ma trace », entre « Vos premières fois » et « Mes jalons » : les deux derniers millésimes qui ont du vin, chaque vin, ses parcelles et ce que la personne y a fait.
+
+### 349c. Ce qui a été vérifié
+- `scripts/mv-harnais-rangbout1.mjs` : 10 assertions et 3 contre-épreuves (la taille de décembre au mauvais millésime, l’« Annulé » compté, la cuvée du décuvage oubliée). `mv-harnais-premieres1` accepte la nouvelle section entre la frise et « Mes jalons ».
+- **Au navigateur**, compte ouvrier : « Millésime 2025 · Clos Bas 2025 — en élevage · Clos Bas · taille, relevage, vendange ».
+- ⚠️ Pas de jeton `--vin` dans la charte : la bordure prend `--cave`.
+
+## 350. ★★ CARTEDOM-1 — « LA CARTE DE VOTRE SAISON » : LES PARCELLES COLORÉES SELON LES PASSAGES (16/10 — `src/jalons.js` (`_mvCarteDomaine`, `_mvCarteNiveau`, `_mvCarteSvgPoints` dans le bloc exécutable ; `_mvCarteDomaineSection`) · `src/app.js` (`renderMaTrace`) · `src/styles.css` (le bloc CARTEDOM-1, avant TETE-2) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Accueil) · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-cartedom1.mjs` (neuf) · `scripts/mv-harnais-premieres1.mjs` · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/*` · `.mv-base` · `lots/CARTEDOM-1.json` · **APP 9.16 → 9.17, SW 9.95 → 9.96**, base `d29f619`, cumulatif avec RANGBOUT-1 à COEQ-1)
+
+### 350a. La demande
+Maquette GRATIF validée par Nico (15/10) : « Carte du domaine (parcelles colorées selon passages) ». « Suite » le 16/10.
+
+### 350b. Ce qui est fait
+- **Les passages** (`_mvCarteDomaine`, exécutable) : les validations de la personne (seule ou à plusieurs) par parcelle depuis le début de la saison active (`SAISONS`, sinon un an), sans doublon (parcelle, tâche, jour, passage) ni « Annulé » ; la casse du nom ne compte pas.
+- **Le dessin** : les contours de la carte des Parcelles (`KML_POLYGONS_DYNAMIC`, sinon `KML_DATA`) projetés en SVG (`_mvCarteSvgPoints`, équirectangulaire au centre, nord en haut, 1 000 de large) — sans fond de carte, donc hors réseau. Quatre teintes par classes (`cd-n0` à `cd-n3` : aucun, 1, 2 à 3, 4 et plus), aucune couleur dans le JavaScript ; une infobulle par parcelle (« Clos Bas — 4 passages »).
+- **La section** dans « Ma trace », après « Les vins de votre travail » : « 2 parcelles sur 4 depuis le 16/03/2026 », la carte, la légende.
+
+### 350c. Ce qui a été vérifié
+- `scripts/mv-harnais-cartedom1.mjs` : 9 assertions et 3 contre-épreuves (un passage d’avant la saison, un doublon, le nord en bas).
+- **Au navigateur**, compte ouvrier, quatre contours : Clos Bas en teinte forte (4 passages), En Champs pâle (1, à deux), les deux autres en gris.
+
+## 351. ★★ SAISONIMG-1 — « MA SAISON EN IMAGES » : SIX CARTES ET UN PDF (16/10 — `src/jalons.js` (`_mvSaisonImages` dans le bloc exécutable ; `_mvSaisonDonnees`, `_mvSaisonCartesHtml`, `openSaisonImages`, `_mvSaisonFermer`, `_mvSaisonPdf`) · `src/app.js` (`renderMaTrace` : le bouton) · `index.html` (`#ovSaisonImg`, les versions) · `src/styles.css` (le bloc SAISONIMG-1, avant TETE-2) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Accueil) · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-saisonimg1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/*` · `.mv-base` · `lots/SAISONIMG-1.json` · **APP 9.17 → 9.18, SW 9.96 → 9.97**, base `d29f619`, cumulatif avec CARTEDOM-1 à COEQ-1)
+
+### 351a. La demande
+Maquette GRATIF validée par Nico (15/10) : « Saison en images (style Spotify Wrapped, 6 cartes, PDF) » ; Spotify Wrapped : « peu de chiffres personnels, racontés comme une histoire ». « Go » le 16/10 — le dernier morceau du plan.
+
+### 351b. Ce qui est fait
+- **Les six cartes** (`_mvSaisonImages`, exécutable), sur la saison active (son début ; sa fin ou aujourd’hui) : 1. Votre saison (sa part en ha, ses jours, ses km de rangs, ses pieds) ; 2. Votre parcelle de cœur (la plus parcourue, ses passages, les autres) ; 3. Vos gestes (les trois premiers par hectares) ; 4. Au volant et au chai (sessions, trous de tarière — coéquipier compris —, ouillages, soutirages, dégustations, remontages et pigeages ; sinon « la vigne avant tout ») ; 5. Vos premières fois et vos jalons DE la saison ; 6. Du rang à la bouteille, puis « Merci pour cette saison ». Toujours six cartes, même vides.
+- **L’écran** : « Ma trace » › « Ma saison en images », une fenêtre (`#ovSaisonImg`) où les cartes se font défiler du doigt (une par écran).
+- **Le PDF** : « Enregistrer en PDF » ouvre le document imprimable de l’appli (`_mvDocOpen`, deux cartes par ligne) ; le navigateur propose « Enregistrer en PDF ».
+
+### 351c. Ce qui a été vérifié
+- `scripts/mv-harnais-saisonimg1.mjs` : 13 assertions et 3 contre-épreuves (un travail d’avant la saison, la part de chacun oubliée, une carte qui manque).
+- ⚠️ **Vu par la liste complète** : `mv-harnais-typo` — une taille égale à un cran écrite en dur dans le CSS du PDF (11 px = `--pt-nano`) et un px de plus dans styles.css (le grand chiffre) ; passés aux jetons (`var(--pt-nano,11px)`, `var(--pt-hero,40px)`).
+- **Au navigateur**, compte ouvrier : le bouton de « Ma trace » ouvre six cartes (« 4,9 ha, de vignes, votre part · 5 jours au domaine », « Clos Bas · 4 passages », « Relevage · 1,6 ha »…) ; « Enregistrer en PDF » ouvre « Ma saison en images — Domaine de la Combe ».

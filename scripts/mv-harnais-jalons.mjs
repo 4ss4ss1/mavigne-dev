@@ -31,6 +31,7 @@ const D0 = () => ({
     { conducteur: 'Paul', activite: 'Tarière', statut: 'Terminé', parcellesFaites: [{ nom: 'P1', data: { Trous: '120' } }, { nom: 'P2', data: { Trous: 30 } }] },
     { conducteur: 'Paul', activite: 'Engrais', statut: 'En cours', parcellesFaites: [{ nom: 'P1' }] },
     { conducteur: 'Léo', activite: 'Tarière', statut: 'Terminé', parcellesFaites: [{ nom: 'P1', data: { Trous: 999 } }] },
+    { conducteur: 'Marc', coequipier: 'Paul', activite: 'Tarière', statut: 'Terminé', parcellesFaites: [{ nom: 'P2', data: { Trous: 50 } }] },   // COEQ-1 : Paul coéquipier
   ],
   cave: { operations: [{ type: 'ouillage', intervenants: ['Paul', 'Léo'] }, { type: 'soutirage', operateur: 'Paul' }, { type: 'degustation', intervenants: ['Léo'] }] },
   membres: [{ nom: 'Paul', debut_contrat: '2025-03-01' }], aujourdhui: new Date('2026-06-12T10:00:00'), ouv: 10,
@@ -40,7 +41,7 @@ function controles(K) {
   r.push(['validations : les siennes et celles de son équipe, sans doublon, sans « Annulé » ni « En cours »', c.val === 2, 'val=' + c.val]);
   r.push(['kilomètres et pieds : à plusieurs, chacun sa part', c.km === 15 && c.pieds === 15000, 'km=' + c.km + ' pieds=' + c.pieds]);
   r.push(['le premier hectare, tâche par tâche', Math.abs(c.haTache.relevage - 1.5) < 1e-9 && !c.haTache.palissage]);
-  r.push(['tracteur : sessions finies du conducteur, trous de la tarière, hectares d’engrais', c.ses === 1 && c.trous === 150 && c.eng === 1 && c.kmtr === 30, JSON.stringify({ ses: c.ses, trous: c.trous, eng: c.eng, kmtr: c.kmtr })]);
+  r.push(['tracteur : sessions finies du conducteur, trous de la tarière (conducteur ET coéquipier), hectares d’engrais ; le coéquipier n’a ni la session ni les km', c.ses === 1 && c.trous === 200 && c.eng === 1 && c.kmtr === 30, JSON.stringify({ ses: c.ses, trous: c.trous, eng: c.eng, kmtr: c.kmtr })]);
   r.push(['Chai : ouillages, soutirages, dégustations où il est noté (et l’ancien « opérateur »)', c.ouil === 1 && c.sout === 1 && c.degu === 0]);
   r.push(['un an au domaine depuis le début du contrat', c.an === 1]);
   const at = K._mvJalonsAtteints(c);

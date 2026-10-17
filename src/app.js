@@ -4079,6 +4079,7 @@ function applyRoles(){
   }
   // Mode plein soleil — appliquer la préférence de l'utilisateur (#6)
   _hcApply(_hcLoad());
+  if(window._mvFetesPeindre) window._mvFetesPeindre();   // FETES-1 (§347) : l'état de « Annoncer mes jalons »
   if(window._dockBuild)_dockBuild();
   _mvReglSync();
   // La question du jour. Si SESSIONS n'est pas encore charge, _mvModeCheck sort sans
@@ -6681,6 +6682,7 @@ function renderHome(){
   });
   if(typeof _updateSaisonSelector==='function')_updateSaisonSelector();
   _mvEqJourRender();   // ÉQUIPES-1
+  if(window._mvCaveNoteRender) window._mvCaveNoteRender();   // ★★ PRESENCE-1 (§344) : « Ta présence est notée »
 
 
   // Stats band Accueil
@@ -7422,7 +7424,12 @@ function renderMaTrace(){
       +'Chaque parcelle validée et chaque entrée de journal alimentent cette page.</div>';
   }
 
+  if(typeof window._mvPremieresSection==='function') h+=window._mvPremieresSection();   // ★★ PREMIERES-1 (§345) : « Vos premières fois »
+  if(typeof window._mvRangBouteilleSection==='function') h+=window._mvRangBouteilleSection();   // ★★ RANGBOUT-1 (§349) : « Les vins de votre travail »
+  if(typeof window._mvCarteDomaineSection==='function') h+=window._mvCarteDomaineSection();   // ★★ CARTEDOM-1 (§350) : « La carte de votre saison »
   if(typeof window._mvJalonsSection==='function') h+=window._mvJalonsSection();   // ★★ JALONS-2 (§341) : « Mes jalons »
+  h+='<button class="mtr-go" onclick="openSaisonImages()"><span>Ma saison en images'
+    +'<span class="sub">Six cartes, et un PDF à garder</span></span><span class="arw">\u203a</span></button>';   // ★★ SAISONIMG-1 (§351)
   if(typeof _mvMurVisible==='function'&&_mvMurVisible()){
     h+='<button class="mtr-go" onclick="openMur()"><span>Le domaine cette semaine'
       +'<span class="sub">Ce que toute l\'équipe a fait</span></span><span class="arw">\u203a</span></button>';

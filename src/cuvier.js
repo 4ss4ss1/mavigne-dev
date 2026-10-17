@@ -1933,6 +1933,18 @@ function _vmInjectActions(mesId){
       +'<div class="mvv-fnote" style="color:var(--texte-doux,#5F5F5F)">Corriger la date remet le relevé à sa place dans la courbe et recalcule la fin de fermentation estimée.</div>'
     : '';
 }
+// ★★ PRESENCE-2 (§346) — « QUI ÉTAIT LÀ » au travail du chapeau : les personnes cochées sur un relevé (remontages,
+//   pigeages) voient sur leur Accueil que leur présence est notée, comme au Chai (PRESENCE-1). Nico (15/10) : « un petit peu
+//   tout ce qui se fait en cave ». Le champ n'est écrit que s'il porte des noms ; `par` dit qui l'a noté.
+// ★ PRESENCE-2B (§348) : le champ est `qui` — celui que la tournée écrit déjà (`_vtEcrire`, `_VT_WHO`) ; PRESENCE-2 avait
+//   ouvert un second champ (`intervenants`) pour la même chose. Un seul concept : `qui`. L'ancien est relu, jamais réécrit.
+function _vmIntRender(sel){
+  var box=document.getElementById('vm-int-pick'); if(!box) return;
+  var pris=Array.isArray(sel)?sel:[];
+  var noms=(window.MEMBRES||[]).filter(function(m){ return m&&m.nom&&(m.statut||'Actif')==='Actif'; }).map(function(m){ return m.nom; });
+  pris.forEach(function(n){ if(noms.indexOf(n)<0) noms.push(n); });   // un ancien coché reste visible à la correction
+  box.innerHTML=noms.map(function(n){ var s=pris.indexOf(n)>=0; return '<div class="pchk'+(s?' sel acre':'')+'" data-val="'+_escAttr(n)+'" onclick="this.classList.toggle(\'sel\');this.classList.toggle(\'acre\')">'+_escHtml(n)+'</div>'; }).join('');
+}
 function openOvVendMesure(cuveId, mesureId) {
   if(!canWrite()) return;
   _vmesureCuveId=cuveId;
@@ -1957,6 +1969,7 @@ function openOvVendMesure(cuveId, mesureId) {
   el=document.getElementById('vm-gf'); if(el) el.value=(m&&_vendGfNum(m.gf)!=null)?_vendGfNum(m.gf):'';     // GF-1, pose en JS (§24 n°5)
   el=document.getElementById('vm-chap'); if(el) el.style.display=_chap?'':'none';
   _vmInjectActions(_vmesureEditId);
+  _vmIntRender(m&&((m.qui&&m.qui.length)?m.qui:m.intervenants));   // ★★ PRESENCE-2 (§346), `qui` depuis PRESENCE-2B
   var ov=document.getElementById('ovVendMesure'); if(ov) ov.classList.add('open');
 }
 function _vendMesDel(){
@@ -2000,6 +2013,16 @@ function saveVendMesure() {
   var mesure=Object.assign({}, pos!==-1?cu.mesures_fa[pos]:{},
     {id:editId||('vm_'+Date.now()),date:date,densite:densite,temp_c:tempC,remontages:_vmRem,pigeages:_vmPig,note:note});
   if(gf!=null) mesure.gf=gf; else delete mesure.gf;
+  // ★★ PRESENCE-2 (§346) : les présents du chapeau — jamais un tableau vide ni `undefined` dans le document.
+  //   ⚠️ On ne touche à `qui` QUE si le choix était sous les yeux (le bloc du chapeau visible, ses puces posées) : corriger un
+  //   relevé de la tournée sans ce bloc garde qui l'a pris (§24 n°12, G27 de mv-harnais-gf).
+  var _vmBox=document.getElementById('vm-int-pick'), _vmChapEl=document.getElementById('vm-chap');
+  var _vmChoix=!!(_vmBox&&_vmBox.children&&_vmBox.children.length&&(!_vmChapEl||_vmChapEl.style.display!=='none'));
+  if(_vmChoix){
+    var _vmInt=[].slice.call(document.querySelectorAll('#vm-int-pick .pchk.sel')).map(function(x){ return x.dataset.val; }).filter(Boolean);
+    if(_vmInt.length){ mesure.qui=_vmInt; mesure.par=(window.currentUser&&window.currentUser.nom)||''; } else { delete mesure.qui; delete mesure.par; }
+    delete mesure.intervenants;   // PRESENCE-2B : l'ancien champ de PRESENCE-2 se fond dans `qui`
+  }
   if(pos!==-1) cu.mesures_fa[pos]=mesure; else cu.mesures_fa.push(mesure);
   _vendTriMes(cu);            // la date vient peut-etre de changer : on range
   _vmesureEditId=null;
@@ -7018,6 +7041,7 @@ function _vtEcrire(){
     if(t!=null) m.temp_c=t;
     m.pigeages=b.p; m.remontages=b.r;
     if(_VT_WHO.length) m.qui=_VT_WHO.slice();
+    if(window.currentUser&&window.currentUser.nom) m.par=window.currentUser.nom;   // ★ PRESENCE-2B (§348) : qui a fait la tournée — il ne se signale pas à lui-même
     m.tour=true;
     _vendTriMes(c);
     n++;

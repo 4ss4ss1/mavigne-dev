@@ -2315,7 +2315,7 @@ function openSessionDetail(id){
   const amap=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
   document.getElementById('sd-titre').textContent=s.activite;
   var _sdPq=document.getElementById('sd-pq');if(_sdPq)_sdPq.innerHTML=window._mvPqBtn?window._mvPqBtn(s.activite,'trac'):'';   // POURQUOI-1 (§336)
-  document.getElementById('sd-meta').textContent=`${_fmtDate(s.date)} · ${s.conducteur||''}`;   // ROB-2 : jamais « undefined »
+  document.getElementById('sd-meta').textContent=`${_fmtDate(s.date)} · ${s.conducteur||''}${s.coequipier?' et '+s.coequipier:''}`;   // COEQ-1 (§343) : « … · Marc et Léo »   // ROB-2 : jamais « undefined »
   renderSDTracEncart();
   closeSdTracPicker();
   updateSDSkipBtn();
@@ -2807,12 +2807,39 @@ function deleteSession(){
   document.getElementById('ovEditSession').classList.remove('open');
   renderTracteur();
 }
-function pickCond(el){var parent=el.parentElement;parent.querySelectorAll('.pchk').forEach(function(x){x.classList.remove('sel','acre');});el.classList.add('sel','acre');}
+function pickCond(el){var parent=el.parentElement;parent.querySelectorAll('.pchk').forEach(function(x){x.classList.remove('sel','acre');});el.classList.add('sel','acre');if(parent&&parent.id==='s-cond-pick')_sessCoeqRender();}   // COEQ-1 : le conducteur ne peut pas être son propre coéquipier
 function openTracAdd(){
   if(isTractoriste()){ _openOv('ovTracAdd'); return; }
   if(isAdmin() && window.openOvTraitement){ window.openOvTraitement(); return; }
 }
 
+// ★★ COEQ-1 (§343) — LE COÉQUIPIER, CHOISI AVEC L'ACTIVITÉ. Nico (15/10) : pour la tarière, l'ensemencement et l'engrais,
+//   « le mettre en place au moment de la sélection de l'activité sur le tracteur ». Un réglage de l'activité (`coequipier`),
+//   coché d'office pour ces trois-là tant que l'admin n'en a pas décidé autrement (Réglages du tracteur › l'activité).
+//   ⚠️ Le champ n'est écrit que s'il porte un nom : Firestore refuse `undefined`.
+function _mvActCoeq(act){
+  if(!act) return false;
+  if(act.coequipier===true) return true;
+  if(act.coequipier===false) return false;
+  var s=String(act.nom||'').normalize('NFD').replace(/\p{M}/gu,'').toLowerCase().replace(/[^a-z]/g,'');
+  return s==='tariere'||s==='ensemencement'||s==='semis'||s==='engrais';
+}
+window._mvActCoeq=_mvActCoeq;
+function _sessCoeqRender(){
+  var wrap=document.getElementById('s-coeq-wrap'), pick=document.getElementById('s-coeq-pick');
+  if(!wrap||!pick) return;
+  var act=ACTIVITES.find(function(a){return a.nom===_actNomDuSelect('s-act');});
+  if(!_mvActCoeq(act)){ wrap.style.display='none'; pick.innerHTML=''; return; }
+  var cEl=document.querySelector('#s-cond-pick .pchk.sel'), cond=cEl?cEl.textContent.trim():'';
+  var avant=(document.querySelector('#s-coeq-pick .pchk.sel')||{dataset:{}}).dataset.val||'';
+  var noms=(window.MEMBRES||[]).filter(function(m){ return m&&m.nom&&m.nom!==cond&&(m.statut||'Actif')==='Actif'; }).map(function(m){ return m.nom; });
+  if(noms.indexOf(avant)<0) avant='';
+  pick.innerHTML='<div class="pchk'+(avant?'':' sel acre')+'" data-val="" onclick="pickCoeq(this)">Personne</div>'
+    +noms.map(function(n){ return '<div class="pchk'+(n===avant?' sel acre':'')+'" data-val="'+_escAttr(n)+'" onclick="pickCoeq(this)">'+_escHtml(n)+'</div>'; }).join('');
+  wrap.style.display='';
+}
+function pickCoeq(el){ document.querySelectorAll('#s-coeq-pick .pchk').forEach(function(x){ x.classList.remove('sel','acre'); }); el.classList.add('sel','acre'); }
+window.pickCoeq=pickCoeq;
 function openNewSession(){
   if(DEBUG) console.log('openNewSession appelé, currentUser=', currentUser, 'isTractoriste=', isTractoriste());
   if(!isTractoriste()){showToast('Réservé aux tractoristes','#C0392B');return;}
@@ -2828,10 +2855,12 @@ function openNewSession(){
   if(document.getElementById('s-trac-id'))document.getElementById('s-trac-id').value='';
   if(document.getElementById('s-trac-override'))document.getElementById('s-trac-override').value='0';
   _fillTracPick('s', ACTIVITES[0]?ACTIVITES[0].nom:'');
+  _sessCoeqRender();   // COEQ-1 (§343)
   _openOv('ovSession');
 }
 function onSessionActChange(){
   var actNom=_actNomDuSelect('s-act');
+  _sessCoeqRender();   // COEQ-1 (§343) : le coéquipier suit l'activité choisie
   if(document.getElementById('s-trac-id'))document.getElementById('s-trac-id').value='';
   _fillTracPick('s', actNom);
   // Vérifier si le tracteur défaut est en répar → bloquer avec modal
@@ -3151,7 +3180,8 @@ function saveSession(){
   if(!tracteurId&&TRACTEURS_LIST.length)tracteurId=TRACTEURS_LIST[0].id;
   var act=ACTIVITES.find(function(x){return x.nom===a;});
   var tracteurOverride=tracteurId!==act?.tracteurDefautId;
-  SESSIONS.push({
+  var _coeqEl=document.querySelector('#s-coeq-pick .pchk.sel'), _coeq=(_mvActCoeq(act)&&_coeqEl)?(_coeqEl.dataset.val||''):'';   // COEQ-1 (§343)
+  var _sess={
     id:Date.now().toString(16),
     saison:_saisonForDate(date),
     activite:a,
@@ -3163,7 +3193,9 @@ function saveSession(){
     tracteurId:tracteurId,
     tracteurOverride:tracteurOverride,
     note:document.getElementById('s-note').value
-  });
+  };
+  if(_coeq) _sess.coequipier=_coeq;   // jamais `undefined` (Firestore le refuse)
+  SESSIONS.push(_sess);
   _saveData('sessions');
   _closeOv(null,'ovSession');
   renderTracteur();

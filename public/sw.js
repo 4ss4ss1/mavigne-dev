@@ -1,4 +1,13 @@
-// MA VIGNE — Service Worker v9.88
+// MA VIGNE — Service Worker v9.97
+// v9.97 (16/10/2026) — SAISONIMG-1 (§351) : « Ma saison en images », six cartes et un PDF, depuis « Ma trace ». jalons.js, app.js, index.html, styles.css, utils.js.
+// v9.96 (16/10/2026) — CARTEDOM-1 (§350) : « La carte de votre saison » dans « Ma trace », un SVG sans fond de carte. jalons.js, app.js, styles.css, utils.js.
+// v9.95 (16/10/2026) — RANGBOUT-1 (§349) : « Les vins de votre travail », du rang à la bouteille, dans « Ma trace ». jalons.js, app.js, styles.css, utils.js.
+// v9.94 (16/10/2026) — PRESENCE-2B (§348) : un seul champ « qui » pour qui était là au Cuvier (celui de la tournée) ; la tournée note qui l’a faite. cuvier.js, jalons.js, utils.js.
+// v9.93 (16/10/2026) — FETES-1 (§347) : « Annoncer mes jalons » se coupe (Réglages › App › Mon compte). jalons.js, app.js, reglages.js, index.html, utils.js.
+// v9.92 (16/10/2026) — PRESENCE-2 (§346) : « Qui était là » au travail du chapeau (Cuvier) ; la présence notée sur l’Accueil, le premier remontage et pigeage dans la frise. cuvier.js, jalons.js, index.html, utils.js.
+// v9.91 (16/10/2026) — PREMIERES-1 (§345) : « Vos premières fois », la frise du parcours au domaine dans « Ma trace ». jalons.js, app.js, styles.css, utils.js.
+// v9.90 (16/10/2026) — PRESENCE-1 (§344) : « Ta présence est notée » — les opérations du Chai où l’admin a coché la personne, sur son Accueil, avec le pourquoi du geste. jalons.js, utils.js, app.js, index.html, styles.css.
+// v9.89 (16/10/2026) — COEQ-1 (§343) : le coéquipier, choisi avec l’activité du tracteur (tarière, ensemencement, engrais). tracteur.js, reglages.js, jalons.js, index.html, utils.js.
 // v9.88 (16/10/2026) — JALONS-2B (§342) : une lecture des jalons refusée ou impossible arrête le calcul ; seuls les jalons nouveaux sont écrits. jalons.js, firebase.js.
 // v9.87 (15/10/2026) — JALONS-2 (§341) : « Nouveau jalon » dans la feuille d’après validation, « Mes jalons » dans « Ma trace ». jalons.js, app.js, styles.css, utils.js.
 // v9.86 (15/10/2026) — JALONS-1 (§340) : le calcul des jalons et leur mémoire (jalons_<uid>, lu et écrit par la personne seule). jalons.js (neuf), firebase.js, app.js, firestore.rules.
@@ -4518,7 +4527,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v9.88';
+const CACHE_NAME   = 'mavigne-v9.97';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4535,7 +4544,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.88 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.97 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4555,7 +4564,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v9.88 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v9.97 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

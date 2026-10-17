@@ -173,6 +173,7 @@ function _etpLoadSeason(){
 window._etpLoadSeason=_etpLoadSeason;
 function switchReglTab(tab){
   reglTab=tab;
+  if(tab==='app'&&window._mvFetesPeindre) window._mvFetesPeindre();   // FETES-1 (§347) : l'état est celui de la personne connectée
   // Vigne et Tracteur ne sont plus des onglets : leurs blocs vivent dans la roue
   // crantée de leur module (lot NAV-1, #ovReglVigne / #ovReglTracteur).
   ['domaine','equipe','app'].forEach(function(t){
@@ -711,7 +712,7 @@ function renderActTracList(){
           +'<div class="mv-l" style="margin-top:2px">'
           +(trac?_escHtml(trac.nom)+(trac.modele?' \u2014 '+_escHtml(trac.modele):''):'Aucune machine par d\u00e9faut')+'</div>'
         +'</div>'
-        +champBadge
+        +champBadge+((window._mvActCoeq&&window._mvActCoeq(a))?_mvBadge('À deux','neutre'):'')   // COEQ-1 (§343)
       +'</div>'
       +'<div class="mv-ft">'
         +'<div class="mv-l">Bar\u00e8me \u2014 heures machine par hectare</div>'
@@ -788,6 +789,7 @@ function openEditActTrac(actNom){
   if(toggle)toggle.style.background=hasChamp?'var(--vert)':'rgba(0,0,0,0.1)';
   if(knob)knob.style.transform=hasChamp?'translateX(20px)':'translateX(0)';
   var _feedsEl=document.getElementById('eat-champ-feeds'); if(_feedsEl)_feedsEl.checked=!!(act.champCustom&&act.champCustom.feedsPlantation);
+  var _coeqEl=document.getElementById('eat-coeq'); if(_coeqEl)_coeqEl.checked=!!(window._mvActCoeq&&window._mvActCoeq(act));   // COEQ-1 (§343)
   if(hasChamp){
     document.getElementById('eat-champ-label').value=act.champCustom.label;
     var t=act.champCustom.type||'nombre';
@@ -815,6 +817,7 @@ function saveEditActTrac(){
   var champType=document.getElementById('eat-champ-type-val').value||'nombre';
   var _feeds=!!((document.getElementById('eat-champ-feeds')||{}).checked) && champType==='nombre';
   act.champCustom=(champActif&&champLabel)?{label:champLabel,type:champType,feedsPlantation:_feeds}:null;
+  var _coeqEl=document.getElementById('eat-coeq'); if(_coeqEl) act.coequipier=!!_coeqEl.checked;   // COEQ-1 (§343) : la décision de l'admin l'emporte sur le réglage d'office
   window.ACTIVITES=window.ACTIVITES;
   window.saveData('activites');
   window.closeOv(null,'ovEditActTrac');

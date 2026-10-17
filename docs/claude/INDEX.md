@@ -395,3 +395,12 @@
 | 340 | 340. ★★ JALONS-1 — LE CALCUL DES JALONS ET LEUR MÉMOIRE : UN DOCUMENT PAR PERSONNE, QU’ELLE SEULE LIT ET ÉC… | `docs/claude/chantiers-330-379.md` |
 | 341 | 341. ★★ JALONS-2 — LES JALONS S’AFFICHENT : « NOUVEAU JALON » APRÈS UNE VALIDATION, « MES JALONS » DANS « M… | `docs/claude/chantiers-330-379.md` |
 | 342 | 342. ★★ JALONS-2B — CORRECTIF DES JALONS : UNE LECTURE REFUSÉE OU IMPOSSIBLE N’EST PAS « AUCUN JALON » (16/… | `docs/claude/chantiers-330-379.md` |
+| 343 | 343. ★★ COEQ-1 — LE COÉQUIPIER, CHOISI AVEC L’ACTIVITÉ DU TRACTEUR (16/10 — `src/tracteur.js` (`_mvActCoeq`… | `docs/claude/chantiers-330-379.md` |
+| 344 | 344. ★★ PRESENCE-1 — « TA PRÉSENCE EST NOTÉE » : LES OPÉRATIONS DU CHAI OÙ L’ADMIN A COCHÉ LA PERSONNE, SUR… | `docs/claude/chantiers-330-379.md` |
+| 345 | 345. ★★ PREMIERES-1 — « VOS PREMIÈRES FOIS » : LA FRISE DU PARCOURS AU DOMAINE, SUR LES VRAIES DATES (16/10… | `docs/claude/chantiers-330-379.md` |
+| 346 | 346. ★★ PRESENCE-2 — « QUI ÉTAIT LÀ » AU CUVIER : LA PRÉSENCE NOTÉE AU TRAVAIL DU CHAPEAU (16/10 — `src/cuv… | `docs/claude/chantiers-330-379.md` |
+| 347 | 347. ★ FETES-1 — « ANNONCER MES JALONS » SE COUPE (16/10 — `src/jalons.js` (`_mvFetesCle`, `_mvFetesOn`, `_… | `docs/claude/chantiers-330-379.md` |
+| 348 | 348. ★ PRESENCE-2B — « QUI » : UN SEUL CHAMP POUR QUI ÉTAIT LÀ AU CUVIER, CELUI DE LA TOURNÉE (16/10 — `src… | `docs/claude/chantiers-330-379.md` |
+| 349 | 349. ★★ RANGBOUT-1 — DU RANG À LA BOUTEILLE : « LES VINS DE VOTRE TRAVAIL » (16/10 — `src/jalons.js` (`_mvR… | `docs/claude/chantiers-330-379.md` |
+| 350 | 350. ★★ CARTEDOM-1 — « LA CARTE DE VOTRE SAISON » : LES PARCELLES COLORÉES SELON LES PASSAGES (16/10 — `src… | `docs/claude/chantiers-330-379.md` |
+| 351 | 351. ★★ SAISONIMG-1 — « MA SAISON EN IMAGES » : SIX CARTES ET UN PDF (16/10 — `src/jalons.js` (`_mvSaisonIm… | `docs/claude/chantiers-330-379.md` |

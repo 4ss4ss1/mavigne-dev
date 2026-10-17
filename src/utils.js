@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.09';
+export const APP_VERSION = '9.18';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,50 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.18', d: '2026-10-16', items: [
+    { niv: 1, pour: ['tous'], emoji: 'etoile', titre: 'Ma saison en images',
+      desc: "Dans « Ma trace », six cartes racontent votre saison : votre part en hectares, votre parcelle de cœur, vos gestes, le tracteur et la cave, vos premières fois et vos jalons, les vins nés de votre travail. "
+        + "Elles se font défiler du doigt, et « Enregistrer en PDF » en garde une copie." },
+  ] },
+  { v: '9.17', d: '2026-10-16', items: [
+    { niv: 1, pour: ['tous'], emoji: 'carte', titre: 'La carte de votre saison',
+      desc: "Dans « Ma trace », les parcelles du domaine sont dessinées et colorées selon vos passages depuis le début de la saison : aucun, un, deux à trois, quatre et plus. Un appui sur une parcelle donne son nom et le nombre de passages. "
+        + "La carte n’a pas de fond : elle s’affiche aussi sans réseau, dans les vignes." },
+  ] },
+  { v: '9.16', d: '2026-10-16', items: [
+    { niv: 1, pour: ['tous'], emoji: 'raisin', titre: 'Du rang à la bouteille : les vins de votre travail',
+      desc: "Dans « Ma trace », « Les vins de votre travail » relie ce que vous avez fait dans les parcelles aux vins qui en sont nés : pour chaque millésime, la cuvée (en cuve, en élevage ou en bouteille), les parcelles d’où elle vient, et ce que vous y avez fait — la taille, le relevage, la vendange… "
+        + "Le chemin est celui que la Cave connaît déjà : la récolte de la parcelle, sa cuve, la cuvée du décuvage." },
+  ] },
+  { v: '9.15', d: '2026-10-16', items: [
+    { niv: 0, pour: ['tous'], emoji: 'verre', titre: 'La tournée du Cuvier note aussi votre présence',
+      desc: "Les personnes nommées dans « Qui ? » de la tournée du Cuvier voient sur leur Accueil que leur présence est notée, comme pour un relevé ou une opération du Chai. Celui qui fait la tournée ne se le signale pas à lui-même." },
+  ] },
+  { v: '9.14', d: '2026-10-16', items: [
+    { niv: 0, pour: ['tous'], emoji: 'etoile', titre: 'L’annonce des jalons se coupe',
+      desc: "Réglages › Moi › Mon compte : « Annoncer mes jalons ». Coupée, la ligne « Nouveau jalon » ne s’affiche plus après une validation ; vos jalons se comptent quand même et restent dans « Ma trace ». "
+        + "Le réglage vaut pour ce téléphone." },
+  ] },
+  { v: '9.13', d: '2026-10-16', items: [
+    { niv: 1, pour: ['tous'], emoji: 'verre', titre: 'Au Cuvier aussi, votre présence est notée',
+      desc: "Le relevé d’une cuve a maintenant « Qui était là » sous les remontages et les pigeages. Les personnes cochées le voient sur leur Accueil pendant trois jours, avec le pourquoi du geste, comme pour les opérations du Chai. "
+        + "Le premier remontage et le premier pigeage entrent dans « Vos premières fois »." },
+  ] },
+  { v: '9.12', d: '2026-10-16', items: [
+    { niv: 1, pour: ['tous'], emoji: 'drapeau', titre: 'Vos premières fois',
+      desc: "Dans « Ma trace », une frise retrace votre parcours au domaine : l’arrivée, la première validation, le premier hectare, le premier trou de tarière, le premier ouillage, un an au domaine… avec leurs vraies dates. "
+        + "Celles qui viennent, comme la première vendange ou la première taille, attendent en pointillé." },
+  ] },
+  { v: '9.11', d: '2026-10-16', items: [
+    { niv: 1, pour: ['tous'], emoji: 'verre', titre: 'Votre présence au chai est notée',
+      desc: "Quand l’administrateur vous coche parmi les intervenants d’une opération du Chai (ouillage, soutirage, sulfitage…), votre Accueil vous le dit pendant trois jours : qui vous a noté, sur quoi, pour quels vins, avec qui, et pourquoi on fait ce geste. "
+        + "« Vu » range la carte. Côté administrateur, une phrase sous les intervenants le rappelle." },
+  ] },
+  { v: '9.10', d: '2026-10-16', items: [
+    { niv: 1, pour: ['tous'], emoji: 'tracteur', titre: 'Le coéquipier, choisi avec l’activité',
+      desc: "Pour la tarière, l’ensemencement et l’engrais, la nouvelle session propose un coéquipier, choisi en même temps que l’activité. Il apparaît dans la fiche de la session, et ses trous de tarière et ses hectares comptent pour ses jalons. "
+        + "L’administrateur peut le proposer pour d’autres activités, ou l’enlever, dans les réglages du tracteur (« Se fait à deux »)." },
+  ] },
   { v: '9.09', d: '2026-10-16', items: [] },   // JALONS-2B (§342) : correctif des jalons (lecture refusée ou impossible, écriture des seuls nouveaux) — rien de visible
   { v: '9.08', d: '2026-10-15', items: [
     { niv: 1, pour: ['tous'], emoji: 'etoile', titre: 'Vos jalons s’affichent',
@@ -3905,7 +3949,7 @@ donnent la même date. + et − déplacent une personne, la date de fin de chaqu
     { emoji: 'bouclier', titre: 'Votre conformité réglementaire en direct', desc: "Toujours dans Pilotage, un onglet « Conformité » réunit trois suivis longtemps calculés en coulisse, enfin visibles au même endroit. Le cuivre : le cumul de cuivre métal sur 7 ans de chaque parcelle face au plafond bio de 28 kg/ha, avec un code couleur qui signale les dépassements. Les passages phyto : le nombre d’interventions par parcelle sur la saison, comparé à une référence régionale que vous ajustez dans Réglages. Et le délai de rentrée (DRE) : après un traitement, les parcelles où l’entrée reste interdite, avec l’heure exacte à laquelle elles redeviennent accessibles." }
   ] },
   { v: '5.37', items: [
-    { emoji: 'loupe', titre: 'Lire plus facilement, même en plein soleil', desc: "Deux améliorations pour la lisibilité en extérieur. D'abord, le pincer-pour-zoomer est réactivé partout dans l'application : écartez deux doigts pour agrandir un petit texte, un tableau ou la carte — rien n'est verrouillé, c'est vous qui choisissez la taille. Ensuite, le mode « Plein soleil » (contraste renforcé pour l'extérieur) retrouve son accès dans Réglages › Application, d'un simple appui." },
+    { emoji: 'loupe', titre: 'Lire plus facilement, même en plein soleil', desc: "Deux améliorations pour la lisibilité en extérieur. D'abord, le pincer-pour-zoomer est réactivé partout dans l'application : écartez deux doigts pour agrandir un petit texte, un tableau ou la carte — rien n'est verrouillé, c'est vous qui choisissez la taille. Ensuite, le mode « Plein soleil » (contraste renforcé pour l'extérieur) retrouve son accès dans Réglages › Moilication, d'un simple appui." },
     { emoji: 'nombre', titre: 'Les fenêtres se ferment au clavier', desc: "Sur ordinateur, la touche Échap referme n'importe quelle fenêtre ouverte ; le focus reste à l'intérieur de la fenêtre (fini le saut inattendu vers l'arrière-plan) puis revient à sa place à la fermeture. Les lecteurs d'écran annoncent désormais correctement l'ouverture d'une fenêtre." },
     { emoji: 'eclair', titre: 'Des écrans plus rapides', desc: "L'application démarre plus vite : la carte n'est plus chargée qu'au moment où vous l'ouvrez (Parcelles ou Pilotage), au lieu de peser sur chaque démarrage — y compris l'écran de connexion. Et pendant qu'un module se remplit, une trame de chargement remplace l'écran blanc, pour une attente plus douce." },
     { emoji: 'doigt', titre: 'Mieux installée sur votre téléphone', desc: "Quelques réglages internes améliorent le comportement de Ma Vigne quand elle est installée sur l'écran d'accueil de votre téléphone, et renforcent la redirection vers le domaine officiel de l'application." }
@@ -5153,6 +5197,12 @@ var MV_AIDE = {
   home: {
     ico: 'feuille', titre: 'Accueil', ancre: 'vigne',
     points: [
+      ['Ma saison en images', " : dans « Ma trace », six cartes qui racontent votre saison ; « Enregistrer en PDF » en garde une copie."],
+      ['La carte de votre saison', " : dans « Ma trace », les parcelles colorées selon vos passages depuis le début de la saison ; elle s’affiche aussi sans réseau."],
+      ['Les vins de votre travail', " : dans « Ma trace », pour chaque millésime, les cuvées nées des parcelles où vous avez travaillé, et ce que vous y avez fait."],
+      ['Annoncer mes jalons', " : Réglages › Moi › Mon compte. Coupée, l’annonce « Nouveau jalon » se tait après une validation ; les jalons se comptent quand même (« Ma trace »)."],
+      ['Vos premières fois', " : dans « Ma trace », la frise de votre parcours au domaine, avec les vraies dates ; celles qui viennent attendent en pointillé."],
+      ['Ta présence est notée', " : quand l’admin vous coche parmi les intervenants d’une opération du Chai, l’Accueil vous le dit pendant trois jours, avec le pourquoi du geste. « Vu » range la carte."],
       ['Mes jalons', " : dans « Ma trace », ceux que vous avez gagnés et les trois prochains. Quand une validation vous en fait atteindre un, la feuille qui suit l’annonce. Vous seul les voyez."],
       ['Chez un ouvrier', " : la Vigne a deux onglets, Accueil et Parcelles. On valide depuis les Parcelles ; le Journal reste à l’administrateur et au pilotage. « Ma semaine » mène à « Ma trace », l’historique de votre travail."],
       ['Sur ordinateur', " : les modules sont dans la <b>barre à gauche</b> (repliable), et <b>Ctrl K</b> ouvre une recherche — une parcelle, un écran, un onglet du Pilotage. Sur téléphone et tablette, rien ne change."],
@@ -5210,6 +5260,7 @@ var MV_AIDE = {
   tracteur: {
     ico: 'tracteur', titre: 'Tracteur', ancre: 'tracteur',
     points: [
+      ['À deux', " : pour la tarière, l’ensemencement et l’engrais, la nouvelle session propose un <b>coéquipier</b>, choisi avec l’activité ; il apparaît dans la fiche de la session. L’admin règle quelles activités se font à deux (réglages du tracteur, « Se fait à deux »)."],
       ['Pourquoi ?', " : dans la fiche d’une session, la pastille <b>« Pourquoi ? »</b> sous l’activité explique pourquoi on la fait : rognage, labour, tarière, engrais, ensemencement, traitements."],
       ['Sur un ordinateur', "toucher une session la choisit : sa fiche s’ouvre à droite — avancement, surface, parcelles, note. Le bouton de la fiche ouvre la feuille de travail (chrono, parcelles), comme un appui au téléphone. Dans l’Entretien, les machines et la cuve de GNR passent à gauche, la révision et les derniers contrôles à droite."],
       ['Heures et GNR d’une session', "les heures viennent du chrono quand il a mesuré la parcelle, sinon du barème de l’activité (h/ha × surface) ; la fiche dit lesquelles. Le GNR est ces heures fois la consommation réglée dans Réglages, 6 L par heure tant qu’elle ne l’est pas — la même valeur que le Pilotage. La bande du haut fait le total de la saison."],
@@ -5280,6 +5331,8 @@ var MV_AIDE = {
   cave: {
     ico: 'verre', titre: 'Cave', ancre: 'cave',
     points: [
+      ['Qui était là', " : dans le relevé d’une cuve du Cuvier — ou dans « Qui ? » de la tournée — les personnes présentes au travail du chapeau (remontages, pigeages) le voient sur leur Accueil, avec le pourquoi du geste."],
+      ['Les intervenants le voient', " : ceux que vous cochez dans <b>Nouvelle opération</b> voient sur leur Accueil que leur présence est notée, avec le pourquoi du geste."],
       ['Pourquoi ?', " : dans <b>Nouvelle opération</b>, la pastille <b>« Pourquoi ? »</b> sous les types explique le geste choisi : ouillage, soutirage, soufre, traitement, filtration, dégustation, analyse."],
       ['Le Chai sur un ordinateur', "toucher une cuvée la choisit : sa fiche s’ouvre à droite de la liste — ouillage, analyses, soutirage, opérations, et ses boutons. Après une opération, la fiche se met à jour sur place."],
       function () {
@@ -6212,8 +6265,14 @@ export function _mvPqBtn(libelle, ctx) {
     ] };
   });
 })();
+// PRESENCE-1 (§344) : un champ d'une fiche, en texte brut (« p » = pourquoi, « q » = quand, « v » = pour le vin).
+export function _mvPqTexte(libelle, ctx, champ) {
+  var s = _mvPqResout(libelle, ctx);
+  return s ? (MV_POURQUOI[s][champ || 'p'] || '') : '';
+}
 window._mvPqBtn = _mvPqBtn;
 window._mvPqCle = _mvPqCle;
+window._mvPqTexte = _mvPqTexte;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // LES ICONES — lot DS-1
