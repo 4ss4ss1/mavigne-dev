@@ -3,9 +3,9 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **17 octobre 2026 (COMPTE-1)** — ★★ **LES PIEDS MARQUÉS CHIFFRENT L’ENTREPLANTATION, ET UNE TÂCHE COCHÉE EN MODIFIANT UNE PÉRIODE ENTRE DANS LE DOMAINE** (§353, §352). Base `c05f624`, cumulatif avec TACHEPER-1 (§352, jamais poussé : le zip COMPTE-1 le contient).
-> `src/comptes.js` (neuf) : le compte sur la parcelle (`p.trous_marques`), donné par qui valide une tâche réglée « Demander le nombre de pieds marqués » (le pavé `#ovCompte`) ou par l’admin pour toutes les parcelles (`#ovComptes`, « Saisir les comptes ») ; trous prévus = le plus grand des deux (marqués, trous de la parcelle), lus par `_plantParcTrous` partout ; comptée à zéro = hors entreplantation ; tarière préremplie. TACHEPER-1 : `_perAssureTaches`, écrivain unique de la création et de la modification d’une période, et réparation à l’ouverture chez un admin.
-> **APP 9.18 → 9.19, SW 9.97 → 9.98.** Canal « refonte » : `npm run site` → `npm run build` → `firebase hosting:channel:deploy refonte` (aucune règle ne change).
+> Dernière consolidation : **17 octobre 2026 (COMPTE-2)** — **UNE ENTREPLANTATION VALIDÉE PAR LE JOURNAL ÉCRIT SES PIEDS** (§354). Base `c988bf5` (COMPTE-1 poussé).
+> `saveJournalEntry` passe par `_cptAuValider` comme « Valider » : l’entrée porte les trous prévus, et le temps réalisé du Pilotage les lit. Vérifié au passage : il n’existe pas de validation en lot dans la Vigne. Un repérage tapé au Journal ne demande pas le compte (feuille des comptes).
+> **Pas de bump** (module JS seul : `src/app.js`), pas d’annonce. Canal « refonte » : `npm run build` → `firebase hosting:channel:deploy refonte`.
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1860,7 +1860,7 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ### ⚠️ COMPTE-1 et TACHEPER-1 — CE QUI RESTE OUVERT (§352, §353, posé le 17/10)
 1. **À regarder chez Nico** (téléphone et ordinateur) : le pavé, la feuille des comptes, la fiche (marqués · percés · plantés, « Corriger le compte »), la tarière préremplie — aucun harnais ne lit une mise en page. **Le domaine du signalement** n’aura la réparation qu’au déploiement général (contournement « + Nouvelle tâche » fait le 16/10).
-2. **Pas de tâche « Repérage » dans la convention** (elle exigerait sa fiche POURQUOI-1) : chaque domaine crée la sienne et coche le réglage au crayon. Ne demandent pas le compte : la validation en lot et l’entrée de journal à la main (à confirmer). Idée non demandée : le total par cépage pour commander les plants.
+2. **Pas de tâche « Repérage » dans la convention** (elle exigerait sa fiche POURQUOI-1) : chaque domaine crée la sienne et coche le réglage au crayon. L’entrée de journal à la main ne demande pas le compte (feuille des comptes) mais écrit les pieds de l’entreplantation (COMPTE-2, §354) ; il n’existe pas de validation en lot dans la Vigne (vérifié le 17/10). Idée non demandée : le total par cépage pour commander les plants.
 
 ### ⚠️ JALONS-1, JALONS-2 et JALONS-2B — CE QUI RESTE OUVERT (§340 à §342, posé le 15/10)
 0. **Le canal « refonte » partage la base et les règles de la production** (Nico, 16/10 : tout passe par `hosting:channel:deploy

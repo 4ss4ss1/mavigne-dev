@@ -42,7 +42,7 @@ async function controles(K) {
   r.push(['le pavé : quatre chiffres au plus, « moins » ne passe pas sous zéro', f.val === '1234' && M._cptPas({ val: '0', frais: false }, 'moins').val === '0' && M._cptPas({ val: '', frais: false }, 'zero').val === '0']);
   return r;
 }
-function cablage() {
+function cablage(A) {
   const pq = A.slice(A.indexOf('function pQuickValidate('), A.indexOf('function pQuickUndoEntry('));
   const cv = A.slice(A.indexOf('function confirmValidation('), A.indexOf('function confirmValidation(') + 6000);
   return [
@@ -60,6 +60,8 @@ function cablage() {
     ['les icônes du pavé existent dans le sprite', /<symbol id="ic-moins"/.test(H) && /<symbol id="ic-effacer"/.test(H)],
     ['aucune couleur en dur dans le style du lot', (() => { const b = S.slice(S.indexOf('/* ★★ COMPTE-1 (§353)'), S.indexOf('/* ★ FIN COMPTE-1 */')); return b.length > 500 && !/#[0-9a-fA-F]{3,6}\b/.test(b) && !/font-size:\s*\d/.test(b); })()],
     ['les textes de la feuille passent par l’échappement', /<b>'\+n\+'<\/b>/.test(K0) && /var n=_e\(p\.nom\)/.test(K0)],
+    // COMPTE-2 (§354) : le Journal tapé à la main écrit les pieds de l'entreplantation (le temps réalisé du Pilotage).
+    ['l’entrée de journal écrit les pieds d’une entreplantation validée', (() => { const sj = A.slice(A.indexOf('async function saveJournalEntry('), A.indexOf('async function saveJournalEntry(') + 5000); return /if\(statut==='Validé'&&!_jeEt&&_jeP&&typeof window\._cptAuValider==='function'\) window\._cptAuValider\(_jeP,tache,jEntry,null\);\n  JOURNAL\.unshift/.test(sj); })()],
   ];
 }
 let ok = 0, ko = 0;
@@ -67,7 +69,7 @@ const t = (x, c, d) => { if (c) { ok++; if (!CONTRE) console.log('  \x1b[32m✓\
 if (!CONTRE) {
   console.log('\n── COMPTE-1 — les pieds marqués\n');
   for (const [x, c, d] of await controles(K0)) t(x, c, d);
-  for (const [x, c] of cablage()) t(x, c);
+  for (const [x, c] of cablage(A)) t(x, c);
   console.log(`\n  ${ok} vertes, ${ko} rouges\n`); process.exit(ko ? 1 : 0);
 }
 console.log('\n── COMPTE-1 — contre-épreuve\n');
@@ -81,4 +83,14 @@ for (const [x, K, cible] of essais) {
   let vu; try { vu = (await controles(K)).some(([y, c]) => y.startsWith(cible) && !c); } catch (e) { vu = true; console.log('      (plantage, donc vu : ' + String(e && e.message).slice(0, 60) + ')'); }
   if (vu) console.log('  \x1b[32m✓\x1b[0m ' + x); else { rates++; console.log('  \x1b[31m✗\x1b[0m ' + x + ' — non vu'); }
 }
-console.log(`\n  ${essais.length - rates} contre-épreuve(s) tenue(s) sur ${essais.length}\n`); process.exit(rates ? 1 : 0);
+// Contre-épreuves du câblage : le code d'app.js muté, l'assertion visée doit rougir.
+const essaisA = [
+  ['un Journal qui oublie les pieds de l’entreplantation est vu', A.replace("if(statut==='Validé'&&!_jeEt&&_jeP&&typeof window._cptAuValider==='function') window._cptAuValider(_jeP,tache,jEntry,null);", ''), 'l’entrée de journal écrit'],
+  ['« Annuler » qui ne remet plus le compte est vu', A.replace('if(typeof window._cptDefaire===\'function\') window._cptDefaire(p,JOURNAL[idx]); ', ''), '« Annuler » remet'],
+];
+for (const [x, AM, cible] of essaisA) {
+  const vu = AM !== A && cablage(AM).some(([y, c]) => y.startsWith(cible) && !c);
+  if (vu) console.log('  \x1b[32m✓\x1b[0m ' + x); else { rates++; console.log('  \x1b[31m✗\x1b[0m ' + x + ' — non vu'); }
+}
+const total = essais.length + essaisA.length;
+console.log(`\n  ${total - rates} contre-épreuve(s) tenue(s) sur ${total}\n`); process.exit(rates ? 1 : 0);

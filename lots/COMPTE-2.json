@@ -1,0 +1,17 @@
+{
+  "lot": "COMPTE-2",
+  "section": "§354",
+  "base": "c988bf5589d8fb138cac03f68633f51ccdea03b4",
+  "inclut": [],
+  "date": "2026-10-17",
+  "fichiers": {
+    ".mv-base": "1323c4a72df004c0f75f2c9716c2c45a27538e927ae22ccca7f5db268199c8b5",
+    "CLAUDE.md": "c97f4dff47b2e2ff3abbffcd85ea81672010af4a6531915a7e48f7c8dc0d466d",
+    "docs/claude/INDEX.md": "de4d42e64dff37015d654958f8c8f912c9a6b9b25458e846c1c34cbb02865792",
+    "docs/claude/chantiers-330-379.md": "c2047e735139e2fca564e4fb7081d68ca44082747e6cb2c2566322bdd339b3b2",
+    "docs/claude/journal.md": "2928acd1017d3a837a705c3feab634718d54d9d186a704a09b5898ab0ff87c0a",
+    "scripts/harnais-claude-md.mjs": "afac9ae334471eedf992945062363c7d8397ea38df41aff6a466a5636b85af9c",
+    "scripts/mv-harnais-compte1.mjs": "a62eb8a7b10d839a8100e83d416fa4332afb3b8eb7c56eb88f0c337e06290df4",
+    "src/app.js": "8b78f66403c35171e4401f3040cfd237e29351280beec8c2f17cf1d24e8cd878"
+  }
+}

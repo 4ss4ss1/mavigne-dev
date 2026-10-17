@@ -8,6 +8,10 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **17 octobre 2026 (COMPTE-1)** — ★★ **LES PIEDS MARQUÉS CHIFFRENT L’ENTREPLANTATION, ET UNE TÂCHE COCHÉE EN MODIFIANT UNE PÉRIODE ENTRE DANS LE DOMAINE** (§353, §352). Base `c05f624`, cumulatif avec TACHEPER-1 (§352, jamais poussé : le zip COMPTE-1 le contient).
+> `src/comptes.js` (neuf) : le compte sur la parcelle (`p.trous_marques`), donné par qui valide une tâche réglée « Demander le nombre de pieds marqués » (le pavé `#ovCompte`) ou par l’admin pour toutes les parcelles (`#ovComptes`, « Saisir les comptes ») ; trous prévus = le plus grand des deux (marqués, trous de la parcelle), lus par `_plantParcTrous` partout ; comptée à zéro = hors entreplantation ; tarière préremplie. TACHEPER-1 : `_perAssureTaches`, écrivain unique de la création et de la modification d’une période, et réparation à l’ouverture chez un admin.
+> **APP 9.18 → 9.19, SW 9.97 → 9.98.** Canal « refonte » : `npm run site` → `npm run build` → `firebase hosting:channel:deploy refonte` (aucune règle ne change).
+
 > Dernière consolidation : **16 octobre 2026 (SAISONIMG-1)** — ★★ **« MA SAISON EN IMAGES » : SIX CARTES ET UN PDF — LE PLAN GRATIF EST AU BOUT** (§351). Base `d29f619`, cumulatif avec CARTEDOM-1, RANGBOUT-1, PRESENCE-2B, FETES-1, PRESENCE-2, PREMIERES-1, PRESENCE-1 et COEQ-1 (§350 à §343, jamais poussés : le zip SAISONIMG-1 les contient).
 > `jalons.js` : `_mvSaisonImages` (exécutable) bâtit six cartes depuis les calculs déjà là — sa part en hectares, jours, km, pieds ; la parcelle de cœur ; ses gestes ; le tracteur et la cave ; les premières fois et jalons DE la saison ; les vins, puis « Merci ». « Ma trace » › « Ma saison en images » (`#ovSaisonImg`, cartes à faire défiler) ; « Enregistrer en PDF » passe par `_mvDocOpen`. Vu au navigateur.
 > **APP 9.17 → 9.18, SW 9.96 → 9.97.** Canal « refonte » : `npm run site` → `npm run build` → `firebase hosting:channel:deploy refonte` (aucune règle ne change).

@@ -552,3 +552,15 @@ Nico (16/10) : « beaucoup de domaines marquent leurs trous avant de les faire �
 - ⚠️ **Dans ce bac à sable, `npm run check` lancé d’un bloc s’arrête au 6ᵉ contrôle sans message** (deux fois) ; le même contrôle seul est vert. Les 431 ont été joués par tranches, en parallèle, et les six plus longs seuls (preflight, trois robustesses, icônes, récupération). Rien de tel n’est connu chez Nico ni en CI : à confirmer à son prochain `npm run check`.
 - **Construit** (`vite build`, après `node scripts/mv-gt-page.mjs` qui fabrique `gt.html`, ignoré par git) : le paquet porte le module.
 - ⚠️ **Non vu au navigateur dans l’appli** : la mise en page du pavé et de la feuille (vus dans la maquette seulement).
+
+## 354. COMPTE-2 — UNE ENTREPLANTATION VALIDÉE PAR LE JOURNAL ÉCRIT SES PIEDS (17/10 — `src/app.js` (`saveJournalEntry`) · `scripts/mv-harnais-compte1.mjs` (une assertion, deux contre-épreuves de câblage) · pas de bump, base `c988bf5`)
+
+### 354a. D’où ça vient
+Le « à confirmer » laissé par COMPTE-1 (§353) : deux chemins ne demandaient pas le compte. Vérifié dans le code : la validation en lot n’existe pas dans la Vigne (les cartes, la carte du domaine et la fiche passent par `pQuickValidate` et `confirmValidation`). Reste l’entrée de journal tapée à la main : une entreplantation validée par là n’écrivait pas ses pieds, et le Pilotage (`ev.trous||p.plantation_trous`) retombait sur les seuls trous de tarière — 0 h sans tarière.
+
+### 354b. Ce qui a été fait
+- `saveJournalEntry` appelle `_cptAuValider(p, tâche, entrée, null)` pour une validation (hors étape d’arrachage) : pour une tâche à trous, l’entrée porte les trous prévus de la parcelle s’ils existent ; pour une tâche qui demande le compte, rien (le compte se saisit dans la feuille). Le même chemin que « Valider », pas une copie.
+- **Pas d’annonce, pas de bump** : le chemin est rare (une saisie de l’admin au Journal) et le seul fichier de l’appli touché est un module JS.
+
+### 354c. Ce qui a été vérifié
+- `scripts/mv-harnais-compte1.mjs` : 28 assertions ; contre-épreuves 5 sur 5 (les trois des règles, et deux de câblage qui mutent `app.js` : le Journal qui oublie les pieds, « Annuler » qui ne remet plus le compte).

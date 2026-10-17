@@ -10283,6 +10283,9 @@ async function saveJournalEntry(){
   }
   // Météo moyenne si validation — VALID-1 (§242) : calculée d'abord, demandée APRÈS l'enregistrement (fin de fonction).
   var _mDeb=(statut==='Validé')?(_findDebutTache(parcelle,tache,date)||date):'';
+  // ★ COMPTE-2 (§354) : une entreplantation validée par le Journal écrit ses pieds (les trous prévus de la parcelle), comme
+  //   « Valider » : le temps réalisé du Pilotage se lit sur l'entrée. Un repérage n'y demande pas le compte (feuille des comptes).
+  if(statut==='Validé'&&!_jeEt&&_jeP&&typeof window._cptAuValider==='function') window._cptAuValider(_jeP,tache,jEntry,null);
   JOURNAL.unshift(_mvEqApplique(jEntry));
   // Mettre à jour le statut de la parcelle si validé
   if(_jeEt&&statut==='Validé'){

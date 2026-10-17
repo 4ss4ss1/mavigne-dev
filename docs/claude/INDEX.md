@@ -406,3 +406,4 @@
 | 351 | 351. ★★ SAISONIMG-1 — « MA SAISON EN IMAGES » : SIX CARTES ET UN PDF (16/10 — `src/jalons.js` (`_mvSaisonIm… | `docs/claude/chantiers-330-379.md` |
 | 352 | 352. ★ TACHEPER-1 — UNE TÂCHE COCHÉE EN MODIFIANT UNE PÉRIODE ENTRE DANS LE DOMAINE (17/10 — `src/reglages.… | `docs/claude/chantiers-330-379.md` |
 | 353 | 353. ★★ COMPTE-1 — LES PIEDS MARQUÉS CHIFFRENT L’ENTREPLANTATION, AVANT LA TARIÈRE (17/10 — `src/comptes.js… | `docs/claude/chantiers-330-379.md` |
+| 354 | 354. COMPTE-2 — UNE ENTREPLANTATION VALIDÉE PAR LE JOURNAL ÉCRIT SES PIEDS (17/10 — `src/app.js` (`saveJour… | `docs/claude/chantiers-330-379.md` |
