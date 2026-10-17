@@ -32,6 +32,10 @@
 
 export const GROUPES = {
 
+  // COMPTE-1 (§353) : le compte du repérage devient les trous prévus de l'entreplantation.
+  'entreplantation-pieds-marques': 'Pieds marqués — le compte du repérage chiffre l’entreplantation, avant la tarière',
+  // TACHEPER-1 (§352) : une tâche cochée dans une période existe dans le domaine.
+  'periodes-taches-du-domaine': 'Périodes — une tâche cochée, à la création comme à la modification, entre dans le domaine',
   // POURQUOI-1 (§336) : le catalogue « Pourquoi on le fait » couvre chaque tâche, activité et opération ; ses pastilles sont posées.
   'pourquoi-une-fiche-par-tache': 'Pourquoi on le fait — une fiche par tâche, posée là où le geste a lieu',
   // ARRIVEE-1 (§337) : qui a le Journal — une seule question, posée partout.
@@ -420,6 +424,10 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-cartedom1.mjs --contre', 'premieres-fois'],
   ['node scripts/mv-harnais-saisonimg1.mjs', 'premieres-fois'],   // SAISONIMG-1 (§351) : « Ma saison en images »
   ['node scripts/mv-harnais-saisonimg1.mjs --contre', 'premieres-fois'],
+  ['node scripts/mv-harnais-tacheper1.mjs', 'periodes-taches-du-domaine'],   // TACHEPER-1 (§352) : une tâche cochée en modifiant une période entre dans le domaine
+  ['node scripts/mv-harnais-tacheper1.mjs --contre', 'periodes-taches-du-domaine'],
+  ['node scripts/mv-harnais-compte1.mjs', 'entreplantation-pieds-marques'],   // COMPTE-1 (§353) : les pieds marqués chiffrent l'entreplantation
+  ['node scripts/mv-harnais-compte1.mjs --contre', 'entreplantation-pieds-marques'],
   ['node scripts/mv-harnais-pil-coherence.mjs'],
   ['node scripts/mv-harnais-axe.mjs'],
   ['node scripts/mv-harnais-sauvegarde.mjs'],

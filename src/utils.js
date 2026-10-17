@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.18';
+export const APP_VERSION = '9.19';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,14 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.19', d: '2026-10-17', items: [
+    { niv: 1, pour: ['tous'], emoji: 'pousse', titre: 'Les pieds marqués chiffrent l’entreplantation',
+      desc: "Beaucoup de domaines marquent les pieds à remplacer avant de passer la tarière. Ce compte entre maintenant dans l’appli : en validant une tâche de repérage réglée pour le demander, un pavé de gros chiffres demande combien de pieds sont marqués sur la parcelle. "
+        + "L’administrateur peut aussi tout saisir d’un coup (roue crantée de la Vigne, sous l’entreplantation : « Saisir les comptes »). L’entreplantation compte ses heures dès le repérage, la tarière arrive préremplie, et une parcelle comptée se valide d’un seul appui." },
+    { niv: 0, pour: ['admin'], emoji: 'outil', titre: 'Une tâche ajoutée à une période existante n’apparaissait nulle part',
+      desc: "Cocher une tâche de la convention en modifiant une période déjà créée l’enregistrait dans la période sans l’ajouter aux tâches du domaine : elle n’apparaissait sur aucun écran. "
+        + "C’est corrigé, et les tâches déjà touchées réapparaissent seules dès qu’un administrateur ouvre l’appli. Le message « Période mise à jour » s’affiche aussi correctement." },
+  ] },
   { v: '9.18', d: '2026-10-16', items: [
     { niv: 1, pour: ['tous'], emoji: 'etoile', titre: 'Ma saison en images',
       desc: "Dans « Ma trace », six cartes racontent votre saison : votre part en hectares, votre parcelle de cœur, vos gestes, le tracteur et la cave, vos premières fois et vos jalons, les vins nés de votre travail. "
@@ -5241,6 +5249,8 @@ var MV_AIDE = {
       ['L’arrachage en étapes', "quand l’administrateur l’a découpé (roue crantée, <b>Tâches</b>), la fiche de la parcelle montre une puce par étape : touchez-la pour la valider à sa date. Une étape <b>prestataire</b> se valide sans compter d’heures de l’équipe. L’avancement compte la part des étapes faites ; quand celles de l’équipe sont faites partout, <b>Ma part du chantier</b> passe au suivant. Au moment choisi, l’application propose de passer la parcelle en « Arrachée »."],
       ['Arrachage, désherbage manuel, effeuillage', "ne concernent que les parcelles <b>choisies pour la campagne</b>. L’administrateur les coche dans la roue crantée, <b>Tâches</b>, sur la ligne du travail, ou une par une dans la fiche de la parcelle. Une parcelle où le travail a déjà été saisi compte d’office. L’an prochain, la liste repart vide."],
       ['Une tâche qui ne se fait pas partout', "(une réparation, un pliage…) concerne toutes les parcelles, sauf celles où on la désactive <b>pour la période</b>. L’administrateur en désactive plusieurs d’un coup dans la roue crantée, <b>Tâches</b> : la ligne du travail ouvre la liste, tout y est coché, décochez celles qui ne la feront pas (« Tout décocher » quand il en reste peu à garder). Une seule se règle aussi depuis sa fiche, avec la croix. À la période suivante, toutes repartent concernées : l’hiver et le printemps peuvent avoir des parcelles différentes. Une parcelle où la tâche est commencée reste concernée. Désactiver la <b>Vendange</b> sur une parcelle veut dire qu’elle ne sera pas récoltée cette année : la Cave et le Revient le lisent aussi, et Le Cuvier ouvre la même liste depuis «\u00a0Encore sur pied\u00a0»."],
+      ['Les pieds marqués', " : quand une tâche de repérage demande le compte (réglage de l’administrateur, le crayon de la tâche), « Valider » ouvre un pavé de gros chiffres : tapez le nombre de pieds marqués sur la parcelle, « Aucun pied à remplacer » se fait en un appui. "
+        + "Ce compte devient les trous prévus de l’<b>entreplantation</b> : une parcelle comptée s’y valide d’un seul appui, une parcelle sans compte demande combien de pieds ont été plantés, une parcelle comptée à zéro n’a rien à planter. La fiche de la parcelle montre les chiffres : marqués, percés, plantés."],
       ['Valider pour l’équipe sans y être', "l’administrateur voit sa propre puce dans le groupe («\u00a0Moi\u00a0», «\u00a0Moi aussi dans les rangs\u00a0» sur la barre d’équipe)\u00a0: décochée, la validation reste signée de son nom mais ses heures ne vont pas à la parcelle. Le choix est retenu pour la tâche."],
       ['L’état du vignoble', "s’imprime depuis la roue crantée de la Vigne, bloc Documents : toutes vos parcelles sur une page, avec la surface, le cépage, la commune, l’avancement, le dernier travail, le dernier rendement — et la liste de ce qui reste à renseigner."],
       ['Le fichier Excel des parcelles', "se prend au même endroit : une ligne par parcelle, avec la surface, l’avancement, chaque tâche et le rendement du millésime choisi en hL/ha — mesuré ou estimé, c’est écrit à côté. Avant de le télécharger, vous choisissez l’ordre : par nom (A → Z ou Z → A) ou par rendement (le plus fort ou le plus faible d’abord). Une parcelle sans récolte part en fin de liste."],
@@ -5260,6 +5270,7 @@ var MV_AIDE = {
   tracteur: {
     ico: 'tracteur', titre: 'Tracteur', ancre: 'tracteur',
     points: [
+      ['La tarière préremplie', " : une activité qui alimente les trous de l’entreplantation propose, pour chaque parcelle cochée, le nombre de pieds marqués au repérage — confirmez, ou corrigez avant de valider."],
       ['À deux', " : pour la tarière, l’ensemencement et l’engrais, la nouvelle session propose un <b>coéquipier</b>, choisi avec l’activité ; il apparaît dans la fiche de la session. L’admin règle quelles activités se font à deux (réglages du tracteur, « Se fait à deux »)."],
       ['Pourquoi ?', " : dans la fiche d’une session, la pastille <b>« Pourquoi ? »</b> sous l’activité explique pourquoi on la fait : rognage, labour, tarière, engrais, ensemencement, traitements."],
       ['Sur un ordinateur', "toucher une session la choisit : sa fiche s’ouvre à droite — avancement, surface, parcelles, note. Le bouton de la fiche ouvre la feuille de travail (chrono, parcelles), comme un appui au téléphone. Dans l’Entretien, les machines et la cuve de GNR passent à gauche, la révision et les derniers contrôles à droite."],
@@ -5491,6 +5502,7 @@ var MV_AIDE = {
   reglages: {
     ico: 'curseurs', titre: 'Réglages', ancre: 'reglages',
     points: [
+      ['Les pieds marqués', " : dans la roue crantée de la Vigne, sous l’entreplantation, « Saisir les comptes » ouvre toutes les parcelles, un nombre chacune. Le crayon d’une tâche de repérage porte « Demander le nombre de pieds marqués » : celui qui valide une parcelle donne alors son compte. Les trous prévus sont le plus grand des deux chiffres : pieds marqués, ou trous percés à la tarière."],
       function () {
         return _mvAideSections('#regl-tabs-row .mvu-tab', 'onglets',
           "Ce qui n’appartient à aucun module : le domaine, l’équipe, votre compte.");
@@ -8101,7 +8113,9 @@ function _mvSelChoisie(p, nom, camp){
 function _mvSelEligible(p, nom){
   return !!(p && p.nom != null && (p.statut !== 'Arrachee' || nom === 'Arrachage') && !_mvArrAvantPeriode(p));
 }
+// ★ COMPTE-1 (§353) : une tâche pilotée par les trous ne concerne pas une parcelle comptée à zéro (rien à planter).
 function _mvTacheConcerne(p, nom, camp){
+  if(p && typeof window._cptHors === 'function' && window._cptHors(p, nom)) return false;
   if(!p) return false;
   if(!_mvTacheSel(nom)) return (p.tachesExclues || []).indexOf(nom) < 0 && !(p.horsPer && _mvHorsPer(p, nom));   // ★ RETRAIT-1 (§325) : ou désactivée pour la période consultée
   var c = _mvCampNum(camp);

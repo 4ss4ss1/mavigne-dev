@@ -1,0 +1,32 @@
+{
+  "lot": "COMPTE-1",
+  "section": "§353",
+  "base": "c05f624c3289b36262e94656f4cb233c9533af90",
+  "inclut": [
+    "TACHEPER-1"
+  ],
+  "date": "2026-10-17",
+  "fichiers": {
+    ".mv-base": "0ec552bd7ab1804560b59fbeacfa9dcdb008c27f7d16e460604b00d0c156758e",
+    "CLAUDE.md": "58643edcfc4aab43f5305b01b1660d875e13f58f96885d678fbefca87573f527",
+    "docs/claude/INDEX.md": "a4d0d03d5673e1bf375cab44e4a1e916a393f88369f8565369536069b3efdf13",
+    "docs/claude/chantiers-330-379.md": "ad42d04b1ae2fefff07161785685b2ab979dd73ac70d5c661ec6176b4ecb6b9a",
+    "docs/claude/journal.md": "835b4f675c22c4c5dbc8ca77eca3544cee5c3ec9b60a7c6309ac847d2a381820",
+    "guide/04-vigne.html": "de31f3abaf24a2f0dcd5b6511de4426e9200713679df78568b19604e12526890",
+    "guide/06-tracteur.html": "74a241fe8b5f2991ad5402bad4bd143fdf5930e807d71ee8ad21407aae897913",
+    "index.html": "bc3b57a514e08d8dae049208373b373cdd8576b8db61eaa9fdeed790d0caa1dd",
+    "public/sw.js": "4f13f96f9c177949d0be115af44bd83f72ffbf0f7a907dcdcca9b866d102ddbc",
+    "scripts/harnais-claude-md.mjs": "eb00efcdef814048fb987e434d397d542c151d524d051da255ff373d3e3e3b2f",
+    "scripts/mv-harnais-liste.mjs": "cd07a8915131f8145034c8e2759ee6e53d8f1ccb335093f8312b2d80b44e49eb",
+    "scripts/mv-harnais-robustesse-accueil.mjs": "81b57d907790bb5dafbc92911d9537f6b9459ea2e9448132ddd8e6a26398982c",
+    "src/app.js": "23549fd5b110694fd51a029557e3223f86ff0d7ff929b2db2f069d0de5773c95",
+    "src/pilotage.js": "69416c4dd06a23087b0ba67f507039761c5f54bf04c3134aa4be8bb5a3893e99",
+    "src/reglages.js": "31eff19b0d366463616e8c8078e5ce40798c6162666a5d9879a5187b6855999c",
+    "src/styles.css": "4868ebda4f10486f5f6e0c6cce440445a93f7e22a2921d19667d357e00222d4b",
+    "src/tracteur.js": "ca883d4001798eb968a086070dc14fbad18641e6e531f45ebbfeb9b239416189",
+    "src/utils.js": "bfc93250e86e7925a5614652b0b58fad1a937fa9af35f89ece014ab92df1b558",
+    "scripts/mv-harnais-compte1.mjs": "a5b4f1ef7054dea3884a5218d6286064de1e609e919fd4629b04b7facf11ac93",
+    "scripts/mv-harnais-tacheper1.mjs": "5c051409cbbb63f9253049d05693dfdb0c4bf544cde6b1dd82f9d898a33542f7",
+    "src/comptes.js": "15f62a36f572e44100960ccfc5eb4541d2f259b926b1f7424b9d86ff06d05986"
+  }
+}

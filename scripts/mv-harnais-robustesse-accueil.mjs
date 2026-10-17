@@ -46,7 +46,7 @@ if (CONTRE) {
     ['app.js', 'la fiche d\u2019une parcelle lit une entrée du journal qui n\u2019existe pas',
       'function openDP(nom){\n', 'function openDP(nom){\n  var __j=JOURNAL[JOURNAL.length].date.length;\n'],
     ['app.js', 'le correctif « NaN h » de la fiche parcelle retiré (Entreplantation sans trous)',
-      "?(p.plantation_trous*_plantMinTrou()/60):0):((t.hha||0)*(parseFloat(p.surface)||0));", "?(p.plantation_trous*_plantMinTrou()/60):(t.hha*p.surface)):(t.hha*p.surface);"],
+      "?(_plantParcTrous(p)*_plantMinTrou()/60):0):((t.hha||0)*(parseFloat(p.surface)||0));", "?(_plantParcTrous(p)*_plantMinTrou()/60):(t.hha*p.surface)):(t.hha*p.surface);"   /* COMPTE-1 (§353) : les trous prévus */],
     ['app.js', 'le correctif « NaN h » de l\u2019Accueil retiré (tâche en temps réel sans barème)',
       "    const _hha=(t.hha||0);\n", "    const _hha=t.hha;\n"],
     ['app.js', 'une erreur journalisée à chaque rendu de l\u2019Accueil',

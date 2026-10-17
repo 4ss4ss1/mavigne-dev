@@ -37,6 +37,7 @@ import './cockpit.js';   // AUJ-1 (§260) : le cockpit d'Aujourd'hui (pilotage.j
 import './cockpit-vue.js';   // REF-1 (§266) : la maquette validée du cockpit, montée avec le modèle réel
 import './coquille.js';   // COQ-1 + PAL-1 (§268) : la barre latérale et la recherche Ctrl K, sur ordinateur
 import './jalons.js';   // JALONS-1 (§340) : le calcul des jalons et leur mémoire (rien n'est montré avant JALONS-2)
+import './comptes.js';   // COMPTE-1 (§353) : les pieds marqués — le compte du repérage chiffre l'entreplantation
 import './reserve.js';
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if(DEBUG) console.log('[Ma Vigne] app.js ' + (window.APP_VERSION ? 'v' + window.APP_VERSION : '') + ' chargé — ' + new Date().toISOString());
@@ -4894,9 +4895,31 @@ function _migrateSaisonTaches(){
 }
 window._migrateSaisonTaches=_migrateSaisonTaches;
 
+// ★ TACHEPER-1 (§352) — RÉPARATION À L'OUVERTURE : une tâche de la convention cochée dans une période mais absente des
+//   tâches du domaine (la modification d'une période ne l'ajoutait pas) y est ajoutée — sur un appareil ADMIN seulement :
+//   TACHES s'écrit d'un seul endroit, les autres téléphones la reçoivent par la synchronisation (aucun n'a à être à jour).
+//   100 % additif, sans effet la deuxième fois. Une tâche du domaine supprimée ne revient pas (elle n'est pas dans la convention).
+function _perReparerTaches(){
+  try{
+    if(!(typeof isAdmin==='function'&&isAdmin())||!(typeof canWrite==='function'&&canWrite())) return false;
+    if(typeof _mvKeyLoaded==='object'&&_mvKeyLoaded&&(!_mvKeyLoaded.taches||!_mvKeyLoaded.saisons)) return false;
+    if(typeof window._perAssureTaches!=='function') return false;
+    var noms=[];
+    (window.SAISONS||[]).forEach(function(s){ (s&&Array.isArray(s.taches)?s.taches:[]).forEach(function(n){ if(n&&noms.indexOf(n)<0) noms.push(n); }); });
+    var ajout=window._perAssureTaches(noms);
+    if(!ajout.length) return false;
+    ajout.forEach(function(n){ try{ recalcTravaux(n); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_perReparerTaches#travaux'); } });
+    saveData('taches'); saveData('travaux');
+    if(typeof logError==='function') logError({level:'info',cat:'data',msg:'Tâches de période rendues au domaine',detail:ajout.join(', ')});
+    return true;
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_perReparerTaches'); return false; }
+}
+window._perReparerTaches=_perReparerTaches;
+
 function _migrateTachesSaison(){
   var act=((getSaisonActive()||{}).nom)||'';
   _migrateSaisonTaches();
+  _perReparerTaches();   // TACHEPER-1 (§352)
   (PARCELLES||[]).forEach(function(p){
     if(!p.tachesAll||typeof p.tachesAll!=='object'||Array.isArray(p.tachesAll)) p.tachesAll={};
     if(!p.taches||typeof p.taches!=='object'||Array.isArray(p.taches)) p.taches={};
@@ -9440,7 +9463,7 @@ function openDP(nom){
     //   la fiche affichait « NaN h » restantes dès que la période portait l'Entreplantation (liste par
     //   défaut). Même règle que calcHeures : sans trous, 0 h ; sinon le barème `t.hha || 0`.
     var _dpTrous=(t.trous||t.nom==='Entreplantation');
-    if(getTacheStatut(p,t.nom)!=='Validé')hReste+=_dpTrous?(((p.plantation_trous||0)>0)?(p.plantation_trous*_plantMinTrou()/60):0):((t.hha||0)*(parseFloat(p.surface)||0));
+    if(getTacheStatut(p,t.nom)!=='Validé')hReste+=_dpTrous?((_plantParcTrous(p)>0)?(_plantParcTrous(p)*_plantMinTrou()/60):0):((t.hha||0)*(parseFloat(p.surface)||0));   // COMPTE-1 (§353) : les trous prévus
   });
   document.getElementById('dp-hreste').innerHTML=Math.round(hReste)+'<span style="font-size:var(--pt-txt,13px)"> h</span>';
   var _dpVS=(typeof _visuSaison==='function'?_visuSaison():((getSaisonActive()||{}).nom||''));
@@ -9486,10 +9509,14 @@ function openDP(nom){
     const canExcl=canEdit&&(!_isSel||isAdmin());
     const isOn=stat==='Validé';
     const isEnCours=stat==='En cours';
-    const _plTr=((t.trous||t.nom==='Entreplantation'))?(parseInt(p.plantation_trous)||0):0;
+    const _plTr=((t.trous||t.nom==='Entreplantation'))?_plantParcTrous(p):0;   // COMPTE-1 (§353) : les trous prévus
     const hEstim=(_plTr>0)?Math.round(_plTr*_plantMinTrou()/60*10)/10:(t.hha?Math.round(t.hha*p.surface*10)/10:0);
     const statusColor=isExclu?'var(--texte-doux)':isOn?'var(--vert)':isEnCours?'var(--or)':'var(--texte-doux)';
     const statusLabel=isExclu?'Non applicable':isOn?'Validé':isEnCours?'En cours':'À faire';
+    // ★ COMPTE-1 (§353) : le compte des pieds marqués (tâche qui le demande) et, pour l'admin, « Corriger le compte ».
+    const _cptTx=(window._cptFicheCompte?window._cptFicheCompte(p,t):'');
+    const _cptAdm=!!(window._cptFicheAdmin&&window._cptFicheAdmin(p,t));
+    const _cptBtn=(window._cptMarques&&window._cptMarques(p)===null)?'Saisir le compte':'Corriger le compte';
     if(isExclu){
       return `<div class="val-row mv-tr" style="opacity:.45">
         <div style="flex:1">
@@ -9538,7 +9565,7 @@ function openDP(nom){
     return `<div class="val-row mv-tr">
       <div style="flex:1;min-width:0">
         <div class="mv-v" style="font-size:13.5px;font-weight:600;color:var(--texte)">${_escHtml(tNom(t.nom))}</div>
-        <div style="font-size:10px;color:var(--texte-doux);margin-top:2px">${(t.trous||t.nom==='Entreplantation')?(_plTr>0?(_plTr+' trous · ~'+hEstim+'h'):'Tarière · aucun trou'):((t.tempsReel?(t.hha?('~'+t.hha+'h/ha estimé'):'temps réel'):(t.hha+'h/ha'))+' · ~'+hEstim+'h')} · <span style="color:${statusColor};font-weight:600">${statusLabel}</span></div>
+        <div style="font-size:10px;color:var(--texte-doux);margin-top:2px">${(t.trous||t.nom==='Entreplantation')?(window._cptFicheTexte?_escHtml(window._cptFicheTexte(p,t,hEstim)):(_plTr>0?(_plTr+' trous · ~'+hEstim+'h'):'Pas encore compté')):((t.tempsReel?(t.hha?('~'+t.hha+'h/ha estimé'):'temps réel'):(t.hha+'h/ha'))+' · ~'+hEstim+'h')}${_cptTx?' · '+_escHtml(_cptTx):''}${_cptAdm?' · <button type="button" class="cpt-lnk" data-cpt-p="'+_escAttr(p.nom)+'" onclick="event.stopPropagation();window._cptCorrigerOuvrir(this.getAttribute(\'data-cpt-p\'))">'+_escHtml(_cptBtn)+'</button>':''} · <span style="color:${statusColor};font-weight:600">${statusLabel}</span></div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
         ${canEdit?`<button onclick="tapTacheSimple('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}',this)" style="min-height:44px;padding:6px 11px;border-radius:8px;font-family:inherit;font-size:var(--pt-micro,11px);font-weight:700;cursor:${isOn?'default':'pointer'};border:1.5px solid ${isOn?'rgba(90,156,74,0.38)':isEnCours?'rgba(220,140,30,0.4)':'rgba(255,255,255,0.08)'};background:${isOn?'rgba(90,156,74,0.14)':isEnCours?'rgba(220,140,30,0.13)':'rgba(255,255,255,0.03)'};color:${isOn?'#6AB855':isEnCours?'#DCA030':'var(--texte-doux)'};white-space:nowrap">${isOn?'✓ Validé':isEnCours?'✓ Valider':'▶ Démarrer'}</button>`:`<span class="jst" style="font-size:10px;color:${isOn?'var(--vert)':isEnCours?'var(--or)':'var(--texte-doux)'}">${stat}</span>`}
@@ -9870,8 +9897,15 @@ function openValidationPanel(nomParcelle,nomTache,btn){
   // Section trous tarrière — visible uniquement pour Plantation
   var vpPlant=document.getElementById('vp-plantation-section');
   var vpTrous=document.getElementById('vp-trous');
-  if(vpPlant)vpPlant.style.display=((_vp_tDef(nomTache)&&_vp_tDef(nomTache).trous)||nomTache==='Entreplantation')?'block':'none';
-  if(vpTrous){var _pvObj=PARCELLES.find(function(x){return x.nom===nomParcelle;});vpTrous.value=(_pvObj&&_pvObj.plantation_trous)?_pvObj.plantation_trous:'';}
+  // ★ COMPTE-1 (§353) : le même champ sert aux pieds plantés (entreplantation, prérempli des trous prévus) et aux pieds
+  //   marqués (tâche réglée « Demander le nombre de pieds marqués », 0 compris).
+  var _vpDem=!!(typeof window._cptDemande==='function'&&window._cptDemande(_vp_tDef(nomTache)));
+  var _vpTr=!!((_vp_tDef(nomTache)&&_vp_tDef(nomTache).trous)||nomTache==='Entreplantation');
+  if(vpPlant)vpPlant.style.display=(_vpTr||_vpDem)?'block':'none';
+  var _vpLbl=document.getElementById('vp-trous-lbl'); if(_vpLbl)_vpLbl.textContent=_vpDem?'Pieds marqués (0 si aucun)':'Pieds plantés';
+  if(vpTrous){var _pvObj=PARCELLES.find(function(x){return x.nom===nomParcelle;});
+    var _pvV=_vpDem?((typeof window._cptMarques==='function')?window._cptMarques(_pvObj):null):(_pvObj?_plantParcTrous(_pvObj):0);
+    vpTrous.value=(_pvV!=null&&(_vpDem||_pvV>0))?_pvV:'';}
   _mvEqUi('vp');   // ÉQUIPES-1
   openOv('ovValidation');
 }
@@ -10097,6 +10131,14 @@ async function confirmValidation(){
   const membresEquipe=equipe?_getSelectedMembres('vp-membres-pick'):[];
   const quiHors=equipe&&_mvQuiHors('vp-membres-pick');
   if(quiHors&&!membresEquipe.length){showToast('Personne dans le groupe : cochez qui a travaillé','#B85A1A');return;}
+  // ★ COMPTE-1 (§353) : une tâche qui demande le compte ne se valide pas sans lui (0 compris).
+  var _vpTrX=!!((_vp_tDef(_validTache)&&_vp_tDef(_validTache).trous)||_validTache==='Entreplantation');
+  var _cptVal=null, _cptDem=!!(typeof window._cptDemande==='function'&&window._cptDemande(_vp_tDef(_validTache)));
+  if(_cptDem){
+    var _cEl=document.getElementById('vp-trous'), _cRaw=_cEl?String(_cEl.value).trim():'';
+    if(!/^[0-9]+$/.test(_cRaw)){ showToast('Indique le nombre de pieds marqués (0 si aucun)','#B85A1A'); return; }
+    _cptVal=parseInt(_cRaw,10);
+  }
   p.taches[_validTache]='Validé';
   // Entreplantation : stocker le nombre de trous tarrière (saisie manuelle)
   var trous=null;
@@ -10113,6 +10155,8 @@ async function confirmValidation(){
   var jEntry={id:Date.now().toString(16),date,parcelle:_validParcelle,tache:_validTache,qui:currentUser.nom,statut:'Validé',equipe,membresEquipe};
   if(quiHors)jEntry.quiHors=true;
   if(trous)jEntry.plantation_trous=trous;
+  else if(_vpTrX&&_plantParcTrous(p)>0) jEntry.plantation_trous=_plantParcTrous(p);   // COMPTE-1 (§353) : le temps réalisé se lit au journal
+  if(_cptDem&&typeof window._cptAuValider==='function') window._cptAuValider(p,_validTache,jEntry,_cptVal);   // COMPTE-1 (§353)
   // Météo moyenne sur la période de la tâche (du premier "En cours" à aujourd'hui) — VALID-1 (§242) : elle n'est
   // plus ATTENDUE. L'entrée s'écrit et la feuille se ferme d'abord ; _mvMeteoApres complète l'entrée ensuite.
   var _mDeb=_findDebutTache(_validParcelle,_validTache,date)||date;
@@ -10328,7 +10372,7 @@ function _mvExclu(p,nom,exclues){
 function _parcConcern(nomTache){
   if(typeof window._mvTacheSel==='function' && window._mvTacheSel(nomTache))
     return PARCELLES.filter(p=>window._mvSelEligible(p,nomTache) && window._mvTacheConcerne(p,nomTache));
-  return PARCELLES.filter(p=>p.statut!=='Arrachee' && !((p.tachesExclues||[]).includes(nomTache)) && !(typeof window._mvHorsPer==='function' && window._mvHorsPer(p,nomTache)));   // ★ RETRAIT-1 (§325) : et pas désactivée pour la période
+  return PARCELLES.filter(p=>p.statut!=='Arrachee' && !((p.tachesExclues||[]).includes(nomTache)) && !(typeof window._mvHorsPer==='function' && window._mvHorsPer(p,nomTache)) && !(typeof window._cptHors==='function' && window._cptHors(p,nomTache)));   // COMPTE-1 (§353) : comptée à zéro, rien à planter   // ★ RETRAIT-1 (§325) : et pas désactivée pour la période
 }
 function _surfConcern(nomTache){
   return _parcConcern(nomTache).reduce((s,p)=>s+(parseFloat(p.surface)||0),0);
@@ -10590,7 +10634,10 @@ window._mvdsSnap=_mvdsSnap;
 // ── Plantation pilotée par le nombre de trous (tarière) ──────────────────────
 function _vp_tDef(nm){ return (window.TACHES||TACHES||[]).find(function(t){return t&&t.nom===nm;}); }
 function _plantMinTrou(){ var v=window.CONFIG&&parseFloat(CONFIG.plantation_min_trou); return (v&&v>0)?v:3; }
-function _plantParcTrous(p){ return parseInt(p&&p.plantation_trous)||0; }
+// ★ COMPTE-1 (§353) : les trous PRÉVUS d'une parcelle — le plus grand des deux : pieds marqués au repérage, trous de la
+//   parcelle (tarière, validation). Toute lecture des trous prévus passe par ici (fiche, rapport, Pilotage), jamais par le champ brut.
+function _plantParcTrous(p){ return (typeof window._cptPrevus==='function')?window._cptPrevus(p):(parseInt(p&&p.plantation_trous)||0); }
+window._plantParcTrous=_plantParcTrous;
 function _plantTrousTot(parcs){ return (parcs||[]).reduce(function(s,p){return s+_plantParcTrous(p);},0); }
 function _plantPlanTrous(nomTache){ return _plantTrousTot(_parcConcern(nomTache||'Entreplantation')); }
 // Recalcule p.plantation_trous depuis les sessions Tarière (champCustom.feedsPlantation).
@@ -13630,6 +13677,10 @@ function pQuickValidate(nom,evt){
   var p=PARCELLES.find(function(x){return x.nom===nom;});if(!p)return;
   var task=pTacheFilter,type=_pvType(task);
   if(type!=='simple'&&pCurStep>_pvEffPlan(p,task)){openDP(nom);return;}
+  // ★ COMPTE-1 (§353) : une tâche qui demande le compte (le repérage), ou l'entreplantation d'une parcelle sans compte,
+  //   ouvre d'abord le pavé ; la validation reprend ici avec le nombre (evt._cpt), par le même chemin.
+  var _cpt=(evt&&evt._cpt!=null)?evt._cpt:null;
+  if(type==='simple'&&_cpt===null&&typeof window._cptAvantValider==='function'&&window._cptAvantValider(p,task,function(n){pQuickValidate(nom,{_cpt:n});})) return;
   _mvdsSnap(task);
   if(!p.taches)p.taches={};
   var prev=(p.taches[task]===undefined)?undefined:JSON.parse(JSON.stringify(p.taches[task]));
@@ -13661,6 +13712,7 @@ function pQuickValidate(nom,evt){
   }
   var jEntry=Object.assign({id:jid,date:date,parcelle:nom,tache:task,qui:currentUser.nom,equipe:equipe,membresEquipe:membresEquipe},extra);
   if(quiHors) jEntry.quiHors=true;   // TV-2
+  if(type==='simple'&&typeof window._cptAuValider==='function') window._cptAuValider(p,task,jEntry,_cpt);   // COMPTE-1 (§353)
   JOURNAL.unshift(_mvEqApplique(jEntry));
   recalcTravaux(task);
   injectMeteoIfNeeded(date);
@@ -13686,7 +13738,7 @@ function pQuickValidate(nom,evt){
 function pQuickUndoEntry(nom,task,prev,jid){
   var p=PARCELLES.find(function(x){return x.nom===nom;});if(!p)return;
   if(prev===undefined){delete p.taches[task];}else{p.taches[task]=prev;}
-  var idx=JOURNAL.findIndex(function(j){return j.id===jid;});if(idx>=0)JOURNAL.splice(idx,1);
+  var idx=JOURNAL.findIndex(function(j){return j.id===jid;});if(idx>=0){ if(typeof window._cptDefaire==='function') window._cptDefaire(p,JOURNAL[idx]); JOURNAL.splice(idx,1); }   // COMPTE-1 (§353) : le compte d'avant revient
   recalcTravaux(task);
   saveData('parcelles');saveData('journal');saveData('travaux');
   if(navigator.vibrate)navigator.vibrate(30);
@@ -14370,7 +14422,7 @@ function exportRapportSaison(seasonNom){
 
     // ── 2) Bilan par parcelle ──
     var mt=(typeof _plantMinTrou==='function')?_plantMinTrou():3;
-    var trousTot=parcActives.reduce(function(s,p){return s+(p.plantation_trous||0);},0);
+    var trousTot=parcActives.reduce(function(s,p){return s+_plantParcTrous(p);},0);   // COMPTE-1 (§353) : les trous prévus
     var anyTrous=trousTot>0;
     var anyCu=(typeof window._cuParcRollSum==='function') && parcActives.some(function(p){return window._cuParcRollSum(p.nom)>0;});
     // Plafond 7 ans derive du plafond annuel reglable (Reglages), jamais 28 en dur.
@@ -14387,7 +14439,7 @@ function exportRapportSaison(seasonNom){
         +'<td class="r muted">'+(parseFloat(p.surface)||0).toFixed(2)+' ha</td>'
         +'<td class="c"><span class="tag '+(tot>0&&ok>=tot?'ok':ok>=tot*0.5?'warn':'neu')+'">'+ok+'/'+tot+' \u2713</span></td>'
         +'<td class="c">'+(dd.d1?'<span class="chip-d">'+fDs(dd.d1)+'</span><span class="arrow">\u2192</span><span class="chip-d">'+fDs(dd.dN)+'</span>':'\u2014')+'</td>'
-        +(anyTrous?'<td class="r">'+((p.plantation_trous||0)>0?'\'+_mvIcon(\'pousse\',16)+\' '+p.plantation_trous:'\u2014')+'</td>':'')
+        +(anyTrous?'<td class="r">'+(_plantParcTrous(p)>0?_plantParcTrous(p):'\u2014')+'</td>':'')
         +(anyCu?'<td class="r" style="font-weight:700;color:'+cuCol(cuR)+'">'+(cu>0?cu.toFixed(1)+' <span class="muted" style="font-weight:400;font-size:9px">/28</span>':'\u2014')+'</td>':'')
         +'</tr>';
     }).join('');

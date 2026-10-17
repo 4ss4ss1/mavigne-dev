@@ -170,6 +170,8 @@
   <symbol id="ic-recu" viewBox="0 0 24 24" data-src="receipt"><path d="M12 17V7" /> <path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8" /> <path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z" /></symbol>
   <symbol id="ic-refus" viewBox="0 0 24 24" data-src="circle-x"><circle cx="12" cy="12" r="10" /> <path d="m15 9-6 6" /> <path d="m9 9 6 6" /></symbol>
   <symbol id="ic-repas" viewBox="0 0 24 24" data-src="utensils"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" /> <path d="M7 2v20" /> <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" /></symbol>
+  <symbol id="ic-moins" viewBox="0 0 24 24" data-src="minus"><path d="M5 12h14" /></symbol>
+  <symbol id="ic-effacer" viewBox="0 0 24 24" data-src="delete"><path d="M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z" /> <path d="m12 9 6 6" /> <path d="m18 9-6 6" /></symbol>
   <symbol id="ic-retour" viewBox="0 0 24 24" data-src="undo-2"><path d="M9 14 4 9l5-5" /> <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" /></symbol>
   <symbol id="ic-reveil" viewBox="0 0 24 24" data-src="alarm-clock"><circle cx="12" cy="13" r="8" /> <path d="M12 9v4l2 2" /> <path d="M5 3 2 6" /> <path d="m22 6-3-3" /> <path d="M6.38 18.7 4 21" /> <path d="M17.64 18.67 20 21" /></symbol>
   <symbol id="ic-rotation" viewBox="0 0 24 24" data-src="refresh-cw"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" /></symbol>
@@ -621,7 +623,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:var(--pt-txt,13px);margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v9.18</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v9.19</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -1096,6 +1098,50 @@
   </div>
 </div>
 
+<!-- ══ OVERLAY : Le compte — pieds marqués, pieds plantés (COMPTE-1, §353) ══ -->
+<div class="overlay" id="ovCompte" onclick="closeOv(event,'ovCompte')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div class="modal-title" id="cpt-titre">Le compte</div>
+      <div class="modal-sub" id="cpt-sub"></div>
+    </div>
+    <div class="modal-body">
+      <div class="cpt-q" id="cpt-q"></div>
+      <div class="cpt-row">
+        <button type="button" class="cpt-pm" onclick="_cptTouche('moins')" aria-label="Un de moins"><svg class="mv-ic" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-moins"></use></svg></button>
+        <output class="cpt-disp" id="cpt-disp" aria-live="polite">—</output>
+        <button type="button" class="cpt-pm" onclick="_cptTouche('plus')" aria-label="Un de plus"><svg class="mv-ic" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-plus"></use></svg></button>
+      </div>
+      <div class="cpt-u" id="cpt-u"></div>
+      <div class="cpt-pad" role="group" aria-label="Pavé numérique"><button type="button" onclick="_cptTouche('d','1')">1</button><button type="button" onclick="_cptTouche('d','2')">2</button><button type="button" onclick="_cptTouche('d','3')">3</button><button type="button" onclick="_cptTouche('d','4')">4</button><button type="button" onclick="_cptTouche('d','5')">5</button><button type="button" onclick="_cptTouche('d','6')">6</button><button type="button" onclick="_cptTouche('d','7')">7</button><button type="button" onclick="_cptTouche('d','8')">8</button><button type="button" onclick="_cptTouche('d','9')">9</button><button type="button" class="fn" onclick="_cptTouche('vider')">Effacer</button><button type="button" onclick="_cptTouche('d','0')">0</button><button type="button" class="fn" onclick="_cptTouche('retour')" aria-label="Effacer le dernier chiffre"><svg class="mv-ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-effacer"></use></svg></button></div>
+      <div class="cpt-zero" id="cpt-zero-w"><button type="button" id="cpt-zero" onclick="_cptTouche('zero')" aria-pressed="false">Aucun pied à remplacer</button></div>
+      <div class="cpt-hint" id="cpt-hint"></div>
+      <button class="mbtn verte" id="cpt-ok" onclick="_cptOk()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg> Valider</button>
+      <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="closeOv(null,'ovCompte')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OVERLAY : La feuille des comptes — toutes les parcelles (COMPTE-1, §353) ══ -->
+<div class="overlay" id="ovComptes" onclick="closeOv(event,'ovComptes')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pousse"></use></svg> Pieds marqués</div>
+      <div class="modal-sub">Un nombre par parcelle. Il devient les trous prévus de l’entreplantation.</div>
+    </div>
+    <div class="modal-body">
+      <div class="cpt-kpis" id="cpts-kpis"></div>
+      <input type="search" class="fi" id="cpts-q" placeholder="Chercher une parcelle" oninput="_cptsFiltre()" aria-label="Chercher une parcelle">
+      <div class="cpts-rows" id="cpts-rows"></div>
+      <div class="mv-l" id="cpts-vide" hidden style="margin-top:12px">Aucune parcelle à ce nom.</div>
+      <button class="mbtn verte" id="cpts-ok" style="margin-top:16px" onclick="_cptsEnregistrer()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg> Enregistrer</button>
+      <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="closeOv(null,'ovComptes')">Annuler</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ OVERLAY : Une étape d'arrachage (ARRACH-3) ══ -->
 <div class="overlay" id="ovArrEtape" onclick="closeOv(event,'ovArrEtape')">
   <div class="modal" onclick="event.stopPropagation()">
@@ -1388,7 +1434,7 @@
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v9.18</div>
+        <div class="mod-header-sub">Ma Vigne v9.19</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
       
@@ -1502,7 +1548,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg></div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v9.18 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div class="ver-tag">Ma Vigne v9.19 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -2752,6 +2798,10 @@
         <button class="pchk" id="new-act-champ-type-txt" onclick="_setActChampType('new-act','texte')" style="flex:1;min-height:40px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Texte</button>
       </div>
       <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);font-style:italic;margin-top:6px">Sera demandé parcelle par parcelle lors de la validation <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg></div>
+      <label style="display:flex;align-items:flex-start;gap:8px;margin-top:12px;cursor:pointer">   <!-- COMPTE-1 (§353) : dès la création -->
+        <input type="checkbox" id="new-act-champ-feeds" style="width:18px;height:18px;margin-top:1px;accent-color:var(--vert);flex-shrink:0">
+        <span style="font-size:var(--pt-micro,12px);color:var(--texte);line-height:1.35"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pousse"></use></svg> Alimente les <b>trous de l’entreplantation</b><br><span style="font-size:var(--pt-micro,12px);color:var(--texte-doux)">Le nombre saisi devient les trous percés de la parcelle ; il arrive prérempli avec les pieds marqués. Pour une activité Tarière.</span></span>
+      </label>
     </div>
   </div>
   <input type="hidden" id="new-act-champ-actif" value="0">
@@ -2969,7 +3019,7 @@
       <div id="vp-membres-pick" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px"></div>
     </div>
     <div id="vp-plantation-section" style="display:none;margin-bottom:4px">
-      <div class="fl"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tariere"></use></svg> Nombre de trous (tarrière)</div>
+      <div class="fl"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pousse"></use></svg> <span id="vp-trous-lbl">Pieds plantés</span></div>
       <input type="number" class="fi ac" id="vp-trous" placeholder="Ex : 120" min="0" step="1" style="margin-bottom:4px">
     </div>
     <button class="mbtn verte" onclick="confirmValidation()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg> Valider le travail</button>
@@ -3329,7 +3379,7 @@
           <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);font-style:italic;margin-top:6px">Sera demandé parcelle par parcelle lors de la validation <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg></div>
           <label id="eat-champ-feeds-row" style="display:flex;align-items:flex-start;gap:8px;margin-top:12px;cursor:pointer">
             <input type="checkbox" id="eat-champ-feeds" style="width:18px;height:18px;margin-top:1px;accent-color:var(--vert);flex-shrink:0">
-            <span style="font-size:var(--pt-micro,12px);color:var(--texte);line-height:1.35"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pousse"></use></svg> Alimente les <b>trous de plantation</b><br><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">Le nombre saisi définit la tâche Plantation (parcelles concernées + temps). Pour une activité Tarière.</span></span>
+            <span style="font-size:var(--pt-micro,12px);color:var(--texte);line-height:1.35"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pousse"></use></svg> Alimente les <b>trous de l’entreplantation</b><br><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">Le nombre saisi devient les trous percés de la parcelle (temps de l’entreplantation) ; il arrive prérempli avec les pieds marqués. Pour une activité Tarière.</span></span>
           </label>
         </div>
       </div>
@@ -3579,6 +3629,7 @@
     <div class="modal-body">
       <div class="fl" id="ocv-label">Information requise</div>
       <input class="fi ac" id="ocv-val" placeholder="" style="font-size:var(--pt-md,20px);text-align:center;font-weight:700">
+      <div class="mv-l" id="ocv-hint" hidden style="margin:6px 2px 4px"></div>   <!-- COMPTE-1 (§353) : la tarière préremplie -->
       <button class="mbtn acre" onclick="confirmerValidationChamp()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg> Confirmer</button>
       <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="closeOv(null,'ovChampValidation')">Annuler</button>
     </div>
@@ -3729,7 +3780,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v9.18</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v9.19</span>
       </div>
     </div>
     <div class="modal-body">

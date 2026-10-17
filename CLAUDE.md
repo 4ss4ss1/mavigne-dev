@@ -3,9 +3,9 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **16 octobre 2026 (SAISONIMG-1)** — ★★ **« MA SAISON EN IMAGES » : SIX CARTES ET UN PDF — LE PLAN GRATIF EST AU BOUT** (§351). Base `d29f619`, cumulatif avec CARTEDOM-1, RANGBOUT-1, PRESENCE-2B, FETES-1, PRESENCE-2, PREMIERES-1, PRESENCE-1 et COEQ-1 (§350 à §343, jamais poussés : le zip SAISONIMG-1 les contient).
-> `jalons.js` : `_mvSaisonImages` (exécutable) bâtit six cartes depuis les calculs déjà là — sa part en hectares, jours, km, pieds ; la parcelle de cœur ; ses gestes ; le tracteur et la cave ; les premières fois et jalons DE la saison ; les vins, puis « Merci ». « Ma trace » › « Ma saison en images » (`#ovSaisonImg`, cartes à faire défiler) ; « Enregistrer en PDF » passe par `_mvDocOpen`. Vu au navigateur.
-> **APP 9.17 → 9.18, SW 9.96 → 9.97.** Canal « refonte » : `npm run site` → `npm run build` → `firebase hosting:channel:deploy refonte` (aucune règle ne change).
+> Dernière consolidation : **17 octobre 2026 (COMPTE-1)** — ★★ **LES PIEDS MARQUÉS CHIFFRENT L’ENTREPLANTATION, ET UNE TÂCHE COCHÉE EN MODIFIANT UNE PÉRIODE ENTRE DANS LE DOMAINE** (§353, §352). Base `c05f624`, cumulatif avec TACHEPER-1 (§352, jamais poussé : le zip COMPTE-1 le contient).
+> `src/comptes.js` (neuf) : le compte sur la parcelle (`p.trous_marques`), donné par qui valide une tâche réglée « Demander le nombre de pieds marqués » (le pavé `#ovCompte`) ou par l’admin pour toutes les parcelles (`#ovComptes`, « Saisir les comptes ») ; trous prévus = le plus grand des deux (marqués, trous de la parcelle), lus par `_plantParcTrous` partout ; comptée à zéro = hors entreplantation ; tarière préremplie. TACHEPER-1 : `_perAssureTaches`, écrivain unique de la création et de la modification d’une période, et réparation à l’ouverture chez un admin.
+> **APP 9.18 → 9.19, SW 9.97 → 9.98.** Canal « refonte » : `npm run site` → `npm run build` → `firebase hosting:channel:deploy refonte` (aucune règle ne change).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1857,6 +1857,10 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ COMPTE-1 et TACHEPER-1 — CE QUI RESTE OUVERT (§352, §353, posé le 17/10)
+1. **À regarder chez Nico** (téléphone et ordinateur) : le pavé, la feuille des comptes, la fiche (marqués · percés · plantés, « Corriger le compte »), la tarière préremplie — aucun harnais ne lit une mise en page. **Le domaine du signalement** n’aura la réparation qu’au déploiement général (contournement « + Nouvelle tâche » fait le 16/10).
+2. **Pas de tâche « Repérage » dans la convention** (elle exigerait sa fiche POURQUOI-1) : chaque domaine crée la sienne et coche le réglage au crayon. Ne demandent pas le compte : la validation en lot et l’entrée de journal à la main (à confirmer). Idée non demandée : le total par cépage pour commander les plants.
 
 ### ⚠️ JALONS-1, JALONS-2 et JALONS-2B — CE QUI RESTE OUVERT (§340 à §342, posé le 15/10)
 0. **Le canal « refonte » partage la base et les règles de la production** (Nico, 16/10 : tout passe par `hosting:channel:deploy

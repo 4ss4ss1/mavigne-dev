@@ -2552,8 +2552,14 @@ function toggleSessionParcelle(nom,row){
     ocvVal.placeholder=act.champCustom.type==='nombre'?'0':'Saisir…';
     ocvVal.min=0;
     ocvVal.value='';
+    // ★ COMPTE-1 (§353) : une activité qui alimente les trous arrive préremplie avec les pieds marqués au repérage.
+    var _ocvH=document.getElementById('ocv-hint'); if(_ocvH){ _ocvH.hidden=true; _ocvH.textContent=''; }
+    if(act.champCustom.feedsPlantation&&typeof window._cptMarques==='function'){
+      var _pM=(window.PARCELLES||[]).find(function(x){return x&&x.nom===nom;}), _nM=_pM?window._cptMarques(_pM):null;
+      if(_nM){ ocvVal.value=String(_nM); if(_ocvH){ _ocvH.textContent='Prérempli avec les '+_nM+' pieds marqués au repérage. Corrige si besoin.'; _ocvH.hidden=false; } }
+    }
     _openOv('ovChampValidation');
-    setTimeout(function(){ocvVal.focus();},200);
+    setTimeout(function(){ocvVal.focus();try{ if(ocvVal.value) ocvVal.select(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/ovChampValidation#select'); }},200);
     return;
   }
   // Pas de champ custom : coche directe (string)
@@ -3211,6 +3217,8 @@ function saveActivite(){
   var champLabel=(document.getElementById('new-act-champ-label').value||'').trim();
   var champType=document.getElementById('new-act-champ-type-val').value||'nombre';
   var champCustom=(champActif&&champLabel)?{label:champLabel,type:champType}:null;
+  // ★ COMPTE-1 (§353) : la case « alimente les trous » dès la création (elle n'existait qu'en modifiant l'activité).
+  var _fdN=document.getElementById('new-act-champ-feeds'); if(champCustom&&champType==='nombre'&&_fdN&&_fdN.checked) champCustom.feedsPlantation=true;
   var emojiBtn=document.getElementById('new-act-emoji-btn');
   // Le bouton porte desormais une ICONE (lot DS-1) : son textContent est vide.
   // La valeur enregistree reste un emoji, rangee dans data-emoji — les <option>
@@ -3221,6 +3229,7 @@ function saveActivite(){
   _saveData('activites');
   _closeOv(null,'ovActivite');
   document.getElementById('new-act').value='';
+  var _fdR=document.getElementById('new-act-champ-feeds'); if(_fdR) _fdR.checked=false;
   renderActTracList();
   renderTracteur();
   showToast('Activité "'+nom+'" créée','#3D6B27');

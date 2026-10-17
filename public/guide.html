@@ -390,6 +390,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <symbol id="ic-recu" viewBox="0 0 24 24" data-src="receipt"><path d="M12 17V7" /> <path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8" /> <path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z" /></symbol>
   <symbol id="ic-refus" viewBox="0 0 24 24" data-src="circle-x"><circle cx="12" cy="12" r="10" /> <path d="m15 9-6 6" /> <path d="m9 9 6 6" /></symbol>
   <symbol id="ic-repas" viewBox="0 0 24 24" data-src="utensils"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" /> <path d="M7 2v20" /> <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" /></symbol>
+  <symbol id="ic-moins" viewBox="0 0 24 24" data-src="minus"><path d="M5 12h14" /></symbol>
+  <symbol id="ic-effacer" viewBox="0 0 24 24" data-src="delete"><path d="M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z" /> <path d="m12 9 6 6" /> <path d="m18 9-6 6" /></symbol>
   <symbol id="ic-retour" viewBox="0 0 24 24" data-src="undo-2"><path d="M9 14 4 9l5-5" /> <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" /></symbol>
   <symbol id="ic-reveil" viewBox="0 0 24 24" data-src="alarm-clock"><circle cx="12" cy="13" r="8" /> <path d="M12 9v4l2 2" /> <path d="M5 3 2 6" /> <path d="m22 6-3-3" /> <path d="M6.38 18.7 4 21" /> <path d="M17.64 18.67 20 21" /></symbol>
   <symbol id="ic-rotation" viewBox="0 0 24 24" data-src="refresh-cw"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" /></symbol>
@@ -803,6 +805,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   </ul>
   <h4>La fiche d'une parcelle</h4>
   <ul class="dot">
+    <li><b>L'entreplantation</b> montre ses chiffres : pieds marqués, trous percés, pieds plantés, et le temps qu'il reste.
+    L'administrateur y corrige le compte d'une parcelle (« Corriger le compte »).</li>
     <li><b>Sa forme</b>, en haut, tirée de son contour : nord en haut, avec une échelle en mètres. Une parcelle sans contour n'en affiche pas.</li>
     <li>Avancement tâche par tâche, surface, heures estimées et heures restantes.</li>
     <li><b>Cépage</b> : cépage principal, et jusqu'à trois cépages pour une parcelle complantée.
@@ -944,6 +948,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Tâches</b> : heures par hectare, passages prévus par saison, temps par trou de
     l'entreplantation, création de tâches propres au domaine. Pour l'arrachage, le désherbage manuel
     et l'effeuillage, la ligne du travail ouvre la liste des <b>parcelles choisies pour la campagne</b>. Pour les autres travaux, elle ouvre la liste des parcelles <b>concernées pendant la période</b> : tout y est coché, décochez celles qui ne le feront pas.</li>
+    <li><b>Pieds marqués</b> : sous l'entreplantation, <em aria-hidden="true">Saisir les comptes</em> ouvre toutes les parcelles,
+    un nombre chacune — les pieds marqués à remplacer. Le crayon d'une tâche de repérage porte « Demander le nombre de pieds
+    marqués » : celui qui valide une parcelle donne alors son compte sur un pavé de gros chiffres (« Aucun pied à remplacer »
+    en un appui). Les trous prévus de l'entreplantation sont le plus grand des deux chiffres : pieds marqués, ou trous percés
+    à la tarière. Une parcelle comptée se valide ensuite d'un seul appui ; comptée à zéro, elle n'a rien à planter.</li>
     <li><b>Ajouter une tâche</b> se fait par un seul bouton, <em aria-hidden="true">+ Nouvelle tâche</em>.
     Tapez le nom du travail : s'il figure dans la convention, il vous est proposé avec ses heures de
     référence ; sinon, le panneau vous propose de créer votre travail à vous, au temps réel. Dans le
@@ -1189,7 +1198,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <details><summary>Je me suis trompé sur le nombre de trous d'une parcelle</summary>
     <div class="dbody">Dans la session, touchez <b>« Voir toutes »</b>, <b>décochez</b> la parcelle —
-    l'application demande confirmation — puis <b>recochez-la</b> : elle redemande la valeur. Le total et la tâche Entreplantation se recalculent immédiatement.</div></details>
+    l'application demande confirmation — puis <b>recochez-la</b> : elle redemande la valeur. Le total et la tâche Entreplantation se recalculent immédiatement. Quand la parcelle a été comptée au repérage, la valeur arrive
+    préremplie avec les pieds marqués : il suffit de confirmer, ou de corriger.</div></details>
   <details><summary>Qui peut créer une session&nbsp;?</summary>
     <div class="dbody">Les <b>tractoristes</b> et les <b>administrateurs</b>. La suppression d'un
     tracteur et les exports sont réservés à l'administrateur.</div></details>

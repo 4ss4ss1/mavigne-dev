@@ -404,3 +404,5 @@
 | 349 | 349. ★★ RANGBOUT-1 — DU RANG À LA BOUTEILLE : « LES VINS DE VOTRE TRAVAIL » (16/10 — `src/jalons.js` (`_mvR… | `docs/claude/chantiers-330-379.md` |
 | 350 | 350. ★★ CARTEDOM-1 — « LA CARTE DE VOTRE SAISON » : LES PARCELLES COLORÉES SELON LES PASSAGES (16/10 — `src… | `docs/claude/chantiers-330-379.md` |
 | 351 | 351. ★★ SAISONIMG-1 — « MA SAISON EN IMAGES » : SIX CARTES ET UN PDF (16/10 — `src/jalons.js` (`_mvSaisonIm… | `docs/claude/chantiers-330-379.md` |
+| 352 | 352. ★ TACHEPER-1 — UNE TÂCHE COCHÉE EN MODIFIANT UNE PÉRIODE ENTRE DANS LE DOMAINE (17/10 — `src/reglages.… | `docs/claude/chantiers-330-379.md` |
+| 353 | 353. ★★ COMPTE-1 — LES PIEDS MARQUÉS CHIFFRENT L’ENTREPLANTATION, AVANT LA TARIÈRE (17/10 — `src/comptes.js… | `docs/claude/chantiers-330-379.md` |

@@ -467,8 +467,9 @@ function renderReglages(){
       // Charte DS-2 : l'etat se dit en badge, pas en couleur ecrite a la main.
       var typeBadge=t.type==='niveaux'?_mvBadge('niveaux','neutre'):
         t.type==='passages'?_mvBadge('passages','neutre'):'';
-      var srcBadge=t.trous?_mvBadge('tarière','neutre'):
+      var srcBadge=t.trous?_mvBadge('au pied','neutre'):
         t.tempsReel?_mvBadge('temps réel','neutre'):'';
+      if(window._cptDemande&&window._cptDemande(t)) srcBadge+=_mvBadge('compte à la validation','vert');   // COMPTE-1 (§353)
       var isMod=false;
       if(catRef&&!catRef.trous&&!catRef.tempsReel&&!_horsBar){
         // Comparaison contre le bareme RAMENE a la densite : un domaine correctement
@@ -548,6 +549,8 @@ function renderReglages(){
           convHtml+='<div class="tcv-lnk" data-perp-t="'+nomEsc+'" onclick="event.stopPropagation();window.openPerParc(this.getAttribute(\'data-perp-t\'))" style="color:var(--vert-med)">'+_prTxt+'</div>';
         }
       }
+      // ★ COMPTE-1 (§353) : sous l'entreplantation, la feuille des pieds marqués de toutes les parcelles.
+      if((t.trous||t.nom==='Entreplantation')&&window._cptLigneReglages) convHtml+=window._cptLigneReglages();
       // ★ ARRACH-3 : l'arrachage se découpe en étapes choisies par l'admin (app.js, openArrCfg).
       if(t.nom==='Arrachage'&&window.openArrCfg){
         var _arR=(typeof window._arrResume==='function')?window._arrResume():'';
@@ -1154,6 +1157,22 @@ function activateSaison(nom){
   if(typeof window._switchSaison==='function') window._switchSaison(nom); // local : pointeur + recalc TRAVAUX + rendu
   renderReglages();window.renderParcelles();window.computePStats();
 }
+// ★ TACHEPER-1 (§352) — UNE TÂCHE COCHÉE DANS UNE PÉRIODE EXISTE DANS LE DOMAINE. Écrivain unique, partagé par la création
+//   (saveSaison), la modification (saveEditSaison) et la réparation à l'ouverture (app.js, _perReparerTaches).
+//   Avant : seule la création ajoutait au domaine une tâche de la convention cochée ; la modification enregistrait la coche et
+//   s'arrêtait. Tous les écrans lisent TACHES filtré par s.taches (getTachesSaison) : la tâche disparaissait PARTOUT.
+//   N'ajoute que des tâches de la convention. N'écrit rien en base : l'appelant décide. Rend la liste des tâches ajoutées.
+function _perAssureTaches(noms){
+  var ajout=[];
+  (noms||[]).forEach(function(tnom){
+    if(!tnom||ajout.indexOf(tnom)>=0) return;
+    if((window.TACHES||[]).some(function(x){return x&&x.nom===tnom;})) return;
+    var cat=(window.TACHES_CATALOGUE||[]).find(function(c){return c&&c.nom===tnom;});
+    if(cat){ window.TACHES.push(_seedFromCat(cat)); ajout.push(tnom); }
+  });
+  if(ajout.length) window.TACHES=window.TACHES;
+  return ajout;
+}
 function saveSaison(){
   var nom=document.getElementById('ns-nom').value.trim();if(!nom){showToast('Nom requis','#B85A1A');return;}
   var _d0=(document.getElementById('ns-debut')||{}).value||'',_f0=(document.getElementById('ns-fin')||{}).value||'';
@@ -1164,14 +1183,8 @@ function saveSaison(){
   // La période porte sa liste de tâches (et non plus TACHES[].saisons, qui n'est plus lu).
   var _selNoms=(_nsTachesSel&&_nsTachesSel.size)?Array.from(_nsTachesSel):[];
   window.SAISONS.push({nom:nom,periode:_nsPeriode(_deb,_fin),debut:_deb,fin:_fin,active:false,taches:_selNoms});
-  // Les tâches choisies doivent exister dans le référentiel du domaine.
-  var touched=false;
-  _selNoms.forEach(function(tnom){
-    if((window.TACHES||[]).some(function(x){return x.nom===tnom;})) return;
-    var cat=(window.TACHES_CATALOGUE||[]).find(function(c){return c.nom===tnom;});
-    if(cat){ window.TACHES.push(_seedFromCat(cat)); touched=true; }
-  });
-  if(touched) window.TACHES=window.TACHES;
+  // Les tâches choisies doivent exister dans le référentiel du domaine — TACHEPER-1 (§352) : l'écrivain unique.
+  var touched=_perAssureTaches(_selNoms).length>0;
   window.saveData('saisons');
   if(touched) window.saveData('taches');
   document.getElementById('ovSaison').classList.remove('open');
@@ -1562,7 +1575,7 @@ function _tcfgRender(){
   var _perT=(window._visuSaison?window._visuSaison():'');
   if(_perT) h+='<div class="tcfg-lbl">Enregistrée dans la période « '+_escHtml(_perT)+' »</div>';
   if(_tcfg.trous){
-    h+='<div class="tcfg-tar">'+_mvIcon('tariere',16)+' <b>Piloté par la tarière</b> — temps = trous saisis en session Tarière × le délai ci-dessous. Pas d\'h/ha à la surface.</div>';
+    h+='<div class="tcfg-tar">'+_mvIcon('tariere',16)+' <b>Piloté par les pieds</b> — temps = pieds marqués au repérage ou trous percés à la tarière (le plus grand des deux) × le délai ci-dessous. Pas d\'h/ha à la surface.</div>';
     h+='<div class="tcfg-lbl">Temps par trou</div><div class="tcfg-hrow"><input class="tcfg-in" type="number" min="0.5" max="60" step="0.5" value="'+_tcfg.minTrou+'" oninput="_tcfgMinTrou(this.value)"><span class="tcfg-u">min/trou</span></div>';
   } else if(_tcfg.tempsReel){
     h+='<div class="tcfg-tr">'+_mvIcon('chrono',16)+' <b>Temps réel</b> — pas d\'heures conventionnelles. Estimation optionnelle pour la charge / l\'ETP.</div>';
@@ -1601,6 +1614,7 @@ function _tcfgApply(){
     if(_ex.saisons&&_ex.saisons.length) t.saisons=_ex.saisons.slice();
     else if(_ex.anytime) t.anytime=true;
     if(_ex.conv) t.conv=_ex.conv;
+    if(_ex.demandeCompte) t.demandeCompte=true;   // COMPTE-1 (§353) : le réglage du compte survit à l'écran des heures
   } else if(c){
     // Tâche ajoutée depuis le barème : saisons du catalogue, ce que l'écran montrait déjà.
     if(c.anytime) t.anytime=true;
@@ -2184,7 +2198,7 @@ function openEditHha(nom){
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
       +'<input class="fi ac" type="number" min="0.5" max="60" step="0.5" id="ehha-mintrou" value="'+_mtCur+'">'
       +'<span style="font-size:var(--pt-base,14px);color:var(--texte-doux)">min/trou</span></div>'
-      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:4px 0 14px">Pas d\'h/ha : le temps = trous saisis en session Tarière × ce délai.</div>';
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:4px 0 14px">Pas d\'h/ha : le temps = pieds marqués ou trous percés (le plus grand des deux) × ce délai.</div>';
     if(subEl)subEl.textContent='Travail piloté par les trous de tarière';
   } else {
     bodyHtml+='<div class="fl">Heures par hectare</div>'
@@ -2192,6 +2206,8 @@ function openEditHha(nom){
       +'<input class="fi ac" type="number" min="0" max="500" step="1" id="ehha-val">'
       +'<span style="font-size:var(--pt-base,14px);color:var(--texte-doux)">h/ha</span></div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--vert);background:rgba(61,107,39,0.1);border-radius:6px;padding:5px 9px;margin:6px 0 14px" id="ehha-est"></div>';
+    // ★ COMPTE-1 (§353) : le compte des pieds marqués, demandé à qui valide (le repérage).
+    bodyHtml+='<label class="cpt-opt"><input type="checkbox" id="ehha-cpt"'+(t.demandeCompte?' checked':'')+'><span><b>Demander le nombre de pieds marqués</b><span class="mv-l">Celui qui valide une parcelle donne son compte. Il devient les trous prévus de l\'entreplantation et préremplit la tarière.</span></span></label>';
     if(subEl)subEl.textContent=t.tempsReel?'Estimation d\'heures par hectare (temps réel)':'Référentiel d\'heures estimées par hectare';
   }
   bodyHtml+='<button class="mbtn verte" onclick="saveEditHha(\''+nomEsc+'\')" style="margin-top:4px">'+_mvIcon('check',16)+' Enregistrer</button>'
@@ -2254,6 +2270,7 @@ function saveEditHha(nom){
   } else {
     var elV=document.getElementById('ehha-val');
     if(elV){var vV=parseFloat(elV.value);if(!isNaN(vV)&&vV>=0)t.hha=vV;}
+    var _cbC=document.getElementById('ehha-cpt'); if(_cbC){ if(_cbC.checked) t.demandeCompte=true; else delete t.demandeCompte; }   // COMPTE-1 (§353)
   }
   window.TACHES=window.TACHES;
   delete window.TRAVAUX[nom];window.recalcTravaux(nom);window.TRAVAUX=window.TRAVAUX;
@@ -5866,6 +5883,7 @@ function saveEditSaison(){
     _renamePeriode(nom,_new); s.nom=_new; _renomme=true;
   }
   s.taches=Array.from(_esTachesSel||[]);
+  var _tAjout=_perAssureTaches(s.taches);   // TACHEPER-1 (§352) : comme à la création, une tâche cochée entre dans le domaine
   s.periode=document.getElementById('es-saison-periode').value.trim();
   if(document.getElementById('es-saison-debut'))s.debut=document.getElementById('es-saison-debut').value||'';
   if(document.getElementById('es-saison-fin'))s.fin=document.getElementById('es-saison-fin').value||'';
@@ -5877,10 +5895,14 @@ function saveEditSaison(){
     if(d1||d2) ech[tn]={d1:d1,d2:d2};
   });
   if(Object.keys(ech).length) s.echeances=ech; else if(s.echeances) delete s.echeances;
-  window.saveData('saisons','\U0001F4C5 Saison mise \u00e0 jour');
+  window.saveData('saisons','Période mise à jour');
+  if(_tAjout.length){
+    _tAjout.forEach(function(n){ if(window.recalcTravaux) window.recalcTravaux(n); });
+    window.saveData('taches'); window.saveData('travaux');
+  }
   window.closeOv(null,'ovEditSaison');
   renderReglages();
-  showToast('\U0001F4C5 Saison mise \u00e0 jour','#3D6B27');
+  showToast('Période mise à jour'+(_tAjout.length?(' · '+_tAjout.length+' tâche'+(_tAjout.length>1?'s':'')+' ajoutée'+(_tAjout.length>1?'s':'')+' au domaine'):''),'#3D6B27');
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -5888,6 +5910,7 @@ function saveEditSaison(){
 // ════════════════════════════════════════════════════════════════════
 window.switchReglTab         = switchReglTab;
 window.renderReglages        = renderReglages;
+window._perAssureTaches      = _perAssureTaches;   // TACHEPER-1 (§352)
 window.renderActTracList     = renderActTracList;
 window.openEditActTrac       = openEditActTrac;
 window.saveEditActTrac       = saveEditActTrac;

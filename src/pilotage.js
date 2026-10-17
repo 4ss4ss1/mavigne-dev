@@ -2199,20 +2199,22 @@ function _opComPt(c){
 }
 
 // ── Reste / plein par tâche (mono) — aligné recalcTravaux (Validé/Auto=fait) ──
+// ★ COMPTE-1 (§353) : les trous PRÉVUS — pieds marqués ou trous de la parcelle, le plus grand (app.js, _plantParcTrous).
+function _opTrousPrevus(p){ return (typeof window._plantParcTrous==='function')?window._plantParcTrous(p):(parseInt(p&&p.plantation_trous)||0); }
 function _opParcFull(p,def){
   var surf=parseFloat(p.surface)||0, SP=window.SAISON_PASSAGES||{}, nom=def.nom, s=_opTm(p)[nom];
   // Entreplantation : PILOTEE PAR LES TROUS (tariere). Aucun trou renseigne = 0 h,
   // meme regle que calcHeures (app.js) : « rien a entreplanter ». L'ancien repli
   // surf x 15 h/ha facturait une entreplantation fantome sur TOUTES les parcelles
   // (~ +15 h/ha sur le cout de la saison) alors que l'avancement, lui, comptait 0.
-  if(def.trous){ var tr=parseInt(p.plantation_trous)||0; return tr>0 ? tr*_opMinTrou(def)/60 : 0; }
+  if(def.trous){ var tr=_opTrousPrevus(p); return tr>0 ? tr*_opMinTrou(def)/60 : 0; }
   if(def.type==='niveaux'){ var rg=SP[nom]||((def.niveaux&&def.niveaux.length)||3); var pOv=(s&&typeof s==='object'&&s.ov!=null)?Math.min(s.ov,rg):rg; return surf*((def.niveaux||[]).filter(function(n){return n.num<=pOv;}).reduce(function(a,n){return a+n.hha;},0)); }
   if(def.type==='passages'){ var pg=SP[nom]||((def.passagesHha&&def.passagesHha.length)||2); var planNb=(s&&typeof s==='object'&&s.ov!=null)?Math.min(s.ov,pg):pg; var h=0; for(var i=1;i<=planNb;i++) h+=_opPassHha(def,i); return surf*h; }
   return surf*((def.hha)||0);
 }
 function _opParcReste(p,def){
   var surf=parseFloat(p.surface)||0, SP=window.SAISON_PASSAGES||{}, nom=def.nom, s=_opTm(p)[nom];
-  if(def.trous){ if(typeof s==='string' && s==='Validé') return 0; var tr=parseInt(p.plantation_trous)||0; return tr>0 ? tr*_opMinTrou(def)/60 : 0; }
+  if(def.trous){ if(typeof s==='string' && s==='Validé') return 0; var tr=_opTrousPrevus(p); return tr>0 ? tr*_opMinTrou(def)/60 : 0; }
   if(def.type==='niveaux'){ var rg=SP[nom]||((def.niveaux&&def.niveaux.length)||3); var allN=def.niveaux||[{num:1,hha:50},{num:2,hha:20},{num:3,hha:20}]; var pOv=(s&&typeof s==='object'&&s.ov!=null)?Math.min(s.ov,rg):rg; var nivsP=allN.filter(function(n){return n.num<=pOv;}), totP=nivsP.reduce(function(a,n){return a+n.hha;},0); if(typeof s==='string') return (s==='Validé')?0:surf*totP; var _rN=window._mvNivH(nivsP,s); return surf*Math.max(0,_rN.total-_rN.done); }
   if(def.type==='passages'){ var pg=SP[nom]||((def.passagesHha&&def.passagesHha.length)||2); var planNb=(s&&typeof s==='object'&&s.ov!=null)?Math.min(s.ov,pg):pg; var htot=0; for(var i=1;i<=planNb;i++) htot+=_opPassHha(def,i); if(typeof s==='string') return (s==='Validé')?0:surf*htot; var doneH=0; for(var j=1;j<=planNb;j++){ if(s&&s['p'+j]==='Validé') doneH+=_opPassHha(def,j); } return surf*(htot-doneH); }
   return (typeof s==='string' && s==='Validé') ? 0 : surf*((def.hha)||0);
@@ -6299,7 +6301,7 @@ function _ecoParcPlant(p){
   // tache et affichait le DOUBLE de plants reellement mis en terre. Les HEURES,
   // elles, restent la somme par tache : c'est ce que fait _opParcFull, et les deux
   // doivent rester d'accord sous peine de faire diverger le budget et son detail.
-  var n=parseInt(p.plantation_trous)||0, h=0, nT=0;
+  var n=_opTrousPrevus(p), h=0, nT=0;
   if(n>0) _ecoAllDefs().forEach(function(def){
     if(!def || !def.trous || !_opApplic(p,def)) return;
     nT++; h+=n*_opMinTrou(def)/60;
