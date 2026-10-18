@@ -218,6 +218,10 @@ function _cptRafraichir(nomFiche){
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'comptes.js/_cptRafraichir#fiche'); }
   try{ var pr=document.querySelector('.page.active'); if(pr&&pr.id==='page-reglages'&&typeof window.renderReglages==='function') window.renderReglages(); }
   catch(e){ if(window._mvAvale) window._mvAvale(e,'comptes.js/_cptRafraichir#reglages'); }
+  // ★ MANQUE-1 (§357) : la feuille s'ouvre aussi depuis « Ce qu'il manque » du Pilotage ; sans ce rendu, « N choses à
+  //   compléter » gardait l'entreplantation jusqu'au prochain passage par le module.
+  try{ var pp=document.querySelector('.page.active'); if(pp&&pp.id==='page-pilotage'&&typeof window.renderPilotage==='function') window.renderPilotage(); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'comptes.js/_cptRafraichir#pilotage'); }
 }
 function _cptCorriger(nom, n){
   if(!isAdmin()||!canWrite()){ showToast('Réservé à l’administrateur','#B85A1A'); return; }

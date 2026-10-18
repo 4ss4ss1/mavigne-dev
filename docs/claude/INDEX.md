@@ -409,3 +409,4 @@
 | 354 | 354. COMPTE-2 — UNE ENTREPLANTATION VALIDÉE PAR LE JOURNAL ÉCRIT SES PIEDS (17/10 — `src/app.js` (`saveJour… | `docs/claude/chantiers-330-379.md` |
 | 355 | 355. ★ ARRIVEE-4 — LE BOUTON « FILTRES » À L’ARRIVÉE DE L’OUVRIER (17/10 — `src/app.js` (`_pFxEtat`, `_pFxA… | `docs/claude/chantiers-330-379.md` |
 | 356 | 356. ★★ FML-1 — PAS DE « FINI » AVANT LA MALO : LE CUVIER LIT LA MALO DE LA CUVÉE AU CHAI (17/10 — `src/cuv… | `docs/claude/chantiers-330-379.md` |
+| 357 | 357. ★★ MANQUE-1 — « CE QU’IL MANQUE » LISIBLE JUSQU’EN BAS, ET DES ALERTES VRAIES (18/10 — `src/styles.css… | `docs/claude/chantiers-330-379.md` |

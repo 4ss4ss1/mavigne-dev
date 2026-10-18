@@ -10719,6 +10719,9 @@ function _recalcPlantationTrous(){
 }
 window._plantMinTrou=_plantMinTrou;
 window._plantPlanTrous=_plantPlanTrous;
+// ★ MANQUE-1 (§357) : le diagnostic du Pilotage demande si l'entreplantation concerne encore une parcelle — la MÊME
+//   réponse que la charge (calcHeures) et la fiche, pas une copie du filtre (désactivées, arrachées, comptées à zéro).
+window._parcConcern=_parcConcern;
 window._recalcPlantationTrous=_recalcPlantationTrous;
 // ── Migration one-time : avancement parcelle 'Plantation'/'Complantation' -> 'Entreplantation' (+ flag cépage) ──
 // Lit les DEUX anciens noms : 'Plantation' (jamais migré) ET 'Complantation' (déjà migré côté MG en base).

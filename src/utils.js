@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.21';
+export const APP_VERSION = '9.22';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,18 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.22', d: '2026-10-18', items: [
+    { niv: 0, pour: ['admin'], emoji: 'graphique', titre: 'Pilotage\u00a0: « Ce qu’il manque » n’est plus coupé en bas',
+      desc: "La barre des modules passait encore devant le bas du panneau ouvert par «\u00a0N choses à compléter\u00a0» : la dernière ligne et son bouton restaient cachés, même en faisant défiler. "
+        + "Le panneau passe maintenant devant la barre, et tout se lit jusqu’au dernier bouton." },
+    { niv: 0, pour: ['admin'], emoji: 'balance', titre: 'Pilotage\u00a0: l’arrachage ne réclame plus de barème',
+      desc: "« Ce qu’il manque » demandait des heures par hectare pour l’arrachage et l’entreplantation, et renvoyait vers les tâches de la Vigne, où il n’y avait rien à corriger. "
+        + "L’arrachage, le désherbage manuel, l’effeuillage et la vendange se comptent au temps passé : ils n’ont pas de barème, et l’alerte n’en parle plus. "
+        + "L’entreplantation se chiffre avec les pieds marqués : tant qu’aucun pied n’est compté, l’alerte le dit, et son bouton «\u00a0Saisir les comptes\u00a0» ouvre la feuille des comptes. Une parcelle sans pied à remplacer se compte à zéro." },
+    { niv: 0, pour: ['admin'], emoji: 'eprouvette', titre: 'Pilotage\u00a0: plus de fausse alerte phyto en hiver',
+      desc: "Sur une période sans aucun traitement, comme l’hiver, «\u00a0Doses phyto non structurées\u00a0» s’affichait quand même, alors que le registre était complet. "
+        + "L’alerte, devenue «\u00a0Traitements sans dose chiffrée\u00a0», ne vient plus que si la période a des traitements et qu’aucun n’a de dose chiffrée." },
+  ] },
   { v: '9.21', d: '2026-10-17', items: [
     { niv: 1, pour: ['cave'], emoji: 'cuve', titre: 'Une cuve n’est plus « finie » avant sa malo',
       desc: "Jusqu’ici, « Décuver » marquait la cuve « Terminé » le jour même, et la frise du Cuvier passait l’étape FML comme si la malo était faite. "
@@ -5488,11 +5500,11 @@ var MV_AIDE = {
       ['L’année, un cadre à la fois', ": en tête de l’onglet, choisissez l’<b>exercice comptable</b> ou l’<b>année vigne</b>, et l’année avec les flèches ; tout l’onglet et les trois chiffres du haut suivent. Le <b>budget</b> est en euros, avec le même calcul dans les deux cadres : dépensé, reste prévu, total attendu. Le <b>renfort</b> dit, avec l’équipe prévue au planning, combien de personnes manqueront et quand ; le bouton mène à Décider pour chiffrer les embauches."],
       ['Une seule date de fin', "pour tout le module : Aujourd’hui, sa frise et Échéances par tâche lisent la même simulation que La campagne sans renfort — chaque travail dans sa fenêtre, l’équipe partagée entre les travaux ouverts en même temps, le tracteur déduit, aux heures normales du planning. Le « i » à côté de la marge dit les trois choses qui la distinguent du simulateur de renfort, et « vers le » signale une fin après la période, l’équipe de la dernière semaine reconduite."],
       ['La conformité n’est plus dans cette ligne', "et c’est une question d’échelle : le cuivre roule sur <b>sept ans glissants</b>, il ne bouge pas quand vous cliquez une campagne. Un chiffre qui ignore la portée n’a pas sa place dans une ligne qui se recadre. Il se lit en entier dans l’onglet Conformité, et le bouton « à compléter » remonte toujours ses alertes, sur tous les onglets."],
-      ['Le bouton « à compléter »', "liste ce qui manque pour que vos chiffres soient justes, et vous emmène à l’endroit exact où le renseigner. Un rond rouge sur un chiffre veut dire qu’il ne se calcule pas ; un rond orange, qu’il sort mais faux."],
+      ['Le bouton « à compléter »', "liste ce qui manque pour que vos chiffres soient justes, et vous emmène à l’endroit exact où le renseigner. Un rond rouge sur un chiffre veut dire qu’il ne se calcule pas ; un rond orange, qu’il sort mais faux. Les travaux au temps passé (arrachage, désherbage manuel, effeuillage, vendange) n’y figurent pas : ils n’ont pas de barème, par nature. L’entreplantation y figure tant qu’aucun pied n’est compté, et son bouton ouvre la feuille des comptes. Une période sans traitement n’a rien à compléter côté phyto : zéro est alors le vrai chiffre."],
       ['Les onglets vont du large au fin', ": l’année, puis la campagne, puis l’équipe et le matériel, puis la décision. Après le trait, ce sont des écrans de détail — on y arrive aussi en touchant un des trois chiffres."],
       ['La carte du domaine se lit de cinq façons', " : l’avancement, les jours depuis le dernier traitement, le cépage, les passages phyto face à votre référence, le coût engagé à l’hectare. La légende suit la vue ; une parcelle sans donnée reste grise."],
       ['La campagne', "montre l’avancement, mais aussi — sous « Où va le temps de l’équipe » — comment la présence se partage entre vigne, tracteur et le reste, avec la frise prévu/réel, la courbe par semaine et l’écart. Ces blocs parlent d’une campagne ; ce qui manquera en personnes d’ici la fin de l’année, lui, se lit dans « L’année »."],
-      ['Une tâche sans barème à l’hectare', "— arrachage, désherbage manuel, entreplantation sans trous saisis — ne prévoit pas d’heures : dans « Avancement par tâche », elle s’avance en <b>surface</b> faite sur surface concernée, la même part que sur la liste des parcelles. Quand l’équipe a fini ses étapes d’arrachage partout, la tâche se range en tête des terminées, en vert, avec « la suite au prestataire »."],
+      ['Une tâche sans barème à l’hectare', "— arrachage, désherbage manuel, entreplantation sans pieds comptés ni trous percés — ne prévoit pas d’heures : dans « Avancement par tâche », elle s’avance en <b>surface</b> faite sur surface concernée, la même part que sur la liste des parcelles. Quand l’équipe a fini ses étapes d’arrachage partout, la tâche se range en tête des terminées, en vert, avec « la suite au prestataire »."],
       ['Deux périodes qui se chevauchent', "ne comptent rien deux fois : les heures suivent les tâches, et une tâche n’appartient qu’à une seule période. Sur les jours communs, la frise hachure le fond en violet — il y a deux barres au même endroit, on lit la plus haute."],
       ['Une fenêtre de tâche s’arrête le jour écrit', " : fin au 25 avril, le 25 travaille. Et les heures se répartissent au prorata des jours <b>travaillables</b> : une semaine de ponts en reçoit moins, les semaines pleines récupèrent le reste."],
       ['Le marqueur « hors période »', "dans la roue crantée, fenêtres des tâches, veut dire qu’une fenêtre enregistrée ne tombe pas dans cette période. La fenêtre par défaut s’applique à la place, et l’écran le dit au lieu d’écraser tout le travail sur un seul jour."],
@@ -5756,7 +5768,7 @@ export const MV_INFO = {
     '<b>Taux horaire</b> — il vit dans la fiche de chaque salarié, Réglages \u203a Équipe. C\u2019est le taux <b>chargé</b> : le coût employeur, cotisations patronales comprises. Sans lui, la main-d\u2019\u0153uvre — le premier poste du domaine — compte pour zéro partout sur cet écran.',
     '<b>Prix du GNR</b> — il se déduit tout seul des <b>appoints de cuve</b> saisis dans Tracteur \u203a Entretien, en moyenne pondérée arrêtée à la date de chaque plein. Aucun appoint saisi, aucun prix : le carburant reste à zéro.',
     '<b>Les litres</b> — ils viennent des <b>pleins</b> notés sur les fiches d\u2019entretien, pas d\u2019une consommation théorique. Un plein non noté est du carburant absent du coût.',
-    '<b>Doses et prix des produits</b> — le coût phyto se calcule à partir d\u2019une dose structurée à la saisie du traitement, et d\u2019un prix unitaire dans La Réserve. Il manque l\u2019un des deux, le traitement compte pour zéro.',
+    '<b>Doses et prix des produits</b> — le coût phyto se calcule à partir d\u2019une dose chiffrée à la saisie du traitement, et d\u2019un prix unitaire dans La Réserve. Il manque l\u2019un des deux, le traitement compte pour zéro. Une période sans aucun traitement (l\u2019hiver) n\u2019a rien à compléter : zéro est alors le vrai chiffre.',
     'Tant qu\u2019un de ces postes manque, lisez le budget affiché comme un <b>plancher</b>, jamais comme un total.'
   ] },
 

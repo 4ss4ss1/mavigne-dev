@@ -6922,9 +6922,13 @@ function _ecoPhytoByParc(win){
     if(sn) return sn===seasonNom;
     return seasonNom===(((window.getSaisonActive&&window.getSaisonActive())||{}).nom||'');
   }
-  var cost={}, unpriced={}, anyDose=false, byDate={};
+  // ★ MANQUE-1 (§357) : nLignes compte les lignes du registre dans la fenêtre, dose ou pas. Le diagnostic ne lisait que
+  //   anyDose (« aucune ligne dosée »), vrai aussi quand il n'y a AUCUN traitement — tout l'hiver : il annonçait alors
+  //   « les produits comptent pour zéro » sur un zéro juste. nLignes sépare les deux cas.
+  var cost={}, unpriced={}, anyDose=false, byDate={}, nLignes=0;
   (window.TRAITEMENTS||[]).forEach(function(e){
     if(!e||!_in(e)) return;
+    nLignes++;
     if(e.dose_val==null||isNaN(e.dose_val)) return; // pas structuré → exclu du calcul
     anyDose=true;
     var base=String(e.dose_unit||'').toLowerCase().split('/')[0];
@@ -6938,7 +6942,7 @@ function _ecoPhytoByParc(win){
       if(e.date) byDate[e.date]=(byDate[e.date]||0)+eur;
     });
   });
-  return { cost:cost, unpriced:Object.keys(unpriced), anyDose:anyDose, hasIntrants:INT.length>0, byDate:byDate };
+  return { cost:cost, unpriced:Object.keys(unpriced), anyDose:anyDose, nLignes:nLignes, hasIntrants:INT.length>0, byDate:byDate };
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
@@ -11394,7 +11398,7 @@ function _pilCssV2(){
   +'.pil-diagbtn.clean{border-color:var(--vert-med);background:var(--vert-pale);color:var(--vert-med)}'
   +'.pil-diagwrap{position:fixed;inset:0;background:rgba(20,17,13,.45);z-index:8905;display:none;align-items:flex-end;justify-content:center}'
   +'.pil-diagwrap.show{display:flex}'
-  +'.pil-diagsheet{background:var(--bg-app);width:100%;max-width:640px;max-height:86vh;overflow:auto;border-radius:18px 18px 0 0;padding:17px 17px 34px}'
+  +'.pil-diagsheet{background:var(--bg-app);width:100%;max-width:640px;max-height:86vh;overflow:auto;border-radius:18px 18px 0 0;padding:17px 17px calc(34px + env(safe-area-inset-bottom,0px))}'
   +'.pil-diag-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}'
   +'.pil-diag-t{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-lg,24px);font-weight:700;color:var(--texte);line-height:1.15}'
   +'.pil-diag-s{font-size:var(--pt-txt,13px);color:var(--texte-doux);margin-top:2px}'
@@ -11917,6 +11921,14 @@ window._pilGo = function(cible){
       else if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'diag: openPriorityEdit absent'});
       return;
     }
+    // Cible INTERNE (MANQUE-1, §357) : la feuille des comptes (COMPTE-1, §353 — comptes.js), le geste qui chiffre
+    //   l'entreplantation. Elle s'ouvre par-dessus le Pilotage, sans quitter le module ; à l'enregistrement,
+    //   _cptRafraichir redessine le Pilotage s'il est la page affichée, et le constat se recompte.
+    if(cible==='comptes'){
+      if(typeof window.openComptes==='function') window.openComptes();
+      else if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'diag: openComptes absent'});
+      return;
+    }
     // Cible INTERNE (PRO-1, §269) : « Voir le détail » de la tension du cockpit — la carte par personne, dans L'équipe.
     if(cible==='tension'){
       if(_PIL_TAB!=='equ'){ _PIL_TAB='equ'; _pilSaveTab('equ'); renderPilotage(); }
@@ -12081,9 +12093,13 @@ function _pilDiag(){
     k:'Prix du GNR inconnu',
     f:'Aucun appoint de cuve saisi\u00a0: le <b>carburant compte pour z\u00e9ro</b>, sur la campagne comme sur l\u2019exercice. Le prix se d\u00e9duit des pleins not\u00e9s dans Tracteur \u203a Entretien.',
     ou:'Tracteur \u203a Entretien' });
-  if(P && P.phy && !P.phy.anyDose) out.push({ g:'o', cible:'phyto', touche:['budget'], zero:true, poste:'Produits phyto',
-    k:'Doses phyto non structur\u00e9es',
-    f:'Aucun traitement ne porte de dose structur\u00e9e\u00a0: les <b>produits comptent pour z\u00e9ro</b>. La dose se saisit au traitement, le prix dans La R\u00e9serve.',
+  // ★ MANQUE-1 (§357) : « aucune ligne dosée » ne veut rien dire sans ligne du tout. Une période sans traitement (tout
+  //   l'hiver) met les produits à zéro parce qu'on n'en a pas mis : un zéro JUSTE, pas un trou — aucun constat. Il ne
+  //   parle que si la période a des traitements et qu'aucun n'a de dose chiffrée. Remonté du terrain : « pour le
+  //   traitement phyto tout est ok, je ne comprends pas la phrase » — il s'affichait en plein hiver.
+  if(P && P.phy && P.phy.nLignes>0 && !P.phy.anyDose) out.push({ g:'o', cible:'phyto', touche:['budget'], zero:true, poste:'Produits phyto',
+    k:'Traitements sans dose chiffr\u00e9e',
+    f:'Les traitements de cette p\u00e9riode n\u2019ont <b>aucune dose chiffr\u00e9e</b>\u00a0: les <b>produits comptent pour z\u00e9ro</b> dans le co\u00fbt. La dose se saisit avec le traitement, le prix dans La R\u00e9serve.',
     ou:'Phyto \u203a Registre' });
   else if(P && P.phy && P.phy.unpriced && P.phy.unpriced.length) out.push({ g:'o', cible:'reserve', touche:['budget'], zero:true, poste:'Produits phyto',
     k:P.phy.unpriced.length+' produit'+(P.phy.unpriced.length>1?'s':'')+' sans prix unitaire',
@@ -12140,8 +12156,20 @@ function _pilDiag(){
   }
 
   // ── Les baremes ──────────────────────────────────────────────────────────
+  // ★ MANQUE-1 (§357) : trois sortes de tâches, et une seule réclame des heures par hectare.
+  //   · Au temps passé (t.tempsReel : arrachage, désherbage manuel, effeuillage, vendange, tâches libres) : PAS de
+  //     barème, par nature — le catalogue les dit « hors barème », l'aide « sans barème à l'hectare », et l'écart de
+  //     cadence les retire déjà ; leurs heures comptent quand elles sont faites. Les réclamer poussait à taper une
+  //     estimation pour faire taire l'alerte — la faute du constat des périodes qui se chevauchent, retiré le 12/08.
+  //     Plus de constat. Une estimation saisie quand même (champ facultatif) compte, comme avant (_pilTacheHha).
+  //   · Pilotée par les pieds (t.trous / Entreplantation) : AUCUN champ h/ha (roue crantée : « Pas d'h/ha à la
+  //     surface ») — le bouton menait à un écran sans rien à corriger. Le geste qui la chiffre est le COMPTE des pieds
+  //     marqués (COMPTE-1, §353) : constat à part, bouton vers la feuille des comptes. Rien à dire quand aucune parcelle
+  //     n'est concernée — désactivée partout, ou toutes comptées à zéro sans trou : _parcConcern les sort.
+  //   · Les autres : un vrai champ resté vide — la roue crantée, comme avant.
   var tks=(typeof window.getTachesSaison==='function')?window.getTachesSaison():(window.TACHES||[]);
-  var sansBar=(tks||[]).filter(function(t){ return t && !(_pilTacheHha(t)>0); });
+  var _parPieds=function(t){ return !!(t&&(t.trous||t.nom==='Entreplantation')); };
+  var sansBar=(tks||[]).filter(function(t){ return t && !t.tempsReel && !_parPieds(t) && !(_pilTacheHha(t)>0); });
   if(sansBar.length) out.push({ g:'o', cible:'taches', touche:['travaux','effectif'],
     k:sansBar.length+' t\u00e2che'+(sansBar.length>1?'s':'')+' sans bar\u00e8me h/ha',
     f:'<b>'+_pilEsc(sansBar.slice(0,4).map(function(t){return t.nom;}).join(', '))
@@ -12149,6 +12177,19 @@ function _pilDiag(){
      +'</b> n\u2019'+(sansBar.length>1?'ont':'a')+' pas d\u2019heures par hectare. '
      +(sansBar.length>1?'Elles ne p\u00e8sent':'Elle ne p\u00e8se')+' <b>rien</b> dans la charge : le total affich\u00e9 est un plancher.',
     ou:'Roue crant\u00e9e de la Vigne \u203a T\u00e2ches' });
+  var sansPieds=(tks||[]).filter(function(t){
+    if(!_parPieds(t) || _pilTacheHha(t)>0) return false;
+    return (typeof window._parcConcern==='function') ? window._parcConcern(t.nom).length>0 : true;
+  });
+  if(sansPieds.length){
+    var _mt=(typeof window._plantMinTrou==='function')?window._plantMinTrou():3, _np=sansPieds.length>1;
+    out.push({ g:'o', cible:'comptes', touche:['travaux','effectif'],
+      k:sansPieds.map(function(t){return t.nom;}).join(', ')+'\u00a0: aucun pied compt\u00e9',
+      f:(_np?'Elles n\u2019ont':'Elle n\u2019a')+' pas d\u2019heures par hectare\u00a0: '+(_np?'leur':'son')+' temps vient des <b>pieds marqu\u00e9s</b> (ou des trous perc\u00e9s), '
+       +String(_mt).replace('.',',')+'\u00a0min par trou. Tant qu\u2019aucun pied n\u2019est compt\u00e9, '+(_np?'elles ne p\u00e8sent':'elle ne p\u00e8se')
+       +' <b>rien</b> dans la charge\u00a0: le total affich\u00e9 est un plancher. Une parcelle sans pied \u00e0 remplacer se compte \u00e0 z\u00e9ro.',
+      ou:'Saisir les comptes' });
+  }
 
   // ── Les parcelles ────────────────────────────────────────────────────────
   var parc=(window.PARCELLES||[]).filter(function(x){ return x && x.statut!=='Arrachee'; });

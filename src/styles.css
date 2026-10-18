@@ -346,8 +346,15 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 /* ══ PAGES ══ */
 .page{display:none;min-height:100vh;padding-bottom:calc(80px + env(safe-area-inset-bottom,0px));}
-.page.active{display:block;animation:pageInFwd 0.24s cubic-bezier(.22,.61,.36,1) forwards;}
-.page.active.nav-back{animation:pageInBack 0.24s cubic-bezier(.22,.61,.36,1) forwards;}
+/* ★ MANQUE-1 (§357) : le fondu d'entrée n'est PLUS « forwards ». Il finit sur opacity:1, la valeur par défaut :
+   le garder appliqué ne changeait rien à l'œil, mais une animation qui reste en vigueur fait de la page active un
+   contexte d'empilement PERMANENT (comme un will-change:opacity). Tout ce que la page contient y restait enfermé :
+   le panneau « Ce qu'il manque » (z 8905) passait SOUS la barre du bas (#mv-dock, z 90, hors de la page) — mesuré au
+   navigateur sur la vraie appli : son dernier bouton caché par la barre, et devant elle en « animations réduites ».
+   Sans « forwards », la page n'est un contexte que pendant les 0,24 s du fondu, puis chacun retrouve son z-index —
+   le même dessin pour tous, animations réduites ou non (CADRE-1, §300, avait mesuré la même cause sur le Planning). */
+.page.active{display:block;animation:pageInFwd 0.24s cubic-bezier(.22,.61,.36,1);}
+.page.active.nav-back{animation:pageInBack 0.24s cubic-bezier(.22,.61,.36,1);}
 @keyframes pageInFwd{from{opacity:0}to{opacity:1}}
 @keyframes pageInBack{from{opacity:0}to{opacity:1}}
 @keyframes pageOut{from{opacity:1}to{opacity:0}}

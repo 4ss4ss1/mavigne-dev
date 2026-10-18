@@ -32,6 +32,10 @@
 
 export const GROUPES = {
 
+  // MANQUE-1 (§357) : « Ce qu'il manque » du Pilotage — lisible jusqu'en bas, plus d'alerte « sans barème » pour le temps
+  //   passé, l'entreplantation par ses pieds comptés, plus de fausse alerte phyto sur une période sans traitement.
+  'pilotage-ce-qui-manque': 'Ce qu’il manque — le bas du panneau, le temps passé, les pieds comptés, le phyto d’hiver',
+
   // FML-1 (§356) : une cuve n'est « finie » qu'avec sa malo — décuvée, la frise lit la malo de sa cuvée au Chai.
   'fin-vinification-malo': 'Fin de vinification — pas de « Fini » avant la malo, « Pas de malo (voulu) », « Terminé » depuis l’étape FML',
 
@@ -435,6 +439,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-compte1.mjs --contre', 'entreplantation-pieds-marques'],
   ['node scripts/mv-harnais-fml1.mjs', 'fin-vinification-malo'],   // FML-1 (§356) : pas de « Fini » avant la malo
   ['node scripts/mv-harnais-fml1.mjs --contre', 'fin-vinification-malo'],
+  ['node scripts/mv-harnais-manque1.mjs', 'pilotage-ce-qui-manque'],   // MANQUE-1 (§357) : « Ce qu'il manque » lisible et vrai
+  ['node scripts/mv-harnais-manque1.mjs --contre', 'pilotage-ce-qui-manque'],
   ['node scripts/mv-harnais-pil-coherence.mjs'],
   ['node scripts/mv-harnais-axe.mjs'],
   ['node scripts/mv-harnais-sauvegarde.mjs'],
