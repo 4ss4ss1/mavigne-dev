@@ -32,6 +32,9 @@
 
 export const GROUPES = {
 
+  // FML-1 (§356) : une cuve n'est « finie » qu'avec sa malo — décuvée, la frise lit la malo de sa cuvée au Chai.
+  'fin-vinification-malo': 'Fin de vinification — pas de « Fini » avant la malo, « Pas de malo (voulu) », « Terminé » depuis l’étape FML',
+
   // COMPTE-1 (§353) : le compte du repérage devient les trous prévus de l'entreplantation.
   'entreplantation-pieds-marques': 'Pieds marqués — le compte du repérage chiffre l’entreplantation, avant la tarière',
   // TACHEPER-1 (§352) : une tâche cochée dans une période existe dans le domaine.
@@ -430,6 +433,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-tacheper1.mjs --contre', 'periodes-taches-du-domaine'],
   ['node scripts/mv-harnais-compte1.mjs', 'entreplantation-pieds-marques'],   // COMPTE-1 (§353) : les pieds marqués chiffrent l'entreplantation
   ['node scripts/mv-harnais-compte1.mjs --contre', 'entreplantation-pieds-marques'],
+  ['node scripts/mv-harnais-fml1.mjs', 'fin-vinification-malo'],   // FML-1 (§356) : pas de « Fini » avant la malo
+  ['node scripts/mv-harnais-fml1.mjs --contre', 'fin-vinification-malo'],
   ['node scripts/mv-harnais-pil-coherence.mjs'],
   ['node scripts/mv-harnais-axe.mjs'],
   ['node scripts/mv-harnais-sauvegarde.mjs'],

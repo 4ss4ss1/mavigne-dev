@@ -43,6 +43,8 @@ const NOMS = [
   '_vendRepere', '_vendADue', '_vendEstFusionnee',
   '_vendTriDate', '_vendTriMes', '_vendLastMes', '_vendSince', '_vendStale', '_vendLastD',
   '_vendStepper', '_vendParcLigne', '_vendKpiData', '_mvgId',
+  /* ★ FML-1 (§356) : la frise et la phrase d'une cuve terminée lisent la malo de sa cuvée — les VRAIES fonctions. */
+  '_vendPassLbl', '_vendFmlPassee', '_vendFmlFin', '_vendFmlVin', '_vendFmlLigne',
   '_vendLigneHtml', '_vendDetailHtml', '_vendCellHtml',
   '_vendDecuvee', '_vendFaEnCours', '_vendPressee', '_vendSuivie', '_vendMesurable',
   '_vtNum', '_vtActives', '_vtB', '_vtTags', '_fermLegende', '_vendCuvF1',

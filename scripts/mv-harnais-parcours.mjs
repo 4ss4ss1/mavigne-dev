@@ -70,6 +70,9 @@ function monte(SRC) {
     bloc(SRC, 'function _vendTriMes(c){', '\n}'),
     bloc(SRC, 'function _vendLastMes(c){', '\n'),
     bloc(SRC, 'function _vendEstFusionnee(c)', '\n'),
+    /* FML-1 (§356) : le parcours nomme le passage d'une cuve terminée (« Décuvée », « Fusionnée »). */
+    bloc(SRC, 'function _vendDecuvee(c)', '\n'),
+    bloc(SRC, 'function _vendPassLbl(c,st){', '\n}'),
     bloc(SRC, 'function _vendStepper(c){', '\n}'),
     bloc(SRC, 'function _vendParcLigne(c){', '\n}'),
     bloc(SRC, 'function _vendParcHist(c,canEdit){', '\n}'),

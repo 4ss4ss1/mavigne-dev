@@ -3,9 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **17 octobre 2026 (ARRIVEE-4)** — ★ **LE BOUTON « FILTRES » À L’ARRIVÉE DE L’OUVRIER** (§355). Base `3abce32` (COMPTE-2 poussé ; SAISONIMG-1 et les huit lots d’avant poussés en `c05f624`).
-> Maquette montrée et validée par Nico le 17/10 (« Oui, go »). Chez l’ouvrier sur sa priorité (`p-arrivee`), la recherche partage sa ligne avec « Filtres » et Carte (`.p-srow`) ; la rangée des états, Liste/Carte (sauf sur la carte) et « Trier par proximité » se rangent. La feuille `#ovPFiltres` actionne les leviers d’avant (`pFilter`, `pShowDone`, `pToggleProximite`) ; la tournée de l’admin garde la main (TRN-2). Premier « Valider » : 530 → 448 px. Vu au navigateur.
-> **APP 9.19 → 9.20, SW 9.98 → 9.99.** Canal « refonte » : `npm run site` → `npm run build` → `firebase hosting:channel:deploy refonte` (aucune règle ne change).
+> Dernière consolidation : **17 octobre 2026 (FML-1)** — ★★ **PAS DE « FINI » AVANT LA MALO** (§356). Base `b4d84bb` (ARRIVEE-4 poussé). Après « Décuver », la frise du Cuvier reste sur FML et lit la malo de la cuvée au Chai (`_vendFmlVin` : pas encore déclarée, en cours, bloquée ; « Fini » à la date de fin de malo) ; « Pas de malo (voulu) » sur la fiche cuvée (les blancs) fait aussi taire la fausse « malo bloquée » d’Aujourd’hui ; « Et la malo ? » au décuvage ; « Terminé » à la main seulement depuis l’étape FML ; « Décuvée » nomme le décuvage ; la légende de la courbe se charge au Cuvier. Rien vu au navigateur. **APP 9.20 → 9.21, SW 9.99 → 10.00.** Canal « refonte » : `npm run site` → `npm run build` → `firebase hosting:channel:deploy refonte` (aucune règle ne change).
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -1857,6 +1855,9 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 **Aucun palier de test ne les aurait vues.**
 
 ## 28. État courant & backlog
+
+### ⚠️ FML-1 — CE QUI RESTE OUVERT (§356, posé le 17/10)
+1. **À regarder chez Nico** (téléphone et ordinateur, clair et sombre) : une cuve décuvée (frise sur FML, phrase dessous), la fiche cuvée à trois boutons, « Et la malo ? » au décuvage, la légende de la courbe au premier passage par le Cuvier — aucun navigateur ici. Une malo finie mais jamais déclarée au Chai reste « pas encore déclarée » jusqu’à sa déclaration ; le parcours du Cuvier reste celui du rouge (pas de parcours propre au blanc).
 
 ### ⚠️ COMPTE-1 et TACHEPER-1 — CE QUI RESTE OUVERT (§352, §353, posé le 17/10)
 1. **À regarder chez Nico** (téléphone et ordinateur) : le pavé, la feuille des comptes, la fiche (marqués · percés · plantés, « Corriger le compte »), la tarière préremplie — aucun harnais ne lit une mise en page. **Le domaine du signalement** n’aura la réparation qu’au déploiement général (contournement « + Nouvelle tâche » fait le 16/10).

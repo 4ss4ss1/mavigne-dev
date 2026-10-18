@@ -110,6 +110,11 @@ function _vendInjectCss(){
 .mvv-parc{margin:6px 0 2px;font-size:var(--pt-micro,11px);line-height:1.5;text-align:center;color:var(--texte-med,#4A4A3A)}
 .mvv-parc b{color:var(--terre,#8A5A38);font-weight:700}
 .mvv-parc .nd{color:var(--texte-doux,#5F5F5F)}
+/* FML-1 : la malo bloquée se voit sur la frise ; la malo évitée exprès est un anneau, pas un point. */
+.mvv-step.alerte .dot{background:#B0412C;border-color:#B0412C;box-shadow:0 0 0 4px rgba(176,65,44,.18)}
+.mvv-step.alerte .lb,.mvv-step.alerte .dt{color:#B0412C}
+.mvv-step.sans .dot{background:var(--bg-card,#FBFAF6);border-color:var(--or,#C2A14D)}
+.mvv-parc.alerte b{color:#B0412C}
 .mvv-ferm{margin-top:14px;background:var(--bg-app,#F2EFE7);border-radius:13px;padding:12px 13px 11px;border:1px solid rgba(138,90,56,.10)}
 .mvv-ferm-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px}
 .mvv-ferm-lbl{font-size:var(--pt-micro,11px);letter-spacing:.4px;text-transform:uppercase;color:var(--texte-doux,#5F5F5F);font-weight:500}
@@ -665,25 +670,137 @@ function _vendSparkline(mes,uid,w){
   return '<div class="mvv-spark"><div class="mvv-spark-lbl"><span>Cin\u00e9tique \u2014 densit\u00e9</span><span>'+mes.length+' relev\u00e9s</span></div>'
     +window._mvGraphSvg(c,aria,g)+'</div>';
 }
+/* ═══════════ FML-1 — LA VINIFICATION FINIT AVEC LA MALO, PAS AU DÉCUVAGE ═══════════
+   Nico, 17/10 : « tu ne peux pas indiquer que la cuvée est terminée si la FML n'est pas
+   faite ». « Décuver » posait 'termine' le jour même : la frise coloriait l'étape FML d'un
+   tiret — comme une étape passée à une date inconnue — et écrivait « Terminé depuis le
+   25/09 » sur un vin qui n'avait pas commencé sa malo. Elle se fait au fût ou en cuve, AU
+   CHAI : la cuvée créée par le décuvage la porte (`decuvage.cuvee_id`). Ce qui suit LIT le
+   Chai ; rien n'est recopié ici.
+   ⚠ `statut` reste 'termine' au décuvage : c'est le FAIT de la cuve — vide, libre au parc
+     (cave.js, _caveCuveOcc), hors tournée (§118). Seul ce que l'écran en DIT change.
+   ⚠ Les règles du Chai, pas une copie (§24 n°18 : deux gardes qui décident la même chose
+     divergent) : l'état déclaré (_caveFmlEtat), la projection (_mlProjMalo : « bloquée » =
+     l'acide malique ne descend plus) et la fin constatée (_mlFinMalo). Une malo évitée
+     exprès — « Pas de malo (voulu) », les blancs — finit la vinification.
+   ⚠ Lu par `typeof` : un bac à sable sans le Chai (harnais) rend « inconnu », pas une panne. */
+
+/* ★ FML-1 — le NOM d'un passage, lu sur la cuve. La clé 'termine' est posée par trois gestes :
+   le décuvage, la fusion, et « Terminé » à la main (malo faite en cuve). « Terminé » écrit sous
+   un décuvage disait fini un vin sans malo : le passage dit ce qui s'est fait ce jour-là. */
+function _vendPassLbl(c,st){
+  if(st==='termine'){
+    if(_vendEstFusionnee(c)) return 'Fusionn\u00e9e';
+    if(_vendDecuvee(c)) return 'D\u00e9cuv\u00e9e';
+  }
+  return _vendStatLbl(st);
+}
+/* La malo est-elle passée par le Cuvier ? L'étape FML en cours, ou franchie. */
+function _vendFmlPassee(c){ return !!c && (c.statut==='fml' || _vendStatIdx(c,'fml')>=0); }
+/* La date à laquelle la malo a été CONSTATÉE finie : la plus ancienne des trois preuves —
+   l'analyse qui la dit terminée, le bouton de la fiche, la mesure de malique passée sous le
+   seuil (et restée dessous). Aucune : null, et l'écran l'écrit. */
+function _vendFmlFin(cu,p){
+  var l=[];
+  try{
+    var fm=(typeof _mlFinMalo==='function')?_mlFinMalo():null;
+    if(fm&&fm[cu.id]) l.push(fm[cu.id]);
+  }catch(err){ if(typeof window!=='undefined'&&window.logError) window.logError({level:'info',cat:'cuvier',msg:'FML-1 : fin de malo',err:err}); }
+  if(cu.fml_terminee&&cu.fml_terminee_date) l.push(cu.fml_terminee_date);
+  if(p&&p.etat==='finie'&&typeof _mlMesMalo==='function'){
+    var lim=(typeof _ML_MAL_FIN==='number')?_ML_MAL_FIN:0.1, f=null;
+    (_mlMesMalo(cu.id)||[]).forEach(function(m){ if(m.val<=lim){ if(!f) f=m.date; } else f=null; });
+    if(f) l.push(f);
+  }
+  l.sort();
+  return l.length?l[0]:null;
+}
+/* Où en est la malo du vin d'une cuve terminée. null hors 'termine' ; sinon {etat, deb, fin, p, cu}.
+   etat : fusion | finie | sans | bouteille | bloquee | cours | attente | inconnu.
+   `deb` : le jour où le vin est entré dans l'étape — l'étape FML posée au Cuvier (malo en cuve),
+   sinon le décuvage (le vin part au Chai, où la malo se fait). */
+function _vendFmlVin(c){
+  if(!c||c.statut!=='termine') return null;
+  if(_vendEstFusionnee(c)) return {etat:'fusion'};
+  var dec=(c.decuvage&&c.decuvage.date)?c.decuvage:null;
+  var dF=_vendStatDeb(c,'fml'), deb=dF||(dec?dec.date:null);
+  /* « Terminé » à la main : la malo ne se lit qu'à son étape — posée, elle a été faite en cuve. */
+  if(!dec) return dF?{etat:'finie', deb:dF, fin:_vendStatDeb(c,'termine'), src:'cuve'}:{etat:'inconnu', deb:null};
+  var ce=(typeof CAVE_ELEVAGE!=='undefined'&&CAVE_ELEVAGE&&CAVE_ELEVAGE.cuvees)?CAVE_ELEVAGE.cuvees:[], cu=null;
+  for(var i=0;i<ce.length;i++){ if(ce[i]&&ce[i].id===dec.cuvee_id){ cu=ce[i]; break; } }
+  if(!cu) return {etat:'inconnu', deb:deb};
+  var e=(typeof _caveFmlEtat==='function')?_caveFmlEtat(cu):null;
+  if(e==='sans') return {etat:'sans', deb:deb, fin:cu.fml_sans_date||null, cu:cu};
+  var p=null;
+  try{ p=(typeof _mlProjMalo==='function')?_mlProjMalo(cu):null; }
+  catch(err){ if(typeof window!=='undefined'&&window.logError) window.logError({level:'info',cat:'cuvier',msg:'FML-1 : projection de malo',err:err}); }
+  if(e==='ok'||(p&&p.etat==='finie')) return {etat:'finie', deb:deb, fin:_vendFmlFin(cu,p), cu:cu};
+  if(cu.statut==='embouteille') return {etat:'bouteille', deb:deb, fin:cu.date_embouteillage||null, cu:cu};
+  if(p&&p.etat==='bloquee') return {etat:'bloquee', deb:deb, p:p, cu:cu};
+  return {etat:((e==='cours')||!!(p&&p.n))?'cours':'attente', deb:deb, p:p, cu:cu};
+}
+/* La phrase sous la frise d'une cuve terminée : ce que la malo dit d'elle, avec ses dates.
+   « Fini » n'y apparaît qu'une fois la malo faite — ou évitée exprès. */
+function _vendFmlLigne(c,v){
+  var n=v.deb?_mlEcartJ(v.deb,_mlAuj()):null;
+  var nd=(n!=null&&n>=0)?' <span class="nd">\u00b7 '+n+'\u00a0j</span>':'';
+  var dep=v.deb?(' depuis le '+_vendFrDate(v.deb)):'';
+  var le=v.fin?(' le '+_vendFrDate(v.fin)):'';
+  var L=function(t,cls){ return '<div class="mvv-parc'+(cls?' '+cls:'')+'">'+t+'</div>'; };
+  if(v.etat==='fusion') return L('<b>Fusionn\u00e9e</b>'+((c.fusion&&c.fusion.date)?(' le '+_vendFrDate(c.fusion.date)):'')
+    +' dans '+_escHtml((c.fusion&&c.fusion.vers_nom)||'une autre cuve')+' \u00b7 la suite se lit sur cette cuve');
+  if(v.etat==='finie') return L('<b>Fini</b>'+le+' \u00b7 '+(v.src==='cuve'?'malo faite en cuve':'malo finie au Chai')
+    +(v.fin?'':' (date non not\u00e9e)'));
+  if(v.etat==='sans') return L('<b>Fini</b>'+le+' \u00b7 pas de malo, choix du domaine');
+  if(v.etat==='bouteille') return L('<b>Fini</b>'+le+' \u00b7 mis en bouteille, malo jamais d\u00e9clar\u00e9e');
+  if(v.etat==='bloquee') return L('<b>FML</b>'+dep+nd+' \u00b7 <b>malo bloqu\u00e9e</b>\u00a0: l\u2019acide malique ne descend plus ('
+    +_vendCuvF1(v.p.mal)+'\u00a0g/L) \u2014 \u00e0 contr\u00f4ler','alerte');
+  if(v.etat==='cours') return L('<b>FML</b>'+dep+nd+' \u00b7 malo en cours au Chai'
+    +((v.p&&v.p.etat==='normal'&&v.p.date)?(', fin estim\u00e9e vers le '+_vendFrDate(v.p.date)):''));
+  if(v.etat==='attente') return L('<b>FML</b>'+dep+nd+' \u00b7 au Chai, malo pas encore d\u00e9clar\u00e9e');
+  return L(v.deb?('<b>FML</b>'+dep+nd+' \u00b7 la cuv\u00e9e n\u2019est plus au Chai\u00a0: la malo ne se lit pas')
+    :('<b>Termin\u00e9</b> sans \u00e9tape FML\u00a0: la malo n\u2019a pas \u00e9t\u00e9 not\u00e9e'));
+}
+
 /* ★ La frise prend la CUVE, plus son seul statut : elle porte desormais la
    date de chaque passage. Une etape franchie dont la date est inconnue
-   affiche « — » — c'est une invitation a la poser, pas un trou. */
+   affiche « — » — c'est une invitation a la poser, pas un trou.
+   ★★★ FML-1 — sauf l'étape FML d'une cuve décuvée : elle n'est pas « franchie à une date
+   inconnue », elle est EN COURS tant que Le Chai ne dit pas la malo finie (ou évitée exprès).
+   « Fini » porte la date de fin de malo, jamais celle du décuvage. Une cuve fusionnée
+   s'arrête à sa dernière étape : son vin continue dans une autre cuve. */
 function _vendStepper(c){
   var st=(c&&c.statut)||'setup';
   var cur=(_VEND_STAT[st]||{i:0}).i;
+  var v=(st==='termine')?_vendFmlVin(c):null, fus=!!(v&&v.etat==='fusion');
+  var fini=!!(v&&(v.etat==='finie'||v.etat==='sans'||v.etat==='bouteille'));
+  if(fus){
+    var hh=_vendHist(c); cur=-1;
+    for(var k=0;k<hh.length;k++){ var ik=(_VEND_STAT[hh[k].statut]||{i:-1}).i; if(hh[k].statut!=='termine'&&ik>cur) cur=ik; }
+  } else if(v&&!fini) cur=_VEND_STAT.fml.i;
   return '<div class="mvv-steps">'+_VEND_STEPS.map(function(s,i){
-    var cls=i<cur?'done':i===cur?'cur':'';
+    var cls=fus?(i<=cur?'done':''):(i<cur?'done':i===cur?'cur':'');
     var d=(i<=cur)?_vendStatDeb(c,s[0]):null;
+    var dt='';   // FML-1 : « sans » sous l'étape FML d'une malo évitée exprès
+    if(v&&!fus&&s[0]==='fml'){
+      d=v.deb||null;
+      if(v.etat==='bloquee') cls+=' alerte';
+      if(v.etat==='sans'){ cls+=' sans'; dt='sans'; }
+    } else if(v&&!fus&&s[0]==='termine') d=fini?(v.fin||null):null;
     return '<div class="mvv-step '+cls+'"><div class="dot"></div><div class="lb">'+s[1]+'</div>'
-      +'<div class="dt">'+(d?_vendFrDate(d):(i<=cur?'\u2014':''))+'</div></div>';
+      +'<div class="dt">'+(dt||(d?_vendFrDate(d):(i<=cur?'\u2014':'')))+'</div></div>';
   }).join('')+'</div>';
 }
 /* La phrase que la frise ne peut pas dire : DEPUIS QUAND, et combien de
    jours. Rien ne s'affiche tant qu'on ne le sait pas. */
 function _vendParcLigne(c){
-  var st=(c&&c.statut)||'', d=_vendStatDeb(c,st);
+  var st=(c&&c.statut)||'';
+  /* ★ FML-1 — une cuve terminée dit où en est la malo de son vin, plus « Terminé depuis le décuvage ». */
+  var v=(st==='termine')?_vendFmlVin(c):null;
+  if(v) return _vendFmlLigne(c,v);
+  var d=_vendStatDeb(c,st);
   if(!d) return '';
-  var n=(st==='termine')?null:_vendStatDuree(c,st);
+  var n=_vendStatDuree(c,st);
   return '<div class="mvv-parc"><b>'+_escHtml(_vendStatLbl(st))+'</b> depuis le '+_vendFrDate(d)
     +(n!=null?' <span class="nd">\u00b7 '+n+'\u00a0j</span>':'')+'</div>';
 }
@@ -700,7 +817,7 @@ function _vendParcHist(c,canEdit){
     var det=fin?('jusqu\u2019au '+_vendFrDate(fin)):'en cours';
     if(e.statut!=='termine'&&n!=null&&n>=0) det+=' \u00b7 '+n+' j';
     return '<div class="mvv-hrow"><div class="mvv-hrow-l">'
-      +'<div class="mvv-hrow-d">'+_vendFrDate(e.date)+' \u00b7 <b>'+_escHtml(_vendStatLbl(e.statut))+'</b></div>'
+      +'<div class="mvv-hrow-d">'+_vendFrDate(e.date)+' \u00b7 <b>'+_escHtml(_vendPassLbl(c,e.statut))+'</b></div>'
       +'<div class="mvv-hrow-u">'+_escHtml(det)+'</div></div>'
       +(canEdit?'<button class="mv-gh mvv-icbtn" onclick="openVendStat(\''+_escAttr(c.id)+'\',\''+_escAttr(e.id)+'\')" title="Corriger cette \u00e9tape" aria-label="Corriger cette \u00e9tape">'+_mvIcon('crayon',16)+'</button>':'')
       +'</div>';
@@ -1842,6 +1959,14 @@ function saveVendCuve() {
   if(_stChg){
     if(date && _stDate<date){ showToast('Le passage est ant\u00e9rieur \u00e0 l\u2019encuvage du '+_vendFrDate(date),'#B85A1A'); return; }
     if(_stDate>_mlAuj()){ showToast('Un passage ne se pose pas dans le futur','#B85A1A'); return; }
+  }
+  /* ★★★ FML-1 — PAS DE « TERMINÉ » SANS MALO. Nico, 17/10 : on ne saute pas l'étape FML pour
+     marquer « Terminé » tout de suite. Le menu passait de n'importe quelle étape à « Terminé » ;
+     il n'y passe plus que depuis l'étape FML (malo faite en cuve). Sinon « Décuver » envoie le
+     vin au Chai, qui suit sa malo. Une cuve déjà terminée (décuvée, fusionnée) n'est pas touchée.
+     Le refus passe AVANT toute écriture, comme ceux des dates. */
+  if(statut==='termine' && !(existing && existing.statut==='termine') && !_vendFmlPassee(existing)){
+    showToast('La malo n\u2019est pas faite\u00a0: passez par l\u2019\u00e9tape FML, ou \u00ab\u00a0D\u00e9cuver\u00a0\u00bb vers Le Chai','#B85A1A'); return;
   }
   // ⚠️ Dernier filet : la cuve a pu etre prise depuis l'ouverture de la fiche.
   if(_vcuvRef && _caveCuveOcc(_vcuvRef, id||null)){
@@ -3612,6 +3737,7 @@ var _vendDecMode='fut', _vendDecCuveRef=null, _vendDecCuveL=0;
 /* CUV-10 : coche par defaut. Chez ce domaine la FA finit en cuve — le cas
    courant ne doit demander aucun geste. */
 var _vendDecFaFinie=true;
+var _vendDecFml=false;      // ★ FML-1 — « Déjà finie en cuve » ; jamais vrai d'office
 // Choix des futs a l'entonnage : {lot_id: nb}. Vide = on retombe sur le simple
 // compte de barriques, comme avant ce lot.
 var _vendDecChoix={};
@@ -3634,7 +3760,7 @@ function openVendDecuvage(cuveId){
   _vendDecCuveId=cuveId;
   var yr=new Date().getFullYear();
   _vendDecMode='fut'; _vendDecCuveRef=null; _vendDecCuveL=0;
-  _vendDecFaFinie=true;
+  _vendDecFaFinie=true; _vendDecFml=false;
   _vendDecVolSaisi=null; _vendDecCuveTouche=false; _vendDecNote='';
   // ⚠️ Le CSS du parc vit dans _caveV2InjectCss : sans cet appel, le selecteur
   //   de cuve sortirait SANS STYLE quand on decuve sans etre passe par Le Chai.
@@ -3652,6 +3778,7 @@ function openVendDecuvage(cuveId){
     +'<label class="mvv-flbl">Millésime</label>'
     +'<input id="vdec-mil" class="mvv-tin" type="number" value="'+yr+'" min="2000" max="'+(yr+1)+'">'
     +_vendDecFaHtml(c)
+    +_vendDecFmlHtml()
     +_vendDecVolHtml()
     +_vendDecSegHtml()
     +'<div id="vdec-zone"></div>'
@@ -3696,6 +3823,27 @@ function _vendDecFaSet(v){
     if(b[1]) b[1].classList.toggle('on',!_vendDecFaFinie); }
 }
 window._vendDecFaSet=_vendDecFaSet;
+/* ★★★ FML-1 — LA MALO, AU MOMENT DU DÉCUVAGE. Le cas courant : elle se fera au chai, en fût —
+   c'est le choix d'office, et Le Chai la suit. « Déjà finie en cuve » : la malo faite dans la
+   cuve avant l'entonnage ; la cuvée naît au Chai malo terminée, datée de ce jour.
+   ⚠ Rien n'est « finie » d'office : un « Fini » faux est exactement le défaut que ce lot retire. */
+function _vendDecFmlHtml(){
+  return '<label class="mvv-flbl">Et la malo\u00a0?</label>'
+    +'<div class="mvv-optabs" id="vdec-fml">'
+    +'<button type="button" class="mvv-optab on" onclick="_vendDecFmlSet(0)">Elle se fera au chai</button>'
+    +'<button type="button" class="mvv-optab" onclick="_vendDecFmlSet(1)">D\u00e9j\u00e0 finie en cuve</button>'
+    +'</div>'
+    +'<div class="mvv-fnote">La cuve ne passe \u00e0 \u00ab\u00a0Fini\u00a0\u00bb qu\u2019une fois la malo faite. '
+    +'Au Chai, la fiche de la cuv\u00e9e la d\u00e9clare\u00a0: termin\u00e9e, ou pas de malo (voulu).</div>';
+}
+function _vendDecFmlSet(v){
+  _vendDecFml=!!v;
+  var z=document.getElementById('vdec-fml');
+  if(z){ var b=z.querySelectorAll('.mvv-optab');
+    if(b[0]) b[0].classList.toggle('on',!_vendDecFml);
+    if(b[1]) b[1].classList.toggle('on',_vendDecFml); }
+}
+window._vendDecFmlSet=_vendDecFmlSet;
 
 /* ★★★ CUV-14 — LE CHAMP « VOLUME DECUVE ». Facultatif, comme la densite : un
    decuvage sans volume saisi reste un decuvage, et le volume ecrit est alors
@@ -4203,7 +4351,8 @@ function saveVendDecuvage(){
   var _tonf=(_ton&&_ton.length)?_ton:(nb>0?[{annee:mil,nb:nb}]:[]);
   var cuvee={id:'cuv_'+Date.now(),nom:nom,millesime:mil,
     tonneaux:_tonf,
-    statut:'elevage',fml_terminee:false,last_ouillage:null,last_analyse:null};
+    statut:'elevage',fml_terminee:!!_vendDecFml,fml_terminee_date:_vendDecFml?_mvToday():null,   // ★ FML-1
+    last_ouillage:null,last_analyse:null};
   // La cuve part avec la cuvee. Le volume ecrit est celui qu'on a saisi : un
   // FAIT DATE, pas la contenance du parc.
   if(_cv) cuvee.cuves=[{ref:_cv.id, litres:_vendDecCuveL}];
@@ -5157,6 +5306,14 @@ function saveVendStat(){
   if(c.date_entree && d<c.date_entree){
     showToast('Ant\u00e9rieur \u00e0 l\u2019encuvage du '+_vendFrDate(c.date_entree),'#B85A1A'); return; }
   if(d>_mlAuj()){ showToast('Un passage ne se pose pas dans le futur','#B85A1A'); return; }
+  /* ★★★ FML-1 — même règle que « Modifier » : poser « Terminé » demande l'étape FML. Corriger la
+     date d'un « Terminé » déjà là reste permis ; une cuve décuvée ou fusionnée est close. */
+  if(_vstSel==='termine' && !(_vendEstFusionnee(c)||!!(c.decuvage&&c.decuvage.date)) && !_vendFmlPassee(c)){
+    var _eT=_vstEditId?_vendHist(c).find(function(x){return x.id===_vstEditId;}):null;
+    if(!(_eT&&_eT.statut==='termine')){
+      showToast('La malo n\u2019est pas faite\u00a0: passez par l\u2019\u00e9tape FML, ou \u00ab\u00a0D\u00e9cuver\u00a0\u00bb vers Le Chai','#B85A1A'); return;
+    }
+  }
   if(!Array.isArray(c.statut_hist)) c.statut_hist=[];
   if(_vstEditId){
     var e=_vendHist(c).find(function(x){return x.id===_vstEditId;});
@@ -7569,7 +7726,7 @@ function _vendFermSvg(cu, w, opts){
        courbe, ni la temperature, ni les reperes d'operation (poses 5 px plus
        bas). Deux passages trop proches ne s'ecrivent PAS l'un sur l'autre :
        le trait reste, le nom part en legende, qui les date tous. */
-    var lbl = _vendStatLbl(e.statut), lg = lbl.length * 5.6;
+    var lbl = _vendPassLbl(cu, e.statut), lg = lbl.length * 5.6;   /* FML-1 : « Décuvée », pas « Terminé » */
     if(x - _xEt < 34) return;
     var fin = (x + 6 + lg) > (W - 2);
     g += '<text x="' + (fin ? (x - 4) : (x + 4)).toFixed(1) + '" y="' + (pT - 13) + '"'
@@ -7609,7 +7766,7 @@ function _vendFermSvg(cu, w, opts){
         + (m.temp_c != null ? ('<div class="r"><i>temp\u00e9rature</i><b>' + _mvF1(m.temp_c) + ' \u00b0C</b></div>') : '')
         + ((m.pigeages != null || m.remontages != null)
             ? ('<div class="r"><i>pigeages / remontages</i><b>' + (m.pigeages || 0) + ' / ' + (m.remontages || 0) + '</b></div>') : '')
-        + (etJ.length ? ('<div class="o">' + _escHtml(etJ.map(function(e){ return _vendStatLbl(e.statut); }).join(' \u00b7 ')) + '</div>') : '')
+        + (etJ.length ? ('<div class="o">' + _escHtml(etJ.map(function(e){ return _vendPassLbl(cu, e.statut); }).join(' \u00b7 ')) + '</div>') : '')
         + (opJ.length ? ('<div class="o">' + _escHtml(opJ.map(function(o){ return _vendOpLbl(o.type); }).join(' \u00b7 ')) + '</div>') : '')
         + (m.note ? ('<div class="o">' + _escHtml(m.note) + '</div>') : '');
       g += window._mvGraphHit(c, xm, Yd(_vendMesD20(m)), xa, xb, tt);
@@ -8830,6 +8987,7 @@ window._vendInjectCss = _vendInjectCss;
 window._vendFrDate = _vendFrDate;
 window._vendFaPct = _vendFaPct;
 window._vendStatLbl = _vendStatLbl;
+window._vendPassLbl = _vendPassLbl;         // ★ FML-1 — légende du graphe, cahier de cuverie
 window._vendIsActive = _vendIsActive;
 window._vendHist = _vendHist;
 window._vendStatDeb = _vendStatDeb;

@@ -8,6 +8,10 @@
 > ici étaient vrais le jour où ils ont été écrits. Rien ici ne se lit comme un fait présent —
 > `APP_VERSION` (`src/utils.js`), l'en-tête de `public/sw.js` et le §28 de `CLAUDE.md` font foi.
 
+> Dernière consolidation : **17 octobre 2026 (ARRIVEE-4)** — ★ **LE BOUTON « FILTRES » À L’ARRIVÉE DE L’OUVRIER** (§355). Base `3abce32` (COMPTE-2 poussé ; SAISONIMG-1 et les huit lots d’avant poussés en `c05f624`).
+> Maquette montrée et validée par Nico le 17/10 (« Oui, go »). Chez l’ouvrier sur sa priorité (`p-arrivee`), la recherche partage sa ligne avec « Filtres » et Carte (`.p-srow`) ; la rangée des états, Liste/Carte (sauf sur la carte) et « Trier par proximité » se rangent. La feuille `#ovPFiltres` actionne les leviers d’avant (`pFilter`, `pShowDone`, `pToggleProximite`) ; la tournée de l’admin garde la main (TRN-2). Premier « Valider » : 530 → 448 px. Vu au navigateur.
+> **APP 9.19 → 9.20, SW 9.98 → 9.99.** Canal « refonte » : `npm run site` → `npm run build` → `firebase hosting:channel:deploy refonte` (aucune règle ne change).
+
 > Dernière consolidation : **17 octobre 2026 (COMPTE-2)** — **UNE ENTREPLANTATION VALIDÉE PAR LE JOURNAL ÉCRIT SES PIEDS** (§354). Base `c988bf5` (COMPTE-1 poussé).
 > `saveJournalEntry` passe par `_cptAuValider` comme « Valider » : l’entrée porte les trous prévus, et le temps réalisé du Pilotage les lit. Vérifié au passage : il n’existe pas de validation en lot dans la Vigne. Un repérage tapé au Journal ne demande pas le compte (feuille des comptes).
 > **Pas de bump** (module JS seul : `src/app.js`), pas d’annonce. Canal « refonte » : `npm run build` → `firebase hosting:channel:deploy refonte`.

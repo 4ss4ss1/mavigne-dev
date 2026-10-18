@@ -851,6 +851,7 @@ function _caveAnaLineHtml(c){
   var fmlTag='';
   if(fml==='ok') fmlTag='<span class="mvc-tag mvc-tag-fmlok">FML '+_mvIcon('check',16)+'</span>';
   else if(fml==='cours') fmlTag='<span class="mvc-tag mvc-tag-fmlc">FML en cours</span>';
+  else if(fml==='sans') fmlTag='<span class="mvc-tag mvc-tag-fmlno">Pas de malo</span>';   // ★ FML-1 — un choix, pas un manque
   if(!la) return '<div class="mvc-cuv-ana">'+(fmlTag||'<span class="mvc-tag-none">Aucune analyse enregistr\u00e9e</span>')+'</div>';
   var so2=(la._src==='op'&&la.data)?la.data.so2_libre:null;
   var tags='';
@@ -1761,10 +1762,11 @@ function _cuvToggle(field, val) {
   hid.value=val;
   var actif={
     non:{bg:'rgba(180,140,50,0.15)',color:'#B8913A',bdr:'rgba(180,140,50,0.35)'},
-    ok:{bg:'rgba(58,140,64,0.15)',color:'#3A8C40',bdr:'rgba(58,140,64,0.35)'}
+    ok:{bg:'rgba(58,140,64,0.15)',color:'#3A8C40',bdr:'rgba(58,140,64,0.35)'},
+    sans:{bg:'rgba(122,115,106,0.15)',color:'var(--texte-med)',bdr:'rgba(122,115,106,0.35)'}   // ★ FML-1
   };
   var inact={bg:'var(--bg-card)',color:'var(--texte-doux)',bdr:'var(--gris)'};
-  ['non','ok'].forEach(function(k){
+  ['non','ok','sans'].forEach(function(k){
     var btn=document.getElementById('cuv-fml-'+k); if(!btn) return;
     var s=k===val?actif[k]:inact;
     btn.style.background=s.bg;
@@ -1929,7 +1931,8 @@ function openOvCavee(cuvId) {
   // ★ Meme lecture que les cartes du Chai : une malo declaree finie par une
   //   ANALYSE ouvrait la fiche sur « Non terminee », qui contredisait
   //   l'etiquette « FML ✓ » de la carte juste derriere.
-  var fmlInit=(cuv&&_caveFmlEtat(cuv)==='ok')?'ok':'non';
+  var _fmlE=cuv?_caveFmlEtat(cuv):null;   // ★ FML-1 — « Pas de malo (voulu) » rouvre sur son bouton
+  var fmlInit=(_fmlE==='ok'||_fmlE==='sans')?_fmlE:'non';
   var hFml=document.getElementById('cuv-fml-val');if(hFml)hFml.value=fmlInit;
   window._cuvToggle('fml',fmlInit);
   // Peupler la r\u00E9partition des tonneaux
@@ -1944,7 +1947,10 @@ function saveCuvee() {
   var nom=((document.getElementById('cuv-nom')||{}).value||'').trim();
   var millesime=parseInt((document.getElementById('cuv-millesime')||{}).value)||new Date().getFullYear();
   var statut=(document.getElementById('cuv-statut')||{}).value||'elevage';
-  var fmlTerminee=(document.getElementById('cuv-fml-val')||{}).value==='ok';
+  var _fmlV=(document.getElementById('cuv-fml-val')||{}).value;
+  var fmlTerminee=_fmlV==='ok';
+  /* ★ FML-1 — « Pas de malo (voulu) » : le domaine évite la malo exprès. Datée comme « Terminée ». */
+  var fmlSans=_fmlV==='sans';
   var existId=(document.getElementById('cuv-id')||{}).value;
   var tonneaux=_cuvTonneaux.filter(function(t){return t.nb>0;});
   var nbTotal=tonneaux.reduce(function(s,t){return s+(t.nb||0);},0);
@@ -2004,11 +2010,17 @@ function saveCuvee() {
       if(fmlTerminee&&(!_prevC.fml_terminee||!_fmlD)) _fmlD=_fmlAuj;
       if(!fmlTerminee) _fmlD=null;
       Object.assign(_prevC,{nom:nom,millesime:millesime,tonneaux:tonneaux,statut:statut,fml_terminee:fmlTerminee,fml_terminee_date:_fmlD});
+      /* ★ FML-1 — même règle de date que « Terminée » : réenregistrer ne la redate pas. */
+      var _sansD=_prevC.fml_sans_date||null;
+      if(fmlSans&&(!_prevC.fml_sans||!_sansD)) _sansD=_fmlAuj;
+      if(fmlSans){ _prevC.fml_sans=true; _prevC.fml_sans_date=_sansD; }
+      else { delete _prevC.fml_sans; delete _prevC.fml_sans_date; }
     }
   } else {
     CAVE_ELEVAGE.cuvees.push({id:'cuv_'+Date.now(),nom:nom,millesime:millesime,
       tonneaux:tonneaux,statut:'elevage',fml_terminee:fmlTerminee,fml_terminee_date:fmlTerminee?_fmlAuj:null,
       last_ouillage:null,last_analyse:null});
+    if(fmlSans){ var _nc=CAVE_ELEVAGE.cuvees[CAVE_ELEVAGE.cuvees.length-1]; _nc.fml_sans=true; _nc.fml_sans_date=_fmlAuj; }   // ★ FML-1
   }
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
   window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},(existId?'Cuv\u00e9e mise \u00e0 jour':'Cuv\u00e9e cr\u00e9\u00e9e')
@@ -2085,11 +2097,19 @@ function _caveFmlDerniereOp(cuvId) {
   return best;
 }
 function _caveFmlEtat(c) {
-  // Etat FML affichable d'une cuvee : 'ok' | 'cours' | 'non' | null.
+  // Etat FML affichable d'une cuvee : 'ok' | 'cours' | 'non' | 'sans' | null.
   // Lecture unique, partagee par les cartes du Chai, la fiche cuvee et _mlMalo.
   if(!c)return null;
   var op=_caveFmlDerniereOp(c.id);
   var mes=op?op.data.fml:null;
+  /* ★ FML-1 — « Pas de malo (voulu) » : une décision du domaine (les blancs), pas une mesure.
+     Datée, elle se laisse corriger par une analyse POSTÉRIEURE qui dit la malo partie ou finie :
+     la déclaration la plus récente gagne, comme pour « Terminée ». */
+  if(c.fml_sans){
+    var ds=c.fml_sans_date||null;
+    if(mes&&ds&&op&&(op.date||'')>ds) return mes;
+    return 'sans';
+  }
   if(!c.fml_terminee)return mes;
   // ⚠️ Le drapeau de la fiche n'etait pas date avant ce lot. Sans date, il
   //    reste la verite du vigneron et gagne (§ lot MALO). Date, il se laisse
@@ -2413,6 +2433,10 @@ function renderCaveVendange() {
      detail deplie s'en sert AVANT qu'aucune feuille n'ait ete ouverte :
      sans cet appel, l'historique sortait sans style au premier affichage. */
   _vendEnsureSheetCss();
+  /* ★ FML-1 — la légende du graphe de fermentation (.mvfm-lg, .mvfm-ets) vit dans _caveV2InjectCss.
+     Le Cuvier ouvert sans passer par Le Chai la montrait en vrac : textes collés, sans les traits
+     de couleur (capture du 17/10). Même défaut que la ligne au-dessus, même remède. */
+  _caveV2InjectCss();
   // ★ L'en-tete et la bande #cave-kpis sont ecrits par renderCave (lot CAVE-1).
   var mvcHost=document.getElementById('mvc-elevage'); if(mvcHost) mvcHost.style.display='none';
   ['auj','reg'].forEach(function(t){var v=document.getElementById('cave-view-'+t);if(v)v.style.display='none';});
@@ -2549,6 +2573,7 @@ function openCuveeDetail(cuvId,dans){
   if(lFml==='ok')fmlH='<div style="font-size:var(--pt-lbl,10.5px);font-weight:600;color:#3A8C40;background:rgba(58,140,64,0.12);border-radius:6px;padding:2px 8px;display:inline-block;margin-top:4px;">FML \u2713</div>';
   else if(lFml==='cours')fmlH='<div style="font-size:var(--pt-lbl,10.5px);font-weight:600;color:#B8913A;background:rgba(184,145,58,0.12);border-radius:6px;padding:2px 8px;display:inline-block;margin-top:4px;">FML en cours</div>';
   else if(lFml==='non')fmlH='<div style="font-size:var(--pt-lbl,10.5px);font-weight:600;color:#E07060;background:rgba(224,112,96,0.1);border-radius:6px;padding:2px 8px;display:inline-block;margin-top:4px;">FML non faite</div>';
+  else if(lFml==='sans')fmlH='<div style="font-size:var(--pt-lbl,10.5px);font-weight:600;color:var(--texte-doux,#7A736A);background:rgba(122,115,106,0.1);border-radius:6px;padding:2px 8px;display:inline-block;margin-top:4px;">Pas de malo (voulu)</div>';   // ★ FML-1
   var cOps=(CAVE_ELEVAGE.operations||[]).filter(function(op){
     var ids=op.cuvees_ids||(op.cuvee_id?[op.cuvee_id]:[]);
     // ★ ASM-1 — la cuvee ou l'on a puise le voit aussi (§153b).
@@ -3968,7 +3993,7 @@ function _fermLegende(cu, ops, t0, mes, deuxAxes, ets){
     h += '<div class="mvfm-ets">';
     ets.forEach(function(e){
       h += '<span class="mvfm-et"><i></i><b>J' + jour(e.date) + '</b> '
-        + _escHtml(_vendStatLbl(e.statut)) + '</span>';
+        + _escHtml(_vendPassLbl(cu, e.statut)) + '</span>';   /* FML-1 : « Décuvée », pas « Terminé » */
     });
     h += '</div>';
   }
@@ -5754,6 +5779,9 @@ function _mlMalo(){
   var fm=_mlFinMalo(), out=[];
   (CAVE_ELEVAGE.cuvees||[]).forEach(function(x){
     if(!x||!x.id||x.statut==='embouteille') return;
+    /* ★ FML-1 — une malo évitée exprès n'est pas suivie : son malique reste plat, et la projection
+       crierait « malo bloquée — à contrôler » sur un vin qui fait exactement ce qu'on lui demande. */
+    if(_caveFmlEtat(x)==='sans') return;
     var p=null;
     try{ p=window._mlProjMalo(x); }
     catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'aujourdhui/projMalo',err:e}); }
@@ -9817,7 +9845,7 @@ function _cuvDoc(an, ctri){
     }
     var _parc = _vendHist(c);
     if(_parc.length) id.push('<em>Parcours <b>' + _parc.map(function(e){
-      return _vendStatLbl(e.statut) + ' ' + _vendFrDate(e.date); }).join(' → ') + '</b></em>');
+      return _vendPassLbl(c, e.statut) + ' ' + _vendFrDate(e.date); }).join(' → ') + '</b></em>');   // FML-1
     if(nj != null)    id.push('<em>Cuvaison <b>' + nj + ' jour' + (nj > 1 ? 's' : '') + '</b></em>');
 
     var pied = '';
@@ -9829,7 +9857,7 @@ function _cuvDoc(an, ctri){
     }
 
     return '<div class="cd-cuve mvdoc-avoid"><h3>' + _escHtml(c.nom || 'Cuve')
-      + '<span class="cd-tag">' + _escHtml(_vendStatLbl(c.statut)) + '</span></h3>'
+      + '<span class="cd-tag">' + _escHtml(_vendPassLbl(c, c.statut)) + '</span></h3>'
       + '<div class="cd-idr">' + id.join('') + '</div>'
       + grf + tbl + (tops ? ('<h2 style="margin-top:9px">Opérations</h2>' + tops) : '') + pied + '</div>';
   }).join('');
@@ -10919,6 +10947,8 @@ window._cuvLev = _cuvLev;
 window._mvF1 = _mvF1;
 window._anaSpd = _anaSpd;
 window._caveV2InjectCss = _caveV2InjectCss;
+window._caveFmlEtat = _caveFmlEtat;     // ★ FML-1 — la frise du Cuvier lit la malo de la cuvée
+window._mlFinMalo = _mlFinMalo;         // ★ FML-1 — et le jour où elle a été constatée finie
 window._apportsRangs = _apportsRangs;
 window._apportsPied = _apportsPied;
 window._fermLegende = _fermLegende;
