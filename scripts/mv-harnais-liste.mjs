@@ -32,6 +32,10 @@
 
 export const GROUPES = {
 
+  // TUTO-1 (§358) : les tutos guidés — la porte unique de firebase.js, la mémoire jetable de boot.js, les étiquettes
+  //   visées, les fonctions enseignées, et le compte des gestes sans tuto qui ne peut que baisser.
+  'tutoriels-guides': 'Tutos guidés — rien ne sort pendant l’entraînement, chaque étiquette existe, aucun geste nouveau sans tuto',
+
   // MANQUE-1 (§357) : « Ce qu'il manque » du Pilotage — lisible jusqu'en bas, plus d'alerte « sans barème » pour le temps
   //   passé, l'entreplantation par ses pieds comptés, plus de fausse alerte phyto sur une période sans traitement.
   'pilotage-ce-qui-manque': 'Ce qu’il manque — le bas du panneau, le temps passé, les pieds comptés, le phyto d’hiver',
@@ -535,6 +539,8 @@ export const HARNAIS = [
   ['node scripts/mv-version-json.mjs --test', 'versions-perimees-et-parc'],
   ['node scripts/mv-harnais-droits.mjs', 'lecture-seule-et-remontee'],
   ['node scripts/mv-harnais-droits.mjs --contre', 'lecture-seule-et-remontee'],
+  ['node scripts/mv-harnais-tutos.mjs', 'tutoriels-guides'],
+  ['node scripts/mv-harnais-tutos.mjs --contre', 'tutoriels-guides'],
   ['node scripts/mv-harnais-gnr-mesure.mjs'],          // GNR-M (§213) : le tracteur sur les travaux en cours, conso mesurée
   ['node scripts/mv-harnais-gnr-mesure.mjs --contre'],
   ['node scripts/mv-harnais-spark.mjs'],               // SPARK-1 (§214) : la petite courbe d’un chiffre

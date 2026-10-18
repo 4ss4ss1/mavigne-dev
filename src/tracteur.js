@@ -813,13 +813,13 @@ function _gnrCardHtml(){
     return '<div class="ent-resume-card" style="margin-bottom:12px">'
       +'<div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte);margin-bottom:4px">Appoint de cuve</div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:10px">Livraison ou remplissage de la cuve du domaine. Le prix saisi ici alimente le coût du GNR dans Pilotage › Économie.</div>'
-      +'<div style="margin-bottom:8px"><div style="'+lCss+'">Litres livrés</div><input type="number" id="gnr-ap-l" min="1" step="1" inputmode="decimal" placeholder="ex. 500" style="'+fCss+'"></div>'
-      +'<div style="margin-bottom:8px"><div style="'+lCss+'">Prix du litre (€/L)</div><input type="number" id="gnr-ap-pu" min="0" step="0.001" inputmode="decimal" placeholder="ex. 1,24" style="'+fCss+'"></div>'
+      +'<div style="margin-bottom:8px"><div style="'+lCss+'">Litres livrés</div><input type="number" id="gnr-ap-l" data-tuto="gnr.litres" min="1" step="1" inputmode="decimal" placeholder="ex. 500" style="'+fCss+'"></div>'
+      +'<div style="margin-bottom:8px"><div style="'+lCss+'">Prix du litre (€/L)</div><input type="number" id="gnr-ap-pu" data-tuto="gnr.prix" min="0" step="0.001" inputmode="decimal" placeholder="ex. 1,24" style="'+fCss+'"></div>'
       +'<div style="margin-bottom:8px"><div style="'+lCss+'">Date</div><input type="date" id="gnr-ap-d" value="'+_gnrTodayISO()+'" style="'+fCss+'"></div>'
       +'<div style="margin-bottom:8px"><div style="'+lCss+'">Fournisseur <span style="opacity:.7">(facultatif)</span></div><input type="text" id="gnr-ap-f" placeholder="ex. coopérative" style="'+fCss+'"></div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:2px 0 10px">Cuve : '+_gnrNum(rest)+' / '+_gnrNum(cap)+' L avant appoint.</div>'
       +'<div style="display:flex;gap:8px">'
-      +'<button onclick="window.saveGnrAppoint()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;min-height:44px">Enregistrer l’appoint</button>'
+      +'<button data-tuto="gnr.save" onclick="window.saveGnrAppoint()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;min-height:44px">Enregistrer l’appoint</button>'
       +'<button onclick="window.cancelGnrAct()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);cursor:pointer;min-height:44px">Annuler</button>'
       +'</div></div>';
   }
@@ -842,7 +842,7 @@ function _gnrCardHtml(){
   }
   var pc=Math.round((Number(g.niveau)||0)/(Number(g.capacite)||1)*100), low=(Number(g.niveau)||0)<=(Number(g.seuil)||0);
   var col=low?'var(--rouge)':pc<40?'var(--orange)':'var(--vert-med)';
-  return '<div class="ent-resume-card" style="margin-bottom:12px">'
+  return '<div class="ent-resume-card" data-tuto="gnr.carte" style="margin-bottom:12px">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">'
       +'<div><div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">'+_mvIcon('carburant',16)+' Cuve GNR'+(low?' <span style="color:var(--rouge);font-weight:700">'+_mvIcon('alerte',16)+' bas</span>':'')+'</div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">'+_gnrNum(g.niveau)+' / '+_gnrNum(g.capacite)+' L \u00b7 '+pc+' %'+(g.maj?(' \u00b7 maj '+_fmtDate(g.maj)):'')+'</div></div>'
@@ -851,7 +851,7 @@ function _gnrCardHtml(){
     +'<div style="height:8px;border-radius:5px;background:var(--gris-clair);overflow:hidden;margin-top:9px"><i style="display:block;height:100%;width:'+Math.min(pc,100)+'%;background:'+col+'"></i></div>'
     +(isAdmin()?_gnrPrixLigne():'')
     +(canEdit?'<div style="display:flex;gap:8px;margin-top:11px">'
-      +(isAdmin()?'<button onclick="window.openGnrAppoint()" style="flex:1;padding:9px;border:1px solid var(--vert-med);border-radius:9px;background:transparent;color:var(--vert-med);font-family:\'Outfit\',sans-serif;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;min-height:44px">Appoint de cuve</button>':'')
+      +(isAdmin()?'<button data-tuto="gnr.appoint" onclick="window.openGnrAppoint()" style="flex:1;padding:9px;border:1px solid var(--vert-med);border-radius:9px;background:transparent;color:var(--vert-med);font-family:\'Outfit\',sans-serif;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;min-height:44px">Appoint de cuve</button>':'')
       +'<button onclick="window.openGnrCorr()" style="flex:1;padding:9px;border:1px solid var(--gris);border-radius:9px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;min-height:44px">Corriger le niveau</button>'
     +'</div>':'')
   +'</div>';

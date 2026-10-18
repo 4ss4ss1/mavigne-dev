@@ -1,0 +1,29 @@
+{
+  "lot": "TUTO-1",
+  "section": "§358",
+  "base": "675580e592cdfa53a9d7fd763a86213bbf7a5514",
+  "inclut": [],
+  "date": "2026-10-18",
+  "fichiers": {
+    ".github/workflows/ci.yml": "c079d2d2a151fb14a3c6e96cecd0030477ae2d33478d109d7d161d2a7fc483fd",
+    "CLAUDE.md": "130aff4297975220d6bae297645e25bd5879635dfff97c5ff9d025028b0f0ba8",
+    "docs/claude/INDEX.md": "f523d743d94e1fe0a0d17a89156adbb83e14d1ab3367957a17e1128df922354e",
+    "docs/claude/chantiers-330-379.md": "0ead80c2402d81a79b5dcd98168510e82eb116dbcd8d111940ceea5847a29a5e",
+    "docs/claude/journal.md": "ac1e2671cc0c244d6070f80f9baabe2b631c3ad68632c02561ea695311d67c16",
+    "docs/claude/modules.md": "6e4db0b0c5feb07ab9409fc7d5e6d052e03ca9adeb231121711963d150911bcc",
+    "guide/01-demarrer.html": "05ba904cbdf89a4e5eef94a5fc16cde1c8578eb0a3ec81802e6d5aff52fae6fc",
+    "index.html": "4d96b15be852d243cba96a7478394b50ba4e937f55c6113529d2d3e681632218",
+    "package.json": "94d5e0583d189cdaa6fb7f3e81f2c7ea3df09e8fb40eb7b0a43b429fcc7e531a",
+    "public/boot.js": "552f18614e598b0ce748bd136b744ccf4488d22f39bd5c1dfd28c3efe3833a5c",
+    "public/sw.js": "1114b34ad3227c065c138c7b592db8247063e87a6ff973cd672bd04318211f21",
+    "scripts/mv-harnais-liste.mjs": "3cafeb8ca01e248b16d17edc705facb118d683c68195e51ea1694395c017b929",
+    "src/app.js": "97b9578893afede3fbe78766ffa9e543c3004165dcdbb7869513771c0b527e73",
+    "src/firebase.js": "7e837473d4c587d85b714553ce1bc06329404e412901cb8494ed49f6f0a43a30",
+    "src/tracteur.js": "04803dc1a03d1a787d2d44091999f037b399ff336455ca407644ff9c4d83c956",
+    "src/utils.js": "3cce450875a203a7985b21e424e24ab3598f750ee73b106deb9ebf57670cbcb9",
+    "scripts/mv-harnais-tutos.mjs": "254d08eaf9e5b1674989b7078b53448b353ed4ce83a1ca51f5d4b0f73f252a9b",
+    "scripts/mv-tutos-jeu.mjs": "fce789c92de679670baddeba2a6ef96f3e716110c80c44d3edf81eab75c5d872",
+    "scripts/tutos-couverture.json": "7953c6d2e7b06b74363aad0045898faf96f986f995e21348316137200f796cb4",
+    "src/tutos.js": "b321760668496c1990da51a05f18ec4f427476835229c73ff7ec55a81ad4e13b"
+  }
+}

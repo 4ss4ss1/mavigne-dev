@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.01
+// MA VIGNE — Service Worker v10.02
+// v10.02 (18/10/2026) — TUTO-1 (§358) : les tutoriels guidés, joués sur les vrais écrans avec un domaine fictif (src/tutos.js neuf). Mémoire du téléphone jetable pendant l’entraînement (boot.js), porte unique des lectures et écritures (firebase.js), étiquettes data-tuto (index.html, tracteur.js), « Me montrer comment faire » dans l’aide (utils.js). APP 9.22 -> 9.23.
 // v10.01 (18/10/2026) — MANQUE-1 (§357) : « Ce qu’il manque » du Pilotage n’est plus coupé par la barre du bas (le fondu d’entrée des pages ne reste plus « forwards » : la page active cessait d’enfermer ses feuilles sous la barre) ; plus d’alerte « sans barème » pour les tâches au temps passé ; entreplantation : « aucun pied compté » et « Saisir les comptes » ; plus de fausse alerte phyto sur une période sans traitement. styles.css, pilotage.js, app.js, comptes.js, utils.js, index.html.
 // v10.00 (17/10/2026) — FML-1 (§356) : pas de « Fini » avant la malo — la frise du Cuvier lit la malo de la cuvée au Chai (en cours, bloquée, finie), « Pas de malo (voulu) » sur la fiche cuvée, « Et la malo ? » au décuvage, « Terminé » à la main seulement depuis l’étape FML ; la légende de la courbe chargée au Cuvier. cuvier.js, cave.js, index.html, utils.js.
 // v9.99 (17/10/2026) — ARRIVEE-4 (§355) : le bouton « Filtres » à l’arrivée de l’ouvrier (états, ordre, carte dans une feuille). app.js, index.html, styles.css, utils.js.
@@ -4531,7 +4532,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.01';
+const CACHE_NAME   = 'mavigne-v10.02';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4548,7 +4549,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.01 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.02 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4568,7 +4569,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.01 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.02 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

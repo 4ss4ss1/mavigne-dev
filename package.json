@@ -13,6 +13,7 @@
     "build": "node scripts/mv-gt-page.mjs && vite build && node scripts/inject-precache.mjs && node scripts/mv-version-json.mjs",
     "preview": "vite preview",
     "test:smoke": "node scripts/smoke.mjs",
+    "test:tutos": "node scripts/mv-tutos-jeu.mjs",
     "test:sec7": "node scripts/harnais-sec7-contre.mjs",
     "test:rules": "npx -y firebase-tools@14.27.0 emulators:exec --only firestore --project demo-mv-rules \"node scripts/mv-harnais-rules.mjs && node scripts/mv-harnais-rules.mjs --contre\"",
     "emu": "firebase emulators:start --only auth,firestore",

@@ -79,6 +79,11 @@ jobs:
       - name: Smoke — l'app demarre sans exception
         run: npm run test:smoke
 
+      # TUTO-1 (§358) : chaque tuto est rejoue tout seul (telephone et ordinateur) sur le build.
+      # Un tuto qui ne va plus au bout = un ecran a change sans que son tuto suive : la mise en ligne attend.
+      - name: Tutos — chacun rejoue jusqu'au bout
+        run: npm run test:tutos
+
       # Utile quand le smoke tombe : on recupere le bundle exact qui a echoue.
       - name: Garder le build en cas d'echec
         if: failure()

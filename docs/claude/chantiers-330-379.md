@@ -651,3 +651,54 @@ Regravé pour la seule ligne `src/utils.js` (902 → 948 ko) de `scripts/typo-ba
 
 ### 357g. Ce qui reste (→ §28)
 À regarder sur un vrai téléphone (le trait d’accueil, les deux thèmes) ; le fondu sans `forwards` vaut pour toutes les pages, à confirmer à l’usage ; un traitement non dosé parmi des traitements dosés reste hors constat. **Vu en passant, hors lot** : dans la feuille des comptes (COMPTE-1), le bouton « Un de plus » montre trois points — `_mvIcon('plus')` dessine les points de suspension du menu « Plus » (`ic-plus`, `data-src="ellipsis"`) ; même pictogramme sur « Saisir un rapport » (labo) et sur le bouton d’intervention groupée du Cuvier. À trancher : un vrai « + ».
+
+## 358. ★★★ TUTO-1 — LES TUTOS GUIDÉS, JOUÉS SUR LES VRAIS ÉCRANS AVEC UN DOMAINE FICTIF (18/10 — `src/tutos.js` (neuf) · `public/boot.js` · `src/firebase.js` · `src/app.js` · `src/tracteur.js` · `src/utils.js` (aide, APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-tutos.mjs` (neuf) · `scripts/mv-tutos-jeu.mjs` (neuf) · `scripts/tutos-couverture.json` (neuf) · `scripts/mv-harnais-liste.mjs` · `package.json` · `.github/workflows/ci.yml` · `guide/01-demarrer.html` · `CLAUDE.md` · `docs/claude/*`)
+
+### 358a. La demande
+08/10 : des tutoriels façon jeu — l’appli montre où toucher, c’est l’humain qui touche — sur un logiciel de démonstration et non sur le domaine du client, pour se passer de l’aide écrite et d’un humain ; puis « chaque action possible de l’application doit être tutorisée ». Une maquette jouable a été publiée le 08/10 (deux tutos, le catalogue « Je veux… »). 18/10 : « on fait le tuto interactif, il faut que ça se mette à jour automatiquement à chaque changement qui le nécessite », et un fichier dédié aux tutos. Reformulation confirmée par Nico avant le travail : ce qui suit l’appli tout seul (libellés, chemin, écran réel), ce qui ne le peut pas (une étape nouvelle) et qui doit bloquer la mise en ligne.
+
+### 358b. Ce qui a été mesuré avant d’écrire
+- **819 gestes** côté client (fonctions lancées par onclick/onchange/oninput…, hors Admin GT), contre **766 le 08/10** : +53 en dix jours. Écrire des tutos à la main sans garde-fou, c’était écrire des tutos faux dans le mois.
+- Le moteur de la visite (`_mvt*`) : **0 ligne changée** depuis le 08/10 (20 moments, 3 missions où le visiteur touche lui-même).
+- Les écritures du SDK vivent toutes dans `firebase.js` (**15 appels**) ; `localStorage` en compte **103** dans dix fichiers.
+- `fbCallFn` agit sur le domaine du **jeton** — celui du client —, pas sur `TENANT_ID` : une fonction serveur appelée pendant un entraînement aurait agi sur le vrai domaine.
+- La session Firebase est commune à tous les onglets : se connecter au compte démo (le chemin de la visite) aurait remplacé la session du client.
+- `currentUser` est une variable de module d’`app.js` (`let`) : un autre module ne peut pas l’écrire.
+
+### 358c. Arbitrages
+- **Les vrais écrans plutôt qu’une copie.** La maquette du 08/10 redessinait l’écran Tracteur : TRAC-1/2 l’avaient rendue fausse dix jours plus tard. Un tuto joué sur l’écran réel n’a pas de copie à tenir.
+- **Un bac à sable sans serveur plutôt que le compte démo.** Ni lecture ni écriture ; le domaine vaut `domaine-dupont`, ce qui hérite des gardes de démo existantes (fbSave local, pas d’appareil noté, pas de jalons) et met les règles Firestore en dernier verrou (le jeton du client ne vaut pas pour ce domaine).
+- **La porte par renommage des imports** (`setDoc as _sdkSetDoc`, seize fonctions) : les appels existants passent par la garde sans être touchés un par un, lectures comprises — rien du vrai domaine n’entre, rien n’en sort.
+- **La mémoire jetable dans `boot.js`** (script classique, avant tout module), par `Object.defineProperty(window, 'localStorage')`, VÉRIFIÉE : sans elle, pas d’entraînement. Seul le thème la traverse.
+- **Ce qui suit tout seul** : les libellés lus à l’écran (`L(sel)`), le chemin vers un module calculé depuis le dock, la barre ou « Plus », « Touchez » / « Cliquez » selon l’appareil. **Ce qui ne peut pas** (une étape nouvelle) est attrapé au build par `npm run test:tutos`.
+- **Une étape réussit sur un état de l’écran** (`fait`), jamais sur un clic.
+- **« Montre-moi » est aussi le mode automatique du build** : le même code joue le geste pour la personne bloquée et pour la CI.
+- **Le compte des gestes sans tuto en cliquet** (813) : un geste nouveau sans tuto rougit ; une exemption se motive dans `tutos-couverture.json`.
+- **Deux tutos (admin) seulement** : le socle d’abord. Le lot s’est réduit plutôt que livrer des tutos qu’aucun test ne rejoue.
+
+### 358d. Pièges trouvés en route
+- Le jeu de démo (`mavigne_demo_data.json`, export de juin) portait `conducteurs` et `activites` en chaînes : LISTES-1 les écartait (« éléments illisibles »). Passés en `{nom}` dans `TU_DONNEES`.
+- « Montre-moi » tapait avec `+=` : un champ nombre efface « 1. », la valeur devenait « 24 », et le tuto du GNR restait bloqué à l’étape du prix. Corrigé : le préfixe entier à chaque frappe.
+- Le harnais comptait `_sdkGetDoc` dans `_sdkGetDocs` (sous-chaîne) et prenait les attributs du moteur (`data-c`) pour des cibles : frontière de mot, liste des attributs du moteur.
+- `_mvNotifPublier` (reglages.js) appelle une fonction serveur au démarrage d’un admin : la porte la retient, l’appli l’avale et le note en console — attendu, déclaré bénin dans `mv-tutos-jeu.mjs`.
+- Les deux `console.log` de `sw.js` portaient encore v10.01 : le preflight l’a vu (C7).
+- Vus sur les captures : le doigt passait SOUS la consigne quand il montrait « Continuer » (z-index 100014 < 100015) → 100017 ; en thème clair, « Continuer » sortait blanc : `--btn-pri` n’atteint pas une couche posée sur `body` → repli `var(--btn-pri, var(--vert-med))` / `var(--btn-pri-tx, var(--blanc))`, lisible dans les deux thèmes.
+
+### 358e. Mesures
+- `npm run test:tutos` (build final du lot, Chromium du bac à sable via `MV_CHROMIUM`) : téléphone — équipes ✓ 5/5 étapes en 15,6 s, GNR ✓ 7/7 en 21,1 s ; ordinateur — équipes ✓ 15,5 s, GNR ✓ 21,0 s ; **0 requête** vers Firestore, le stockage ou les fonctions ; la porte retient 3 appels par parcours.
+- `mv-harnais-tutos` : vert ; contre-épreuves **9/9**.
+- `node scripts/mv-lanceur.mjs --continuer` : **439/439 commandes, 599 s, une seule rouge** — `mv-harnais-contraste` (thème sombre, `src/tutos.js` 0 → 1 écart : le repli `#fff` du bouton principal). Corrigé (repli `var(--blanc)`), puis rejoués : contraste et sa contre-épreuve, `mv-harnais-tutos` et sa contre-épreuve (9/9), `lint-cliquet`, `mv-harnais-typo`, preflight — tous à 0. Le premier passage (avant correctifs) avait 21 rouges : 4 adresses e-mail du jeu de démo (confidentialité), huit harnais qui exécutent des fonctions de `firebase.js` hors du module (`_MV_TUTO` inconnu chez eux → les gardes lisent `window.__MV_TUTO`), le plafond de `CLAUDE.md` (2 803 > 2 800), le §28 ouvert sur un bloc non conforme, une cible de pastille en classe au lieu d’un #id.
+- Captures du vrai écran (390 × 844, clair et sombre) : le cadre et le doigt sur la pastille, sur « Équipe 1 » de Jean, sur le champ des litres puis sur « Continuer » ; la consigne en haut quand la cible est basse ; le bandeau « Entraînement ».
+
+### 358f. Ce qui n’a pas été vérifié
+Le clavier d’un vrai téléphone pendant une saisie (la consigne passe en haut quand `visualViewport` rétrécit) ; les deux thèmes à l’œil ; la pastille « Nouveau » sur le bouton Aide.
+
+### 358g. Ce qui reste (→ §28)
+L’inventaire des 819 gestes en objectifs (≈ 230 tutos estimés au 08/10, à recompter) et un tuto par objectif, module par module ; les tutos de l’ouvrier et du tractoriste (utilisateur fictif au rôle du tuto) ; des données fictives élargies (cave, planning, journal) ; les options à trancher par Nico : lecture à voix haute, parcours de démarrage par rôle, « Me montrer » depuis les nouveautés, envoi d’un tuto à un salarié.
+
+### 358h. Rangement de CLAUDE.md (plafond de 2 800 lignes)
+Le cœur était à son plafond ; le lot y ajoute une ligne de consigne (règle d’or n°4 : les tutos) et une ligne au §28. Descendu ici, parce que c’est de l’histoire et plus une consigne — le point 2 d’« ARRIVEE-1 à ARRIVEE-3 — ce qui reste ouvert », fait depuis :
+
+> 2. **Le bouton « Filtres » est fait : ARRIVEE-4 (§355), 17/10** — ce qui suit est la note d’origine. ~~Pas fait~~ (le tri — tournée, proximité, normal — dans un seul bouton) : l’objectif
+>    mesuré est atteint sans lui ; à décider après l’avoir vu.
+

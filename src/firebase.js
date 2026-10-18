@@ -14,18 +14,18 @@ import {
   connectFirestoreEmulator,
   collection,
   doc,
-  getDoc,
-  setDoc,
-  onSnapshot,
-  runTransaction,
-  getDocs,
-  getDocFromServer,
-  getDocFromCache,
+  getDoc as _sdkGetDoc,
+  setDoc as _sdkSetDoc,
+  onSnapshot as _sdkOnSnapshot,
+  runTransaction as _sdkRunTransaction,
+  getDocs as _sdkGetDocs,
+  getDocFromServer as _sdkGetDocFromServer,
+  getDocFromCache as _sdkGetDocFromCache,
   enableNetwork,
   disableNetwork,
 } from 'firebase/firestore';
-import { getStorage, ref as _storageRef, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
-import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/functions';
+import { getStorage, ref as _storageRef, uploadBytesResumable as _sdkUploadBytesResumable, getDownloadURL, deleteObject as _sdkDeleteObject } from 'firebase/storage';
+import { getFunctions, httpsCallable as _sdkHttpsCallable, connectFunctionsEmulator } from 'firebase/functions';
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import { deepClone } from './utils.js';
 import { MV_LIMITE_DOC, mvOctetsDoc } from './taille-doc.js';   // TAILLE-2 (§246) : la règle partagée avec npm run taille
@@ -34,17 +34,60 @@ import { PLAN_CLES_ADMIN, PLAN_CLE_EQUIPE, planCleMoi, planVueComplete, planComp
 import {
   getAuth,
   connectAuthEmulator,
-  signInWithEmailAndPassword,
-  signOut,
-  sendPasswordResetEmail,
-  updatePassword,
-  reauthenticateWithCredential,
+  signInWithEmailAndPassword as _sdkSignInWithEmailAndPassword,
+  signOut as _sdkSignOut,
+  sendPasswordResetEmail as _sdkSendPasswordResetEmail,
+  updatePassword as _sdkUpdatePassword,
+  reauthenticateWithCredential as _sdkReauthenticateWithCredential,
   EmailAuthProvider,
-  createUserWithEmailAndPassword,
+  createUserWithEmailAndPassword as _sdkCreateUserWithEmailAndPassword,
   onAuthStateChanged,
   setPersistence,
   browserSessionPersistence,
 } from 'firebase/auth';
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// ★★★ TUTO-1 (§358) — LA PORTE UNIQUE. Pendant un entraînement (window.__MV_TUTO, posé par
+//   public/boot.js APRÈS avoir remplacé la mémoire du téléphone), RIEN ne sort et RIEN n'entre :
+//   ni écriture, ni lecture, ni fonction serveur, ni fichier, ni mot de passe, ni déconnexion.
+//   Les fonctions du SDK qui parlent au serveur sont importées sous un nom _sdk* et ne s'appellent
+//   QUE d'ici : le harnais mv-harnais-tutos.mjs le vérifie (un appel direct rougit le build).
+//   Hors entraînement, chaque garde est un `if` faux : le comportement de l'appli est inchangé.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+const _MV_TUTO = (typeof window !== 'undefined' && window.__MV_TUTO) ? String(window.__MV_TUTO) : '';
+function _mvTutoPorte(quoi) {
+  if (!_MV_TUTO) return false;
+  window.__MV_TUTO_BLOQUES = (window.__MV_TUTO_BLOQUES || 0) + 1;
+  (window.__MV_TUTO_PORTE = window.__MV_TUTO_PORTE || []).push(quoi);
+  return true;
+}
+function _mvTutoRefus() { var e = new Error('Entra\u00eenement\u00a0: rien n\u2019est envoy\u00e9 au serveur.'); e.code = 'mv/entrainement'; return e; }
+var _mvTutoDocVide = { exists: function () { return false; }, data: function () { return undefined; }, get: function () { return undefined; }, id: '', metadata: { fromCache: true, hasPendingWrites: false } };
+var _mvTutoListeVide = { docs: [], empty: true, size: 0, forEach: function () { return null; }, docChanges: function () { return []; } };
+function _mvTutoEnvoiRefuse() {
+  var err = _mvTutoRefus(), p = Promise.reject(err);
+  p.catch(function () { return null; });
+  return { snapshot: { bytesTransferred: 0, totalBytes: 0, ref: null },
+           on: function (ev, suite, echec) { setTimeout(function () { if (typeof echec === 'function') echec(err); }, 0); return function () { return null; }; },
+           then: function (a, b) { return p.then(a, b); }, catch: function (b) { return p.catch(b); },
+           cancel: function () { return false; }, pause: function () { return false; }, resume: function () { return false; } };
+}
+function getDoc() { if (_mvTutoPorte('getDoc')) return Promise.resolve(_mvTutoDocVide); return _sdkGetDoc.apply(null, arguments); }
+function getDocFromServer() { if (_mvTutoPorte('getDocFromServer')) return Promise.resolve(_mvTutoDocVide); return _sdkGetDocFromServer.apply(null, arguments); }
+function getDocFromCache() { if (_mvTutoPorte('getDocFromCache')) return Promise.resolve(_mvTutoDocVide); return _sdkGetDocFromCache.apply(null, arguments); }
+function getDocs() { if (_mvTutoPorte('getDocs')) return Promise.resolve(_mvTutoListeVide); return _sdkGetDocs.apply(null, arguments); }
+function onSnapshot() { if (_mvTutoPorte('onSnapshot')) return function () { return null; }; return _sdkOnSnapshot.apply(null, arguments); }
+function setDoc() { if (_mvTutoPorte('setDoc')) return Promise.resolve(); return _sdkSetDoc.apply(null, arguments); }
+function runTransaction() { if (_mvTutoPorte('runTransaction')) return Promise.reject(_mvTutoRefus()); return _sdkRunTransaction.apply(null, arguments); }
+function uploadBytesResumable() { if (_mvTutoPorte('uploadBytesResumable')) return _mvTutoEnvoiRefuse(); return _sdkUploadBytesResumable.apply(null, arguments); }
+function deleteObject() { if (_mvTutoPorte('deleteObject')) return Promise.reject(_mvTutoRefus()); return _sdkDeleteObject.apply(null, arguments); }
+function httpsCallable() { if (_mvTutoPorte('httpsCallable')) return function () { return Promise.reject(_mvTutoRefus()); }; return _sdkHttpsCallable.apply(null, arguments); }
+function signInWithEmailAndPassword() { if (_mvTutoPorte('signIn')) return Promise.reject(_mvTutoRefus()); return _sdkSignInWithEmailAndPassword.apply(null, arguments); }
+function signOut() { if (_mvTutoPorte('signOut')) return Promise.resolve(); return _sdkSignOut.apply(null, arguments); }
+function sendPasswordResetEmail() { if (_mvTutoPorte('sendPasswordResetEmail')) return Promise.reject(_mvTutoRefus()); return _sdkSendPasswordResetEmail.apply(null, arguments); }
+function updatePassword() { if (_mvTutoPorte('updatePassword')) return Promise.reject(_mvTutoRefus()); return _sdkUpdatePassword.apply(null, arguments); }
+function reauthenticateWithCredential() { if (_mvTutoPorte('reauthenticate')) return Promise.reject(_mvTutoRefus()); return _sdkReauthenticateWithCredential.apply(null, arguments); }
+function createUserWithEmailAndPassword() { if (_mvTutoPorte('createUser')) return Promise.reject(_mvTutoRefus()); return _sdkCreateUserWithEmailAndPassword.apply(null, arguments); }
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if(DEBUG) console.log('Firebase modulaire v10 chargé');
@@ -1869,7 +1912,7 @@ window.fbSave = async function (key, value) {
   // localStorage (deja ecrits par saveData) donnent l'experience interactive ; au rechargement
   // la demo repart du jeu de donnees d'origine (re-lu depuis Firestore). Aucune pollution,
   // aucune collision entre prospects, aucune surface d'ecriture exposee.
-  if (TENANT_ID === 'domaine-dupont') {
+  if (TENANT_ID === 'domaine-dupont' || (typeof window !== 'undefined' && window.__MV_TUTO)) {   // ★★★ TUTO-1 (§358) : l'entraînement aussi, même si le domaine venait d'ailleurs
     if (typeof showSyncBadge === 'function') showSyncBadge('Sauvegardé', '#3D6B27');
     return { ok: true, local: true };
   }
@@ -2124,6 +2167,7 @@ window._fbLoadEphy = async function () {
 
 // ── _fbLoadAfterAuth ──
 window._fbLoadAfterAuth = async function () {
+  if (typeof window !== 'undefined' && window.__MV_TUTO) return;   // ★★★ TUTO-1 (§358) : idem après connexion
   if (window._fbPlanAssainir) window._fbPlanAssainir();   // ★★ MOTIFS-1 (§250) : avant toute lecture, la copie ne garde que ce qu'un salarié peut détenir
   showSyncBadge('⏳ Chargement données…', '#B8913A');
   try {
@@ -2581,6 +2625,7 @@ window._mvReprise = async function (absenceMs) {
 
 // ── _fbLoad (point d'entrée pré-auth) ──
 window._fbLoad = async function () {
+  if (typeof window !== 'undefined' && window.__MV_TUTO) return;   // ★★★ TUTO-1 (§358) : un entraînement ne charge jamais le domaine (app.js démarre le tuto)
   var B = _mvBootDebut();   // ★ BOOT-1 (§145) : chaque attente bornée, et un filet final à 15 s
   _loadQueue();
   // ★ PREP-1 (§134) — une préparation GUERETTECH (ou son retour au panneau) se reprend ICI, file chargée.

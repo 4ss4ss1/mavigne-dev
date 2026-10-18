@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **18 octobre 2026 (MANQUE-1)** — ★★ **« CE QU’IL MANQUE » LISIBLE JUSQU’EN BAS, ET DES ALERTES VRAIES** (§357). Base `7ff8a7d` (FML-1 poussé). Capture de Nico : le bas du panneau coupé, une alerte « sans barème » impossible à lever, une alerte phyto incomprise. Mesuré sur la vraie appli (Chromium du bac à sable, 390 × 844) : le dernier bouton sous la barre du bas, mais devant elle en animations réduites — le fondu de `.page` en `forwards` faisait de la page active un contexte d’empilement permanent (TOUR-1 avait monté le z-index sans le mesurer, sans effet) ; fondu sans `forwards`. Les tâches au temps passé ne sont plus « sans barème » ; l’entreplantation a son constat (« aucun pied compté », bouton « Saisir les comptes » → `openComptes`, Pilotage redessiné à l’enregistrement) ; le constat phyto se tait sur une période sans traitement (`nLignes`). Vu au navigateur. **APP 9.21 → 9.22, SW 10.00 → 10.01.** Canal « refonte » : `npm run site` → `npm run build` → `firebase hosting:channel:deploy refonte` (aucune règle ne change).
+> Dernière consolidation : **18 octobre 2026 (TUTO-1)** — ★★★ **LES TUTOS GUIDÉS, JOUÉS SUR LES VRAIS ÉCRANS AVEC UN DOMAINE FICTIF** (§358). Base `675580e` (MANQUE-1 poussé). Demande de Nico (08/10, confirmée le 18/10) : chaque geste de l’appli tutorisé, façon tutoriel de jeu, sur un domaine fictif, et des tutos qui suivent l’appli tout seuls. Livré : `src/tutos.js` (moteur, domaine fictif, 2 tutos pilotes : équipes du jour, plein de GNR), mémoire du téléphone jetable dans `public/boot.js`, porte unique des lectures/écritures du SDK dans `firebase.js`, entrée « Me montrer comment faire » en tête de l’aide, `npm run test:tutos` (chaque tuto rejoué sur le build, téléphone et ordinateur, branché en CI après le smoke) et `mv-harnais-tutos` (porte, étiquettes, fonctions enseignées, compte des gestes sans tuto : 813, plafond). Mesuré dans Chromium sur le build : 4/4 parcours au bout, 0 requête vers Firestore pendant l’entraînement. À regarder sur un vrai téléphone : le clavier pendant une saisie, les deux thèmes.
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -283,6 +283,7 @@ au lot suivant : c'est une **condition de clôture**, au même titre que le pref
 | **Fiche `MV_INFO`** du chiffre touché | `src/utils.js` | dès que la MÉTHODE de calcul change, ou qu'un chiffre cesse d'être posé |
 | **Section du guide public** | `guide/NN-<section>.html` → `node scripts/build-guide.mjs` | dès qu'une fonctionnalité décrite change |
 | **Visite guidée** `_mvtSteps` | `src/app.js` | dès qu'un sélecteur visé bouge |
+| **Tutos guidés** `TU_TUTOS` | `src/tutos.js` | dès qu'un geste enseigné change — `npm run test:tutos` le rejoue au build et rougit sinon ; un geste nouveau sans tuto fait monter le compte de `mv-harnais-tutos` (§358) |
 | **`WHATS_NEW`** | `src/utils.js` | dès que le changement est **visible** par l'utilisateur — avec son `niv` et son `pour` (§225) |
 | **Écran qui énumère ce qui reste à faire** | selon | dès qu'on lui apprend à faire une des choses listées |
 
@@ -1855,6 +1856,7 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ TUTO-1 — CE QUI RESTE OUVERT (§358, posé le 18/10) : **à regarder chez Nico** sur un vrai téléphone (clair et sombre) : les deux tutos depuis l’Aide, le clavier pendant la saisie des litres, la pastille « Nouveau » sur Aide. **La suite (§358g)** : l’inventaire des gestes en objectifs et un tuto par objectif, module par module (le compte de `mv-harnais-tutos` baisse à chaque tuto) ; tutos de l’ouvrier et du tractoriste ; données fictives élargies ; options à trancher (voix, parcours par rôle, « Me montrer » depuis les nouveautés, envoi à un salarié).
 ### ⚠️ MANQUE-1 — CE QUI RESTE OUVERT (§357, posé le 18/10) : **à regarder chez Nico** sur un vrai téléphone (clair et sombre) : le panneau « Ce qu’il manque » jusqu’au dernier bouton (trait d’accueil d’un iPhone compris), « Saisir les comptes » → feuille → compteur qui baisse — vu au navigateur du bac à sable seulement. Le fondu sans `forwards` vaut pour TOUTES les pages : ce qu’une page range en `position:fixed` reprend son z-index au-dessus de la barre du bas, comme en animations réduites (inventaire au §357d : rien d’autre ne chevauche la barre) — à confirmer à l’usage. Inchangé : un traitement sans dose au milieu de traitements dosés compte pour zéro sans constat. `src/utils.js` regravé à la main dans `typo-baseline.json` (902 → 948 ko) : sortir `WHATS_NEW` dans un module à lui, à trancher (§357f). Vu en passant, hors lot : le « + » de la feuille des comptes dessine les trois points du menu « Plus » (`ic-plus`) — §357g.
 ### ⚠️ FML-1 — CE QUI RESTE OUVERT (§356, posé le 17/10)
 1. **À regarder chez Nico** (téléphone et ordinateur, clair et sombre) : une cuve décuvée (frise sur FML, phrase dessous), la fiche cuvée à trois boutons, « Et la malo ? » au décuvage, la légende de la courbe au premier passage par le Cuvier — aucun navigateur ici. Une malo finie mais jamais déclarée au Chai reste « pas encore déclarée » jusqu’à sa déclaration ; le parcours du Cuvier reste celui du rouge (pas de parcours propre au blanc).
@@ -1880,9 +1882,7 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 ### ⚠️ ARRIVEE-1 à ARRIVEE-3 — CE QUI RESTE OUVERT (§337 à §339, posé le 15/10)
 1. **Mesuré à 375 × 667, sans tournée** : premier « Valider » de 800 à 530 px, au-dessus du dock. **Pas mesuré avec une tournée
    active** : chez l’ouvrier, la barre de la tournée remplace alors « Trier par proximité » (TRN-2) — à regarder au domaine.
-2. **Le bouton « Filtres » est fait : ARRIVEE-4 (§355), 17/10** — ce qui suit est la note d’origine. ~~Pas fait~~ (le tri — tournée, proximité, normal — dans un seul bouton) : l’objectif
-   mesuré est atteint sans lui ; à décider après l’avoir vu.
-3. **À regarder chez Nico** : un vrai compte ouvrier au téléphone — deux onglets, « Ma trace », « Prochaine », niveau et équipe.
+2. **À regarder chez Nico** : un vrai compte ouvrier au téléphone — deux onglets, « Ma trace », « Prochaine », niveau et équipe.
 
 ### ⚠️ POURQUOI-1 — CE QUI RESTE OUVERT (§336, posé le 15/10)
 1. **À regarder chez Nico, au téléphone puis sur PC, en clair et en sombre** : la pastille « Pourquoi ? » à côté de la tâche choisie ou de la priorité

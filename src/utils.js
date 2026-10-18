@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.22';
+export const APP_VERSION = '9.23';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,12 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.23', d: '2026-10-18', items: [
+    { niv: 1, pour: ['admin'], cible: '#home-aide-btn', emoji: 'doigt', titre: 'Des tutos guidés : l’appli vous montre où toucher',
+      desc: "Dans l’aide de l’Accueil et du Tracteur, «\u00a0Me montrer comment faire\u00a0» lance un entraînement : un cadre doré montre où toucher, une consigne dit quoi faire, et c’est vous qui touchez. "
+        + "Il se joue sur le Domaine des Grandes Vignes, un domaine fictif : rien de ce que vous touchez n’arrive sur votre domaine, et un bouton vous y ramène à la fin. "
+        + "Deux tutos pour commencer : indiquer les équipes du jour, et noter un plein de GNR. «\u00a0Montre-moi\u00a0» fait le geste à votre place si vous êtes bloqué." },
+  ] },
   { v: '9.22', d: '2026-10-18', items: [
     { niv: 0, pour: ['admin'], emoji: 'graphique', titre: 'Pilotage\u00a0: « Ce qu’il manque » n’est plus coupé en bas',
       desc: "La barre des modules passait encore devant le bas du panneau ouvert par «\u00a0N choses à compléter\u00a0» : la dernière ligne et son bouton restaient cachés, même en faisant défiler. "
@@ -5574,6 +5580,7 @@ function openAide() {
         + '<span class="mva-hd-ic">' + _escHtml(a.ico) + '</span>'
         + '<div><div class="modal-title">' + _escHtml(a.titre) + '</div>'
         + '<div class="modal-sub">Ce qu’on peut faire sur cet écran</div></div></div>'
+        + (window._mvTutoAideBloc ? window._mvTutoAideBloc() : '')   // ★★★ TUTO-1 (§358) : « Me montrer comment faire »
         + '<div class="mva-list">';
   for (var i = 0; i < a.points.length; i++) {
     var p = a.points[i];
@@ -5593,6 +5600,7 @@ function openAide() {
      + '<button type="button" class="mva-fbtn mva-bug" id="mva-bug">' + _mvIcon('bogue',16) + ' Un problème</button>'
      + '</div>';
   el.innerHTML = h;
+  if (window._mvTutoAideBrancher) window._mvTutoAideBrancher(el);   // TUTO-1 : les tutos s'ouvrent dans cette même fenêtre
   var g = document.getElementById('mva-guide');
   if (g) g.onclick = function () { window.open('https://mavigneapp.fr/guide.html#' + encodeURIComponent(a.ancre), '_blank'); };
   var b = document.getElementById('mva-bug');
@@ -5616,6 +5624,9 @@ function _mvInjectHelpBtn() {
     var b = document.createElement('button');
     b.type = 'button';
     b.className = 'mv-help-btn';
+    // TUTO-1 (§358) : celui de l'Accueil porte un id — la pastille « Nouveau » des tutos s'y pose (une cible = un #id, ANN-1).
+    //   Posé en JS (pas de HTML construit ici) : la cible s'écrit id="home-aide-btn" pour que mv-whatsnew-check la trouve.
+    if (rows[i].closest && rows[i].closest('#page-home')) b.id = 'home-aide-btn';
     b.title = 'Aide sur cet écran';
     b.setAttribute('aria-label', 'Aide sur cet écran');
     // textContent + appendChild : aucun HTML construit ici.

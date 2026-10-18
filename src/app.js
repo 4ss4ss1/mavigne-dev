@@ -37,6 +37,7 @@ import './cockpit.js';   // AUJ-1 (§260) : le cockpit d'Aujourd'hui (pilotage.j
 import './cockpit-vue.js';   // REF-1 (§266) : la maquette validée du cockpit, montée avec le modèle réel
 import './coquille.js';   // COQ-1 + PAL-1 (§268) : la barre latérale et la recherche Ctrl K, sur ordinateur
 import './jalons.js';   // JALONS-1 (§340) : le calcul des jalons et leur mémoire (rien n'est montré avant JALONS-2)
+import './tutos.js';   // TUTO-1 (§358) : les tutoriels guidés, joués sur les vrais écrans avec un domaine fictif
 import './comptes.js';   // COMPTE-1 (§353) : les pieds marqués — le compte du repérage chiffre l'entreplantation
 import './reserve.js';
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -12601,6 +12602,26 @@ function _mvErreurTiers(){
 //   réveille (déverrouillage, fond de cave), il peut tarder des dizaines de secondes — et avec lui TOUT
 //   le démarrage : les profils, le bouton « Se connecter », les gestionnaires d'erreurs.
 //   Une seule exécution, quel que soit celui qui arrive le premier.
+// ★★★ TUTO-1 (§358) — L'ENTRAÎNEMENT DÉMARRE ICI, À LA PLACE DU CHARGEMENT DU DOMAINE.
+//   tutos.js fournit l'utilisateur et le domaine fictifs ; app.js pose currentUser (variable de CE
+//   module : tutos.js ne peut pas l'écrire) puis ouvre l'écran de départ. Faux = tuto inconnu : on
+//   retombe sur le démarrage normal. La porte de firebase.js a déjà fermé toute lecture et écriture.
+function _mvTutoEntrer(){
+  var T = window._mvTutoPrepare ? window._mvTutoPrepare() : null;
+  if(!T) return false;
+  currentUser = T.utilisateur; window.currentUser = currentUser;
+  var ls=document.getElementById('login-screen'); if(ls) ls.style.display='none';
+  var sp=document.getElementById('splash-screen'); if(sp) sp.style.display='none';
+  try{ if(window._mvTutoCharger) window._mvTutoCharger(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTutoEntrer#donnees'); }
+  window._dataReady = true; window._authReady = true;
+  window.DOMAINE_NOM = T.domaine;
+  try{ applyRoles(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTutoEntrer#roles'); }
+  if(window.applyDomNom){ try{ window.applyDomNom(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTutoEntrer#nom'); } }
+  if(window._dockBuild){ try{ window._dockBuild(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTutoEntrer#dock'); } }
+  try{ goTo(T.page||'home'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTutoEntrer#page'); }
+  if(window._mvTutoLancer) setTimeout(window._mvTutoLancer, 600);
+  return true;
+}
 var _mvDemarre=false;
 function _mvDemarrer(){
   if(_mvDemarre) return;
@@ -12624,7 +12645,9 @@ function _mvDemarrer(){
   // Initialisation : Firebase en priorité, localStorage en fallback
   // try/catch global pour éviter l'écran noir iOS en cas d'erreur silencieuse
   try {
-    if(window._fbLoad) {
+    if(window.__MV_TUTO && _mvTutoEntrer()) {
+      // ★★★ TUTO-1 (§358) : un entraînement — ni chargement du domaine, ni écran de connexion.
+    } else if(window._fbLoad) {
       window._fbLoad().catch(function(){
         try { loadData(); initLogin(); } catch(e){ console.error('[Init fallback]',e); }
       });

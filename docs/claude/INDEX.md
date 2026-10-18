@@ -80,6 +80,7 @@
 | 27d | 27d. ★★★ LE GUIDE PUBLIC — SOURCES DÉCOUPÉES & GÉNÉRATEUR | `docs/claude/modules.md` |
 | 27e | 27e. ★★ La démo guidée & les supports imprimés | `docs/claude/modules.md` |
 | 27f | 27f. ★★ `mise-en-route.html` — le formulaire d'installation client | `docs/claude/modules.md` |
+| 27g | 27g. Les tutos guidés (TUTO-1, §358) | `docs/claude/modules.md` |
 | 28 | 28. État courant & backlog | `CLAUDE.md` |
 | 29 | 29. Synchronisation de la mémoire | `CLAUDE.md` |
 | 30 | 30. ★★ MULTI-TERROIR — rendre le barème vrai ailleurs qu'en Côte de Nuits | `docs/claude/chantiers-030-079.md` |
@@ -410,3 +411,4 @@
 | 355 | 355. ★ ARRIVEE-4 — LE BOUTON « FILTRES » À L’ARRIVÉE DE L’OUVRIER (17/10 — `src/app.js` (`_pFxEtat`, `_pFxA… | `docs/claude/chantiers-330-379.md` |
 | 356 | 356. ★★ FML-1 — PAS DE « FINI » AVANT LA MALO : LE CUVIER LIT LA MALO DE LA CUVÉE AU CHAI (17/10 — `src/cuv… | `docs/claude/chantiers-330-379.md` |
 | 357 | 357. ★★ MANQUE-1 — « CE QU’IL MANQUE » LISIBLE JUSQU’EN BAS, ET DES ALERTES VRAIES (18/10 — `src/styles.css… | `docs/claude/chantiers-330-379.md` |
+| 358 | 358. ★★★ TUTO-1 — LES TUTOS GUIDÉS, JOUÉS SUR LES VRAIS ÉCRANS AVEC UN DOMAINE FICTIF (18/10 — `src/tutos.j… | `docs/claude/chantiers-330-379.md` |

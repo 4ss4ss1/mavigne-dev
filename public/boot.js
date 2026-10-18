@@ -7,6 +7,47 @@
 // pas là après 10 s : 1 rechargement auto silencieux, puis un écran
 // "Réessayer" au lieu d'un splash muet.
 // ════════════════════════════════════════════════════════════════════
+// ★★★ TUTO-1 (§358) — L'ENTRAÎNEMENT. Un tuto se joue sur un domaine FICTIF. Avant le moindre module, la
+//   mémoire du téléphone (localStorage) est remplacée par une mémoire jetable : le domaine y vaut
+//   « domaine-dupont », et aucune copie locale du vrai domaine n'est lue ni écrite. La mémoire jetable
+//   disparaît au rechargement : sortir de l'entraînement = recharger sans ?tuto.
+//   ⚠️ Si la mémoire ne peut PAS être remplacée, il n'y a PAS d'entraînement : jamais de tuto sur la vraie.
+(function () {
+  'use strict';
+  var id = '';
+  try {
+    var q = location.search || '';
+    var m = /[?&]tuto=([a-z0-9-]{1,40})/i.exec(q);
+    if (m) sessionStorage.setItem('mavigne_tuto', m[1].toLowerCase());
+    if (/[?&]tuto_auto=1(&|$)/.test(q)) sessionStorage.setItem('mavigne_tuto_auto', '1');
+    id = sessionStorage.getItem('mavigne_tuto') || '';
+  } catch (e) { id = ''; window.__MV_BOOT_TUTO = String(e); }
+  if (!id) return;
+  var vrai = null;
+  try { vrai = window.localStorage; } catch (e) { vrai = null; window.__MV_BOOT_TUTO = String(e); }
+  var M = Object.create(null);
+  // Le seul réglage qui suit la personne dans l'entraînement : son thème.
+  try { var th = vrai && vrai.getItem('mavigne_theme'); if (th != null) M.mavigne_theme = String(th); } catch (e) { window.__MV_BOOT_TUTO = String(e); }
+  M.mavigne_tenant = 'domaine-dupont';
+  var jetable = {
+    getItem: function (k) { k = String(k); return (k in M) ? M[k] : null; },
+    setItem: function (k, v) { M[String(k)] = String(v); },
+    removeItem: function (k) { delete M[String(k)]; },
+    clear: function () { M = Object.create(null); },
+    key: function (i) { var ks = Object.keys(M); return i < ks.length ? ks[i] : null; },
+    get length() { return Object.keys(M).length; }
+  };
+  var pose = false;
+  try { Object.defineProperty(window, 'localStorage', { configurable: true, enumerable: true, get: function () { return jetable; } }); pose = true; }
+  catch (e) { window.__MV_BOOT_TUTO = String(e); }
+  if (!pose || window.localStorage !== jetable) {
+    try { sessionStorage.removeItem('mavigne_tuto'); sessionStorage.removeItem('mavigne_tuto_auto'); } catch (e) { window.__MV_BOOT_TUTO = String(e); }
+    return;
+  }
+  window.__MV_TUTO = id;
+  try { window.__MV_TUTO_AUTO = sessionStorage.getItem('mavigne_tuto_auto') === '1'; } catch (e) { window.__MV_TUTO_AUTO = false; }
+})();
+
 (function () {
   'use strict';
   // MAJ-2 (§327) : la page se recharge pour une mise a jour (app.js a pose mv_maj_faite juste avant) — l'ecran de

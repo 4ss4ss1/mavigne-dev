@@ -2608,3 +2608,28 @@ radios/cases, section « pièces à joindre » explicite.
   publique remplie **avant** l'installation ; celui-là est un bloc **dans l'app**, après.
 
 ---
+
+## 27g. Les tutos guidés (TUTO-1, §358)
+
+**Ce que c'est.** Un tuto montre UN geste sur les vrais écrans, avec le domaine fictif de la démo (Marie,
+Jean, Sophie, Paul — « Domaine des Grandes Vignes »). Voile sombre avec un trou sur la cible, cadre doré,
+doigt animé, consigne en bas ou en haut (jamais sur la cible) ; c'est la personne qui touche. Toucher à
+côté explique (délai de grâce de 700 ms pendant le défilement) ; « Montre-moi » fait le geste.
+
+**Où.** `src/tutos.js` (moteur, `TU_DONNEES`, `TU_TUTOS`). Entrée : « Me montrer comment faire » en tête
+de l'aide de chaque écran (`openAide`, utils.js) — les tutos de l'écran, puis « Tous les tutos ».
+
+**Le bac à sable, trois verrous.** ① `public/boot.js` remplace `localStorage` par une mémoire jetable
+AVANT tout module (domaine `domaine-dupont`) ; impossible de la poser = pas d'entraînement. ② `firebase.js` :
+seize fonctions du SDK (lectures, écritures, fichiers, fonctions serveur, mot de passe, déconnexion)
+importées en `_sdk*` et appelées seulement depuis leur garde `_mvTutoPorte`. ③ Les règles Firestore :
+le jeton du client ne vaut pas pour `domaine-dupont`. Sortie = rechargement sans `?tuto`.
+
+**Démarrage.** `?tuto=<id>` → boot.js pose `window.__MV_TUTO` → `_mvDemarrer` (app.js) appelle
+`_mvTutoEntrer` à la place de `_fbLoad` : `currentUser` fictif (admin, `_isDemo`, `_isTuto`), données par
+`applyFbData`, rôles, dock, écran de départ, puis `_mvTutoLancer`.
+
+**Écrire un tuto.** Étapes `toucher` (cible + `fait`), `choisir` (options qui prennent `.sel`, `zone`),
+`taper` (`valide`, `exemple`, `facultatif`), `regarder`, `aller` (page : chemin CALCULÉ depuis le dock, la
+barre ou « Plus »). Textes : `L(sel)` lit le libellé à l'écran ; `{T}` = « Touchez »/« Cliquez ». Poser les
+`data-tuto` sur les éléments visés, déclarer `couvre`. Puis `npm run build && npm run test:tutos`.
