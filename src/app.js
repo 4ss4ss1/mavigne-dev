@@ -12645,7 +12645,10 @@ function _mvDemarrer(){
   // Initialisation : Firebase en priorité, localStorage en fallback
   // try/catch global pour éviter l'écran noir iOS en cas d'erreur silencieuse
   try {
-    if(window.__MV_TUTO && _mvTutoEntrer()) {
+    if(window.__MV_TUTO_BLOQUE) {
+      // ★ TUTO-4 (§361) : un entraînement sans le boot.js de sa version — ni l'entraînement, ni (surtout) la vraie appli dans le panneau.
+      if(window._mvTutoBloque) window._mvTutoBloque();
+    } else if(window.__MV_TUTO && _mvTutoEntrer()) {
       // ★★★ TUTO-1 (§358) : un entraînement — ni chargement du domaine, ni écran de connexion.
     } else if(window._fbLoad) {
       window._fbLoad().catch(function(){

@@ -46,7 +46,7 @@ function serveur(racine) {
           const id = (/[?&]id=([a-z0-9-]+)/.exec(req.url) || [])[1] || 'equipes';
           res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
           res.end('<!doctype html><html><body style="margin:0"><script>window.__fini=false;window.addEventListener("message",function(e){var d=e.data||{};var f=document.getElementById("f").contentWindow;'
-            + 'if(d.mvtu==="fini"){window.__fini=true;return;}if(d.mvtu==="etape"){setTimeout(function(){f.postMessage({mvtu:"miroir",i:d.i,valeur:(d.id==="gnr"&&d.i===3)?"1200":undefined},location.origin);},400);}});</script>'
+            + 'if(d.mvtu==="fini"){window.__fini=true;return;}if(d.mvtu==="etape"){setTimeout(function(){f.postMessage({mvtu:"miroir",i:d.i,fait:d.i,valeur:(d.id==="gnr"&&d.i===3)?"1200":undefined},location.origin);},400);}});</script>'
             + '<iframe id="f" src="/?tuto=' + id + '&tuto_cadre=1" style="width:420px;height:860px;border:0"></iframe></body></html>');
           return;
         }
@@ -154,6 +154,26 @@ async function jouerMiroir(navigateur, base, id) {
   return { ok: !!(r1 && r1.etat && r1.etat.fini && !erreurs.length), erreurs, n: types.filter((x) => x !== 'regarder').length };
 }
 
+// TUTO-4 : un boot.js d'une version précédente (resté en cache) — le panneau doit refuser, jamais ouvrir l'appli.
+async function jouerVieuxBoot(navigateur, base) {
+  const ctx = await navigateur.newContext({ serviceWorkers: 'block', locale: 'fr-FR', viewport: { width: 1280, height: 900 } });
+  await ctx.route('**/*', (route) => (route.request().url().startsWith(base) ? route.continue() : route.abort()));
+  await ctx.route('**/boot.js*', (route) => route.fulfill({ status: 200, contentType: 'text/javascript', body: '/* boot.js d\'une version précédente */' }));
+  const page = await ctx.newPage(), erreurs = [];
+  let r = null;
+  try {
+    await page.goto(base + '__cadre.html?id=equipes', { waitUntil: 'load' });
+    await page.waitForFunction(() => { const f = document.getElementById('f'); return f && f.contentWindow && f.contentWindow.document.querySelector('.mvtu-bloque'); }, null, { timeout: 30000 });
+    r = await page.evaluate(() => { const w = document.getElementById('f').contentWindow; return { bloque: w.__MV_TUTO_BLOQUE === true, accueil: !!w.document.querySelector('#page-home.active'), entrainement: !!w.__MV_TUTO_ETAT, session: sessionStorage.length }; });
+    if (!r.bloque) erreurs.push('pas bloqué');
+    if (r.accueil) erreurs.push('l\u2019appli s\u2019est ouverte dans le panneau');
+    if (r.entrainement) erreurs.push('un entraînement a démarré sans le bon boot.js');
+    if (r.session) erreurs.push('la mémoire de session de l\u2019appli a bougé');
+  } catch (e) { erreurs.push('vieux boot.js : ' + String(e.message || e).split('\n')[0]); }
+  await ctx.close();
+  return { ok: !!r && !erreurs.length, erreurs };
+}
+
 async function main() {
   let pw;
   try { pw = await import('playwright'); } catch (e) { console.error(c.r('✖ Playwright absent : npm i -D playwright && npx playwright install chromium')); process.exit(2); }
@@ -191,6 +211,11 @@ async function main() {
     const r = await jouerMiroir(navigateur, base, liste[i]);
     if (r.ok) console.log(c.g('  ✓ ') + 'miroir · ' + liste[i] + ' · la fenêtre suit le domaine jusqu\u2019au bout ; ' + r.n + ' étape(s) vues faites côté domaine');
     else { rouges++; console.log(c.r('  ✗ ') + 'miroir · ' + liste[i]); r.erreurs.slice(0, 6).forEach((e) => console.log('      ' + e)); }
+  }
+  {
+    const r = await jouerVieuxBoot(navigateur, base);
+    if (r.ok) console.log(c.g('  ✓ ') + 'boot.js d\u2019une version précédente · le panneau refuse et le dit ; ni entraînement, ni appli');
+    else { rouges++; console.log(c.r('  ✗ ') + 'boot.js d\u2019une version précédente'); r.erreurs.forEach((e) => console.log('      ' + e)); }
   }
   await navigateur.close(); srv.close();
   console.log('\n  ' + (rouges ? c.r(rouges + ' tuto(s) ne vont plus au bout : l\u2019écran a changé, le tuto doit suivre') : c.g('chaque tuto va au bout, sans rien envoyer au serveur')) + '\n');

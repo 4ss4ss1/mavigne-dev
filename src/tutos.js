@@ -43,6 +43,13 @@
 var TU_DOMAINE = 'Domaine des Grandes Vignes';
 var TU_DONNEES = {"config":{"domaine_nom":"Domaine des Grandes Vignes","lat":47.22,"lon":4.97,"onboarding_done":true,"gnr":{"capacite":2000,"niveau":650,"seuil":300,"maj":"2026-10-02"}},"membres":[{"nom":"Marie","roles":["admin","ouvrier","tractoriste"],"couleur":"#3D6B27","statut":"actif"},{"nom":"Jean","roles":["ouvrier","tractoriste"],"couleur":"#1A4A7A","statut":"actif"},{"nom":"Sophie","roles":["ouvrier"],"couleur":"#7A4F2E","statut":"actif"},{"nom":"Paul","roles":["ouvrier","tractoriste"],"couleur":"#5B2D8E","statut":"actif"}],"saisons":[{"nom":"Printemps 2026","periode":"Mars — Juillet 2026","active":true,"taches":["Ebourgeonnage","Relevage","Accolage","Pioche","Palissage"]},{"nom":"Hiver 2025-2026","periode":"Nov. 2025 — Fév. 2026","active":false,"taches":["Taille","Tirage","Brulage"]}],"taches":[{"nom":"Taille","hha":70,"saison":"Hiver"},{"nom":"Tirage","hha":40,"saison":"Hiver"},{"nom":"Brulage","hha":40,"saison":"Hiver"},{"nom":"Ebourgeonnage","hha":35,"saison":"Printemps"},{"nom":"Relevage","hha":50,"saison":"Printemps"},{"nom":"Accolage","hha":50,"saison":"Printemps"},{"nom":"Pioche","hha":40,"saison":"Printemps"},{"nom":"Palissage","hha":50,"saison":"Printemps"}],"parcelles":[{"nom":"Clos du Moulin","surface":0.45,"statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":null,"ov":null},"Relevage":{"n1":null,"n2":null,"n3":null,"ov":null},"Accolage":null,"Pioche":{"p1":"Valide","p2":null,"ov":null},"Palissage":null}},{"nom":"Les Charmes","surface":1.2,"statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":"Valide","ov":null},"Relevage":{"n1":"Valide","n2":null,"n3":null,"ov":null},"Accolage":"Valide","Pioche":{"p1":"Valide","p2":"Valide","ov":null},"Palissage":null}},{"nom":"Vieilles Vignes","surface":0.8,"statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":null,"ov":null},"Relevage":{"n1":null,"n2":null,"n3":null,"ov":null},"Accolage":null,"Pioche":{"p1":null,"p2":null,"ov":null},"Palissage":null}},{"nom":"Les Perrières","surface":1.05,"statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":"Valide","ov":"Valide"},"Relevage":{"n1":"Valide","n2":"Valide","n3":null,"ov":null},"Accolage":"Valide","Pioche":{"p1":"Valide","p2":null,"ov":null},"Palissage":null}},{"nom":"Champ de la Croix","surface":0.62,"statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":"Valide","ov":null},"Relevage":{"n1":"Valide","n2":null,"n3":null,"ov":null},"Accolage":null,"Pioche":{"p1":"Valide","p2":null,"ov":null},"Palissage":null}},{"nom":"En Bertrange","surface":0.9,"statut":"Active","taches":{"Ebourgeonnage":{"p1":null,"p2":null,"ov":null},"Relevage":{"n1":null,"n2":null,"n3":null,"ov":null},"Accolage":null,"Pioche":{"p1":null,"p2":null,"ov":null},"Palissage":null}},{"nom":"La Combotte","surface":1.5,"statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":"Valide","ov":null},"Relevage":{"n1":"Valide","n2":"Valide","n3":"Valide","ov":null},"Accolage":"Valide","Pioche":{"p1":"Valide","p2":"Valide","ov":null},"Palissage":null}},{"nom":"Aux Murgers","surface":0.5,"statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":null,"ov":null},"Relevage":{"n1":null,"n2":null,"n3":null,"ov":null},"Accolage":null,"Pioche":{"p1":null,"p2":null,"ov":null},"Palissage":null}}],"conducteurs":[{"nom":"Marie"},{"nom":"Jean"},{"nom":"Paul"}],"activites":[{"nom":"Griffage"},{"nom":"Buttage"},{"nom":"Intercep"},{"nom":"Traitement"},{"nom":"Broyage"}]};
 
+// ★ TUTO-4 (§361) — UN ENTRAÎNEMENT EXIGE LE boot.js DE SA VERSION. boot.js (sans numéro dans son nom) a survécu à des
+//   mises à jour dans le cache : un panneau démarré avec un ancien boot.js ne savait plus qu'il était un panneau — et avec
+//   un boot.js d'avant les tutos, c'est la VRAIE appli qui se serait ouverte dedans. Marque absente ou autre : app.js
+//   n'ouvre ni l'entraînement ni l'appli ; un message dit quoi faire.
+var TU_BOOT_V = 4;
+if (/[?&]tuto=/.test(window.location.search || '') && window.__MV_BOOT_TUTO_V !== TU_BOOT_V) window.__MV_TUTO_BLOQUE = true;
+
 // ── 2. PETITS OUTILS ─────────────────────────────────────────────────────────────────────────────
 function _avale(e, ou) { if (window._mvAvale) window._mvAvale(e, 'tutos.js/' + ou); }
 function _q(s) { try { return document.querySelector(s); } catch (e) { _avale(e, '_q'); return null; } }
@@ -220,6 +227,13 @@ function _css() {
     '.mvtu-mod{margin:14px 0 2px;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux)}',
     '.mvtu-panneau{position:fixed;top:12px;bottom:12px;right:12px;width:min(420px,calc(100vw - 24px));z-index:100005;display:flex;flex-direction:column;overflow:hidden;border-radius:var(--r-lg,16px);border:1px solid var(--gris);background:var(--bg-card);box-shadow:var(--shadow-lg,0 14px 56px rgba(0,0,0,.5))}',
     '.mvtu-anneau{position:fixed;left:0;top:0;width:0;height:0;z-index:100004;border:2px solid var(--or-clair);border-radius:var(--r-md,12px);pointer-events:none;opacity:0;box-shadow:0 0 0 1px rgba(0,0,0,.2),0 0 16px rgba(216,188,114,.45);animation:mvtuPouls 1.7s ease-in-out infinite;transition:opacity var(--mv-d1,140ms)}',
+    '.mvtu-suivi{display:none;margin:4px 0 0;font-size:var(--pt-micro,12px);font-weight:600}',
+    '.mvtu-suivi.ok{display:block;color:var(--vert-med)}',
+    '.mvtu-suivi.ko{display:block;color:var(--orange)}',
+    '.mvtu-bloque{position:fixed;inset:0;z-index:100030;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg-app);font-family:' + _PF + '}',
+    '.mvtu-bloque > div{max-width:420px;padding:20px;border-radius:var(--r-lg,16px);border:1px solid var(--gris);background:var(--bg-card);color:var(--texte)}',
+    '.mvtu-bloque h2{margin:0 0 8px;font:600 var(--pt-lg,23px)/1.2 \'Cormorant Garamond\',Georgia,serif}',
+    '.mvtu-bloque p{margin:0 0 12px;font-size:var(--pt-base,14px);line-height:1.5;color:var(--texte-doux)}',
     '.mvtu-reel{margin:6px 0 0;padding:6px 10px;border-radius:10px;background:var(--or-pale);font-size:var(--pt-base,14px);line-height:1.35}',
     '.mvtu-p-hd{display:flex;align-items:center;gap:6px;min-height:46px;padding:0 8px 0 14px;background:var(--cave);color:var(--or-clair);font:600 var(--pt-base,14px) ' + _PF + '}',
     '.mvtu-p-hd span{margin-right:auto}',
@@ -361,6 +375,7 @@ function _coach() {
     + '<button type="button" class="mvtu-x" data-c="quitter">' + _ic('croix', 16) + 'Quitter</button></div>'
     + '<p class="mvtu-tx">' + _texte(e) + '</p>'
     + ((_cadre() && e.txtReel) ? '<p class="mvtu-reel">Sur votre domaine : ' + _esc(e.txtReel) + '</p>' : '')
+    + (_cadre() ? '<p class="mvtu-suivi" aria-live="polite"></p>' : '')
     + '<p class="mvtu-msg" aria-live="polite"></p>'
     + '<div class="mvtu-act">'
     + (montre ? '<button type="button" class="mvtu-b2" data-c="montre">' + _ic('doigt', 17) + 'Montre-moi</button>' : '')
@@ -541,6 +556,7 @@ function _boucle() {
       if (!vu) { if (!E.perdu) E.perdu = Date.now(); else if (Date.now() - E.perdu > 12000) _perdu(); }
       else E.perdu = 0;
       _verifie();
+      if (_cadre()) _suivi();
       if (e.type === 'aller' && E.etat === 'attente') {
         var n = _nav(e.page), k = n ? (n.plus ? 'plus' : n.ou) : '';
         if (k !== E.navCle) { E.navCle = k; var tx = D.coach.querySelector('.mvtu-tx'); if (tx) tx.innerHTML = _texte(e); }
@@ -598,6 +614,8 @@ function _sortir() {
     if (!(window.parent && window.parent !== window)) window.close();
     return;
   }
+  // Un drapeau d'une version précédente (boot.js de TUTO-1) dans la mémoire de session : effacé, sinon l'appli y revient.
+  try { sessionStorage.removeItem('mavigne_tuto'); sessionStorage.removeItem('mavigne_tuto_auto'); } catch (e) { _avale(e, '_sortir#session'); }
   window.location.replace(_retour());
 }
 // ★★ TUTO-3 (§360) — LE MIROIR. Dans le panneau (ou la fenêtre à part), la fenêtre d'entraînement dit à l'appli qui
@@ -613,13 +631,44 @@ function _dire(m) {
   var h = _hote(); if (!h) return;
   try { h.postMessage(m, window.location.origin); } catch (e) { _avale(e, '_dire'); }
 }
+// TUTO-4 : l'appli envoie son état À CHAQUE TOUR (« miroir », avec `fait` = l'étape la plus loin faite sur le domaine, ou
+// -1) — c'est aussi le signe qu'elle suit. Un message perdu n'est plus une étape perdue : le suivant la redit.
 function _surMiroir(ev) {
   if (ev.origin !== window.location.origin || !ev.data || ev.data.mvtu !== 'miroir') return;
   var d = ev.data;
-  if (!E.actif || d.i !== E.i) return;
-  E.miroirJusqua = Math.max(typeof E.miroirJusqua === 'number' ? E.miroirJusqua : -1, typeof d.jusqua === 'number' ? d.jusqua : d.i);
+  E.veille = Date.now();
+  if (!E.actif || d.i !== E.i || typeof d.fait !== 'number' || d.fait < E.i) return;
+  E.miroirJusqua = Math.max(typeof E.miroirJusqua === 'number' ? E.miroirJusqua : -1, d.fait);
   if (d.valeur != null) E.miroirVal = { i: d.i, v: String(d.valeur) };
   _jouerMiroir();
+}
+// La ligne qui dit si le panneau suit le domaine (seulement dans le panneau ou la fenêtre à part).
+function _suivi() {
+  var p = D.coach && D.coach.querySelector('.mvtu-suivi'); if (!p) return;
+  var vivant = E.veille && Date.now() - E.veille < 2500, muet = !vivant && Date.now() - (E.lance || 0) > 4000;
+  var etat = vivant ? 'ok' : (muet ? 'ko' : '');
+  if (p.getAttribute('data-e') === etat) return;
+  p.setAttribute('data-e', etat);
+  p.className = 'mvtu-suivi' + (etat ? ' ' + etat : '');
+  p.textContent = etat === 'ok' ? 'Je suis vos gestes sur votre domaine.' : (etat === 'ko' ? 'Votre appli ne répond pas : fermez-la et rouvrez-la pour que je suive vos gestes.' : '');
+}
+function _bloque() {
+  _css();
+  var dansCadre = !!(window.parent && window.parent !== window), hote = dansCadre ? window.parent : window.opener;
+  var ls = document.getElementById('login-screen'); if (ls) ls.style.display = 'none';
+  var sp = document.getElementById('splash-screen'); if (sp) sp.style.display = 'none';
+  var f = document.createElement('div');
+  f.className = 'mvtu-bloque';
+  f.innerHTML = '<div role="alertdialog" aria-label="Mise à jour à finir"><h2>Une mise à jour à finir</h2>'
+    + '<p>Ce tuto a besoin de la dernière version de l’appli. Fermez tous les onglets Ma Vigne, puis rouvrez-la : le tuto marchera.</p>'
+    + '<button type="button" class="mvtu-b1 mvtu-large" data-b="ok">Fermer</button></div>';
+  f.addEventListener('click', function (ev) {
+    if (!ev.target.closest('[data-b]')) return;
+    if (hote) { try { hote.postMessage({ mvtu: 'fermer' }, window.location.origin); } catch (e) { _avale(e, '_bloque'); } if (!dansCadre) window.close(); return; }
+    try { sessionStorage.removeItem('mavigne_tuto'); sessionStorage.removeItem('mavigne_tuto_auto'); } catch (e) { _avale(e, '_bloque#session'); }
+    window.location.replace(window.location.pathname);
+  });
+  document.body.appendChild(f);
 }
 function _jouerMiroir() {
   var e = _e();
@@ -662,36 +711,39 @@ function _miroirAnneau() {
   else if (e && e.type === 'choisir') el = e.cibleReel ? _q(e.cibleReel) : null;
   else if (e && e.type !== 'regarder') el = _q(e.cible);
   var r = MI.anneau;
-  if (!el || !_vis(el) || MI.envoye === MI.i) { r.style.opacity = '0'; return; }
+  if (!el || !_vis(el) || MI.fait >= MI.i) { r.style.opacity = '0'; return; }
   var b = el.getBoundingClientRect();
   r.style.left = Math.round(b.left - 5) + 'px'; r.style.top = Math.round(b.top - 5) + 'px';
   r.style.width = Math.round(b.width + 10) + 'px'; r.style.height = Math.round(b.height + 10) + 'px';
   r.style.opacity = '1';
 }
+// TUTO-4 : l'état part À CHAQUE TOUR (même -1 : c'est le signe que l'appli suit), plus « une seule fois » — un message
+// arrivé pendant que la fenêtre se chargeait ou bougeait n'est plus perdu.
 function _miroirTic() {
   if (!MI) return;
-  _miroirAnneau();
-  var e = MI.t.etapes[MI.i];
-  if (!e || MI.envoye === MI.i || Date.now() - MI.depuis < 700) return;
-  var k = -1;
-  for (var j = MI.i; j < Math.min(MI.t.etapes.length, MI.i + 3); j++) { if (_miroirFait(MI.t.etapes[j], MI.memo)) k = j; }
-  if (k < 0) { MI.ok = 0; return; }
-  if (k === MI.i && e.type === 'taper') {   // une saisie : on attend qu'elle soit posée
-    var c = _q(e.cible), v = c ? c.value : '';
-    if (v !== MI.val) { MI.val = v; MI.valDepuis = Date.now(); return; }
-    if (document.activeElement === c && Date.now() - MI.valDepuis < 1500) return;
+  if (MI.cible && MI.cible.closed) { _miroirArret(); return; }
+  var e = MI.t.etapes[MI.i], k = -1;
+  if (e && Date.now() - MI.depuis >= 700) {
+    for (var j = MI.i; j < Math.min(MI.t.etapes.length, MI.i + 3); j++) { if (_miroirFait(MI.t.etapes[j], MI.memo)) k = j; }
+    if (k === MI.i && e.type === 'taper') {   // une saisie : on attend qu'elle soit posée
+      var c = _q(e.cible), v = c ? c.value : '';
+      if (v !== MI.val) { MI.val = v; MI.valDepuis = Date.now(); k = -1; }
+      else if (document.activeElement === c && Date.now() - MI.valDepuis < 1500) k = -1;
+    }
+    MI.ok = k >= 0 ? MI.ok + 1 : 0;
+    if (MI.ok < 2) k = -1;
   }
-  if (++MI.ok < 2) return;
-  MI.envoye = MI.i;
-  var m = { mvtu: 'miroir', i: MI.i, jusqua: k };
-  if (e.type === 'taper') { var c2 = _q(e.cible); if (c2 && c2.value) m.valeur = c2.value; }
+  MI.fait = k;
+  if (k >= 0 && MI.dit !== MI.i) { MI.dit = MI.i; if (window.console) window.console.info('[Tuto miroir] étape ' + (MI.i + 1) + ' faite sur votre domaine : le panneau suit.'); }
+  var m = { mvtu: 'miroir', i: MI.i, fait: k };
+  if (k >= 0 && e && e.type === 'taper') { var c2 = _q(e.cible); if (c2 && c2.value) m.valeur = c2.value; }
   try { MI.cible.postMessage(m, window.location.origin); } catch (er) { _avale(er, '_miroirTic'); }
 }
 function _miroirBoucle() { if (!MI) return; _miroirAnneau(); window.requestAnimationFrame(_miroirBoucle); }
 function _miroirDemarrer(t, cible) {
   _miroirArret();
   _css();
-  MI = { t: t, i: 0, memo: {}, cible: cible, depuis: Date.now(), envoye: -1, ok: 0, val: null, valDepuis: 0 };
+  MI = { t: t, i: 0, memo: {}, cible: cible, depuis: Date.now(), fait: -1, dit: -1, ok: 0, val: null, valDepuis: 0 };
   if (t.avant) { try { t.avant(MI.memo); } catch (e) { _avale(e, '_miroirDemarrer#avant'); } }
   MI.anneau = document.createElement('div');
   MI.anneau.className = 'mvtu-anneau';
@@ -743,9 +795,9 @@ function _panneau(id) {
       if (ev.origin !== window.location.origin || !ev.data || !ev.data.mvtu) return;
       var d = ev.data;
       if (d.mvtu === 'fermer') _fermerPanneau();
-      else if (d.mvtu === 'fini') { if (MI) { MI.envoye = MI.i; _miroirArret(); } }
+      else if (d.mvtu === 'fini') _miroirArret();
       else if (d.mvtu === 'etape' && MI && MI.t.id === d.id && typeof d.i === 'number') {
-        MI.i = d.i; MI.depuis = Date.now(); MI.envoye = -1; MI.ok = 0; MI.val = null;
+        MI.i = d.i; MI.depuis = Date.now(); MI.fait = -1; MI.ok = 0; MI.val = null;
       }
     });
   }
@@ -813,7 +865,7 @@ function _charger() {
 function _demarrer() {
   var t = _tuto(String(window.__MV_TUTO || ''));
   if (!t || E.actif) return;
-  E.t = t; E.i = 0; E.memo = {};
+  E.t = t; E.i = 0; E.memo = {}; E.lance = Date.now();
   if (t.avant) { try { t.avant(E.memo); } catch (e) { _avale(e, '_demarrer#avant'); } }
   _etat('fini', false);
   _etat('types', t.etapes.map(function (x) { return x.type; }));
@@ -834,6 +886,7 @@ window._mvTutoAideBloc = _aideBloc;
 window._mvTutoAideBrancher = _aideBrancher;
 window._mvTutoListe = function () { return TU_TUTOS.map(function (t) { return t.id; }); };
 window._mvTutoSortir = _sortir;
+window._mvTutoBloque = _bloque;
 // Vérification du miroir (lecture seule) : l'étape i du tuto est-elle faite sur CE domaine ? mv-tutos-jeu.mjs s'en sert.
 window._mvTutoAvant = function (id) { var t = _tuto(id), m = {}; if (t && t.avant) t.avant(m); return m; };
 window._mvTutoMiroirFait = function (id, i, memo) { var t = _tuto(id); return t ? _miroirFait(t.etapes[i], memo || {}) : false; };

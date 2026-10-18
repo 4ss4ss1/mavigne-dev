@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.04
+// MA VIGNE — Service Worker v10.05
+// v10.05 (18/10/2026) — TUTO-4 (§361) : boot.js toujours frais (adresse versionnée dans index.html, no-cache dans firebase.json, réseau d’abord ici) — un ancien boot.js resté en cache empêchait le panneau de suivre ; un entraînement refuse de démarrer sans le boot.js de sa version ; le miroir renvoie son état chaque tour et le panneau dit s’il suit. boot.js, tutos.js, app.js, utils.js, index.html, firebase.json. APP 9.25 -> 9.26.
 // v10.04 (18/10/2026) — TUTO-3 (§360) : le miroir — sur ordinateur, le tuto ouvert à côté de l’appli suit les gestes faits sur le vrai domaine (un seul sens : du domaine vers la fenêtre), anneau doré discret sur le vrai bouton, « De l’autre côté » retiré. tutos.js, utils.js, index.html. APP 9.24 -> 9.25.
 // v10.03 (18/10/2026) — TUTO-2 (§359) : sur ordinateur, le tuto s’ouvre dans un panneau à côté de l’appli (un cadre de la même appli, en entraînement) ; les titres des tutos sont des questions ; l’entraînement remplace aussi la mémoire de session et garde son cache Firestore en mémoire ; frame-src accepte l’appli elle-même (firebase.json). boot.js, firebase.js, tutos.js, utils.js, index.html. APP 9.23 -> 9.24.
 // v10.02 (18/10/2026) — TUTO-1 (§358) : les tutoriels guidés, joués sur les vrais écrans avec un domaine fictif (src/tutos.js neuf). Mémoire du téléphone jetable pendant l’entraînement (boot.js), porte unique des lectures et écritures (firebase.js), étiquettes data-tuto (index.html, tracteur.js), « Me montrer comment faire » dans l’aide (utils.js). APP 9.22 -> 9.23.
@@ -4534,7 +4535,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.04';
+const CACHE_NAME   = 'mavigne-v10.05';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4551,7 +4552,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.04 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.05 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4571,7 +4572,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.04 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.05 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
@@ -4697,6 +4698,19 @@ self.addEventListener('fetch', event => {
         if (!at || (Date.now() - at) > MET_MAX_AGE) return metStale('stale');
         return cached;
       }))
+    );
+    return;
+  }
+
+  // ★ TUTO-4 (§361) — boot.js : RÉSEAU D'ABORD, sans le cache du navigateur. Il n'a pas de numéro dans son nom : servi
+  //   depuis le cache (précaché par cache.addAll, qui peut lire le cache HTTP), une version précédente survivait aux mises
+  //   à jour — et le panneau d'entraînement ne savait plus qu'il en était un. Hors ligne : la copie gardée.
+  if (url.pathname.endsWith('/boot.js')) {
+    event.respondWith(
+      fetch(url.pathname + url.search, { cache: 'no-store', credentials: 'same-origin' }).then(r => {
+        if (r.ok) { const rc = r.clone(); caches.open(CACHE_NAME).then(c => c.put('./boot.js', rc)).catch(e => { if (DEBUG) console.warn('[SW] boot.js non gardé', e); }); }
+        return r;
+      }).catch(() => caches.match('./boot.js'))
     );
     return;
   }

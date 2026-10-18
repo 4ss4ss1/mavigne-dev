@@ -16,6 +16,8 @@
 //   ⚠️ Si une mémoire ne peut PAS être remplacée, il n'y a PAS d'entraînement : jamais de tuto sur la vraie.
 (function () {
   'use strict';
+  // TUTO-4 (§361) : la marque de CE boot.js — tutos.js refuse tout entraînement sans elle (un boot.js resté en cache).
+  window.__MV_BOOT_TUTO_V = 4;
   var q = '';
   try { q = location.search || ''; } catch (e) { q = ''; }
   var m = /[?&]tuto=([a-z0-9-]{1,40})/i.exec(q), retour = '';

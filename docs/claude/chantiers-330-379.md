@@ -761,3 +761,30 @@ Le miroir à côté d’une VRAIE session (le bac à sable n’en a pas) ; « Fe
 ### 360e. Ce qui reste (→ §28)
 Chaque nouvelle étape à valeurs fictives : son `reel` et son `txtReel`, sinon la fenêtre ne peut pas la suivre (elle reste faisable dans la fenêtre). Le reste comme au §359g.
 
+## 361. ★★ TUTO-4 — LE MIROIR NE SUIVAIT PAS CHEZ NICO : UN boot.js D’UNE VERSION PRÉCÉDENTE, GARDÉ EN CACHE (18/10 — `public/boot.js` · `public/sw.js` · `firebase.json` · `index.html` · `src/tutos.js` · `src/app.js` · `src/utils.js` (APP, WHATS_NEW) · `guide/01-demarrer.html` · `scripts/mv-harnais-tutos.mjs` · `scripts/mv-tutos-jeu.mjs` · `CLAUDE.md` · `docs/claude/*`)
+
+### 361a. Le constat
+TUTO-3 en ligne (9.25, vérifié par Nico) : sa capture montre la vraie fenêtre « Équipes du jour » ouverte à gauche, et le panneau resté à « Étape 1 sur 5 ». Mes tests passaient : le côté « domaine » y était l’appli en entraînement, sans service worker ni vraie session.
+
+### 361b. La recherche
+- Reproduit avec un VRAI clic de souris sur la pastille, dans la fenêtre de l’appli (1 900 × 950) : la fenêtre s’ouvre, le panneau passe à l’étape 2, l’anneau suit. Le miroir marche ; la différence est ailleurs.
+- `sw.js` : les pages en réseau d’abord (le panneau reçoit donc un `index.html` frais) ; mais `boot.js` est dans `SHELL_STATIC`, précaché par `cache.addAll` à l’installation — qui peut lire le cache du navigateur — puis servi par la branche « statics : cache-first » jusqu’à la version suivante.
+- `firebase.json` : aucun `Cache-Control` pour `/boot.js` (Firebase Hosting garde alors une heure par défaut). Trois mises en ligne le même après-midi : le service worker de la 9.25 a pu précacher le `boot.js` de TUTO-1.
+- Or c’est le `boot.js` de TUTO-2 qui pose `__MV_TUTO_CADRE` : sans lui, le panneau ne parle pas à l’appli et n’écoute rien. Le même défaut expliquerait « De l’autre côté fait planter les fenêtres » (TUTO-2) : sans `_cadre()`, « Quitter » chargeait l’appli DANS le panneau.
+- Risque associé : le `boot.js` de TUTO-1 écrit `mavigne_tuto` dans la mémoire de session — partagée avec l’onglet de l’appli, qui pouvait redémarrer en entraînement et y revenir à chaque sortie (l’effacement avait quitté `_sortir` avec TUTO-2).
+
+### 361c. Le correctif
+- **`boot.js` toujours frais** : `boot.js?v=<APP_VERSION>` dans `index.html` (une adresse neuve à chaque version : ni le cache du navigateur ni celui de l’ancien service worker ne la connaissent — la bascule tient même avant l’activation du nouveau), `no-cache` dans `firebase.json`, réseau d’abord (`cache: 'no-store'`) dans `sw.js`, copie gardée pour le hors-ligne.
+- **Rien sans le bon `boot.js`** : marque `__MV_BOOT_TUTO_V = 4` ; `tutos.js` la vérifie dès son chargement quand l’adresse porte `?tuto=` ; absente ou autre → `__MV_TUTO_BLOQUE`, et `app.js` n’ouvre NI l’entraînement NI l’appli (avec un `boot.js` d’avant les tutos, c’est la vraie session qui se serait ouverte dans le panneau) ; « Une mise à jour à finir : fermez tous les onglets Ma Vigne, puis rouvrez ».
+- **`_sortir` efface de nouveau `mavigne_tuto`** de la mémoire de session (sans effet avec un `boot.js` frais, qui la remplace).
+- **Le miroir renvoyé à chaque tour** (300 ms), même « rien de fait » : un message perdu pendant un chargement n’est plus une étape perdue, et c’est un signe de vie — le panneau affiche « Je suis vos gestes sur votre domaine », ou « Votre appli ne répond pas » au bout de 4 s. Une ligne `[Tuto miroir]` dans la console à chaque étape vue faite.
+
+### 361d. Mesures
+- `npm run test:tutos` : **9/9** — les 8 d’avant, plus un `boot.js` d’une version précédente servi au panneau : bloqué, message affiché, ni entraînement ni appli, mémoire de session de la page intacte.
+- Vrai clic dans la fenêtre de l’appli (Chromium, 1 900 × 950) : avant — panneau étape 1, « Je suis vos gestes sur votre domaine », anneau visible ; après — la fenêtre des équipes ouverte, panneau étape 2.
+- `mv-harnais-tutos` : vert ; contre-épreuves **21/21** (dont : `boot.js?v=` d’une autre version, `no-cache` retiré, branche réseau d’abord retirée, marque changée, `app.js` qui démarre quand même).
+- `node scripts/mv-lanceur.mjs --continuer` : **439/439 commandes, 0 rouge** (753 s).
+
+### 361e. Ce qui n’a pas été vérifié
+La bascule réelle du service worker chez un client (installation de v10.05 par-dessus v10.04) : le bac à sable bloque le service worker. Ce qui la rend sûre sans elle : l’adresse versionnée de `boot.js`.
+

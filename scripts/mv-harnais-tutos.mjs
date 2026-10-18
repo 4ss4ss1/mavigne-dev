@@ -25,6 +25,8 @@
         s'afficher dans un cadre d'elle-même (frame-src 'self') ; chaque titre de tuto est une question.
      H. TUTO-3 (§360) : le miroir ne va que du domaine vers la fenêtre — la fenêtre ne dit que « etape »,
         « fini », « fermer » ; elle n'écoute que « miroir » ; aucun clic hors de « Montre-moi ».
+     I. TUTO-4 (§361) : boot.js toujours frais — adresse versionnée (= APP_VERSION) dans index.html, no-cache dans
+        firebase.json, réseau d'abord dans sw.js ; sa marque ; un entraînement sans elle est bloqué (app.js avant tout).
      F. Le compte des gestes sans tuto (fonctions lancées par un clic, un choix ou une
         saisie, moins celles qu'un tuto couvre, moins les exemptés motivés) ne monte
         jamais : scripts/tutos-couverture.json. Il descend à chaque tuto ajouté.
@@ -49,7 +51,7 @@ const GENERIQUES = new Set(['$', 'if', 'return', 'event.stopPropagation', 'event
 function charger() {
   const F = {};
   const src = fs.readdirSync(path.join(RACINE, 'src')).filter((f) => f.endsWith('.js')).map((f) => 'src/' + f);
-  for (const f of src.concat(['index.html', 'public/boot.js', 'scripts/tutos-couverture.json', 'firebase.json'])) F[f] = lire(f);
+  for (const f of src.concat(['index.html', 'public/boot.js', 'public/sw.js', 'scripts/tutos-couverture.json', 'firebase.json'])) F[f] = lire(f);
   return F;
 }
 // Les attributs du moteur lui-même (boutons de la consigne, de la fin, de l'aide) ne visent pas l'appli.
@@ -122,6 +124,15 @@ function verifie(F) {
   const iMM = tu.indexOf('function _montreMoi('), fMM = tu.indexOf('\nfunction ', iMM + 10);
   const horsMM = tu.slice(0, iMM) + tu.slice(fMM);
   t('H · aucun clic du moteur hors de « Montre-moi » (le vrai domaine n\u2019est jamais touché)', iMM > 0 && !/\.click\(\)/.test(horsMM));
+  // I. TUTO-4 — boot.js frais, et rien sans lui
+  const ver = (/export const APP_VERSION = '([^']+)'/.exec(F['src/utils.js']) || [])[1];
+  t('I · index.html charge boot.js à l\u2019adresse de la version (' + ver + ')', !!ver && F['index.html'].includes('<script src="/boot.js?v=' + ver + '"></script>'));
+  t('I · firebase.json interdit le cache à boot.js', /"source":\s*"\/boot\.js"[\s\S]{0,160}?"no-cache"/.test(F['firebase.json']));
+  t('I · sw.js sert boot.js réseau d\u2019abord, sans le cache du navigateur', F['public/sw.js'].includes("if (url.pathname.endsWith('/boot.js')) {") && F['public/sw.js'].includes("cache: 'no-store'"));
+  const marque = (/window\.__MV_BOOT_TUTO_V = (\d+);/.exec(bt) || [])[1], attendue = (/var TU_BOOT_V = (\d+);/.exec(tu) || [])[1];
+  t('I · boot.js porte la marque que tutos.js attend (' + marque + ' = ' + attendue + ')', !!marque && marque === attendue && tu.includes('window.__MV_BOOT_TUTO_V !== TU_BOOT_V) window.__MV_TUTO_BLOQUE = true;'));
+  const iBl = ap.indexOf('if(window.__MV_TUTO_BLOQUE) {');
+  t('I · app.js : un entraînement bloqué n\u2019ouvre ni l\u2019entraînement ni l\u2019appli', iBl > 0 && iBl < ap.indexOf('if(window.__MV_TUTO && _mvTutoEntrer())'));
   // F. le compte des gestes sans tuto
   const gestes = new Set();
   for (const [f, s] of Object.entries(F)) {
@@ -159,6 +170,11 @@ const MUT = [
   ['un titre qui n\u2019est pas une question', 'src/tutos.js', "titre: 'Comment faire pour noter un plein de GNR", "titre: 'Plein de GNR"],
   ['la fenêtre qui dit autre chose', 'src/tutos.js', "_dire({ mvtu: 'etape'", "_dire({ mvtu: 'clic'"],
   ['la fenêtre qui écoute tout', 'src/tutos.js', "|| ev.data.mvtu !== 'miroir') return;", ") return;"],
+  ['boot.js à l\u2019adresse d\u2019une autre version', 'index.html', '<script src="/boot.js?v=9.26"></script>', '<script src="/boot.js?v=9.25"></script>'],
+  ['boot.js gardé par le navigateur', 'firebase.json', '"/boot.js"', '"/boot-x.js"'],
+  ['boot.js servi depuis le cache du service worker', 'public/sw.js', "if (url.pathname.endsWith('/boot.js')) {", "if (url.pathname.endsWith('/boot-x.js')) {"],
+  ['boot.js sans la marque attendue', 'public/boot.js', 'window.__MV_BOOT_TUTO_V = 4;', 'window.__MV_BOOT_TUTO_V = 3;'],
+  ['app.js qui démarre quand même', 'src/app.js', 'if(window.__MV_TUTO_BLOQUE) {', 'if(false) {'],
   ['un clic sur le vrai domaine', 'src/tutos.js', "if (d.mvtu === 'fermer') _fermerPanneau();", "if (d.mvtu === 'fermer') { document.body.click(); _fermerPanneau(); }"],
   ['app.js sans tutos.js', 'src/app.js', "import './tutos.js';", ''],
   ['une étiquette disparue', 'index.html', 'data-tuto="eqj.save" ', ''],

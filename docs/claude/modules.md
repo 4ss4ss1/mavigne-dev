@@ -2626,6 +2626,10 @@ le cadre demande sa fermeture par `postMessage({mvtu:'fermer'})`. Téléphone et
 vérifie l'étape sur le vrai domaine (`_miroirFait` : `reel` si l'étape en a un, sinon `fait`, la page, ou une saisie
 valide et posée) et répond `miroir` (+ `jusqua`, + `valeur`) ; la fenêtre joue l'étape (`_jouerMiroir`). Un seul sens.
 Une étape à valeurs fictives (« Jean et Sophie ») DOIT avoir son `reel` (et son `txtReel`, « Sur votre domaine : … »).
+**TUTO-4 (§361).** L'état `miroir` part à chaque tour (300 ms), même `fait: -1` : c'est le signe de vie qu'affiche le
+panneau (« Je suis vos gestes… » / « ne répond pas »). `boot.js` est chargé en `boot.js?v=<APP_VERSION>`, `no-cache`,
+réseau d'abord dans `sw.js` ; sa marque `__MV_BOOT_TUTO_V` doit valoir `TU_BOOT_V` (tutos.js), sinon `__MV_TUTO_BLOQUE` :
+app.js n'ouvre ni l'entraînement ni l'appli, `_mvTutoBloque` affiche « Une mise à jour à finir ».
 
 **Le bac à sable, trois verrous.** ① `public/boot.js` remplace `localStorage` ET `sessionStorage` (partagée
 avec le cadre) par des mémoires jetables AVANT tout module (domaine `domaine-dupont`) ; le drapeau vit dans
