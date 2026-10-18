@@ -21,6 +21,8 @@
      E. tutos.js : chaque étiquette data-tuto visée existe dans l'appli ; chaque attribut
         visé existe ; chaque fonction de `couvre` existe ; chaque personne visée est dans
         le domaine fictif.
+     G. TUTO-2 (§359) : le cache Firestore de l'entraînement reste en mémoire ; la CSP laisse l'appli
+        s'afficher dans un cadre d'elle-même (frame-src 'self') ; chaque titre de tuto est une question.
      F. Le compte des gestes sans tuto (fonctions lancées par un clic, un choix ou une
         saisie, moins celles qu'un tuto couvre, moins les exemptés motivés) ne monte
         jamais : scripts/tutos-couverture.json. Il descend à chaque tuto ajouté.
@@ -45,7 +47,7 @@ const GENERIQUES = new Set(['$', 'if', 'return', 'event.stopPropagation', 'event
 function charger() {
   const F = {};
   const src = fs.readdirSync(path.join(RACINE, 'src')).filter((f) => f.endsWith('.js')).map((f) => 'src/' + f);
-  for (const f of src.concat(['index.html', 'public/boot.js', 'scripts/tutos-couverture.json'])) F[f] = lire(f);
+  for (const f of src.concat(['index.html', 'public/boot.js', 'scripts/tutos-couverture.json', 'firebase.json'])) F[f] = lire(f);
   return F;
 }
 // Les attributs du moteur lui-même (boutons de la consigne, de la fin, de l'aide) ne visent pas l'appli.
@@ -77,9 +79,10 @@ function verifie(F) {
   t('B · aucun autre fichier n\u2019importe le SDK serveur' + (fuites.length ? ' (' + fuites.join(', ') + ')' : ''), fuites.length === 0);
   // C. boot.js
   const bt = F['public/boot.js'];
-  const iVerif = bt.indexOf('if (!pose || window.localStorage !== jetable) {'), iPose = bt.indexOf('window.__MV_TUTO = id;');
-  t('C · boot.js remplace la mémoire du téléphone', bt.includes("Object.defineProperty(window, 'localStorage'") && bt.includes("M.mavigne_tenant = 'domaine-dupont';"));
-  t('C · __MV_TUTO n\u2019existe qu\u2019APRÈS la vérification de la mémoire jetable', iVerif > 0 && iPose > iVerif);
+  const iVerif = bt.indexOf('if (!pose || window.localStorage !== JL || window.sessionStorage !== JS) {'), iPose = bt.indexOf('window.__MV_TUTO = m[1].toLowerCase();');
+  t('C · boot.js remplace la mémoire du téléphone ET la mémoire de session', bt.includes("Object.defineProperty(window, 'localStorage'") && bt.includes("Object.defineProperty(window, 'sessionStorage'") && bt.includes("depart = { mavigne_tenant: 'domaine-dupont' }"));
+  t('C · __MV_TUTO n\u2019existe qu\u2019APRÈS la vérification des deux mémoires jetables', iVerif > 0 && iPose > iVerif);
+  t('C · le drapeau d\u2019entraînement ne s\u2019écrit jamais en mémoire de session (partagée avec le panneau)', !/sessionStorage\.setItem\(\s*['"]mavigne_tuto['"]/.test(bt + F['src/tutos.js']));
   // D. app.js
   const ap = F['src/app.js'];
   const iTu = ap.indexOf('if(window.__MV_TUTO && _mvTutoEntrer())'), iFb = ap.indexOf('window._fbLoad().catch(');
@@ -104,6 +107,12 @@ function verifie(F) {
   for (const n of visees) t('E · « ' + n + ' » est bien dans le domaine fictif', membres.includes(n));
   const ids = [...new Set([...tu.matchAll(/L\('#([a-z0-9-]+)'\)/g)].map((m) => m[1]))];
   for (const i of ids) t('E · libellé lu à l\u2019écran « #' + i + ' » présent', autres.includes('id="' + i + '"') || autres.includes("id=\\\"" + i + "\\\""));
+  // G. TUTO-2
+  t('G · l\u2019entraînement garde son cache Firestore en mémoire (jamais le cache partagé entre onglets)', fb.includes("if (typeof window !== 'undefined' && window.__MV_TUTO) return initializeFirestore(app, { localCache: memoryLocalCache() });"));
+  const csp = (/frame-src[^;"]*/.exec(F['firebase.json']) || [''])[0];
+  t('G · la CSP laisse l\u2019appli s\u2019afficher dans son panneau (frame-src \'self\')', csp.includes("'self'"));
+  const titres = [...tu.matchAll(/\btitre: '([^']*)'/g)].map((m) => m[1]);
+  t('G · ' + titres.length + ' titre(s) de tuto, tous en question « Comment faire pour… ? »', titres.length > 0 && titres.every((x) => x.startsWith('Comment faire pour ') && /\?$/.test(x)));
   // F. le compte des gestes sans tuto
   const gestes = new Set();
   for (const [f, s] of Object.entries(F)) {
@@ -134,7 +143,11 @@ const MUT = [
   ['setDoc importé en direct', 'src/firebase.js', 'setDoc as _sdkSetDoc', 'setDoc'],
   ['un appel direct au SDK', 'src/firebase.js', 'function setDoc() {', 'function _mvFuite() { return _sdkSetDoc(); }\nfunction setDoc() {'],
   ['_fbLoad qui charge pendant un entraînement', 'src/firebase.js', "window._fbLoad = async function () {\n  if (typeof window !== 'undefined' && window.__MV_TUTO) return;", 'window._fbLoad = async function () {'],
-  ['boot.js sans la vérification', 'public/boot.js', 'if (!pose || window.localStorage !== jetable) {', 'if (!pose) {'],
+  ['boot.js sans la vérification', 'public/boot.js', 'if (!pose || window.localStorage !== JL || window.sessionStorage !== JS) {', 'if (!pose) {'],
+  ['boot.js qui écrit le drapeau en mémoire de session', 'public/boot.js', 'window.__MV_TUTO = m[1].toLowerCase();', "sessionStorage.setItem('mavigne_tuto', m[1]);\n  window.__MV_TUTO = m[1].toLowerCase();"],
+  ['l\u2019entraînement dans le cache partagé', 'src/firebase.js', "  if (typeof window !== 'undefined' && window.__MV_TUTO) return initializeFirestore(app, { localCache: memoryLocalCache() });\n", ''],
+  ['frame-src sans l\u2019appli', 'firebase.json', "frame-src 'self' https://www.google.com", 'frame-src https://www.google.com'],
+  ['un titre qui n\u2019est pas une question', 'src/tutos.js', "titre: 'Comment faire pour noter un plein de GNR", "titre: 'Plein de GNR"],
   ['app.js sans tutos.js', 'src/app.js', "import './tutos.js';", ''],
   ['une étiquette disparue', 'index.html', 'data-tuto="eqj.save" ', ''],
   ['une fonction enseignée renommée', 'src/tutos.js', "couvre: ['openGnrAppoint', 'saveGnrAppoint']", "couvre: ['openGnrAppoint', 'saveGnrAppointX']"],

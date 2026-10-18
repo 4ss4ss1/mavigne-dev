@@ -14,6 +14,8 @@
    Téléphone (390 × 844, tactile) PUIS ordinateur (1280 × 860) : le chemin vers un
    module n'est pas le même (dock ou barre de gauche), le tuto doit trouver les deux.
    Hermétique comme le smoke : tout ce qui n'est pas le serveur local est coupé.
+   TUTO-2 (§359) : chaque tuto est aussi joué DANS UN CADRE (le panneau d'entraînement sur ordinateur) ; on
+   exige que la mémoire de l'appli qui l'ouvre ne bouge pas et que « Fermer l'entraînement » la prévienne.
    ─────────────────────────────────────────────────────────────────────────── */
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
@@ -39,6 +41,14 @@ function serveur(racine) {
     const s = http.createServer(async (req, res) => {
       try {
         let p = decodeURIComponent(req.url.split('?')[0]);
+        // TUTO-2 : une page d'appli qui ouvre le tuto dans un cadre, comme le panneau d'entraînement sur ordinateur.
+        if (p === '/__cadre.html') {
+          const id = (/[?&]id=([a-z0-9-]+)/.exec(req.url) || [])[1] || 'equipes';
+          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+          res.end('<!doctype html><html><body style="margin:0"><script>window.__ferme=false;window.addEventListener("message",function(e){if(e.data&&e.data.mvtu==="fermer")window.__ferme=true;});</script>'
+            + '<iframe id="f" src="/?tuto=' + id + '&tuto_auto=1&tuto_cadre=1" style="width:420px;height:860px;border:0"></iframe></body></html>');
+          return;
+        }
         if (p === '/' || p === '') p = '/index.html';
         let fp = join(racine, p);
         try { if ((await stat(fp)).isDirectory()) fp = join(fp, 'index.html'); } catch (e) { fp = join(racine, p); }
@@ -76,6 +86,35 @@ async function jouer(navigateur, base, id, ecran) {
   return { ok, etat, erreurs, fuites, ms: Date.now() - t0 };
 }
 
+async function jouerCadre(navigateur, base, id) {
+  const ctx = await navigateur.newContext({ serviceWorkers: 'block', locale: 'fr-FR', viewport: { width: 1280, height: 900 } });
+  const fuites = [], erreurs = [];
+  await ctx.route('**/*', (route) => {
+    const u = route.request().url();
+    if (u.startsWith(base)) return route.continue();
+    if (/firestore\.googleapis\.com|firebasestorage|cloudfunctions\.net/.test(u)) fuites.push(route.request().method() + ' ' + u.slice(0, 90));
+    return route.abort();
+  });
+  const page = await ctx.newPage();
+  page.on('pageerror', (e) => { if (!benin(e.message)) erreurs.push('exception : ' + e.message); });
+  const t0 = Date.now();
+  let etat = null, parent = null;
+  try {
+    await page.goto(base + '__cadre.html?id=' + encodeURIComponent(id), { waitUntil: 'load' });
+    await page.waitForFunction(() => { const f = document.getElementById('f'); return f && f.contentWindow && f.contentWindow.__MV_TUTO_ETAT && (f.contentWindow.__MV_TUTO_ETAT.fini || f.contentWindow.__MV_TUTO_ETAT.erreur); }, null, { timeout: DELAI });
+    // « Fermer l'entraînement » dans le cadre : l'appli qui l'a ouvert doit recevoir la demande.
+    await page.evaluate(() => { const d = document.getElementById('f').contentWindow.document; const b = d.querySelector('[data-f="sortir"]'); if (b) b.click(); });
+    await page.waitForTimeout(400);
+    etat = await page.evaluate(() => document.getElementById('f').contentWindow.__MV_TUTO_ETAT);
+    parent = await page.evaluate(() => ({ session: sessionStorage.length, tenant: localStorage.getItem('mavigne_tenant'), local: localStorage.length, ferme: window.__ferme }));
+  } catch (e) { erreurs.push('cadre : ' + String(e.message || e).split('\n')[0]); }
+  await ctx.close();
+  if (parent && (parent.session || parent.local || parent.tenant)) erreurs.push('la mémoire de l\u2019appli qui ouvre le panneau a bougé : ' + JSON.stringify(parent));
+  if (parent && !parent.ferme) erreurs.push('« Fermer l\u2019entraînement » n\u2019a pas prévenu l\u2019appli');
+  const ok = !!(etat && etat.fini && !etat.erreur && !erreurs.length && !fuites.length);
+  return { ok, etat, erreurs, fuites, ms: Date.now() - t0 };
+}
+
 async function main() {
   let pw;
   try { pw = await import('playwright'); } catch (e) { console.error(c.r('✖ Playwright absent : npm i -D playwright && npx playwright install chromium')); process.exit(2); }
@@ -102,6 +141,12 @@ async function main() {
         r.fuites.slice(0, 5).forEach((e) => console.log('      fuite vers le serveur : ' + e));
       }
     }
+  }
+  for (let i = 0; i < liste.length; i++) {
+    const r = await jouerCadre(navigateur, base, liste[i]);
+    const lib = 'panneau (cadre) · ' + liste[i] + ' · ' + (r.etat ? (r.etat.etape + '/' + r.etat.total + ' étapes') : '?') + ' · ' + (r.ms / 1000).toFixed(1) + ' s · mémoire de l\u2019appli intacte, fermeture transmise';
+    if (r.ok) console.log(c.g('  ✓ ') + lib);
+    else { rouges++; console.log(c.r('  ✗ ') + lib.split(' · mémoire')[0]); r.erreurs.slice(0, 5).forEach((e) => console.log('      ' + e)); r.fuites.slice(0, 5).forEach((e) => console.log('      fuite vers le serveur : ' + e)); }
   }
   await navigateur.close(); srv.close();
   console.log('\n  ' + (rouges ? c.r(rouges + ' tuto(s) ne vont plus au bout : l\u2019écran a changé, le tuto doit suivre') : c.g('chaque tuto va au bout, sans rien envoyer au serveur')) + '\n');

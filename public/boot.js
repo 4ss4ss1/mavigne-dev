@@ -7,45 +7,58 @@
 // pas là après 10 s : 1 rechargement auto silencieux, puis un écran
 // "Réessayer" au lieu d'un splash muet.
 // ════════════════════════════════════════════════════════════════════
-// ★★★ TUTO-1 (§358) — L'ENTRAÎNEMENT. Un tuto se joue sur un domaine FICTIF. Avant le moindre module, la
-//   mémoire du téléphone (localStorage) est remplacée par une mémoire jetable : le domaine y vaut
-//   « domaine-dupont », et aucune copie locale du vrai domaine n'est lue ni écrite. La mémoire jetable
-//   disparaît au rechargement : sortir de l'entraînement = recharger sans ?tuto.
-//   ⚠️ Si la mémoire ne peut PAS être remplacée, il n'y a PAS d'entraînement : jamais de tuto sur la vraie.
+// ★★★ TUTO-1 (§358), TUTO-2 (§359) — L'ENTRAÎNEMENT. Un tuto se joue sur un domaine FICTIF. Avant le moindre
+//   module, la mémoire du téléphone (localStorage) ET la mémoire de session (sessionStorage) sont remplacées par
+//   des mémoires jetables : le domaine y vaut « domaine-dupont », rien du vrai domaine n'est lu ni écrit.
+//   La mémoire de session est PARTAGÉE entre l'appli et un cadre de l'appli (le panneau d'entraînement, sur
+//   ordinateur) : l'entraînement n'y écrit donc jamais, et son drapeau vit dans l'ADRESSE seule (?tuto=…).
+//   Sortir = recharger sans ?tuto.
+//   ⚠️ Si une mémoire ne peut PAS être remplacée, il n'y a PAS d'entraînement : jamais de tuto sur la vraie.
 (function () {
   'use strict';
-  var id = '';
+  var q = '';
+  try { q = location.search || ''; } catch (e) { q = ''; }
+  var m = /[?&]tuto=([a-z0-9-]{1,40})/i.exec(q), retour = '';
+  // Le retour posé par le vrai domaine (plein écran), lu AVANT de remplacer la mémoire ; puis le ménage
+  // (TUTO-1 gardait aussi son drapeau dans la mémoire de session).
   try {
-    var q = location.search || '';
-    var m = /[?&]tuto=([a-z0-9-]{1,40})/i.exec(q);
-    if (m) sessionStorage.setItem('mavigne_tuto', m[1].toLowerCase());
-    if (/[?&]tuto_auto=1(&|$)/.test(q)) sessionStorage.setItem('mavigne_tuto_auto', '1');
-    id = sessionStorage.getItem('mavigne_tuto') || '';
-  } catch (e) { id = ''; window.__MV_BOOT_TUTO = String(e); }
-  if (!id) return;
-  var vrai = null;
-  try { vrai = window.localStorage; } catch (e) { vrai = null; window.__MV_BOOT_TUTO = String(e); }
-  var M = Object.create(null);
+    retour = sessionStorage.getItem('mavigne_tuto_retour') || '';
+    sessionStorage.removeItem('mavigne_tuto'); sessionStorage.removeItem('mavigne_tuto_auto'); sessionStorage.removeItem('mavigne_tuto_retour');
+  } catch (e) { window.__MV_BOOT_TUTO = String(e); }
+  if (!m) return;
+  var cadre = /[?&]tuto_cadre=1(&|$)/.test(q);
+  function jetable(depart) {
+    var M = Object.create(null), k;
+    for (k in depart) M[k] = depart[k];
+    return {
+      getItem: function (c) { c = String(c); return (c in M) ? M[c] : null; },
+      setItem: function (c, v) { M[String(c)] = String(v); },
+      removeItem: function (c) { delete M[String(c)]; },
+      clear: function () { M = Object.create(null); },
+      key: function (i) { var ks = Object.keys(M); return i < ks.length ? ks[i] : null; },
+      get length() { return Object.keys(M).length; }
+    };
+  }
   // Le seul réglage qui suit la personne dans l'entraînement : son thème.
-  try { var th = vrai && vrai.getItem('mavigne_theme'); if (th != null) M.mavigne_theme = String(th); } catch (e) { window.__MV_BOOT_TUTO = String(e); }
-  M.mavigne_tenant = 'domaine-dupont';
-  var jetable = {
-    getItem: function (k) { k = String(k); return (k in M) ? M[k] : null; },
-    setItem: function (k, v) { M[String(k)] = String(v); },
-    removeItem: function (k) { delete M[String(k)]; },
-    clear: function () { M = Object.create(null); },
-    key: function (i) { var ks = Object.keys(M); return i < ks.length ? ks[i] : null; },
-    get length() { return Object.keys(M).length; }
-  };
-  var pose = false;
-  try { Object.defineProperty(window, 'localStorage', { configurable: true, enumerable: true, get: function () { return jetable; } }); pose = true; }
-  catch (e) { window.__MV_BOOT_TUTO = String(e); }
-  if (!pose || window.localStorage !== jetable) {
-    try { sessionStorage.removeItem('mavigne_tuto'); sessionStorage.removeItem('mavigne_tuto_auto'); } catch (e) { window.__MV_BOOT_TUTO = String(e); }
+  var depart = { mavigne_tenant: 'domaine-dupont' };
+  try { var th = window.localStorage.getItem('mavigne_theme'); if (th != null) depart.mavigne_theme = String(th); } catch (e) { window.__MV_BOOT_TUTO = String(e); }
+  var JL = jetable(depart), JS = jetable({}), pose = false;
+  try {
+    Object.defineProperty(window, 'localStorage', { configurable: true, enumerable: true, get: function () { return JL; } });
+    Object.defineProperty(window, 'sessionStorage', { configurable: true, enumerable: true, get: function () { return JS; } });
+    pose = true;
+  } catch (e) { window.__MV_BOOT_TUTO = String(e); }
+  if (!pose || window.localStorage !== JL || window.sessionStorage !== JS) {
+    // Pas de mémoire jetable : pas d'entraînement. En plein écran, retour à l'appli normale ; dans un cadre, on
+    // arrête tout — l'appli ne doit jamais démarrer sur la vraie session dans le panneau d'entraînement.
+    if (cadre) { try { window.stop(); document.documentElement.innerHTML = '<body style="font-family:system-ui,sans-serif;padding:24px">L\u2019entra\u00eenement n\u2019a pas pu d\u00e9marrer sur ce navigateur.</body>'; } catch (e2) { window.__MV_BOOT_TUTO = String(e2); } }
+    else location.replace(location.pathname);
     return;
   }
-  window.__MV_TUTO = id;
-  try { window.__MV_TUTO_AUTO = sessionStorage.getItem('mavigne_tuto_auto') === '1'; } catch (e) { window.__MV_TUTO_AUTO = false; }
+  window.__MV_TUTO = m[1].toLowerCase();
+  window.__MV_TUTO_AUTO = /[?&]tuto_auto=1(&|$)/.test(q);
+  window.__MV_TUTO_CADRE = cadre;
+  window.__MV_TUTO_RETOUR = retour;
 })();
 
 (function () {

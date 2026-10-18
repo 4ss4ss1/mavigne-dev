@@ -412,3 +412,4 @@
 | 356 | 356. ★★ FML-1 — PAS DE « FINI » AVANT LA MALO : LE CUVIER LIT LA MALO DE LA CUVÉE AU CHAI (17/10 — `src/cuv… | `docs/claude/chantiers-330-379.md` |
 | 357 | 357. ★★ MANQUE-1 — « CE QU’IL MANQUE » LISIBLE JUSQU’EN BAS, ET DES ALERTES VRAIES (18/10 — `src/styles.css… | `docs/claude/chantiers-330-379.md` |
 | 358 | 358. ★★★ TUTO-1 — LES TUTOS GUIDÉS, JOUÉS SUR LES VRAIS ÉCRANS AVEC UN DOMAINE FICTIF (18/10 — `src/tutos.j… | `docs/claude/chantiers-330-379.md` |
+| 359 | 359. ★★ TUTO-2 — LE TUTO À CÔTÉ DE L’APPLI SUR ORDINATEUR, DES TITRES EN QUESTIONS, L’ENTRAÎNEMENT HORS DU … | `docs/claude/chantiers-330-379.md` |

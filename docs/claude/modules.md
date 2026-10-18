@@ -2618,9 +2618,15 @@ côté explique (délai de grâce de 700 ms pendant le défilement) ; « Montre-
 
 **Où.** `src/tutos.js` (moteur, `TU_DONNEES`, `TU_TUTOS`). Entrée : « Me montrer comment faire » en tête
 de l'aide de chaque écran (`openAide`, utils.js) — les tutos de l'écran, puis « Tous les tutos ».
+**À côté ou en plein écran (TUTO-2, §359).** Ordinateur (≥ 1 024 px, pointeur fin) : panneau à droite avec un
+cadre de l'appli `?tuto=<id>&tuto_cadre=1` ; « De l'autre côté », « Fenêtre à part » (`window.open`), la croix ;
+le cadre demande sa fermeture par `postMessage({mvtu:'fermer'})`. Téléphone et tablette : plein écran.
+**Titres.** Toujours une question : « Comment faire pour … ? » (tenu par `mv-harnais-tutos`).
 
-**Le bac à sable, trois verrous.** ① `public/boot.js` remplace `localStorage` par une mémoire jetable
-AVANT tout module (domaine `domaine-dupont`) ; impossible de la poser = pas d'entraînement. ② `firebase.js` :
+**Le bac à sable, trois verrous.** ① `public/boot.js` remplace `localStorage` ET `sessionStorage` (partagée
+avec le cadre) par des mémoires jetables AVANT tout module (domaine `domaine-dupont`) ; le drapeau vit dans
+l'adresse seule ; impossible de les poser = pas d'entraînement. Firestore en `memoryLocalCache` (jamais le cache
+partagé entre onglets). ② `firebase.js` :
 seize fonctions du SDK (lectures, écritures, fichiers, fonctions serveur, mot de passe, déconnexion)
 importées en `_sdk*` et appelées seulement depuis leur garde `_mvTutoPorte`. ③ Les règles Firestore :
 le jeton du client ne vaut pas pour `domaine-dupont`. Sortie = rechargement sans `?tuto`.

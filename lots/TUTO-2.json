@@ -1,0 +1,25 @@
+{
+  "lot": "TUTO-2",
+  "section": "§359",
+  "base": "f82a0daa327fdf35dd1a96c9846af26f75c449b7",
+  "inclut": [],
+  "date": "2026-10-18",
+  "fichiers": {
+    "CLAUDE.md": "d58cac655118fbd6afe6e7ab040505605d5287f3d36421d97d594fc663f462d2",
+    "docs/claude/INDEX.md": "f57361844ec0497da69499a86eb1a5c7ce39ebe16b0372bbe1df3262cad86f9e",
+    "docs/claude/chantiers-330-379.md": "b165948325dbf53fa2d13ecfb4c908469f09a4d33c680babc27d92beb726299b",
+    "docs/claude/journal.md": "a5b08956728273042f1381d2738d44157f6533e3744128ee25e9df5c606b3c7a",
+    "docs/claude/modules.md": "b16a22f6dad0ddbf0acf305f628dab9d5191a5c1fc10ee31c686e7e8f2d680f1",
+    "firebase.json": "a625fb31c83cb5a3ee9b18e074785532298d0afd7601c6e1408a6ee7d2d0dace",
+    "guide/01-demarrer.html": "06bca5874d7b392a796147155fe7cb79dd91e31b1d232045305f71b16bff9608",
+    "index.html": "e5bc6e80ac42324e2daef20890e5f3494ea4155181588828abf09d7f56719ae5",
+    "public/boot.js": "1aa0b1cd91450d2c260a2fa5f890fdc3d7f66053d3468968cb401340e208c9d5",
+    "public/sw.js": "5064f8a17ad9f2b0d9e705b0498da741d0a1c0d78e560ed5e46e555b0fcf8753",
+    "scripts/mv-harnais-tutos.mjs": "b07bb2cd5ff7301bc012bbd03791720c81b413c59b2505cc9ee74e22f96a7fd9",
+    "scripts/mv-tutos-jeu.mjs": "6d1055ce5b08649a0d62b057a6581174a8ed10e06535bdeabd20099b912b8721",
+    "src/firebase.js": "232fe11a9fe6420486de26057e2f1f9e5c2fca8493ebabc6f13f763c516735c5",
+    "src/tutos.js": "4af2f975544c752c76c55ecdcbb13cf19845b03c4e0eb2ad6817402edc3a19da",
+    "src/utils.js": "0fb8e1599bcd6928c464be2b0b6468606a397b01682060362664d55b427276fc",
+    "scripts/mv-tutos-inventaire.mjs": "e7e925724d4aacfb713c69f6fb9be0d594e915b453386d8e6e74ee0fda3b6cc5"
+  }
+}

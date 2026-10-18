@@ -11,6 +11,7 @@ import {
   initializeFirestore,
   persistentLocalCache,
   persistentMultipleTabManager,
+  memoryLocalCache,
   connectFirestoreEmulator,
   collection,
   doc,
@@ -156,6 +157,9 @@ const _MV_EMU = DEBUG && (window.__MV_USE_EMULATOR || new URLSearchParams(locati
 // ATTENTION : ne rien changer au chemin emulateur (DEV/E2E) -- il reste inerte en prod.
 const db = (function () {
   if (_MV_EMU) return initializeFirestore(app, { experimentalForceLongPolling: true });
+  // ★★ TUTO-2 (§359) — un entraînement ne rejoint JAMAIS le cache partagé entre onglets : avec le panneau d'entraînement à
+  //   côté de l'appli, deux fenêtres tournent en même temps, et celle d'entraînement a une mémoire remplacée (boot.js).
+  if (typeof window !== 'undefined' && window.__MV_TUTO) return initializeFirestore(app, { localCache: memoryLocalCache() });
   try {
     return initializeFirestore(app, {
       localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),

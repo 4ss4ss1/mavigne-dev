@@ -702,3 +702,36 @@ Le cœur était à son plafond ; le lot y ajoute une ligne de consigne (règle d
 > 2. **Le bouton « Filtres » est fait : ARRIVEE-4 (§355), 17/10** — ce qui suit est la note d’origine. ~~Pas fait~~ (le tri — tournée, proximité, normal — dans un seul bouton) : l’objectif
 >    mesuré est atteint sans lui ; à décider après l’avoir vu.
 
+## 359. ★★ TUTO-2 — LE TUTO À CÔTÉ DE L’APPLI SUR ORDINATEUR, DES TITRES EN QUESTIONS, L’ENTRAÎNEMENT HORS DU CACHE PARTAGÉ (18/10 — `src/tutos.js` · `public/boot.js` · `src/firebase.js` · `firebase.json` (CSP) · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/01-demarrer.html` · `scripts/mv-harnais-tutos.mjs` · `scripts/mv-tutos-jeu.mjs` · `scripts/mv-tutos-inventaire.mjs` (neuf) · `CLAUDE.md` · `docs/claude/*`)
+
+### 359a. La demande
+Après l’inventaire publié (818 gestes, 354 groupes), Nico : sur ordinateur, ouvrir le tuto « par-dessus ou à côté » de l’appli, pour faire le geste pour de vrai sur sa propre session en même temps ; et des titres qui répondent à une question, « comment faire pour », plutôt qu’un mot. Reformulation confirmée avant le travail, avec un verrou ajouté : l’entraînement hors du cache Firestore partagé. TUTO-1 était déjà poussé et déployé (`f82a0da`, empreintes identiques au livrable).
+
+### 359b. Mesuré avant d’écrire
+- CSP : `frame-ancestors 'self'` et `X-Frame-Options: SAMEORIGIN` laissaient l’appli s’afficher dans un cadre d’elle-même, mais `frame-src` ne listait que Google et Firebase : le panneau aurait été **bloqué en ligne**, et aucun test local ne l’aurait vu (le serveur de test n’envoie pas la CSP) → `frame-src 'self'`, et le harnais le tient.
+- Firestore : `persistentLocalCache({ tabManager: persistentMultipleTabManager() })`. Le seul appel non gardé (`disableNetwork`/`enableNetwork`, `_mvReprise`) s’arrête sur `_isDemo` : en TUTO-1 l’entraînement n’ouvrait probablement jamais ce cache (non mesurable ici, faute de serveur). Avec le panneau, deux fenêtres tournent à coup sûr : `memoryLocalCache` pendant l’entraînement, pour une garantie plutôt qu’une probabilité.
+- La mémoire de session (`sessionStorage`) d’un cadre est celle de la fenêtre qui l’ouvre : le drapeau de TUTO-1 (`mavigne_tuto` en mémoire de session) aurait fait redémarrer **l’appli du client** en entraînement à son rechargement suivant.
+
+### 359c. Arbitrages
+- **Un cadre de l’appli plutôt qu’une copie** : le panneau montre le vrai écran, au format téléphone (le cadre fait 420 px) ; la consigne parle donc de « en bas de l’écran » du panneau — c’est la même appli que sur le téléphone de l’équipe.
+- **Un panneau qui se déplace plutôt qu’une appli qu’on retaille** : retailler toute l’appli pour lui faire de la place, sans pouvoir regarder chaque écran, était un pari ; le panneau passe « de l’autre côté » ou part dans « Fenêtre à part ».
+- **Le drapeau dans l’adresse seule**, et les deux mémoires remplacées : rien de l’entraînement ne touche la mémoire de la fenêtre qui l’ouvre ; le retour du plein écran est lu par `boot.js` avant le remplacement (`window.__MV_TUTO_RETOUR`).
+- **Sans mémoire jetable, pas d’entraînement** : en plein écran, retour à l’appli ; dans un cadre, `window.stop()` et un message — l’appli ne doit jamais démarrer sur la vraie session dans le panneau.
+- **Titres en questions tenus par le harnais**, pas par une consigne seule.
+- **L’inventaire est fabriqué** (`dist/tutos-inventaire.json`) : on livre le script, on nomme la commande (§24, `guide.html`).
+
+### 359d. Pièges
+- Le premier lancement de la capture du panneau ne montrait rien : le bloc « Me montrer comment faire » ne liste que les tutos permis au rôle et à l’écran — sans session, aucun. Pas un défaut de l’appli : la capture a posé un utilisateur admin.
+
+### 359e. Mesures
+- `npm run test:tutos` (build du lot) : téléphone — équipes ✓ 16,0 s, GNR ✓ 21,1 s ; ordinateur — ✓ 15,8 s, ✓ 21,2 s ; **panneau (cadre dans une page de l’appli)** — équipes ✓ 16,1 s, GNR ✓ 21,6 s, mémoire de la page qui l’ouvre intacte (session 0, locale 0), « Fermer l’entraînement » transmis ; 0 requête vers le serveur.
+- `mv-harnais-tutos` : vert ; contre-épreuves **13/13** (dont : drapeau en mémoire de session, entraînement dans le cache partagé, `frame-src` sans l’appli, titre qui n’est pas une question).
+- Capture (1 366 × 820) : le panneau à droite, sa barre (« De l’autre côté », « Fenêtre à part », croix), le tuto qui s’y joue (cadre doré sur la pastille, « Cliquez »).
+- `node scripts/mv-lanceur.mjs --continuer` : **439/439 commandes, 0 rouge** (784 s).
+
+### 359f. Ce qui n’a pas été vérifié
+Le panneau à côté d’une VRAIE session (le bac à sable n’en a pas) ; « Fenêtre à part » dans un vrai navigateur (bloqueur de fenêtres) ; la CSP réelle (seulement lue dans `firebase.json`).
+
+### 359g. Ce qui reste (→ §28)
+Trier l’inventaire module par module en écrivant les tutos, chaque titre en question — d’abord la Vigne ; l’utilisateur fictif au rôle du tuto (ouvrier, tractoriste) ; données fictives élargies ; gestes serveur à trancher (dernier écran ou réponse simulée).
+

@@ -89,7 +89,7 @@ function _zoneEquipe(chip) {
 // `fait` : l'écran a-t-il vraiment changé ? · `{T}` devient « Touchez » ou « Cliquez ».
 // `couvre` : les fonctions de l'appli que le tuto enseigne (le harnais vérifie qu'elles existent).
 var TU_TUTOS = [
-  { id: 'equipes', titre: 'Indiquer les équipes du jour', fin: 'indiquer les équipes du jour',
+  { id: 'equipes', titre: 'Comment faire pour indiquer les équipes du jour\u00a0?', fin: 'indiquer les équipes du jour',
     module: 'Vigne', pages: ['home'], pour: 'admin', duree: '1 min', depart: 'home',
     couvre: ['openEqJour', '_mvEqPick', 'saveEqJour'],
     retenir: ['Accueil › pastille « Équipes du jour ».',
@@ -113,7 +113,7 @@ var TU_TUTOS = [
       { type: 'regarder', cible: '[data-tuto="home.eqj"]',
         txt: function () { return 'La pastille dit maintenant « ' + L('#home-eqj-txt') + ' ». Chacun valide avec son équipe, sans pouvoir la changer. Demain, rien n’est réglé : tout le monde travaille ensemble.'; } }
     ] },
-  { id: 'gnr', titre: 'Noter un plein de GNR', fin: 'noter un plein de GNR',
+  { id: 'gnr', titre: 'Comment faire pour noter un plein de GNR\u00a0?', fin: 'noter un plein de GNR',
     module: 'Tracteur', pages: ['tracteur'], pour: 'admin', duree: '1 min', depart: 'home',
     couvre: ['openGnrAppoint', 'saveGnrAppoint'],
     retenir: ['Tracteur › onglet Entretien.',
@@ -212,6 +212,12 @@ function _css() {
     '.mvtu-row small{display:block;margin-top:2px;font-size:var(--pt-micro,12px);font-weight:400;color:var(--texte-doux)}',
     '.mvtu-tous{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0;border:0;background:none;color:var(--or);font:600 var(--pt-base,14px) ' + _PF + ';cursor:pointer}',
     '.mvtu-mod{margin:14px 0 2px;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux)}',
+    '.mvtu-panneau{position:fixed;top:12px;bottom:12px;right:12px;width:min(420px,calc(100vw - 24px));z-index:100005;display:flex;flex-direction:column;overflow:hidden;border-radius:var(--r-lg,16px);border:1px solid var(--gris);background:var(--bg-card);box-shadow:var(--shadow-lg,0 14px 56px rgba(0,0,0,.5))}',
+    '.mvtu-panneau.gauche{right:auto;left:88px}',
+    '.mvtu-p-hd{display:flex;align-items:center;gap:6px;min-height:46px;padding:0 8px 0 14px;background:var(--cave);color:var(--or-clair);font:600 var(--pt-base,14px) ' + _PF + '}',
+    '.mvtu-p-hd span{margin-right:auto}',
+    '.mvtu-p-b{display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:0 10px;border-radius:9px;border:1px solid rgba(232,210,148,.35);background:transparent;color:var(--or-clair);font:600 var(--pt-micro,12px) ' + _PF + ';cursor:pointer}',
+    '.mvtu-p-if{flex:1;width:100%;border:0;background:var(--bg-app)}',
     '@media (prefers-reduced-motion:reduce){.mvtu-m,.mvtu-ring,.mvtu-main,.mvtu-coach{transition:none!important;animation:none!important}.mvtu-main svg,.mvtu-tire,.mvtu-ring.attend{animation:none!important}}'
   ].join('\n');
   document.head.appendChild(s);
@@ -549,7 +555,7 @@ function _fin() {
     + '<div class="mvtu-fin-ic">' + _ic('check', 28) + '</div>'
     + '<h2>Vous savez ' + _esc(t.fin) + '.</h2>'
     + '<ol>' + t.retenir.map(function (r) { return '<li>' + _esc(r) + '</li>'; }).join('') + '</ol>'
-    + '<button type="button" class="mvtu-b1 mvtu-large" data-f="sortir">Revenir à mon domaine</button>'
+    + '<button type="button" class="mvtu-b1 mvtu-large" data-f="sortir">' + (_cadre() ? 'Fermer l’entraînement' : 'Revenir à mon domaine') + '</button>'
     + (suiv ? '<button type="button" class="mvtu-b2 mvtu-large" data-f="suivant" data-id="' + _esc(suiv.id) + '">Tuto suivant : ' + _esc(suiv.fin) + '</button>' : '')
     + '<button type="button" class="mvtu-b3 mvtu-large" data-f="refaire">Refaire ce tuto</button></div>';
   f.addEventListener('click', function (ev) {
@@ -561,28 +567,75 @@ function _fin() {
   });
   document.body.appendChild(f);
 }
+// ★ TUTO-2 (§359) — À CÔTÉ OU EN PLEIN ÉCRAN. Sur ordinateur, le tuto se joue dans un panneau à côté de l'appli : un
+//   cadre de la même appli, en entraînement. La personne peut faire le geste pour de vrai en même temps, dans sa propre
+//   session. Sur téléphone et tablette, plein écran comme avant. Le drapeau vit dans l'ADRESSE seule (?tuto=…) : la
+//   mémoire de session est partagée entre l'appli et son cadre, l'entraînement n'y écrit jamais (boot.js la remplace).
+function _cadre() { return !!window.__MV_TUTO_CADRE; }
 function _retour() {
-  var r = '';
-  try { r = sessionStorage.getItem('mavigne_tuto_retour') || ''; } catch (e) { _avale(e, '_retour'); }
+  var r = String(window.__MV_TUTO_RETOUR || '');
   return (r && r.charAt(0) === '/' && r.charAt(1) !== '/') ? r : window.location.pathname;
 }
-// Sortir = recharger SANS ?tuto : la mémoire jetable disparaît, le vrai domaine revient tel quel.
+// Sortir : dans le panneau, on demande à l'appli de le fermer ; dans une fenêtre à part, on la ferme ; en plein écran,
+// on recharge SANS ?tuto — la mémoire jetable disparaît, le vrai domaine revient tel quel.
 function _sortir() {
-  var r = _retour();
-  try { sessionStorage.removeItem('mavigne_tuto'); sessionStorage.removeItem('mavigne_tuto_auto'); sessionStorage.removeItem('mavigne_tuto_retour'); }
-  catch (e) { _avale(e, '_sortir'); }
-  window.location.replace(r);
+  if (_cadre()) {
+    if (window.parent && window.parent !== window) {
+      try { window.parent.postMessage({ mvtu: 'fermer' }, window.location.origin); } catch (e) { _avale(e, '_sortir#cadre'); }
+      return;
+    }
+    window.close();
+    return;
+  }
+  window.location.replace(_retour());
 }
 function _rejouer(id) {
-  try { sessionStorage.setItem('mavigne_tuto', id); } catch (e) { _avale(e, '_rejouer'); }
-  window.location.replace(window.location.pathname + '?tuto=' + encodeURIComponent(id));
+  window.location.replace(window.location.pathname + '?tuto=' + encodeURIComponent(id) + (_cadre() ? '&tuto_cadre=1' : ''));
 }
-// Depuis le vrai domaine : on note où revenir, puis on recharge en entraînement.
+function _aCoteDispo() {
+  return !!(window.matchMedia && window.matchMedia('(min-width: 1024px)').matches && !window.matchMedia('(pointer: coarse)').matches);
+}
+// Depuis le vrai domaine. Ordinateur : le panneau. Sinon : on note où revenir, puis on recharge en entraînement.
 function _lancer(id) {
   if (!_tuto(id)) return;
+  if (_aCoteDispo()) { _panneau(id); return; }
   try { sessionStorage.setItem('mavigne_tuto_retour', window.location.pathname + window.location.search + window.location.hash); }
   catch (e) { _avale(e, '_lancer'); }
   window.location.assign(window.location.pathname + '?tuto=' + encodeURIComponent(id));
+}
+var _ecoute = false;
+function _fermerPanneau() { var p = document.getElementById('mvtu-panneau'); if (p && p.parentNode) p.parentNode.removeChild(p); }
+function _panneau(id) {
+  var t = _tuto(id); if (!t) return;
+  _css();
+  if (typeof window.closeAide === 'function') { try { window.closeAide(); } catch (e) { _avale(e, '_panneau#aide'); } }
+  _fermerPanneau();
+  var url = window.location.pathname + '?tuto=' + encodeURIComponent(id) + '&tuto_cadre=1';
+  var p = document.createElement('div');
+  p.id = 'mvtu-panneau';
+  p.className = 'mvtu-panneau';
+  p.setAttribute('role', 'complementary');
+  p.setAttribute('aria-label', 'Entraînement');
+  p.innerHTML = '<div class="mvtu-p-hd"><span>Entraînement</span>'
+    + '<button type="button" class="mvtu-p-b" data-p="cote">De l’autre côté</button>'
+    + '<button type="button" class="mvtu-p-b" data-p="fenetre">Fenêtre à part</button>'
+    + '<button type="button" class="mvtu-p-b" data-p="fermer" aria-label="Fermer l’entraînement">' + _ic('croix', 16) + '</button></div>'
+    + '<iframe class="mvtu-p-if" title="' + _esc(t.titre) + '" src="' + _esc(url) + '"></iframe>';
+  p.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-p]'); if (!b) return;
+    var a = b.getAttribute('data-p');
+    if (a === 'fermer') _fermerPanneau();
+    else if (a === 'cote') p.classList.toggle('gauche');
+    else if (a === 'fenetre') { var w = window.open(url, 'mvtuto', 'popup=yes,width=440,height=900'); if (w) _fermerPanneau(); }
+  });
+  document.body.appendChild(p);
+  if (!_ecoute) {
+    _ecoute = true;
+    window.addEventListener('message', function (ev) {
+      if (ev.origin !== window.location.origin || !ev.data || ev.data.mvtu !== 'fermer') return;
+      _fermerPanneau();
+    });
+  }
 }
 
 // ── 9. L'ENTRÉE : « Me montrer comment faire », en tête de l'aide de chaque écran ──────────────
@@ -604,7 +657,7 @@ function _catalogue(el) {
   var tous = TU_TUTOS.filter(_permis), mods = [], h = '';
   tous.forEach(function (t) { if (mods.indexOf(t.module) < 0) mods.push(t.module); });
   mods.forEach(function (m) { h += '<div class="mvtu-mod">' + _esc(m) + '</div>' + tous.filter(function (t) { return t.module === m; }).map(_ligne).join(''); });
-  el.innerHTML = '<div class="modal-hd"><div><div class="modal-title">Je veux…</div><div class="modal-sub">Un geste à la fois, sur un domaine fictif</div></div></div>'
+  el.innerHTML = '<div class="modal-hd"><div><div class="modal-title">Comment faire pour…</div><div class="modal-sub">Un geste à la fois, sur un domaine fictif</div></div></div>'
     + '<div class="mvtu-aide">' + h + '</div>'
     + '<button type="button" class="mvtu-b3 mvtu-large" data-tu="retour">Retour à l’aide</button>';
 }
@@ -612,7 +665,8 @@ function _confirmer(el, id) {
   var t = _tuto(id); if (!t) return;
   el.innerHTML = '<div class="modal-hd"><div><div class="modal-title">' + _esc(t.titre) + '</div><div class="modal-sub">' + t.etapes.length + ' étapes, environ ' + _esc(t.duree) + '</div></div></div>'
     + '<div class="mvtu-aide"><h4>' + _ic('bouclier', 18) + ' Un entraînement, pas votre domaine</h4>'
-    + '<p>Vous vous entraînez sur le ' + _esc(TU_DOMAINE) + ', un domaine fictif. Rien de ce que vous touchez n’arrive sur votre domaine. À la fin, un bouton vous y ramène.</p></div>'
+    + '<p>Vous vous entraînez sur le ' + _esc(TU_DOMAINE) + ', un domaine fictif. Rien de ce que vous touchez n’arrive sur votre domaine. '
+    + (_aCoteDispo() ? 'Il s’ouvre à côté de l’appli : vous pouvez faire le geste pour de vrai en même temps.' : 'À la fin, un bouton vous y ramène.') + '</p></div>'
     + '<button type="button" class="mvtu-b1 mvtu-large" data-tu="lancer" data-id="' + _esc(t.id) + '">Commencer l’entraînement</button>'
     + '<button type="button" class="mvtu-b3 mvtu-large" data-tu="retour">Retour à l’aide</button>';
 }

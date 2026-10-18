@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.23';
+export const APP_VERSION = '9.24';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,12 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.24', d: '2026-10-18', items: [
+    { niv: 0, pour: ['admin'], emoji: 'doigt', titre: 'Sur ordinateur, le tuto s’ouvre à côté de l’appli',
+      desc: "«\u00a0Me montrer comment faire\u00a0» ouvre maintenant l’entraînement dans un panneau à droite de l’écran : vous suivez le tuto d’un côté et vous pouvez faire le geste pour de vrai sur votre domaine de l’autre, en même temps. "
+        + "«\u00a0De l’autre côté\u00a0» déplace le panneau, «\u00a0Fenêtre à part\u00a0» l’ouvre dans sa propre fenêtre. Sur téléphone, rien ne change. "
+        + "Chaque tuto porte maintenant la question qu’on se pose : «\u00a0Comment faire pour noter un plein de GNR\u00a0?\u00a0»." },
+  ] },
   { v: '9.23', d: '2026-10-18', items: [
     { niv: 1, pour: ['admin'], cible: '#home-aide-btn', emoji: 'doigt', titre: 'Des tutos guidés : l’appli vous montre où toucher',
       desc: "Dans l’aide de l’Accueil et du Tracteur, «\u00a0Me montrer comment faire\u00a0» lance un entraînement : un cadre doré montre où toucher, une consigne dit quoi faire, et c’est vous qui touchez. "
