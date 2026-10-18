@@ -2622,6 +2622,10 @@ de l'aide de chaque écran (`openAide`, utils.js) — les tutos de l'écran, pui
 cadre de l'appli `?tuto=<id>&tuto_cadre=1` ; « De l'autre côté », « Fenêtre à part » (`window.open`), la croix ;
 le cadre demande sa fermeture par `postMessage({mvtu:'fermer'})`. Téléphone et tablette : plein écran.
 **Titres.** Toujours une question : « Comment faire pour … ? » (tenu par `mv-harnais-tutos`).
+**Le miroir (TUTO-3, §360).** La fenêtre (cadre ou fenêtre à part) dit `etape`/`fini`/`fermer` à l'appli ; l'appli
+vérifie l'étape sur le vrai domaine (`_miroirFait` : `reel` si l'étape en a un, sinon `fait`, la page, ou une saisie
+valide et posée) et répond `miroir` (+ `jusqua`, + `valeur`) ; la fenêtre joue l'étape (`_jouerMiroir`). Un seul sens.
+Une étape à valeurs fictives (« Jean et Sophie ») DOIT avoir son `reel` (et son `txtReel`, « Sur votre domaine : … »).
 
 **Le bac à sable, trois verrous.** ① `public/boot.js` remplace `localStorage` ET `sessionStorage` (partagée
 avec le cadre) par des mémoires jetables AVANT tout module (domaine `domaine-dupont`) ; le drapeau vit dans

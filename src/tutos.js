@@ -92,6 +92,7 @@ var TU_TUTOS = [
   { id: 'equipes', titre: 'Comment faire pour indiquer les équipes du jour\u00a0?', fin: 'indiquer les équipes du jour',
     module: 'Vigne', pages: ['home'], pour: 'admin', duree: '1 min', depart: 'home',
     couvre: ['openEqJour', '_mvEqPick', 'saveEqJour'],
+    avant: function (memo) { memo.eqj0 = L('#home-eqj-txt'); },
     retenir: ['Accueil › pastille « Équipes du jour ».',
               'Une équipe par personne. « Aucune » garde ses heures pour ses propres validations.',
               '« Enregistrer pour aujourd’hui » vaut jusqu’à ce soir.'],
@@ -102,13 +103,18 @@ var TU_TUTOS = [
         ok: 'La fenêtre des équipes s’est ouverte.' },
       { type: 'choisir', options: ['[data-eqj-n="Jean"][data-eqj-k="1"]', '[data-eqj-n="Sophie"][data-eqj-k="1"]'], zone: _zoneEquipe,
         txt: function () { return 'Mettez Jean et Sophie dans « ' + L('[data-eqj-n="Jean"][data-eqj-k="1"]') + ' ».'; },
+        txtReel: 'choisissez l’équipe de chacun.', cibleReel: '#eqj-rows',
+        reel: function () { return _ouvert('ovEqJour') && !!_q('#eqj-rows .pchk.sel:not([data-eqj-k="0"])'); },
         ok: 'Jean et Sophie travailleront ensemble aujourd’hui.' },
       { type: 'choisir', options: ['[data-eqj-n="Paul"][data-eqj-k="2"]'], zone: _zoneEquipe,
         txt: function () { return 'Paul part seul au tracteur : mettez-le dans « ' + L('[data-eqj-n="Paul"][data-eqj-k="2"]') + ' ». Marie reste sur « ' + L('[data-eqj-n="Marie"][data-eqj-k="0"]') + ' » : ses heures iront à ses propres validations.'; },
+        txtReel: 'une équipe par personne ; « Aucune » garde ses heures pour ses propres validations.', cibleReel: '#eqj-rows',
+        reel: function () { return _ouvert('ovEqJour') && !!_q('#eqj-rows .pchk.sel:not([data-eqj-k="0"])'); },
         ok: 'Paul a son équipe à lui.' },
       { type: 'toucher', cible: '[data-tuto="eqj.save"]',
         txt: function () { return '{T} « ' + L('[data-tuto="eqj.save"]') + ' ».'; },
         fait: function () { return !_ouvert('ovEqJour') && /Jean/.test(L('#home-eqj-txt')); },
+        reel: function (memo) { return !_ouvert('ovEqJour') && L('#home-eqj-txt') !== memo.eqj0; },
         ok: 'C’est enregistré : le message vert le confirme.' },
       { type: 'regarder', cible: '[data-tuto="home.eqj"]',
         txt: function () { return 'La pastille dit maintenant « ' + L('#home-eqj-txt') + ' ». Chacun valide avec son équipe, sans pouvoir la changer. Demain, rien n’est réglé : tout le monde travaille ensemble.'; } }
@@ -131,11 +137,11 @@ var TU_TUTOS = [
         fait: function () { return !!_q('[data-tuto="gnr.litres"]'); },
         ok: 'Le formulaire d’appoint est ouvert.' },
       { type: 'taper', cible: '[data-tuto="gnr.litres"]', exemple: '800',
-        txt: function () { return 'Tapez les litres livrés, par exemple 800.'; },
+        txt: function () { return 'Tapez les litres livrés, par exemple 800.'; }, txtReel: 'les litres de votre bon de livraison.',
         valide: function (x) { var n = _num(x); return n > 0 && n <= 20000; },
         ok: function (x) { return _nb(_num(x)) + ' litres : c’est noté.'; } },
       { type: 'taper', facultatif: true, cible: '[data-tuto="gnr.prix"]', exemple: '1.24',
-        txt: function () { return 'Le prix du litre est sur la facture : tapez-le, par exemple 1,24. Vous ne l’avez pas ? Passez.'; },
+        txt: function () { return 'Le prix du litre est sur la facture : tapez-le, par exemple 1,24. Vous ne l’avez pas ? Passez.'; }, txtReel: 'le prix du litre de votre facture, si vous l’avez.',
         valide: function (x) { var n = _num(x); return n > 0 && n < 10; },
         ok: function () { return 'Ce prix ira dans le coût du GNR, au Pilotage.'; } },
       { type: 'toucher', cible: '[data-tuto="gnr.save"]',
@@ -213,7 +219,8 @@ function _css() {
     '.mvtu-tous{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0;border:0;background:none;color:var(--or);font:600 var(--pt-base,14px) ' + _PF + ';cursor:pointer}',
     '.mvtu-mod{margin:14px 0 2px;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux)}',
     '.mvtu-panneau{position:fixed;top:12px;bottom:12px;right:12px;width:min(420px,calc(100vw - 24px));z-index:100005;display:flex;flex-direction:column;overflow:hidden;border-radius:var(--r-lg,16px);border:1px solid var(--gris);background:var(--bg-card);box-shadow:var(--shadow-lg,0 14px 56px rgba(0,0,0,.5))}',
-    '.mvtu-panneau.gauche{right:auto;left:88px}',
+    '.mvtu-anneau{position:fixed;left:0;top:0;width:0;height:0;z-index:100004;border:2px solid var(--or-clair);border-radius:var(--r-md,12px);pointer-events:none;opacity:0;box-shadow:0 0 0 1px rgba(0,0,0,.2),0 0 16px rgba(216,188,114,.45);animation:mvtuPouls 1.7s ease-in-out infinite;transition:opacity var(--mv-d1,140ms)}',
+    '.mvtu-reel{margin:6px 0 0;padding:6px 10px;border-radius:10px;background:var(--or-pale);font-size:var(--pt-base,14px);line-height:1.35}',
     '.mvtu-p-hd{display:flex;align-items:center;gap:6px;min-height:46px;padding:0 8px 0 14px;background:var(--cave);color:var(--or-clair);font:600 var(--pt-base,14px) ' + _PF + '}',
     '.mvtu-p-hd span{margin-right:auto}',
     '.mvtu-p-b{display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:0 10px;border-radius:9px;border:1px solid rgba(232,210,148,.35);background:transparent;color:var(--or-clair);font:600 var(--pt-micro,12px) ' + _PF + ';cursor:pointer}',
@@ -352,7 +359,9 @@ function _coach() {
   var montre = e.type !== 'regarder', suite = (e.type === 'regarder' || e.type === 'taper');
   D.coach.innerHTML = '<div class="mvtu-hd"><span class="mvtu-n">Étape ' + (E.i + 1) + ' sur ' + n + '</span><span class="mvtu-dots" aria-hidden="true">' + d + '</span>'
     + '<button type="button" class="mvtu-x" data-c="quitter">' + _ic('croix', 16) + 'Quitter</button></div>'
-    + '<p class="mvtu-tx">' + _texte(e) + '</p><p class="mvtu-msg" aria-live="polite"></p>'
+    + '<p class="mvtu-tx">' + _texte(e) + '</p>'
+    + ((_cadre() && e.txtReel) ? '<p class="mvtu-reel">Sur votre domaine : ' + _esc(e.txtReel) + '</p>' : '')
+    + '<p class="mvtu-msg" aria-live="polite"></p>'
     + '<div class="mvtu-act">'
     + (montre ? '<button type="button" class="mvtu-b2" data-c="montre">' + _ic('doigt', 17) + 'Montre-moi</button>' : '')
     + (e.facultatif ? '<button type="button" class="mvtu-b3" data-c="passer">Passer</button>' : '')
@@ -388,6 +397,9 @@ function _montrer() {
   if (window.__MV_TUTO_AUTO) {
     setTimeout(function () { if (E.actif && E.etat === 'attente' && _e() === e) { if (e.type === 'regarder') _confirme(); else _montreMoi(); } }, 700);
   }
+  // TUTO-3 : la fenêtre dit à l'appli où elle en est ; si le domaine a déjà fait plus loin, elle rattrape.
+  _dire({ mvtu: 'etape', id: E.t.id, i: E.i });
+  if (E.miroirJusqua >= E.i) setTimeout(_jouerMiroir, 450);
 }
 function _verifie() {
   var e = _e(); if (!e || E.etat !== 'attente') return;
@@ -497,7 +509,8 @@ function _montreMoi() {
     ch = ch.then(function () { return _fantome(_q(e.cible)); }).then(function () {
       var inp = _q(e.cible); if (!inp) return null;
       // Préfixe entier à chaque frappe (pas +=) : un champ nombre efface « 1. », la suite le rétablit.
-      inp.value = ''; var s = String(e.exemple), k = 0;
+      var mv = (E.miroirVal && E.miroirVal.i === E.i && e.valide(E.miroirVal.v)) ? E.miroirVal.v : null;   // TUTO-3 : la valeur tapée sur le domaine
+      inp.value = ''; var s = String(mv != null ? mv : e.exemple), k = 0;
       return new Promise(function (res) { (function tape() { if (k >= s.length) { res(); return; } k++; inp.value = s.slice(0, k); inp.dispatchEvent(new Event('input', { bubbles: true })); setTimeout(tape, 140); })(); });
     }).then(function () { return _attendre(350); }).then(function () { E.montre = false; _confirme(); });
   }
@@ -549,6 +562,7 @@ function _fin() {
   for (var i = 1; i < TU_TUTOS.length && !suiv; i++) { var c = TU_TUTOS[(idx + i) % TU_TUTOS.length]; if (c !== t && _permis(c)) suiv = c; }
   _arrete();
   _etat('fini', true);
+  _dire({ mvtu: 'fini', id: t.id });
   var f = document.createElement('div');
   f.className = 'mvtu-fin';
   f.innerHTML = '<div class="mvtu-fin-in" role="dialog" aria-modal="true" aria-label="Tuto terminé">'
@@ -576,18 +590,44 @@ function _retour() {
   var r = String(window.__MV_TUTO_RETOUR || '');
   return (r && r.charAt(0) === '/' && r.charAt(1) !== '/') ? r : window.location.pathname;
 }
-// Sortir : dans le panneau, on demande à l'appli de le fermer ; dans une fenêtre à part, on la ferme ; en plein écran,
-// on recharge SANS ?tuto — la mémoire jetable disparaît, le vrai domaine revient tel quel.
+// Sortir : dans le panneau ou la fenêtre à part, on prévient l'appli qui l'a ouvert ; en plein écran, on recharge SANS
+// ?tuto — la mémoire jetable disparaît, le vrai domaine revient tel quel.
 function _sortir() {
   if (_cadre()) {
-    if (window.parent && window.parent !== window) {
-      try { window.parent.postMessage({ mvtu: 'fermer' }, window.location.origin); } catch (e) { _avale(e, '_sortir#cadre'); }
-      return;
-    }
-    window.close();
+    _dire({ mvtu: 'fermer' });
+    if (!(window.parent && window.parent !== window)) window.close();
     return;
   }
   window.location.replace(_retour());
+}
+// ★★ TUTO-3 (§360) — LE MIROIR. Dans le panneau (ou la fenêtre à part), la fenêtre d'entraînement dit à l'appli qui
+//   l'a ouvert où elle en est (« etape », « fini », « fermer ») — RIEN d'autre ne part vers le vrai domaine. L'appli
+//   regarde si l'étape en cours est faite sur le vrai domaine ; si oui, elle envoie « miroir » et la fenêtre joue
+//   l'étape sur le domaine fictif. Un seul sens : du domaine vers la fenêtre, jamais l'inverse.
+function _hote() {
+  if (!_cadre()) return null;
+  if (window.parent && window.parent !== window) return window.parent;
+  return window.opener || null;
+}
+function _dire(m) {
+  var h = _hote(); if (!h) return;
+  try { h.postMessage(m, window.location.origin); } catch (e) { _avale(e, '_dire'); }
+}
+function _surMiroir(ev) {
+  if (ev.origin !== window.location.origin || !ev.data || ev.data.mvtu !== 'miroir') return;
+  var d = ev.data;
+  if (!E.actif || d.i !== E.i) return;
+  E.miroirJusqua = Math.max(typeof E.miroirJusqua === 'number' ? E.miroirJusqua : -1, typeof d.jusqua === 'number' ? d.jusqua : d.i);
+  if (d.valeur != null) E.miroirVal = { i: d.i, v: String(d.valeur) };
+  _jouerMiroir();
+}
+function _jouerMiroir() {
+  var e = _e();
+  if (!E.actif || !e || E.etat !== 'attente' || E.montre || !(E.miroirJusqua >= E.i)) return;
+  _msg('ok', 'Fait sur votre domaine : la fenêtre suit.');
+  if (e.type === 'regarder') { _confirme(); return; }
+  if (e.type === 'taper' && e.facultatif && !(E.miroirVal && E.miroirVal.i === E.i)) { _passer(); return; }
+  _montreMoi();
 }
 function _rejouer(id) {
   window.location.replace(window.location.pathname + '?tuto=' + encodeURIComponent(id) + (_cadre() ? '&tuto_cadre=1' : ''));
@@ -603,8 +643,74 @@ function _lancer(id) {
   catch (e) { _avale(e, '_lancer'); }
   window.location.assign(window.location.pathname + '?tuto=' + encodeURIComponent(id));
 }
+// Le miroir côté vrai domaine : l'étape en cours (dite par la fenêtre) est-elle faite ICI ? Même vérification que le
+// tuto — l'écran a vraiment changé —, sauf les étapes qui ont leur `reel` (les valeurs du domaine fictif n'existent
+// pas ici). Un anneau doré discret, sans voile, montre le même bouton sur le vrai domaine.
+var MI = null;
+function _miroirFait(e, memo) {
+  if (!e) return false;
+  if (e.reel) return !!e.reel(memo || {});
+  if (e.type === 'toucher') return !!e.fait(memo || {});
+  if (e.type === 'aller') return _pageActive(e.page);
+  if (e.type === 'taper') { var c = _q(e.cible); return !!(c && e.valide(c.value)); }
+  return false;
+}
+function _miroirAnneau() {
+  if (!MI || !MI.anneau) return;
+  var e = MI.t.etapes[MI.i], el = null;
+  if (e && e.type === 'aller') { var n = _nav(e.page); el = n ? n.el : null; }
+  else if (e && e.type === 'choisir') el = e.cibleReel ? _q(e.cibleReel) : null;
+  else if (e && e.type !== 'regarder') el = _q(e.cible);
+  var r = MI.anneau;
+  if (!el || !_vis(el) || MI.envoye === MI.i) { r.style.opacity = '0'; return; }
+  var b = el.getBoundingClientRect();
+  r.style.left = Math.round(b.left - 5) + 'px'; r.style.top = Math.round(b.top - 5) + 'px';
+  r.style.width = Math.round(b.width + 10) + 'px'; r.style.height = Math.round(b.height + 10) + 'px';
+  r.style.opacity = '1';
+}
+function _miroirTic() {
+  if (!MI) return;
+  _miroirAnneau();
+  var e = MI.t.etapes[MI.i];
+  if (!e || MI.envoye === MI.i || Date.now() - MI.depuis < 700) return;
+  var k = -1;
+  for (var j = MI.i; j < Math.min(MI.t.etapes.length, MI.i + 3); j++) { if (_miroirFait(MI.t.etapes[j], MI.memo)) k = j; }
+  if (k < 0) { MI.ok = 0; return; }
+  if (k === MI.i && e.type === 'taper') {   // une saisie : on attend qu'elle soit posée
+    var c = _q(e.cible), v = c ? c.value : '';
+    if (v !== MI.val) { MI.val = v; MI.valDepuis = Date.now(); return; }
+    if (document.activeElement === c && Date.now() - MI.valDepuis < 1500) return;
+  }
+  if (++MI.ok < 2) return;
+  MI.envoye = MI.i;
+  var m = { mvtu: 'miroir', i: MI.i, jusqua: k };
+  if (e.type === 'taper') { var c2 = _q(e.cible); if (c2 && c2.value) m.valeur = c2.value; }
+  try { MI.cible.postMessage(m, window.location.origin); } catch (er) { _avale(er, '_miroirTic'); }
+}
+function _miroirBoucle() { if (!MI) return; _miroirAnneau(); window.requestAnimationFrame(_miroirBoucle); }
+function _miroirDemarrer(t, cible) {
+  _miroirArret();
+  _css();
+  MI = { t: t, i: 0, memo: {}, cible: cible, depuis: Date.now(), envoye: -1, ok: 0, val: null, valDepuis: 0 };
+  if (t.avant) { try { t.avant(MI.memo); } catch (e) { _avale(e, '_miroirDemarrer#avant'); } }
+  MI.anneau = document.createElement('div');
+  MI.anneau.className = 'mvtu-anneau';
+  MI.anneau.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(MI.anneau);
+  MI.tic = setInterval(_miroirTic, 300);
+  window.requestAnimationFrame(_miroirBoucle);
+}
+function _miroirArret() {
+  if (!MI) return;
+  clearInterval(MI.tic);
+  if (MI.anneau && MI.anneau.parentNode) MI.anneau.parentNode.removeChild(MI.anneau);
+  MI = null;
+}
 var _ecoute = false;
-function _fermerPanneau() { var p = document.getElementById('mvtu-panneau'); if (p && p.parentNode) p.parentNode.removeChild(p); }
+function _fermerPanneau(garderMiroir) {
+  var p = document.getElementById('mvtu-panneau'); if (p && p.parentNode) p.parentNode.removeChild(p);
+  if (!garderMiroir) _miroirArret();
+}
 function _panneau(id) {
   var t = _tuto(id); if (!t) return;
   _css();
@@ -617,7 +723,6 @@ function _panneau(id) {
   p.setAttribute('role', 'complementary');
   p.setAttribute('aria-label', 'Entraînement');
   p.innerHTML = '<div class="mvtu-p-hd"><span>Entraînement</span>'
-    + '<button type="button" class="mvtu-p-b" data-p="cote">De l’autre côté</button>'
     + '<button type="button" class="mvtu-p-b" data-p="fenetre">Fenêtre à part</button>'
     + '<button type="button" class="mvtu-p-b" data-p="fermer" aria-label="Fermer l’entraînement">' + _ic('croix', 16) + '</button></div>'
     + '<iframe class="mvtu-p-if" title="' + _esc(t.titre) + '" src="' + _esc(url) + '"></iframe>';
@@ -625,15 +730,23 @@ function _panneau(id) {
     var b = ev.target.closest('[data-p]'); if (!b) return;
     var a = b.getAttribute('data-p');
     if (a === 'fermer') _fermerPanneau();
-    else if (a === 'cote') p.classList.toggle('gauche');
-    else if (a === 'fenetre') { var w = window.open(url, 'mvtuto', 'popup=yes,width=440,height=900'); if (w) _fermerPanneau(); }
+    else if (a === 'fenetre') {
+      var w = window.open(url, 'mvtuto', 'popup=yes,width=440,height=900');
+      if (w) { _fermerPanneau(true); _miroirDemarrer(t, w); }
+    }
   });
   document.body.appendChild(p);
+  _miroirDemarrer(t, p.querySelector('iframe').contentWindow);
   if (!_ecoute) {
     _ecoute = true;
     window.addEventListener('message', function (ev) {
-      if (ev.origin !== window.location.origin || !ev.data || ev.data.mvtu !== 'fermer') return;
-      _fermerPanneau();
+      if (ev.origin !== window.location.origin || !ev.data || !ev.data.mvtu) return;
+      var d = ev.data;
+      if (d.mvtu === 'fermer') _fermerPanneau();
+      else if (d.mvtu === 'fini') { if (MI) { MI.envoye = MI.i; _miroirArret(); } }
+      else if (d.mvtu === 'etape' && MI && MI.t.id === d.id && typeof d.i === 'number') {
+        MI.i = d.i; MI.depuis = Date.now(); MI.envoye = -1; MI.ok = 0; MI.val = null;
+      }
     });
   }
 }
@@ -703,11 +816,13 @@ function _demarrer() {
   E.t = t; E.i = 0; E.memo = {};
   if (t.avant) { try { t.avant(E.memo); } catch (e) { _avale(e, '_demarrer#avant'); } }
   _etat('fini', false);
+  _etat('types', t.etapes.map(function (x) { return x.type; }));
   E.actif = true;
   _couches();
   document.addEventListener('click', _surClic, true);
   document.addEventListener('input', _surSaisie, true);
   document.addEventListener('keydown', _surTouche, true);
+  if (_cadre()) window.addEventListener('message', _surMiroir);
   window.requestAnimationFrame(_boucle);
   setTimeout(_montrer, 300);
 }
@@ -719,3 +834,6 @@ window._mvTutoAideBloc = _aideBloc;
 window._mvTutoAideBrancher = _aideBrancher;
 window._mvTutoListe = function () { return TU_TUTOS.map(function (t) { return t.id; }); };
 window._mvTutoSortir = _sortir;
+// Vérification du miroir (lecture seule) : l'étape i du tuto est-elle faite sur CE domaine ? mv-tutos-jeu.mjs s'en sert.
+window._mvTutoAvant = function (id) { var t = _tuto(id), m = {}; if (t && t.avant) t.avant(m); return m; };
+window._mvTutoMiroirFait = function (id, i, memo) { var t = _tuto(id); return t ? _miroirFait(t.etapes[i], memo || {}) : false; };

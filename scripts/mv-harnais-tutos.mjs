@@ -23,6 +23,8 @@
         le domaine fictif.
      G. TUTO-2 (§359) : le cache Firestore de l'entraînement reste en mémoire ; la CSP laisse l'appli
         s'afficher dans un cadre d'elle-même (frame-src 'self') ; chaque titre de tuto est une question.
+     H. TUTO-3 (§360) : le miroir ne va que du domaine vers la fenêtre — la fenêtre ne dit que « etape »,
+        « fini », « fermer » ; elle n'écoute que « miroir » ; aucun clic hors de « Montre-moi ».
      F. Le compte des gestes sans tuto (fonctions lancées par un clic, un choix ou une
         saisie, moins celles qu'un tuto couvre, moins les exemptés motivés) ne monte
         jamais : scripts/tutos-couverture.json. Il descend à chaque tuto ajouté.
@@ -113,6 +115,13 @@ function verifie(F) {
   t('G · la CSP laisse l\u2019appli s\u2019afficher dans son panneau (frame-src \'self\')', csp.includes("'self'"));
   const titres = [...tu.matchAll(/\btitre: '([^']*)'/g)].map((m) => m[1]);
   t('G · ' + titres.length + ' titre(s) de tuto, tous en question « Comment faire pour… ? »', titres.length > 0 && titres.every((x) => x.startsWith('Comment faire pour ') && /\?$/.test(x)));
+  // H. TUTO-3 — le miroir
+  const dits = [...tu.matchAll(/_dire\(\{ mvtu: '([a-z]+)'/g)].map((m) => m[1]);
+  t('H · la fenêtre ne dit que « etape », « fini », « fermer » (' + dits.join(', ') + ')', dits.length >= 3 && dits.every((x) => ['etape', 'fini', 'fermer'].includes(x)));
+  t('H · la fenêtre n\u2019écoute que « miroir »', tu.includes("if (ev.origin !== window.location.origin || !ev.data || ev.data.mvtu !== 'miroir') return;"));
+  const iMM = tu.indexOf('function _montreMoi('), fMM = tu.indexOf('\nfunction ', iMM + 10);
+  const horsMM = tu.slice(0, iMM) + tu.slice(fMM);
+  t('H · aucun clic du moteur hors de « Montre-moi » (le vrai domaine n\u2019est jamais touché)', iMM > 0 && !/\.click\(\)/.test(horsMM));
   // F. le compte des gestes sans tuto
   const gestes = new Set();
   for (const [f, s] of Object.entries(F)) {
@@ -148,6 +157,9 @@ const MUT = [
   ['l\u2019entraînement dans le cache partagé', 'src/firebase.js', "  if (typeof window !== 'undefined' && window.__MV_TUTO) return initializeFirestore(app, { localCache: memoryLocalCache() });\n", ''],
   ['frame-src sans l\u2019appli', 'firebase.json', "frame-src 'self' https://www.google.com", 'frame-src https://www.google.com'],
   ['un titre qui n\u2019est pas une question', 'src/tutos.js', "titre: 'Comment faire pour noter un plein de GNR", "titre: 'Plein de GNR"],
+  ['la fenêtre qui dit autre chose', 'src/tutos.js', "_dire({ mvtu: 'etape'", "_dire({ mvtu: 'clic'"],
+  ['la fenêtre qui écoute tout', 'src/tutos.js', "|| ev.data.mvtu !== 'miroir') return;", ") return;"],
+  ['un clic sur le vrai domaine', 'src/tutos.js', "if (d.mvtu === 'fermer') _fermerPanneau();", "if (d.mvtu === 'fermer') { document.body.click(); _fermerPanneau(); }"],
   ['app.js sans tutos.js', 'src/app.js', "import './tutos.js';", ''],
   ['une étiquette disparue', 'index.html', 'data-tuto="eqj.save" ', ''],
   ['une fonction enseignée renommée', 'src/tutos.js', "couvre: ['openGnrAppoint', 'saveGnrAppoint']", "couvre: ['openGnrAppoint', 'saveGnrAppointX']"],

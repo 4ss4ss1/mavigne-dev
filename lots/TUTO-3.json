@@ -1,0 +1,21 @@
+{
+  "lot": "TUTO-3",
+  "section": "§360",
+  "base": "13b718f6bdbcd6759f9cd7d335eab1123cb356b4",
+  "inclut": [],
+  "date": "2026-10-18",
+  "fichiers": {
+    "CLAUDE.md": "280f158806045dfc0d31cbe9e78dffabae2e395e13b7c178d6ed5cdd2f7c24d5",
+    "docs/claude/INDEX.md": "ba45d7dbd084de5946d1f005843f8dc09956787b7e2f77d90b7148eeccbd97a8",
+    "docs/claude/chantiers-330-379.md": "44abfcd7f268fb2bb06d64bc26bc90bdd56bb9caf1058b648c68f6029cb31a11",
+    "docs/claude/journal.md": "0a93d016ba683214135e5d34470f645493778607ae9e40c697420bbee50e981d",
+    "docs/claude/modules.md": "a02567c44dfc6623500919d5cb85c55f13e7c1a1e35c72dc5ceb40554942a403",
+    "guide/01-demarrer.html": "27e9713258e697fa251678f6111d0cf85c92880d8ce3824d196d296f6a7f08d6",
+    "index.html": "0e602ecf79678c3e2db179d300535f7a496c0fc6188008c6c99d9b473ae81897",
+    "public/sw.js": "7c4c18ad60783e4d284d12802137b0ee3b0e77cbaa075d6685a81e2cf77302a5",
+    "scripts/mv-harnais-tutos.mjs": "3386ca80a6d92bf93ce9ee6cf97d98952148e5997b575d6b6b78f04644f46dd1",
+    "scripts/mv-tutos-jeu.mjs": "1330ebc2e621a9bf77d622bce4f6006fc6a9ccf91d92d742dd123e6a3d91d13c",
+    "src/tutos.js": "9b3f64671817e59d108f89a0ac2c958dd33ffdc5183d9b7cca9c10544f51b476",
+    "src/utils.js": "8ba98a3f49032adfc2dff463b19595a62fcd72e8c3a17a9e23f455ab8c662ee4"
+  }
+}

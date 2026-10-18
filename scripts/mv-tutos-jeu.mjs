@@ -42,6 +42,14 @@ function serveur(racine) {
       try {
         let p = decodeURIComponent(req.url.split('?')[0]);
         // TUTO-2 : une page d'appli qui ouvre le tuto dans un cadre, comme le panneau d'entraînement sur ordinateur.
+        if (p === '/__miroir.html') {
+          const id = (/[?&]id=([a-z0-9-]+)/.exec(req.url) || [])[1] || 'equipes';
+          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+          res.end('<!doctype html><html><body style="margin:0"><script>window.__fini=false;window.addEventListener("message",function(e){var d=e.data||{};var f=document.getElementById("f").contentWindow;'
+            + 'if(d.mvtu==="fini"){window.__fini=true;return;}if(d.mvtu==="etape"){setTimeout(function(){f.postMessage({mvtu:"miroir",i:d.i,valeur:(d.id==="gnr"&&d.i===3)?"1200":undefined},location.origin);},400);}});</script>'
+            + '<iframe id="f" src="/?tuto=' + id + '&tuto_cadre=1" style="width:420px;height:860px;border:0"></iframe></body></html>');
+          return;
+        }
         if (p === '/__cadre.html') {
           const id = (/[?&]id=([a-z0-9-]+)/.exec(req.url) || [])[1] || 'equipes';
           res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -115,6 +123,37 @@ async function jouerCadre(navigateur, base, id) {
   return { ok, etat, erreurs, fuites, ms: Date.now() - t0 };
 }
 
+// TUTO-3 : le miroir. (1) côté fenêtre — une page qui répond « miroir » à chaque étape : la fenêtre doit aller au bout
+// SANS qu'on touche à rien, et reprendre la valeur tapée « sur le domaine » (1 200 L). (2) côté domaine — l'appli joue le
+// tuto en vrai (son propre écran) : à chaque étape qui se fait, la vérification du miroir doit la voir faite.
+async function jouerMiroir(navigateur, base, id) {
+  const ctx = await navigateur.newContext({ serviceWorkers: 'block', locale: 'fr-FR', viewport: { width: 1280, height: 900 } });
+  await ctx.route('**/*', (route) => (route.request().url().startsWith(base) ? route.continue() : route.abort()));
+  const page = await ctx.newPage(), erreurs = [];
+  page.on('pageerror', (e) => { if (!benin(e.message)) erreurs.push('exception : ' + e.message); });
+  let r1 = null;
+  try {
+    await page.goto(base + '__miroir.html?id=' + encodeURIComponent(id), { waitUntil: 'load' });
+    await page.waitForFunction(() => window.__fini === true, null, { timeout: DELAI });
+    r1 = await page.evaluate(() => { const w = document.getElementById('f').contentWindow; return { etat: w.__MV_TUTO_ETAT, cuve: w.CONFIG && w.CONFIG.gnr ? w.CONFIG.gnr.niveau : null }; });
+    if (id === 'gnr' && r1.cuve !== 1850) erreurs.push('la valeur tapée sur le domaine n\u2019a pas suivi : cuve à ' + r1.cuve + ' L au lieu de 1 850');
+  } catch (e) { erreurs.push('miroir (fenêtre) : ' + String(e.message || e).split('\n')[0]); }
+  // (2) la détection côté domaine
+  const p2 = await ctx.newPage();
+  let vus = null, types = [];
+  try {
+    await p2.goto(base + '?tuto=' + encodeURIComponent(id) + '&tuto_auto=1', { waitUntil: 'load' });
+    await p2.waitForFunction(() => !!window._mvTutoAvant, null, { timeout: 20000 });
+    await p2.evaluate((tid) => { window.__memo = window._mvTutoAvant(tid); window.__vus = {}; setInterval(function () { var s = window.__MV_TUTO_ETAT; if (!s || !s.etape) return; var i = s.etape - 1; if (window._mvTutoMiroirFait(tid, i, window.__memo)) window.__vus[i] = true; }, 80); }, id);
+    await p2.waitForFunction(() => window.__MV_TUTO_ETAT && (window.__MV_TUTO_ETAT.fini || window.__MV_TUTO_ETAT.erreur), null, { timeout: DELAI });
+    const r2 = await p2.evaluate(() => ({ vus: window.__vus, types: window.__MV_TUTO_ETAT.types || [] }));
+    vus = r2.vus; types = r2.types;
+    types.forEach((ty, i) => { if (ty !== 'regarder' && !vus[i]) erreurs.push('étape ' + (i + 1) + ' (' + ty + ') faite sur le domaine sans que le miroir la voie'); });
+  } catch (e) { erreurs.push('miroir (domaine) : ' + String(e.message || e).split('\n')[0]); }
+  await ctx.close();
+  return { ok: !!(r1 && r1.etat && r1.etat.fini && !erreurs.length), erreurs, n: types.filter((x) => x !== 'regarder').length };
+}
+
 async function main() {
   let pw;
   try { pw = await import('playwright'); } catch (e) { console.error(c.r('✖ Playwright absent : npm i -D playwright && npx playwright install chromium')); process.exit(2); }
@@ -147,6 +186,11 @@ async function main() {
     const lib = 'panneau (cadre) · ' + liste[i] + ' · ' + (r.etat ? (r.etat.etape + '/' + r.etat.total + ' étapes') : '?') + ' · ' + (r.ms / 1000).toFixed(1) + ' s · mémoire de l\u2019appli intacte, fermeture transmise';
     if (r.ok) console.log(c.g('  ✓ ') + lib);
     else { rouges++; console.log(c.r('  ✗ ') + lib.split(' · mémoire')[0]); r.erreurs.slice(0, 5).forEach((e) => console.log('      ' + e)); r.fuites.slice(0, 5).forEach((e) => console.log('      fuite vers le serveur : ' + e)); }
+  }
+  for (let i = 0; i < liste.length; i++) {
+    const r = await jouerMiroir(navigateur, base, liste[i]);
+    if (r.ok) console.log(c.g('  ✓ ') + 'miroir · ' + liste[i] + ' · la fenêtre suit le domaine jusqu\u2019au bout ; ' + r.n + ' étape(s) vues faites côté domaine');
+    else { rouges++; console.log(c.r('  ✗ ') + 'miroir · ' + liste[i]); r.erreurs.slice(0, 6).forEach((e) => console.log('      ' + e)); }
   }
   await navigateur.close(); srv.close();
   console.log('\n  ' + (rouges ? c.r(rouges + ' tuto(s) ne vont plus au bout : l\u2019écran a changé, le tuto doit suivre') : c.g('chaque tuto va au bout, sans rien envoyer au serveur')) + '\n');

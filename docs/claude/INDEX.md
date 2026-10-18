@@ -413,3 +413,4 @@
 | 357 | 357. ★★ MANQUE-1 — « CE QU’IL MANQUE » LISIBLE JUSQU’EN BAS, ET DES ALERTES VRAIES (18/10 — `src/styles.css… | `docs/claude/chantiers-330-379.md` |
 | 358 | 358. ★★★ TUTO-1 — LES TUTOS GUIDÉS, JOUÉS SUR LES VRAIS ÉCRANS AVEC UN DOMAINE FICTIF (18/10 — `src/tutos.j… | `docs/claude/chantiers-330-379.md` |
 | 359 | 359. ★★ TUTO-2 — LE TUTO À CÔTÉ DE L’APPLI SUR ORDINATEUR, DES TITRES EN QUESTIONS, L’ENTRAÎNEMENT HORS DU … | `docs/claude/chantiers-330-379.md` |
+| 360 | 360. ★★ TUTO-3 — LE MIROIR : LE TUTO OUVERT À CÔTÉ DE L’APPLI SUIT LES GESTES FAITS SUR LE VRAI DOMAINE (18… | `docs/claude/chantiers-330-379.md` |

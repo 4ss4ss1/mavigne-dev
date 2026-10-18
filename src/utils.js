@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.24';
+export const APP_VERSION = '9.25';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,12 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.25', d: '2026-10-18', items: [
+    { niv: 0, pour: ['admin'], emoji: 'doigt', titre: 'Sur ordinateur, le tuto suit vos gestes sur votre domaine',
+      desc: "Quand le tuto est ouvert à côté de l’appli, faites chaque geste où vous voulez : dans le tuto, ou pour de vrai sur votre domaine. "
+        + "Si vous le faites sur votre domaine, le tuto le voit et avance tout seul : plus besoin de le faire deux fois. "
+        + "Un cercle doré discret montre le bouton à toucher sur votre domaine. Le tuto, lui, ne touche jamais à votre domaine." },
+  ] },
   { v: '9.24', d: '2026-10-18', items: [
     { niv: 0, pour: ['admin'], emoji: 'doigt', titre: 'Sur ordinateur, le tuto s’ouvre à côté de l’appli',
       desc: "«\u00a0Me montrer comment faire\u00a0» ouvre maintenant l’entraînement dans un panneau à droite de l’écran : vous suivez le tuto d’un côté et vous pouvez faire le geste pour de vrai sur votre domaine de l’autre, en même temps. "

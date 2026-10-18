@@ -735,3 +735,29 @@ Le panneau à côté d’une VRAIE session (le bac à sable n’en a pas) ; « F
 ### 359g. Ce qui reste (→ §28)
 Trier l’inventaire module par module en écrivant les tutos, chaque titre en question — d’abord la Vigne ; l’utilisateur fictif au rôle du tuto (ouvrier, tractoriste) ; données fictives élargies ; gestes serveur à trancher (dernier écran ou réponse simulée).
 
+## 360. ★★ TUTO-3 — LE MIROIR : LE TUTO OUVERT À CÔTÉ DE L’APPLI SUIT LES GESTES FAITS SUR LE VRAI DOMAINE (18/10 — `src/tutos.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/01-demarrer.html` · `scripts/mv-harnais-tutos.mjs` · `scripts/mv-tutos-jeu.mjs` · `CLAUDE.md` · `docs/claude/*`)
+
+### 360a. La demande
+Après TUTO-2 : « De l’autre côté » dérègle l’affichage ; et surtout, ce que la personne fait sur son domaine, la fenêtre du tuto ne le suit pas — il faut faire le geste deux fois. Nico : garder la fenêtre ; la personne choisit de faire le geste dans la fenêtre ou sur son domaine ; un mode miroir entre les deux ; et pouvoir tout faire dans la fenêtre seule. Reformulation confirmée (« C’est parti »), avec le sens unique et l’anneau doré proposés.
+
+### 360b. Arbitrages
+- **Un seul sens, du domaine vers la fenêtre.** L’inverse ferait écrire l’entraînement sur le vrai domaine : la garantie de TUTO-1 tomberait. Tenu par le harnais : la fenêtre ne dit que `etape`, `fini`, `fermer` ; elle n’écoute que `miroir` ; aucun clic du moteur hors de « Montre-moi ».
+- **La même vérification que le tuto**, évaluée par l’appli sur SON écran : les étapes sont déjà écrites en « l’écran a vraiment changé » (fenêtre ouverte, onglet actif, cuve montée). Pas de pistage des clics.
+- **`reel` pour les étapes à valeurs fictives** : « Jean et Sophie dans l’Équipe 1 » n’existe pas chez le client → au moins une personne placée ; « la pastille dit Jean » → la pastille a changé depuis l’ouverture (`memo.eqj0`). `txtReel` ajoute « Sur votre domaine : … » à la consigne de la fenêtre.
+- **Rattrapage** : l’appli regarde jusqu’à deux étapes d’avance ; la fenêtre joue les étapes en retard (une saisie facultative laissée vide est passée).
+- **Une saisie se suit quand elle est posée** : valeur stable 1,5 s ou champ quitté — sinon « 8 » partirait avant « 800 ». Le nombre tapé est repris dans la fenêtre.
+- **L’anneau doré, sans voile, sur le vrai bouton**, caché dès que l’étape est faite chez le client ; aucune étape « regarder » n’est suivie : la fenêtre attend « Continuer ».
+- **« Fenêtre à part » garde le miroir** (la fenêtre ouverte reçoit les messages) ; **« De l’autre côté » retiré**.
+
+### 360c. Mesures
+- `npm run test:tutos` : **8/8** — téléphone, ordinateur, panneau (mémoire de l’appli intacte), et le miroir : (1) une page qui répond `miroir` à chaque étape mène la fenêtre au bout sans autre geste, et le « 1 200 L » tapé « sur le domaine » arrive (cuve fictive 1 850 L) ; (2) l’appli jouée en vrai : chaque étape faite est vue faite par la vérification du miroir (équipes 4/4, GNR 6/6, hors « regarder »).
+- Parcours de bout en bout (Chromium, 1 366 × 860) : l’appli (domaine fictif, entraînement GNR) ouvre le panneau depuis « Me montrer comment faire » ; les gestes sont faits CHEZ ELLE ; le panneau suit 1 → 7 (une étape de retard pendant la saisie, le temps qu’elle soit posée), cuve du panneau à 1 450 L (les 800 L tapés chez elle) ; il s’arrête sur « regarder » en attendant « Terminer ».
+- `mv-harnais-tutos` : vert ; contre-épreuves **16/16**.
+- `node scripts/mv-lanceur.mjs --continuer` : **439/439 commandes, 0 rouge** (869 s).
+
+### 360d. Ce qui n’a pas été vérifié
+Le miroir à côté d’une VRAIE session (le bac à sable n’en a pas) ; « Fenêtre à part » avec un vrai bloqueur de fenêtres.
+
+### 360e. Ce qui reste (→ §28)
+Chaque nouvelle étape à valeurs fictives : son `reel` et son `txtReel`, sinon la fenêtre ne peut pas la suivre (elle reste faisable dans la fenêtre). Le reste comme au §359g.
+
