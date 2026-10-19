@@ -42,11 +42,16 @@ function serveur(racine) {
       try {
         let p = decodeURIComponent(req.url.split('?')[0]);
         // TUTO-2 : une page d'appli qui ouvre le tuto dans un cadre, comme le panneau d'entraînement sur ordinateur.
+        // TUTO-5 : une « appli » qui se laisse lire — chaque étape y est faite dès que le panneau y arrive (?aligne=1 : le
+        // chemin du GNR — module et onglet — est déjà fait à l'ouverture, le panneau doit démarrer après lui).
         if (p === '/__miroir.html') {
           const id = (/[?&]id=([a-z0-9-]+)/.exec(req.url) || [])[1] || 'equipes';
+          const aligne = /[?&]aligne=1/.test(req.url);
           res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-          res.end('<!doctype html><html><body style="margin:0"><script>window.__fini=false;window.addEventListener("message",function(e){var d=e.data||{};var f=document.getElementById("f").contentWindow;'
-            + 'if(d.mvtu==="fini"){window.__fini=true;return;}if(d.mvtu==="etape"){setTimeout(function(){f.postMessage({mvtu:"miroir",i:d.i,fait:d.i,valeur:(d.id==="gnr"&&d.i===3)?"1200":undefined},location.origin);},400);}});</script>'
+          res.end('<!doctype html><html><body style="margin:0"><script>window.__anneau=[];window._mvTutoAvant=function(){return {};};'
+            + 'window._mvTutoMiroirFait=function(id,i){var f=document.getElementById("f"),s=f&&f.contentWindow&&f.contentWindow.__MV_TUTO_ETAT,cur=(s&&s.etape)?s.etape-1:-1;return ' + (aligne ? '(id==="gnr"&&i<=1)||' : '') + 'i<=cur;};'
+            + 'window._mvTutoValeur=function(id,i){return {v:(id==="gnr"&&i===3)?"1200":"",focus:false};};'
+            + 'window._mvTutoAnneau=function(id,i){window.__anneau.push(i);};</script>'
             + '<iframe id="f" src="/?tuto=' + id + '&tuto_cadre=1" style="width:420px;height:860px;border:0"></iframe></body></html>');
           return;
         }
@@ -134,9 +139,18 @@ async function jouerMiroir(navigateur, base, id) {
   let r1 = null;
   try {
     await page.goto(base + '__miroir.html?id=' + encodeURIComponent(id), { waitUntil: 'load' });
-    await page.waitForFunction(() => window.__fini === true, null, { timeout: DELAI });
-    r1 = await page.evaluate(() => { const w = document.getElementById('f').contentWindow; return { etat: w.__MV_TUTO_ETAT, cuve: w.CONFIG && w.CONFIG.gnr ? w.CONFIG.gnr.niveau : null }; });
+    await page.waitForFunction(() => { const w = document.getElementById('f').contentWindow; return w && w.__MV_TUTO_ETAT && w.__MV_TUTO_ETAT.fini; }, null, { timeout: DELAI });
+    r1 = await page.evaluate(() => { const w = document.getElementById('f').contentWindow; return { etat: w.__MV_TUTO_ETAT, cuve: w.CONFIG && w.CONFIG.gnr ? w.CONFIG.gnr.niveau : null, anneau: window.__anneau.length }; });
     if (id === 'gnr' && r1.cuve !== 1850) erreurs.push('la valeur tapée sur le domaine n\u2019a pas suivi : cuve à ' + r1.cuve + ' L au lieu de 1 850');
+    if (!r1.anneau) erreurs.push('le panneau n\u2019a jamais demandé l\u2019anneau doré');
+    if (id === 'gnr') {   // départ aligné : chemin déjà fait sur le domaine → le panneau commence après lui
+      const pa = await ctx.newPage();
+      await pa.goto(base + '__miroir.html?id=gnr&aligne=1', { waitUntil: 'load' });
+      await pa.waitForFunction(() => { const w = document.getElementById('f').contentWindow; return w && w.__MV_TUTO_ETAT && typeof w.__MV_TUTO_ETAT.depart === 'number'; }, null, { timeout: 30000 });
+      const dep = await pa.evaluate(() => document.getElementById('f').contentWindow.__MV_TUTO_ETAT.depart);
+      if (dep !== 2) erreurs.push('départ aligné : le panneau commence à l\u2019étape ' + (dep + 1) + ' au lieu de 3 (module et onglet déjà faits chez le client)');
+      await pa.close();
+    }
   } catch (e) { erreurs.push('miroir (fenêtre) : ' + String(e.message || e).split('\n')[0]); }
   // (2) la détection côté domaine
   const p2 = await ctx.newPage();

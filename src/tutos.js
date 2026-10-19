@@ -135,7 +135,7 @@ var TU_TUTOS = [
     avant: function (memo) { memo.gnr0 = _gnr().niveau; },
     etapes: [
       { type: 'aller', page: 'tracteur', pourquoi: 'Le plein de la cuve se note dans le module Tracteur.' },
-      { type: 'toucher', cible: '[data-tuto="trac.entretien"]',
+      { type: 'toucher', chemin: true, cible: '[data-tuto="trac.entretien"]',
         txt: function () { return '{T} l’onglet « ' + L('[data-tuto="trac.entretien"]') + ' ».'; },
         fait: function () { var b = _q('[data-tuto="trac.entretien"]'); return !!(b && b.classList.contains('active')); },
         ok: 'Voici l’entretien : la cuve GNR y a sa carte.' },
@@ -227,9 +227,6 @@ function _css() {
     '.mvtu-mod{margin:14px 0 2px;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux)}',
     '.mvtu-panneau{position:fixed;top:12px;bottom:12px;right:12px;width:min(420px,calc(100vw - 24px));z-index:100005;display:flex;flex-direction:column;overflow:hidden;border-radius:var(--r-lg,16px);border:1px solid var(--gris);background:var(--bg-card);box-shadow:var(--shadow-lg,0 14px 56px rgba(0,0,0,.5))}',
     '.mvtu-anneau{position:fixed;left:0;top:0;width:0;height:0;z-index:100004;border:2px solid var(--or-clair);border-radius:var(--r-md,12px);pointer-events:none;opacity:0;box-shadow:0 0 0 1px rgba(0,0,0,.2),0 0 16px rgba(216,188,114,.45);animation:mvtuPouls 1.7s ease-in-out infinite;transition:opacity var(--mv-d1,140ms)}',
-    '.mvtu-suivi{display:none;margin:4px 0 0;font-size:var(--pt-micro,12px);font-weight:600}',
-    '.mvtu-suivi.ok{display:block;color:var(--vert-med)}',
-    '.mvtu-suivi.ko{display:block;color:var(--orange)}',
     '.mvtu-bloque{position:fixed;inset:0;z-index:100030;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg-app);font-family:' + _PF + '}',
     '.mvtu-bloque > div{max-width:420px;padding:20px;border-radius:var(--r-lg,16px);border:1px solid var(--gris);background:var(--bg-card);color:var(--texte)}',
     '.mvtu-bloque h2{margin:0 0 8px;font:600 var(--pt-lg,23px)/1.2 \'Cormorant Garamond\',Georgia,serif}',
@@ -375,7 +372,6 @@ function _coach() {
     + '<button type="button" class="mvtu-x" data-c="quitter">' + _ic('croix', 16) + 'Quitter</button></div>'
     + '<p class="mvtu-tx">' + _texte(e) + '</p>'
     + ((_cadre() && e.txtReel) ? '<p class="mvtu-reel">Sur votre domaine : ' + _esc(e.txtReel) + '</p>' : '')
-    + (_cadre() ? '<p class="mvtu-suivi" aria-live="polite"></p>' : '')
     + '<p class="mvtu-msg" aria-live="polite"></p>'
     + '<div class="mvtu-act">'
     + (montre ? '<button type="button" class="mvtu-b2" data-c="montre">' + _ic('doigt', 17) + 'Montre-moi</button>' : '')
@@ -412,8 +408,8 @@ function _montrer() {
   if (window.__MV_TUTO_AUTO) {
     setTimeout(function () { if (E.actif && E.etat === 'attente' && _e() === e) { if (e.type === 'regarder') _confirme(); else _montreMoi(); } }, 700);
   }
-  // TUTO-3 : la fenêtre dit à l'appli où elle en est ; si le domaine a déjà fait plus loin, elle rattrape.
-  _dire({ mvtu: 'etape', id: E.t.id, i: E.i });
+  // TUTO-5 : la lecture de l'appli repart à zéro à chaque étape ; si le domaine a déjà fait plus loin, la fenêtre rattrape.
+  E.lu = { v: undefined, depuis: 0 }; E.luOk = 0;
   if (E.miroirJusqua >= E.i) setTimeout(_jouerMiroir, 450);
 }
 function _verifie() {
@@ -550,13 +546,13 @@ function _reprendre() {
   if (E.etat === 'attente' && e && e.type === 'taper') { var c = _q(e.cible); if (c) _surSaisie({ target: c }); }
 }
 function _boucle() {
-  if (E.actif) {
+  if (E.actif && !E.aligne) {
     var e = _e(), vu = _place();
     if (e && E.etat === 'attente') {
       if (!vu) { if (!E.perdu) E.perdu = Date.now(); else if (Date.now() - E.perdu > 12000) _perdu(); }
       else E.perdu = 0;
       _verifie();
-      if (_cadre()) _suivi();
+      if (_cadre()) _miroirLire();
       if (e.type === 'aller' && E.etat === 'attente') {
         var n = _nav(e.page), k = n ? (n.plus ? 'plus' : n.ou) : '';
         if (k !== E.navCle) { E.navCle = k; var tx = D.coach.querySelector('.mvtu-tx'); if (tx) tx.innerHTML = _texte(e); }
@@ -578,7 +574,7 @@ function _fin() {
   for (var i = 1; i < TU_TUTOS.length && !suiv; i++) { var c = TU_TUTOS[(idx + i) % TU_TUTOS.length]; if (c !== t && _permis(c)) suiv = c; }
   _arrete();
   _etat('fini', true);
-  _dire({ mvtu: 'fini', id: t.id });
+  var hf = _hoteLu(); if (hf) { try { hf._mvTutoAnneau(t.id, -1); } catch (e) { _avale(e, '_fin#anneau'); } }
   var f = document.createElement('div');
   f.className = 'mvtu-fin';
   f.innerHTML = '<div class="mvtu-fin-in" role="dialog" aria-modal="true" aria-label="Tuto terminé">'
@@ -631,26 +627,66 @@ function _dire(m) {
   var h = _hote(); if (!h) return;
   try { h.postMessage(m, window.location.origin); } catch (e) { _avale(e, '_dire'); }
 }
-// TUTO-4 : l'appli envoie son état À CHAQUE TOUR (« miroir », avec `fait` = l'étape la plus loin faite sur le domaine, ou
-// -1) — c'est aussi le signe qu'elle suit. Un message perdu n'est plus une étape perdue : le suivant la redit.
-function _surMiroir(ev) {
-  if (ev.origin !== window.location.origin || !ev.data || ev.data.mvtu !== 'miroir') return;
-  var d = ev.data;
-  E.veille = Date.now();
-  if (!E.actif || d.i !== E.i || typeof d.fait !== 'number' || d.fait < E.i) return;
-  E.miroirJusqua = Math.max(typeof E.miroirJusqua === 'number' ? E.miroirJusqua : -1, d.fait);
-  if (d.valeur != null) E.miroirVal = { i: d.i, v: String(d.valeur) };
-  _jouerMiroir();
+// ★★ TUTO-5 (§362) — LE PANNEAU LIT LUI-MÊME L'APPLI. Au lieu d'attendre ses messages (TUTO-4 : s'ils s'arrêtaient, le
+//   panneau disait « ne répond pas » alors qu'elle allait bien), il lui demande toutes les 300 ms — même site, il en a le
+//   droit — « cette étape est-elle faite chez toi ? ». Par des fonctions en LECTURE SEULE (_mvTutoMiroirFait, _mvTutoAvant,
+//   _mvTutoValeur), plus _mvTutoAnneau pour l'anneau doré. Jamais le document ni les données de l'appli.
+function _hoteLu() {
+  var h = _hote();
+  try { return (h && typeof h._mvTutoMiroirFait === 'function') ? h : null; } catch (e) { return null; }
 }
-// La ligne qui dit si le panneau suit le domaine (seulement dans le panneau ou la fenêtre à part).
-function _suivi() {
-  var p = D.coach && D.coach.querySelector('.mvtu-suivi'); if (!p) return;
-  var vivant = E.veille && Date.now() - E.veille < 2500, muet = !vivant && Date.now() - (E.lance || 0) > 4000;
-  var etat = vivant ? 'ok' : (muet ? 'ko' : '');
-  if (p.getAttribute('data-e') === etat) return;
-  p.setAttribute('data-e', etat);
-  p.className = 'mvtu-suivi' + (etat ? ' ' + etat : '');
-  p.textContent = etat === 'ok' ? 'Je suis vos gestes sur votre domaine.' : (etat === 'ko' ? 'Votre appli ne répond pas : fermez-la et rouvrez-la pour que je suive vos gestes.' : '');
+var _luA = 0;
+function _miroirLire() {
+  var now = Date.now(); if (now - _luA < 300 || E.aligne) return; _luA = now;
+  var h = _hoteLu(), e = _e();
+  if (!h || !E.actif || !e) return;
+  try {
+    if (!E.memoHote) E.memoHote = h._mvTutoAvant(E.t.id) || {};
+    var k = -1;
+    if (E.etat === 'attente' && !E.montre && now - E.debut >= 700) {
+      for (var j = E.i; j < Math.min(E.t.etapes.length, E.i + 3); j++) { if (h._mvTutoMiroirFait(E.t.id, j, E.memoHote)) k = j; }
+      if (k === E.i && e.type === 'taper') {   // une saisie : on attend qu'elle soit posée
+        var s = h._mvTutoValeur(E.t.id, E.i) || {};
+        if (s.v !== E.lu.v) { E.lu = { v: s.v, depuis: now }; k = -1; }
+        else if (s.focus && now - E.lu.depuis < 1500) k = -1;
+      }
+      E.luOk = k >= 0 ? (E.luOk || 0) + 1 : 0;
+      if (E.luOk < 2) k = -1;
+    }
+    h._mvTutoAnneau(E.t.id, (E.etat === 'attente' && k < 0) ? E.i : -1);
+    if (k >= 0) {
+      E.miroirJusqua = Math.max(typeof E.miroirJusqua === 'number' ? E.miroirJusqua : -1, k);
+      if (k === E.i && e.type === 'taper' && E.lu.v) E.miroirVal = { i: E.i, v: String(E.lu.v) };
+      _jouerMiroir();
+    }
+  } catch (er) { _avale(er, '_miroirLire'); }
+}
+// Le panneau démarre là où vous êtes : les étapes de CHEMIN (aller vers un module, choisir un onglet) déjà faites dans
+// l'appli sont jouées ici tout de suite, avant la première consigne — pas de rattrapage en rafale ensuite.
+function _alignerDepart(fin) {
+  var h = _hoteLu(), memo = {};
+  if (!h) { fin(); return; }
+  try { memo = h._mvTutoAvant(E.t.id) || {}; } catch (e) { memo = {}; }
+  E.memoHote = memo; E.aligne = true;
+  var finir = function () { E.aligne = false; _etat('depart', E.i); fin(); };
+  (function pas() {
+    var e = _e(), deja = false;
+    if (!e || !(e.chemin || e.type === 'aller')) { finir(); return; }
+    try { deja = !!h._mvTutoMiroirFait(E.t.id, E.i, memo); } catch (er) { deja = false; }
+    if (!deja) { finir(); return; }
+    var t0 = Date.now(), coups = 0;
+    (function joue() {
+      var ok = e.type === 'aller' ? _pageActive(e.page) : !!e.fait(E.memo);
+      if (ok) { E.i++; pas(); return; }
+      if (Date.now() - t0 > 3000) { finir(); return; }
+      if (coups < 3) {
+        coups++;
+        if (e.type === 'aller') { var n = _nav(e.page); if (n) n.el.click(); }
+        else { var c = _q(e.cible); if (c) c.click(); }
+      }
+      setTimeout(joue, 250);
+    })();
+  })();
 }
 function _bloque() {
   _css();
@@ -692,10 +728,8 @@ function _lancer(id) {
   catch (e) { _avale(e, '_lancer'); }
   window.location.assign(window.location.pathname + '?tuto=' + encodeURIComponent(id));
 }
-// Le miroir côté vrai domaine : l'étape en cours (dite par la fenêtre) est-elle faite ICI ? Même vérification que le
-// tuto — l'écran a vraiment changé —, sauf les étapes qui ont leur `reel` (les valeurs du domaine fictif n'existent
-// pas ici). Un anneau doré discret, sans voile, montre le même bouton sur le vrai domaine.
-var MI = null;
+// Côté vrai domaine : la vérification que le panneau vient lire (même vérification que le tuto — l'écran a vraiment changé —,
+// sauf les étapes qui ont leur `reel`, les valeurs du domaine fictif n'existant pas ici).
 function _miroirFait(e, memo) {
   if (!e) return false;
   if (e.reel) return !!e.reel(memo || {});
@@ -704,64 +738,35 @@ function _miroirFait(e, memo) {
   if (e.type === 'taper') { var c = _q(e.cible); return !!(c && e.valide(c.value)); }
   return false;
 }
-function _miroirAnneau() {
-  if (!MI || !MI.anneau) return;
-  var e = MI.t.etapes[MI.i], el = null;
+// L'anneau doré sur le vrai bouton : dessiné À LA DEMANDE du panneau, qui le redemande à chaque tour ; il s'efface tout seul
+// s'il ne le redemande plus (panneau fermé, tuto fini) — aucun lien de vie à tenir entre les deux fenêtres.
+var AN = { el: null, id: '', i: -1, vu: 0, tourne: false };
+function _anneauDessin() {
+  if (!AN.el) return;
+  var actif = AN.i >= 0 && Date.now() - AN.vu < 1200, t = actif ? _tuto(AN.id) : null, e = t ? t.etapes[AN.i] : null, el = null;
   if (e && e.type === 'aller') { var n = _nav(e.page); el = n ? n.el : null; }
   else if (e && e.type === 'choisir') el = e.cibleReel ? _q(e.cibleReel) : null;
   else if (e && e.type !== 'regarder') el = _q(e.cible);
-  var r = MI.anneau;
-  if (!el || !_vis(el) || MI.fait >= MI.i) { r.style.opacity = '0'; return; }
-  var b = el.getBoundingClientRect();
-  r.style.left = Math.round(b.left - 5) + 'px'; r.style.top = Math.round(b.top - 5) + 'px';
-  r.style.width = Math.round(b.width + 10) + 'px'; r.style.height = Math.round(b.height + 10) + 'px';
-  r.style.opacity = '1';
-}
-// TUTO-4 : l'état part À CHAQUE TOUR (même -1 : c'est le signe que l'appli suit), plus « une seule fois » — un message
-// arrivé pendant que la fenêtre se chargeait ou bougeait n'est plus perdu.
-function _miroirTic() {
-  if (!MI) return;
-  if (MI.cible && MI.cible.closed) { _miroirArret(); return; }
-  var e = MI.t.etapes[MI.i], k = -1;
-  if (e && Date.now() - MI.depuis >= 700) {
-    for (var j = MI.i; j < Math.min(MI.t.etapes.length, MI.i + 3); j++) { if (_miroirFait(MI.t.etapes[j], MI.memo)) k = j; }
-    if (k === MI.i && e.type === 'taper') {   // une saisie : on attend qu'elle soit posée
-      var c = _q(e.cible), v = c ? c.value : '';
-      if (v !== MI.val) { MI.val = v; MI.valDepuis = Date.now(); k = -1; }
-      else if (document.activeElement === c && Date.now() - MI.valDepuis < 1500) k = -1;
-    }
-    MI.ok = k >= 0 ? MI.ok + 1 : 0;
-    if (MI.ok < 2) k = -1;
+  if (!el || !_vis(el)) AN.el.style.opacity = '0';
+  else {
+    var r = el.getBoundingClientRect();
+    AN.el.style.left = Math.round(r.left - 5) + 'px'; AN.el.style.top = Math.round(r.top - 5) + 'px';
+    AN.el.style.width = Math.round(r.width + 10) + 'px'; AN.el.style.height = Math.round(r.height + 10) + 'px';
+    AN.el.style.opacity = '1';
   }
-  MI.fait = k;
-  if (k >= 0 && MI.dit !== MI.i) { MI.dit = MI.i; if (window.console) window.console.info('[Tuto miroir] étape ' + (MI.i + 1) + ' faite sur votre domaine : le panneau suit.'); }
-  var m = { mvtu: 'miroir', i: MI.i, fait: k };
-  if (k >= 0 && e && e.type === 'taper') { var c2 = _q(e.cible); if (c2 && c2.value) m.valeur = c2.value; }
-  try { MI.cible.postMessage(m, window.location.origin); } catch (er) { _avale(er, '_miroirTic'); }
+  if (actif) window.requestAnimationFrame(_anneauDessin); else { AN.tourne = false; AN.el.style.opacity = '0'; }
 }
-function _miroirBoucle() { if (!MI) return; _miroirAnneau(); window.requestAnimationFrame(_miroirBoucle); }
-function _miroirDemarrer(t, cible) {
-  _miroirArret();
+function _anneau(id, i) {
   _css();
-  MI = { t: t, i: 0, memo: {}, cible: cible, depuis: Date.now(), fait: -1, dit: -1, ok: 0, val: null, valDepuis: 0 };
-  if (t.avant) { try { t.avant(MI.memo); } catch (e) { _avale(e, '_miroirDemarrer#avant'); } }
-  MI.anneau = document.createElement('div');
-  MI.anneau.className = 'mvtu-anneau';
-  MI.anneau.setAttribute('aria-hidden', 'true');
-  document.body.appendChild(MI.anneau);
-  MI.tic = setInterval(_miroirTic, 300);
-  window.requestAnimationFrame(_miroirBoucle);
-}
-function _miroirArret() {
-  if (!MI) return;
-  clearInterval(MI.tic);
-  if (MI.anneau && MI.anneau.parentNode) MI.anneau.parentNode.removeChild(MI.anneau);
-  MI = null;
+  if (!AN.el) { AN.el = document.createElement('div'); AN.el.className = 'mvtu-anneau'; AN.el.setAttribute('aria-hidden', 'true'); document.body.appendChild(AN.el); }
+  AN.id = String(id || ''); AN.i = typeof i === 'number' ? i : -1; AN.vu = Date.now();
+  if (AN.i < 0) { AN.el.style.opacity = '0'; return; }
+  if (!AN.tourne) { AN.tourne = true; window.requestAnimationFrame(_anneauDessin); }
 }
 var _ecoute = false;
-function _fermerPanneau(garderMiroir) {
+function _fermerPanneau() {
   var p = document.getElementById('mvtu-panneau'); if (p && p.parentNode) p.parentNode.removeChild(p);
-  if (!garderMiroir) _miroirArret();
+  _anneau('', -1);
 }
 function _panneau(id) {
   var t = _tuto(id); if (!t) return;
@@ -782,23 +787,14 @@ function _panneau(id) {
     var b = ev.target.closest('[data-p]'); if (!b) return;
     var a = b.getAttribute('data-p');
     if (a === 'fermer') _fermerPanneau();
-    else if (a === 'fenetre') {
-      var w = window.open(url, 'mvtuto', 'popup=yes,width=440,height=900');
-      if (w) { _fermerPanneau(true); _miroirDemarrer(t, w); }
-    }
+    else if (a === 'fenetre') { var w = window.open(url, 'mvtuto', 'popup=yes,width=440,height=900'); if (w) _fermerPanneau(); }
   });
   document.body.appendChild(p);
-  _miroirDemarrer(t, p.querySelector('iframe').contentWindow);
   if (!_ecoute) {
     _ecoute = true;
     window.addEventListener('message', function (ev) {
-      if (ev.origin !== window.location.origin || !ev.data || !ev.data.mvtu) return;
-      var d = ev.data;
-      if (d.mvtu === 'fermer') _fermerPanneau();
-      else if (d.mvtu === 'fini') _miroirArret();
-      else if (d.mvtu === 'etape' && MI && MI.t.id === d.id && typeof d.i === 'number') {
-        MI.i = d.i; MI.depuis = Date.now(); MI.fait = -1; MI.ok = 0; MI.val = null;
-      }
+      if (ev.origin !== window.location.origin || !ev.data || ev.data.mvtu !== 'fermer') return;
+      _fermerPanneau();
     });
   }
 }
@@ -874,9 +870,8 @@ function _demarrer() {
   document.addEventListener('click', _surClic, true);
   document.addEventListener('input', _surSaisie, true);
   document.addEventListener('keydown', _surTouche, true);
-  if (_cadre()) window.addEventListener('message', _surMiroir);
   window.requestAnimationFrame(_boucle);
-  setTimeout(_montrer, 300);
+  setTimeout(function () { if (_cadre()) _alignerDepart(_montrer); else _montrer(); }, 300);
 }
 
 window._mvTutoPrepare = _prepare;
@@ -890,3 +885,6 @@ window._mvTutoBloque = _bloque;
 // Vérification du miroir (lecture seule) : l'étape i du tuto est-elle faite sur CE domaine ? mv-tutos-jeu.mjs s'en sert.
 window._mvTutoAvant = function (id) { var t = _tuto(id), m = {}; if (t && t.avant) t.avant(m); return m; };
 window._mvTutoMiroirFait = function (id, i, memo) { var t = _tuto(id); return t ? _miroirFait(t.etapes[i], memo || {}) : false; };
+// TUTO-5 : la saisie de l'étape i sur CE domaine (valeur, et le champ a-t-il la main) ; l'anneau doré à la demande du panneau.
+window._mvTutoValeur = function (id, i) { var t = _tuto(id), e = t ? t.etapes[i] : null, c = e && e.cible ? _q(e.cible) : null; return c ? { v: c.value, focus: document.activeElement === c } : { v: undefined, focus: false }; };
+window._mvTutoAnneau = _anneau;

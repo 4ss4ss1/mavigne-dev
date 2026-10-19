@@ -788,3 +788,23 @@ TUTO-3 en ligne (9.25, vérifié par Nico) : sa capture montre la vraie fenêtre
 ### 361e. Ce qui n’a pas été vérifié
 La bascule réelle du service worker chez un client (installation de v10.05 par-dessus v10.04) : le bac à sable bloque le service worker. Ce qui la rend sûre sans elle : l’adresse versionnée de `boot.js`.
 
+## 362. ★★ TUTO-5 — LE PANNEAU DU TUTO LIT LUI-MÊME L’APPLI ET DÉMARRE LÀ OÙ L’ON EST (18/10 — `src/tutos.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `guide/01-demarrer.html` · `scripts/mv-harnais-tutos.mjs` · `scripts/mv-tutos-jeu.mjs` · `CLAUDE.md` · `docs/claude/*`)
+
+### 362a. La demande
+Après TUTO-4 : « Votre appli ne répond pas » s’affichait dans le panneau alors que l’appli allait bien ; et le suivi accrochait quand l’appli était déjà sur le bon onglet — « il faudrait bloquer le suivi une fois qu’on est sur l’onglet dédié, ou trouver une autre façon de faire ». Proposé et confirmé : le panneau lit lui-même l’appli ; il démarre là où l’on est ; une fois l’onglet dédié atteint, il ne suit plus que les gestes de l’écran.
+
+### 362b. Arbitrages
+- **Lire plutôt qu’écouter.** TUTO-4 faisait dépendre le panneau d’envois réguliers de l’appli : un arrêt, même bref (onglet en arrière-plan, minuterie freinée, cycle de vie de l’écouteur), devenait « ne répond pas ». Le panneau et l’appli sont le même site : le panneau appelle des fonctions de l’appli en LECTURE SEULE (`_mvTutoMiroirFait`, `_mvTutoAvant`, `_mvTutoValeur`) et `_mvTutoAnneau` pour l’anneau. Plus d’écouteur côté appli (sauf « fermer »), plus de veilleur, plus de message d’absence : s’il ne lit pas l’appli, le panneau ne suit pas, c’est tout.
+- **L’anneau à la demande** : redemandé à chaque lecture, il s’efface seul au bout d’1,2 s sans demande — aucun lien de vie à tenir.
+- **Démarrer là où l’on est** : `_alignerDepart` joue, avant la première consigne, les étapes de CHEMIN déjà faites dans l’appli (`aller`, et les étapes marquées `chemin: true`, comme l’onglet Entretien) ; plus de rattrapage en rafale à l’écran. Le chemin n’est jamais repris ensuite : changer d’onglet dans l’appli ne fait plus rien au panneau.
+- **Le sens unique reste tenu par le harnais** : la fenêtre n’appelle que ces quatre fonctions, ne touche jamais le document de l’appli, ne lui dit que « fermer » ; le moteur ne clique que dans « Montre-moi » et dans l’alignement du départ — sur SA page.
+
+### 362c. Mesures
+- `npm run test:tutos` : **9/9** — dont le miroir par lecture (une « appli » qui se laisse lire mène le panneau au bout ; 1 200 L repris ; l’anneau demandé) et le départ aligné (chemin du GNR déjà fait : le panneau commence à l’étape 3).
+- Vrais clics (Chromium, 1 900 × 950) : la vraie pastille → le panneau passe à l’étape 2, anneau visible ; l’appli déjà sur Tracteur › Entretien à l’ouverture → le panneau commence à « La cuve est à 650 litres sur 2 000. Cliquez « Appoint de cuve » ».
+- `mv-harnais-tutos` : vert ; contre-épreuves **22/22**.
+- `node scripts/mv-lanceur.mjs --continuer` : **439/439 commandes, 0 rouge** (775 s).
+
+### 362d. Ce qui n’a pas été vérifié
+Chez un vrai client connecté (le bac à sable n’a pas de session) ; la « Fenêtre à part » avec un vrai bloqueur de fenêtres.
+

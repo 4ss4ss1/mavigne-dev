@@ -2626,8 +2626,11 @@ le cadre demande sa fermeture par `postMessage({mvtu:'fermer'})`. Téléphone et
 vérifie l'étape sur le vrai domaine (`_miroirFait` : `reel` si l'étape en a un, sinon `fait`, la page, ou une saisie
 valide et posée) et répond `miroir` (+ `jusqua`, + `valeur`) ; la fenêtre joue l'étape (`_jouerMiroir`). Un seul sens.
 Une étape à valeurs fictives (« Jean et Sophie ») DOIT avoir son `reel` (et son `txtReel`, « Sur votre domaine : … »).
-**TUTO-4 (§361).** L'état `miroir` part à chaque tour (300 ms), même `fait: -1` : c'est le signe de vie qu'affiche le
-panneau (« Je suis vos gestes… » / « ne répond pas »). `boot.js` est chargé en `boot.js?v=<APP_VERSION>`, `no-cache`,
+**TUTO-5 (§362) — le miroir par lecture.** Plus de messages de l'appli : le panneau lit l'appli (`_hoteLu`, toutes les
+300 ms) par `_mvTutoMiroirFait` / `_mvTutoAvant` / `_mvTutoValeur` (lecture seule) et demande l'anneau (`_mvTutoAnneau`,
+qui s'efface seul faute d'être redemandé). Il démarre là où l'on est : `_alignerDepart` joue les étapes de chemin
+(`aller`, ou `chemin: true`) déjà faites dans l'appli avant la première consigne. Il ne dit à l'appli que « fermer ».
+**TUTO-4 (§361).** `boot.js` est chargé en `boot.js?v=<APP_VERSION>`, `no-cache`,
 réseau d'abord dans `sw.js` ; sa marque `__MV_BOOT_TUTO_V` doit valoir `TU_BOOT_V` (tutos.js), sinon `__MV_TUTO_BLOQUE` :
 app.js n'ouvre ni l'entraînement ni l'appli, `_mvTutoBloque` affiche « Une mise à jour à finir ».
 

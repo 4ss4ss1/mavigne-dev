@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.26';
+export const APP_VERSION = '9.27';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,11 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.27', d: '2026-10-18', items: [
+    { niv: 0, pour: ['admin'], emoji: 'doigt', titre: 'Le tuto à côté de l’appli démarre là où vous êtes',
+      desc: "Si votre appli est déjà sur le bon module ou le bon onglet, le tuto ouvert à côté commence directement à cette étape, sans refaire le chemin. "
+        + "Il regarde lui-même votre appli pour suivre vos gestes : le message «\u00a0Votre appli ne répond pas\u00a0» disparaît." },
+  ] },
   { v: '9.26', d: '2026-10-18', items: [
     { niv: 0, pour: ['admin'], emoji: 'doigt', titre: 'Le tuto ouvert à côté de l’appli suit vraiment vos gestes',
       desc: "Correction : une ancienne pièce de l’appli restait en mémoire après les mises à jour, et le panneau du tuto ne voyait pas vos gestes sur votre domaine. "
