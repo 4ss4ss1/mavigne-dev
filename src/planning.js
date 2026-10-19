@@ -3414,7 +3414,7 @@ function _pl2Synth(){
     var brc=_planLegalBreaches(mbr,planMonth);
     var badges=(brc>0?'<span class="plan-badge plan-badge-abs">'+_mvIcon('alerte',16)+' '+brc+' sem. &gt; max</span>':'')
       +(abs>0?'<span class="plan-badge plan-badge-abs">'+abs+' abs.</span>':'')
-      +(cpj>0?'<span class="plan-badge" style="background:var(--orange-pale);color:var(--orange)">CP '+cpj+' j</span>':'')
+      +(cpj>0?'<span class="plan-badge mvpas-type mvpas-bleu">CP '+cpj+' j</span>':'')
       +(mbr.planning_note?'<span class="plan-badge plan-badge-warn">'+_mvIcon('alerte',16)+' '+_escHtml(mbr.planning_note)+'</span>':'');
     var pulse=_pl2PulseNom===mbr.nom?' pl2-pulse':'';
     h+='<button class="pl2-mcard'+pulse+'" data-plcard="'+nomA+'" onclick="openPlanFiche(\''+nomA+'\')">'
@@ -3443,7 +3443,7 @@ function _pl2SynthColl(mbr,nomA){
   return '<button class="pl2-mcard" data-plcard="'+nomA+'" onclick="openPlanFiche(\''+nomA+'\')">'
     +'<span class="pl2-ava pl2-ava-lg" style="background:'+(mbr.couleur||'#8A5A38')+'">'+_mvIcon('equipe',18)+'</span>'
     +'<span class="pl2-mc-mid">'
-      +'<span class="pl2-mc-n">'+_escHtml(mbr.nom)+'<span class="plan-badge" style="background:var(--tag-amber-bg,#fffbeb);color:var(--tag-amber-tx,#92400e)">\u00e9quipe</span></span>'
+      +'<span class="pl2-mc-n">'+_escHtml(mbr.nom)+'<span class="plan-badge mvpas-type mvpas-ambre">\u00e9quipe</span></span>'
       +'<span class="pl2-mc-s">'+n+' personne'+(n>1?'s':'')+' au plus fort \u00b7 '+jours+' jour'+(jours>1?'s':'')+' travaill\u00e9'+(jours>1?'s':'')+'</span>'
     +'</span>'
     +'<span class="pl2-mc-right"><span class="pl2-mc-e" style="color:var(--terre,#8A5A38)">'+_planFmt(ch)+'</span><span class="pl2-mc-etp">au total</span></span>'
@@ -6732,8 +6732,8 @@ function _planRenderCadre(){
       +'<div class="plan-tpl-info">'
         +'<div class="plan-tpl-name">'+id
           +(isDefault?' <span class="plan-badge plan-badge-def">D\u00e9faut</span>':'')
-          +(hasTimings?' <span class="plan-badge" style="background:var(--vert-pale);color:var(--vert-med);font-size:9px">\ud83d\udd50 Horaires</span>':'')
-          +(hasJour?' <span class="plan-badge" style="background:var(--plan-acc-pale);color:var(--plan-acc);font-size:9px">\ud83d\udcc6 Horaires par jour</span>':'')
+          +(hasTimings?' <span class="plan-badge">\ud83d\udd50 Horaires</span>':'')
+          +(hasJour?' <span class="plan-badge">\ud83d\udcc6 Horaires par jour</span>':'')
         +'</div>'
         +'<div class="plan-tpl-sub">Assign\u00e9\u00a0: '+assignes+'</div>'
       +'</div>'

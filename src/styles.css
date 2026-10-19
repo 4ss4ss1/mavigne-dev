@@ -1116,7 +1116,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .chat-canal.actif{background:rgba(61,107,39,0.2);color:#5A8F3C;}
 .chat-canal-ico{font-size:18px;line-height:1;}
 .chat-canal-lbl{font-size:8px;font-weight:600;margin-top:1px;}
-.chat-canal-badge{position:absolute;top:3px;right:3px;background:#C0392B;color:white;font-size:9px;font-weight:700;padding:0 3px;border-radius:6px;min-width:13px;text-align:center;line-height:13px;height:13px;}
+.chat-canal-badge{ position:absolute; top:3px; right:3px; text-align:center; }
 .chat-dm{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 4px;border-radius:8px;cursor:pointer;color:#7A8499;margin:1px 4px;position:relative;min-height:44px;}
 .chat-dm.actif{background:rgba(61,107,39,0.12);color:#E8EAF0;}
 .chat-dm-ava{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:var(--pt-micro,11px);font-weight:700;color:white;position:relative;}
@@ -1389,14 +1389,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .plan-emp-ecart{font-weight:700;font-size:15px;}
 .plan-emp-etp{font-size:var(--pt-micro,12px);font-weight:600;margin-top:2px;}
 .plan-emp-btns{display:flex;gap:8px;flex-shrink:0;}
-.plan-badge{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:600;}
-.plan-badge-warn{background:var(--orange-pale);color:var(--orange);}
-.plan-badge-abs{background:var(--rouge-pale);color:var(--rouge-tx,#A0291E);}
-.plan-badge-cont{background:var(--plan-acc-pale);color:var(--plan-acc);}
-.plan-badge-def{background:var(--gris-clair);color:var(--texte-doux);}
-.plan-badge-ctrat{background:var(--bleu-pale);color:var(--bleu-tx,#1A4A7A);font-size:10px;}
-.plan-badge-cdebut{background:var(--vert-pale);color:var(--vert-med);font-size:10px;}
-.plan-badge-cfin{background:var(--rouge-pale);color:var(--rouge-tx,#A0291E);font-size:10px;}
 .plan-days-list{display:flex;flex-direction:column;gap:7px;}
 .plan-day-row{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:13px;border:1.5px solid;transition:opacity .1s;}
 .plan-day-num{width:36px;text-align:center;flex-shrink:0;}
@@ -2913,12 +2905,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 
 /* ── Ligne analyse ── */
 .mvc-cuv-ana{ display:flex; align-items:center; flex-wrap:wrap; gap:5px; margin-top:9px; }
-.mvc-tag{ font-size:var(--pt-micro,11px); font-weight:600; padding:3px 9px; border-radius:8px; white-space:nowrap; }
-.mvc-tag-so2{ color:var(--ink-info,#4A9FC8); background:rgba(74,159,200,.12); border:1px solid rgba(74,159,200,.22); }
-.mvc-tag-fmlok{ color:var(--vert-med,#3D6B27); background:rgba(61,107,39,.12); border:1px solid rgba(61,107,39,.22); }
-.mvc-tag-fmlc{ color:#B8913A; background:rgba(184,145,58,.12); border:1px solid rgba(184,145,58,.24); }
-.mvc-tag-fmlno{ color:var(--texte-doux,#7A736A); background:rgba(122,115,106,.1); border:1px solid rgba(122,115,106,.2); }
-.mvc-tag-av{ color:#B0412C; background:rgba(176,65,44,.1); border:1px solid rgba(176,65,44,.24); }
+.mvc-tag{ white-space:nowrap; }
 .mvc-tag-none{ font-size:var(--pt-lbl,12px); color:var(--texte-doux,#7A736A); font-style:italic; }
 .mvc-tag-pdf{ font-size:var(--pt-txt,13px); }
 .mvc-ana-date{ margin-left:auto; font-size:var(--pt-micro,11px); color:var(--texte-doux,#7A736A); }
@@ -3149,12 +3136,9 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .sdp-dist{font-size:var(--pt-txt,13px);font-weight:700;color:var(--bleu);}
 .sdp-sep{font-size:var(--pt-micro,12px);font-weight:700;color:var(--texte-doux);padding:12px 0 6px;
   border-top:1px solid var(--gris-clair);margin-top:4px;}
-.sdp-tag.ecart{background:var(--or-pale);color:var(--terre);border:1px solid var(--or);}
-.sdp-tag{font-size:var(--pt-lbl,10.5px);font-weight:600;padding:3px 8px;border-radius:7px;white-space:nowrap;flex-shrink:0;text-align:right;margin-left:6px;}
+.sdp-tag{ white-space:nowrap; flex-shrink:0; text-align:right; margin-left:6px; }
 .sdp-tag small{display:block;font-weight:500;font-size:9px;opacity:.85;margin-top:1px;}
-.sdp-tag.mes{background:var(--acier-pale);color:var(--acier);}
-.sdp-tag.bar{background:var(--gris-clair);color:var(--texte-doux);}
-.sdp-tag.pend{background:rgba(201,168,76,.18);color:#8a6d1e;animation:chrPulse 1.5s infinite;}
+.sdp-tag.pend{ animation:chrPulse 1.5s infinite; }
 /* SESS-1 (§168) : l'historique des gestes, en bas de la feuille de session (administrateur) */
 .sd-hist{margin-top:16px;border-top:1px solid var(--gris-clair);padding-top:12px;}
 .sd-hist summary{cursor:pointer;font-size:var(--pt-txt,13px);font-weight:700;color:var(--texte-doux);padding:8px 0;}
@@ -4024,9 +4008,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pf-sem-h h3{margin:0;font-size:var(--pt-base,14px);font-weight:var(--fw-bold,700);color:var(--texte)}
 .pf-sem-h span{font-size:var(--pt-txt,13px);color:var(--texte-med);white-space:nowrap}
 .pf-tags{display:flex;flex-wrap:wrap;gap:var(--e-1,4px);padding:0 var(--e-3,12px) var(--e-2,8px)}
-.pf-tag{display:inline-flex;align-items:center;gap:var(--e-1,4px);padding:2px var(--e-2,8px);border-radius:99px;background:var(--bg-app);color:var(--texte-med);font-size:var(--pt-micro,11px);font-weight:var(--fw-semi,600)}
-.pf-tag-sup{background:var(--terre-pale);color:var(--terre-tx,#8A5A38)}
-.pf-tag-al{background:var(--rouge-pale);color:var(--rouge-tx,#A0291E)}
 .pf-jt,.pf-jr{display:grid;grid-template-columns:34px minmax(0,1fr) minmax(0,1fr) 44px;column-gap:var(--e-2,8px)}
 .pf-jt{padding:var(--e-1,4px) var(--e-3,12px);border-top:1px solid var(--gris-clair);font-size:var(--pt-micro,11px);font-weight:var(--fw-semi,600);color:var(--texte-doux)}
 .pf-jt span:last-child{text-align:right}
@@ -4143,7 +4124,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .st-act,.tcv,.jsv,.rb-admin,.sc-active-badge,.pdot.done{color:var(--vert-tx);}
 
 /* 4 — Badges orange.  4,14:1 -> 5,32:1 */
-.tce,.jse,.ssenc,.tic,.mq-btn-start,.hdre-bad.wait,.rp-chip.sel,.plan-badge-warn,
+.tce,.jse,.ssenc,.tic,.mq-btn-start,.hdre-bad.wait,.rp-chip.sel,
 .pc-start,.pdot.comm,.pil-badge.b-warn,.pl2c-dn,.pl2-heat-btn.on{color:var(--orange-tx);}
 
 /* 5 — Astuce de l'accueil (« changer »).  2,03:1 -> 6,53:1 */
@@ -5247,10 +5228,6 @@ button.pil-dz-set{cursor:pointer;width:100%;}
 .pil-dz-rt .nm .st{color:var(--or);}
 .pil-dz-rt .l2{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-2,8px);margin-top:var(--e-2,8px);font-size:var(--pt-txt,13px);}
 .pil-dz-rt .l2 .fin{font-weight:700;color:var(--texte);}
-.pil-dz-tag{padding:2px 8px;border-radius:var(--dz-rs);font-size:var(--pt-lbl,10.5px);font-weight:700;}
-.pil-dz-tag.ok{background:var(--vert-pale);color:var(--vert-tx,var(--vert-med));}
-.pil-dz-tag.ko{background:var(--rouge-pale);color:var(--rouge-tx,var(--rouge));}
-.pil-dz-tag.gr{background:var(--gris-clair);color:var(--texte-doux);}
 .pil-dz-lk{margin-left:auto;height:36px;padding:0 var(--e-1,4px);border:0;background:transparent;color:var(--or-tx,var(--terre));font-family:inherit;font-size:var(--pt-micro,11px);font-weight:700;cursor:pointer;}
 .pil-dz-lib{margin-top:var(--e-2,8px);padding:var(--e-2,8px) var(--e-3,12px);border:1px dashed var(--gris);border-radius:var(--dz-rs);font-size:var(--pt-txt,13px);color:var(--texte-doux);}
 .pil-dz-lib b{color:var(--texte);}
@@ -8006,7 +7983,7 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
 #page-parcelles.p-arrivee .p-fx-btn{display:inline-flex;align-items:center;gap:var(--e-1,4px);min-height:44px;padding:0 var(--e-3,12px);border-radius:var(--r-lg,12px);border:1px solid var(--gris-clair);background:var(--bg-card);color:var(--texte);font:600 var(--pt-txt,13px)/1 var(--font-ui);position:relative;flex:none;cursor:pointer}
 #page-parcelles.p-arrivee .frow,#page-parcelles.p-arrivee #p-prox-bar{display:none!important}
 #page-parcelles.p-arrivee .tabs2:not(:has(#tbc.active)){display:none}
-.p-fx-badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 var(--e-1,4px);border-radius:var(--r-full,999px);background:var(--or-pale);border:1px solid var(--or);color:var(--or-tx);font:700 var(--pt-nano,11px)/18px var(--font-ui);text-align:center}
+.p-fx-badge{ position:absolute; top:-6px; right:-6px; text-align:center; }
 .p-fx-corps{padding:0 var(--e-4,16px) var(--e-4,16px)}
 .p-fx-k{margin:var(--e-3,12px) 0 var(--e-2,8px);font-size:var(--pt-nano,11px);letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--texte-doux)}
 .p-fx-chips{display:flex;flex-wrap:wrap;gap:var(--e-2,8px)}
@@ -8072,6 +8049,49 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .mvbtn:active, .plan-btn-saisir:active, .mvc-set-btn:active, .sd-trac-confirm-btn:active, .pf-btn:active, .plan-btn-pdf:active, .cave-toggle-btn:active, .trac-type-btn:active, .cave-op-type-btn:active, .rfut-reason-btn:active, .mbtn:active, .mbtn-del:active, .cave-stepper-btn:active, .mvc-step-btn:active, .mvv-step2-b:active, .rp-stp:active{ background-image:linear-gradient(var(--presse),var(--presse)); }
 .mvbtn:disabled, .plan-btn-saisir:disabled, .mvc-set-btn:disabled, .sd-trac-confirm-btn:disabled, .pf-btn:disabled, .plan-btn-pdf:disabled, .cave-toggle-btn:disabled, .trac-type-btn:disabled, .cave-op-type-btn:disabled, .rfut-reason-btn:disabled, .mbtn:disabled, .mbtn-del:disabled, .cave-stepper-btn:disabled, .mvc-step-btn:disabled, .mvv-step2-b:disabled, .rp-stp:disabled{ opacity:var(--o-off,.45); cursor:default; background-image:none; }
 /* ═══ fin CHARTE-3 ═══ */
+
+/* ═══ CHARTE-4 — LE JEU DE PASTILLES COMMUN (§374) ═══════════════════════════════════════════════
+   Décidé le 19/10 (« regarde ce qui se fait chez les plus grands et go »), après lecture d’Atlassian,
+   Carbon et Primer : le STATUT porte la couleur de sens ; l’ÉTIQUETTE est neutre ; une étiquette ne
+   prend de couleur que pour dire un TYPE (la palette --tag-* de la charte) ; le COMPTEUR est neutre,
+   à l’accent quand le nombre compte, rouge seulement pour une alerte ; le FILTRE se touche.
+   Une forme : 20 px de haut (plus si deux lignes), arrondi 4 px, texte 12 px, jamais en capitales ;
+   le compteur et le filtre sont ronds. Aucune couleur ni taille écrite en dur ici (mv-harnais-pastilles).
+   ★ CHARTE-4a : sept familles d’avant passées au jeu (Planning .pf-tag .plan-badge, Cave .mvc-tag,
+     Tracteur .sdp-tag, Pilotage .pil-dz-tag, Discussion .chat-canal-badge, Parcelles .p-fx-badge) ;
+     leur règle d’origine ne garde que la mise en page (position, marges, animation). */
+.mvpas, .pf-tag, .plan-badge, .mvc-tag, .sdp-tag, .pil-dz-tag{ display:inline-flex; align-items:center; gap:var(--e-1,4px); box-sizing:border-box; min-height:var(--h-badge,20px); padding:0 var(--e-2,8px); border:0; border-radius:var(--r-xs,4px); background:var(--survol); color:var(--texte-med); font-family:var(--font-ui); font-size:var(--pt-micro,12px); font-weight:var(--fw-semi,600); line-height:1.2; letter-spacing:normal; text-transform:none; white-space:nowrap; vertical-align:middle; }
+.mvpas svg, .pf-tag svg, .plan-badge svg, .mvc-tag svg, .sdp-tag svg, .pil-dz-tag svg{ width:1em; height:1em; flex:none; }
+.mvpas-statut::before{ content:""; flex:none; width:6px; height:6px; border-radius:50%; background:var(--mvpas-point, currentColor); }
+/* le statut : cinq états, la couleur de la charte */
+.mvpas-fait, .pil-dz-tag.ok, .mvc-tag-fmlok, .plan-badge-cdebut{ background:var(--ok-doux); color:var(--ok-texte); --mvpas-point:var(--ok); }
+.mvpas-encours, .mvc-tag-fmlc, .sdp-tag.pend{ background:var(--survol); color:var(--texte); --mvpas-point:var(--encours); }
+.mvpas-afaire, .pil-dz-tag.gr, .mvc-tag-fmlno{ background:var(--survol); color:var(--texte-med); --mvpas-point:var(--texte-pale); }
+.mvpas-surveiller, .sdp-tag.ecart, .plan-badge-warn{ background:var(--attention-doux); color:var(--attention-texte); --mvpas-point:var(--attention); }
+.mvpas-retard, .pf-tag-al, .plan-badge-abs, .plan-badge-cfin, .pil-dz-tag.ko, .mvc-tag-av{ background:var(--danger-doux); color:var(--danger-texte); --mvpas-point:var(--danger); }
+/* l’étiquette : neutre (la base) ; l’étiquette de type : une couleur de la palette, seulement pour dire un type */
+.mvpas-etiquette{ background:var(--survol); color:var(--texte-med); }
+.mvpas-type.mvpas-vert{ background:var(--tag-green-bg); color:var(--tag-green-tx); }
+.mvpas-type.mvpas-ambre{ background:var(--tag-amber-bg); color:var(--tag-amber-tx); }
+.mvpas-type.mvpas-bleu, .plan-badge-ctrat{ background:var(--tag-blue-bg); color:var(--tag-blue-tx); }
+.mvpas-type.mvpas-violet{ background:var(--tag-purple-bg); color:var(--tag-purple-tx); }
+.mvpas-type.mvpas-rouge{ background:var(--tag-red-bg); color:var(--tag-red-tx); }
+.mvpas-type.mvpas-canard{ background:var(--tag-teal-bg); color:var(--tag-teal-tx); }
+.mvpas-type.mvpas-ciel{ background:var(--tag-sky-bg); color:var(--tag-sky-tx); }
+.mvpas-type.mvpas-gris{ background:var(--tag-grey-bg); color:var(--tag-grey-tx); }
+.mvpas-type.mvpas-orange{ background:var(--tag-orange-bg); color:var(--tag-orange-tx); }
+/* le compteur : un nombre sur un onglet, une icône, un filtre */
+.mvpas-compteur, .p-fx-badge, .chat-canal-badge{ display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; min-width:18px; height:18px; padding:0 5px; border:0; border-radius:var(--r-full,999px); background:var(--ligne-forte); color:var(--texte); font-family:var(--font-ui); font-size:var(--pt-nano,11px); font-weight:var(--fw-bold,700); line-height:1; }
+.mvpas-compteur.mvpas-fort, .p-fx-badge{ background:var(--accent); color:var(--sur-accent); }
+.mvpas-compteur.mvpas-alerte, .chat-canal-badge{ background:var(--danger); color:var(--sur-danger); }
+/* le filtre : une pastille qu’on touche ; 36 px au téléphone, 28 sur ordinateur ; le choisi à la couleur d’action */
+.mvpas-filtre{ display:inline-flex; align-items:center; gap:var(--e-2,8px); box-sizing:border-box; min-height:var(--h-row,36px); padding:0 var(--e-4,16px); border:var(--bw,1px) solid var(--ligne-forte); border-radius:var(--r-full,999px); background:var(--bg-card); color:var(--texte-med); font-family:var(--font-ui); font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); line-height:1.2; white-space:nowrap; cursor:pointer; }
+@media (min-width:768px){ .mvpas-filtre{ min-height:var(--h-sm,28px); padding:0 var(--e-3,12px); font-size:var(--pt-txt,13px); } }
+.mvpas-filtre:hover{ background-image:linear-gradient(var(--survol),var(--survol)); }
+.mvpas-filtre.on, .mvpas-filtre[aria-pressed="true"]{ border-color:var(--accent-texte); background:var(--accent-doux); color:var(--accent-texte); }
+.mvpas-filtre:focus-visible{ outline:2px solid var(--focus,var(--accent)); outline-offset:2px; }
+.mvpas-filtre:disabled{ opacity:.45; cursor:not-allowed; }
+/* ★ FIN CHARTE-4 */
 
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.
    Deux rangées partout, Pilotage compris (pilotage.js pose désormais un vrai .mod-header) : l'identité (icône, titre,

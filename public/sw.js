@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.16
+// MA VIGNE — Service Worker v10.17
+// v10.17 (19/10/2026) — CHARTE-4a (§374) : le jeu de pastilles commun — statut (5 états, couleur de sens), étiquette neutre, étiquette de type (palette --tag-*), compteur, filtre ; sept familles d’avant passées au jeu (.pf-tag, .plan-badge, .mvc-tag, .sdp-tag, .pil-dz-tag, .chat-canal-badge, .p-fx-badge) ; trois textes d’état lisibles ajoutés à la charte (--ok/--attention/--danger-texte). styles.css, charte.css, planning.js, utils.js, index.html. APP 9.37 -> 9.38.
 // v10.16 (19/10/2026) — CHARTE-3c (§373) : les « − / + » (.cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp, 12 emplois) deviennent le bouton icône du jeu ; leur allure retirée de la feuille et du CSS de la Cave et du Cuvier. Vu dans leurs écrans (mv-captures). Contrôle des jetons réparé (sa regravure comptait les rayons à l’ancienne et desserrait le cliquet) ; trois cliquets regravés à la baisse. styles.css, cave.js, cuvier.js, utils.js, index.html. APP 9.36 -> 9.37.
 // v10.15 (19/10/2026) — CHARTE-3b (§372) : le bouton des fenêtres (.mbtn, 101 emplois) passe au jeu commun — seul : secondaire ; .verte, .acre, .phyte, .mbtn-p : principal (lie-de-vin) ; .mbtn-del : danger ; 38 boutons stylés sur place rendus au jeu (5 principaux de la Cave, 4 suppressions). Vu dans ses écrans (mv-captures). styles.css, index.html, cave.js, phyto.js, reglages.js, utils.js. APP 9.35 -> 9.36.
 // v10.14 (19/10/2026) — CHARTE-3 (§370) : le jeu de boutons commun — les pièces .mvbtn (principal, secondaire, discret, danger ; option et choix ; icône ; terrain 48 px au téléphone, bureau 36 px dès 768 px, compact 28 px), tout lu dans la charte (--sur-danger neuf) ; neuf anciennes classes y passent (Planning, Cave, Tracteur) et perdent leur allure propre ; quatre boutons stylés sur place rendus au jeu. Nouveau contrôle : mv-harnais-boutons. charte.css, styles.css, cave.js, planning.js, utils.js, index.html. APP 9.34 -> 9.35.
@@ -4546,7 +4547,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.16';
+const CACHE_NAME   = 'mavigne-v10.17';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4563,7 +4564,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.16 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.17 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4583,7 +4584,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.16 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.17 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -1161,3 +1161,25 @@ La suite proposée après CHARTE-3b, acceptée (« suite ») : « Valider » et 
 
 ### 373f. La leçon
 **Un cliquet se regrave avec la même règle qu’il contrôle.** Deux fonctions qui mesurent « la même chose » finissent par diverger (§24 n°18) ; ici, la divergence ne faisait rien rougir — elle rendait seulement la regravure dangereuse.
+
+## 374. ★★ CHARTE-4a — LE JEU DE PASTILLES COMMUN, PREMIER PASSAGE (19/10 — `src/styles.css` · `src/charte.css` · `src/planning.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-pastilles.mjs` (nouveau) · `scripts/mv-harnais-liste.mjs` · `scripts/mv-jetons-baseline.json` · `scripts/mv-espace-baseline.json` · `scripts/harnais-claude-md.mjs` · **APP 9.37 → 9.38, SW 10.16 → 10.17**, base `71004ba`)
+
+### 374a. La demande et la décision
+Après CHARTE-3c, l’inventaire et une maquette (« go »). Mesuré à `71004ba` : **147 sortes de pastilles** dans la feuille (97 employées), 15 hauteurs, 20 arrondis, 12 tailles de texte, 34 fonds, une dizaine faites à la main. Maquette Design « Ma Vigne — le jeu de pastilles commun (CHARTE-4) », quatre planches (clair, sombre, deux téléphones, aujourd’hui). Une question posée : étiquettes neutres, ou teintées par module. Réponse : **« regarde ce qui se fait chez les plus grands et go »**.
+
+Lu (19/10) : **Atlassian** sépare la Tag (catégoriser, discrète), le Lozenge (un statut, plein) et le Badge (des nombres seulement — « pour un statut, un Lozenge ») ; **Carbon** : la tag étiquette et catégorise, grise par défaut, colorée pour distinguer des catégories ; **Primer** (GitHub) : le Label porte un statut ou une catégorie avec des variantes de sens (succès, attention, danger…), le CounterLabel ajoute un nombre, neutre par défaut. Aucun ne teinte une étiquette par zone de produit. → **étiquettes neutres** ; la couleur dit un statut ou un type ; le compteur est neutre, plus fort quand le nombre compte, rouge pour une alerte.
+
+### 374b. Ce qui est livré
+- **Le jeu** (bloc `CHARTE-4` de `styles.css`, fermé par `/* ★ FIN CHARTE-4 */`, juste avant TETE-2 — `mv-harnais-tete2` exige que TETE-2 finisse la feuille) : `.mvpas` (20 px, arrondi 4, 12 px, jamais en capitales ; plus haut si deux lignes) ; statut `.mvpas-statut` + `fait` / `encours` / `afaire` / `surveiller` / `retard` (point + mot) ; `.mvpas-etiquette` ; `.mvpas-type` + 9 couleurs (la palette `--tag-*` de la charte) ; `.mvpas-compteur` + `fort` / `alerte` ; `.mvpas-filtre` (36 px au téléphone, 28 sur ordinateur, le choisi à la couleur d’action).
+- **Sept familles d’avant passées au jeu**, groupées sous les pièces ; leur règle ne garde que la mise en page : Planning `.pf-tag` (+ `-al` → en retard) et `.plan-badge` (+ `-warn` → à surveiller, `-abs` / `-cfin` → en retard, `-cdebut` → fait, `-ctrat` → type bleu) ; Cave `.mvc-tag` (FML fait / en cours / sans, acidité volatile → en retard) ; Tracteur `.sdp-tag` (en cours, écart → à surveiller) ; Pilotage `.pil-dz-tag` (ok → fait, ko → en retard, à l’arrêt → à faire) ; Discussion `.chat-canal-badge` (compteur d’alerte) ; Parcelles `.p-fx-badge` (compteur fort). Quatre pastilles du Planning peintes sur place rendues au jeu (« CP n j » → type bleu, « équipe » → type ambre, deux « Horaires » → neutres) ; `.plan-badge-warn` sorti d’un groupe de contraste qui le recolorait.
+- **Charte** : `--ok-texte`, `--attention-texte`, `--danger-texte`. Le texte d’état posé sur son fond doux passait sous 4,5:1 en clair (4,33 / 4,24 / 4,45) ; plus foncés d’un cran (4,75), ils sont redits en sombre (où l’état passe déjà, 5,7 à 6,6).
+- **`mv-harnais-pastilles`** (A à E), branché : les pièces dans le bloc ; aucune couleur ni taille de texte en dur, aucune capitale ; les 21 classes passées au jeu sans allure ailleurs (feuille, CSS des modules, style sur place ; exemption écrite : le second rang d’une pastille de session) ; le plafond des pastilles « maison » (**92**, ne peut que baisser) ; les couleurs de type et d’état dans la charte, en clair et en sombre. 5 vérifications, 10 contre-épreuves.
+- Cliquets regravés à la baisse : rayons en dur 230 → 228, espacements hors échelle 995 → 993 ; plancher des cercles 106 → 107.
+
+### 374c. Vu, et pas vu
+- **Vu** (`mv-captures`, Planning, Pilotage, session de tracteur ; ordinateur et téléphone, clair et sombre) : les écrans intacts, 12 captures valables.
+- **Pas vu** : les pastilles passées au jeu elles-mêmes — elles vivent dans des vues que l’outil n’ouvre pas encore (Planning › Les gens, Pilotage › Décider, le détail d’une session, la fiche d’une cuvée). Elles sont vues sur la maquette et vérifiées dans le code. Ajouter ces vues à `mv-captures` est la suite.
+- **Chaîne** : 451 commandes (le nouveau contrôle et ses contre-épreuves compris), **0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 374d. La leçon
+**Une pastille colorée par habitude finit par ne plus rien dire.** 34 fonds pour 97 pastilles : la couleur décorait. Les grands systèmes la réservent au sens — un statut, un type — et laissent le reste neutre ; c’est ce qui rend un écran lisible d’un coup d’œil.
