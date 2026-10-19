@@ -21,10 +21,11 @@ const lire = p => readFileSync(join(RACINE, p), 'utf8').replace(/\r\n/g, '\n');
 const DEBUT = '/* ═══ CHARTE-5 — LE JEU DE CARTES COMMUN', FIN = '/* ★ FIN CHARTE-5 */';
 const PIECES = ['mvcarte', 'mvcarte-tete', 'mvcarte-titre', 'mvcarte-clic', 'mvchiffres', 'mvchiffres-v', 'mvchiffres-l',
   'mvencadre', 'mvencadre-t', 'mvencadre-info', 'mvencadre-ok', 'mvencadre-attention', 'mvencadre-danger'];
-const MIGREES = ['pf-card', 'mtr-card', 'mur-card'];   // ★ CHARTE-5a (§379)
+const MIGREES = ['pf-card', 'mtr-card', 'mur-card',   // ★ CHARTE-5a (§379)
+  'cmp-alert'];   // ★ CHARTE-5c (§381) : l’encadré à classe des Réglages
 const EXEMPTIONS = [];
 const PLAFOND = 48;       // CHARTE-5a (§379) : cartes « maison », relevé au premier passage ; ne peut que baisser (D)
-const PLAFOND_ENC = 211;  // CHARTE-5a (§379) : encadrés faits à la main, 232 au premier passage ; ne peut que baisser (F). CHARTE-5b (§380) : 232 → 211
+const PLAFOND_ENC = 168;   /* CHARTE-5c (§381) : 211 → 168 */ //  // CHARTE-5a (§379) : encadrés faits à la main, 232 au premier passage ; ne peut que baisser (F). CHARTE-5b (§380) : 232 → 211
 const ALLURE = /^(background(-color|-image)?|border(-(color|width|style|radius|top|bottom|left|right))?|box-shadow)$/;
 const sansCom = s => s.replace(/\/\*[\s\S]*?\*\//g, '');
 const porte = (sel, c) => new RegExp('\\.' + c.replace(/-/g, '\\-') + '(?![\\w-])').test(sel.replace(/:not\([^)]*\)/g, ''));
@@ -116,7 +117,7 @@ if (!process.argv.includes('--contre')) {
     const bon = idx === null ? R.every((r, i) => i === 3 || i === 5 ? true : r.ok) : !R[idx].ok;
     console.log('  ' + (bon ? V(nom) : X(nom))); bon ? ok++ : ko++;
   };
-  rougit('une pièce disparaît du bloc → la règle A rougit', 0, x => { x.feuille = x.feuille.replace('.mvencadre-danger{', '.mvencadre-xdanger{'); });
+  rougit('une pièce disparaît du bloc → la règle A rougit', 0, x => { x.feuille = x.feuille.replace('.mvencadre-danger, ', '.mvencadre-xdanger, ');   /* CHARTE-5c : la règle est groupée avec .cmp-alert.bad */ });
   rougit('le bloc écrit une couleur en dur → la règle B rougit', 1, x => { x.feuille = x.feuille.replace('.mvencadre-info{ background:var(--info-doux);', '.mvencadre-info{ background:#E8F0FA;'); });
   rougit('une carte passée au jeu reprend une ombre dans la feuille → la règle C rougit', 2, x => { x.feuille = '.pf-card{ box-shadow:var(--shadow-sm); }\n' + x.feuille; });
   rougit('une carte passée au jeu reprend un arrondi dans un module → la règle C rougit', 2, x => { x.modules['src/app.js'] += "\nconst _c='.mtr-card{border-radius:15px}';"; });

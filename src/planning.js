@@ -1043,7 +1043,7 @@ function _planEffMax(mbr,m){
 // Encart affiche partout ou un compteur individuel n'aurait pas de sens.
 function _planCollNote(mbr){
   var n=_planEffMax(mbr,planMonth),ch=_planCollH(mbr,planMonth);
-  return '<div style="background:var(--tag-amber-bg,#fffbeb);border:1.5px solid #fcd34d;border-radius:12px;padding:13px 14px;margin-top:10px">'
+  return '<div class="mvencadre mvencadre-attention" style="margin-top:10px">'
     +'<div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--tag-amber-tx,#92400e);margin-bottom:4px">\u{1F465} \u00c9quipe collective \u00b7 '+n+' personne'+(n>1?'s':'')+' au plus fort</div>'
     +'<div style="font-size:15px;font-weight:700;color:var(--tag-amber-tx,#92400e);margin-bottom:6px">'+_planFmt(ch)+' '+PLAN_MOIS[planMonth]+'</div>'
     +'<div style="font-size:var(--pt-lbl,12px);color:var(--tag-amber-tx,#92400e);line-height:1.5">Heures d\u2019une journ\u00e9e multipli\u00e9es par le nombre de personnes pr\u00e9sentes ce jour-l\u00e0. Une \u00e9quipe collective n\u2019a ni compteur des 1607\u00a0h, ni cong\u00e9s pay\u00e9s, ni heures suppl\u00e9mentaires, ni relev\u00e9 individuel\u00a0: ces compteurs sont propres \u00e0 UN salari\u00e9. Le nombre par d\u00e9faut se r\u00e8gle dans R\u00e9glages \u203a \u00c9quipe, jour par jour ici via <b>S\u00e9lection multiple \u2192 \u{1F465} Effectif</b>.</div>'
@@ -5758,12 +5758,12 @@ function _planHsupCard(mbr){
     +'<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px"><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--terre,#8A5A38)">📊 Solde des heures · année</span><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">au '+PLAN_MOIS_C[dm]+' '+planYear+'</span></div>'
     +'<div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:12px"><span style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">Solde net</span><span style="font-size:var(--pt-xl,28px);font-weight:800;color:'+_netCol+'">'+_planFmtE(_yb.net)+'</span></div>'
     +'<div style="display:flex;gap:8px">'
-      +'<div style="flex:1;text-align:center;padding:8px 4px;background:var(--terre-pale,#F3EADF);border-radius:10px"><div style="font-size:15px;font-weight:800;color:var(--terre,#8A5A38)">'+_planFmt(_dep)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Départ</div></div>'
-      +'<div style="flex:1;text-align:center;padding:8px 4px;background:var(--vert-pale);border-radius:10px"><div style="font-size:15px;font-weight:800;color:var(--vert-med)">'+_plusStr+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Sup + cumul</div></div>'
-      +(_yb.maj>0.0001?'<div style="flex:1;text-align:center;padding:8px 4px;background:var(--orange-pale,#FDF0DE);border-radius:10px"><div style="font-size:15px;font-weight:var(--fw-bold,700);color:var(--orange)">+'+_planFmt(_yb.maj)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Major. + cumul</div></div>':'')
-      +'<div style="flex:1;text-align:center;padding:8px 4px;background:var(--rouge-pale);border-radius:10px"><div style="font-size:15px;font-weight:800;color:var(--rouge)">'+_minusStr+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Récup − cumul</div></div>'
-      +(_yb.minusPay>0.0001?'<div style="flex:1;text-align:center;padding:8px 4px;background:var(--orange-pale,#FDF0DE);border-radius:10px"><div style="font-size:15px;font-weight:800;color:var(--orange)">−'+_planFmt(_yb.minusPay)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Payé − cumul</div></div>':'')
-      +(_yb.dues>0.0001?'<div style="flex:1;text-align:center;padding:8px 4px;background:var(--rouge-pale);border-radius:10px"><div style="font-size:15px;font-weight:800;color:var(--rouge)">−'+_planFmt(_yb.dues)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Retir\u00e9es − cumul</div></div>':'')
+      +'<div class="mvencadre mvencadre-attention" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--terre,#8A5A38)">'+_planFmt(_dep)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Départ</div></div>'
+      +'<div class="mvencadre mvencadre-ok" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--vert-med)">'+_plusStr+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Sup + cumul</div></div>'
+      +(_yb.maj>0.0001?'<div class="mvencadre mvencadre-attention" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:var(--fw-bold,700);color:var(--orange)">+'+_planFmt(_yb.maj)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Major. + cumul</div></div>':'')
+      +'<div class="mvencadre mvencadre-danger" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--rouge)">'+_minusStr+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Récup − cumul</div></div>'
+      +(_yb.minusPay>0.0001?'<div class="mvencadre mvencadre-attention" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--orange)">−'+_planFmt(_yb.minusPay)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Payé − cumul</div></div>':'')
+      +(_yb.dues>0.0001?'<div class="mvencadre mvencadre-danger" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--rouge)">−'+_planFmt(_yb.dues)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Retir\u00e9es − cumul</div></div>':'')
     +'</div>'
     +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:10px;line-height:1.35">Cumul depuis le départ : heures reportées (+), récup ou acomptes pris (−). Rien ne périme en cours d’année — le solde se règle à la clôture du 31 décembre.'
       +(_yb.retenue>0.0001?' Retenu sur la paie depuis septembre\u00a0: '+_planFmt(_yb.retenue)+'.':'')
@@ -6745,7 +6745,7 @@ function _planRenderCadre(){
       +'</div>'
     +'</div>';
     if(delConfirm){
-      html+='<div class="plan-card" style="background:var(--orange-pale);border:1.5px solid rgba(220,38,38,0.4);margin-top:-6px;border-radius:0 0 14px 14px;padding:10px 14px;flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap">'
+      html+='<div class="plan-card mvencadre mvencadre-danger" style="margin-top:-6px;flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap">'
         +'<span style="flex:1;font-size:var(--pt-txt,13px);color:var(--rouge)">Supprimer \u00ab\u00a0'+id+'\u00a0\u00bb ? Les membres assign\u00e9s passeront \u00e0 "standard".</span>'
         +'<button class="mvbtn mvbtn-danger" onclick="planDeleteTemplate(\''+id+'\')">Confirmer</button>'
         +'<button class="plan-btn-pdf" onclick="planCancelDeleteTemplate()">Annuler</button>'
@@ -7380,7 +7380,7 @@ function _planSheetOneHtml(mode){
         +'<input type="number" id="plan-cp-heures" step="0.5" min="0" max="24" value="'+(Math.round(initCpH*100)/100)+'" style="width:90px;border:2px solid rgba(217,119,6,0.35);border-radius:10px;padding:10px;font-size:18px;text-align:center;outline:none;background:var(--orange-pale);box-sizing:border-box">'
         +'<span style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">h (selon planning)</span>'
       +'</div>'
-      +'<div style="font-size:var(--pt-micro,12px);color:var(--orange);background:var(--orange-pale);border:1px solid rgba(217,119,6,0.35);padding:10px 12px;border-radius:10px">'
+      +'<div class="mvencadre mvencadre-attention">'
         +'\u2600 Journ\u00e9e de cong\u00e9 pay\u00e9 \u2014 d\u00e9compte <strong>1 jour</strong> du solde.'+(pl>0?'':' Jour sans heures pr\u00e9vues \u2192 0 h d\u00e9duite, le jour est bien d\u00e9compt\u00e9.')
       +'</div>'
     +'</div>'

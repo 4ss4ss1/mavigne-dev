@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.42';
+export const APP_VERSION = '9.43';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.43', d: '2026-10-19', items: [   // CHARTE-5c (§381) : les encadrés d’alerte, partout ailleurs
+    { niv: 0, pour: ['tous'], emoji: 'check', titre: 'Les encadrés d’alerte, partout',
+      desc: "Les encadrés qui préviennent ou rassurent prennent les quatre tons communs dans le reste de l’appli : fenêtres de saisie, Planning, Accueil, Cave, Pilotage, et le bilan de la campagne dans les Réglages. Bleu pour informer, vert quand c’est bon, ambre pour faire attention, rouge pour un danger." },
+  ] },
   { v: '9.42', d: '2026-10-19', items: [   // CHARTE-5b (§380) : les encadrés du Phyto et des Réglages au jeu
     { niv: 0, pour: ['tous'], emoji: 'check', titre: 'Les encadrés d’alerte au même dessin',
       desc: "Au Phyto et dans les Réglages, les encadrés qui préviennent ou rassurent prennent les quatre tons communs : bleu pour informer, vert quand c’est bon, ambre pour faire attention, rouge pour un danger. Le texte reste noir, lisible ; la couleur dit le sens." },

@@ -7861,7 +7861,9 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
    CHIFFRES : une carte découpée en cases par des filets. L’ENCADRÉ : quatre tons (informer, réussi,
    attention, danger), une icône, jamais de bordure de côté. Aucune couleur ni taille écrite en dur ici
    (mv-harnais-cartes). Le dessin d’une carte d’avant passe au jeu ; sa marge intérieure reste la sienne.
-   ★ CHARTE-5a : trois cartes d’avant au jeu — Planning .pf-card, Accueil .mtr-card (Ma trace) et .mur-card (le mur). */
+   ★ CHARTE-5a : trois cartes d’avant au jeu — Planning .pf-card, Accueil .mtr-card (Ma trace) et .mur-card (le mur).
+   ★ CHARTE-5c (§381) : .cmp-alert des Réglages (ok / warn / bad) groupé sous l’encadré ; sa règle d’index.html ne garde
+     que la mise en page (une icône et un texte, en ligne). */
 .mvcarte, .pf-card, .mtr-card, .mur-card{ background:var(--bg-card); border:var(--bw,1px) solid var(--ligne,#E7E6E2); border-radius:var(--r-md,8px); box-shadow:none; }
 .mvcarte{ display:flex; flex-direction:column; gap:var(--e-2,8px); padding:var(--e-4,16px); color:var(--texte); }
 .mvcarte-tete{ display:flex; align-items:baseline; justify-content:space-between; gap:var(--e-3,12px); }
@@ -7885,16 +7887,20 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .mvchiffres-v{ font-family:var(--font-ui); font-size:var(--pt-lg,24px); font-weight:var(--fw-semi,600); letter-spacing:-0.02em; color:var(--texte); font-variant-numeric:tabular-nums; }
 .mvchiffres-l{ font-size:var(--pt-micro,12px); color:var(--texte-med); }
 /* l’encadré : quatre tons, une icône, le titre au ton, le texte à l’encre */
-.mvencadre{ display:block; padding:var(--e-3,12px) var(--e-3,12px); border:0; border-radius:var(--r-md,8px); background:var(--survol); color:var(--texte); font-size:var(--pt-txt,13px); line-height:1.45; }
+.mvencadre, .cmp-alert{ display:block; padding:var(--e-3,12px) var(--e-3,12px); border:0; border-radius:var(--r-md,8px); background:var(--survol); color:var(--texte); font-size:var(--pt-txt,13px); line-height:1.45; }
 /* avec une icône en premier enfant, l’encadré se range en ligne ; sinon il reste un bloc de texte (le texte d’un encadré
    d’avant, mêlé de <b> et de <br>, ne doit pas devenir une rangée d’éléments flex) — CHARTE-5b (§380) */
 .mvencadre:has(> svg){ display:flex; align-items:flex-start; gap:var(--e-2,8px); }
 .mvencadre > svg{ flex:none; width:18px; height:18px; color:var(--mvencadre-ton,var(--texte-med)); }
 .mvencadre-t{ display:block; font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); color:var(--mvencadre-ton,var(--texte)); }
 .mvencadre-info{ background:var(--info-doux); --mvencadre-ton:var(--info-texte); }
-.mvencadre-ok{ background:var(--ok-doux); --mvencadre-ton:var(--ok-texte); }
-.mvencadre-attention{ background:var(--attention-doux); --mvencadre-ton:var(--attention-texte); }
-.mvencadre-danger{ background:var(--danger-doux); --mvencadre-ton:var(--danger-texte); }
+.mvencadre-ok, .cmp-alert.ok{ background:var(--ok-doux); --mvencadre-ton:var(--ok-texte); }
+.mvencadre-attention, .cmp-alert.warn{ background:var(--attention-doux); --mvencadre-ton:var(--attention-texte); }
+.mvencadre-danger, .cmp-alert.bad{ background:var(--danger-doux); --mvencadre-ton:var(--danger-texte); }
+/* .cmp-alert (bilan de la campagne, Réglages) : une icône et un texte en ligne — sa mise en page quitte le <style> d’index.html
+   (mv-harnais-couches : une classe ne se déclare que dans une feuille) */
+.cmp-alert{ display:flex; gap:var(--e-2,8px); align-items:flex-start; margin-top:var(--e-2,8px); }
+.cmp-alert .ic{ flex-shrink:0; font-weight:var(--fw-bold,700); color:var(--mvencadre-ton,var(--texte-med)); }
 /* ★ FIN CHARTE-5 */
 
 /* JALONS-2 (§341) — « Nouveau jalon » dans la feuille d'après validation, et « Mes jalons » dans « Ma trace ». */

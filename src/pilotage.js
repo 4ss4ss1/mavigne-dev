@@ -1848,7 +1848,7 @@ function _pilPanelTemps(d){
     +_rowR('#3D6B27','Travaux vigne','(bar\u00e8me)',_vig,_pV,_etpF(_vig))
     +((_tH>0)?_rowR('#4A9FC8','Tracteur','(estim\u00e9 h/ha)',_tH,_pT,_etpF(_tH)):'')
     +(_surch?'':_rowR('#8A5A38','Autres',((_tH>0)?'(cave, trajet, entretien\u2026)':'(tracteur, cave, trajet\u2026)'),_aut,_pA,_etpF(_aut)))
-    +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:10px;background:rgba(74,159,200,.08);border-radius:8px;padding:8px 11px">'+_footR+'</div>'
+    +'<div class="mvencadre mvencadre-info" style="margin-top:10px">'+_footR+'</div>'
   +'</div>';
   var body=chips+repartBlock;
   if(s.etp_frise!==0){ body+='<div style="font-size:var(--pt-lbl,12px);color:var(--texte-doux);margin:14px 0 6px">Frise pr\u00e9vu / r\u00e9el \u2014 fen\u00eatres modifiables dans la <b>roue crant\u00e9e</b></div>'

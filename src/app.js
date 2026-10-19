@@ -1616,7 +1616,7 @@ function _initLoginDemo(){
     +' oninput="this.value=this.value.toUpperCase()"'
     +' onkeydown="if(event.keyCode===13)confirmDemoCode()">'
     +'</div>'
-    +'<div id="demo-code-error" style="display:none;background:rgba(224,112,96,0.12);border:1px solid rgba(224,112,96,0.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:var(--pt-micro,12px);color:#E07060;text-align:center"></div>'
+    +'<div id="demo-code-error" class="mvencadre mvencadre-danger" style="display:none;margin-bottom:12px;text-align:center"></div>'
     +'<button onclick="confirmDemoCode()" style="width:100%;background:var(--or);color:#0C1A0A;border:none;border-radius:12px;padding:13px;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Accéder à la démo</button>'
     +'<div style="text-align:center;margin-top:14px;font-size:var(--pt-micro,11px);color:var(--texte-doux)">Code valable 30 jours &middot; <a href="tel:+33699424859" style="color:var(--or);text-decoration:none">06 99 42 48 59</a></div>';
 }
@@ -10924,7 +10924,7 @@ function _renderNiveauxModal(){
   if(cascadeUp.length>0){
     var topVal=_nivSelDone.slice().sort(function(a,b){return b-a;})[0];
     var skipMsg='N'+topVal+' valid\u00e9 \u2192 N'+cascadeUp.join('+N')+' auto-valid\u00e9'+(cascadeUp.length>1?'s':'');
-    html+='<div style="margin-bottom:10px;padding:9px 12px;border-radius:8px;background:rgba(74,159,200,0.08);border:1px solid rgba(74,159,200,0.22);color:var(--acier-med);font-size:var(--pt-micro,12px);display:flex;gap:8px;align-items:flex-start"><span>&#9889;</span><span>'+skipMsg+'</span></div>';
+    html+='<div class="mvencadre mvencadre-info" style="margin-bottom:10px;display:flex;gap:8px;align-items:flex-start"><span>&#9889;</span><span>'+skipMsg+'</span></div>';
   }
   // Section override par parcelle
   html+='<div style="border-top:1px solid rgba(255,255,255,0.07);padding-top:14px;margin-top:4px">';
@@ -10938,7 +10938,7 @@ function _renderNiveauxModal(){
       +'</div>';
   }
   if(_nivOv!==null&&_nivOv!==planGlobal){
-    html+='<div style="margin-top:8px;padding:8px 12px;border-radius:7px;background:rgba(74,159,200,0.08);border:1px solid rgba(74,159,200,0.2);color:var(--acier-med);font-size:var(--pt-micro,11px)">&#9881; Override activ\u00e9 — cette parcelle diff\u00e8re du plan saison</div>';
+    html+='<div class="mvencadre mvencadre-info" style="margin-top:8px">&#9881; Override activ\u00e9 — cette parcelle diff\u00e8re du plan saison</div>';
   }
   html+='</div>';
   body.innerHTML=html;
@@ -11097,7 +11097,7 @@ function _renderPassagesModal(){
       +'</div>';
   }
   if(_passOv!==null&&_passOv!==planDef){
-    html+='<div style="margin-top:8px;padding:8px 12px;border-radius:7px;background:rgba(74,159,200,0.08);border:1px solid rgba(74,159,200,0.2);color:var(--acier-med);font-size:var(--pt-micro,11px)">Override activé — cette parcelle diffère du plan saison</div>';
+    html+='<div class="mvencadre mvencadre-info" style="margin-top:8px">Override activé — cette parcelle diffère du plan saison</div>';
   }
   html+='</div>';
   body.innerHTML=html;
@@ -14693,7 +14693,7 @@ function exportRapportSaison(seasonNom){
         +'<div style="font-size:var(--pt-micro,11px);font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--texte-doux)">Travaux vigne \u2014 avancement</div>'
         +'<div style="display:flex;align-items:baseline;gap:9px;margin-top:8px"><span style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:30px;font-weight:700;color:#3D6B27">'+_vpct+'\u00a0%</span><span style="font-size:var(--pt-micro,12px);color:var(--texte-doux)">'+f0(sHd)+' h r\u00e9alis\u00e9es / '+f0(vigneH)+' h au total</span></div>'
         +'<div style="height:9px;background:var(--ligne);border-radius:6px;overflow:hidden;margin-top:10px"><i style="display:block;height:100%;width:'+_vpct+'%;background:linear-gradient(90deg,#5C8A3A,#3D6B27);border-radius:6px"></i></div></div>'
-        +'<div style="border:1px solid rgba(61,107,39,.22);border-radius:12px;padding:14px;background:linear-gradient(135deg,rgba(61,107,39,.08),rgba(194,135,30,.08));display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">'
+        +'<div class="mvencadre mvencadre-ok" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">'
         +'<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:38px;font-weight:700;color:#3D6B27;line-height:1">'+_etpS(vigneH)+'<span style="font-size:15px;color:#8A5A38"> ETP</span></div>'
         +'<div style="font-size:var(--pt-micro,12px);font-weight:600;margin-top:4px">ETP vigne</div><div style="font-size:10px;color:var(--texte-doux);margin-top:3px">pour les seuls travaux vigne</div></div></div>';
     } else {

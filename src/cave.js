@@ -753,7 +753,7 @@ function _copUpdateOpDate(){
 
 function _caveSaisBanner() {
   if(!isSaisonnier()) return '';
-  return '<div style="margin:0 0 10px;padding:8px 12px;border-radius:10px;background:rgba(184,90,26,.08);border:1px solid rgba(184,90,26,.2);display:flex;align-items:center;gap:8px;font-size:var(--pt-micro,11px);color:#B85A1A">'
+  return '<div class="mvencadre mvencadre-attention" style="margin:0 0 10px;display:flex;align-items:center;gap:8px">'
     +_mvIcon('cadenas',16)+' Lecture seule \u2014 votre r\u00f4le ne permet pas de modifier les donn\u00e9es.</div>';
 }
 
@@ -2614,9 +2614,9 @@ function openCuveeDetail(cuvId,dans){
   // SO2 + AV chips
   if(lSO2L||lSO2T||lAv){
     html+='<div style="display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap;">';
-    if(lSO2L)html+='<div style="background:var(--bg-card);border:1px solid rgba(74,159,200,0.3);border-radius:10px;padding:8px 12px;flex:1;min-width:80px;"><div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);">SO\u2082 libre</div><div style="font-size:var(--pt-sm,16px);font-weight:700;color:var(--ink-info,#4A9FC8);">'+lSO2L+'<span style="font-size:var(--pt-micro,11px);font-weight:400;"> mg/L</span></div></div>';
-    if(lSO2T)html+='<div style="background:var(--bg-card);border:1px solid rgba(74,159,200,0.2);border-radius:10px;padding:8px 12px;flex:1;min-width:80px;"><div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);">SO\u2082 total</div><div style="font-size:var(--pt-sm,16px);font-weight:700;color:var(--ink-info,#4A9FC8);">'+lSO2T+'<span style="font-size:var(--pt-micro,11px);font-weight:400;"> mg/L</span></div></div>';
-    if(lAv)html+='<div style="background:var(--bg-card);border:1px solid rgba(224,112,96,0.25);border-radius:10px;padding:8px 12px;flex:1;min-width:80px;"><div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);">Ac. volatile</div><div style="font-size:var(--pt-sm,16px);font-weight:700;color:var(--rouge,#E07060);">'+lAv+'<span style="font-size:var(--pt-micro,11px);font-weight:400;"> g/L</span></div></div>';
+    if(lSO2L)html+='<div class="mvencadre mvencadre-info" style="flex:1;min-width:80px"><div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);">SO\u2082 libre</div><div style="font-size:var(--pt-sm,16px);font-weight:700;color:var(--ink-info,#4A9FC8);">'+lSO2L+'<span style="font-size:var(--pt-micro,11px);font-weight:400;"> mg/L</span></div></div>';
+    if(lSO2T)html+='<div class="mvencadre mvencadre-info" style="flex:1;min-width:80px"><div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);">SO\u2082 total</div><div style="font-size:var(--pt-sm,16px);font-weight:700;color:var(--ink-info,#4A9FC8);">'+lSO2T+'<span style="font-size:var(--pt-micro,11px);font-weight:400;"> mg/L</span></div></div>';
+    if(lAv)html+='<div class="mvencadre mvencadre-danger" style="flex:1;min-width:80px"><div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);">Ac. volatile</div><div style="font-size:var(--pt-sm,16px);font-weight:700;color:var(--rouge,#E07060);">'+lAv+'<span style="font-size:var(--pt-micro,11px);font-weight:400;"> g/L</span></div></div>';
     html+='</div>';
   }
   // SO2 sparkline
