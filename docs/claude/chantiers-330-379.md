@@ -1021,10 +1021,40 @@ Le deuxième étage du plan confirmé le 19/10 (§367a) — « un seul fichier �
 - **Hors de ce lot** : deux contre-épreuves qui ne sont pas dans la chaîne étaient déjà rouges sur `d741866` — `mv-harnais-jetons --contre` (« on retire --r-md », « un cercle converti » : le plancher des cercles est gravé à 80 pour 107 cercles réels) et `mv-harnais-cuvdoc --contre`.
 
 ### 368e. Les décisions
-- **Le contraste renforcé reste dans index.html, exempté.** Son `<style>` passe AVANT la feuille : dans la charte, il doit garder cette place (en tête), sinon un réglage clair renforcé passerait devant le sombre ; et la preuve se refait avec `data-hicontrast`. Un lot à lui, avec sa preuve.
+- **Le contraste renforcé reste dans index.html, exempté** — rangé au lot suivant (§369). ⚠️ Écrit ici d’abord : « son `<style>` passe AVANT la feuille, donc en tête de la charte ». **Faux** : ce `<style>` est dans le `<body>`, lu APRÈS la feuille — d’où sa place en fin de charte (§369b).
 - **Les réglages locaux à une pièce restent dans la feuille** (`.ck2{--bg-app:inherit}`, les blocs du cockpit) : ce sont des renvois propres à un bloc, pas des réglages de l’appli. Le témoin du harnais le garantit.
 - **Les documents imprimés gardent leur `:root`** : un autre document, qui ne charge pas la feuille (même raison que l’exemption `--ligne` de `mv-harnais-jetons`).
 - **D est la règle de §59 mise sous contrôle** : la bascule manuelle et le mode automatique du téléphone ne peuvent plus diverger sans rougir.
 
 ### 368f. La leçon
 **Un fichier se range en le prouvant, pas en le relisant.** 440 réglages déplacés : la seule preuve qui vaille était de demander au navigateur la valeur de chacun, dans chaque situation, avant et après. Et le contrôle écrit pour le rangement a trouvé, à son premier passage, trois réglages qu’aucune relecture n’avait vus — dans index.html.
+
+## 369. ★ CHARTE-2B — LE MODE PLEIN SOLEIL REJOINT LA CHARTE : PLUS AUCUN RÉGLAGE HORS D’ELLE (19/10 — `src/charte.css` · `index.html` · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `scripts/mv-harnais-charte.mjs` · `scripts/harnais-claude-md.mjs` · **APP 9.33 → 9.34, SW 10.12 → 10.13**, base `c770f2f`)
+
+### 369a. La demande
+Le reste ouvert de CHARTE-2 (§368e) : les trois réglages du mode plein soleil (le contraste renforcé : le bouton du hub pose `data-hicontrast="1"` sur `#app-root`), encore dans un `<style>` d’index.html, exemptés. Nico : « suite ». CHARTE-2 poussé (`c770f2f`), identique au zip.
+
+### 369b. Ce qui a été lu avant d’écrire
+- ⚠️ **Le `<style>` n’est pas là où §368 le disait.** Il est dans le `<body>` (lignes 202 à 376 d’index.html ; `</head>` est à la ligne 57) : le navigateur le lit APRÈS la feuille, que Vite pose dans le `<head>`, au build comme en développement. Les trois règles vont donc en FIN de charte, pas en tête.
+- Elles ne posent que `--texte`, `--texte-med` et `--texte-doux` sur `#app-root` ; en sombre, la bascule manuelle et le mode automatique redisent les mêmes valeurs.
+- Le même `<style>` porte aussi le CSS du splash (il reste en ligne, §4) et ~120 lignes de règles d’écran : campagne, archives, périodes, choix des tâches, carte vivante du hub.
+
+### 369c. Ce qui est livré
+- **`src/charte.css`** : les trois règles, telles quelles, en fin de fichier, sous un commentaire qui dit d’où elles viennent et pourquoi là.
+- **`index.html`** : elles en sortent ; une ligne de commentaire dit où elles sont. Les deux règles d’écran du mode (`.hub-card-sub`, `.hub-livestat`) restent : ce ne sont pas des réglages.
+- **`mv-harnais-charte`** : plus aucune exemption pour index.html ; D compare à part le sombre du plein soleil (il se mêlait sinon au sombre ordinaire) ; une contre-épreuve de plus.
+- **Le défaut que le rangement a fait voir, corrigé** : `mv-harnais-theme` (§59) a rougi dès que les trois règles sont entrées dans la charte — « aucune variable de thème enfermée sous #app-root » : `--texte`, `--texte-med`, `--texte-doux`. Le plein soleil ne se posait que sur `#app-root` ; les fenêtres, ses SŒURS, gardaient les encres ordinaires — le défaut exact de §59, que le contrôle ne voyait pas tant que les règles vivaient dans index.html. `_hcApply` (app.js) pose désormais aussi l’attribut sur `<html>`, et les trois règles emmènent `:root`. Annoncé (WHATS_NEW 9.34, niv 0).
+
+### 369d. Mesuré
+- **Au navigateur** (Chromium 153) : la charte et la feuille d’avant, plus le `<style>` d’index.html à sa vraie place (après), contre la nouvelle charte : 229 réglages × 5 éléments (html, `#app-root`, une page, `.hub-card-sub`, `.hub-livestat`) × 12 contextes dont 6 en plein soleil, plus couleur, fond, police et `color-scheme` : **13 980 valeurs, 0 écart** pour le seul rangement. Avec la correction (l’attribut aussi sur `<html>`) : 48 écarts, **tous en plein soleil et tous voulus** — sur `<html>`, ses trois encres (`--texte`, `--texte-med`, `--texte-doux`) ; et `--meteo-nuage` partout : réglage DÉRIVÉ (`var(--texte-doux)`, posé sur `:root`), il se calcule sur `<html>` puis descend tel quel — il gardait l’encre ordinaire en plein soleil, il suit maintenant l’encre douce renforcée (24 = 4 éléments × 6 contextes : ce seul réglage). Zéro écart hors plein soleil, zéro autre réglage.
+- **La charte** : 449 réglages, 30 blocs, 121 redits en sombre.
+- **Chaîne** : 447 commandes, **0 rouge**, jouée d’un trait après la correction (707 s). La première passe, avant elle, avait rougi sur `mv-harnais-theme` : c’est ce rouge qui a montré le défaut du plein soleil.
+
+### 369e. Trouvé en route
+- **§368e et le §28 disaient « en tête de charte : son `<style>` passe avant la feuille ».** Faux, corrigé aux deux endroits. La place d’un `<style>` se lit dans le fichier — `<head>` ou `<body>` —, elle ne se suppose pas : même famille que le z-index qui se mesure (§24).
+- **~120 lignes de règles d’écran vivent encore dans index.html**, après la feuille. Elles appartiennent à styles.css ; les y ramener demande de garder leur rang (TETE-2 doit rester le dernier bloc, `mv-harnais-tete2`) et une preuve au navigateur (§28).
+
+- **Un réglage dérivé se calcule là où il est posé.** `--meteo-nuage: var(--texte-doux)` sur `:root` ignorait tout changement de `--texte-doux` fait plus bas, sur `#app-root` : même mécanique que `--ligne` (§DS-0, « redit dans les deux blocs sombres »). Poser le mode sur `<html>` règle les deux d’un coup.
+
+### 369f. La leçon
+**Avant de déplacer une règle, lire où le navigateur la lit.** Posées en tête de charte comme §368 le prévoyait, ces trois règles auraient changé de rang. Ici sans effet visible — les règles sombres du plein soleil sont plus précises —, mais c’est la preuve au navigateur qui devait le montrer, pas le raisonnement.

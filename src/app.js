@@ -5971,6 +5971,8 @@ function _hcLoad(){try{return localStorage.getItem(_hcKey())==='1';}catch(e){ret
 function _hcApply(on){
   var r=document.getElementById('app-root');if(!r)return;
   if(on)r.setAttribute('data-hicontrast','1');else r.removeAttribute('data-hicontrast');
+  // ★ CHARTE-2B (§369) : comme le thème (§59), le plein soleil se pose AUSSI sur <html> — les fenêtres, sœurs de #app-root, gardaient sinon les encres ordinaires
+  if(on)document.documentElement.setAttribute('data-hicontrast','1');else document.documentElement.removeAttribute('data-hicontrast');
   var _hcS=document.getElementById('regl-hc-state'); if(_hcS){_hcS.textContent=on?'Activ\u00e9':'Activer';}
 }
 function toggleHiContrast(){

@@ -45,12 +45,8 @@ const EXEMPTIONS = [
     raison: 'le relevé d’heures imprimé (_rsCss) : un document A4 ouvert dans sa propre fenêtre, sans la feuille — '
           + 'il pose ses propres couleurs (même exemption que mv-harnais-jetons pour --ligne)' },
   { fichier: 'src/cave.js', n: 2,
-    raison: 'les documents imprimés de la Cave (mv-harnais-cuvdoc) : ouverts dans leur propre fenêtre, sans la feuille' },
-  { fichier: 'index.html', n: 3,
-    raison: 'le mode « contraste renforcé » (data-hicontrast, CONTRASTE-1/2) : ses réglages sont ENCORE dans un <style> '
-          + 'd’index.html, chargé AVANT la feuille. Les ranger dans la charte demande de garder cette place (en tête de la '
-          + 'charte) et une preuve au navigateur avec data-hicontrast, clair et sombre : prochain lot (§28). Ne pas en ajouter.' }
-];
+    raison: 'les documents imprimés de la Cave (mv-harnais-cuvdoc) : ouverts dans leur propre fenêtre, sans la feuille' }
+];   // ★ CHARTE-2B (§369) : le mode plein soleil a rejoint la charte — plus aucune exemption pour index.html
 
 /* ══ Lecture du CSS : énoncés de premier niveau, @media déroulés d'un cran ═══════════════ */
 const sansCom = s => s.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -154,7 +150,8 @@ function verifier(SRC) {
     const cible = !r.media && sel.includes('[data-theme="dark"]') ? manuel
                 : (/prefers-color-scheme:dark/.test(media) && sel.includes(':not([data-theme="light"])')) ? auto : null;
     if (!cible) continue;
-    for (const d of decls(r.corps)) { const k = d.indexOf(':'); cible.set(d.slice(0, k).trim(), d.slice(k + 1).trim()); }
+    const variante = sel.includes('[data-hicontrast') ? 'plein soleil · ' : '';   // ★ CHARTE-2B : le plein soleil se compare à part
+    for (const d of decls(r.corps)) { const k = d.indexOf(':'); cible.set(variante + d.slice(0, k).trim(), d.slice(k + 1).trim()); }
   }
   for (const [k, v] of manuel) if (!auto.has(k)) f.D.push(k + ' : redit pour la bascule manuelle, pas pour le mode automatique');
     else if (auto.get(k) !== v) f.D.push(k + ' : « ' + v + ' » en manuel, « ' + auto.get(k) + ' » en automatique');
@@ -186,7 +183,7 @@ if (!CONTRE) {
   const CAS = [
     ['un réglage revient au milieu de styles.css', 'A', () => muter(FEUILLE, s => s + '\n:root{--zz-a:1px}\n')],
     ['un réglage revient dans un @media de styles.css', 'A', () => muter(FEUILLE, s => s + '\n@media (min-width:1px){ #app-root[data-theme="dark"]{--zz-b:1px} }\n')],
-    ['index.html pose un réglage de plus', 'A', () => muter('index.html', s => s.replace('</head>', '<style>:root{--zz-c:1px}</style></head>'))],
+    ['index.html pose un réglage', 'A', () => muter('index.html', s => s.replace('</head>', '<style>:root{--zz-c:1px}</style></head>'))],
     ['une page GT pose un réglage', 'A', () => muter('src/gt/console.html', s => s + '\n<style>:root{--zz-i:1px}</style>\n')],
     ['un module pose un réglage sur la racine', 'A', () => muter('src/reserve.js', s => s + "\nwindow._zz = '<style>:root{--zz-d:1px}</style>';\n")],
     ['une règle d’écran glisse dans la charte', 'B', () => muter(CHARTE, s => s + '\n.zz-e{color:red}\n')],
@@ -195,6 +192,7 @@ if (!CONTRE) {
     ['un module importe la charte une seconde fois', 'C', () => muter('src/app.js', s => "import './charte.css';\n" + s)],
     ['une couleur sombre changée dans la seule bascule manuelle', 'D', () => muter(CHARTE, s => s.replace('--texte:#EDECE9;', '--texte:#FFFFFF;'))],
     ['un réglage sombre ajouté au seul mode automatique', 'D', () => muter(CHARTE, s => s.replace(/(:root:not\(\[data-theme="light"\]\)\s*\{)/, '$1--zz-f:1px;'))],
+    ['le plein soleil sombre perd son pendant automatique', 'D', () => muter(CHARTE, s => s.replace(/@media\(prefers-color-scheme:dark\)\{#app-root:not\(\[data-theme="light"\]\)\[data-hicontrast="1"\][^{]*\{[^}]*\}\}/, ''))],
     ['une exemption ne sert plus', 'E', () => muter('src/cave.js', s => s.replace(/:root\{--bleu:/, ':racine{--bleu:'))]
   ];
   for (const [nom, regle, fab] of CAS) {

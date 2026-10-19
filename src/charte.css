@@ -423,3 +423,13 @@
    · La pastille de présence clignote, les jours travaillés au planning ; fixe si les animations sont coupées.
    · La charge restante : un point par mesure, plus de zone remplie. */
 :root{--meteo-soleil:var(--or);--meteo-pluie:var(--bleu);--meteo-nuage:var(--texte-doux)}
+
+/* ── LE MODE PLEIN SOLEIL (contraste renforcé : le bouton du hub pose data-hicontrast="1" sur #app-root) ──
+   CHARTE-2B (§369) : venu du <style> d'index.html, qui passe APRÈS la feuille — d'où sa place, en fin de
+   charte. Des encres plus franches en clair ; en sombre, deux blocs à l'identique (bascule manuelle et mode
+   automatique du téléphone). Ses deux règles d'écran (.hub-card-sub, .hub-livestat) restent dans index.html :
+   ce ne sont pas des réglages. Chaque bloc emmène :root (§59) : app.js pose aussi data-hicontrast sur <html>,
+   sinon les fenêtres — sœurs de #app-root — gardaient les encres ordinaires (défaut d'avant, corrigé ici). */
+#app-root[data-hicontrast="1"],:root[data-hicontrast="1"]{--texte:#0A0A06;--texte-med:#16160F;--texte-doux:#33332A;}
+#app-root[data-theme="dark"][data-hicontrast="1"],:root[data-theme="dark"][data-hicontrast="1"]{--texte:#FFFFFF;--texte-doux:#DCDCD2;--texte-med:#F0F0E8;}
+@media(prefers-color-scheme:dark){#app-root:not([data-theme="light"])[data-hicontrast="1"],:root:not([data-theme="light"])[data-hicontrast="1"]{--texte:#FFFFFF;--texte-doux:#DCDCD2;--texte-med:#F0F0E8;}}
