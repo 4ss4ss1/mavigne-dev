@@ -1335,7 +1335,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .rp-chip.sel{border-color:var(--orange);background:var(--orange-pale);color:var(--orange);}
 .rp-qrow{display:flex;align-items:center;gap:10px;background:var(--gris-clair);border-radius:13px;padding:10px 14px;margin-bottom:18px;}
 .rp-qrow .l{flex:1;font-size:var(--pt-txt,13px);font-weight:600;}
-.rp-stp{width:42px;height:42px;border-radius:11px;border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte);font-size:var(--pt-md,20px);font-weight:600;cursor:pointer;}
 .rp-qval{min-width:40px;text-align:center;font-family:var(--font-titre);font-size:var(--pt-lg,24px);font-weight:600;}
 .rp-save{width:100%;min-height:52px;border:none;border-radius:13px;background:var(--vert-med);color:#fff;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;}
 .rp-save:disabled{opacity:0.4;}
@@ -1603,7 +1602,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .cave-op-types{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px;}
 .cave-cuvee-chip{padding:7px 13px;border-radius:20px;border:1px solid var(--bord);background:var(--fond-carte);font-size:var(--pt-txt,13px);cursor:pointer;color:var(--texte);white-space:nowrap;line-height:1.3;}
 .cave-stepper-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
-.cave-stepper-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--bord);background:var(--gris-clair);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;color:var(--texte);}
+.cave-stepper-btn{ flex-shrink:0; }
 .cave-stepper-val{flex:1;text-align:center;font-size:var(--pt-sm,16px);font-weight:600;color:var(--texte);}
 .cave-calc-result{display:flex;align-items:center;justify-content:space-around;padding:11px 14px;border-radius:10px;border:1px solid rgba(192,132,90,.3);background:rgba(192,132,90,.07);margin-top:0;}
 .cave-calc-col{text-align:center;}
@@ -2990,10 +2989,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .mvc-set-t{ font-size:15px; font-weight:600; color:var(--texte,#2A2622); }
 .mvc-set-d{ font-size:var(--pt-txt,13px); color:var(--texte-doux,#7A736A); margin-top:4px; line-height:1.4; }
 .mvc-stepper{ display:flex; align-items:center; justify-content:center; gap:18px; margin-top:14px; }
-.mvc-step-btn{ width:46px; height:46px; border-radius:13px; border:1px solid rgba(138,90,56,.22);
-  background:var(--bg-app,#F2EFE7); color:var(--terre,#8A5A38); font-size:var(--pt-lg,24px); line-height:1; cursor:pointer;
-  -webkit-tap-highlight-color:transparent; }
-.mvc-step-btn:active{ background:rgba(138,90,56,.1); }
+.mvc-step-btn{ -webkit-tap-highlight-color:transparent; }
 .mvc-step-val{ text-align:center; min-width:70px; }
 .mvc-step-num{ font-family:var(--font-titre); font-size:38px; font-weight:700; color:var(--terre,#8A5A38); line-height:1; }
 .mvc-step-unit{ font-size:10px; font-weight:600; letter-spacing:1px; color:var(--texte-doux,#7A736A); margin-top:2px; }
@@ -8040,23 +8036,27 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
      garde que la mise en page (largeur, marge, flex).
    ★ CHARTE-3b (§372) : le bouton des fenêtres, .mbtn (101 emplois) — seul : secondaire ; .verte, .acre,
      .phyte et .mbtn-p : principal ; .mbtn-del : danger. Ses styles écrits sur place rendus au jeu.
+   ★ CHARTE-3c (§373) : les « − / + » (.cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp) deviennent des boutons icône.
    ═══════════════════════════════════════════════════════════════════════════ */
-.mvbtn, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn, .plan-btn-pdf, .cave-toggle-btn, .trac-type-btn, .cave-op-type-btn, .rfut-reason-btn, .mbtn, .mbtn-del{ display:inline-flex; align-items:center; justify-content:center; gap:var(--e-2,8px); box-sizing:border-box; min-height:var(--h-row-2,48px); padding:0 var(--e-5,20px); border:var(--bw,1px) solid transparent; border-radius:var(--r-sm,6px); font-family:var(--font-ui); font-size:var(--pt-sm,16px); font-weight:var(--fw-semi,600); line-height:1.2; cursor:pointer; text-decoration:none; }
+.mvbtn, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn, .plan-btn-pdf, .cave-toggle-btn, .trac-type-btn, .cave-op-type-btn, .rfut-reason-btn, .mbtn, .mbtn-del, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp{ display:inline-flex; align-items:center; justify-content:center; gap:var(--e-2,8px); box-sizing:border-box; min-height:var(--h-row-2,48px); padding:0 var(--e-5,20px); border:var(--bw,1px) solid transparent; border-radius:var(--r-sm,6px); font-family:var(--font-ui); font-size:var(--pt-sm,16px); font-weight:var(--fw-semi,600); line-height:1.2; cursor:pointer; text-decoration:none; }
 @media (min-width:768px){
-  .mvbtn, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn, .plan-btn-pdf, .cave-toggle-btn, .trac-type-btn, .cave-op-type-btn, .rfut-reason-btn, .mbtn, .mbtn-del{ min-height:var(--h-row,36px); padding:0 var(--e-4,16px); font-size:var(--pt-base,14px); }
+  .mvbtn, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn, .plan-btn-pdf, .cave-toggle-btn, .trac-type-btn, .cave-op-type-btn, .rfut-reason-btn, .mbtn, .mbtn-del, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp{ min-height:var(--h-row,36px); padding:0 var(--e-4,16px); font-size:var(--pt-base,14px); }
 }
 .mvbtn.mvbtn-terrain{ min-height:var(--h-row-2,48px); padding:0 var(--e-5,20px); font-size:var(--pt-sm,16px); }
 .mvbtn.mvbtn-bureau{ min-height:var(--h-row,36px); padding:0 var(--e-4,16px); font-size:var(--pt-base,14px); }
 .mvbtn.mvbtn-compact{ min-height:var(--h-sm,28px); padding:0 var(--e-3,12px); font-size:var(--pt-txt,13px); }
-.mvbtn.mvbtn-icone{ padding:0; width:var(--h-row-2,48px); }
-@media (min-width:768px){ .mvbtn.mvbtn-icone{ width:var(--h-row,36px); } }
+.mvbtn.mvbtn-icone, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp{ padding:0; width:var(--h-row-2,48px); }
+@media (min-width:768px){ .mvbtn.mvbtn-icone, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp{ width:var(--h-row,36px); } }
+/* CHARTE-3c (§373) : les « − / + » sont des boutons icône ; leur signe garde une taille lisible, la petite variante passe en bureau */
+.cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp{ font-size:var(--pt-md,20px); line-height:1; }
+.mvc-step-btn.sm{ width:var(--h-row,36px); min-height:var(--h-row,36px); font-size:var(--pt-sm,16px); }
 .mvbtn.mvbtn-icone.mvbtn-terrain{ width:var(--h-row-2,48px); }
 .mvbtn.mvbtn-icone.mvbtn-compact{ width:var(--h-sm,28px); }
 /* Principal : l'action de l'écran, une seule par écran */
 .mvbtn-principal, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn.pf-btn-ok, .mbtn.verte, .mbtn.acre, .mbtn.phyte, .mbtn.mbtn-p{ background:var(--accent); border-color:var(--accent); color:var(--sur-accent); }
 .mvbtn-principal:hover, .plan-btn-saisir:hover, .mvc-set-btn:hover, .sd-trac-confirm-btn:hover, .pf-btn.pf-btn-ok:hover, .mbtn.verte:hover, .mbtn.acre:hover, .mbtn.phyte:hover, .mbtn.mbtn-p:hover{ background:var(--accent-survol); border-color:var(--accent-survol); }
 /* Secondaire : une action à côté */
-.mvbtn-secondaire, .pf-btn, .plan-btn-pdf, .mbtn{ background:var(--bg-card); border-color:var(--ligne-forte); color:var(--texte); }
+.mvbtn-secondaire, .pf-btn, .plan-btn-pdf, .mbtn, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp{ background:var(--bg-card); border-color:var(--ligne-forte); color:var(--texte); }
 /* Discret : une action légère, ou revenir */
 .mvbtn-discret{ background:transparent; color:var(--accent-texte); }
 /* Danger : effacer, retirer — toujours suivi d'une confirmation */
@@ -8067,10 +8067,10 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .mvbtn-choix{ display:inline-flex; gap:0; padding:var(--e-0,2px); border:var(--bw,1px) solid var(--ligne-forte); border-radius:var(--r-sm,6px); background:var(--bg-card); }
 .mvbtn-choix > .mvbtn-option{ border-color:transparent; border-radius:var(--r-xs,4px); }
 /* Les états, les mêmes partout */
-.mvbtn-secondaire:hover, .mvbtn-discret:hover, .mvbtn-option:hover, .pf-btn:not(.pf-btn-ok):hover, .plan-btn-pdf:hover, .mbtn:not(.verte):not(.acre):not(.phyte):not(.mbtn-p):not(.mbtn-del):hover, .cave-toggle-btn:hover, .trac-type-btn:hover, .cave-op-type-btn:hover, .rfut-reason-btn:hover{ background-image:linear-gradient(var(--survol),var(--survol)); }
+.mvbtn-secondaire:hover, .mvbtn-discret:hover, .mvbtn-option:hover, .pf-btn:not(.pf-btn-ok):hover, .plan-btn-pdf:hover, .mbtn:not(.verte):not(.acre):not(.phyte):not(.mbtn-p):not(.mbtn-del):hover, .cave-stepper-btn:hover, .mvc-step-btn:hover, .mvv-step2-b:hover, .rp-stp:hover, .cave-toggle-btn:hover, .trac-type-btn:hover, .cave-op-type-btn:hover, .rfut-reason-btn:hover{ background-image:linear-gradient(var(--survol),var(--survol)); }
 .mvbtn-danger:hover, .mbtn-del:hover{ background-image:linear-gradient(var(--presse),var(--presse)); }
-.mvbtn:active, .plan-btn-saisir:active, .mvc-set-btn:active, .sd-trac-confirm-btn:active, .pf-btn:active, .plan-btn-pdf:active, .cave-toggle-btn:active, .trac-type-btn:active, .cave-op-type-btn:active, .rfut-reason-btn:active, .mbtn:active, .mbtn-del:active{ background-image:linear-gradient(var(--presse),var(--presse)); }
-.mvbtn:disabled, .plan-btn-saisir:disabled, .mvc-set-btn:disabled, .sd-trac-confirm-btn:disabled, .pf-btn:disabled, .plan-btn-pdf:disabled, .cave-toggle-btn:disabled, .trac-type-btn:disabled, .cave-op-type-btn:disabled, .rfut-reason-btn:disabled, .mbtn:disabled, .mbtn-del:disabled{ opacity:var(--o-off,.45); cursor:default; background-image:none; }
+.mvbtn:active, .plan-btn-saisir:active, .mvc-set-btn:active, .sd-trac-confirm-btn:active, .pf-btn:active, .plan-btn-pdf:active, .cave-toggle-btn:active, .trac-type-btn:active, .cave-op-type-btn:active, .rfut-reason-btn:active, .mbtn:active, .mbtn-del:active, .cave-stepper-btn:active, .mvc-step-btn:active, .mvv-step2-b:active, .rp-stp:active{ background-image:linear-gradient(var(--presse),var(--presse)); }
+.mvbtn:disabled, .plan-btn-saisir:disabled, .mvc-set-btn:disabled, .sd-trac-confirm-btn:disabled, .pf-btn:disabled, .plan-btn-pdf:disabled, .cave-toggle-btn:disabled, .trac-type-btn:disabled, .cave-op-type-btn:disabled, .rfut-reason-btn:disabled, .mbtn:disabled, .mbtn-del:disabled, .cave-stepper-btn:disabled, .mvc-step-btn:disabled, .mvv-step2-b:disabled, .rp-stp:disabled{ opacity:var(--o-off,.45); cursor:default; background-image:none; }
 /* ═══ fin CHARTE-3 ═══ */
 
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.

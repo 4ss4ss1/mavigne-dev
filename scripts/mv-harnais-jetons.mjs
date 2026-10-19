@@ -291,9 +291,10 @@ function mesure(CSS) {
   return {
     cercles: (NU.match(/border-radius\s*:\s*50%/g) || []).length,
     sansRepli: sansRepli(PAIRES(CSS), estAncien).length,
-    radDur: (NU.match(/border-radius\s*:\s*[^;}]+/g) || [])
-      .flatMap(d => (d.match(/(\d+)px/g) || []).map(v => parseInt(v)))
-      .filter(v => [8, 12, 16, 999].includes(v)).length,
+    radDur: (NU.match(/border-radius\s*:\s*[^;}]+/g) || [])        // ★ CHARTE-3c (§373) : LA MÊME mesure que le contrôle
+      .map(d => d.replace(/var\(--[a-z0-9-]+,\s*[^)]*\)/g, ''))       //   (DS-4 : pas 4/6/8/12/999, repli retiré). L'ancienne
+      .flatMap(d => (d.match(/(\d+)px/g) || []).map(v => parseInt(v)))  //   (8/12/16/999) gravait 316 quand le contrôle en
+      .filter(v => [4, 6, 8, 12, 999].includes(v)).length,          //   comptait 230 : regraver DESSERRAIT le cliquet.
     fwHors: [...CSS_TOUT(CSS).matchAll(/font-weight\s*:\s*([0-9]{3}|bold|bolder|lighter)/g)]
       .filter(m => !['500', '600', '700'].includes(m[1])).length,
     filetPerdant: (CSS_TOUT(CSS).match(/border(?:-[a-z]+)?\s*:\s*1px\s+solid\s+var\(--gris\)/g) || []).length

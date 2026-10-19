@@ -2220,7 +2220,7 @@ function _vendEnsureSheetCss(){
 .mvv-tin:focus{border-color:var(--terre,#8A5A38);outline:none;box-shadow:0 0 0 3px rgba(138,90,56,.12)}
 .mvv-fnote{font-size:var(--pt-micro,11px);color:#8A4212;margin-top:8px;line-height:1.45}
 .mvv-step2{display:flex;align-items:center;gap:12px;margin-top:4px}
-.mvv-step2-b{width:44px;height:44px;border-radius:12px;background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.28);color:var(--terre,#8A5A38);font-size:var(--pt-lg,24px);font-weight:700;cursor:pointer;line-height:1}
+
 .mvv-step2-v{font-family:var(--font-titre,'Cormorant Garamond',Georgia,serif);font-weight:700;font-size:var(--pt-xxl,32px);color:var(--texte,#1A1A14);min-width:44px;text-align:center}
 .mvv-step2-u{font-size:var(--pt-txt,13px);color:var(--texte-doux,#5F5F5F)}
 .mvv-optabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}

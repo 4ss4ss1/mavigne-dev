@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.36';
+export const APP_VERSION = '9.37';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.37', d: '2026-10-19', items: [   // CHARTE-3c (§373) : les « − / + » passent au jeu commun
+    { niv: 0, pour: ['tous'], emoji: 'check', titre: 'Les « − » et « + » au même dessin',
+      desc: "Les petits boutons « − » et « + » qui font monter ou descendre un nombre (volume d’une ouillette, nombre de fûts, tournée du Cuvier, réparations) ont tous le même dessin : un carré bordé, à la taille du doigt au téléphone. Ils étaient ronds, gris ou couleur terre selon l’écran." },
+  ] },
   { v: '9.36', d: '2026-10-19', items: [   // CHARTE-3b (§372) : le bouton des fenêtres passe au jeu commun
     { niv: 0, pour: ['tous'], emoji: 'check', titre: 'Les boutons des fenêtres aussi',
       desc: "Dans les fenêtres qui s’ouvrent pour ajouter, enregistrer ou confirmer, le bouton d’action prend la couleur lie-de-vin, et les suppressions le rouge du bouton Danger — fini le vert, l’orange, le bordeaux ou le bleu selon l’écran. « Annuler » et « Fermer » ont tous le même dessin." },

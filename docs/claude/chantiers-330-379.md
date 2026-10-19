@@ -1137,3 +1137,27 @@ La suite proposée après CAPTURES-1 (§371d), acceptée (« suite ») : ce qui 
 
 ### 372f. La leçon
 **Un bouton peint sur place ment sur sa classe.** `.mbtn` « n’avait pas de couleur » ; 34 de ses emplois en portaient une, écrite à côté. Ranger une classe, c’est d’abord lire ses emplois.
+
+## 373. ★ CHARTE-3c — LES « − / + » PASSENT AU JEU COMMUN (19/10 — `src/styles.css` · `src/cave.js` · `src/cuvier.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-boutons.mjs` · `scripts/mv-harnais-jetons.mjs` · `scripts/mv-jetons-baseline.json` · `scripts/mv-espace-baseline.json` · `scripts/harnais-claude-md.mjs` · **APP 9.36 → 9.37, SW 10.15 → 10.16**, base `899c322`)
+
+### 373a. La demande
+La suite proposée après CHARTE-3b, acceptée (« suite ») : « Valider » et « Début » des cartes de travail, les « − / + » ronds, les pastilles d’une session, les derniers boutons stylés sur place.
+
+### 373b. Ce qui a été lu avant d’écrire
+- ⚠️ **« Valider » et « Début » sont DÉJÀ au jeu.** PARC-1 et PARC-2 (§274-275) les ont dessinés à la maquette : `#pList .pcard-qv .pc-validate` à l’accent, `.pc-start` en secondaire, `.done` au vert du « fait » — et leurs harnais (`parc1`, `parc2`, `carte-parcelle`, `arrivee2`) en vérifient le texte. J’avais annoncé à Nico qu’il passerait en lie-de-vin « au prochain lot » : c’était déjà fait. Corrigé devant lui. (Pas vu en capture : la tâche du jour de la démo est terminée, aucune carte à valider.)
+- **Les pastilles d’une session** (« Désactiver », « Voir toutes ») sont des pastilles, pas des boutons : elles iront avec les pastilles (CHARTE-4).
+- **Les « − / + »** : quatre classes, 12 emplois — `.cave-stepper-btn` (rond, lisant `--bord`, déclaré nulle part), `.mvc-step-btn` (et sa petite variante `.sm`, posée par le CSS de la Cave), `.mvv-step2-b` (tout son style dans le CSS du Cuvier), `.rp-stp`.
+
+### 373c. Ce qui est livré
+- **Les « − / + » deviennent le bouton icône du jeu** : carré bordé, secondaire, 48 px au téléphone et 36 sur ordinateur ; leur signe garde 20 px (lisible), la variante `.sm` passe en bureau (36 px, signe à 16). Leur allure est retirée de la feuille ET du CSS de la Cave et du Cuvier : injecté après la feuille, il l’aurait emporté sur le jeu (`mv-harnais-boutons` C le surveille).
+- **`mv-harnais-boutons`** : 17 classes surveillées ; plafond des boutons « maison » 74 → 72.
+
+### 373d. Trouvé en route
+- **La regravure de `mv-harnais-jetons` desserrait son propre cliquet.** Depuis DS-4, le contrôle compte les rayons en dur sur les nouveaux pas (4/6/8/12/999, repli retiré) ; la fonction de regravure les comptait encore sur les anciens (8/12/16/999). Regraver par la commande gravait 316 quand le contrôle en mesurait 230 : la dette pouvait regrossir de 86 rayons sans rougir. Mesure alignée sur celle du contrôle ; trois cliquets regravés, tous à la baisse — rayons 234 → 230, filet perdant 74 → 73, espacements hors échelle (`mv-espace-baseline`) 1 003 → 995 — et le plancher des cercles relevé de 80 à 106 (les cercles réels).
+
+### 373e. Mesuré
+- **Vu dans leurs écrans** (`mv-captures`, téléphone, clair et sombre) : le volume d’une ouillette (Nouvelle opération) et le nombre de fûts (Retrait de fût) en carrés bordés ; 12 captures valables.
+- **Chaîne** : 449 commandes, **0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 373f. La leçon
+**Un cliquet se regrave avec la même règle qu’il contrôle.** Deux fonctions qui mesurent « la même chose » finissent par diverger (§24 n°18) ; ici, la divergence ne faisait rien rougir — elle rendait seulement la regravure dangereuse.

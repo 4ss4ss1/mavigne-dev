@@ -3721,7 +3721,7 @@ function _caveV2InjectCss(){
   +'.mvc-milrow-a{flex:1;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)}'
   +'.mvc-milrow-v{min-width:52px;text-align:center;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte-doux)}'
   +'.mvc-milrow-v.own{color:var(--vert-med,#3D6B27)}'
-  +'.mvc-step-btn.sm{width:34px;height:34px;min-width:34px;font-size:var(--pt-sm,16px);line-height:1}'
+  +''
   +'.mvc-milrow-x{width:30px;height:30px;min-width:30px;border:none;background:transparent;color:var(--texte-doux);font-size:var(--pt-base,14px);cursor:pointer;border-radius:8px}'
   +'.mvc-milrow-x:hover{background:var(--gris-clair)}'
   /* — Soutirage sur la carte de cuvée — */
