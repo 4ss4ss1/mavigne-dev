@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.31';
+export const APP_VERSION = '9.32';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -74,14 +74,14 @@ window._mvDocCss = function(orient){
   var o = (orient === 'paysage') ? 'A4 landscape' : 'A4 portrait';
   return '@page{size:' + o + ';margin:' + MV_DOC_MARGE + '}'
     + 'html,body{margin:0;padding:0;background:#fff;color:#1A1A14;'
-      + 'font-family:\'Outfit\',system-ui,-apple-system,sans-serif;font-size:var(--pt-micro,11px);line-height:1.5;'
+      + 'font-family:var(--font-ui,\'Outfit\',system-ui,-apple-system,sans-serif);font-size:var(--pt-micro,11px);line-height:1.5;'
       + '-webkit-print-color-adjust:exact;print-color-adjust:exact}'
-    + '.mvdoc-serif{font-family:\'Cormorant Garamond\',Georgia,serif}'
+    + '.mvdoc-serif{font-family:var(--font-titre,\'Cormorant Garamond\',Georgia,serif)}'
     // en-tete : bande sombre + filet d'or. Le filet est la signature du domaine.
     + '.mvdoc-hd{background:' + MV_DOC_ENCRE + ';color:#F3EEE2;padding:16px 18px 14px;position:relative}'
     + '.mvdoc-hd::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;'
       + 'background:linear-gradient(90deg,#8A5A38 0%,' + MV_DOC_OR + ' 48%,#D8BC72 100%)}'
-    + '.mvdoc-dom{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:19px;font-weight:600;letter-spacing:.3px;line-height:1.15}'
+    + '.mvdoc-dom{font-family:var(--font-titre,\'Cormorant Garamond\',Georgia,serif);font-size:19px;font-weight:600;letter-spacing:.3px;line-height:1.15}'
     + '.mvdoc-tit{font-size:var(--pt-micro,11px);font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:#D8BC72;margin-top:5px}'
     + '.mvdoc-meta{font-size:var(--pt-nano,9.5px);color:#A79E8E;margin-top:6px;display:flex;gap:14px;flex-wrap:wrap}'
     // corps et pied
@@ -225,7 +225,7 @@ function _mvTriCss(){
    +'.mvz-ov.open .mvz-sh{transform:translateY(0)}'
    +'.mvz-sh *{box-sizing:border-box}'
    +'.mvz-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}'
-   +'.mvz-t{font-family:\'Cormorant Garamond\',Georgia,serif;font-weight:600;font-size:var(--pt-lg,24px);'
+   +'.mvz-t{font-family:var(--font-titre,\'Cormorant Garamond\',Georgia,serif);font-weight:600;font-size:var(--pt-lg,24px);'
      +'line-height:1.15;display:flex;align-items:center;gap:8px}'
    +'.mvz-x{background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.18);'
      +'color:var(--texte-doux,#5F5F5F);width:38px;height:38px;border-radius:10px;cursor:pointer;'
@@ -1058,6 +1058,7 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.32', d: '2026-10-19', items: [] },   // CHARTE-1 (§367) : la police passe par la charte — rien ne change à l’écran
   { v: '9.31', d: '2026-10-19', items: [
     { niv: 1, pour: ['admin', 'cave'], cible: '#mvv-tab-ana', emoji: 'raisin', titre: 'Les maturités, rangées',
       desc: "L’onglet Maturités du Cuvier tient sur un écran clair : en haut, la vendange choisie et «\u00a0Noter des mesures\u00a0» ; puis où en est la maturité, avec trois tuiles qui filtrent ; puis l’ordre de maturité, une ligne par parcelle, la plus avancée en tête. "

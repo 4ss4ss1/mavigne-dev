@@ -157,7 +157,18 @@ function finPrevue() { return V && V.fin ? deIso(V.fin) : ajout(AUJ, 1); }
    ⚠️ Avant : chaque zone d'une ligne avait la même hauteur — une parcelle de 0,31 ha sortait plus grande qu'une de
    0,88 ha, le rapport des surfaces ne tenait qu'à l'intérieur d'une commune. Et la commune, rangée { nom, lat, lng }
    depuis la météo par secteur, s'écrivait « [object Object] » au-dessus de chaque bloc (toutes fondues en une). */
-const POL_PL = { zone: '600 13px Outfit, system-ui, sans-serif', ha: '400 12px Outfit, system-ui, sans-serif', pc: '500 12px Outfit, system-ui, sans-serif' };
+/* ★ CHARTE-1 (§367) — une toile (canvas) ne lit pas les variables CSS : la police qui mesure les noms est celle du réglage
+   --font-ui de styles.css, lue au premier dessin (la feuille est appliquée bien avant le cockpit). Le repli redit la police
+   d'avant, pour le cas où la feuille ne serait pas encore là ; il est exempté, avec sa raison, dans mv-harnais-police. */
+let POLICE_UI = '';
+function policeUi() {
+  if (!POLICE_UI) {
+    try { POLICE_UI = getComputedStyle(document.documentElement).getPropertyValue('--font-ui').trim(); }
+    catch (e) { if (window._mvAvale) window._mvAvale(e, 'cockpit-vue.js/policeUi'); }
+  }
+  return POLICE_UI || 'Outfit, system-ui, sans-serif';
+}
+const POL_PL = { get zone() { return '600 13px ' + policeUi(); }, get ha() { return '400 12px ' + policeUi(); }, get pc() { return '500 12px ' + policeUi(); } };
 const bornePl = (v, a, b) => Math.max(a, Math.min(b, v));
 const nomCommune = c => (c && typeof c === 'object') ? String(c.nom || '') : String(c || '');
 let CTX2D = null;

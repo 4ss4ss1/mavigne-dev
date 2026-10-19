@@ -94,7 +94,7 @@
     s.innerHTML =
       '<div style="position:fixed;inset:0;background:#0F1319;display:flex;flex-direction:column;' +
       'align-items:center;justify-content:center;gap:18px;padding:32px;text-align:center;' +
-      'font-family:Outfit,system-ui,sans-serif;color:#F0E2C8;z-index:99999">' +
+      'font-family:var(--font-ui,Outfit,system-ui,sans-serif);color:#F0E2C8;z-index:99999">' +
         '<div style="font-size:44px">🍇</div>' +
         '<div style="font-size:17px;font-weight:600">Connexion instable</div>' +
         '<div style="font-size:13px;color:rgba(240,226,200,0.55);line-height:1.5;max-width:280px">' +

@@ -733,7 +733,7 @@ function _chrToggleHtml(){
   return '<div style="display:flex;align-items:center;gap:12px;background:var(--gris-clair);border-radius:11px;padding:11px 13px;margin-bottom:10px">'
     +'<div style="flex:1;min-width:0"><div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">'+_mvIcon('chrono',16)+' Chronometrer le temps reel</div>'
     +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px;line-height:1.4">Optionnel - dans une session, mesure le travail parcelle par parcelle. Sinon, le bareme ci-dessous prend le relais.</div></div>'
-    +'<button onclick="_chronoSetMode('+(o?'false':'true')+')" style="flex-shrink:0;border:none;cursor:pointer;font-family:Outfit,sans-serif;font-weight:700;font-size:var(--pt-micro,12px);padding:8px 15px;border-radius:20px;min-height:40px;'+(o?'background:var(--vert);color:#fff':'background:var(--gris);color:var(--texte-doux)')+'">'+(o?'ON':'OFF')+'</button>'
+    +'<button onclick="_chronoSetMode('+(o?'false':'true')+')" style="flex-shrink:0;border:none;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);font-weight:700;font-size:var(--pt-micro,12px);padding:8px 15px;border-radius:20px;min-height:40px;'+(o?'background:var(--vert);color:#fff':'background:var(--gris);color:var(--texte-doux)')+'">'+(o?'ON':'OFF')+'</button>'
   +'</div>';
 }
 window._chronoSetMode=function(on){
@@ -3374,7 +3374,7 @@ function _clotOverlayHTML(ctx){
   var esc = _clotEsc(ctx.endNom);
   var reste = Math.max(0, 100 - (ctx.pct||0));
   var stat = function(v,l){ return '<div style="background:#FBFAF6;border:1px solid #E7E3DA;border-radius:12px;padding:12px 6px;text-align:center">'
-    + '<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-lg,24px);color:#1C1813">'+v+'</div>'
+    + '<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-lg,24px);color:#1C1813">'+v+'</div>'
     + '<div style="font-size:9px;letter-spacing:.4px;text-transform:uppercase;color:#6B655C;margin-top:3px">'+l+'</div></div>'; };
   var prepOpts = (ctx.prepared||[]).map(function(s){ return '<option value="'+_clotEsc(s.nom)+'">'+_clotEsc(s.nom)+'</option>'; }).join('');
   var activateInner = (ctx.prepared && ctx.prepared.length)
@@ -3387,11 +3387,11 @@ function _clotOverlayHTML(ctx){
     : '';
 
   return ''
-  + '<div id="ovCloture" style="position:fixed;inset:0;z-index:4000;background:#F2EFE7;display:flex;flex-direction:column;font-family:\'Outfit\',system-ui,sans-serif;color:#1C1813">'
+  + '<div id="ovCloture" style="position:fixed;inset:0;z-index:4000;background:#F2EFE7;display:flex;flex-direction:column;font-family:var(--font-ui,\'Outfit\',system-ui,sans-serif);color:#1C1813">'
     + '<div style="background:#14110D;color:#F0E2C8;padding:16px 16px 14px;position:relative;flex:none">'
       + '<div style="display:flex;align-items:center;gap:12px">'
         + '<button onclick="window._clotClose&&window._clotClose()" style="background:rgba(255,255,255,.08);border:none;color:#F0E2C8;width:32px;height:32px;border-radius:9px;font-size:var(--pt-sm,16px);cursor:pointer">'+_mvIcon('croix',16)+'</button>'
-        + '<div id="clot-ttl" style="font-family:\'Cormorant Garamond\',serif;font-weight:600;font-size:var(--pt-md,20px)">Bilan de la campagne</div>'
+        + '<div id="clot-ttl" style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:600;font-size:var(--pt-md,20px)">Bilan de la campagne</div>'
       + '</div>'
       + '<div style="display:flex;gap:6px;margin-top:13px">'
         + '<div id="clot-d1" style="height:4px;flex:1;border-radius:3px;background:#C9A84C"></div>'
@@ -3404,8 +3404,8 @@ function _clotOverlayHTML(ctx){
       + '<div id="clot-s1">'
         + '<div style="background:linear-gradient(165deg,#14110D,#1C1813);border-radius:18px;padding:26px 20px 22px;color:#F0E2C8;text-align:center">'
           + '<div style="font-size:var(--pt-micro,11px);letter-spacing:1.8px;text-transform:uppercase;color:#C9A84C">Campagne qui se termine</div>'
-          + '<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:66px;line-height:1;margin:6px 0 2px">'+(ctx.pct||0)+'%</div>'
-          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:22px">'+esc+'</div>'
+          + '<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:66px;line-height:1;margin:6px 0 2px">'+(ctx.pct||0)+'%</div>'
+          + '<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:22px">'+esc+'</div>'
           + '<div style="font-size:var(--pt-base,14px);color:#e9dcc0;margin-top:10px">'+_mvIcon('raisin',16)+' Bravo à l\'équipe — belle campagne.</div>'
         + '</div>'
         + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:15px">'
@@ -3417,7 +3417,7 @@ function _clotOverlayHTML(ctx){
         + '<div style="display:flex;gap:9px;align-items:flex-start;background:#F6EDD8;border:1px solid rgba(201,168,76,.35);border-radius:12px;padding:12px 13px;margin-top:15px;font-size:var(--pt-txt,13px);line-height:1.45;color:#5c4a1f"><span>'+_mvIcon('carton',16)+'</span><div>Cette campagne sera <b>archivée dans l\'Historique</b> (parcelles, journal, sessions tracteur, phyto) — consultable ensuite pour le comparatif N-1.</div></div>'
       + '</div>'
       + '<div id="clot-s2" style="display:none">'
-        + '<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:22px;margin-bottom:4px">La prochaine campagne</div>'
+        + '<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:22px;margin-bottom:4px">La prochaine campagne</div>'
         + '<div style="font-size:var(--pt-txt,13px);color:#6B655C;margin-bottom:16px;line-height:1.4">Crée la suivante, ou active une campagne déjà préparée à l\'avance.</div>'
         + '<div style="display:flex;gap:8px;margin-bottom:16px">'
           + '<button id="clot-seg-create" onclick="window._clotSeg&&window._clotSeg(\'create\')" style="flex:1;background:#14110D;color:#F0E2C8;border:1px solid #14110D;border-radius:11px;padding:11px 8px;font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer">Créer la prochaine</button>'
@@ -3437,12 +3437,12 @@ function _clotOverlayHTML(ctx){
         + '<div id="clot-activate" style="display:none">'+activateInner+'</div>'
       + '</div>'
       + '<div id="clot-s3" style="display:none">'
-        + '<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:22px;margin-bottom:4px">Confirmer la clôture</div>'
+        + '<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:22px;margin-bottom:4px">Confirmer la clôture</div>'
         + '<div style="font-size:var(--pt-txt,13px);color:#6B655C;margin-bottom:16px;line-height:1.4">Voici ce qui va se passer quand tu valides.</div>'
         + '<div style="display:flex;align-items:stretch;margin-bottom:16px;border-radius:16px;overflow:hidden;border:1px solid #E7E3DA">'
-          + '<div style="flex:1;padding:18px 12px;text-align:center;background:#eef4ea"><div style="font-family:\'Cormorant Garamond\',serif;font-weight:600;font-size:var(--pt-sm,16px);line-height:1.15">'+esc+'</div><div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-xxl,32px);color:#3D6B27;margin-top:6px">'+(ctx.pct||0)+'%</div><div style="font-size:10px;letter-spacing:.6px;text-transform:uppercase;margin-top:4px;color:#3f5233">'+_mvIcon('check',16)+' archivée</div></div>'
+          + '<div style="flex:1;padding:18px 12px;text-align:center;background:#eef4ea"><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:600;font-size:var(--pt-sm,16px);line-height:1.15">'+esc+'</div><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-xxl,32px);color:#3D6B27;margin-top:6px">'+(ctx.pct||0)+'%</div><div style="font-size:10px;letter-spacing:.6px;text-transform:uppercase;margin-top:4px;color:#3f5233">'+_mvIcon('check',16)+' archivée</div></div>'
           + '<div style="width:40px;display:grid;place-items:center;background:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27);color:#fff;font-size:var(--pt-md,20px);font-weight:700">→</div>'
-          + '<div style="flex:1;padding:18px 12px;text-align:center;background:#14110D;color:#F0E2C8"><div id="clot-cf-new" style="font-family:\'Cormorant Garamond\',serif;font-weight:600;font-size:var(--pt-sm,16px);line-height:1.15">'+_clotEsc(ctx.sug.nom)+'</div><div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-xxl,32px);color:#C9A84C;margin-top:6px">0%</div><div style="font-size:10px;letter-spacing:.6px;text-transform:uppercase;margin-top:4px;opacity:.85">démarre</div></div>'
+          + '<div style="flex:1;padding:18px 12px;text-align:center;background:#14110D;color:#F0E2C8"><div id="clot-cf-new" style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:600;font-size:var(--pt-sm,16px);line-height:1.15">'+_clotEsc(ctx.sug.nom)+'</div><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-xxl,32px);color:#C9A84C;margin-top:6px">0%</div><div style="font-size:10px;letter-spacing:.6px;text-transform:uppercase;margin-top:4px;opacity:.85">démarre</div></div>'
         + '</div>'
         + '<div style="background:linear-gradient(180deg,#f3f7ef,#eef4ea);border:1px solid rgba(61,107,39,.28);border-radius:13px;padding:14px 15px;margin-bottom:15px"><div style="font-weight:600;font-size:13.5px;color:#3D6B27;margin-bottom:5px">'+_mvIcon('pousse',16)+' Rien n\'est perdu</div><div style="font-size:var(--pt-txt,13px);line-height:1.5;color:#3f5233">Le 0% est un nouveau départ, pas une régression. L\'avancement de '+esc+' reste consultable via le sélecteur de saison et l\'Historique.</div></div>'
         + '<div>'
@@ -3781,7 +3781,7 @@ function renderHistorique(){
   if(archivesDeleteables.length>0){
     html += `<div style="padding:0 16px">`;
     archivesDeleteables.forEach(h=>{
-      html += `<button onclick="deleteHistoSnapshot('${_escAttr(h.saisonNom)}')" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--rouge);background:transparent;color:var(--rouge);font-size:var(--pt-micro,12px);font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;margin-bottom:8px">${_mvIcon('corbeille',16)} Supprimer le snapshot « ${_escHtml(h.saisonNom)} »</button>`;
+      html += `<button onclick="deleteHistoSnapshot('${_escAttr(h.saisonNom)}')" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--rouge);background:transparent;color:var(--rouge);font-size:var(--pt-micro,12px);font-weight:600;font-family:var(--font-ui,'Outfit',sans-serif);cursor:pointer;margin-bottom:8px">${_mvIcon('corbeille',16)} Supprimer le snapshot « ${_escHtml(h.saisonNom)} »</button>`;
     });
     html += `</div>`;
   }
@@ -4379,7 +4379,7 @@ async function _docsRestOpen(){
     + 'ensuite pour repartir sur les données restaurées.</div>'
     + '<button id="docs-rest-go" onclick="_docsRestGo()" style="background:var(--rouge);color:white;'
     + 'border:none;border-radius:10px;padding:11px 18px;font-size:var(--pt-txt,13px);font-weight:600;'
-    + 'font-family:\'Outfit\',sans-serif;width:100%;cursor:pointer;margin-top:10px">'
+    + 'font-family:var(--font-ui,\'Outfit\',sans-serif);width:100%;cursor:pointer;margin-top:10px">'
     + 'Restaurer ' + remplace.length + ' élément(s)</button>'
     + '</div>';
   host.innerHTML=h;
@@ -4451,7 +4451,7 @@ function showImportFeedback(msg,bg,color){
     // Toast flottant si l'overlay est fermé
     let toast=document.createElement('div');
     toast.textContent=msg;
-    toast.style.cssText=`position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:${bg};color:${color};border-radius:12px;padding:12px 20px;font-size:var(--pt-txt,13px);font-weight:600;font-family:'Outfit',sans-serif;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.15);max-width:340px;text-align:center;`;
+    toast.style.cssText=`position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:${bg};color:${color};border-radius:12px;padding:12px 20px;font-size:var(--pt-txt,13px);font-weight:600;font-family:var(--font-ui,'Outfit',sans-serif);z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.15);max-width:340px;text-align:center;`;
     document.body.appendChild(toast);
     setTimeout(()=>toast.remove(),4000);
   }
@@ -4513,20 +4513,20 @@ function exportCSVJournal(){
 // ═══════════════════════════════════════════════════════════════════════════
 var _JIV_CSS =
  '*{margin:0;padding:0;box-sizing:border-box}'
-+'body{font-family:Outfit,system-ui,sans-serif;color:#1A1A14;background:#fff;font-size:var(--pt-micro,11px)}'
++'body{font-family:var(--font-ui,Outfit,system-ui,sans-serif);color:#1A1A14;background:#fff;font-size:var(--pt-micro,11px)}'
 +'@page{size:A4 portrait;margin:11mm}'
 +'.jiv-cov{background:#2A1A10;color:#fff;padding:22px 26px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}'
 +'.jiv-k{font-size:9px;letter-spacing:3px;text-transform:uppercase;opacity:.45;margin-bottom:5px}'
-+'.jiv-t{font-family:"Cormorant Garamond",Georgia,serif;font-size:var(--pt-xl,28px);font-weight:700;line-height:1.05}'
++'.jiv-t{font-family:var(--font-titre,"Cormorant Garamond",Georgia,serif);font-size:var(--pt-xl,28px);font-weight:700;line-height:1.05}'
 +'.jiv-s{opacity:.72;font-size:var(--pt-micro,12px);margin-top:4px}'
 +'.jiv-m{text-align:right;opacity:.55;font-size:10px;line-height:1.6}'
 +'.jiv-kpi{display:flex;gap:10px;padding:14px 26px 4px;flex-wrap:wrap}'
 +'.jiv-kc{flex:1;min-width:110px;border:1px solid #E3DFD4;border-radius:11px;padding:9px 12px}'
-+'.jiv-kv{font-family:"Cormorant Garamond",Georgia,serif;font-size:var(--pt-lg,24px);font-weight:700;color:#2A1A10;line-height:1.05}'
++'.jiv-kv{font-family:var(--font-titre,"Cormorant Garamond",Georgia,serif);font-size:var(--pt-lg,24px);font-weight:700;color:#2A1A10;line-height:1.05}'
 +'.jiv-kl{font-size:var(--pt-nano,9.5px);text-transform:uppercase;letter-spacing:.8px;color:#7A7A6A;font-weight:600;margin-top:2px}'
 +'.jiv-ks{font-size:var(--pt-nano,9.5px);color:#8A8A7A;margin-top:2px;line-height:1.35}'
 +'.jiv-sec{padding:16px 26px 0;break-inside:auto}'
-+'.jiv-st{font-family:"Cormorant Garamond",Georgia,serif;font-size:19px;font-weight:700;color:#2A1A10;'
++'.jiv-st{font-family:var(--font-titre,"Cormorant Garamond",Georgia,serif);font-size:19px;font-weight:700;color:#2A1A10;'
         +'border-bottom:2px solid #2A1A10;padding-bottom:4px;margin-bottom:3px}'
 +'.jiv-sx{font-size:10px;color:#7A7A6A;margin-bottom:8px;line-height:1.45}'
 +'table{width:100%;border-collapse:collapse}'
@@ -4776,7 +4776,7 @@ function _jivChoix(F){
       +'<div class="ov-close" onclick="closeOv(null,\'ovJivExport\')">'+_mvIcon('croix',18)+'</div></div>'
       +'<div id="jiv-body" style="padding:0 20px 20px;overflow-y:auto;max-height:70vh"></div>'
       +'<div style="padding:0 20px 16px"><button class="mbtn" onclick="closeOv(null,\'ovJivExport\')" '
-      +'style="width:100%;font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px);padding:12px;border-radius:12px;'
+      +'style="width:100%;font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px);padding:12px;border-radius:12px;'
       +'border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-doux);cursor:pointer;'
       +'min-height:44px">Annuler</button></div></div>';
     document.body.appendChild(ov);
@@ -4790,7 +4790,7 @@ function _jivChoix(F){
     h+='<button onclick="window.exportJournalInterventions(\''+_escAttr(f.k)+'\')" '
       +'style="width:100%;display:block;text-align:left;background:var(--bg-card);border:1.5px solid '
       +(acc?'var(--vert,#3D6B27)':'var(--gris)')+';border-radius:12px;padding:14px 16px;margin-bottom:10px;'
-      +'cursor:pointer;font-family:Outfit,sans-serif;min-height:44px">'
+      +'cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);min-height:44px">'
       +'<span style="display:block;font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">'+_escHtml(f.lbl)+'</span>'
       +'<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px;line-height:1.4">'+_escHtml(f.sub||'')+'</span>'
       +'<span style="display:block;font-size:var(--pt-micro,11px);color:'+(n?'var(--vert,#3D6B27)':'var(--texte-doux)')
@@ -5238,7 +5238,7 @@ function exportPDFMois(){
 <link rel="stylesheet" href="/fonts/fonts.css">
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Outfit',system-ui,-apple-system,sans-serif;color:#1A1A14;background:white;font-size:var(--pt-micro,12px);}
+  body{font-family:var(--font-ui,'Outfit',system-ui,-apple-system,sans-serif);color:#1A1A14;background:white;font-size:var(--pt-micro,12px);}
   /* ── COVER ── */
   .cover{background:#1E3A12;color:white;padding:32px 40px;display:flex;justify-content:space-between;align-items:flex-end;}
   .cover-left{}
@@ -5576,7 +5576,7 @@ function exportPDFPhyto(mode){
 <style>
   @page{size:A4 landscape;margin:9mm;}
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Outfit',system-ui,-apple-system,sans-serif;color:#1A1A14;background:white;font-size:var(--pt-micro,11px);}
+  body{font-family:var(--font-ui,'Outfit',system-ui,-apple-system,sans-serif);color:#1A1A14;background:white;font-size:var(--pt-micro,11px);}
   .cover{background:#2D0B45;color:white;padding:24px 30px 20px;position:relative;display:flex;align-items:flex-end;justify-content:space-between;}
   .cover-l{padding-top:30px;}
   .cover-pic{font-size:var(--pt-xl,28px);position:absolute;left:30px;top:20px;opacity:.9;}
@@ -6310,7 +6310,7 @@ var _ECO_IN_CSS='width:78px;padding:7px 8px;border:1.5px solid var(--gris-clair)
 var _ECO_ROW_CSS='display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap';
 function _ecoCarte(titre,sous,corps){
   return '<div style="background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin:14px 16px">'
-    +'<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--texte,#14110D);margin-bottom:3px">'+titre+'</div>'
+    +'<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-md,20px);color:var(--texte,#14110D);margin-bottom:3px">'+titre+'</div>'
     +'<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);margin-bottom:12px">'+sous+'</div>'
     +corps+'</div>';
 }
@@ -6662,7 +6662,7 @@ window._cuParcRollN   = _cuParcRollN;
 function _cuColor(r){ return r>1?'--rouge':r>=0.875?'--orange':r>=0.75?'--or':'--vert'; }
 function _cuStatus(r){ return r>1?['D\u00e9passement','--rouge']:r>=0.875?['Vigilance','--orange']:['Conforme','--vert']; }
 function _cuFmt(d){ if(!d)return '\u2014'; var pp=d.split('-'); return pp.length>=3?pp[2]+'/'+pp[1]+'/'+pp[0]:d; }
-function _cuKpi(v,u,l,warn){ return '<div style="background:rgba(255,255,255,0.05);border:1px solid '+(warn?'rgba(192,57,43,0.5)':'rgba(201,168,76,0.18)')+';border-radius:12px;padding:11px 12px"><div style="font-size:22px;font-weight:700;font-family:\'Cormorant Garamond\',serif;line-height:1.1;color:'+(warn?'#E8846F':'#EFE7D3')+'">'+v+'<span style="font-size:var(--pt-micro,11px);font-weight:500;color:#B7AE98;font-family:Outfit"> '+u+'</span></div><div style="font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:#A79E88;margin-top:4px;font-weight:600">'+l+'</div></div>'; }
+function _cuKpi(v,u,l,warn){ return '<div style="background:rgba(255,255,255,0.05);border:1px solid '+(warn?'rgba(192,57,43,0.5)':'rgba(201,168,76,0.18)')+';border-radius:12px;padding:11px 12px"><div style="font-size:22px;font-weight:700;font-family:var(--font-titre,\'Cormorant Garamond\',serif);line-height:1.1;color:'+(warn?'#E8846F':'#EFE7D3')+'">'+v+'<span style="font-size:var(--pt-micro,11px);font-weight:500;color:#B7AE98;font-family:var(--font-ui,Outfit)"> '+u+'</span></div><div style="font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:#A79E88;margin-top:4px;font-weight:600">'+l+'</div></div>'; }
 
 window._cuToggleRow=function(el){ var d=el.querySelector('.cu-det'); if(d) d.style.display=(d.style.display==='none'?'block':'none'); };
 window._cuClose=function(){ var o=document.getElementById('ovSyntheseCuivre'); if(o) o.classList.remove('open'); };
@@ -6701,7 +6701,7 @@ function _renderCuivre(){
   if(!treats.length){
     body='<div style="text-align:center;padding:40px 16px;color:var(--texte-doux)">'
       +'<div style="font-size:34px;margin-bottom:10px">&#x1FA99;</div>'
-      +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:19px;color:var(--texte);margin-bottom:6px">Aucun traitement cuivre chiffr\u00e9 pour '+year+'</div>'
+      +'<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:19px;color:var(--texte);margin-bottom:6px">Aucun traitement cuivre chiffr\u00e9 pour '+year+'</div>'
       +'<div style="font-size:var(--pt-txt,13px);max-width:340px;margin:0 auto;line-height:1.6">Le cuivre m\u00e9tal (kg/ha) se renseigne sur chaque traitement cuivre dans l\'assistant (Tracteur &#x203A; Phyto &#x203A; nouveau traitement). La synth\u00e8se se remplit automatiquement au fil de la campagne.</div>'
       +'</div>';
   } else {
@@ -6720,7 +6720,7 @@ function _renderCuivre(){
           +'<div style="display:flex;justify-content:space-between;font-size:var(--pt-micro,12px);padding:5px 0 0"><span style="color:var(--texte-doux)">Moyenne sur les ann\u00e9es suivies</span><span style="font-weight:700">'+r.roll.toFixed(2)+' kg/ha/an <span style="font-weight:500;color:var(--texte-doux)">sur '+_cuParcRollN(r.p.nom)+' an'+(_cuParcRollN(r.p.nom)>1?'n\u00e9es':'n\u00e9e')+'</span></span></div>':'');
       return '<div onclick="window._cuToggleRow(this)" style="border:1px solid var(--gris);border-radius:13px;padding:12px 14px;background:var(--bg-card);cursor:pointer;margin-bottom:9px">'
         +'<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">'
-        +'<div><div style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-sm,16px);font-weight:600">'+esc(r.p.nom)+'</div>'
+        +'<div><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-sm,16px);font-weight:600">'+esc(r.p.nom)+'</div>'
         +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+((r.p.commune&&r.p.commune.nom)?'&#x1F4CD; '+esc(r.p.commune.nom)+' &#x00B7; ':'')+window._mvHaP(r.p.surface)+' ha</div></div>'
         +'<div style="font-size:var(--pt-sm,16px);font-weight:700;white-space:nowrap;color:var('+col+')">'+r.shown.toFixed(2)+'<span style="font-size:var(--pt-micro,11px);font-weight:500;color:var(--texte-doux)"> kg Cu/ha</span></div>'
         +'</div>'
@@ -6733,15 +6733,15 @@ function _renderCuivre(){
       ?'UE : 28 kg/ha sur 7 ans &#x21D2; 4 kg/ha/an en moyenne (ancien bar\u00e8me FR : 6). Ajuste selon ton organisme certificateur.'
       :'Moyenne annuelle sur les ann\u00e9es enregistr\u00e9es. Doit rester &#x2264; plafond en contr\u00f4le.';
     body='<div style="background:linear-gradient(155deg,#14110D,#1C1813);color:#EFE7D3;border:1px solid #2A241C;border-radius:16px;padding:16px;margin-bottom:16px">'
-      +'<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:13px"><div style="font-family:\'Cormorant Garamond\',serif;font-size:18px;font-weight:600">Bilan du domaine</div>'
+      +'<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:13px"><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:18px;font-weight:600">Bilan du domaine</div>'
       +'<div style="display:inline-flex;border:1px solid rgba(201,168,76,0.3);border-radius:9px;overflow:hidden">'
-      +'<button onclick="window._cuSetMode(\'an\')" style="background:'+(mode==='an'?'#C9A84C':'transparent')+';border:none;color:'+(mode==='an'?'#1B1710':'#B7AE98')+';font-family:Outfit;font-size:var(--pt-micro,12px);font-weight:600;padding:6px 11px;cursor:pointer">Campagne '+year+'</button>'
-      +'<button onclick="window._cuSetMode(\'roll\')" style="background:'+(mode==='roll'?'#C9A84C':'transparent')+';border:none;color:'+(mode==='roll'?'#1B1710':'#B7AE98')+';font-family:Outfit;font-size:var(--pt-micro,12px);font-weight:600;padding:6px 11px;cursor:pointer">Liss\u00e9 7 ans</button>'
+      +'<button onclick="window._cuSetMode(\'an\')" style="background:'+(mode==='an'?'#C9A84C':'transparent')+';border:none;color:'+(mode==='an'?'#1B1710':'#B7AE98')+';font-family:var(--font-ui,Outfit);font-size:var(--pt-micro,12px);font-weight:600;padding:6px 11px;cursor:pointer">Campagne '+year+'</button>'
+      +'<button onclick="window._cuSetMode(\'roll\')" style="background:'+(mode==='roll'?'#C9A84C':'transparent')+';border:none;color:'+(mode==='roll'?'#1B1710':'#B7AE98')+';font-family:var(--font-ui,Outfit);font-size:var(--pt-micro,12px);font-weight:600;padding:6px 11px;cursor:pointer">Liss\u00e9 7 ans</button>'
       +'</div></div>'
       +kpis
       +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:13px;padding-top:13px;border-top:1px solid rgba(201,168,76,0.16)">'
       +'<span style="font-size:var(--pt-micro,12px);color:#C9C0AC">Plafond&#xA0;:</span>'
-      +'<input type="number" step="0.5" value="'+ceil+'" onchange="window._cuSetPlafond(this.value)" style="width:60px;padding:6px 8px;border-radius:8px;border:1.5px solid rgba(201,168,76,0.35);background:rgba(0,0,0,0.25);color:#F3ECD8;font-family:Outfit;font-size:var(--pt-base,14px);text-align:center">'
+      +'<input type="number" step="0.5" value="'+ceil+'" onchange="window._cuSetPlafond(this.value)" style="width:60px;padding:6px 8px;border-radius:8px;border:1.5px solid rgba(201,168,76,0.35);background:rgba(0,0,0,0.25);color:#F3ECD8;font-family:var(--font-ui,Outfit);font-size:var(--pt-base,14px);text-align:center">'
       +'<span style="font-size:var(--pt-micro,12px);color:#C9C0AC">kg&#xA0;Cu/ha/an</span>'
       +'<span style="font-size:var(--pt-micro,11px);color:#8C8470;flex:1;min-width:180px">'+domHint+'</span>'
       +'</div></div>'
@@ -6759,8 +6759,8 @@ function _renderCuivre(){
     +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:3px">'+esc(dom)+' &#x00B7; Campagne '+year+' &#x00B7; '+parc.length+' parcelles</div></div>'
     +'<div style="flex:1;overflow-y:auto;padding:16px 20px 0">'+body+'</div>'
     +'<div style="padding:12px 20px 20px;border-top:1px solid var(--gris);flex-shrink:0;display:flex;gap:10px">'
-    +(treats.length?'<button onclick="if(window.exportPDFPhyto)window.exportPDFPhyto()" style="flex:1;padding:13px;border-radius:12px;border:none;background:var(--vert);color:#fff;font-family:Outfit;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer"><span>&#x1F4C4; Registre PDF</span></button>':'')
-    +'<button onclick="window._cuClose()" style="flex:1;padding:13px;border-radius:12px;border:1.5px solid var(--gris);background:transparent;color:var(--texte);font-family:Outfit;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer"><span>Fermer</span></button>'
+    +(treats.length?'<button onclick="if(window.exportPDFPhyto)window.exportPDFPhyto()" style="flex:1;padding:13px;border-radius:12px;border:none;background:var(--vert);color:#fff;font-family:var(--font-ui,Outfit);font-size:var(--pt-base,14px);font-weight:700;cursor:pointer"><span>&#x1F4C4; Registre PDF</span></button>':'')
+    +'<button onclick="window._cuClose()" style="flex:1;padding:13px;border-radius:12px;border:1.5px solid var(--gris);background:transparent;color:var(--texte);font-family:var(--font-ui,Outfit);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer"><span>Fermer</span></button>'
     +'</div>';
 }
 window._renderCuivre=_renderCuivre;
@@ -7068,8 +7068,8 @@ function _tcvRender(){
     +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:3px">'+(mode?esc(_tcvTache):'Travaux de la vigne · h/ha de référence')+'</div></div>'
     +'<div style="flex:1;overflow-y:auto;padding:16px 20px 0">'+body+'</div>'
     +'<div style="padding:12px 20px 20px;border-top:1px solid var(--gris);flex-shrink:0;display:flex;gap:10px">'
-    +((mode&&cur&&admin)?'<button onclick="window._tcvPick(\'\')" style="flex:1;padding:13px;border-radius:12px;border:1.5px solid var(--gris);background:transparent;color:var(--bordeaux,#7A1020);font-family:Outfit;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer"><span>'+_mvIcon('retour',16)+' Détacher</span></button>':'')
-    +'<button onclick="window._tcvClose()" style="flex:1;padding:13px;border-radius:12px;border:1.5px solid var(--gris);background:transparent;color:var(--texte);font-family:Outfit;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer"><span>Fermer</span></button>'
+    +((mode&&cur&&admin)?'<button onclick="window._tcvPick(\'\')" style="flex:1;padding:13px;border-radius:12px;border:1.5px solid var(--gris);background:transparent;color:var(--bordeaux,#7A1020);font-family:var(--font-ui,Outfit);font-size:var(--pt-base,14px);font-weight:700;cursor:pointer"><span>'+_mvIcon('retour',16)+' Détacher</span></button>':'')
+    +'<button onclick="window._tcvClose()" style="flex:1;padding:13px;border-radius:12px;border:1.5px solid var(--gris);background:transparent;color:var(--texte);font-family:var(--font-ui,Outfit);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer"><span>Fermer</span></button>'
     +'</div>';
 }
 
@@ -7114,8 +7114,8 @@ var MV_VGNDOC_CSS = ''
     + 'border-radius:7px;padding:9px 13px;margin-bottom:13px}'
   + '.cd-k{min-width:96px}'
   + '.cd-k b{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.6px;color:#8B6020;margin-bottom:2px}'
-  + '.cd-k span{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:var(--pt-md,20px);font-weight:700;color:#2D1B09;line-height:1.05}'
-  + '.cd-k span small{font-family:\'Outfit\',sans-serif;font-size:9px;font-weight:600;color:#7A6A4A}'
+  + '.cd-k span{font-family:var(--font-titre,\'Cormorant Garamond\',Georgia,serif);font-size:var(--pt-md,20px);font-weight:700;color:#2D1B09;line-height:1.05}'
+  + '.cd-k span small{font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:9px;font-weight:600;color:#7A6A4A}'
   + '.cd-k i{display:block;font-style:normal;font-size:8px;color:#7A7263;margin-top:2px;line-height:1.4}'
   + 'h2{font-size:var(--pt-micro,11px);color:#2D1B09;margin:15px 0 6px;text-transform:uppercase;letter-spacing:.9px}'
   + 'table{width:100%;border-collapse:collapse;font-size:var(--pt-nano,9.5px);margin-bottom:4px}'
@@ -7543,7 +7543,7 @@ function _docsReleveOpen(){
       + 'et l\u2019annualisation de l\u2019ann\u00e9e ' + an + '. Deux lignes de signature en bas de page. '
       + 'L\u2019ann\u00e9e est celle consult\u00e9e au Planning.</div>'
     + '<button onclick="_docsReleveGo()" style="background:var(--phyto-med,#7B6DB8);color:white;border:none;'
-      + 'border-radius:10px;padding:11px 18px;font-size:var(--pt-txt,13px);font-weight:600;font-family:\'Outfit\',sans-serif;'
+      + 'border-radius:10px;padding:11px 18px;font-size:var(--pt-txt,13px);font-weight:600;font-family:var(--font-ui,\'Outfit\',sans-serif);'
       + 'width:100%;cursor:pointer">\u{1F5A8}\u{FE0F} \u00c9diter le relev\u00e9</button>'
     + '</div>';
   _docsPane('docs-pane-releve');
@@ -7611,7 +7611,7 @@ function _docsPlanNomOpen(){
       + 'les cong\u00e9s et les r\u00e9cup\u00e9rations d\u00e9j\u00e0 pos\u00e9s au calendrier y figurent, et le total '
       + 'distingue les heures faites au domaine de celles faites en formation.</div>'
     + '<button onclick="_docsPlanNomGo()" style="background:var(--phyto-med,#7B6DB8);color:white;border:none;'
-      + 'border-radius:10px;padding:11px 18px;font-size:var(--pt-txt,13px);font-weight:600;font-family:\'Outfit\',sans-serif;'
+      + 'border-radius:10px;padding:11px 18px;font-size:var(--pt-txt,13px);font-weight:600;font-family:var(--font-ui,\'Outfit\',sans-serif);'
       + 'width:100%;cursor:pointer">\u00c9diter le planning</button>'
     + '</div>';
   _docsPane('docs-pane-plannom');

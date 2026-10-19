@@ -695,6 +695,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-range1.mjs --contre'],
   ['node scripts/mv-harnais-matu1.mjs'],             // MATU-1 (§366) : les Maturités rangées — la vendange bornée, la fourchette par couleur, l'ordre, la saisie en série
   ['node scripts/mv-harnais-matu1.mjs --contre'],
+  ['node scripts/mv-harnais-police.mjs'],            // CHARTE-1 (§367) : la police passe par les deux réglages de la charte — aucune police en toutes lettres hors réglage, repli ou exemption
+  ['node scripts/mv-harnais-police.mjs --contre'],
   ['node scripts/mv-harnais-larg1.mjs'],             // LARG-1 (§334) : une seule largeur sur ordinateur — chaque page bornée par la règle, ou exemptée avec sa raison
   ['node scripts/mv-harnais-larg1.mjs --contre'],
   ['node scripts/mv-harnais-retrait1.mjs'],          // RETRAIT-1 (§325) : une tâche ordinaire désactivée sur des parcelles pour la période — règle, feuille, croix, renommages, L'année

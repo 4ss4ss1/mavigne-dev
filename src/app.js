@@ -1569,7 +1569,7 @@ function initLogin(){
     window._loginRetryCount++;
     var _tenant = localStorage.getItem('mavigne_tenant') || '(absent)';
     profiles.style.display = 'block';
-    profiles.innerHTML = '<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.4);font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px);letter-spacing:.08em">'
+    profiles.innerHTML = '<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.4);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px);letter-spacing:.08em">'
       + '<div style="margin-bottom:12px;animation:spin 1.2s linear infinite;display:inline-flex;color:var(--texte-doux)">'+_mvIcon('sablier',40)+'</div>'
       + '<div>Chargement… (' + window._loginRetryCount + ')</div>'
       + '<div style="margin-top:8px;font-size:10px;opacity:.5">tenant: ' + _tenant + '</div>'
@@ -1604,7 +1604,7 @@ function _initLoginDemo(){
   profiles.innerHTML =
     '<div style="text-align:center;margin-bottom:20px">'
     +'<div style="font-size:var(--pt-xl,28px);margin-bottom:8px">&#127815;</div>'
-    +'<div style="font-family:Cormorant Garamond,serif;font-size:18px;font-weight:600;color:var(--or);margin-bottom:4px">Accès démo</div>'
+    +'<div style="font-family:var(--font-titre,Cormorant Garamond,serif);font-size:18px;font-weight:600;color:var(--or);margin-bottom:4px">Accès démo</div>'
     +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5">Entrez le code reçu par téléphone</div>'
     +'</div>'
     +'<div style="margin-bottom:14px">'
@@ -1617,7 +1617,7 @@ function _initLoginDemo(){
     +' onkeydown="if(event.keyCode===13)confirmDemoCode()">'
     +'</div>'
     +'<div id="demo-code-error" style="display:none;background:rgba(224,112,96,0.12);border:1px solid rgba(224,112,96,0.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:var(--pt-micro,12px);color:#E07060;text-align:center"></div>'
-    +'<button onclick="confirmDemoCode()" style="width:100%;background:var(--or);color:#0C1A0A;border:none;border-radius:12px;padding:13px;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Accéder à la démo</button>'
+    +'<button onclick="confirmDemoCode()" style="width:100%;background:var(--or);color:#0C1A0A;border:none;border-radius:12px;padding:13px;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Accéder à la démo</button>'
     +'<div style="text-align:center;margin-top:14px;font-size:var(--pt-micro,11px);color:var(--texte-doux)">Code valable 30 jours &middot; <a href="tel:+33699424859" style="color:var(--or);text-decoration:none">06 99 42 48 59</a></div>';
 }
 
@@ -2365,15 +2365,15 @@ function _mvtWelcome(){
 
 // ── Moteur de visite (coach-marks : spotlight + infobulles) ──
 var _mvtCss = `
-.mvtwc{position:fixed;inset:0;z-index:99999;background:rgba(12,10,8,.55);display:flex;align-items:center;justify-content:center;padding:16px;font-family:'Outfit',sans-serif}
+.mvtwc{position:fixed;inset:0;z-index:99999;background:rgba(12,10,8,.55);display:flex;align-items:center;justify-content:center;padding:16px;font-family:var(--font-ui,'Outfit',sans-serif)}
 .mvtwc-card{width:392px;max-width:100%;max-height:94vh;overflow-y:auto;background:radial-gradient(circle at 50% 0%,#FCF7EC,#F1EADC 70%);border-radius:22px;box-shadow:0 30px 70px rgba(0,0,0,.5);display:flex;flex-direction:column}
 .mvtwc-top{height:120px;flex-shrink:0;background:linear-gradient(165deg,#1C1813,#14110D);position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:0 22px 16px;border-bottom:2px solid transparent;border-image:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27) 1;border-radius:22px 22px 0 0}
 .mvtwc-top::before{content:'';position:absolute;top:-40px;right:-20px;width:150px;height:150px;border-radius:50%;background:rgba(201,168,76,.1)}
 .mvtwc-logo-img{position:absolute;top:14px;right:18px;width:50px;height:50px;object-fit:contain}
 .mvtwc-eye{font-size:var(--pt-lbl,10.5px);font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#C9A84C}
-.mvtwc-logo{font-family:'Cormorant Garamond',serif;font-size:var(--pt-xxl,32px);font-weight:600;color:#fff;line-height:1;margin-top:2px}
+.mvtwc-logo{font-family:var(--font-titre,'Cormorant Garamond',serif);font-size:var(--pt-xxl,32px);font-weight:600;color:#fff;line-height:1;margin-top:2px}
 .mvtwc-mid{padding:20px 22px 8px}
-.mvtwc-h{font-family:'Cormorant Garamond',serif;font-size:var(--pt-lg,24px);font-weight:600;line-height:1.12;color:#2A2521}
+.mvtwc-h{font-family:var(--font-titre,'Cormorant Garamond',serif);font-size:var(--pt-lg,24px);font-weight:600;line-height:1.12;color:#2A2521}
 .mvtwc-sub{font-size:var(--pt-txt,13px);color:#6a5f52;line-height:1.5;margin-top:9px}
 .mvtwc-sub b{color:#8A5A38;font-weight:600}
 .mvtwc-grid{padding:13px 22px 6px;display:grid;grid-template-columns:1fr 1fr;gap:9px}
@@ -2384,7 +2384,7 @@ var _mvtCss = `
 .mvtwc-note{text-align:center;font-size:var(--pt-lbl,12px);color:#6a5f52;margin-bottom:11px}
 .mvtwc-go{display:block;width:100%;border:0;border-radius:14px;padding:15px;cursor:pointer;font-family:inherit;font-weight:600;font-size:15px;background:linear-gradient(135deg,#2a2118,#14110D);color:#f3ecdf;box-shadow:0 8px 22px rgba(20,17,13,.3)}
 .mvtwc-skip{display:block;width:100%;background:none;border:0;margin-top:8px;cursor:pointer;font-family:inherit;font-size:var(--pt-txt,13px);color:#6a5f52;text-decoration:underline;text-underline-offset:3px}
-#mvt{position:fixed;inset:0;z-index:100000;pointer-events:none;font-family:'Outfit',sans-serif}
+#mvt{position:fixed;inset:0;z-index:100000;pointer-events:none;font-family:var(--font-ui,'Outfit',sans-serif)}
 .mvt-mask{position:fixed;background:rgba(10,8,5,.7);pointer-events:auto;transition:left .28s ease,top .28s ease,width .28s ease,height .28s ease}
 #mvt-c{background:transparent}
 .mvt-ring{position:fixed;border:2px solid #C9A84C;border-radius:13px;pointer-events:none;box-shadow:0 0 0 1px rgba(0,0,0,.3),0 0 22px rgba(201,168,76,.45);transition:all .28s ease;z-index:100002}
@@ -2409,20 +2409,20 @@ var _mvtCss = `
 .mvt-chip.on{display:inline-flex}
 .mvt-chip.zap{transform:scale(1.06)}
 .mvt-chip .ic{font-size:var(--pt-micro,12px)}
-.mvt-chip .v{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;color:#D8BC72;line-height:1;min-width:50px;text-align:right}
+.mvt-chip .v{font-family:var(--font-titre,'Cormorant Garamond',serif);font-size:19px;font-weight:700;color:#D8BC72;line-height:1;min-width:50px;text-align:right}
 .mvt-chip .l{font-size:9px;letter-spacing:.4px;text-transform:uppercase;color:#9C8F79}
-.mvt-fly{position:fixed;z-index:100004;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:18px;color:#3D6B27;background:#FBFAF6;border:1px solid #E8E0D2;border-radius:999px;padding:4px 11px;box-shadow:0 6px 16px rgba(20,17,13,.3);transition:transform .75s cubic-bezier(.3,.7,.3,1),opacity .75s;pointer-events:none}
-.mvt-add{position:fixed;inset:0;z-index:100004;overflow-y:auto;background:radial-gradient(circle at 50% -10%,#2b2318,#14110D 65%);color:#F5EEDF;font-family:'Outfit',sans-serif;pointer-events:auto;padding:32px 20px calc(28px + env(safe-area-inset-bottom));text-align:center}
+.mvt-fly{position:fixed;z-index:100004;font-family:var(--font-titre,'Cormorant Garamond',serif);font-weight:700;font-size:18px;color:#3D6B27;background:#FBFAF6;border:1px solid #E8E0D2;border-radius:999px;padding:4px 11px;box-shadow:0 6px 16px rgba(20,17,13,.3);transition:transform .75s cubic-bezier(.3,.7,.3,1),opacity .75s;pointer-events:none}
+.mvt-add{position:fixed;inset:0;z-index:100004;overflow-y:auto;background:radial-gradient(circle at 50% -10%,#2b2318,#14110D 65%);color:#F5EEDF;font-family:var(--font-ui,'Outfit',sans-serif);pointer-events:auto;padding:32px 20px calc(28px + env(safe-area-inset-bottom));text-align:center}
 .mvt-add::before{content:'';position:fixed;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27)}
 .mvt-add-in{max-width:360px;margin:0 auto}
 .mvt-add-eye{font-size:var(--pt-lbl,10.5px);font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#C2A14D}
 .mvt-add-td{font-size:var(--pt-txt,13px);color:#C9BCA4;margin-top:10px}
 .mvt-add-td b{color:#F5EEDF;font-weight:600}
-.mvt-add-big{font-family:'Cormorant Garamond',serif;font-size:46px;font-weight:700;color:#D8BC72;line-height:1;margin-top:14px}
+.mvt-add-big{font-family:var(--font-titre,'Cormorant Garamond',serif);font-size:46px;font-weight:700;color:#D8BC72;line-height:1;margin-top:14px}
 .mvt-add-sub{font-size:var(--pt-txt,13px);color:#C9BCA4;margin-top:6px}
 .mvt-add-rows{margin:16px auto 0;max-width:300px;text-align:left}
 .mvt-add-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 2px;border-bottom:1px solid rgba(245,238,223,.12);font-size:var(--pt-txt,13px);color:#D8CDB8}
-.mvt-add-row i{font-style:normal;font-family:'Cormorant Garamond',serif;font-size:var(--pt-sm,16px);font-weight:700;color:#F5EEDF;white-space:nowrap}
+.mvt-add-row i{font-style:normal;font-family:var(--font-titre,'Cormorant Garamond',serif);font-size:var(--pt-sm,16px);font-weight:700;color:#F5EEDF;white-space:nowrap}
 .mvt-add-hyp{font-size:var(--pt-lbl,10.5px);color:#9C8F79;line-height:1.55;margin-top:12px}
 .mvt-add-eur{margin-top:13px;font-size:var(--pt-txt,13px);color:#D8CDB8}
 .mvt-add-plus{margin:16px auto 0;max-width:300px;text-align:left;border-top:1px solid rgba(245,238,223,.14);padding-top:12px}
@@ -2439,10 +2439,10 @@ var _mvtCss = `
 .mvt-more span{font-size:var(--pt-micro,11px);font-weight:600;color:#8A5A38;background:#F3EADF;border:1px solid #E8E0D2;border-radius:99px;padding:4px 10px}
 .mvt-eb{display:block;width:100%;box-sizing:border-box;font-family:inherit;font-weight:600;font-size:var(--pt-base,14px);border-radius:12px;padding:13px;cursor:pointer;border:1px solid #E8E0D2;background:#fff;color:#2A2521;margin-top:9px;text-decoration:none}
 .mvt-eb.p{background:linear-gradient(135deg,#2a2118,#14110D);color:#f3ecdf;border-color:transparent}
-.mvt-menu{position:fixed;inset:0;z-index:100005;background:rgba(12,10,8,.82);display:flex;align-items:center;justify-content:center;padding:16px;font-family:'Outfit',sans-serif;overflow-y:auto}
+.mvt-menu{position:fixed;inset:0;z-index:100005;background:rgba(12,10,8,.82);display:flex;align-items:center;justify-content:center;padding:16px;font-family:var(--font-ui,'Outfit',sans-serif);overflow-y:auto}
 .mvt-menu-card{width:404px;max-width:100%;background:radial-gradient(circle at 50% 0%,#FCF7EC,#F1EADC 72%);border-radius:22px;box-shadow:0 30px 70px rgba(0,0,0,.5);padding:22px 20px calc(18px + env(safe-area-inset-bottom));max-height:94vh;overflow-y:auto}
 .mvt-menu-eye{font-size:var(--pt-lbl,10.5px);font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#C2871E;text-align:center}
-.mvt-menu-h{font-family:'Cormorant Garamond',serif;font-size:25px;font-weight:600;line-height:1.1;color:#2A2521;text-align:center;margin-top:4px}
+.mvt-menu-h{font-family:var(--font-titre,'Cormorant Garamond',serif);font-size:25px;font-weight:600;line-height:1.1;color:#2A2521;text-align:center;margin-top:4px}
 .mvt-menu-sub{font-size:var(--pt-txt,13px);color:#6a5f52;line-height:1.5;text-align:center;margin:8px 6px 4px}
 .mvt-ch-grid{display:flex;flex-direction:column;gap:8px;margin:14px 0 6px}
 .mvt-fam{display:flex;align-items:center;gap:8px;margin:14px 2px 2px;font-size:var(--pt-lbl,10.5px);font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:#8A5A38}
@@ -2457,7 +2457,7 @@ var _mvtCss = `
 .mvt-ch-tx i{display:block;font-size:var(--pt-lbl,12px);font-style:normal;color:#76695a;line-height:1.35;margin-top:2px}
 .mvt-ch-go{font-size:var(--pt-md,20px);color:#C2871E;flex-shrink:0;font-weight:600}
 .mvt-menu-note{font-size:var(--pt-lbl,12px);color:#6a5f52;text-align:center;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.28);border-radius:11px;padding:9px 11px;margin:8px 0 12px;line-height:1.4}
-.mvt-chbar{position:fixed;left:0;right:0;bottom:0;z-index:100006;background:linear-gradient(180deg,#1C1813,#14110D);border-top:2px solid transparent;border-image:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27) 1;box-shadow:0 -10px 30px rgba(10,8,5,.5);padding:11px 14px calc(11px + env(safe-area-inset-bottom));font-family:'Outfit',sans-serif}
+.mvt-chbar{position:fixed;left:0;right:0;bottom:0;z-index:100006;background:linear-gradient(180deg,#1C1813,#14110D);border-top:2px solid transparent;border-image:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27) 1;box-shadow:0 -10px 30px rgba(10,8,5,.5);padding:11px 14px calc(11px + env(safe-area-inset-bottom));font-family:var(--font-ui,'Outfit',sans-serif)}
 .mvt-chbar-in{display:flex;align-items:center;gap:12px;max-width:560px;margin:0 auto}
 .mvt-chbar-tx{flex:1;min-width:0;color:#f3ecdf}
 .mvt-chbar-tx b{display:block;font-size:var(--pt-txt,13px);font-weight:600;line-height:1.2}
@@ -5886,8 +5886,8 @@ function _mvReceiptRender(){
     var _hasFill=false; try{ _hasFill=!!localStorage.getItem('mv_terms_fill'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvReceiptRender'); }
     if(_hasFill||window._MV_TERMS_FILL){
       box.innerHTML+='<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">'
-        +'<button onclick="window._mvTermsOpenDoc&&_mvTermsOpenDoc(\'dpa\')" style="flex:1;min-width:148px;font-family:\'Outfit\',sans-serif;font-weight:600;font-size:var(--pt-micro,12px);color:var(--vert,#3D6B27);background:var(--bg-card,#FBFAF6);border:1px solid rgba(61,107,39,0.4);border-radius:9px;padding:9px 10px;cursor:pointer">&#128196; DPA sign\u00e9</button>'
-        +'<button onclick="window._mvTermsOpenDoc&&_mvTermsOpenDoc(\'cgv\')" style="flex:1;min-width:148px;font-family:\'Outfit\',sans-serif;font-weight:600;font-size:var(--pt-micro,12px);color:var(--vert,#3D6B27);background:var(--bg-card,#FBFAF6);border:1px solid rgba(61,107,39,0.4);border-radius:9px;padding:9px 10px;cursor:pointer">&#128196; CGU sign\u00e9es</button>'
+        +'<button onclick="window._mvTermsOpenDoc&&_mvTermsOpenDoc(\'dpa\')" style="flex:1;min-width:148px;font-family:var(--font-ui,\'Outfit\',sans-serif);font-weight:600;font-size:var(--pt-micro,12px);color:var(--vert,#3D6B27);background:var(--bg-card,#FBFAF6);border:1px solid rgba(61,107,39,0.4);border-radius:9px;padding:9px 10px;cursor:pointer">&#128196; DPA sign\u00e9</button>'
+        +'<button onclick="window._mvTermsOpenDoc&&_mvTermsOpenDoc(\'cgv\')" style="flex:1;min-width:148px;font-family:var(--font-ui,\'Outfit\',sans-serif);font-weight:600;font-size:var(--pt-micro,12px);color:var(--vert,#3D6B27);background:var(--bg-card,#FBFAF6);border:1px solid rgba(61,107,39,0.4);border-radius:9px;padding:9px 10px;cursor:pointer">&#128196; CGU sign\u00e9es</button>'
         +'</div>';
     }
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvReceiptRender#2'); }
@@ -6415,7 +6415,7 @@ function goTo(page){
         _ov = document.createElement('div');
         _ov.id = 'regl-wait-ov';
         _ov.style.cssText = 'position:absolute;inset:0;background:rgba(240,238,232,0.92);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;';
-        _ov.innerHTML = '<div style="display:flex;justify-content:center;color:var(--texte-doux)">'+_mvIcon('sablier',40)+'</div><div style="font-size:var(--pt-txt,13px);color:var(--texte-med,#5F5F5F);font-family:Outfit,sans-serif">Chargement en cours...</div>';
+        _ov.innerHTML = '<div style="display:flex;justify-content:center;color:var(--texte-doux)">'+_mvIcon('sablier',40)+'</div><div style="font-size:var(--pt-txt,13px);color:var(--texte-med,#5F5F5F);font-family:var(--font-ui,Outfit,sans-serif)">Chargement en cours...</div>';
         var pg = document.getElementById('page-reglages');
         if(pg) { pg.style.position='relative'; pg.appendChild(_ov); }
       }
@@ -6589,7 +6589,7 @@ function _showAppLoader() {
     el.style.cssText = 'position:fixed;inset:0;background:#F0EEE8;z-index:8000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
     el.innerHTML = '<div style="display:flex;justify-content:center;color:var(--texte-doux)">'+_mvIcon('raisin',40)+'</div>'
       + '<div style="width:36px;height:36px;border:3px solid rgba(61,107,39,0.2);border-top-color:#3D6B27;border-radius:50%;animation:spin 0.8s linear infinite"></div>'
-      + '<div style="font-family:Outfit,sans-serif;font-size:var(--pt-txt,13px);color:var(--texte-med,#5F5F5F);font-weight:500">Chargement des données...</div>';
+      + '<div style="font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px);color:var(--texte-med,#5F5F5F);font-weight:500">Chargement des données...</div>';
     var root = document.getElementById('app-root') || document.body;
     root.appendChild(el);
   }
@@ -9386,10 +9386,10 @@ function _dpRendInjectCss(){
 .dprh-ico{font-size:15px}
 .dprh-surf{margin-left:auto;font-size:var(--pt-micro,11px);font-weight:500;color:var(--texte-doux,#5F5F5F)}
 .dprh-row{display:flex;align-items:center;gap:9px}
-.dprh-yr{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;font-size:18px;color:var(--texte,#2A241C);width:46px;flex-shrink:0}
+.dprh-yr{font-family:var(--font-titre,'Cormorant Garamond',Georgia,serif);font-weight:700;font-size:18px;color:var(--texte,#2A241C);width:46px;flex-shrink:0}
 .dprh-bar{flex:1;height:8px;border-radius:5px;background:rgba(138,90,56,.1);overflow:hidden}
 .dprh-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--terre,#8A5A38),var(--or,#C9A84C))}
-.dprh-val{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;font-size:var(--pt-sm,16px);color:var(--bordeaux,#7A1020);width:98px;text-align:right;flex-shrink:0;line-height:1.05}
+.dprh-val{font-family:var(--font-titre,'Cormorant Garamond',Georgia,serif);font-weight:700;font-size:var(--pt-sm,16px);color:var(--bordeaux,#7A1020);width:98px;text-align:right;flex-shrink:0;line-height:1.05}
 .dprh-u{font-family:inherit;font-size:9px;color:var(--texte-doux,#5F5F5F);font-weight:400}
 .dprh-d{width:58px;text-align:right;flex-shrink:0;font-size:var(--pt-micro,11px);font-weight:700}
 .dprh-d.up{color:var(--vert-med,#3D6B27)}
@@ -9490,7 +9490,7 @@ function openDP(nom){
   try{ _dpFillParcMeteo(p); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/onclick#3'); }
   const pe=document.getElementById('dp-pct');
   pe.textContent=cl.pct+'%';
-  pe.style.cssText='float:right;font-family:"Cormorant Garamond",serif;font-size:38px;font-weight:600;color:'+(cl.pct===100?'var(--vert)':cl.pct>=75?'var(--or)':'var(--orange)');
+  pe.style.cssText='float:right;font-family:var(--font-titre,"Cormorant Garamond",serif);font-size:38px;font-weight:600;color:'+(cl.pct===100?'var(--vert)':cl.pct>=75?'var(--or)':'var(--orange)');
   // ⚠️ innerHTML et non textContent : l'unite descend en petit, sinon « 0,42 ha »
   //   pese autant que le chiffre et la hierarchie a trois niveaux tombe a deux.
   document.getElementById('dp-surf').innerHTML=p.surface+'<span style="font-size:var(--pt-txt,13px)"> ha</span>';
@@ -13227,7 +13227,7 @@ async function refreshApp(){
   // PTR : seuil 120px (était 75) + départ touch dans la zone haute (Y<80px depuis le bord)
   // Évite les déclenchements accidentels en scrollant normalement
   var _sy=0,_startY=0,_act=false,_ind=null,PTR=120,START_ZONE=80;
-  function gi(){if(!_ind){_ind=document.createElement('div');_ind.style.cssText='position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-60px);z-index:9999;background:#3D6B27;color:#fff;border-radius:0 0 20px 20px;padding:8px 20px;font-size:var(--pt-txt,13px);font-family:Outfit,sans-serif;font-weight:600;pointer-events:none;opacity:0;transition:opacity 0.1s;';document.body.appendChild(_ind);}return _ind;}
+  function gi(){if(!_ind){_ind=document.createElement('div');_ind.style.cssText='position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-60px);z-index:9999;background:#3D6B27;color:#fff;border-radius:0 0 20px 20px;padding:8px 20px;font-size:var(--pt-txt,13px);font-family:var(--font-ui,Outfit,sans-serif);font-weight:600;pointer-events:none;opacity:0;transition:opacity 0.1s;';document.body.appendChild(_ind);}return _ind;}
   document.addEventListener('touchstart',function(e){
     if(document.querySelector('.overlay.open'))return;
     var pg=document.querySelector('.page.active');
@@ -14211,7 +14211,7 @@ return `:root{--cave:#14110D; --cave-2:#1C1813; --cave-3:#241f18;
   --ok:#4E7D34; --ok-bg:#EDF3E7; --warn:#C08328; --warn-bg:#FBF1DE; --bad:#B4432E; --bad-bg:#FBEAE4;}
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
-body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg-app);color:var(--texte);line-height:1.5;
+body{font-family:var(--font-ui,'Outfit',system-ui,sans-serif);background:var(--bg-app);color:var(--texte);line-height:1.5;
   background-image:radial-gradient(circle at 20% -10%,rgba(194,135,30,.05),transparent 55%),radial-gradient(circle at 90% 110%,rgba(61,107,39,.05),transparent 55%)}
 /* ───────── FEUILLE A4 ───────── */
 .sheet{max-width:210mm;margin:26px auto;background:var(--paper);box-shadow:0 20px 60px rgba(20,17,13,.18);
@@ -14230,9 +14230,9 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg-app);color:va
 .cov-eyebrow{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--or-2);font-weight:600;
   display:flex;align-items:center;gap:12px;margin-bottom:22px}
 .cov-eyebrow::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(201,168,76,.5),transparent)}
-.cov-dom{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:700;line-height:1.02;letter-spacing:.3px}
+.cov-dom{font-family:var(--font-titre,'Cormorant Garamond',serif);font-size:42px;font-weight:700;line-height:1.02;letter-spacing:.3px}
 .cov-grape{color:var(--or);font-size:.7em;margin-right:6px}
-.cov-sais{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;color:rgba(255,255,255,.62);margin-top:4px}
+.cov-sais{font-family:var(--font-titre,'Cormorant Garamond',serif);font-style:italic;font-size:19px;color:rgba(255,255,255,.62);margin-top:4px}
 .cov-meta{font-size:var(--pt-micro,11px);color:rgba(255,255,255,.42);margin-top:14px;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
 .cov-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--or);opacity:.6}
 .cov-state{display:inline-flex;align-items:center;gap:6px;background:rgba(78,125,52,.18);border:1px solid rgba(139,196,116,.35);
@@ -14252,7 +14252,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg-app);color:va
 .sec-head{display:flex;align-items:baseline;gap:12px;border-bottom:1.5px solid var(--cave);padding-bottom:8px;margin-bottom:14px}
 .sec-eyebrow{font-size:9px;letter-spacing:2.6px;text-transform:uppercase;color:var(--terre);font-weight:700;margin-bottom:2px}
 .sec-titles{flex:1}
-.sec-title{font-family:'Cormorant Garamond',serif;font-size:var(--pt-lg,24px);font-weight:700;line-height:1;letter-spacing:.2px;color:var(--cave)}
+.sec-title{font-family:var(--font-titre,'Cormorant Garamond',serif);font-size:var(--pt-lg,24px);font-weight:700;line-height:1;letter-spacing:.2px;color:var(--cave)}
 .sec-title .acc{color:var(--acier-d)}
 .sec-title .cop{color:var(--terre)}
 .sec-count{font-size:var(--pt-micro,11px);font-weight:700;color:var(--texte-doux);white-space:nowrap;align-self:center;
@@ -14437,7 +14437,7 @@ function openRapportSaison(){
     return '<div onclick="closeOv(null,\'ovRapportSaison\');exportRapportSaison(\''+nomEsc+'\')" '
       +'style="display:flex;align-items:center;gap:12px;padding:14px 16px;margin-bottom:10px;background:var(--fond-module,#FBFAF6);border:1px solid var(--gris,#e5e2d8);border-radius:14px;cursor:pointer">'
       +'<div style="width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#7A1020,#8A5A38);display:flex;align-items:center;justify-content:center;font-size:var(--pt-md,20px);flex-shrink:0">\uD83D\uDCC4</div>'
-      +'<div style="flex:1;min-width:0"><div style="font-family:\'Cormorant Garamond\',serif;font-size:19px;font-weight:700;color:var(--texte,#2A2118);line-height:1.1">'+htmlNom+badge+'</div>'
+      +'<div style="flex:1;min-width:0"><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:19px;font-weight:700;color:var(--texte,#2A2118);line-height:1.1">'+htmlNom+badge+'</div>'
       +(sub?'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#8a8a7a);margin-top:2px">'+sub+'</div>':'')+'</div>'
       +'<div style="font-size:18px;color:var(--texte-doux,#8a8a7a)">\u203a</div></div>';
   }).join('');
@@ -14669,7 +14669,7 @@ function exportRapportSaison(seasonNom){
       var tag=(presSrc==='manuel')?'\u270E saisie manuelle (R\u00e9glages)':'\uD83D\uDD17 depuis le Planning';
       etpBand='<div style="display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,#14110D,#1C1813);border-radius:12px;padding:16px 20px;color:#F2EFE7;position:relative;overflow:hidden;margin-bottom:4px">'
         +'<div style="font-size:var(--pt-lg,24px);opacity:.9">\uD83D\uDC65</div>'
-        +'<div><div style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xxl,32px);font-weight:700;line-height:1">'+f0(presPrev)+' <span style="font-size:15px;opacity:.7">h</span></div>'
+        +'<div><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xxl,32px);font-weight:700;line-height:1">'+f0(presPrev)+' <span style="font-size:15px;opacity:.7">h</span></div>'
         +'<div style="font-size:var(--pt-micro,11px);opacity:.82;margin-top:2px">Pr\u00e9sence de l\u2019\u00e9quipe sur la saison ('+tag+')'+((worked>0)?(' \u00b7 dont '+f0(worked)+' h travaill\u00e9es'):'')+'</div></div>'
         +'<div style="margin-left:auto;text-align:right"><div style="font-size:18px;font-weight:800">'+etpEquipe+' ETP</div><div style="font-size:9px;opacity:.7;text-transform:uppercase;letter-spacing:.5px">\u00e9quipe</div></div></div>';
       var _seg=function(w,grad,txt){ return (w>0.5)?('<div style="width:'+w+'%;background:'+grad+';display:flex;align-items:center;justify-content:center;font-size:var(--pt-micro,11px);font-weight:700;color:#fff;white-space:nowrap;overflow:hidden">'+txt+'</div>'):''; };
@@ -14689,10 +14689,10 @@ function exportRapportSaison(seasonNom){
       etpBand+='<div style="display:grid;grid-template-columns:1.3fr 1fr;gap:12px;margin-top:18px">'
         +'<div style="border:1px solid var(--ligne);border-radius:12px;padding:14px 16px;background:#fff">'
         +'<div style="font-size:var(--pt-micro,11px);font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--texte-doux)">Travaux vigne \u2014 avancement</div>'
-        +'<div style="display:flex;align-items:baseline;gap:9px;margin-top:8px"><span style="font-family:\'Cormorant Garamond\',serif;font-size:30px;font-weight:700;color:#3D6B27">'+_vpct+'\u00a0%</span><span style="font-size:var(--pt-micro,12px);color:var(--texte-doux)">'+f0(sHd)+' h r\u00e9alis\u00e9es / '+f0(vigneH)+' h au total</span></div>'
+        +'<div style="display:flex;align-items:baseline;gap:9px;margin-top:8px"><span style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:30px;font-weight:700;color:#3D6B27">'+_vpct+'\u00a0%</span><span style="font-size:var(--pt-micro,12px);color:var(--texte-doux)">'+f0(sHd)+' h r\u00e9alis\u00e9es / '+f0(vigneH)+' h au total</span></div>'
         +'<div style="height:9px;background:var(--ligne);border-radius:6px;overflow:hidden;margin-top:10px"><i style="display:block;height:100%;width:'+_vpct+'%;background:linear-gradient(90deg,#5C8A3A,#3D6B27);border-radius:6px"></i></div></div>'
         +'<div style="border:1px solid rgba(61,107,39,.22);border-radius:12px;padding:14px;background:linear-gradient(135deg,rgba(61,107,39,.08),rgba(194,135,30,.08));display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">'
-        +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:38px;font-weight:700;color:#3D6B27;line-height:1">'+_etpS(vigneH)+'<span style="font-size:15px;color:#8A5A38"> ETP</span></div>'
+        +'<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:38px;font-weight:700;color:#3D6B27;line-height:1">'+_etpS(vigneH)+'<span style="font-size:15px;color:#8A5A38"> ETP</span></div>'
         +'<div style="font-size:var(--pt-micro,12px);font-weight:600;margin-top:4px">ETP vigne</div><div style="font-size:10px;color:var(--texte-doux);margin-top:3px">pour les seuls travaux vigne</div></div></div>';
     } else {
       var hDues=Math.round(presPrev), hFaites=Math.round(worked), ecart=hFaites-hDues;

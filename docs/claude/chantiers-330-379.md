@@ -955,3 +955,45 @@ Le cœur était à son plafond (2 800). Les points 4 et 5 du backlog technique (
 
 ### 366g. La leçon
 **Un harnais qui lit un fichier par son nom vieillit avec le découpage.** `mv-harnais-info` lisait « la Cave » dans cave.js depuis avant CUV-DEC : il n’a jamais vu une bulle du Cuvier. Quand un module se scinde, chercher les harnais qui le lisent par son nom.
+
+## 367. ★★ CHARTE-1 — LA POLICE PASSE PAR LA CHARTE : UNE LIGNE POUR CHANGER DE POLICE (19/10 — `src/styles.css` · `index.html` · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `public/boot.js` · `src/gt/console.html` · `src/gt/connexion.html` · `src/admin-gt.js` · `src/app.js` · `src/cave.js` · `src/cockpit-vue.js` (`policeUi`, `POL_PL`) · `src/cuvier.js` · `src/onboarding.js` · `src/phyto.js` · `src/pilotage.js` · `src/planning.js` · `src/reglages.js` · `src/reserve.js` · `src/tracteur.js` · `src/tutos.js` (`_PF`) · `scripts/mv-harnais-police.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · **APP 9.31 → 9.32, SW 10.10 → 10.11**, base `d741866`)
+
+### 367a. La demande
+19/10, Nico : « chaque fois que j’essaie de changer le style des modules — la police, la mise en page, la déco — on doit tout changer module par module et c’est très long » ; il veut un fichier qui régit tout le style, pour alléger les modules et n’avoir qu’un fichier à changer à la prochaine refonte. Objectif reformulé puis confirmé (« oui ») : changer le look de toute l’appli en touchant un seul fichier.
+
+### 367b. Le constat, mesuré avant d’écrire
+- **Le fichier existe déjà en grande partie** : 229 réglages en tête de `styles.css` (couleurs, polices, tailles, espacements, arrondis, ombres, clair et sombre). DS-4 (§270) l’a prouvé : tout ce qui les lisait a suivi d’un coup.
+- **Mais l’appli le contourne** : la police écrite à la main 765 fois, contre 94 par le réglage ; ~4 400 couleurs à la main dans les modules (backlog n°29) ; 4 283 attributs `style=` (~280 ko, modules + index.html) ; 28 fonctions qui fabriquent leur feuille dans les modules (~240 ko) — un choix ancien, voulu pour éviter de bumper le SW (§4), qui a éparpillé la charte ; des réglages redéfinis à une quinzaine d’endroits de la feuille ; 3 397 classes, dont une soixantaine de sortes de cartes, plus de 70 de boutons, plus de 90 de pastilles. Les jetons changent les couleurs et les tailles, jamais la forme d’une carte.
+- **Le plan annoncé** : trois étages — un seul fichier de charte, une boîte de pièces communes, les écrans passés un par un sans rien changer à l’œil, chacun avec un cliquet. Premier lot : la police.
+- ⚠️ **Premier chiffre annoncé faux** : 684. Le comptage s’arrêtait au premier guillemet et ignorait `font:`, les attributs SVG et `&#39;`. L’inventaire complet en donne **765** : 719 `font-family`, 32 raccourcis `font:`, 10 attributs SVG, 4 `var(--sans,…)`. Corrigé devant Nico avant la livraison.
+
+### 367c. Ce qui est livré
+- **styles.css** : 325 polices → `var(--font-ui)` / `var(--font-titre)`, sans repli — le réglage est dans le même fichier, comme pour les 94 appels d’avant (tous dans la feuille).
+- **Hors feuille** (13 modules, index.html, les deux pages GT, boot.js) : 440 polices → `var(--font-ui,<la liste d’avant>)`. Le repli est la liste EXACTE d’avant, dans sa forme d’échappement (`\'`, `&#39;`, nu) : une fenêtre sans feuille — impression ouverte depuis un Blob, écran de démarrage, boot.js — rend exactement comme avant.
+- **`--sans`** : déclaré nulle part, appelé quatre fois (`.aoc-*`), il tombait toujours sur son repli — un second nom pour la même chose, la faute de `--bordeaux` (TOUR-1). → `var(--font-ui)`.
+- **Les attributs SVG** (`pilotage.js`, 10) : `font-family="var(--font-ui,Outfit)"`. Un `var()` dans un attribut de présentation : vérifié au Chromium 153 du bac à sable (police résolue au réglage, repli quand il manque) ; Firefox et WebKit le gèrent aussi (W3C svgwg #1031, novembre 2025 — Chromium ne le refuse que pour les longueurs) ; c’est le mécanisme des `fill="var(--texte)"` déjà en place.
+- **Une toile ne lit pas les variables CSS** : `cockpit-vue.js/policeUi()` lit `--font-ui` par `getComputedStyle` au premier dessin ; `POL_PL` devient trois accesseurs — les quatre appels de `largeurTx` n’ont pas changé. Repli : la police d’avant, si la feuille n’est pas encore là (exemption écrite).
+- **`tutos.js/_PF`** : la police du tuto lit le réglage, avec son repli (le panneau peut s’ouvrir dans une fenêtre à côté).
+- **`mv-harnais-police`** — A : aucune police en toutes lettres hors réglage, repli ou exemption ; B : un repli ne ment pas sur son rôle ; C : hors feuille, chaque `var(--font-*)` porte son repli ; D : le réglage, une fois, dans la feuille ; E : la première police de chaque réglage a ses `@font-face` dans `public/fonts/fonts.css` ; F : `--sans` ne revient pas ; G : chaque exemption sert, au compte exact. 13 contre-épreuves, 3 témoins (un commentaire, un repli au bon rôle, une famille générique ne rougissent pas).
+
+### 367d. Les décisions
+- **Le repli dans les modules, pas dans la feuille.** Savoir, site par site, quelle chaîne part dans une fenêtre sans feuille est impossible à 440 sites ; le repli partout coûte ~8 ko, se tromper coûte une impression en Times. Même règle que les `--pt-*` (`mv-harnais-typo` C).
+- **Le repli ne suit pas un changement de police, et c’est voulu.** Si Nico change `--font-ui`, l’appli suit ; les impressions gardent Outfit jusqu’au lot qui leur passera la charte (§28). Le harnais garde le RÔLE du repli (Cormorant jamais derrière `--font-ui`), pas son nom — sinon changer de police redemanderait 440 retouches.
+- **La police de secours change, et c’est la seule différence possible à l’écran.** `'Outfit',sans-serif` devient la chaîne du réglage (`Outfit,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif`). Seuls les caractères hors de l’`unicode-range` de `fonts.css` (→, ✓, ★…) changent de police de secours : Segoe UI sur PC, SF sur iPhone, au lieu d’Arial ou Helvetica dans certains écrans — la police que les en-têtes et la barre latérale leur donnaient déjà. Android : Roboto des deux côtés.
+- **Hors périmètre** : le site public (`guide/`, pages de `public/`) et les PDF (`mkpdf.py`, polices fontsource) ne chargent pas `styles.css`. Les trois polices de code (`'Courier New'`, `monospace`) restent : `--font-code` changerait leur dessin.
+- **E est le piège exact de la demande** : « je change la police dans le réglage, et chaque téléphone en prend une autre sans rien dire » — la police n’a pas ses fichiers. Une famille générique (`system-ui`…) n’en demande pas.
+
+### 367e. Mesuré
+- **Chaîne complète** (`node scripts/mv-lanceur.mjs --continuer`) : **445 commandes, 0 rouge**. `mv-harnais-police` : 8 vertes ; ses 13 contre-épreuves rougissent toutes, ses 3 témoins restent verts.
+- **Base → lot, fichier par fichier** : syntaxe juste (15 JS lus en module, `sw.js`, `boot.js`) ; `catch{}` vides inchangés ; accolades et `<div>` à l’équilibre d’avant ; diff ciblé : **0 ligne hors du motif « police »**, sauf les 3 lignes de `policeUi`.
+- **Poids** : `styles.css` 805 583 → 803 240 octets ; modules, index.html, pages GT et boot.js : +8 027 octets en tout (les replis) — loin de la tolérance de `mv-harnais-typo` (+5 % par lot).
+- **Chromium 153** : `var()` résolu dans un attribut SVG `font-family` et dans un raccourci `font:` ; le repli est pris quand le réglage manque.
+- **Trois cliquets en baisse, identiques sur la base** (donc d’un lot précédent) : C24b 6 → 3, icônes −5, contraste sombre −6. Non regravés ici.
+- ⚠️ **PAS FAIT : les captures avant/après de la vraie appli.** Le montage (Chromium sans tête, serveur Vite, données d’e2e-local, connexion simulée) n’a jamais atteint l’écran des profils : « Nico E2E » n’apparaît pas à l’écran de connexion — trois essais, cause non trouvée. `npm run test:e2e` chez Nico dira si c’est le montage ou l’étape de connexion d’e2e-local. Le rendu reste à regarder chez lui (§28).
+
+### 367f. Trouvé en route
+- **§24, l’item 19 était coupé en deux** : l’item 20 (TETE-2) s’était glissé entre sa première ligne et sa suite. Recollé, sans changer un mot.
+- **Le cœur était à 2 799 lignes sur 2 800** : les deux lignes de consigne neuves (§24 n°21, §28) ont été payées par une ligne blanche de mise en forme (sous « L’offre de lancement est bornée »), aucune consigne déplacée. Le prochain lot devra descendre de l’historique.
+
+### 367g. La leçon
+**Un réglage qui existe n’est pas un réglage qui sert.** `--font-ui` existait depuis DS-4 (08/10) : 94 appels contre 765 polices écrites à la main, et aucun harnais ne regardait les polices. DS-3 l’avait déjà écrit pour l’espacement (« 19 appels contre 1 682 valeurs ») : ce que le contrôle ne compte pas ne se résorbe pas. **Un jeton se pose avec son cliquet, dans le même lot** — c’est la règle que la série CHARTE applique pièce par pièce.

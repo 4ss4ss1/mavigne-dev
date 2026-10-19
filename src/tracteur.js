@@ -802,8 +802,8 @@ function _gnrCardHtml(){
       +_gnrField('gnr-lvl','Litrage restant (L)',gg.niveau)
       +_gnrField('gnr-seuil','Seuil d\u2019alerte (L)',gg.seuil)
       +'<div style="display:flex;gap:8px;margin-top:6px">'
-      +'<button onclick="window.saveGnr()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;min-height:44px">Enregistrer</button>'
-      +'<button onclick="window.cancelGnrEdit()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);cursor:pointer;min-height:44px">Annuler</button>'
+      +'<button onclick="window.saveGnr()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;min-height:44px">Enregistrer</button>'
+      +'<button onclick="window.cancelGnrEdit()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-base,14px);cursor:pointer;min-height:44px">Annuler</button>'
       +'</div></div>';
   }
   if(_gnrAct==='appoint' && isAdmin()){
@@ -819,8 +819,8 @@ function _gnrCardHtml(){
       +'<div style="margin-bottom:8px"><div style="'+lCss+'">Fournisseur <span style="opacity:.7">(facultatif)</span></div><input type="text" id="gnr-ap-f" placeholder="ex. coopérative" style="'+fCss+'"></div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:2px 0 10px">Cuve : '+_gnrNum(rest)+' / '+_gnrNum(cap)+' L avant appoint.</div>'
       +'<div style="display:flex;gap:8px">'
-      +'<button data-tuto="gnr.save" onclick="window.saveGnrAppoint()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;min-height:44px">Enregistrer l’appoint</button>'
-      +'<button onclick="window.cancelGnrAct()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);cursor:pointer;min-height:44px">Annuler</button>'
+      +'<button data-tuto="gnr.save" onclick="window.saveGnrAppoint()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;min-height:44px">Enregistrer l’appoint</button>'
+      +'<button onclick="window.cancelGnrAct()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-base,14px);cursor:pointer;min-height:44px">Annuler</button>'
       +'</div></div>';
   }
   if(_gnrAct==='corr' && canEdit){
@@ -830,14 +830,14 @@ function _gnrCardHtml(){
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:10px">À utiliser si un plein n\'a pas été noté.</div>'
       +_gnrField('gnr-corr','Litrage restant réel (L)',gc.niveau)
       +'<div style="display:flex;gap:8px;margin-top:6px">'
-      +'<button onclick="window.saveGnrCorr()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;min-height:44px">Enregistrer</button>'
-      +'<button onclick="window.cancelGnrAct()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);cursor:pointer;min-height:44px">Annuler</button>'
+      +'<button onclick="window.saveGnrCorr()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;min-height:44px">Enregistrer</button>'
+      +'<button onclick="window.cancelGnrAct()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-base,14px);cursor:pointer;min-height:44px">Annuler</button>'
       +'</div></div>';
   }
   if(!g||!g.capacite){
     return '<div class="ent-resume-card" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">'
       +'<div><div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">'+_mvIcon('carburant',16)+' Cuve GNR</div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">Non renseign\u00e9e</div></div>'
-      +(canEdit?'<button onclick="window.openGnrEdit()" style="padding:8px 14px;border:1px solid var(--acier);border-radius:8px;background:transparent;color:var(--acier);font-family:\'Outfit\',sans-serif;font-size:var(--pt-micro,12px);font-weight:600;cursor:pointer;min-height:44px">Renseigner</button>':'')
+      +(canEdit?'<button onclick="window.openGnrEdit()" style="padding:8px 14px;border:1px solid var(--acier);border-radius:8px;background:transparent;color:var(--acier);font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-micro,12px);font-weight:600;cursor:pointer;min-height:44px">Renseigner</button>':'')
       +'</div>';
   }
   var pc=Math.round((Number(g.niveau)||0)/(Number(g.capacite)||1)*100), low=(Number(g.niveau)||0)<=(Number(g.seuil)||0);
@@ -846,13 +846,13 @@ function _gnrCardHtml(){
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">'
       +'<div><div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">'+_mvIcon('carburant',16)+' Cuve GNR'+(low?' <span style="color:var(--rouge);font-weight:700">'+_mvIcon('alerte',16)+' bas</span>':'')+'</div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">'+_gnrNum(g.niveau)+' / '+_gnrNum(g.capacite)+' L \u00b7 '+pc+' %'+(g.maj?(' \u00b7 maj '+_fmtDate(g.maj)):'')+'</div></div>'
-      +(canEdit?'<button onclick="window.openGnrEdit()" style="padding:8px 12px;border:1px solid var(--gris);border-radius:8px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:var(--pt-txt,13px);cursor:pointer;min-width:44px;min-height:44px">'+_mvIcon('crayon',18)+'</button>':'')
+      +(canEdit?'<button onclick="window.openGnrEdit()" style="padding:8px 12px;border:1px solid var(--gris);border-radius:8px;background:transparent;color:var(--texte-doux);font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-txt,13px);cursor:pointer;min-width:44px;min-height:44px">'+_mvIcon('crayon',18)+'</button>':'')
     +'</div>'
     +'<div style="height:8px;border-radius:5px;background:var(--gris-clair);overflow:hidden;margin-top:9px"><i style="display:block;height:100%;width:'+Math.min(pc,100)+'%;background:'+col+'"></i></div>'
     +(isAdmin()?_gnrPrixLigne():'')
     +(canEdit?'<div style="display:flex;gap:8px;margin-top:11px">'
-      +(isAdmin()?'<button data-tuto="gnr.appoint" onclick="window.openGnrAppoint()" style="flex:1;padding:9px;border:1px solid var(--vert-med);border-radius:9px;background:transparent;color:var(--vert-med);font-family:\'Outfit\',sans-serif;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;min-height:44px">Appoint de cuve</button>':'')
-      +'<button onclick="window.openGnrCorr()" style="flex:1;padding:9px;border:1px solid var(--gris);border-radius:9px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;min-height:44px">Corriger le niveau</button>'
+      +(isAdmin()?'<button data-tuto="gnr.appoint" onclick="window.openGnrAppoint()" style="flex:1;padding:9px;border:1px solid var(--vert-med);border-radius:9px;background:transparent;color:var(--vert-med);font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;min-height:44px">Appoint de cuve</button>':'')
+      +'<button onclick="window.openGnrCorr()" style="flex:1;padding:9px;border:1px solid var(--gris);border-radius:9px;background:transparent;color:var(--texte-doux);font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;min-height:44px">Corriger le niveau</button>'
     +'</div>':'')
   +'</div>';
 }
@@ -865,8 +865,8 @@ function _revCardHtml(t){
       +_gnrField('rev-comp','Compteur actuel (h)',comp)
       +_gnrField('rev-target','Prochaine r\u00e9vision \u00e0 (h)',rev)
       +'<div style="display:flex;gap:8px;margin-top:6px">'
-      +'<button onclick="window.saveRev()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;min-height:44px">Enregistrer</button>'
-      +'<button onclick="window.cancelRevEdit()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);cursor:pointer;min-height:44px">Annuler</button>'
+      +'<button onclick="window.saveRev()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;min-height:44px">Enregistrer</button>'
+      +'<button onclick="window.cancelRevEdit()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-base,14px);cursor:pointer;min-height:44px">Annuler</button>'
       +'</div></div>';
   }
   var hasComp=(comp!=null&&comp!==''&&rev!=null&&rev!=='');
@@ -876,7 +876,7 @@ function _revCardHtml(t){
   return '<div class="ent-resume-card" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">'
     +'<div><div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">'+_mvIcon('engrenage',16)+' Prochaine r\u00e9vision</div>'
     +'<div style="font-size:var(--pt-micro,11px);color:'+col+';font-weight:'+fw+';margin-top:2px">'+sub+'</div></div>'
-    +(canEdit?'<button onclick="window.openRevEdit()" style="padding:8px 12px;border:1px solid var(--gris);border-radius:8px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:var(--pt-txt,13px);cursor:pointer;min-width:44px;min-height:44px">'+_mvIcon('crayon',18)+'</button>':'')
+    +(canEdit?'<button onclick="window.openRevEdit()" style="padding:8px 12px;border:1px solid var(--gris);border-radius:8px;background:transparent;color:var(--texte-doux);font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-txt,13px);cursor:pointer;min-width:44px;min-height:44px">'+_mvIcon('crayon',18)+'</button>':'')
   +'</div>';
 }
 // ════ APPOINT DE CUVE (admin uniquement) ════
@@ -1074,7 +1074,7 @@ function renderEntretiens(){
         +'<div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">Derniers contrôles</div>'
         +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">'+nbF+' fiche'+(nbF>1?'s':'')+nbAnoText+'</div>'
       +'</div>'
-      +'<button onclick="openListeFiches()" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--acier);background:transparent;color:var(--acier);font-size:var(--pt-micro,12px);font-weight:600;font-family:\'Outfit\',sans-serif;cursor:pointer;min-height:44px">Voir tout →</button>'
+      +'<button onclick="openListeFiches()" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--acier);background:transparent;color:var(--acier);font-size:var(--pt-micro,12px);font-weight:600;font-family:var(--font-ui,\'Outfit\',sans-serif);cursor:pointer;min-height:44px">Voir tout →</button>'
     +'</div>'
     +'<div class="ent-resume-grid">'+gridHtml+'</div>'
     +anoBanner

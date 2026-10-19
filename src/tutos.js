@@ -168,7 +168,7 @@ var TU_TUTOS = [
 ];
 
 // ── 4. L'ALLURE : les jetons de l'appli, rien en dur sauf le voile ───────────────────────────────
-var _PF = 'Outfit,system-ui,-apple-system,sans-serif';
+var _PF = 'var(--font-ui,Outfit,system-ui,-apple-system,sans-serif)';   // ★ CHARTE-1 (§367) : la police du réglage, son repli pour une fenêtre sans styles.css
 var _MAIN_SVG = '<svg width="44" height="44" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path style="fill:var(--or-clair);stroke:var(--cave)" stroke-width="2" stroke-linejoin="round" d="M19 6.5a3.5 3.5 0 0 1 7 0V21l1.2-.4a3.4 3.4 0 0 1 4.3 2l.1.3.9-.3a3.4 3.4 0 0 1 4.3 2.2l.1.3.6-.2a3.3 3.3 0 0 1 4.1 2.3l.2.7c1.3 4.6.6 9.6-2 13.6L39 43H20.5l-7.8-10.3a3.6 3.6 0 0 1 .5-4.9 3.6 3.6 0 0 1 4.8.1l1 1Z"/></svg>';
 function _css() {
   if (document.getElementById('mvtu-css')) return;
@@ -221,7 +221,7 @@ function _css() {
     'body.mvtu-on #mv-toast{z-index:100020!important}',
     '.mvtu-fin{position:fixed;inset:0;z-index:100030;display:flex;align-items:flex-end;background:rgba(10,8,5,.55)}',
     '.mvtu-fin-in{width:100%;max-width:560px;max-height:92%;overflow:auto;margin:0 auto;padding:18px 18px calc(env(safe-area-inset-bottom,0px) + 22px);border-radius:22px 22px 0 0;background:var(--bg-card);color:var(--texte);font-family:' + _PF + '}',
-    '.mvtu-fin h2{margin:8px 0 4px;font:600 var(--pt-lg,23px)/1.2 \'Cormorant Garamond\',Georgia,serif}',
+    '.mvtu-fin h2{margin:8px 0 4px;font:600 var(--pt-lg,23px)/1.2 var(--font-titre,\'Cormorant Garamond\',Georgia,serif)}',
     '.mvtu-fin ol{margin:6px 0 14px;padding-left:20px;font-size:var(--pt-base,14px);line-height:1.5;color:var(--texte-doux)}',
     '.mvtu-fin-ic{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:var(--vert-pale);color:var(--vert-med)}',
     '.mvtu-aide{margin:2px 0 12px;padding:8px 12px 10px;border-radius:var(--r-lg,16px);background:var(--or-pale)}',
@@ -236,7 +236,7 @@ function _css() {
     '.mvtu-anneau{position:fixed;left:0;top:0;width:0;height:0;z-index:100004;border:2px solid var(--or-clair);border-radius:var(--r-md,12px);pointer-events:none;opacity:0;box-shadow:0 0 0 1px rgba(0,0,0,.2),0 0 16px rgba(216,188,114,.45);animation:mvtuPouls 1.7s ease-in-out infinite;transition:opacity var(--mv-d1,140ms)}',
     '.mvtu-bloque{position:fixed;inset:0;z-index:100030;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg-app);font-family:' + _PF + '}',
     '.mvtu-bloque > div{max-width:420px;padding:20px;border-radius:var(--r-lg,16px);border:1px solid var(--gris);background:var(--bg-card);color:var(--texte)}',
-    '.mvtu-bloque h2{margin:0 0 8px;font:600 var(--pt-lg,23px)/1.2 \'Cormorant Garamond\',Georgia,serif}',
+    '.mvtu-bloque h2{margin:0 0 8px;font:600 var(--pt-lg,23px)/1.2 var(--font-titre,\'Cormorant Garamond\',Georgia,serif)}',
     '.mvtu-bloque p{margin:0 0 12px;font-size:var(--pt-base,14px);line-height:1.5;color:var(--texte-doux)}',
     '.mvtu-reel{margin:6px 0 0;padding:6px 10px;border-radius:10px;background:var(--or-pale);font-size:var(--pt-base,14px);line-height:1.35}',
     '.mvtu-p-hd{display:flex;align-items:center;gap:6px;min-height:46px;padding:0 8px 0 14px;background:var(--cave);color:var(--or-clair);font:600 var(--pt-base,14px) ' + _PF + '}',

@@ -535,7 +535,7 @@ window.showPublicLanding = function () {
     + ' onkeydown="if(event.keyCode===13)mvLandingGo()">'
     + '<div class="mvl-err" style="display:none;font-size:var(--pt-micro,12px);color:#E07060;margin-top:8px"></div>'
     + '<button onclick="mvLandingGo()" style="width:100%;margin-top:12px;background:var(--or);color:#0C1A0A;border:none;'
-    + 'border-radius:12px;padding:13px;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Ouvrir mon domaine</button>'
+    + 'border-radius:12px;padding:13px;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Ouvrir mon domaine</button>'
     + '<div onclick="mvLandingBack()" style="text-align:center;margin-top:14px;font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.45);cursor:pointer;padding:8px">&#8249; Retour</div>'
     + '</div>'
     + '<div style="text-align:center;margin-top:22px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3);line-height:1.7">'

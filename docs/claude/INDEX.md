@@ -420,3 +420,4 @@
 | 364 | 364. ★★ TUTO-7 — LE TUTO DES ÉQUIPES NE SAUTE PLUS D’ÉTAPE (19/10 — `src/tutos.js` · `src/utils.js` (APP, W… | `docs/claude/chantiers-330-379.md` |
 | 365 | 365. ★★ AIDE-1 — LA FENÊTRE « ? AIDE » SE LIT : PLUS DE CODE À L’ÉCRAN, L’ICÔNE DESSINÉE, LE PILOTAGE QUI D… | `docs/claude/chantiers-330-379.md` |
 | 366 | 366. ★★ MATU-1 — LES MATURITÉS RANGÉES : UN ÉCRAN, LA VENDANGE CHOISIE, LA FOURCHETTE PAR COULEUR (19/10 — … | `docs/claude/chantiers-330-379.md` |
+| 367 | 367. ★★ CHARTE-1 — LA POLICE PASSE PAR LA CHARTE : UNE LIGNE POUR CHANGER DE POLICE (19/10 — `src/styles.cs… | `docs/claude/chantiers-330-379.md` |
