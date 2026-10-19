@@ -53,7 +53,12 @@ const ECRANS = {
   'reserve': "goTo('reserve');",
   'planning': "goTo('planning');",
   'pilotage': "goTo('pilotage');",
-  'reglages': "goTo('reglages');"
+  'reglages': "goTo('reglages');",
+  // ★ CAPTURES-2 (§375) : les vues profondes où vivent les pastilles du jeu (CHARTE-4a)
+  'planning-gens': "goTo('planning'); planSwitchTab('gens');",
+  'pilotage-decider': "goTo('pilotage'); if (window._pilSetTab) window._pilSetTab('sim');",   // l’onglet « Décider » a la clé sim
+  'tracteur-session-detail': "goTo('tracteur'); setTimeout(function(){ var c = document.querySelector('[onclick^=\"openSessionDetail\"]'); if (c) c.click(); }, 400);",
+  'cave-chai': "goTo('cave'); selectCaveSection('elevage');"
 };
 const choisis = opt('--ecrans') ? opt('--ecrans').split(',').map(x => x.trim()).filter(Boolean) : Object.keys(ECRANS);
 const inconnus = choisis.filter(x => !ECRANS[x]);

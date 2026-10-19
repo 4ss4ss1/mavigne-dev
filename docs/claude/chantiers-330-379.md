@@ -1183,3 +1183,24 @@ Lu (19/10) : **Atlassian** sépare la Tag (catégoriser, discrète), le Lozenge 
 
 ### 374d. La leçon
 **Une pastille colorée par habitude finit par ne plus rien dire.** 34 fonds pour 97 pastilles : la couleur décorait. Les grands systèmes la réservent au sens — un statut, un type — et laissent le reste neutre ; c’est ce qui rend un écran lisible d’un coup d’œil.
+
+## 375. CAPTURES-2 — L’OUTIL DE CAPTURES OUVRE LES VUES PROFONDES (19/10 — `scripts/mv-captures.mjs` · `scripts/harnais-claude-md.mjs` · doc · **pas de bump** : aucun fichier de l’appli, base `4a826fe`)
+
+### 375a. La demande
+La suite proposée après CHARTE-4a (§374c), acceptée (« suite ») : voir en vrai les pastilles passées au jeu, qui vivent dans des vues que l’outil n’ouvrait pas.
+
+### 375b. Ce qui est livré
+Quatre vues de plus dans `mv-captures` (17 en tout), chacune ouverte comme un utilisateur le ferait :
+- `planning-gens` : `planSwitchTab('gens')` ;
+- `pilotage-decider` : `_pilSetTab('sim')` — ⚠️ l’onglet « Décider » a la clé `sim` (les clés valides : `auj`, `an`, `avc`, `equ`, `cav`, `eco`, `cfm`, `arc`, `sim`) ; `'decider'` laissait l’écran sur Aujourd’hui sans rien dire ;
+- `tracteur-session-detail` : un clic sur la première carte de session (`[onclick^="openSessionDetail"]`) ;
+- `cave-chai` : `selectCaveSection('elevage')`.
+
+### 375c. Vu, et pas vu
+- **Vu en vrai** : Cave › Le Chai, la pastille « FML ✓ » d’une cuvée (`.mvc-tag-fmlok`) au statut « fait » du jeu — fond vert pâle et texte vert en clair, teinte verte en sombre, icône à la taille du texte. Juste.
+- **Les trois autres vues s’ouvrent, intactes, mais n’en montrent aucune** : la démo n’a pas d’heures sup ni d’alerte de paie (Planning › Les gens, `.pf-tag`), aucune tâche à répartir (Pilotage › Décider, `.pil-dz-tag`), aucune session chronométrée (détail d’une session, `.sdp-tag`).
+- **Vu en passant, hors du jeu** : « Désactiver » et « Voir toutes » d’une session, les filtres de millésime du Chai — pour CHARTE-4b.
+- **Chaîne** : 451 commandes, **0 rouge**, jouée d’un trait après le dernier changement.
+
+### 375d. La leçon
+**Une capture ne prouve que ce que les données montrent.** Ouvrir la bonne vue ne suffit pas : sans heures sup, sans tâche à répartir, sans session chronométrée dans la démo, trois pastilles sur sept restent invisibles. Pour les voir, il faut une démo qui porte ces états.
