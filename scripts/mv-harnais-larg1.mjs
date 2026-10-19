@@ -10,7 +10,7 @@ import fs from 'fs'; import path from 'path'; import { fileURLToPath } from 'url
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const S0 = { css: L('src/styles.css'), idx: L('index.html'), liste: L('scripts/mv-harnais-liste.mjs') };
+const S0 = { css: L('src/charte.css') + '\n' + L('src/styles.css'), idx: L('index.html'), liste: L('scripts/mv-harnais-liste.mjs') };
 fs.readdirSync(path.join(R, 'src')).filter(f => f.endsWith('.js')).sort().forEach(f => { S0['js:' + f] = L('src/' + f); });
 
 // Les pages HORS de la règle, chacune avec sa raison. En retirer une = l'ajouter à la règle, dans le même lot.

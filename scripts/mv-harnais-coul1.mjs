@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const S0 = { css: L('src/styles.css'), liste: L('scripts/mv-harnais-liste.mjs') };
+const S0 = { css: L('src/charte.css') + '\n' + L('src/styles.css'), liste: L('scripts/mv-harnais-liste.mjs') };
 const n = (css, s) => css.split(s).length - 1;
 function hexL(h) { const c = h.replace('#', ''); const v = [0, 2, 4].map((i) => parseInt(c.slice(i, i + 2), 16) / 255).map((x) => (x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4))); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; }
 const ratio = (a, b) => { const A = hexL(a), B = hexL(b); return (Math.max(A, B) + 0.05) / (Math.min(A, B) + 0.05); };

@@ -8,181 +8,9 @@
      (affichage stylé garanti avant tout chargement d'asset).
    © 2026 Nicolas GUÉRET / GUERETTECH
    ════════════════════════════════════════════════════════════════════ */
+@import './charte.css';   /* ★ CHARTE-2 (§368) : TOUS les réglages — couleurs, polices, tailles, espacements… — vivent dans charte.css ; cette feuille ne fait que les lire */
 
-:root{
-  color-scheme:light dark;
-  /* ═══ L'ECHELLE DE TEXTE DU PILOTAGE — ONZE PAS NOMMES ═══
-     Le module portait 28 valeurs de font-size ecrites a la main, de 8,5 a 40 px,
-     choisies une par une au fil des ecrans. Vingt-huit tailles, ce n'est pas une
-     hierarchie : c'est son absence. L'oeil n'a aucun point d'accroche, alors il
-     lit tout pour trouver un chiffre.
-     Onze pas, chacun nomme par son ROLE. Toute nouvelle taille passe par ici, ou
-     elle n'existe pas — le harnais mv-harnais-echelle.mjs le verifie en CI.
-     ⚠️ Elle etait declaree dans _pilCssV2() pour avoir pu etre livree sans bump.
-        Elle remonte ici au premier lot qui bumpe, avec _PIL_SEM. Les appels
-        gardent leur repli : var(--pt-txt,13px) reste juste si ce fichier est
-        en retard chez un client. */
-  /* ═══ L'ECHELLE D'ESPACEMENT — HUIT PAS, MULTIPLES DE 4 ═══ (lot DS-3)
-     La feuille portait 1 à 20 px de padding, chaque valeur utilisee : 129 fois
-     10 px, 126 fois 8, 88 fois 6, 73 fois 9, 66 fois 11... Vingt valeurs, ce
-     n'est pas un rythme, c'est vingt decisions prises une par une. Rien ne
-     s'aligne sur rien, et c'est ce qui fait « brouillon » avant meme qu'on
-     lise le contenu.
-     ⚠️ LA FEUILLE N'EST PAS REECRITE D'UN COUP. Remapper 800 declarations sans
-       pouvoir verifier une seule capture serait un pari, pas un lot. La charte
-       DS-2 passe a l'echelle ; le RESTE est tenu par un CLIQUET (le nombre de
-       valeurs hors echelle ne peut plus monter) et se resorbe ecran par ecran.
-     ★ Multiples de 4, sauf --e-1 : 2 px existe pour un ecart optique, pas pour
-       une marge. */
-  --e-0:2px; --e-1:4px; --e-2:8px; --e-3:12px;
-  --e-4:16px; --e-5:20px; --e-6:24px; --e-7:32px; --e-8:40px;
-  --pt-hero:40px;   /* le verdict, une seule fois par ecran      */
-  --pt-xxl:32px;    /* LE chiffre d'une carte                    */
-  --pt-xl:28px;     /* chiffre secondaire                        */
-  --pt-lg:24px;     /* titre serif d'un panneau                  */
-  --pt-md:20px;     /* titre serif d'une section                 */
-  --pt-sm:16px;     /* bouton, pas d'un compteur                 */
-  --pt-base:14px;   /* valeur forte dans une liste               */
-  --pt-txt:13px;    /* le corps : listes, lignes de detail       */
-  /* ★★★ TEXTE-A (§247) — les trois petits crans relevés, décision de Nico sur maquette (05/10) : 11 → 12, 10,5 → 11,5,
-     9,5 → 11. Plus rien sous 11 px par ces jetons. Les REPLIS var(--pt-*, Npx) des modules gardent les anciennes valeurs
-     EXPRÈS : ils servent aux fenêtres d'impression (sans :root) — le relevé d'heures tient sur une A4 de hauteur fixe —,
-     et l'impression n'a pas été jugée. Seule exception : pilotage.js, qui n'imprime rien, où mv-harnais-echelle exige que
-     le repli redise la valeur du pas. */
-  --pt-micro:12px;  /* la ligne de cadre, legendes, mentions     */
-  --pt-lbl:12px;    /* etiquette : capitales, interlettrage      */
-  --pt-nano:11px;   /* sur-etiquette, en-tete de tableau         */
 
-  /* ═══ DS-0 — LE SOCLE : RAYONS, OMBRES, GRAISSES, FILET ═══
-     ⚠️ L'ESPACEMENT N'EST PAS ICI — il existe DEJA, trente lignes plus haut :
-       --e-0..--e-8 (lot DS-3). Le cadrage de DS-0 demandait --sp-1..--sp-8 ;
-       SIX des huit pas y sont deja, au meme pixel exact (4/8/12/16/24/32 =
-       e-1/e-2/e-3/e-4/e-6/e-7). Declarer une seconde famille aurait fait DEUX
-       VERITES pour un meme pixel : la faute exacte de §47a. Seuls les deux pas
-       reellement manquants sont ajoutes, DANS la famille existante.
-     ★ Et le vrai defaut de l'espacement n'est pas l'absence d'echelle, c'est
-       qu'elle ne sert pas : 19 appels var(--e-*) contre 1682 valeurs de padding,
-       margin et gap ecrites a la main. Une echelle qu'on ignore n'en est plus
-       une — c'est le cliquet de mv-harnais-echelle qui la resorbe, pas ce lot. */
-  --e-9:48px; --e-10:64px;
-
-  /* RAYONS — quatre pas. 674 border-radius dans cette feuille, 45 valeurs
-     distinctes ; les quatre pas couvrent les quatre plus gros usages reels :
-     12px (95 fois), 8px (50), 16px (27), 999px (8).
-     ⚠️ border-radius:50% — 130 occurrences, tous fichiers — est un CERCLE, pas
-       un rayon : une pastille de 44px et une de 22px n'ont aucune valeur en
-       pixels en commun. Il n'est JAMAIS remplace par un jeton, et le harnais
-       pose un PLANCHER dessus pour interdire la conversion.
-     ⚠️ 99px (10 occurrences) rend la meme pilule que 999px sur un element bas,
-       mais PAS au-dela de 198px de haut. Laisse tel quel : c'est un arbitrage a
-       l'oeil, pas une substitution mecanique. */
-  --r-xs:4px; --r-sm:6px; --r-md:8px; --r-lg:12px; --r-full:999px;
-
-  /* OMBRES — trois pas. sm et md existaient deja (plus bas dans ce meme bloc),
-     lg est neuf.
-     ★★★ LA MESURE DU 16/08 ETAIT FAUSSE, et voici exactement pourquoi : dans
-       « 0 2px 8px », le premier 0 N'A PAS D'UNITE. Une expression qui cherche
-       \d+px n'y trouve que DEUX longueurs, en deduit « pas de flou », et range
-       tout dans le seuil faible. D'ou le « les 230 usages tombent tous dans
-       faible » qui laissait croire que trois pas etaient de trop.
-     Mesure refaite en TOKENISANT (0 sans unite = 0px) : 239 declarations dont 65
-     via jeton, 177 couches mesurables. 65 de ces couches ont un flou de ZERO —
-     ce sont des ANNEAUX (0 0 0 2px) et des filets (inset 0 1px 0), pas des
-     elevations ; les compter comme des ombres est la seconde moitie de l'erreur,
-     la meme confusion que 50% pour un rayon.
-     Restent 112 vraies elevations : 57 sous 10px de flou, 41 entre 10 et 39,
-     14 a 40px et plus. Trois populations, trois pas — le troisieme ne manquait
-     pas de justification, il manquait tout court. Ses clients sont nommes :
-     .ent-confirm-modal, .saison-menu, .ov-plan-sheet, #mv-dock-sheet,
-     .pil-drawer, .pl2-mbar, .mvt-card, .mvds-sheet. */
-  --shadow-lg:0 16px 40px -8px rgba(20,18,14,.22),0 4px 10px -4px rgba(20,18,14,.10);
-
-  /* GRAISSES — trois pas. 1971 font-weight mesures, tous fichiers :
-     600 (976 fois), 700 (686), 500 (156) — 92 % a eux trois.
-     ⚠️ 800 existe 78 fois. Ce n'est ni un pas ni un accident : c'est un
-       QUATRIEME PAS DE FAIT, jamais declare. Il n'est pas ajoute en douce ici —
-       il part au cliquet du harnais, ou il ne peut plus que descendre. Le
-       trancher (quatrieme pas, ou residu a resorber) demande une capture. */
-  --fw-med:500; --fw-semi:600; --fw-bold:700;
-
-  /* ★ MOUV-1 (§259) — LE MOUVEMENT, UNE SEULE SOURCE : quatre durées, trois courbes.
-     d1 répond à un geste (appui, survol) · d2 un petit changement d'état · d3 un élément qui entre
-     ou change de place · d4 un chiffre ou une barre qui se remplit. « sortie » arrive et se pose,
-     « glisse » part et arrive, « ressort » confirme avec un léger rebond. Un écran prend ces jetons,
-     jamais une durée en dur ; « moins d'animations » les ramène à 1 ms (fin du fichier, MOUV-1). */
-  --mv-d1:140ms; --mv-d2:240ms; --mv-d3:420ms; --mv-d4:900ms;
-  --mv-sortie:cubic-bezier(.22,1,.36,1); --mv-glisse:cubic-bezier(.65,0,.35,1); --mv-ressort:cubic-bezier(.34,1.56,.64,1);
-
-  /* LE FILET NEUTRE — une seule source, arbitree par le nombre :
-     « 1px solid var(--gris-clair) » = 172 occurrences (+14 avec repli),
-     « var(--gris) » = 71. --gris-clair mene de plus du double : il gagne.
-     ⚠⚠ POURQUOI --ligne EST AUSSI DECLARE DANS LES DEUX BLOCS SOMBRES : la
-       substitution d'un var() ecrit DANS une custom property se resout SUR
-       L'ELEMENT QUI LA DECLARE. Declare ici seulement, --ligne se figerait a la
-       valeur CLAIRE et resterait clair en mode sombre — sans erreur, sans
-       avertissement. Il ne suit le theme que parce qu'il est redit la ou
-       --gris-clair est redit. Le harnais verifie les DEUX blocs sombres : n'en
-       traiter qu'un ferait diverger la bascule manuelle du mode auto de l'OS.
-     ⚠️ Le nom --ligne existe deja dans _rsCss() (app.js) : c'est le :root d'un
-       DOCUMENT A4 imprime, ouvert dans sa propre fenetre, qui ne charge jamais
-       cette feuille. Deux documents distincts, aucun conflit. */
-  --ligne:var(--gris-clair,#E7E6E2);
-  --vert:#1E3A12;--vert-med:#3D6B27;--vert-clair:#6BA34A;--vert-pale:#EAF3E2;
-  --or:#C2A14D;--or-clair:#D8BC72;--or-pale:#FAF3E0;
-  --terre:#8A5A38;--terre-pale:#F3EADF;
-  --acier:#2C3E50;--acier-med:#3D5166;--acier-pale:#ECF0F4;
-  --phyto:#5B2D8E;--phyto-med:#7B4DB8;--phyto-pale:#F0EAF8;
-  --bleu:#1A4A7A;--bleu-pale:#E8F0FA;
-  --blanc:#FFFFFF;--gris-clair:#E7E6E2;--gris:#D5D4CF;
-  --texte:#1B1A18;--texte-med:#55534E;--texte-doux:#686660;
-  /* Alias historique : --radius-card etait un SECOND nom pour 16px, avec ses
-     10 appels. Il devient un renvoi vers --r-lg au lieu d'une valeur jumelle. */
-  --radius-card:var(--r-lg,12px);
-  --rouge:#A0291E;--rouge-pale:#FAEAE8;
-  /* TOUR-1 : --bordeaux etait appele 11 fois avec son repli #7A1020 mais DECLARE nulle part :
-     en sombre, ce bordeaux tombait a 1,6:1 sur le fond (« % vol potentiel », total des
-     bouteilles, estimation alcoolique). Il devient un jeton qui suit le theme. */
-  --bordeaux:#7A1020;
-  --orange:#B85A1A;--orange-pale:#FBF0E6;
-  --plan-acc:#7B6DB8;--plan-acc-pale:rgba(123,109,184,0.12);
-  --shadow-xs:0 1px 1px rgba(20,18,14,.04);
-  --shadow-sm:0 1px 2px rgba(20,18,14,.05),0 1px 3px rgba(20,18,14,.04);
-  --shadow-md:0 6px 16px -4px rgba(20,18,14,.12),0 2px 4px -2px rgba(20,18,14,.06);
-  /* Nav sombre permanent (contraste terrain) */
-  --bg-app:#F0EEE9;--bg-card:#FFFFFF;
-  /* ★ DS-4 (§270) — LA CHARTE DE LA MAQUETTE V2 (validée par Nico le 08/10, « c'est parfait »).
-     Les noms ci-dessus GARDENT leur nom et prennent les valeurs de la maquette : tout ce qui passe déjà par un jeton
-     suit d'un coup (le crème devient un neutre, les arrondis maigrissent, les ombres s'allègent).
-     Les noms ci-dessous couvrent les rôles qui n'en avaient pas. Une seule couleur pour agir (la lie-de-vin des
-     grappes du logo), trois pour dire l'état ; l'ombre ne sert qu'à ce qui flotte. Redits à l'identique dans les
-     DEUX blocs sombres (harnais jetons). */
-  --bg-doux:#F7F5F1; --survol:rgba(28,26,22,.055); --presse:rgba(28,26,22,.095); --ligne-forte:#CDCAC2; --texte-pale:#A3A19B;
-  --accent:#7A2850; --accent-survol:#6A2145; --accent-texte:#7A2850; --accent-doux:rgba(122,40,80,.11); --sur-accent:#FFFFFF; --anneau:rgba(122,40,80,.42);
-  --ok:#237A47; --ok-doux:rgba(35,122,71,.15); --attention:#A15C00; --attention-doux:rgba(161,92,0,.15); --danger:#C2381B; --danger-doux:rgba(194,56,27,.13);
-  --encours:#4F4D48; --piste:rgba(28,26,22,.10); --inverse:#1F1E1B; --sur-inverse:#F5F4F1; --voile:rgba(16,15,13,.30); --sk-reflet:rgba(255,255,255,.70);
-  --reflet:inset 0 1px 0 rgba(255,255,255,.14); --panneau:0 1px 2px rgba(20,18,14,.04);
-  --focus-ombre:0 0 0 var(--bw-2,2px) var(--bg-card),0 0 0 calc(var(--bw-2,2px) * 2) var(--anneau); --focus-dedans:inset 0 0 0 var(--bw-2,2px) var(--anneau);
-  --font-ui:Outfit,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --font-titre:"Cormorant Garamond",Georgia,"Times New Roman",serif; --font-code:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
-  --lh-serre:1.15; --lh-ui:1.35; --lh-texte:1.5; --ls-serre:-0.011em; --ls-titre:-0.02em; --fw-reg:400; --bw:1px; --bw-2:2px;
-  --h-kbd:20px; --h-badge:20px; --h-sm:28px; --h-ctl:32px; --h-row:36px; --h-row-2:48px; --h-top:52px; --h-dock:56px;
-  --ic-xs:14px; --ic-sm:16px; --ic-md:18px; --ic-lg:20px; --av:28px; --o-off:.45;
-  --l-side:248px; --l-rail:56px; --l-inset:8px; --l-ecran:100vh; --l-cmdk:600px; --h-cmdk:52px; --l-list:400px; --l-fiche:440px;
-  --mv-sk:1600ms; --mv-toast:5000ms;
-  --z-sticky:10; --z-voile:95; --z-sheet:96; --z-overlay:600; --z-cmdk:700; --z-tip:800; --z-toast:2500;
-  --cave:#14110D;--cave-2:#1C1813;
-  --horizon:linear-gradient(90deg,#8A5A38 0%,#C2871E 50%,#3D6B27 100%);
-  /* Etiquettes/pastilles thematiques (fond teinte + texte lisible, basculent en sombre) */
-  --tag-green-bg:#EAF3E2;--tag-green-tx:#2D5016;
-  --tag-amber-bg:#FFF3CD;--tag-amber-tx:#856404;
-  --tag-blue-bg:#E8F0FA;--tag-blue-tx:#1A4A7A;
-  --tag-purple-bg:#F3E5F5;--tag-purple-tx:#6A1B9A;
-  --tag-red-bg:#FAEAE8;--tag-red-tx:#A0291E;
-  --tag-teal-bg:#E0F2F1;--tag-teal-tx:#00695C;
-  --tag-sky-bg:#E1F5FE;--tag-sky-tx:#0277BD;
-  --tag-grey-bg:#ECEFF1;--tag-grey-tx:#455A64;
-  --tag-orange-bg:#FBF0E6;--tag-orange-tx:#B85A1A;
-  --ink-info:#4A9FC8;
-}
 
 /* Filet de securite : tout champ de saisie herite du texte thematique (jamais invisible en clair ni sombre) */
 input,select,textarea{color:var(--texte);}
@@ -192,94 +20,7 @@ input::placeholder,textarea::placeholder{color:var(--texte-doux);opacity:1;}
 .hv2-meteo-cache-banner{display:flex;align-items:center;justify-content:space-between;padding:6px 0 2px;border-top:1px solid var(--gris-clair);}
 /* ══ DARK MODE ══ */
 /* 1) Toggle manuel : #app-root[data-theme=dark] */
-/* ⚠⚠⚠ LES DEUX SÉLECTEURS SONT INDISPENSABLES, ET C'EST MESURÉ (§59).
-   #app-root est fermé ligne 3197 d'index.html : les 13 overlays statiques,
-   les 37 .modal qui les habitent et tous les overlays posés en JS par
-   document.body.appendChild sont ses FRÈRES, pas ses enfants. Les 63
-   variables de thème redéfinies ici ne les atteignaient pas : une modale
-   sortait BLANCHE au milieu d'une application sombre.
-   Ajouter :root suffit — les variables sont posées sur <html> et héritées par
-   tout le document. AUCUNE déclaration n'est dupliquée : c'est le même bloc,
-   avec deux sélecteurs. Les règles #app-root[data-theme="dark"] .xxx qui
-   existent ailleurs continuent de fonctionner sans changement. */
-#app-root[data-theme="dark"],:root[data-theme="dark"]{
-  color-scheme:dark;
-  --vert:#5A9E3A;--vert-med:#6AB845;--vert-clair:#8DC868;--vert-pale:rgba(90,158,58,0.22);
-  --or:#D8BC72;--or-clair:#E8D294;--or-pale:rgba(216,188,114,0.20);
-  --terre:#A07050;--terre-pale:rgba(160,112,80,0.22);
-  --acier:#4A80C4;--acier-med:#6AA0D4;--acier-pale:rgba(74,128,196,0.22);
-  --phyto:#8B5CC8;--phyto-med:#AB7CE8;--phyto-pale:rgba(139,92,200,0.22);
-  --bleu:#4A80C4;--bleu-pale:rgba(74,128,196,0.22);
-  --blanc:#151514;--gris-clair:#272624;--gris:#363532;
-  --texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;
-  --rouge:#E05545;--rouge-pale:rgba(224,85,69,0.22);
-  --bordeaux:#E8848C;
-  --orange:#D4721A;--orange-pale:rgba(212,114,26,0.20);
-  --plan-acc:#A394E8;--plan-acc-pale:rgba(163,148,232,0.16);
-  --shadow-sm:0 1px 2px rgba(0,0,0,.40),0 1px 3px rgba(0,0,0,.25);
-  --shadow-md:0 8px 20px -6px rgba(0,0,0,.60),0 2px 6px -2px rgba(0,0,0,.40);
-  --shadow-lg:0 20px 48px -10px rgba(0,0,0,.72),0 4px 12px -4px rgba(0,0,0,.50);
-  --ligne:var(--gris-clair,#272624);
-  --bg-doux:#1A1A19; --survol:rgba(255,248,235,.055); --presse:rgba(255,248,235,.09); --ligne-forte:#3E3D39; --texte-pale:#5F5D58;
-  --accent:#8A3560; --accent-survol:#9A3E6B; --accent-texte:#E59ABD; --accent-doux:rgba(229,154,189,.15); --sur-accent:#FFFFFF; --anneau:rgba(229,154,189,.50);
-  --ok:#76C995; --ok-doux:rgba(118,201,149,.17); --attention:#E9AA4A; --attention-doux:rgba(233,170,74,.17); --danger:#F28B6A; --danger-doux:rgba(242,139,106,.17);
-  --encours:#C9C7C1; --piste:rgba(255,248,235,.12); --inverse:#EDECE9; --sur-inverse:#151514; --voile:rgba(0,0,0,.55); --sk-reflet:rgba(255,255,255,.06);
-  --shadow-xs:0 1px 1px rgba(0,0,0,.30); --reflet:inset 0 1px 0 rgba(255,255,255,.07); --panneau:inset 0 1px 0 rgba(255,255,255,.035);
-  --bg-app:#0D0D0C;--bg-card:#151514;--cave:#100D0A;--cave-2:#171410;--horizon:linear-gradient(90deg,#A06A42 0%,#D8A642 50%,#6AB845 100%);
-  --tag-green-bg:rgba(106,184,69,0.18);--tag-green-tx:#A5D88C;
-  --tag-amber-bg:rgba(216,170,66,0.18);--tag-amber-tx:#E8C46A;
-  --tag-blue-bg:rgba(74,128,196,0.22);--tag-blue-tx:#8FBEE8;
-  --tag-purple-bg:rgba(168,120,210,0.22);--tag-purple-tx:#D8B0E8;
-  --tag-red-bg:rgba(224,85,69,0.22);--tag-red-tx:#F0A89C;
-  --tag-teal-bg:rgba(38,166,154,0.20);--tag-teal-tx:#6ED0C4;
-  --tag-sky-bg:rgba(80,170,230,0.20);--tag-sky-tx:#7FC3E6;
-  --tag-grey-bg:rgba(150,160,170,0.18);--tag-grey-tx:#B4BAC4;
-  --tag-orange-bg:rgba(212,114,26,0.20);--tag-orange-tx:#E8A45A;
-  --ink-info:#7FC3E6;
-}
 /* 2) Mode OS auto : prefers-color-scheme:dark, sauf si mode clair forcé */
-@media(prefers-color-scheme:dark){
-  /* Même raison qu'au bloc précédent : en mode AUTO, aucun attribut n'est
-     posé, et :root:not([data-theme="light"]) est vrai — le thème de l'OS
-     atteint alors les overlays. En mode clair FORCÉ, l'attribut "light" est
-     posé sur <html> aussi, ce qui éteint cette règle : c'est pour ça que la
-     visite guidée doit poser l'attribut aux DEUX endroits (§59c). */
-  #app-root:not([data-theme="light"]),:root:not([data-theme="light"]){
-    color-scheme:dark;
-    --vert:#5A9E3A;--vert-med:#6AB845;--vert-clair:#8DC868;--vert-pale:rgba(90,158,58,0.22);
-    --or:#D8BC72;--or-clair:#E8D294;--or-pale:rgba(216,188,114,0.20);
-    --terre:#A07050;--terre-pale:rgba(160,112,80,0.22);
-    --acier:#4A80C4;--acier-med:#6AA0D4;--acier-pale:rgba(74,128,196,0.22);
-    --phyto:#8B5CC8;--phyto-med:#AB7CE8;--phyto-pale:rgba(139,92,200,0.22);
-    --bleu:#4A80C4;--bleu-pale:rgba(74,128,196,0.22);
-    --blanc:#151514;--gris-clair:#272624;--gris:#363532;
-    --texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;
-    --rouge:#E05545;--rouge-pale:rgba(224,85,69,0.22);
-  --bordeaux:#E8848C;
-    --orange:#D4721A;--orange-pale:rgba(212,114,26,0.20);
-    --plan-acc:#A394E8;--plan-acc-pale:rgba(163,148,232,0.16);
-    --shadow-sm:0 1px 2px rgba(0,0,0,.40),0 1px 3px rgba(0,0,0,.25);
-    --shadow-md:0 8px 20px -6px rgba(0,0,0,.60),0 2px 6px -2px rgba(0,0,0,.40);
-    --shadow-lg:0 20px 48px -10px rgba(0,0,0,.72),0 4px 12px -4px rgba(0,0,0,.50);
-    --ligne:var(--gris-clair,#272624);
-    --bg-doux:#1A1A19; --survol:rgba(255,248,235,.055); --presse:rgba(255,248,235,.09); --ligne-forte:#3E3D39; --texte-pale:#5F5D58;
-    --accent:#8A3560; --accent-survol:#9A3E6B; --accent-texte:#E59ABD; --accent-doux:rgba(229,154,189,.15); --sur-accent:#FFFFFF; --anneau:rgba(229,154,189,.50);
-    --ok:#76C995; --ok-doux:rgba(118,201,149,.17); --attention:#E9AA4A; --attention-doux:rgba(233,170,74,.17); --danger:#F28B6A; --danger-doux:rgba(242,139,106,.17);
-    --encours:#C9C7C1; --piste:rgba(255,248,235,.12); --inverse:#EDECE9; --sur-inverse:#151514; --voile:rgba(0,0,0,.55); --sk-reflet:rgba(255,255,255,.06);
-    --shadow-xs:0 1px 1px rgba(0,0,0,.30); --reflet:inset 0 1px 0 rgba(255,255,255,.07); --panneau:inset 0 1px 0 rgba(255,255,255,.035);
-    --bg-app:#0D0D0C;--bg-card:#151514;--cave:#100D0A;--cave-2:#171410;--horizon:linear-gradient(90deg,#A06A42 0%,#D8A642 50%,#6AB845 100%);
-    --tag-green-bg:rgba(106,184,69,0.18);--tag-green-tx:#A5D88C;
-    --tag-amber-bg:rgba(216,170,66,0.18);--tag-amber-tx:#E8C46A;
-    --tag-blue-bg:rgba(74,128,196,0.22);--tag-blue-tx:#8FBEE8;
-    --tag-purple-bg:rgba(168,120,210,0.22);--tag-purple-tx:#D8B0E8;
-    --tag-red-bg:rgba(224,85,69,0.22);--tag-red-tx:#F0A89C;
-    --tag-teal-bg:rgba(38,166,154,0.20);--tag-teal-tx:#6ED0C4;
-    --tag-sky-bg:rgba(80,170,230,0.20);--tag-sky-tx:#7FC3E6;
-    --tag-grey-bg:rgba(150,160,170,0.18);--tag-grey-tx:#B4BAC4;
-    --tag-orange-bg:rgba(212,114,26,0.20);--tag-orange-tx:#E8A45A;
-    --ink-info:#7FC3E6;
-  }
-}
 /* Mode clair — gradient carte priorité */
 :root:not([data-theme="dark"]) .hv2-card-or,
 #app-root[data-theme="light"] .hv2-card-or{background:linear-gradient(135deg,#FFF8E8,#FAF0CC);}
@@ -1499,12 +1240,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 #ob-toast{position:fixed;bottom:120px;left:50%;transform:translateX(-50%);background:#A0291E;color:white;border-radius:20px;padding:9px 18px;font-size:var(--pt-txt,13px);font-weight:600;opacity:0;transition:opacity 0.2s;pointer-events:none;white-space:nowrap;z-index:10001;}
 #ob-toast.show{opacity:1;}
 
-/* ══ HUB NAVIGATION v1 ══ */
-:root{
-  --vigne-bg:#1B3A1F; --vigne-dot:#E8708A; --vigne-txt:#E8708A;
-  --vigne-sub:rgba(255,255,255,0.38); --vigne-border:rgba(255,255,255,0.06);
-  --vigne-pill-bg:rgba(232,112,138,0.15); --vigne-pill-txt:#E8708A;
-}
 
 
 /* ── Hub : cloche + journal d'alertes (v4.33) ── */
@@ -3609,15 +3344,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 /* fin UI-3 correctifs 2 */
 
 
-/* ═══════════════════════════════════════════════════════════════════════
-   UI-3 — CORRECTIF : token --sheen manquant (régression des lots précédents)
-   --sheen était utilisé sans être défini → var() invalide → la déclaration
-   box-shadow entière était annulée : .mod-stat / .plan-stat / .mvc-kpi / .tpc
-   se retrouvaient SANS ombre. Défini ici pour les 3 chemins de thème.
-   ═══════════════════════════════════════════════════════════════════════ */
-:root{ --sheen:rgba(255,255,255,0.55); }
-#app-root[data-theme="dark"],:root[data-theme="dark"]{ --sheen:rgba(255,255,255,0.05); }
-@media(prefers-color-scheme:dark){ #app-root:not([data-theme="light"]),:root:not([data-theme="light"]){ --sheen:rgba(255,255,255,0.05); } }
 
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -3762,14 +3488,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
    Tokens only, blocs scopés, appendés → gagnent par ordre de source.
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* — 0. Les pilotes. Changer --mvu-idh change la hauteur des 9 bandeaux. — */
-:root{
-  --mvu-idh:44px;   /* hauteur du bloc identité = celle de la tuile d'icône */
-  --mvu-pt:16px;    /* respiration au-dessus (sous la safe-area) */
-  --mvu-pb:15px;    /* respiration en dessous, au-dessus du filet */
-  --mvu-gut:16px;   /* gouttière latérale */
-  --mvu-gap:11px;   /* tuile → titre : fixe l'axe du titre à 71 px */
-}
 
 /* — 1. « Ma Vigne » masqué : c'est lui qui poussait Vigne à 86 px. — */
 .hv2-brand{ display:none!important; }
@@ -4114,12 +3832,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
   color:var(--terre); text-decoration:underline; padding:8px 0 2px; }
 
 /* ═══════════════════ PERF-3 — Skeletons (chargement) ═══════════════════ */
-/* Primitive .mv-sk : shimmer OPT-IN (reduce-first), 100% tokens. Coupé d'office
-   si l'OS réduit les animations. Réutilise les vraies coques de cartes → aucun
-   décalage quand le contenu réel arrive. */
-#app-root,:root{ --mv-sk-base:var(--gris-clair); --mv-sk-glow:var(--sheen); --mv-sk-neutral:var(--gris); }
-#app-root[data-theme="dark"],:root[data-theme="dark"]{ --mv-sk-glow:rgba(240,239,233,0.055); }
-@media (prefers-color-scheme:dark){ #app-root:not([data-theme="light"]),:root:not([data-theme="light"]){ --mv-sk-glow:rgba(240,239,233,0.055); } }
 .mv-sk{ position:relative; overflow:hidden; background:var(--mv-sk-base); border-radius:6px; display:block; }
 .mv-sk::after{ content:""; position:absolute; inset:0; transform:translateX(-100%);
   background:linear-gradient(90deg,transparent 0%,var(--mv-sk-glow) 50%,transparent 100%); }
@@ -4438,26 +4150,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
    --or-tx / --vert-tx / --orange-tx, qui s'inversent en mode sombre.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* ═══ L'ENCRE DES BADGES — lot CONTRASTE-2 ═══════════════════════════════
-   Un badge, c'est `color:var(--X)` sur `background:var(--X-pale)`. En theme
-   CLAIR la teinte d'accent est sombre et la pastille pale : 4,9 a 8,1, rien a
-   redire. En SOMBRE le meme jeton sert d'encre sur une pastille a 22 %
-   d'opacite au-dessus d'une carte quasi noire : phyto 2,92 · terre 3,13 ·
-   bleu 3,28 · rouge 3,52. Sept familles entre 2,9 et 3,9 — une cause unique,
-   pas sept etourderies.
-   ⚠️⚠️ ON NE PEUT PAS ECLAIRCIR `--X` : le meme jeton sert aussi de FOND PLEIN
-   sous du texte blanc (#fff sur --vert = 3,29 aujourd'hui). L'eclaircir
-   ameliorerait le badge et abimerait le bouton. Un jeton, deux metiers : il en
-   faut deux. C'est exactement la forme que --tag-X-bg / --tag-X-tx avait deja,
-   et que --or-tx / --vert-tx / --orange-tx / --acier-tx avaient commencee.
-   ★ LA VALEUR CLAIRE EST L'ACCENT ACTUEL, AU HEXA PRES : ce lot ne deplace pas
-     un pixel en theme clair, il ne repare que le sombre. */
-:root{--terre-tx:#8A5A38;--bleu-tx:#1A4A7A;--phyto-tx:#5B2D8E;--rouge-tx:#A0291E;}
-:root{--or-tx:#7A5E12;--vert-tx:#31601C;--orange-tx:#9C4E14;}
-#app-root[data-theme="dark"],:root[data-theme="dark"]{--terre-tx:#B99074;--bleu-tx:#709BD1;--phyto-tx:#A986D6;--rouge-tx:#E7796C;}
-#app-root[data-theme="dark"],:root[data-theme="dark"]{--or-tx:#E8D294;--vert-tx:#A5D88C;--orange-tx:#E8A45A;}
-@media(prefers-color-scheme:dark){#app-root:not([data-theme="light"]),:root:not([data-theme="light"]){--terre-tx:#B99074;--bleu-tx:#709BD1;--phyto-tx:#A986D6;--rouge-tx:#E7796C;}}
-@media(prefers-color-scheme:dark){#app-root:not([data-theme="light"]),:root:not([data-theme="light"]){--or-tx:#E8D294;--vert-tx:#A5D88C;--orange-tx:#E8A45A;}}
 
 /* 1 — Onglets de module : Accueil, Parcelles, Journal, Tracteur, Phyto,
        Planning, Cave, Reglages, Reserve.  1,09:1 -> 7,84:1 */
@@ -4509,14 +4201,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
    106 regles sous AA -> 6 ; 24 illisibles (<2:1) -> 0 ; 0 regression.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* — 1. Tokens. --vin-tx / --acier-tx suivent le principe de --or-tx :
-       lisibles sur papier, inverses en mode sombre.
-       --ardoise etait UTILISE dans index.html mais JAMAIS DEFINI : le
-       bouton « Enregistrer les heures » de l'export se retrouvait sans
-       fond, texte blanc sur carte blanche (1,04:1). — */
-:root{--vin-tx:#8A4A26;--acier-tx:#1F5E80;--ardoise:#2C3E50;}
-#app-root[data-theme="dark"],:root[data-theme="dark"]{--vin-tx:#E8A882;--acier-tx:#8FC7E0;}
-@media(prefers-color-scheme:dark){#app-root:not([data-theme="light"]),:root:not([data-theme="light"]){--vin-tx:#E8A882;--acier-tx:#8FC7E0;}}
 
 /* — 2. LA CAUSE : barres d'onglets .mvu-tabs rendues sur le papier.
        1,09:1 -> 6,68:1 (inactif) et 14,7:1 (actif). — */
@@ -5684,13 +5368,6 @@ button.pil-dz-set{cursor:pointer;width:100%;}
    largeur d'un « 0 » et laisse un trou : « 12 % » se lisait « I 2 % ». La chasse fixe reste aux colonnes. */
 .pil-th-stat b,.pil-big,.pil-ck .kv,.pil-kval,.pil-gauge-pct,.pil-ring-mid .pc,.pil-verdict .vbig,.pil-donut-c1,.pil-trx-co .v b,
 .hv2-card-val,.hv2-trac-val,.histo-col-pct,.hmsem-v,.pc-pct,.hc-total-val,.mvc-kpi-num,.pil-dom{font-variant-numeric:lining-nums proportional-nums;letter-spacing:0;}
-/* La largeur sur grand écran : une seule, 1 200 px, centrée. KIT-1 (§226) l'avait posée sur l'Accueil, les Parcelles et le
-   Pilotage en laissant « les autres modules aux lots 3b/3c », qui ne l'ont jamais fait : sur un écran large, le Journal, le
-   Tracteur, Phyto, la Cave, la Réserve, le Planning et Réglages prenaient toute la largeur, et l'écran changeait de largeur
-   d'un module à l'autre (LARG-1, §334). Le Planning suit, sur maquette validée par Nico : sur « Les gens », la liste et la
-   fiche rangée (440 px, PLAN-2 §280) se partagent la colonne.
-   Une page ajoutée demain se range ici : `mv-harnais-larg1` rougit si une page de index.html n'est ni bornée ni exemptée. */
-:root{--page-max:1200px;}
 .pil-wrap{max-width:var(--page-max,1200px);}
 @media (min-width:1200px){ #page-home,#page-parcelles,#page-journal,#page-pilotage,#page-tracteur,#page-phyto,#page-cave,#page-reserve,#page-planning,#page-reglages{max-width:var(--page-max,1200px);margin-left:auto;margin-right:auto;} }
 
@@ -5834,7 +5511,6 @@ body .mvv-rh-fill{background:var(--terre,#8A5A38);}
 .mv-reflet::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);transform:translateX(-100%);animation:mv-reflet 1.15s var(--mv-glisse) .2s 1}
 @keyframes mv-reflet{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
 @media(prefers-reduced-motion:reduce){
-  :root{--mv-d1:1ms;--mv-d2:1ms;--mv-d3:1ms;--mv-d4:1ms}
   .mv-reflet::after{animation:none;display:none}
 }
 
@@ -5865,28 +5541,6 @@ body .mvv-rh-fill{background:var(--terre,#8A5A38);}
   --verre-clair:rgba(251,250,246,.80);--verre-clair-b:rgba(26,26,20,.10);
   --hover:rgba(26,26,20,.04);--focus:#7A5E12;--seg-ind:#FBFAF6;--info:#2F7FAE;--zone-fond:rgba(122,94,18,.035);
   --btn-pri:#1C1813;--btn-pri-tx:#E8D294}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    color-scheme:dark;
-    --plan-sol:#0F0D0A;--plan-fond:radial-gradient(120% 95% at 45% 35%,#17140F 0%,#0B0907 100%);--plan-trait:rgba(216,188,114,.26);--plan-rang:rgba(240,239,233,.075);--plan-relief:rgba(216,188,114,.07);
-    --et-faite:rgba(106,184,69,.16);--et-faite-b:#6AB845;
-    --et-cours:rgba(216,188,114,.32);--et-cours-b:#D8BC72;
-    --et-afaire:rgba(240,239,233,.025);--et-afaire-b:rgba(240,239,233,.18);
-    --et-retard:rgba(212,114,26,.32);--et-retard-b:#E08A3C;
-    --verre-clair:rgba(30,27,23,.78);--verre-clair-b:rgba(255,255,255,.09);
-    --hover:rgba(240,239,233,.045);--focus:#E8D294;--seg-ind:#34302A;--info:#7FBFE0;--zone-fond:rgba(216,188,114,.03);
-    --btn-pri:#D8BC72;--btn-pri-tx:#1C1813}
-}
-:root[data-theme="dark"]{
-  color-scheme:dark;
-  --plan-sol:#0F0D0A;--plan-fond:radial-gradient(120% 95% at 45% 35%,#17140F 0%,#0B0907 100%);--plan-trait:rgba(216,188,114,.26);--plan-rang:rgba(240,239,233,.075);--plan-relief:rgba(216,188,114,.07);
-  --et-faite:rgba(106,184,69,.16);--et-faite-b:#6AB845;
-  --et-cours:rgba(216,188,114,.32);--et-cours-b:#D8BC72;
-  --et-afaire:rgba(240,239,233,.025);--et-afaire-b:rgba(240,239,233,.18);
-  --et-retard:rgba(212,114,26,.32);--et-retard-b:#E08A3C;
-  --verre-clair:rgba(30,27,23,.78);--verre-clair-b:rgba(255,255,255,.09);
-  --hover:rgba(240,239,233,.045);--focus:#E8D294;--seg-ind:#34302A;--info:#7FBFE0;--zone-fond:rgba(216,188,114,.03);
-  --btn-pri:#D8BC72;--btn-pri-tx:#1C1813}
 
 /* ═══ SOCLE ═══ */
 /* ★ CADRE-1 (§300) — BORNÉ AU COCKPIT. Recopiée telle quelle de la maquette (où .ck2 pose border-box et ses enfants en
@@ -6317,12 +5971,6 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
   .ck-eq::before{display:none}
 }
 
-/* ══════════════════════════════════════════════════════════════════════════════════════════════
-   ★★ COQ-1 + PAL-1 (§268) — LA BARRE LATÉRALE ET LA RECHERCHE CTRL K (ordinateur, à partir de 1 024 px)
-   Celles de la maquette validée, classes renommées en mv-* (aucune collision avec le cockpit), passées à la charte.
-   Le rail remplace le dock sur ordinateur ; le téléphone et la tablette gardent le dock.
-   ══════════════════════════════════════════════════════════════════════════════════════════════ */
-:root{--ck-r-sm:var(--r-sm,6px);--ck-r-md:var(--r-md,8px);--ck-r-lg:var(--r-lg,12px);--ck-r-full:var(--r-full,999px)}
 
 .mv-rail-logo{display:block;flex:none;width:32px;height:32px;border-radius:9px}
 .mv-rail-b{position:relative;display:grid;place-items:center;width:48px;height:48px;border:0;border-radius:var(--ck-r-md);background:transparent;color:rgba(240,226,200,.58);cursor:pointer;transition:background-color var(--mv-d2),color var(--mv-d2)}
@@ -6387,7 +6035,6 @@ body:not(.mv-rail-ouvert) .mv-rail [data-tip]:hover::after,body:not(.mv-rail-ouv
 .mv-pal-i{grid-template-columns:20px minmax(0,1fr) auto}
 .mv-pal-i>svg,.mv-rail-b>svg,.mv-rail-cherche>svg{width:20px;height:20px;flex:none}
 
-:root{--mv-rail-w:76px;--mv-rail-w-ouvert:244px}
 .mv-rail{display:none}
 @media(min-width:1024px){
   body.mv-avec-rail .mv-rail{display:flex}
@@ -7856,17 +7503,6 @@ html .ck-agr-voile{ background:var(--voile); }
 /* La tension par personne, rangée sous les présences dans L'équipe & le matériel */
 .pil-tension-det{margin-top:16px}
 
-/* ★★ AUJ-5 (§307) — LE COCKPIT REMIS À LA MAQUETTE (Nico, 10/10, capture de la maquette validée à l'appui).
-   · Trois colonnes dès 1 000 px de contenu (1 150 avant : avec la barre latérale ouverte, un écran de 1 440 px passait en
-     deux colonnes et « À savoir » partait à gauche). Entre 760 et 1 000 px : le reste à gauche, « À savoir » à droite.
-   · « À savoir » reste visible quand on descend dans la page (sa colonne colle en haut, sa liste défile seule).
-   · Une seule échelle de texte : la phrase de fin prévue redescend de 40 à 28 px, titres de carte et réponses de la
-     décision à 20 px.
-   · La météo garde ses couleurs : la charte du cockpit (DS-4) rend --info et --or neutres, la météo a ses jetons à elle,
-     tirés des couleurs de l'appli au niveau de la racine (un var() se résout là où il est déclaré).
-   · La pastille de présence clignote, les jours travaillés au planning ; fixe si les animations sont coupées.
-   · La charge restante : un point par mesure, plus de zone remplie. */
-:root{--meteo-soleil:var(--or);--meteo-pluie:var(--bleu);--meteo-nuage:var(--texte-doux)}
 [data-taille="large"] .ck-gt{grid-template-columns:minmax(260px,4.3fr) minmax(0,6.8fr) minmax(280px,3.7fr)}
 [data-taille="moyen"] .ck-gt{grid-template-columns:minmax(0,1fr) minmax(280px,340px)}
 [data-taille="moyen"] .ck-gt>#ck-t-b{display:none}

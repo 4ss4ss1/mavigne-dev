@@ -17,7 +17,7 @@ const _args = process.argv.slice(2).filter(a => !a.startsWith('--'));
 const JS  = _args[0] || 'src/pilotage.js';
 const CSS = _args[1] || 'src/styles.css';
 const BRUT = readFileSync(JS, 'utf8');
-const FEUILLE = readFileSync(CSS, 'utf8');
+const FEUILLE = (CSS === 'src/styles.css' ? readFileSync('src/charte.css', 'utf8') + '\n' : '') + readFileSync(CSS, 'utf8'); /* ★ CHARTE-2 (§368) : les réglages vivent dans charte.css, lue AVANT la feuille */
 
 /* §34g — LES COMMENTAIRES NE SONT PAS UNE PREUVE. Une assertion satisfaite par
    la phrase qui documente la correction ne teste rien. On lit le code seul. */

@@ -44,10 +44,11 @@ const RACINE = path.resolve(ICI, '..');
 const CONTRE = process.argv.includes('--contre');
 
 const FEUILLE = 'src/styles.css';
+const CHARTE = 'src/charte.css';   // ★ CHARTE-2 (§368) : le réglage se déclare ici, et nulle part ailleurs
 const POLICES = 'public/fonts/fonts.css';
 const FICHIERS = [
   ...fs.readdirSync(path.join(RACINE, 'src')).filter(f => f.endsWith('.js')).sort().map(f => 'src/' + f),
-  FEUILLE, 'index.html',
+  CHARTE, FEUILLE, 'index.html',
   ...fs.readdirSync(path.join(RACINE, 'src', 'gt')).filter(f => f.endsWith('.html')).sort().map(f => 'src/gt/' + f),
   'public/boot.js'
 ];
@@ -103,7 +104,7 @@ function verifier(SRC) {
       vus.noms++;
       const avant = s.slice(Math.max(0, m.index - 200), m.index);
       /* (a) la définition du réglage, dans la feuille seulement */
-      if (f === FEUILLE && /--font-(?:ui|titre|code)\s*:[^;{}]*$/.test(avant)) { vus.definitions++; continue; }
+      if (f === CHARTE && /--font-(?:ui|titre|code)\s*:[^;{}]*$/.test(avant)) { vus.definitions++; continue; }
       /* (b) le repli d'un var(--font-ui|titre, …) — rien entre les deux qui ouvre ou ferme une parenthèse */
       const r = avant.match(/var\(\s*(--font-(?:ui|titre))\s*,[^()]*$/);
       if (r) {
@@ -119,7 +120,7 @@ function verifier(SRC) {
       fautes.A.push(f + ':' + ligneDe(s, m.index) + ' « ' + ligne.trim().slice(Math.max(0, ligne.trim().indexOf(m[1]) - 50), ligne.trim().indexOf(m[1]) + 40) + ' »');
     }
     /* C. le repli, hors de la feuille */
-    if (f !== FEUILLE) {
+    if (f !== FEUILLE && f !== CHARTE) {
       for (const m of s.matchAll(/var\(\s*--font-(?:ui|titre|code)\s*\)/g))
         if (!dans(z, m.index)) fautes.C.push(f + ':' + ligneDe(s, m.index) + ' ' + m[0]);
       for (const m of s.matchAll(/--font-(?:ui|titre)\s*:/g))
@@ -133,11 +134,12 @@ function verifier(SRC) {
   EXEMPTIONS.forEach((e, k) => { if (exemptCompte[k] !== e.n) fautes.G.push(e.fichier + ' « ' + e.extrait + ' » : ' + exemptCompte[k] + ' nom(s) pour ' + e.n + ' attendu(s)'); });
 
   /* D. le réglage, une fois chacun, dans la feuille */
-  const NU = sansCom(SRC[FEUILLE] || '');
+  const NU = sansCom(SRC[CHARTE] || '');
+  for (const m of sansCom(SRC[FEUILLE] || '').matchAll(/--font-(?:ui|titre)\s*:/g)) fautes.D.push(FEUILLE + ' : ' + m[0] + ' redéclaré hors de la charte');
   const valeurs = {};
   for (const j of ['--font-ui', '--font-titre']) {
     const decl = [...NU.matchAll(new RegExp(j.replace(/-/g, '\\-') + '\\s*:\\s*([^;}]+)', 'g'))];
-    if (decl.length !== 1) fautes.D.push(FEUILLE + ' : ' + j + ' déclaré ' + decl.length + ' fois (attendu : 1)');
+    if (decl.length !== 1) fautes.D.push(CHARTE + ' : ' + j + ' déclaré ' + decl.length + ' fois (attendu : 1)');
     else valeurs[j] = decl[0][1].trim();
   }
   /* E. la première police de chaque réglage a ses fichiers */
@@ -172,7 +174,7 @@ if (!CONTRE) {
   t('aucun repli ne ment sur son rôle (' + fautes.B.length + ')', fautes.B.length === 0, liste(fautes.B));
   t('hors de styles.css, chaque var(--font-*) porte son repli (' + fautes.C.length + ' nu(s))', fautes.C.length === 0,
     liste(fautes.C) + '\n        impressions, écran de démarrage, boot.js : la feuille n’y est pas, le réglage n’existe pas');
-  t('--font-ui et --font-titre déclarés une fois chacun, dans styles.css', fautes.D.length === 0, liste(fautes.D));
+  t('--font-ui et --font-titre déclarés une fois chacun, dans la charte (src/charte.css)', fautes.D.length === 0, liste(fautes.D));
   t('la police de chaque réglage a ses fichiers (' + Object.values(valeurs).map(v => v.split(',')[0]).join(' · ') + ')',
     fautes.E.length === 0, liste(fautes.E));
   t('--sans ne revient pas (' + fautes.F.length + ')', fautes.F.length === 0, liste(fautes.F));
@@ -200,11 +202,11 @@ if (!CONTRE) {
     ['le réglage est déclaré deux fois', 'D',
       () => muter(FEUILLE, s => s + '\n:root{--font-ui:Outfit,sans-serif}\n')],
     ['le réglage des titres disparaît', 'D',
-      () => muter(FEUILLE, s => s.replace(/--font-titre\s*:/, '--font-titre-x:'))],
+      () => muter(CHARTE, s => s.replace(/--font-titre\s*:/, '--font-titre-x:'))],
     ['un module redéclare le réglage', 'D',
       () => muter('src/utils.js', s => s + "\nwindow._zz = ':root{--font-ui:Inter}';\n")],
     ['la police change sans ses fichiers', 'E',
-      () => muter(FEUILLE, s => s.replace(/--font-ui\s*:\s*Outfit/, '--font-ui:Inter'))],
+      () => muter(CHARTE, s => s.replace(/--font-ui\s*:\s*Outfit/, '--font-ui:Inter'))],
     ['--sans revient', 'F',
       () => muter(FEUILLE, s => s + '\n.zz-c{font:600 13px var(--sans)}\n')],
     ['une exemption ne sert plus', 'G',
@@ -219,7 +221,7 @@ if (!CONTRE) {
   const temoins = [
     ['une police nommée dans un commentaire ne compte pas', () => muter('src/cave.js', s => s + "\n// la police Outfit, pour mémoire\n")],
     ['un repli à son bon rôle ne compte pas', () => muter('src/cave.js', s => s + "\nwindow._zz = 'font-family:var(--font-titre,\\'Cormorant Garamond\\',serif)';\n")],
-    ['une famille générique en tête du réglage ne demande pas de fichier', () => muter(FEUILLE, s => s.replace(/--font-ui\s*:\s*Outfit,/, '--font-ui:system-ui,'))]
+    ['une famille générique en tête du réglage ne demande pas de fichier', () => muter(CHARTE, s => s.replace(/--font-ui\s*:\s*Outfit,/, '--font-ui:system-ui,'))]
   ];
   for (const [nom, fab] of temoins) {
     const { fautes } = verifier(fab());

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const S0 = { coq: L('src/coquille.js'), css: L('src/styles.css'), guide: L('guide/01-demarrer.html'), liste: L('scripts/mv-harnais-liste.mjs') };
+const S0 = { coq: L('src/coquille.js'), css: (L('src/charte.css') + '\n' + L('src/styles.css')), guide: L('guide/01-demarrer.html'), liste: L('scripts/mv-harnais-liste.mjs') };
 
 // Une fonction affectée à window, extraite par ses accolades (jamais par expression régulière : §24).
 function fonction(src, debut) {
@@ -102,3 +102,5 @@ if (CONTRE) {
   if (mord !== DEF.length) process.exit(1);
 }
 if (ko) process.exit(1);
+
+/* ★ CHARTE-2 (§368) : les réglages vivent dans src/charte.css, que styles.css importe en premier — ce harnais lit les deux, la charte d’abord. */

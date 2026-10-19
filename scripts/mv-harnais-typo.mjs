@@ -64,6 +64,7 @@ const lire = f => fs.readFileSync(path.join(RACINE, f), 'utf8');
 
 let SRC = {};
 for (const f of FICHIERS) SRC[f] = lire(f);
+SRC['src/styles.css'] = lire('src/charte.css') + '\n' + SRC['src/styles.css'];  // ★ CHARTE-2 (§368) : les réglages vivent dans charte.css, que styles.css importe en premier
 
 /* ── Injections de la contre-epreuve ─────────────────────────────────────── */
 const INJECTIONS = [

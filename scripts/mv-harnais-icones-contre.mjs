@@ -32,6 +32,7 @@ for (const f of ['mv-harnais-icones.mjs', 'mv-icones-baseline.json', 'preflight.
   fs.copyFileSync(path.join(root, 'scripts', f), path.join(bac, 'scripts', f));
 fs.copyFileSync(path.join(root, 'index.html'), path.join(bac, 'index.html'));
 fs.copyFileSync(path.join(root, 'src', 'styles.css'), path.join(bac, 'src', 'styles.css'));
+fs.copyFileSync(path.join(root, 'src', 'charte.css'), path.join(bac, 'src', 'charte.css'));   // ★ CHARTE-2 (§368) : la feuille importe la charte — le bac doit l’avoir
 
 /* ⚠️⚠️ LE BAC DOIT CONTENIR TOUT CE QUE LE HARNAIS LIT, SINON IL PLANTE AVANT
    LA PREMIERE EPREUVE. Vecu a la minute ou le cliquet s'est etendu aux

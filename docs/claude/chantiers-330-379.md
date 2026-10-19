@@ -997,3 +997,34 @@ Le cœur était à son plafond (2 800). Les points 4 et 5 du backlog technique (
 
 ### 367g. La leçon
 **Un réglage qui existe n’est pas un réglage qui sert.** `--font-ui` existait depuis DS-4 (08/10) : 94 appels contre 765 polices écrites à la main, et aucun harnais ne regardait les polices. DS-3 l’avait déjà écrit pour l’espacement (« 19 appels contre 1 682 valeurs ») : ce que le contrôle ne compte pas ne se résorbe pas. **Un jeton se pose avec son cliquet, dans le même lot** — c’est la règle que la série CHARTE applique pièce par pièce.
+
+## 368. ★★ CHARTE-2 — LA CHARTE DANS UN SEUL FICHIER : `src/charte.css` (19/10 — `src/charte.css` (neuf) · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-charte.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · onze harnais qui lisaient les réglages dans styles.css (`auj5`, `coul1`, `contraste`, `echelle`, `jetons`, `larg1`, `mouv1`, `police`, `textea`, `theme`, `typo`) · `scripts/harnais-claude-md.mjs` · **APP 9.32 → 9.33, SW 10.11 → 10.12**, base `5608a34`)
+
+### 368a. La demande
+Le deuxième étage du plan confirmé le 19/10 (§367a) — « un seul fichier à changer quand je veux une nouvelle ergonomie ». Nico : « suite ». CHARTE-1 poussé (`5608a34`), identique au zip au caractère près.
+
+### 368b. Le constat
+- **27 règles de réglages éparpillées dans styles.css**, de la ligne 12 à la ligne 7 869 : 440 réglages. Le socle (DS-0 à DS-4) et ses deux blocs sombres en tête ; puis, posés au fil des lots au milieu des écrans : la vigne, les reflets, les squelettes, les encres (`--*-tx`), la largeur des pages, les animations réduites, le sombre du Planning, le cockpit, la barre latérale, la météo. Aucune règle mixte (réglages + autre chose).
+- **Trois réglages encore ailleurs**, trouvés par le harnais neuf à son premier passage : le contraste renforcé, dans un `<style>` d’index.html.
+
+### 368c. Ce qui est livré
+- **`src/charte.css`** (425 lignes, 28 ko) : les 27 règles telles quelles, avec le commentaire collé au-dessus de chacune, dans leur ordre d’origine, chacune dans son `@media` d’origine ; un en-tête qui dit comment s’en servir (le sombre en deux blocs, la police et ses fichiers).
+- **`styles.css`** : sans elles (787 247 → 760 234 octets) ; son premier énoncé est `@import './charte.css';`.
+- **Pourquoi un `@import`, pas un second import dans app.js** : l’ordre est garanti par le CSS lui-même ; Vite inline les `@import`, en développement comme au build — un seul fichier servi, rien à changer au précache ; et `mv-app-node.mjs`, qui charge l’appli dans Node pour `auj5` et les harnais de robustesse, retire `import './styles.css'` d’app.js : un second import l’a fait planter au premier essai (« Cannot find module charte.css »).
+- **`mv-harnais-charte`** — A : aucun réglage posé sur la racine hors de la charte (feuille, @media, pages, modules ; exemptés avec leur raison : les documents imprimés d’app.js et de cave.js, et — provisoirement — le contraste renforcé d’index.html) ; B : la charte ne contient que des réglages ; C : styles.css la lit en premier, une seule fois ; D : le sombre est redit à l’identique, bascule manuelle = mode automatique (118 réglages) ; E : chaque exemption sert. 12 contre-épreuves, 2 témoins (un commentaire, un réglage local à une pièce).
+- **Onze harnais suivent la charte** : ils lisaient les réglages dans styles.css ; ils lisent `charte.css + styles.css`, la charte d’abord — l’ordre exact de l’`@import`. Leurs contre-épreuves mordent toutes.
+
+### 368d. Mesuré
+- **Au navigateur** (Chromium 153) : 229 réglages × 3 éléments (html, `#app-root`, une page) × 12 contextes (sans attribut, clair forcé, sombre forcé × téléphone clair / sombre × animations normales / réduites), plus `color-scheme`, la police, la couleur et le fond : **8 388 valeurs comparées, 0 écart**.
+- **La suite des règles d’écran** est identique avant et après, dans le même ordre : 5 947 règles.
+- **Chaîne** : 447 commandes. Au premier passage, 6 rouges : quatre harnais de plus lisaient les réglages dans styles.css sans jamais écrire `:root` — `courbes`, `journal1`, `coq2` (lisent maintenant charte + feuille) et `icones-contre`, qui copie la feuille dans un bac et doit désormais y copier aussi la charte. Suivis, puis les commandes rouges relancées seules : vertes. La chaîne n’a pas été rejouée d’un trait après ce dernier suivi : le build de Nico la joue (`prebuild`).
+- **Hors de ce lot** : deux contre-épreuves qui ne sont pas dans la chaîne étaient déjà rouges sur `d741866` — `mv-harnais-jetons --contre` (« on retire --r-md », « un cercle converti » : le plancher des cercles est gravé à 80 pour 107 cercles réels) et `mv-harnais-cuvdoc --contre`.
+
+### 368e. Les décisions
+- **Le contraste renforcé reste dans index.html, exempté.** Son `<style>` passe AVANT la feuille : dans la charte, il doit garder cette place (en tête), sinon un réglage clair renforcé passerait devant le sombre ; et la preuve se refait avec `data-hicontrast`. Un lot à lui, avec sa preuve.
+- **Les réglages locaux à une pièce restent dans la feuille** (`.ck2{--bg-app:inherit}`, les blocs du cockpit) : ce sont des renvois propres à un bloc, pas des réglages de l’appli. Le témoin du harnais le garantit.
+- **Les documents imprimés gardent leur `:root`** : un autre document, qui ne charge pas la feuille (même raison que l’exemption `--ligne` de `mv-harnais-jetons`).
+- **D est la règle de §59 mise sous contrôle** : la bascule manuelle et le mode automatique du téléphone ne peuvent plus diverger sans rougir.
+
+### 368f. La leçon
+**Un fichier se range en le prouvant, pas en le relisant.** 440 réglages déplacés : la seule preuve qui vaille était de demander au navigateur la valeur de chacun, dans chaque situation, avant et après. Et le contrôle écrit pour le rangement a trouvé, à son premier passage, trois réglages qu’aucune relecture n’avait vus — dans index.html.

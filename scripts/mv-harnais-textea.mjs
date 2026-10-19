@@ -10,7 +10,7 @@ const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = f => fs.readFileSync(path.join(R, f), 'utf8');
 const MODULES = fs.readdirSync(path.join(R, 'src')).filter(f => f.endsWith('.js')).sort();
-const BASE0 = { css: lire('src/styles.css'), html: lire('index.html'), trac: lire('src/tracteur.js'), typo: lire('scripts/mv-harnais-typo.mjs'),
+const BASE0 = { css: lire('src/charte.css') + '\n' + lire('src/styles.css'), html: lire('index.html'), trac: lire('src/tracteur.js'), typo: lire('scripts/mv-harnais-typo.mjs'),
   modules: Object.fromEntries(MODULES.map(f => [f, lire('src/' + f)])) };
 function fonction(src, nom) {
   const m = new RegExp('^function ' + nom + '\\s*\\(', 'm').exec(src); if (!m) throw new Error('ABSENTE : ' + nom);

@@ -12,7 +12,7 @@ const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = f => fs.readFileSync(path.join(R, f), 'utf8');
 const sansCom = s => s.replace(/^\s*\/\/.*$/gm, '');
-const BASE = { ck: lire('src/cockpit.js'), pil: lire('src/pilotage.js'), vue: lire('src/cockpit-vue.js'), css: lire('src/styles.css'), app: lire('src/app.js') };
+const BASE = { ck: lire('src/cockpit.js'), pil: lire('src/pilotage.js'), vue: lire('src/cockpit-vue.js'), css: lire('src/charte.css') + '\n' + lire('src/styles.css'), app: lire('src/app.js') };
 const { chargerApp } = await import(pathToFileURL(path.join(R, 'scripts/mv-app-node.mjs')).href);
 
 function partieA(S, T) {

@@ -58,6 +58,7 @@ const FICHIERS = fs.readdirSync(path.join(RACINE, 'src'))
 
 let SRC = {};
 for (const f of FICHIERS) SRC[f] = fs.readFileSync(path.join(RACINE, f), 'utf8');
+SRC['src/styles.css'] = fs.readFileSync(path.join(RACINE, 'src/charte.css'), 'utf8') + '\n' + SRC['src/styles.css'];  // ★ CHARTE-2 (§368) : les réglages vivent dans charte.css, que styles.css importe en premier
 
 /* ── Injections ──────────────────────────────────────────────────────────── */
 /* ⚠️ Deux de ces quatre injections AJOUTENT du code au lieu de remplacer une

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.32';
+export const APP_VERSION = '9.33';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,7 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.33', d: '2026-10-19', items: [] },   // CHARTE-2 (§368) : les réglages rassemblés dans src/charte.css — rien ne change à l’écran
   { v: '9.32', d: '2026-10-19', items: [] },   // CHARTE-1 (§367) : la police passe par la charte — rien ne change à l’écran
   { v: '9.31', d: '2026-10-19', items: [
     { niv: 1, pour: ['admin', 'cave'], cible: '#mvv-tab-ana', emoji: 'raisin', titre: 'Les maturités, rangées',

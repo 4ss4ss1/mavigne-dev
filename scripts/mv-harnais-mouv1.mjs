@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC0 = { uti: L('src/utils.js'), css: L('src/styles.css') };
+const SRC0 = { uti: L('src/utils.js'), css: L('src/charte.css') + '\n' + L('src/styles.css') }; /* ★ CHARTE-2 (§368) : les réglages vivent dans charte.css, lue AVANT la feuille */
 
 function bloc(src, debut, fin) {
   const i = src.indexOf(debut); if (i < 0) throw new Error('introuvable : ' + debut);

@@ -421,3 +421,4 @@
 | 365 | 365. ★★ AIDE-1 — LA FENÊTRE « ? AIDE » SE LIT : PLUS DE CODE À L’ÉCRAN, L’ICÔNE DESSINÉE, LE PILOTAGE QUI D… | `docs/claude/chantiers-330-379.md` |
 | 366 | 366. ★★ MATU-1 — LES MATURITÉS RANGÉES : UN ÉCRAN, LA VENDANGE CHOISIE, LA FOURCHETTE PAR COULEUR (19/10 — … | `docs/claude/chantiers-330-379.md` |
 | 367 | 367. ★★ CHARTE-1 — LA POLICE PASSE PAR LA CHARTE : UNE LIGNE POUR CHANGER DE POLICE (19/10 — `src/styles.cs… | `docs/claude/chantiers-330-379.md` |
+| 368 | 368. ★★ CHARTE-2 — LA CHARTE DANS UN SEUL FICHIER : `src/charte.css` (19/10 — `src/charte.css` (neuf) · `sr… | `docs/claude/chantiers-330-379.md` |

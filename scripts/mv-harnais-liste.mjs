@@ -697,6 +697,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-matu1.mjs --contre'],
   ['node scripts/mv-harnais-police.mjs'],            // CHARTE-1 (§367) : la police passe par les deux réglages de la charte — aucune police en toutes lettres hors réglage, repli ou exemption
   ['node scripts/mv-harnais-police.mjs --contre'],
+  ['node scripts/mv-harnais-charte.mjs'],            // CHARTE-2 (§368) : les réglages ne se déclarent que dans src/charte.css ; la charte ne contient que des réglages ; le sombre redit à l'identique
+  ['node scripts/mv-harnais-charte.mjs --contre'],
   ['node scripts/mv-harnais-larg1.mjs'],             // LARG-1 (§334) : une seule largeur sur ordinateur — chaque page bornée par la règle, ou exemptée avec sa raison
   ['node scripts/mv-harnais-larg1.mjs --contre'],
   ['node scripts/mv-harnais-retrait1.mjs'],          // RETRAIT-1 (§325) : une tâche ordinaire désactivée sur des parcelles pour la période — règle, feuille, croix, renommages, L'année

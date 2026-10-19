@@ -181,7 +181,7 @@ T('l’axe est en mois depuis l’entonnage', svgE.includes('mois depuis l’ent
 
 console.log('\n── LA GARDE DES JETONS (§86b, transposée) ────────────────────');
 const cssPil = bloc(pilo, "function _pcavInjectCss(){", "var st=document.createElement('style');");
-const declares = new Set([...fs.readFileSync(path.join(R, 'src/styles.css'), 'utf8')
+const declares = new Set([...(fs.readFileSync(path.join(R, 'src/charte.css'), 'utf8') + '\n' + fs.readFileSync(path.join(R, 'src/styles.css'), 'utf8'))
   .matchAll(/(--[a-z0-9-]+)\s*:/g)].map(m => m[1]));
 const invoques = new Set([...(cssPil + svgD + svgT + svgE).matchAll(/var\((--[a-z0-9-]+)/g)].map(m => m[1]));
 const manquants = [...invoques].filter(v => !declares.has(v));
@@ -259,3 +259,5 @@ if (CONTRE) {
 console.log('\n═════════════════════════════════════════════════════════════');
 console.log('  ' + ok + ' assertions vertes, ' + ko + ' rouges');
 process.exit(ko ? 1 : 0);
+
+/* ★ CHARTE-2 (§368) : les réglages vivent dans src/charte.css, que styles.css importe en premier — ce harnais lit les deux, la charte d’abord. */

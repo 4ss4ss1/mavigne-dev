@@ -10,7 +10,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = f => fs.readFileSync(path.join(R, f), 'utf8');
-const BASE0 = { css: lire('src/styles.css'), app: lire('src/app.js') };
+const BASE0 = { css: (lire('src/charte.css') + '\n' + lire('src/styles.css')), app: lire('src/app.js') };
 const sansCom = s => s.replace(/\/\*[\s\S]*?\*\//g, '');
 // La DERNIÈRE déclaration d'une propriété pour un sélecteur exact (c'est elle qui gagne, à spécificité égale).
 function prop(css, sel, nom) {
@@ -81,3 +81,5 @@ for (const [n, f] of DEF) {
 }
 console.log(`\n${rg}/${DEF.length} contre-épreuves rougissent`);
 process.exit(rg === DEF.length ? 0 : 1);
+
+/* ★ CHARTE-2 (§368) : les réglages vivent dans src/charte.css, que styles.css importe en premier — ce harnais lit les deux, la charte d’abord. */

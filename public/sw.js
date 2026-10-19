@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.11
+// MA VIGNE — Service Worker v10.12
+// v10.12 (19/10/2026) — CHARTE-2 (§368) : tous les réglages de la charte (440 : couleurs, polices, tailles, espacements, arrondis, ombres, mouvement, clair et sombre) sortent des 27 endroits de styles.css où ils étaient éparpillés pour un seul fichier, src/charte.css, que styles.css importe en premier ; chaque réglage garde sa valeur (vérifié au navigateur : 8 388 valeurs, 12 contextes). Rien ne change à l’écran. Nouveau contrôle : mv-harnais-charte. charte.css (neuf), styles.css, utils.js, index.html. APP 9.32 -> 9.33.
 // v10.11 (19/10/2026) — CHARTE-1 (§367) : la police passe partout par les deux réglages de la charte (--font-ui, --font-titre, en tête de styles.css) — 765 polices écrites en toutes lettres remplacées (325 dans styles.css, 440 dans les modules, index.html, les pages GT et boot.js, avec la police d’avant en repli pour les fenêtres sans feuille) ; --sans, déclaré nulle part, retiré ; la mesure des noms du plan du cockpit lit le réglage. Rien ne change à l’écran. Nouveau contrôle : mv-harnais-police. styles.css, index.html, utils.js, admin-gt, app, cave, cockpit-vue, cuvier, onboarding, phyto, pilotage, planning, reglages, reserve, tracteur, tutos, src/gt/*.html, boot.js. APP 9.31 -> 9.32.
 // v10.10 (19/10/2026) — MATU-1 (§366) : l’onglet Maturités du Cuvier rangé (la vendange choisie, la synthèse, l’ordre de maturité avec la fourchette de chaque couleur en bande, les courbes, la fiche, la saisie en série) ; la fourchette se règle dans la roue crantée › Le Cuvier ; les années ne se mélangent plus. cuvier.js, cave.js, styles.css, index.html, utils.js. APP 9.30 -> 9.31.
 // v10.09 (19/10/2026) — AIDE-1 (§365) : la fenêtre « ? Aide » s’affiche proprement — l’icône se dessine (le nom « graphique » s’écrivait en toutes lettres), le gras écrit dans les fiches devient du gras (105 bouts de code visibles au Pilotage), « & » et « SO2 » en caractères ordinaires ; aide du Pilotage : plus de nombre d’onglets en dur, l’ouverture sur Aujourd’hui dite. utils.js, styles.css, index.html. APP 9.29 -> 9.30.
@@ -4541,7 +4542,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.11';
+const CACHE_NAME   = 'mavigne-v10.12';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4558,7 +4559,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.11 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.12 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4578,7 +4579,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.11 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.12 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

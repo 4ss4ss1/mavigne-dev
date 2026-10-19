@@ -103,7 +103,7 @@ function controles(CSS, UTILS, APP, IDX) {
   return R;
 }
 
-const F = () => [lire('src/styles.css'), lire('src/utils.js'), lire('src/app.js'), lire('index.html')];
+const F = () => [lire('src/charte.css') + '\n' + lire('src/styles.css'), lire('src/utils.js'), lire('src/app.js'), lire('index.html')];
 
 if (process.argv.includes('--contre')) {
   console.log('\n── CONTRE-ÉPREUVES ──\n');
