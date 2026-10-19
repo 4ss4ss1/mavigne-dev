@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.28';
+export const APP_VERSION = '9.29';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,11 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.29', d: '2026-10-19', items: [
+    { niv: 0, pour: ['admin'], emoji: 'doigt', titre: 'Le tuto des équipes ne saute plus d’étape',
+      desc: "Correction : quand vous placiez quelqu’un dans une équipe sur votre domaine, le tuto ouvert à côté pouvait sauter une étape. "
+        + "Il attend maintenant que vous enregistriez, puis rejoue les choix dans l’ordre. Un même geste n’est plus jamais refait deux fois." },
+  ] },
   { v: '9.28', d: '2026-10-18', items: [
     { niv: 0, pour: ['admin'], emoji: 'doigt', titre: 'Le tuto à côté de l’appli suit plus vite',
       desc: "Quand vous faites un geste sur votre domaine, le tuto ouvert à côté passe à l’étape suivante en une demi-seconde, au lieu de trois. "

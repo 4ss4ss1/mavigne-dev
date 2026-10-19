@@ -832,3 +832,30 @@ La lecture de l’appli pouvait partir AVANT l’alignement du départ (`E.align
 - `mv-harnais-tutos` : vert ; contre-épreuves **23/23** (dont : le miroir qui rejoue le doigt animé).
 - `node scripts/mv-lanceur.mjs --continuer` : **439/439 commandes, 0 rouge** (829 s).
 
+## 364. ★★ TUTO-7 — LE TUTO DES ÉQUIPES NE SAUTE PLUS D’ÉTAPE (19/10 — `src/tutos.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-tutos.mjs` · `scripts/mv-tutos-jeu.mjs` · `CLAUDE.md` · `docs/claude/*`)
+
+### 364a. Le constat
+Nico, avant de lancer le déploiement de tous les tutos : à l’entraînement « mettre les ouvriers dans une équipe », le panneau passe parfois de l’étape 2 à l’étape 4 ; « ça plante, vérifie le code ».
+
+### 364b. Ce que le code faisait
+- **Une même vérification pour deux étapes.** Les étapes 2 (« Jean et Sophie dans l’Équipe 1 ») et 3 (« Paul dans l’Équipe 2 ») avaient le même `reel` : « la fenêtre est ouverte chez le client et quelqu’un y a une équipe ». Un seul choix chez le client les validait toutes les deux ; la lecture d’avance (jusqu’à deux étapes) faisait jouer l’étape 3 aussitôt : 2 → 4.
+- **Le geste d’un coup sans verrou** (TUTO-6) : la lecture repasse toutes les 150 ms ; tant que l’écran n’avait pas changé, le même geste se rejouait — la pastille re-cliquée rouvrait la fenêtre et effaçait les choix.
+- **Une référence lue trop tôt** : la pastille « d’avant » était lue au premier regard du panneau, parfois avant d’être dessinée ; tout texte ensuite passait pour un enregistrement.
+- **Le prix du GNR** comptait même tapé avant les litres : les litres pouvaient être sautés.
+
+### 364c. Le correctif
+- Plus de `reel` sur les deux choix : sur le vrai domaine, les personnes du domaine fictif n’existent pas, les choix ne se distinguent pas. Le panneau suit quand le client ENREGISTRE, et rejoue alors les choix dans l’ordre. La consigne dit « choisissez l’équipe de chacun, puis enregistrez ».
+- L’enregistrement : la pastille « d’avant » est lue pendant que la fenêtre est ouverte chez le client (dès l’ouverture, étape 1, puis à chaque lecture fenêtre ouverte).
+- Un geste d’un coup par étape (`E.joue`, remis à zéro à chaque consigne).
+- Le prix du GNR n’est vu fait qu’avec les litres posés.
+
+### 364d. Mesures
+- **Le défaut d’abord reproduit** : la garde neuve de `test:tutos` (aucune étape plus loin annoncée faite avant son tour) a rougi sur le code d’avant — « étape 3 vue faite côté domaine alors que le panneau était à l’étape 2 ».
+- Après : `npm run test:tutos` **9/9**, avec les deux gardes neuves (aucun saut, aucun geste rejoué : `vites` ≤ étapes).
+- Vrais clics dans l’appli (Chromium) : pastille → panneau à l’étape 2 ; un choix, puis un deuxième → le panneau RESTE à l’étape 2 ; « Enregistrer » → le panneau passe par 2 → 3 → 4 → 5.
+- `mv-harnais-tutos` : vert ; contre-épreuves **24/24** (dont : le geste d’un coup sans verrou).
+- `node scripts/mv-lanceur.mjs --continuer` : **439/439 commandes, 0 rouge** (871 s).
+
+### 364e. La règle qui en sort (→ §27g)
+Deux étapes ne partagent jamais la même vérification côté domaine. Une étape à valeurs fictives qu’on ne peut pas distinguer chez le client n’a pas de `reel` : elle se rattrape à l’étape suivante.
+

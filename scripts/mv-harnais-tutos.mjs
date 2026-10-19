@@ -128,6 +128,7 @@ function verifie(F) {
   t('H · aucun clic du moteur hors de « Montre-moi », du geste d\u2019un coup et de l\u2019alignement du départ', tu.includes('function _montreMoi(') && tu.includes('function _jouerVite(') && tu.includes('function _alignerDepart(') && !/\.click\(\)/.test(horsDe(horsDe(horsDe(tu, '_montreMoi'), '_jouerVite'), '_alignerDepart')));
   const jm = tu.slice(tu.indexOf('function _jouerMiroir('), tu.indexOf('\nfunction ', tu.indexOf('function _jouerMiroir(') + 10));
   t('H · en miroir, le panneau refait le geste d\u2019un coup, sans le doigt animé (TUTO-6)', jm.includes('_jouerVite();') && !jm.includes('_montreMoi()'));
+  t('H · un geste d\u2019un coup ne se rejoue jamais deux fois pour la même étape (TUTO-7)', tu.includes('if (E.joue === E.i) return;\n  E.joue = E.i;') && jm.includes('E.joue === E.i'));
   // I. TUTO-4 — boot.js frais, et rien sans lui
   const ver = (/export const APP_VERSION = '([^']+)'/.exec(F['src/utils.js']) || [])[1];
   t('I · index.html charge boot.js à l\u2019adresse de la version (' + ver + ')', !!ver && F['index.html'].includes('<script src="/boot.js?v=' + ver + '"></script>'));
@@ -175,12 +176,13 @@ const MUT = [
   ['la fenêtre qui dit autre chose', 'src/tutos.js', "_dire({ mvtu: 'fermer' })", "_dire({ mvtu: 'clic' })"],
   ['la fenêtre qui appelle autre chose chez l\u2019appli', 'src/tutos.js', "h._mvTutoAnneau(E.t.id,", "h._mvTutoSortir(E.t.id,"],
   ['la fenêtre qui touche le document de l\u2019appli', 'src/tutos.js', "    if (!E.memoHote) E.memoHote = h._mvTutoAvant(E.t.id) || {};", "    if (!E.memoHote) E.memoHote = h._mvTutoAvant(E.t.id) || {};\n    h.document.body.click();"],
-  ['boot.js à l\u2019adresse d\u2019une autre version', 'index.html', '<script src="/boot.js?v=9.28"></script>', '<script src="/boot.js?v=9.27"></script>'],
+  ['boot.js à l\u2019adresse d\u2019une autre version', 'index.html', '<script src="/boot.js?v=9.29"></script>', '<script src="/boot.js?v=9.28"></script>'],
   ['boot.js gardé par le navigateur', 'firebase.json', '"/boot.js"', '"/boot-x.js"'],
   ['boot.js servi depuis le cache du service worker', 'public/sw.js', "if (url.pathname.endsWith('/boot.js')) {", "if (url.pathname.endsWith('/boot-x.js')) {"],
   ['boot.js sans la marque attendue', 'public/boot.js', 'window.__MV_BOOT_TUTO_V = 4;', 'window.__MV_BOOT_TUTO_V = 3;'],
   ['app.js qui démarre quand même', 'src/app.js', 'if(window.__MV_TUTO_BLOQUE) {', 'if(false) {'],
   ['le miroir qui rejoue le doigt animé', 'src/tutos.js', '  _jouerVite();\n}', '  _montreMoi();\n}'],
+  ['le geste d\u2019un coup sans verrou', 'src/tutos.js', '  if (E.joue === E.i) return;\n  E.joue = E.i;', '  E.joue = E.i;'],
   ['un clic hors du moteur', 'src/tutos.js', "    if (a === 'fermer') _fermerPanneau();", "    if (a === 'fermer') { document.body.click(); _fermerPanneau(); }"],
   ['app.js sans tutos.js', 'src/app.js', "import './tutos.js';", ''],
   ['une étiquette disparue', 'index.html', 'data-tuto="eqj.save" ', ''],

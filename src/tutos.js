@@ -99,7 +99,6 @@ var TU_TUTOS = [
   { id: 'equipes', titre: 'Comment faire pour indiquer les équipes du jour\u00a0?', fin: 'indiquer les équipes du jour',
     module: 'Vigne', pages: ['home'], pour: 'admin', duree: '1 min', depart: 'home',
     couvre: ['openEqJour', '_mvEqPick', 'saveEqJour'],
-    avant: function (memo) { memo.eqj0 = L('#home-eqj-txt'); },
     retenir: ['Accueil › pastille « Équipes du jour ».',
               'Une équipe par personne. « Aucune » garde ses heures pour ses propres validations.',
               '« Enregistrer pour aujourd’hui » vaut jusqu’à ce soir.'],
@@ -107,21 +106,28 @@ var TU_TUTOS = [
       { type: 'toucher', cible: '[data-tuto="home.eqj"]',
         txt: function () { return 'Vous commencez sur l’Accueil. Les équipes du jour se règlent ici, sous la tâche prioritaire. {T} la pastille « ' + (L('[data-tuto="home.eqj"]').split(':')[0].trim() || 'Équipes du jour') + ' ».'; },
         fait: function () { return _ouvert('ovEqJour'); },
+        reel: function (memo) { var o = _ouvert('ovEqJour'); if (o) { memo.eqjVu = true; memo.eqjAvant = L('#home-eqj-txt'); } return o; },
         ok: 'La fenêtre des équipes s’est ouverte.' },
       { type: 'choisir', options: ['[data-eqj-n="Jean"][data-eqj-k="1"]', '[data-eqj-n="Sophie"][data-eqj-k="1"]'], zone: _zoneEquipe,
         txt: function () { return 'Mettez Jean et Sophie dans « ' + L('[data-eqj-n="Jean"][data-eqj-k="1"]') + ' ».'; },
-        txtReel: 'choisissez l’équipe de chacun.', cibleReel: '#eqj-rows',
-        reel: function () { return _ouvert('ovEqJour') && !!_q('#eqj-rows .pchk.sel:not([data-eqj-k="0"])'); },
+        // TUTO-7 (§364) : pas de `reel` ici — sur le vrai domaine, « Jean et Sophie » et « Paul » ne se distinguent pas ; les
+        //   deux étapes de choix avaient la même vérification, et un seul choix chez le client faisait sauter la seconde.
+        //   Le panneau suit quand le client ENREGISTRE (étape suivante), et rejoue alors les choix d'un coup.
+        txtReel: 'choisissez l’équipe de chacun, puis enregistrez.', cibleReel: '#eqj-rows',
         ok: 'Jean et Sophie travailleront ensemble aujourd’hui.' },
       { type: 'choisir', options: ['[data-eqj-n="Paul"][data-eqj-k="2"]'], zone: _zoneEquipe,
         txt: function () { return 'Paul part seul au tracteur : mettez-le dans « ' + L('[data-eqj-n="Paul"][data-eqj-k="2"]') + ' ». Marie reste sur « ' + L('[data-eqj-n="Marie"][data-eqj-k="0"]') + ' » : ses heures iront à ses propres validations.'; },
         txtReel: 'une équipe par personne ; « Aucune » garde ses heures pour ses propres validations.', cibleReel: '#eqj-rows',
-        reel: function () { return _ouvert('ovEqJour') && !!_q('#eqj-rows .pchk.sel:not([data-eqj-k="0"])'); },
         ok: 'Paul a son équipe à lui.' },
       { type: 'toucher', cible: '[data-tuto="eqj.save"]',
         txt: function () { return '{T} « ' + L('[data-tuto="eqj.save"]') + ' ».'; },
         fait: function () { return !_ouvert('ovEqJour') && /Jean/.test(L('#home-eqj-txt')); },
-        reel: function (memo) { return !_ouvert('ovEqJour') && L('#home-eqj-txt') !== memo.eqj0; },
+        // TUTO-7 : la pastille « d'avant » est lue pendant que la fenêtre est ouverte chez le client (avant, elle pouvait être
+        //   lue avant même d'être dessinée, et tout texte ensuite passait pour un enregistrement).
+        reel: function (memo) {
+          if (_ouvert('ovEqJour')) { memo.eqjVu = true; memo.eqjAvant = L('#home-eqj-txt'); return false; }
+          return !!memo.eqjVu && L('#home-eqj-txt') !== memo.eqjAvant;
+        },
         ok: 'C’est enregistré : le message vert le confirme.' },
       { type: 'regarder', cible: '[data-tuto="home.eqj"]',
         txt: function () { return 'La pastille dit maintenant « ' + L('#home-eqj-txt') + ' ». Chacun valide avec son équipe, sans pouvoir la changer. Demain, rien n’est réglé : tout le monde travaille ensemble.'; } }
@@ -149,6 +155,7 @@ var TU_TUTOS = [
         ok: function (x) { return _nb(_num(x)) + ' litres : c’est noté.'; } },
       { type: 'taper', facultatif: true, cible: '[data-tuto="gnr.prix"]', exemple: '1.24',
         txt: function () { return 'Le prix du litre est sur la facture : tapez-le, par exemple 1,24. Vous ne l’avez pas ? Passez.'; }, txtReel: 'le prix du litre de votre facture, si vous l’avez.',
+        reel: function () { var l = _q('[data-tuto="gnr.litres"]'), p = _q('[data-tuto="gnr.prix"]'); return !!(l && p && _num(l.value) > 0 && _num(p.value) > 0 && _num(p.value) < 10); },
         valide: function (x) { var n = _num(x); return n > 0 && n < 10; },
         ok: function () { return 'Ce prix ira dans le coût du GNR, au Pilotage.'; } },
       { type: 'toucher', cible: '[data-tuto="gnr.save"]',
@@ -412,7 +419,7 @@ function _montrer() {
     setTimeout(function () { if (E.actif && E.etat === 'attente' && _e() === e) { if (e.type === 'regarder') _confirme(); else _montreMoi(); } }, 700);
   }
   // TUTO-5 : la lecture de l'appli repart à zéro à chaque étape ; si le domaine a déjà fait plus loin, la fenêtre rattrape.
-  E.lu = { v: undefined, depuis: 0 }; E.luOk = 0; E.vite = false;
+  E.lu = { v: undefined, depuis: 0 }; E.luOk = 0; E.vite = false; E.joue = -1;
   if (E.miroirJusqua >= E.i) setTimeout(_jouerMiroir, 80);
 }
 function _verifie() {
@@ -710,7 +717,7 @@ function _bloque() {
 }
 function _jouerMiroir() {
   var e = _e();
-  if (!E.actif || !e || E.etat !== 'attente' || E.montre || !(E.miroirJusqua >= E.i)) return;
+  if (!E.actif || !e || E.etat !== 'attente' || E.montre || E.joue === E.i || !(E.miroirJusqua >= E.i)) return;
   _msg('ok', 'Fait sur votre domaine : la fenêtre suit.');
   E.vite = true;
   if (e.type === 'regarder') { _confirme(); return; }
@@ -721,6 +728,11 @@ function _jouerMiroir() {
 //   doigt animé (1,1 s de trajet et d'appui), et la pause de réussite tombe à 0,3 s ; plusieurs étapes d'avance s'enchaînent.
 function _jouerVite() {
   var e = _e(); if (!e || E.etat !== 'attente') return;
+  // TUTO-7 : la lecture repasse toutes les 150 ms ; sans ce verrou, le même geste se rejouait tant que l'écran n'avait pas
+  //   changé (la pastille re-cliquée rouvrait la fenêtre et effaçait les choix). Un geste par étape.
+  if (E.joue === E.i) return;
+  E.joue = E.i;
+  _etat('vites', ((window.__MV_TUTO_ETAT && window.__MV_TUTO_ETAT.vites) || 0) + 1);
   if (e.type === 'toucher') { var c = _q(e.cible); if (c) c.click(); return; }
   if (e.type === 'aller') {
     var n = 0;
@@ -901,6 +913,8 @@ function _demarrer() {
   if (t.avant) { try { t.avant(E.memo); } catch (e) { _avale(e, '_demarrer#avant'); } }
   _etat('fini', false);
   _etat('types', t.etapes.map(function (x) { return x.type; }));
+  // TUTO-7 : les étapes que le miroir suit une à une (un choix sans `reel` se rattrape à l'étape suivante).
+  _etat('suivis', t.etapes.map(function (x) { return x.type !== 'regarder' && (x.type !== 'choisir' || !!x.reel); }));
   E.actif = true;
   _couches();
   document.addEventListener('click', _surClic, true);

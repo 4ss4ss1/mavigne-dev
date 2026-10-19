@@ -143,6 +143,8 @@ async function jouerMiroir(navigateur, base, id) {
     r1 = await page.evaluate(() => { const w = document.getElementById('f').contentWindow; return { etat: w.__MV_TUTO_ETAT, cuve: w.CONFIG && w.CONFIG.gnr ? w.CONFIG.gnr.niveau : null, anneau: window.__anneau.length }; });
     if (id === 'gnr' && r1.cuve !== 1850) erreurs.push('la valeur tapée sur le domaine n\u2019a pas suivi : cuve à ' + r1.cuve + ' L au lieu de 1 850');
     if (!r1.anneau) erreurs.push('le panneau n\u2019a jamais demandé l\u2019anneau doré');
+    const nr = (r1.etat.types || []).filter((x) => x !== 'regarder').length, vites = r1.etat.vites || 0;
+    if (vites > nr) erreurs.push('un geste rejoué plusieurs fois pour la même étape : ' + vites + ' gestes d\u2019un coup pour ' + nr + ' étapes');
     if (id === 'gnr') {   // départ aligné : chemin déjà fait sur le domaine → le panneau commence après lui
       const pa = await ctx.newPage();
       await pa.goto(base + '__miroir.html?id=gnr&aligne=1', { waitUntil: 'load' });
@@ -158,14 +160,17 @@ async function jouerMiroir(navigateur, base, id) {
   try {
     await p2.goto(base + '?tuto=' + encodeURIComponent(id) + '&tuto_auto=1', { waitUntil: 'load' });
     await p2.waitForFunction(() => !!window._mvTutoAvant, null, { timeout: 20000 });
-    await p2.evaluate((tid) => { window.__memo = window._mvTutoAvant(tid); window.__vus = {}; setInterval(function () { var s = window.__MV_TUTO_ETAT; if (!s || !s.etape) return; var i = s.etape - 1; if (window._mvTutoMiroirFait(tid, i, window.__memo)) window.__vus[i] = true; }, 80); }, id);
+    // TUTO-7 : et JAMAIS une étape plus loin annoncée faite avant son tour (c'est ce qui faisait sauter le panneau de 2 à 4).
+    await p2.evaluate((tid) => { window.__memo = window._mvTutoAvant(tid); window.__vus = {}; window.__tot = []; setInterval(function () { var s = window.__MV_TUTO_ETAT; if (!s || !s.etape) return; var i = s.etape - 1; if (window._mvTutoMiroirFait(tid, i, window.__memo)) window.__vus[i] = true; for (var j = i + 1; j <= i + 2 && j < s.total; j++) { if (window._mvTutoMiroirFait(tid, j, window.__memo) && window.__tot.indexOf(j + '<' + i) < 0) window.__tot.push(j + '<' + i); } }, 80); }, id);
     await p2.waitForFunction(() => window.__MV_TUTO_ETAT && (window.__MV_TUTO_ETAT.fini || window.__MV_TUTO_ETAT.erreur), null, { timeout: DELAI });
-    const r2 = await p2.evaluate(() => ({ vus: window.__vus, types: window.__MV_TUTO_ETAT.types || [] }));
+    const r2 = await p2.evaluate(() => ({ vus: window.__vus, types: window.__MV_TUTO_ETAT.types || [], suivis: window.__MV_TUTO_ETAT.suivis || [], tot: window.__tot }));
     vus = r2.vus; types = r2.types;
-    types.forEach((ty, i) => { if (ty !== 'regarder' && !vus[i]) erreurs.push('étape ' + (i + 1) + ' (' + ty + ') faite sur le domaine sans que le miroir la voie'); });
+    r2.tot.forEach((x) => { const [a, b] = x.split('<').map(Number); erreurs.push('étape ' + (a + 1) + ' vue faite côté domaine alors que le panneau était à l\u2019étape ' + (b + 1) + ' (saut d\u2019étape)'); });
+    types.forEach((ty, i) => { if (r2.suivis[i] && !vus[i]) erreurs.push('étape ' + (i + 1) + ' (' + ty + ') faite sur le domaine sans que le miroir la voie'); });
+    types = types.filter((x, i) => r2.suivis[i]);
   } catch (e) { erreurs.push('miroir (domaine) : ' + String(e.message || e).split('\n')[0]); }
   await ctx.close();
-  return { ok: !!(r1 && r1.etat && r1.etat.fini && !erreurs.length), erreurs, n: types.filter((x) => x !== 'regarder').length };
+  return { ok: !!(r1 && r1.etat && r1.etat.fini && !erreurs.length), erreurs, n: types.length };
 }
 
 // TUTO-4 : un boot.js d'une version précédente (resté en cache) — le panneau doit refuser, jamais ouvrir l'appli.

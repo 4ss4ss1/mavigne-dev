@@ -2633,6 +2633,10 @@ qui s'efface seul faute d'être redemandé). Il démarre là où l'on est : `_al
 **TUTO-6 (§363) — fluidité.** Lecture toutes les 150 ms (rien avant la première consigne : `E.debut`, `E.aligne`) ; en
 miroir, `_jouerVite` refait le geste sans doigt animé et la pause de réussite tombe à 0,3 s ; panneau seul : 0,8 s
 (saisie 0,7 s, « Passer » 0,5 s) ; une saisie est posée au champ quitté ou après 0,8 s sans frappe.
+**TUTO-7 (§364).** Deux étapes ne partagent JAMAIS la même vérification côté domaine : sinon une seule réalité les valide
+toutes les deux et le panneau saute. Un choix aux valeurs fictives n'a pas de `reel` : il se rattrape à l'étape suivante.
+Une référence « d'avant » se prend quand l'écran concerné est ouvert chez le client. `_jouerVite` : un geste par étape
+(`E.joue`). L'état expose `suivis` (étapes suivies une à une) et `vites` (gestes d'un coup) pour `test:tutos`.
 **TUTO-4 (§361).** `boot.js` est chargé en `boot.js?v=<APP_VERSION>`, `no-cache`,
 réseau d'abord dans `sw.js` ; sa marque `__MV_BOOT_TUTO_V` doit valoir `TU_BOOT_V` (tutos.js), sinon `__MV_TUTO_BLOQUE` :
 app.js n'ouvre ni l'entraînement ni l'appli, `_mvTutoBloque` affiche « Une mise à jour à finir ».
