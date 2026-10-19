@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.27';
+export const APP_VERSION = '9.28';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,11 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.28', d: '2026-10-18', items: [
+    { niv: 0, pour: ['admin'], emoji: 'doigt', titre: 'Le tuto à côté de l’appli suit plus vite',
+      desc: "Quand vous faites un geste sur votre domaine, le tuto ouvert à côté passe à l’étape suivante en une demi-seconde, au lieu de trois. "
+        + "Il ne rejoue plus le geste avec son doigt animé : il le fait d’un coup. Le panneau affiche «\u00a0Préparation de l’entraînement…\u00a0» pendant qu’il s’ouvre." },
+  ] },
   { v: '9.27', d: '2026-10-18', items: [
     { niv: 0, pour: ['admin'], emoji: 'doigt', titre: 'Le tuto à côté de l’appli démarre là où vous êtes',
       desc: "Si votre appli est déjà sur le bon module ou le bon onglet, le tuto ouvert à côté commence directement à cette étape, sans refaire le chemin. "

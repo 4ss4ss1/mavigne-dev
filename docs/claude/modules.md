@@ -2630,6 +2630,9 @@ Une étape à valeurs fictives (« Jean et Sophie ») DOIT avoir son `reel` (et 
 300 ms) par `_mvTutoMiroirFait` / `_mvTutoAvant` / `_mvTutoValeur` (lecture seule) et demande l'anneau (`_mvTutoAnneau`,
 qui s'efface seul faute d'être redemandé). Il démarre là où l'on est : `_alignerDepart` joue les étapes de chemin
 (`aller`, ou `chemin: true`) déjà faites dans l'appli avant la première consigne. Il ne dit à l'appli que « fermer ».
+**TUTO-6 (§363) — fluidité.** Lecture toutes les 150 ms (rien avant la première consigne : `E.debut`, `E.aligne`) ; en
+miroir, `_jouerVite` refait le geste sans doigt animé et la pause de réussite tombe à 0,3 s ; panneau seul : 0,8 s
+(saisie 0,7 s, « Passer » 0,5 s) ; une saisie est posée au champ quitté ou après 0,8 s sans frappe.
 **TUTO-4 (§361).** `boot.js` est chargé en `boot.js?v=<APP_VERSION>`, `no-cache`,
 réseau d'abord dans `sw.js` ; sa marque `__MV_BOOT_TUTO_V` doit valoir `TU_BOOT_V` (tutos.js), sinon `__MV_TUTO_BLOQUE` :
 app.js n'ouvre ni l'entraînement ni l'appli, `_mvTutoBloque` affiche « Une mise à jour à finir ».

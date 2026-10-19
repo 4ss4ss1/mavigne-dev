@@ -808,3 +808,27 @@ Après TUTO-4 : « Votre appli ne répond pas » s’affichait dans le panneau a
 ### 362d. Ce qui n’a pas été vérifié
 Chez un vrai client connecté (le bac à sable n’a pas de session) ; la « Fenêtre à part » avec un vrai bloqueur de fenêtres.
 
+## 363. ★ TUTO-6 — LE TUTO À CÔTÉ DE L’APPLI SUIT EN UNE DEMI-SECONDE (18/10 — `src/tutos.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-tutos.mjs` · `CLAUDE.md` · `docs/claude/*`)
+
+### 363a. La demande
+Après TUTO-5 : « Ça manque de fluidité. Sinon, c’est vraiment très bien. »
+
+### 363b. Mesuré avant d’écrire
+Vrai clic sur la vraie pastille (Chromium, 1 900 × 950) : « Fait sur votre domaine » affiché à **618 ms**, étape suivante prête à **2 915 ms**. Les 2,3 s d’écart : le doigt animé qui rejoue le geste (740 ms de trajet + 330 ms d’appui) et la pause de réussite (1 200 ms). En enchaînant chez soi, le panneau perdait ~3 s par étape.
+
+### 363c. Arbitrages
+- **En miroir, plus de doigt animé** : le geste est déjà fait sur le domaine ; `_jouerVite` le refait ici d’un coup (clic, choix, valeur posée), pause de réussite 0,3 s, étapes d’avance enchaînées (relance à 80 ms). « Montre-moi » garde son doigt : là, montrer est le but.
+- **Lecture plus vive** : toutes les 150 ms (au lieu de 300), une seule lecture pour un changement d’écran (au lieu de deux), lecture dès 250 ms après la consigne (au lieu de 700) ; une saisie compte au champ quitté ou après 0,8 s sans frappe (au lieu de 1,5 s).
+- **Panneau seul** : pause 0,8 s (saisie 0,7 s, « Passer » 0,5 s) au lieu de 1,2 s.
+- **Ouverture** : « Préparation de l’entraînement… » jusqu’à la première consigne (lue dans le cadre : `etape` et `depart` posés).
+
+### 363d. Piège trouvé en route
+La lecture de l’appli pouvait partir AVANT l’alignement du départ (`E.aligne` n’était posé que dans `_alignerDepart`, 300 ms après le démarrage) : les deux jouaient le chemin, le panneau commençait à l’étape 4 au lieu de 3. Plus rare avec l’ancienne cadence, possible quand même. `test:tutos` l’a vu (départ aligné) ; corrigé : `E.aligne` posé au démarrage dans un cadre, et aucune lecture avant la première consigne (`E.debut`).
+
+### 363e. Mesures
+- Vrai clic : « Fait sur votre domaine » à **145 ms**, étape suivante prête à **477 ms** (au lieu de 2 915).
+- « Préparation de l’entraînement… » : affiché à l’ouverture, effacé à ~1,65 s, quand la première consigne est prête.
+- `npm run test:tutos` : **9/9** (parcours seuls ~10 % plus courts : équipes 14,0 s au lieu de 15,8).
+- `mv-harnais-tutos` : vert ; contre-épreuves **23/23** (dont : le miroir qui rejoue le doigt animé).
+- `node scripts/mv-lanceur.mjs --continuer` : **439/439 commandes, 0 rouge** (829 s).
+

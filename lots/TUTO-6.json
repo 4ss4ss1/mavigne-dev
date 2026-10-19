@@ -1,0 +1,19 @@
+{
+  "lot": "TUTO-6",
+  "section": "§363",
+  "base": "ef8f88f92bbcc8bfa0285d187d5eb68887c8eb4c",
+  "inclut": [],
+  "date": "2026-10-19",
+  "fichiers": {
+    "CLAUDE.md": "2485203497b98103dff39fdb252b0b5cd25f463d4bb49b1fdbcd975d0eac8972",
+    "docs/claude/INDEX.md": "3ec7213ce9eb6db55fabec506f732cea62753ba96ff5a7d017d837d2eebda3ad",
+    "docs/claude/chantiers-330-379.md": "bdfd5f8009e3afdf9cec1f64b6286a07a2995ef4d753059d3fe30a4e144e1e23",
+    "docs/claude/journal.md": "c4d7a0892a1f59994bcac56d2cd154758a51147cd7715859b2e0be44d5475ef8",
+    "docs/claude/modules.md": "df1132775976c971c2a0921c067c20bec6cb400e05999d1096e9032ee86715f7",
+    "index.html": "54eace40d6e03d7947f718368a150468a5c79b0d22795a48aa87d1236a68e2a7",
+    "public/sw.js": "ccb73a27e4639f7fb38fe08c2bcf195725bcdf321c577551e3889398822afdc4",
+    "scripts/mv-harnais-tutos.mjs": "c62435b809f6f6bdbb64c558dc8aab3c103be32c0b9c81abd10f21b0076b44f0",
+    "src/tutos.js": "150c7f734773774609b93126c5768a7e9565a793ecd0b62fd04175efa777cba1",
+    "src/utils.js": "705f6d2266e2e2f83f771fd961975705aedf31d6d0acff9716bba06ff31e5358"
+  }
+}

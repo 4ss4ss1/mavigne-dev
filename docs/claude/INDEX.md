@@ -416,3 +416,4 @@
 | 360 | 360. ★★ TUTO-3 — LE MIROIR : LE TUTO OUVERT À CÔTÉ DE L’APPLI SUIT LES GESTES FAITS SUR LE VRAI DOMAINE (18… | `docs/claude/chantiers-330-379.md` |
 | 361 | 361. ★★ TUTO-4 — LE MIROIR NE SUIVAIT PAS CHEZ NICO : UN boot.js D’UNE VERSION PRÉCÉDENTE, GARDÉ EN CACHE (… | `docs/claude/chantiers-330-379.md` |
 | 362 | 362. ★★ TUTO-5 — LE PANNEAU DU TUTO LIT LUI-MÊME L’APPLI ET DÉMARRE LÀ OÙ L’ON EST (18/10 — `src/tutos.js` … | `docs/claude/chantiers-330-379.md` |
+| 363 | 363. ★ TUTO-6 — LE TUTO À CÔTÉ DE L’APPLI SUIT EN UNE DEMI-SECONDE (18/10 — `src/tutos.js` · `src/utils.js`… | `docs/claude/chantiers-330-379.md` |

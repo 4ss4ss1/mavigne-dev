@@ -235,8 +235,11 @@ function _css() {
     '.mvtu-p-hd{display:flex;align-items:center;gap:6px;min-height:46px;padding:0 8px 0 14px;background:var(--cave);color:var(--or-clair);font:600 var(--pt-base,14px) ' + _PF + '}',
     '.mvtu-p-hd span{margin-right:auto}',
     '.mvtu-p-b{display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:0 10px;border-radius:9px;border:1px solid rgba(232,210,148,.35);background:transparent;color:var(--or-clair);font:600 var(--pt-micro,12px) ' + _PF + ';cursor:pointer}',
+    '.mvtu-p-corps{position:relative;flex:1;display:flex;min-height:0}',
     '.mvtu-p-if{flex:1;width:100%;border:0;background:var(--bg-app)}',
-    '@media (prefers-reduced-motion:reduce){.mvtu-m,.mvtu-ring,.mvtu-main,.mvtu-coach{transition:none!important;animation:none!important}.mvtu-main svg,.mvtu-tire,.mvtu-ring.attend{animation:none!important}}'
+    '.mvtu-p-load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg-app);color:var(--texte-doux);font:500 var(--pt-base,14px) ' + _PF + ';animation:mvtuCharge 1.2s ease-in-out infinite}',
+    '@keyframes mvtuCharge{0%,100%{opacity:.55}50%{opacity:1}}',
+    '@media (prefers-reduced-motion:reduce){.mvtu-p-load{animation:none!important}.mvtu-m,.mvtu-ring,.mvtu-main,.mvtu-coach{transition:none!important;animation:none!important}.mvtu-main svg,.mvtu-tire,.mvtu-ring.attend{animation:none!important}}'
   ].join('\n');
   document.head.appendChild(s);
 }
@@ -409,8 +412,8 @@ function _montrer() {
     setTimeout(function () { if (E.actif && E.etat === 'attente' && _e() === e) { if (e.type === 'regarder') _confirme(); else _montreMoi(); } }, 700);
   }
   // TUTO-5 : la lecture de l'appli repart à zéro à chaque étape ; si le domaine a déjà fait plus loin, la fenêtre rattrape.
-  E.lu = { v: undefined, depuis: 0 }; E.luOk = 0;
-  if (E.miroirJusqua >= E.i) setTimeout(_jouerMiroir, 450);
+  E.lu = { v: undefined, depuis: 0 }; E.luOk = 0; E.vite = false;
+  if (E.miroirJusqua >= E.i) setTimeout(_jouerMiroir, 80);
 }
 function _verifie() {
   var e = _e(); if (!e || E.etat !== 'attente') return;
@@ -435,7 +438,8 @@ function _reussi() {
   _vide();
   var suiv = E.t.etapes[E.i + 1];
   if (e.type === 'taper' && (!suiv || suiv.type !== 'taper')) { var inp = _q(e.cible); if (inp) inp.blur(); }
-  setTimeout(function () { if (E.actif && E.etat === 'ok') _suivant(); }, e.type === 'taper' ? 900 : 1200);
+  // TUTO-6 (§363) : en miroir, le geste est déjà fait sur le domaine — on passe à la suite presque aussitôt.
+  setTimeout(function () { if (E.actif && E.etat === 'ok') _suivant(); }, E.vite ? 300 : (e.type === 'taper' ? 700 : 800));
 }
 function _suivant() { E.i++; if (E.i >= E.t.etapes.length) { _fin(); return; } _montrer(); }
 function _confirme() {
@@ -451,7 +455,7 @@ function _passer() {
   var e = _e(); if (!e || !e.facultatif || E.etat !== 'attente') return;
   var c = _q(e.cible); if (c) c.value = '';
   E.etat = 'ok'; _msg('ok', 'Étape passée : le champ reste vide.'); _vide();
-  setTimeout(function () { if (E.actif) _suivant(); }, 700);
+  setTimeout(function () { if (E.actif) _suivant(); }, E.vite ? 250 : 500);
 }
 function _indice(txt) {
   _msg('info', txt);
@@ -637,21 +641,19 @@ function _hoteLu() {
 }
 var _luA = 0;
 function _miroirLire() {
-  var now = Date.now(); if (now - _luA < 300 || E.aligne) return; _luA = now;
+  var now = Date.now(); if (now - _luA < 150 || E.aligne || !E.debut) return; _luA = now;
   var h = _hoteLu(), e = _e();
   if (!h || !E.actif || !e) return;
   try {
     if (!E.memoHote) E.memoHote = h._mvTutoAvant(E.t.id) || {};
     var k = -1;
-    if (E.etat === 'attente' && !E.montre && now - E.debut >= 700) {
+    if (E.etat === 'attente' && !E.montre && now - E.debut >= 250) {
       for (var j = E.i; j < Math.min(E.t.etapes.length, E.i + 3); j++) { if (h._mvTutoMiroirFait(E.t.id, j, E.memoHote)) k = j; }
       if (k === E.i && e.type === 'taper') {   // une saisie : on attend qu'elle soit posée
         var s = h._mvTutoValeur(E.t.id, E.i) || {};
         if (s.v !== E.lu.v) { E.lu = { v: s.v, depuis: now }; k = -1; }
-        else if (s.focus && now - E.lu.depuis < 1500) k = -1;
+        else if (s.focus && now - E.lu.depuis < 800) k = -1;   // posée : champ quitté, ou 0,8 s sans frappe
       }
-      E.luOk = k >= 0 ? (E.luOk || 0) + 1 : 0;
-      if (E.luOk < 2) k = -1;
     }
     h._mvTutoAnneau(E.t.id, (E.etat === 'attente' && k < 0) ? E.i : -1);
     if (k >= 0) {
@@ -665,7 +667,7 @@ function _miroirLire() {
 // l'appli sont jouées ici tout de suite, avant la première consigne — pas de rattrapage en rafale ensuite.
 function _alignerDepart(fin) {
   var h = _hoteLu(), memo = {};
-  if (!h) { fin(); return; }
+  if (!h) { E.aligne = false; fin(); return; }
   try { memo = h._mvTutoAvant(E.t.id) || {}; } catch (e) { memo = {}; }
   E.memoHote = memo; E.aligne = true;
   var finir = function () { E.aligne = false; _etat('depart', E.i); fin(); };
@@ -710,9 +712,32 @@ function _jouerMiroir() {
   var e = _e();
   if (!E.actif || !e || E.etat !== 'attente' || E.montre || !(E.miroirJusqua >= E.i)) return;
   _msg('ok', 'Fait sur votre domaine : la fenêtre suit.');
+  E.vite = true;
   if (e.type === 'regarder') { _confirme(); return; }
   if (e.type === 'taper' && e.facultatif && !(E.miroirVal && E.miroirVal.i === E.i)) { _passer(); return; }
-  _montreMoi();
+  _jouerVite();
+}
+// ★ TUTO-6 (§363) — LE GESTE D'UN COUP. En miroir, le geste est déjà fait sur le domaine : le panneau le refait ici sans le
+//   doigt animé (1,1 s de trajet et d'appui), et la pause de réussite tombe à 0,3 s ; plusieurs étapes d'avance s'enchaînent.
+function _jouerVite() {
+  var e = _e(); if (!e || E.etat !== 'attente') return;
+  if (e.type === 'toucher') { var c = _q(e.cible); if (c) c.click(); return; }
+  if (e.type === 'aller') {
+    var n = 0;
+    (function va() { if (!E.actif || _pageActive(e.page) || n++ > 4) return; var m = _nav(e.page); if (m) m.el.click(); setTimeout(va, 120); })();
+    return;
+  }
+  if (e.type === 'choisir') {
+    (function choix() { var o = _optCourante(); if (!o || !E.actif || E.etat !== 'attente') return; var el = _q(o); if (el) el.click(); setTimeout(choix, 60); })();
+    return;
+  }
+  if (e.type === 'taper') {
+    var inp = _q(e.cible); if (!inp) return;
+    var mv = (E.miroirVal && E.miroirVal.i === E.i && e.valide(E.miroirVal.v)) ? E.miroirVal.v : e.exemple;
+    inp.value = String(mv);
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+    _confirme();
+  }
 }
 function _rejouer(id) {
   window.location.replace(window.location.pathname + '?tuto=' + encodeURIComponent(id) + (_cadre() ? '&tuto_cadre=1' : ''));
@@ -782,7 +807,8 @@ function _panneau(id) {
   p.innerHTML = '<div class="mvtu-p-hd"><span>Entraînement</span>'
     + '<button type="button" class="mvtu-p-b" data-p="fenetre">Fenêtre à part</button>'
     + '<button type="button" class="mvtu-p-b" data-p="fermer" aria-label="Fermer l’entraînement">' + _ic('croix', 16) + '</button></div>'
-    + '<iframe class="mvtu-p-if" title="' + _esc(t.titre) + '" src="' + _esc(url) + '"></iframe>';
+    + '<div class="mvtu-p-corps"><iframe class="mvtu-p-if" title="' + _esc(t.titre) + '" src="' + _esc(url) + '"></iframe>'
+    + '<div class="mvtu-p-load" role="status">Préparation de l’entraînement…</div></div>';
   p.addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-p]'); if (!b) return;
     var a = b.getAttribute('data-p');
@@ -790,6 +816,14 @@ function _panneau(id) {
     else if (a === 'fenetre') { var w = window.open(url, 'mvtuto', 'popup=yes,width=440,height=900'); if (w) _fermerPanneau(); }
   });
   document.body.appendChild(p);
+  // TUTO-6 : « Préparation de l'entraînement… » jusqu'à ce que la première consigne soit prête (lue dans le cadre).
+  var ifr = p.querySelector('iframe'), lo = p.querySelector('.mvtu-p-load'), t0 = Date.now();
+  (function pret() {
+    var ok = false;
+    try { var s = ifr.contentWindow && ifr.contentWindow.__MV_TUTO_ETAT; ok = !!(s && s.etape >= 1 && typeof s.depart === 'number'); } catch (e) { ok = true; }
+    if (ok || Date.now() - t0 > 15000 || !p.parentNode) { if (lo && lo.parentNode) lo.parentNode.removeChild(lo); return; }
+    setTimeout(pret, 150);
+  })();
   if (!_ecoute) {
     _ecoute = true;
     window.addEventListener('message', function (ev) {
@@ -862,6 +896,8 @@ function _demarrer() {
   var t = _tuto(String(window.__MV_TUTO || ''));
   if (!t || E.actif) return;
   E.t = t; E.i = 0; E.memo = {}; E.lance = Date.now();
+  // TUTO-6 : rien ne lit l'appli avant la première consigne — dans un cadre, l'alignement du départ passe d'abord.
+  E.debut = 0; E.aligne = _cadre();
   if (t.avant) { try { t.avant(E.memo); } catch (e) { _avale(e, '_demarrer#avant'); } }
   _etat('fini', false);
   _etat('types', t.etapes.map(function (x) { return x.type; }));
