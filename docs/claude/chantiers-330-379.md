@@ -1112,3 +1112,28 @@ CHARTE-3 (§370) est parti avec « les écrans eux-mêmes non regardés ». La s
 
 ### 371e. La leçon
 **Devant un « zéro écart », demander ce qui a été photographié.** Trois lots ont comparé des écrans de connexion entre eux ; le seul contrôle qui l’a vu était d’ouvrir une capture. L’outil le dit désormais lui-même.
+
+## 372. ★★ CHARTE-3b — LE BOUTON DES FENÊTRES PASSE AU JEU COMMUN (19/10 — `src/styles.css` · `index.html` · `src/cave.js` · `src/phyto.js` · `src/reglages.js` · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `scripts/mv-harnais-boutons.mjs` · `scripts/harnais-claude-md.mjs` · **APP 9.35 → 9.36, SW 10.14 → 10.15**, base `8b7b33c`)
+
+### 372a. La demande
+La suite proposée après CAPTURES-1 (§371d), acceptée (« suite ») : ce qui sautait aux yeux sur les vraies captures — « Ajouter le tracteur » vert, « Enregistrer » d’une opération de cave orange, « Confirmer le retrait » bordeaux. Tous ces boutons sont un seul : `.mbtn`.
+
+### 372b. Mesuré avant d’écrire (`8b7b33c`)
+`.mbtn` : 101 emplois, toutes les fenêtres. Une règle de base (pleine largeur, 14 px de marge intérieure, arrondi 12, police 15 px), trois couleurs (`.verte`, `.acre`, `.phyte`), `.mbtn-del` en contour rouge, et 34 boutons qui se peignaient eux-mêmes sur place : 11 « Annuler » en contour gris, 5 principaux orange de la Cave (`#C0845A`), des suppressions rouges, des teintes terre ou cave. Deux règles de Réglages (RG-1, RG-2) peignent `.verte` exprès, et `mv-harnais-rg2` en vérifie le texte.
+
+### 372c. Ce qui est livré
+- **Le jeu** : `.mbtn` seul = secondaire ; `.mbtn.verte`, `.acre`, `.phyte` et le neuf `.mbtn-p` = principal ; `.mbtn-del` = danger ; les mêmes tailles et états que les pièces. Les règles d’origine ne gardent que la mise en page (largeur, marge du haut).
+- **38 styles écrits sur place rendus au jeu**, par un script qui lit chaque balise : les propriétés d’allure retirées, la mise en page gardée ; un fond orange et blanc → `.mbtn-p`, un fond rouge → `.mbtn-del` ; 18 styles retirés en entier. Un « Annuler » de Réglages, écrit sur trois morceaux de chaîne, nettoyé à la main.
+- **`mv-harnais-boutons`** suit : 13 classes surveillées ; deux exemptions écrites (les règles RG-1 et RG-2 de Réglages) ; une classe citée seulement dans un `:not()` n’est plus prise pour une classe stylée.
+
+### 372d. Vu dans ses écrans
+`mv-captures` (§371) après construction, téléphone, clair et sombre : « Ajouter le tracteur » lie-de-vin ; « Confirmer le retrait » au rouge du Danger, et en sombre au saumon avec un texte foncé ; les options au jeu. 16 captures valables, zéro retour de la connexion. Chaîne : 449 commandes, **0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 372e. Les décisions
+- **`.mbtn` seul devient secondaire** : sans couleur, il n’en avait pas — c’étaient les styles écrits sur place qui le coloraient, et le plus fréquent était le contour gris d’« Annuler ».
+- **Le principal orange de la Cave devient lie-de-vin** (`.mbtn-p`) : une seule couleur d’action, la décision de la maquette (§370a).
+- **Une suppression devient le Danger plein** : la règle du jeu, « toujours suivi d’une confirmation ».
+- **Les deux règles de Réglages restent** : RG-1 peint en secondaire les « Enregistrer » de Réglages › Domaine, RG-2 met « Ajouter un membre » à l’accent — deux décisions écran par écran, vérifiées par leur harnais.
+
+### 372f. La leçon
+**Un bouton peint sur place ment sur sa classe.** `.mbtn` « n’avait pas de couleur » ; 34 de ses emplois en portaient une, écrite à côté. Ranger une classe, c’est d’abord lire ses emplois.

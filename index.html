@@ -621,7 +621,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:var(--pt-txt,13px);margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v9.35</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v9.36</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -1047,7 +1047,7 @@
         <select class="fsel ac" id="dpc-cepage-sel-3"></select>
       </div>
       <button class="mbtn verte" style="margin-top:18px" onclick="saveDPCepage()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg> Enregistrer</button>
-      <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="closeOv(null,'ovCepage')">Annuler</button>
+      <button class="mbtn" onclick="closeOv(null,'ovCepage')">Annuler</button>
     </div>
   </div>
 </div>
@@ -1071,8 +1071,8 @@
       <div class="mv-l" style="margin-top:12px">La parcelle n'est pas supprimée : elle sort des surfaces, de l'avancement, du planning et du registre phyto, et son historique reste consultable. Une erreur se corrige depuis sa fiche avec « Remettre en exploitation ».</div>
       <div id="arr-valide-row" style="display:none"></div>
       <div id="arr-warn" style="display:none;margin-top:10px;font-size:var(--pt-txt,13px);font-weight:600;color:var(--orange)"></div>
-      <button class="mbtn" style="background:var(--rouge-pale);color:var(--rouge-tx,#A0291E);border:1.5px solid var(--rouge);margin-top:18px" onclick="saveArrachage()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg> Confirmer l'arrachage</button>
-      <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="closeOv(null,'ovArrachage')">Annuler</button>
+      <button class="mbtn mbtn-del" style="margin-top:18px" onclick="saveArrachage()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg> Confirmer l'arrachage</button>
+      <button class="mbtn" onclick="closeOv(null,'ovArrachage')">Annuler</button>
     </div>
   </div>
 </div>
@@ -1095,7 +1095,7 @@
       <div id="selp-rows"></div>
       <div class="mv-l" id="selp-tot" style="margin-top:12px;font-weight:600"></div>
       <button class="mbtn" style="margin-top:18px" onclick="saveSelParc()">Enregistrer</button>
-      <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="closeOv(null,'ovSelParc')">Annuler</button>
+      <button class="mbtn" onclick="closeOv(null,'ovSelParc')">Annuler</button>
     </div>
   </div>
 </div>
@@ -1141,7 +1141,7 @@
       <div class="cpt-zero" id="cpt-zero-w"><button type="button" id="cpt-zero" onclick="_cptTouche('zero')" aria-pressed="false">Aucun pied à remplacer</button></div>
       <div class="cpt-hint" id="cpt-hint"></div>
       <button class="mbtn verte" id="cpt-ok" onclick="_cptOk()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg> Valider</button>
-      <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="closeOv(null,'ovCompte')">Annuler</button>
+      <button class="mbtn" onclick="closeOv(null,'ovCompte')">Annuler</button>
     </div>
   </div>
 </div>
@@ -1160,7 +1160,7 @@
       <div class="cpts-rows" id="cpts-rows"></div>
       <div class="mv-l" id="cpts-vide" hidden style="margin-top:12px">Aucune parcelle à ce nom.</div>
       <button class="mbtn verte" id="cpts-ok" style="margin-top:16px" onclick="_cptsEnregistrer()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg> Enregistrer</button>
-      <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="closeOv(null,'ovComptes')">Annuler</button>
+      <button class="mbtn" onclick="closeOv(null,'ovComptes')">Annuler</button>
     </div>
   </div>
 </div>
@@ -1187,8 +1187,8 @@
         <div class="mv-l" style="margin-top:10px">Étape faite par un prestataire : aucune heure de votre équipe n'y est comptée. Le montant entre dans le poste « Prestations » du Pilotage, Économie. Cette facture se note ici seulement : La Réserve la refuse.</div>
       </div>
       <button class="mbtn" id="arre-ok" style="margin-top:18px" onclick="saveArrEtape()">Valider l'étape</button>
-      <button class="mbtn" id="arre-undo" style="display:none;background:var(--rouge-pale);color:var(--rouge-tx,#A0291E);border:1.5px solid var(--rouge);margin-top:18px" onclick="annulerArrEtape()">Annuler cette étape</button>
-      <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="closeOv(null,'ovArrEtape')">Fermer</button>
+      <button class="mbtn mbtn-del" id="arre-undo" style="display:none;margin-top:18px" onclick="annulerArrEtape()">Annuler cette étape</button>
+      <button class="mbtn" onclick="closeOv(null,'ovArrEtape')">Fermer</button>
     </div>
   </div>
 </div>
@@ -1205,11 +1205,11 @@
       <div class="mv-l">Touchez les étapes que vous faites, dans l'ordre où vous les faites. « Prestataire » : l'étape se valide, mais aucune heure de l'équipe n'y est comptée. Aucune étape cochée : l'arrachage se valide en une seule fois, comme avant.</div>
       <div id="arrcf-rows"></div>
       <div class="fl" style="margin-top:14px">Ajouter une étape</div>
-      <div style="display:flex;gap:6px"><input type="text" class="fi" id="arrcf-new" maxlength="60" placeholder="Ex : Broyage des souches" style="flex:1"><button class="mbtn" style="width:auto;margin:0;padding:0 16px" onclick="_arrCfgAjout()">Ajouter</button></div>
+      <div style="display:flex;gap:6px"><input type="text" class="fi" id="arrcf-new" maxlength="60" placeholder="Ex : Broyage des souches" style="flex:1"><button class="mbtn" style="width:auto;margin:0" onclick="_arrCfgAjout()">Ajouter</button></div>
       <div class="fl" style="margin-top:14px">Proposer de passer la parcelle en « Arrachée »</div>
       <select class="fsel" id="arrcf-apres"></select>
       <button class="mbtn" style="margin-top:18px" onclick="saveArrCfg()">Enregistrer</button>
-      <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="closeOv(null,'ovArrCfg')">Annuler</button>
+      <button class="mbtn" onclick="closeOv(null,'ovArrCfg')">Annuler</button>
     </div>
   </div>
 </div>
@@ -1226,7 +1226,7 @@
       <div class="mv-l">Touchez l'équipe de chacun. Chaque salarié validera et démarrera avec son équipe, sans pouvoir la changer. Quelqu'un laissé sur « Aucune » garde ses heures pour ses propres validations. Sous les noms, la tournée de chaque équipe : par défaut, celle du travail. Demain, rien n'est réglé : tout le monde travaille ensemble, comme d'habitude.</div>
       <div id="eqj-rows" style="margin-top:6px"></div>
       <button class="mbtn" data-tuto="eqj.save" style="margin-top:18px" onclick="saveEqJour()">Enregistrer pour aujourd'hui</button>
-      <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="clearEqJour()">Tout le monde ensemble</button>
+      <button class="mbtn" onclick="clearEqJour()">Tout le monde ensemble</button>
     </div>
   </div>
 </div>
@@ -1249,7 +1249,7 @@
       <div class="cm-picked" id="comm-picked" style="display:none"></div>
       <div class="cm-hint" id="comm-hint"></div>
       <button class="mbtn verte" style="margin-top:18px" onclick="saveCommune()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg> Enregistrer</button>
-      <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="clearCommune()">Retirer (hériter du domaine)</button>
+      <button class="mbtn" onclick="clearCommune()">Retirer (hériter du domaine)</button>
     </div>
   </div>
 </div>
@@ -1457,7 +1457,7 @@
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v9.35</div>
+        <div class="mod-header-sub">Ma Vigne v9.36</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
       
@@ -1498,7 +1498,7 @@
       <div class="set-title">Campagne</div>
       <div id="saisons-list" style="padding:0 16px"></div>
       <div style="padding:0 16px;margin-top:8px">
-        <button class="mbtn verte" style="margin-top:0;font-size:var(--pt-txt,13px);padding:10px" onclick="openSaison()">+ Nouvelle période</button>
+        <button class="mbtn verte" style="margin-top:0" onclick="openSaison()">+ Nouvelle période</button>
       </div>
       <div style="padding:12px 16px 4px">
         <button onclick="window.openClotureFlow&&window.openClotureFlow()" style="width:100%;display:flex;align-items:center;gap:13px;background:linear-gradient(180deg,#fffdf7,#f9f4e7);border:1px solid rgba(201,168,76,.45);border-radius:14px;padding:14px 15px;cursor:pointer;text-align:left;font-family:var(--font-ui,&#39;Outfit&#39;,sans-serif)">
@@ -1527,7 +1527,7 @@
     <div class="set-sec" id="set-sec-equipe">
       <div class="set-title">Équipe &amp; accès</div>
       <div id="membres-list" style="padding:0 16px"></div>
-      <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0;font-size:var(--pt-txt,13px);padding:10px" onclick="openOv(&#39;ovMembre&#39;)">+ Ajouter un membre</button></div>
+      <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0" onclick="openOv(&#39;ovMembre&#39;)">+ Ajouter un membre</button></div>
     </div>
   </div>
 
@@ -1571,7 +1571,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg></div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v9.35 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div class="ver-tag">Ma Vigne v9.36 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -1680,10 +1680,10 @@
         <input class="fi" id="edn-lat" type="number" step="0.00001" inputmode="decimal" placeholder="Latitude" style="flex:1">
         <input class="fi" id="edn-lon" type="number" step="0.00001" inputmode="decimal" placeholder="Longitude" style="flex:1">
       </div>
-      <button class="mbtn" onclick="ednUseCentroide()" style="margin-top:8px;background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux);font-size:var(--pt-micro,12px);padding:8px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg> Centrer sur mes parcelles</button>
+      <button class="mbtn" onclick="ednUseCentroide()" style="margin-top:8px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg> Centrer sur mes parcelles</button>
       <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:6px;margin-bottom:14px">Laissez vide pour centrer automatiquement la météo sur vos parcelles géolocalisées. Renseignez ces champs pour forcer un point précis.</div>
       <button class="mbtn verte" onclick="saveEditDomNom()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg> Enregistrer</button>
-      <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="closeOv(null,'ovEditDomNom')">Annuler</button>
+      <button class="mbtn" onclick="closeOv(null,'ovEditDomNom')">Annuler</button>
     </div>
   </div>
 </div>
@@ -1746,7 +1746,7 @@
            existe dans la convention. C'est le champ de recherche du panneau qui
            répond à la question, et le barème reste consultable depuis ce panneau. -->
       <div style="padding:0 16px;margin-top:8px">
-        <button class="mbtn verte" style="margin-top:0;font-size:var(--pt-txt,13px);padding:11px;line-height:1.35" onclick="window.openTacheNew&amp;&amp;window.openTacheNew()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg> + Nouvelle tâche</button>
+        <button class="mbtn verte" style="margin-top:0" onclick="window.openTacheNew&amp;&amp;window.openTacheNew()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg> + Nouvelle tâche</button>
       </div>
       <div id="passages-config-section" style="display:none">
         <div class="section-header" style="padding:18px 16px 6px;display:flex;align-items:center;gap:8px">
@@ -1806,7 +1806,7 @@
     <div class="set-sec" id="set-sec-tracteurs">
       <div class="set-title"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg> Parc tracteurs</div>
       <div id="tracteurs-set-list" style="padding:0 16px"></div>
-      <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0;font-size:var(--pt-txt,13px);padding:10px" onclick="openOv(&#39;ovAddTracteur&#39;)">+ Ajouter un tracteur</button></div>
+      <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0" onclick="openOv(&#39;ovAddTracteur&#39;)">+ Ajouter un tracteur</button></div>
     </div>
     <div class="set-sec" id="set-sec-act-trac">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px 0">
@@ -2010,7 +2010,7 @@
         <div id="report-preview" style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.7"></div>
       </div>
       <button id="report-send-btn" class="mbtn verte" style="margin-top:0;width:100%" onclick="submitReport()">Envoyer le signalement</button>
-      <button class="mbtn" style="width:100%;background:none;color:var(--texte-doux);box-shadow:none;margin-top:6px" onclick="closeReport()">Annuler</button>
+      <button class="mbtn" style="width:100%;margin-top:6px" onclick="closeReport()">Annuler</button>
     </div>
   </div>
 </div>
@@ -2463,8 +2463,8 @@
       <div class="fl">Notes</div>
       <input type="text" class="fi ac" id="cop-notes" placeholder="Observations…">
     </div>
-    <button class="mbtn" style="background:#C0845A;color:#fff;border-color:#C0845A;" onclick="saveCaveOp()">Enregistrer</button>
-    <button class="mbtn" id="cop-dg-next" style="display:none;margin-top:10px;background:transparent;color:#C0845A;border:1.5px solid #C0845A;" onclick="_copDgNext()">Enregistrer et goûter la suivante →</button>
+    <button class="mbtn mbtn-p" onclick="saveCaveOp()">Enregistrer</button>
+    <button class="mbtn" id="cop-dg-next" style="display:none;margin-top:10px" onclick="_copDgNext()">Enregistrer et goûter la suivante →</button>
     <input type="hidden" id="cop-op-id">
   </div>
 </div></div>
@@ -2497,7 +2497,7 @@
     <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:-6px 0 14px;line-height:1.45;">« Pas de malo » : le domaine l’évite exprès, pour garder l’acidité (blancs, rosés). La cuve du Cuvier passe alors à « Fini ».</div>
     <input type="hidden" id="cuv-fml-val" value="non">
     <input type="hidden" id="cuv-id">
-    <button class="mbtn" style="background:#C0845A;color:#fff;border-color:#C0845A;" onclick="saveCuvee()">Enregistrer</button>
+    <button class="mbtn mbtn-p" onclick="saveCuvee()">Enregistrer</button>
     <button class="mbtn-del" id="cuv-del-btn" onclick="deleteCuvee()" style="display:none;"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg> Supprimer cette cuvée</button>
   </div>
 </div></div>
@@ -2739,7 +2739,7 @@
     <div id="cana-edit-cuv-hint" style="font-size:10px;color:var(--texte-doux);font-style:italic;margin-bottom:13px;min-height:14px;"></div>
     <div class="fl">Commentaire <span style="font-size:var(--pt-micro,11px);font-weight:400;font-style:italic;">(facultatif)</span></div>
     <textarea class="fi ac" id="cana-edit-commentaire" placeholder="Ex : SO₂ libre bas sur PN23…" style="height:70px;resize:none;font-family:var(--font-ui,'Outfit',sans-serif);"></textarea>
-    <button class="mbtn" style="background:#C0845A;color:#fff;border-color:#C0845A;" onclick="saveCaveAnaEdit()">Enregistrer</button>
+    <button class="mbtn mbtn-p" onclick="saveCaveAnaEdit()">Enregistrer</button>
   </div>
 </div></div>
 
@@ -2790,7 +2790,7 @@
       <div id="cana-link-op-list"></div>
       <input type="hidden" id="cana-link-op-id">
     </div>
-    <button id="cana-save-btn" class="mbtn" style="background:#C0845A;color:#fff;border-color:#C0845A;" onclick="saveCaveAna()">Enregistrer</button>
+    <button id="cana-save-btn" class="mbtn mbtn-p" onclick="saveCaveAna()">Enregistrer</button>
   </div>
 </div></div>
 
@@ -3157,7 +3157,7 @@
     <div style="color:rgba(255,255,255,0.45);font-size:var(--pt-micro,11px);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px">Mot de passe provisoire</div>
     <div id="npw-val" style="font-family:var(--font-ui,'Outfit',system-ui,sans-serif);font-size:26px;font-weight:600;color:#C9A84C;letter-spacing:0.02em;word-break:break-all;line-height:1.3;-webkit-user-select:all;user-select:all"></div>
   </div>
-  <button class="mbtn" id="npw-copy" onclick="_mvCopyNewPwd()" style="width:100%;margin:0 0 14px;background:var(--terre-pale,#F3EADF);color:var(--terre-tx,#8A5A38);border:1.5px solid var(--terre,#8A5A38)"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> Copier</button>
+  <button class="mbtn" id="npw-copy" onclick="_mvCopyNewPwd()" style="width:100%;margin:0 0 14px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> Copier</button>
   <div style="background:var(--tag-amber-bg,#fffbeb);border:1.5px solid #fcd34d;border-radius:12px;padding:12px 14px;font-size:var(--pt-micro,12px);color:var(--tag-amber-tx,#92400e);line-height:1.65">
     <b>Notez-le maintenant.</b> Il n'est enregistré nulle part et ne sera plus jamais affiché — ni ici, ni ailleurs.<br><br>
     Communiquez-le à la personne&nbsp;: elle devra choisir le sien à sa première connexion. En cas de perte, revenez sur sa fiche et réinitialisez.
@@ -3185,7 +3185,7 @@
 <div class="overlay" id="ovEditSaison" onclick="closeOv(event,'ovEditSaison')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Modifier la période</div><div class="modal-sub">Affichée dans les réglages et rapports</div></div><div class="modal-body"><input type="hidden" id="es-saison-nom"><div class="fl">Nom</div><input type="text" class="fi" id="es-saison-nomlibre" placeholder="Ex : Hiver, Saison verte"><div class="fl">Libellé de période (facultatif)</div><input type="text" class="fi" id="es-saison-periode" placeholder="Ex : Nov. 2025 – Mars 2026"><div class="fl">Début</div><input type="date" class="fi" id="es-saison-debut"><div class="fl">Fin</div><input type="date" class="fi" id="es-saison-fin"><div class="fl" style="margin-top:14px;display:flex;justify-content:space-between;align-items:center">Tâches de cette période <span id="es-taches-count" style="font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-doux)"></span></div><div id="es-taches-pick" class="ns-taches-pick"></div><div class="es-ech-hd">Dates de travaux estimées <span>(elles donnent l’ordre des tâches et la tâche du moment)</span></div><div id="es-echeances" class="es-ech-list"></div><button class="mbtn verte" onclick="saveEditSaison()" style="margin-top:16px">Enregistrer</button></div></div></div>
 
 <div class="overlay" id="ovTache" onclick="closeOv(event,'ovTache')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg> Nouvelle tâche</div><div class="modal-sub">Le travail, ses heures, et les périodes où il se fait</div></div><div class="modal-body"><div id="tn-body"></div></div></div></div>
-<div class="overlay" id="ovTacheCfg" onclick="closeOv(event,'ovTacheCfg')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="tcfg-title">Tâche</div></div><div class="modal-body"><div id="tcfg-body"></div><button class="mbtn verte" id="tcfg-save" onclick="tcfgSave()" style="margin-top:14px">+ Ajouter à la saison</button><button class="mbtn" onclick="window.closeOv(null,'ovTacheCfg')" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux);margin-top:6px">Annuler</button></div></div></div>
+<div class="overlay" id="ovTacheCfg" onclick="closeOv(event,'ovTacheCfg')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="tcfg-title">Tâche</div></div><div class="modal-body"><div id="tcfg-body"></div><button class="mbtn verte" id="tcfg-save" onclick="tcfgSave()" style="margin-top:14px">+ Ajouter à la saison</button><button class="mbtn" onclick="window.closeOv(null,'ovTacheCfg')" style="margin-top:6px">Annuler</button></div></div></div>
 
 <div class="overlay" id="ovMembre" onclick="closeOv(event,'ovMembre')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-personne"></use></svg> Nouveau membre</div></div><div class="modal-body"><div class="fl">Prénom</div><input type="text" class="fi" id="nm-nom" placeholder="Prénom"><div class="fl">Email</div><input type="email" class="fi" id="nm-email" placeholder="email@domaine.fr"><div class="fl">Mot de passe <span style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);font-weight:400">(laisser vide — recommandé)</span></div><input type="password" class="fi" id="nm-mdp" placeholder="Vide = généré automatiquement"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);margin:-6px 0 12px;line-height:1.5">Un mot de passe unique et facile à dire sera généré et affiché une seule fois. La personne le remplacera à sa première connexion.</div><div class="fl">Rôles</div><div class="roles-check" id="nm-roles"><div class="role-check-row"><span class="role-check-name"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg> Ouvrier</span><div class="role-chk on" id="rc-ouvrier" onclick="toggleRole('ouvrier')"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg></div></div><div class="role-check-row"><span class="role-check-name"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg> Tractoriste</span><div class="role-chk" id="rc-tractoriste" onclick="toggleRole('tractoriste')"></div></div><div class="role-check-row"><span class="role-check-name"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-ticket"></use></svg> Saisonnier</span><div class="role-chk" id="rc-saisonnier" onclick="toggleRole('saisonnier')"></div></div><div class="role-check-row"><span class="role-check-name"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> Pilotage</span><div class="role-chk" id="rc-pilotage" onclick="toggleRole('pilotage')"></div></div></div><div class="fl">Période (si saisonnier)</div><input type="text" class="fi" id="nm-periode" placeholder="Ex : Juin–Août 2026"><button class="mbtn verte" onclick="saveMembre()">Ajouter</button></div></div></div>
 
@@ -3301,7 +3301,7 @@
       <div style="background:var(--bleu-pale);border:1px solid var(--bleu);border-radius:10px;padding:10px 12px;font-size:var(--pt-micro,12px);color:var(--bleu-tx,#1A4A7A);margin-bottom:20px">
         <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cloche"></use></svg> Si une date de retour est renseignée, vous recevrez une notification la <strong>veille</strong> et le <strong>jour J</strong> — et une alerte si la date est dépassée.
       </div>
-      <button class="mbtn" style="background:var(--rouge);color:white;border-color:var(--rouge)" onclick="saveReparateur()">Confirmer — Chez le réparateur</button>
+      <button class="mbtn mbtn-del" onclick="saveReparateur()">Confirmer — Chez le réparateur</button>
     </div>
   </div>
 </div>
@@ -3351,7 +3351,7 @@
       <p style="font-size:var(--pt-txt,13px);color:var(--texte-doux);margin:0 0 16px">Le réparateur n'a pas terminé ? Saisissez une nouvelle date. Une nouvelle notification sera programmée.</p>
       <div class="fl">Nouvelle date de retour prévue</div>
       <input type="date" class="fi ac" id="reporter-date" style="margin-bottom:20px">
-      <button class="mbtn" style="background:var(--orange);color:white;border-color:var(--orange)" onclick="saveReporter()">Enregistrer la nouvelle date</button>
+      <button class="mbtn" onclick="saveReporter()">Enregistrer la nouvelle date</button>
     </div>
   </div>
 </div>
@@ -3663,7 +3663,7 @@
       <input class="fi ac" id="ocv-val" placeholder="" style="font-size:var(--pt-md,20px);text-align:center;font-weight:700">
       <div class="mv-l" id="ocv-hint" hidden style="margin:6px 2px 4px"></div>   <!-- COMPTE-1 (§353) : la tarière préremplie -->
       <button class="mbtn acre" onclick="confirmerValidationChamp()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg> Confirmer</button>
-      <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="closeOv(null,'ovChampValidation')">Annuler</button>
+      <button class="mbtn" onclick="closeOv(null,'ovChampValidation')">Annuler</button>
     </div>
   </div>
 <!-- ══ OVERLAY Confirmation simple (remplace confirm()) ══ -->
@@ -3720,7 +3720,7 @@
     </div>
   </div>
 </div>
-<script src="/boot.js?v=9.35"></script>
+<script src="/boot.js?v=9.36"></script>
 <script type="module" src="/src/app.js"></script>
 
 <!-- ── Overlay erreur critique Ma Vigne (v2.68) ── -->
@@ -3770,7 +3770,7 @@
     </div>
     <input type="radio" name="cexp-group" id="cexp-group-date" value="date" checked style="display:none">
     <input type="radio" name="cexp-group" id="cexp-group-cuv" value="cuv" style="display:none">
-    <button class="mbtn" style="background:#C0845A;color:#fff;border-color:#C0845A;" onclick="generateCaveExport()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-document"></use></svg> Générer le rapport PDF</button>
+    <button class="mbtn mbtn-p" onclick="generateCaveExport()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-document"></use></svg> Générer le rapport PDF</button>
   </div>
 </div></div>
 
@@ -3799,7 +3799,7 @@
     </div>
     <div class="fl">Note <span style="font-size:var(--pt-micro,11px);font-weight:400;font-style:italic;">(facultatif)</span></div>
     <textarea class="fi ac" id="rfut-notes" placeholder="Ex : vendu au domaine X..." style="height:60px;resize:none;font-family:var(--font-ui,'Outfit',sans-serif);"></textarea>
-    <button class="mbtn" style="background:#8B2020;color:#fff;border-color:#8B2020;margin-top:8px;" onclick="window.saveRetraitFut()">Confirmer le retrait</button>
+    <button class="mbtn mbtn-del" style="margin-top:8px" onclick="window.saveRetraitFut()">Confirmer le retrait</button>
   </div>
 </div></div>
 <div class="overlay" id="ovWhatsNew" onclick="if(window.dismissWhatsNew)window.dismissWhatsNew()">
@@ -3812,7 +3812,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v9.35</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v9.36</span>
       </div>
     </div>
     <div class="modal-body">
@@ -3820,7 +3820,7 @@
       <div id="wn-items"></div>
     </div>
     <div style="padding:0 20px calc(14px + env(safe-area-inset-bottom,0px));flex-shrink:0;">
-      <button class="mbtn" style="background:#C8B020;color:#0A0508;border:none;margin-top:0;font-weight:600;" onclick="if(window.dismissWhatsNew)window.dismissWhatsNew()">Compris, c&#39;est parti ! →</button>
+      <button class="mbtn" style="margin-top:0" onclick="if(window.dismissWhatsNew)window.dismissWhatsNew()">Compris, c&#39;est parti ! →</button>
       <button type="button" id="wn-journal-btn" class="mvn-wn-lien" onclick="if(window.openNouvJournal)window.openNouvJournal()">Ouvrir le Journal des nouveautés</button>
     </div>
   </div>

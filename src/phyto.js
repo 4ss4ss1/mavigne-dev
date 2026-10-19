@@ -85,7 +85,7 @@ function openCatDetail(nom){
       <div class="ov-hd"><div class="ov-title" id="ocd-title"></div><div class="ov-close" onclick="closeOv(null,'${ovId}')">${_mvIcon('croix',18)}</div></div>
       <div id="ocd-body" style="padding:0 20px 20px;overflow-y:auto;max-height:70vh"></div>
       <div style="padding:16px 20px">
-        <button class="mbtn" onclick="closeOv(null,'${ovId}')" style="width:100%;font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px);padding:12px;border-radius:12px;border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-doux);cursor:pointer">Fermer</button>
+        <button class="mbtn" onclick="closeOv(null,'${ovId}')" style="width:100%;cursor:pointer">Fermer</button>
       </div>
     </div>`;
     document.body.appendChild(ov);
@@ -1127,7 +1127,7 @@ function _phytoExportChoix(cible){
       <div class="ov-hd"><div class="ov-title" id="phx-title">Exporter le registre</div><div class="ov-close" onclick="closeOv(null,'${ovId}')">${_mvIcon('croix',18)}</div></div>
       <div id="phx-body" style="padding:0 20px 20px;overflow-y:auto;max-height:70vh"></div>
       <div style="padding:0 20px 16px">
-        <button class="mbtn" onclick="closeOv(null,'${ovId}')" style="width:100%;font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px);padding:12px;border-radius:12px;border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-doux);cursor:pointer;min-height:44px">Annuler</button>
+        <button class="mbtn" onclick="closeOv(null,'${ovId}')" style="width:100%;cursor:pointer">Annuler</button>
       </div>
     </div>`;
     document.body.appendChild(ov);

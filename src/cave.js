@@ -2676,7 +2676,7 @@ function openCuveeDetail(cuvId,dans){
   html+='<button onclick="window.openOvRetraitFut&&window.openOvRetraitFut(\''+cuv.id+'\')" style="width:100%;padding:10px;border:1px solid rgba(139,32,32,0.3);border-radius:10px;background:rgba(139,32,32,0.06);font-size:var(--pt-txt,13px);font-weight:500;color:#8B2020;cursor:pointer;min-height:44px;font-family:var(--font-ui,Outfit,sans-serif);margin-bottom:6px;">\uD83D\uDEAA Retirer un f\u00FCt</button>';
   if(typeof isAdmin==='function'&&isAdmin()){
     html+='<div style="display:flex;gap:8px;">';
-    html+='<button onclick="closeOv(null,\'ovCuveeDetail\');openOvCavee(\''+cuv.id+'\')" class="mbtn" style="flex:1;background:rgba(192,132,90,0.12);color:#C0845A;border-color:rgba(192,132,90,0.3);">\u270F\uFE0F Modifier</button>';
+    html+='<button onclick="closeOv(null,\'ovCuveeDetail\');openOvCavee(\''+cuv.id+'\')" class="mbtn" style="flex:1">\u270F\uFE0F Modifier</button>';
     html+='<button onclick="closeOv(null,\'ovCuveeDetail\');deleteCuveeById(\''+cuv.id+'\')" style="padding:10px 14px;border:1px solid rgba(224,112,96,0.3);border-radius:10px;background:rgba(224,112,96,0.08);font-size:var(--pt-txt,13px);color:#E07060;cursor:pointer;min-height:44px;">\uD83D\uDDD1</button>';
     html+='</div>';
   }

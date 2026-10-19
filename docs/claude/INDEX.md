@@ -425,3 +425,4 @@
 | 369 | 369. ★ CHARTE-2B — LE MODE PLEIN SOLEIL REJOINT LA CHARTE : PLUS AUCUN RÉGLAGE HORS D’ELLE (19/10 — `src/ch… | `docs/claude/chantiers-330-379.md` |
 | 370 | 370. ★★ CHARTE-3 — LE JEU DE BOUTONS COMMUN, PREMIER PASSAGE (19/10 — `src/charte.css` (`--sur-danger`) · `… | `docs/claude/chantiers-330-379.md` |
 | 371 | 371. ★★ CAPTURES-1 — LES VRAIS ÉCRANS SE REGARDENT : L’OUTIL DE CAPTURES RÉPARÉ (19/10 — `scripts/mv-captur… | `docs/claude/chantiers-330-379.md` |
+| 372 | 372. ★★ CHARTE-3b — LE BOUTON DES FENÊTRES PASSE AU JEU COMMUN (19/10 — `src/styles.css` · `index.html` · `… | `docs/claude/chantiers-330-379.md` |

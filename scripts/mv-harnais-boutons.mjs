@@ -35,9 +35,12 @@ const MODULES = fs.readdirSync(path.join(RACINE, 'src')).filter(f => f.endsWith(
 const PIECES = ['.mvbtn', '.mvbtn-principal', '.mvbtn-secondaire', '.mvbtn-discret', '.mvbtn-danger', '.mvbtn-option',
                 '.mvbtn-choix', '.mvbtn-icone', '.mvbtn-terrain', '.mvbtn-bureau', '.mvbtn-compact'];
 const MIGREES = ['plan-btn-saisir', 'mvc-set-btn', 'sd-trac-confirm-btn', 'pf-btn', 'pf-btn-ok', 'plan-btn-pdf',
-                 'cave-toggle-btn', 'trac-type-btn', 'cave-op-type-btn', 'rfut-reason-btn'];
+                 'cave-toggle-btn', 'trac-type-btn', 'cave-op-type-btn', 'rfut-reason-btn',
+                 'mbtn', 'mbtn-del', 'mbtn-p'];   // ★ CHARTE-3b (§372) : le bouton des fenêtres
 const EXEMPTIONS = [
-  { selecteur: '#ovRepBlock .sd-trac-confirm-btn', raison: 'un blanc forcé (!important) d’avant CHARTE-3, sur le principal : c’est déjà le texte du jeu' }
+  { selecteur: '#ovRepBlock .sd-trac-confirm-btn', raison: 'un blanc forcé (!important) d’avant CHARTE-3, sur le principal : c’est déjà le texte du jeu' },
+  { selecteur: '#regl-view-domaine .mbtn.verte', raison: 'RG-1 (§295) : Réglages › Domaine peint ses « Enregistrer » en secondaire, exprès (mv-harnais-rg1)' },
+  { selecteur: '#regl-view-equipe .mbtn.verte', raison: 'RG-2 (§296) : « Ajouter un membre » à l’accent, la pièce principale du jeu redite (mv-harnais-rg2)' }
 ];
 const PLAFOND = 74;   /* classes de boutons (hors bloc) qui posent leur propre fond ou arrondi — mesuré à CHARTE-3a ; ne peut que BAISSER */
 const ALLURE = /^(background(-color|-image)?|color|border(-(color|width|style|radius))?|padding(-\w+)?|min-height|height|font-(size|weight|family))$/;
@@ -51,7 +54,7 @@ function bloc(css) {
 }
 const regles = s => [...sansCom(s).matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(m => [m[1].trim(), m[2]]);
 const decls = c => c.split(';').map(x => x.trim()).filter(Boolean).map(x => x.split(':')[0].trim());
-const porte = (sel, c) => new RegExp('\\.' + c.replace(/-/g, '\\-') + '(?![\\w-])').test(sel);
+const porte = (sel, c) => new RegExp('\\.' + c.replace(/-/g, '\\-') + '(?![\\w-])').test(sel.replace(/:not\([^)]*\)/g, ''));   // une classe citée dans :not() n’est pas stylée
 
 function verifier(S) {
   const f = { A: [], B: [], C: [], D: [], E: [] };

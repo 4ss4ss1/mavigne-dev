@@ -1,0 +1,23 @@
+{
+  "lot": "CHARTE-3B",
+  "section": "§372",
+  "base": "8b7b33c20c25cdfa49735c552843a3a371ed6aa9",
+  "inclut": [],
+  "date": "2026-10-19",
+  "fichiers": {
+    ".mv-base": "50e64ddd2087f18a342e719c233610b631e2a29b73aa480779a6be26996a5654",
+    "CLAUDE.md": "452816290698058b491f38686db8579423c875f5e008bc6784cf89d14d410bb3",
+    "docs/claude/INDEX.md": "239133bad2115716c1f5a87391b3a3780fcd3d67ff910fa306f44b0b3f7c99f5",
+    "docs/claude/chantiers-330-379.md": "9657ab3fc5b76197c426698db22fae5206c91d17e5ba7c699a8d0f85f5758416",
+    "docs/claude/journal.md": "4cb97a3d62da869e1691eccc283c8e29c99901a53085f816fd5419cf70723a43",
+    "index.html": "7c3f4594f0613aae6b3b0aa7f435e6f31d5c188ce66ba7af02e85f6c2d1fae68",
+    "public/sw.js": "7a4c8c4b8e41033d03495aa5b552246f8b759e46c0e7c0193cdefc2dd0213d9d",
+    "scripts/harnais-claude-md.mjs": "b3f4ffe2632db06d3be3727aa7b8806442998c15baf1f0d97a659b92b3bdffc8",
+    "scripts/mv-harnais-boutons.mjs": "d1eb637eda31c6b47ca4bda838ad913d068843995ba725fee89c6cefa360a4a2",
+    "src/cave.js": "d0c646c690497502b56879fef3f90a5e1558a06257304d0a4615d74f963f69f1",
+    "src/phyto.js": "8869351a5e95e9de72fa757ef9cdaeebf5f7026f6b7ef04788ea9bbfa5c2206e",
+    "src/reglages.js": "448f0fae2dbc1d48da8bcf783806027cb9c54a6f4caa6ebee4eedbaf3b05723d",
+    "src/styles.css": "3337db6831cb4f304aeec46daa03f52c121889dbe5fbc5c0f07010eab15b5aff",
+    "src/utils.js": "d14a9d6d25eda6cca1f0079ee8b1ec7b52311fe0c28bc39d788170b4b26dca91"
+  }
+}

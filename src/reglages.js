@@ -1333,7 +1333,7 @@ function _tnRender(){
   }).join('');
   h+='<div style="'+_TN_HINT+'">Les dates préparent le Pilotage. Elles restent facultatives, et se modifient plus tard dans la période.</div>';
   h+='<button class="mbtn verte" onclick="window._tnSave()" style="margin-top:6px">Enregistrer la tâche</button>';
-  h+='<button class="mbtn" onclick="window.closeOv(null,\'ovTache\')" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux);margin-top:6px">Annuler</button>';
+  h+='<button class="mbtn" onclick="window.closeOv(null,\'ovTache\')" style="margin-top:6px">Annuler</button>';
   host.innerHTML=h;
 }
 
@@ -2211,7 +2211,7 @@ function openEditHha(nom){
     if(subEl)subEl.textContent=t.tempsReel?'Estimation d\'heures par hectare (temps réel)':'Référentiel d\'heures estimées par hectare';
   }
   bodyHtml+='<button class="mbtn verte" onclick="saveEditHha(\''+nomEsc+'\')" style="margin-top:4px">'+_mvIcon('check',16)+' Enregistrer</button>'
-    +'<button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux);margin-top:6px" onclick="window.closeOv(null,\'ovEditHha\')">Annuler</button>';
+    +'<button class="mbtn" style="margin-top:6px" onclick="window.closeOv(null,\'ovEditHha\')">Annuler</button>';
   // RENOM-1 (§230) : renommer une tâche créée par le domaine — depuis sa fenêtre « Modifier ».
   if(_renTacheCustom(t.nom)) bodyHtml+='<div style="margin-top:14px;text-align:center"><button type="button" class="mv-gh" data-nom="'+_escAttr(t.nom)+'" onclick="closeOv(null,\'ovEditHha\');openRenTache(this.dataset.nom)">'+_mvIcon('etiquette',16)+' Renommer cette t\u00e2che</button></div>';
     if(bodyEl)bodyEl.innerHTML=bodyHtml;
@@ -2553,7 +2553,7 @@ function editMembre(nom){
        '<div class="fl" style="margin-top:14px">Accès</div>'
       +'<div style="background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 12px">'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);line-height:1.5;margin-bottom:9px">Génère un nouveau mot de passe, affiché <b>une seule fois</b>. '+_escHtml(nom)+' devra le remplacer à sa prochaine connexion.</div>'
-      +'<button type="button" class="mbtn" id="em-reset-pwd" onclick="_mvResetMemberPwd(\''+_escAttr(m.nom)+'\')" style="width:100%;margin:0;background:var(--terre-pale,#F3EADF);color:var(--terre-tx,#8A5A38);border:1.5px solid var(--terre,#8A5A38)">Réinitialiser le mot de passe</button>'
+      +'<button type="button" class="mbtn" id="em-reset-pwd" onclick="_mvResetMemberPwd(\''+_escAttr(m.nom)+'\')" style="width:100%;margin:0">Réinitialiser le mot de passe</button>'
       +'</div>'):'');
   window.openOv('ovEditMembre');
   _emhRender(nom);
@@ -4776,9 +4776,7 @@ function _jivChoix(F){
       +'<div class="ov-close" onclick="closeOv(null,\'ovJivExport\')">'+_mvIcon('croix',18)+'</div></div>'
       +'<div id="jiv-body" style="padding:0 20px 20px;overflow-y:auto;max-height:70vh"></div>'
       +'<div style="padding:0 20px 16px"><button class="mbtn" onclick="closeOv(null,\'ovJivExport\')" '
-      +'style="width:100%;font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px);padding:12px;border-radius:12px;'
-      +'border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-doux);cursor:pointer;'
-      +'min-height:44px">Annuler</button></div></div>';
+      +'style="width:100%">Annuler</button></div></div>';
     document.body.appendChild(ov);
   }
   var _ib=(typeof window._mvInfoBtn==='function')?window._mvInfoBtn:function(){ return ''; };
