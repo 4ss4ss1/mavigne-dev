@@ -168,7 +168,7 @@
      DEUX blocs sombres (harnais jetons). */
   --bg-doux:#F7F5F1; --survol:rgba(28,26,22,.055); --presse:rgba(28,26,22,.095); --ligne-forte:#CDCAC2; --texte-pale:#A3A19B;
   --accent:#7A2850; --accent-survol:#6A2145; --accent-texte:#7A2850; --accent-doux:rgba(122,40,80,.11); --sur-accent:#FFFFFF; --anneau:rgba(122,40,80,.42);
-  --ok:#237A47; --ok-doux:rgba(35,122,71,.15); --attention:#A15C00; --attention-doux:rgba(161,92,0,.15); --danger:#C2381B; --danger-doux:rgba(194,56,27,.13);
+  --ok:#237A47; --ok-doux:rgba(35,122,71,.15); --attention:#A15C00; --attention-doux:rgba(161,92,0,.15); --danger:#C2381B; --danger-doux:rgba(194,56,27,.13); --sur-danger:#FFFFFF;
   --encours:#4F4D48; --piste:rgba(28,26,22,.10); --inverse:#1F1E1B; --sur-inverse:#F5F4F1; --voile:rgba(16,15,13,.30); --sk-reflet:rgba(255,255,255,.70);
   --reflet:inset 0 1px 0 rgba(255,255,255,.14); --panneau:0 1px 2px rgba(20,18,14,.04);
   --focus-ombre:0 0 0 var(--bw-2,2px) var(--bg-card),0 0 0 calc(var(--bw-2,2px) * 2) var(--anneau); --focus-dedans:inset 0 0 0 var(--bw-2,2px) var(--anneau);
@@ -224,7 +224,7 @@
   --ligne:var(--gris-clair,#272624);
   --bg-doux:#1A1A19; --survol:rgba(255,248,235,.055); --presse:rgba(255,248,235,.09); --ligne-forte:#3E3D39; --texte-pale:#5F5D58;
   --accent:#8A3560; --accent-survol:#9A3E6B; --accent-texte:#E59ABD; --accent-doux:rgba(229,154,189,.15); --sur-accent:#FFFFFF; --anneau:rgba(229,154,189,.50);
-  --ok:#76C995; --ok-doux:rgba(118,201,149,.17); --attention:#E9AA4A; --attention-doux:rgba(233,170,74,.17); --danger:#F28B6A; --danger-doux:rgba(242,139,106,.17);
+  --ok:#76C995; --ok-doux:rgba(118,201,149,.17); --attention:#E9AA4A; --attention-doux:rgba(233,170,74,.17); --danger:#F28B6A; --danger-doux:rgba(242,139,106,.17); --sur-danger:#151514;
   --encours:#C9C7C1; --piste:rgba(255,248,235,.12); --inverse:#EDECE9; --sur-inverse:#151514; --voile:rgba(0,0,0,.55); --sk-reflet:rgba(255,255,255,.06);
   --shadow-xs:0 1px 1px rgba(0,0,0,.30); --reflet:inset 0 1px 0 rgba(255,255,255,.07); --panneau:inset 0 1px 0 rgba(255,255,255,.035);
   --bg-app:#0D0D0C;--bg-card:#151514;--cave:#100D0A;--cave-2:#171410;--horizon:linear-gradient(90deg,#A06A42 0%,#D8A642 50%,#6AB845 100%);
@@ -266,7 +266,7 @@
     --ligne:var(--gris-clair,#272624);
     --bg-doux:#1A1A19; --survol:rgba(255,248,235,.055); --presse:rgba(255,248,235,.09); --ligne-forte:#3E3D39; --texte-pale:#5F5D58;
     --accent:#8A3560; --accent-survol:#9A3E6B; --accent-texte:#E59ABD; --accent-doux:rgba(229,154,189,.15); --sur-accent:#FFFFFF; --anneau:rgba(229,154,189,.50);
-    --ok:#76C995; --ok-doux:rgba(118,201,149,.17); --attention:#E9AA4A; --attention-doux:rgba(233,170,74,.17); --danger:#F28B6A; --danger-doux:rgba(242,139,106,.17);
+    --ok:#76C995; --ok-doux:rgba(118,201,149,.17); --attention:#E9AA4A; --attention-doux:rgba(233,170,74,.17); --danger:#F28B6A; --danger-doux:rgba(242,139,106,.17); --sur-danger:#151514;
     --encours:#C9C7C1; --piste:rgba(255,248,235,.12); --inverse:#EDECE9; --sur-inverse:#151514; --voile:rgba(0,0,0,.55); --sk-reflet:rgba(255,255,255,.06);
     --shadow-xs:0 1px 1px rgba(0,0,0,.30); --reflet:inset 0 1px 0 rgba(255,255,255,.07); --panneau:inset 0 1px 0 rgba(255,255,255,.035);
     --bg-app:#0D0D0C;--bg-card:#151514;--cave:#100D0A;--cave-2:#171410;--horizon:linear-gradient(90deg,#A06A42 0%,#D8A642 50%,#6AB845 100%);

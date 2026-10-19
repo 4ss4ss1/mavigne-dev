@@ -403,8 +403,7 @@ body.mv-demo-on .mod-header,body.mv-demo-on .pil-tabsbar{top:var(--mv-demo-h,40p
 .sd-trac-sheet-btn.sel .sd-trac-sheet-radio{border-color:var(--acier);background:var(--acier);}
 .sd-trac-sheet-warn{margin:0 16px 12px;background:rgba(192,57,43,0.12);border:1px solid rgba(192,57,43,0.35);border-radius:10px;padding:10px 12px;}
 .sd-trac-sheet-actions{padding:4px 16px 0;display:flex;flex-direction:column;gap:8px;}
-.sd-trac-confirm-btn{width:100%;padding:14px;border-radius:12px;border:none;background:var(--vert);color:#fff;font-family:var(--font-ui);font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;min-height:44px;transition:all 0.2s;}
-.sd-trac-confirm-btn:disabled{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.2);cursor:default;}
+.sd-trac-confirm-btn{ width:100%; transition:all 0.2s; }
 .sd-trac-cancel-btn{width:100%;padding:12px;border-radius:12px;border:none;background:transparent;color:rgba(255,255,255,0.4);font-family:var(--font-ui);font-size:var(--pt-txt,13px);font-weight:500;cursor:pointer;min-height:44px;}
 /* ── Overlay blocage répar à la création ── */
 .ov-rep-block-sheet{background:#1C2128;border-radius:20px 20px 0 0;padding:0 0 32px;font-family:var(--font-ui);}
@@ -475,9 +474,7 @@ body.mv-demo-on .mod-header,body.mv-demo-on .pil-tabsbar{top:var(--mv-demo-h,40p
 .trac-set-card{background:var(--bg-card);border-radius:var(--radius-card);margin-bottom:10px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;}
 .trac-set-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .trac-type-pick{display:flex;gap:8px;margin-bottom:14px;}
-.trac-type-btn{flex:1;padding:10px;border-radius:10px;font-family:var(--font-ui);font-size:var(--pt-txt,13px);cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:var(--bg-card);transition:all 0.15s;min-height:44px;}
-.trac-type-btn.sel-meca{border-color:var(--vert);background:var(--vert-pale);color:var(--vert);font-weight:600;}
-.trac-type-btn.sel-hydro{border-color:var(--acier);background:var(--acier-pale);color:var(--acier);font-weight:600;}
+.trac-type-btn{ flex:1; transition:all 0.15s; }
 .trac-trait-toggle{width:100%;margin-bottom:16px;padding:11px 14px;display:flex;align-items:center;gap:10px;border-radius:10px;cursor:pointer;border:1.5px solid var(--gris);background:var(--bg-card);font-family:var(--font-ui);min-height:44px;transition:all 0.15s;}
 .trac-trait-toggle.on{border-color:var(--orange);background:var(--orange-pale);}
 /* ── Info tracteur bar ── */
@@ -1405,8 +1402,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .plan-badge-ctrat{background:var(--bleu-pale);color:var(--bleu-tx,#1A4A7A);font-size:10px;}
 .plan-badge-cdebut{background:var(--vert-pale);color:var(--vert-med);font-size:10px;}
 .plan-badge-cfin{background:var(--rouge-pale);color:var(--rouge-tx,#A0291E);font-size:10px;}
-.plan-btn-saisir{padding:9px 14px;border-radius:10px;border:none;background:#1C1A2E;color:white;font-size:var(--pt-micro,12px);font-weight:600;cursor:pointer;font-family:inherit;}
-.plan-btn-pdf{padding:9px 12px;border-radius:10px;border:1.5px solid var(--gris-clair);background:var(--bg-card);color:var(--texte);font-size:var(--pt-micro,12px);font-weight:600;cursor:pointer;font-family:inherit;}
 .plan-days-list{display:flex;flex-direction:column;gap:7px;}
 .plan-day-row{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:13px;border:1.5px solid;transition:opacity .1s;}
 .plan-day-num{width:36px;text-align:center;flex-shrink:0;}
@@ -1624,15 +1619,12 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .cave-so2-mode-btn{flex:1;padding:9px 4px;border-radius:10px;border:1px solid var(--bord);background:var(--fond-carte);font-size:var(--pt-micro,12px);font-weight:500;cursor:pointer;color:var(--texte);}
 .cave-so2-mode-btn.cave-so2-active{background:rgba(92,184,122,.15);color:#5CB87A;border-color:rgba(92,184,122,.5);}
 .cave-toggle-row{display:flex;gap:8px;margin-bottom:12px;}
-.cave-toggle-btn{flex:1;padding:10px;border-radius:10px;border:1px solid var(--bord);background:var(--fond-carte);font-size:var(--pt-txt,13px);font-weight:500;cursor:pointer;color:var(--texte);}
-.cave-toggle-btn.cave-toggle-active{background:rgba(92,184,122,.15);color:#5CB87A;border-color:rgba(92,184,122,.5);}
+.cave-toggle-btn{ flex:1; }
 .cave-dose-row{display:flex;gap:8px;margin-bottom:10px;align-items:stretch;}
 .cave-so2-cal-title{font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte);margin-bottom:8px;}
 .cave-so2-cal-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid rgba(92,184,122,.18);}
 .cave-so2-cal-j{font-size:var(--pt-micro,11px);font-weight:500;color:#5CB87A;min-width:76px;}
 .cave-so2-cal-d{font-size:var(--pt-txt,13px);color:var(--texte);}
-.cave-op-type-btn{padding:9px 12px;border-radius:10px;font-size:var(--pt-micro,12px);font-family:var(--font-ui);font-weight:500;cursor:pointer;border:1px solid var(--gris);background:transparent;color:var(--texte-doux);min-height:44px;}
-.cave-op-type-btn.sel{border-color:#C0845A;background:rgba(192,132,90,0.15);color:#C0845A;}
 /* FML segmented */
 .cave-fml-seg{display:flex;border-radius:10px;overflow:hidden;border:1px solid var(--gris);margin-bottom:13px;}
 .cave-fml-opt{flex:1;padding:10px 4px;font-size:var(--pt-micro,11px);font-family:var(--font-ui);font-weight:500;background:transparent;border:none;cursor:pointer;color:var(--texte-doux);text-align:center;min-height:44px;}
@@ -1716,8 +1708,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 }
 
 /* -- Cave Vendange -- */
-.rfut-reason-btn{padding:9px 8px;border:1.5px solid var(--gris);border-radius:10px;background:transparent;font-size:var(--pt-micro,12px);font-weight:500;color:var(--texte-doux);cursor:pointer;font-family:var(--font-ui);min-height:40px;}
-.rfut-reason-btn.sel{border-color:#C0845A;background:rgba(192,132,90,0.1);color:#C0845A;}
 .cave-pdf-chip{padding:3px 9px;border:1px solid rgba(192,132,90,0.4);border-radius:7px;background:rgba(192,132,90,0.1);font-size:10px;color:#C0845A;cursor:pointer;font-family:var(--font-ui);min-height:28px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
 .cana-mode-btn{flex:1;padding:8px 10px;border-radius:10px;border:1.5px solid var(--gris);background:transparent;color:var(--texte-doux);font-size:var(--pt-micro,12px);font-weight:500;cursor:pointer;font-family:var(--font-ui);transition:all 0.15s;min-height:40px;}
 .cana-mode-btn.cana-mode-sel{border-color:#C0845A;background:rgba(192,132,90,0.1);color:#C0845A;}
@@ -3011,10 +3001,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .mvc-step-val{ text-align:center; min-width:70px; }
 .mvc-step-num{ font-family:var(--font-titre); font-size:38px; font-weight:700; color:var(--terre,#8A5A38); line-height:1; }
 .mvc-step-unit{ font-size:10px; font-weight:600; letter-spacing:1px; color:var(--texte-doux,#7A736A); margin-top:2px; }
-.mvc-set-btn{ width:100%; padding:12px; margin-top:14px; border:0; border-radius:12px; cursor:pointer;
-  background:var(--cave,#14110D); color:#F0E2C8; font-family:var(--font-ui); font-size:var(--pt-base,14px); font-weight:600;
-  -webkit-tap-highlight-color:transparent; }
-.mvc-set-btn:active{ opacity:.9; }
+.mvc-set-btn{ width:100%; margin-top:14px; -webkit-tap-highlight-color:transparent; }
 
 @media (prefers-reduced-motion:reduce){.mvc-health-ok,
 .mvc-health-due,
@@ -4036,8 +4023,8 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pf-an .pf-cv{padding-left:var(--e-1,4px)}
 .pf-an td.dn{color:var(--orange-tx,#9C4E14);font-weight:var(--fw-semi,600)}
 .pf-scroll{overflow-x:auto}
-.pf-btn{display:flex;align-items:center;justify-content:center;gap:var(--e-2,8px);width:100%;min-height:48px;border-radius:13px;border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte);font-family:inherit;font-size:var(--pt-base,14px);font-weight:var(--fw-semi,600);cursor:pointer;margin:0 0 var(--e-3,12px)}
-.pf-btn-ok{background:var(--cave-2);border-color:var(--cave-2);color:#F0E2C8}   /* le bouton sombre de la feuille du jour */
+.pf-btn{ display:flex; align-items:center; justify-content:center; gap:var(--e-2,8px); width:100%; margin:0 0 var(--e-3,12px); }
+   /* le bouton sombre de la feuille du jour */
 .pf-btn-2{margin:0}
 .pf-leg{display:flex;flex-wrap:wrap;gap:var(--e-1,4px) var(--e-2,8px);margin:0 0 var(--e-3,12px);font-size:var(--pt-micro,11px)}
 .pf-sem{background:var(--bg-card);border:1.5px solid var(--gris-clair);border-radius:15px;margin:0 0 var(--e-3,12px);overflow:hidden}
@@ -4226,8 +4213,8 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
        or 2,37:1 / terracotta 3,01:1 / bleu 2,54:1 / vert 3,23:1 -> 5,3 a 7,1:1 — */
 .mvt-fl,.mvt-doc-lire,.home-prio-pill-chevron{color:var(--or-tx);}
 .mvt-doc-ver{color:#6B520F;}
-.cave-select-lbl,.cave-calc-val,.cave-op-type-btn.sel,.cave-fml-opt.sel,
-.cana-mode-btn.cana-mode-sel,.rfut-reason-btn.sel,.cexp-group-btn.sel{color:var(--vin-tx);}
+.cave-select-lbl,.cave-calc-val,.cave-fml-opt.sel,
+.cana-mode-btn.cana-mode-sel,.cexp-group-btn.sel{color:var(--vin-tx);}
 .cave-fml-opt.fml-none{color:var(--rouge);}
 .ink-info,.pdf-detail-toggle{color:var(--acier-tx);}
 a[href^="mailto:"]{color:var(--or-tx);}
@@ -4254,7 +4241,6 @@ a[href^="mailto:"]{color:var(--or-tx);}
 #ovRepBlock .sd-trac-sheet-title,#ovRepBlock .sd-trac-sheet-sub,
 #ovRepBlock .sd-trac-sheet-radio{color:var(--texte) !important;}
 #ovRepBlock .sd-trac-cancel-btn{color:var(--texte-med) !important;}
-#ovRepBlock .sd-trac-confirm-btn:disabled{background:var(--gris-clair) !important;color:var(--texte-doux) !important;}
 #ovRepBlock .sd-trac-confirm-btn{color:#fff !important;}
 #ovRepBlock #rb-warn div{color:var(--rouge) !important;}
 
@@ -4284,7 +4270,6 @@ a[href^="mailto:"]{color:var(--or-tx);}
 .chat-canal-ico,.chat-canal-lbl,.ob-add-btn,.ob-mbr-add-btn{color:#8FD16A;}
 .hv2-trac-sub{color:rgba(255,255,255,0.74);}
 #sp-copyright,#sp-sub{color:rgba(255,255,255,0.62) !important;}
-#ovSessionDetail .sd-trac-confirm-btn:disabled{color:rgba(255,255,255,0.5);}
 #ovSessionDetail .sd-trac-note{color:rgba(255,255,255,0.68);}
 [style*="color:rgba(255,255,255,0.2)"],[style*="color:rgba(255,255,255,.2)"],
 [style*="color:rgba(255,255,255,0.25)"],[style*="color:rgba(255,255,255,.25)"],
@@ -8045,6 +8030,50 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .p-fx-act button{flex:1;min-height:44px;border-radius:var(--r-lg,12px);border:1px solid var(--gris-clair);background:transparent;color:var(--texte);font:600 var(--pt-base,14px)/1 var(--font-ui);cursor:pointer}
 .p-fx-act button.p{background:var(--accent);border-color:var(--accent);color:var(--sur-accent)}   /* l'accent de la charte et son texte (définis à la racine, en clair comme en sombre ; --btn-pri ne vit que dans le cockpit) */
 
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CHARTE-3 (§370) — LE JEU DE BOUTONS COMMUN
+   Maquette validée par Nico le 19/10 (« tes reco », Valider en lie-de-vin) : quatre boutons (principal,
+   secondaire, discret, danger), trois tailles (terrain 48 px au téléphone, bureau 36 px dès 768 px,
+   compact 28 px), deux pièces voisines (l'icône carrée, l'option et le choix), les mêmes états partout.
+   Tout vient de la charte (src/charte.css) : aucune couleur, aucune taille écrite ici.
+   ★ Code neuf : class="mvbtn mvbtn-principal" (mvbtn-secondaire, mvbtn-discret, mvbtn-danger, mvbtn-option, mvbtn-icone ;
+     mvbtn-terrain, mvbtn-bureau, mvbtn-compact pour forcer une taille). Plus de classe de bouton qui pose son
+     propre fond, sa bordure ou son arrondi (mv-harnais-boutons).
+   ★ CHARTE-3a : neuf anciennes classes passées au jeu, groupées sous chaque pièce ; leur règle d'origine ne
+     garde que la mise en page (largeur, marge, flex).
+   ═══════════════════════════════════════════════════════════════════════════ */
+.mvbtn, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn, .plan-btn-pdf, .cave-toggle-btn, .trac-type-btn, .cave-op-type-btn, .rfut-reason-btn{ display:inline-flex; align-items:center; justify-content:center; gap:var(--e-2,8px); box-sizing:border-box; min-height:var(--h-row-2,48px); padding:0 var(--e-5,20px); border:var(--bw,1px) solid transparent; border-radius:var(--r-sm,6px); font-family:var(--font-ui); font-size:var(--pt-sm,16px); font-weight:var(--fw-semi,600); line-height:1.2; cursor:pointer; text-decoration:none; }
+@media (min-width:768px){
+  .mvbtn, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn, .plan-btn-pdf, .cave-toggle-btn, .trac-type-btn, .cave-op-type-btn, .rfut-reason-btn{ min-height:var(--h-row,36px); padding:0 var(--e-4,16px); font-size:var(--pt-base,14px); }
+}
+.mvbtn.mvbtn-terrain{ min-height:var(--h-row-2,48px); padding:0 var(--e-5,20px); font-size:var(--pt-sm,16px); }
+.mvbtn.mvbtn-bureau{ min-height:var(--h-row,36px); padding:0 var(--e-4,16px); font-size:var(--pt-base,14px); }
+.mvbtn.mvbtn-compact{ min-height:var(--h-sm,28px); padding:0 var(--e-3,12px); font-size:var(--pt-txt,13px); }
+.mvbtn.mvbtn-icone{ padding:0; width:var(--h-row-2,48px); }
+@media (min-width:768px){ .mvbtn.mvbtn-icone{ width:var(--h-row,36px); } }
+.mvbtn.mvbtn-icone.mvbtn-terrain{ width:var(--h-row-2,48px); }
+.mvbtn.mvbtn-icone.mvbtn-compact{ width:var(--h-sm,28px); }
+/* Principal : l'action de l'écran, une seule par écran */
+.mvbtn-principal, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn.pf-btn-ok{ background:var(--accent); border-color:var(--accent); color:var(--sur-accent); }
+.mvbtn-principal:hover, .plan-btn-saisir:hover, .mvc-set-btn:hover, .sd-trac-confirm-btn:hover, .pf-btn.pf-btn-ok:hover{ background:var(--accent-survol); border-color:var(--accent-survol); }
+/* Secondaire : une action à côté */
+.mvbtn-secondaire, .pf-btn, .plan-btn-pdf{ background:var(--bg-card); border-color:var(--ligne-forte); color:var(--texte); }
+/* Discret : une action légère, ou revenir */
+.mvbtn-discret{ background:transparent; color:var(--accent-texte); }
+/* Danger : effacer, retirer — toujours suivi d'une confirmation */
+.mvbtn-danger{ background:var(--danger); border-color:var(--danger); color:var(--sur-danger); }
+/* L'option (un choix parmi plusieurs) et le choix (les options réunies) */
+.mvbtn-option, .cave-toggle-btn, .trac-type-btn, .cave-op-type-btn, .rfut-reason-btn{ background:var(--bg-card); border-color:var(--ligne-forte); color:var(--texte-med); }
+.mvbtn-option.on, .mvbtn-option[aria-pressed="true"], .cave-toggle-btn.cave-toggle-active, .cave-toggle-btn.sel, .trac-type-btn.sel-meca, .trac-type-btn.sel-hydro, .cave-op-type-btn.sel, .rfut-reason-btn.sel{ background:var(--accent-doux); border-color:var(--accent-texte); color:var(--accent-texte); }
+.mvbtn-choix{ display:inline-flex; gap:0; padding:var(--e-0,2px); border:var(--bw,1px) solid var(--ligne-forte); border-radius:var(--r-sm,6px); background:var(--bg-card); }
+.mvbtn-choix > .mvbtn-option{ border-color:transparent; border-radius:var(--r-xs,4px); }
+/* Les états, les mêmes partout */
+.mvbtn-secondaire:hover, .mvbtn-discret:hover, .mvbtn-option:hover, .pf-btn:not(.pf-btn-ok):hover, .plan-btn-pdf:hover, .cave-toggle-btn:hover, .trac-type-btn:hover, .cave-op-type-btn:hover, .rfut-reason-btn:hover{ background-image:linear-gradient(var(--survol),var(--survol)); }
+.mvbtn-danger:hover{ background-image:linear-gradient(var(--presse),var(--presse)); }
+.mvbtn:active, .plan-btn-saisir:active, .mvc-set-btn:active, .sd-trac-confirm-btn:active, .pf-btn:active, .plan-btn-pdf:active, .cave-toggle-btn:active, .trac-type-btn:active, .cave-op-type-btn:active, .rfut-reason-btn:active{ background-image:linear-gradient(var(--presse),var(--presse)); }
+.mvbtn:disabled, .plan-btn-saisir:disabled, .mvc-set-btn:disabled, .sd-trac-confirm-btn:disabled, .pf-btn:disabled, .plan-btn-pdf:disabled, .cave-toggle-btn:disabled, .trac-type-btn:disabled, .cave-op-type-btn:disabled, .rfut-reason-btn:disabled{ opacity:var(--o-off,.45); cursor:default; background-image:none; }
+/* ═══ fin CHARTE-3 ═══ */
 
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.
    Deux rangées partout, Pilotage compris (pilotage.js pose désormais un vrai .mod-header) : l'identité (icône, titre,

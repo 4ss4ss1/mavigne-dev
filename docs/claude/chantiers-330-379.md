@@ -1058,3 +1058,36 @@ Le reste ouvert de CHARTE-2 (§368e) : les trois réglages du mode plein soleil 
 
 ### 369f. La leçon
 **Avant de déplacer une règle, lire où le navigateur la lit.** Posées en tête de charte comme §368 le prévoyait, ces trois règles auraient changé de rang. Ici sans effet visible — les règles sombres du plein soleil sont plus précises —, mais c’est la preuve au navigateur qui devait le montrer, pas le raisonnement.
+
+## 370. ★★ CHARTE-3 — LE JEU DE BOUTONS COMMUN, PREMIER PASSAGE (19/10 — `src/charte.css` (`--sur-danger`) · `src/styles.css` (bloc CHARTE-3, neuf anciennes classes épurées) · `src/planning.js` · `src/cave.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-boutons.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · **APP 9.34 → 9.35, SW 10.13 → 10.14**, base `b8520fe`)
+
+### 370a. La demande
+Le troisième étage du plan (§367a) : des pièces communes, en commençant par les boutons. Maquette d’abord, sur une toile Design « le jeu de boutons commun (CHARTE-3) » : le jeu en clair et en sombre, deux téléphones (Valider en lie-de-vin ou en vert), « aujourd’hui » (les quinze boutons les plus employés redessinés d’après leurs valeurs). Nico : « tes reco » — la recommandation, Valider en lie-de-vin (le vert garde le sens « c’est fait »), et le jeu tel que proposé.
+
+### 370b. Mesuré avant d’écrire (`b8520fe`)
+86 classes de boutons dans la feuille, 76 employées ; 1 247 balises `<button>` dans le code, dont 379 stylées sur place et 314 sans classe ; 17 hauteurs, 18 arrondis, 31 fonds. Les neuf classes choisies : une seule règle chacune, plus leurs états (`.sel`, `.sel-meca`, `.cave-toggle-active`, `:disabled`) ; aucune dans le CSS d’un module.
+
+### 370c. Ce qui est livré
+- **Les pièces** (bloc CHARTE-3, juste avant TETE-2) : `.mvbtn` et `.mvbtn-principal / -secondaire / -discret / -danger`, `.mvbtn-option` (+ `.on` ou `aria-pressed`) et `.mvbtn-choix`, `.mvbtn-icone`, `.mvbtn-terrain / -bureau / -compact`. Sans taille forcée : terrain (48 px) au téléphone, bureau (36 px) dès 768 px. Les états : survol et appui par un voile (`--survol`, `--presse`), inactif à `--o-off`. Aucune couleur ni taille écrite : tout vient de la charte, replis en px posés pour les jetons du socle (`mv-harnais-jetons`).
+- **`--sur-danger`** dans la charte : blanc en clair, `#151514` en sombre (le blanc sur le rouge clair du sombre tombait à 2,3:1).
+- **Neuf anciennes classes passées au jeu**, groupées sous chaque pièce ; leur règle d’origine ne garde que la mise en page : principal `.plan-btn-saisir`, `.mvc-set-btn`, `.sd-trac-confirm-btn`, `.pf-btn.pf-btn-ok` ; secondaire `.pf-btn`, `.plan-btn-pdf` ; option `.cave-toggle-btn`, `.trac-type-btn`, `.cave-op-type-btn`, `.rfut-reason-btn`. Leurs états retirés au profit de ceux du jeu.
+- **Quatre boutons stylés sur place, rendus au jeu** : « Supprimer le modèle » (Planning) devient `.mvbtn-danger` ; « Importer » et la demande de suppression d’un modèle redeviennent secondaires ; les deux boutons du réglage de la Cave qui se peignaient en contour terre deviennent `.mvbtn-secondaire`.
+- **`mv-harnais-boutons`** — A : les pièces ; B : aucune couleur ni taille de texte en dur dans le bloc ; C : les classes passées au jeu ne reprennent aucune allure ailleurs (feuille, CSS d’un module, style écrit sur place — exemption : le blanc forcé de `#ovRepBlock`) ; D : le plafond des boutons « maison » (74, ne peut que baisser) ; E : `--sur-danger` en clair et en sombre. 7 contre-épreuves, 2 témoins.
+
+### 370d. Vu, et pas vu
+- **Vu au navigateur** (Chromium 153, l’appli servie par Vite) : une planche témoin posée dans la VRAIE page — les neuf classes avec leurs états, et les pièces neuves —, avant et après, en clair et en sombre, au téléphone et sur ordinateur. Après : l’action principale partout lie-de-vin, un seul arrondi, les options au même dessin, le Danger lisible en sombre.
+- ⚠️ **Pas vu : les écrans eux-mêmes.** Le montage entre par la démo (`fbLoginDemo` simulé, `_authReady`, `_startDemoVisite`), mais l’écran de connexion reste devant : `initLogin` relance son attente tant que `MEMBRES` est vide (« Chargement… (4) »). Les captures des pages comparent donc deux écrans de connexion — sans valeur, et dites comme telles. À réparer pour le prochain lot visuel : injecter les membres AVANT la démo.
+- **Chaîne** : 449 commandes, **0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 370e. Les décisions
+- **Grouper plutôt que renommer** : les anciennes classes gardent leur nom dans le balisage (aucun sélecteur de la visite guidée, des tutos ou des harnais ne bouge) ; elles prennent l’allure des pièces par le bloc. Le code neuf, lui, écrit `.mvbtn`.
+- **Ne jamais mêler une pièce et une ancienne classe d’une autre famille** sur un même bouton : `.plan-btn-saisir:hover` (principal) repeint le fond, et un Danger qui porterait aussi `.plan-btn-saisir` deviendrait lie-de-vin au survol. D’où `class="mvbtn mvbtn-danger"` seul.
+- **Hors de ce lot** : les classes de la refonte déjà proches du jeu, `.plan-cont-btn` (une carte d’option sur plusieurs lignes : une hauteur fixe la couperait), les écrans de connexion et de démarrage, la console GT.
+- **Les deux couleurs de `.trac-type-btn`** (mécanique vert, hydraulique acier) deviennent la seule couleur d’option : le libellé dit lequel est choisi.
+
+### 370f. Trouvé en route
+- **`.cave-toggle-btn` lisait `--bord` et `--fond-carte`, déclarés nulle part** : sans bordure ni fond depuis toujours. Le jeu les lui donne.
+- **Le préfixe `.mvb-` était pris** (un document de la Cave, `.mvb-sec`, `.mvb-card`) : les pièces s’appellent `.mvbtn`.
+
+### 370g. La leçon
+**Une capture qui montre deux fois le même écran de connexion ne prouve rien — même à zéro pixel d’écart.** Le zéro se regarde avant d’être cru : c’est en ouvrant une capture qu’on a vu que les pages n’étaient pas là.

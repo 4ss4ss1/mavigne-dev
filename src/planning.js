@@ -6740,14 +6740,14 @@ function _planRenderCadre(){
       +'<div class="plan-tpl-btns">'
         +'<button class="plan-btn-saisir" onclick="planOpenGridEditor(\''+id+'\')">Modifier</button>'
         +'<button class="plan-btn-pdf" onclick="planExportCSV(\''+id+'\')">CSV \u2193</button>'
-        +'<button class="plan-btn-pdf" style="background:var(--plan-acc-pale);color:var(--plan-acc);border-color:rgba(123,109,184,0.4)" onclick="planDirectImportCSV(\''+id+'\')">CSV \u2191</button>'
-        +(!isDefault?'<button class="plan-btn-pdf" style="background:var(--rouge-pale);color:var(--rouge-tx,#A0291E);border-color:rgba(220,38,38,0.3)" onclick="planAskDeleteTemplate(\''+id+'\')">Suppr.</button>':'')
+        +'<button class="plan-btn-pdf" onclick="planDirectImportCSV(\''+id+'\')">CSV \u2191</button>'
+        +(!isDefault?'<button class="plan-btn-pdf" onclick="planAskDeleteTemplate(\''+id+'\')">Suppr.</button>':'')
       +'</div>'
     +'</div>';
     if(delConfirm){
       html+='<div class="plan-card" style="background:var(--orange-pale);border:1.5px solid rgba(220,38,38,0.4);margin-top:-6px;border-radius:0 0 14px 14px;padding:10px 14px;flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap">'
         +'<span style="flex:1;font-size:var(--pt-txt,13px);color:var(--rouge)">Supprimer \u00ab\u00a0'+id+'\u00a0\u00bb ? Les membres assign\u00e9s passeront \u00e0 "standard".</span>'
-        +'<button class="plan-btn-saisir" style="background:var(--rouge);border-color:var(--rouge);color:white" onclick="planDeleteTemplate(\''+id+'\')">Confirmer</button>'
+        +'<button class="mvbtn mvbtn-danger" onclick="planDeleteTemplate(\''+id+'\')">Confirmer</button>'
         +'<button class="plan-btn-pdf" onclick="planCancelDeleteTemplate()">Annuler</button>'
       +'</div>';
     }

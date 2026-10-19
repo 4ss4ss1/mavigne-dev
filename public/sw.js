@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.13
+// MA VIGNE — Service Worker v10.14
+// v10.14 (19/10/2026) — CHARTE-3 (§370) : le jeu de boutons commun — les pièces .mvbtn (principal, secondaire, discret, danger ; option et choix ; icône ; terrain 48 px au téléphone, bureau 36 px dès 768 px, compact 28 px), tout lu dans la charte (--sur-danger neuf) ; neuf anciennes classes y passent (Planning, Cave, Tracteur) et perdent leur allure propre ; quatre boutons stylés sur place rendus au jeu. Nouveau contrôle : mv-harnais-boutons. charte.css, styles.css, cave.js, planning.js, utils.js, index.html. APP 9.34 -> 9.35.
 // v10.13 (19/10/2026) — CHARTE-2B (§369) : les trois réglages du mode plein soleil (contraste renforcé, data-hicontrast) quittent le <style> d’index.html pour la fin de src/charte.css ; plus aucun réglage hors de la charte, et le contrôle compare à part le sombre du plein soleil. Corrigé en route : le plein soleil ne se posait que sur #app-root, les fenêtres gardaient les encres ordinaires — il se pose aussi sur <html>. charte.css, index.html, utils.js, app.js. APP 9.33 -> 9.34.
 // v10.12 (19/10/2026) — CHARTE-2 (§368) : tous les réglages de la charte (440 : couleurs, polices, tailles, espacements, arrondis, ombres, mouvement, clair et sombre) sortent des 27 endroits de styles.css où ils étaient éparpillés pour un seul fichier, src/charte.css, que styles.css importe en premier ; chaque réglage garde sa valeur (vérifié au navigateur : 8 388 valeurs, 12 contextes). Rien ne change à l’écran. Nouveau contrôle : mv-harnais-charte. charte.css (neuf), styles.css, utils.js, index.html. APP 9.32 -> 9.33.
 // v10.11 (19/10/2026) — CHARTE-1 (§367) : la police passe partout par les deux réglages de la charte (--font-ui, --font-titre, en tête de styles.css) — 765 polices écrites en toutes lettres remplacées (325 dans styles.css, 440 dans les modules, index.html, les pages GT et boot.js, avec la police d’avant en repli pour les fenêtres sans feuille) ; --sans, déclaré nulle part, retiré ; la mesure des noms du plan du cockpit lit le réglage. Rien ne change à l’écran. Nouveau contrôle : mv-harnais-police. styles.css, index.html, utils.js, admin-gt, app, cave, cockpit-vue, cuvier, onboarding, phyto, pilotage, planning, reglages, reserve, tracteur, tutos, src/gt/*.html, boot.js. APP 9.31 -> 9.32.
@@ -4543,7 +4544,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.13';
+const CACHE_NAME   = 'mavigne-v10.14';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4560,7 +4561,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.13 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.14 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4580,7 +4581,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.13 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.14 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

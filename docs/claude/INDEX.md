@@ -423,3 +423,4 @@
 | 367 | 367. ★★ CHARTE-1 — LA POLICE PASSE PAR LA CHARTE : UNE LIGNE POUR CHANGER DE POLICE (19/10 — `src/styles.cs… | `docs/claude/chantiers-330-379.md` |
 | 368 | 368. ★★ CHARTE-2 — LA CHARTE DANS UN SEUL FICHIER : `src/charte.css` (19/10 — `src/charte.css` (neuf) · `sr… | `docs/claude/chantiers-330-379.md` |
 | 369 | 369. ★ CHARTE-2B — LE MODE PLEIN SOLEIL REJOINT LA CHARTE : PLUS AUCUN RÉGLAGE HORS D’ELLE (19/10 — `src/ch… | `docs/claude/chantiers-330-379.md` |
+| 370 | 370. ★★ CHARTE-3 — LE JEU DE BOUTONS COMMUN, PREMIER PASSAGE (19/10 — `src/charte.css` (`--sur-danger`) · `… | `docs/claude/chantiers-330-379.md` |

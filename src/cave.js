@@ -1138,8 +1138,8 @@ function _cavePkFormHtml(){
   if(o) h+='<div class="mvc-pk-note chaud">Cette cuve porte <b>'+_escHtml(o.nom)+'</b>. '
     +'On peut corriger son nom, pas la supprimer : il faudrait d\u2019abord la vider.</div>';
   h+='<button class="mvc-set-btn" onclick="_cavePkSave()">'+(p?'Enregistrer':'Ajouter la cuve')+'</button>';
-  if(p&&!o) h+='<button class="mvc-set-btn" style="background:none;border:1px solid rgba(138,90,56,.22);color:var(--terre)" onclick="_cavePkDel()">Supprimer cette cuve</button>';
-  h+='<button class="mvc-set-btn" style="background:none;border:1px solid rgba(138,90,56,.22);color:var(--terre)" onclick="_cavePkClose()">Annuler</button>';
+  if(p&&!o) h+='<button class="mvbtn mvbtn-secondaire" style="width:100%;margin-top:14px" onclick="_cavePkDel()">Supprimer cette cuve</button>';
+  h+='<button class="mvbtn mvbtn-secondaire" style="width:100%;margin-top:14px" onclick="_cavePkClose()">Annuler</button>';
   return h;
 }
 function _cavePkOpen(id){

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.34';
+export const APP_VERSION = '9.35';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.35', d: '2026-10-19', items: [   // CHARTE-3 (§370) : le jeu de boutons commun, premier passage
+    { niv: 0, pour: ['tous'], emoji: 'check', titre: 'Des boutons qui se ressemblent',
+      desc: "Premier passage au jeu de boutons commun : l’action principale prend partout la même couleur lie-de-vin (Planning, Cave, Tracteur), et les choix entre options — type de travail, opération de cave, motif de sortie d’un fût — ont une seule apparence. Au téléphone, ces boutons sont plus hauts, pour le doigt ; sur ordinateur, plus serrés." },
+  ] },
   { v: '9.34', d: '2026-10-19', items: [   // CHARTE-2B (§369) : le mode plein soleil rejoint la charte, et les fenêtres le prennent aussi
     { niv: 0, pour: ['tous'], emoji: 'oeil', titre: 'Plein soleil : les fenêtres aussi',
       desc: "En mode plein soleil (Réglages › Moi), les fenêtres qui s’ouvrent par-dessus l’écran — saisies, confirmations, fiches — gardaient les encres ordinaires, moins lisibles dehors. Elles prennent maintenant les mêmes encres renforcées que le reste de l’appli." },

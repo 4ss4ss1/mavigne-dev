@@ -699,6 +699,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-police.mjs --contre'],
   ['node scripts/mv-harnais-charte.mjs'],            // CHARTE-2 (§368) : les réglages ne se déclarent que dans src/charte.css ; la charte ne contient que des réglages ; le sombre redit à l'identique
   ['node scripts/mv-harnais-charte.mjs --contre'],
+  ['node scripts/mv-harnais-boutons.mjs'],           // CHARTE-3 (§370) : le jeu de boutons commun — les pièces, aucune couleur en dur, les classes passées au jeu sans allure propre, le plafond des boutons « maison »
+  ['node scripts/mv-harnais-boutons.mjs --contre'],
   ['node scripts/mv-harnais-larg1.mjs'],             // LARG-1 (§334) : une seule largeur sur ordinateur — chaque page bornée par la règle, ou exemptée avec sa raison
   ['node scripts/mv-harnais-larg1.mjs --contre'],
   ['node scripts/mv-harnais-retrait1.mjs'],          // RETRAIT-1 (§325) : une tâche ordinaire désactivée sur des parcelles pour la période — règle, feuille, croix, renommages, L'année
