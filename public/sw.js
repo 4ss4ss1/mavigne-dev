@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.20
+// MA VIGNE — Service Worker v10.21
+// v10.21 (19/10/2026) — CHARTE-5b (§380) : 21 encadrés faits à la main au jeu (Phyto 9, Réglages 12), le ton d’après leur couleur ; l’encadré reste un bloc de texte (en ligne seulement avec une icône). phyto.js, reglages.js, styles.css, utils.js, index.html. APP 9.41 -> 9.42.
 // v10.20 (19/10/2026) — CHARTE-5a (§379) : le jeu de cartes commun — carte, carte cliquable, bloc de chiffres, encadré à quatre tons ; couleur « informer » dans la charte (--info-doux, --info-texte) ; trois cartes d’avant au jeu (.pf-card, .mtr-card, .mur-card). styles.css, charte.css, utils.js, index.html. APP 9.40 -> 9.41.
 // v10.19 (19/10/2026) — CHARTE-4c (§378) : 34 pastilles faites à la main rendues au jeu (Phyto, Cave, Planning, Réglages, Tracteur, Accueil, index.html) ; cliquet sur celles qui restent (56). Les filtres du Tracteur restent un contrôle segmenté (TRAC-2). app.js, cave.js, phyto.js, planning.js, reglages.js, tracteur.js, utils.js, index.html. APP 9.39 -> 9.40.
 // v10.18 (19/10/2026) — CHARTE-4b (§377) : trois filtres d’avant au jeu de pastilles (.mvcm-chip du Chai, .cave-cuvee-chip de l’opération — allumée en couleur de l’opération par le code, .sdp-skip-btn) ; « Désactiver » et « Voir toutes » d’une session : deux <div> cliquables deviennent des boutons .mvpas-filtre (aria-pressed). styles.css, cave.js, tracteur.js, utils.js, index.html. APP 9.38 -> 9.39.
@@ -4550,7 +4551,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.20';
+const CACHE_NAME   = 'mavigne-v10.21';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4567,7 +4568,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.20 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.21 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4587,7 +4588,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.20 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.21 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

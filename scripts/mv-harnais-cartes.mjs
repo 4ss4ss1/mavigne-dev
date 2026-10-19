@@ -24,7 +24,7 @@ const PIECES = ['mvcarte', 'mvcarte-tete', 'mvcarte-titre', 'mvcarte-clic', 'mvc
 const MIGREES = ['pf-card', 'mtr-card', 'mur-card'];   // ★ CHARTE-5a (§379)
 const EXEMPTIONS = [];
 const PLAFOND = 48;       // CHARTE-5a (§379) : cartes « maison », relevé au premier passage ; ne peut que baisser (D)
-const PLAFOND_ENC = 232;  // CHARTE-5a (§379) : encadrés faits à la main, relevé au premier passage ; ne peut que baisser (F)
+const PLAFOND_ENC = 211;  // CHARTE-5a (§379) : encadrés faits à la main, 232 au premier passage ; ne peut que baisser (F). CHARTE-5b (§380) : 232 → 211
 const ALLURE = /^(background(-color|-image)?|border(-(color|width|style|radius|top|bottom|left|right))?|box-shadow)$/;
 const sansCom = s => s.replace(/\/\*[\s\S]*?\*\//g, '');
 const porte = (sel, c) => new RegExp('\\.' + c.replace(/-/g, '\\-') + '(?![\\w-])').test(sel.replace(/:not\([^)]*\)/g, ''));

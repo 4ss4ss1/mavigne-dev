@@ -125,11 +125,11 @@ function openCatDetail(nom){
       <div style="font-size:9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600;margin-bottom:6px">Dose indicative</div>
       <div style="font-size:var(--pt-sm,16px);font-weight:700">${p.dose}</div>
     </div>
-    ${p.cible?`<div style="background:var(--vert-pale);border-radius:12px;padding:14px;margin-bottom:12px">
+    ${p.cible?`<div class="mvencadre mvencadre-ok" style="margin-bottom:12px">
       <div style="font-size:9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600;margin-bottom:6px">Cibles</div>
       <div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--vert)">${p.cible}</div>
     </div>`:''}
-    ${p.usage?`<div style="background:var(--tag-amber-bg,#FFF8E8);border:1.5px solid #E8C840;border-radius:12px;padding:14px">
+    ${p.usage?`<div class="mvencadre mvencadre-attention">
       <div style="font-size:9px;text-transform:uppercase;color:var(--tag-amber-tx,#7A5C10);font-weight:600;margin-bottom:6px">Conditions d'emploi</div>
       <div style="font-size:var(--pt-micro,12px);color:var(--tag-amber-tx,#4A3A08);line-height:1.5">${p.usage}</div>
     </div>`:''}
@@ -417,9 +417,9 @@ function _tratCuBudgetHtml(){
     +'</div>';
   });
   if(over.length){
-    h+='<div style="font-size:var(--pt-lbl,12px);color:var(--rouge);background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.25);border-radius:8px;padding:9px 11px;margin-top:4px;line-height:1.5">&#x26A0;&#xFE0F; D&#xe9;passement du plafond '+CU_MAX+'&#x202F;kg/ha sur '+over.length+' parcelle'+(over.length>1?'s':'')+' : '+_escHtml(over.map(function(r){return r.nom;}).join(', '))+'. Le traitement <b>reste enregistrable</b> &#x2014; le d&#xe9;passement est consign&#xe9; au registre ; v&#xe9;rifier la d&#xe9;rogation applicable.</div>';
+    h+='<div class="mvencadre mvencadre-danger" style="margin-top:4px">&#x26A0;&#xFE0F; D&#xe9;passement du plafond '+CU_MAX+'&#x202F;kg/ha sur '+over.length+' parcelle'+(over.length>1?'s':'')+' : '+_escHtml(over.map(function(r){return r.nom;}).join(', '))+'. Le traitement <b>reste enregistrable</b> &#x2014; le d&#xe9;passement est consign&#xe9; au registre ; v&#xe9;rifier la d&#xe9;rogation applicable.</div>';
   } else {
-    h+='<div style="font-size:var(--pt-lbl,12px);color:var(--vert);background:rgba(61,122,39,0.08);border:1px solid rgba(61,122,39,0.25);border-radius:8px;padding:9px 11px;margin-top:4px">&#x2705; Conforme &#x2014; toutes les parcelles restent sous '+CU_MAX+'&#x202F;kg/ha sur 7 ans.</div>';
+    h+='<div class="mvencadre mvencadre-ok" style="margin-top:4px">&#x2705; Conforme &#x2014; toutes les parcelles restent sous '+CU_MAX+'&#x202F;kg/ha sur 7 ans.</div>';
   }
   return h+'</div>';
 }
@@ -465,12 +465,12 @@ function _tratRender(){
             +'</div>';
         }).join('');
     if(maxDrae>0){
-      prodsHtml+='<div style="font-size:var(--pt-micro,12px);color:var(--orange);background:rgba(184,90,26,0.1);border:1px solid rgba(184,90,26,0.3);border-radius:8px;padding:7px 10px;margin-bottom:10px">'
+      prodsHtml+='<div class="mvencadre mvencadre-attention" style="margin-bottom:10px">'
         +'&#x26A0;&#xFE0F; DRAE cocktail : <strong>'+maxDrae+'h</strong> (d&#xe9;lai le plus long appliqu&#xe9;)</div>';
     }
     var hasInsect=_trat.produits.some(function(p){return _pMeta(p).type==='Insecticide';});
     if(hasInsect){
-      prodsHtml+='<div style="font-size:var(--pt-micro,12px);color:#E0934A;background:rgba(184,90,26,0.08);border:1px solid rgba(184,90,26,0.25);border-radius:8px;padding:7px 10px;margin-bottom:10px">&#x1F41D; Insecticide : renseignez les horaires d&#39;application et respectez les pr&#xe9;cautions abeilles (hors floraison, en soir&#xe9;e).</div>';
+      prodsHtml+='<div class="mvencadre mvencadre-attention" style="margin-bottom:10px">&#x1F41D; Insecticide : renseignez les horaires d&#39;application et respectez les pr&#xe9;cautions abeilles (hors floraison, en soir&#xe9;e).</div>';
     }
     var addHtml='<div style="background:var(--gris-clair);border:1.5px dashed var(--gris);border-radius:12px;padding:14px;margin-bottom:14px">'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:8px">+ Ajouter un produit</div>'
@@ -551,7 +551,7 @@ function _tratRender(){
     var parcListHtml=_trat.parcelles.map(function(nom){
       return '<span class="mvpas mvpas-etiquette">'+_escHtml(nom)+'</span>';
     }).join(' ');
-    var recapHtml='<div style="background:rgba(61,122,39,0.08);border:1.5px solid rgba(61,122,39,0.3);border-radius:12px;padding:14px;margin-bottom:14px">'
+    var recapHtml='<div class="mvencadre mvencadre-ok" style="margin-bottom:14px">'
       +'<div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--vert);margin-bottom:10px">&#x1F33F; Traitement &#x00B7; '+fmtDate(_trat.date)+' &#x00B7; '+_escHtml(_trat.conducteur||'—')+'</div>'
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">'
       +rcells.map(function(f){
@@ -772,9 +772,9 @@ function openTraitDetail(idx){
     </div>
     ${t.note?`<div style="background:var(--gris-clair);border-radius:12px;padding:12px;font-size:var(--pt-micro,12px);color:var(--texte-doux);font-style:italic">${_escHtml(t.note)}</div>`:''}
     ${(t.parcelles&&t.parcelles.length>0)?`<div style="margin-top:10px"><div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:5px">Parcelles traitées</div><div style="display:flex;flex-wrap:wrap;gap:5px">${t.parcelles.map(n=>'<span class="mvpas mvpas-etiquette">'+_escHtml(n)+'</span>').join('')}</div></div>`:''}
-    ${t.stade?`<div style="background:rgba(160,96,224,0.08);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:var(--pt-micro,12px);color:#A060E0">Stade : ${_escHtml(t.stade)}</div>`:''}
+    ${t.stade?`<div class="mvencadre mvencadre-info" style="margin-top:8px">Stade : ${_escHtml(t.stade)}</div>`:''}
     ${t.heureDebut?`<div style="background:var(--gris-clair);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:var(--pt-micro,12px)">Horaires : ${t.heureDebut}–${t.heureFin||'?'}</div>`:''}
-    ${t.dreAnticipe?`<div style="background:rgba(184,90,26,0.08);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:var(--pt-micro,12px);color:var(--orange)">DRE anticipé : ${_escHtml(t.dreAnticipe)}</div>`:''}
+    ${t.dreAnticipe?`<div class="mvencadre mvencadre-attention" style="margin-top:8px">DRE anticipé : ${_escHtml(t.dreAnticipe)}</div>`:''}
     ${typeof t.modeAb!=='undefined'?`<div style="margin-top:8px;font-size:var(--pt-micro,12px);color:var(--texte-doux)">Mode : <strong style="color:${t.modeAb?'#40C080':'var(--texte)'}">${t.modeAb?'🌿 Agriculture Biologique (AB)':'🌾 Conventionnel'}</strong></div>`:''}
     ${_canEd?`<button onclick="openTraitEdit(${idx})" style="width:100%;margin-top:16px;padding:13px;border-radius:11px;border:1.5px solid var(--phyto);background:rgba(90,45,142,0.12);color:#9B70D4;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:var(--font-ui,'Outfit',sans-serif);min-height:44px"><span>✏️ Modifier ce traitement</span></button>`:''}
   `;

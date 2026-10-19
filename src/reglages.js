@@ -648,7 +648,7 @@ function renderReglages(){
       var _ab=document.getElementById('contrats-alertes');
       if(!_ab){_ab=document.createElement('div');_ab.id='contrats-alertes';ml.parentNode.insertBefore(_ab,ml);}
       if(_alertes.length>0){
-        _ab.innerHTML='<div style="background:var(--tag-amber-bg,#fef3c7);border:1.5px solid #f59e0b;border-radius:12px;padding:12px 14px;margin-bottom:12px">'
+        _ab.innerHTML='<div class="mvencadre mvencadre-attention" style="margin-bottom:12px">'
           +'<div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--tag-amber-tx,#92400e);margin-bottom:8px">'+_mvIcon('alerte',16)+' Contrats \u00e0 renouveler ('+_alertes.length+')</div>'
           +_alertes.map(function(m){
             var dateRef=_dsP(m.fin_contrat);
@@ -1286,7 +1286,7 @@ function _tnRender(){
   }
   // ── Le travail est choisi ──
   var c=_tnCatOf(_tn.choix);
-  h+='<div style="display:flex;align-items:center;gap:9px;padding:11px 12px;border-radius:11px;background:var(--vert-pale);border:1px solid rgba(61,107,39,0.32)">'
+  h+='<div class="mvencadre mvencadre-ok" style="display:flex;align-items:center;gap:9px">'
     +'<span style="flex:none">'+_mvIconTache(_tn.choix||'',18)+'</span>'
     +'<span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600;color:var(--texte)">'+_escHtml(_tnLbl())+'</span>'
     +'<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:1px">'+(_tn.libre?'Hors convention \u00b7 temps réel':'Travail de la convention')+'</span></span>'
@@ -3380,10 +3380,10 @@ function _clotOverlayHTML(ctx){
   var activateInner = (ctx.prepared && ctx.prepared.length)
     ? '<div style="margin-bottom:13px"><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Campagne déjà préparée</label>'
       + '<select id="clot-prep" onchange="window._clotSyncConfirm&&window._clotSyncConfirm()" style="width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid #E7E3DA;border-radius:10px;background:#fff;color:#1C1813">'+prepOpts+'</select></div>'
-      + '<div style="display:flex;gap:9px;align-items:flex-start;background:#eef4ea;border:1px solid rgba(61,107,39,.3);border-radius:12px;padding:12px 13px;font-size:var(--pt-txt,13px);line-height:1.45;color:#3f5233"><span>'+_mvIcon('check',16)+'</span><div>Cette campagne a déjà ses dates. Elle deviendra simplement la <b>campagne active</b> de l\'équipe.</div></div>'
-    : '<div style="display:flex;gap:9px;align-items:flex-start;background:#fbeede;border:1px solid rgba(184,90,26,.4);border-radius:12px;padding:12px 13px;font-size:var(--pt-txt,13px);line-height:1.45;color:#8a4516"><span>ℹ️</span><div>Aucune campagne préparée à l\'avance. Utilise <b>« Créer la prochaine »</b> ci-dessus.</div></div>';
+      + '<div class="mvencadre mvencadre-ok" style="display:flex;gap:9px;align-items:flex-start"><span>'+_mvIcon('check',16)+'</span><div>Cette campagne a déjà ses dates. Elle deviendra simplement la <b>campagne active</b> de l\'équipe.</div></div>'
+    : '<div class="mvencadre mvencadre-attention" style="display:flex;gap:9px;align-items:flex-start"><span>ℹ️</span><div>Aucune campagne préparée à l\'avance. Utilise <b>« Créer la prochaine »</b> ci-dessus.</div></div>';
   var garde = ctx.warn
-    ? '<div style="display:flex;gap:9px;align-items:flex-start;background:#fbeede;border:1px solid rgba(184,90,26,.4);border-radius:12px;padding:12px 13px;margin-top:6px;font-size:var(--pt-txt,13px);line-height:1.45;color:#8a4516"><span>'+_mvIcon('alerte',16)+'</span><div><b>Il reste '+reste+'% de travail</b> sur '+esc+'. Tu peux clôturer quand même — l\'avancement restera consultable — mais vérifie que la campagne est bien terminée.</div></div>'
+    ? '<div class="mvencadre mvencadre-attention" style="display:flex;gap:9px;align-items:flex-start;margin-top:6px"><span>'+_mvIcon('alerte',16)+'</span><div><b>Il reste '+reste+'% de travail</b> sur '+esc+'. Tu peux clôturer quand même — l\'avancement restera consultable — mais vérifie que la campagne est bien terminée.</div></div>'
     : '';
 
   return ''
@@ -3414,7 +3414,7 @@ function _clotOverlayHTML(ctx){
           + stat(ctx.nSess||0, 'Sessions tracteur')
           + stat(ctx.nTrait||0, 'Traitements phyto')
         + '</div>'
-        + '<div style="display:flex;gap:9px;align-items:flex-start;background:#F6EDD8;border:1px solid rgba(201,168,76,.35);border-radius:12px;padding:12px 13px;margin-top:15px;font-size:var(--pt-txt,13px);line-height:1.45;color:#5c4a1f"><span>'+_mvIcon('carton',16)+'</span><div>Cette campagne sera <b>archivée dans l\'Historique</b> (parcelles, journal, sessions tracteur, phyto) — consultable ensuite pour le comparatif N-1.</div></div>'
+        + '<div class="mvencadre mvencadre-attention" style="display:flex;gap:9px;align-items:flex-start;margin-top:15px"><span>'+_mvIcon('carton',16)+'</span><div>Cette campagne sera <b>archivée dans l\'Historique</b> (parcelles, journal, sessions tracteur, phyto) — consultable ensuite pour le comparatif N-1.</div></div>'
       + '</div>'
       + '<div id="clot-s2" style="display:none">'
         + '<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:22px;margin-bottom:4px">La prochaine campagne</div>'
@@ -3444,7 +3444,7 @@ function _clotOverlayHTML(ctx){
           + '<div style="width:40px;display:grid;place-items:center;background:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27);color:#fff;font-size:var(--pt-md,20px);font-weight:700">→</div>'
           + '<div style="flex:1;padding:18px 12px;text-align:center;background:#14110D;color:#F0E2C8"><div id="clot-cf-new" style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:600;font-size:var(--pt-sm,16px);line-height:1.15">'+_clotEsc(ctx.sug.nom)+'</div><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-xxl,32px);color:#C9A84C;margin-top:6px">0%</div><div style="font-size:10px;letter-spacing:.6px;text-transform:uppercase;margin-top:4px;opacity:.85">démarre</div></div>'
         + '</div>'
-        + '<div style="background:linear-gradient(180deg,#f3f7ef,#eef4ea);border:1px solid rgba(61,107,39,.28);border-radius:13px;padding:14px 15px;margin-bottom:15px"><div style="font-weight:600;font-size:13.5px;color:#3D6B27;margin-bottom:5px">'+_mvIcon('pousse',16)+' Rien n\'est perdu</div><div style="font-size:var(--pt-txt,13px);line-height:1.5;color:#3f5233">Le 0% est un nouveau départ, pas une régression. L\'avancement de '+esc+' reste consultable via le sélecteur de saison et l\'Historique.</div></div>'
+        + '<div class="mvencadre mvencadre-ok" style="margin-bottom:15px"><div style="font-weight:600;font-size:13.5px;color:#3D6B27;margin-bottom:5px">'+_mvIcon('pousse',16)+' Rien n\'est perdu</div><div style="font-size:var(--pt-txt,13px);line-height:1.5;color:#3f5233">Le 0% est un nouveau départ, pas une régression. L\'avancement de '+esc+' reste consultable via le sélecteur de saison et l\'Historique.</div></div>'
         + '<div>'
           + '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 2px;font-size:var(--pt-txt,13px);line-height:1.4;border-bottom:1px solid #E7E3DA"><span style="color:#3D6B27;font-weight:700">'+_mvIcon('check',16)+'</span><div><b>'+esc+'</b> archivée — snapshot complet (parcelles, journal, sessions, phyto).</div></div>'
           + '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 2px;font-size:var(--pt-txt,13px);line-height:1.4;border-bottom:1px solid #E7E3DA"><span style="color:#3D6B27;font-weight:700">'+_mvIcon('check',16)+'</span><div><b id="clot-cf-new2">'+_clotEsc(ctx.sug.nom)+'</b> devient la campagne active de <b>toute l\'équipe</b>.</div></div>'
@@ -3658,7 +3658,7 @@ function renderHistorique(){
     </div>
     <div style="font-size:var(--pt-md,20px);color:var(--texte-doux)">›</div>
   </div>
-  <div id="histo-archive-feedback" style="display:none;margin:0 16px 12px;background:var(--vert-pale);color:var(--vert);border-radius:10px;padding:8px 14px;font-size:var(--pt-micro,12px);font-weight:600"></div>`;
+  <div id="histo-archive-feedback" class="mvencadre mvencadre-ok" style="display:none;margin:0 16px 12px"></div>`;
 
   if(allSaisons.length < 2){
     html += `<div class="empty-state"><div class="ei">${_mvIcon('dossier',40)}</div><div class="et">Aucune saison archivée</div><div class="ed">L'historique s'enrichira au fil des saisons clôturées. La saison active n'apparaît pas ici.</div></div>`;
@@ -4322,7 +4322,7 @@ async function _docsRestOpen(){
   });
 
   var dateTxt = meta.date ? new Date(meta.date).toLocaleString('fr-FR') : 'date inconnue';
-  var h='<div style="background:var(--rouge-pale);border-radius:14px;padding:14px 16px">'
+  var h='<div class="mvencadre mvencadre-danger">'
     + '<div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--rouge);margin-bottom:4px">Restaurer une sauvegarde</div>'
     + '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin-bottom:12px">'
       + _docsEsc(_mvSauvEnCours.nom) + '<br>Sauvegarde du ' + _docsEsc(dateTxt)
@@ -4331,15 +4331,13 @@ async function _docsRestOpen(){
       + '</div>';
 
   if(meta.ancien){
-    h+='<div style="background:var(--or-pale);border-radius:10px;padding:9px 11px;font-size:var(--pt-micro,11px);'
-      + 'line-height:1.5;margin-bottom:10px"><b>Fichier d’une ancienne version.</b> Il ne contient '
+    h+='<div class="mvencadre mvencadre-attention" style="margin-bottom:10px"><b>Fichier d’une ancienne version.</b> Il ne contient '
       + 'que huit éléments sur ' + cles.length + ', et les fiches de l’équipe y sont incomplètes '
       + '(nom, rôles et statut seulement). Les contrats, e-mails et couleurs actuels seront '
       + '<b>conservés</b> : ce fichier ne les remplace pas.</div>';
   }
   if(meta.complet===false || (meta.cles_en_erreur && meta.cles_en_erreur.length)){
-    h+='<div style="background:var(--or-pale);border-radius:10px;padding:9px 11px;font-size:var(--pt-micro,11px);'
-      + 'line-height:1.5;margin-bottom:10px"><b>Cette sauvegarde se déclare incomplète.</b> '
+    h+='<div class="mvencadre mvencadre-attention" style="margin-bottom:10px"><b>Cette sauvegarde se déclare incomplète.</b> '
       + 'Certains éléments n’avaient pas pu être lus au moment où elle a été faite.</div>';
   }
 
@@ -4368,8 +4366,7 @@ async function _docsRestOpen(){
   }
 
   if(perte>0){
-    h+='<div style="background:var(--rouge-pale);border:1px solid var(--rouge);border-radius:10px;'
-      + 'padding:9px 11px;font-size:var(--pt-micro,11px);line-height:1.5;margin-top:12px">'
+    h+='<div class="mvencadre mvencadre-danger" style="margin-top:12px">'
       + '<b>' + perte + ' ligne(s) de moins</b> après restauration. Si ce n’est pas ce que vous '
       + 'attendez, faites d’abord une sauvegarde de l’état actuel et comparez les deux fichiers.</div>';
   }

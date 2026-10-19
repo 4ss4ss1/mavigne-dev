@@ -1,0 +1,22 @@
+{
+  "lot": "CHARTE-5B",
+  "section": "§380",
+  "base": "89c7e08e6afb1b489930d364b82a1d2ac8c60610",
+  "inclut": [],
+  "date": "2026-10-19",
+  "fichiers": {
+    ".mv-base": "4ea0ee8307551ec8285e7f1d1c61129fc25dc972c786af9b95cafabe04466c6c",
+    "CLAUDE.md": "62b6d17e6ef44d0fb6998e65f601350d389dcf02657a079ab2382579555a4da6",
+    "docs/claude/INDEX.md": "df50767b7ec16914af7a002f5bf69bd7e39d1c8229d39299f3e4dfbe87a0067e",
+    "docs/claude/journal.md": "fd91a99c35ebac5daf9b19f20a0809a7484b540adbda1c2dcf414c6c5d983735",
+    "index.html": "6eff9e97df7ed2131a701cb45098f2e43d3d601478ff99a44def204e27ae7d3c",
+    "public/sw.js": "a53940fca347b35d69a75dccb79b259944bf29dd0e9c6898aedb8bf4051fd2d9",
+    "scripts/harnais-claude-md.mjs": "4a2e1aba314f2c9dcce50dac6463acf04c3dfbd0cd3fb8adeb63a4fe9e0e9f95",
+    "scripts/mv-harnais-cartes.mjs": "43c0de884b360d47606c29b8c330a122ea223730b5339c96a77f344922091d4f",
+    "src/phyto.js": "ba4b7bacced6f276a77ba86342cf65d367585c3ef040f77c183730d4d4c357b1",
+    "src/reglages.js": "b18a89facb5e4d802798935eae73f112163f085a64f54f15ad9b98854452ba76",
+    "src/styles.css": "d07e2ed66d559143a4ef031deac989f474df4def3ce4bb20bd7fdc575bbf1bff",
+    "src/utils.js": "49fcaf4483a25bbbbab76289cff9c3caafa0596c53c3ab1c847c149a32bfa9b6",
+    "docs/claude/chantiers-380-429.md": "69826d987c7862b1dfadbf3ea12ac971cc064bb14e3a48ac66989f25c4acf230"
+  }
+}
