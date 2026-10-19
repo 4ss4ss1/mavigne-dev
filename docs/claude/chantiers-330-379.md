@@ -1204,3 +1204,22 @@ Quatre vues de plus dans `mv-captures` (17 en tout), chacune ouverte comme un ut
 
 ### 375d. La leçon
 **Une capture ne prouve que ce que les données montrent.** Ouvrir la bonne vue ne suffit pas : sans heures sup, sans tâche à répartir, sans session chronométrée dans la démo, trois pastilles sur sept restent invisibles. Pour les voir, il faut une démo qui porte ces états.
+
+## 376. ⚠️ CHEMINS-1 — LE CONTRÔLE DES PASTILLES PLANTAIT SOUS WINDOWS (19/10 — `scripts/mv-harnais-pastilles.mjs` · `scripts/mv-harnais-chemins.mjs` (nouveau) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · doc · **pas de bump** : aucun fichier de l’appli, base `4a826fe`)
+
+### 376a. Ce que Nico a vu
+Sa chaîne sur son poste (451 commandes, 269 s, 12 à la fois) : **2 rouges**, `mv-harnais-pastilles.mjs` et `mv-harnais-pastilles.mjs --contre` (code 1) ; tout le reste vert. Dans le bac à sable, la même chaîne était à 0 rouge (§374, §375).
+
+### 376b. La cause
+`mv-harnais-pastilles` (§374) prenait sa racine par `new URL('..', import.meta.url).pathname`. Sous Windows, ce chemin vaut « /C:/Users/… », que Node relit en « C:\C:\Users\… » : aucun fichier ne s’ouvre, le harnais sort en erreur dès sa première lecture. **C’est la leçon §53**, écrite en tête de `harnais-claude-md.mjs` (« leçon payée deux fois ») et dans `harnais-sec3`, `harnais-vitrine`, `harnais-escattr` : je l’ai payée une troisième fois. Le bac à sable est Linux ; il ne pouvait pas le voir. Les 256 autres scripts de la chaîne prennent leur racine par `fileURLToPath`.
+
+### 376c. Ce qui est livré
+- **`mv-harnais-pastilles` réparé** : racine par `fileURLToPath` + `join`, fins de ligne CRLF ramenées à LF à la lecture. Rejoué ici, et sur une copie du dépôt aux fins de ligne Windows : 5/5 et 10/10.
+- **Garde-fou `mv-harnais-chemins`** (branché, 2 commandes de plus : 453) : il lit la liste de la chaîne et refuse le motif dans le **code** de chaque script qu’elle lance — un commentaire qui le cite pour l’interdire reste permis ; ses propres exemples recollent le motif à l’exécution pour ne pas se désigner eux-mêmes. 3 vérifications, 5 contre-épreuves. **Il aurait vu la version livrée** (essayé sur le fichier de `4a826fe`).
+- Restent hors chaîne, avec le motif dans leur code : `harnais-bandeau-essai`, `harnais-cadence-escalier`, `harnais-parcours-prospect`, `harnais-reconduction` — ils ne tournent pas dans la chaîne ; à réparer si on les relance un jour.
+
+### 376d. Mesuré
+**Chaîne** : **453 commandes, 0 rouge**, rejouée d’un trait sur le lot réuni (le garde-fou et ses contre-épreuves compris). Un premier passage avait **1 rouge** : `mv-lots`, la garde des lots — CAPTURES-2 (§375), livré mais pas encore poussé, et ce lot étaient « deux lots frères collés sans commit entre eux ». La garde demande un lot par commit : **les deux sont réunis en un seul, CHEMINS-1** (la marque `lots/CAPTURES-2.json` retirée, celle de CHEMINS-1 couvre aussi `mv-captures.mjs`). Rejouée ensuite, la garde est verte, puis toute la chaîne. ⚠️ Si Nico a déjà dézippé CAPTURES-2 sans le pousser, il supprime `lots/CAPTURES-2.json` avant de dézipper CHEMINS-1.
+
+### 376e. La leçon
+**Une leçon écrite dans un commentaire ne protège que celui qui relit ce fichier.** §53 était notée quatre fois, dans quatre harnais ; un nouveau harnais ne les relit pas. Une leçon payée deux fois devient un contrôle — elle l’est maintenant (`mv-harnais-chemins`). Et sur le poste de Nico, c’est Windows : le bac à sable vert ne prouve rien des chemins ni des fins de ligne.

@@ -1,0 +1,19 @@
+{
+  "lot": "CHEMINS-1",
+  "section": "§376",
+  "base": "4a826fe2055dac7fe3d8496e35f9c5cb3383b32f",
+  "inclut": [],
+  "date": "2026-10-19",
+  "fichiers": {
+    ".mv-base": "37f22caf8e83962107ba817000a1a8abdc9ae0433097f190b9200460bab0233d",
+    "CLAUDE.md": "0b3fe5850a451cf1e52857d96ebacf3a9b283fcb1b17d55cab870279fc66b19a",
+    "docs/claude/INDEX.md": "27a15c51e02929dec55ebd0652bc5e87a31eb3e66cb19ae1ddc24534e702d620",
+    "docs/claude/chantiers-330-379.md": "fd2f3d928aecb918950440ca3265e52397b1937877d72461125427e55bf2584c",
+    "docs/claude/journal.md": "7eaaca689e34f10390e5365e06b67e26d04151a410854d24843377e06f087647",
+    "scripts/harnais-claude-md.mjs": "99915123a4f5a9e6ddfdc1a8bd312a17bda851ddfc8b47c87e8b0f96630593b5",
+    "scripts/mv-captures.mjs": "c92adccf80891dac87b28042c3587812c126b0bf0da5235d9a9882ba46c4181c",
+    "scripts/mv-harnais-liste.mjs": "09dc17f9a8a1243f00b127e2923bb35a042e90ea88a3334ea14faba637fa590c",
+    "scripts/mv-harnais-pastilles.mjs": "5b5e2f8f1f751cadf8b5571dd4793192b5b417c5786de994bf59b66423ef462d",
+    "scripts/mv-harnais-chemins.mjs": "28b5625565dd018a9cb0e3225d0a20d2280cb5c6bcf804586b5346e7e7367e51"
+  }
+}

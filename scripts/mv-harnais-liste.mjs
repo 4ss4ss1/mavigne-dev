@@ -703,6 +703,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-boutons.mjs --contre'],
   ['node scripts/mv-harnais-pastilles.mjs'],         // CHARTE-4 (§374) : le jeu de pastilles commun — les pièces, aucune couleur en dur ni capitale, les classes passées au jeu sans allure propre, le plafond des pastilles « maison », les couleurs de type et d’état dans la charte
   ['node scripts/mv-harnais-pastilles.mjs --contre'],
+  ['node scripts/mv-harnais-chemins.mjs'],           // §376 : aucun script de la chaîne ne prend le chemin d’un fichier par `new URL(…).pathname` (faux sous Windows, §53) — fileURLToPath seul
+  ['node scripts/mv-harnais-chemins.mjs --contre'],
   ['node scripts/mv-harnais-larg1.mjs'],             // LARG-1 (§334) : une seule largeur sur ordinateur — chaque page bornée par la règle, ou exemptée avec sa raison
   ['node scripts/mv-harnais-larg1.mjs --contre'],
   ['node scripts/mv-harnais-retrait1.mjs'],          // RETRAIT-1 (§325) : une tâche ordinaire désactivée sur des parcelles pour la période — règle, feuille, croix, renommages, L'année

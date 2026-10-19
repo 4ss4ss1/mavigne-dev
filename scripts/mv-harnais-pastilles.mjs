@@ -12,8 +12,15 @@
      E. la charte porte les neuf couleurs de type et les trois textes d’état, en clair et en sombre.
    Usage : node scripts/mv-harnais-pastilles.mjs [--contre] */
 import { readFileSync, readdirSync } from 'node:fs';
-const ROOT = new URL('..', import.meta.url).pathname;
-const lire = p => readFileSync(ROOT + p, 'utf8');
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+/* ⚠⚠⚠ CHEMIN PORTABLE (§53, §376) : la racine vient de fileURLToPath, la seule forme juste sous
+   Linux ET sous Windows. La première version de ce harnais prenait le `.pathname` d’une URL
+   (« /C:/Users/… » chez Nico) : verte dans le bac à sable, elle a planté au premier lancement
+   sur le poste de Nico — la leçon §53, payée une troisième fois. `mv-harnais-chemins` la garde
+   désormais pour toute la chaîne. Fins de ligne : CRLF ramené à LF (le poste de Nico est sous Windows). */
+const RACINE = join(dirname(fileURLToPath(import.meta.url)), '..');
+const lire = p => readFileSync(join(RACINE, p), 'utf8').replace(/\r\n/g, '\n');
 const DEBUT = '/* ═══ CHARTE-4 — LE JEU DE PASTILLES COMMUN';
 const COULEURS = ['vert', 'ambre', 'bleu', 'violet', 'rouge', 'canard', 'ciel', 'gris', 'orange'];
 const PIECES = ['mvpas', 'mvpas-statut', 'mvpas-fait', 'mvpas-encours', 'mvpas-afaire', 'mvpas-surveiller', 'mvpas-retard',
@@ -89,7 +96,7 @@ function verifier({ charte, feuille, modules }) {
 }
 const lireTout = () => {
   const modules = {};
-  for (const f of readdirSync(ROOT + 'src')) if (f.endsWith('.js')) modules['src/' + f] = lire('src/' + f);
+  for (const f of readdirSync(join(RACINE, 'src')).sort()) if (f.endsWith('.js')) modules['src/' + f] = lire('src/' + f);
   modules['index.html'] = lire('index.html');
   return { charte: lire('src/charte.css'), feuille: lire('src/styles.css'), modules };
 };

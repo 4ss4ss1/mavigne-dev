@@ -429,3 +429,4 @@
 | 373 | 373. ★ CHARTE-3c — LES « − / + » PASSENT AU JEU COMMUN (19/10 — `src/styles.css` · `src/cave.js` · `src/cuv… | `docs/claude/chantiers-330-379.md` |
 | 374 | 374. ★★ CHARTE-4a — LE JEU DE PASTILLES COMMUN, PREMIER PASSAGE (19/10 — `src/styles.css` · `src/charte.css… | `docs/claude/chantiers-330-379.md` |
 | 375 | 375. CAPTURES-2 — L’OUTIL DE CAPTURES OUVRE LES VUES PROFONDES (19/10 — `scripts/mv-captures.mjs` · `script… | `docs/claude/chantiers-330-379.md` |
+| 376 | 376. ⚠️ CHEMINS-1 — LE CONTRÔLE DES PASTILLES PLANTAIT SOUS WINDOWS (19/10 — `scripts/mv-harnais-pastilles.… | `docs/claude/chantiers-330-379.md` |
