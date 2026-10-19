@@ -2188,9 +2188,17 @@ AVANT d'annoncer la liste des fichiers.**
 **Dix fiches, une par PAGE.** `_mvAideFiche()` lit l'id de `.page.active` → une fiche sans
 `#page-<clé>` correspondante est **écrite mais inatteignable** (C22 le vérifie).
 
-**Format d'un point : `[amorce, suite]`, deux chaînes de TEXTE PUR.**
-⚠️ Le gras est posé par le **rendu**, jamais par le contenu — une première version portait du `<b>`
-dans les chaînes et **C19 l'a refusée, à raison**.
+**Format d'un point : `[amorce, suite]`.** L'**amorce** est du texte pur : le rendu la met en gras.
+★★ **AIDE-1 (§365) — la suite permet le gras `<b>…</b>`, et RIEN D'AUTRE.** `openAide` la passe par `_mvAideTexte` :
+tout est échappé, puis seuls `<b>` et `</b>` redeviennent du gras — appariés, jamais imbriqués, refermés en fin de ligne.
+Jusqu'au 18/10, la suite était échappée en bloc : les 26 gras du Pilotage, un `&amp;` et un `<sub>` s'affichaient **en
+code**, et le nom de l'icône (`ico: 'graphique'`) s'écrivait en toutes lettres dans l'en-tête — depuis au moins le 06/09,
+sans qu'aucun contrôle le voie. ⚠️ Une entité ou une autre balise s'affiche telle quelle : écrire `&`, « SO2 » (U+2082
+est hors du sous-ensemble des polices, `mv-harnais-subset` refuse d'en ajouter). `ico` est un nom du jeu d'icônes
+(`index.html`, `#ic-<nom>`), dessiné dans la tuile `.mvi-ic`. **`mv-harnais-aide`** rejoue `openAide` sur chaque fiche
+et refuse tout code visible, une icône absente, une ligne perdue.
+(Avant : « le gras est posé par le rendu, jamais par le contenu — C19 l'a refusée » ; la règle avait cessé d'être suivie,
+et rien ne mesurait ce que la fenêtre affichait.)
 
 ### ★★★ Le point dynamique — l'aide qui lit la structure
 

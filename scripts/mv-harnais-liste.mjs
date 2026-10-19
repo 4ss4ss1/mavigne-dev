@@ -32,6 +32,10 @@
 
 export const GROUPES = {
 
+  // AIDE-1 (§365) : la fenêtre « ? Aide » — openAide rejouée sur chaque fiche : aucun code à l'écran, l'icône dessinée,
+  //   le gras apparié, et l'aide du Pilotage qui dit vrai sur ses onglets.
+  'aide-sans-code': 'Aide — rien de codé à l’écran, l’icône dessinée, le gras en gras, les onglets du Pilotage dits vrais',
+
   // TUTO-1 (§358) : les tutos guidés — la porte unique de firebase.js, la mémoire jetable de boot.js, les étiquettes
   //   visées, les fonctions enseignées, et le compte des gestes sans tuto qui ne peut que baisser.
   'tutoriels-guides': 'Tutos guidés — rien ne sort pendant l’entraînement, chaque étiquette existe, aucun geste nouveau sans tuto',
@@ -541,6 +545,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-droits.mjs --contre', 'lecture-seule-et-remontee'],
   ['node scripts/mv-harnais-tutos.mjs', 'tutoriels-guides'],
   ['node scripts/mv-harnais-tutos.mjs --contre', 'tutoriels-guides'],
+  ['node scripts/mv-harnais-aide.mjs', 'aide-sans-code'],          // AIDE-1 (§365) : la fenêtre « ? Aide » se lit
+  ['node scripts/mv-harnais-aide.mjs --contre', 'aide-sans-code'],
   ['node scripts/mv-harnais-gnr-mesure.mjs'],          // GNR-M (§213) : le tracteur sur les travaux en cours, conso mesurée
   ['node scripts/mv-harnais-gnr-mesure.mjs --contre'],
   ['node scripts/mv-harnais-spark.mjs'],               // SPARK-1 (§214) : la petite courbe d’un chiffre

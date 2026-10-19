@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **19 octobre 2026 (TUTO-7)** — ★★ **LE TUTO DES ÉQUIPES NE SAUTE PLUS D’ÉTAPE** (§364). Base `95496cb` (TUTO-6 poussé). Retour de Nico : à l’entraînement des équipes, le panneau passait parfois de l’étape 2 à l’étape 4. Causes trouvées dans le code : les deux étapes de choix avaient la MÊME vérification côté domaine (un seul choix chez le client les validait toutes les deux) ; le geste d’un coup (TUTO-6) n’avait pas de verrou et la lecture repassant toutes les 150 ms le rejouait ; la pastille « d’avant » pouvait être lue avant d’être dessinée. Livré dans `src/tutos.js` : plus de `reel` sur les choix (suivis quand le client ENREGISTRE, rejoués alors dans l’ordre), référence prise fenêtre ouverte, un geste par étape (`E.joue`), prix du GNR compté seulement litres posés. `test:tutos` reproduisait le saut avant le correctif (« étape 3 vue faite alors que le panneau était à l’étape 2 ») ; vert après, avec deux gardes neuves (aucune étape annoncée avant son tour, aucun geste rejoué).
+> Dernière consolidation : **19 octobre 2026 (AIDE-1)** — ★★ **LA FENÊTRE « ? AIDE » SE LIT : PLUS DE CODE À L’ÉCRAN, L’ICÔNE DESSINÉE** (§365). Base `97ed506` (TUTO-7 poussé ; lot monté d’abord sur `f82a0da`, réappliqué après TUTO-2 à 7). Nico (18/10) : « il y a un souci dans l’écran d’aide de pilotage ». Mesuré au navigateur (Chromium du bac à sable, 390 × 844 et 1366 × 900, clair et sombre) : le nom de l’icône (« graphique ») écrit en gros à la place de l’icône, 105 bouts de code dans le texte (les gras, un `&amp;`), « Huit onglets » contre « les sept onglets », « le dernier ouvert revient » faux depuis AUJ-5. Rejoué en Node : 215 bouts de code dans six fiches, le nom de l’icône dans les onze. Cause unique, là depuis au moins le 06/09 : `openAide` échappait l’icône et la suite comme du texte. Livré : `_mvAideTexte` (seul `<b>…</b>` passe, apparié, refermé), l’icône dans la tuile de la fiche « Nouveau », « & » et « SO2 » en caractères ordinaires (U+2082 est hors du sous-ensemble des polices : `mv-harnais-subset` a refusé le premier montage), les deux phrases du Pilotage, le guide (huit onglets), `mv-harnais-aide` (openAide rejouée sur chaque fiche : 28 vertes, 17/17 contre-épreuves, 11 rouges sur les fichiers d’avant — ce que voyait Nico). Vu en route : `boot.js?v=` est un 5ᵉ affichage de version depuis TUTO-4 (§7 le dit maintenant ; la contre-épreuve de `mv-harnais-tutos` ne l’écrit plus en dur) ; `test:smoke` et `test:e2e` cherchent un Chromium absent du bac à sable — joués quand même par un lien vers la 1194 (§365e) : smoke vert, e2e vert hors météo (`api.open-meteo.com` injoignable d’ici : adresse non résolue, `curl` sort en code 6). Chaîne : 441 commandes, 0 rouge. APP 9.30, SW 10.09.
 ---
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
@@ -191,7 +191,7 @@ vérifié.** Un constat que j'énonce n'est pas plus frais qu'un dossier `/mnt/p
 Tout le reste est banni, **y compris dans l'historique du §28** — une version écrite ici finit
 toujours par être recopiée à la place d'être lue.
 Toujours **lire** avant de travailler : `APP_VERSION` dans `src/utils.js`, la version SW dans
-l'en-tête de `sw.js` **et** `CACHE_NAME`, les **4 affichages** dans `index.html`.
+l'en-tête de `sw.js` **et** `CACHE_NAME`, les **5 affichages** dans `index.html` (dont `boot.js?v=`).
 **Deux séquences indépendantes** (APP et SW) : ne jamais déduire l'une de l'autre.
 `package.json` reste figé à `1.0.0`.
 
@@ -707,7 +707,7 @@ des fûts et des intrants, récoltes, suivi d'élevage, carnet d'entretien, rég
 
 ```
 mavigne/
-├── index.html              ← À LA RACINE (shell + overlays + 4 affichages de version)
+├── index.html              ← À LA RACINE (shell + overlays + 5 affichages de version)
 │                             ⚠️ contient AUSSI la section Réglages › Import / Export
 │                                (le bouton du hub Documents est écrit en dur, PAS dans reglages.js)
 │                             ★ le formulaire d'opération de cave (#cop-*), rang de millésimes
@@ -1105,7 +1105,7 @@ ajoute pas.** Remplacement type : `window.logError({level:'info', cat:'…'})`.
 
 **Séquence APP** (visible du client) :
 1. `APP_VERSION` dans `src/utils.js` — ⚠️ la forme réelle est **`export const APP_VERSION = '…';`**
-2. **4 affichages RÉELS** dans `index.html` (**à la racine**) : footer `·`, `.mod-header-sub`,
+2. **5 affichages RÉELS** dans `index.html` (**à la racine**) : ★ `boot.js?v=` (TUTO-4, §361), footer `·`, `.mod-header-sub`,
    `.ver-tag`, `#wn-version-badge`
    ⚠️ **JAMAIS** les commentaires CSS `(vX.XX)`, ⚠️ **JAMAIS** le `v5.12` du commentaire HTML de
    l'Élevage.
@@ -1664,7 +1664,7 @@ Un lot n'est livrable que quand **les six** sont vraies. Les écrire dans la ré
    `for(var i…)` dupliqué d'`app.js` a été corrigé. Le point « passer le plafond à 0 » est clos.
 3. **Syntaxe** — `node --check` (CJS) / `--input-type=module --check` (ESM) · accolades CSS
    équilibrées · balance des balises HTML · scan demi-surrogates.
-4. **Versions** — bump APP (`APP_VERSION` + **les 4 affichages réels** d'`index.html`) **ET** SW
+4. **Versions** — bump APP (`APP_VERSION` + **les 5 affichages réels** d'`index.html`) **ET** SW
    (en-tête + `CACHE_NAME` + les 2 `console.log` + une ligne de changelog **prépendée**) dès qu'on
    touche `index.html` / `app.js` / `utils.js` / `styles.css`. Un module JS seul = **aucun bump**.
 5. **`WHATS_NEW`** — prépendé, jamais remplacé, rédigé **du point de vue de l'utilisateur** (le
@@ -1856,6 +1856,7 @@ trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglage
 
 ## 28. État courant & backlog
 
+### ⚠️ AIDE-1 — CE QUI RESTE OUVERT (§365, posé le 19/10) : **à regarder chez Nico** sur un vrai téléphone : l’aide de deux ou trois modules (l’icône dans sa tuile, le gras) — vue au Chromium du bac à sable seulement, clair et sombre. **Pas fait, à trancher** : la fiche du Pilotage (48 points, le premier de ~2 000 caractères) se lit encore par endroits comme un journal des changements (« n’est plus un onglet », « désormais », « était rangé ») ; seules ses deux phrases fausses ont été réécrites, et les dix fiches n’ont pas été relues phrase à phrase contre leurs écrans (§365g). Vu en passant, hors lot : le chevron de « Tous les tutos » pointe vers le bas alors qu’il ouvre un autre écran ; une espace simple avant « ; » laisse le point-virgule commencer une ligne.
 ### ⚠️ TUTO-1 à TUTO-7 — CE QUI RESTE OUVERT (§358 à §364, posé le 18/10) : **à regarder chez Nico** : sur ordinateur, ouvrir un tuto depuis un écran où l’on est déjà (le panneau doit commencer à la bonne étape), faire le geste chez lui et voir le panneau suivre ; si le panneau dit « Mise à jour à finir » : fermer tous les onglets Ma Vigne et rouvrir. **Leçon (§361)** : un fichier du démarrage sans numéro dans son nom ne doit jamais être servi depuis un cache — adresse versionnée, `no-cache`, réseau d’abord. **La suite** : l’inventaire (`node scripts/mv-tutos-inventaire.mjs`) se trie module par module en écrivant les tutos — d’abord la Vigne —, chaque étape à valeurs fictives avec son `reel` — jamais la même vérification pour deux étapes (§364), chaque étape de chemin marquée `chemin` ; tutos de l’ouvrier et du tractoriste ; données fictives élargies ; gestes serveur à trancher.
 ### ⚠️ MANQUE-1 — CE QUI RESTE OUVERT (§357, posé le 18/10) : **à regarder chez Nico** sur un vrai téléphone (clair et sombre) : le panneau « Ce qu’il manque » jusqu’au dernier bouton (trait d’accueil d’un iPhone compris), « Saisir les comptes » → feuille → compteur qui baisse — vu au navigateur du bac à sable seulement. Le fondu sans `forwards` vaut pour TOUTES les pages : ce qu’une page range en `position:fixed` reprend son z-index au-dessus de la barre du bas, comme en animations réduites (inventaire au §357d : rien d’autre ne chevauche la barre) — à confirmer à l’usage. Inchangé : un traitement sans dose au milieu de traitements dosés compte pour zéro sans constat. `src/utils.js` regravé à la main dans `typo-baseline.json` (902 → 948 ko) : sortir `WHATS_NEW` dans un module à lui, à trancher (§357f). Vu en passant, hors lot : le « + » de la feuille des comptes dessine les trois points du menu « Plus » (`ic-plus`) — §357g.
 ### ⚠️ FML-1 — CE QUI RESTE OUVERT (§356, posé le 17/10)
@@ -2263,12 +2264,8 @@ d'heures « en attente », et l'écart des deux mesures sur une période close.
 3. ★ **Caler les trois estimations neuves** : pointage 10 min × 220, carnet tracteur 10 min × 60,
    papiers du contrôle 60 min × 6. Elles sont de moi, pas de Nico — lui seul peut les signer,
    comme il a signé les 250 tâches de janvier à juillet.
-4. ~~**`lint-cliquet` / ESLint** : jamais joué côté Claude~~ — **RAYÉ le 01/09.**
-   ★ **`npm install eslint@9 --no-save` fonctionne dans le bac à sable** (registry.npmjs.org est
-   ouvert) : 309 paquets en 12 s, puis `node scripts/lint-cliquet.mjs` tourne normalement.
-   L'entrée disait « impossible » là où personne n'avait essayé. **Ce filet est désormais jouable à
-   chaque lot, et il doit l'être** — voir §78.
-5. **`test:smoke` / `test:e2e`** : jamais joués côté Claude (Chromium injoignable).
+4. ★ **ESLint et un navigateur se jouent côté Claude** (vérifié le 19/10, AIDE-1 §365) : `npm ci` installe tout, ESLint compris (l’entrée « jamais joué », rayée le 01/09, est au §365h). Un Chromium vit dans `/opt/pw-browsers/chromium-1194/chrome-linux/chrome` : `test:tutos` le prend par `MV_CHROMIUM`.
+   ⚠️ `test:smoke` et `test:e2e` lancent le Chromium par défaut de Playwright (révision 1228, absente du bac à sable) : les jouer avec `PLAYWRIGHT_BROWSERS_PATH=/tmp/pwb` et un lien vers la 1194 (recette au §365e — smoke vert, e2e vert hors météo, injoignable d’ici), ou leur faire lire `MV_CHROMIUM`.
 
 ### ⚠️ OUVERT DEPUIS LE 25/08 — L'ÉLÉMENT QUI DÉBORDE SUR L'ACCUEIL (§67c)
 

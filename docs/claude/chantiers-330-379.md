@@ -859,3 +859,58 @@ Nico, avant de lancer le déploiement de tous les tutos : à l’entraînement �
 ### 364e. La règle qui en sort (→ §27g)
 Deux étapes ne partagent jamais la même vérification côté domaine. Une étape à valeurs fictives qu’on ne peut pas distinguer chez le client n’a pas de `reel` : elle se rattrape à l’étape suivante.
 
+## 365. ★★ AIDE-1 — LA FENÊTRE « ? AIDE » SE LIT : PLUS DE CODE À L’ÉCRAN, L’ICÔNE DESSINÉE, LE PILOTAGE QUI DIT VRAI (19/10 — `src/utils.js` (`openAide`, `_mvAideTexte` neuve, `_mvAideOngletsPil`, fiches Pilotage et Cave, APP, WHATS_NEW) · `src/styles.css` (`.mva-hd-ic` retirée) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-aide.mjs` (neuf) · `scripts/mv-harnais-tutos.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `.mv-base` · `lots/AIDE-1.json` · `CLAUDE.md` · `docs/claude/*` · **APP 9.29 → 9.30, SW 10.08 → 10.09**, base `97ed506`)
+
+### 365a. La demande
+18/10, Nico : « il y a un souci dans l’écran d’aide de pilotage », sans capture. Exploré avant de demander : quatre défauts listés (le mot « graphique » à la place de l’icône, du code dans le texte, « Huit onglets » contre « les sept onglets », « le dernier ouvert revient »), confirmés par Nico (« c’est exactement ça »), avec la proposition : la cause pour toutes les fiches, les deux phrases, un contrôle qui bloque la mise en ligne.
+Le lot a d’abord été monté sur `f82a0da` (TUTO-1). Nico a poussé TUTO-2 à TUTO-7 entre-temps ; à sa consigne (« relis les fichiers et les mises à jour et go »), tout a été réappliqué sur `97ed506` : ancres relues, versions relues (9.29 / 10.08), section renumérotée (TUTO-2 avait pris le §359).
+
+### 365b. Ce qui a été mesuré avant d’écrire
+- **Au navigateur** (Chromium du bac à sable, `/opt/pw-browsers/chromium-1194`, parcours de `e2e-local.mjs` : données injectées, connexion DOM réelle, réseau Firebase coupé) — aide du Pilotage, 390 × 844 et 1366 × 900, clair et sombre : en-tête « graphique », 105 bouts de code visibles, « Huit onglets » et « les sept onglets », « le dernier ouvert revient ».
+- **Rendu rejoué en Node sur les dix fiches** : 215 bouts de code visibles — Pilotage 105, Cave 64 (dont un `<sub>`), Parcelles 30, Accueil 8, Tracteur 4, Réserve 4 ; le nom de l’icône écrit en clair dans les onze (défaut compris).
+- **Âge** : `_escHtml(a.ico)` et `_escHtml(p[1] || '')` sont dans le plus vieil état du dépôt (06/09) ; le Pilotage portait alors 24 balises, 52 le 18/10.
+- `openAide` est le seul lecteur de `MV_AIDE`. Les nouveautés (`a.it.desc`) s’injectent SANS échappement : leurs `<sub>` s’affichent bien, rien à y changer.
+- Aucun harnais ne rendait l’aide : C22 vérifie qu’une fiche a sa page ; les « 73 assertions » du 09/08 (§27b) ne sont plus dans `scripts/`.
+- `goHub` (app.js) appelle `_pilOuvrirAujourdhui` depuis AUJ-5 (§307) ; `renderPilotage` relit ensuite l’onglet mémorisé : « s’ouvre sur Aujourd’hui, garde l’onglet où vous étiez » est la phrase vraie.
+
+### 365c. Arbitrages
+- **Le gras rendu plutôt que retiré.** §27b disait « le gras est posé par le rendu, jamais par le contenu » ; les fiches avaient pris l’habitude de `MV_INFO`, qui porte son `<b>`. Retirer 107 gras aurait aplati des pavés de 2 000 caractères où le gras est le seul repère. Le texte est écrit, jamais saisi : `_mvAideTexte` échappe tout, puis rend `<b>`/`</b>` — appariés, jamais imbriqués, refermés en fin de ligne (un gras ouvert déborderait sur les lignes suivantes : le navigateur reconstruit les éléments de mise en forme restés ouverts). Nico a confirmé « vrai gras ».
+- **Une seule balise permise, et aucun caractère neuf.** `<sub>2</sub>` → « SO2 » en chiffres ordinaires. Le premier montage avait écrit `SO\u2082`, comme ailleurs dans `utils.js` et `cave.js` : `mv-harnais-subset` a rougi — U+2082 est hors du sous-ensemble des polices, la dette est gelée à 271 caractères et « ne remonte pas ». `&amp;` → `&`.
+- **L’icône dans la tuile `.mvi-ic`** de la fiche « Nouveau » plutôt qu’une classe neuve : une seule charte pour les deux feuilles ; `.mva-hd-ic` (taillée pour un émoji) n’avait plus d’élément et sort de `styles.css`.
+- **Le nombre d’onglets n’est dit qu’une fois, par le code** (`_mvAideOngletsPil`) ; « Le « i » est partout » ne compte plus. La phrase d’ouverture suit AUJ-5, et `mv-harnais-aide` la lie à `goHub` : si goHub cesse de rouvrir Aujourd’hui, le build rougit et l’aide se réécrit.
+- **Le guide dans le même lot** (règle d’or n°4) : « Les sept onglets suivent désormais » → « Tous les onglets suivent » ; Archives au sous-titre (huit onglets dans `_PIL_TABS`). `public/guide.html` n’est pas livré : `npm run site` le refait.
+- **Pas de relecture de fond des fiches** : le lot est la panne d’affichage et les deux phrases fausses, ce que Nico a confirmé (→ §365g).
+- `WHATS_NEW` 9.30 : une correction, niveau 0 (Journal), pour tous — l’aide de chaque module est lue par tout le monde.
+
+### 365d. Pièges trouvés en route
+- L’ancre « L’équipe &amp; le matériel » portait une espace fine insécable réelle (U+202F), que `repr()` affiche `\u202f` : retapée avec un antislash, elle n’existait pas. « Extraire l’ancre, ne jamais la retaper » vaut aussi pour la lecture d’un `repr`.
+- La première capture montrait l’écran des conditions : `_mvApplyTrialGating` le rouvre pendant la navigation (le piège de l’E2E) — refermé juste avant d’ouvrir l’aide.
+- Joué sur les fichiers d’avant, le harnais plantait au montage (`_mvAideTexte` absente) : un plantage ne prouve pas qu’on voit le défaut. Avec la fonction facultative au montage, il rougit sur 11 points — exactement ce que voyait Nico.
+- Une contre-épreuve dont l’ancre se perd n’a rien posé : elle compte MUETTE (le modèle de MANQUE-1 la comptait « rougit »).
+- **`boot.js?v=<APP_VERSION>` est un 5ᵉ affichage de version depuis TUTO-4 (§361)**, que §7 ne disait pas (« 4 affichages », quatre fois dans CLAUDE.md : corrigé). Et la contre-épreuve de `mv-harnais-tutos` écrivait `boot.js?v=9.29` en dur : chaque bump d’APP la faisait tomber en « motif introuvable » — elle lit désormais `APP_VERSION`.
+- CLAUDE.md disait « `test:smoke` / `test:e2e` : jamais joués côté Claude (Chromium injoignable) » : faux à moitié — un Chromium est dans le bac à sable (révision 1194), mais Playwright du dépôt cherche la 1228 : seul `mv-tutos-jeu.mjs` sait prendre `MV_CHROMIUM`.
+
+### 365e. Mesures
+- `mv-harnais-aide` : 28 vertes ; contre-épreuves 17/17 ; sur les fichiers d’avant le lot : 11 rouges sur 20.
+- `mv-harnais-tutos` : vert, contre-épreuves 24/24 (dont « boot.js à l’adresse d’une autre version », version lue).
+- Captures après (même parcours) : en-tête « Pilotage » avec son icône, 0 code visible, 100 gras, « Huit onglets », plus « sept » ni « dernier ouvert » — téléphone et ordinateur, clair et sombre.
+- `mv-harnais-subset` : vert, dette inchangée (271) ; `preflight` : 0 erreur ; `mv-whatsnew-check` vert.
+- **La chaîne complète** (`mv-lanceur --continuer`, sur `97ed506` + le lot) : **441 commandes, 0 rouge, 741 s**. Le premier montage (sur `f82a0da`) en avait laissé deux rouges : `mv-harnais-subset` (le `SO\u2082`, → « SO2 ») et `build-guide --check` (la page dérivée pas refaite — vert après `node scripts/build-guide.mjs`, page rendue ensuite à son état poussé : `npm run site` la refait chez Nico).
+- **Build** (sans `prebuild`, la chaîne venait de passer) : `dist/version.json` 9.30. **`test:smoke`** : OK. **`test:tutos`** (`MV_CHROMIUM`) : les deux tutos au téléphone, à l’ordinateur, en panneau et en miroir, et le refus d’un vieux `boot.js` — tout vert. **`test:e2e`** : connexion et dix pages passent ; trois erreurs, toutes « Failed to fetch » vers la météo (`_pluieCharger`, météo du secteur) : `api.open-meteo.com` est injoignable depuis le bac à sable (adresse non résolue : `curl` sort en code 6, vérifié), code hors du lot.
+- Pour jouer `smoke` et `e2e` ici : `PLAYWRIGHT_BROWSERS_PATH=/tmp/pwb`, où `chromium_headless_shell-1228/chrome-headless-shell-linux64/chrome-headless-shell` est un lien vers le `headless_shell` de la révision 1194 (plus les deux fichiers témoins `INSTALLATION_COMPLETE` et `DEPENDENCIES_VALIDATED`).
+
+### 365f. Ce qui n’a pas été vérifié
+Un vrai téléphone (Chromium du bac à sable seulement) ; à l’œil, les fiches autres que le Pilotage (le harnais les rend toutes, la capture ne montre que le Pilotage).
+
+### 365g. Ce qui reste (→ §28)
+La relecture de fond des dix fiches contre leurs écrans — la fiche du Pilotage se lit par endroits comme un journal des changements et son premier point fait ~2 000 caractères ; `test:smoke` et `test:e2e` qui liraient `MV_CHROMIUM` (aujourd’hui : le lien de §365e) ; vus en passant : le chevron de « Tous les tutos », l’espace simple avant « ; ».
+
+### 365h. Rangement de CLAUDE.md (plafond de 2 800 lignes)
+Le cœur était à son plafond (2 800). Les points 4 et 5 du backlog technique (six lignes) deviennent deux lignes justes ; voici les six d’origine, descendus ici parce que le premier est de l’histoire (rayé le 01/09, raconté au §78) et que le second était faux :
+
+> 4. ~~**`lint-cliquet` / ESLint** : jamais joué côté Claude~~ — **RAYÉ le 01/09.**
+>    ★ **`npm install eslint@9 --no-save` fonctionne dans le bac à sable** (registry.npmjs.org est
+>    ouvert) : 309 paquets en 12 s, puis `node scripts/lint-cliquet.mjs` tourne normalement.
+>    L'entrée disait « impossible » là où personne n'avait essayé. **Ce filet est désormais jouable à
+>    chaque lot, et il doit l'être** — voir §78.
+> 5. **`test:smoke` / `test:e2e`** : jamais joués côté Claude (Chromium injoignable).

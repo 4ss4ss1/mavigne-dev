@@ -164,6 +164,7 @@ if (!process.argv.includes('--contre')) {
   process.exit(r.ko ? 1 : 0);
 }
 // Contre-épreuves : chaque mutation DOIT rougir.
+const VER0 = (/export const APP_VERSION = '([^']+)'/.exec(F0['src/utils.js']) || [])[1];
 const MUT = [
   ['setDoc importé en direct', 'src/firebase.js', 'setDoc as _sdkSetDoc', 'setDoc'],
   ['un appel direct au SDK', 'src/firebase.js', 'function setDoc() {', 'function _mvFuite() { return _sdkSetDoc(); }\nfunction setDoc() {'],
@@ -176,7 +177,8 @@ const MUT = [
   ['la fenêtre qui dit autre chose', 'src/tutos.js', "_dire({ mvtu: 'fermer' })", "_dire({ mvtu: 'clic' })"],
   ['la fenêtre qui appelle autre chose chez l\u2019appli', 'src/tutos.js', "h._mvTutoAnneau(E.t.id,", "h._mvTutoSortir(E.t.id,"],
   ['la fenêtre qui touche le document de l\u2019appli', 'src/tutos.js', "    if (!E.memoHote) E.memoHote = h._mvTutoAvant(E.t.id) || {};", "    if (!E.memoHote) E.memoHote = h._mvTutoAvant(E.t.id) || {};\n    h.document.body.click();"],
-  ['boot.js à l\u2019adresse d\u2019une autre version', 'index.html', '<script src="/boot.js?v=9.29"></script>', '<script src="/boot.js?v=9.28"></script>'],
+  // AIDE-1 (§365) : la version se lit dans utils.js — écrite en dur, cette contre-épreuve cassait à chaque bump d'APP.
+  ['boot.js à l\u2019adresse d\u2019une autre version', 'index.html', '<script src="/boot.js?v=' + VER0 + '"></script>', '<script src="/boot.js?v=0.0"></script>'],
   ['boot.js gardé par le navigateur', 'firebase.json', '"/boot.js"', '"/boot-x.js"'],
   ['boot.js servi depuis le cache du service worker', 'public/sw.js', "if (url.pathname.endsWith('/boot.js')) {", "if (url.pathname.endsWith('/boot-x.js')) {"],
   ['boot.js sans la marque attendue', 'public/boot.js', 'window.__MV_BOOT_TUTO_V = 4;', 'window.__MV_BOOT_TUTO_V = 3;'],

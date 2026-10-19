@@ -4675,7 +4675,6 @@ a[href^="mailto:"]{color:var(--or-tx);}
 
 /* — Feuille d'aide (#ovAide) — */
 .mva-hd{ display:flex; align-items:flex-start; gap:11px; }
-.mva-hd-ic{ font-size:var(--pt-lg,24px); line-height:1.1; flex-shrink:0; }
 .mva-list{ padding:6px 20px 2px; }
 .mva-it{
   display:flex; gap:11px; padding:11px 0; font-size:13.5px; line-height:1.55;

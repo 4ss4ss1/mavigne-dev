@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.29';
+export const APP_VERSION = '9.30';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,11 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.30', d: '2026-10-19', items: [
+    { niv: 0, pour: ['tous'], emoji: 'livre', titre: 'La fenêtre d’aide s’affiche proprement',
+      desc: "Dans la fenêtre «\u00a0? Aide\u00a0», le nom de l’icône s’écrivait en toutes lettres en haut («\u00a0graphique\u00a0», «\u00a0feuille\u00a0»…), et des bouts de code apparaissaient au milieu des phrases, surtout dans l’aide du Pilotage, de la Cave et des Parcelles. "
+        + "L’icône est revenue et le gras s’affiche en gras. Dans l’aide du Pilotage, deux phrases fausses sont corrigées\u00a0: le nombre d’onglets, et l’onglet où il s’ouvre — toujours Aujourd’hui à l’ouverture de l’appli." },
+  ] },
   { v: '9.29', d: '2026-10-19', items: [
     { niv: 0, pour: ['admin'], emoji: 'doigt', titre: 'Le tuto des équipes ne saute plus d’étape',
       desc: "Correction : quand vous placiez quelqu’un dans une équipe sur votre domaine, le tuto ouvert à côté pouvait sauter une étape. "
@@ -5265,7 +5270,26 @@ function _mvAideOngletsPil() {
   if (!t || !t.length) return null;
   var noms = t.map(function (x) { return x[2]; });
   return [_mvAideNb(noms.length) + ' onglets',
-    ': ' + _mvAideEnum(noms) + '. Le dernier ouvert revient à la visite suivante.'];
+    // AIDE-1 (§365) : « Le dernier ouvert revient à la visite suivante » était faux depuis AUJ-5 (§307) — goHub (app.js)
+    //   rouvre Aujourd'hui à chaque ouverture de l'appli ; renderPilotage relit ensuite l'onglet mémorisé.
+    //   mv-harnais-aide exige que goHub le fasse toujours, tant que cette phrase le dit.
+    ': ' + _mvAideEnum(noms) + '. À l’ouverture de l’appli, le Pilotage s’ouvre sur Aujourd’hui ; quand vous y revenez, il garde l’onglet où vous étiez.'];
+}
+
+// ★ AIDE-1 (§365) — LE TEXTE D'UNE FICHE : DU TEXTE, ET LE GRAS. Ce texte est ÉCRIT ici, jamais saisi : on y permet
+//   <b>…</b>, et rien d'autre. Tout est échappé, puis seuls <b> et </b> redeviennent du gras — appariés, jamais
+//   imbriqués, refermés en fin de ligne (un gras resté ouvert déborderait sur les lignes suivantes).
+//   Jusqu'au 18/10, la suite était échappée en bloc : les 26 gras du Pilotage s'affichaient en code.
+//   ⚠️ Une entité (&amp;) ou une autre balise (<sub>) s'afficherait telle quelle : écrire « & » et « SO2 ».
+//   scripts/mv-harnais-aide.mjs rejoue openAide sur chaque fiche et refuse tout code visible.
+function _mvAideTexte(s) {
+  var out = '', gras = false;
+  String(s == null ? '' : s).split(/(<\/?b>)/).forEach(function (m) {
+    if (m === '<b>') { if (!gras) { out += '<b>'; gras = true; } }
+    else if (m === '</b>') { if (gras) { out += '</b>'; gras = false; } }
+    else if (m) out += _escHtml(m);
+  });
+  return gras ? out + '</b>' : out;
 }
 
 var MV_AIDE = {
@@ -5474,7 +5498,7 @@ var MV_AIDE = {
       ['Une opération se corrige aussi', "toutes sont listées, plus seulement la dernière. Une saignée retire son volume de ce que contient la cuve — l’estimation d’après les caisses —, plus de sa contenance. Une saignée d’avant la version 7.42 avait pris sur la contenance : la corriger ou la supprimer la lui rend d’abord, et le volume ne se retranche jamais deux fois."],
       ['Un refroidissement dit par quel moyen', "groupe de froid, échangeur, glace carbonique, azote liquide, CO₂ liquide, eau froide. Les trois qui se pèsent demandent une quantité en kilos, et la carboglace annonce l’abaissement approximatif — un ordre de grandeur, la cuve n’étant pas isolée. Le moyen et la quantité partent au registre des manipulations : c’est là qu’on les cherche."],
       ['Tanins, enzymes et bentonite', "se posent sur une cuve comme les autres opérations, mais le produit se choisit dans La Réserve : c’est ce qui permet de sortir la quantité du stock toute seule. L’unité de dose suit le produit — g/hL pour ce qui se pèse, mL/hL pour ce qui se verse. Sans produit choisi, l’opération s’enregistre quand même, hors bilan matière, et l’écran le dit."],
-      ['La quantité se calcule sur un volume, et ce volume dit d’où il vient', "tant que la cuve n’est pas décuvée, c’est le volume <b>estimé d’après ses caisses</b>, à la règle du Cuvier, saignées déduites — jamais sa contenance : la saisie affiche « volume estimé », et le registre imprime « (estimé) ». Cela vaut pour la chaptalisation, le SO<sub>2</sub>, les tanins, enzymes et bentonite, dans la feuille comme dans l’intervention groupée. Sans caisse rattachée, rien n’est inventé : la case reste vide. Corriger le volume à la main reste possible, et se voit."],
+      ['La quantité se calcule sur un volume, et ce volume dit d’où il vient', "tant que la cuve n’est pas décuvée, c’est le volume <b>estimé d’après ses caisses</b>, à la règle du Cuvier, saignées déduites — jamais sa contenance : la saisie affiche « volume estimé », et le registre imprime « (estimé) ». Cela vaut pour la chaptalisation, le SO2, les tanins, enzymes et bentonite, dans la feuille comme dans l’intervention groupée. Sans caisse rattachée, rien n’est inventé : la case reste vide. Corriger le volume à la main reste possible, et se voit."],
       ['Un stock négatif n’empêche jamais d’enregistrer', "le tanin est déjà dans la cuve : refuser la saisie parce qu’une facture manque ferait mentir le suivi pour protéger la comptabilité. L’écart part dans La Réserve, qui le nomme et le garde jusqu’à régularisation."],
       ['Encore sur pied', "en haut de l\u2019écran Récoltes, les parcelles actives qui n\u2019ont aucune récolte saisie sur la campagne, la plus mûre en premier d\u2019après vos analyses. Une parcelle arrachée n\u2019y figure pas ; une parcelle sans surface renseignée, si. Toucher une ligne ouvre la nouvelle récolte avec la parcelle déjà choisie. Un nom de parcelle absent du parcellaire est signalé sous la carte : c\u2019est ce qui explique un compte qui semble faux. Une parcelle qu’on ne vendangera pas cette année (condamnée à l’arrachage, grêlée…) : l’administrateur touche «\u00a0Une parcelle ne sera pas récoltée ?\u00a0» en bas de la carte et la décoche. Elle quitte la carte, Le millésime et le Revient, mais reste dans le domaine ; une ligne «\u00a0Pas de récolte cette année\u00a0» la nomme, et «\u00a0Modifier\u00a0» la remet."],
       ['Le millésime', "une tête commune — l’année (les boutons à droite changent de millésime), son état et ses quatre chiffres — puis quatre vues. Ensemble : ce qu’il faut surveiller (un volume entonné à mesurer, une parcelle au-dessus du maximum, ce qui reste sur pied, les cuves en fermentation), le parcours du vin de la benne à la bouteille, les cuvées en un coup d’œil et les repères du millésime. Parcelles : le rendement de chaque parcelle face au maximum de l’appellation, du plus haut au plus bas, avec des filtres. Cuvées : la liste, puis la fiche de chaque cuvée — à droite sur ordinateur. Courbes : maturités, densités, températures et malo côte à côte sur ordinateur, une à la fois au téléphone ; le couloir des densités va de la cuve la plus lente à la plus rapide, sa médiane en pointillé, et par-dessus la ou les deux cuves que vous choisissez."],
@@ -5559,12 +5583,12 @@ var MV_AIDE = {
       ['Économie › Revient', "répond à trois questions pour le millésime : combien de vin, combien de bouteilles, combien coûte chacune à la vigne. Tout se lit sur le <b>cycle</b> du millésime, d’une vendange à la suivante. Tant qu’une parcelle n’est pas récoltée, son rendement est la moyenne de ses millésimes connus — jamais le plafond — et les chiffres sont marqués <b>probable</b>. Le tableau se lit par appellation ; touchez une ligne pour voir ses parcelles. Deux réglages dans la roue crantée : les pertes d’élevage, et vos autres charges de l’année pour un coût complet indicatif. Une parcelle déclarée sans récolte cette année (Le Cuvier, «\u00a0Encore sur pied\u00a0») ne compte ni rendement ni bouteilles, et son coût se répartit sur les autres vignes."],
       ['La carte de verdict d’Économie', ": elle dit en une phrase où vous en êtes, et pose les boutons pour agir — voir quel travail dérape, ouvrir le barème. Quand la cadence affichée vient de la campagne précédente, une ligne sous le texte le dit, avec le nom de cette campagne. Le <b>comment</b> du calcul est derrière son petit « i »."],
       ['L’écart de cadence cherche sa source dans un ordre', ", et dit toujours laquelle il a trouvée. D’abord <b>la période en cours</b>, dès 40 % de barème réalisé. Sinon <b>la même période de la campagne précédente</b>, si elle est archivée — la ligne porte alors un <b>↩</b> et nomme la campagne : cet écart-là <b>se lit, il ne s’applique pas</b> au budget ni à la date de fin. Même règle quand le facteur sort de [0,5 ; 3] : un trou de saisie n’est pas une cadence, l’écran le dit. Sinon rien, et l’écran l’écrit plutôt que d’afficher un chiffre inventé."],
-      ['Conformité', "suit le cuivre sur sept ans, le nombre de passages, le <b>registre phyto</b> et les délais de rentrée en cours. Le registre était rangé dans « L’équipe &amp; le matériel » alors qu’il lit exactement les mêmes traitements que « Passages phyto » : il est désormais juste en dessous, en détail de ce total."],
+      ['Conformité', "suit le cuivre sur sept ans, le nombre de passages, le <b>registre phyto</b> et les délais de rentrée en cours. Le registre était rangé dans « L’équipe & le matériel » alors qu’il lit exactement les mêmes traitements que « Passages phyto » : il est désormais juste en dessous, en détail de ce total."],
       ['« Traiter ? » porte les cinq jours', ": la fenêtre de traitement était affichée à <b>deux endroits</b> — sur Aujourd’hui et dans le matériel — pour une seule source. C’est une décision du jour : elle reste dans Aujourd’hui. Le verdict du moment est en grand, les cinq jours à venir se déplient sous « les 5 prochains jours ». Rien n’a été retiré du calcul."],
       ['Le budget de l’année, mois par mois', ": dans <b>L’année</b>, deux courbes cumulées — le prévu au barème en tireté, la dépense réelle en trait plein. ⚠️ <b>L’écart n’est pas un dépassement</b> : le prévu ne chiffre que la vigne, la dépense porte tout le domaine, cave et atelier compris. L’écran l’écrit sous le graphe, et le « i » en donne le détail."],
       ['Cave', "n’est plus un onglet : une carte dans Aujourd’hui dit combien de gestes pressent et ouvre la Cave. Le millésime, ses courbes et le parc à fûts vivent chez eux — Cave › Le millésime, La Réserve › Fûts."],
       ['Archives', "empile les campagnes sur un même axe, du 1er août au 31 juillet : le décalage d’une année sur l’autre se lit d’un coup d’œil."],
-      ['Le « i » est partout, maintenant', ": les sept onglets suivent la même règle — le chiffre, une ligne qui dit sur quoi il porte, le détail du calcul derrière le « i ». Dans <b>Décider</b>, chaque étape a le sien : il remplace les pavés « comment lire » qui séparaient le titre du graphique. La <b>légende des couleurs</b>, elle, reste affichée : on ne la lit pas, on la consulte."],
+      ['Le « i » est partout', ": chaque onglet suit la même règle — le chiffre, une ligne qui dit sur quoi il porte, le détail du calcul derrière le « i ». Dans <b>Décider</b>, chaque étape a le sien : il remplace les pavés « comment lire » qui séparaient le titre du graphique. La <b>légende des couleurs</b>, elle, reste affichée : on ne la lit pas, on la consulte."],
       ['Il se lit aussi sur téléphone', ": les chiffres du haut se rangent en une ligne qui défile, et le titre de l’onglet ne prend plus de place — la barre d’onglets le dit déjà. Le grand écran reste plus confortable pour les tableaux et les graphiques, mais vous n’avez plus à faire défiler un écran entier avant d’atteindre un chiffre."]
     ]
   },
@@ -5609,7 +5633,10 @@ function openAide() {
   if (!el) return;
   var a = _mvAideFiche();
   var h = '<div class="modal-hd mva-hd">'
-        + '<span class="mva-hd-ic">' + _escHtml(a.ico) + '</span>'
+        // ★ AIDE-1 (§365) : l'icône se DESSINE. `ico` porte un nom du jeu d'icônes ('graphique') : échappé comme du
+        //   texte, le mot s'écrivait en toutes lettres, en gros, à la place de l'icône. Même tuile que la fiche
+        //   « Nouveau » (.mvi-ic) : une seule charte pour les deux feuilles.
+        + '<span class="mvi-ic" aria-hidden="true">' + _mvIcon(a.ico, 18) + '</span>'
         + '<div><div class="modal-title">' + _escHtml(a.titre) + '</div>'
         + '<div class="modal-sub">Ce qu’on peut faire sur cet écran</div></div></div>'
         + (window._mvTutoAideBloc ? window._mvTutoAideBloc() : '')   // ★★★ TUTO-1 (§358) : « Me montrer comment faire »
@@ -5625,7 +5652,7 @@ function openAide() {
     }
     if (!p || !p[0]) continue;
     h += '<div class="mva-it"><span class="mva-bul"></span><span><b>'
-       + _escHtml(p[0]) + '</b> ' + _escHtml(p[1] || '') + '</span></div>';
+       + _escHtml(p[0]) + '</b> ' + _mvAideTexte(p[1] || '') + '</span></div>';   // AIDE-1 (§365) : le gras écrit s'affiche en gras
   }
   h += '</div><div class="mva-foot">'
      + '<button type="button" class="mva-fbtn" id="mva-guide">' + _mvIcon('livre',16) + ' Guide complet</button>'

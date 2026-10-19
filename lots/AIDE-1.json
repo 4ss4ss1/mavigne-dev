@@ -1,0 +1,24 @@
+{
+  "lot": "AIDE-1",
+  "section": "§365",
+  "base": "97ed50677b36c33b39a660da87b357a35ddc676a",
+  "inclut": [],
+  "date": "2026-10-19",
+  "fichiers": {
+    ".mv-base": "71ab453cf13d6f82dd1acde77bbc35fa713d476774e791c0ad9629f5df6986da",
+    "CLAUDE.md": "d7608fda31295b468c8d053874ca607f5edc2e98680d83d5a7f195974f6a3f89",
+    "docs/claude/INDEX.md": "b7ba6e37676b5549beede885926488a2124312789895c7f7303964de5230229f",
+    "docs/claude/chantiers-330-379.md": "6708c1818ee6df1457b0e31259d9953dc818007ebdb3d468708416e2bd6f483a",
+    "docs/claude/journal.md": "9490efc20da6c1af91e524d71990f97ee665a8acb2e3c19a12a48c393be7aafa",
+    "docs/claude/modules.md": "d252bfdefd2c507005dec44ea24f7cf38378172ada45d0670b5a32a56a750f2a",
+    "guide/11-pilotage.html": "cd2df168029e9fbd835914986874e30e5745a3f249d6eabc42927cd233c287e7",
+    "index.html": "a7e75240f7b4b751154c12877f191911d389a43bba9d47175e6172db133f7a46",
+    "public/sw.js": "63129b776507f273d4caa850d25f41188b0036bc54c137fd902a94cb3a40d444",
+    "scripts/harnais-claude-md.mjs": "4ae6a1a8e2dcc396f1a99be873d868b84d604b19f8e62298860744f027539eb6",
+    "scripts/mv-harnais-liste.mjs": "3bc1feb6a011167e9d0ad87216eda9a5e50a4c97b147c3dda83e5d96fa702663",
+    "scripts/mv-harnais-tutos.mjs": "e514a2877b986bce2aa4b6c1a904138d893b8f133b046cbfb173f9cd5239d905",
+    "src/styles.css": "82f30c481c0bebf422406bda47212e3826b79b4fa67a5561cf46b7a4762122f8",
+    "src/utils.js": "aa4095812b4c781005ce6c83f09c8ea69fc9261bb64b03509d1be37445c04a93",
+    "scripts/mv-harnais-aide.mjs": "87bf5e3d2271f78e57debc641b4b2d4855321710a24ab9d72740108a70893f9e"
+  }
+}

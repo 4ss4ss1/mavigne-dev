@@ -418,3 +418,4 @@
 | 362 | 362. ★★ TUTO-5 — LE PANNEAU DU TUTO LIT LUI-MÊME L’APPLI ET DÉMARRE LÀ OÙ L’ON EST (18/10 — `src/tutos.js` … | `docs/claude/chantiers-330-379.md` |
 | 363 | 363. ★ TUTO-6 — LE TUTO À CÔTÉ DE L’APPLI SUIT EN UNE DEMI-SECONDE (18/10 — `src/tutos.js` · `src/utils.js`… | `docs/claude/chantiers-330-379.md` |
 | 364 | 364. ★★ TUTO-7 — LE TUTO DES ÉQUIPES NE SAUTE PLUS D’ÉTAPE (19/10 — `src/tutos.js` · `src/utils.js` (APP, W… | `docs/claude/chantiers-330-379.md` |
+| 365 | 365. ★★ AIDE-1 — LA FENÊTRE « ? AIDE » SE LIT : PLUS DE CODE À L’ÉCRAN, L’ICÔNE DESSINÉE, LE PILOTAGE QUI D… | `docs/claude/chantiers-330-379.md` |
