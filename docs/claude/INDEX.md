@@ -432,3 +432,4 @@
 | 376 | 376. ⚠️ CHEMINS-1 — LE CONTRÔLE DES PASTILLES PLANTAIT SOUS WINDOWS (19/10 — `scripts/mv-harnais-pastilles.… | `docs/claude/chantiers-330-379.md` |
 | 377 | 377. ★ CHARTE-4b — TROIS FILTRES AU JEU DE PASTILLES (19/10 — `src/styles.css` · `src/cave.js` · `src/tract… | `docs/claude/chantiers-330-379.md` |
 | 378 | 378. CHARTE-4c — LES PASTILLES FAITES À LA MAIN RENDUES AU JEU (19/10 — `src/app.js` · `src/cave.js` · `src… | `docs/claude/chantiers-330-379.md` |
+| 379 | 379. ★★ CHARTE-5a — LE JEU DE CARTES COMMUN, PREMIER PASSAGE (19/10 — `src/styles.css` · `src/charte.css` ·… | `docs/claude/chantiers-330-379.md` |

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.40';
+export const APP_VERSION = '9.41';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.41', d: '2026-10-19', items: [   // CHARTE-5a (§379) : le jeu de cartes commun, premier passage
+    { niv: 0, pour: ['tous'], emoji: 'check', titre: 'Les cartes au même dessin',
+      desc: "Les cartes prennent un dessin commun : fond blanc, un filet fin, coins arrondis, sans ombre. Premier passage : les demandes du Planning, « Ma trace » et le mur de l’équipe sur l’Accueil. Les autres suivront, avec les encadrés d’information." },
+  ] },
   { v: '9.40', d: '2026-10-19', items: [   // CHARTE-4c (§378) : 34 pastilles faites à la main rendues au jeu
     { niv: 0, pour: ['tous'], emoji: 'check', titre: 'Les dernières petites étiquettes au même dessin',
       desc: "Les petites étiquettes qu’on avait dessinées une par une prennent la forme commune : au Phyto (DAR, ZNT, délai de rentrée, autorisé, retiré), à la Cave (FML, SO2), au Planning (conforme, semaines au-delà du maximum, CP), au Tracteur (en réparation, DAR, rentrée) et dans les exports des Réglages." },

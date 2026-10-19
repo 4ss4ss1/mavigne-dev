@@ -3964,7 +3964,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pf-sal .pf-lst>div{padding:var(--e-1,4px) 0}
 .pf-sal .pf-lst dt small{display:block;font-size:var(--pt-micro,11px);font-weight:normal;color:var(--texte-doux)}
 .pf-plan{display:block;margin-top:var(--e-1,4px);font-size:var(--pt-micro,11px);color:var(--texte-doux)}
-.pf-card{background:var(--bg-card);border:1.5px solid var(--gris-clair);border-radius:15px;padding:var(--e-3,12px) var(--e-4,16px);margin:0 0 var(--e-3,12px)}
+.pf-card{ padding:var(--e-3,12px) var(--e-4,16px); margin:0 0 var(--e-3,12px); }
 .pf-card-t{display:flex;justify-content:space-between;align-items:baseline;gap:var(--e-2,8px);margin-bottom:var(--e-2,8px)}
 .pf-card-t h3{margin:0;font-family:var(--font-titre);font-size:var(--pt-md,20px);font-weight:var(--fw-bold,700);line-height:1.1;color:var(--texte)}
 .pf-card-t span{font-size:var(--pt-micro,11px);color:var(--texte-doux)}
@@ -4879,8 +4879,7 @@ body,#app-root,.page{min-height:100dvh;}
 
 .mtr-lab{font-size:var(--pt-lbl,10.5px);letter-spacing:1.5px;text-transform:uppercase;color:var(--texte-doux);
   font-weight:600;margin:20px 4px 9px}
-.mtr-card{background:var(--bg-card);border:1px solid var(--gris-clair);
-  border-radius:var(--radius-card);box-shadow:var(--shadow-sm);padding:5px 15px}
+.mtr-card{ padding:5px 15px; }
 .mtr-r{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--gris-clair)}
 .mtr-r:last-child{border-bottom:none}
 .mtr-r .em{font-size:var(--pt-sm,16px);width:22px;text-align:center;flex:0 0 22px}
@@ -4934,8 +4933,7 @@ body,#app-root,.page{min-height:100dvh;}
 
 .mur-lab{font-size:var(--pt-lbl,10.5px);letter-spacing:1.5px;text-transform:uppercase;color:var(--texte-doux);
   font-weight:600;margin:20px 4px 9px}
-.mur-card{background:var(--bg-card);border:1px solid var(--gris-clair);
-  border-radius:var(--radius-card);box-shadow:var(--shadow-sm);overflow:hidden}
+.mur-card{ overflow:hidden; }
 .mur-row{display:flex;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid var(--gris-clair)}
 .mur-row:last-child{border-bottom:none}
 .mur-row .av{display:flex;width:34px;height:34px;border-radius:50%;align-items:center;justify-content:center;
@@ -7855,6 +7853,46 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
 #page-parcelles.p-arrivee #p-subsel-wrap:empty+#p-team-bar .pv-team-bar{margin:0 var(--e-4,16px) var(--e-2,8px)}
 #page-parcelles.p-arrivee .pv-team-info,#page-parcelles.p-arrivee .pv-team-ico{display:none}   /* les pastilles (initiales) disent l'équipe ; les noms sont dans « Changer » */
 #page-parcelles.p-arrivee #p-subsel-wrap:empty+#p-team-bar .pv-team-info{display:block}
+
+/* ═══ CHARTE-5 — LE JEU DE CARTES COMMUN (§379) ═════════════════════════════════════════════════
+   Maquette Design « Ma Vigne — le jeu de cartes commun (CHARTE-5) », validée par Nico le 19/10 (« go »).
+   La CARTE : fond de carte, un filet, arrondi 8 px, pas d’ombre (l’ombre est pour ce qui flotte : menus,
+   fenêtres) ; cliquable, elle a les états du jeu et, choisie, un filet à la couleur d’action. Le BLOC DE
+   CHIFFRES : une carte découpée en cases par des filets. L’ENCADRÉ : quatre tons (informer, réussi,
+   attention, danger), une icône, jamais de bordure de côté. Aucune couleur ni taille écrite en dur ici
+   (mv-harnais-cartes). Le dessin d’une carte d’avant passe au jeu ; sa marge intérieure reste la sienne.
+   ★ CHARTE-5a : trois cartes d’avant au jeu — Planning .pf-card, Accueil .mtr-card (Ma trace) et .mur-card (le mur). */
+.mvcarte, .pf-card, .mtr-card, .mur-card{ background:var(--bg-card); border:var(--bw,1px) solid var(--ligne,#E7E6E2); border-radius:var(--r-md,8px); box-shadow:none; }
+.mvcarte{ display:flex; flex-direction:column; gap:var(--e-2,8px); padding:var(--e-4,16px); color:var(--texte); }
+.mvcarte-tete{ display:flex; align-items:baseline; justify-content:space-between; gap:var(--e-3,12px); }
+.mvcarte-titre{ margin:0; font-family:var(--font-ui); font-size:var(--pt-sm,16px); font-weight:var(--fw-semi,600); color:var(--texte); }
+/* la carte cliquable : un vrai bouton (ou un lien), les états du jeu ; choisie, un filet à la couleur d’action */
+.mvcarte-clic{ width:100%; text-align:left; font:inherit; color:inherit; cursor:pointer; transition:background-color .12s, border-color .12s, box-shadow .12s; }
+.mvcarte-clic:hover{ background-image:linear-gradient(var(--survol),var(--survol)); }
+.mvcarte-clic:active{ background-image:linear-gradient(var(--presse,var(--survol)),var(--presse,var(--survol))); }
+.mvcarte-clic:focus-visible{ outline:2px solid var(--focus,var(--accent)); outline-offset:2px; }
+.mvcarte-clic.on, .mvcarte-clic[aria-pressed="true"], .mvcarte-clic[aria-current="true"]{ border-color:var(--accent-texte); box-shadow:0 0 0 var(--bw,1px) var(--accent-texte); }
+/* le bloc de chiffres : une carte, des cases séparées par un filet — deux colonnes au téléphone, une ligne sur ordinateur */
+.mvchiffres{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); border:var(--bw,1px) solid var(--ligne,#E7E6E2); border-radius:var(--r-md,8px); background:var(--bg-card); overflow:hidden; }
+.mvchiffres > *{ display:flex; flex-direction:column; gap:var(--e-1,4px); padding:var(--e-3,12px) var(--e-4,16px); }
+.mvchiffres > *:nth-child(even){ border-left:var(--bw,1px) solid var(--ligne,#E7E6E2); }
+.mvchiffres > *:nth-child(n+3){ border-top:var(--bw,1px) solid var(--ligne,#E7E6E2); }
+@media (min-width:768px){
+  .mvchiffres{ grid-template-columns:repeat(var(--mvchiffres-n,4), minmax(0, 1fr)); }
+  .mvchiffres > *:nth-child(n){ border-top:0; border-left:0; }
+  .mvchiffres > *:nth-child(n+2){ border-left:var(--bw,1px) solid var(--ligne,#E7E6E2); }
+}
+.mvchiffres-v{ font-family:var(--font-ui); font-size:var(--pt-lg,24px); font-weight:var(--fw-semi,600); letter-spacing:-0.02em; color:var(--texte); font-variant-numeric:tabular-nums; }
+.mvchiffres-l{ font-size:var(--pt-micro,12px); color:var(--texte-med); }
+/* l’encadré : quatre tons, une icône, le titre au ton, le texte à l’encre */
+.mvencadre{ display:flex; align-items:flex-start; gap:var(--e-2,8px); padding:var(--e-3,12px) var(--e-3,12px); border:0; border-radius:var(--r-md,8px); background:var(--survol); color:var(--texte); font-size:var(--pt-txt,13px); line-height:1.45; }
+.mvencadre > svg{ flex:none; width:18px; height:18px; color:var(--mvencadre-ton,var(--texte-med)); }
+.mvencadre-t{ display:block; font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); color:var(--mvencadre-ton,var(--texte)); }
+.mvencadre-info{ background:var(--info-doux); --mvencadre-ton:var(--info-texte); }
+.mvencadre-ok{ background:var(--ok-doux); --mvencadre-ton:var(--ok-texte); }
+.mvencadre-attention{ background:var(--attention-doux); --mvencadre-ton:var(--attention-texte); }
+.mvencadre-danger{ background:var(--danger-doux); --mvencadre-ton:var(--danger-texte); }
+/* ★ FIN CHARTE-5 */
 
 /* JALONS-2 (§341) — « Nouveau jalon » dans la feuille d'après validation, et « Mes jalons » dans « Ma trace ». */
 .mvds-jal{display:flex;gap:var(--e-2,8px);align-items:flex-start;margin:var(--e-2,8px) 0;padding:var(--e-2,8px) var(--e-3,12px);border-radius:var(--r-lg,12px);background:var(--or-pale);border:1px solid var(--or);color:var(--texte);text-align:left}

@@ -1,0 +1,23 @@
+{
+  "lot": "CHARTE-5A",
+  "section": "§379",
+  "base": "0e244e93c44dc65ee7166f9a7d961f4b962e938a",
+  "inclut": [],
+  "date": "2026-10-19",
+  "fichiers": {
+    ".mv-base": "dc23c7ebe24b2451d744f30e632b037e714ce29f123608bb3bad3ce7714e2aa8",
+    "CLAUDE.md": "7bce6d118f1c3cbdbb565cb9bde0b5e65d46bda08683c4aea989375298175462",
+    "docs/claude/INDEX.md": "2d3ad8fc76481665a78a3c59e9ed6eff14f142e64517dfd04b4a5fcf7214232e",
+    "docs/claude/chantiers-330-379.md": "f4a42f179e9ecc5777359270298efb22ebc65a59061b189ab6796a01856e311a",
+    "docs/claude/journal.md": "50303ee8f2bb7aee0b433a35c7b2c6c448240f551ab81a8ebf708d9d29f06405",
+    "index.html": "80ebdafccfc1b517e7f086d7a00e4fdfb2292bc6db841c591a31493214d5ea5e",
+    "public/sw.js": "7fb415a83e39e85ef28324a0717e1cacb4cbd8131b6d9ce427288691ea3922d5",
+    "scripts/harnais-claude-md.mjs": "bf53daf1e9f7d99904fb790482950fc6addbb2b306d316caafc8debc798e7063",
+    "scripts/mv-harnais-liste.mjs": "c7064fea21c22c917645b76c490c621a7ca50e473d64e6e629ca3ac01b972606",
+    "scripts/mv-jetons-baseline.json": "93331f01e56017fdec60ff8c0bc9f1b1df7362c168c1a24351822093501dbadb",
+    "src/charte.css": "d88e71082d2118a8e224ad11295a27fe24a27ed34c79269ad41004f4cff2fd33",
+    "src/styles.css": "cdd7eac3d82f5a4ad5df50be2be309398a5c23af7344073565cd904c0cc40e84",
+    "src/utils.js": "885aea9eef4173b237366a76f71b94bfcd1b2a99eea612a28165adb1a0589c09",
+    "scripts/mv-harnais-cartes.mjs": "f39cf0b1da830add00150c73de1774d1d62ff5e589ff9221a3e9c3aff8655f1c"
+  }
+}

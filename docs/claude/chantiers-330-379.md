@@ -1273,3 +1273,27 @@ La suite proposée après CHARTE-4b, acceptée (« suite ») : les filtres du Tr
 
 ### 378e. La leçon
 **Avant de ranger une pièce, regarder si un écran l’a déjà décidée.** `.chip` portait le nom d’une pastille ; TRAC-2 en avait fait autre chose, exprès. La charte unifie ce qui a été dessiné au hasard, pas ce qui a été dessiné écran par écran.
+
+## 379. ★★ CHARTE-5a — LE JEU DE CARTES COMMUN, PREMIER PASSAGE (19/10 — `src/styles.css` · `src/charte.css` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-cartes.mjs` (nouveau) · `scripts/mv-harnais-liste.mjs` · `scripts/mv-jetons-baseline.json` · `scripts/harnais-claude-md.mjs` · **APP 9.40 → 9.41, SW 10.19 → 10.20**, base `0e244e9`)
+
+### 379a. La demande
+Après CHARTE-4c, les cartes : inventaire et maquette d’abord. Mesuré à `0e244e9` : **103 sortes de cartes** (76 employées), 16 arrondis, 31 marges intérieures, 10 ombres, 19 fonds, 19 bordures, et **232 encadrés faits à la main**. La refonte avait déjà fixé un dessin (fond de carte, filet, arrondi 8 px, sans ombre) sur les cartes du Planning, de l’Entretien et du matériel. Maquette Design « Ma Vigne — le jeu de cartes commun (CHARTE-5) », quatre planches ; l’encadré « informer » en bleu, comme les messages d’information d’Atlassian (icône ronde bleue, apparence par défaut de leurs messages de section). Nico : **« go »**.
+
+### 379b. Ce qui est livré
+- **Le jeu** (bloc `CHARTE-5`, fermé par `/* ★ FIN CHARTE-5 */`, placé juste avant JALONS-2 — voir 379c) : `.mvcarte` (fond de carte, filet, arrondi 8 px, pas d’ombre, marge 16 px), `.mvcarte-tete` / `.mvcarte-titre` (16 px), `.mvcarte-clic` (un vrai bouton : survol, appui, focus ; choisie — `on`, `aria-pressed` ou `aria-current` — un filet à la couleur d’action) ; `.mvchiffres` (deux colonnes au téléphone, une ligne de `--mvchiffres-n` cases sur ordinateur ; le chiffre en `--pt-lg`, chiffres droits) ; `.mvencadre` + `-info` / `-ok` / `-attention` / `-danger` (une icône, le titre au ton, le texte à l’encre, sans bordure de côté).
+- **Charte** : `--info-doux` et `--info-texte`, en clair et dans les deux sombres — les valeurs du bleu des étiquettes de type. `--info` existe déjà (le cockpit, en sombre seulement) : pas touché.
+- **Trois cartes d’avant au jeu** : Planning `.pf-card` (les demandes), Accueil `.mtr-card` (« Ma trace ») et `.mur-card` (le mur) ; leur règle ne garde que la marge et le débordement — **le dessin d’une carte passe au jeu, sa marge intérieure reste la sienne** (des rangées dessinées dedans en dépendent).
+- **`mv-harnais-cartes`** (A à F), branché (455 commandes) : les pièces ; aucune couleur ni taille de texte en dur ; les cartes passées au jeu sans fond, filet, arrondi ni ombre propres ; **48** cartes « maison » et **232** encadrés faits à la main, deux plafonds qui ne peuvent que baisser ; la couleur « informer » dans la charte. 6 vérifications, 10 contre-épreuves. Chemin par `fileURLToPath`, CRLF ramené (§376).
+
+### 379c. Trouvé en route
+- Le filet du bloc de chiffres, d’abord tracé par un écart de 1 px entre les cases, sortait de l’échelle d’espacement (`mv-harnais-echelle`) : tracé par des bordures, deux colonnes au téléphone, une ligne sur ordinateur.
+- `--ligne` appelé sans repli dans le bloc : `mv-harnais-jetons` l’a vu ; repli posé. Cliquet des replis manquants regravé à la baisse (89 → 87).
+- **Le premier passage de la chaîne : 5 rouges** — `mv-harnais-jalons`, `-arrivee4`, `-presence1`, `-premieres1`, `-rangbout1`. Chacun garde « sans couleur en dur » la tranche de feuille qui va de son bloc à TETE-2 ; le bloc CHARTE-5, posé juste avant TETE-2, y tombait, et le repli `#E7E6E2` de `--ligne` est une couleur écrite. Le bloc CHARTE-4 n’en a aucune, d’où le silence au lot précédent. Bloc déplacé juste avant JALONS-2, hors des cinq tranches ; aucune règle de la tranche ne touche les cartes passées au jeu (`mv-harnais-cartes` C), l’ordre de la cascade ne change rien.
+
+### 379d. Vu, et pas vu
+- **Vu** (`mv-captures`, Accueil, Planning › Les gens ; téléphone, clair et sombre) : les écrans intacts.
+- **Pas vu** : les trois cartes passées au jeu — « Ma trace » et le mur vivent sur l’Accueil d’un ouvrier, les demandes dans la fiche d’un salarié ; la démo entre en visiteur administrateur.
+- **Chaîne** : **455 commandes, 0 rouge** au second passage (le nouveau contrôle et ses contre-épreuves compris), joué d’un trait après le dernier changement de code — le déplacement du bloc (379c). Le premier passage avait 5 rouges.
+
+### 379e. La leçon
+**Le dessin et la marge ne se rangent pas ensemble.** Le jeu fixe ce qui fait reconnaître une carte (fond, filet, arrondi, ombre) ; la marge intérieure porte la mise en page de ce qu’il y a dedans. La ranger d’office, c’était déplacer des rangées qu’on ne pouvait pas voir.
