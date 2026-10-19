@@ -241,12 +241,12 @@ function _tratResultRow(m, section, i){
   var isE=section==='ephy';
   var ko=isE&&m.statut==='ko';
   var sel=_trat.selMeta&&_phyNorm(_trat.selMeta.nom)===_phyNorm(m.nom);
-  var minis='<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;background:rgba(200,176,32,0.15);color:#C9A84C">DAR '+(m.dar>0?m.dar+'j':'0j')+'</span> ';
-  if(m.znt!=null) minis+='<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;background:rgba(192,57,43,0.15);color:#E07A6E">ZNT '+m.znt+'m</span> ';
-  minis+='<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;background:rgba(184,90,26,0.15);color:#E0934A">DRE '+(m.drae||0)+'h</span>';
+  var minis='<span class="mvpas mvpas-type mvpas-ambre">DAR '+(m.dar>0?m.dar+'j':'0j')+'</span> ';
+  if(m.znt!=null) minis+='<span class="mvpas mvpas-type mvpas-rouge">ZNT '+m.znt+'m</span> ';
+  minis+='<span class="mvpas mvpas-type mvpas-orange">DRE '+(m.drae||0)+'h</span>';
   var stat=isE?(m.statut==='ok'
-      ?' <span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;background:rgba(61,122,39,0.18);color:#6FBF4F">&#x2713; Autoris&#xe9;</span>'
-      :' <span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;background:rgba(192,57,43,0.18);color:#E07A6E">&#x26d4; Retir&#xe9;</span>'):'';
+      ?' <span class="mvpas mvpas-fait">&#x2713; Autoris&#xe9;</span>'
+      :' <span class="mvpas mvpas-retard">&#x26d4; Retir&#xe9;</span>'):'';
   return '<div onclick="window._tratPick('+i+')" style="display:flex;align-items:center;gap:9px;padding:10px 11px;border-radius:10px;cursor:pointer;margin-bottom:6px;background:'+(sel?'rgba(74,159,200,0.12)':'var(--bg-card)')+';border:1.5px solid '+(sel?'var(--acier-med)':'var(--gris)')+';'+(ko?'opacity:.6':'')+'">'
     +'<div style="flex:1;min-width:0">'
     +'<div style="font-size:var(--pt-txt,13px);font-weight:'+(isE?'600':'700')+';color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(T[m.type]||'')+' '+_escHtml(m.nom)+'</div>'
@@ -549,7 +549,7 @@ function _tratRender(){
     if(_trat.heureDebut)rcells.push({l:'Horaires',v:_trat.heureDebut+'–'+(_trat.heureFin||'?')});
     if(_trat.dreAnticipe)rcells.push({l:'DRE anticipé',v:_trat.dreAnticipe});
     var parcListHtml=_trat.parcelles.map(function(nom){
-      return '<span style="font-size:var(--pt-micro,11px);background:var(--gris-clair);border-radius:6px;padding:3px 8px">'+_escHtml(nom)+'</span>';
+      return '<span class="mvpas mvpas-etiquette">'+_escHtml(nom)+'</span>';
     }).join(' ');
     var recapHtml='<div style="background:rgba(61,122,39,0.08);border:1.5px solid rgba(61,122,39,0.3);border-radius:12px;padding:14px;margin-bottom:14px">'
       +'<div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--vert);margin-bottom:10px">&#x1F33F; Traitement &#x00B7; '+fmtDate(_trat.date)+' &#x00B7; '+_escHtml(_trat.conducteur||'—')+'</div>'
@@ -771,7 +771,7 @@ function openTraitDetail(idx){
       </div>
     </div>
     ${t.note?`<div style="background:var(--gris-clair);border-radius:12px;padding:12px;font-size:var(--pt-micro,12px);color:var(--texte-doux);font-style:italic">${_escHtml(t.note)}</div>`:''}
-    ${(t.parcelles&&t.parcelles.length>0)?`<div style="margin-top:10px"><div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:5px">Parcelles traitées</div><div style="display:flex;flex-wrap:wrap;gap:5px">${t.parcelles.map(n=>'<span style="font-size:var(--pt-micro,11px);background:var(--gris-clair);border-radius:6px;padding:3px 8px">'+_escHtml(n)+'</span>').join('')}</div></div>`:''}
+    ${(t.parcelles&&t.parcelles.length>0)?`<div style="margin-top:10px"><div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:5px">Parcelles traitées</div><div style="display:flex;flex-wrap:wrap;gap:5px">${t.parcelles.map(n=>'<span class="mvpas mvpas-etiquette">'+_escHtml(n)+'</span>').join('')}</div></div>`:''}
     ${t.stade?`<div style="background:rgba(160,96,224,0.08);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:var(--pt-micro,12px);color:#A060E0">Stade : ${_escHtml(t.stade)}</div>`:''}
     ${t.heureDebut?`<div style="background:var(--gris-clair);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:var(--pt-micro,12px)">Horaires : ${t.heureDebut}–${t.heureFin||'?'}</div>`:''}
     ${t.dreAnticipe?`<div style="background:rgba(184,90,26,0.08);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:var(--pt-micro,12px);color:var(--orange)">DRE anticipé : ${_escHtml(t.dreAnticipe)}</div>`:''}

@@ -9475,7 +9475,7 @@ function openDP(nom){
       dpCepRow.style.display='';
       if(dpCepVal){
         if(hasCep){
-          var compBadge=p.entreplantation?'<span style="font-size:10px;font-weight:700;background:rgba(74,159,200,0.15);color:#4A9FC8;border-radius:6px;padding:1px 7px;margin-left:6px;vertical-align:middle">Complantation</span>':'';
+          var compBadge=p.entreplantation?'<span class="mvpas mvpas-etiquette" style="margin-left:6px;vertical-align:middle">Complantation</span>':'';
           dpCepVal.innerHTML='<span style="font-size:15px;font-weight:600;color:var(--texte)">'+cepArr.join(' · ')+'</span>'+compBadge;
         } else {
           dpCepVal.innerHTML='<span style="color:var(--texte-doux);font-style:italic">— Non renseigné</span>';
@@ -14434,8 +14434,8 @@ function openRapportSaison(){
     var act=s.nom===actNom, cons=(s.nom===vue)&&!act;
     var nomEsc=(window._escAttr?_escAttr(s.nom):s.nom), htmlNom=_escHtml(s.nom);
     var sub=_escHtml(s.periode||(((s.debut||'')&&(s.fin||''))?((s.debut||'')+' \u2192 '+(s.fin||'')):''));
-    var badge=act?'<span style="margin-left:8px;font-size:10px;font-weight:700;color:#2C6E29;background:rgba(61,107,39,.14);padding:2px 8px;border-radius:20px">active</span>'
-             :(cons?'<span style="margin-left:8px;font-size:10px;font-weight:700;color:#7A4F2E;background:rgba(138,90,56,.14);padding:2px 8px;border-radius:20px">consult\u00e9e</span>':'');
+    var badge=act?'<span class="mvpas mvpas-fait" style="margin-left:8px">active</span>'
+             :(cons?'<span class="mvpas mvpas-etiquette" style="margin-left:8px">consult\u00e9e</span>':'');
     return '<div onclick="closeOv(null,\'ovRapportSaison\');exportRapportSaison(\''+nomEsc+'\')" '
       +'style="display:flex;align-items:center;gap:12px;padding:14px 16px;margin-bottom:10px;background:var(--fond-module,#FBFAF6);border:1px solid var(--gris,#e5e2d8);border-radius:14px;cursor:pointer">'
       +'<div style="width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#7A1020,#8A5A38);display:flex;align-items:center;justify-content:center;font-size:var(--pt-md,20px);flex-shrink:0">\uD83D\uDCC4</div>'

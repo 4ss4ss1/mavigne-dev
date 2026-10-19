@@ -32,6 +32,8 @@ const MIGREES = ['pf-tag', 'pf-tag-sup', 'pf-tag-al', 'plan-badge', 'plan-badge-
 const EXEMPTIONS = [
   { selecteur: '.sdp-tag small', raison: 'le second rang d’une pastille de session (la mesure sous l’écart) : un petit texte, pas une pastille' }
 ];
+const PLAFOND_MAIN = 56;   // CHARTE-4c (§378) : les pastilles faites à la main (petit bloc arrondi dont le fond, une marge de 0 à 3 px et la taille
+                         //   du texte sont écrits sur place) — relevé après en avoir rendu 34 au jeu ; ne peut que baisser (F)
 const PLAFOND = 91;   // CHARTE-4a (§374) : relevé au premier passage (92) ; ne peut que baisser. CHARTE-4b (§377) : 92 → 91
 const ALLURE = /^(background(-color|-image)?|color|border(-(color|width|style|radius|top|bottom|left|right))?|box-shadow|font|font-(size|weight|family)|padding(-[a-z]+)?|height|min-height|line-height|text-transform|letter-spacing)$/;
 const sansCom = s => s.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -57,6 +59,15 @@ function maison(hors) {   // une classe de pastille qui se peint elle-même hors
       if (/(^|-)(chip|chips|pill|badge|pastille|tag)(-|$)/.test(k) && !/-(lbl|label|ico|icon|sub|row|wrap|bar|list|zone|txt|text|cnt|dot|in|x|close)$/.test(k)) n.add(k);
     }
   }
+  return n;
+}
+function faitesMain(modules) {
+  let n = 0;
+  for (const js of Object.values(modules))
+    for (const m of js.matchAll(/<(?:span|div|b|small)\b[^<>]*?style=\\?"([^"\\]*)/g)) {
+      const st = m[1];
+      if (/border-radius/.test(st) && /background/.test(st) && /padding:\s*[0-3](?:\.\d+)?px/.test(st) && /font-size/.test(st)) n++;
+    }
   return n;
 }
 function verifier({ charte, feuille, modules }) {
@@ -93,6 +104,9 @@ function verifier({ charte, feuille, modules }) {
   const blocs = [c.slice(c.indexOf(':root{')), c.slice(c.indexOf('[data-theme="dark"]'))];
   const absents = tok.filter(k => !blocs.every(b => b.includes(k + ':')));
   t('la charte porte les couleurs de type et les textes d’état, en clair et en sombre', !absents.length, absents.join(', '));
+  const nm = faitesMain(modules);
+  t(`les pastilles faites à la main ne remontent pas (${nm} ≤ ${PLAFOND_MAIN})`, nm <= PLAFOND_MAIN);
+  if (nm < PLAFOND_MAIN) R.baisse = (R.baisse ? R.baisse + ' · ' : '') + `↓ ${PLAFOND_MAIN - nm} pastille(s) faite(s) à la main de moins — baisser PLAFOND_MAIN`;
   return R;
 }
 const lireTout = () => {
@@ -125,6 +139,7 @@ if (!process.argv.includes('--contre')) {
   rougit('un style écrit sur place à côté d’une classe passée au jeu → la règle C rougit', 2, x => { x.modules['src/planning.js'] += `\nconst _h='<span class="pf-tag" style="background:#FAEAE8">x</span>';`; });
   rougit('une pastille « maison » de plus → la règle D rougit', 3, x => { x.feuille = '.essai-badge{ background:var(--or-pale); }\n' + x.feuille; });
   rougit('la charte perd une couleur de type en sombre → la règle E rougit', 4, x => { const i = x.charte.indexOf('[data-theme="dark"]'); x.charte = x.charte.slice(0, i) + x.charte.slice(i).replace(/--tag-blue-bg:/g, '--tag-xblue-bg:'); });
+  rougit('une pastille faite à la main de plus → la règle F rougit', 5, x => { x.modules['src/phyto.js'] += `\nconst _p='<span style="font-size:10px;background:var(--vert-pale);border-radius:6px;padding:1px 6px">ok</span>';`; });
   rougit('témoin — une allure dans un commentaire ne compte pas', null, x => { x.feuille = '/* .pf-tag{ background:red } */\n' + x.feuille; });
   rougit('témoin — la mise en page d’une classe passée au jeu reste permise', null, x => { x.feuille = '.pf-tag{ margin-left:4px; }\n' + x.feuille; });
   console.log(`\n  ${ok} vertes, ${ko} rouges\n`); process.exit(ko ? 1 : 0);

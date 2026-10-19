@@ -4266,7 +4266,7 @@ function _planBuildMonHtml(mbr,canEdit){
     // Une absence n'est plus rouge par principe : st.c porte deja la couleur du
     // motif (bleu = assimilee travail, orange = payee, rouge = non payee).
     var effColor=isRecup?'var(--plan-acc)':e&&e.absent?st.c:isCp?'var(--orange)':e&&eff>pl&&pl>0?'var(--vert-med)':e&&eff<pl&&pl>0?'var(--orange)':st.c;
-    var cpBadge=isCp?'<span style="font-size:10px;font-weight:600;background:rgba(217,119,6,0.35);color:var(--orange);padding:1px 7px;border-radius:20px;margin-left:6px">CP</span>':'';
+    var cpBadge=isCp?'<span class="mvpas mvpas-type mvpas-bleu" style="margin-left:6px">CP</span>':'';
     daysHtml+='<div class="plan-day-row" style="border-color:'+st.bd+';background:'+st.bg+';cursor:'+(canEdit?'pointer':'default')+'"'+(canEdit?' onclick="openPlanDayModal(\''+_escAttr(mbr.nom)+'\','+d+')"':'')+'>'
       +'<div class="plan-day-num" style="color:'+st.c+'"><div class="plan-day-n">'+d+'</div><div class="plan-day-dow">'+PLAN_JOURS[dow]+'</div></div>'
       +'<div class="plan-day-info">'
@@ -4315,7 +4315,7 @@ function _planCompteCard(mbr,uptoMonth,a){
   var h='<div class="plan-card" style="background:var(--bg-card);border:1.5px solid var(--gris-clair);margin-bottom:14px;flex-direction:column;align-items:stretch">';
   h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:11px">'
     +'<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--terre)">\u23f1 Heures faites \u00b7 '+planYear+'</span>'
-    +'<span style="margin-left:auto;font-size:10px;font-weight:700;color:var(--texte-doux);background:var(--bg-app);border:1px solid var(--gris-clair);padding:2px 8px;border-radius:20px">'+_escHtml(tc)+'</span>'
+    +'<span class="mvpas mvpas-etiquette" style="margin-left:auto">'+_escHtml(tc)+'</span>'
   +'</div>';
   h+='<div style="display:flex;gap:7px">'
     +'<div style="flex:1;text-align:center;padding:11px 4px;background:var(--bg-app);border-radius:10px"><div style="font-size:var(--pt-lg,24px);font-weight:800;line-height:1;font-variant-numeric:tabular-nums">'+_planFmt(a.cumul)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:4px">Travail effectif</div></div>'
@@ -5866,8 +5866,8 @@ function _planLegalCard(mbr){
   var breaches=_planLegalBreaches(mbr,planMonth);
   var worked=_planWorkMonth(mbr,planMonth);
   var headPill=breaches>0
-    ?'<span style="margin-left:auto;font-size:10px;font-weight:700;color:var(--rouge-tx,#A0291E);background:var(--rouge-pale);border:1px solid rgba(220,38,38,0.4);padding:2px 8px;border-radius:20px">\u26a0 '+breaches+' sem. &gt; max</span>'
-    :'<span style="margin-left:auto;font-size:10px;font-weight:700;color:var(--vert-med);background:var(--vert-pale);border:1px solid rgba(61,107,39,0.35);padding:2px 8px;border-radius:20px">\u2713 conforme</span>';
+    ?'<span class="mvpas mvpas-retard" style="margin-left:auto">\u26a0 '+breaches+' sem. &gt; max</span>'
+    :'<span class="mvpas mvpas-fait" style="margin-left:auto">\u2713 conforme</span>';
   var border=breaches>0?'1.5px solid var(--rouge)':'1px solid var(--gris-clair)';
   var h='<div class="plan-card" style="border:'+border+';flex-direction:column;align-items:stretch;margin-bottom:14px">';
   h+='<div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--plan-acc)">\u2696\ufe0f Cadre l\u00e9gal</span>'+headPill+'</div>';

@@ -3956,11 +3956,11 @@ function _docsCan(mod){
 }
 function _docsEsc(s){ return (typeof window._escHtml==='function') ? window._escHtml(String(s==null?'':s)) : String(s==null?'':s); }
 function _docsFmTag(fm){
-  if(fm==='pdf')  return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--rouge-pale);color:var(--rouge-tx,#A0291E)">PDF</span>';
-  if(fm==='csv')  return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--vert-pale);color:var(--vert)">Excel / CSV</span>';
-  if(fm==='json') return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--acier-pale);color:var(--acier)">JSON</span>';
-  if(fm==='imp')  return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--bleu-pale);color:var(--bleu-tx,#1A4A7A)">Fichier \u00e0 choisir</span>';
-  return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--gris-clair);color:var(--texte-doux)">R\u00e9glage</span>';
+  if(fm==='pdf')  return '<span class="mvpas mvpas-type mvpas-rouge">PDF</span>';
+  if(fm==='csv')  return '<span class="mvpas mvpas-type mvpas-vert">Excel / CSV</span>';
+  if(fm==='json') return '<span class="mvpas mvpas-type mvpas-bleu">JSON</span>';
+  if(fm==='imp')  return '<span class="mvpas mvpas-type mvpas-ambre">Fichier \u00e0 choisir</span>';
+  return '<span class="mvpas mvpas-type mvpas-gris">R\u00e9glage</span>';
 }
 function _docsChip(txt,bg,col){
   return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:'+bg+';color:'+col+'">'+_docsEsc(txt)+'</span>';
@@ -3996,7 +3996,7 @@ function _docsRender(){
   var fond=_docsFam==='oblig'?'var(--rouge-pale)':(_docsFam==='suivi'?'var(--or-pale)':'var(--acier-pale)');
   intro.innerHTML='<div style="background:'+fond+';border-left:3px solid '+bord+';border-radius:12px;padding:11px 13px;font-size:var(--pt-lbl,12px);line-height:1.55;color:var(--texte);margin-bottom:12px">'
     +fam.intro
-    +(_docsFam==='oblig'?' <span style="display:inline-block;background:var(--rouge);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-top:4px">Fichier obligatoire au 01/01/2027</span>':'')
+    +(_docsFam==='oblig'?' <span class="mvpas mvpas-surveiller" style="margin-top:4px">Fichier obligatoire au 01/01/2027</span>':'')
     +'</div>';
   var arr=[];
   MV_DOCS.forEach(function(d,i){ if(d.f===_docsFam) arr.push({d:d,i:i,ok:_docsCan(d.mod)}); });

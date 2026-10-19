@@ -1,0 +1,25 @@
+{
+  "lot": "CHARTE-4C",
+  "section": "§378",
+  "base": "b98194c5b39fa380e5b5018ae0c2a2491f05ccb6",
+  "inclut": [],
+  "date": "2026-10-19",
+  "fichiers": {
+    ".mv-base": "ecf747097ecc1f6aa595d5766d2f7cbe1f195e9291dd2a00a18f1ebc045981e6",
+    "CLAUDE.md": "d4c6d47bbd4a0583c59958288289e77cb46b8424be0623f731c27d0d079532d5",
+    "docs/claude/INDEX.md": "218fbf30498ebb5e733931f23c93951f97e610760f55d4fb05f2122a93bed095",
+    "docs/claude/chantiers-330-379.md": "77f024c4c226591464a4dfe8aea78c8929e1b28aff46c4331f3d6515e81d1b5b",
+    "docs/claude/journal.md": "46ac5689247d40dbd7d9a2ec27f13b364fe8ec2223dd35a47f8c227ebcfa964f",
+    "index.html": "84e029026d30de19a4cb1e87b53a248b3f9665bfc96fac79eaf195a798fa71b7",
+    "public/sw.js": "194e3e6a1809552a48754a0b57ebb52546451cb7c3d0d08dc135c67e193f773e",
+    "scripts/harnais-claude-md.mjs": "7126d313c49c9f84186945c56806bdfc1b569c7416e60c1f97346fc42ccd5439",
+    "scripts/mv-harnais-pastilles.mjs": "5868e14ace637ebb09943e16c11cc953f9e372bdeb97d55e26fc68bca949fb08",
+    "src/app.js": "01326a927d77fa9928cdd729194b4bd88f447538185ae49ab59e941ce02b196c",
+    "src/cave.js": "feed54098cbbac0446c2b576e1dcf25a319bef7c98106afb83540c40bf91880f",
+    "src/phyto.js": "c3fd55443e40f7625682ddcf176b5439545f47e7ff8242f8a7619fb82e7760e4",
+    "src/planning.js": "a50037149373ecec6997d9f859ea63d121235e3780c3662c29bfdfe1e75427a8",
+    "src/reglages.js": "f759a6d6b2e0caabcbc8a4c30ee491db2ffe413efaa60b64dfb6235abe1b6f81",
+    "src/tracteur.js": "5870a1fad47c174394269c88309cb9cce04299f44b513cdae9d1567ba37baccb",
+    "src/utils.js": "7ce1376a41d43ff92f8f561554a80c51a21e7ee51302f47a2a8340d619aeb065"
+  }
+}

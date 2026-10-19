@@ -238,13 +238,13 @@ function renderPhytoTrac(){
     if(darBase>0&&t.date){
       const ap=new Date(t.date);const fin=new Date(ap.getTime()+darBase*86400000);
       const reste=Math.ceil((fin-now)/86400000);
-      if(reste>0) darBadge='<span style="background:var(--rouge-pale);color:var(--rouge-tx,#A0291E);font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px">DAR '+reste+'j</span>';
+      if(reste>0) darBadge='<span class="mvpas mvpas-type mvpas-ambre">DAR '+reste+'j</span>';
     }
     const dreInfo=dreEffectif(m.drae,m.type,m.dreH,m.dreHc);
     let draeBadge='';
     if(dreInfo.h>0&&t.date){
       const draeR=Math.max(0,dreInfo.h-Math.floor((now-new Date(t.date))/3600000));
-      if(draeR>0) draeBadge='<span style="background:var(--tag-amber-bg,#FFF3CD);color:var(--tag-amber-tx,#856404);font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px">Réentrée '+draeR+'h</span>';
+      if(draeR>0) draeBadge='<span class="mvpas mvpas-type mvpas-orange">Réentrée '+draeR+'h</span>';
     }
     const tc=TC[m.type]||'var(--texte-doux)', tb=TB[m.type]||'var(--gris-clair)';
     const emj='';
@@ -1628,7 +1628,7 @@ function renderTracteur(){
     var nbProd=g.produits.length;
     var abBadge=g.anyAb?'<span class="sc-ab-badge">AB</span>':'';
     var npTag='<span class="sc-phyto-badge">PHYTO</span>';
-    var passTag=g.nbPass>1?'<span style="display:inline-block;background:var(--vert-pale);color:var(--vert-med);border-radius:6px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:4px">'+g.nbPass+' passages</span>':'';
+    var passTag=g.nbPass>1?'<span class="mvpas mvpas-etiquette" style="margin-left:4px">'+g.nbPass+' passages</span>':'';
     var condTxt=g.conducteurs.length===0?'—':(g.conducteurs.length===1?g.conducteurs[0]:'Plusieurs');
     var chips=g.produits.map(function(nom){
       var ty=_prodType[nom]||'';
@@ -3138,8 +3138,8 @@ function _fillTracPickWithId(pfx, actNom, selId, defId){
           '<div style="font-size:10px;color:'+col+'">'+_escHtml(t.type||'')+(isDefaut?' · Défaut pour '+actNom:'')+'</div>'+
         '</div>'+
       '</div>'+
-      (rep?'<span style="font-size:10px;font-weight:600;background:var(--rouge-pale);color:var(--rouge-tx,#A0291E);border-radius:6px;padding:2px 8px">En répar.</span>':'')+
-      ((!rep&&isDefaut)?'<span style="font-size:10px;background:var(--acier-pale);color:var(--acier-med);border-radius:6px;padding:2px 8px">Défaut</span>':'')+
+      (rep?'<span class="mvpas mvpas-retard">En répar.</span>':'')+
+      ((!rep&&isDefaut)?'<span class="mvpas mvpas-etiquette">Défaut</span>':'')+
     '</div>';
   }).join('');
   tracBtnEl.querySelectorAll('.trac-sel-btn').forEach(function(btn){

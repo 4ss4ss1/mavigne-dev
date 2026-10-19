@@ -1248,3 +1248,28 @@ La suite proposée après CHEMINS-1, acceptée (« suite ») : le reste des past
 
 ### 377e. La leçon
 **Un état peint par le code échappe à la charte.** Trois styles allumaient les pastilles de l’opération à la couleur du type d’opération : aucune feuille ne pouvait les ramener au jeu. Un état se dit par une classe (et `aria-pressed`) ; la couleur reste à la feuille.
+
+## 378. CHARTE-4c — LES PASTILLES FAITES À LA MAIN RENDUES AU JEU (19/10 — `src/app.js` · `src/cave.js` · `src/phyto.js` · `src/planning.js` · `src/reglages.js` · `src/tracteur.js` · `index.html` · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `scripts/mv-harnais-pastilles.mjs` · `scripts/harnais-claude-md.mjs` · **APP 9.39 → 9.40, SW 10.18 → 10.19**, base `b98194c`)
+
+### 378a. La demande
+La suite proposée après CHARTE-4b, acceptée (« suite ») : les filtres du Tracteur et les pastilles faites à la main.
+
+### 378b. Les filtres du Tracteur : lus, et laissés — une décision
+`.chip` (8 emplois, tous au Tracteur : conducteurs, activités, machines de l’entretien) n’est plus une pastille depuis TRAC-1/TRAC-2 : des règles de contexte (`#page-tracteur .chips-row .chip`, `#ent-trac-filter .chip`, `#ent-gauche #ent-trac-filter .chip`) en font un **contrôle segmenté** — une barre grise où le choisi devient une carte blanche, et sur ordinateur une liste à gauche, le choisi à l’accent doux. `mv-harnais-trac2` en vérifie le texte, `mv-harnais-retour` le crayon d’un conducteur et l’agrandissement de la cible tactile. Les passer en filtres ronds défairait une décision écran par écran déjà validée : ils restent. Le jeu n’a pas de pièce « contrôle segmenté » ; l’unifier (avec les onglets Sessions / Entretien) serait un lot à part.
+
+### 378c. Ce qui est livré
+- **34 pastilles faites à la main rendues au jeu**, chacune choisie à la main et vérifiée sur son texte avant d’être réécrite : la balise reçoit sa pièce, ne garde que sa mise en page (marges, alignement vertical, position).
+  - Phyto : DAR → type ambre, ZNT → type rouge, délai de rentrée → type orange, « ✓ Autorisé » → fait, « ⛔ Retiré » → en retard ; deux étiquettes neutres.
+  - Cave : « SO₂ ✓ » et « FML ✓ » → fait, « FML en cours » → en cours, « FML non faite » → en retard, « Pas de malo (voulu) » → à faire ; les doses « 2g » / « 5g » des conversions → neutres.
+  - Planning : « CP » → type bleu (comme au §374), « ⚠ … sem. > max » → en retard, « ✓ conforme » → fait, une étiquette neutre.
+  - Réglages, types d’export : PDF rouge, Excel / CSV vert, JSON bleu, « Fichier à choisir » ambre, « Réglage » gris ; « Fichier obligatoire au 01/01 » → à surveiller.
+  - Tracteur : DAR → type ambre, rentrée → type orange, « En répar. » → en retard, « Défaut » et le nombre de passages → neutres. Accueil : « Complantation », « consultée » → neutres, « active » → fait.
+- **Règle F de `mv-harnais-pastilles`** : une pastille faite à la main (petit bloc arrondi dont le fond, une marge de 0 à 3 px et la taille du texte sont écrits sur place) ne peut plus s’ajouter ; il en reste **56** (la console GT, les couleurs calculées par le code, des cas à trancher), plafond qui ne peut que baisser. 6 vérifications, 11 contre-épreuves.
+
+### 378d. Vu, et pas vu
+- **Vu** (`mv-captures`, Phyto, Tracteur, Planning › Les gens ; clair et sombre) : les écrans intacts.
+- **Pas vu** : les pastilles rendues elles-mêmes — elles vivent dans des fiches que l’outil n’ouvre pas (le détail d’un produit, la fiche d’une cuvée, l’entretien d’une machine, les exports des Réglages) ou que la démo ne porte pas.
+- **Chaîne** : **453 commandes, 0 rouge**, au second passage, joué d’un trait après le dernier changement de code. Le premier avait **1 rouge** : `mv-harnais-subset` — l’annonce 9.40 écrivait « SO₂ », et le « ₂ » n’est pas dans le sous-ensemble de la police servie avec l’appli (`src/utils.js` 34 → 35 caractères hors sous-ensemble). Écrit « SO2 » dans l’annonce ; la pastille de la Cave garde son « SO₂ » (déjà là avant, compté dans le plafond).
+
+### 378e. La leçon
+**Avant de ranger une pièce, regarder si un écran l’a déjà décidée.** `.chip` portait le nom d’une pastille ; TRAC-2 en avait fait autre chose, exprès. La charte unifie ce qui a été dessiné au hasard, pas ce qui a été dessiné écran par écran.

@@ -2419,7 +2419,7 @@ function _populateCanaLinkOps() {
     return '<div class="cana-link-op-item" data-id="'+op.id+'" onclick="window.selectCanaLinkOp(this,\''+op.id+'\')">'  
       +'<div style="display:flex;align-items:flex-start;gap:8px;">'  
       +'<span style="font-size:var(--pt-base,14px);margin-top:1px;">\uFFFD\uFFFD</span>'  
-      +'<div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte);">'+_caveDateFr(op.date)+'</span>'+(hasSO2?'<span style="font-size:var(--pt-lbl,10.5px);font-weight:600;color:#4A9FC8;background:rgba(74,159,200,0.1);border-radius:6px;padding:1px 6px;">SO\u2082 \u2713</span>':'')+'</div>'  
+      +'<div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte);">'+_caveDateFr(op.date)+'</span>'+(hasSO2?'<span class="mvpas mvpas-fait">SO\u2082 \u2713</span>':'')+'</div>'  
       +'<div style="font-size:var(--pt-txt,13px);font-weight:500;color:var(--terre,#C0845A);margin-bottom:2px;">\uD83C\uDF77 '+_escHtml(cuvLabel)+'</div>'  
       +notesHtml+'</div>'  
       +'</div>';
@@ -2569,10 +2569,10 @@ function openCuveeDetail(cuvId,dans){
   //   finie dans sa propre fiche n'y voyait aucune etiquette.
   lFml=_caveFmlEtat(cuv);
   var fmlH='';
-  if(lFml==='ok')fmlH='<div style="font-size:var(--pt-lbl,10.5px);font-weight:600;color:#3A8C40;background:rgba(58,140,64,0.12);border-radius:6px;padding:2px 8px;display:inline-block;margin-top:4px;">FML \u2713</div>';
-  else if(lFml==='cours')fmlH='<div style="font-size:var(--pt-lbl,10.5px);font-weight:600;color:#B8913A;background:rgba(184,145,58,0.12);border-radius:6px;padding:2px 8px;display:inline-block;margin-top:4px;">FML en cours</div>';
-  else if(lFml==='non')fmlH='<div style="font-size:var(--pt-lbl,10.5px);font-weight:600;color:#E07060;background:rgba(224,112,96,0.1);border-radius:6px;padding:2px 8px;display:inline-block;margin-top:4px;">FML non faite</div>';
-  else if(lFml==='sans')fmlH='<div style="font-size:var(--pt-lbl,10.5px);font-weight:600;color:var(--texte-doux,#7A736A);background:rgba(122,115,106,0.1);border-radius:6px;padding:2px 8px;display:inline-block;margin-top:4px;">Pas de malo (voulu)</div>';   // ★ FML-1
+  if(lFml==='ok')fmlH='<div class="mvpas mvpas-fait" style="margin-top:4px">FML \u2713</div>';
+  else if(lFml==='cours')fmlH='<div class="mvpas mvpas-encours" style="margin-top:4px">FML en cours</div>';
+  else if(lFml==='non')fmlH='<div class="mvpas mvpas-retard" style="margin-top:4px">FML non faite</div>';
+  else if(lFml==='sans')fmlH='<div class="mvpas mvpas-afaire" style="margin-top:4px">Pas de malo (voulu)</div>';   // ★ FML-1
   var cOps=(CAVE_ELEVAGE.operations||[]).filter(function(op){
     var ids=op.cuvees_ids||(op.cuvee_id?[op.cuvee_id]:[]);
     // ★ ASM-1 — la cuvee ou l'on a puise le voit aussi (§153b).
