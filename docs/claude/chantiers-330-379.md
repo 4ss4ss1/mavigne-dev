@@ -1091,3 +1091,24 @@ Le troisième étage du plan (§367a) : des pièces communes, en commençant par
 
 ### 370g. La leçon
 **Une capture qui montre deux fois le même écran de connexion ne prouve rien — même à zéro pixel d’écart.** Le zéro se regarde avant d’être cru : c’est en ouvrant une capture qu’on a vu que les pages n’étaient pas là.
+
+## 371. ★★ CAPTURES-1 — LES VRAIS ÉCRANS SE REGARDENT : L’OUTIL DE CAPTURES RÉPARÉ (19/10 — `scripts/mv-captures.mjs` (neuf) · `CLAUDE.md` · `scripts/harnais-claude-md.mjs` · **aucun bump** (un script et la doc), base `a298edd`)
+
+### 371a. La demande
+CHARTE-3 (§370) est parti avec « les écrans eux-mêmes non regardés ». La suite proposée et acceptée (« suite ») : réparer d’abord l’outil, pour regarder les écrans avant de livrer, puis CHARTE-3b. CHARTE-3 poussé (`a298edd`), identique au zip.
+
+### 371b. Les trois causes, trouvées une par une
+1. **Vite en développement recharge la page** quand il découvre une dépendance à préparer : tout ce qu’on avait posé (données, connexion) part avec. → On capture l’appli CONSTRUITE (`dist/`), servie telle quelle.
+2. **Le premier chargement avec `?tenant=` se recharge lui-même** (le domaine est rangé, l’adresse nettoyée). Mesuré : deux chargements ; la démo lancée pendant le premier disparaissait. → On attend le second.
+3. **La connexion simulée d’e2e-local** cherche la tuile « Nico E2E » en toutes lettres et attend des membres qui n’arrivent pas : l’écran reste sur « Chargement… (4) ». → On entre par la DÉMO : `fbLoginDemo` simulé, `_authReady` posé, `_startDemoVisite` — son scénario (Domaine des Grandes Vignes) pose ses données en mémoire, rien n’est écrit (réseau extérieur coupé, Firebase compris).
+- Et le petit serveur renvoyait la page d’accueil pour un fichier absent (`/version.json`) : il répond désormais « absent ».
+
+### 371c. L’outil
+`scripts/mv-captures.mjs` : l’appli construite servie par un petit serveur, Playwright du dépôt, réseau extérieur coupé, entrée par la démo ; 13 écrans (les pages, et les fenêtres : ajouter un tracteur, une session, une opération de cave, un retrait de fût), téléphone (390 × 844) et ordinateur (1366 × 900), clair et sombre ; sortie dans `rapports/captures/`. **Une capture où l’écran de connexion est revenu est nommée et ne compte pas** (code 1). Hors de la chaîne : il demande `dist/` et un navigateur (`npx playwright install chromium` ; dans le bac à sable de Claude, `MV_CHROMIUM`). Essayé : 16 captures valables sur quatre écrans, zéro retour de la connexion.
+
+### 371d. Ce qu’on a vu, en vrai
+- **CHARTE-3 dans ses écrans** : les options passées au jeu — le type de transmission (Ajouter un tracteur), le type d’opération (Nouvelle opération), la raison (Retrait de fût) — et « Enregistrer » d’une session : justes, en clair et en sombre, au téléphone et sur ordinateur.
+- **Ce qui saute aux yeux, hors jeu** : les boutons d’action des fenêtres — « Ajouter le tracteur » vert, « Enregistrer » d’une opération de cave orange, « Confirmer le retrait » bordeaux —, les pastilles « Désactiver » et « Voir toutes » d’une session, les « − » et « + » ronds. C’est CHARTE-3b.
+
+### 371e. La leçon
+**Devant un « zéro écart », demander ce qui a été photographié.** Trois lots ont comparé des écrans de connexion entre eux ; le seul contrôle qui l’a vu était d’ouvrir une capture. L’outil le dit désormais lui-même.

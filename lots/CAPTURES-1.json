@@ -1,0 +1,16 @@
+{
+  "lot": "CAPTURES-1",
+  "section": "§371",
+  "base": "a298eddfbd475311fbd015421ea16fa24f7dda6a",
+  "inclut": [],
+  "date": "2026-10-19",
+  "fichiers": {
+    ".mv-base": "f3c0a1eb9d9bdc811b0e4ab0d718026cb417120f8a5a39abd69a7b3c5782e047",
+    "CLAUDE.md": "20c16c3d985733a05307bf43c3231ba76a5214dd46b04ad5433d3bf36beffe48",
+    "docs/claude/INDEX.md": "123e538df97dcf8d1382f65792ef1b581ad0bbabe0079ac4b42cb87471f0ed55",
+    "docs/claude/chantiers-330-379.md": "4e15604e372f1ac0a2b9b49477324cebd35c3664fc45953b5b1ceca34568765c",
+    "docs/claude/journal.md": "c5c875975a000ef7d69e8a4e32776b2071b9369c0d596ced56cae634822ec61b",
+    "scripts/harnais-claude-md.mjs": "fa719dbcf2b5bc1112c27be8d77412dc91c2dd38adc19ccc03eef82fe04ff36e",
+    "scripts/mv-captures.mjs": "f952c2ae264d427aa17b801fd1976105271043f7a0ac98c043fc37e19e2a90f3"
+  }
+}
