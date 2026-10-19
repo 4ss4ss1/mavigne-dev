@@ -32,7 +32,7 @@
   "src/cuvier.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 531
+    "ko": 568
   },
   "src/firebase.js": {
     "dur": 0,
@@ -112,6 +112,6 @@
   "src/styles.css": {
     "dur": 269,
     "petit": 90,
-    "ko": 747
+    "ko": 787
   }
 }

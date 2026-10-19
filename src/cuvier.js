@@ -18,7 +18,7 @@
 //   fichiers ne lit l'autre avant le premier geste (mv-harnais-cuvier).
 // ════════════════════════════════════════════════════════════════════════════
 
-import { isAdmin, canWrite, showToast, _escHtml, _escAttr, _mvBadge, _mvIcon } from './utils.js';
+import { isAdmin, canWrite, showToast, _escHtml, _escAttr, _mvBadge, _mvIcon, _mvInfoBtn, _mvInfoSet } from './utils.js';
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -1580,6 +1580,7 @@ function renderVendParam() {
   html+='<div class="mvv-set"><div class="mvv-set-t">Chaptalisation</div>'
     +'<div class="mvv-set-d">Sucre pour enrichir de 1° d’alcool potentiel. Standard : 16,83 g/L (≈ 17 g/L). Utilisé par l’assistant d’opération sur cuve.</div>'
     +'<div class="mvv-prow"><div class="mvv-prow-l">Sucre par degré</div><div style="display:flex;align-items:center;gap:7px"><input class="mvv-fi" id="vpfi-spd" type="number" min="15" max="20" step="0.01" value="'+cfg.sucre_par_degre+'"><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F)">g/L</span></div></div></div>';
+  html+=_matRegHtml();   // ★ MATU-1 : la fourchette visée par couleur
   html+='<div class="mvv-set"><div class="mvv-set-t">Clients vrac</div>'
     +'<div class="mvv-set-d">Acheteurs de raisin en vrac, avec leur poids par caisse. Sert à convertir les caisses vendues et suivre les volumes livrés.</div>'
     +(canWrite()?'<button class="mvv-save ghost2" style="margin-top:12px" onclick="openVendClients()">Gérer les clients ('+_vendClients().length+')</button>':'')
@@ -2179,11 +2180,14 @@ function _vendSaveParam() {
   var _inv=(rMin>rMax);
   if(_inv){ var _t=rMin; rMin=rMax; rMax=_t; }
   var _corr=(_av!==[pck,rMin,rMax,spd].join('|'));
+  // ★ MATU-1 — la fourchette de maturité : deux bornes ou aucune, sinon rien ne s'enregistre.
+  var _mf=_matRegLire(); if(_mf.err){ showToast(_mf.err,'var(--attention)'); return; }
   if(!CAVE_VENDANGE.config) CAVE_VENDANGE.config={};
   CAVE_VENDANGE.config.poids_caisse_kg=pck;
   CAVE_VENDANGE.config.ratio_min=rMin;
   CAVE_VENDANGE.config.ratio_max=rMax;
   CAVE_VENDANGE.config.sucre_par_degre=spd;
+  CAVE_VENDANGE.config.mat_four=_mf.four;
   window.CAVE_VENDANGE=CAVE_VENDANGE;
   _vendFbSave(_inv?'Ratios remis dans l\u2019ordre \u00b7 min '+rMin+', max '+rMax
                   :(_corr?'Param\u00e8tres enregistr\u00e9s \u00b7 valeur(s) ramen\u00e9e(s) aux bornes'
@@ -7593,9 +7597,6 @@ window._vendSaveParam       = _vendSaveParam;
 // ── AJOUTS v2 : Analyses maturité (Cuvier) · Millésimes + Mise en
 //    bouteille (Le Chai). Injections DOM+CSS idempotentes → aucun bump.
 // ══════════════════════════════════════════════════════════════════
-var _vendAnaUnitMode = 'sucre';   // 'sucre' (g/L) | 'alc' (%vol)
-function _vendAnaAlc(a){ var spd=_anaSpd(a); return a.mode==='alc'?(a.val||0):((a.val||0)/spd); }
-
 // ─────────── ANALYSES DE MATURITÉ (Cuvier) ───────────
 // ═══════════════════════════════════════════════════════════════════════════
 // LOT M2 — Apports par parcelle. Ce qui se decide : rien. Ce qu'il prouve :
@@ -7953,6 +7954,8 @@ function _vendMatSvg(byP, w, opt){
   var vMin = Math.floor((Math.min.apply(null, vs) - 8) / 10) * 10;
   var vMax = Math.ceil((Math.max.apply(null, vs) + 8) / 10) * 10;
   if(opt.objectif > 0){ vMin = Math.min(vMin, opt.objectif - 10); vMax = Math.max(vMax, opt.objectif + 10); }
+  /* ★ MATU-1 : la fourchette visée de chaque couleur, en bande. L'échelle s'ouvre pour la contenir. */
+  (opt.bandes || []).forEach(function(b){ vMin = Math.min(vMin, Math.floor((b.min - 6) / 10) * 10); vMax = Math.max(vMax, Math.ceil((b.max + 6) / 10) * 10); });
   if(vMax - vMin < 20) vMax = vMin + 20;
 
   function X(t){ return pL + (t - t0) / (t1 - t0) * iw; }
@@ -7983,8 +7986,13 @@ function _vendMatSvg(byP, w, opt){
        + '<text x="' + (pL + 6) + '" y="' + (yo - 7).toFixed(1) + '" font-size="' + c.txt.mini + '" font-weight="700" fill="' + c.col.alerte + '">objectif ' + Math.round(opt.objectif) + ' g/L \u00b7 ' + _mvF1(opt.objectif / spd) + ' %vol</text>';
   }
 
+  (opt.bandes || []).forEach(function(b){
+    var y1 = Y(b.max), y2 = Y(b.min);
+    g += '<rect x="' + pL + '" y="' + y1.toFixed(1) + '" width="' + (W - c.padR - pL).toFixed(1) + '" height="' + Math.max(0, y2 - y1).toFixed(1) + '" style="fill:var(--ok-doux);stroke:var(--ok);stroke-width:1"/>'
+       + '<text x="' + (W - c.padR - 6) + '" y="' + (y1 + 12).toFixed(1) + '" text-anchor="end" font-size="' + c.txt.mini + '" font-weight="700" style="fill:var(--ok)">' + _escHtml(b.lbl) + '</text>';
+  });
   traces.forEach(function(r, k){
-    var col = MV_MAT_COL[k % MV_MAT_COL.length];
+    var col = opt.couleur || MV_MAT_COL[k % MV_MAT_COL.length];
     var pts = r.arr.map(function(a){ return X(Date.parse(a.date)).toFixed(1) + ',' + Y(_matSuc(a, spd)).toFixed(1); });
     g += '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + col + '" stroke-width="' + c.trait.mesure + '" stroke-linejoin="round" stroke-linecap="round"/>';
     r.arr.forEach(function(a){
@@ -8000,7 +8008,7 @@ function _vendMatSvg(byP, w, opt){
   var aria = 'Maturit\u00e9 par parcelle : ' + traces.length + ' parcelles suivies, de '
     + Math.round(traces[traces.length - 1].suc) + ' \u00e0 ' + Math.round(traces[0].suc)
     + ' grammes de sucre par litre. ' + premiere + ' est la plus avanc\u00e9e.';
-  return window._mvGraphSvg(c, aria, g) + _matLegende(traces, caches, et);
+  return window._mvGraphSvg(c, aria, g) + (opt.sansLegende ? '' : _matLegende(traces, caches, et));
 }
 
 // La legende vit SOUS le graphe, en HTML : elle reste lisible quand le graphe
@@ -8026,109 +8034,98 @@ function _matLegende(traces, caches, etroit){
   return h;
 }
 
-function _vendAnaSpark(arr,w){
-  if(arr.length<2) return window._mvGraphVide('Une seule analyse sur cette parcelle',
-    'La courbe de maturit\u00e9 se trace \u00e0 partir de deux mesures.');
-  var c=window._mvGraphCadre(w,126,{padL:26,padR:8,padT:20,padB:26});
-  var W=c.w,H=c.h,pad=c.padL;
-  var ys=arr.map(_vendAnaAlc);
-  var mn=Math.min.apply(null,ys)-0.4, mx=Math.max.apply(null,ys)+0.4;
-  if(mx-mn<0.2){mn-=0.5;mx+=0.5;}
-  var px=function(i){return pad+i*(W-pad-c.padR)/(arr.length-1);};
-  var py=function(v){return H-c.padB-(v-mn)/(mx-mn)*c.ih;};
-  var pts=arr.map(function(a,i){return px(i)+','+py(_vendAnaAlc(a));}).join(' ');
-  var pas=arr.length>7?Math.ceil(arr.length/7):1;
-  var dots=arr.map(function(a,i){
-    return '<circle cx="'+px(i)+'" cy="'+py(_vendAnaAlc(a))+'" r="3.5" fill="'+c.col.mesure+'"/>'
-      +((i%pas===0||i===arr.length-1)
-        ? '<text x="'+px(i)+'" y="'+(H-6)+'" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'" text-anchor="middle">'+(a.date?a.date.slice(8)+'/'+a.date.slice(5,7):'')+'</text>'
-        : '');
-  }).join('');
-  var last=_vendAnaAlc(arr[arr.length-1]);
-  var g='<line x1="'+pad+'" y1="'+c.padT+'" x2="'+pad+'" y2="'+(H-c.padB)+'" stroke="'+c.col.grille+'" stroke-width="'+c.trait.grille+'"/>'
-    +'<line x1="'+pad+'" y1="'+(H-c.padB)+'" x2="'+(W-c.padR)+'" y2="'+(H-c.padB)+'" stroke="'+c.col.grille+'" stroke-width="'+c.trait.grille+'"/>'
-    +'<polyline points="'+pts+'" fill="none" stroke="'+c.col.mesure+'" stroke-width="'+c.trait.mesure+'"/>'+dots
-    +'<text x="'+(W-c.padR)+'" y="'+(c.txt.axe+3)+'" font-size="'+c.txt.axe+'" fill="var(--texte)" text-anchor="end" font-weight="600">~'+_mvF1(last)+'% vol potentiel</text>';
-  return window._mvGraphSvg(c,'Maturit\u00e9 : '+arr.length+' analyses, degr\u00e9 potentiel jusqu\u2019\u00e0 '+_mvF1(last)+' pour cent volume.',g);
-}
-
 // ══════════════════════════════════════════════════════════════════
-// ── SYNTHESE DE MATURITE A DATE (Cuvier › Analyses)
-//    Repond a « ou en est-on » quand on n'a mesure qu'une partie du
-//    domaine : trois moyennes (domaine / rouges / blancs) et le
-//    classement de TOUTES les parcelles. Aucune saisie nouvelle —
-//    analyses, surfaces, cepages et recoltes existent deja.
-//
-//    ⚠️ Le calcul vit toujours en SUCRE. La conversion est lineaire :
-//    moyenner en g/L puis reconvertir redonne exactement le degre.
-//    C'est l'AFFICHAGE qui suit l'unite de saisie du domaine. Un
-//    domaine qui lit son degre au refractometre ne doit pas trouver un
-//    chiffre en g/L en gros : personne ne l'a mesure.
 // ══════════════════════════════════════════════════════════════════
-var _matFen      = 7;      // fenetre de fraicheur, en jours
-var _matFiltre   = 'dom';  // 'dom' | 'rge' | 'bl'
-var _matVoirTout = false;  // deplier les parcelles jamais analysees
-var _matUn       = 's';    // unite d'affichage : 's' g/L | 'a' %vol
-var _MAT_CAMP_J  = 150;    // au-dela, c'est la vendange precedente
+// ★★ MATU-1 (§366) — LES MATURITÉS RANGÉES (Cuvier › Maturités)
+//   Nico (18/10) : « tout étalé, un peu chantier, pas pro ». Maquette validée le
+//   19/10 sur une toile Design (téléphone, ordinateur, clair, sombre) : « reproduire
+//   telle quelle ». Une tête (la vendange choisie, la date, Noter des mesures,
+//   Imprimer le contrôle), la synthèse (trois tuiles qui filtrent, la fraîcheur, le
+//   « i »), l'ordre de maturité (une ligne par parcelle sur une échelle commune, la
+//   fourchette de sa couleur en bande), les courbes, la fiche, la saisie en série.
+//   ⚠️ LE CALCUL NE CHANGE PAS : _matSynth reste la source (moyenne pondérée par la
+//     surface, fenêtre de fraîcheur, parcelles rentrées hors moyenne). Seule la
+//     fourchette est neuve, et c'est un réglage du domaine (config.mat_four).
+//   ⚠️ LA VENDANGE CHOISIE BORNE TOUT L'ONGLET. Avant, la courbe et les fiches
+//     lisaient toutes les analyses de toutes les années (byP sans filtre) : à la
+//     deuxième vendange, 2025 et 2026 se seraient mêlés sur le même axe.
+// ══════════════════════════════════════════════════════════════════
+var _matFen      = 7;       // fenetre de fraicheur, en jours
+var _matFiltre   = 'dom';   // 'dom' | 'rge' | 'bl'
+var _matVoirTout = { jamais:false, rent:false };   // les deux groupes repliés
+var _matUn       = 's';     // unite d'affichage : 's' g/L | 'a' %vol
+var _MAT_CAMP_J  = 150;     // au-dela, c'est la vendange precedente
+var _matAn       = null;    // la vendange choisie (null : la plus récente)
+var _matVue      = 'ordre'; // téléphone : 'ordre' | 'courbes'
+var _matSelNom   = null;    // la parcelle dont la fiche est ouverte
+var _matSaisieEt = null;    // la feuille de saisie en série
 
 function _matNorm(s){
   var t = String(s || '').trim().toLowerCase();
   return t.normalize ? t.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : t;
 }
-function _vendSetCoul(nom, c){
-  if(!canWrite()){ showToast('Accès lecture seule', '#B85A1A'); return; }
-  if(!CAVE_VENDANGE.config) CAVE_VENDANGE.config = {};
-  if(!CAVE_VENDANGE.config.coul_parc) CAVE_VENDANGE.config.coul_parc = {};
-  if(CAVE_VENDANGE.config.coul_parc[nom] === c) delete CAVE_VENDANGE.config.coul_parc[nom];
-  else CAVE_VENDANGE.config.coul_parc[nom] = c;
-  window.CAVE_VENDANGE = CAVE_VENDANGE;
-  _vendFbSave(null);
-  renderVendAna();
-}
-
 function _matJours(d, tj){ return Math.round((tj - Date.parse(d)) / 86400000); }
+function _matLarge(){ try{ return window.matchMedia('(min-width:1024px)').matches; }catch(e){ return false; } }
+
+/* La fourchette visée de chaque couleur : un réglage du domaine (roue crantée ›
+   Le Cuvier). Une borne absente ou incohérente : pas de bande, rien d'inventé. */
+function _matFour(){
+  var f = (_vendCfg().mat_four) || {}, o = { r:null, b:null };
+  ['r','b'].forEach(function(c){
+    var w = f[c]; if(!w) return;
+    var mn = parseFloat(w.min), mx = parseFloat(w.max);
+    if(mn > 0 && mx > mn) o[c] = { min:mn, max:mx };
+  });
+  return o;
+}
+/* La vendange choisie : la plus récente qui a des mesures (l'hiver, l'onglet ne
+   s'ouvre pas vide), l'année en cours sinon. */
+function _matAnCourant(){
+  var cur = String(new Date().getFullYear()), ans = _matAnnees();
+  if(_matAn && (_matAn === cur || ans.indexOf(_matAn) >= 0)) return _matAn;
+  return ans.indexOf(cur) >= 0 ? cur : (ans[0] || cur);
+}
+/* La date à laquelle l'écran se place : aujourd'hui pour l'année en cours, la
+   dernière mesure pour une vendange passée (même règle que le document imprimé). */
+function _matRefDe(an){
+  if(an === String(new Date().getFullYear())) return null;
+  var r = '';
+  (CAVE_VENDANGE.analyses || []).forEach(function(a){ if(a && a.date && String(a.date).slice(0, 4) === an && a.date > r) r = a.date; });
+  return r || (an + '-12-31');
+}
 
 // Le calcul. Rien n'est invente : une parcelle sans mesure n'a pas de valeur,
 // une mesure trop vieille sort de la moyenne mais reste affichee.
-//
-// ★ `refIso` n'existe QUE pour le document imprime : il rejoue la synthese a
-// une date passee. Sans lui, rien ne change — l'ecran appelle _matSynth(_matFen)
-// et lit aujourd'hui, exactement comme avant ce lot. Avec lui, il faut aussi
-// borner PAR LE HAUT : _matJours rend un ecart NEGATIF pour une mesure
-// posterieure a la reference, donc le filtre des 150 jours la laisse passer.
-// Un releve de la vendange suivante se serait invite dans le document de
-// l'annee precedente — un seul moteur, mais deux bornes.
-function _matSynth(fen, refIso){
-  var o = { frais:[], vieilles:[], jamais:[], rentrees:[], nonClass:[], tiles:{} };
+// ★ `refIso` rejoue la synthese a une date passee (le document imprime, une
+// vendange passee a l'ecran) ; ★ MATU-1 : `an` borne a UNE vendange — sans lui, le
+// filtre des 150 jours laissait entrer la fin de la vendange d'avant en hiver.
+function _matSynth(fen, refIso, an){
+  var o = { frais:[], vieilles:[], jamais:[], rentrees:[], nonClass:[], tiles:{}, tous:{} };
   var ref = refIso || _mvToday();
   var tj = Date.parse(ref);
-
+  var dans = function(d){ return !an || String(d).slice(0, 4) === String(an); };
   var byP = {};
   (CAVE_VENDANGE.analyses || []).forEach(function(a){
-    if(!a || !a.parcelle || !a.date) return;
-    if(_matJours(a.date, tj) > _MAT_CAMP_J) return;   // vendange precedente
-    if(refIso && a.date > ref) return;                // vendange suivante
+    if(!a || !a.parcelle || !a.date || !dans(a.date)) return;
+    if(_matJours(a.date, tj) > _MAT_CAMP_J) return;
+    if(refIso && a.date > ref) return;
     (byP[a.parcelle] = byP[a.parcelle] || []).push(a);
   });
-  // Une recolte de l'an dernier ne sort pas la parcelle de cette campagne.
   var rec = {};
   (CAVE_VENDANGE.recoltes || []).forEach(function(r){
-    if(!r || !r.parcelle || !r.date) return;
+    if(!r || !r.parcelle || !r.date || !dans(r.date)) return;
     if(_matJours(r.date, tj) > _MAT_CAMP_J) return;
     if(refIso && r.date > ref) return;
     if(!rec[r.parcelle] || r.date > rec[r.parcelle]) rec[r.parcelle] = r.date;
   });
-
-  var actives = (window.PARCELLES || []).filter(function(p){
-    return p && p.nom && p.statut !== 'Arrachee';
-  });
-
+  var actives = (window.PARCELLES || []).filter(function(p){ return p && p.nom && p.statut !== 'Arrachee'; });
   actives.forEach(function(p){
     var nom = String(p.nom).trim();
-    var e = { nom:nom, ha:parseFloat(p.surface) || 0, coul:_parcCoul(nom),
-              suc:null, date:null, age:null, vit:null, mode:null, rentree:rec[nom] || null };
+    var e = { nom:nom, ha:parseFloat(p.surface) || 0, coul:_parcCoul(nom), aoc:(typeof _vendAocDe === 'function' ? _vendAocDe(nom) : '') || '',
+              suc:null, date:null, age:null, vit:null, mode:null, rentree:rec[nom] || null, arr:[] };
     if(e.coul === '?') o.nonClass.push(e);
     var arr = (byP[nom] || []).slice().sort(function(a, b){ return (a.date || '') < (b.date || '') ? -1 : 1; });
+    e.arr = arr;
     if(arr.length){
       var der = arr[arr.length - 1];
       e.suc = _matSuc(der); e.date = der.date; e.age = _matJours(der.date, tj);
@@ -8138,29 +8135,25 @@ function _matSynth(fen, refIso){
         if(dj > 0) e.vit = (e.suc - _matSuc(av)) / dj;
       }
     }
-    if(e.rentree)        o.rentrees.push(e);
+    o.tous[nom] = e;
+    if(e.rentree)          o.rentrees.push(e);
     else if(e.suc == null) o.jamais.push(e);
     else if(e.age > fen)   o.vieilles.push(e);
     else                   o.frais.push(e);
   });
-
   o.frais.sort(function(a, b){ return b.suc - a.suc; });
   o.vieilles.sort(function(a, b){ return b.suc - a.suc; });
   o.jamais.sort(function(a, b){ return a.nom.localeCompare(b.nom, 'fr'); });
   o.nonClass = o.nonClass.filter(function(e){ return !e.rentree; });
-
-  // Pondere par la SURFACE : une moyenne simple ferait peser 0,26 ha autant
-  // que 1,54 ha. Le denominateur, lui, est tout ce qui reste a rentrer.
+  // Pondere par la SURFACE : une moyenne simple ferait peser 0,26 ha autant que
+  // 1,54 ha. Le denominateur, lui, est tout ce qui reste a rentrer.
   function bloc(f){
     var m = o.frais.filter(f);
-    var tous = actives.filter(function(p){
-      var nom = String(p.nom).trim();
-      return !rec[nom] && f({ coul:_parcCoul(nom) });
-    });
+    var tous = actives.filter(function(p){ var nom = String(p.nom).trim(); return !rec[nom] && f({ coul:_parcCoul(nom) }); });
     var haTot = tous.reduce(function(s, p){ return s + (parseFloat(p.surface) || 0); }, 0);
     if(!m.length) return { n:0, nTot:tous.length, haTot:haTot };
     var haM = m.reduce(function(s, x){ return s + x.ha; }, 0);
-    if(!(haM > 0)) haM = m.length;   // surfaces non renseignees : moyenne simple
+    if(!(haM > 0)) haM = m.length;
     return { n:m.length, nTot:tous.length, ha:haM, haTot:haTot,
       pond:   m.reduce(function(s, x){ return s + x.suc * (x.ha || 1); }, 0) / (haM || 1),
       simple: m.reduce(function(s, x){ return s + x.suc; }, 0) / m.length,
@@ -8172,293 +8165,510 @@ function _matSynth(fen, refIso){
   return o;
 }
 
-
-// ─────────── Rendu de la synthese ───────────
+// ─────────── L'affichage ───────────
 function _matUnite(){ return _matUn === 'a' ? '%vol' : 'g/L'; }
 function _matGros(suc, spd){ return _matUn === 'a' ? _mvF1(suc / spd) : String(Math.round(suc)); }
-function _matPetit(suc, spd){
-  return _matUn === 'a' ? Math.round(suc) + ' g/L' : '~' + _mvF1(suc / spd) + ' %vol';
+function _matPetit(suc, spd){ return _matUn === 'a' ? Math.round(suc) + ' g/L' : _mvF1(suc / spd) + ' %vol'; }
+function _matJj(d){ return String(d).slice(8, 10) + '/' + String(d).slice(5, 7); }
+function _matAge(a){ return a === 0 ? 'auj.' : a === 1 ? 'hier' : 'il y a ' + a + ' j'; }
+function _matVit(v, spd){
+  if(v == null) return '';
+  var x = _matUn === 'a' ? v / spd : v;
+  return (x >= 0 ? '+' : '\u2212') + (_matUn === 'a' ? (Math.round(Math.abs(x) * 100) / 100).toFixed(2).replace('.', ',') : _mvF1(Math.abs(x)));
 }
-function _matTuile(cls, lab, b, spd){
-  var sel = _matFiltre === cls ? ' sel' : '';
-  if(!b.n) return '<button type="button" class="mvsy-t vide ' + cls + sel + '" onclick="_matSetFiltre(\'' + cls + '\')">'
-    + '<span class="lb">' + lab + '</span><span class="gl">—</span>'
-    + '<span class="cv">aucune mesure<br>dans la fenêtre</span></button>';
-  return '<button type="button" class="mvsy-t ' + cls + sel + '" onclick="_matSetFiltre(\'' + cls + '\')">'
-    + '<span class="lb">' + lab + '</span>'
-    + '<span class="gl">' + _matGros(b.pond, spd) + '<em>' + _matUnite() + '</em></span>'
-    + '<span class="al">' + _matPetit(b.pond, spd) + '</span>'
-    + '<span class="cv">' + b.n + ' parc. sur ' + b.nTot + '<br>' + _mvF1(b.ha) + ' ha · ' + b.pct + ' %</span></button>';
+function _matVin(c){ return c === 'r' ? 'r' : c === 'b' ? 'b' : 'q'; }
+function _matPlur(n, s, p){ return n + ' ' + (n > 1 ? (p || s + 's') : s); }
+
+
+/* La bulle « i » de la synthèse : ce que le chiffre est, et ce qu'il n'est pas.
+   Ses nombres changent avec la fenêtre et la vendange : elle se réécrit à chaque
+   rendu (MV_INFO_LIVE, BULLE-1), la fiche fixe de MV_INFO reste le repli. */
+function _matInfoMaj(r, spd){
+  if(typeof _mvInfoSet !== 'function') return;
+  var b = r.tiles.dom, fen = _matFen === _MAT_CAMP_J ? 'toute la vendange' : _matFen + ' jours';
+  _mvInfoSet('cave.maturite', { p: [
+    '<b>La moyenne des parcelles mesurées depuis ' + (_matFen === _MAT_CAMP_J ? 'le début de la vendange' : 'moins de ' + fen) + '</b>, pondérée par leur surface : une parcelle de 0,30 ha pèse moins qu’une de 1,50 ha.',
+    b.n ? 'Sans pondération : <b>' + _matGros(b.simple, spd) + ' ' + _matUnite() + '</b>.' : 'Aucune mesure récente : rien à moyenner.',
+    'Ce n’est pas la moyenne du domaine : ' + (r.jamais.length ? _matPlur(r.jamais.length, 'parcelle') + ' sans aucune mesure cette vendange' : 'toutes les parcelles ont une mesure')
+      + (r.rentrees.length ? ', et ' + _matPlur(r.rentrees.length, 'parcelle déjà rentrée', 'parcelles déjà rentrées') + ' ne ' + (r.rentrees.length > 1 ? 'comptent' : 'compte') + ' plus.' : '.')
+  ] });
 }
 
-function _matSynthHtml(){
-  var r = _matSynth(_matFen);
+function renderVendAna(){
+  var el = document.getElementById('mvv-body'); if(!el) return;
   var spd = (_vendCfg().sucre_par_degre) || 16.83;
-  // L'unite d'affichage suit la majorite des saisies retenues.
+  var an = _matAnCourant(), ref = _matRefDe(an), courante = !ref;
+  var r = _matSynth(_matFen, ref, an);
   var tot = 0, alc = 0;
   r.frais.concat(r.vieilles).forEach(function(e){ if(e.mode){ tot++; if(e.mode === 'a') alc++; } });
   _matUn = (tot && alc > tot / 2) ? 'a' : 's';
+  var four = _matFour(), canEdit = canWrite() && courante;
+  var aucune = !(r.frais.length + r.vieilles.length + r.rentrees.length);
+  if(_matSelNom && !r.tous[_matSelNom]) _matSelNom = null;
+  window._mvGraphOublier('#mvg-mat-');
 
-  var h = '<div class="mvsy">'
-    + '<div class="mvsy-hd"><div class="mvsy-ttl">Où en est la maturité</div>'
-    + '<div class="mvsy-dt">au ' + _mvToday().slice(8, 10) + '/' + _mvToday().slice(5, 7) + '</div></div>'
-    + '<div class="mvsy-fen">'
-    + [[7, '7 derniers jours'], [14, '14 jours'], [_MAT_CAMP_J, 'Cette vendange']].map(function(f){
-        return '<button type="button" class="' + (_matFen === f[0] ? 'on' : '') + '" onclick="_matSetFen(' + f[0] + ')">' + f[1] + '</button>';
-      }).join('')
-    + '</div>'
-    + '<div class="mvsy-tiles">' + _matTuile('dom', 'Domaine', r.tiles.dom, spd)
-    + _matTuile('rge', 'Rouges', r.tiles.rge, spd) + _matTuile('bl', 'Blancs', r.tiles.bl, spd) + '</div>';
-
-  var b = r.tiles[_matFiltre] || r.tiles.dom;
-  if(b.n) h += '<div class="mvsy-simple">moyenne pondérée par la surface · sans pondération : '
-    + _matGros(b.simple, spd) + ' ' + _matUnite() + '</div>';
-
-  // ── Classement : TOUTES les parcelles, une piste commune ──
-  function garde(e){ return _matFiltre === 'dom' || e.coul === (_matFiltre === 'rge' ? 'r' : 'b'); }
-  var frais = r.frais.filter(garde), vieilles = r.vieilles.filter(garde),
-      jamais = r.jamais.filter(garde), rent = r.rentrees.filter(garde);
-  // Une parcelle rentree (ou listee) sans analyse porte suc = null : la laisser
-  // entrer ici ferait Math.min(null, ...) = 0 et l'echelle partirait a zero.
-  var vals = frais.concat(vieilles, rent)
-    .filter(function(e){ return e.suc != null; }).map(function(e){ return e.suc; });
-  var obj = parseFloat(_vendCfg().mat_objectif) || 0;
-  if(obj > 0) vals.push(obj);
-
-  h += '<div class="mvcl"><div class="mvcl-hd"><div class="mvcl-ttl">Classement à date'
-    + (_matFiltre === 'rge' ? ' · rouges' : _matFiltre === 'bl' ? ' · blancs' : '') + '</div>'
-    + '<div class="mvcl-n">' + (frais.length + vieilles.length + jamais.length + rent.length) + ' parcelles</div></div>';
-
-  if(!vals.length){
-    h += '<div class="mvcl-vide">Aucune mesure à classer dans cette fenêtre.</div></div></div>';
-    return h;
+  var h = _matTeteHtml(an, ref, canEdit);
+  if(aucune){
+    h += '<div class="mat-carte mat-vide">'
+      + '<div class="mat-vide-ic">' + _mvIcon('raisin', 24) + '</div>'
+      + '<div class="mat-vide-t">Pas encore de mesure pour la vendange ' + _escHtml(an) + '</div>'
+      + '<div class="mat-vide-p">Notez la première mesure de sucre : l’ordre de maturité se construit dès la première, et la vitesse dès la deuxième sur une même parcelle.</div>'
+      + (canEdit ? '<button type="button" class="mat-btn prim mat-vide-b" onclick="_matSaisie(null)">' + _mvIcon('plus', 16) + 'Noter des mesures</button>' : '')
+      + '</div>';
+    el.innerHTML = h;
+    _vendRefreshCockpit();
+    return;
   }
-
-  var vMin = Math.floor((Math.min.apply(null, vals) - 8) / 10) * 10;
-  var vMax = Math.ceil((Math.max.apply(null, vals) + 8) / 10) * 10;
-  if(vMax - vMin < 30) vMax = vMin + 30;
-  function pos(v){ return ((v - vMin) / (vMax - vMin) * 100).toFixed(1); }
-
-  // Graduations posees sur des valeurs RONDES DANS L'UNITE AFFICHEE : des g/L
-  // reconvertis donneraient 10,1 · 11,3 · 12,5.
-  var gr = '';
-  if(_matUn === 'a'){
-    var aMin = Math.ceil(vMin / spd * 2) / 2, aMax = vMax / spd, pasA = (aMax - aMin) > 3 ? 1 : 0.5;
-    for(var a = aMin; a <= aMax + 0.01; a += pasA) gr += '<span style="left:' + pos(a * spd) + '%">' + _mvF1(a) + '</span>';
-  } else {
-    var pasS = Math.max(10, Math.round((vMax - vMin) / 4 / 10) * 10);
-    for(var v = vMin; v <= vMax; v += pasS) gr += '<span style="left:' + pos(v) + '%">' + v + '</span>';
-  }
-  h += '<div class="mvcl-grad"><div></div><div class="g">' + gr + '</div><div></div></div>';
-
-  var ov = '';
-  if(b.n) ov += '<i style="left:' + pos(b.pond) + '%"></i><b class="moy" style="left:' + pos(b.pond) + '%">moy.</b>';
-  if(obj > 0) ov += '<i class="obj" style="left:' + pos(obj) + '%"></i><b class="obj" style="left:' + pos(obj) + '%">objectif</b>';
-
-  var nConv = 0;
-  function ligne(e, cls, dot, sous){
-    var conv = e.suc != null && e.mode && e.mode !== _matUn;
-    if(conv) nConv++;
-    return '<div class="mvcl-r' + (cls ? ' ' + cls : '') + '">'
-      + '<span class="n">' + _escHtml(e.nom) + '</span>'
-      + '<span class="pi">' + (e.suc != null ? '<i class="dot ' + dot + '" style="left:' + pos(e.suc) + '%"></i>' : '') + '</span>'
-      + '<span class="v' + (conv ? ' conv' : '') + '">' + (e.suc != null ? '<b>' + _matGros(e.suc, spd) + '</b>' : '—')
-      + '<s>' + sous + '</s></span></div>';
-  }
-  var rows = '';
-  frais.forEach(function(e){ rows += ligne(e, '', e.coul === '?' ? 'q' : e.coul, _matPetit(e.suc, spd)); });
-  if(vieilles.length){
-    rows += '<div class="mvcl-sep">Mesure de plus de ' + _matFen + ' jours — hors moyenne</div>';
-    vieilles.forEach(function(e){ rows += ligne(e, 'pale', 'old ' + (e.coul === '?' ? 'q' : e.coul), 'le ' + e.date.slice(8) + '/' + e.date.slice(5, 7)); });
-  }
-  if(jamais.length){
-    // Ce qui est MESURE reste toujours visible. Ce qui n'a rien se COMPTE :
-    // sur quarante parcelles, la liste des muettes noierait le classement.
-    rows += '<div class="mvcl-sep">Jamais analysées — ' + jamais.length + ' parcelles · '
-      + _mvF1(jamais.reduce(function(x, e){ return x + e.ha; }, 0)) + ' ha</div>';
-    (_matVoirTout ? jamais : jamais.slice(0, 3)).forEach(function(e){ rows += ligne(e, 'pale', '', _mvF1(e.ha) + ' ha'); });
-    if(jamais.length > 3) rows += '<button type="button" class="mvcl-plus" onclick="_matVoirPlus()">'
-      + (_matVoirTout ? 'replier' : 'voir les ' + (jamais.length - 3) + ' autres') + '</button>';
-  }
-  if(rent.length){
-    rows += '<div class="mvcl-sep">Déjà rentrées</div>';
-    rent.forEach(function(e){ rows += ligne(e, 'pale out', 'old ' + (e.coul === '?' ? 'q' : e.coul), 'le ' + e.rentree.slice(8) + '/' + e.rentree.slice(5, 7)); });
-  }
-  h += '<div class="mvcl-zone"><div class="mvcl-ov">' + ov + '</div>' + rows + '</div>'
-    + '<div class="mvcl-lg"><span><i class="pl"></i>mesure dans la fenêtre</span>'
-    + '<span><i class="cr"></i>mesure plus ancienne, hors moyenne</span>'
-    + '<span><i class="tr"></i>moyenne</span>'
-    + (nConv ? '<span><i class="cv">' + (_matUn === 'a' ? '12,7' : '214') + '</i>valeur convertie, pas mesurée</span>' : '')
+  h += _matSynthHtml(r, spd);
+  var large = _matLarge(), fiche = large && _matSelNom;
+  h += '<div class="mat-grille mat-v-' + (_matVue === 'courbes' ? 'courbes' : 'ordre') + '">'
+    + _matOrdreHtml(r, spd, four, courante)
+    + '<div class="mat-droite">' + (fiche ? '<section class="mat-carte" aria-label="Fiche de la parcelle">' + _matFicheHtml(_matSelNom, r, spd, four, courante) + '</section>'
+                                           : _matCourbesHtml(r, spd, four)) + '</div>'
     + '</div>';
-  if(nConv) h += '<div class="mvcl-pied">' + (_matUn === 'a'
-      ? 'Les ' + nConv + ' valeurs soulignées ont été saisies en sucre et converties : sucre ÷ ' + _mvF1(spd) + '.'
-      : 'Les ' + nConv + ' valeurs soulignées ont été lues en degré au réfractomètre et converties : degré × ' + _mvF1(spd) + '.') + '</div>';
-  h += '</div>';
-
-  // ── L'ecart, ce que la benne mettrait ensemble ──
-  if(frais.length > 1){
-    var hi = frais[0], lo = frais[frais.length - 1], d = hi.suc - lo.suc;
-    h += '<div class="mvsy-ec"><b>' + _escHtml(hi.nom) + '</b> en tête, <b>' + _escHtml(lo.nom) + '</b> en queue : <b>'
-      + (_matUn === 'a' ? _mvF1(d / spd) + ' %vol d’écart</b>, ' + Math.round(d) + ' g/L'
-                        : Math.round(d) + ' g/L d’écart</b>, ' + _mvF1(d / spd) + ' %vol')
-      + '. C’est ce que la même benne mettrait ensemble.</div>';
-  }
-
-  if(vieilles.length){
-    h += '<div class="mvsy-warn"><b>' + vieilles.length + ' parcelle' + (vieilles.length > 1 ? 's écartées' : ' écartée')
-      + '</b> du calcul : rien depuis plus de ' + _matFen + ' jours. ';
-    vieilles.forEach(function(e){
-      h += _escHtml(e.nom) + ' en est restée au ' + e.date.slice(8) + '/' + e.date.slice(5, 7)
-        + ' (' + e.age + ' j, ' + _matGros(e.suc, spd) + ' ' + _matUnite() + ')';
-      // La projection est une projection : elle se dit, elle ne se compte pas.
-      h += (e.vit != null && e.vit > 0)
-        ? ' — à ' + (_matUn === 'a' ? _mvF1(e.vit / spd) + ' %vol' : _mvF1(e.vit) + ' g/L') + ' par jour elle serait vers '
-          + _matGros(e.suc + e.vit * e.age, spd) + ', mais personne ne l’a mesurée. '
-        : '. ';
-    });
-    h += '</div>';
-  }
-
-  h += '<div class="mvsy-info"><b>Ce chiffre n’est pas la moyenne du domaine</b> : c’est la moyenne des parcelles '
-    + 'qui ont une mesure fraîche, pondérée par leur surface. ' + r.jamais.length + ' parcelle'
-    + (r.jamais.length > 1 ? 's n’ont' : ' n’a') + ' aucune analyse cette vendange.'
-    + (r.rentrees.length ? ' ' + r.rentrees.length + ' parcelle' + (r.rentrees.length > 1 ? 's déjà rentrées ne comptent' : ' déjà rentrée ne compte') + ' plus.' : '')
-    + '</div>';
-
-  if(r.nonClass.length && canWrite()){
-    h += '<div class="mvsy-cls"><div class="t"><b>' + r.nonClass.length + ' parcelle'
-      + (r.nonClass.length > 1 ? 's' : '') + ' sans couleur.</b> Le cépage ne permet pas de trancher. '
-      + (r.nonClass.length > 1 ? 'Elles comptent' : 'Elle compte') + ' dans le domaine, pas dans les deux colonnes.</div>';
-    var cp = _vendCfg().coul_parc || {};
-    r.nonClass.forEach(function(e){
-      h += '<div class="mvsy-clr"><span class="n">' + _escHtml(e.nom) + ' · ' + _mvF1(e.ha) + ' ha</span>'
-        + '<button type="button" class="r' + (cp[e.nom] === 'r' ? ' on' : '') + '" onclick="_vendSetCoul(' + _mvQ(e.nom) + ',\'r\')">Rouge</button>'
-        + '<button type="button" class="b' + (cp[e.nom] === 'b' ? ' on' : '') + '" onclick="_vendSetCoul(' + _mvQ(e.nom) + ',\'b\')">Blanc</button></div>';
-    });
-    h += '</div>';
-  }
-  return h + '</div>';
-}
-function _matSetFen(f){ _matFen = f; renderVendAna(); }
-function _matSetFiltre(k){ _matFiltre = (_matFiltre === k ? 'dom' : k); renderVendAna(); }
-function _matVoirPlus(){ _matVoirTout = !_matVoirTout; renderVendAna(); }
-
-function renderVendAna(){
-  _caveV2InjectCss();
-  var el=document.getElementById('mvv-body'); if(!el) return;
-  var spd=(_vendCfg().sucre_par_degre)||16.83;
-  var names=_vendParcelleNames();
-  var opts='<option value="">— Choisir une parcelle —</option>'+names.map(function(n){return '<option value="'+_escHtml(n)+'">'+_escHtml(n)+'</option>';}).join('');
-  var sucOn=_vendAnaUnitMode==='sucre';
-  var canEdit=canWrite();
-  var html='';
-  if(canEdit){
-    html+='<div class="mva-form">'
-      +'<div class="mva-frow">'
-        +'<div class="mva-fld" style="min-width:150px"><label>Parcelle</label><select id="mva-parc">'+opts+'</select></div>'
-        +'<div class="mva-fld" style="max-width:150px"><label>Date</label><input id="mva-date" type="date" value="'+(_mvToday())+'"></div>'
-        +'<div class="mva-fld" style="max-width:160px"><label>Mesure</label><div class="mva-useg">'
-          +'<button id="mva-u-suc" class="'+(sucOn?'on':'')+'" onclick="_vendAnaUnit(\'sucre\')">Sucre g/L</button>'
-          +'<button id="mva-u-alc" class="'+(sucOn?'':'on')+'" onclick="_vendAnaUnit(\'alc\')">°alc %vol</button>'
-        +'</div></div>'
-        +'<div class="mva-fld" style="max-width:120px"><label id="mva-vlab">'+(sucOn?'Sucre (g/L)':'°alc (%vol)')+'</label><input id="mva-val" type="number" step="'+(sucOn?'1':'0.1')+'" value="'+(sucOn?'200':'12')+'" oninput="_vendAnaLive()"></div>'
-        +'<div class="mva-fld" style="flex:0 0 auto"><button class="mva-add" onclick="_vendAnaAdd()">+ Ajouter</button></div>'
-      +'</div>'
-      +'<div class="mva-derived"><div>Sucre<b id="mva-d-suc">—</b></div><div>Degré potentiel<b id="mva-d-alc">—</b></div><div>Estimation alcoolique<b id="mva-d-est" style="color:var(--bordeaux,#7A1020)">—</b></div></div>'
-    +'</div>';
-  }
-  html+='<div class="mva-hint">Réfractomètre : saisie en sucre (g/L) ou en degré potentiel (%vol). Degré = sucre ÷ '+_mvF1(spd)+'. Courbe d\'évolution par parcelle.</div>';
-  var all=CAVE_VENDANGE.analyses||[];
-  var byP={};
-  all.forEach(function(a){ if(!a||!a.parcelle) return; (byP[a.parcelle]=byP[a.parcelle]||[]).push(a); });
-  var parcs=Object.keys(byP).sort(function(a,b){return a.localeCompare(b,'fr');});
-  if(!parcs.length){
-    html+='<div class="mvb-empty">Aucune analyse enregistrée.<br>Ajoutez une première mesure de maturité ci-dessus.</div>';
-  } else {
-    window._mvGraphOublier('#mvg-mat-');
-    // La synthese « ou en est-on » AVANT tout : c'est la question qu'on se pose
-    // en montant au cuvier. Le graphe d'evolution et les fiches restent dessous.
-    html+=_matSynthHtml();
-    // Le graphe qui COMPARE. Les fiches par parcelle restent dessous :
-    // elles portent le detail des mesures et leur suppression.
-    html+='<div class="mvmat-card"><div class="mvmat-ttl">Maturit\u00e9 par parcelle \u00b7 r\u00e9fractom\u00e8tre</div>'
-      +'<div id="mvg-mat-all"></div></div>';
-    (function(bp){
-      window._mvGraphSuivre('#mvg-mat-all', function(lg){
-        // L'objectif n'existe que si le domaine l'a pose : absent, la ligne ne
-        // s'affiche pas. Rien n'est invente, et le jour ou le reglage existe,
-        // il n'y a rien d'autre a brancher.
-        return _vendMatSvg(bp, lg, { objectif: parseFloat(_vendCfg().mat_objectif) || 0 });
-      });
-    })(byP);
-    parcs.forEach(function(p,pi){
-      var arr=byP[p].slice().sort(function(a,b){return (a.date||'')<(b.date||'')?-1:1;});
-      var last=arr[arr.length-1];
-      var lastSuc=_matSuc(last,spd);
-      html+='<div class="mva-card"><div class="mva-cname">'+_escHtml(p)+'</div>'
-        +'<div class="mva-meta">'+arr.length+' analyse'+(arr.length>1?'s':'')+' · dernière le '+(last.date?last.date.slice(8)+'/'+last.date.slice(5,7):'')+'</div>'
-        +'<div class="mva-line"><span>'+Math.round(lastSuc)+' g/L</span><span class="pot">~'+_mvF1(_vendAnaAlc(last))+'% vol potentiel</span></div>'
-        +'<div id="mvg-mat-'+pi+'"></div>';
-      (function(a2,ix){ window._mvGraphSuivre('#mvg-mat-'+ix, function(lg){ return _vendAnaSpark(a2,lg); }); })(arr,pi);
-      html+='<div class="mva-rows">';
-      arr.slice().reverse().forEach(function(a){
-        var suc=_matSuc(a,spd);
-        html+='<div class="mva-row"><span>'+(a.date?a.date.slice(8)+'/'+a.date.slice(5,7)+'/'+a.date.slice(0,4):'')+' · '+Math.round(suc)+' g/L · ~'+_mvF1(_vendAnaAlc(a))+'% vol</span>'
-          +(canEdit?'<button class="mva-x" onclick="_vendAnaDel(\''+a.id+'\')" aria-label="Supprimer">×</button>':'')+'</div>';
-      });
-      html+='</div></div>';
-    });
-  }
-  el.innerHTML=html;
+  el.innerHTML = h;
+  _matInfoMaj(r, spd);
+  _matPeindre(r, spd, four, fiche);
   if(window._mvGraphRepeindre) window._mvGraphRepeindre();
-  if(canEdit) _vendAnaLive();
   _vendRefreshCockpit();
 }
-function _vendAnaUnit(u){
-  _vendAnaUnitMode=u;
-  var bs=document.getElementById('mva-u-suc'), ba=document.getElementById('mva-u-alc');
-  if(bs) bs.classList.toggle('on',u==='sucre'); if(ba) ba.classList.toggle('on',u==='alc');
-  var lab=document.getElementById('mva-vlab'); if(lab) lab.textContent=u==='sucre'?'Sucre (g/L)':'°alc (%vol)';
-  var v=document.getElementById('mva-val'); if(v){ v.value=u==='sucre'?200:12; v.step=u==='sucre'?'1':'0.1'; }
-  _vendAnaLive();
+
+function _matTeteHtml(an, ref, canEdit){
+  var cur = String(new Date().getFullYear()), ans = _matAnnees();
+  if(ans.indexOf(cur) < 0) ans.unshift(cur);
+  var titre = ans.length > 1
+    ? '<select class="mat-an" aria-label="Choisir la vendange" onchange="_matSetAn(this.value)">'
+      + ans.map(function(a){ return '<option value="' + _escHtml(a) + '"' + (a === an ? ' selected' : '') + '>Vendange ' + _escHtml(a) + '</option>'; }).join('')
+      + '</select>'
+    : '<span class="mat-an-t">Vendange ' + _escHtml(an) + '</span>';
+  var d = ref || _mvToday();
+  var J = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+  var M = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  var t = new Date(d + 'T12:00:00Z');
+  var lbl = J[t.getUTCDay()] + ' ' + t.getUTCDate() + (t.getUTCDate() === 1 ? 'er' : '') + ' ' + M[t.getUTCMonth()];
+  return '<div class="mat-tete"><div class="mat-tete-g">' + titre
+    + '<span class="mat-ref">' + (ref ? 'relue au ' + lbl + ' ' + _escHtml(an) + ', date de la dernière mesure' : 'au ' + lbl) + '</span></div>'
+    + '<button type="button" class="mat-btn mat-imp" onclick="_matExportChoix()">' + _mvIcon('imprimante', 16) + '<span>Imprimer le contrôle</span></button>'
+    + (canEdit ? '<button type="button" class="mat-btn prim" onclick="_matSaisie(null)">' + _mvIcon('plus', 16) + '<span class="lg">Noter des mesures</span><span class="sm">Mesures</span></button>' : '')
+    + '</div>';
 }
-function _vendAnaLive(){
-  var el=document.getElementById('mva-val'); if(!el) return;
-  var spd=(_vendCfg().sucre_par_degre)||16.83;
-  var v=parseFloat(el.value)||0;
-  var suc=_vendAnaUnitMode==='sucre'?v:(v*spd);
-  var alc=_vendAnaUnitMode==='sucre'?(v/spd):v;
-  var ds=document.getElementById('mva-d-suc'); if(ds) ds.textContent=Math.round(suc)+' g/L';
-  var da=document.getElementById('mva-d-alc'); if(da) da.textContent='~'+_mvF1(alc)+'% vol';
-  var de=document.getElementById('mva-d-est'); if(de) de.textContent='~'+_mvF1(alc)+'% vol';
+
+function _matSynthHtml(r, spd){
+  var FEN = [[7, '7 j', '7 jours'], [14, '14 j', '14 jours'], [_MAT_CAMP_J, 'Vendange', 'Toute la vendange']];
+  var large = _matLarge();
+  var tuile = function(cle, lab, pt){
+    var b = r.tiles[cle], on = _matFiltre === cle;
+    return '<button type="button" class="mat-tuile' + (on ? ' on' : '') + '" aria-pressed="' + on + '" onclick="_matSetFiltre(\'' + _escAttr(cle) + '\')">'
+      + '<span class="lb"><i class="mat-pt ' + pt + '"></i>' + lab + '</span>'
+      + '<span class="v">' + (b.n ? _matGros(b.pond, spd) + '<small>' + _matUnite() + '</small>' : '\u2014') + '</span>'
+      + '<span class="c">' + (b.n ? _matPetit(b.pond, spd) + (_matUn === 's' ? ' potentiel' : '') : 'aucune mesure récente') + '</span>'
+      + '<span class="s">' + (b.n ? b.n + ' sur ' + (large ? _matPlur(b.nTot, 'parcelle') : b.nTot) : (b.nTot ? b.nTot + ' à mesurer' : 'aucune')) + '</span>'
+      + '<span class="s">' + (b.n ? b.pct + (large ? ' % de la surface' : ' % surface') : '') + '</span>'
+      + '</button>';
+  };
+  return '<section class="mat-carte mat-synth" aria-label="Où en est la maturité">'
+    + '<div class="mat-carte-hd"><h2 class="mat-carte-t mat-synth-t">Où en est la maturité</h2>'
+    + _mvInfoBtn('cave.maturite')
+    + '<span class="mat-flex"></span>'
+    + '<div class="mat-seg" role="group" aria-label="Fraîcheur des mesures">'
+    + FEN.map(function(f){ return '<button type="button" class="' + (_matFen === f[0] ? 'on' : '') + '" aria-pressed="' + (_matFen === f[0]) + '" onclick="_matSetFen(' + _escAttr(String(f[0])) + ')">' + (large ? f[2] : f[1]) + '</button>'; }).join('')
+    + '</div></div>'
+    + '<div class="mat-tuiles">' + tuile('dom', 'Domaine', 'dom') + tuile('rge', 'Rouges', 'r') + tuile('bl', 'Blancs', 'b') + '</div>'
+    + '</section>';
 }
+
+function _matVuesHtml(){
+  return '<div class="mat-seg mat-vues" role="group" aria-label="Vue">'
+    + [['ordre', 'Ordre'], ['courbes', 'Courbes']].map(function(v){
+        return '<button type="button" class="' + (_matVue === v[0] ? 'on' : '') + '" aria-pressed="' + (_matVue === v[0]) + '" onclick="_matSetVue(\'' + _escAttr(v[0]) + '\')">' + v[1] + '</button>';
+      }).join('') + '</div>';
+}
+
+function _matOrdreHtml(r, spd, four, courante){
+  function garde(e){ return _matFiltre === 'dom' || e.coul === (_matFiltre === 'rge' ? 'r' : 'b'); }
+  var frais = r.frais.filter(garde), vieilles = r.vieilles.filter(garde), jamais = r.jamais.filter(garde), rent = r.rentrees.filter(garde);
+  var vals = frais.concat(vieilles, rent).filter(function(e){ return e.suc != null; }).map(function(e){ return e.suc; });
+  frais.concat(vieilles, rent).forEach(function(e){ var w = four[e.coul]; if(w){ vals.push(w.min, w.max); } });
+  var vMin = 170, vMax = 230;
+  if(vals.length){
+    vMin = Math.floor((Math.min.apply(null, vals) - 8) / 10) * 10;
+    vMax = Math.ceil((Math.max.apply(null, vals) + 8) / 10) * 10;
+    if(vMax - vMin < 30) vMax = vMin + 30;
+  }
+  function pos(v){ return ((v - vMin) / (vMax - vMin) * 100).toFixed(2); }
+  var b = r.tiles[_matFiltre] || r.tiles.dom;
+  var nConv = 0;
+  function ligne(e, grp){
+    var conv = !!(e.mode && e.mode !== _matUn && e.suc != null);
+    if(conv) nConv++;
+    var w = four[e.coul], pale = grp !== 'frais', sel = _matSelNom === e.nom;
+    var age = '', sous = '', val = '\u2014', vit = '';
+    if(grp === 'jamais'){ age = 'aucune mesure'; sous = _mvF1(e.ha) + ' ha'; }
+    else if(grp === 'rentree'){ age = 'rentrée le ' + _matJj(e.rentree); val = e.suc != null ? _matGros(e.suc, spd) : '\u2014'; sous = e.suc != null ? _matPetit(e.suc, spd) : ''; }
+    else {
+      val = _matGros(e.suc, spd); age = _matAge(e.age);
+      vit = _matVit(e.vit, spd) || '1 mesure';
+      sous = _matVit(e.vit, spd) ? _matVit(e.vit, spd) + ' /j' : '1 mesure';
+    }
+    var pt = e.suc != null ? '<i class="pt ' + _matVin(e.coul) + (grp === 'vieille' ? ' vx' : '') + (grp === 'rentree' ? ' out' : '') + '" style="left:' + pos(e.suc) + '%"></i>' : '';
+    var zo = (w && grp !== 'jamais') ? '<i class="zo" style="left:' + pos(w.min) + '%;width:' + ((w.max - w.min) / (vMax - vMin) * 100).toFixed(2) + '%"></i>' : '';
+    var my = (b.n && grp !== 'jamais') ? '<i class="my" style="left:' + pos(b.pond) + '%"></i>' : '';
+    return '<button type="button" class="mat-l mat-cols' + (pale ? ' pale' : '') + (sel ? ' sel' : '') + '" data-nom="' + _escAttr(e.nom) + '" onclick="_matSel(this.dataset.nom)">'
+      + '<span class="n"><span class="nm"><i class="mat-pt ' + _matVin(e.coul) + '"></i><span>' + _escHtml(e.nom) + '</span></span>'
+      + '<span class="ag' + (grp === 'vieille' ? ' vx' : '') + '">' + age + '</span></span>'
+      + '<span class="pi">' + zo + my + pt + '</span>'
+      + '<span class="va"><b' + (conv ? ' class="cv"' : '') + '>' + val + '</b><s>' + (_matLarge() && grp === 'frais' ? _matPetit(e.suc, spd) : sous) + '</s></span>'
+      + '<span class="vi">' + vit + '</span>'
+      + '</button>';
+  }
+  var dans = frais.filter(function(e){ var w = four[e.coul]; return w && e.suc >= w.min && e.suc <= w.max; }).length;
+  var dessus = frais.filter(function(e){ var w = four[e.coul]; return w && e.suc > w.max; }).length;
+  var objOn = !!(four.r || four.b);
+  var stats = '';
+  if(frais.length > 1){
+    var hi = frais[0], lo = frais[frais.length - 1], d = hi.suc - lo.suc;
+    stats = (_matUn === 'a' ? _mvF1(d / spd) + ' %vol' : Math.round(d) + ' g/L') + ' d’écart entre ' + _escHtml(hi.nom) + ' et ' + _escHtml(lo.nom) + ', ce qu’une même benne mélangerait.';
+  }
+  var objStat = objOn && frais.length ? (dans ? _matPlur(dans, 'parcelle') + ' dans leur fourchette' : 'Aucune parcelle dans sa fourchette') + (dessus ? ', ' + dessus + ' au-dessus' : '') + '. ' : '';
+  var wF = _matFiltre === 'rge' ? four.r : _matFiltre === 'bl' ? four.b : null;
+  var axe = '';
+  if(_matUn === 'a'){
+    var aMin = Math.ceil(vMin / spd * 2) / 2, aMax = vMax / spd, pasA = (aMax - aMin) > 3 ? 1 : 0.5;
+    for(var a = aMin; a <= aMax + 0.01; a += pasA) axe += '<span class="g" style="left:' + pos(a * spd) + '%">' + _mvF1(a) + '</span>';
+  } else {
+    var pasS = Math.max(10, Math.round((vMax - vMin) / 4 / 10) * 10);
+    for(var v = vMin; v <= vMax; v += pasS) axe += '<span class="g" style="left:' + pos(v) + '%">' + v + '</span>';
+  }
+  if(wF) axe += '<span class="fo" style="left:' + pos((wF.min + wF.max) / 2) + '%">fourchette ' + _matGros(wF.min, spd) + '\u2013' + _matGros(wF.max, spd) + '</span>';
+  var filtre = _matFiltre === 'rge' ? 'Rouges' : _matFiltre === 'bl' ? 'Blancs' : '';
+  var h = '<section class="mat-carte mat-ordre" aria-label="Ordre de maturité">'
+    + '<div class="mat-carte-hd"><h2 class="mat-carte-t">Ordre de maturité</h2>'
+    + (filtre ? '<button type="button" class="mat-btn mat-chip" onclick="_matSetFiltre(\'dom\')" aria-label="Retirer le filtre">' + filtre + _mvIcon('croix', 16) + '</button>' : '')
+    + _matVuesHtml() + '</div>';
+  if(stats || objStat) h += '<p class="mat-stats">' + (objStat ? '<b>' + objStat + '</b>' : '') + stats + '</p>';
+  h += '<div class="mat-cols mat-axe" aria-hidden="true"><span></span><span class="pi">' + axe + '</span><span class="u">' + _matUnite() + '</span><span class="u vi">' + _matUnite() + ' par jour</span></div>';
+  frais.forEach(function(e){ h += ligne(e, 'frais'); });
+  if(!frais.length) h += '<p class="mat-stats">Aucune mesure de moins de ' + (_matFen === _MAT_CAMP_J ? _MAT_CAMP_J : _matFen) + ' jours' + (filtre ? ' sur les ' + filtre.toLowerCase() : '') + '.</p>';
+  if(b.n && frais.length) h += '<div class="mat-cols mat-moy" aria-hidden="true"><span></span><span class="pi"><span style="left:' + pos(b.pond) + '%">moyenne ' + _matGros(b.pond, spd) + '</span></span></div>';
+  if(vieilles.length){
+    h += '<div class="mat-sep">Plus de ' + (_matFen === _MAT_CAMP_J ? _MAT_CAMP_J : _matFen) + ' jours sans mesure · hors moyenne</div>';
+    vieilles.forEach(function(e){ h += ligne(e, 'vieille'); });
+  }
+  function plie(k, lbl, n, liste, grp){
+    var ouv = !!_matVoirTout[k];
+    var s = '<button type="button" class="mat-plie' + (ouv ? ' ouv' : '') + '" aria-expanded="' + ouv + '" onclick="_matVoirPlus(\'' + _escAttr(k) + '\')">'
+      + '<span class="t">' + lbl + '</span><span>' + n + '</span><span class="ch">' + _mvIcon('chevron', 16) + '</span></button>';
+    if(ouv) liste.forEach(function(e){ s += ligne(e, grp); });
+    return s;
+  }
+  if(jamais.length) h += plie('jamais', 'Jamais mesurées', _matPlur(jamais.length, 'parcelle') + ' · ' + _mvF1(jamais.reduce(function(x, e){ return x + e.ha; }, 0)) + ' ha', jamais, 'jamais');
+  if(rent.length) h += plie('rent', 'Déjà rentrées', _matPlur(rent.length, 'parcelle'), rent, 'rentree');
+  var fourTxt = ['r', 'b'].filter(function(c){ return four[c]; }).map(function(c){ return (c === 'r' ? 'rouges ' : 'blancs ') + _matGros(four[c].min, spd) + '\u2013' + _matGros(four[c].max, spd); });
+  h += '<div class="mat-leg"><span><i class="r"></i>rouge</span><span><i class="b"></i>blanc</span>'
+    + '<span><i class="vx"></i>plus de ' + (_matFen === _MAT_CAMP_J ? _MAT_CAMP_J : _matFen) + ' j</span>'
+    + (b.n ? '<span><i class="my"></i>moyenne</span>' : '')
+    + (objOn ? '<span><i class="fo"></i>fourchette visée</span>' : '')
+    + (nConv ? '<span><i class="cv">' + (_matUn === 'a' ? '12,7' : '214') + '</i>' + (_matUn === 'a' ? 'lu en sucre, converti (÷ ' : 'lu en degré, converti (× ') + _mvF1(spd) + ')</span>' : '')
+    + (objOn && _matFiltre === 'dom' && fourTxt.length ? '<span class="four">fourchettes : ' + fourTxt.join(' · ') + ' ' + _matUnite() + '</span>' : '')
+    + (!objOn && courante && (typeof isAdmin === 'function' && isAdmin()) ? '<span class="four">Aucune fourchette réglée : la roue crantée de la Cave › Le Cuvier › Maturité.</span>' : '')
+    + '</div>';
+  if(r.nonClass.length && canWrite() && courante){
+    h += '<div class="mat-coul"><span>' + (r.nonClass.length > 1 ? r.nonClass.length + ' parcelles sans couleur : elles comptent' : '1 parcelle sans couleur : elle compte')
+      + ' dans Domaine, pas dans Rouges ni Blancs.</span><button type="button" class="mat-btn" onclick="_matCouleurs()">Classer</button></div>';
+  }
+  return h + '</section>';
+}
+
+/* Les courbes de la vendange choisie, du filtre choisi, sans les parcelles rentrées. */
+function _matByP(r){
+  function garde(e){ return _matFiltre === 'dom' || e.coul === (_matFiltre === 'rge' ? 'r' : 'b'); }
+  var o = {};
+  r.frais.concat(r.vieilles).filter(garde).forEach(function(e){ if(e.arr.length >= 2) o[e.nom] = e.arr; });
+  return o;
+}
+function _matCourbesHtml(r, spd, four){
+  var byP = _matByP(r), n = Object.keys(byP).length;
+  var note = n > MV_MAT_MAX ? 'Les ' + MV_MAT_MAX + ' plus avancées sur ' + n + ' suivies. Touchez une parcelle pour sa fiche.'
+    : (n ? _matPlur(n, 'parcelle suivie', 'parcelles suivies') + '. Touchez une parcelle pour sa fiche.' : 'Il faut deux mesures sur une même parcelle pour tracer une courbe.');
+  var leg = '';
+  if(n){
+    var rangs = _matClasse(byP, spd).filter(function(x){ return x.arr.length >= 2; }).slice(0, MV_MAT_MAX);
+    leg = '<div class="mat-cl-l">' + rangs.map(function(x, k){
+      return '<button type="button" class="mat-cl" data-nom="' + _escAttr(x.nom) + '" onclick="_matSel(this.dataset.nom)"><i style="background:' + MV_MAT_COL[k % MV_MAT_COL.length] + '"></i>'
+        + '<span class="nm">' + _escHtml(x.nom) + '</span><b>' + _matGros(x.suc, spd) + ' ' + _matUnite() + '</b>'
+        + '<s>' + (x.vit != null ? _matVit(x.vit, spd) + ' par jour' : '') + '</s></button>';
+    }).join('') + '</div>';
+  }
+  return '<section class="mat-carte mat-courbes" aria-label="Évolution du sucre">'
+    + '<div class="mat-carte-hd"><h2 class="mat-carte-t">Évolution du sucre</h2>' + _matVuesHtml() + '</div>'
+    + '<p class="mat-note">' + note + '</p>'
+    + (n ? '<div id="mvg-mat-all" class="mat-gr"></div>' + leg : '')
+    + '</section>';
+}
+function _matBandes(four, couls, spd){
+  return ['r', 'b'].filter(function(c){ return four[c] && couls[c]; }).map(function(c){
+    return { min:four[c].min, max:four[c].max, lbl:(c === 'r' ? 'rouges ' : 'blancs ') + _matGros(four[c].min, spd) + '\u2013' + _matGros(four[c].max, spd) };
+  });
+}
+function _matPeindre(r, spd, four, fiche){
+  var byP = _matByP(r), couls = {};
+  Object.keys(byP).forEach(function(n){ var e = r.tous[n]; if(e && (e.coul === 'r' || e.coul === 'b')) couls[e.coul] = 1; });
+  var bandes = _matBandes(four, couls, spd);
+  if(document.getElementById('mvg-mat-all'))
+    window._mvGraphSuivre('#mvg-mat-all', function(lg){ return _vendMatSvg(byP, lg, { bandes:bandes, sansLegende:true }); });
+  if(fiche || document.getElementById('mvg-mat-fi')) _matPeindreFiche(r, spd, four);
+}
+function _matPeindreFiche(r, spd, four){
+  var e = _matSelNom && r.tous[_matSelNom]; if(!e || e.arr.length < 2 || !document.getElementById('mvg-mat-fi')) return;
+  var o = {}; o[e.nom] = e.arr;
+  var c = {}; if(e.coul === 'r' || e.coul === 'b') c[e.coul] = 1;
+  var bandes = _matBandes(four, c, spd);
+  window._mvGraphSuivre('#mvg-mat-fi', function(lg){ return _vendMatSvg(o, lg, { bandes:bandes, sansLegende:true, couleur:(e.coul === 'b' ? 'var(--or)' : e.coul === 'r' ? 'var(--rouge)' : 'var(--texte-med)') }); });
+}
+
+/* ─────────── La fiche d'une parcelle ─────────── */
+function _matFicheHtml(nom, r, spd, four, courante){
+  var e = r.tous[nom]; if(!e) return '';
+  var grp = e.rentree ? 'rentree' : e.suc == null ? 'jamais' : e.age > _matFen ? 'vieille' : 'frais';
+  var idx = r.frais.indexOf(e);
+  var p = (typeof _vendParcByName === 'function' ? _vendParcByName(nom) : null) || {};
+  var cep = (p.cepages && p.cepages.length) ? p.cepages.join(', ') : (p.cepage || '');
+  var tags = '<span class="mat-tag"><i class="mat-pt ' + _matVin(e.coul) + '"></i>' + (e.coul === 'r' ? 'Rouge' : e.coul === 'b' ? 'Blanc' : 'Sans couleur') + '</span>'
+    + '<span class="mat-tag">' + _mvF1(e.ha) + ' ha</span>' + (cep ? '<span class="mat-tag">' + _escHtml(cep) + '</span>' : '') + (e.aoc ? '<span class="mat-tag">' + _escHtml(e.aoc) + '</span>' : '');
+  var kpi = function(l, v, u, s){ return '<div class="mat-kpi"><span class="l">' + l + '</span><span class="v">' + v + (u ? '<small>' + u + '</small>' : '') + '</span><span class="s">' + s + '</span></div>'; };
+  var h = '<div class="mat-fi-hd"><div class="mat-fi-cel"><h3 class="mat-fi-t">' + _escHtml(nom) + '</h3><div class="mat-tags">' + tags + '</div></div>'
+    + '<button type="button" class="mat-x" aria-label="Fermer la fiche" onclick="_matSel(null)">' + _mvIcon('croix', 16) + '</button></div>'
+    + '<div class="mat-kpis">'
+    + kpi('Dernière mesure', e.suc != null ? _matGros(e.suc, spd) : '\u2014', e.suc != null ? _matUnite() : '', e.suc != null ? _matPetit(e.suc, spd) + ' · ' + _matAge(e.age) : 'aucune mesure')
+    + kpi('Vitesse', _matVit(e.vit, spd) || '\u2014', e.vit != null ? _matUnite() + ' /j' : '', e.vit != null ? 'entre les deux dernières' : (e.arr.length === 1 ? 'une seule mesure' : 'pas de mesure'))
+    + kpi('Rang', idx >= 0 ? (idx + 1) + '<small>' + (idx ? 'e' : 're') + '</small>' : '\u2014', '', idx >= 0 ? 'sur ' + r.frais.length + ' mesurées' : (grp === 'rentree' ? 'déjà rentrée' : grp === 'vieille' ? 'hors moyenne' : 'pas classée'))
+    + '</div>';
+  if(grp === 'vieille') h += '<div class="mat-fi-note">Rien depuis ' + e.age + ' jours : elle sort de la moyenne.'
+    + (e.vit != null && e.vit > 0 ? ' À ' + _matVit(e.vit, spd) + ' ' + _matUnite() + ' par jour, elle serait vers ' + _matGros(e.suc + e.vit * e.age, spd) + ' ' + _matUnite() + ', mais personne ne l’a mesurée.' : ' Une seule mesure : pas encore de vitesse.') + '</div>';
+  else if(grp === 'rentree') h += '<div class="mat-fi-note neutre">Rentrée le ' + _matJj(e.rentree) + ' : elle ne compte plus dans les moyennes.</div>';
+  else if(grp === 'jamais') h += '<div class="mat-fi-note neutre">Aucune mesure cette vendange : elle compte dans les parcelles à mesurer, pas dans les moyennes.</div>';
+  var w = four[e.coul];
+  if(e.coul === 'r' || e.coul === 'b'){
+    var etat, cls = '';
+    if(!w) etat = 'pas réglée';
+    else if(e.suc == null) etat = 'pas de mesure';
+    else if(e.suc > w.max){ etat = 'au-dessus de ' + _matGros(e.suc - w.max, spd) + ' ' + _matUnite(); cls = 'att'; }
+    else if(e.suc >= w.min){ var at = e.arr.filter(function(a){ return _matSuc(a) >= w.min; })[0]; etat = 'dedans depuis le ' + _matJj(at.date); cls = 'ok'; }
+    else etat = 'à ' + _matGros(w.min - e.suc, spd) + ' ' + _matUnite() + ' du bas';
+    h += '<div class="mat-fi-sec"><div class="mat-fi-st">Repères</div>'
+      + '<div class="mat-rp"><span class="t">Fourchette des ' + (e.coul === 'r' ? 'rouges' : 'blancs') + '<small>' + (w ? _matGros(w.min, spd) + '\u2013' + _matGros(w.max, spd) + ' ' + _matUnite() : '\u2014') + '</small></span><b class="' + cls + '">' + etat + '</b></div></div>';
+  }
+  h += '<div class="mat-fi-sec"><div class="mat-fi-st">Évolution</div>'
+    + (e.arr.length >= 2 ? '<div id="mvg-mat-fi" class="mat-gr2"></div>' : '<p class="mat-note mat-gr2">' + (e.arr.length === 1 ? 'La courbe se trace à partir de deux mesures.' : 'Pas encore de mesure sur cette parcelle.') + '</p>')
+    + '</div>';
+  var canEdit = canWrite() && courante;
+  h += '<div class="mat-fi-sec"><div class="mat-fi-st">Mesures de la vendange<small>' + _matPlur(e.arr.length, 'mesure') + '</small></div>';
+  e.arr.slice().reverse().forEach(function(a){
+    var suc = _matSuc(a), lu = (a.mode === 'alc' ? 'a' : 's') !== _matUn ? (a.mode === 'alc' ? 'lu en degré' : 'lu en sucre') : '';
+    h += '<div class="mat-mes"><span class="d">' + _matJj(a.date) + '</span><span class="v">' + _matGros(suc, spd) + ' ' + _matUnite() + '<small>' + _matPetit(suc, spd) + '</small></span>'
+      + (lu ? '<span class="lu">' + lu + '</span>' : '')
+      + (canEdit ? '<button type="button" class="del" aria-label="Supprimer cette mesure" onclick="_vendAnaDel(\'' + _escAttr(String(a.id)) + '\')">' + _mvIcon('corbeille', 16) + '</button>' : '')
+      + '</div>';
+  });
+  h += '</div>';
+  if(canEdit && !e.rentree) h += '<div class="mat-fi-act"><button type="button" class="mat-btn large" data-nom="' + _escAttr(nom) + '" onclick="_matSaisie(this.dataset.nom)">' + _mvIcon('plus', 16) + 'Noter une mesure sur cette parcelle</button></div>';
+  return h;
+}
+
+/* ─────────── Les gestes ─────────── */
+function _matSetFen(f){ _matFen = f; renderVendAna(); }
+function _matSetFiltre(k){ _matFiltre = (_matFiltre === k ? 'dom' : k); _matSelNom = null; renderVendAna(); }
+function _matVoirPlus(k){ if(!k){ return; } _matVoirTout[k] = !_matVoirTout[k]; renderVendAna(); }
+function _matSetVue(v){ _matVue = v === 'courbes' ? 'courbes' : 'ordre'; renderVendAna(); }
+function _matSetAn(an){ _matAn = String(an || ''); _matSelNom = null; _matVoirTout = { jamais:false, rent:false }; renderVendAna(); }
+/* La fiche : à droite sur ordinateur, dans une fenêtre au téléphone. */
+function _matSel(nom){
+  _matSelNom = nom || null;
+  if(_matLarge()){ renderVendAna(); return; }
+  if(!nom){ if(typeof window.closeOv === 'function') window.closeOv(null, 'ovMatFiche'); renderVendAna(); return; }
+  var spd = (_vendCfg().sucre_par_degre) || 16.83, an = _matAnCourant(), ref = _matRefDe(an);
+  var r = _matSynth(_matFen, ref, an), corps = document.getElementById('mat-fiche-corps');
+  if(!corps || !r.tous[nom]) return;
+  corps.innerHTML = _matFicheHtml(nom, r, spd, _matFour(), !ref);
+  if(typeof window.openOv === 'function') window.openOv('ovMatFiche');
+  _matPeindreFiche(r, spd, _matFour());
+  if(window._mvGraphRepeindre) window._mvGraphRepeindre();
+}
+
+/* ─────────── La saisie en série ───────────
+   Une feuille, toutes les parcelles sur pied dans l'ordre de maturité : on ne remplit
+   que celles qu'on a mesurées, puis on enregistre tout d'un coup. La date et l'unité
+   restent ; une valeur hors des plages plausibles est signalée, pas refusée. */
+function _matSaisie(focus){
+  if(!canWrite()){ showToast('Accès lecture seule', 'var(--attention)'); return; }
+  var an = _matAnCourant(), ref = _matRefDe(an);
+  _matSaisieEt = { date:ref || _mvToday(), unite:(_matUn === 'a' ? 'a' : 's'), vals:{}, focus:focus || null };
+  _matSaisieRendre();
+  if(typeof window.openOv === 'function') window.openOv('ovMatSaisie');
+}
+function _matSaisieLignes(){
+  var s = _matSaisieEt, an = String(s.date).slice(0, 4);
+  var r = _matSynth(_matFen, s.date === _mvToday() ? null : s.date, an);
+  var ordre = r.frais.concat(r.vieilles, r.jamais);
+  if(s.focus){ var f = ordre.filter(function(e){ return e.nom === s.focus; })[0]; if(f){ ordre.splice(ordre.indexOf(f), 1); ordre.unshift(f); } }
+  return ordre;
+}
+function _matSaisieAide(nom){
+  var s = _matSaisieEt, spd = (_vendCfg().sucre_par_degre) || 16.83;
+  var v = parseFloat(String(s.vals[nom] || '').replace(',', '.'));
+  if(!(v > 0)) return { txt:'', cls:'' };
+  var biz = s.unite === 'a' ? (v < 7 || v > 17.5) : (v < 120 || v > 290);
+  if(biz) return { txt:'à vérifier', cls:'bizarre' };
+  return { txt:'= ' + (s.unite === 'a' ? Math.round(v * spd) + ' g/L' : _mvF1(v / spd) + ' %vol'), cls:'plein' };
+}
+function _matSaisieN(){
+  var s = _matSaisieEt, n = 0;
+  Object.keys(s.vals).forEach(function(k){ if(parseFloat(String(s.vals[k]).replace(',', '.')) > 0) n++; });
+  return n;
+}
+function _matSaisieBtn(){
+  var n = _matSaisieN(), b = document.getElementById('mat-saisie-ok'); if(!b) return;
+  b.disabled = !n;
+  b.textContent = n > 1 ? 'Enregistrer ' + n + ' mesures' : n ? 'Enregistrer 1 mesure' : 'Enregistrer';
+}
+function _matSaisieRendre(){
+  var corps = document.getElementById('mat-saisie-corps'); if(!corps || !_matSaisieEt) return;
+  var s = _matSaisieEt, spd = (_vendCfg().sucre_par_degre) || 16.83, u = s.unite === 'a' ? '%vol' : 'g/L';
+  var lignes = _matSaisieLignes().map(function(e){
+    var der = e.suc != null ? 'dernière : ' + (s.unite === 'a' ? _mvF1(e.suc / spd) : Math.round(e.suc)) + ' ' + u + ', ' + _matAge(Math.max(0, _matJours(e.date, Date.parse(s.date)))) : 'aucune mesure';
+    var a = _matSaisieAide(e.nom), id = 'mat-v-' + _escAttr(String(e.nom).replace(/[^\w-]/g, '_'));
+    return '<label class="mat-f-l' + (s.focus === e.nom ? ' focus' : '') + '">'
+      + '<span class="n"><b><i class="mat-pt ' + _matVin(e.coul) + '"></i><span>' + _escHtml(e.nom) + '</span></b><small>' + der + '</small></span>'
+      + '<span class="c"><input type="text" inputmode="decimal" class="' + a.cls + '" id="' + id + '" data-nom="' + _escAttr(e.nom) + '" value="' + _escAttr(String(s.vals[e.nom] || '')) + '" placeholder="' + u + '" aria-label="Mesure pour ' + _escAttr(e.nom) + '" oninput="_matSaisieIn(this)">'
+      + '<small class="' + a.cls + '">' + a.txt + '</small></span></label>';
+  }).join('');
+  corps.innerHTML = '<div class="mat-f-hd"><h3 class="mat-f-t">Noter des mesures</h3><button type="button" class="mat-x" aria-label="Fermer" onclick="closeOv(null,\'ovMatSaisie\')">' + _mvIcon('croix', 16) + '</button></div>'
+    + '<div class="mat-f-ctl"><label>Date<input type="date" value="' + _escAttr(s.date) + '" max="' + _mvToday() + '" onchange="_matSaisieDate(this.value)"></label>'
+    + '<label>Lecture du réfractomètre<span class="mat-seg" role="group" aria-label="Unité">'
+    + [['s', 'Sucre g/L'], ['a', 'Degré %vol']].map(function(x){ return '<button type="button" class="' + (s.unite === x[0] ? 'on' : '') + '" aria-pressed="' + (s.unite === x[0]) + '" onclick="_matSaisieUnite(\'' + _escAttr(x[0]) + '\')">' + x[1] + '</button>'; }).join('')
+    + '</span></label>'
+    + '<p class="mat-f-aide">Degré = sucre ÷ ' + _mvF1(spd) + ', le réglage du Cuvier. Remplissez seulement les parcelles mesurées, puis enregistrez tout d’un coup.</p></div>'
+    + '<div class="mat-f-liste">' + lignes + '</div>'
+    + '<div class="mat-f-pied"><button type="button" class="mat-btn" onclick="closeOv(null,\'ovMatSaisie\')">Annuler</button>'
+    + '<button type="button" class="mat-btn prim" id="mat-saisie-ok" disabled onclick="_vendAnaAdd()">Enregistrer</button></div>';
+  _matSaisieBtn();
+  if(s.focus){ var el = corps.querySelector('input[data-nom]'); if(el) setTimeout(function(){ try{ el.focus(); }catch(e){ if(window.logError) window.logError({ level:'info', cat:'cave', msg:'saisie maturité : focus' }); } }, 60); }
+}
+function _matSaisieIn(el){
+  if(!_matSaisieEt || !el) return;
+  var nom = el.getAttribute('data-nom'); _matSaisieEt.vals[nom] = el.value;
+  var a = _matSaisieAide(nom), small = el.nextElementSibling;
+  el.className = a.cls; if(small){ small.className = a.cls; small.textContent = a.txt; }
+  _matSaisieBtn();
+}
+function _matSaisieUnite(u){ if(!_matSaisieEt) return; _matSaisieEt.unite = u === 'a' ? 'a' : 's'; _matSaisieEt.vals = {}; _matSaisieRendre(); }
+function _matSaisieDate(d){ if(!_matSaisieEt || !d) return; _matSaisieEt.date = d; _matSaisieRendre(); }
 function _vendAnaAdd(){
-  if(!canWrite()){ showToast('Accès lecture seule','#B85A1A'); return; }
-  var p=(document.getElementById('mva-parc')||{}).value||'';
-  var d=(document.getElementById('mva-date')||{}).value||'';
-  var v=parseFloat((document.getElementById('mva-val')||{}).value);
-  if(!p){ showToast('Choisissez une parcelle','#E07060'); return; }
-  if(!(v>0)){ showToast('Saisissez une mesure','#E07060'); return; }
-  if(!CAVE_VENDANGE.analyses) CAVE_VENDANGE.analyses=[];
-  CAVE_VENDANGE.analyses.push({id:'vana_'+Date.now(),parcelle:p,date:d||_mvToday(),
-    mode:_vendAnaUnitMode,val:v,spd:(_vendCfg().sucre_par_degre)||16.83});
-  window.CAVE_VENDANGE=CAVE_VENDANGE;
-  _vendFbSave('Analyse enregistrée','#C0845A');
+  if(!canWrite()){ showToast('Accès lecture seule', 'var(--attention)'); return; }
+  var s = _matSaisieEt; if(!s) return;
+  var spd = (_vendCfg().sucre_par_degre) || 16.83, n = 0, t = Date.now();
+  if(!CAVE_VENDANGE.analyses) CAVE_VENDANGE.analyses = [];
+  Object.keys(s.vals).forEach(function(nom, k){
+    var v = parseFloat(String(s.vals[nom]).replace(',', '.'));
+    if(!(v > 0)) return;
+    CAVE_VENDANGE.analyses.push({ id:'vana_' + t + '_' + k, parcelle:nom, date:s.date || _mvToday(), mode:(s.unite === 'a' ? 'alc' : 'sucre'), val:v, spd:spd });
+    n++;
+  });
+  if(!n) return;
+  window.CAVE_VENDANGE = CAVE_VENDANGE;
+  _matSaisieEt = null;
+  if(typeof window.closeOv === 'function') window.closeOv(null, 'ovMatSaisie');
+  _vendFbSave(n > 1 ? n + ' mesures enregistrées' : 'Mesure enregistrée', 'var(--ok)');
+  _matAn = String((s.date || _mvToday()).slice(0, 4));
   renderVendAna();
 }
 function _vendAnaDel(id){
-  if(!canWrite()){ showToast('Accès lecture seule','#B85A1A'); return; }
-  CAVE_VENDANGE.analyses=(CAVE_VENDANGE.analyses||[]).filter(function(a){return a.id!==id;});
-  window.CAVE_VENDANGE=CAVE_VENDANGE;
+  if(!canWrite()){ showToast('Accès lecture seule', 'var(--attention)'); return; }
+  CAVE_VENDANGE.analyses = (CAVE_VENDANGE.analyses || []).filter(function(a){ return String(a.id) !== String(id); });
+  window.CAVE_VENDANGE = CAVE_VENDANGE;
+  _vendFbSave('Mesure supprimée', 'var(--texte-med)');
+  renderVendAna();
+  if(!_matLarge() && _matSelNom && document.getElementById('ovMatFiche') && document.getElementById('ovMatFiche').classList.contains('open')) _matSel(_matSelNom);
+}
+
+/* ─────────── La couleur des parcelles que le cépage ne tranche pas ─────────── */
+function _vendSetCoul(nom, c){
+  if(!canWrite()){ showToast('Accès lecture seule', 'var(--attention)'); return; }
+  if(!CAVE_VENDANGE.config) CAVE_VENDANGE.config = {};
+  if(!CAVE_VENDANGE.config.coul_parc) CAVE_VENDANGE.config.coul_parc = {};
+  if(CAVE_VENDANGE.config.coul_parc[nom] === c) delete CAVE_VENDANGE.config.coul_parc[nom];
+  else CAVE_VENDANGE.config.coul_parc[nom] = c;
+  window.CAVE_VENDANGE = CAVE_VENDANGE;
   _vendFbSave(null);
   renderVendAna();
+  if(document.getElementById('ovMatCouleurs') && document.getElementById('ovMatCouleurs').classList.contains('open')) _matCouleurs(true);
+}
+function _matCouleurs(rafraichir){
+  var corps = document.getElementById('mat-coul-corps'); if(!corps) return;
+  var cp = _vendCfg().coul_parc || {};
+  var liste = (window.PARCELLES || []).filter(function(p){
+    if(!p || !p.nom || p.statut === 'Arrachee') return false;
+    var nom = String(p.nom).trim(), ov = cp[nom];
+    if(ov === 'r' || ov === 'b') return true;      // déjà classée ici : on peut la reclasser
+    return _parcCoul(nom) === '?';
+  });
+  corps.innerHTML = '<div class="mat-f-hd"><h3 class="mat-f-t">Couleur des parcelles</h3><button type="button" class="mat-x" aria-label="Fermer" onclick="closeOv(null,\'ovMatCouleurs\')">' + _mvIcon('croix', 16) + '</button></div>'
+    + '<p class="mat-f-p">Le cépage ne permet pas de trancher. La couleur range la parcelle dans Rouges ou Blancs ; elle compte déjà dans Domaine.</p>'
+    + '<div class="mat-f-liste">' + liste.map(function(p){
+        var nom = String(p.nom).trim(), c = cp[nom] || '?';
+        return '<div class="mat-f-l fixe"><span class="n"><b><span>' + _escHtml(nom) + '</span></b><small>' + _mvF1(parseFloat(p.surface) || 0) + ' ha</small></span>'
+          + '<span class="mat-seg" role="group" aria-label="Couleur de ' + _escAttr(nom) + '">'
+          + [['r', 'Rouge'], ['b', 'Blanc']].map(function(x){ return '<button type="button" class="' + (c === x[0] ? 'on' : '') + '" aria-pressed="' + (c === x[0]) + '" data-nom="' + _escAttr(nom) + '" onclick="_vendSetCoul(this.dataset.nom,\'' + _escAttr(x[0]) + '\')">' + x[1] + '</button>'; }).join('')
+          + '</span></div>';
+      }).join('') + '</div>'
+    + '<div class="mat-f-pied"><button type="button" class="mat-btn prim" onclick="closeOv(null,\'ovMatCouleurs\')">Terminé</button></div>';
+  if(!rafraichir && typeof window.openOv === 'function') window.openOv('ovMatCouleurs');
+}
+
+
+/* La fourchette dans la roue crantée (Le Cuvier) : deux bornes par couleur, ou rien. */
+function _matRegLigne(c, lbl, w){
+  var ph = c === 'r' ? ['205', '225'] : ['195', '215'];
+  var champ = function(b, v, p, a){ return '<input class="mvv-fi" id="vpfi-m' + c + '-' + b + '" type="number" min="120" max="300" step="1" inputmode="numeric" value="' + v + '" placeholder="' + p + '" aria-label="' + lbl + ', ' + a + '">'; };
+  return '<div class="mvv-prow"><div class="mvv-prow-l">' + lbl + ', g/L</div><div class="mat-reg">'
+    + champ('min', w ? Math.round(w.min) : '', ph[0], 'bas de la fourchette') + '<span>à</span>' + champ('max', w ? Math.round(w.max) : '', ph[1], 'haut de la fourchette')
+    + '</div></div>';
+}
+function _matRegHtml(){
+  var f = _matFour();
+  return '<div class="mvv-set"><div class="mvv-set-t">Maturité</div>'
+    + '<div class="mvv-set-d">La fourchette de sucre visée pour vendanger, par couleur. Elle trace sa bande dans les Maturités. Laisser vide : pas de bande.</div>'
+    + _matRegLigne('r', 'Rouges', f.r) + _matRegLigne('b', 'Blancs', f.b) + '</div>';
+}
+/* Lue par _vendSaveParam : { four, err }. */
+function _matRegLire(){
+  var o = { r:null, b:null }, err = '';
+  ['r', 'b'].forEach(function(c){
+    var nm = c === 'r' ? 'rouges' : 'blancs';
+    var a = parseFloat((document.getElementById('vpfi-m' + c + '-min') || {}).value), b = parseFloat((document.getElementById('vpfi-m' + c + '-max') || {}).value);
+    if(!(a > 0) && !(b > 0)) return;
+    if(!(a > 0) || !(b > 0)){ err = err || 'Fourchette des ' + nm + ' : remplissez les deux bornes, ou videz les deux.'; return; }
+    a = Math.min(300, Math.max(120, Math.round(a))); b = Math.min(300, Math.max(120, Math.round(b)));
+    if(a > b){ var t = a; a = b; b = t; }
+    if(a === b){ err = err || 'Fourchette des ' + nm + ' : le haut doit dépasser le bas.'; return; }
+    o[c] = { min:a, max:b };
+  });
+  return { four:o, err:err };
 }
 
 // ── expositions v2 ──
 window.renderVendAna        = renderVendAna;
-window._vendAnaUnit         = _vendAnaUnit;
-window._vendAnaLive         = _vendAnaLive;
 window._vendAnaAdd          = _vendAnaAdd;
+// ★ MATU-1 — les gestes du nouvel onglet, et la fourchette lue par Le millésime (cave.js)
+window._matSetVue           = _matSetVue;
+window._matSetAn            = _matSetAn;
+window._matSel              = _matSel;
+window._matSaisie           = _matSaisie;
+window._matSaisieIn         = _matSaisieIn;
+window._matSaisieUnite      = _matSaisieUnite;
+window._matSaisieDate       = _matSaisieDate;
+window._matCouleurs         = _matCouleurs;
+window._matFour             = _matFour;
 window._matSetFen           = _matSetFen;
 window._matSetFiltre        = _matSetFiltre;
 window._matVoirPlus         = _matVoirPlus;

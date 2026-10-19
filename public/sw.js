@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.09
+// MA VIGNE — Service Worker v10.10
+// v10.10 (19/10/2026) — MATU-1 (§366) : l’onglet Maturités du Cuvier rangé (la vendange choisie, la synthèse, l’ordre de maturité avec la fourchette de chaque couleur en bande, les courbes, la fiche, la saisie en série) ; la fourchette se règle dans la roue crantée › Le Cuvier ; les années ne se mélangent plus. cuvier.js, cave.js, styles.css, index.html, utils.js. APP 9.30 -> 9.31.
 // v10.09 (19/10/2026) — AIDE-1 (§365) : la fenêtre « ? Aide » s’affiche proprement — l’icône se dessine (le nom « graphique » s’écrivait en toutes lettres), le gras écrit dans les fiches devient du gras (105 bouts de code visibles au Pilotage), « & » et « SO2 » en caractères ordinaires ; aide du Pilotage : plus de nombre d’onglets en dur, l’ouverture sur Aujourd’hui dite. utils.js, styles.css, index.html. APP 9.29 -> 9.30.
 // v10.08 (19/10/2026) — TUTO-7 (§364) : le tuto des équipes ne saute plus d’étape (les deux étapes de choix avaient la même vérification côté domaine) ; un geste d’un coup ne se rejoue plus pour la même étape ; la référence de la pastille est prise fenêtre ouverte. tutos.js, utils.js, index.html. APP 9.28 -> 9.29.
 // v10.07 (18/10/2026) — TUTO-6 (§363) : le tuto à côté de l’appli suit plus vite — en miroir, le geste d’un coup (sans doigt animé) et 0,3 s de pause ; lecture toutes les 150 ms, une saisie posée en 0,8 s ; « Préparation de l’entraînement… » à l’ouverture du panneau. tutos.js, utils.js, index.html. APP 9.27 -> 9.28.
@@ -4539,7 +4540,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.09';
+const CACHE_NAME   = 'mavigne-v10.10';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4556,7 +4557,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.09 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.10 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4576,7 +4577,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.09 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.10 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

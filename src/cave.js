@@ -4096,13 +4096,6 @@ function _parcCoul(nom){
   return vu || '?';
 }
 
-// Nom de parcelle passe a un onclick : il vient de la saisie du domaine.
-function _mvQ(s){
-  var t = String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");   // 1. litteral JS
-  t = t.replace(/&/g, '&amp;').replace(/"/g, '&quot;')             // 2. attribut HTML
-       .replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  return "'" + t + "'";
-}
 
 // ─────────── MILLÉSIMES (Le Chai) ───────────
 /* ★★★ Lot CAVE-6 — LE FILTRE PORTE SUR LE CHAI, PLUS SUR UNE SEULE LISTE.
@@ -9977,7 +9970,10 @@ window._cuvMatSvg = function(w){
   if(!Object.keys(byP).length) return '';
   /* L'objectif n'existe que si le domaine l'a pose : absent, la ligne ne
      s'affiche pas. Meme appel que l'ecran des analyses — pas un second. */
-  return _vendMatSvg(byP, w, { objectif: parseFloat(_vendCfg().mat_objectif) || 0 });
+  // ★ MATU-1 : les fourchettes visées du Cuvier, en bande — plus l'objectif unique, jamais réglable.
+  var f = (typeof window._matFour === 'function') ? window._matFour() : {};
+  var bandes = ['r', 'b'].filter(function(k){ return f[k]; }).map(function(k){ return { min:f[k].min, max:f[k].max, lbl:(k === 'r' ? 'rouges ' : 'blancs ') + Math.round(f[k].min) + '\u2013' + Math.round(f[k].max) }; });
+  return _vendMatSvg(byP, w, { bandes:bandes });
 };
 window._caveBilanChaine  = _caveBilanChaine;
 window._caveBtlGraphSvg  = _caveBtlGraphSvg;
@@ -10956,7 +10952,6 @@ window._cuveCouches = _cuveCouches;
 window._apTronc = _apTronc;
 window._remplirPied = _remplirPied;
 window._parcCoul = _parcCoul;
-window._mvQ = _mvQ;
 window._mlAuj = _mlAuj;
 window._mlEcartJ = _mlEcartJ;
 window._mlCampagne = _mlCampagne;

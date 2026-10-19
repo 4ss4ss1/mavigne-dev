@@ -15,7 +15,9 @@ const PIL  = fs.readFileSync('src/pilotage.js', 'utf8');
 const COCKPIT = fs.readFileSync('src/cockpit.js', 'utf8');
 /* ★ Lot CAVE-1 : la Cave pose sa propre pastille (cave.auj). Un corpus limite au
    Pilotage aurait dit « fiche orpheline » sur une pastille bien reelle. */
-const CAVE = fs.readFileSync('src/cave.js', 'utf8');
+// ★ MATU-1 (§366) : depuis CUV-DEC (§164), Le Cuvier vit dans cuvier.js. Lire cave.js seul faisait passer
+//   pour orpheline toute bulle posée au Cuvier (vécu : « cave.maturite »).
+const CAVE = fs.readFileSync('src/cave.js', 'utf8') + '\n' + fs.readFileSync('src/cuvier.js', 'utf8');
 /* ★ Lot AXE-1 : le catalogue des documents vit dans reglages.js, et ses panneaux
    de choix posent leurs pastilles (doc.fenetres, doc.journal). Meme cause que la
    ligne au-dessus, deux lots plus tard — quand une surface pose une pastille,

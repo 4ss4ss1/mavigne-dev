@@ -914,3 +914,44 @@ Le cœur était à son plafond (2 800). Les points 4 et 5 du backlog technique (
 >    L'entrée disait « impossible » là où personne n'avait essayé. **Ce filet est désormais jouable à
 >    chaque lot, et il doit l'être** — voir §78.
 > 5. **`test:smoke` / `test:e2e`** : jamais joués côté Claude (Chromium injoignable).
+
+## 366. ★★ MATU-1 — LES MATURITÉS RANGÉES : UN ÉCRAN, LA VENDANGE CHOISIE, LA FOURCHETTE PAR COULEUR (19/10 — `src/cuvier.js` (`renderVendAna` réécrit, `_matSynth` borné, `_vendMatSvg`, la fiche, la saisie en série, la fenêtre des couleurs, `renderVendParam`, `_vendSaveParam`, expositions) · `src/cave.js` (`_cuvMatSvg` : les bandes ; `_mvQ` retiré) · `src/styles.css` (bloc MATU-1) · `src/utils.js` (MV_INFO `cave.maturite`, MV_AIDE Cave, APP, WHATS_NEW) · `index.html` (trois fenêtres) · `public/sw.js` · `guide/08-cave.html` · `scripts/mv-harnais-matu1.mjs` (neuf) · `scripts/mv-harnais-info.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/typo-baseline.json` · `scripts/tutos-couverture.json` · `.mv-base` · `lots/MATU-1.json` · `CLAUDE.md` · `docs/claude/*` · **APP 9.30 → 9.31, SW 10.09 → 10.10**, base `4f9cf13`)
+
+### 366a. La demande
+18/10, Nico : l’onglet Maturités du Cuvier est « tout étalé, un peu chantier, pas pro ». Maquette d’abord : une toile Design jouable (téléphone et ordinateur, clair et sombre, données fictives du Domaine des Grandes Vignes au 08/09/2026), contrôlée par un script sur 343 états. Validée le 19/10, « telle quelle » ; le rangement s’étend ensuite à tout le Cuvier et à la roue crantée, lot par lot. Ce lot-ci : les Maturités seules.
+
+### 366b. Ce qui a été lu avant d’écrire
+- **Les années se mêlaient.** La courbe et les cartes de l’ancien onglet lisaient TOUTES les analyses (`byP` sans filtre) ; seule la synthèse se bornait, par une fenêtre de 150 jours. À la deuxième vendange, 2025 et 2026 se seraient superposés sur le même axe ; l’hiver, la fenêtre des 150 jours laissait même entrer l’automne d’avant dans « l’année en cours ».
+- **La saisie repartait de zéro.** Un formulaire par mesure : choisir la parcelle, taper, enregistrer, recommencer — douze fois pour une tournée de réfractomètre.
+- **`mat_objectif` était lu (la ligne d’objectif des courbes) mais aucun écran ne permettait de le poser.**
+- Degré potentiel et estimation alcoolique affichaient le même chiffre deux fois.
+
+### 366c. Ce qui est livré
+- **La tête** : la vendange choisie (liste native : sur téléphone, le sélecteur du système), la date — une vendange passée se relit à sa dernière mesure, comme le document imprimé —, « Noter des mesures », et « Imprimer le contrôle » sur ordinateur seulement.
+- **La synthèse** : trois tuiles (Domaine, Rouges, Blancs) qui filtrent tout l’écran, la fenêtre de fraîcheur (7 jours, 14 jours, toute la vendange), et le « i » : une fiche vivante (`_mvInfoSet('cave.maturite')`) qui redit la moyenne sans pondération et ce qui n’est pas compté. La fiche fixe de MV_INFO reste le repli.
+- **L’ordre de maturité** : une ligne par parcelle sur une échelle commune ; la bande verte est la fourchette de SA couleur, le trait pointillé la moyenne ; « hors moyenne » au-delà de la fenêtre ; jamais mesurées et déjà rentrées repliées (`_matVoirTout` devient `{ jamais, rent }`) ; la phrase du haut dit combien sont dans leur fourchette et l’écart que mélangerait une même benne.
+- **Les courbes** : celles de la vendange choisie et du filtre choisi, sans les parcelles rentrées, avec les bandes ; la légende est une liste qui ouvre la fiche.
+- **La fiche** : dernière mesure, vitesse, rang, repères (position dans la fourchette, depuis quand), courbe à la couleur du vin, mesures avec la corbeille, « Noter une mesure sur cette parcelle ». À droite sur ordinateur (à la place des courbes, collante), dans une fenêtre au téléphone (`ovMatFiche`).
+- **La saisie en série** (`ovMatSaisie`) : la date, l’unité du réfractomètre, toutes les parcelles sur pied dans l’ordre de maturité (celle de la fiche en tête) ; on remplit celles qu’on a mesurées, un seul enregistrement, une seule sauvegarde. Hors des plages plausibles (120–290 g/L, 7–17,5 %vol) : signalé « à vérifier », pas refusé.
+- **La couleur des parcelles** que le cépage ne tranche pas : une fenêtre (`ovMatCouleurs`) au lieu des boutons en bas de carte.
+- **La fourchette** : roue crantée › Le Cuvier › Maturité, une par couleur, en g/L (`config.mat_four = { r:{min,max}|null, b:… }`). `_matRegLire` : deux bornes ou aucune, remises dans l’ordre, bornées à 120–300, un haut égal au bas refusé — rien ne s’enregistre tant que c’est faux. Le millésime (`_cuvMatSvg`) trace les mêmes bandes.
+
+### 366d. Les décisions
+- **Le minimum de l’appellation (le trait rouge de la maquette) n’est pas dans ce lot.** Il se règle avec l’appellation (Gevrey-Chambertin : 180 g/L en rouge au cahier des charges), donc avec le lot de la roue crantée ; le poser ici aurait affiché un repère que personne ne peut régler.
+- **La fourchette est un réglage du domaine, pas une norme.** Aucune borne haute réglementaire n’existe pour le raisin ; le seul plafond porte sur le vin enrichi. D’où « Laisser vide : pas de bande », et aucune valeur par défaut posée en silence (les valeurs de la maquette ne sont que l’exemple grisé des champs).
+- **Le calcul ne change pas** : `_matSynth` reste la source ; seul son troisième argument (la vendange) est neuf.
+
+### 366e. Trouvé en route
+- **`mv-harnais-info` ne lisait que cave.js.** Écrit avant CUV-DEC (§164) ; toute bulle posée au Cuvier passait pour orpheline. Il lit maintenant cave.js + cuvier.js.
+- **C24b** : deux valeurs posées dans des `onclick` sans `_escAttr`. Le nom de parcelle passe désormais par `data-nom` et `this.dataset.nom` ; du coup `_mvQ` (cave.js) n’avait plus d’appelant : retiré, avec son exposition.
+- **Les replis des jetons** : `mv-harnais-jetons` exige un repli sur chaque jeton du socle et compte les replis manquants des anciens (`--pt-*`, `--e-*`) : 288 posés dans le bloc MATU-1, aucun nu.
+- Un `catch` vide (le focus de la feuille) : il trace maintenant.
+- **Où poser un bloc de style.** En fin de feuille, il passe après TETE-2, qui doit rester le dernier (`mv-harnais-tete2`). Juste avant TETE-2, il fait rougir sept harnais (JALONS-2, PRESENCE-1, PREMIERES-1, RANGBOUT-1, CARTEDOM-1, SAISONIMG-1, ARRIVEE-4) : chacun découpe la feuille de son bloc jusqu’à `/* ★ TETE-2 (§329)` et y refuse toute couleur en dur — or les replis des jetons (`--ligne`, les ombres) en portent. Posé juste après `★ FIN CAVE-2`, il ne traverse aucun découpage connu (vérifié en relevant tous les couples `indexOf(A), indexOf(B)` des scripts).
+- **La marque d’un lot fige ses fichiers** : retoucher styles.css après `mv-lot-marque` rougit `mv-lots` (« ne retrouve plus 1 de ses 18 fichiers »). La marque se pose en dernier.
+
+### 366f. Deux décisions à revoir
+- **`typo-baseline.json` regravé** : cuvier.js 531 → 568 ko, styles.css 747 → 787 ko. Le style a d’abord été écrit injecté dans cuvier.js (587 ko) ; sorti dans styles.css, cuvier.js reste à +7 %. Les trois onglets suivants du Cuvier le feront encore grossir : la question d’un module à part (les vues du Cuvier, ou les Maturités seules) se pose AVANT le lot Récoltes.
+- **Le plafond des gestes sans tuto relevé de 813 à 820** (`tutos-couverture.json`) : sept gestes neufs (la vue, la vendange, la fiche, la feuille, sa saisie, son unité, sa date, la fenêtre des couleurs ; deux anciens retirés). Un tuto « Noter des mesures » en couvrirait l’essentiel.
+
+### 366g. La leçon
+**Un harnais qui lit un fichier par son nom vieillit avec le découpage.** `mv-harnais-info` lisait « la Cave » dans cave.js depuis avant CUV-DEC : il n’a jamais vu une bulle du Cuvier. Quand un module se scinde, chercher les harnais qui le lisent par son nom.
