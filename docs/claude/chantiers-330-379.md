@@ -1223,3 +1223,28 @@ Sa chaîne sur son poste (451 commandes, 269 s, 12 à la fois) : **2 rouges**, `
 
 ### 376e. La leçon
 **Une leçon écrite dans un commentaire ne protège que celui qui relit ce fichier.** §53 était notée quatre fois, dans quatre harnais ; un nouveau harnais ne les relit pas. Une leçon payée deux fois devient un contrôle — elle l’est maintenant (`mv-harnais-chemins`). Et sur le poste de Nico, c’est Windows : le bac à sable vert ne prouve rien des chemins ni des fins de ligne.
+
+## 377. ★ CHARTE-4b — TROIS FILTRES AU JEU DE PASTILLES (19/10 — `src/styles.css` · `src/cave.js` · `src/tracteur.js` · `index.html` · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `scripts/mv-harnais-pastilles.mjs` · `scripts/mv-jetons-baseline.json` · `scripts/mv-espace-baseline.json` · `scripts/harnais-claude-md.mjs` · **APP 9.38 → 9.39, SW 10.17 → 10.18**, base `6359811`)
+
+### 377a. La demande
+La suite proposée après CHEMINS-1, acceptée (« suite ») : le reste des pastilles. Ce lot prend les trois **filtres** dont le dessin se décidait ailleurs que dans la feuille ; les filtres du Tracteur (`.chip`, cité par six contrôles) et les pastilles faites à la main restent pour CHARTE-4c.
+
+### 377b. Ce qui a été lu avant d’écrire
+- **Cave › Le Chai, `.mvcm-chip`** (filtres de millésime) : tout son dessin dans le CSS de la Cave ; le choisi en noir et or (`--cave` / `--or`). Le contrôle `cave6` vérifie le balisage du compteur (`<span class="mvcm-c">`), pas le dessin.
+- **L’opération de cave, `.cave-cuvee-chip`** (millésimes et cuvées) : la règle lisait `--bord` et `--fond-carte`, **déclarés nulle part** ; le choisi était peint par le code (`_copRenderMils`, `_copUpdateChips`, `_copChipH`) à la couleur de l’opération — trois styles écrits sur place.
+- **Tracteur, `.sdp-skip-btn`** (« Désactiver » / « Réactiver » d’une parcelle) ; et en tête de liste, **« ⊘ Désactiver » et « Voir toutes » : deux `<div onclick>`** — pas de clavier, pas de rôle ; `updateSDSkipBtn` les repeignait en couleurs écrites dans le code.
+
+### 377c. Ce qui est livré
+- Les trois classes groupées sous `.mvpas-filtre` (36 px au téléphone, 28 sur ordinateur, arrondi complet ; le choisi à la couleur d’action) ; leurs règles d’origine ne gardent que la mise en page. Le CSS de la Cave pour `.mvcm-chip` retiré.
+- **L’état posé par une classe**, plus par des couleurs : `on` + `aria-pressed` dans `_copRenderMils`, `_copUpdateChips`, `_copChipH`, `updateSDSkipBtn` et le bouton « Voir toutes » de `renderSDParcelles` (hors du bloc que `mv-harnais-tap` exécute).
+- « ⊘ Désactiver » et « Voir toutes » deviennent des `<button type="button" class="mvpas-filtre">`, ids et gestes gardés.
+- `mv-harnais-pastilles` : 24 classes surveillées ; plafond des pastilles « maison » 92 → 91. Cliquets regravés à la baisse : rayons en dur 228 → 227, espacements hors échelle 993 → 991.
+- Trouvé en montant la version : `index.html` contient « 9.38 » une fois de trop — dans le tracé d’une icône (« 19.381 »). Le compte global de la version s’y trompait ; les cinq affichages ont été remplacés un par un.
+
+### 377d. Vu, et pas vu
+- **Vu** (`mv-captures`, téléphone, clair et sombre) : les millésimes du Chai (« Tous 4 » choisi, lie-de-vin) ; « ⊘ Désactiver » et « Voir toutes » d’une session, en filtres. 12 captures valables.
+- **Pas vu** : les cuvées et millésimes de l’opération — la démo ouvre l’opération sur un sélecteur fermé.
+- **Chaîne** : 453 commandes, **1 rouge** : `mv-base`. Le commit CHEMINS-1 (`6359811`) déclarait la base `4a826fe`, mais Nico avait poussé CAPTURES-2 à part (`0bc083c`) et l’a posé dessus. Vérifié par fusion à trois voies (base `4a826fe`, `6359811`, `0bc083c`) : `mv-captures.mjs` identique, les conflits ne portent que sur les lignes de doc que CHEMINS-1 réécrivait exprès (l’en-tête, le compteur de sections) ; §375 et l’en-tête de CAPTURES-2 sont bien dans `6359811` — **rien d’effacé**, CHEMINS-1 contenait CAPTURES-2. Ce lot déclare la vraie base `6359811` : la garde est verte.
+
+### 377e. La leçon
+**Un état peint par le code échappe à la charte.** Trois styles allumaient les pastilles de l’opération à la couleur du type d’opération : aucune feuille ne pouvait les ramener au jeu. Un état se dit par une classe (et `aria-pressed`) ; la couleur reste à la feuille.

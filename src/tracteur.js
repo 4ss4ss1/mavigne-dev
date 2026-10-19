@@ -2331,8 +2331,8 @@ function openSessionDetail(id){
 }
 function updateSDSkipBtn(){
   const btn=document.getElementById('sd-skip-mode-btn');if(!btn)return;
-  if(sdSkipMode){btn.textContent='⊘ Mode désactivation ON';btn.style.background='#C83A20';btn.style.color='white';}
-  else{btn.textContent='⊘ Désactiver';btn.style.background='#F0D0C8';btn.style.color='#8B3A28';}
+  if(sdSkipMode){btn.textContent='⊘ Mode désactivation ON';btn.classList.add('on');btn.setAttribute('aria-pressed','true');}
+  else{btn.textContent='⊘ Désactiver';btn.classList.remove('on');btn.setAttribute('aria-pressed','false');}
 }
 function toggleSDSkipMode(){sdSkipMode=!sdSkipMode;updateSDSkipBtn();renderSDParcelles();}
 // ── TAP-1 : début du bloc (scripts/mv-harnais-tap.mjs l'exécute tel quel, entre ces deux bornes) ──
@@ -2435,7 +2435,7 @@ function renderSDParcelles(){
     toShow=_t.liste; window._sdTri=_t;
   }
   const btn=document.getElementById('sd-show-done-btn');
-  if(btn)btn.textContent=sdShowDone?'Masquer faites':'Voir toutes';
+  if(btn){btn.textContent=sdShowDone?'Masquer faites':'Voir toutes';btn.classList.toggle('on',!!sdShowDone);btn.setAttribute('aria-pressed',sdShowDone?'true':'false');}
   if(toShow.length===0){document.getElementById('sd-parcelles').innerHTML='<div style="text-align:center;padding:24px;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Toutes les parcelles sont cochées</div>';_renderChronoBar();_sdRenderHist();return;}
   // Activité courante pour savoir si il y a un champ custom
   var act=ACTIVITES.find(function(a){return a.nom===s.activite;});

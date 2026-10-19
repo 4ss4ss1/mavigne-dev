@@ -703,9 +703,7 @@ html.mv-ov-lock,body.mv-ov-lock{overflow:hidden!important;}
 .sdp-check{width:22px;height:22px;border-radius:7px;border:2px solid var(--gris);background:white;display:flex;align-items:center;justify-content:center;font-size:var(--pt-txt,13px);font-weight:700;color:white;flex-shrink:0;transition:all 0.15s;}
 .sdp-check.on{background:var(--vert-med);border-color:var(--vert-med);}
 .sdp-check.skip{background:#E0C0B8;border-color:#C89A90;color:#8B4A40;font-size:var(--pt-micro,11px);}
-.sdp-skip-btn{font-size:var(--pt-micro,11px);font-weight:700;padding:3px 8px;border-radius:6px;border:none;cursor:pointer;flex-shrink:0;transition:all 0.15s;}
-.sdp-skip-btn.active{background:var(--terre-pale);color:var(--terre-tx,#8A5A38);}
-.sdp-skip-btn.inactive{background:var(--gris-clair);color:var(--texte-doux);}
+.sdp-skip-btn{ flex-shrink:0; transition:all 0.15s; }
 .sc-edit-btn{background:var(--acier-pale);border:1.5px solid var(--acier);border-radius:8px;padding:4px 9px;font-size:var(--pt-txt,13px);cursor:pointer;color:var(--acier);margin-right:6px;flex-shrink:0;transition:background 0.15s;}
 .sc-edit-btn:active{background:var(--acier);color:white;}
 .sc-bfill-enc{background:var(--orange)!important;}
@@ -1592,7 +1590,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .cave-sout-new{background:rgba(80,192,130,0.1);border:1px solid rgba(80,192,130,0.18);border-radius:6px;padding:3px 8px;font-weight:600;color:#5CB87A;}
 /* Overlay Cave Op */
 .cave-op-types{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px;}
-.cave-cuvee-chip{padding:7px 13px;border-radius:20px;border:1px solid var(--bord);background:var(--fond-carte);font-size:var(--pt-txt,13px);cursor:pointer;color:var(--texte);white-space:nowrap;line-height:1.3;}
+.cave-cuvee-chip{ white-space:nowrap; }
 .cave-stepper-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
 .cave-stepper-btn{ flex-shrink:0; }
 .cave-stepper-val{flex:1;text-align:center;font-size:var(--pt-sm,16px);font-weight:600;color:var(--texte);}
@@ -8059,7 +8057,10 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
    le compteur et le filtre sont ronds. Aucune couleur ni taille écrite en dur ici (mv-harnais-pastilles).
    ★ CHARTE-4a : sept familles d’avant passées au jeu (Planning .pf-tag .plan-badge, Cave .mvc-tag,
      Tracteur .sdp-tag, Pilotage .pil-dz-tag, Discussion .chat-canal-badge, Parcelles .p-fx-badge) ;
-     leur règle d’origine ne garde que la mise en page (position, marges, animation). */
+     leur règle d’origine ne garde que la mise en page (position, marges, animation).
+   ★ CHARTE-4b (§377) : trois filtres d’avant au jeu — Cave › Le Chai .mvcm-chip, l’opération .cave-cuvee-chip
+     (allumée en couleur de l’opération par le code, deux jetons lus déclarés nulle part), Tracteur .sdp-skip-btn ;
+     « Désactiver » et « Voir toutes » d’une session, deux <div> cliquables, deviennent des boutons .mvpas-filtre. */
 .mvpas, .pf-tag, .plan-badge, .mvc-tag, .sdp-tag, .pil-dz-tag{ display:inline-flex; align-items:center; gap:var(--e-1,4px); box-sizing:border-box; min-height:var(--h-badge,20px); padding:0 var(--e-2,8px); border:0; border-radius:var(--r-xs,4px); background:var(--survol); color:var(--texte-med); font-family:var(--font-ui); font-size:var(--pt-micro,12px); font-weight:var(--fw-semi,600); line-height:1.2; letter-spacing:normal; text-transform:none; white-space:nowrap; vertical-align:middle; }
 .mvpas svg, .pf-tag svg, .plan-badge svg, .mvc-tag svg, .sdp-tag svg, .pil-dz-tag svg{ width:1em; height:1em; flex:none; }
 .mvpas-statut::before{ content:""; flex:none; width:6px; height:6px; border-radius:50%; background:var(--mvpas-point, currentColor); }
@@ -8085,12 +8086,12 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .mvpas-compteur.mvpas-fort, .p-fx-badge{ background:var(--accent); color:var(--sur-accent); }
 .mvpas-compteur.mvpas-alerte, .chat-canal-badge{ background:var(--danger); color:var(--sur-danger); }
 /* le filtre : une pastille qu’on touche ; 36 px au téléphone, 28 sur ordinateur ; le choisi à la couleur d’action */
-.mvpas-filtre{ display:inline-flex; align-items:center; gap:var(--e-2,8px); box-sizing:border-box; min-height:var(--h-row,36px); padding:0 var(--e-4,16px); border:var(--bw,1px) solid var(--ligne-forte); border-radius:var(--r-full,999px); background:var(--bg-card); color:var(--texte-med); font-family:var(--font-ui); font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); line-height:1.2; white-space:nowrap; cursor:pointer; }
-@media (min-width:768px){ .mvpas-filtre{ min-height:var(--h-sm,28px); padding:0 var(--e-3,12px); font-size:var(--pt-txt,13px); } }
-.mvpas-filtre:hover{ background-image:linear-gradient(var(--survol),var(--survol)); }
-.mvpas-filtre.on, .mvpas-filtre[aria-pressed="true"]{ border-color:var(--accent-texte); background:var(--accent-doux); color:var(--accent-texte); }
-.mvpas-filtre:focus-visible{ outline:2px solid var(--focus,var(--accent)); outline-offset:2px; }
-.mvpas-filtre:disabled{ opacity:.45; cursor:not-allowed; }
+.mvpas-filtre, .mvcm-chip, .cave-cuvee-chip, .sdp-skip-btn{ display:inline-flex; align-items:center; gap:var(--e-2,8px); box-sizing:border-box; min-height:var(--h-row,36px); padding:0 var(--e-4,16px); border:var(--bw,1px) solid var(--ligne-forte); border-radius:var(--r-full,999px); background:var(--bg-card); color:var(--texte-med); font-family:var(--font-ui); font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); line-height:1.2; white-space:nowrap; cursor:pointer; }
+@media (min-width:768px){ .mvpas-filtre, .mvcm-chip, .cave-cuvee-chip, .sdp-skip-btn{ min-height:var(--h-sm,28px); padding:0 var(--e-3,12px); font-size:var(--pt-txt,13px); } }
+.mvpas-filtre:hover, .mvcm-chip:hover, .cave-cuvee-chip:hover, .sdp-skip-btn:hover{ background-image:linear-gradient(var(--survol),var(--survol)); }
+.mvpas-filtre.on, .mvpas-filtre[aria-pressed="true"], .mvcm-chip.on, .cave-cuvee-chip.on, .sdp-skip-btn.active{ border-color:var(--accent-texte); background:var(--accent-doux); color:var(--accent-texte); }
+.mvpas-filtre:focus-visible, .mvcm-chip:focus-visible, .cave-cuvee-chip:focus-visible, .sdp-skip-btn:focus-visible{ outline:2px solid var(--focus,var(--accent)); outline-offset:2px; }
+.mvpas-filtre:disabled, .mvcm-chip:disabled, .cave-cuvee-chip:disabled, .sdp-skip-btn:disabled{ opacity:.45; cursor:not-allowed; }
 /* ★ FIN CHARTE-4 */
 
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.

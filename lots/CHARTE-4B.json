@@ -1,0 +1,24 @@
+{
+  "lot": "CHARTE-4B",
+  "section": "§377",
+  "base": "63598110cc28568d0cd69d4a948e35502d76069f",
+  "inclut": [],
+  "date": "2026-10-19",
+  "fichiers": {
+    ".mv-base": "7aa034056e505fe03c6c3e9eab2bec071909c0ad5600fb8bbeb6a8a0da320e15",
+    "CLAUDE.md": "4b019a4ac465e980fd5e530df9be63133db34545d759b316292a87a6157be852",
+    "docs/claude/INDEX.md": "2bae43a96d0dc7b28e5c3a5cae785887b9028dbb369f14b17027cb9b9d8be801",
+    "docs/claude/chantiers-330-379.md": "14579fcb9694950a258d69203e2142a4c48e41ae83ac8ea96d65b51d3b2f01ec",
+    "docs/claude/journal.md": "c2dc0dc8ae1839c98f9bd18e0486ac8f730fb1dc9fa2a7523154748936904ba8",
+    "index.html": "1fb58f557620ae3fbc453d80c92b8b6dd403c0a1c8afa1e10df25e73a0b4681d",
+    "public/sw.js": "50b2fed6cfac050766da830e6c4c4ee9b7dc8cda3f53ced09443f344a96621ff",
+    "scripts/harnais-claude-md.mjs": "cb1a431beccbbd82e36167672ec7a0eea7cb0a484f38da18e243cbf112fa4236",
+    "scripts/mv-espace-baseline.json": "92070fbc0e90653d20ffe221a51596cf954e285691fd077b88490ce76109be32",
+    "scripts/mv-harnais-pastilles.mjs": "f4a0611a578fe6306343e6018f70da9d510decf5edd59fa769e399d00cf301d2",
+    "scripts/mv-jetons-baseline.json": "b2bc09fa5c368dbd1add849b0f16f12acb0e35bbe3e1fa78779958da2d211d3a",
+    "src/cave.js": "fa5913caec00443e35dbfe72ebcc98fa17d84d37b73898c0b3c63a6c77d87711",
+    "src/styles.css": "6c7789afa29173aa5438d53fd749b74021e44b029ab4175c465a5339553200df",
+    "src/tracteur.js": "69a8e5b7f110a4063d99bdc15ffed391193b9658085bf470343d2ad7a2bf573b",
+    "src/utils.js": "ed869c7dec2312ffe21dd4d838506e44f3e17891f26fdc27415f7ef4667858d5"
+  }
+}

@@ -598,12 +598,12 @@ function _copUpdateChips(){
   var actives=_copCuvsDuMil();
   var a=_copAccent();
   var ab=document.getElementById('cop-chip-all');
-  if(ab){ab.style.background=_copAllCuv?a:'';ab.style.color=_copAllCuv?'#fff':'';ab.style.border=_copAllCuv?'none':'';}
+  if(ab){ab.classList.toggle('on',!!_copAllCuv);ab.setAttribute('aria-pressed',_copAllCuv?'true':'false');}
   if(ab) ab.style.display=(_caveOpType==='degustation')?'none':''; // ★ GESTES-1
   actives.forEach(function(c){
     var b=document.getElementById('cop-chip-'+c.id);if(!b)return;
     var on=_copAllCuv||_copCuvSel.has(c.id);
-    b.style.background=on?a+'1e':'';b.style.color=on?a:'';b.style.border=on?'1px solid '+a+'88':'';
+    b.classList.toggle('on',!!on);b.setAttribute('aria-pressed',on?'true':'false');
   });
   _copNouvSync(); // ★ GESTES-1
 }
@@ -666,8 +666,7 @@ function _copRenderMils(){
       return ((c.millesime==null||c.millesime==='')?'?':String(c.millesime))===m;
     }).length;
     var on=(m===_copMil);
-    return '<button class="cave-cuvee-chip" id="cop-mil-'+_escHtml(m)+'" onclick="selCopMil(\''+_escAttr(m)+'\')"'
-      +(on?' style="background:'+a+';color:#fff;border:none;"':'')
+    return '<button class="cave-cuvee-chip'+(on?' on':'')+'" aria-pressed="'+(on?'true':'false')+'" id="cop-mil-'+_escHtml(m)+'" onclick="selCopMil(\''+_escAttr(m)+'\')"'
       +'>'+(m==='?'?'Sans millésime':_escHtml(m))+' \u00b7 '+nb+'</button>';
   }).join('');
   var note=document.getElementById('cop-mil-note');
@@ -1555,7 +1554,7 @@ function _copNouvCuvs(){
   return (CAVE_ELEVAGE.cuvees||[]).filter(function(c){ return c&&ids.indexOf(c.id)!==-1; });
 }
 function _copNouvVolHl(){ return _copNouvCuvs().reduce(function(s,c){ var v=_caveVolHl(c); return s+((isFinite(v)&&v>0)?v:0); },0); }
-function _copChipH(on,lbl,fn,a){ return '<button class="cave-cuvee-chip" onclick="'+fn+'"'+(on?' style="background:'+a+'1e;color:'+a+';border:1px solid '+a+'88;"':'')+'>'+_escHtml(lbl)+'</button>'; }
+function _copChipH(on,lbl,fn,a){ return '<button class="cave-cuvee-chip'+(on?' on':'')+'" aria-pressed="'+(on?'true':'false')+'" onclick="'+fn+'"'+'>'+_escHtml(lbl)+'</button>'; }
 function _copTogH(on,lbl,fn,flex){ return '<button class="cave-toggle-btn'+(on?' cave-toggle-active':'')+'" style="flex:'+flex+';" onclick="'+fn+'">'+lbl+'</button>'; }
 function _copTrProds(){ return (typeof window._vendIntrProds==='function')?(window._vendIntrProds()||[]):[]; }
 function _copTrProdObj(){ return _copTrProds().filter(function(p){ return p&&p.id===_copTr.prod; })[0]||null; }
@@ -3876,8 +3875,8 @@ function _caveV2InjectCss(){
   +'.mvcm-chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:2px 0 12px}'
   +'.mvcm-lab{font-size:var(--pt-lbl,10.5px);letter-spacing:.1em;color:var(--texte-doux,#5F5F5F);text-transform:uppercase;margin-right:2px}'
   +'.mvc-jmilnote{font-size:var(--pt-micro,11px);color:var(--texte-med);background:var(--or-pale,#FAF3E0);border:1px solid rgba(194,161,77,.28);border-radius:8px;padding:7px 10px;margin:0 0 12px;line-height:1.4}'
-  +'.mvcm-chip{font-size:var(--pt-txt,13px);font-weight:500;padding:6px 13px;border-radius:99px;border:1px solid rgba(138,90,56,.25);background:var(--bg-card,#FBFAF6);color:var(--terre,#8A5A38);cursor:pointer}'
-  +'.mvcm-chip.on{background:var(--cave,#14110D);color:var(--or,#C9A84C);border-color:var(--cave,#14110D)}'
+  +''
+  +''
   +'.mvcm-c{opacity:.6;font-size:var(--pt-lbl,10.5px);margin-left:4px}'
   /* — Mise en bouteille — */
   +'.mvb-sec{font-size:var(--pt-lbl,10.5px);letter-spacing:.13em;color:var(--terre,#8A5A38);text-transform:uppercase;margin:6px 0 8px;font-weight:600}'
