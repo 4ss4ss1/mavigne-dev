@@ -730,7 +730,7 @@ function renderActTracList(){
 }
 function _chrToggleHtml(){
   var o=!!(window.CONFIG&&window.CONFIG.chrono_mode==='on');
-  return '<div style="display:flex;align-items:center;gap:12px;background:var(--gris-clair);border-radius:11px;padding:11px 13px;margin-bottom:10px">'
+  return '<div class="mvencadre" style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'
     +'<div style="flex:1;min-width:0"><div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">'+_mvIcon('chrono',16)+' Chronometrer le temps reel</div>'
     +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px;line-height:1.4">Optionnel - dans une session, mesure le travail parcelle par parcelle. Sinon, le bareme ci-dessous prend le relais.</div></div>'
     +'<button onclick="_chronoSetMode('+(o?'false':'true')+')" style="flex-shrink:0;border:none;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);font-weight:700;font-size:var(--pt-micro,12px);padding:8px 15px;border-radius:20px;min-height:40px;'+(o?'background:var(--vert);color:#fff':'background:var(--gris);color:var(--texte-doux)')+'">'+(o?'ON':'OFF')+'</button>'
@@ -2526,7 +2526,7 @@ function editMembre(nom){
     // PAS dans le doc `membres` (lisible par toute l'équipe) — l'historique ne
     // fusionne les deux qu'à l'affichage, et seulement pour un administrateur.
     +'<div class="fl" style="margin-top:14px">Rattachement</div>'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 12px">'
+    +'<div class="mvencadre" style="display:flex;align-items:center;justify-content:space-between;gap:12px">'
     +'<div style="font-size:var(--pt-txt,13px);color:var(--texte,#374151);font-weight:600">Bureau<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);font-weight:400;margin-top:1px;max-width:300px">Non compté dans la capacité de travail des vignes (calcul de charge).</div></div>'
     +'<div class="role-chk '+(m.bureau?'on':'')+'" id="em-bureau" onclick="toggleEmBureau(this)">'+(m.bureau?_mvIcon('check',16):'')+'</div>'
     +'</div>'
@@ -2536,7 +2536,7 @@ function editMembre(nom){
     // Volontairement SOUS le rattachement : c'est le meme genre de drapeau, il
     // dit ce que cette fiche EST, pas ce qu'elle fait.
     +'<div class="fl" style="margin-top:14px">'+_mvIcon('equipe',16)+' \u00c9quipe collective</div>'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 12px">'
+    +'<div class="mvencadre" style="display:flex;align-items:center;justify-content:space-between;gap:12px">'
     +'<div style="font-size:var(--pt-txt,13px);color:var(--texte,#374151);font-weight:600">Une ligne, plusieurs personnes<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);font-weight:400;margin-top:1px;max-width:300px">Pour la vendange ou un prestataire. Ni compteur des 1607\u00a0h, ni cong\u00e9s, ni heures sup, ni compte de connexion\u00a0: ce n\u2019est pas un salari\u00e9, c\u2019est une \u00e9quipe.</div></div>'
     +'<div class="role-chk '+(m.collectif?'on':'')+'" id="em-collectif" onclick="toggleEmCollectif(this)">'+(m.collectif?'\u2713':'')+'</div>'
     +'</div>'
@@ -2551,7 +2551,7 @@ function editMembre(nom){
     // Function refuse de toute façon un appelant sans claim `adm`.
     +((window.isAdmin&&window.isAdmin()&&m.email)?(
        '<div class="fl" style="margin-top:14px">Accès</div>'
-      +'<div style="background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 12px">'
+      +'<div class="mvencadre">'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);line-height:1.5;margin-bottom:9px">Génère un nouveau mot de passe, affiché <b>une seule fois</b>. '+_escHtml(nom)+' devra le remplacer à sa prochaine connexion.</div>'
       +'<button type="button" class="mbtn" id="em-reset-pwd" onclick="_mvResetMemberPwd(\''+_escAttr(m.nom)+'\')" style="width:100%;margin:0">Réinitialiser le mot de passe</button>'
       +'</div>'):'');
@@ -6786,7 +6786,7 @@ function _renderCuivre(){
       +'</div></div>'
       +'<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);margin:-4px 0 12px">Le plafond s\'applique <b>par hectare</b>. Touche une parcelle pour le d\u00e9tail des apports.</div>'
       +'<div>'+listHtml+'</div>'
-      +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);background:var(--gris-clair);border-radius:10px;padding:10px 12px;margin-top:14px;line-height:1.55"><b>Lissage 7 ans.</b> La r\u00e8gle UE autorise '+_cuPlafond7()+'&#x202F;kg&#x202F;Cu/ha sur 7 ans ('+_cuPlafond()+' kg/ha/an en moyenne) : une ann\u00e9e peut d\u00e9passer 4 tant que la moyenne glissante reste sous le plafond. Bascule \u00ab Liss\u00e9 7 ans \u00bb pour la moyenne par parcelle, calcul\u00e9e sur les ann\u00e9es <b>couvertes par votre registre</b> \u2014 une ann\u00e9e sans cuivre \u00e0 l\u2019int\u00e9rieur de cette p\u00e9riode compte pour z\u00e9ro, les ann\u00e9es d\u2019avant votre premi\u00e8re trace ne comptent pas.</div>';
+      +'<div class="mvencadre" style="margin-top:14px"><b>Lissage 7 ans.</b> La r\u00e8gle UE autorise '+_cuPlafond7()+'&#x202F;kg&#x202F;Cu/ha sur 7 ans ('+_cuPlafond()+' kg/ha/an en moyenne) : une ann\u00e9e peut d\u00e9passer 4 tant que la moyenne glissante reste sous le plafond. Bascule \u00ab Liss\u00e9 7 ans \u00bb pour la moyenne par parcelle, calcul\u00e9e sur les ann\u00e9es <b>couvertes par votre registre</b> \u2014 une ann\u00e9e sans cuivre \u00e0 l\u2019int\u00e9rieur de cette p\u00e9riode compte pour z\u00e9ro, les ann\u00e9es d\u2019avant votre premi\u00e8re trace ne comptent pas.</div>';
   }
 
   var panel=ov.querySelector('.modal');
@@ -7073,7 +7073,7 @@ function _tcvRender(){
       +(on?'var(--vert-med)':'var(--gris-clair)')+';background:'+(on?'rgba(61,107,39,0.12)':'transparent')
       +';color:'+(on?'var(--vert-med)':'var(--texte-doux)')+'">'+esc(o.court||k)+'</span>';
   };
-  var barHtml='<div style="font-size:var(--pt-lbl,12px);line-height:1.5;border:1px solid var(--gris-clair);border-radius:10px;padding:9px 11px;margin-bottom:9px;background:var(--bg-card)">'
+  var barHtml='<div class="mvencadre" style="margin-bottom:9px">'
     +'<b>Barème de référence</b><div style="margin-top:5px">'
     +Object.keys(_BS).map(function(k){return _chip(k,_BS[k]);}).join('')+'</div>'
     +(_bar?('<div style="color:var(--texte-doux);margin-top:2px">'+esc(_bar.label)+'<br>'
@@ -7082,7 +7082,7 @@ function _tcvRender(){
     +'<div style="color:var(--texte-doux);margin-top:4px;opacity:0.85">Référence indicative : vos heures restent les vôtres.</div>'
     +'</div>';
 
-  var densHtml='<div style="font-size:var(--pt-lbl,12px);line-height:1.5;border:1px solid var(--gris-clair);border-radius:10px;padding:9px 11px;margin-bottom:12px;background:var(--bg-card)">'
+  var densHtml='<div class="mvencadre" style="margin-bottom:12px">'
     +'<b>Vos plantations</b> — '
     +(_dv ? (esc(String(_dv.ec_rang).replace('.',','))+' × '+esc(String(_dv.ec_pied).replace('.',','))+' m · <b>'+_dv.pieds+' pieds/ha</b>')
           : '<span style="color:var(--texte-doux)">non renseignées</span>')
@@ -7560,7 +7560,7 @@ function _docsReleveOpen(){
   }
   var mSel = (typeof window._planReleveMois === 'function') ? window._planReleveMois() : 0;
   var an   = (typeof window._planReleveAn   === 'function') ? window._planReleveAn()   : new Date().getFullYear();
-  host.innerHTML = '<div style="background:var(--phyto-pale);border-radius:14px;padding:14px 16px">'
+  host.innerHTML = '<div class="mvencadre">'
     + '<div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--phyto-med,#7B6DB8);margin-bottom:12px">'
       + '\u{1F464} Relev\u00e9 individuel d\u2019un salari\u00e9</div>'
     + '<div class="fl" style="margin-top:0">Salari\u00e9</div>'
@@ -7628,7 +7628,7 @@ function _docsPlanNomOpen(){
   var anDef = (typeof window._planReleveAn === 'function') ? window._planReleveAn() : ans[ans.length - 1];
   if(ans.indexOf(anDef) < 0) anDef = ans[ans.length - 1];
 
-  host.innerHTML = '<div style="background:var(--phyto-pale);border-radius:14px;padding:14px 16px">'
+  host.innerHTML = '<div class="mvencadre">'
     + '<div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--phyto-med,#7B6DB8);margin-bottom:12px">'
       + _mvIcon('calendrier',18) + ' Planning de l\u2019ann\u00e9e d\u2019un salari\u00e9</div>'
     + '<div class="fl" style="margin-top:0">Salari\u00e9</div>'

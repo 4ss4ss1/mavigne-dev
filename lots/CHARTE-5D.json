@@ -1,0 +1,24 @@
+{
+  "lot": "CHARTE-5D",
+  "section": "§396",
+  "base": "e93f854279daf19d87cffb54048b6e3656a23631",
+  "inclut": [],
+  "date": "2026-10-20",
+  "fichiers": {
+    ".mv-base": "7c3654704cee3aab5bef51fffab56c8714507d5fc508b9039dc2eb07b230ee83",
+    "CLAUDE.md": "3e42909eb11a2b88c33ae3372a5ab480d56b8751a7a414c2a17521c32234881c",
+    "docs/claude/INDEX.md": "02a98ecd964cffb802bfd6ab61945ccc379c88f00c4bb4c51d283e0a0b21c293",
+    "docs/claude/chantiers-380-429.md": "226945bcff083cd3d172f27461f7e1a24a3893c92abc32eb75b76fc478cb8be4",
+    "docs/claude/journal.md": "19873f6bf4b941da54b560a082f5ce7c940a05b1044c4eabbf761a4cb86c1ac6",
+    "index.html": "a0382779c2612b6613ed0e4cd660cda8a8ca2ae0729bfdadc908b2f134184f14",
+    "public/sw.js": "88335c1cc2f0632b2b030cce4bf31ef0fd13c26800de434d5905f62268262944",
+    "scripts/mv-harnais-cartes.mjs": "c624dff6665703f48d4b0c8ecdd33584756aedb09ef14616945d2de72e1ece68",
+    "scripts/mv-jetons-baseline.json": "0f0532d7e33153de2682791315d9348493d19ccc7a1cf7123f26a07729f85faf",
+    "src/cave.js": "55e1204201aa9625ae17dccdcdd40d7371facda1c8397cc03f893f3aa046717d",
+    "src/phyto.js": "b2eca7b10f0ceb4469ebc97adfe3b78f6a2899cc2f9541e3879e40ab87141583",
+    "src/pilotage.js": "84dbd47f757462bd69b87478a9b3b61d5a5e825dd83749370634cd89cc82cf9b",
+    "src/planning.js": "4530bd614c892df8439888c7f12918a0be5fb57d782d35f24eac9b538ff80d75",
+    "src/reglages.js": "0a74fe638bcd2c6fad1399155ee42d2363052209369469e48575a3d56993cabf",
+    "src/utils.js": "dca2865a07ea9fbf39e41b0c3128e1c22036a96e177438bf17534fc5d82faff3"
+  }
+}

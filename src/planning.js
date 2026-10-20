@@ -4396,7 +4396,7 @@ function _planAnnuCard(mbr,uptoMonth){
   h+='<div style="display:flex;gap:7px;margin-top:12px">'
     +'<div style="flex:1;text-align:center;padding:9px 4px;background:var(--bg-app);border-radius:10px"><div style="font-size:15px;font-weight:800;color:'+(a.reste<0?'var(--orange)':'var(--vert-med)')+'">'+_planFmt(Math.abs(a.reste))+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">'+(a.reste<0?'Au-dessus':'Reste')+'</div></div>'
     +'<div style="flex:1;text-align:center;padding:9px 4px;background:var(--bg-app);border-radius:10px"><div style="font-size:15px;font-weight:800">'+a.moisRest+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Mois rest.</div></div>'
-    +'<div style="flex:1;text-align:center;padding:9px 4px;background:var(--bg-app);border-radius:10px"><div style="font-size:15px;font-weight:800">'+(a.moisRest>0?_planFmt(a.cadence):'\u2014')+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">h / mois</div></div>'
+    +'<div class="mvencadre" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800">'+(a.moisRest>0?_planFmt(a.cadence):'\u2014')+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">h / mois</div></div>'
   +'</div>';
   var nt='Mesur\u00e9 en <b>travail effectif</b>\u00a0: cong\u00e9s, arr\u00eats et r\u00e9cup n\u2019y entrent pas. Les '+_planFmt(L.plafAnnuel)+' sont d\u00e9j\u00e0 calcul\u00e9es cong\u00e9s d\u00e9duits.';
   if(a.susp>0.0001)nt='<b>Suspension de contrat prise en compte\u00a0:</b> le plafond descend de '+_planFmt(a.susp)+'. Ces heures ne sont ni \u00e0 rattraper, ni compt\u00e9es en d\u00e9ficit. '+nt;
@@ -6343,7 +6343,7 @@ function _planCPRenderSel(){
   if(!_pl2CpSelData.length){
     h+='<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);text-align:center;padding:12px">Aucun salari\u00e9 reconnu dans la s\u00e9lection.</div>';
   } else {
-    h+='<div style="background:var(--bg-app);border:1px solid var(--gris-clair);border-radius:12px;padding:10px 11px">'+head+rows+'</div>';
+    h+='<div class="mvencadre">'+head+rows+'</div>';
     if(ign>0)h+='<div class="pl2-note" style="margin-top:8px">'+_mvIcon('info',16)+' '+ign+' case'+(ign>1?'s':'')+' de la s\u00e9lection ne '+(ign>1?'seront':'sera')+' pas pos\u00e9e'+(ign>1?'s':'')+' (dimanche, f\u00e9ri\u00e9, samedi de repos ou hors contrat). Survolez une case grise pour la raison.</div>';
     if(mode!=='ouvres')h+='<div class="pl2-note" style="margin-top:8px">Un vendredi pos\u00e9 entra\u00eene automatiquement le samedi de repos suivant dans le d\u00e9compte, sans occuper la case.</div>';
     h+='<div class="pl2-note" style="margin-top:8px">Les jours d\u00e9j\u00e0 en r\u00e9cup\u00e9ration ou en absence sont pr\u00e9serv\u00e9s.</div>';
@@ -6522,7 +6522,7 @@ function _planCpPreview(){
     +'<span style="font-size:var(--pt-md,20px);font-weight:800;color:var(--orange)">'+total+'<span style="font-size:var(--pt-micro,11px);font-weight:700;color:var(--texte-doux)">\u00a0j au total</span></span>'
     +'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-align:right">'+noms.length+' salari\u00e9'+(noms.length>1?'s':'')+'</span></div>';
   var note=fer>0?'<div class="pl2-note" style="margin-top:8px">'+_mvIcon('info',16)+' Jour(s) f\u00e9ri\u00e9(s) dans la plage \u2014 non d\u00e9compt\u00e9(s) (jour ch\u00f4m\u00e9 pay\u00e9).</div>':'';
-  box.innerHTML='<div style="background:var(--bg-app);border:1px solid var(--gris-clair);border-radius:12px;padding:10px 11px">'+head+rows+'</div>'+note;
+  box.innerHTML='<div class="mvencadre">'+head+rows+'</div>'+note;
 }
 function planCpApply(){
   if(!isAdmin())return;
@@ -7386,7 +7386,7 @@ function _planSheetOneHtml(mode){
     +'</div>'
     +'<div id="plan-recup-section" style="display:none">'
       +'<div class="plan-modal-lbl">R\u00e9cup\u00e9ration</div>'
-      +'<div style="font-size:var(--pt-micro,12px);color:var(--plan-acc);background:var(--plan-acc-pale);border:1px solid rgba(123,109,184,0.4);padding:10px 12px;border-radius:10px;line-height:1.5">'
+      +'<div class="mvencadre">'
         +'\u21ba Jour pris en r\u00e9cup\u00e9ration \u2014 compte comme pr\u00e9sence pay\u00e9e et d\u00e9duit <strong>'+_planFmt(plDisplay)+'</strong> du temps de r\u00e9cup.'
       +'</div>'
       +'<div id="plan-rec-verdict"></div>'
@@ -7430,7 +7430,7 @@ function _planSheetManyHtml(mode){
     +_planSheetAbsSection('',true)
     +'<div id="plan-recup-section" style="display:none">'
       +'<div class="plan-modal-lbl">R\u00e9cup\u00e9ration</div>'
-      +'<div style="font-size:var(--pt-micro,12px);color:var(--plan-acc);background:var(--plan-acc-pale);border:1px solid rgba(123,109,184,0.4);padding:10px 12px;border-radius:10px;line-height:1.5">'
+      +'<div class="mvencadre">'
         +'\u21ba Chaque jour coch\u00e9 devient une r\u00e9cup\u00e9ration \u2014 pr\u00e9sence pay\u00e9e, \u00e9cart neutre, heures d\u00e9duites du compteur.'
       +'</div>'
     +'</div>'

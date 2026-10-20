@@ -1841,7 +1841,7 @@ function _pilPanelTemps(d){
   // ★ Une moyenne n'est pas un pic : le dire ICI, a cote du chiffre moyen, est le
   //   seul endroit ou quelqu'un risque de le confondre avec un besoin reel.
   _footR+=' <b>Une moyenne n\u2019est pas un pic.</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.avc.temps')):'')+'';
-  var repartBlock='<div style="border:1px solid var(--gris);border-radius:11px;padding:12px 14px;margin-bottom:12px;background:#fff">'
+  var repartBlock='<div class="mvencadre" style="margin-bottom:12px">'
     +'<div style="font-size:var(--pt-micro,12px);font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--texte-doux)">O\u00f9 va le temps de l\u2019\u00e9quipe</div>'
     +'<div style="display:flex;align-items:baseline;gap:7px;margin:8px 0 3px"><span style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xl,28px);font-weight:700;color:var(--texte)">'+_pilNum(_prez)+' h</span><span style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">pr\u00e9sence \u00b7 '+_etpF(_prez)+' ETP \u00e9quipe</span></div>'
     +'<div style="display:flex;height:24px;border-radius:7px;overflow:hidden;border:1px solid var(--gris);margin:9px 0">'+_segR(_wV,'linear-gradient(180deg,#5C8A3A,#3D6B27)')+_segR(_wT,'linear-gradient(180deg,#6FB6D6,#4A9FC8)')+_segR(_wA,'linear-gradient(180deg,#B98A5E,#8A5A38)')+'</div>'
@@ -12448,7 +12448,7 @@ function _pilParamBody(d){
   //   endroit est le pire des defauts : elle ne se voit qu'a la campagne suivante.
   var _zoomAilleurs = !!(_PIL_SCOPE.camp && cd && cd.saison && _PIL_SCOPE.camp!==cd.saison);
   var _avert = _zoomAilleurs
-    ? ('<div style="margin:0 0 10px;padding:9px 12px;border-radius:9px;background:#FBF0DC;color:#8A5A38;font-size:var(--pt-txt,13px);line-height:1.5">'
+    ? ('<div class="mvencadre" style="margin:0 0 10px">'
        +'\u26A0 Vous regardez <b>'+_pilEsc(_PIL_SCOPE.camp)+'</b> dans le reste du Pilotage, mais ce param\u00e9trage porte sur '
        +'<b>'+_pilEsc(cd.saison)+'</b>, la p\u00e9riode consult\u00e9e. Pour param\u00e9trer '+_pilEsc(_PIL_SCOPE.camp)+', '
        +'changez de p\u00e9riode consult\u00e9e (R\u00e9glages \u203a Campagne).</div>')

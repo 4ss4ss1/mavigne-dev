@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.56';
+export const APP_VERSION = '9.57';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.57', d: '2026-10-20', items: [   // CHARTE-5d (§396) : les notes grises au dessin commun
+    { niv: 1, pour: ['tous'], emoji: 'check', titre: 'Les petites notes au même dessin',
+      desc: "Les petits blocs gris d’explication (dans le Phyto, les Réglages, le Planning, la Cave, le Pilotage et les fenêtres) prennent tous la même forme : mêmes coins, même marge, même gris, en clair comme en sombre." },
+  ] },
   { v: '9.56', d: '2026-10-20', items: [   // CHAT-0 (§395) : l’ancien module de discussion retiré
     { niv: 1, pour: ['admin'], emoji: 'check', titre: 'Ménage : l’ancienne discussion retirée',
       desc: "Le premier module de discussion de l’appli (canaux et messages privés) est retiré. Il n’était plus accessible depuis longtemps : pour échanger avec l’équipe, WhatsApp, les messages et les appels font ça plus simplement. Vos données ne sont pas touchées." },

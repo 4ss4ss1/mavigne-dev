@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.35
+// MA VIGNE — Service Worker v10.36
+// v10.36 (20/10/2026) — CHARTE-5d (§396) : 51 notes grises faites à la main rendues à l’encadré neutre (Phyto 17, index.html 17, Réglages 9, Planning 5, Pilotage 2, Cave 1). index.html, phyto.js, reglages.js, planning.js, pilotage.js, cave.js, utils.js. APP 9.56 -> 9.57.
 // v10.35 (20/10/2026) — CHAT-0 (§395) : le module de discussion retiré (page, 19 noms d’app.js, 43 règles de style) — sans appelant depuis la v4.28, son API Firestore v8 ne marchait plus. app.js, index.html, styles.css, utils.js. APP 9.55 -> 9.56.
 // v10.34 (20/10/2026) — CHRONO-1 (§394) : la bande des trois temps du chrono en bloc de chiffres (une couleur de type par icône : vert, gris, ambre) ; l’explication en encadré bleu ; « Pause déjeuner » / « Fin de journée » au bouton secondaire ; lignes faite / écart / désactivée aux couleurs d’état. styles.css, tracteur.js, utils.js, index.html. APP 9.54 -> 9.55.
 // v10.33 (20/10/2026) — REVUE-4 (§393) : la pastille d’écart d’une parcelle de session passe à la ligne (second rang dessous, la moitié de la ligne au plus) au lieu d’écraser le nom. styles.css, utils.js, index.html. APP 9.53 -> 9.54.
@@ -4565,7 +4566,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.35';
+const CACHE_NAME   = 'mavigne-v10.36';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4582,7 +4583,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.35 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.36 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4602,7 +4603,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.35 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.36 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

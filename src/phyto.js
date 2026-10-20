@@ -99,7 +99,7 @@ function openCatDetail(nom){
         <div style="font-size:9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600">Type</div>
         <div style="margin-top:6px"><span class="cat-db ${TCLS[p.type]||'tfc'}" style="font-size:var(--pt-micro,12px)">${p.type}</span></div>
       </div>
-      <div style="background:var(--gris-clair);border-radius:12px;padding:12px">
+      <div class="mvencadre">
         <div style="font-size:9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600">N° AMM</div>
         <div style="font-size:var(--pt-txt,13px);font-weight:700;margin-top:4px;font-family:monospace">${p.amm}</div>
       </div>
@@ -121,7 +121,7 @@ function openCatDetail(nom){
         <div style="font-size:9px;color:var(--texte-doux)">zone tampon</div>
       </div>
     </div>
-    <div style="background:var(--gris-clair);border-radius:12px;padding:14px;margin-bottom:12px">
+    <div class="mvencadre" style="margin-bottom:12px">
       <div style="font-size:9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600;margin-bottom:6px">Dose indicative</div>
       <div style="font-size:var(--pt-sm,16px);font-weight:700">${p.dose}</div>
     </div>
@@ -262,13 +262,13 @@ function _tratSelectedHtml(){
   var dvPre=(dp.val!=null?dp.val:'');
   var duPre=dp.unit||_doseUnitDefault(m.type);
   var uOpts=['l/ha','kg/ha','g/ha'].map(function(u){return '<option value="'+u+'"'+(u===duPre?' selected':'')+'>'+u+'</option>';}).join('');
-  return '<div style="background:rgba(74,158,224,0.08);border:1.5px solid rgba(74,158,224,0.3);border-radius:12px;padding:12px 13px;margin-top:10px">'
+  return '<div class="mvencadre" style="margin-top:10px">'
     +'<div style="font-size:var(--pt-base,14px);font-weight:700;color:var(--texte);margin-bottom:'+(m.sub?'2':'10')+'px">'+(T[m.type]||'')+' '+_escHtml(m.nom)+'</div>'
     +(m.sub?'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:10px">'+_escHtml(m.sub)+'</div>':'')
     +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:10px">'
-    +'<div style="background:var(--gris-clair);border-radius:8px;padding:7px;text-align:center"><div style="font-size:9px;color:var(--texte-doux);text-transform:uppercase;font-weight:600">DAR</div><div style="font-size:18px;font-weight:700;font-family:var(--font-titre,&#39;Cormorant Garamond&#39;,serif);color:'+(m.dar>0?'var(--or)':'var(--vert-med)')+'">'+(m.dar>0?m.dar+'j':'Libre')+'</div></div>'
-    +'<div style="background:var(--gris-clair);border-radius:8px;padding:7px;text-align:center"><div style="font-size:9px;color:var(--texte-doux);text-transform:uppercase;font-weight:600">DRE</div><div style="font-size:18px;font-weight:700;font-family:var(--font-titre,&#39;Cormorant Garamond&#39;,serif);color:'+((m.drae||0)>0?'var(--orange)':'var(--vert-med)')+'">'+(m.drae||0)+'h</div></div>'
-    +'<div style="background:var(--gris-clair);border-radius:8px;padding:7px;text-align:center"><div style="font-size:9px;color:var(--texte-doux);text-transform:uppercase;font-weight:600">ZNT</div><div style="font-size:18px;font-weight:700;font-family:var(--font-titre,&#39;Cormorant Garamond&#39;,serif);color:'+(m.znt>5?'var(--rouge)':'var(--texte)')+'">'+(m.znt!=null?m.znt+'m':'&#8212;')+'</div></div>'
+    +'<div class="mvencadre" style="text-align:center"><div style="font-size:9px;color:var(--texte-doux);text-transform:uppercase;font-weight:600">DAR</div><div style="font-size:18px;font-weight:700;font-family:var(--font-titre,&#39;Cormorant Garamond&#39;,serif);color:'+(m.dar>0?'var(--or)':'var(--vert-med)')+'">'+(m.dar>0?m.dar+'j':'Libre')+'</div></div>'
+    +'<div class="mvencadre" style="text-align:center"><div style="font-size:9px;color:var(--texte-doux);text-transform:uppercase;font-weight:600">DRE</div><div style="font-size:18px;font-weight:700;font-family:var(--font-titre,&#39;Cormorant Garamond&#39;,serif);color:'+((m.drae||0)>0?'var(--orange)':'var(--vert-med)')+'">'+(m.drae||0)+'h</div></div>'
+    +'<div class="mvencadre" style="text-align:center"><div style="font-size:9px;color:var(--texte-doux);text-transform:uppercase;font-weight:600">ZNT</div><div style="font-size:18px;font-weight:700;font-family:var(--font-titre,&#39;Cormorant Garamond&#39;,serif);color:'+(m.znt>5?'var(--rouge)':'var(--texte)')+'">'+(m.znt!=null?m.znt+'m':'&#8212;')+'</div></div>'
     +'</div>'
     +'<input id="trat-dose-input" type="text" placeholder="'+ph+'" value="'+_escHtml(m.dose||'')+'" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px);margin-bottom:9px">'
     +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">Dose/ha</span>'
@@ -295,7 +295,7 @@ function _tratAddZoneHtml(){
       html+=items.map(function(o){return _tratResultRow(o.r.meta,o.r.section,o.i);}).join('');
     });
     if(_trat._ephyMore>0) html+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-align:center;padding:3px">+ '+_trat._ephyMore+' autres &#8212; pr&#xe9;cisez la recherche</div>';
-    if(!q) html+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);display:flex;gap:6px;align-items:flex-start;margin-top:6px;padding:8px 10px;background:rgba(74,158,224,0.06);border-radius:8px"><span>&#x1F50D;</span><span>Tapez un nom ou une substance pour chercher dans le <strong style="color:#7FC3E6">catalogue officiel E-Phy (ANSES)</strong>.</span></div>';
+    if(!q) html+='<div class="mvencadre" style="display:flex;gap:6px;align-items:flex-start;margin-top:6px"><span>&#x1F50D;</span><span>Tapez un nom ou une substance pour chercher dans le <strong style="color:#7FC3E6">catalogue officiel E-Phy (ANSES)</strong>.</span></div>';
     else if(!_trat._ephyOffline && res.some(function(r){return r.section==='ephy';})) html+='<div style="font-size:10px;color:var(--texte-doux);font-style:italic;margin-top:6px">&#x2139;&#xfe0f; Donn&#xe9;es E-Phy indicatives, non opposables &#8212; seul le registre officiel fait foi.</div>';
   }
   return html+_tratSelectedHtml();
@@ -472,7 +472,7 @@ function _tratRender(){
     if(hasInsect){
       prodsHtml+='<div class="mvencadre mvencadre-attention" style="margin-bottom:10px">&#x1F41D; Insecticide : renseignez les horaires d&#39;application et respectez les pr&#xe9;cautions abeilles (hors floraison, en soir&#xe9;e).</div>';
     }
-    var addHtml='<div style="background:var(--gris-clair);border:1.5px dashed var(--gris);border-radius:12px;padding:14px;margin-bottom:14px">'
+    var addHtml='<div class="mvencadre" style="margin-bottom:14px">'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:8px">+ Ajouter un produit</div>'
       +'<div style="position:relative;margin-bottom:10px">'
       +'<span style="position:absolute;left:11px;top:11px;font-size:var(--pt-base,14px);pointer-events:none">&#x1F50D;</span>'
@@ -501,7 +501,7 @@ function _tratRender(){
     }).join('');
     var reqStadeLabel='Stade ph&#xe9;nologique'+(needsStade?' <span style="color:var(--rouge)">*requis</span>':'');
     var reqHeureLabel='Horaires d&#39;application'+(needsHeure?' <span style="color:var(--rouge)">*requis</span>':'');
-    var rglHtml='<div style="background:rgba(74,158,224,0.05);border:1.5px solid rgba(74,158,224,0.2);border-radius:12px;padding:14px;margin-bottom:14px">'
+    var rglHtml='<div class="mvencadre" style="margin-bottom:14px">'
       +'<div style="font-size:var(--pt-micro,12px);font-weight:700;color:var(--ink-info,#4A9EE0);margin-bottom:12px">&#x1F4CB; Champs r&#xe9;glementaires obligatoires</div>'
       +'<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">'+reqStadeLabel+'</div>'
       +'<select id="trat-stade" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px);appearance:none">'
@@ -576,7 +576,7 @@ function _tratRender(){
         var draeBadge=c.drae>0?'<span style="font-size:10px;background:rgba(192,57,43,0.15);color:var(--rouge);border-radius:5px;padding:1px 6px;font-weight:700;margin-left:4px">DRE '+c.drae+'h</span>':'';
         var stRow=_trat.stade?'<div style="font-size:var(--pt-micro,11px);color:var(--phyto-med,#A060E0);margin-top:2px">&#x1F4CB; '+_escHtml(_trat.stade.split('(')[0].trim())+'</div>':'';
         var hRow=_trat.heureDebut?'<div style="font-size:var(--pt-micro,11px);color:var(--or);margin-top:2px">&#x1F550; '+_escHtml(_trat.heureDebut)+'–'+_escHtml(_trat.heureFin||'?')+'</div>':'';
-        return '<div style="background:var(--bg-card);border:1.5px solid var(--gris);border-radius:10px;padding:12px 14px;margin-bottom:8px">'
+        return '<div class="mvencadre" style="margin-bottom:8px">'
           +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
           +'<div style="flex:1"><div style="font-size:var(--pt-txt,13px);font-weight:700">'+_escHtml(p.nom)+abBadge+draeBadge+'</div>'
           +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">AMM '+(c.amm?_escHtml(c.amm):'—')+' &#x00B7; Dose : '+_escHtml(p.dose||c.dose||'—')+(p.dose_val!=null?' &#x00B7; <span style="color:#A56B3A;font-weight:600">'+p.dose_val+' '+_escHtml(p.dose_unit||'')+'</span>':'')+'</div>'
@@ -740,11 +740,11 @@ function openTraitDetail(idx){
   document.getElementById('otd-sub').textContent=fmtDate(t.date)+((t.conducteur||t.operateur)?' · '+(t.conducteur||t.operateur):'');
   document.getElementById('otd-body').innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <div style="background:var(--gris-clair);border-radius:12px;padding:12px">
+      <div class="mvencadre">
         <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">Dose</div>
         <div style="font-size:var(--pt-sm,16px);font-weight:700;margin-top:4px">${m.dose||'—'}</div>
       </div>
-      <div style="background:var(--gris-clair);border-radius:12px;padding:12px">
+      <div class="mvencadre">
         <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">N° AMM</div>
         <div style="font-size:var(--pt-txt,13px);font-weight:600;margin-top:4px;font-family:monospace">${m.amm||'—'}</div>
       </div>
@@ -761,19 +761,19 @@ function openTraitDetail(idx){
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <div style="background:var(--gris-clair);border-radius:12px;padding:12px">
+      <div class="mvencadre">
         <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">Substance active</div>
         <div style="font-size:var(--pt-txt,13px);font-weight:600;margin-top:4px">${_escHtml(m.sub||'—')}</div>
       </div>
-      <div style="background:var(--gris-clair);border-radius:12px;padding:12px">
+      <div class="mvencadre">
         <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">ZNT</div>
         <div style="font-size:var(--pt-sm,16px);font-weight:700;margin-top:4px">${m.znt!=null?m.znt+' m':'—'}</div>
       </div>
     </div>
-    ${t.note?`<div style="background:var(--gris-clair);border-radius:12px;padding:12px;font-size:var(--pt-micro,12px);color:var(--texte-doux);font-style:italic">${_escHtml(t.note)}</div>`:''}
+    ${t.note?`<div class="mvencadre">${_escHtml(t.note)}</div>`:''}
     ${(t.parcelles&&t.parcelles.length>0)?`<div style="margin-top:10px"><div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:5px">Parcelles traitées</div><div style="display:flex;flex-wrap:wrap;gap:5px">${t.parcelles.map(n=>'<span class="mvpas mvpas-etiquette">'+_escHtml(n)+'</span>').join('')}</div></div>`:''}
     ${t.stade?`<div class="mvencadre mvencadre-info" style="margin-top:8px">Stade : ${_escHtml(t.stade)}</div>`:''}
-    ${t.heureDebut?`<div style="background:var(--gris-clair);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:var(--pt-micro,12px)">Horaires : ${t.heureDebut}–${t.heureFin||'?'}</div>`:''}
+    ${t.heureDebut?`<div class="mvencadre" style="margin-top:8px">Horaires : ${t.heureDebut}–${t.heureFin||'?'}</div>`:''}
     ${t.dreAnticipe?`<div class="mvencadre mvencadre-attention" style="margin-top:8px">DRE anticipé : ${_escHtml(t.dreAnticipe)}</div>`:''}
     ${typeof t.modeAb!=='undefined'?`<div style="margin-top:8px;font-size:var(--pt-micro,12px);color:var(--texte-doux)">Mode : <strong style="color:${t.modeAb?'#40C080':'var(--texte)'}">${t.modeAb?'🌿 Agriculture Biologique (AB)':'🌾 Conventionnel'}</strong></div>`:''}
     ${_canEd?`<button onclick="openTraitEdit(${idx})" style="width:100%;margin-top:16px;padding:13px;border-radius:11px;border:1.5px solid var(--phyto);background:rgba(90,45,142,0.12);color:#9B70D4;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:var(--font-ui,'Outfit',sans-serif);min-height:44px"><span>✏️ Modifier ce traitement</span></button>`:''}
@@ -1145,7 +1145,7 @@ function _phytoExportChoix(cible){
       <span style="display:block;font-size:var(--pt-micro,11px);color:${n?'#5A2D8E':'var(--texte-doux)'};font-weight:600;margin-top:5px">${n} traitement${n>1?'s':''}</span>
     </button>`;
   });
-  h += `<div style="background:var(--gris-clair);border-radius:12px;padding:12px;margin-top:4px">
+  h += `<div class="mvencadre" style="margin-top:4px">
       <div style="font-size:9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600;margin-bottom:6px">\u00c0 savoir</div>
       <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5">La colonne \u00ab\u00a0Surface de la parcelle (ha)\u00a0\u00bb donne la surface TOTALE de la parcelle. Ma Vigne n\u2019enregistre pas de surface partielle : si un traitement n\u2019a couvert qu\u2019une partie du rang, corrigez la valeur dans le tableur avant de remettre le fichier.</div>
     </div>`;

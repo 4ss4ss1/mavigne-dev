@@ -2679,7 +2679,7 @@ function openCuveeDetail(cuvId,dans){
       if(det.length)html+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:5px;line-height:1.5;">'+det.join(' \u00B7 ')+'</div>';
       if(op.notes)html+='<div style="font-size:var(--pt-micro,11px);font-style:italic;color:var(--texte-doux);margin-top:3px;">'+_escHtml(op.notes)+'</div>';
       if(op.type==='analyse'&&op.data&&op.data.pdf_url){
-        html+='<div style="display:flex;align-items:center;gap:6px;margin-top:6px;padding:6px 8px;background:rgba(192,132,90,0.06);border-radius:8px;border:1px solid rgba(192,132,90,0.2);">\uD83D\uDCC4 <span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+_escHtml(op.data.pdf_nom||'rapport.pdf')+'</span>';
+        html+='<div class="mvencadre" style="display:flex;align-items:center;gap:6px;margin-top:6px">\uD83D\uDCC4 <span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+_escHtml(op.data.pdf_nom||'rapport.pdf')+'</span>';
         html+='<button class="cave-pdf-chip" data-url="'+_escHtml(op.data.pdf_url)+'" onclick="_caveOpenPdf(this)">Ouvrir</button></div>';
       }
       html+='</div>';

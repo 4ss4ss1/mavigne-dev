@@ -364,3 +364,25 @@ La revue à l’écran (étape 1) a ouvert la page de la discussion (`goTo('chat
 
 ### 395e. La leçon
 **Un code sans appelant coûte quand même.** Inatteignable, il ne gênait personne à l’écran — mais il pesait dans chaque revue, chaque contrôle de style, chaque inventaire de la charte. Le garder « honnête » avait un sens tant qu’on pouvait le rebrancher ; quand son propriétaire n’en veut plus, le retirer est la mesure honnête.
+
+## 396. CHARTE-5d — ÉTAPE 2 : LES NOTES GRISES À L’ENCADRÉ NEUTRE (20/10 — `index.html` · `src/phyto.js` · `src/reglages.js` · `src/planning.js` · `src/pilotage.js` · `src/cave.js` · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `scripts/mv-harnais-cartes.mjs` · `scripts/mv-jetons-baseline.json` · **APP 9.56 → 9.57, SW 10.35 → 10.36**, base `e93f854`)
+
+### 396a. La demande et le tri
+L’étape 2 de la recommandation (§389a) : les 165 encadrés faits à la main restants (`mv-harnais-cartes` F). Inventaire : **83 neutres** (fond gris ou blanc), **50 de la console GT**, **19 aux couleurs calculées par le code**, **12 zones sombres** (connexion, mentions légales, bandeaux), **1 teinté**. Parmi les neutres, tri proposé d’après leur style et leur texte : **60 notes**, 10 tuiles (un chiffre en grand), 7 cartes, 7 lignes cliquables. Une planche des 165 était prévue ; leurs textes, souvent calculés par le code, la rendaient illisible — le tri par règle (le jeu validé) a été préféré, les décisions réelles gardées pour Nico (la console GT, les zones sombres).
+
+### 396b. Ce qui est livré
+- **51 notes grises rendues à l’encadré neutre** (`.mvencadre`, fond `--survol`) : Phyto 17 (assistant, catalogue, détail d’un traitement, export), `index.html` 17 (les fenêtres : mot de passe, compte, saisies), Réglages 9 (chrono, membres, cuivre, documents), Planning 5 (récapitulatifs, congés, la feuille d’une journée), Pilotage 2, Cave 1. Leur fond, leur filet, leur arrondi, leur couleur et leur taille écrits sur place sont retirés, leur mise en page gardée — comme aux §380-§381. Écartées par le passage : celles aux couleurs calculées et les cliquables.
+- **Gardées à part, avec leur raison** :
+  - le **rapport de saison** (`exportRapportSaison`) : il s’ouvre dans une fenêtre à part (`window.open` + `document.write`), sans la feuille de l’appli — une classe n’y vaut rien ; son style écrit sur place reste ;
+  - les **trois notes d’app.js** (la tournée, « Trié par proximité », la fiche « Parcelle arrachée ») : leurs textes portent des couleurs écrites sur place (gris doux, rouge) que `mv-harnais-contraste` ne sait plus rapporter au fond une fois celui-ci donné par une classe — l’écart en thème sombre montait de 7 à 8. Trois essais pour isoler la cause ; app.js est rendu à l’état poussé, à reprendre en ôtant d’abord ces couleurs.
+- Plafond des encadrés faits à la main **165 → 114** ; filet perdant 70 → 68.
+
+### 396c. Reste de l’étape 2
+- **Deux décisions pour Nico** : la console GT (50) — la soigner, ou l’écarter de la règle, par écrit ; les zones sombres (12) — garder (connexion, mentions légales : sombres exprès ?) ou ramener au jeu.
+- **Par la règle** : les 10 tuiles (→ bloc de chiffres), les 7 cartes (→ carte), les 7 lignes cliquables (→ carte cliquable, un vrai bouton), les 19 couleurs calculées (→ un ton par classe, cas par cas), les 3 notes d’app.js.
+- **Pas vu à l’écran dans ce lot** : les 51 notes (même passage que §380-§381, revu alors).
+
+- **Chaîne** : **469 commandes, 0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 396d. La leçon
+**Un contrôle de contraste statique lit le fond là où il est écrit.** Quand le fond passe dans une classe, un texte coloré sur place perd son fond aux yeux du contrôle : il faut ôter la couleur du texte en même temps que celle du fond — ou garder les deux.
