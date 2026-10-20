@@ -7009,6 +7009,103 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 .mat-fi-cel{min-width:0}
 .mat-f-l.fixe{cursor:default}
 /* ★ FIN MATU-1 */
+/* ★ REC-1 (§382) — LES RÉCOLTES RANGÉES, AU DESSIN DE LA MAQUETTE VALIDÉE LE 19/10.
+   Classes rec-, posées par cuvier.js (renderVendRec, le journal, la fiche). Les pièces du jeu font le reste :
+   mvcarte, mvchiffres, mvencadre, mvbtn, mvpas. La tête reprend celle des Maturités (mat-tete, mat-an).
+   Téléphone : Parcelles / Journal, la fiche en fenêtre. À partir de 1 024 px : le rendement à gauche, le journal ou la
+   fiche à droite, collants. */
+.rec-nouv .sm{display:none}
+.rec-vide{align-items:center;text-align:center;padding:var(--e-8,40px) var(--e-6,24px)}
+.rec-vide-ic{display:inline-grid;place-items:center;width:var(--e-10,64px);height:var(--e-10,64px);border-radius:50%;background:var(--accent-doux);color:var(--accent-texte)}
+.rec-note{margin:0;font-size:var(--pt-micro,12px);line-height:var(--lh-texte);color:var(--texte-doux)}
+.rec-chiffres{margin-bottom:var(--e-3,12px)}
+.rec-u{margin-left:var(--e-1,4px);font-size:var(--pt-micro,12px);font-weight:var(--fw-reg,400);letter-spacing:0;color:var(--texte-doux)}
+.rec-sous{font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.rec-jauge{display:block;height:var(--e-1,4px);margin-top:var(--e-1,4px);border-radius:var(--r-full,999px);background:var(--piste);overflow:hidden}
+.rec-jauge i{display:block;height:100%;background:var(--ok)}
+.rec-vrac{margin-bottom:var(--e-3,12px)}
+.rec-vrac span{flex:1;min-width:0}
+.rec-grille{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--e-4,16px);align-items:start}
+.rec-gauche{display:flex;flex-direction:column;gap:var(--e-4,16px);min-width:0}
+.rec-droite{min-width:0}
+#mvv-body .rec-v-parc .rec-droite{display:none}
+#mvv-body .rec-v-jour .rec-gauche{display:none}
+.rec-parc,.rec-jour{padding:var(--e-4,16px) var(--e-2,8px) var(--e-3,12px)}
+.rec-parc .mvcarte-tete,.rec-jour .mvcarte-tete{align-items:center;padding:0 var(--e-2,8px)}
+.rec-parc>.rec-note,.rec-parc>.mvencadre{margin:0 var(--e-2,8px)}
+.rec-cols{display:grid;grid-template-columns:7rem minmax(0,1fr) 4.5rem;column-gap:var(--e-2,8px)}
+.rec-c4{display:none}
+.rec-axe{align-items:end;height:var(--e-6,24px);padding:0 var(--e-2,8px)}
+.rec-axe .pi{position:relative;height:100%}
+.rec-axe .g{position:absolute;bottom:var(--e-0,2px);transform:translateX(-50%);font-size:var(--pt-nano,11px);color:var(--texte-doux);font-variant-numeric:tabular-nums}
+.rec-axe .u{text-align:right;font-size:var(--pt-nano,11px);color:var(--texte-doux)}
+.rec-l{width:100%;box-sizing:border-box;min-height:var(--h-row-2);padding:var(--e-1,4px) var(--e-2,8px);align-items:center;border:0;border-radius:var(--r-sm,6px);background:transparent;font-family:var(--font-ui);color:inherit;text-align:left;cursor:pointer}
+.rec-l:hover{background:var(--survol)}
+.rec-l.sel{background:var(--accent-doux)}
+.rec-l .n,.rec-j .n{display:flex;flex-direction:column;gap:var(--e-0,2px);min-width:0}
+.rec-l .nm,.rec-j .nm{display:flex;align-items:center;gap:var(--e-2,8px);min-width:0;font-size:var(--pt-base,14px);font-weight:var(--fw-semi,600);color:var(--texte)}
+.rec-l .nm span,.rec-j .nm span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-l .ag,.rec-j .ag{padding-left:var(--e-4,16px);font-size:var(--pt-micro,12px);color:var(--texte-doux);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-l .pi{position:relative;align-self:stretch;min-height:var(--e-8,40px)}
+.rec-l .pi::before{content:"";position:absolute;left:0;right:0;top:50%;height:var(--bw-2);margin-top:calc(var(--bw) * -1);border-radius:var(--r-xs,4px);background:var(--piste)}
+.rec-l .bar{position:absolute;top:50%;height:var(--e-2,8px);margin-top:calc(var(--e-2,8px) / -2);border-radius:var(--r-full,999px);background:var(--rec-vin,var(--texte-pale))}
+.rec-l .bar.dep{background:var(--danger)}
+.rec-l .mx{position:absolute;top:calc(var(--e-1,4px) * -1);bottom:calc(var(--e-1,4px) * -1);width:0;border-left:var(--bw-2) solid var(--danger)}
+.rec-l .n1{position:absolute;top:50%;width:var(--e-3,12px);height:var(--e-3,12px);margin:calc(var(--e-3,12px) / -2) 0 0 calc(var(--e-3,12px) / -2);box-sizing:border-box;border-radius:50%;border:var(--bw-2) solid var(--texte-med);background:var(--bg-card)}
+.rec-l .my{position:absolute;top:calc(var(--e-1,4px) * -1);bottom:calc(var(--e-1,4px) * -1);width:0;border-left:1.5px dashed var(--texte-pale)}
+.rec-l .va{display:flex;flex-direction:column;align-items:flex-end;gap:var(--e-0,2px);min-width:0}
+.rec-l .va b{font-size:var(--pt-base,14px);font-weight:var(--fw-semi,600);color:var(--texte);white-space:nowrap;font-variant-numeric:tabular-nums}
+.rec-l .va b.dep{color:var(--danger-texte)}
+.rec-l .va s{text-decoration:none;font-size:var(--pt-micro,12px);color:var(--texte-doux);white-space:nowrap;font-variant-numeric:tabular-nums}
+.rec-l .rec-c4{text-align:right;font-size:var(--pt-txt,13px);color:var(--texte-med);font-variant-numeric:tabular-nums}
+.rec-parc .mat-moy{padding:0 var(--e-2,8px)}
+.rec-parc .mat-leg{margin:var(--e-3,12px) var(--e-2,8px) 0}
+.rec-k{display:inline-block;vertical-align:middle}
+.rec-k.bar{width:var(--e-5,20px);height:var(--e-2,8px);border-radius:var(--r-full,999px);background:var(--texte-pale)}
+.rec-k.mx{width:0;height:var(--e-3,12px);border-left:var(--bw-2) solid var(--danger)}
+.rec-k.n1{width:var(--e-3,12px);height:var(--e-3,12px);box-sizing:border-box;border-radius:50%;border:var(--bw-2) solid var(--texte-med)}
+.rec-j-jour{display:flex;align-items:baseline;justify-content:space-between;gap:var(--e-2,8px);margin:var(--e-3,12px) var(--e-2,8px) 0;padding-bottom:var(--e-1,4px);border-bottom:var(--bw) solid var(--ligne,#E7E6E2);font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.rec-j-jour b{font-size:var(--pt-txt,13px);font-weight:var(--fw-semi,600);color:var(--texte)}
+.rec-j{display:flex;align-items:center;gap:var(--e-3,12px);width:100%;box-sizing:border-box;min-height:var(--h-row-2);padding:var(--e-2,8px);border:0;border-bottom:var(--bw) solid var(--ligne,#E7E6E2);background:transparent;font-family:var(--font-ui);color:inherit;text-align:left;cursor:pointer}
+.rec-j:hover{background:var(--survol)}
+.rec-j .n{flex:1}
+.rec-j .ag{white-space:normal}
+.rec-j .va{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:var(--e-1,4px)}
+.rec-j .va b{font-size:var(--pt-txt,13px);font-weight:var(--fw-semi,600);color:var(--texte);white-space:nowrap}
+.rec-fiche{padding:0;gap:0}
+.rec-fi-chiffres,.rec-fi-enc{margin:var(--e-4,16px) var(--e-5,20px) 0}
+.rec-fi-enc span{flex:1;min-width:0}
+.mat-modal .rec-fi-chiffres,.mat-modal .rec-fi-enc{margin-left:var(--e-4,16px);margin-right:var(--e-4,16px)}
+.rec-h{display:grid;grid-template-columns:2.75rem minmax(0,1fr) 2.5rem 3rem;align-items:center;column-gap:var(--e-2,8px);min-height:var(--e-8,40px);border-bottom:var(--bw) solid var(--ligne,#E7E6E2);font-size:var(--pt-txt,13px);font-variant-numeric:tabular-nums}
+.rec-h .a{color:var(--texte-med)}
+.rec-h .pi{position:relative;height:var(--e-3,12px)}
+.rec-h .bar{position:absolute;left:0;top:0;bottom:0;border-radius:var(--r-xs,4px);background:var(--rec-vin,var(--texte-pale))}
+.rec-h .bar.fic{opacity:.45}
+.rec-h .bar.dep{background:var(--danger)}
+.rec-h .mx{position:absolute;top:calc(var(--e-1,4px) * -1);bottom:calc(var(--e-1,4px) * -1);width:0;border-left:var(--bw-2) solid var(--danger)}
+.rec-h .v{text-align:right;font-weight:var(--fw-semi,600);color:var(--texte)}
+.rec-h .d{text-align:right;font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.rec-pe{display:flex;align-items:center;gap:var(--e-2,8px);min-height:var(--e-9,48px);padding:var(--e-1,4px) 0;border-bottom:var(--bw) solid var(--ligne,#E7E6E2)}
+.rec-pe .d{flex:none;width:2.75rem;font-size:var(--pt-txt,13px);color:var(--texte-doux);font-variant-numeric:tabular-nums}
+.rec-pe .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:var(--e-0,2px)}
+.rec-pe .t b{font-size:var(--pt-txt,13px);font-weight:var(--fw-semi,600);color:var(--texte)}
+.rec-pe .t small{font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.rec-fiche .mat-fi-sec .rec-note{margin-top:var(--e-2,8px)}
+.rec-large{width:100%}
+@media (max-width:1023px){
+  .rec-nouv .lg{display:none}
+  .rec-nouv .sm{display:inline}
+}
+@media (min-width:1024px){
+  .rec-grille{grid-template-columns:minmax(0,1fr) var(--l-fiche)}
+  #mvv-body .rec-v-parc .rec-droite,#mvv-body .rec-v-jour .rec-droite{display:block}
+  #mvv-body .rec-v-jour .rec-gauche{display:flex}
+  .rec-droite{position:sticky;top:var(--e-4,16px)}
+  .rec-vues{display:none}
+  .rec-cols{grid-template-columns:11rem minmax(0,1fr) 5.5rem 3.5rem}
+  .rec-c4{display:block}
+}
+/* ★ FIN REC-1 */
 /* ★ CAVE-3 (§290) — LE CHAI EN LISTE + FICHE (MAQUETTE V8). La fiche est celle de l'appli (openCuveeDetail écrite dans
    #chai-fiche) ; au téléphone, la fenêtre comme avant. Cuvées au cadre neutre (la choisie cerclée), alerte d'ouillage en ambre,
    « Ouiller les … » et « Nouvelle cuvée » à l'accent. Par jetons. */

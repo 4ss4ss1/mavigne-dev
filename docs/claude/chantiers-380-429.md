@@ -45,3 +45,31 @@ Les encadrés faits à la main hors Phyto, Réglages et console GT, classés par
 
 ### 381e. La leçon
 **Le passage à la machine a une fin.** Les encadrés colorés se reconnaissent à leur couleur ; ceux qui restent (168) ne disent pas ce qu’ils sont — une note grise, une tuile, une ligne, une couleur calculée. Ceux-là se tranchent un par un, en les regardant.
+
+## 382. ★★ REC-1 — LES RÉCOLTES RANGÉES : QUATRE CHIFFRES, LE RENDEMENT FACE AU MAXIMUM, LE JOURNAL, LA FICHE (20/10 — `src/cuvier.js` (`renderVendRec` réécrit, `_recDonnees`, `_recParcHtml`, `_recJourHtml`, `_recFicheHtml`, `_recHist`, `_vendAnnees`, `_vendDateLongue`, `_vendVoir`, `_matSetAn`, `_matAnCourant`, `_matTeteHtml`, la fiche des Maturités ; partis : `_vendApportsSvg`, `MV_APP_MAX`, `_vendRendHistHtml`, `_vendRendHistData`, `_vendRendInjectCss`) · `src/cave.js` (`_apportsRangs`, `_apportsPied` retirés) · `src/styles.css` (bloc REC-1) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE) · `index.html` (`ovRecFiche`) · `public/sw.js` · `guide/08-cave.html` · `public/guide.html` · `scripts/mv-harnais-rec1.mjs` (neuf) · `scripts/mv-harnais-kit4.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/tutos-couverture.json` · `.mv-base` · `lots/REC-1.json` · `CLAUDE.md` · `docs/claude/*` · **APP 9.43 → 9.44, SW 10.22 → 10.23**, base `e1f6cd2`)
+
+### 382a. La demande
+Le rangement du Cuvier continue, onglet par onglet, sur la maquette validée le 19/10 (MATU-1, §366). Ce lot : les Récoltes. Nico (19/10) : « relis les fichiers et suite » — la série CHARTE était passée entre-temps : le nouvel écran s’écrit avec les pièces du jeu, pas avec des classes maison.
+
+### 382b. Ce qui a été lu avant d’écrire
+- **L’onglet d’avant ne bornait pas la vendange** : le bandeau, les apports et la liste lisaient TOUTES les récoltes, toutes années confondues (le même défaut que les Maturités d’avant).
+- **Le rendement existe déjà, et il est riche** : `_mlRendements` (cave.js, Le millésime › Rendements) suit l’escalier des sources VD-3 (les litres rendus par le client et le volume logé d’abord, l’estimé au ratio ensuite) et le maximum dans l’ordre parcelle › appellation › ancien réglage. La maquette estimait au ratio seul : le refaire aurait donné deux chiffres différents pour la même parcelle.
+- **« Encore sur pied » existe déjà** (`_vendResteHtml`) avec SANSREC-1 (« Pas de récolte cette année », la question à l’admin, le hors parcellaire) et deux harnais qui l’exécutent.
+
+### 382c. Ce qui est livré
+- **La tête** : la vendange choisie, commune avec les Maturités (`_vendAnnees` réunit les années des maturités et des pesées ; `_matSetAn` redessine l’onglet ouvert), la date — une vendange passée se relit à sa dernière pesée —, « Nouvelle récolte » pour la vendange en cours seulement.
+- **Quatre chiffres** (`mvchiffres`) : rentrées sur à récolter (et la jauge de la surface), rendement moyen pondéré par la surface avec l’an passé sur les mêmes parcelles, récolté, en cuve.
+- **Les ventes en raisin** : un encadré (`mvencadre`, attention s’il reste un retour client attendu) et « Voir les ventes ».
+- **Le rendement par parcelle** : la plus proche de son maximum en tête (l’ordre de `_mlRendements`) ; la barre est le rendement (un trait quand il est mesuré, la fourchette quand il est estimé), le trait du maximum, le rond creux de l’an passé, le pointillé de la moyenne ; au-dessus du maximum, la barre et le chiffre passent au ton danger et un encadré nomme la parcelle. Sur ordinateur, une colonne pour l’an passé.
+- **Le journal** : les pesées par jour, la plus récente en tête, avec leurs destinataires, l’éraflage et l’état sanitaire au ton du jeu (80 % et plus : réussi ; 55 à 79 : à surveiller ; dessous : en retard).
+- **La fiche** : chiffres, dépassement, « Encore sur pied » et « Voir sa maturité », l’historique des cinq dernières vendanges (le rendement du Millésime pour celles saisies dans l’appli ; celles du fichier des parcelles estimées d’après leurs kilos, en barres pâles, et dites telles), les pesées avec « Modifier », « Ajouter une pesée sur cette parcelle ». À droite sur ordinateur, dans `ovRecFiche` au téléphone. La fiche des Maturités d’une parcelle rentrée porte « Voir sa récolte ».
+
+### 382d. Les décisions
+- **Aucun calcul neuf** : les deux écrans (Récoltes, Le millésime) affichent les mêmes chiffres parce qu’ils lisent la même fonction.
+- **« Encore sur pied » reste la carte d’avant**, sous le rendement. La maquette mêlait les parcelles sur pied à la liste des rendements ; garder la carte gardait SANSREC-1 et ses deux harnais — à revoir avec Nico s’il tient à la liste unique.
+- **Partis** : le bandeau de campagne, « Apports par parcelle », la liste « Détail des récoltes », le bloc pluriannuel. Leur contenu vit dans les chiffres, les barres, le journal (une pesée s’ouvre par sa fiche, puis « Modifier ») et l’historique de la fiche.
+
+### 382e. Trouvé en route
+- **Retirer un rendu laisse ses aides orphelines** : `_apportsRangs` et `_apportsPied` vivaient dans cave.js, exposées pour le seul `_vendApportsSvg` ; le préflight les a vues. `_recDests`, que seul l’ancien rendu appelait, a un harnais (vendange-parts) : il est rebranché (`_recDestsTxt`) plutôt que retiré.
+- **La marge de cuvier.js** : 568 → 580 ko (+2 %), sous les 5 % — l’ancien code retiré a payé la moitié du nouveau.
+- **KIT-4 (§229) compte les formateurs de surface** : une surface s’écrit par `window._mvHaP` (une parcelle, au centiare) ou `window._mvHaT` (un total, au centième), et le harnais tient le compte exact par fichier. Le bloc pluriannuel parti emportait le seul `_mvHaT` de cuvier.js ; les chiffres des Récoltes en portent trois, la fiche un `_mvHaP` : le compte passe de 1 à 4, dit dans le harnais. Le premier passage de la chaîne l’a vu (`mv-harnais-kit4` et sa contre-épreuve). ⚠️ Les surfaces des Maturités (MATU-1) s’écrivent encore par `_mvF1(…) + ' ha'` : à passer aux formateurs au prochain lot du Cuvier.

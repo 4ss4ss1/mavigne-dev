@@ -1070,63 +1070,319 @@ function _vendResteHtml(){
 }
 function _vendResteToggle(){ _vendResteOuv=!_vendResteOuv; renderVendRec(); }
 
-function renderVendRec() {
-  var el=document.getElementById('mvv-body'); if(!el) return;
-  var cfg=_vendCfg();
-  var recoltes=CAVE_VENDANGE.recoltes||[];
-  var canEdit=canWrite();
-  var caisses=recoltes.reduce(function(s,r){return s+_recCaisses(r);},0);
-  var kg=recoltes.reduce(function(s,r){return s+_recKg(r);},0);
-  var kgCuve=recoltes.reduce(function(s,r){return s+_recKgDom(r);},0);
-  var kgVendu=recoltes.reduce(function(s,r){return s+_recKgCli(r);},0);
-  var html=_caveSaisBanner();
-  if(recoltes.length){
-    html+='<div class="mvv-camp"><div class="mvv-camp-lbl">Campagne '+(new Date().getFullYear())+' · '+recoltes.length+' récolte'+(recoltes.length>1?'s':'')+'</div><div class="mvv-camp-grid">'
-      +'<div><div class="mvv-camp-n">'+caisses+'</div><div class="mvv-camp-cl">Caisses</div></div>'
-      +'<div><div class="mvv-camp-n">'+(kg/1000).toFixed(1)+'<span class="u">t</span></div><div class="mvv-camp-cl">Récoltés</div></div>'
-      +'<div><div class="mvv-camp-n">'+(kgCuve/cfg.ratio_max).toFixed(0)+'<span class="u">hL</span></div><div class="mvv-camp-cl">Estimés cuvés</div></div>'
-      +'</div>'
-      +(kgVendu>0?('<div class="mvv-camp-sold" onclick="openVendVrac()" style="cursor:pointer">'
-          +_mvIcon('carton',16)+' <span>'+kgVendu.toLocaleString('fr-FR')+' kg vendus en raisin · '
-          +(function(){var d=_vendRetoursDus();
-              return d?('<b style="color:var(--orange,#B85A1A)">'+d+' retour'+(d>1?'s':'')+' client attendu'+(d>1?'s':'')+'</b>')
-                      :'tous les retours reçus';})()
-          +'</span> '+_mvIcon('chevron',16)+'</div>'):'')
-      +'</div>';
-    html+=_vendResteHtml();
-    window._mvGraphOublier('#mvg-ap-');
-    html+='<div class="mvmat-card"><div class="mvmat-ttl">Apports par parcelle</div>'
-      +'<div id="mvg-ap-all"></div></div>';
-    (function(rr){ window._mvGraphSuivre('#mvg-ap-all', function(lg){ return _vendApportsSvg(rr,lg); }); })(recoltes);
-    html+='<div class="mvv-seclbl">Détail des récoltes</div>';
-    recoltes.forEach(function(r){
-      var kg_=_recKg(r);
-      var surf_=_vendParcSurf(r.parcelle);
-      html+='<div class="mvv-rec" onclick="openOvVendRec(\''+r.id+'\')"><div class="mvv-rec-l">'
-        +'<div class="mvv-rec-nm">'+_escHtml(r.parcelle)+'</div>'
-        +'<div class="mvv-rec-mt">'+_vendFrDate(r.date)+' · '+_recCaisses(r)+' caisses'
-        +(_recDests(r).length>1?(' · '+_recDests(r).length+' destinataires'):'')+'</div>'
-        +'<div class="mvv-rec-badges">'+_vendEtatBadge(r.etat_pct||0)
-        +'<span class="mvv-b er">'+_vendErLbl(r)+'</span>'
-        +_recDests(r).map(function(pt){
-            return pt.dom?_mvBadge('Domaine '+_vpCs(pt)+' c.','vert')
-                         :_mvBadge(_vpNom(pt)+' '+_vpCs(pt)+' c.','neutre'); }).join('')
-        +'</div></div>'
-        +'<div class="mvv-rec-r">'
-        +(_recKgDom(r)>0?('<div class="mvv-rec-hl">'+_vendHlRange(_recKgDom(r))+'<span class="su">hL est.</span></div>')
-                        :'<div class="mvv-rec-hl sold">vendu</div>')
-        +'<div class="mvv-rec-kg">'+kg_.toLocaleString('fr-FR')+' kg</div>'
-        +(surf_>0?'<div class="mvv-rec-kg">'+Math.round(kg_/surf_).toLocaleString('fr-FR')+' kg/ha</div>':'')
-        +'</div></div>';
-    });
-  } else {
-    html+='<div class="mvv-empty"><div class="mvv-empty-ic">'+_mvIcon('raisin',40)+'</div><div class="mvv-empty-tx">Aucune récolte saisie.<br>Pesez votre première benne pour lancer la campagne.</div></div>';
-    html+=_vendResteHtml();
+// ══════════════════════════════════════════════════════════════════
+// ★★ REC-1 (§382) — LES RÉCOLTES RANGÉES (Cuvier › Récoltes)
+//   Suite de MATU-1, sur la même maquette validée le 19/10 : la vendange choisie
+//   (commune avec les Maturités), quatre chiffres, le rendement de chaque parcelle
+//   face au maximum de son appellation, le journal des pesées, la fiche.
+//   ⚠️ AUCUN CALCUL NEUF : le rendement est celui du Millésime (_mlRendements,
+//     cave.js) — l'escalier des sources VD-3 (le volume mesuré d'abord, l'estimé
+//     au ratio ensuite), le maximum dans l'ordre parcelle › appellation › ancien
+//     réglage. Une parcelle mesurée a une valeur, une estimée une fourchette.
+//   ⚠️ « Encore sur pied » reste la carte d'avant (_vendResteHtml, SANSREC-1,
+//     ses deux harnais) : la plus mûre en tête, un appui pèse sa première benne.
+//   Remplacés : le bandeau de campagne, « Apports par parcelle », la liste
+//   « Détail des récoltes » et le bloc pluriannuel — leur contenu vit dans les
+//   chiffres, les barres, le journal et l'historique de la fiche.
+// ══════════════════════════════════════════════════════════════════
+var _recVue    = 'parc';   // téléphone : 'parc' | 'jour'
+var _recSelNom = null;     // la parcelle dont la fiche est ouverte
+
+/* Les années que l'on peut relire : celles qui ont une mesure de maturité OU une
+   pesée, et l'année en cours. Commune aux Maturités et aux Récoltes. */
+function _vendAnnees(){
+  var o = {}, cur = String(new Date().getFullYear());
+  _matAnnees().forEach(function(a){ o[a] = 1; });
+  (CAVE_VENDANGE.recoltes || []).forEach(function(r){ if(r && r.date) o[String(_vendMillOfDate(r.date))] = 1; });
+  o[cur] = 1;
+  return Object.keys(o).sort().reverse();
+}
+function _vendDateLongue(iso){
+  var J = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+  var M = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  var t = new Date(String(iso).slice(0, 10) + 'T12:00:00Z');
+  return J[t.getUTCDay()] + ' ' + t.getUTCDate() + (t.getUTCDate() === 1 ? 'er' : '') + ' ' + M[t.getUTCMonth()];
+}
+function _recMilliers(x){ return String(Math.round(x || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0'); }
+function _recVin(c){ return c === 'r' ? 'var(--rouge)' : c === 'b' ? 'var(--or)' : 'var(--texte-pale)'; }
+/* Une valeur quand le volume est mesuré, une fourchette quand il est estimé. */
+function _recRdtTxt(o){
+  if(!o || o.hlHa == null) return '\u2014';
+  if(o.statut === 'mesure' || o.hlMin == null || o.hlMax == null || Math.round(o.hlMin) === Math.round(o.hlMax)) return String(Math.round(o.hlHa));
+  return Math.round(o.hlMin) + '\u2013' + Math.round(o.hlMax);
+}
+function _recSanit(r){
+  var s = parseFloat(r && r.etat_pct);
+  if(!(s > 0)) return '';
+  return '<span class="mvpas mvpas-statut ' + (s >= 80 ? 'mvpas-fait' : s >= 55 ? 'mvpas-surveiller' : 'mvpas-retard') + '">sanitaire ' + Math.round(s) + ' %</span>';
+}
+function _recDestsTxt(r){
+  return _recDests(r).map(function(p){
+    return (p.dom ? 'Domaine' : _escHtml(_vpNom(p))) + ' ' + _vpCs(p) + ' c.';
+  }).join(' · ') + ' · ' + _escHtml(_vendErLbl(r));
+}
+
+/* Tout ce que l'onglet montre, pour une vendange. */
+function _recDonnees(an){
+  var courante = String(an) === String(_mlCampagne());
+  var recs = (CAVE_VENDANGE.recoltes || []).filter(function(r){ return r && r.parcelle && String(_vendMillOfDate(r.date)) === String(an); });
+  var R = (typeof window._mlRendements === 'function') ? window._mlRendements : function(){ return []; };
+  var rows = R(an), n1 = {};
+  R(Number(an) - 1).forEach(function(o){ if(o.hlHa != null) n1[o.parcelle.nom] = o.hlHa; });
+  var parP = {};
+  recs.forEach(function(r){ var p = _vendParcByName(r.parcelle), k = p ? p.nom : String(r.parcelle).trim(); (parP[k] = parP[k] || []).push(r); });
+  var sS = 0, sLo = 0, sHi = 0, sB = 0, sS1 = 0, sN1 = 0, mesure = true;
+  rows.forEach(function(o){
+    o.nom = o.parcelle.nom; o.surface = parseFloat(o.parcelle.surface) || 0; o.coul = _parcCoul(o.nom);
+    o.rr = (parP[o.nom] || []).slice().sort(function(a, b){ return (a.date || '') < (b.date || '') ? -1 : 1; });
+    o.kgDom = o.rr.reduce(function(s, r){ return s + _recKgDom(r); }, 0);
+    o.der = o.rr.length ? o.rr[o.rr.length - 1].date : '';
+    o.n1 = n1[o.nom] != null ? n1[o.nom] : null;
+    if(!(o.surface > 0) || o.hlHa == null) return;
+    sS += o.surface; sLo += (o.hlMin || 0) * o.surface; sHi += (o.hlMax || 0) * o.surface; sB += o.hlHa * o.surface;
+    if(o.statut !== 'mesure') mesure = false;
+    if(o.n1 != null){ sS1 += o.surface; sN1 += o.n1 * o.surface; }
+  });
+  var reste = courante ? _vendResteARentrer(an) : { lignes:[], sans:[], inconnues:[] };
+  return { an:String(an), courante:courante, recs:recs, rows:rows, reste:reste,
+    moy: sS > 0 ? { lo:sLo / sS, hi:sHi / sS, hlHa:sB / sS, hlMin:sLo / sS, hlMax:sHi / sS, statut:mesure ? 'mesure' : 'estime' } : null,
+    moy1: sS1 > 0 ? sN1 / sS1 : null,
+    kg: recs.reduce(function(s, r){ return s + _recKg(r); }, 0),
+    cs: recs.reduce(function(s, r){ return s + _recCaisses(r); }, 0),
+    kgDom: recs.reduce(function(s, r){ return s + _recKgDom(r); }, 0),
+    kgCli: recs.reduce(function(s, r){ return s + _recKgCli(r); }, 0) };
+}
+
+function renderVendRec(){
+  var el = document.getElementById('mvv-body'); if(!el) return;
+  var an = _matAnCourant(), D = _recDonnees(an), canEdit = canWrite() && D.courante;
+  if(_recSelNom && !_recConnue(_recSelNom, D)) _recSelNom = null;
+  var h = _caveSaisBanner() + _recTeteHtml(D, canEdit);
+  if(!D.recs.length){
+    h += '<section class="mvcarte rec-vide"><div class="rec-vide-ic">' + _mvIcon('raisin', 24) + '</div>'
+      + '<h2 class="mvcarte-titre">Pas encore de récolte pour la vendange ' + _escHtml(D.an) + '</h2>'
+      + '<p class="rec-note">La première pesée lance la campagne : le rendement de chaque parcelle se calcule tout seul, face au maximum de son appellation.</p></section>'
+      + (D.courante ? _vendResteHtml() : '');
+    el.innerHTML = h; _vendRefreshCockpit(); return;
   }
-  html+=_vendRendHistHtml();
-  if(canEdit) html+='<div class="mvv-fab"><button class="mvv-fab-btn" onclick="openOvVendRec(null)">+ Nouvelle récolte</button></div>';
-  el.innerHTML=html;
+  h += _recChiffresHtml(D);
+  if(D.kgCli > 0){
+    var dus = _vendRetoursDus();
+    h += '<div class="mvencadre ' + (dus ? 'mvencadre-attention' : 'mvencadre-info') + ' rec-vrac">' + _mvIcon('carton', 18)
+      + '<span>' + _recMilliers(D.kgCli) + ' kg vendus en raisin · ' + (dus ? dus + ' retour' + (dus > 1 ? 's' : '') + ' client attendu' + (dus > 1 ? 's' : '') : 'tous les retours reçus') + '</span>'
+      + '<button type="button" class="mvbtn mvbtn-discret mvbtn-compact" onclick="openVendVrac()">Voir les ventes</button></div>';
+  }
+  var fiche = _matLarge() && _recSelNom;
+  h += '<div class="rec-grille rec-v-' + (_recVue === 'jour' ? 'jour' : 'parc') + '">'
+    + '<div class="rec-gauche">' + _recParcHtml(D) + (D.courante ? _vendResteHtml() : '') + '</div>'
+    + '<div class="rec-droite">' + (fiche ? '<section class="mvcarte rec-fiche" aria-label="Fiche de la parcelle">' + _recFicheHtml(_recSelNom, D) + '</section>' : _recJourHtml(D)) + '</div>'
+    + '</div>';
+  el.innerHTML = h;
   _vendRefreshCockpit();
+}
+function _recConnue(nom, D){
+  return D.rows.some(function(o){ return o.nom === nom; }) || D.reste.lignes.some(function(e){ return e.nom === nom; });
+}
+
+function _recTeteHtml(D, canEdit){
+  var ans = _vendAnnees();
+  var titre = ans.length > 1
+    ? '<select class="mat-an" aria-label="Choisir la vendange" onchange="_matSetAn(this.value)">'
+      + ans.map(function(a){ return '<option value="' + _escAttr(a) + '"' + (a === D.an ? ' selected' : '') + '>Vendange ' + _escHtml(a) + '</option>'; }).join('')
+      + '</select>'
+    : '<span class="mat-an-t">Vendange ' + _escHtml(D.an) + '</span>';
+  var der = D.recs.reduce(function(m, r){ return r.date > m ? r.date : m; }, '');
+  var ref = D.courante ? 'au ' + _vendDateLongue(_mvToday()) : (der ? 'dernière pesée le ' + _vendDateLongue(der) + ' ' + _escHtml(D.an) : 'aucune pesée');
+  return '<div class="mat-tete"><div class="mat-tete-g">' + titre + '<span class="mat-ref">' + ref + '</span></div>'
+    + (canEdit ? '<button type="button" class="mvbtn mvbtn-principal rec-nouv" onclick="openOvVendRec(null)">' + _mvIcon('plus', 16) + '<span class="lg">Nouvelle récolte</span><span class="sm">Récolte</span></button>' : '')
+    + '</div>';
+}
+
+function _recChiffresHtml(D){
+  var nRest = D.reste.lignes.length, nTot = D.rows.length + nRest;
+  var haR = D.rows.reduce(function(s, o){ return s + o.surface; }, 0);
+  var haT = haR + D.reste.lignes.reduce(function(s, e){ return s + e.ha; }, 0);
+  var pct = haT > 0 ? Math.round(haR / haT * 100) : 0;
+  var cas = function(l, v, u, s, jauge){
+    return '<div><span class="mvchiffres-l">' + l + '</span><span class="mvchiffres-v">' + v + (u ? '<small class="rec-u">' + u + '</small>' : '') + '</span>'
+      + '<span class="rec-sous">' + s + '</span>' + (jauge != null ? '<span class="rec-jauge"><i style="width:' + jauge + '%"></i></span>' : '') + '</div>';
+  };
+  return '<div class="mvchiffres rec-chiffres" style="--mvchiffres-n:4">'
+    + cas('Rentrées', String(D.rows.length), D.courante ? 'sur ' + nTot : '', D.courante ? window._mvHaT(haR) + ' ha sur ' + window._mvHaT(haT) : window._mvHaT(haR) + ' ha', D.courante ? pct : null)
+    + cas('Rendement moyen', D.moy ? _recRdtTxt(D.moy) : '\u2014', D.moy ? 'hL/ha' : '',
+          D.moy1 != null ? 'mêmes parcelles en ' + (Number(D.an) - 1) + ' : ' + Math.round(D.moy1) + ' hL/ha' : 'pondéré par la surface')
+    + cas('Récolté', _mvF1(D.kg / 1000), 't', _recMilliers(D.cs) + ' caisses')
+    + cas('En cuve', D.kgDom > 0 ? _vendHlRange(D.kgDom) : '\u2014', D.kgDom > 0 ? 'hL' : '', 'estimé, part du domaine')
+    + '</div>';
+}
+
+function _recVuesHtml(){
+  return '<div class="mvbtn-choix rec-vues" role="group" aria-label="Vue">'
+    + [['parc', 'Parcelles'], ['jour', 'Journal']].map(function(v){
+        var on = _recVue === v[0];
+        return '<button type="button" class="mvbtn mvbtn-option mvbtn-compact' + (on ? ' on' : '') + '" aria-pressed="' + on + '" onclick="_recSetVue(\'' + _escAttr(v[0]) + '\')">' + v[1] + '</button>';
+      }).join('') + '</div>';
+}
+
+/* Le rendement de chaque parcelle, sur une échelle commune : la barre est la
+   fourchette (un trait quand le volume est mesuré), le trait rouge le maximum de
+   l'appellation, le rond creux l'an passé, le pointillé la moyenne du domaine. */
+function _recParcHtml(D){
+  var rMax = 60;
+  D.rows.forEach(function(o){ rMax = Math.max(rMax, (o.hlMax || o.hlHa || 0) + 4, (o.max || 0) + 4, (o.n1 || 0) + 4); });
+  rMax = Math.ceil(rMax / 10) * 10;
+  var pos = function(v){ return (Math.max(0, Math.min(v, rMax)) / rMax * 100).toFixed(2); };
+  var pas = rMax > 80 ? 20 : 10, axe = '';
+  for(var v = 0; v <= rMax; v += pas) axe += '<span class="g" style="left:' + pos(v) + '%">' + v + '</span>';
+  var dep = D.rows.filter(function(o){ return o.depasse; });
+  var y1 = Number(D.an) - 1, large = _matLarge();
+  var h = '<section class="mvcarte rec-parc" aria-label="Rendement par parcelle">'
+    + '<div class="mvcarte-tete"><h2 class="mvcarte-titre">Rendement par parcelle</h2>' + _recVuesHtml() + '</div>';
+  if(dep.length) h += '<div class="mvencadre mvencadre-danger">' + _mvIcon('alerte', 18) + '<span>' + (dep.length === 1
+      ? '<b>' + _escHtml(dep[0].nom) + '</b> au-dessus du maximum de son appellation.' : dep.length + ' parcelles au-dessus du maximum de leur appellation.') + '</span></div>';
+  var cfg = _vendCfg();
+  h += '<p class="rec-note">' + _matPlur(D.rows.length, 'parcelle rentrée', 'parcelles rentrées') + (D.courante ? ' sur ' + (D.rows.length + D.reste.lignes.length) : '')
+    + '. Une valeur quand le volume est mesuré, une fourchette quand il est estimé (' + (cfg.ratio_min || 130) + ' à ' + (cfg.ratio_max || 140) + ' kg par hL).</p>'
+    + '<div class="rec-cols rec-axe" aria-hidden="true"><span></span><span class="pi">' + axe + '</span><span class="u">hL/ha</span><span class="u rec-c4">' + y1 + '</span></div>';
+  D.rows.forEach(function(o){
+    var lo = o.hlMin != null ? o.hlMin : o.hlHa, hi = o.hlMax != null ? o.hlMax : o.hlHa, sel = _recSelNom === o.nom;
+    var bar = o.hlHa != null ? '<i class="bar' + (o.depasse ? ' dep' : '') + '" style="left:' + pos(lo) + '%;width:' + Math.max(1.2, pos(hi) - pos(lo)).toFixed(2) + '%"></i>' : '';
+    var my = D.moy ? '<i class="my" style="left:' + pos(D.moy.hlHa) + '%"></i>' : '';
+    var mx = o.max ? '<i class="mx" style="left:' + pos(o.max) + '%"></i>' : '';
+    var n1 = o.n1 != null ? '<i class="n1" style="left:' + pos(o.n1) + '%"></i>' : '';
+    h += '<button type="button" class="rec-l rec-cols' + (sel ? ' sel' : '') + '" style="--rec-vin:' + _recVin(o.coul) + '" data-nom="' + _escAttr(o.nom) + '" onclick="_recSel(this.dataset.nom)">'
+      + '<span class="n"><span class="nm"><i class="mat-pt ' + _matVin(o.coul) + '"></i><span>' + _escHtml(o.nom) + '</span></span>'
+      + '<span class="ag">' + (o.der ? 'rentrée le ' + _matJj(o.der) : '') + (o.max ? ' · max ' + o.max : '') + '</span></span>'
+      + '<span class="pi">' + my + bar + mx + n1 + '</span>'
+      + '<span class="va"><b' + (o.depasse ? ' class="dep"' : '') + '>' + _recRdtTxt(o) + '</b><s>' + (o.kgDom > 0 ? _vendHlRange(o.kgDom) + ' hL' : 'vendu')
+      + (!large && o.n1 != null ? ' · ' + y1 + ' : ' + Math.round(o.n1) : '') + '</s></span>'
+      + '<span class="rec-c4">' + (o.n1 != null ? Math.round(o.n1) : '\u2014') + '</span>'
+      + '</button>';
+  });
+  if(D.moy) h += '<div class="rec-cols mat-moy" aria-hidden="true"><span></span><span class="pi"><span style="left:' + pos(D.moy.hlHa) + '%">moyenne ' + _recRdtTxt(D.moy) + '</span></span></div>';
+  h += '<div class="mat-leg"><span><i class="rec-k bar"></i>rendement</span><span><i class="rec-k mx"></i>maximum de l’appellation</span>'
+    + '<span><i class="rec-k n1"></i>' + y1 + '</span>' + (D.moy ? '<span><i class="my"></i>moyenne</span>' : '') + '</div>';
+  return h + '</section>';
+}
+
+/* Le journal : les pesées par jour, la plus récente en tête. */
+function _recJourHtml(D){
+  var jours = {};
+  D.recs.forEach(function(r){ (jours[r.date] = jours[r.date] || []).push(r); });
+  var h = '<section class="mvcarte rec-jour" aria-label="Journal des pesées"><div class="mvcarte-tete"><h2 class="mvcarte-titre">Journal des pesées</h2>' + _recVuesHtml() + '</div>';
+  Object.keys(jours).sort().reverse().forEach(function(d){
+    var L = jours[d];
+    h += '<div class="rec-j-jour"><b>' + _vendDateLongue(d) + (D.courante ? '' : ' ' + _escHtml(D.an)) + '</b><span>' + _matPlur(L.length, 'pesée')
+      + ' · ' + _recMilliers(L.reduce(function(s, r){ return s + _recCaisses(r); }, 0)) + ' caisses</span></div>';
+    L.forEach(function(r){
+      var p = _vendParcByName(r.parcelle), nom = p ? p.nom : String(r.parcelle).trim();
+      h += '<button type="button" class="rec-j" data-nom="' + _escAttr(nom) + '" onclick="_recSel(this.dataset.nom)">'
+        + '<span class="n"><span class="nm"><i class="mat-pt ' + _matVin(_parcCoul(nom)) + '"></i><span>' + _escHtml(nom) + '</span></span><span class="ag">' + _recDestsTxt(r) + '</span></span>'
+        + '<span class="va"><b>' + _recMilliers(_recCaisses(r)) + ' caisses</b>' + _recSanit(r) + '</span></button>';
+    });
+  });
+  return h + '</section>';
+}
+
+/* L'historique d'une parcelle : les vendanges saisies dans l'appli (le même
+   rendement que le Millésime), puis celles venues du fichier des parcelles,
+   estimées d'après leurs kilos et dites telles. Les cinq dernières. */
+function _recHist(nom, p){
+  var ans = {}, out = [], kgHl = _mlKgHl() || 135, s = parseFloat(p.surface) || 0;
+  (CAVE_VENDANGE.recoltes || []).forEach(function(r){
+    var q = r && r.parcelle && _vendParcByName(r.parcelle);
+    if(q && q.nom === nom) ans[String(_vendMillOfDate(r.date))] = 'app';
+  });
+  (Array.isArray(p.rendement_hist) ? p.rendement_hist : []).forEach(function(e){
+    var m = e && (e.millesime || parseInt(String(e.date || '').slice(0, 4), 10));
+    if(m && !ans[String(m)]) ans[String(m)] = 'fic';
+  });
+  Object.keys(ans).sort().slice(-5).forEach(function(y){
+    var v = null, mx = _vendRdtMax(p, y).max;
+    if(ans[y] === 'app'){
+      var o = ((typeof window._mlRendements === 'function') ? window._mlRendements(y) : []).filter(function(x){ return x.parcelle.nom === nom; })[0];
+      v = o ? o.hlHa : null;
+    } else if(s > 0){
+      var kg = 0;
+      p.rendement_hist.forEach(function(e){ var m = e && (e.millesime || parseInt(String(e.date || '').slice(0, 4), 10)); if(String(m) === y) kg += (e.kg || 0); });
+      v = kg > 0 ? kg / kgHl / s : null;
+    }
+    out.push({ an:y, v:v, max:mx, fic:ans[y] === 'fic' });
+  });
+  return out;
+}
+
+function _recFicheHtml(nom, D){
+  var o = D.rows.filter(function(x){ return x.nom === nom; })[0] || null;
+  var p = _vendParcByName(nom) || { nom:nom, surface:0 }, coul = _parcCoul(nom), mx = _vendRdtMax(p, D.an);
+  var cep = (p.cepages && p.cepages.length) ? p.cepages.join(', ') : (p.cepage || '');
+  var aoc = mx.aoc || (_vendAocDe(p) || {}).nom || '';
+  var tag = function(t){ return '<span class="mvpas mvpas-etiquette">' + t + '</span>'; };
+  var h = '<div class="mat-fi-hd"><div class="mat-fi-cel"><h3 class="mat-fi-t">' + _escHtml(nom) + '</h3><div class="mat-tags">'
+    + tag('<i class="mat-pt ' + _matVin(coul) + '"></i>' + (coul === 'r' ? 'Rouge' : coul === 'b' ? 'Blanc' : 'Sans couleur'))
+    + tag(window._mvHaP(p.surface) + ' ha') + (cep ? tag(_escHtml(cep)) : '')
+    + (aoc ? tag(_escHtml(aoc) + (mx.max ? ' · max ' + mx.max + ' hL/ha' : '')) : '') + '</div></div>'
+    + '<button type="button" class="mvbtn mvbtn-icone mvbtn-secondaire" aria-label="Fermer la fiche" onclick="_recSel(null)">' + _mvIcon('croix', 16) + '</button></div>';
+  var cas = function(l, v, u, s){ return '<div><span class="mvchiffres-l">' + l + '</span><span class="mvchiffres-v">' + v + (u ? '<small class="rec-u">' + u + '</small>' : '') + '</span><span class="rec-sous">' + s + '</span></div>'; };
+  var y1 = Number(D.an) - 1;
+  h += '<div class="mvchiffres rec-fi-chiffres" style="--mvchiffres-n:3">'
+    + cas('Rendement', o ? _recRdtTxt(o) : '\u2014', o ? 'hL/ha' : '', o ? (mx.max ? 'maximum ' + mx.max : 'sans maximum connu') + (o.n1 != null ? ' · ' + y1 + ' : ' + Math.round(o.n1) : '') : 'pas encore récoltée')
+    + cas('Récolté', o ? _recMilliers(o.kg) : '\u2014', o ? 'kg' : '', o ? _recMilliers(o.caisses) + ' caisses' : '')
+    + cas('En cuve', o ? (o.kgDom > 0 ? _vendHlRange(o.kgDom) : 'vendu') : '\u2014', o && o.kgDom > 0 ? 'hL' : '', o ? (o.kgDom > 0 ? 'estimé, part du domaine' : 'tout part en raisin') : '')
+    + '</div>';
+  if(o && o.depasse) h += '<div class="mvencadre mvencadre-danger rec-fi-enc">' + _mvIcon('alerte', 18) + '<span>Au-dessus du maximum ' + (aoc ? 'de l’appellation ' + _escHtml(aoc) + ' ' : '') + '(' + o.max + ' hL/ha)' + (o.statut === 'mesure' ? '.' : ', même au bas de la fourchette.') + '</span></div>';
+  else if(!o && D.courante){
+    var e = _matSynth(_matFen, null, D.an).tous[nom], spd = (_vendCfg().sucre_par_degre) || 16.83;
+    h += '<div class="mvencadre mvencadre-info rec-fi-enc">' + _mvIcon('raisin', 18) + '<span>Encore sur pied. '
+      + (e && e.suc != null ? 'Dernière maturité : ' + Math.round(e.suc) + ' g/L (' + _mvF1(e.suc / spd) + ' %vol), ' + _matAge(e.age) + '.' : 'Pas encore de mesure de maturité.')
+      + '</span><button type="button" class="mvbtn mvbtn-discret mvbtn-compact" data-nom="' + _escAttr(nom) + '" onclick="_vendVoir(\'ana\',this.dataset.nom)">Voir sa maturité</button></div>';
+  }
+  var hist = _recHist(nom, p).filter(function(x){ return x.v != null; });
+  if(hist.length){
+    var hMax = Math.max.apply(null, hist.map(function(x){ return Math.max(x.v, x.max || 0); })) * 1.15 || 1;
+    h += '<div class="mat-fi-sec"><div class="mat-fi-st">Rendement par vendange<small>hL/ha</small></div>';
+    hist.forEach(function(x, i){
+      var pr = i ? hist[i - 1].v : null, dp = pr ? Math.round((x.v / pr - 1) * 100) : null;
+      h += '<div class="rec-h"><span class="a">' + x.an + '</span><span class="pi"><i class="bar' + (x.max && x.v > x.max ? ' dep' : '') + (x.fic ? ' fic' : '') + '" style="width:' + (x.v / hMax * 100).toFixed(1) + '%;--rec-vin:' + _recVin(coul) + '"></i>'
+        + (x.max ? '<i class="mx" style="left:' + (x.max / hMax * 100).toFixed(1) + '%"></i>' : '') + '</span>'
+        + '<span class="v">' + Math.round(x.v) + '</span><span class="d">' + (dp == null ? '' : (dp > 0 ? '+' : dp < 0 ? '\u2212' : '') + Math.abs(dp) + ' %') + '</span></div>';
+    });
+    if(hist.some(function(x){ return x.fic; })) h += '<p class="rec-note">Barres pâles : vendanges du fichier des parcelles, estimées d’après leurs kilos.</p>';
+    h += '</div>';
+  }
+  if(o){
+    var ecrire = canWrite();
+    h += '<div class="mat-fi-sec"><div class="mat-fi-st">Pesées<small>' + _matPlur(o.rr.length, 'pesée') + '</small></div>';
+    o.rr.slice().reverse().forEach(function(r){
+      h += '<div class="rec-pe"><span class="d">' + _matJj(r.date) + '</span><span class="t"><b>' + _recMilliers(_recCaisses(r)) + ' caisses · ' + _recMilliers(_recKg(r)) + ' kg</b>'
+        + '<small>' + _recDestsTxt(r) + '</small></span>' + _recSanit(r)
+        + (ecrire ? '<button type="button" class="mvbtn mvbtn-discret mvbtn-compact" data-id="' + _escAttr(String(r.id)) + '" onclick="openOvVendRec(this.dataset.id)">Modifier</button>' : '') + '</div>';
+    });
+    h += '</div>';
+  }
+  if(D.courante && canWrite()) h += '<div class="mat-fi-act"><button type="button" class="mvbtn mvbtn-secondaire rec-large" data-nom="' + _escAttr(nom) + '" onclick="openOvVendRec(null,this.dataset.nom)">'
+    + _mvIcon('plus', 16) + (o ? 'Ajouter une pesée sur cette parcelle' : 'Peser une récolte sur cette parcelle') + '</button></div>';
+  return h;
+}
+
+/* ─────────── Les gestes ─────────── */
+function _recSetVue(v){ _recVue = v === 'jour' ? 'jour' : 'parc'; renderVendRec(); }
+/* La fiche : à droite sur ordinateur, dans une fenêtre au téléphone. */
+function _recSel(nom){
+  _recSelNom = nom || null;
+  if(_matLarge()){ renderVendRec(); return; }
+  if(!nom){ if(typeof window.closeOv === 'function') window.closeOv(null, 'ovRecFiche'); return; }
+  var corps = document.getElementById('rec-fiche-corps'); if(!corps) return;
+  corps.innerHTML = _recFicheHtml(nom, _recDonnees(_matAnCourant()));
+  if(typeof window.openOv === 'function') window.openOv('ovRecFiche');
+}
+/* D'un onglet à l'autre sur la même parcelle : « Voir sa maturité », « Voir sa récolte ». */
+function _vendVoir(tab, nom){
+  _matSelNom = tab === 'ana' ? (nom || null) : null;
+  _recSelNom = tab === 'rec' ? (nom || null) : null;
+  if(typeof window.closeOv === 'function'){ window.closeOv(null, 'ovMatFiche'); window.closeOv(null, 'ovRecFiche'); }
+  if(typeof window.switchVendOng === 'function') window.switchVendOng(tab); else { _vendTab = tab; _vendRenderTab(); }
+  if(!_matLarge() && nom){ if(tab === 'ana') _matSel(nom); else _recSel(nom); }
 }
 function _vendOutilsHtml(cuves){
   var h='<div class="mvv-tools">';
@@ -6754,81 +7010,6 @@ function _vendUnrecordRendement(recId, parcelleNom){
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'cave.js/_vendUnrecordRendement'); }
 }
 // Agrège rendement_hist de toutes les parcelles, groupé climat -> millésime
-function _vendRendHistData(){
-  var ps=window.PARCELLES||[]; var out=[];
-  ps.forEach(function(p){
-    var h=Array.isArray(p.rendement_hist)?p.rendement_hist:[];
-    if(!h.length) return;
-    var surf=parseFloat(p.surface)||0, byM={};
-    h.forEach(function(e){
-      if(!e) return;
-      var m=e.millesime||parseInt(String(e.date||'').slice(0,4),10)||0;
-      if(!m) return;
-      if(!byM[m]) byM[m]={millesime:m,kg:0,caisses:0};
-      byM[m].kg+=(e.kg||0); byM[m].caisses+=(e.caisses||0);
-    });
-    var years=Object.keys(byM).map(Number).sort(function(a,b){return a-b;});
-    if(!years.length) return;
-    var rows=years.map(function(m){var o=byM[m]; o.kg_ha=surf>0?Math.round(o.kg/surf):null; return o;});
-    out.push({nom:p.nom,surface:surf,rows:rows});
-  });
-  out.sort(function(a,b){return String(a.nom||'').localeCompare(String(b.nom||''),'fr');});
-  return out;
-}
-function _vendRendInjectCss(){
-  if(document.getElementById('mvv-rh-css')) return;
-  var s=document.createElement('style'); s.id='mvv-rh-css';
-  s.textContent=`
-.mvv-rh{margin-top:20px}
-.mvv-rh-p{background:var(--bg-card,#FBFAF6);border:1px solid rgba(138,90,56,.10);border-radius:15px;padding:13px 14px;margin-bottom:10px;box-shadow:0 1px 5px rgba(20,17,13,.04)}
-.mvv-rh-nm{font-family:var(--font-titre,'Cormorant Garamond',Georgia,serif);font-weight:600;font-size:var(--pt-sm,16px);color:var(--texte,#1A1A14);line-height:1.1}
-.mvv-rh-sub{font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F);margin-top:2px}
-.mvv-rh-years{margin-top:11px;display:flex;flex-direction:column;gap:7px}
-.mvv-rh-row{display:flex;align-items:center;gap:9px}
-.mvv-rh-yr{font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte-med,#4A4A3A);width:40px;flex-shrink:0}
-.mvv-rh-bar{flex:1;height:9px;border-radius:5px;background:var(--gris-clair,#ECE6DA);overflow:hidden}
-.mvv-rh-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--terre,#8A5A38),#C2871E)}
-.mvv-rh-val{font-family:var(--font-titre,'Cormorant Garamond',Georgia,serif);font-weight:700;font-size:var(--pt-base,14px);color:var(--terre,#8A5A38);width:104px;text-align:right;flex-shrink:0}
-.mvv-rh-val .u{font-family:inherit;font-size:var(--pt-nano,9.5px);color:var(--texte-doux,#5F5F5F);font-weight:400;margin-left:2px}
-.mvv-rh-val.na{color:var(--texte-doux,#5F5F5F);font-size:var(--pt-micro,11px);font-family:inherit;font-weight:500}
-.mvv-rh-delta{font-size:var(--pt-lbl,10.5px);font-weight:600;width:50px;text-align:right;flex-shrink:0}
-.mvv-rh-delta.up{color:var(--vert-med,#3D6B27)}
-.mvv-rh-delta.down{color:#B0412C}
-.mvv-rh-delta.flat{color:var(--texte-doux,#5F5F5F)}
-`;
-  document.head.appendChild(s);
-}
-function _vendRendHistHtml(){
-  var data=_vendRendHistData();
-  if(!data.length) return '';
-  _vendRendInjectCss();
-  var html='<div class="mvv-rh"><div class="mvv-seclbl">Rendements par climat · pluriannuel</div>';
-  data.forEach(function(d){
-    var vals=d.rows.map(function(r){return r.kg_ha||0;});
-    var max=Math.max.apply(null,vals.concat([1]));
-    var rowsH=d.rows.map(function(r,i){
-      var prev=i>0?d.rows[i-1]:null, delta;
-      if(prev&&prev.kg_ha&&r.kg_ha){
-        var dp=Math.round((r.kg_ha/prev.kg_ha-1)*100);
-        var cls=dp>2?'up':dp<-2?'down':'flat';
-        delta='<span class="mvv-rh-delta '+cls+'">'+(dp>0?'+':'')+dp+'%</span>';
-      } else delta='<span class="mvv-rh-delta flat">—</span>';
-      var w=r.kg_ha?Math.max(4,Math.round(r.kg_ha/max*100)):0;
-      var valH=r.kg_ha!=null
-        ?'<span class="mvv-rh-val">'+r.kg_ha.toLocaleString('fr-FR')+'<span class="u">kg/ha</span></span>'
-        :'<span class="mvv-rh-val na">'+(r.kg||0).toLocaleString('fr-FR')+' kg</span>';
-      return '<div class="mvv-rh-row"><span class="mvv-rh-yr">'+r.millesime+'</span>'
-        +'<span class="mvv-rh-bar"><span class="mvv-rh-fill" style="width:'+w+'%"></span></span>'
-        +valH+delta+'</div>';
-    }).join('');
-    var span=d.rows.length>1?(d.rows[0].millesime+'–'+d.rows[d.rows.length-1].millesime):String(d.rows[0].millesime);
-    html+='<div class="mvv-rh-p"><div class="mvv-rh-nm">'+_escHtml(d.nom||'')+'</div>'
-      +'<div class="mvv-rh-sub">'+d.rows.length+' millésime'+(d.rows.length>1?'s':'')+' · '+span+(d.surface>0?' · '+window._mvHaT(d.surface)+' ha':'')+'</div>'
-      +'<div class="mvv-rh-years">'+rowsH+'</div></div>';
-  });
-  return html+'</div>';
-}
-
 /* ★ CUV-DEC (§164) — le Chai remet Le Cuvier sur l'onglet Cuves par ici. */
 function _vendOngletCuves(){ _vendTab='cuves'; }
 function switchVendOng(tab) {
@@ -7598,49 +7779,6 @@ window._vendSaveParam       = _vendSaveParam;
 //    bouteille (Le Chai). Injections DOM+CSS idempotentes → aucun bump.
 // ══════════════════════════════════════════════════════════════════
 // ─────────── ANALYSES DE MATURITÉ (Cuvier) ───────────
-// ═══════════════════════════════════════════════════════════════════════════
-// LOT M2 — Apports par parcelle. Ce qui se decide : rien. Ce qu'il prouve :
-// le rendement de chaque parcelle sort tout seul, le jour meme.
-// ═══════════════════════════════════════════════════════════════════════════
-var MV_APP_MAX = 10;
-
-function _vendApportsSvg(recs, w){
-  var rs = _apportsRangs(recs || []);
-  if(!rs.length) return window._mvGraphVide('Aucun apport pes\u00e9 pour l\u2019instant',
-    'Chaque pes\u00e9e de caisses au quai alimente ce graphe.');
-  var caches = Math.max(0, rs.length - MV_APP_MAX);
-  rs = rs.slice(0, MV_APP_MAX);
-
-  var c0 = window._mvGraphCadre(w, 100), et = c0.etroit;
-  var rowH = et ? 46 : 30, pT = et ? 12 : 14, pB = 8;
-  var c = window._mvGraphCadre(w, pT + rs.length * rowH + pB,
-    { padL: et ? 0 : 168, padR: et ? 0 : 150, padT: pT, padB: pB });
-  var W = c.w, iw = c.iw, mx = rs[0].caisses || 1;
-  var g = '';
-  rs.forEach(function(o, i){
-    var y = pT + i * rowH, bw = Math.max(2, o.caisses / mx * iw);
-    var kgTxt = Math.round(o.kg) + ' kg';
-    var rdt = o.hlHa != null ? _mvF1(o.hlHa) + ' hL/ha' : '\u2014';
-    if(et){
-      g += '<text x="0" y="' + (y + 11) + '" font-size="' + c.txt.axe + '" font-weight="600" fill="var(--texte)">' + _escHtml(o.nom) + '</text>'
-        + '<text x="' + W + '" y="' + (y + 11) + '" text-anchor="end" font-size="' + c.txt.axe + '" fill="' + c.col.texte + '">' + kgTxt + ' \u00b7 ' + rdt + '</text>'
-        + '<rect x="0" y="' + (y + 18) + '" width="' + iw.toFixed(1) + '" height="15" rx="4" fill="' + c.col.mesure + '" opacity=".16"/>'
-        + '<rect x="0" y="' + (y + 18) + '" width="' + bw.toFixed(1) + '" height="15" rx="4" fill="' + c.col.mesure + '"/>'
-        + '<text x="7" y="' + (y + 29) + '" font-size="' + c.txt.mini + '" font-weight="700" fill="#fff">' + o.caisses + ' caisses</text>';
-    } else {
-      g += '<text x="' + (c.padL - 12) + '" y="' + (y + 15) + '" text-anchor="end" font-size="' + c.txt.axe + '" font-weight="600" fill="var(--texte)">' + _escHtml(o.nom) + '</text>'
-        + '<text x="' + (c.padL - 12) + '" y="' + (y + 26) + '" text-anchor="end" font-size="' + c.txt.mini + '" fill="' + c.col.texte + '">' + (o.ha > 0 ? _mvF1(o.ha) + ' ha' : '') + '</text>'
-        + '<rect x="' + c.padL + '" y="' + (y + 4) + '" width="' + iw.toFixed(1) + '" height="18" rx="4" fill="' + c.col.mesure + '" opacity=".16"/>'
-        + '<rect x="' + c.padL + '" y="' + (y + 4) + '" width="' + bw.toFixed(1) + '" height="18" rx="4" fill="' + c.col.mesure + '"/>'
-        + '<text x="' + (c.padL + 8) + '" y="' + (y + 17) + '" font-size="' + c.txt.mini + '" font-weight="700" fill="#fff">' + o.caisses + ' caisses</text>'
-        + '<text x="' + (W - 80) + '" y="' + (y + 17) + '" text-anchor="end" font-size="' + c.txt.axe + '" font-weight="600" fill="var(--texte)">' + kgTxt + '</text>'
-        + '<text x="' + W + '" y="' + (y + 17) + '" text-anchor="end" font-size="' + c.txt.axe + '" fill="' + c.col.texte + '">' + rdt + '</text>';
-    }
-  });
-  var tete = rs[0].nom, teteC = rs[0].caisses;
-  var aria = 'Apports par parcelle : ' + rs.length + ' parcelles pes\u00e9es, ' + tete + ' en t\u00eate avec ' + teteC + ' caisses.';
-  return window._mvGraphSvg(c, aria, g) + _apportsPied(rs, caches);
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // LOT M3 — La fermentation : densite, temperature, et les operations DATEES
@@ -8081,7 +8219,7 @@ function _matFour(){
 /* La vendange choisie : la plus récente qui a des mesures (l'hiver, l'onglet ne
    s'ouvre pas vide), l'année en cours sinon. */
 function _matAnCourant(){
-  var cur = String(new Date().getFullYear()), ans = _matAnnees();
+  var cur = String(new Date().getFullYear()), ans = _vendAnnees();
   if(_matAn && (_matAn === cur || ans.indexOf(_matAn) >= 0)) return _matAn;
   return ans.indexOf(cur) >= 0 ? cur : (ans[0] || cur);
 }
@@ -8234,18 +8372,14 @@ function renderVendAna(){
 }
 
 function _matTeteHtml(an, ref, canEdit){
-  var cur = String(new Date().getFullYear()), ans = _matAnnees();
-  if(ans.indexOf(cur) < 0) ans.unshift(cur);
+  var ans = _vendAnnees();
   var titre = ans.length > 1
     ? '<select class="mat-an" aria-label="Choisir la vendange" onchange="_matSetAn(this.value)">'
       + ans.map(function(a){ return '<option value="' + _escHtml(a) + '"' + (a === an ? ' selected' : '') + '>Vendange ' + _escHtml(a) + '</option>'; }).join('')
       + '</select>'
     : '<span class="mat-an-t">Vendange ' + _escHtml(an) + '</span>';
   var d = ref || _mvToday();
-  var J = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
-  var M = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
-  var t = new Date(d + 'T12:00:00Z');
-  var lbl = J[t.getUTCDay()] + ' ' + t.getUTCDate() + (t.getUTCDate() === 1 ? 'er' : '') + ' ' + M[t.getUTCMonth()];
+  var lbl = _vendDateLongue(d);
   return '<div class="mat-tete"><div class="mat-tete-g">' + titre
     + '<span class="mat-ref">' + (ref ? 'relue au ' + lbl + ' ' + _escHtml(an) + ', date de la dernière mesure' : 'au ' + lbl) + '</span></div>'
     + '<button type="button" class="mat-btn mat-imp" onclick="_matExportChoix()">' + _mvIcon('imprimante', 16) + '<span>Imprimer le contrôle</span></button>'
@@ -8445,7 +8579,8 @@ function _matFicheHtml(nom, r, spd, four, courante){
     + '</div>';
   if(grp === 'vieille') h += '<div class="mat-fi-note">Rien depuis ' + e.age + ' jours : elle sort de la moyenne.'
     + (e.vit != null && e.vit > 0 ? ' À ' + _matVit(e.vit, spd) + ' ' + _matUnite() + ' par jour, elle serait vers ' + _matGros(e.suc + e.vit * e.age, spd) + ' ' + _matUnite() + ', mais personne ne l’a mesurée.' : ' Une seule mesure : pas encore de vitesse.') + '</div>';
-  else if(grp === 'rentree') h += '<div class="mat-fi-note neutre">Rentrée le ' + _matJj(e.rentree) + ' : elle ne compte plus dans les moyennes.</div>';
+  else if(grp === 'rentree') h += '<div class="mat-fi-note neutre">Rentrée le ' + _matJj(e.rentree) + ' : elle ne compte plus dans les moyennes. '
+    + '<button type="button" class="mvbtn mvbtn-discret mvbtn-compact" data-nom="' + _escAttr(nom) + '" onclick="_vendVoir(\'rec\',this.dataset.nom)">Voir sa récolte</button></div>';   // ★ REC-1
   else if(grp === 'jamais') h += '<div class="mat-fi-note neutre">Aucune mesure cette vendange : elle compte dans les parcelles à mesurer, pas dans les moyennes.</div>';
   var w = four[e.coul];
   if(e.coul === 'r' || e.coul === 'b'){
@@ -8480,7 +8615,7 @@ function _matSetFen(f){ _matFen = f; renderVendAna(); }
 function _matSetFiltre(k){ _matFiltre = (_matFiltre === k ? 'dom' : k); _matSelNom = null; renderVendAna(); }
 function _matVoirPlus(k){ if(!k){ return; } _matVoirTout[k] = !_matVoirTout[k]; renderVendAna(); }
 function _matSetVue(v){ _matVue = v === 'courbes' ? 'courbes' : 'ordre'; renderVendAna(); }
-function _matSetAn(an){ _matAn = String(an || ''); _matSelNom = null; _matVoirTout = { jamais:false, rent:false }; renderVendAna(); }
+function _matSetAn(an){ _matAn = String(an || ''); _matSelNom = null; _recSelNom = null; _matVoirTout = { jamais:false, rent:false }; _vendRenderTab(); }   // ★ REC-1 : commune aux Maturités et aux Récoltes
 /* La fiche : à droite sur ordinateur, dans une fenêtre au téléphone. */
 function _matSel(nom){
   _matSelNom = nom || null;
@@ -8669,6 +8804,10 @@ window._matSaisieUnite      = _matSaisieUnite;
 window._matSaisieDate       = _matSaisieDate;
 window._matCouleurs         = _matCouleurs;
 window._matFour             = _matFour;
+// ★ REC-1 — les gestes des Récoltes rangées
+window._recSetVue           = _recSetVue;
+window._recSel              = _recSel;
+window._vendVoir            = _vendVoir;
 window._matSetFen           = _matSetFen;
 window._matSetFiltre        = _matSetFiltre;
 window._matVoirPlus         = _matVoirPlus;

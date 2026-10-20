@@ -3925,45 +3925,9 @@ function _caveV2InjectCss(){
   document.head.appendChild(s);
 }
 
-function _apportsRangs(recs){
-  var byP = {};
-  recs.forEach(function(r){
-    if(!r || !r.parcelle) return;
-    var o = byP[r.parcelle] || (byP[r.parcelle] = { nom:r.parcelle, caisses:0, kg:0 });
-    o.caisses += (r.nb_caisses || 0);
-    o.kg += _recKg(r);
-  });
-  return Object.keys(byP).map(function(n){
-    var o = byP[n], p = _vendParcByName(n);
-    o.ha = p ? (parseFloat(p.surface) || 0) : 0;
-    o.hl = _vendHlKg(o.kg);
-    o.hlHa = o.ha > 0 ? o.hl / o.ha : null;
-    return o;
-  }).sort(function(a,b){ return b.caisses - a.caisses; });
-}
-
 // Le pied porte la conversion, en FOURCHETTE. Le rendement en jus n'est pas
 // connu avant le pressoir : annoncer un seul chiffre serait plus faux que
 // d'annoncer une plage, meme si l'app calcule ailleurs sur le milieu.
-function _apportsPied(rs, caches){
-  var cfg = _vendCfg();
-  var caisses = rs.reduce(function(s,o){ return s + o.caisses; }, 0);
-  var kg = rs.reduce(function(s,o){ return s + o.kg; }, 0);
-  var rmin = parseFloat(cfg.ratio_min) || 130, rmax = parseFloat(cfg.ratio_max) || 140;
-  var h = '<div class="mvap-tot">'
-    + '<span><b>' + caisses.toLocaleString('fr-FR') + '</b>caisses pes\u00e9es</span>'
-    + '<em>\u00d7 ' + (cfg.poids_caisse_kg || 25) + ' kg</em>'
-    + '<span><b>' + Math.round(kg).toLocaleString('fr-FR') + '</b>kilos</span>'
-    + '<em>\u00f7 ' + Math.round(rmin) + '\u2013' + Math.round(rmax) + '</em>'
-    + '<span class="hl"><b>' + Math.round(kg/rmax) + '\u2013' + Math.round(kg/rmin) + '</b>hectolitres</span>'
-    + '</div>'
-    + '<div class="mvap-note">Au quai on compte des caisses, pas des hectolitres. La conversion donne une '
-    + '<b>fourchette</b> plut\u00f4t qu\u2019un chiffre faux : le rendement en jus n\u2019est jamais connu avant le pressoir.</div>';
-  if(caches > 0) h += '<div class="mvap-note">Les ' + rs.length + ' parcelles les plus apport\u00e9es. '
-    + caches + ' autre' + (caches > 1 ? 's' : '') + ' plus bas.</div>';
-  return h;
-}
-
 function _fermLegende(cu, ops, t0, mes, deuxAxes, ets){
   function jour(d){ return Math.round((Date.parse(d) - t0) / 86400000); }
   var h = '<div class="mvfm-lg">'
@@ -10944,8 +10908,6 @@ window._anaSpd = _anaSpd;
 window._caveV2InjectCss = _caveV2InjectCss;
 window._caveFmlEtat = _caveFmlEtat;     // ★ FML-1 — la frise du Cuvier lit la malo de la cuvée
 window._mlFinMalo = _mlFinMalo;         // ★ FML-1 — et le jour où elle a été constatée finie
-window._apportsRangs = _apportsRangs;
-window._apportsPied = _apportsPied;
 window._fermLegende = _fermLegende;
 window._cuveCouches = _cuveCouches;
 window._apTronc = _apTronc;

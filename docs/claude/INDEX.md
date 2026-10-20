@@ -435,3 +435,4 @@
 | 379 | 379. ★★ CHARTE-5a — LE JEU DE CARTES COMMUN, PREMIER PASSAGE (19/10 — `src/styles.css` · `src/charte.css` ·… | `docs/claude/chantiers-330-379.md` |
 | 380 | 380. CHARTE-5b — LES ENCADRÉS DU PHYTO ET DES RÉGLAGES AU JEU (19/10 — `src/phyto.js` · `src/reglages.js` ·… | `docs/claude/chantiers-380-429.md` |
 | 381 | 381. CHARTE-5c — LES ENCADRÉS D’ALERTE, PARTOUT AILLEURS (19/10 — `index.html` · `src/planning.js` · `src/a… | `docs/claude/chantiers-380-429.md` |
+| 382 | 382. ★★ REC-1 — LES RÉCOLTES RANGÉES : QUATRE CHIFFRES, LE RENDEMENT FACE AU MAXIMUM, LE JOURNAL, LA FICHE … | `docs/claude/chantiers-380-429.md` |

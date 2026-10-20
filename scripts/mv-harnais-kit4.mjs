@@ -25,7 +25,7 @@ function suite(S) {
     [S.cuv, /_mvF1\(d\.surface\)\+' ha'/]];
   T('plus aucune surface écrite au point dans le Traitement, le Tracteur, les Réglages, le Cuvier', RAW.every(([s, re]) => !re.test(s)));
   T('… elles passent toutes par les deux formateurs', (S.phyto.match(/window\._mvHa[PT]\(/g) || []).length === 6 && (S.trac.match(/window\._mvHa[PT]\(/g) || []).length === 9   /* TRAC-1 (§282) : +2, la surface de la fiche de session */
-    && (S.reg.match(/window\._mvHa[PT]\(/g) || []).length === 4 && (S.cuv.match(/window\._mvHaT\(/g) || []).length === 1);
+    && (S.reg.match(/window\._mvHa[PT]\(/g) || []).length === 4 && (S.cuv.match(/window\._mvHa[PT]\(/g) || []).length === 4);   /* REC-1 (§382) : le bloc pluriannuel parti (−1) ; les chiffres des Récoltes (3 totaux) et la fiche (1 parcelle) */
   const css = S.css, apres = (sel, decl) => { const i = css.lastIndexOf(sel + '{' + decl); return i > 0 && i > css.indexOf(sel + '{'); };
   T('la Cave et la vendange au kit (6 px, pilule, piste gris-clair)', apres('.mvc-gauge-track', 'height:6px;border-radius:3px;background:var(--gris-clair);') && apres('.vend-prog-track', 'height:6px;border-radius:3px;background:var(--gris-clair);'));
   T('le Cuvier : l\u2019avancement en doré, le niveau de cuve en terre (le mesuré)', css.includes('body .vt-prog-f{border-radius:3px;background:var(--or);}') && css.includes('body .mvv-rh-fill{background:var(--terre,#8A5A38);}'));
