@@ -6466,6 +6466,33 @@ window._aocSupprimer=function(nom){
     },'corbeille','Supprimer','#C0392B');
 };
 
+/* ★ MINAOC-1 (§385) — LE MINIMUM DE MATURITÉ DE L'APPELLATION. La richesse minimale en sucre de son cahier des charges,
+   par couleur, en g/L (`sucre_min: { r, b }`). Les Maturités la tracent en trait rouge sur chaque parcelle rattachée et
+   la redisent dans la fiche (« atteint le… »). Rien n'est posé d'office : un minimum se lit dans l'arrêté. */
+window._aocSetMin=function(nom,coul){
+  if(typeof isAdmin==='function'&&!isAdmin()){ if(window.showToast) window.showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#B85A1A'); return; }
+  var a=_aocTrouve(nom); if(!a||typeof window.openPrompt!=='function') return;
+  var c=(coul==='b')?'b':'r', lbl=(c==='r')?'rouges':'blancs', cur=(a.sucre_min&&a.sucre_min[c]>0)?a.sucre_min[c]:null;
+  window.openPrompt({
+    titre:'Minimum de maturit\u00e9 des '+lbl, sub:a.nom+' \u2014 la richesse minimale en sucre du cahier des charges, en g/L. Exemple : Gevrey-Chambertin, 180 g/L en rouge (189 en premier cru). Valider \u00e0 vide le retire.',
+    valeur:(cur?String(cur):''), unite:'g/L', icone:'raisin', type:'nombre', placeholder:(c==='r'?'180':'170'), btnLabel:'Enregistrer',
+    cb:function(v){
+      var s=String(v==null?'':v).trim();
+      if(!s){
+        if(cur){ delete a.sucre_min[c]; if(!a.sucre_min.r&&!a.sucre_min.b) delete a.sucre_min; _aocSave();
+          if(window.showToast) window.showToast(a.nom+' \u00b7 minimum des '+lbl+' retir\u00e9','#B85A1A'); }
+        _aocRenderCard(); return;
+      }
+      var x=parseFloat(s.replace(',','.'));
+      if(!isFinite(x)||x<100||x>300){ if(window.showToast) window.showToast('Entre 100 et 300 g/L','#B85A1A'); return; }
+      if(!a.sucre_min||typeof a.sucre_min!=='object') a.sucre_min={};
+      a.sucre_min[c]=Math.round(x);
+      _aocSave();
+      if(window.showToast) window.showToast(a.nom+' \u00b7 minimum des '+lbl+' : '+Math.round(x)+' g/L','#3D6B27');
+      _aocRenderCard();
+    }
+  });
+};
 window._aocSetMax=function(nom,mil){
   if(typeof isAdmin==='function'&&!isAdmin()){ if(window.showToast) window.showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#B85A1A'); return; }
   var a=_aocTrouve(nom); if(!a||typeof window.openPrompt!=='function') return;
@@ -6547,16 +6574,20 @@ function _aocPlafondsHtml(){
     h+='<div class="aoc-list">';
     A.forEach(function(a){
       var n=_aocParcelles(a.nom).length, v=_aocMax(a,m), q='\''+_aocAtt(a.nom)+'\'';
-      h+='<div class="aoc-row"><div class="aoc-n"><b>'+_aocEsc(a.nom)+'</b><span>'+n+' parcelle'+(n>1?'s':'')+'</span></div>'
+      var mn=a.sucre_min||{}, mt=[mn.r>0?'rouges '+mn.r:'', mn.b>0?'blancs '+mn.b:''].filter(Boolean).join(' · ');   // ★ MINAOC-1
+      h+='<div class="aoc-row"><div class="aoc-n"><b>'+_aocEsc(a.nom)+'</b><span>'+n+' parcelle'+(n>1?'s':'')+(mt?' · minimum '+mt+' g/L':'')+'</span></div>'
         +'<button type="button" class="aoc-pill'+(v==null?' vide':'')+'" onclick="window._aocSetMax('+q+','+m+')">'+(v==null?'Poser le plafond':(_aocNb(v)+' hL/ha'))+'</button>'
         +'<button type="button" class="aoc-more" aria-label="Plus d\u2019actions" onclick="_aocBasculer('+q+')">\u00b7\u00b7\u00b7</button></div>';
-      if(_aocOuvert===a.nom) h+='<div class="aoc-tiroir"><button type="button" class="aoc-act" onclick="window._aocRenommer('+q+')">Renommer</button>'
+      if(_aocOuvert===a.nom) h+='<div class="aoc-tiroir">'
+        +'<button type="button" class="aoc-act" onclick="window._aocSetMin('+q+',\'r\')">Minimum des rouges'+(mn.r>0?' : '+mn.r+' g/L':'')+'</button>'
+        +'<button type="button" class="aoc-act" onclick="window._aocSetMin('+q+',\'b\')">Minimum des blancs'+(mn.b>0?' : '+mn.b+' g/L':'')+'</button>'
+        +'<button type="button" class="aoc-act" onclick="window._aocRenommer('+q+')">Renommer</button>'
         +'<button type="button" class="aoc-act rouge" onclick="window._aocSupprimer('+q+')">Supprimer</button></div>';
     });
     h+='</div>';
   }
   h+='<button type="button" class="aoc-ajout" onclick="window._aocAjouter()">+ Ajouter une appellation</button>'
-    +'<div class="aoc-note">Le plafond se touche pour le modifier ; \u00ab \u00b7\u00b7\u00b7 \u00bb renomme ou supprime l\u2019appellation. Un plafond pos\u00e9 directement sur une parcelle (Cave \u203a Le mill\u00e9sime) reste prioritaire sur celui de son appellation.</div>';
+    +'<div class="aoc-note">Le plafond se touche pour le modifier ; \u00ab \u00b7\u00b7\u00b7 \u00bb pose le minimum de maturit\u00e9, renomme ou supprime l\u2019appellation. Un plafond pos\u00e9 directement sur une parcelle (Cave \u203a Le mill\u00e9sime) reste prioritaire sur celui de son appellation.</div>';
   return h;
 }
 // Fenêtre « Rattachement des parcelles » : filtres, parcelles rangées par appellation (sans appellation en tête).

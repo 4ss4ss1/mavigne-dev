@@ -438,3 +438,4 @@
 | 382 | 382. ★★ REC-1 — LES RÉCOLTES RANGÉES : QUATRE CHIFFRES, LE RENDEMENT FACE AU MAXIMUM, LE JOURNAL, LA FICHE … | `docs/claude/chantiers-380-429.md` |
 | 383 | 383. ★★ CUVES-1 — UNE CUVE S’OUVRE EN FICHE : À DROITE SUR ORDINATEUR, DANS SA FENÊTRE AU TÉLÉPHONE (20/10 … | `docs/claude/chantiers-380-429.md` |
 | 384 | 384. ★ TOURCUV-1 — LA TOURNÉE DU CUVIER À LA MÊME ENSEIGNE (20/10 — `src/cuvier.js` (`_vtBandeauHtml`, `ren… | `docs/claude/chantiers-380-429.md` |
+| 385 | 385. ★ MINAOC-1 — LE MINIMUM DE MATURITÉ DE L’APPELLATION (20/10 — `src/reglages.js` (`window._aocSetMin`, … | `docs/claude/chantiers-380-429.md` |

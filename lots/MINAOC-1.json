@@ -1,0 +1,27 @@
+{
+  "lot": "MINAOC-1",
+  "section": "§385",
+  "base": "8b91a055565057288518b531bada4c50349e5b1c",
+  "inclut": [],
+  "date": "2026-10-20",
+  "fichiers": {
+    ".mv-base": "ba5ed661ec5d39b2c94a861ca7dc9780bb2b8cab50082c7dd32031105a9d25e9",
+    "CLAUDE.md": "c962e2b200869f86c195f23065502501999f288082cc8aa8065ab5dd37a80e51",
+    "docs/claude/INDEX.md": "f19f0b550b86d305f632f96337caf59dd4ef220fbdb91fd6158d8bf8d07923c7",
+    "docs/claude/chantiers-380-429.md": "747aee8a13f7f6d57742d211bef03ef5ad092abbace25fea91a87c53e92b9809",
+    "docs/claude/journal.md": "90ab2d4a5ea45185ac2b806679b546ae1ab7b7125eb107193d6f4cd7737a68e2",
+    "guide/08-cave.html": "5b5b9d168bd6dd73f831298e8d55a8af84f0de5244e1f5ca8cd23944c8e3074a",
+    "guide/12-reglages.html": "682285f4b6c63fef38414d7b7a8ab641e638418cb61e614a83651a24ff6e5157",
+    "index.html": "bb559254a316476354f016b406093a5906e9b90d028dc367b068a706df2cf5bd",
+    "public/guide.html": "9adb272bf769a6f6444966a7961024a41a60627dbd8d24b415863721c373a15e",
+    "public/sw.js": "d520ff076726c929e4ba32145461cb6faf6c5d7947b5d93a838cf1b9c36605c2",
+    "scripts/mv-harnais-liste.mjs": "c12666a7cb8c15cbf1661f0e2af91423790e987b68575d3920f590d3f8ac1dda",
+    "scripts/mv-harnais-matu1.mjs": "e4805ba929269f04c7b26ec836622cf79b79992cfde890b2bd4fe9329c866d2a",
+    "scripts/tutos-couverture.json": "2d86f8196b12b870ac72ee63a71ebf8c1e1c67aa13cf346cc1d97bcb5874c6f5",
+    "src/cuvier.js": "f903b2512bcab520cc5f5c4f603e4e0524d06309e90d25ce00eda416a6076f30",
+    "src/reglages.js": "204a84dcbf3a74cfe4808e6db68b54c7d588f8eb9e879abbb0ffaae069b510d4",
+    "src/styles.css": "37a71ea5a6debe64f7bf696557fd693ea989636e8b6ac3b0254967fd6fffcada",
+    "src/utils.js": "915e1b7a2a43a9aa65c5776e385e1bd0f9307bd20e2acbc19f5a15095ecce522",
+    "scripts/mv-harnais-minaoc1.mjs": "6cdce089118c724faee2f7dda59fbb41daa67e19600aba799c0074dd794abac2"
+  }
+}

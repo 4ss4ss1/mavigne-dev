@@ -118,3 +118,21 @@ La Tournée faisait déjà tout ce que la maquette demande : la progression, les
 ### 384d. Les décisions
 - **L’habit seulement** : la saisie, ses compteurs, son écriture et son bilan sont couverts par CUV-7 et CUV-11 ; rien de ce qu’ils jouent n’a changé, sauf la date de la tête (`_vendDateLongue`, ajoutée à la liste de CUV-7).
 - **Pas de choix de vendange dans la Tournée** : elle ne concerne que les cuves en cours (la maquette ne la montrait pas non plus).
+
+## 385. ★ MINAOC-1 — LE MINIMUM DE MATURITÉ DE L’APPELLATION (20/10 — `src/reglages.js` (`window._aocSetMin`, `_aocPlafondsHtml`) · `src/cuvier.js` (`_matSynth`, `_matMin`, `_matOrdreHtml`, `_matFicheHtml`, `_matMinRp`) · `src/styles.css` (bloc MINAOC-1) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE) · `index.html` · `public/sw.js` · `guide/08-cave.html` · `guide/12-reglages.html` · `public/guide.html` · `scripts/mv-harnais-minaoc1.mjs` (neuf) · `scripts/mv-harnais-matu1.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/tutos-couverture.json` · `.mv-base` · `lots/MINAOC-1.json` · `CLAUDE.md` · `docs/claude/*` · **APP 9.46 → 9.47, SW 10.25 → 10.26**, base `8b91a05`)
+
+### 385a. La demande
+Le trait rouge de la maquette des Maturités (19/10) : le minimum de l’appellation, reporté de MATU-1 (§366d) parce qu’il se règle avec l’appellation. Ce que dit la réglementation (vérifié pendant la maquette) : Gevrey-Chambertin, richesse minimale 180 g/L en rouge, 189 g/L en premier cru (décret et cahier des charges INAO) ; aucune borne haute réglementaire pour le raisin.
+
+### 385b. Ce qui est livré
+- **La donnée** : `sucre_min: { r, b }`, en g/L, sur l’appellation (`CONFIG.appellations`, enregistrée avec la configuration comme le plafond).
+- **Le réglage** : Réglages › Appellations & plafonds, « ··· » de l’appellation, « Minimum des rouges » et « Minimum des blancs » (`window._aocSetMin` : la fenêtre de saisie commune, 100 à 300 g/L, à vide la retire, réservé à l’administrateur). La ligne de l’appellation écrit son minimum. Rien n’est posé d’office : un minimum se lit dans l’arrêté.
+- **Les Maturités** : un trait rouge sur chaque parcelle rattachée à une appellation qui a un minimum pour sa couleur (l’échelle s’ouvre pour le contenir), la légende, la phrase du haut (« N parcelles sous le minimum de leur appellation »), et dans la fiche la ligne « Minimum · <appellation> » des repères : « atteint le 05/09 », ou ce qu’il manque.
+
+### 385c. Trouvé en route
+- **L’appellation d’une parcelle était lue sur son nom.** `_matSynth` appelait `_vendAocDe(nom)` ; la fonction lit le champ `appellation` d’une parcelle. Depuis MATU-1, `e.aoc` était donc toujours vide et l’étiquette d’appellation de la fiche ne sortait jamais. La contre-épreuve du harnais réinjecte l’erreur.
+- **Une contre-épreuve qui ne rougit pas dit souvent que le décor est trop pauvre** : « compter à l’envers » donnait le même nombre (une parcelle de chaque côté). Une parcelle de plus au-dessus du minimum, et la contre-épreuve a mordu.
+
+### 385d. Ce qui reste ouvert
+- Le chemin vers le réglage passe par « ··· » ; la maquette le mettait dans la roue crantée de la Cave (section Appellations) : il y viendra avec le lot de la roue crantée.
+- Le premier cru (189 g/L à Gevrey) suppose une appellation « premier cru » déclarée à part : c’est déjà ainsi que le plafond se règle.

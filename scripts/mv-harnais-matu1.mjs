@@ -37,7 +37,8 @@ function bornes(src, nom) {
 const fn = (src, nom) => { const [a, b] = bornes(src, nom); return src.slice(a, b); };
 
 const FONCTIONS = ['_matJours', '_matLarge', '_matFour', '_matSynth', '_matUnite', '_matGros', '_matPetit', '_matJj', '_matAge',
-  '_matVit', '_matVin', '_matPlur', '_matVuesHtml', '_matOrdreHtml', '_matRegLire', '_vendAnaAdd', '_matSuc', '_vendCfg'];
+  '_matVit', '_matVin', '_matPlur', '_matVuesHtml', '_matOrdreHtml', '_matRegLire', '_vendAnaAdd', '_matSuc', '_vendCfg',
+  '_matMin'];   // MINAOC-1 (§385) : l'ordre de maturité trace le minimum de l'appellation
 
 function jouer(S) {
   const L = [];

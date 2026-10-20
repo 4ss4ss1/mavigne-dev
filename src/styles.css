@@ -7117,6 +7117,11 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 #page-cave .rec-gauche #mvv-corps{grid-template-columns:minmax(0,1fr)}
 #mvv-body .rec-grille.cuv-ici .rec-droite{display:block}
 /* ★ FIN CUVES-1 */
+/* ★ MINAOC-1 (§385) — le minimum de l’appellation dans les Maturités : un trait rouge sur la ligne et dans la légende. */
+.mat-l .mn{position:absolute;top:calc(var(--e-1,4px) * -1);bottom:calc(var(--e-1,4px) * -1);width:0;border-left:var(--bw-2) solid var(--danger)}
+.mat-leg i.mn{width:0;height:var(--e-3,12px);border-radius:0;border-left:var(--bw-2) solid var(--danger);background:none}
+.mat-stats b.att{color:var(--attention)}
+/* ★ FIN MINAOC-1 */
 /* ★ CAVE-3 (§290) — LE CHAI EN LISTE + FICHE (MAQUETTE V8). La fiche est celle de l'appli (openCuveeDetail écrite dans
    #chai-fiche) ; au téléphone, la fenêtre comme avant. Cuvées au cadre neutre (la choisie cerclée), alerte d'ouillage en ambre,
    « Ouiller les … » et « Nouvelle cuvée » à l'accent. Par jetons. */

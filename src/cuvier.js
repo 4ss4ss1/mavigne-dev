@@ -8199,6 +8199,9 @@ function _matNorm(s){
   return t.normalize ? t.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : t;
 }
 function _matJours(d, tj){ return Math.round((tj - Date.parse(d)) / 86400000); }
+/* ★ MINAOC-1 (§385) : la richesse minimale en sucre du cahier des charges de l'appellation, pour la couleur de la
+   parcelle (Réglages › Appellations, `sucre_min: { r, b }` en g/L). Absente : rien n'est tracé. */
+function _matMin(e){ var s = e && e.aocObj && e.aocObj.sucre_min, v = s ? parseFloat(s[e.coul]) : NaN; return v > 0 ? v : null; }
 function _matLarge(){ try{ return window.matchMedia('(min-width:1024px)').matches; }catch(e){ return false; } }
 
 /* La fourchette visée de chaque couleur : un réglage du domaine (roue crantée ›
@@ -8255,7 +8258,9 @@ function _matSynth(fen, refIso, an){
   var actives = (window.PARCELLES || []).filter(function(p){ return p && p.nom && p.statut !== 'Arrachee'; });
   actives.forEach(function(p){
     var nom = String(p.nom).trim();
-    var e = { nom:nom, ha:parseFloat(p.surface) || 0, coul:_parcCoul(nom), aoc:(typeof _vendAocDe === 'function' ? _vendAocDe(nom) : '') || '',
+    // ★ MINAOC-1 (§385) : _vendAocDe lit la PARCELLE (son champ appellation) ; lui passer le nom rendait toujours rien.
+    var ao = (typeof _vendAocDe === 'function') ? _vendAocDe(p) : null;
+    var e = { nom:nom, ha:parseFloat(p.surface) || 0, coul:_parcCoul(nom), aoc:ao ? String(ao.nom) : '', aocObj:ao,
               suc:null, date:null, age:null, vit:null, mode:null, rentree:rec[nom] || null, arr:[] };
     if(e.coul === '?') o.nonClass.push(e);
     var arr = (byP[nom] || []).slice().sort(function(a, b){ return (a.date || '') < (b.date || '') ? -1 : 1; });
@@ -8418,7 +8423,7 @@ function _matOrdreHtml(r, spd, four, courante){
   function garde(e){ return _matFiltre === 'dom' || e.coul === (_matFiltre === 'rge' ? 'r' : 'b'); }
   var frais = r.frais.filter(garde), vieilles = r.vieilles.filter(garde), jamais = r.jamais.filter(garde), rent = r.rentrees.filter(garde);
   var vals = frais.concat(vieilles, rent).filter(function(e){ return e.suc != null; }).map(function(e){ return e.suc; });
-  frais.concat(vieilles, rent).forEach(function(e){ var w = four[e.coul]; if(w){ vals.push(w.min, w.max); } });
+  frais.concat(vieilles, rent).forEach(function(e){ var w = four[e.coul]; if(w){ vals.push(w.min, w.max); } var mn = _matMin(e); if(mn) vals.push(mn); });
   var vMin = 170, vMax = 230;
   if(vals.length){
     vMin = Math.floor((Math.min.apply(null, vals) - 8) / 10) * 10;
@@ -8427,7 +8432,7 @@ function _matOrdreHtml(r, spd, four, courante){
   }
   function pos(v){ return ((v - vMin) / (vMax - vMin) * 100).toFixed(2); }
   var b = r.tiles[_matFiltre] || r.tiles.dom;
-  var nConv = 0;
+  var nConv = 0, nMin = 0;
   function ligne(e, grp){
     var conv = !!(e.mode && e.mode !== _matUn && e.suc != null);
     if(conv) nConv++;
@@ -8443,10 +8448,12 @@ function _matOrdreHtml(r, spd, four, courante){
     var pt = e.suc != null ? '<i class="pt ' + _matVin(e.coul) + (grp === 'vieille' ? ' vx' : '') + (grp === 'rentree' ? ' out' : '') + '" style="left:' + pos(e.suc) + '%"></i>' : '';
     var zo = (w && grp !== 'jamais') ? '<i class="zo" style="left:' + pos(w.min) + '%;width:' + ((w.max - w.min) / (vMax - vMin) * 100).toFixed(2) + '%"></i>' : '';
     var my = (b.n && grp !== 'jamais') ? '<i class="my" style="left:' + pos(b.pond) + '%"></i>' : '';
+    var mv = grp !== 'jamais' ? _matMin(e) : null; if(mv) nMin++;
+    var mn = mv ? '<i class="mn" style="left:' + pos(mv) + '%"></i>' : '';
     return '<button type="button" class="mat-l mat-cols' + (pale ? ' pale' : '') + (sel ? ' sel' : '') + '" data-nom="' + _escAttr(e.nom) + '" onclick="_matSel(this.dataset.nom)">'
       + '<span class="n"><span class="nm"><i class="mat-pt ' + _matVin(e.coul) + '"></i><span>' + _escHtml(e.nom) + '</span></span>'
       + '<span class="ag' + (grp === 'vieille' ? ' vx' : '') + '">' + age + '</span></span>'
-      + '<span class="pi">' + zo + my + pt + '</span>'
+      + '<span class="pi">' + zo + my + mn + pt + '</span>'
       + '<span class="va"><b' + (conv ? ' class="cv"' : '') + '>' + val + '</b><s>' + (_matLarge() && grp === 'frais' ? _matPetit(e.suc, spd) : sous) + '</s></span>'
       + '<span class="vi">' + vit + '</span>'
       + '</button>';
@@ -8475,7 +8482,9 @@ function _matOrdreHtml(r, spd, four, courante){
     + '<div class="mat-carte-hd"><h2 class="mat-carte-t">Ordre de maturité</h2>'
     + (filtre ? '<button type="button" class="mat-btn mat-chip" onclick="_matSetFiltre(\'dom\')" aria-label="Retirer le filtre">' + filtre + _mvIcon('croix', 16) + '</button>' : '')
     + _matVuesHtml() + '</div>';
-  if(stats || objStat) h += '<p class="mat-stats">' + (objStat ? '<b>' + objStat + '</b>' : '') + stats + '</p>';
+  var sousMin = frais.filter(function(e){ var m = _matMin(e); return m && e.suc < m; }).length;
+  if(stats || objStat || sousMin) h += '<p class="mat-stats">' + (objStat ? '<b>' + objStat + '</b>' : '')
+    + (sousMin ? '<b class="att">' + _matPlur(sousMin, 'parcelle') + ' sous le minimum de ' + (sousMin > 1 ? 'leur' : 'son') + ' appellation.</b> ' : '') + stats + '</p>';
   h += '<div class="mat-cols mat-axe" aria-hidden="true"><span></span><span class="pi">' + axe + '</span><span class="u">' + _matUnite() + '</span><span class="u vi">' + _matUnite() + ' par jour</span></div>';
   frais.forEach(function(e){ h += ligne(e, 'frais'); });
   if(!frais.length) h += '<p class="mat-stats">Aucune mesure de moins de ' + (_matFen === _MAT_CAMP_J ? _MAT_CAMP_J : _matFen) + ' jours' + (filtre ? ' sur les ' + filtre.toLowerCase() : '') + '.</p>';
@@ -8498,6 +8507,7 @@ function _matOrdreHtml(r, spd, four, courante){
     + '<span><i class="vx"></i>plus de ' + (_matFen === _MAT_CAMP_J ? _MAT_CAMP_J : _matFen) + ' j</span>'
     + (b.n ? '<span><i class="my"></i>moyenne</span>' : '')
     + (objOn ? '<span><i class="fo"></i>fourchette visée</span>' : '')
+    + (nMin ? '<span><i class="mn"></i>minimum de l’appellation</span>' : '')
     + (nConv ? '<span><i class="cv">' + (_matUn === 'a' ? '12,7' : '214') + '</i>' + (_matUn === 'a' ? 'lu en sucre, converti (÷ ' : 'lu en degré, converti (× ') + _mvF1(spd) + ')</span>' : '')
     + (objOn && _matFiltre === 'dom' && fourTxt.length ? '<span class="four">fourchettes : ' + fourTxt.join(' · ') + ' ' + _matUnite() + '</span>' : '')
     + (!objOn && courante && (typeof isAdmin === 'function' && isAdmin()) ? '<span class="four">Aucune fourchette réglée : la roue crantée de la Cave › Le Cuvier › Maturité.</span>' : '')
@@ -8587,7 +8597,7 @@ function _matFicheHtml(nom, r, spd, four, courante){
     else if(e.suc >= w.min){ var at = e.arr.filter(function(a){ return _matSuc(a) >= w.min; })[0]; etat = 'dedans depuis le ' + _matJj(at.date); cls = 'ok'; }
     else etat = 'à ' + _matGros(w.min - e.suc, spd) + ' ' + _matUnite() + ' du bas';
     h += '<div class="mat-fi-sec"><div class="mat-fi-st">Repères</div>'
-      + '<div class="mat-rp"><span class="t">Fourchette des ' + (e.coul === 'r' ? 'rouges' : 'blancs') + '<small>' + (w ? _matGros(w.min, spd) + '\u2013' + _matGros(w.max, spd) + ' ' + _matUnite() : '\u2014') + '</small></span><b class="' + cls + '">' + etat + '</b></div></div>';
+      + '<div class="mat-rp"><span class="t">Fourchette des ' + (e.coul === 'r' ? 'rouges' : 'blancs') + '<small>' + (w ? _matGros(w.min, spd) + '\u2013' + _matGros(w.max, spd) + ' ' + _matUnite() : '\u2014') + '</small></span><b class="' + cls + '">' + etat + '</b></div>' + _matMinRp(e, spd) + '</div>';
   }
   h += '<div class="mat-fi-sec"><div class="mat-fi-st">Évolution</div>'
     + (e.arr.length >= 2 ? '<div id="mvg-mat-fi" class="mat-gr2"></div>' : '<p class="mat-note mat-gr2">' + (e.arr.length === 1 ? 'La courbe se trace à partir de deux mesures.' : 'Pas encore de mesure sur cette parcelle.') + '</p>')
@@ -8604,6 +8614,16 @@ function _matFicheHtml(nom, r, spd, four, courante){
   h += '</div>';
   if(canEdit && !e.rentree) h += '<div class="mat-fi-act"><button type="button" class="mat-btn large" data-nom="' + _escAttr(nom) + '" onclick="_matSaisie(this.dataset.nom)">' + _mvIcon('plus', 16) + 'Noter une mesure sur cette parcelle</button></div>';
   return h;
+}
+
+/* La ligne « Minimum » des repères : atteint (depuis quand), ou ce qu'il manque. */
+function _matMinRp(e, spd){
+  var m = _matMin(e); if(!m) return '';
+  var etat, cls = '';
+  if(e.suc == null) etat = 'pas de mesure';
+  else if(e.suc >= m){ var at = e.arr.filter(function(a){ return _matSuc(a) >= m; })[0]; etat = 'atteint le ' + _matJj(at.date); cls = 'ok'; }
+  else { etat = 'à ' + _matGros(m - e.suc, spd) + ' ' + _matUnite(); cls = 'att'; }
+  return '<div class="mat-rp"><span class="t">Minimum · ' + _escHtml(e.aoc) + '<small>' + _matGros(m, spd) + ' ' + _matUnite() + ', cahier des charges</small></span><b class="' + cls + '">' + etat + '</b></div>';
 }
 
 /* ─────────── Les gestes ─────────── */
