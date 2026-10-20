@@ -1,0 +1,25 @@
+{
+  "lot": "RSV-BTN",
+  "section": "§402",
+  "base": "d12061c012d639c34bd3e1fcfde3908487c0cca4",
+  "inclut": [],
+  "date": "2026-10-20",
+  "fichiers": {
+    ".mv-base": "8ddab6af4b432c1657e3750168a4c9a3adc6932aaadf82324c1892a31933f856",
+    "CLAUDE.md": "0cfad93f9de0a59d3b9fab5da49abd6aec257044b3286e254a58fd3962437407",
+    "docs/claude/INDEX.md": "95ba06e250abe3d6fc0f98156303ad6090d7627c263900b94fc78bebb46e78bb",
+    "docs/claude/chantiers-380-429.md": "5ab6235ace5de0dfdcbfa09e383b9cbf7742127a62dab27eaa4fd503d77210b2",
+    "docs/claude/journal.md": "dd8e6a67c733ff942c64ed0bde42458be9ba9a87cb16311140c9cd96c7ca42e0",
+    "index.html": "8b36c41b8c997db22435f2d5d90723bbca8c30078766ef8f651e8b5ee389a379",
+    "public/sw.js": "aa9d6148ad297a1fca1307747bab4c123eb3ecf394fb6b8205382be6c180eeee",
+    "scripts/contraste-baseline.json": "67c659e70e7e33e5ef2f26ec8a00e41050381694f7f91eec208f658472fff004",
+    "scripts/mv-espace-baseline.json": "48b74052e8961fbf3c6e19c4f00f9adcc2e013c33130ea77c3f9949eae40415b",
+    "scripts/mv-harnais-boutons.mjs": "984c61ced3c6c5bd344da0e25f77f880f66f35f980b7d8fff963a8b4f37ba8fa",
+    "scripts/mv-harnais-rsv1.mjs": "2c6237071af76ad83284ee3f7b166329e1dccb2b04cc37fccb06985b16ac1fe6",
+    "scripts/mv-jetons-baseline.json": "d7709e50247006e0c65142a431aebd650b07b21c5c4fa8c24d85d00b4558b3de",
+    "src/phyto.js": "b1112642dbc0542c59477b1b6e03bf5e5ec51996c8289935441b87a159c918f1",
+    "src/reserve.js": "7ffb7d2193f587f9e55f6dbc545123a2a062cecc02bded9534ee8ce8d9131306",
+    "src/styles.css": "5d7f78332ba02f3cd1c6de3314fe06d495a2a5ef12b0b7c65e1e5f09c8ed93ce",
+    "src/utils.js": "6b8b90b796e940071f1ce43d3b9953ce971b1e54e0a2ac9598b4dae35e539666"
+  }
+}

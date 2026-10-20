@@ -1496,9 +1496,9 @@ function openOvFerti(){
     +'<div class="fer-h">Sans prix, le co\u00fbt reste \u00ab\u00a0\u2014\u00a0\u00bb. Il se pose \u00e0 la facture, depuis l\u2019achat dans La R\u00e9serve.</div>')
   +_ferStep(2,'Les parcelles',''
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
-      +'<button type="button" class="mvr-btn mvr-btn-o" style="flex:none;padding:8px 12px" onclick="_ferAll(1)">Tout cocher</button>'
-      +'<button type="button" class="mvr-btn mvr-btn-o" style="flex:none;padding:8px 12px" onclick="_ferAll(0)">Tout d\u00e9cocher</button>'
-      +'<button type="button" class="mvr-btn mvr-btn-o" style="flex:none;padding:8px 12px" onclick="_ferAll(\'zv\')">Zone vuln\u00e9rable</button></div>'
+      +'<button type="button" class="mvr-btn mvr-btn-o" style="flex:none" onclick="_ferAll(1)">Tout cocher</button>'
+      +'<button type="button" class="mvr-btn mvr-btn-o" style="flex:none" onclick="_ferAll(0)">Tout d\u00e9cocher</button>'
+      +'<button type="button" class="mvr-btn mvr-btn-o" style="flex:none" onclick="_ferAll(\'zv\')">Zone vuln\u00e9rable</button></div>'
     +'<div id="fer-plist"></div>'
     +'<div class="fer-h">Sacs arrondis au demi-sac par parcelle\u00a0; la commande est arrondie au sac entier sur le total. <span class="fer-chip zv">ZV</span> = zone vuln\u00e9rable, d\u00e9clar\u00e9e dans le registre de fertilisation, parcelle par parcelle.</div>'
     +'<div id="fer-ilot"></div>')

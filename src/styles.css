@@ -3602,12 +3602,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 
 /* ── Boutons ── */
 .mvr-btnrow{ display:flex; gap:9px; margin-bottom:14px; flex-wrap:wrap; }
-.mvr-btn{ flex:1; min-width:130px; font-family:var(--font-ui); font-size:var(--pt-txt,13px); font-weight:600; border-radius:12px;
-  padding:12px 14px; cursor:pointer; min-height:44px; border:1px solid transparent; transition:filter .15s; }
-.mvr-btn:hover{ filter:brightness(1.05); }
-.mvr-btn-p{ background:var(--terre); color:#fff; box-shadow:0 3px 10px rgba(138,90,56,0.26); }
-.mvr-btn-o{ background:var(--bg-card); color:var(--terre); border-color:rgba(138,90,56,0.30); box-shadow:none; }
-.mvr-btn-g{ background:linear-gradient(135deg,#C2871E,#A9741A); color:#fff; box-shadow:0 3px 10px rgba(194,135,30,0.28); }
+.mvr-btn{ flex:1; min-width:130px; }   /* RSV-BTN (§402) : le dessin des boutons de la Réserve est au jeu de boutons (bloc CHARTE-3) */
 
 .mvr-subtitle{ font-family:var(--font-titre); font-size:19px; font-weight:700; color:var(--terre);
   margin:6px 0 10px; padding-bottom:5px; border-bottom:1px solid rgba(138,90,56,0.16); }
@@ -3627,9 +3622,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .mvr-fqte span{ font-family:var(--font-ui); font-size:var(--pt-micro,11px); font-weight:500; color:var(--texte-doux,#7A7060); margin-left:3px; }
 .mvr-fmeta{ display:flex; gap:14px; flex-wrap:wrap; margin-top:7px; font-family:var(--font-ui); font-size:var(--pt-micro,12px); color:var(--texte-doux,#7A7060); }
 .mvr-frow{ display:flex; gap:8px; margin-top:11px; }
-.mvr-mini{ font-family:var(--font-ui); font-size:var(--pt-micro,12px); font-weight:600; color:var(--terre-tx,#8A5A38); background:var(--terre-pale);
-  border:none; border-radius:9px; padding:7px 12px; cursor:pointer; min-height:38px; }
-.mvr-mini-d{ color:var(--rouge-tx,#A0291E); background:var(--rouge-pale); }
+/* RSV-BTN (§402) : .mvr-mini (les petits boutons des listes de la Réserve) est au jeu — bouton secondaire, -d danger, la taille du jeu. */
 
 /* ── État vide ── */
 .mvr-empty{ text-align:center; padding:38px 20px; color:var(--texte-doux,#7A7060); font-family:var(--font-ui); font-size:var(--pt-base,14px); }
@@ -3680,7 +3673,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .mvr-seg{ display:flex; gap:5px; background:var(--bg-app); border-radius:11px; padding:4px; border:1px solid rgba(138,90,56,0.16); }
 .mvr-segb{ flex:1; font-family:var(--font-ui); font-size:var(--pt-micro,12px); font-weight:600; color:var(--texte-doux,#7A7060);
   background:none; border:none; border-radius:8px; padding:8px 4px; cursor:pointer; min-height:38px; }
-.mvr-segb.on{ background:var(--terre); color:#fff; }
+.mvr-segb.on{ background:var(--accent); color:var(--sur-accent); }   /* RSV-BTN : le choix fait prend la couleur d'action (plus le terre) */
 
 /* ── Inventaire d'ouverture ── */
 .mvr-irow{ display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid rgba(138,90,56,0.10); }
@@ -4155,7 +4148,7 @@ a[href^="mailto:"]{color:var(--or-tx);}
        (1,04:1 sur or, 3,14:1 sur terracotta). Le fond garde sa teinte,
        seul le texte s'assombrit — le langage « cave » est preserve. — */
 .cave-empty-btn,.mvc-batch,
-.mvc-tab-badge,.agt-err-badge,.mvr-btn-g,.scard-enc-hint{color:#241A10;}
+.mvc-tab-badge,.agt-err-badge,.scard-enc-hint{color:#241A10;}
 [style*="background:#C0845A"],[style*="background: #C0845A"],
 [style*="background:#C2A14D"],[style*="background: #C2A14D"],
 [style*="background:var(--or)"],[style*="background:#C0845A"] *,
@@ -7170,9 +7163,6 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 #page-reserve .mvr-kpi + .mvr-kpi{ border-left:var(--bw) solid var(--ligne,#E7E6E2); }
 #page-reserve .mvr-kv{ font-family:var(--font-ui); font-size:var(--pt-md,20px); font-weight:var(--fw-semi,600); color:var(--texte); }
 #page-reserve .mvr-kl{ font-size:var(--pt-micro,12px); letter-spacing:0; text-transform:none; color:var(--texte-doux); }
-#page-reserve .mvr-btn-p{ border:0; border-radius:var(--r-sm,6px); background:var(--accent); color:var(--sur-accent); font-family:var(--font-ui); font-weight:var(--fw-med,500); box-shadow:var(--shadow-xs),var(--reflet); }
-#page-reserve :is(.mvr-btn-o,.mvr-mini){ border:var(--bw) solid var(--ligne-forte); border-radius:var(--r-sm,6px); background:var(--bg-card); color:var(--texte); font-family:var(--font-ui); font-weight:var(--fw-med,500); box-shadow:var(--shadow-xs); }
-#page-reserve .mvr-mini-d{ border-color:var(--danger); color:var(--danger); }
 #page-reserve .mvr-flabel{ font-size:var(--pt-micro,12px); letter-spacing:0; text-transform:none; color:var(--texte-doux); }
 #page-reserve .mvr-fchip{ border:var(--bw) solid var(--ligne-forte); border-radius:var(--r-full,999px); background:var(--bg-card); color:var(--texte-med); font-weight:var(--fw-med,500); }
 #page-reserve .mvr-fchip.on{ border-color:var(--accent); background:var(--accent-doux); color:var(--accent-texte); }
@@ -7188,7 +7178,6 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 #page-reserve .mvr-ftag-ach{ background:var(--survol); color:var(--texte-med); }
 #page-reserve .mvr-ftag-loc{ background:var(--accent-doux); color:var(--accent-texte); }
 #page-reserve .mvr-ftag-cap{ background:var(--bg-doux); color:var(--texte-med); }
-#page-reserve .mvr-fstepb{ border:var(--bw) solid var(--ligne-forte); border-radius:var(--r-sm,6px); color:var(--texte); }
 #page-reserve .mvr-fstepv{ font-family:var(--font-ui); font-size:var(--pt-lg,24px); font-weight:var(--fw-semi,600); }
 #page-reserve .pcav-card{ border:var(--bw) solid var(--ligne,#E7E6E2); border-radius:var(--r-md,8px); background:var(--bg-card); box-shadow:none; }
 #page-reserve .pcav-t{ font-size:var(--pt-micro,12px); letter-spacing:0; text-transform:none; color:var(--texte-doux); }
@@ -8186,39 +8175,39 @@ input[type="checkbox"], input[type="radio"]{ accent-color:var(--accent); }
      .phyte et .mbtn-p : principal ; .mbtn-del : danger. Ses styles écrits sur place rendus au jeu.
    ★ CHARTE-3c (§373) : les « − / + » (.cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp) deviennent des boutons icône.
    ═══════════════════════════════════════════════════════════════════════════ */
-.mvbtn, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn, .plan-btn-pdf, .cave-toggle-btn, .trac-type-btn, .cave-op-type-btn, .rfut-reason-btn, .mbtn, .mbtn-del, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp, .mur-btn, .chr-act{ display:inline-flex; align-items:center; justify-content:center; gap:var(--e-2,8px); box-sizing:border-box; min-height:var(--h-row-2,48px); padding:0 var(--e-5,20px); border:var(--bw,1px) solid transparent; border-radius:var(--r-sm,6px); font-family:var(--font-ui); font-size:var(--pt-sm,16px); font-weight:var(--fw-semi,600); line-height:1.2; cursor:pointer; text-decoration:none; }
+.mvbtn, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn, .plan-btn-pdf, .cave-toggle-btn, .trac-type-btn, .cave-op-type-btn, .rfut-reason-btn, .mbtn, .mbtn-del, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp, .mur-btn, .chr-act, .mvr-btn, .mvr-fstepb, .mvr-mini{ display:inline-flex; align-items:center; justify-content:center; gap:var(--e-2,8px); box-sizing:border-box; min-height:var(--h-row-2,48px); padding:0 var(--e-5,20px); border:var(--bw,1px) solid transparent; border-radius:var(--r-sm,6px); font-family:var(--font-ui); font-size:var(--pt-sm,16px); font-weight:var(--fw-semi,600); line-height:1.2; cursor:pointer; text-decoration:none; }
 @media (min-width:768px){
-  .mvbtn, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn, .plan-btn-pdf, .cave-toggle-btn, .trac-type-btn, .cave-op-type-btn, .rfut-reason-btn, .mbtn, .mbtn-del, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp, .mur-btn, .chr-act{ min-height:var(--h-row,36px); padding:0 var(--e-4,16px); font-size:var(--pt-base,14px); }
+  .mvbtn, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn, .plan-btn-pdf, .cave-toggle-btn, .trac-type-btn, .cave-op-type-btn, .rfut-reason-btn, .mbtn, .mbtn-del, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp, .mur-btn, .chr-act, .mvr-btn, .mvr-fstepb, .mvr-mini{ min-height:var(--h-row,36px); padding:0 var(--e-4,16px); font-size:var(--pt-base,14px); }
 }
 .mvbtn.mvbtn-terrain{ min-height:var(--h-row-2,48px); padding:0 var(--e-5,20px); font-size:var(--pt-sm,16px); }
 .mvbtn.mvbtn-bureau{ min-height:var(--h-row,36px); padding:0 var(--e-4,16px); font-size:var(--pt-base,14px); }
 .mvbtn.mvbtn-compact{ min-height:var(--h-sm,28px); padding:0 var(--e-3,12px); font-size:var(--pt-txt,13px); }
-.mvbtn.mvbtn-icone, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp{ padding:0; width:var(--h-row-2,48px); }
-@media (min-width:768px){ .mvbtn.mvbtn-icone, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp{ width:var(--h-row,36px); } }
+.mvbtn.mvbtn-icone, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp, .mvr-fstepb{ padding:0; width:var(--h-row-2,48px); }
+@media (min-width:768px){ .mvbtn.mvbtn-icone, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp, .mvr-fstepb{ width:var(--h-row,36px); } }
 /* CHARTE-3c (§373) : les « − / + » sont des boutons icône ; leur signe garde une taille lisible, la petite variante passe en bureau */
 .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp{ font-size:var(--pt-md,20px); line-height:1; }
 .mvc-step-btn.sm{ width:var(--h-row,36px); min-height:var(--h-row,36px); font-size:var(--pt-sm,16px); }
 .mvbtn.mvbtn-icone.mvbtn-terrain{ width:var(--h-row-2,48px); }
 .mvbtn.mvbtn-icone.mvbtn-compact{ width:var(--h-sm,28px); }
 /* Principal : l'action de l'écran, une seule par écran */
-.mvbtn-principal, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn.pf-btn-ok, .mbtn.verte, .mbtn.acre, .mbtn.phyte, .mbtn.mbtn-p, .mur-btn{ background:var(--accent); border-color:var(--accent); color:var(--sur-accent); }
-.mvbtn-principal:hover, .plan-btn-saisir:hover, .mvc-set-btn:hover, .sd-trac-confirm-btn:hover, .pf-btn.pf-btn-ok:hover, .mbtn.verte:hover, .mbtn.acre:hover, .mbtn.phyte:hover, .mbtn.mbtn-p:hover, .mur-btn:not(.q):hover{ background:var(--accent-survol); border-color:var(--accent-survol); }
+.mvbtn-principal, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn.pf-btn-ok, .mbtn.verte, .mbtn.acre, .mbtn.phyte, .mbtn.mbtn-p, .mur-btn, .mvr-btn-p, .mvr-btn-g{ background:var(--accent); border-color:var(--accent); color:var(--sur-accent); }
+.mvbtn-principal:hover, .plan-btn-saisir:hover, .mvc-set-btn:hover, .sd-trac-confirm-btn:hover, .pf-btn.pf-btn-ok:hover, .mbtn.verte:hover, .mbtn.acre:hover, .mbtn.phyte:hover, .mbtn.mbtn-p:hover, .mur-btn:not(.q):hover, .mvr-btn-p:hover, .mvr-btn-g:hover{ background:var(--accent-survol); border-color:var(--accent-survol); }
 /* Secondaire : une action à côté */
-.mvbtn-secondaire, .pf-btn, .plan-btn-pdf, .mbtn, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp, .mur-btn.q, .chr-act{ background:var(--bg-card); border-color:var(--ligne-forte); color:var(--texte); }
+.mvbtn-secondaire, .pf-btn, .plan-btn-pdf, .mbtn, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp, .mur-btn.q, .chr-act, .mvr-btn-o, .mvr-fstepb, .mvr-mini{ background:var(--bg-card); border-color:var(--ligne-forte); color:var(--texte); }
 /* Discret : une action légère, ou revenir */
 .mvbtn-discret{ background:transparent; color:var(--accent-texte); }
 /* Danger : effacer, retirer — toujours suivi d'une confirmation */
-.mvbtn-danger, .mbtn-del, .mbtn.mbtn-del{ background:var(--danger); border-color:var(--danger); color:var(--sur-danger); }
+.mvbtn-danger, .mbtn-del, .mbtn.mbtn-del, .mvr-btn.mvr-btn-dgr, .mvr-mini.mvr-mini-d{ background:var(--danger); border-color:var(--danger); color:var(--sur-danger); }
 /* L'option (un choix parmi plusieurs) et le choix (les options réunies) */
 .mvbtn-option, .cave-toggle-btn, .trac-type-btn, .cave-op-type-btn, .rfut-reason-btn{ background:var(--bg-card); border-color:var(--ligne-forte); color:var(--texte-med); }
 .mvbtn-option.on, .mvbtn-option[aria-pressed="true"], .cave-toggle-btn.cave-toggle-active, .cave-toggle-btn.sel, .trac-type-btn.sel-meca, .trac-type-btn.sel-hydro, .cave-op-type-btn.sel, .rfut-reason-btn.sel{ background:var(--accent-doux); border-color:var(--accent-texte); color:var(--accent-texte); }
 .mvbtn-choix{ display:inline-flex; gap:0; padding:var(--e-0,2px); border:var(--bw,1px) solid var(--ligne-forte); border-radius:var(--r-sm,6px); background:var(--bg-card); }
 .mvbtn-choix > .mvbtn-option{ border-color:transparent; border-radius:var(--r-xs,4px); }
 /* Les états, les mêmes partout */
-.mvbtn-secondaire:hover, .mvbtn-discret:hover, .mvbtn-option:hover, .pf-btn:not(.pf-btn-ok):hover, .plan-btn-pdf:hover, .mbtn:not(.verte):not(.acre):not(.phyte):not(.mbtn-p):not(.mbtn-del):hover, .cave-stepper-btn:hover, .mvc-step-btn:hover, .mvv-step2-b:hover, .rp-stp:hover, .mur-btn.q:hover, .chr-act:hover, .cave-toggle-btn:hover, .trac-type-btn:hover, .cave-op-type-btn:hover, .rfut-reason-btn:hover{ background-image:linear-gradient(var(--survol),var(--survol)); }
-.mvbtn-danger:hover, .mbtn-del:hover{ background-image:linear-gradient(var(--presse),var(--presse)); }
-.mvbtn:active, .plan-btn-saisir:active, .mvc-set-btn:active, .sd-trac-confirm-btn:active, .pf-btn:active, .plan-btn-pdf:active, .cave-toggle-btn:active, .trac-type-btn:active, .cave-op-type-btn:active, .rfut-reason-btn:active, .mbtn:active, .mbtn-del:active, .cave-stepper-btn:active, .mvc-step-btn:active, .mvv-step2-b:active, .rp-stp:active, .mur-btn:active, .chr-act:active{ background-image:linear-gradient(var(--presse),var(--presse)); }
-.mvbtn:disabled, .plan-btn-saisir:disabled, .mvc-set-btn:disabled, .sd-trac-confirm-btn:disabled, .pf-btn:disabled, .plan-btn-pdf:disabled, .cave-toggle-btn:disabled, .trac-type-btn:disabled, .cave-op-type-btn:disabled, .rfut-reason-btn:disabled, .mbtn:disabled, .mbtn-del:disabled, .cave-stepper-btn:disabled, .mvc-step-btn:disabled, .mvv-step2-b:disabled, .rp-stp:disabled, .mur-btn:disabled, .chr-act:disabled{ opacity:var(--o-off,.45); cursor:default; background-image:none; }
+.mvbtn-secondaire:hover, .mvbtn-discret:hover, .mvbtn-option:hover, .pf-btn:not(.pf-btn-ok):hover, .plan-btn-pdf:hover, .mbtn:not(.verte):not(.acre):not(.phyte):not(.mbtn-p):not(.mbtn-del):hover, .cave-stepper-btn:hover, .mvc-step-btn:hover, .mvv-step2-b:hover, .rp-stp:hover, .mur-btn.q:hover, .chr-act:hover, .cave-toggle-btn:hover, .trac-type-btn:hover, .cave-op-type-btn:hover, .rfut-reason-btn:hover, .mvr-btn-o:hover, .mvr-fstepb:hover, .mvr-mini:hover{ background-image:linear-gradient(var(--survol),var(--survol)); }
+.mvbtn-danger:hover, .mbtn-del:hover, .mvr-btn.mvr-btn-dgr:hover{ background-image:linear-gradient(var(--presse),var(--presse)); }
+.mvbtn:active, .plan-btn-saisir:active, .mvc-set-btn:active, .sd-trac-confirm-btn:active, .pf-btn:active, .plan-btn-pdf:active, .cave-toggle-btn:active, .trac-type-btn:active, .cave-op-type-btn:active, .rfut-reason-btn:active, .mbtn:active, .mbtn-del:active, .cave-stepper-btn:active, .mvc-step-btn:active, .mvv-step2-b:active, .rp-stp:active, .mur-btn:active, .chr-act:active, .mvr-btn:active, .mvr-fstepb:active, .mvr-mini:active{ background-image:linear-gradient(var(--presse),var(--presse)); }
+.mvbtn:disabled, .plan-btn-saisir:disabled, .mvc-set-btn:disabled, .sd-trac-confirm-btn:disabled, .pf-btn:disabled, .plan-btn-pdf:disabled, .cave-toggle-btn:disabled, .trac-type-btn:disabled, .cave-op-type-btn:disabled, .rfut-reason-btn:disabled, .mbtn:disabled, .mbtn-del:disabled, .cave-stepper-btn:disabled, .mvc-step-btn:disabled, .mvv-step2-b:disabled, .rp-stp:disabled, .mur-btn:disabled, .chr-act:disabled, .mvr-btn:disabled, .mvr-fstepb:disabled, .mvr-mini:disabled{ opacity:var(--o-off,.45); cursor:default; background-image:none; }
 /* ═══ fin CHARTE-3 ═══ */
 
 /* ═══ CHARTE-4 — LE JEU DE PASTILLES COMMUN (§374) ═══════════════════════════════════════════════

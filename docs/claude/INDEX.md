@@ -455,3 +455,4 @@
 | 399 | 399. CHARTE-5f — ÉTAPE 2 : LES ÉTATS CALCULÉS PAR LE CODE (20/10 — `src/phyto.js` · `src/planning.js` · `sr… | `docs/claude/chantiers-380-429.md` |
 | 400 | 400. CHARTE-6a — ÉTAPE 3 : LE JEU DES CASES DE SAISIE (20/10 — `src/styles.css` · `src/charte.css` · `src/p… | `docs/claude/chantiers-380-429.md` |
 | 401 | 401. CHARTE-6b — ÉTAPE 3, SUITE : LES AUTRES FAMILLES DE CHAMPS (20/10 — `src/styles.css` · `src/utils.js` … | `docs/claude/chantiers-380-429.md` |
+| 402 | 402. RSV-BTN — LES BOUTONS DE LA RÉSERVE AU JEU (20/10 — `src/styles.css` · `src/reserve.js` · `src/phyto.j… | `docs/claude/chantiers-380-429.md` |

@@ -9,8 +9,8 @@
   },
   "code": {
     "clair": {
-      "mesurees": 979,
-      "nonResoluble": 359,
+      "mesurees": 972,
+      "nonResoluble": 357,
       "fondInconnu": 498,
       "sous": {
         "src/app.js": 5,
@@ -26,8 +26,8 @@
       }
     },
     "sombre": {
-      "mesurees": 980,
-      "nonResoluble": 354,
+      "mesurees": 973,
+      "nonResoluble": 352,
       "fondInconnu": 505,
       "sous": {
         "src/app.js": 7,
@@ -40,7 +40,7 @@
         "src/reserve.js": 7,
         "src/tracteur.js": 5,
         "index.html": 10,
-        "src/styles.css": 79
+        "src/styles.css": 76
       }
     }
   },

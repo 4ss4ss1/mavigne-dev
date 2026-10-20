@@ -509,3 +509,23 @@ La suite de l’étape 3 (§400) : les autres familles de champs. Relevé (hors 
 
 ### 401e. La leçon
 **Un champ compact n’a pas à devenir grand pour être au jeu.** Le filtre de dates du Journal vit dans une barre étroite ; lui imposer 48 px aurait cassé la barre. Le dessin seul (`.mvchamp-fond`) lui donne l’apparence commune sans toucher à sa taille — comme `.mvcarte-fond` pour les cartes (§398).
+
+## 402. RSV-BTN — LES BOUTONS DE LA RÉSERVE AU JEU (20/10 — `src/styles.css` · `src/reserve.js` · `src/phyto.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-boutons.mjs` · `scripts/mv-harnais-rsv1.mjs` · `scripts/contraste-baseline.json` · `scripts/mv-jetons-baseline.json` · `scripts/mv-espace-baseline.json` · **APP 9.62 → 9.63, SW 10.41 → 10.42**, base `d12061c`)
+
+### 402a. La demande
+Vu au §401 (le formulaire d’achat de la Réserve) : le bouton principal « Enregistrer l’achat » et le sélecteur « Par unités / Directe / Les deux » restaient couleur terre. Les boutons de la Réserve n’étaient au jeu que sur la page (`#page-reserve …`), pas dans ses fenêtres.
+
+### 402b. Ce qui est livré
+- **Au jeu de boutons** (bloc CHARTE-3) : `.mvr-btn` (les listes de base, actif, désactivé ; sa mise en page `flex:1; min-width:130px` gardée), `.mvr-btn-p` et `.mvr-btn-g` (le doré, en dégradé) → **principal** ; `.mvr-btn-o` → **secondaire** ; `.mvr-btn-dgr` (le dégradé rouge que reserve.js posait pour une sortie « destruction ») → **danger** ; `.mvr-mini` (les petits boutons des listes, fond terre pâle) → **secondaire**, `.mvr-mini-d` → **danger** ; `.mvr-fstepb` (les « − / + » du nombre de fûts) → **bouton icône** du jeu (secondaire).
+- **Le sélecteur** `.mvr-segb.on` : le choix fait prend la couleur d’action (plus le terre). Le sélecteur reste un contrôle segmenté à lui, comme celui du Tracteur (§378).
+- **Retirés** : le dessin des règles d’avant (fond terre et son ombre, dégradé doré, filet brun translucide, arrondis 9 et 12 px…) ; les règles à part de `#page-reserve` (`.mvr-btn-p`, `:is(.mvr-btn-o,.mvr-mini)`, `.mvr-mini-d`, `.mvr-fstepb`) ; les dessins injectés par reserve.js (`.mvr-fstepb` et ses états, `.mvr-btn-dgr`) — `mv-harnais-couches` refuse une classe déclarée dans deux feuilles ; `.mvr-btn-g` retiré d’une règle groupée qui le recolorait (`#241A10`) ; la marge écrite sur place des trois boutons « Tout cocher / Tout décocher / Zone vulnérable » de la fertilisation (Phyto).
+- `mv-harnais-rsv1` (RSV-1, §292) vérifiait « Ajouter des fûts » à l’accent par la règle à part `#page-reserve .mvr-btn-p` : il le vérifie désormais dans la liste du principal du jeu de boutons, et sa contre-épreuve retire `.mvr-btn-p` de cette liste (vu par le premier passage de la chaîne : 2 rouges, le contrôle et sa contre-épreuve).
+- `mv-harnais-boutons` surveille les six classes ; plafond des boutons « maison » **70 → 66**. La couverture du contraste baisse (979 → 972 paires mesurées : les paires terre sur terre pâle ont disparu avec leurs couleurs) — regravée, comme les jetons (rayons en dur) et l’échelle.
+
+### 402c. Vu
+`reserve-achat` (téléphone clair et sombre) : « Enregistrer l’achat » à la couleur d’action, « Annuler » secondaire, « Par unités » choisi à la couleur d’action. `reserve` : intacte.
+
+- **Chaîne** : **471 commandes, 0 rouge** au dernier passage, joué d’un trait après le dernier changement de code. Avant : 2 rouges (`mv-harnais-rsv1` et sa contre-épreuve), puis un passage coupé à la fin d’un message (389 commandes, sans rouge).
+
+### 402d. La leçon
+**Une règle rangée sous `#page-…` ne suit pas la fenêtre qu’on ouvre de la page.** Les fenêtres vivent hors de la page dans le document : le jeu posé « pour la Réserve » ne valait que sur son écran. Une pièce commune se pose sans portée.

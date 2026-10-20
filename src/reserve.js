@@ -634,13 +634,9 @@ function _rsvInjectCss(){
   st.id='mvr-step-css';
   st.textContent=''
     +'.mvr-fstep{display:flex;align-items:center;gap:9px;flex:none}'
-    +'.mvr-fstepb{width:40px;height:40px;border-radius:11px;border:1.5px solid var(--terre,#8A5A38);background:var(--bg-card,#FBFAF6);color:var(--terre,#8A5A38);font-size:22px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;transition:transform .07s ease,background .12s ease;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}'
-    +'.mvr-fstepb:active{transform:scale(.9);background:var(--terre-pale,#F3EADF)}'
-    +'.mvr-fstepb:disabled{opacity:.32;cursor:default}'
     +'.mvr-fstepc{min-width:46px;text-align:center}'
     +'.mvr-fstepv{font-family:var(--font-titre,\'Cormorant Garamond\',Georgia,serif);font-size:var(--pt-xl,28px);font-weight:700;color:var(--terre,#8A5A38);line-height:1;display:block}'
     +'.mvr-fstepl{font-size:var(--pt-lbl,10.5px);color:var(--muted,#7A7060);margin-top:-1px}'
-    +'@media(hover:hover){.mvr-fstepb:hover{background:var(--terre-pale,#F3EADF)}}'
     +'.mvr-mseg{display:flex;border:1.5px solid var(--gris,#DED7C9);border-radius:999px;overflow:hidden;background:var(--bg-card,#FBFAF6);margin-bottom:12px}'
     +'.mvr-mseg button{flex:1;border:0;background:transparent;color:var(--texte-med,#4A4A3A);padding:10px 6px;font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;line-height:1;cursor:pointer}'
     +'.mvr-mseg button.on{background:var(--terre,#8A5A38);color:#FBF7F1}'
@@ -727,7 +723,7 @@ function _rsvInjectCss(){
     +'.mvr-sepmot.on{background:var(--cave,#14110D);color:var(--or-clair,#D8BC72);border-color:var(--cave,#14110D)}'
     +'.mvr-sepmot.on.dgr{background:var(--rouge,#A0291E);color:#fff;border-color:var(--rouge,#A0291E)}'
     +'.mvr-sepwarn{background:var(--orange-pale,#FBF0E6);border:1px solid rgba(184,90,26,.35);border-radius:11px;padding:10px 12px;margin-top:8px;font-size:var(--pt-micro,12px);color:var(--texte-med,#4A4A3A);line-height:1.5}'
-    +'.mvr-btn-dgr{background:linear-gradient(180deg,#B4402F,#8E2A1C)!important;color:#fff!important}';
+    +'';   /* RSV-BTN (§402) : .mvr-btn-dgr est au jeu (danger) */
   document.head.appendChild(st);
 }
 
