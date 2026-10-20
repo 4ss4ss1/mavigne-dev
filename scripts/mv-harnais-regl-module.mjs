@@ -87,7 +87,7 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
     'les blocs Vigne et Tracteur existent une seule fois');
   const iV = html.indexOf('id="ovReglVigne"'), iT = html.indexOf('id="ovReglTracteur"');
   const bV = html.indexOf('id="regl-view-vigne"'), bT = html.indexOf('id="regl-view-tracteur"');
-  const iR = html.indexOf('id="page-reglages"'), iC = html.indexOf('id="page-chat"');
+  const iR = html.indexOf('id="page-reglages"'), iC = html.indexOf('id="ovHubAide"');
   T(iV > 0 && iT > 0 && iV < bV && bV < iT && iT < bT && bT < iC,
     'chaque bloc vit dans la feuille de son module, hors de la page R\u00e9glages',
     JSON.stringify({ iV, bV, iT, bT, iC }));
@@ -205,7 +205,7 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
   T(!/data-tab="cadre"/.test(html) && nb(html, /data-tab="(mois|gens)"/g) === 2, 'la barre du Planning a deux onglets, sans « Le cadre »');
   T(nb(html, /_mvReglOpen\('planning'\)/g) === 1, 'la roue du Planning est sur son en-t\u00eate');
   const iP = html.indexOf('id="ovReglPlanning"'), hP = html.indexOf('id="plan-cadre-host"'), dP = html.indexOf('id="regl-docs-planning"');
-  T(iP > 0 && hP > iP && dP > hP && dP < html.indexOf('id="page-chat"'), 'la feuille du Planning porte l\u2019h\u00f4te du cadre puis les documents');
+  T(iP > 0 && hP > iP && dP > hP && dP < html.indexOf('id="ovHubAide"'), 'la feuille du Planning porte l\u2019h\u00f4te du cadre puis les documents');
   T(/var _PLAN_VALID_TAB=\{mois:1,gens:1,moi:1,eqmois:1\};/.test(pln), '_PLAN_VALID_TAB ne conna\u00eet plus cadre');
   T(/cadre:'mois'/.test(pln) && /templates:'mois'/.test(pln), 'les cl\u00e9s m\u00e9moris\u00e9es cadre et templates atterrissent sur le mois');
   T(/if\(tab==='cadre'\)\{ if\(window\._mvReglOpen\) window\._mvReglOpen\('planning'\); return; \}/.test(pln), 'planSwitchTab(\'cadre\') ouvre la roue');
@@ -287,7 +287,7 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
   T(!/Outils \u203a Param\u00e9trage/.test(aideEtInfo) && !/Outils \\u203a Param/.test(aideEtInfo), 'plus aucun \u00ab Outils \u203a Param\u00e9trage \u00bb dans l\u2019aide ni les fiches \u00ab i \u00bb');
   T(!/Le bouton <b>Outils<\/b>/.test(G11) && /La roue crant\u00e9e \u2014 ce qui se r\u00e8gle/.test(G11), 'le guide Pilotage d\u00e9crit la roue, plus le bouton Outils');
   const iPT = html.indexOf('id="ovReglPilotage"');
-  T(iPT > 0 && html.indexOf('id="pil-regl-host"') > iPT && html.indexOf('id="regl-eco-pilotage"') > iPT && html.indexOf('id="regl-docs-pilotage"') > iPT && iPT < html.indexOf('id="page-chat"'),
+  T(iPT > 0 && html.indexOf('id="pil-regl-host"') > iPT && html.indexOf('id="regl-eco-pilotage"') > iPT && html.indexOf('id="regl-docs-pilotage"') > iPT && iPT < html.indexOf('id="ovHubAide"'),
     'la feuille du Pilotage porte l\u2019h\u00f4te du Param\u00e9trage, la carte IFT, puis les documents');
   T(html.indexOf('id="regl-eco-tracteur"') > html.indexOf('id="ovReglTracteur"') && html.indexOf('id="regl-eco-tracteur"') < html.indexOf('id="regl-docs-tracteur"'), 'la feuille du Tracteur porte la carte Carburant avant ses documents');
 

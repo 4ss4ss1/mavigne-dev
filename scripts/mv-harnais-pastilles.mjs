@@ -27,7 +27,7 @@ const PIECES = ['mvpas', 'mvpas-statut', 'mvpas-fait', 'mvpas-encours', 'mvpas-a
   'mvpas-etiquette', 'mvpas-type', ...COULEURS.map(c => 'mvpas-' + c), 'mvpas-compteur', 'mvpas-fort', 'mvpas-alerte', 'mvpas-filtre'];
 const MIGREES = ['pf-tag', 'pf-tag-sup', 'pf-tag-al', 'plan-badge', 'plan-badge-warn', 'plan-badge-abs', 'plan-badge-cont', 'plan-badge-def',
   'plan-badge-ctrat', 'plan-badge-cdebut', 'plan-badge-cfin', 'mvc-tag', 'mvc-tag-so2', 'mvc-tag-fmlok', 'mvc-tag-fmlc', 'mvc-tag-fmlno',
-  'mvc-tag-av', 'sdp-tag', 'pil-dz-tag', 'chat-canal-badge', 'p-fx-badge',   // ★ CHARTE-4a (§374)
+  'mvc-tag-av', 'sdp-tag', 'pil-dz-tag', 'p-fx-badge',   /* chat-canal-badge : retiré avec la discussion (CHAT-0, §395) */   // ★ CHARTE-4a (§374)
   'mvcm-chip', 'cave-cuvee-chip', 'sdp-skip-btn',   // ★ CHARTE-4b (§377) : trois filtres
   'mur-seg'];   // ★ REVUE-2 (§390) : le choix de visibilité du mur, resté vert
 const EXEMPTIONS = [

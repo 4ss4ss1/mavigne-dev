@@ -16,7 +16,7 @@ fs.readdirSync(path.join(R, 'src')).filter(f => f.endsWith('.js')).sort().forEac
 // Les pages HORS de la règle, chacune avec sa raison. En retirer une = l'ajouter à la règle, dans le même lot.
 // (Le Planning y a été jusqu'à sa maquette : Nico a choisi « A », borné comme les autres — LARG-1, §334.)
 const EXEMPTES = {
-  chat: 'page sans appelant (app.js : « #page-chat n’a AUCUN appelant »), hors périmètre client, comme dans C22',
+  // (vide depuis CHAT-0, §395 : la seule exemptée, la page du chat, a été retirée de l’appli)
 };
 const VIGNE_ET_MODULES = ['home', 'parcelles', 'journal', 'pilotage', 'tracteur', 'phyto', 'cave', 'reserve', 'planning', 'reglages'];
 const RE_REGLE = /@media \(min-width:1200px\)\{ ((?:#page-[a-z0-9-]+,)*#page-[a-z0-9-]+)\{max-width:var\(--page-max,1200px\);margin-left:auto;margin-right:auto;\} \}/g;
@@ -91,7 +91,6 @@ if (CONTRE) {
     ['une page neuve arrive sans largeur', 'idx', '<div class="page" id="page-reserve"></div>',
       '<div class="page" id="page-reserve"></div>\n<div class="page" id="page-nouveau"></div>', 'libres'],
     ['le Planning ressort de la règle', 'css', '#page-reserve,#page-planning,', '#page-reserve,', 'libres'],
-    ['une page exemptée entre aussi dans la règle', 'css', '#page-planning,#page-reglages{', '#page-planning,#page-reglages,#page-chat{', 'deux'],
     ['la règle vise une page qui n’existe plus', 'css', '#page-planning,#page-reglages{', '#page-planning,#page-reglages,#page-ancienne{', 'fantomes'],
     ['la règle est mise en commentaire', 'css', ligneRegle, '/* ' + ligneRegle + ' */', 'une'],
     ['la Vigne perd son Journal', 'css', '#page-parcelles,#page-journal,', '#page-parcelles,', 'vigne'],

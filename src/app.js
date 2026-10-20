@@ -6456,7 +6456,6 @@ function goTo(page){
       }).catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/goTo'); });
     }
   }
-  if(page==='chat')chatRender();
   if(page==='planning'){if(window.renderPlanning)window.renderPlanning();}
   if(page==='admin-gt'){if(window.renderAdminGT)window.renderAdminGT();}
   if(page==='pilotage'){ if(window.renderPilotage){ _ensureLeaflet().then(function(){window.renderPilotage();}).catch(function(){window.renderPilotage();}); } }
@@ -11910,260 +11909,8 @@ function pickVal(el,hid,cls){el.parentElement.querySelectorAll('.pchk').forEach(
 
 
 
-// ════ MODULE CHAT ════
-
-
-// ════════════════════════════════════
-// MODULE CHAT
-// ════════════════════════════════════
-
-var _chatCanal = 'general';
-var _chatDMTarget = null;
-var _chatUnsub = null;
-var _chatDMUnsub = null;
-
-var CHAT_CANAUX = {
-  general:  {ico:'#',  label:'Général',  desc:'Discussion générale du domaine'},
-  travaux:  {ico:'feuille', label:'Travaux',  desc:'Suivi des travaux en cours'},
-  tracteur: {ico:'tracteur', label:'Tracteur', desc:'Passages et sessions tracteur'},
-  phyto:    {ico:'eprouvette', label:'Phyto',    desc:'Traitements phytosanitaires'},
-  meteo:    {ico:'nuage', label:'Météo',    desc:'Alertes météo et gel'}
-};
-
-/* ⚠⚠ LE CHAT EST HORS SERVICE, ET IL L'ÉTAIT DÉJÀ EN SILENCE.
-   Ces deux fonctions parlent l'API Firestore v8 (`db.collection().doc()`), que
-   le SDK v10 modulaire ne connaît plus — et `db` est encapsulé dans firebase.js
-   derrière les `fb*`, volontairement : c'est là que vit le cloisonnement par
-   domaine. Le nom nu `db` produisait donc une ReferenceError opaque.
-   ★ La page #page-chat n'a AUCUN appelant : `goTo('chat')` n'est écrit nulle
-   part. Le code est inatteignable, on ne le supprime pas (§51) — on le rend
-   honnête. Exposer `window.db` aurait changé la ReferenceError en
-   « db.collection is not a function » : décoration, pas correctif.
-   Pour remettre le chat en service : réécrire en API modulaire via `fbSave` /
-   `fbDoc`, jamais en rouvrant un accès direct à la poignée Firestore. */
-function _chatHorsService(quoi){
-  throw new Error('Chat hors service (' + quoi + ') — à réécrire en API Firestore modulaire');
-}
-function _chatDoc(canal){
-  return _chatHorsService('canal ' + canal);
-}
-function _dmDoc(a, b){
-  return _chatHorsService('DM ' + [a, b].sort().join('__'));
-}
-
-// ── Init : peupler la liste des membres DM ──
-function chatInit(){
-  if(!currentUser) return;
-  var dl = document.getElementById('chat-dm-list');
-  if(!dl) return;
-  dl.innerHTML = MEMBRES
-    .filter(function(m){ return m.nom !== currentUser.nom; })
-    .map(function(m){
-      var bg = COULEURS_MBR[m.nom] || '#3D6B27';
-      return '<div class="chat-dm" onclick="chatOpenDM(this,\'' + m.nom + '\')">' +
-        '<div class="chat-dm-ava" style="background:' + bg + '">' +
-          m.nom.charAt(0).toUpperCase() +
-          '<div class="chat-dm-status"></div>' +
-        '</div>' +
-        '<span class="chat-canal-badge" id="dmbadge-' + m.nom + '" style="display:none">!</span>' +
-      '</div>';
-    }).join('');
-}
-
-// ── Chargement des messages via .get() (fiable) ──
-function chatLoad(){
-  var area = document.getElementById('chat-msgs-area');
-  if(!area) return;
-  area.innerHTML = '<div class="chat-system">Chargement…</div>';
-
-  // Détacher les anciens listeners
-  if(_chatUnsub){ _chatUnsub(); _chatUnsub = null; }
-  if(_chatDMUnsub){ _chatDMUnsub(); _chatDMUnsub = null; }
-
-  if(_chatDMTarget){
-    // ── DM ──
-    var dmRef = _dmDoc(currentUser.nom, _chatDMTarget);
-    dmRef.get().then(function(snap){
-      var msgs = (snap.exists && snap.data() && snap.data().msgs) ? snap.data().msgs : [];
-      chatRenderMsgs(msgs, area);
-    }).catch(function(e){
-      area.innerHTML = '<div class="chat-system">Erreur : ' + e.code + '</div>';
-    });
-    // Listener temps réel
-    _chatDMUnsub = dmRef.onSnapshot(function(snap){
-      var msgs = (snap.exists && snap.data() && snap.data().msgs) ? snap.data().msgs : [];
-      chatRenderMsgs(msgs, area);
-      // Masquer badge
-      var badge = document.getElementById('dmbadge-' + _chatDMTarget);
-      if(badge) badge.style.display = 'none';
-      chatCheckNavDot();
-    }, function(e){ console.warn('[Chat DM]', e.code); });
-
-  } else {
-    // ── Canal ──
-    var cRef = _chatDoc(_chatCanal);
-    cRef.get().then(function(snap){
-      var msgs = (snap.exists && snap.data() && snap.data().msgs) ? snap.data().msgs : [];
-      chatRenderMsgs(msgs, area);
-    }).catch(function(e){
-      area.innerHTML = '<div class="chat-system">Erreur : ' + e.code + '</div>';
-    });
-    // Listener temps réel
-    _chatUnsub = cRef.onSnapshot(function(snap){
-      var msgs = (snap.exists && snap.data() && snap.data().msgs) ? snap.data().msgs : [];
-      chatRenderMsgs(msgs, area);
-      var badge = document.getElementById('cbadge-' + _chatCanal);
-      if(badge) badge.style.display = 'none';
-      chatCheckNavDot();
-    }, function(e){ console.warn('[Chat canal]', e.code); });
-  }
-}
-
-// ── Afficher la topbar selon le contexte ──
-function chatUpdateTopbar(){
-  var ico  = document.getElementById('chat-topbar-ico');
-  var name = document.getElementById('chat-topbar-name');
-  var desc = document.getElementById('chat-topbar-desc');
-  var ta   = document.getElementById('chat-ta');
-  if(_chatDMTarget){
-    var bg = COULEURS_MBR[_chatDMTarget] || '#3D6B27';
-    if(ico) ico.innerHTML = '<span style="width:22px;height:22px;border-radius:50%;background:'+bg+';display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white">'+_chatDMTarget.charAt(0)+'</span>';
-    if(name) name.textContent = _chatDMTarget;
-    if(desc) desc.textContent = 'Message privé';
-    if(ta) ta.placeholder = 'Message à ' + _chatDMTarget + '…';
-  } else {
-    var cfg = CHAT_CANAUX[_chatCanal] || {ico:'#', label:_chatCanal, desc:''};
-    if(ico) window._mvSetIcon(ico, cfg.ico, 20);
-    if(name) name.textContent = cfg.label;
-    if(desc) desc.textContent = cfg.desc;
-    if(ta) ta.placeholder = 'Message #' + cfg.label + '…';
-  }
-}
-
-// ── Rendu des messages ──
-function chatRenderMsgs(msgs, area){
-  if(!area) return;
-  if(!msgs || !msgs.length){
-    area.innerHTML = '<div class="chat-empty">Aucun message — soyez le premier à écrire !</div>';
-    return;
-  }
-  var html = '';
-  var lastDate = '';
-  msgs.forEach(function(msg){
-    var d = new Date(msg.ts);
-    var dateStr = d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
-    if(dateStr !== lastDate){
-      html += '<div class="chat-date-sep"><span>' + dateStr + '</span></div>';
-      lastDate = dateStr;
-    }
-    var isMine = currentUser && msg.auteur === currentUser.nom;
-    var bg = COULEURS_MBR[msg.auteur] || '#3D6B27';
-    var hhmm = d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-    html += '<div class="chat-msg' + (isMine ? ' mine' : '') + '">';
-    if(!isMine){
-      html += '<div class="chat-msg-ava" style="background:' + bg + '">' + msg.auteur.charAt(0) + '</div>';
-    }
-    html += '<div class="chat-msg-body">';
-    html += '<div class="chat-msg-meta">';
-    if(!isMine) html += '<span class="chat-msg-author" style="color:' + bg + '">' + msg.auteur + '</span>';
-    html += '<span class="chat-msg-time">' + hhmm + '</span>';
-    html += '</div>';
-    html += '<div class="chat-bubble">' + _chatEscapeHtml(msg.txt) + '</div>';
-    html += '</div></div>';
-  });
-  area.innerHTML = html;
-  area.scrollTop = area.scrollHeight;
-}
-
-function _chatEscapeHtml(txt){
-  return String(txt)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;');
-}
-
-// ── Switcher canal ──
-function chatSwitch(el, canal){
-  _chatCanal = canal;
-  _chatDMTarget = null;
-  document.querySelectorAll('.chat-canal,.chat-dm').forEach(function(x){ x.classList.remove('actif'); });
-  el.classList.add('actif');
-  chatUpdateTopbar();
-  chatLoad();
-}
-
-// ── Ouvrir DM ──
-function chatOpenDM(el, nom){
-  _chatDMTarget = nom;
-  _chatCanal = null;
-  document.querySelectorAll('.chat-canal,.chat-dm').forEach(function(x){ x.classList.remove('actif'); });
-  el.classList.add('actif');
-  chatUpdateTopbar();
-  chatLoad();
-}
-
-// ── Envoi message ──
-async function chatSend(){
-  if(isSaisonnier()){ showToast('Lecture seule · envoi impossible','#C0392B'); return; }
-  var ta = document.getElementById('chat-ta');
-  var txt = ta.value.trim();
-  if(!txt) return;
-  var msg = {auteur: currentUser.nom, txt: txt, ts: Date.now()};
-  ta.value = '';
-  ta.style.height = 'auto';
-  try{
-    if(_chatDMTarget){
-      var dmRef = _dmDoc(currentUser.nom, _chatDMTarget);
-      var snap = await dmRef.get();
-      var msgs = (snap.exists && snap.data().msgs) ? snap.data().msgs : [];
-      msgs.push(msg);
-      if(msgs.length > 200) msgs = msgs.slice(msgs.length - 200);
-      await dmRef.set({msgs: msgs, updatedAt: Date.now()});
-    } else {
-      var cRef = _chatDoc(_chatCanal);
-      var snap2 = await cRef.get();
-      var msgs2 = (snap2.exists && snap2.data().msgs) ? snap2.data().msgs : [];
-      msgs2.push(msg);
-      if(msgs2.length > 200) msgs2 = msgs2.slice(msgs2.length - 200);
-      await cRef.set({msgs: msgs2, updatedAt: Date.now()});
-    }
-  } catch(e){
-    console.error('[Chat] Envoi échoué', e);
-    showSyncBadge('Message non envoyé', '#B85A1A');
-  }
-}
-
-// ── Helpers textarea ──
-function chatAutoResize(el){
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 90) + 'px';
-}
-function chatHandleKey(e){
-  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); chatSend(); }
-}
-
-// ── Badge notification nav ──
-function chatCheckNavDot(){
-  var hasNew = false;
-  Object.keys(CHAT_CANAUX).forEach(function(c){
-    var b = document.getElementById('cbadge-' + c);
-    if(b && b.style.display !== 'none') hasNew = true;
-  });
-  if(currentUser){
-    MEMBRES.filter(function(m){ return m.nom !== currentUser.nom; }).forEach(function(m){
-      var b = document.getElementById('dmbadge-' + m.nom);
-      if(b && b.style.display !== 'none') hasNew = true;
-    });
-  }
-  // pastille nav supprimée avec la nav-bar (v4.28) — badges canaux/DM gérés dans la page chat
-}
-
-// ── Appelé au goTo('chat') ──
-function chatRender(){
-  chatInit();
-  chatUpdateTopbar();
-  chatLoad();
-}
+// ★ CHAT-0 (§395) : le module de discussion (canaux, messages privés) est retiré — sans appelant depuis la v4.28, son
+//   API Firestore v8 ne marchait plus ; Nico : « WhatsApp, les messages et les appels font ça bien plus simplement ».
 
 // ── Effacer recherche Parcelles ──
 function clearPSearch(){
@@ -13261,10 +13008,6 @@ async function refreshApp(){
   if (typeof calcEtpLivePdf !== "undefined") window.calcEtpLivePdf = calcEtpLivePdf;
   if (typeof onPdfManualEdit !== "undefined") window.onPdfManualEdit = onPdfManualEdit;
   if (typeof pdfDetailToggle !== "undefined") window.pdfDetailToggle = pdfDetailToggle;
-  if (typeof chatAutoResize !== "undefined") window.chatAutoResize = chatAutoResize;
-  if (typeof chatHandleKey !== "undefined") window.chatHandleKey = chatHandleKey;
-  if (typeof chatSend !== "undefined") window.chatSend = chatSend;
-  if (typeof chatSwitch !== "undefined") window.chatSwitch = chatSwitch;
   if (typeof checkDangerConf !== "undefined") window.checkDangerConf = checkDangerConf;
   if (typeof clearJDateFilter !== "undefined") window.clearJDateFilter = clearJDateFilter;
   if (typeof clearJSearch !== "undefined") window.clearJSearch = clearJSearch;
@@ -13476,7 +13219,6 @@ async function refreshApp(){
   if (typeof openEditTracteur !== "undefined") window.openEditTracteur = openEditTracteur;
   if (typeof openSdTracPicker !== "undefined") window.openSdTracPicker = openSdTracPicker;
   if (typeof retourReparateur !== "undefined") window.retourReparateur = retourReparateur;
-  if (typeof chatOpenDM !== "undefined") window.chatOpenDM = chatOpenDM;
   if (typeof _pickActEmoji !== "undefined") window._pickActEmoji = _pickActEmoji;
   if (typeof _pickNewActTrac !== "undefined") window._pickNewActTrac = _pickNewActTrac;
   if (typeof _rbPick !== "undefined") window._rbPick = _rbPick;

@@ -1104,48 +1104,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .hjr-date{font-size:var(--pt-micro,11px);color:var(--texte-doux);flex-shrink:0;}
 
 /* ══ CHAT ══ */
-#page-chat{background:#0F1319;color:#E8EAF0;padding-bottom:0 !important;display:none;min-height:unset !important;}
-#page-chat.active{display:flex;flex-direction:column;height:calc(100vh - env(safe-area-inset-bottom,0px));}
-.chat-wrap{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;}
-.chat-layout{display:flex;flex:1;overflow:hidden;min-height:0;}
-.chat-sidebar{width:56px;background:#161C24;border-right:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;overflow-x:hidden;}
-.chat-sec-lbl{font-size:8px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#4A5568;padding:10px 0 4px;text-align:center;}
-.chat-canal{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 4px;border-radius:8px;cursor:pointer;color:#7A8499;position:relative;margin:1px 4px;min-height:44px;}
-.chat-canal.actif{background:rgba(61,107,39,0.2);color:#5A8F3C;}
-.chat-canal-ico{font-size:18px;line-height:1;}
-.chat-canal-lbl{font-size:8px;font-weight:600;margin-top:1px;}
-.chat-canal-badge{ position:absolute; top:3px; right:3px; text-align:center; }
-.chat-dm{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 4px;border-radius:8px;cursor:pointer;color:#7A8499;margin:1px 4px;position:relative;min-height:44px;}
-.chat-dm.actif{background:rgba(61,107,39,0.12);color:#E8EAF0;}
-.chat-dm-ava{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:var(--pt-micro,11px);font-weight:700;color:white;position:relative;}
-.chat-dm-status{position:absolute;bottom:-1px;right:-1px;width:7px;height:7px;border-radius:50%;border:1.5px solid #161C24;background:#4A5568;}
-.chat-main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#0F1319;}
-.chat-topbar{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.07);background:#161C24;display:flex;align-items:center;gap:8px;flex-shrink:0;min-height:48px;}
-.chat-topbar-name{font-weight:600;font-size:var(--pt-base,14px);color:#E8EAF0;}
-.chat-topbar-desc{font-size:var(--pt-micro,11px);color:#7A8499;}
-.chat-msgs{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:2px;}
-.chat-date-sep{display:flex;align-items:center;gap:8px;margin:10px 0 6px;}
-.chat-date-sep::before,.chat-date-sep::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.07);}
-.chat-date-sep span{font-size:var(--pt-micro,11px);color:#4A5568;white-space:nowrap;}
-.chat-msg{display:flex;gap:7px;padding:1px 0;}
-.chat-msg.mine{flex-direction:row-reverse;}
-.chat-msg-ava{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:var(--pt-micro,11px);font-weight:700;color:white;flex-shrink:0;align-self:flex-end;margin-bottom:2px;}
-.chat-msg-body{max-width:80%;}
-.chat-msg.mine .chat-msg-body{display:flex;flex-direction:column;align-items:flex-end;}
-.chat-msg-meta{display:flex;align-items:baseline;gap:4px;margin-bottom:2px;}
-.chat-msg.mine .chat-msg-meta{flex-direction:row-reverse;}
-.chat-msg-author{font-size:var(--pt-micro,11px);font-weight:600;color:#7A8499;}
-.chat-msg-time{font-size:var(--pt-micro,11px);color:#4A5568;}
-.chat-bubble{background:#1E2630;padding:6px 10px;border-radius:4px 10px 10px 10px;font-size:var(--pt-txt,13px);line-height:1.5;color:#E8EAF0;word-break:break-word;display:inline-block;}
-.chat-msg.mine .chat-bubble{background:rgba(61,107,39,0.3);border:1px solid rgba(90,143,60,0.3);border-radius:10px 4px 10px 10px;}
-.chat-system{text-align:center;font-size:var(--pt-micro,11px);color:#4A5568;font-style:italic;margin:8px 0;}
-.chat-empty{text-align:center;font-size:var(--pt-micro,12px);color:#4A5568;margin-top:40px;font-family:var(--font-titre);font-style:italic;}
-.chat-input-zone{padding:8px 10px;background:#161C24;border-top:1px solid rgba(255,255,255,0.07);flex-shrink:0;}
-.chat-input-row{display:flex;align-items:center;gap:7px;background:#1E2630;border:1px solid rgba(255,255,255,0.12);border-radius:22px;padding:5px 5px 5px 12px;}
-.chat-input-row:focus-within{border-color:rgba(61,107,39,0.5);}
-#chat-ta{flex:1;background:none;border:none;outline:none;color:#E8EAF0;font-family:var(--font-ui);font-size:var(--pt-base,14px);resize:none;max-height:90px;line-height:1.5;-webkit-user-select:text;user-select:text;}
-#chat-ta::placeholder{color:#4A5568;}
-.chat-send-btn{width:34px;height:34px;min-width:34px;background:#3D6B27;border:none;border-radius:50%;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;}
 
 /* ══ ONBOARDING ══ */
 #onboarding-screen{position:fixed;inset:0;background:linear-gradient(160deg,#1A1F2E 0%,#0F1319 55%,#111820 100%);display:flex;flex-direction:column;z-index:10000;overflow:hidden;}
@@ -1663,12 +1621,11 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 /* ══ iOS FIXES — Patch safe-area + anti-zoom ══ */
 /* Anti-zoom Safari iOS : tout input < 16px déclenche un zoom automatique */
 @supports (-webkit-touch-callout: none) {
-  .fi, .fsel, .sbox input, .j-date-input,
-  #chat-ta, .ob-input, .login-input {
+  .fi, .fsel, .sbox input, .j-date-input, .ob-input, .login-input {
     font-size:var(--pt-sm,16px) !important;
   }
   /* Scroll fluide natif iOS sur les containers scrollable */
-  .modal, .ob-body, .chat-msgs, .plan-body,
+  .modal, .ob-body, .plan-body,
   .agt-body, .frow, .orow, .tfilters,
   .chips-row, .trac-tabs {
     -webkit-overflow-scrolling: touch;
@@ -4230,8 +4187,7 @@ a[href^="mailto:"]{color:var(--or-tx);}
 .ob-step-lbl.done{color:rgba(255,255,255,0.78);}
 .hub-aide-guide-sub{color:rgba(240,226,200,0.68);}
 .agt-sl,.agt-tab{color:rgba(255,255,255,0.66);}
-.chat-sec-lbl,.chat-empty{color:rgba(255,255,255,0.62);}
-.chat-canal-ico,.chat-canal-lbl,.ob-add-btn,.ob-mbr-add-btn{color:#8FD16A;}
+.ob-add-btn,.ob-mbr-add-btn{color:#8FD16A;}
 .hv2-trac-sub{color:rgba(255,255,255,0.74);}
 #sp-copyright,#sp-sub{color:rgba(255,255,255,0.62) !important;}
 #ovSessionDetail .sd-trac-note{color:rgba(255,255,255,0.68);}
@@ -8287,9 +8243,9 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .mvpas-type.mvpas-gris{ background:var(--tag-grey-bg); color:var(--tag-grey-tx); }
 .mvpas-type.mvpas-orange{ background:var(--tag-orange-bg); color:var(--tag-orange-tx); }
 /* le compteur : un nombre sur un onglet, une icône, un filtre */
-.mvpas-compteur, .p-fx-badge, .chat-canal-badge{ display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; min-width:18px; height:18px; padding:0 5px; border:0; border-radius:var(--r-full,999px); background:var(--ligne-forte); color:var(--texte); font-family:var(--font-ui); font-size:var(--pt-nano,11px); font-weight:var(--fw-bold,700); line-height:1; }
+.mvpas-compteur, .p-fx-badge{ display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; min-width:18px; height:18px; padding:0 5px; border:0; border-radius:var(--r-full,999px); background:var(--ligne-forte); color:var(--texte); font-family:var(--font-ui); font-size:var(--pt-nano,11px); font-weight:var(--fw-bold,700); line-height:1; }
 .mvpas-compteur.mvpas-fort, .p-fx-badge{ background:var(--accent); color:var(--sur-accent); }
-.mvpas-compteur.mvpas-alerte, .chat-canal-badge{ background:var(--danger); color:var(--sur-danger); }
+.mvpas-compteur.mvpas-alerte{ background:var(--danger); color:var(--sur-danger); }
 /* le filtre : une pastille qu’on touche ; 36 px au téléphone, 28 sur ordinateur ; le choisi à la couleur d’action */
 .mvpas-filtre, .mvcm-chip, .cave-cuvee-chip, .sdp-skip-btn, .mur-seg{ display:inline-flex; align-items:center; gap:var(--e-2,8px); box-sizing:border-box; min-height:var(--h-row,36px); padding:0 var(--e-4,16px); border:var(--bw,1px) solid var(--ligne-forte); border-radius:var(--r-full,999px); background:var(--bg-card); color:var(--texte-med); font-family:var(--font-ui); font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); line-height:1.2; white-space:nowrap; cursor:pointer; }
 @media (min-width:768px){ .mvpas-filtre, .mvcm-chip, .cave-cuvee-chip, .sdp-skip-btn, .mur-seg{ min-height:var(--h-sm,28px); padding:0 var(--e-3,12px); font-size:var(--pt-txt,13px); } }

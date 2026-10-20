@@ -338,3 +338,29 @@ Après REVUE-4 (§393), où le chrono avait été laissé tel quel (dessiné éc
 
 ### 394d. La leçon
 **Une couleur qui distingue doit se distinguer.** Le chrono avait raison de colorer ses trois temps ; deux bleus voisins annulaient l’idée. La palette des types existe pour ça : des teintes faites pour ne pas se confondre.
+
+## 395. ⚠️ CHAT-0 — LE MODULE DE DISCUSSION RETIRÉ (20/10 — `src/app.js` · `index.html` · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `scripts/mv-harnais-regl-module.mjs` · `scripts/mv-harnais-larg1.mjs` · `scripts/preflight.mjs` · `scripts/mv-harnais-pastilles.mjs` · `scripts/mv-harnais-boutons.mjs` · `scripts/mv-jetons-baseline.json` · `scripts/mv-espace-baseline.json` · **APP 9.55 → 9.56, SW 10.34 → 10.35**, base `9126d03`)
+
+### 395a. La demande
+La revue à l’écran (étape 1) a ouvert la page de la discussion (`goTo('chat')`, appelé directement par l’outil) : toujours sombre, même en mode clair, 38 couleurs écrites en dur. Vérifié ensuite : **aucun bouton ne l’ouvre** depuis la suppression de la barre de navigation (v4.28) — un commentaire d’`app.js` le disait (« #page-chat n’a AUCUN appelant ») ; ses utilisateurs ne la voyaient donc pas. Nico : un ancien module du tout début, « WhatsApp, les messages, les appels sont bien plus simples » — **retirer**.
+
+### 395b. Une exception voulue à §51
+§51 : on ne supprime pas du code inatteignable, on le rend honnête. Ici le retrait est **décidé par Nico** : le module n’a plus d’usage prévu, son API Firestore v8 ne marchait plus (le commentaire l’expliquait), et le garder obligeait à le restyler. L’exception est écrite ici, avec sa raison.
+
+### 395c. Ce qui est retiré
+- **`index.html`** : la page `#page-chat` (56 lignes : la barre des canaux, les fils privés, la zone de saisie).
+- **`app.js`** : le bloc « MODULE CHAT » (19 noms de premier niveau : `_chatCanal`, `_chatDMTarget`, `_chatUnsub`, `_chatDMUnsub`, `CHAT_CANAUX`, `_chatHorsService`, `_chatDoc`, `_dmDoc`, `chatInit`, `chatLoad`, `chatUpdateTopbar`, `chatRenderMsgs`, `_chatEscapeHtml`, `chatSwitch`, `chatOpenDM`, `chatAutoResize`, `chatHandleKey`, `chatCheckNavDot`, `chatRender`, et `chatSend`), l’aiguillage `if(page==='chat')chatRender();`, les cinq exports `window.chat*`. Vérifié avant : aucun autre module n’appelle ces noms ; `index.html` ne les appelait que depuis la page retirée.
+- **`styles.css`** : 43 règles du chat (`#page-chat`, `.chat-*`, `#chat-*`) et cinq sélecteurs du chat retirés de groupes mêlés (les champs de saisie, les fonds de fenêtres, l’ajout d’un membre, le compteur du jeu de pastilles). ⚠️ Première passe refaite : le découpage prenait les commentaires qui précèdent une règle pour une partie de sa liste de sélecteurs et en recollait les lignes ; la seconde masque les commentaires avant de lire (628 ouvertures, 628 fermetures).
+- **Les messages déjà en base** ne sont pas touchés : seul le module quitte l’appli.
+
+### 395d. Les contrôles ajustés
+- `mv-harnais-regl-module` se servait de `id="page-chat"` comme borne dans `index.html` (trois vérifications d’ordre) : la borne devient `id="ovHubAide"`, qui suivait la page.
+- `mv-harnais-larg1` : la page du chat était sa seule page exemptée de la règle de largeur ; la liste est vide, la contre-épreuve « une page exemptée entre dans la règle » n’a plus de sujet (retirée, commentée).
+- `preflight` (C22) : l’exemption d’aide `chat` retirée. `mv-harnais-pastilles` : `chat-canal-badge` retiré de ses classes.
+- **Vus par le premier passage de la chaîne (2 rouges, deux contre-épreuves)** : `mv-harnais-globaux --contre` réintroduisait le défaut du chat v8 dans `_chatDoc` (« motif introuvable — contre-épreuve inopérante ») → réécrite : elle ajoute une fonction d’essai qui lit une poignée Firestore nue `db` ; `mv-harnais-tutos --contre` (« un geste nouveau sans tuto → reste vert ») : les quatre gestes du chat partis, le compte était à 815 sous un plafond de 820 → plafond abaissé à 815 (`scripts/tutos-couverture.json`). Puis `mv-harnais-tuto8` (TUTO-8, §388) : il voulait le plafond **égal** à 820 — devenu « 820 au plus » (il ne remonte pas), sa contre-épreuve remonte le chiffre quel qu’il soit.
+- Cliquets : boutons « maison » 71 → 70 ; **cercles 110 → 106** (les avatars et pastilles du chat, partis avec lui — un plancher qui baisse parce que ses sujets ont disparu, pas parce qu’un cercle est devenu carré) ; rayons en dur 225 → 221 ; espacements hors échelle 982 → 969.
+
+- **Chaîne** : **469 commandes, 0 rouge** au dernier passage, joué d’un trait après le dernier changement de code. Avant : 2 rouges (globaux, tutos), puis un passage coupé à la fin d’un message (289 commandes, sans rouge), puis 1 rouge (`mv-harnais-tuto8`).
+
+### 395e. La leçon
+**Un code sans appelant coûte quand même.** Inatteignable, il ne gênait personne à l’écran — mais il pesait dans chaque revue, chaque contrôle de style, chaque inventaire de la charte. Le garder « honnête » avait un sens tant qu’on pouvait le rebrancher ; quand son propriétaire n’en veut plus, le retirer est la mesure honnête.

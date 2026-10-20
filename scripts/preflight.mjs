@@ -895,7 +895,6 @@ function checkHelpersOrphelins() {
 // Pour en exempter une de plus, il faut ecrire POURQUOI.
 const AIDE_EXEMPT = {
   'admin-gt': 'panneau GUERETTECH — hors perimetre client',
-  'chat':     'ecran interne, pas un module du dock',
 };
 // window.X y designe un objet du navigateur, pas une fonction de l'app.
 const WIN_NATIF = new Set(['scrollTo', 'open', 'location', 'setTimeout', 'addEventListener', 'document', 'print', 'innerWidth']);

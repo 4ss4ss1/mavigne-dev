@@ -53,7 +53,7 @@ function jouer(S) {
   t('des parcelles du domaine fictif, des fourchettes réglées', cave.analyses.every((a) => /"nom":"/.test(S.tutos) && S.tutos.includes('"nom":"' + a.parcelle + '"')) && cave.config.mat_four.r.min === 205);
   t('le domaine fictif reçoit cette vendange', /window\.applyFbData\('cave_vendange', _tuCave\(\)\)/.test(fn(S.tutos, '_charger')));
   /* ══ 4. LE COMPTE ══ */
-  t('le plafond des gestes sans tuto redescend à 820', JSON.parse(S.couv).plafond === 820);
+  t('le plafond des gestes sans tuto est redescendu à 820, et ne remonte pas (815 depuis CHAT-0, §395)', JSON.parse(S.couv).plafond <= 820);
   t('la nouveauté le dit', /\{ v: '9\.50'/.test(S.utils));
   return L;
 }
@@ -64,7 +64,7 @@ const DEFAUTS = [
   ['une date en dur', (S) => ({ ...S, tutos: S.tutos.replace("a(1, 'Les Charmes', -6, 196)", "{ id: 'tu_1', parcelle: 'Les Charmes', date: '2026-09-02', mode: 'sucre', val: 196, spd: 16.83 }") })],
   ['le domaine fictif n’a plus de vendange', (S) => ({ ...S, tutos: S.tutos.replace("window.applyFbData('cave_vendange', _tuCave());", "void 0;") })],
   ['le tuto ne couvre plus l’enregistrement', (S) => ({ ...S, tutos: S.tutos.replace("'_matSaisieIn', '_vendAnaAdd']", "'_matSaisieIn']") })],
-  ['le plafond reste haut', (S) => ({ ...S, couv: S.couv.replace('"plafond": 820', '"plafond": 825') })],
+  ['le plafond reste haut', (S) => ({ ...S, couv: S.couv.replace(/"plafond": \d+/, '"plafond": 825') })],
 ];
 
 const c = { v: (s) => '\x1b[32m' + s + '\x1b[0m', r: (s) => '\x1b[31m' + s + '\x1b[0m', d: (s) => '\x1b[2m' + s + '\x1b[0m' };

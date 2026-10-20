@@ -285,12 +285,11 @@ const CAS = [
   },
   {
     nom: 'db',
-    quoi: 'le chat v8 — poignee Firestore encapsulee dans firebase.js',
+    // CHAT-0 (§395) : l'exemple d'origine (_chatDoc, le chat v8) est parti avec le module ; la contre-epreuve
+    // reintroduit le meme defaut — une poignee Firestore nue `db` — dans une fonction d'essai.
+    quoi: 'une poignee Firestore nue (db), encapsulee dans firebase.js — le defaut du chat v8',
     casse(s) {
-      return edite(s, 'app.js', (t) => t.replace(
-        /function _chatDoc\(canal\)\{\n  return _chatHorsService\('canal ' \+ canal\);\n\}/,
-        "function _chatDoc(canal){\n  return db.collection('mavigne').doc('chat_canal_' + canal);\n}",
-      ));
+      return edite(s, 'app.js', (t) => t + "\nfunction _essaiPoigneeNue(){\n  return db.collection('mavigne').doc('essai');\n}\n");
     },
   },
   {

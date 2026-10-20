@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.55';
+export const APP_VERSION = '9.56';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.56', d: '2026-10-20', items: [   // CHAT-0 (§395) : l’ancien module de discussion retiré
+    { niv: 1, pour: ['admin'], emoji: 'check', titre: 'Ménage : l’ancienne discussion retirée',
+      desc: "Le premier module de discussion de l’appli (canaux et messages privés) est retiré. Il n’était plus accessible depuis longtemps : pour échanger avec l’équipe, WhatsApp, les messages et les appels font ça plus simplement. Vos données ne sont pas touchées." },
+  ] },
   { v: '9.55', d: '2026-10-20', items: [   // CHRONO-1 (§394) : le chrono au dessin commun
     { niv: 0, pour: ['admin','tractoriste'], emoji: 'check', titre: 'Le chrono plus lisible',
       desc: "Dans une session, les trois temps du chrono tiennent dans une seule carte, une case chacun, les chiffres en noir et bien gros. Chaque sorte de temps garde sa couleur, sur son icône : vert dans les parcelles, gris hors parcelle, ambre pour la pause — les deux bleus d’avant se confondaient au soleil. L’explication passe en encadré bleu, « Pause déjeuner » et « Fin de journée » prennent le dessin commun." },

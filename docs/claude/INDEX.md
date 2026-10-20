@@ -448,3 +448,4 @@
 | 392 | 392. REVUE-3 — LA REVUE À L’ÉCRAN, TROISIÈME PASSAGE : DES SITUATIONS MISES EN PLACE PAR L’OUTIL (20/10 — `… | `docs/claude/chantiers-380-429.md` |
 | 393 | 393. REVUE-4 — LA REVUE À L’ÉCRAN, QUATRIÈME PASSAGE : UNE SESSION CHRONOMÉTRÉE, LA DEMANDE D’UN SALARIÉ (2… | `docs/claude/chantiers-380-429.md` |
 | 394 | 394. CHRONO-1 — LE CHRONO AU DESSIN COMMUN (20/10 — `src/styles.css` · `src/tracteur.js` · `src/utils.js` (… | `docs/claude/chantiers-380-429.md` |
+| 395 | 395. ⚠️ CHAT-0 — LE MODULE DE DISCUSSION RETIRÉ (20/10 — `src/app.js` · `index.html` · `src/styles.css` · `… | `docs/claude/chantiers-380-429.md` |

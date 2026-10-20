@@ -1,0 +1,29 @@
+{
+  "lot": "CHAT-0",
+  "section": "§395",
+  "base": "9126d03a634f0d6aa8439321388ca0e51dd5d6b3",
+  "inclut": [],
+  "date": "2026-10-20",
+  "fichiers": {
+    ".mv-base": "2db6022e450fb7ed5953a283c1f6b40a25cba511db85dd90add25243b9934c98",
+    "CLAUDE.md": "641a9f9dee5b5856695a8f6a43725626de72be06c429a440a9c16694056faee9",
+    "docs/claude/INDEX.md": "0d771a37dab7204284cbe4c947ea762a75159ee8f439a5d6983c21915c1440a6",
+    "docs/claude/chantiers-380-429.md": "6b36913f4b27793ef6071b988fad2d43428e5f0de937e633adfe3474ea721e9d",
+    "docs/claude/journal.md": "5a65fa920c9b1640dfd781a5ffc8cc28f4723c590d0d1292b7a903cf087e5d16",
+    "index.html": "3a4f18533384d9be107cdd84f95cfc76e00fe3fc67899f51a9ff7ad668816d55",
+    "public/sw.js": "afbe47f582b5367107648d9150f1f8f8d11cc1f8da58e2056def16dca4abfde6",
+    "scripts/mv-espace-baseline.json": "0da115e0101c6cfca94d3b60b7f69a27797a20b3de663a9acc52584de55c41ff",
+    "scripts/mv-harnais-boutons.mjs": "45190521423aa3cee34fb927ecb537edc18cb70b57ae68a23e16eeb85d6aaafd",
+    "scripts/mv-harnais-globaux.mjs": "7287337d0a992a42a6d977daaee52a13c02caf83e730744b135bc9ea2e727f10",
+    "scripts/mv-harnais-larg1.mjs": "341bff8124c653604fe67e7b98cf07f97df8b712eb66fc214bb9cd4a77946f11",
+    "scripts/mv-harnais-pastilles.mjs": "0eec7b636a3757df448a25269688f4d9289cabaaf2147212de08af01ed1f5099",
+    "scripts/mv-harnais-regl-module.mjs": "6154891805dfbaa187958f8c01357469133ac32c387dff4d930078bc65fd584f",
+    "scripts/mv-harnais-tuto8.mjs": "3823835b6f705568e8699a1335e51e5a42e9ace0d61bc9bf06f197a1ce2b6473",
+    "scripts/mv-jetons-baseline.json": "3243ec1652029fc8cb96cb2b61d7061f66ac8af1342b4ccf802d183faadd46ae",
+    "scripts/preflight.mjs": "ca3b46113513c31d98ece408cd28ee84594e374256abeeb869d99bae9ef95e26",
+    "scripts/tutos-couverture.json": "63e77c45e4fb1e19ef59575d649bd6b6ece44dc75a9fa1a985cbfcc39eaf2166",
+    "src/app.js": "d2c29cb27f03f59805003d144e17e3bd4433bd152a0b652e5b324c742a0a54d1",
+    "src/styles.css": "3eea38ea4a880247e538dc246a3b881184bed0acfcb1c266b3db879b3dea95b5",
+    "src/utils.js": "7833bc3a816c5b6f86cc602bdcc564955c7af9af714dcf8e13652a8b898b7e5c"
+  }
+}
