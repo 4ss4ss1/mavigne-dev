@@ -1,0 +1,26 @@
+{
+  "lot": "CUVES-1",
+  "section": "§383",
+  "base": "2c8d73f8cf8753b1e804ddd92b4ea392c74bc67b",
+  "inclut": [],
+  "date": "2026-10-20",
+  "fichiers": {
+    ".mv-base": "ed75053c89ed90bce7b796a9a2b03b056e7dc61389a21dc75112bd855a8c5cd6",
+    "CLAUDE.md": "8c13c4e10ab8fd548ff3952ce41f59bdb8e053fcb9beb9d6f911482d03fe4050",
+    "docs/claude/INDEX.md": "d14779dfd1682e7c6ea5eff651128757cb57c71060362b79e2f439a46f7bade1",
+    "docs/claude/chantiers-380-429.md": "761e2d1eda6598f3bd7148aa39b9fbe8b3ae3684b8c14e00294e71fadaa201ab",
+    "docs/claude/journal.md": "cdb0aa73436d78d9b5c21a399a56369017b621f76ab7424a1a3ff5f7f677b869",
+    "guide/08-cave.html": "7f6b2916477497f8683af81b790a40a9350bf4f4e4b1adfbdde9ae73bace3b93",
+    "index.html": "b7973225dc086d737b3ffeda38aacdd57e0da9da66083845cea686780aeb2f65",
+    "public/guide.html": "a420ca17cb07a3b471c14217c7c90ffe967b971468b0e956118a88ac16592396",
+    "public/sw.js": "0d7872d7b244e15fc3e38cfdc0e853023a373e47e64ed58d865786068c48c477",
+    "scripts/mv-harnais-cave2.mjs": "dbb3506b016047c7bad8b5677fea8e2585d0a3f8eeade47b2a0f4942c5caa921",
+    "scripts/mv-harnais-gf.mjs": "87fe6c3716f6f126de0ff3a05e0c6ff45abc282a40bef0a8f040b80c7707d88e",
+    "scripts/mv-harnais-liste.mjs": "557c3116777c8cc9508d8068fed19db3af0d5f60c691e2b2ec646993ffb0b99a",
+    "src/cave.js": "2bc7420d85d1dbc691fdb5c4160ad9b8b3cbbfd6a0d5a72080f6805ab2f1c575",
+    "src/cuvier.js": "819594ababf892956fdfd1fbac76a87a3c792477c91d249d451d8f7aec5a0262",
+    "src/styles.css": "1e15dc13594cce5b8b945f34c2324e9ff49535c989d98e8dd7014453cb3b69af",
+    "src/utils.js": "8244a7512169b593b6ecc73975001ce8ccc7c76025d11c3f6d4827e496b71c52",
+    "scripts/mv-harnais-cuves1.mjs": "7cefaa2b1e4eb116ff6574a7961db6e4c07e2cfee1886ad1e1b2ef8c89a5a594"
+  }
+}

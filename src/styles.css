@@ -7106,6 +7106,17 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
   .rec-c4{display:block}
 }
 /* ★ FIN REC-1 */
+/* ★ CUVES-1 (§383) — LES CUVES RANGÉES. La fiche d'une cuve (à droite sur ordinateur, ovCuveFiche au téléphone), le
+   plan de cuverie à droite tant qu'aucune n'est ouverte. La grille, la tête et les chiffres sont ceux des Récoltes
+   (rec-grille, mat-tete, rec-chiffres) ; le détail garde son style d'avant (mvv-*). */
+.cuv-fiche{padding:0;gap:0}
+.cuv-fi-corps{padding:var(--e-3,12px) var(--e-5,20px) var(--e-5,20px)}
+.mat-modal .cuv-fi-corps{padding:var(--e-3,12px) var(--e-4,16px) var(--e-5,20px)}
+.cuv-remp{padding:var(--e-4,16px)}
+.cuv-remp .mvv-plan{margin-top:var(--e-2,8px)}
+#page-cave .rec-gauche #mvv-corps{grid-template-columns:minmax(0,1fr)}
+#mvv-body .rec-grille.cuv-ici .rec-droite{display:block}
+/* ★ FIN CUVES-1 */
 /* ★ CAVE-3 (§290) — LE CHAI EN LISTE + FICHE (MAQUETTE V8). La fiche est celle de l'appli (openCuveeDetail écrite dans
    #chai-fiche) ; au téléphone, la fenêtre comme avant. Cuvées au cadre neutre (la choisie cerclée), alerte d'ouillage en ambre,
    « Ouiller les … » et « Nouvelle cuvée » à l'accent. Par jetons. */

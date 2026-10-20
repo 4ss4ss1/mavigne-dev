@@ -4008,29 +4008,10 @@ function _cuveCouches(cu, recs){
   return { couches: cs, plein: plein, cap: parseFloat(cu.volume_hl) || 0 };
 }
 
-function _apTronc(s, n){ s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '\u2026' : s; }
-
 /* Le pied dit l'ASSIETTE du chiffre (§7) : sur quoi porte le pourcentage, et
    ce qui n'y est pas. La ligne « N cuves de plus, visibles sur un ecran plus
    large » a disparu avec la coupe — elle decrivait un chemin qui n'existe
    plus (test du mode d'emploi, §27a). */
-function _remplirPied(plein, cap, sansCap, total){
-  var h = '';
-  if(cap > 0){
-    var pct = Math.round(plein / cap * 100);
-    h += '<div class="mvcv-ord">La cuverie est remplie \u00e0 <b>' + pct + ' %</b> \u2014 '
-      + _mvF1(plein) + ' hL sur ' + _mvF1(cap) + ' hL, ' + total + ' cuve' + (total > 1 ? 's' : '')
-      + ' en cours. C\u2019est le chiffre qui dit si la journ\u00e9e de r\u00e9colte de demain peut \u00eatre lanc\u00e9e.</div>';
-  }
-  h += '<div class="mvcv-note">Chaque apport garde le nom de sa parcelle jusque dans la cuve. '
-    + 'Le vide au-dessus, c\u2019est la marge qui reste.</div>';
-  if(sansCap > 0) h += '<div class="mvcv-note">' + sansCap + ' cuve' + (sansCap > 1 ? 's' : '')
-    + ' sans contenance renseign\u00e9e (trait tiret\u00e9) : ' + (sansCap > 1 ? 'elles ne comptent' : 'elle ne compte')
-    + ' pas dans le taux de remplissage.</div>';
-  h += '<div class="mvcv-note">Les cuves d\u00e9cuv\u00e9es n\u2019y sont pas : leur vin est parti en f\u00fbt.</div>';
-  return h;
-}
-
 var _MV_CEP_COUL = {
   'pinot noir':'r','gamay':'r','cesar':'r','pinot meunier':'r','merlot':'r','syrah':'r',
   'cabernet sauvignon':'r','cabernet franc':'r','grenache':'r','malbec':'r','cot':'r',
@@ -10910,8 +10891,6 @@ window._caveFmlEtat = _caveFmlEtat;     // ★ FML-1 — la frise du Cuvier lit 
 window._mlFinMalo = _mlFinMalo;         // ★ FML-1 — et le jour où elle a été constatée finie
 window._fermLegende = _fermLegende;
 window._cuveCouches = _cuveCouches;
-window._apTronc = _apTronc;
-window._remplirPied = _remplirPied;
 window._parcCoul = _parcCoul;
 window._mlAuj = _mlAuj;
 window._mlEcartJ = _mlEcartJ;

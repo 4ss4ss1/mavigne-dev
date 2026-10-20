@@ -73,3 +73,30 @@ Le rangement du Cuvier continue, onglet par onglet, sur la maquette validée le 
 - **Retirer un rendu laisse ses aides orphelines** : `_apportsRangs` et `_apportsPied` vivaient dans cave.js, exposées pour le seul `_vendApportsSvg` ; le préflight les a vues. `_recDests`, que seul l’ancien rendu appelait, a un harnais (vendange-parts) : il est rebranché (`_recDestsTxt`) plutôt que retiré.
 - **La marge de cuvier.js** : 568 → 580 ko (+2 %), sous les 5 % — l’ancien code retiré a payé la moitié du nouveau.
 - **KIT-4 (§229) compte les formateurs de surface** : une surface s’écrit par `window._mvHaP` (une parcelle, au centiare) ou `window._mvHaT` (un total, au centième), et le harnais tient le compte exact par fichier. Le bloc pluriannuel parti emportait le seul `_mvHaT` de cuvier.js ; les chiffres des Récoltes en portent trois, la fiche un `_mvHaP` : le compte passe de 1 à 4, dit dans le harnais. Le premier passage de la chaîne l’a vu (`mv-harnais-kit4` et sa contre-épreuve). ⚠️ Les surfaces des Maturités (MATU-1) s’écrivent encore par `_mvF1(…) + ' ha'` : à passer aux formateurs au prochain lot du Cuvier.
+
+## 383. ★★ CUVES-1 — UNE CUVE S’OUVRE EN FICHE : À DROITE SUR ORDINATEUR, DANS SA FENÊTRE AU TÉLÉPHONE (20/10 — `src/cuvier.js` (`renderVendCuves` réécrit, `_vendTeteHtml`, `_vendChiffresHtml`, `_vendRempHtml`, `_vendFicheHtml`, `_vendBascOuv`, `_vendLigneHtml`, `_vendCorpsHtml` ; parti : `_vendRemplirSvg`) · `src/cave.js` (`_apTronc`, `_remplirPied` retirés) · `src/styles.css` (bloc CUVES-1) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE) · `index.html` (`ovCuveFiche`) · `public/sw.js` · `guide/08-cave.html` · `public/guide.html` · `scripts/mv-harnais-cuves1.mjs` (neuf) · `scripts/mv-harnais-cave2.mjs` · `scripts/mv-harnais-gf.mjs` · `scripts/mv-harnais-liste.mjs` · `.mv-base` · `lots/CUVES-1.json` · `CLAUDE.md` · `docs/claude/*` · **APP 9.44 → 9.45, SW 10.23 → 10.24**, base `2c8d73f`)
+
+### 383a. La demande
+Troisième onglet du rangement du Cuvier, sur la maquette du 19/10. La question laissée ouverte en août — une cuve s’ouvre-t-elle sur place dans la liste, ou en fiche ? — Nico la tranche le 20/10 : « comme dans la maquette », en fiche.
+
+### 383b. Ce qui a été lu avant d’écrire
+- **Le détail d’une cuve est le cœur de la vinification** : `_vendDetailHtml` porte la frise (PARC-1), la courbe, le labo (GF-1, LABO-1), les relevés et les opérations corrigeables, la fusion, le pressurage (CUV-13), la FML, et tous les boutons. Trois harnais au moins l’exécutent (GF, CUV-13, fusion).
+- **La liste a déjà ce que la maquette demande** : les filtres, le tri, la recherche, le plan de cuverie en vignettes (`_vendCellHtml`, chaque cuve à son niveau) — la « vue Remplissage » de la maquette.
+- **CAVE-2 et GF lisent l’ancien comportement** : le texte du bouton flottant « + Nouvelle cuve », et le détail lu dans l’écran après l’ouverture d’une cuve.
+
+### 383c. Ce qui est livré
+- **La fiche** : `_vendBascOuv` ouvre ou referme la cuve ; sa fiche (`_vendFicheHtml`) est un en-tête — le nom, « Cuve X », l’étape, la matière et la contenance, la couleur, la croix — puis, pour une cuve à relever, un encadré « Pas de relevé depuis N jours » avec « Noter un relevé », puis `_vendDetailHtml` entier. À droite sur ordinateur, collante ; dans `ovCuveFiche` au téléphone, ses courbes peintes une fois la fenêtre remplie ; sans fenêtre, dans l’écran.
+- **La tête** commune aux trois onglets : la vendange choisie (une vendange passée : « Les cuves de 2025 sont décuvées », renvoi au Chai), « Fusionner » (dès deux cuves en cours), « Nouvelle cuve ».
+- **Quatre chiffres** : en fermentation (et combien en macération à froid), à relever (nommées), en cuve sur la contenance de la cuverie (avec la jauge), en attente d’encuvage.
+- **Sur ordinateur, le plan de cuverie à droite** tant qu’aucune cuve n’est ouverte ; au téléphone, la bascule Liste / Plan reste dans les outils.
+- Gardés : le bandeau « à mesurer » (il ouvre la fiche), la recherche, les filtres, le tri, les sections fusionnées et décuvées.
+
+### 383d. Les décisions
+- **Le cadre change, pas le contenu** : le détail d’avant devient le corps de la fiche, dans son ordre. La maquette rangeait autrement (chiffres, frise, courbe, relevés, opérations, boutons) ; réordonner `_vendDetailHtml` aurait touché ce que lisent GF, CUV-13 et fusion pour un gain de mise en page.
+- **Parti : le graphique « Remplissage des cuves · parcelle par parcelle »**, replié depuis longtemps et doublé par le plan. Ses deux aides de cave.js partent avec lui.
+- **Aucun geste neuf** : la fiche se ferme par `_vendBascOuv`, la tête rappelle `openVendFusion` et `openOvVendCuve`, la vendange `_matSetAn`. Le plafond des tutos ne bouge pas.
+
+### 383e. Trouvé en route
+- **Deux harnais décrivaient l’ancien geste, pas une règle** : CAVE-2 cherchait le texte du bouton flottant, GF le détail dans l’écran. Adaptés à l’intention (le bouton de la tête ; la fiche dans sa fenêtre au téléphone), leurs contre-épreuves vertes. Leçon : un harnais qui lit la place d’un contenu (« dans mvv-body ») vieillit quand le contenu change de cadre ; lire le contenu là où il est rendu.
+- **Les noms en `_cuv` sont au Chai** (`mv-harnais-cuvier`, D2) : les quatre fonctions neuves, d’abord nommées `_cuvTeteHtml`, `_cuvChiffresHtml`, `_cuvRempHtml`, `_cuvFicheHtml`, ont rougi le premier passage de la chaîne ; elles s’appellent `_vendTeteHtml`, `_vendChiffresHtml`, `_vendRempHtml`, `_vendFicheHtml`. Au Cuvier, une fonction commence par `_vend` (ou `_mat`, `_rec` pour ses onglets) ; les classes CSS `cuv-` ne sont pas concernées.
+- **Le bac à sable du harnais GF crée tout élément demandé** : c’est la fenêtre qui y reçoit la fiche. Le repli « sans fenêtre, dans l’écran » sert à un index.html ancien encore en cache, le temps du rechargement.

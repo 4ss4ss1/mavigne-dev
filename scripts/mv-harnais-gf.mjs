@@ -118,12 +118,12 @@ async function essais() {
     const i = liste.indexOf('mvv-alert'), al = i > -1 ? liste.slice(i, liste.indexOf('</div></div>', i) + 12) : '';
     return (al.indexOf('Cuve 3') > -1 && al.indexOf('Cuve 7') === -1 && al.indexOf('Cuve 5') === -1) || ('bandeau : ' + al.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 160));
   });
-  G._vendBascOuv('vk7'); const fiche7 = els['mvv-body'].innerHTML;
+  G._vendBascOuv('vk7'); const fiche7 = (els['cuv-fiche-corps'] && els['cuv-fiche-corps'].innerHTML) || els['mvv-body'].innerHTML;   // CUVES-1 (§383) : au téléphone, la fiche vit dans sa fenêtre
   essai('G17', 'la fiche porte le bloc du labo et le conteneur de sa courbe', () => (fiche7.indexOf('class="mvv-gf"') > -1 && /id="mvg-gf-[^"]+"/.test(fiche7)) || 'bloc absent');
   essai('G18', 'la phrase : en route vers le sec, la date et la marge', () => fiche7.indexOf('vers le <b>13/10</b>, \u00e0 2\u00a0jours pr\u00e8s') > -1 || 'phrase absente');
   essai('G19', 'une cuve qui finit au chai porte « Déclarer la FA finie » dans le bloc du labo', () => fiche7.indexOf("openVendFaFin('vk7')") > -1 || 'bouton absent');
   essai('G20', 'la courbe des sucres se dessine, seuil compris, sans valeur sale', () => { const s = G._vendGfSvg(cu('vk7'), 340); return (s.indexOf('<svg') === 0 && !sale(s).length && s.indexOf('sec au labo') > -1) || ('svg : ' + sale(s).join(' ; ').slice(0, 120) + s.slice(0, 40)); });
-  G._vendBascOuv('vk1'); const fiche1 = els['mvv-body'].innerHTML;
+  G._vendBascOuv('vk1'); const fiche1 = (els['cuv-fiche-corps'] && els['cuv-fiche-corps'].innerHTML) || els['mvv-body'].innerHTML;   // CUVES-1 (§383) : au téléphone, la fiche vit dans sa fenêtre
   essai('G21', 'sans analyse, « Déclarer la FA finie » vit dans la rangée des gestes', () => (fiche1.indexOf("openVendFaFin('vk1')") > -1 && fiche1.indexOf('class="mvv-gf"') === -1) || 'bouton absent, ou bloc labo sans analyse');
 
   // ── D. La feuille de relevé ─────────────────────────────────────────────────

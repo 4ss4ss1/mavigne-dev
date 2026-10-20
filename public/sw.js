@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.23
+// MA VIGNE — Service Worker v10.24
+// v10.24 (20/10/2026) — CUVES-1 (§383) : une cuve s’ouvre en fiche (à droite sur ordinateur, dans une fenêtre au téléphone), la tête et quatre chiffres de l’onglet Cuves, le plan de cuverie à droite sur ordinateur. cuvier.js, cave.js, styles.css, index.html, utils.js. APP 9.44 -> 9.45.
 // v10.23 (20/10/2026) — REC-1 (§382) : l’onglet Récoltes du Cuvier rangé (quatre chiffres, le rendement de chaque parcelle face au maximum de son appellation, le journal des pesées, la fiche), sur la vendange choisie commune avec les Maturités. cuvier.js, cave.js, styles.css, index.html, utils.js. APP 9.43 -> 9.44.
 // v10.22 (19/10/2026) — CHARTE-5c (§381) : 43 encadrés faits à la main au jeu (index.html 24, Planning 9, Accueil 5, Cave 4, Pilotage 1) ; .cmp-alert des Réglages groupé sous les tons de l’encadré. index.html, planning.js, app.js, cave.js, pilotage.js, styles.css, utils.js. APP 9.42 -> 9.43.
 // v10.21 (19/10/2026) — CHARTE-5b (§380) : 21 encadrés faits à la main au jeu (Phyto 9, Réglages 12), le ton d’après leur couleur ; l’encadré reste un bloc de texte (en ligne seulement avec une icône). phyto.js, reglages.js, styles.css, utils.js, index.html. APP 9.41 -> 9.42.
@@ -4553,7 +4554,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.23';
+const CACHE_NAME   = 'mavigne-v10.24';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4570,7 +4571,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.23 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.24 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4590,7 +4591,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.23 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.24 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

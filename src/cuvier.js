@@ -579,7 +579,18 @@ function _vendListe(cuves){
 function _vendSetVue(v){ _vendVue=(v==='plan'?'plan':'liste'); renderVendCuves(); }
 function _vendSetFiltre(k){ _vendFiltre=k; _vendOuvert=null; renderVendCuves(); }
 function _vendSetTri(k){ _vendTri=k; renderVendCuves(); }
-function _vendBascOuv(id){ _vendOuvert=(_vendOuvert===id?null:id); renderVendCuves(); }
+function _vendBascOuv(id){
+  _vendOuvert=(_vendOuvert===id?null:id);
+  /* ★ CUVES-1 (§383) : à droite sur ordinateur (le rendu la pose), dans sa fenêtre au téléphone. */
+  var corps=document.getElementById('cuv-fiche-corps');
+  renderVendCuves();
+  if(_matLarge()||!corps) return;
+  if(!_vendOuvert){ if(typeof window.closeOv==='function') window.closeOv(null,'ovCuveFiche'); return; }
+  var c=(CAVE_VENDANGE.cuves_vinif||[]).filter(function(x){ return x&&x.id===_vendOuvert; })[0]; if(!c) return;
+  corps.innerHTML='<div class="cuv-fiche">'+_vendFicheHtml(c,canWrite())+'</div>';
+  if(typeof window.openOv==='function') window.openOv('ovCuveFiche');
+  _vendPeindreGraphes();
+}
 /* ⚠️ On ne repeint PAS a chaque frappe : le champ perdrait le focus, meme
    piege que _vendDecCuveVol. On repeint la liste seule, et on remet le
    curseur ou il etait. */
@@ -1468,7 +1479,7 @@ function _vendLigneHtml(c,canEdit){
     +etat
     +'<span class="mvv-chev">'+_mvIcon('chevron',16)+'</span>'
     +'</span></button>';
-  h+='<div class="mvv-det"'+(ouv?'':' hidden')+'>'+(ouv?_vendDetailHtml(c,canEdit):'')+'</div>';
+  /* ★ CUVES-1 (§383) : la cuve ouverte se lit dans sa fiche (à droite, ou dans sa fenêtre) ; la ligne reste marquée. */
   return h+'</div>';
 }
 
@@ -1704,13 +1715,8 @@ function _vendCorpsHtml(){
                     :'Aucune cuve de vinification.<br>Cr\u00e9ez votre premi\u00e8re cuve pour suivre la fermentation.')
       +'</div></div>';
   }
-  if(_vendVue==='plan'){
+  if(_vendVue==='plan' && !_matLarge()){   // ★ CUVES-1 : sur ordinateur, le plan est à droite
     var h='<div class="mvv-plan">'+l.map(_vendCellHtml).join('')+'</div>';
-    var o=l.filter(function(c){ return c.id===_vendOuvert; })[0];
-    if(o) h+='<div class="mvv-row '+(o.statut==='termine'?'fini':(_vendADue(o)?'due':'fa'))+' open" style="margin-top:10px">'
-      +'<div class="mvv-hd" style="cursor:default"><span class="mvv-mid">'
-      +'<span class="mvv-nom">'+_escHtml(o.nom||'Cuve')+'</span></span></div>'
-      +'<div class="mvv-det">'+_vendDetailHtml(o,canEdit)+'</div></div>';
     return h;
   }
   return l.map(function(c){ return _vendLigneHtml(c,canEdit); }).join('');
@@ -1740,20 +1746,41 @@ function _vendPeindreGraphes(){
   if(window._mvGraphRepeindre) window._mvGraphRepeindre();
 }
 
+// ══════════════════════════════════════════════════════════════════
+// ★★ CUVES-1 (§383) — LES CUVES RANGÉES (Cuvier › Cuves)
+//   Suite de MATU-1 et REC-1, même maquette. Nico (20/10) : une cuve s'ouvre en
+//   FICHE, « comme dans la maquette » — à droite sur ordinateur, dans une fenêtre
+//   au téléphone (ovCuveFiche) —, et plus sur place dans la liste.
+//   ⚠️ LA FICHE EST LE DÉTAIL D'AVANT : _vendDetailHtml (la frise, la courbe, le
+//     labo, les relevés, les opérations, les boutons) ne change pas, seul son cadre
+//     change. Aucun geste n'est perdu ; ses harnais (GF, CUV-13, fusion…) le lisent
+//     toujours. Sans la fenêtre (index.html ancien, bac à sable), la fiche se pose
+//     dans l'écran, comme sur ordinateur.
+//   Neuf : la tête (la vendange choisie, « Fusionner », « Nouvelle cuve » à la
+//   place des deux boutons flottants), quatre chiffres, et sur ordinateur le
+//   remplissage (le plan de cuverie) à droite tant qu'aucune cuve n'est ouverte.
+//   Parti : le graphique « Remplissage des cuves · parcelle par parcelle ».
+// ══════════════════════════════════════════════════════════════════
 function renderVendCuves() {
   var el=document.getElementById('mvv-body'); if(!el) return;
   window._mvGraphOublier('#mvg-fa-');
   window._mvGraphOublier('#mvg-fm-');
-  window._mvGraphOublier('#mvg-cv-');
   window._mvGraphOublier('#mvg-gf-');
   window._mvGraphOublier('#mvg-lbc-');   // ★ LABO-1
+  var an=_matAnCourant(), courante=String(an)===String(_mlCampagne());
   var toutes=CAVE_VENDANGE.cuves_vinif||[];
   var cuves=toutes.filter(function(c){ return c && !_vendEstFusionnee(c); });
   var canEdit=canWrite();
   var actives=cuves.filter(function(c){ return c.statut!=='termine'; });
   var due=cuves.filter(_vendADue);
-
-  var h=_caveSaisBanner();
+  var h=_caveSaisBanner()+_vendTeteHtml(an, courante, canEdit&&courante, actives.length);
+  if(!courante){
+    h+='<section class="mvcarte rec-vide"><div class="rec-vide-ic">'+_mvIcon('cuve',24)+'</div>'
+      +'<h2 class="mvcarte-titre">Les cuves de '+_escHtml(an)+' sont décuvées</h2>'
+      +'<p class="rec-note">Leur vin se suit au Chai, dans les cuvées du millésime '+_escHtml(an)+'.</p></section>';
+    el.innerHTML=h; _vendRefreshCockpit(); return;
+  }
+  if(cuves.length) h+=_vendChiffresHtml(cuves);
   if(due.length){
     h+='<div class="mvv-alert"><div class="mvv-alert-t">'+due.length+' cuve'+(due.length>1?'s':'')+' \u00e0 mesurer</div>'
       +'<div class="mvv-alert-d">En fermentation active, un relev\u00e9 de densit\u00e9 par jour suit la cin\u00e9tique et anticipe un arr\u00eat.</div>'
@@ -1762,32 +1789,78 @@ function renderVendCuves() {
           +_escHtml(c.nom)+' <small>\u00b7 '+_vendStale(c)+' j</small></button>';
       }).join('')+'</div></div>';
   }
-  /* ★ Le remplissage parcelle par parcelle reste, mais REPLIE : il repond a
-     « la journee de recolte de demain peut-elle partir ? », pas a « ou est ma
-     cuve ? ». Deplie, il repoussait la liste d'un ecran entier. */
-  if(actives.length){
-    h+='<details class="mvv-histwrap" style="margin-bottom:10px"><summary>Remplissage des cuves '
-      +'<span class="u">\u00b7 parcelle par parcelle</span></summary>'
-      +'<div id="mvg-cv-all"></div></details>';
-    (function(cc,rr){ window._mvGraphSuivre('#mvg-cv-all', function(lg){ return _vendRemplirSvg(cc,rr,lg); }); })(actives, CAVE_VENDANGE.recoltes||[]);
-  }
-  if(cuves.length) h+=_vendOutilsHtml(cuves);
-  h+='<div id="mvv-corps">'+_vendCorpsHtml()+'</div>';
-
-  /* Les cuves absorbees par une fusion : hors de la liste, jamais perdues. */
-  h+=_vendFusionneesSection(toutes.filter(_vendEstFusionnee));
-  h+=_vendDecuveesSection(cuves.filter(function(c){ return c.statut==='termine'; }));
-
-  if(canEdit){
-    h+='<div class="mvv-fab">';
-    if(actives.length>=2)
-      h+='<button class="mvv-fab-btn" style="background:var(--bg-card,#FBFAF6);color:var(--terre,#8A5A38);'
-        +'border:1px solid rgba(138,90,56,.3);margin-bottom:8px" onclick="openVendFusion()">Fusionner des cuves</button>';
-    h+='<button class="mvv-fab-btn" onclick="openOvVendCuve(null)">+ Nouvelle cuve</button></div>';
-  }
+  var large=_matLarge(), o=_vendOuvert?cuves.filter(function(c){ return c.id===_vendOuvert; })[0]:null;
+  var ici=!!o && !large && !document.getElementById('cuv-fiche-corps');
+  h+='<div class="rec-grille rec-v-parc'+(ici?' cuv-ici':'')+'">'
+    +'<div class="rec-gauche">'+(cuves.length?_vendOutilsHtml(cuves):'')+'<div id="mvv-corps">'+_vendCorpsHtml()+'</div>'
+    +_vendFusionneesSection(toutes.filter(_vendEstFusionnee))
+    +_vendDecuveesSection(cuves.filter(function(c){ return c.statut==='termine'; }))+'</div>'
+    +'<div class="rec-droite">'+((o&&(large||ici))?'<section class="mvcarte cuv-fiche" aria-label="Fiche de la cuve">'+_vendFicheHtml(o,canEdit)+'</section>'
+      :(large&&cuves.length?_vendRempHtml(cuves):''))+'</div>'
+    +'</div>';
   el.innerHTML=h;
   _vendPeindreGraphes();
   _vendRefreshCockpit();
+}
+
+function _vendTeteHtml(an, courante, canEdit, nAct){
+  var ans=_vendAnnees();
+  var titre=ans.length>1
+    ? '<select class="mat-an" aria-label="Choisir la vendange" onchange="_matSetAn(this.value)">'
+      +ans.map(function(a){ return '<option value="'+_escAttr(a)+'"'+(a===String(an)?' selected':'')+'>Vendange '+_escHtml(a)+'</option>'; }).join('')+'</select>'
+    : '<span class="mat-an-t">Vendange '+_escHtml(an)+'</span>';
+  return '<div class="mat-tete"><div class="mat-tete-g">'+titre+'<span class="mat-ref">'+(courante?'au '+_vendDateLongue(_mvToday()):'vendange passée')+'</span></div>'
+    +(canEdit&&nAct>=2?'<button type="button" class="mvbtn mvbtn-secondaire" onclick="openVendFusion()">Fusionner</button>':'')
+    +(canEdit?'<button type="button" class="mvbtn mvbtn-principal rec-nouv" onclick="openOvVendCuve(null)">'+_mvIcon('plus',16)+'<span class="lg">Nouvelle cuve</span><span class="sm">Cuve</span></button>':'')
+    +'</div>';
+}
+
+function _vendChiffresHtml(cuves){
+  var act=cuves.filter(function(c){ return c.statut!=='termine'; });
+  var fa=act.filter(function(c){ return c.statut==='fa'; }), mpf=act.filter(function(c){ return c.statut==='mpf'; });
+  var due=cuves.filter(_vendADue), setup=act.filter(function(c){ return c.statut==='setup'; });
+  var vol=0, cap=0;
+  act.forEach(function(c){ vol+=(_vendVolContenu(c).hl||0); cap+=(parseFloat(c.volume_hl)||0); });
+  var noms=function(l){ return l.slice(0,3).map(function(c){ return _escHtml(c.nom||'Cuve'); }).join(', ')+(l.length>3?' et '+(l.length-3)+' autre'+(l.length>4?'s':''):''); };
+  var cas=function(l,v,u,s,j){
+    return '<div><span class="mvchiffres-l">'+l+'</span><span class="mvchiffres-v">'+v+(u?'<small class="rec-u">'+u+'</small>':'')+'</span>'
+      +'<span class="rec-sous">'+s+'</span>'+(j!=null?'<span class="rec-jauge"><i style="width:'+j+'%"></i></span>':'')+'</div>';
+  };
+  return '<div class="mvchiffres rec-chiffres" style="--mvchiffres-n:4">'
+    +cas('En fermentation', String(fa.length), fa.length>1?'cuves':'cuve', mpf.length?mpf.length+' en macération à froid':'aucune en macération')
+    +cas('À relever', String(due.length), '', due.length?noms(due):'toutes relevées')
+    +cas('En cuve', vol>0?String(Math.round(vol)):'\u2014', vol>0?'hL':'', cap>0?'sur '+Math.round(cap)+' hL de cuverie':'contenances à renseigner', cap>0?Math.min(100,Math.round(vol/cap*100)):null)
+    +cas('Encuvage', String(setup.length), '', setup.length?noms(setup):'aucune cuve en attente')
+    +'</div>';
+}
+
+/* Sur ordinateur, tant qu'aucune cuve n'est ouverte : le plan de cuverie, chaque
+   cuve à son niveau. Le même plan que la vue « Plan » du téléphone. */
+function _vendRempHtml(cuves){
+  var act=cuves.filter(function(c){ return c.statut!=='termine'; }), l=_vendListe(cuves), vol=0, cap=0;
+  act.forEach(function(c){ vol+=(_vendVolContenu(c).hl||0); cap+=(parseFloat(c.volume_hl)||0); });
+  return '<section class="mvcarte cuv-remp" aria-label="Remplissage"><div class="mvcarte-tete"><h2 class="mvcarte-titre">Remplissage</h2>'
+    +'<span class="rec-sous">'+_matPlur(l.length,'cuve')+'</span></div>'
+    +'<p class="rec-note">'+(cap>0?Math.round(vol)+' hL en cuve sur '+Math.round(cap)+' hL de cuverie, '+Math.round(vol/cap*100)+' %. ':'')+'Touchez une cuve pour sa fiche.</p>'
+    +'<div class="mvv-plan">'+l.map(_vendCellHtml).join('')+'</div></section>';
+}
+
+/* La fiche : un en-tête (le nom, l'étape, la cuve, la couleur, fermer), l'appel au
+   relevé quand il manque, puis le détail d'avant, entier. */
+function _vendFicheHtml(c, canEdit){
+  var rep=_vendRepere(c), p=c.cuve_ref?_caveCuve(c.cuve_ref):null;
+  var mat=p?String(p.materiau||p.type||''):'';
+  var coul=(c.parcelles&&c.parcelles.length)?_parcCoul(c.parcelles[0]):'?';
+  var tag=function(t){ return '<span class="mvpas mvpas-etiquette">'+t+'</span>'; };
+  var h='<div class="mat-fi-hd"><div class="mat-fi-cel"><h3 class="mat-fi-t">'+_escHtml(c.nom||'Cuve')+'</h3><div class="mat-tags">'
+    +(rep?tag('Cuve '+_escHtml(rep)):'')+tag(_escHtml(_vendStatLbl(c.statut)))
+    +((mat||c.volume_hl)?tag(_escHtml([mat, c.volume_hl?_vendCuvF1(c.volume_hl)+'\u00a0hL':''].filter(Boolean).join(' · '))):'')
+    +((coul==='r'||coul==='b')?tag('<i class="mat-pt '+_matVin(coul)+'"></i>'+(coul==='r'?'Rouge':'Blanc')):'')
+    +'</div></div><button type="button" class="mvbtn mvbtn-icone mvbtn-secondaire" aria-label="Fermer la fiche" data-id="'+_escAttr(c.id)+'" onclick="_vendBascOuv(this.dataset.id)">'+_mvIcon('croix',16)+'</button></div>';
+  if(_vendADue(c)) h+='<div class="mvencadre mvencadre-attention rec-fi-enc">'+_mvIcon('alerte',18)
+    +'<span>Pas de relevé depuis '+_matPlur(Math.max(1,_vendStale(c)),'jour')+'. En macération comme en fermentation, un relevé par jour suit la cinétique et voit venir un arrêt.</span>'
+    +(canEdit?'<button type="button" class="mvbtn mvbtn-principal mvbtn-compact" data-id="'+_escAttr(c.id)+'" onclick="openOvVendMesure(this.dataset.id)">Noter un relevé</button>':'')+'</div>';
+  return h+'<div class="cuv-fi-corps">'+_vendDetailHtml(c,canEdit)+'</div>';
 }
 
 function _vendCfg(){return Object.assign({poids_caisse_kg:25,ratio_min:130,ratio_max:140,sucre_par_degre:16.83},CAVE_VENDANGE.config||{});}
@@ -7958,81 +8031,6 @@ var MV_CUV_PIED = 44;   // les trois lignes de legende sous une cuve
    l'est maintenant, en tirete : une cuve qui disparait sans le dire est
    exactement ce qu'on corrige ici. Elle ne compte pas dans le taux, et le pied
    le dit. */
-function _vendRemplirSvg(cuves, recs, w){
-  var cs = (cuves || []).slice().sort(_vendTriRepere).map(function(cu){
-    var d = _cuveCouches(cu, recs);
-    return { cu:cu, couches:d.couches, plein:d.plein, cap:d.cap };
-  });
-  if(!cs.length) return window._mvGraphVide('Aucune cuve de vinification en cours',
-    'Cr\u00e9ez une cuve et rattachez-y vos pes\u00e9es pour voir l\u2019assemblage se dessiner.');
-
-  // La largeur utile se mesure AVANT de connaitre la hauteur : c'est elle qui
-  // dit combien de cuves tiennent sur une rangee, donc combien de rangees.
-  var c0 = window._mvGraphCadre(w, 100, { padL: 4, padR: 4 }), et = c0.etroit;
-  var iw = c0.iw;
-  var parLigne = Math.max(1, Math.floor((iw + MV_CUV_GAP) / (MV_CUV_LARG + MV_CUV_GAP)));
-  var lignes = Math.ceil(cs.length / parLigne);
-  var hCorps = lignes >= 4 ? (et ? 110 : 124)
-             : lignes >= 2 ? (et ? 134 : 150)
-             :               (et ? 186 : 228);
-  var hRang = hCorps + MV_CUV_PIED;
-  var hTot = 10 + lignes * hRang + (lignes - 1) * 10 + 6;
-
-  var c = window._mvGraphCadre(w, hTot, { padL: 4, padR: 4, padT: 10, padB: 6 });
-  var parRang = Math.min(parLigne, cs.length);
-  var bw = (c.iw - MV_CUV_GAP * (parRang - 1)) / parRang;
-  var capMax = Math.max.apply(null, cs.map(function(x){ return Math.max(x.cap, x.plein); })) || 1;
-
-  var g = '';
-  cs.forEach(function(x, i){
-    var r  = Math.floor(i / parLigne), k0 = i % parLigne;
-    var bx = c.padL + k0 * (bw + MV_CUV_GAP);
-    var yT = c.padT + r * (hRang + 10);
-    // La hauteur du CONTOUR est la contenance, jamais le contenu : le rectangle
-    // est le recipient. Une cuve remplie au-dela de sa contenance deborde
-    // VOLONTAIREMENT par le haut (c'est le signal, cf. la fusion) — mais le
-    // debordement est borne a la rangee, sinon il irait ecrire par-dessus les
-    // noms de la rangee du dessus.
-    var hCuve = Math.max(30, x.cap / capMax * hCorps);
-    var by = yT + (hCorps - hCuve);
-    var vide = (x.cap <= 0 && x.plein <= 0);
-    var den = x.cap || x.plein || 1;
-    var hPile = (x.plein / den) * hCuve;
-    var kEch = (hPile > hCorps) ? (hCorps / hPile) : 1;
-    // La cuve : un contour, et le vide au-dessus qui se voit. En tirete quand
-    // la contenance n'est pas renseignee — le trait dit ce qui manque.
-    g += '<rect x="' + bx.toFixed(1) + '" y="' + by.toFixed(1) + '" width="' + bw.toFixed(1)
-       + '" height="' + hCuve.toFixed(1) + '" rx="4" fill="var(--bg-card)" stroke="' + c.col.grille
-       + '" stroke-width="1.5"' + (x.cap > 0 ? '' : ' stroke-dasharray="4 3"') + '/>';
-    var acc = 0;
-    x.couches.forEach(function(o, kk){
-      var hh = (o.hl / den) * hCuve * kEch;
-      var y = by + hCuve - acc - hh;
-      var op = 1 - kk * 0.16;
-      g += '<rect x="' + (bx + 2).toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + (bw - 4).toFixed(1) + '" height="' + Math.max(1, hh).toFixed(1) + '" fill="' + c.col.mesure + '" opacity="' + Math.max(0.3, op).toFixed(2) + '"/>';
-      if(hh >= 15)
-        g += '<text x="' + (bx + 7).toFixed(1) + '" y="' + (y + 13).toFixed(1) + '" font-size="' + c.txt.mini + '" font-weight="600" fill="#fff">' + _escHtml(_apTronc(o.nom, et ? 11 : 15)) + '</text>'
-           + '<text x="' + (bx + 7).toFixed(1) + '" y="' + (y + 24).toFixed(1) + '" font-size="' + c.txt.mini + '" fill="#fff" opacity=".85">' + _mvF1(o.hl) + ' hL</text>';
-      acc += hh;
-    });
-    // Les trois lignes de legende, calees sous LA RANGEE, jamais sous le SVG.
-    var yL = yT + hCorps;
-    var pct = x.cap > 0 ? Math.round(x.plein / x.cap * 100) : 0;
-    var sous = x.cap > 0 ? 'sur ' + _mvF1(x.cap) + ' \u00b7 ' + pct + ' %' : 'contenance ?';
-    g += '<text x="' + (bx + bw/2).toFixed(1) + '" y="' + (yL + 16).toFixed(1) + '" text-anchor="middle" font-size="' + c.txt.axe + '" font-weight="600" fill="var(--texte)">' + _escHtml(_apTronc(x.cu.nom || '', et ? 12 : 16)) + '</text>'
-      + '<text x="' + (bx + bw/2).toFixed(1) + '" y="' + (yL + 29).toFixed(1) + '" text-anchor="middle" font-size="' + c.txt.mini + '" font-weight="700" fill="' + (vide ? c.col.texte : c.col.mesure) + '">' + (vide ? '\u2014' : _mvF1(x.plein) + ' hL') + '</text>'
-      + '<text x="' + (bx + bw/2).toFixed(1) + '" y="' + (yL + 41).toFixed(1) + '" text-anchor="middle" font-size="' + c.txt.mini + '" fill="' + c.col.texte + '">' + sous + '</text>';
-  });
-
-  var tPlein = cs.reduce(function(s,x){ return s + x.plein; }, 0);
-  var tCap = cs.reduce(function(s,x){ return s + x.cap; }, 0);
-  var sansCap = cs.filter(function(x){ return !(x.cap > 0); }).length;
-  var aria = 'Remplissage des cuves : ' + cs.length + ' cuve' + (cs.length > 1 ? 's' : '')
-    + ', ' + _mvF1(tPlein) + ' hectolitres'
-    + (tCap > 0 ? ' pour ' + _mvF1(tCap) + ' de cuverie' : '') + '.';
-  return window._mvGraphSvg(c, aria, g) + _remplirPied(tPlein, tCap, sansCap, cs.length);
-}
-
 // ── CANDIDAT — Maturite par parcelle, une seule courbe pour tout le domaine ──
 // Remplace les N sparklines separees de renderVendAna par UN graphe qui compare.
 // Ce qui se decide ici : l'ordre de recolte. Le graphe ne sert qu'a le montrer.
