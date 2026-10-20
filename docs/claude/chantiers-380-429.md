@@ -184,3 +184,22 @@ Le reste de la maquette de la roue crantée (§386d) : les réglages du Cuvier e
 - **Ce qui a été vérifié** : les dix-huit fichiers de `df68385` sont identiques, octet pour octet, à ceux du zip de CAVEREG-1 ; CAVEREG-2 a été bâti exactement sur cet état. Coller CAVEREG-2 n’a donc rien effacé de CAVEREG-1. (La fusion à trois voies, `git merge-file`, crie au conflit sur les lignes que les deux lots changent — les versions, la tête des nouveautés, les consolidations : ce sont les changements voulus de CAVEREG-2, pas des pertes.)
 - **Ce que livre CAVEREG-2B** : `.mv-base` sur `b15a481`, ce paragraphe, la consolidation corrigée, sa marque. Aucun fichier de l’appli.
 - **La leçon** : un zip qui porte un lot non poussé doit le dire en tête de la note (« à appliquer À LA PLACE de … ») ; si le lot porté est poussé entre-temps, redemander un rejeu sur le nouveau commit plutôt que coller. La garde a fait son travail : elle a arrêté le build avant le déploiement.
+
+## 388. ★ TUTO-8 — UN TUTO POUR LES MATURITÉS (20/10 — `src/tutos.js` (le tuto `maturites`, `_tuJour`, `_tuCave`, `_charger`) · `src/cuvier.js` (cinq étiquettes `data-tuto`) · `index.html` (`cave.cuvier`, versions) · `src/utils.js` · `public/sw.js` · `scripts/tutos-couverture.json` · `scripts/mv-harnais-tuto8.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `.mv-base` · `lots/TUTO-8.json` · `CLAUDE.md` · `docs/claude/*` · **APP 9.49 → 9.50, SW 10.28 → 10.29**, base `32c0b5b`)
+
+### 388a. La demande
+Le plafond des gestes sans tuto est monté de 813 à 825 pendant le rangement du Cuvier et de la roue crantée (MATU-1 à CAVEREG-2). Nico (20/10) : « suite tuto ».
+
+### 388b. Ce qui est livré
+- **Le tuto** `maturites` (TU_TUTOS, tutos.js), pour l’administrateur, sept étapes : aller à la Cave ; « Le Cuvier » ; l’onglet « Maturités » ; « Noter des mesures » (la feuille s’ouvre) ; taper le sucre du premier champ (120 à 290 g/L, l’exemple 214) ; « Enregistrer » (la feuille se ferme, une mesure de plus) ; regarder l’ordre de maturité. Les consignes lisent les vrais libellés à l’écran (`L(…)`) et le nom de la parcelle du premier champ.
+- **Les étiquettes** : `cave.cuvier` (index.html), `cuv.maturites`, `mat.noter`, `mat.champ` (le premier champ de la feuille seulement), `mat.ok`, `mat.ordre` (cuvier.js).
+- **Une vendange pour le domaine fictif** : `_tuCave` (cinq mesures sur trois parcelles du domaine de la démo, les fourchettes réglées), chargée par `_charger` avec `applyFbData('cave_vendange', …)`. Les dates sont calculées au chargement (`_tuJour`, de six jours à hier).
+- **Le compte** : 820 gestes sans tuto (plafond abaissé), 10 couverts.
+
+### 388c. Comment il a été vérifié
+- `npm run test:tutos` (mv-tutos-jeu.mjs) dans le bac à sable, Chromium par `MV_CHROMIUM=/opt/pw-browsers/chromium-1194/chrome-linux/chrome`, sur un build fait SANS la chaîne (`node scripts/mv-gt-page.mjs && npx vite build && node scripts/inject-precache.mjs && node scripts/mv-version-json.mjs` — `npm run build` rejoue d’abord tout `npm run check`) : les trois tutos vont au bout au téléphone, sur ordinateur, dans le panneau et au miroir ; le boot.js d’une version précédente est refusé. Celui des maturités : 7/7 étapes, 17 appels retenus par la porte, rien envoyé.
+- `mv-harnais-tuto8` : ce que le rejeu ne dit pas — les étiquettes à leur place, ce que le tuto couvre, des dates jamais en dur, le plafond.
+
+### 388d. Ce qui reste ouvert
+- Les prochains tutos qui feraient le plus baisser le compte : peser une récolte (`openOvVendRec` et sa fenêtre), ouvrir une cuve en fiche (`_vendBascOuv`), la tournée du Cuvier, la roue crantée (`_caveRegSec`).
+- L’inventaire ne voit pas les gestes passés par une variable (§387d) : les fenêtres des réglages ne sont ni comptées ni couvrables tant qu’il ne les lit pas.

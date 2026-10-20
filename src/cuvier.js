@@ -876,7 +876,7 @@ function _vendCockpitHtml(){
     //   Cuves (ce qui fermente). L'ordre precedent partait du milieu.
     //   ⚠ Seule la position des trois boutons change : les cles, les handlers
     //   et l'onglet d'arrivee (_vendTab) sont inchanges.
-    +'<button class="mvu-tab" id="mvv-tab-ana" onclick="switchVendOng(\'ana\')"><span class="t-ico"></span> Maturités</button>'
+    +'<button class="mvu-tab" id="mvv-tab-ana" data-tuto="cuv.maturites" onclick="switchVendOng(\'ana\')"><span class="t-ico"></span> Maturités</button>'
     +'<button class="mvu-tab" id="mvv-tab-rec" onclick="switchVendOng(\'rec\')"><span class="t-ico"></span> Récoltes</button>'
     +'<button class="mvu-tab" id="mvv-tab-cuves" onclick="switchVendOng(\'cuves\')"><span class="t-ico"></span> Cuves</button>'
     // ★★ Lot CUV-7 : « Tournée » est le geste QUOTIDIEN, en aval des cuves —
@@ -8462,7 +8462,7 @@ function _matTeteHtml(an, ref, canEdit){
   return '<div class="mat-tete"><div class="mat-tete-g">' + titre
     + '<span class="mat-ref">' + (ref ? 'relue au ' + lbl + ' ' + _escHtml(an) + ', date de la dernière mesure' : 'au ' + lbl) + '</span></div>'
     + '<button type="button" class="mat-btn mat-imp" onclick="_matExportChoix()">' + _mvIcon('imprimante', 16) + '<span>Imprimer le contrôle</span></button>'
-    + (canEdit ? '<button type="button" class="mat-btn prim" onclick="_matSaisie(null)">' + _mvIcon('plus', 16) + '<span class="lg">Noter des mesures</span><span class="sm">Mesures</span></button>' : '')
+    + (canEdit ? '<button type="button" class="mat-btn prim" data-tuto="mat.noter" onclick="_matSaisie(null)">' + _mvIcon('plus', 16) + '<span class="lg">Noter des mesures</span><span class="sm">Mesures</span></button>' : '')
     + '</div>';
 }
 
@@ -8556,7 +8556,7 @@ function _matOrdreHtml(r, spd, four, courante){
   }
   if(wF) axe += '<span class="fo" style="left:' + pos((wF.min + wF.max) / 2) + '%">fourchette ' + _matGros(wF.min, spd) + '\u2013' + _matGros(wF.max, spd) + '</span>';
   var filtre = _matFiltre === 'rge' ? 'Rouges' : _matFiltre === 'bl' ? 'Blancs' : '';
-  var h = '<section class="mat-carte mat-ordre" aria-label="Ordre de maturité">'
+  var h = '<section class="mat-carte mat-ordre" data-tuto="mat.ordre" aria-label="Ordre de maturité">'
     + '<div class="mat-carte-hd"><h2 class="mat-carte-t">Ordre de maturité</h2>'
     + (filtre ? '<button type="button" class="mat-btn mat-chip" onclick="_matSetFiltre(\'dom\')" aria-label="Retirer le filtre">' + filtre + _mvIcon('croix', 16) + '</button>' : '')
     + _matVuesHtml() + '</div>';
@@ -8763,12 +8763,12 @@ function _matSaisieBtn(){
 function _matSaisieRendre(){
   var corps = document.getElementById('mat-saisie-corps'); if(!corps || !_matSaisieEt) return;
   var s = _matSaisieEt, spd = (_vendCfg().sucre_par_degre) || 16.83, u = s.unite === 'a' ? '%vol' : 'g/L';
-  var lignes = _matSaisieLignes().map(function(e){
+  var lignes = _matSaisieLignes().map(function(e, k){   // ★ TUTO-8 : k — le premier champ porte l'étiquette du tuto
     var der = e.suc != null ? 'dernière : ' + (s.unite === 'a' ? _mvF1(e.suc / spd) : Math.round(e.suc)) + ' ' + u + ', ' + _matAge(Math.max(0, _matJours(e.date, Date.parse(s.date)))) : 'aucune mesure';
     var a = _matSaisieAide(e.nom), id = 'mat-v-' + _escAttr(String(e.nom).replace(/[^\w-]/g, '_'));
     return '<label class="mat-f-l' + (s.focus === e.nom ? ' focus' : '') + '">'
       + '<span class="n"><b><i class="mat-pt ' + _matVin(e.coul) + '"></i><span>' + _escHtml(e.nom) + '</span></b><small>' + der + '</small></span>'
-      + '<span class="c"><input type="text" inputmode="decimal" class="' + a.cls + '" id="' + id + '" data-nom="' + _escAttr(e.nom) + '" value="' + _escAttr(String(s.vals[e.nom] || '')) + '" placeholder="' + u + '" aria-label="Mesure pour ' + _escAttr(e.nom) + '" oninput="_matSaisieIn(this)">'
+      + '<span class="c"><input type="text" inputmode="decimal" class="' + a.cls + '" id="' + id + '"' + (k ? '' : ' data-tuto="mat.champ"') + ' data-nom="' + _escAttr(e.nom) + '" value="' + _escAttr(String(s.vals[e.nom] || '')) + '" placeholder="' + u + '" aria-label="Mesure pour ' + _escAttr(e.nom) + '" oninput="_matSaisieIn(this)">'
       + '<small class="' + a.cls + '">' + a.txt + '</small></span></label>';
   }).join('');
   corps.innerHTML = '<div class="mat-f-hd"><h3 class="mat-f-t">Noter des mesures</h3><button type="button" class="mat-x" aria-label="Fermer" onclick="closeOv(null,\'ovMatSaisie\')">' + _mvIcon('croix', 16) + '</button></div>'
@@ -8779,7 +8779,7 @@ function _matSaisieRendre(){
     + '<p class="mat-f-aide">Degré = sucre ÷ ' + _mvF1(spd) + ', le réglage du Cuvier. Remplissez seulement les parcelles mesurées, puis enregistrez tout d’un coup.</p></div>'
     + '<div class="mat-f-liste">' + lignes + '</div>'
     + '<div class="mat-f-pied"><button type="button" class="mat-btn" onclick="closeOv(null,\'ovMatSaisie\')">Annuler</button>'
-    + '<button type="button" class="mat-btn prim" id="mat-saisie-ok" disabled onclick="_vendAnaAdd()">Enregistrer</button></div>';
+    + '<button type="button" class="mat-btn prim" id="mat-saisie-ok" data-tuto="mat.ok" disabled onclick="_vendAnaAdd()">Enregistrer</button></div>';
   _matSaisieBtn();
   if(s.focus){ var el = corps.querySelector('input[data-nom]'); if(el) setTimeout(function(){ try{ el.focus(); }catch(e){ if(window.logError) window.logError({ level:'info', cat:'cave', msg:'saisie maturité : focus' }); } }, 60); }
 }

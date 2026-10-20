@@ -164,6 +164,40 @@ var TU_TUTOS = [
         ok: 'Le message vert confirme l’appoint.' },
       { type: 'regarder', cible: '[data-tuto="gnr.carte"]',
         txt: function () { var g = _gnr(); return 'La cuve remonte à ' + _nb(g.niveau) + ' litres sur ' + _nb(g.capacite) + '. Sur votre domaine, rien n’a bougé : c’était un entraînement.'; } }
+    ] },
+  // ★ TUTO-8 (§388) — les maturités (MATU-1) : la saisie en série. Il fait redescendre le compte des gestes sans tuto.
+  { id: 'maturites', titre: 'Comment faire pour noter des mesures de maturité\u00a0?', fin: 'noter des mesures de maturité',
+    module: 'Cave', pages: ['cave'], pour: 'admin', duree: '1 min', depart: 'home',
+    couvre: ['selectCaveSection', 'switchVendOng', '_matSaisie', '_matSaisieIn', '_vendAnaAdd'],
+    retenir: ['Cave › Le Cuvier › Maturités.',
+              '« Noter des mesures » : toutes les parcelles sur pied, sur une seule feuille.',
+              'Remplissez celles que vous avez mesurées, puis enregistrez tout d’un coup.'],
+    avant: function (memo) { memo.n0 = ((window.CAVE_VENDANGE || {}).analyses || []).length; },
+    etapes: [
+      { type: 'aller', page: 'cave', pourquoi: 'Les maturités se notent dans la Cave, au Cuvier.' },
+      { type: 'toucher', chemin: true, cible: '[data-tuto="cave.cuvier"]',
+        txt: function () { return '{T} « ' + (L('[data-tuto="cave.cuvier"]') || 'Le Cuvier') + ' ».'; },
+        fait: function () { var b = _q('[data-tuto="cave.cuvier"]'); return !!(b && b.classList.contains('active')); },
+        ok: 'Voici le Cuvier : maturités, récoltes, cuves, tournée.' },
+      { type: 'toucher', chemin: true, cible: '[data-tuto="cuv.maturites"]',
+        txt: function () { return '{T} l’onglet « ' + (L('[data-tuto="cuv.maturites"]') || 'Maturités') + ' ».'; },
+        fait: function () { var b = _q('[data-tuto="cuv.maturites"]'); return !!(b && b.classList.contains('active')) && !!_q('[data-tuto="mat.noter"]'); },
+        ok: 'Les parcelles sont rangées de la plus avancée à la moins avancée.' },
+      { type: 'toucher', cible: '[data-tuto="mat.noter"]',
+        txt: function () { return 'Vous revenez du réfractomètre. {T} « ' + (L('[data-tuto="mat.noter"] .lg') || L('[data-tuto="mat.noter"]')) + ' ».'; },
+        fait: function () { return _ouvert('ovMatSaisie') && !!_q('[data-tuto="mat.champ"]'); },
+        ok: 'Toutes les parcelles sur pied sont sur la feuille, la plus mûre en tête.' },
+      { type: 'taper', cible: '[data-tuto="mat.champ"]', exemple: '214',
+        txt: function () { var c = _q('[data-tuto="mat.champ"]'); return 'Tapez le sucre lu pour « ' + ((c && c.getAttribute('data-nom')) || 'cette parcelle') + ' », par exemple 214.'; },
+        txtReel: 'le sucre lu, parcelle par parcelle — celles que vous n’avez pas mesurées restent vides.',
+        valide: function (x) { var n = _num(x); return n >= 120 && n <= 290; },
+        ok: function (x) { return _nb(_num(x)) + ' g/L : la conversion en degré s’affiche sous le champ.'; } },
+      { type: 'toucher', cible: '[data-tuto="mat.ok"]',
+        txt: function () { return '{T} « ' + L('[data-tuto="mat.ok"]') + ' ».'; },
+        fait: function (memo) { return !_ouvert('ovMatSaisie') && ((window.CAVE_VENDANGE || {}).analyses || []).length > (memo.n0 || 0); },
+        ok: 'C’est enregistré : le message vert le confirme.' },
+      { type: 'regarder', cible: '[data-tuto="mat.ordre"]',
+        txt: function () { return 'La mesure prend sa place dans l’ordre de maturité, face à la fourchette visée. Sur votre domaine, rien n’a bougé : c’était un entraînement.'; } }
     ] }
 ];
 
@@ -897,12 +931,23 @@ function _prepare() {
   return { utilisateur: { nom: 'Marie', roles: ['admin', 'ouvrier', 'tractoriste'], email: '', _isDemo: true, _isTuto: true },
            domaine: TU_DOMAINE, page: t.depart || 'home' };
 }
+/* ★ TUTO-8 (§388) — UNE VENDANGE POUR LE DOMAINE FICTIF. Les maturités se notent sur la vendange EN COURS : des dates
+   écrites en dur deviendraient une vendange passée l'an prochain, et « Noter des mesures » disparaîtrait (il n'est offert
+   que pour la vendange en cours). Les dates se calculent donc au chargement, à quelques jours d'aujourd'hui. */
+function _tuJour(n) { var d = new Date(); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function _tuCave() {
+  var a = function (id, p, j, v) { return { id: 'tu_' + id, parcelle: p, date: _tuJour(j), mode: 'sucre', val: v, spd: 16.83 }; };
+  return { config: { poids_caisse_kg: 25, ratio_min: 130, ratio_max: 140, sucre_par_degre: 16.83, mat_four: { r: { min: 205, max: 225 }, b: { min: 195, max: 215 } } },
+    analyses: [a(1, 'Les Charmes', -6, 196), a(2, 'Les Charmes', -2, 204), a(3, 'Clos du Moulin', -5, 203), a(4, 'Clos du Moulin', -1, 211), a(5, 'Vieilles Vignes', -2, 199)],
+    recoltes: [], cuves_vinif: [] };
+}
 function _charger() {
   var d = JSON.parse(JSON.stringify(TU_DONNEES));
   ['config', 'membres', 'saisons', 'taches', 'activites', 'conducteurs', 'parcelles'].forEach(function (k) {
     if (d[k] === undefined || typeof window.applyFbData !== 'function') return;
     try { window.applyFbData(k, d[k]); } catch (e) { _avale(e, '_charger#' + k); }
   });
+  if (typeof window.applyFbData === 'function') { try { window.applyFbData('cave_vendange', _tuCave()); } catch (e) { _avale(e, '_charger#cave_vendange'); } }
 }
 function _demarrer() {
   var t = _tuto(String(window.__MV_TUTO || ''));

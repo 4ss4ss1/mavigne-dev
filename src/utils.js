@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.49';
+export const APP_VERSION = '9.50';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.50', d: '2026-10-20', items: [
+    { niv: 0, pour: ['admin'], emoji: 'raisin', titre: 'Un tuto pour les maturités',
+      desc: "« Comment faire pour noter des mesures de maturité ? » rejoint les tutos guidés : la Cave, Le Cuvier, Maturités, « Noter des mesures », une valeur, enregistrer — sur un domaine fictif, sans rien toucher au vôtre." },
+  ] },
   { v: '9.49', d: '2026-10-20', items: [
     { niv: 1, pour: ['admin'], cible: '#cave-hdr-gear', emoji: 'engrenage', titre: 'Une ligne par réglage',
       desc: "Dans la roue crantée de la Cave, Le Cuvier et Le Chai montrent chaque réglage sur une ligne : sa valeur, à quoi il sert, et « Modifier », qui ouvre sa fenêtre. "

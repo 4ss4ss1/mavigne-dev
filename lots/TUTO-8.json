@@ -1,0 +1,22 @@
+{
+  "lot": "TUTO-8",
+  "section": "§388",
+  "base": "32c0b5b01fd17e9a5342e07265b848a2576d248e",
+  "inclut": [],
+  "date": "2026-10-20",
+  "fichiers": {
+    ".mv-base": "5c3f74917af2a986b55d09dd1dacd18aed1a3404c0654336e56f2391aa2731ae",
+    "CLAUDE.md": "38bf106730e672600163dbd310571946d074e18a145df1d80e1015508e8db482",
+    "docs/claude/INDEX.md": "7e4fdd80a1ee46fbc740e8677e421dc72e72cfcb148ba6bc4282bea589005561",
+    "docs/claude/chantiers-380-429.md": "d7601cc62f95567d40525667baaaa7bf97c66163dd6cf1ef37048be67b3154c3",
+    "docs/claude/journal.md": "c8951639429e7271463aff4ce49ce619331c63ef2f9f5d138d2839e7e51faed0",
+    "index.html": "67bb3ec67341b448b1b58cceaf7e396704265661f8efb2c6df56b33ca2707253",
+    "public/sw.js": "05d4430f64c375135b377052fa5c5bc0b0e7f9379d555334b35e60678e037a8f",
+    "scripts/mv-harnais-liste.mjs": "22a37f527d13f84af0bbd6dceff239eeaded5248884bdb123a76cc317f3b0fd4",
+    "scripts/tutos-couverture.json": "cd2ca77a43ab9d0e7c747a32e2678da49e98ca231cf1d2042fda63bcc3d9b6e1",
+    "src/cuvier.js": "f3d6ff405dc7dc048c7c64a3b9b5bacdf691990973e77e4c4a256fd854861976",
+    "src/tutos.js": "58ee08f10426ea0aeae86a3cff99ef9423be3e5fc9e8bc50877d21949d642129",
+    "src/utils.js": "0e66fa84906892c65b5d9c3f66d79006987a078c921cc7e920973a48a85ddba9",
+    "scripts/mv-harnais-tuto8.mjs": "b3ab41a086ed67a6fa63ea2b5500883e00b9d1137b185ffd15d2646c70e14e76"
+  }
+}
