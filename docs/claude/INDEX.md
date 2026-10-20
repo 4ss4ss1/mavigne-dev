@@ -447,3 +447,4 @@
 | 391 | 391. ⚠️ CHARGE-1 — LE LANCEUR NE FAIT PLUS PARTIR LES LOURDES ENSEMBLE (20/10 — `scripts/mv-lanceur.mjs` · … | `docs/claude/chantiers-380-429.md` |
 | 392 | 392. REVUE-3 — LA REVUE À L’ÉCRAN, TROISIÈME PASSAGE : DES SITUATIONS MISES EN PLACE PAR L’OUTIL (20/10 — `… | `docs/claude/chantiers-380-429.md` |
 | 393 | 393. REVUE-4 — LA REVUE À L’ÉCRAN, QUATRIÈME PASSAGE : UNE SESSION CHRONOMÉTRÉE, LA DEMANDE D’UN SALARIÉ (2… | `docs/claude/chantiers-380-429.md` |
+| 394 | 394. CHRONO-1 — LE CHRONO AU DESSIN COMMUN (20/10 — `src/styles.css` · `src/tracteur.js` · `src/utils.js` (… | `docs/claude/chantiers-380-429.md` |

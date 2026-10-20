@@ -38,7 +38,8 @@ const MIGREES = ['plan-btn-saisir', 'mvc-set-btn', 'sd-trac-confirm-btn', 'pf-bt
                  'cave-toggle-btn', 'trac-type-btn', 'cave-op-type-btn', 'rfut-reason-btn',
                  'mbtn', 'mbtn-del', 'mbtn-p',   // ★ CHARTE-3b (§372) : le bouton des fenêtres
                  'cave-stepper-btn', 'mvc-step-btn', 'mvv-step2-b', 'rp-stp',   // ★ CHARTE-3c (§373) : les « − / + »
-                 'mur-btn'];   // ★ REVUE-2 (§390) : « Enregistrer le mot » du mur, resté vert
+                 'mur-btn',   // ★ REVUE-2 (§390) : « Enregistrer le mot » du mur, resté vert
+                 'chr-act'];   // ★ CHRONO-1 (§394) : « Pause déjeuner » et « Fin de journée »
 const EXEMPTIONS = [
   { selecteur: '#ovRepBlock .sd-trac-confirm-btn', raison: 'un blanc forcé (!important) d’avant CHARTE-3, sur le principal : c’est déjà le texte du jeu' },
   { selecteur: '#regl-view-domaine .mbtn.verte', raison: 'RG-1 (§295) : Réglages › Domaine peint ses « Enregistrer » en secondaire, exprès (mv-harnais-rg1)' },

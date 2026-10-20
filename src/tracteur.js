@@ -2176,13 +2176,13 @@ function _renderChronoBar(){
     +'<div class="chr-st chr-st-p"><div class="chr-st-k">'+_mvIcon('repas',16)+' Pause<br>d\u00e9jeuner</div>'
       +'<div class="chr-st-v" id="chr-c-p">'+_chrFmtDur(_chrPause()/60000)+'</div></div>'
     +'</div>'
-    +'<div class="chr-cadre">'+_mvIcon('chrono',16)+' Ce chrono mesure <b>le temps pass\u00e9 dans les parcelles</b>, '
+    +'<div class="mvencadre mvencadre-info">'+_mvIcon('chrono',16)+'<span>Ce chrono mesure <b>le temps pass\u00e9 dans les parcelles</b>, '
     +'pour budg\u00e9ter les travaux. <b>Ce n\'est pas la journ\u00e9e de travail</b>\u00a0: le lavage, '
     +'les niveaux et le plein n\'y sont pas.'
     +(_chrono.ecarte?'<br><span class="chr-cadre-w">'+_chrono.ecarte+' mesure'+(_chrono.ecarte>1?'s':'')
       +' \u00e9cart\u00e9e'+(_chrono.ecarte>1?'s':'')+' \u2014 '+_chrFmtDur(_chrono.ecarteMs/60000)
       +' de chrono non exploitable'+(_chrono.ecarte>1?'s':'')+'.</span>':'')
-    +'</div>';
+    +'</span></div>';
   host.innerHTML=h;
 }
 function _chronoTick(){

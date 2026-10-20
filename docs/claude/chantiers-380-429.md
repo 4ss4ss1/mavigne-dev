@@ -317,3 +317,24 @@ Pilotage › Décider avec des tâches (des priorités, une équipe et des heure
 
 ### 393e. La leçon
 **Une pièce commune ne connaît pas le contenu qu’on lui donne.** La pastille du jeu est faite pour un mot ; celle d’une session porte deux rangs. Ranger une classe sous une pièce, c’est vérifier qu’elle tient ce qu’on y met — et seule la donnée réelle (ou de revue) le montre.
+
+## 394. CHRONO-1 — LE CHRONO AU DESSIN COMMUN (20/10 — `src/styles.css` · `src/tracteur.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-captures.mjs` · `scripts/mv-harnais-boutons.mjs` · `scripts/mv-jetons-baseline.json` · `scripts/mv-espace-baseline.json` · **APP 9.54 → 9.55, SW 10.33 → 10.34**, base `80e96bb`)
+
+### 394a. La demande
+Après REVUE-4 (§393), où le chrono avait été laissé tel quel (dessiné écran par écran, TRAC-3), Nico demande un conseil. Réponse : garder le sens des couleurs (une par sorte de temps), mais les prendre dans le jeu commun ; changer ce qui ne dit rien ; garder le grand bloc sombre du chrono en marche. Nico : « oui ».
+
+### 394b. Ce qui est livré
+- **La bande des trois temps** (`.chr-strip`, `.chr-st`) : trois tuiles teintées (acier, bleu, terre) → **un bloc de chiffres** du jeu — une carte, trois cases séparées par un filet. Une couleur par sorte de temps, prise dans la palette des types et portée par l’icône (`--chr-ton`) : **vert** (`--tag-green-tx`) dans les parcelles, **gris** hors parcelle, **ambre** la pause. Les deux bleus d’avant (acier, bleu) ne se distinguaient pas au soleil. Chiffres à l’encre, 24 px, chiffres droits.
+- **L’explication** (« Ce chrono mesure le temps passé dans les parcelles… ») : fond or et filet → **encadré « informer »** ; son texte est enveloppé dans un `<span>` derrière l’icône (en flex, chaque morceau du texte serait devenu une case, §380). La ligne d’alerte des mesures écartées passe à `--attention-texte`.
+- **« Pause déjeuner » et « Fin de journée »** (`.chr-act`, et `.chr-act-fin` en bleu sans raison) → **bouton secondaire** du jeu ; `mv-harnais-boutons` surveille `.chr-act`.
+- **Les lignes d’une session** : faite (`--vert-pale`) → `--ok-doux`, le nom à `--ok-texte` ; écart au barème (`--or-pale`) → `--attention-doux` ; désactivée (`--rouge-pale`) → `--danger-doux`.
+- **Gardé** : le grand bloc sombre du chrono en marche, son minuteur à 52 px — fait pour être lu d’un coup d’œil dans la vigne ; ses couleurs écrites en dur sont à passer en réglages de la charte, plus tard.
+- `mv-captures` : `session-chrono-haut` (le haut de la session, sans défilement). Cliquets regravés à la baisse : rayons en dur 226 → 225, filet perdant 71 → 70, espacements hors échelle 990 → 982.
+
+### 394c. Vu
+`session-chrono` et `session-chrono-haut`, téléphone et ordinateur, clair et sombre : la carte des trois temps, l’encadré bleu, les deux boutons, les lignes faite et écart — justes. Les icônes colorées sont discrètes à cette taille : la sorte de temps se lit d’abord par son libellé et son icône.
+
+- **Chaîne** : **469 commandes, 0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 394d. La leçon
+**Une couleur qui distingue doit se distinguer.** Le chrono avait raison de colorer ses trois temps ; deux bleus voisins annulaient l’idée. La palette des types existe pour ça : des teintes faites pour ne pas se confondre.
