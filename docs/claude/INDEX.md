@@ -444,3 +444,4 @@
 | 388 | 388. ★ TUTO-8 — UN TUTO POUR LES MATURITÉS (20/10 — `src/tutos.js` (le tuto `maturites`, `_tuJour`, `_tuCav… | `docs/claude/chantiers-380-429.md` |
 | 389 | 389. REVUE-1 — LA REVUE À L’ÉCRAN DE CE QUI A CHANGÉ DE DESSIN (20/10 — `scripts/mv-captures.mjs` · `src/st… | `docs/claude/chantiers-380-429.md` |
 | 390 | 390. REVUE-2 — LA REVUE À L’ÉCRAN, DEUXIÈME PASSAGE (20/10 — `src/styles.css` · `src/reglages.js` · `src/ut… | `docs/claude/chantiers-380-429.md` |
+| 391 | 391. ⚠️ CHARGE-1 — LE LANCEUR NE FAIT PLUS PARTIR LES LOURDES ENSEMBLE (20/10 — `scripts/mv-lanceur.mjs` · … | `docs/claude/chantiers-380-429.md` |

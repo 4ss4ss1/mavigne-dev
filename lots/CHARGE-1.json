@@ -1,0 +1,17 @@
+{
+  "lot": "CHARGE-1",
+  "section": "§391",
+  "base": "1cf3c05ff29c353f1e70f05de02c8d63238c01a3",
+  "inclut": [],
+  "date": "2026-10-20",
+  "fichiers": {
+    ".mv-base": "0b428b9536185ca3dabcd6250c18f0267b6f5db7ea624995d56387b0a3a0197f",
+    "CLAUDE.md": "62fa5e3144328ceb6b007a85f359cd175463fb31f8c86d0260343a580002e43a",
+    "docs/claude/INDEX.md": "7270664c5bbe4a46efaa6b8f9f301892f9b123bd58823e5b5646109a7df81d6e",
+    "docs/claude/chantiers-380-429.md": "338030b302bad7928a65c97de1d1059843635d7b14879e81908fbceff199d337",
+    "docs/claude/journal.md": "b94e2398f05e7fdbce8d56fb3c681bd3696886151f2be943a0e2459642c25151",
+    "scripts/mv-harnais-lanceur.mjs": "ff014e75b8fd2cbc01fac1aeff30819b8214f80117732406ea8d3d54b6a87cc3",
+    "scripts/mv-harnais-liste.mjs": "b30c9ecfe6900915a68486176fc064b062aaac05bb6de6b325f12b8c7ec5c685",
+    "scripts/mv-lanceur.mjs": "ecb08a4d1dbbbf70f472fe31497c848a60bc48d1e1e566333696dcae5adc9477"
+  }
+}

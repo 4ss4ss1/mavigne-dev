@@ -37,7 +37,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { HARNAIS, GROUPES, SEULS } from './mv-harnais-liste.mjs';
+import { HARNAIS, GROUPES, SEULS, LOURDS } from './mv-harnais-liste.mjs';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const c = { g: s => `\x1b[32m${s}\x1b[0m`, r: s => `\x1b[31m${s}\x1b[0m`, dim: s => `\x1b[2m${s}\x1b[0m`, b: s => `\x1b[1m${s}\x1b[0m` };
@@ -54,7 +54,7 @@ export function decouper(cmd) {
    `executer(x)` rend une promesse { code, ... }. mv-harnais-lanceur le joue avec un faux exécutant
    (durées simulées) : c'est ce qui prouve le « seul », la limite de `jobs` et l'arrêt au premier
    rouge sans lancer 345 processus. Rend { res, arrete } — res[i] vide = commande jamais lancée. */
-export async function jouer(liste, { jobs, continuer, executer, surFin, attendu }) {
+export async function jouer(liste, { jobs, continuer, executer, surFin, attendu, maxLourds }) {
   const res = new Array(liste.length);
   let rouge = false;
   const lancer = async i => {
@@ -77,11 +77,28 @@ export async function jouer(liste, { jobs, continuer, executer, surFin, attendu 
     const a = i => { const v = attendu(liste[i]); return typeof v === 'number' ? v : Infinity; };
     autres.sort((i, j) => (a(j) === a(i) ? 0 : a(j) > a(i) ? 1 : -1));
   }
-  let k = 0;
+  // ★ CHARGE-1 (§391) : au plus `maxLourds` commandes LOURDES en même temps (`lourd` : déclarée dans LOURDS, ou plus d’une
+  //   minute au build d’avant). Lancées d’abord parce que longues, les plus lourdes partaient ensemble : douze à la fois sur
+  //   le PC de Nico, la mémoire a manqué (Node tué, code 134 ; ESLint, preflight, icônes en rouge). Une lourde qui n’a pas de
+  //   place laisse passer les légères derrière elle ; un ouvrier sans rien à prendre attend qu’une lourde finisse.
+  const LOURDS_MAX = (typeof maxLourds === 'number' && maxLourds >= 1) ? Math.floor(maxLourds) : Infinity;
+  const pris = new Set(); let lourdsEnCours = 0, reveils = [];
+  const reveiller = () => { const r = reveils; reveils = []; r.forEach(f => f()); };
+  const prendre = () => {
+    for (const i of autres) {
+      if (pris.has(i)) continue;
+      if (liste[i].lourd && lourdsEnCours >= LOURDS_MAX) continue;
+      pris.add(i); return i;
+    }
+    return -1;
+  };
   const ouvrier = async () => {
-    while (k < autres.length) {
+    while (pris.size < autres.length) {
       if (rouge && !continuer) return;          // plus rien ne démarre ; ce qui tourne va au bout
-      await lancer(autres[k++]);
+      const i = prendre();
+      if (i < 0) { await new Promise(r => reveils.push(r)); continue; }
+      if (liste[i].lourd) lourdsEnCours++;
+      try { await lancer(i); } finally { if (liste[i].lourd) lourdsEnCours--; reveiller(); }
     }
   };
   await Promise.all(Array.from({ length: Math.max(1, Math.min(jobs, autres.length)) }, ouvrier));
@@ -97,10 +114,18 @@ export function vider(res, etat, ecrire, fin) {
   }
 }
 
+/* ★ CHARGE-1 (§391) : par défaut, au plus JOBS_MAX commandes à la fois, et au plus LOURDS_PAR_DEFAUT lourdes parmi elles.
+   Autant que de cœurs (12 chez Nico) faisait partir ensemble les plus lourdes : 4 rouges de pure charge (MV_JOBS=4 : 0 rouge).
+   MV_JOBS=N et MV_LOURDS=N gardent la main. */
+export const JOBS_MAX = 6, LOURDS_PAR_DEFAUT = 2, SEUIL_LOURD = 60;
 export function jobsParDefaut() {
   const n = Number(process.env.MV_JOBS);
   if (n >= 1) return Math.floor(n);
-  return Math.max(1, typeof os.availableParallelism === 'function' ? os.availableParallelism() : os.cpus().length);
+  return Math.max(1, Math.min(JOBS_MAX, typeof os.availableParallelism === 'function' ? os.availableParallelism() : os.cpus().length));
+}
+export function lourdsParDefaut() {
+  const n = Number(process.env.MV_LOURDS);
+  return n >= 1 ? Math.floor(n) : LOURDS_PAR_DEFAUT;
 }
 
 function executerVrai(x) {
@@ -180,7 +205,10 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       for (const [fd, b] of r.morceaux) (fd === 1 ? process.stdout : process.stderr).write(b);
     };
     const connues = lireDurees();
-    ({ res, arrete } = await jouer(liste, { jobs, continuer: CONTINUER, executer: executerVrai, attendu: x => connues[x.cmd], surFin: (i, rr) => vider(rr, etat, ecrire, false) }));
+    liste.forEach(x => { x.lourd = (x.cmd in LOURDS) || (typeof connues[x.cmd] === 'number' && connues[x.cmd] >= SEUIL_LOURD); });
+    const maxLourds = lourdsParDefaut();
+    console.log(c.dim(`── dont ${liste.filter(x => x.lourd).length} lourde(s), ${maxLourds} au plus en même temps (MV_LOURDS)`));
+    ({ res, arrete } = await jouer(liste, { jobs, continuer: CONTINUER, executer: executerVrai, attendu: x => connues[x.cmd], maxLourds, surFin: (i, rr) => vider(rr, etat, ecrire, false) }));
     vider(res, etat, ecrire, true);
   }
 

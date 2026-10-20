@@ -784,6 +784,20 @@ export const SEULS = {
   'scripts/mv-harnais-renom-parc.mjs': 'charge depuis scripts/.mv-renp-*.mjs (meme raison)',
 };
 
+/* LOURDES — ★ CHARGE-1 (§391) : des commandes qui prennent beaucoup de mémoire ou de processeur. Le lanceur n’en fait tourner
+   que quelques-unes en même temps (MV_LOURDS, 2 par défaut) ; une commande qui a duré plus d’une minute au build d’avant
+   est lourde d’office. Mesures du PC de Nico le 20/10, douze à la fois : 4 rouges de charge — Node tué (code 134), ESLint,
+   preflight, icônes. Une ligne par commande, avec sa raison ; mv-harnais-lanceur refuse une entrée hors de la liste. */
+export const LOURDS = {
+  'node scripts/mv-harnais-recup.mjs --contre': '290 à 330 s, la plus longue de la liste',
+  'node scripts/preflight.mjs': '200 à 240 s : environ 450 `node --check` lancés l’un après l’autre — rouge deux fois sous la charge',
+  'node scripts/mv-harnais-icones-contre.mjs': '200 à 230 s, rejoue l’appli dans un bac à sable — rouge sous la charge',
+  'node scripts/mv-harnais-robustesse-planning.mjs --contre': '160 à 200 s',
+  'node scripts/mv-harnais-robustesse-pilotage.mjs --contre': '110 à 140 s',
+  'node scripts/mv-harnais-pic-avenir.mjs --contre': 'tuée par manque de mémoire (code 134) quand les lourdes tournaient ensemble',
+  'node scripts/lint-cliquet.mjs': 'ESLint sur tout src/ — rouge (code 2) sous la charge',
+};
+
 /* ECRIT_HORS_LISTE — elles écrivent dans le dépôt, mais SEULEMENT sous un drapeau que la liste ne
    passe jamais. mv-harnais-lanceur vérifie que la liste ne le passe pas (ou passe bien --check / --test). */
 export const ECRIT_HORS_LISTE = {

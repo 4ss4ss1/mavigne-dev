@@ -254,3 +254,22 @@ Pilotage › Décider avec des tâches, une session chronométrée, la Discussio
 
 ### 390f. La leçon
 **Une carte sans ombre montre où elle est posée.** Avec l’ombre, une carte collée au bord de la fenêtre passait pour un choix ; sans elle, le filet qui touche l’écran se voit. Changer le dessin d’une pièce rend visibles des défauts de mise en page qui dormaient — c’est pour cela qu’on regarde.
+
+## 391. ⚠️ CHARGE-1 — LE LANCEUR NE FAIT PLUS PARTIR LES LOURDES ENSEMBLE (20/10 — `scripts/mv-lanceur.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/mv-harnais-lanceur.mjs` · doc · **pas de bump** : aucun fichier de l’appli, base `1cf3c05`)
+
+### 391a. Ce que Nico a vu
+Après REVUE-2 (§390), sa chaîne à **12 commandes à la fois** : 34 commandes jouées sur 469, **4 rouges** — `lint-cliquet` (code 2), `preflight` (code 1), `mv-harnais-pic-avenir --contre` (**code 134** : Node arrêté net, le plus souvent faute de mémoire), `mv-harnais-icones-contre` (code 1). Relancée avec `MV_JOBS=4` : **0 rouge**. Le preflight avait déjà rougi une fois de la même façon (§390d).
+
+### 391b. La cause
+Le lanceur (BUILD-1, §305) joue les commandes autant à la fois que le processeur a de cœurs (12 sur le PC de Nico), **les plus longues d’abord** — un bon ordre pour finir tôt, mais les plus longues sont aussi les plus lourdes : `recup --contre`, le preflight, la contre-épreuve des icônes, les robustesses, ESLint partaient ensemble, et la mémoire du PC n’a pas suivi. Rien dans le code de l’appli ni dans REVUE-2.
+
+### 391c. Ce qui est livré
+- **Au plus 6 commandes à la fois par défaut** (`JOBS_MAX`), même sur 12 cœurs ; `MV_JOBS=N` garde la main.
+- **Au plus 2 commandes lourdes en même temps** (`MV_LOURDS`, `LOURDS_PAR_DEFAUT`). Une commande est lourde si elle est déclarée dans **`LOURDS`** (`mv-harnais-liste.mjs` : sept commandes, chacune avec sa raison mesurée chez Nico) **ou** si elle a duré plus d’une minute au build d’avant (`SEUIL_LOURD`) — une lourde de demain est prise d’office. Une lourde qui n’a pas de place laisse passer les légères derrière elle ; un ouvrier sans rien à prendre attend qu’une lourde finisse. L’ordre « les plus longues d’abord » et les sorties dans l’ordre de la liste sont gardés ; le lanceur annonce combien de lourdes il a et combien en même temps.
+- **`mv-harnais-lanceur`** le prouve en simulation (le moteur joué sur un faux exécutant) : jamais plus de 2 lourdes et 2 atteint ; les légères passent pendant ce temps ; tout est joué, l’écran dans l’ordre ; sans limite, elles partent ensemble ; le plafond par défaut est 6 ; chaque lourde est une commande de la liste, avec sa raison. Trois contre-épreuves de plus (la limite des lourdes retirée, le plafond retiré, une lourde hors de la liste) : **14/14 détectées**.
+
+### 391d. Mesuré
+- **Chaîne** : jouée **en parallèle** ici, avec le nouvel ordonnanceur (`MV_JOBS=4` — le bac à sable n’a qu’un cœur, donc 1 à la fois par défaut — et 2 lourdes au plus, vues tourner ensemble : `recup --contre` et la contre-épreuve des icônes, avec deux légères à côté) : **469 commandes, 0 rouge**, 786 s, après le dernier changement de code.
+
+### 391e. La leçon
+**Le meilleur ordre pour le temps n’est pas le meilleur pour la mémoire.** Lancer les longues d’abord finissait plus tôt sur le papier ; sur un vrai PC, ça mettait les plus gourmandes côte à côte. Un ordonnanceur qui ne compte que les cœurs ignore ce qui manque en premier.

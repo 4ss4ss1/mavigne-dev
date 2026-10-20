@@ -25,7 +25,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
-import { HARNAIS, SEULS, ECRIT_HORS_LISTE } from './mv-harnais-liste.mjs';
+import { HARNAIS, SEULS, ECRIT_HORS_LISTE, LOURDS } from './mv-harnais-liste.mjs';
 
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
@@ -47,19 +47,20 @@ function moteur(src) {
 }
 
 /* ── A à E : le moteur, sur un faux exécutant ─────────────────────────── */
-async function simuler(m, spec, jobs, continuer, attendu) {
-  const journal = [], actifs = new Set(); let max = 0;
-  const liste = spec.map(x => ({ cmd: x.nom, seul: !!x.seul }));
+async function simuler(m, spec, jobs, continuer, attendu, maxLourds) {
+  const journal = [], actifs = new Set(); let max = 0, lourdsMax = 0;
+  const liste = spec.map(x => ({ cmd: x.nom, seul: !!x.seul, lourd: !!x.lourd }));
+  const lourdsActifs = () => [...actifs].filter(n => spec.find(y => y.nom === n).lourd).length;
   const executer = x => new Promise(res => {
     const s = spec.find(y => y.nom === x.cmd);
-    actifs.add(x.cmd); max = Math.max(max, actifs.size);
+    actifs.add(x.cmd); max = Math.max(max, actifs.size); lourdsMax = Math.max(lourdsMax, lourdsActifs());
     journal.push({ ev: 'debut', nom: x.cmd, n: actifs.size });
     setTimeout(() => { actifs.delete(x.cmd); journal.push({ ev: 'fin', nom: x.cmd }); res({ code: s.code, duree: s.ms / 1000 }); }, s.ms);
   });
   const ecrits = [], etat = { p: 0 };
-  const r = await m.jouer(liste, { jobs, continuer, executer, attendu, surFin: (i, rr) => m.vider(rr, etat, k => ecrits.push(k), false) });
+  const r = await m.jouer(liste, { jobs, continuer, executer, attendu, maxLourds, surFin: (i, rr) => m.vider(rr, etat, k => ecrits.push(k), false) });
   m.vider(r.res, etat, k => ecrits.push(k), true);
-  return Object.assign(r, { journal, max, ecrits, spec });
+  return Object.assign(r, { journal, max, lourdsMax, ecrits, spec });
 }
 const MS = [40, 5, 30, 10, 25, 5, 15, 35, 5, 20, 10, 30];
 const fabrique = (seuls, rouges) => MS.map((ms, i) => ({ nom: 'c' + i, ms, seul: seuls.includes(i), code: rouges.includes(i) ? 1 : 0 }));
@@ -98,6 +99,18 @@ async function verifierMoteur(src) {
   const premiers = s6.journal.filter(e => e.ev === 'debut').slice(0, 3).map(e => e.nom);
   ok('G. les plus longues d’abord (durée connue), l’inconnue en tête', premiers.join() === 'c10,c11,c4');
   ok('G. … et les sorties restent dans l’ordre de la liste', s6.ecrits.join() === MS.map((_, i) => i).join());
+  // ★ CHARGE-1 (§391) — H : les lourdes. Cinq longues et lourdes, sept légères, six à la fois, deux lourdes au plus.
+  const lourdes = MS.map((ms, i) => ({ nom: 'c' + i, ms: i < 5 ? 60 : ms, lourd: i < 5, code: 0 }));
+  const connuL = Object.fromEntries(lourdes.map(x => [x.nom, x.ms]));
+  const s7 = await simuler(m, lourdes, 6, false, x => connuL[x.cmd], 2);
+  ok('H. jamais plus de 2 lourdes à la fois, et 2 atteint', s7.lourdsMax === 2);
+  ok('H. … les légères passent pendant ce temps (plus de 2 à la fois)', s7.max > 2 && s7.max <= 6);
+  ok('H. … et tout est joué, dans l’ordre de la liste à l’écran', lances(s7).length === lourdes.length && s7.ecrits.join() === lourdes.map((_, i) => i).join());
+  const s8 = await simuler(m, lourdes, 6, false, x => connuL[x.cmd]);
+  ok('H. sans limite de lourdes, rien ne change (elles partent ensemble)', s8.lourdsMax > 2);
+  // H : le nombre à la fois par défaut est plafonné (6), MV_JOBS garde la main
+  const jp = corps(src, 'export function jobsParDefaut(');
+  ok('H. par défaut, au plus JOBS_MAX = 6 commandes à la fois', /JOBS_MAX = 6\b/.test(src) && /Math\.min\(JOBS_MAX, /.test(jp) && /MV_JOBS/.test(jp));
   return t;
 }
 
@@ -165,9 +178,13 @@ function verifierDepot(e) {
   return t;
 }
 const lireVrai = f => fs.readFileSync(path.join(R, f), 'utf8');
-const ETAT = { harnais: HARNAIS, seuls: SEULS, hors: ECRIT_HORS_LISTE, lire: lireVrai };
-
-async function tout(src, etat) { return [...await verifierMoteur(src), ...verifierDepot(etat)]; }
+const ETAT = { harnais: HARNAIS, seuls: SEULS, hors: ECRIT_HORS_LISTE, lire: lireVrai, lourds: LOURDS };
+function verifierLourds(etat) {   // ★ CHARGE-1 (§391) : chaque LOURDE est une commande de la liste, avec sa raison
+  const cmds = new Set(etat.harnais.map(([c]) => c));
+  const hors = Object.keys(etat.lourds).filter(k => !cmds.has(k)), sansRaison = Object.entries(etat.lourds).filter(([, v]) => !String(v).trim()).map(([k]) => k);
+  return [['H. chaque commande LOURDE est dans la liste, avec sa raison', !hors.length && !sansRaison.length, hors.concat(sansRaison).join(', ')]];
+}
+async function tout(src, etat) { return [...await verifierMoteur(src), ...verifierDepot(etat), ...verifierLourds(etat)]; }
 
 const base = await tout(LANCEUR, ETAT);
 console.log('\n  MA VIGNE — Harnais du LANCEUR EN PARALLÈLE (BUILD-1)');
@@ -194,6 +211,9 @@ const DEF = [
   ['la liste fait réécrire guide.html (build-guide sans --check)', () => [LANCEUR, Object.assign({}, ETAT, {
     harnais: HARNAIS.map(([c, g]) => [c === 'node scripts/build-guide.mjs --check' ? 'node scripts/build-guide.mjs' : c, g]) })]],
   ['la liste regrave le cliquet du preflight (--baseline)', () => [LANCEUR, Object.assign({}, ETAT, { harnais: HARNAIS.concat([['node scripts/preflight.mjs --baseline']]) })]],
+  ['les lourdes ne sont plus limitées', () => [remplace(LANCEUR, 'if (liste[i].lourd && lourdsEnCours >= LOURDS_MAX) continue;', ''), ETAT]],
+  ['le nombre à la fois par défaut n’est plus plafonné', () => [remplace(LANCEUR, 'Math.min(JOBS_MAX, ', 'Math.min(Infinity, '), ETAT]],
+  ['une entrée LOURDS hors de la liste', () => [LANCEUR, Object.assign({}, ETAT, { lourds: Object.assign({ 'node scripts/mv-harnais-disparu.mjs': 'x' }, LOURDS) })]],
 ];
 console.log('\n  CONTRE-ÉPREUVE — chaque défaut réintroduit doit faire rougir');
 let rg = 0;
