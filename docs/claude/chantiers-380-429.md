@@ -203,3 +203,28 @@ Le plafond des gestes sans tuto est monté de 813 à 825 pendant le rangement du
 ### 388d. Ce qui reste ouvert
 - Les prochains tutos qui feraient le plus baisser le compte : peser une récolte (`openOvVendRec` et sa fenêtre), ouvrir une cuve en fiche (`_vendBascOuv`), la tournée du Cuvier, la roue crantée (`_caveRegSec`).
 - L’inventaire ne voit pas les gestes passés par une variable (§387d) : les fenêtres des réglages ne sont ni comptées ni couvrables tant qu’il ne les lit pas.
+
+## 389. REVUE-1 — LA REVUE À L’ÉCRAN DE CE QUI A CHANGÉ DE DESSIN (20/10 — `scripts/mv-captures.mjs` · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/harnais-claude-md.mjs` · **APP 9.50 → 9.51, SW 10.29 → 10.30**, base `f1aa11d`)
+
+### 389a. La demande
+Après CHARTE-5c, Nico demande une recommandation en sachant que « l’appli doit être parfaite et professionnelle ». Réponse : d’abord regarder en vrai tout ce qui a changé de dessin (une bonne centaine d’éléments passés au jeu n’avaient jamais été vus à l’écran — les contrôles vérifient le code, pas le rendu), puis finir les 168 encadrés, puis les cases de saisie. Nico : « relis les fichiers et go pour l’étape 1 ».
+
+### 389b. Ce qui est livré
+- **Sept écrans de plus dans `mv-captures`** : `accueil-ouvrier` (la démo réduite au rôle ouvrier), `ma-trace` (« Ma trace » de l’ouvrier, `openMaTrace`), `phyto-traitement`, `cave-cuvee` (la première carte du Chai, `.mvc-cuv[data-cuv]`), `tracteur-entretien`, `reglages-documents` (`openDocs`), `mot-de-passe-erreur` (la fenêtre ouverte, l’erreur posée par l’outil : un état mis en scène, pour voir l’encadré).
+- **Les rôles remis à chaque écran** : la démo entre avec trois rôles (admin, ouvrier, tractoriste) ; un écran « ouvrier » les réduisait et l’outil gardait la page d’un écran à l’autre — les écrans suivants sortaient « Réservé à l’administrateur ». L’outil relève les rôles de départ et les remet avant chaque écran.
+- **Corrigé** : le sélecteur de cuvées de l’export (Cave) marque la cuvée choisie par la classe `.sel`, pas `.on` ; au §377 seul `.on` a rejoint l’état choisi du filtre, la cuvée choisie ne s’y distinguait plus. `.cave-cuvee-chip.sel` rejoint l’état choisi.
+
+### 389c. Vu en vrai (téléphone et ordinateur, clair et sombre)
+- **« Ma trace » de l’ouvrier** : les cartes du jeu (fond, filet fin, arrondi 8 px, sans ombre) sous le bandeau du total — justes dans les deux thèmes (CHARTE-5a, `.mtr-card`).
+- **La fiche d’une cuvée** : « FML ✓ » au statut « fait » (CHARTE-4a/4c).
+- **Les documents des Réglages** : l’encadré « Ce que vous devez pouvoir sortir en contrôle » au ton danger, « Fichier obligatoire au 01/01 » à surveiller, les types d’export (PDF rouge, Excel / CSV vert) et « Choix de la période » neutre (CHARTE-4c, 5b) — lisibles en clair et en sombre.
+- **Le mot de passe en erreur** : l’encadré danger, texte à l’encre (CHARTE-5c).
+- **L’Entretien du Tracteur** : intact (la barre à choix des machines, les chiffres de la révision, les derniers contrôles).
+
+### 389d. Pas encore vu, et à trancher
+- **Pas vu** : la saisie d’un traitement (toucher une ligne du registre ne l’ouvre pas ; il faut trouver le bon geste), la fiche d’un produit (DAR, ZNT), le mur de l’équipe, les demandes d’un salarié au Planning, Pilotage › Décider avec des tâches, une session chronométrée, la Discussion avec un message non lu — la démo ne les porte pas ou l’outil ne sait pas encore les ouvrir.
+- **À trancher avec Nico** : l’encadré des documents est rouge parce qu’il l’était — c’est une obligation, pas un danger : « attention » (ambre) serait plus juste ? Au téléphone, les cartes de « Ma trace » semblent toucher les bords de la fenêtre : à regarder chez lui.
+- **Chaîne** : **469 commandes, 0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 389e. La leçon
+**Un outil qui garde l’état d’un écran à l’autre fausse les suivants.** Le rôle ouvrier d’un écran faisait mentir les cinq d’après — et sans les regarder, rien ne l’aurait dit. Chaque écran d’une revue repart du même point.

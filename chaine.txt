@@ -1,0 +1,1287 @@
+[2m── 469 commandes : 13 seule(s) d'abord, puis 12 à la fois — sorties dans l'ordre de la liste[0m
+[2m
+── [6/469] node scripts/mv-harnais-lanceur.mjs --contre   16.0 s[0m
+
+  MA VIGNE — Harnais du LANCEUR EN PARALLÈLE (BUILD-1)
+  ✓ A. sorties dans l’ordre de la liste (arrivées dans le désordre)
+  ✓ B. jamais plus de 3 à la fois, et 3 atteint
+  ✓ C. une commande SEULE ne croise jamais une autre
+  ✓ C. les SEULES passent toutes avant les autres
+  ✓ tout vert : tout est joué, pas d’arrêt
+  ✓ D. au premier rouge, plus rien ne démarre
+  ✓ D. ce qui a démarré va au bout (rien n’est tué)
+  ✓ A. arrêt : on écrit, dans l’ordre, exactement ce qui a été joué
+  ✓ E. --continuer joue tout
+  ✓ jobs = 1 : une à la fois, les seules puis la liste dans l’ordre
+  ✓ D. une SEULE en rouge : rien d’autre ne démarre
+  ✓ G. les plus longues d’abord (durée connue), l’inconnue en tête
+  ✓ G. … et les sorties restent dans l’ordre de la liste
+  ✓ F. tout script qui écrit dans le dépôt est déclaré (SEULS ou ECRIT_HORS_LISTE)
+  ✓ F. aucune entrée périmée (hors liste, ou plus aucune écriture repérée)
+  ✓ F. aucun script n’est à la fois SEUL et ECRIT_HORS_LISTE
+  ✓ F. la liste ne passe jamais le drapeau qui fait écrire
+
+  17 vert(s) · 0 rouge(s)
+
+  CONTRE-ÉPREUVE — chaque défaut réintroduit doit faire rougir
+    DÉTECTÉ  plus de `jobs` commandes à la fois
+    DÉTECTÉ  les SEULES jouées au milieu des autres
+    DÉTECTÉ  au premier rouge, ça continue de démarrer
+    DÉTECTÉ  une SEULE en rouge n’arrête pas les suivantes
+    DÉTECTÉ  les durées connues ne changent plus l’ordre de lancement
+    DÉTECTÉ  l’affichage saute les commandes pas encore arrivées
+    DÉTECTÉ  cuvgr3 retiré de SEULS
+    DÉTECTÉ  un nouveau harnais écrit dans src/ sans être déclaré
+    DÉTECTÉ  une entrée SEULS périmée
+    DÉTECTÉ  la liste fait réécrire guide.html (build-guide sans --check)
+    DÉTECTÉ  la liste regrave le cliquet du preflight (--baseline)
+
+  11/11 défauts détectés
+[2m
+── [7/469] node scripts/lint-cliquet.mjs   15.3 s[0m
+
+<--- Last few GCs --->
+
+[8768:00000260ECF15000]    13331 ms: Scavenge (interleaved) 211.9 (246.0) -> 180.0 (246.0) MB, pooled: 0 MB, 0.64 / 0.00 ms  (average mu = 0.909, current mu = 0.855) allocation failure; 
+[8768:00000260ECF15000]    13605 ms: Scavenge (interleaved) 214.5 (248.6) -> 183.8 (249.9) MB, pooled: 0 MB, 4.12 / 0.00 ms  (average mu = 0.909, current mu = 0.855) allocation failure; 
+
+FATAL ERROR: Zone Allocation failed - process out of memory
+----- Native stack trace -----
+
+ 1: 00007FF66EA33D9F 
+ 2: 00007FF66D67DCB7 
+ 3: 00007FF66CFF5B96 
+ 4: 00007FF66E55D372 
+ 5: 00007FF66E55D1E0 
+ 6: 00007FF66E09326A 
+ 7: 00007FF66E06C6F0 
+ 8: 00007FF66E0695EF 
+ 9: 00007FF66E068F3D 
+10: 00007FF66D5F196F 
+11: 00007FF66D5B69BD 
+12: 00007FF66D5B66B5 
+13: 00007FF66DE56C6F 
+14: 00007FF66E97944B 
+15: 00007FF66D6D2D76 
+16: 00007FF66ED7DC73 
+17: 00007FFFD3C9DDA7 
+18: 00007FFFD48FEE4C 
+✖ ESLint n’a rien renvoye. Dependances installees ? (npm ci)
+
+<--- Last few GCs --->
+
+[8768:00000260ECF15000]    13331 ms: Scavenge (interleaved) 211.9 (246.0) -> 180.0 (246.0) MB, pooled: 0 MB, 0.64 / 0.00 ms  (average mu = 0.909, current mu = 0.855) allocation failure; 
+[8768:00000260ECF15000]    13605 ms: Scavenge (interleaved) 214.5 (248.6) -> 183.8 (249.9) MB, pooled: 0 MB, 4.12 / 0.00 ms  (average mu = 0.909, current mu = 0.855) allocation failure; 
+
+FATAL ERROR: Zone Allocation failed - process out of memory
+----- Native stack trace -----
+
+ 1: 00007FF66EA33D9F 
+ 2: 00007FF66D67DCB7 
+ 3: 00007FF66CFF5B96 
+ 4: 00007FF66E55D372 
+ 5: 00007FF66E55D1E0 
+ 6: 00007FF66E09326A 
+ 7: 00007FF66E06C6F0 
+ 8: 00007FF66E0695EF 
+ 9: 00007FF66E068F3D 
+10: 00007FF66D5F196F 
+11: 00007FF66D5B69BD 
+12: 00007FF66D5B66B5 
+13: 00007FF66DE56C6F 
+14: 00007FF66E97944B 
+15: 00007FF66D6D2D76 
+16: 00007FF66ED7DC73 
+17: 00007FFFD3C9DDA7 
+18: 00007FFFD48FEE4C 
+
+[2m
+── [8/469] node scripts/preflight.mjs   202.2 s[0m
+
+  MA VIGNE — Preflight  (filet anti-régression, lecture seule)
+  Racine : C:\Users\p4n0m\Desktop\Dev\mavigne-dev
+  Version app : v9.51   ·   Version SW : v10.30
+
+  scripts
+    ATTENTION  C26 : aucun import() de chemin brut.
+
+  scripts/mv-harnais-parc1.mjs
+    ERREUR  Syntaxe invalide (mode module) :
+    <--- Last few GCs --->
+    
+    
+    
+    #
+
+  scripts/mv-harnais-photo.mjs
+    ERREUR  Syntaxe invalide (mode module) :
+    
+
+  src/cave.js
+    ATTENTION  L3011 <div> dans un <button> (template JS) -> HTML5 invalide (le handler est sur le button donc fonctionne, mais a corriger en <span>). Cf. §24.
+
+  src/cockpit-vue.js
+    ATTENTION  Aucun `const DEBUG` dans ce module → le premier if(DEBUG) ajouté lèvera un ReferenceError silencieux. Déclarer en tête : const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+  src/cockpit.js
+    ATTENTION  Aucun `const DEBUG` dans ce module → le premier if(DEBUG) ajouté lèvera un ReferenceError silencieux. Déclarer en tête : const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+  src/comptes.js
+    ATTENTION  Aucun `const DEBUG` dans ce module → le premier if(DEBUG) ajouté lèvera un ReferenceError silencieux. Déclarer en tête : const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+  src/coquille.js
+    ATTENTION  Aucun `const DEBUG` dans ce module → le premier if(DEBUG) ajouté lèvera un ReferenceError silencieux. Déclarer en tête : const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+  src/cuvier.js
+    ATTENTION  C24b — valeur posee dans un slot JS de gestionnaire sans _escAttr : 4 contre 6 en référence — regraver : node scripts/preflight.mjs --baseline
+
+  src/gt.js
+    ATTENTION  Aucun `const DEBUG` dans ce module → le premier if(DEBUG) ajouté lèvera un ReferenceError silencieux. Déclarer en tête : const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+  src/ids.js
+    ATTENTION  Aucun `const DEBUG` dans ce module → le premier if(DEBUG) ajouté lèvera un ReferenceError silencieux. Déclarer en tête : const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+  src/jalons.js
+    ATTENTION  Aucun `const DEBUG` dans ce module → le premier if(DEBUG) ajouté lèvera un ReferenceError silencieux. Déclarer en tête : const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+  src/planning-vue.js
+    ATTENTION  Aucun `const DEBUG` dans ce module → le premier if(DEBUG) ajouté lèvera un ReferenceError silencieux. Déclarer en tête : const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+  src/taille-doc.js
+    ATTENTION  Aucun `const DEBUG` dans ce module → le premier if(DEBUG) ajouté lèvera un ReferenceError silencieux. Déclarer en tête : const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+  src/tournees.js
+    ATTENTION  Aucun `const DEBUG` dans ce module → le premier if(DEBUG) ajouté lèvera un ReferenceError silencieux. Déclarer en tête : const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+  src/tutos.js
+    ATTENTION  Aucun `const DEBUG` dans ce module → le premier if(DEBUG) ajouté lèvera un ReferenceError silencieux. Déclarer en tête : const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+  2 erreur(s) · 13 avertissement(s)
+  ✗ Preflight ÉCHOUÉ — livraison à corriger.
+[2m
+── [9/469] node scripts/mv-harnais-globaux.mjs   18.5 s[0m
+[1m
+── HARNAIS GLOBAUX — un nom lu existe-t-il apres bundling ? ──
+[0m
+[2m  24 modules · 2108 noms poses sur window · 196 primitives tolerees[0m
+[33m
+  ⚠ 1 exposition(s) hors de portee du harnais :[0m
+[2m    · app.js — window[key.toUpperCase()] = … (non analysable)[0m
+[2m    (un nom pose UNIQUEMENT par ce chemin sortira rouge — poser un window.X = X explicite)[0m
+[32m
+  ✓ aucun nom libre injoignable — le bundle ne perdra personne
+[0m
+[2m
+── [52/469] node scripts/mv-harnais-releve.mjs   0.5 s[0m
+[MaVigne Error] INFO [avale] erreur avalée dans planning.js/_pl2YearTabs 
+ReferenceError: _mvISO is not defined
+    at file:///C:/Users/p4n0m/Desktop/Dev/mavigne-dev/src/planning.js:237:47
+    at file:///C:/Users/p4n0m/Desktop/Dev/mavigne-dev/src/planning.js:243:3
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loa
+
+0. Les moteurs du planning répondent
+   vert  _mvContrats existe (utils.js)
+   vert  Victor a DEUX périodes (coupure du 25/07 au 31/08)
+   vert  Chloé n’en a qu’UNE (contrats contigus fusionnés)
+   vert  _planAnnu est exposé
+   vert  le plafond de Victor est proratisé sous 1 607 h
+   vert  le plafond de Nico (CDI sans date) vaut 1 607 h
+
+1. Le point d’entrée du hub
+   vert  _planReleveIndiv est exposé
+   vert  _planReleveMbrs rend les 4 salariés
+   vert  l’équipe collective est signalée dans la liste
+   vert  un document est produit
+   vert  ⚠️ le mois du Planning est RESTAURÉ après édition
+   vert  un salarié inconnu ne produit rien
+
+2. Le bloc CONTRATS
+   vert  le bloc est présent
+   vert  la première période est datée en toutes lettres, avec SON type
+   vert  la seconde période est datée elle aussi, au 1ER
+   vert  la durée de chaque période est comptée
+   vert  ⚠️ la COUPURE est nommée, et comptée en jours
+   vert  la période qui couvre aujourd’hui est marquée « en cours »
+   vert  le prorata du plafond est expliqué
+
+3. Le bloc CONGÉS
+   vert  le bloc est présent
+   vert  le solde initial de Victor (12 j) y est
+   vert  ⚠️ les jours ne sont pas formatés en heures (« 12h j »)
+   vert  le mode de décompte du domaine est nommé
+
+4. Ce qui existait déjà n’a pas bougé
+   vert  le compteur d’annualisation est toujours là
+   vert  le plafond affiché est celui de _planAnnu
+   vert  le détail mois par mois est toujours là
+   vert  les deux signatures sont toujours là
+   vert  les blocs neufs sont AVANT le compteur
+
+5. Les cas particuliers
+   vert  un CDI sans date le dit au lieu d’inventer
+   vert  deux contrats contigus restent DEUX lignes (chacun son type) …
+   vert  … séparées par « se poursuit sans interruption »
+   vert  aucune coupure annoncée pour Chloé
+   vert  ⚠️ une équipe collective n’a PAS de bloc congés
+   vert  mais elle garde son bloc contrats
+   vert  ⚠️ une équipe collective n’est PAS annualisée, et le document le dit
+
+6. Structure HTML
+   vert  balises équilibrées dans le document complet
+   vert  le CSS des blocs neufs est embarqué
+   vert  un document est produit pour le contrat de mi-mois
+   vert  ⚠️ la colonne de gauche n’est plus vide (contrat ouvert le 17)
+   vert  ⚠️ les deux colonnes sont équilibrées à une ligne près
+   vert  aucune graisse 800 (Outfit ne monte qu’à 700)
+   vert  plus de monospace du navigateur sur les horaires
+   vert  ⚠️ plancher de police à 8,5 px
+   vert  ⚠️ une base absolue est posée pour /fonts (iOS, about:blank)
+   vert  ⚠️ on attend le chargement de la police avant d’imprimer
+   vert  ⚠️ @page sans marge : plus de « about:blank » imprimé par le navigateur
+   vert  ⚠️ il y a un endroit où signer (deux cadres)
+   vert  les deux libellés de signature sont conservés
+   vert  la date d’édition est portée par le document
+   vert  le document se nomme lui-même en pied (2 pages sans en-tête navigateur)
+   vert  ⚠️ ni « Jun » ni « Jul » : les mois sont abrégés en français
+   vert  la période des congés est datée en français
+   vert  ⚠️ « ETP 1.12 » a disparu (point décimal + terme faux)
+   vert  le même total d’heures n’est plus écrit deux fois
+   vert  la référence annonce sur combien de jours elle porte
+   vert  plus d’émoji dans les titres de section
+   vert  … mais le raisin de l’en-tête reste
+   vert  ⚠️ un retard n’est plus peint en rouge sang
+   vert  ⚠️ plus de « Janvier 0h » sur un contrat ouvert en août
+   vert  … et août, lui, y est bien
+   vert  … et le document dit pourquoi le compteur commence là
+   vert  un contrat couvrant toute l’année garde ses douze mois
+   vert  les heures faites du mois : 77h30
+   vert  ★★ la référence AFFICHÉE est le planning brut : 86h30
+   vert  ★★ … sur 11 jours prévus — les 5 jours d’échange en font partie
+   vert  ★ le retard compte comme jour travaillé : 10 jours, pas 9
+   vert  ★★★ les 8h30 de l’absence injustifiée SONT dues, pas seulement le retard
+   vert  ★★★ … et elles descendent le compteur : reste à prendre −9h
+   vert  ★ la ligne « Ce mois » explique le −9h au lieu de le laisser tomber du ciel
+   vert  la note nomme LES DEUX motifs, puisque les deux comptent
+   vert  le signe moins est typographique (−), pas un trait d’union
+   vert  ★★★ l’écart au prévu vaut −9h — il compte l’absence ET le retard
+   vert  ★ l’écart et les heures dues disent LE MÊME chiffre
+   vert  la réalisation suit la référence brute (90 %, pas 100 %)
+   vert  mois à écart POSITIF : 94h30 faites pour 86h30 prévues
+   vert  ★ l’écart affiché est +8h
+   vert  ★★ heures sup 17h — l’absence n’en a PAS rogné 9 de plus
+   vert  ★★★ pas de double peine : 17h − 9h = +8h de reste à prendre
+   vert  ★ et l’écart affiché ÉGALE le reste à prendre
+   vert  drapeaux perdus : la référence retombe à 69h30
+   vert  ⚠️ … et l’écart redevient positif — il FAUT reposer les deux jours
+   vert  ⚠️⚠️ drapeaux perdus : l’absence du 20 ne doit RIEN — sa référence a disparu
+   vert  ★ mais la référence ne descend plus SOUS ZÉRO (+8h et non +8h30)
+   vert  le retard y compte quand même comme jour travaillé
+   vert  ★ borne de neutralisation : reste à prendre +7h30, pas +8h
+   vert  _planRefPart est exposé
+   vert  un jour d’échange pèse son horaire
+   vert  un jour supplémentaire ne pèse rien
+   vert  un jour au modèle pèse le modèle
+   vert  une récup ne pèse rien
+   vert  un jour à 0 h a été trouvé dans le mois courant
+   vert  ★★★ poser une absence sur un jour d’échange ne détruit plus le drapeau
+   vert  ★★★ … ni l’horaire, seule trace de ce qui était attendu
+   vert  l’absence reste bien une absence
+   vert  ⚠️ un jour supplémentaire, lui, perd bien son horaire
+   vert  ★ _planRempH mesure l’ATTENDU par défaut, le FAIT sur demande
+
+──────────────────────────────
+  96 vert · 0 rouge
+[2m
+── [54/469] node scripts/mv-harnais-fuseau.mjs   1.3 s[0m
+
+  MA VIGNE — Harnais des fuseaux horaires
+  ──────────────────────────────────────────────────────────
+
+1. Les valeurs attendues (fond du calendrier)
+   vert  _mvJourApres(2026-06-30) = 2026-07-01
+   vert  _mvJourApres(2026-01-31) = 2026-02-01
+   vert  _mvJourApres(2026-02-28) = 2026-03-01 (2026 non bissextile)
+   vert  _mvJourApres(2024-02-28) = 2024-02-29 (2024 bissextile)
+   vert  _mvJourApres(2024-02-29) = 2024-03-01
+   vert  _mvJourApres(2026-12-31) = 2027-01-01
+   vert  une chaîne vide rend une chaîne vide
+   vert  une entrée qui n’est pas une date est rendue telle quelle
+
+2. ★★★ L’INVARIANCE — même résultat sous tous les fuseaux
+   vert  sous Europe/Paris         : identique à UTC
+   vert  sous Pacific/Auckland     : identique à UTC
+   vert  sous America/Los_Angeles  : identique à UTC
+   vert  sous Asia/Kolkata         : identique à UTC
+
+3. La fusion des contrats, là où le défaut se voyait
+   vert  ★ deux contrats contigus (30/06 → 01/07) n’en font QU’UN
+   vert  … et sous Europe/Paris aussi — c’est le cas qui a rougi chez Nico
+   vert  une vraie coupure (31/07 → 17/08) reste DEUX périodes
+   vert  deux périodes qui se chevauchent fusionnent
+   vert  contiguïté par-dessus un 29 février
+
+──────────────────────────────
+  17 vert · 0 rouge
+[2m
+── [73/469] node scripts/mv-harnais-robustesse-planning.mjs   96.2 s[0m
+
+A. Mois figé, mode payé, dimanche travaillé hors heures sup
+
+B. 24 domaines tirés au hasard × 12 mois × toutes les surfaces du Planning
+
+──────────────────────────────
+  31 vert · 0 rouge
+[2m
+── [74/469] node scripts/mv-harnais-robustesse-pilotage.mjs   33.1 s[0m
+
+A. Chaque onglet sur une base vide, puis sur une base fixe
+[applyFbData] Tableau vide ignore pour membres
+[applyFbData] Tableau vide ignore pour saisons
+[applyFbData] Tableau vide ignore pour activites
+
+B. 12 domaines tirés au hasard × 8 onglets + 6 vues Économie × 2 axes
+
+C. LISTES-1 — applyFbData écarte ce qui n’est pas une fiche
+
+──────────────────────────────
+  12 vert · 0 rouge
+[2m
+── [107/469] node scripts/mv-harnais-cuvgr3.mjs   0.3 s[0m
+
+── 1. UNE COLONNE PAR RELEVÉ, BORD À BORD ──
+   vert  w=390 : autant de colonnes que de relevés (7)
+   vert  w=390 : aucun creux entre deux colonnes
+   vert  w=390 : la première colonne part du cadre, la dernière y finit
+   vert  w=430 : autant de colonnes que de relevés (7)
+   vert  w=430 : aucun creux entre deux colonnes
+   vert  w=430 : la première colonne part du cadre, la dernière y finit
+   vert  w=760 : autant de colonnes que de relevés (7)
+   vert  w=760 : aucun creux entre deux colonnes
+   vert  w=760 : la première colonne part du cadre, la dernière y finit
+
+── 2. ★ ELLES SONT ÉMISES EN DERNIER ──
+   vert  la première zone vient après la dernière courbe
+   vert  et après le dernier point tracé
+
+── 3. CE QUE L’INFOBULLE PORTE ──
+   vert  chaque zone porte une infobulle
+   vert  toutes datent le relevé
+   vert  la densité à 20 °C y est
+   vert  la température y est
+   vert  le jour de la chaptalisation la nomme
+   vert  le passage en FA est nommé sur son jour
+   vert  la note du relevé remonte
+   vert  ★ le HTML de l’infobulle est échappé dans l’attribut
+
+── 4. L’ACCESSIBILITÉ NE BOUGE PAS ──
+   vert  le svg garde role="img"
+   vert  il garde son aria-label résumé
+   vert  ★ les zones sont aria-hidden
+   vert  elles sont transparentes, pas invisibles au doigt
+
+── 5. LE PAPIER N’EN PORTE PAS ──
+   vert  sansTouche : aucune zone
+   vert  mais le tracé est le même
+   vert  le cahier de cuverie passe bien sansTouche
+   vert  « touchez la courbe » est masqué à l’impression
+
+── 6. ★ AUCUN AUTRE GRAPHE N’EST TOUCHÉ ──
+   vert  ★ le nombre de graphes a infobulle ne descend jamais (>= 2)
+   vert  les autres graphes appellent toujours le socle inchangé (11)
+   vert  ★ _mvGraphTouch sort sans rien faire sur une boîte sans zone
+   vert  _mvGraphHit échappe ce qu’on lui donne
+
+VERT  —  31 assertions, 0 échecs
+[2m
+── [155/469] node scripts/mv-harnais-manque1.mjs --contre   32.6 s[0m
+  rougit   les tâches au temps passé redeviennent « sans barème »
+  rougit   l’entreplantation retombe dans « sans barème » (vers la roue crantée)
+  rougit   le bouton de l’entreplantation renvoie encore aux tâches
+  rougit   les parcelles concernées ignorées (toutes comptées à zéro, l’alerte reste)
+  rougit   _parcConcern plus exposé par app.js
+  rougit   le constat phyto reparle sans traitement (l’ancien test)
+  rougit   les lignes du registre ne sont plus comptées
+  rougit   la porte « comptes » disparaît de _pilGo
+  rougit   le Pilotage ne se redessine plus après les comptes
+  rougit   le fondu redevient « forwards » (le bas recoupé)
+  rougit   la marge basse perd le trait d’accueil
+  rougit   l’aide reparle d’« entreplantation sans trous saisis »
+  rougit   le guide perd la phrase des travaux au temps passé
+MANQUE-1 contre-épreuves : 13 sur 13 rougissent
+[2m
+── [163/469] node scripts/harnais-claude-md.mjs   79.2 s[0m
+
+── structure ──
+  [32m✓[0m §40 existe et est unique
+  [32m✓[0m §14b enrichi de l'essai borné
+  [32m✓[0m §28 s'ouvre directement sur un bloc d'alerte
+  [32m✓[0m aucun numéro de section en doublon
+
+── les nombres annoncés sont les vrais ──
+  [32m✓[0m TRIAL_DAYS = 15 · dans le code ET dans le doc
+  [32m✓[0m TRIAL_MAX_RENEW = 1 · idem
+  [32m✓[0m TRIAL_WARN_D = 3 · idem
+  [32m✓[0m _FC_TRIAL_DAYS / _FC_TRIAL_MAX existent bien dans admin-gt.js
+  [32m✓[0m le seuil d<=3 du bandeau existe bien dans app.js
+  [32m✓[0m les deux versions réelles se lisent
+  [32m✓[0m les versions ne sont PAS recopiées dans le document (règle d'or n°2)
+
+── les affirmations vérifiables ──
+  [32m✓[0m ★ « rules ignore trial » — c'est vrai
+  [32m✓[0m ★ saveData refuse en tête quand l'essai est terminé
+  [32m✓[0m ★ les rewrites annoncés existent
+  [32m✓[0m gtRenewTrial et trialWatch nommés dans le doc ET exportés
+  [32m✓[0m trialPrevu / trialRenewals documentés et présents
+  [32m✓[0m _guerettech/trial_mails documenté et utilisé
+  [32m✓[0m 8h05 annoncé = cron réel
+  [32m✓[0m ★ « esc() n'existe pas dans claims.js » — toujours vrai
+
+── ce que le doc promet de ne PAS avoir fait ──
+  [32m✓[0m smoke/e2e déclarés non joués
+  [32m✓[0m ★ l'hypothèse J30 est signalée comme non confirmée
+  [32m✓[0m les 4 harnais sont nommés
+  [32m✓[0m le total d'assertions annoncé = 58+15+20+15
+
+── les règles d'or que Nico a demandées ──
+  [32m✓[0m le document annonce SIX règles d'or, et les six existent
+  [32m✓[0m ★ règle n°6 — ce document part avec le dernier lot de la conversation
+  [32m✓[0m ★ la note de livraison est écrite, fichier par fichier
+  [32m✓[0m les numéros de ligne recopiés ne remontent pas (35 ≤ 35)
+
+── le document a-t-il PERDU un chantier ? ──
+  [32m✓[0m tout script de scripts/ est nommé dans le document (0 muet(s))
+  [32m✓[0m APP ne recule pas (9.50 → 9.51)
+  [32m✓[0m SW ne recule pas (10.29 → 10.30)
+  [32m✓[0m aucune section n'a disparu (422 ≥ 414)
+    ↑ 8 de plus — relever SECTIONS dans ce fichier
+  [32m✓[0m ★ ça reste un TITRE de section : DS-0, le socle de la charte
+  [32m✓[0m ★ ça reste un TITRE de section : la feuille d'heures
+  [32m✓[0m ★ ça reste un TITRE de section : les consommables par atelier
+  [32m✓[0m ★ ça reste un TITRE de section : le thème hors #app-root
+  [32m✓[0m ★ le document connaît toujours le harnais des jetons
+  [32m✓[0m aucun titre de section des 12 derniers commits n'a disparu (0 perdu(s))
+
+── la scission (DOC-1, §189) ──
+  [32m✓[0m le cœur (CLAUDE.md) porte : mode d'emploi
+  [32m✓[0m le cœur (CLAUDE.md) porte : les six règles d'or
+  [32m✓[0m le cœur (CLAUDE.md) porte : environnement de Nico
+  [32m✓[0m le cœur (CLAUDE.md) porte : communication
+  [32m✓[0m le cœur (CLAUDE.md) porte : §1
+  [32m✓[0m le cœur (CLAUDE.md) porte : §2
+  [32m✓[0m le cœur (CLAUDE.md) porte : §3
+  [32m✓[0m le cœur (CLAUDE.md) porte : §4
+  [32m✓[0m le cœur (CLAUDE.md) porte : §5
+  [32m✓[0m le cœur (CLAUDE.md) porte : §6
+  [32m✓[0m le cœur (CLAUDE.md) porte : §6b
+  [32m✓[0m le cœur (CLAUDE.md) porte : §6c
+  [32m✓[0m le cœur (CLAUDE.md) porte : §7
+  [32m✓[0m le cœur (CLAUDE.md) porte : §8
+  [32m✓[0m le cœur (CLAUDE.md) porte : §8b
+  [32m✓[0m le cœur (CLAUDE.md) porte : §8c
+  [32m✓[0m le cœur (CLAUDE.md) porte : §24
+  [32m✓[0m le cœur (CLAUDE.md) porte : §25
+  [32m✓[0m le cœur (CLAUDE.md) porte : §27a
+  [32m✓[0m le cœur (CLAUDE.md) porte : §28
+  [32m✓[0m le cœur (CLAUDE.md) porte : §29
+  [32m✓[0m le mode d'emploi précède la règle d'or n°1
+  [32m✓[0m une seule consolidation en tête du cœur (les précédentes → docs/claude/journal.md)
+  [32m✓[0m le cœur reste sous son plafond (2800 ≤ 2800 lignes)
+  [32m✓[0m chaque chantier (§30+) est dans le fichier de sa tranche (0 mal rangé(s))
+  [32m✓[0m docs/claude/INDEX.md est à jour (node scripts/mv-claude-index.mjs)
+
+[32m✓ 63 vertes, 0 rouge[0m
+[2m
+── [173/469] node scripts/mv-harnais-vignoble.mjs   0.3 s[0m
+
+0. Les moteurs extraits d'app.js repondent
+   vert  getTachesSaison() rend les 4 taches
+   vert  getPCls(Ergot) = 100 % (4/4)
+   vert  getPCls(Jouise) = 50 % (2/4)
+   vert  getPCls(Bollery) = 100 % (3/3, Relevage hors sujet)
+   vert  _dpRendHistRows agrege 2025 : 2000 kg / 0,37 ha
+
+1. Lecture du domaine
+   vert  5 parcelles lues
+   vert  tri par commune puis nom
+   vert  le dernier travail d'Ergot est le Pliage du 02/04, pas le relevé météo du 20/05
+   vert  Ergot est localisee et contouree
+   vert  Jouise est localisee mais sans contour
+   vert  Crais n'a ni cepage, ni position, ni contour
+   vert  Bollery : 1 tache hors sujet comptee
+   vert  Chaziere est marquee arrachee
+
+2. Repartition par cepage
+   vert  Pinot Noir : 2 parcelles, 0,89 ha (Chaziere arrachee exclue)
+   vert  Chardonnay : 2 parcelles (Jouise complantee comptee), 0,75 ha
+   vert  les parcelles sans cepage ont leur propre ligne
+
+3. Le document
+   vert  un document est produit
+   vert  titre et orientation
+   vert  4 parcelles actives annoncees
+   vert  avancement pondere par la surface = 60 %
+   vert  la surface totale du tableau = 1,67 ha
+   vert  Jouise est signalee complantee
+   vert  le rendement 2025 d'Ergot est ramene a l'hectare
+   vert  les reperes manquants de Crais sont marques
+   vert  Ergot ne porte aucun repere manquant
+   vert  la section « Ce qu'il reste à renseigner » nomme les parcelles
+   vert  les arrachees ont leur propre tableau
+   vert  Chaziere n'est pas dans le tableau des actives
+   vert  le double compte des complantees est annonce
+   vert  l'absence d'heures est annoncee
+   vert  la periode consultee est nommee
+   vert  l'encadre de limite est present
+
+4. Structure HTML
+   vert  balises equilibrees
+   vert  tableau 1 rectangulaire
+   vert  tableau 2 rectangulaire
+   vert  tableau 3 rectangulaire
+
+5. Cas limites
+   vert  aucune parcelle → aucun document
+   vert  que des arrachees → aucun document
+   vert  sans SURF_TOTALE, la surface affichee reste 1,67 ha
+
+──────────────────────────────
+  39 vert · 0 rouge
+[2m
+── [175/469] node scripts/mv-harnais-entretien.mjs   0.3 s[0m
+
+1. Le document passe par la charte
+   vert  un document est produit
+   vert  titre : « Carnet d’entretien 2026 »
+   vert  orientation portrait et catégorie tracteur
+   vert  les métas nomment les machines et la date
+   vert  l’overlay de choix se referme
+
+2. Ce que l’ancien en-tête disait, et ne dit plus
+   vert  ⚠️ plus aucune mention de GUERETTECH
+   vert  ⚠️ le document ne s’intitule plus « Ma Vigne »
+   vert  plus de « Document confidentiel · Usage interne »
+   vert  l’ancien en-tête a disparu du corps
+
+3. Le CSS : la charte fournit, le document ne duplique plus
+   vert  plus de @page dans le CSS du document
+   vert  plus de font-family de base (body)
+   vert  plus de reset * {}
+   vert  le CSS propre au carnet est conservé : .tracteur-section
+   vert  le CSS propre au carnet est conservé : .tracteur-title
+   vert  le CSS propre au carnet est conservé : .resume-bar
+   vert  le CSS propre au carnet est conservé : .fiche-bloc
+   vert  le CSS propre au carnet est conservé : .check-item
+   vert  le CSS propre au carnet est conservé : .anomalie
+   vert  le CSS propre au carnet est conservé : .rep-bloc
+   vert  le CSS propre au carnet est conservé : .page-break
+   vert  le CSS ne contient aucune accolade orpheline
+
+4. Le corps est complet
+   vert  les deux machines cochées y sont, la troisième non
+   vert  un saut de page sépare les machines
+   vert  les fiches d’entretien sont là
+   vert  l’anomalie est reportée
+   vert  la réparation figure au carnet
+   vert  les compteurs de résumé sont calculés
+   vert  balises équilibrées
+
+5. Rien à imprimer
+   vert  aucune machine cochée → aucun document
+   vert  et l’utilisateur est prévenu
+
+──────────────────────────────
+  30 vert · 0 rouge
+[2m
+── [179/469] node scripts/mv-harnais-globaux.mjs --contre   25.8 s[0m
+[1m
+── CONTRE-EPREUVES — le filet attrape-t-il vraiment ? ──
+[0m
+  [32m✓[0m depart vert : aucun nom libre injoignable dans les sources livrees
+  [32m✓[0m [loginPendingIdx] la panne du 21/08 — `let` de module + lecteurs nus → rouge
+  [32m✓[0m [STADES_PHENO] le bouton « nouveau traitement » — window retire, lecteurs nus → rouge
+  [32m✓[0m [db] le chat v8 — poignee Firestore encapsulee dans firebase.js → rouge
+  [32m✓[0m [_mvTemoinJamaisDeclare] un defaut inedit, dans un module etranger au lot → rouge
+  [32m✓[0m un nom nu mais expose sur window reste vert (pas de faux positif)
+
+  6 vert(s) · 0 rouge(s)
+
+[2m
+── [193/469] node scripts/mv-harnais-icones-contre.mjs   198.9 s[0m
+
+── CONTRE-EPREUVE DU HARNAIS D’ICONES
+
+  [32m✓[0m un symbole renomme — rougit, et le dit
+  [32m✓[0m un triplet qui cite un symbole absent — rougit, et le dit
+  [32m✓[0m un emoji reintroduit dans reglages.js — rougit, et le dit
+  [32m✓[0m une forme qui fige sa couleur — rougit, et le dit
+  [32m✓[0m un trou creuse avec du blanc en dur — rougit, et le dit
+  [32m✓[0m le compte global qui remonte — rougit, et le dit
+  [32m✓[0m une taille hors echelle (13 px) — rougit, et le dit
+  [32m✓[0m un symbole prive de sa marque d’origine — rougit, et le dit
+  [32m✓[0m un badge d’un ton inexistant — rougit, et le dit
+  [32m✓[0m une regle CSS qui vise un enfant par son rang — rougit, et le dit
+  [32m✓[0m un ternaire a deux branches identiques — rougit, et le dit
+  [32m✓[0m un espacement ecrit a la main dans la charte — rougit, et le dit
+  [32m✓[0m une table qui demande un symbole absent — rougit, et le dit
+  [32m✓[0m un aide prive appele mais disparu — rougit, et le dit
+  [32m✓[0m _mvIcon dans un document imprime — rougit, et le dit
+  [32m✓[0m un emoji repose dans index.html — rougit, et le dit
+  [32m✓[0m un glyphe hors des plages historiques (ℹ) — rougit, et le dit
+  [32m✓[0m _mvIcon dans un document imprime, via un helper — rougit, et le dit
+  [32m✓[0m une tuile d’un ton inexistant — rougit, et le dit
+  [32m✓[0m un emoji repose dans une source du guide — rougit, et le dit
+  [32m✓[0m un nom faux dans une branche de ternaire — rougit, et le dit
+  [32m✓[0m _mvIcon dans un document bati par _mvDocOpen — rougit, et le dit
+
+[32mLes 22 contre-epreuves rougissent[0m
+
+[2m
+── [206/469] node scripts/mv-harnais-recup.mjs --contre   290.3 s[0m
+
+  MA VIGNE — Harnais RECUP-1 (heures manquées, récup majorée)
+  ──────────────────────────────────────────────────────────
+  ✓ 435 assertions vertes.
+
+  CONTRE-ÉPREUVE — chaque défaut réintroduit doit faire rougir
+    DÉTECTÉ  DIM-2 · en mode payé, la majoration d’avant septembre revient au compteur à part (payée deux fois) (7 rouges)
+    DÉTECTÉ  DIM-2 · le détail de l’année perd la colonne « Dimanches faites » (3 rouges)
+    DÉTECTÉ  DIMAV-1 · le planning perd la colonne des dimanches et fériés (1 rouge)
+    DÉTECTÉ  AVANT-2 · le stock d’avant septembre reste à 1 pour 1 (17 rouges)
+    DÉTECTÉ  AVANT-2 · la majoration du stock n’entre pas dans ce que le mois apporte (3 rouges)
+    DÉTECTÉ  DIM-2 · un dimanche d’avant septembre est majoré deux fois à la bascule (3 rouges)
+    DÉTECTÉ  AVANT-2 · le report d’avant Ma Vigne est majoré sans qu’on sache rien de ses semaines (13 rouges)
+    DÉTECTÉ  AVANT-2 · août perd son astérisque (1 rouge)
+    DÉTECTÉ  AVANT-2 · la légende redit « majoration comprise » sans la règle d’avant (1 rouge)
+    DÉTECTÉ  CLAIR-1 · le salaire de base redit « Maintenu » (4 rouges)
+    DÉTECTÉ  CLAIR-1 · la case ne dit plus d’où viennent ses heures (6 rouges)
+    DÉTECTÉ  CLAIR-1 · une case à zéro disparaît (5 rouges)
+    DÉTECTÉ  CLAIR-1 · les dimanches d’avant septembre sortent des restantes (2 rouges)
+    DÉTECTÉ  CLAIR-1 · « déjà majorées » revient (1 rouge)
+    DÉTECTÉ  DIM-1 · la majoration seule se paie de nouveau sans regarder les absences (9 rouges)
+    DÉTECTÉ  DIM-1 · la majoration seule n’entre plus au compteur le temps du calcul (10 rouges)
+    DÉTECTÉ  DIM-1 · l’instantané fige la majoration travaillée, pas la majoration payée (4 rouges)
+    DÉTECTÉ  DIM-1 · la majoration née après l’envoi ne passe plus au mois suivant (2 rouges)
+    DÉTECTÉ  DIM-1 · la part couverte par la majoration redevient « prise sur la récup » (1 rouge)
+    DÉTECTÉ  DIM-1 · le cadre réimprime la majoration travaillée (3 rouges)
+    DÉTECTÉ  TAUX-1 · le paiement du mois reprend le 25 % d’abord (22 rouges)
+    DÉTECTÉ  TAUX-1 · l’estimation d’avant septembre range sa pile dans l’ancien sens (10 rouges)
+    DÉTECTÉ  TAUX-1 · une absence reprend le taux le plus bas d’abord (19 rouges)
+    DÉTECTÉ  TAUX-1 · le taux le plus fort passe avant le mois le plus ancien (7 rouges)
+    DÉTECTÉ  TAUX-1 · le détail de l’année reconvertit les absences en heures sup brutes (6 rouges)
+    DÉTECTÉ  TAUX-1 · « de octobre » revient (1 rouge)
+    DÉTECTÉ  TAUX-1 · une récup redevient « payée » (1 rouge)
+    DÉTECTÉ  TAUX-1 · le rattrapage ne dit plus qu’il n’est pas majoré (1 rouge)
+    DÉTECTÉ  PAIE-1 · dans la semaine, le domaine repasse avant le salarié (2 rouges)
+    DÉTECTÉ  PAIE-1 · un mois figé repaie le compteur selon ses heures sup d’aujourd’hui (1 rouge)
+    DÉTECTÉ  PAIE-1 · « récupérées » mêle de nouveau la récup prise et les absences (3 rouges)
+    DÉTECTÉ  PAIE-1 · l’écran reprend l’ancien cadre, la retenue en petit sous le trio (25 rouges)
+    DÉTECTÉ  les heures manquées retirées au taux heures sup (71 rouges)
+    DÉTECTÉ  le seuil des 50 % oublié (47 rouges)
+    DÉTECTÉ  la majoration des heures sup oubliée (69 rouges)
+    DÉTECTÉ  dimanche et heures sup cumulés (25 rouges)
+    DÉTECTÉ  un arrêt retire des heures (5 rouges)
+    DÉTECTÉ  la journée du domaine retenue sur la paie (12 rouges)
+    DÉTECTÉ  la fenêtre de septembre 2026 supprimée (36 rouges)
+    DÉTECTÉ  la coupure comptée dans l’absence (2 rouges)
+    DÉTECTÉ  ce qui reste à rattraper n’est jamais comblé (3 rouges)
+    DÉTECTÉ  on déclare 1h15 à la compta au lieu de l’heure brute (2 rouges)
+    DÉTECTÉ  un paiement pris au compteur se déclare en temps de récup (6 rouges)
+    DÉTECTÉ  payé : la majoration d’un dimanche prévu part aussi au compteur (10 rouges)
+    DÉTECTÉ  payer des heures brutes retire autant de récup, sans leur taux (2 rouges)
+    DÉTECTÉ  un congé payé se lit en heures manquées (9 rouges)
+    DÉTECTÉ  la récup est payée même quand le compteur ne la couvre pas (2 rouges)
+    DÉTECTÉ  le solde restant garde la majoration de la récup (4 rouges)
+    DÉTECTÉ  le paiement ignore le compteur au-delà du mois (PAIE-1 : la demande fond avec les heures sup du mois) (23 rouges)
+    DÉTECTÉ  les heures restantes oublient leur taux (11 rouges)
+    DÉTECTÉ  les heures payées sur le compteur ne rejoignent pas leur taux (6 rouges)
+    DÉTECTÉ  le relevé de septembre retombe sur l’ancien (1 rouge)
+    DÉTECTÉ  le relevé oublie les absences payées (4 rouges)
+    DÉTECTÉ  les heures sup se recomptent au jour (19 rouges)
+    DÉTECTÉ  le 50 % repart de la 44e heure travaillée (1 rouge)
+    DÉTECTÉ  une semaine à cheval se recoupe en deux (5 rouges)
+    DÉTECTÉ  un jour sans saisie reprend son horaire par défaut (1 rouge)
+    DÉTECTÉ  ce que la semaine a rattrapé repart au compteur de la fiche (3 rouges)
+    DÉTECTÉ  le verdict redit « retiré au taux normal » pour des heures rattrapées (1 rouge)
+    DÉTECTÉ  la feuille tait que les jours à venir comptent au planning (2 rouges)
+    DÉTECTÉ  le compteur repart sans son solde d’avant (papier et écran) (2 rouges)
+    DÉTECTÉ  une absence sans motif redevient neutre (2 rouges)
+    DÉTECTÉ  octobre porte déjà un solde (2 rouges)
+    DÉTECTÉ  les heures à rattraper disparaissent du papier (2 rouges)
+    DÉTECTÉ  l’onglet Jours revient à l’écart du jour (3 rouges)
+    DÉTECTÉ  la carte « Heures à rattraper » ne perd pas ce que la semaine a rattrapé (2 rouges)
+    DÉTECTÉ  la lecture laisse la bascule de septembre au 1er janvier (30 rouges)
+    DÉTECTÉ  ce que les jours ne montrent pas passe à 50 % (1 rouge)
+    DÉTECTÉ  un dimanche se majore deux fois (9 rouges)
+    DÉTECTÉ  un paiement pris au compteur perd son mois (saisie d’avant PAIE-1) (1 rouge)
+    DÉTECTÉ  un paiement pris au compteur perd son mois (demande en total, PAIE-1) (1 rouge)
+    DÉTECTÉ  le report d’avant Ma Vigne se mêle aux heures estimées (2 rouges)
+    DÉTECTÉ  le relevé ne dit plus ce qui vient d’avant septembre dans les restantes (1 rouge)
+    DÉTECTÉ  DIM-2 · « À savoir » ne dit plus qu’un dimanche non prévu compte en entier (1 rouge)
+    DÉTECTÉ  un paiement passe avant les absences (16 rouges)
+    DÉTECTÉ  la récup ne reprend plus les heures du domaine (2 rouges)
+    DÉTECTÉ  le domaine passe avant le salarié (3 rouges)
+    DÉTECTÉ  DIM-2 · un dimanche non prévu rattrape de nouveau les absences de la semaine (majoration seule) (3 rouges)
+    DÉTECTÉ  DIM-3 · « toujours » : un dimanche prévu redevient une journée normale (majoration seule) (2 rouges)
+    DÉTECTÉ  DIM-3 · « toujours », avant septembre : les dimanches prévus ne sont plus comptés en heures sup (3 rouges)
+    DÉTECTÉ  DIM-3 · « toujours » : le paiement d’avant septembre garde son vieux partage (il vide le compteur) (1 rouge)
+    DÉTECTÉ  le lundi 31 août rattrape encore le 1er septembre (la transition de SEM-1 revient) (3 rouges)
+    DÉTECTÉ  la bascule des absences sans motif suit AVANT-1 (1 rouge)
+    DÉTECTÉ  le relevé reparle de « non payées » (2 rouges)
+    DÉTECTÉ  la reprise redevient une case à cocher (1 rouge)
+    DÉTECTÉ  un mois figé se repaie selon le compteur (4 rouges)
+    DÉTECTÉ  ce qui change après l’envoi ne passe pas au mois suivant (4 rouges)
+    DÉTECTÉ  le report se retient sans passer par les heures sup du mois (1 rouge)
+    DÉTECTÉ  la retenue de trop n’est pas rendue (2 rouges)
+    DÉTECTÉ  figé, la retenue se recalcule (2 rouges)
+
+  Les 90 défauts sont détectés.
+[2m
+── [207/469] node scripts/mv-harnais-robustesse-planning.mjs --contre   163.8 s[0m
+
+Contre-épreuves — chaque défaut reposé doit rougir
+   vert   rougit : l’ancien libellé qui lit l.jours.length (le plantage du 27/09)
+   vert   rougit : la majoration figée n’est plus relue dans le calcul du mois
+   vert   rougit : un plantage inédit dans l’onglet Congés (hors du cas connu)
+   vert   rougit : la page 2 redit le dimanche que la page 1 porte déjà (doublon MEP-1)
+   vert   rougit : le style .cl redevient global (blocs Contrats et Congés défaits)
+   vert   rougit : la page 2 revient en deux colonnes figées
+   vert   rougit : un mois figé recalcule ce qui est parti au lieu de le montrer (DIM-2)
+   vert   rougit : un « NaN » dans le releve papier
+
+──────────────────────────────
+  8 vert · 0 rouge
+[2m
+── [208/469] node scripts/mv-harnais-robustesse-pilotage.mjs --contre   114.7 s[0m
+
+Contre-épreuves — chaque défaut reposé doit rougir
+   vert   rougit : LISTES-1 retiré : applyFbData laisse passer une parcelle nulle
+   vert   rougit : un onglet qui lit un champ d’une archive sans la garder
+   vert   rougit : un « NaN » dans l’onglet Archives
+   vert   rougit : un tracteur sans compteur affiché en « undefined »
+   vert   rougit : une erreur avalée et journalisée dans le rendu
+
+──────────────────────────────
+  5 vert · 0 rouge
+[2m
+── [210/469] node scripts/mv-harnais-gf.mjs --contre   33.5 s[0m
+
+── GF-1 — contre-épreuves : chaque défaut réinjecté doit mordre, par sa règle ──
+
+  [32m✓[0m C1 le seuil n’est plus inclus (0,2 pile ne serait pas sec)
+  [32m✓[0m C2 le repère de densité retombe sur l’ancien seuil de 2 g/L
+  [32m✓[0m C3 le chiffre labo repasse en fin de ligne (coupé au téléphone)
+  [32m✓[0m C4 la liste réclame de nouveau une densité par jour
+  [32m✓[0m C5 la virgule française n’est plus lue à l’enregistrement
+  [32m✓[0m C6 le chiffre labo n’est plus écrit sur le relevé
+  [32m✓[0m C7 le relevé corrigé est reconstruit de zéro (la tournée s’efface)
+  [32m✓[0m C8 la déclaration n’écrit plus la fin
+  [32m✓[0m C9 la densité projette encore une cuve suivie au labo
+  [32m✓[0m C10 la ligne du Chai perd son span : chaque <b> refait sa colonne
+  [32m✓[0m C11 après le pressurage, 2 remontages reviennent par défaut
+  [32m✓[0m C12 le cahier perd sa colonne labo
+  [32m✓[0m C13 l’agenda réclame de nouveau une densité par jour
+  [32m✓[0m C14 « 0,8 » écrit en texte se relit 0
+
+  [32m14/14 défauts attrapés, chacun par sa règle[0m
+
+[2m
+── [211/469] node scripts/mv-harnais-labo.mjs --contre   29.2 s[0m
+
+── LABO-1 — contre-épreuves : chaque défaut réinjecté doit mordre, par sa règle ──
+
+  [32m✓[0m C1 compléter repart de zéro : une case vide efface
+  [32m✓[0m C2 le n° de rapport n’est plus reconnu d’une date à l’autre
+  [32m✓[0m C3 une ancienne analyse commune à deux cuvées devient complétable
+  [32m✓[0m C4 le glucose ouvre un second relevé le jour de la densité
+  [32m✓[0m C5 le degré probable du labo ne cale plus le repère sec
+  [32m✓[0m C6 la purge des PDF ignore les rapports des cuves
+  [32m✓[0m C7 l’ancien formulaire rouvre une analyse née d’une fiche (et l’écraserait)
+  [32m✓[0m C8 deux valeurs différentes : la nouvelle écrase sans demander
+  [32m✓[0m C9 « Le passer au 8 oct. » ne déplace rien
+  [32m✓[0m C11 l’onglet « Labo » n’est plus dans la liste des onglets du Chai
+  [32m✓[0m C12 après l’enregistrement, la fiche touchée n’est plus mise en surbrillance
+  [32m✓[0m C10 le « < » du bulletin se perd à l’écriture
+
+  [32m12/12 défauts attrapés, chacun par sa règle[0m
+
+[2m
+── [285/469] node scripts/mv-harnais-entree1.mjs --contre   53.3 s[0m
+  ✓ connexion réussie avec réseau : le téléphone garde une empreinte du compte
+  ✓ … jamais le mot de passe lui-même
+  ✓ … une vraie empreinte (sel de 16 octets, 32 octets d’empreinte, assez de tours)
+  ✓ … et les droits utiles hors réseau, sans ceux de GUERETTECH ni le mot de passe provisoire
+  ✓ premier mot de passe (SEC-2) : aucune empreinte du provisoire
+  ✓ mauvais mot de passe avec réseau : aucune empreinte
+  ✓ sans réseau, bon mot de passe, session du téléphone à ce compte : on ENTRE
+  ✓ … marquée « entrée sans réseau » (le retour du signal relancera la session)
+  ✓ … avec les droits gardés sur le téléphone (sinon l’écran des conditions bloquerait l’admin)
+  ✓ … seules les clés que la copie dit venues du serveur sont libérées (parcelles, membres ; pas saisons)
+  ✓ … et la copie du téléphone devient la base de fusion
+  ✓ sans réseau, mauvais mot de passe : « Mot de passe incorrect. », on n’entre pas
+  ✓ sans réseau, aucune empreinte : la première connexion sur ce téléphone demande du réseau
+  ✓ sans réseau, empreinte d’une autre personne : seule la dernière personne connectée peut entrer
+  ✓ sans réseau, plus de session gardée sur le téléphone : on n’entre pas
+  ✓ sans réseau, la session gardée est celle d’un AUTRE compte : on n’entre pas
+  ✓ copie d’avant le lot (sans liste des clés) : on entre, mais rien n’est libéré (prudence)
+  ✓ réseau qui traîne : la connexion est bornée à 8 s quand une empreinte existe
+  ✓ … au bout de la borne, l’empreinte ouvre
+  ✓ … et la réponse tardive du serveur n’ouvre pas une seconde fois
+  ✓ réseau qui traîne, sans empreinte : comme avant, on attend la réponse (aucune borne)
+  ✓ base de fusion : les parcelles prennent la copie du téléphone
+  ✓ … une clé déjà en file garde sa première base (rien posé)
+  ✓ … une base déjà reçue du serveur n’est pas écrasée
+  ✓ … le KML (remplacé, jamais fusionné) n’en reçoit pas ; les autres clés oui
+  ✓ avec la copie pour base : ma validation ET celle du collègue sont gardées
+  ✓ sans base (base = serveur), la copie en retard aurait effacé la taille du collègue
+  ✓ la copie locale dit quelles clés venaient du serveur (CLES), loadData la relit
+  ✓ sans réseau, l’entrée dessine l’écran tout de suite (la suite partagée)
+  ✓ au retour du signal : d’abord la file, puis la session complète
+  ✓ une déconnexion volontaire efface l’empreinte (poste partagé)
+
+ENTREE-1 : 31 vertes, 0 rouges
+  ✓ rougit : le mot de passe est gardé en clair
+  ✓ rougit : l’empreinte est posée AVANT la garde SEC-2
+  ✓ rougit : la session du téléphone n’est plus vérifiée
+  ✓ rougit : toutes les clés sont libérées, même un squelette
+  ✓ rougit : les droits ne sont plus restaurés
+  ✓ rougit : la base de fusion n’est plus posée
+  ✓ rougit : le réseau qui traîne n’est plus borné
+  ✓ rougit : la réponse tardive ouvre une seconde fois
+  ✓ rougit : les bases écrasent la première base d’une clé en file
+  ✓ rougit : le retour du signal ne relance plus la session
+  ✓ rougit : une déconnexion garde l’empreinte
+  ✓ rougit : l’entrée sans réseau ne dessine plus l’écran
+
+12/12 contre-épreuves rougissent
+[2m
+── [289/469] node scripts/mv-harnais-taille2.mjs --contre   75.1 s[0m
+  ✓ règle Firestore : l’exemple de la documentation (44 / 71 / 147 octets)
+  ✓ octets UTF-8 comptés sans tampon = ce que dit Node (400 textes : accents, emoji, moitiés de paire)
+  ✓ petit document : écrit, aucune alerte
+  ✓ vers 800 Ko (≈ 78 %, le domaine de référence aujourd’hui) : écrit, AUCUNE alerte (seuil à 90 %, décision de Nico)
+  ✓ au-delà de 90 % : écrit quand même
+  ✓ … une alerte remonte à GUERETTECH, en avertissement, SANS rien afficher au client
+  ✓ … une seule fois par jour, par document et par téléphone
+  ✓ … et de nouveau le lendemain
+  ✓ au-delà de la limite : RIEN n’est envoyé
+  ✓ … rien ne reste en file (plus de renvoi sans fin)
+  ✓ … la saisie va au coffre des saisies non enregistrées
+  ✓ … le voyant et l’écran disent la vraie raison, et où est la saisie
+  ✓ … une alerte remonte à GUERETTECH (erreur, silencieuse)
+  ✓ … le message n’est montré qu’une fois par séance
+  ✓ local léger, mais fusionné avec le serveur il dépasse : rien n’est envoyé
+  ✓ parcelles au-delà de la limite : rien n’est envoyé, la saisie va au coffre
+  ✓ KML (écrit sans fusion) au-delà de la limite : rien n’est envoyé
+  ✓ file : un document trop gros en file en sort, au coffre, sans rien envoyer
+  ✓ … et le voyant ne dit pas « synchronisé »
+  ✓ refus de taille du serveur : au coffre, jamais en file
+  ✓ … pareil quand c’est la file qui envoie
+  ✓ … et sans les 7 s de nouveaux essais (un refus de taille ne se réessaie pas)
+  ✓ une panne passagère, elle, part toujours en file (inchangé)
+  ✓ le script npm run taille joue la MÊME règle (importée de src/taille-doc.js, aucune copie)
+
+TAILLE-2 : 24 vertes, 0 rouges
+  ✓ rougit : la limite n’est plus vérifiée avant la fusion
+  ✓ rougit : l’alerte des 90 % s’affiche au client
+  ✓ rougit : le seuil redescend à 70 % (l’alerte sonnerait tous les jours à 800 Ko)
+  ✓ rougit : l’alerte des 90 % part à chaque envoi
+  ✓ rougit : un document trop gros repart en file
+  ✓ rougit : la saisie trop grosse n’est plus mise au coffre
+  ✓ rougit : la file trop grosse annonce « synchronisé »
+  ✓ rougit : le refus de taille du serveur n’est plus reconnu
+  ✓ rougit : un refus de taille est réessayé (7 s)
+  ✓ rougit : les parcelles ne sont plus mesurées
+  ✓ rougit : le script garde sa propre règle
+  ✓ rougit : l’octet UTF-8 est mal compté pour les emoji
+
+12/12 contre-épreuves rougissent
+[2m
+── [294/469] node scripts/mv-harnais-gt1.mjs   0.3 s[0m
+  ✓ l’appli des clients n’importe plus la console (app.js)
+  ✓ l’entrée de gt.html charge l’appli PUIS la console (src/gt.js)
+  ✓ index.html ne contient plus rien de la console (page, verrou, nouveau domaine, appels agt…)
+  ✓ … ni le panneau de connexion GUERETTECH
+  ✓ … mais un repère de chaque fragment, une fois
+  ✓ les fragments portent ce qui est parti
+  ✓ gt.html fabriqué contient la console et le panneau de connexion
+  ✓ … charge src/gt.js et plus src/app.js
+  ✓ … n’est pas indexé (une seule balise robots, noindex, nofollow), sans manifeste d’installation, titré GUERETTECH
+  ✓ … dit qu’il est fabriqué (ne pas éditer), et la fabrique est stable
+  ✓ … et la fabrique REFUSE un index.html sans repère (jamais de page à moitié)
+  ✓ Vite construit les deux pages
+  ✓ npm run build et npm run dev fabriquent gt.html avant Vite
+  ✓ gt.html n’entre pas dans git (fabriqué)
+  ✓ gt.html servi sans cache, comme index.html
+  ✓ … et non indexé côté serveur (X-Robots-Tag)
+  ✓ précache : le fichier propre à la console n’est JAMAIS téléchargé par un client
+  ✓ … le code commun et celui chargé à la demande restent précachés
+  ✓ … et sans gt.html dans le build, rien n’est retiré
+  ✓ appli des clients : cinq appuis sur le logo envoient vers /gt.html
+  ✓ gt.html : le panneau de connexion s’ouvre de lui-même, une seule fois
+  ✓ … et les cinq appuis l’ouvrent sans quitter la page
+  ✓ dans l’appli des clients, aller à la console renvoie vers gt.html (goTo)
+  ✓ le preflight lit aussi les fragments de gt.html (ids, appels, caractères)
+
+GT-1 : 24 vertes, 0 rouges
+[2m
+── [295/469] node scripts/mv-harnais-gt1.mjs --contre   0.9 s[0m
+  ✓ l’appli des clients n’importe plus la console (app.js)
+  ✓ l’entrée de gt.html charge l’appli PUIS la console (src/gt.js)
+  ✓ index.html ne contient plus rien de la console (page, verrou, nouveau domaine, appels agt…)
+  ✓ … ni le panneau de connexion GUERETTECH
+  ✓ … mais un repère de chaque fragment, une fois
+  ✓ les fragments portent ce qui est parti
+  ✓ gt.html fabriqué contient la console et le panneau de connexion
+  ✓ … charge src/gt.js et plus src/app.js
+  ✓ … n’est pas indexé (une seule balise robots, noindex, nofollow), sans manifeste d’installation, titré GUERETTECH
+  ✓ … dit qu’il est fabriqué (ne pas éditer), et la fabrique est stable
+  ✓ … et la fabrique REFUSE un index.html sans repère (jamais de page à moitié)
+  ✓ Vite construit les deux pages
+  ✓ npm run build et npm run dev fabriquent gt.html avant Vite
+  ✓ gt.html n’entre pas dans git (fabriqué)
+  ✓ gt.html servi sans cache, comme index.html
+  ✓ … et non indexé côté serveur (X-Robots-Tag)
+  ✓ précache : le fichier propre à la console n’est JAMAIS téléchargé par un client
+  ✓ … le code commun et celui chargé à la demande restent précachés
+  ✓ … et sans gt.html dans le build, rien n’est retiré
+  ✓ appli des clients : cinq appuis sur le logo envoient vers /gt.html
+  ✓ gt.html : le panneau de connexion s’ouvre de lui-même, une seule fois
+  ✓ … et les cinq appuis l’ouvrent sans quitter la page
+  ✓ dans l’appli des clients, aller à la console renvoie vers gt.html (goTo)
+  ✓ le preflight lit aussi les fragments de gt.html (ids, appels, caractères)
+
+GT-1 : 24 vertes, 0 rouges
+  ✓ rougit : app.js réimporte la console
+  ✓ rougit : la page de la console reste dans index.html
+  ✓ rougit : la fabrique garde l’entrée de l’appli client
+  ✓ rougit : la fabrique garde le manifeste d’installation
+  ✓ rougit : la fabrique accepte un repère absent
+  ✓ rougit : le précache garde le fichier de la console
+  ✓ rougit : Vite oublie gt.html
+  ✓ rougit : le build ne fabrique plus gt.html
+  ✓ rougit : gt.html redevient cachable
+  ✓ rougit : cinq appuis ouvrent le panneau (absent) au lieu d’envoyer vers gt.html
+  ✓ rougit : gt.html n’ouvre plus le panneau de lui-même
+  ✓ rougit : le preflight ne lit plus les fragments
+
+12/12 contre-épreuves rougissent
+[2m
+── [296/469] node scripts/mv-harnais-ids1.mjs   0.3 s[0m
+  ✓ un identifiant déduit du nom : le même partout, toujours
+  ✓ … insensible aux espaces autour et à la forme des accents (É composé ou non)
+  ✓ … 20 000 noms différents → 20 000 identifiants différents
+  ✓ une parcelle sans identifiant en reçoit un ; celle qui en a un le GARDE (même renommée)
+  ✓ une entrée du journal reçoit l’identifiant de SA parcelle (celui qui est posé, pas celui du nom)
+  ✓ … un nom inconnu n’en reçoit pas ; une entrée qui en a un le garde
+  ✓ … et repasser ne change rien (idempotent)
+  ✓ une entrée supprimée ailleurs NE REVIENT PAS parce qu’on lui a posé un identifiant
+  ✓ … et celle qui reste porte son identifiant
+  ✓ une validation faite ailleurs est gardée, et l’identifiant aussi
+  ✓ une entrée écrite par un téléphone pas à jour reçoit son identifiant à la fusion
+  ✓ parcelles : la validation faite ailleurs et l’identifiant posé ici sont gardés tous les deux
+  ✓ … et une parcelle ajoutée par un téléphone pas à jour reçoit son identifiant dès la fusion
+  ✓ saveData pose les identifiants avant chaque écriture des parcelles et du journal (aucun écrivain à reprendre)
+
+IDS-1 : 14 vertes, 0 rouges
+[2m
+── [297/469] node scripts/mv-harnais-ids1.mjs --contre   1.0 s[0m
+  ✓ un identifiant déduit du nom : le même partout, toujours
+  ✓ … insensible aux espaces autour et à la forme des accents (É composé ou non)
+  ✓ … 20 000 noms différents → 20 000 identifiants différents
+  ✓ une parcelle sans identifiant en reçoit un ; celle qui en a un le GARDE (même renommée)
+  ✓ une entrée du journal reçoit l’identifiant de SA parcelle (celui qui est posé, pas celui du nom)
+  ✓ … un nom inconnu n’en reçoit pas ; une entrée qui en a un le garde
+  ✓ … et repasser ne change rien (idempotent)
+  ✓ une entrée supprimée ailleurs NE REVIENT PAS parce qu’on lui a posé un identifiant
+  ✓ … et celle qui reste porte son identifiant
+  ✓ une validation faite ailleurs est gardée, et l’identifiant aussi
+  ✓ une entrée écrite par un téléphone pas à jour reçoit son identifiant à la fusion
+  ✓ parcelles : la validation faite ailleurs et l’identifiant posé ici sont gardés tous les deux
+  ✓ … et une parcelle ajoutée par un téléphone pas à jour reçoit son identifiant dès la fusion
+  ✓ saveData pose les identifiants avant chaque écriture des parcelles et du journal (aucun écrivain à reprendre)
+
+IDS-1 : 14 vertes, 0 rouges
+  ✓ rougit : la fusion du journal ne normalise plus le serveur et la base
+  ✓ rougit : la fusion des parcelles ne normalise plus
+  ✓ rougit : l’identifiant dépend du hasard (deux téléphones, deux identifiants)
+  ✓ rougit : une parcelle déjà identifiée perd son identifiant
+  ✓ rougit : une entrée prend l’identifiant de son NOM, pas celui de sa parcelle
+  ✓ rougit : un nom inconnu reçoit quand même un identifiant
+  ✓ rougit : saveData ne pose plus les identifiants
+
+7/7 contre-épreuves rougissent
+[2m
+── [298/469] node scripts/mv-harnais-ids1b.mjs   0.3 s[0m
+  ✓ aujourd’hui (aucun renommage) : rien ne change
+  ✓ après un renommage, chaque entrée de la parcelle prend son NOUVEAU nom
+  ✓ … une entrée sans identifiant, ou d’une parcelle disparue, garde son nom
+  ✓ … et repasser ne change rien (idempotent)
+  ✓ les écrans, qui comparent des noms, retrouvent tout l’historique de la parcelle renommée
+  ✓ un identifiant porté par deux parcelles n’impose jamais un nom (aucune entrée renommée au hasard)
+  ✓ une fiche recopiée avec l’identifiant d’une autre en reçoit un à elle ; l’originale garde le sien
+  ✓ une entrée supprimée ailleurs ne revient pas parce que son nom a été remis à jour
+  ✓ … et celle qui reste porte le nouveau nom
+  ✓ une validation faite ailleurs est gardée, sous le nouveau nom
+  ✓ une entrée écrite plus tard par un téléphone resté hors ligne prend le nouveau nom à la fusion
+  ✓ à chaque réception du journal ou des parcelles, les noms suivent (applyFbData)
+  ✓ … au chargement de la copie du téléphone (loadData)
+  ✓ … et avant chaque écriture (saveData)
+
+IDS-1 lot 2 : 14 vertes, 0 rouges
+[2m
+── [299/469] node scripts/mv-harnais-ids1b.mjs --contre   0.7 s[0m
+  ✓ aujourd’hui (aucun renommage) : rien ne change
+  ✓ après un renommage, chaque entrée de la parcelle prend son NOUVEAU nom
+  ✓ … une entrée sans identifiant, ou d’une parcelle disparue, garde son nom
+  ✓ … et repasser ne change rien (idempotent)
+  ✓ les écrans, qui comparent des noms, retrouvent tout l’historique de la parcelle renommée
+  ✓ un identifiant porté par deux parcelles n’impose jamais un nom (aucune entrée renommée au hasard)
+  ✓ une fiche recopiée avec l’identifiant d’une autre en reçoit un à elle ; l’originale garde le sien
+  ✓ une entrée supprimée ailleurs ne revient pas parce que son nom a été remis à jour
+  ✓ … et celle qui reste porte le nouveau nom
+  ✓ une validation faite ailleurs est gardée, sous le nouveau nom
+  ✓ une entrée écrite plus tard par un téléphone resté hors ligne prend le nouveau nom à la fusion
+  ✓ à chaque réception du journal ou des parcelles, les noms suivent (applyFbData)
+  ✓ … au chargement de la copie du téléphone (loadData)
+  ✓ … et avant chaque écriture (saveData)
+
+IDS-1 lot 2 : 14 vertes, 0 rouges
+  ✓ rougit : la fusion ne fait plus suivre les noms des trois côtés
+  ✓ rougit : un identifiant partagé impose quand même un nom
+  ✓ rougit : une entrée sans identifiant est renommée quand même
+  ✓ rougit : une fiche recopiée garde l’identifiant de l’autre
+  ✓ rougit : la réception ne fait plus suivre les noms
+  ✓ rougit : le chargement ne fait plus suivre les noms
+  ✓ rougit : l’écriture ne fait plus suivre les noms
+
+7/7 contre-épreuves rougissent
+[2m
+── [300/469] node scripts/mv-harnais-renom-parc.mjs   0.3 s[0m
+  ✓ la parcelle prend le nouveau nom et GARDE son identifiant
+  ✓ journal : ses entrées suivent (avec ou sans identifiant), pas celles des autres
+  ✓ sessions tracteur : parcelles faites (texte et {nom}), parcelles, parcelle
+  ✓ registre phyto : liste et texte seul
+  ✓ Chai et Cuvier : récoltes et analyses (même saisies sans casse ni espaces), cuves de vinification
+  ✓ fertilisation : parcelles de l’apport et dates posées à la main
+  ✓ carte : le contour (nom sans casse) suit
+  ✓ tournées : celle de la tâche et l’ancienne liste
+  ✓ les archives des campagnes passées gardent le nom de l’époque
+  ✓ le renommage devient une règle du domaine (ancien, nouveau, identifiant, date, auteur)
+  ✓ les travaux sont recalculés, pas recopiés
+  ✓ tout est enregistré : parcelles, journal, travaux, sessions, phyto, Chai, réglages, réserve, carte
+  ✓ un non-administrateur ne renomme rien
+  ✓ refusé : un nom vide, ou le même
+  ✓ refusé : le nom d’une autre parcelle, même arrachée, sans souci de casse
+  ✓ refusé : un ancien nom d’une AUTRE parcelle (elle hériterait de son historique)
+  ✓ refusé : plus de 60 caractères, ou un caractère de contrôle
+  ✓ accepté : un nom libre, ou la même avec une autre casse
+  ✓ un autre téléphone applique la règle à tous ses registres, saisies hors ligne comprises
+  ✓ … et repasser ne change plus rien (aucune boucle d’enregistrements)
+  ✓ … un appareil d’admin enregistre la correction
+  ✓ … un appareil d’ouvrier corrige en mémoire sans rien enregistrer de lui-même
+  ✓ une nouvelle parcelle qui reprend l’ancien nom n’est pas renommée, ni ses données
+  ✓ les règles de TÂCHES s’appliquent toujours (aucune régression)
+  ✓ changer seulement la casse : appliqué une fois, puis plus rien (idempotent)
+  ✓ le formulaire propose toutes les parcelles, arrachées signalées, et ouvre son panneau
+  ✓ la ligne vit dans la roue crantée de la Vigne (Parcelles & secteurs météo), son panneau existe
+  ✓ les données reçues de chaque registre repassent par les règles (firebase.js)
+
+RENOMMER UNE PARCELLE : 28 vertes, 0 rouges
+[2m
+── [301/469] node scripts/mv-harnais-renom-parc.mjs --contre   0.9 s[0m
+  ✓ la parcelle prend le nouveau nom et GARDE son identifiant
+  ✓ journal : ses entrées suivent (avec ou sans identifiant), pas celles des autres
+  ✓ sessions tracteur : parcelles faites (texte et {nom}), parcelles, parcelle
+  ✓ registre phyto : liste et texte seul
+  ✓ Chai et Cuvier : récoltes et analyses (même saisies sans casse ni espaces), cuves de vinification
+  ✓ fertilisation : parcelles de l’apport et dates posées à la main
+  ✓ carte : le contour (nom sans casse) suit
+  ✓ tournées : celle de la tâche et l’ancienne liste
+  ✓ les archives des campagnes passées gardent le nom de l’époque
+  ✓ le renommage devient une règle du domaine (ancien, nouveau, identifiant, date, auteur)
+  ✓ les travaux sont recalculés, pas recopiés
+  ✓ tout est enregistré : parcelles, journal, travaux, sessions, phyto, Chai, réglages, réserve, carte
+  ✓ un non-administrateur ne renomme rien
+  ✓ refusé : un nom vide, ou le même
+  ✓ refusé : le nom d’une autre parcelle, même arrachée, sans souci de casse
+  ✓ refusé : un ancien nom d’une AUTRE parcelle (elle hériterait de son historique)
+  ✓ refusé : plus de 60 caractères, ou un caractère de contrôle
+  ✓ accepté : un nom libre, ou la même avec une autre casse
+  ✓ un autre téléphone applique la règle à tous ses registres, saisies hors ligne comprises
+  ✓ … et repasser ne change plus rien (aucune boucle d’enregistrements)
+  ✓ … un appareil d’admin enregistre la correction
+  ✓ … un appareil d’ouvrier corrige en mémoire sans rien enregistrer de lui-même
+  ✓ une nouvelle parcelle qui reprend l’ancien nom n’est pas renommée, ni ses données
+  ✓ les règles de TÂCHES s’appliquent toujours (aucune régression)
+  ✓ changer seulement la casse : appliqué une fois, puis plus rien (idempotent)
+  ✓ le formulaire propose toutes les parcelles, arrachées signalées, et ouvre son panneau
+  ✓ la ligne vit dans la roue crantée de la Vigne (Parcelles & secteurs météo), son panneau existe
+  ✓ les données reçues de chaque registre repassent par les règles (firebase.js)
+
+RENOMMER UNE PARCELLE : 28 vertes, 0 rouges
+  ✓ rougit : les sessions tracteur sont oubliées
+  ✓ rougit : les {nom} des parcelles faites sont oubliés
+  ✓ rougit : le Chai compare à la lettre (une saisie libre est oubliée)
+  ✓ rougit : la fertilisation est oubliée
+  ✓ rougit : la carte est oubliée
+  ✓ rougit : les tournées sont oubliées
+  ✓ rougit : la parcelle perd son identifiant
+  ✓ rougit : le renommage ne devient pas une règle
+  ✓ rougit : un non-administrateur peut renommer
+  ✓ rougit : un ancien nom d’une autre parcelle est accepté
+  ✓ rougit : la règle renomme aussi une nouvelle parcelle qui a repris l’ancien nom
+  ✓ rougit : les travaux ne sont pas recalculés
+  ✓ rougit : la réserve n’est pas enregistrée
+  ✓ rougit : les données reçues des registres ne repassent pas par les règles
+
+14/14 contre-épreuves rougissent
+[2m
+── [361/469] node scripts/mv-harnais-auj5.mjs --contre   9.1 s[0m
+  rougit   un week-end coupe de nouveau une absence
+  rougit   le motif cache de nouveau la date de retour
+
+<--- Last few GCs --->
+
+[20032:000001C6A66E8000]     7945 ms: Scavenge 56.7 (65.4) -> 56.8 (65.4) MB, pooled: 0 MB, 0.69 / 0.00 ms  (average mu = 0.993, current mu = 0.205) allocation failure; 
+[20032:000001C6A66E8000]     8055 ms: Mark-Compact 62.0 (70.5) -> 52.9 (70.2) MB, pooled: 0 MB, 16.44 / 0.00 ms  (+ 0.5 ms in 4 steps since start of marking, biggest step 0.4 ms, walltime since start of marking 110 ms) (average mu = 0.990, current mu = 0.
+FATAL ERROR: MarkCompactCollector: young object promotion failed Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 00007FF66EA33D9F 
+ 2: 00007FF66D67DCB7 
+ 3: 00007FF66D47E4F7 
+ 4: 00007FF66D45DBEE 
+ 5: 00007FF66D4532AD 
+ 6: 00007FF66D452F5C 
+ 7: 00007FF66D452BA1 
+ 8: 00007FF66D465098 
+ 9: 00007FF66DE56C6F 
+10: 00007FF66E97944B 
+11: 00007FF66D6D2D76 
+12: 00007FF66ED7DC73 
+13: 00007FFFD3C9DDA7 
+14: 00007FFFD48FEE4C 
+[2m
+── [365/469] node scripts/mv-harnais-auj7.mjs --contre   25.8 s[0m
+
+  MA VIGNE — Harnais AUJ-7, contre-épreuves (10)
+
+   mord   l’arrachage reprend 0 h le jour mêlé  (A1 le jour mêlé donne sa part à l’arrachage : « Souches » 0.0 h (la réparation ne ramasse plus tout))
+   mord   le budget oublie les travaux à l’heure  (A9 la somme des lignes tombe sur l’atterrissage (13546 / 12771))
+   mord   la cadence recompte l’arrachage  (A5 l’écart de cadence retire le tracteur ET les travaux à l’heure (40.1 h))
+   mord   l’atterrissage redevient « dépensé + reste d’argent »  (A7 l’atterrissage du cockpit EST la fin projetée (il valait le budget))
+   mord   la cadence multiplie aussi le tracteur et le GNR  (A6 la cadence ne touche que la main-d’œuvre : fin projetée = engagé + reste + reste de main-d’œuvre × écart)
+   mord   le cockpit reprend le barème du fait pour la main-d’œuvre  (A8 la main-d’œuvre du cockpit est celle qui est payée, pas le barème du fait)
+   mord   la journée de référence revient comme cadence  (B2 la cadence affichée est celle de l’équipe)
+   mord   le « −0 » revient  (B1 jamais « −0 » : le signe se pose après l’arrondi (montants et pourcentages))
+   mord   les tâches pas comparables reviennent  (B5 les tâches dessinées et mises à jour sont les mêmes (comparables seulement))
+   mord   une fonte perd son espace fine  (B9 l’espace fine (U+202F) fournie à chacune des fontes (10 / 11))
+
+TOUT VERT — 10/10 contre-épreuves mordent
+[2m
+── [371/469] node scripts/mv-harnais-auj8.mjs --contre   35.4 s[0m
+  rougit   le vent inconnu redevient 0 km/h
+  rougit   la commune relue comme un texte (« [object Object] »)
+  rougit   une tâche pas encore ouverte au calendrier dite en cours
+  rougit   une tâche finie dite en cours
+  rougit   la parcelle sans commune sortie du secteur du domaine
+  rougit   toutes les tâches écrites, sans limite
+  rougit   un verdict revenu sous la ligne par secteur
+  rougit   la phrase vide écrite quand même (ancien cockpit)
+  rougit   la bande refait son propre cumul, sans le vent (pilotage)
+  rougit   le risque de pluie oublié par le modèle
+  rougit   la phrase vide écrite quand même (cockpit)
+  rougit   la légende du brûlage revient
+  rougit   un vent inconnu écrit « 0 km/h »
+  rougit   le risque de pluie hors de 0–100 %
+  rougit   la règle de la barre du brûlage revient dans la feuille
+  rougit   la requête de conteneur perdue : « km/h » ne passe dessous que pour certains jours
+  rougit   la fiche MV_INFO reparle des parcelles qui devront attendre
+AUJ-8 contre-épreuves : 17 sur 17 rougissent
+[2m
+── [389/469] node scripts/mv-harnais-dates1.mjs --contre   46.9 s[0m
+  ✓ A1 taskDates porte TOUTES les tâches de la période, heures au barème ou pas
+  ✓ A2 taskWindows ne garde que les tâches au barème (Réparation, Taille, Tirage) : l’étalement des heures ne bouge pas
+  ✓ A3 une tâche au barème reprend SA fenêtre (le même objet)
+  ✓ A4 l’arrachage prend les dates réglées : du 10/09 au 10/10, sans heure
+  ✓ A5 l’entreplantation sans trou compté aussi : du 01/11 au 15/12
+  ✓ A6 une tâche sans barème ni dates : la fenêtre par défaut (ici toute la période)
+  ✓ A7 aucune heure inventée : la charge = la somme des tâches au barème, les autres à 0 h
+  ✓ A8 des dates hors de la période : la fenêtre par défaut, et le calcul le sait (horsPeriode)
+  ✓ B1 l’ordre (_mvChantiersCtx) lit les dates des tâches sans barème : l’arrachage au 10/09, l’entreplantation au 01/11
+  ✓ B2 le retard (_mvkRetards) : l’arrachage, dont les dates sont passées le 13/10 ; ni l’entreplantation ni la réparation
+  ✓ B3 un calcul d’avant ce lot (sans taskDates) ne plante pas : repli sur les fenêtres
+  ✓ B4 la ligne de l’arrachage dit ses dates, du 10/09 au 10/10 (plus le premier chantier et l’objectif)
+  ✓ B5 … l’entreplantation, du 01/11 au 15/12 ; la réparation garde les siennes
+  ✓ B6 l’ordre suit les dates : arrachage, réparation, entreplantation, taille, tirage
+  ✓ B7 le début de la campagne (courbe, frise) reste celui des tâches au barème : le 01/10, pas le 10/09 de l’arrachage
+  ✓ B8 À savoir dit l’arrachage en retard (fenêtre passée), pas l’entreplantation
+  ✓ B9 l’arrachage fini pour l’équipe (la suite au prestataire) n’est pas « en retard » dans À savoir
+  ✓ B10 la mémoire de L’année suit un changement des dates de travaux, sans recharger
+  ✓ C1 le cockpit de secours (cockpit.js) reçoit aussi les dates de toutes les tâches
+  ✓ C2 la nouveauté l’annonce (bloc 8.91)
+  ✓ C3 aucune erreur avalée en route
+
+DATES-1 : 21 vertes, 0 rouges
+  ✓ contre-épreuve rouge : planning.js : les dates des seules tâches au barème (taskDates = taskWindows)
+  ✓ contre-épreuve rouge : planning.js : taskDates n’est pas rendu (les lecteurs retombent sur les fenêtres)
+  ✓ contre-épreuve rouge : planning.js : des heures inventées (les tâches sans barème entrent dans la charge)
+  ✓ contre-épreuve rouge : planning.js : les dates réglées ne valent que pour les tâches au barème
+  ✓ contre-épreuve rouge : utils.js : le retard ne lit que les fenêtres des tâches au barème
+  ✓ contre-épreuve rouge : app.js : l’ordre ne lit que les fenêtres des tâches au barème
+  ✓ contre-épreuve rouge : pilotage.js : les lignes du cockpit ne lisent que les fenêtres
+  ✓ contre-épreuve rouge : pilotage.js : le début de la campagne prend aussi les tâches sans barème
+  ✓ contre-épreuve rouge : pilotage.js : l’arrachage fini pour l’équipe redevient « en retard »
+  ✓ contre-épreuve rouge : app.js : _arrEquipeFiniePartout n’est plus exposée
+  ✓ contre-épreuve rouge : pilotage.js : la mémoire de L’année ignore les dates de travaux
+  ✓ contre-épreuve rouge : pilotage.js : le cockpit de secours ne lit que les fenêtres
+
+DATES-1 contre-épreuves : 12/12 mordent
+[2m
+── [391/469] node scripts/mv-harnais-tournee1.mjs --contre   37.4 s[0m
+  ✓ A1 l’encart ne propose que Taille et Pioche, dans l’ordre du catalogue : ni Dégraffage (fait), ni Vendange (autre campagne), ni Réparation (ne reste que désactivée), ni Arrachage (au prestataire)
+  ✓ A2 l’encart garde son libellé, et sa puce ouvre la liste de sa tâche
+  ✓ A3 chaque puce mène à une liste qui n’est pas vide
+  ✓ A4 tout fini : plus d’encart du tout (ni libellé seul, ni puce)
+  ✓ A5 « Tri normal » choisi : « Reprendre la tournée du domaine » tant qu’une tournée sert encore…
+  ✓ A6 … et plus rien quand aucune ne sert
+  ✓ A7 la tâche affichée qui reste à faire garde sa barre (« Tournée du domaine · Taille », 2 parcelles, ordre du 12/10) et ses numéros : B 1, C 2
+  ✓ A8 de Taille à Dégraffage (fait partout, liste vide) : la barre de Taille ne reste pas au-dessus de « … terminé »
+  ✓ A9 Dégraffage sur « Toutes » (les parcelles faites affichées) : ni barre, ni numéros de tournée
+  ✓ A10 il reste à faire, mais aucune parcelle de la tournée dans la liste : la barre le dit (plus « tout est fait »)
+  ✓ A11 la sortie « liste vide » redessine aussi les numéros de la carte et l’anneau (lu : Leaflet ne tourne pas dans Node)
+  ✓ B1 la capture : pour chaque tâche qui a une tournée, puce proposée ⇔ liste « À faire » non vide
+  ✓ B2 40 tirages au hasard (graine fixe) : la même réponse, tâche par tâche — et chaque tâche vue des deux côtés
+  ✓ B3 la puce et la liste appellent les mêmes fonctions (_mvArrHors, _mvExclu, _pvCurDone, _pvAuPresta) : une condition ajoutée d’un seul côté rougit
+  ✓ C1 rien n’est effacé : les six tournées restent enregistrées, celle des vendanges comprise
+  ✓ C2 la nouveauté l’annonce (bloc 8.92)
+  ✓ C3 l’aide de Parcelles le dit (le numéro, l’encart)
+  ✓ C4 le guide aussi
+  ✓ C5 aucune erreur avalée en route
+
+TOURNEE-1 : 19 vertes, 0 rouges
+  ✓ contre-épreuve rouge : app.js : l’encart propose toutes les tournées enregistrées (l’écran d’avant)
+  ✓ contre-épreuve rouge : app.js : la campagne n’est plus regardée (les vendanges en hiver)
+  ✓ contre-épreuve rouge : app.js : une parcelle faite compte comme « à faire »
+  ✓ contre-épreuve rouge : app.js : une tâche désactivée compte comme « à faire »
+  ✓ contre-épreuve rouge : app.js : une parcelle arrachée compte pour une autre tâche que l’arrachage
+  ✓ contre-épreuve rouge : app.js : l’arrachage au prestataire compte comme « à faire » pour l’équipe
+  ✓ contre-épreuve rouge : app.js : « Reprendre la tournée du domaine » reste quand plus rien ne sert
+  ✓ contre-épreuve rouge : app.js : un encart vide (« Tournée définie pour : » sans puce)
+  ✓ contre-épreuve rouge : app.js : la tâche affichée finie garde sa tournée (barre, numéros)
+  ✓ contre-épreuve rouge : app.js : la liste vide ne redessine plus la barre (celle de la tâche d’avant reste)
+  ✓ contre-épreuve rouge : app.js : la liste vide ne remet plus les numéros de la carte
+  ✓ contre-épreuve rouge : app.js : la liste vide ne remet plus l’anneau
+  ✓ contre-épreuve rouge : app.js : une condition ajoutée à la seule liste (les parcelles commencées cachées)
+  ✓ contre-épreuve rouge : app.js : une condition ajoutée à la seule puce
+  ✓ contre-épreuve rouge : app.js : « tout est fait sur ce travail » revient alors qu’il reste à faire
+
+TOURNEE-1 contre-épreuves : 15/15 mordent
+
+[1mMA VIGNE — lanceur des contrôles[0m[2m  (35/469 commandes, 298 s, 12 à la fois)[0m
+[2m  les plus longues : mv-harnais-recup.mjs --contre 290 s · preflight.mjs 202 s · mv-harnais-icones-contre.mjs 199 s · mv-harnais-robustesse-planning.mjs --contre 164 s · mv-harnais-robustesse-pilotage.mjs --contre 115 s[0m
+[31m  ✗ node scripts/lint-cliquet.mjs[0m[2m  (code 2 · ESLint — cliquet anti-regression)[0m
+[31m  ✗ node scripts/preflight.mjs[0m[2m  (code 1 · Preflight (C1–C22))[0m
+[31m  ✗ node scripts/mv-harnais-auj5.mjs --contre[0m[2m  (code 134)[0m
+[2m  arrêt au premier rouge — 434 commande(s) non jouée(s). Reprendre : node scripts/mv-lanceur.mjs --depuis mv-base.mjs[0m

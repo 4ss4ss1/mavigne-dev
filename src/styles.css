@@ -8269,7 +8269,9 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
      leur règle d’origine ne garde que la mise en page (position, marges, animation).
    ★ CHARTE-4b (§377) : trois filtres d’avant au jeu — Cave › Le Chai .mvcm-chip, l’opération .cave-cuvee-chip
      (allumée en couleur de l’opération par le code, deux jetons lus déclarés nulle part), Tracteur .sdp-skip-btn ;
-     « Désactiver » et « Voir toutes » d’une session, deux <div> cliquables, deviennent des boutons .mvpas-filtre. */
+     « Désactiver » et « Voir toutes » d’une session, deux <div> cliquables, deviennent des boutons .mvpas-filtre.
+   ★ REVUE-1 (§389) : le sélecteur de cuvées de l’export (Cave) marque la cuvée choisie par .sel, pas .on — oublié au §377,
+     la cuvée choisie n’y était plus distinguée ; .cave-cuvee-chip.sel rejoint l’état choisi du filtre. */
 .mvpas, .pf-tag, .plan-badge, .mvc-tag, .sdp-tag, .pil-dz-tag{ display:inline-flex; align-items:center; gap:var(--e-1,4px); box-sizing:border-box; min-height:var(--h-badge,20px); padding:0 var(--e-2,8px); border:0; border-radius:var(--r-xs,4px); background:var(--survol); color:var(--texte-med); font-family:var(--font-ui); font-size:var(--pt-micro,12px); font-weight:var(--fw-semi,600); line-height:1.2; letter-spacing:normal; text-transform:none; white-space:nowrap; vertical-align:middle; }
 .mvpas svg, .pf-tag svg, .plan-badge svg, .mvc-tag svg, .sdp-tag svg, .pil-dz-tag svg{ width:1em; height:1em; flex:none; }
 .mvpas-statut::before{ content:""; flex:none; width:6px; height:6px; border-radius:50%; background:var(--mvpas-point, currentColor); }
@@ -8298,7 +8300,7 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .mvpas-filtre, .mvcm-chip, .cave-cuvee-chip, .sdp-skip-btn{ display:inline-flex; align-items:center; gap:var(--e-2,8px); box-sizing:border-box; min-height:var(--h-row,36px); padding:0 var(--e-4,16px); border:var(--bw,1px) solid var(--ligne-forte); border-radius:var(--r-full,999px); background:var(--bg-card); color:var(--texte-med); font-family:var(--font-ui); font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); line-height:1.2; white-space:nowrap; cursor:pointer; }
 @media (min-width:768px){ .mvpas-filtre, .mvcm-chip, .cave-cuvee-chip, .sdp-skip-btn{ min-height:var(--h-sm,28px); padding:0 var(--e-3,12px); font-size:var(--pt-txt,13px); } }
 .mvpas-filtre:hover, .mvcm-chip:hover, .cave-cuvee-chip:hover, .sdp-skip-btn:hover{ background-image:linear-gradient(var(--survol),var(--survol)); }
-.mvpas-filtre.on, .mvpas-filtre[aria-pressed="true"], .mvcm-chip.on, .cave-cuvee-chip.on, .sdp-skip-btn.active{ border-color:var(--accent-texte); background:var(--accent-doux); color:var(--accent-texte); }
+.mvpas-filtre.on, .mvpas-filtre[aria-pressed="true"], .mvcm-chip.on, .cave-cuvee-chip.on, .cave-cuvee-chip.sel, .sdp-skip-btn.active{ border-color:var(--accent-texte); background:var(--accent-doux); color:var(--accent-texte); }
 .mvpas-filtre:focus-visible, .mvcm-chip:focus-visible, .cave-cuvee-chip:focus-visible, .sdp-skip-btn:focus-visible{ outline:2px solid var(--focus,var(--accent)); outline-offset:2px; }
 .mvpas-filtre:disabled, .mvcm-chip:disabled, .cave-cuvee-chip:disabled, .sdp-skip-btn:disabled{ opacity:.45; cursor:not-allowed; }
 /* ★ FIN CHARTE-4 */

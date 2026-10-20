@@ -58,7 +58,15 @@ const ECRANS = {
   'planning-gens': "goTo('planning'); planSwitchTab('gens');",
   'pilotage-decider': "goTo('pilotage'); if (window._pilSetTab) window._pilSetTab('sim');",   // l’onglet « Décider » a la clé sim
   'tracteur-session-detail': "goTo('tracteur'); setTimeout(function(){ var c = document.querySelector('[onclick^=\"openSessionDetail\"]'); if (c) c.click(); }, 400);",
-  'cave-chai': "goTo('cave'); selectCaveSection('elevage');"
+  'cave-chai': "goTo('cave'); selectCaveSection('elevage');",
+  // ★ REVUE-1 (§389) : les écrans où vivent les pièces passées au jeu (CHARTE-3 à 5c) sans avoir été vues
+  'accueil-ouvrier': "window.currentUser.roles = ['ouvrier']; if (window.applyRoles) window.applyRoles(); goTo('home');",
+  'phyto-traitement': "goTo('phyto'); setTimeout(function(){ var c = document.querySelector('[onclick^=\"openTraitEdit\"]'); if (c) c.click(); }, 500);",
+  'cave-cuvee': "goTo('cave'); selectCaveSection('elevage'); setTimeout(function(){ var c = document.querySelector('#mvc-body-cuv .mvc-cuv[data-cuv]'); if (c) c.click(); }, 500);",
+  'tracteur-entretien': "goTo('tracteur'); switchTracOnglet('entretiens');",
+  'reglages-documents': "goTo('reglages'); window.openDocs();",
+  'ma-trace': "window.currentUser.roles = ['ouvrier']; goTo('home'); setTimeout(function(){ if (window.openMaTrace) window.openMaTrace(); }, 400);",
+  'mot-de-passe-erreur': "goTo('reglages'); if (window.openChangePwd) window.openChangePwd(); else window._openOv('ovChangePwd'); setTimeout(function(){ var e = document.getElementById('cpwd-error'); if (e) { e.textContent = 'Le mot de passe actuel ne correspond pas.'; e.style.display = 'block'; } }, 300);"
 };
 const choisis = opt('--ecrans') ? opt('--ecrans').split(',').map(x => x.trim()).filter(Boolean) : Object.keys(ECRANS);
 const inconnus = choisis.filter(x => !ECRANS[x]);
@@ -99,6 +107,9 @@ for (const vue of [{ id: 'tel', w: 390, h: 844 }, { id: 'pc', w: 1366, h: 900 }]
     await page.waitForTimeout(2500);
     for (const nom of choisis) {
       await page.evaluate(([code, th]) => {
+        // ★ REVUE-1 (§389) : chaque écran repart avec les rôles de la démo (admin, ouvrier, tractoriste) — un écran « ouvrier »
+        // les réduit, et sans cette remise les écrans suivants seraient pris en ouvrier (« Réservé à l’administrateur »).
+        if (window.currentUser) { if (!window.__MV_ROLES0) window.__MV_ROLES0 = (window.currentUser.roles || []).slice(); window.currentUser.roles = window.__MV_ROLES0.slice(); if (window.applyRoles) window.applyRoles(); }
         document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
         document.querySelectorAll('[id^="mvt"], [class^="mvt-"], [class*=" mvt-"]').forEach(e => { e.style.display = 'none'; });
         const t = th === 'sombre' ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', t);
