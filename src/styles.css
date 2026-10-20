@@ -8271,6 +8271,10 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
      la cuvée choisie n’y était plus distinguée ; .cave-cuvee-chip.sel rejoint l’état choisi du filtre. */
 .mvpas, .pf-tag, .plan-badge, .mvc-tag, .sdp-tag, .pil-dz-tag{ display:inline-flex; align-items:center; gap:var(--e-1,4px); box-sizing:border-box; min-height:var(--h-badge,20px); padding:0 var(--e-2,8px); border:0; border-radius:var(--r-xs,4px); background:var(--survol); color:var(--texte-med); font-family:var(--font-ui); font-size:var(--pt-micro,12px); font-weight:var(--fw-semi,600); line-height:1.2; letter-spacing:normal; text-transform:none; white-space:nowrap; vertical-align:middle; }
 .mvpas svg, .pf-tag svg, .plan-badge svg, .mvc-tag svg, .sdp-tag svg, .pil-dz-tag svg{ width:1em; height:1em; flex:none; }
+/* REVUE-4 (§393) : la pastille d’une parcelle de session porte un second rang (la mesure sous l’écart, dans un <small>) ;
+   d’une seule ligne insécable, elle écrasait le nom de la parcelle (vu dans mv-captures). Elle passe à la ligne, le second rang dessous. */
+.sdp-tag{ flex-wrap:wrap; justify-content:flex-end; white-space:normal; max-width:50%; }
+.sdp-tag > small{ flex-basis:100%; }
 .mvpas-statut::before{ content:""; flex:none; width:6px; height:6px; border-radius:50%; background:var(--mvpas-point, currentColor); }
 /* le statut : cinq états, la couleur de la charte */
 .mvpas-fait, .pil-dz-tag.ok, .mvc-tag-fmlok, .plan-badge-cdebut{ background:var(--ok-doux); color:var(--ok-texte); --mvpas-point:var(--ok); }

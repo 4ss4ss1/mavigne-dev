@@ -295,3 +295,25 @@ La suite de l’étape 1 (§389-§390) : voir les derniers écrans, en mettant e
 
 ### 392e. La leçon
 **Une démo vide cache des écrans entiers.** Sans parcelle, la moitié des fenêtres n’affiche que son état vide — et c’est la moitié qu’on n’avait jamais regardée. Une revue a besoin de ses propres données, posées par l’outil, pas de celles qu’on montre aux visiteurs.
+
+## 393. REVUE-4 — LA REVUE À L’ÉCRAN, QUATRIÈME PASSAGE : UNE SESSION CHRONOMÉTRÉE, LA DEMANDE D’UN SALARIÉ (20/10 — `scripts/mv-captures.mjs` · `src/styles.css` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · **APP 9.53 → 9.54, SW 10.32 → 10.33**, base `f5fa3a1`)
+
+### 393a. La demande
+La suite de l’étape 1 (§392) : préparer les données de revue des quatre derniers écrans — une session chronométrée, une demande d’un salarié, Décider avec des tâches, un message non lu.
+
+### 393b. Ce qui est livré
+- **`session-chrono`** : l’outil pose trois parcelles de revue, met le chrono en marche (`CONFIG.chrono_mode`), marque deux parcelles faites sur la première session de la démo (« Les Grandes Vignes » mesurée 42 min, « Champ Perdrix » à écart `haut` — chrono resté ouvert, 1h35 mesurées), ouvre la session et affiche les parcelles faites (`toggleSDShowDone`).
+- **`planning-demande`** : Planning › Les gens, la fiche défilée jusqu’à « Paiement des heures sup » (`.pf-dem`).
+- **Corrigé** : la pastille d’écart d’une parcelle de session (`.sdp-tag.ecart`) porte un second rang dans un `<small>` (la mesure sous le motif). Passée au jeu au §374 — une seule ligne insécable, en ligne —, son second rang venait à côté au lieu de dessous et écrasait le nom de la parcelle. Elle passe à la ligne (`flex-wrap`, le `<small>` sur toute la largeur), la moitié de la ligne au plus. Revu en clair et en sombre.
+
+### 393c. Vu juste, et laissé
+- **La demande d’heures sup** (PC, clair et sombre) : la carte au jeu, la case « Camille demande à être payée », les « − / + », « Figer octobre » au secondaire.
+- **Laissé — dessiné écran par écran (TRAC-3, §284)** : les trois tuiles du chrono (« mesuré dans les parcelles », « hors parcelle », « pause déjeuner »), une couleur par sorte de temps — la règle du jeu (la couleur dit un type) — ; son encadré d’explication ; les lignes « faite » (vert) et « écart » (ambre) ; « Fin de journée » en bleu. À trancher avec Nico s’il veut les ramener au jeu.
+
+### 393d. Reste
+Pilotage › Décider avec des tâches (des priorités, une équipe et des heures au planning à poser) et un message non lu (un fil de discussion à poser) — les deux derniers écrans de l’étape 1.
+
+- **Chaîne** : **469 commandes, 0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 393e. La leçon
+**Une pièce commune ne connaît pas le contenu qu’on lui donne.** La pastille du jeu est faite pour un mot ; celle d’une session porte deux rangs. Ranger une classe sous une pièce, c’est vérifier qu’elle tient ce qu’on y met — et seule la donnée réelle (ou de revue) le montre.
