@@ -408,3 +408,28 @@ Validée « au jeu commun ». Pas dans ce lot : sa garde (`_agtGuard`, le jeton 
 
 ### 397e. La leçon
 **Un fond pensé pour le sombre disparaît en clair.** Du blanc à 5 % fait un cadre sur un fond noir et rien sur un fond blanc : un dessin qui ne marche que dans un thème n’est pas un dessin de la charte.
+
+## 398. CHARTE-5e — ÉTAPE 2, SUITE : TUILES, LIGNES CLIQUABLES, PETITES CARTES (20/10 — `src/styles.css` · `src/app.js` · `src/phyto.js` · `src/planning.js` · `src/reglages.js` · `src/cave.js` · `src/tracteur.js` · `index.html` · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `scripts/mv-harnais-cartes.mjs` · `scripts/mv-jetons-baseline.json` · **APP 9.58 → 9.59, SW 10.37 → 10.38**, base `8fea966`)
+
+### 398a. La console GUERETTECH : hors charte, décision de Nico
+Validée « au jeu commun » au §397, la console s’est révélée une application à part (`gt.html`, depuis GT-1 §249), fermée par une vraie connexion Firebase, et chargée de 1 363 couleurs écrites en dur. Trois voies proposées (un mode revue limité à l’ordinateur de l’outil de captures ; des captures de Nico ; le faire sans voir et vérifier sur le canal `refonte`). Nico : **« on ne touche pas au gt admin »**. La console reste telle quelle — son code, sa connexion, son thème violet. `mv-harnais-cartes` F ne compte plus `src/admin-gt.js` (ses 50 encadrés ne pèsent plus sur le plafond). L’écran `console-gt` essayé dans `mv-captures` n’est pas livré.
+
+### 398b. Ce qui est livré
+- **`.mvcarte-fond`** (bloc CHARTE-5) : le dessin de la carte seul — fond, filet, arrondi, sans ombre — groupé avec `.mvcarte`, mais **sans** sa mise en page (`.mvcarte` est une colonne en flex avec 16 px de marge : posée sur une rangée d’avant en flex, elle l’aurait mise en colonne).
+- **19 blocs faits à la main au jeu**, chacun relu sur sa ligne :
+  - **9 tuiles** → `.mvcarte-fond`, leur mise en page et leur marge gardées : la tournée (Accueil), le produit choisi (Phyto), quatre récapitulatifs du Planning (travail effectif, jours travaillés, mois restants…) et une tuile du Planning, deux cartes des Réglages ;
+  - **2 cartes d’analyse de la Cave** (l’évolution du SO₂, les analyses de la cuvée : filet blanc à 7 %, invisible en clair) → `.mvcarte-fond` ;
+  - **3 lignes cliquables** → `.mvcarte-fond .mvcarte-clic` (survol, appui, focus du jeu) : un traitement du Tracteur, une commune des Réglages, le choix de la complantation (`index.html`) ;
+  - **5 petites cartes d’aide** → encadré neutre : le cuivre métal par kg/ha (deux, Phyto), le cépage et la commune cachés du formulaire d’une parcelle, une rangée d’`index.html`.
+- Plafond des encadrés faits à la main **105 → 36** (dont 50 de la console sortis) ; filet perdant 68 → 67.
+
+### 398c. Vu, et pas vu
+`planning-demande` (ordinateur), `cave-cuvee`, `phyto-saisie` (téléphone), clair et sombre : intacts. Les blocs passés au jeu n’y paraissent pas tous (une cuvée sans analyse, un produit sans cuivre).
+
+### 398d. Reste de l’étape 2 (36)
+19 couleurs calculées par le code (un ton par classe, cas par cas), 10 notes dont le style est coupé sur plusieurs morceaux de chaîne (à reprendre à la main), les 3 notes d’`app.js` (ôter d’abord leurs couleurs de texte, §396), 2 lignes cliquables introuvables au passage (le choix d’une saison du rapport, une ligne des documents), la zone de dépôt d’un rapport PDF (en pointillés, une pièce à elle), une ligne de l’accueil d’installation (couleur calculée), le rapport de saison (document à part).
+
+- **Chaîne** : **469 commandes, 0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 398e. La leçon
+**Une pièce porte un dessin et une mise en page ; on n’en veut parfois que la moitié.** `.mvcarte` range son contenu en colonne : juste pour une carte neuve, faux pour une rangée d’avant. Séparer le dessin (`.mvcarte-fond`) de la mise en page laisse passer au jeu sans rien casser.

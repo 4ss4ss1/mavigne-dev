@@ -2641,7 +2641,7 @@ function openCuveeDetail(cuvId,dans){
   var spark=_caveSparkSO2(cuvId, window._mvGraphW(null));
   if(spark) window._mvGraphSuivre('#mvg-so2-'+_mvgId(cuvId), function(lg){ return _caveSparkSO2(cuvId,lg); });
   if(spark) spark='<div id="mvg-so2-'+_mvgId(cuvId)+'"></div>';
-  if(spark)html+='<div style="background:var(--bg-card);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:11px;margin-bottom:12px;"><div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">'+'\u00C9volution SO\u2082 libre (mg/L)</div>'+spark+'</div>';
+  if(spark)html+='<div class="mvcarte-fond" style="padding:11px;margin-bottom:12px"><div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">'+'\u00C9volution SO\u2082 libre (mg/L)</div>'+spark+'</div>';
   html+=_laboCuveeHtml(cuv);   // ★ LABO-1 (§319) — « Au labo » : TAV, sucres, volatile, acidité, pH, malique, SO2 total
   // Journal
   if(allIt.length){
@@ -2650,7 +2650,7 @@ function openCuveeDetail(cuvId,dans){
     var tL={degustation:'D\u00e9gustation',traitement:'Traitement',filtration:'Filtration',ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',retrait_fut:'Retrait f\u00FBt',assemblage:'Assemblage',autre:'Autre'};
     allIt.forEach(function(op){
       var ico=_mvIcon(tI[op.type]||'crayon',16),lbl=tL[op.type]||_caveTypeLabel(op.type);   // ROB-2 : jamais « undefined »
-      html+='<div style="background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:11px;margin-bottom:7px;">';
+      html+='<div class="mvcarte-fond" style="padding:11px;margin-bottom:7px">';
       html+='<div style="display:flex;align-items:flex-start;gap:8px;">';
       html+='<span style="font-size:var(--pt-sm,16px);margin-top:1px;">'+ico+'</span>';
       html+='<div style="flex:1;min-width:0;"><div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte);">'+lbl+'</div>';

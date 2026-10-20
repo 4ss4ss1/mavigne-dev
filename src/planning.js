@@ -598,7 +598,7 @@ function _planRetardBornes(mbr,m,d){
 // ★ 5e argument OPTIONNEL. Sans lui, l'unite reste 'h' : les sept appels du cadre
 //   legal ne changent pas d'un caractere. Le bloc des majorations, lui, affiche '%'.
 function _planLegInput(id,label,val,step,unit){
-  return '<div style="background:var(--bg-app);border:1px solid var(--gris-clair);border-radius:11px;padding:9px 10px">'
+  return '<div class="mvcarte-fond" style="padding:9px 10px">'
     +'<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);font-weight:600;line-height:1.25;margin-bottom:5px;min-height:26px">'+label+'</div>'
     +'<div style="display:flex;align-items:center;gap:5px"><input type="number" id="'+id+'" step="'+step+'" value="'+val+'" style="width:100%;font-family:inherit;font-size:var(--pt-sm,16px);font-weight:700;padding:7px 8px;border:1.5px solid var(--gris-clair);border-radius:9px;outline:none;background:var(--bg-card);color:var(--texte);text-align:center"><span style="font-size:var(--pt-micro,12px);color:var(--gris);font-weight:600">'+(unit===undefined?'h':unit)+'</span></div>'
     +'</div>';
@@ -4318,8 +4318,8 @@ function _planCompteCard(mbr,uptoMonth,a){
     +'<span class="mvpas mvpas-etiquette" style="margin-left:auto">'+_escHtml(tc)+'</span>'
   +'</div>';
   h+='<div style="display:flex;gap:7px">'
-    +'<div style="flex:1;text-align:center;padding:11px 4px;background:var(--bg-app);border-radius:10px"><div style="font-size:var(--pt-lg,24px);font-weight:800;line-height:1;font-variant-numeric:tabular-nums">'+_planFmt(a.cumul)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:4px">Travail effectif</div></div>'
-    +'<div style="flex:1;text-align:center;padding:11px 4px;background:var(--bg-app);border-radius:10px"><div style="font-size:var(--pt-lg,24px);font-weight:800;line-height:1;font-variant-numeric:tabular-nums">'+jours+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:4px">Jours travaill\u00e9s</div></div>'
+    +'<div class="mvcarte-fond" style="flex:1;text-align:center;padding:11px 4px"><div style="font-size:var(--pt-lg,24px);font-weight:800;line-height:1;font-variant-numeric:tabular-nums">'+_planFmt(a.cumul)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:4px">Travail effectif</div></div>'
+    +'<div class="mvcarte-fond" style="flex:1;text-align:center;padding:11px 4px"><div style="font-size:var(--pt-lg,24px);font-weight:800;line-height:1;font-variant-numeric:tabular-nums">'+jours+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:4px">Jours travaill\u00e9s</div></div>'
   +'</div>';
   h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:11px;line-height:1.4">'
     +'<b>Pas d\u2019annualisation</b> pour ce type de contrat\u00a0: les heures sont pay\u00e9es \u00e0 l\u2019heure. '
@@ -4394,8 +4394,8 @@ function _planAnnuCard(mbr,uptoMonth){
   +'</div>';
   h+='<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--texte-doux)"><span>0h</span><span>'+_planFmt(ech)+'</span></div>';
   h+='<div style="display:flex;gap:7px;margin-top:12px">'
-    +'<div style="flex:1;text-align:center;padding:9px 4px;background:var(--bg-app);border-radius:10px"><div style="font-size:15px;font-weight:800;color:'+(a.reste<0?'var(--orange)':'var(--vert-med)')+'">'+_planFmt(Math.abs(a.reste))+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">'+(a.reste<0?'Au-dessus':'Reste')+'</div></div>'
-    +'<div style="flex:1;text-align:center;padding:9px 4px;background:var(--bg-app);border-radius:10px"><div style="font-size:15px;font-weight:800">'+a.moisRest+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Mois rest.</div></div>'
+    +'<div class="mvcarte-fond" style="flex:1;text-align:center;padding:9px 4px"><div style="font-size:15px;font-weight:800;color:'+(a.reste<0?'var(--orange)':'var(--vert-med)')+'">'+_planFmt(Math.abs(a.reste))+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">'+(a.reste<0?'Au-dessus':'Reste')+'</div></div>'
+    +'<div class="mvcarte-fond" style="flex:1;text-align:center;padding:9px 4px"><div style="font-size:15px;font-weight:800">'+a.moisRest+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Mois rest.</div></div>'
     +'<div class="mvencadre" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800">'+(a.moisRest>0?_planFmt(a.cadence):'\u2014')+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">h / mois</div></div>'
   +'</div>';
   var nt='Mesur\u00e9 en <b>travail effectif</b>\u00a0: cong\u00e9s, arr\u00eats et r\u00e9cup n\u2019y entrent pas. Les '+_planFmt(L.plafAnnuel)+' sont d\u00e9j\u00e0 calcul\u00e9es cong\u00e9s d\u00e9duits.';

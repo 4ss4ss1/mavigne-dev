@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.58';
+export const APP_VERSION = '9.59';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.59', d: '2026-10-20', items: [   // CHARTE-5e (§398) : tuiles, lignes et petites cartes au dessin commun
+    { niv: 1, pour: ['tous'], emoji: 'check', titre: 'Tuiles et listes au même dessin',
+      desc: "Les petites tuiles de chiffres (récapitulatifs du Planning, réglages), les lignes qu’on touche (traitements du Tracteur, communes, choix de complantation) et les cartes d’analyses de la Cave prennent le dessin commun des cartes : fond, filet fin, coins arrondis." },
+  ] },
   { v: '9.58', d: '2026-10-20', items: [   // ZONES-1 (§397) : les zones sombres tranchées
     { niv: 1, pour: ['tous'], emoji: 'check', titre: 'Les bandeaux sombres au même dessin',
       desc: "« Ma trace », le mur du domaine et le bilan du cuivre partagent le même bandeau sombre, aux coins plus discrets, sans capitales. La fiche d’une cuvée range ouillage, analyse et soutirage dans une seule carte. Les mentions légales et quelques messages restent lisibles en mode clair." },

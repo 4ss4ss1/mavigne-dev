@@ -3373,7 +3373,7 @@ function _clotDatesFor(type, yr){
 function _clotOverlayHTML(ctx){
   var esc = _clotEsc(ctx.endNom);
   var reste = Math.max(0, 100 - (ctx.pct||0));
-  var stat = function(v,l){ return '<div style="background:#FBFAF6;border:1px solid #E7E3DA;border-radius:12px;padding:12px 6px;text-align:center">'
+  var stat = function(v,l){ return '<div class="mvcarte-fond" style="padding:12px 6px;text-align:center">'
     + '<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-lg,24px);color:#1C1813">'+v+'</div>'
     + '<div style="font-size:9px;letter-spacing:.4px;text-transform:uppercase;color:#6B655C;margin-top:3px">'+l+'</div></div>'; };
   var prepOpts = (ctx.prepared||[]).map(function(s){ return '<option value="'+_clotEsc(s.nom)+'">'+_clotEsc(s.nom)+'</option>'; }).join('');
@@ -6306,7 +6306,7 @@ window._ecoCfgSet=function(group,key,val){
 var _ECO_IN_CSS='width:78px;padding:7px 8px;border:1.5px solid var(--gris-clair);border-radius:9px;font-family:inherit;font-size:var(--pt-base,14px);text-align:right;background:var(--bg-app);color:var(--texte);box-sizing:border-box';
 var _ECO_ROW_CSS='display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap';
 function _ecoCarte(titre,sous,corps){
-  return '<div style="background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin:14px 16px">'
+  return '<div class="mvcarte-fond" style="padding:16px 18px;margin:14px 16px">'
     +'<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-md,20px);color:var(--texte,#14110D);margin-bottom:3px">'+titre+'</div>'
     +'<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);margin-bottom:12px">'+sous+'</div>'
     +corps+'</div>';
@@ -6757,7 +6757,7 @@ function _renderCuivre(){
         +'<div style="display:flex;justify-content:space-between;font-size:var(--pt-micro,12px);padding:6px 0 0;font-weight:700"><span>Cumul '+year+'</span><span>'+r.an.toFixed(2)+' kg Cu/ha</span></div>'
         +(mode==='roll'?'<div style="display:flex;justify-content:space-between;font-size:var(--pt-micro,12px);padding:5px 0 0"><span style="color:var(--texte-doux)">Budget 7 ans ('+_cuRollingYears()[0]+'\u2013'+year+')</span><span style="font-weight:700;color:var(--vert)">'+_cuParcRollSum(r.p.nom).toFixed(1)+' / '+_cuPlafond7()+' kg/ha</span></div>'
           +'<div style="display:flex;justify-content:space-between;font-size:var(--pt-micro,12px);padding:5px 0 0"><span style="color:var(--texte-doux)">Moyenne sur les ann\u00e9es suivies</span><span style="font-weight:700">'+r.roll.toFixed(2)+' kg/ha/an <span style="font-weight:500;color:var(--texte-doux)">sur '+_cuParcRollN(r.p.nom)+' an'+(_cuParcRollN(r.p.nom)>1?'n\u00e9es':'n\u00e9e')+'</span></span></div>':'');
-      return '<div onclick="window._cuToggleRow(this)" style="border:1px solid var(--gris);border-radius:13px;padding:12px 14px;background:var(--bg-card);cursor:pointer;margin-bottom:9px">'
+      return '<div onclick="window._cuToggleRow(this)" class="mvcarte-fond mvcarte-clic" style="padding:12px 14px;cursor:pointer;margin-bottom:9px">'
         +'<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">'
         +'<div><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-sm,16px);font-weight:600">'+esc(r.p.nom)+'</div>'
         +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+((r.p.commune&&r.p.commune.nom)?'&#x1F4CD; '+esc(r.p.commune.nom)+' &#x00B7; ':'')+window._mvHaP(r.p.surface)+' ha</div></div>'

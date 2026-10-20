@@ -25,7 +25,7 @@ const MIGREES = ['pf-card', 'mtr-card', 'mur-card',   // ★ CHARTE-5a (§379)
   'cmp-alert'];   // ★ CHARTE-5c (§381) : l’encadré à classe des Réglages
 const EXEMPTIONS = [];
 const PLAFOND = 48;       // CHARTE-5a (§379) : cartes « maison », relevé au premier passage ; ne peut que baisser (D)
-const PLAFOND_ENC = 105;   /* ZONES-1 (§397) : 114 → 105 (le bilan du domaine en bandeau, la fiche d’une cuvée en bloc de chiffres, cinq encadrés écrits pour le sombre) */ //   /* CHARTE-5d (§396) : 165 → 114, 51 notes grises rendues à l’encadré neutre ; celles d’app.js restent (voir §396) */ //   /* REVUE-3 (§392) : 167 → 165, le budget cuivre et l’encadré bleu de l’assistant phyto */ //   /* REVUE-2 (§390) : 168 → 167, l’encadré des documents */ //   /* CHARTE-5c (§381) : 211 → 168 */ //  // CHARTE-5a (§379) : encadrés faits à la main, 232 au premier passage ; ne peut que baisser (F). CHARTE-5b (§380) : 232 → 211
+const PLAFOND_ENC = 36;   /* CHARTE-5e (§398) : 105 → 36 — la console GT (50) sortie du décompte (hors charte, décision de Nico), 19 blocs de plus au jeu */ //   /* ZONES-1 (§397) : 114 → 105 (le bilan du domaine en bandeau, la fiche d’une cuvée en bloc de chiffres, cinq encadrés écrits pour le sombre) */ //   /* CHARTE-5d (§396) : 165 → 114, 51 notes grises rendues à l’encadré neutre ; celles d’app.js restent (voir §396) */ //   /* REVUE-3 (§392) : 167 → 165, le budget cuivre et l’encadré bleu de l’assistant phyto */ //   /* REVUE-2 (§390) : 168 → 167, l’encadré des documents */ //   /* CHARTE-5c (§381) : 211 → 168 */ //  // CHARTE-5a (§379) : encadrés faits à la main, 232 au premier passage ; ne peut que baisser (F). CHARTE-5b (§380) : 232 → 211
 const ALLURE = /^(background(-color|-image)?|border(-(color|width|style|radius|top|bottom|left|right))?|box-shadow)$/;
 const sansCom = s => s.replace(/\/\*[\s\S]*?\*\//g, '');
 const porte = (sel, c) => new RegExp('\\.' + c.replace(/-/g, '\\-') + '(?![\\w-])').test(sel.replace(/:not\([^)]*\)/g, ''));
@@ -54,11 +54,13 @@ function maison(hors) {
 }
 function encadresMain(modules) {
   let n = 0;
-  for (const js of Object.values(modules))
+  for (const [nom, js] of Object.entries(modules)) {
+    if (nom === 'src/admin-gt.js') continue;   // la console GUERETTECH est hors charte, décision de Nico (CHARTE-5e, §398)
     for (const m of js.matchAll(/<(?:div|p|section)\b[^<>]*?style=\\?"([^"\\]*)/g)) {
       const st = m[1];
       if (/border-radius/.test(st) && /background/.test(st) && /padding:\s*(?:[6-9]|1\d)px/.test(st)) n++;
     }
+  }
   return n;
 }
 function verifier({ charte, feuille, modules }, P = PLAFOND, PE = PLAFOND_ENC) {

@@ -252,7 +252,7 @@ function renderPhytoTrac(){
     const cond=t.conducteur||t.operateur||'';
     const meta3=(parc||cond);
     // PHYTO-1 (§285) : sur ordinateur, toucher un traitement le CHOISIT (sa fiche s'ouvre à droite) ; au téléphone, le détail.
-    return `<div class="phyto-row" onclick="_phSel(${idx})" data-pidx="${Number(idx)}" style="background:var(--bg-card);border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--gris-clair);cursor:pointer">
+    return `<div class="phyto-row mvcarte-fond mvcarte-clic" onclick="_phSel(${idx})" data-pidx="${Number(idx)}" style="padding:12px 14px;margin-bottom:8px;cursor:pointer">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">
         <span style="font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">${_escHtml(t.produit)}</span>
         <span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">${_escHtml(t.date)}</span>

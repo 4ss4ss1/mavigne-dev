@@ -8224,7 +8224,7 @@ function _pvRenderOrdreBar(){
     // TOURNEE-1 (§324) : une tâche finie n'arrive plus ici (`_pOrdTache`). n = 0 veut dire qu'il reste à faire, mais qu'aucune
     //   parcelle de la tournée n'est dans la liste (hors tournée, ou cachée par la recherche) : « tout est fait » aurait menti.
     var sub=(n>0?(n+' parcelle'+(n>1?'s':'')+' à faire, dans l’ordre'):'aucune parcelle de la tournée dans la liste')+(d?(' · ordre du '+d):'');
-    el.innerHTML='<div style="display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1.5px solid var(--or);border-radius:12px;padding:9px 12px">'
+    el.innerHTML='<div class="mvcarte-fond" style="display:flex;align-items:center;gap:10px;padding:9px 12px">'
       +'<span style="font-size:var(--pt-sm,16px);flex-shrink:0"></span>'
       +'<div style="flex:1;min-width:0"><div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_pOrdTitre(o,t)+'</div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_escHtml(sub)+'</div></div>'

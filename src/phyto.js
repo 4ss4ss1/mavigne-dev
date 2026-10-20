@@ -323,7 +323,7 @@ function _tratCuFieldHtml(p,i){
   var v=(p.cuMetal!=null?p.cuMetal:'');
   var pct=_cuPct(p.nom,p.sub);
   var hint=(pct!=null?'base ~'+pct+'% Cu, ajustable':'kg de cuivre m&#xe9;tal apport&#xe9;');
-  return '<div style="margin-top:7px;display:flex;align-items:center;gap:8px;background:rgba(165,107,58,0.1);border:1px solid rgba(165,107,58,0.28);border-radius:8px;padding:6px 9px">'
+  return '<div class="mvencadre" style="margin-top:7px;display:flex;align-items:center;gap:8px">'
     +'<span style="font-size:var(--pt-micro,11px);font-weight:700;color:#A56B3A;white-space:nowrap">&#x1FA99; Cuivre m&#xe9;tal</span>'
     +'<input id="trat-cu-'+i+'" type="number" step="0.05" inputmode="decimal" value="'+v+'" oninput="window._tratSetCu('+i+',this.value)" style="width:74px;padding:5px 7px;border-radius:7px;border:1.5px solid rgba(165,107,58,0.4);background:var(--bg-card);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px);text-align:center">'
     +'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">kg/ha</span>'
@@ -456,7 +456,7 @@ function _tratRender(){
           if(c.stadeOblig)warns+='<span style="font-size:10px;color:var(--phyto-med,#A060E0)">&#x1F4CB; stade requis</span> ';
           if(c.heureOblig||c.type==='Insecticide')warns+='<span style="font-size:10px;color:var(--or)">&#x1F550; horaires conseill&#xe9;s</span> ';
           if(c.drae>0)warns+='<span style="font-size:10px;color:var(--orange)">DRE '+c.drae+'h</span>';
-          return '<div style="display:flex;align-items:center;gap:10px;background:var(--gris-clair);border-radius:10px;padding:10px 12px;margin-bottom:6px">'
+          return '<div class="mvcarte-fond" style="display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:6px">'
             +'<div style="flex:1"><div style="font-size:var(--pt-txt,13px);font-weight:700">'+_escHtml(p.nom)+'</div>'
             +(p.dose?'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_escHtml(p.dose)+'</div>':'')
             +(p.dose_val!=null?'<div style="font-size:var(--pt-micro,11px);color:#A56B3A;font-weight:600">&#x1F4E6; '+p.dose_val+' '+_escHtml(p.dose_unit||'')+'</div>':'')
@@ -826,7 +826,7 @@ function openTraitEdit(idx){
   var _cuVal=(t.cuMetal!=null?t.cuMetal:'');
   var _cuPctV=(typeof _cuPct==='function'?_cuPct(t.produit,t.sub):null);
   var _cuHint=(_cuPctV!=null?'base ~'+_cuPctV+'% Cu, ajustable':'kg de cuivre m&#xe9;tal apport&#xe9;');
-  var cuHtml=_isCu?('<div style="margin-bottom:14px;display:flex;align-items:center;gap:8px;background:rgba(165,107,58,0.1);border:1px solid rgba(165,107,58,0.28);border-radius:8px;padding:8px 10px">'
+  var cuHtml=_isCu?('<div class="mvencadre" style="margin-bottom:14px;display:flex;align-items:center;gap:8px">'
     +'<span style="font-size:var(--pt-micro,12px);font-weight:700;color:#A56B3A;white-space:nowrap">&#x1FA99; Cuivre m&#xe9;tal</span>'
     +'<input id="te-cu" type="number" step="0.05" inputmode="decimal" value="'+_cuVal+'" style="width:84px;padding:6px 8px;border-radius:7px;border:1.5px solid rgba(165,107,58,0.4);background:var(--bg-card);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-base,14px);text-align:center">'
     +'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">kg/ha</span>'

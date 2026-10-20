@@ -616,7 +616,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:var(--pt-txt,13px);margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v9.58</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v9.59</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -961,7 +961,7 @@
         </div>
         <div class="mv-track" style="margin-top:14px"><div class="mv-fill" id="dp-bar" style="width:0%"></div></div>
       </div>
-      <div id="dp-cepage-row" style="display:none;background:var(--gris-clair);border-radius:12px;padding:10px 14px;margin-bottom:14px">
+      <div id="dp-cepage-row" class="mvencadre" style="display:none;margin-bottom:14px">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase;font-weight:700;letter-spacing:0.5px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> Cépage</div>
           <button id="dp-cepage-edit-btn" style="display:none;background:none;border:none;font-size:var(--pt-micro,12px);color:var(--texte-doux);cursor:pointer;padding:3px 8px;border-radius:8px;font-family:inherit"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Modifier</button>
@@ -969,7 +969,7 @@
         <div id="dp-cepage-val" style="font-size:15px;font-weight:600;color:var(--texte);margin-top:5px"></div>
       </div>
       <div class="dp-parc-meteo" id="dp-parc-meteo" style="display:none"></div>
-      <div id="dp-commune-row" style="display:none;background:var(--gris-clair);border-radius:12px;padding:10px 14px;margin-bottom:14px">
+      <div id="dp-commune-row" class="mvencadre" style="display:none;margin-bottom:14px">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase;font-weight:700;letter-spacing:0.5px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg> Commune (météo)</div>
           <button id="dp-commune-edit-btn" style="display:none;background:none;border:none;font-size:var(--pt-micro,12px);color:var(--texte-doux);cursor:pointer;padding:3px 8px;border-radius:8px;font-family:inherit"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Modifier</button>
@@ -1026,7 +1026,7 @@
       <input type="hidden" id="dpc-hidden-nom">
       <div class="fl">Cépage principal</div>
       <select class="fsel ac" id="dpc-cepage-sel-1"></select>
-      <div style="display:flex;align-items:center;gap:10px;margin:14px 0 6px;padding:10px 12px;background:rgba(74,159,200,0.07);border:1.5px solid rgba(74,159,200,0.2);border-radius:12px;cursor:pointer" onclick="document.getElementById('dpc-entreplantation').click()">
+      <div class="mvcarte-fond mvcarte-clic" style="display:flex;align-items:center;gap:10px;margin:14px 0 6px;padding:10px 12px;cursor:pointer" onclick="document.getElementById('dpc-entreplantation').click()">
         <input type="checkbox" id="dpc-entreplantation" onchange="_dpcToggleEntreplantation(this.checked)" style="width:18px;height:18px;accent-color:#4A9FC8;cursor:pointer;flex-shrink:0">
         <div>
           <div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">Complantation</div>
@@ -1473,7 +1473,7 @@
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v9.58</div>
+        <div class="mod-header-sub">Ma Vigne v9.59</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
       
@@ -1587,7 +1587,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg></div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v9.58 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div class="ver-tag">Ma Vigne v9.59 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -2722,7 +2722,7 @@
     <div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-document"></use></svg> Importer une analyse</div>
   </div>
   <div class="modal-body">
-    <div style="display:flex;align-items:center;gap:9px;padding:8px 10px;background:rgba(192,132,90,0.07);border:1px solid rgba(192,132,90,0.2);border-radius:10px;margin-bottom:13px;">
+    <div class="mvencadre" style="display:flex;align-items:center;gap:9px;margin-bottom:13px">
       <span style="font-size:var(--pt-md,20px);"><svg class="mv-ic" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-document"></use></svg></span>
       <span id="cana-filename" style="font-size:var(--pt-micro,12px);font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--texte);"></span>
       <span id="cana-filesize" style="font-size:var(--pt-micro,11px);color:var(--texte-doux);flex-shrink:0;"></span>
@@ -3687,7 +3687,7 @@
     </div>
   </div>
 </div>
-<script src="/boot.js?v=9.58"></script>
+<script src="/boot.js?v=9.59"></script>
 <script type="module" src="/src/app.js"></script>
 
 <!-- ── Overlay erreur critique Ma Vigne (v2.68) ── -->
@@ -3779,7 +3779,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v9.58</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v9.59</span>
       </div>
     </div>
     <div class="modal-body">

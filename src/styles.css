@@ -7967,9 +7967,11 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
    attention, danger), une icône, jamais de bordure de côté. Aucune couleur ni taille écrite en dur ici
    (mv-harnais-cartes). Le dessin d’une carte d’avant passe au jeu ; sa marge intérieure reste la sienne.
    ★ CHARTE-5a : trois cartes d’avant au jeu — Planning .pf-card, Accueil .mtr-card (Ma trace) et .mur-card (le mur).
+   ★ CHARTE-5e (§398) : .mvcarte-fond — le dessin de la carte seul (fond, filet, arrondi), sans sa mise en page : pour un bloc
+     d’avant qui garde la sienne (une rangée en flex, sa marge intérieure).
    ★ CHARTE-5c (§381) : .cmp-alert des Réglages (ok / warn / bad) groupé sous l’encadré ; sa règle d’index.html ne garde
      que la mise en page (une icône et un texte, en ligne). */
-.mvcarte, .pf-card, .mtr-card, .mur-card{ background:var(--bg-card); border:var(--bw,1px) solid var(--ligne,#E7E6E2); border-radius:var(--r-md,8px); box-shadow:none; }
+.mvcarte, .mvcarte-fond, .pf-card, .mtr-card, .mur-card{ background:var(--bg-card); border:var(--bw,1px) solid var(--ligne,#E7E6E2); border-radius:var(--r-md,8px); box-shadow:none; }
 .mvcarte{ display:flex; flex-direction:column; gap:var(--e-2,8px); padding:var(--e-4,16px); color:var(--texte); }
 .mvcarte-tete{ display:flex; align-items:baseline; justify-content:space-between; gap:var(--e-3,12px); }
 .mvcarte-titre{ margin:0; font-family:var(--font-ui); font-size:var(--pt-sm,16px); font-weight:var(--fw-semi,600); color:var(--texte); }
