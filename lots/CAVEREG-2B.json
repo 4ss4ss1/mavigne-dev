@@ -1,0 +1,14 @@
+{
+  "lot": "CAVEREG-2B",
+  "section": "§387",
+  "base": "b15a48119f39796bfaf87bb476ebaf5ad6a25f85",
+  "inclut": [
+    "CAVEREG-2"
+  ],
+  "date": "2026-10-20",
+  "fichiers": {
+    ".mv-base": "6cde87823b29660574c266a7074ce02eeb8156133f8250e42b4e416804f3da40",
+    "CLAUDE.md": "b637b5d6927e59a2acedfdc4cdc635cac23176af4cb7ef0eda0affa86d331dae",
+    "docs/claude/chantiers-380-429.md": "d91f26233a6cf1c2e7897e71886a5b5d3696a3aeeb2cd5ebfaf8adcc87532130"
+  }
+}
