@@ -453,3 +453,4 @@
 | 397 | 397. ZONES-1 — LES ZONES SOMBRES TRANCHÉES (20/10 — `src/styles.css` · `src/charte.css` · `src/reglages.js`… | `docs/claude/chantiers-380-429.md` |
 | 398 | 398. CHARTE-5e — ÉTAPE 2, SUITE : TUILES, LIGNES CLIQUABLES, PETITES CARTES (20/10 — `src/styles.css` · `sr… | `docs/claude/chantiers-380-429.md` |
 | 399 | 399. CHARTE-5f — ÉTAPE 2 : LES ÉTATS CALCULÉS PAR LE CODE (20/10 — `src/phyto.js` · `src/planning.js` · `sr… | `docs/claude/chantiers-380-429.md` |
+| 400 | 400. CHARTE-6a — ÉTAPE 3 : LE JEU DES CASES DE SAISIE (20/10 — `src/styles.css` · `src/charte.css` · `src/p… | `docs/claude/chantiers-380-429.md` |

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.60';
+export const APP_VERSION = '9.61';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.61', d: '2026-10-20', items: [   // CHARTE-6a (§400) : le jeu des cases de saisie
+    { niv: 0, pour: ['tous'], emoji: 'check', titre: 'Des champs plus lisibles',
+      desc: "Les cases où l’on écrit ont un fond blanc et un contour bien visible, même au soleil, et leur titre au-dessus s’écrit en lettres normales, plus en petites capitales grises. Quand on touche un champ, son contour prend la couleur de l’appli." },
+  ] },
   { v: '9.60', d: '2026-10-20', items: [   // CHARTE-5f (§399) : les états et les choix au dessin commun
     { niv: 0, pour: ['admin','tractoriste'], emoji: 'check', titre: 'Traitement phyto : les choix et les alertes au même dessin',
       desc: "Dans l’assistant d’un traitement, ce qu’on choisit (produit, parcelles, conducteur, conventionnel ou bio) s’entoure de lie-de-vin, et « Continuer » prend la couleur d’action. Dans la fiche d’un produit et d’un traitement, le DAR, le délai de rentrée et la ZNT prennent les tons communs : vert si c’est bon, ambre à surveiller, rouge en cas de danger." },

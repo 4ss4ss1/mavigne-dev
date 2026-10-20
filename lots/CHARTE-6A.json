@@ -1,0 +1,23 @@
+{
+  "lot": "CHARTE-6A",
+  "section": "§400",
+  "base": "34c82a35d8c21b7215d1209f9a3110bb5f793157",
+  "inclut": [],
+  "date": "2026-10-20",
+  "fichiers": {
+    ".mv-base": "3d9a9947911bcf9278913928680615e695eb23d7910713f131a32c8b0c7f101f",
+    "CLAUDE.md": "e393a07aee5411fb42d04718a7cd7afff82039259a8befb8c550723eb48f40f5",
+    "docs/claude/INDEX.md": "d582520faae391eab28252901bcca9dfe69d49857d9f58d88d901a755a863308",
+    "docs/claude/chantiers-380-429.md": "b10db7f89650b242fec0d31b36837065aceea0f7f525d2eb1ed9c5dd4e620cec",
+    "docs/claude/journal.md": "3811a58691730f0bd12a2927c7e4dfe50b3e8dc505dc21ce9c5da47686401fa2",
+    "index.html": "308c3fb4db9fd23acd21ff6574a57ca8b9140680a9119949598dae9b39f4cfa9",
+    "public/sw.js": "75a0d8fa28b079f455d880c79e5cc9dfb58ea583eb660f6f70f6270ad1666b42",
+    "scripts/mv-espace-baseline.json": "fb71f5566cfb9d31b2fed1fcb34327fd5ec5db7fc9983190fcb8d94026210856",
+    "scripts/mv-harnais-liste.mjs": "09d0d4e9cb1235a996765332f72ddbdaa23adf46441bd820dfb5e2c84640e339",
+    "src/charte.css": "3e6c8b39b6901f8586bcc3448e2ab0ec291dc71bc039bd422de51dcf9719d1bc",
+    "src/phyto.js": "557f8645c5dbb8fdee8836d091283c7479c88740b413e41bd3768cc722407f7d",
+    "src/styles.css": "1a204c6e632c105b9a980d35705928add03784033614dc81b176ecd2c0995976",
+    "src/utils.js": "fe40d829d41cbc5675b7fa5d152d13f718638adb1a7d9bf1d78b6bad251f71bd",
+    "scripts/mv-harnais-champs.mjs": "e41e61da33e4e6e0e3eaa9e9d97024fb1a535129f2d248802f9d97a4277a875c"
+  }
+}

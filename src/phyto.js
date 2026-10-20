@@ -819,7 +819,7 @@ function openTraitEdit(idx){
   var condOpts='<option value="">— Aucun —</option>'+conds.map(function(c){return '<option value="'+_escHtml(c.nom)+'"'+(c.nom===curCond?' selected':'')+'>'+_escHtml(c.nom)+'</option>';}).join('');
   var stadeOpts='<option value="">— Aucun —</option>'+(window.STADES_PHENO||[]).map(function(sd){return '<option value="'+_escHtml(sd)+'"'+(sd===(t.stade||'')?' selected':'')+'>'+_escHtml(sd)+'</option>';}).join('');
   var abVal=(t.modeAb===true)?'1':((t.modeAb===false)?'0':'');
-  var L='font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px;display:block';
+  // CHARTE-6 (§400) : les étiquettes de la saisie d'un traitement prennent l'étiquette du jeu (.mvchamp-l), plus un style écrit ici
   var BM='padding:6px 12px;border-radius:8px;border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-doux);font-size:var(--pt-micro,12px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);min-height:36px';
   var _ttCu=(t.type||(window._phResolve?(window._phResolve(t)||{}).type:'')||'');
   var _isCu=(_ttCu==='Cuivre');
@@ -834,16 +834,16 @@ function openTraitEdit(idx){
     +'</div>'):'';
   document.getElementById('te-title').textContent='✏️ '+t.produit;
   document.getElementById('te-body').innerHTML=
-     '<div style="margin-bottom:14px"><span style="'+L+'">📅 Date du traitement</span><input type="date" id="te-date" class="fi"></div>'
-    +'<div style="margin-bottom:14px"><span style="'+L+'">Conducteur</span><select id="te-cond" class="fsel">'+condOpts+'</select></div>'
-    +'<div style="margin-bottom:14px"><span style="'+L+'">Dose</span><input type="text" id="te-dose" class="fi" placeholder="ex. 750 g/hL"></div>'
+     '<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">📅 Date du traitement</span><input type="date" id="te-date" class="fi"></div>'
+    +'<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">Conducteur</span><select id="te-cond" class="fsel">'+condOpts+'</select></div>'
+    +'<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">Dose</span><input type="text" id="te-dose" class="fi" placeholder="ex. 750 g/hL"></div>'
     +cuHtml
-    +'<div style="margin-bottom:14px"><span style="'+L+'">Stade phénologique</span><select id="te-stade" class="fsel">'+stadeOpts+'</select></div>'
-    +'<div style="display:flex;gap:10px;margin-bottom:14px"><div style="flex:1"><span style="'+L+'">Heure début</span><input type="time" id="te-hd" class="fi"></div><div style="flex:1"><span style="'+L+'">Heure fin</span><input type="time" id="te-hf" class="fi"></div></div>'
-    +'<div style="margin-bottom:14px"><span style="'+L+'">DRE anticipé</span><input type="text" id="te-dre" class="fi" placeholder="ex. Soirée hors butinage"></div>'
-    +'<div style="margin-bottom:14px"><span style="'+L+'">Mode</span><select id="te-ab" class="fsel"><option value="">— Non renseigné —</option><option value="0"'+(abVal==='0'?' selected':'')+'>🌾 Conventionnel</option><option value="1"'+(abVal==='1'?' selected':'')+'>🌿 Agriculture Biologique (AB)</option></select></div>'
-    +'<div style="margin-bottom:14px"><span style="'+L+'">Note / observations</span><input type="text" id="te-note" class="fi" placeholder="Conditions, cible…"></div>'
-    +'<div style="margin-bottom:4px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="'+L+';margin-bottom:0">📍 Parcelles traitées</span><div style="display:flex;gap:6px"><button type="button" onclick="window._teAllParc()" style="'+BM+'">Tout</button><button type="button" onclick="window._teNoneParc()" style="'+BM+'">Aucun</button></div></div><div id="te-parc-count" style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:8px"></div><div id="te-parc-grid" style="display:flex;flex-wrap:wrap;gap:6px"></div></div>';
+    +'<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">Stade phénologique</span><select id="te-stade" class="fsel">'+stadeOpts+'</select></div>'
+    +'<div style="display:flex;gap:10px;margin-bottom:14px"><div style="flex:1"><span class="mvchamp-l" style="margin-bottom:6px">Heure début</span><input type="time" id="te-hd" class="fi"></div><div style="flex:1"><span class="mvchamp-l" style="margin-bottom:6px">Heure fin</span><input type="time" id="te-hf" class="fi"></div></div>'
+    +'<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">DRE anticipé</span><input type="text" id="te-dre" class="fi" placeholder="ex. Soirée hors butinage"></div>'
+    +'<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">Mode</span><select id="te-ab" class="fsel"><option value="">— Non renseigné —</option><option value="0"'+(abVal==='0'?' selected':'')+'>🌾 Conventionnel</option><option value="1"'+(abVal==='1'?' selected':'')+'>🌿 Agriculture Biologique (AB)</option></select></div>'
+    +'<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">Note / observations</span><input type="text" id="te-note" class="fi" placeholder="Conditions, cible…"></div>'
+    +'<div style="margin-bottom:4px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="mvchamp-l">📍 Parcelles traitées</span><div style="display:flex;gap:6px"><button type="button" onclick="window._teAllParc()" style="'+BM+'">Tout</button><button type="button" onclick="window._teNoneParc()" style="'+BM+'">Aucun</button></div></div><div id="te-parc-count" style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:8px"></div><div id="te-parc-grid" style="display:flex;flex-wrap:wrap;gap:6px"></div></div>';
   var de=document.getElementById('te-date'); if(de) de.value=t.date||'';
   var dse=document.getElementById('te-dose'); if(dse) dse.value=t.dose||'';
   var hd=document.getElementById('te-hd'); if(hd) hd.value=t.heureDebut||'';

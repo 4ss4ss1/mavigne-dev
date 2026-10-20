@@ -461,3 +461,27 @@ La vente au Cuvier (`bg` et `bd` calculés plus haut), une ligne du Planning (`r
 
 ### 399e. La leçon
 **Un état se dit par une classe ; la couleur reste à la feuille.** Écrit `'+(sel?'var(--acier)':'var(--bg-card)')+'`, un état ne suit ni la charte ni le mode sombre — et `aria-pressed` manquait partout : une lecture d’écran ne savait pas ce qui était choisi.
+
+## 400. CHARTE-6a — ÉTAPE 3 : LE JEU DES CASES DE SAISIE (20/10 — `src/styles.css` · `src/charte.css` · `src/phyto.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-champs.mjs` (nouveau) · `scripts/mv-harnais-liste.mjs` · `scripts/mv-espace-baseline.json` · **APP 9.60 → 9.61, SW 10.39 → 10.40**, base `34c82a3`)
+
+### 400a. La demande
+L’étape 3 de la recommandation (§389a) : les cases de saisie. Inventaire (hors console GT) : 431 champs (115 nombres, 111 textes, 71 dates…), 61 listes, 11 zones de texte ; 16 hauteurs, 13 arrondis, 14 tailles de texte, 20 fonds ; 62 champs stylés sur place. La famille principale, `.fi` et `.fsel` (175), est grise pleine, sans bord : sur une carte blanche, son contour se devine. Maquette Design « Ma Vigne — le jeu des cases de saisie (CHARTE-6) » (quatre planches : les pièces et leurs états, une vraie fenêtre au téléphone, le sombre, l’aujourd’hui) ; Nico : **« go »**.
+
+### 400b. Ce qui est livré
+- **La charte** : `--champ-filet` (#85827C en clair, 3,8 pour 1 sur le blanc ; #77736B dans les deux blocs sombres, 3,6 pour 1 — la règle d’accessibilité des bords de commandes, 3 pour 1) et `--h-champ` (48 px).
+- **Le bloc CHARTE-6** (après CHARTE-5, fermé par `/* ★ FIN CHARTE-6 */`) : `.mvchamp, .fi, .fsel` — fond de carte, filet `--champ-filet`, arrondi 8 px, 48 px de haut et 16 px de texte au téléphone (Safari zoome sous 16 px), 36 px et 14 px au bureau (comme les boutons) ; la zone de texte deux fois plus haute ; survol (filet à l’encre), **focus** (filet à la couleur d’action — le halo est l’anneau de focus commun, que le jeu n’éteint pas), **erreur** (`aria-invalid="true"`, filet rouge), **désactivé** (fond de survol, texte doux). `.mvchamp-l, .fl` : l’étiquette — encre, demi-gras, sans capitales, 14 px (13 au bureau).
+- **Retirés** : le dessin de `.fi` et `.fsel` (fond gris, filet transparent à 2 px, arrondi 10 px), leurs focus colorés (vert, phyto, acier), les règles à part des fenêtres du Tracteur pour `.fi`, `.fsel` et `.fl` ; le dessin de `.fl` (capitales grises de 11 px). La règle anti-zoom de Safari (16 px) est gardée.
+- **La saisie d’un traitement** : ses étiquettes étaient dessinées par un style écrit dans une variable (`var L='…text-transform:uppercase…'`) → `.mvchamp-l`. ⚠️ Un dernier emploi de `L` (« Parcelles traitées ») a échappé au premier passage : la capture l’a attrapé (« L is not defined ») avant toute livraison.
+- **Nouveau contrôle `mv-harnais-champs`** : A le bloc et ses états, B aucune couleur en dur, C le filet dans la charte (clair et sombres), D `.fi`/`.fsel` dessinés par le jeu seul (hors la règle anti-zoom), E 16 px au téléphone, F les champs stylés sur place ne remontent pas (≤ 60) ; 6/6 contre-épreuves. Inscrit à la chaîne (471 commandes).
+- Deux corrections en route, d’après `mv-harnais-jetons` : pas d’`outline:none` dans le jeu (« 1 seul outline:none toléré » — l’anneau commun n’est jamais éteint), et le repli de `--ligne`.
+
+### 400c. Vu
+`phyto-saisie` (téléphone clair et sombre, ordinateur), `tracteur-entretien`, `mot-de-passe-erreur` : champs blancs au contour net, étiquettes en lettres normales, le sombre lisible, l’ordinateur compact.
+
+### 400d. Reste de l’étape 3
+Les autres familles de champs (`.mvr-fi` de la Réserve, `.mvv-tin`, `.emh-in`, `.mvt-fi`, `.plan-ge-input`…), les 60 champs stylés sur place, les étiquettes faites à la main ailleurs (comme celle de la saisie d’un traitement), les cases à cocher et l’interrupteur. Les écrans de connexion et d’installation gardent leurs champs sombres (comme les bandeaux, §397).
+
+- **Chaîne** : **471 commandes, 0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 400e. La leçon
+**Supprimer une variable, c’est chercher tous ses emplois — même concaténés.** `'+L+'` et `'+L+';margin-bottom:0'` ne s’écrivent pas pareil ; le second a échappé au remplacement. La capture, qui ouvre vraiment la fenêtre, l’a vu là où la syntaxe ne voyait rien.
