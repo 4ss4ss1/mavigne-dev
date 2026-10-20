@@ -1,0 +1,25 @@
+{
+  "lot": "REVUE-2",
+  "section": "§390",
+  "base": "b367a89d2104f3510917c5230df3eda1babf3807",
+  "inclut": [],
+  "date": "2026-10-20",
+  "fichiers": {
+    ".mv-base": "1b1ff5e8c6664afabb9ca77303f50cccb9d72e1b52617d7e37b5863f977e1737",
+    "CLAUDE.md": "1c70b3acb8a04f003514cf9b1b6fc7c0bd07144a536548c077b5a1280dacf48b",
+    "docs/claude/INDEX.md": "3222d0e5e1e4ddf19387ed4985734af86d4c77d3fe950ba78fe673e479967bd5",
+    "docs/claude/chantiers-380-429.md": "8be7a9086fdce5aaad1ce64ed620e6d3b5d9b1f11cccb7210342a3830ae6bd5c",
+    "docs/claude/journal.md": "d2bf52c8b09c14c43736c73234192c44db25c76e237b3a5f6a15c359562e71c7",
+    "index.html": "52579da05c4d2b2cab534dfe1e1de258cb47267b5417f0d0fd54509ba6bf3dcd",
+    "public/sw.js": "977195b18a9b784105f0442eec97e85b095c3d68c0347c79d61324a1724e2dd8",
+    "scripts/mv-captures.mjs": "d2d753caabe13f1954c2e031ca85b3b038000317b861e2c6a1ef9516b829f0a4",
+    "scripts/mv-espace-baseline.json": "550c74639e89eeebd5785421a6144d60f3083de42a9b6ecd63c50546299ba23d",
+    "scripts/mv-harnais-boutons.mjs": "381323ab88e3998333c2800d613ab844879e4c6eccd7d4ee5d4649660a3dbb2b",
+    "scripts/mv-harnais-cartes.mjs": "62c8154da893204b07b8bf28b24c19ab7ba28a72345113a117f8df4cd6e3bebb",
+    "scripts/mv-harnais-pastilles.mjs": "5d9cea56fcf06d588e918214184b77268dc2019503c342602dafe94095e2b592",
+    "scripts/mv-jetons-baseline.json": "910408b0c6f4d58fc2d2c7e46fe82b848eab441ec440fe479560effaf863c463",
+    "src/reglages.js": "c06599ff0769f24ad9929d407433ae0c2bd08f2b69b1dc35561b0bf82676de24",
+    "src/styles.css": "519aff4f064a353ee2c3ecc32547795bfda6b0bcebb471f6deeb153e9532550a",
+    "src/utils.js": "7fedb09b2aa747947b5d581f82023c910e2f9945ea09a57299c92a7e3b8bc710"
+  }
+}

@@ -66,6 +66,9 @@ const ECRANS = {
   'tracteur-entretien': "goTo('tracteur'); switchTracOnglet('entretiens');",
   'reglages-documents': "goTo('reglages'); window.openDocs();",
   'ma-trace': "window.currentUser.roles = ['ouvrier']; goTo('home'); setTimeout(function(){ if (window.openMaTrace) window.openMaTrace(); }, 400);",
+  // ★ REVUE-2 (§390)
+  'phyto-saisie': "goTo('phyto'); setTimeout(function(){ if (window.openTraitEdit) window.openTraitEdit(0); }, 400);",
+  'mur': "goTo('home'); setTimeout(function(){ if (window.openMur) window.openMur(); }, 400);",
   'mot-de-passe-erreur': "goTo('reglages'); if (window.openChangePwd) window.openChangePwd(); else window._openOv('ovChangePwd'); setTimeout(function(){ var e = document.getElementById('cpwd-error'); if (e) { e.textContent = 'Le mot de passe actuel ne correspond pas.'; e.style.display = 'block'; } }, 300);"
 };
 const choisis = opt('--ecrans') ? opt('--ecrans').split(',').map(x => x.trim()).filter(Boolean) : Object.keys(ECRANS);

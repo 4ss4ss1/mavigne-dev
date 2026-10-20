@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.30
+// MA VIGNE — Service Worker v10.31
+// v10.31 (20/10/2026) — REVUE-2 (§390) : le mur et « Ma trace » ont une marge de côté ; .mur-btn au jeu de boutons, .mur-seg au filtre ; l’encadré d’introduction des documents par classe (Obligatoire ambre, Suivi bleu, Données brutes neutre). styles.css, reglages.js, utils.js, index.html. APP 9.51 -> 9.52.
 // v10.30 (20/10/2026) — REVUE-1 (§389) : revue à l’écran des pièces passées au jeu (CHARTE-3 à 5c) ; le sélecteur de cuvées de l’export marque de nouveau la cuvée choisie (.cave-cuvee-chip.sel, oublié au §377). styles.css, utils.js, index.html. APP 9.50 -> 9.51.
 // v10.29 (20/10/2026) — TUTO-8 (§388) : le tuto « noter des mesures de maturité », une vendange pour le domaine fictif. tutos.js, cuvier.js, index.html, utils.js. APP 9.49 -> 9.50.
 // v10.28 (20/10/2026) — CAVEREG-2 (§387) : les réglages du Cuvier et du Chai en lignes, chacun sa fenêtre (la fourchette en sucre ou en degré, le rendement jus, la base, l’alerte d’ouillage). cuvier.js, cave.js, styles.css, index.html, utils.js. APP 9.48 -> 9.49.
@@ -4560,7 +4561,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.30';
+const CACHE_NAME   = 'mavigne-v10.31';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4577,7 +4578,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.30 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.31 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4597,7 +4598,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.30 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.31 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

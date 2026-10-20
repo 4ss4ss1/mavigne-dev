@@ -1,121 +1,13 @@
-[2m── 469 commandes : 13 seule(s) d'abord, puis 12 à la fois — sorties dans l'ordre de la liste[0m
+[2m── 469 commandes : 13 seule(s) d'abord, puis 4 à la fois — sorties dans l'ordre de la liste[0m
 [2m
-── [6/469] node scripts/mv-harnais-lanceur.mjs --contre   16.0 s[0m
-
-  MA VIGNE — Harnais du LANCEUR EN PARALLÈLE (BUILD-1)
-  ✓ A. sorties dans l’ordre de la liste (arrivées dans le désordre)
-  ✓ B. jamais plus de 3 à la fois, et 3 atteint
-  ✓ C. une commande SEULE ne croise jamais une autre
-  ✓ C. les SEULES passent toutes avant les autres
-  ✓ tout vert : tout est joué, pas d’arrêt
-  ✓ D. au premier rouge, plus rien ne démarre
-  ✓ D. ce qui a démarré va au bout (rien n’est tué)
-  ✓ A. arrêt : on écrit, dans l’ordre, exactement ce qui a été joué
-  ✓ E. --continuer joue tout
-  ✓ jobs = 1 : une à la fois, les seules puis la liste dans l’ordre
-  ✓ D. une SEULE en rouge : rien d’autre ne démarre
-  ✓ G. les plus longues d’abord (durée connue), l’inconnue en tête
-  ✓ G. … et les sorties restent dans l’ordre de la liste
-  ✓ F. tout script qui écrit dans le dépôt est déclaré (SEULS ou ECRIT_HORS_LISTE)
-  ✓ F. aucune entrée périmée (hors liste, ou plus aucune écriture repérée)
-  ✓ F. aucun script n’est à la fois SEUL et ECRIT_HORS_LISTE
-  ✓ F. la liste ne passe jamais le drapeau qui fait écrire
-
-  17 vert(s) · 0 rouge(s)
-
-  CONTRE-ÉPREUVE — chaque défaut réintroduit doit faire rougir
-    DÉTECTÉ  plus de `jobs` commandes à la fois
-    DÉTECTÉ  les SEULES jouées au milieu des autres
-    DÉTECTÉ  au premier rouge, ça continue de démarrer
-    DÉTECTÉ  une SEULE en rouge n’arrête pas les suivantes
-    DÉTECTÉ  les durées connues ne changent plus l’ordre de lancement
-    DÉTECTÉ  l’affichage saute les commandes pas encore arrivées
-    DÉTECTÉ  cuvgr3 retiré de SEULS
-    DÉTECTÉ  un nouveau harnais écrit dans src/ sans être déclaré
-    DÉTECTÉ  une entrée SEULS périmée
-    DÉTECTÉ  la liste fait réécrire guide.html (build-guide sans --check)
-    DÉTECTÉ  la liste regrave le cliquet du preflight (--baseline)
-
-  11/11 défauts détectés
-[2m
-── [7/469] node scripts/lint-cliquet.mjs   15.3 s[0m
-
-<--- Last few GCs --->
-
-[8768:00000260ECF15000]    13331 ms: Scavenge (interleaved) 211.9 (246.0) -> 180.0 (246.0) MB, pooled: 0 MB, 0.64 / 0.00 ms  (average mu = 0.909, current mu = 0.855) allocation failure; 
-[8768:00000260ECF15000]    13605 ms: Scavenge (interleaved) 214.5 (248.6) -> 183.8 (249.9) MB, pooled: 0 MB, 4.12 / 0.00 ms  (average mu = 0.909, current mu = 0.855) allocation failure; 
-
-FATAL ERROR: Zone Allocation failed - process out of memory
------ Native stack trace -----
-
- 1: 00007FF66EA33D9F 
- 2: 00007FF66D67DCB7 
- 3: 00007FF66CFF5B96 
- 4: 00007FF66E55D372 
- 5: 00007FF66E55D1E0 
- 6: 00007FF66E09326A 
- 7: 00007FF66E06C6F0 
- 8: 00007FF66E0695EF 
- 9: 00007FF66E068F3D 
-10: 00007FF66D5F196F 
-11: 00007FF66D5B69BD 
-12: 00007FF66D5B66B5 
-13: 00007FF66DE56C6F 
-14: 00007FF66E97944B 
-15: 00007FF66D6D2D76 
-16: 00007FF66ED7DC73 
-17: 00007FFFD3C9DDA7 
-18: 00007FFFD48FEE4C 
-✖ ESLint n’a rien renvoye. Dependances installees ? (npm ci)
-
-<--- Last few GCs --->
-
-[8768:00000260ECF15000]    13331 ms: Scavenge (interleaved) 211.9 (246.0) -> 180.0 (246.0) MB, pooled: 0 MB, 0.64 / 0.00 ms  (average mu = 0.909, current mu = 0.855) allocation failure; 
-[8768:00000260ECF15000]    13605 ms: Scavenge (interleaved) 214.5 (248.6) -> 183.8 (249.9) MB, pooled: 0 MB, 4.12 / 0.00 ms  (average mu = 0.909, current mu = 0.855) allocation failure; 
-
-FATAL ERROR: Zone Allocation failed - process out of memory
------ Native stack trace -----
-
- 1: 00007FF66EA33D9F 
- 2: 00007FF66D67DCB7 
- 3: 00007FF66CFF5B96 
- 4: 00007FF66E55D372 
- 5: 00007FF66E55D1E0 
- 6: 00007FF66E09326A 
- 7: 00007FF66E06C6F0 
- 8: 00007FF66E0695EF 
- 9: 00007FF66E068F3D 
-10: 00007FF66D5F196F 
-11: 00007FF66D5B69BD 
-12: 00007FF66D5B66B5 
-13: 00007FF66DE56C6F 
-14: 00007FF66E97944B 
-15: 00007FF66D6D2D76 
-16: 00007FF66ED7DC73 
-17: 00007FFFD3C9DDA7 
-18: 00007FFFD48FEE4C 
-
-[2m
-── [8/469] node scripts/preflight.mjs   202.2 s[0m
+── [8/469] node scripts/preflight.mjs   179.0 s[0m
 
   MA VIGNE — Preflight  (filet anti-régression, lecture seule)
   Racine : C:\Users\p4n0m\Desktop\Dev\mavigne-dev
-  Version app : v9.51   ·   Version SW : v10.30
+  Version app : v9.52   ·   Version SW : v10.31
 
   scripts
     ATTENTION  C26 : aucun import() de chemin brut.
-
-  scripts/mv-harnais-parc1.mjs
-    ERREUR  Syntaxe invalide (mode module) :
-    <--- Last few GCs --->
-    
-    
-    
-    #
-
-  scripts/mv-harnais-photo.mjs
-    ERREUR  Syntaxe invalide (mode module) :
-    
 
   src/cave.js
     ATTENTION  L3011 <div> dans un <button> (template JS) -> HTML5 invalide (le handler est sur le button donc fonctionne, mais a corriger en <span>). Cf. §24.
@@ -156,21 +48,8 @@ FATAL ERROR: Zone Allocation failed - process out of memory
   src/tutos.js
     ATTENTION  Aucun `const DEBUG` dans ce module → le premier if(DEBUG) ajouté lèvera un ReferenceError silencieux. Déclarer en tête : const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
-  2 erreur(s) · 13 avertissement(s)
-  ✗ Preflight ÉCHOUÉ — livraison à corriger.
-[2m
-── [9/469] node scripts/mv-harnais-globaux.mjs   18.5 s[0m
-[1m
-── HARNAIS GLOBAUX — un nom lu existe-t-il apres bundling ? ──
-[0m
-[2m  24 modules · 2108 noms poses sur window · 196 primitives tolerees[0m
-[33m
-  ⚠ 1 exposition(s) hors de portee du harnais :[0m
-[2m    · app.js — window[key.toUpperCase()] = … (non analysable)[0m
-[2m    (un nom pose UNIQUEMENT par ce chemin sortira rouge — poser un window.X = X explicite)[0m
-[32m
-  ✓ aucun nom libre injoignable — le bundle ne perdra personne
-[0m
+  0 erreur · 13 avertissement(s)
+  ⚠ Preflight OK (avertissements non bloquants).
 [2m
 ── [52/469] node scripts/mv-harnais-releve.mjs   0.5 s[0m
 [MaVigne Error] INFO [avale] erreur avalée dans planning.js/_pl2YearTabs 
@@ -324,7 +203,7 @@ ReferenceError: _mvISO is not defined
 ──────────────────────────────
   17 vert · 0 rouge
 [2m
-── [73/469] node scripts/mv-harnais-robustesse-planning.mjs   96.2 s[0m
+── [73/469] node scripts/mv-harnais-robustesse-planning.mjs   71.4 s[0m
 
 A. Mois figé, mode payé, dimanche travaillé hors heures sup
 
@@ -333,7 +212,7 @@ B. 24 domaines tirés au hasard × 12 mois × toutes les surfaces du Planning
 ──────────────────────────────
   31 vert · 0 rouge
 [2m
-── [74/469] node scripts/mv-harnais-robustesse-pilotage.mjs   33.1 s[0m
+── [74/469] node scripts/mv-harnais-robustesse-pilotage.mjs   22.8 s[0m
 
 A. Chaque onglet sur une base vide, puis sur une base fixe
 [applyFbData] Tableau vide ignore pour membres
@@ -394,7 +273,7 @@ C. LISTES-1 — applyFbData écarte ce qui n’est pas une fiche
 
 VERT  —  31 assertions, 0 échecs
 [2m
-── [155/469] node scripts/mv-harnais-manque1.mjs --contre   32.6 s[0m
+── [155/469] node scripts/mv-harnais-manque1.mjs --contre   18.9 s[0m
   rougit   les tâches au temps passé redeviennent « sans barème »
   rougit   l’entreplantation retombe dans « sans barème » (vers la roue crantée)
   rougit   le bouton de l’entreplantation renvoie encore aux tâches
@@ -410,7 +289,7 @@ VERT  —  31 assertions, 0 échecs
   rougit   le guide perd la phrase des travaux au temps passé
 MANQUE-1 contre-épreuves : 13 sur 13 rougissent
 [2m
-── [163/469] node scripts/harnais-claude-md.mjs   79.2 s[0m
+── [163/469] node scripts/harnais-claude-md.mjs   41.8 s[0m
 
 ── structure ──
   [32m✓[0m §40 existe et est unique
@@ -451,10 +330,10 @@ MANQUE-1 contre-épreuves : 13 sur 13 rougissent
 
 ── le document a-t-il PERDU un chantier ? ──
   [32m✓[0m tout script de scripts/ est nommé dans le document (0 muet(s))
-  [32m✓[0m APP ne recule pas (9.50 → 9.51)
-  [32m✓[0m SW ne recule pas (10.29 → 10.30)
-  [32m✓[0m aucune section n'a disparu (422 ≥ 414)
-    ↑ 8 de plus — relever SECTIONS dans ce fichier
+  [32m✓[0m APP ne recule pas (9.51 → 9.52)
+  [32m✓[0m SW ne recule pas (10.30 → 10.31)
+  [32m✓[0m aucune section n'a disparu (423 ≥ 414)
+    ↑ 9 de plus — relever SECTIONS dans ce fichier
   [32m✓[0m ★ ça reste un TITRE de section : DS-0, le socle de la charte
   [32m✓[0m ★ ça reste un TITRE de section : la feuille d'heures
   [32m✓[0m ★ ça reste un TITRE de section : les consommables par atelier
@@ -593,7 +472,7 @@ MANQUE-1 contre-épreuves : 13 sur 13 rougissent
 ──────────────────────────────
   30 vert · 0 rouge
 [2m
-── [179/469] node scripts/mv-harnais-globaux.mjs --contre   25.8 s[0m
+── [179/469] node scripts/mv-harnais-globaux.mjs --contre   19.1 s[0m
 [1m
 ── CONTRE-EPREUVES — le filet attrape-t-il vraiment ? ──
 [0m
@@ -607,7 +486,7 @@ MANQUE-1 contre-épreuves : 13 sur 13 rougissent
   6 vert(s) · 0 rouge(s)
 
 [2m
-── [193/469] node scripts/mv-harnais-icones-contre.mjs   198.9 s[0m
+── [193/469] node scripts/mv-harnais-icones-contre.mjs   178.7 s[0m
 
 ── CONTRE-EPREUVE DU HARNAIS D’ICONES
 
@@ -637,7 +516,7 @@ MANQUE-1 contre-épreuves : 13 sur 13 rougissent
 [32mLes 22 contre-epreuves rougissent[0m
 
 [2m
-── [206/469] node scripts/mv-harnais-recup.mjs --contre   290.3 s[0m
+── [206/469] node scripts/mv-harnais-recup.mjs --contre   336.5 s[0m
 
   MA VIGNE — Harnais RECUP-1 (heures manquées, récup majorée)
   ──────────────────────────────────────────────────────────
@@ -737,7 +616,7 @@ MANQUE-1 contre-épreuves : 13 sur 13 rougissent
 
   Les 90 défauts sont détectés.
 [2m
-── [207/469] node scripts/mv-harnais-robustesse-planning.mjs --contre   163.8 s[0m
+── [207/469] node scripts/mv-harnais-robustesse-planning.mjs --contre   148.0 s[0m
 
 Contre-épreuves — chaque défaut reposé doit rougir
    vert   rougit : l’ancien libellé qui lit l.jours.length (le plantage du 27/09)
@@ -752,7 +631,7 @@ Contre-épreuves — chaque défaut reposé doit rougir
 ──────────────────────────────
   8 vert · 0 rouge
 [2m
-── [208/469] node scripts/mv-harnais-robustesse-pilotage.mjs --contre   114.7 s[0m
+── [208/469] node scripts/mv-harnais-robustesse-pilotage.mjs --contre   94.1 s[0m
 
 Contre-épreuves — chaque défaut reposé doit rougir
    vert   rougit : LISTES-1 retiré : applyFbData laisse passer une parcelle nulle
@@ -764,7 +643,7 @@ Contre-épreuves — chaque défaut reposé doit rougir
 ──────────────────────────────
   5 vert · 0 rouge
 [2m
-── [210/469] node scripts/mv-harnais-gf.mjs --contre   33.5 s[0m
+── [210/469] node scripts/mv-harnais-gf.mjs --contre   20.7 s[0m
 
 ── GF-1 — contre-épreuves : chaque défaut réinjecté doit mordre, par sa règle ──
 
@@ -786,7 +665,7 @@ Contre-épreuves — chaque défaut reposé doit rougir
   [32m14/14 défauts attrapés, chacun par sa règle[0m
 
 [2m
-── [211/469] node scripts/mv-harnais-labo.mjs --contre   29.2 s[0m
+── [211/469] node scripts/mv-harnais-labo.mjs --contre   13.4 s[0m
 
 ── LABO-1 — contre-épreuves : chaque défaut réinjecté doit mordre, par sa règle ──
 
@@ -796,17 +675,8 @@ Contre-épreuves — chaque défaut reposé doit rougir
   [32m✓[0m C4 le glucose ouvre un second relevé le jour de la densité
   [32m✓[0m C5 le degré probable du labo ne cale plus le repère sec
   [32m✓[0m C6 la purge des PDF ignore les rapports des cuves
-  [32m✓[0m C7 l’ancien formulaire rouvre une analyse née d’une fiche (et l’écraserait)
-  [32m✓[0m C8 deux valeurs différentes : la nouvelle écrase sans demander
-  [32m✓[0m C9 « Le passer au 8 oct. » ne déplace rien
-  [32m✓[0m C11 l’onglet « Labo » n’est plus dans la liste des onglets du Chai
-  [32m✓[0m C12 après l’enregistrement, la fiche touchée n’est plus mise en surbrillance
-  [32m✓[0m C10 le « < » du bulletin se perd à l’écriture
-
-  [32m12/12 défauts attrapés, chacun par sa règle[0m
-
 [2m
-── [285/469] node scripts/mv-harnais-entree1.mjs --contre   53.3 s[0m
+── [285/469] node scripts/mv-harnais-entree1.mjs --contre   51.7 s[0m
   ✓ connexion réussie avec réseau : le téléphone garde une empreinte du compte
   ✓ … jamais le mot de passe lui-même
   ✓ … une vraie empreinte (sel de 16 octets, 32 octets d’empreinte, assez de tours)
@@ -855,7 +725,7 @@ ENTREE-1 : 31 vertes, 0 rouges
 
 12/12 contre-épreuves rougissent
 [2m
-── [289/469] node scripts/mv-harnais-taille2.mjs --contre   75.1 s[0m
+── [289/469] node scripts/mv-harnais-taille2.mjs --contre   58.1 s[0m
   ✓ règle Firestore : l’exemple de la documentation (44 / 71 / 147 octets)
   ✓ octets UTF-8 comptés sans tampon = ce que dit Node (400 textes : accents, emoji, moitiés de paire)
   ✓ petit document : écrit, aucune alerte
@@ -967,7 +837,7 @@ GT-1 : 24 vertes, 0 rouges
 
 12/12 contre-épreuves rougissent
 [2m
-── [296/469] node scripts/mv-harnais-ids1.mjs   0.3 s[0m
+── [296/469] node scripts/mv-harnais-ids1.mjs   0.4 s[0m
   ✓ un identifiant déduit du nom : le même partout, toujours
   ✓ … insensible aux espaces autour et à la forme des accents (É composé ou non)
   ✓ … 20 000 noms différents → 20 000 identifiants différents
@@ -985,7 +855,7 @@ GT-1 : 24 vertes, 0 rouges
 
 IDS-1 : 14 vertes, 0 rouges
 [2m
-── [297/469] node scripts/mv-harnais-ids1.mjs --contre   1.0 s[0m
+── [297/469] node scripts/mv-harnais-ids1.mjs --contre   1.1 s[0m
   ✓ un identifiant déduit du nom : le même partout, toujours
   ✓ … insensible aux espaces autour et à la forme des accents (É composé ou non)
   ✓ … 20 000 noms différents → 20 000 identifiants différents
@@ -1057,7 +927,7 @@ IDS-1 lot 2 : 14 vertes, 0 rouges
 
 7/7 contre-épreuves rougissent
 [2m
-── [300/469] node scripts/mv-harnais-renom-parc.mjs   0.3 s[0m
+── [300/469] node scripts/mv-harnais-renom-parc.mjs   0.4 s[0m
   ✓ la parcelle prend le nouveau nom et GARDE son identifiant
   ✓ journal : ses entrées suivent (avec ou sans identifiant), pas celles des autres
   ✓ sessions tracteur : parcelles faites (texte et {nom}), parcelles, parcelle
@@ -1089,7 +959,7 @@ IDS-1 lot 2 : 14 vertes, 0 rouges
 
 RENOMMER UNE PARCELLE : 28 vertes, 0 rouges
 [2m
-── [301/469] node scripts/mv-harnais-renom-parc.mjs --contre   0.9 s[0m
+── [301/469] node scripts/mv-harnais-renom-parc.mjs --contre   1.0 s[0m
   ✓ la parcelle prend le nouveau nom et GARDE son identifiant
   ✓ journal : ses entrées suivent (avec ou sans identifiant), pas celles des autres
   ✓ sessions tracteur : parcelles faites (texte et {nom}), parcelles, parcelle
@@ -1137,50 +1007,38 @@ RENOMMER UNE PARCELLE : 28 vertes, 0 rouges
 
 14/14 contre-épreuves rougissent
 [2m
-── [361/469] node scripts/mv-harnais-auj5.mjs --contre   9.1 s[0m
-  rougit   un week-end coupe de nouveau une absence
-  rougit   le motif cache de nouveau la date de retour
-
-<--- Last few GCs --->
-
-[20032:000001C6A66E8000]     7945 ms: Scavenge 56.7 (65.4) -> 56.8 (65.4) MB, pooled: 0 MB, 0.69 / 0.00 ms  (average mu = 0.993, current mu = 0.205) allocation failure; 
-[20032:000001C6A66E8000]     8055 ms: Mark-Compact 62.0 (70.5) -> 52.9 (70.2) MB, pooled: 0 MB, 16.44 / 0.00 ms  (+ 0.5 ms in 4 steps since start of marking, biggest step 0.4 ms, walltime since start of marking 110 ms) (average mu = 0.990, current mu = 0.
-FATAL ERROR: MarkCompactCollector: young object promotion failed Allocation failed - JavaScript heap out of memory
------ Native stack trace -----
-
- 1: 00007FF66EA33D9F 
- 2: 00007FF66D67DCB7 
- 3: 00007FF66D47E4F7 
- 4: 00007FF66D45DBEE 
- 5: 00007FF66D4532AD 
- 6: 00007FF66D452F5C 
- 7: 00007FF66D452BA1 
- 8: 00007FF66D465098 
- 9: 00007FF66DE56C6F 
-10: 00007FF66E97944B 
-11: 00007FF66D6D2D76 
-12: 00007FF66ED7DC73 
-13: 00007FFFD3C9DDA7 
-14: 00007FFFD48FEE4C 
-[2m
-── [365/469] node scripts/mv-harnais-auj7.mjs --contre   25.8 s[0m
+── [365/469] node scripts/mv-harnais-auj7.mjs --contre   4.9 s[0m
 
   MA VIGNE — Harnais AUJ-7, contre-épreuves (10)
 
    mord   l’arrachage reprend 0 h le jour mêlé  (A1 le jour mêlé donne sa part à l’arrachage : « Souches » 0.0 h (la réparation ne ramasse plus tout))
    mord   le budget oublie les travaux à l’heure  (A9 la somme des lignes tombe sur l’atterrissage (13546 / 12771))
-   mord   la cadence recompte l’arrachage  (A5 l’écart de cadence retire le tracteur ET les travaux à l’heure (40.1 h))
-   mord   l’atterrissage redevient « dépensé + reste d’argent »  (A7 l’atterrissage du cockpit EST la fin projetée (il valait le budget))
-   mord   la cadence multiplie aussi le tracteur et le GNR  (A6 la cadence ne touche que la main-d’œuvre : fin projetée = engagé + reste + reste de main-d’œuvre × écart)
-   mord   le cockpit reprend le barème du fait pour la main-d’œuvre  (A8 la main-d’œuvre du cockpit est celle qui est payée, pas le barème du fait)
-   mord   la journée de référence revient comme cadence  (B2 la cadence affichée est celle de l’équipe)
-   mord   le « −0 » revient  (B1 jamais « −0 » : le signe se pose après l’arrondi (montants et pourcentages))
-   mord   les tâches pas comparables reviennent  (B5 les tâches dessinées et mises à jour sont les mêmes (comparables seulement))
-   mord   une fonte perd son espace fine  (B9 l’espace fine (U+202F) fournie à chacune des fontes (10 / 11))
 
-TOUT VERT — 10/10 contre-épreuves mordent
+<--- Last few GCs --->
+
+[38368:000001E310926000]     2342 ms: Mark-Compact 57.6 (122.2) -> 38.3 (104.4) MB, pooled: 0 MB, 6.38 / 0.00 ms  (+ 0.3 ms in 6 steps since start of marking, biggest step 0.1 ms, walltime since start of marking 91 ms) (average mu = 0.997, current mu = 0.[38368:000001E310926000]     4376 ms: Scavenge (interleaved) 98.8 (138.9) -> 70.9 (133.3) MB, pooled: 20 MB, 265.77 / 0.01 ms  (average mu = 0.997, current mu = 0.997) allocation failure; 
+
+FATAL ERROR: Committing semi space failed. Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 00007FF66EA33D9F 
+ 2: 00007FF66D67DCB7 
+ 3: 00007FF66D47E4F7 
+ 4: 00007FF66D416AEB 
+ 5: 00007FF66D43F06A 
+ 6: 00007FF66D4808D6 
+ 7: 00007FF66D47FF26 
+ 8: 00007FF66D490E82 
+ 9: 00007FF66D4909AB 
+10: 00007FF66ED624AD 
+11: 00007FF66D47BFC0 
+12: 00007FF66D483EE0 
+13: 00007FF66D2F8CC4 
+14: 00007FF66D6A544E 
+15: 00007FF66EA78C00 
+16: 000001E348F4F64D 
 [2m
-── [371/469] node scripts/mv-harnais-auj8.mjs --contre   35.4 s[0m
+── [371/469] node scripts/mv-harnais-auj8.mjs --contre   20.9 s[0m
   rougit   le vent inconnu redevient 0 km/h
   rougit   la commune relue comme un texte (« [object Object] »)
   rougit   une tâche pas encore ouverte au calendrier dite en cours
@@ -1200,7 +1058,7 @@ TOUT VERT — 10/10 contre-épreuves mordent
   rougit   la fiche MV_INFO reparle des parcelles qui devront attendre
 AUJ-8 contre-épreuves : 17 sur 17 rougissent
 [2m
-── [389/469] node scripts/mv-harnais-dates1.mjs --contre   46.9 s[0m
+── [389/469] node scripts/mv-harnais-dates1.mjs --contre   25.1 s[0m
   ✓ A1 taskDates porte TOUTES les tâches de la période, heures au barème ou pas
   ✓ A2 taskWindows ne garde que les tâches au barème (Réparation, Taille, Tirage) : l’étalement des heures ne bouge pas
   ✓ A3 une tâche au barème reprend SA fenêtre (le même objet)
@@ -1239,7 +1097,7 @@ DATES-1 : 21 vertes, 0 rouges
 
 DATES-1 contre-épreuves : 12/12 mordent
 [2m
-── [391/469] node scripts/mv-harnais-tournee1.mjs --contre   37.4 s[0m
+── [391/469] node scripts/mv-harnais-tournee1.mjs --contre   21.0 s[0m
   ✓ A1 l’encart ne propose que Taille et Pioche, dans l’ordre du catalogue : ni Dégraffage (fait), ni Vendange (autre campagne), ni Réparation (ne reste que désactivée), ni Arrachage (au prestataire)
   ✓ A2 l’encart garde son libellé, et sa puce ouvre la liste de sa tâche
   ✓ A3 chaque puce mène à une liste qui n’est pas vide
@@ -1279,9 +1137,8 @@ TOURNEE-1 : 19 vertes, 0 rouges
 
 TOURNEE-1 contre-épreuves : 15/15 mordent
 
-[1mMA VIGNE — lanceur des contrôles[0m[2m  (35/469 commandes, 298 s, 12 à la fois)[0m
-[2m  les plus longues : mv-harnais-recup.mjs --contre 290 s · preflight.mjs 202 s · mv-harnais-icones-contre.mjs 199 s · mv-harnais-robustesse-planning.mjs --contre 164 s · mv-harnais-robustesse-pilotage.mjs --contre 115 s[0m
-[31m  ✗ node scripts/lint-cliquet.mjs[0m[2m  (code 2 · ESLint — cliquet anti-regression)[0m
-[31m  ✗ node scripts/preflight.mjs[0m[2m  (code 1 · Preflight (C1–C22))[0m
-[31m  ✗ node scripts/mv-harnais-auj5.mjs --contre[0m[2m  (code 134)[0m
-[2m  arrêt au premier rouge — 434 commande(s) non jouée(s). Reprendre : node scripts/mv-lanceur.mjs --depuis mv-base.mjs[0m
+[1mMA VIGNE — lanceur des contrôles[0m[2m  (31/469 commandes, 344 s, 4 à la fois)[0m
+[2m  les plus longues : mv-harnais-recup.mjs --contre 336 s · preflight.mjs 179 s · mv-harnais-icones-contre.mjs 179 s · mv-harnais-robustesse-planning.mjs --contre 148 s · mv-harnais-robustesse-pilotage.mjs --contre 94 s[0m
+[31m  ✗ node scripts/mv-harnais-labo.mjs --contre[0m[2m  (code 3221226505)[0m
+[31m  ✗ node scripts/mv-harnais-auj7.mjs --contre[0m[2m  (code 134)[0m
+[2m  arrêt au premier rouge — 438 commande(s) non jouée(s). Reprendre : node scripts/mv-lanceur.mjs --depuis mv-base.mjs[0m

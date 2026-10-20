@@ -28,7 +28,8 @@ const PIECES = ['mvpas', 'mvpas-statut', 'mvpas-fait', 'mvpas-encours', 'mvpas-a
 const MIGREES = ['pf-tag', 'pf-tag-sup', 'pf-tag-al', 'plan-badge', 'plan-badge-warn', 'plan-badge-abs', 'plan-badge-cont', 'plan-badge-def',
   'plan-badge-ctrat', 'plan-badge-cdebut', 'plan-badge-cfin', 'mvc-tag', 'mvc-tag-so2', 'mvc-tag-fmlok', 'mvc-tag-fmlc', 'mvc-tag-fmlno',
   'mvc-tag-av', 'sdp-tag', 'pil-dz-tag', 'chat-canal-badge', 'p-fx-badge',   // ★ CHARTE-4a (§374)
-  'mvcm-chip', 'cave-cuvee-chip', 'sdp-skip-btn'];   // ★ CHARTE-4b (§377) : trois filtres
+  'mvcm-chip', 'cave-cuvee-chip', 'sdp-skip-btn',   // ★ CHARTE-4b (§377) : trois filtres
+  'mur-seg'];   // ★ REVUE-2 (§390) : le choix de visibilité du mur, resté vert
 const EXEMPTIONS = [
   { selecteur: '.sdp-tag small', raison: 'le second rang d’une pastille de session (la mesure sous l’écart) : un petit texte, pas une pastille' }
 ];

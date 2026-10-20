@@ -3992,9 +3992,11 @@ function _docsRender(){
       +' <span style="opacity:.55;font-weight:500">'+n+'</span></button>';
   }).join('');
   var fam=MV_DOCS_FAM.filter(function(f){return f.k===_docsFam;})[0]||MV_DOCS_FAM[0];
-  var bord=_docsFam==='oblig'?'var(--rouge)':(_docsFam==='suivi'?'var(--or)':'var(--acier)');
-  var fond=_docsFam==='oblig'?'var(--rouge-pale)':(_docsFam==='suivi'?'var(--or-pale)':'var(--acier-pale)');
-  intro.innerHTML='<div style="background:'+fond+';border-left:3px solid '+bord+';border-radius:12px;padding:11px 13px;font-size:var(--pt-lbl,12px);line-height:1.55;color:var(--texte);margin-bottom:12px">'
+  // ★ REVUE-2 (§390) : l’encadré d’introduction au jeu (CHARTE-5) — « Obligatoire » est une obligation, pas un danger :
+  //   ambre (attention), comme Nico l’a tranché ; « Suivi du domaine » informe (bleu) ; « Données brutes » reste neutre.
+  //   Plus de bordure de côté ni de couleurs calculées ici : le ton est une classe.
+  var ton=_docsFam==='oblig'?' mvencadre-attention':(_docsFam==='suivi'?' mvencadre-info':'');
+  intro.innerHTML='<div class="mvencadre'+ton+'" style="margin-bottom:12px">'
     +fam.intro
     +(_docsFam==='oblig'?' <span class="mvpas mvpas-surveiller" style="margin-top:4px">Fichier obligatoire au 01/01/2027</span>':'')
     +'</div>';

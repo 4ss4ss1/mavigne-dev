@@ -228,3 +228,29 @@ Après CHARTE-5c, Nico demande une recommandation en sachant que « l’appli do
 
 ### 389e. La leçon
 **Un outil qui garde l’état d’un écran à l’autre fausse les suivants.** Le rôle ouvrier d’un écran faisait mentir les cinq d’après — et sans les regarder, rien ne l’aurait dit. Chaque écran d’une revue repart du même point.
+
+## 390. REVUE-2 — LA REVUE À L’ÉCRAN, DEUXIÈME PASSAGE (20/10 — `src/styles.css` · `src/reglages.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-captures.mjs` · `scripts/mv-harnais-boutons.mjs` · `scripts/mv-harnais-pastilles.mjs` · `scripts/mv-harnais-cartes.mjs` · `scripts/mv-jetons-baseline.json` · `scripts/mv-espace-baseline.json` · **APP 9.51 → 9.52, SW 10.30 → 10.31**, base `b367a89`)
+
+### 390a. La demande
+Après REVUE-1 (§389), Nico : « oui » — continuer l’étape 1 (voir les écrans restants) et passer en ambre l’encadré « Obligatoire » des documents, « une obligation, pas un danger ». Entre-temps, sa chaîne avait rougi une fois sur le preflight (12 commandes à la fois) ; seul, le preflight passait chez lui (0 erreur), et la chaîne relancée était verte.
+
+### 390b. Ce qui a été vu, et corrigé
+- **`mv-captures`** ouvre deux écrans de plus : `phyto-saisie` (`openTraitEdit(0)`, la saisie d’un traitement) et `mur` (`openMur`).
+- **Le mur et « Ma trace » au ras de la fenêtre** : leurs cartes sont posées directement dans `.modal`, qui n’a pas de marge de côté (ses autres contenus portent la leur) ; au téléphone, cartes, bandeau et libellés touchaient les bords de l’écran — déjà avant la charte, plus visible depuis que les cartes n’ont plus d’ombre. `#mur-body, #mtr-body` reçoivent une marge de côté au pas de l’échelle (`--e-4`). Revu : cartes et bandeau encadrés, libellés alignés, en clair, en sombre et sur ordinateur.
+- **Le mur, resté vert** : « Enregistrer le mot » (`.mur-btn`, vert plein) passe au bouton principal du jeu, sa variante discrète (`.mur-btn.q`) au secondaire ; le choix « toute l’équipe / l’administrateur seul » (`.mur-seg`, le choisi en vert pâle) passe au filtre, le choisi à la couleur d’action. Leurs règles d’avant retirées ; `mv-harnais-boutons` et `mv-harnais-pastilles` les surveillent ; plafond des boutons « maison » 72 → 71.
+- **L’encadré d’introduction des documents** : ses couleurs étaient calculées par le code avec une bordure de côté (rouge, or, acier selon la famille) — il n’avait pas été rangé au §380. Il devient `.mvencadre` + une classe : « Obligatoire » → **attention** (ambre, tranché par Nico), « Suivi du domaine » → informer, « Données brutes » → neutre. Plafond des encadrés faits à la main 168 → 167. La pastille « Fichier obligatoire au 01/01 », ambre dans un encadré ambre, reste lisible mais discrète : à regarder.
+- Cliquets regravés à la baisse : rayons en dur 227 → 226, graisses hors pas 147 → 145, filet perdant 73 → 71, espacements hors échelle 991 → 990 ; plancher des cercles 107 → 110.
+
+### 390c. Vu sans défaut
+La saisie d’un traitement s’ouvre (date, conducteur, dose, stade, heures, délai de rentrée anticipé, mode) : les champs sont à l’unisson ; l’encadré « conforme / dépassement » n’apparaît qu’une fois une dose comparée à celle du produit — pas vu.
+
+### 390d. Le preflight rouge une fois
+Chez Nico, chaîne à 12 commandes à la fois : le preflight a rendu le code 1, puis est passé seul (0 erreur, 13 avertissements) et à la relance de toute la chaîne. Vérifié ici : il passe sur le dépôt et sur une copie aux fins de ligne Windows ; aucun contrôle qui tourne avec lui n’écrit dans `src/` ou `scripts/` (ceux qui le font sont dans `SEULS`, joués d’abord, seuls ; les longues contre-épreuves écrivent dans le dossier temporaire du système). Piste la plus probable : il lance environ 450 `node --check`, et un lancement refusé sous la charge est compté comme une faute de syntaxe. Pas reproduit : noté, sans correction. S’il revient, le jouer seul ou lui faire retenter une vérification qui n’a pas pu se lancer.
+
+### 390e. Pas encore vu
+Pilotage › Décider avec des tâches, une session chronométrée, la Discussion avec un message non lu, les demandes d’un salarié au Planning, la fiche d’un produit phyto, l’encadré « conforme / dépassement » : il faut que la démo porte ces situations (ou que l’outil les pose), c’est la suite de l’étape 1.
+
+- **Chaîne** : **469 commandes, 0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 390f. La leçon
+**Une carte sans ombre montre où elle est posée.** Avec l’ombre, une carte collée au bord de la fenêtre passait pour un choix ; sans elle, le filet qui touche l’écran se voit. Changer le dessin d’une pièce rend visibles des défauts de mise en page qui dormaient — c’est pour cela qu’on regarde.
