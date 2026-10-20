@@ -529,3 +529,27 @@ Vu au §401 (le formulaire d’achat de la Réserve) : le bouton principal « En
 
 ### 402d. La leçon
 **Une règle rangée sous `#page-…` ne suit pas la fenêtre qu’on ouvre de la page.** Les fenêtres vivent hors de la page dans le document : le jeu posé « pour la Réserve » ne valait que sur son écran. Une pièce commune se pose sans portée.
+
+## 403. CHARTE-6c — ÉTAPE 3 : LES CHAMPS DU CUVIER (20/10 — `src/styles.css` · `src/cuvier.js` · `src/cave.js` · `index.html` · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `scripts/mv-harnais-champs.mjs` · `scripts/mv-harnais-boutons.mjs` · `scripts/mv-harnais-rsv1.mjs` · `scripts/mv-captures.mjs` · `scripts/contraste-baseline.json` · **APP 9.63 → 9.64, SW 10.42 → 10.43**, base `c131f4a`)
+
+### 403a. La demande
+La suite de l’étape 3 (§401) : les champs « sans règle propre » — `.mvv-tin` (Cuvier, 47), `.tcfg-in` (tournées, 8), `.mvc-pk-in` (Cave, 3). Leur dessin n’était pas dans styles.css : il vivait dans la feuille que cuvier.js injecte à l’ouverture d’une fiche (`_vendEnsureSheetCss`, gabarit sur plusieurs lignes), dans celle de cave.js (chaînes concaténées), et dans le `<style>` d’`index.html`.
+
+### 403b. Ce qui est livré
+- **Au jeu des cases de saisie** : `.mvv-tin` et `.mvc-pk-in` (filet brun translucide, arrondi 11 px, focus terre et son ombre) ; `.tcfg-in` en **dessin seul** (`.mvchamp-fond` : ses 74 px de large, son texte centré gardés) ; les étiquettes `.mvv-flbl` (capitales grises) et `.mvc-pk-lbl` (pareil) → l’étiquette du jeu.
+- **Les feuilles injectées** : leurs règles de ces classes retirées (`mv-harnais-couches` refuse une classe déclarée dans deux feuilles) ; leur mise en page reprise dans styles.css, après le bloc CHARTE-6, sur l’échelle d’espacement (14 px → 12, 6 px → 8 : `mv-harnais-echelle` voyait trois valeurs hors échelle de plus, qui n’étaient pas comptées dans les feuilles injectées).
+- **Vu, et corrigé** : la fiche « Nouveau client » (`openVendClient`) montrait un « Enregistrer » nu, au dessin du navigateur. Son dessin (`.mvv-save` : dégradé doré, texte brun) n’était posé que par `_vendInjectCss`, appelée au rendu du Cuvier — une fiche ouverte sans lui restait nue. → **au jeu de boutons** (principal ; `.mvv-save.ghost2` → secondaire) ; ses deux règles injectées retirées ; `mv-harnais-boutons` le surveille.
+- **La police** : le jeu pose `font-family: var(--font-ui)` dans ses champs (les champs du Cuvier tombaient sur la police du système une fois leur règle injectée retirée).
+- `mv-harnais-rsv1` (ajusté au §402) cherchait la liste du principal **finissant** par `.mvr-btn-g{` : `.mvv-save` l’allonge — il accepte désormais une liste qui continue (vu par le premier passage de la chaîne : 2 rouges, le contrôle et sa contre-épreuve).
+- `mv-harnais-champs` : trois familles de plus (`JEU`), `.tcfg-in` en dessin seul (`FOND`). `mv-captures` : `cuvier-client` (passe par « Le Cuvier », puis ouvre la fiche, comme le ferait l’utilisateur). La couverture du contraste regravée (972 → 968 paires mesurées : celles des règles retirées).
+
+### 403c. Vu
+`cuvier-client` (téléphone clair et sombre, ordinateur) : champs blancs au contour net, titres en lettres normales, la police de l’appli, « Enregistrer » à la couleur d’action sur toute la largeur.
+
+### 403d. Reste de l’étape 3
+Les 60 champs stylés sur place ; les étiquettes faites à la main ailleurs ; l’interrupteur ; `.danger-conf-input` (rouge exprès) et `.mat-an` (le grand chiffre du Cuvier) restent à eux.
+
+- **Chaîne** : **471 commandes, 0 rouge** au dernier passage, joué d’un trait après le dernier changement de code. Avant : 2 rouges (`mv-harnais-rsv1` et sa contre-épreuve), puis un passage coupé à la fin d’un message (423 commandes, sans rouge).
+
+### 403e. La leçon
+**Une feuille injectée ne vaut que si son injecteur a tourné.** Le bouton du Cuvier n’avait de dessin qu’après le rendu d’un écran précis ; ouvert par un autre chemin, il était nu. Une pièce commune dans la feuille de l’appli vaut partout, tout le temps.

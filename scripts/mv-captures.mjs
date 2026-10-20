@@ -80,6 +80,8 @@ const ECRANS = {
   'planning-demande': "goTo('planning'); planSwitchTab('gens'); setTimeout(function(){ var d = document.querySelector('.pf-dem'); if (d) d.scrollIntoView({ block: 'center' }); }, 600);",
   // ★ CHARTE-6b (§401) : un formulaire de la Réserve (ses champs .mvr-fi)
   'reserve-achat': "goTo('reserve'); setTimeout(function(){ if (window._rsvOpenAchat) window._rsvOpenAchat(); }, 500);",
+  // ★ CHARTE-6c (§403) : une fiche du Cuvier (ses champs .mvv-tin)
+  'cuvier-client': "goTo('cave'); setTimeout(function(){ if (window._caveRegSec) window._caveRegSec('cuvier'); setTimeout(function(){ if (window.openVendClient) window.openVendClient(); }, 400); }, 400);",
   'mot-de-passe-erreur': "goTo('reglages'); if (window.openChangePwd) window.openChangePwd(); else window._openOv('ovChangePwd'); setTimeout(function(){ var e = document.getElementById('cpwd-error'); if (e) { e.textContent = 'Le mot de passe actuel ne correspond pas.'; e.style.display = 'block'; } }, 300);"
 };
 const choisis = opt('--ecrans') ? opt('--ecrans').split(',').map(x => x.trim()).filter(Boolean) : Object.keys(ECRANS);

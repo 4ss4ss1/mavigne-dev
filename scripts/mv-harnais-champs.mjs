@@ -39,8 +39,8 @@ const S0 = {
 const sansCom = s => s.replace(/\/\*[\s\S]*?\*\//g, '');
 // Les classes passées au jeu : leur dessin ne vient que du bloc (CHARTE-6a : .fi, .fsel ; CHARTE-6b, §401 : la Réserve, les heures,
 // la visite guidée, le Planning, le filtre de dates du Journal).
-const JEU = ['fi', 'fsel', 'mvr-fi', 'emh-in', 'mvt-fi', 'plan-ge-input', 'pl2r-tin', 'j-date-input'];
-const FOND = ['j-date-input'];   // dessin seul (.mvchamp-fond) : sa taille (marge, texte) reste à lui
+const JEU = ['fi', 'fsel', 'mvr-fi', 'emh-in', 'mvt-fi', 'plan-ge-input', 'pl2r-tin', 'j-date-input', 'mvv-tin', 'mvc-pk-in', 'tcfg-in'];   // CHARTE-6c (§403) : le Cuvier, la Cave, les tournées
+const FOND = ['j-date-input', 'tcfg-in'];   // dessin seul (.mvchamp-fond) : sa taille (marge, texte) reste à lui
 const RE_JEU = new RegExp('\\.(' + JEU.join('|') + ')(?![\\w-])');
 function bloc(css) {
   const a = css.indexOf('/* ★ CHARTE-6 '), b = css.indexOf('/* ★ FIN CHARTE-6 */');

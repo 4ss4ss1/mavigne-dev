@@ -3703,9 +3703,6 @@ function _caveV2InjectCss(){
   +'.mvc-dhf{display:inline-block;margin-left:8px;font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--or-tx,#7A5E12);vertical-align:1px}'
   +'.mvc-pk-vide{text-align:center;padding:20px 12px;color:var(--texte-doux);font-size:var(--pt-txt,13px);line-height:1.6;font-style:italic}'
   +'.mvc-pk-tot{font-size:var(--pt-txt,13px);color:var(--texte-doux);margin-top:11px;padding-top:10px;border-top:1px dashed rgba(138,90,56,.22)}'
-  +'.mvc-pk-in{width:100%;background:var(--bg-card);border:1px solid rgba(138,90,56,.28);border-radius:11px;padding:12px 13px;font-family:inherit;font-size:var(--pt-base,14px);color:var(--texte);min-height:46px;margin-top:6px}'
-  +'.mvc-pk-in:focus{border-color:var(--terre);outline:none;box-shadow:0 0 0 3px rgba(138,90,56,.12)}'
-  +'.mvc-pk-lbl{display:block;font-size:var(--pt-micro,11px);font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--texte-doux);margin-top:14px}'
   +'.mvc-pk-hint{text-transform:none;letter-spacing:0;font-weight:400;opacity:.85}'
   +'.mvc-pk-seg{display:flex;gap:6px;background:var(--bg-app);border:1px solid rgba(138,90,56,.14);border-radius:13px;padding:4px;margin-top:6px}'
   +'.mvc-pk-seg button{flex:1;padding:9px 4px;border:0;border-radius:10px;background:transparent;font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte-doux);cursor:pointer;min-height:44px;display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1.2}'
@@ -3932,7 +3929,7 @@ function _caveV2InjectCss(){
   +'.mvc-pk-att{display:block;font-size:var(--pt-micro,11px);font-weight:700;color:var(--terre-tx,var(--terre));margin-top:3px;text-align:right}'
   +'.mvv-asm-grp{font-size:var(--pt-nano,9.5px);letter-spacing:1.3px;text-transform:uppercase;color:var(--texte-doux,#5F5F5F);font-weight:700;margin:12px 2px 6px}'
   +'.mvv-asm-aoc{font-style:italic}'
-  // deux classes : la feuille pose `.mvv-tin{width:100%}` APRES ce style, a la meme force
+  // deux classes : .mvv-tin (le jeu des cases de saisie, styles.css) et .mvv-asm-l, plus fort ici par son parent (.mvv-step2)
   +'.mvv-step2 .mvv-asm-l{width:96px;flex:0 0 96px;text-align:center;padding:6px 8px;font-family:var(--font-titre,\'Cormorant Garamond\',Georgia,serif);font-weight:700;font-size:var(--pt-xl,28px)}'
   +'.mvv-asm-prev{margin-top:12px;background:var(--or-pale);border:1px solid rgba(194,161,77,.4);border-radius:12px;padding:10px 12px;font-size:var(--pt-txt,13px);line-height:1.5;color:var(--texte-med,#4A4A3A)}'
   +'.mvv-asm-prev b{color:var(--texte)}'

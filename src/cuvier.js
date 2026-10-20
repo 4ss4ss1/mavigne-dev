@@ -225,7 +225,6 @@ button.mvv-reste-li{cursor:pointer}
 .mvv-fi:focus{border-color:var(--terre,#8A5A38);outline:none;box-shadow:0 0 0 3px rgba(138,90,56,.12)}
 .mvv-preview{background:var(--terre-pale,#F3EADF);border:1px solid rgba(138,90,56,.16);border-radius:10px;padding:10px 12px;margin-top:12px;font-size:var(--pt-micro,11px);color:var(--texte-med,#4A4A3A)}
 .mvv-preview b{color:var(--terre,#8A5A38)}
-.mvv-save{width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(180deg,var(--or,#C2A14D),#B8952F);color:#241B08;font-size:var(--pt-base,14px);font-weight:600;margin-top:4px;font-family:inherit;cursor:pointer;min-height:44px}
 .mvv-wrap :focus-visible{outline:2px solid var(--terre,#8A5A38);outline-offset:2px;border-radius:6px}
 @media (prefers-reduced-motion: reduce){.mvv-wrap *{animation-duration:.001ms !important;transition-duration:.001ms !important}}
 .mvv-dlots{display:flex;flex-direction:column;gap:2px;margin-bottom:4px}
@@ -2622,10 +2621,7 @@ function _vendEnsureSheetCss(){
 .mvv-sheet-t{font-family:var(--font-titre,'Cormorant Garamond',Georgia,serif);font-weight:600;font-size:var(--pt-lg,24px);color:var(--texte,#1A1A14);line-height:1.1}
 .mvv-sheet-x{background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.18);color:var(--texte-doux,#5F5F5F);width:38px;height:38px;border-radius:10px;font-size:var(--pt-base,14px);cursor:pointer;flex-shrink:0}
 .mvv-sheet-sub{font-size:var(--pt-txt,13px);color:var(--texte-doux,#5F5F5F);line-height:1.5;margin-bottom:6px}
-.mvv-flbl{display:block;font-size:var(--pt-micro,11px);letter-spacing:.8px;text-transform:uppercase;color:var(--texte-doux,#5F5F5F);font-weight:700;margin:14px 0 6px}
 .mvv-fhint{text-transform:none;letter-spacing:0;color:var(--texte-doux,#5F5F5F);font-weight:400}
-.mvv-tin{width:100%;background:var(--bg-card,#fff);border:1px solid rgba(138,90,56,.3);border-radius:11px;padding:11px 13px;color:var(--texte,#1A1A14);font-size:var(--pt-base,14px);font-weight:500;font-family:inherit}
-.mvv-tin:focus{border-color:var(--terre,#8A5A38);outline:none;box-shadow:0 0 0 3px rgba(138,90,56,.12)}
 .mvv-fnote{font-size:var(--pt-micro,11px);color:#8A4212;margin-top:8px;line-height:1.45}
 .mvv-step2{display:flex;align-items:center;gap:12px;margin-top:4px}
 
@@ -2645,7 +2641,6 @@ function _vendEnsureSheetCss(){
 .mvv-icbtn{width:40px;height:40px;border-radius:10px;background:var(--bg-card,#fff);border:1px solid rgba(138,90,56,.18);color:var(--texte-doux,#5F5F5F);font-size:var(--pt-base,14px);cursor:pointer}
 .mvv-cllist{margin-top:4px}
 .mvv-del{width:100%;padding:12px;border-radius:11px;background:var(--rouge-pale,#FAEAE8);border:1px solid rgba(160,41,30,.28);color:var(--rouge-tx,#A0291E);font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;margin-top:10px;font-family:inherit;min-height:44px}
-.mvv-save.ghost2{background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.24);color:var(--terre,#8A5A38)}
 .mvv-actrow{display:flex;gap:8px;margin-top:9px}
 .mvv-act2{flex:1;padding:11px;border-radius:10px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:inherit;background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.2);color:var(--terre,#8A5A38);min-height:44px}
 .mvv-act2.dec{background:rgba(200,106,78,.10);border-color:rgba(200,106,78,.32);color:#B0412C}

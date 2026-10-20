@@ -40,7 +40,8 @@ const MIGREES = ['plan-btn-saisir', 'mvc-set-btn', 'sd-trac-confirm-btn', 'pf-bt
                  'cave-stepper-btn', 'mvc-step-btn', 'mvv-step2-b', 'rp-stp',   // ★ CHARTE-3c (§373) : les « − / + »
                  'mur-btn',   // ★ REVUE-2 (§390) : « Enregistrer le mot » du mur, resté vert
                  'chr-act',   // ★ CHRONO-1 (§394) : « Pause déjeuner » et « Fin de journée »
-                 'mvr-btn', 'mvr-btn-p', 'mvr-btn-o', 'mvr-btn-g', 'mvr-fstepb', 'mvr-mini'];   // ★ RSV-BTN (§402) : les boutons de la Réserve
+                 'mvr-btn', 'mvr-btn-p', 'mvr-btn-o', 'mvr-btn-g', 'mvr-fstepb', 'mvr-mini',   // ★ RSV-BTN (§402)
+                 'mvv-save'];   // ★ CHARTE-6c (§403) : « Enregistrer » du Cuvier (dégradé doré, et .ghost2)   // ★ RSV-BTN (§402) : les boutons de la Réserve
 const EXEMPTIONS = [
   { selecteur: '#ovRepBlock .sd-trac-confirm-btn', raison: 'un blanc forcé (!important) d’avant CHARTE-3, sur le principal : c’est déjà le texte du jeu' },
   { selecteur: '#regl-view-domaine .mbtn.verte', raison: 'RG-1 (§295) : Réglages › Domaine peint ses « Enregistrer » en secondaire, exprès (mv-harnais-rg1)' },

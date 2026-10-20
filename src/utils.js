@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.63';
+export const APP_VERSION = '9.64';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.64', d: '2026-10-20', items: [   // CHARTE-6c (§403) : les champs du Cuvier au même dessin
+    { niv: 1, pour: ['admin'], emoji: 'check', titre: 'Cuvier : des champs et un « Enregistrer » comme ailleurs',
+      desc: "Dans les fiches du Cuvier (clients, apports, décuvage, opérations), les champs prennent le dessin commun — blancs, contour net, titres en lettres normales — et « Enregistrer » la couleur d’action, plus le doré. Pareil pour la fiche d’une cuve de la Cave et les réglages des tournées." },
+  ] },
   { v: '9.63', d: '2026-10-20', items: [   // RSV-BTN (§402) : les boutons de la Réserve au jeu commun
     { niv: 1, pour: ['admin'], emoji: 'check', titre: 'Réserve : les boutons comme ailleurs',
       desc: "Dans la Réserve, « Enregistrer » prend la couleur d’action de l’appli (plus le brun), « Annuler » et les petits boutons des listes le dessin commun, et le choix « Par unités / Directe / Les deux » se marque de la même couleur. Les « − / + » des fûts aussi." },

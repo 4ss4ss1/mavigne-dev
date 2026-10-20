@@ -7998,25 +7998,32 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
    bords de commandes), l'arrondi des cartes, la hauteur des boutons (48 px au téléphone, 36 au bureau) ; le texte à 16 px au
    téléphone (en dessous, Safari zoome en entrant dans le champ). Le focus prend la couleur d'action, et garde l'anneau de focus commun (jamais éteint) ; l'erreur
    (aria-invalid) le rouge, le désactivé s'efface. .mvchamp pour les champs neufs ; .fi et .fsel, les plus employés, au jeu. */
-.mvchamp, .fi, .fsel, .mvr-fi, .emh-in, .mvt-fi, .plan-ge-input, .pl2r-tin{ box-sizing:border-box; min-height:var(--h-champ,48px); padding:0 var(--e-3,12px); font-size:var(--pt-sm,16px); line-height:1.3; color:var(--texte); background:var(--bg-card); border:var(--bw,1px) solid var(--champ-filet); border-radius:var(--r-md,8px); }
+.mvchamp, .fi, .fsel, .mvr-fi, .emh-in, .mvt-fi, .plan-ge-input, .pl2r-tin, .mvv-tin, .mvc-pk-in{ box-sizing:border-box; font-family:var(--font-ui); min-height:var(--h-champ,48px); padding:0 var(--e-3,12px); font-size:var(--pt-sm,16px); line-height:1.3; color:var(--texte); background:var(--bg-card); border:var(--bw,1px) solid var(--champ-filet); border-radius:var(--r-md,8px); }
 textarea.mvchamp, textarea.fi, textarea.mvr-fi, textarea.emh-in, textarea.mvt-fi{ min-height:calc(var(--h-champ,48px) * 2); padding:var(--e-3,12px); line-height:1.45; }
-.mvchamp:hover, .fi:hover, .fsel:hover, .mvr-fi:hover, .emh-in:hover, .mvt-fi:hover, .plan-ge-input:hover, .pl2r-tin:hover, .j-date-input:hover{ border-color:var(--texte); }
-.mvchamp:focus, .fi:focus, .fsel:focus, .mvr-fi:focus, .emh-in:focus, .mvt-fi:focus, .plan-ge-input:focus, .pl2r-tin:focus, .j-date-input:focus{ border-color:var(--accent); }   /* le halo : l'anneau de focus commun de l'appli, qu'on n'éteint pas */
-.mvchamp[aria-invalid="true"], .fi[aria-invalid="true"], .fsel[aria-invalid="true"], .mvr-fi[aria-invalid="true"], .emh-in[aria-invalid="true"], .mvt-fi[aria-invalid="true"], .plan-ge-input[aria-invalid="true"], .pl2r-tin[aria-invalid="true"], .j-date-input[aria-invalid="true"]{ border-color:var(--danger); }
-.mvchamp:disabled, .fi:disabled, .fsel:disabled, .mvr-fi:disabled, .emh-in:disabled, .mvt-fi:disabled, .plan-ge-input:disabled, .pl2r-tin:disabled, .j-date-input:disabled{ background:var(--survol); color:var(--texte-doux); border-color:var(--ligne,#E7E6E2); cursor:not-allowed; }
+.mvchamp:hover, .fi:hover, .fsel:hover, .mvr-fi:hover, .emh-in:hover, .mvt-fi:hover, .plan-ge-input:hover, .pl2r-tin:hover, .j-date-input:hover, .mvv-tin:hover, .mvc-pk-in:hover, .tcfg-in:hover{ border-color:var(--texte); }
+.mvchamp:focus, .fi:focus, .fsel:focus, .mvr-fi:focus, .emh-in:focus, .mvt-fi:focus, .plan-ge-input:focus, .pl2r-tin:focus, .j-date-input:focus, .mvv-tin:focus, .mvc-pk-in:focus, .tcfg-in:focus{ border-color:var(--accent); }   /* le halo : l'anneau de focus commun de l'appli, qu'on n'éteint pas */
+.mvchamp[aria-invalid="true"], .fi[aria-invalid="true"], .fsel[aria-invalid="true"], .mvr-fi[aria-invalid="true"], .emh-in[aria-invalid="true"], .mvt-fi[aria-invalid="true"], .plan-ge-input[aria-invalid="true"], .pl2r-tin[aria-invalid="true"], .j-date-input[aria-invalid="true"], .mvv-tin[aria-invalid="true"], .mvc-pk-in[aria-invalid="true"], .tcfg-in[aria-invalid="true"]{ border-color:var(--danger); }
+.mvchamp:disabled, .fi:disabled, .fsel:disabled, .mvr-fi:disabled, .emh-in:disabled, .mvt-fi:disabled, .plan-ge-input:disabled, .pl2r-tin:disabled, .j-date-input:disabled, .mvv-tin:disabled, .mvc-pk-in:disabled, .tcfg-in:disabled{ background:var(--survol); color:var(--texte-doux); border-color:var(--ligne,#E7E6E2); cursor:not-allowed; }
 /* CHARTE-6b (§401) : .mvchamp-fond — le dessin du champ seul (fond, filet, arrondi, couleur), sa taille gardée : le filtre de dates du Journal, compact dans sa barre. */
-.mvchamp-fond, .j-date-input{ color:var(--texte); background:var(--bg-card); border:var(--bw,1px) solid var(--champ-filet); border-radius:var(--r-md,8px); }
-.mvchamp::placeholder, .fi::placeholder, .mvr-fi::placeholder, .emh-in::placeholder, .mvt-fi::placeholder, .plan-ge-input::placeholder, .pl2r-tin::placeholder, .j-date-input::placeholder{ color:var(--texte-doux); }
+.mvchamp-fond, .j-date-input, .tcfg-in{ color:var(--texte); background:var(--bg-card); border:var(--bw,1px) solid var(--champ-filet); border-radius:var(--r-md,8px); }
+.mvchamp::placeholder, .fi::placeholder, .mvr-fi::placeholder, .emh-in::placeholder, .mvt-fi::placeholder, .plan-ge-input::placeholder, .pl2r-tin::placeholder, .j-date-input::placeholder, .mvv-tin::placeholder, .mvc-pk-in::placeholder, .tcfg-in::placeholder{ color:var(--texte-doux); }
 /* L'étiquette, au-dessus du champ : à l'encre, demi-gras, sans capitales (comme les bandeaux, §397) — 14 px au téléphone, 13 au bureau. */
-.mvchamp-l, .fl, .mvt-fl, .mvr-fl{ display:block; font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); line-height:1.3; letter-spacing:0; text-transform:none; color:var(--texte); }
+.mvchamp-l, .fl, .mvt-fl, .mvr-fl, .mvv-flbl, .mvc-pk-lbl{ display:block; font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); line-height:1.3; letter-spacing:0; text-transform:none; color:var(--texte); }
 @media (min-width:768px){
-  .mvchamp, .fi, .fsel, .mvr-fi, .emh-in, .mvt-fi, .plan-ge-input, .pl2r-tin{ min-height:var(--h-row,36px); font-size:var(--pt-base,14px); }
-  .mvchamp-l, .fl, .mvt-fl, .mvr-fl{ font-size:var(--pt-txt,13px); }
+  .mvchamp, .fi, .fsel, .mvr-fi, .emh-in, .mvt-fi, .plan-ge-input, .pl2r-tin, .mvv-tin, .mvc-pk-in{ min-height:var(--h-row,36px); font-size:var(--pt-base,14px); }
+  .mvchamp-l, .fl, .mvt-fl, .mvr-fl, .mvv-flbl, .mvc-pk-lbl{ font-size:var(--pt-txt,13px); }
   textarea.mvchamp, textarea.fi, textarea.mvr-fi, textarea.emh-in, textarea.mvt-fi{ min-height:calc(var(--h-row,36px) * 2.5); }
 }
 /* CHARTE-6b (§401) : cocher et choisir — la case et le bouton rond natifs prennent la couleur d'action (la maquette : 20 px, lie-de-vin). */
 input[type="checkbox"], input[type="radio"]{ accent-color:var(--accent); }
 /* ★ FIN CHARTE-6 */
+/* CHARTE-6c (§403) : la mise en page des champs passés au jeu, venue des feuilles injectées (Cuvier, Cave) et d'index.html (tournées) — leur dessin est au jeu. */
+.mvv-tin, .mvc-pk-in{ width:100%; }
+.mvc-pk-in{ margin-top:var(--e-2,8px); }
+.mvv-flbl{ margin:var(--e-3,12px) 0 var(--e-2,8px); }
+.mvc-pk-lbl{ margin-top:var(--e-3,12px); }
+.mvv-save{ width:100%; margin-top:var(--e-1,4px); }   /* CHARTE-6c : le bouton « Enregistrer » du Cuvier est au jeu de boutons (principal ; .ghost2 secondaire) */
+.tcfg-in{ width:74px; padding:var(--e-2,8px); font-family:inherit; font-size:var(--pt-base,14px); text-align:center; }
 
 /* JALONS-2 (§341) — « Nouveau jalon » dans la feuille d'après validation, et « Mes jalons » dans « Ma trace ». */
 .mvds-jal{display:flex;gap:var(--e-2,8px);align-items:flex-start;margin:var(--e-2,8px) 0;padding:var(--e-2,8px) var(--e-3,12px);border-radius:var(--r-lg,12px);background:var(--or-pale);border:1px solid var(--or);color:var(--texte);text-align:left}
@@ -8175,9 +8182,9 @@ input[type="checkbox"], input[type="radio"]{ accent-color:var(--accent); }
      .phyte et .mbtn-p : principal ; .mbtn-del : danger. Ses styles écrits sur place rendus au jeu.
    ★ CHARTE-3c (§373) : les « − / + » (.cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp) deviennent des boutons icône.
    ═══════════════════════════════════════════════════════════════════════════ */
-.mvbtn, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn, .plan-btn-pdf, .cave-toggle-btn, .trac-type-btn, .cave-op-type-btn, .rfut-reason-btn, .mbtn, .mbtn-del, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp, .mur-btn, .chr-act, .mvr-btn, .mvr-fstepb, .mvr-mini{ display:inline-flex; align-items:center; justify-content:center; gap:var(--e-2,8px); box-sizing:border-box; min-height:var(--h-row-2,48px); padding:0 var(--e-5,20px); border:var(--bw,1px) solid transparent; border-radius:var(--r-sm,6px); font-family:var(--font-ui); font-size:var(--pt-sm,16px); font-weight:var(--fw-semi,600); line-height:1.2; cursor:pointer; text-decoration:none; }
+.mvbtn, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn, .plan-btn-pdf, .cave-toggle-btn, .trac-type-btn, .cave-op-type-btn, .rfut-reason-btn, .mbtn, .mbtn-del, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp, .mur-btn, .chr-act, .mvr-btn, .mvr-fstepb, .mvr-mini, .mvv-save{ display:inline-flex; align-items:center; justify-content:center; gap:var(--e-2,8px); box-sizing:border-box; min-height:var(--h-row-2,48px); padding:0 var(--e-5,20px); border:var(--bw,1px) solid transparent; border-radius:var(--r-sm,6px); font-family:var(--font-ui); font-size:var(--pt-sm,16px); font-weight:var(--fw-semi,600); line-height:1.2; cursor:pointer; text-decoration:none; }
 @media (min-width:768px){
-  .mvbtn, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn, .plan-btn-pdf, .cave-toggle-btn, .trac-type-btn, .cave-op-type-btn, .rfut-reason-btn, .mbtn, .mbtn-del, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp, .mur-btn, .chr-act, .mvr-btn, .mvr-fstepb, .mvr-mini{ min-height:var(--h-row,36px); padding:0 var(--e-4,16px); font-size:var(--pt-base,14px); }
+  .mvbtn, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn, .plan-btn-pdf, .cave-toggle-btn, .trac-type-btn, .cave-op-type-btn, .rfut-reason-btn, .mbtn, .mbtn-del, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp, .mur-btn, .chr-act, .mvr-btn, .mvr-fstepb, .mvr-mini, .mvv-save{ min-height:var(--h-row,36px); padding:0 var(--e-4,16px); font-size:var(--pt-base,14px); }
 }
 .mvbtn.mvbtn-terrain{ min-height:var(--h-row-2,48px); padding:0 var(--e-5,20px); font-size:var(--pt-sm,16px); }
 .mvbtn.mvbtn-bureau{ min-height:var(--h-row,36px); padding:0 var(--e-4,16px); font-size:var(--pt-base,14px); }
@@ -8190,10 +8197,10 @@ input[type="checkbox"], input[type="radio"]{ accent-color:var(--accent); }
 .mvbtn.mvbtn-icone.mvbtn-terrain{ width:var(--h-row-2,48px); }
 .mvbtn.mvbtn-icone.mvbtn-compact{ width:var(--h-sm,28px); }
 /* Principal : l'action de l'écran, une seule par écran */
-.mvbtn-principal, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn.pf-btn-ok, .mbtn.verte, .mbtn.acre, .mbtn.phyte, .mbtn.mbtn-p, .mur-btn, .mvr-btn-p, .mvr-btn-g{ background:var(--accent); border-color:var(--accent); color:var(--sur-accent); }
-.mvbtn-principal:hover, .plan-btn-saisir:hover, .mvc-set-btn:hover, .sd-trac-confirm-btn:hover, .pf-btn.pf-btn-ok:hover, .mbtn.verte:hover, .mbtn.acre:hover, .mbtn.phyte:hover, .mbtn.mbtn-p:hover, .mur-btn:not(.q):hover, .mvr-btn-p:hover, .mvr-btn-g:hover{ background:var(--accent-survol); border-color:var(--accent-survol); }
+.mvbtn-principal, .plan-btn-saisir, .mvc-set-btn, .sd-trac-confirm-btn, .pf-btn.pf-btn-ok, .mbtn.verte, .mbtn.acre, .mbtn.phyte, .mbtn.mbtn-p, .mur-btn, .mvr-btn-p, .mvr-btn-g, .mvv-save{ background:var(--accent); border-color:var(--accent); color:var(--sur-accent); }
+.mvbtn-principal:hover, .plan-btn-saisir:hover, .mvc-set-btn:hover, .sd-trac-confirm-btn:hover, .pf-btn.pf-btn-ok:hover, .mbtn.verte:hover, .mbtn.acre:hover, .mbtn.phyte:hover, .mbtn.mbtn-p:hover, .mur-btn:not(.q):hover, .mvr-btn-p:hover, .mvr-btn-g:hover, .mvv-save:not(.ghost2):hover{ background:var(--accent-survol); border-color:var(--accent-survol); }
 /* Secondaire : une action à côté */
-.mvbtn-secondaire, .pf-btn, .plan-btn-pdf, .mbtn, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp, .mur-btn.q, .chr-act, .mvr-btn-o, .mvr-fstepb, .mvr-mini{ background:var(--bg-card); border-color:var(--ligne-forte); color:var(--texte); }
+.mvbtn-secondaire, .pf-btn, .plan-btn-pdf, .mbtn, .cave-stepper-btn, .mvc-step-btn, .mvv-step2-b, .rp-stp, .mur-btn.q, .chr-act, .mvr-btn-o, .mvr-fstepb, .mvr-mini, .mvv-save.ghost2{ background:var(--bg-card); border-color:var(--ligne-forte); color:var(--texte); }
 /* Discret : une action légère, ou revenir */
 .mvbtn-discret{ background:transparent; color:var(--accent-texte); }
 /* Danger : effacer, retirer — toujours suivi d'une confirmation */
@@ -8204,10 +8211,10 @@ input[type="checkbox"], input[type="radio"]{ accent-color:var(--accent); }
 .mvbtn-choix{ display:inline-flex; gap:0; padding:var(--e-0,2px); border:var(--bw,1px) solid var(--ligne-forte); border-radius:var(--r-sm,6px); background:var(--bg-card); }
 .mvbtn-choix > .mvbtn-option{ border-color:transparent; border-radius:var(--r-xs,4px); }
 /* Les états, les mêmes partout */
-.mvbtn-secondaire:hover, .mvbtn-discret:hover, .mvbtn-option:hover, .pf-btn:not(.pf-btn-ok):hover, .plan-btn-pdf:hover, .mbtn:not(.verte):not(.acre):not(.phyte):not(.mbtn-p):not(.mbtn-del):hover, .cave-stepper-btn:hover, .mvc-step-btn:hover, .mvv-step2-b:hover, .rp-stp:hover, .mur-btn.q:hover, .chr-act:hover, .cave-toggle-btn:hover, .trac-type-btn:hover, .cave-op-type-btn:hover, .rfut-reason-btn:hover, .mvr-btn-o:hover, .mvr-fstepb:hover, .mvr-mini:hover{ background-image:linear-gradient(var(--survol),var(--survol)); }
+.mvbtn-secondaire:hover, .mvbtn-discret:hover, .mvbtn-option:hover, .pf-btn:not(.pf-btn-ok):hover, .plan-btn-pdf:hover, .mbtn:not(.verte):not(.acre):not(.phyte):not(.mbtn-p):not(.mbtn-del):hover, .cave-stepper-btn:hover, .mvc-step-btn:hover, .mvv-step2-b:hover, .rp-stp:hover, .mur-btn.q:hover, .chr-act:hover, .cave-toggle-btn:hover, .trac-type-btn:hover, .cave-op-type-btn:hover, .rfut-reason-btn:hover, .mvr-btn-o:hover, .mvr-fstepb:hover, .mvr-mini:hover, .mvv-save.ghost2:hover{ background-image:linear-gradient(var(--survol),var(--survol)); }
 .mvbtn-danger:hover, .mbtn-del:hover, .mvr-btn.mvr-btn-dgr:hover{ background-image:linear-gradient(var(--presse),var(--presse)); }
-.mvbtn:active, .plan-btn-saisir:active, .mvc-set-btn:active, .sd-trac-confirm-btn:active, .pf-btn:active, .plan-btn-pdf:active, .cave-toggle-btn:active, .trac-type-btn:active, .cave-op-type-btn:active, .rfut-reason-btn:active, .mbtn:active, .mbtn-del:active, .cave-stepper-btn:active, .mvc-step-btn:active, .mvv-step2-b:active, .rp-stp:active, .mur-btn:active, .chr-act:active, .mvr-btn:active, .mvr-fstepb:active, .mvr-mini:active{ background-image:linear-gradient(var(--presse),var(--presse)); }
-.mvbtn:disabled, .plan-btn-saisir:disabled, .mvc-set-btn:disabled, .sd-trac-confirm-btn:disabled, .pf-btn:disabled, .plan-btn-pdf:disabled, .cave-toggle-btn:disabled, .trac-type-btn:disabled, .cave-op-type-btn:disabled, .rfut-reason-btn:disabled, .mbtn:disabled, .mbtn-del:disabled, .cave-stepper-btn:disabled, .mvc-step-btn:disabled, .mvv-step2-b:disabled, .rp-stp:disabled, .mur-btn:disabled, .chr-act:disabled, .mvr-btn:disabled, .mvr-fstepb:disabled, .mvr-mini:disabled{ opacity:var(--o-off,.45); cursor:default; background-image:none; }
+.mvbtn:active, .plan-btn-saisir:active, .mvc-set-btn:active, .sd-trac-confirm-btn:active, .pf-btn:active, .plan-btn-pdf:active, .cave-toggle-btn:active, .trac-type-btn:active, .cave-op-type-btn:active, .rfut-reason-btn:active, .mbtn:active, .mbtn-del:active, .cave-stepper-btn:active, .mvc-step-btn:active, .mvv-step2-b:active, .rp-stp:active, .mur-btn:active, .chr-act:active, .mvr-btn:active, .mvr-fstepb:active, .mvr-mini:active, .mvv-save:active{ background-image:linear-gradient(var(--presse),var(--presse)); }
+.mvbtn:disabled, .plan-btn-saisir:disabled, .mvc-set-btn:disabled, .sd-trac-confirm-btn:disabled, .pf-btn:disabled, .plan-btn-pdf:disabled, .cave-toggle-btn:disabled, .trac-type-btn:disabled, .cave-op-type-btn:disabled, .rfut-reason-btn:disabled, .mbtn:disabled, .mbtn-del:disabled, .cave-stepper-btn:disabled, .mvc-step-btn:disabled, .mvv-step2-b:disabled, .rp-stp:disabled, .mur-btn:disabled, .chr-act:disabled, .mvr-btn:disabled, .mvr-fstepb:disabled, .mvr-mini:disabled, .mvv-save:disabled{ opacity:var(--o-off,.45); cursor:default; background-image:none; }
 /* ═══ fin CHARTE-3 ═══ */
 
 /* ═══ CHARTE-4 — LE JEU DE PASTILLES COMMUN (§374) ═══════════════════════════════════════════════
