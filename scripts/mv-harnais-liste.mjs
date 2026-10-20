@@ -699,6 +699,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-rec1.mjs --contre'],
   ['node scripts/mv-harnais-cuves1.mjs'],            // CUVES-1 (§383) : une cuve s'ouvre en fiche — l'ordinateur, la fenêtre du téléphone, le bac à sable ; les quatre chiffres
   ['node scripts/mv-harnais-cuves1.mjs --contre'],
+  ['node scripts/mv-harnais-tourcuv1.mjs'],          // TOURCUV-1 (§384) : la Tournée du Cuvier rangée — la tête claire, les filtres et les boutons du jeu
+  ['node scripts/mv-harnais-tourcuv1.mjs --contre'],
   ['node scripts/mv-harnais-police.mjs'],            // CHARTE-1 (§367) : la police passe par les deux réglages de la charte — aucune police en toutes lettres hors réglage, repli ou exemption
   ['node scripts/mv-harnais-police.mjs --contre'],
   ['node scripts/mv-harnais-charte.mjs'],            // CHARTE-2 (§368) : les réglages ne se déclarent que dans src/charte.css ; la charte ne contient que des réglages ; le sombre redit à l'identique

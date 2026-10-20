@@ -33,7 +33,8 @@ const NOMS = ['_vtJour','_vtNum','_vtB','_vtMesJour','_vtEcrire','_vtActives','_
      renvoyait « Aucune cuve en fermentation » avant de regarder le filtre.
      Trois fonctions vertes derrière une porte fermée. Un harnais qui s'arrête
      aux prédicats ne voit pas une impasse : il faut RENDRE l'écran. */
-  '_vtVisibles','_vtBase','_vtFiltDef','_vtLoad','_vtBandeauHtml','_vtMaj','renderVendTour'];
+  '_vtVisibles','_vtBase','_vtFiltDef','_vtLoad','_vtBandeauHtml','_vtMaj','renderVendTour',
+  '_vendDateLongue'];   // TOURCUV-1 (§384) : la tête de la Tournée écrit la date en toutes lettres
 // ⚠ Ordre réel du fichier : on relit les indices avant de découper.
 NOMS.sort((a,b)=>SRC.indexOf('function '+a+'(')-SRC.indexOf('function '+b+'('));
 

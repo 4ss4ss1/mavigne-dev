@@ -1,0 +1,23 @@
+{
+  "lot": "TOURCUV-1",
+  "section": "§384",
+  "base": "3ba6914542bbdd21f5bd1698e9a1542c7a2ce41d",
+  "inclut": [],
+  "date": "2026-10-20",
+  "fichiers": {
+    ".mv-base": "ea15f3077457249a8e6d6794e3da7e5e94e39fc4cc0b856c25282163a6b5b19a",
+    "CLAUDE.md": "e30016d6acba4456521d0353ae042d0d407ced7696a72581bb43b746841914d5",
+    "docs/claude/INDEX.md": "33c36536c16dfad44bb63e08caf60f485363b767f435f53f34a802d0badbd223",
+    "docs/claude/chantiers-380-429.md": "cec383863575fcc59b979a2eb7267f69756035df8504a74e46d5d296d4111020",
+    "docs/claude/journal.md": "f2e9a9902d54bbcb06564bf5ebb0e597ec8b9bbf4edb5f1be713bb69472eb651",
+    "guide/08-cave.html": "6b9ea814b6ad3040869bd53043e2725b1eca78a1e46d0d47f7575dba1a6fd84e",
+    "index.html": "31219415fb537e824a2e244d250ea26d06549546796a00d42b4c80d7e4c59c1b",
+    "public/guide.html": "73d69d79cdfa0d74a208e901eb0dfd3a2dd035b7bf328480beb49daaa53c7d13",
+    "public/sw.js": "1b21e1e79412b160ec2043571ae6b4960a033eae9426920d1f4f971b1d862716",
+    "scripts/mv-harnais-cuv7.mjs": "5d94aaabde2bf1ec19923afac5cd815d32346409204e2db33cf2dcad5dfe91b5",
+    "scripts/mv-harnais-liste.mjs": "6084f954d933cb6243dcc9e78f31f58baef05ab18b472fe56de0ec5fd04246cb",
+    "src/cuvier.js": "8b9e9aff11b569cb798c30fe75e0212228f693f88f87f94f4e25668bb4b36c03",
+    "src/utils.js": "6696f0e95413e1aa53241e1e71946137f82e6c3e8f3917188709a1742e95c3e0",
+    "scripts/mv-harnais-tourcuv1.mjs": "81e20f221c54809ab6d65ac87577ab7ac7cb09b2f7a3bbfe2263ff3adcb5b93f"
+  }
+}

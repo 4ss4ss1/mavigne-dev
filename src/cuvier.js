@@ -7221,7 +7221,7 @@ function renderVendTour(){
       +'<div class="vt-vide-d">La tournée s\'ouvre dès qu\'une cuve passe en macération ou en fermentation, '
       +'et une cuve décuvée y reste relevable : le vin continue de se goûter et de se mesurer. '
       +'Les cuves se créent depuis l\'onglet Cuves.</div>'
-      +'<button class="mvv-act2 dec" onclick="switchVendOng(\'cuves\')">Aller aux cuves</button></div>';
+      +'<button type="button" class="mvbtn mvbtn-secondaire" onclick="switchVendOng(\'cuves\')">Aller aux cuves</button></div>';
     return;
   }
   var canEdit=canWrite();
@@ -7232,33 +7232,33 @@ function renderVendTour(){
   if(!vis.length)
     h+='<div class="vt-vide"><div class="vt-vide-d">Plus rien en fermentation active. '
       +'Les cuves décuvées se relèvent sous «&nbsp;Toutes&nbsp;».</div>'
-      +'<button class="mvv-act2 dec" onclick="_vtFilt(\'tout\')">Voir toutes les cuves</button></div>';
+      +'<button type="button" class="mvbtn mvbtn-secondaire" onclick="_vtFilt(\'tout\')">Voir toutes les cuves</button></div>';
   vis.forEach(function(c){ h+=_vtRowHtml(c,canEdit); });
   h+='</div>';
   if(canEdit) h+='<div class="vt-bot">'
-    +'<button class="vt-fin" onclick="_vtFin()">Terminer la tournée <small id="vt-fin-n"></small></button>'
-    +'<button class="vt-fab" onclick="_vtSheet()" aria-label="Intervention groupée">'+_mvIcon('plus',24)+'</button>'
+    +'<button type="button" class="mvbtn mvbtn-principal vt-fin" onclick="_vtFin()">Terminer la tournée <small id="vt-fin-n"></small></button>'
+    +'<button type="button" class="mvbtn mvbtn-secondaire vt-fab" onclick="_vtSheet()">'+_mvIcon('plus',16)+'<span>Intervention groupée</span></button>'   // ★ TOURCUV-1
     +'</div>';
   h+='</div>';
   host.innerHTML=h;
   _vtMaj();
 }
 function _vtBandeauHtml(){
-  var j=new Date();
-  var J=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
-  var M=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  /* ★ TOURCUV-1 (§384) : la tête des autres onglets du Cuvier (le titre, la date, « Qui ? »), puis une carte collée en haut :
+     la progression, les filtres du jeu, la légende. Les identifiants (vt-pf, vt-pn, vt-pt) restent : _vtMaj les remplit. */
+  var d=_vendDateLongue(_mvToday());
   var f=[['cours','En cours'],['reste','Reste à faire'],['tout','Toutes']];
-  return '<div class="vt-hd">'
-    +'<div class="vt-hd-top">'
-    +'<div><div class="vt-t">La tournée</div><div class="vt-d">'+J[j.getDay()]+' '+j.getDate()+' '+M[j.getMonth()]+'</div></div>'
-    +'<button class="vt-who" onclick="_vtWho()">'+_escHtml(_VT_WHO.length?_caveIntLabel(_VT_WHO):'Qui ?')+'</button>'
-    +'</div>'
+  return '<div class="mat-tete"><div class="mat-tete-g">'
+    +'<span class="mat-an-t"><span class="vt-lg">Tournée du '+d+'</span><span class="vt-sm">Tournée du jour</span></span>'
+    +'<span class="mat-ref"><span class="vt-lg">Les cuves en macération et en fermentation</span><span class="vt-sm">'+d+'</span></span></div>'
+    +'<button type="button" class="mvbtn mvbtn-secondaire vt-who" onclick="_vtWho()">'+_escHtml(_VT_WHO.length?_caveIntLabel(_VT_WHO):'Qui ?')+'</button></div>'
+    +'<div class="mvcarte vt-hd">'
     +'<div class="vt-prog"><div class="vt-prog-bar"><div class="vt-prog-f" id="vt-pf"></div></div>'
     +'<div class="vt-prog-n"><span id="vt-pn">0</span><small id="vt-pt">/0</small></div></div>'
-    +'<div class="vt-filt">'
-    +f.map(function(x){ return '<button class="vt-fb'+(x[0]===_VT_FILT?' on':'')+'" onclick="_vtFilt(\''+_escAttr(x[0])+'\')">'+_escHtml(x[1])+'</button>'; }).join('')
-    +'</div></div>'
-    +'<div class="vt-leg"><span><b>P</b> pigeage</span><span><b>R</b> remontage</span><span>appui long = −1</span></div>';
+    +'<div class="mvbtn-choix vt-filt" role="group" aria-label="Filtrer les cuves">'
+    +f.map(function(x){ var on=x[0]===_VT_FILT; return '<button type="button" class="mvbtn mvbtn-option mvbtn-compact'+(on?' on':'')+'" aria-pressed="'+on+'" onclick="_vtFilt(\''+_escAttr(x[0])+'\')">'+_escHtml(x[1])+'</button>'; }).join('')
+    +'</div>'
+    +'<div class="vt-leg"><span><b>P</b> pigeage</span><span><b>R</b> remontage</span><span>appui long = −1</span></div></div>';
 }
 function _vtRowHtml(c,canEdit){
   /* ★★★ CUV-11 — CETTE LIGNE FERMAIT LA TOURNEE QUE §116 VENAIT D'OUVRIR.
@@ -7716,21 +7716,19 @@ function _vtCss(){
   var s=document.createElement('style'); s.id='vt-css';
   s.textContent=[
 ".vt{padding:0 0 150px}",
-".vt-hd{position:sticky;top:0;z-index:40;background:var(--cave,#14110D);color:#F0E2C8;padding:13px 14px 0;border-radius:0 0 16px 16px;box-shadow:0 6px 20px rgba(20,17,13,.16)}",
-".vt-hd-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}",
-".vt-t{font-family:var(--font-titre,'Cormorant Garamond',Georgia,serif);font-weight:700;font-size:var(--pt-lg,24px);line-height:1.05;color:#F5EBD6}",
-".vt-d{font-size:var(--pt-micro,11px);color:rgba(240,226,200,.62);margin-top:2px}",
-".vt-who{background:rgba(240,226,200,.10);border:1px solid rgba(240,226,200,.22);color:#F0E2C8;border-radius:999px;padding:8px 12px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;min-height:38px;white-space:nowrap;font-family:inherit;max-width:46%;overflow:hidden;text-overflow:ellipsis}",
-".vt-prog{display:flex;align-items:center;gap:9px;margin-top:11px}",
-".vt-prog-bar{flex:1;height:5px;border-radius:999px;background:rgba(240,226,200,.14);overflow:hidden}",
+"/* ★ TOURCUV-1 (§384) : la tête claire des autres onglets ; le bandeau sombre est parti. La carte (mvcarte) reste collée en haut. */",
+".vt-hd{position:sticky;top:0;z-index:40;padding:var(--e-3,12px) var(--e-4,16px) var(--e-2,8px);gap:var(--e-2,8px)}",
+".vt-sm{display:none}",
+"@media (max-width:1023px){.vt-lg{display:none}.vt-sm{display:inline}}",
+".vt-who{max-width:46%;overflow:hidden;text-overflow:ellipsis}",
+".vt-prog{display:flex;align-items:center;gap:var(--e-2,8px)}",
+".vt-prog-bar{flex:1;height:var(--e-1,4px);border-radius:var(--r-full,999px);background:var(--piste);overflow:hidden}",
 ".vt-prog-f{height:100%;width:0;background:linear-gradient(90deg,var(--or,#C2A14D),#8DC868);border-radius:999px;transition:width .3s cubic-bezier(.4,0,.2,1)}",
-".vt-prog-n{font-family:var(--font-titre,'Cormorant Garamond',serif);font-weight:700;font-size:var(--pt-sm,16px);color:#F5EBD6;min-width:52px;text-align:right}",
-".vt-prog-n small{font-size:var(--pt-micro,11px);font-weight:400;color:rgba(240,226,200,.55)}",
-".vt-filt{display:flex;gap:6px;padding:11px 0 12px;overflow-x:auto;scrollbar-width:none}",
+".vt-prog-n{font-weight:var(--fw-semi,600);font-size:var(--pt-base,14px);color:var(--texte);min-width:3.25rem;text-align:right;font-variant-numeric:tabular-nums}",
+".vt-prog-n small{font-size:var(--pt-micro,11px);font-weight:var(--fw-reg,400);color:var(--texte-doux)}",
+".vt-filt{align-self:flex-start;max-width:100%;overflow-x:auto;scrollbar-width:none}",
 ".vt-filt::-webkit-scrollbar{display:none}",
-".vt-fb{background:transparent;border:1px solid rgba(240,226,200,.22);color:rgba(240,226,200,.72);border-radius:10px;padding:7px 11px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;white-space:nowrap;min-height:36px;font-family:inherit}",
-".vt-fb.on{background:rgba(240,226,200,.94);border-color:rgba(240,226,200,.94);color:var(--cave,#14110D)}",
-".vt-leg{display:flex;justify-content:flex-end;gap:13px;padding:9px 14px 2px;font-size:var(--pt-nano,9.5px);color:var(--texte-doux,#5F5F5F);letter-spacing:.3px}",
+".vt-leg{display:flex;justify-content:flex-end;gap:var(--e-3,12px);font-size:var(--pt-nano,9.5px);color:var(--texte-doux,#5F5F5F);letter-spacing:.3px}",
 ".vt-leg b{color:var(--texte-med,#4A4A3A);font-weight:700}",
 ".vt-sv{text-align:center;font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-doux,#5F5F5F);height:0;overflow:hidden;transition:height .18s}",
 ".vt-sv.show{height:20px}",
@@ -7772,9 +7770,9 @@ function _vtCss(){
 "/* Le socle (#mv-dock) est en position:fixed bottom:0 z-index:90 : une barre posee a bottom:0 passe DESSOUS, boutons compris. Convention du projet (.pl2-mbar) : on se cale sur la hauteur du socle et on passe au-dessus. 93 = au-dessus du socle, sous la feuille du socle (#mv-dock-sheet-bg 95). */",
 ".vt-bot{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:93;width:100%;max-width:430px;padding:22px 12px 11px;display:flex;align-items:center;gap:9px;background:linear-gradient(180deg,rgba(242,239,231,0) 0%,var(--bg-app,#F2EFE7) 34%);pointer-events:none}",
 ".vt-bot>*{pointer-events:auto}",
-".vt-fin{flex:1;min-height:50px;border-radius:13px;background:var(--cave,#14110D);border:none;color:#F0E2C8;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;box-shadow:0 6px 20px rgba(20,17,13,.2)}",
-".vt-fin small{font-weight:500;font-size:var(--pt-micro,11px);color:rgba(240,226,200,.6)}",
-".vt-fab{width:50px;height:50px;border-radius:14px;background:var(--terre,#8A5A38);border:none;color:#fff;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(138,90,56,.3)}",
+".vt-fin{flex:1;min-height:var(--e-9,48px)}",
+".vt-fin small{font-weight:var(--fw-med,500);font-size:var(--pt-micro,11px);opacity:.8}",
+".vt-fab{flex:none;min-height:var(--e-9,48px)}",
 ".vt-vide{padding:34px 20px;text-align:center}",
 ".vt-vide-t{font-family:var(--font-titre,'Cormorant Garamond',serif);font-weight:700;font-size:var(--pt-md,20px);color:var(--texte,#1A1A14)}",
 ".vt-vide-d{font-size:var(--pt-txt,13px);color:var(--texte-doux,#5F5F5F);line-height:1.55;margin:8px 0 16px}",

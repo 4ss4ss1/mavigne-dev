@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.45';
+export const APP_VERSION = '9.46';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,11 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.46', d: '2026-10-20', items: [
+    { niv: 1, pour: ['admin', 'cave'], cible: '#mvv-tab-tour', emoji: 'check', titre: 'La tournée, à la même enseigne',
+      desc: "La Tournée du Cuvier prend la tête claire des autres onglets : « Tournée du jour », la date, « Qui ? ». La progression et les filtres tiennent dans une carte collée en haut de l’écran. "
+        + "En bas, « Terminer la tournée » et « Intervention groupée », écrit en toutes lettres à la place du « + ». La saisie, les compteurs et l’enregistrement ne changent pas." },
+  ] },
   { v: '9.45', d: '2026-10-20', items: [
     { niv: 1, pour: ['admin', 'cave'], cible: '#mvv-tab-cuves', emoji: 'cuve', titre: 'Les cuves s’ouvrent en fiche',
       desc: "Touchez une cuve : sa fiche s’ouvre à droite sur ordinateur, dans une fenêtre au téléphone — la frise, la courbe, le labo, les relevés, les opérations et tous les boutons, comme avant. "
@@ -5510,7 +5515,7 @@ var MV_AIDE = {
       ['La tournée', "est l’écran de la main gauche, au milieu du cuvier : toutes les cuves en fermentation l’une sous l’autre, deux champs par cuve. La touche « Suivant » du clavier enchaîne température, densité, cuve suivante sans jamais refermer le clavier, et le champ visé remonte au centre de l’écran. La ligne passe au vert dès que les deux chiffres y sont ; la barre du haut dit combien de cuves restent. Filtrez sur « Reste à faire » pour ne plus voir que celles-là."],
       ['Ce que la tournée écrit', "un relevé par cuve et par jour, le même objet que « Saisir une mesure » — corrigible au crayon depuis la cuve, courbe comprise. Elle met à jour le relevé du jour au lieu d’en créer un second. Un champ laissé vide veut dire « je n’ai pas saisi », jamais « efface » : pour retirer une valeur, passez par « Saisir une mesure », qui reconstruit le relevé en entier."],
       ['Les compteurs P et R', "pigeage et remontage. Un appui ajoute un, un appui long en retire un. Ils se posent sur le relevé du jour, comme dans la fiche de mesure. Le nom de qui fait la tournée se choisit en haut à droite et part sur chaque relevé : c’est ce qui répond à « qui a pigé ? » trois semaines plus tard."],
-      ['L’intervention groupée', "le bouton + en bas à droite de la tournée : une opération, les cuves retenues (ou « Toutes »), une dose. Chaque cuve reçoit sa propre opération, calculée sur SON volume — jamais sur un volume commun. Chacune se corrige ensuite depuis sa cuve, comme si elle avait été saisie à la main."],
+      ['L’intervention groupée', "le bouton « Intervention groupée », en bas de la tournée à côté de « Terminer la tournée » : une opération, les cuves retenues (ou « Toutes »), une dose. Chaque cuve reçoit sa propre opération, calculée sur SON volume — jamais sur un volume commun. Chacune se corrige ensuite depuis sa cuve, comme si elle avait été saisie à la main."],
       ['La tournée s’enregistre toute seule', "une seule fois, une seconde après votre dernière frappe, pas à chaque chiffre tapé. Un « Enregistré » discret passe sous la barre. Si le réseau manque au fond du cuvier, l’écran le dit et garde votre saisie : elle repart dès que le téléphone accroche."],
       ['Déguster, traiter, filtrer', "Le bouton « Nouvelle opération » du Chai propose huit gestes. Dégustation : une cuvée à la fois — ou un fût précis, désigné par son lot et un repère (numéro à la craie, emplacement), si une anomalie s’y montre — avec comment il goûte, ce qu’on remarque et la suite à donner ; « Enregistrer et goûter la suivante » passe à la cuvée suivante du millésime. "
         + "Traitement : la nature (collage, stabilisation, acidité, tanins et gomme, ensemencement), le produit de La Réserve qui fixe l’unité de la dose, puis la dose ; le volume des cuvées choisies se remplit seul, la quantité se calcule et sort du stock comme les adjonctions du Cuvier. Filtration : le type, le seuil, la perte — notée, sans toucher au volume de la cuvée. "

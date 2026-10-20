@@ -100,3 +100,21 @@ Troisième onglet du rangement du Cuvier, sur la maquette du 19/10. La question 
 - **Deux harnais décrivaient l’ancien geste, pas une règle** : CAVE-2 cherchait le texte du bouton flottant, GF le détail dans l’écran. Adaptés à l’intention (le bouton de la tête ; la fiche dans sa fenêtre au téléphone), leurs contre-épreuves vertes. Leçon : un harnais qui lit la place d’un contenu (« dans mvv-body ») vieillit quand le contenu change de cadre ; lire le contenu là où il est rendu.
 - **Les noms en `_cuv` sont au Chai** (`mv-harnais-cuvier`, D2) : les quatre fonctions neuves, d’abord nommées `_cuvTeteHtml`, `_cuvChiffresHtml`, `_cuvRempHtml`, `_cuvFicheHtml`, ont rougi le premier passage de la chaîne ; elles s’appellent `_vendTeteHtml`, `_vendChiffresHtml`, `_vendRempHtml`, `_vendFicheHtml`. Au Cuvier, une fonction commence par `_vend` (ou `_mat`, `_rec` pour ses onglets) ; les classes CSS `cuv-` ne sont pas concernées.
 - **Le bac à sable du harnais GF crée tout élément demandé** : c’est la fenêtre qui y reçoit la fiche. Le repli « sans fenêtre, dans l’écran » sert à un index.html ancien encore en cache, le temps du rechargement.
+
+## 384. ★ TOURCUV-1 — LA TOURNÉE DU CUVIER À LA MÊME ENSEIGNE (20/10 — `src/cuvier.js` (`_vtBandeauHtml`, `renderVendTour`, `_vtCss`) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE) · `index.html` · `public/sw.js` · `guide/08-cave.html` · `public/guide.html` · `scripts/mv-harnais-tourcuv1.mjs` (neuf) · `scripts/mv-harnais-cuv7.mjs` · `scripts/mv-harnais-liste.mjs` · `.mv-base` · `lots/TOURCUV-1.json` · `CLAUDE.md` · `docs/claude/*` · **APP 9.45 → 9.46, SW 10.24 → 10.25**, base `3ba6914`)
+
+### 384a. La demande
+Le quatrième onglet du rangement du Cuvier, sur la maquette du 19/10 : la Tournée.
+
+### 384b. Ce qui a été lu avant d’écrire
+La Tournée faisait déjà tout ce que la maquette demande : la progression, les trois filtres, une carte par cuve avec la température et la densité côte à côte et l’écart au relevé d’avant, les compteurs P et R (l’appui long retire), l’écriture au fil de la frappe (CUV-7, CUV-11), « Terminer la tournée » et son bilan, l’intervention groupée. Ce qui différait : l’habit — un bandeau sombre collé en haut (`--cave`), des boutons faits main, un « + » flottant sans mot.
+
+### 384c. Ce qui est livré
+- **La tête claire des autres onglets** : « Tournée du mardi 8 septembre » et « Les cuves en macération et en fermentation » sur ordinateur ; « Tournée du jour » et la date au téléphone ; « Qui ? » en bouton du jeu.
+- **Une carte collée en haut** (`mvcarte vt-hd`) : la progression (ses identifiants `vt-pf`, `vt-pn`, `vt-pt` restent, `_vtMaj` les remplit), les filtres en options du jeu (un seul choisi, `aria-pressed`), la légende P / R.
+- **En bas** : « Terminer la tournée » en bouton principal, son compte dedans ; « Intervention groupée » écrit, en bouton secondaire, à la place du « + ».
+- **Le style** : `_vtCss` perd ses boutons faits main et les couleurs du bandeau ; les cartes des cuves et leurs champs ne bougent pas.
+
+### 384d. Les décisions
+- **L’habit seulement** : la saisie, ses compteurs, son écriture et son bilan sont couverts par CUV-7 et CUV-11 ; rien de ce qu’ils jouent n’a changé, sauf la date de la tête (`_vendDateLongue`, ajoutée à la liste de CUV-7).
+- **Pas de choix de vendange dans la Tournée** : elle ne concerne que les cuves en cours (la maquette ne la montrait pas non plus).
