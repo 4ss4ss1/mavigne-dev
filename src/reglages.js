@@ -6771,7 +6771,7 @@ function _renderCuivre(){
     var domHint=(mode==='an')
       ?'UE : 28 kg/ha sur 7 ans &#x21D2; 4 kg/ha/an en moyenne (ancien bar\u00e8me FR : 6). Ajuste selon ton organisme certificateur.'
       :'Moyenne annuelle sur les ann\u00e9es enregistr\u00e9es. Doit rester &#x2264; plafond en contr\u00f4le.';
-    body='<div style="background:linear-gradient(155deg,#14110D,#1C1813);color:#EFE7D3;border:1px solid #2A241C;border-radius:16px;padding:16px;margin-bottom:16px">'
+    body='<div class="mvbandeau" style="padding:16px;margin-bottom:16px">'
       +'<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:13px"><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:18px;font-weight:600">Bilan du domaine</div>'
       +'<div style="display:inline-flex;border:1px solid rgba(201,168,76,0.3);border-radius:9px;overflow:hidden">'
       +'<button onclick="window._cuSetMode(\'an\')" style="background:'+(mode==='an'?'#C9A84C':'transparent')+';border:none;color:'+(mode==='an'?'#1B1710':'#B7AE98')+';font-family:var(--font-ui,Outfit);font-size:var(--pt-micro,12px);font-weight:600;padding:6px 11px;cursor:pointer">Campagne '+year+'</button>'

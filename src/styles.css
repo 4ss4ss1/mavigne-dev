@@ -4815,11 +4815,9 @@ body,#app-root,.page{min-height:100dvh;}
 /* ════════════════════════════════════════════════════════════════════
    « MA TRACE » — page personnelle (lot UX-R3). Prefixe .mtr- exclusif.
    ════════════════════════════════════════════════════════════════════ */
-.mtr-hero{display:block;background:linear-gradient(168deg,var(--cave-2),var(--cave) 78%);
-  border-radius:18px;padding:20px 18px;position:relative;overflow:hidden;text-align:center;
-  box-shadow:var(--shadow-md);margin-bottom:4px}
+.mtr-hero{ display:block; padding:20px 18px; position:relative; overflow:hidden; text-align:center; margin-bottom:4px; }
 .mtr-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--horizon)}
-.mtr-k{display:block;font-size:var(--pt-lbl,10.5px);letter-spacing:1.6px;text-transform:uppercase;
+.mtr-k{display:block;font-size:var(--pt-lbl,10.5px);
   color:var(--or-clair);font-weight:600}
 .mtr-v{display:block;font-family:var(--font-titre);font-size:62px;font-weight:600;
   color:#F5EEDF;line-height:1;margin-top:8px;letter-spacing:-1px}
@@ -4867,8 +4865,7 @@ body,#app-root,.page{min-height:100dvh;}
 .mtr-go .sub{display:block;font-size:var(--pt-lbl,12px);color:var(--texte-doux);font-weight:400;margin-top:2px}
 .mtr-go .arw{color:var(--texte-doux);font-size:var(--pt-sm,16px);flex:0 0 auto}
 
-.mur-tot{background:linear-gradient(168deg,var(--cave-2),var(--cave) 78%);border-radius:18px;
-  padding:17px;position:relative;overflow:hidden;box-shadow:var(--shadow-md)}
+.mur-tot{ padding:17px; position:relative; overflow:hidden; }
 .mur-tot::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--horizon)}
 .mur-tot-r{display:flex;align-items:flex-end;justify-content:space-between;gap:14px}
 .mur-tot-v{display:block;font-family:var(--font-titre);font-size:46px;font-weight:600;
@@ -8009,6 +8006,17 @@ body.trn-glisse{user-select:none;-webkit-user-select:none;cursor:grabbing}
    (mv-harnais-couches : une classe ne se déclare que dans une feuille) */
 .cmp-alert{ display:flex; gap:var(--e-2,8px); align-items:flex-start; margin-top:var(--e-2,8px); }
 .cmp-alert .ic{ flex-shrink:0; font-weight:var(--fw-bold,700); color:var(--mvencadre-ton,var(--texte-med)); }
+/* ★ ZONES-1 (§397) : LE BANDEAU — un fond sombre fait exprès pour un chiffre clé (« Ma trace », « Le domaine » du mur, le bilan du
+   domaine) : le même dégradé « cave », arrondi 8 px, sans ombre, l'encre crème ; plus de capitales dans ses libellés. Toujours
+   sombre, dans les deux thèmes. */
+.mvbandeau, .mtr-hero, .mur-tot{ background:linear-gradient(160deg,var(--cave-2),var(--cave) 78%); color:var(--sur-bandeau); border:0; border-radius:var(--r-md,8px); box-shadow:none; }
+/* ZONES-1 : le bloc de chiffres à deux colonnes partout (la fiche d'une cuvée : ouillage, analyse, puis le soutirage sur toute la ligne) */
+@media (min-width:768px){
+  .mvchiffres.mvchiffres-2{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+  .mvchiffres.mvchiffres-2 > *:nth-child(n){ border-left:0; border-top:0; }
+  .mvchiffres.mvchiffres-2 > *:nth-child(even){ border-left:var(--bw,1px) solid var(--ligne,#E7E6E2); }
+  .mvchiffres.mvchiffres-2 > *:nth-child(n+3){ border-top:var(--bw,1px) solid var(--ligne,#E7E6E2); }
+}
 /* ★ FIN CHARTE-5 */
 
 /* JALONS-2 (§341) — « Nouveau jalon » dans la feuille d'après validation, et « Mes jalons » dans « Ma trace ». */

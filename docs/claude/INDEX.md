@@ -450,3 +450,4 @@
 | 394 | 394. CHRONO-1 — LE CHRONO AU DESSIN COMMUN (20/10 — `src/styles.css` · `src/tracteur.js` · `src/utils.js` (… | `docs/claude/chantiers-380-429.md` |
 | 395 | 395. ⚠️ CHAT-0 — LE MODULE DE DISCUSSION RETIRÉ (20/10 — `src/app.js` · `index.html` · `src/styles.css` · `… | `docs/claude/chantiers-380-429.md` |
 | 396 | 396. CHARTE-5d — ÉTAPE 2 : LES NOTES GRISES À L’ENCADRÉ NEUTRE (20/10 — `index.html` · `src/phyto.js` · `sr… | `docs/claude/chantiers-380-429.md` |
+| 397 | 397. ZONES-1 — LES ZONES SOMBRES TRANCHÉES (20/10 — `src/styles.css` · `src/charte.css` · `src/reglages.js`… | `docs/claude/chantiers-380-429.md` |

@@ -386,3 +386,25 @@ L’étape 2 de la recommandation (§389a) : les 165 encadrés faits à la main 
 
 ### 396d. La leçon
 **Un contrôle de contraste statique lit le fond là où il est écrit.** Quand le fond passe dans une classe, un texte coloré sur place perd son fond aux yeux du contrôle : il faut ôter la couleur du texte en même temps que celle du fond — ou garder les deux.
+
+## 397. ZONES-1 — LES ZONES SOMBRES TRANCHÉES (20/10 — `src/styles.css` · `src/charte.css` · `src/reglages.js` · `src/cave.js` · `src/phyto.js` · `index.html` · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `scripts/mv-harnais-cartes.mjs` · `scripts/mv-jetons-baseline.json` · **APP 9.57 → 9.58, SW 10.36 → 10.37**, base `573d675`)
+
+### 397a. La demande
+Après CHARTE-5d (§396), deux décisions restaient pour Nico : les 12 zones sombres et la console GT. Il demande des maquettes (« maquette pour zone sombre, gt maquette ») : canvas Design « Ma Vigne — zones sombres et console GT (à trancher) », deux planches, l’aujourd’hui redessiné d’après les vraies valeurs face à la proposition. Les douze zones sombres sont de trois sortes : des **bandeaux** voulus (un chiffre clé sur fond « cave »), des **encadrés écrits pour un fond sombre** (blanc à 5 % : invisibles en clair) et les **tuiles de la fiche d’une cuvée** (un filet blanc à 7 % : invisible en clair). Propositions : garder les bandeaux et les unifier ; les deux autres au jeu ; la console GT au jeu commun avec un bandeau en tête. Nico : **« go »**.
+
+### 397b. Ce qui est livré
+- **La pièce bandeau** (`.mvbandeau`, dans le bloc CHARTE-5) : `linear-gradient(160deg, --cave-2, --cave 78%)`, encre `--sur-bandeau` (crème, nouveau dans la charte avec `--sur-bandeau-doux`), arrondi 8 px, sans ombre ni filet ; toujours sombre, dans les deux thèmes. Y passent : « Ma trace » (`.mtr-hero` — arrondi 18 px et ombre retirés, son libellé `.mtr-k` sans capitales ni espacement), « Le domaine » du mur (`.mur-tot`, arrondi 18 px retiré), le bilan du domaine (Réglages › cuivre, `_renderCuivre` : dégradé, encre et filet écrits sur place → la classe). La ligne de couleur en tête de « Ma trace » et du mur est gardée.
+- **La fiche d’une cuvée** (`openCuveeDetail`) : trois tuiles (fond de carte, filet blanc à 7 %, libellés en capitales) → **un bloc de chiffres** à deux colonnes, le soutirage sur toute la ligne (« pour ne pas laisser un demi-trou », disait le code) ; `.mvchiffres-2` garde deux colonnes sur ordinateur, ses filets suivent. Libellés en `.mvchiffres-l`, sans capitales.
+- **Cinq encadrés écrits pour le sombre** → **encadré neutre** : `index.html` (le compte sans adresse e-mail ; dans les mentions légales, la réversibilité, la force majeure, l’identité de GUERETTECH), `phyto.js` (une ligne de l’assistant).
+- Plafond des encadrés faits à la main **114 → 105** ; replis manquants 87 → 85.
+
+### 397c. Vu
+`ma-trace`, `mur`, `cave-cuvee` (téléphone, clair et sombre) : les bandeaux au même arrondi, le libellé de « Ma trace » sans capitales ; la fiche d’une cuvée en une carte à filets (ouillage | analyse, puis le soutirage). Pas vu : le bilan du domaine (l’outil ne trouve pas encore son écran) et les encadrés des mentions légales (plus bas dans la fenêtre).
+
+### 397d. La console GT — le lot suivant
+Validée « au jeu commun ». Pas dans ce lot : sa garde (`_agtGuard`, le jeton `gtAdmin`) empêche l’outil de captures de l’ouvrir dans la démo, et la console porte des centaines de couleurs écrites sur place (blanc translucide, violet) — la passer au jeu sans la voir serait travailler à l’aveugle. D’abord : apprendre à l’outil à l’ouvrir (un jeton de revue), puis la passer au jeu, vue écran par écran.
+
+- **Chaîne** : **469 commandes, 0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 397e. La leçon
+**Un fond pensé pour le sombre disparaît en clair.** Du blanc à 5 % fait un cadre sur un fond noir et rien sur un fond blanc : un dessin qui ne marche que dans un thème n’est pas un dessin de la charte.

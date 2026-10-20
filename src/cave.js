@@ -2601,9 +2601,9 @@ function openCuveeDetail(cuvId,dans){
   var allIt=cOps.map(function(op){return Object.assign({},op,{_src:'op'});}).concat(cAnas).sort(function(a,b){return a.date>b.date?-1:1;});
   var html='';
   // Stat cards
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">';
-  html+='<div style="background:var(--bg-card);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:11px;">';
-  html+='<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Ouillage</div>';
+  html+='<div class="mvchiffres mvchiffres-2" style="margin-bottom:12px;">';
+  html+='<div>';
+  html+='<div class="mvchiffres-l">Ouillage</div>';
   // ⚠️ Sans bois, « Jamais » en rouge serait une alerte inventee.
   if(!ouSuivi){
     html+='<div style="font-size:var(--pt-base,14px);font-weight:600;color:var(--texte-doux);">Sans objet</div>';
@@ -2613,16 +2613,16 @@ function openCuveeDetail(cuvId,dans){
     if(ouS)html+='<div style="font-size:var(--pt-micro,11px);color:'+ouC+';margin-top:2px;">il y a '+ouS+(ouOk?'':' \u26A0')+'</div>';
   }
   html+='</div>';
-  html+='<div style="background:var(--bg-card);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:11px;">';
-  html+='<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Derni\u00E8re analyse</div>';
+  html+='<div>';
+  html+='<div class="mvchiffres-l">Derni\u00E8re analyse</div>';
   html+='<div style="font-size:var(--pt-base,14px);font-weight:600;color:var(--texte);">'+(lAna?_caveDateFr(lAna.date_analyse):'Aucune')+'</div>'+fmlH;
   if(lPdfUrl)html+='<div style="margin-top:5px;"><button class="cave-pdf-chip" data-url="'+_escHtml(lPdfUrl)+'" onclick="_caveOpenPdf(this)">\uD83D\uDCC4 '+(lPdfNom?_escHtml(lPdfNom):'PDF')+'</button></div>';
   html+='</div>';
   // Le soutirage a lieu plusieurs fois : on montre le DERNIER et le compte,
   // jamais un oui/non. Pleine largeur pour ne pas laisser un demi-trou.
   var soutD=_caveLastSout(cuvId), soutN=_caveSoutOps(cuvId).length;
-  html+='<div style="grid-column:1/-1;background:var(--bg-card);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:11px;">';
-  html+='<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Dernier soutirage</div>';
+  html+='<div style="grid-column:1/-1">';
+  html+='<div class="mvchiffres-l">Dernier soutirage</div>';
   html+='<div style="font-size:var(--pt-base,14px);font-weight:600;color:'+(soutD?'var(--texte)':'var(--texte-doux)')+';">'
     +(soutD?_caveDateFr(soutD):'Aucun enregistr\u00E9')
     +(soutN>1?'<span style="font-size:var(--pt-micro,11px);font-weight:400;color:var(--texte-doux);"> \u00B7 '+soutN+' au total</span>':'')+'</div>';

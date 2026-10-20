@@ -555,7 +555,7 @@ function _tratRender(){
       +'<div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--vert);margin-bottom:10px">&#x1F33F; Traitement &#x00B7; '+fmtDate(_trat.date)+' &#x00B7; '+_escHtml(_trat.conducteur||'—')+'</div>'
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">'
       +rcells.map(function(f){
-        return '<div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:8px 10px">'
+        return '<div class="mvencadre">'
           +'<div style="font-size:9px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:2px">'+f.l+'</div>'
           +'<div style="font-size:var(--pt-micro,12px);font-weight:600">'+_escHtml(String(f.v))+'</div></div>';
       }).join('')+'</div>'

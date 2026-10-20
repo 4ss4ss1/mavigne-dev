@@ -168,7 +168,7 @@
      DEUX blocs sombres (harnais jetons). */
   --bg-doux:#F7F5F1; --survol:rgba(28,26,22,.055); --presse:rgba(28,26,22,.095); --ligne-forte:#CDCAC2; --texte-pale:#A3A19B;
   --accent:#7A2850; --accent-survol:#6A2145; --accent-texte:#7A2850; --accent-doux:rgba(122,40,80,.11); --sur-accent:#FFFFFF; --anneau:rgba(122,40,80,.42);
-  --ok:#237A47; --ok-doux:rgba(35,122,71,.15); --attention:#A15C00; --attention-doux:rgba(161,92,0,.15); --danger:#C2381B; --danger-doux:rgba(194,56,27,.13); --ok-texte:#217343; --attention-texte:#975600; --danger-texte:#BA361A; --info-doux:#E8F0FA; --info-texte:#1A4A7A; --sur-danger:#FFFFFF;
+  --ok:#237A47; --ok-doux:rgba(35,122,71,.15); --attention:#A15C00; --attention-doux:rgba(161,92,0,.15); --danger:#C2381B; --danger-doux:rgba(194,56,27,.13); --ok-texte:#217343; --attention-texte:#975600; --danger-texte:#BA361A; --sur-bandeau:#F2EBDD; --sur-bandeau-doux:#CFC5AE; --info-doux:#E8F0FA; --info-texte:#1A4A7A; --sur-danger:#FFFFFF;
   --encours:#4F4D48; --piste:rgba(28,26,22,.10); --inverse:#1F1E1B; --sur-inverse:#F5F4F1; --voile:rgba(16,15,13,.30); --sk-reflet:rgba(255,255,255,.70);
   --reflet:inset 0 1px 0 rgba(255,255,255,.14); --panneau:0 1px 2px rgba(20,18,14,.04);
   --focus-ombre:0 0 0 var(--bw-2,2px) var(--bg-card),0 0 0 calc(var(--bw-2,2px) * 2) var(--anneau); --focus-dedans:inset 0 0 0 var(--bw-2,2px) var(--anneau);
