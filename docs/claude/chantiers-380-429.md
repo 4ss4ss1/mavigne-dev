@@ -136,3 +136,23 @@ Le trait rouge de la maquette des Maturités (19/10) : le minimum de l’appella
 ### 385d. Ce qui reste ouvert
 - Le chemin vers le réglage passe par « ··· » ; la maquette le mettait dans la roue crantée de la Cave (section Appellations) : il y viendra avec le lot de la roue crantée.
 - Le premier cru (189 g/L à Gevrey) suppose une appellation « premier cru » déclarée à part : c’est déjà ainsi que le plafond se règle.
+
+## 386. ★ CAVEREG-1 — LA ROUE CRANTÉE DE LA CAVE EN QUATRE SECTIONS (20/10 — `index.html` (`#cave-reg-body`) · `src/cave.js` (`_caveRegSec`, `renderCaveReglagesCave`) · `src/reglages.js` (`_aocResumeHtml`) · `src/styles.css` (bloc CAVEREG-1) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE) · `public/sw.js` · `guide/08-cave.html` · `public/guide.html` · `scripts/mv-harnais-cavereg1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/tutos-couverture.json` · `.mv-base` · `lots/CAVEREG-1.json` · `CLAUDE.md` · `docs/claude/*` · **APP 9.47 → 9.48, SW 10.26 → 10.27**, base `c093715`)
+
+### 386a. La demande
+La page « Réglages et documents de la cave » de la maquette du 19/10 : quatre sections (Le Cuvier, Le Chai, Appellations, Documents), une navigation à gauche sur ordinateur et en haut au téléphone, une ligne par réglage, le minimum de chaque appellation.
+
+### 386b. Ce qui a été lu avant d’écrire
+La page existait déjà en quatre blocs empilés (CAVE-2, AOC-1, PARC-XLS-2) : `cave-reg-cuvier` (les réglages du Cuvier, `renderVendParam`), `mvc-body-reglages` (le Chai, `renderCaveReglages`), `cave-reg-mil` (« Le Millésime » : les deux lignes des appellations), `cave-reg-docs` (les documents, déjà en lignes, `docsGo`). Les réglages du Cuvier et du Chai sont des champs (le poids d’une caisse, le rendement jus, la base, le sucre par degré, l’alerte d’ouillage en compteur) et non des lignes qui ouvrent une fenêtre — la plupart de ces fenêtres n’existent pas.
+
+### 386c. Ce qui est livré
+- **La navigation** : quatre options du jeu (`mvbtn-choix`, `role="tab"`, `data-creg`), en haut au téléphone, en colonne collante à gauche à partir de 1 024 px ; une section à la fois (`hidden`). `_caveRegSec` bascule ; la section choisie reste choisie d’une ouverture à l’autre de la page.
+- **« Appellations »** (l’ancien « Le Millésime ») : les deux lignes d’avant (Appellations & plafonds, Rattachement), puis une ligne par appellation — son maximum du millésime et son minimum de maturité, « Rouges » et « Blancs » pour poser les minimums (`_aocSetMin`, MINAOC-1). C’est le chemin que la maquette donnait au minimum ; « ··· » de la fenêtre des plafonds reste.
+- **Les quatre hôtes gardent leur nom** : leurs rendus et leurs harnais (CAVE-2, réglages, AOC-CAVE, MINAOC-1) ne bougent pas.
+
+### 386d. Ce qui n’est pas fait, et pourquoi
+- **Les lignes « libellé · valeur · Modifier » pour le Cuvier et le Chai.** La maquette annonçait des fenêtres « inchangées » ; elles n’existent pas pour le poids d’une caisse, le rendement jus, la base du rendement, le sucre par degré, l’alerte d’ouillage (des champs et un compteur dans la page). Les écrire est un lot à part, à décider avec Nico.
+- **Le badge « nouveau » des fourchettes** : avec les lignes.
+
+### 386e. Trouvé en route
+- **`mv-harnais-regl-module` (NAV-1) comptait les « Le Millésime » d’index.html** : deux, l’onglet de la Cave et le bloc de la roue crantée. Le bloc s’appelle « Appellations » : le compte passe à un, l’intention (la majuscule, comme « Le Cuvier ») reste vérifiée.

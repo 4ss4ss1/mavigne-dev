@@ -7122,6 +7122,25 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 .mat-leg i.mn{width:0;height:var(--e-3,12px);border-radius:0;border-left:var(--bw-2) solid var(--danger);background:none}
 .mat-stats b.att{color:var(--attention)}
 /* ★ FIN MINAOC-1 */
+/* ★ CAVEREG-1 (§386) — LA ROUE CRANTÉE DE LA CAVE EN QUATRE SECTIONS : la navigation (les options du jeu) en haut au téléphone,
+   en colonne collante à gauche à partir de 1 024 px ; une section à la fois ; les minimums de maturité par appellation. */
+.creg-lay{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--e-3,12px);margin-top:var(--e-3,12px)}
+.creg-nav{max-width:100%;overflow-x:auto;scrollbar-width:none}
+.creg-nav::-webkit-scrollbar{display:none}
+.creg-sec[hidden]{display:none}
+.creg-sec>.creg-grp:first-child{margin-top:var(--e-1,4px)}
+.creg-aoc-t{margin:var(--e-4,16px) var(--e-0,2px) var(--e-2,8px);font-size:var(--pt-micro,12px);font-weight:var(--fw-semi,600);color:var(--texte-med)}
+.creg-aoc{display:flex;align-items:center;justify-content:space-between;gap:var(--e-3,12px);margin-bottom:var(--e-2,8px);padding:var(--e-3,12px);border:var(--bw) solid var(--ligne,#E7E6E2);border-radius:var(--r-md,8px);background:var(--bg-card)}
+.creg-aoc .l{display:flex;flex-direction:column;gap:var(--e-0,2px);min-width:0}
+.creg-aoc .t{font-size:var(--pt-base,14px);font-weight:var(--fw-semi,600);color:var(--texte)}
+.creg-aoc .d{font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.creg-aoc .b{flex:none;display:flex;gap:var(--e-1,4px)}
+@media (min-width:1024px){
+  .creg-lay{grid-template-columns:12.5rem minmax(0,1fr);gap:var(--e-6,24px);align-items:start}
+  .creg-nav{position:sticky;top:var(--e-4,16px);flex-direction:column;align-items:stretch}
+  .creg-nav>.mvbtn{justify-content:flex-start}
+}
+/* ★ FIN CAVEREG-1 */
 /* ★ CAVE-3 (§290) — LE CHAI EN LISTE + FICHE (MAQUETTE V8). La fiche est celle de l'appli (openCuveeDetail écrite dans
    #chai-fiche) ; au téléphone, la fenêtre comme avant. Cuvées au cadre neutre (la choisie cerclée), alerte d'ouillage en ambre,
    « Ouiller les … » et « Nouvelle cuvée » à l'accent. Par jetons. */

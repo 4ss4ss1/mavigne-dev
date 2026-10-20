@@ -703,6 +703,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-tourcuv1.mjs --contre'],
   ['node scripts/mv-harnais-minaoc1.mjs'],           // MINAOC-1 (§385) : le minimum de maturité de l'appellation — le réglage, le trait, la phrase, la fiche
   ['node scripts/mv-harnais-minaoc1.mjs --contre'],
+  ['node scripts/mv-harnais-cavereg1.mjs'],          // CAVEREG-1 (§386) : la roue crantée de la Cave en quatre sections, une à la fois ; les minimums par appellation
+  ['node scripts/mv-harnais-cavereg1.mjs --contre'],
   ['node scripts/mv-harnais-police.mjs'],            // CHARTE-1 (§367) : la police passe par les deux réglages de la charte — aucune police en toutes lettres hors réglage, repli ou exemption
   ['node scripts/mv-harnais-police.mjs --contre'],
   ['node scripts/mv-harnais-charte.mjs'],            // CHARTE-2 (§368) : les réglages ne se déclarent que dans src/charte.css ; la charte ne contient que des réglages ; le sombre redit à l'identique

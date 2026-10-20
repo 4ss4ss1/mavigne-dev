@@ -6560,7 +6560,18 @@ function _aocResumeHtml(){
   var dR=!A.length?'D\u00e9clarez d\u2019abord une appellation'
     :(nAtt+' parcelle'+(nAtt>1?'s':'')+' rattach\u00e9e'+(nAtt>1?'s':'')+(sans?(' \u00b7 <b style="color:var(--orange-tx,#9C4E14)">'+sans+' sans appellation</b>'):''));
   var ligne=function(fn,ic,t,d){ return '<button type="button" class="creg-row" onclick="'+fn+'()"><span class="l"><span class="ic">'+_mvIcon(ic,16)+'</span><span><span class="t">'+t+'</span><span class="d">'+d+'</span></span></span><span class="r">\u203a</span></button>'; };
-  return ligne('openAocPlafonds','etiquette','Appellations &amp; plafonds',dA)+ligne('openAocRattach','carte','Rattachement des parcelles',dR);
+  /* ★ CAVEREG-1 (§386) : la section Appellations de la roue crantée — une ligne par appellation, son maximum du millésime et
+     son minimum de maturité (MINAOC-1), les deux minimums à portée de main. */
+  var lignes=A.map(function(a){
+    var mx=_aocMax(a,m), mn=a.sucre_min||{}, q='\''+_aocAtt(a.nom)+'\'';
+    var mins=[mn.r>0?'rouges '+mn.r+' g/L':'', mn.b>0?'blancs '+mn.b+' g/L':''].filter(Boolean).join(' \u00b7 ');
+    return '<div class="creg-aoc"><span class="l"><span class="t">'+_aocEsc(a.nom)+'</span>'
+      +'<span class="d">'+(mx!=null?('maximum '+_aocNb(mx)+' hL/ha en '+m):('plafond '+m+' \u00e0 poser'))+' \u00b7 '+(mins?('minimum de maturit\u00e9 : '+mins):'minimum de maturit\u00e9 \u00e0 renseigner')+'</span></span>'
+      +'<span class="b"><button type="button" class="mvbtn mvbtn-discret mvbtn-compact" onclick="window._aocSetMin('+q+',\'r\')">Rouges</button>'
+      +'<button type="button" class="mvbtn mvbtn-discret mvbtn-compact" onclick="window._aocSetMin('+q+',\'b\')">Blancs</button></span></div>';
+  }).join('');
+  return ligne('openAocPlafonds','etiquette','Appellations &amp; plafonds',dA)+ligne('openAocRattach','carte','Rattachement des parcelles',dR)
+    +(A.length?('<div class="creg-aoc-t">Minimum de maturit\u00e9, par appellation</div>'+lignes):'');
 }
 // Fenêtre « Appellations & plafonds » : le millésime, une ligne par appellation, « ⋯ » pour renommer ou supprimer.
 function _aocPlafondsHtml(){

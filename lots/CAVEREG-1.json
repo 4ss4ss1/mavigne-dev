@@ -1,0 +1,26 @@
+{
+  "lot": "CAVEREG-1",
+  "section": "§386",
+  "base": "c09371506a36a38f803021781c95eb6363ec7086",
+  "inclut": [],
+  "date": "2026-10-20",
+  "fichiers": {
+    ".mv-base": "73b29cc65b300a0ba55cc38cb77b732eb3c8cdaf1e155c8154715adc45669f0d",
+    "CLAUDE.md": "5282455367df8696ebc20990c80104dc5e4c9f3dce8c25c0209b924ddeb654d4",
+    "docs/claude/INDEX.md": "0fe81cbbce7fa957e1332ce1a54356ed5e972a9c518e1873725d7a52b4ca7fec",
+    "docs/claude/chantiers-380-429.md": "8bf941dcadd66d73b8259e1dbd5263d1f617202bbdc34509a231c3bf5906b682",
+    "docs/claude/journal.md": "73e15961af3877093053da9169e8a1007a20131e3653ad432a8804524e4af4af",
+    "guide/08-cave.html": "2a985c09934629e3fe2673fc57d485ce84cbf800b21664f0a7fcfac2751a43bc",
+    "index.html": "5d86408412317e6ab7e100efc9efb8eeb193b00bf9c3e1af9a6b1a62050260dc",
+    "public/guide.html": "2e3e9b8e9866e6a6a071f596d76f4dda7f2795cc64a517e44c7fbe8c832911cb",
+    "public/sw.js": "95c9b9b34c54e7001630288670ebd0f1c516bd0633a8eaef3a35a2c838b4b97f",
+    "scripts/mv-harnais-liste.mjs": "00ea6c24ef6891d68a2d41f9f00d33303f3e6d7807ae7049baed70f7ddea27bc",
+    "scripts/mv-harnais-regl-module.mjs": "d333d8044ba54c2779c20d115ffc88f1b44c44e6ac03b4873aaf44c7f86d6db8",
+    "scripts/tutos-couverture.json": "0d388e53971d1277975fd3edbd9219630dfc9d7b68fbf3fff4256d9304d1d16c",
+    "src/cave.js": "18aef266821d44cd12a3ad03b5944f077eb2980f04fa5d08767c03ef9b3e9e0b",
+    "src/reglages.js": "a0562308505432519312a52e5f01ee638200b698f998c3ac32ff0e72fdef667a",
+    "src/styles.css": "e8cf8e2138db3672aed4e179e19a1094ea155b90e70c138f6c20a256b03eec55",
+    "src/utils.js": "4181e2cf3773ce22c7bf5aabad0509db1079c3bd6f69e53fe163e172cc34c1f9",
+    "scripts/mv-harnais-cavereg1.mjs": "1fc145e6530c05e6e65f7ebad797004f003d1657ba942d98d07b9b5007f55661"
+  }
+}

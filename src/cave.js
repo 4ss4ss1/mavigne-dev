@@ -6118,6 +6118,19 @@ function _caveRegDocsHtml(){
   +'<div class="mlx-hint" style="margin-top:8px">Tous les documents de l\u2019application restent r\u00e9unis dans R\u00e9glages \u203a App \u203a Documents &amp; impressions.</div>';
 }
 
+/* ★ CAVEREG-1 (§386) — LA ROUE CRANTÉE EN QUATRE SECTIONS, une à la fois (la maquette du 19/10) : Le Cuvier, Le Chai,
+   Appellations, Documents. La navigation est dans index.html (data-creg) ; la section choisie reste choisie d'une
+   ouverture à l'autre de la page. Les hôtes des quatre blocs n'ont pas changé de nom. */
+var _CREG_SEC='cuvier';
+function _caveRegSec(s){
+  if(['cuvier','chai','aoc','docs'].indexOf(s)>=0) _CREG_SEC=s;
+  var host=document.getElementById('cave-reg-body'); if(!host||!host.querySelectorAll) return;
+  Array.prototype.forEach.call(host.querySelectorAll('[data-creg]'), function(el){
+    var on=el.getAttribute('data-creg')===_CREG_SEC;
+    if(String(el.tagName).toUpperCase()==='SECTION') el.hidden=!on;
+    else { el.classList.toggle('on', on); el.setAttribute('aria-selected', on?'true':'false'); }
+  });
+}
 function renderCaveReglagesCave(){
   _caveRegInjectCss(); _mlInjectCss();
   var mlv=document.getElementById('cave-view-mil'); if(mlv) mlv.style.display='none';
@@ -6130,6 +6143,7 @@ function renderCaveReglagesCave(){
   if(typeof window._aocRenderCard==='function') window._aocRenderCard();
   var docs=document.getElementById('cave-reg-docs');
   if(docs) docs.innerHTML=_caveRegDocsHtml();
+  _caveRegSec(_CREG_SEC);   // ★ CAVEREG-1
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -7542,6 +7556,7 @@ window._caveParcHtml       = _caveParcHtml;
 window.renderCaveAujourdhui= renderCaveAujourdhui;
 window.renderCaveReglagesCave = renderCaveReglagesCave;
 window._caveOpenReglages   = _caveOpenReglages;
+window._caveRegSec = _caveRegSec;   // ★ CAVEREG-1
 // ★ Lus par le Pilotage (carte Cave, lot ③) : le verdict et l'agenda complet
 //   n'ont qu'UNE definition, et elle est ici.
 window._mlAgendaComplet    = _mlAgendaComplet;

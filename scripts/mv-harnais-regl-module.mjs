@@ -305,7 +305,8 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
   T(/switchReglTab\('domaine'\); if\(window\.openDocs\) window\.openDocs\(\);/.test(app), '\u00ab Tous les documents \u00bb depuis une roue va dans Domaine');
   T(/<div class="mod-header-title">R\u00e9serve<\/div>/.test(rsv) && !/La R\u00e9serve<\/div>/.test(rsv), 'l\u2019en-t\u00eate de la R\u00e9serve dit le mot du dock');
   T(/ttl\.textContent='Cave';/.test(nu(CAV)), 'l\u2019en-t\u00eate de la Cave dit le mot du dock');
-  T(nb(html, /Le Mill\u00e9sime/g) === 2 && !/Le mill\u00e9sime<\/button>/.test(html), '\u00ab Le Mill\u00e9sime \u00bb s\u2019\u00e9crit comme \u00ab Le Cuvier \u00bb');
+  // CAVEREG-1 (§386) : le bloc « Le Millésime » de la roue crantée s’appelle « Appellations » ; il reste l’onglet de la Cave.
+  T(nb(html, /Le Mill\u00e9sime/g) === 1 && !/Le mill\u00e9sime<\/button>/.test(html), '\u00ab Le Mill\u00e9sime \u00bb s\u2019\u00e9crit comme \u00ab Le Cuvier \u00bb');
   T(!/Param\u00e9trage|Param\\u00e9trage/.test(pil), 'le mot \u00ab Param\u00e9trage \u00bb n\u2019appara\u00eet plus dans le Pilotage (hors commentaires)');
   T(!/R\u00e9glages \u203a App/.test(G04 + G06 + G10 + G11 + G12 + readFileSync('guide/13-donnees.html', 'utf8') + readFileSync('guide/08-cave.html', 'utf8') + readFileSync('guide/01-demarrer.html', 'utf8') + readFileSync('guide/14-depannage.html', 'utf8')),
     'plus aucun chemin \u00ab R\u00e9glages \u203a App \u00bb dans le guide');
