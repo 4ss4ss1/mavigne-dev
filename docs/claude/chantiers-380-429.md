@@ -273,3 +273,25 @@ Le lanceur (BUILD-1, §305) joue les commandes autant à la fois que le processe
 
 ### 391e. La leçon
 **Le meilleur ordre pour le temps n’est pas le meilleur pour la mémoire.** Lancer les longues d’abord finissait plus tôt sur le papier ; sur un vrai PC, ça mettait les plus gourmandes côte à côte. Un ordonnanceur qui ne compte que les cœurs ignore ce qui manque en premier.
+
+## 392. REVUE-3 — LA REVUE À L’ÉCRAN, TROISIÈME PASSAGE : DES SITUATIONS MISES EN PLACE PAR L’OUTIL (20/10 — `scripts/mv-captures.mjs` · `src/phyto.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-cartes.mjs` · **APP 9.52 → 9.53, SW 10.31 → 10.32**, base `4f46429`)
+
+### 392a. La demande
+La suite de l’étape 1 (§389-§390) : voir les derniers écrans, en mettant en place les situations qui les font apparaître (une dose qui dépasse, la fiche d’un produit, des tâches à répartir, une session chronométrée, un message non lu, une demande d’un salarié), sans toucher à la démo des visiteurs.
+
+### 392b. Ce qui a été trouvé
+- **La démo n’a aucune parcelle** (« 0 parcelles · 0 ha » : l’état d’une installation, les contours étant posés par GUERETTECH). Tout ce qui dépend d’une parcelle y reste vide : la saisie d’un traitement s’arrête à l’étape des parcelles, Décider n’a rien à répartir, une session n’a rien à chronométrer.
+- **`applyFbData` ignore toute donnée pendant la visite** (`_visiteScenarioReady` : « scénario figé »). L’outil lève ce gel le temps de poser ses données, puis le remet.
+- **La fiche d’un produit** : le catalogue E-Phy se charge du réseau — hors ligne, l’outil ne voit que « Catalogue E-Phy en cours de chargement… ». Écran gardé (`phyto-produit`), à jouer en ligne.
+
+### 392c. Ce qui est livré
+- **`mv-captures` pose des données de revue** pour un écran : `phyto-cuivre` pose deux parcelles (« Les Grandes Vignes », « Champ Perdrix »), ouvre l’assistant, choisit la Bouillie bordelaise RSR, Paul, une date, toutes les parcelles, et va jusqu’au récapitulatif — le budget cuivre et son verdict « Conforme » apparaissent.
+- **Vu et corrigé dans l’assistant** (tous faits à la main) : la carte du budget cuivre (fond et filet bleutés, titre `#1A4A7A`) → `.mvcarte`, titre à l’encre ; « Tout » (texte or) et « Aucune » → `.mvbtn .mvbtn-secondaire` ; l’information du registre (fond et filet bleus) → `.mvencadre-info`. Revu en clair et en sombre. Plafond des encadrés faits à la main 167 → 165.
+
+### 392d. Reste
+- **La carte récapitulative verte** de l’étape 3 (fond et filet verts) et **la barre des étapes** (vert, or, gris) : le jeu n’a pas de pièce « étapes » ; à décider avec les cases de saisie.
+- **Décider avec des tâches, une session chronométrée, un message non lu, une demande d’un salarié** : chacun demande ses données de revue (priorités et équipe, une session et ses temps, un fil de discussion, une demande) — au même procédé, un par un.
+- **Chaîne** : **469 commandes, 0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 392e. La leçon
+**Une démo vide cache des écrans entiers.** Sans parcelle, la moitié des fenêtres n’affiche que son état vide — et c’est la moitié qu’on n’avait jamais regardée. Une revue a besoin de ses propres données, posées par l’outil, pas de celles qu’on montre aux visiteurs.

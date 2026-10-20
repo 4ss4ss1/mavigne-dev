@@ -402,8 +402,8 @@ function _tratCuBudgetHtml(){
   var over=rows.filter(function(r){return r.proj>CU_MAX;});
   var col=function(v){var r=v/CU_MAX;return r>1?'#C0392B':(r>=0.875?'#B8621A':(r>=0.75?'#C9A84C':'#3D7A27'));};
   var f1=function(v){return v.toFixed(1).replace('.',',');};
-  var h='<div style="background:rgba(26,74,122,0.05);border:1.5px solid rgba(26,74,122,0.25);border-radius:12px;padding:14px;margin-bottom:14px">'
-    +'<div style="font-size:var(--pt-txt,13px);font-weight:700;color:#1A4A7A;margin-bottom:3px">&#x1F535; Budget cuivre m&#xe9;tal &#x00B7; bio</div>'
+  var h='<div class="mvcarte" style="margin-bottom:14px">'
+    +'<div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--texte);margin-bottom:3px">&#x1F535; Budget cuivre m&#xe9;tal &#x00B7; bio</div>'
     +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:12px">Plafond '+CU_MAX+'&#x202F;kg Cu/ha sur 7 ans ('+CU_AN+' kg/ha/an en moyenne). Ce traitement apporte <b style="color:#1A4A7A">+'+f1(add)+'&#x202F;kg/ha</b>.</div>';
   rows.forEach(function(r){
     var c=col(r.proj),pct=Math.min(100,r.proj/CU_MAX*100),pctNow=Math.min(100,r.cur/CU_MAX*100);
@@ -532,8 +532,8 @@ function _tratRender(){
     bodyHtml='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
       +'<div id="trat-parc-count" style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">'+_tratParcCountTxt()+'</div>'
       +'<div style="display:flex;gap:8px">'
-      +'<button onclick="window._tratAllParc()" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--gris);background:transparent;color:var(--or);font-size:var(--pt-micro,12px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);min-height:44px"><span>Tout</span></button>'
-      +'<button onclick="window._tratNoneParc()" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--gris);background:transparent;color:var(--texte-doux);font-size:var(--pt-micro,12px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);min-height:44px"><span>Aucune</span></button>'
+      +'<button type="button" class="mvbtn mvbtn-secondaire" onclick="window._tratAllParc()"><span>Tout</span></button>'
+      +'<button type="button" class="mvbtn mvbtn-secondaire" onclick="window._tratNoneParc()"><span>Aucune</span></button>'
       +'</div></div>'
       +'<div id="trat-parc-list">'+_tratParcRowsHtml()+'</div>';
 
@@ -563,7 +563,7 @@ function _tratRender(){
       +'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:'+(maxDrae>0?'10':'0')+'px">'+parcListHtml+'</div>'
       +(maxDrae>0?'<div style="font-size:var(--pt-micro,12px);color:var(--orange);margin-top:4px">&#x26A0;&#xFE0F; DRAE max : <strong>'+maxDrae+'h</strong> &#x2014; parcelles signal&#xe9;es en rouge</div>':'')
       +'</div>';
-    var confHtml='<div style="background:rgba(74,158,224,0.05);border:1.5px solid rgba(74,158,224,0.2);border-radius:10px;padding:10px 12px;margin-bottom:14px">'
+    var confHtml='<div class="mvencadre mvencadre-info" style="margin-bottom:14px">'
       +'<div style="font-size:var(--pt-micro,11px);font-weight:700;color:var(--ink-info,#4A9EE0);margin-bottom:3px">&#x2705; Conforme r&#xe9;glementation 2027</div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">Format num&#xe9;rique structur&#xe9; &#x00B7; Tous champs obligatoires renseign&#xe9;s</div>'
       +'</div>';

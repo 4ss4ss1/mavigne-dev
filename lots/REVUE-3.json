@@ -1,0 +1,20 @@
+{
+  "lot": "REVUE-3",
+  "section": "§392",
+  "base": "4f46429cba965e650b2969bfda7d9d6b96ec1c53",
+  "inclut": [],
+  "date": "2026-10-20",
+  "fichiers": {
+    ".mv-base": "4e89e313d286a90f5609d02408f5140c4770057a369051192a2369cec7e28886",
+    "CLAUDE.md": "4defb4891928d44449e07f9c25f87e2b34ed63a3b571341ef42520b97c92999a",
+    "docs/claude/INDEX.md": "1fe9291c764bc830850df9b28847de75a91f97bec834526b369af563587d3b7e",
+    "docs/claude/chantiers-380-429.md": "bd26814a22ab3cbed1d5a0f2f3e5b87708bdca7dc0e43af7d0bf449ca2459ae6",
+    "docs/claude/journal.md": "88db93419df457974bbf77b81efa1902eb105d84db6756290f1a4b8cdb9229af",
+    "index.html": "0eeb305a46bd29e273cbc4b0562331c3159e7ae41ef6e8967f089dcb4b3d9e58",
+    "public/sw.js": "f7894c87013a9ffad19a028008e0eddc9d24cd6f0d274e3edcaeb2b1ebb49c9c",
+    "scripts/mv-captures.mjs": "a1b56dc9869c1e3b5e5561f0df89ee6d02bba8be7d2ee2fcf2be7c87bc9a25b6",
+    "scripts/mv-harnais-cartes.mjs": "90351540b94a5ce945d6c908223aa101a6a6610421f2d98f7455f01e978c113f",
+    "src/phyto.js": "b36f6691c8b435c70c17f1bfe2a2cd2ce5190b3dfed79d6e6d82d02baaaf24dc",
+    "src/utils.js": "550504de87dbe65e6f2a07c88bcdf9d218bbe87c1b9f319d5e4b6e420475c8e0"
+  }
+}

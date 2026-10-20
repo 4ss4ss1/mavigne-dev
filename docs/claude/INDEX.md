@@ -445,3 +445,4 @@
 | 389 | 389. REVUE-1 — LA REVUE À L’ÉCRAN DE CE QUI A CHANGÉ DE DESSIN (20/10 — `scripts/mv-captures.mjs` · `src/st… | `docs/claude/chantiers-380-429.md` |
 | 390 | 390. REVUE-2 — LA REVUE À L’ÉCRAN, DEUXIÈME PASSAGE (20/10 — `src/styles.css` · `src/reglages.js` · `src/ut… | `docs/claude/chantiers-380-429.md` |
 | 391 | 391. ⚠️ CHARGE-1 — LE LANCEUR NE FAIT PLUS PARTIR LES LOURDES ENSEMBLE (20/10 — `scripts/mv-lanceur.mjs` · … | `docs/claude/chantiers-380-429.md` |
+| 392 | 392. REVUE-3 — LA REVUE À L’ÉCRAN, TROISIÈME PASSAGE : DES SITUATIONS MISES EN PLACE PAR L’OUTIL (20/10 — `… | `docs/claude/chantiers-380-429.md` |

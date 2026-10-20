@@ -69,6 +69,9 @@ const ECRANS = {
   // ★ REVUE-2 (§390)
   'phyto-saisie': "goTo('phyto'); setTimeout(function(){ if (window.openTraitEdit) window.openTraitEdit(0); }, 400);",
   'mur': "goTo('home'); setTimeout(function(){ if (window.openMur) window.openMur(); }, 400);",
+  // ★ REVUE-3 (§392) : des situations mises en place par l’outil, sans toucher à la démo des visiteurs
+  'phyto-produit': "goTo('phyto'); switchPhytoTab('cat'); setTimeout(function(){ var c = document.querySelector('.catitem'); if (c) c.click(); }, 500);",
+  'phyto-cuivre': "var _r = window._visiteScenarioReady; window._visiteScenarioReady = false; window.applyFbData('parcelles', [{ id: 'rv1', nom: 'Les Grandes Vignes', surface: 0.42, superficie: 0.42, statut: 'Actif', cepage: 'Pinot noir' }, { id: 'rv2', nom: 'Champ Perdrix', surface: 0.31, superficie: 0.31, statut: 'Actif', cepage: 'Pinot noir' }]); window._visiteScenarioReady = _r; goTo('phyto'); openOvTraitement(); setTimeout(function(){ window._tratSearch('Bouillie bordelaise RSR'); window._tratPick(0); var d = document.getElementById('trat-dose-input'); if (d) d.value = '1,5'; window._tratAddSel(); window._tratSetCu(0, '30'); window._tratSetConducteur('Paul'); var dt = document.getElementById('trat-date'); if (dt) dt.value = '2026-10-20'; window._tratNext(); window._tratAllParc(); window._tratNext(); }, 400);",
   'mot-de-passe-erreur': "goTo('reglages'); if (window.openChangePwd) window.openChangePwd(); else window._openOv('ovChangePwd'); setTimeout(function(){ var e = document.getElementById('cpwd-error'); if (e) { e.textContent = 'Le mot de passe actuel ne correspond pas.'; e.style.display = 'block'; } }, 300);"
 };
 const choisis = opt('--ecrans') ? opt('--ecrans').split(',').map(x => x.trim()).filter(Boolean) : Object.keys(ECRANS);
