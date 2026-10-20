@@ -1029,18 +1029,16 @@ function _caveJDet(op){
   }
   return h;
 }
-function renderCaveReglages(){
-  var el=document.getElementById('mvc-body-reglages'); if(!el) return;
-  // ⚠️ Le CSS du parc vit dans _caveV2InjectCss : sans cet appel, arriver aux
-  //   reglages avant d'avoir ouvert les cuvees rendrait le parc SANS STYLE.
-  _caveV2InjectCss();
-  var adm=(typeof isAdmin==='function'&&isAdmin());
-  var seuil=_caveSeuilGlobal();
-  var _mils=_caveMilsEnCave();
-  var html='';
-  if(adm){
-    // Un seuil par millesime : un vin jeune s'ouille plus souvent qu'un vin
-    // d'un an. Le stepper global reste la reference des millesimes non regles.
+/* ★ CAVEREG-2 (§387) — LE CHAI EN LIGNES (roue crantée › Le Chai) : Élevage (l'alerte d'ouillage, la contenance d'un fût),
+   le parc à cuves tel quel, Outils (le convertisseur SO₂). L'alerte d'ouillage — son compteur général et ceux de chaque
+   millésime, inchangés — passe dans la fenêtre ovCregEdit, qui suit chaque geste. */
+function _cregLigne(t, v, s, act, geste){
+  return '<div class="creg-l"><span class="l"><span class="t">'+t+'</span>'+(s?'<span class="d">'+s+'</span>':'')+'</span>'+(v?'<span class="v">'+v+'</span>':'')
+    +(act?'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" onclick="'+geste+'">'+act+'</button>':'')+'</div>';
+}
+function _cregGroupe(t, lignes){ return '<div class="creg-g"><div class="creg-g-t">'+t+'</div>'+lignes+'</div>'; }
+function _caveOuilHtml(){
+  var seuil=_caveSeuilGlobal(), _mils=_caveMilsEnCave(), html='';
     html+='<div class="mvc-set-card"><div class="mvc-set-t">'+_mvIcon('sablier',16)+' Alerte d\u2019ouillage</div>'
       +'<div class="mvc-set-d">Nombre de jours sans ouillage avant qu\u2019une cuv\u00e9e passe au rouge. La jauge \u00ab part des anges \u00bb se cale sur ce seuil.</div>'
       +'<div class="mvc-stepper"><button class="mvc-step-btn" onclick="_caveSeuilStep(-1)" aria-label="Diminuer">\u2212</button>'
@@ -1060,15 +1058,33 @@ function renderCaveReglages(){
       });
     }
     html+='</div>';
-    html+='<div class="mvc-set-card"><div class="mvc-set-t">'+_mvIcon('barrique',16)+' Contenance d\u2019un f\u00fbt</div>'
-      +'<div class="mvc-set-d">Volume d\u2019une barrique. Sert \u00e0 convertir les f\u00fbts en hL partout dans Le Chai. 228 L en Bourgogne, 225 L \u00e0 Bordeaux, 500 \u00e0 600 L pour un demi-muid.</div>'
-      +'<button class="mvc-set-btn" onclick="_caveFutPrompt()">'+_caveFutL()+' L \u00b7 Modifier</button></div>';
+  return html+'<div class="mat-f-pied"><button type="button" class="mvbtn mvbtn-principal" onclick="closeOv(null,\'ovCregEdit\')">Terminé</button></div>';
+}
+function _caveRegOuil(){
+  if(!(typeof isAdmin==='function'&&isAdmin())){ showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#C0392B'); return; }
+  var corps=document.getElementById('creg-ed-corps'); if(!corps) return;
+  corps.setAttribute('data-ouil','1'); corps.innerHTML=_caveOuilHtml();
+  if(window.openOv) window.openOv('ovCregEdit');
+}
+function renderCaveReglages(){
+  var el=document.getElementById('mvc-body-reglages'); if(!el) return;
+  // ⚠️ Le CSS du parc vit dans _caveV2InjectCss : sans cet appel, arriver aux
+  //   reglages avant d'avoir ouvert les cuvees rendrait le parc SANS STYLE.
+  _caveV2InjectCss();
+  var adm=(typeof isAdmin==='function'&&isAdmin()), seuil=_caveSeuilGlobal(), _mils=_caveMilsEnCave();
+  var par=(CAVE_ELEVAGE.config&&CAVE_ELEVAGE.config.ouillage_par_mil)||{};
+  var propres=_mils.filter(function(m){ return parseInt(par[m],10)>0; });
+  var html='';
+  if(adm){
+    html+=_cregGroupe('\u00c9levage',
+       _cregLigne('Alerte d\u2019ouillage', 'tous les '+seuil+' jours', propres.length?propres.map(function(m){ return (m==='?'?'sans mill\u00e9sime':_escHtml(m))+' : '+_caveSeuilOu(m)+' j'; }).join(' \u00b7 '):'un seuil propre \u00e0 chaque mill\u00e9sime reste possible', 'Modifier', '_caveRegOuil()')
+      +_cregLigne('Contenance d\u2019un f\u00fbt', _caveFutL()+' L', 'pour les volumes et la part des anges', 'Modifier', '_caveFutPrompt()'));
     html+=_caveParcCardHtml();
   }
-  html+='<div class="mvc-set-card"><div class="mvc-set-t">'+_mvIcon('eprouvette',16)+' Convertisseur SO\u2082</div>'
-    +'<div class="mvc-set-d">Dose, dilution, pastilles \u2014 pour pr\u00e9parer vos sulfitages.</div>'
-    +'<button class="mvc-set-btn" onclick="openOvCaveConvert()">Ouvrir le convertisseur</button></div>';
+  html+=_cregGroupe('Outils', _cregLigne('Convertisseur SO\u2082', '', 'dose, dilution, pastilles \u2014 pour pr\u00e9parer vos sulfitages', 'Ouvrir', 'openOvCaveConvert()'));
   el.innerHTML=html;
+  var ov=document.getElementById('creg-ed-corps');
+  if(ov&&ov.getAttribute&&ov.getAttribute('data-ouil')==='1') ov.innerHTML=_caveOuilHtml();
 }
 // ══ L'ECRAN DU PARC ═══════════════════════════════════════════════════════
 // Le formulaire vit DANS la carte, pas dans un overlay : ajouter une cuve ne
@@ -1214,6 +1230,7 @@ function _caveSeuilStep(delta){
   var n=document.getElementById('mvc-seuil-num'); if(n) n.textContent=v;
   _mvcRenderHeader();
   renderCaveCuvees();
+  if(typeof renderCaveReglages==='function') renderCaveReglages();   // ★ CAVEREG-2 : la ligne et la fenêtre suivent
 }
 // Reglage de la contenance d'un fut. openPrompt (jamais prompt() natif : il ne
 // rend RIEN en PWA iOS). Ecrit CONFIG.cave.fut_l en PRESERVANT le reste de
@@ -7557,6 +7574,7 @@ window.renderCaveAujourdhui= renderCaveAujourdhui;
 window.renderCaveReglagesCave = renderCaveReglagesCave;
 window._caveOpenReglages   = _caveOpenReglages;
 window._caveRegSec = _caveRegSec;   // ★ CAVEREG-1
+window._caveRegOuil = _caveRegOuil;   // ★ CAVEREG-2
 // ★ Lus par le Pilotage (carte Cave, lot ③) : le verdict et l'agenda complet
 //   n'ont qu'UNE definition, et elle est ici.
 window._mlAgendaComplet    = _mlAgendaComplet;

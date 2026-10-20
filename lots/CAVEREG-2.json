@@ -1,0 +1,32 @@
+{
+  "lot": "CAVEREG-2",
+  "section": "§387",
+  "base": "c09371506a36a38f803021781c95eb6363ec7086",
+  "inclut": [
+    "CAVEREG-1"
+  ],
+  "date": "2026-10-20",
+  "fichiers": {
+    ".mv-base": "5ee5cb9c6ef92861b03dcc5c7555f35a766fdbd3ea071864577bbc7d94e8ea14",
+    "CLAUDE.md": "5b0f32af2ecf98c501161ec6295dfb4851bdb513dd90fafb75d753bbcb7f95da",
+    "docs/claude/INDEX.md": "cd68f2f63fb1e0465d82f0d623e913d352eb880f1cb8535576aee8c6d12d6554",
+    "docs/claude/chantiers-380-429.md": "798010c5200ac3b446d86dfab49b5b57f92661d1d92b88dd749fa59e4d1be6a9",
+    "docs/claude/journal.md": "6e3479bf0840d48c193e3b9968256c5a7d37ef77139bfb02ec9be293d7596130",
+    "guide/08-cave.html": "621dc802fe275485a1845cd306b3d9ddf8ef49fac207b2b7d592c35059843c47",
+    "index.html": "1345ae91d7ece4e7e218730daef7448a8f50079ac17bf2864e22d1d67f6e597c",
+    "public/guide.html": "7fac053896f5c0c39c317c057d50547b1b556c3629deba1f96dd173007f28870",
+    "public/sw.js": "374fb36a43a61d01d7c0c20f42f32a57533059227f6b6233e2718acf1befa00f",
+    "scripts/mv-harnais-liste.mjs": "0441d5525966195f3603710770f78af6dc57ddf509bbb9ff789e92762d88bc6c",
+    "scripts/mv-harnais-matu1.mjs": "498370cd04d813e79bdd0e15d17179b53a3a90ae7554a1e5ab0dfddd10fc5e46",
+    "scripts/mv-harnais-regl-module.mjs": "d333d8044ba54c2779c20d115ffc88f1b44c44e6ac03b4873aaf44c7f86d6db8",
+    "scripts/mv-harnais-tourcuv1.mjs": "fce34a2254a70eebde4488f17f61f3858c8aef232a9c4e2cb16351e21b72c340",
+    "scripts/tutos-couverture.json": "0d388e53971d1277975fd3edbd9219630dfc9d7b68fbf3fff4256d9304d1d16c",
+    "src/cave.js": "d119463b4e0a3a09a95c3bae003ae81d025f5a71d21321ae5b452a25465ed175",
+    "src/cuvier.js": "8224d8d8439b24a42b4707d6989b7a6c4594a3736325fc434e7b6cc03c151260",
+    "src/reglages.js": "a0562308505432519312a52e5f01ee638200b698f998c3ac32ff0e72fdef667a",
+    "src/styles.css": "13832b454e474c9f36e7659798993b49f5388c9e8b99de8fcc539d6cc4fc2191",
+    "src/utils.js": "f77f1ebae3588029205db8bb186e33c117f7fa5ffd2e7aab624bdb3c636146aa",
+    "scripts/mv-harnais-cavereg1.mjs": "1fc145e6530c05e6e65f7ebad797004f003d1657ba942d98d07b9b5007f55661",
+    "scripts/mv-harnais-cavereg2.mjs": "3349b8a68aa8d5ed7cad3587d826bae76aab01913a04124c8ec232eda408abcb"
+  }
+}

@@ -37,7 +37,7 @@ function bornes(src, nom) {
 const fn = (src, nom) => { const [a, b] = bornes(src, nom); return src.slice(a, b); };
 
 const FONCTIONS = ['_matJours', '_matLarge', '_matFour', '_matSynth', '_matUnite', '_matGros', '_matPetit', '_matJj', '_matAge',
-  '_matVit', '_matVin', '_matPlur', '_matVuesHtml', '_matOrdreHtml', '_matRegLire', '_vendAnaAdd', '_matSuc', '_vendCfg',
+  '_matVit', '_matVin', '_matPlur', '_matVuesHtml', '_matOrdreHtml', '_vendAnaAdd', '_matSuc', '_vendCfg',
   '_matMin'];   // MINAOC-1 (§385) : l'ordre de maturité trace le minimum de l'appellation
 
 function jouer(S) {
@@ -119,18 +119,7 @@ function jouer(S) {
   t('chaque ligne ouvre la fiche par son nom (data-nom, pas de nom dans le code du clic)',
     /data-nom="Champ Perdrix" onclick="_matSel\(this\.dataset\.nom\)"/.test(html));
 
-  /* ══ 4. LE RÉGLAGE : deux bornes ou aucune ══ */
-  const champs = (rmin, rmax, bmin, bmax) => { DOM['vpfi-mr-min'] = { value: rmin }; DOM['vpfi-mr-max'] = { value: rmax };
-    DOM['vpfi-mb-min'] = { value: bmin }; DOM['vpfi-mb-max'] = { value: bmax }; };
-  champs('225', '205', '', '');
-  let lu = ctx._matRegLire();
-  t('deux bornes inversées sont remises dans l’ordre', !lu.err && lu.four.r.min === 205 && lu.four.r.max === 225 && lu.four.b === null, JSON.stringify(lu));
-  champs('205', '225', '200', '');
-  lu = ctx._matRegLire();
-  t('une seule borne : rien ne s’enregistre, et on le dit', /deux bornes/.test(lu.err), JSON.stringify(lu));
-  champs('210', '210', '', '');
-  t('un haut égal au bas est refusé', /dépasser le bas/.test(ctx._matRegLire().err));
-
+  /* ══ 4. LE RÉGLAGE de la fourchette : depuis CAVEREG-2 (§387), sa fenêtre et ses règles ont leur harnais (cavereg2). ══ */
   /* ══ 5. LA SAISIE EN SÉRIE : seules les valeurs lisibles s'enregistrent, toutes d'un coup ══ */
   const avant = ctx.CAVE_VENDANGE.analyses.length;
   ctx._matSaisieEt = { date: '2026-09-08', unite: 's', vals: { 'Les Charmes': '214', 'Clos Blanc': '', 'Vieille Vigne': 'abc', 'Champ Perdrix': '222,5' }, focus: null };
@@ -146,8 +135,6 @@ function jouer(S) {
   t('l’écran passe la vendange choisie au calcul', /_matSynth\(_matFen, ref, an\)/.test(fn(S.cuv, 'renderVendAna')));
   t('le graphe trace les fourchettes et sait taire sa légende', /opt\.bandes/.test(fn(S.cuv, '_vendMatSvg'))
     && /--ok-doux/.test(fn(S.cuv, '_vendMatSvg')) && /opt\.sansLegende/.test(fn(S.cuv, '_vendMatSvg')));
-  t('l’enregistrement des réglages lit la fourchette et refuse une erreur', /_matRegLire\(\)/.test(fn(S.cuv, '_vendSaveParam'))
-    && /mat_four\s*=\s*_mf\.four/.test(fn(S.cuv, '_vendSaveParam')));
   t('les trois fenêtres existent dans index.html', ['ovMatFiche" onclick', 'ovMatSaisie" onclick', 'ovMatCouleurs" onclick', 'id="mat-fiche-corps"',
     'id="mat-saisie-corps"', 'id="mat-coul-corps"'].every((x) => S.html.includes(x)));
   t('la bulle « i » de la synthèse a sa fiche', /'cave\.maturite': \{ t:/.test(S.utils) && /_mvInfoBtn\('cave\.maturite'\)/.test(S.cuv));
@@ -161,7 +148,6 @@ const DEFAUTS = [
   ['une fourchette incohérente est tracée', (S) => ({ ...S, cuv: S.cuv.replace('if(mn > 0 && mx > mn) o[c] = { min:mn, max:mx };', 'if(mn > 0) o[c] = { min:mn, max:mx };') })],
   ['la bande prend la fourchette de l’autre couleur', (S) => ({ ...S, cuv: S.cuv.replace("var w = four[e.coul], pale = grp !== 'frais', sel = _matSelNom === e.nom;", "var w = four.b, pale = grp !== 'frais', sel = _matSelNom === e.nom;") })],
   ['les jamais mesurées ne sont plus repliées', (S) => ({ ...S, cuv: S.cuv.replace('if(ouv) liste.forEach(function(e){ s += ligne(e, grp); });', 'liste.forEach(function(e){ s += ligne(e, grp); });') })],
-  ['une seule borne s’enregistre', (S) => ({ ...S, cuv: S.cuv.replace("if(!(a > 0) || !(b > 0)){ err = err || 'Fourchette des ' + nm + ' : remplissez les deux bornes, ou videz les deux.'; return; }", '') })],
   ['une valeur illisible s’enregistre', (S) => ({ ...S, cuv: S.cuv.replace("    var v = parseFloat(String(s.vals[nom]).replace(',', '.'));\n    if(!(v > 0)) return;\n", "    var v = parseFloat(String(s.vals[nom]).replace(',', '.'));\n    if(s.vals[nom] === '') return;\n") })],
   ['l’écran ne passe plus la vendange au calcul', (S) => ({ ...S, cuv: S.cuv.replace('var r = _matSynth(_matFen, ref, an);', 'var r = _matSynth(_matFen, ref);') })],
   ['une fenêtre manque dans index.html', (S) => ({ ...S, html: S.html.replace('id="ovMatSaisie"', 'id="ovMatSaisieX"') })],

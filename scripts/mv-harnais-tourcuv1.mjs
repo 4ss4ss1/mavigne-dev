@@ -79,7 +79,7 @@ function jouer(S) {
 
 const DEFAUTS = [
   ['le bandeau sombre revient', (S) => ({ ...S, cuv: S.cuv.replace('".vt-hd{position:sticky;top:0;z-index:40;padding:var(--e-3,12px) var(--e-4,16px) var(--e-2,8px);gap:var(--e-2,8px)}",', '".vt-hd{position:sticky;top:0;z-index:40;background:var(--cave,#14110D);color:#F0E2C8;padding:13px 14px 0}",') })],
-  ['le filtre choisi ne se voit plus', (S) => ({ ...S, cuv: S.cuv.replace("'<button type=\"button\" class=\"mvbtn mvbtn-option mvbtn-compact'+(on?' on':'')+'\" aria-pressed=\"'+on+'\"", "'<button type=\"button\" class=\"mvbtn mvbtn-option mvbtn-compact\" aria-pressed=\"false\"") })],
+  ['le filtre choisi ne se voit plus', (S) => ({ ...S, cuv: S.cuv.replace("'<button type=\"button\" class=\"mvbtn mvbtn-option mvbtn-compact'+(on?' on':'')+'\" aria-pressed=\"'+on+'\" onclick=\"_vtFilt(", "'<button type=\"button\" class=\"mvbtn mvbtn-option mvbtn-compact\" aria-pressed=\"false\" onclick=\"_vtFilt(") })],   // CAVEREG-2 : la fenêtre des réglages porte le même bouton ; viser celui de la Tournée
   ['le « + » muet revient', (S) => ({ ...S, cuv: S.cuv.replace("onclick=\"_vtSheet()\">'+_mvIcon('plus',16)+'<span>Intervention groupée</span></button>'", "onclick=\"_vtSheet()\" aria-label=\"Intervention groupée\">'+_mvIcon('plus',24)+'</button>'") })],
   ['la tête perd la date', (S) => ({ ...S, cuv: S.cuv.replace("+'<span class=\"mat-an-t\"><span class=\"vt-lg\">Tournée du '+d+'</span>", "+'<span class=\"mat-an-t\"><span class=\"vt-lg\">Tournée</span>") })],
   ['la progression perd un identifiant', (S) => ({ ...S, cuv: S.cuv.replace('<div class="vt-prog-f" id="vt-pf"></div>', '<div class="vt-prog-f"></div>') })],

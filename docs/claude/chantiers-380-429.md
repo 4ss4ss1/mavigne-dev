@@ -156,3 +156,25 @@ La page existait déjà en quatre blocs empilés (CAVE-2, AOC-1, PARC-XLS-2) : `
 
 ### 386e. Trouvé en route
 - **`mv-harnais-regl-module` (NAV-1) comptait les « Le Millésime » d’index.html** : deux, l’onglet de la Cave et le bloc de la roue crantée. Le bloc s’appelle « Appellations » : le compte passe à un, l’intention (la majuscule, comme « Le Cuvier ») reste vérifiée.
+
+## 387. ★ CAVEREG-2 — UNE LIGNE PAR RÉGLAGE, CHACUN SA FENÊTRE (20/10 — `src/cuvier.js` (`renderVendParam` réécrit, `_vendReg*` ; partis : `_vendSaveParam`, `_matRegLire`, `_matRegHtml`, `_matRegLigne`) · `src/cave.js` (`renderCaveReglages` réécrit, `_cregLigne`, `_cregGroupe`, `_caveOuilHtml`, `_caveRegOuil`, `_caveSeuilStep`) · `src/styles.css` (bloc CAVEREG-2) · `src/utils.js` · `index.html` (`ovCregEdit`) · `public/sw.js` · `guide/08-cave.html` · `public/guide.html` · `scripts/mv-harnais-cavereg2.mjs` (neuf) · `scripts/mv-harnais-matu1.mjs` · `scripts/mv-harnais-liste.mjs` · `.mv-base` · `lots/CAVEREG-2.json` · `CLAUDE.md` · `docs/claude/*` · **APP 9.48 → 9.49, SW 10.27 → 10.28**, base `c093715`, avec CAVEREG-1)
+
+### 387a. La demande
+Le reste de la maquette de la roue crantée (§386d) : les réglages du Cuvier et du Chai en lignes « libellé · ce qu’il sert · valeur · Modifier », chacun sa fenêtre, et le badge « nouveau » des fourchettes. Nico (20/10) : « suite ».
+
+### 387b. Ce qui est livré
+- **Le Cuvier** : Maturité (Fourchette des rouges, Fourchette des blancs — badge « nouveau » —, Sucre pour un degré), Pesée et rendement (Poids d’une caisse, Corriger un poids déjà saisi, Rendement jus, Base du rendement), Vente de raisin (Clients vrac, Livraisons et bons). « Modifier » pour l’administrateur ; les portes d’avant (corriger un poids, gérer les clients, livraisons et bons) restent, avec leurs droits.
+- **Un nombre seul** (le poids d’une caisse, le sucre pour un degré) : la fenêtre de saisie commune ; les bornes d’avant (10 à 60 kg, 15 à 20 g/L, au centième), ramenées et dites.
+- **La fourchette** (`ovCregEdit`) : en sucre ou en degré (× le sucre pour un degré), la conversion écrite en direct, deux bornes ou aucune (« Vider »), remises dans l’ordre, 120 à 300 g/L, un haut égal au bas refusé — l’erreur reste dans la fenêtre. Enregistrer une couleur garde l’autre.
+- **Le rendement jus** : deux bornes, 80 à 200 kg/hL, remises dans l’ordre et dites, l’aperçu (« 100 caisses de 25 kg font… ») en direct. **La base** : deux choix, enregistrés par `_vendSetRdtBase`, la fenêtre se ferme.
+- **Le Chai** : Élevage (Alerte d’ouillage — la ligne dit les millésimes qui ont leur seuil ; « Modifier » ouvre les compteurs d’avant dans `ovCregEdit`, que `renderCaveReglages` réécrit à chaque geste — ; Contenance d’un fût, par sa fenêtre d’avant), le parc à cuves tel quel, Outils (le convertisseur SO₂).
+
+### 387c. Les décisions
+- **Chaque réglage s’enregistre seul** : « Enregistrer les paramètres » enregistrait les quatre chiffres et la fourchette d’un coup ; une ligne qui ouvre une fenêtre enregistre la sienne. Les règles (bornes, ordre, deux bornes ou aucune) sont reprises mot pour mot.
+- **Le réglage de la fourchette quitte le harnais des Maturités** pour `mv-harnais-cavereg2` : son code a quitté le leur.
+
+### 387d. Trouvé en route
+- **L’inventaire des tutos ne voit pas un geste passé par une variable** (`onclick="'+geste+'"`) : les sept gestes neufs (`_vendReg`, sa fenêtre, `_caveRegOuil`) n’ont pas fait monter le compte. Ce n’est pas une couverture : à corriger dans l’inventaire, ou à écrire en clair.
+- **VD-GARDE** : `_vendRegNombre` écrivait la configuration sans garde de rôle (la garde était dans `_vendReg`, qui l’appelle) ; `mv-harnais-vendange-garde` veut la garde dans chaque écrivain. Posée.
+- **Une injection de contre-épreuve vise la PREMIÈRE occurrence** : celle de TOURCUV-1 (« le filtre choisi ne se voit plus ») tombait désormais sur le bouton d’unité de la fenêtre des réglages, écrit à l’identique. Elle vise maintenant le bouton de la Tournée (`onclick="_vtFilt(`).
+- **Une contre-épreuve qui fait planter le harnais ne rougit pas proprement** : « enregistrer une couleur efface l’autre » rendait la fourchette des rouges nulle et la vérification lisait `.r.min` — `TypeError`. Lire `(… || {}).min`.

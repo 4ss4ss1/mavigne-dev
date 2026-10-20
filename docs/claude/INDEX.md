@@ -440,3 +440,4 @@
 | 384 | 384. ★ TOURCUV-1 — LA TOURNÉE DU CUVIER À LA MÊME ENSEIGNE (20/10 — `src/cuvier.js` (`_vtBandeauHtml`, `ren… | `docs/claude/chantiers-380-429.md` |
 | 385 | 385. ★ MINAOC-1 — LE MINIMUM DE MATURITÉ DE L’APPELLATION (20/10 — `src/reglages.js` (`window._aocSetMin`, … | `docs/claude/chantiers-380-429.md` |
 | 386 | 386. ★ CAVEREG-1 — LA ROUE CRANTÉE DE LA CAVE EN QUATRE SECTIONS (20/10 — `index.html` (`#cave-reg-body`) ·… | `docs/claude/chantiers-380-429.md` |
+| 387 | 387. ★ CAVEREG-2 — UNE LIGNE PAR RÉGLAGE, CHACUN SA FENÊTRE (20/10 — `src/cuvier.js` (`renderVendParam` réé… | `docs/claude/chantiers-380-429.md` |

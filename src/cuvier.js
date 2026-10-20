@@ -1864,60 +1864,178 @@ function _vendFicheHtml(c, canEdit){
 }
 
 function _vendCfg(){return Object.assign({poids_caisse_kg:25,ratio_min:130,ratio_max:140,sucre_par_degre:16.83},CAVE_VENDANGE.config||{});}
-function renderVendParam() {
-  // Lot CAVE-2 : les reglages du Cuvier vivent dans la roue crantee de la Cave.
+// ══════════════════════════════════════════════════════════════════
+// ★★ CAVEREG-2 (§387) — LES RÉGLAGES DU CUVIER EN LIGNES (roue crantée › Le Cuvier)
+//   La maquette du 19/10 : une ligne par réglage — le libellé, la valeur, ce qu'elle
+//   sert, « Modifier » — rangées en trois groupes (Maturité, Pesée et rendement,
+//   Vente de raisin). Les champs posés dans la page et leur bouton « Enregistrer les
+//   paramètres » sont partis : chaque réglage s'enregistre seul, par sa fenêtre.
+//   Un nombre seul passe par la fenêtre de saisie commune (openPrompt) ; la
+//   fourchette (deux bornes, sucre ou degré), le rendement jus (deux bornes) et la
+//   base du rendement (un choix) par la fenêtre ovCregEdit. Les règles d'avant
+//   restent, mot pour mot : bornes ramenées et dites, ratios remis dans l'ordre et
+//   dits, fourchette à deux bornes ou aucune. Le Chai (cave.js) a la même forme.
+// ══════════════════════════════════════════════════════════════════
+var _vendRegEt = null;   // la fenêtre ouverte : { k:'four-r'|'four-b'|'ratio'|'base', u:'s'|'a' }
+
+function _vendRegLigne(t, v, s, act, geste, neuf){
+  return '<div class="creg-l"><span class="l"><span class="t">' + t + (neuf ? '<span class="mvpas mvpas-etiquette creg-neuf">nouveau</span>' : '') + '</span>'
+    + (s ? '<span class="d">' + s + '</span>' : '') + '</span>' + (v ? '<span class="v">' + v + '</span>' : '')
+    + (act ? '<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" onclick="' + geste + '">' + act + '</button>' : '') + '</div>';
+}
+function _vendRegGroupe(t, d, lignes){
+  return '<div class="creg-g"><div class="creg-g-t">' + t + '</div>' + (d ? '<p class="creg-g-d">' + d + '</p>' : '') + lignes + '</div>';
+}
+function _vendFr(x){ return String(x).replace('.', ','); }
+
+function renderVendParam(){
+  // Lot CAVE-2 : les réglages du Cuvier vivent dans la roue crantée de la Cave.
   var el=document.getElementById('cave-reg-cuvier'); if(!el) return;
-  // \u2605 RDT-XLS (02/10) : .mvv-set, .mvv-prow, .mvv-fi vivent dans _vendInjectCss, .mvv-fnote et
-  //   .mvv-save.ghost2 dans _vendEnsureSheetCss. Ouverte depuis Aujourd'hui SANS passer par Le Cuvier,
-  //   la roue de la Cave rendait ce bloc SANS STYLE (champs noirs, boutons gris). Meme garde que
-  //   renderCaveReglages pour le Chai (_caveV2InjectCss).
   _vendInjectCss(); _vendEnsureSheetCss();
-  var cfg=_vendCfg();
-  var pck=cfg.poids_caisse_kg, rMin=cfg.ratio_min, rMax=cfg.ratio_max;
-  var ex=100*pck;
-  var admin=(typeof isAdmin==='function'&&isAdmin());
-  var html=_caveSaisBanner();
-  html+='<div class="mvv-set"><div class="mvv-set-t">Pesée</div>'
-    +'<div class="mvv-set-d">Poids moyen d\'une caisse de vendange, utilisé pour convertir les caisses en kilos.</div>'
-    +'<div class="mvv-prow"><div class="mvv-prow-l">Poids par caisse</div><div style="display:flex;align-items:center;gap:7px"><input class="mvv-fi" id="vpfi-pck" type="number" min="10" max="60" value="'+pck+'"><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F)">kg</span></div></div>'
-    // Le poids par défaut ne vaut QUE pour les saisies à venir : chaque apport
-    // fige le sien (VD-1). La correction des apports déjà saisis a sa porte.
-    +'<div class="mvv-fnote" style="color:var(--texte-doux,#5F5F5F)">Poids proposé aux prochaines saisies. Chaque apport garde celui du jour où il a été pesé.</div>'
-    +(canWrite()?'<button class="mvv-save ghost2" style="margin-top:10px" onclick="openVendPoids()">Corriger un poids déjà saisi</button>':'')
-    +'</div>';
-  html+='<div class="mvv-set"><div class="mvv-set-t">Rendement jus</div>'
-    +'<div class="mvv-set-d">Kilos de raisin pour produire 1 hL de jus. Standard Bourgogne rouge : 130–140 kg/hL.</div>'
-    +'<div class="mvv-prow"><div class="mvv-prow-l">Ratio minimum</div><div style="display:flex;align-items:center;gap:7px"><input class="mvv-fi" id="vpfi-rmin" type="number" min="80" max="200" value="'+rMin+'"><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F)">kg/hL</span></div></div>'
-    +'<div class="mvv-prow"><div class="mvv-prow-l">Ratio maximum</div><div style="display:flex;align-items:center;gap:7px"><input class="mvv-fi" id="vpfi-rmax" type="number" min="80" max="200" value="'+rMax+'"><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F)">kg/hL</span></div></div>'
-    +'<div class="mvv-preview">100 caisses de '+pck+' kg → <b>'+(ex/rMax).toFixed(1)+'–'+(ex/rMin).toFixed(1)+' hL</b></div></div>';
-  var _rb=_vendRdtBase();
-  html+='<div class="mvv-set"><div class="mvv-set-t">Base du rendement</div>'
-    +'<div class="mvv-set-d">Le client rend deux chiffres apr\u00e8s pressurage : les litres de jus et les litres '
-    +'de lie. Celui qui compte pour votre d\u00e9claration se r\u00e8gle ici \u2014 l\u2019application ne le devine pas.</div>'
-    +'<div class="mvv-prow"><div class="mvv-prow-l">Volume retenu</div>'
-    +'<div style="display:flex;gap:6px">'
-    +'<button class="mvv-save ghost2" style="width:auto;padding:8px 12px;margin:0;'
-      +(_rb==='jus'?'background:rgba(138,90,56,.16);border-color:rgba(138,90,56,.4)':'')
-      +'" onclick="_vendSetRdtBase(\'jus\')">Jus clair</button>'
-    +'<button class="mvv-save ghost2" style="width:auto;padding:8px 12px;margin:0;'
-      +(_rb==='total'?'background:rgba(138,90,56,.16);border-color:rgba(138,90,56,.4)':'')
-      +'" onclick="_vendSetRdtBase(\'total\')">Jus + lies</button></div></div>'
-    +'<div class="mvv-preview">'+(_rb==='jus'
-        ?'Seul le jus clair entre dans le rendement.'
-        :_mvIcon('alerte',16)+' Jus et lies comptent. Le volume du domaine est un volume log\u00e9 : ses lies ne sont compt\u00e9es nulle part.')
-    +'</div></div>';
-  html+='<div class="mvv-set"><div class="mvv-set-t">Chaptalisation</div>'
-    +'<div class="mvv-set-d">Sucre pour enrichir de 1° d’alcool potentiel. Standard : 16,83 g/L (≈ 17 g/L). Utilisé par l’assistant d’opération sur cuve.</div>'
-    +'<div class="mvv-prow"><div class="mvv-prow-l">Sucre par degré</div><div style="display:flex;align-items:center;gap:7px"><input class="mvv-fi" id="vpfi-spd" type="number" min="15" max="20" step="0.01" value="'+cfg.sucre_par_degre+'"><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F)">g/L</span></div></div></div>';
-  html+=_matRegHtml();   // ★ MATU-1 : la fourchette visée par couleur
-  html+='<div class="mvv-set"><div class="mvv-set-t">Clients vrac</div>'
-    +'<div class="mvv-set-d">Acheteurs de raisin en vrac, avec leur poids par caisse. Sert à convertir les caisses vendues et suivre les volumes livrés.</div>'
-    +(canWrite()?'<button class="mvv-save ghost2" style="margin-top:12px" onclick="openVendClients()">Gérer les clients ('+_vendClients().length+')</button>':'')
-    +'<button class="mvv-save ghost2" style="margin-top:8px" onclick="openVendVrac()">Livraisons et bons</button>'
-    +'</div>';
-  if(admin) html+='<button class="mvv-save" onclick="_vendSaveParam()">Enregistrer les paramètres</button>';
-  el.innerHTML=html;
+  var cfg=_vendCfg(), spd=cfg.sucre_par_degre||16.83, f=_matFour(), rb=_vendRdtBase();
+  var adm=(typeof isAdmin==='function'&&isAdmin()), ecrire=canWrite(), mod=adm?'Modifier':'';
+  var pck=cfg.poids_caisse_kg, rMin=cfg.ratio_min, rMax=cfg.ratio_max, ex=100*pck;
+  var four=function(w){ return w ? Math.round(w.min)+' à '+Math.round(w.max)+' g/L' : 'aucune'; };
+  var fourS=function(w){ return w ? _mvF1(w.min/spd)+' à '+_mvF1(w.max/spd)+' %vol potentiel' : 'pas de bande dans les Maturités'; };
+  el.innerHTML=_caveSaisBanner()
+    +_vendRegGroupe('Maturité', 'La fourchette visée de chaque couleur trace sa bande dans les Maturités. Le minimum de chaque appellation se règle dans Appellations.',
+       _vendRegLigne('Fourchette des rouges', four(f.r), fourS(f.r), mod, "_vendReg('four-r')", true)
+      +_vendRegLigne('Fourchette des blancs', four(f.b), fourS(f.b), mod, "_vendReg('four-b')", true)
+      +_vendRegLigne('Sucre pour un degré', _vendFr(spd)+' g/L', 'la conversion sucre et degré, aussi pour la chaptalisation', mod, "_vendReg('spd')"))
+    +_vendRegGroupe('Pesée et rendement', '',
+       _vendRegLigne('Poids d’une caisse', _vendFr(pck)+' kg', 'proposé aux prochaines pesées ; chaque pesée garde le sien', mod, "_vendReg('pck')")
+      +(ecrire?_vendRegLigne('Corriger un poids déjà saisi', '', 'reprendre tout un millésime d’un coup', 'Ouvrir', 'openVendPoids()'):'')
+      +_vendRegLigne('Rendement jus', rMin+' à '+rMax+' kg par hL', '100 caisses de '+_vendFr(pck)+' kg font '+(ex/rMax).toFixed(1).replace('.', ',')+' à '+(ex/rMin).toFixed(1).replace('.', ',')+' hL', mod, "_vendReg('ratio')")
+      +_vendRegLigne('Base du rendement', rb==='jus'?'jus clair':'jus et lies', 'ce qui compte pour votre déclaration', mod, "_vendReg('base')"))
+    +_vendRegGroupe('Vente de raisin', '',
+       _vendRegLigne('Clients vrac', _matPlur(_vendClients().length, 'client'), 'acheteurs et poids de leurs caisses', ecrire?'Gérer':'', 'openVendClients()')
+      +_vendRegLigne('Livraisons et bons', '', 'bons de livraison et retours attendus', 'Ouvrir', 'openVendVrac()'));
   _vendRefreshCockpit();
+}
+
+/* Ouvrir un réglage. Un nombre seul : la fenêtre de saisie commune. Le reste : ovCregEdit. */
+function _vendReg(k){
+  if(!(typeof isAdmin==='function'&&isAdmin())){ showToast('Réservé à l’administrateur', 'var(--attention)'); return; }
+  var cfg=_vendCfg();
+  if(k==='pck'||k==='spd'){
+    if(typeof window.openPrompt!=='function') return;
+    var pk=(k==='pck');
+    window.openPrompt({ titre:pk?'Poids d’une caisse':'Sucre pour un degré',
+      sub:pk?'Proposé aux prochaines pesées ; chaque pesée garde le poids du jour où elle a été faite. Entre 10 et 60 kg.'
+            :'Le sucre pour un degré d’alcool potentiel : la conversion des maturités et la chaptalisation. Standard : 16,83 g/L. Entre 15 et 20.',
+      valeur:_vendFr(pk?cfg.poids_caisse_kg:(cfg.sucre_par_degre||16.83)), unite:pk?'kg':'g/L', icone:pk?'balance':'eprouvette',
+      type:'nombre', placeholder:pk?'25':'16,83', btnLabel:'Enregistrer', cb:function(v){ _vendRegNombre(k, v); } });
+    return;
+  }
+  _vendRegEt={ k:k, u:'s' };
+  _vendRegRendre();
+  if(typeof window.openOv==='function') window.openOv('ovCregEdit');
+}
+/* Les bornes d'avant (_vendSaveParam) : une valeur hors bornes est ramenée, et on le dit. */
+function _vendRegNombre(k, v){
+  if(!(typeof isAdmin==='function'&&isAdmin())) return;   // VD-GARDE : un écrivain porte sa garde de rôle, même appelé par sa fenêtre
+  var x=parseFloat(String(v==null?'':v).replace(',', '.'));
+  if(!isFinite(x)){ showToast('Valeur non comprise', 'var(--attention)'); return; }
+  var pk=(k==='pck'), y=Math.min(pk?60:20, Math.max(pk?10:15, x));
+  if(!pk) y=Math.round(y*100)/100;
+  if(!CAVE_VENDANGE.config) CAVE_VENDANGE.config={};
+  CAVE_VENDANGE.config[pk?'poids_caisse_kg':'sucre_par_degre']=y;
+  window.CAVE_VENDANGE=CAVE_VENDANGE;
+  _vendFbSave((pk?'Poids d’une caisse : ':'Sucre pour un degré : ')+_vendFr(y)+(pk?' kg':' g/L')+(y!==x?' · ramené aux bornes':''), y!==x?'var(--attention)':'var(--ok)');
+  renderVendParam();
+}
+
+function _vendRegRendre(){
+  var corps=document.getElementById('creg-ed-corps'), E=_vendRegEt; if(!corps||!E) return;
+  corps.removeAttribute('data-ouil');   // la même fenêtre sert l'alerte d'ouillage du Chai (cave.js)
+  var cfg=_vendCfg(), spd=cfg.sucre_par_degre||16.83, h='', pied=true;
+  var champ=function(id, lbl, val, ph, u){ return '<label class="creg-ed-f">'+lbl+'<span><input id="'+id+'" type="text" inputmode="decimal" value="'+_escAttr(String(val))+'" placeholder="'+_escAttr(ph)+'" oninput="_vendRegMaj()"><small>'+u+'</small></span></label>'; };
+  if(E.k==='four-r'||E.k==='four-b'){
+    var c=E.k.slice(-1), w=_matFour()[c], a=(E.u==='a'), cv=function(x){ return w?(a?_mvF1(x/spd):String(Math.round(x))):''; };
+    h='<h3 class="creg-ed-t">Fourchette des '+(c==='r'?'rouges':'blancs')+'</h3>'
+      +'<div class="mvbtn-choix" role="group" aria-label="Unité">'+[['s','Sucre g/L'],['a','Degré %vol']].map(function(x){ var on=E.u===x[0]; return '<button type="button" class="mvbtn mvbtn-option mvbtn-compact'+(on?' on':'')+'" aria-pressed="'+on+'" onclick="_vendRegUnite(\''+x[0]+'\')">'+x[1]+'</button>'; }).join('')+'</div>'
+      +'<div class="creg-ed-2">'+champ('creg-min', 'Bas', cv(w?w.min:0), a?(c==='r'?'12,2':'11,6'):(c==='r'?'205':'195'), a?'%vol':'g/L')
+      +champ('creg-max', 'Haut', cv(w?w.max:0), a?(c==='r'?'13,4':'12,8'):(c==='r'?'225':'215'), a?'%vol':'g/L')+'</div>'
+      +'<p class="creg-ed-conv" id="creg-conv"></p>'
+      +'<p class="creg-ed-aide">Le bas : le sucre à partir duquel vous vendangez. Le haut : au-delà, vous jugez la parcelle trop mûre pour votre style. Rien à voir avec le minimum de l’appellation, qui se règle dans Appellations.</p>'
+      +'<button type="button" class="mvbtn mvbtn-discret mvbtn-compact" onclick="_vendRegVider()">Vider</button>';
+  } else if(E.k==='ratio'){
+    h='<h3 class="creg-ed-t">Rendement jus</h3>'
+      +'<p class="creg-ed-aide">Les kilos de raisin pour un hectolitre de jus : la fourchette de tous les volumes estimés de l’application. Standard Bourgogne rouge : 130 à 140 kg par hL.</p>'
+      +'<div class="creg-ed-2">'+champ('creg-min', 'Minimum', cfg.ratio_min, '130', 'kg/hL')+champ('creg-max', 'Maximum', cfg.ratio_max, '140', 'kg/hL')+'</div>'
+      +'<p class="creg-ed-conv" id="creg-conv"></p>';
+  } else {
+    var rb=_vendRdtBase(); pied=false;
+    h='<h3 class="creg-ed-t">Base du rendement</h3>'
+      +'<p class="creg-ed-aide">Le client rend deux chiffres après pressurage : les litres de jus et les litres de lie. Celui qui compte pour votre déclaration se règle ici — l’application ne le devine pas.</p>'
+      +'<div class="creg-ed-choix">'+[['jus','Jus clair','Seul le jus clair entre dans le rendement.'],['total','Jus et lies','Le volume du domaine est un volume logé : ses lies ne sont comptées nulle part.']].map(function(x){
+          var on=rb===x[0]; return '<button type="button" class="mvbtn mvbtn-option'+(on?' on':'')+'" aria-pressed="'+on+'" onclick="_vendRegChoix(\''+x[0]+'\')"><b>'+x[1]+'</b><small>'+x[2]+'</small></button>'; }).join('')+'</div>';
+  }
+  corps.innerHTML='<div class="creg-ed">'+h+'</div>'
+    +'<div class="mat-f-pied"><button type="button" class="mvbtn mvbtn-secondaire" onclick="closeOv(null,\'ovCregEdit\')">'+(pied?'Annuler':'Fermer')+'</button>'
+    +(pied?'<button type="button" class="mvbtn mvbtn-principal" onclick="_vendRegOk()">Enregistrer</button>':'')+'</div>';
+  _vendRegMaj();
+}
+function _vendRegVal(id){ var e=document.getElementById(id); var s=e?String(e.value).trim():''; return s?parseFloat(s.replace(',', '.')):NaN; }
+/* Lire la fenêtre : { val, err, txt }. val === null : vider (fourchette) ; undefined : rien à écrire. */
+function _vendRegLire(){
+  var E=_vendRegEt, spd=(_vendCfg().sucre_par_degre)||16.83, lo=_vendRegVal('creg-min'), hi=_vendRegVal('creg-max');
+  if(E.k==='ratio'){
+    if(!(lo>0)||!(hi>0)) return { err:'Remplissez les deux bornes.' };
+    var a=Math.min(200, Math.max(80, lo)), b=Math.min(200, Math.max(80, hi)), inv=a>b;
+    if(inv){ var t=a; a=b; b=t; }
+    var pck=_vendCfg().poids_caisse_kg;
+    return { val:{ min:a, max:b }, inv:inv, borne:(a!==Math.min(lo, hi)||b!==Math.max(lo, hi)),
+      txt:'100 caisses de '+_vendFr(pck)+' kg font '+(100*pck/b).toFixed(1).replace('.', ',')+' à '+(100*pck/a).toFixed(1).replace('.', ',')+' hL'+(inv?' — les deux bornes seront remises dans l’ordre':'') };
+  }
+  var deg=(E.u==='a'), sLo=lo>0?(deg?lo*spd:lo):NaN, sHi=hi>0?(deg?hi*spd:hi):NaN;
+  if(!(sLo>0)&&!(sHi>0)) return { val:null, txt:'Vide : pas de bande pour cette couleur.' };
+  if(!(sLo>0)||!(sHi>0)) return { err:'Remplissez les deux bornes, ou videz les deux.' };
+  var mn=Math.min(300, Math.max(120, Math.round(Math.min(sLo, sHi)))), mx=Math.min(300, Math.max(120, Math.round(Math.max(sLo, sHi))));
+  if(mn===mx) return { err:'Le haut doit dépasser le bas.' };
+  return { val:{ min:mn, max:mx }, txt:'soit '+(deg?mn+' à '+mx+' g/L':_mvF1(mn/spd)+' à '+_mvF1(mx/spd)+' %vol potentiel') };
+}
+function _vendRegMaj(){
+  var p=document.getElementById('creg-conv'); if(!p||!_vendRegEt||_vendRegEt.k==='base') return;
+  var r=_vendRegLire(); p.textContent=r.err||r.txt||''; p.className='creg-ed-conv'+(r.err?' err':'');
+}
+function _vendRegUnite(u){
+  if(!_vendRegEt) return;
+  var spd=(_vendCfg().sucre_par_degre)||16.83, lo=_vendRegVal('creg-min'), hi=_vendRegVal('creg-max'), de=_vendRegEt.u;
+  _vendRegEt.u=(u==='a')?'a':'s';
+  _vendRegRendre();
+  if(de===_vendRegEt.u) return;
+  var cv=function(x){ return !(x>0)?'':(_vendRegEt.u==='a'?_mvF1(x/spd):String(Math.round(x*spd))); };
+  var a=document.getElementById('creg-min'), b=document.getElementById('creg-max');
+  if(a) a.value=cv(lo); if(b) b.value=cv(hi);
+  _vendRegMaj();
+}
+function _vendRegVider(){ ['creg-min','creg-max'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; }); _vendRegMaj(); }
+function _vendRegOk(){
+  var E=_vendRegEt; if(!E||!(typeof isAdmin==='function'&&isAdmin())) return;
+  var r=_vendRegLire();
+  if(r.err){ _vendRegMaj(); return; }
+  if(!CAVE_VENDANGE.config) CAVE_VENDANGE.config={};
+  var msg, ton='var(--ok)';
+  if(E.k==='ratio'){
+    CAVE_VENDANGE.config.ratio_min=r.val.min; CAVE_VENDANGE.config.ratio_max=r.val.max;
+    msg=r.inv?'Ratios remis dans l’ordre · min '+r.val.min+', max '+r.val.max:'Rendement jus : '+r.val.min+' à '+r.val.max+' kg par hL'+(r.borne?' · ramené aux bornes':'');
+    if(r.inv||r.borne) ton='var(--attention)';
+  } else {
+    var c=E.k.slice(-1), f=Object.assign({ r:null, b:null }, CAVE_VENDANGE.config.mat_four||{});
+    f[c]=r.val; CAVE_VENDANGE.config.mat_four=f;
+    msg='Fourchette des '+(c==='r'?'rouges':'blancs')+(r.val?' : '+r.val.min+' à '+r.val.max+' g/L':' retirée');
+  }
+  window.CAVE_VENDANGE=CAVE_VENDANGE;
+  _vendRegEt=null;
+  if(typeof window.closeOv==='function') window.closeOv(null, 'ovCregEdit');
+  _vendFbSave(msg, ton);
+  renderVendParam();
+}
+function _vendRegChoix(v){
+  _vendSetRdtBase(v);
+  _vendRegEt=null;
+  if(typeof window.closeOv==='function') window.closeOv(null, 'ovCregEdit');
 }
 
 function _vndUpdateCalc() {
@@ -2486,45 +2604,6 @@ function saveVendMesure() {
   if(window.closeOv) window.closeOv(null,'ovVendMesure');
   renderVendCuves();
 }
-function _vendSaveParam() {
-  if(typeof isAdmin==='function'&&!isAdmin()) return;
-  var pck=parseFloat((document.getElementById('vpfi-pck')||{}).value)||25;
-  var rMin=parseFloat((document.getElementById('vpfi-rmin')||{}).value)||130;
-  var rMax=parseFloat((document.getElementById('vpfi-rmax')||{}).value)||140;
-  var spd=parseFloat((document.getElementById('vpfi-spd')||{}).value)||16.83;
-  // \u26a0\u26a0\u26a0 CES QUATRE CHIFFRES PILOTENT TOUS LES VOLUMES DE L'APPLICATION, ET
-  // RIEN NE LES VERIFIAIT. Les min/max des champs sont des attributs HTML : sans
-  // soumission de formulaire, ils ne bloquent rien \u2014 on lisait `.value` sec.
-  // ratio_min/ratio_max alimentent `_mlKgHl`, donc `_mlRdtMoyen`, donc le rendement
-  // hL/ha, qui est un indicateur reglementaire. Une saisie a cote ne doit pas
-  // pouvoir s'enregistrer en silence.
-  // \u2605 Et l'ORDRE compte : le ratio est en kg/hL, donc le ratio MAXIMUM donne le
-  // volume MINIMUM. Inverser les deux champs est une confusion naturelle, et elle
-  // retournait toutes les fourchettes de l'app (\u00ab 15,4\u201314,3 \u00bb). On les remet dans
-  // l'ordre plutot que de refuser : le vigneron a saisi deux bornes, on sait
-  // lesquelles \u2014 mais on le DIT.
-  var _bor=function(v,lo,hi){ return Math.min(hi,Math.max(lo,v)); };
-  var _av=[pck,rMin,rMax,spd].join('|');
-  pck=_bor(pck,10,60); rMin=_bor(rMin,80,200); rMax=_bor(rMax,80,200); spd=_bor(spd,15,20);
-  var _inv=(rMin>rMax);
-  if(_inv){ var _t=rMin; rMin=rMax; rMax=_t; }
-  var _corr=(_av!==[pck,rMin,rMax,spd].join('|'));
-  // ★ MATU-1 — la fourchette de maturité : deux bornes ou aucune, sinon rien ne s'enregistre.
-  var _mf=_matRegLire(); if(_mf.err){ showToast(_mf.err,'var(--attention)'); return; }
-  if(!CAVE_VENDANGE.config) CAVE_VENDANGE.config={};
-  CAVE_VENDANGE.config.poids_caisse_kg=pck;
-  CAVE_VENDANGE.config.ratio_min=rMin;
-  CAVE_VENDANGE.config.ratio_max=rMax;
-  CAVE_VENDANGE.config.sucre_par_degre=spd;
-  CAVE_VENDANGE.config.mat_four=_mf.four;
-  window.CAVE_VENDANGE=CAVE_VENDANGE;
-  _vendFbSave(_inv?'Ratios remis dans l\u2019ordre \u00b7 min '+rMin+', max '+rMax
-                  :(_corr?'Param\u00e8tres enregistr\u00e9s \u00b7 valeur(s) ramen\u00e9e(s) aux bornes'
-                         :'Param\u00e8tres enregistr\u00e9s'),
-              (_inv||_corr)?'#B85A1A':'#3D6B27');
-  renderVendParam();
-}
-
 // ═══════════════════════════════════════════════════════════════════════════
 // VENDANGE v2 — densité @20°C · opérations cuve · clients vrac · décuvage → Chai
 // (cave.js seul — CSS injecté en JS, bottom-sheets construits en JS)
@@ -7841,7 +7920,6 @@ window._vndSetEr            = _vndSetEr;
 window._vndToggleMpf        = _vndToggleMpf;
 window._vmAdjRem            = _vmAdjRem;
 window._vmAdjPig            = _vmAdjPig;
-window._vendSaveParam       = _vendSaveParam;
 
 
 
@@ -8778,35 +8856,7 @@ function _matCouleurs(rafraichir){
 
 
 /* La fourchette dans la roue crantée (Le Cuvier) : deux bornes par couleur, ou rien. */
-function _matRegLigne(c, lbl, w){
-  var ph = c === 'r' ? ['205', '225'] : ['195', '215'];
-  var champ = function(b, v, p, a){ return '<input class="mvv-fi" id="vpfi-m' + c + '-' + b + '" type="number" min="120" max="300" step="1" inputmode="numeric" value="' + v + '" placeholder="' + p + '" aria-label="' + lbl + ', ' + a + '">'; };
-  return '<div class="mvv-prow"><div class="mvv-prow-l">' + lbl + ', g/L</div><div class="mat-reg">'
-    + champ('min', w ? Math.round(w.min) : '', ph[0], 'bas de la fourchette') + '<span>à</span>' + champ('max', w ? Math.round(w.max) : '', ph[1], 'haut de la fourchette')
-    + '</div></div>';
-}
-function _matRegHtml(){
-  var f = _matFour();
-  return '<div class="mvv-set"><div class="mvv-set-t">Maturité</div>'
-    + '<div class="mvv-set-d">La fourchette de sucre visée pour vendanger, par couleur. Elle trace sa bande dans les Maturités. Laisser vide : pas de bande.</div>'
-    + _matRegLigne('r', 'Rouges', f.r) + _matRegLigne('b', 'Blancs', f.b) + '</div>';
-}
 /* Lue par _vendSaveParam : { four, err }. */
-function _matRegLire(){
-  var o = { r:null, b:null }, err = '';
-  ['r', 'b'].forEach(function(c){
-    var nm = c === 'r' ? 'rouges' : 'blancs';
-    var a = parseFloat((document.getElementById('vpfi-m' + c + '-min') || {}).value), b = parseFloat((document.getElementById('vpfi-m' + c + '-max') || {}).value);
-    if(!(a > 0) && !(b > 0)) return;
-    if(!(a > 0) || !(b > 0)){ err = err || 'Fourchette des ' + nm + ' : remplissez les deux bornes, ou videz les deux.'; return; }
-    a = Math.min(300, Math.max(120, Math.round(a))); b = Math.min(300, Math.max(120, Math.round(b)));
-    if(a > b){ var t = a; a = b; b = t; }
-    if(a === b){ err = err || 'Fourchette des ' + nm + ' : le haut doit dépasser le bas.'; return; }
-    o[c] = { min:a, max:b };
-  });
-  return { four:o, err:err };
-}
-
 // ── expositions v2 ──
 window.renderVendAna        = renderVendAna;
 window._vendAnaAdd          = _vendAnaAdd;
@@ -8820,6 +8870,13 @@ window._matSaisieUnite      = _matSaisieUnite;
 window._matSaisieDate       = _matSaisieDate;
 window._matCouleurs         = _matCouleurs;
 window._matFour             = _matFour;
+// ★ CAVEREG-2 — les réglages du Cuvier en lignes, et leur fenêtre
+window._vendReg             = _vendReg;
+window._vendRegUnite        = _vendRegUnite;
+window._vendRegMaj          = _vendRegMaj;
+window._vendRegVider        = _vendRegVider;
+window._vendRegOk           = _vendRegOk;
+window._vendRegChoix        = _vendRegChoix;
 // ★ REC-1 — les gestes des Récoltes rangées
 window._recSetVue           = _recSetVue;
 window._recSel              = _recSel;

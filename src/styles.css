@@ -7141,6 +7141,36 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
   .creg-nav>.mvbtn{justify-content:flex-start}
 }
 /* ★ FIN CAVEREG-1 */
+/* ★ CAVEREG-2 (§387) — LES RÉGLAGES EN LIGNES : un groupe, une ligne par réglage (libellé, ce qu’il sert, valeur, bouton), et
+   la fenêtre d’un réglage (ovCregEdit). */
+.creg-g{margin-bottom:var(--e-4,16px)}
+.creg-g-t{margin:0 var(--e-0,2px) var(--e-1,4px);font-size:var(--pt-base,14px);font-weight:var(--fw-semi,600);color:var(--texte)}
+.creg-g-d{margin:0 var(--e-0,2px) var(--e-2,8px);font-size:var(--pt-micro,12px);line-height:var(--lh-texte);color:var(--texte-doux)}
+.creg-l{display:flex;align-items:center;gap:var(--e-3,12px);min-height:var(--h-row-2);padding:var(--e-2,8px) var(--e-3,12px);border:var(--bw) solid var(--ligne,#E7E6E2);border-bottom-width:0;background:var(--bg-card)}
+.creg-g .creg-l:first-of-type{border-radius:var(--r-md,8px) var(--r-md,8px) 0 0}
+.creg-g .creg-l:last-child{border-bottom-width:var(--bw);border-radius:0 0 var(--r-md,8px) var(--r-md,8px)}
+.creg-g .creg-l:first-of-type:last-child{border-radius:var(--r-md,8px)}
+.creg-l .l{flex:1;min-width:0;display:flex;flex-direction:column;gap:var(--e-0,2px)}
+.creg-l .t{display:flex;align-items:center;gap:var(--e-2,8px);font-size:var(--pt-base,14px);font-weight:var(--fw-med,500);color:var(--texte)}
+.creg-l .d{font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.creg-l .v{flex:none;max-width:40%;text-align:right;font-size:var(--pt-txt,13px);font-weight:var(--fw-semi,600);color:var(--texte);font-variant-numeric:tabular-nums}
+.creg-l .mvbtn{flex:none}
+.creg-neuf{flex:none}
+.creg-ed{display:flex;flex-direction:column;gap:var(--e-3,12px);padding:var(--e-4,16px)}
+.creg-ed-t{margin:0;font-size:var(--pt-sm,16px);font-weight:var(--fw-semi,600);color:var(--texte)}
+.creg-ed-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--e-3,12px)}
+.creg-ed-f{display:flex;flex-direction:column;gap:var(--e-1,4px);font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.creg-ed-f span{display:flex;align-items:center;gap:var(--e-2,8px)}
+.creg-ed-f input{box-sizing:border-box;width:100%;min-width:0;height:var(--e-9,48px);padding:0 var(--e-3,12px);border:var(--bw) solid var(--ligne-forte);border-radius:var(--r-sm,6px);background:var(--bg-card);color:var(--texte);font-family:var(--font-ui);font-size:var(--pt-sm,16px);font-weight:var(--fw-semi,600);font-variant-numeric:tabular-nums}
+.creg-ed-f small{flex:none;font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.creg-ed-conv{margin:0;min-height:var(--e-4,16px);font-size:var(--pt-txt,13px);color:var(--texte-med)}
+.creg-ed-conv.err{color:var(--danger-texte)}
+.creg-ed-aide{margin:0;font-size:var(--pt-micro,12px);line-height:var(--lh-texte);color:var(--texte-doux)}
+.creg-ed .mvbtn-discret{align-self:flex-start}
+.creg-ed-choix{display:flex;flex-direction:column;gap:var(--e-2,8px)}
+.creg-ed-choix .mvbtn{height:auto;flex-direction:column;align-items:flex-start;gap:var(--e-0,2px);padding:var(--e-3,12px);text-align:left;white-space:normal}
+.creg-ed-choix small{font-size:var(--pt-micro,12px);font-weight:var(--fw-reg,400)}
+/* ★ FIN CAVEREG-2 */
 /* ★ CAVE-3 (§290) — LE CHAI EN LISTE + FICHE (MAQUETTE V8). La fiche est celle de l'appli (openCuveeDetail écrite dans
    #chai-fiche) ; au téléphone, la fenêtre comme avant. Cuvées au cadre neutre (la choisie cerclée), alerte d'ouillage en ambre,
    « Ouiller les … » et « Nouvelle cuvée » à l'accent. Par jetons. */
