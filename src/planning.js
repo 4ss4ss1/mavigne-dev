@@ -5824,7 +5824,7 @@ function _planHsupCard(mbr){
   if(aPayer>0.0001){
     var alerte=false;   // annualisation : aucune heure ne perime en cours d'annee
     var fTxt='';
-    h+='<div style="margin-top:12px;padding:10px 12px;border-radius:10px;background:'+(alerte?'var(--rouge-pale)':'var(--bg-card)')+';border:1.5px solid '+(alerte?'var(--rouge)':'var(--gris-clair)')+'">';
+    h+='<div class="mvencadre'+(alerte?' mvencadre-danger':'')+'" style="margin-top:12px">';
     h+='<div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:var(--pt-txt,13px);font-weight:700;color:'+(alerte?'var(--rouge)':'var(--texte)')+'">'+(alerte?'\u26a0\ufe0f ':'')+'\u00c0 payer ce mois</div><div style="font-size:18px;font-weight:800;color:'+(alerte?'var(--rouge)':'var(--texte)')+'">'+_planFmt(aPayer)+'</div></div>';
     h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px">'+(payBank>0.0001?_planFmt(paye)+' sur les heures du mois + '+_planFmt(payBank)+' sur le compteur':_planFmt(paye)+' en acompte')+'\u00a0\u2014 d\u00e9duites du solde de cl\u00f4ture.</div>';
     h+='</div>';

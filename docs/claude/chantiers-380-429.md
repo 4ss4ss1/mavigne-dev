@@ -433,3 +433,31 @@ Validée « au jeu commun » au §397, la console s’est révélée une applica
 
 ### 398e. La leçon
 **Une pièce porte un dessin et une mise en page ; on n’en veut parfois que la moitié.** `.mvcarte` range son contenu en colonne : juste pour une carte neuve, faux pour une rangée d’avant. Séparer le dessin (`.mvcarte-fond`) de la mise en page laisse passer au jeu sans rien casser.
+
+## 399. CHARTE-5f — ÉTAPE 2 : LES ÉTATS CALCULÉS PAR LE CODE (20/10 — `src/phyto.js` · `src/planning.js` · `src/reglages.js` · `src/app.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-cartes.mjs` · `scripts/mv-captures.mjs` · **APP 9.59 → 9.60, SW 10.38 → 10.39**, base `eb96ea2`)
+
+### 399a. La demande
+La suite de l’étape 2 (§398) : les 19 encadrés dont le code calcule la couleur — des états que l’utilisateur doit lire d’un coup d’œil. Relus un par un (l’attribut de style entier) : deux sortes, des **tons** (une couleur selon une condition) et des **choix** (une ligne ou une pastille qu’on touche, teintée quand elle est choisie).
+
+### 399b. Ce qui est livré
+- **Les tons** → `.mvencadre` et un ton choisi par la condition, sans couleur écrite :
+  - fiche d’un produit : DAR (ambre s’il y en a un, sinon vert), DRAE (pareil), ZNT (rouge au-delà de 5 m, sinon neutre) ;
+  - détail d’un traitement : DAR restant (rouge, sinon vert), délai de rentrée (neutre s’il ne s’applique pas, ambre s’il court, sinon vert) ;
+  - Planning : l’alerte des heures sup à payer (danger, sinon neutre).
+- **Les choix** → l’état par une classe, plus par des couleurs : `on` et `aria-pressed` :
+  - lignes : le produit trouvé et la parcelle (assistant phyto), la période (Réglages, tournées), le niveau et le passage (Accueil) → `.mvcarte-fond .mvcarte-clic` (choisie : le filet d’action) ;
+  - pastilles : le conducteur, « conventionnel / agriculture biologique » (assistant), la parcelle (édition d’un traitement) → `.mvpas-filtre` (choisie : la couleur d’action). Le vert sombre « bio » (`#1A3A1A`, `#40C080`) et le bleu acier du conducteur disparaissent.
+- **Vu en plus** : les deux « Continuer » de l’assistant (bleu acier, gris quand désactivés) étaient repeints par le code à chaque parcelle cochée (`_tratRenderParcList`). → `.mvbtn .mvbtn-principal` ; l’état passe par l’attribut `disabled` seul.
+- `mv-captures` : `phyto-cuivre-1` et `phyto-cuivre-2` (l’assistant aux étapes 1 et 2).
+- Plafond des encadrés faits à la main **36 → 21**.
+
+### 399c. Vu
+`phyto-cuivre-1`, `phyto-cuivre-2` (téléphone, clair et sombre) : les parcelles choisies au filet lie-de-vin, « Continuer » à la couleur d’action, l’alerte DRAE à l’ambre. Pas vu : la fiche d’un produit (le catalogue E-Phy se charge du réseau), l’alerte du Planning et les lignes de l’Accueil (la démo ne les porte pas).
+
+### 399d. Restent (4 calculés, et le reste de l’étape 2)
+La vente au Cuvier (`bg` et `bd` calculés plus haut), une ligne du Planning (`rowBg`, `rowBd`), une ligne du Pilotage (à bordure de côté de 3 px : à reprendre), les chiffres du bilan du cuivre (dans le bandeau sombre, leur blanc translucide y est juste). Puis les 10 notes au style coupé, les 3 notes d’`app.js`, et les cas à part (§398d).
+
+- **Chaîne** : **469 commandes, 0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 399e. La leçon
+**Un état se dit par une classe ; la couleur reste à la feuille.** Écrit `'+(sel?'var(--acier)':'var(--bg-card)')+'`, un état ne suit ni la charte ni le mode sombre — et `aria-pressed` manquait partout : une lecture d’écran ne savait pas ce qui était choisi.

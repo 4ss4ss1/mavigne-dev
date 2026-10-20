@@ -105,17 +105,17 @@ function openCatDetail(nom){
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
-      <div style="background:${p.dar>0?'#FFF3CD':'var(--vert-pale)'};border-radius:12px;padding:12px;text-align:center">
+      <div class="mvencadre mvencadre-${p.dar>0?'attention':'ok'}" style="text-align:center">
         <div style="font-size:9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600">DAR</div>
         <div style="font-size:22px;font-weight:700;font-family:var(--font-titre,Cormorant Garamond,serif);color:${p.dar>0?'#856404':'var(--vert)'}">${p.dar>0?p.dar+'j':'Libre'}</div>
         <div style="font-size:9px;color:var(--texte-doux)">avant récolte</div>
       </div>
-      <div style="background:${p.drae>0?'#FEF9E7':'var(--vert-pale)'};border-radius:12px;padding:12px;text-align:center">
+      <div class="mvencadre mvencadre-${p.drae>0?'attention':'ok'}" style="text-align:center">
         <div style="font-size:9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600">DRAE</div>
         <div style="font-size:22px;font-weight:700;font-family:var(--font-titre,Cormorant Garamond,serif);color:${p.drae>0?'#B85A1A':'var(--vert)'}">${p.drae>0?p.drae+'h':'0h'}</div>
         <div style="font-size:9px;color:var(--texte-doux)">délai rentrée</div>
       </div>
-      <div style="background:${p.znt>5?'#FEE8E8':'var(--gris-clair)'};border-radius:12px;padding:12px;text-align:center">
+      <div class="mvencadre${p.znt>5?' mvencadre-danger':''}" style="text-align:center">
         <div style="font-size:9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600">ZNT</div>
         <div style="font-size:22px;font-weight:700;font-family:var(--font-titre,Cormorant Garamond,serif);color:${p.znt>5?'var(--rouge)':'var(--texte)'}">${p.znt||5}m</div>
         <div style="font-size:9px;color:var(--texte-doux)">zone tampon</div>
@@ -247,7 +247,7 @@ function _tratResultRow(m, section, i){
   var stat=isE?(m.statut==='ok'
       ?' <span class="mvpas mvpas-fait">&#x2713; Autoris&#xe9;</span>'
       :' <span class="mvpas mvpas-retard">&#x26d4; Retir&#xe9;</span>'):'';
-  return '<div onclick="window._tratPick('+i+')" style="display:flex;align-items:center;gap:9px;padding:10px 11px;border-radius:10px;cursor:pointer;margin-bottom:6px;background:'+(sel?'rgba(74,159,200,0.12)':'var(--bg-card)')+';border:1.5px solid '+(sel?'var(--acier-med)':'var(--gris)')+';'+(ko?'opacity:.6':'')+'">'
+  return '<div onclick="window._tratPick('+i+')" class="mvcarte-fond mvcarte-clic'+(sel?' on':'')+'" aria-pressed="'+(sel?'true':'false')+'" style="display:flex;align-items:center;gap:9px;padding:10px 11px;margin-bottom:6px;'+(ko?'opacity:.6':'')+'">'
     +'<div style="flex:1;min-width:0">'
     +'<div style="font-size:var(--pt-txt,13px);font-weight:'+(isE?'600':'700')+';color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(T[m.type]||'')+' '+_escHtml(m.nom)+'</div>'
     +'<div style="font-size:10px;color:var(--texte-doux);margin-top:1px">'+_escHtml(m.type||'')+(m.sub?' &#x00B7; '+_escHtml(m.sub):'')+'</div>'
@@ -371,7 +371,7 @@ function _tratParcRowsHtml(){var allParc=_tratParcAll();return allParc.map(funct
         var sel=_trat.parcelles.includes(p.nom);
         var abBadge=p.ab?'<span style="font-size:9px;background:rgba(64,192,128,0.15);color:#40C080;border-radius:5px;padding:1px 5px;font-weight:700;margin-left:5px">AB</span>':'';
         var pnEsc=p.nom.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-        return '<div onclick="window._tratToggleParc(\''+pnEsc+'\')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;margin-bottom:8px;cursor:pointer;background:'+(sel?'rgba(61,122,39,0.1)':'var(--bg-card)')+';border:1.5px solid '+(sel?'var(--vert)':'var(--gris)')+';min-height:52px">'
+        return '<div onclick="window._tratToggleParc(\''+pnEsc+'\')" class="mvcarte-fond mvcarte-clic'+(sel?' on':'')+'" aria-pressed="'+(sel?'true':'false')+'" style="display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:8px;min-height:52px">'
           +'<div style="width:22px;height:22px;border-radius:6px;background:'+(sel?'var(--vert)':'transparent')+';border:2px solid '+(sel?'var(--vert)':'var(--gris)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(sel?'<span style="color:#fff;font-size:var(--pt-txt,13px);font-weight:700">&#x2713;</span>':'')+'</div>'
           +'<div style="flex:1"><div style="font-size:15px;font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:600;color:'+(sel?'var(--texte)':'var(--texte-doux)')+'">'+_escHtml(p.nom)+abBadge+'</div>'
           +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+window._mvHaP(p.surface)+' ha</div></div>'
@@ -385,7 +385,7 @@ function _tratRenderParcList(){
   var btn=document.getElementById('trat-next-btn');
   if(btn){var canNext2=_trat.parcelles.length>0;var surfSel=_tratSurfSel();
     if(canNext2){btn.removeAttribute('disabled');}else{btn.setAttribute('disabled','');}
-    btn.style.background=canNext2?'var(--acier)':'var(--gris)';btn.style.color=canNext2?'#fff':'var(--texte-doux)';
+    // CHARTE-5f (§399) : le bouton principal du jeu se désactive par l'attribut, sans couleurs posées ici
     btn.innerHTML='<span>'+(canNext2?'Continuer ('+_trat.parcelles.length+' parc. &#x00B7; '+window._mvHaT(surfSel)+' ha)\u00a0\u2192':'S&#xe9;lectionner au moins 1 parcelle')+'</span>';}
 }
 window._tratRenderParcList=_tratRenderParcList;
@@ -491,7 +491,7 @@ function _tratRender(){
       +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
       +conds.map(function(c){
         var sel=_trat.conducteur===c.nom;
-        return '<div onclick="window._tratSetConducteur(\''+c.nom.replace(/'/g,"\\'")+'\')" style="padding:10px 16px;border-radius:10px;cursor:pointer;background:'+(sel?'var(--acier)':'var(--bg-card)')+';border:1.5px solid '+(sel?'var(--acier-med)':'var(--gris)')+';color:'+(sel?'#fff':'var(--texte-doux)')+';font-size:var(--pt-txt,13px);font-weight:600;min-height:44px;display:flex;align-items:center">'+_escHtml(c.nom)+'</div>';
+        return '<div onclick="window._tratSetConducteur(\''+c.nom.replace(/'/g,"\\'")+'\')" class="mvpas-filtre'+(sel?' on':'')+'" aria-pressed="'+(sel?'true':'false')+'">'+_escHtml(c.nom)+'</div>';
       }).join('')+'</div></div>';
     /* ★ window.STADES_PHENO : la liste est déclarée dans app.js. Lue au nom nu,
        Rollup la renommait puis le tree-shaking la supprimait — ce bouton ouvrait
@@ -517,8 +517,8 @@ function _tratRender(){
       +'<input id="trat-dre" type="text" placeholder="Ex : 6h &#x2014; justification agronomique" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px)"></div>'
       +'<div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Mode de production</div>'
       +'<div style="display:flex;gap:10px">'
-      +'<div onclick="window._tratSetModeAb(false)" style="flex:1;padding:10px 12px;border-radius:10px;cursor:pointer;text-align:center;background:'+(!_trat.modeAb?'var(--acier)':'var(--bg-card)')+';border:1.5px solid '+(!_trat.modeAb?'var(--acier-med)':'var(--gris)')+';color:'+(!_trat.modeAb?'#fff':'var(--texte-doux)')+';font-size:var(--pt-micro,12px);font-weight:600;min-height:44px;display:flex;align-items:center;justify-content:center">&#x1F33E; Conventionnel</div>'
-      +'<div onclick="window._tratSetModeAb(true)" style="flex:1;padding:10px 12px;border-radius:10px;cursor:pointer;text-align:center;background:'+(_trat.modeAb?'#1A3A1A':'var(--bg-card)')+';border:1.5px solid '+(_trat.modeAb?'#2A6A2A':'var(--gris)')+';color:'+(_trat.modeAb?'#40C080':'var(--texte-doux)')+';font-size:var(--pt-micro,12px);font-weight:600;min-height:44px;display:flex;align-items:center;justify-content:center">&#x1F33F; Bio (AB)</div>'
+      +'<div onclick="window._tratSetModeAb(false)" class="mvpas-filtre'+(!_trat.modeAb?' on':'')+'" aria-pressed="'+(!_trat.modeAb?'true':'false')+'" style="flex:1;justify-content:center">&#x1F33E; Conventionnel</div>'
+      +'<div onclick="window._tratSetModeAb(true)" class="mvpas-filtre'+(_trat.modeAb?' on':'')+'" aria-pressed="'+(_trat.modeAb?'true':'false')+'" style="flex:1;justify-content:center">&#x1F33F; Bio (AB)</div>'
       +'</div></div></div>';
     var noteHtml='<div style="margin-bottom:14px">'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Observations (optionnel)</div>'
@@ -594,10 +594,10 @@ function _tratRender(){
   var backBtn=step>1?'<button onclick="window._tratPrev()" style="flex:1;padding:14px;border-radius:12px;border:1.5px solid var(--gris);background:transparent;color:var(--texte-doux);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);min-height:44px"><span>&#x2190; Retour</span></button>':'';
   var mainBtn='';
   if(step===1){
-    mainBtn='<button onclick="window._tratNext()" '+(canNext1?'':'disabled')+' style="flex:2;padding:14px;border-radius:12px;border:none;background:'+(canNext1?'var(--acier)':'var(--gris)')+';color:'+(canNext1?'#fff':'var(--texte-doux)')+';font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);min-height:44px"><span>'
+    mainBtn='<button onclick="window._tratNext()" '+(canNext1?'':'disabled')+' class="mvbtn mvbtn-principal" style="flex:2"><span>'
       +(_trat.produits.length>0?'Continuer ('+_trat.produits.length+' produit'+(_trat.produits.length>1?'s':'')+')\u00a0\u2192':'Ajouter au moins 1 produit')+'</span></button>';
   } else if(step===2){
-    mainBtn='<button id="trat-next-btn" onclick="window._tratNext()" '+(canNext2?'':'disabled')+' style="flex:2;padding:14px;border-radius:12px;border:none;background:'+(canNext2?'var(--acier)':'var(--gris)')+';color:'+(canNext2?'#fff':'var(--texte-doux)')+';font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);min-height:44px"><span>'
+    mainBtn='<button id="trat-next-btn" onclick="window._tratNext()" '+(canNext2?'':'disabled')+' class="mvbtn mvbtn-principal" style="flex:2"><span>'
       +(canNext2?'Continuer ('+_trat.parcelles.length+' parc. &#x00B7; '+window._mvHaT(surfSel)+' ha)\u00a0\u2192':'S&#xe9;lectionner au moins 1 parcelle')+'</span></button>';
   } else {
     mainBtn='<button onclick="window._tratSave()" style="flex:2;padding:14px;border-radius:12px;border:none;background:#2C6E29;color:#fff;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);min-height:44px"><span>&#x2713; Enregistrer</span></button>';
@@ -750,11 +750,11 @@ function openTraitDetail(idx){
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <div style="background:${darR>0?'var(--rouge-pale)':'var(--vert-pale)'};border-radius:12px;padding:12px">
+      <div class="mvencadre mvencadre-${darR>0?'danger':'ok'}">
         <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">DAR récolte</div>
         <div style="font-size:var(--pt-sm,16px);font-weight:700;margin-top:4px;color:${darR>0?'var(--rouge)':'var(--vert)'}">${darR!==null?(darR>0?darR+'j restants':'Libre'):'—'}</div>
       </div>
-      <div style="background:${_dre.na?'var(--gris-clair)':(draeR>0?'#FFF3CD':'var(--vert-pale)')};border-radius:12px;padding:12px">
+      <div class="mvencadre${_dre.na?'':(draeR>0?' mvencadre-attention':' mvencadre-ok')}">
         <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">Délai de réentrée</div>
         <div style="font-size:var(--pt-sm,16px);font-weight:700;margin-top:4px;color:${_dre.na?'var(--texte-doux)':(draeR>0?'#856404':'var(--vert)')}">${_dre.na?'Non concerné':(draeR>0?draeR+'h restantes':'Libre')}</div>
         ${_dre.defaut&&!_dre.na?'<div style="font-size:9px;color:var(--texte-doux);margin-top:3px">minimum réglementaire</div>':''}
@@ -800,7 +800,7 @@ function _teRenderParc(){
   var act=(window.PARCELLES||[]).filter(function(p){return p.statut!=='Arrachee';});
   grid.innerHTML=act.map(function(p){
     var sel=_phEdit.parc.indexOf(p.nom)>=0;
-    return '<div onclick="window._teToggleParc(\''+p.nom.replace(/'/g,"\\'")+'\')" style="padding:7px 11px;border-radius:9px;cursor:pointer;background:'+(sel?'var(--phyto)':'var(--bg-card)')+';border:1.5px solid '+(sel?'var(--phyto)':'var(--gris)')+';color:'+(sel?'#fff':'var(--texte-doux)')+';font-size:var(--pt-micro,12px);font-weight:600;min-height:36px;display:flex;align-items:center">'+_escHtml(p.nom)+'</div>';
+    return '<div onclick="window._teToggleParc(\''+p.nom.replace(/'/g,"\\'")+'\')" class="mvpas-filtre'+(sel?' on':'')+'" aria-pressed="'+(sel?'true':'false')+'">'+_escHtml(p.nom)+'</div>';
   }).join('');
   var c=document.getElementById('te-parc-count');
   if(c){ var tot=act.length; c.textContent = _phEdit.parc.length===0 ? 'Aucune parcelle sélectionnée' : (_phEdit.parc.length+' / '+tot+' parcelle'+(_phEdit.parc.length>1?'s':'')); }

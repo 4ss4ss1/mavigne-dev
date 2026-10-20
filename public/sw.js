@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.38
+// MA VIGNE — Service Worker v10.39
+// v10.39 (20/10/2026) — CHARTE-5f (§399) : 15 états calculés par le code au jeu (tons des tuiles DAR/DRAE/ZNT et du détail d’un traitement, l’alerte du Planning ; lignes et choix sélectionnables → carte cliquable ou filtre, l’état par une classe et aria-pressed) ; les deux « Continuer » de l’assistant au bouton principal. phyto.js, planning.js, reglages.js, app.js, utils.js, index.html. APP 9.59 -> 9.60.
 // v10.38 (20/10/2026) — CHARTE-5e (§398) : .mvcarte-fond (le dessin de la carte seul) ; 19 blocs faits à la main au jeu (tuiles, lignes cliquables, cartes d’analyse, petites cartes → encadré). La console GT hors charte (décision de Nico). styles.css, app.js, phyto.js, planning.js, reglages.js, cave.js, tracteur.js, utils.js, index.html. APP 9.58 -> 9.59.
 // v10.37 (20/10/2026) — ZONES-1 (§397) : la pièce bandeau (« Ma trace », le mur, le bilan du domaine) ; la fiche d’une cuvée en bloc de chiffres ; cinq encadrés écrits pour le sombre à l’encadré neutre. styles.css, charte.css, reglages.js, cave.js, phyto.js, utils.js, index.html. APP 9.57 -> 9.58.
 // v10.36 (20/10/2026) — CHARTE-5d (§396) : 51 notes grises faites à la main rendues à l’encadré neutre (Phyto 17, index.html 17, Réglages 9, Planning 5, Pilotage 2, Cave 1). index.html, phyto.js, reglages.js, planning.js, pilotage.js, cave.js, utils.js. APP 9.56 -> 9.57.
@@ -4568,7 +4569,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.38';
+const CACHE_NAME   = 'mavigne-v10.39';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4585,7 +4586,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.38 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.39 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4605,7 +4606,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.38 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.39 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -1321,7 +1321,7 @@ function _tnRender(){
   if(!pers.length){ h+='<div style="'+_TN_HINT+'">Aucune période à afficher.</div>'; }
   h+=pers.map(function(s){
     var on=!!_tn.perSel[s.nom], d=_tn.dates[s.nom]||{}, cons=(_regPeriode()||{}).nom===s.nom;
-    var row='<div style="display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:11px;cursor:pointer;background:'+(on?'var(--vert-pale)':'var(--bg-card)')+';border:1px solid '+(on?'rgba(61,107,39,0.32)':'var(--gris)')+'" onclick="window._tnTogPer(\''+_escAttr(s.nom)+'\')">'
+    var row='<div class="mvcarte-fond mvcarte-clic'+(on?' on':'')+'" aria-pressed="'+(on?'true':'false')+'" style="display:flex;align-items:center;gap:9px;padding:10px 12px" onclick="window._tnTogPer(\''+_escAttr(s.nom)+'\')">'
       +'<span style="width:18px;height:18px;border-radius:5px;flex:none;border:1.5px solid '+(on?'var(--vert-med)':'var(--gris)')+';background:'+(on?'var(--vert-med)':'transparent')+';color:var(--bg-card);display:flex;align-items:center;justify-content:center">'+(on?_mvIcon('check',16):'')+'</span>'
       +'<span style="flex:1;min-width:0"><span style="display:block;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">'+_escHtml(s.nom)+(cons?' '+_mvBadge('consultée','neutre'):'')+'</span>'
       +'<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_escHtml(s.periode||((s.debut||'')+' \u2192 '+(s.fin||'')))+'</span></span></div>';

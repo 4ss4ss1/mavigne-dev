@@ -10931,7 +10931,7 @@ function _renderNiveauxModal(){
   for(var _n=1;_n<=3;_n++){
     var _selN=(planNb===_n);
     var _isDef=(_n===planGlobal);
-    html+='<div onclick="_setNivOv('+_n+')" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;margin-bottom:6px;cursor:pointer;background:'+(_selN?'rgba(192,132,90,0.07)':'rgba(255,255,255,0.02)')+';border:1px solid '+(_selN?'rgba(192,132,90,0.22)':'rgba(255,255,255,0.05)')+';transition:all 0.12s">'
+    html+='<div onclick="_setNivOv('+_n+')" class="mvcarte-fond mvcarte-clic'+(_selN?' on':'')+'" aria-pressed="'+(_selN?'true':'false')+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;margin-bottom:6px">'
       +'<span style="width:16px;height:16px;border-radius:50%;flex-shrink:0;border:2px solid '+(_selN?'var(--accent)':'rgba(255,255,255,0.2)')+';background:'+(_selN?'var(--accent)':'transparent')+';transition:all 0.12s"></span>'
       +'<span style="color:'+(_selN?'var(--texte)':'var(--texte-doux)')+';font-size:var(--pt-txt,13px)">'+_n+' niveau'+(_n>1?'x':'')+(_isDef?' <span style="color:var(--texte-doux);font-size:var(--pt-micro,11px)">(d\u00e9faut saison)</span>':'')+'</span>'
       +'</div>';
@@ -11090,7 +11090,7 @@ function _renderPassagesModal(){
   for(var n=1;n<=3;n++){
     var selN=(planNb===n);
     var isDef=(n===planDef);
-    html+='<div onclick="_setPassOv('+n+')" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;margin-bottom:6px;cursor:pointer;background:'+(selN?'rgba(192,132,90,0.07)':'rgba(255,255,255,0.02)')+';border:1px solid '+(selN?'rgba(192,132,90,0.22)':'rgba(255,255,255,0.05)')+';transition:all 0.12s">'
+    html+='<div onclick="_setPassOv('+n+')" class="mvcarte-fond mvcarte-clic'+(selN?' on':'')+'" aria-pressed="'+(selN?'true':'false')+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;margin-bottom:6px">'
       +'<span style="width:16px;height:16px;border-radius:50%;flex-shrink:0;border:2px solid '+(selN?'var(--accent)':'rgba(255,255,255,0.2)')+';background:'+(selN?'var(--accent)':'transparent')+';transition:all 0.12s"></span>'
       +'<span style="color:'+(selN?'var(--texte)':'var(--texte-doux)')+';font-size:var(--pt-txt,13px)">'+n+' passage'+(n>1?'s':'')+(isDef?' <span style=\"color:var(--texte-doux);font-size:var(--pt-micro,11px)\">(défaut saison)</span>':'')+'</span>'
       +'</div>';

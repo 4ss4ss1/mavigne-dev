@@ -1,0 +1,23 @@
+{
+  "lot": "CHARTE-5F",
+  "section": "§399",
+  "base": "eb96ea2efd8a4d6c577399c1fede2e7e86ba19ba",
+  "inclut": [],
+  "date": "2026-10-20",
+  "fichiers": {
+    ".mv-base": "cb5d5547a36b1d8e8ade66e2ebb7787868da57c47f64f3296952fede73f2bce8",
+    "CLAUDE.md": "705f187aec90143182e595b223c55a19b2436369c273c7313bc5ffc6e0e81773",
+    "docs/claude/INDEX.md": "fd4f32520e4c2dd418d4e835f1cf4d5d806b631f3c5760578c7b88fb87874ab2",
+    "docs/claude/chantiers-380-429.md": "03a3053389f23f72fc1011abd166664dc024e0ad6f43539d4b3de7e855b6a284",
+    "docs/claude/journal.md": "9b93cc823a982fa28be07933b9ce37c180d40ba77b357dbce5012034764b38c5",
+    "index.html": "6787b36ed60bbe1378aeb726d9bd028d4018f379e562b785d49c052cdd0b6dab",
+    "public/sw.js": "0ac6216bafcacf71d20b36ac4da031d07c0466e232304c1b21a2168664748c92",
+    "scripts/mv-captures.mjs": "1b294c8db2f58ff9c59ba8ed9ba64ee282119c44f462a42c802aba1f4cdb42fb",
+    "scripts/mv-harnais-cartes.mjs": "3cded7048f2a960c9eb7ac457e8eb31f1ec92960bd0ab08b0c90c072eaea28db",
+    "src/app.js": "24809e093e79ee2bc4715f1e207ca4f8ef7429b3d50e173c1bdc9c7b5225544e",
+    "src/phyto.js": "1cd88f1ef2437000708f53e318544093840c67a7a763d956422e033dcb3bccc0",
+    "src/planning.js": "cb08d4da4e1601d061229ea8f80b81209cc730f4ae04bdb11c1939bad78d1410",
+    "src/reglages.js": "8906be7c1fa92279b194302d98607772f93246284fc0d4396b8025cb257354dd",
+    "src/utils.js": "6d67de0ce65b6ccdc5eae513ec112c2b105ee0a06055d6e0414f6790a2e087e1"
+  }
+}
