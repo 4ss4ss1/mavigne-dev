@@ -1,7 +1,7 @@
 {
   "familles": {
     "clair": {
-      "plan-acc / plan-acc-pale": 3.7,
+      "plan-acc / plan-acc-pale": 3.85,
       "tag-orange": 4.14,
       "tag-sky": 4.27
     },
@@ -9,45 +9,44 @@
   },
   "code": {
     "clair": {
-      "mesurees": 854,
-      "nonResoluble": 261,
-      "fondInconnu": 428,
+      "mesurees": 979,
+      "nonResoluble": 359,
+      "fondInconnu": 498,
       "sous": {
         "src/app.js": 5,
         "src/cave.js": 6,
         "src/cuvier.js": 5,
         "src/pilotage.js": 4,
-        "src/planning.js": 9,
+        "src/planning.js": 3,
         "src/reglages.js": 5,
         "src/reserve.js": 1,
         "src/tracteur.js": 1,
-        "index.html": 7,
+        "index.html": 2,
         "src/styles.css": 47
       }
     },
     "sombre": {
-      "mesurees": 854,
-      "nonResoluble": 261,
-      "fondInconnu": 430,
+      "mesurees": 980,
+      "nonResoluble": 354,
+      "fondInconnu": 505,
       "sous": {
         "src/app.js": 7,
-        "src/cave.js": 16,
-        "src/cuvier.js": 20,
+        "src/cave.js": 15,
+        "src/cuvier.js": 12,
         "src/phyto.js": 1,
-        "src/pilotage.js": 7,
-        "src/planning.js": 8,
-        "src/reglages.js": 14,
+        "src/pilotage.js": 6,
+        "src/planning.js": 4,
+        "src/reglages.js": 10,
         "src/reserve.js": 7,
         "src/tracteur.js": 5,
-        "index.html": 23,
-        "src/styles.css": 89
+        "index.html": 10,
+        "src/styles.css": 79
       }
     }
   },
   "surfaces": {
     "src/app.js": 5,
     "src/cave.js": 1,
-    "src/cuvier.js": 1,
     "src/pilotage.js": 1,
     "src/planning.js": 6,
     "src/reglages.js": 1,

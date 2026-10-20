@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.40
+// MA VIGNE — Service Worker v10.41
+// v10.41 (20/10/2026) — CHARTE-6b (§401) : cinq familles de champs au jeu (.mvr-fi, .emh-in, .mvt-fi, .plan-ge-input, .pl2r-tin), le filtre de dates du Journal en dessin seul (.mvchamp-fond), deux familles d’étiquettes (.mvt-fl, .mvr-fl) ; les cases à cocher et boutons ronds à la couleur d’action. styles.css, utils.js, index.html. APP 9.61 -> 9.62.
 // v10.40 (20/10/2026) — CHARTE-6a (§400) : le jeu des cases de saisie — champ blanc au filet --champ-filet, 48/36 px, 16 px au téléphone, focus à la couleur d’action (l’anneau commun gardé), erreur, désactivé ; .fi et .fsel au jeu, leurs focus colorés retirés ; l’étiquette .fl (et celles de la saisie d’un traitement) au jeu. styles.css, charte.css, phyto.js, utils.js, index.html. APP 9.60 -> 9.61.
 // v10.39 (20/10/2026) — CHARTE-5f (§399) : 15 états calculés par le code au jeu (tons des tuiles DAR/DRAE/ZNT et du détail d’un traitement, l’alerte du Planning ; lignes et choix sélectionnables → carte cliquable ou filtre, l’état par une classe et aria-pressed) ; les deux « Continuer » de l’assistant au bouton principal. phyto.js, planning.js, reglages.js, app.js, utils.js, index.html. APP 9.59 -> 9.60.
 // v10.38 (20/10/2026) — CHARTE-5e (§398) : .mvcarte-fond (le dessin de la carte seul) ; 19 blocs faits à la main au jeu (tuiles, lignes cliquables, cartes d’analyse, petites cartes → encadré). La console GT hors charte (décision de Nico). styles.css, app.js, phyto.js, planning.js, reglages.js, cave.js, tracteur.js, utils.js, index.html. APP 9.58 -> 9.59.
@@ -4570,7 +4571,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.40';
+const CACHE_NAME   = 'mavigne-v10.41';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4587,7 +4588,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.40 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.41 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4607,7 +4608,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.40 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.41 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

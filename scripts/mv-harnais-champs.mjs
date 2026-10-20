@@ -37,6 +37,11 @@ const S0 = {
 };
 
 const sansCom = s => s.replace(/\/\*[\s\S]*?\*\//g, '');
+// Les classes passées au jeu : leur dessin ne vient que du bloc (CHARTE-6a : .fi, .fsel ; CHARTE-6b, §401 : la Réserve, les heures,
+// la visite guidée, le Planning, le filtre de dates du Journal).
+const JEU = ['fi', 'fsel', 'mvr-fi', 'emh-in', 'mvt-fi', 'plan-ge-input', 'pl2r-tin', 'j-date-input'];
+const FOND = ['j-date-input'];   // dessin seul (.mvchamp-fond) : sa taille (marge, texte) reste à lui
+const RE_JEU = new RegExp('\\.(' + JEU.join('|') + ')(?![\\w-])');
 function bloc(css) {
   const a = css.indexOf('/* ★ CHARTE-6 '), b = css.indexOf('/* ★ FIN CHARTE-6 */');
   return (a >= 0 && b > a) ? css.slice(a, b) : '';
@@ -54,7 +59,7 @@ function verifie(S) {
   const T = (id, msg, ok, detail = '') => res.push({ id, msg, ok, detail });
   const B = sansCom(bloc(S.css));
   T('A', 'le bloc du jeu des cases de saisie est là, avec ses pièces et ses états (focus, erreur, désactivé, bureau)',
-    !!B && /\.mvchamp, \.fi, \.fsel\{/.test(B) && /:focus\{/.test(B) && /\[aria-invalid="true"\]/.test(B) && /:disabled\{/.test(B) && /@media \(min-width:768px\)/.test(B));
+    !!B && /\.mvchamp, \.fi, \.fsel[^{]*\{/.test(B) && /:focus\{/.test(B) && /\[aria-invalid="true"\]/.test(B) && /:disabled\{/.test(B) && /@media \(min-width:768px\)/.test(B));
   const sansVar = B.replace(/var\(--[\w-]+(?:,[^()]*(?:\([^()]*\))?[^()]*)?\)/g, '');
   T('B', 'aucune couleur écrite en dur dans le bloc', !!B && !/#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(/.test(sansVar));
   T('C', 'le filet des champs est un réglage de la charte, en clair et dans les blocs sombres',
@@ -63,13 +68,15 @@ function verifie(S) {
   const viol = [];
   for (const m of hors.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
     const sels = m[1].split(',').map(x => x.trim());
-    if (!sels.some(x => /\.(fi|fsel)\b/.test(x))) continue;
+    if (!sels.some(x => RE_JEU.test(x))) continue;
     if (/-webkit-touch-callout/.test(hors.slice(Math.max(0, m.index - 200), m.index + m[1].length))) continue;
-    if (/(?:^|;)\s*(background(?:-color)?|border(?:-color|-radius|-width)?|box-shadow|color|padding|min-height|height)\s*:/.test(m[2]))
+    const fond = sels.every(x => !RE_JEU.test(x) || FOND.some(f => new RegExp('\\.' + f + '(?![\\w-])').test(x)));
+    const INTERDIT = fond ? /(?:^|;)\s*(background(?:-color)?|border(?:-color|-radius|-width)?|box-shadow|color)\s*:/ : /(?:^|;)\s*(background(?:-color)?|border(?:-color|-radius|-width)?|box-shadow|color|padding|min-height|height)\s*:/;
+    if (INTERDIT.test(m[2]))
       viol.push(m[1].trim().replace(/\s+/g, ' ').slice(0, 70));
   }
-  T('D', '.fi et .fsel ne prennent leur dessin que du jeu', viol.length === 0, viol.join(' | '));
-  T('E', 'au téléphone, le texte d’un champ fait 16 px (Safari ne zoome pas)', /\.mvchamp, \.fi, \.fsel\{[^}]*font-size:var\(--pt-sm,16px\)/.test(B));
+  T('D', 'les champs passés au jeu ne prennent leur dessin que de lui', viol.length === 0, viol.join(' | '));
+  T('E', 'au téléphone, le texte d’un champ fait 16 px (Safari ne zoome pas)', /\.mvchamp, \.fi, \.fsel[^{]*\{[^}]*font-size:var\(--pt-sm,16px\)/.test(B));
   const n = champsSurPlace(S);
   T('F', `les champs stylés sur place ne remontent pas (${n} ≤ ${PLAFOND_INLINE})`, n <= PLAFOND_INLINE);
   return { res, n };

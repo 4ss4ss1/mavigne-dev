@@ -1,0 +1,23 @@
+{
+  "lot": "CHARTE-6B",
+  "section": "§401",
+  "base": "add87b759b47d29fad27ed79e666ced4ebdf83b0",
+  "inclut": [],
+  "date": "2026-10-20",
+  "fichiers": {
+    ".mv-base": "091afa1f4191c98382bc5e4e2b81bc6d59b3469313370f7da63d4140039b1b93",
+    "CLAUDE.md": "c09df6189300e54e2226f9312c01f241141b7e25ea7297d5c32294e5ef6f74d5",
+    "docs/claude/INDEX.md": "86001f80338409450f03a182b016747c1aaa7dbc5daf37d3f8977f080c4096fd",
+    "docs/claude/chantiers-380-429.md": "466d284f6bcb32f110647b80c810d64e0ccd80c8a8e0ae820088dc99bc82c084",
+    "docs/claude/journal.md": "d07bea9186674258d72ed6ae18a9b5045ec087c6c08f100b6fd22f9a396469f9",
+    "index.html": "001b7f6645c0b606b3f2579cd83a51d4f6cece828a74746bdce3a713e12dbac7",
+    "public/sw.js": "1dc6c5e82abba51672233f4ea5bf208fd9821e4b87be5ef230f96d8a226b115d",
+    "scripts/contraste-baseline.json": "bd57f9e0559abc2355d6cc49948ea40a1c55f2a26336e4dbf8464f16b0970e2b",
+    "scripts/mv-captures.mjs": "0edc7dfbdcd4f89a83ced784155c8b1424706ea715974ce2323e3833c9e0440b",
+    "scripts/mv-espace-baseline.json": "0492f2396bbb1c1120d5c726ede2920ef6e7ebe9c41dcded41bb4315f761a5e9",
+    "scripts/mv-harnais-champs.mjs": "db85b2d2ca898077b6b01a065092d2e51a8db515f603c28be999b18c3fa18f7a",
+    "scripts/mv-jetons-baseline.json": "fc0f577fd61ac4bb22efa90c56c501a1a99421cb672b68d8ec42a91b576fb56f",
+    "src/styles.css": "1cf6263b49798ce3935d664a51ee51104ccb97041bef7fec089855a8a69cd969",
+    "src/utils.js": "81972938cb78afdc5375521fb49b3ad0dd4ada3c982ed2660da2ddede4f5f607"
+  }
+}

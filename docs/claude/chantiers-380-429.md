@@ -485,3 +485,27 @@ Les autres familles de champs (`.mvr-fi` de la Réserve, `.mvv-tin`, `.emh-in`, 
 
 ### 400e. La leçon
 **Supprimer une variable, c’est chercher tous ses emplois — même concaténés.** `'+L+'` et `'+L+';margin-bottom:0'` ne s’écrivent pas pareil ; le second a échappé au remplacement. La capture, qui ouvre vraiment la fenêtre, l’a vu là où la syntaxe ne voyait rien.
+
+## 401. CHARTE-6b — ÉTAPE 3, SUITE : LES AUTRES FAMILLES DE CHAMPS (20/10 — `src/styles.css` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-champs.mjs` · `scripts/mv-captures.mjs` · `scripts/mv-jetons-baseline.json` · `scripts/mv-espace-baseline.json` · `scripts/contraste-baseline.json` · **APP 9.61 → 9.62, SW 10.40 → 10.41**, base `add87b7`)
+
+### 401a. La demande
+La suite de l’étape 3 (§400) : les autres familles de champs. Relevé (hors console GT) : `.mvr-fi` (Réserve, 39), `.mvv-tin` (Cuvier, 47 — sans règle propre), `.emh-in` (7), `.tcfg-in` (8 — sans règle), `.mvt-fi` (6), `.plan-ge-input` (1), `.pl2r-tin` (2), `.j-date-input` (2), `.mat-an` (le grand chiffre transparent du Cuvier, voulu), `.danger-conf-input` (la confirmation d’une suppression, rouge exprès), `.vend-param-fi` (aucun emploi).
+
+### 401b. Ce qui est livré
+- **Au jeu** (`.mvchamp`, `.fi`, `.fsel` et leurs états) : `.mvr-fi`, `.emh-in`, `.mvt-fi`, `.plan-ge-input` (sa largeur de 70 px gardée), `.pl2r-tin` — fond (`--bg-app`, `--gris-clair`), filets (brun translucide, gris clair à 1,5 ou 2 px), arrondis (10 à 13 px), marges, tailles et couleurs retirés ; leurs focus colorés (`--terre`, `--or` et son ombre dorée) et le texte indicatif beige de la visite guidée aussi. Les zones de texte de ces familles prennent la hauteur double du jeu.
+- **Dessin seul** — `.mvchamp-fond` (dans le bloc) : le filtre de dates du Journal (`.j-date-input`) garde sa taille compacte (marge, texte : la règle anti-zoom de Safari le remonte à 16 px sur iPhone) et prend le fond, le filet, l’arrondi et la couleur du jeu, et ses états.
+- **Les étiquettes** `.mvt-fl` (capitales or espacées) et `.mvr-fl` (terre) → l’étiquette du jeu.
+- **Cocher et choisir** : `input[type="checkbox"], input[type="radio"]` prennent `accent-color: var(--accent)` ; cinq cases qui avaient leur couleur (les types d’export de la Cave en cuivre, deux de la visite guidée en or et en vert, la case du Planning en terre, une option en vert) aussi. Gardée : la case des CGU de l’installation (écran sombre, comme ses champs).
+- `mv-harnais-champs` : D suit la liste des familles passées au jeu (`JEU`) ; pour le dessin seul (`FOND`), la marge et la taille restent permises. 6/6 contre-épreuves. `mv-captures` : `reserve-achat` (le formulaire d’achat de la Réserve).
+- Cliquets regravés à la baisse : rayons en dur 221 → 220, espacements hors échelle, contraste.
+
+### 401c. Vu
+`reserve-achat` (téléphone clair et sombre, ordinateur) : champs blancs au contour net, étiquettes en lettres normales, la liste d’intrants, la date, les champs côte à côte. `reserve`, `planning-gens`, `reglages` : intacts. **Vu aussi, à reprendre** : dans la Réserve, le bouton principal (« Enregistrer l’achat ») et le sélecteur « Par unités / Directe / Les deux » restent en terre — les boutons de la Réserve (`.mvr-btn`) ne sont pas au jeu de boutons.
+
+### 401d. Reste de l’étape 3
+`.mvv-tin`, `.tcfg-in`, `.mvc-pk-in` (sans règle propre : leur dessin vient du style écrit sur place ou d’un parent, à voir écran par écran), les 60 champs stylés sur place, les étiquettes faites à la main, l’interrupteur ; et les boutons de la Réserve.
+
+- **Chaîne** : **471 commandes, 0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 401e. La leçon
+**Un champ compact n’a pas à devenir grand pour être au jeu.** Le filtre de dates du Journal vit dans une barre étroite ; lui imposer 48 px aurait cassé la barre. Le dessin seul (`.mvchamp-fond`) lui donne l’apparence commune sans toucher à sa taille — comme `.mvcarte-fond` pour les cartes (§398).

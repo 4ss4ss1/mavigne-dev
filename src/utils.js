@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.61';
+export const APP_VERSION = '9.62';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.62', d: '2026-10-20', items: [   // CHARTE-6b (§401) : les autres champs au même dessin
+    { niv: 1, pour: ['tous'], emoji: 'check', titre: 'Les mêmes champs partout',
+      desc: "Les formulaires de la Réserve (achats, inventaires), des heures, du Planning et de la visite guidée prennent les mêmes champs blancs au contour net, avec leur titre en lettres normales. Les cases à cocher prennent la couleur de l’appli." },
+  ] },
   { v: '9.61', d: '2026-10-20', items: [   // CHARTE-6a (§400) : le jeu des cases de saisie
     { niv: 0, pour: ['tous'], emoji: 'check', titre: 'Des champs plus lisibles',
       desc: "Les cases où l’on écrit ont un fond blanc et un contour bien visible, même au soleil, et leur titre au-dessus s’écrit en lettres normales, plus en petites capitales grises. Quand on touche un champ, son contour prend la couleur de l’appli." },
