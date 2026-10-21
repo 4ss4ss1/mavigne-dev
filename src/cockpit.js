@@ -476,6 +476,14 @@ function _ckPlanLire(parcs, journal, tache, debutIso, o){
     if((debutIso && d < debutIso) || (fin && d > fin)) return;
     if(!c || d > dc || (d === dc && (Number(e.ts_debut) || 0) > (Number(c.ts_debut) || 0))) deb[e.parcelle] = e;
   });
+  // ★ ETATS-1 (§415) — une parcelle « en cours » SANS entrée « En cours » (un arrachage en étapes : ses étapes sont validées
+  //   une à une) : la dernière entrée de la tâche sur la parcelle, dans la période, dit qui y travaille. Avant : « Personne
+  //   d'indiqué » (DIRECT-2), alors que l'équipe venait de valider une étape.
+  (journal || []).forEach(function(e){ if(!e || e.tache !== tache || etat[e.parcelle] !== 'cours' || (deb[e.parcelle] && deb[e.parcelle].statut === 'En cours')) return;
+    // (noms à part : les ancres du premier passage restent uniques pour les contre-épreuves d'ETAT-1)
+    var jour = String(e.date || ''), avant = deb[e.parcelle], jourAvant = avant ? String(avant.date || '') : '';
+    if(debutIso && jour < debutIso) return; if(fin && jour > fin) return;
+    if(!avant || jour > jourAvant || (jour === jourAvant && (Number(e.ts) || Number(e.ts_debut) || 0) > (Number(avant.ts) || Number(avant.ts_debut) || 0))) deb[e.parcelle] = e; });
   return { etat: etat, deb: deb };
 }
 window._ckPlanEtats = function(parcs, journal, tache, debutIso, enRetard, o){

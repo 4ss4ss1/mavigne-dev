@@ -843,3 +843,22 @@ d'Aujourd'hui notés au backlog (§28, paquet 4).
   tablette.
 - Les autres pastilles possibles (Phyto : délai avant récolte, Vigne : ce qui attend une validation) : à décider.
 
+## 415. ★ ETATS-1 — DES ÉTATS FRANCS SUR LES PLANS ; QUATRE FINITIONS DU PILOTAGE (21/10 — `src/styles.css` (jetons `--et-*` du bloc `.ck2`, formes `.mv-fo`, hachures, bloc ETATS-1) · `src/cockpit-vue.js` (motif hachuré, `indiceSeg`) · `src/cockpit.js` (`_ckPlanLire`) · `src/pilotage.js` (`.pil-cr-note`) · `src/utils.js` (APP, WHATS_NEW) · `guide/11-pilotage.html` · `index.html` · `public/sw.js` · `scripts/mv-harnais-etats1.mjs` (neuf) — APP 9.74 → 9.75 · SW 10.53 → 10.54 — base `c07f335`)
+
+- **Demande** (Nico, 21/10) : « renforcer la couleur des indications sur les cartes des parcelles […] on a du mal à faire la
+  différence entre fait, à faire, arrachée » ; et « ok » pour les finitions proposées.
+- **Cause mesurée** (rendu navigateur des cinq états, clair et sombre) : les fonds d'état étaient des teintes « douces »
+  (`--ok-doux`, `--presse`, `--survol`, `--danger-doux`), et **« en cours » suivait `--encours`, un GRIS NEUTRE** depuis la
+  charte de la refonte (#4F4D48 / #C9C7C1) : en cours, à faire et arrachée se confondaient.
+- **Correction** : fait = 46 % de `--ok`, en cours = 48 % de `--attention` (ambre), en retard = 44 % de `--danger`, mêlés au
+  fond de carte ; à faire = fond de carte cerné de `--texte-doux` ; arrachée = fond gris (`.ck-hach-f`) sous des hachures
+  appuyées. Les mêmes mélanges sur les formes `.mv-fo` (carte de l'Accueil, fiches). Tout par jetons : le thème sombre suit.
+- **Finitions** : le choix de la tâche du plan a un fondu au bord quand il défile (`indiceSeg`, AUJ-6) ; `.ck-ch` en
+  `border-box` (100 % + 16 px plus sa marge intérieure débordait de 8 px, CADRE-1) ; « cliquez une campagne » : la phrase reste
+  HORS de la barre collante au téléphone (choix de CARTE, gardé par `mv-harnais-carte` — l'essai de la remettre l'a fait rougir),
+  et le mode d'emploi du zoom est dit dans l'aide du Pilotage (la piste du backlog) ;
+  une parcelle « en cours » sans entrée « En cours » (arrachage en étapes) prend la dernière entrée de la tâche dans la
+  période pour dire qui y travaille (DIRECT-2 : « Personne d'indiqué »).
+- **`mv-harnais-etats1`** (neuf) : 10 assertions, 6 contre-épreuves.
+- **Ouvert** : les cartes du Pilotage sans sous-titre (en-tête à deux étages, §42 de l'archive) — un travail d'écriture
+  carte par carte, à faire avec la liste ; d'autres pastilles de la barre (Phyto, Vigne) — à décider par Nico.

@@ -45,7 +45,7 @@ function suite(S) {
   T('le fil de portée collé sous le bandeau, les onglets sous les deux ; sa hauteur posée aussi sur Aujourd’hui',
     S.css.includes('body #page-pilotage .pil-tabsbar{top:calc(var(--pil-entete-bas,0px) + var(--pil-portee-h,0px))}') && S.css.includes('body #page-pilotage .pil-portee{position:sticky;top:var(--pil-entete-bas,0px);z-index:61}')
     && S.pil.includes('window._ck2Monter(_V); _pilStickyH();'));
-  T('version et nouveautés (9.74)', /export const APP_VERSION = '9\.74';/.test(S.uti) && /\{ v: '9\.74', d: '2026-10-21', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-page'/.test(S.uti));
+  T('la nouveauté de VIF-1 reste au Journal (bloc 9.74)', /\{ v: '9\.74', d: '2026-10-21', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-page'/.test(S.uti));
   return out;
 }
 function jouer(S) { try { return suite(S); } catch (e) { return [['plantage : ' + (e && e.message), false]]; } }

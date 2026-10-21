@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.74';
+export const APP_VERSION = '9.75';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,12 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.75', d: '2026-10-21', items: [
+    { niv: 1, pour: ['tous'], emoji: 'feuille', titre: 'Des parcelles bien colorées sur les plans',
+      desc: "Sur le plan du Pilotage, la carte de l’Accueil et les fiches : fait en vert, en cours en ambre, à faire en blanc, en retard en rouge, arrachée en gris hachuré — on les distingue d’un coup d’œil." },
+    { niv: 0, pour: ['admin'], emoji: 'cle', titre: 'Quatre finitions du Pilotage',
+      desc: "« En direct » nomme l’équipe d’un arrachage fait en étapes ; le choix de la tâche montre qu’il défile ; les lignes des chantiers tiennent dans leur carte ; l’aide dit comment zoomer sur une campagne." },
+  ] },
   { v: '9.74', d: '2026-10-21', items: [
     { niv: 1, pour: ['admin'], cible: '#ck-page', emoji: 'eclair', titre: 'Aujourd’hui bouge en direct',
       desc: "Quand l’équipe valide, Pilotage › Aujourd’hui se met à jour sans recharger : la date de fin roule, les barres avancent, la parcelle s’éclaire sur le plan et le fil s’allonge." },
@@ -5727,6 +5733,7 @@ var MV_AIDE = {
   pilotage: {
     ico: 'graphique', titre: 'Pilotage', ancre: 'pilotage',
     points: [
+      ['Zoomer sur une campagne', " : dans <b>La campagne</b>, touchez (ou cliquez) une campagne de la frise pour la voir en grand ; au téléphone, la petite phrase qui le rappelle ne tient pas dans la barre du haut."],
       ['Aujourd’hui se lit d’un coup d’œil', ": une phrase résume la journée (l’avance ou le retard sur l’objectif, les points à anticiper). Viennent les photos du domaine, la <b>fin prévue</b> avec sa frise et votre objectif, la <b>décision du jour</b> en quatre tuiles, le <b>domaine en direct</b> (chaque parcelle à sa forme et à l’échelle, colorée selon son état sur sa fiche pour la tâche choisie, en contour pâle quand cette tâche y est désactivée, rangée par appellation, l’équipe posée sur chaque parcelle en cours, sa pastille qui clignote les jours travaillés ; au survol, une loupe la montre en grand ; la toucher ouvre sa fiche), les chantiers (à faire ou en cours en haut, par date de début ; les terminés en bas) et la charge restante (une ligne relie la photo de chaque jour au point d’aujourd’hui). À droite sur ordinateur, le fil <b>En direct</b> puis <b>À savoir</b> restent visibles quand vous descendez dans la page, sous le bandeau et les onglets, qui restent en haut. Le fil <b>En direct</b> montre d’abord qui est où en ce moment — chaque parcelle en cours avec son équipe et depuis quand, le tracteur en marche ou en pause —, puis la journée : validations, débuts, parcelles finies au tracteur avec le temps mesuré, traitements ; l’équipe passe d’abord, et celui qui a saisi n’y figure que s’il était dans les rangs. Sur ordinateur, il garde la hauteur d’une journée calme : quand il y a plus, la fin s’efface et « Tout voir » le déplie ; « Replier » le remet à sa taille. <b>À savoir</b> réunit la météo des cinq jours, la pluie ou le vent par secteur, les absences, les fins de contrat, les retards et le matériel. Tout ce qui parle des gens suit le <b>planning</b> : un jour sans travail, l’effectif et les présences montrent le prochain jour travaillé ; un absent revient le premier jour où le planning le prévoit, un arrêt maladie dit sa date de fin. La bascule <b>Terrain / Économie</b>, en haut, donne la photo économique du jour : l’atterrissage de la campagne, le coût à l’hectare, l’écart au barème, le dépensé face au fait, la cadence de l’équipe, le coût de l’inaction, les postes, les appellations et les tâches — les chiffres de l’onglet Économie ; l’atterrissage y est la fin projetée, et l’arrachage (comme les autres travaux sans barème) a sa ligne « Travaux à l’heure ». « Agrandir » ouvre la courbe en grand ; « Changer la priorité » ouvre le choix de la tâche prioritaire ; la date de l’objectif se règle en touchant son bouton. La tension par personne se détaille dans L’équipe & le matériel, la protection restante dans Conformité."],
       ['Presque tout se lit, quatre choses s’écrivent', ": les chiffres viennent du journal, du planning, des sessions tracteur et de la cave. Ce qui s’écrit ici est nommé : les prix des achats (Économie), le mois d’ouverture de l’exercice comptable et celui de l’année vigne (roue crantée, Économie › Exercice), et ce que porte la roue crantée."],
       ['Vos deux années se règlent au même endroit', ": la roue crantée porte l’ouverture de l’<b>exercice comptable</b> — celui de votre bilan, fixé par votre comptable — et, juste dessous, le <b>cadre de votre campagne</b>, l’axe des Archives et du bilan de campagne. Une campagne est un cycle de production : ce qui la borne, c’est la <b>vendange</b>, et le mois n’en est que la traduction. L’écran dit où tombe la vôtre dans le cadre choisi — elle l’ouvre, elle la clôt, ou la borne la coupe en deux — et propose le mois qui suit la fin de vos vendanges. Le changer recadre des chiffres déjà affichés, jamais vos saisies."],

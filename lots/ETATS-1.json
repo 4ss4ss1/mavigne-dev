@@ -1,0 +1,24 @@
+{
+  "lot": "ETATS-1",
+  "section": "§415",
+  "base": "c07f3350c0ce419e85777ecd01828f240f096ffd",
+  "inclut": [],
+  "date": "2026-10-21",
+  "fichiers": {
+    "docs/claude/INDEX.md": "380622b04493327ab6a754453daa21ce603968223f19bec262e1f8004a6c4ff6",
+    "docs/claude/chantiers-380-429.md": "011a9237731e0d5b56fac986771299439b5c95a7e6bc1ef80437427ca0ab257b",
+    "guide/11-pilotage.html": "8502384ce09dfe27d2cdc5fda0b94fa6abcce6d1ae6360e7a021dfcbd7eadb1a",
+    "index.html": "f4dd7abf15444e72f0b66abcd7cefac16bbaa00c29fc5e2640f53c8fd3be6316",
+    "public/guide.html": "958b9312423da58b0a43b198e5d8ff5051295cab909a870431971ae0dee7d6fe",
+    "public/sw.js": "7b580083a2999069dfa450f570a90f07d79777dffa4013cdf8d54312b8837255",
+    "scripts/harnais-claude-md.mjs": "19c9b1c99ca3ce1969cd1e6d306758d93e7abed24297b06606c625edec158988",
+    "scripts/mv-harnais-forme1.mjs": "963c563fef7d15e965854ff8c6dd68e2f9d5d11a2dfda0662560ce491bf7bd9b",
+    "scripts/mv-harnais-liste.mjs": "b9cc2e9e7d58d1448c0a4d6a7b0e7e49a94044460d06b0b98f5eafedcd168bd3",
+    "scripts/mv-harnais-vif1.mjs": "b98305bba522817db61abccb73b8bc45b0813095461b40c3047480f9e9e54c34",
+    "src/cockpit-vue.js": "06cc15fb9b69fc09ee3ad646f9f0c30376bb0203d48682880c34dfb0cf050672",
+    "src/cockpit.js": "3cf3d7c081f99cd92d9c689ba024f5c007ccd6d5a954db7d910f8fc2866af96c",
+    "src/styles.css": "26a06a4dc182ffdc769977c8b68c34b53b863768637b47fdc9c13daf331234ef",
+    "src/utils.js": "fb76eaf69df4529e396c2ce644fe127c908ad3f9753a9c7d62c45b4bbae90f5c",
+    "scripts/mv-harnais-etats1.mjs": "0b8f99fe241c1d8cee91ba3169fc6c1781c763d12dad61d8a92909e90b4210a3"
+  }
+}

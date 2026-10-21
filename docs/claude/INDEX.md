@@ -468,3 +468,4 @@
 | 412 | 412. COLLE-1 — « EN DIRECT » AU-DESSUS D’« À SAVOIR », PLUS RIEN SOUS LE BANDEAU (21/10 — `src/cockpit-vue.… | `docs/claude/chantiers-380-429.md` |
 | 413 | 413. ★★ HLHA-1 — LE hL/ha DE CHAQUE CUVÉE, ET LE RENDEMENT PAR APPELLATION : CE QUI SE DÉCLARE (21/10 — `sr… | `docs/claude/chantiers-380-429.md` |
 | 414 | 414. ★★ VIF-1 — AUJOURD'HUI SE MET À JOUR EN DIRECT ; LES PASTILLES D'ALERTE DE LA BARRE ; TROIS DÉFAUTS D'… | `docs/claude/chantiers-380-429.md` |
+| 415 | 415. ★ ETATS-1 — DES ÉTATS FRANCS SUR LES PLANS ; QUATRE FINITIONS DU PILOTAGE (21/10 — `src/styles.css` (j… | `docs/claude/chantiers-380-429.md` |

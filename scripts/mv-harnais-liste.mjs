@@ -771,6 +771,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-pro1.mjs --contre'],
   ['node scripts/mv-harnais-vif1.mjs'],               // VIF-1 (§414) : Aujourd'hui en direct, pastilles de la barre, trois défauts
   ['node scripts/mv-harnais-vif1.mjs --contre'],
+  ['node scripts/mv-harnais-etats1.mjs'],             // ETATS-1 (§415) : états francs sur les plans, quatre finitions du Pilotage
+  ['node scripts/mv-harnais-etats1.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────

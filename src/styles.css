@@ -5562,7 +5562,8 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .ck-pa.et-afaire{fill:var(--et-afaire);stroke:var(--et-afaire-b)}
 .ck-pa.et-retard{fill:var(--et-retard);stroke:var(--et-retard-b)}
 .ck-pa.et-arr{fill:url(#ck-hach);stroke:var(--et-afaire-b);stroke-dasharray:3 3;cursor:default}
-.ck-hach-l{stroke:var(--plan-rang);stroke-width:1.6}
+.ck-hach-l{stroke:var(--texte-doux);stroke-width:2;stroke-opacity:.7}
+.ck-hach-f{fill:color-mix(in srgb,var(--texte-doux) 18%,var(--bg-card))}
 .ck-rangs{pointer-events:none;transition:opacity .9s .55s}
 .ck-rangs line{stroke:var(--plan-rang);stroke-width:.9}
 .ck-carte[data-filtre] .ck-pa:not(.f-on){opacity:.16}
@@ -7409,8 +7410,8 @@ body.ck-agr-on{overflow:hidden}
   --hover:var(--survol); --orange:var(--attention); --orange-tx:var(--attention); --orange-pale:var(--attention-doux);
   --rouge:var(--danger); --rouge-pale:var(--danger-doux); --rouge-tx:var(--danger); --info:var(--texte-med);
   --plan-sol:var(--bg-card); --plan-fond:var(--bg-doux); --plan-trait:var(--ligne-forte); --plan-rang:var(--ligne-forte); --plan-relief:var(--survol); --zone-fond:var(--survol);
-  --et-faite-b:var(--ok); --et-cours-b:var(--encours); --et-afaire-b:var(--ligne-forte); --et-retard-b:var(--danger);
-  --et-faite:var(--ok-doux); --et-cours:var(--presse); --et-afaire:var(--survol); --et-retard:var(--danger-doux);
+  --et-faite-b:var(--ok); --et-cours-b:var(--attention); --et-afaire-b:var(--texte-doux); --et-retard-b:var(--danger);
+  --et-faite:color-mix(in srgb,var(--ok) 46%,var(--bg-card)); --et-cours:color-mix(in srgb,var(--attention) 48%,var(--bg-card)); --et-afaire:var(--bg-card); --et-retard:color-mix(in srgb,var(--danger) 44%,var(--bg-card));
   --seg-ind:var(--bg-card); --btn-pri:var(--accent); --btn-pri-tx:var(--sur-accent); --focus:var(--anneau);
   --verre-clair:var(--bg-card); --verre-clair-b:var(--ligne,#E7E6E2); --c:var(--encours);
   --ck-r-sm:var(--r-sm,6px); --ck-r-md:var(--r-md,8px); --ck-r-lg:var(--r-lg,12px); --ck-r-full:var(--r-full,999px);
@@ -7481,10 +7482,10 @@ html .ck-agr-voile{ background:var(--voile); }
 .mv-fo-svg{display:block;width:100%;height:auto}
 .mv-fo{stroke-width:1.4;stroke-linejoin:round}
 .mv-fo.et-neutre,.mv-fo.et-afaire{fill:var(--bg-card);stroke:var(--texte-doux)}
-.mv-fo.et-faite{fill:var(--ok-doux);stroke:var(--ok)}
-.mv-fo.et-cours{fill:var(--presse);stroke:var(--encours);stroke-width:1.8}
-.mv-fo.et-retard{fill:var(--danger-doux);stroke:var(--danger)}
-.mv-fo.et-arr{stroke:var(--gris);stroke-dasharray:3 3}
+.mv-fo.et-faite{fill:color-mix(in srgb,var(--ok) 46%,var(--bg-card));stroke:var(--ok)}
+.mv-fo.et-cours{fill:color-mix(in srgb,var(--attention) 48%,var(--bg-card));stroke:var(--attention);stroke-width:1.8}
+.mv-fo.et-retard{fill:color-mix(in srgb,var(--danger) 44%,var(--bg-card));stroke:var(--danger)}
+.mv-fo.et-arr{fill:color-mix(in srgb,var(--texte-doux) 24%,var(--bg-card));stroke:var(--texte-doux);stroke-dasharray:3 3}
 .mv-fo-rg{stroke:var(--ligne-forte);stroke-width:.9}
 .mv-fo-h{stroke:var(--gris);stroke-width:1.2}
 .mv-fo-r{pointer-events:none}
@@ -8314,6 +8315,25 @@ input[type="checkbox"], input[type="radio"]{ accent-color:var(--accent); }
   #ck-t-c .ck-fil-tout:not([hidden]){display:inline-flex}
 }
 /* ★ FIN COLLE-1 */
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   ★ ETATS-1 (§415) — DES ÉTATS FRANCS SUR LES PLANS, ET QUATRE FINITIONS DU PILOTAGE
+   Nico (21/10) : « les parcelles pas assez colorées, on a du mal à faire la différence entre fait, à faire, arrachée ».
+   Les fonds d'état passent des teintes « douces » (10 à 20 % de couleur) à un vrai mélange (44 à 52 %) de la couleur
+   de l'état et du fond de carte : fait vert, en cours ambre (--attention : le gris neutre de --encours se confondait
+   avec l'arrachée et l'à faire), en retard rouge, à faire BLANC cerné, arrachée grise hachurée.
+   Tout passe par les jetons --et-* (plan du cockpit, légende) et les mêmes mélanges pour les formes (.mv-fo : carte
+   de l'Accueil, fiches) ; clair comme sombre, puisque chaque couleur de base suit le thème.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+.ck2 .ck-pa.et-faite,.ck2 .ck-pa.et-retard{stroke-opacity:.95;stroke-width:1.4}
+.ck2 .ck-pa.et-afaire{stroke-opacity:.8}
+/* Le choix de la tâche sur le plan : un fondu au bord qui dit qu'il y en a d'autres (AUJ-6), posé par cockpit-vue.js */
+.ck-seg.deborde{-webkit-mask-image:linear-gradient(90deg,var(--texte,currentColor) calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,var(--texte,currentColor) calc(100% - 40px),transparent)}
+.ck-seg.deborde.milieu{-webkit-mask-image:linear-gradient(90deg,transparent,var(--texte,currentColor) 40px calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,transparent,var(--texte,currentColor) 40px calc(100% - 40px),transparent)}
+.ck-seg.deborde.fin{-webkit-mask-image:linear-gradient(90deg,transparent,var(--texte,currentColor) 40px);mask-image:linear-gradient(90deg,transparent,var(--texte,currentColor) 40px)}
+/* Les lignes des chantiers tenaient en largeur 100 % + 16 px PLUS leur marge intérieure : 8 px de trop à droite (CADRE-1) */
+.ck-ch{box-sizing:border-box}
+
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.
    Deux rangées partout, Pilotage compris (pilotage.js pose désormais un vrai .mod-header) : l'identité (icône, titre,
    sous-titre, gestes du module) puis la ligne du jour (saison, date — ou la météo, qui porte alors la date courte —,

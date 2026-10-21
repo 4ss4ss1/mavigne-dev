@@ -536,7 +536,7 @@ function htmlDecision() {
 function svgPlan() {
   const K = mesuresPlan(PLAN_W), D = K.p ? 3 : 3.4, angles = new Set(), fa = typeof window._mvFormeAngle === 'function' ? window._mvFormeAngle : () => 90;
   PARCS.forEach(p => { if (p.f && !p.arr) angles.add(fa(p.f.ang)); });
-  const defs = '<pattern id="ck-hach" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line class="ck-hach-l" x1="0" y1="0" x2="0" y2="7"/></pattern>'
+  const defs = '<pattern id="ck-hach" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect class="ck-hach-f" width="7" height="7"/><line class="ck-hach-l" x1="0" y1="0" x2="0" y2="7"/></pattern>'
     + [...angles].map(k => '<pattern id="ck-rg-' + k + '" width="' + D + '" height="' + D + '" patternUnits="userSpaceOnUse" patternTransform="rotate(' + k + ')"><path class="ck-rg-l" d="M' + (D / 2) + ' 0V' + D + '"/></pattern>').join('');
   const pcW = largeurTx('100 %', POL_PL.pc);
   const zones = APPS.map(a => {
@@ -1464,7 +1464,16 @@ function colleHaut() {
   });
   return Math.round(bas) + 16;
 }
+// ETATS-1 (§415) — le choix de la tâche défile de côté quand il y a beaucoup de tâches : un fondu au bord le dit (AUJ-6).
+function indiceSeg() {
+  $$('.ck-seg').forEach(s => {
+    const deb = s.scrollWidth > s.clientWidth + 2, g = s.scrollLeft > 2, d = s.scrollLeft + s.clientWidth < s.scrollWidth - 2;
+    s.classList.toggle('deborde', deb); s.classList.toggle('milieu', deb && g && d); s.classList.toggle('fin', deb && g && !d);
+    if (!s._indice) { s._indice = true; s.addEventListener('scroll', indiceSeg, { passive: true }); }
+  });
+}
 function ranger() {
+  indiceSeg();
   const pg = $('#ck-page');
   // PRO-1 (§269) : le cockpit a quitté l'écran (autre onglet, autre module) — l'observateur restait branché sur la
   //   page disparue et plantait à chaque redimensionnement (« reading 'clientWidth' », journalisé en erreur).

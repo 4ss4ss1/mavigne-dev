@@ -138,7 +138,7 @@ function suite(S) {
     S.app.includes("_dpf.innerHTML=_dph; _dpf.hidden=!_dph;") && S.app.includes("window._mvParcFormeHtml(p.nom,520,170,'pfxf')") && S.app.includes("(p.commune&&typeof p.commune==='object')?p.commune.nom:p.commune")
     && /id="ovParcelle"[\s\S]{0,6000}id="dp-forme"/.test(S.html));
   T('la feuille : le plan sans largeur minimale ni défilement, la loupe, la forme des fiches', S.css.includes('.ck2 .ck-carte-in{min-width:0;aspect-ratio:auto}')
-    && S.css.includes('.ck-loupe{position:fixed;') && S.css.includes('.mv-fo.et-faite{fill:var(--ok-doux);stroke:var(--ok)}'));
+    && S.css.includes('.ck-loupe{position:fixed;') && S.css.includes('.mv-fo.et-faite{fill:color-mix(in srgb,var(--ok) 46%,var(--bg-card));stroke:var(--ok)}')   /* ETATS-1 (§415) : un vrai vert */);
   return out;
 }
 function jouer(S) { try { return suite(S); } catch (e) { return [['plantage : ' + (e && e.message), false]]; } }
