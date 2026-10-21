@@ -252,6 +252,8 @@ window._ckChargeSvg = function(w, serie, m){
 //   • matériel et cave : les blocs d'avant, rangés DANS l'encart (aucun recalculé).
 var _CK_SV = { jours: 7, contrat: 30, pluie: 2, vent: 40, loin: 62 };   // loin (AUJ-5) : jusqu'où chercher la fin d'une absence
 function _ckJc(dt){ return dt.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }); }
+// ★ ANTICIPE-1 (§420) : « Absence de Inès » → « Absence d’Inès » — l'élision devant une voyelle ou un h (VIF-1 écrivait toujours « de »).
+function _ckDe(nom){ var s = String(nom || ''); return (/^[aeiouh\u00e0\u00e2\u00e4\u00e9\u00e8\u00ea\u00eb\u00ee\u00ef\u00f4\u00f6\u00f9\u00fb\u00fc\u0153\u00e6]/i.test(s) ? 'd\u2019' : 'de ') + s; }
 function _ckPlusJ(t, k){ return new Date(t.getFullYear(), t.getMonth(), t.getDate() + k); }
 // AUJ-5 : le point final, sans doubler celui d'une date abrégée (« mar. 13 oct. », jamais « oct.. »).
 function _ckPt(s){ return /\.$/.test(s) ? s : s + '.'; }
@@ -377,7 +379,7 @@ window._ckSvAbsences = function(membres, PE, etatDe, now, travaille){
       : 'Pas de retour prévu au planning d’ici deux mois.');
     var sous = pl.etat === 'maladie' ? _ckPt('Fin d’arrêt le ' + _ckJc(d1)) : (pl.motif ? _ckPt(pl.motif) + ' ' : '') + fin;
     // VIF-1 : « absent » ne s'accorde pas sans le genre de la personne (la fiche ne le porte pas) : « Absence de Sophie ».
-    out.push({ cat: 'equipe', prio: 2, titre: pl.etat === 'absent' ? 'Absence de ' + m.nom : m.nom + ' ' + lib,
+    out.push({ cat: 'equipe', prio: 2, titre: pl.etat === 'absent' ? 'Absence ' + _ckDe(m.nom) : m.nom + ' ' + lib,
       quand: pl.debut === pl.fin ? (pl.debut === 1 ? 'Demain' : _ckJc(d0)) : 'Du ' + _ckJc(d0) + ' au ' + _ckJc(d1),
       sous: sous, action: 'planning' });
   });

@@ -367,7 +367,7 @@ const INFO = {
   effectif: 'Personnes prévues au planning aujourd’hui, hors bureau, et celles qui manquent (congé, arrêt, récupération). Un jour sans travail au planning — week-end, jour chômé —, la tuile montre le prochain jour travaillé et le dit.',
   budget: 'Part du budget main-d’œuvre déjà payée — les heures du planning dans les rangs, hors travaux à l’heure (arrachage…) —, face à la part du travail faite au barème. Payer moins vite qu’on n’avance, c’est être en avance.',
   conformite: 'Points du registre phyto et des documents obligatoires qui demandent une action de votre part.',
-  savoir: 'Ce qui peut changer la journée ou la semaine. Sous chaque jour : le risque de pluie (le plus haut de la journée), le cumul en millimètres et le vent le plus fort (vent moyen, sans les rafales). Dessous : la pluie ou le vent des deux jours qui viennent, secteur par secteur, et ce qui est en cours dans les communes touchées ; puis les absences, les contrats, les retards et le matériel. Les motifs d’absence ne sont visibles que de l’admin.',
+  savoir: 'Ce qui peut changer la journée ou la semaine. En tête, surlignés et marqués « À anticiper », les points que compte la phrase du haut de la page : une tâche dont les dates sont passées sans être finie, un contrat qui se termine dans les 30 jours, la pluie (2 mm et plus) ou le vent (40 km/h et plus) des deux jours qui viennent sur une commune où une tâche est en cours ; toucher la phrase mène ici. Sous chaque jour de la bande : le risque de pluie (le plus haut de la journée), le cumul en millimètres et le vent le plus fort (vent moyen, sans les rafales). Puis le reste : la pluie ou le vent sans tâche en cours dans les communes touchées, les absences et le matériel. Les motifs d’absence ne sont visibles que de l’admin.',
   decision: 'Les quatre questions de chaque matin, chacune avec sa réponse et le bouton pour agir.',
   plan: 'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine. Sa couleur dit l’état de la tâche choisie, celui de sa fiche pour la période : faite une fois validée, en cours une fois commencée ; un arrachage fini pour l’équipe est fait, la suite au prestataire. Une parcelle où la tâche est désactivée sur sa fiche ou dans la liste de la tâche, ou pas choisie pour la campagne (arrachage, désherbage, effeuillage), reste à sa place en contour pâle : ni à faire ni en retard, elle ne compte pas dans l’avancement. Le trait sous chaque appellation dit son avancement. Une parcelle en cours porte l’équipe qui l’a commencée, même un autre jour. Au survol, une loupe la montre en grand ; la toucher ouvre sa fiche. Les rangs dessinés sont un repère, pas le relevé des rangs ; une parcelle sans contour est un carré de sa surface, en pointillé.',
   fil: 'En ce moment : chaque parcelle en cours, avec l’équipe qui l’a commencée et depuis quand — même un autre jour —, puis le tracteur en marche ou en pause. Un arrachage en étapes compte depuis sa première étape validée. Aujourd’hui : les validations, les débuts de parcelle et le travail au tracteur de la journée (parcelles finies, avec le temps mesuré au chrono ; session ouverte ; traitement), du plus récent au plus ancien. L’équipe passe d’abord ; celui qui a saisi n’y figure que s’il était dans les rangs.',
@@ -468,7 +468,11 @@ function htmlVerdict(r) {
 
 function savoirItems() {
   // Les éléments viennent des sources de « À savoir » de l'appli (météo, absences, contrats, retards, matériel, cave).
-  return (V.savoir || []).map(x => Object.assign({ ic: ({ meteo: 'pluie', equipe: 'equipe', contrat: 'contrat', retard: 'retard', materiel: 'materiel', cave: 'cave' })[x.cat] || 'info' }, x));
+  // ★ ANTICIPE-1 (§420) : les points que la phrase du haut compte (prio 1) passent EN TÊTE, chacun dans son ordre (météo, contrats,
+  //   retards), comme dans le cockpit de secours (cockpit.js/_ckSavoirHtml). Ils venaient après les absences et, passé cinq lignes,
+  //   « Tout voir » les cachait : la phrase en annonçait deux qu'on ne trouvait pas (Nico, 21/10 : « 2 points à anticiper… Lesquels ? »).
+  const L = (V.savoir || []).map(x => Object.assign({ ic: ({ meteo: 'pluie', equipe: 'equipe', contrat: 'contrat', retard: 'retard', materiel: 'materiel', cave: 'cave' })[x.cat] || 'info' }, x));
+  return L.filter(x => x.prio === 1).concat(L.filter(x => x.prio !== 1));
 }
 
 function htmlSavoir(r) {
@@ -489,7 +493,7 @@ function htmlSavoir(r) {
     + (METEO.some(m => m.pp != null) ? '<p class="ck-met-leg"><i></i>risque de pluie</p>' : ''));
   const lis = items.map(x => '<li class="ck-sv ck-sv-' + x.cat + (x.prio === 1 ? ' fort' : '') + '"' + (x.id ? ' id="' + x.id + '"' : '') + '>'
     + '<span class="ck-sv-ic">' + ICO[x.ic] + '</span>'
-    + '<div class="ck-sv-tx"><div class="ck-sv-h"><b>' + esc(x.titre) + '</b><span class="ck-sv-q">' + esc(x.quand) + '</span></div>'
+    + '<div class="ck-sv-tx">' + (x.prio === 1 ? '<span class="ck-sv-k">À anticiper</span>' : '') + '<div class="ck-sv-h"><b>' + esc(x.titre) + '</b><span class="ck-sv-q">' + esc(x.quand) + '</span></div>'   // ANTICIPE-1 : l'étiquette, en mot
     + (x.sous ? '<p class="ck-sv-s">' + esc(x.sous) + '</p>' : '')   // AUJ-8 : rien en cours, rien d'écrit
     + (x.action ? '<button type="button" class="ck-sv-a"' + (x.onglet ? ' data-onglet="' + x.onglet + '"' : '') + (x.fn ? ' data-fn="' + x.fn + '"' : '')
       + (x.module ? ' data-module="' + x.module + '"' : '') + '>' + x.action + '</button>' : '')
@@ -504,7 +508,7 @@ function htmlSavoir(r) {
 
 function htmlDecision() {
   const D = V.decision || {};
-  const presents = GENS.map(g => '<span class="ck-av-m' + (g.absent ? ' abs' : '') + '" title="' + esc(g.p + (g.absent ? ', ' + (g.motif || 'absent') : '')) + '">' + esc(g.p.charAt(0)) + '</span>').join('');
+  const presents = GENS.map(g => '<span class="ck-av-m' + (g.absent ? ' abs' : '') + '" title="' + esc(g.absent ? (g.motif ? g.p + ' ' + g.motif : 'Absence\u00a0: ' + g.p) : g.p) + '">' + esc(g.p.charAt(0)) + '</span>').join('');   // ANTICIPE-1 (§420) : « absent » ne s'accordait pas
   const tens = GENS.filter(g => !g.absent && g.tens != null).map(g => '<span class="ck-tn" title="' + esc(g.p) + ' : ' + g.tens + '\u00a0%"><i style="height:' + Math.max(0, Math.min(100, (g.tens - 60) * 2.5)) + '%"'
     + (g.tens > 105 ? ' class="haut"' : '') + '></i><em>' + esc(g.p.charAt(0)) + '</em></span>').join('');
   const dz = (t, v, raison, bande, pied, attr) => '<div class="ck-dz"' + (attr || '') + '><div class="ck-dz-t">' + t + '</div><div class="ck-dz-v">' + esc(v) + '</div>'
@@ -945,7 +949,10 @@ function majResume(r) {
   const n = savoirItems(r).filter(x => x.prio === 1).length;
   const temps = r.ecart > 0 ? r.ecart + ' jour' + (r.ecart > 1 ? 's' : '') + ' d’avance' : r.ecart < 0 ? -r.ecart + ' jours de retard' : 'pile à l’heure';
   const e0 = Math.round(r.sous), argent = !(V.eco && r.budget > 0) ? '' : (e0 === 0 ? 'pile dans le budget' : e0 > 0 ? eur(e0) + ' sous le budget' : eur(-e0) + ' au-dessus du budget');   // AUJ-7 : à l'euro, comme partout
-  $('#ck-resume').innerHTML = '<b>' + maj1(temps) + '</b>, ' + (argent ? '<b>' + argent + '</b>, ' : '') + (n ? n + ' point' + (n > 1 ? 's' : '') + ' à anticiper.' : 'rien à anticiper.');
+  // ★ ANTICIPE-1 (§420) : les points annoncés se touchent — le bouton mène à eux, en tête d'« À savoir » (allerAnticiper).
+  const pts = n + ' point' + (n > 1 ? 's' : '') + ' à anticiper';
+  $('#ck-resume').innerHTML = '<b>' + maj1(temps) + '</b>, ' + (argent ? '<b>' + argent + '</b>, ' : '')
+    + (n ? '<button type="button" class="ck-res-pts" data-fn="anticiper" aria-label="' + pts + ', en tête d’« À savoir »">' + pts + '</button>.' : 'rien à anticiper.');
 }
 function majVerdict(r) {
   Anim.rouler($('#ck-v-fin'), dLong(r.fin));
@@ -1325,6 +1332,25 @@ function voirRetard() {
   majPlan();
   $('#ck-plan').scrollIntoView({ behavior: reduit() ? 'auto' : 'smooth', block: 'start' });
 }
+// ★ ANTICIPE-1 (§420) — « N points à anticiper », touché, mène à eux : Terrain si l'on était sur Économie ; la liste dépliée quand ils
+//   sont plus de cinq ; la première ligne amenée à l'écran (au téléphone sous les barres collantes, grâce à son scroll-margin ; sur
+//   ordinateur, dans la colonne de droite, au plus court) ; puis elles respirent deux fois — jamais en animations réduites. Rien à
+//   montrer (la liste a changé entre-temps) : le geste le trace au lieu de se taire.
+function allerAnticiper() {
+  if (S.mode !== 'terrain') { choisirMode('terrain'); }
+  const l = $('#ck-sv-l'), forts = $$('#ck-sv-l .ck-sv.fort');
+  if (!l || !forts.length) { if (window.logError) window.logError({ level: 'info', cat: 'cockpit', msg: 'anticiper : aucune ligne à montrer' }); return; }
+  if (forts.length > 5 && !l.classList.contains('tout')) {
+    l.classList.add('tout'); S.svTout = true;
+    const b = $('#ck-sv-tout'); if (b) { b.setAttribute('aria-expanded', 'true'); b.textContent = 'Replier'; }
+  }
+  const pg = $('#ck-page'), petit = !pg || pg.dataset.taille === 'petit';
+  requestAnimationFrame(() => {
+    forts[0].scrollIntoView({ behavior: reduit() ? 'auto' : 'smooth', block: petit ? 'start' : 'nearest' });
+    forts[0].setAttribute('tabindex', '-1'); forts[0].focus({ preventScroll: true });
+    if (!reduit()) forts.forEach(li => { li.classList.remove('signal'); void li.offsetWidth; li.classList.add('signal'); li.addEventListener('animationend', () => li.classList.remove('signal'), { once: true }); });
+  });
+}
 
 /* ═══ 15. LES GRAPHES : survol, largeur ═══ */
 function redimCourbe(force) {
@@ -1622,6 +1648,7 @@ function brancher() {
     }
     const fn = ev.target.closest('[data-fn]');
     if (fn && fn.dataset.fn === 'voirRetard') { voirRetard(); return; }
+    if (fn && fn.dataset.fn === 'anticiper') { allerAnticiper(); return; }   // ANTICIPE-1 (§420) : la phrase du haut
     if (fn && fn.dataset.fn === 'export') { if (typeof window._pilEcoExport === 'function') window._pilEcoExport(); return; }
     // PRO-1 (§269) : « Agrandir » était branché sur une instruction vide ; « Changer la priorité » menait à l'onglet
     //   L'équipe & le matériel au lieu d'ouvrir le choix de la priorité.

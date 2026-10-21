@@ -779,6 +779,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-accv2.mjs --contre'],
   ['node scripts/mv-harnais-accv4.mjs'],
   ['node scripts/mv-harnais-accv4.mjs --contre'],
+  ['node scripts/mv-harnais-anticipe1.mjs'],          // ANTICIPE-1 (§420) : les points à anticiper en tête d'« À savoir », la phrase qui y mène, les absences
+  ['node scripts/mv-harnais-anticipe1.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────

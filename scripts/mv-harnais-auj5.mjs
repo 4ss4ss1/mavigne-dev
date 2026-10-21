@@ -31,7 +31,7 @@ function partieA(S, T) {
   PE.Loin[2026][9][20] = { type: 'cp' };
   const etatDe = e => { if (e.type === 'cp') return { etat: 'cp', motif: '' }; if (e.type === 'recup') return { etat: 'recup', motif: '' }; if (e.absent) return { etat: /malad/i.test(e.comment || '') ? 'maladie' : 'absent', motif: e.comment || '' }; return { etat: 'present', motif: '' }; };
   const M = [{ nom: 'Hugo' }, { nom: 'Alicia' }, { nom: 'Paul' }, { nom: 'Loin' }, { nom: 'Ines' }, { nom: 'Theo' }];
-  const ab = ctx._ckSvAbsences(M, PE, etatDe, now), par = n => ab.find(x => x.titre.startsWith(n) || x.titre === 'Absence de ' + n);   // VIF-1 : « Absence de … »
+  const ab = ctx._ckSvAbsences(M, PE, etatDe, now), par = n => ab.find(x => x.titre.startsWith(n) || x.titre === 'Absence de ' + n || x.titre === 'Absence d\u2019' + n);   // VIF-1 : « Absence de … » ; ANTICIPE-1 (§420) : « Absence d’Ines »
   T('A1 un congé de deux semaines est UNE absence (le week-end ne la coupe pas)', par('Hugo') && par('Hugo').quand === 'Du lun. 12 oct. au ven. 23 oct.');
   T('A2 le retour tombe le lundi suivant, jamais un samedi', par('Hugo') && par('Hugo').sous === 'De retour le lun. 26 oct.' && par('Paul') && par('Paul').sous === 'De retour le lun. 19 oct.');
   T('A3 un arrêt maladie dit sa fin, sans double point', par('Alicia') && par('Alicia').titre === 'Alicia en arrêt' && par('Alicia').sous === 'Fin d’arrêt le mar. 13 oct.');

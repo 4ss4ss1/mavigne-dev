@@ -5213,7 +5213,10 @@ function _pilCk2Modele(d, m){
     if(pr.length) presta[t.id]=pr;
   });
   // Présences du jour (les mêmes que la tuile « Présences ») et tension de chacun (moteur de la tuile « Tension »).
-  var LIB={ cp:'en congé', recup:'en récupération', maladie:'en arrêt', absent:'absent' };
+  // ★ ANTICIPE-1 (§420) : « absent » ne s'accordait pas (« Sophie absent ») — la fiche ne porte pas le genre (VIF-1, §414). Une
+  //   absence sans motif ne prend plus d'adjectif : un motif connu reste derrière le nom (« Marion en congé », comme avant) ; dès qu'un
+  //   nom n'en a pas, le mot vient en tête de la liste (« Absences : Inès, Sophie », plus bas).
+  var LIB={ cp:'en congé', recup:'en récupération', maladie:'en arrêt', absent:'' };
   var gens=(d.presences||[]).filter(function(p){ return p&&!p.bureau&&p.etat!=='repos'; }).map(function(p){ return { nom:p.nom, absent:p.etat!=='present', motif:LIB[p.etat]||'' }; });
   // ★★ AUJ-5 (§307) : un jour sans travail au planning (week-end, jour chômé), l'Effectif et les Présences montrent le
   //   PROCHAIN jour travaillé, et le disent. Les jours travaillés se lisent au planning (_pilJourDomaine), gardés ici.
@@ -5234,8 +5237,10 @@ function _pilCk2Modele(d, m){
   var TS=null; try{ TS=_pilTensData(d); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#tens'); }
   ((TS&&TS.rows)||[]).forEach(function(r){ var g=gens.filter(function(x){ return x.nom===r.nom; })[0]; if(g&&r.p>0) g.tens=Math.round((r.f||0)/r.p*100); });
   var nPres=gens.filter(function(g){ return !g.absent; }).length, abs=gens.filter(function(g){ return g.absent; });
-  var absListe=abs.length?(abs.slice(0,2).map(function(g){ return g.nom+' '+g.motif; }).join(', ')+(abs.length>2?' et '+(abs.length-2)+' autre'+(abs.length>3?'s':''):'')):'';
-  var absTxt=repos?(jEff?('Repos aujourd\u2019hui \u00b7 '+jNom+' : '+(absListe||'toute l\u2019équipe')):'Pas de travail prévu au planning ces deux semaines'):(absListe||'Toute l\u2019équipe est là');
+  var absVus=abs.slice(0,2), absPref=absVus.some(function(g){ return !g.motif; });
+  var absNoms=absVus.map(function(g){ return g.nom+(g.motif?' '+g.motif:''); }).join(', ')+(abs.length>2?' et '+(abs.length-2)+' autre'+(abs.length>3?'s':''):'');
+  var absListe=!abs.length?'':(absPref?(abs.length>1?'Absences':'Absence')+'\u00a0: '+absNoms:absNoms);
+  var absTxt=repos?(jEff?('Repos aujourd\u2019hui \u00b7 '+jNom+(absPref?', '+absListe.charAt(0).toLowerCase()+absListe.slice(1):' : '+(absListe||'toute l\u2019équipe'))):'Pas de travail prévu au planning ces deux semaines'):(absListe||'Toute l\u2019équipe est là');
   // Le fil : le journal du jour (fonctions de cockpit.js). Les équipes : plus bas (FORME-1, §301).
   var fil=(typeof window._ckFilDonnees==='function')?window._ckFilDonnees(J, auj):[];
   // ★ DIRECT-1 (§318) : qui travaille = cockpit.js/_ckQui (l'équipe d'abord, l'auteur s'il était dans les rangs — « sans moi »
@@ -5360,7 +5365,7 @@ function _pilCk2Modele(d, m){
     objectif:isoD(m&&m.obj), fin:isoD(m&&m.proj), marge:(m&&m.marge!=null)?m.marge:null,
     dateTxt:sem[t0.getDay()].replace(/^./,function(c){ return c.toUpperCase(); })+' '+t0.getDate()+' '+t0.toLocaleDateString('fr-FR',{month:'long'})+', semaine '+nSem,
     saisonDe:saisonDe, taches:taches, parcs:parcs, etats:etats, presta:presta, gens:gens, presents:nPres, effectifTotal:gens.length,
-    presTxt:nPres+' présent'+(nPres>1?'s':'')+(abs.length?', '+absTxt:''), absTxt:absTxt,
+    presTxt:nPres+' présent'+(nPres>1?'s':'')+(abs.length?', '+(absPref&&!repos?absTxt.charAt(0).toLowerCase()+absTxt.slice(1):absTxt):''), absTxt:absTxt,
     confN:diag.length, confTxt:diag.length?tx(diag[0].t||diag[0].txt||'Un point à régler'):'Rien à régler',
     equipes:equipes, depuis:depuis, evts:evts, tracCours:tracCours, photos:ph, reste:d.totalReste||0, total:hT, hFait:d.hDone||0, hTotal:hT, pct:Number(d.gaugePct)||0,
     capMoy:(m&&m.cadH)||0, besoin:(function(){ if(!(m&&m.obj)) return 0; var n=0, x=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()+1); while(x<=m.obj&&n<400){ if(ouv(x)) n++; x.setDate(x.getDate()+1); } return n?Math.round((d.totalReste||0)/n):0; })(),

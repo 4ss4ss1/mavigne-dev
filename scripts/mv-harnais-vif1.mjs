@@ -58,7 +58,7 @@ if (CONTRE) {
     ['un tracteur compté sans réparation', 'coq', "filter(t => t && R[t.id]).length", "filter(t => t).length"],
     ['la priorité qui redessine toute la page', 'app', "if(pg&&pg.id==='page-pilotage'&&typeof window.renderPilotage==='function'){ if(!(window._pilRafraichirVif&&window._pilRafraichirVif())) window.renderPilotage(); }", "if(pg&&pg.id==='page-pilotage'&&typeof window.renderPilotage==='function') window.renderPilotage();"],
     ['plus d’onde sur une parcelle validée', 'vue', "(b === 'faite' || b === 'cours')) onde(id, b, t);", "(b === 'faite' || b === 'cours')) {}"],
-    ['« Sophie absent » revenu', 'ck', "titre: pl.etat === 'absent' ? 'Absence de ' + m.nom : m.nom + ' ' + lib,", "titre: m.nom + ' ' + lib,"],
+    ['« Sophie absent » revenu', 'ck', "titre: pl.etat === 'absent' ? 'Absence ' + _ckDe(m.nom) : m.nom + ' ' + lib,", "titre: m.nom + ' ' + lib,"],   // ANTICIPE-1 (§420) : l'élision
     ['la ligne d’allure d’un objectif passé', 'vue', "VISEE > AUJ ? 'M' + f1(xa)", "true ? 'M' + f1(xa)"],
     ['la mise en direct sur un autre onglet', 'pil', "if(_PIL_TAB!=='auj'||!document.getElementById('ck-page')", "if(!document.getElementById('ck-page')"],
   ];

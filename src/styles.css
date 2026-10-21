@@ -5729,6 +5729,20 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 @media (hover:hover){.ck-sv-a:hover{border-color:var(--or);background:var(--hover)}}
 .ck-sv-tout{margin-top:4px}
 .ck-sv-l:not(.tout) .ck-sv:nth-child(n+6){display:none}
+/* ★ ANTICIPE-1 (§420) — LES POINTS À ANTICIPER : ceux que compte la phrase du haut (prio 1), en tête de la liste, surlignés, avec leur
+   étiquette ; « N points à anticiper », dans la phrase, est un bouton qui y mène et les fait respirer deux fois. Borné au cockpit
+   d'Aujourd'hui (.ck2) : le cockpit de secours (cockpit.js) garde ses lignes. Le marquage se lit en couleur ET en mot. La couleur est
+   celle de l'ÉTAT « attention » (--attention-*) : dans .ck2, l'or est rendu au neutre (DS-4, §270 : la couleur dit l'état) — un
+   fond --or-pale y sortait gris, vu au rendu. Le focus : l'anneau commun de la charte (mv-harnais-jetons : aucun outline:none de plus). */
+.ck2 .ck-sv.fort{margin:0 calc(-1 * var(--e-3,12px));padding:var(--e-3,12px);border-radius:var(--ck-r-md);background:var(--attention-doux);box-shadow:none;scroll-margin-top:var(--ck-colle,16px)}
+.ck2 .ck-sv.fort .ck-sv-q{color:var(--attention-texte)}
+.ck2 .ck-sv.fort .ck-sv-a{background:var(--bg-card)}
+.ck2 .ck-sv.fort + .ck-sv{margin-top:var(--e-1,4px);box-shadow:none}
+.ck2 .ck-sv-k{display:flex;align-items:center;gap:var(--e-2,8px);margin-bottom:var(--e-1,4px);font-size:var(--pt-nano,11px);font-weight:600;line-height:1.2;color:var(--attention-texte)}
+.ck2 .ck-sv-k::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:currentColor}
+.ck2 .ck-sv.signal{animation:hpc-pouls 1.2s var(--mv-sortie) 2}
+.ck2 .ck-res-pts{display:inline;margin:0;padding:0;border:0;border-radius:var(--ck-r-sm);background:none;font:inherit;letter-spacing:inherit;color:var(--attention-texte);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.18em;text-decoration-color:color-mix(in srgb,currentColor 45%,transparent);cursor:pointer}
+@media (hover:hover){.ck2 .ck-res-pts:hover{text-decoration-color:currentColor}}
 
 /* ═══ LA DÉCISION DU JOUR — quatre tuiles aux étages alignés (ALIGN-1) ═══ */
 .ck-dz-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0 -16px -16px;border-top:1px solid var(--ligne,#ECE6DA)}
