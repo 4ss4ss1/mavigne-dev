@@ -1,0 +1,26 @@
+{
+  "lot": "ACCV-4",
+  "section": "§419",
+  "base": "192196a3d033c4c158edf80ec214cb3e7b1755d4",
+  "inclut": [],
+  "date": "2026-10-21",
+  "fichiers": {
+    "CLAUDE.md": "5716b9cd2bbca5ae51bda0547dff8735ab5d4d62bfb103777a274cb3b97fee6d",
+    "docs/claude/INDEX.md": "6f49d6ed4646339e379e542f623220c7dcc21815dd58978b82a5609a8ea4c6ca",
+    "docs/claude/chantiers-380-429.md": "920b83d6e0b70226fc83a54d06a4a1d806611755696a625c2b9ff387c96c0a32",
+    "docs/claude/journal.md": "404eeed2ec5784013938543c7135a5a11795cb87b364d8278001b2d250cccf16",
+    "guide/04-vigne.html": "71639ad7bc29688b3d362ad939c53838f21633d2d2b9601d84250605e7461f00",
+    "index.html": "be56ad3a85614fbf8f34dcf6dd6a505763fa31bb914e0cb9612241f3213520bd",
+    "public/sw.js": "c21a67bcacbdb731fb36dbb68f712c211e18a8ca837d4469d935b15224074f8c",
+    "scripts/mv-harnais-liste.mjs": "ede8b1efc0afe229c3218adc46a04543d30739f8d59aa06bf4031acd28d4084f",
+    "scripts/mv-harnais-rangbout1.mjs": "67b2a66db69710a179b0424a20540655e683fb183280005eb125ae3ca9a44f92",
+    "scripts/mv-harnais-robustesse-accueil.mjs": "4167544b0cfe5e86bd20f7ea72b9ebed740b1d2c7a41ffaf53951b435fb66b96",
+    "scripts/mv-harnais-temps-vigne.mjs": "88a85acfe7f08dc00e1668e27976cdaf1830852cf58dd6c6bca812094d9c11dc",
+    "src/app.js": "0a613d99b6e2fb3bc7f3d2991066428178cce3fad16837cafcc7520b84a05ebe",
+    "src/jalons.js": "2ee9e907b64a2a1cb5b0843d33a9fabdc7741620d24e1dd948a961fe2207c05c",
+    "src/styles.css": "9de45e72e479fa9abee46c5f2b5286b483016f58f28e776944c991ca7ace7e2a",
+    "src/tutos.js": "89e4c95e2d766c52fe7a2fc35a0c5d45842358cbcf8b47022af84eee3bf751c6",
+    "src/utils.js": "ab23d5ef1a6b8739a2eadb2c6680916e1add215f1adf671ae5f400eda690adf2",
+    "scripts/mv-harnais-accv4.mjs": "fe5ba0a3b229f5fe0894fbb5f3bbaefd8d65a35411cfa33960c8e78f4da8e1a7"
+  }
+}

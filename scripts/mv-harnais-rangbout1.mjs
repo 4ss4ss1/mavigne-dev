@@ -62,7 +62,7 @@ if (!CONTRE) {
 console.log('\n── RANGBOUT-1 — contre-épreuve\n');
 const essais = [
   ['la taille de décembre rangée dans le mauvais millésime est vue', J0.replace("return String(m >= 11 ? y + 1 : y);", "return String(y);"), 'ce qu’il y a fait'],
-  ['une validation défaite comptée est vue', J0.replace("if (!j || j.meteo || j.statut !== 'Validé' || !iso(j.date) || !j.parcelle) return;\n    var eq = [j.qui]", "if (!j || j.meteo || !iso(j.date) || !j.parcelle) return;\n    var eq = [j.qui]"), 'ni une parcelle défaite'],
+  ['une validation défaite comptée est vue', J0.replace("if (!j || j.meteo || j.statut !== 'Validé' || !iso(j.date) || !j.parcelle) return;\n    var eq = _fp(j)", "if (!j || j.meteo || !iso(j.date) || !j.parcelle) return;\n    var eq = _fp(j)"), 'ni une parcelle défaite'],
   ['la cuvée du décuvage oubliée est vue', J0.replace("var cu = (cv.decuvage && cv.decuvage.cuvee_id) ? cuvees.find(function (x) { return x && x.id === cv.decuvage.cuvee_id; }) : null;\n      var cle", "var cu = null;\n      var cle"), 'le vin de Clos Bas'],
 ];
 let rates = 0;

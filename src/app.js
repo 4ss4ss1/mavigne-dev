@@ -6347,7 +6347,7 @@ function getHomeCardData(){
   tachesSaison.forEach(t=>{
     const parcT=_parcConcern(t.nom);
     totalSurfTaches += parcT.reduce((s,p)=>s+parseFloat(p.surface||0),0);
-    totalSurfDone   += parcT.filter(p=>getTacheStatut(p,t.nom)==='Validé').reduce((s,p)=>s+parseFloat(p.surface||0),0);
+    totalSurfDone   += parcT.reduce((s,p)=>s+parseFloat(p.surface||0)*(typeof _mvTFaite==='function'?_mvTFaite(p,t.nom):(getTacheStatut(p,t.nom)==='Validé'?1:0)),0);   // ★ ACCV-4 (§419) : la règle commune (COH-1)
   });
   // ★ REVUE-8 (§408) : sans travaux à mesurer (domaine qui démarre, démo vide), l'avancement n'est pas « 100 % » mais rien :
   //   on l'affiche « — » (rienAMesurer) ; la valeur numérique tombe à 0, pas à 100.
@@ -6454,11 +6454,11 @@ function _homePrioCarte(){
   var etat=function(p){
     if(t&&typeof window._mvTacheConcerne==='function'&&!window._mvTacheConcerne(p,t)) return 'hors';   // HORS-1 (§322) : tâche désactivée sur la parcelle ou pas choisie pour la campagne — sa fiche le dit
     if(t){ if(t==='Arrachage'&&_pvAuPresta(p,t)) return 'fait';   // ARRACH-9 : fait pour l'équipe (lu pour l'arrachage seulement)
-      var st=getTacheStatut(p,t)||'Non d\u00e9marr\u00e9'; return st==='Valid\u00e9'?'fait':(st==='En cours'?'cours':'afaire'); }
+      var st=getTacheStatut(p,t)||'Non d\u00e9marr\u00e9', f=(typeof _mvTFaite==='function')?_mvTFaite(p,t):(st==='Valid\u00e9'?1:0); return f>=1?'fait':((f>0||st==='En cours')?'cours':'afaire'); }   // ★ ACCV-4 (§419) : la règle commune
     var pc=getPCls(p).pct; return pc>=100?'fait':(pc>0?'cours':'afaire');
   };
   var surf=0,fait=0,pond=0,nHors=0;
-  act.forEach(function(p){ var sf=_homeSurf(p), e=etat(p); if(e==='hors'){ nHors++; } else surf+=sf; if(e==='fait')fait+=sf; pond+=getPCls(p).pct*sf; });   // HORS-1 : une parcelle pas concernée ne compte ni dans les hectares ni dans le pourcentage
+  act.forEach(function(p){ var sf=_homeSurf(p), e=etat(p); if(e==='hors'){ nHors++; } else surf+=sf; if(e==='fait')fait+=sf; else if(t&&e==='cours'&&typeof _mvTFaite==='function') fait+=sf*_mvTFaite(p,t); pond+=getPCls(p).pct*sf; });   // HORS-1 : une parcelle pas concernée ne compte ni dans les hectares ni dans le pourcentage
   var pct=t?(surf?Math.round(fait/surf*100):0):(surf?Math.round(pond/surf):0);
   var maxS=Math.max.apply(null,act.map(_homeSurf).concat([0.0001])), rang={fait:0,cours:1,afaire:2,hors:3};
   // FORME-2 (§315) : chaque parcelle à la forme de son contour (_homeForme) ; sans contour, le rectangle d'avant — en
@@ -6609,16 +6609,23 @@ function renderHomeSaison(){
   var ech=(sa&&sa.echeances&&typeof sa.echeances==='object'&&!Array.isArray(sa.echeances))?sa.echeances:{};
   var auj=(typeof _mvToday==='function')?_mvToday():'', its=(typeof _prioItems==='function')?_prioItems():[], prio=its.length?its[0].t:'';
   var D=getHomeCardData(), ch=document.getElementById('home-saison-chip');
+  // ★ ACCV-4 (§419) : les chiffres du Pilotage (calcHeures) et la règle commune de la part faite (_mvTFaite, COH-1) — un arrachage
+  //   découpé compte ses étapes. Avant, « Validé » seulement : quatre parcelles arrachées à 67 % sortaient à 0 % sur l'Accueil.
+  var CH=(typeof calcHeures==='function')?calcHeures():null, chN={}, G;
+  var tf=(typeof _mvTFaite==='function')?_mvTFaite:function(p,n){ return getTacheStatut(p,n)==='Valid\u00e9'?1:0; };
+  if(CH){ (CH.data||[]).forEach(function(x){ if(x&&x.nom) chN[x.nom]=x; }); var hT=Math.round(CH.totalTotal||0), hR=Math.round(CH.totalReste||0); G={vide:!(hT>0), pct:hT>0?Math.round(Math.max(0,hT-hR)/hT*100):0}; }   // la jauge du Pilotage (_pilData), au chiffre près
+  else G={vide:D.rienAMesurer, pct:D.pctGlobal};
   if(ch) ch.textContent=(typeof _visuSaison==='function')?_visuSaison():((sa&&sa.nom)||'');
   var MO=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
   var dt=function(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso||'')); return m?((+m[3])+(m[3]==='01'?'er':'')+' '+MO[+m[2]-1]):''; };
   var L=ts.map(function(t){
     var P=_parcConcern(t.nom), sT=0, sD=0, nR=0;
-    P.forEach(function(p){ var s=parseFloat(String((p&&p.surface)||0).replace(',','.'))||0; sT+=s; if(getTacheStatut(p,t.nom)==='Valid\u00e9') sD+=s; else nR++; });   // « 0,5 » comme « 0.5 » (_homeSurf)
-    var pct=sT>0?Math.round(sD/sT*100):0, d1=(ech[t.nom]&&ech[t.nom].d1)||(sa&&sa.debut)||'';
+    P.forEach(function(p){ var s=parseFloat(String((p&&p.surface)||0).replace(',','.'))||0, f=tf(p,t.nom)||0; sT+=s; sD+=s*f; if(f<1) nR++; });   // « 0,5 » comme « 0.5 » (_homeSurf)
+    var x0=chN[t.nom], pct=(x0&&typeof x0.pct==='number')?x0.pct:(sT>0?Math.round(sD/sT*100):0), d1=(ech[t.nom]&&ech[t.nom].d1)||(sa&&sa.debut)||'';
     var presta=t.nom==='Arrachage'&&typeof _arrEquipeFiniePartout==='function'&&_arrEquipeFiniePartout()&&pct<100;
     var etat=(pct>=100||presta)?'fini':((pct>0||(d1&&auj&&d1<=auj))?'cours':'avenir');
-    return {n:t.nom, pct:pct, rest:Math.max(0,sT-sD), nR:nR, d1:d1, etat:etat, presta:presta};
+    var rest=(x0&&typeof x0.surf_done==='number'&&typeof x0.surf_total==='number')?Math.max(0,x0.surf_total-x0.surf_done):Math.max(0,sT-sD);
+    return {n:t.nom, pct:pct, rest:rest, nR:nR, d1:d1, etat:etat, presta:presta};
   });
   var parD=function(a,b){ return String(a.d1).localeCompare(String(b.d1)); };
   var C=L.filter(function(x){ return x.etat==='cours'; }).sort(parD), A=L.filter(function(x){ return x.etat==='avenir'; }).sort(parD);
@@ -6627,8 +6634,8 @@ function renderHomeSaison(){
     if(x.etat==='cours') return '<li class="hk-sa"><span class="hk-sa-n">'+nm+(x.n===prio?'<span class="mvpas mvpas-etiquette">'+_mvIcon('eclair',16)+'Priorit\u00e9</span>':'')+'</span><span class="hk-sa-v">'+x.pct+'\u00a0%</span><span class="hk-sa-m"><span class="hk-barre"><i style="--p:'+x.pct+'%"></i></span><span>reste '+_accHa(x.rest)+'\u00a0ha, '+x.nR+' parcelle'+(x.nR>1?'s':'')+'</span></span></li>';
     if(x.etat==='avenir') return '<li class="hk-sa avenir"><span class="hk-sa-n">'+nm+'</span><span class="hk-sa-v">'+(x.d1?'d\u00e8s le '+dt(x.d1):'\u00e0 venir')+'</span></li>';
     return '<li class="hk-sa fini"><span class="hk-sa-n">'+_mvIcon('check',16)+nm+'</span><span class="hk-sa-v"><span class="mvpas mvpas-statut mvpas-fait">'+(x.presta?'fini pour l\u2019\u00e9quipe':'termin\u00e9')+'</span></span></li>'; };
-  c.innerHTML='<div class="hk-sa-tot"><span class="hk-grand">'+(D.rienAMesurer?'\u2014':D.pctGlobal+'<small>\u00a0%</small>')+'</span><span class="hk-lbl">'+(D.rienAMesurer?'la saison commence':'de la saison faite')+'</span></div>'
-    +'<div class="hk-barre g'+(D.rienAMesurer?' vide':'')+'"><i style="--p:'+(D.rienAMesurer?0:D.pctGlobal)+'%"></i></div>'
+  c.innerHTML='<div class="hk-sa-tot"><span class="hk-grand">'+(G.vide?'\u2014':G.pct+'<small>\u00a0%</small>')+'</span><span class="hk-lbl">'+(G.vide?'la saison commence':'de la saison faite')+'</span></div>'
+    +'<div class="hk-barre g'+(G.vide?' vide':'')+'"><i style="--p:'+(G.vide?0:G.pct)+'%"></i></div>'
     +(L.length?'<ul class="hk-sa-l">'+C.map(ligne).join('')+(A.length?'<li class="hk-sa-g">\u00c0 venir</li>'+A.map(ligne).join(''):'')+(F.length?'<li class="hk-sa-g">Termin\u00e9</li>'+F.map(ligne).join(''):'')+'</ul>':'<div class="hk-calme">Aucune t\u00e2che dans cette saison.</div>')
     +'<button type="button" class="hk-lien" onclick="switchVigneOng(\'parcelles\')"><span>Toutes les t\u00e2ches</span>'+_mvIcon('chevron',16)+'</button>';
 }
@@ -6652,7 +6659,7 @@ function renderHomeMoi(){
   var now=new Date(), lun=new Date(now.getFullYear(),now.getMonth(),now.getDate()-((now.getDay()+6)%7)), sem=[0,0,0,0,0], vus={};
   (typeof JOURNAL!=='undefined'?JOURNAL:[]).forEach(function(j){
     if(!j||j.meteo||j.statut!=='Valid\u00e9'||!j.date||!j.parcelle) return;
-    var eq=[j.qui].concat(j.membresEquipe||[]).filter(function(x,i,l){ return x&&l.indexOf(x)===i; }); if(eq.indexOf(nom)<0) return;
+    var eq=(typeof _jFaitPar==='function')?_jFaitPar(j):[j.qui].concat(j.membresEquipe||[]).filter(function(x,i,l){ return x&&l.indexOf(x)===i; }); if(eq.indexOf(nom)<0) return;
     var di=Math.round((new Date(j.date+'T12:00:00')-lun)/864e5); if(di<0||di>4) return;
     var k=j.date+'|'+j.parcelle+'|'+j.tache; if(vus[k]) return; vus[k]=1;
     var p=(PARCELLES||[]).find(function(x){ return x&&x.nom===j.parcelle; }); if(p) sem[di]+=(parseFloat(String(p.surface||0).replace(',','.'))||0)/eq.length; });
@@ -6702,13 +6709,13 @@ function renderHomeDirect(){
   var c=document.getElementById('home-direct'); if(!c) return;
   var me=(currentUser&&currentUser.nom)||'', auj=(typeof _mvToday==='function')?_mvToday():'';
   var J=((typeof JOURNAL!=='undefined'&&JOURNAL)||[]).filter(function(j){ return j&&!j.meteo; });
-  var qui=function(j){ return [j.qui].concat(j.membresEquipe||[]).filter(function(n,i,l){ return n&&n!=='Equipe'&&l.indexOf(n)===i; }); };
+  var qui=function(j){ return (typeof _jFaitPar==='function')?_jFaitPar(j):[j.qui].concat(j.membresEquipe||[]).filter(function(n,i,l){ return n&&n!=='Equipe'&&l.indexOf(n)===i; }); };
   var sujet=function(l){ var lui=l.indexOf(me)>=0, au=l.filter(function(n){ return n!==me; });
     return lui?('<b>'+(au.length?'Vous et '+_escHtml(_accNoms(au)):'Vous')+'</b> avez valid\u00e9'):('<b>'+_escHtml(_accNoms(l)||'\u00c9quipe')+'</b> '+(l.length>1?'ont valid\u00e9':'a valid\u00e9')); };
   var vus={}, cours=[];
   J.forEach(function(j){ if(j.statut!=='En cours'||j.date!==auj||!j.parcelle) return; var k=j.parcelle+'|'+j.tache; if(vus[k]) return; vus[k]=1;
     var p=(PARCELLES||[]).find(function(x){ return x&&x.nom===j.parcelle; }); if(p&&getTacheStatut(p,j.tache)!=='En cours') return; cours.push(j); });
-  var S=((typeof SESSIONS!=='undefined'&&SESSIONS)||[]).filter(function(s){ return s&&s.statut==='En cours'; });
+  var S=((typeof SESSIONS!=='undefined'&&SESSIONS)||[]).filter(function(s){ return s&&s.statut==='En cours'&&(typeof window._sessInSaison!=='function'||window._sessInSaison(s)); });   // ★ ACCV-4 (§419) : les sessions de la saison, comme le Tracteur
   var hC=cours.map(function(j){ var l=qui(j), lui=l.indexOf(me)>=0, h=_hvHeure(j);
       return '<div class="hk-ed cours"><span class="hk-ed-i"><i class="hpc-pouls" aria-hidden="true"></i></span><span class="hk-ed-t"><b>'+(lui?(l.length>1?'Votre \u00e9quipe':'Vous'):_escHtml(_accNoms(l)))+'</b><span>'+_escHtml(tNom(j.tache))+', '+_escHtml(j.parcelle)+'</span></span><span class="hk-ed-h">'+(h?'depuis '+h:'')+'</span></div>'; }).join('')
     +S.map(function(s){ var lui=s.conducteur===me; return '<div class="hk-ed cours"><span class="hk-ed-i">'+_mvIcon('tracteur',16)+'</span><span class="hk-ed-t"><b>'+(lui?'Vous':_escHtml(s.conducteur||'Un tractoriste'))+', au tracteur</b><span>'+_escHtml(s.activite||'Session')+'</span></span><span class="hk-ed-h"></span></div>'; }).join('');
@@ -6982,8 +6989,7 @@ function _mvPartCalc(tache,nom){
     if(!j||j.meteo||j.tache!==tache||!j.parcelle||!j.date)return;
     if(vn&&typeof window._saisonForDate==='function'&&window._saisonForDate(j.date)!==vn)return;
     var set=contrib[j.parcelle]||(contrib[j.parcelle]={});
-    if(j.qui)set[j.qui]=1;
-    (j.membresEquipe||[]).forEach(function(n){ if(n)set[n]=1; });
+    ((typeof _jFaitPar==='function')?_jFaitPar(j):[j.qui].concat(j.membresEquipe||[])).forEach(function(n){ if(n)set[n]=1; });   // ★ ACCV-4 (§419) : quiHors compte
     if(j.date>=d15&&j.statut==='Validé')recent[j.parcelle]=1;
   });
   var mine=0,done=0,restS=0,restN=0,recS=0,restNoms=[],mineParcs=[];
@@ -7247,9 +7253,7 @@ function _mvTraceData(nom){
   JOURNAL.forEach(function(j){
     if(!j||j.meteo||!j.date)return;
     if(vn&&typeof window._saisonForDate==='function'&&window._saisonForDate(j.date)!==vn)return;
-    var eq=[];
-    if(j.qui)eq.push(j.qui);
-    (j.membresEquipe||[]).forEach(function(n){ if(n&&eq.indexOf(n)<0)eq.push(n); });
+    var eq=(typeof _jFaitPar==='function')?_jFaitPar(j):[j.qui].concat(j.membresEquipe||[]).filter(function(n,i,l){ return n&&l.indexOf(n)===i; });   // ★ ACCV-4 (§419) : quiHors compte
     if(eq.indexOf(nom)<0)return;
     jours[j.date]=1;
     eq.forEach(function(n){ if(n!==nom){ co[n]=co[n]||{}; co[n][j.date]=1; } });
@@ -11421,6 +11425,77 @@ function _renderMeteoSnapshot(s){
     +precipStr+joursStr+'</div>';
 }
 
+// ★★ ACCV-4 (§419) — QUI A TRAVAILLÉ, ET LE CORRIGER APRÈS COUP (administrateur). Nico (21/10) : « les parcelles validées mardi,
+//   c'est moi qui les ai validées, mais c'est pas moi qui les ai faites… il faudra ajouter une possibilité de modifier les membres de
+//   l'équipe dans le journal, que de la part de l'administrateur ».
+//   · _jFaitPar : la règle TV-2 en une fonction — l'auteur (`qui`) sauf s'il porte `quiHors`, plus `membresEquipe`, sans doublon ni le
+//     vieux « Equipe ». « Ma saison », « Ma trace », « En direct » et les jalons passent par elle ; avant, ils comptaient toujours l'auteur.
+//   · La correction ne touche que le groupe : l'auteur reste (traçabilité), la date, la parcelle, la tâche et l'état ne bougent pas
+//     (les changer changerait l'avancement des parcelles). Elle s'écrit sur l'entrée (`eqCorr` : par qui, quand).
+//   · « Toute la journée » : les validations de la même tâche, le même jour, par le même auteur, dans le même état.
+function _jFaitPar(j){
+  if(!j) return [];
+  var l=(j.quiHors?[]:[j.qui]).concat(j.membresEquipe||[]);
+  return l.filter(function(n,i){ return n&&n!=='Equipe'&&l.indexOf(n)===i; });
+}
+window._jFaitPar=_jFaitPar;
+function _jEqCibles(id,tout){
+  var e=(JOURNAL||[]).find(function(x){ return x&&x.id===id; }); if(!e) return [];
+  if(!tout) return [e];
+  return JOURNAL.filter(function(x){ return x&&!x.meteo&&x.parcelle&&x.date===e.date&&x.tache===e.tache&&x.qui===e.qui&&x.statut===e.statut; });
+}
+function _jEqAppliquer(L,travailleurs,par,le){
+  var W=(travailleurs||[]).filter(function(n,i,a){ return n&&a.indexOf(n)===i; });
+  if(!W.length||!L||!L.length) return 0;   // un groupe vide n'a personne : refusé, comme à la validation (TV-2)
+  L.forEach(function(e){
+    var autres=W.filter(function(n){ return n!==e.qui; }), hors=W.indexOf(e.qui)<0;
+    e.equipe=autres.length>0; e.membresEquipe=autres;
+    if(hors) e.quiHors=true; else delete e.quiHors;
+    delete e.eqJour; e.eqCorr={par:par||'', le:le||''};
+  });
+  return L.length;
+}
+function _jEqBtn(r){
+  if(!r||r.meteo||!r.parcelle||typeof isAdmin!=='function'||!isAdmin()) return '';
+  return '<button type="button" class="mvbtn mvbtn-discret mvbtn-compact jeq-btn" data-tuto="journal.equipe" onclick="openJEquipe(\''+_escAttr(String(r.id||''))+'\')">'+_escHtml('\u00c9quipe')+'</button>';
+}
+function _jEqTrace(r){
+  if(!r||!r.eqCorr) return '';
+  var d=String(r.eqCorr.le||'').slice(0,10);
+  return '<div class="jeq-trace">'+_escHtml('\u00c9quipe corrig\u00e9e par '+(r.eqCorr.par||'?')+(d?' le '+(typeof fmtDate==='function'?fmtDate(d):d):''))+'</div>';
+}
+function openJEquipe(id){
+  if(typeof isAdmin!=='function'||!isAdmin()) return;
+  var e=(JOURNAL||[]).find(function(x){ return x&&x.id===id; }), ov=document.getElementById('ovJEquipe'); if(!e||!ov) return;
+  var W=_jFaitPar(e), noms=[];
+  (typeof MEMBRES!=='undefined'&&MEMBRES||[]).forEach(function(m){ if(m&&m.nom&&m.actif!==false&&!m.inactif&&noms.indexOf(m.nom)<0) noms.push(m.nom); });
+  W.concat([e.qui]).forEach(function(n){ if(n&&n!=='Equipe'&&noms.indexOf(n)<0) noms.push(n); });
+  var dt=(typeof fmtDate==='function')?fmtDate(e.date):e.date;
+  document.getElementById('jeq-sub').textContent=(typeof tNom==='function'?tNom(e.tache):e.tache)+' \u00b7 '+e.parcelle+' \u00b7 '+dt+' \u2014 valid\u00e9 par '+(e.qui||'?');
+  document.getElementById('jeq-pick').innerHTML=noms.map(function(n){ return '<button type="button" class="pchk mbr-chk'+(W.indexOf(n)>=0?' sel':'')+'" data-jeq-n="'+_escAttr(n)+'" onclick="_jEqBasc(this)">'+_escHtml(n)+(n===e.qui?' <small>(a valid\u00e9)</small>':'')+'</button>'; }).join('');
+  var autres=_jEqCibles(id,true).length-1, lb=document.getElementById('jeq-tout-l'), cb=document.getElementById('jeq-tout');
+  if(cb) cb.checked=false;
+  if(lb){ lb.style.display=autres>0?'':'none'; document.getElementById('jeq-tout-t').textContent='Toute la journ\u00e9e\u00a0: aussi les '+autres+' autre'+(autres>1?'s':'')+' validation'+(autres>1?'s':'')+' de '+(typeof tNom==='function'?tNom(e.tache):e.tache)+' du '+dt; }
+  ov.setAttribute('data-jid',id); ov.classList.add('open'); if(typeof _mvOvSync==='function') _mvOvSync();
+}
+window.openJEquipe=openJEquipe;
+function _jEqBasc(el){ if(el) el.classList.toggle('sel'); }
+window._jEqBasc=_jEqBasc;
+function saveJEquipe(){
+  if(typeof isAdmin!=='function'||!isAdmin()) return;
+  var ov=document.getElementById('ovJEquipe'), id=ov&&ov.getAttribute('data-jid'); if(!id) return;
+  var W=Array.from(document.querySelectorAll('#jeq-pick .pchk.sel')).map(function(el){ return el.getAttribute('data-jeq-n'); }).filter(Boolean);
+  if(!W.length){ showToast('Cochez qui a travaill\u00e9','#B85A1A'); return; }
+  var cb=document.getElementById('jeq-tout'), n=_jEqAppliquer(_jEqCibles(id,!!(cb&&cb.checked)),W,(currentUser&&currentUser.nom)||'',new Date().toISOString());
+  if(!n) return;
+  if(typeof saveData==='function') saveData('journal');
+  closeOv(null,'ovJEquipe');
+  try{ if(typeof renderJournalList==='function') renderJournalList(); }catch(err){ if(window._mvAvale) window._mvAvale(err,'app.js/saveJEquipe#1'); }
+  try{ if(typeof renderHome==='function') renderHome(); }catch(err){ if(window._mvAvale) window._mvAvale(err,'app.js/saveJEquipe#2'); }
+  if(window._mvJalonsSync) window._mvJalonsSync();
+  showToast(n>1?(n+' validations corrig\u00e9es'):'\u00c9quipe corrig\u00e9e');
+}
+window.saveJEquipe=saveJEquipe;
 function renderJournalList(){
   if(!window._dataReady){ var _skj=document.getElementById('timeline'); if(_skj)_skj.innerHTML=window._mvSk('journal'); return; }
   // Rafraîchir les chips de parcelle à chaque rendu
@@ -11493,13 +11568,13 @@ function renderJournalList(){
         const col=m?.couleur||COULEURS_MBR[r.qui]||'#888';
         const isEq=r.equipe||r.qui==='Equipe';
         const membresStr=isEq&&r.membresEquipe&&r.membresEquipe.length>0?` + ${r.membresEquipe.join(', ')}`:isEq?' + équipe':'';
-        const quiAff=isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui}${membresStr})`:isEq?'Équipe':r.qui||'Non assigné';
+        const quiAff=r.quiHors?((_jFaitPar(r).join(', ')||'\u2014')+' \u00b7 valid\u00e9 par '+(r.qui||'?')):(isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui}${membresStr})`:isEq?'Équipe':r.qui||'Non assigné');   // ★ ACCV-4 (§419) : l'auteur hors du groupe ne passe plus pour un travailleur
         // ARRACH-3 : l'étape d'arrachage, et le prestataire quand c'en est un, à côté de la tâche.
         const tacheAff=_escHtml(tNom(r.tache)+(r.etapeLbl?(' \u00b7 '+r.etapeLbl+(r.presta?(' (prestataire'+(r.prestaNom?' '+r.prestaNom:'')+')'):'')):''));
         const repSuffix=(r.reparation_types&&r.reparation_types.length)?_escHtml(' · '+r.reparation_types.join(', ')+(r.reparation_qte?(' ×'+r.reparation_qte):'')):'';
         const quiAffE=_escHtml(quiAff);
         const parcelleE=_escHtml(r.parcelle);
-        return `<div class="jitem"><div class="jdotcol"><div class="jdot ${sc}"></div>${hasNext?'<div class="jlinev"></div>':''}</div><div class="jcard mv-c" style="margin-bottom:0"><div class="jcard-bar ${barCls}"></div><div class="jcard-col"><div class="jcard-inner"><div class="mv-hd" style="flex:1;min-width:0"><div style="min-width:0"><div class="mv-v" style="font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">${tacheAff}${repSuffix}</div><div class="jmeta"><div class="java" style="background:${col}">${_escHtml((r.qui||'?')[0])}</div><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${quiAffE}</span><span style="color:var(--gris-clair)">\u00b7</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${parcelleE}</span></div></div>${_mvBadge(r.statut, isValide?'vert':isInfo?'neutre':'ambre')}</div></div>${r.meteo_snapshot?_renderMeteoSnapshot(r.meteo_snapshot):''}</div></div></div>`;
+        return `<div class="jitem"><div class="jdotcol"><div class="jdot ${sc}"></div>${hasNext?'<div class="jlinev"></div>':''}</div><div class="jcard mv-c" style="margin-bottom:0"><div class="jcard-bar ${barCls}"></div><div class="jcard-col"><div class="jcard-inner"><div class="mv-hd" style="flex:1;min-width:0"><div style="min-width:0"><div class="mv-v" style="font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">${tacheAff}${repSuffix}</div><div class="jmeta"><div class="java" style="background:${col}">${_escHtml((r.qui||'?')[0])}</div><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${quiAffE}</span><span style="color:var(--gris-clair)">\u00b7</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${parcelleE}</span></div>${_jEqTrace(r)}</div>${_mvBadge(r.statut, isValide?'vert':isInfo?'neutre':'ambre')}${_jEqBtn(r)}</div></div>${r.meteo_snapshot?_renderMeteoSnapshot(r.meteo_snapshot):''}</div></div></div>`;
       }).join('')}
     </div>`).join('');
   // ── Bouton "Charger plus" ──────────────────────────────────────────────────

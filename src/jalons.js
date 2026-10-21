@@ -26,6 +26,8 @@ const MV_JALONS_SERIES = [
   { id: 'degu',  t: 'Dégustations',           seuils: [1] },
   { id: 'an',    t: 'Années au domaine',      seuils: [1] },
 ];
+// ★ ACCV-4 (§419) : qui a travaillé sur une entrée — _jFaitPar (app.js) honore `quiHors` (TV-2) ; repli d'avant si elle manque.
+var _fp = function (j) { return (typeof window !== 'undefined' && typeof window._jFaitPar === 'function') ? window._jFaitPar(j) : [j.qui].concat(j.membresEquipe || []).filter(function (n, i, a) { return n && a.indexOf(n) === i; }); };
 function _mvJalSlug(x) {
   return String(x == null ? '' : x).normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
@@ -51,8 +53,7 @@ function _mvJalonsCompteurs(nom, D) {
   (D.journal || []).forEach(function (j) {
     if (!j || j.meteo || j.statut !== 'Validé') return;                    // « ↩ » passe l'entrée en « Annulé » : elle sort du compte
     var eq = [];
-    if (j.qui) eq.push(j.qui);
-    (j.membresEquipe || []).forEach(function (n) { if (n && eq.indexOf(n) < 0) eq.push(n); });
+    _fp(j).forEach(function (n) { if (eq.indexOf(n) < 0) eq.push(n); });
     if (eq.indexOf(nom) < 0) return;
     var cle = [j.parcelle, j.tache, j.date, j.passage || j.niveau || ''].join('|');
     if (vus[cle]) return;                                                  // valider deux fois ne rapporte rien
@@ -199,7 +200,7 @@ function _mvPremieresFois(nom, D) {
   var rang = D.vigne ? (parseFloat(D.vigne.ec_rang) || 0) : 0;
   var m = (D.membres || []).find(function (x) { return x && x.nom === nom; }), arrivee = m ? iso(m.debut_contrat) : '';
   ajoute('arrivee', 'Arrivée au domaine', arrivee, '');
-  var equipe = function (j) { return [j.qui].concat(j.membresEquipe || []).filter(function (n, i, a) { return n && a.indexOf(n) === i; }); };
+  var equipe = function (j) { return _fp(j); };
   var J = (D.journal || []).filter(function (j) { return j && !j.meteo && j.statut === 'Validé' && iso(j.date) && equipe(j).indexOf(nom) >= 0; })
     .sort(function (a, b) { return iso(a.date).localeCompare(iso(b.date)); });
   if (J.length) ajoute('val', 'Première validation', iso(J[0].date), [nt(J[0].tache), J[0].parcelle].filter(Boolean).join(', '));
@@ -287,7 +288,7 @@ function _mvRangBouteille(nom, D) {
   var travail = {};   // millésime → parcelle → [tâches]
   (D.journal || []).forEach(function (j) {
     if (!j || j.meteo || j.statut !== 'Validé' || !iso(j.date) || !j.parcelle) return;
-    var eq = [j.qui].concat(j.membresEquipe || []);
+    var eq = _fp(j);
     if (eq.indexOf(nom) < 0) return;
     var M = millDe(iso(j.date)), t = nt(j.tache || '');
     travail[M] = travail[M] || {}; var L = travail[M][j.parcelle] = travail[M][j.parcelle] || [];
@@ -324,7 +325,7 @@ function _mvCarteDomaine(nom, D) {
   if (nom) (D.journal || []).forEach(function (j) {
     if (!j || j.meteo || j.statut !== 'Validé' || !iso(j.date) || !j.parcelle) return;
     if (depuis && iso(j.date) < depuis) return;
-    if ([j.qui].concat(j.membresEquipe || []).indexOf(nom) < 0) return;
+    if (_fp(j).indexOf(nom) < 0) return;
     var cle = [j.parcelle, j.tache, iso(j.date), j.passage || j.niveau || ''].join('|');
     if (vus[cle]) return; vus[cle] = 1;
     var p = String(j.parcelle).toLowerCase(); n[p] = (n[p] || 0) + 1;
@@ -362,7 +363,7 @@ function _mvSaisonImages(nom, D) {
   var ha = 0, km = 0, pieds = 0, jours = {}, pass = {}, taches = {}, vus = {}, out = { ses: 0, trous: 0, ouil: 0, sout: 0, degu: 0, chap: 0 };
   if (nom) (D.journal || []).forEach(function (j) {
     if (!j || j.meteo || j.statut !== 'Validé' || !dans(j.date) || !j.parcelle) return;
-    var eq = [j.qui].concat(j.membresEquipe || []).filter(function (n, i, a) { return n && a.indexOf(n) === i; });
+    var eq = _fp(j);
     if (eq.indexOf(nom) < 0) return;
     var cle = [j.parcelle, j.tache, iso(j.date), j.passage || j.niveau || ''].join('|'); if (vus[cle]) return; vus[cle] = 1;
     jours[iso(j.date)] = 1; pass[j.parcelle] = (pass[j.parcelle] || 0) + 1;

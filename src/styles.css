@@ -8596,6 +8596,13 @@ input[type="checkbox"], input[type="radio"]{ accent-color:var(--accent); }
 }
 @media (prefers-reduced-motion:reduce){ #page-home .hk-vif{ animation:none; } }
 /* ★ FIN ACCV-2 */
+/* ★ ACCV-4 (§419) : corriger l'équipe d'une validation (Journal, administrateur) — par jetons seulement */
+.jeq-pick{ display:flex; flex-wrap:wrap; gap:var(--e-2,8px); margin-top:var(--e-3,12px); }
+.jeq-tout{ display:flex; align-items:center; gap:var(--e-2,8px); margin-top:var(--e-3,12px); font-size:var(--pt-txt,13px); color:var(--texte); }
+.jeq-act{ display:flex; justify-content:flex-end; gap:var(--e-2,8px); margin-top:var(--e-4,16px); }
+.jeq-trace{ margin-top:var(--e-1,4px); font-size:var(--pt-micro,12px); color:var(--texte-2,var(--gris)); }
+.jeq-btn{ margin-left:var(--e-2,8px); flex:0 0 auto; }
+/* ★ FIN ACCV-4 */
 
 
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.

@@ -472,3 +472,4 @@
 | 416 | 416. ★★ ACCV-1 — LA CARTE DU JOUR DE L’ACCUEIL AU DESSIN DE LA MAQUETTE (21/10 — `src/app.js` (`_homePrioCa… | `docs/claude/chantiers-380-429.md` |
 | 417 | 417. ★★★ ACCV-2 — L’ACCUEIL VIGNE EN SEPT CARTES, AU DESSIN DE LA MAQUETTE : LES LOTS 2 À 4 ENSEMBLE (21/10… | `docs/claude/chantiers-380-429.md` |
 | 418 | 418. ★★ ACCV-3 — L’ACCUEIL VIGNE NETTOYÉ : LES ANCIENS BLOCS ET LEUR CODE RETIRÉS, L’ŒIL SEUL, UNE CARTE MÉ… | `docs/claude/chantiers-380-429.md` |
+| 419 | 419. ★★ ACCV-4 — L’ACCUEIL DIT VRAI, ET L’ADMINISTRATEUR CORRIGE L’ÉQUIPE D’UNE VALIDATION (21/10 — `src/ap… | `docs/claude/chantiers-380-429.md` |

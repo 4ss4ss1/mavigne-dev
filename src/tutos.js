@@ -96,6 +96,26 @@ function _zoneEquipe(chip) {
 // `fait` : l'écran a-t-il vraiment changé ? · `{T}` devient « Touchez » ou « Cliquez ».
 // `couvre` : les fonctions de l'appli que le tuto enseigne (le harnais vérifie qu'elles existent).
 var TU_TUTOS = [
+  // ★ ACCV-4 (§419) : corriger l'équipe d'une validation, au Journal (administrateur).
+  { id: 'jequipe', titre: 'Comment faire pour corriger l’équipe d’une validation\u00a0?', fin: 'corriger l’équipe d’une validation',
+    module: 'Vigne', pages: ['journal'], pour: 'admin', duree: '1 min', depart: 'journal',
+    couvre: ['openJEquipe', '_jEqBasc', 'saveJEquipe'],
+    retenir: ['Journal › bouton « Équipe » sur une validation (administrateur).',
+              'Cochez qui a vraiment travaillé ; celui qui a validé peut rester décoché : il reste l’auteur de l’entrée.',
+              '« Toute la journée » corrige d’un coup les validations de la même tâche, le même jour.'],
+    etapes: [
+      { type: 'toucher', cible: '[data-tuto="journal.equipe"]',
+        txt: function () { return 'Vous êtes dans le Journal. Chaque validation porte un bouton « Équipe ». {T} celui de la première.'; },
+        fait: function () { return _ouvert('ovJEquipe'); },
+        ok: 'La fenêtre « Qui a fait ce travail ? » s’est ouverte.' },
+      { type: 'choisir', options: ['[data-jeq-n="Jean"]', '[data-jeq-n="Sophie"]'], zone: function () { return _q('#jeq-pick'); },
+        txt: function () { return 'Cochez Jean et Sophie : ce sont eux qui ont fait le travail. Celui qui a validé peut rester décoché.'; },
+        txtReel: 'cochez qui a vraiment travaillé' },
+      { type: 'toucher', cible: '[data-tuto="journal.equipe.ok"]',
+        txt: function () { return '{T} « Enregistrer ». L’entrée garde la trace de la correction.'; },
+        fait: function () { return !_ouvert('ovJEquipe'); },
+        ok: 'L’équipe est corrigée : la saison de chacun suit.' }
+    ] },
   { id: 'equipes', titre: 'Comment faire pour indiquer les équipes du jour\u00a0?', fin: 'indiquer les équipes du jour',
     module: 'Vigne', pages: ['home'], pour: 'admin', duree: '1 min', depart: 'home',
     couvre: ['openEqJour', '_mvEqPick', 'saveEqJour'],
