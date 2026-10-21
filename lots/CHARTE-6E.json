@@ -1,0 +1,21 @@
+{
+  "lot": "CHARTE-6E",
+  "section": "§405",
+  "base": "11d5d7041daaa83737281b86dab77ac28e28f9ea",
+  "inclut": [],
+  "date": "2026-10-21",
+  "fichiers": {
+    ".mv-base": "68dbdd008cf0cf008140b288d4eda19780d627348064e0bb0525ae334ae6bf0c",
+    "CLAUDE.md": "177e1cf380eeda1c195f90f27e2fb263b3d4c982877195df87349abe7f14eddc",
+    "docs/claude/INDEX.md": "e12dfa84a5c864ba14eba2ace249320f317a46da1e00b8a27d50f9f5f5a7ac37",
+    "docs/claude/chantiers-380-429.md": "c10ea5421aa3f8071c3b623af5874618b6c93b2de975a59d868159658c38f6df",
+    "docs/claude/journal.md": "67174478f0515619263a676294f774bf452467de24ac1484f7fbb2e08d61b979",
+    "index.html": "6fe4df365abe36032f5edd51ffaf89410ac255a79508492d01eed0d7ab1bc58c",
+    "public/sw.js": "a9c81d1413d245508e1a9d5358af8b62ee9617e64f884a67eaae3406f68c8d74",
+    "scripts/mv-harnais-phyto2.mjs": "264aa3c83106867c5511eac9643cb25c1cedb9c6d1169295af56931d3abce2ef",
+    "src/phyto.js": "ee30cda32b22ee453fec3414dcc5953b7d6e2c21a871a34888f5be0311ba6cc0",
+    "src/reglages.js": "39da3f6507bd0f07ccaec74920dcf70ae567b5bf84e5ff4b46cdde67113a0ce9",
+    "src/styles.css": "62244fcfb31b7e1bd04b248105ad325bd2bb9fafb69856b72ec8763d6385e64f",
+    "src/utils.js": "95223aa4cd8a6a6ece7689ea43c4f0b7e0cdf8b7907cc79f04b9892330e3ac34"
+  }
+}

@@ -529,9 +529,8 @@ body.mv-demo-on .mod-header,body.mv-demo-on .pil-tabsbar{top:var(--mv-demo-h,40p
 .ephy-subbar{display:flex;align-items:center;justify-content:space-between;padding:2px 2px 8px;}
 .ephy-cnt{font-size:var(--pt-micro,12px);color:var(--texte-doux);font-weight:500;}
 .ephy-tgl{display:flex;align-items:center;gap:7px;font-size:var(--pt-micro,12px);color:var(--texte-doux);cursor:pointer;font-weight:500;min-height:32px;}
-.ephy-tgl .sw{width:36px;height:21px;border-radius:11px;background:var(--gris-clair);position:relative;transition:.2s;flex-shrink:0;}
+.ephy-tgl .sw{width:36px;height:21px;border-radius:11px;position:relative;transition:.2s;flex-shrink:0;}
 .ephy-tgl .sw::after{content:"";position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,.25);}
-.ephy-tgl.on .sw{background:#9B70D4;}
 .ephy-tgl.on .sw::after{left:17px;}
 .ephy-minis{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px;}
 .ephy-mini{font-size:var(--pt-nano,9.5px);font-weight:600;padding:2px 7px;border-radius:6px;white-space:nowrap;}
@@ -1953,8 +1952,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pil-opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2px 14px;}
 .pil-perso label{display:flex;align-items:center;gap:9px;font-size:var(--pt-txt,13px);font-weight:600;padding:6px;border-radius:8px;cursor:pointer;color:var(--texte);}
 .pil-perso label:hover{background:rgba(127,127,127,.06);}
-.pil-sw{width:34px;height:20px;-webkit-appearance:none;appearance:none;background:var(--gris);border-radius:999px;position:relative;cursor:pointer;flex:none;transition:.18s;}
-.pil-sw:checked{background:var(--vert-med);}
+.pil-sw{width:34px;height:20px;-webkit-appearance:none;appearance:none;border-radius:999px;position:relative;cursor:pointer;flex:none;transition:.18s;}
 .pil-sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.18s;}
 .pil-sw:checked::after{left:16px;}
 .pil-perso-note{font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:8px;line-height:1.5;}
@@ -6606,7 +6604,6 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 #page-phyto #ephy-chips{ display:inline-flex; flex-wrap:wrap; gap:var(--e-0,2px); padding:var(--e-0,2px)!important; border-radius:var(--r-sm,6px); background:var(--survol); }
 #page-phyto #ephy-chips .ephy-chip{ height:var(--h-sm); padding:0 var(--e-2,8px)!important; border:0!important; border-radius:var(--r-xs,4px)!important; background:transparent!important; color:var(--texte-med)!important; font-size:var(--pt-micro,12px)!important; font-weight:var(--fw-med,500)!important; box-shadow:none!important; }
 #page-phyto #ephy-chips .ephy-chip:is(.on,.active,.sel){ background:var(--bg-card)!important; color:var(--texte)!important; box-shadow:var(--shadow-sm,0 1px 2px rgba(20,18,14,.05),0 1px 3px rgba(20,18,14,.04))!important; }
-#page-phyto .ephy-tgl.on .sw{ background:var(--accent)!important; }
 #page-phyto .catitem{ border:var(--bw) solid var(--ligne,#E7E6E2)!important; border-radius:var(--r-md,8px)!important; background:var(--bg-card)!important; box-shadow:none!important; }
 #page-phyto .catitem:hover{ background:var(--survol)!important; }
 #page-phyto .catitem[aria-selected="true"]{ outline:var(--bw-2) solid var(--accent); outline-offset:calc(var(--bw) * -1); }
@@ -8020,6 +8017,9 @@ textarea.mvchamp, textarea.fi, textarea.mvr-fi, textarea.emh-in, textarea.mvt-fi
 }
 /* CHARTE-6b (§401) : cocher et choisir — la case et le bouton rond natifs prennent la couleur d'action (la maquette : 20 px, lie-de-vin). */
 input[type="checkbox"], input[type="radio"]{ accent-color:var(--accent); }
+/* CHARTE-6e (§405) : l'interrupteur — la piste au filet des champs (visible, comme leur contour), la couleur d'action quand il est activé ; le rond reste blanc. */
+.ephy-tgl .sw, .pil-sw{ background:var(--champ-filet); }
+.ephy-tgl.on .sw, .pil-sw:checked{ background:var(--accent); }
 /* ★ FIN CHARTE-6 */
 /* CHARTE-6c (§403) : la mise en page des champs passés au jeu, venue des feuilles injectées (Cuvier, Cave) et d'index.html (tournées) — leur dessin est au jeu. */
 .mvv-tin, .mvc-pk-in{ width:100%; }

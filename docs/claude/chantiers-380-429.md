@@ -578,3 +578,25 @@ L’expression de la passe ne consommait pas le guillemet fermant du style : cha
 
 ### 404e. La leçon
 **La construction est un contrôle.** Le code passait la syntaxe ; l’HTML qu’il fabriquait ne passait pas `vite build`. Après une passe sur des balises, on construit avant de regarder — sinon la capture montre l’ancienne version.
+
+## 405. CHARTE-6e — ÉTAPE 3 : L’INTERRUPTEUR, LES DERNIÈRES ÉTIQUETTES (21/10 — `src/styles.css` · `src/phyto.js` · `src/reglages.js` · `index.html` · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `scripts/mv-harnais-phyto2.mjs` · **APP 9.65 → 9.66, SW 10.44 → 10.45**, base `11d5d70`)
+
+### 405a. La demande
+La fin de l’étape 3 (§404) : l’interrupteur de la maquette CHARTE-6 (piste, activé à la couleur d’action) et les étiquettes de champ faites à la main.
+
+### 405b. Ce qui est livré
+- **L’interrupteur** : relevé (hors console GT) — `.ephy-tgl .sw` (« Masquer les retirés », catalogue phyto : piste gris clair, activé en violet `#9B70D4` ; une règle `#page-phyto .ephy-tgl.on .sw{…!important}` ne mettait l’accent que sur la page) et `.pil-sw` (les affichages du Pilotage : piste grise, activé en vert). Les autres « bascules » de l’appli (`.cave-toggle-btn`…) sont des contrôles segmentés, pas des interrupteurs. → Dans le bloc CHARTE-6 : la piste prend `--champ-filet` (le contour des champs, 3,8 pour 1 : l’interrupteur éteint se voit), l’activé `--accent` ; le rond reste blanc. Couleurs d’avant et règle à part retirées.
+- **Les étiquettes faites à la main** : un élément (`div`, `span`, `label`, `p`) en capitales, suivi d’un champ dans les 170 caractères (hors cases à cocher) → `.mvchamp-l` (taille, graisse, police, couleur, espacement, capitales retirés de l’attribut ; affichage et marges gardés) : 9 — Phyto 4, Réglages 4 (dont l’export des documents), `index.html` 1. Les en-têtes de section en capitales (« Ajouter un produit », « Vos produits récents ») ne sont pas des étiquettes de champ : laissés.
+
+- `mv-harnais-phyto2` (PHYTO-2, §286) : sa contre-épreuve « une couleur écrite en dur dans le bloc » visait la règle retirée de l’interrupteur — elle vise maintenant la ligne choisie du catalogue, dans le même bloc (vu par le premier passage de la chaîne : 1 rouge).
+
+### 405c. Vu
+`phyto-produit` (le catalogue, clair et sombre : l’interrupteur activé à la couleur d’action), `phyto-cuivre-1` : justes.
+
+### 405d. L’étape 3 est close
+Le jeu des cases de saisie est posé (§400) ; les familles de champs y sont (§400-§403), les champs stylés sur place ramenés de 60 à 7 (§404), les cases à cocher et l’interrupteur à la couleur d’action. Restent à part, par décision : les champs des écrans de connexion et d’installation (sombres exprès), le grand chiffre du Cuvier, la confirmation d’une suppression (rouge exprès), la console GT. **Suite proposée** : le tour complet de l’appli en captures, écran par écran, clair et sombre, pour clore la série CHARTE sur une vérification d’ensemble.
+
+- **Chaîne** : **471 commandes, 0 rouge** au dernier passage, joué d’un trait après le dernier changement de code. Avant : 1 rouge (`mv-harnais-phyto2 --contre`).
+
+### 405e. La leçon
+**Une règle « pour la page » oublie les fenêtres et les autres pages.** L’interrupteur du catalogue n’était à l’accent que sous `#page-phyto` — comme les boutons de la Réserve (§402). La pièce commune, sans portée, met fin à ces exceptions.

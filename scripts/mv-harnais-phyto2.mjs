@@ -46,7 +46,8 @@ if (CONTRE) {
     ['la fenêtre perd son titre', 'tr', "if(!dans){ document.getElementById('oed-title').textContent = p.nom;", "if(false){ document.getElementById('oed-title').textContent = p.nom;", 1],
     ['au téléphone, toucher choisit au lieu d’ouvrir', 'tr', "  if(!_catDesk()){ openEphyDetail(amm); return; }\n", '', 2],
     ['la fiche ne suit plus la liste', 'tr', "  if(typeof _catFicheSync==='function')_catFicheSync(l);   // PHYTO-2 (§286)\n", '', 3],
-    ['une couleur écrite en dur dans le bloc', 'css', '#page-phyto .ephy-tgl.on .sw{ background:var(--accent)!important; }', '#page-phyto .ephy-tgl.on .sw{ background:#7A2048!important; }', 5],
+    // CHARTE-6e (§405) : la règle d’avant (l’interrupteur du catalogue à l’accent, sur la page seulement) est partie au jeu ; la contre-épreuve vise une autre règle du bloc
+    ['une couleur écrite en dur dans le bloc', 'css', '#page-phyto .catitem[aria-selected="true"]{ outline:var(--bw-2) solid var(--accent);', '#page-phyto .catitem[aria-selected="true"]{ outline:var(--bw-2) solid #7A2048;', 5],
     ['le harnais sort de la liste', 'liste', "['node scripts/mv-harnais-phyto2.mjs'],", '', 8]
   ];
   let mord = 0;

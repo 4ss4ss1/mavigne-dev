@@ -458,3 +458,4 @@
 | 402 | 402. RSV-BTN — LES BOUTONS DE LA RÉSERVE AU JEU (20/10 — `src/styles.css` · `src/reserve.js` · `src/phyto.j… | `docs/claude/chantiers-380-429.md` |
 | 403 | 403. CHARTE-6c — ÉTAPE 3 : LES CHAMPS DU CUVIER (20/10 — `src/styles.css` · `src/cuvier.js` · `src/cave.js`… | `docs/claude/chantiers-380-429.md` |
 | 404 | 404. CHARTE-6d — ÉTAPE 3 : LES CHAMPS STYLÉS SUR PLACE (20/10 — `src/styles.css` · `src/phyto.js` · `src/pl… | `docs/claude/chantiers-380-429.md` |
+| 405 | 405. CHARTE-6e — ÉTAPE 3 : L’INTERRUPTEUR, LES DERNIÈRES ÉTIQUETTES (21/10 — `src/styles.css` · `src/phyto.… | `docs/claude/chantiers-380-429.md` |

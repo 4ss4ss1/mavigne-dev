@@ -3378,7 +3378,7 @@ function _clotOverlayHTML(ctx){
     + '<div style="font-size:9px;letter-spacing:.4px;text-transform:uppercase;color:#6B655C;margin-top:3px">'+l+'</div></div>'; };
   var prepOpts = (ctx.prepared||[]).map(function(s){ return '<option value="'+_clotEsc(s.nom)+'">'+_clotEsc(s.nom)+'</option>'; }).join('');
   var activateInner = (ctx.prepared && ctx.prepared.length)
-    ? '<div style="margin-bottom:13px"><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Campagne déjà préparée</label>'
+    ? '<div style="margin-bottom:13px"><label class="mvchamp-l" style="display:block;margin-bottom:6px">Campagne déjà préparée</label>'
       + '<select id="clot-prep" onchange="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%">'+prepOpts+'</select></div>'
       + '<div class="mvencadre mvencadre-ok" style="display:flex;gap:9px;align-items:flex-start"><span>'+_mvIcon('check',16)+'</span><div>Cette campagne a déjà ses dates. Elle deviendra simplement la <b>campagne active</b> de l\'équipe.</div></div>'
     : '<div class="mvencadre mvencadre-attention" style="display:flex;gap:9px;align-items:flex-start"><span>ℹ️</span><div>Aucune campagne préparée à l\'avance. Utilise <b>« Créer la prochaine »</b> ci-dessus.</div></div>';
@@ -3426,11 +3426,11 @@ function _clotOverlayHTML(ctx){
         + '<div id="clot-create" style="display:block">'
           + '<div style="margin-bottom:13px"><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Type de saison</label>'
             + '<div style="font-size:var(--pt-micro,12px);color:#6B655C;line-height:1.45">La p\u00e9riode ci-dessous reprend « '+_clotEsc(ctx.endNom)+' » d\u00e9cal\u00e9e d\u2019un an, avec la m\u00eame liste de travaux. Ajustez ce qui doit l\u2019\u00eatre.</div></div>'
-          + '<div style="margin-bottom:13px"><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Nom de la campagne</label>'
+          + '<div style="margin-bottom:13px"><label class="mvchamp-l" style="display:block;margin-bottom:6px">Nom de la campagne</label>'
             + '<input id="clot-name" value="'+_clotEsc(ctx.sug.nom)+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%"></div>'
           + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-            + '<div><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Début</label><input id="clot-deb" type="date" value="'+ctx.sug.deb+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%"></div>'
-            + '<div><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Fin</label><input id="clot-fin" type="date" value="'+ctx.sug.fin+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%"></div>'
+            + '<div><label class="mvchamp-l" style="display:block;margin-bottom:6px">Début</label><input id="clot-deb" type="date" value="'+ctx.sug.deb+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%"></div>'
+            + '<div><label class="mvchamp-l" style="display:block;margin-bottom:6px">Fin</label><input id="clot-fin" type="date" value="'+ctx.sug.fin+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%"></div>'
           + '</div>'
           + garde
         + '</div>'

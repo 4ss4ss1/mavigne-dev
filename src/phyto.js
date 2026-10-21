@@ -482,7 +482,7 @@ function _tratRender(){
       +'<div id="trat-add-zone">'+_tratAddZoneHtml()+'</div>'
       +'</div>';
     var dateHtml='<div style="margin-bottom:14px">'
-      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Date du traitement</div>'
+      +'<div class="mvchamp-l" style="margin-bottom:6px">Date du traitement</div>'
       +'<input id="trat-date" type="date" class="mvchamp" style="width:100%">'
       +'</div>';
     var conds=_conducteursDispo().filter(function(c){return c.statut!=='Archivé';});
@@ -503,7 +503,7 @@ function _tratRender(){
     var reqHeureLabel='Horaires d&#39;application'+(needsHeure?' <span style="color:var(--rouge)">*requis</span>':'');
     var rglHtml='<div class="mvencadre" style="margin-bottom:14px">'
       +'<div style="font-size:var(--pt-micro,12px);font-weight:700;color:var(--ink-info,#4A9EE0);margin-bottom:12px">&#x1F4CB; Champs r&#xe9;glementaires obligatoires</div>'
-      +'<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">'+reqStadeLabel+'</div>'
+      +'<div style="margin-bottom:12px"><div class="mvchamp-l" style="margin-bottom:6px">'+reqStadeLabel+'</div>'
       +'<select id="trat-stade" class="mvchamp" style="width:100%">'
       +'<option value="">S&#xe9;lectionner le stade&#x2026;</option>'+stadeOpts+'</select></div>'
       +'<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">'+reqHeureLabel+'</div>'
@@ -513,7 +513,7 @@ function _tratRender(){
       +'<div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:4px">Fin</div>'
       +'<input id="trat-hf" type="time" class="mvchamp" style="width:100%"></div>'
       +'</div></div>'
-      +'<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">DRE anticip&#xe9; (si rentr&#xe9;e avant d&#xe9;lai standard)</div>'
+      +'<div style="margin-bottom:12px"><div class="mvchamp-l" style="margin-bottom:6px">DRE anticip&#xe9; (si rentr&#xe9;e avant d&#xe9;lai standard)</div>'
       +'<input id="trat-dre" type="text" placeholder="Ex : 6h &#x2014; justification agronomique" class="mvchamp" style="width:100%"></div>'
       +'<div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Mode de production</div>'
       +'<div style="display:flex;gap:10px">'
@@ -521,7 +521,7 @@ function _tratRender(){
       +'<div onclick="window._tratSetModeAb(true)" class="mvpas-filtre'+(_trat.modeAb?' on':'')+'" aria-pressed="'+(_trat.modeAb?'true':'false')+'" style="flex:1;justify-content:center">&#x1F33F; Bio (AB)</div>'
       +'</div></div></div>';
     var noteHtml='<div style="margin-bottom:14px">'
-      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Observations (optionnel)</div>'
+      +'<div class="mvchamp-l" style="margin-bottom:6px">Observations (optionnel)</div>'
       +'<input id="trat-note" type="text" placeholder="Conditions m&#xe9;t&#xe9;o, stade v&#xe9;g&#xe9;tatif compl&#xe9;mentaire&#x2026;" class="mvchamp" style="width:100%">'
       +'</div>';
     bodyHtml=prodsHtml+addHtml+dateHtml+condHtml+rglHtml+noteHtml;

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.65';
+export const APP_VERSION = '9.66';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.66', d: '2026-10-21', items: [   // CHARTE-6e (§405) : l’interrupteur et les dernières étiquettes
+    { niv: 1, pour: ['tous'], emoji: 'check', titre: 'Interrupteurs à la couleur de l’appli',
+      desc: "Les interrupteurs (« Masquer les retirés » du catalogue phyto, les affichages du Pilotage) prennent la couleur d’action quand ils sont activés, et leur piste se voit mieux quand ils ne le sont pas. Quelques titres de champs encore en petites capitales passent en lettres normales." },
+  ] },
   { v: '9.65', d: '2026-10-20', items: [   // CHARTE-6d (§404) : les derniers champs faits à la main
     { niv: 1, pour: ['tous'], emoji: 'check', titre: 'Les derniers champs au même dessin',
       desc: "Une cinquantaine de champs faits à part (assistant phyto, Planning, Réglages, Tracteur, fenêtres de l’appli) prennent le dessin commun ; les petits champs de chiffres gardent leur taille. Sur iPhone, aucun ne fait plus zoomer l’écran." },
