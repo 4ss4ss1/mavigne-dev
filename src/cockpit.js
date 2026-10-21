@@ -373,10 +373,11 @@ window._ckSvAbsences = function(membres, PE, etatDe, now, travaille){
     var d0 = _ckPlusJ(t, pl.debut), d1 = _ckPlusJ(t, pl.fin);
     var lib = pl.etat === 'cp' ? 'en congé' : pl.etat === 'recup' ? 'en récupération' : pl.etat === 'maladie' ? 'en arrêt' : 'absent';
     // Le motif (admin seulement) ne cache plus la date : « Formation CACES. De retour le ven. 16 oct. »
-    var fin = ret ? _ckPt('De retour le ' + _ckJc(ret)) : (suite ? _ckPt('Puis ' + ({ cp: 'en congé', recup: 'en récupération', maladie: 'en arrêt maladie' }[suite] || 'absent'))
+    var fin = ret ? _ckPt('De retour le ' + _ckJc(ret)) : (suite ? _ckPt('Puis ' + ({ cp: 'en congé', recup: 'en récupération', maladie: 'en arrêt maladie' }[suite] || 'absence'))
       : 'Pas de retour prévu au planning d’ici deux mois.');
     var sous = pl.etat === 'maladie' ? _ckPt('Fin d’arrêt le ' + _ckJc(d1)) : (pl.motif ? _ckPt(pl.motif) + ' ' : '') + fin;
-    out.push({ cat: 'equipe', prio: 2, titre: m.nom + ' ' + lib,
+    // VIF-1 : « absent » ne s'accorde pas sans le genre de la personne (la fiche ne le porte pas) : « Absence de Sophie ».
+    out.push({ cat: 'equipe', prio: 2, titre: pl.etat === 'absent' ? 'Absence de ' + m.nom : m.nom + ' ' + lib,
       quand: pl.debut === pl.fin ? (pl.debut === 1 ? 'Demain' : _ckJc(d0)) : 'Du ' + _ckJc(d0) + ' au ' + _ckJc(d1),
       sous: sous, action: 'planning' });
   });

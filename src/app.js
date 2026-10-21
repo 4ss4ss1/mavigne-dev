@@ -5083,7 +5083,7 @@ function _renderAfterSaison(){
   try{ if(typeof applyVigneSaison==='function')applyVigneSaison(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderAfterSaison'); }
   try{ if(typeof renderHome==='function')renderHome(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderAfterSaison#2'); }
   try{ if(typeof renderParcelles==='function')renderParcelles(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderAfterSaison#3'); }
-  try{ if(typeof renderPilotage==='function'&&document.getElementById('page-pilotage')&&document.getElementById('page-pilotage').classList.contains('active'))renderPilotage(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderAfterSaison#4'); }
+  try{ if(typeof renderPilotage==='function'&&document.getElementById('page-pilotage')&&document.getElementById('page-pilotage').classList.contains('active')){ if(!(window._pilRafraichirVif&&window._pilRafraichirVif())) renderPilotage(); } if(window._railAlertesMaj) window._railAlertesMaj(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderAfterSaison#4'); }
   _updateSaisonSelector();
   _seasonMenuClose();
 }
@@ -9890,8 +9890,10 @@ function _prioRedessine(){
   try{ renderHomeMaPart(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_prioRedessine'); }
   try{
     var pg=document.querySelector('.page.active');
-    if(pg&&pg.id==='page-pilotage'&&typeof window.renderPilotage==='function') window.renderPilotage();
+    // VIF-1 (§414) : Aujourd'hui à l'écran se met à jour en direct ; sinon le Pilotage se redessine comme avant.
+    if(pg&&pg.id==='page-pilotage'&&typeof window.renderPilotage==='function'){ if(!(window._pilRafraichirVif&&window._pilRafraichirVif())) window.renderPilotage(); }
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_prioRedessine#2'); }
+  try{ if(window._railAlertesMaj) window._railAlertesMaj(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_prioRedessine#3'); }
 }
 function savePriorityData(){
   // localStorage

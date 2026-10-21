@@ -74,7 +74,7 @@ function verifs(S) {
   ok('J5. renderPilotage suit le bandeau', corps(S.pil, 'function renderPilotage(){').includes('_pilEnteteSuivre();'));
   const B = bloc(S.css), iT = S.css.indexOf('★ TETE-2 (§329)'), iC = S.css.indexOf('★ COLLE-1 (§412)');
   ok('K1. le bloc existe, AVANT celui de TETE-2', B && iC > 0 && iT > iC);
-  ok('K2. les onglets sous le bandeau, sur ordinateur et tablette seulement', /@media \(min-width:760px\) and \(min-height:600px\)\{\s*body #page-pilotage \.pil-tabsbar\{top:var\(--pil-entete-bas,0px\)\}/.test(B));
+  ok('K2. les onglets sous le bandeau, sur ordinateur et tablette seulement', /@media \(min-width:760px\) and \(min-height:600px\)\{\s*body #page-pilotage \.pil-tabsbar\{top:calc\(var\(--pil-entete-bas,0px\) \+ var\(--pil-portee-h,0px\)\)\}/.test(B)   /* VIF-1 (§414) : sous le bandeau ET sous le fil de portée, collé lui aussi */);
   ok('K3. la colonne bornée à l’écran, qui défile seule', B.includes('max-height:calc(100dvh - var(--ck-colle,16px) - var(--e-2,8px))') && B.includes('overflow-y:auto'));
   ok('K4. « En direct » plafonné à une journée calme, et pas écrasé', B.includes('#ck-t-c #ck-fil{position:relative;max-height:186px;overflow:hidden}') && B.includes('#ck-t-c #ck-fil,#ck-t-c #ck-savoir{flex:none}'));
   ok('K5. déplié sans plafond ; le fondu ; le bouton à la hauteur du titre', B.includes('#ck-t-c #ck-fil.ouvert{max-height:none;overflow:visible}') && B.includes('#ck-t-c #ck-fil.deborde:not(.ouvert)::after') && B.includes('min-height:var(--h-sm,28px)'));

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.73';
+export const APP_VERSION = '9.74';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,12 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.74', d: '2026-10-21', items: [
+    { niv: 1, pour: ['admin'], cible: '#ck-page', emoji: 'eclair', titre: 'Aujourd’hui bouge en direct',
+      desc: "Quand l’équipe valide, Pilotage › Aujourd’hui se met à jour sans recharger : la date de fin roule, les barres avancent, la parcelle s’éclaire sur le plan et le fil s’allonge." },
+    { niv: 0, pour: ['tous'], emoji: 'alerte', titre: 'Des pastilles dans la barre latérale',
+      desc: "Sur ordinateur, une pastille rouge signale ce qui attend : un tracteur en réparation, ce qui presse en cave, et pour l’admin un contrat qui finit dans le mois ou un point prioritaire du Pilotage." },
+  ] },
   { v: '9.73', d: '2026-10-21', items: [
     { niv: 1, pour: ['admin', 'cave'], cible: '#ml-tab-parc', emoji: 'raisin', titre: 'Le rendement par appellation, et le hL/ha de chaque cuvée',
       desc: "Dans Le millésime, la vue Parcelles s’ouvre maintenant sur ce qui se déclare : pour chaque appellation et chaque couleur, la surface récoltée, le volume et le hL/ha, face au maximum de l’appellation. Le raisin vendu compte, sur toute la surface de sa parcelle. "
@@ -5481,7 +5487,7 @@ var MV_AIDE = {
       ['Ta présence est notée', " : quand l’admin vous coche parmi les intervenants d’une opération du Chai, l’Accueil vous le dit pendant trois jours, avec le pourquoi du geste. « Vu » range la carte."],
       ['Mes jalons', " : dans « Ma trace », ceux que vous avez gagnés et les trois prochains. Quand une validation vous en fait atteindre un, la feuille qui suit l’annonce. Vous seul les voyez."],
       ['Chez un ouvrier', " : la Vigne a deux onglets, Accueil et Parcelles. On valide depuis les Parcelles ; le Journal reste à l’administrateur et au pilotage. « Ma semaine » mène à « Ma trace », l’historique de votre travail."],
-      ['Sur ordinateur', " : les modules sont dans la <b>barre à gauche</b> (repliable), et <b>Ctrl K</b> ouvre une recherche — une parcelle, un écran, un onglet du Pilotage. Sur téléphone et tablette, rien ne change."],
+      ['Sur ordinateur', " : les modules sont dans la <b>barre à gauche</b> (repliable), et <b>Ctrl K</b> ouvre une recherche — une parcelle, un écran, un onglet du Pilotage. Sur téléphone et tablette, rien ne change. Des pastilles rouges signalent ce qui attend : un tracteur en réparation, un contrat qui finit dans le mois, ce qui presse en cave, les points prioritaires du Pilotage."],
       ['La priorité du moment', "reste épinglée en haut, dans une carte : la tâche que l’équipe attaque, son avancement, et les parcelles dessinées à leur forme (leur contour, nord en haut) et à leur surface (fait, en cours, à faire) — un appui sur l’une ouvre sa fiche. Une parcelle dont le contour n’est pas enregistré reste un rectangle, en pointillé. Une parcelle où la tâche est désactivée, ou pas choisie pour la campagne, reste en contour pâle, en dernier, et ne compte pas dans l’avancement. Sans priorité, la carte montre la saison, parcelle par parcelle. Les trois chiffres du domaine sont à droite sur ordinateur, dessous au téléphone."],
       ['Équipes du jour', "juste sous la priorité. L’administrateur la touche pour répartir les salariés en équipes <b>pour la journée</b> : chacun validera et démarrera avec son équipe, sans pouvoir la changer, et ne voit pas les autres. Sous les noms, il peut aussi choisir la tournée de chaque équipe : par défaut, celle du travail. Rien de réglé, ou « Tout le monde ensemble » : l’application fait comme d’habitude. Le lendemain, tout repart à zéro. Un salarié voit ici son équipe du jour, quand il y en a une."],
       ['Une ligne « À vérifier »', "peut s’afficher sous les chiffres : un changement de l’application qui vous concerne — un chiffre qui bouge, un réglage à contrôler. Touchez-la pour le détail, « Vu » pour la ranger ; elle reste dans Réglages › Moi › Journal des nouveautés."],

@@ -38,10 +38,47 @@ function domaine() {
   const n = M.filter(m => m && m.statut !== 'Inactif').length;
   return { nom: C.domaine_nom || window.DOMAINE_NOM || 'Ma Vigne', sous: (ha ? ha.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '\u202fha' : '') + (n ? (ha ? ', ' : '') + n + ' personne' + (n > 1 ? 's' : '') : '') };
 }
+// ★ VIF-1 (§414) — LES PASTILLES D'ALERTE DE LA BARRE, lues dans des sources qui existent déjà (aucun calcul neuf) :
+//   Tracteur : les engins en réparation (window.REPARATEUR, le registre que lit le Pilotage) ; Planning (admin) : les
+//   contrats qui finissent dans les 30 jours (fin_contrat) ; Cave : ce qui presse (agenda de cave, verdict « dû », comme
+//   la carte Cave) ; Pilotage (admin) : les points prioritaires d'« À savoir », comptés quand Aujourd'hui se calcule.
+window._railAlertes = function () {
+  const a = {}, admin = (typeof window.isAdmin === 'function') && window.isAdmin();
+  try { const R = window.REPARATEUR || {}; a.tracteur = (window.TRACTEURS_LIST || []).filter(t => t && R[t.id]).length; } catch (e) { if (window._mvAvale) window._mvAvale(e, 'coquille.js/alertes#trac'); }
+  if (admin) {
+    const t = new Date(), iso = k => { const x = new Date(t.getFullYear(), t.getMonth(), t.getDate() + k); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
+    const auj = iso(0), lim = iso(30);
+    a.planning = (window.MEMBRES || []).filter(m => m && m.statut !== 'Inactif' && typeof m.fin_contrat === 'string' && m.fin_contrat >= auj && m.fin_contrat <= lim).length;
+    a.pilotage = Number(window._ckSavoirFort) || 0;
+  }
+  try {
+    if (typeof window._mlAgendaComplet === 'function' && typeof window._mlVerdict === 'function' && typeof window._mvToday === 'function') {
+      const sem = window._mlAgendaComplet(window._mvToday(), 4), v = sem ? window._mlVerdict(sem, { phase: null, haReste: 0, parc: null }) : null;
+      if (v && v.cls === 'due') a.cave = (sem[0] && sem[0].items) ? sem[0].items.length : 1;
+    }
+  } catch (e) { if (window._mvAvale) window._mvAvale(e, 'coquille.js/alertes#cave'); }
+  Object.keys(a).forEach(k => { if (!(a[k] > 0)) delete a[k]; });
+  return a;
+};
+const PASTILLE_LIB = { tracteur: 'en réparation', planning: 'contrat qui finit dans le mois', cave: 'à faire en cave', pilotage: 'point prioritaire à savoir' };
+function pastille(p, n) {
+  if (!(n > 0)) return '';
+  const lib = n + ' ' + (PASTILLE_LIB[p] || 'à voir') + (n > 1 && p !== 'cave' ? 's' : '');
+  return '<span class="mv-rail-badge" data-alerte="' + esc(p) + '" role="img" aria-label="' + esc(lib) + '" title="' + esc(lib) + '">' + (n > 9 ? '9+' : n) + '</span>';
+}
+// Repeint les seules pastilles (le temps réel les rappelle sans reconstruire la barre).
+window._railAlertesMaj = function () {
+  const a = window._railAlertes();
+  document.querySelectorAll('#mv-rail .mv-rail-b').forEach(b => {
+    const p = b.getAttribute('data-page'), vieille = b.querySelector('.mv-rail-badge');
+    if (vieille) vieille.remove();
+    if (a[p]) b.insertAdjacentHTML('beforeend', pastille(p, a[p]));
+  });
+};
 window._railHtml = function (items, moi, dom) {
   const R = window._railRubriques(items);
   const bouton = x => '<button class="mv-rail-b" type="button" data-page="' + esc(x.p) + '" data-tip="' + esc(x.l) + '" aria-label="' + esc(x.l) + '">' + ico(x.ic, 20)
-    + '<span class="mv-rail-lbl">' + esc(x.l) + '</span>' + (x.p === 'pilotage' ? '<span class="mv-rail-vif" aria-hidden="true"></span>' : '') + '</button>';
+    + '<span class="mv-rail-lbl">' + esc(x.l) + '</span>' + (x.p === 'pilotage' ? '<span class="mv-rail-vif" aria-hidden="true"></span>' : '') + pastille(x.p, x.n) + '</button>';
   // RAIL-1 : le logo, dessiné pour 28 px, est posé par la feuille selon le thème (l'icône de l'appli y pâlissait).
   return '<div class="mv-rail-dom"><span class="mv-rail-logo" aria-hidden="true"></span><span class="mv-rail-lbl"><b>Ma Vigne</b><small title="' + esc(dom.sous) + '">' + esc(dom.nom) + '</small></span></div>'
     + '<button class="mv-rail-cherche" id="mv-rail-cherche" type="button" aria-label="Rechercher" data-tip="Rechercher, ' + TOUCHE + '">' + ico('loupe', 18) + '<span class="mv-rail-lbl">Rechercher</span><kbd class="mv-rail-lbl">' + TOUCHE + '</kbd></button>'
@@ -95,6 +132,7 @@ window._railBuild = function () {
   }
   const nom = String(u.nom || u.email || 'Moi'), admin = (typeof window.isAdmin === 'function') && window.isAdmin();
   r.innerHTML = window._railHtml(window._dockDef(), { nom, ini: (nom.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w.charAt(0).toUpperCase()).join('') || 'M'), role: admin ? 'Administration' : 'Équipe' }, domaine());
+  window._railAlertesMaj();   // VIF-1 : les pastilles, dès la construction
   document.body.classList.add('mv-avec-rail');
   plier(ouvert(), false);
   const act = document.querySelector('.page.active'); window._railSync(act ? act.id.replace('page-', '') : '');

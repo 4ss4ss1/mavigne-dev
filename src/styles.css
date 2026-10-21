@@ -8286,7 +8286,8 @@ input[type="checkbox"], input[type="radio"]{ accent-color:var(--accent); }
    la colonne de droite sous les deux (--ck-colle, mesuré par cockpit-vue.js, bandeau compris). Au téléphone, rien ne change.
    Copie de la maquette validée le 21/10 ; le bloc reste AVANT celui de TETE-2, le dernier de la feuille. */
 @media (min-width:760px) and (min-height:600px){
-  body #page-pilotage .pil-tabsbar{top:var(--pil-entete-bas,0px)}
+  body #page-pilotage .pil-tabsbar{top:calc(var(--pil-entete-bas,0px) + var(--pil-portee-h,0px))}
+  body #page-pilotage .pil-portee{position:sticky;top:var(--pil-entete-bas,0px);z-index:61}   /* VIF-1 (§414) : le fil de portée collé sous le bandeau, les onglets sous les deux */
 }
 @media (min-width:760px){
   /* La colonne tient dans l’écran et défile seule quand elle déborde : une seule barre de défilement, la sienne (plus de

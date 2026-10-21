@@ -769,6 +769,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-pil1.mjs --contre'],
   ['node scripts/mv-harnais-pro1.mjs'],               // PRO-1 (§269) : la barre à sa vraie largeur, les boutons du cockpit, la consommation refaite
   ['node scripts/mv-harnais-pro1.mjs --contre'],
+  ['node scripts/mv-harnais-vif1.mjs'],               // VIF-1 (§414) : Aujourd'hui en direct, pastilles de la barre, trois défauts
+  ['node scripts/mv-harnais-vif1.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────

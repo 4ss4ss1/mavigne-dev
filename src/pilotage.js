@@ -5353,6 +5353,8 @@ function _pilCk2Modele(d, m){
   var OUVL=[], xo=new Date(t0.getFullYear(), t0.getMonth(), t0.getDate());
   while(xo<=jusq){ if(ouv(xo)) OUVL.push(_pilPhotoIso(xo)); xo.setDate(xo.getDate()+1); }
   var diag=[]; try{ diag=_pilDiag().filter(function(x){ return x&&x.touche&&x.touche.indexOf('cfm')>=0; }); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#cfm'); }
+  window._ckSavoirFort=(sv||[]).filter(function(x){ return x&&x.prio===1; }).length;   // VIF-1 : la pastille du Pilotage dans la barre
+  if(typeof window._railAlertesMaj==='function') setTimeout(window._railAlertesMaj,0);
   return {
     auj:auj, debut:(debH.sort()[0])||(ph[0]&&ph[0].d)||auj,
     objectif:isoD(m&&m.obj), fin:isoD(m&&m.proj), marge:(m&&m.marge!=null)?m.marge:null,
@@ -5439,6 +5441,20 @@ function _pilCk2Eco(d, V){
     serie:serie, sparkBud:serie.slice(-14).map(function(x){ return x.dep; }) };
 }
 window._pilCk2Eco=_pilCk2Eco;
+// ★★ VIF-1 (§414) — AUJOURD'HUI SE MET À JOUR EN DIRECT. Quand les données changent (une validation de l'équipe, une priorité)
+//   et qu'Aujourd'hui est à l'écran, on ne redessine plus la page : le modèle est recalculé par les MÊMES fonctions que
+//   _pilTabAuj, et la maquette met à jour ce qui change (_ck2Maj → majTout : la date qui roule, les barres qui avancent,
+//   le fil, l'onde sur les parcelles qui viennent d'être faites ou commencées). Rend vrai si la mise à jour a eu lieu ;
+//   sinon l'appelant redessine comme avant.
+window._pilRafraichirVif=function(){
+  try{
+    if(_PIL_TAB!=='auj'||!document.getElementById('ck-page')||typeof window._ck2Maj!=='function') return false;
+    var d=_pilData(), m=_pilMargeCalc(d), V=_pilCk2Modele(d,m); V.eco=_pilCk2Eco(d,V);
+    window._ck2Maj(V);
+    _pilStickyH();
+    return true;
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilRafraichirVif'); return false; }
+};
 // L'export comptable du cockpit est celui de l'onglet Économie (même tableau CSV, même moteur).
 window._pilEcoExport=function(){ if(typeof _pecExport==='function') _pecExport('csv', _pecData()); };
 function _pilTabAuj(d){
@@ -5515,7 +5531,7 @@ function _pilTabAuj(d){
   if(_pilShow('auj_alertes')) H+='<div class="pil-sec-h">Alertes matériel</div>'+_pilCkAlertes(d);
   // ★★★ REF-1 (§266) : la maquette validée, montée avec le modèle réel (src/cockpit-vue.js). Repli : l'ancien cockpit.
   if(typeof window._ck2Squelette==='function'&&typeof window._ck2Monter==='function'){
-    try{ var _V=_pilCk2Modele(d,m); _V.eco=_pilCk2Eco(d,_V); setTimeout(function(){ try{ window._ck2Monter(_V); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#ck2m'); } },0);
+    try{ var _V=_pilCk2Modele(d,m); _V.eco=_pilCk2Eco(d,_V); setTimeout(function(){ try{ window._ck2Monter(_V); _pilStickyH(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#ck2m'); } },0);   // VIF-1 : la hauteur du fil de portée posée aussi sur Aujourd'hui
       return window._ck2Squelette(); }
     catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#ck2'); }
   }

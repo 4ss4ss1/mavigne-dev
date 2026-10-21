@@ -803,3 +803,43 @@ Proposé à Nico : « Par appellation » en tête de Parcelles, par appellation 
 
 ### 413f. Ouvert
 §28 : paquet 1 (le regard sur ses données), 3 (un maximum par couleur), 4 (pieds manquants, « au-dessus » sur une fourchette, deux cuves dans une cuvée), 5 (l’unité régionale).
+
+## 414. ★★ VIF-1 — AUJOURD'HUI SE MET À JOUR EN DIRECT ; LES PASTILLES D'ALERTE DE LA BARRE ; TROIS DÉFAUTS D'AUJOURD'HUI (21/10 — `src/pilotage.js` (`window._pilRafraichirVif`, `window._ckSavoirFort`, `_pilStickyH` sur Aujourd'hui) · `src/cockpit-vue.js` (`_ck2Maj`, ligne d'allure) · `src/coquille.js` (`window._railAlertes`, `window._railAlertesMaj`) · `src/cockpit.js` (absences) · `src/app.js` (`_prioRedessine`, `_renderAfterSaison`) · `src/styles.css` (fil de portée) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE) · `guide/11-pilotage.html` · `guide/01-demarrer.html` · `index.html` · `public/sw.js` · `scripts/mv-harnais-vif1.mjs` (neuf) — APP 9.73 → 9.74 · SW 10.52 → 10.53 — base `a872e62`)
+
+### 414a. La demande
+
+Nico (21/10), sur le bilan du chantier cockpit : « go » pour les trois points restants — les pastilles d'alerte de la barre
+latérale, la mise à jour en direct de la maquette (jamais branchée : `_ck2Maj` n'avait aucun appelant) et les trois défauts
+d'Aujourd'hui notés au backlog (§28, paquet 4).
+
+### 414b. Ce qui change
+
+- **En direct.** `_prioRedessine` et `_renderAfterSaison` (les deux chemins qui redessinaient le Pilotage quand les données
+  changent) appellent d'abord `window._pilRafraichirVif()` : si Aujourd'hui est à l'écran (`_PIL_TAB === 'auj'`, `#ck-page`
+  présent), le modèle est recalculé par les MÊMES fonctions que `_pilTabAuj` (`_pilData`, `_pilMargeCalc`, `_pilCk2Modele`,
+  `_pilCk2Eco`) et `_ck2Maj` met à jour ce qui change (`majTout` : la date qui roule, les barres, le fil, le plan, la courbe,
+  la vue Économie). Les parcelles qui viennent d'être faites ou commencées ont leur `onde`, retrouvées par leur NOM (le
+  plan peut renuméroter ses parcelles). Sinon : le Pilotage se redessine comme avant. Rien n'exige que les téléphones de
+  l'équipe soient à jour : l'écran admin reçoit ce que la base lui envoie.
+- **Pastilles de la barre** (`_railAlertes`, sources existantes seulement) : Tracteur = engins en réparation
+  (`REPARATEUR`, le registre du Pilotage) ; Cave = ce qui presse (verdict « dû » de l'agenda, comme la carte Cave) ; pour
+  l'admin, Planning = contrats qui finissent dans les 30 jours, Pilotage = points prioritaires d'« À savoir » (compté par
+  `_pilCk2Modele`, donc dès qu'Aujourd'hui se calcule — l'admin y arrive à l'ouverture). Aucune pastille à zéro ; « 9+ »
+  au-delà ; une étiquette qui dit ce qu'elle compte. Repeintes à la construction de la barre et par le temps réel.
+- **Trois défauts** : « Sophie absent » → « Absence de Sophie » (la fiche ne porte pas le genre) et « Puis absence » ; un
+  objectif déjà passé n'a plus de ligne d'allure (elle partait vers la gauche, sur la colonne voisine) ; le fil de portée
+  est collé sous le bandeau et les onglets sous les deux (`--pil-portee-h` posé aussi sur Aujourd'hui, à son montage et à
+  chaque mise à jour en direct).
+
+### 414c. Mesuré
+
+- **`mv-harnais-vif1`** (neuf) : 13 assertions (pastilles exécutées sur le vrai `coquille.js`, absences sur le vrai
+  `cockpit.js`, le reste lu) et 8 contre-épreuves.
+
+### 414d. Ouvert
+
+- À voir chez Nico : la mise à jour en direct pendant qu'un salarié valide (un autre téléphone) ; les pastilles avec ses
+  données ; le fil de portée collé sur ses autres onglets du Pilotage (il l'est maintenant partout sur ordinateur) ; la
+  tablette.
+- Les autres pastilles possibles (Phyto : délai avant récolte, Vigne : ce qui attend une validation) : à décider.
+

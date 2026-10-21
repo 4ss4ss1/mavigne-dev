@@ -467,3 +467,4 @@
 | 411 | 411. BACKLOG-1 — LE BACKLOG AUDITÉ ET RANGÉ (21/10 — `CLAUDE.md` (§28) · `docs/claude/backlog-archive-2026-… | `docs/claude/chantiers-380-429.md` |
 | 412 | 412. COLLE-1 — « EN DIRECT » AU-DESSUS D’« À SAVOIR », PLUS RIEN SOUS LE BANDEAU (21/10 — `src/cockpit-vue.… | `docs/claude/chantiers-380-429.md` |
 | 413 | 413. ★★ HLHA-1 — LE hL/ha DE CHAQUE CUVÉE, ET LE RENDEMENT PAR APPELLATION : CE QUI SE DÉCLARE (21/10 — `sr… | `docs/claude/chantiers-380-429.md` |
+| 414 | 414. ★★ VIF-1 — AUJOURD'HUI SE MET À JOUR EN DIRECT ; LES PASTILLES D'ALERTE DE LA BARRE ; TROIS DÉFAUTS D'… | `docs/claude/chantiers-380-429.md` |

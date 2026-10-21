@@ -42,7 +42,7 @@ function suite(S) {
     Chloe: { 2027: { 0: { 13: { type: 'cp' } } } }, Paul: { 2027: { 0: { 16: { absent: true, comment: 'Maladie' } } } } };
   const membres = [{ nom: 'Marion' }, { nom: 'Thomas' }, { nom: 'Chloe', bureau: true }, { nom: 'Paul' }, { nom: 'Ancien', statut: 'Inactif' }];
   const ab = W._ckSvAbsences(membres, PE, W._pilEtatEntree, now);
-  const par = n => ab.find(x => x.titre.startsWith(n));
+  const par = n => ab.find(x => x.titre.startsWith(n) || x.titre === 'Absence de ' + n);   // VIF-1 : « Absence de Thomas »
   T('un congé sur trois jours : une ligne, la plage et le retour', !!par('Marion') && par('Marion').titre === 'Marion en congé'
     && par('Marion').quand.startsWith('Du ') && par('Marion').sous.startsWith('De retour le'));
   T('une absence avec son motif ; aujourd\u2019hui n\u2019est pas compté (déjà dans « Présences »)', par('Thomas') && /^Formation Certiphyto\. (De retour le |Puis |Pas de retour)/.test(par('Thomas').sous) && !par('Thomas').quand.includes('12'));   // AUJ-5 (§307) : le motif, PUIS la date de retour

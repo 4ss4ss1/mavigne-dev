@@ -796,7 +796,8 @@ function dessinerCourbe(reste, fin) {
   //   s'empilaient en « oooo » sur les premiers jours d'un axe de huit mois, et des photos à 0 h (prises avant l'arrivée des
   //   données) tiraient des traits verticaux : cockpit.js/_ckChargeSerie les écarte, pilotage.js/_pilPhotoEcrire ne les prend plus.
   $('#ck-c-proj').setAttribute('d', 'M' + f1(xa) + ' ' + f1(ya) + 'L' + f1(xf) + ' ' + f1(y0));
-  $('#ck-c-besoin').setAttribute('d', 'M' + f1(xa) + ' ' + f1(ya) + 'L' + f1(xv) + ' ' + f1(y0));
+  // VIF-1 : un objectif déjà passé n'a pas d'allure à tenir — la ligne partait vers la gauche, sur la colonne voisine.
+  $('#ck-c-besoin').setAttribute('d', VISEE > AUJ ? 'M' + f1(xa) + ' ' + f1(ya) + 'L' + f1(xv) + ' ' + f1(y0) : '');
   const pt = $('#ck-c-pt'); pt.setAttribute('cx', f1(xa)); pt.setAttribute('cy', f1(ya));
   $('#ck-c-fin').setAttribute('transform', 'translate(' + f1(xf) + ' ' + f1(y0) + ')');
   const fl = $('#ck-c-fin-l'); if (fl) fl.setAttribute('text-anchor', xf > c.w - c.padR - 30 ? 'end' : 'middle');
@@ -1680,5 +1681,19 @@ window._ck2Monter = function (v) {
   SANS_MVT = !!window._ck2EntreeFaite; entree(); SANS_MVT = false; window._ck2EntreeFaite = true;
   if (modeAvant === 'eco' && V.eco) { SANS_MVT = true; try { choisirMode('eco'); } finally { SANS_MVT = false; } }   // AUJ-6
 };
-window._ck2Maj = function (v) { if (!document.getElementById('ck-page')) return; charger(v); majTout({}); };
+window._ck2Maj = function (v) {
+  // VIF-1 (§414) : la mise à jour en direct, appelée par pilotage.js (_pilRafraichirVif) quand les données changent. Les
+  //   parcelles qui viennent d'être faites ou commencées ont leur onde, comme une validation dans la maquette.
+  if (!document.getElementById('ck-page')) return;
+  const avant = {}, nom = {};
+  Object.keys(S.etats).forEach(t => { avant[t] = Object.assign({}, S.etats[t]); });
+  PARCS.forEach(p => { nom[p.id] = p.nom; });
+  charger(v); majTout({});
+  if (reduit()) return;
+  const parNom = {}; PARCS.forEach(p => { parNom[p.nom] = p.id; });
+  Object.keys(S.etats).forEach(t => Object.keys(avant[t] || {}).forEach(pid => {
+    const n = nom[pid], id = n && parNom[n], a = avant[t][pid], b = id && S.etats[t][id];
+    if (id && b && a && b !== a && (b === 'faite' || b === 'cours')) onde(id, b, t);
+  }));
+};
 })();

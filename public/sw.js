@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.52
+// MA VIGNE — Service Worker v10.53
+// v10.53 (21/10/2026) — VIF-1 (§414) : Aujourd'hui se met a jour en direct (_ck2Maj), pastilles d'alerte dans la barre, trois defauts d'Aujourd'hui. APP 9.73 -> 9.74.
 // v10.52 (21/10/2026) — HLHA-1 (§413) : Le millésime — en tête de Parcelles, le rendement par appellation et par couleur
 //   (ce qui se déclare : surface récoltée, volume, hL/ha face au maximum) ; dans la fiche d’une cuvée, le hL/ha sous le kg/hL,
 //   sur la surface des parcelles qui ont rempli la cuve. index.html, utils.js (et cave.js).
@@ -4584,7 +4585,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.52';
+const CACHE_NAME   = 'mavigne-v10.53';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4601,7 +4602,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.52 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.53 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4621,7 +4622,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.52 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.53 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

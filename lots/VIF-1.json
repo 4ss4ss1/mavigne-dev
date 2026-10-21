@@ -1,0 +1,31 @@
+{
+  "lot": "VIF-1",
+  "section": "§414",
+  "base": "a872e62d092a79a57145f2449d2d48ed255db16b",
+  "inclut": [],
+  "date": "2026-10-21",
+  "fichiers": {
+    "docs/claude/INDEX.md": "4b74301c1952804010b25e90d2b2a0242e3d3ddad816dde3c1d98bb3670cb419",
+    "docs/claude/chantiers-380-429.md": "27776aad3729b54cf8c3ebd23a9dcba75cdfc802d0f8e87a1c5ddae039ae346e",
+    "guide/01-demarrer.html": "d88641fb4f28cd31360f01cc5d11fed2ff87d8458418c64f6e8c3e4cf981799f",
+    "guide/11-pilotage.html": "406e5bb709f00661ac559d856c2e1b3cc802eb9b0da140748241dc5c8593ba32",
+    "index.html": "97fa48d9493e67d8b177535bc1b74a6981e903b41df3ed598b2eeae49063658f",
+    "public/guide.html": "d30be2472b0cc3c981d60a1edbf3bc5147e33373c0a61f9685a6ca60b507a69c",
+    "public/sw.js": "8993d50e42974dfb7001b7fb12d2de96c1e213751055b597e1ba056d9d355501",
+    "scripts/harnais-claude-md.mjs": "d9063e4fcc096c798d9d4611b4e19456a5c82067f917fe0c7e8ca873e0f967a4",
+    "scripts/mv-harnais-auj2.mjs": "86ee8efa90c5cec6128608c23105d055f8e6235ea685661a9814f0bf1ac8d64f",
+    "scripts/mv-harnais-auj5.mjs": "3c4a7c86b377ff5a55d972d3cf6af12435f1f18f9506e1e6a73cc33ed3cf08ee",
+    "scripts/mv-harnais-colle1.mjs": "faf51ed3311c054d7be5a81b92f8393d46c2b2ade5dd13d661c412104c32e569",
+    "scripts/mv-harnais-liste.mjs": "d7b05ab099acfda5abe414280842deaffacd01ad7389ad9d58fa1d8d84e651b2",
+    "scripts/mv-harnais-ref1.mjs": "c9ac6b23fb638d7e1d6a2e2dc7cf0ecb25c0bd4cbc9c5168990e45555f3dd4a9",
+    "scripts/typo-baseline.json": "ce7727cbca31118a8aa5bee3ac6ebcfe781138778863e2a89f7bd3f8ccaf934e",
+    "src/app.js": "940070c7d8b3450ba1b3a9bc82ddc16ecc6afbe5802030937f0c20e5f601cc24",
+    "src/cockpit-vue.js": "e2207e6f1d8615be8de1c79087682d33143d2b8874edcb838c083543be9a029e",
+    "src/cockpit.js": "54a7fee0f79cf42c82f832dad734d1129fc5dc106120f0938ddf32456fa9bfc1",
+    "src/coquille.js": "6e9fc85c2c1d98d5fa0bdc7a2b84aed5af70f765cf4780c4f0d22cfb355bbe89",
+    "src/pilotage.js": "b4d76a7ee9b1630b9ec020e9d211c2a13633d752aa788355d56728ad9f12baab",
+    "src/styles.css": "913ec8f50e5405fd646e0687f85d60d28084148b8cec6f5985cb4330590fbaed",
+    "src/utils.js": "582251c4ced3ed45aca0df0b8451a30cd6d18cd38c220e74ed4e1f3b7de42521",
+    "scripts/mv-harnais-vif1.mjs": "94f0e50ea6b4efd33f992f034ca5f25292459564787764cccfaab5b3fed3c197"
+  }
+}
