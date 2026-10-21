@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.47
+// MA VIGNE — Service Worker v10.48
+// v10.48 (21/10/2026) — REVUE-8 (§408) : sans travaux à mesurer, l’avancement dit « — » (Accueil : tuile et carte de la saison « À venir » ; Pilotage : jauge et tuile), sa valeur tombe à 0 au lieu de 100. app.js, pilotage.js, utils.js, index.html. APP 9.68 -> 9.69.
 // v10.47 (21/10/2026) — REVUE-7 (§407) : la lecture — 153 déclarations font-variant-numeric redisent lining-nums (tabular-nums seul remettait Cormorant à ses chiffres elzéviriens) ; 87 règles de la feuille, 120 règles injectées et 78 styles écrits sur place passent des capitales aux lettres normales (hors connexion, installation, console GT, marques) ; « Arrachées ». styles.css, index.html, app.js, cave.js, cuvier.js, jalons.js, phyto.js, pilotage.js, planning.js, reglages.js, reserve.js, utils.js. APP 9.67 -> 9.68.
 // v10.46 (21/10/2026) — REVUE-6 (§406) : la revue complète, lot 1 — « Mode hors ligne » s’efface (4 s) au lieu de recouvrir l’en-tête ; la suppression d’une session en zone de danger (.mvbtn-danger-discret, rouge plein à la confirmation) ; le doré du texte de priorité (--or-tx) ; « Ouiller la cuvée aujourd’hui ». utils.js, tracteur.js, cave.js, styles.css, index.html. APP 9.66 -> 9.67.
 // v10.45 (21/10/2026) — CHARTE-6e (§405) : l’interrupteur au jeu (piste --champ-filet, activé à la couleur d’action : .ephy-tgl .sw, .pil-sw) ; 9 étiquettes faites à la main → .mvchamp-l. styles.css, phyto.js, reglages.js, index.html, utils.js. APP 9.65 -> 9.66.
@@ -4577,7 +4578,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.47';
+const CACHE_NAME   = 'mavigne-v10.48';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4594,7 +4595,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.47 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.48 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4614,7 +4615,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.47 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.48 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

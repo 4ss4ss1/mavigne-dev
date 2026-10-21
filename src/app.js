@@ -6490,7 +6490,10 @@ function getHomeCardData(){
     totalSurfTaches += parcT.reduce((s,p)=>s+parseFloat(p.surface||0),0);
     totalSurfDone   += parcT.filter(p=>getTacheStatut(p,t.nom)==='Validé').reduce((s,p)=>s+parseFloat(p.surface||0),0);
   });
-  const pctGlobal = totalSurfTaches>0 ? Math.round(totalSurfDone/totalSurfTaches*100) : 100;
+  // ★ REVUE-8 (§408) : sans travaux à mesurer (domaine qui démarre, démo vide), l'avancement n'est pas « 100 % » mais rien :
+  //   on l'affiche « — » (rienAMesurer) ; la valeur numérique tombe à 0, pas à 100.
+  const rienAMesurer = !(totalSurfTaches>0);
+  const pctGlobal = totalSurfTaches>0 ? Math.round(totalSurfDone/totalSurfTaches*100) : 0;
   // Tâches en cours — pct par surface concernée (cohérent avec renderHeuresCard)
   const tachesAvec = tachesSaison.map(t=>{
     const parcT=_parcConcern(t.nom);
@@ -6504,11 +6507,11 @@ function getHomeCardData(){
   }).filter(t=>t.val>0&&t.pct<100);
   const tacheLaMoinsAvancee = tachesAvec.length>0 ? tachesAvec.sort((a,b)=>a.pct-b.pct)[0] : null;
   const tacheLaPlusAvancee  = tachesAvec.length>0 ? tachesAvec.sort((a,b)=>b.pct-a.pct)[0] : null;
-  return {pctGlobal, tacheLaMoinsAvancee, tacheLaPlusAvancee, parcActives};
+  return {pctGlobal, rienAMesurer, tacheLaMoinsAvancee, tacheLaPlusAvancee, parcActives};
 }
 
 function renderHomeCard(){
-  const {pctGlobal, tacheLaPlusAvancee, parcActives} = getHomeCardData();
+  const {pctGlobal, rienAMesurer, tacheLaPlusAvancee, parcActives} = getHomeCardData();
   const saison = getSaisonActive();
   const {totalReste} = calcHeures();
   const _picto=document.getElementById('home-stat-picto');
@@ -6523,9 +6526,9 @@ function renderHomeCard(){
     _chip.textContent='';
     _content.innerHTML=`<div class="mv-hd"><div><div class="mv-l">Avancement de la saison</div>
         <div class="mv-t" style="margin-top:1px">${_escHtml(_visuSaison())}</div></div>
-        ${_mvBadge(pctGlobal>=100?'Termin\u00e9e':'En cours',pctGlobal>=100?'vert':'ambre')}</div>
+        ${rienAMesurer?_mvBadge('\u00c0 venir','neutre'):_mvBadge(pctGlobal>=100?'Termin\u00e9e':'En cours',pctGlobal>=100?'vert':'ambre')}</div>
       <div style="display:flex;align-items:flex-end;gap:14px;margin-top:14px">
-        <div class="mv-hn">${pctGlobal}<span style="font-size:22px;font-weight:600">%</span></div>
+        <div class="mv-hn">${rienAMesurer?'\u2014':pctGlobal+'<span style="font-size:22px;font-weight:600">%</span>'}</div>
         <div style="flex:1;padding-bottom:7px">
           <div class="mv-track"><div class="mv-fill" style="width:${pctGlobal}%;background:${barCol}"></div></div>
           <div class="mv-l" style="margin-top:6px">${parcActives.length} parcelles \u00b7 ${parcActives.reduce((s,p)=>s+(parseFloat(p.surface)||0),0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})} ha</div>
@@ -6711,11 +6714,11 @@ function renderHome(){
 
 
   // Stats band Accueil
-  const {pctGlobal, parcActives} = getHomeCardData();
+  const {pctGlobal, rienAMesurer, parcActives} = getHomeCardData();
   var elAvt=document.getElementById('hs-avancement');
   var elNbP=document.getElementById('hs-nb-parc');
   var elSurf=document.getElementById('hs-surf');
-  if(elAvt)elAvt.textContent=pctGlobal+'\u00a0%';   // KIT-2 : « 17 % », comme partout
+  if(elAvt)elAvt.textContent=rienAMesurer?'\u2014':pctGlobal+'\u00a0%';   // REVUE-8 : « — » quand rien n'est à mesurer   // KIT-2 : « 17 % », comme partout
   if(elNbP)elNbP.textContent=parcActives.length;
   if(elSurf){
     var surfTot=PARCELLES.filter(function(p){return p.statut!=='Arrachee';}).reduce(function(s,p){return s+parseFloat(p.surface||0);},0);

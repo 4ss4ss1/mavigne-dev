@@ -47,7 +47,7 @@ function suite(S) {
   T('les Parcelles sur deux colonnes : la grille ne touche que les cartes (#pList), le reste pleine largeur',
     /#pList\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\);/.test(css) && /#pList > :not\(\.mv-c\)\{grid-column:1\/-1;\}/.test(css));
   T('les chiffres alignés partout (lnum de la Cormorant, par héritage)', /\nbody\{font-variant-numeric:lining-nums;\}/.test(css));
-  T('les tuiles : « 17 % » et « 11,85 »', S.app.includes("elAvt.textContent=pctGlobal+'\\u00a0%';") && S.app.includes("elSurf.textContent=surfTot>0?surfTot.toFixed(2).replace('.',','):"));
+  T('les tuiles : « 17 % » et « 11,85 »', S.app.includes("elAvt.textContent=rienAMesurer?'\\u2014':pctGlobal+'\\u00a0%';")   /* REVUE-8 (§408) : « — » quand rien n'est à mesurer */ && S.app.includes("elSurf.textContent=surfTot>0?surfTot.toFixed(2).replace('.',','):"));
   T('la barre de la saison et le travail le plus avancé disent l\u2019état (doré, vert fini)',
     S.app.includes("const barCol=pctGlobal>=100?'var(--vert-med)':'var(--or)';") && S.app.includes("const colT=t.pct>=100?'var(--vert-med)':'var(--or)';"));
   return out;

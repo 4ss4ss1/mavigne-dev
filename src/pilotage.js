@@ -367,7 +367,9 @@ function _pilData(){
   var totalReste = Math.round((ch&&ch.totalReste)||0);
   var totalTotal = Math.round((ch&&ch.totalTotal)||0);
   var hDone = Math.max(0, totalTotal - totalReste);
-  var gaugePct = totalTotal>0 ? Math.round(hDone/totalTotal*100) : 100;
+  // ★ REVUE-8 (§408) : 0 h prévues, ce n'est pas « 100 % fait » — la jauge dit « — » (gaugeVide), sa valeur tombe à 0.
+  var gaugeVide = !(totalTotal>0);
+  var gaugePct = totalTotal>0 ? Math.round(hDone/totalTotal*100) : 0;
 
   var active = data.filter(function(t){ return (t.pct||0) < 100; });
   var done   = data.filter(function(t){ return (t.pct||0) >= 100; });
@@ -468,7 +470,7 @@ function _pilData(){
 
   var domaine = window.DOMAINE_NOM || 'Domaine';
 
-  return { data:data, active:active, done:done, totalReste:totalReste, totalTotal:totalTotal, hDone:hDone, gaugePct:gaugePct,
+  return { data:data, active:active, done:done, totalReste:totalReste, totalTotal:totalTotal, hDone:hDone, gaugePct:gaugePct, gaugeVide:gaugeVide,
            saison:saison, surfTot:surfTot, nActives:nActives, membres:membres, refDate:_refDs, nFinis:nFinis,
            sessions:sessions, lastSess:lastSess, sessAdv:sessAdv, cuvees:cuvees, traits:traits, meteo:meteo, domaine:domaine,
            tracs:tracs, nRepar:nRepar, gnr:gnr, ouAlerte:ouAlerte, presences:presences, nPresent:nPresent, nCp:nCp, nAbs:nAbs, nRecup:nRecup, nVchamp:nVchamp, presentChamp:presentChamp, presentFiches:presentFiches, nIndispoChamp:nIndispoChamp,
@@ -522,7 +524,7 @@ function _pilRenderGauge(d){
   g.innerHTML =
     '<div class="pil-gauge-top">'
     + '<div><div class="pil-gauge-lab">Avancement de la saison</div><div class="pil-gm" style="margin-top:5px">'+_pilEsc(d.saison)+' · '+d.data.length+' tâche'+(d.data.length>1?'s':'')+'</div></div>'
-    + '<div class="pil-gauge-pct">'+d.gaugePct+'<small>%</small></div>'
+    + '<div class="pil-gauge-pct">'+(d.gaugeVide?'\u2014':d.gaugePct+'<small>%</small>')+'</div>'
     + '</div>'
     + '<div class="pil-gauge-track"><div class="pil-gauge-fill" style="width:'+d.gaugePct+'%"></div></div>'
     + '<div class="pil-gauge-meta">'
@@ -859,7 +861,7 @@ function _pilPanelCarte(d){
     + '<div class="pil-map-leg">'+_pilLentLeg(_PIL_LENT_PREP)
     + '<span style="display:flex;align-items:center;gap:6px"><span class="pil-map-sw" style="background:rgba(192,57,43,.5);border-color:#C0392B"></span>Arrachée</span>'
     + '<button type="button" class="pil-names-btn">'+(_pilNamesOn?(_mvIcon('etiquette',16)+' Noms '+_mvIcon('check',16)):(_mvIcon('etiquette',16)+' Noms'))+'</button></div>';
-  return _pilTile('carte','#7FA83A','Carte du domaine', _pilStat(d.gaugePct,' %',null), d.nActives+' parcelles · '+ha+' ha', d.gaugePct, body, 'pil.carte');
+  return _pilTile('carte','#7FA83A','Carte du domaine', _pilStat(d.gaugeVide?'\u2014':d.gaugePct,d.gaugeVide?'':' %',null), d.nActives+' parcelles · '+ha+' ha', d.gaugePct, body, 'pil.carte');
 }
 // Detruire une carte Leaflet pendant qu'une animation de zoom est en vol leve
 // « Cannot read properties of undefined (reading '_leaflet_pos') » 250 ms plus tard :

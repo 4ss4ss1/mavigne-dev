@@ -461,3 +461,4 @@
 | 405 | 405. CHARTE-6e — ÉTAPE 3 : L’INTERRUPTEUR, LES DERNIÈRES ÉTIQUETTES (21/10 — `src/styles.css` · `src/phyto.… | `docs/claude/chantiers-380-429.md` |
 | 406 | 406. REVUE-6 — LA REVUE COMPLÈTE, LOT 1 (21/10 — `src/utils.js` · `src/tracteur.js` · `src/cave.js` · `src/… | `docs/claude/chantiers-380-429.md` |
 | 407 | 407. REVUE-7 — LA REVUE, LOT 2 : LA LECTURE (21/10 — `src/styles.css` · `index.html` · `src/app.js` · `src/… | `docs/claude/chantiers-380-429.md` |
+| 408 | 408. REVUE-8 — LA REVUE, LOT 3 (1/2) : RIEN À MESURER N’EST PAS « 100 % » (21/10 — `src/app.js` · `src/pilo… | `docs/claude/chantiers-380-429.md` |

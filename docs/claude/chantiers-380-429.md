@@ -653,3 +653,23 @@ Le lot 2 de la revue complète (§406a) : 3. des chiffres difficiles à lire (le
 
 ### 407f. La leçon
 **Une propriété qui regroupe plusieurs réglages se remplace entière.** Poser `tabular-nums` « en plus » efface `lining-nums` — on croit ajouter, on retire. Pour `font-variant-numeric` comme pour `font`, `background` ou `border`, on redit tout ce qu’on veut garder.
+
+## 408. REVUE-8 — LA REVUE, LOT 3 (1/2) : RIEN À MESURER N’EST PAS « 100 % » (21/10 — `src/app.js` · `src/pilotage.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · `scripts/mv-harnais-kit2.mjs` · **APP 9.68 → 9.69, SW 10.47 → 10.48**, base `203aa81`)
+
+### 408a. La demande
+Le lot 3 de la revue complète (§406a, défaut 5) : l’Accueil d’un domaine qui démarre — et la démo — affichait « Avancement 100 % » à côté de « 0 parcelle » et « — ha ». Partie 1 : « — » quand il n’y a rien à mesurer. Partie 2 : une démo garnie, maquette du contenu d’abord.
+
+### 408b. Ce qui est livré
+- **L’Accueil** : `getHomeCardData` calculait `totalSurfTaches>0 ? … : 100` — sans surface de travaux, la saison était « faite à 100 % ». Il renvoie désormais `rienAMesurer` et une valeur de 0 (pas 100 : `reglages.js` lit ce nombre, « 0 % accompli » est juste). La tuile « Avancement » affiche « — » ; la carte « Avancement de la saison » affiche « — » et la pastille « À venir » (au lieu de « Terminée » en vert).
+- **Le Pilotage** (`_pilData`) : `totalTotal>0 ? … : 100` → `gaugeVide`, valeur 0 ; la jauge des travaux et la tuile « Carte du domaine » disent « — ». Le cockpit reçoit 0 : « Travaux 0 % · 0 h faites sur 0 h » — cohérent ; y écrire « — » demanderait de toucher son compteur animé (`#ck-ph-trav`), laissé.
+- Les autres « … : 100 » du code (la part des cuves sans alerte, la couverture du planning…) disent « tout va bien » quand il n’y a rien à surveiller : laissés, ce n’est pas un avancement.
+
+- `mv-harnais-kit2` (KIT-2, §227) cherchait la tuile écrite `pctGlobal+'\u00a0%'` : il attend désormais la forme qui dit « — » quand rien n’est à mesurer (vu par le premier passage de la chaîne : 2 rouges, le contrôle et sa contre-épreuve).
+
+### 408c. Vu
+`accueil-ouvrier` (« — Avancement · 0 Parcelles · — ha »), `pilotage` (« Travaux 0 % · 0 h faites sur 0 h »), `accueil`.
+
+- **Chaîne** : **471 commandes, 0 rouge** au dernier passage, joué d’un trait après le dernier changement de code. Avant : 2 rouges (`mv-harnais-kit2` et sa contre-épreuve), puis un passage coupé à la fin d’un message (289 commandes, sans rouge).
+
+### 408d. La leçon
+**« Rien » n’est ni 0 % ni 100 %.** Une division par zéro rattrapée par un 100 « par défaut » transforme l’absence de travail en travail fini. Le bon défaut est un état à part, dit tel quel : « — », « À venir ».
