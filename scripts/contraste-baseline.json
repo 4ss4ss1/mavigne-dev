@@ -9,8 +9,8 @@
   },
   "code": {
     "clair": {
-      "mesurees": 968,
-      "nonResoluble": 356,
+      "mesurees": 932,
+      "nonResoluble": 355,
       "fondInconnu": 498,
       "sous": {
         "src/app.js": 5,
@@ -26,8 +26,8 @@
       }
     },
     "sombre": {
-      "mesurees": 969,
-      "nonResoluble": 351,
+      "mesurees": 933,
+      "nonResoluble": 350,
       "fondInconnu": 505,
       "sous": {
         "src/app.js": 7,

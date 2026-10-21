@@ -553,3 +553,28 @@ Les 60 champs stylés sur place ; les étiquettes faites à la main ailleurs ; l
 
 ### 403e. La leçon
 **Une feuille injectée ne vaut que si son injecteur a tourné.** Le bouton du Cuvier n’avait de dessin qu’après le rendu d’un écran précis ; ouvert par un autre chemin, il était nu. Une pièce commune dans la feuille de l’appli vaut partout, tout le temps.
+
+## 404. CHARTE-6d — ÉTAPE 3 : LES CHAMPS STYLÉS SUR PLACE (20/10 — `src/styles.css` · `src/phyto.js` · `src/planning.js` · `src/reglages.js` · `src/tracteur.js` · `index.html` · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `scripts/mv-harnais-champs.mjs` · `scripts/contraste-baseline.json` · `scripts/mv-jetons-baseline.json` · **APP 9.64 → 9.65, SW 10.43 → 10.44**, base `88dac78`)
+
+### 404a. La demande
+La suite de l’étape 3 (§403) : les champs dont le dessin est écrit dans l’attribut `style`. Relevé (hors console GT) : 63 — `index.html` 22, Phyto 14, Planning 12, Réglages 11, app.js 2, installation 1, Tracteur 1 ; 15 nombres, 12 textes, 8 cases à cocher, 8 dates, 7 listes, 7 zones de texte, 5 heures, 1 e-mail ; 32 en pleine largeur.
+
+### 404b. Ce qui est livré
+- **43 champs → `.mvchamp`** (ou leur `.fi` gardé) : fond, filet, arrondi, marge intérieure, taille et police du texte, couleur, `outline`, hauteur retirés de l’attribut ; largeur, `flex`, marges, alignement du texte, `resize`, graisse gardés.
+- **5 petits champs** (largeur sous 120 px : le cuivre métal, la dilution, des chiffres du Planning et des Réglages) → **`.mvchamp .mvchamp-compact`** (nouveau, dans le bloc : 36 px partout, marge de 8 px, 14 px de texte) ; leur largeur reste écrite là où ils sont.
+- **`.mvchamp-recherche`** (nouveau) : le champ de recherche de l’assistant phyto a une loupe posée à gauche ; la passe lui avait retiré sa marge de 34 px — vu à la capture (la loupe recouvrait le texte), rendu par la pièce.
+- **7 cases à cocher** : leur couleur écrite sur place (vert, bleu, violet du Phyto) retirée — l’`accent-color` commun (§401) s’applique ; leur taille reste. La case d’export d’un tracteur garde la couleur du tracteur (calculée : une couleur qui dit lequel).
+- **La règle anti-zoom de Safari** (16 px sur iPhone) couvre désormais `.mvchamp` et `.mvchamp-compact`.
+- **Laissés (8)** : le champ de l’installation et un chiffre du bilan du cuivre (sombres exprès), le grand code centré, deux champs d’app.js (dont un à l’or translucide — app.js fait monter le contraste en sombre dès qu’on touche ses couleurs, §396), la case d’un tracteur (calculée), deux champs d’`index.html` que la passe n’a pas trouvés sur leur ligne.
+- `mv-harnais-champs` F : les cases à cocher et boutons ronds sortent du compte (leur largeur et leur hauteur sont leur taille, pas un dessin) ; plafond **60 → 7**. Couverture du contraste regravée (968 → 932 paires mesurées : celles des couleurs retirées des attributs) ; filets perdants 67 → 64.
+
+### 404c. ⚠️ Un premier passage refait
+L’expression de la passe ne consommait pas le guillemet fermant du style : chaque champ ressortait avec `style="…""`. JavaScript l’acceptait (un guillemet de trop dans une chaîne), mais `vite build` a refusé l’HTML d’`index.html` (« missing-whitespace-between-attributes »), et la capture suivante montrait encore l’ancienne construction. Les cinq fichiers ont été repris de leur copie d’avant, la passe rejouée avec le guillemet ; un contrôle a vérifié qu’aucun guillemet doublé ne restait.
+
+### 404d. Vu
+`phyto-cuivre-1` (téléphone clair et sombre, ordinateur : le cuivre métal en petit champ, la recherche et sa loupe), `tracteur-ajout` (nom et modèle), `reglages-documents` : justes.
+
+- **Chaîne** : **471 commandes, 0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 404e. La leçon
+**La construction est un contrôle.** Le code passait la syntaxe ; l’HTML qu’il fabriquait ne passait pas `vite build`. Après une passe sur des balises, on construit avant de regarder — sinon la capture montre l’ancienne version.

@@ -720,7 +720,7 @@ function renderActTracList(){
       +'<div class="mv-ft">'
         +'<div class="mv-l">Bar\u00e8me \u2014 heures machine par hectare</div>'
         +'<div onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:6px;flex:none">'
-          +'<input type="number" inputmode="decimal" step="0.1" min="0" value="'+hhaV+'" placeholder="\u2014" onchange="setActHha(\''+nomA+'\',this.value)" style="width:62px;text-align:right;border:1px solid var(--gris);border-radius:9px;padding:7px 8px;font-family:inherit;font-size:var(--pt-base,14px);background:var(--bg-card);color:var(--texte)">'
+          +'<input type="number" inputmode="decimal" step="0.1" min="0" value="'+hhaV+'" placeholder="\u2014" onchange="setActHha(\''+nomA+'\',this.value)" class="mvchamp mvchamp-compact" style="width:62px;text-align:right">'
           +'<span class="mv-l">h/ha</span>'
           +'<button class="mv-gh" onclick="openEditActTrac(\''+nomA+'\')" title="Modifier" aria-label="Modifier">'+_mvIcon('crayon',18)+'</button>'
         +'</div>'
@@ -1326,9 +1326,9 @@ function _tnRender(){
       +'<span style="flex:1;min-width:0"><span style="display:block;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">'+_escHtml(s.nom)+(cons?' '+_mvBadge('consultée','neutre'):'')+'</span>'
       +'<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_escHtml(s.periode||((s.debut||'')+' \u2192 '+(s.fin||'')))+'</span></span></div>';
     if(on) row+='<div style="display:flex;align-items:center;gap:6px;padding:8px 2px 2px 38px">'
-      +'<input type="date" class="fi" style="margin:0;flex:1;font-size:var(--pt-micro,12px);padding:7px 9px" value="'+_escAttr(d.d1||'')+'" onchange="window._tnDate(\''+_escAttr(s.nom)+'\',\'d1\',this.value)">'
+      +'<input type="date" class="fi" style="margin:0;flex:1" value="'+_escAttr(d.d1||'')+'" onchange="window._tnDate(\''+_escAttr(s.nom)+'\',\'d1\',this.value)">'
       +'<span style="color:var(--texte-doux);font-size:var(--pt-micro,12px)">\u2192</span>'
-      +'<input type="date" class="fi" style="margin:0;flex:1;font-size:var(--pt-micro,12px);padding:7px 9px" value="'+_escAttr(d.d2||'')+'" onchange="window._tnDate(\''+_escAttr(s.nom)+'\',\'d2\',this.value)"></div>';
+      +'<input type="date" class="fi" style="margin:0;flex:1" value="'+_escAttr(d.d2||'')+'" onchange="window._tnDate(\''+_escAttr(s.nom)+'\',\'d2\',this.value)"></div>';
     return '<div style="margin-bottom:7px">'+row+'</div>';
   }).join('');
   h+='<div style="'+_TN_HINT+'">Les dates préparent le Pilotage. Elles restent facultatives, et se modifient plus tard dans la période.</div>';
@@ -2520,7 +2520,7 @@ function editMembre(nom){
   cs.innerHTML=_emModsHtml(m)
     +'<div id="em-hist-wrap"></div>'
     +'<div class="fl" style="margin-top:14px">Solde CP initial <span style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);font-weight:400">('+(((window.CONFIG&&window.CONFIG.cp_mode)==='ouvres')?'jours ouvrés':'jours ouvrables')+', au début de la période de référence)</span></div>'
-    +'<input type="number" id="em-cp-initial-j" min="0" max="100" step="0.5" value="'+(m.cp_initial_j||0)+'" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:var(--pt-base,14px);outline:none;box-sizing:border-box;margin-bottom:8px;font-family:inherit">'
+    +'<input type="number" id="em-cp-initial-j" min="0" max="100" step="0.5" value="'+(m.cp_initial_j||0)+'" class="mvchamp" style="width:100%;margin-bottom:8px">'
     // Le taux horaire a quitté ce bloc : il est devenu un ÉVÉNEMENT de
     // l'historique ci-dessus (§39). Il vit toujours dans la collection `paie`,
     // PAS dans le doc `membres` (lisible par toute l'équipe) — l'historique ne
@@ -2542,7 +2542,7 @@ function editMembre(nom){
     +'</div>'
     +'<div id="em-eff-wrap" style="display:'+(m.collectif?'block':'none')+'">'
       +'<div class="fl" style="margin-top:10px">Nombre de personnes par d\u00e9faut</div>'
-      +'<input type="number" id="em-effectif" min="1" max="999" step="1" inputmode="numeric" value="'+(m.effectif||1)+'" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:var(--pt-sm,16px);outline:none;box-sizing:border-box;font-family:inherit">'
+      +'<input type="number" id="em-effectif" min="1" max="999" step="1" inputmode="numeric" value="'+(m.effectif||1)+'" class="mvchamp" style="width:100%">'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);margin:5px 2px 0;line-height:1.5">Se change jour par jour dans le Planning\u00a0: onglet <b>Le mois</b>, cocher les jours, puis \u{1F465}\u00a0Effectif. Pensez \u00e0 renseigner les dates de contrat pour que la ligne n\u2019apparaisse que pendant le chantier.</div>'
     +'</div>'
     // ── SEC-2 : l'admin du domaine dépanne son équipe lui-même ──────────
@@ -3379,7 +3379,7 @@ function _clotOverlayHTML(ctx){
   var prepOpts = (ctx.prepared||[]).map(function(s){ return '<option value="'+_clotEsc(s.nom)+'">'+_clotEsc(s.nom)+'</option>'; }).join('');
   var activateInner = (ctx.prepared && ctx.prepared.length)
     ? '<div style="margin-bottom:13px"><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Campagne déjà préparée</label>'
-      + '<select id="clot-prep" onchange="window._clotSyncConfirm&&window._clotSyncConfirm()" style="width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid #E7E3DA;border-radius:10px;background:#fff;color:#1C1813">'+prepOpts+'</select></div>'
+      + '<select id="clot-prep" onchange="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%">'+prepOpts+'</select></div>'
       + '<div class="mvencadre mvencadre-ok" style="display:flex;gap:9px;align-items:flex-start"><span>'+_mvIcon('check',16)+'</span><div>Cette campagne a déjà ses dates. Elle deviendra simplement la <b>campagne active</b> de l\'équipe.</div></div>'
     : '<div class="mvencadre mvencadre-attention" style="display:flex;gap:9px;align-items:flex-start"><span>ℹ️</span><div>Aucune campagne préparée à l\'avance. Utilise <b>« Créer la prochaine »</b> ci-dessus.</div></div>';
   var garde = ctx.warn
@@ -3427,10 +3427,10 @@ function _clotOverlayHTML(ctx){
           + '<div style="margin-bottom:13px"><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Type de saison</label>'
             + '<div style="font-size:var(--pt-micro,12px);color:#6B655C;line-height:1.45">La p\u00e9riode ci-dessous reprend « '+_clotEsc(ctx.endNom)+' » d\u00e9cal\u00e9e d\u2019un an, avec la m\u00eame liste de travaux. Ajustez ce qui doit l\u2019\u00eatre.</div></div>'
           + '<div style="margin-bottom:13px"><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Nom de la campagne</label>'
-            + '<input id="clot-name" value="'+_clotEsc(ctx.sug.nom)+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" style="width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid #E7E3DA;border-radius:10px;background:#fff;color:#1C1813"></div>'
+            + '<input id="clot-name" value="'+_clotEsc(ctx.sug.nom)+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%"></div>'
           + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-            + '<div><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Début</label><input id="clot-deb" type="date" value="'+ctx.sug.deb+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" style="width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid #E7E3DA;border-radius:10px;background:#fff;color:#1C1813"></div>'
-            + '<div><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Fin</label><input id="clot-fin" type="date" value="'+ctx.sug.fin+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" style="width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid #E7E3DA;border-radius:10px;background:#fff;color:#1C1813"></div>'
+            + '<div><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Début</label><input id="clot-deb" type="date" value="'+ctx.sug.deb+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%"></div>'
+            + '<div><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Fin</label><input id="clot-fin" type="date" value="'+ctx.sug.fin+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%"></div>'
           + '</div>'
           + garde
         + '</div>'

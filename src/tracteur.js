@@ -790,7 +790,7 @@ function _gnrNum(n){ return (Number(n)||0).toLocaleString('fr-FR'); }
 function _gnrTodayISO(){ return _mvToday(); }
 function _gnrField(id,label,val){
   return '<div style="margin-bottom:8px"><div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-bottom:3px">'+label+'</div>'
-    +'<input type="number" id="'+id+'" value="'+(val!=null&&val!==''?val:'')+'" min="0" inputmode="numeric" style="width:100%;padding:9px 11px;border:1.5px solid var(--gris);border-radius:9px;font-size:var(--pt-sm,16px);font-family:inherit;background:var(--bg-card);color:var(--texte);box-sizing:border-box"></div>';
+    +'<input type="number" id="'+id+'" value="'+(val!=null&&val!==''?val:'')+'" min="0" inputmode="numeric" class="mvchamp" style="width:100%"></div>';
 }
 function _gnrCardHtml(){
   var cfg=window.CONFIG||{}, g=cfg.gnr||null, canEdit=isAdmin()||isTractoriste();

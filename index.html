@@ -587,7 +587,7 @@
       <div style="width:36px;height:4px;background:#DDD;border-radius:2px;margin:0 auto 18px"></div>
       <div style="font-family:var(--font-titre,'Cormorant Garamond',serif);font-size:22px;font-weight:600;color:var(--texte);margin-bottom:6px"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-bogue"></use></svg> Signaler un problème</div>
       <div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5;margin-bottom:16px">Décrivez le souci rencontré avant connexion. Nous recevons votre message avec les informations techniques utiles.</div>
-      <textarea id="login-report-text" rows="4" placeholder="Ex : impossible de me connecter, l'écran reste bloqué…" style="width:100%;box-sizing:border-box;border:1.5px solid var(--gris-clair);border-radius:12px;padding:12px 14px;font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-base,14px);line-height:1.5;resize:vertical;min-height:96px;color:var(--texte);background:var(--bg-card)"></textarea>
+      <textarea id="login-report-text" rows="4" placeholder="Ex : impossible de me connecter, l'écran reste bloqué…" class="mvchamp" style="width:100%;line-height:1.5;resize:vertical"></textarea>
       <div id="login-report-status" style="display:none;font-size:var(--pt-micro,12px);margin-top:10px"></div>
       <button id="login-report-send-btn" onclick="submitReportLogin()" style="display:block;width:100%;margin-top:14px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Envoyer</button>
       <button onclick="closeReportLogin()" style="display:block;width:100%;margin-top:8px;padding:12px;background:none;color:var(--texte-doux);border:none;font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-txt,13px);cursor:pointer">Annuler</button>
@@ -615,7 +615,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:var(--pt-txt,13px);margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v9.64</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v9.65</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -1007,7 +1007,7 @@
         <button type="button" class="rp-stp" onclick="repPonctQty(1)">+</button>
       </div>
       <div class="rp-lbl">Date</div>
-      <input type="date" id="rp-date" style="width:100%;font-family:inherit;font-size:var(--pt-sm,16px);padding:12px;border-radius:11px;border:1.5px solid var(--gris-clair);background:var(--bg-app);color:var(--texte);margin-bottom:18px">
+      <input type="date" id="rp-date" class="mvchamp" style="width:100%;margin-bottom:18px">
       <button id="rp-save" class="rp-save" onclick="saveRepPonct()" disabled>Enregistrer</button>
     </div>
   </div>
@@ -1026,7 +1026,7 @@
       <div class="fl">Cépage principal</div>
       <select class="fsel ac" id="dpc-cepage-sel-1"></select>
       <div class="mvcarte-fond mvcarte-clic" style="display:flex;align-items:center;gap:10px;margin:14px 0 6px;padding:10px 12px;cursor:pointer" onclick="document.getElementById('dpc-entreplantation').click()">
-        <input type="checkbox" id="dpc-entreplantation" onchange="_dpcToggleEntreplantation(this.checked)" style="width:18px;height:18px;accent-color:#4A9FC8;cursor:pointer;flex-shrink:0">
+        <input type="checkbox" id="dpc-entreplantation" onchange="_dpcToggleEntreplantation(this.checked)" style="width:18px;height:18px;cursor:pointer;flex-shrink:0">
         <div>
           <div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">Complantation</div>
           <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:1px">Mélange de plusieurs cépages sur la parcelle</div>
@@ -1057,11 +1057,11 @@
     <div class="modal-body">
       <input type="hidden" id="arr-hidden-nom">
       <div class="fl">Date d'arrachage</div>
-      <input type="date" id="arr-date" style="width:100%;font-family:inherit;font-size:var(--pt-sm,16px);padding:12px;border-radius:11px;border:1.5px solid var(--gris-clair);background:var(--bg-app);color:var(--texte);box-sizing:border-box">
+      <input type="date" id="arr-date" class="mvchamp" style="width:100%">
       <div class="fl" style="margin-top:14px">Motif</div>
       <select class="fsel ac" id="arr-motif"></select>
       <div class="fl" style="margin-top:14px">Note <span style="font-size:var(--pt-micro,11px);font-weight:400;color:var(--texte-doux)">(optionnel)</span></div>
-      <textarea id="arr-note" rows="2" maxlength="300" placeholder="Ex : arrachage prévu avant replantation en 2027" style="width:100%;box-sizing:border-box;border:1.5px solid var(--gris-clair);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:var(--pt-sm,16px);background:var(--bg-app);color:var(--texte);resize:vertical"></textarea>
+      <textarea id="arr-note" rows="2" maxlength="300" placeholder="Ex : arrachage prévu avant replantation en 2027" class="mvchamp" style="width:100%;resize:vertical"></textarea>
       <div class="mv-l" style="margin-top:12px">La parcelle n'est pas supprimée : elle sort des surfaces, de l'avancement, du planning et du registre phyto, et son historique reste consultable. Une erreur se corrige depuis sa fiche avec « Remettre en exploitation ».</div>
       <div id="arr-valide-row" style="display:none"></div>
       <div id="arr-warn" style="display:none;margin-top:10px;font-size:var(--pt-txt,13px);font-weight:600;color:var(--orange)"></div>
@@ -1257,7 +1257,7 @@
     <div class="modal-body">
       <div class="fl">Commune la plus proche</div>
       <div class="cm-ac-wrap">
-        <input id="comm-input" type="text" autocomplete="off" placeholder="Rechercher une commune…" oninput="_commOnInput()" style="width:100%;font-size:var(--pt-sm,16px);padding:12px 14px;border-radius:11px;border:1.5px solid var(--gris-clair);background:var(--bg-app);color:var(--texte);font-family:inherit;box-sizing:border-box">
+        <input id="comm-input" type="text" autocomplete="off" placeholder="Rechercher une commune…" oninput="_commOnInput()" class="mvchamp" style="width:100%">
         <div class="cm-ac-results" id="comm-results"></div>
       </div>
       <div class="cm-suggest" id="comm-suggest" onclick="_commSuggestFromCoords(false)" style="display:none"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg> Suggérer depuis les coordonnées GPS</div>
@@ -1472,7 +1472,7 @@
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v9.64</div>
+        <div class="mod-header-sub">Ma Vigne v9.65</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
       
@@ -1586,7 +1586,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg></div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v9.64 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div class="ver-tag">Ma Vigne v9.65 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -1686,7 +1686,7 @@
       <div class="fl" style="margin-top:6px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-recu"></use></svg> N° SIRET de l’exploitation</div>
       <input class="fi" id="edn-siret" type="text" inputmode="numeric" maxlength="17" placeholder="14 chiffres">
       <label for="edn-bio" style="display:flex;align-items:center;gap:10px;margin-top:10px;min-height:44px;cursor:pointer">
-        <input type="checkbox" id="edn-bio" style="width:20px;height:20px;accent-color:var(--vert)">
+        <input type="checkbox" id="edn-bio" style="width:20px;height:20px">
         <span style="font-size:var(--pt-txt,13px);color:var(--texte)"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg> Production conduite en bio (AB)</span>
       </label>
       <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:6px;margin-bottom:14px">Reportés sur chaque ligne du registre phytosanitaire exporté, comme l’exige l’arrêté du 24 décembre 2025.</div>
@@ -1963,7 +1963,7 @@
       <div class="modal-sub">Décrivez ce qui s'est passé, avec vos mots. Les informations techniques utiles sont jointes automatiquement.</div>
     </div>
     <div style="padding:16px 20px 8px">
-      <textarea class="fi" id="report-text" rows="4" placeholder="Ex : je ne vois pas mon nom sur l'écran d'accueil ce matin…" style="resize:vertical;min-height:96px;font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-base,14px);line-height:1.5;margin-bottom:12px"></textarea>
+      <textarea class="fi" id="report-text" rows="4" placeholder="Ex : je ne vois pas mon nom sur l'écran d'accueil ce matin…" style="resize:vertical;line-height:1.5;margin-bottom:12px"></textarea>
       <div class="mvencadre mvencadre-ok" style="margin-bottom:14px">
         <div style="font-size:var(--pt-micro,11px);font-weight:600;color:var(--vert-med);margin-bottom:5px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-valide"></use></svg> Contexte joint automatiquement</div>
         <div id="report-preview" style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.7"></div>
@@ -2633,7 +2633,7 @@
       <button class="cave-toggle-btn sel" id="cdil-5" onclick="setConvDil(5)">5%</button>
       <button class="cave-toggle-btn" id="cdil-6" onclick="setConvDil(6)">6%</button>
       <button class="cave-toggle-btn" id="cdil-8" onclick="setConvDil(8)">8%</button>
-      <input type="number" id="conv-dil-inp" value="5" min="1" max="99" step="0.5" oninput="onConvDilInput()" style="width:54px;padding:8px;border:1px solid var(--gris);border-radius:8px;font-size:var(--pt-txt,13px);background:var(--gris-clair);color:var(--texte);text-align:center;">
+      <input type="number" id="conv-dil-inp" value="5" min="1" max="99" step="0.5" oninput="onConvDilInput()" class="mvchamp mvchamp-compact" style="width:54px;text-align:center">
     </div>
     <div id="conv-dil-note" style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:12px;">1 cL à 5% = <strong>0.5 g SO₂</strong></div>
     <!-- Liquide → Pastilles -->
@@ -2704,7 +2704,7 @@
     <div id="cana-edit-cuv-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;min-height:36px;"></div>
     <div id="cana-edit-cuv-hint" style="font-size:10px;color:var(--texte-doux);font-style:italic;margin-bottom:13px;min-height:14px;"></div>
     <div class="fl">Commentaire <span style="font-size:var(--pt-micro,11px);font-weight:400;font-style:italic;">(facultatif)</span></div>
-    <textarea class="fi ac" id="cana-edit-commentaire" placeholder="Ex : SO₂ libre bas sur PN23…" style="height:70px;resize:none;font-family:var(--font-ui,'Outfit',sans-serif);"></textarea>
+    <textarea class="fi ac" id="cana-edit-commentaire" placeholder="Ex : SO₂ libre bas sur PN23…" style="resize:none"></textarea>
     <button class="mbtn mbtn-p" onclick="saveCaveAnaEdit()">Enregistrer</button>
   </div>
 </div></div>
@@ -2747,7 +2747,7 @@
       <div id="cana-cuv-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;min-height:36px;"></div>
       <div id="cana-cuv-hint" style="font-size:10px;color:var(--texte-doux);font-style:italic;margin-bottom:13px;min-height:14px;"></div>
       <div class="fl">Commentaire <span style="font-size:var(--pt-micro,11px);font-weight:400;font-style:italic;">(facultatif)</span></div>
-      <textarea class="fi ac" id="cana-commentaire" placeholder="Ex : SO₂ libre bas sur PN23, prévoir ajustement fin mai…" style="height:70px;resize:none;font-family:var(--font-ui,'Outfit',sans-serif);"></textarea>
+      <textarea class="fi ac" id="cana-commentaire" placeholder="Ex : SO₂ libre bas sur PN23, prévoir ajustement fin mai…" style="resize:none"></textarea>
     </div>
     <!-- Mode rattacher à une opération existante -->
     <div id="cana-section-link" style="display:none;">
@@ -2790,7 +2790,7 @@
       </div>
       <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);font-style:italic;margin-top:6px">Sera demandé parcelle par parcelle lors de la validation <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg></div>
       <label style="display:flex;align-items:flex-start;gap:8px;margin-top:12px;cursor:pointer">   <!-- COMPTE-1 (§353) : dès la création -->
-        <input type="checkbox" id="new-act-champ-feeds" style="width:18px;height:18px;margin-top:1px;accent-color:var(--vert);flex-shrink:0">
+        <input type="checkbox" id="new-act-champ-feeds" style="width:18px;height:18px;margin-top:1px;flex-shrink:0">
         <span style="font-size:var(--pt-micro,12px);color:var(--texte);line-height:1.35"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pousse"></use></svg> Alimente les <b>trous de l’entreplantation</b><br><span style="font-size:var(--pt-micro,12px);color:var(--texte-doux)">Le nombre saisi devient les trous percés de la parcelle ; il arrive prérempli avec les pieds marqués. Pour une activité Tarière.</span></span>
       </label>
     </div>
@@ -2849,7 +2849,7 @@
       <button onclick="pdfDetailToggle()" id="pdf-detail-toggle" style="background:transparent;border:none;font-size:var(--pt-micro,11px);color:#4A9FC8;font-family:var(--font-ui,Outfit,sans-serif);cursor:pointer;padding:0 0 10px;display:block;text-align:left"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chevron"></use></svg> Détail par salarié</button>
       <div class="mvencadre" style="margin-bottom:10px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg> Valeurs importées depuis le Planning RH · modifiables manuellement</div>
       <div class="fl" style="margin-top:0"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-bulle"></use></svg> Commentaire mensuel</div>
-      <textarea class="fi" id="pdf-commentaire" placeholder="Observations, conditions, points notables…" style="margin-bottom:10px;min-height:72px;resize:vertical;font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-txt,13px);line-height:1.5"></textarea>
+      <textarea class="fi" id="pdf-commentaire" placeholder="Observations, conditions, points notables…" style="margin-bottom:10px;resize:vertical;line-height:1.5"></textarea>
       <button onclick="exportPDFMois()" style="background:var(--rouge);color:white;border:none;border-radius:10px;padding:11px 18px;font-size:var(--pt-txt,13px);font-weight:700;font-family:var(--font-ui,'Outfit',sans-serif);cursor:pointer;width:100%">Générer le PDF du mois</button>
     </div>
     </div>
@@ -2861,7 +2861,7 @@
       <div style="padding:14px 16px;border-bottom:1px solid var(--gris)">
         <div id="etp-season-lbl" style="font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux)">Heures de la saison</div>
         <div style="font-size:10px;color:var(--texte-doux);opacity:0.6;margin-top:2px">Historisé par saison · utilisé dans le rapport PDF</div>
-        <select id="etp-season-sel" style="margin-top:10px;width:100%;background:var(--fond-module);border:1px solid var(--gris);border-radius:8px;color:var(--texte);font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-txt,13px);font-weight:600;padding:8px 10px"></select>
+        <select id="etp-season-sel" class="mvchamp" style="margin-top:10px;width:100%;font-weight:600"></select>
       </div>
       <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
         <div style="display:flex;align-items:center;gap:10px">
@@ -3369,13 +3369,13 @@
           </div>
           <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);font-style:italic;margin-top:6px">Sera demandé parcelle par parcelle lors de la validation <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg></div>
           <label id="eat-champ-feeds-row" style="display:flex;align-items:flex-start;gap:8px;margin-top:12px;cursor:pointer">
-            <input type="checkbox" id="eat-champ-feeds" style="width:18px;height:18px;margin-top:1px;accent-color:var(--vert);flex-shrink:0">
+            <input type="checkbox" id="eat-champ-feeds" style="width:18px;height:18px;margin-top:1px;flex-shrink:0">
             <span style="font-size:var(--pt-micro,12px);color:var(--texte);line-height:1.35"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pousse"></use></svg> Alimente les <b>trous de l’entreplantation</b><br><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">Le nombre saisi devient les trous percés de la parcelle (temps de l’entreplantation) ; il arrive prérempli avec les pieds marqués. Pour une activité Tarière.</span></span>
           </label>
         </div>
       </div>
       <label id="eat-coeq-row" style="display:flex;align-items:flex-start;gap:8px;margin-top:12px;cursor:pointer">
-        <input type="checkbox" id="eat-coeq" style="width:18px;height:18px;accent-color:var(--vert);flex-shrink:0">
+        <input type="checkbox" id="eat-coeq" style="width:18px;height:18px;flex-shrink:0">
         <span style="font-size:var(--pt-micro,12px);color:var(--texte);line-height:1.35">Se fait <b>à deux</b> : un coéquipier se choisit avec l’activité<br><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">Ses trous de tarière et ses hectares comptent aussi pour ses jalons. D’office pour la tarière, l’ensemencement et l’engrais.</span></span>
       </label>
       <input type="hidden" id="eat-champ-actif" value="0">
@@ -3677,7 +3677,7 @@
     <div style="font-family:var(--font-titre,'Cormorant Garamond',serif);font-size:var(--pt-md,20px);font-weight:600;text-align:center;margin-bottom:6px" id="mvp-title">Saisir une valeur</div>
     <div style="font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-txt,13px);color:#666;text-align:center;margin-bottom:16px" id="mvp-sub"></div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
-      <input id="mvp-input" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" onkeydown="if(event.key==='Enter'){event.preventDefault();_execPrompt();}" style="flex:1;min-width:0;padding:12px;border-radius:10px;border:1.5px solid var(--gris);background:var(--bg-app);color:var(--texte);font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-sm,16px);min-height:44px">
+      <input id="mvp-input" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" onkeydown="if(event.key==='Enter'){event.preventDefault();_execPrompt();}" class="mvchamp" style="flex:1;min-width:0">
       <span id="mvp-unit" style="font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-txt,13px);color:#666;white-space:nowrap"></span>
     </div>
     <div style="display:flex;gap:10px">
@@ -3686,7 +3686,7 @@
     </div>
   </div>
 </div>
-<script src="/boot.js?v=9.64"></script>
+<script src="/boot.js?v=9.65"></script>
 <script type="module" src="/src/app.js"></script>
 
 <!-- ── Overlay erreur critique Ma Vigne (v2.68) ── -->
@@ -3764,7 +3764,7 @@
       <button class="rfut-reason-btn" data-reason="autre" onclick="window._retraitFutSetRaison('autre',this)" style="grid-column:1/-1;">Autre</button>
     </div>
     <div class="fl">Note <span style="font-size:var(--pt-micro,11px);font-weight:400;font-style:italic;">(facultatif)</span></div>
-    <textarea class="fi ac" id="rfut-notes" placeholder="Ex : vendu au domaine X..." style="height:60px;resize:none;font-family:var(--font-ui,'Outfit',sans-serif);"></textarea>
+    <textarea class="fi ac" id="rfut-notes" placeholder="Ex : vendu au domaine X..." style="resize:none"></textarea>
     <button class="mbtn mbtn-del" style="margin-top:8px" onclick="window.saveRetraitFut()">Confirmer le retrait</button>
   </div>
 </div></div>
@@ -3778,7 +3778,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v9.64</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v9.65</span>
       </div>
     </div>
     <div class="modal-body">
@@ -3836,7 +3836,7 @@
     </div>
     <div class="modal-body">
       <label style="font-size:var(--pt-micro,11px);letter-spacing:.6px;text-transform:uppercase;color:#B8911F;font-weight:600;font-family:var(--font-ui,'Outfit',sans-serif)">Nouvelle adresse e-mail</label>
-      <input id="mv-email-input" type="email" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="nouvelle@adresse.fr" style="width:100%;font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-sm,16px);color:var(--texte);background:var(--bg-card);border:1px solid var(--line,#E7E1D5);border-radius:10px;padding:12px;margin-top:7px;outline:none" />
+      <input id="mv-email-input" type="email" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="nouvelle@adresse.fr" class="mvchamp" style="width:100%;margin-top:7px" />
       <div id="mv-email-msg" style="display:none;font-size:var(--pt-micro,12px);margin-top:8px"></div>
       <div style="display:flex;gap:8px;margin-top:14px">
         <button id="mv-email-save" onclick="window._saveEmailModal&&window._saveEmailModal()" style="flex:1;font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-base,14px);font-weight:600;color:#fff;background:#3D6B27;border:0;border-radius:10px;padding:12px;cursor:pointer;-webkit-tap-highlight-color:transparent">Enregistrer</button>

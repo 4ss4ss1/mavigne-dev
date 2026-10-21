@@ -457,3 +457,4 @@
 | 401 | 401. CHARTE-6b — ÉTAPE 3, SUITE : LES AUTRES FAMILLES DE CHAMPS (20/10 — `src/styles.css` · `src/utils.js` … | `docs/claude/chantiers-380-429.md` |
 | 402 | 402. RSV-BTN — LES BOUTONS DE LA RÉSERVE AU JEU (20/10 — `src/styles.css` · `src/reserve.js` · `src/phyto.j… | `docs/claude/chantiers-380-429.md` |
 | 403 | 403. CHARTE-6c — ÉTAPE 3 : LES CHAMPS DU CUVIER (20/10 — `src/styles.css` · `src/cuvier.js` · `src/cave.js`… | `docs/claude/chantiers-380-429.md` |
+| 404 | 404. CHARTE-6d — ÉTAPE 3 : LES CHAMPS STYLÉS SUR PLACE (20/10 — `src/styles.css` · `src/phyto.js` · `src/pl… | `docs/claude/chantiers-380-429.md` |

@@ -270,10 +270,10 @@ function _tratSelectedHtml(){
     +'<div class="mvencadre" style="text-align:center"><div style="font-size:9px;color:var(--texte-doux);text-transform:uppercase;font-weight:600">DRE</div><div style="font-size:18px;font-weight:700;font-family:var(--font-titre,&#39;Cormorant Garamond&#39;,serif);color:'+((m.drae||0)>0?'var(--orange)':'var(--vert-med)')+'">'+(m.drae||0)+'h</div></div>'
     +'<div class="mvencadre" style="text-align:center"><div style="font-size:9px;color:var(--texte-doux);text-transform:uppercase;font-weight:600">ZNT</div><div style="font-size:18px;font-weight:700;font-family:var(--font-titre,&#39;Cormorant Garamond&#39;,serif);color:'+(m.znt>5?'var(--rouge)':'var(--texte)')+'">'+(m.znt!=null?m.znt+'m':'&#8212;')+'</div></div>'
     +'</div>'
-    +'<input id="trat-dose-input" type="text" placeholder="'+ph+'" value="'+_escHtml(m.dose||'')+'" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px);margin-bottom:9px">'
+    +'<input id="trat-dose-input" type="text" placeholder="'+ph+'" value="'+_escHtml(m.dose||'')+'" class="mvchamp" style="width:100%;margin-bottom:9px">'
     +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">Dose/ha</span>'
-    +'<input id="trat-doseval-input" type="number" step="0.01" inputmode="decimal" placeholder="ex. 1.5" value="'+dvPre+'" style="flex:1;min-width:0;padding:9px 10px;border-radius:9px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px)">'
-    +'<select id="trat-doseunit-input" style="padding:9px 8px;border-radius:9px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px)">'+uOpts+'</select></div>'
+    +'<input id="trat-doseval-input" type="number" step="0.01" inputmode="decimal" placeholder="ex. 1.5" value="'+dvPre+'" class="mvchamp" style="flex:1;min-width:0">'
+    +'<select id="trat-doseunit-input" class="mvchamp">'+uOpts+'</select></div>'
     +'<div style="font-size:10px;color:var(--texte-doux);margin-bottom:9px;line-height:1.4">&#x1F4E6; Quantit&#xe9; r&#xe9;elle appliqu&#xe9;e &#8212; alimente le bilan mati&#xe8;re de La R&#xe9;serve.</div>'
     +'<button onclick="window._tratAddSel()" style="width:100%;padding:12px;border-radius:10px;border:none;background:var(--acier);color:#fff;font-size:var(--pt-txt,13px);font-weight:700;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);min-height:44px"><span>+ Ajouter ce produit</span></button>'
     +'</div>';
@@ -325,7 +325,7 @@ function _tratCuFieldHtml(p,i){
   var hint=(pct!=null?'base ~'+pct+'% Cu, ajustable':'kg de cuivre m&#xe9;tal apport&#xe9;');
   return '<div class="mvencadre" style="margin-top:7px;display:flex;align-items:center;gap:8px">'
     +'<span style="font-size:var(--pt-micro,11px);font-weight:700;color:#A56B3A;white-space:nowrap">&#x1FA99; Cuivre m&#xe9;tal</span>'
-    +'<input id="trat-cu-'+i+'" type="number" step="0.05" inputmode="decimal" value="'+v+'" oninput="window._tratSetCu('+i+',this.value)" style="width:74px;padding:5px 7px;border-radius:7px;border:1.5px solid rgba(165,107,58,0.4);background:var(--bg-card);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px);text-align:center">'
+    +'<input id="trat-cu-'+i+'" type="number" step="0.05" inputmode="decimal" value="'+v+'" oninput="window._tratSetCu('+i+',this.value)" class="mvchamp mvchamp-compact" style="width:74px;text-align:center">'
     +'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">kg/ha</span>'
     +'<span style="font-size:10px;color:var(--texte-doux);flex:1;text-align:right">'+hint+'</span>'
     +'</div>';
@@ -476,14 +476,14 @@ function _tratRender(){
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:8px">+ Ajouter un produit</div>'
       +'<div style="position:relative;margin-bottom:10px">'
       +'<span style="position:absolute;left:11px;top:11px;font-size:var(--pt-base,14px);pointer-events:none">&#x1F50D;</span>'
-      +'<input id="trat-q" type="text" oninput="window._tratSearch(this.value)" autocomplete="off" placeholder="Vos produits + catalogue E-Phy ANSES&#x2026;" value="'+_escHtml(_trat.q||'')+'" style="width:100%;padding:11px 12px 11px 34px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px)">'
+      +'<input id="trat-q" type="text" oninput="window._tratSearch(this.value)" autocomplete="off" placeholder="Vos produits + catalogue E-Phy ANSES&#x2026;" value="'+_escHtml(_trat.q||'')+'" class="mvchamp mvchamp-recherche" style="width:100%">'
       +'<button id="trat-q-clr" onclick="window._tratQClear()" style="position:absolute;right:6px;top:6px;width:30px;height:30px;border:none;background:transparent;color:var(--texte-doux);cursor:pointer;display:'+(_trat.q?'block':'none')+'"><span>&#x2715;</span></button>'
       +'</div>'
       +'<div id="trat-add-zone">'+_tratAddZoneHtml()+'</div>'
       +'</div>';
     var dateHtml='<div style="margin-bottom:14px">'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Date du traitement</div>'
-      +'<input id="trat-date" type="date" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px)">'
+      +'<input id="trat-date" type="date" class="mvchamp" style="width:100%">'
       +'</div>';
     var conds=_conducteursDispo().filter(function(c){return c.statut!=='Archivé';});
     var condHtml='<div style="margin-bottom:14px">'
@@ -504,17 +504,17 @@ function _tratRender(){
     var rglHtml='<div class="mvencadre" style="margin-bottom:14px">'
       +'<div style="font-size:var(--pt-micro,12px);font-weight:700;color:var(--ink-info,#4A9EE0);margin-bottom:12px">&#x1F4CB; Champs r&#xe9;glementaires obligatoires</div>'
       +'<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">'+reqStadeLabel+'</div>'
-      +'<select id="trat-stade" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px);appearance:none">'
+      +'<select id="trat-stade" class="mvchamp" style="width:100%">'
       +'<option value="">S&#xe9;lectionner le stade&#x2026;</option>'+stadeOpts+'</select></div>'
       +'<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">'+reqHeureLabel+'</div>'
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
       +'<div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:4px">D&#xe9;but</div>'
-      +'<input id="trat-hd" type="time" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px)"></div>'
+      +'<input id="trat-hd" type="time" class="mvchamp" style="width:100%"></div>'
       +'<div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:4px">Fin</div>'
-      +'<input id="trat-hf" type="time" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px)"></div>'
+      +'<input id="trat-hf" type="time" class="mvchamp" style="width:100%"></div>'
       +'</div></div>'
       +'<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">DRE anticip&#xe9; (si rentr&#xe9;e avant d&#xe9;lai standard)</div>'
-      +'<input id="trat-dre" type="text" placeholder="Ex : 6h &#x2014; justification agronomique" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px)"></div>'
+      +'<input id="trat-dre" type="text" placeholder="Ex : 6h &#x2014; justification agronomique" class="mvchamp" style="width:100%"></div>'
       +'<div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Mode de production</div>'
       +'<div style="display:flex;gap:10px">'
       +'<div onclick="window._tratSetModeAb(false)" class="mvpas-filtre'+(!_trat.modeAb?' on':'')+'" aria-pressed="'+(!_trat.modeAb?'true':'false')+'" style="flex:1;justify-content:center">&#x1F33E; Conventionnel</div>'
@@ -522,7 +522,7 @@ function _tratRender(){
       +'</div></div></div>';
     var noteHtml='<div style="margin-bottom:14px">'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Observations (optionnel)</div>'
-      +'<input id="trat-note" type="text" placeholder="Conditions m&#xe9;t&#xe9;o, stade v&#xe9;g&#xe9;tatif compl&#xe9;mentaire&#x2026;" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px)">'
+      +'<input id="trat-note" type="text" placeholder="Conditions m&#xe9;t&#xe9;o, stade v&#xe9;g&#xe9;tatif compl&#xe9;mentaire&#x2026;" class="mvchamp" style="width:100%">'
       +'</div>';
     bodyHtml=prodsHtml+addHtml+dateHtml+condHtml+rglHtml+noteHtml;
 
@@ -828,7 +828,7 @@ function openTraitEdit(idx){
   var _cuHint=(_cuPctV!=null?'base ~'+_cuPctV+'% Cu, ajustable':'kg de cuivre m&#xe9;tal apport&#xe9;');
   var cuHtml=_isCu?('<div class="mvencadre" style="margin-bottom:14px;display:flex;align-items:center;gap:8px">'
     +'<span style="font-size:var(--pt-micro,12px);font-weight:700;color:#A56B3A;white-space:nowrap">&#x1FA99; Cuivre m&#xe9;tal</span>'
-    +'<input id="te-cu" type="number" step="0.05" inputmode="decimal" value="'+_cuVal+'" style="width:84px;padding:6px 8px;border-radius:7px;border:1.5px solid rgba(165,107,58,0.4);background:var(--bg-card);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-base,14px);text-align:center">'
+    +'<input id="te-cu" type="number" step="0.05" inputmode="decimal" value="'+_cuVal+'" class="mvchamp mvchamp-compact" style="width:84px;text-align:center">'
     +'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">kg/ha</span>'
     +'<span style="font-size:10px;color:var(--texte-doux);flex:1;text-align:right">'+_cuHint+'</span>'
     +'</div>'):'';
@@ -1486,7 +1486,7 @@ function openOvFerti(){
     +'<div class="mvr-fl">Type au sens de la directive nitrates</div>'
     +'<select class="mvr-fi" id="fer-typ" onchange="_ferSet(\'prod.typ\',this.value)">'+typOpts+'</select>'
     +'<div class="fer-h" id="fer-typ-h"></div>'
-    +'<label class="fer-pl" style="border:0"><input type="checkbox" id="fer-ab" '+(P.ab?'checked':'')+' onchange="_ferSet(\'prod.ab\',this.checked)" style="width:20px;height:20px;accent-color:var(--vert-med,#3D6B27)"><span style="font-size:var(--pt-txt,13px)">Utilisable en agriculture biologique</span></label>'
+    +'<label class="fer-pl" style="border:0"><input type="checkbox" id="fer-ab" '+(P.ab?'checked':'')+' onchange="_ferSet(\'prod.ab\',this.checked)" style="width:20px;height:20px"><span style="font-size:var(--pt-txt,13px)">Utilisable en agriculture biologique</span></label>'
     +'<div class="mvr-f2"><div>'+_ferIn('fer-dose','Dose conseill\u00e9e',F.dose,'t/ha','oninput="_ferSet(\'dose\',this.value)"')+'</div>'
       +'<div>'+_ferIn('fer-kg','Poids d\u2019un sac',F.kg,'kg','oninput="_ferSet(\'kg\',this.value)"')+'</div></div>'
     +'<div class="fer-box" id="fer-calcN"></div>'
@@ -1691,7 +1691,7 @@ function openFerParc(nom){
   _ferEnsureOv(); _ferPcNom=nom;
   document.getElementById('fer-pc-t').textContent=nom;
   document.getElementById('fer-pc-body').innerHTML=''
-    +'<label class="fer-pl" style="border:0;margin-top:0"><input type="checkbox" id="fer-pc-zv" '+(p.zv?'checked':'')+' style="width:20px;height:20px;accent-color:var(--phyto,#5B2D8E)"><span style="font-size:var(--pt-txt,13px)">En zone vuln\u00e9rable aux nitrates</span></label>'
+    +'<label class="fer-pl" style="border:0;margin-top:0"><input type="checkbox" id="fer-pc-zv" '+(p.zv?'checked':'')+' style="width:20px;height:20px"><span style="font-size:var(--pt-txt,13px)">En zone vuln\u00e9rable aux nitrates</span></label>'
     +'<div class="fer-h" style="margin-top:0">Le classement peut ne couvrir qu\u2019une partie d\u2019une commune (par section cadastrale). La carte officielle est sur le site de la DREAL.</div>'
     +'<div class="mvr-fl">\u00celot PAC</div><input class="mvr-fi" id="fer-pc-ilot" type="text" autocomplete="off" placeholder="ex. \u00eelot 12" value="'+_escAttr(p.ilot||'')+'">'
     +'<div class="mvr-fl">Type de sol</div><input class="mvr-fi" id="fer-pc-sol" type="text" autocomplete="off" placeholder="ex. argilo-calcaire" value="'+_escAttr(p.sol||'')+'">'

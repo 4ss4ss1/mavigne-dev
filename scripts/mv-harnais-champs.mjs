@@ -25,7 +25,7 @@ const CONTRE = process.argv.includes('--contre');
 
 // Les champs stylés sur place (fond, filet, marge, hauteur, taille ou arrondi écrits dans l'attribut style).
 // Ce nombre ne peut que baisser.
-const PLAFOND_INLINE = 60;
+const PLAFOND_INLINE = 7;   // CHARTE-6d (§404) : 60 → 7 (les cases à cocher sorties du compte, 48 champs passés au jeu)
 
 const S0 = {
   css: L('src/styles.css'),
@@ -49,7 +49,7 @@ function bloc(css) {
 function champsSurPlace(S) {
   let n = 0;
   for (const js of [...Object.values(S.mods), S.idx])
-    for (const m of js.matchAll(/<(?:input|select|textarea)\b[^>]*?style=\\?["']([^"'\\]*)/g))
+    for (const m of js.matchAll(/<(?:input|select|textarea)\b(?![^>]*type=\\?["'](?:checkbox|radio))[^>]*?style=\\?["']([^"'\\]*)/g))   // une case à cocher a sa taille, pas un dessin (CHARTE-6d)
       if (/(?:^|;)\s*(border|background|padding|height|font-size|border-radius)\s*:/.test(m[1])) n++;
   return n;
 }

@@ -1,0 +1,25 @@
+{
+  "lot": "CHARTE-6D",
+  "section": "§404",
+  "base": "88dac78895b755ea4c354f3fc92c0561ce4a06b7",
+  "inclut": [],
+  "date": "2026-10-20",
+  "fichiers": {
+    ".mv-base": "83db9f2e9c6470a82941163492d48150faf2d29df4bddae3b90e0d061df2467e",
+    "CLAUDE.md": "8dd5703343c7e845aff12459a42dc0958fe6d5ddaaa43ce3a5067eae0e1d8017",
+    "docs/claude/INDEX.md": "08e711fbe606e2c0f4d453199404830ce3aae563d7abcd1afe85bde9e2b6c711",
+    "docs/claude/chantiers-380-429.md": "54b3971ae0efc9e47fa729b51cf238118e1de7a498755fe853f8fe3d93175fe3",
+    "docs/claude/journal.md": "c6eead23c21ed2735f3c2d7dcf7a94dabffb2b076ec93ce9735e1586f2448010",
+    "index.html": "31aa46754d898d05e731dfe17f6fa113d3d48dd447e2ba54168411726f195fd8",
+    "public/sw.js": "4a77eac24a0fad99096cc6095f9015160889521624a682099c05381bbaa21e1a",
+    "scripts/contraste-baseline.json": "007203cfdd92cadb2959d3eb5aca6551d1af02577220d7d6400773125c255d81",
+    "scripts/mv-harnais-champs.mjs": "4f4698606a79ed0d494032e310c49f5ea7f44820306056f3236ae70c6e9f2c7c",
+    "scripts/mv-jetons-baseline.json": "1c715ea671065467d12131c9761b140d55e2dbd552c0a527a5a8491408d887a2",
+    "src/phyto.js": "f686ce441be1e2bddf76183e7b816993ec328cdb0d152f6e9fc0541640f854fc",
+    "src/planning.js": "d75d8dd28a7a67d827746f06eb1939cacb425bab53c8e468cfbc9aaba1ddf43f",
+    "src/reglages.js": "7e918d1c9b130974dc5d3bedb7d661cdf326e831efba5d88eb8f3d6e2e859ac1",
+    "src/styles.css": "864badeeb091331df9fd66b5b1cb84381286df791d84844a6f96d4630f674a92",
+    "src/tracteur.js": "32d00880961a4aaed54f5c5aa2ec581a72946ec13365387a3adc1fd3d40f28e2",
+    "src/utils.js": "9f2e8a316e2ccd985d3806d299e00668b694c3ef8e27eeaa6d239d7af138f922"
+  }
+}

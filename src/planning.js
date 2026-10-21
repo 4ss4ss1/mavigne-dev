@@ -600,7 +600,7 @@ function _planRetardBornes(mbr,m,d){
 function _planLegInput(id,label,val,step,unit){
   return '<div class="mvcarte-fond" style="padding:9px 10px">'
     +'<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);font-weight:600;line-height:1.25;margin-bottom:5px;min-height:26px">'+label+'</div>'
-    +'<div style="display:flex;align-items:center;gap:5px"><input type="number" id="'+id+'" step="'+step+'" value="'+val+'" style="width:100%;font-family:inherit;font-size:var(--pt-sm,16px);font-weight:700;padding:7px 8px;border:1.5px solid var(--gris-clair);border-radius:9px;outline:none;background:var(--bg-card);color:var(--texte);text-align:center"><span style="font-size:var(--pt-micro,12px);color:var(--gris);font-weight:600">'+(unit===undefined?'h':unit)+'</span></div>'
+    +'<div style="display:flex;align-items:center;gap:5px"><input type="number" id="'+id+'" step="'+step+'" value="'+val+'" class="mvchamp" style="width:100%;font-weight:700;text-align:center"><span style="font-size:var(--pt-micro,12px);color:var(--gris);font-weight:600">'+(unit===undefined?'h':unit)+'</span></div>'
     +'</div>';
 }
 
@@ -5744,8 +5744,8 @@ function _planHsupCard(mbr){
   var hDep='<div class="plan-card" style="background:var(--terre-pale,#F3EADF);border:1.5px solid rgba(138,90,56,0.35);margin-bottom:14px;flex-direction:column;align-items:stretch">'
     +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--terre,#8A5A38);margin-bottom:10px">🌱 Solde de départ · '+planYear+'</div>'
     +'<div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">'
-      +'<div style="flex:1;min-width:120px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:4px">Report d’heures (avant Ma Vigne)</div><input type="number" step="0.5" id="plan-depsolde" value="'+(Math.round(_dep*100)/100)+'" onchange="planSaveDepart()" style="width:100%;border:1.5px solid rgba(138,90,56,0.4);border-radius:10px;padding:9px;font-size:var(--pt-sm,16px);text-align:center;outline:none;background:var(--bg-card);color:var(--texte);box-sizing:border-box"></div>'
-      +'<div style="flex:1;min-width:120px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:4px">À partir du</div><input type="date" id="plan-depdate" value="'+_escAttr(_depDate)+'" min="'+planYear+'-01-01" max="'+planYear+'-12-31" onblur="planSaveDepart()" style="width:100%;border:1.5px solid rgba(138,90,56,0.4);border-radius:10px;padding:9px;font-size:15px;outline:none;background:var(--bg-card);color:var(--texte);box-sizing:border-box"></div>'
+      +'<div style="flex:1;min-width:120px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:4px">Report d’heures (avant Ma Vigne)</div><input type="number" step="0.5" id="plan-depsolde" value="'+(Math.round(_dep*100)/100)+'" onchange="planSaveDepart()" class="mvchamp" style="width:100%;text-align:center"></div>'
+      +'<div style="flex:1;min-width:120px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:4px">À partir du</div><input type="date" id="plan-depdate" value="'+_escAttr(_depDate)+'" min="'+planYear+'-01-01" max="'+planYear+'-12-31" onblur="planSaveDepart()" class="mvchamp" style="width:100%"></div>'
     +'</div>'
     +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:8px;line-height:1.35">Saisi une fois par salarié. Point de départ du solde annuel ci-dessous.</div>'
   +'</div>';
@@ -6609,7 +6609,7 @@ function _planRenderCadre(){
       // choisit son moment ; avec lui, la journee se lit sans interpretation.
       +'<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);line-height:1.5;margin-top:2px">\u00c0 quelle heure\u00a0?</div>'
       +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
-        +'<input type="time" id="plan-coup-h" value="'+(curCoupFixe?curCoup:'')+'" onchange="planSaveCoupureH()" style="font-family:inherit;font-size:var(--pt-base,14px);padding:9px 10px;border:1.5px solid var(--gris-clair);border-radius:10px;background:var(--bg-card);color:var(--texte);outline:none">'
+        +'<input type="time" id="plan-coup-h" value="'+(curCoupFixe?curCoup:'')+'" onchange="planSaveCoupureH()" class="mvchamp">'
         +'<button onclick="planSaveCoupure(\'libre\')" style="padding:9px 12px;font-size:var(--pt-txt,13px);font-weight:600;border:1.5px solid '+(curCoup==='libre'?'#2D6A27':'var(--gris-clair)')+';border-radius:10px;cursor:pointer;background:'+(curCoup==='libre'?'#2D6A27':'transparent')+';color:'+(curCoup==='libre'?'white':'var(--texte-doux)')+'">Selon le chantier</button>'
         +(curCoup?'<button onclick="planSaveCoupure(\'\')" style="padding:9px 10px;font-size:var(--pt-micro,12px);border:none;background:none;color:var(--texte-doux);cursor:pointer;text-decoration:underline">Effacer</button>':'')
       +'</div>'
@@ -6624,7 +6624,7 @@ function _planRenderCadre(){
   var _isCuma=(_L.hebdoLeg===35&&Math.abs(_L.mensLeg-151.67)<0.01&&_L.maxHebdo===48&&_L.maxMoy===44&&_L.maxJour===10);
   html+='<div class="plan-sec-lbl" style="margin-top:8px">Cadre l\u00e9gal \u2014 dur\u00e9es \u00e0 ne pas d\u00e9passer</div>'
     +'<div class="plan-card" style="flex-direction:column;gap:10px;align-items:stretch">'
-      +'<select id="plan-leg-preset" onchange="planLegalPreset(this.value)" style="width:100%;font-family:inherit;font-size:var(--pt-base,14px);padding:10px;border:1.5px solid var(--gris-clair);border-radius:10px;background:var(--bg-card);color:var(--texte);outline:none">'
+      +'<select id="plan-leg-preset" onchange="planLegalPreset(this.value)" class="mvchamp" style="width:100%">'
         +'<option value="cuma"'+(_isCuma?' selected':'')+'>Production Agricole et CUMA \u2014 IDCC 7024</option>'
         +'<option value="custom"'+(_isCuma?'':' selected')+'>Personnalis\u00e9</option>'
       +'</select>'
@@ -6672,7 +6672,7 @@ function _planRenderCadre(){
   }
   html+='<div class="plan-sec-lbl" style="margin-top:8px">Absences qui doivent des heures</div>'
     +'<div class="plan-card" style="flex-direction:column;gap:10px;align-items:stretch">'
-      +'<select id="plan-dues-deb" onchange="planSetDuesDebut(this.value)" style="width:100%;font-family:inherit;font-size:var(--pt-base,14px);padding:10px;border:1.5px solid var(--gris-clair);border-radius:10px;background:var(--bg-card);color:var(--texte);outline:none">'
+      +'<select id="plan-dues-deb" onchange="planSetDuesDebut(this.value)" class="mvchamp" style="width:100%">'
         +'<option value=""'+(_dq?'':' selected')+'>Inactif \u2014 aucune absence ne touche le compteur</option>'
         +_dqOpt
       +'</select>'
@@ -6757,7 +6757,7 @@ function _planRenderCadre(){
   html+='<div class="plan-card">'
     +'<div class="plan-card-lbl">Nouveau template</div>'
     +'<div style="display:flex;gap:8px;margin-top:8px">'
-      +'<input id="plan-new-tpl-id" type="text" placeholder="Nom (ex: victor)" style="flex:1;padding:10px;border:1.5px solid var(--gris-clair);border-radius:10px;font-size:var(--pt-base,14px);font-family:inherit;outline:none">'
+      +'<input id="plan-new-tpl-id" type="text" placeholder="Nom (ex: victor)" class="mvchamp" style="flex:1">'
       +'<button class="plan-btn-saisir" onclick="planCreateTemplate()">Cr\u00e9er</button>'
     +'</div>'
   +'</div>';
@@ -6770,7 +6770,7 @@ function _planRenderCadre(){
     html+='<div class="plan-card" style="flex-direction:row;align-items:center;gap:12px;padding:12px 14px">'
       +'<div class="plan-emp-ava" style="background:'+((mbr.couleur||'#3D6B27')+'22')+';color:'+(mbr.couleur||'#3D6B27')+';width:36px;height:36px;font-size:15px">'+_escHtml(mbr.nom.charAt(0))+'</div>'
       +'<div style="flex:1;font-weight:600;font-size:var(--pt-base,14px)">'+_escHtml(mbr.nom)+'</div>'
-      +'<select onchange="planAssignTpl(\''+_escAttr(mbr.nom)+'\',this.value)" style="padding:8px;border:1.5px solid var(--gris-clair);border-radius:9px;font-size:var(--pt-txt,13px);font-family:inherit;outline:none">'+opts+'</select>'
+      +'<select onchange="planAssignTpl(\''+_escAttr(mbr.nom)+'\',this.value)" class="mvchamp">'+opts+'</select>'
     +'</div>';
   });
 
@@ -7249,9 +7249,9 @@ function _planSheetTiming(lbl,initCont,heatOn,rempHtml){
   return '<div id="plan-timing-section">'
       +'<div class="plan-modal-lbl">'+lbl+'</div>'
       +'<div class="plan-time-row">'
-        +'<div class="plan-time-field"><div class="plan-time-lbl">Prise de service</div><input type="time" id="plan-t-debut" value="'+_planEdT0+'" onchange="planCalcResult()" style="width:100%;border:2px solid var(--gris-clair);border-radius:11px;padding:11px;font-size:var(--pt-sm,16px);font-family:monospace;outline:none;text-align:center;background:var(--gris-clair);color:var(--texte);box-sizing:border-box;cursor:pointer"></div>'
+        +'<div class="plan-time-field"><div class="plan-time-lbl">Prise de service</div><input type="time" id="plan-t-debut" value="'+_planEdT0+'" onchange="planCalcResult()" class="mvchamp" style="width:100%;text-align:center;cursor:pointer"></div>'
         +'<div style="font-size:var(--pt-md,20px);color:var(--gris);align-self:flex-end;padding-bottom:11px;text-align:center">\u2192</div>'
-        +'<div class="plan-time-field"><div class="plan-time-lbl">Fin de service</div><input type="time" id="plan-t-fin" value="'+_planEdT1+'" onchange="planCalcResult()" style="width:100%;border:2px solid var(--gris-clair);border-radius:11px;padding:11px;font-size:var(--pt-sm,16px);font-family:monospace;outline:none;text-align:center;background:var(--gris-clair);color:var(--texte);box-sizing:border-box;cursor:pointer"></div>'
+        +'<div class="plan-time-field"><div class="plan-time-lbl">Fin de service</div><input type="time" id="plan-t-fin" value="'+_planEdT1+'" onchange="planCalcResult()" class="mvchamp" style="width:100%;text-align:center;cursor:pointer"></div>'
       +'</div>'
       +'<button id="plan-cont-btn" onclick="planToggleContinu()" class="plan-cont-btn'+(initCont?' active':'')+'">'
         +'<span id="plan-cont-chk" class="plan-cont-chk'+(initCont?' on':'')+'" style="display:flex;align-items:center;justify-content:center">'+(initCont?'\u2713':'')+'</span>'
@@ -7273,7 +7273,7 @@ function _planSheetRemp(lblTxt,subTxt){
 function _planSheetComment(val){
   return '<div id="plan-comment-section">'
       +'<div class="plan-modal-lbl" style="margin-top:12px">Commentaire <span style="font-size:var(--pt-micro,11px);font-weight:400">(optionnel)</span></div>'
-      +'<input type="text" id="plan-comment" value="'+_escAttr(val||'')+'" placeholder="Ex\u00a0: chaleur, vendanges\u2026" style="width:100%;border:2px solid var(--gris-clair);border-radius:10px;padding:11px;font-size:var(--pt-base,14px);outline:none;font-family:inherit;box-sizing:border-box">'
+      +'<input type="text" id="plan-comment" value="'+_escAttr(val||'')+'" placeholder="Ex\u00a0: chaleur, vendanges\u2026" class="mvchamp" style="width:100%">'
     +'</div>';
 }
 function _planSheetAbsSection(initComment,manyOnly){
@@ -7377,7 +7377,7 @@ function _planSheetOneHtml(mode){
     +'<div id="plan-cp-section" style="display:none">'
       +'<div class="plan-modal-lbl">Heures d\u00e9compt\u00e9es</div>'
       +'<div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">'
-        +'<input type="number" id="plan-cp-heures" step="0.5" min="0" max="24" value="'+(Math.round(initCpH*100)/100)+'" style="width:90px;border:2px solid rgba(217,119,6,0.35);border-radius:10px;padding:10px;font-size:18px;text-align:center;outline:none;background:var(--orange-pale);box-sizing:border-box">'
+        +'<input type="number" id="plan-cp-heures" step="0.5" min="0" max="24" value="'+(Math.round(initCpH*100)/100)+'" class="mvchamp mvchamp-compact" style="width:90px;text-align:center">'
         +'<span style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">h (selon planning)</span>'
       +'</div>'
       +'<div class="mvencadre mvencadre-attention">'

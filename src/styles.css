@@ -1615,7 +1615,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 /* ══ iOS FIXES — Patch safe-area + anti-zoom ══ */
 /* Anti-zoom Safari iOS : tout input < 16px déclenche un zoom automatique */
 @supports (-webkit-touch-callout: none) {
-  .fi, .fsel, .sbox input, .j-date-input, .ob-input, .login-input {
+  .fi, .fsel, .sbox input, .j-date-input, .ob-input, .login-input, .mvchamp, .mvchamp-compact {
     font-size:var(--pt-sm,16px) !important;
   }
   /* Scroll fluide natif iOS sur les containers scrollable */
@@ -8004,6 +8004,10 @@ textarea.mvchamp, textarea.fi, textarea.mvr-fi, textarea.emh-in, textarea.mvt-fi
 .mvchamp:focus, .fi:focus, .fsel:focus, .mvr-fi:focus, .emh-in:focus, .mvt-fi:focus, .plan-ge-input:focus, .pl2r-tin:focus, .j-date-input:focus, .mvv-tin:focus, .mvc-pk-in:focus, .tcfg-in:focus{ border-color:var(--accent); }   /* le halo : l'anneau de focus commun de l'appli, qu'on n'éteint pas */
 .mvchamp[aria-invalid="true"], .fi[aria-invalid="true"], .fsel[aria-invalid="true"], .mvr-fi[aria-invalid="true"], .emh-in[aria-invalid="true"], .mvt-fi[aria-invalid="true"], .plan-ge-input[aria-invalid="true"], .pl2r-tin[aria-invalid="true"], .j-date-input[aria-invalid="true"], .mvv-tin[aria-invalid="true"], .mvc-pk-in[aria-invalid="true"], .tcfg-in[aria-invalid="true"]{ border-color:var(--danger); }
 .mvchamp:disabled, .fi:disabled, .fsel:disabled, .mvr-fi:disabled, .emh-in:disabled, .mvt-fi:disabled, .plan-ge-input:disabled, .pl2r-tin:disabled, .j-date-input:disabled, .mvv-tin:disabled, .mvc-pk-in:disabled, .tcfg-in:disabled{ background:var(--survol); color:var(--texte-doux); border-color:var(--ligne,#E7E6E2); cursor:not-allowed; }
+/* CHARTE-6d (§404) : .mvchamp-recherche — une loupe posée à gauche dans le champ : le texte commence après elle. */
+.mvchamp-recherche{ padding-left:calc(var(--e-3,12px) + 22px); }
+/* CHARTE-6d (§404) : .mvchamp-compact — le champ du jeu, en petit, pour une valeur courte dans une rangée (sa largeur reste écrite là où il est) : 36 px partout, 14 px de texte (16 sur iPhone, par la règle anti-zoom). */
+.mvchamp-compact{ min-height:var(--h-row,36px); padding:0 var(--e-2,8px); font-size:var(--pt-base,14px); }
 /* CHARTE-6b (§401) : .mvchamp-fond — le dessin du champ seul (fond, filet, arrondi, couleur), sa taille gardée : le filtre de dates du Journal, compact dans sa barre. */
 .mvchamp-fond, .j-date-input, .tcfg-in{ color:var(--texte); background:var(--bg-card); border:var(--bw,1px) solid var(--champ-filet); border-radius:var(--r-md,8px); }
 .mvchamp::placeholder, .fi::placeholder, .mvr-fi::placeholder, .emh-in::placeholder, .mvt-fi::placeholder, .plan-ge-input::placeholder, .pl2r-tin::placeholder, .j-date-input::placeholder, .mvv-tin::placeholder, .mvc-pk-in::placeholder, .tcfg-in::placeholder{ color:var(--texte-doux); }
