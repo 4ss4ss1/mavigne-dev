@@ -18,7 +18,8 @@ function suite(S) {
   T('le zoom d’une campagne dit dans l’aide (la phrase reste hors de la barre collante au téléphone, choix de CARTE)', S.uti.includes("['Zoomer sur une campagne', ") && S.pil.includes("+'.pil-cr-note{display:none}'"));
   T('un arrachage en étapes dit qui y travaille : la dernière entrée de la tâche, faute d’entrée « En cours »',
     S.ck.includes("if(!e || e.tache !== tache || etat[e.parcelle] !== 'cours' || (deb[e.parcelle] && deb[e.parcelle].statut === 'En cours')) return;"));
-  T('version et nouveauté (9.75)', /export const APP_VERSION = '9\.75';/.test(S.uti) && /\{ v: '9\.75', d: '2026-10-21', items: \[\n    \{ niv: 1, pour: \['tous'\], emoji: 'feuille'/.test(S.uti));
+  T('version (au moins 9.75) et nouveauté (9.75)', (() => { const v = (S.uti.match(/export const APP_VERSION = '(\d+)\.(\d+)';/) || []).slice(1).map(Number); return v.length === 2 && (v[0] > 9 || (v[0] === 9 && v[1] >= 75)); })() &&   // ACCV-1 (§416) : « au moins » — l’égalité stricte rougissait au lot suivant (cliquet à l’envers, §6c)
+    /\{ v: '9\.75', d: '2026-10-21', items: \[\n    \{ niv: 1, pour: \['tous'\], emoji: 'feuille'/.test(S.uti));
   return out;
 }
 function jouer(S) { try { return suite(S); } catch (e) { return [['plantage : ' + (e && e.message), false]]; } }

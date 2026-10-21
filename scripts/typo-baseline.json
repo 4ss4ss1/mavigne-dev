@@ -2,27 +2,32 @@
   "src/admin-gt.js": {
     "dur": 105,
     "petit": 65,
-    "ko": 386
+    "ko": 388
   },
   "src/app.js": {
-    "dur": 105,
-    "petit": 60,
-    "ko": 907
+    "dur": 101,
+    "petit": 56,
+    "ko": 961
   },
   "src/cave.js": {
     "dur": 28,
     "petit": 24,
-    "ko": 670
+    "ko": 679
   },
   "src/cockpit-vue.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 127
+    "ko": 131
   },
   "src/cockpit.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 51
+    "ko": 53
+  },
+  "src/comptes.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 23
   },
   "src/coquille.js": {
     "dur": 0,
@@ -32,12 +37,12 @@
   "src/cuvier.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 568
+    "ko": 586
   },
   "src/firebase.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 198
+    "ko": 206
   },
   "src/gt.js": {
     "dur": 0,
@@ -49,20 +54,25 @@
     "petit": 0,
     "ko": 5
   },
+  "src/jalons.js": {
+    "dur": 2,
+    "petit": 1,
+    "ko": 52
+  },
   "src/onboarding.js": {
     "dur": 3,
     "petit": 1,
     "ko": 41
   },
   "src/phyto.js": {
-    "dur": 49,
-    "petit": 42,
-    "ko": 155
+    "dur": 44,
+    "petit": 37,
+    "ko": 147
   },
   "src/pilotage.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 903
+    "ko": 914
   },
   "src/planning-vue.js": {
     "dur": 0,
@@ -70,19 +80,19 @@
     "ko": 4
   },
   "src/planning.js": {
-    "dur": 121,
-    "petit": 91,
-    "ko": 667
+    "dur": 113,
+    "petit": 85,
+    "ko": 663
   },
   "src/reglages.js": {
-    "dur": 116,
-    "petit": 86,
-    "ko": 484
+    "dur": 111,
+    "petit": 85,
+    "ko": 486
   },
   "src/reserve.js": {
-    "dur": 16,
+    "dur": 15,
     "petit": 5,
-    "ko": 105
+    "ko": 104
   },
   "src/taille-doc.js": {
     "dur": 0,
@@ -95,23 +105,28 @@
     "ko": 63
   },
   "src/tracteur.js": {
-    "dur": 16,
-    "petit": 16,
-    "ko": 196
+    "dur": 11,
+    "petit": 11,
+    "ko": 200
+  },
+  "src/tutos.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 71
   },
   "src/utils.js": {
     "dur": 5,
     "petit": 2,
-    "ko": 948
+    "ko": 987
   },
   "index.html": {
-    "dur": 83,
-    "petit": 36,
-    "ko": 360
+    "dur": 77,
+    "petit": 30,
+    "ko": 364
   },
   "src/styles.css": {
-    "dur": 269,
-    "petit": 90,
-    "ko": 787
+    "dur": 256,
+    "petit": 83,
+    "ko": 821
   }
 }

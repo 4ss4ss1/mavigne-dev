@@ -9,6 +9,11 @@
 
   <h3>{ic:maison} Accueil — l'état du domaine d'un coup d'œil</h3>
   <div class="cards">
+    <div class="card"><h4>{ic:maison} L'Accueil en sept cartes</h4><ul class="dot">
+      <li>Dans l'ordre des questions du matin : <b>la carte du jour</b>, <b>À savoir</b> (un délai de rentrée en cours, la pluie probable, le gel et le vent des jours travaillés), <b>la météo</b>, <b>La saison</b> (chaque tâche en cours, à venir ou terminée, rangée par date de début), <b>Ma saison</b> (votre part, votre semaine en hectares, vos jalons), <b>Au tracteur</b> (tractoriste et administrateur) et <b>En direct</b> (ce qui est commencé, puis le fil des validations)</li>
+      <li>Sur ordinateur, la journée à gauche et une colonne à droite — À savoir, la météo, En direct — qui reste visible en descendant quand elle tient dans l'écran ; au téléphone, une seule colonne</li>
+      <li><b>Personnaliser</b> : l'œil masque une carte ou la réaffiche ; l'ordre ne bouge pas, et la carte du jour et À savoir restent toujours affichées</li>
+    </ul></div>
     <div class="card"><h4>{ic:graphique} Avancement</h4><ul class="dot">
       <li>Pourcentage d'avancement de la saison en cours</li>
       <li>Nombre de parcelles actives et surface totale</li>
@@ -27,8 +32,8 @@
     </ul></div>
     <div class="card"><h4>{ic:journal} Chez l'ouvrier : Accueil et Parcelles</h4><ul class="dot">
       <li>Un ouvrier a deux onglets, <b>Accueil</b> et <b>Parcelles</b> : il valide depuis les Parcelles</li>
-      <li>L'onglet <b>Journal</b> et les raccourcis « + Journal » et « Valider » restent à l'administrateur et au pilotage</li>
-      <li>« Ma semaine » mène à <b>« Ma trace »</b>, l'historique de son travail</li>
+      <li>L'onglet <b>Journal</b> reste à l'administrateur et au pilotage</li>
+      <li>« Ma saison » mène à <b>« Ma trace »</b>, l'historique de son travail</li>
       <li>Sur sa priorité, elle n'est annoncée qu'une fois ; dessous, le niveau et l'équipe tiennent sur une ligne, et la prochaine parcelle à valider porte la marque <b>« Prochaine »</b> : au téléphone, elle apparaît sans faire défiler</li>
     </ul></div>
     <div class="card"><h4>{ic:feuille} Pourquoi on le fait</h4><ul class="dot">
@@ -37,30 +42,29 @@
       <li>Une fiche par tâche de l'année, de la taille au dégraffage</li>
     </ul></div>
     <div class="card"><h4>{ic:eclair} Tâche prioritaire</h4><ul class="dot">
-      <li>La carte du haut de l'Accueil indique la tâche du moment décidée par l'administrateur, son avancement, et les parcelles dessinées à leur forme (leur contour, nord en haut) et à leur surface : en vert ce qui est fait, en gris foncé ce qui est commencé. Une parcelle dont le contour n'est pas enregistré reste un rectangle en pointillé. Un appui sur une parcelle ouvre sa fiche. Une parcelle où la tâche est désactivée reste en contour pâle et ne compte pas dans l'avancement</li>
+      <li>La carte du haut de l'Accueil indique la tâche du moment décidée par l'administrateur, en grand, avec son message, son avancement en hectares, ce qui a avancé aujourd'hui et hier, votre équipe, la parcelle en cours et la fin prévue au rythme des 15 derniers jours. <b>« Aller aux parcelles »</b> ouvre la tâche, <b>« Pourquoi ? »</b> sa fiche. À côté (dessous au téléphone), les parcelles dessinées à leur forme (leur contour, nord en haut) et à leur surface, avec leurs rangs : en vert ce qui est fait, en ambre ce qui est commencé, en blanc ce qui reste. Une parcelle dont le contour n'est pas enregistré reste un rectangle en pointillé. Un appui sur une parcelle ouvre sa fiche. Une parcelle où la tâche est désactivée reste en contour pâle et ne compte pas dans l'avancement. Un délai de rentrée en cours s'affiche en rouge, en haut de la carte et sur les parcelles concernées. Sans priorité fixée, la carte montre les chantiers du moment d'après le calendrier de la campagne</li>
       <li>Une équipe peut être rattachée à chaque priorité</li>
       <li>Un ouvrier concerné arrive directement sur ses parcelles, filtre posé</li>
       <li>Plusieurs priorités peuvent coexister : chacun voit la sienne</li>
-      <li>Sans priorité fixée, <b>Ma part du chantier</b> suit la seule tâche dans ses dates de travaux ; si plusieurs se chevauchent, celle où vous avez le plus travaillé ces 15 derniers jours</li>
+      <li>Sans priorité fixée, <b>Ma saison</b> suit la seule tâche dans ses dates de travaux ; si plusieurs se chevauchent, celle où vous avez le plus travaillé ces 15 derniers jours</li>
     </ul></div>
     <div class="card"><h4>{ic:nuage} Météo du vignoble</h4><ul class="dot">
       <li>Prévision à 5 jours, calée sur le centre de vos parcelles</li>
       <li>Résolution fine, adaptée au relief de la Côte</li>
-      <li>Si le domaine s'étend sur plusieurs communes, une météo <b>par secteur</b> s'affiche</li>
+      <li>Si le domaine s'étend sur plusieurs communes, le bouton <b>« Secteurs »</b> de la carte Météo montre la météo de chaque commune</li>
       <li>Une parcelle ouverte utilise d'abord ses propres coordonnées</li>
     </ul></div>
     <div class="card"><h4>{ic:alerte} Alertes</h4><ul class="dot">
       <li><b>Gel</b> annoncé dans les prochaines heures</li>
       <li><b>Délai de rentrée</b> : parcelles encore interdites d'accès après un traitement</li>
       <li>Matériel en réparation, alertes de cave</li>
-      <li>Travaux mécaniques en cours et derniers travaux réalisés</li>
+      <li>« En direct » : ce qui est commencé, puis les dernières validations</li>
     </ul></div>
   </div>
-  <div class="note info"><span class="ni" aria-hidden="true">{ic:info}</span><div>Sur ordinateur (1&nbsp;024&nbsp;px et plus), les blocs
-  de l'Accueil vont par deux, <b>en rangées</b> : les deux blocs d'une rangée ont la même hauteur et leurs bas s'alignent ; l'un est un peu plus large que l'autre, et ça s'inverse d'une rangée à la suivante, dans l'ordre que vous leur donnez. En mode Personnaliser, le bouton « Pleine largeur » met un bloc sur toute la rangée, en
-  pleine largeur, et un bloc masqué laisse son voisin prendre toute la largeur. La météo par secteur a son propre bloc, en une seule carte. La liste des parcelles se range elle aussi sur deux colonnes.</div></div>
-  <div class="note tip"><span class="ni" aria-hidden="true">{ic:eclair}</span><div>Le bloc <b>« Ma semaine »</b> résume vos propres
-  heures et renvoie au journal. Les raccourcis en bas d'écran mènent directement aux gestes du jour.</div></div>
+  <div class="note info"><span class="ni" aria-hidden="true">{ic:info}</span><div>Sur ordinateur (1&nbsp;024&nbsp;px et plus), l'Accueil tient
+  sur deux colonnes : à gauche la journée (la carte du jour, la saison, votre saison, le tracteur), à droite « À savoir », la météo et « En direct », qui restent à l'écran quand vous faites défiler si elles y tiennent ; chaque carte garde la largeur de sa colonne. En mode Personnaliser, l'œil masque ou affiche une carte. La liste des parcelles se range elle aussi sur deux colonnes.</div></div>
+  <div class="note tip"><span class="ni" aria-hidden="true">{ic:eclair}</span><div>La carte <b>« Ma saison »</b> résume votre propre
+  travail de la saison et mène à « Ma trace », l'historique de vos journées.</div></div>
 
   <h3>{ic:carte} Parcelles — suivre et valider le travail</h3>
   <h4>Trouver la bonne parcelle</h4>
@@ -274,7 +278,7 @@
     les heures conseillées à votre densité réelle — sans elles, le barème suppose 10 000
     pieds/hectare.</li>
     <li><b>Parcelles &amp; secteurs météo</b> : affecter chaque parcelle à sa commune. Dès que deux
-    communes sont actives, une météo par secteur apparaît sur l'Accueil.</li>
+    communes sont actives, le bouton « Secteurs » apparaît sur la carte Météo de l'Accueil.</li>
     <li><b>Documents</b> : l'état du vignoble, le rapport de saison, le journal des travaux et
     le fichier Excel des parcelles. Le catalogue complet reste dans
     <span class="path">Réglages › Domaine › Documents &amp; impressions</span>.</li>

@@ -1,0 +1,25 @@
+{
+  "lot": "ACCV-1",
+  "section": "§416",
+  "base": "91f56517916206d8e9213cb3d55c8be3ae94b140",
+  "inclut": [],
+  "date": "2026-10-21",
+  "fichiers": {
+    "CLAUDE.md": "1b24067a33703e1f24aed4c550f09dae035f4f21ebd616613d5b6c01c8586019",
+    "docs/claude/INDEX.md": "f20f0814d3734bc778d1e2cbda97b75126cfc126d0428408ba7a7603fd2a4f53",
+    "docs/claude/chantiers-380-429.md": "02ec437f52daf8bf5c791cd8495e34a2f06913e44760e2a16b0c50fb45273938",
+    "docs/claude/journal.md": "be295c78de306a5d1f5c4b79fe9b4696f950662ff16c43d2d7982ee92b2929c4",
+    "guide/04-vigne.html": "aba26d33072842a680ffcfaf75e2d44dc8d9b590d72abe5d6fecadd7281e1705",
+    "index.html": "eef74d4f4db765e508a1be6ecd0acd36a31a6462d7e7f7b540bc74b0492efaf5",
+    "public/sw.js": "3c955723b6f0e7624682047bbf990e2f71f389ea70a54fdbc01e2b1a91c2d0b5",
+    "scripts/harnais-claude-md.mjs": "b2e090009a737d49c62c24fce398423f3988c6be7a9593587a4918b45d3ce76b",
+    "scripts/mv-harnais-acc2.mjs": "4e04fa0863e6e59db522c8d8a4d0ad35ebd987eb7bb558aa1eeba3ea1e528405",
+    "scripts/mv-harnais-etats1.mjs": "e45ea41bb185943be7284a2b64688ee016d17d8ff2ad41f7547cef6f1fdeccc3",
+    "scripts/mv-harnais-hors1.mjs": "4663d06c02cbb37cb100327acb748e7719c4a9a4391f0ba9c1f1827e7ce8be24",
+    "scripts/mv-harnais-liste.mjs": "dcf646ad7a9463cb84d1bce9868988454f0f74259cc0413b1fb8cda96d5356e7",
+    "src/app.js": "3ffdde2626e40c5edd30eadc3b881c36745981260514ee2e01d547aeeb3ec431",
+    "src/styles.css": "1ad060c6eb85f69f83a5c469d4c5f7beb6b0a02a18450634feb91d7ef29a6fc7",
+    "src/utils.js": "e544925c53e349851b54cbbb874638534791897bf16b7ec4d5843ca49bf7b389",
+    "scripts/mv-harnais-accv1.mjs": "33c3187579ba092b1c797658f63a1346b7721f1ac801f1ead09d8328ab81be4e"
+  }
+}

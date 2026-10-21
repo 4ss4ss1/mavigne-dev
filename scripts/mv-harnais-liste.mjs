@@ -773,6 +773,10 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-vif1.mjs --contre'],
   ['node scripts/mv-harnais-etats1.mjs'],             // ETATS-1 (§415) : états francs sur les plans, quatre finitions du Pilotage
   ['node scripts/mv-harnais-etats1.mjs --contre'],
+  ['node scripts/mv-harnais-accv1.mjs'],
+  ['node scripts/mv-harnais-accv1.mjs --contre'],
+  ['node scripts/mv-harnais-accv2.mjs'],             // ACCV-2 (§417) : l'Accueil Vigne en sept cartes (maquette, lots 2 à 4)
+  ['node scripts/mv-harnais-accv2.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────

@@ -1,0 +1,33 @@
+{
+  "lot": "ACCV-2",
+  "section": "§417",
+  "base": "91f56517916206d8e9213cb3d55c8be3ae94b140",
+  "inclut": [
+    "ACCV-1"
+  ],
+  "date": "2026-10-21",
+  "fichiers": {
+    "CLAUDE.md": "099ee7d97df554ed7138ff5153cd1b48c9155b0ef95e7a5e225e7ef222915b2a",
+    "docs/claude/INDEX.md": "6a1494f10799035d27533887a77939e16ca9f29e2225304e3040ebc451f562dd",
+    "docs/claude/chantiers-380-429.md": "0238a919a0bc46b2dada11be85282d3da9ad622143dbf2c721471e7682984e65",
+    "docs/claude/journal.md": "d1266a0d71bd3a7935ef280c335522710b993b449acbc70e9508acd6bc22e324",
+    "guide/04-vigne.html": "8334d45a822ddc75160ede2a60bb3954678d43aa4a76514a3d02fcff91eb8e0a",
+    "index.html": "acc7f8b1ea35d1cdfc6cfebc142e2c5e1070cb5f349c154e062ea19c62b118b5",
+    "public/sw.js": "df08971ba3e405c69086e3292e93b1399be38019e6897ec76dfea435e6165ce1",
+    "scripts/harnais-claude-md.mjs": "3ee20c92044a805d3002b012380e9b5f53f532bfaf59b996bb3364aee4b584b2",
+    "scripts/mv-harnais-acc2.mjs": "4e04fa0863e6e59db522c8d8a4d0ad35ebd987eb7bb558aa1eeba3ea1e528405",
+    "scripts/mv-harnais-acc3.mjs": "cd68babd9098313fef3f16882df4833d2d3fffb08366a1ed81ce8b1274dff47a",
+    "scripts/mv-harnais-accv1.mjs": "33c3187579ba092b1c797658f63a1346b7721f1ac801f1ead09d8328ab81be4e",
+    "scripts/mv-harnais-chant1.mjs": "e4ed59176ca6c14e7b50c22b9b0e36e6f5c86c2f8dca33789a0a0eff3a775327",
+    "scripts/mv-harnais-etats1.mjs": "e45ea41bb185943be7284a2b64688ee016d17d8ff2ad41f7547cef6f1fdeccc3",
+    "scripts/mv-harnais-hors1.mjs": "4663d06c02cbb37cb100327acb748e7719c4a9a4391f0ba9c1f1827e7ce8be24",
+    "scripts/mv-harnais-liste.mjs": "9108afd797023a67b2b84ee72a80a42605fcc06191d4764c561291573159fdf2",
+    "scripts/tutos-couverture.json": "73beffc78ef87d241bc0ee81d46204fddf3692a9f910faa44445bee70361626c",
+    "scripts/typo-baseline.json": "90de062db518f61f4290d279a6f93d5dd6ee83e675f0b4bd0163c90aaea0a90e",
+    "src/app.js": "389de015db7a8e7fa5540cb571165346499e445a2e53457482a12cfc99b73959",
+    "src/jalons.js": "6df60ef1d1f6fa68fa26449c205869409d786f6070556f3d62f95e304e612664",
+    "src/styles.css": "405bfeebf1eeccf321c71d8fc2be26e6443a9e648ade765cd66a9c772237de08",
+    "src/utils.js": "bfaff991b44cb9642f25b20d827c8fd016ff43e0d108aa9ffb2d89d11f847184",
+    "scripts/mv-harnais-accv2.mjs": "37b5a9224f0cfc6196f11980b951ccc59c25b9b45f1707dd785a376589cf3508"
+  }
+}

@@ -27,17 +27,12 @@ function controles(A, H) {
   r.push(['l’ouvrier, le tractoriste et le saisonnier n’ont pas le Journal', essai(['ouvrier']) === false && essai(['tractoriste']) === false && essai(['saisonnier']) === false && essai(['ouvrier', 'tractoriste']) === false]);
   r.push(['sans utilisateur, pas de Journal', essai(null) === false && essai([]) === false]);
   const ar = fonction(A, 'applyRoles');
-  r.push(['applyRoles cache les deux onglets Journal, « Tout voir » et le lien Journal de « Ma semaine »',
-    /\['vng-ong-journal','vng-ong-journal-p','home-trv-tout','home-msem-journal'\]\.forEach[\s\S]{0,140}_jOk\?'':'none'/.test(ar) && /var _jOk=_mvJournalOuvert\(\)/.test(ar)]);
-  r.push(['applyRoles montre « Ma trace » à la place, chez l’ouvrier', /getElementById\('home-msem-trace'\)[\s\S]{0,80}_jOk\?'none':''/.test(ar)]);
+  r.push(['applyRoles cache les deux onglets Journal chez l’ouvrier', /\['vng-ong-journal','vng-ong-journal-p'\]\.forEach[\s\S]{0,140}_jOk\?'':'none'/.test(ar) && /var _jOk=_mvJournalOuvert\(\)/.test(ar)]);
+  r.push(['ACCV-3 (§418) : « Ma trace » est dans « Ma saison », pour tous', /onclick=\"openMaTrace\(\)\"/.test(fonction(A, 'renderHomeMoi'))]);
   r.push(['goTo renvoie le Journal vers les Parcelles chez l’ouvrier', /if\(page==='journal'&&!_mvJournalOuvert\(\)\) page='parcelles';/.test(fonction(A, 'goTo'))]);
   r.push(['switchVigneOng fait de même', /if\(dest==='journal'&&!_mvJournalOuvert\(\)\) dest='parcelles';/.test(fonction(A, 'switchVigneOng'))]);
-  const rc = fonction(A, 'renderHomeRaccourcis');
-  r.push(['l’Accueil de l’ouvrier n’a ni « + Journal » ni « Valider »',
-    /if\(_mvJournalOuvert\(\)&&typeof canWrite==='function'&&canWrite\(\)\)btns\.push\(\{i:'crayon',l:'\+ Journal'/.test(rc) && /if\(_mvJournalOuvert\(\)\)btns\.push\(\{i:'check',l:'Valider'/.test(rc)]);
-  r.push(['« Ma trace » reste un raccourci pour tous', /btns\.push\(\{i:'liste',l:'Ma trace',a:'trace'\}\)/.test(rc)]);
-  r.push(['index.html porte les cibles : #home-trv-tout, #home-msem-journal, #home-msem-trace (masqué d’office)',
-    H.includes('id="home-trv-tout"') && H.includes('id="home-msem-journal"') && /id="home-msem-trace"[^>]*style="display:none"/.test(H)]);
+  r.push(['ACCV-3 (§418) : l’Accueil n’a plus de raccourcis — ni « + Journal » ni « Valider », pour personne', !/function renderHomeRaccourcis\(/.test(A) && !/function homeShortcut\(/.test(A)]);
+  r.push(['index.html ne porte plus les cibles retirées (#home-trv-tout, #home-msem-journal, #home-msem-trace)', !H.includes('id="home-trv-tout"') && !H.includes('id="home-msem-journal"') && !H.includes('id="home-msem-trace"')]);
   return r;
 }
 let ok = 0, ko = 0;
@@ -52,7 +47,7 @@ console.log('\n── ARRIVEE-1 — contre-épreuve\n');
 const essais = [
   ['le tractoriste qui retrouve le Journal est vu', A0.replace("return r.indexOf('admin')>=0||r.indexOf('pilotage')>=0;", "return r.indexOf('admin')>=0||r.indexOf('pilotage')>=0||r.indexOf('tractoriste')>=0;"), H0, 'l’ouvrier, le tractoriste'],
   ['la garde de goTo retirée est vue', A0.replace("  if(page==='journal'&&!_mvJournalOuvert()) page='parcelles';", ''), H0, 'goTo renvoie'],
-  ['« Valider » revenu à l’Accueil de l’ouvrier est vu', A0.replace("if(_mvJournalOuvert())btns.push({i:'check'", "btns.push({i:'check'"), H0, 'l’Accueil de l’ouvrier'],
+  ['des raccourcis revenus à l’Accueil sont vus', A0 + '\nfunction renderHomeRaccourcis(){}', H0, 'ACCV-3 (§418) : l’Accueil n’a plus de raccourcis'],
 ];
 let rates = 0;
 for (const [nom, A, H, cible] of essais) {

@@ -105,7 +105,7 @@ function suite(S) {
   T('les deux lectures sont exposées (pilotage.js et le kit les appellent par window)', () => /window\._mvOrdreChantiers=_mvOrdreChantiers;/.test(sansCom(S.uti)) && /window\._mvChantiersCtx=_mvChantiersCtx;/.test(sansCom(S.app)));
   T('la mention a sa règle de feuille, aux jetons seuls', () => /\.mvk-note\{margin:0 0 var\(--e-1,4px\);font-size:var\(--pt-micro,11px\);color:var\(--texte-doux\);\}/.test(S.css));
   // ── l'accompagnement ──
-  T('l\u2019aide de l\u2019Accueil et du Pilotage dit la règle', () => S.uti.includes("['Avancement par tâche', \"range les tâches par date de début")
+  T('l\u2019aide de l\u2019Accueil et du Pilotage dit la règle', () => S.uti.includes('La carte range les tâches par date de début')   /* ACCV-2 (§417) : « La saison » reprend la règle de « Avancement par tâche » */
     && S.uti.includes('les chantiers (à faire ou en cours en haut, par date de début ; les terminés en bas)') && S.uti.includes('la tâche se range en tête des terminées, en vert'));
   T('le guide aussi (Vigne et Pilotage)', () => S.g04.includes('rangé par date de début, ce qui reste à faire en haut') && S.g04.includes('en tête des tâches finies, en vert')
     && S.g11.includes('par date de début ; les terminés en bas') && S.g11.includes("l'arrachage fini pour l'équipe passe en tête des terminées"));

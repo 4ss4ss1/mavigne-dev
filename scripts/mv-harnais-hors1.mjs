@@ -217,7 +217,7 @@ function suite(S) {
   T('E2 le pourcentage et les hectares ne comptent que les concernées : 50 %, 1,00 ha faits sur 2,00 ha', () => E1.html.includes('<div class="hpc-pct">50<small>')
     && E1.html.includes('1,00\u00a0ha faits sur 2,00\u00a0ha'));
   T('E3 la légende « Pas concernées » n’apparaît que s’il y en a', () => { const E3 = accueil(S, PE.map(p => Object.assign({}, p, { tachesExclues: [] })), STE, true, true);
-    return E1.html.includes('<span class="hpc-l-hors"><i></i>Pas concernées</span>') && !E3.html.includes('hpc-l-hors') && E3.html.includes('<div class="hpc-pct">75<small>'); });
+    return /<span class="hpc-l-hors"><i><\/i><b>\d+<\/b> pas concernées?<\/span>/.test(E1.html) && !E3.html.includes('hpc-l-hors') && E3.html.includes('<div class="hpc-pct">75<small>'); });
   T('E4 sans la règle (fonction absente) : la carte d’avant, rien ne plante', () => { const E4 = accueil(S, PE, STE, true, false); return !E4.html.includes('hpc-hors') && E4.html.includes('<div class="hpc-pct">75<small>'); });
   T('E5 sans priorité, la saison parcelle par parcelle : pas de fantôme', () => { const E5 = accueil(S, PE, STE, false, true); return !E5.html.includes('hpc-hors') && E5.html.includes('3 parcelles, 4,00\u00a0ha'); });
   // ── F. la feuille

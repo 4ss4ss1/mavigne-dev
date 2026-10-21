@@ -47,8 +47,8 @@ if (CONTRE) {
       'function openDP(nom){\n', 'function openDP(nom){\n  var __j=JOURNAL[JOURNAL.length].date.length;\n'],
     ['app.js', 'le correctif « NaN h » de la fiche parcelle retiré (Entreplantation sans trous)',
       "?(_plantParcTrous(p)*_plantMinTrou()/60):0):((t.hha||0)*(parseFloat(p.surface)||0));", "?(_plantParcTrous(p)*_plantMinTrou()/60):(t.hha*p.surface)):(t.hha*p.surface);"   /* COMPTE-1 (§353) : les trous prévus */],
-    ['app.js', 'le correctif « NaN h » de l\u2019Accueil retiré (tâche en temps réel sans barème)',
-      "    const _hha=(t.hha||0);\n", "    const _hha=t.hha;\n"],
+    ['app.js', 'le garde-fou d\u2019une tâche sans surface retiré dans « La saison » (« NaN % ») — ACCV-3 : l\u2019ancien total d\u2019heures de l\u2019Accueil est retiré',
+      "    var pct=sT>0?Math.round(sD/sT*100):0, d1=", "    var pct=Math.round(sD/sT*100), d1="],
     ['app.js', 'une erreur journalisée à chaque rendu de l\u2019Accueil',
       'function renderHome(){\n', "function renderHome(){\n  if(window.logError) window.logError({level:'error',cat:'accueil',msg:'contre-epreuve'});\n"],
     ['app.js', 'un « NaN » dans la liste du Journal',
@@ -158,7 +158,7 @@ for (const [lib, d] of [['vide', {}], ['fixe', FIXE]]) {
     // Une tâche « en temps réel » activée (Arrachage) : l'Accueil garde un total chiffré.
     poser({ taches: TACHES_DEF.concat([TACHES_TEMPS_REEL[0]]) });
     viderEcran(); G.switchVigneOng('home');
-    T('A · base fixe + Arrachage activé : l\u2019Accueil garde un total d\u2019heures chiffré', !/NaN/.test(ecran()) && /class="mv-n">\d/.test(ecran()));
+    T('A · base fixe + Arrachage activé : l\u2019Accueil garde ses chiffres (aucun NaN, un pourcentage chiffré)', !/NaN/.test(ecran()) && /\d(?:\u00a0|&nbsp;| )?%/.test(ecran()));
   }
 }
 

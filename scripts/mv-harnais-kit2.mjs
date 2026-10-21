@@ -1,7 +1,7 @@
 // HARNAIS — KIT-2 (§227) : l'Accueil et les Parcelles sur deux colonnes, et ce que les captures de Nico (03/10) montraient.
 //   node scripts/mv-harnais-kit2.mjs           → doit être vert
 //   node scripts/mv-harnais-kit2.mjs --contre  → chaque défaut réinjecté doit rougir
-// Exécute le VRAI _homeDragMove (src/app.js) sur une page factice en deux colonnes, puis en une seule ;
+// ACCV-3 (§418) : le glisser-déposer de l'Accueil est retiré — le harnais tient ce retrait ;
 // lit le reste dans les sources (grille, chiffres alignés, tuiles, barre de saison).
 import fs from 'fs'; import path from 'path'; import vm from 'vm';
 import { fileURLToPath } from 'url';
@@ -29,17 +29,7 @@ function glisse(S, blocs, cx, cy) {
 }
 function suite(S) {
   const out = []; const T = (n, c) => out.push([n, !!c]);
-  const DEUX = [['A', 0, 0], ['B', 450, 0], ['C', 0, 220], ['D', 450, 220]];
-  let g = glisse(S, DEUX, 650, 300);
-  T('deux colonnes : tiré dans la moitié haute du bloc de DROITE, il se range avant lui (D), pas avant son voisin de rangée',
-    g.log.join() === 'avant D');
-  g = glisse(S, DEUX, 200, 380);
-  T('… dans la moitié basse d\u2019un bloc de gauche, il se range après lui (C)', g.log.join() === 'après C');
-  T('… le bloc suit le doigt dans les deux sens (translate x et y)', /^translate\(|^$/.test(g.tr || '') && /translate\('\+dx\+'px,'\+dy\+'px\)/.test(S.app));
-  g = glisse(S, [['A', 0, 0], ['C', 0, 220]], 200, 250);
-  T('une colonne (téléphone) : la règle d\u2019avant — moitié haute de C → avant C', g.log.join() === 'avant C');
-  g = glisse(S, DEUX, 425, 300);
-  T('dans l\u2019allée entre deux colonnes, rien ne bouge', g.log.length === 0);
+  T('ACCV-3 (§418) : le glisser-déposer de l\u2019Accueil est retiré — l\u2019ordre suit la journée', !S.app.includes('function _homeDragMove(') && !S.app.includes('function _homeDndInit('));
   const css = S.css;
   T('l\u2019Accueil sur deux colonnes à partir de 1 024 px, EN RANGÉES : les blocs dans #home-cols, même hauteur par rangée, un bloc seul en pleine largeur (ALIGN-2, §237)',
     /@media \(min-width:1024px\)\{[\s\S]{0,1400}#home-cols\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\);column-gap:var\(--e-4,16px\);align-items:stretch;\}/.test(css) && /#home-cols > \.home-w-large,#home-cols > \.home-w-seul\{grid-column:1\/-1;\}/.test(css));   /* ALIGN-2 (§237) : en rangées */
@@ -48,8 +38,7 @@ function suite(S) {
     /#pList\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\);/.test(css) && /#pList > :not\(\.mv-c\)\{grid-column:1\/-1;\}/.test(css));
   T('les chiffres alignés partout (lnum de la Cormorant, par héritage)', /\nbody\{font-variant-numeric:lining-nums;\}/.test(css));
   T('les tuiles : « 17 % » et « 11,85 »', S.app.includes("elAvt.textContent=rienAMesurer?'\\u2014':pctGlobal+'\\u00a0%';")   /* REVUE-8 (§408) : « — » quand rien n'est à mesurer */ && S.app.includes("elSurf.textContent=surfTot>0?surfTot.toFixed(2).replace('.',','):"));
-  T('la barre de la saison et le travail le plus avancé disent l\u2019état (doré, vert fini)',
-    S.app.includes("const barCol=pctGlobal>=100?'var(--vert-med)':'var(--or)';") && S.app.includes("const colT=t.pct>=100?'var(--vert-med)':'var(--or)';"));
+  T('ACCV-3 (§418) : l\u2019ancienne carte de saison (sa barre, son travail le plus avancé) est retirée ; « La saison » la remplace', !S.app.includes('const barCol=pctGlobal') && S.app.includes('function renderHomeSaison('));
   return out;
 }
 let ok = 0, ko = 0;
@@ -59,13 +48,13 @@ if (!CONTRE) process.exit(ko ? 1 : 0);
 if (ko) process.exit(1);
 const sub = (k, a, b) => S => Object.assign({}, S, { [k]: S[k].replace(a, b) });
 const D = [
-  ['le glissement ne regarde plus que la hauteur', sub('app', 'if(cx<sr.left||cx>sr.right||cy<sr.top||cy>sr.bottom) continue;', 'if(cy<sr.top||cy>sr.bottom) continue;')],
+  ['le glisser-déposer revient', sub('app', 'function _homeRenderGrips(lay){', 'function _homeDragMove(e){}\nfunction _homeRenderGrips(lay){')],
   ['l\u2019Accueil revient sur une colonne', sub('css', '#home-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));', '#home-cols{display:block;grid-template-columns:none;')],
   ['les blocs restent sous la page, hors des colonnes', sub('app', 'cols.appendChild(el); // ré-appende', 'page.appendChild(el); // ré-appende')],
   ['la liste des parcelles revient sur une colonne', sub('css', '#pList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));', '#pList{display:block;')],
   ['les chiffres elzéviriens reviennent', sub('css', '\nbody{font-variant-numeric:lining-nums;}', '\n')],
   ['la surface reprend son point', sub('app', "elSurf.textContent=surfTot>0?surfTot.toFixed(2).replace('.',','):", 'elSurf.textContent=surfTot>0?surfTot.toFixed(2):')],
-  ['la barre de saison repart du pourcentage', sub('app', "const barCol=pctGlobal>=100?'var(--vert-med)':'var(--or)';", "const barCol=pctGlobal>=75?'var(--vert-med)':pctGlobal>=40?'var(--or)':'var(--orange)';")],
+  ['l\u2019ancienne barre de saison revient', sub('app', 'function renderHomeSaison(){', "const barCol=pctGlobal>=100?'var(--vert-med)':'var(--or)';\nfunction renderHomeSaison(){")],
 ];
 let rg = 0;
 D.forEach(([n, f]) => {

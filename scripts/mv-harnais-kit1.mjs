@@ -63,7 +63,7 @@ function suite(S) {
     && /window\.openOv\('ovGraph'\)/.test(S.uti) && /e\.agr = !\(opts && opts\.agrandir === false\)/.test(S.uti));
   T('la barre des cartes de parcelle dit l\u2019état (verte finie, dorée sinon), le dégradé reste à la carte',
     /var _fk=\(pct===100\)\?'var\(--vert-med\)':'var\(--or\)';/.test(S.app) && (S.app.match(/fill:_fk,/g) || []).length === 3 && !/fill:_gc,/.test(S.app));
-  T('Accueil et Pilotage appellent le même dessin', /window\._mvkAvancement\(data,ret\)/.test(S.app) && /window\._mvkAvancement\(d\.data,_pilRetards\(\)\)/.test(S.pil)
+  T('le Pilotage appelle le dessin commun ; l’ancienne carte de l’Accueil est retirée (ACCV-3)', !/function renderHomeCard\(/.test(S.app) && /window\._mvkAvancement\(d\.data,_pilRetards\(\)\)/.test(S.pil)
     && !/function _pilBarQte\(/.test(S.pil) && !/function tAbr\(/.test(S.uti) && !/\btAbr\b/.test(sansCom(S.app)));
   const css = S.css;
   T('les grands chiffres en chiffres proportionnels (« 12 % », plus « I 2 % »)', /\.pil-th-stat b,[^{]*\{font-variant-numeric:lining-nums proportional-nums;letter-spacing:0;\}/.test(css)

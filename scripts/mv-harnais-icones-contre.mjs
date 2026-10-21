@@ -161,7 +161,7 @@ epreuve('un symbole prive de sa marque d\u2019origine',
       meme chose de deux couleurs differentes. */
 epreuve('un badge d\u2019un ton inexistant',
   () => ecrire('src/app.js', lire('src/app.js')
-        .replace("_mvBadge('En cours','ambre')", "_mvBadge('En cours','orange')")),
+        .replace("_mvBadge('En cours','neutre')", "_mvBadge('En cours','orange')")),
   /ton inexistant/);
 
 /* 5quinquies. Une regle CSS qui vise un enfant par son rang dans un bloc que

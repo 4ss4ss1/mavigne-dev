@@ -3638,7 +3638,6 @@ function _mvApresEntree(){
     if(window._mvApplyTrialGating)window._mvApplyTrialGating();
     if(window.applyDomNom) window.applyDomNom();
     goHub();
-    showHomeLoader();
     fetchMeteo();
     clearInterval(_meteoInterval); _meteoInterval = setInterval(fetchMeteo, 15 * 60 * 1000); // anti-empilement
     if(navigator.onLine && window._fbLoadAfterAuth) {
@@ -4056,8 +4055,7 @@ function applyRoles(){
   // ★ ARRIVEE-1 (§337) — chez l'ouvrier, la Vigne n'a que deux onglets, l'Accueil ne renvoie plus au Journal,
   //   et « Ma semaine » mène à « Ma trace ».
   var _jOk=_mvJournalOuvert();
-  ['vng-ong-journal','vng-ong-journal-p','home-trv-tout','home-msem-journal'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display=_jOk?'':'none'; });
-  var _msT=document.getElementById('home-msem-trace'); if(_msT) _msT.style.display=_jOk?'none':'';
+  ['vng-ong-journal','vng-ong-journal-p'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display=_jOk?'':'none'; });
   // Tracteur readonly banner
   const isReadOnly=!isTractoriste();
   // Export PDF entretien masqué pour non-admins
@@ -4394,11 +4392,11 @@ function _wxStoreCard(g,store){
 function renderHomeMeteoCommunes(){
   var c=document.getElementById('home-meteo-communes'); if(!c) return;
   var groups=_communesActives();
-  // ALIGN-2 (§237) : la météo par secteur a son propre bloc, et UNE carte. Moins de deux communes : le bloc s'efface (son
-  //   voisin de rangée prend toute la largeur) et l'entrée « Communes » revient sous la météo 5 jours.
-  var wrapS=document.querySelector('.home-w[data-w="meteosect"]'), bulkE=document.getElementById('home-cm-bulk');
-  if(groups.length<2){ c.innerHTML=''; if(wrapS)wrapS.style.display='none'; if(bulkE)bulkE.style.display=''; if(typeof _homeRangees==='function')_homeRangees(); _homeSpans(); return; }
-  if(wrapS)wrapS.style.display=''; if(bulkE)bulkE.style.display='none';
+  // ★ ACCV-3 (§418) : une seule carte Météo — « Vignoble » (les cinq jours) ou « Secteurs » (cette carte, une ligne par commune).
+  //   Moins de deux communes : pas de bascule, la vue « Vignoble », et l'entrée « Communes » revient sous les cinq jours.
+  var seg=document.getElementById('home-meteo-vue'), bulkE=document.getElementById('home-cm-bulk');
+  if(groups.length<2){ c.innerHTML=''; if(seg)seg.style.display='none'; window._homeMeteoVue('vignoble'); if(bulkE)bulkE.style.display=''; return; }
+  if(seg)seg.style.display=''; if(bulkE)bulkE.style.display='none';
   var store=window.METEO_PAR_COMMUNE, ts=window._MV_WXCOM_TS||0;
   // Un relevé en mémoire qui ne couvre pas tous les secteurs actuels est périmé :
   // une commune vient d'être affectée, ou l'on revient d'un autre domaine.
@@ -4412,8 +4410,16 @@ function renderHomeMeteoCommunes(){
   groups.forEach(function(g){ html+=_wxStoreCard(g,store); });
   html+='</div><button type="button" class="cm-wx-pied" onclick="openCommunesBulk()">Communes &amp; m\u00e9t\u00e9o par secteur \u203A</button></div>';
   c.innerHTML=html;
-  if(typeof _homeRangees==='function')_homeRangees(); _homeSpans();
+  window._homeMeteoVue(window._homeMeteoVueEtat||'vignoble');
 }
+window._homeMeteoVue=function(v){
+  var seg=document.getElementById('home-meteo-vue'), m5=document.getElementById('home-meteo5'), mc=document.getElementById('home-meteo-communes');
+  var sect=(v==='secteurs')&&!!seg&&seg.style.display!=='none';
+  window._homeMeteoVueEtat=sect?'secteurs':'vignoble';
+  if(m5) m5.style.display=sect?'none':'';
+  if(mc) mc.style.display=sect?'':'none';
+  if(seg) seg.querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed',String(b.getAttribute('data-vue')===window._homeMeteoVueEtat)); });
+};
 
 // ════ AFFECTATION COMMUNE — édition d'une parcelle ════
 var _commEditNom='';
@@ -4599,15 +4605,7 @@ async function fetchMeteo(){
     try{localStorage.setItem('mavigne_meteo_cache',JSON.stringify({...meteoData,wind,rain,gelIdx:_gelIdx,gelTemp:_gelTemp,ts:Date.now()}));}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/fetchMeteo#4'); }
     // Badge météo mini dans le header
     _renderMeteoMini(emoji,temp,wind);
-    // Alerte gel
-    if(_gelIdx>=0){
-      const gelIdx=_gelIdx;
-      {
-        const jrs=['ce soir','demain','après-demain','dans 3 jours','dans 4 jours'];
-        const alertDiv=document.getElementById('home-gel-alert')||(()=>{const el=document.createElement('div');el.id='home-gel-alert';el.style.cssText='margin:8px 16px 0;background:#FFF8E8;border:1px solid #F0D080;border-radius:12px;padding:9px 14px;font-size:var(--pt-micro,12px);color:#7A5C10;display:flex;align-items:center;gap:8px;';const card=document.getElementById('home-stat-card');if(card&&card.parentNode)card.parentNode.insertBefore(el,card);return el;})();
-        alertDiv.innerHTML=`${_mvIcon('alerte',16)} Risque de gel ${jrs[gelIdx]||''} (${Math.round(d.daily.temperature_2m_min[gelIdx])}°C)`;
-      }
-    }
+    // ACCV-3 (§418) : l'alerte gel collée au-dessus de l'ancienne carte de saison est retirée — « À savoir » dit le gel annoncé.
     // Météo par secteur (≥2 communes) — sinon météo unique du domaine
     try{ if(_communesActives().length>=2){ _ensureDomaineCommune(); fetchMeteoCommunes(); } else { window.METEO_PAR_COMMUNE=null; renderHomeMeteoCommunes(); } }catch(eCom){ if(window._mvAvale) window._mvAvale(eCom,'app.js/fetchMeteo#5'); }
     // Enregistrer dans journal seulement si un vrai travail existe ce jour
@@ -5234,26 +5232,6 @@ function calcHeures(){
   return{data,totalReste:Math.round(totalReste),totalTotal:Math.round(totalTotal)};
 }
 
-function renderHeuresCard(containerId){
-  // KIT-1 (§226) : la carte dessine avec le kit commun (_mvkAvancement, utils.js) — le MÊME dessin que
-  //   Pilotage › La campagne : noms entiers, couleur d'état (fini, en cours, en retard = fenêtre passée sans
-  //   être fini), la longueur pour l'avancement, le détail en heures ou en surface. Avant : une grille de 72 px,
-  //   des noms abrégés et une couleur au pourcentage (orange sous 50 %).
-  const {data,totalReste}=calcHeures();
-  const c=document.getElementById(containerId); if(!c) return;
-  let ret={};
-  try{
-    const sa=(typeof getSaisonActive==='function')?getSaisonActive():null;
-    const cd=(window._chargeSaisonData&&sa)?window._chargeSaisonData(sa):null;
-    ret=(typeof window._mvkRetards==='function')?window._mvkRetards(cd):{};
-  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/renderHeuresCard'); }
-  c.innerHTML=`<div class="mv-hd" style="margin-bottom:14px">
-      <div><div class="mv-l">Avancement par t\u00e2che</div>
-        <div class="mv-t" style="margin-top:1px">${_escHtml(_visuSaison())}</div></div>
-      <div style="text-align:right;flex:none"><div class="mv-n">${totalReste}<span style="font-size:var(--pt-txt,13px)"> h</span></div>
-        <div class="mv-l">restantes</div></div></div>`
-    +'<div class="mvk-liste">'+((typeof window._mvkAvancement==='function')?window._mvkAvancement(data,ret):'')+'</div>';
-}
 
 
 /* ══ HUB — Thèmes saisonniers carte Vigne ══ */
@@ -5992,10 +5970,10 @@ window.toggleHiContrast=toggleHiContrast;
 // ════════════════════════════════
 // ALIGN-2 (§237) : l'ordre par défaut forme les rangées de la maquette validée le 04/10 — Ma part | la saison,
 //   l'avancement par tâche | la météo par secteur, la météo 5 jours | les travaux mécaniques. « meteosect » est né de « meteo5 ».
-const HOME_WIDGETS=['demarrage','mapart','avancement','heures','meteosect','meteo5','tracteur','raccourcis','masemaine','dre','travaux'];
+const HOME_WIDGETS=['demarrage','savoir','meteo5','saison','moi','trac','direct'];   // ★ ACCV-3 (§418) : les sept cartes de la maquette ; les blocs d'avant sont retirés
 // Widgets qui doivent apparaitre EN HAUT chez ceux qui ont deja personnalise leur accueil :
 // la regle generale ajoute les nouveaux widgets en QUEUE, ou celui-ci serait invisible.
-const HOME_NEW_TOP=['demarrage','mapart'];
+const HOME_NEW_TOP=['demarrage'];
 const HOME_PINNED='priorite'; // toujours en haut — seule la taille est modifiable
 let homeEditMode=false;
 function _homeLayoutKey(){return 'mavigne_home_layout_'+(window.TENANT_ID||'default')+'_'+((currentUser&&currentUser.nom)||'anon');}
@@ -6009,19 +5987,14 @@ function getHomeLayout(){
   if(!lay){try{var cfgD=window.CONFIG||{};if(cfgD.home_layout_default&&Array.isArray(cfgD.home_layout_default.order))lay=cfgD.home_layout_default;}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/getHomeLayout#3'); }}
   if(!lay||!Array.isArray(lay.order))lay={order:HOME_WIDGETS.slice(),hidden:[],compact:[]};
   lay={order:(lay.order||[]).slice(),hidden:(lay.hidden||[]).slice(),compact:(lay.compact||[]).slice(),large:(lay.large||[]).slice()};
-  // ALIGN-2 (§237) : « meteosect » est né de « meteo5 » — il prend sa place dans un ordre déjà réglé, et son état masqué.
-  if(lay.order.indexOf('meteosect')===-1&&lay.order.indexOf('meteo5')!==-1){
-    lay.order.splice(lay.order.indexOf('meteo5'),0,'meteosect');
-    if(lay.hidden.indexOf('meteo5')!==-1&&lay.hidden.indexOf('meteosect')===-1)lay.hidden.push('meteosect');
-  }
   HOME_WIDGETS.forEach(function(w){
     if(lay.order.indexOf(w)!==-1)return;
     if(HOME_NEW_TOP.indexOf(w)!==-1)lay.order.unshift(w); else lay.order.push(w); // futurs widgets
   });
   lay.order=lay.order.filter(function(w){return HOME_WIDGETS.indexOf(w)!==-1;});   // purge aussi 'priorite' des anciens layouts
+  lay.hidden=lay.hidden.filter(function(w){return w!=='savoir';});   // ACCV-2 (§417) : « À savoir » reste toujours affichée
   lay.hidden=lay.hidden.filter(function(w){return HOME_WIDGETS.indexOf(w)!==-1;});
-  lay.compact=lay.compact.filter(function(w){return HOME_WIDGETS.indexOf(w)!==-1||w===HOME_PINNED;});
-  lay.large=lay.large.filter(function(w){return HOME_WIDGETS.indexOf(w)!==-1;});
+  lay.compact=[]; lay.large=[];   // ACCV-3 (§418) : ni taille compacte ni pleine largeur — Personnaliser, c'est l'œil seul
   return lay;
 }
 function saveHomeLayout(lay){
@@ -6068,8 +6041,8 @@ function applyHomeLayout(){
     foot.style.display=(homeEditMode&&typeof isAdmin==='function'&&isAdmin())?'block':'none';
   }
   _homeRenderGrips(lay);
-  _homeDndInit();
-  _homeRangees(); _homeSpans();
+  _homeRangees();
+  if(typeof _accZones==='function') _accZones();   // ACCV-2 (§417) : la journée à gauche, ce qu'il faut savoir à droite
 }
 function _homeRenderGrips(lay){
   var page=document.getElementById('page-home');if(!page)return;
@@ -6079,45 +6052,21 @@ function _homeRenderGrips(lay){
     });
     if(!homeEditMode)return;
     var id=el.getAttribute('data-w');
-    var compact=lay.compact.indexOf(id)!==-1;
-    // bouton taille (commun épinglé + déplaçables)
-    var sz=document.createElement('button');sz.className='home-w-size'+(compact?' act':'');
-    sz.textContent=compact?'\u25AD':'\u25FC';
-    sz.title=compact?'Repasser en taille normale':'Taille compacte';
-    sz.setAttribute('onclick','homeWidgetSize(\''+id+'\')');
-    el.appendChild(sz);
-    if(id===HOME_PINNED){
-      var pinB=document.createElement('div');pinB.className='home-w-pin';window._mvSetIcon(pinB,'epingle',16);pinB.title='\u00c9pingl\u00e9 en haut';
+    // ACCV-3 (§418) : l'œil seul — ni glisser, ni flèches, ni taille, ni largeur. La carte du jour et « À savoir » restent toujours
+    //   affichées : une épingle le dit.
+    if(id===HOME_PINNED||id==='savoir'){
+      var pinB=document.createElement('div');pinB.className='home-w-pin';window._mvSetIcon(pinB,'epingle',16);pinB.title='Toujours affich\u00e9e';
       el.appendChild(pinB);
       return;
     }
-    var idx=lay.order.indexOf(id);
     var hidden=lay.hidden.indexOf(id)!==-1;
-    var grip=document.createElement('div');grip.className='home-w-grip';
-    grip.innerHTML='<div class="home-w-drag" title="Appui long puis glisser">\u283F</div>'
-      +'<button onclick="homeWidgetMove(\''+id+'\',-1)"'+(idx<=0?' disabled':'')+'>\u25B2</button>'
-      +'<button onclick="homeWidgetMove(\''+id+'\',1)"'+(idx>=lay.order.length-1?' disabled':'')+'>\u25BC</button>';
-    el.appendChild(grip);
     var eye=document.createElement('button');eye.className='home-w-eye';
     // ALIGN-3 (§238) : toujours un œil, barré quand le bloc est masqué (le panneau « interdit » ne se lisait pas comme un œil).
     window._mvSetIcon(eye, 'oeil', 16);eye.type='button';eye.classList.toggle('off',hidden);
     eye.title=hidden?'Afficher ce bloc':'Masquer ce bloc';eye.setAttribute('aria-label',eye.title);
     eye.setAttribute('onclick','homeWidgetToggle(\''+id+'\')');
     el.appendChild(eye);
-    // ALIGN-2 (§237) : demi ou pleine largeur, sur ordinateur (le bouton ne s'y montre qu'à partir de 1 024 px).
-    var large=lay.large.indexOf(id)!==-1;
-    var lg=document.createElement('button');lg.type='button';lg.className='home-w-larg'+(large?' act':'');
-    lg.textContent=large?'Demi-largeur':'Pleine largeur';lg.title=large?'Repasser en demi-largeur':'Pleine largeur (ordinateur)';
-    lg.setAttribute('aria-label',lg.title);
-    lg.setAttribute('onclick','homeWidgetLarge(\''+id+'\')');
-    el.appendChild(lg);
   });
-}
-function homeWidgetMove(id,dir){
-  var lay=getHomeLayout();var i=lay.order.indexOf(id);var j=i+dir;
-  if(i<0||j<0||j>=lay.order.length)return;
-  var t=lay.order[i];lay.order[i]=lay.order[j];lay.order[j]=t;
-  saveHomeLayout(lay);applyHomeLayout();
 }
 function homeWidgetToggle(id){
   var lay=getHomeLayout();var i=lay.hidden.indexOf(id);
@@ -6147,32 +6096,7 @@ function _homeRangees(){
 // ACC-1 (§276) : sur ordinateur, une grille de 12 colonnes (maquette v4). Deux blocs se partagent une rangée, 7 et 5
 //   colonnes puis 5 et 7 ; un bloc pleine largeur ou resté seul garde toute la rangée (classes de _homeRangees).
 //   ⚠️ Fonction à part, appelée juste après _homeRangees : le harnais ALIGN-2 extrait _homeRangees seule et vise sa fin.
-function _homeSpans(){
-  var cols=document.getElementById('home-cols'); if(!cols) return;
-  var paire=0, prem=null;
-  [].slice.call(cols.children).forEach(function(el){
-    if(!el.classList||!el.classList.contains('home-w')) return;
-    el.style.removeProperty('--hw-span');
-    if((el.classList.contains('home-w-off')&&!homeEditMode)||el.style.display==='none') return;
-    if(el.classList.contains('home-w-large')||el.classList.contains('home-w-seul')){ prem=null; return; }
-    if(!prem){ prem=el; return; }
-    var g=(paire%2)?[5,7]:[7,5]; prem.style.setProperty('--hw-span',String(g[0])); el.style.setProperty('--hw-span',String(g[1])); paire++; prem=null;
-  });
-}
-function homeWidgetLarge(id){
-  var lay=getHomeLayout();var i=lay.large.indexOf(id);
-  if(i>=0)lay.large.splice(i,1);else lay.large.push(id);
-  saveHomeLayout(lay);applyHomeLayout();
-  showToast(i>=0?'Bloc en demi-largeur':'Bloc en pleine largeur','#3D6B27');
-}
-window.homeWidgetLarge=homeWidgetLarge;
-function homeWidgetSize(id){
-  var lay=getHomeLayout();var i=lay.compact.indexOf(id);
-  if(i>=0)lay.compact.splice(i,1);else lay.compact.push(id);
-  saveHomeLayout(lay);applyHomeLayout();
-  _renderHomeWidgets();
-  showToast(i>=0?'Bloc en taille normale':'Bloc compact','#3D6B27');
-}
+
 function toggleHomeEdit(){
   homeEditMode=!homeEditMode;
   var page=document.getElementById('page-home');if(page)page.classList.toggle('home-edit',homeEditMode);
@@ -6192,74 +6116,11 @@ function homeSetDomainLayout(){
   saveData('config');
   showToast('Disposition du domaine enregistr\u00e9e','#3D6B27');
 }
-// ── Drag & drop appui long (poignée ⠿) ──
-var _homeDndReady=false,_homeDrag=null;
-function _homeDndInit(){
-  if(_homeDndReady)return;_homeDndReady=true;
-  document.addEventListener('pointerdown',function(e){
-    if(!homeEditMode)return;
-    var h=e.target.closest&&e.target.closest('.home-w-drag');if(!h)return;
-    var el=h.closest('.home-w');if(!el||el.classList.contains('home-w-pinned'))return;
-    e.preventDefault();
-    var timer=setTimeout(function(){_homeDragStart(el,e);},250);
-    var cancel=function(){clearTimeout(timer);document.removeEventListener('pointerup',cancel);document.removeEventListener('pointercancel',cancel);};
-    document.addEventListener('pointerup',cancel);
-    document.addEventListener('pointercancel',cancel);
-  });
-}
-function _homeDragStart(el,e){
-  if(navigator.vibrate)navigator.vibrate(40);
-  _homeDrag={el:el,y:e.clientY,x:e.clientX};
-  el.classList.add('home-w-dragging');
-  document.addEventListener('pointermove',_homeDragMove,{passive:false});
-  document.addEventListener('pointerup',_homeDragEnd);
-  document.addEventListener('pointercancel',_homeDragEnd);
-}
-function _homeDragMove(e){
-  // KIT-2 (§227) : sur ordinateur, l'Accueil passe sur DEUX colonnes. Le glissement suit donc le doigt dans les
-  //   deux sens (translate x/y), et la place se cherche dans le bloc qui contient le CENTRE du bloc tiré : moitié
-  //   haute → avant lui, moitié basse → après. Au téléphone (une colonne), c'est exactement la règle d'avant.
-  //   Avant : translateY seul, et le premier voisin de la RANGÉE gagnait — impossible de viser la colonne de droite.
-  if(!_homeDrag)return;
-  e.preventDefault();
-  var dx=e.clientX-(_homeDrag.x||e.clientX), dy=e.clientY-_homeDrag.y;
-  _homeDrag.el.style.transform='translate('+dx+'px,'+dy+'px)';
-  var page=document.getElementById('page-home');if(!page)return;
-  var sibs=[].slice.call(page.querySelectorAll('.home-w:not(.home-w-dragging):not(.home-w-pinned)'));
-  var r=_homeDrag.el.getBoundingClientRect();
-  var cx=r.left+r.width/2, cy=r.top+r.height/2;
-  for(var k=0;k<sibs.length;k++){
-    var sr=sibs[k].getBoundingClientRect();
-    if(cx<sr.left||cx>sr.right||cy<sr.top||cy>sr.bottom) continue;
-    if(cy<sr.top+sr.height/2) sibs[k].before(_homeDrag.el); else sibs[k].after(_homeDrag.el);
-    _homeDrag.el.style.transform=''; _homeDrag.y=e.clientY; _homeDrag.x=e.clientX;
-    break;
-  }
-}
-function _homeDragEnd(){
-  if(!_homeDrag)return;
-  _homeDrag.el.style.transform='';
-  _homeDrag.el.classList.remove('home-w-dragging');
-  var page=document.getElementById('page-home');
-  var lay=getHomeLayout();
-  if(page){
-    lay.order=[].slice.call(page.querySelectorAll('.home-w')).map(function(n){return n.getAttribute('data-w');})
-      .filter(function(id){return HOME_WIDGETS.indexOf(id)!==-1;});
-  }
-  saveHomeLayout(lay);
-  _homeRenderGrips(lay);
-  _homeRangees(); _homeSpans();
-  if(navigator.vibrate)navigator.vibrate(60);
-  showToast('Ordre enregistr\u00e9','#3D6B27');
-  _homeDrag=null;
-  document.removeEventListener('pointermove',_homeDragMove);
-  document.removeEventListener('pointerup',_homeDragEnd);
-  document.removeEventListener('pointercancel',_homeDragEnd);
-}
+// ACCV-3 (§418) : le glisser-déposer des blocs est retiré — l'ordre suit la journée.
 window.toggleHomeEdit=toggleHomeEdit;
-window.homeWidgetMove=homeWidgetMove;
+
 window.homeWidgetToggle=homeWidgetToggle;
-window.homeWidgetSize=homeWidgetSize;
+
 window.homeSetDomainLayout=homeSetDomainLayout;
 window.applyHomeLayout=applyHomeLayout;
 
@@ -6465,8 +6326,6 @@ function goTo(page){
 
 // ════ ACCUEIL ════
 let homeCardMode = 0; // 0 = avancement global, 1 = tâche en cours — mémorisé par utilisateur (v4.34)
-function _homeCardModeKey(){return 'mavigne_card_mode_'+(window.TENANT_ID||'default')+'_'+((currentUser&&currentUser.nom)||'anon');}
-function _homeLoadCardMode(){try{var v=parseInt(localStorage.getItem(_homeCardModeKey())||'0',10);return (v===1)?1:0;}catch(e){return 0;}}
 /* ★ CONF-4 (05/09/2026) — DERNIER NOM DE CLIENT SORTI DU CODE.
    Ce repli affichait le nom du domaine de référence chez TOUS les domaines, et
    dans un dépôt public. Comme le KML, il ne pouvait partir qu'après vérification
@@ -6510,69 +6369,7 @@ function getHomeCardData(){
   return {pctGlobal, rienAMesurer, tacheLaMoinsAvancee, tacheLaPlusAvancee, parcActives};
 }
 
-function renderHomeCard(){
-  const {pctGlobal, rienAMesurer, tacheLaPlusAvancee, parcActives} = getHomeCardData();
-  const saison = getSaisonActive();
-  const {totalReste} = calcHeures();
-  const _picto=document.getElementById('home-stat-picto');
-  const _chip=document.getElementById('home-stat-chip');
-  const _content=document.getElementById('home-stat-content');
-  // KIT-2 (§227) : la barre dit l'ÉTAT (kit KIT-1) — dorée en cours, verte finie. Avant : orange sous 40 %.
-  const barCol=pctGlobal>=100?'var(--vert-med)':'var(--or)';
-  if(homeCardMode===0){
-    // ── Charte DS-2 ── Le pourcentage est LE sujet : il passe en heros, la
-    //   jauge se cale a cote, et le contexte descend en etiquette douce.
-    _picto.textContent='';
-    _chip.textContent='';
-    _content.innerHTML=`<div class="mv-hd"><div><div class="mv-l">Avancement de la saison</div>
-        <div class="mv-t" style="margin-top:1px">${_escHtml(_visuSaison())}</div></div>
-        ${rienAMesurer?_mvBadge('\u00c0 venir','neutre'):_mvBadge(pctGlobal>=100?'Termin\u00e9e':'En cours',pctGlobal>=100?'vert':'ambre')}</div>
-      <div style="display:flex;align-items:flex-end;gap:14px;margin-top:14px">
-        <div class="mv-hn">${rienAMesurer?'\u2014':pctGlobal+'<span style="font-size:22px;font-weight:600">%</span>'}</div>
-        <div style="flex:1;padding-bottom:7px">
-          <div class="mv-track"><div class="mv-fill" style="width:${pctGlobal}%;background:${barCol}"></div></div>
-          <div class="mv-l" style="margin-top:6px">${parcActives.length} parcelles \u00b7 ${parcActives.reduce((s,p)=>s+(parseFloat(p.surface)||0),0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})} ha</div>
-        </div></div>`;
-  } else {
-    const t=tacheLaPlusAvancee;
-    _picto.textContent='';
-    _chip.textContent='';
-    if(t){
-      const colT=t.pct>=100?'var(--vert-med)':'var(--or)';   // KIT-2 : l'état, pas le pourcentage
-      _content.innerHTML=`<div class="mv-hd"><div><div class="mv-l">Le travail le plus avanc\u00e9</div>
-          <div class="mv-t" style="margin-top:1px">${_escHtml(tNom(t.nom))}</div></div>
-          ${_mvBadge('En cours','ambre')}</div>
-        <div style="display:flex;align-items:flex-end;gap:14px;margin-top:14px">
-          <div class="mv-hn">${t.pct}<span style="font-size:22px;font-weight:600">%</span></div>
-          <div style="flex:1;padding-bottom:7px">
-            <div class="mv-track"><div class="mv-fill" style="width:${t.pct}%;background:${colT}"></div></div>
-            <div class="mv-l" style="margin-top:6px">${t.val}/${t.total} parcelles faites</div>
-          </div></div>`;
-    } else {
-      // ⚠️ Pas de coche verte geante : la saison finie se dit par le mot et le
-      //   badge, pas par un pictogramme de 38 px.
-      _content.innerHTML=`<div class="mv-hd"><div><div class="mv-l">Tous les travaux de la saison</div>
-          <div class="mv-t" style="margin-top:1px">${_escHtml(_visuSaison())}</div></div>
-          ${_mvBadge('Termin\u00e9e','vert')}</div>
-        <div style="display:flex;align-items:flex-end;gap:14px;margin-top:14px">
-          <div class="mv-hn" style="color:var(--vert-med)">100<span style="font-size:22px;font-weight:600">%</span></div>
-          <div style="flex:1;padding-bottom:7px"><div class="mv-track"><div class="mv-fill" style="width:100%;background:var(--vert-med)"></div></div>
-          <div class="mv-l" style="margin-top:6px">Plus rien en attente.</div></div></div>`;
-    }
-  }
-  // Animation tap
-  const card=document.getElementById('home-stat-card');
-  card.style.transition='transform 0.15s';
-  card.style.transform='scale(0.96)';
-  setTimeout(()=>{card.style.transform='scale(1)';},150);
-  updateHomeDots();
-}
 
-function toggleHomeCard(){
-  homeCardMode = (homeCardMode+1) % 2;
-  try{localStorage.setItem(_homeCardModeKey(),String(homeCardMode));}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/toggleHomeCard'); }
-  renderHomeCard();
-}
 
 function togglePrioPill(){
   const detail=document.getElementById('home-prio-detail');
@@ -6609,21 +6406,6 @@ function _hideAppLoader() {
 }
 
 // ── Indicateur chargement accueil ──
-function showHomeLoader() {
-  var el = document.getElementById('home-stat-content');
-  if(!el) return;
-  el.innerHTML = '<div class="mv-sk sk-ln" style="width:44%;height:34px;border-radius:8px;margin:2px 0"></div>'
-    + '<div class="hv2-prog-track" aria-hidden="true" style="margin:8px 0 6px"></div>'
-    + '<div class="mv-sk sk-ln h13" style="width:56%"></div>'
-    + '<div class="mv-sk sk-ln h9" style="width:40%;margin-top:6px"></div>';
-  // Ajouter l'animation si pas déjà présente
-  if(!document.getElementById('spin-style')) {
-    var s = document.createElement('style');
-    s.id = 'spin-style';
-    s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
-    document.head.appendChild(s);
-  }
-}
 
 // ACC-2 (§277) : LA PRIORITÉ ÉPINGLÉE AU DESSIN DE LA MAQUETTE V4 — la tâche du moment, son avancement, les parcelles à leur
 //   surface (fait, en cours, à faire ; un appui ouvre sa fiche) et, à droite sur ordinateur, les trois chiffres du domaine.
@@ -6644,6 +6426,14 @@ function _homeForme(f,r){
   if(!/^[0-9MLZ .-]+$/.test(d)) return null;   // un point illisible (NaN) : pas de dessin plutôt qu'un dessin faux
   return { fw:Math.sqrt(s*a).toFixed(3), fh:Math.sqrt(s/a).toFixed(3), vb:'0 0 '+x(f.w)+' '+x(f.h), d:d };
 }
+// ★★ ACCV-1 (§416) — LA CARTE DU JOUR AU DESSIN DE LA MAQUETTE DE L'ACCUEIL (Nico, 21/10 : « go comme la maquette »).
+//   La tâche du jour en grand (police des titres), le message de l'administrateur, l'avancement en hectares et ce qui a avancé
+//   aujourd'hui et hier (la petite victoire), l'équipe, la parcelle en cours, la fin prévue, puis « Aller aux parcelles » et
+//   « Pourquoi ? ». À droite sur ordinateur, dessous au téléphone : les parcelles à leur forme (FORME-2), avec leurs rangs, aux
+//   couleurs franches d'ETATS-1. Un délai de rentrée en cours passe en rouge en tête de carte et sur les parcelles concernées.
+//   Sans priorité : les chantiers du moment (PRIO-1) ; sans rien : une carte qui dit quoi faire. Les identifiants et les gestes
+//   d'avant restent (#home-prio-corps, #home-prio-mos, openDP) ; « Équipes du jour » porte data-tuto="home.eqj" (TUTO-1).
+//   Tout ce qui vient d'ailleurs est lu SI la fonction existe : la carte se dessine aussi dans les harnais (ACC-2, FORME-2, HORS-1).
 function _homePrioCarte(){
   var w=document.querySelector('#page-home .home-w[data-w="priorite"]'); if(!w)return;
   w.classList.add('hpc');
@@ -6651,7 +6441,15 @@ function _homePrioCarte(){
   var kp=document.getElementById('home-kpis'); if(kp&&kp.parentNode!==w)w.insertBefore(kp,eq||null);
   var c=document.getElementById('home-prio-corps');
   if(!c){ c=document.createElement('div'); c.id='home-prio-corps'; c.className='hpc-corps'; w.insertBefore(c,kp||eq||null); }
-  var its=(typeof _prioItems==='function')?_prioItems():[], t=its.length?its[0].t:'';
+  var its=(typeof _prioItems==='function')?_prioItems():[], t=its.length?its[0].t:'', it=its[0]||null;
+  c.className='hpc-corps'+(((PARCELLES||[]).some(function(p){ return p&&p.statut!=='Arrachee'; }))?'':' hpc-sans-pan');   // aucune parcelle : pas de panneau, une seule colonne
+  var me=(typeof currentUser!=='undefined'&&currentUser&&currentUser.nom)||'';
+  if(t&&me&&typeof _prioForMember==='function'){ var _pm=_prioForMember(me); if(_pm&&_pm.t){ t=_pm.t; it=_pm; } }   // plusieurs priorités : chacun voit la sienne
+  var adm=(typeof _mvMoiAdmin==='function')&&!!_mvMoiAdmin();
+  var ico=(typeof _mvIcon==='function')?_mvIcon:function(){ return ''; };
+  var J=(typeof JOURNAL!=='undefined'&&JOURNAL)||[], MB=(typeof MEMBRES!=='undefined'&&MEMBRES)||[];
+  var noms=function(l){ l=(l||[]).filter(Boolean); return l.length<2?(l[0]||''):l.slice(0,-1).join(', ')+' et '+l[l.length-1]; };
+  var avt=function(n){ var m=MB.find(function(x){ return x&&x.nom===n; }), k=(m&&m.couleur)||''; return '<span class="hpc-avt"'+(/^#[0-9A-Fa-f]{3,8}$/.test(k)?' style="--c:'+k+'"':'')+' aria-hidden="true">'+_escHtml(String(n||'?').charAt(0).toUpperCase())+'</span>'; };
   var act=(PARCELLES||[]).filter(function(p){return p&&p.statut!=='Arrachee';});
   var etat=function(p){
     if(t&&typeof window._mvTacheConcerne==='function'&&!window._mvTacheConcerne(p,t)) return 'hors';   // HORS-1 (§322) : tâche désactivée sur la parcelle ou pas choisie pour la campagne — sa fiche le dit
@@ -6669,20 +6467,286 @@ function _homePrioCarte(){
   //   sélection et rendait la main sans rien ouvrir — le défaut que FORME-1 (§301c) a corrigé dans le cockpit, pas ici.
   var lireForme=(typeof window._mvParcForme==='function')?window._mvParcForme:function(){ return null; };
   var avecContours=act.some(function(p){ return !!lireForme(p.nom); });
+  // Les rangs de vigne dans une forme : un trait vertical tous les ~3,4 px à l'écran (la forme mesure ~62 px par unité de
+  //   --fw, voir la feuille), coupé exactement au contour — les intersections triées vont par paires (une forme en équerre aussi).
+  var rangs=function(fo,fw){
+    if(!fo||!Array.isArray(fo.rings)||!(fo.w>0)||!(fo.h>0)) return '';
+    var n=Math.max(3,Math.min(60,Math.floor((parseFloat(fw)||0)*62/3.4))), pas=fo.w/n, out='', x=function(v){ return String(Math.round(v*10)/10); };
+    for(var k=1;k<n;k++){
+      var X=k*pas, ys=[];
+      fo.rings.forEach(function(q){ for(var i=0;i<q.length;i++){ var a=q[i], b=q[(i+1)%q.length]; if((a[0]<=X&&b[0]>X)||(b[0]<=X&&a[0]>X)) ys.push(a[1]+(X-a[0])*(b[1]-a[1])/(b[0]-a[0])); } });
+      ys.sort(function(u,v){ return u-v; });
+      for(var m=0;m+1<ys.length;m+=2){ if(ys[m+1]-ys[m]>fo.h*0.06&&isFinite(ys[m])&&isFinite(ys[m+1])) out+='<line x1="'+x(X)+'" y1="'+x(ys[m])+'" x2="'+x(X)+'" y2="'+x(ys[m+1])+'"/>'; }
+    }
+    return out?'<g class="hpc-rg">'+out+'</g>':'';
+  };
+  // Les délais de rentrée en cours : la même règle que la carte « Délai de rentrée » (_homeDreLignes).
+  var dreL=[]; try{ if(typeof _homeDreLignes==='function') dreL=_homeDreLignes(new Date()).filter(function(r){ return r.diffH>0; }); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_homePrioCarte#dre'); }
+  var dreN={}, dreTout=false; dreL.forEach(function(r){ var l=(r.g&&r.g.parcelles)||[]; if(!l.length) dreTout=true; l.forEach(function(n){ dreN[n]=1; }); });
+  var nb={fait:0,cours:0,afaire:0,hors:0};
   var mos=act.slice().sort(function(a,b){return rang[etat(a)]-rang[etat(b)]||_homeSurf(b)-_homeSurf(a);}).map(function(p){
-    var e=etat(p), r=_homeSurf(p)/maxS, f=_homeForme(lireForme(p.nom),r), lib=p.nom+', '+_pvSurfFr(p.surface)+' ha'+(e==='hors'?', pas concern\u00e9e':'');   // HORS-1 : le titre le dit
-    return '<button type="button" class="hpc-p'+(f?' hpc-fo':(avecContours?' hpc-sans':''))+' hpc-'+e+'" style="'+(f?'--fw:'+f.fw+';--fh:'+f.fh:'--s:'+Math.sqrt(r).toFixed(3))+'" data-nom="'+_escAttr(p.nom)+'" title="'+_escAttr((f||!avecContours)?lib:lib+', pas de contour enregistr\u00e9')+'" aria-label="'+_escAttr(p.nom)+'" onclick="openDP(this.dataset.nom)">'
-      +(f?'<svg viewBox="'+f.vb+'" aria-hidden="true" focusable="false"><path d="'+f.d+'"/></svg>':'')+'</button>';
+    var e=etat(p), r=_homeSurf(p)/maxS, fo=lireForme(p.nom), f=_homeForme(fo,r), dre=dreTout||!!dreN[p.nom], lib=p.nom+', '+_pvSurfFr(p.surface)+' ha'+(e==='hors'?', pas concern\u00e9e':'')+(dre?', rentr\u00e9e interdite':'');   // HORS-1 : le titre le dit
+    nb[e]=(nb[e]||0)+1;
+    return '<button type="button" class="hpc-p'+(f?' hpc-fo':(avecContours?' hpc-sans':''))+' hpc-'+e+(dre?' hpc-dre':'')+'" style="'+(f?'--fw:'+f.fw+';--fh:'+f.fh:'--s:'+Math.sqrt(r).toFixed(3))+'" data-nom="'+_escAttr(p.nom)+'" title="'+_escAttr((f||!avecContours)?lib:lib+', pas de contour enregistr\u00e9')+'" aria-label="'+_escAttr(p.nom)+'" onclick="openDP(this.dataset.nom)">'
+      +(f?'<svg viewBox="'+f.vb+'" aria-hidden="true" focusable="false">'+rangs(fo,f.fw)+'<path d="'+f.d+'"/></svg>':'')
+      +(e==='cours'?'<span class="hpc-ici" aria-hidden="true"></span>':'')+(dre?'<span class="hpc-dre-i" aria-hidden="true">'+ico('interdit',16)+'</span>':'')+'</button>';
   }).join('');
-  var meta=t?(_homeHa(fait)+'\u00a0ha faits sur '+_homeHa(surf)+'\u00a0ha'+((its[0].equipe&&its[0].equipe.length)?', \u00e9quipe\u00a0: '+_escHtml(its[0].equipe.join(', ')):''))
-            :(act.length+' parcelle'+(act.length>1?'s':'')+', '+_homeHa(surf)+'\u00a0ha');
-  // Sans tâche prioritaire, le pourcentage de la saison est déjà dans les chiffres de droite : la carte ne montre que les parcelles.
-  c.innerHTML=(t?'<div class="hpc-chiffres"><div class="hpc-pct">'+pct+'<small>\u00a0%</small></div>'
-    +'<div class="hpc-meta"><b>Priorit\u00e9 du moment\u00a0: '+_escHtml(tNom(t))+'</b><span>'+meta+'</span></div></div>'
-    +'<div class="hpc-bar"><i style="--p:'+pct+'%"></i></div>'
-    :'<div class="hpc-meta"><b>La saison, parcelle par parcelle</b><span>'+meta+'</span></div>')
-    +(act.length?'<div class="hpc-mos" id="home-prio-mos" aria-label="Les parcelles, \u00e0 leur forme et \u00e0 leur surface">'+mos+'</div>'
-      +'<div class="hpc-leg"><span class="hpc-l-fait"><i></i>Fait</span><span class="hpc-l-cours"><i></i>En cours</span><span class="hpc-l-afaire"><i></i>\u00c0 faire</span>'+(nHors?'<span class="hpc-l-hors"><i></i>Pas concern\u00e9es</span>':'')+'</div>':'');
+  // Sans priorité : les chantiers du moment (PRIO-1, _mvTacheDuMoment) ; sans rien du tout : la carte dit quoi faire.
+  var M=null, lst=[];
+  if(!t){ try{ if(typeof _mvPartTache==='function'){ var _o={}; _mvPartTache(_o); M=_o.M||null; } }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_homePrioCarte#moment'); } lst=(M&&Array.isArray(M.taches))?M.taches.slice(0,2):[]; }
+  var sans=!t&&lst.length>0, vide=!t&&!lst.length;
+  var iso=(typeof _mvToday==='function')?_mvToday():'', hier=(typeof _mvISO==='function')?_mvISO(new Date(Date.now()-864e5)):'';
+  var gain=function(T,d){ if(!T||!d) return 0; var vus={}, s=0; J.forEach(function(j){ if(!j||j.meteo||j.tache!==T||j.statut!=='Valid\u00e9'||j.date!==d||!j.parcelle||vus[j.parcelle]) return; vus[j.parcelle]=1; var p=act.find(function(x){ return x.nom===j.parcelle; }); if(p) s+=_homeSurf(p); }); return s; };
+  var sur=function(lib,ic){ return '<div class="hpc-sur">'+ico(ic,16)+'<span>'+lib+'</span>'+(adm?'<button type="button" class="hpc-lien" onclick="openPriorityEdit()">'+ico('crayon',16)+'<span>'+(t?'Modifier':'Fixer')+'</span></button>':'')+'</div>'; };
+  var pm=(typeof priorityMessage!=='undefined'&&priorityMessage)?String(priorityMessage).trim():'';
+  var mot=pm?('<div class="hpc-mot">'+ico('bulle',16)+'<div><p>\u00ab\u00a0'+_escHtml(pm)+'\u00a0\u00bb</p><small>Le message de l\u2019administrateur</small></div></div>'):'';
+  var gA=gain(t,iso), gH=gain(t,hier);
+  var av=t?('<div class="hpc-av"><div class="hpc-pct">'+pct+'<small>\u00a0%</small></div><span class="hpc-ha">'+_homeHa(fait)+'\u00a0ha faits sur '+_homeHa(surf)+'\u00a0ha</span>'
+      +(gA>0?'<span class="hpc-gain">'+ico('pousse',16)+'<span>+'+_homeHa(gA)+'\u00a0ha aujourd\u2019hui</span></span>':'')+'</div>'
+      +'<div class="hpc-bar"><i style="--p:'+pct+'%"></i></div>'
+      +'<div class="hpc-sous"><span>'+nb.fait+' parcelle'+(nb.fait>1?'s':'')+' faite'+(nb.fait>1?'s':'')+' sur '+(act.length-nHors)+'</span>'+(gH>0?'<span>hier +'+_homeHa(gH)+'\u00a0ha</span>':'')+'</div>'):'';
+  var duo='';
+  if(sans&&typeof _mvPartCalc==='function') duo='<div class="hpc-duo">'+lst.map(function(T){ var P=_mvPartCalc(T,me)||{}, q=P.pct||0;
+      return '<div class="hpc-duo-c"><span class="hpc-lbl">'+_escHtml(tNom(T))+'</span><span class="hpc-duo-v">'+q+'<small>\u00a0%</small></span><span class="hpc-s">'+(P.restN?P.restN+' parcelle'+(P.restN>1?'s restent':' reste'):'plus rien \u00e0 faire')+'</span><div class="hpc-bar"><i style="--p:'+q+'%"></i></div></div>'; }).join('')+'</div>';
+  var tache=t?_escHtml(tNom(t)):'';
+  var gauche=t?(sur('Priorit\u00e9 du jour','eclair')+'<h2 class="hpc-titre">'+tache+'</h2>'+mot+av)
+    :sans?(sur('Les chantiers du moment','calendrier')+'<h2 class="hpc-titre">'+_escHtml(tNom(lst[0]))+(lst[1]?' et '+_escHtml(tNom(lst[1]).toLowerCase()):'')+'<small>Pas de priorit\u00e9 fix\u00e9e aujourd\u2019hui\u00a0: voici ce que pr\u00e9voit le calendrier de la campagne.</small></h2>'+mot+duo)
+    :(sur('Priorit\u00e9 du jour','eclair')+'<h2 class="hpc-titre">Pas encore de priorit\u00e9<small>'+(adm?'Fixez la priorit\u00e9 du jour\u00a0: l\u2019\u00e9quipe la verra ici en ouvrant l\u2019appli, avec son \u00e9quipe et l\u2019avancement.':'D\u00e8s qu\u2019elle est fix\u00e9e, vous la verrez ici avec votre \u00e9quipe et l\u2019avancement.')+'</small></h2>'+mot);
+  // Les trois faits : l'équipe (l'administrateur règle les équipes du jour d'ici), où elle est, quand ce sera fini.
+  var eqBtn=function(){ var TJ=(typeof window._mvEqJour==='function'&&iso)?window._mvEqJour(iso):null, n=(TJ&&TJ.length)||0;
+    return '<button type="button" class="hpc-fx hpc-fx-b" data-tuto="home.eqj" onclick="openEqJour()"><span class="hpc-lbl">'+ico('equipe',16)+'<span>\u00c9quipes du jour\u00a0: '+(n?n+' \u00e9quipe'+(n>1?'s':''):'tout le monde ensemble')+'</span></span><span class="hpc-val"><span>'+(n?_escHtml(TJ.map(function(x){ return noms(x); }).join(' \u00b7 ')):'Une seule \u00e9quipe')+'</span></span><span class="hpc-s">modifier</span></button>'; };
+  var faits='';
+  if(t||sans){
+    var f1;
+    if(adm) f1=eqBtn();
+    else {
+      var eqj=(me&&iso&&typeof window._mvEqDe==='function')?window._mvEqDe(me,iso):null, eqL=(eqj&&eqj.length)?eqj:((it&&it.equipe&&it.equipe.length)?it.equipe:null), trn='';
+      try{ if(eqj&&typeof window._mvEqJour==='function'&&typeof _mvEqBrut==='function'&&typeof window._mvTourneesLues==='function'){ var TJ2=window._mvEqJour(iso)||[], k=-1; TJ2.forEach(function(x,i){ if(x.indexOf(me)>=0) k=i; }); var br=k>=0?(_mvEqBrut(iso)[k]||{}):{}; if(br.t){ var o=window._mvTourneesLues().find(function(x){ return String(x.id)===String(br.t); }); if(o) trn=o.nom; } } }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_homePrioCarte#tournee'); }
+      f1='<div class="hpc-fx"><span class="hpc-lbl">'+ico('equipe',16)+'<span>Votre \u00e9quipe</span></span><span class="hpc-val">'+(eqL?eqL.map(avt).join('')+'<span>'+_escHtml(noms(eqL))+'</span>':'<span>Toute l\u2019\u00e9quipe</span>')+'</span><span class="hpc-s">'+(trn?'tourn\u00e9e \u00ab\u00a0'+_escHtml(trn)+'\u00a0\u00bb':(eqj?'\u00e9quipe du jour':'pas d\u2019\u00e9quipe indiqu\u00e9e'))+'</span></div>';
+    }
+    var ici=t?act.filter(function(p){ return etat(p)==='cours'; }):[], f2;
+    if(ici.length){
+      var jc=J.filter(function(j){ return j&&!j.meteo&&j.tache===t&&j.statut==='En cours'&&ici.some(function(p){ return p.nom===j.parcelle; }); });
+      var mien=jc.filter(function(j){ return me&&(j.qui===me||(j.membresEquipe||[]).indexOf(me)>=0); }), jj=(mien.length?mien:jc).slice(-1)[0]||null;
+      var pI=jj?(ici.find(function(p){ return p.nom===jj.parcelle; })||ici[0]):ici[0], hI=(jj&&typeof _hvHeure==='function')?_hvHeure(jj):'';
+      f2='<div class="hpc-fx"><span class="hpc-lbl"><i class="hpc-pouls" aria-hidden="true"></i><span>En ce moment</span></span><span class="hpc-val"><span>'+_escHtml(pI.nom)+'</span></span><span class="hpc-s">'+(hI?'depuis '+hI.replace(':','\u00a0h\u00a0'):'commenc\u00e9e')+(ici.length>1?', et '+(ici.length-1)+' autre'+(ici.length>2?'s':'')+' en cours':'')+'</span></div>';
+    } else {
+      var rN=t?nb.afaire:0, rS=Math.max(0,surf-fait);
+      f2='<div class="hpc-fx"><span class="hpc-lbl">'+ico('carte',16)+'<span>Reste \u00e0 faire</span></span><span class="hpc-val"><span>'+(t?rN+' parcelle'+(rN>1?'s':''):'\u2014')+'</span></span><span class="hpc-s">'+(t?_homeHa(rS)+'\u00a0ha':'voir les parcelles')+'</span></div>';
+    }
+    var T0=t||lst[0], P0=(T0&&typeof _mvPartCalc==='function')?_mvPartCalc(T0,me):null, fin=(P0&&P0.fin&&typeof _mvPartDate==='function')?_mvPartDate(P0.fin):'';
+    var f3='<div class="hpc-fx"><span class="hpc-lbl">'+ico('calendrier',16)+'<span>'+(t?'Fin pr\u00e9vue':'Fin de la '+_escHtml(tNom(T0).toLowerCase()))+'</span></span><span class="hpc-val"><span>'+(fin?'vers le '+fin:'\u2014')+'</span></span><span class="hpc-s">'+(fin?'au rythme des 15 derniers jours':(P0&&P0.rest>0?'pas encore de rythme sur 15 jours':'rien en attente'))+'</span></div>';
+    faits='<div class="hpc-faits">'+f1+f2+f3+'</div>';
+  }
+  var pq=(t&&window._mvPqBtn)?window._mvPqBtn(t,'vigne'):'';
+  var gestes='<div class="hpc-act">'+((vide&&adm)?'<button type="button" class="hpc-cta" onclick="openPriorityEdit()">'+ico('eclair',16)+'<span>Fixer la priorit\u00e9</span></button>'+eqBtn()
+      :'<button type="button" class="hpc-cta" onclick="switchVigneOng(\'parcelles\')"><span>Aller aux parcelles</span>'+ico('chevron',16)+'</button>'+pq)+'</div>';
+  // Le bandeau rouge : jusqu'à quand, sur quelles parcelles (les noms, trois au plus), et combien de temps encore.
+  var dreB='';
+  if(dreL.length){
+    var der=dreL.reduce(function(a,r){ return (!a||r.fin>a)?r.fin:a; },null), now=new Date(), dem=new Date(now.getTime()+864e5);
+    var jr=der.toDateString()===now.toDateString()?'':(der.toDateString()===dem.toDateString()?' demain':(typeof fmtDate==='function'?' le '+fmtDate(der.getFullYear()+'-'+('0'+(der.getMonth()+1)).slice(-2)+'-'+('0'+der.getDate()).slice(-2)):''));
+    var lN=dreTout?['tout le domaine']:Object.keys(dreN), rH=Math.max(0,(der-now)/36e5), rM=Math.round((rH%1)*60);
+    dreB='<div class="hpc-dre-b" role="alert">'+ico('interdit',18)+'<span>Rentr\u00e9e interdite jusqu\u2019\u00e0 <b>'+der.getHours()+'\u00a0h\u00a0'+('0'+der.getMinutes()).slice(-2)+jr+'</b> sur '+_escHtml(noms(lN.slice(0,3)))+(lN.length>3?' et '+(lN.length-3)+' autre'+(lN.length>4?'s':''):'')+'</span><span class="hpc-dre-r">'+(rH>=1?'encore '+Math.floor(rH)+'\u00a0h'+(rM?'\u00a0'+('0'+rM).slice(-2):''):'encore '+Math.max(5,Math.round(rH*60))+'\u00a0min')+'</span></div>';
+  }
+  c.innerHTML=dreB+'<div class="hpc-g">'+gauche+'</div>'
+    +(act.length?'<div class="hpc-pan"><div class="hpc-pan-h"><b>'+(t?'Les parcelles':'La saison, parcelle par parcelle')+'</b><span>'+(t?((act.length-nHors)+' concern\u00e9e'+((act.length-nHors)>1?'s':'')):(act.length+' parcelle'+(act.length>1?'s':'')+', '+_homeHa(surf)+'\u00a0ha'))+'</span></div>'
+      +'<div class="hpc-mos" id="home-prio-mos" aria-label="Les parcelles, \u00e0 leur forme et \u00e0 leur surface">'+mos+'</div>'
+      +'<div class="hpc-leg"><span class="hpc-l-fait"><i></i><b>'+nb.fait+'</b> '+(t?'faite'+(nb.fait>1?'s':''):'finie'+(nb.fait>1?'s':''))+'</span><span class="hpc-l-cours"><i></i><b>'+nb.cours+'</b> en cours</span><span class="hpc-l-afaire"><i></i><b>'+nb.afaire+'</b> \u00e0 faire</span>'
+      +(nHors?'<span class="hpc-l-hors"><i></i><b>'+nHors+'</b> pas concern\u00e9e'+(nHors>1?'s':'')+'</span>':'')+(dreL.length?'<span class="hpc-l-dre"><i></i>rentr\u00e9e interdite</span>':'')+'</div></div>':'')
+    +faits+gestes;
+}
+
+// ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+// ★★ ACCV-2 (§417) — L'ACCUEIL VIGNE AU DESSIN DE LA MAQUETTE : LES LOTS 2 À 4 ENSEMBLE (Nico, 21/10 : « tous les lots en même temps »)
+//   Sept cartes dans l'ordre des questions du matin : la carte du jour (ACCV-1), « À savoir », la météo, « La saison », « Ma
+//   saison », « Au tracteur » (tractoriste, admin), « En direct ». Sur ordinateur, la journée à gauche et une colonne à droite
+//   (« À savoir », la météo, « En direct ») qui reste visible si elle tient dans l'écran ; au téléphone, une colonne dans cet
+//   ordre. Des faits, jamais une décision (Nico, 11/10) ; des hectares, jamais des heures pour l'ouvrier (Ma trace, UX-R3).
+// ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+function _accNoms(l){ l=(l||[]).filter(Boolean); return l.length<2?(l[0]||''):l.slice(0,-1).join(', ')+' et '+l[l.length-1]; }
+function _accHa(v){ return (Math.round((parseFloat(v)||0)*100)/100).toFixed(2).replace('.',','); }
+// « À savoir » : le délai de rentrée en cours (la règle de _homeDreLignes), puis le temps des jours travaillés — la pluie
+//   probable (au moins 50 %), le gel, le vent de journée (au moins 25 km/h). Samedi et dimanche ne comptent pas (Nico, 10/10).
+function _accSavoirItems(now){
+  now=now||new Date();
+  var out=[], jl=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+  var hm=function(d){ return d.getHours()+'\u00a0h\u00a0'+('0'+d.getMinutes()).slice(-2); };
+  var auj=now.getFullYear()+'-'+('0'+(now.getMonth()+1)).slice(-2)+'-'+('0'+now.getDate()).slice(-2);
+  try{ (typeof _homeDreLignes==='function'?_homeDreLignes(now):[]).filter(function(r){ return r.diffH>0; }).sort(function(a,b){ return a.fin-b.fin; }).forEach(function(r){
+      var l=(r.g&&r.g.parcelles)||[], noms=l.length?(l.length>3?l.slice(0,3).join(', ')+' et '+(l.length-3)+' autres':_accNoms(l)):'tout le domaine';
+      out.push({t:'dan', i:'interdit', ti:'D\u00e9lai de rentr\u00e9e en cours', d:noms+((r.g&&r.g.produits&&r.g.produits.length)?', '+r.g.produits.join(' + '):''), v:'jusqu\u2019\u00e0 '+hm(r.fin)+(r.fin.toDateString()!==now.toDateString()?' demain':'')});
+  }); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_accSavoirItems#dre'); }
+  var md=window.METEO_DAILY, mh=window.METEO_HOURLY;
+  var ouvre=function(iso){ var w=new Date(iso+'T12:00:00').getDay(); return w!==0&&w!==6; };
+  var nomJ=function(iso){ if(iso===auj) return 'aujourd\u2019hui'; var dm=new Date(now.getTime()+864e5); if(iso===dm.getFullYear()+'-'+('0'+(dm.getMonth()+1)).slice(-2)+'-'+('0'+dm.getDate()).slice(-2)) return 'demain'; return jl[new Date(iso+'T12:00:00').getDay()]; };
+  if(md&&Array.isArray(md.time)){
+    for(var k=1;k<Math.min(5,md.time.length);k++){ var iso=md.time[k]; if(!ouvre(iso)||!((md.pp&&md.pp[k])>=50)) continue;
+      var hs=[]; if(mh&&Array.isArray(mh.time)&&Array.isArray(mh.precip)) mh.time.forEach(function(t,i){ if(String(t).slice(0,10)===iso){ var h=+String(t).slice(11,13); if(h>=6&&h<=20&&(mh.precip[i]||0)>0.1) hs.push(h); } });
+      out.push({t:'pluie', i:'pluie', ti:'Pluie probable '+nomJ(iso), d:hs.length?'entre '+hs[0]+'\u00a0h et '+(hs[hs.length-1]+1)+'\u00a0h':'sur le vignoble', v:md.pp[k]+'\u00a0%'}); break; }
+    for(var g=0;g<Math.min(4,md.time.length);g++){ var iso2=md.time[g]; if(md.tmin&&md.tmin[g]!=null&&md.tmin[g]<0&&ouvre(iso2)){ out.push({t:'att', i:'thermometre', ti:'Gel annonc\u00e9 '+nomJ(iso2), d:'minimum '+Math.round(md.tmin[g])+'\u00b0', v:Math.round(md.tmin[g])+'\u00b0'}); break; } }
+  }
+  if(mh&&Array.isArray(mh.time)&&Array.isArray(mh.wind)){
+    var vu={}; for(var i=0;i<mh.time.length;i++){ var t=String(mh.time[i]), d=t.slice(0,10), h=+t.slice(11,13); if(h<7||h>19||!ouvre(d)||(d===auj&&h<now.getHours())||d<auj) continue; var w=+mh.wind[i]||0; if(!vu[d]||w>vu[d].w) vu[d]={w:w,h:h}; }
+    var ds=Object.keys(vu).sort().slice(0,4);
+    for(var q=0;q<ds.length;q++){ if(vu[ds[q]].w>=25){ out.push({t:'att', i:'vent', ti:'Vent '+nomJ(ds[q])+(vu[ds[q]].h>=13?' apr\u00e8s-midi':' matin'), d:'jusqu\u2019\u00e0 '+Math.round(vu[ds[q]].w)+'\u00a0km/h en journ\u00e9e', v:Math.round(vu[ds[q]].w)+'\u00a0km/h'}); break; } }
+  }
+  return out;
+}
+function renderHomeSavoir(){
+  var c=document.getElementById('home-savoir'); if(!c) return;
+  var L=_accSavoirItems(new Date()), n=document.getElementById('home-savoir-n');
+  if(n){ n.textContent=L.length?String(L.length):''; n.className='mvpas mvpas-compteur'+(L.some(function(x){ return x.t==='dan'; })?' mvpas-alerte':''); n.style.display=L.length?'':'none'; }
+  c.innerHTML=L.length?('<ul class="hk-as">'+L.map(function(x){ return '<li class="hk-as-l'+(x.t?' '+x.t:'')+'"><span class="hk-as-i">'+_mvIcon(x.i,16)+'</span><span class="hk-as-c"><b>'+_escHtml(x.ti)+'</b><span>'+_escHtml(x.d)+'</span></span>'+(x.v?'<span class="hk-as-v">'+_escHtml(x.v)+'</span>':'')+'</li>'; }).join('')+'</ul>')
+    :'<div class="hk-calme"><span class="hk-as-i ok">'+_mvIcon('check',16)+'</span><span>Rien \u00e0 signaler aujourd\u2019hui.</span></div>';
+}
+// « La saison » : le pourcentage de la saison (getHomeCardData, la même règle qu'avant), puis chaque tâche — en cours, à venir
+//   (avec la date de début de la campagne), terminé ; rangées par date de début (Nico, 12/10). L'arrachage fini pour l'équipe
+//   passe en tête des terminées (ARRACH-9). Des hectares et des parcelles, pas des heures.
+function renderHomeSaison(){
+  var c=document.getElementById('home-saison'); if(!c) return;
+  var ts=(typeof getTachesSaison==='function')?getTachesSaison():[], sa=(typeof getSaisonActive==='function')?getSaisonActive():null;
+  var ech=(sa&&sa.echeances&&typeof sa.echeances==='object'&&!Array.isArray(sa.echeances))?sa.echeances:{};
+  var auj=(typeof _mvToday==='function')?_mvToday():'', its=(typeof _prioItems==='function')?_prioItems():[], prio=its.length?its[0].t:'';
+  var D=getHomeCardData(), ch=document.getElementById('home-saison-chip');
+  if(ch) ch.textContent=(typeof _visuSaison==='function')?_visuSaison():((sa&&sa.nom)||'');
+  var MO=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
+  var dt=function(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso||'')); return m?((+m[3])+(m[3]==='01'?'er':'')+' '+MO[+m[2]-1]):''; };
+  var L=ts.map(function(t){
+    var P=_parcConcern(t.nom), sT=0, sD=0, nR=0;
+    P.forEach(function(p){ var s=parseFloat(String((p&&p.surface)||0).replace(',','.'))||0; sT+=s; if(getTacheStatut(p,t.nom)==='Valid\u00e9') sD+=s; else nR++; });   // « 0,5 » comme « 0.5 » (_homeSurf)
+    var pct=sT>0?Math.round(sD/sT*100):0, d1=(ech[t.nom]&&ech[t.nom].d1)||(sa&&sa.debut)||'';
+    var presta=t.nom==='Arrachage'&&typeof _arrEquipeFiniePartout==='function'&&_arrEquipeFiniePartout()&&pct<100;
+    var etat=(pct>=100||presta)?'fini':((pct>0||(d1&&auj&&d1<=auj))?'cours':'avenir');
+    return {n:t.nom, pct:pct, rest:Math.max(0,sT-sD), nR:nR, d1:d1, etat:etat, presta:presta};
+  });
+  var parD=function(a,b){ return String(a.d1).localeCompare(String(b.d1)); };
+  var C=L.filter(function(x){ return x.etat==='cours'; }).sort(parD), A=L.filter(function(x){ return x.etat==='avenir'; }).sort(parD);
+  var F=L.filter(function(x){ return x.etat==='fini'; }).sort(function(a,b){ return (b.presta?1:0)-(a.presta?1:0); });
+  var ligne=function(x){ var nm=_escHtml(tNom(x.n));
+    if(x.etat==='cours') return '<li class="hk-sa"><span class="hk-sa-n">'+nm+(x.n===prio?'<span class="mvpas mvpas-etiquette">'+_mvIcon('eclair',16)+'Priorit\u00e9</span>':'')+'</span><span class="hk-sa-v">'+x.pct+'\u00a0%</span><span class="hk-sa-m"><span class="hk-barre"><i style="--p:'+x.pct+'%"></i></span><span>reste '+_accHa(x.rest)+'\u00a0ha, '+x.nR+' parcelle'+(x.nR>1?'s':'')+'</span></span></li>';
+    if(x.etat==='avenir') return '<li class="hk-sa avenir"><span class="hk-sa-n">'+nm+'</span><span class="hk-sa-v">'+(x.d1?'d\u00e8s le '+dt(x.d1):'\u00e0 venir')+'</span></li>';
+    return '<li class="hk-sa fini"><span class="hk-sa-n">'+_mvIcon('check',16)+nm+'</span><span class="hk-sa-v"><span class="mvpas mvpas-statut mvpas-fait">'+(x.presta?'fini pour l\u2019\u00e9quipe':'termin\u00e9')+'</span></span></li>'; };
+  c.innerHTML='<div class="hk-sa-tot"><span class="hk-grand">'+(D.rienAMesurer?'\u2014':D.pctGlobal+'<small>\u00a0%</small>')+'</span><span class="hk-lbl">'+(D.rienAMesurer?'la saison commence':'de la saison faite')+'</span></div>'
+    +'<div class="hk-barre g'+(D.rienAMesurer?' vide':'')+'"><i style="--p:'+(D.rienAMesurer?0:D.pctGlobal)+'%"></i></div>'
+    +(L.length?'<ul class="hk-sa-l">'+C.map(ligne).join('')+(A.length?'<li class="hk-sa-g">\u00c0 venir</li>'+A.map(ligne).join(''):'')+(F.length?'<li class="hk-sa-g">Termin\u00e9</li>'+F.map(ligne).join(''):'')+'</ul>':'<div class="hk-calme">Aucune t\u00e2che dans cette saison.</div>')
+    +'<button type="button" class="hk-lien" onclick="switchVigneOng(\'parcelles\')"><span>Toutes les t\u00e2ches</span>'+_mvIcon('chevron',16)+'</button>';
+}
+// « Ma saison » : ce que l'appli rend à celui qui la remplit (UX-R) — sa part de la saison, ses jours, ses kilomètres de rangs
+//   (jalons.js), sa part du chantier du moment (_mvPartCalc, la même règle que « Ma part du chantier »), sa semaine en hectares,
+//   ses deux jalons les plus proches et le dernier gagné. Aucun classement entre collègues.
+function renderHomeMoi(){
+  var c=document.getElementById('home-moi'), w=document.querySelector('.home-w[data-w="moi"]'); if(!c) return;
+  if(window._mvPrepOn&&window._mvPrepOn()){ if(w) w.style.display='none'; c.innerHTML=''; return; }   // PREP-1 (§134) : GUERETTECH n'est pas dans l'équipe
+  if(w) w.style.display='';
+  var nom=(currentUser&&currentUser.nom)||'', T=(typeof _mvTraceData==='function')?_mvTraceData(nom):{total:0,jours:0};
+  var J=window._mvJalons||null, km=(J&&J.compteurs&&J.compteurs.km)||0;
+  var st='<div class="hk-st"><div><span class="hk-moyen">'+_accHa(T.total)+'<small>\u00a0ha</small></span><span class="hk-lbl">votre part cette saison</span></div>'
+    +'<div><span class="hk-moyen">'+(T.jours||0)+'</span><span class="hk-lbl">jour'+((T.jours||0)>1?'s':'')+' au domaine</span></div>'
+    +'<div><span class="hk-moyen">'+(km?String(Math.round(km*10)/10).replace('.',',')+'<small>\u00a0km</small>':'\u2014')+'</span><span class="hk-lbl">de rangs parcourus</span></div></div>';
+  var _pm={}, tache=(typeof _mvPartTache==='function')?_mvPartTache(_pm):null, part='';
+  if(tache&&typeof _mvPartCalc==='function'){ var r=_mvPartCalc(tache,nom), a=r.tot>0?r.mine/r.tot*100:0, b=r.tot>0?r.them/r.tot*100:0;
+    part='<div class="hk-sec"><div class="hk-ti"><b>Votre part du chantier</b><span>'+_escHtml(tNom(tache))+'\u00a0: '+_accHa(r.mine)+' sur '+_accHa(r.done)+'\u00a0ha faits</span></div>'
+      +'<div class="hk-part" aria-hidden="true"><i class="moi" style="width:'+a.toFixed(1)+'%"></i><i class="eux" style="width:'+b.toFixed(1)+'%"></i></div>'
+      +'<div class="hk-part-leg"><span><i class="moi"></i>Vous</span><span><i class="eux"></i>Le reste de l\u2019\u00e9quipe</span></div></div>'; }
+  var now=new Date(), lun=new Date(now.getFullYear(),now.getMonth(),now.getDate()-((now.getDay()+6)%7)), sem=[0,0,0,0,0], vus={};
+  (typeof JOURNAL!=='undefined'?JOURNAL:[]).forEach(function(j){
+    if(!j||j.meteo||j.statut!=='Valid\u00e9'||!j.date||!j.parcelle) return;
+    var eq=[j.qui].concat(j.membresEquipe||[]).filter(function(x,i,l){ return x&&l.indexOf(x)===i; }); if(eq.indexOf(nom)<0) return;
+    var di=Math.round((new Date(j.date+'T12:00:00')-lun)/864e5); if(di<0||di>4) return;
+    var k=j.date+'|'+j.parcelle+'|'+j.tache; if(vus[k]) return; vus[k]=1;
+    var p=(PARCELLES||[]).find(function(x){ return x&&x.nom===j.parcelle; }); if(p) sem[di]+=(parseFloat(String(p.surface||0).replace(',','.'))||0)/eq.length; });
+  var mx=Math.max.apply(null,sem.concat([0.01])), jn=['Lun.','Mar.','Mer.','Jeu.','Ven.'], ai=(now.getDay()+6)%7;
+  var semH='<div class="hk-sec"><div class="hk-ti"><b>Cette semaine</b><span>'+_accHa(sem.reduce(function(x,y){ return x+y; },0))+'\u00a0ha</span></div><div class="hk-sem">'
+    +sem.map(function(v,i){ return '<div'+(i===ai?' class="auj"':'')+'><em>'+(v?_accHa(v):'')+'</em><s><i style="height:'+(v/mx*100).toFixed(0)+'%"></i></s>'+(i===ai?'Auj.':jn[i])+'</div>'; }).join('')+'</div></div>';
+  var jal='';
+  if(J&&typeof window._mvJalonsProchains==='function'){
+    var nx=window._mvJalonsProchains(J.compteurs,J.gagnes).slice(0,2), ids=Object.keys(J.gagnes||{}).sort(function(x,y){ return String(J.gagnes[y]||'').localeCompare(String(J.gagnes[x]||'')); });
+    var C2=2*Math.PI*16, ring=function(p){ return '<span class="hk-an"><svg class="an-c" viewBox="0 0 40 40" aria-hidden="true"><circle class="f" cx="20" cy="20" r="16"/><circle class="p" cx="20" cy="20" r="16" stroke-dasharray="'+C2.toFixed(1)+'" stroke-dashoffset="'+(C2*(1-Math.min(1,p||0))).toFixed(1)+'"/></svg></span>'; };
+    var lj=nx.map(function(x){ return '<div class="hk-jal">'+ring(x.ratio)+'<span class="hk-jal-c"><b>'+_escHtml(x.titre)+'</b><span>'+_escHtml(x.reste)+'</span></span></div>'; }).join('')
+      +((ids.length&&typeof window._mvJalonLibelle==='function')?'<div class="hk-jal gagne"><span class="hk-an">'+_mvIcon('etoile',16)+'</span><span class="hk-jal-c"><b>'+_escHtml(window._mvJalonLibelle(ids[0]).titre)+'</b><span>dernier jalon gagn\u00e9</span></span></div>':'');
+    if(lj) jal='<div class="hk-sec">'+lj+'</div>';
+  }
+  c.innerHTML=((T.total>0||T.jours>0)?st+part+semH+jal
+    :'<div class="hk-calme"><span class="hk-as-i">'+_mvIcon('etincelles',16)+'</span><span><b>Votre saison commence.</b> Votre premi\u00e8re validation lancera vos compteurs\u00a0: hectares, jours au domaine, kilom\u00e8tres de rangs.</span></div>'+part+jal)
+    +'<button type="button" class="hk-lien" onclick="openMaTrace()"><span>Ma trace</span>'+_mvIcon('chevron',16)+'</button>';
+}
+// « Au tracteur » (tractoriste et administrateur) : sa dernière session, le compteur du tracteur et sa révision, la cuve de GNR
+//   (administrateur) ou ses sessions de la saison ; « Démarrer une session » ouvre la feuille du module Tracteur.
+function renderHomeTrac(){
+  var c=document.getElementById('home-trac'), w=document.querySelector('.home-w[data-w="trac"]'); if(!c) return;
+  var tr=(typeof isTractoriste==='function')&&!!isTractoriste(), adm=(typeof _mvMoiAdmin==='function')&&!!_mvMoiAdmin();
+  if(!tr&&!adm){ if(w) w.style.display='none'; c.innerHTML=''; return; }
+  if(w) w.style.display='';
+  var me=(currentUser&&currentUser.nom)||'', S=(typeof SESSIONS!=='undefined'&&SESSIONS)||[];
+  var mien=S.filter(function(s){ return s&&(s.conducteur===me||s.coequipier===me); }).sort(function(a,b){ return String(b.date||'').localeCompare(String(a.date||'')); });
+  var der=mien[0]||null, TL=window.TRACTEURS_LIST||[], tc=(der&&TL.find(function(t){ return t&&t.id===der.tracteurId; }))||TL[0]||null;
+  var np=der?((Array.isArray(der.parcellesFaites)&&der.parcellesFaites.length)||(Array.isArray(der.parcelles)&&der.parcelles.length)||0):0;
+  var fx=function(ic,l,v,s){ return '<div class="hk-fx"><span class="hk-lbl">'+_mvIcon(ic,16)+'<span>'+l+'</span></span><span class="hk-val">'+v+'</span><span class="hk-s">'+s+'</span></div>'; };
+  var f1=fx('chrono','Votre derni\u00e8re session',der?'<span>'+_escHtml(der.activite||'Session')+(der.date?', '+_escHtml(typeof fmtDate==='function'?fmtDate(der.date):der.date):'')+'</span>':'<span>Aucune pour l\u2019instant</span>',der?(np?np+' parcelle'+(np>1?'s':''):_escHtml(der.statut||'')):'la premi\u00e8re s\u2019affichera ici');
+  var f2='';
+  if(tc){ var cp=parseFloat(tc.compteur_h), rv=parseFloat(tc.revision_h), reste=(rv>0&&cp>=0)?Math.round(rv-cp):null;
+    f2=fx('tracteur',_escHtml(tc.nom||'Tracteur'),'<span>'+(isNaN(cp)?'\u2014':Math.round(cp)+'\u00a0h')+'</span>'+((reste!=null&&reste<=50)?'<span class="mvpas mvpas-statut mvpas-surveiller">'+(reste>0?'r\u00e9vision dans '+reste+'\u00a0h':'r\u00e9vision d\u00e9pass\u00e9e')+'</span>':''),'au compteur'); }
+  var f3;
+  if(adm){ var g=(window.CONFIG&&window.CONFIG.gnr)||null, niv=g?parseFloat(g.niveau):NaN, cap=g?parseFloat(g.capacite):NaN, pc=(cap>0&&niv>=0)?Math.round(niv/cap*100):null;
+    f3=fx('carburant','Cuve de GNR','<span>'+(pc==null?'\u2014':Math.round(niv)+'\u00a0L')+'</span>'+((pc!=null&&pc<25)?'<span class="mvpas mvpas-statut mvpas-surveiller">basse</span>':''),pc==null?'non renseign\u00e9e':'<span class="hk-barre'+(pc<25?' bas':'')+'"><i style="--p:'+pc+'%"></i></span>');
+  } else { var ns=S.filter(function(s){ return s&&s.conducteur===me&&(!window._sessInSaison||window._sessInSaison(s)); }).length;
+    f3=fx('liste','Vos sessions','<span>'+ns+'</span>','cette saison'); }
+  c.innerHTML='<div class="hk-faits">'+f1+f2+f3+'</div>'+'<div class="hk-act">'+(tr?'<button type="button" class="mvbtn mvbtn-secondaire" onclick="goTo(\'tracteur\');openNewSession()">'+_mvIcon('chrono',16)+'<span>D\u00e9marrer une session</span></button>':'')+'<button type="button" class="hk-lien" onclick="goTo(\'tracteur\')"><span>Le Tracteur</span>'+_mvIcon('chevron',16)+'</button></div>';
+}
+// « En direct » : ce qui est commencé aujourd'hui et pas encore validé (et les sessions du tracteur ouvertes), puis le fil des
+//   validations par jour ; « Vous et Jean avez validé » quand on en est. La hauteur d'une journée calme, « Tout voir » déplie
+//   sur place (la règle validée pour le cockpit, COLLE-1).
+var _accDirectOuvert=false;
+function renderHomeDirect(){
+  var c=document.getElementById('home-direct'); if(!c) return;
+  var me=(currentUser&&currentUser.nom)||'', auj=(typeof _mvToday==='function')?_mvToday():'';
+  var J=((typeof JOURNAL!=='undefined'&&JOURNAL)||[]).filter(function(j){ return j&&!j.meteo; });
+  var qui=function(j){ return [j.qui].concat(j.membresEquipe||[]).filter(function(n,i,l){ return n&&n!=='Equipe'&&l.indexOf(n)===i; }); };
+  var sujet=function(l){ var lui=l.indexOf(me)>=0, au=l.filter(function(n){ return n!==me; });
+    return lui?('<b>'+(au.length?'Vous et '+_escHtml(_accNoms(au)):'Vous')+'</b> avez valid\u00e9'):('<b>'+_escHtml(_accNoms(l)||'\u00c9quipe')+'</b> '+(l.length>1?'ont valid\u00e9':'a valid\u00e9')); };
+  var vus={}, cours=[];
+  J.forEach(function(j){ if(j.statut!=='En cours'||j.date!==auj||!j.parcelle) return; var k=j.parcelle+'|'+j.tache; if(vus[k]) return; vus[k]=1;
+    var p=(PARCELLES||[]).find(function(x){ return x&&x.nom===j.parcelle; }); if(p&&getTacheStatut(p,j.tache)!=='En cours') return; cours.push(j); });
+  var S=((typeof SESSIONS!=='undefined'&&SESSIONS)||[]).filter(function(s){ return s&&s.statut==='En cours'; });
+  var hC=cours.map(function(j){ var l=qui(j), lui=l.indexOf(me)>=0, h=_hvHeure(j);
+      return '<div class="hk-ed cours"><span class="hk-ed-i"><i class="hpc-pouls" aria-hidden="true"></i></span><span class="hk-ed-t"><b>'+(lui?(l.length>1?'Votre \u00e9quipe':'Vous'):_escHtml(_accNoms(l)))+'</b><span>'+_escHtml(tNom(j.tache))+', '+_escHtml(j.parcelle)+'</span></span><span class="hk-ed-h">'+(h?'depuis '+h:'')+'</span></div>'; }).join('')
+    +S.map(function(s){ var lui=s.conducteur===me; return '<div class="hk-ed cours"><span class="hk-ed-i">'+_mvIcon('tracteur',16)+'</span><span class="hk-ed-t"><b>'+(lui?'Vous':_escHtml(s.conducteur||'Un tractoriste'))+', au tracteur</b><span>'+_escHtml(s.activite||'Session')+'</span></span><span class="hk-ed-h"></span></div>'; }).join('');
+  var V=J.filter(function(j){ return j.statut==='Valid\u00e9'&&j.parcelle; }).slice(0,12), prec='', hF='';
+  V.forEach(function(j){ var jr=_hvJour(j.date); if(jr!==prec){ hF+='<div class="hk-ed-g">'+_escHtml(jr)+'</div>'; prec=jr; }
+    hF+='<div class="hk-ed"><span class="hk-ed-i">'+_mvIcon('check',16)+'</span><span class="hk-ed-t">'+sujet(qui(j))+' <b>'+_escHtml(j.parcelle)+'</b><span>'+_escHtml(tNom(j.tache))+'</span></span><span class="hk-ed-h">'+_hvHeure(j)+'</span></div>'; });
+  var n=cours.length+S.length, nb=document.getElementById('home-direct-n'), vif=document.getElementById('home-direct-vif');
+  if(nb){ nb.textContent=n?n+' en cours':''; nb.style.display=n?'':'none'; }
+  if(vif) vif.classList.toggle('off',!n);
+  if(!hC&&!hF){ c.innerHTML='<div class="hk-calme"><span class="hk-as-i">'+_mvIcon('sablier',16)+'</span><span>Rien encore aujourd\u2019hui. Les d\u00e9buts et les validations de l\u2019\u00e9quipe s\u2019afficheront ici, au fil de la journ\u00e9e.</span></div>'; return; }
+  var tot=n+V.length;
+  c.innerHTML='<div class="hk-ed-w'+(_accDirectOuvert?' ouvert':'')+(tot<=5?' court':'')+'">'+(hC?'<div class="hk-ed-g">En cours</div>'+hC:'')+hF+'</div>'
+    +(tot>5?'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact hk-plus" aria-expanded="'+(_accDirectOuvert?'true':'false')+'" onclick="_homeDirectTout()"><span>'+(_accDirectOuvert?'Replier':'Tout voir ('+tot+')')+'</span>'+_mvIcon('chevron',16)+'</button>':'');
+}
+window._homeDirectTout=function(){ _accDirectOuvert=!_accDirectOuvert; renderHomeDirect(); _accColle(); };
+// La grille : la carte du jour et la colonne de gauche (#home-cols, ses deux colonnes de KIT-2) dans #home-gauche ; « À savoir »,
+//   la météo et « En direct » dans #home-droite. Au téléphone, les trois conteneurs s'effacent (display:contents) et l'ordre des
+//   cartes suit les questions du matin (la feuille, bloc ACCV-2).
+function _accZones(){
+  var page=document.getElementById('page-home'), cols=document.getElementById('home-cols'); if(!page||!cols) return;
+  var gr=document.getElementById('home-grille'), ga=document.getElementById('home-gauche'), dr=document.getElementById('home-droite');
+  if(!gr){ gr=document.createElement('div'); gr.id='home-grille'; gr.className='home-grille'; }
+  if(!ga){ ga=document.createElement('div'); ga.id='home-gauche'; ga.className='home-gauche'; }
+  if(!dr){ dr=document.createElement('div'); dr.id='home-droite'; dr.className='home-droite'; }
+  cols.parentNode.insertBefore(gr,cols);
+  var pin=page.querySelector('.home-w[data-w="priorite"]'); if(pin) ga.appendChild(pin);
+  ga.appendChild(cols); gr.appendChild(ga); gr.appendChild(dr);
+  ['demarrage','saison','moi','trac'].forEach(function(id){ var el=page.querySelector('.home-w[data-w="'+id+'"]'); if(el) cols.appendChild(el); });
+  ['savoir','meteo5','direct'].forEach(function(id){ var el=page.querySelector('.home-w[data-w="'+id+'"]'); if(el) dr.appendChild(el); });
+}
+// La colonne de droite reste visible en descendant, seulement si elle tient dans l'écran sous le bandeau (jamais de carte coupée).
+var _accColleOk=false;
+function _accColle(){
+  var dr=document.getElementById('home-droite'); if(!dr) return;
+  var hd=document.querySelector('#page-home .mod-header'), h=hd?hd.offsetHeight:0;
+  dr.style.setProperty('--acc-haut',h+'px');
+  dr.classList.toggle('colle',window.innerWidth>=1024&&(dr.offsetHeight+h+40)<=window.innerHeight);
+  if(!_accColleOk){ _accColleOk=true; window.addEventListener('resize',function(){ clearTimeout(window._accColleT); window._accColleT=setTimeout(_accColle,150); }); }
 }
 
 // ACC-3 (§278) : le jour d'une entrée de journal (« Aujourd'hui », « Hier », sinon la date) et son heure, lue dans l'identifiant
@@ -6729,9 +6793,6 @@ function renderHome(){
   var sub=document.getElementById('hv2-header-sub');
   if(sub)sub.textContent='Tableau de bord';
 
-  // Carte stat domaine — mode mémorisé (v4.34)
-  homeCardMode=_homeLoadCardMode();
-  renderHomeCard();
 
   // Date (Accueil, Parcelles, Journal)
   const jours=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
@@ -6775,50 +6836,6 @@ function renderHome(){
   const htEl=document.getElementById('hs-travaux');
   if(htEl)htEl.textContent=nbTravaux;
 
-  // Tracteur sessions
-  const _sessVue=(window._sessInSaison?SESSIONS.filter(window._sessInSaison):SESSIONS);
-  const tracBars=document.getElementById('hv2-trac-bars');
-  if(tracBars){
-    tracBars.innerHTML=_sessVue.map(s=>{
-      const pct=s.avancement||0;
-      const isCours=s.statut==='En cours';
-      return `<div class="hv2-bar-item">
-        <div class="hv2-bar-label"><span>${s.activite}</span><span>${pct}%</span></div>
-        <div class="hv2-bar-track" aria-hidden="true"><div class="hv2-bar-fill${isCours?' or':''}" style="width:${pct}%"></div></div>
-      </div>`;
-    }).join('');
-  }
-  const tracNb=document.getElementById('hv2-trac-nb');
-  // ⚠️ Le <span> reprend la taille de la charte : sans style ici, il heriterait
-  //   du 22 px de .mv-n et « sessions » pese autant que le chiffre.
-  if(tracNb)tracNb.innerHTML=_sessVue.length+' <span style="font-size:var(--pt-txt,13px)">session'
-    +(_sessVue.length>1?'s':'')+'</span>';
-
-  // Heures card
-  renderHeuresCard('heures-card-home');
-
-  // Derniers travaux — nouveau markup
-  // Charte DS-2 : la liste vit dans UN ilot, pas quatre blocs empiles.
-  const dt=document.getElementById('derniers-travaux');
-  if(dt)dt.className='hv2-travaux mv-c';
-  const recent=JOURNAL.filter(j=>!j.meteo).slice(0,4);
-  // ACC-3 (§278) : le fil de la maquette v4 — les jours en intertitre, une ligne par travail : l'heure (lue dans l'identifiant
-  //   de l'entrée, qui naît d'un horodatage), les initiales, « qui a validé / a commencé la tâche sur la parcelle », l'état.
-  let _jPrec='';
-  dt.innerHTML=recent.length?recent.map(r=>{
-    const isEq=r.equipe||r.qui==='Equipe';
-    const quiAff=isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui})`:isEq?'Équipe':r.qui||'—';
-    const isVal=r.statut==='Validé';
-    const jour=_hvJour(r.date), tete=(jour!==_jPrec)?`<div class="hv2-fil-jour">${_escHtml(jour)}</div>`:'';
-    _jPrec=jour;
-    const ini=String(r.qui||'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w.charAt(0).toUpperCase()).join('')||'?';
-    return tete+`<div class="hv2-fil" onclick="goTo('journal')">
-      <span class="hv2-fil-h">${_hvHeure(r)}</span><span class="hv2-fil-av">${_escHtml(ini)}</span>
-      <span class="hv2-fil-tx"><b>${_escHtml(quiAff)}</b> ${isVal?'a validé':'a commencé'} <b>${_escHtml(typeof tNom==='function'?tNom(r.tache):r.tache)}</b> sur <b>${_escHtml(r.parcelle)}</b></span>
-      ${isVal?'':_mvBadge('En cours','neutre')}
-    </div>`;
-  }).join(''):'<div class="hv2-fil-vide">Aucun travail au journal pour l\u2019instant.</div>';
-
   // Nouveaux widgets personnalisables (v4.34)
   _renderHomeWidgets();
   _homePrioCarte();   // ACC-2 (§277)
@@ -6827,12 +6844,11 @@ function renderHome(){
 // ════ WIDGETS ACCUEIL v4.34 — Météo 5j · Ma semaine · Délai de rentrée · Raccourcis · Mini-carte ════
 function _renderHomeWidgets(){
   try{renderHomeDemarrage();}catch(e){window.logError&&window.logError({level:'info',cat:'home',msg:'renderHomeDemarrage'});}
-  try{renderHomeMaPart();}catch(e){window.logError&&window.logError({level:'info',cat:'home',msg:'renderHomeMaPart'});}
   try{renderHomeMeteo5();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets'); }
-  try{renderHomeMaSemaine();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#2'); }
-  try{renderHomeDRE();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#3'); }
-  try{renderHomeRaccourcis();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#4'); }
-  try{_homeRangees(); _homeSpans();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#5'); }   // ALIGN-2 : un bloc a pu s'effacer
+  try{_homeRangees();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#5'); }   // ALIGN-2 : un bloc a pu s'effacer
+  // ★ ACCV-2 (§417) : les cartes de la maquette
+  [renderHomeSavoir,renderHomeSaison,renderHomeMoi,renderHomeTrac,renderHomeDirect].forEach(function(f){ try{ f(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#accv2'); } });
+  try{ _accColle(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#colle'); }
 }
 
 // ── Météo 5 jours ──
@@ -6880,60 +6896,13 @@ function renderHomeMeteo5(){
 }
 
 // ── Ma semaine : interventions + heures estimées (surface × h/ha, ÷ équipe) ──
-function renderHomeMaSemaine(){
-  var c=document.getElementById('home-msem');if(!c)return;
-  if(!currentUser){c.innerHTML='';return;}
-  var nom=currentUser.nom;
-  var lbl=document.getElementById('home-msem-label');
-  if(lbl)lbl.textContent='Ma semaine \u00b7 '+nom;
-  var now=new Date();
-  var lundi=new Date(now.getFullYear(),now.getMonth(),now.getDate()-((now.getDay()+6)%7));
-  var hours=[0,0,0,0,0,0,0],nbInt=0;
-  (JOURNAL||[]).forEach(function(j){
-    if(j.meteo||!j.date)return;
-    var d=new Date(j.date+'T12:00:00');if(isNaN(d))return;
-    var di=Math.floor((d-lundi)/86400000);
-    if(di<0||di>6)return;
-    var moi=(j.qui===nom)||(j.equipe&&Array.isArray(j.membresEquipe)&&j.membresEquipe.indexOf(nom)!==-1);
-    if(!moi)return;
-    nbInt++;
-    if(j.statut==='Validé'){
-      var p=PARCELLES.find(function(x){return x.nom===j.parcelle;});
-      var tDef=TACHES.find(function(t){return t.nom===j.tache;});
-      if(p&&tDef){
-        var h=(parseFloat(p.surface)||0)*(parseFloat(tDef.hha)||0);
-        if(j.equipe)h=h/Math.max(1,(j.membresEquipe||[]).length||1);
-        hours[di]+=h;
-      }
-    }
-  });
-  var tot=hours.reduce(function(a,b){return a+b;},0);
-  var totTxt=tot>0?('\u2248 '+(Math.round(tot*2)/2)+'h'):String(nbInt);
-  var totLbl=tot>0?'estim\u00e9es cette semaine':'intervention'+(nbInt>1?'s':'')+' cette semaine';
-  if(_homeIsCompact('masemaine')){
-    c.innerHTML='<div class="mv-c"><div class="mv-hd"><div><div class="mv-n">'+totTxt+'</div>'
-      +'<div class="mv-l">'+totLbl+'</div></div>'
-      +_mvBadge(nbInt+' entr\u00e9e'+(nbInt>1?'s':''),'neutre')+'</div></div>';
-    return;
-  }
-  var maxH=Math.max.apply(null,hours.concat([1]));
-  var bl=['L','M','M','J','V','S','D'];
-  var bars=hours.map(function(h,i){
-    var pct=Math.round(h/maxH*100);
-    return '<div class="hmsem-b'+(h<=0?' off':'')+'"><div class="hmsem-bar" style="height:'+Math.max(5,pct)+'%"></div><div class="hmsem-bl">'+bl[i]+'</div></div>';
-  }).join('');
-  // Charte DS-2 : le chiffre de la semaine en tete, les barres a cote.
-  c.innerHTML='<div class="mv-c"><div class="mv-hd">'
-    +'<div><div class="mv-n">'+totTxt+'</div><div class="mv-l">'+totLbl+'</div></div>'
-    +_mvBadge(nbInt+' entr\u00e9e'+(nbInt>1?'s':''),'neutre')+'</div>'
-    +'<div class="hmsem-bars" style="margin-top:14px">'+bars+'</div></div>';
-}
 
 // ── Délai de rentrée (DRE) : sessions traitement T3, max drae des produits ──
-function renderHomeDRE(){
-  var c=document.getElementById('home-dre');if(!c)return;
+// ACCV-1 (§416) : les délais de rentrée (traitements regroupés par session, le plus long délai des produits). Une seule
+//   règle pour la carte « Délai de rentrée » et pour la carte du jour (bandeau rouge, parcelles marquées).
+function _homeDreLignes(now){
   var TR=window.TRAITEMENTS||[];var CAT=window.CATALOGUE||[];
-  var now=new Date();
+  now=now||new Date();
   var groups={};
   TR.forEach(function(t){
     if(!t.date)return;
@@ -6956,69 +6925,10 @@ function renderHomeDRE(){
     if(diffH<=-24)return; // rentrée autorisée depuis plus de 24h → on n'affiche plus
     rows.push({g:g,fin:fin,diffH:diffH,drae:drae});
   });
-  rows.sort(function(a,b){return b.fin-a.fin;});
-  rows=rows.slice(0,3);
-  var nbWait=rows.filter(function(r){return r.diffH>0;}).length;
-  if(_homeIsCompact('dre')){
-    if(!rows.length){c.innerHTML='<div class="mv-c"><div class="mv-hd"><div class="mv-l">Aucune restriction de rentr\u00e9e</div>'+_mvBadge('Libre','vert')+'</div></div>';return;}
-    if(nbWait>0){
-      var next=rows.filter(function(r){return r.diffH>0;}).sort(function(a,b){return a.fin-b.fin;})[0];
-      var hh=('0'+next.fin.getHours()).slice(-2)+'h'+('0'+next.fin.getMinutes()).slice(-2);
-      var jourTxt=(next.fin.toDateString()===now.toDateString())?'':' demain';
-      c.innerHTML='<div class="mv-c mv-c-al"><div class="mv-hd"><div class="mv-l"><b style="color:var(--rouge)">'+nbWait+' zone'+(nbWait>1?'s':'')+' en d\u00e9lai de rentr\u00e9e</b><br>prochaine'+jourTxt+' \u00e0 '+hh+'</div>'+_mvBadge('Attendre','rouge')+'</div></div>';
-    }else{
-      c.innerHTML='<div class="mv-c"><div class="mv-hd"><div class="mv-l">Rentr\u00e9e autoris\u00e9e sur toutes les zones trait\u00e9es</div>'+_mvBadge('Libre','vert')+'</div></div>';
-    }
-    return;
-  }
-  if(!rows.length){
-    c.innerHTML='<div class="mv-c"><div class="mv-hd"><div class="mv-l">Aucune restriction de rentr\u00e9e en cours</div>'+_mvBadge('Libre','vert')+'</div></div>';
-    return;
-  }
-  // La liste vit dans un ilot : une carte, des lignes, pas des blocs empiles.
-  c.innerHTML='<div class="mv-c'+(nbWait>0?' mv-c-al':'')+'">'+rows.map(function(r){
-    var g=r.g;var wait=r.diffH>0;
-    var badge;
-    if(wait){
-      badge=(r.diffH>=1)?('encore '+Math.ceil(r.diffH)+'h'):('encore '+Math.max(5,Math.round(r.diffH*60))+' min');
-    }else badge='rentr\u00e9e OK';
-    var nbP=(g.parcelles||[]).length;
-    var sub=fmtDate(g.date)+(g.heure?' '+_escHtml(g.heure):'')+' \u00b7 '+(nbP?nbP+' parcelle'+(nbP>1?'s':''):'domaine')+' \u00b7 DRE '+r.drae+'h';
-    if(g.dreAnticipe)sub+=' \u00b7 d\u00e9lai anticip\u00e9 : '+_escHtml(g.dreAnticipe);
-    return '<div class="mv-tr">'
-      +'<div style="min-width:0"><div class="mv-v" style="font-size:13.5px;font-weight:600;color:var(--texte)">'
-        +_escHtml(g.produits.join(' + ')||'Traitement')+'</div><div class="mv-l">'+sub+'</div></div>'
-      +_mvBadge(badge, wait?'rouge':'vert')+'</div>';
-  }).join('')+'</div>';
+  return rows;
 }
 
-// ── Raccourcis selon rôles ──
-function renderHomeRaccourcis(){
-  var c=document.getElementById('home-shc');if(!c)return;
-  var cmp=_homeIsCompact('raccourcis');
-  var btns=[];
-  // ⚠️ Un raccourci EST un bouton d'action : c'est l'un des trois cas ou
-  //   l'icone reste legitime. Elle vient du sprite, plus d'un emoji.
-  // ★ ARRIVEE-1 (§337) : chez l'ouvrier, ni « + Journal » ni « Valider » — il arrive sur les Parcelles et y valide.
-  if(_mvJournalOuvert()&&typeof canWrite==='function'&&canWrite())btns.push({i:'crayon',l:'+ Journal',a:'journal'});
-  if(_mvJournalOuvert())btns.push({i:'check',l:'Valider',a:'valider'});
-  btns.push({i:'liste',l:'Ma trace',a:'trace'});
-  if(typeof isTractoriste==='function'&&isTractoriste())btns.push({i:'tracteur',l:'Session',a:'session'});
-  c.style.gridTemplateColumns='repeat('+btns.length+',1fr)';
-  c.innerHTML=btns.map(function(b){
-    var inner=cmp?('<span class="shc-l">'+b.l+'</span>')
-      :('<span class="shc-i">'+_mvIcon(b.i,20)+'</span><span class="shc-l">'+b.l+'</span>');
-    return '<button onclick="homeShortcut(\''+b.a+'\')">'+inner+'</button>';
-  }).join('');
-}
-function homeShortcut(which){
-  if(which==='journal'){if(window.openJournalEntry)window.openJournalEntry();}
-  else if(which==='valider'){if(window.switchVigneOng)window.switchVigneOng('parcelles');}
-  else if(which==='session'){if(window.openNewSession)window.openNewSession();}
-  else if(which==='trace'){if(window.openMaTrace)window.openMaTrace();}
-}
 
-window.homeShortcut=homeShortcut;
 
 // ════════════════════════════════════════════════════════════════════════════
 // « MA PART DU CHANTIER » — widget d'accueil (lot UX-R2)
@@ -7311,59 +7221,7 @@ function renderHomeDemarrage(){
   c.innerHTML = h;
 }
 
-function renderHomeMaPart(){
-  var c=document.getElementById('home-mapart');
-  if(!c)return;
-  var wrap=document.querySelector('.home-w[data-w="mapart"]');
-  var _pm={};
-  var tache=_mvPartTache(_pm);
-  // PREP-1 (§134) : GUERETTECH n'est pas dans l'équipe, sa part serait toujours vide.
-  if(!tache||window._mvPrepOn()){ if(wrap)wrap.style.display='none'; c.innerHTML=''; return; }
-  if(wrap)wrap.style.display='';
-  var nom=(currentUser&&currentUser.nom)||'';
-  var r=_mvPartCalc(tache,nom);
-  var lbl=document.getElementById('home-mapart-label');
-  if(lbl)lbl.textContent='Ma part du chantier';
-  var pMine=r.tot>0?(r.mine/r.tot*100):0;
-  var pThem=r.tot>0?(r.them/r.tot*100):0;
-  var ha=function(v){return (Math.round((parseFloat(v)||0)*100)/100).toFixed(2).replace('.',',');};
-  var titre=_escHtml(tNom(tache));
-  // PRIO-1 (§235) : la ligne sous le titre dit pourquoi cette tache, en deux ou trois mots.
-  var _M=_pm.M||null, _dt=(_M&&_M.dates&&_M.dates[tache])||null, raison='';
-  if(_M&&_M.mode==='admin') raison='priorit\u00e9 du moment';
-  else if(_M&&_M.mode==='prochaine'&&_dt&&_dt.debut) raison='d\u00e8s le '+_mvPartDate(new Date(_dt.debut+'T12:00:00'));
-  else if(_M&&_M.retard&&_M.retard[tache]) raison='en retard';
 
-  if(_homeIsCompact('mapart')){
-    c.innerHTML='<div class="mv-c"><div class="mv-hd"><div><div class="mv-t">'+titre+'</div>'
-      +'<div class="mv-l">'+ha(r.mine)+' ha de vous sur '+ha(r.done)+' ha faits</div></div>'
-      +_mvBadge(r.pct+' %','neutre')+'</div></div>';
-    return;
-  }
-
-  c.innerHTML='<div class="mv-c mv-c-clic hmp" onclick="goTo(\'parcelles\')">'
-    +'<div class="mv-hd"><div><div class="mv-t">'+titre+'</div>'
-      +'<div class="mv-l" style="margin-top:2px">'+ha(r.done)+' ha faits sur '+ha(r.tot)+' ha'+(raison?(' \u00b7 '+raison):'')+'</div></div>'
-      +'<div class="mv-n">'+r.pct+'<span style="font-size:var(--pt-txt,13px)"> %</span></div></div>'
-    +'<div class="hmp-bar" aria-hidden="true"><span class="mine" style="width:'+pMine.toFixed(1)+'%"></span>'
-      +'<span class="them" style="width:'+pThem.toFixed(1)+'%"></span></div>'
-    +'<div class="hmp-leg">'
-      +'<span><i class="hmp-i-or"></i>'+(r.mine>0?('Votre part \u00b7 '+ha(r.mine)+' ha'):'Vous n\'avez pas encore travaill\u00e9 ce chantier')+'</span>'
-      +(r.them>0?('<span><i class="hmp-i-vt"></i>L\'\u00e9quipe \u00b7 '+ha(r.them)+' ha</span>'):'')
-    +'</div>'
-    +(r.restN>0?('<div class="hmp-rest">Il reste <b>'+r.restN+' parcelle'+(r.restN>1?'s':'')+'</b> \u2014 '+ha(r.rest)+' ha'
-      +(r.restNoms.length?(' \u00b7 '+_escHtml(r.restNoms.join(', '))+(r.restN>r.restNoms.length?'\u2026':'.')):'.')
-      +(r.fin?('<br>Au rythme des 15 derniers jours, fin vers le <b>'+_mvPartDate(r.fin)+'</b>.'):'')
-      +(function(){
-         if(!r.fin)return '';
-         var t=(typeof _mvCompTxt==='function')?_mvCompTxt(tache,_mvIsoLocal(r.fin)):'';
-         return t?('<br><span class="hmp-n1">'+t+'</span>'):'';
-       })()
-      +'</div>'):'<div class="hmp-rest">Chantier termin\u00e9 sur tout le domaine.</div>')
-  +'</div>';
-}
-
-window.renderHomeMaPart=renderHomeMaPart;
 
 // ════════════════════════════════════════════════════════════════════════════
 // « MA TRACE » — la seule page de l'app qui appartienne a celui qui la remplit
@@ -8852,7 +8710,7 @@ function _mvPerSave(){
   saveData('parcelles');
   if(typeof closeOv==='function') closeOv(null,'ovSelParc');
   try{ renderParcelles(); computePStats(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPerSave'); }
-  if(typeof renderHomeCard==='function'){ try{ renderHomeCard(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPerSave#2'); } }
+  if(typeof renderHomeSaison==='function'){ try{ renderHomeSaison(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPerSave#2'); } }
   if(typeof window.renderReglages==='function'){ try{ window.renderReglages(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPerSave#3'); } }
   showToast(_mvSelLabel(nom)+' : '+n+' parcelle'+(n>1?'s':'')+' \u00b7 '+per,'#3D6B27');
 }
@@ -8877,7 +8735,7 @@ function _mvRecSave(){
   saveData('parcelles');
   if(typeof closeOv==='function') closeOv(null,'ovSelParc');
   try{ renderParcelles(); computePStats(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvRecSave'); }
-  if(typeof renderHomeCard==='function'){ try{ renderHomeCard(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvRecSave#2'); } }
+  if(typeof renderHomeSaison==='function'){ try{ renderHomeSaison(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvRecSave#2'); } }
   try{ var _pg=document.querySelector('.page.active'); if(_pg&&_pg.id==='page-cave'&&typeof window.renderCave==='function') window.renderCave(); }
   catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvRecSave#3'); }
   showToast('R\u00e9colte '+_SELP.mil+' : '+(nS?(nS+' parcelle'+(nS>1?'s':'')+' sans r\u00e9colte'):'toutes les parcelles \u00e0 r\u00e9colter'),'#3D6B27');
@@ -8898,7 +8756,7 @@ function saveSelParc(){
   saveData('parcelles');
   closeOv(null,'ovSelParc');
   try{ renderParcelles(); computePStats(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveSelParc'); }
-  if(typeof renderHomeCard==='function'){ try{ renderHomeCard(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveSelParc#2'); } }
+  if(typeof renderHomeSaison==='function'){ try{ renderHomeSaison(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveSelParc#2'); } }
   if(typeof window.renderReglages==='function'){ try{ window.renderReglages(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveSelParc#3'); } }
   showToast(_mvSelLabel(nom)+' : '+n+' parcelle'+(n>1?'s':'')+' cette campagne','#3D6B27');
 }
@@ -9349,7 +9207,7 @@ function _arrApres(nom,msg){
   saveData('parcelles');
   closeOv(null,'ovArrachage');
   renderParcelles(); computePStats();
-  if(typeof renderHomeCard==='function'){ try{ renderHomeCard(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_arrApres#2'); } }
+  if(typeof renderHomeSaison==='function'){ try{ renderHomeSaison(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_arrApres#2'); } }
   openDP(nom);
   showToast(msg,'#3D6B27');
 }
@@ -9748,7 +9606,7 @@ function toggleExcluTache(nomParcelle,nomTache){
   recalcTravaux(nomTache); window.TRAVAUX=TRAVAUX; // MAJ heures + avancement du domaine
   saveData('parcelles');                            // persister l'exclusion
   renderParcelles();computePStats();
-  if(typeof renderHomeCard==='function'){try{renderHomeCard();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/toggleExcluTache'); }}
+  if(typeof renderHomeSaison==='function'){try{renderHomeSaison();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/toggleExcluTache'); }}
   // Rafraîchir la fiche ouverte
   openDP(nomParcelle);
 }
@@ -9887,7 +9745,7 @@ function clearPriority(){
 // (Aujourd'hui, Decider). Seul Parcelles se redessinait : une priorite fixee depuis la carte du
 // Pilotage n'y apparaissait qu'au rechargement.
 function _prioRedessine(){
-  try{ renderHomeMaPart(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_prioRedessine'); }
+  try{ renderHomeMoi(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_prioRedessine'); }   // ACCV-3 (§418) : « Ma saison » remplace « Ma part du chantier »
   try{
     var pg=document.querySelector('.page.active');
     // VIF-1 (§414) : Aujourd'hui à l'écran se met à jour en direct ; sinon le Pilotage se redessine comme avant.
@@ -12010,12 +11868,6 @@ window.openPrompt  = openPrompt;
 window._execPrompt = _execPrompt;
 
 // ── Mise à jour dots card accueil ──
-function updateHomeDots(){
-  var dots=document.querySelectorAll('.hv2-card-dot');
-  dots.forEach(function(d,i){
-    d.classList.toggle('active',i===homeCardMode);
-  });
-}
 
 // ── Filtre dates Journal ──
 function applyJDateFilter(){
@@ -13049,7 +12901,6 @@ async function refreshApp(){
   if (typeof exportPDFRapportSaison !== "undefined") window.exportPDFRapportSaison = exportPDFRapportSaison;
   if (typeof goTo !== "undefined") window.goTo = goTo;
   if (typeof saveData !== "undefined") window.saveData = saveData;
-  if (typeof showHomeLoader !== "undefined") window.showHomeLoader = showHomeLoader;
   if (typeof _showAppLoader !== "undefined") window._showAppLoader = _showAppLoader;
   if (typeof _hideAppLoader !== "undefined") window._hideAppLoader = _hideAppLoader;
   if (typeof hideForgotPanel !== "undefined") window.hideForgotPanel = hideForgotPanel;
@@ -13143,7 +12994,6 @@ async function refreshApp(){
   if (typeof toggleEfAnoTraitee !== "undefined") window.toggleEfAnoTraitee = toggleEfAnoTraitee;
   if (typeof toggleEntAnoTraitee !== "undefined") window.toggleEntAnoTraitee = toggleEntAnoTraitee;
   if (typeof toggleEquipeMode !== "undefined") window.toggleEquipeMode = toggleEquipeMode;
-  if (typeof toggleHomeCard !== "undefined") window.toggleHomeCard = toggleHomeCard;
   if (typeof toggleJEMode !== "undefined") window.toggleJEMode = toggleJEMode;
   if (typeof openEqJour !== "undefined") window.openEqJour = openEqJour;   // ÉQUIPES-1
   if (typeof saveEqJour !== "undefined") window.saveEqJour = saveEqJour;

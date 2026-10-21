@@ -59,7 +59,7 @@ function suite(S) {
   T('Pilotage : sans barème, la ligne s\u2019écrit en surface', w.f._mvkDet(arr) === '0,07 / 0,20 ha');
   T('Pilotage : avec barème, elle reste en heures', w.f._mvkDet(tai) === '35 / 53 h');
   T('Pilotage : ni heures ni surface → un tiret, plus « 0/0 h »', w.f._mvkDet({ h_total: 0, surf_total: 0 }) === '\u2014');
-  T('Accueil et Pilotage : un seul dessin (_mvkAvancement), donc un seul formateur', /window\._mvkAvancement\(data,ret\)/.test(S.app) && /window\._mvkAvancement\(d\.data,_pilRetards\(\)\)/.test(S.pil));
+  T('le Pilotage garde le dessin commun (_mvkAvancement) ; l’Accueil lit les mêmes chiffres (getHomeCardData) dans « La saison » (ACCV-3)', /window\._mvkAvancement\(d\.data,_pilRetards\(\)\)/.test(S.pil) && /getHomeCardData\(\)/.test(S.app.slice(S.app.indexOf('function renderHomeSaison('), S.app.indexOf('\n}\n', S.app.indexOf('function renderHomeSaison(')))));
   T('carte : le compte suit le pourcentage (« 0,3/1 tâche », « 1,5/2 tâches »)',
     w.f._pvCompte(w.f.getPCls(w.ctx.PARCELLES[0])) === '0,3/1 t\u00e2che' && w.f._pvCompte({ nbDone: 1, part: 0.5, nbTotal: 2 }) === '1,5/2 t\u00e2ches');
   T('surface d\u2019une parcelle au centiare (0,0870 · 0,1144 · vide)', w.f._pvSurfFr(0.087) === '0,0870' && w.f._pvSurfFr('0,1144') === '0,1144' && w.f._pvSurfFr('') === '');
@@ -68,7 +68,7 @@ function suite(S) {
   const A = S.app;
   T('puces de Parcelles : le nom affiché, plus la clé', /onclick="setPTacheFilter\('\$\{_escAttr\(t\.nom\)\}',this\)">\$\{_escHtml\(tNom\(t\.nom\)\)\}<\/div>/.test(A));
   T('journal : plus aucune lecture directe de TABREV dans app.js', !/TABREV\[/.test(A) && /const tacheAff=_escHtml\(tNom\(r\.tache\)/.test(A));
-  T('« Ma part du chantier » : pas de point derrière « … »', A.includes("'\\u2026':'.')):'.')") && !A.includes("'\\u2026':'')):'')+'.'"));
+  T('« Ma part du chantier » est retirée (ACCV-3) : le point derrière « … » ne peut plus revenir', !A.includes('function renderHomeMaPart(') && !A.includes("'\\u2026':'')):'')+'.'"));
   T('cartes du Pilotage confinées sous la barre du bas', /\.pil-map\{position:relative;z-index:0;/.test(S.css) && /\.pil-dz-map,\.pil-dz-svg\{position:relative;z-index:0;/.test(S.css));
   T('« 0,0 ETP tracteur » ne s\u2019affiche plus', S.pil.includes('(_tH>0&&_cr>0&&_tH/_cr>=0.05)'));
   T('la journée de référence dit ce qu\u2019elle fait (repli des échéances)', /h_jour: *\{[^}]*repli des <b>\\u00e9ch\\u00e9ances/.test(S.pil) && !/h_jour: *\{[^}]*cart de cadence/.test(S.pil));
@@ -85,13 +85,13 @@ const D = [
   ['calcHeures ne connaît plus que « Validé »', sub('app', '*_mvTFaite(p,t.nom),0);', "*(getTacheStatut(p,t.nom)==='Validé'?1:0),0);")],
   ['_mvTFaite oublie l\u2019arrachage découpé', sub('app', 'return _arrFraction(p)||0;', 'return 0;')],
   ['le formateur commun repasse en heures pour tout', sub('uti', 'if((t.h_total||0)>0) return _mvkNb', 'if(true) return _mvkNb')],
-  ['l\u2019Accueil reprend son propre dessin', sub('app', 'window._mvkAvancement(data,ret)', 'window._mvkAutre(data,ret)')],
+  ['« La saison » ne lit plus les chiffres communs', sub('app', "  var D=getHomeCardData(), ch=document.getElementById('home-saison-chip');", "  var D={}, ch=document.getElementById('home-saison-chip');")],
   ['tNom relit les abréviations et les clés brutes', sub('uti', 'export function tNom(nom) { return tLib(nom); }', 'export function tNom(nom) { return TABREV[nom] || nom; }')],
   ['le compte oublie la part de l\u2019arrachage', sub('app', '+((cl&&cl.part)||0))*10', ')*10')],
   ['la surface repasse en brut', sub('app', "return isFinite(v)?v.toFixed(4).replace('.',','):String(s);", "return String(s).replace('.',',');")],
   ['les puces affichent la clé', sub('app', `onclick="setPTacheFilter('\${_escAttr(t.nom)}',this)">\${_escHtml(tNom(t.nom))}</div>`, `onclick="setPTacheFilter('\${_escAttr(t.nom)}',this)">\${t.nom}</div>`)],
   ['le journal relit TABREV', sub('app', 'const tacheAff=_escHtml(tNom(r.tache)+', 'const tacheAff=_escHtml((TABREV[r.tache]||r.tache)+')],
-  ['le point revient derrière « … »', sub('app', "'\\u2026':'.')):'.')", "'\\u2026':'')):'')+'.'")],
+  ['« Ma part du chantier » revient', sub('app', 'function renderHomeSaison(){', 'function renderHomeMaPart(){}\nfunction renderHomeSaison(){')],
   ['la carte du domaine ressort de son cadre', sub('css', '.pil-map{position:relative;z-index:0;', '.pil-map{')],
   ['« 0,0 ETP tracteur » revient', sub('pil', '(_tH>0&&_cr>0&&_tH/_cr>=0.05)', '(_tH>0)')],
 ];

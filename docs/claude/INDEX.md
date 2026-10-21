@@ -469,3 +469,6 @@
 | 413 | 413. ★★ HLHA-1 — LE hL/ha DE CHAQUE CUVÉE, ET LE RENDEMENT PAR APPELLATION : CE QUI SE DÉCLARE (21/10 — `sr… | `docs/claude/chantiers-380-429.md` |
 | 414 | 414. ★★ VIF-1 — AUJOURD'HUI SE MET À JOUR EN DIRECT ; LES PASTILLES D'ALERTE DE LA BARRE ; TROIS DÉFAUTS D'… | `docs/claude/chantiers-380-429.md` |
 | 415 | 415. ★ ETATS-1 — DES ÉTATS FRANCS SUR LES PLANS ; QUATRE FINITIONS DU PILOTAGE (21/10 — `src/styles.css` (j… | `docs/claude/chantiers-380-429.md` |
+| 416 | 416. ★★ ACCV-1 — LA CARTE DU JOUR DE L’ACCUEIL AU DESSIN DE LA MAQUETTE (21/10 — `src/app.js` (`_homePrioCa… | `docs/claude/chantiers-380-429.md` |
+| 417 | 417. ★★★ ACCV-2 — L’ACCUEIL VIGNE EN SEPT CARTES, AU DESSIN DE LA MAQUETTE : LES LOTS 2 À 4 ENSEMBLE (21/10… | `docs/claude/chantiers-380-429.md` |
+| 418 | 418. ★★ ACCV-3 — L’ACCUEIL VIGNE NETTOYÉ : LES ANCIENS BLOCS ET LEUR CODE RETIRÉS, L’ŒIL SEUL, UNE CARTE MÉ… | `docs/claude/chantiers-380-429.md` |

@@ -615,7 +615,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:var(--pt-txt,13px);margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v9.75</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v9.78</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -666,7 +666,7 @@
   <div id="home-annonce" style="display:none"></div>
 
   <div id="home-cave-note"></div>   <!-- PRESENCE-1 (§344) : « Ta présence est notée » -->
-  <div class="home-edit-banner" id="home-edit-banner">⠿ appui long + glisser pour déplacer · ▲▼ flèches · <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-oeil"></use></svg> masquer · ◼/▭ taille — <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg> la priorité reste épinglée en haut. Disposition mémorisée pour vous</div>
+  <div class="home-edit-banner" id="home-edit-banner"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-oeil"></use></svg> Choisissez les cartes à afficher avec l’œil. L’ordre suit la journée et ne bouge pas : la carte du jour et « À savoir » restent toujours affichées. Votre choix est mémorisé pour vous.</div>
 
   <!-- PILL PRIORITÉ — dépliable -->
   <div class="home-w" data-w="priorite">
@@ -694,43 +694,15 @@
   </div>
   </div><!-- /home-w priorite -->
 
-  <!-- GRANDE STAT CARD — pleine largeur, directement sous le header -->
-  <div class="home-w" data-w="avancement">
-  <div class="hv2-section-label home-lbl-pc" style="margin-top:20px">Avancement de la saison</div>
-  <div class="hv2-card-solo">
-    <div class="hv2-card hv2-card-vert hv2-card-fixed" id="home-stat-card" onclick="toggleHomeCard()" style="width:100%">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div class="hv2-card-picto" id="home-stat-picto" style="margin-bottom:0"><svg class="mv-ic" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
-        <div class="hv2-tap-hint"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-doigt"></use></svg> changer</div>
-      </div>
-      <div class="hv2-card-content" id="home-stat-content"></div>
-      <div class="hv2-card-pied" style="display:flex;align-items:center;justify-content:space-between">
-        <div class="hv2-chip hv2-chip-vert" id="home-stat-chip">Domaine</div>
-        <div class="hv2-card-dots" id="home-stat-dots">
-          <div class="hv2-card-dot active"></div>
-          <div class="hv2-card-dot"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-  </div><!-- /home-w avancement -->
 
   <!-- MISE EN ROUTE — admin seulement, s'efface quand tout est fait -->
-  <div class="home-w" data-w="demarrage">
+  <div class="home-w mvcarte" data-w="demarrage">
   <div class="hv2-section-head" style="margin-top:20px">
     <div class="hv2-section-label" style="margin:0" id="home-demarrage-label">Mise en route</div>
   </div>
   <div id="home-demarrage"></div>
   </div><!-- /home-w demarrage -->
 
-  <!-- MA PART DU CHANTIER (lot UX-R2) -->
-  <div class="home-w" data-w="mapart">
-  <div class="hv2-section-head" style="margin-top:20px">
-    <div class="hv2-section-label" style="margin:0" id="home-mapart-label">Ma part du chantier</div>
-    <div class="hv2-voir-tout" onclick="openMaTrace()">Ma trace ›</div>
-  </div>
-  <div id="home-mapart"></div>
-  </div><!-- /home-w mapart -->
 
   <!-- IDs cachés pour compatibilité renderHome() -->
   <span id="home-prio-card" style="display:none"></span>
@@ -738,78 +710,50 @@
   <span id="home-prio-chip" style="display:none"></span>
   <span id="home-prio-picto" style="display:none"></span>
 
-  <!-- AVANCEMENT PAR TÂCHE -->
-  <div class="home-w" data-w="heures">
-  <div class="hv2-section-head" style="cursor:pointer;margin-top:20px" onclick="document.getElementById('hv2-hcard').classList.toggle('hv2-collapsed')">
-    <div class="hv2-section-label" style="margin:0">Avancement par tâche</div>
-    <div class="hv2-voir-tout">Détail ›</div>
-  </div>
-  <div class="hv2-hcard-wrap" id="hv2-hcard">
-    <div class="heures-card mv-c" id="heures-card-home"></div>
-  </div>
-  </div><!-- /home-w heures -->
 
-  <!-- TRACTEUR SESSIONS — CARD SOMBRE -->
-  <div class="home-w" data-w="tracteur">
-  <div class="hv2-section-label" style="margin-top:20px">Travaux mécaniques</div>
-  <div class="hv2-trac-card" onclick="goTo('tracteur')">
-    <div class="hv2-trac-left">
-      <div class="mv-n" id="hv2-trac-nb" style="color:inherit">3 <span style="font-size:var(--pt-txt,13px)">sessions</span></div>
-      <div class="mv-l" style="color:inherit;opacity:.7">Saison 2026</div>
-    </div>
-    <div class="hv2-trac-bars" id="hv2-trac-bars"></div>
-  </div>
-  </div><!-- /home-w tracteur -->
 
-  <!-- DERNIERS TRAVAUX -->
-  <div class="home-w" data-w="travaux">
-  <div class="hv2-section-head" style="margin-top:20px">
-    <div class="hv2-section-label" style="margin:0">Derniers travaux</div>
-    <div class="hv2-voir-tout" id="home-trv-tout" onclick="goTo('journal')">Tout voir →</div>
-  </div>
-  <div class="hv2-travaux" id="derniers-travaux"></div>
-  </div><!-- /home-w travaux -->
 
-  <!-- MÉTÉO PAR SECTEUR — ALIGN-2 (§237) : un bloc à lui, les secteurs dans UNE carte (≥ 2 communes, sinon le bloc s'efface) -->
-  <div class="home-w" data-w="meteosect">
-  <div class="hv2-section-label" style="margin-top:20px">Météo par secteur</div>
-  <div id="home-meteo-communes"></div>
-  </div><!-- /home-w meteosect -->
 
-  <!-- MÉTÉO 5 JOURS (v4.34) -->
-  <div class="home-w" data-w="meteo5">
-  <div class="hv2-section-label" style="margin-top:20px">Météo 5 jours · vignoble</div>
-  <div id="home-meteo5"></div>
+  <!-- MÉTÉO — ★ ACCV-3 (§418) : une seule carte, « Vignoble » (les cinq jours) ou « Secteurs » (une ligne par commune) -->
+  <div class="home-w mvcarte" data-w="meteo5">
+    <div class="hk-h"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-soleil"></use></svg><span class="hk-t">Météo</span><span class="hk-seg" id="home-meteo-vue" role="group" aria-label="Vue de la météo" style="display:none"><button type="button" class="mvbtn mvbtn-choix" data-vue="vignoble" aria-pressed="true" onclick="_homeMeteoVue('vignoble')">Vignoble</button><button type="button" class="mvbtn mvbtn-choix" data-vue="secteurs" aria-pressed="false" onclick="_homeMeteoVue('secteurs')">Secteurs</button></span></div>
+    <div id="home-meteo5"></div>
+    <div id="home-meteo-communes" style="display:none"></div>
   <div class="cm-bulk-entry" id="home-cm-bulk" onclick="openCommunesBulk()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carte"></use></svg> Communes & météo par secteur <span>›</span></div>
   </div><!-- /home-w meteo5 -->
 
-  <!-- RACCOURCIS (v4.34) -->
-  <div class="home-w" data-w="raccourcis">
-  <div class="hv2-section-label" style="margin-top:20px">Raccourcis</div>
-  <div class="home-shc" id="home-shc"></div>
-  </div><!-- /home-w raccourcis -->
 
-  <!-- MA SEMAINE (v4.34) -->
-  <div class="home-w" data-w="masemaine">
-  <div class="hv2-section-head" style="margin-top:20px">
-    <div class="hv2-section-label" style="margin:0" id="home-msem-label">Ma semaine</div>
-    <div class="hv2-voir-tout" id="home-msem-journal" onclick="goTo('journal')">Journal ›</div><div class="hv2-voir-tout" id="home-msem-trace" onclick="window.openMaTrace&&window.openMaTrace()" style="display:none">Ma trace ›</div>
+
+
+  <!-- ★ ACCV-2 (§417) : les cartes de la maquette — « À savoir », « La saison », « Ma saison », « Au tracteur », « En direct ».
+       _accZones (app.js) les range : la journée à gauche, ce qu'il faut savoir à droite ; au téléphone, l'ordre du matin. -->
+  <div class="home-w hk mvcarte" data-w="savoir">
+    <div class="hk-h"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cloche"></use></svg><span class="hk-t">À savoir</span><span class="mvpas mvpas-compteur" id="home-savoir-n" style="display:none"></span></div>
+    <div id="home-savoir"></div>
   </div>
-  <div id="home-msem"></div>
-  </div><!-- /home-w masemaine -->
-
-  <!-- DÉLAI DE RENTRÉE (v4.34) -->
-  <div class="home-w" data-w="dre">
-  <div class="hv2-section-label" style="margin-top:20px">Délai de rentrée parcelles</div>
-  <div id="home-dre"></div>
-  </div><!-- /home-w dre -->
+  <div class="home-w hk mvcarte" data-w="saison">
+    <div class="hk-h"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg><span class="hk-t">La saison</span><span class="mvpas mvpas-etiquette hk-chip" id="home-saison-chip"></span></div>
+    <div id="home-saison"></div>
+  </div>
+  <div class="home-w hk mvcarte" data-w="moi">
+    <div class="hk-h"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-personne"></use></svg><span class="hk-t">Ma saison</span></div>
+    <div id="home-moi"></div>
+  </div>
+  <div class="home-w hk mvcarte" data-w="trac" style="display:none">
+    <div class="hk-h"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg><span class="hk-t">Au tracteur</span></div>
+    <div id="home-trac"></div>
+  </div>
+  <div class="home-w hk mvcarte" data-w="direct">
+    <div class="hk-h"><span class="hk-vif off" id="home-direct-vif" aria-hidden="true"></span><span class="hk-t">En direct</span><span class="mvpas mvpas-compteur" id="home-direct-n" style="display:none"></span></div>
+    <div id="home-direct"></div>
+  </div>
 
   <!-- IDs cachés pour compatibilité avec renderHome() -->
   <span id="hs-travaux" style="display:none">0</span>
 
   <!-- Disposition par défaut du domaine (admin, mode édition) (v4.34) -->
   <div id="home-admin-foot" style="display:none">
-    <button onclick="homeSetDomainLayout()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg> Définir comme disposition par défaut du domaine</button>
+    <button onclick="homeSetDomainLayout()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg> Proposer ce choix de cartes à toute l’équipe</button>
     <div class="haf-note">Les membres qui n'ont pas encore personnalisé leur accueil hériteront de cette disposition.</div>
   </div>
 
@@ -1472,7 +1416,7 @@
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v9.75</div>
+        <div class="mod-header-sub">Ma Vigne v9.78</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
       
@@ -1586,7 +1530,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg></div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v9.75 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div class="ver-tag">Ma Vigne v9.78 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -3686,7 +3630,7 @@
     </div>
   </div>
 </div>
-<script src="/boot.js?v=9.75"></script>
+<script src="/boot.js?v=9.78"></script>
 <script type="module" src="/src/app.js"></script>
 
 <!-- ── Overlay erreur critique Ma Vigne (v2.68) ── -->
@@ -3778,7 +3722,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v9.75</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v9.78</span>
       </div>
     </div>
     <div class="modal-body">

@@ -29,10 +29,10 @@ function suite(APP, CSS, HTML) {
   const GL = consts + '\n' + sansCom(fn(APP, 'function _homeLayoutKey(){')) + sansCom(fn(APP, 'function getHomeLayout(){'));
   const lay = (stocke) => { const ctx = { currentUser: { nom: 'Nico' }, localStorage: { getItem: () => null }, JSON }; ctx.window = { CONFIG: stocke ? { home_layout: { Nico: stocke } } : {} }; vm.createContext(ctx); vm.runInContext(GL + '\nthis.__g=getHomeLayout;', ctx); return ctx.__g(); };
   let L = null; try { L = lay({ order: ['mapart', 'avancement', 'meteo5', 'heures', 'tracteur'], hidden: ['meteo5'], compact: [], large: ['heures', 'inconnu'] }); } catch (e) { L = null; }
-  T('un ordre déjà réglé : « meteosect » prend la place de « meteo5 », et son état masqué', L && L.order.indexOf('meteosect') === L.order.indexOf('meteo5') - 1 && L.hidden.indexOf('meteosect') >= 0);
-  T('la pleine largeur est conservée, purgée des blocs inconnus', L && Array.isArray(L.large) && L.large.join() === 'heures');
+  T('ACCV-3 (§418) : un ordre déjà réglé oublie les blocs retirés et « meteosect », garde la météo', L && L.order.indexOf('meteosect') === -1 && L.order.indexOf('mapart') === -1 && L.order.indexOf('meteo5') !== -1 && L.hidden.indexOf('meteo5') !== -1);
+  T('ni pleine largeur ni taille compacte : purgées au chargement (Personnaliser, c’est l’œil seul)', L && Array.isArray(L.large) && L.large.length === 0 && L.compact.length === 0);
   let D = null; try { D = lay(null); } catch (e) { D = null; }
-  T('par défaut, les rangées de la maquette : Ma part | saison, tâches | secteurs, 5 jours | tracteur', D && D.order.slice(1, 7).join() === 'mapart,avancement,heures,meteosect,meteo5,tracteur');
+  T('par défaut, l’ordre du matin : À savoir, la météo, la saison, ma saison, le tracteur, en direct', D && D.order.slice(1, 7).join() === 'savoir,meteo5,saison,moi,trac,direct');
   // CSS
   T('ordinateur : une grille de deux colonnes, les blocs d’une rangée étirés', /#home-cols\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\);column-gap:var\(--e-4,16px\);align-items:stretch;\}/.test(CSS) && !/#home-cols\{column-count/.test(CSS));
   T('un bloc pleine largeur ou seul prend la rangée', /#home-cols > \.home-w-large,#home-cols > \.home-w-seul\{grid-column:1\/-1;\}/.test(CSS));
@@ -42,9 +42,9 @@ function suite(APP, CSS, HTML) {
   T('le bouton ↔ est cliquable en mode édition, et absent au téléphone', /:not\(\.home-w-pin\):not\(\.home-w-larg\)\{pointer-events:none;\}/.test(CSS) && /@media \(max-width:1023px\)\{\.home-edit \.home-w-larg\{display:none;\}\}/.test(CSS));
   // la météo par secteur
   const MC = fn(APP, 'function renderHomeMeteoCommunes(){');
-  T('la météo par secteur : UNE carte, un pied « Communes », le bloc s’efface sous deux communes', /<div class="mv-c cm-wx-carte">/.test(MC) && /class="cm-wx-pied"/.test(MC) && /if\(groups\.length<2\)\{ c\.innerHTML=''; if\(wrapS\)wrapS\.style\.display='none';/.test(MC));
-  T('index.html : le bloc « meteosect » porte les secteurs, « meteo5 » ne les porte plus', /data-w="meteosect">\s*<div class="hv2-section-label"[^>]*>Météo par secteur<\/div>\s*<div id="home-meteo-communes"><\/div>/.test(HTML) && !/data-w="meteo5">\s*<div id="home-meteo-communes">/.test(HTML) && /id="home-cm-bulk"/.test(HTML));
-  T('les boutons du mode édition : ↔ posé, et retiré au rendu suivant', /'\.home-w-larg'\]\.forEach/.test(APP) && /homeWidgetLarge\(\\''\+id\+'\\'\)/.test(APP));
+  T('la météo par secteur : UNE carte, un pied « Communes », la bascule s’efface sous deux communes', /<div class="mv-c cm-wx-carte">/.test(MC) && /class="cm-wx-pied"/.test(MC) && /if\(groups\.length<2\)\{ c\.innerHTML=''; if\(seg\)seg\.style\.display='none'; window\._homeMeteoVue\('vignoble'\);/.test(MC));
+  T('index.html : UNE carte Météo — la bascule Vignoble / Secteurs, les cinq jours, les secteurs et l’entrée Communes', /data-w="meteo5">[\s\S]{0,600}id="home-meteo-vue"[\s\S]{0,900}<div id="home-meteo5"><\/div>\s*<div id="home-meteo-communes" style="display:none"><\/div>/.test(HTML) && !/data-w="meteosect"/.test(HTML) && /id="home-cm-bulk"/.test(HTML));
+  T('Personnaliser : l’œil seul — plus de bouton ↔, ni taille, ni flèches, ni poignée', /'\.home-w-larg'\]\.forEach/.test(APP) && !/homeWidgetLarge|homeWidgetSize|homeWidgetMove/.test(APP));
   return out;
 }
 function joueS(A, C, H) { try { return suite(A, C, H); } catch (e) { return [['plantage : ' + (e && e.message), false]]; } }
@@ -57,8 +57,8 @@ const DEF = [
   ['un bloc resté seul ne s’étire plus', a => a.replace("  if(att) att.classList.add('home-w-seul');\n}", '\n}'), c => c],
   ['un bloc masqué compte encore', a => a.replace("if(el.classList.contains('home-w-off')&&!homeEditMode) return false;", ''), c => c],
   ['la pleine largeur est ignorée', a => a.replace("if(el.classList.contains('home-w-large')){ if(att) att.classList.add('home-w-seul'); att=null; return; }", ''), c => c],
-  ['« meteosect » part en queue d’un ordre réglé', a => a.replace("lay.order.splice(lay.order.indexOf('meteo5'),0,'meteosect');", ''), c => c],
-  ['la pleine largeur se perd au chargement', a => a.replace(',large:(lay.large||[]).slice()', ''), c => c],
+  ['« meteosect » revient parmi les blocs', a => a.replace("const HOME_WIDGETS=['demarrage','savoir','meteo5',", "const HOME_WIDGETS=['demarrage','savoir','meteosect','meteo5',"), c => c],
+  ['la pleine largeur revient', a => a.replace('lay.compact=[]; lay.large=[];', 'lay.compact=[];'), c => c],
   ['les colonnes de KIT-5 reviennent', a => a, c => c.replace('#home-cols{display:grid;', '#home-cols{column-count:2;')],
   ['un bloc seul ne prend plus la rangée', a => a, c => c.replace('#home-cols > .home-w-large,#home-cols > .home-w-seul{grid-column:1/-1;}', '')],
   ['le pied de la carte de saison flotte', a => a, c => c.replace('#home-cols #home-stat-card > .hv2-card-pied{margin-top:auto;}', '')],

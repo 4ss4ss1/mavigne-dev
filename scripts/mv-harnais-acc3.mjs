@@ -32,10 +32,10 @@ function suite(S) {
   T('la note du premier jour pluvieux (au-delà de 50 %), avec son nom', m.includes('Pluie probable samedi\u00a0: 80\u00a0%.') && !m.includes('vendredi\u00a0:'));
   T('le gel reste signalé, la version compacte reste celle d’avant', m.includes('hm5-d gel') && mc.includes('class="hm5-mini"') && !mc.includes('hm5-now'));
   T('le fil : « Aujourd’hui », « Hier », sinon la date ; l’heure lue dans l’identifiant, rien sinon', j.auj === 'Aujourd\u2019hui' && j.hier === 'Hier' && j.vieux === 'le 2026-09-01' && j.h === '09:10' && j.rien === '');
-  T('le fil : un intertitre par jour, les initiales, « a validé / a commencé », les noms échappés', S.app.includes("const jour=_hvJour(r.date), tete=(jour!==_jPrec)?`<div class=\"hv2-fil-jour\">${_escHtml(jour)}</div>`:'';") && S.app.includes("${isVal?'a validé':'a commencé'}") && S.app.includes('<b>${_escHtml(r.parcelle)}</b>'));
+  T('le fil d’« En direct » : un intertitre par jour, les noms échappés — l’ancien fil des derniers travaux est retiré (ACCV-3)', (() => { const i = S.app.indexOf('function renderHomeDirect('); const d = i < 0 ? '' : S.app.slice(i, S.app.indexOf('\n}\n', i)); return d.includes('_hvJour(') && d.includes('_escHtml(') && !S.app.includes("getElementById('derniers-travaux')"); })());
   T('le bloc ACC-3 est posé après ACC-2, par jetons seulement (' + dur.length + ')', B.length > 2500 && S.css.indexOf('★ ACC-3 (§278)') > S.css.indexOf('★ FIN ACC-2') && dur.length === 0);
   T('cinq colonnes à filet, et la ligne du fil sur quatre colonnes', B.includes('#page-home .hm5{ display:grid!important; grid-template-columns:repeat(5,minmax(0,1fr));') && B.includes('grid-template-columns:var(--h-row-2) var(--av) minmax(0,1fr) auto;'));
-  T('l’aide dit le risque de pluie (pas des millimètres) et le fil', S.uti.includes("['La météo 5 jours', \"le jour en tête, puis cinq colonnes.") && S.uti.includes('une probabilité, pas des millimètres') && S.uti.includes("['Derniers travaux', \"le fil des quatre derniers travaux"));
+  T('l’aide dit le risque de pluie (pas des millimètres) et le fil', S.uti.includes("['La météo 5 jours', \"le jour en tête, puis cinq colonnes.") && S.uti.includes('une probabilité, pas des millimètres') && S.uti.includes("['En direct', \" : ce qui est commencé aujourd’hui")   /* ACCV-2 (§417) : « En direct » remplace « Derniers travaux » */);
   T('ce harnais est branché dans la liste des contrôles', S.liste.includes("['node scripts/mv-harnais-acc3.mjs'],") && S.liste.includes("['node scripts/mv-harnais-acc3.mjs --contre'],"));
   return out;
 }

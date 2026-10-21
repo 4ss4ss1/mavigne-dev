@@ -243,8 +243,8 @@ function statiques(S) {
   r.push([fonction(S.app, '_mvSessCheck', 'src/app.js').indexOf('_mvPrepOn()') !== -1, 'la garde multi-onglet ignore la préparation']);
   r.push([fonction(S.app, '_mvRefreshCurrentUserRoles', 'src/app.js').indexOf('_mvPrepOn()') !== -1,
     'les rôles de GUERETTECH ne sont jamais relus dans MEMBRES']);
-  r.push([fonction(S.app, 'renderHomeMaPart', 'src/app.js').indexOf('if(!tache||window._mvPrepOn())') !== -1,
-    '« Ma part du chantier » masquée en préparation']);
+  r.push([fonction(S.app, 'renderHomeMoi', 'src/app.js').indexOf('_mvPrepOn()') !== -1,
+    '« Ma saison » masquée en préparation (ACCV-3 : elle remplace « Ma part du chantier »)']);
   const mt = fonction(S.app, 'openMaTrace', 'src/app.js');
   r.push([mt.indexOf('_mvPrepOn()') !== -1 && mt.indexOf('_mvPrepOn()') < mt.indexOf('renderMaTrace();'), '« Ma trace » refusée en préparation']);
   const wn = fonction(S.utils, 'checkWhatsNew', 'src/utils.js');
