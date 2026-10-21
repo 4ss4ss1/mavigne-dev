@@ -718,3 +718,20 @@ Un premier jet de ce lot avait été préparé par-dessus REVUE-9, livré mais p
 
 ### 410f. La leçon
 **Un balayage n’est complet que s’il connaît tous les endroits où vit la règle.** La feuille, les règles injectées, les attributs `style` — et les blocs `<style>` d’`index.html`, oubliés au premier passage. Lister les sources avant de balayer.
+
+## 411. BACKLOG-1 — LE BACKLOG AUDITÉ ET RANGÉ (21/10 — `CLAUDE.md` (§28) · `docs/claude/backlog-archive-2026-10-21.md` (nouveau) · pas de bump, base `5f2996a`)
+
+### 411a. La demande
+Après la revue complète (§406-§410), Nico demande « ce qu’il reste à faire en tout, exactement ». Le §28 comptait 75 rubriques « ce qui reste ouvert », 236 points, jamais repassés depuis l’audit du 16/08 (§44) — certains déjà réglés (exemple : il demandait d’écrire un contrôle du contraste qui existe). Conseil donné : le repasser point par point contre le code, rayer ce qui est fait, rendre une liste courte. Nico : « on suit ton conseil ».
+
+### 411b. La méthode
+Les 236 points découpés et triés : 18 déjà marqués faits, 47 vérifications à faire chez Nico, 171 lus un par un. Quinze points vérifiés dans le code le 21/10 : le contrôle du contraste existe ; `.val-toggle` n’a aucun emploi ; `avecBureau` est en place (la masse salariale et les bureaux) ; `toISOString().slice(0,10)` : 14 (64 au 16/08) ; `catch` vides : 20 (193) ; couleurs en dur dans les JS : 4 224 (3 319) ; `mvDate()`/`mvNum()`, le rôle `pil:true`, le contrat « tâcheron » : 0 ; `.pil-cr-note` toujours caché au téléphone ; « Solde cumulé » et « Reste à prendre » coexistent ; le Cuvier dit encore « la colonne reste vide » ; `_pecZeros` encore appelé deux fois ; `mv-harnais-cuvier-correction.mjs` toujours là, hors chaîne ; `demarrage.html` 939 lignes ; 17 points de rupture dans la feuille ; les modules les plus lourds (`utils.js` 979 ko, `app.js` 925, `pilotage.js` 911, `cave.js` 667).
+
+### 411c. Ce qui est livré
+- **Le §28 réécrit** : un bloc d’alerte (le contrôle de la doc exige que le §28 s’ouvre sur un ⚠️), puis six paquets, une ligne par point avec son lot d’origine — **1. à vérifier chez Nico** (par module), **2. gestes hors code** (déploiements dans l’ordre, règles Firestore, installation à blanc, données d’août), **3. décisions** (douze questions), **4. petites suites techniques** (dont la dette re-mesurée), **5. chantiers** (le site internet, le déploiement général, la cave, « Pourquoi on le fait », le Pilotage…), **6. commercial et juridique** — et la liste de ce qui est rayé, avec sa raison.
+- **L’archive** : le §28 d’avant, mot pour mot, dans `docs/claude/backlog-archive-2026-10-21.md` (896 lignes → 60 dans `CLAUDE.md`).
+
+- **Chaîne** : **471 commandes, 0 rouge**, jouée d’un trait après le dernier changement.
+
+### 411d. La leçon
+**Un backlog qu’on ne fait qu’allonger finit par mentir.** Chaque lot y posait ses restes ; personne ne rayait. Repasser la liste contre le code — pas contre la mémoire — est un lot à part entière, à refaire de temps en temps.

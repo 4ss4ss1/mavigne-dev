@@ -1,0 +1,15 @@
+{
+  "lot": "BACKLOG-1",
+  "section": "§411",
+  "base": "5f2996a06e714b3619c2c96e37cf95a6023ab6e0",
+  "inclut": [],
+  "date": "2026-10-21",
+  "fichiers": {
+    ".mv-base": "b50c513f47deed99c61138723dc0c37a923a521f1d99cf25e6c60560db712dc3",
+    "CLAUDE.md": "3748fc934cbe11e930f57ae79e390f5291b896578355f621bf099fd48b29aadb",
+    "docs/claude/INDEX.md": "a271fff8da09589d9f6b7cc6874f3f53514fb0fe42aa418aa44514d95b208bd1",
+    "docs/claude/chantiers-380-429.md": "46c74f0d8f4937efcfb6d7eaae9be6001e1182c233a0dd5be971c824dcf21ba5",
+    "docs/claude/journal.md": "14d2131ce8fdcf1e8446be9516fb605ed9d9cd914760e49af4e778b40a7211ae",
+    "docs/claude/backlog-archive-2026-10-21.md": "1815636a988d218123744234ffe859ec9d50d89e5a6b65e645caf81640c8d356"
+  }
+}

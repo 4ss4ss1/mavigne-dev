@@ -464,3 +464,4 @@
 | 408 | 408. REVUE-8 — LA REVUE, LOT 3 (1/2) : RIEN À MESURER N’EST PAS « 100 % » (21/10 — `src/app.js` · `src/pilo… | `docs/claude/chantiers-380-429.md` |
 | 409 | 409. REVUE-9 — LA VISITE DE DÉMO SANS « MISE EN ROUTE » (21/10 — `src/app.js` · `src/utils.js` (APP, WHATS_… | `docs/claude/chantiers-380-429.md` |
 | 410 | 410. REVUE-10 — LA REVUE, LOT 4 : LES FINITIONS (21/10 — `index.html` · `src/tracteur.js` · `src/utils.js` … | `docs/claude/chantiers-380-429.md` |
+| 411 | 411. BACKLOG-1 — LE BACKLOG AUDITÉ ET RANGÉ (21/10 — `CLAUDE.md` (§28) · `docs/claude/backlog-archive-2026-… | `docs/claude/chantiers-380-429.md` |
