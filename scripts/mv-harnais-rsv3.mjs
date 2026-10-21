@@ -16,7 +16,7 @@ function suite(S) {
   T('le rendu du bilan produit bien les classes recalées (en-tête, tableau, stock négatif, note)', S.rsv.includes('<div class="mvr-exp-head"><div class="mvr-exp-t">Bilan matière — Intrants</div>') && S.rsv.includes('<div class="mvr-exp-tbl"><table>') && S.rsv.includes("((s.known&&s.q<0)?'mvr-neg':'')") && S.rsv.includes('<div class="mvr-exp-legal">'));
   T('l’en-tête quitte le noir cave : carte claire, titre en Outfit', B.includes('#page-reserve .mvr-exp-head{ border:var(--bw) solid var(--ligne,#E7E6E2);') && B.includes('background:var(--bg-card); }') && B.includes('#page-reserve .mvr-exp-t{ font-family:var(--font-ui);'));
   T('le stock négatif reste en rouge, plus fort que la couleur des cellules', B.includes('#page-reserve .mvr-exp-tbl td.mvr-neg{ color:var(--danger);') && B.includes('#page-reserve .mvr-exp-tbl td{ border-top-color:var(--ligne,#E7E6E2); color:var(--texte-med); }'));
-  T('les titres de colonne du kit, les chiffres tabulaires, la note sur fond doux', B.includes('#page-reserve .mvr-exp-tbl table{ font-size:var(--pt-txt,13px); font-variant-numeric:tabular-nums; }') && B.includes('#page-reserve .mvr-exp-legal{ border-radius:var(--r-sm,6px); background:var(--bg-doux);'));
+  T('les titres de colonne du kit, les chiffres tabulaires, la note sur fond doux', B.includes('#page-reserve .mvr-exp-tbl table{ font-size:var(--pt-txt,13px); font-variant-numeric:lining-nums tabular-nums; }') && B.includes('#page-reserve .mvr-exp-legal{ border-radius:var(--r-sm,6px); background:var(--bg-doux);'));
   T('ce harnais est branché dans la liste des contrôles', S.liste.includes("['node scripts/mv-harnais-rsv3.mjs'],") && S.liste.includes("['node scripts/mv-harnais-rsv3.mjs --contre'],"));
   return out;
 }

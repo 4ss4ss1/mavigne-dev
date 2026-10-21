@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.67';
+export const APP_VERSION = '9.68';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -82,7 +82,7 @@ window._mvDocCss = function(orient){
     + '.mvdoc-hd::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;'
       + 'background:linear-gradient(90deg,#8A5A38 0%,' + MV_DOC_OR + ' 48%,#D8BC72 100%)}'
     + '.mvdoc-dom{font-family:var(--font-titre,\'Cormorant Garamond\',Georgia,serif);font-size:19px;font-weight:600;letter-spacing:.3px;line-height:1.15}'
-    + '.mvdoc-tit{font-size:var(--pt-micro,11px);font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:#D8BC72;margin-top:5px}'
+    + '.mvdoc-tit{font-size:var(--pt-micro,11px);font-weight:700;text-transform:none;letter-spacing:0;color:#D8BC72;margin-top:5px}'
     + '.mvdoc-meta{font-size:var(--pt-nano,9.5px);color:#A79E8E;margin-top:6px;display:flex;gap:14px;flex-wrap:wrap}'
     // corps et pied
     + '.mvdoc-body{padding:16px 18px}'
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.68', d: '2026-10-21', items: [   // REVUE-7 (§407) : la lecture — chiffres et libellés
+    { niv: 0, pour: ['tous'], emoji: 'check', titre: 'Des chiffres et des titres plus faciles à lire',
+      desc: "Les chiffres s’écrivent tous à pleine hauteur et s’alignent en colonne : fini le « 0 » qui ressemblait à un « o ». Les petits titres qui étaient en capitales espacées (« Millésime », « Mes jalons », « Finies »…) s’écrivent en lettres normales, et « Arrach. » devient « Arrachées »." },
+  ] },
   { v: '9.67', d: '2026-10-21', items: [   // REVUE-6 (§406) : la revue complète, premières corrections
     { niv: 1, pour: ['tous'], emoji: 'check', titre: 'Petites corrections, grand confort',
       desc: "Le message « Mode hors ligne » ne reste plus posé sur l’en-tête : il s’annonce puis s’efface, le voyant en haut à droite garde l’état. La suppression d’une session se range dans une zone de danger, en bouton discret (le rouge plein n’arrive qu’à la confirmation). La priorité du jour s’écrit dans un doré lisible, et le Chai dit « Ouiller la cuvée aujourd’hui » quand il n’y en a qu’une." },

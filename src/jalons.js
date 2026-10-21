@@ -640,7 +640,7 @@ function _mvSaisonPdf() {
   window._mvDocOpen({ titre: 'Ma saison en images', metas: [u.nom, R.saison], cat: 'saison',
     corps: '<div class="si-print">' + _mvSaisonCartesHtml(R, esc) + '</div>',
     css: '.si-print{display:grid;grid-template-columns:1fr 1fr;gap:12px}.si-c{border:1px solid rgba(0,0,0,.18);border-radius:12px;padding:14px;break-inside:avoid;page-break-inside:avoid}'
-       + '.si-n{font-size:10px;opacity:.6}.si-t{font-size:var(--pt-nano,11px);letter-spacing:.06em;text-transform:uppercase;font-weight:700;margin-top:4px}'
+       + '.si-n{font-size:10px;opacity:.6}.si-t{font-size:var(--pt-nano,11px);letter-spacing:0;text-transform:none;font-weight:700;margin-top:4px}'
        + '.si-g{font-size:26px;font-weight:700;margin-top:6px}.si-p{opacity:.75}.si-l{margin:8px 0 0;padding-left:18px}' });
 }
 window.openSaisonImages = openSaisonImages;

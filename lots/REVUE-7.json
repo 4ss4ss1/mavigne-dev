@@ -1,0 +1,29 @@
+{
+  "lot": "REVUE-7",
+  "section": "§407",
+  "base": "1c8952bc58b87fbc272fac8d709eb08ca9cb9d43",
+  "inclut": [],
+  "date": "2026-10-21",
+  "fichiers": {
+    ".mv-base": "cf3b66c596cc794345b899c4839f216a407b81e98679fe9b99c19ae359921278",
+    "CLAUDE.md": "0d2e5f5dc727d5c02d8a4b81af4ada5a00a025768377fb6c86fd55f705cfbe0c",
+    "docs/claude/INDEX.md": "6fd34d19cf84476e2508821c3e6a76ce06dadb2b38f6e5766867f8756dbdc1b5",
+    "docs/claude/chantiers-380-429.md": "4607c76e1169d8082580da10be334ac3fab17ae454aff37abe154cf98def75b9",
+    "docs/claude/journal.md": "6b8711010f4e2f85abf8620899549a62321fb9d16ee76cb21806d52476cffc80",
+    "index.html": "edbc1610279ffa3fb74836d9086068a4898e11519a0603ee1d38001de0f8f9ed",
+    "public/sw.js": "af788c19e684befbb7cf78c7badd6d8434da741dd2d205752d4eac3e13a551f5",
+    "scripts/mv-harnais-jetons.mjs": "1e8084ca56f1b6dffa6bffaeeb7297740c8afe1bb994e6c007c098042f724a2c",
+    "scripts/mv-harnais-rsv3.mjs": "94cec50e50a59b1cf4415f49ed959d176860a3f962a8aad86f628b466a713b13",
+    "src/app.js": "8c3b1bf203d46fcf9197f2bf8746600ffa90daaf6c9dae8faf7320c43babb57c",
+    "src/cave.js": "ba4fbc2a8a9edf258ec9eeafd77edbe9a38f2c87064dd80da1894aa9b88ba52b",
+    "src/cuvier.js": "fd529a83ecb3b015e7cf48affc3f410550dfe127b077c546cbed1ec5a9ee18a4",
+    "src/jalons.js": "06336845f71e1cd137fe1c9678567c34e13a624352c7a6211e53833238b2a7a8",
+    "src/phyto.js": "de1b9e482eff318c90e8b06bd2c19ea8bdc91c14dc94c4b67c4f8cfa08951b32",
+    "src/pilotage.js": "ef351a940dab22bdff0cc9690ee10b0879c6e6baaef4c3338d0cbe7daf1a7660",
+    "src/planning.js": "47294bf87ac07d260f02c696d9c7c9fe482c1cc5c047434f249fda4538250ead",
+    "src/reglages.js": "65c924bd4868f8996858cb679d59b0c30b117aa6f1f727fcea37e36606593865",
+    "src/reserve.js": "38de3ddc315c6fe02d197a85220835de9c7b499272e24d0e8075e53c1db2609f",
+    "src/styles.css": "c14f1e96f89c846a90033f962170f1ab661d05455d1d50764e32a0d228709c32",
+    "src/utils.js": "d180bf8b0657b971139fc1bbdd99e5a2d73db095cfaaac30d7369c4499e261d8"
+  }
+}

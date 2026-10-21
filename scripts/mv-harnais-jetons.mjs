@@ -198,8 +198,9 @@ function controles(CSS, ref) {
      #app-root ligne 3197, les overlays sont ses FRÈRES et les overlays
      dynamiques sont posés par document.body.appendChild. Ancrée sur #app-root,
      la règle laisserait toutes les modales en chiffres proportionnels. */
-  t('les chiffres sont tabulaires, et la règle est posée sur :root',
-    /:root\{\s*font-variant-numeric\s*:\s*tabular-nums\s*;?\s*\}/.test(NU));
+  // REVUE-7 (§407) : « tabular-nums » seul remet Cormorant à ses chiffres elzéviriens (le 0 en forme de o) — la règle redit lining-nums
+  t('les chiffres sont alignés et tabulaires, et la règle est posée sur :root',
+    /:root\{\s*font-variant-numeric\s*:\s*lining-nums tabular-nums\s*;?\s*\}/.test(NU));
   t('la règle des chiffres n\'est PAS ancrée sur #app-root',
     !/#app-root\s*\{[^}]*font-variant-numeric/.test(NU));
   t('l\'anneau de focus existe, avec son repli et son décalage',
@@ -335,7 +336,7 @@ function joue(CSS, silencieux) {
 const MUTATIONS = [
   ['on retire --r-md de :root',
     s => s.replace('--r-sm:6px; --r-md:8px;', '--r-sm:6px;'),
-    'vaut 12px'],
+    'vaut 8px'],   // REVUE-7 (§407) : --r-md vaut 8 px depuis la série CHARTE ; la contre-épreuve attendait encore 12
   ['on change la valeur de --fw-semi',
     s => s.replace('--fw-semi:600;', '--fw-semi:650;'),
     'vaut 600'],
@@ -353,8 +354,8 @@ const MUTATIONS = [
     s => s.replace('  --fw-med:500;', '  --shadow-lg:0 1px 1px #000;\n  --fw-med:500;'),
     'plus de fois que prévu'],
   ['la règle des chiffres redescend sur #app-root',
-    s => s.replace(':root{ font-variant-numeric:tabular-nums; }',
-                   '#app-root{ font-variant-numeric:tabular-nums; }'),
+    s => s.replace(':root{ font-variant-numeric:lining-nums tabular-nums; }',
+                   '#app-root{ font-variant-numeric:lining-nums tabular-nums; }'),
     'posée sur :root'],
   ['un champ éteint l\'anneau APRÈS la règle de focus',
     s => s + '\n.zz-champ{outline:none;}\n',

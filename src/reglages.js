@@ -3375,7 +3375,7 @@ function _clotOverlayHTML(ctx){
   var reste = Math.max(0, 100 - (ctx.pct||0));
   var stat = function(v,l){ return '<div class="mvcarte-fond" style="padding:12px 6px;text-align:center">'
     + '<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-lg,24px);color:#1C1813">'+v+'</div>'
-    + '<div style="font-size:9px;letter-spacing:.4px;text-transform:uppercase;color:#6B655C;margin-top:3px">'+l+'</div></div>'; };
+    + '<div style="font-size:9px;color:#6B655C;margin-top:3px">'+l+'</div></div>'; };
   var prepOpts = (ctx.prepared||[]).map(function(s){ return '<option value="'+_clotEsc(s.nom)+'">'+_clotEsc(s.nom)+'</option>'; }).join('');
   var activateInner = (ctx.prepared && ctx.prepared.length)
     ? '<div style="margin-bottom:13px"><label class="mvchamp-l" style="display:block;margin-bottom:6px">Campagne déjà préparée</label>'
@@ -3403,7 +3403,7 @@ function _clotOverlayHTML(ctx){
     + '<div id="clot-scroll" style="flex:1;overflow-y:auto;padding:18px 16px 16px">'
       + '<div id="clot-s1">'
         + '<div style="background:linear-gradient(165deg,#14110D,#1C1813);border-radius:18px;padding:26px 20px 22px;color:#F0E2C8;text-align:center">'
-          + '<div style="font-size:var(--pt-micro,11px);letter-spacing:1.8px;text-transform:uppercase;color:#C9A84C">Campagne qui se termine</div>'
+          + '<div style="font-size:var(--pt-micro,11px);color:#C9A84C">Campagne qui se termine</div>'
           + '<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:66px;line-height:1;margin:6px 0 2px">'+(ctx.pct||0)+'%</div>'
           + '<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:22px">'+esc+'</div>'
           + '<div style="font-size:var(--pt-base,14px);color:#e9dcc0;margin-top:10px">'+_mvIcon('raisin',16)+' Bravo à l\'équipe — belle campagne.</div>'
@@ -3424,7 +3424,7 @@ function _clotOverlayHTML(ctx){
           + '<button id="clot-seg-activate" onclick="window._clotSeg&&window._clotSeg(\'activate\')" style="flex:1;background:#FBFAF6;color:#6B655C;border:1px solid #E7E3DA;border-radius:11px;padding:11px 8px;font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer">Activer une préparée</button>'
         + '</div>'
         + '<div id="clot-create" style="display:block">'
-          + '<div style="margin-bottom:13px"><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Type de saison</label>'
+          + '<div style="margin-bottom:13px"><label style="display:block;font-size:var(--pt-micro,11px);color:#6B655C;font-weight:600;margin-bottom:6px">Type de saison</label>'
             + '<div style="font-size:var(--pt-micro,12px);color:#6B655C;line-height:1.45">La p\u00e9riode ci-dessous reprend « '+_clotEsc(ctx.endNom)+' » d\u00e9cal\u00e9e d\u2019un an, avec la m\u00eame liste de travaux. Ajustez ce qui doit l\u2019\u00eatre.</div></div>'
           + '<div style="margin-bottom:13px"><label class="mvchamp-l" style="display:block;margin-bottom:6px">Nom de la campagne</label>'
             + '<input id="clot-name" value="'+_clotEsc(ctx.sug.nom)+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%"></div>'
@@ -3440,9 +3440,9 @@ function _clotOverlayHTML(ctx){
         + '<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:22px;margin-bottom:4px">Confirmer la clôture</div>'
         + '<div style="font-size:var(--pt-txt,13px);color:#6B655C;margin-bottom:16px;line-height:1.4">Voici ce qui va se passer quand tu valides.</div>'
         + '<div style="display:flex;align-items:stretch;margin-bottom:16px;border-radius:16px;overflow:hidden;border:1px solid #E7E3DA">'
-          + '<div style="flex:1;padding:18px 12px;text-align:center;background:#eef4ea"><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:600;font-size:var(--pt-sm,16px);line-height:1.15">'+esc+'</div><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-xxl,32px);color:#3D6B27;margin-top:6px">'+(ctx.pct||0)+'%</div><div style="font-size:10px;letter-spacing:.6px;text-transform:uppercase;margin-top:4px;color:#3f5233">'+_mvIcon('check',16)+' archivée</div></div>'
+          + '<div style="flex:1;padding:18px 12px;text-align:center;background:#eef4ea"><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:600;font-size:var(--pt-sm,16px);line-height:1.15">'+esc+'</div><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-xxl,32px);color:#3D6B27;margin-top:6px">'+(ctx.pct||0)+'%</div><div style="font-size:10px;margin-top:4px;color:#3f5233">'+_mvIcon('check',16)+' archivée</div></div>'
           + '<div style="width:40px;display:grid;place-items:center;background:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27);color:#fff;font-size:var(--pt-md,20px);font-weight:700">→</div>'
-          + '<div style="flex:1;padding:18px 12px;text-align:center;background:#14110D;color:#F0E2C8"><div id="clot-cf-new" style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:600;font-size:var(--pt-sm,16px);line-height:1.15">'+_clotEsc(ctx.sug.nom)+'</div><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-xxl,32px);color:#C9A84C;margin-top:6px">0%</div><div style="font-size:10px;letter-spacing:.6px;text-transform:uppercase;margin-top:4px;opacity:.85">démarre</div></div>'
+          + '<div style="flex:1;padding:18px 12px;text-align:center;background:#14110D;color:#F0E2C8"><div id="clot-cf-new" style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:600;font-size:var(--pt-sm,16px);line-height:1.15">'+_clotEsc(ctx.sug.nom)+'</div><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-xxl,32px);color:#C9A84C;margin-top:6px">0%</div><div style="font-size:10px;margin-top:4px;opacity:.85">démarre</div></div>'
         + '</div>'
         + '<div class="mvencadre mvencadre-ok" style="margin-bottom:15px"><div style="font-weight:600;font-size:13.5px;color:#3D6B27;margin-bottom:5px">'+_mvIcon('pousse',16)+' Rien n\'est perdu</div><div style="font-size:var(--pt-txt,13px);line-height:1.5;color:#3f5233">Le 0% est un nouveau départ, pas une régression. L\'avancement de '+esc+' reste consultable via le sélecteur de saison et l\'Historique.</div></div>'
         + '<div>'
@@ -3667,11 +3667,11 @@ function renderHistorique(){
   }
 
   // ── Sélecteurs de saisons ──
-  html += `<div style="padding:0 16px;margin-bottom:8px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--texte-doux);margin-bottom:8px">Saison A — référence</div>
+  html += `<div style="padding:0 16px;margin-bottom:8px"><div style="font-size:10px;font-weight:700;color:var(--texte-doux);margin-bottom:8px">Saison A — référence</div>
     <div class="histo-sel-row" style="padding:0;margin-bottom:12px">
       ${allSaisons.map(s=>`<button class="histo-sel-btn ${s.saisonKey===histoSelA?'actif':''}" onclick="histoSelectA('${_escAttr(s.saisonKey)}')">${_escHtml(s.saisonNom.replace(' (actuelle)',''))}</button>`).join('')}
     </div>
-    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--texte-doux);margin-bottom:8px">Saison B — comparaison</div>
+    <div style="font-size:10px;font-weight:700;color:var(--texte-doux);margin-bottom:8px">Saison B — comparaison</div>
     <div class="histo-sel-row" style="padding:0;margin-bottom:4px">
       ${allSaisons.map(s=>`<button class="histo-sel-btn ${s.saisonKey===histoSelB?'actif2':''}" onclick="histoSelectB('${_escAttr(s.saisonKey)}')">${_escHtml(s.saisonNom.replace(' (actuelle)',''))}</button>`).join('')}
     </div>
@@ -3692,7 +3692,7 @@ function renderHistorique(){
 
   html += `<div style="padding:0 16px;margin-bottom:6px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--texte-doux)">Avancement global</div>
+      <div style="font-size:10px;font-weight:700;color:var(--texte-doux)">Avancement global</div>
       <div style="font-size:var(--pt-micro,11px);font-weight:700;color:${diffCol}">${diffSign} ${Math.abs(diffPct)}% d'écart</div>
     </div>
     <div class="histo-compare-grid" style="padding:0">
@@ -3737,7 +3737,7 @@ function renderHistorique(){
   ])];
 
   if(toutesLesTaches.length>0){
-    html += `<div style="padding:0 16px;margin-bottom:8px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--texte-doux);margin-bottom:10px">Détail par tâche</div></div>
+    html += `<div style="padding:0 16px;margin-bottom:8px"><div style="font-size:10px;font-weight:700;color:var(--texte-doux);margin-bottom:10px">Détail par tâche</div></div>
     <div class="histo-tache-compare">`;
     toutesLesTaches.forEach(nom=>{
       const tA = (stA.tachesStats||[]).find(t=>t.nom===nom)||{pct:0,h_done:0};
@@ -4351,7 +4351,7 @@ async function _docsRestOpen(){
         return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:var(--pt-micro,11px);'
           + 'padding:3px 0;border-bottom:1px solid rgba(0,0,0,.05)">'
           + '<span>' + _docsEsc(_sauvNom(x.k)) + '</span>'
-          + '<span style="font-variant-numeric:tabular-nums;font-weight:600;'
+          + '<span style="font-variant-numeric:lining-nums tabular-nums;font-weight:600;'
           + (baisse?'color:var(--rouge)':'color:var(--texte-doux)') + '">'
           + x.av + ' \u2192 ' + x.ap + '</span></div>';
       }).join('')
@@ -4515,14 +4515,14 @@ var _JIV_CSS =
 +'body{font-family:var(--font-ui,Outfit,system-ui,sans-serif);color:#1A1A14;background:#fff;font-size:var(--pt-micro,11px)}'
 +'@page{size:A4 portrait;margin:11mm}'
 +'.jiv-cov{background:#2A1A10;color:#fff;padding:22px 26px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}'
-+'.jiv-k{font-size:9px;letter-spacing:3px;text-transform:uppercase;opacity:.45;margin-bottom:5px}'
++'.jiv-k{font-size:9px;letter-spacing:0;text-transform:none;opacity:.45;margin-bottom:5px}'
 +'.jiv-t{font-family:var(--font-titre,"Cormorant Garamond",Georgia,serif);font-size:var(--pt-xl,28px);font-weight:700;line-height:1.05}'
 +'.jiv-s{opacity:.72;font-size:var(--pt-micro,12px);margin-top:4px}'
 +'.jiv-m{text-align:right;opacity:.55;font-size:10px;line-height:1.6}'
 +'.jiv-kpi{display:flex;gap:10px;padding:14px 26px 4px;flex-wrap:wrap}'
 +'.jiv-kc{flex:1;min-width:110px;border:1px solid #E3DFD4;border-radius:11px;padding:9px 12px}'
 +'.jiv-kv{font-family:var(--font-titre,"Cormorant Garamond",Georgia,serif);font-size:var(--pt-lg,24px);font-weight:700;color:#2A1A10;line-height:1.05}'
-+'.jiv-kl{font-size:var(--pt-nano,9.5px);text-transform:uppercase;letter-spacing:.8px;color:#7A7A6A;font-weight:600;margin-top:2px}'
++'.jiv-kl{font-size:var(--pt-nano,9.5px);text-transform:none;letter-spacing:0;color:#7A7A6A;font-weight:600;margin-top:2px}'
 +'.jiv-ks{font-size:var(--pt-nano,9.5px);color:#8A8A7A;margin-top:2px;line-height:1.35}'
 +'.jiv-sec{padding:16px 26px 0;break-inside:auto}'
 +'.jiv-st{font-family:var(--font-titre,"Cormorant Garamond",Georgia,serif);font-size:19px;font-weight:700;color:#2A1A10;'
@@ -4535,7 +4535,7 @@ var _JIV_CSS =
 +'tr{break-inside:avoid}'
 +'.jiv-mo td{background:#F4F1E8;font-weight:700;font-size:10px;text-transform:uppercase;'
             +'letter-spacing:1px;color:#5A4A38;padding:5px 6px}'
-+'.r{text-align:right;font-variant-numeric:tabular-nums}.c{text-align:center}'
++'.r{text-align:right;font-variant-numeric:lining-nums tabular-nums}.c{text-align:center}'
 +'.mut{color:#8A8A7A}.b{font-weight:600}'
 +'.tag{display:inline-block;font-size:8.5px;font-weight:700;padding:1px 6px;border-radius:20px}'
 +'.tg-ok{background:#E3EDDD;color:#2C6E29}.tg-w{background:#F7F1D9;color:#7D6608}'
@@ -5239,7 +5239,7 @@ function exportPDFMois(){
   /* ── COVER ── */
   .cover{background:#1E3A12;color:white;padding:32px 40px;display:flex;justify-content:space-between;align-items:flex-end;}
   .cover-left{}
-  .cover-brand{font-size:9px;letter-spacing:3px;text-transform:uppercase;opacity:0.5;margin-bottom:6px;}
+  .cover-brand{font-size:9px;letter-spacing:0;text-transform:none;opacity:0.5;margin-bottom:6px;}
   .cover-title{font-size:var(--pt-xl,28px);font-weight:700;margin-bottom:2px;}
   .cover-sub{opacity:0.5;font-size:var(--pt-micro,11px);}
   .cover-right{text-align:right;}
@@ -5250,36 +5250,36 @@ function exportPDFMois(){
   .stat{padding:14px 20px;border-right:1px solid #EAF3E2;}
   .stat:last-child{border-right:none;}
   .stat-val{font-size:26px;font-weight:700;color:#1E3A12;}
-  .stat-lbl{font-size:9px;color:#7A7A6A;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+  .stat-lbl{font-size:9px;color:#7A7A6A;text-transform:none;letter-spacing:0;margin-top:2px;}
   /* ── SECTIONS ── */
   .section{padding:18px 24px;border-bottom:1px solid #EFEDE8;}
   .section:last-of-type{border-bottom:none;}
-  .section-title{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7A7A6A;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #EFEDE8;}
+  .section-title{font-size:9px;font-weight:700;letter-spacing:0;text-transform:none;color:#7A7A6A;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #EFEDE8;}
   /* ── MÉTÉO ── */
   .meteo-resume{background:#E8F0FA;border-radius:10px;padding:14px 16px;}
   .meteo-cols{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:8px;}
   .meteo-col{text-align:center;}
   .mc-val{font-size:15px;font-weight:700;color:#1A4A7A;}
-  .mc-lbl{font-size:9px;color:#7A7A6A;margin-top:2px;text-transform:uppercase;}
+  .mc-lbl{font-size:9px;color:#7A7A6A;margin-top:2px;text-transform:none;}
   .mc-cond{font-size:10px;color:#4A4A3A;font-style:italic;}
   /* ── HEURES ── */
   .heures-box{display:flex;border:1px solid #EFEDE8;border-radius:10px;overflow:hidden;}
   .h-item{flex:1;padding:12px 16px;text-align:center;background:white;}
   .h-sep{width:1px;background:#EFEDE8;flex-shrink:0;}
   .h-val{font-size:22px;font-weight:700;color:#1A1A14;line-height:1;}
-  .h-lbl{font-size:9px;color:#7A7A6A;margin-top:3px;text-transform:uppercase;letter-spacing:0.4px;}
+  .h-lbl{font-size:9px;color:#7A7A6A;margin-top:3px;text-transform:none;letter-spacing:0;}
   .commentaire-box{background:#F8F7F3;border-left:3px solid #3D6B27;border-radius:0 8px 8px 0;padding:12px 14px;font-size:var(--pt-micro,11px);line-height:1.6;color:#1A1A14;font-style:italic;white-space:pre-wrap;}
   /* ── AVANCEMENT ── */
   .avancement-global{display:flex;align-items:center;gap:14px;background:#F5F5F0;border-radius:10px;padding:12px 16px;margin-bottom:12px;}
   .ag-left,.ag-right{text-align:center;min-width:48px;}
   .ag-pct{font-size:var(--pt-md,20px);font-weight:700;color:#1E3A12;}
-  .ag-lbl{font-size:9px;color:#7A7A6A;text-transform:uppercase;margin-top:2px;}
+  .ag-lbl{font-size:9px;color:#7A7A6A;text-transform:none;margin-top:2px;}
   .ag-bar-wrap{flex:1;display:flex;flex-direction:column;gap:4px;}
   .ag-bar{height:8px;background:#EFEDE8;border-radius:4px;overflow:hidden;}
   .ag-fill{height:100%;background:#3D6B27;border-radius:4px;}
   .ag-fill-reste{height:100%;background:#D4A56A;border-radius:4px;}
   .taches-table{width:100%;border-collapse:collapse;}
-  .taches-table th{font-size:9px;font-weight:700;text-transform:uppercase;color:#7A7A6A;padding:5px 8px;text-align:left;border-bottom:2px solid #EFEDE8;}
+  .taches-table th{font-size:9px;font-weight:700;text-transform:none;color:#7A7A6A;padding:5px 8px;text-align:left;border-bottom:2px solid #EFEDE8;}
   .taches-table td{padding:6px 8px;border-bottom:1px solid #F5F5F0;font-size:var(--pt-micro,11px);vertical-align:middle;}
   .tc-val{text-align:center;font-weight:600;}
   .cv{color:#1E3A12;}.co{color:#B85A1A;}.cr{color:#A0291E;}
@@ -5288,7 +5288,7 @@ function exportPDFMois(){
   .mini-pct{font-size:10px;font-weight:700;vertical-align:middle;}
   /* ── TRACTEUR RÉSUMÉ ── */
   .trac-table{width:100%;border-collapse:collapse;}
-  .trac-table th{font-size:9px;font-weight:700;text-transform:uppercase;color:#7A7A6A;padding:5px 8px;text-align:left;border-bottom:2px solid #ECF0F4;}
+  .trac-table th{font-size:9px;font-weight:700;text-transform:none;color:#7A7A6A;padding:5px 8px;text-align:left;border-bottom:2px solid #ECF0F4;}
   .trac-table td{padding:7px 8px;border-bottom:1px solid #F5F5F0;font-size:var(--pt-micro,11px);vertical-align:middle;}
   .trac-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;}
   .trac-ter{background:#ECF0F4;color:#2C3E50;}.trac-enc{background:#FBF0E6;color:#B85A1A;}
@@ -5306,7 +5306,7 @@ function exportPDFMois(){
   .an-date{font-size:9px;color:#999;margin-top:3px;}
   /* ── PAGE 2 ── */
   .page2{page-break-before:always;}
-  .page2-header{background:#1E3A12;color:white;padding:14px 24px;font-size:9px;letter-spacing:2px;text-transform:uppercase;opacity:1;}
+  .page2-header{background:#1E3A12;color:white;padding:14px 24px;font-size:9px;letter-spacing:0;text-transform:none;opacity:1;}
   .page2-header span{opacity:0.6;}
   /* Détail journées */
   .day-block{margin-bottom:14px;}
@@ -5323,7 +5323,7 @@ function exportPDFMois(){
   .trac-session-head{font-size:var(--pt-micro,11px);font-weight:700;color:#1A1A14;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #EBEBEB;}
   .trac-detail-block{display:flex;flex-wrap:wrap;gap:12px;}
   .trac-detail-col{flex:1;min-width:150px;}
-  .trac-detail-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;padding:2px 6px;border-radius:4px;display:inline-block;}
+  .trac-detail-label{font-size:9px;font-weight:700;text-transform:none;letter-spacing:0;margin-bottom:5px;padding:2px 6px;border-radius:4px;display:inline-block;}
   .trac-det-ok{background:#EAF3E2;color:#1E3A12;}
   .trac-det-rest{background:#FBF0E6;color:#8B4A1A;}
   .trac-det-skip{background:#F5E8E5;color:#7A2A1A;}
@@ -5577,7 +5577,7 @@ function exportPDFPhyto(mode){
   .cover{background:#2D0B45;color:white;padding:24px 30px 20px;position:relative;display:flex;align-items:flex-end;justify-content:space-between;}
   .cover-l{padding-top:30px;}
   .cover-pic{font-size:var(--pt-xl,28px);position:absolute;left:30px;top:20px;opacity:.9;}
-  .cover-brand{font-size:9px;letter-spacing:3px;text-transform:uppercase;opacity:0.45;margin-bottom:5px;}
+  .cover-brand{font-size:9px;letter-spacing:0;text-transform:none;opacity:0.45;margin-bottom:5px;}
   .cover-title{font-size:25px;font-weight:700;letter-spacing:-0.5px;}
   .cover-sub{opacity:0.6;font-size:var(--pt-micro,12px);margin-top:3px;}
   .cover-meta{text-align:right;opacity:0.5;font-size:10px;line-height:1.6;}
@@ -5586,12 +5586,12 @@ function exportPDFPhyto(mode){
   .stat{padding:11px 16px;border-right:1px solid #F0EAF8;}
   .stat:last-child{border-right:none;}
   .stat-val{font-size:22px;font-weight:700;color:#2D0B45;}
-  .stat-lbl{font-size:8.5px;color:#7A7A6A;text-transform:uppercase;letter-spacing:0.4px;margin-top:1px;}
+  .stat-lbl{font-size:8.5px;color:#7A7A6A;text-transform:none;letter-spacing:0;margin-top:1px;}
   .section{padding:14px 22px 18px;}
-  .section-title{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7A7A6A;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid #F0EAF8;}
+  .section-title{font-size:9px;font-weight:700;letter-spacing:0;text-transform:none;color:#7A7A6A;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid #F0EAF8;}
   table.reg{width:100%;border-collapse:collapse;table-layout:fixed;}
   table.reg thead tr{background:#2D0B45;color:white;}
-  table.reg th{padding:6px 7px;font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;text-align:left;vertical-align:bottom;}
+  table.reg th{padding:6px 7px;font-size:8px;font-weight:600;text-transform:none;letter-spacing:0;text-align:left;vertical-align:bottom;}
   table.reg td{padding:6px 7px;border-bottom:1px solid #F5F0FA;vertical-align:top;font-size:var(--pt-nano,9.5px);word-wrap:break-word;}
   table.reg tr:nth-child(even) td{background:#FAF7FC;}
   .c-num{color:#C0B0D0;font-size:8.5px;text-align:center;}
@@ -5611,7 +5611,7 @@ function exportPDFPhyto(mode){
   .rb-val{font-weight:600;color:#2D0B45;}
   .signature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:10px;}
   .sig-box{border:1px solid #E0D8EC;border-radius:8px;padding:12px;height:72px;display:flex;flex-direction:column;justify-content:flex-end;}
-  .sig-lbl{font-size:8.5px;color:#7A7A6A;text-transform:uppercase;letter-spacing:0.4px;}
+  .sig-lbl{font-size:8.5px;color:#7A7A6A;text-transform:none;letter-spacing:0;}
   .footer{border-top:1px solid #F0EAF8;padding:9px 22px;font-size:8px;color:#7A7A6A;display:flex;justify-content:space-between;margin-top:8px;}
   @media print{
     body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
@@ -6701,7 +6701,7 @@ window._cuParcRollN   = _cuParcRollN;
 function _cuColor(r){ return r>1?'--rouge':r>=0.875?'--orange':r>=0.75?'--or':'--vert'; }
 function _cuStatus(r){ return r>1?['D\u00e9passement','--rouge']:r>=0.875?['Vigilance','--orange']:['Conforme','--vert']; }
 function _cuFmt(d){ if(!d)return '\u2014'; var pp=d.split('-'); return pp.length>=3?pp[2]+'/'+pp[1]+'/'+pp[0]:d; }
-function _cuKpi(v,u,l,warn){ return '<div style="background:rgba(255,255,255,0.05);border:1px solid '+(warn?'rgba(192,57,43,0.5)':'rgba(201,168,76,0.18)')+';border-radius:12px;padding:11px 12px"><div style="font-size:22px;font-weight:700;font-family:var(--font-titre,\'Cormorant Garamond\',serif);line-height:1.1;color:'+(warn?'#E8846F':'#EFE7D3')+'">'+v+'<span style="font-size:var(--pt-micro,11px);font-weight:500;color:#B7AE98;font-family:var(--font-ui,Outfit)"> '+u+'</span></div><div style="font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:#A79E88;margin-top:4px;font-weight:600">'+l+'</div></div>'; }
+function _cuKpi(v,u,l,warn){ return '<div style="background:rgba(255,255,255,0.05);border:1px solid '+(warn?'rgba(192,57,43,0.5)':'rgba(201,168,76,0.18)')+';border-radius:12px;padding:11px 12px"><div style="font-size:22px;font-weight:700;font-family:var(--font-titre,\'Cormorant Garamond\',serif);line-height:1.1;color:'+(warn?'#E8846F':'#EFE7D3')+'">'+v+'<span style="font-size:var(--pt-micro,11px);font-weight:500;color:#B7AE98;font-family:var(--font-ui,Outfit)"> '+u+'</span></div><div style="font-size:10px;color:#A79E88;margin-top:4px;font-weight:600">'+l+'</div></div>'; }
 
 window._cuToggleRow=function(el){ var d=el.querySelector('.cu-det'); if(d) d.style.display=(d.style.display==='none'?'block':'none'); };
 window._cuClose=function(){ var o=document.getElementById('ovSyntheseCuivre'); if(o) o.classList.remove('open'); };
@@ -7152,7 +7152,7 @@ var MV_VGNDOC_CSS = ''
   + '.cd-kpis{display:flex;gap:16px;flex-wrap:wrap;background:#FAF6EC;border:1px solid #E8DCC0;'
     + 'border-radius:7px;padding:9px 13px;margin-bottom:13px}'
   + '.cd-k{min-width:96px}'
-  + '.cd-k b{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.6px;color:#8B6020;margin-bottom:2px}'
+  + '.cd-k b{display:block;font-size:8px;text-transform:none;letter-spacing:0;color:#8B6020;margin-bottom:2px}'
   + '.cd-k span{font-family:var(--font-titre,\'Cormorant Garamond\',Georgia,serif);font-size:var(--pt-md,20px);font-weight:700;color:#2D1B09;line-height:1.05}'
   + '.cd-k span small{font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:9px;font-weight:600;color:#7A6A4A}'
   + '.cd-k i{display:block;font-style:normal;font-size:8px;color:#7A7263;margin-top:2px;line-height:1.4}'

@@ -625,3 +625,31 @@ Nico : « fais le travail comme un expert informatique, expert en ergonomie et e
 
 ### 406d. La leçon
 **Un correctif peut être défait par une règle plus précise.** Le tour du contraste avait mis la priorité au doré du texte ; une règle de l’état « activé », plus forte, la remettait au doré clair. Seule la mesure sur l’écran rendu l’a montré.
+
+## 407. REVUE-7 — LA REVUE, LOT 2 : LA LECTURE (21/10 — `src/styles.css` · `index.html` · `src/app.js` · `src/cave.js` · `src/cuvier.js` · `src/jalons.js` · `src/phyto.js` · `src/pilotage.js` · `src/planning.js` · `src/reglages.js` · `src/reserve.js` · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `scripts/mv-harnais-jetons.mjs` · `scripts/mv-harnais-rsv3.mjs` · **APP 9.67 → 9.68, SW 10.46 → 10.47**, base `1c8952b`)
+
+### 407a. La demande
+Le lot 2 de la revue complète (§406a) : 3. des chiffres difficiles à lire (le « 0 » des tuiles des Parcelles ressemble à un « o ») ; 6. des capitales et abréviations restantes.
+
+### 407b. Les chiffres : la cause
+`body{font-variant-numeric:lining-nums}` existait. Mais `font-variant-numeric` est **une seule propriété** : toute règle qui pose `tabular-nums` seul la remplace entière, et retire `lining-nums` — Cormorant Garamond retombe alors sur ses chiffres **elzéviriens** (le « 0 » à hauteur de « o »). 153 déclarations le faisaient (feuille 109 ; JS 44 : Cave, Pilotage, Planning, Phyto…), dont celle de `:root`. Les fichiers woff2 de l’appli gardent les fonctions `lnum` et `tnum` (lues avec fontTools : `zero.lf`, `zero.tf`) → chaque déclaration redit `lining-nums` devant ; `:root{ font-variant-numeric:lining-nums tabular-nums; }`. Cormorant garde son allure, ses chiffres sont à pleine hauteur et alignés — c’est ce que font Stripe et Linear pour leurs chiffres, sans changer de police.
+
+### 407c. Les capitales
+- **La feuille** : 87 règles en `text-transform:uppercase` → `none`, leur `letter-spacing` (fait pour les capitales) à 0. Gardées (10) : la connexion (`.login-*`), l’installation (`.ob-*`), la console GT (`.agt-*`), la marque (`.hv2-brand`, `.ph-domain`), la confirmation d’une suppression (`.danger-conf-lbl`).
+- **Les règles injectées par le JS** (chaînes et gabarits de CSS) : 120 — Cave 32, Cuvier 20, Réglages 18, app.js 16, Pilotage 14, Planning 12, Réserve 5…
+- **Les styles écrits sur place** : 78 — Phyto 27, Planning 20, Réglages 10, `index.html` 13…
+- **L’abréviation** : la tuile des Parcelles « Arrach. » → « Arrachées ». (Les abréviations des étiquettes de graphiques, `utils.js`, restent : place comptée.)
+- Reste vu : la barre de campagne des Réglages, en capitales dans son texte même.
+
+### 407d. Les contrôles
+`mv-harnais-jetons` : sa vérification « les chiffres sont tabulaires, posés sur :root » attend désormais `lining-nums tabular-nums`, sa contre-épreuve aussi. Sa contre-épreuve « on retire --r-md de :root » attendait une assertion « vaut 12px » : `--r-md` vaut 8 px depuis la série CHARTE — réparée (cette contre-épreuve n’est pas jouée par la chaîne : elle était rouge sans que personne le voie).
+
+`mv-harnais-rsv3` (RSV-3) cherchait la règle du tableau d’export de la Réserve avec `font-variant-numeric:tabular-nums;` : il attend désormais `lining-nums tabular-nums` (vu par le premier passage de la chaîne : 2 rouges, le contrôle et sa contre-épreuve).
+
+### 407e. Vu
+`parcelles` (les tuiles « 0 Finies / En cours / Arrachées »), `ma-trace` (« 0,00 ha » à pleine hauteur), `cave-chai` (« Millésime »), `phyto-cuivre-1` (« Ajouter un produit », « Vos produits récents »), et `accueil`, `cave`, `pilotage`, `planning`, `reglages`, `reserve`, `tracteur` (téléphone, clair) : intacts, lettres normales.
+
+- **Chaîne** : **471 commandes, 0 rouge** au dernier passage, joué d’un trait après le dernier changement de code. Avant : 2 rouges (`mv-harnais-rsv3` et sa contre-épreuve).
+
+### 407f. La leçon
+**Une propriété qui regroupe plusieurs réglages se remplace entière.** Poser `tabular-nums` « en plus » efface `lining-nums` — on croit ajouter, on retire. Pour `font-variant-numeric` comme pour `font`, `background` ou `border`, on redit tout ce qu’on veut garder.

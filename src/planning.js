@@ -4292,7 +4292,7 @@ var _planHsupDetM=null;
 function _planHsupInjectCss(){
   if(document.getElementById('plh-css'))return;
   var st=document.createElement('style');st.id='plh-css';
-  st.textContent='.plh-wrap{margin-bottom:14px}.plh-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--terre,#8A5A38);margin-bottom:8px}.plh-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1.5px solid var(--gris-clair,#E8E2D8);border-radius:12px;background:var(--bg-card,#FBFAF6)}.plh-tbl{width:100%;border-collapse:collapse;font-size:var(--pt-micro,12px);min-width:328px}.plh-tbl th{font-size:8.5px;text-transform:uppercase;letter-spacing:.2px;color:var(--texte-doux,#8A8178);font-weight:700;text-align:center;padding:8px 3px 6px;line-height:1.15}.plh-tbl th.plh-mo{text-align:left;padding-left:10px}.plh-tbl td{padding:4px 3px;text-align:center;border-top:1px solid var(--gris-clair,#E8E2D8)}.plh-tbl td.plh-mo{text-align:left;padding-left:10px;font-weight:600;color:var(--texte,#2A2620);cursor:pointer;white-space:nowrap}.plh-tbl tr.plh-sel td{background:rgba(201,168,76,0.12)}.plh-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--terre,#8A5A38);margin-right:6px;vertical-align:1px}.plh-ro{font-weight:700;font-variant-numeric:tabular-nums}.plh-ro.z{color:#C3BBAE;font-weight:500}.plh-ro.rec{color:var(--rouge,#dc2626)}.plh-f{width:52px;font-family:inherit;font-size:var(--pt-txt,13px);text-align:center;color:var(--texte,#2A2620);border-radius:7px;padding:5px 2px;outline:none;font-variant-numeric:tabular-nums;-moz-appearance:textfield}.plh-f::-webkit-outer-spin-button,.plh-f::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}.plh-ov{background:#fff;border:1.5px solid var(--gris-clair,#E8E2D8);color:var(--vert-med,#3D6B27);font-weight:700}.plh-ov.man{background:var(--orange-pale,#FDF0DE);border-color:var(--orange,#d97706)}.plh-pm{background:var(--plan-acc-pale,#F0EDF9);border:1.5px solid rgba(123,109,184,0.4)}.plh-pb{background:var(--orange-pale,#FDF0DE);border:1.5px solid rgba(217,119,6,0.5)}.plh-f:disabled{background:#F1EEE8;border:1.5px dashed var(--gris-clair,#E8E2D8);color:#C3BBAE}.plh-tbl tfoot td{border-top:2px solid var(--terre,#8A5A38);padding-top:8px;font-weight:800}.plh-tbl tfoot td.plh-mo{color:var(--terre,#8A5A38)}.plh-tot-v{font-variant-numeric:tabular-nums}.plh-tbl th.plh-restc,.plh-tbl td.plh-restc{background:rgba(138,90,56,0.03);border-left:1px solid var(--gris-clair,#E8E2D8)}.plh-tbl th.plh-cumc,.plh-tbl td.plh-cumc{background:rgba(138,90,56,0.055);border-left:1px solid var(--gris-clair,#E8E2D8)}.plh-tbl tfoot td.plh-restc{background:rgba(138,90,56,0.06)}.plh-tbl tfoot td.plh-cumc{background:rgba(138,90,56,0.1)}.plh-cum{font-weight:800}.plh-note{font-size:var(--pt-micro,11px);color:var(--texte-doux,#8A8178);margin-top:8px;line-height:1.35}';
+  st.textContent='.plh-wrap{margin-bottom:14px}.plh-title{font-size:10px;font-weight:700;text-transform:none;letter-spacing:0;color:var(--terre,#8A5A38);margin-bottom:8px}.plh-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1.5px solid var(--gris-clair,#E8E2D8);border-radius:12px;background:var(--bg-card,#FBFAF6)}.plh-tbl{width:100%;border-collapse:collapse;font-size:var(--pt-micro,12px);min-width:328px}.plh-tbl th{font-size:8.5px;text-transform:none;letter-spacing:0;color:var(--texte-doux,#8A8178);font-weight:700;text-align:center;padding:8px 3px 6px;line-height:1.15}.plh-tbl th.plh-mo{text-align:left;padding-left:10px}.plh-tbl td{padding:4px 3px;text-align:center;border-top:1px solid var(--gris-clair,#E8E2D8)}.plh-tbl td.plh-mo{text-align:left;padding-left:10px;font-weight:600;color:var(--texte,#2A2620);cursor:pointer;white-space:nowrap}.plh-tbl tr.plh-sel td{background:rgba(201,168,76,0.12)}.plh-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--terre,#8A5A38);margin-right:6px;vertical-align:1px}.plh-ro{font-weight:700;font-variant-numeric:lining-nums tabular-nums}.plh-ro.z{color:#C3BBAE;font-weight:500}.plh-ro.rec{color:var(--rouge,#dc2626)}.plh-f{width:52px;font-family:inherit;font-size:var(--pt-txt,13px);text-align:center;color:var(--texte,#2A2620);border-radius:7px;padding:5px 2px;outline:none;font-variant-numeric:lining-nums tabular-nums;-moz-appearance:textfield}.plh-f::-webkit-outer-spin-button,.plh-f::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}.plh-ov{background:#fff;border:1.5px solid var(--gris-clair,#E8E2D8);color:var(--vert-med,#3D6B27);font-weight:700}.plh-ov.man{background:var(--orange-pale,#FDF0DE);border-color:var(--orange,#d97706)}.plh-pm{background:var(--plan-acc-pale,#F0EDF9);border:1.5px solid rgba(123,109,184,0.4)}.plh-pb{background:var(--orange-pale,#FDF0DE);border:1.5px solid rgba(217,119,6,0.5)}.plh-f:disabled{background:#F1EEE8;border:1.5px dashed var(--gris-clair,#E8E2D8);color:#C3BBAE}.plh-tbl tfoot td{border-top:2px solid var(--terre,#8A5A38);padding-top:8px;font-weight:800}.plh-tbl tfoot td.plh-mo{color:var(--terre,#8A5A38)}.plh-tot-v{font-variant-numeric:lining-nums tabular-nums}.plh-tbl th.plh-restc,.plh-tbl td.plh-restc{background:rgba(138,90,56,0.03);border-left:1px solid var(--gris-clair,#E8E2D8)}.plh-tbl th.plh-cumc,.plh-tbl td.plh-cumc{background:rgba(138,90,56,0.055);border-left:1px solid var(--gris-clair,#E8E2D8)}.plh-tbl tfoot td.plh-restc{background:rgba(138,90,56,0.06)}.plh-tbl tfoot td.plh-cumc{background:rgba(138,90,56,0.1)}.plh-cum{font-weight:800}.plh-note{font-size:var(--pt-micro,11px);color:var(--texte-doux,#8A8178);margin-top:8px;line-height:1.35}';
   document.head.appendChild(st);
 }
 // Total annuel d'un modele de planning. Un modele qui ne totalise pas le plafond
@@ -4314,12 +4314,12 @@ function _planCompteCard(mbr,uptoMonth,a){
   var tc=mbr.type_contrat||'CDI';
   var h='<div class="plan-card" style="background:var(--bg-card);border:1.5px solid var(--gris-clair);margin-bottom:14px;flex-direction:column;align-items:stretch">';
   h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:11px">'
-    +'<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--terre)">\u23f1 Heures faites \u00b7 '+planYear+'</span>'
+    +'<span style="font-size:10px;font-weight:700;color:var(--terre)">\u23f1 Heures faites \u00b7 '+planYear+'</span>'
     +'<span class="mvpas mvpas-etiquette" style="margin-left:auto">'+_escHtml(tc)+'</span>'
   +'</div>';
   h+='<div style="display:flex;gap:7px">'
-    +'<div class="mvcarte-fond" style="flex:1;text-align:center;padding:11px 4px"><div style="font-size:var(--pt-lg,24px);font-weight:800;line-height:1;font-variant-numeric:tabular-nums">'+_planFmt(a.cumul)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:4px">Travail effectif</div></div>'
-    +'<div class="mvcarte-fond" style="flex:1;text-align:center;padding:11px 4px"><div style="font-size:var(--pt-lg,24px);font-weight:800;line-height:1;font-variant-numeric:tabular-nums">'+jours+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:4px">Jours travaill\u00e9s</div></div>'
+    +'<div class="mvcarte-fond" style="flex:1;text-align:center;padding:11px 4px"><div style="font-size:var(--pt-lg,24px);font-weight:800;line-height:1;font-variant-numeric:lining-nums tabular-nums">'+_planFmt(a.cumul)+'</div><div style="font-size:9px;color:var(--texte-doux);margin-top:4px">Travail effectif</div></div>'
+    +'<div class="mvcarte-fond" style="flex:1;text-align:center;padding:11px 4px"><div style="font-size:var(--pt-lg,24px);font-weight:800;line-height:1;font-variant-numeric:lining-nums tabular-nums">'+jours+'</div><div style="font-size:9px;color:var(--texte-doux);margin-top:4px">Jours travaill\u00e9s</div></div>'
   +'</div>';
   h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:11px;line-height:1.4">'
     +'<b>Pas d\u2019annualisation</b> pour ce type de contrat\u00a0: les heures sont pay\u00e9es \u00e0 l\u2019heure. '
@@ -4357,12 +4357,12 @@ function _planAnnuCard(mbr,uptoMonth){
       var col2=over2?'var(--orange)':'var(--texte-doux)';
       prevH+='<div class="plan-card" style="background:var(--bg-card);border:1.5px solid var(--gris-clair);margin-bottom:10px;flex-direction:column;align-items:stretch">'
         +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">'
-        +'<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--texte-doux)">'
+        +'<span style="font-size:10px;font-weight:700;color:var(--texte-doux)">'
         +''+_mvIcon('chrono',16)+' Compteur sold\u00e9 \u00b7 '+_pShort(ctr.debut)+' \u2192 '+_pShort(ctr.fin)+'</span>'
         +'<span style="margin-left:auto;font-size:10px;font-weight:700;color:'+(over2?'var(--orange)':'var(--vert-med)')+'">'+(over2?'surplus\u00a0\u26a0\ufe0f':'sold\u00e9\u00a0\u2713')+'</span>'
         +'</div>'
         +'<div style="display:flex;align-items:center;gap:9px">'
-        +'<div><span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">'+_planFmt(pa.cumul)+'</span>'
+        +'<div><span style="font-size:22px;font-weight:800;font-variant-numeric:lining-nums tabular-nums">'+_planFmt(pa.cumul)+'</span>'
         +'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-left:3px"> sur '+_planFmt(pa.plafond)+'</span></div>'
         +'<div style="flex:1;height:7px;background:var(--gris-clair);border-radius:4px;position:relative;overflow:hidden">'
         +'<div style="position:absolute;left:0;top:0;bottom:0;border-radius:4px;width:'+pct+'%;background:'+col2+'"></div>'
@@ -4381,12 +4381,12 @@ function _planAnnuCard(mbr,uptoMonth){
     :{t:'en cours',c:'var(--vert-med)',bg:'var(--vert-pale)',b:'rgba(61,107,39,0.35)'};
   var h='<div class="plan-card" style="background:var(--bg-card);border:1.5px solid var(--gris-clair);margin-bottom:14px;flex-direction:column;align-items:stretch">';
   h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:11px">'
-    +'<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--terre)">\ud83d\udcc5 Compteur d\u2019heures \u00b7 '+planYear+'</span>'
+    +'<span style="font-size:10px;font-weight:700;color:var(--terre)">\ud83d\udcc5 Compteur d\u2019heures \u00b7 '+planYear+'</span>'
     +'<span style="margin-left:auto;font-size:10px;font-weight:700;color:'+pill.c+';background:'+pill.bg+';border:1px solid '+pill.b+';padding:2px 8px;border-radius:20px">'+pill.t+'</span>'
   +'</div>';
   h+='<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px">'
-    +'<div><span style="font-size:var(--pt-xxl,32px);font-weight:800;line-height:1;font-variant-numeric:tabular-nums">'+_planFmt(a.cumul)+'</span><span style="font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux);margin-left:4px"> faites</span></div>'
-    +'<div style="text-align:right;font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.35">plafond<b style="display:block;font-size:var(--pt-base,14px);color:var(--texte);font-variant-numeric:tabular-nums">'+_planFmt(a.plafond)+'</b></div>'
+    +'<div><span style="font-size:var(--pt-xxl,32px);font-weight:800;line-height:1;font-variant-numeric:lining-nums tabular-nums">'+_planFmt(a.cumul)+'</span><span style="font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux);margin-left:4px"> faites</span></div>'
+    +'<div style="text-align:right;font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.35">plafond<b style="display:block;font-size:var(--pt-base,14px);color:var(--texte);font-variant-numeric:lining-nums tabular-nums">'+_planFmt(a.plafond)+'</b></div>'
   +'</div>';
   h+='<div style="position:relative;height:13px;background:var(--gris-clair);border-radius:7px;margin:13px 0 6px">'
     +'<div style="position:absolute;left:0;top:0;bottom:0;border-radius:7px;width:'+Math.min(100,a.cumul/ech*100)+'%;background:'+(over?'var(--orange)':'var(--vert-med)')+'"></div>'
@@ -4394,9 +4394,9 @@ function _planAnnuCard(mbr,uptoMonth){
   +'</div>';
   h+='<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--texte-doux)"><span>0h</span><span>'+_planFmt(ech)+'</span></div>';
   h+='<div style="display:flex;gap:7px;margin-top:12px">'
-    +'<div class="mvcarte-fond" style="flex:1;text-align:center;padding:9px 4px"><div style="font-size:15px;font-weight:800;color:'+(a.reste<0?'var(--orange)':'var(--vert-med)')+'">'+_planFmt(Math.abs(a.reste))+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">'+(a.reste<0?'Au-dessus':'Reste')+'</div></div>'
-    +'<div class="mvcarte-fond" style="flex:1;text-align:center;padding:9px 4px"><div style="font-size:15px;font-weight:800">'+a.moisRest+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Mois rest.</div></div>'
-    +'<div class="mvencadre" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800">'+(a.moisRest>0?_planFmt(a.cadence):'\u2014')+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">h / mois</div></div>'
+    +'<div class="mvcarte-fond" style="flex:1;text-align:center;padding:9px 4px"><div style="font-size:15px;font-weight:800;color:'+(a.reste<0?'var(--orange)':'var(--vert-med)')+'">'+_planFmt(Math.abs(a.reste))+'</div><div style="font-size:9px;color:var(--texte-doux);margin-top:2px">'+(a.reste<0?'Au-dessus':'Reste')+'</div></div>'
+    +'<div class="mvcarte-fond" style="flex:1;text-align:center;padding:9px 4px"><div style="font-size:15px;font-weight:800">'+a.moisRest+'</div><div style="font-size:9px;color:var(--texte-doux);margin-top:2px">Mois rest.</div></div>'
+    +'<div class="mvencadre" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800">'+(a.moisRest>0?_planFmt(a.cadence):'\u2014')+'</div><div style="font-size:9px;color:var(--texte-doux);margin-top:2px">h / mois</div></div>'
   +'</div>';
   var nt='Mesur\u00e9 en <b>travail effectif</b>\u00a0: cong\u00e9s, arr\u00eats et r\u00e9cup n\u2019y entrent pas. Les '+_planFmt(L.plafAnnuel)+' sont d\u00e9j\u00e0 calcul\u00e9es cong\u00e9s d\u00e9duits.';
   if(a.susp>0.0001)nt='<b>Suspension de contrat prise en compte\u00a0:</b> le plafond descend de '+_planFmt(a.susp)+'. Ces heures ne sont ni \u00e0 rattraper, ni compt\u00e9es en d\u00e9ficit. '+nt;
@@ -4404,7 +4404,7 @@ function _planAnnuCard(mbr,uptoMonth){
   h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:10px;line-height:1.4">'+nt+'</div>';
   var _mdl=_planModelTotal(_planPlId(mbr)),_dev=_mdl-L.plafAnnuel,_devAb=Math.abs(_dev);
   h+='<div style="margin-top:12px;padding-top:11px;border-top:1px solid var(--gris-clair)">';
-  h+='<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">Mod\u00e8le \u00ab\u00a0'+_escHtml(_planPlId(mbr))+'\u00a0\u00bb sur l\u2019ann\u00e9e</span><span style="font-size:var(--pt-base,14px);font-weight:800;color:'+(_devAb>10?'var(--orange)':'var(--vert-med)')+';font-variant-numeric:tabular-nums">'+_planFmt(_mdl)+'</span></div>';
+  h+='<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">Mod\u00e8le \u00ab\u00a0'+_escHtml(_planPlId(mbr))+'\u00a0\u00bb sur l\u2019ann\u00e9e</span><span style="font-size:var(--pt-base,14px);font-weight:800;color:'+(_devAb>10?'var(--orange)':'var(--vert-med)')+';font-variant-numeric:lining-nums tabular-nums">'+_planFmt(_mdl)+'</span></div>';
   h+='<div style="font-size:var(--pt-micro,11px);color:'+(_devAb>10?'var(--orange)':'var(--texte-doux)')+';margin-top:5px;line-height:1.4">'
     +(_devAb>10
       ?'<b>\u00c9cart de '+(_dev>0?'+':'\u2212')+_planFmt(_devAb)+' avec les '+_planFmt(L.plafAnnuel)+' attendues.</b> Corrige la grille du mod\u00e8le dans R\u00e9glages\u00a0: l\u2019\u00e9cart se reporte sur chaque salari\u00e9 qui l\u2019utilise.'
@@ -4413,7 +4413,7 @@ function _planAnnuCard(mbr,uptoMonth){
   h+='</div><div style="margin-top:12px;padding-top:11px;border-top:1px solid var(--gris-clair)">';
   var mOver=(a.modul>a.modulMax+0.0001),mWarn=(a.modul>a.modulMax*0.8);
   var mCol=mOver?'var(--rouge)':mWarn?'var(--orange)':'var(--plan-acc)';
-  h+='<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">Heures de modulation \u00b7 au-del\u00e0 de '+_planFmt(L.hebdoLeg)+'/sem.</span><span style="font-size:var(--pt-base,14px);font-weight:800;color:'+mCol+';font-variant-numeric:tabular-nums">'+_planFmt(a.modul)+' / '+_planFmt(a.modulMax)+'</span></div>';
+  h+='<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">Heures de modulation \u00b7 au-del\u00e0 de '+_planFmt(L.hebdoLeg)+'/sem.</span><span style="font-size:var(--pt-base,14px);font-weight:800;color:'+mCol+';font-variant-numeric:lining-nums tabular-nums">'+_planFmt(a.modul)+' / '+_planFmt(a.modulMax)+'</span></div>';
   h+='<div style="position:relative;height:9px;background:var(--gris-clair);border-radius:5px;margin-top:8px"><div style="position:absolute;left:0;top:0;bottom:0;border-radius:5px;width:'+Math.min(100,a.modul/Math.max(1,a.modulMax)*100)+'%;background:'+mCol+'"></div></div>';
   h+='<div style="font-size:var(--pt-micro,11px);color:'+(mOver?'var(--rouge)':'var(--texte-doux)')+';margin-top:8px;line-height:1.4">'
     +(mOver?'<b>Plafond d\u00e9pass\u00e9.</b> Au-del\u00e0, les heures sortent de la modulation. Un accord peut relever ce plafond.'
@@ -5742,7 +5742,7 @@ function _planHsupCard(mbr){
   var dm=_planHsupDetM;
   var _dep=_planDepartSolde(mbr),_depDate=_planDepartDate(mbr);
   var hDep='<div class="plan-card" style="background:var(--terre-pale,#F3EADF);border:1.5px solid rgba(138,90,56,0.35);margin-bottom:14px;flex-direction:column;align-items:stretch">'
-    +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--terre,#8A5A38);margin-bottom:10px">🌱 Solde de départ · '+planYear+'</div>'
+    +'<div style="font-size:10px;font-weight:700;color:var(--terre,#8A5A38);margin-bottom:10px">🌱 Solde de départ · '+planYear+'</div>'
     +'<div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">'
       +'<div style="flex:1;min-width:120px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:4px">Report d’heures (avant Ma Vigne)</div><input type="number" step="0.5" id="plan-depsolde" value="'+(Math.round(_dep*100)/100)+'" onchange="planSaveDepart()" class="mvchamp" style="width:100%;text-align:center"></div>'
       +'<div style="flex:1;min-width:120px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:4px">À partir du</div><input type="date" id="plan-depdate" value="'+_escAttr(_depDate)+'" min="'+planYear+'-01-01" max="'+planYear+'-12-31" onblur="planSaveDepart()" class="mvchamp" style="width:100%"></div>'
@@ -5755,15 +5755,15 @@ function _planHsupCard(mbr){
   var _minusStr=(_yb.minus>0.0001?'\u2212':'')+_planFmt(_yb.minus);
   var _netCol=_yb.net>=-0.0001?'var(--vert-med,#3D6B27)':'var(--rouge,#dc2626)';
   var hYb='<div class="plan-card" style="background:var(--bg-card);border:1.5px solid var(--gris-clair);margin-bottom:14px;flex-direction:column;align-items:stretch">'
-    +'<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px"><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--terre,#8A5A38)">📊 Solde des heures · année</span><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">au '+PLAN_MOIS_C[dm]+' '+planYear+'</span></div>'
+    +'<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px"><span style="font-size:10px;font-weight:700;color:var(--terre,#8A5A38)">📊 Solde des heures · année</span><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">au '+PLAN_MOIS_C[dm]+' '+planYear+'</span></div>'
     +'<div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:12px"><span style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">Solde net</span><span style="font-size:var(--pt-xl,28px);font-weight:800;color:'+_netCol+'">'+_planFmtE(_yb.net)+'</span></div>'
     +'<div style="display:flex;gap:8px">'
-      +'<div class="mvencadre mvencadre-attention" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--terre,#8A5A38)">'+_planFmt(_dep)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Départ</div></div>'
-      +'<div class="mvencadre mvencadre-ok" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--vert-med)">'+_plusStr+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Sup + cumul</div></div>'
-      +(_yb.maj>0.0001?'<div class="mvencadre mvencadre-attention" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:var(--fw-bold,700);color:var(--orange)">+'+_planFmt(_yb.maj)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Major. + cumul</div></div>':'')
-      +'<div class="mvencadre mvencadre-danger" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--rouge)">'+_minusStr+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Récup − cumul</div></div>'
-      +(_yb.minusPay>0.0001?'<div class="mvencadre mvencadre-attention" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--orange)">−'+_planFmt(_yb.minusPay)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Payé − cumul</div></div>':'')
-      +(_yb.dues>0.0001?'<div class="mvencadre mvencadre-danger" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--rouge)">−'+_planFmt(_yb.dues)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Retir\u00e9es − cumul</div></div>':'')
+      +'<div class="mvencadre mvencadre-attention" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--terre,#8A5A38)">'+_planFmt(_dep)+'</div><div style="font-size:9px;color:var(--texte-doux);margin-top:2px">Départ</div></div>'
+      +'<div class="mvencadre mvencadre-ok" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--vert-med)">'+_plusStr+'</div><div style="font-size:9px;color:var(--texte-doux);margin-top:2px">Sup + cumul</div></div>'
+      +(_yb.maj>0.0001?'<div class="mvencadre mvencadre-attention" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:var(--fw-bold,700);color:var(--orange)">+'+_planFmt(_yb.maj)+'</div><div style="font-size:9px;color:var(--texte-doux);margin-top:2px">Major. + cumul</div></div>':'')
+      +'<div class="mvencadre mvencadre-danger" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--rouge)">'+_minusStr+'</div><div style="font-size:9px;color:var(--texte-doux);margin-top:2px">Récup − cumul</div></div>'
+      +(_yb.minusPay>0.0001?'<div class="mvencadre mvencadre-attention" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--orange)">−'+_planFmt(_yb.minusPay)+'</div><div style="font-size:9px;color:var(--texte-doux);margin-top:2px">Payé − cumul</div></div>':'')
+      +(_yb.dues>0.0001?'<div class="mvencadre mvencadre-danger" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--rouge)">−'+_planFmt(_yb.dues)+'</div><div style="font-size:9px;color:var(--texte-doux);margin-top:2px">Retir\u00e9es − cumul</div></div>':'')
     +'</div>'
     +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:10px;line-height:1.35">Cumul depuis le départ : heures reportées (+), récup ou acomptes pris (−). Rien ne périme en cours d’année — le solde se règle à la clôture du 31 décembre.'
       +(_yb.retenue>0.0001?' Retenu sur la paie depuis septembre\u00a0: '+_planFmt(_yb.retenue)+'.':'')
@@ -5785,7 +5785,7 @@ function _planHsupCard(mbr){
   //   d'avant gardent leur carte : c'est leur regle qu'elle decrit.
   if(_planRecupActive(dm))return _planRecupCartes(mbr,dm)+_planAnnuCard(mbr,dm)+hDep+hTab+hYb;
   var h=_planAnnuCard(mbr,dm)+hDep+hTab+hYb+'<div class="plan-card" style="background:var(--plan-acc-pale);border:1.5px solid rgba(123,109,184,0.4);margin-bottom:14px">';
-  h+='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--plan-acc);margin-bottom:10px">\u23f1 Compteur \u00b7 '+PLAN_MOIS_C[dm]+' '+planYear+'</div>';
+  h+='<div style="font-size:10px;font-weight:700;color:var(--plan-acc);margin-bottom:10px">\u23f1 Compteur \u00b7 '+PLAN_MOIS_C[dm]+' '+planYear+'</div>';
   if(sup>0.0001){
     h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="font-size:var(--pt-txt,13px);color:var(--texte)">Heures sup. du mois</div><div style="font-size:var(--pt-sm,16px);font-weight:700;color:var(--vert-med)">+'+_planFmt(sup)+'</div></div>';
     h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">Pay\u00e9es ce mois</div><div style="font-size:15px;font-weight:700;color:var(--texte)">'+_planFmt(paye)+'</div></div>';
@@ -5870,13 +5870,13 @@ function _planLegalCard(mbr){
     :'<span class="mvpas mvpas-fait" style="margin-left:auto">\u2713 conforme</span>';
   var border=breaches>0?'1.5px solid var(--rouge)':'1px solid var(--gris-clair)';
   var h='<div class="plan-card" style="border:'+border+';flex-direction:column;align-items:stretch;margin-bottom:14px">';
-  h+='<div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--plan-acc)">\u2696\ufe0f Cadre l\u00e9gal</span>'+headPill+'</div>';
+  h+='<div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;font-weight:700;color:var(--plan-acc)">\u2696\ufe0f Cadre l\u00e9gal</span>'+headPill+'</div>';
   var overLeg=worked>L.mensLeg+0.0001;
   var mScale=Math.max(L.mensLeg*1.25,worked*1.08,1);
   h+='<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:10px"><span style="font-size:var(--pt-micro,12px);color:var(--texte-doux)">Mois \u00b7 travail effectif</span><span style="font-size:var(--pt-sm,16px);font-weight:800">'+_planFmt(worked)+'</span></div>';
   h+=_planLegalBar(worked,mScale,overLeg?'var(--plan-acc)':'var(--vert-med)',L.mensLeg,null);
   h+='<div style="font-size:var(--pt-micro,11px);margin-top:13px;color:'+(overLeg?'var(--plan-acc)':'var(--texte-doux)')+'">'+(overLeg?'+'+_planFmt(worked-L.mensLeg)+' au-dessus de la dur\u00e9e l\u00e9gale ('+_planFmt(L.mensLeg)+')':'Sous la dur\u00e9e l\u00e9gale mensuelle ('+_planFmt(L.mensLeg)+')')+'</div>';
-  h+='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--texte-doux);margin:16px 0 4px;border-top:1px solid var(--gris-clair);padding-top:12px">\ud83d\udcc6 Par semaine \u00b7 max '+_planFmt(L.maxHebdo)+'</div>';
+  h+='<div style="font-size:10px;font-weight:700;color:var(--texte-doux);margin:16px 0 4px;border-top:1px solid var(--gris-clair);padding-top:12px">\ud83d\udcc6 Par semaine \u00b7 max '+_planFmt(L.maxHebdo)+'</div>';
   h+='<div style="font-size:10px;color:var(--gris);margin-bottom:8px">Rep\u00e8res : trait = dur\u00e9e l\u00e9gale, trait rouge = maximum.</div>';
   weeks.forEach(function(w){
     var tot=_planWeekTotal(mbr,planMonth,w),cls,sc,ic,txt;
@@ -6657,7 +6657,7 @@ function _planRenderCadre(){
         +'<div id="pl-cpmode-ouvres" onclick="planSetCpMode(\'ouvres\')" style="'+_cpSeg+';'+(_cpMode==='ouvres'?_cpOn:_cpOff)+'">5 jours ouvr\u00e9s<div style="font-size:10px;font-weight:500;opacity:.85;margin-top:2px">lun\u2192ven</div></div>'
       +'</div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5">'+_cpHint+'</div>'
-      +'<div style="font-size:var(--pt-micro,11px);font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--texte-doux);margin-top:6px;padding-top:12px;border-top:1px solid var(--gris-clair)">P\u00e9riode de r\u00e9f\u00e9rence</div>'
+      +'<div style="font-size:var(--pt-micro,11px);font-weight:700;color:var(--texte-doux);margin-top:6px;padding-top:12px;border-top:1px solid var(--gris-clair)">P\u00e9riode de r\u00e9f\u00e9rence</div>'
       +'<div style="display:flex;gap:8px">'
         +'<div id="pl-cpper-juin" onclick="planSetCpPeriode(5)" style="'+_cpSeg+';'+(_cpMd===5?_cpOn:_cpOff)+'">1er juin \u2192 31 mai<span style="display:block;font-size:10px;font-weight:500;opacity:.85;margin-top:2px">usage agricole</span></div>'
         +'<div id="pl-cpper-jan" onclick="planSetCpPeriode(0)" style="'+_cpSeg+';'+(_cpMd===0?_cpOn:_cpOff)+'">Ann\u00e9e civile<span style="display:block;font-size:10px;font-weight:500;opacity:.85;margin-top:2px">janv. \u2192 d\u00e9c.</span></div>'
@@ -8119,7 +8119,7 @@ function _planReleveFiche_(nom,mbr,_ctr){
     +'.cad-g{display:grid;grid-template-columns:1.62fr 1fr}.cb{padding:6px 10px;border-top:1px solid #E7E5E4}.cb:nth-child(-n+2){border-top:none}.cb:nth-child(even){border-left:1px solid #E7E5E4}'
     // ★★★ PAIE-1 — une ligne par chose que la compta saisit : le libellé à gauche, le chiffre en gros, le pourquoi dessous.
     +'.cpt{padding:2px 10px 5px}.cpt .cl{display:grid;grid-template-columns:30mm 1fr;column-gap:8px;align-items:baseline;padding:4px 0 3px;border-top:1px solid #EFEDEA}.cpt .cl:first-child{border-top:none}'
-    +'.cl-l{font-size:var(--pt-micro,11px);font-weight:600;color:#1C1917}.cl-v{font-size:var(--pt-sm,16px);font-weight:700;line-height:1.15;color:#1C1917;font-variant-numeric:tabular-nums}'
+    +'.cl-l{font-size:var(--pt-micro,11px);font-weight:600;color:#1C1917}.cl-v{font-size:var(--pt-sm,16px);font-weight:700;line-height:1.15;color:#1C1917;font-variant-numeric:lining-nums tabular-nums}'
     +'.cl-v small{font-size:var(--pt-lbl,10.5px);font-weight:600}.cl-v .x{display:block;white-space:nowrap}'
     +'.tx3{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:5px}.tb em{display:block;font-style:normal;font-size:var(--pt-nano,9.5px);font-weight:600;line-height:1.25;color:#8A5A38;margin-top:2px}.tb{display:block;border:1px solid #D9C7B8;border-radius:5px;padding:2px 6px 3px;background:#FBF6F1}'
     +'.tb small{display:block;font-size:var(--pt-nano,9.5px);font-weight:600;color:#57534E}.tb b{display:block;font-size:var(--pt-sm,16px);line-height:1.1}'
@@ -8138,7 +8138,7 @@ function _planReleveFiche_(nom,mbr,_ctr){
     +'.r.rien{color:#57534E}.r.fort span:last-child b{color:#A0291E}.plus .r span:last-child b{color:#8A5A38}.plus .r.rien span:last-child b{color:#57534E}'
     +'.pd{padding:4px 10px;border-top:1.5px solid #1C1917;font-size:var(--pt-nano,9.5px)}'
     +'.nt{font-size:var(--pt-nano,9.5px);color:#57534E;margin-top:2px}h4.st{font-size:var(--pt-micro,11px);font-weight:700;margin:5px 0 2px}'
-    +'table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}'
+    +'table{width:100%;border-collapse:collapse;font-variant-numeric:lining-nums tabular-nums}'
     +'.j{font-size:var(--pt-nano,9.5px)}.j th{text-align:left;font-weight:600;color:#57534E;padding:2px 3px;border-bottom:1.5px solid #1C1917}'
     +'.j td{padding:1px 3px;border-bottom:1px solid #EFEDEA;white-space:nowrap;line-height:1.2}.j .n{text-align:right}.j td.jr{font-weight:600}'
     +'.j .cpv{background:#E4ECF5;color:#1A4A7A}.j .cfa{background:#E6F0DC;color:#31601C;font-weight:600}.j .cab{background:#F4F2EE;color:#44403C}'
@@ -8460,7 +8460,7 @@ function _planExportPDF_(nom,mbr,_ctr){
     +'<style>*{box-sizing:border-box;margin:0;padding:0}'
     +'html,body{background:#fff}'
     +'body{font-family:var(--font-ui,\'Outfit\',system-ui,-apple-system,"Segoe UI",sans-serif);font-size:10px;line-height:1.35;color:#1c1917;'
-      +'font-variant-numeric:tabular-nums;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+      +'font-variant-numeric:lining-nums tabular-nums;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
     +'.sheet{padding:11mm 10mm 9mm}'
     +'.hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;border-bottom:2px solid #d8c3a3;padding-bottom:9px;margin-bottom:11px}'
     +'.hdr h1{font-size:19px;font-weight:700;letter-spacing:-.2px}.hdr .sub{font-size:var(--pt-micro,11px);color:#57534e;margin-top:3px}'
@@ -8469,18 +8469,18 @@ function _planExportPDF_(nom,mbr,_ctr){
     +'.etp{font-size:var(--pt-nano,9.5px);color:#78716c;text-align:right;margin-top:3px;white-space:nowrap}'
     +'.tete{display:flex;border:1.5px solid #d8c3a3;border-radius:8px;overflow:hidden;margin-bottom:10px}'
     +'.tmain{padding:9px 14px;background:#faf6ef;min-width:196px}'
-    +'.tmain .lab{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#8A5A38}'
+    +'.tmain .lab{font-size:8.5px;font-weight:700;text-transform:none;letter-spacing:0;color:#8A5A38}'
     +'.tmain .big{font-size:30px;font-weight:700;line-height:1.05;letter-spacing:-1px;margin-top:1px}'
     +'.tmain .tsub{font-size:var(--pt-nano,9.5px);color:#57534e;margin-top:3px}.tmain .tsub b{color:#292524;font-weight:600}'
     +'.tsplit{flex:1;display:flex;border-left:1.5px solid #e7ddc9}'
     +'.tc{flex:1;padding:9px 11px;border-right:1px solid #efe7da}.tc:last-child{border-right:0}'
     +'.tc .n{font-size:18px;font-weight:700;line-height:1.1}'
-    +'.tc .l{font-size:8.5px;color:#78716c;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;line-height:1.35}'
+    +'.tc .l{font-size:8.5px;color:#78716c;text-transform:none;letter-spacing:0;margin-top:3px;line-height:1.35}'
     +'.tc.fo{background:#f4f7fb}.tc.fo .n{color:#2c5f8f}.tc.fa{background:#f7f4fa}.tc.fa .n{color:#6b5a8a}'
     +'.cemois{font-size:var(--pt-nano,9.5px);color:#57534e;border:1px solid #e7e5e4;border-radius:6px;padding:6px 11px;margin-top:9px}'
     +'.cemois b{color:#1c1917;font-weight:700}.cemois .nb{color:#78716c}'
     +'.soldean{border:1.5px solid #d8c3a3;background:#faf6ef;border-radius:8px;padding:8px 12px;margin-bottom:9px;display:flex;flex-wrap:wrap;gap:4px 18px;align-items:baseline;page-break-inside:avoid}'
-    +'.soldean .t{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8A5A38;width:100%;margin-bottom:2px}'
+    +'.soldean .t{font-size:9px;font-weight:700;text-transform:none;letter-spacing:0;color:#8A5A38;width:100%;margin-bottom:2px}'
     +'.soldean .it{font-size:var(--pt-lbl,10.5px);color:#57534e}.soldean .it b{font-size:var(--pt-micro,12px);color:#1c1917}'
     +'.soldean .nt{width:100%;font-size:9px;color:#78716c;margin-top:5px;line-height:1.45}'
     +'.days{display:flex;gap:14px;align-items:flex-start}.col{flex:1;min-width:0}'
@@ -8491,16 +8491,16 @@ function _planExportPDF_(nom,mbr,_ctr){
     +'td.c{white-space:nowrap}td.c b{color:#57534e;font-weight:700}'
     +'.dow{color:#a8a29e;font-size:9px}.tim{color:#8b8580;font-size:9px;letter-spacing:-.1px}'
     +'.ctr{border:1.5px solid #d8c3a3;background:#faf6ef;border-radius:8px;padding:8px 12px;margin-bottom:9px;page-break-inside:avoid}'
-    +'.ctr .t{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8A5A38;margin-bottom:5px}'
+    +'.ctr .t{font-size:9px;font-weight:700;text-transform:none;letter-spacing:0;color:#8A5A38;margin-bottom:5px}'
     +'.crow{display:flex;justify-content:space-between;gap:12px;font-size:10px;color:#44403c;padding:2.5px 0;border-bottom:1px solid #efe7da}'
     +'.crow:last-of-type{border-bottom:none}.crow .cv{white-space:nowrap;color:#57534e}'
     +'.cgap .cl,.cgap .cv{color:#a8a29e;font-style:italic}'
     +'.cbreak{background:repeating-linear-gradient(135deg,#fff,#fff 4px,#faf3ea 4px,#faf3ea 8px)}'
     +'.cbreak .cl,.cbreak .cv{color:#b45309;font-style:normal}'
-    +'.cnow{font-size:8.5px;text-transform:uppercase;letter-spacing:.4px;color:#15803d;background:#f0fdf4;border-radius:8px;padding:1px 5px;margin-left:4px}'
+    +'.cnow{font-size:8.5px;text-transform:none;letter-spacing:0;color:#15803d;background:#f0fdf4;border-radius:8px;padding:1px 5px;margin-left:4px}'
     +'.ctr .note{font-size:9px;color:#8b8580;margin-top:5px;line-height:1.45}.ctr .note b{color:#57534e}'
     +'.annu{margin-top:11px;page-break-inside:avoid}'
-    +'.annu .t{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8A5A38;margin-bottom:5px}'
+    +'.annu .t{font-size:9px;font-weight:700;text-transform:none;letter-spacing:0;color:#8A5A38;margin-bottom:5px}'
     +'.annu th.hi,.annu td.hi{background:#f7f3ec}.annu thead th.hi{background:#2c2942}'
     +'.annu tbody tr.cur{background:#f8f6fd}'
     +'.annu tfoot td{border-top:1.5px solid #cfcac4;border-bottom:none;font-weight:700;background:#fafaf9}'
@@ -8513,7 +8513,7 @@ function _planExportPDF_(nom,mbr,_ctr){
     +'.lieu{margin-top:15px;font-size:10px;color:#44403c;page-break-inside:avoid}'
     +'.lieu b{font-weight:600}'
     +'.foot{margin-top:7px;display:flex;gap:34px;page-break-inside:avoid}'
-    +'.sig{flex:1}.sig .sl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#57534e}'
+    +'.sig{flex:1}.sig .sl{font-size:9px;font-weight:700;text-transform:none;letter-spacing:0;color:#57534e}'
     +'.sig .sb{height:21mm;margin-top:4px;border:1px solid #cfcac4;border-radius:6px;background:#fdfcfb}'
     +'.credit{margin-top:12px;padding-top:6px;border-top:1px solid #ece9e5;display:flex;justify-content:space-between;gap:14px;font-size:8.5px;color:#a8a29e}'
     // \u2605\u2605 MARGE ZERO, ET C'EST VOULU. Le navigateur dessine SES en-tetes et pieds \u2014
@@ -9010,17 +9010,17 @@ var _PA_CSS =
 + '.pa-nom{display:flex;align-items:baseline;gap:8px;padding:4px 9px;background:#2B2118;'
   +'margin-bottom:5px;border-radius:4px}'
 + '.pa-nom b{font-family:var(--font-titre,\'Cormorant Garamond\',Georgia,serif);font-size:var(--pt-base,14px);color:#F5EFE3;font-weight:700}'
-+ '.pa-nom span{font-size:7.5px;color:#C2A14D;text-transform:uppercase;letter-spacing:1px;margin-left:auto}'
++ '.pa-nom span{font-size:7.5px;color:#C2A14D;text-transform:none;letter-spacing:0;margin-left:auto}'
 + '.pa-vent{display:flex;gap:0;border:1px solid #C2A14D;margin-top:5px;page-break-inside:avoid}'
 + '.pa-vent div{flex:1;padding:4px 8px;border-right:1px solid #E0CFA6}'
 + '.pa-vent div:last-child{border-right:0}'
 + '.pa-vent b{display:block;font-family:var(--font-titre,\'Cormorant Garamond\',Georgia,serif);font-size:var(--pt-txt,13px);color:#2B2118}'
-+ '.pa-vent span{font-size:6.5px;color:#8A7A62;text-transform:uppercase;letter-spacing:.6px}'
++ '.pa-vent span{font-size:6.5px;color:#8A7A62;text-transform:none;letter-spacing:0;}'
 + '.pa-grp{page-break-after:always;break-after:page}'
 + '.pa-grp:last-child{page-break-after:auto;break-after:auto}'
 + '.pa-who{display:flex;align-items:baseline;gap:8px;padding:3px 9px;background:#FAF3E0;'
   +'border-left:3px solid #C2A14D;margin-bottom:5px;border-radius:0 4px 4px 0}'
-+ '.pa-who b{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:#8A7A62;font-weight:700;white-space:nowrap}'
++ '.pa-who b{font-size:8px;text-transform:none;letter-spacing:0;color:#8A7A62;font-weight:700;white-space:nowrap}'
 + '.pa-who p{font-family:var(--font-titre,\'Cormorant Garamond\',Georgia,serif);font-size:var(--pt-micro,12px);font-weight:600;color:#2B2118;margin:0}'
 + '.pa-hz{display:flex;border:1px solid #A5701E;background:#FDF7E9;page-break-inside:avoid;break-inside:avoid}'
 + '.pa-hnote{font-size:6.5px;color:#96794A;line-height:1.3;margin:2px 0 5px;padding-left:2px}'

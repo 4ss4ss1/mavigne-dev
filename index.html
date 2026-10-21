@@ -615,7 +615,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:var(--pt-txt,13px);margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v9.67</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v9.68</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -843,7 +843,7 @@
   <div class="mvu-kpis" id="parc-kpis">
     <div class="mvu-kpi"><div class="mvu-kpi-v" id="pc-c">0</div><div class="mvu-kpi-l">Finies</div></div>
     <div class="mvu-kpi"><div class="mvu-kpi-v" id="pc-e">0</div><div class="mvu-kpi-l">En cours</div></div>
-    <div class="mvu-kpi"><div class="mvu-kpi-v" id="pc-a">0</div><div class="mvu-kpi-l">Arrach.</div></div>
+    <div class="mvu-kpi"><div class="mvu-kpi-v" id="pc-a">0</div><div class="mvu-kpi-l">Arrachées</div></div>
   </div>
   <div class="frow">
     <div class="fchip active" data-filter="toutes">Toutes</div>
@@ -862,7 +862,7 @@
         <div style="display:flex;align-items:flex-start;gap:10px">
           <div style="font-size:var(--pt-md,20px);flex-shrink:0"><svg class="mv-ic" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></div>
           <div style="flex:1">
-            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7A5C10;margin-bottom:3px">Priorité du moment</div>
+            <div style="font-size:10px;font-weight:700;color:#7A5C10;margin-bottom:3px">Priorité du moment</div>
             <div id="priority-text" style="font-size:var(--pt-txt,13px);font-weight:600;color:#4A3A08;line-height:1.4"></div>
             <div id="priority-task-row" style="display:none;margin-top:6px"><span id="priority-task-text" style="display:inline-block;background:#4A3A08;color:#FBE89A;font-size:var(--pt-micro,12px);font-weight:700;border-radius:8px;padding:3px 10px"></span></div>
           </div>
@@ -962,7 +962,7 @@
       </div>
       <div id="dp-cepage-row" class="mvencadre" style="display:none;margin-bottom:14px">
         <div style="display:flex;align-items:center;justify-content:space-between">
-          <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase;font-weight:700;letter-spacing:0.5px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> Cépage</div>
+          <div style="font-size:10px;color:var(--texte-doux);font-weight:700"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> Cépage</div>
           <button id="dp-cepage-edit-btn" style="display:none;background:none;border:none;font-size:var(--pt-micro,12px);color:var(--texte-doux);cursor:pointer;padding:3px 8px;border-radius:8px;font-family:inherit"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Modifier</button>
         </div>
         <div id="dp-cepage-val" style="font-size:15px;font-weight:600;color:var(--texte);margin-top:5px"></div>
@@ -970,12 +970,12 @@
       <div class="dp-parc-meteo" id="dp-parc-meteo" style="display:none"></div>
       <div id="dp-commune-row" class="mvencadre" style="display:none;margin-bottom:14px">
         <div style="display:flex;align-items:center;justify-content:space-between">
-          <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase;font-weight:700;letter-spacing:0.5px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg> Commune (météo)</div>
+          <div style="font-size:10px;color:var(--texte-doux);font-weight:700"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg> Commune (météo)</div>
           <button id="dp-commune-edit-btn" style="display:none;background:none;border:none;font-size:var(--pt-micro,12px);color:var(--texte-doux);cursor:pointer;padding:3px 8px;border-radius:8px;font-family:inherit"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Modifier</button>
         </div>
         <div id="dp-commune-val" style="margin-top:5px"></div>
       </div>
-      <div style="font-size:var(--pt-micro,11px);font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--texte-doux);margin-bottom:10px">Tâches — <span id="dp-saison-label"></span></div>
+      <div style="font-size:var(--pt-micro,11px);font-weight:700;color:var(--texte-doux);margin-bottom:10px">Tâches — <span id="dp-saison-label"></span></div>
       <!-- Le delai de reentree est un statut CRITIQUE et REGLEMENTAIRE : c'est
            le seul endroit de la fiche ou une icone reste. -->
       <div id="dp-drae-alert" class="mv-c mv-c-al" style="display:none"></div>
@@ -1472,7 +1472,7 @@
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v9.67</div>
+        <div class="mod-header-sub">Ma Vigne v9.68</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
       
@@ -1586,7 +1586,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg></div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v9.67 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div class="ver-tag">Ma Vigne v9.68 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -2594,7 +2594,7 @@
     <div class="fl">Travail du chapeau</div>
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <div class="mvencadre" style="flex:1;text-align:center">
-        <div style="font-size:10px;color:var(--texte-leger);letter-spacing:.5px;text-transform:uppercase;margin-bottom:7px">Remontages</div>
+        <div style="font-size:10px;color:var(--texte-leger);margin-bottom:7px">Remontages</div>
         <div style="display:flex;align-items:center;justify-content:center;gap:10px">
           <button onclick="_vmAdjRem(-1)" style="width:32px;height:32px;border-radius:8px;background:rgba(192,132,90,.12);border:1px solid rgba(192,132,90,.2);color:#C0845A;font-size:18px;cursor:pointer;">&#8722;</button>
           <span id="vm-rem-val" style="font-size:18px;font-weight:600;color:var(--texte);min-width:24px;text-align:center">2</span>
@@ -2602,7 +2602,7 @@
         </div>
       </div>
       <div class="mvencadre" style="flex:1;text-align:center">
-        <div style="font-size:10px;color:var(--texte-leger);letter-spacing:.5px;text-transform:uppercase;margin-bottom:7px">Pigeages</div>
+        <div style="font-size:10px;color:var(--texte-leger);margin-bottom:7px">Pigeages</div>
         <div style="display:flex;align-items:center;justify-content:center;gap:10px">
           <button onclick="_vmAdjPig(-1)" style="width:32px;height:32px;border-radius:8px;background:rgba(192,132,90,.12);border:1px solid rgba(192,132,90,.2);color:#C0845A;font-size:18px;cursor:pointer;">&#8722;</button>
           <span id="vm-pig-val" style="font-size:18px;font-weight:600;color:var(--texte);min-width:24px;text-align:center">1</span>
@@ -2644,7 +2644,7 @@
         <span style="padding:10px 12px;border:1px solid var(--gris);border-radius:10px;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte-doux);white-space:nowrap;">cL</span>
       </div>
       <div id="conv-res-liq2past" class="mvencadre mvencadre-info" style="display:none;margin-top:10px">
-        <div style="font-size:10px;font-weight:700;letter-spacing:.8px;color:#4A9FC8;text-transform:uppercase;margin-bottom:8px;">Résultat</div>
+        <div style="font-size:10px;font-weight:700;color:#4A9FC8;margin-bottom:8px">Résultat</div>
         <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:var(--pt-txt,13px);color:var(--texte-doux);">SO₂ pur</span><span id="conv-res-g" style="font-size:var(--pt-sm,16px);font-weight:700;">—</span></div>
         <div style="height:1px;background:rgba(74,159,200,0.2);margin:6px 0;"></div>
         <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:var(--pt-txt,13px);color:var(--texte-doux);display:flex;align-items:center;gap:6px;"><span class="mvpas mvpas-etiquette">2g</span>éq.</span><span id="conv-res-p2" style="font-size:15px;font-weight:700;">—</span></div>
@@ -2659,7 +2659,7 @@
         <div style="flex:1;"><div class="fl"><span class="mvpas mvpas-etiquette">5g</span> Pastilles</div><input type="number" class="fi ac" id="conv-p5" placeholder="ex. 40" min="0" oninput="_calcConvPast()"></div>
       </div>
       <div id="conv-res-past2liq" class="mvencadre mvencadre-info" style="display:none;margin-top:10px">
-        <div style="font-size:10px;font-weight:700;letter-spacing:.8px;color:#4A9FC8;text-transform:uppercase;margin-bottom:8px;">Résultat</div>
+        <div style="font-size:10px;font-weight:700;color:#4A9FC8;margin-bottom:8px">Résultat</div>
         <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:var(--pt-txt,13px);color:var(--texte-doux);">SO₂ pur total</span><span id="conv-res-total" style="font-size:var(--pt-sm,16px);font-weight:700;">—</span></div>
         <div style="height:1px;background:rgba(74,159,200,0.2);margin:6px 0;"></div>
         <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:var(--pt-txt,13px);color:var(--texte-doux);">Solution à <span id="conv-pct-lbl">5</span>%</span><span id="conv-res-cl" style="font-size:19px;font-weight:700;color:#4A9FC8;">—</span></div>
@@ -2667,7 +2667,7 @@
       </div>
     </div>
     <div class="mvencadre" style="margin-top:14px">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--texte-doux);text-transform:uppercase;margin-bottom:4px;">Formule</div>
+      <div style="font-size:10px;font-weight:700;color:var(--texte-doux);margin-bottom:4px">Formule</div>
       <div style="font-size:var(--pt-micro,12px);font-family:monospace;color:var(--texte-doux);margin-bottom:2px;">g SO₂ = cL × concentration% ÷ 10</div>
       <div style="font-size:var(--pt-micro,12px);font-family:monospace;color:var(--texte-doux);">cL = g SO₂ × 10 ÷ concentration%</div>
     </div>
@@ -2856,7 +2856,7 @@
     <div id="docs-pane-etp" style="display:none">
       <!-- Bloc ETP saison — admin uniquement -->
   <div id="set-sec-etp" style="display:none">
-    <div style="font-size:var(--pt-micro,11px);font-weight:700;color:var(--texte-doux);text-transform:uppercase;letter-spacing:1px;margin:18px 0 10px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg> Heures &amp; ETP — rapport de saison</div>
+    <div style="font-size:var(--pt-micro,11px);font-weight:700;color:var(--texte-doux);margin:18px 0 10px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg> Heures &amp; ETP — rapport de saison</div>
     <div style="background:var(--fond-module);border:1px solid var(--gris);border-radius:14px;overflow:hidden">
       <div style="padding:14px 16px;border-bottom:1px solid var(--gris)">
         <div id="etp-season-lbl" style="font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux)">Heures de la saison</div>
@@ -3120,7 +3120,7 @@
 <div class="overlay" id="ovNewPwd" onclick="closeOv(event,'ovNewPwd')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cle"></use></svg> Mot de passe à communiquer</div><div class="modal-sub" id="npw-sub"></div></div><div class="modal-body">
   <div id="npw-who" class="mvencadre mvencadre-attention" style="margin-bottom:14px;text-align:center"></div>
   <div style="background:var(--cave,#14110D);border-radius:14px;padding:20px 16px;text-align:center;margin-bottom:12px">
-    <div style="color:rgba(255,255,255,0.45);font-size:var(--pt-micro,11px);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px">Mot de passe provisoire</div>
+    <div style="color:rgba(255,255,255,0.45);font-size:var(--pt-micro,11px);margin-bottom:8px">Mot de passe provisoire</div>
     <div id="npw-val" style="font-family:var(--font-ui,'Outfit',system-ui,sans-serif);font-size:26px;font-weight:600;color:#C9A84C;letter-spacing:0.02em;word-break:break-all;line-height:1.3;-webkit-user-select:all;user-select:all"></div>
   </div>
   <button class="mbtn" id="npw-copy" onclick="_mvCopyNewPwd()" style="width:100%;margin:0 0 14px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> Copier</button>
@@ -3460,7 +3460,7 @@
       <div class="sd-trac-sheet-sub" id="rb-sub"></div>
     </div>
     <div class="mvencadre mvencadre-danger" style="margin:14px 16px 4px" id="rb-info"></div>
-    <div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.4);padding:14px 20px 8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Choisir un autre tracteur</div>
+    <div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.4);padding:14px 20px 8px;font-weight:600">Choisir un autre tracteur</div>
     <div class="sd-trac-sheet-list" id="rb-trac-list"></div>
     <div id="rb-warn" style="display:none" class="sd-trac-sheet-warn">
       <div style="font-size:var(--pt-micro,12px);color:#E07070;font-weight:600;margin-bottom:2px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg> Ce tracteur est aussi en réparation</div>
@@ -3581,7 +3581,7 @@
       </div>
 
       <div style="margin:14px 0 6px;padding-top:12px;border-top:1px solid var(--line)">
-        <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:6px;font-weight:600;letter-spacing:.4px;text-transform:uppercase">Documents</div>
+        <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:6px;font-weight:600">Documents</div>
         <a href="/cgu.html" target="_blank" rel="noopener" style="display:block;color:var(--or);text-decoration:none;font-weight:600;font-size:var(--pt-txt,13px);padding:5px 0">&#8594; Conditions g&#233;n&#233;rales d&#39;utilisation (v1.1)</a>
         <a href="/dpa.html" target="_blank" rel="noopener" style="display:block;color:var(--or);text-decoration:none;font-weight:600;font-size:var(--pt-txt,13px);padding:5px 0">&#8594; Accord de traitement des donn&#233;es &#183; RGPD art. 28 (v1.0)</a>
       </div>
@@ -3686,7 +3686,7 @@
     </div>
   </div>
 </div>
-<script src="/boot.js?v=9.67"></script>
+<script src="/boot.js?v=9.68"></script>
 <script type="module" src="/src/app.js"></script>
 
 <!-- ── Overlay erreur critique Ma Vigne (v2.68) ── -->
@@ -3778,7 +3778,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v9.67</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v9.68</span>
       </div>
     </div>
     <div class="modal-body">
