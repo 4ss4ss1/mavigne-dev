@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.50
+// MA VIGNE — Service Worker v10.51
+// v10.51 (21/10/2026) — COLLE-1 (§412) : Pilotage › Aujourd’hui — « En direct » en tête de la colonne de droite, au-dessus d’« À savoir » ; la barre d’onglets se cale sous le bandeau (sa hauteur mesurée, --pil-entete-bas) et la colonne de droite sous les deux (colleHaut compte le bandeau) : plus rien ne passe derrière ; « En direct » garde la hauteur d’une journée calme, « Tout voir (N) » le déplie. styles.css, cockpit-vue.js, pilotage.js, utils.js (APP, WHATS_NEW, aide), guide.
 // v10.50 (21/10/2026) — REVUE-10 (§410) : les finitions de la revue — 5 règles en capitales des <style> d’index.html en lettres normales (titre de la campagne, Archives, badge de période) ; « + Conducteur », un vrai bouton (Tracteur). index.html, tracteur.js, utils.js. APP 9.70 -> 9.71.
 // v10.49 (21/10/2026) — REVUE-9 (§409) : la visite de démo cache « Mise en route » (currentUser._isVisite) — décision de Nico. app.js, utils.js, index.html. APP 9.69 -> 9.70.
 // v10.48 (21/10/2026) — REVUE-8 (§408) : sans travaux à mesurer, l’avancement dit « — » (Accueil : tuile et carte de la saison « À venir » ; Pilotage : jauge et tuile), sa valeur tombe à 0 au lieu de 100. app.js, pilotage.js, utils.js, index.html. APP 9.68 -> 9.69.
@@ -4580,7 +4581,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.50';
+const CACHE_NAME   = 'mavigne-v10.51';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4597,7 +4598,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.50 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.51 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4617,7 +4618,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.50 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.51 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

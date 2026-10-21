@@ -109,7 +109,7 @@ function suite(S) {
   // REF-1 (§266) : la feuille de cet ancien cockpit est remplacée par celle de la maquette validée, passée à la charte.
   T('l\u2019ancienne feuille a laissé la place à celle de la maquette (REF-1)', S.css.includes('★★★ REF-1 (§266) — LE COCKPIT D\'AUJOURD\'HUI : LA FEUILLE DE LA MAQUETTE VALIDÉE') && !S.css.includes('AUJ-1 (§260) — LE COCKPIT D\'AUJOURD\'HUI, VUE TERRAIN'));
   T('l\u2019aide, les bulles et le guide décrivent le nouvel écran', /'pil\.fil': \{ t: 'En direct'/.test(S.uti) && /'pil\.charge': \{ t: 'La charge restante'/.test(S.uti)
-    && S.uti.includes('Aujourd’hui se lit d’un coup d’œil') && S.guide.includes('le fil <b>En direct</b> : en haut, qui est où en ce moment'));
+    && S.uti.includes('Aujourd’hui se lit d’un coup d’œil') && S.guide.includes("le fil <b>En direct</b> : d'abord qui est où en ce moment"));   // COLLE-1 (§412) : « En direct » en haut de la colonne de droite, la phrase du guide a suivi
   T('la nouveauté d\u2019AUJ-1 reste au Journal (bloc 8.32, pastille sur le fil, pour l\u2019admin)',
     /\{ v: '8\.32', d: '2026-10-07', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-fil-pan'/.test(S.uti));
   return out;

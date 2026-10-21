@@ -73,7 +73,7 @@ async function partieB(S, T) {
 function partieC(S, T) {
   const app = sansCom(S.app), vue = sansCom(S.vue), css = S.css;
   T('C1 goHub ouvre le Pilotage sur Aujourd’hui avant d’atterrir', /function goHub\(\)\{[^\n]*_pilOuvrirAujourdhui\(\)[^\n]*_goLanding\(\); \}/.test(app));
-  T('C2 trois colonnes dès 1 000 px de contenu, « À savoir » à droite entre 760 et 1 000', vue.includes("const taille = w >= 1000 ? 'large' : w >= 760 ? 'moyen' : 'petit';") && vue.includes("moyen: [['verdict', 'decision', 'plan', 'chant', 'courbe', 'fil'], [], ['savoir']]"));
+  T('C2 trois colonnes dès 1 000 px de contenu, « À savoir » à droite entre 760 et 1 000', vue.includes("const taille = w >= 1000 ? 'large' : w >= 760 ? 'moyen' : 'petit';") && vue.includes("moyen: [['verdict', 'decision', 'plan', 'chant', 'courbe'], [], ['fil', 'savoir']]"));   // COLLE-1 (§412) : « En direct » au-dessus d’« À savoir », à droite
   T('C3 « À savoir » colle : la page du Pilotage n’est plus un conteneur de défilement', css.includes('#page-pilotage:has(.ck2){overflow-x:clip;overflow-y:visible}') && css.includes('[data-taille="large"] #ck-t-c,[data-taille="moyen"] #ck-t-c{position:sticky;'));
   T('C4 la carte se redessine : sa case est observée, et une case sans largeur est réessayée', vue.includes('if (ci) obs.observe(ci);') && /if \(W < 120\) \{ if \(planEssais\+\+ < 30\) requestAnimationFrame\(\(\) => dessinerPlan\(true\)\); return; \}/.test(vue));
   T('C5 la charge restante sans zone remplie (et depuis AUJ-6 sans ronds : une ligne)', !vue.includes("ck-c-aire") && !vue.includes('ck-c-mes') && vue.includes('<path id="ck-c-ligne" class="ck-c-ligne"/>'));

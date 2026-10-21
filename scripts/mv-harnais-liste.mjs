@@ -633,6 +633,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-tete1.mjs --contre'],
   ['node scripts/mv-harnais-tete2.mjs'],              // TETE-2 (§329) : un seul modèle d'en-tête, lisible et calé, Pilotage compris
   ['node scripts/mv-harnais-tete2.mjs --contre'],
+  ['node scripts/mv-harnais-colle1.mjs'],             // COLLE-1 (§412) : « En direct » au-dessus d’« À savoir », collés sous le bandeau et les onglets
+  ['node scripts/mv-harnais-colle1.mjs --contre'],
   ['node scripts/mv-harnais-parc1.mjs'],              // PARC-1 (§274) : les Parcelles sur ordinateur, liste + fiche (maquette v3)
   ['node scripts/mv-harnais-parc1.mjs --contre'],
   ['node scripts/mv-harnais-parc2.mjs'],              // PARC-2 (§275) : les cartes de travail du téléphone (maquette v3)

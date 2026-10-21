@@ -8279,6 +8279,40 @@ input[type="checkbox"], input[type="radio"]{ accent-color:var(--accent); }
 .mvbtn-danger-discret:hover{ background:var(--danger-doux); }
 .mvbtn-danger-discret[data-confirm="1"]{ background:var(--danger); color:var(--sur-danger); }
 
+/* ★ COLLE-1 (§412) — LE BANDEAU, LES ONGLETS, PUIS LA COLONNE DE DROITE (« En direct » au-dessus d’« À savoir »).
+   TETE-2 (§329) a donné au Pilotage un vrai .mod-header, collant à top:0 au-dessus de tout (z-index 80). La barre d’onglets,
+   collante elle aussi à top:0, passait dessous ; « À savoir », calé sur les seuls onglets (AUJ-6, §308), aussi (Nico, 21/10).
+   Sur ordinateur et tablette, les onglets se calent sous le bandeau (sa hauteur MESURÉE : --pil-entete-bas, pilotage.js) ;
+   la colonne de droite sous les deux (--ck-colle, mesuré par cockpit-vue.js, bandeau compris). Au téléphone, rien ne change.
+   Copie de la maquette validée le 21/10 ; le bloc reste AVANT celui de TETE-2, le dernier de la feuille. */
+@media (min-width:760px) and (min-height:600px){
+  body #page-pilotage .pil-tabsbar{top:var(--pil-entete-bas,0px)}
+}
+@media (min-width:760px){
+  /* La colonne tient dans l’écran et défile seule quand elle déborde : une seule barre de défilement, la sienne (plus de
+     liste qui défile dans « À savoir »). Ses 8 px de marge intérieure, compensés au-dehors, laissent passer l’ombre des
+     cartes et la pastille « Nouveau » (8 px au-dessus de sa cible). */
+  #ck-page[data-taille="large"] #ck-t-c,#ck-page[data-taille="moyen"] #ck-t-c{
+    top:calc(var(--ck-colle,16px) - var(--e-2,8px));max-height:calc(100dvh - var(--ck-colle,16px) - var(--e-2,8px));
+    margin:calc(-1 * var(--e-2,8px));padding:var(--e-2,8px);overflow-y:auto;scrollbar-width:thin}
+  #ck-page[data-taille="large"] #ck-savoir,#ck-page[data-taille="moyen"] #ck-savoir{max-height:none}
+  #ck-page[data-taille="large"] #ck-savoir>#ck-sv-l,#ck-page[data-taille="moyen"] #ck-savoir>#ck-sv-l{overflow:visible}
+  /* « En direct » garde la hauteur d’une journée calme : le titre et le message « Rien encore aujourd’hui » (mesurée : 185 px
+     sur 280 px de large). Quand il y a plus, la fin s’efface en fondu et « Tout voir (N) », en haut à droite comme « Agrandir »
+     sur les autres cartes, le déplie sur place ; « Replier » le remet à sa taille (Nico, 21/10). Déplié : plus de plafond, la
+     colonne défile. Les classes deborde et ouvert sont posées par cockpit-vue.js (filTaille : la mesure, puis le geste).
+     flex:none — la colonne est une boîte flexible bornée : sans lui, la carte coupée était écrasée à 42 px (vu au rendu). */
+  #ck-t-c #ck-fil,#ck-t-c #ck-savoir{flex:none}
+  #ck-t-c #ck-fil{position:relative;max-height:186px;overflow:hidden}
+  #ck-t-c #ck-fil.ouvert{max-height:none;overflow:visible}
+  #ck-t-c #ck-fil.deborde:not(.ouvert)::after{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--h-sm,28px);
+    background:linear-gradient(to bottom,transparent,var(--bg-card));pointer-events:none}
+  #ck-t-c .ck-fil-l{max-height:none;overflow:visible}
+  /* À la hauteur de la ligne du titre : à 36 px, le bouton mordait sur la ligne de cadre (vu au rendu). */
+  #ck-t-c .ck-fil-tout{position:absolute;top:var(--e-5,20px);right:var(--e-5,20px);margin:0;min-height:var(--h-sm,28px);line-height:1}
+  #ck-t-c .ck-fil-tout:not([hidden]){display:inline-flex}
+}
+/* ★ FIN COLLE-1 */
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.
    Deux rangées partout, Pilotage compris (pilotage.js pose désormais un vrai .mod-header) : l'identité (icône, titre,
    sous-titre, gestes du module) puis la ligne du jour (saison, date — ou la météo, qui porte alors la date courte —,

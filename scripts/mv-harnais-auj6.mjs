@@ -73,7 +73,7 @@ function partieC(S, T) {
     && (vue.match(/box\.querySelector\('svg'\)\)\) return;/g) || []).length === 2);
   T('C4 les graphes ne visent jamais une boîte pas dessinée', vue.includes("if (!c || !$('#ck-c-ligne')) return;") && vue.includes("if (!c || !$('#ck-e-fait')) return;"));
   T('C5 « À savoir » colle sous les barres collantes du Pilotage, à leur hauteur mesurée', vue.includes("pg.style.setProperty('--ck-colle', colleHaut() + 'px');")
-    && vue.includes("$$('#page-pilotage .pil-portee, #page-pilotage .pil-tabsbar')"));
+    && vue.includes("$$('#page-pilotage .mod-header, #page-pilotage .pil-portee, #page-pilotage .pil-tabsbar')"));   // COLLE-1 (§412) : le bandeau compris
   T('C6 la carte « À savoir » ne coupe plus (la pastille « Nouveau » dépasse de 8 px) : seule sa liste défile',
     css.includes('#ck-savoir{display:flex;flex-direction:column;max-height:calc(100dvh - var(--ck-colle,16px) - 24px);overflow:visible}') && css.includes('#ck-savoir>#ck-sv-l{flex:0 1 auto;min-height:0;overflow-y:auto;'));
   T('C7 la charge restante est une ligne : plus de ronds par photo', !vue.includes('ck-c-mes') && !css.includes('.ck-c-mes'));

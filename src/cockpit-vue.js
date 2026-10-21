@@ -1148,6 +1148,7 @@ function majFil() {
   const C = coursItems(), cl = $('#ck-fil-c');
   if (cl) cl.innerHTML = C.map(htmlCoursLi).join('');
   ['#ck-fil-sec-c', '#ck-fil-sec-j'].forEach(q => { const x = $(q); if (x) x.hidden = !C.length; });
+  filTaille(); setTimeout(filTaille, 520);   // COLLE-1 : remesurée, puis une fois les lignes neuves et sortantes posées (480 ms)
   if (vide) vide.textContent = videFil(C.length);
 }
 function majEco(r) {
@@ -1421,8 +1422,9 @@ function ouvrirFeuille(pid) { const p = PIDX[pid]; if (p && !p.arr) { cacherLoup
 
 
 const RANGS = {
-  t: { large: [['verdict', 'decision', 'fil'], ['plan', 'chant', 'courbe'], ['savoir']],
-       moyen: [['verdict', 'decision', 'plan', 'chant', 'courbe', 'fil'], [], ['savoir']],   // AUJ-5 : « À savoir » reste à droite
+  // ★ COLLE-1 (§412) : « En direct » en tête de la colonne de droite, dans sa carte, au-dessus d'« À savoir » (Nico, 21/10).
+  t: { large: [['verdict', 'decision'], ['plan', 'chant', 'courbe'], ['fil', 'savoir']],
+       moyen: [['verdict', 'decision', 'plan', 'chant', 'courbe'], [], ['fil', 'savoir']],   // AUJ-5 : « À savoir » reste à droite
        petit: [['verdict', 'savoir', 'decision', 'plan', 'fil', 'chant', 'courbe'], [], []] },
   e: { large: [['ever', 'ekpi'], ['echart', 'etac'], ['epos', 'eapp']],
        moyen: [['ever', 'ekpi', 'epos'], ['echart', 'etac', 'eapp'], []],
@@ -1430,11 +1432,32 @@ const RANGS = {
 };
 let rangerRaf = 0, redimT = 0, redimPlanT = 0;
 function rangerBientot() { if (!rangerRaf) rangerRaf = requestAnimationFrame(() => { rangerRaf = 0; ranger(); }); }
+// ★ COLLE-1 (§412) — « En direct », dans la colonne de droite, garde la hauteur d'une journée calme (la feuille le plafonne) ;
+//   quand son contenu dépasse, la fin s'efface en fondu et « Tout voir (N) », en haut à droite, le déplie sur place —
+//   « Replier » le remet à sa taille (Nico, 21/10 : « de la taille d'une journée calme avec possibilité d'extension »).
+//   Ailleurs (téléphone, une colonne) : le bouton d'avant, « Tout le fil » au-delà de quatre faits (DIRECT-1).
+function filTaille() {
+  const f = $('#ck-fil'), b = $('#ck-fil-tout'), l = $('#ck-fil-l'); if (!f || !b) return;
+  if (!(f.parentElement && f.parentElement.id === 'ck-t-c')) {
+    f.classList.remove('deborde', 'ouvert'); if (l) l.classList.toggle('tout', !!S.filTout);
+    b.hidden = S.evts.length <= 4; b.textContent = S.filTout ? 'Replier' : 'Tout le fil'; b.setAttribute('aria-expanded', String(!!S.filTout));
+    return;
+  }
+  const ouvert = !!S.filOuvert;
+  f.classList.toggle('ouvert', ouvert); if (l) l.classList.toggle('tout', ouvert);
+  if (!ouvert) { f.classList.remove('deborde'); f.classList.toggle('deborde', f.scrollHeight > f.clientHeight + 4); }
+  b.hidden = !f.classList.contains('deborde');
+  b.textContent = ouvert ? 'Replier' : 'Tout voir (' + (coursItems().length + S.evts.length) + ')';
+  b.setAttribute('aria-expanded', String(ouvert));
+}
 // ★ AUJ-6 (§308) : « À savoir » colle SOUS les barres collantes du Pilotage (le fil de portée, puis les onglets), à leur hauteur
 //   MESURÉE. À 16 px du haut (AUJ-5, --ck-colle jamais posé), il passait sous la barre d'onglets dès qu'on descendait (10/10).
+// ★ COLLE-1 (§412) : le bandeau compris. TETE-2 (§329) a fait du haut du Pilotage un vrai .mod-header, collant à top:0
+//   au-dessus de tout : la mesure ne le comptait pas, la colonne de droite passait dessous (Nico, 21/10). Les onglets se
+//   calent désormais sous lui (styles.css, --pil-entete-bas posé par pilotage.js) : le plus bas des trois donne la hauteur.
 function colleHaut() {
   let bas = 0;
-  $$('#page-pilotage .pil-portee, #page-pilotage .pil-tabsbar').forEach(el => {
+  $$('#page-pilotage .mod-header, #page-pilotage .pil-portee, #page-pilotage .pil-tabsbar').forEach(el => {
     const cs = getComputedStyle(el), h = el.getBoundingClientRect().height;
     if (h && (cs.position === 'sticky' || cs.position === 'fixed')) bas = Math.max(bas, (parseFloat(cs.top) || 0) + h);
   });
@@ -1455,6 +1478,7 @@ function ranger() {
       ids.forEach(id => { const el = $('#ck-' + id); if (el) col.appendChild(el); });
     }));
   }
+  filTaille();   // COLLE-1 : la hauteur d'« En direct » se remesure à chaque rangement (place ou largeur changée)
   // PRO-1 : les graphes suivent TOUTE nouvelle largeur (ils ne se redessinaient qu'au changement de disposition : la
   //   barre latérale repliée ou dépliée les laissait trop larges ou trop étroits), une fois la largeur posée.
   clearTimeout(redimT); redimT = setTimeout(() => { if ($('#ck-page')) { redimCourbe(false); redimEChart(false); } }, 140);
@@ -1605,6 +1629,7 @@ function brancher() {
     const mod = ev.target.closest('[data-module]');
     if (mod) { if (typeof window.goTo === 'function') window.goTo(mod.dataset.module); return; }
     const plus = ev.target.closest('#ck-fil-tout, #ck-sv-tout');
+    if (plus && plus.id === 'ck-fil-tout' && plus.closest('#ck-t-c')) { S.filOuvert = !S.filOuvert; filTaille(); return; }   // COLLE-1
     if (plus) {
       const l = plus.id === 'ck-fil-tout' ? $('#ck-fil-l') : $('#ck-sv-l'), on = !l.classList.contains('tout');
       l.classList.toggle('tout', on); plus.setAttribute('aria-expanded', String(on));
@@ -1649,7 +1674,7 @@ window._ck2Monter = function (v) {
   G.reste = R.reste; G.fin = R.fin; GE.fin = R.fin;   // l'état des graphes : la maquette le prenait au chargement
   cacherLoupe(); monter(); brancherPlan(); ranger(); dessinerPlan(true);
   if (!branche) { brancher(); branche = true; setInterval(heures, 30000); }
-  if ('ResizeObserver' in window) { if (obs) obs.disconnect(); obs = new ResizeObserver(() => rangerBientot()); obs.observe($('#ck-page')); const ci = $('#ck-carte-in'); if (ci) obs.observe(ci); }   // AUJ-5 : le plan suit aussi SA case
+  if ('ResizeObserver' in window) { if (obs) obs.disconnect(); obs = new ResizeObserver(() => rangerBientot()); obs.observe($('#ck-page')); const ci = $('#ck-carte-in'); if (ci) obs.observe(ci); const hd = document.querySelector('#page-pilotage .mod-header'); if (hd) obs.observe(hd); }   // AUJ-5 : le plan suit aussi SA case ; COLLE-1 : et le bandeau, dont la hauteur règle la colonne de droite
   placerInd($('.ck-seg [aria-selected="true"]'), $('.ck-seg-ind'));
   placerInd($('.ck-bascule [aria-selected="true"]'), $('.ck-bascule-ind'));
   SANS_MVT = !!window._ck2EntreeFaite; entree(); SANS_MVT = false; window._ck2EntreeFaite = true;

@@ -11840,6 +11840,26 @@ function _pilStickyH(){
   try{ document.documentElement.style.setProperty('--pil-portee-h', h+'px'); }
   catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'sticky: hauteur du fil'}); }
 }
+// ★ COLLE-1 (§412) — le bas du bandeau du Pilotage, MESURÉ. TETE-2 (§329) en a fait un vrai .mod-header, collant à top:0
+//   au-dessus de tout (z-index 80) : la barre d'onglets, collante elle aussi à top:0, passait dessous. Elle se cale désormais
+//   sous lui (styles.css, sur ordinateur et tablette), et le cockpit y cale sa colonne de droite (cockpit-vue.js, colleHaut).
+//   Reposé à chaque affichage et dès que le bandeau change de taille ; une page cachée (hauteur 0) ne l'écrase pas.
+var _pilEnteteObs=null;
+function _pilEnteteBas(){
+  var hd=document.querySelector('#page-pilotage .mod-header'); if(!hd) return;
+  try{
+    var h=hd.getBoundingClientRect().height; if(!h) return;
+    var b=Math.round((parseFloat(getComputedStyle(hd).top)||0)+h);
+    document.documentElement.style.setProperty('--pil-entete-bas', b+'px');
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilEnteteBas'); }
+}
+// L'observateur se branche ici seulement, jamais depuis son propre rappel (observe() relance un premier rappel : la boucle).
+function _pilEnteteSuivre(){
+  _pilEnteteBas();
+  var hd=document.querySelector('#page-pilotage .mod-header'); if(!hd || !('ResizeObserver' in window)) return;
+  if(!_pilEnteteObs) _pilEnteteObs=new ResizeObserver(function(){ _pilEnteteBas(); });
+  _pilEnteteObs.disconnect(); _pilEnteteObs.observe(hd);
+}
 window._pilPortee = _pilPortee;
 
 
@@ -12866,6 +12886,7 @@ function renderPilotage(){
   // ★ TETE-2 : la ligne du jour reçoit la date (data-mv-date) et l'en-tête son voyant de synchro, comme les autres modules.
   if(typeof window._mvMetaSync==='function') window._mvMetaSync();
   if(typeof window._syncEnsureDots==='function'){ window._syncEnsureDots(); if(typeof window._syncRefresh==='function') window._syncRefresh(); }
+  _pilEnteteSuivre();   // ★ COLLE-1 : le bandeau fini, sa hauteur pour les onglets et la colonne de droite
   if(!window._dataReady){ setTimeout(function(){ var p=document.querySelector('.page.active'); if(p&&p.id==='page-pilotage'){ try{ _pilFillContent(_pilData()); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/renderPilotage'); } } }, 800); }
 }
 
