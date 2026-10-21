@@ -8,10 +8,17 @@
 // Bouchons (dits ici, pas cachés) : les tuiles, le rendement par parcelle et ce qui reste sur pied sont fournis
 // tels quels — leurs propres harnais (cave-mil, rdtmil) les jouent ; les quatre cartes des courbes sont des marques.
 import vm from 'node:vm';
+import fs from 'node:fs';
 import { lireCave } from './mv-cave-src.mjs';
 
 const CONTRE = process.argv.includes('--contre');
 const SAIN = { cave: lireCave() };
+// ★ HLHA-1 (§413) : la fiche et la vue Parcelles écrivent des surfaces par les deux formateurs de utils.js (KIT-4).
+const FORMATEURS = (() => {
+  const m = fs.readFileSync('src/utils.js', 'utf8').match(/function _mvHaNum\(x\)\{[^\n]*\n(window\._mvHaP=[^\n]*\n)(window\._mvHaT=[^\n]*\n)/);
+  if (!m) throw new Error('formateurs de surface introuvables dans utils.js');
+  return m[0];
+})();
 
 function bornes(src, nom) {
   const re = new RegExp('^(?:export )?function ' + nom + '\\s*\\(', 'gm');
@@ -42,6 +49,18 @@ function tableau(src, nom) {
   }
   throw new Error('table non fermée : ' + nom);
 }
+function objet(src, nom) {
+  const m = new RegExp('^var ' + nom + '\\s*=\\s*\\{', 'm').exec(src);
+  if (!m) throw new Error('table absente : ' + nom);
+  let d = 0, q = null;
+  for (let j = src.indexOf('{', m.index); j < src.length; j++) {
+    const ch = src[j];
+    if (q) { if (ch === '\\') j++; else if (ch === q) q = null; continue; }
+    if (ch === "'" || ch === '"') { q = ch; continue; }
+    if (ch === '{') d++; else if (ch === '}' && --d === 0) return src.slice(m.index, j + 1) + ';';
+  }
+  throw new Error('table non fermée : ' + nom);
+}
 function scalaire(src, nom) {
   const m = new RegExp('^var ' + nom + '\\s*=\\s*[0-9.]+;', 'm').exec(src);
   if (!m) throw new Error('variable absente : ' + nom);
@@ -53,7 +72,9 @@ const NC = ['_vendCfg', '_vendPckLegacy', '_vendParts', '_vpPck', '_vpCs', '_vpK
   '_pcrbCvEnt', '_pcrbCvNomCuve', '_pcrbCvNomVend', '_pcrbCvParcs', '_pcrbCvParcTxt', '_pcrbCvSous', '_pcrbCvVente',
   '_pcrbCvChaineCuve', '_pcrbCvPleines', '_pcrbCvLignes', '_pcrbCvCellules', '_pcrbCvCelHtml',
   '_mlJourCourt', '_mlJours', '_mlDatesRec', '_mlEtat', '_mlHead', '_mlCuvInfo', '_mlBlocCuvees', '_mlBlocVeille',
-  '_mlBlocReperes', '_mlRenderParc', '_mlCuvFicheHtml', '_mlRenderCuv', '_pcavVueCourbes'];
+  '_mlBlocReperes', '_mlRenderParc', '_mlCuvFicheHtml', '_mlRenderCuv', '_pcavVueCourbes',
+  // ★ HLHA-1 (§413) : le hL/ha des cuvées et le rendement par appellation (vraies fonctions, comme le reste)
+  '_mlCuvSurf', '_mlAocRdt', '_mlAocHtml', '_parcCoul', '_matNorm', '_vendAocNorm', '_vendAocList', '_vendAocDe', '_vendAocMax'];
 const PRELUDE = `
 var __logs = [], __adm = true, __ecrit = true, __RD = {}, __RESTE = {};
 var __SURF = {'Vieilles Vignes':0.62,'Champ de la Croix':0.62,'Les Perri\\u00e8res':1.1,'Clos du Moulin':0.45,'Les Charmes':1.4,'La Combotte':1.5,'Aux Murgers':0.5,'En Bertrange':0.85,'En Jouise':0.3};
@@ -94,7 +115,7 @@ function __rd(o){ __RD = o || {}; }
 function __reste(o){ __RESTE = o || {}; }
 `;
 function charger(S) {
-  const corps = PRELUDE + scalaire(S.cave, 'MV_CV_ZONE') + '\n' + scalaire(S.cave, 'MV_CV_FICHE') + '\n'
+  const corps = PRELUDE + FORMATEURS + objet(S.cave, '_MV_CEP_COUL') + '\n' + scalaire(S.cave, 'MV_CV_ZONE') + '\n' + scalaire(S.cave, 'MV_CV_FICHE') + '\n'
     + tableau(S.cave, '_PCRB_CV_GR') + '\n' + tableau(S.cave, '_ML_MOIS') + '\n'
     + NC.map(n => fn(S.cave, n)).join('\n')
     + '\nwindow._caveBilanChaine = _caveBilanChaine; window._vendDvolCorriger = function(){};'

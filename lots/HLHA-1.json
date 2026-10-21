@@ -1,0 +1,23 @@
+{
+  "lot": "HLHA-1",
+  "section": "§413",
+  "base": "825a51e52c76ac936583764f81ab39aae429038a",
+  "inclut": [],
+  "date": "2026-10-21",
+  "fichiers": {
+    ".mv-base": "bdb2b9b750e9a94aef0c301976ff6adc40f73112d687b5f0138da1eb26115c57",
+    "CLAUDE.md": "926f8c822ceafacc20a8bf3e19b5612b271e3ca7001ea1602d3df48c10934850",
+    "docs/claude/INDEX.md": "5363786da7bf6d4683054e9a805dd201c6cdf249e1be30e6f2357f71b77cd981",
+    "docs/claude/chantiers-380-429.md": "46b2d2bea9ae4308b56e909dc401de5e2f60d802174b72879d42dad0cb9492a9",
+    "docs/claude/journal.md": "87232e08fdf1180140ceee1d7574e6bcedc4c081b41d1fad72553a96b5217e3d",
+    "guide/08-cave.html": "7f774791a8037da0d47de4adfa3c18721f9ee294b46ff3be11721f009825a987",
+    "index.html": "990bf6d10a4c7829e28481c0a6251009c4177f8a97ef151559c328e4a7be1157",
+    "public/sw.js": "60219724c20542f1ad915adedc0c056727a701458ef00c59f9e7189d2f4b9dc3",
+    "scripts/harnais-claude-md.mjs": "7d1b381b28f0a8e1a714e7e0e6fda90b10ac28cbd75040c8bb15d4baedc07927",
+    "scripts/mv-harnais-liste.mjs": "8aa82aa1e0f76866f184d44289e22ffe3f6ee95bfc0a2dadf5d35f58bbfd0c53",
+    "scripts/mv-harnais-range1.mjs": "7fbf6d6418f66b6125a7b4b6745701c0421ed7f3341826c399b3c7075a3a0f70",
+    "src/cave.js": "5faf3029853b4e9afdd8c3843501b85a4630f83c48430c2989d7ec24af253387",
+    "src/utils.js": "c5803ed773d4c35861b3aa1e3e1da9529d151cf49af3db63b154b28a59cbe20d",
+    "scripts/mv-harnais-hlha1.mjs": "2c009715ab35363f8363a53d4e594b639240b75c9d136d840027ca12d2eac402"
+  }
+}

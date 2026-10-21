@@ -5464,6 +5464,92 @@ function _mlBlocReperes(mil,d){
   if(e.nCuve) h+='<li class="now"><span class="mlr-d">Aujourd\u2019hui</span><i class="mlr-p"></i><span>'+e.nCuve+' cuve'+(e.nCuve>1?'s':'')+' en fermentation</span></li>';
   return h+'</ol></section>';
 }
+/* ★ HLHA-1 (§413) — LE RENDEMENT PAR APPELLATION : CE QUI SE DECLARE. Nico (15/10) : « on declare en hL/ha par
+   appellation » (declaration de recolte, assurances). Par appellation ET par couleur — la declaration en fait
+   deux colonnes —, sur les parcelles RECOLTEES : tout leur raisin, vendu compris (la declaration porte le
+   volume obtenu du raisin vendu), sur toute leur surface. C'est la LIGNE de chaque parcelle (_mlRendements),
+   sommee : rien de neuf n'est calcule, et le chiffre tombe dans la fourchette des parcelles juste dessous.
+   ⚠️ Ce n'est pas le Revient (Pilotage › Economie) : lui projette les parcelles pas encore recoltees pour
+   chiffrer une bouteille ; ici, seulement ce qui est rentre. Les deux se rejoignent quand tout est rentre.
+   ⚠️ Le maximum est celui de l'APPELLATION pour ce millesime (_vendAocMax) — l'arrete vise l'appellation ;
+   a defaut, celui que portent toutes ses parcelles, et l'ecran le dit.
+   ⚠️ Une parcelle sans surface est ecartee des deux cotes, et comptee ; une parcelle encore sur pied reste
+   hors du calcul, et comptee : elle se declare a part. */
+function _mlAocRdt(rd,reste,mil){
+  var kgHl=_mlKgHl(), G={}, ord=[];
+  function ligne(p){
+    var a=(typeof _vendAocDe==='function')?_vendAocDe(p):null;
+    var nom=(a&&a.nom)||String((p&&p.appellation)||'').trim(), k=nom?_vendAocNorm(nom):'', c=_parcCoul(p.nom);
+    if(!G[k]){ G[k]={cle:k, nom:nom, a:a, couls:{}, ordC:[]}; ord.push(k); }
+    var g=G[k];
+    if(!g.couls[c]){ g.couls[c]={coul:c, ha:0, hl:0, hlMin:0, hlMax:0, kg:0, kgOk:0, n:0, mes:0, sansSurf:0, maxs:{}, pied:0, haPied:0}; g.ordC.push(c); }
+    return g.couls[c];
+  }
+  (rd||[]).forEach(function(r){
+    var p=r&&r.parcelle; if(!p) return;
+    var L=ligne(p), s=parseFloat(p.surface)||0, v=(r.rdt&&r.rdt.vol)||null;
+    if(!(s>0)){ L.sansSurf++; return; }
+    var hl=v?((v.hl||0)+(v.kgKo||0)/kgHl):((r.hlHa!=null)?r.hlHa*s:0);
+    L.n++; L.ha+=s; L.hl+=hl;
+    L.hlMin+=v?(v.hlMin||0):((r.hlMin!=null)?r.hlMin*s:hl); L.hlMax+=v?(v.hlMax||0):((r.hlMax!=null)?r.hlMax*s:hl);
+    L.kg+=(v?v.kg:r.kg)||0; L.kgOk+=v?(v.kgOk||0):(r.statut==='mesure'?(r.kg||0):0);
+    if(r.statut==='mesure') L.mes++;
+    if(r.max!=null) L.maxs[String(r.max)]=r.max;
+  });
+  (reste||[]).forEach(function(p){ if(!p) return; var L=ligne(p); L.pied++; L.haPied+=parseFloat(p.surface)||0; });
+  var out=[];
+  ord.forEach(function(k){
+    var g=G[k], am=(g.a&&typeof _vendAocMax==='function')?_vendAocMax(g.a,mil):null;
+    var cs=g.ordC.slice().sort(function(x,y){ return 'rb?'.indexOf(x)-'rb?'.indexOf(y); });
+    cs.forEach(function(c){
+      var L=g.couls[c], vals=Object.keys(L.maxs).map(function(x){ return L.maxs[x]; });
+      // Sans appellation, pas de maximum : ces parcelles sont a rattacher, elles ne se declarent pas ensemble.
+      var max=!k?null:((am!=null)?am:((vals.length===1)?vals[0]:null));
+      L.nom=g.nom; L.cle=g.cle; L.multi=(cs.length>1);
+      L.hlHa=L.ha>0?L.hl/L.ha:null; L.hlHaMin=L.ha>0?L.hlMin/L.ha:null; L.hlHaMax=L.ha>0?L.hlMax/L.ha:null;
+      L.statut=!L.n?'vide':((L.mes===L.n)?'mesure':(L.kgOk>0?'partiel':'estime'));
+      L.pctOk=L.kg>0?Math.round(L.kgOk/L.kg*100):0;
+      L.max=max; L.maxSrc=(am!=null)?'aoc':(max!=null?'parcelles':null); L.maxDiff=!!(k&&am==null&&vals.length>1);
+      L.depasse=!!(max&&L.hlHa!=null&&L.hlHa>max); L.pct=(max&&L.hlHa!=null)?Math.round(L.hlHa/max*100):null;
+      out.push(L);
+    });
+  });
+  return out.sort(function(a,b){
+    if(!a.cle!==!b.cle) return a.cle?-1:1;   // « Sans appellation » en dernier
+    return (b.ha-a.ha)||String(a.nom).localeCompare(String(b.nom),'fr',{sensitivity:'base'});
+  });
+}
+function _mlAocHtml(L){
+  if(!L||!L.length) return '';
+  var h='<section class="pcav-card mlp mla"><div class="mlp-bar"><b class="mla-t">Par appellation</b>'
+    +(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.aoc'):'')+'</div>'
+    +'<div class="mlx-hint mlp-hint">Ce qui se d\u00e9clare\u00a0: la surface r\u00e9colt\u00e9e et le volume de chaque appellation, couleur par couleur. '
+    +'Le raisin vendu compte, sur toute la surface de sa parcelle.</div>'
+    +'<div class="mlp-h mla-h" aria-hidden="true"><span>Appellation</span><span>Surface</span><span>R\u00e9colt\u00e9</span>'
+    +'<span>hL/ha</span><span>Face au maximum</span><span>Volume</span></div>';
+  L.forEach(function(x){
+    var coul=(x.coul==='r')?'rouge':((x.coul==='b')?'blanc':''), vin=(x.coul==='r')?'r':((x.coul==='b')?'b':'q'), sous=[];
+    if(!x.cle) sous.push('\u00e0 rattacher \u00e0 leur appellation (roue crant\u00e9e de la Cave, Appellations)');
+    if(x.n) sous.push(x.n+' parcelle'+(x.n>1?'s':'')+' r\u00e9colt\u00e9e'+(x.n>1?'s':''));
+    if(x.pied) sous.push(x.pied+' encore sur pied ('+window._mvHaT(x.haPied)+'\u00a0ha), hors du calcul');
+    if(x.sansSurf) sous.push(x.sansSurf+' sans surface, hors du calcul');
+    var ech=(x.max||0)*1.15, w=(x.max&&x.hlHa!=null)?Math.min(100,Math.round(x.hlHa/ech*100)):0;
+    h+='<div class="mla-l'+(x.depasse?' over':'')+'">'
+      +'<span class="mlp-n"><i class="mat-pt '+vin+'"></i><b>'+(x.cle?_escHtml(x.nom):'Sans appellation')+'</b>'
+        +((x.multi&&coul)?('<small class="mla-c">'+coul+'</small>'):'')+(x.depasse?'<span class="mlx-tag">au-dessus</span>':'')
+        +(sous.length?('<span class="mla-sous">'+sous.join(' \u00b7 ')+'</span>'):'')+'</span>'
+      +'<span class="mlp-s">'+(x.ha>0?(window._mvHaT(x.ha)+'\u00a0ha'):'\u2014')+'</span>'
+      +'<span class="mlp-k">'+(x.ha>0?(_mvF1(x.hl)+'\u00a0hL<small>'+_pcrbCvEnt(x.kg)+'\u00a0kg</small>'):'\u2014')+'</span>'
+      +'<span class="mlp-v">'+((x.hlHa==null)?'\u2014':((x.statut==='mesure')?_mvF1(x.hlHa):(_mvF1(x.hlHaMin)+'\u2013'+_mvF1(x.hlHaMax))))+'<small>hL/ha</small></span>'
+      +'<span class="mlp-b">'+((x.max&&x.hlHa!=null)
+          ?('<span class="mlx-tr"><span class="mlx-fi" style="width:'+w+'%"></span><span class="mlx-mk" style="left:87%"></span></span>'
+            +'<span class="mlp-bt">'+x.pct+'\u00a0%<small>max '+_mvF1(x.max)+((x.maxSrc==='parcelles')?' \u00b7 d\u2019apr\u00e8s ses parcelles':'')+'</small></span>')
+          :('<span class="mlp-bt">'+(!x.cle?'\u2014':(x.maxDiff?'Maximums diff\u00e9rents selon les parcelles':(x.max?('max '+_mvF1(x.max)):'Maximum non renseign\u00e9')))+'</span>'))+'</span>'
+      +'<span class="mlp-t'+((x.statut==='mesure')?' ok':'')+'">'+((x.statut==='mesure')?'mesur\u00e9':((x.statut==='partiel')?(x.pctOk+' % mesur\u00e9')
+        :((x.statut==='vide')?(x.pied?'sur pied':'sans surface'):'estim\u00e9')))+'</span></div>';
+  });
+  return h+'</section>';
+}
 function _mlRenderParc(){
   var mil=_mlMilActif(), rd=[], reste=[];
   try{ rd=_mlRendements(mil); }catch(e){ _pcavLog('rdt',e); }
@@ -5473,7 +5559,9 @@ function _mlRenderParc(){
   var adm=(typeof isAdmin==='function'&&isAdmin()), F=_mlParcF;
   _mlRdtCss();
   var nD=rd.filter(function(r){ return r.depasse; }).length, nV=rd.filter(function(r){ return r.vendu; }).length;
-  var h='<section class="pcav-card mlp"><div class="mlp-bar"><div class="mlx-chips mlp-f" role="group" aria-label="Filtrer les parcelles">';
+  /* ★ HLHA-1 (§413) : en tete, ce qui se declare — le rendement par appellation et par couleur. */
+  var aoc=''; try{ aoc=_mlAocHtml(_mlAocRdt(rd,reste,mil)); }catch(e){ _pcavLog('aoc',e); }
+  var h=aoc+'<section class="pcav-card mlp"><div class="mlp-bar"><div class="mlx-chips mlp-f" role="group" aria-label="Filtrer les parcelles">';
   [['tout','Toutes',rd.length],['dessus','Au-dessus du maximum',nD],['vendu','Vendues',nV],['pied','Encore sur pied',reste.length]].forEach(function(f){
     var on=f[0]===F;
     h+='<button type="button" class="mlx-chip'+(on?' on':'')+'" aria-pressed="'+(on?'true':'false')+'" onclick="_mlSetParcF(\''+_escAttr(f[0])+'\')">'+f[1]+' <small>'+f[2]+'</small></button>';
@@ -5517,6 +5605,37 @@ function _mlRenderParc(){
   });
   return h+'</section>';
 }
+/* ★ HLHA-1 (§413) — LA SURFACE D'UNE CUVE, POUR LE hL/ha DE SA CUVEE. Nico (15/10) : « en plus des kg/hL,
+   les hL/ha » — l'unite des declarations.
+   La surface des parcelles qui ont rempli la cuve, PART DU DOMAINE seulement : `_vendSurfParc` (lu par
+   `_vendRdtParc`) la connait deja, surfaces achetees retirees. Une parcelle partie dans plusieurs cuves y
+   compte au prorata de ses kilos : la meme hypothese que « reste au prorata » (un rendement egal sur la
+   parcelle).
+   ⚠️ Une parcelle sans surface du domaine connue rend `ha` nul : un denominateur partiel donnerait un hL/ha
+   trop haut, avec l'air d'une mesure. On dit laquelle (`sans`) au lieu de l'ecarter en silence.
+   ⚠️ Les kilos comptes sont ceux du millesime `mil` : ce sont les seuls que `_vendSurfParc` met en face. */
+function _mlCuvSurf(cuveId,mil){
+  if(!cuveId||typeof _vendRdtParc!=='function') return null;
+  var M=String(mil), kg={}, ord=[];
+  (CAVE_VENDANGE.recoltes||[]).forEach(function(r){
+    if(!r||r.cuve_id!==cuveId||String(r.date||'').slice(0,4)!==M) return;
+    var k=_recKgDom(r); if(!(k>0)) return;
+    var n=String(r.parcelle||'').trim()||'Parcelle';
+    if(kg[n]==null){ kg[n]=0; ord.push(n); }
+    kg[n]+=k;
+  });
+  var ha=0, par={}, sans=[], prorata=[];
+  ord.forEach(function(n){
+    var p=_vendParcByName(n), d=p?_vendRdtParc(p.nom,M):null, dom=null;
+    ((d&&d.surf&&d.surf.lignes)||[]).forEach(function(x){ if(x&&x.dom) dom=x; });
+    var tot=p?(parseFloat(p.surface)||0):0;
+    if(!dom||!(dom.ha>0)||!(dom.kg>0)){ sans.push(n); par[n]={ha:null, tot:tot}; return; }
+    var h=dom.ha*Math.min(1,kg[n]/dom.kg);
+    if(dom.src==='reste-prorata') prorata.push(n);
+    par[n]={ha:h, tot:tot}; ha+=h;
+  });
+  return { cuve:cuveId, ha:(ord.length&&!sans.length&&ha>0)?ha:null, par:par, sans:sans, prorata:prorata };
+}
 function _mlCuvFicheHtml(g,l){
   var ecrit=(typeof canWrite==='function'&&canWrite()&&_pcavHasW('_vendDvolCorriger'));
   var cv=l.cuveId?(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){ return x&&x.id===l.cuveId; }):null, cu=l.cuvee||null;
@@ -5524,7 +5643,11 @@ function _mlCuvFicheHtml(g,l){
   var h='<button type="button" class="mlc-ret" onclick="_mlCuvRetour()">'+_mvIcon('gauche',16)+' Toutes les cuv\u00e9es</button>'
     +'<div class="mlc-fh"><div class="mlc-ft"><h3>'+_escHtml(l.nom)+'</h3><span>'+_escHtml(l.sous||'')+'</span></div>'
     +'<span class="mlc-pill '+g.cle+'">'+i.etat+'</span>'+(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.cuvees'):'')+'</div>';
-  var cells=_pcrbCvCellules(ch,l.sorties,l.prelev,l.decuvee&&!(ch.entonneHl!=null&&ch.entonneSrc==='mesure'),MV_CV_FICHE);
+  /* ★ HLHA-1 (§413) : la surface de la cuve dont la chaine lit les kilos (ch.cuveId — deux cuves dans une
+     cuvee : la chaine suit _caveCuveSource), pour le hL/ha sous Entonne et Bouteilles. */
+  var S=null; try{ S=_mlCuvSurf(ch.cuveId||l.cuveId,_mlMilActif()); }catch(e){ _pcavLog('cuvSurf',e); }
+  var cells=_pcrbCvCellules(ch,l.sorties,l.prelev,l.decuvee&&!(ch.entonneHl!=null&&ch.entonneSrc==='mesure'),MV_CV_FICHE,S?S.ha:null);
+  var SP=(S&&cv&&S.cuve===cv.id)?S:null;   // « D'ou vient » ne montre la surface comptee que pour SA cuve
   h+='<div class="mlc-sec">De la r\u00e9colte \u00e0 la bouteille</div>'
     +'<div class="pcrb-cv-g mlc-lab"><span>R\u00e9colte</span><span>En cuve</span><span>Entonn\u00e9</span><span>Bouteilles</span></div>'
     +'<div class="pcrb-cv-g mlc-steps">'+cells.map(_pcrbCvCelHtml).join('')+'</div>';
@@ -5540,11 +5663,23 @@ function _mlCuvFicheHtml(g,l){
   var b='';
   if(ord.length){
     b+='<div class="mlc-col"><div class="mlc-sec">D\u2019o\u00f9 vient la cuv\u00e9e</div>';
+    var kgT=0;
     ord.forEach(function(n){
       var p=(typeof _vendParcByName==='function')?_vendParcByName(n):null, ha=p?(parseFloat(p.surface)||0):0;
-      b+='<div class="mlc-o"><b>'+_escHtml(n)+'</b>'+(ha?('<span>'+_mvF1(ha)+'\u00a0ha</span>'):'')
+      var q=SP?SP.par[n]:null, st=ha?(_mvF1(ha)+'\u00a0ha'):'';
+      // HLHA-1 : la surface COMPTEE dans le hL/ha (au centiare, KIT-4) ; « sur » la parcelle entiere quand elle en differe.
+      if(q) st=(q.ha==null)?'':((Math.abs(q.ha-q.tot)<0.00005||!(q.tot>0))?(window._mvHaP(q.ha)+'\u00a0ha')
+        :(window._mvHaP(q.ha)+' sur '+window._mvHaP(q.tot)+'\u00a0ha'));
+      if(q&&q.ha!=null) kgT+=par[n];   // le total ne compte que les parcelles dont la surface est comptee
+      b+='<div class="mlc-o"><b>'+_escHtml(n)+'</b>'+(st?('<span>'+st+'</span>'):'')
         +'<span class="k">'+_pcrbCvEnt(par[n])+'\u00a0kg</span></div>';
     });
+    if(SP&&SP.ha>0&&ord.length>1) b+='<div class="mlc-o mlc-ot"><b>Total</b><span>'+window._mvHaT(SP.ha)+'\u00a0ha</span>'
+      +'<span class="k">'+_pcrbCvEnt(kgT)+'\u00a0kg</span></div>';
+    if(SP&&SP.sans.length) b+='<div class="mvencadre mvencadre-attention mlc-enc">'+_mvIcon('alerte',18)+'<span>Pas de hL/ha\u00a0: '
+      +'la surface du domaine n\u2019est pas connue pour '+_escHtml(SP.sans.join(', '))+'.</span></div>';
+    if(SP&&SP.prorata.length) b+='<div class="mvencadre mvencadre-info mlc-enc">'+_mvIcon('info',18)+'<span>'+_escHtml(SP.prorata.join(', '))
+      +'\u00a0: la surface achet\u00e9e par le client n\u2019est pas saisie, la part du domaine est estim\u00e9e au prorata des kilos.</span></div>';
     b+='</div>';
   }
   var dt=[];
@@ -6751,6 +6886,15 @@ function _pcavInjectCss(){
   +'.mlp-l.over .mlp-bt{color:var(--rouge)}'
   +'.mlp-t.ok{background:var(--terre-pale);color:var(--terre-tx,#8A5A38)}'
   +'.mlp-vide{padding:var(--e-4,16px);font-size:var(--pt-txt,13px);color:var(--texte-doux)}'
+  /* ★ HLHA-1 (§413) : le bloc « Par appellation » prend les cellules de la liste des parcelles (memes colonnes) */
+  +'.pcav-card.mla{margin-bottom:var(--e-4,16px)}'
+  +'.mla-t{flex:1;font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)}'
+  +'.mla-h{display:none}'
+  +'.mla-l{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--e-1,4px) var(--e-3,12px);padding:var(--e-3,12px) var(--e-4,16px);border-top:1px solid var(--gris-clair)}'
+  +'.mla-l.over{background:var(--rouge-pale)}.mla-l.over .mlp-bt{color:var(--rouge)}'
+  +'.mla-l .mat-pt{display:inline-block;margin-right:var(--e-2,8px);vertical-align:middle}'
+  +'.mla-c{margin-right:var(--e-1,4px);font-size:var(--pt-micro,11px);color:var(--texte-doux)}'
+  +'.mla-sous{display:block;margin-top:var(--e-0,2px);font-size:var(--pt-micro,11px);color:var(--texte-doux)}'
   +'.mlc{display:flex;flex-direction:column;gap:var(--e-4,16px)}'
   +'.pcav-card.mlc-liste{padding:var(--e-1,4px) var(--e-4,16px) var(--e-2,8px);margin:0}'
   +'.pcav-card.mlc-fiche{display:none;padding:var(--e-4,16px) var(--e-5,20px);margin:0}'
@@ -6772,6 +6916,8 @@ function _pcavInjectCss(){
   +'.mlc-o{display:flex;align-items:baseline;gap:var(--e-2,8px);padding:var(--e-1,4px) 0;font-size:var(--pt-txt,13px)}'
   +'.mlc-o b{flex:1;font-weight:600;color:var(--texte)}.mlc-o span{color:var(--texte-doux)}.mlc-o .k{color:var(--texte)}'
   +'.mlc-x{font-size:var(--pt-txt,13px);color:var(--texte);line-height:1.5}'
+  +'.mlc-o.mlc-ot{margin-top:var(--e-1,4px);padding-top:var(--e-2,8px);border-top:1px solid var(--gris-clair)}'
+  +'.mlc-enc{margin-top:var(--e-2,8px)}'
   +'.mlc-act{display:flex;flex-wrap:wrap;gap:var(--e-2,8px);margin-top:var(--e-5,20px)}'
   +'.mlc-bp{min-height:40px;padding:0 var(--e-4,16px);border:0;border-radius:var(--r-sm,6px);background:var(--accent);color:#fff;font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer}'
   +'.pcrb-mil{margin:0 0 var(--e-3,12px);font-size:var(--pt-micro,11px);color:var(--texte-doux)}'
@@ -6785,6 +6931,8 @@ function _pcavInjectCss(){
   +'.mlg-a,.mlg-b{display:flex;flex-direction:column;gap:var(--e-4,16px);min-width:0}'
   +'.mlp-h{display:grid;grid-template-columns:minmax(0,1.6fr) 72px 112px 112px minmax(160px,1.4fr) 96px;gap:var(--e-3,12px);padding:var(--e-2,8px) var(--e-4,16px);border-top:1px solid var(--gris-clair);font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-doux)}'
   +'.mlp-l{display:grid;grid-template-columns:minmax(0,1.6fr) 72px 112px 112px minmax(160px,1.4fr) 96px;align-items:center;gap:var(--e-3,12px)}'
+  +'.mla-h{display:grid;grid-template-columns:minmax(0,1.6fr) 72px 112px 112px minmax(160px,1.4fr) 96px;gap:var(--e-3,12px);padding:var(--e-2,8px) var(--e-4,16px);border-top:1px solid var(--gris-clair);font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-doux)}'
+  +'.mla-l{display:grid;grid-template-columns:minmax(0,1.6fr) 72px 112px 112px minmax(160px,1.4fr) 96px;align-items:center;gap:var(--e-3,12px)}'
   +'.mlp-n,.mlp-v,.mlp-s,.mlp-k,.mlp-t,.mlp-b{order:0}'
   +'.mlp-l.s{grid-template-columns:minmax(0,1.6fr) 72px minmax(0,1fr)}'
   +'.mlc{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:start}'
@@ -7414,8 +7562,9 @@ function _pcrbCvLignes(mil){
            groupes:_PCRB_CV_GR.map(function(g){ return {cle:g[0], lab:g[1], lignes:G[g[0]].sort(tri)}; }) };
 }
 // Les quatre cases, aux valeurs du graphe du Chai : perte face a l'etape dessinee d'avant
-// (bouteilles : face a tout l'entonne, apport compris) ; kg/hL sur le vin de la cuvee seul.
-function _pcrbCvCellules(ch,sorties,prelev,attente,zone){
+// (bouteilles : face a tout l'entonne, apport compris) ; kg/hL et hL/ha sur le vin de la cuvee seul.
+// `ha` (HLHA-1, §413) : la surface de la cuve (_mlCuvSurf). La fiche la passe ; les lignes de la liste, non.
+function _pcrbCvCellules(ch,sorties,prelev,attente,zone,ha){
   var NB='\u00a0', kg=ch.recolteKg, Z=zone||MV_CV_ZONE;
   var ent=(ch.entonneHl!=null&&ch.entonneSrc==='mesure');
   var ap=(ent&&parseFloat(ch.apportHl)>0)?parseFloat(ch.apportHl):0;
@@ -7424,6 +7573,7 @@ function _pcrbCvCellules(ch,sorties,prelev,attente,zone){
   var max=Math.max(vRec||0,vEst||0,(vEnt||0)+vAp,vBtl||0)||1, prec=null, C=[];
   var haut=function(v){ return Math.max(3,Math.round(v/max*Z)); };
   var kgHl=function(hl){ return (kg!=null&&hl>0)?(Math.round(kg/hl)+NB+'kg/hL'):''; };
+  var hlHa=function(hl){ return (ha>0&&hl>0)?(_mvF1(hl/ha)+NB+'hL/ha'):''; };
   var perte=function(v,ref){
     if(!(ref>0)) return '';
     var p=Math.round((1-v/ref)*100);
@@ -7440,12 +7590,12 @@ function _pcrbCvCellules(ch,sorties,prelev,attente,zone){
   } else C.push(vide('\u2014'));
   if(vEnt!=null){
     C.push({h:haut(vEnt), apH:(vAp?haut(vAp):0), perte:perte(vEnt,prec), val:_mvF1(ch.entonneHl)+NB+'hL',
-      sous:kgHl(ch.entonneHl), k:true, sous2:(ap?('+'+_mvF1(ap)+NB+'hL apport'):'')});
+      sous:kgHl(ch.entonneHl), k:true, ha:hlHa(ch.entonneHl), sous2:(ap?('+'+_mvF1(ap)+NB+'hL apport'):'')});
     prec=vEnt+vAp;
   } else C.push(attente?vide('\u00e0 mesurer',true):vide('\u2014'));
   if(vBtl!=null){
     var part=ap?ch.entonneHl/(ch.entonneHl+ap):1;   // la part du vin de la cuvee dans les cols
-    C.push({h:haut(vBtl), perte:perte(vBtl,prec), val:_pcrbCvEnt(vBtl), sous:kgHl(vBtl*0.75/100*part), k:true});
+    C.push({h:haut(vBtl), perte:perte(vBtl,prec), val:_pcrbCvEnt(vBtl), sous:kgHl(vBtl*0.75/100*part), k:true, ha:hlHa(vBtl*0.75/100*part)});
   } else C.push(vide('\u2014'));
   return C;
 }
@@ -7457,6 +7607,7 @@ function _pcrbCvCelHtml(x){
     +'<span class="pcrb-cv-z" aria-hidden="true">'+z+'</span>'
     +'<b class="pcrb-cv-n'+(x.vide?(x.att?' att':' vide'):'')+'">'+x.val+'</b>'
     +(x.sous?('<span class="pcrb-cv-s'+(x.k?' k':'')+'">'+x.sous+'</span>'):'')
+    +(x.ha?('<span class="pcrb-cv-s k">'+x.ha+'</span>'):'')
     +(x.sous2?('<span class="pcrb-cv-s">'+x.sous2+'</span>'):'')+'</div>';
 }
 

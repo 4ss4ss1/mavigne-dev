@@ -695,6 +695,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-sansrec1.mjs --contre'],
   ['node scripts/mv-harnais-range1.mjs'],            // RANGE-1 (§335) : Le millésime rangé — la tête, les quatre vues, la chaîne de chaque cuvée (ex-CHAINE-1)
   ['node scripts/mv-harnais-range1.mjs --contre'],
+  ['node scripts/mv-harnais-hlha1.mjs'],             // HLHA-1 (§413) : le hL/ha de chaque cuvée (fiche) et le rendement par appellation et par couleur (Parcelles)
+  ['node scripts/mv-harnais-hlha1.mjs --contre'],
   ['node scripts/mv-harnais-matu1.mjs'],             // MATU-1 (§366) : les Maturités rangées — la vendange bornée, la fourchette par couleur, l'ordre, la saisie en série
   ['node scripts/mv-harnais-matu1.mjs --contre'],
   ['node scripts/mv-harnais-rec1.mjs'],              // REC-1 (§382) : les Récoltes rangées — la moyenne pondérée, valeur ou fourchette, le dépassement, le journal, la fiche
