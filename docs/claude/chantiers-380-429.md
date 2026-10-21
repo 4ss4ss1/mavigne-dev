@@ -693,3 +693,28 @@ Sur le canal `refonte`, la visite affichait « Mise en route » sur l’Accueil 
 
 ### 409e. La leçon
 **Un outil de revue a ses angles morts : les nommer avant de conclure.** Les captures tournent sans réseau ; tout ce qui vient de la base y est absent. Avant d’appeler « vide » un écran, vérifier d’où viennent ses données.
+
+## 410. REVUE-10 — LA REVUE, LOT 4 : LES FINITIONS (21/10 — `index.html` · `src/tracteur.js` · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · **APP 9.70 → 9.71, SW 10.49 → 10.50**, base `ffd28aa`)
+
+### 410a. La demande
+Le lot 4 de la revue complète (§406a) : 8. les filtres du Tracteur ; 9. Planning › Les gens sur ordinateur ; 10. le liseré doré des fenêtres en sombre ; 11. l’aplat vert « Saison en cours » des Réglages. Et ce qui restait vu au §407 : le titre « Campagne… » des Réglages, toujours en capitales.
+
+### 410b. Ce qui est livré
+- **Les `<style>` d’`index.html`** avaient échappé au passage en lettres normales (§407 : la feuille, les règles injectées et les styles écrits sur place, pas ces blocs-là). 5 règles → `text-transform:none`, espacement à 0 : `.cmp-head .t` (le titre « Campagne 1 mars → … » des Réglages), `.arc-lab .y em`, `.arc-kpi .l`, `.arcan-yh em` (les Archives), `.per-badge`. L’écran de lancement (`#sp-sub`) garde ses capitales.
+- **Le Tracteur** : le « Conducteur » en pointillés au bout de la rangée des conducteurs n’était pas un libellé mal placé — la revue s’était trompée — mais le **bouton d’ajout** (`openAddConducteur`), un `<div>`. → `<button type="button">` « + Conducteur », `aria-label="Ajouter un conducteur"`.
+
+### 410c. Écartés après vérification
+- **9. Planning › Les gens sur ordinateur** : à partir de 1 024 px, la fiche du premier salarié se range d’office à droite de la liste (`_plGensDock`, PLAN-2 §280) ; la capture de la revue était prise avant (celle de `planning-demande`, qui attend, la montre). Pas un défaut.
+- **11. L’aplat vert de la frise des Réglages** : chaque période a sa couleur (`_cmpCouleur`) — un type, pas un état ; dans l’outil de captures, la seule période (« Saison en cours », le nom par défaut d’un domaine sans données) tombait sur le vert. Pas un défaut.
+- **10. Le liseré doré des fenêtres en sombre** : sa règle n’a pas été trouvée (ni `.modal`, ni ses ombres, ni les règles du thème sombre en tête de la feuille). À identifier sur l’appareil, avec l’inspecteur du navigateur.
+
+### 410d. ⚠️ L’ordre des lots
+Un premier jet de ce lot avait été préparé par-dessus REVUE-9, livré mais pas encore poussé : l’emballer aurait mêlé deux lots et déclaré une base fausse (`mv-base` l’aurait refusé chez Nico). Arrêté, dit à Nico ; refait ici sur `ffd28aa`, une fois REVUE-9 poussé.
+
+### 410e. Vu
+`tracteur` (« + Conducteur » au bout des filtres), `reglages` (le titre de la campagne).
+
+- **Chaîne** : **471 commandes, 0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 410f. La leçon
+**Un balayage n’est complet que s’il connaît tous les endroits où vit la règle.** La feuille, les règles injectées, les attributs `style` — et les blocs `<style>` d’`index.html`, oubliés au premier passage. Lister les sources avant de balayer.

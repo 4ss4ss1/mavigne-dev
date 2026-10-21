@@ -1517,7 +1517,7 @@ function renderTracteur(){
     +_condList().map(c=>`<div class="chip ${window.fCond===c.nom?'active ac':''}" onclick="window.fCond='${_escAttr(c.nom)}';renderTracteur()">${_escHtml(c.nom)}</div>`
       +(isAdmin()?'<button type="button" class="chip chip-ed" aria-label="Modifier '+_escAttr(c.nom)+'" title="Modifier '+_escAttr(c.nom)+'" onclick="editCond(\''+_escAttr(c.nom)+'\')">'+_mvIcon('crayon',16)+'</button>':'')).join('');
 
-  if(cc && typeof isAdmin==='function' && isAdmin()) cc.insertAdjacentHTML('beforeend','<div class="chip" style="border-style:dashed;opacity:0.85;cursor:pointer" onclick="openAddConducteur()">Conducteur</div>');
+  if(cc && typeof isAdmin==='function' && isAdmin()) cc.insertAdjacentHTML('beforeend','<button type="button" class="chip" style="border-style:dashed;opacity:0.85;cursor:pointer" aria-label="Ajouter un conducteur" onclick="openAddConducteur()">+ Conducteur</button>');   // REVUE-10 (§410) : un vrai bouton, qui dit « ajouter »
 
   // Filtres activités
   const ac=document.getElementById('act-chips');
