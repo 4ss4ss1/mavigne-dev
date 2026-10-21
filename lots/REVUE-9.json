@@ -1,0 +1,18 @@
+{
+  "lot": "REVUE-9",
+  "section": "§409",
+  "base": "1a13c3bab5b8e6c2d41acd11311a809f125eb1bd",
+  "inclut": [],
+  "date": "2026-10-21",
+  "fichiers": {
+    ".mv-base": "060e0fc94b940fcf92ade7d4cea49312120ceb14937ae4c96bb66581996563a1",
+    "CLAUDE.md": "f5dc3e9d98c2445e56b92c1d169bf9bb80dedbe91b7fd236648fec9bde601dfd",
+    "docs/claude/INDEX.md": "c1d68e8dff7e26b767ed698120a27f67ca339cec2e2886581d59233ec296424a",
+    "docs/claude/chantiers-380-429.md": "34379ee78b95dd5fda8859bf7f4ff99d4fcba77276a701e50dfbf510f7a2d27e",
+    "docs/claude/journal.md": "00b303f072488b36cfd54268838be34fd5313eb9c9afcfc00a2834b0e6aa9994",
+    "index.html": "5f9f8a60a135b80b759acf70b3ec7b49f7035df539958c57e28eeeb55b6d237d",
+    "public/sw.js": "202b972c41dda58223c12055572e5f67c13f6282f13237ea604b0f0768a977e6",
+    "src/app.js": "86f92eb94e5d590ce33b068ca45968fdd972e6409801cfb03dc1ef4aadfeb9ad",
+    "src/utils.js": "a415c313f9ff6646042f3a3ea267aed51611c68552e93c29950da3e013c08dea"
+  }
+}

@@ -673,3 +673,23 @@ Le lot 3 de la revue complète (§406a, défaut 5) : l’Accueil d’un domaine 
 
 ### 408d. La leçon
 **« Rien » n’est ni 0 % ni 100 %.** Une division par zéro rattrapée par un 100 « par défaut » transforme l’absence de travail en travail fini. Le bon défaut est un état à part, dit tel quel : « — », « À venir ».
+
+## 409. REVUE-9 — LA VISITE DE DÉMO SANS « MISE EN ROUTE » (21/10 — `src/app.js` · `src/utils.js` (APP, WHATS_NEW) · `index.html` · `public/sw.js` · **APP 9.69 → 9.70, SW 10.48 → 10.49**, base `1a13c3b`)
+
+### 409a. Une correction de la revue
+Le défaut 5 de la revue complète (§406a, « la démo est vide ») venait de **l’outil de captures** : il tourne sans réseau. La vraie visite — le lien public `?demo=visite`, qui pose le domaine `domaine-dupont` (firebase.js) — se connecte au compte de démo (`fbLoginDemo`) et charge ses données depuis la base (`_fbLoadAfterAuth`) avant le scénario (`_visiteScenario`, qui place justement les parcelles autour de Gevrey-Chambertin, Brochon et Fixin pour la météo par secteur). Le fichier `public/mavigne_demo_data.json` (8 parcelles) n’est lu par aucun code : une ancienne copie. Écrit à Nico, la maquette de la « démo garnie » suspendue, l’accès à la visite expliqué (le canal `refonte` + `?demo=visite`, dans une fenêtre privée : la visite fait basculer le navigateur sur le domaine de démo).
+
+### 409b. Ce que Nico a vu, ce qu’il a décidé
+Sur le canal `refonte`, la visite affichait « Mise en route » sur l’Accueil (le nom du domaine, et d’autres étapes d’installation) : « ce n’est pas abouti ». Décisions : **la carte reste neutre** (une démo garnie se placerait en plaine sans nom), **« Mise en route » est cachée** dans la visite.
+
+### 409c. Ce qui est livré
+`renderHomeDemarrage` : quand `currentUser._isVisite`, le bloc « Mise en route » est caché (comme pour un ouvrier). Le vrai Accueil d’un domaine ne change pas. (Premier passage de la chaîne : 1 rouge, le preflight — le `catch(e){}` vide de cette garde ; il appelle `window._mvAvale`, comme tout `catch` du code.) Vu : l’Accueil de la visite (outil de captures) — « Mise en route » absente, « Ma part du chantier » et « Avancement de la saison » à la suite.
+
+### 409d. Ouvert
+- Les autres signes d’un domaine « pas fini » dans la visite : le bandeau « N choses à compléter » du Pilotage (`_pilDiag`) relit les données du domaine de démo (un taux horaire absent, un exercice comptable…) — mieux vaut **compléter les données de démo** que cacher le diagnostic, qui est une fonction à montrer. À voir avec Nico sur la visite en ligne.
+- Une **copie hors ligne des données de la démo** pour `mv-captures`, pour que les revues voient ce que voit un visiteur.
+
+- **Chaîne** : **471 commandes, 0 rouge** au dernier passage, joué d’un trait après le dernier changement de code. Avant : 1 rouge (le preflight : un `catch` vide), puis un passage coupé à la fin d’un message (315 commandes, sans rouge).
+
+### 409e. La leçon
+**Un outil de revue a ses angles morts : les nommer avant de conclure.** Les captures tournent sans réseau ; tout ce qui vient de la base y est absent. Avant d’appeler « vide » un écran, vérifier d’où viennent ses données.

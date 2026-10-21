@@ -7249,6 +7249,9 @@ function renderHomeDemarrage(){
   var wrap = document.querySelector('.home-w[data-w="demarrage"]');
   var lbl  = document.getElementById('home-demarrage-label');
   var cacher = function(){ if (wrap) wrap.style.display = 'none'; c.innerHTML = ''; };
+  // ★ REVUE-9 (§409) : la visite de démo montre un domaine installé — « Mise en route » (le nom du domaine, les parcelles,
+  //   les contours…) n'y a pas de sens : un visiteur n'a rien à installer. Décision de Nico : « on le cache ».
+  try { if (window.currentUser && window.currentUser._isVisite) { cacher(); return; } } catch(e) { if (window._mvAvale) window._mvAvale(e, 'app.js/renderHomeDemarrage#visite'); }
 
   // Reglages du domaine : l'administrateur seul peut y repondre.
   var adm = false;
