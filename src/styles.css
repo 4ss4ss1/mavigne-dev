@@ -4397,7 +4397,7 @@ a[href^="mailto:"]{color:var(--or-tx);}
 .home-prio-pill{ background:var(--gris-clair); border-color:var(--gris); }
 .home-prio-pill .home-prio-pill-txt{ color:var(--texte-doux); }
 .home-prio-pill.home-prio-on{ background:var(--or-pale); border-color:color-mix(in srgb,var(--or) 40%, transparent); }
-.home-prio-pill.home-prio-on .home-prio-pill-txt{ color:var(--or); }
+.home-prio-pill.home-prio-on .home-prio-pill-txt{ color:var(--or-tx); }   /* REVUE-6 (§406) : le doré clair (≈ 2,5 pour 1 sur le blanc) → le doré du texte */
 
 /* ══════════════════════════════════════════════════════════════════════════
    LA CHARTE D'ILOTS — lot DS-2
@@ -8272,6 +8272,12 @@ input[type="checkbox"], input[type="radio"]{ accent-color:var(--accent); }
 .mvpas-filtre:focus-visible, .mvcm-chip:focus-visible, .cave-cuvee-chip:focus-visible, .sdp-skip-btn:focus-visible, .mur-seg:focus-visible{ outline:2px solid var(--focus,var(--accent)); outline-offset:2px; }
 .mvpas-filtre:disabled, .mvcm-chip:disabled, .cave-cuvee-chip:disabled, .sdp-skip-btn:disabled, .mur-seg:disabled{ opacity:.45; cursor:not-allowed; }
 /* ★ FIN CHARTE-4 */
+/* ★ REVUE-6 (§406) : LE DANGER DISCRET — une suppression ne doit pas être le bouton le plus visible d'une fiche. Comme la
+   « zone de danger » de GitHub ou de Stripe : rangée à part, en contour rouge ; le rouge plein n'arrive qu'à la confirmation
+   (la double confirmation existante pose data-confirm="1"). */
+.mvbtn-danger-discret{ background:transparent; color:var(--danger-texte); border:var(--bw,1px) solid var(--danger); }
+.mvbtn-danger-discret:hover{ background:var(--danger-doux); }
+.mvbtn-danger-discret[data-confirm="1"]{ background:var(--danger); color:var(--sur-danger); }
 
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.
    Deux rangées partout, Pilotage compris (pilotage.js pose désormais un vrai .mod-header) : l'identité (icône, titre,

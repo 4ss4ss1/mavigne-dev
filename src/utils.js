@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.66';
+export const APP_VERSION = '9.67';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.67', d: '2026-10-21', items: [   // REVUE-6 (§406) : la revue complète, premières corrections
+    { niv: 1, pour: ['tous'], emoji: 'check', titre: 'Petites corrections, grand confort',
+      desc: "Le message « Mode hors ligne » ne reste plus posé sur l’en-tête : il s’annonce puis s’efface, le voyant en haut à droite garde l’état. La suppression d’une session se range dans une zone de danger, en bouton discret (le rouge plein n’arrive qu’à la confirmation). La priorité du jour s’écrit dans un doré lisible, et le Chai dit « Ouiller la cuvée aujourd’hui » quand il n’y en a qu’une." },
+  ] },
   { v: '9.66', d: '2026-10-21', items: [   // CHARTE-6e (§405) : l’interrupteur et les dernières étiquettes
     { niv: 1, pour: ['tous'], emoji: 'check', titre: 'Interrupteurs à la couleur de l’appli',
       desc: "Les interrupteurs (« Masquer les retirés » du catalogue phyto, les affichages du Pilotage) prennent la couleur d’action quand ils sont activés, et leur piste se voit mieux quand ils ne le sont pas. Quelques titres de champs encore en petites capitales passent en lettres normales." },
@@ -4786,13 +4790,15 @@ export function showSyncBadge(msg, color) {
   clearTimeout(badge._t);
   var isOffline = msg.includes('Hors ligne') || msg.includes('attente') || msg.includes('Mode hors ligne');
   var isLoading = msg.includes('Chargement') || msg.includes('Connexion') || msg.includes('Synchronisation');
-  if(isLoading || isOffline) {
+  // ★ REVUE-6 (§406) : « Mode hors ligne » restait posé sur l'en-tête, par-dessus le titre et un bouton, tant que durait la
+  //   coupure (fréquente dans les vignes). Il s'annonce puis s'efface ; l'état reste dit par le voyant de l'en-tête.
+  if(isLoading) {
     badge.style.fontSize = '13px';
     badge.style.padding = '8px 18px';
   } else {
-    badge.style.fontSize = '';
-    badge.style.padding = '';
-    badge._t = setTimeout(function(){ badge.style.opacity='0'; }, 2500);
+    badge.style.fontSize = isOffline ? '13px' : '';
+    badge.style.padding = isOffline ? '8px 18px' : '';
+    badge._t = setTimeout(function(){ badge.style.opacity='0'; }, isOffline ? 4000 : 2500);
   }
 }
 

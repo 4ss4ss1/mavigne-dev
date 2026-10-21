@@ -2326,7 +2326,7 @@ function openSessionDetail(id){
   var sdAdminZone=document.getElementById('sd-admin-zone');
   if(sdAdminZone)sdAdminZone.style.display=isAdmin()?'block':'none';
   var sdDelBtn=document.getElementById('sd-del-btn');
-  if(sdDelBtn){sdDelBtn.dataset.confirm='';sdDelBtn.textContent='Supprimer cette session';sdDelBtn.style.background='';sdDelBtn.style.color='';}
+  if(sdDelBtn){sdDelBtn.dataset.confirm='';sdDelBtn.textContent='Supprimer cette session';}   // REVUE-6 : l'état « confirmer » est dit par la feuille ([data-confirm="1"])
   _openOv('ovSessionDetail');
 }
 function updateSDSkipBtn(){
@@ -2700,14 +2700,10 @@ function deleteSessionFromDetail(btn){
   if(btn.dataset.confirm!=='1'){
     btn.dataset.confirm='1';
     btn.textContent='Confirmer la suppression';
-    btn.style.background='var(--rouge)';
-    btn.style.color='white';
     setTimeout(function(){
       if(btn.dataset.confirm==='1'){
         btn.dataset.confirm='';
         btn.textContent='Supprimer cette session';
-        btn.style.background='';
-        btn.style.color='';
       }
     },3000);
     return;
@@ -2787,13 +2783,9 @@ function confirmDeleteSession(btn){
   } else {
     btn.dataset.confirm='1';
     btn.textContent='Confirmer la suppression';
-    btn.style.background='var(--rouge)';
-    btn.style.color='white';
     setTimeout(function(){
       btn.dataset.confirm='';
       btn.textContent='Supprimer cette session';
-      btn.style.background='';
-      btn.style.color='';
     }, 3000);
   }
 }

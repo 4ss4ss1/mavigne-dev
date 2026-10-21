@@ -600,3 +600,28 @@ Le jeu des cases de saisie est posé (§400) ; les familles de champs y sont (§
 
 ### 405e. La leçon
 **Une règle « pour la page » oublie les fenêtres et les autres pages.** L’interrupteur du catalogue n’était à l’accent que sous `#page-phyto` — comme les boutons de la Réserve (§402). La pièce commune, sans portée, met fin à ces exceptions.
+
+## 406. REVUE-6 — LA REVUE COMPLÈTE, LOT 1 (21/10 — `src/utils.js` · `src/tracteur.js` · `src/cave.js` · `src/styles.css` · `index.html` · `public/sw.js` · **APP 9.66 → 9.67, SW 10.45 → 10.46**, base `7658866`)
+
+### 406a. La revue
+Nico : « fais le travail comme un expert informatique, expert en ergonomie et en expérience utilisateur, copie les meilleurs du secteur logiciel ». Tous les écrans que `mv-captures` sait ouvrir (35) × téléphone et ordinateur × clair et sombre : 140 captures, lues sur des planches puis agrandies aux endroits suspects. Grille : les 10 heuristiques de Nielsen (gravité 0-4), WCAG 2.2 AA (contraste mesuré sur la capture), Apple HIG / Material 3, et ce que font Linear, Stripe, GitHub, GOV.UK. Verdict : la base est saine et cohérente (le jeu commun tient partout) ; ce qui reste touche le terrain (hors réseau, lecture des chiffres), les actions dangereuses et la première impression.
+- **Majeurs (3)** : 1. « Mode hors ligne » recouvre l’en-tête ; 2. « Supprimer cette session » est le bouton le plus visible de la fiche ; 3. des chiffres en police à empattements (le « 0 » des tuiles des Parcelles ressemble à un « O ») ; 4. le texte doré de la priorité du jour (≈ 3,5:1 mesuré sur la capture, seuil 4,5) ; 5. la démo vide et l’Accueil qui se contredit (« Avancement 100 % » à côté de 0 parcelle, 0 ha).
+- **Mineurs (2)** : 6. des capitales et abréviations restantes (« FINIES / EN COURS / ARRACH. », « PART DES ANGES », « CAMPAGNE… », « MILLÉSIME », « MES JALONS ») ; 7. « Ouiller les 1 aujourd’hui » ; 8. les filtres du Tracteur (un crayon après chaque conducteur, le libellé « Conducteur » après la rangée) ; 9. Planning › Les gens sur ordinateur (un tiers de liste, le reste vide sans invitation).
+- **Cosmétiques (1)** : 10. un liseré doré en haut des fenêtres, en sombre seulement ; 11. l’aplat vert « Saison en cours » des Réglages.
+- **Faux défauts écartés** : la date « mm/dd/yyyy » (langue du navigateur de l’outil) ; le badge hors ligne lui-même (l’outil tourne sans réseau) — seul son chevauchement est un défaut.
+- **Plan** : lot 1 (1, 2, 4, 7, 10), lot 2 (3, 6), lot 3 (5 : « — » au lieu de 100 %, puis une démo garnie, maquette d’abord), lot 4 (8, 9, 11).
+
+### 406b. Ce qui est livré (lot 1)
+- **1. Le badge hors ligne** (`showSyncBadge`) : il restait affiché tant que durait la coupure, posé au centre de l’en-tête (titre et un bouton cachés). Il s’annonce puis s’efface après 4 s, comme les autres messages ; l’état reste dit par le voyant de l’en-tête (`_syncSetState`, qui passe à « hors ligne » sans réseau). Les messages de chargement restent affichés jusqu’au suivant.
+- **2. La zone de danger** : nouvelle pièce `.mvbtn-danger-discret` (après le bloc CHARTE-4 : fond transparent, texte et contour rouges ; au survol, le rouge doux ; `[data-confirm="1"]` → rouge plein). Le détail d’une session : « Admin » (capitales rouges de 10 px) → « Zone de danger » (l’étiquette du jeu, au rouge du texte), le bouton `.mbtn-del` plein → `.mbtn .mvbtn-danger-discret` ; tracteur.js ne repeint plus le bouton à la confirmation (la feuille le fait par `data-confirm`).
+- **4. Le doré du texte de priorité** : `.home-prio-pill.home-prio-on .home-prio-pill-txt` repassait au doré clair (`--or`, ≈ 2,5:1 sur le blanc) par-dessus le correctif du tour du contraste → `--or-tx` (#7A5E12, ≈ 6:1 ; #E8D294 en sombre).
+- **7. L’accord** : « Ouiller la cuvée aujourd’hui » pour une cuvée, « Ouiller les N cuvées aujourd’hui » au-delà.
+- **10. Le liseré doré des fenêtres en sombre** : sa source n’a pas été retrouvée (ni `.modal`, ni ses ombres) — reporté.
+
+### 406c. Vu
+`tracteur-session-detail` (clair et sombre : la zone de danger, le bouton en contour), `accueil` (la priorité au doré du texte), `cave-chai` (« Ouiller la cuvée aujourd’hui »).
+
+- **Chaîne** : **471 commandes, 0 rouge**, jouée d’un trait après le dernier changement de code.
+
+### 406d. La leçon
+**Un correctif peut être défait par une règle plus précise.** Le tour du contraste avait mis la priorité au doré du texte ; une règle de l’état « activé », plus forte, la remettait au doré clair. Seule la mesure sur l’écran rendu l’a montré.

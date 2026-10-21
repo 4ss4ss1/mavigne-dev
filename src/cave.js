@@ -1380,7 +1380,7 @@ function renderCaveCuvees() {
     html+='<div class="mvc-alert"><div class="mvc-alert-ico">'+_mvIcon('seau',24)+'</div><div class="mvc-alert-txt">'
       +'<div class="mvc-alert-t">'+due.length+' cuv\u00e9e'+(due.length>1?'s':'')+' \u00e0 ouiller</div>'
       +'<div class="mvc-alert-s">L\u2019\u00e9vaporation menace \u2014 remplissez les f\u00fbts pour \u00e9viter l\u2019oxydation.</div></div></div>';
-    if(w) html+='<button class="mvc-batch" onclick="_caveOuillerTous()">'+_mvIcon('seau',16)+' Ouiller les '+due.length+' aujourd\u2019hui</button>';
+    if(w) html+='<button class="mvc-batch" onclick="_caveOuillerTous()">'+_mvIcon('seau',16)+(due.length===1?' Ouiller la cuvée aujourd\u2019hui':' Ouiller les '+due.length+' cuvées aujourd\u2019hui')+'</button>';
   }
   sorted.filter(_caveDansFiltre).forEach(function(c){ html+=_caveCuvCardHtml(c,w); });
   if(typeof isAdmin==='function'&&isAdmin()){
