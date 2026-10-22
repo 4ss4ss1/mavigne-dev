@@ -29,13 +29,14 @@ const MIGREES = ['pf-tag', 'pf-tag-sup', 'pf-tag-al', 'plan-badge', 'plan-badge-
   'plan-badge-ctrat', 'plan-badge-cdebut', 'plan-badge-cfin', 'mvc-tag', 'mvc-tag-so2', 'mvc-tag-fmlok', 'mvc-tag-fmlc', 'mvc-tag-fmlno',
   'mvc-tag-av', 'sdp-tag', 'pil-dz-tag', 'p-fx-badge',   /* chat-canal-badge : retiré avec la discussion (CHAT-0, §395) */   // ★ CHARTE-4a (§374)
   'mvcm-chip', 'cave-cuvee-chip', 'sdp-skip-btn',   // ★ CHARTE-4b (§377) : trois filtres
-  'mur-seg'];   // ★ REVUE-2 (§390) : le choix de visibilité du mur, resté vert
+  'mur-seg',   // ★ REVUE-2 (§390) : le choix de visibilité du mur, resté vert
+  'mv-rail-badge'];   // ★ JEQ-1 (§421) : le compteur de la barre latérale (il se peignait en rouge, anneau noir)
 const EXEMPTIONS = [
   { selecteur: '.sdp-tag small', raison: 'le second rang d’une pastille de session (la mesure sous l’écart) : un petit texte, pas une pastille' }
 ];
 const PLAFOND_MAIN = 56;   // CHARTE-4c (§378) : les pastilles faites à la main (petit bloc arrondi dont le fond, une marge de 0 à 3 px et la taille
                          //   du texte sont écrits sur place) — relevé après en avoir rendu 34 au jeu ; ne peut que baisser (F)
-const PLAFOND = 91;   // CHARTE-4a (§374) : relevé au premier passage (92) ; ne peut que baisser. CHARTE-4b (§377) : 92 → 91
+const PLAFOND = 90;   // CHARTE-4a (§374) : relevé au premier passage (92) ; ne peut que baisser. CHARTE-4b (§377) : 92 → 91. JEQ-1 (§421) : 91 → 90 (le compteur de la barre)
 const ALLURE = /^(background(-color|-image)?|color|border(-(color|width|style|radius|top|bottom|left|right))?|box-shadow|font|font-(size|weight|family)|padding(-[a-z]+)?|height|min-height|line-height|text-transform|letter-spacing)$/;
 const sansCom = s => s.replace(/\/\*[\s\S]*?\*\//g, '');
 const porte = (sel, c) => new RegExp('\\.' + c.replace(/-/g, '\\-') + '(?![\\w-])').test(sel.replace(/:not\([^)]*\)/g, ''));

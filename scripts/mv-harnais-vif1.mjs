@@ -25,7 +25,7 @@ function suite(S) {
   const C = coquille(S, Object.assign({}, base, { isAdmin: () => true, REPARATEUR: {}, MEMBRES: [], _ckSavoirFort: 0, _mlVerdict: () => ({ cls: 'ok' }) }))._railAlertes();
   T('rien à signaler : aucune pastille (pas de zéro affiché)', Object.keys(C).length === 0);
   T('la pastille dit ce qu’elle compte, au singulier ou au pluriel, et plafonne à 9+',
-    S.coq.includes("(n > 9 ? '9+' : n)") && S.coq.includes("+ (n > 1 && p !== 'cave' ? 's' : '')") && S.coq.includes('role="img" aria-label="'));
+    S.coq.includes("(n > 9 ? '9+' : n)") && S.coq.includes("return n + ' ' + L[n > 1 ? 1 : 0];") && S.coq.includes('role="img" aria-label="'));
   T('la barre peint ses pastilles à sa construction et le temps réel les repeint', S.coq.includes('window._railAlertesMaj();   // VIF-1') && (S.app.match(/window\._railAlertesMaj\(\)/g) || []).length >= 2);
   T('Aujourd’hui à l’écran se met à jour en direct, avec les mêmes fonctions que son dessin',
     S.pil.includes("if(_PIL_TAB!=='auj'||!document.getElementById('ck-page')||typeof window._ck2Maj!=='function') return false;")

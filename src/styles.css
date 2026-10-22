@@ -674,6 +674,9 @@ html.mv-ov-lock,body.mv-ov-lock{overflow:hidden!important;}
 .fsel{width:100%;font-family:var(--font-ui);transition:border-color 0.2s,box-shadow 0.18s;appearance:none;cursor:pointer;}   /* CHARTE-6 : le dessin est au jeu */
 .ppicker{display:flex;gap:8px;flex-wrap:wrap;}
 .pchk{padding:7px 14px;border-radius:20px;font-size:var(--pt-micro,12px);font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:var(--bg-card);transition:all 0.15s;}
+/* JEQ-1 (§421) : une pastille cochée se voit toujours, même quand l’écran oublie sa teinte — vécu deux fois (ARRACH-5, puis la
+   correction d’équipe du Journal, ACCV-4) : « sel » seul ne colorait rien. Le vert de la feuille de validation, par défaut. */
+.pchk.sel{border-color:var(--vert);background:var(--vert-pale);color:var(--vert);}
 .pchk.sel.vert{border-color:var(--vert);background:var(--vert-pale);color:var(--vert);}
 .pchk.sel.acre{border-color:var(--acier);background:var(--acier-pale);color:var(--acier);}
 .pchk.sel.phyt{border-color:var(--phyto);background:var(--phyto-pale);color:var(--phyto-tx,#5B2D8E);}
@@ -5877,10 +5880,20 @@ body.mv-rail-ouvert .mv-rail{width:244px}
 .mv-rail-sec{position:relative;height:16px;margin:12px 0 2px;padding:0 12px;font-size:var(--pt-nano,11px);font-weight:600;letter-spacing:.02em;color:rgba(240,226,200,.66)}
 .mv-rail-sec::before{content:"";position:absolute;left:12px;right:12px;top:50%;height:1px;background:rgba(240,226,200,.1);transition:opacity var(--mv-d2)}
 .mv-rail-ouvert .mv-rail-sec::before{opacity:0}
-.mv-rail-badge{position:absolute;top:6px;left:28px;display:grid;place-items:center;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#B5382A;color:#fff;font-size:var(--pt-nano,11px);font-weight:700;box-shadow:0 0 0 2px #100D0A;transition:left var(--mv-d3) var(--mv-sortie),top var(--mv-d3) var(--mv-sortie)}
-.mv-rail-ouvert .mv-rail-badge{left:calc(100% - 30px);top:12px}
-.mv-rail-vif{position:absolute;top:9px;left:31px;width:8px;height:8px;border-radius:50%;background:#7CCB55;box-shadow:0 0 0 2px #100D0A;animation:respire 2.4s ease-out infinite;transition:left var(--mv-d3) var(--mv-sortie),top var(--mv-d3) var(--mv-sortie)}
-.mv-rail-ouvert .mv-rail-vif{left:calc(100% - 24px);top:17px}
+/* ★ JEQ-1 (§421) — LE COMPTEUR DE LA BARRE, AU JEU COMMUN (CHARTE-4). Nico (21/10) : « le chiffre dans le rond rouge […] c’est
+   trop présent, on voit que ça, c’est pas aligné ». Dessiné pour la barre sombre de COQ-1 : un anneau #100D0A (noir sur la barre claire
+   de COQ-2), un « top » calculé pour des lignes de 42 px (elles en font 32 : 4,5 px trop bas), un calage par la gauche (« 9+ » dépassait
+   à droite), le point « en direct » du Pilotage caché dessous, et en sombre un chiffre blanc sur saumon (2,4:1). Le compteur prend la
+   pièce neutre .mvpas-compteur (coquille.js) ; ici, rien que sa place. Barre dépliée : au bout de la ligne, centré par elle, tous au
+   même bord. Barre repliée : un point à l’accent au coin de l’icône — le nombre est dans l’infobulle ; le point « en direct » s’efface
+   alors devant lui (un seul point par icône). */
+body:not(.mv-rail-ouvert) .mv-rail .mv-rail-badge{display:none}
+body.mv-rail-ouvert .mv-rail .mv-rail-badge{flex:none;margin-left:auto}
+.mv-rail-point{position:absolute;top:3px;left:26px;width:8px;height:8px;border-radius:50%;background:var(--accent-texte);box-shadow:0 0 0 var(--bw-2,2px) var(--bg-app);pointer-events:none}
+body.mv-rail-ouvert .mv-rail .mv-rail-point{display:none}
+.mv-rail-vif{position:absolute;top:3px;left:26px;width:8px;height:8px;border-radius:50%;animation:respire 2.4s ease-out infinite}
+body:not(.mv-rail-ouvert) .mv-rail .mv-rail-alerte .mv-rail-vif{display:none}
+body.mv-rail-ouvert .mv-rail .mv-rail-vif{position:static;flex:none;margin-left:calc(var(--e-1,4px) * -1)}
 .mv-rail .mv-rail-b[aria-current="page"]::before{content:"";position:absolute;left:-14px;top:11px;bottom:11px;width:3px;border-radius:0 3px 3px 0;background:#D8BC72}
 .mv-rail-bas{display:flex;flex-direction:column;gap:2px;margin-top:auto;padding-top:8px;border-top:1px solid rgba(240,226,200,.08)}
 .mv-rail-moi{position:relative;display:flex;align-items:center;gap:12px;height:46px;padding:0 8px}
@@ -5961,7 +5974,6 @@ body .mv-rail .mv-rail-b[aria-current="page"]{ background:var(--presse); color:v
 body .mv-rail .mv-rail-b[aria-current="page"]>svg{ color:var(--accent-texte); }
 body .mv-rail .mv-rail-b[aria-current="page"]::before{ display:none; }
 body .mv-rail .mv-rail-vif{ background:var(--ok); box-shadow:0 0 0 var(--bw-2) var(--bg-app); }
-body .mv-rail .mv-rail-badge{ background:var(--danger); color:var(--sur-accent); }
 body .mv-rail .mv-rail-bas{ border-top:var(--bw) solid var(--ligne,#E7E6E2); }
 body .mv-rail .mv-rail-moi{ gap:var(--e-2,8px); padding:0 var(--e-1,4px) 0 var(--e-2,8px); }
 body .mv-rail .mv-rail-av{ position:relative; width:var(--av); height:var(--av); background:var(--presse); color:var(--texte-med); font-size:var(--pt-nano,11px); font-weight:var(--fw-semi,600); }

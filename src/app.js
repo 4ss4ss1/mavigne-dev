@@ -9924,7 +9924,22 @@ function _mvEqUi(prefix){
 }
 // ── La carte de l'Accueil et son réglage ──
 var _EQJ_SEL={}, _EQJ_TRN={};   // TRN-2 (§331) : _EQJ_TRN[n° d'équipe] = id de sa tournée
-function _mvEqMembres(){ return (MEMBRES||[]).filter(function(m){ return m && m.nom && m.statut!=='Inactif' && !m.bureau; }); }
+// ★ JEQ-1 (§421) — QUI PROPOSER DANS UNE LISTE « QUI A TRAVAILLÉ » : la règle commune « sous contrat ce jour-là » (_mvEnContratLe,
+//   utils.js — les dates de contrat ; une fiche sans date compte si elle est active, PRES-1). Nico (21/10) : « toutes les personnes qui
+//   ont été inscrites sur l'application sont affichées, alors qu'elles ne sont plus sous contrat ». Chaque liste avait sa règle : la
+//   correction du Journal lisait un champ que les fiches n'ont pas (`actif`, `inactif` : personne ne sortait, même « Inactif ») ; la
+//   validation, la barre d'équipe et les équipes du jour, le seul statut « Inactif » (un CDD fini restait proposé).
+//   · Ce jour ou plus tard : une fiche passée « Inactive » sort aussi, comme l'effectif du Pilotage (_pilMembresActifs).
+//   · Un jour passé : le statut d'aujourd'hui ne réécrit pas l'histoire — même doctrine que _mvEnContratSurPeriode.
+function _mvEquipeProposee(ds){
+  var auj=_mvToday(), d=ds||auj;
+  return (MEMBRES||[]).filter(function(m){
+    if(!m||!m.nom) return false;
+    if(m.statut==='Inactif'&&d>=auj) return false;
+    return (typeof window._mvEnContratLe==='function')?window._mvEnContratLe(m,d):m.statut!=='Inactif';
+  });
+}
+function _mvEqMembres(){ return _mvEquipeProposee().filter(function(m){ return !m.bureau; }); }
 function _mvEqJourRender(){
   var w=document.getElementById('home-eqj-wrap'), tx=document.getElementById('home-eqj-txt');
   if(!w || !tx) return;
@@ -10025,19 +10040,30 @@ function _mvQuiHors(containerId){
   var el=document.querySelector('#'+containerId+' .mbr-moi');
   return !!(el && !el.classList.contains('sel'));
 }
-function _buildMembresCheckboxes(containerId,excludeNom,moiHors){
+function _buildMembresCheckboxes(containerId,excludeNom,moiHors,garder){
   const container=document.getElementById(containerId);
   if(!container)return;
-  const membres=MEMBRES.filter(m=>m.statut!=='Inactif'&&m.nom!==(excludeNom||currentUser?.nom)&&m.nom!==currentUser?.nom);
+  // JEQ-1 (§421) : la date de la feuille (vp-, niv-, pass-, je-date ; aujourd'hui par défaut) décide qui est proposé. Changer la
+  //   date refait la liste (_mvMembresDate) en gardant les cochés, même hors contrat à la nouvelle date : rien ne sort en silence.
+  const pre=String(containerId).split('-')[0], dEl=document.getElementById(pre+'-date'), ds=(dEl&&dEl.value)||_mvToday();
+  const prop=_mvEquipeProposee(ds), G=Array.isArray(garder)?garder:[];
+  const membres=MEMBRES.filter(m=>m&&m.nom&&(prop.indexOf(m)>=0||G.indexOf(m.nom)>=0)&&m.nom!==(excludeNom||currentUser?.nom)&&m.nom!==currentUser?.nom);
+  container.setAttribute('data-exclu',excludeNom||'');
+  if(dEl&&!dEl._mvEqDate){ dEl._mvEqDate=true; dEl.addEventListener('change',function(){ _mvMembresDate(containerId); }); }
   // La puce « Moi » n'a PAS de data-nom : _getSelectedMembres ne la ramasse jamais, et
   // _jePrefillTeam (qui vise .mbr-chk) ne la touche pas.
   const moi=_mvMoiAdmin()
     ? `<div class="pchk mbr-moi${moiHors?'':' sel vert'}" data-moi="1" onclick="this.classList.toggle('sel');this.classList.toggle('vert')" title="Décochez si vous validez sans avoir travaillé dans les rangs">Moi (${_escHtml(currentUser.nom)})</div>`
     : '';
-  container.innerHTML=moi+membres.map(m=>`<div class="pchk mbr-chk" data-nom="${_escHtml(m.nom)}" onclick="this.classList.toggle('sel');this.classList.toggle('vert')" style="display:flex;align-items:center;gap:6px"><div style="width:20px;height:20px;border-radius:50%;background:${m.couleur||'#888'};display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white">${_escHtml(m.nom[0])}</div>${_escHtml(m.nom)}</div>`).join('');
+  container.innerHTML=moi+membres.map(m=>`<div class="pchk mbr-chk${G.indexOf(m.nom)>=0?' sel vert':''}" data-nom="${_escHtml(m.nom)}" onclick="this.classList.toggle('sel');this.classList.toggle('vert')" style="display:flex;align-items:center;gap:6px"><div style="width:20px;height:20px;border-radius:50%;background:${m.couleur||'#888'};display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white">${_escHtml(m.nom[0])}</div>${_escHtml(m.nom)}</div>`).join('');
 }
 function _getSelectedMembres(containerId){
   return Array.from(document.querySelectorAll(`#${containerId} .pchk.sel`)).map(el=>el.dataset.nom).filter(Boolean);
+}
+// JEQ-1 (§421) : la date de la feuille a changé — la liste suit, les cochés et « Moi » restent comme ils étaient.
+function _mvMembresDate(containerId){
+  var c=document.getElementById(containerId); if(!c||!c.innerHTML) return;
+  _buildMembresCheckboxes(containerId,c.getAttribute('data-exclu')||'',_mvQuiHors(containerId),_getSelectedMembres(containerId));
 }
 async function confirmValidation(){
   if(_mvValidBlocked())return;
@@ -11468,18 +11494,21 @@ function openJEquipe(id){
   if(typeof isAdmin!=='function'||!isAdmin()) return;
   var e=(JOURNAL||[]).find(function(x){ return x&&x.id===id; }), ov=document.getElementById('ovJEquipe'); if(!e||!ov) return;
   var W=_jFaitPar(e), noms=[];
-  (typeof MEMBRES!=='undefined'&&MEMBRES||[]).forEach(function(m){ if(m&&m.nom&&m.actif!==false&&!m.inactif&&noms.indexOf(m.nom)<0) noms.push(m.nom); });
+  // JEQ-1 (§421) : ceux qui étaient sous contrat le jour de l'entrée (la règle des listes), puis ceux déjà notés et l'auteur, même
+  //   hors contrat — une correction ne fait disparaître personne. L'ancien filtre lisait `actif`/`inactif`, absents des fiches.
+  _mvEquipeProposee(e.date).forEach(function(m){ if(noms.indexOf(m.nom)<0) noms.push(m.nom); });
   W.concat([e.qui]).forEach(function(n){ if(n&&n!=='Equipe'&&noms.indexOf(n)<0) noms.push(n); });
   var dt=(typeof fmtDate==='function')?fmtDate(e.date):e.date;
   document.getElementById('jeq-sub').textContent=(typeof tNom==='function'?tNom(e.tache):e.tache)+' \u00b7 '+e.parcelle+' \u00b7 '+dt+' \u2014 valid\u00e9 par '+(e.qui||'?');
-  document.getElementById('jeq-pick').innerHTML=noms.map(function(n){ return '<button type="button" class="pchk mbr-chk'+(W.indexOf(n)>=0?' sel':'')+'" data-jeq-n="'+_escAttr(n)+'" onclick="_jEqBasc(this)">'+_escHtml(n)+(n===e.qui?' <small>(a valid\u00e9)</small>':'')+'</button>'; }).join('');
+  // JEQ-1 (§421) : « sel » seul ne colorait rien (une pastille cochée prend aussi sa teinte : ARRACH-5) — la fenêtre sortait toute blanche.
+  document.getElementById('jeq-pick').innerHTML=noms.map(function(n){ var on=W.indexOf(n)>=0; return '<button type="button" class="pchk mbr-chk'+(on?' sel vert':'')+'" aria-pressed="'+(on?'true':'false')+'" data-jeq-n="'+_escAttr(n)+'" onclick="_jEqBasc(this)">'+_escHtml(n)+(n===e.qui?' <small>(a valid\u00e9)</small>':'')+'</button>'; }).join('');
   var autres=_jEqCibles(id,true).length-1, lb=document.getElementById('jeq-tout-l'), cb=document.getElementById('jeq-tout');
   if(cb) cb.checked=false;
   if(lb){ lb.style.display=autres>0?'':'none'; document.getElementById('jeq-tout-t').textContent='Toute la journ\u00e9e\u00a0: aussi les '+autres+' autre'+(autres>1?'s':'')+' validation'+(autres>1?'s':'')+' de '+(typeof tNom==='function'?tNom(e.tache):e.tache)+' du '+dt; }
   ov.setAttribute('data-jid',id); ov.classList.add('open'); if(typeof _mvOvSync==='function') _mvOvSync();
 }
 window.openJEquipe=openJEquipe;
-function _jEqBasc(el){ if(el) el.classList.toggle('sel'); }
+function _jEqBasc(el){ if(!el) return; var on=!el.classList.contains('sel'); el.classList.toggle('sel',on); el.classList.toggle('vert',on); el.setAttribute('aria-pressed',on?'true':'false'); }
 window._jEqBasc=_jEqBasc;
 function saveJEquipe(){
   if(typeof isAdmin!=='function'||!isAdmin()) return;
@@ -13226,7 +13255,7 @@ var _eqtLoaded = false;
 
 function _eqtKey(){return 'mavigne_eqt_'+(window.TENANT_ID||'default')+'_'+((currentUser&&currentUser.nom)||'anon');}
 function _eqtRecentKey(){return 'mavigne_eqt_recent_'+(window.TENANT_ID||'default')+'_'+((currentUser&&currentUser.nom)||'anon');}
-function _eqtClean(team){return (Array.isArray(team)?team:[]).filter(function(n){return (MEMBRES||[]).some(function(m){return m.nom===n&&m.statut!=='Inactif';});});}
+function _eqtClean(team){ var P=_mvEquipeProposee(); return (Array.isArray(team)?team:[]).filter(function(n){ return P.some(function(m){ return m.nom===n; }); }); }   // JEQ-1 (§421) : la règle des listes — sous contrat aujourd'hui
 function _eqtSameTeam(a,b){return a.length===b.length&&a.every(function(n){return b.indexOf(n)>=0;});}
 function _eqtPushRecent(team){team=_eqtClean(team);if(!team.length)return;EQUIPE_RECENT=EQUIPE_RECENT.filter(function(t){return !_eqtSameTeam(_eqtClean(t),team);});EQUIPE_RECENT.unshift(team.slice());EQUIPE_RECENT=EQUIPE_RECENT.slice(0,4);}
 function _eqtLoad(){
@@ -13387,7 +13416,7 @@ function _pvBuildTeamPick(){
   //   si le validateur compte dans le groupe, au lieu de l'y mettre deux fois.
   var adm=_mvMoiAdmin(), me=adm?currentUser.nom:null;
   var moi=adm?('<div class="pv-mbr-chip'+(_pvMoiHors?'':' sel')+'" onclick="_pvToggleMoi()" title="Décochez si vous validez pour l\u2019équipe sans travailler dans les rangs"><span class="pv-mbr-av" style="background:'+(COULEURS_MBR[me]||'#3D6B27')+'">'+(me[0]||'?')+'</span>Moi aussi dans les rangs</div>'):'';
-  c.innerHTML=moi+(MEMBRES||[]).filter(function(m){return m.statut!=='Inactif'&&m.nom!==me;}).map(function(m){
+  c.innerHTML=moi+_mvEquipeProposee().filter(function(m){return m.nom!==me;}).map(function(m){   // JEQ-1 (§421) : la règle des listes
     var on=_pvTeamSel.indexOf(m.nom)>=0;
     return '<div class="pv-mbr-chip'+(on?' sel':'')+'" onclick="_pvToggleTeamMbr(\''+_escAttr(m.nom)+'\')"><span class="pv-mbr-av" style="background:'+(COULEURS_MBR[m.nom]||'#3D6B27')+'">'+(m.nom[0]||'?')+'</span>'+_escHtml(m.nom)+'</div>';
   }).join('');

@@ -60,19 +60,33 @@ window._railAlertes = function () {
   Object.keys(a).forEach(k => { if (!(a[k] > 0)) delete a[k]; });
   return a;
 };
-const PASTILLE_LIB = { tracteur: 'en réparation', planning: 'contrat qui finit dans le mois', cave: 'à faire en cave', pilotage: 'point prioritaire à savoir' };
+// ★ JEQ-1 (§421) — LE COMPTEUR DE LA BARRE, AU JEU COMMUN (CHARTE-4). Nico (21/10) : « le chiffre dans le rond rouge […] c'est pas du
+//   tout pro, c'est trop présent […] c'est pas aligné ». Le compteur prend la pièce neutre .mvpas-compteur (la règle de CHARTE-4 : le
+//   compteur est neutre, rouge pour une vraie alerte seulement) ; la feuille ne lui donne que sa place. Barre repliée, il devient un
+//   point (.mv-rail-point) : le nombre passe dans l'infobulle et dans le nom du bouton.
+//   ★ Le libellé s'accorde : VIF-1 collait le « s » au bout de la phrase (« 2 point prioritaire à savoirs », « 2 contrat qui finit
+//   dans le moiss »). Le Pilotage reprend le mot d'Aujourd'hui (ANTICIPE-1, §420) : « points à anticiper ».
+const PASTILLE_LIB = { tracteur: ['engin en réparation', 'engins en réparation'], planning: ['contrat qui finit dans le mois', 'contrats qui finissent dans le mois'],
+  cave: ['à faire en cave', 'à faire en cave'], pilotage: ['point à anticiper', 'points à anticiper'] };
+function libelle(p, n) { const L = PASTILLE_LIB[p] || ['à voir', 'à voir']; return n + ' ' + L[n > 1 ? 1 : 0]; }
 function pastille(p, n) {
   if (!(n > 0)) return '';
-  const lib = n + ' ' + (PASTILLE_LIB[p] || 'à voir') + (n > 1 && p !== 'cave' ? 's' : '');
-  return '<span class="mv-rail-badge" data-alerte="' + esc(p) + '" role="img" aria-label="' + esc(lib) + '" title="' + esc(lib) + '">' + (n > 9 ? '9+' : n) + '</span>';
+  const lib = libelle(p, n);
+  return '<span class="mv-rail-badge mvpas-compteur" data-alerte="' + esc(p) + '" role="img" aria-label="' + esc(lib) + '" title="' + esc(lib) + '">' + (n > 9 ? '9+' : n) + '</span>'
+    + '<span class="mv-rail-point" aria-hidden="true"></span>';
 }
 // Repeint les seules pastilles (le temps réel les rappelle sans reconstruire la barre).
 window._railAlertesMaj = function () {
   const a = window._railAlertes();
   document.querySelectorAll('#mv-rail .mv-rail-b').forEach(b => {
-    const p = b.getAttribute('data-page'), vieille = b.querySelector('.mv-rail-badge');
-    if (vieille) vieille.remove();
-    if (a[p]) b.insertAdjacentHTML('beforeend', pastille(p, a[p]));
+    const p = b.getAttribute('data-page'), n = a[p] || 0, lbl = b.querySelector('.mv-rail-lbl');
+    const nom = lbl ? lbl.textContent : String(b.getAttribute('aria-label') || '').split(' · ')[0];
+    b.querySelectorAll('.mv-rail-badge, .mv-rail-point').forEach(x => x.remove());
+    b.classList.toggle('mv-rail-alerte', n > 0);
+    // JEQ-1 : barre repliée, l'infobulle (data-tip) et le nom du bouton disent le nombre que le point ne montre pas
+    const dit = n > 0 ? nom + ' · ' + libelle(p, n) : nom;
+    b.setAttribute('data-tip', dit); b.setAttribute('aria-label', dit);
+    if (n > 0) b.insertAdjacentHTML('beforeend', pastille(p, n));
   });
 };
 window._railHtml = function (items, moi, dom) {
