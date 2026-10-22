@@ -1336,3 +1336,81 @@ autres champs date en lot à part — et « go ».
 - Les dates de travaux estimées : une fin avant le début n’y est pas contrôlée.
 - À voir chez Nico : les deux fenêtres sur SON PC (Windows, Chrome, zoom 125 %), une date impossible tapée. Au téléphone, le
   sélecteur de date du système propose un calendrier : la frappe d’un 31/09 y est sans doute impossible — à confirmer.
+
+## 428. ★★ JCAVE-1 — LES JOURNÉES DE CAVE SE MARQUENT AU PLANNING : LA JOURNÉE, LE MATIN OU L’APRÈS-MIDI ; « CAVE » DANS LES ÉQUIPES DU JOUR (22/10 — `src/planning.js` (`_pl2Board`, `_pl2MbarSync`, `_capDayReal`, `_planBornesJour`, `_planAbsBornesJour`, `_pl2Iso`, `_planCaveH`, `_planCaveCases`, `_planCaveRuban`, `_planCaveHtml`, `planCaveSheet`, `planCaveMode`, `planCaveApply`, `planCaveRetirer`) · `src/utils.js` (`_mvCaveJour`, `_mvCaveEcrire`, APP, WHATS_NEW, MV_AIDE Accueil et Planning, MV_INFO `pil.eco.engage` et `pil.eco.temps`) · `src/pilotage.js` (`_ecoCaveJours`, `_ecoTempsVigne`) · `src/app.js` (`openEqJour`, `_mvEqRows`, `_mvEqPick`, `_mvEqCaveEcrire`, `saveEqJour`) · `src/cockpit-vue.js` (fiches « i » de la fin prévue et de l’écart par tâche) · `src/styles.css` (bloc JCAVE-1, en fin de feuille) · `src/tutos.js` (`_caveN`, tuto `cave`) · `index.html` (la fenêtre des équipes, versions) · `public/sw.js` · `guide/10-planning.html` · `guide/04-vigne.html` · `guide/11-pilotage.html` · `scripts/mv-harnais-jcave1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/mv-captures.mjs` (`planning-cave`, `planning-cave-fenetre`) · `scripts/typo-baseline.json` (regravée) · `docs/claude/modules.md` · `.mv-base` · `lots/JCAVE-1.json` · **APP 9.86 → 9.87, SW 10.65 → 10.66**, base `5c38720`)
+
+### 428a. D’où ça vient
+Nico (22/10, capture de la vue Économie d’Aujourd’hui, dicté) : la Réparation à « +899,5 % — 15 h de barème, 150 h réelles ». Sur le
+terrain : trois personnes une journée (21 h), trois une matinée (12 h), puis deux personnes quelques jours ; le chantier s’est mêlé de
+cave (entonnage, ouillage) et s’est arrêté pour la sécheresse — « l’appli est censée prendre en compte les personnes qui sont en cave ».
+★ **Mesuré en rejouant les vraies fonctions** (`_ecoTempsVigne` et ses dépendances, récit à prénoms fictifs, cinq personnes, 7 h par
+jour au planning) : le temps réel (TV-1, PAR-1) verse les heures du planning **à la validation** ; une journée sans validation attend
+et part sur la suivante ; quelqu’un qui n’est nommé sur aucune validation du jour verse **tout ce qu’il a en attente** sur les
+parcelles validées ce jour-là. Le seul filtre cave (ENG-2, §173c) lisait `CAVE_ELEVAGE.operations[].intervenants` : ni le Cuvier
+(`cuves_vinif[].operations`, `mesures_fa[].qui`), ni l’entonnage (un mouvement de fûts, `INTRANTS.fut_mouv`, sans nom), ni un ouillage
+noté sans cocher personne, ni une demi-journée. Le récit : **245 h pour 75** ; tous les jours de cave cochés au Chai : 84 (les 9 h de
+l’après-midi de cave du mardi) ; équipes du jour posées : 126 ; une reprise après la pause : **210 h sur une parcelle d’une journée à deux**.
+★ Au passage : la tuile « Écart au barème » à 0,0 % n’est pas une mesure — la cadence ne se calcule qu’à 40 % du travail validé
+(`_PEC_CAD_AVC`), sinon `_pilCk2Eco` envoie 0 et l’écran l’écrit comme un chiffre. Hors de la maquette : laissé aux décisions (§428e).
+
+### 428b. L’arbitrage
+- **Où marquer la cave.** Nico hésitait entre l’Accueil (là où il fait les équipes) et le Planning, avec une exigence : rattraper « le
+  jeudi de la semaine dernière » sans « des tonnes d’endroits et des milliers de clics ». Maquette `maquette-journees-cave-v1.html`
+  (hors dépôt, une page sur la vraie feuille, §225b), validée « go » : **le Planning comme maison** — le seul écran qui croise les
+  gens et les jours ; le geste d’un congé, cocher puis choisir dans la barre ; la semaine d’avant à un cran — et **les équipes du
+  jour comme raccourci du matin**, pour la journée seulement (la demi-journée reste au Planning, la fenêtre reste simple). Écarté :
+  remplir un jour passé dans les équipes du jour (proposé avant la maquette) — le Planning le fait déjà.
+- **La donnée : `CONFIG.cave_jours`**, `{ 'AAAA-MM-JJ': { Nom: 'j' | 'm' | 'a' } }`, **pas les entrées du planning** : leurs écrivains
+  reconstruisent l’entrée à neuf (§55, §24 n°12) et la perdraient, et la paie n’a pas à la lire. Deux ans gardés, comme
+  `equipes_jour`. `_mvCaveEcrire` n’écrit la configuration que si une case change.
+- **Le matin, l’après-midi** : découpés sur l’horaire du jour (saisie, code, horaire du mois) par `_planBornesJour` — sortie de
+  `_planAbsBornesJour`, qui l’appelle : une seule définition pour « Absence › Le matin » et pour la cave ; plafonnés aux heures dispo
+  (tracteur déduit) ; sans horaire lisible, la moitié. Le Chai le même jour l’emporte sur une moitié (la journée entière).
+- **Les mots et les signes** : le verre du module Cave pour le bouton (le fût du sprite se lisait comme un globe à 16 px) ; « La
+  journée / Le matin / L’après-midi » (« Toute la journée » passait sur deux lignes au téléphone) ; la bande couleur fût (`--terre`)
+  plutôt que la lie-de-vin, déjà prise par les congés (`--accent-doux`) ; « Retirer la cave » sur une ligne, pièce `.mvbtn-secondaire`.
+- **Non touchés, exprès** : l’écart de cadence (« ne rien changer sans lui », consigne du 23/09) ; l’effectif du jour (Décider, tuile
+  Effectif) ; la cuverie — le « qui » de la tournée se préremplit avec la dernière équipe ou celui qui l’ouvre : pas une preuve de journée.
+
+### 428c. Ce qui change
+- **Planning** : bouton « Cave » (`#plan-mbar-cave`, entre Absence et Récup, quand la sélection porte des jours travaillés) ; fenêtre
+  « Travail de cave » dans le cadre de `#ovPlanDay` — « Quand » à trois choix (`.pl2r-seg-3`), le ruban vigne / coupure / cave quand
+  toutes les cases ont le même horaire, les heures qui sortent de la vigne, « Paie, relevé d’heures, annualisation : inchangés »,
+  l’encadré, « Retirer la cave » si une case l’est déjà ; une bande au pied de la case (toute la largeur, moitié gauche, moitié droite)
+  et son entrée de légende ; l’en-tête du jour visé par le tuto (`data-tuto="plan.jour"` : aujourd’hui s’il porte des heures, sinon le
+  premier jour travaillé de la vue). `_capDayReal` retire la cave de `work`, jamais de `pay`.
+- **Équipes du jour** : la pastille « Cave » (`data-eqj-k="cave"`) ; à l’ouverture, une journée en cave arrive sur « Cave » ; à
+  l’enregistrement, `_mvEqCaveEcrire` pose ou retire la journée — une demi-journée du Planning n’est pas touchée et se dit sous le nom
+  — et les équipes ne gardent pas ceux en cave ; seulement de la cave : « tout le monde ensemble », la cave posée ; « Tout le monde
+  ensemble » laisse la cave.
+- **Pilotage** : `_ecoCaveJours` lit `cave_jours` (1 pour la journée, « m » / « a » pour une moitié) ; `_ecoTempsVigne` n’enlève d’une
+  moitié que ses heures (`window._planCaveH`, la moitié sans lui). L’Économie le dit déjà (« h de journées de cave retirées »).
+- **La feuille** : bloc JCAVE-1 en fin de styles.css — la bande, la légende, le segment à trois, le ruban, `.plan-cave-ret`, la
+  pastille et `.eqj-demi` ; la barre de sélection passe à des boutons de 80 px pour tenir à six sur ordinateur.
+- **L’accompagnement** : MV_AIDE (Accueil : la pastille ; Planning : la barre et « Une journée de cave »), MV_INFO (engagé, temps
+  réel), les fiches « i » du cockpit (fin prévue, écart par tâche), le guide (Planning, Vigne, Pilotage), WHATS_NEW 9.87 (niv 1
+  sur `#plan-mbar-cave`, niv 0 pour les équipes), le tuto « Comment faire pour noter une journée de cave ? » — il couvre les quatre
+  gestes neufs : le compte des gestes sans tuto ne monte pas.
+
+### 428d. Mesuré
+- `mv-harnais-jcave1` : **54 vertes, 12/12 contre-épreuves** — A la donnée (poser, relire, rien d’écrit pour rien, deux ans), B le temps
+  réel (le Chai l’emporte, une moitié, sans horaire la moitié, **le récit de Nico retombe sur 75 h**, rien en attente), C les moitiés
+  (8 h–12 h = 4 h, 13 h–16 h = 3 h, plafond, sans horaire), D la capacité (cave hors de `work`, `pay` intact, équipe collective), E la
+  fenêtre (exécutée : trois choix, 9 h, ruban, « Retirer », jour sans heures), F les équipes du jour (exécutées). `mv-harnais-temps-vigne`
+  reste à 84 sans retouche.
+- **Deux vrais défauts du lot pris par les contrôles** : le preflight C24b — une valeur posée dans `onclick="planCaveMode('…')"` sans
+  `_escAttr` ; `mv-harnais-tutos` E — l’étiquette `plan.cave.m` fabriquée par une variable, invisible au contrôle (la règle de
+  PERDATE-1 vaut pour les étiquettes comme pour les noms de gestes : en clair).
+- **Tutos** : 5 tutos concernés (le moteur a bougé, donc tous) rejoués sur le build — téléphone, ordinateur, panneau, miroir, côte à côte en trois tailles, boot.js d’avant : tout vert ; le tuto « cave » 6/6 étapes partout.
+- **Chaîne** : un premier passage a levé trois rouges du lot — un émoji de plus dans planning.js (le « ↩ » de « Retirer la cave », devenu le pictogramme `retour`), l’encre de la pastille « Cave » sous 4,5:1 en sombre (passée à `--texte`), tutos.js +9 % sur sa référence de taille (+4 % dans ce lot ; regravée, pas de découpage à 83 ko) —, corrigés ; second passage d’un trait après la dernière retouche : 501 commandes, 0 rouge (902 s). Les tutos rejoués une seconde fois sur ce dernier build (24 vérifications, toutes vertes), les contre-épreuves du lot 12/12 après l’ajustement de E8.
+- **Rendu** : regardé sur l’appli construite (outil de captures, écrans planning-cave et planning-cave-fenetre neufs), téléphone et PC, clair et sombre : les six boutons de la barre tiennent sur une ligne au PC, les bandes (journée, matin, après-midi), la fenêtre (21 h pour six cases l’après-midi, « Retirer la cave de ces 2 cases ») ; la démo n’a pas d’heure de coupure : elle se place au milieu de la journée, comme pour l’absence.
+
+### 428e. Ouvert
+- **À voir chez Nico** : le Planning sur son PC (zoom 125 %) et au téléphone — l’en-tête d’un jour, « Cave », la fenêtre, la bande ;
+  ses journées de cave d’octobre marquées, la Réparation et le Dégraffage de Pilotage › Aujourd’hui ; la pastille « Cave » des équipes
+  du jour (au téléphone, elle passe à la ligne sous les trois équipes).
+- **Décisions** : l’écart de cadence et sa tuile à 0,0 % sous 40 % de travail validé (un tiret ?) ; l’effectif du jour sans les
+  personnes en cave ; le « qui » d’une opération du Cuvier.
+- **Chantier** : « D’où viennent ces heures » sous chaque tâche du Pilotage — qui, quels jours, ce qui vient de jours d’attente.
+- Les journées de cave d’octobre déjà passées ne se reconstituent pas toutes seules : elles se marquent au Planning, semaine par
+  semaine ; les chiffres réels de la Réparation et du Dégraffage suivent.

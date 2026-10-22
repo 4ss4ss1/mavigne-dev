@@ -9965,6 +9965,8 @@ function openEqJour(){
   _EQJ_SEL={}; _EQJ_TRN={};
   T.forEach(function(t,i){ t.forEach(function(n){ _EQJ_SEL[n]=i+1; }); });
   _mvEqBrut(iso).forEach(function(t,i){ if(t.t) _EQJ_TRN[i+1]=String(t.t); });
+  // ★ JCAVE-1 (§428) : une personne en cave toute la journée (Planning ou ici) arrive sur « Cave ».
+  if(typeof window._mvCaveJour==='function') _mvEqMembres().forEach(function(m){ if(window._mvCaveJour(m.nom,iso)==='j') _EQJ_SEL[m.nom]='cave'; });
   var d=document.getElementById('eqj-date');
   if(d){ var p=iso.split('-'); d.textContent='Aujourd\u2019hui, '+p[2]+'/'+p[1]+'/'+p[0]; }
   _mvEqRows();
@@ -9976,8 +9978,12 @@ function _mvEqRows(){
     var cur=_EQJ_SEL[m.nom]||0;
     var ch=[0,1,2,3].map(function(k){
       return '<div class="pchk'+(cur===k?' sel vert':'')+'" data-eqj-n="'+_escAttr(m.nom)+'" data-eqj-k="'+k+'" onclick="_mvEqPick(this)">'+(k?('\u00c9quipe '+k):'Aucune')+'</div>';
-    }).join('');
-    return '<div class="fl" style="margin-top:10px">'+_escHtml(m.nom)+'</div><div class="ppicker">'+ch+'</div>';
+    }).join('')
+      // ★ JCAVE-1 (§428) : « Cave » = la journée en cave. Ses heures ne vont pas à la vigne et elle quitte les équipes.
+      +'<div class="pchk'+(cur==='cave'?' sel cave':'')+'" data-eqj-n="'+_escAttr(m.nom)+'" data-eqj-k="cave" onclick="_mvEqPick(this)">Cave</div>';
+    var dj=(typeof window._mvCaveJour==='function')?window._mvCaveJour(m.nom,_mvToday()):'';
+    var demi=(dj==='m'||dj==='a')?(' <span class="eqj-demi">\u00b7 cave '+(dj==='m'?'le matin':'l\u2019apr\u00e8s-midi')+', pos\u00e9e au Planning</span>'):'';
+    return '<div class="fl" style="margin-top:10px">'+_escHtml(m.nom)+demi+'</div><div class="ppicker">'+ch+'</div>';
   }).join('');
   // ★ TRN-2 (§331) : la tournée de chaque équipe du jour — par défaut, celle du travail.
   var T=(typeof window._mvTourneesLues==='function')?window._mvTourneesLues():[], ks=[];
@@ -10001,7 +10007,7 @@ function _mvEqBrut(iso){
   return Array.isArray(L)?L.filter(function(t){ return t&&Array.isArray(t.m)&&t.m.some(function(n){ return n!=null&&n!==''; }); }):[];
 }
 function _mvEqPick(el){
-  var n=el.getAttribute('data-eqj-n'), k=parseInt(el.getAttribute('data-eqj-k'),10)||0;
+  var n=el.getAttribute('data-eqj-n'), ka=el.getAttribute('data-eqj-k'), k=(ka==='cave')?'cave':(parseInt(ka,10)||0);   // JCAVE-1 (§428)
   if(k) _EQJ_SEL[n]=k; else delete _EQJ_SEL[n];
   _mvEqRows();
 }
@@ -10024,14 +10030,34 @@ function _mvEqApres(msg){
   try{ window.dispatchEvent(new CustomEvent('mv-tournees')); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvEqApres/tournees'); }   // TRN-2 : Parcelles suit la tournée de l'équipe
   showToast(msg,'#3D6B27');
 }
+// ★ JCAVE-1 (§428) — la cave du jour, telle que la fenêtre la montre : « Cave » posé → la journée en cave ; une journée en cave
+//   que la fenêtre ne coche plus → retirée. Une demi-journée posée au Planning n'est pas touchée. Rend les noms en cave.
+function _mvEqCaveEcrire(iso){
+  if(typeof window._mvCaveEcrire!=='function'||typeof window._mvCaveJour!=='function') return [];
+  var poser=[], retirer=[], noms=[];
+  _mvEqMembres().forEach(function(m){
+    var en=window._mvCaveJour(m.nom,iso);
+    if(_EQJ_SEL[m.nom]==='cave'){ noms.push(m.nom); if(en!=='j') poser.push({iso:iso,nom:m.nom}); }
+    else if(en==='j') retirer.push({iso:iso,nom:m.nom});
+  });
+  if(poser.length) window._mvCaveEcrire(poser,'j');
+  if(retirer.length) window._mvCaveEcrire(retirer,null);
+  return noms;
+}
 function saveEqJour(){
   if(!_mvMoiAdmin()) return;
+  var _cv=_mvEqCaveEcrire(_mvToday()), _cvT=_cv.length?(' \u00b7 en cave\u00a0: '+_cv.join(', ')):'';   // JCAVE-1 (§428)
   var by={};
   Object.keys(_EQJ_SEL).forEach(function(n){ var k=_EQJ_SEL[n]; if(k>0) (by[k]=by[k]||[]).push(n); });
   var cles=Object.keys(by).sort(), teams=cles.map(function(k){ return by[k]; });
-  if(!teams.length){ clearEqJour(); return; }
+  if(!teams.length){
+    if(!_cv.length){ clearEqJour(); return; }
+    _mvEqEcrire(_mvToday(), []);
+    _mvEqApres('Aujourd\u2019hui\u00a0: tout le monde ensemble'+_cvT);
+    return;
+  }
   _mvEqEcrire(_mvToday(), teams, cles.map(function(k){ return _EQJ_TRN[k]||''; }));   // TRN-2 : la tournée de chaque équipe
-  _mvEqApres(teams.length+' \u00e9quipe'+(teams.length>1?'s':'')+' pour aujourd\u2019hui');
+  _mvEqApres(teams.length+' \u00e9quipe'+(teams.length>1?'s':'')+' pour aujourd\u2019hui'+_cvT);
 }
 function clearEqJour(){
   if(!_mvMoiAdmin()) return;

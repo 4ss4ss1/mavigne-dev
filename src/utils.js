@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.86';
+export const APP_VERSION = '9.87';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,12 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.87', d: '2026-10-22', items: [
+    { niv: 1, pour: ['admin'], cible: '#plan-mbar-cave', emoji: 'verre', titre: 'Les journées de cave se marquent au Planning',
+      desc: "Les heures réelles du Pilotage comptaient en vigne les journées passées en cave — pressurage, entonnage, un ouillage sans nom coché — et les versaient à la prochaine parcelle validée : une réparation pouvait afficher dix fois son barème. Au Planning, cochez les cases de ceux qui étaient en cave, touchez « Cave », puis choisissez la journée, le matin ou l’après-midi. La case garde ses heures, la paie ne change pas, et porte une bande au pied. Le Pilotage ne verse plus ces heures aux parcelles, et la fin prévue des travaux en tient compte, même pour un jour à venir." },
+    { niv: 0, pour: ['admin'], emoji: 'equipe', titre: '« Cave » dans les équipes du jour',
+      desc: "Le matin même, la fenêtre des équipes du jour propose « Cave » à côté des équipes : la personne passe la journée en cave, ses heures ne vont pas à la vigne et elle quitte les équipes. C’est la même marque qu’au Planning ; une demi-journée se marque au Planning." },
+  ] },
   { v: '9.86', d: '2026-10-22', items: [
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Une date qui n’existe pas est signalée',
       desc: "En créant une période, une fin au 31 septembre faisait répondre « Début et fin obligatoires » alors que les deux cases étaient remplies : le 31 septembre n’existe pas, et la case se lisait vide. En modifiant une période, la même date effaçait sa fin sans prévenir. Une date impossible ou incomplète passe maintenant en rouge, avec son explication, et rien n’est enregistré tant qu’elle n’est pas corrigée — pas plus qu’une fin placée avant le début. Au passage, la liste des tâches d’une nouvelle période écrit « temps réel » là où elle affichait « undefined h/ha »." },
@@ -5553,7 +5559,7 @@ var MV_AIDE = {
       ['Chez un ouvrier', " : la Vigne a deux onglets, Accueil et Parcelles. On valide depuis les Parcelles ; le Journal reste à l’administrateur et au pilotage. « Ma saison » mène à « Ma trace », l’historique de votre travail."],
       ['Sur ordinateur', " : les modules sont dans la <b>barre à gauche</b> (repliable), et <b>Ctrl K</b> ouvre une recherche — une parcelle, un écran, un onglet du Pilotage. Sur téléphone et tablette, rien ne change. Un petit compteur au bout d’une entrée signale ce qui attend : un tracteur en réparation, un contrat qui finit dans le mois, ce qui presse en cave, les points à anticiper du Pilotage. Barre repliée, c’est un point sur l’icône : survolez-la pour lire le nombre."],
       ['La priorité du moment', "reste épinglée en haut, dans une carte : la tâche du jour en grand, le message de l’administrateur, l’avancement en hectares, ce qui a avancé aujourd’hui et hier, votre équipe, la parcelle en cours et la fin prévue au rythme des 15 derniers jours. « Aller aux parcelles » ouvre la tâche, « Pourquoi ? » sa fiche. À côté, les parcelles dessinées à leur forme (leur contour, nord en haut) et à leur surface (fait, en cours, à faire) — un appui sur l’une ouvre sa fiche ; elles portent leurs rangs, en vert ce qui est fait, en ambre ce qui est commencé, en blanc ce qui reste. Une parcelle dont le contour n’est pas enregistré reste un rectangle, en pointillé. Une parcelle où la tâche est désactivée, ou pas choisie pour la campagne, reste en contour pâle, en dernier, et ne compte pas dans l’avancement. Un délai de rentrée en cours s’affiche en rouge en haut de la carte et sur les parcelles concernées. Sans priorité, la carte montre les chantiers du moment d’après le calendrier de la campagne. L’administrateur modifie la priorité (« Modifier ») et règle les équipes du jour depuis la carte."],
-      ['Équipes du jour', "juste sous la priorité. L’administrateur la touche pour répartir les salariés sous contrat ce jour-là en équipes <b>pour la journée</b> : chacun validera et démarrera avec son équipe, sans pouvoir la changer, et ne voit pas les autres. Sous les noms, il peut aussi choisir la tournée de chaque équipe : par défaut, celle du travail. Rien de réglé, ou « Tout le monde ensemble » : l’application fait comme d’habitude. Le lendemain, tout repart à zéro. Un salarié voit ici son équipe du jour, quand il y en a une."],
+      ['Équipes du jour', "juste sous la priorité. L’administrateur la touche pour répartir les salariés sous contrat ce jour-là en équipes <b>pour la journée</b> : chacun validera et démarrera avec son équipe, sans pouvoir la changer, et ne voit pas les autres. Sous les noms, il peut aussi choisir la tournée de chaque équipe : par défaut, celle du travail. « Cave » met la personne en cave pour la journée : ses heures ne vont pas à la vigne et elle quitte les équipes — la même marque qu’au Planning, où se pose une demi-journée. Rien de réglé, ou « Tout le monde ensemble » : l’application fait comme d’habitude ; les journées de cave, elles, restent. Le lendemain, tout repart à zéro. Un salarié voit ici son équipe du jour, quand il y en a une."],
       ['Une ligne « À vérifier »', "peut s’afficher en haut de l’Accueil : un changement de l’application qui vous concerne — un chiffre qui bouge, un réglage à contrôler. Touchez-la pour le détail, « Vu » pour la ranger ; elle reste dans Réglages › Moi › Journal des nouveautés."],
       ['La mise en route', "n’apparaît que chez l’administrateur d’un domaine neuf : sept étapes qui se cochent en lisant ce qui est déjà enregistré, rien à pointer à la main. Le bloc s’efface tout seul quand tout est fait."],
       ['Ma saison', " : ce que l’appli vous rend — votre part de la saison en hectares, vos jours au domaine, vos kilomètres de rangs ; votre part du chantier du moment (la priorité de votre équipe ; sans priorité, la seule tâche dans ses dates de travaux ; si plusieurs se chevauchent, celle où vous avez le plus travaillé ces 15 derniers jours) ; votre semaine en hectares, jamais en heures ; vos deux jalons les plus proches et le dernier gagné. « Ma trace » ouvre le détail."],
@@ -5663,7 +5669,8 @@ var MV_AIDE = {
       ['La roue crantée', "en haut à droite ouvre le cadre de l’année — modèles de semaine, coupure, convention, règle des congés, sort des heures sup — et les relevés à imprimer. Administrateur seulement."],
       ['Changer d’année', "se fait par les onglets au-dessus de la grille. Tant qu’aucun modèle n’est enregistré pour une année, sa grille est un report du modèle intégré, replacé sur les bons jours de la semaine. Un bandeau le dit et compte les jours qui restent à poser : une année n’a pas les mêmes semaines qu’une autre, et rien n’est ajouté à votre place."],
       ['Toucher une case', "la coche. Toucher le numéro du jour, en haut, coche toute l’équipe ce jour-là ; toucher un nom coche sa ligne ; toucher « Salarié », dans le coin, coche tout ce qui est affiché. Un deuxième appui décoche."],
-      ['La barre du bas', "dit qui est coché et à quelles dates, puis propose ce qui s’applique vraiment à cette sélection — heures, congé, absence, récup, chaleur, effacer. Une case ou trente, c’est le même geste et la même fiche."],
+      ['La barre du bas', "dit qui est coché et à quelles dates, puis propose ce qui s’applique vraiment à cette sélection — heures, congé, absence, cave, récup, chaleur, effacer. Une case ou trente, c’est le même geste et la même fiche."],
+      ['Une journée de cave', "se marque sur les cases de ceux qui étaient en cave : « Cave » dans la barre, puis la journée, le matin (de la prise à la coupure) ou l’après-midi (de la reprise à la fin). La case garde ses heures — paie, relevé et annualisation ne changent pas — et porte une bande au pied : toute la largeur pour la journée, la moitié gauche pour le matin, la droite pour l’après-midi. Le Pilotage ne verse plus ces heures aux parcelles validées, et la fin prévue des travaux en tient compte, même pour un jour à venir. Pour la semaine passée, « ‹ » en haut de la grille. « Retirer la cave » défait. Administrateur seulement."],
       ['Sur une période plus longue', "que la vue affichée, deux boutons au-dessus de la grille posent des congés ou des horaires chaleur du jour au jour, pour plusieurs salariés."],
       ['Une journée écourtée', "par le salarié (personnel, injustifiée, retard) se rattrape d’abord dans la semaine, par les heures en plus — avant les journées du domaine ; le reste se reprend sur la récup et les heures sup du mois, heure pour heure : 1 h manquée = 1 h de récup en moins, prise sur les heures à 50 % d’abord. Ce qu’elles ne couvrent pas est retenu sur le salaire. Écourtée ou décidée par le domaine, elle se reprend de la même façon, mais ce qui manque va au compteur des heures à rattraper, que les prochaines heures sup comblent : jamais de retenue. Une absence sans motif compte comme injustifiée. Un arrêt de travail, une formation, un événement familial ou un congé sans solde ne retirent rien. Ces règles valent à partir de septembre 2026 ; les mois d’avant gardent la leur."],
       ['Une absence sur une partie de la journée', "se note dans Absence, « Une partie seulement » : de telle heure à telle heure, ou un raccourci — le matin, l’après-midi, arrivé en retard, parti plus tôt — puis le motif. L’écran calcule les heures manquées, coupure déduite, dessine la journée et dit avant d’enregistrer ce qu’elles retirent du compteur. Un horaire raccourci dans « Travaillé » demande aussi son motif, sauf les horaires chaleur et les jours d’échange."],
@@ -6064,14 +6071,14 @@ export const MV_INFO = {
   'pil.eco.engage': { t: 'Engagé à ce jour', p: [
     'La <b>main-d\u2019\u0153uvre</b> engagée, ce sont les heures <b>réellement payées</b> : pour chaque salarié vigne, ses heures dans les rangs au planning depuis le début de la période jusqu\u2019à aujourd\u2019hui — congés, absences et formation à zéro, bureau exclu — au <b>taux chargé</b> de sa fiche, celui qui valait ce jour-là.',
     'Qu\u2019une parcelle soit validée ou non n\u2019y change rien : une semaine de dégrafage pas encore validée est déjà payée. C\u2019est ce qui permet de lire l\u2019avance ou le retard : <b>30 % du budget engagé pour 15 % du travail fait</b>, c\u2019est du retard, en euros.',
-    'Deux choses en sont retirées. La <b>conduite du tracteur</b>, comptée à part dans son propre poste. Les <b>journées de cave</b> : un jour où le salarié figure parmi les intervenants d\u2019une opération de cave (soutirage, remontage…), sa journée entière sort de la vigne — l\u2019opération ne dit pas combien de temps elle a pris.',
+    'Deux choses en sont retirées. La <b>conduite du tracteur</b>, comptée à part dans son propre poste. Les <b>journées de cave</b> : celles marquées au Planning — la journée, le matin ou l\u2019après-midi, d\u2019après l\u2019horaire du jour —, et un jour où le salarié figure parmi les intervenants d\u2019une opération du Chai (soutirage, ouillage…) : sa journée entière sort de la vigne, l\u2019opération ne disant pas combien de temps elle a pris.',
     'Le tracteur, le carburant et le phyto sont comptés comme avant. Le <b>budget</b>, lui, reste le barème : surface \u00d7 heures par hectare \u00d7 taux.',
     'Un jour d\u2019atelier ou de bureau d\u2019un salarié vigne n\u2019est écrit nulle part : il reste compté dans la vigne. Un salarié sans taux sur sa fiche est compté au taux moyen du domaine.'
   ] },
 
   // ★ TV-1 (23/09/2026) — posée sur la carte « Temps réel contre barème » (_pecCarteTemps).
   'pil.eco.temps': { t: 'Temps réel contre barème', p: [
-    'Pour chaque salarié, chaque jour : ses heures <b>dans les rangs</b> au planning — congés, récup, arrêts, absences et formation à zéro — moins ses heures de <b>conduite tracteur</b>, déjà mesurées par les sessions. Le bureau n\u2019entre pas. Un jour où il figure sur une <b>opération de cave</b>, sa journée entière sort de la vigne.',
+    'Pour chaque salarié, chaque jour : ses heures <b>dans les rangs</b> au planning — congés, récup, arrêts, absences et formation à zéro — moins ses heures de <b>conduite tracteur</b>, déjà mesurées par les sessions. Le bureau n\u2019entre pas. Les <b>journées de cave</b> marquées au Planning en sortent — la journée, ou le matin, ou l\u2019après-midi d\u2019après l\u2019horaire du jour — et un jour où il figure sur une <b>opération du Chai</b>, sa journée entière.',
     'Ces heures sont versées aux parcelles <b>validées ce jour-là</b>. Une validation vaut pour toutes les personnes nommées : trois personnes une heure sur un are, c\u2019est trois heures sur ce travail. Quelqu\u2019un qui n\u2019est nommé sur aucune validation du jour voit sa journée partagée entre <b>toutes</b> les parcelles validées ce jour-là : valider pour l\u2019équipe sans la cocher ne fait pas perdre ses heures. Deux équipes cochées sur des parcelles différentes gardent chacune les leurs. Une parcelle validée par une session tracteur (« faite au tracteur ») ne reçoit pas d\u2019heures de l\u2019équipe : son temps est celui de la session. Une étape d\u2019arrachage faite par un <b>prestataire</b> non plus : elle se valide, mais n\u2019absorbe aucune heure de l\u2019équipe.',
     'Plusieurs parcelles validées <b>le même jour</b> se partagent la journée <b>au prorata du barème</b> : pour un même travail, c\u2019est la surface. Trois personnes huit heures sur 1 ha, 0,5 ha et 0,5 ha de taille : 24 h pour 2 ha, soit <b>12 h/ha</b> — contre 15 au barème, le travail est allé plus vite que la convention. Une taille et un relevage validés le même jour se partagent la journée selon ce que chacun demande au barème.',
     'Un <b>travail à l’heure</b> (arrachage, désherbage manuel…) n’a pas de barème : le jour où il partage la liste avec des travaux au barème, la journée se partage d’abord <b>à la surface</b> entre les deux, puis au barème entre les travaux au barème. Avant, il ne prenait rien, et la réparation validée le même jour ramassait les heures d’arrachage.',
@@ -9412,6 +9419,40 @@ export function _mvEqDe(nom, iso){
 }
 window._mvEqJour = _mvEqJour;
 window._mvEqDe   = _mvEqDe;
+
+// ★★ JCAVE-1 (§428) — LES JOURNÉES DE CAVE. CONFIG.cave_jours = { 'AAAA-MM-JJ': { 'Nom': 'j' | 'm' | 'a' } } :
+//   la journée, le matin ou l'après-midi en cave. Posée par l'administrateur au Planning (planning.js, planCaveApply) ou,
+//   pour la journée, depuis les équipes du jour (app.js, saveEqJour) — une seule donnée, deux portes. Lue par le temps réel
+//   du Pilotage (pilotage.js, _ecoCaveJours) et par la capacité de l'équipe (planning.js, _capDayReal). Les heures restent
+//   payées : rien ici ne touche au planning, à la paie ni au relevé. Deux ans gardés, comme les équipes du jour.
+window._mvCaveJour = function(nom, iso){
+  var C=(window.CONFIG||{}).cave_jours;
+  if(!C || typeof C!=='object' || Array.isArray(C) || nom==null) return '';
+  var J=C[String(iso||'').slice(0,10)], v=(J && typeof J==='object') ? J[String(nom)] : '';
+  return (v==='j' || v==='m' || v==='a') ? v : '';
+};
+// liste = [{iso, nom}] ; part = 'j' | 'm' | 'a' pour poser, null pour retirer. Rend le nombre de cases changées ; n'écrit
+//   la configuration que si quelque chose a changé.
+window._mvCaveEcrire = function(liste, part){
+  var cfg=window.CONFIG||{}, C0=cfg.cave_jours;
+  var C=(C0 && typeof C0==='object' && !Array.isArray(C0)) ? Object.assign({}, C0) : {};
+  var pose=(part==='j' || part==='m' || part==='a'), n=0;
+  (liste||[]).forEach(function(x){
+    var iso=String((x&&x.iso)||'').slice(0,10), nom=x&&x.nom;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(iso) || nom==null || nom==='') return;
+    var J=Object.assign({}, C[iso]||{});
+    if(pose){ if(J[nom]!==part){ J[nom]=part; n++; } }
+    else if(J[nom]){ delete J[nom]; n++; }
+    if(Object.keys(J).length) C[iso]=J; else delete C[iso];
+  });
+  if(!n) return 0;
+  var lim=new Date(); lim.setDate(lim.getDate()-730);
+  var limIso=lim.getFullYear()+'-'+String(lim.getMonth()+1).padStart(2,'0')+'-'+String(lim.getDate()).padStart(2,'0');
+  Object.keys(C).forEach(function(k){ if(k<limIso) delete C[k]; });
+  cfg.cave_jours=C; window.CONFIG=cfg;
+  if(typeof window.saveData==='function') window.saveData('config');
+  return n;
+};
 window.MV_FORMAT          = MV_FORMAT;   // VER-1
 window._mvLectureSeule    = _mvLectureSeule;   // DROITS-1
 window.checkWhatsNew      = checkWhatsNew;

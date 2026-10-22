@@ -943,6 +943,7 @@ par salarié**. Deux mesures **volontairement séparées** :
 
 ★ **Paramètre année optionnel** : une campagne **à cheval sur deux années** charge le bon modèle
 pour chaque moitié. ⚠️ **Repli complet** si `capHPerm` est absent. 27 scénarios exécutés.
+★ **JCAVE-1 (§428)** : dans `_capDayReal`, une journée — ou une moitié — marquée en cave (`CONFIG.cave_jours`, lu par `window._mvCaveJour`) retire ses heures de `work` (capacité pour la vigne) par `window._planCaveH` ; `pay` ne bouge pas. La marque se pose au Planning (bouton « Cave » de la barre, fenêtre `_planCaveHtml`) ou, pour la journée, depuis les équipes du jour ; le temps réel du Pilotage la lit dans `_ecoCaveJours`. Le matin et l’après-midi se découpent sur `_planBornesJour` (la définition de « Absence › Le matin »).
 
 ★★ **`_planWorkPersRange(mbr, Date, Date)`** — ⚠️ **signature : un membre et DEUX OBJETS Date.**
 C'est la source unique de « combien d'heures cette personne a-t-elle été là », partagée par

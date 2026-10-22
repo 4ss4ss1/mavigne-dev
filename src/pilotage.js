@@ -6569,6 +6569,19 @@ function _ecoCaveJours(d0, d1){
       if(!n) return; (out[n]=out[n]||{})[iso]=1;
     });
   });
+  // ★★ JCAVE-1 (§428) — LA CAVE MARQUÉE AU PLANNING (CONFIG.cave_jours, utils.js/_mvCaveJour) : la journée (1), le matin (« m »)
+  //   ou l'après-midi (« a »). Le Cuvier, l'entonnage et un ouillage sans nom n'écrivaient rien que cette fonction sache lire :
+  //   ces journées restaient en attente et tombaient sur la prochaine parcelle validée (Réparation à +900 %, Nico, 22/10).
+  //   Une opération du Chai le même jour vide déjà toute la journée : elle l'emporte sur une moitié.
+  var C=(window.CONFIG&&window.CONFIG.cave_jours&&typeof window.CONFIG.cave_jours==='object')?window.CONFIG.cave_jours:{};
+  Object.keys(C).forEach(function(iso){
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(iso) || iso<d0 || iso>d1) return;
+    var J=C[iso]||{};
+    Object.keys(J).forEach(function(n){
+      var v=J[n]; if(v!=='j'&&v!=='m'&&v!=='a') return;
+      var o=(out[n]=out[n]||{}); if(o[iso]!==1) o[iso]=(v==='j')?1:v;
+    });
+  });
   return out;
 }
 function _ecoTempsVigne(win){
@@ -6645,7 +6658,13 @@ function _ecoTempsVigne(win){
       var ht=Math.min(h, Number(cd[d])||0);
       g.hChamp+=h; g.hTrac+=ht;
       var hv=h-ht;
-      if(hv>0 && cj[d]){ g.hCave+=hv; hv=0; }           // ENG-2 : journée de cave, hors vigne
+      if(hv>0 && cj[d]){                                 // ENG-2 : journée de cave, hors vigne
+        // ★ JCAVE-1 (§428) : une demi-journée marquée au Planning n'enlève que sa moitié, d'après l'horaire du jour
+        //   (planning.js/_planCaveH) — sans lui, la moitié des heures. Le reste de la journée reste à la vigne.
+        var hc=(cj[d]===1)?hv:((typeof window._planCaveH==='function')?(Number(window._planCaveH(m,d,cj[d],hv))||0):hv/2);
+        if(hc>hv) hc=hv;
+        g.hCave+=hc; hv-=hc;
+      }
       if(hv>0){
         if(!(acc>0)) g.dAtt=d; acc+=hv; g.hVigne+=hv;
         // ENG-2 : l'euro engagé, au taux chargé de CE jour (une augmentation ne réécrit pas mars).

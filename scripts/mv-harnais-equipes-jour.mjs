@@ -28,7 +28,7 @@ function extraire(src, nom) {
 
 function monde(src, { admin = false, moi = 'Victor', config = {} } = {}) {
   const A = nu(src.app), U = nu(src.utl);
-  const fns = [['_mvEqJour', U], ['_mvEqDe', U], ['_mvEqJourMoi', A], ['_mvEqApplique', A], ['_mvEqEcrire', A], ['saveEqJour', A], ['clearEqJour', A]];
+  const fns = [['_mvEqJour', U], ['_mvEqDe', U], ['_mvEqJourMoi', A], ['_mvEqApplique', A], ['_mvEqEcrire', A], ['_mvEqCaveEcrire', A], ['saveEqJour', A], ['clearEqJour', A]];
   const code = [], manque = [];
   for (const [n, s] of fns) { const f = extraire(s, n); if (f) code.push(f); else manque.push(n); }
   if (manque.length) return { manque };

@@ -1,0 +1,45 @@
+{
+  "lot": "JCAVE-1",
+  "section": "§428",
+  "base": "5c38720312192e7eaff8141224b921302b768eef",
+  "inclut": [],
+  "date": "2026-10-22",
+  "tutos": {
+    "ok": true,
+    "empreinte": "7eb40876d1d559e69b83b6d0871432b2150c42627604c6ff9e01abc0ec154f5a",
+    "date": "2026-10-22T15:13:32.935Z",
+    "joues": {
+      "téléphone": 5,
+      "ordinateur": 5,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "a66e010d2a62ada3e1efc0e3bb95fd041162c2b81de3eae5d6e605114ae00e8d",
+    "CLAUDE.md": "7012b4cc282d31fb2613549da9a454ec372a4fdf33366d03c821dd1d52bc07b0",
+    "docs/claude/INDEX.md": "bf709d86a2bd30224332710a358a5c47736f3bd6d321c87751768e31dd6c2647",
+    "docs/claude/chantiers-380-429.md": "62d76d3a87ace61b4ab3e7688ee021ccdc3cf13a2a79b6079d84f852a53d6fe7",
+    "docs/claude/journal.md": "b156e79c20e5b70e170fbfd7ba7883121f052c8d0908bb2f852c46f7fd090772",
+    "docs/claude/modules.md": "c6cfe37e0c18fbb36fc037879a7d237262160f9caf94469a290507675d350995",
+    "guide/04-vigne.html": "af53614b607af1e6ba461b4f5b8046a8d8f9f238736068dd9729913c977bcbde",
+    "guide/10-planning.html": "8f5929f18c60b6958ec0b2428617871ddf15aa2d914a63ccbaef5e81f278f5c0",
+    "guide/11-pilotage.html": "32dea4649e44d2622f8bb8e59484f006235c57aa4e9faf2c9dd630e917188a08",
+    "index.html": "606d607a9f08f93d120733094fa15a9e1f1fa425812388584daeac143971aac7",
+    "public/sw.js": "02a248c387ab86822c5c89ab5adb0db0545e939a6a0e2cbfc7decf830c692ac7",
+    "scripts/mv-captures.mjs": "8d11d05f17d15ef9b2074ab72d134f6c825c5cbaa3863fd2c2ed7357fadcbc57",
+    "scripts/mv-harnais-equipes-jour.mjs": "05b234c261a721465e175e4ef7820773187943e3fedde2656f65df8d26475dec",
+    "scripts/mv-harnais-liste.mjs": "2685f07abd5f29318df70727c2c549958976d05d9a79f56ea58aaf02f69d05cc",
+    "scripts/mv-harnais-temps-vigne.mjs": "7997604f4143576da5e2de488b98e6a4bc1a72134eb879e7428c8388cd7d33f3",
+    "scripts/typo-baseline.json": "03695fc753723ee24dca6c2a23e855d1d2753ceff14f0a771b82bfdbaf85caba",
+    "src/app.js": "83c8d1119831df5bd8bd2e449155abe54c7202e0ba01fefc212c4563a1c9b7c2",
+    "src/cockpit-vue.js": "daa2b8710d09cc6bccf503d8eba661bbde3eb7a3552828aee99d06d82b217036",
+    "src/pilotage.js": "d8f7b9ed620400edfbd54a6dee23aef0ebe6c87a214b354ce51773ad029a852d",
+    "src/planning.js": "c9560a226da334325a27ee12b429d9c0a41753c70e25ff6fdde83b16359dcd31",
+    "src/styles.css": "cd550894a54fff77b6bd98e4cb83a89b0c13faa3266c4e1ce5b7525ee581f20e",
+    "src/tutos.js": "06e19069d14e952a2aeacb188bc4257a50556804a11dd73a1092868f41e65f42",
+    "src/utils.js": "af3ad951ce4776b4b845371965070c022e63c73b34a65d8fcf9f92cc6620a340",
+    "scripts/mv-harnais-jcave1.mjs": "60f477312a84bbb006c029b3cc70e7a4cfd14b18e98c54df567d7c1833cb5005"
+  }
+}

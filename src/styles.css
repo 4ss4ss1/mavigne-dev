@@ -8681,6 +8681,31 @@ body:not(.mv-rail-ouvert) .mv-rail .mv-rail-b[aria-current="page"]{ background:t
 body:not(.mv-rail-ouvert) .mv-rail .mv-rail-b[aria-current="page"] .mv-rail-ic{ box-shadow:var(--email-ombre); }
 body:not(.mv-rail-ouvert) .mv-rail .mv-rail-point,body:not(.mv-rail-ouvert) .mv-rail .mv-rail-vif{ top:0; left:calc(50% + var(--tuile-rail-pliee) / 2 - 6px); }
 /* ★ FIN ETAIN-1 */
+/* ════════════════════════════════════════════════════════════════════
+   ★★ JCAVE-1 (§428) — LES JOURNÉES DE CAVE (maquette validée le 22/10)
+   ════════════════════════════════════════════════════════════════════ */
+/* La marque « cave » d'une case du Planning : une bande au pied de la case, couleur fût de chêne.
+   Toute la largeur : la journée. Moitié gauche : le matin. Moitié droite : l'après-midi.
+   Le chiffre de la case ne change pas : les heures restent payées. */
+#page-planning .pl2-cave{position:absolute;left:var(--e-2,8px);right:var(--e-2,8px);bottom:5px;height:4px;border-radius:var(--r-full,999px);background:var(--piste);pointer-events:none}
+#page-planning .pl2-cave i{position:absolute;top:0;bottom:0;border-radius:inherit;background:var(--terre)}
+#page-planning .pl2-cave-j i{left:0;right:0}
+#page-planning .pl2-cave-m i{left:0;right:50%}
+#page-planning .pl2-cave-a i{left:50%;right:0}
+#page-planning .pl2-legend i.pl2-lg-cave{position:relative;background:transparent!important;outline:0!important}
+#page-planning .pl2-legend i.pl2-lg-cave::after{content:'';position:absolute;left:0;right:0;bottom:1px;height:4px;border-radius:var(--r-full,999px);background:var(--terre)}
+/* « Quand » à trois choix (le segment de l'absence en a deux). */
+.pl2r-seg.pl2r-seg-3{grid-template-columns:1fr 1fr 1fr}
+/* Le ruban de la journée : la part en cave. */
+.pl2r-cave{background:var(--terre)}
+/* « Retirer la cave » : la pièce .mvbtn-secondaire, sur toute la largeur, sous l'encadré. */
+.plan-cave-ret{width:100%;margin-top:var(--e-3,12px)}
+/* Six boutons dans la barre de sélection : ils tiennent encore sur une ligne sur ordinateur. */
+#plan-mbar .pl2-mbar-acts{grid-template-columns:repeat(auto-fit,minmax(80px,1fr))}
+/* Équipes du jour : la pastille « Cave », et la demi-journée posée au Planning, dite sous le nom. */
+.pchk.sel.cave{border-color:var(--terre);background:var(--terre-pale);color:var(--texte)}
+.eqj-demi{font-weight:var(--fw-reg,400);color:var(--texte-doux)}
+/* ★ FIN JCAVE-1 */
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.
    Deux rangées partout, Pilotage compris (pilotage.js pose désormais un vrai .mod-header) : l'identité (icône, titre,
    sous-titre, gestes du module) puis la ligne du jour (saison, date — ou la météo, qui porte alors la date courte —,
@@ -8727,3 +8752,4 @@ body .mod-header .mv-help-btn .mvh-q{ width:var(--ic-sm,16px); height:var(--ic-s
      SOUS « N choses à compléter » ; il garde sa largeur, le bouton passe à la ligne s'il le faut. — */
 body #page-pilotage .pil-portee .pil-crumb{ min-width:auto; }
 /* ★ FIN TETE-2 */
+

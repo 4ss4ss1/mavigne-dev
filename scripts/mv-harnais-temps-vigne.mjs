@@ -399,7 +399,7 @@ const MUT = [
   ['quiHors ignoré par le moteur', "var noms=[]; if(j.qui && !j.quiHors) noms.push(j.qui);   // TV-2 : le validateur hors des rangs ne compte pas\n    (j.membresEquipe||[]).forEach(function(n){ if(n && noms.indexOf(n)<0) noms.push(n); });\n    // ★★ ÉQUIPES-1", "var noms=[]; if(j.qui) noms.push(j.qui);\n    (j.membresEquipe||[]).forEach(function(n){ if(n && noms.indexOf(n)<0) noms.push(n); });\n    // ★★ ÉQUIPES-1"],
   ['ENG-2 : operateur compte comme intervenant', "(Array.isArray(op.intervenants)?op.intervenants:[]).forEach(", "(Array.isArray(op.intervenants)&&op.intervenants.length?op.intervenants:[op.operateur]).forEach("],
   ['ENG-2 : les analyses vident une journée', "if(!op || op.type==='analyse' || !op.date) return;", "if(!op || !op.date) return;"],
-  ['ENG-2 : les journées de cave ne sortent plus', "if(hv>0 && cj[d]){ g.hCave+=hv; hv=0; }", ""],
+  ['ENG-2 : les journées de cave ne sortent plus', "if(hv>0 && cj[d]){", "if(false){"],   // JCAVE-1 (§428) : le bloc porte aussi les demi-journées
   ['ENG-2 : taux fixe au lieu du taux du jour', "Number(window._mvPaieTauxEffAt(m,d))||0", "Number(window._mvPaieTauxEffAt(m,d0))||0"],
   ['ENG-2 : l\'engagé revient au barème des validations', "var engage = moReel + T.tracF + T.gnrF + T.phyF;", "var engage = T.moF + T.tracF + T.gnrF + T.phyF;"],
   ['ENG-2 : la courbe ignore le planning', "if(E.moSrc==='planning' && E.tv && E.tv.byD){", "if(false){"],

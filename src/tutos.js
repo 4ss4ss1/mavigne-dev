@@ -72,6 +72,8 @@ function _num(x) { var n = parseFloat(String(x == null ? '' : x).replace(/\s/g, 
 function _nb(n) { return Math.round(Number(n) || 0).toLocaleString('fr-FR'); }
 function _ouvert(id) { var o = document.getElementById(id); return !!(o && o.classList.contains('open')); }
 function _gnr() { var c = window.CONFIG || {}; return c.gnr || { capacite: 0, niveau: 0 }; }
+// ★ JCAVE-1 (§428) : le nombre de cases marquées en cave (CONFIG.cave_jours), pour voir qu'une marque vient d'être posée.
+function _caveN() { var C = (window.CONFIG || {}).cave_jours || {}, n = 0; Object.keys(C).forEach(function (k) { n += Object.keys(C[k] || {}).length; }); return n; }
 function _ic(n, t) { return window._mvIcon ? window._mvIcon(n, t || 18) : ''; }
 function _page() { var p = _q('.page.active'); return p ? String(p.id || '').replace(/^page-/, '') : ''; }
 function _tuto(id) { for (var i = 0; i < TU_TUTOS.length; i++) { if (TU_TUTOS[i].id === id) return TU_TUTOS[i]; } return null; }
@@ -155,6 +157,35 @@ var TU_TUTOS = [
         ok: 'C’est enregistré : le message vert le confirme.' },
       { type: 'regarder', cible: '[data-tuto="home.eqj"]',
         txt: function () { return 'La pastille dit maintenant « ' + L('#home-eqj-txt') + ' ». Chacun valide avec son équipe, sans pouvoir la changer. Demain, rien n’est réglé : tout le monde travaille ensemble.'; } }
+    ] },
+  // ★ JCAVE-1 (§428) — la journée de cave, au Planning (administrateur). Elle couvre les quatre gestes de la fenêtre « Travail de cave ».
+  { id: 'cave', titre: 'Comment faire pour noter une journée de cave\u00a0?', fin: 'noter une journée de cave',
+    module: 'Planning', pages: ['planning'], pour: 'admin', duree: '1 min', depart: 'home',
+    couvre: ['planCaveSheet', 'planCaveMode', 'planCaveApply', 'planCaveRetirer'],
+    avant: function (memo) { memo.cav0 = _caveN(); },
+    retenir: ['Planning › Le mois : cochez les cases de ceux qui étaient en cave, puis « Cave » dans la barre.',
+              'La journée, le matin ou l’après-midi : la case garde ses heures, la paie ne change pas.',
+              'Le Pilotage ne verse plus ces heures aux parcelles validées. Pour défaire : les mêmes cases, « Cave », « Retirer la cave ».'],
+    etapes: [
+      { type: 'aller', page: 'planning', pourquoi: 'Une journée de cave se note au Planning, sur les cases du jour.' },
+      { type: 'toucher', cible: '[data-tuto="plan.jour"]',
+        txt: function () { return '{T} le numéro d’un jour, en haut de la grille : toute l’équipe est cochée ce jour-là. Les cases se cochent aussi une par une.'; },
+        fait: function () { var b = _q('#plan-mbar'); return !!(b && b.classList.contains('open')); },
+        ok: 'La barre du bas dit qui est coché.' },
+      { type: 'toucher', cible: '[data-tuto="plan.cave"]',
+        txt: function () { return '{T} « ' + L('[data-tuto="plan.cave"]') + ' » dans la barre.'; },
+        fait: function () { return _ouvert('ovPlanDay') && !!_q('#plan-cave-q'); },
+        ok: 'La fenêtre « Travail de cave » s’est ouverte.' },
+      { type: 'toucher', cible: '[data-tuto="plan.cave.m"]',
+        txt: function () { return 'Ce jour-là, l’équipe était en cave le matin. {T} « ' + L('[data-tuto="plan.cave.m"]') + ' » : le ruban montre la part de la journée qui sort de la vigne.'; },
+        fait: function () { var b = _q('[data-tuto="plan.cave.m"]'); return !!(b && b.classList.contains('on')); },
+        ok: 'Le matin va de la prise à la coupure, d’après l’horaire du jour.' },
+      { type: 'toucher', cible: '[data-tuto="plan.cave.ok"]',
+        txt: function () { return '{T} « ' + L('[data-tuto="plan.cave.ok"]') + ' ».'; },
+        fait: function (memo) { return !_ouvert('ovPlanDay') && _caveN() > (memo.cav0 || 0); },
+        ok: 'C’est noté : le message vert le confirme.' },
+      { type: 'regarder', cible: '[data-tuto="plan.jour"]',
+        txt: function () { return 'Au pied de chaque case de ce jour, une bande à gauche dit « cave le matin ». Les heures restent au planning ; au Pilotage, elles ne vont plus aux parcelles validées. Sur votre domaine, rien n’a bougé : c’était un entraînement.'; } }
     ] },
   { id: 'gnr', titre: 'Comment faire pour noter un plein de GNR\u00a0?', fin: 'noter un plein de GNR',
     module: 'Tracteur', pages: ['tracteur'], pour: 'admin', duree: '1 min', depart: 'home',

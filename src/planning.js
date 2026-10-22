@@ -1856,6 +1856,10 @@ function _chargeSaisonData_(s){
       var w=(coll&&typeof window._mvEffDef==='function')?window._mvEffDef(mb):1;
       var plId=_planPlId(mb), e=_entDayY(mb.nom,yr,mi,dj);
       var hw=_planWorkH(plId,mi,dj,e,yr)*w, hp=_planDayH(plId,mi,dj,e,yr)*w;
+      // ★ JCAVE-1 (§428) : une journée, ou une moitié, marquée en cave n'est pas de la capacité pour la vigne — la fin prévue
+      //   des travaux en tient compte, même posée à l'avance (une mise en bouteille). Les heures payées (hp) ne bougent pas.
+      var _cvj=(typeof window._mvCaveJour==='function')?window._mvCaveJour(mb.nom,ds):'';
+      if(_cvj&&hw>0)hw=Math.max(0,hw-window._planCaveH(mb,ds,_cvj,hw/w)*w);
       out.work+=hw; out.pay+=hp;
       if(!coll){ out.workPerm+=hw; out.payPerm+=hp; }
     });
@@ -2947,13 +2951,18 @@ function _planVerdict(tete,mo,manq,av,ap){
   return h+'</div>';
 }
 // ── Les gestes de la section Absence ──
-function _planAbsBornesJour(){
-  var ed=_planEditDay;if(!ed)return null;
-  var b=_planRetardBornes(ed.mbr,planMonth,ed.day),co=_planCoupureH(planMonth,_planPlId(ed.mbr));
+// ★ JCAVE-1 (§428) : les bornes d'une journée — prise, coupure, fin — pour n'importe quel salarié, n'importe quel jour du mois m.
+//   UNE définition pour « Absence › Le matin » et pour la cave du matin ou de l'après-midi (_planCaveH).
+function _planBornesJour(mbr,m,d){
+  var b=_planRetardBornes(mbr,m,d),co=_planCoupureH(m,_planPlId(mbr));
   var D0=_planMinOf(b.t0),D1=_planMinOf(b.t1),p=Math.round(((D1-D0)/60-_planTimingH(b.t0,b.t1,b.continu))*60),c0=_planMinOf(co);
   if(p>0&&(c0<D0||c0+p>D1))c0=Math.round((D0+D1-p)/2);
   b.coup=co;b.c0=p>0?c0:Math.round((D0+D1)/2);b.c1=b.c0+Math.max(0,p);
   return b;
+}
+function _planAbsBornesJour(){
+  var ed=_planEditDay;if(!ed)return null;
+  return _planBornesJour(ed.mbr,planMonth,ed.day);
 }
 function planAbsQuand(part){
   _planAbsPart=!!part;
@@ -3330,6 +3339,16 @@ function _pl2Board(){
   var mbrs=_pl2Actifs(),L=_planLegal();
   if(!mbrs.length)return '<div class="plan-empty">Aucun salari\u00e9 sous contrat ce mois.</div>';
   var cols=_pl2DayCols(),mo=_pl2View==='mo';
+  // ★ JCAVE-1 (§428) : la colonne que vise le tuto « journée de cave » — aujourd'hui s'il porte des heures, sinon le premier
+  //   jour de la vue qui en porte (pour la première personne sous contrat). Un tuto ne vise jamais un dimanche vide.
+  var _tuJ=null;
+  (function(){
+    var m0=mbrs[0];if(!m0)return;
+    var p0=_planPlId(m0),ok=function(d){return d!=null&&_planInContract(m0,planMonth,d)&&_planPlanned(p0,planMonth,d)>0;};
+    var td=cols.filter(function(d){return ok(d)&&_pl2IsToday(d);})[0];
+    _tuJ=(td!=null)?td:(cols.filter(ok)[0]);
+    if(_tuJ===undefined)_tuJ=null;
+  })();
   var h='<div class="pl2-board"><div class="pl2-bwrap"><div class="pl2-grid'+(mo?' pl2-mo':' pl2-wk')+'" style="--nbc:'+cols.length+'">';
   // Le coin est le croisement de toutes les lignes et de toutes les colonnes :
   // il coche la vue entiere. C'est la selection « toute l'equipe, cette semaine ».
@@ -3340,7 +3359,7 @@ function _pl2Board(){
     var fer=_planFerie(planMonth,d);
     // L'en-tete du jour coche la COLONNE : toute l'equipe, ce jour-la. C'est le geste
     // « demain tout le monde commence a 6 h » en deux touches au lieu de huit.
-    h+='<button class="pl2-dh'+(we?' pl2-we':'')+(_pl2IsToday(d)?' pl2-today':'')+(_planColFull(d)?' pl2-hdon':'')+'" data-col="'+d+'" onclick="planColTap('+d+')" aria-label="Cocher le '+d+' pour toute l\u2019\u00e9quipe"><span class="pl2-dh-dow">'+(mo?PLAN_JOURS[dow].charAt(0):PLAN_JOURS[dow])+'</span><span class="pl2-dh-num">'+d+'</span>'+(fer?'<span class="pl2-dh-fer" title="'+_escAttr(fer)+'"></span>':'')+'</button>';
+    h+='<button class="pl2-dh'+(we?' pl2-we':'')+(_pl2IsToday(d)?' pl2-today':'')+(_planColFull(d)?' pl2-hdon':'')+'" data-col="'+d+'"'+(d===_tuJ?' data-tuto="plan.jour"':'')+' onclick="planColTap('+d+')" aria-label="Cocher le '+d+' pour toute l\u2019\u00e9quipe"><span class="pl2-dh-dow">'+(mo?PLAN_JOURS[dow].charAt(0):PLAN_JOURS[dow])+'</span><span class="pl2-dh-num">'+d+'</span>'+(fer?'<span class="pl2-dh-fer" title="'+_escAttr(fer)+'"></span>':'')+'</button>';
   });
   mbrs.forEach(function(mbr){
     var s=_planSummary(mbr,planMonth),plId=_planPlId(mbr),nomA=_escAttr(mbr.nom);
@@ -3365,7 +3384,11 @@ function _pl2Board(){
       }
       if(c.hc){h+='<div class="pl2-cell pl2-cell-hc'+(we?' pl2-we':'')+'"><span class="pl2-chip pl2c-hc">\u2013</span></div>';return;}
       var sel=_pl2Sel[mbr.nom+'|'+d]?' pl2-selon':'';
-      h+='<button class="pl2-cell'+(we?' pl2-we':'')+(_pl2IsToday(d)?' pl2-tdcol':'')+sel+'" data-cell="'+nomA+'|'+d+'" onclick="planCellTap(\''+nomA+'\','+d+')" aria-label="'+nomA+' '+d+' '+PLAN_MOIS_C[planMonth]+'"><span class="pl2-chip '+c.cls+(c.brk?' pl2c-brk':'')+'">'+c.txt+'</span></button>';
+      // ★ JCAVE-1 (§428) : la marque « cave » du jour — une bande au pied de la case : toute la largeur pour la journée,
+      //   la moitié gauche pour le matin, la droite pour l'après-midi. Le chiffre ne change pas : les heures restent payées.
+      var _cv=(typeof window._mvCaveJour==='function')?window._mvCaveJour(mbr.nom,_pl2Iso(d)):'';
+      var _cvBand=_cv?('<span class="pl2-cave pl2-cave-'+_cv+'" aria-hidden="true"><i></i></span>'):'',_cvLab=_cv?(', cave '+_PL2_CAVE_LIB[_cv]):'';
+      h+='<button class="pl2-cell'+(we?' pl2-we':'')+(_pl2IsToday(d)?' pl2-tdcol':'')+sel+'" data-cell="'+nomA+'|'+d+'" onclick="planCellTap(\''+nomA+'\','+d+')" aria-label="'+nomA+' '+d+' '+PLAN_MOIS_C[planMonth]+_cvLab+'"><span class="pl2-chip '+c.cls+(c.brk?' pl2c-brk':'')+'">'+c.txt+'</span>'+_cvBand+'</button>';
     });
   });
   h+='<div class="pl2-totl">\u03a3 jour</div>';
@@ -3395,6 +3418,7 @@ function _pl2Board(){
     +'<span><i class="pl2c-rec"></i> R\u00e9cup</span>'
     +'<span><i class="pl2c-heat"></i> Chaleur</span>'
     +'<span><i style="background:var(--or)"></i> F\u00e9ri\u00e9</span>'
+    +'<span><i class="pl2-lg-cave"></i> Cave (matin \u00e0 gauche, apr\u00e8s-midi \u00e0 droite)</span>'   // JCAVE-1 (§428)
   +'</div></div>';
   return h;
 }
@@ -3787,7 +3811,8 @@ function _pl2MbarSync(){
   var h='<button class="pl2-mbar-heures" onclick="planSelSheet(\'travail\')"><span>'+_mvIcon('chrono',16)+'</span><span>Heures</span></button>'
     +'<button onclick="openPlanCP(true)"><span>'+_mvIcon('soleil',16)+'</span><span>Cong\u00e9</span></button>'
     +'<button onclick="planSelSheet(\'absent\')"><span>'+_mvIcon('croix',16)+'</span><span>Absence</span></button>';
-  if(st.trav>0)h+='<button onclick="planSelAction(\'rec\')"><span>'+_mvIcon('rotation',16)+'</span><span>R\u00e9cup</span></button>'
+  if(st.trav>0)h+='<button id="plan-mbar-cave" data-tuto="plan.cave" onclick="planCaveSheet()"><span>'+_mvIcon('verre',16)+'</span><span>Cave</span></button>'   // JCAVE-1 (§428)
+    +'<button onclick="planSelAction(\'rec\')"><span>'+_mvIcon('rotation',16)+'</span><span>R\u00e9cup</span></button>'
     +'<button onclick="planSelAction(\'heat\')"><span>'+_mvIcon('thermometre',16)+'</span><span>Chaleur</span></button>';
   if(st.coll>0)h+='<button onclick="planSelEffectif()"><span>'+_mvIcon('equipe',16)+'</span><span>Effectif</span></button>';
   if(st.saisis>0)h+='<button onclick="planSelAction(\'clr\')"><span>'+_mvIcon('retour',16)+'</span><span>Effacer</span></button>';
@@ -9323,6 +9348,143 @@ window.planToggleRemp       = planToggleRemp;
 window.planSetDuesDebut     = planSetDuesDebut;
 window.planCalcResult       = planCalcResult;
 
+// ══════════════════════════════════════════════════════════════════════
+// ★★ JCAVE-1 (§428) — LES JOURNÉES DE CAVE, AU PLANNING
+// ══════════════════════════════════════════════════════════════════════
+// Nico (22/10), sur la Réparation à +900 % : « l'appli est censée prendre en compte les personnes qui sont en cave ». Elle ne
+//   le savait que par les intervenants cochés au Chai (ENG-2, §173) : ni le Cuvier, ni l'entonnage, ni un ouillage sans nom,
+//   ni une demi-journée. Les journées de cave restaient en attente et tombaient sur la prochaine parcelle validée.
+// Maquette validée (« go ») : les cases cochées → « Cave » dans la barre → la journée, le matin ou l'après-midi. Une seule
+//   donnée, CONFIG.cave_jours (utils.js : _mvCaveJour, _mvCaveEcrire), écrite aussi par les équipes du jour (app.js). Les
+//   heures restent au planning (paie, relevé, annualisation) ; le Pilotage les retire du travail de la vigne (_ecoTempsVigne)
+//   et la capacité de l'équipe aussi (_capDayReal).
+var _planCaveMode='j';
+var _PL2_CAVE_LIB={j:'la journ\u00e9e',m:'le matin',a:'l\u2019apr\u00e8s-midi'};
+function _pl2Iso(d){return planYear+'-'+String(planMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');}
+// Les heures de cave d'une journée : « j » = toutes ses heures ; « m » = de la prise à la coupure ; « a » = de la reprise à la
+//   fin, d'après l'horaire du jour (saisie, code, horaire du mois — _planBornesJour) ; jamais plus que `h`, les heures dispo
+//   que passe l'appelant (dans les rangs, tracteur déduit). Sans horaire lisible : la moitié.
+window._planCaveH=function(mbr,iso,part,h){
+  h=Number(h)||0;
+  if(!(h>0)||!mbr)return 0;
+  if(part==='j'||part===1)return h;
+  if(part!=='m'&&part!=='a')return 0;
+  var s=String(iso||''),y=parseInt(s.slice(0,4),10),mi=parseInt(s.slice(5,7),10)-1,dj=parseInt(s.slice(8,10),10),v=NaN;
+  try{
+    var b=window._planSurAnnee(y,function(){return _planBornesJour(mbr,mi,dj);});
+    var D0=_planMinOf(b.t0),D1=_planMinOf(b.t1);
+    if(D0>=0&&D1>D0)v=(part==='m'?(b.c0-D0):(D1-b.c1))/60;
+  }catch(e){ if(window._mvAvale)window._mvAvale(e,'planning.js/_planCaveH'); }
+  if(!(v>0))v=h/2;
+  return Math.min(h,v);
+};
+// Les cases cochées, avec leurs heures dans les rangs ce jour-là (un jour sans heures n'a rien à sortir de la vigne).
+function _planCaveCases(){
+  var out=[];
+  _planSelKeys().forEach(function(k){
+    var p=_planSelParse(k),m=(window.MEMBRES||[]).find(function(x){return x.nom===p.nom;});
+    if(!m||isNaN(p.d)||!_planInContract(m,planMonth,p.d))return;
+    var iso=_pl2Iso(p.d),dt=new Date(planYear,planMonth,p.d,12),h=0;
+    try{ h=Number(_planChampPersRange(m,dt,dt))||0; }catch(e){ h=0; if(window._mvAvale)window._mvAvale(e,'planning.js/_planCaveCases'); }
+    out.push({nom:p.nom,d:p.d,iso:iso,mbr:m,h:h,cave:(typeof window._mvCaveJour==='function')?window._mvCaveJour(p.nom,iso):''});
+  });
+  return out;
+}
+// Le ruban de la journée (même dessin que _planRuban) quand toutes les cases ont le même horaire : en vigne, coupure, en cave.
+function _planCaveRuban(L){
+  if(!L.length)return '';
+  var B=null,meme=true;
+  L.forEach(function(x){
+    var b=null;
+    try{ b=_planBornesJour(x.mbr,planMonth,x.d); }catch(e){ b=null; if(window._mvAvale)window._mvAvale(e,'planning.js/_planCaveRuban'); }
+    var k=b?(b.t0+'|'+b.t1+'|'+b.c0+'|'+b.c1):'';
+    if(B===null)B={b:b,k:k};else if(B.k!==k)meme=false;
+  });
+  if(!meme||!B||!B.b)return '';
+  var b=B.b,D0=_planMinOf(b.t0),D1=_planMinOf(b.t1);
+  if(!(D0>=0&&D1>D0))return '';
+  var mo=_planCaveMode,am=(mo==='j'||mo==='m')?'cave':'w',pm=(mo==='j'||mo==='a')?'cave':'w';
+  var seg=(b.c1>b.c0)?[[D0,b.c0,am],[b.c0,b.c1,'c'],[b.c1,D1,pm]]:[[D0,b.c0,am],[b.c0,D1,pm]];
+  var lib={w:'en vigne',c:'coupure',cave:'en cave'},span=D1-D0,h='',dit=[],vus={};
+  seg.forEach(function(x){
+    if(!(x[1]>x[0]))return;
+    vus[x[2]]=1;
+    h+='<span class="pl2r-'+x[2]+'" style="left:'+((x[0]-D0)/span*100).toFixed(2)+'%;width:'+((x[1]-x[0])/span*100).toFixed(2)+'%"></span>';
+    dit.push(_planMinTxt(x[0])+' \u00e0 '+_planMinTxt(x[1])+' '+lib[x[2]]);
+  });
+  var tk='<span style="left:0%;transform:translateX(0)">'+_planMinTxt(D0)+'</span>';
+  var pc=(b.c0-D0)/span;
+  if(pc>=0.14&&pc<=0.84)tk+='<span style="left:'+(pc*100).toFixed(2)+'%;transform:translateX(-50%)">'+_planMinTxt(b.c0)+'</span>';
+  tk+='<span style="left:100%;transform:translateX(-100%)">'+_planMinTxt(D1)+'</span>';
+  var lg='';
+  ['w','c','cave'].forEach(function(t){ if(vus[t])lg+='<span><i class="pl2r-'+t+'"></i>'+lib[t]+'</span>'; });
+  return '<div class="pl2r-ruban" role="img" aria-label="'+_escAttr(dit.join(', '))+'"><div class="pl2r-rb">'+h+'</div>'
+    +'<div class="pl2r-tk" aria-hidden="true">'+tk+'</div><div class="pl2r-lg" aria-hidden="true">'+lg+'</div></div>';
+}
+function _planCaveHtml(){
+  var L=_planCaveCases(),T=L.filter(function(x){return x.h>0;}),nT=T.length,mo=_planCaveMode;
+  var deja=L.filter(function(x){return !!x.cave;}).length,tot=0;
+  T.forEach(function(x){ tot+=window._planCaveH(x.mbr,x.iso,mo,x.h); });
+  var seg=function(k,t){
+    return '<button type="button" id="plan-cave-'+_escAttr(k)+'"'+(k==='m'?' data-tuto="plan.cave.m"':'')+(mo===k?' class="on"':'')+' aria-pressed="'+(mo===k)+'" onclick="planCaveMode(\''+_escAttr(k)+'\')">'+t+'</button>';
+  };
+  var corps=nT
+    ?('<div class="plan-modal-lbl">Quand</div>'
+      +'<div class="pl2r-seg pl2r-seg-3" id="plan-cave-q" role="group" aria-label="Quand">'+seg('j','La journ\u00e9e')+seg('m','Le matin')+seg('a','L\u2019apr\u00e8s-midi')+'</div>'
+      +_planCaveRuban(T)
+      +'<div class="pl2r-vr"><span>Sortent du travail de la vigne<em>'+nT+' case'+(nT>1?'s':'')+', d\u2019apr\u00e8s l\u2019horaire de chaque jour</em></span><b>'+_planFmt(tot)+'</b></div>'
+      +'<div class="pl2r-vr"><span>Paie, relev\u00e9 d\u2019heures, annualisation</span><b>inchang\u00e9s</b></div>'
+      +'<div class="mvencadre" style="margin:var(--e-3,12px) 0 0">Ces heures ne sont plus vers\u00e9es aux parcelles valid\u00e9es. Le Pilotage les retire du travail de la vigne et le dit sous \u00ab\u00a0Temps r\u00e9el contre bar\u00e8me\u00a0\u00bb.</div>')
+    :'<div class="mvencadre" style="margin:0 0 var(--e-3,12px)">Les jours coch\u00e9s n\u2019ont pas d\u2019heures au planning\u00a0: rien \u00e0 sortir de la vigne.</div>';
+  var retirer=deja?('<button type="button" class="mvbtn mvbtn-secondaire plan-cave-ret" onclick="planCaveRetirer()">'+_mvIcon('retour',16)+'<span>Retirer la cave de '
+      +(deja>1?('ces '+deja+' cases'):'cette case')+'</span></button>'):'';
+  return '<div class="plan-modal-hdr">'
+      +'<div style="width:36px;height:4px;background:rgba(255,255,255,0.2);border-radius:99px;margin:0 auto 12px"></div>'
+      +'<div class="pl2-ed-nav"><div class="pl2-ed-mid"><div class="pl2-ed-d">Travail de cave</div>'
+      +'<div class="pl2-ed-s">'+_escHtml(_planSelResume())+'</div></div>'
+      +'<button class="pl2-ed-x" onclick="closePlanDayModal()" aria-label="Fermer">\u00d7</button></div></div>'
+    +'<div id="plan-modal-body" style="overflow-y:auto;flex:1;padding:18px 24px 8px">'+corps+retirer+'</div>'
+    +'<div class="pl2-ed-foot">'
+      +'<button class="pl2-ed-btn pl2-ed-ghost" onclick="closePlanDayModal()">Fermer</button>'
+      +'<button class="pl2-ed-btn pl2-ed-dark" data-tuto="plan.cave.ok" onclick="planCaveApply()"'+(nT?'':' disabled')+'>Marquer en cave</button>'
+    +'</div>';
+}
+function planCaveSheet(){
+  if(!isAdmin())return;
+  var keys=_planSelKeys();
+  if(!keys.length)return;
+  _planEdKeys=keys.slice();_planEditDay=null;
+  // Une sélection déjà toute en cave, sur la même moitié, s'ouvre sur cette moitié.
+  var deja=_planCaveCases().filter(function(x){return !!x.cave;});
+  if(deja.length&&deja.every(function(x){return x.cave===deja[0].cave;}))_planCaveMode=deja[0].cave;
+  var sheet=document.getElementById('ovPlanDaySheet');
+  if(sheet)sheet.innerHTML=_planCaveHtml();
+  var ov=document.getElementById('ovPlanDay');
+  if(ov)ov.classList.add('open');
+}
+function planCaveMode(k){
+  if(k!=='j'&&k!=='m'&&k!=='a')return;
+  _planCaveMode=k;
+  var sheet=document.getElementById('ovPlanDaySheet');
+  if(sheet)sheet.innerHTML=_planCaveHtml();
+}
+function planCaveApply(){
+  if(!isAdmin())return;
+  var T=_planCaveCases().filter(function(x){return x.h>0;});
+  if(!T.length||typeof window._mvCaveEcrire!=='function')return;
+  window._mvCaveEcrire(T.map(function(x){return {iso:x.iso,nom:x.nom};}),_planCaveMode);
+  closePlanDayModal();planSelClear();_pl2RenderEquipe();
+  showToast(T.length+' case'+(T.length>1?'s':'')+' en cave, '+_PL2_CAVE_LIB[_planCaveMode]+'\u00a0: ces heures ne vont plus \u00e0 la vigne','#3D6B27');
+}
+function planCaveRetirer(){
+  if(!isAdmin())return;
+  var L=_planCaveCases().filter(function(x){return !!x.cave;});
+  if(!L.length||typeof window._mvCaveEcrire!=='function')return;
+  window._mvCaveEcrire(L.map(function(x){return {iso:x.iso,nom:x.nom};}),null);
+  closePlanDayModal();planSelClear();_pl2RenderEquipe();
+  showToast(L.length+' case'+(L.length>1?'s redeviennent':' redevient')+' du travail de vigne','#3D6B27');
+}
+
 // ── Grille équipe / fiche salarié / sélection / outils / chaleur ──
 window.pl2SetView           = pl2SetView;
 window.pl2Nav               = pl2Nav;
@@ -9372,6 +9534,10 @@ window.planEdNav            = planEdNav;
 window.planEdSwitch         = planEdSwitch;
 window.planPresetChaleur    = planPresetChaleur;
 window._pl2Refresh          = _pl2Refresh;
+window.planCaveSheet        = planCaveSheet;     // JCAVE-1 (§428)
+window.planCaveMode         = planCaveMode;
+window.planCaveApply        = planCaveApply;
+window.planCaveRetirer      = planCaveRetirer;
 
 // ── Saisie admin ──
 window.planExportPDF        = planExportPDF;

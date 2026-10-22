@@ -362,7 +362,7 @@ const signe = v => { const n = Math.round(v); return (n > 0 ? '+' : n < 0 ? '−
 const NF1 = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const pct1 = v => { const n = Math.round(v * 10) / 10; return (n > 0 ? '+' : n < 0 ? '−' : '') + NF1.format(Math.abs(n)) + '\u202f%'; };   // AUJ-7 : jamais « −0,0 % »
 const INFO = {
-  fin: 'La fin prévue prend les heures qui restent au barème et les retire, jour après jour, de la capacité inscrite au planning : contrats en cours, absences, formations et congés compris. Elle avance quand une parcelle est validée.',
+  fin: 'La fin prévue prend les heures qui restent au barème et les retire, jour après jour, de la capacité inscrite au planning : contrats en cours, absences, formations et congés compris, et les journées de cave marquées au Planning, même à venir. Elle avance quand une parcelle est validée.',
   travaux: 'Heures du barème des parcelles validées, sur le total des tâches de la campagne. Une parcelle commencée ne compte qu’à sa validation.',
   effectif: 'Personnes prévues au planning aujourd’hui, hors bureau, et celles qui manquent (congé, arrêt, récupération). Un jour sans travail au planning — week-end, jour chômé —, la tuile montre le prochain jour travaillé et le dit.',
   budget: 'Part du budget main-d’œuvre déjà payée — les heures du planning dans les rangs, hors travaux à l’heure (arrachage…) —, face à la part du travail faite au barème. Payer moins vite qu’on n’avance, c’est être en avance.',
@@ -380,7 +380,7 @@ const INFO = {
   echart: 'Du début de la période à aujourd’hui : le budget main-d’œuvre payé (heures du planning, au jour où elles ont été faites, hors travaux à l’heure) et le travail fait au barème (à la date des validations). Tant que le payé reste sous le fait, la main-d’œuvre coûte moins que prévu. Les pointillés prolongent jusqu’à la fin prévue.',
   postes: 'Main-d’œuvre : la barre est son budget, la partie pleine ce qui est payé, le trait la fin prévue ; à droite, l’écart prévu. Tracteur, GNR, phyto : leur prévu suit l’avancement ; à droite, ce qui reste à dépenser. Prestations et travaux à l’heure (arrachage…) : payés au réel, sans prévu.',
   apps: 'Le barème du travail validé dans chaque appellation, au coût horaire de l’équipe, divisé par ses hectares en production. Une appellation sans travail validé ne se compare pas.',
-  taches: 'Pour chaque tâche au barème qui a du travail validé : l’écart entre les heures réellement versées et le barème. À droite du zéro, l’équipe va moins vite que le barème. Un travail à l’heure (arrachage…) n’a pas de barème : il a sa ligne dans « Par poste ».',
+  taches: 'Pour chaque tâche au barème qui a du travail validé : l’écart entre les heures réellement versées et le barème. Les heures de cave n’y entrent pas : les journées, matins ou après-midis marqués au Planning, et les jours d’opération du Chai. À droite du zéro, l’équipe va moins vite que le barème. Un travail à l’heure (arrachage…) n’a pas de barème : il a sa ligne dans « Par poste ».',
 };
 const SVG = (d, cls) => '<svg' + (cls ? ' class="' + cls + '"' : '') + ' viewBox="0 0 24 24" aria-hidden="true">' + d + '</svg>';
 const ICO = {

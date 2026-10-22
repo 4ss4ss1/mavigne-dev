@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.65
+// MA VIGNE — Service Worker v10.66
+// v10.66 (22/10/2026) — JCAVE-1 (§428) : les journées de cave se marquent au Planning (cases cochées → « Cave » → la journée, le matin ou l’après-midi ; une bande au pied de la case) et, pour la journée, depuis les équipes du jour ; le temps réel du Pilotage ne verse plus ces heures aux parcelles (demi-journées d’après l’horaire du jour) et la capacité de l’équipe les retire, même à venir. APP 9.86 → 9.87.
 // v10.65 (22/10/2026) — PERDATE-1 (§427) : une date impossible (31 septembre, 29 février hors année bissextile) ou incomplète n’est plus lue comme une case vide dans « Nouvelle période » et « Modifier la période » — la case passe en rouge avec son explication, rien n’est enregistré (la modification effaçait la fin en silence) ; la modification refuse aussi une fin avant le début ; une seule liste de tâches pour les deux fenêtres (« temps réel » au lieu de « undefined h/ha »). reglages.js, index.html, utils.js (APP 9.86, nouveautés).
 // v10.64 (22/10/2026) — ETAIN-1 (§426) : les icônes des modules en relief — une tuile d’étain gravée, l’écran ouvert en émail lie-de-vin, dans la barre du bas, la feuille « Plus » (quatre par rang, sans cadre) et la barre latérale (ouverte et repliée) ; « Plus » s’allume quand l’écran ouvert y est rangé (maquette validée le 22/10). charte.css, styles.css, app.js, coquille.js, utils.js, index.html. APP 9.84 -> 9.85.
 // v10.63 (22/10/2026) — COTE-1 (§424) : sur ordinateur (1 280 px et plus), le panneau du tuto se colle au bord droit et l’appli se resserre à côté — fenêtres, tiroirs, barres, messages et recherche compris, la barre latérale jugée sur la place qui reste, plein écran au-dessous ; le « + » des boutons d’ajout revient (l’icône des trois points s’appelle désormais « points », une icône « ajout » neuve). tutos.js, coquille.js, index.html, app.js, tournees.js, cuvier.js, cave.js, comptes.js, utils.js. APP 9.83 -> 9.84.
@@ -4597,7 +4598,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.65';
+const CACHE_NAME   = 'mavigne-v10.66';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4614,7 +4615,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.65 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.66 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4634,7 +4635,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.65 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.66 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

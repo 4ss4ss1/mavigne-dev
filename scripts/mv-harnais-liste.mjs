@@ -793,6 +793,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-tuto10.mjs --contre'],
   ['node scripts/mv-harnais-perdate1.mjs'],          // PERDATE-1 (§427) : une date impossible (31/09) n'est pas une case vide — les deux fenêtres de période, une seule liste de tâches
   ['node scripts/mv-harnais-perdate1.mjs --contre'],
+  ['node scripts/mv-harnais-jcave1.mjs'],          // JCAVE-1 (§428) : les journées de cave — la marque (Planning, équipes du jour), le temps réel, la capacité
+  ['node scripts/mv-harnais-jcave1.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────
