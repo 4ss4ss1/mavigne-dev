@@ -1432,6 +1432,7 @@ function openOvCaveOp(opId) {
   // Reset champs soutirage
   var snEl=document.getElementById('cop-sout-note');if(snEl)snEl.value='';
   setCopSo2Mode('none');setCopSo2Nb(2);setCopSo2Freq(10);
+  _copSoutAir=null;_copSoutAirSync();   // ★ DIAG-2 (§430)
   // Reset champs soufre
   _copSoufreG=5;_copSoufreMode='fut';
   var sfEl=document.getElementById('cop-sf-nb');if(sfEl)sfEl.value='';
@@ -1472,6 +1473,7 @@ function openOvCaveOp(opId) {
       }
       if(op.type==='soutirage'&&op.data){
         if(snEl)snEl.value=op.data.note||'';
+        _copSoutAir=(op.data.air===true||op.data.air===false)?op.data.air:null; _copSoutAirSync();   // ★ DIAG-2 (§430)
         if(op.data.so2&&op.data.so2.mode){
           setCopSo2Mode(op.data.so2.mode);
           if(op.data.so2.nb_doses)setCopSo2Nb(op.data.so2.nb_doses);
@@ -1557,9 +1559,14 @@ function selCaveOpType(type) {
    ⚠️ Rien de réglementaire (backlog §28, entrée 43) : le registre reste interne.
    ════════════════════════════════════════════════════════════════════════════ */
 var _COP_DG_ETATS=[['tb','Très bien','#5CB87A'],['b','Bien','#8DC868'],['s','À surveiller','#D8BC72'],['p','Problème','#E07060']];
-var _COP_DG_SIG=[['fruit','Fruité'],['ouv','Ouvert'],['ferm','Fermé'],['red','Réduit'],['oxy','Oxydatif'],['vol','Volatile'],['ani','Animal'],['bois','Bois marqué']];
+var _COP_DG_SIG=[['fruit','Fruité'],['ouv','Ouvert'],['ferm','Fermé'],['red','Réduit'],['oxy','Oxydatif'],['vol','Volatile'],['ani','Animal'],['bois','Bois marqué'],['fleur','Fleur en surface']];   // ★ DIAG-2 (§430) : la fleur se note ici
 var _COP_DG_SUITE=[['rien','Rien'],['sout','Soutirer'],['ana','Analyser'],['asm','Assembler'],['mise','Prête pour la mise'],['retfut','Retirer le fût']];
 var _COP_TR_NAT=[['col','Collage'],['sta','Stabilisation'],['aci','Acidité'],['tan','Tanins · gomme'],['ens','Ensemencement'],['aut','Autre produit']];
+// ★ DIAG-2 (§430) — l’aération du soutirage : « À l’abri de l’air » ou « À l’air » (op.data.air), lue par le diagnostic du Chai.
+//   Rien de coché = non renseigné (null) : le diagnostic le dit, il ne suppose pas.
+var _copSoutAir=null;
+function _copSoutAirSync(){ [['non',false],['oui',true]].forEach(function(x){ var b=document.getElementById('cop-sout-air-'+x[0]); if(b) b.classList.toggle('cave-toggle-active',_copSoutAir===x[1]); }); }
+function setCopSoutAir(v){ _copSoutAir=(_copSoutAir===v)?null:v; _copSoutAirSync(); }
 var _COP_FI_TYPES=[['pla','Plaques'],['len','Lenticulaire'],['tan','Tangentielle'],['car','Cartouche'],['ter','Terre']];
 var _COP_FI_SEUILS=[5,1,0.65,0.45,0.2];
 var _copDg={etat:null,sig:[],suite:null,fut:false,futKey:'',repere:''};
@@ -1829,6 +1836,7 @@ async function saveCaveOp() {
   } else if(_caveOpType==='soutirage'){
     var sn=((document.getElementById('cop-sout-note')||{}).value||'').trim();
     opData={note:sn};
+    if(_copSoutAir!==null) opData.air=_copSoutAir;   // ★ DIAG-2 (§430) : true = à l’air, false = à l’abri ; absent = non renseigné
     if(_copSo2Mode!=='none'){
       var so2={mode:_copSo2Mode};
       if(_copSo2Mode==='unique'){
@@ -2669,6 +2677,7 @@ function openCuveeDetail(cuvId,dans){
         : (op.data.litres+'\u00a0L de '+_escHtml(op.data.de_nom||'une autre cuve')));
       if(op.type==='soufre'&&op.data&&op.data.grammes_pastille)det.push(op.data.grammes_pastille+'g \u00D7 '+op.data.nb_total+' = '+op.data.so2_total_g+' g SO\u2082');
       if(op.type==='degustation'||op.type==='traitement'||op.type==='filtration') _copNouvLignes(op).forEach(function(x){det.push(_escHtml(x));}); // ★ GESTES-1
+      if(op.type==='soutirage'&&op.data&&(op.data.air===true||op.data.air===false)) det.push(op.data.air?'\u00c0 l\u2019air':'\u00c0 l\u2019abri de l\u2019air');   // ★ DIAG-2 (§430)
       if(op.type==='soutirage'&&op.data&&op.data.so2&&op.data.so2.mode!=='none'){var ss=op.data.so2;det.push('SO\u2082 '+ss.dose+' '+(ss.unite||'cL')+(ss.mode==='unique'?' dose unique':' \u00D7 '+ss.nb_doses));}
       if(op.type==='analyse'&&op._src==='op'&&op.data){
         if(op.data.so2_libre)det.push('SO\u2082 libre: '+op.data.so2_libre+' mg/L');
@@ -2779,6 +2788,7 @@ window.toggleCopCuvee       = toggleCopCuvee;
 window.adjCopOuillette      = adjCopOuillette;
 window.updateCopOuillageCalc= updateCopOuillageCalc;
 window.setCopSo2Mode        = setCopSo2Mode;
+window.setCopSoutAir        = setCopSoutAir;   // ★ DIAG-2 (§430)
 window.setCopSo2Nb          = setCopSo2Nb;
 window.setCopSo2Freq        = setCopSo2Freq;
 window._copUpdateOpDate     = _copUpdateOpDate;

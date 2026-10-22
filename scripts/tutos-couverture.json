@@ -2,6 +2,7 @@
   "plafond": 813,
   "exempts": {
     "_homeDirectTout": "ACCV-2 (§417) : déplie « En direct » sur place, rien à apprendre — la carte montre déjà l’essentiel",
-    "_esDatesNote": "PERDATE-1 (§427) : relit les dates de « Modifier la période » quand on quitte une case — rien à apprendre, c’est l’écran qui signale une date impossible"
+    "_esDatesNote": "PERDATE-1 (§427) : relit les dates de « Modifier la période » quand on quitte une case — rien à apprendre, c’est l’écran qui signale une date impossible",
+    "setCopSoutAir": "DIAG-2 (§430) : une bascule de plus dans le soutirage (« À l’abri de l’air » / « À l’air »), rien à apprendre — le geste du soutirage ne change pas, le diagnostic lit le choix"
   }
 }

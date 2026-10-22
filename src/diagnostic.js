@@ -90,7 +90,7 @@ function dgnModele(cuvee, lab) {
     if (op.type === 'ouillage') { ouil.push(ds); return; }
     if (op.type === 'analyse') return;
     if (op.type === 'soutirage') {
-      gestes.push({ d: ds, k: 'sout', l: 'Soutirage', det: d.note ? String(d.note) : '', air: null });
+      gestes.push({ d: ds, k: 'sout', l: 'Soutirage', det: d.note ? String(d.note) : '', air: (d.air === true || d.air === false) ? d.air : null });   /* DIAG-2 : op.data.air */
       var so2 = (d.so2 && typeof d.so2 === 'object') ? d.so2 : null;
       if (so2 && so2.mode && so2.mode !== 'none') {
         var dts = (Array.isArray(so2.dates) && so2.dates.length) ? so2.dates : [ds], dose2 = dgnNum(so2.dose);
@@ -461,7 +461,7 @@ function indices(M) {
   var na = nez(M, 'ani'); mk('nez_ani', na.etat, 'Nez animal, écurie', na.val, 'Dégustation'); I.nez_ani.g = na.g;
   var nv = nez(M, 'vol'); mk('nez_vol', nv.etat, 'Nez piqué, volatile', nv.val, 'Dégustation'); I.nez_vol.g = nv.g;
   var no = nez(M, 'oxy'); mk('nez_oxy', no.etat, 'Nez oxydatif', no.val, 'Dégustation'); I.nez_oxy.g = no.g;
-  mk('fleur', 'inconnu', 'Fleur en surface', 'non suivie (nouveau champ)', 'Nouveau champ');
+  var fl = nez(M, 'fleur'); mk('fleur', fl.etat, 'Fleur en surface', fl.val, 'Dégustation');   /* DIAG-2 : le signal « Fleur en surface » de la dégustation */
   var souts = D.gestes.filter(function (g) { return g.k === 'sout' && M.maloEnd && t(g.d) > M.maloEnd && t(g.d) <= M.ref; });
   var air = souts.filter(function (g) { return g.air === true; }).pop();
   if (air) mk('air', 'oui', 'Soutirage à l’air', 'le ' + fd(t(air.d)), 'Opérations');
@@ -1392,8 +1392,8 @@ var AIDE = [
     ['Acétate d’éthyle', 'confirmation d’une piqûre acétique', 'nouveau'],
     ['Éthanal', 'oxydation, levures de voile (fleur)', 'nouveau'],
     ['Contrôle au nez, fût par fût', 'localiser le fût en cause', 'oui'],
-    ['Fleur en surface', 'présence d’air au-dessus du vin', 'nouveau'],
-    ['Ouillages, soutirages à l’air', 'apports d’oxygène', 'air']]],
+    ['Fleur en surface', 'présence d’air au-dessus du vin', 'oui'],
+    ['Ouillages, soutirages à l’air', 'apports d’oxygène', 'oui']]],
   ['Mise en bouteille', [
     ['SO2 libre, SO2 total et pH', 'protection du vin en bouteille', 'nouveau'],
     ['Sucres et acide malique', 'prévenir une reprise de fermentation en bouteille', 'oui'],

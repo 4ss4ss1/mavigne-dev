@@ -1209,6 +1209,7 @@ sans bump — c'est une page de `public/`, hors `SHELL_STATIC` (§27d).
 - ★★ **DIAG-1 (§429) — l’onglet Diagnostic** vit dans `src/diagnostic.js` (préfixe `dgn-`, ES module, aucun `onclick`) : lecture seule,
   il lit `_laboLignes()`, la cuve d’origine par `decuvage.cuvee_id`, `cuve.operations`, `CAVE_ELEVAGE.operations`, `tonneaux` ;
   `switchCaveOng('diag')` appelle `window.renderCaveDiag` ; réglages dans `CAVE_ELEVAGE.config.diag` (admin). Harnais `mv-harnais-diag1`.
+  ★ **DIAG-2 (§430)** : le soutirage porte `data.air` (true = à l’air, false = à l’abri, absent = non renseigné : `_copSoutAir`, `setCopSoutAir`) ; la dégustation a le signal `fleur` (`_COP_DG_SIG`).
 - **Le Cuvier** : vendange. **Cuvées normalisées** (`_cuvKey` + distance de Levenshtein).
   ★ **Repeint aux couleurs de la Cave le 09/08** (c'était le dernier écran sombre ; 7 textes hérités
   étaient illisibles).
