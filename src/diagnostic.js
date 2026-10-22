@@ -51,6 +51,13 @@ var DGN_CUVIER = {
   remontage: ['trait', 'Remontage'], pigeage: ['trait', 'Pigeage'], assemblage: ['asm', 'Assemblage'], bacteries: ['malo', 'Ensemencement de la malo']
 };
 var DGN_SIG = { fruit: 'fruité', ouv: 'ouvert', ferm: 'fermé', red: 'réduit', oxy: 'oxydatif', vol: 'piqué, volatile', ani: 'animal, écurie', bois: 'boisé' };
+/* DIAG-4 : la force de la solution de SO2 du Chai (Réglages du diagnostic) convertit une dose du soutirage en mg/L. */
+function dgnMglChai(dose, unite, volL) {
+  var c = (typeof S !== 'undefined' && S.set) ? S.set.solution : null;
+  if (!c || dose == null || !(volL > 0)) return null;
+  var ml = (unite === 'mL' || unite === 'ml') ? dose : dose * 10;
+  return Math.round(ml * c / 100 * 1000 / volL * 10) / 10;
+}
 function dgnModele(cuvee, lab) {
   var cv = dgnCuveDe(cuvee), parD = {};
   lab.forEach(function (l) {
@@ -75,6 +82,9 @@ function dgnModele(cuvee, lab) {
     var vins = (isFinite(an) && typeof window._mvFutVins === 'function') ? window._mvFutVins(an, isFinite(mil) ? mil : null) : null;
     return { t: String(l.four || '').trim() || 'Tonnelier non renseigné', an: isFinite(an) ? an : null, nb: Math.max(1, parseInt(l.nb, 10) || 1), vins: vins };
   });
+  var nbL = 0, sumL = 0;
+  (Array.isArray(cuvee.tonneaux) ? cuvee.tonneaux : []).forEach(function (l) { var v = dgnNum(l && l.l), nb = Math.max(1, parseInt(l && l.nb, 10) || 1); if (v > 0) { sumL += v * nb; nbL += nb; } });
+  var futL = nbL ? sumL / nbL : 228;
   var gestes = [], ouil = [];
   if (cv && Array.isArray(cv.operations)) cv.operations.forEach(function (o) {
     if (!o || typeof o !== 'object' || !dgnOkD(o.date)) return;
@@ -94,7 +104,7 @@ function dgnModele(cuvee, lab) {
       var so2 = (d.so2 && typeof d.so2 === 'object') ? d.so2 : null;
       if (so2 && so2.mode && so2.mode !== 'none') {
         var dts = (Array.isArray(so2.dates) && so2.dates.length) ? so2.dates : [ds], dose2 = dgnNum(so2.dose);
-        dts.filter(dgnOkD).forEach(function (x) { if (dgnD(x) <= dgnIso(dgnAujMs())) gestes.push({ d: dgnD(x), k: 'so2', l: 'Sulfitage au soutirage', det: dose2 != null ? dose2 + ' ' + (so2.unite || 'cL') + ' par fût' : '', mgl: null }); });
+        dts.filter(dgnOkD).forEach(function (x) { if (dgnD(x) <= dgnIso(dgnAujMs())) gestes.push({ d: dgnD(x), k: 'so2', l: 'Sulfitage au soutirage', det: dose2 != null ? dose2 + ' ' + (so2.unite || 'cL') + ' par fût' : '', mgl: dgnMglChai(dose2, so2.unite || 'cL', futL) }); });
       }
       return;
     }
@@ -129,7 +139,7 @@ function dgnModele(cuvee, lab) {
   if (!m0) m0 = fa1;
   return { k: String(cuvee.id), id: cuvee.id, nom: String(cuvee.nom || 'Cuvée'), mil: cuvee.millesime != null ? cuvee.millesime : '', coul: dgnCoul(cv), anges: null,
     futs: futs, debut: debut, fa: [fa0, fa1], malo: [m0, m1], mise: mise, bouteilles: cuvee.nb_bouteilles || null, tart: null, co2: null,
-    densPts: densPts, ana: ana, gestes: gestes, ouilDates: ouil.sort(), sansCuve: !cv };
+    densPts: densPts, ana: ana, gestes: gestes, ouilDates: ouil.sort(), sansCuve: !cv, futL: futL };
 }
 function dgnDonnees() {
   var E = window.CAVE_ELEVAGE, out = {};
@@ -144,13 +154,14 @@ function dgnDonnees() {
 function dgnReglages() {
   var E = window.CAVE_ELEVAGE, c = (E && E.config && E.config.diag && typeof E.config.diag === 'object') ? E.config.diag : {};
   var n = function (v, d) { var x = parseFloat(v); return isFinite(x) ? x : d; };
-  return { unite: c.unite === 'acet' ? 'acet' : 'h2so4', objR: n(c.objR, 0.5), objB: n(c.objB, 0.8), seuil: n(c.seuil, 0.60) };
+  var sol = parseFloat(c.solution);
+  return { unite: c.unite === 'acet' ? 'acet' : 'h2so4', objR: n(c.objR, 0.5), objB: n(c.objB, 0.8), seuil: n(c.seuil, 0.60), solution: (isFinite(sol) && sol > 0) ? sol : null };
 }
 function dgnPeutRegler() { return typeof window.isAdmin === 'function' && !!window.isAdmin(); }
 function dgnEnregistrer(msg) {
   var E = window.CAVE_ELEVAGE; if (!E || !dgnPeutRegler()) return;
   if (!E.config) E.config = {};
-  E.config.diag = { unite: S.set.unite, objR: S.set.objR, objB: S.set.objB, seuil: S.set.seuil };
+  E.config.diag = { unite: S.set.unite, objR: S.set.objR, objB: S.set.objB, seuil: S.set.seuil, solution: S.set.solution };
   window.CAVE_ELEVAGE = E;
   if (typeof window.fbSaveToast === 'function') window.fbSaveToast({ cave_elevage: E }, msg, '#3D6B27');
 }
@@ -214,7 +225,7 @@ function analyser(D) {
     var ageJ = Math.round((AUJ - last.ms) / J);
     so2 = {
       vide: false, mise: false, last: last, need: need, act: actif(last.v, last.ph), estAuj: estAuj, actAuj: actif(estAuj, last.ph),
-      fit: fit, cross: cross, rend: rend, dose: dose, totApres: dose != null ? last.tot + dose : null, cl: dose != null ? dose * 228 / 1000 : null,
+      fit: fit, cross: cross, rend: rend, dose: dose, totApres: dose != null ? last.tot + dose : null, cl: dose != null ? dose * (D.futL || 228) / 1000 * 10 / (S.set.solution || 10) : null,
       lie: lie, since: since, lastAdd: lastAdd, ageJ: ageJ, vieux: ageJ > 45
     };
   }
@@ -355,7 +366,7 @@ function pourquoi(M, k) {
       if (s.since.length && s.since[0].v < s.need) o.ps.push('Après le dernier sulfitage, le SO2 libre n’est monté qu’à ' + nf(s.since[0].v, 0) + ' mg/L : à ce pH, la dose était insuffisante.');
       if (s.dose != null) {
         var lim = M.D.coul === 'blanc' ? 200 : 150;
-        o.repere = 'Estimation indicative : environ ' + nf(s.dose, 0) + ' mg/L de SO2 à ajouter (sur ce vin, ' + nf(s.rend * 100, 0) + ' % de l’ajout se retrouve en SO2 libre), soit ' + nf(s.cl, 1) + ' cL par fût de solution à 10 %.';
+        o.repere = 'Estimation indicative : environ ' + nf(s.dose, 0) + ' mg/L de SO2 à ajouter (sur ce vin, ' + nf(s.rend * 100, 0) + ' % de l’ajout se retrouve en SO2 libre), soit ' + nf(s.cl, 1) + ' cL par fût de solution à ' + nf(S.set.solution || 10, 0) + ' %' + (S.set.solution ? '' : ' (force non réglée : 10 % par défaut)') + '.';
         if (s.totApres > lim) o.repere += ' Le SO2 total atteindrait ' + nf(s.totApres, 0) + ' mg/L, au-delà de la limite de ' + lim + ' mg/L des vins ' + coul + ' : à voir avec l’œnologue.';
       }
     } else {
@@ -868,7 +879,7 @@ function diagHtml(M) {
   if (pasSuivi.length) h += '<div class="dgn-terrain"><span>Non suivi à ce jour</span>' + pasSuivi.map(function (x) { return '<span class="mvpas mvpas-etiquette dgn-nonsuivi">' + esc(x.label) + '</span>'; }).join('') + '</div>';
   h += '</div><div class="dgn-diag-bloc"><h3>Pour confirmer</h3>';
   var lab = top.filter(function (e) { return e.R.laboDit; });
-  h += '<div class="dgn-opt"><b>Au laboratoire</b><ul>' + (lab.length ? lab.map(function (e) { return '<li><b>' + esc(e.R.labo) + '</b> : ' + esc(e.R.laboDit) + '.</li>'; }).join('') : top.map(function (e) { return '<li>' + esc(e.R.labo) + '.</li>'; }).join('')) + '</ul><button type="button" class="mvbtn mvbtn-principal mvbtn-bureau" data-dgn="labo">' + ico('fiole', 'ico-s') + 'Demander une analyse</button></div>';
+  h += '<div class="dgn-opt"><b>Au laboratoire</b><ul>' + (lab.length ? lab.map(function (e) { var dm = e.R.conf && e.R.conf[0] ? dg.I[e.R.conf[0]] : null; return '<li><b>' + esc(e.R.labo) + '</b> : ' + esc(e.R.laboDit) + '.' + (dm && dm.etat !== 'inconnu' ? ' Déjà mesuré : ' + esc(dm.val) + '.' : '') + '</li>'; }).join('') : top.map(function (e) { return '<li>' + esc(e.R.labo) + '.</li>'; }).join('')) + '</ul><button type="button" class="mvbtn mvbtn-principal mvbtn-bureau" data-dgn="labo">' + ico('fiole', 'ico-s') + 'Demander une analyse</button></div>';
   var chai = top.filter(function (e) { return e.R.chai; });
   if (chai.length && dg.stage === 'elev') {
     var vl = vieuxLot(M), nz = dg.I.nez_ani.g || dg.I.nez_vol.g;
@@ -1428,6 +1439,7 @@ function renderTiroir() {
   h += '<div class="dgn-tiroir-t"><h2>Réglages du diagnostic</h2><button type="button" class="mvbtn mvbtn-discret mvbtn-icone mvbtn-bureau" data-dgn="fermer" aria-label="Fermer">' + ico('fermer') + '</button></div><div class="dgn-tiroir-c">';
   h += '<div class="dgn-reg"><h3>Unité de la volatile</h3><p>Celle de vos rapports de laboratoire. Les valeurs attendues et le seuil suivent.</p>' + seg([['h2so4', 'En H2SO4'], ['acet', 'En acide acétique']], 'set-unite', st.unite, '', 'Unité') + '<p class="dgn-petit">0,60 g/L en H2SO4 = 0,74 g/L en acide acétique.</p></div>';
   h += '<div class="dgn-reg"><h3>Objectif de SO2 actif</h3><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="width:56px;font-size:var(--pt-txt,13px);color:var(--texte-med)">Rouges</span>' + seg([[0.5, '0,5'], [0.6, '0,6'], [0.7, '0,7'], [0.8, '0,8']], 'set-objR', st.objR, '', 'Rouges') + '</div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="width:56px;font-size:var(--pt-txt,13px);color:var(--texte-med)">Blancs</span>' + seg([[0.6, '0,6'], [0.7, '0,7'], [0.8, '0,8']], 'set-objB', st.objB, '', 'Blancs') + '</div><p>SO2 libre nécessaire selon le pH :</p><table class="dgn-tab"><thead><tr><th>pH</th><th>Rouges</th><th>Blancs</th></tr></thead><tbody>' + phs + '</tbody></table></div>';
+  h += '<div class="dgn-reg"><h3>Solution de SO2 du Chai</h3><p>Sa force convertit les doses du soutirage (cL ou mL par fût) en mg/L : rendement des sulfitages et dose estimée.</p>' + seg([['', 'Non réglée'], [5, '5 %'], [6, '6 %'], [8, '8 %'], [10, '10 %'], [18, '18 %']], 'set-sol', st.solution == null ? '' : st.solution, '', 'Solution de SO2') + '</div>';
   h += '<div class="dgn-reg"><h3>Seuil d’alerte de la volatile</h3><div class="dgn-pas"><button type="button" class="mvbtn mvbtn-secondaire mvbtn-icone mvbtn-bureau" data-dgn="set-seuil" data-v="-1" aria-label="Baisser">−</button><output>' + nf(avU(st.seuil), 2) + '</output><button type="button" class="mvbtn mvbtn-secondaire mvbtn-icone mvbtn-bureau" data-dgn="set-seuil" data-v="1" aria-label="Monter">+</button><span style="font-size:var(--pt-txt,13px);color:var(--texte-med)">' + uAv(false) + '</span></div></div>';
   h += '<div class="dgn-reg"><h3>Références du domaine</h3><p>' + (REFS.n >= 3 ? 'Médianes calculées sur ' + REFS.n + ' cuvées du domaine sorties de la malo, hors cuvée en alerte' : 'Pas encore assez de cuvées sorties de la malo : valeurs de référence') + ' ; elles servent à repérer les écarts.</p><table class="dgn-tab"><tbody><tr><td>Volatile en élevage</td><td><b>' + sg(avU(USUEL_AV), 3) + '</b> par mois</td></tr><tr><td>SO2 libre perdu, rouges</td><td><b>−' + nf(USUEL_SO2.rouge, 1) + '</b> mg/L par mois</td></tr><tr><td>SO2 libre perdu, blancs</td><td><b>−' + nf(USUEL_SO2.blanc, 1) + '</b> mg/L par mois</td></tr><tr><td>SO2 combiné</td><td><b>' + sg(USUEL_LIE, 1) + '</b> mg/L par mois</td></tr></tbody></table></div>';
   T.innerHTML = typo(h + '</div>');
@@ -1473,10 +1485,10 @@ function dgnClic(e) {
     case 'reg': S.tiroir = 'reg'; break;
     case 'aide': S.tiroir = 'aide'; break;
     case 'fermer': S.tiroir = null; S.fen = null; break;
-    case 'set-unite': case 'set-objR': case 'set-objB': case 'set-seuil':
+    case 'set-unite': case 'set-objR': case 'set-objB': case 'set-seuil': case 'set-sol':
       if (!dgnPeutRegler()) { toast('Réglage réservé à l’administrateur'); return; }
-      if (a === 'set-unite') S.set.unite = v; else if (a === 'set-objR') S.set.objR = +v; else if (a === 'set-objB') S.set.objB = +v;
-      else S.set.seuil = Math.max(0.3, Math.min(0.98, Math.round((S.set.seuil + (+v) * 0.02) * 100) / 100));
+      if (a === 'set-unite') S.set.unite = v; else if (a === 'set-objR') S.set.objR = +v; else if (a === 'set-objB') S.set.objB = +v; else if (a === 'set-sol') S.set.solution = (v === '' ? null : +v);
+      else if (a === 'set-seuil') S.set.seuil = Math.max(0.3, Math.min(0.98, Math.round((S.set.seuil + (+v) * 0.02) * 100) / 100));
       dgnEnregistrer('Réglage du diagnostic enregistré'); break;
     case 'labo': S.fen = 'labo'; S.fenCuv = b.getAttribute('data-c') || null; break;
     case 'fut-suspect': S.op.futSuspect = !S.op.futSuspect; break;

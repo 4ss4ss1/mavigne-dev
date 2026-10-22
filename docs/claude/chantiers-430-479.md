@@ -62,3 +62,28 @@ pour toujours. Nico : « suite ». Le labo d’abord, parce que c’est la boucl
 ### 431d. Ce qui reste
 Force de la solution de SO2 (mg/L du Chai, dose suggérée), température du chai, la mise (oxygène dissous, tests de stabilité), part des
 anges par cuvée. « Pour confirmer » propose encore une analyse déjà faite : afficher son résultat à la place serait plus juste.
+
+## 432. ★ DIAG-4 — LA FORCE DE LA SOLUTION DE SO2 : LES SULFITAGES DU CHAI EN MG/L ; « POUR CONFIRMER » DIT CE QUI EST DÉJÀ MESURÉ (22/10 — `src/diagnostic.js` (`dgnMglChai`, `dgnModele` : volume moyen des fûts, `dgnReglages` / `dgnEnregistrer` : `solution`, la dose en cL, les Réglages, « Déjà mesuré ») · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Cave — « Le diagnostic ») · `index.html` (versions) · `public/sw.js` · `guide/08-cave.html` · `scripts/mv-harnais-diag1.mjs` · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/DIAG-4.json` · **APP 9.90 → 9.91, SW 10.69 → 10.70**, base `8922537`)
+
+### 432a. D’où ça vient
+Le soutirage note le SO2 en cL ou mL par fût, sans la force de la solution : le diagnostic ne pouvait ni calculer le rendement d’un
+sulfitage du Chai, ni estimer la dose qui ramène le SO2 actif à l’objectif. Nico : « suite ».
+
+### 432b. Ce qui change
+- Les Réglages du diagnostic (admin) portent « Solution de SO2 du Chai » : Non réglée, 5, 6, 8, 10, 18 %. Rangé dans
+  `CAVE_ELEVAGE.config.diag.solution`, à côté de l’unité de la volatile et des objectifs.
+- `dgnMglChai(dose, unité, volume)` : mL de solution × force ÷ 100 = grammes de SO2 ; ÷ le volume moyen d’un fût de la cuvée (champ `l`
+  des lots, pondéré par le nombre de fûts ; 228 L à défaut) = mg/L. 6 cL d’une solution à 10 % dans un fût de 228 L = 26,3 mg/L.
+- Conséquences, sans rien toucher d’autre : le journal du diagnostic dit « environ … mg/L de SO2 ajoutés », le rendement de chaque
+  sulfitage se calcule, et « Points d’attention » peut estimer la dose (« 74 mg/L … 42 % de l’ajout se retrouve en SO2 libre » sur le
+  Pinot fictif, les chiffres de la maquette). La dose en cL suit la force réglée (10 % à défaut, et le texte le dit).
+- **Rien n’est écrit dans les opérations** : la conversion se fait à la lecture. Changer la force recalcule tout l’historique.
+- « Pour confirmer › Au laboratoire » ajoute « Déjà mesuré : 620 µg/L le 18 oct., au-dessus du seuil… » quand l’analyse existe.
+
+### 432c. Pièges
+- Une seule force pour tout le Chai : c’est l’hypothèse la plus simple et la plus fréquente. Un domaine qui change de solution en cours
+  d’année verra ses anciens sulfitages recalculés avec la nouvelle force — à revoir s’il le demande (une force par soutirage).
+- Les méchages (pastilles) restent sans mg/L : la part du SO2 brûlé qui passe dans le vin n’est pas connue.
+
+### 432d. Ce qui reste
+Température du chai, la mise (oxygène dissous, tests de stabilité), part des anges par cuvée.

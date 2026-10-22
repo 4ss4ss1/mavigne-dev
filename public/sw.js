@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.69
+// MA VIGNE — Service Worker v10.70
+// v10.70 (22/10/2026) — DIAG-4 (§432) : la force de la solution de SO2 du Chai (Réglages du diagnostic) convertit les doses du soutirage en mg/L — rendement, dose estimée ; « Pour confirmer » affiche une analyse déjà faite.
 // v10.69 (22/10/2026) — DIAG-3 (§431) : quatre analyses de plus au labo (azote assimilable, éthylphénols, acétate d’éthyle, éthanal) ; le diagnostic du Chai les compare au seuil de perception — au-dessus, indice principal ; en dessous, « Analyse contraire » et pas de « Signes forts ».
 // v10.68 (22/10/2026) — DIAG-2 (§430) : au soutirage, « À l’abri de l’air » / « À l’air » (op.data.air) ; à la dégustation, le signal « Fleur en surface » ; le diagnostic du Chai les lit (piqûre acétique, oxydation) au lieu de « non suivi ».
 // v10.67 (22/10/2026) — DIAG-1 (§429) : Le Chai a son onglet « Diagnostic » — lecture seule ; il croise analyses, opérations, fûts et dégustations, nomme une cause possible (Brett, piqûre acétique, oxydation, malo lente), annonce les sulfitages et compare les cuvées ; seule action, préparer une demande d’analyse. Nouveau module src/diagnostic.js, importé par app.js.
@@ -4601,7 +4602,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.69';
+const CACHE_NAME   = 'mavigne-v10.70';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4618,7 +4619,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.69 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.70 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4638,7 +4639,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.69 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.70 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

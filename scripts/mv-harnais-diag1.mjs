@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// ── HARNAIS DIAG-1 (§429) + DIAG-2 (§430 : l’aération du soutirage, la fleur) + DIAG-3 (§431 : les analyses de confirmation) — LE CHAI › DIAGNOSTIC, sur les VRAIES fonctions ─────────────────────────────────
+// ── HARNAIS DIAG-1 (§429) + DIAG-2 (§430 : l’aération du soutirage, la fleur) + DIAG-3 (§431 : les analyses de confirmation) + DIAG-4 (§432 : la solution de SO2) — LE CHAI › DIAGNOSTIC, sur les VRAIES fonctions ─────────────────────────────────
 //   node scripts/mv-harnais-diag1.mjs            les six cuvées du domaine fictif rendent leur diagnostic
 //   node scripts/mv-harnais-diag1.mjs --contre   chaque défaut réintroduit doit faire rougir
 // Le domaine (format réel : CAVE_ELEVAGE.cuvees / operations, CAVE_VENDANGE.cuves_vinif) est figé ci-dessous ;
@@ -12,9 +12,9 @@ const DOMAINE = {"cuvees":[{"id":"cv_pn25","nom":"Bourgogne Pinot Noir","millesi
 function bloc(src, debut, fin) { const a = src.indexOf(debut); if (a < 0) throw new Error('introuvable : ' + debut); const b = src.indexOf(fin, a); return src.slice(a, b); }
 const LABO = [bloc(CAVE, 'var LABO_ANA=[', 'var LABO_MALO='), bloc(CAVE, 'function _laboNum(v){', 'function _laboLit(raw){'),
   bloc(CAVE, 'function _laboValsOp(d){', '/* ── La règle « rien ne s')].join('\n');
-function monter(diagSrc, dom, filtre) {
+function monter(diagSrc, dom, filtre, conf) {
   const D = JSON.parse(JSON.stringify(dom));
-  const w = { CAVE_ELEVAGE: { cuvees: D.cuvees, operations: D.operations, config: {} }, CAVE_VENDANGE: { cuves_vinif: D.cuves },
+  const w = { CAVE_ELEVAGE: { cuvees: D.cuvees, operations: D.operations, config: conf || {} }, CAVE_VENDANGE: { cuves_vinif: D.cuves },
     _mvToday: () => '2026-10-22', _parcCoul: p => p, _mvFutVins: (an, y) => an == null ? null : Math.max(0, (y || 2026) - an),
     _caveDansFiltre: filtre || (() => true), isAdmin: () => true, showToast: () => {}, addEventListener() {},
     document: { getElementById: () => null, body: { appendChild() {} }, querySelector: () => null, addEventListener() {} },
@@ -47,6 +47,8 @@ function suite(diagSrc, dom, filtre) {
   T('le SO2 du Cuvier passe en mg/L (g/hL × 10), celui du Chai reste sans dose', pn && pn.adds.some(a => a.mgl > 0) && pn.adds.some(a => a.mgl == null));
   const ev = k => { const c = monter(diagSrc, dom, filtre), M2 = c.__T.MOD(); return c.__T.diagnostic(M2.cv_pn25).ev.filter(e => e.k === k)[0]; };
   const eb = ev('brett'), ep2 = ev('pique');
+  const cs = monter(diagSrc, dom, filtre, { diag: { solution: 10 } }), Ms = cs.__T.MOD().cv_pn25;
+  T('DIAG-4 : sans force réglée, le SO2 du Chai reste sans mg/L ; à 10 %, 6 cL par fût de 228 L = 26,3 mg/L', pn.adds.some(a => a.mgl == null) && Ms && Ms.adds.some(a => Math.abs((a.mgl || 0) - 26.3) < 0.05));
   T('DIAG-2 : le soutirage à l’air du 10 juin appuie la piqûre acétique', ep2 && ep2.preuves.some(x => x.id === 'air'));
   T('DIAG-3 : l’analyse de confirmation compte — éthylphénols 620 µg/L, au-dessus du seuil : indice fort de Brett', eb && eb.preuves.some(x => x.id === 'ep'));
   T('DIAG-3 : l’analyse contraire empêche « Signes forts » — acétate d’éthyle 60 mg/L : la piqûre reste « modérée »', ep2 && ep2.st === 'possible' && (ep2.contre || []).some(x => x.id === 'acet'));
@@ -68,6 +70,7 @@ const MUT = [
   ['le SO2 du Cuvier n’est plus converti', DIAG.replace('g.mgl = dose != null ? dose * 10 : null;', 'g.mgl = null;'), DOMAINE],
   ['l’aération du soutirage n’est plus lue (DIAG-2)', DIAG.replace('air: (d.air === true || d.air === false) ? d.air : null', 'air: null'), DOMAINE],
   ['les éthylphénols ne sont plus lus (DIAG-3)', DIAG.replace("'mal', 'azote', 'ep', 'acet', 'ethanal']", "'mal', 'azote', 'acet', 'ethanal']"), DOMAINE],
+  ['la force de la solution n’est plus lue (DIAG-4)', DIAG.replace("var c = (typeof S !== 'undefined' && S.set) ? S.set.solution : null;", 'var c = null;'), DOMAINE],
   ['l’analyse contraire ne plafonne plus (DIAG-3)', DIAG.replace("if (contre.length && st === 'probable') st = 'possible';", ''), DOMAINE]
 ];
 let ko = 0;
