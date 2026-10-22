@@ -856,10 +856,10 @@ function _rejouer(id) {
    mv-harnais-cote1, qui lit la feuille et rougit sinon ; test:tutos mesure la page au navigateur (rien sous le panneau). */
 var COTE_MQ = '(min-width: 1280px)';
 var COTE_L = 'clamp(360px, 28vw, 420px)';
-var COTE_VOILES = ['.overlay', '.mvv-ov', '.mvz-ov', '.pil-scrim', '.pil-diagwrap', '.pil-dz-shw', '.pil-dz-fm', '.mvds-bg', '.mv-pal-voile', '.ck-agr', '.trn-ov', '.trn-layer', '#mv-perime-ov', '#mv-expired-ov', '#ovCloture'];
-var COTE_DROITE = ['.pil-drawer'];
+var COTE_VOILES = ['.overlay', '.mvv-ov', '.mvz-ov', '.pil-scrim', '.pil-diagwrap', '.pil-dz-shw', '.pil-dz-fm', '.mvds-bg', '.mv-pal-voile', '.ck-agr', '.trn-ov', '.trn-layer', '#mv-perime-ov', '#mv-expired-ov', '#ovCloture', '.dgn-voile'];
+var COTE_DROITE = ['.pil-drawer', '.dgn-tiroir'];
 var COTE_BARRES = ['#demo-banner', '#mv-trial-bar', '#mv-maj-barre', '.trn-toast', '.pl2-abar', '.pl2-mbar'];
-var COTE_CENTRES = ['#mv-toast', '#pv-toast', '.mv-pal', '.pil-dz-pk', '.vt-bot'];
+var COTE_CENTRES = ['#mv-toast', '#pv-toast', '.mv-pal', '.pil-dz-pk', '.vt-bot', '.dgn-fen'];
 var COTE_BOUTONS = ['#trac-fab', '#phyto-fab'];
 function _coteCss() {
   var h = function (l) { return l.map(function (s) { return 'html.mvtu-cote ' + s; }).join(','); };

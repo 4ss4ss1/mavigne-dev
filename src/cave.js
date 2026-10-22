@@ -30,7 +30,7 @@ const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.
 // \u2550\u2550\u2550\u2550 CAVE \u00C9LEVAGE \u2550\u2550\u2550\u2550
 var CAVE_ELEVAGE = { cuvees:[], operations:[], analyses:[], config:{ ouillage_alerte_j:14 } };
 var CAVE_VENDANGE = { config:{poids_caisse_kg:25,ratio_min:130,ratio_max:140,sucre_par_degre:16.83}, recoltes:[], cuves_vinif:[], clients:[], analyses:[], cuvees:[] };
-var caveTab = 'cuv';   // onglet actif du Chai — DOIT etre l'un des 4 de switchCaveOng
+var caveTab = 'cuv';   // onglet actif du Chai — DOIT etre l'un des 5 de switchCaveOng (DIAG-1 : 'diag')
 var caveSection = 'aujourdhui'; // section active : 'aujourdhui' (l'arrivee) | 'elevage' (Le Chai) | 'vendange' (Le Cuvier) | 'millesime'. La Cave s'ouvre TOUJOURS sur Aujourd'hui : le verdict dit ce qui presse, chaque ligne mene au geste (lot CAVE-1).
 var _caveFml = 'none';
 var _caveOpType = 'ouillage';
@@ -1326,6 +1326,7 @@ function switchCaveOng(tab) {
   // boucle d'affichage doivent parler de la meme liste (deux definitions du meme
   // concept dans un module = incoherence garantie entre deux ecrans).
   var ONGLETS = ['cuv','journal','bouteille','labo'];   // ★ LABO-2 (§321) : le labo a son onglet
+  ONGLETS.push('diag');   // ★ DIAG-1 (§429) : le diagnostic, lecture seule — la ligne du dessus reste telle quelle, deux harnais la mutent
   // Les reglages du Chai sont dans la roue crantee (lot CAVE-2) : les anciennes
   // cles y atterrissent.
   if(tab==='divers'||tab==='reglages'){ _caveOpenReglages(); return; }
@@ -1347,6 +1348,7 @@ function switchCaveOng(tab) {
   else if(tab==='journal') renderCaveJournal();
   else if(tab==='bouteille') renderCaveBouteille();
   else if(tab==='labo') renderCaveLabo();
+  else if(tab==='diag'){ if(typeof window.renderCaveDiag==='function') window.renderCaveDiag(); }   // ★ DIAG-1 (§429) : src/diagnostic.js
 }
 
 
@@ -4109,6 +4111,7 @@ function _caveSetMill(m){
   if(caveTab==='journal') renderCaveJournal();
   else if(caveTab==='bouteille') renderCaveBouteille();
   else if(caveTab==='labo') renderCaveLabo();   // ★ LABO-2 : le quatrième onglet suit aussi le filtre
+  else if(caveTab==='diag'){ if(typeof window.renderCaveDiag==='function') window.renderCaveDiag(); }   // ★ DIAG-1 : le diagnostic aussi
   else renderCaveCuvees();
   _caveMilBarRender();
   // Sans ce rappel, les chiffres du bandeau restaient sur la cave entiere
@@ -4356,6 +4359,7 @@ window._caveSeuilStep    = _caveSeuilStep;
 // millesime doit etre CELUI du Chai, pas une seconde regle qui divergerait.
 window._caveSeuilOu      = _caveSeuilOu;
 window._caveMilsEnCave   = _caveMilsEnCave;
+window._caveDansFiltre    = _caveDansFiltre;   // ★ DIAG-1 (§429) : le diagnostic suit le filtre millésime du Chai, même source unique
 window._caveSeuilMilStep = _caveSeuilMilStep;
 window._caveSeuilMilReset= _caveSeuilMilReset;
 window._caveFutL         = _caveFutL;

@@ -1206,6 +1206,9 @@ sans bump — c'est une page de `public/`, hors `SHELL_STATIC` (§27d).
 - **Le Chai** (namespace `mvc-`) : élevage, fûts, **jauges de part des anges**.
   ★★ **GESTES-1 (§239)** : « Nouvelle opération » a huit types ; `degustation` (une cuvée, ou un fût désigné par lot + repère),
   `traitement` (produit de La Réserve, unités du Cuvier, sortie de stock par `_consoCuvier`), `filtration` (perte notée, volume intact).
+- ★★ **DIAG-1 (§429) — l’onglet Diagnostic** vit dans `src/diagnostic.js` (préfixe `dgn-`, ES module, aucun `onclick`) : lecture seule,
+  il lit `_laboLignes()`, la cuve d’origine par `decuvage.cuvee_id`, `cuve.operations`, `CAVE_ELEVAGE.operations`, `tonneaux` ;
+  `switchCaveOng('diag')` appelle `window.renderCaveDiag` ; réglages dans `CAVE_ELEVAGE.config.diag` (admin). Harnais `mv-harnais-diag1`.
 - **Le Cuvier** : vendange. **Cuvées normalisées** (`_cuvKey` + distance de Levenshtein).
   ★ **Repeint aux couleurs de la Cave le 09/08** (c'était le dernier écran sombre ; 7 textes hérités
   étaient illisibles).

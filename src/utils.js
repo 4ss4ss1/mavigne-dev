@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.87';
+export const APP_VERSION = '9.88';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.88', d: '2026-10-22', items: [
+    { niv: 1, pour: ['admin'], cible: '#mvc-tbtn-diag', emoji: 'loupe', titre: 'Le Chai a son diagnostic',
+      desc: "Nouvel onglet « Diagnostic » dans Le Chai : il croise ce que vous notez déjà — analyses du labo, opérations, fûts, dégustations — et nomme une cause possible quand plusieurs signaux vont ensemble (Brett, piqûre acétique, oxydation, malo lente), avec les indices qui la déclenchent et ce qui permettrait de la confirmer, au labo ou au chai. Rien à y saisir : le seul bouton, « Demander une analyse », prépare la demande pour le labo. L’Échéancier annonce les sulfitages à prévoir ; la Comparaison met vos cuvées côte à côte selon les fûts et le millésime." },
+  ] },
   { v: '9.87', d: '2026-10-22', items: [
     { niv: 1, pour: ['admin'], cible: '#plan-mbar-cave', emoji: 'verre', titre: 'Les journées de cave se marquent au Planning',
       desc: "Les heures réelles du Pilotage comptaient en vigne les journées passées en cave — pressurage, entonnage, un ouillage sans nom coché — et les versaient à la prochaine parcelle validée : une réparation pouvait afficher dix fois son barème. Au Planning, cochez les cases de ceux qui étaient en cave, touchez « Cave », puis choisissez la journée, le matin ou l’après-midi. La case garde ses heures, la paie ne change pas, et porte une bande au pied. Le Pilotage ne verse plus ces heures aux parcelles, et la fin prévue des travaux en tient compte, même pour un jour à venir." },
@@ -5717,6 +5721,7 @@ var MV_AIDE = {
         + "Les trois arrivent au journal et au Suivi d’élevage ; traitement et filtration entrent au registre des manipulations, la dégustation y est comptée en pied."],
       ['Un millésime à la fois', "une opération porte sur une seule année. Changer de millésime en haut du formulaire vide la sélection : on ne mélange pas deux vins dans un même geste."],
       ['Les rapports du labo', "Le Chai › onglet « Labo » : une fiche par envoi au labo. La date du prélèvement, les analyses demandées — reprises de la fiche précédente —, puis une ligne par rapport : n° de rapport, n° d’échantillon, la cuvée au Chai ou la cuve au Cuvier. La couleur et l’appellation se lisent sur ses parcelles ; « < 0,1 » s’écrit tel quel ; un PDF par rapport. Avant d’enregistrer, l’écran montre où va chaque chiffre : le glucose d’une cuve qui fermente sur sa courbe des sucres, le malique d’une cuvée sur sa malo, le reste dans son bloc « Au labo »."],
+      ['Le diagnostic', "Le Chai › onglet « Diagnostic » : rien à y saisir. Il croise les analyses du labo, les opérations, les fûts et les dégustations de chaque cuvée, et nomme une cause possible quand plusieurs signaux vont ensemble — Brett, piqûre acétique, oxydation, malo lente. Pour chaque cuvée : les indices relevés, ce qui permettrait de confirmer (au labo, au chai), les chiffres clés, la grille des risques et l’évolution des analyses. <b>Échéancier</b> liste ce qui est à traiter maintenant et les sulfitages des 60 prochains jours ; <b>Comparaison</b> met les cuvées côte à côte selon les fûts ou le millésime ; <b>Méthode</b> explique les statuts ; <b>Réglages</b> (administrateur) fixe l’unité de la volatile, l’objectif de SO2 actif et le seuil d’alerte. Seule action : <b>Demander une analyse</b> prépare la demande, à partager ou copier pour le labo. Le diagnostic est indicatif : il oriente les contrôles, il ne remplace ni l’analyse de confirmation ni l’avis de l’œnologue."],
       ['Rien ne s’efface', "la même date rouvre la fiche, et un n° de rapport déjà saisi est reconnu, même tapé à une autre date. Une case laissée vide ne retire rien ; deux valeurs différentes pour la même analyse, une autre date ou une autre cuvée pour le même rapport : c’est vous qui choisissez. Pour corriger, « Compléter » le rapport dans sa fiche et prendre la nouvelle valeur ; l’administrateur peut aussi le « Retirer »."],
       ['Au labo', "la fiche d’une cuvée porte la courbe de chaque analyse dès deux rapports, ceux de la cuve d’où elle vient compris ; une cuve du Cuvier a le même bloc, son glucose gardant sa courbe des sucres. Le degré probable d’un rapport devient la première source du repère « vin sec » de la cuve."],
       ['Le délai d’ouillage', "se règle pour tout le domaine, et se resserre millésime par millésime — un vin jeune se surveille de plus près."],

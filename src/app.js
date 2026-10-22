@@ -28,6 +28,7 @@ import './onboarding.js';
 import './cave.js';
 // ★ CUV-DEC (§164) — Le Cuvier, sorti de cave.js : JUSTE APRÈS lui (il lit le Chai par window).
 import './cuvier.js';
+import './diagnostic.js';   // DIAG-1 (§429) : le diagnostic du Chai — lecture seule, il croise Cuvées, Bouteilles et Labo
 import './planning.js';
 import './reglages.js';
 import './tracteur.js';

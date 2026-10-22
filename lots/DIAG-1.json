@@ -1,0 +1,39 @@
+{
+  "lot": "DIAG-1",
+  "section": "§429",
+  "base": "85299d52454c04dae562a95016bd600f63785acf",
+  "inclut": [],
+  "date": "2026-10-22",
+  "tutos": {
+    "ok": true,
+    "empreinte": "81dcef0d2e883a6b8186b7e47c450ba002b70864347c15de1757899db2eee48e",
+    "date": "2026-10-22T18:28:44.037Z",
+    "joues": {
+      "téléphone": 5,
+      "ordinateur": 5,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "69f2e2fa54cf859d1ee9892b5a6f89878b2be4db8d2c2ec050fe678362b0b1d2",
+    "CLAUDE.md": "845c73b39aab9e4db08e6fff2a60a70f573258f8120441715fd2d67900e6ba40",
+    "docs/claude/INDEX.md": "0e5512a4ea9f704ba60b2d2645443483840c0321b29caf3707cfe3a2227757d4",
+    "docs/claude/chantiers-380-429.md": "af62bceda8f69295b0980614d9d203067adf04b6fe956f99b47a8df1bf5b3882",
+    "docs/claude/journal.md": "3d83c5e8feea127c67aeb5b85b363ec503324b6158867d3d58edb7d0a7d4ccaf",
+    "docs/claude/modules.md": "01f3a7729f5b6d512529e60c8f08c628fd9e13d674132e48c13285f80ee10f60",
+    "guide/08-cave.html": "b1659d55765feefc544b3b90ae5790d0342cc0bf6ad87f87db952b208cccafef",
+    "index.html": "13bc7c89ab56bee8a1b50dd56168a2554ba9da8439b052de512bd0763f8975fe",
+    "public/sw.js": "14943fa6da0f7c623dba6ee9baf7e6d261739afe791737fec09f802260aec4df",
+    "scripts/harnais-claude-md.mjs": "d6b4ce230caef774f78a9323d9e4ab7d7afd17e695463a60335b50069c708a6a",
+    "scripts/mv-harnais-liste.mjs": "435f28b1d60154358c8d6d77badf3fc694e3d6bd341050b24349ae2cfc104748",
+    "src/app.js": "c83a7d286141465a6179b3ad9ba552f696527f8ef15996e87736d899eccbc49f",
+    "src/cave.js": "c65af4aa3f6c592693248f76ae583e7c251dcdd75783755f59774b7daf6fa325",
+    "src/styles.css": "44c30427ef45ea37df2333be0d93bd469f5a38f0ad24da12d4ca64e5c7074885",
+    "src/tutos.js": "2dd901a8da43083a1c17706f4d72f26c392138e6cfaec82e25723a8bc2cea434",
+    "src/utils.js": "803f2c46280d35add4852d69b650645bf5def6c083d9efca6f9f566d19f66bbb",
+    "scripts/mv-harnais-diag1.mjs": "650c0d95b8bd55f0310c161270f6d63fcd9034d800b77e8df7080b8bf033a9e9",
+    "src/diagnostic.js": "023979745d19d59602dcd5230411999327d3c279c0bcb67eceac730db5e52758"
+  }
+}

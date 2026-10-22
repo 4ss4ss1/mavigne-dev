@@ -1414,3 +1414,53 @@ l’après-midi de cave du mardi) ; équipes du jour posées : 126 ; une reprise
 - **Chantier** : « D’où viennent ces heures » sous chaque tâche du Pilotage — qui, quels jours, ce qui vient de jours d’attente.
 - Les journées de cave d’octobre déjà passées ne se reconstituent pas toutes seules : elles se marquent au Planning, semaine par
   semaine ; les chiffres réels de la Réparation et du Dégraffage suivent.
+
+## 429. ★★ DIAG-1 — LE CHAI A SON DIAGNOSTIC : LECTURE SEULE, IL CROISE ANALYSES, OPÉRATIONS, FÛTS ET DÉGUSTATIONS, NOMME UNE CAUSE POSSIBLE, ANNONCE LES SULFITAGES, COMPARE LES CUVÉES (22/10 — `src/diagnostic.js` (neuf : `dgnModele`, `dgnDonnees`, `dgnListe`, `dgnRefs`, `dgnCmp`, `dgnDemande`, `dgnEnvoyer`, `dgnTypo`, `analyser`, `indices`, `diagnostic`, `render` → `window.renderCaveDiag`) · `src/cave.js` (`switchCaveOng`, `_caveSetMill`, `window._caveDansFiltre`) · `src/app.js` (l’import) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Cave) · `src/styles.css` (bloc DIAG-1, avant TETE-2) · `index.html` (l’onglet, sa vue, versions) · `public/sw.js` · `guide/08-cave.html` · `scripts/mv-harnais-diag1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/DIAG-1.json` · **APP 9.87 → 9.88, SW 10.66 → 10.67**, base `85299d5`)
+
+### 429a. D’où ça vient
+Nico (22/10) : aller plus loin dans la Cave — une analyse dynamique des analyses du labo (degré probable, glucose-fructose,
+volatile, SO2), croisée avec les gestes d’élevage et les fûts (tonnelier, année, nombre de vins), pour anticiper. Deux maquettes
+HTML (« pas mal », puis « plutôt très bien, rends-le encore plus pro »), validées ; puis « go, et que ça corresponde parfaitement
+à la maquette ». L’onglet ne se saisit pas : il recoupe Cuvées, Bouteilles et Labo ; seule action, demander une analyse au labo.
+Les analyses se font sur la cuvée entière ; le fût par fût se juge au nez (et à la fleur).
+
+### 429b. Ce que fait l’onglet
+- **Par cuvée** : liste triée par urgence (filtre millésime du Chai suivi), puis la fiche — le diagnostic (indices principaux et
+  secondaires, sources, conditions favorables, ce qui n’est pas suivi, « Pour confirmer » au labo et au chai, comparaison des
+  hypothèses), les chiffres clés (SO2 actif, volatile, sucres, malo — chacun avec sa méthode), la grille des risques, les sept
+  couloirs d’évolution (projection, preuves cerclées), et les onglets Opérations, Analyses du labo, Fûts, Fiche.
+- **Statuts** : Signes forts (≥ 2 indices principaux), Signes modérés, Signe isolé, Aucun signe, Non évaluable. Un statut décrit
+  des indices, jamais une certitude ; la carte porte la mention « indicatif, ne remplace ni l’analyse ni l’œnologue ».
+- **Échéancier** (à traiter maintenant, sulfitages des 60 jours), **Comparaison** (volatile gagnée, SO2 perdu, selon la part de
+  neuf, l’âge, le tonnelier dominant à 70 %, le millésime), **Méthode** (lecture des statuts, ce qui est surveillé), **Réglages**
+  (admin : unité de la volatile, objectifs de SO2 actif rouge/blanc, seuil d’alerte — `CAVE_ELEVAGE.config.diag`, `fbSaveToast`).
+- **Demande d’analyse** : construite depuis le diagnostic (analyses, échantillon du fût suspect, potentiel en phénols volatils si
+  Brett) ; « Préparer la demande » partage (téléphone) ou copie (ordinateur) le texte.
+
+### 429c. Les données — ce qui est lu, et d’où
+- Toutes les analyses par `_laboLignes()` (Chai et Cuvier, une seule forme) ; la cuve d’origine par `decuvage.cuvee_id` (règle de
+  `_caveCuveSource`, non exposée : recopiée) ; FA par `mesures_fa` (densité → sucres estimés, ×2,2 au-dessus de 1 002) et
+  `decuvage.fa_fin_date` ; malo par `fml_terminee_date`, sinon une analyse `fml: ok`, sinon malique < 0,1.
+- Gestes : `cuve.operations` (le SO2 du Cuvier est en g/hL → mg/L ×10), `CAVE_ELEVAGE.operations` (soutirage et son SO2 unique ou
+  récurrent, méchage, dégustation avec `signaux` et fût, ouillages, traitement, filtration, retrait, assemblage), la mise
+  (`date_embouteillage`). Fûts : `tonneaux` (`four` = tonnelier), âge au millésime par `_mvFutVins(annee, millesime)`.
+- Références du domaine : médianes des cuvées sorties de la malo, hors cuvée en alerte (≥ 3), sinon valeurs par défaut.
+
+### 429d. Pièges
+- ★★ **Tout est préfixé `dgn-`** : `styles.css` porte 31 des noms de classe de la maquette (`.ok`, `.on`, `.chip`, `.vide`…).
+  Les classes d’état ajoutées par concaténation (`' detail'`) aussi — oubliées au premier jet, la fiche ne s’ouvrait pas au téléphone.
+- ★★ **Aucun réglage hors charte** : les couleurs de la maquette sont devenues les jetons de `charte.css` (tous ont leur valeur
+  sombre) ; espacements sur l’échelle (2…40), tailles par `--pt-*` avec repli, rayons par `--r-*`, trois graisses, pas
+  d’`outline:none`, boutons du jeu commun `.mvbtn` (CHARTE-3) — les cliquets d’échelle, de jetons, de typo et de boutons ont tous
+  rougi au premier passage. Les valeurs de la maquette ont été arrondies au cran le plus proche.
+- ★ **« ₂ » hors du subset** : la source écrit SO2 et H2SO4 ; `dgnTypo` pose `<sub>` (ou un `tspan` dans le SVG) à l’affichage,
+  jamais dans un attribut. La fiche MV_AIDE écrit « SO2 » en clair (harnais de l’aide).
+- ★ Le bloc CSS se pose **avant** TETE-2, qui doit finir la feuille (`mv-harnais-tete2`). La ligne `ONGLETS` de `switchCaveOng`
+  reste telle quelle (deux harnais la mutent) : `ONGLETS.push('diag')` juste dessous.
+- Écoute posée sur `#mvc-body-diag` et sur ses calques, jamais sur `document` ; le module est un ES module : aucun `onclick`.
+
+### 429e. Ce qui reste (DIAG-2)
+Les champs que la maquette marque « nouveau » ne sont pas saisis aujourd’hui ; le diagnostic les affiche « non suivi » :
+aération au soutirage (« à l’air / à l’abri »), fleur en surface (dégustation), température du chai, azote assimilable,
+éthylphénols, acétate d’éthyle, éthanal, oxygène dissous et tests de stabilité à la mise, force de la solution de SO2 (sans elle,
+pas de mg/L ni de dose suggérée pour le Chai), part des anges par cuvée (bouton grisé dans Comparaison).

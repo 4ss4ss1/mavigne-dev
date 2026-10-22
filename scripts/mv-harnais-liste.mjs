@@ -795,6 +795,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-perdate1.mjs --contre'],
   ['node scripts/mv-harnais-jcave1.mjs'],          // JCAVE-1 (§428) : les journées de cave — la marque (Planning, équipes du jour), le temps réel, la capacité
   ['node scripts/mv-harnais-jcave1.mjs --contre'],
+  ['node scripts/mv-harnais-diag1.mjs'],          // DIAG-1 (§429) : le diagnostic du Chai — six cuvées du domaine fictif, sur le vrai _laboLignes et le vrai module
+  ['node scripts/mv-harnais-diag1.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────
