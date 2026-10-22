@@ -1,0 +1,36 @@
+{
+  "lot": "ETAIN-1",
+  "section": "§426",
+  "base": "6750c312a487acbc206ab3882de73904ffb14cbd",
+  "inclut": [],
+  "date": "2026-10-22",
+  "tutos": {
+    "ok": true,
+    "empreinte": "045ef2acc21ba3a866038d09bded209b1aa113d6682d1bc23781e2c1a219e304",
+    "date": "2026-10-22T11:09:56.057Z",
+    "joues": {
+      "téléphone": 4,
+      "ordinateur": 4,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "644daebcd6f179e5308cc0aa554355e4813324708c79ff10a433355894e5f477",
+    "CLAUDE.md": "52c66bba7537f3543b07030459697673acd645c73943979055518e68969be68e",
+    "docs/claude/INDEX.md": "adb94f303ee75de6ac38e438c7c5ac2de2ccd4cbf5e8f7f6f19ad6e44f541b17",
+    "docs/claude/chantiers-380-429.md": "0c2cc91491d3af6dee6e7a8c11171186aa71fe6e4e9b25ed91dcb43c23889e2c",
+    "docs/claude/journal.md": "dc465ae84f026a24862fc89def08767994cc1212ade62daac293fb80142e806b",
+    "index.html": "16ba3d3174f50c42670f4a15d8c48674055171d2450de7e14bb0e7406993be33",
+    "public/sw.js": "664c088f2f8258a4508d86a872886156163e787ec7db658523f1cb2ee768b4d8",
+    "scripts/harnais-claude-md.mjs": "74fb70ad66ec66022ffea2237212222defedefa28ad68eb4b627f3147b9a3b8c",
+    "scripts/mv-harnais-liste.mjs": "67d6b170c59f9f01cb7dd964fd6a4e2924dc771daceff728b90428e95621fcda",
+    "src/app.js": "b92dc1e1482a0420a8d6ef476cc49aacafa309eeec7872dbc124e04266f87ffe",
+    "src/charte.css": "d7738cca33f8b660f745c2a7e514f14599194de10abbe13a78b93a66ae262aa9",
+    "src/coquille.js": "644a84f2898757bfcafb63165bcc1488abc2b278d3ccd1fe44cc1a7442841bfe",
+    "src/styles.css": "954f0354a4973f47a81e57abf4d732e0ac63a8ae19a50d19238db616ee58360b",
+    "src/utils.js": "a0d16d3f562e4bea378589f1d2e796fcdb2fb3e88847a4b5352a306e2ec3c81c",
+    "scripts/mv-harnais-etain1.mjs": "9c8e716459f82c24285b78b950a6e55a24ef042b1be0f0eb63a44826a85a5849"
+  }
+}

@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.63
+// MA VIGNE — Service Worker v10.64
+// v10.64 (22/10/2026) — ETAIN-1 (§426) : les icônes des modules en relief — une tuile d’étain gravée, l’écran ouvert en émail lie-de-vin, dans la barre du bas, la feuille « Plus » (quatre par rang, sans cadre) et la barre latérale (ouverte et repliée) ; « Plus » s’allume quand l’écran ouvert y est rangé (maquette validée le 22/10). charte.css, styles.css, app.js, coquille.js, utils.js, index.html. APP 9.84 -> 9.85.
 // v10.63 (22/10/2026) — COTE-1 (§424) : sur ordinateur (1 280 px et plus), le panneau du tuto se colle au bord droit et l’appli se resserre à côté — fenêtres, tiroirs, barres, messages et recherche compris, la barre latérale jugée sur la place qui reste, plein écran au-dessous ; le « + » des boutons d’ajout revient (l’icône des trois points s’appelle désormais « points », une icône « ajout » neuve). tutos.js, coquille.js, index.html, app.js, tournees.js, cuvier.js, cave.js, comptes.js, utils.js. APP 9.83 -> 9.84.
 // v10.62 (22/10/2026) — TUTO-9 (§423) : le tuto « corriger l’équipe d’une validation » va au bout — le domaine fictif reçoit un Journal (trois validations aux dates calculées), l’étape « Enregistrer » ne se croit plus faite avant d’ouvrir la fenêtre ; test:tutos joue chaque tuto sur chaque écran sous son vrai nom et compte, refuse un build plus ancien que les sources, écrit son rapport ; la marque d’un lot qui touche l’appli exige des tutos rejoués au vert sur ses fichiers. tutos.js, utils.js, index.html, scripts. APP 9.82 -> 9.83.
 // v10.61 (22/10/2026) — BASCULE-1 (§422) : la bascule « Vignoble / Secteurs » de la carte Météo devient un vrai groupe du jeu commun — un cadre autour de deux options compactes, la vue choisie teintée (ACCV-3 avait posé le cadre sur chaque bouton : taille terrain, texte au bord, aucune option marquée).
@@ -4595,7 +4596,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.63';
+const CACHE_NAME   = 'mavigne-v10.64';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4612,7 +4613,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.63 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.64 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4632,7 +4633,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.63 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.64 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

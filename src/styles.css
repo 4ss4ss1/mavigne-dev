@@ -8633,6 +8633,54 @@ input[type="checkbox"], input[type="radio"]{ accent-color:var(--accent); }
 /* ★ FIN ACCV-4 */
 
 
+/* ★ ETAIN-1 (§426) — LES ICÔNES DES MODULES EN RELIEF (maquette validée le 22/10) : l’étain au repos, l’émail lie-de-vin pour
+   l’écran ouvert — barre du bas, feuille « Plus », barre latérale ouverte et repliée. Aucune couleur écrite : la matière et
+   les tailles sont des réglages de la charte (--etain-*, --email-*, --tuile-*). Posé après COQ-2 et RAIL-1, qu’il surcharge :
+   COQ-2 couchait la tuile de la barre à plat, ombre comprise, en !important — d’où les !important d’ici, au même
+   sélecteur. Reste avant l’en-tête commun, qui ferme la feuille. */
+/* — La barre du bas : une ombre douce au-dessus du filet ; la tuile d’étain gravée, l’écran ouvert en émail soulevé — */
+body #mv-dock{ box-shadow:var(--dock-relief); }
+body #mv-dock .mv-dk .mv-dk-ic{ width:var(--tuile-dock); height:var(--tuile-dock); border-radius:var(--r-tuile,30%); background:var(--etain-fond); color:var(--etain-encre); box-shadow:var(--etain-ombre)!important; transition:transform var(--mv-d1) var(--mv-sortie), box-shadow var(--mv-d1) var(--mv-sortie); }
+body #mv-dock .mv-dk .mv-dk-ic svg{ filter:var(--etain-gravure); }
+body #mv-dock .mv-dk.on{ color:var(--accent-texte); }
+body #mv-dock .mv-dk.on .mv-dk-lb{ font-weight:var(--fw-semi,600); }
+body #mv-dock .mv-dk.on .mv-dk-ic{ background:var(--email-fond); color:var(--sur-accent); box-shadow:var(--email-ombre)!important; transform:translateY(-1px); }
+body #mv-dock .mv-dk.on .mv-dk-ic svg{ filter:var(--email-relief); }
+body #mv-dock .mv-dk:active .mv-dk-ic{ transform:translateY(1px) scale(.96); box-shadow:var(--etain-appui)!important; }
+body #mv-dock .mv-dk.on:active .mv-dk-ic{ box-shadow:var(--email-appui)!important; }
+body #mv-dock .mv-dk:focus-visible .mv-dk-ic{ outline:var(--bw-2,2px) solid var(--anneau); outline-offset:var(--bw-2,2px); }
+/* — La feuille « Plus » : rangée comme l’écran d’accueil d’un téléphone, quatre par rang, sans cadre ; l’écran ouvert en émail — */
+body #mv-dock-sheet #mv-dock-sheet-items{ grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--e-2,8px); }
+body #mv-dock-sheet .mv-sg{ gap:var(--e-2,8px); padding:var(--e-2,8px) 0 var(--e-1,4px); border:0; border-radius:var(--r-lg,12px); background:none; box-shadow:none; }
+body #mv-dock-sheet .mv-sg .mv-sg-ic{ width:var(--tuile-feuille); height:var(--tuile-feuille); border:0; border-radius:var(--r-tuile,30%); background:var(--etain-fond); color:var(--etain-encre); box-shadow:var(--etain-ombre); transition:transform var(--mv-d1) var(--mv-sortie), box-shadow var(--mv-d1) var(--mv-sortie); }
+body #mv-dock-sheet .mv-sg .mv-sg-ic svg{ width:var(--ic-tuile); height:var(--ic-tuile); filter:var(--etain-gravure); }
+body #mv-dock-sheet .mv-sg .mv-sg-lb{ font-weight:var(--fw-med,500); color:var(--texte-med); }
+body #mv-dock-sheet .mv-sg.on .mv-sg-ic{ background:var(--email-fond); color:var(--sur-accent); box-shadow:var(--email-ombre); transform:translateY(-1px); }
+body #mv-dock-sheet .mv-sg.on .mv-sg-ic svg{ filter:var(--email-relief); }
+body #mv-dock-sheet .mv-sg.on .mv-sg-lb{ color:var(--accent-texte); font-weight:var(--fw-semi,600); }
+body #mv-dock-sheet .mv-sg:active .mv-sg-ic{ transform:translateY(1px) scale(.96); box-shadow:var(--etain-appui); }
+body #mv-dock-sheet .mv-sg.on:active .mv-sg-ic{ box-shadow:var(--email-appui); }
+/* Le bouton de mode (terrain, tracteur) n’est pas un module : toute la largeur, sous un filet, en petite tuile. */
+body #mv-dock-sheet .mv-sg.mv-sg-mode{ grid-column:1 / -1; flex-direction:row; justify-content:center; margin-top:var(--e-1,4px); padding:var(--e-3,12px) 0 0; border-top:var(--bw) solid var(--ligne,var(--gris-clair)); border-radius:0; }
+body #mv-dock-sheet .mv-sg.mv-sg-mode .mv-sg-ic{ width:var(--tuile-rail); height:var(--tuile-rail); box-shadow:var(--etain-ombre-petite); }
+body #mv-dock-sheet .mv-sg.mv-sg-mode .mv-sg-ic svg{ width:var(--ic-sm,16px); height:var(--ic-sm,16px); }
+/* — La barre latérale (ordinateur) : rangs de 40 px dépliée comme repliée (rien ne saute au pliage) ; tuile de 28 px dépliée,
+     le libellé gardant sa place d’avant (6 + 28 + 8), 34 px repliée et centrée ; les points d’alerte sur le coin de la tuile — */
+body .mv-rail .mv-rail-b{ height:var(--rang-rail); gap:var(--e-2,8px); padding:0 calc(var(--e-1,4px) * 1.5); transition:background-color var(--mv-d2), color var(--mv-d2), padding var(--mv-d3) var(--mv-sortie); }
+body .mv-rail .mv-rail-ic{ display:grid; place-items:center; flex:none; width:var(--tuile-rail); height:var(--tuile-rail); border-radius:var(--r-tuile,30%); background:var(--etain-fond); color:var(--etain-encre); box-shadow:var(--etain-ombre-petite); transition:width var(--mv-d3) var(--mv-sortie), height var(--mv-d3) var(--mv-sortie), transform var(--mv-d1) var(--mv-sortie), box-shadow var(--mv-d1) var(--mv-sortie); }
+body .mv-rail .mv-rail-ic svg{ width:var(--ic-sm,16px); height:var(--ic-sm,16px); filter:var(--etain-gravure); }
+body .mv-rail .mv-rail-b[aria-current="page"] .mv-rail-ic{ background:var(--email-fond); color:var(--sur-accent); box-shadow:var(--email-ombre-petite); transform:translateY(-1px); }
+body .mv-rail .mv-rail-b[aria-current="page"] .mv-rail-ic svg{ filter:var(--email-relief); }
+body .mv-rail .mv-rail-b[aria-current="page"] .mv-rail-lbl{ font-weight:var(--fw-semi,600); }
+body .mv-rail .mv-rail-b:active .mv-rail-ic{ transform:translateY(1px) scale(.96); box-shadow:var(--etain-appui); }
+body .mv-rail .mv-rail-b[aria-current="page"]:active .mv-rail-ic{ box-shadow:var(--email-appui); }
+body:not(.mv-rail-ouvert) .mv-rail .mv-rail-b{ padding:0 0 0 calc((100% - var(--tuile-rail-pliee)) / 2); }
+body:not(.mv-rail-ouvert) .mv-rail .mv-rail-ic{ width:var(--tuile-rail-pliee); height:var(--tuile-rail-pliee); }
+body:not(.mv-rail-ouvert) .mv-rail .mv-rail-ic svg{ width:var(--ic-md,18px); height:var(--ic-md,18px); }
+body:not(.mv-rail-ouvert) .mv-rail .mv-rail-b[aria-current="page"]{ background:transparent; }
+body:not(.mv-rail-ouvert) .mv-rail .mv-rail-b[aria-current="page"] .mv-rail-ic{ box-shadow:var(--email-ombre); }
+body:not(.mv-rail-ouvert) .mv-rail .mv-rail-point,body:not(.mv-rail-ouvert) .mv-rail .mv-rail-vif{ top:0; left:calc(50% + var(--tuile-rail-pliee) / 2 - 6px); }
+/* ★ FIN ETAIN-1 */
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.
    Deux rangées partout, Pilotage compris (pilotage.js pose désormais un vrai .mod-header) : l'identité (icône, titre,
    sous-titre, gestes du module) puis la ligne du jour (saison, date — ou la météo, qui porte alors la date courte —,

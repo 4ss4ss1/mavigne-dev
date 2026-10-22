@@ -91,7 +91,8 @@ window._railAlertesMaj = function () {
 };
 window._railHtml = function (items, moi, dom) {
   const R = window._railRubriques(items);
-  const bouton = x => '<button class="mv-rail-b" type="button" data-page="' + esc(x.p) + '" data-tip="' + esc(x.l) + '" aria-label="' + esc(x.l) + '">' + ico(x.ic, 20)
+  // ★ ETAIN-1 (§426) : l'icône posée dans sa tuile d'étain (.mv-rail-ic), comme la barre du bas et la feuille « Plus ».
+  const bouton = x => '<button class="mv-rail-b" type="button" data-page="' + esc(x.p) + '" data-tip="' + esc(x.l) + '" aria-label="' + esc(x.l) + '"><span class="mv-rail-ic" aria-hidden="true">' + ico(x.ic, 20) + '</span>'
     + '<span class="mv-rail-lbl">' + esc(x.l) + '</span>' + (x.p === 'pilotage' ? '<span class="mv-rail-vif" aria-hidden="true"></span>' : '') + pastille(x.p, x.n) + '</button>';
   // RAIL-1 : le logo, dessiné pour 28 px, est posé par la feuille selon le thème (l'icône de l'appli y pâlissait).
   return '<div class="mv-rail-dom"><span class="mv-rail-logo" aria-hidden="true"></span><span class="mv-rail-lbl"><b>Ma Vigne</b><small title="' + esc(dom.sous) + '">' + esc(dom.nom) + '</small></span></div>'

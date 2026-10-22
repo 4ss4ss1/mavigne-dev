@@ -424,6 +424,54 @@
    · La charge restante : un point par mesure, plus de zone remplie. */
 :root{--meteo-soleil:var(--or);--meteo-pluie:var(--bleu);--meteo-nuage:var(--texte-doux)}
 
+/* ★★ ETAIN-1 (§426) — LES ICÔNES DES MODULES EN RELIEF : L’ÉTAIN AU REPOS, L’ÉMAIL LIE-DE-VIN POUR L’ÉCRAN OUVERT.
+   Maquette validée par Nico le 22/10 (« go pour étain, fidèle à la maquette ») : la barre du bas, la feuille « Plus » et la
+   barre latérale posent chaque icône sur une tuile de métal satiné, l’icône gravée ; l’écran ouvert passe en émail
+   lie-de-vin, icône blanche — la seule couleur pour agir reste la lie-de-vin (DS-4). Le doré d’avant la refonte, écarté par
+   Nico : il tranchait avec la charte. Tailles de la maquette : 40 px dans la barre, 52 dans la feuille, 28 (ouverte) et 34
+   (repliée) dans la barre latérale ; l’arrondi suit le côté (30 %). Le sombre se redit deux fois à l’identique ;
+   `mv-harnais-etain1` le tient. */
+:root{
+  --tuile-dock:40px; --tuile-feuille:52px; --tuile-rail:28px; --tuile-rail-pliee:34px; --rang-rail:40px; --r-tuile:30%; --ic-tuile:24px;
+  --etain-fond:linear-gradient(180deg,rgba(255,255,255,.8) 0%,rgba(255,255,255,0) 50%),repeating-linear-gradient(90deg,rgba(255,255,255,0) 0 1.5px,rgba(60,56,48,.024) 1.5px 3px),linear-gradient(180deg,#F6F5F2 0%,#E4E2DC 100%);
+  --etain-ombre:inset 0 1px 0 #FFFFFF,inset 0 -1px 0 rgba(28,26,22,.08),0 0 0 1px rgba(28,26,22,.10),0 1px 1.5px rgba(20,18,14,.10),0 3px 6px -2px rgba(20,18,14,.12);
+  --etain-ombre-petite:inset 0 1px 0 #FFFFFF,inset 0 -1px 0 rgba(28,26,22,.08),0 0 0 1px rgba(28,26,22,.10),0 1px 1.5px rgba(20,18,14,.10),0 2px 4px -2px rgba(20,18,14,.12);
+  --etain-appui:inset 0 1px 0 #FFFFFF,inset 0 -1px 0 rgba(28,26,22,.08),inset 0 2px 4px rgba(0,0,0,.16);
+  --etain-encre:#5A5852; --etain-gravure:drop-shadow(0 1px 0 rgba(255,255,255,.95));
+  --email-fond:radial-gradient(130% 75% at 50% -10%,rgba(255,255,255,.34) 0%,rgba(255,255,255,.08) 45%,rgba(255,255,255,0) 62%),linear-gradient(180deg,#93395F 0%,#7A2850 52%,#641F41 100%);
+  --email-ombre:inset 0 1px 0 rgba(255,255,255,.38),inset 0 -2px 3px rgba(48,8,26,.30),0 0 0 1px rgba(92,22,56,.62),0 2px 3px rgba(60,12,34,.22),0 6px 12px -4px rgba(122,40,80,.50);
+  --email-ombre-petite:inset 0 1px 0 rgba(255,255,255,.38),inset 0 -2px 3px rgba(48,8,26,.30),0 0 0 1px rgba(92,22,56,.62),0 2px 3px rgba(60,12,34,.22),0 3px 7px -3px rgba(122,40,80,.50);
+  --email-appui:inset 0 1px 0 rgba(255,255,255,.38),inset 0 -2px 3px rgba(48,8,26,.30),inset 0 2px 4px rgba(0,0,0,.16);
+  --email-relief:drop-shadow(0 1px 1px rgba(40,6,22,.5));
+  --dock-relief:0 -10px 24px -14px rgba(20,18,14,.18);
+}
+#app-root[data-theme="dark"],:root[data-theme="dark"]{
+    --etain-fond:linear-gradient(180deg,rgba(255,255,255,.075) 0%,rgba(255,255,255,0) 50%),repeating-linear-gradient(90deg,rgba(255,255,255,0) 0 1.5px,rgba(255,255,255,.02) 1.5px 3px),linear-gradient(180deg,#2E2D2A 0%,#1D1C1A 100%);
+    --etain-ombre:inset 0 1px 0 rgba(255,255,255,.11),inset 0 -1px 0 rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.6),0 2px 4px rgba(0,0,0,.45);
+    --etain-ombre-petite:inset 0 1px 0 rgba(255,255,255,.11),inset 0 -1px 0 rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.6),0 2px 4px rgba(0,0,0,.45);
+    --etain-appui:inset 0 1px 0 rgba(255,255,255,.11),inset 0 -1px 0 rgba(0,0,0,.35),inset 0 2px 4px rgba(0,0,0,.45);
+    --etain-encre:#BDBAB2; --etain-gravure:drop-shadow(0 1px 0 rgba(0,0,0,.7));
+    --email-fond:radial-gradient(130% 75% at 50% -10%,rgba(255,255,255,.28) 0%,rgba(255,255,255,.06) 45%,rgba(255,255,255,0) 62%),linear-gradient(180deg,#A3487A 0%,#8A3560 52%,#6D2348 100%);
+    --email-ombre:inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 3px rgba(30,4,16,.35),0 0 0 1px rgba(20,4,12,.7),0 4px 14px -3px rgba(190,70,130,.40);
+    --email-ombre-petite:inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 3px rgba(30,4,16,.35),0 0 0 1px rgba(20,4,12,.7),0 2px 8px -2px rgba(190,70,130,.40);
+    --email-appui:inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 3px rgba(30,4,16,.35),inset 0 2px 4px rgba(0,0,0,.45);
+    --dock-relief:0 -10px 24px -14px rgba(0,0,0,.7);
+}
+@media(prefers-color-scheme:dark){
+  #app-root:not([data-theme="light"]),:root:not([data-theme="light"]){
+    --etain-fond:linear-gradient(180deg,rgba(255,255,255,.075) 0%,rgba(255,255,255,0) 50%),repeating-linear-gradient(90deg,rgba(255,255,255,0) 0 1.5px,rgba(255,255,255,.02) 1.5px 3px),linear-gradient(180deg,#2E2D2A 0%,#1D1C1A 100%);
+    --etain-ombre:inset 0 1px 0 rgba(255,255,255,.11),inset 0 -1px 0 rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.6),0 2px 4px rgba(0,0,0,.45);
+    --etain-ombre-petite:inset 0 1px 0 rgba(255,255,255,.11),inset 0 -1px 0 rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.6),0 2px 4px rgba(0,0,0,.45);
+    --etain-appui:inset 0 1px 0 rgba(255,255,255,.11),inset 0 -1px 0 rgba(0,0,0,.35),inset 0 2px 4px rgba(0,0,0,.45);
+    --etain-encre:#BDBAB2; --etain-gravure:drop-shadow(0 1px 0 rgba(0,0,0,.7));
+    --email-fond:radial-gradient(130% 75% at 50% -10%,rgba(255,255,255,.28) 0%,rgba(255,255,255,.06) 45%,rgba(255,255,255,0) 62%),linear-gradient(180deg,#A3487A 0%,#8A3560 52%,#6D2348 100%);
+    --email-ombre:inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 3px rgba(30,4,16,.35),0 0 0 1px rgba(20,4,12,.7),0 4px 14px -3px rgba(190,70,130,.40);
+    --email-ombre-petite:inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 3px rgba(30,4,16,.35),0 0 0 1px rgba(20,4,12,.7),0 2px 8px -2px rgba(190,70,130,.40);
+    --email-appui:inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 3px rgba(30,4,16,.35),inset 0 2px 4px rgba(0,0,0,.45);
+    --dock-relief:0 -10px 24px -14px rgba(0,0,0,.7);
+  }
+}
+
 /* ── LE MODE PLEIN SOLEIL (contraste renforcé : le bouton du hub pose data-hicontrast="1" sur #app-root) ──
    CHARTE-2B (§369) : venu du <style> d'index.html, qui passe APRÈS la feuille — d'où sa place, en fin de
    charte. Des encres plus franches en clair ; en sombre, deux blocs à l'identique (bascule manuelle et mode

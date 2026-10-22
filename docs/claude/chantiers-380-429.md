@@ -1154,3 +1154,75 @@ Nico, après COTE-1 : « que les tutos suivent s’il y a des modifications […
 ### 425f. Ouvert
 - Le parallélisme de test:tutos dans la CI (à mesurer).
 - Les écrans des tutos (`pages`) ne sont pas lus par l’aiguillage : seuls les boutons visés et les fonctions enseignées le sont. Si une prise de la CI le montre utile, ajouter la fonction qui dessine l’écran au `couvre` du tuto.
+
+## 426. ★★ ETAIN-1 — LES ICÔNES DES MODULES EN RELIEF : L’ÉTAIN AU REPOS, L’ÉMAIL LIE-DE-VIN POUR L’ÉCRAN OUVERT (22/10 — `src/charte.css` (`--etain-*`, `--email-*`, `--tuile-*`, `--rang-rail`, `--r-tuile`, `--ic-tuile`, `--dock-relief`) · `src/styles.css` (bloc ETAIN-1, avant l’en-tête commun) · `src/app.js` (`_dockSync`) · `src/coquille.js` (`.mv-rail-ic`) · `src/utils.js` · `index.html` · `public/sw.js` · `scripts/mv-harnais-etain1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` — APP 9.84 → 9.85, SW 10.63 → 10.64)
+
+### 426a. La demande
+Nico (22/10, dicté) : revoir les icônes des modules — Vigne, Pilotage, Cave, Réglages… — avec « une petite texture un peu 3D comme
+Windows, comme Apple », pour que l’appli ait « un petit peu plus de relief », « plus vivant », « quelque chose de pro ». Il se
+souvenait d’un relief doré « avant le changement des grosses versions » ; vérifié dans la feuille : DS-4 posait une tuile creusée au
+repos, dorée sur l’écran ouvert (`.mv-dk-ic`), et COQ-2 (§271, 08/10) l’a couchée à plat (barre blanche, icône seule, l’écran ouvert
+à l’accent). Après reformulation (« exact »), il a écarté le doré — « ça trancherait trop avec le style de l’appli maintenant » — et
+laissé le choix : « vois-toi ce qui est le mieux ».
+
+### 426b. La maquette
+Un canevas, quatre rangées : **Étain** (recommandé), **Verre** (façon Apple : barre flottante translucide, lentille sous l’écran
+ouvert), **Pastilles** (une couleur par module, façon Réglages d’Apple) et **Aujourd’hui** pour comparer ; chacune au téléphone clair
+et sombre, feuille « Plus » ouverte, et barre latérale dépliée (clair) et repliée (sombre), toutes touchables. Réponse : « go pour
+étain (fidèle à la maquette) ». Les raisons de la recommandation : son idée du métal grisé ; une seule couleur pour agir, la
+lie-de-vin, comme le bouton Valider (CHARTE-3) ; l’écran ouvert se lit en plein soleil (une tache de couleur, icône blanche) ; et un
+clin d’œil au métier, les capsules d’étain des bouteilles de Bourgogne. Verre : relief plus léger, flou coûteux sur les vieux Android
+et à surveiller par-dessus la carte. Pastilles : la plus vivante, mais elle casse la règle « une seule couleur » de la refonte.
+
+### 426c. Ce qui est posé
+- **La charte** porte la matière et les tailles : `--etain-fond` (dégradé satiné, brossage vertical très léger, reflet en haut),
+  `--etain-ombre` et `--etain-ombre-petite` (filet de lumière, liseré, ombre de contact), `--etain-encre`, `--etain-gravure` (l’icône
+  gravée : un trait de lumière dessous en clair, d’ombre en sombre), `--etain-appui` ; `--email-fond`, `--email-ombre(-petite)`,
+  `--email-relief`, `--email-appui` ; `--dock-relief` ; `--tuile-dock` 40 px, `--tuile-feuille` 52, `--tuile-rail` 28,
+  `--tuile-rail-pliee` 34, `--rang-rail` 40, `--r-tuile` 30 %, `--ic-tuile` 24. Le sombre redit deux fois à l’identique (bascule
+  manuelle, mode automatique).
+- **Le bloc ETAIN-1** de la feuille, juste avant l’en-tête commun (qui reste le dernier bloc, `mv-harnais-tete2`), sans couleur
+  écrite : la tuile d’étain sous chaque icône de la barre du bas, l’émail sur l’écran ouvert (soulevé d’un pixel), son libellé
+  lie-de-vin en demi-gras ; l’appui enfonce la tuile (un pixel, 96 %) ; le clavier garde un anneau. La feuille « Plus » : quatre par
+  rang, sans cadre, tuiles de 52 px, l’écran ouvert en émail ; le bouton de mode (terrain, tracteur) passe sur toute la largeur sous
+  un filet, en petite tuile. La barre latérale : rangs de 40 px, tuile de 28 px dépliée (le libellé garde sa place d’avant :
+  6 + 28 + 8 px), 34 px repliée et centrée ; l’écran ouvert en émail sur le fond pressé (dépliée), sans fond (repliée) ; le point
+  d’alerte et le point « en direct » posés sur le coin de la tuile, barre repliée. COQ-2 couchait la tuile de la barre à plat, ombre
+  comprise, en `!important` : les ombres d’ETAIN-1 le sont aussi, au même sélecteur, posées après.
+- **coquille.js** : l’icône de chaque entrée dans un `<span class="mv-rail-ic" aria-hidden="true">` — la tuile a besoin d’une boîte ;
+  les harnais de la barre (coq1, rail1, jeq1, cote1) lisent le bouton entier et restent verts.
+- **app.js, `_dockSync`** : l’entrée de la feuille marquée `.on` comme celles de la barre, et « Plus » allumé quand l’écran ouvert y
+  est rangé — au téléphone, Cave, Réserve, Planning et Réglages n’avaient plus aucune marque une fois la feuille refermée. Repris de la
+  maquette, où Nico l’a vu.
+
+### 426d. Arbitrages
+- Rangs de la barre latérale à 40 px dépliée comme repliée (maquette : 36 et 42) : une seule hauteur, rien ne saute au pliage ; la
+  tuile grandit de 28 à 34 px pendant le pliage.
+- Les replis : `--r-tuile` et `--ligne` en ont un (`mv-harnais-jetons` : un appel du socle redit sa valeur) ; celui du filet passe par
+  `var(--gris-clair)`, comme les blocs voisins — un code couleur en repli faisait rougir `mv-harnais-arrivee4` (« sans couleur en
+  dur », de l’arrivée à l’en-tête commun).
+- Le mode plein soleil garde ses encres ; la tuile a la sienne (`--etain-encre` : 6:1 sur l’étain clair, 7,9:1 sur l’étain foncé).
+- Les icônes des en-têtes de module restent à plat : la demande portait sur la barre du bas et la barre latérale.
+
+### 426e. Mesures
+- `mv-harnais-etain1` : 15 verts (la charte et ses deux sombres, la place et la propreté du bloc, chaque réglage lu existant, la
+  feuille à quatre par rang, `_dockSync` joué pour Cave, Réglages, Tracteur, Journal et Parcelles, `_railHtml` joué) ; contre-épreuve :
+  7 défauts réinjectés, 7 détectés.
+- Harnais voisins verts : coq1, coq2, rail1, jeq1, cote1, tete2, maj2, vif1, pastilles, boutons, jetons, arrivee4.
+- Captures de l’appli construite (`mv-captures`, démo, téléphone 390 px et ordinateur 1 366 px, clair et sombre) : Accueil (Vigne en
+  émail), Cave (« Plus » allumé au téléphone, Cave en émail dans la barre latérale avec son compteur au bout), feuille « Plus »
+  ouverte (écran ajouté le temps de la mesure, non livré) — 12 captures valables, regardées.
+- `npm run check` (le lanceur, 497 commandes) : vert, joué en cinq tranches — le bac à sable coupe une commande à 5 minutes et
+  n’a qu’un cœur ; `mv-harnais-recup --contre` joué seul (90 défauts détectés). Deux rouges en route, corrigés : `mv-harnais-arrivee4`
+  (« sans couleur en dur » : le repli du filet était un code couleur → `var(--gris-clair)`), puis `harnais-claude-md` (le harnais neuf
+  pas encore nommé au document → la section écrite, `SECTIONS` 455 → 459). Les 127 premières commandes ont tourné avant le repli
+  corrigé : jetons, arrivee4 et etain1 (contre-épreuve comprise) rejoués après, verts.
+- `npm run test:tutos -- --concernes` — « Tutos concernés : TOUS (4) — le chemin vers les modules (_railHtml) » : vert,
+  `rapports/tutos.json` écrit. Les quatre tutos au téléphone, à l’ordinateur, au panneau et au miroir ; côte à côte à 1 280 × 800
+  (barre repliée), 1 536 × 864 (barre repliée) et 1 920 × 1 080 (barre dépliée) : bouton touchable, anneau visible, rien dessous ;
+  le panneau refuse un `boot.js` d’une version précédente ; rien envoyé au serveur.
+
+### 426f. Ouvert
+- La barre latérale **repliée** n’a pas été regardée en capture (l’outil photographie l’ordinateur à 1 366 px, barre dépliée) ; les
+  tutos côte à côte la traversent à 1 280 et 1 536 px sans défaut. À regarder sur le PC de Nico (touche « [ »).
+- La couleur par module (rangée Pastilles du canevas) reste disponible si Nico veut un jour plus de couleur ailleurs.

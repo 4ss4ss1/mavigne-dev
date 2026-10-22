@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.84';
+export const APP_VERSION = '9.85';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.85', d: '2026-10-22', items: [
+    { niv: 1, pour: ['tous'], cible: '#mv-dock', emoji: 'oeil', titre: 'Les icônes des modules prennent du relief',
+      desc: "En bas de l’écran comme dans la barre de gauche sur ordinateur, chaque module a maintenant son icône sur une petite tuile de métal gris, et celui où vous êtes ressort en lie-de-vin. Dans le menu « Plus », les modules sont rangés quatre par ligne, comme sur l’écran d’accueil d’un téléphone ; quand vous êtes dans l’un d’eux, c’est « Plus » qui s’allume." },
+  ] },
   { v: '9.84', d: '2026-10-22', items: [
     { niv: 0, pour: ['admin'], emoji: 'doigt', titre: 'Sur ordinateur, le tuto se range à côté de l’appli',
       desc: "Le panneau du tuto se posait par-dessus la droite de l’écran et cachait justement le bouton à toucher, celui que montre le cercle doré. Il se colle maintenant au bord droit et l’appli se resserre à côté : vous voyez et touchez les deux en même temps, fenêtres comprises. Si la place manque, la barre des modules se replie d’elle-même. Sur un écran de moins de 1 280 pixels, l’entraînement s’ouvre en plein écran, comme sur téléphone." },

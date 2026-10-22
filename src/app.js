@@ -5540,8 +5540,12 @@ function _dockSync(page){
   if(window._railSync) window._railSync(page);   // COQ-1 : l'entrée active de la barre latérale suit
   var inner=document.getElementById('mv-dock-inner'); if(!inner) return;
   var a=(page==='parcelles'||page==='journal')?'home':page;
+  // ★ ETAIN-1 (§426) : l'écran ouvert est marqué aussi dans la feuille « Plus », et « Plus » s'allume quand il y est rangé —
+  //   au téléphone, Cave, Réserve, Planning et Réglages n'avaient plus aucune marque une fois la feuille refermée.
+  var sh=document.getElementById('mv-dock-sheet-items'), range=false;
+  if(sh){ var ss=sh.querySelectorAll('.mv-sg[data-page]'); for(var j=0;j<ss.length;j++){ var o=ss[j].getAttribute('data-page')===a; ss[j].classList.toggle('on',o); if(o) range=true; } }
   var bs=inner.querySelectorAll('.mv-dk');
-  for(var i=0;i<bs.length;i++){ bs[i].classList.toggle('on', bs[i].getAttribute('data-page')===a); }
+  for(var i=0;i<bs.length;i++){ bs[i].classList.toggle('on', bs[i].getAttribute('data-plus') ? range : bs[i].getAttribute('data-page')===a); }
 }
 window._dockSync=_dockSync;
 function _dockGo(p){ _dockPlusClose(); goTo(p); }
