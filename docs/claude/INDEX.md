@@ -475,3 +475,4 @@
 | 419 | 419. ★★ ACCV-4 — L’ACCUEIL DIT VRAI, ET L’ADMINISTRATEUR CORRIGE L’ÉQUIPE D’UNE VALIDATION (21/10 — `src/ap… | `docs/claude/chantiers-380-429.md` |
 | 420 | 420. ★ ANTICIPE-1 — LES POINTS À ANTICIPER, EN TÊTE ET D’UN GESTE (21/10 — `src/cockpit-vue.js` (`savoirIte… | `docs/claude/chantiers-380-429.md` |
 | 421 | 421. ★★ JEQ-1 — QUI A TRAVAILLÉ : SEULEMENT LES PRÉSENTS, ET ON VOIT QUI EST COCHÉ ; LE COMPTEUR DE LA BARR… | `docs/claude/chantiers-380-429.md` |
+| 422 | 422. ★ BASCULE-1 — LA BASCULE MÉTÉO AU DESSIN DU JEU COMMUN : UN CADRE AUTOUR, DES OPTIONS DEDANS (22/10 — … | `docs/claude/chantiers-380-429.md` |

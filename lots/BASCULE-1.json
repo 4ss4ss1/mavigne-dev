@@ -1,0 +1,22 @@
+{
+  "lot": "BASCULE-1",
+  "section": "§422",
+  "base": "4a92394d1ef7f596a8ee5c791571737437bd008a",
+  "inclut": [],
+  "date": "2026-10-22",
+  "fichiers": {
+    ".mv-base": "488fcffd6a21385f8b2a871d9e4f0eb89a59a5ce3f544b9c461a19ff8ef871d5",
+    "CLAUDE.md": "6669d8e6b0bba7baabd6372ffe551e4854a968fbae452fd581da9015d8f4b0eb",
+    "docs/claude/INDEX.md": "a78e7c0cae390a574999dd44ad6d95e53b3e258bfcada1089aeb6eb862d0db06",
+    "docs/claude/chantiers-380-429.md": "936a30a3ad1a55d4b2daec666d5683ef159d270614f4b6398d52d6d58257ed50",
+    "docs/claude/journal.md": "b8cf3e34863ae93049871b6826bd8d5abbbbd31cf0c3ed246204bae78d2efdf3",
+    "index.html": "01b2d928ffa1ce0d2809b3db71421831281fca744a076d4aedf61c897ec2671c",
+    "public/sw.js": "5791c5a2b44644ce47346b5531a2c712b3040d3ebea093a7c759dad7a2c00c40",
+    "scripts/harnais-claude-md.mjs": "b516b62733f7cb39b16d2d051b76936e5429107603d16c0fcb62ebd1e714e936",
+    "scripts/mv-captures.mjs": "2a50c783870ff92836bdb1983a63639d4196969dca0d4b82db20cd7746f01809",
+    "scripts/mv-harnais-boutons.mjs": "45648967c879844573b416c239dafd4281cd75301375ef2bfcd2b830bb4a5c05",
+    "scripts/mv-harnais-jeq1.mjs": "848502fe9ba366464cd235399c0640b83902b9450ce4d5a1c22e599c2a78380d",
+    "src/styles.css": "747869ed3ebb77327b76143b6afdae4a897700137982b99e9c16da26975216f7",
+    "src/utils.js": "106592dfae4b96d706ad0f39808411ebd5052641cd842d9560ef3ff9f375ff26"
+  }
+}

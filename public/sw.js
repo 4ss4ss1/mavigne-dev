@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.60
+// MA VIGNE — Service Worker v10.61
+// v10.61 (22/10/2026) — BASCULE-1 (§422) : la bascule « Vignoble / Secteurs » de la carte Météo devient un vrai groupe du jeu commun — un cadre autour de deux options compactes, la vue choisie teintée (ACCV-3 avait posé le cadre sur chaque bouton : taille terrain, texte au bord, aucune option marquée).
 // v10.60 (21/10/2026) — JEQ-1 (§421) : les listes « qui a travaillé » ne proposent que les personnes sous contrat ce jour-là (correction du Journal, validation, barre d’équipe, équipes du jour) ; les cochés de la correction en vert ; le compteur de la barre au jeu commun, aligné, et son libellé accordé.
 // v10.59 (21/10/2026) — ANTICIPE-1 (§420) : les points à anticiper en tête d’« À savoir », surlignés et marqués, et la phrase d’Aujourd’hui qui y mène ; « Absences : » dans la tuile Effectif, « Absence d’… » dans « À savoir ». APP 9.79 -> 9.80.
 // v10.58 (21/10/2026) — ACCV-4 (§419) : l’Accueil compte comme le reste de l’appli (arrachage par étapes, jauge du Pilotage, sessions de la saison, qui a vraiment travaillé) ; l’administrateur corrige l’équipe d’une validation au Journal.
@@ -4592,7 +4593,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.60';
+const CACHE_NAME   = 'mavigne-v10.61';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4609,7 +4610,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.60 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.61 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4629,7 +4630,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.60 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.61 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

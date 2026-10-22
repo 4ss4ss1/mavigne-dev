@@ -82,7 +82,10 @@ const ECRANS = {
   'reserve-achat': "goTo('reserve'); setTimeout(function(){ if (window._rsvOpenAchat) window._rsvOpenAchat(); }, 500);",
   // ★ CHARTE-6c (§403) : une fiche du Cuvier (ses champs .mvv-tin)
   'cuvier-client': "goTo('cave'); setTimeout(function(){ if (window._caveRegSec) window._caveRegSec('cuvier'); setTimeout(function(){ if (window.openVendClient) window.openVendClient(); }, 400); }, 400);",
-  'mot-de-passe-erreur': "goTo('reglages'); if (window.openChangePwd) window.openChangePwd(); else window._openOv('ovChangePwd'); setTimeout(function(){ var e = document.getElementById('cpwd-error'); if (e) { e.textContent = 'Le mot de passe actuel ne correspond pas.'; e.style.display = 'block'; } }, 300);"
+  'mot-de-passe-erreur': "goTo('reglages'); if (window.openChangePwd) window.openChangePwd(); else window._openOv('ovChangePwd'); setTimeout(function(){ var e = document.getElementById('cpwd-error'); if (e) { e.textContent = 'Le mot de passe actuel ne correspond pas.'; e.style.display = 'block'; } }, 300);",
+  // ★ BASCULE-1 (§422) : la bascule « Vignoble / Secteurs » de la carte Météo. La démo n’a qu’une commune : l’appli la cache
+  // (moins de deux communes), c’est pourquoi ACCV-3 ne l’a jamais vue au rendu. L’outil l’affiche, sans rien changer d’autre.
+  'accueil-meteo-bascule': "goTo('home'); setTimeout(function(){ var s = document.getElementById('home-meteo-vue'); if (s) s.style.display = ''; var c = document.querySelector('.home-w[data-w=\"meteo5\"]'); if (c) c.scrollIntoView({ block: 'center' }); }, 400);"
 };
 const choisis = opt('--ecrans') ? opt('--ecrans').split(',').map(x => x.trim()).filter(Boolean) : Object.keys(ECRANS);
 const inconnus = choisis.filter(x => !ECRANS[x]);

@@ -99,7 +99,8 @@ function suite(S) {
   T('G1', 'le compteur prend la pièce neutre du jeu, suivi de son point ; libellés accordés ; 9+ au-delà', g1);
   T('G2', 'barre repliée : l’infobulle et le nom du bouton disent le nombre ; rien à signaler, rien de collé', g2);
   // H. ce que l'appli raconte
-  T('H1', 'la nouveauté 9.81, l’aide et le guide le disent', /export const WHATS_NEW = \[\n  \{ v: '9\.81', d: '2026-10-21', items: \[/.test(S.uti) && S.uti.includes('La liste propose les personnes sous contrat le jour de l’entrée, plus celles déjà notées')
+  // ★ BASCULE-1 (§422) : le bloc 9.81 où qu’il soit — qu’il ouvre le journal, c’est C27 (mv-whatsnew-check) qui le tient, pas ce lot.
+  T('H1', 'la nouveauté 9.81, l’aide et le guide le disent', /\{ v: '9\.81', d: '2026-10-21', items: \[/.test(S.uti) && S.uti.includes('La liste propose les personnes sous contrat le jour de l’entrée, plus celles déjà notées')
     && S.uti.includes('Un petit compteur au bout d’une entrée signale ce qui attend') && S.g4.includes("La liste propose les personnes sous contrat le jour de l'entrée") && S.g1.includes("Un petit compteur au bout d'une entrée signale ce qui attend") && !S.g1.includes('Une pastille rouge sur une entrée'));
   T('H2', 'ce harnais est branché dans la liste des contrôles', S.liste.includes("['node scripts/mv-harnais-jeq1.mjs'],") && S.liste.includes("['node scripts/mv-harnais-jeq1.mjs --contre'],"));
   return out;

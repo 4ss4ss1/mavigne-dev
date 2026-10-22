@@ -8589,8 +8589,10 @@ input[type="checkbox"], input[type="radio"]{ accent-color:var(--accent); }
 #page-home .hk-ed.cours .hk-ed-h{ font-weight:var(--fw-semi,600); color:var(--attention-texte); }
 #page-home .hk-plus{ width:100%; margin-top:var(--e-2,8px); }
 #page-home .hk-plus[aria-expanded="true"] .mv-ic{ transform:rotate(180deg); }
-/* ACCV-3 (§418) : la bascule de la carte Météo — deux boutons « choix » du jeu commun, rangés à droite du titre */
-#page-home .hk-seg{ margin-left:auto; display:inline-flex; gap:var(--e-1,4px); }
+/* ACCV-3 (§418) : la bascule de la carte Météo, rangée à droite du titre. ★ BASCULE-1 (§422) : son dessin vient du jeu commun —
+   .mvbtn-choix est le CADRE du groupe (posé sur ce span), chaque bouton une .mvbtn-option compacte. ACCV-3 avait posé le cadre
+   sur chaque bouton : taille terrain, texte collé au bord, aucune option marquée. Cette règle ne garde que la place. */
+#page-home .hk-seg{ margin-left:auto; flex:none; }
 @media (max-width:1023.98px){
   #page-home #home-grille #home-cols{ display:contents; }
   #page-home .home-w[data-w="demarrage"]{ order:0; }

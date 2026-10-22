@@ -19,7 +19,11 @@
         d'un module, ou dans un style écrit sur place à côté de la classe — exemptions écrites, avec raison ;
      D. que le compte des classes de boutons qui posent LEUR PROPRE fond ou arrondi remonte (PLAFOND :
         il ne peut que baisser, on le baisse à la main en passant des classes au jeu) ;
-     E. que la charte perde --sur-danger (le texte du bouton Danger, clair et sombre).
+     E. que la charte perde --sur-danger (le texte du bouton Danger, clair et sombre) ;
+     F. ★ BASCULE-1 (§422) : que le cadre .mvbtn-choix soit posé sur un <button> (index.html, modules). C'est le CADRE
+        d'un groupe d'options, posé une fois autour ; sur chaque bouton, il en fait un cadre à part, en taille terrain,
+        le texte collé au bord, sans option marquée — la bascule Météo d'ACCV-3 (§418), jamais vue : la démo n'a
+        qu'une commune.
    ⚠️ Il ne regarde pas un écran : la preuve au navigateur se fait au lot (§370).
    ─────────────────────────────────────────────────────────────────────────── */
 import fs from 'node:fs';
@@ -62,7 +66,7 @@ const decls = c => c.split(';').map(x => x.trim()).filter(Boolean).map(x => x.sp
 const porte = (sel, c) => new RegExp('\\.' + c.replace(/-/g, '\\-') + '(?![\\w-])').test(sel.replace(/:not\([^)]*\)/g, ''));   // une classe citée dans :not() n’est pas stylée
 
 function verifier(S) {
-  const f = { A: [], B: [], C: [], D: [], E: [] };
+  const f = { A: [], B: [], C: [], D: [], E: [], F: [] };
   const { dedans, dehors } = bloc(S['src/styles.css']);
   /* A */
   if (!dedans) f.A.push('le bloc CHARTE-3 est introuvable dans styles.css');
@@ -104,10 +108,13 @@ function verifier(S) {
   /* E */
   const n = (sansCom(S['src/charte.css'] || '').match(/--sur-danger\s*:/g) || []).length;
   if (n !== 3) f.E.push('--sur-danger déclaré ' + n + ' fois dans la charte (attendu : 3 — clair, sombre manuel, sombre automatique)');
+  /* F — le cadre .mvbtn-choix entoure un groupe : jamais sur un bouton (BASCULE-1, §422) */
+  for (const fi of ['index.html', ...MODULES])
+    for (const m of (S[fi] || '').matchAll(/<button\b[^>]*?\bclass=\\?["'][^"'<>]*(?<![\w-])mvbtn-choix(?![\w-])/g)) f.F.push(fi + ' : « ' + m[0].slice(0, 80) + ' »');
   return { f, maison: maison.size, pieces: PIECES.length };
 }
 
-const S0 = Object.fromEntries(['src/styles.css', 'src/charte.css', ...MODULES].map(x => [x, lire(x)]));
+const S0 = Object.fromEntries(['src/styles.css', 'src/charte.css', 'index.html', ...MODULES].map(x => [x, lire(x)]));
 let ok = 0, ko = 0;
 const t = (nom, cond, detail) => { if (cond) { ok++; console.log('  \x1b[32m✓\x1b[0m ' + nom); } else { ko++; console.log('  \x1b[31m✗\x1b[0m ' + nom + (detail ? '\n      → ' + detail : '')); } };
 const liste = a => a.slice(0, 6).join('\n        ') + (a.length > 6 ? '\n        … (+' + (a.length - 6) + ')' : '');
@@ -120,6 +127,7 @@ if (!CONTRE) {
   t('les boutons « maison » ne remontent pas (' + maison + ' ≤ ' + PLAFOND + ')', f.D.length === 0, liste(f.D));
   if (maison < PLAFOND) console.log('    ↓ ' + (PLAFOND - maison) + ' de moins — baisser PLAFOND dans ce fichier');
   t('la charte porte --sur-danger en clair et en sombre', f.E.length === 0, liste(f.E));
+  t('le cadre .mvbtn-choix entoure un groupe d’options, il n’est posé sur aucun bouton', f.F.length === 0, liste(f.F));
 } else {
   console.log('\n── CONTRE-ÉPREUVES — le jeu de boutons commun (CHARTE-3)\n');
   const muter = (fi, fn) => { const S = { ...S0 }; const av = S[fi]; S[fi] = fn(av); if (S[fi] === av) throw new Error('défaut non posé : ' + fi); return S; };
@@ -130,12 +138,15 @@ if (!CONTRE) {
     ['une classe passée au jeu reprend un arrondi dans un module', 'C', () => muter('src/cave.js', s => s + "\nwindow._zz = '.plan-btn-pdf{border-radius:10px}';\n")],
     ['un style écrit sur place à côté d’une classe passée au jeu', 'C', () => muter('src/planning.js', s => s + "\nwindow._zz = '<button class=\"plan-btn-saisir\" style=\"background:#1C1A2E\">x</button>';\n")],
     ['un bouton « maison » de plus', 'D', () => muter('src/styles.css', s => s + '\n.zz-neuf-btn{background:var(--vert);border-radius:12px}\n')],
-    ['la charte perd --sur-danger', 'E', () => muter('src/charte.css', s => s.replace('--sur-danger:#FFFFFF;', ''))]
+    ['la charte perd --sur-danger', 'E', () => muter('src/charte.css', s => s.replace('--sur-danger:#FFFFFF;', ''))],
+    ['le cadre .mvbtn-choix posé sur un bouton dans index.html (la bascule Météo d’ACCV-3)', 'F', () => muter('index.html', s => s + '\n<button type="button" class="mvbtn mvbtn-choix" data-vue="vignoble">Vignoble</button>\n')],
+    ['le cadre .mvbtn-choix posé sur un bouton écrit par un module', 'F', () => muter('src/cuvier.js', s => s + "\nwindow._zz = '<button type=\\\"button\\\" class=\\\"mvbtn-choix\\\">x</button>';\n")]
   ];
   for (const [nom, r, fab] of CAS) { let S; try { S = fab(); } catch (e) { t(nom + ' — ' + e.message, false); continue; } t(nom + ' → la règle ' + r + ' rougit', verifier(S).f[r].length > 0); }
   for (const [nom, fab] of [
     ['une allure dans un commentaire ne compte pas', () => muter('src/styles.css', s => s + '\n/* .trac-type-btn{background:red} */\n')],
-    ['la mise en page d’une classe passée au jeu reste permise', () => muter('src/styles.css', s => s + '\n.trac-type-btn{flex:1}\n')]]) {
+    ['la mise en page d’une classe passée au jeu reste permise', () => muter('src/styles.css', s => s + '\n.trac-type-btn{flex:1}\n')],
+    ['le cadre .mvbtn-choix autour de ses options reste permis', () => muter('src/cuvier.js', s => s + "\nwindow._zz = '<div class=\\\"mvbtn-choix\\\" role=\\\"group\\\"><button type=\\\"button\\\" class=\\\"mvbtn mvbtn-option\\\">x</button></div>';\n")]]) {
     const { f } = verifier(fab()); const n = Object.values(f).reduce((a, x) => a + x.length, 0);
     t('témoin — ' + nom, n === 0, Object.entries(f).filter(([, a]) => a.length).map(([k, a]) => k + ' : ' + a[0]).join(' · '));
   }
