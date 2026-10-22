@@ -100,6 +100,7 @@ var TU_TUTOS = [
   { id: 'jequipe', titre: 'Comment faire pour corriger l’équipe d’une validation\u00a0?', fin: 'corriger l’équipe d’une validation',
     module: 'Vigne', pages: ['journal'], pour: 'admin', duree: '1 min', depart: 'journal',
     couvre: ['openJEquipe', '_jEqBasc', 'saveJEquipe'],
+    avant: function (m) { m.jeq0 = new Date().toISOString(); },   // ★ TUTO-9 (§423) : l'heure du départ, pour l'étape 3
     retenir: ['Journal › bouton « Équipe » sur une validation (administrateur).',
               'Cochez qui a vraiment travaillé ; celui qui a validé peut rester décoché : il reste l’auteur de l’entrée.',
               '« Toute la journée » corrige d’un coup les validations de la même tâche, le même jour.'],
@@ -108,12 +109,15 @@ var TU_TUTOS = [
         txt: function () { return 'Vous êtes dans le Journal. Chaque validation porte un bouton « Équipe ». {T} celui de la première.'; },
         fait: function () { return _ouvert('ovJEquipe'); },
         ok: 'La fenêtre « Qui a fait ce travail ? » s’est ouverte.' },
-      { type: 'choisir', options: ['[data-jeq-n="Jean"]', '[data-jeq-n="Sophie"]'], zone: function () { return _q('#jeq-pick'); },
+      { type: 'choisir', options: ['[data-jeq-n="Jean"]', '[data-jeq-n="Sophie"]'], zone: function () { var z = _q('#jeq-pick'); return z ? [z] : []; },   // TUTO-9 : une LISTE (le moteur la parcourt)
         txt: function () { return 'Cochez Jean et Sophie : ce sont eux qui ont fait le travail. Celui qui a validé peut rester décoché.'; },
         txtReel: 'cochez qui a vraiment travaillé' },
       { type: 'toucher', cible: '[data-tuto="journal.equipe.ok"]',
         txt: function () { return '{T} « Enregistrer ». L’entrée garde la trace de la correction.'; },
-        fait: function () { return !_ouvert('ovJEquipe'); },
+        // ★ TUTO-9 (§423) : « la fenêtre est fermée » était vrai AVANT même de l'ouvrir — côté domaine, le panneau voyait
+        //   l'étape 3 faite dès l'étape 1 (saut d'étape, la règle de TUTO-7). Fait = fenêtre refermée ET une validation corrigée
+        //   depuis le départ du tuto (la trace « Équipe corrigée par… » que pose saveJEquipe).
+        fait: function (memo) { return !_ouvert('ovJEquipe') && _jeqCorrigee(memo); },
         ok: 'L’équipe est corrigée : la saison de chacun suit.' }
     ] },
   { id: 'equipes', titre: 'Comment faire pour indiquer les équipes du jour\u00a0?', fin: 'indiquer les équipes du jour',
@@ -961,6 +965,20 @@ function _tuCave() {
     analyses: [a(1, 'Les Charmes', -6, 196), a(2, 'Les Charmes', -2, 204), a(3, 'Clos du Moulin', -5, 203), a(4, 'Clos du Moulin', -1, 211), a(5, 'Vieilles Vignes', -2, 199)],
     recoltes: [], cuves_vinif: [] };
 }
+/* ★ TUTO-9 (§423) — UN JOURNAL POUR LE DOMAINE FICTIF. Le tuto « corriger l'équipe d'une validation » (ACCV-4, §419) vise le
+   bouton « Équipe » d'une validation : le domaine fictif n'en avait AUCUNE (« Journal vide »), le tuto restait à l'étape 1
+   partout. test:tutos ne l'a pas vu au téléphone : il y jouait un autre tuto sous son nom (§423b). La première validation est
+   celle que le tuto corrige : Paul l'a validée seul, Jean et Sophie ont fait le travail. Dates CALCULÉES (_tuJour), comme la
+   vendange : ce sont toujours les derniers jours. */
+function _tuJournal() {
+  var v = function (n, j, p, t, qui, eq) { return { id: 'tu_j' + n, date: _tuJour(j), parcelle: p, tache: t, qui: qui, statut: 'Validé', equipe: eq.length > 0, membresEquipe: eq }; };
+  return [v(1, -1, 'Les Charmes', 'Relevage', 'Paul', []), v(2, -1, 'Clos du Moulin', 'Relevage', 'Marie', ['Jean']), v(3, -2, 'Vieilles Vignes', 'Palissage', 'Sophie', ['Paul'])];
+}
+function _jeqCorrigee(memo) {
+  var t0 = memo && memo.jeq0;
+  if (!t0) return false;
+  return (window.JOURNAL || []).some(function (x) { return !!(x && x.eqCorr && String(x.eqCorr.le || '') >= t0); });
+}
 function _charger() {
   var d = JSON.parse(JSON.stringify(TU_DONNEES));
   ['config', 'membres', 'saisons', 'taches', 'activites', 'conducteurs', 'parcelles'].forEach(function (k) {
@@ -968,6 +986,7 @@ function _charger() {
     try { window.applyFbData(k, d[k]); } catch (e) { _avale(e, '_charger#' + k); }
   });
   if (typeof window.applyFbData === 'function') { try { window.applyFbData('cave_vendange', _tuCave()); } catch (e) { _avale(e, '_charger#cave_vendange'); } }
+  if (typeof window.applyFbData === 'function') { try { window.applyFbData('journal', _tuJournal()); } catch (e) { _avale(e, '_charger#journal'); } }   // TUTO-9
 }
 function _demarrer() {
   var t = _tuto(String(window.__MV_TUTO || ''));

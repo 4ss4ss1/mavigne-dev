@@ -1,0 +1,34 @@
+{
+  "lot": "TUTO-9",
+  "section": "§423",
+  "base": "123c0c1804155246d58e2f7784a0622920a3b40b",
+  "inclut": [],
+  "date": "2026-10-22",
+  "tutos": {
+    "ok": true,
+    "empreinte": "42991b80e6e528086878287d5e1ecebe92bbd8a3e857c7f3567f0177ab79489e",
+    "date": "2026-10-22T08:26:55.294Z",
+    "joues": {
+      "téléphone": 4,
+      "ordinateur": 4
+    }
+  },
+  "fichiers": {
+    ".mv-base": "727c828fb73c9cba80f0f649256d28ea45695f0538c239e8b4d4258158603f93",
+    "CLAUDE.md": "3aa750437d5c5bd8eb5f005fa32969d9eeaac1c39a520d40a8fedd97175db131",
+    "docs/claude/INDEX.md": "f12069e21326e86c16a1134eec8da09b90eda330ac1e0505b2de2f9d647849a1",
+    "docs/claude/chantiers-380-429.md": "b703df074f380c6f40751f95e706a2babc9c67d393b79e255f9d3dc805a62be3",
+    "docs/claude/journal.md": "8b1cf8ec8d90e62e21da91c59ff9a001c8b2745f184787ad7e7b311c6fb73835",
+    "guide/01-demarrer.html": "c32a81f942f14c9fba1d367a7aa49c564fd70b1488941407467e31eba3402231",
+    "index.html": "4253ef970a2f40c6fa362246c1aa4f8bb75de27fb66e9c232b75817acb155265",
+    "public/sw.js": "dca6129ec2c3ba3248742bd39924414815b4210ffeb93eeb63bb87c22093ee32",
+    "scripts/mv-harnais-liste.mjs": "97a8571be2dbe46b8c42a85589fb71c387fb7745490d40572d717c996c0efc98",
+    "scripts/mv-lot-marque.mjs": "28687cc7d877c4831e9c938f66ff4f50192bcc17491f39f5e7e973e16075f131",
+    "scripts/mv-tutos-jeu.mjs": "43ebd7bbb004e4d0b1f94e35e41a16ab4f92e4f27f8221d38937f031f7efe132",
+    "scripts/typo-baseline.json": "2459ad915b1ac7a005d9bf7c3dba41a02c1c6790079607fc52f0830b79c6db57",
+    "src/tutos.js": "552cc137761708e9ae100bf4585ef50b816c6cba7dea3499b3241aa26c87dbf6",
+    "src/utils.js": "81831573bbb6c5908f9da34de9a490869f1086fbb92936c7bbc4f8d0e131104a",
+    "scripts/mv-harnais-tuto9.mjs": "c6645fa2997a244ce2e1d06699cd84bdd9e16bbc28259c29701e95e144d90c9e",
+    "scripts/mv-tutos-empreinte.mjs": "b06b0b5680cc30ad5c4a2fd14ef4d462a3001594f0f4860104b65ee65f359d40"
+  }
+}

@@ -783,6 +783,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-anticipe1.mjs --contre'],
   ['node scripts/mv-harnais-jeq1.mjs'],
   ['node scripts/mv-harnais-jeq1.mjs --contre'],
+  ['node scripts/mv-harnais-tuto9.mjs'],             // TUTO-9 (§423) : le Journal du domaine fictif, l'étape « Enregistrer », test:tutos qui joue tout et compte, la marque qui exige les tutos rejoués
+  ['node scripts/mv-harnais-tuto9.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────

@@ -476,3 +476,4 @@
 | 420 | 420. ★ ANTICIPE-1 — LES POINTS À ANTICIPER, EN TÊTE ET D’UN GESTE (21/10 — `src/cockpit-vue.js` (`savoirIte… | `docs/claude/chantiers-380-429.md` |
 | 421 | 421. ★★ JEQ-1 — QUI A TRAVAILLÉ : SEULEMENT LES PRÉSENTS, ET ON VOIT QUI EST COCHÉ ; LE COMPTEUR DE LA BARR… | `docs/claude/chantiers-380-429.md` |
 | 422 | 422. ★ BASCULE-1 — LA BASCULE MÉTÉO AU DESSIN DU JEU COMMUN : UN CADRE AUTOUR, DES OPTIONS DEDANS (22/10 — … | `docs/claude/chantiers-380-429.md` |
+| 423 | 423. ★★ TUTO-9 — LES TUTOS SUIVENT CHAQUE CHANGEMENT : LE TUTO DU JOURNAL VA AU BOUT, ET PLUS DE LIVRAISON … | `docs/claude/chantiers-380-429.md` |

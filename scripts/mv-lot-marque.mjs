@@ -6,6 +6,7 @@
 import fs from 'fs'; import path from 'path'; import { execFileSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { empreinteDe } from './mv-lots.mjs';
+import { empreinteSources, toucheAppli } from './mv-tutos-empreinte.mjs';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const a = process.argv.slice(2), lot = a[0];
 if (!lot || !/^[A-Z0-9][A-Z0-9+_-]*$/.test(lot)) { console.error('usage : node scripts/mv-lot-marque.mjs <LOT> [--section §NNN] [--inclut A,B]'); process.exit(2); }
@@ -24,7 +25,25 @@ lignes.forEach(l => {
   if (f.startsWith('lots/') || etat.includes('D')) return;
   fichiers[f] = empreinteDe(fs.readFileSync(path.join(R, f)));
 });
-const marque = { lot, section: opt('--section'), base, inclut: (opt('--inclut') || '').split(',').filter(Boolean), date: new Date().toISOString().slice(0, 10), fichiers };
+// ★ TUTO-9 (§423) — PAS DE MARQUE SANS TUTOS REJOUÉS SUR CES FICHIERS. ACCV-4 a livré un tuto jamais joué (« mv-tutos-jeu.mjs
+//   n'est pas dans la chaîne ») : la CI l'a trouvé après coup, au rouge. Un lot qui touche l'appli exige rapports/tutos.json
+//   (écrit par npm run test:tutos) : vert, et fait sur les sources telles qu'elles partent. Exception décidée, écrite dans la
+//   marque : --sans-tutos "<raison>".
+let tutos = null;
+if (toucheAppli(Object.keys(fichiers))) {
+  const raison = opt('--sans-tutos');
+  if (raison) tutos = { saute: raison };
+  else {
+    let rap = null;
+    try { rap = JSON.parse(fs.readFileSync(path.join(R, 'rapports', 'tutos.json'), 'utf8')); } catch (e) { rap = null; }
+    const emp = empreinteSources(R);
+    if (!rap) { console.error('les tutos n’ont pas été rejoués : npm run build, puis npm run test:tutos (ou --sans-tutos "<raison>")'); process.exit(4); }
+    if (rap.empreinte !== emp) { console.error('les tutos ont été rejoués sur d’autres sources que celles du lot (un fichier a changé depuis) : npm run build, puis npm run test:tutos'); process.exit(4); }
+    if (!rap.ok) { console.error('npm run test:tutos est rouge (' + rap.rouges + ') : le tuto doit suivre l’écran avant la livraison'); process.exit(4); }
+    tutos = { ok: true, empreinte: emp, date: rap.date, joues: rap.joues };
+  }
+}
+const marque = { lot, section: opt('--section'), base, inclut: (opt('--inclut') || '').split(',').filter(Boolean), date: new Date().toISOString().slice(0, 10), tutos, fichiers };
 fs.mkdirSync(path.join(R, 'lots'), { recursive: true });
 fs.writeFileSync(path.join(R, 'lots', lot + '.json'), JSON.stringify(marque, null, 2) + '\n');
 console.log('marque posée : lots/' + lot + '.json — ' + Object.keys(fichiers).length + ' fichiers, base ' + base.slice(0, 7));

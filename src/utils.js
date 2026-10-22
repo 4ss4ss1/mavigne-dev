@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.82';
+export const APP_VERSION = '9.83';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.83', d: '2026-10-22', items: [
+    { niv: 0, pour: ['admin'], emoji: 'doigt', titre: 'Le tuto « corriger l’équipe d’une validation » va au bout',
+      desc: "Il restait bloqué dès la première étape : le domaine d’entraînement n’avait aucune validation dans son Journal, donc aucun bouton « Équipe » à montrer. Il en a maintenant, et le tuto se joue jusqu’à « Enregistrer », sur téléphone comme sur ordinateur, et à côté de l’appli." },
+  ] },
   { v: '9.82', d: '2026-10-22', items: [
     { niv: 0, pour: ['tous'], emoji: 'nuage', titre: 'La bascule de la carte Météo, discrète et lisible',
       desc: "Sur un domaine à plusieurs communes, les boutons « Vignoble » et « Secteurs » de la carte Météo étaient trop gros et trop voyants, et rien ne montrait lequel était choisi. Ils deviennent une petite bascule dans un même cadre, comme les autres de l’appli : la vue choisie est surlignée." },

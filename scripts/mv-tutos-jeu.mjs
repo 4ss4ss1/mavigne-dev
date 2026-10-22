@@ -16,10 +16,14 @@
    Hermétique comme le smoke : tout ce qui n'est pas le serveur local est coupé.
    TUTO-2 (§359) : chaque tuto est aussi joué DANS UN CADRE (le panneau d'entraînement sur ordinateur) ; on
    exige que la mémoire de l'appli qui l'ouvre ne bouge pas et que « Fermer l'entraînement » la prévienne.
+   ★ TUTO-9 (§423) : chaque tuto de la liste est joué sur chaque écran, sous son vrai nom, et COMPTÉ ; un build plus ancien
+   que les sources est refusé ; le rapport (rapports/tutos.json) dit sur quelles sources les tutos ont été rejoués — la
+   marque d'un lot l'exige (scripts/mv-lot-marque.mjs).
    ─────────────────────────────────────────────────────────────────────────── */
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, writeFileSync, mkdirSync } from 'node:fs';
+import { empreinteSources, sourcesPlusRecentes } from './mv-tutos-empreinte.mjs';
 import { join, extname, resolve } from 'node:path';
 
 const DIR = resolve(process.argv.includes('--dir') ? process.argv[process.argv.indexOf('--dir') + 1] : 'dist');
@@ -197,6 +201,10 @@ async function main() {
   let pw;
   try { pw = await import('playwright'); } catch (e) { console.error(c.r('✖ Playwright absent : npm i -D playwright && npx playwright install chromium')); process.exit(2); }
   if (!existsSync(DIR)) { console.error(c.r('✖ ' + DIR + ' absent : lancer npm run build d\u2019abord')); process.exit(2); }
+  // ★ TUTO-9 : un build plus ancien que les sources rejouerait les tutos d'AVANT le changement — et dirait vert.
+  const vieux = sourcesPlusRecentes('.', join(DIR, 'version.json'));
+  if (vieux.length) { console.error(c.r('✖ le build est plus ancien que ' + vieux.slice(0, 3).join(', ') + (vieux.length > 3 ? '…' : '') + ' : npm run build, puis npm run test:tutos')); process.exit(2); }
+  const empreinte = empreinteSources('.');
   const srv = await serveur(DIR), base = 'http://127.0.0.1:' + srv.address().port + '/';
   const navigateur = await pw.chromium.launch(process.env.MV_CHROMIUM ? { executablePath: process.env.MV_CHROMIUM, args: ['--no-sandbox'] } : {});
   const ECRANS = [
@@ -204,12 +212,23 @@ async function main() {
     { nom: 'ordinateur', ctx: { viewport: { width: 1280, height: 860 } } },
   ];
   console.log(c.b('MA VIGNE — Les tutos rejoués sur le build') + c.dim('  (' + base + ')'));
-  let liste = ['equipes'], rouges = 0, premier = true;
+  // ★ TUTO-9 (§423) — CHAQUE TUTO, SUR CHAQUE ÉCRAN, SOUS SON VRAI NOM. La liste se lisait dans l'appli au premier tuto
+  //   joué (« equipes »), et ce premier résultat s'affichait sous le nom du PREMIER de la liste : depuis qu'ACCV-4 a mis
+  //   « jequipe » en tête, le téléphone affichait « jequipe ✓ 5/5 » pour… « equipes », et ne jouait jamais « jequipe ».
+  //   On rejoue la vraie liste en entier (sans refaire ce qui est fait), chaque ligne porte le tuto JOUÉ, et on COMPTE :
+  //   un tuto non joué est un rouge (§25 : compter les sites lus, pas seulement vérifier qu'un motif existe).
+  let liste = null, rouges = 0;
+  const joues = {};
   for (const ecran of ECRANS) {
-    for (let i = 0; i < liste.length; i++) {
-      const r = await jouer(navigateur, base, liste[i], ecran);
-      if (premier && r.etat && r.etat.liste && r.etat.liste.length) { liste = r.etat.liste; premier = false; }
-      const lib = ecran.nom + ' · ' + liste[i] + ' · ' + (r.etat ? (r.etat.etape + '/' + r.etat.total + ' étapes') : '?') + ' · ' + (r.ms / 1000).toFixed(1) + ' s · porte : ' + ((r.etat && r.etat.bloques) || 0) + ' appel(s) retenu(s)';
+    const faits = new Set();
+    let a = liste || ['equipes'];
+    for (let i = 0; i < a.length; i++) {
+      const id = a[i];
+      if (faits.has(id)) continue;
+      const r = await jouer(navigateur, base, id, ecran);
+      faits.add(id);
+      if (!liste && r.etat && r.etat.liste && r.etat.liste.length) { liste = r.etat.liste.slice(); a = liste; i = -1; }
+      const lib = ecran.nom + ' · ' + id + ' · ' + (r.etat ? (r.etat.etape + '/' + r.etat.total + ' étapes') : '?') + ' · ' + (r.ms / 1000).toFixed(1) + ' s · porte : ' + ((r.etat && r.etat.bloques) || 0) + ' appel(s) retenu(s)';
       if (r.ok) console.log(c.g('  ✓ ') + lib);
       else {
         rouges++;
@@ -219,7 +238,10 @@ async function main() {
         r.fuites.slice(0, 5).forEach((e) => console.log('      fuite vers le serveur : ' + e));
       }
     }
+    joues[ecran.nom] = faits.size;
   }
+  if (!liste) { rouges++; liste = []; console.log(c.r('  ✗ ') + 'la liste des tutos n\u2019a pas pu être lue dans l\u2019appli'); }
+  for (const ecran of ECRANS) if (joues[ecran.nom] !== liste.length) { rouges++; console.log(c.r('  ✗ ') + ecran.nom + ' : ' + joues[ecran.nom] + ' tuto(s) joué(s) pour ' + liste.length + ' dans l\u2019appli'); }
   for (let i = 0; i < liste.length; i++) {
     const r = await jouerCadre(navigateur, base, liste[i]);
     const lib = 'panneau (cadre) · ' + liste[i] + ' · ' + (r.etat ? (r.etat.etape + '/' + r.etat.total + ' étapes') : '?') + ' · ' + (r.ms / 1000).toFixed(1) + ' s · mémoire de l\u2019appli intacte, fermeture transmise';
@@ -237,6 +259,10 @@ async function main() {
     else { rouges++; console.log(c.r('  ✗ ') + 'boot.js d\u2019une version précédente'); r.erreurs.forEach((e) => console.log('      ' + e)); }
   }
   await navigateur.close(); srv.close();
+  // ★ TUTO-9 (§423) — LE RAPPORT : sur QUELLES sources les tutos ont été rejoués. scripts/mv-lot-marque.mjs le lit : pas de
+  //   marque de lot — donc pas de zip — sans tutos rejoués, au vert, sur les fichiers tels qu'ils partent.
+  try { mkdirSync('rapports', { recursive: true }); writeFileSync('rapports/tutos.json', JSON.stringify({ ok: !rouges, rouges, empreinte, date: new Date().toISOString(), tutos: liste, joues }, null, 2) + '\n'); }
+  catch (e) { rouges++; console.log(c.r('  ✗ rapport non écrit : ' + e.message)); }
   console.log('\n  ' + (rouges ? c.r(rouges + ' tuto(s) ne vont plus au bout : l\u2019écran a changé, le tuto doit suivre') : c.g('chaque tuto va au bout, sans rien envoyer au serveur')) + '\n');
   process.exit(rouges ? 1 : 0);
 }
