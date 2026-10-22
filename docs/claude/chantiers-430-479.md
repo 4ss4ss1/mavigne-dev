@@ -87,3 +87,29 @@ sulfitage du Chai, ni estimer la dose qui ramène le SO2 actif à l’objectif. 
 
 ### 432d. Ce qui reste
 Température du chai, la mise (oxygène dissous, tests de stabilité), part des anges par cuvée.
+
+## 433. ★★ DIAG-5 — TEMPÉRATURE DU CHAI, MESURES DE LA MISE, PART DES ANGES : LE DIAGNOSTIC N’A PLUS DE « NOUVEAU CHAMP » (22/10 — `src/cave.js` (`_copNouvData`, `_copNouvPrefill`, `_copNouvLignes` : la température ; la remise à zéro de Nouvelle opération ; la mise en bouteille : trois champs et leur enregistrement) · `index.html` (le champ « Température du chai », versions) · `src/diagnostic.js` (`dgnModele` : `temp`, `o2`, `tart`, `prot`, part des anges ; `analyser` : `tempChai` et le frein « Chai » ; indices `temp`, `o2`, `tart_ko`, `prot_ko` ; le risque « Dépôts » ; la Comparaison ; la fiche du vin fini ; la Méthode) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Cave) · `public/sw.js` · `guide/08-cave.html` · `scripts/mv-harnais-diag1.mjs` · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/DIAG-5.json` · **APP 9.91 → 9.92, SW 10.70 → 10.71**, base `6910115`)
+
+### 433a. D’où ça vient
+Les trois derniers « nouveau champ » de la maquette : la température du chai (frein de la malo), les mesures de la mise (protection en
+bouteille, dépôts) et la part des anges par cuvée (mesure grisée de la Comparaison). Nico : « suite ».
+
+### 433b. Ce qui change
+- **Dégustation** : « Température du chai » (°C, facultatif) → `data.temp_chai` ; le journal dit « Chai à 14 °C ». La dégustation est le
+  geste qu’on fait au chai : pas de nouveau type d’opération, pas de geste nouveau (un champ lu à l’enregistrement).
+- **Mise en bouteille** : oxygène dissous (mg/L) et tests de stabilité tartrique et protéique (Non fait / Stable / Instable), facultatifs,
+  dans la même rangée que « Bouteilles réelles » → `c.mise_o2`, `c.mise_tart`, `c.mise_prot`.
+- **Diagnostic** : la dernière température des 30 jours entre dans les freins de la malo (favorable de 18 à 22 °C, défavorable sous
+  16 °C) et dans l’indice « Chai à moins de 16 °C » ; « Au chai » dit où la noter. À la mise : `o2` au-delà de 1 mg/L (repère de
+  l’oxygène total visé), `tart_ko`, `prot_ko` — le risque « Dépôts et troubles » a désormais deux indices principaux.
+- **Part des anges** : la somme des volumes ouillés (`vol_total_L`, le premier ouillage exclu) ramenée à l’année, sur le volume des
+  fûts de la cuvée (nombre × contenance) ; au moins deux mois d’ouillages. Elle allume la mesure de la Comparaison et s’affiche dans
+  la fiche (bloc Fûts).
+- La Méthode n’a plus aucune ligne « Nouveau champ ».
+
+### 433c. Pièges
+- Une seule température par dégustation, pas de relevé continu : le diagnostic prend la dernière des 30 jours et dit sa date.
+- La part des anges compte ce qu’on a remis dans les fûts : un ouillage sans volume noté ne compte pas, la part serait sous-estimée.
+
+### 433d. Ce qui reste
+Rien de la maquette. À suivre selon l’usage : une force de solution par soutirage, un relevé de température dédié s’il en faut un.

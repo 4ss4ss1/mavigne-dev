@@ -1212,6 +1212,7 @@ sans bump — c'est une page de `public/`, hors `SHELL_STATIC` (§27d).
   ★ **DIAG-2 (§430)** : le soutirage porte `data.air` (true = à l’air, false = à l’abri, absent = non renseigné : `_copSoutAir`, `setCopSoutAir`) ; la dégustation a le signal `fleur` (`_COP_DG_SIG`).
   ★ **DIAG-3 (§431)** : `LABO_ANA` porte 13 analyses (+ `azote`, `ep` en µg/L, `acet`, `ethanal`) ; le diagnostic les compare au seuil de perception (`confLabo`, `evaluer` : `contre`).
   ★ **DIAG-4 (§432)** : `config.diag.solution` (force de la solution de SO2 du Chai) → `dgnMglChai` : mg/L des doses du soutirage, calculés à la lecture, jamais écrits.
+  ★ **DIAG-5 (§433)** : dégustation `data.temp_chai` ; mise `c.mise_o2`, `c.mise_tart`, `c.mise_prot` ; part des anges calculée sur `vol_total_L` des ouillages.
 - **Le Cuvier** : vendange. **Cuvées normalisées** (`_cuvKey` + distance de Levenshtein).
   ★ **Repeint aux couleurs de la Cave le 09/08** (c'était le dernier écran sombre ; 7 textes hérités
   étaient illisibles).

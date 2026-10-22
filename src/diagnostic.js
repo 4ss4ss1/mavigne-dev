@@ -85,7 +85,7 @@ function dgnModele(cuvee, lab) {
   var nbL = 0, sumL = 0;
   (Array.isArray(cuvee.tonneaux) ? cuvee.tonneaux : []).forEach(function (l) { var v = dgnNum(l && l.l), nb = Math.max(1, parseInt(l && l.nb, 10) || 1); if (v > 0) { sumL += v * nb; nbL += nb; } });
   var futL = nbL ? sumL / nbL : 228;
-  var gestes = [], ouil = [];
+  var gestes = [], ouil = [], ouilVol = [];
   if (cv && Array.isArray(cv.operations)) cv.operations.forEach(function (o) {
     if (!o || typeof o !== 'object' || !dgnOkD(o.date)) return;
     var ty = DGN_CUVIER[o.type] || ['trait', String(o.type || 'Opération').charAt(0).toUpperCase() + String(o.type || 'opération').slice(1)];
@@ -97,7 +97,7 @@ function dgnModele(cuvee, lab) {
   if (dec && dgnOkD(dec.date)) gestes.push({ d: dgnD(dec.date), k: 'enton', l: 'Décuvage et entonnage', det: '' });
   dgnOpsDe(cuvee).forEach(function (op) {
     var d = (op.data && typeof op.data === 'object') ? op.data : {}, ds = dgnD(op.date);
-    if (op.type === 'ouillage') { ouil.push(ds); return; }
+    if (op.type === 'ouillage') { ouil.push(ds); var vo = dgnNum(d.vol_total_L); if (vo > 0) ouilVol.push({ d: ds, v: vo }); return; }   /* DIAG-5 : le volume ouillé fait la part des anges */
     if (op.type === 'analyse') return;
     if (op.type === 'soutirage') {
       gestes.push({ d: ds, k: 'sout', l: 'Soutirage', det: d.note ? String(d.note) : '', air: (d.air === true || d.air === false) ? d.air : null });   /* DIAG-2 : op.data.air */
@@ -112,7 +112,7 @@ function dgnModele(cuvee, lab) {
     if (op.type === 'degustation') {
       var f = (d.fut && typeof d.fut === 'object') ? d.fut : null, sig = Array.isArray(d.signaux) ? d.signaux.slice() : [];
       var txt = sig.map(function (x) { return DGN_SIG[x] || x; }).join(', ');
-      gestes.push({ d: ds, k: 'degus', l: f ? 'Dégustation d’un fût' : 'Dégustation', det: (f && f.repere ? 'Fût ' + f.repere + (f.four || f.annee ? ' (' + [f.four, f.annee].filter(Boolean).join(', ') + ')' : '') + ' : ' : '') + (txt || 'aucun signal noté') + '.', sig: sig, suite: d.suite || null, fut: f ? ('fût ' + String(f.repere || '').trim()).trim() : null, futDe: f ? [f.four, f.annee].filter(Boolean).join(', ') : '' });
+      gestes.push({ d: ds, k: 'degus', temp: dgnNum(d.temp_chai), l: f ? 'Dégustation d’un fût' : 'Dégustation', det: (f && f.repere ? 'Fût ' + f.repere + (f.four || f.annee ? ' (' + [f.four, f.annee].filter(Boolean).join(', ') + ')' : '') + ' : ' : '') + (txt || 'aucun signal noté') + '.', sig: sig, suite: d.suite || null, fut: f ? ('fût ' + String(f.repere || '').trim()).trim() : null, futDe: f ? [f.four, f.annee].filter(Boolean).join(', ') : '' });
       return;
     }
     var LBL2 = { traitement: ['trait', 'Traitement'], filtration: ['filtre', 'Filtration'], retrait_fut: ['retrait', 'Retrait de fût'], assemblage: ['asm', 'Assemblage'] }[op.type] || ['trait', 'Opération'];
@@ -132,13 +132,20 @@ function dgnModele(cuvee, lab) {
     if (v == null) return; if (v < 2) v = v * 1000;
     if (v >= 1002) densPts.push({ d: dgnD(m.date), s: Math.round((v - 1000) * 2.2) });
   });
+  /* DIAG-5 : part des anges = volume ouillé ramené à l’année, sur le volume des fûts de la cuvée (au moins deux mois d’ouillages) */
+  var anges = null, volFuts = nbL ? sumL : 0;
+  if (ouilVol.length >= 2 && volFuts > 0) {
+    var j0 = Date.parse(ouilVol[0].d + 'T00:00:00Z'), j1 = Date.parse(ouilVol[ouilVol.length - 1].d + 'T00:00:00Z'), ans = (j1 - j0) / 864e5 / 365;
+    if (ans >= 60 / 365) anges = Math.round(ouilVol.slice(1).reduce(function (s, o) { return s + o.v; }, 0) / volFuts / ans * 1000) / 10;
+  }
+  var mt = function (v) { return v === 'stable' || v === 'instable' ? v : null; };
   var dates = [fa0, m0].concat(ana.map(function (a) { return a.d; }), gestes.map(function (g) { return g.d; })).filter(Boolean).sort();
   var debut = dates.length ? dgnIso(Date.parse(dates[0] + 'T00:00:00Z') - 5 * 864e5) : dgnIso(dgnAujMs() - 30 * 864e5);
   if (!fa1) fa1 = fa0 || m0 || debut;
   if (!fa0) fa0 = fa1;
   if (!m0) m0 = fa1;
-  return { k: String(cuvee.id), id: cuvee.id, nom: String(cuvee.nom || 'Cuvée'), mil: cuvee.millesime != null ? cuvee.millesime : '', coul: dgnCoul(cv), anges: null,
-    futs: futs, debut: debut, fa: [fa0, fa1], malo: [m0, m1], mise: mise, bouteilles: cuvee.nb_bouteilles || null, tart: null, co2: null,
+  return { k: String(cuvee.id), id: cuvee.id, nom: String(cuvee.nom || 'Cuvée'), mil: cuvee.millesime != null ? cuvee.millesime : '', coul: dgnCoul(cv), anges: anges, o2: dgnNum(cuvee.mise_o2), prot: mt(cuvee.mise_prot),
+    futs: futs, debut: debut, fa: [fa0, fa1], malo: [m0, m1], mise: mise, bouteilles: cuvee.nb_bouteilles || null, tart: mt(cuvee.mise_tart), co2: null,
     densPts: densPts, ana: ana, gestes: gestes, ouilDates: ouil.sort(), sansCuve: !cv, futL: futL };
 }
 function dgnDonnees() {
@@ -261,12 +268,14 @@ function analyser(D) {
   var enrich = 0, enrichInconnu = false; D.gestes.forEach(function (g) { if (g.k === 'chapt') { if (g.vol) enrich += g.vol; else enrichInconnu = true; } });
   var so2tp = serie('so2t'), so2t = so2tp.length ? so2tp[so2tp.length - 1].v : null;
   var phLast = phAt(ref);
-  var conds = [], nLim = 0;
+  var conds = [], nLim = 0, tempChai = null;
+  D.gestes.forEach(function (g) { var ms = t(g.d); if (g.k === 'degus' && g.temp != null && ms <= ref && ms >= ref - 30 * J) tempChai = { v: g.temp, ms: ms }; });
   if (!maloEnd) {
     var cond = function (nom, txt, fav, def) { return { nom: nom, v: txt, etat: fav ? 'favorable' : (def ? 'défavorable' : 'limite') }; };
     if (tav != null) conds.push(cond('TAV', nf(tav, 1) + ' % vol', tav < 13, tav > 14));
     if (phLast != null) conds.push(cond('pH', nf(phLast, 2), phLast >= 3.3 && phLast <= 3.5, phLast < 3.1));
     if (so2t != null) conds.push(cond('SO2 total', nf(so2t, 0) + ' mg/L', so2t < 30, so2t > 40));
+    if (tempChai) conds.push(cond('Chai', nf(tempChai.v, 1) + ' °C', tempChai.v >= 18 && tempChai.v <= 22, tempChai.v < 16));   /* DIAG-5 : la température notée à la dégustation */
     nLim = conds.filter(function (c) { return c.etat !== 'favorable'; }).length;
   }
 
@@ -290,7 +299,7 @@ function analyser(D) {
   return {
     D: D, obj: obj, miseMs: miseMs, ref: ref, phAt: phAt, serie: serie, nbF: nbF, nbNeuf: nbNeuf, part: part, age: age,
     faEnd: faEnd, m0: m0, maloEnd: maloEnd, adds: adds, so2: so2, av: av, env: env, gf: gf, malLast: malLast,
-    tav: tav, dp: dp, enrich: enrich, so2t: so2t, phLast: phLast, conds: conds, nLim: nLim, sigs: sigs, defSel: defSel,
+    tav: tav, dp: dp, enrich: enrich, tempChai: tempChai, so2t: so2t, phLast: phLast, conds: conds, nLim: nLim, sigs: sigs, defSel: defSel,
     ouil: ou, enrichInconnu: enrichInconnu, so2Ajoute: adds.reduce(function (s, a) { return s + (a.mgl || 0); }, 0), so2Inconnu: adds.some(function (a) { return !a.mgl; })
   };
 }
@@ -398,8 +407,8 @@ function pourquoi(M, k) {
     if (M.maloEnd) { o.titre = 'Malo terminée'; o.ps.push('Malo achevée le ' + fd(M.maloEnd, true) + ', ' + Math.round((M.maloEnd - M.m0) / J) + ' jours après l’entonnage ; acide malique inférieur à 0,1 g/L.'); o.ps.push('La malo augmente l’acidité volatile : les bactéries dégradent aussi l’acide citrique.'); return o; }
     o.titre = 'Freins de la malo';
     o.ps.push('Repères de l’AWRI : TAV inférieur à 13 % vol, pH de 3,3 à 3,5, SO2 total inférieur à 30 mg/L, température de 18 à 22 °C. Les freins s’additionnent.');
-    o.ps.push('Ici : ' + M.conds.map(function (c) { return c.nom + ' ' + c.v + ' (' + c.etat + ')'; }).join(', ') + '. Température du chai : non suivie.');
-    o.repere = 'Relever la température du chai compléterait ce diagnostic.';
+    o.ps.push('Ici : ' + M.conds.map(function (c) { return c.nom + ' ' + c.v + ' (' + c.etat + ')'; }).join(', ') + '.' + (M.tempChai ? '' : ' Température du chai : aucune notée à la dégustation depuis 30 jours.'));
+    o.repere = (M.tempChai ? 'Température du chai prise à la dégustation du ' + fd(M.tempChai.ms) + '.' : 'Noter la température du chai à la dégustation compléterait ce diagnostic.');
     o.base = pt('Acide malique : ' + nf(M.malLast.v, 1) + ' g/L le ' + fd(t(M.malLast.a.d)));
   }
   return o;
@@ -506,7 +515,7 @@ function indices(M) {
   if (M.tav != null) mk('alc', M.tav > 13 ? 'oui' : 'non', 'TAV supérieur à 13 % vol', nf(M.tav, 1) + ' % vol', 'Labo');
   if (M.so2t != null) mk('so2t', M.so2t > 30 ? 'oui' : 'non', 'SO2 total supérieur à 30 mg/L', nf(M.so2t, 0) + ' mg/L', 'Labo');
   if (M.phLast != null) mk('ph_bas', M.phLast < 3.3 ? 'oui' : 'non', 'pH inférieur à 3,3', 'pH ' + nf(M.phLast, 2), 'Labo');
-  mk('temp', 'inconnu', 'Chai à moins de 16 °C', 'température non suivie (nouveau champ)', 'Nouveau champ');
+  var tg = M.tempChai; if (tg) mk('temp', tg.v < 16 ? 'oui' : 'non', 'Chai à moins de 16 °C', nf(tg.v, 1) + ' °C le ' + fd(tg.ms) + ' (dégustation)', 'Dégustation'); else mk('temp', 'inconnu', 'Chai à moins de 16 °C', 'aucune température notée à la dégustation depuis 30 jours', 'Dégustation');   /* DIAG-5 */
   if (M.gf.fa || M.gf.last) { var gfin = (M.gf.fa || M.gf.last); mk('sucres_fin', gfin.v >= 1 ? 'oui' : 'non', 'Sucres résiduels de 1 g/L ou plus en fin de FA', nf(gfin.v, 1) + ' g/L', 'Labo', 'sucres'); }
   if (M.phLast != null) mk('ph_haut', M.phLast >= 3.5 ? 'oui' : 'non', 'pH de 3,5 ou plus', 'pH ' + nf(M.phLast, 2), 'Labo', 'ph');
   var nass = D.ana.filter(function (x) { return x.nass != null; })[0];
@@ -515,8 +524,10 @@ function indices(M) {
   if (s.mise) {
     mk('actif_mise', s.act < M.obj ? 'oui' : 'non', 'SO2 actif à la mise sous l’objectif', nf(s.act, 2) + ' mg/L pour un objectif de ' + nf(M.obj, 1), 'Calcul', 'so2');
     if (s.apres) mk('baisse_btl', s.last.v - s.apres.v > 5 ? 'oui' : 'non', 'SO2 libre en baisse en bouteille', nf(s.last.v, 0) + ' puis ' + nf(s.apres.v, 0) + ' mg/L en ' + Math.round((s.apres.ms - s.last.ms) / J / 30.44) + ' mois', 'Labo', 'so2');
-    mk('tart_ko', D.tart == null ? 'inconnu' : (/raté/.test(D.tart) ? 'oui' : 'non'), 'Test de stabilité tartrique défavorable', D.tart == null ? 'non renseigné (nouveau champ)' : 'test ' + D.tart, D.tart == null ? 'Nouveau champ' : 'Mise');
-    mk('o2', 'inconnu', 'Oxygène dissous à la mise', 'non mesuré (nouveau champ)', 'Nouveau champ');
+    var tst = function (x) { return x == null ? 'non renseigné' : (x === 'instable' ? 'test défavorable (instable)' : 'test favorable (stable)'); };   /* DIAG-5 : les tests notés à la mise */
+    mk('tart_ko', D.tart == null ? 'inconnu' : (D.tart === 'instable' ? 'oui' : 'non'), 'Test de stabilité tartrique défavorable', tst(D.tart), 'Mise');
+    mk('prot_ko', D.prot == null ? 'inconnu' : (D.prot === 'instable' ? 'oui' : 'non'), 'Test de stabilité protéique défavorable', tst(D.prot), 'Mise');
+    if (D.o2 != null) mk('o2', D.o2 > 1 ? 'oui' : 'non', 'Oxygène dissous à la mise', nf(D.o2, 1) + ' mg/L (repère : 1 mg/L au plus)', 'Mise'); else mk('o2', 'inconnu', 'Oxygène dissous à la mise', 'non mesuré', 'Mise');   /* DIAG-5 */
   }
   return I;
 }
@@ -536,7 +547,7 @@ var RISQUES = {
   btl: [
     { laboL: [], k: 'prot', nom: 'Protection SO2 en bouteille', tc: 'protection SO2 juste', question: 'Protection SO2 un peu juste en bouteille', cause: 'Après la mise, le SO2 libre continue de baisser ; trop bas, il protège moins bien le vin de l’oxydation.', core: [['actif_mise', 2]], sup: [['baisse_btl', 1]], ctx: [], conf: [], labo: 'SO2 libre et total en bouteille', laboDit: '', chai: '', lanes: ['so2'] },
     { laboL: ['Acide malique'], k: 'referm', nom: 'Reprise de fermentation en bouteille', tc: 'reprise de fermentation', question: 'Risque de reprise de fermentation en bouteille ?', cause: 'Des sucres ou de l’acide malique résiduels peuvent fermenter en bouteille.', core: [['sucres_haut', 2], ['malique', 2]], sup: [], ctx: [], conf: [], labo: 'Sucres et acide malique', laboDit: '', chai: '', lanes: ['sucres', 'mal'] },
-    { laboL: ['Tests de stabilité tartrique et protéique'], k: 'stab', nom: 'Dépôts et troubles', tc: 'dépôts', question: 'Risque de dépôts ?', cause: 'Sans stabilisation, des cristaux de tartre ou un trouble protéique peuvent apparaître en bouteille.', core: [['tart_ko', 2]], sup: [], ctx: [], conf: [], labo: 'Tests de stabilité', laboDit: '', chai: '', lanes: [] },
+    { laboL: ['Tests de stabilité tartrique et protéique'], k: 'stab', nom: 'Dépôts et troubles', tc: 'dépôts', question: 'Risque de dépôts ?', cause: 'Sans stabilisation, des cristaux de tartre ou un trouble protéique peuvent apparaître en bouteille.', core: [['tart_ko', 2], ['prot_ko', 2]], sup: [], ctx: [], conf: [], labo: 'Tests de stabilité', laboDit: '', chai: '', lanes: [] },
     { laboL: ['Oxygène dissous'], k: 'o2', nom: 'Oxygène à la mise', tc: 'oxygène à la mise', question: 'Oxygène à la mise trop élevé ?', cause: 'L’oxygène dissous et celui de l’espace de tête consomment le SO2 libre dans les premiers mois.', core: [['o2', 2]], sup: [], ctx: [], conf: [], labo: 'Oxygène dissous', laboDit: '', chai: '', lanes: [] }
   ]
 };
@@ -621,7 +632,7 @@ function dgnCmp() {
   var out = [];
   Object.keys(MOD).forEach(function (k) {
     var M = MOD[k], D = M.D; if (!M.maloEnd) return;
-    var r = { k: k, nom: D.nom, mil: D.mil, coul: D.coul, c: dgnInit(D.nom), enCours: !M.miseMs, neuf: Math.round(M.part * 100), age: M.age, tonn: null, dom: null, av: null, so2: null, anges: null, alerte: false };
+    var r = { k: k, nom: D.nom, mil: D.mil, coul: D.coul, c: dgnInit(D.nom), enCours: !M.miseMs, neuf: Math.round(M.part * 100), age: M.age, tonn: null, dom: null, av: null, so2: null, anges: D.anges, alerte: false };
     var parT = {}; D.futs.forEach(function (f) { parT[f.t] = (parT[f.t] || 0) + f.nb; });
     Object.keys(parT).forEach(function (n) { var p = M.nbF ? parT[n] / M.nbF : 0; if (p >= 0.7 && n !== 'Tonnelier non renseigné') { r.tonn = n; r.dom = Math.round(p * 100); } });
     var avp = M.serie('av').filter(function (p) { return p.ms >= M.maloEnd && p.ms <= M.ref; });
@@ -632,7 +643,7 @@ function dgnCmp() {
     var pentes = []; segs.forEach(function (sg2) { var f = ls(sg2); if (f && f.b < 0) pentes.push(-f.b * 30.44); });
     if (pentes.length) { pentes.sort(function (a, b) { return a - b; }); r.so2 = pentes[Math.floor(pentes.length / 2)]; }
     try { var dg = diagnostic(M); r.alerte = !!(dg.top && dg.top.length && dg.top[0].st === 'probable'); } catch (err) { dgnLog(err); }
-    if (r.av != null || r.so2 != null) out.push(r);
+    if (r.av != null || r.so2 != null || r.anges != null) out.push(r);
   });
   return out;
 }
@@ -885,7 +896,7 @@ function diagHtml(M) {
     var vl = vieuxLot(M), nz = dg.I.nez_ani.g || dg.I.nez_vol.g;
     h += '<div class="dgn-opt"><b>Au chai</b><p>Contrôler les ' + M.nbF + ' fûts au nez, un par un' + (nz && nz.fut ? ', en commençant par le ' + nz.fut + ', puis les plus âgés' : (vl ? ', en commençant par les plus âgés (' + vl.t + ', ' + vl.an + ')' : '')) + '. ' + cap(chai.map(function (e) { return e.R.chai + ' : ' + e.R.tc; }).join(' ; ')) + '. Vérifier aussi la présence de fleur et le niveau.</p><button type="button" class="mvbtn mvbtn-secondaire mvbtn-bureau" data-dgn="tab" data-v="futs">Voir l’ordre de contrôle</button></div>';
   } else if (chai.length && dg.stage === 'malo') {
-    h += '<div class="dgn-opt"><b>Au chai</b><p>Relever la température du chai : en dessous de 16 °C, la malo ralentit. C’est le seul frein que l’application ne mesure pas encore.</p></div>';
+    h += '<div class="dgn-opt"><b>Au chai</b><p>Relever la température du chai : en dessous de 16 °C, la malo ralentit. Elle se note à la dégustation (Nouvelle opération).</p></div>';
   }
   h += '</div></div>';
   /* comparaison des hypothèses */
@@ -1021,13 +1032,14 @@ function ongletFiche(M) {
   bloc('Malo', M.maloEnd ? Math.round((M.maloEnd - M.m0) / J) + ' jours' : 'En attente', M.maloEnd ? pt('Finie le ' + fd(M.maloEnd, true)) : 'Pas encore terminée.');
   if (!av.vide) bloc('Acidité volatile', nf(avU(av.last.v), 2) + ' ' + uAv(true), 'Fin de FA ' + nf(avU(av.fa), 2) + (av.malo != null ? ', fin de malo ' + nf(avU(av.malo), 2) : '') + (M.miseMs ? ', mise ' : ', dernière analyse ') + nf(avU(av.last.v), 2) + '. Valeur attendue : ' + nf(avU(av.env), 2) + '.');
   bloc('Sulfitages', M.adds.length + ' sulfitage' + (M.adds.length > 1 ? 's' : ''), (M.so2Ajoute ? 'Dont ' + nf(M.so2Ajoute, 0) + ' mg/L connus.' : 'Doses non converties en mg/L.') + (!s.vide ? ' ' + (s.mise ? 'À la mise' : 'Dernière analyse') + ' : libre ' + nf(s.last.v, 0) + ', total ' + nf(s.mise ? s.tot : s.last.tot, 0) + ' mg/L.' : ''));
-  bloc('Fûts', M.nbF + ' fûts', M.nbF ? Math.round(M.part * 100) + ' % de neufs, âge moyen ' + vinsTxt(M.age) + '.' : 'Aucun fût renseigné.');
+  bloc('Fûts', M.nbF + ' fûts', M.nbF ? Math.round(M.part * 100) + ' % de neufs, âge moyen ' + vinsTxt(M.age) + (D.anges != null ? ', part des anges ' + nf(D.anges, 1) + ' % par an' : '') + '.' : 'Aucun fût renseigné.');
   var h = '<div class="dgn-grille2" style="margin-top:8px">' + b.join('') + '</div>';
   if (M.miseMs) {
     h += '<h3 style="margin:18px 0 8px;font-size:var(--pt-base,14px)">À la mise, le ' + fd(M.miseMs, true) + '</h3><div class="dgn-grille2">';
     h += '<div class="dgn-bloc"><span class="dgn-k">Bouteilles</span><span class="dgn-v">' + (D.bouteilles ? Number(D.bouteilles).toLocaleString('fr-FR') : '—') + '</span><span class="dgn-c">' + M.ouil.length + ' ouillages pendant l’élevage.</span></div>';
     if (!s.vide && s.mise) h += '<div class="dgn-bloc"><span class="dgn-k">SO2 actif</span><span class="dgn-v">' + nf(s.act, 2) + ' mg/L</span><span class="dgn-c">Libre ' + nf(s.last.v, 0) + ', total ' + nf(s.tot, 0) + ' mg/L, pH ' + nf(s.last.ph, 2) + '.</span></div>';
-    h += '<div class="dgn-bloc"><span class="dgn-k">CO2 dissous, stabilité</span><span class="dgn-v">—</span><span class="dgn-c">Non renseignés (nouveaux champs de la mise).</span></div>';
+    var stb = function (x) { return x === 'stable' ? 'stable' : (x === 'instable' ? 'instable' : 'non renseigné'); };
+    h += '<div class="dgn-bloc"><span class="dgn-k">Oxygène dissous, stabilité</span><span class="dgn-v">' + (D.o2 != null ? nf(D.o2, 1) + ' mg/L' : '—') + '</span><span class="dgn-c">Test tartrique ' + stb(D.tart) + ', test protéique ' + stb(D.prot) + '.</span></div>';
     if (s.apres) h += '<div class="dgn-bloc"><span class="dgn-k">En bouteille</span><span class="dgn-v">' + nf(s.apres.v, 0) + ' mg/L</span><span class="dgn-c">SO2 libre le ' + fd(s.apres.ms, true) + ', ' + nf(s.last.v - s.apres.v, 0) + ' de moins qu’à la mise.</span></div>';
     h += '</div>';
     var A = dgnAvant(M);
@@ -1342,7 +1354,7 @@ function cmpModele() {
 }
 function vueComparer() {
   var C = S.cmp, R = cmpModele();
-  var h = '<div class="dgn-cmp-ctl"><label>Indicateur' + seg([['av', 'Hausse de l’acidité volatile'], ['so2', 'Baisse du SO2 libre'], ['anges', 'Part des anges', true]], 'cmp-mes', C.mes, '', 'Indicateur') + '</label>';
+  var h = '<div class="dgn-cmp-ctl"><label>Indicateur' + seg([['av', 'Hausse de l’acidité volatile'], ['so2', 'Baisse du SO2 libre'], ['anges', 'Part des anges']], 'cmp-mes', C.mes, '', 'Indicateur') + '</label>';
   h += '<label>Critère' + seg([['neuf', 'Part de fûts neufs'], ['age', 'Âge des fûts'], ['tonn', 'Tonnelier'], ['mil', 'Millésime']], 'cmp-axe', C.axe, '', 'Critère') + '</label>';
   h += '<label>Couleur' + seg([['rouge', 'Rouges'], ['blanc', 'Blancs'], ['tous', 'Toutes']], 'cmp-coul', C.coul, '', 'Couleur') + '</label>';
   h += '<button type="button" class="dgn-interr" data-dgn="cmp-ecart" aria-pressed="' + C.ecart + '"><span class="dgn-sw" aria-hidden="true"></span>Exclure la cuvée en alerte</button></div>';
@@ -1400,7 +1412,7 @@ var AIDE = [
   ['Fermentation malolactique', [
     ['Acide malique', 'suivre l’avancement de la malo', 'oui'],
     ['TAV, pH, SO2 total', 'freins de la malo, qui s’additionnent', 'oui'],
-    ['Température du chai', 'en dessous de 16 °C, la malo ralentit', 'nouveau']]],
+    ['Température du chai', 'en dessous de 16 °C, la malo ralentit', 'oui']]],
   ['Élevage', [
     ['Acidité volatile', 'piqûre acétique, Brettanomyces, bactéries lactiques', 'oui'],
     ['SO2 libre, SO2 total et pH', 'SO2 actif (protection) et SO2 combiné', 'oui'],
@@ -1413,11 +1425,11 @@ var AIDE = [
     ['Fleur en surface', 'présence d’air au-dessus du vin', 'oui'],
     ['Ouillages, soutirages à l’air', 'apports d’oxygène', 'oui']]],
   ['Mise en bouteille', [
-    ['SO2 libre, SO2 total et pH', 'protection du vin en bouteille', 'nouveau'],
+    ['SO2 libre, SO2 total et pH', 'protection du vin en bouteille', 'oui'],
     ['Sucres et acide malique', 'prévenir une reprise de fermentation en bouteille', 'oui'],
-    ['Oxygène dissous', 'oxygène total en bouteille : de l’ordre de 1 mg/L', 'nouveau'],
-    ['Tests de stabilité, turbidité', 'prévenir cristaux et troubles', 'nouveau'],
-    ['Contrôle des Brettanomyces en cas de doute', 'décider d’une filtration', 'nouveau']]]
+    ['Oxygène dissous', 'oxygène total en bouteille : de l’ordre de 1 mg/L', 'oui'],
+    ['Tests de stabilité, turbidité', 'prévenir cristaux et troubles', 'oui'],
+    ['Contrôle des Brettanomyces en cas de doute', 'décider d’une filtration', 'oui']]]
 ];
 function renderTiroir() {
   var T = $('dgn-tiroir'), V = $('dgn-voile'), on = !!S.tiroir || !!S.fen;

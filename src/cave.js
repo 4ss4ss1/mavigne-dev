@@ -1433,6 +1433,7 @@ function openOvCaveOp(opId) {
   var snEl=document.getElementById('cop-sout-note');if(snEl)snEl.value='';
   setCopSo2Mode('none');setCopSo2Nb(2);setCopSo2Freq(10);
   _copSoutAir=null;_copSoutAirSync();   // ★ DIAG-2 (§430)
+  var dtEl=document.getElementById('cop-dg-temp');if(dtEl)dtEl.value='';   // ★ DIAG-5 (§433)
   // Reset champs soufre
   _copSoufreG=5;_copSoufreMode='fut';
   var sfEl=document.getElementById('cop-sf-nb');if(sfEl)sfEl.value='';
@@ -1702,6 +1703,7 @@ function _copNouvData(cuvees){
   if(t==='degustation'){
     if(cuvees.length!==1){ showToast('Une dégustation porte sur une seule cuvée','#E07060'); return null; }
     var d={etat:_copDg.etat, signaux:_copDg.sig.slice(), suite:_copDg.suite, fut:null};
+    var _tc=parseFloat(String((document.getElementById('cop-dg-temp')||{}).value||'').replace(',','.')); if(isFinite(_tc)) d.temp_chai=Math.round(_tc*10)/10;   // ★ DIAG-5 (§433) : la température du chai, lue par le diagnostic (freins de la malo)
     if(_copDg.fut){
       var lots=Array.isArray(cuvees[0].tonneaux)?cuvees[0].tonneaux:[], f=null;
       lots.forEach(function(l){ if(l&&_copDgFutKey(l)===_copDg.futKey) f=l; });
@@ -1727,6 +1729,7 @@ function _copNouvPrefill(op){
     var fo=(d.fut&&typeof d.fut==='object')?d.fut:null;
     _copDg={etat:d.etat||null, sig:Array.isArray(d.signaux)?d.signaux.slice():[], suite:d.suite||null, fut:!!fo, futKey:fo?_copDgFutKey(fo):'', repere:fo?String(fo.repere||''):''};
     var r=document.getElementById('cop-dg-repere'); if(r) r.value=_copDg.repere;
+    var te=document.getElementById('cop-dg-temp'); if(te) te.value=(d.temp_chai!=null?d.temp_chai:'');   // ★ DIAG-5 (§433)
   } else if(op.type==='traitement'){
     _copTr={nature:d.nature||'col', prod:d.prod_id||'', volMan:d.vol_src==='saisi'};
     var de=document.getElementById('cop-tr-dose'); if(de) de.value=(d.dose!=null?d.dose:'');
@@ -1743,7 +1746,7 @@ function _copNouvLignes(op){
   if(op.type==='degustation'){
     var e=f(_COP_DG_ETATS,d.etat), su=f(_COP_DG_SUITE,d.suite), l=[];
     var sig=(Array.isArray(d.signaux)?d.signaux:[]).map(function(k){ var x=f(_COP_DG_SIG,k); return x?x[1]:null; }).filter(Boolean);
-    if(e) l.push(e[1]); if(sig.length) l.push(sig.join(', ')); if(su&&su[0]!=='rien') l.push('Suite : '+su[1].toLowerCase());
+    if(e) l.push(e[1]); if(sig.length) l.push(sig.join(', ')); if(d.temp_chai!=null&&d.temp_chai!=='') l.push('Chai \u00e0 '+String(d.temp_chai).replace('.',',')+'\u00a0\u00b0C'); if(su&&su[0]!=='rien') l.push('Suite : '+su[1].toLowerCase());
     if(l.length) out.push(l.join(' \u00b7 '));
     if(d.fut&&typeof d.fut==='object'){
       var g=['Sur un fût']; if(d.fut.annee!=null&&d.fut.annee!=='') g.push(String(d.fut.annee)); if(d.fut.four) g.push(String(d.fut.four)); if(d.fut.ref) g.push(String(d.fut.ref));
@@ -4251,6 +4254,10 @@ function renderCaveBouteille(){
         if(_caveBtlConfirm===c.id){
           html+='<div class="mvb-ask">Mettre « '+_escHtml(c.nom)+' » en bouteille ? Elle quittera le chai.</div>'
             +'<div class="mvb-frow"><div class="mvb-fld"><label>Bouteilles réelles</label><input id="mvb-reel-'+c.id+'" type="number" value="'+auto+'"></div>'
+             /* ★ DIAG-5 (§433) — les mesures de la mise, facultatives, lues par le diagnostic du Chai (protection en bouteille, dépôts) */
+             +'<div class="mvb-fld"><label>Oxygène dissous (mg/L)</label><input id="mvb-o2-'+c.id+'" type="number" step="0.1" min="0" placeholder="facultatif"></div>'
+             +'<div class="mvb-fld"><label>Test tartrique</label><select class="fsel" id="mvb-tart-'+c.id+'"><option value="">Non fait</option><option value="stable">Stable</option><option value="instable">Instable</option></select></div>'
+             +'<div class="mvb-fld"><label>Test protéique</label><select class="fsel" id="mvb-prot-'+c.id+'"><option value="">Non fait</option><option value="stable">Stable</option><option value="instable">Instable</option></select></div>'
             +'<button class="mvb-yes" onclick="_caveBtlConfirmYes(\''+c.id+'\')">Confirmer</button>'
             +'<button class="mvb-no" onclick="_caveBtlConfirmNo()">Annuler</button></div>';
         } else {
@@ -4305,6 +4312,7 @@ function _caveBtlConfirmYes(id){
   var c=(CAVE_ELEVAGE.cuvees||[]).find(function(x){return x.id===id;}); if(!c) return;
   var hl=_caveVolHl(c);
   var reel=parseInt((document.getElementById('mvb-reel-'+id)||{}).value)||_mvBtl(hl);
+  var _o2=parseFloat(String((document.getElementById('mvb-o2-'+id)||{}).value||'').replace(',','.')), _ta=((document.getElementById('mvb-tart-'+id)||{}).value)||'', _pr=((document.getElementById('mvb-prot-'+id)||{}).value)||'';   // ★ DIAG-5 (§433)
   var ch=_caveBilanChaine(c);
   // Les futs de la cuvee redeviennent disponibles : ils sont physiquement vides,
   // vieillis d'un vin. Sans ce retour, le parc fondait a chaque mise en bouteille.
@@ -4317,6 +4325,7 @@ function _caveBtlConfirmYes(id){
   c.statut='embouteille';
   c.nb_bouteilles=reel;
   c.date_embouteillage=_mvToday();
+  if(isFinite(_o2)&&_o2>=0) c.mise_o2=Math.round(_o2*100)/100; if(_ta==='stable'||_ta==='instable') c.mise_tart=_ta; if(_pr==='stable'||_pr==='instable') c.mise_prot=_pr;   // ★ DIAG-5 (§433) : lus par le diagnostic
   // ★ VOL-1 — plus de `cuveHl` (la contenance) (§152b).
   c.bilan_perte={recolteKg:ch.recolteKg,estHl:ch.estHl,entonneHl:ch.entonneHl,entonneSrc:ch.entonneSrc,eleveHl:hl};
   _caveBtlConfirm=null;

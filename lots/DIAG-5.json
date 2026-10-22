@@ -1,0 +1,27 @@
+{
+  "lot": "DIAG-5",
+  "section": "§433",
+  "base": "6910115902056975c0316561d4904ec9e0367caa",
+  "inclut": [],
+  "date": "2026-10-22",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "f5a5d43157aa35c85c390bc845a15206f00b547a614548aace619f7ef4a3fca9",
+    "CLAUDE.md": "8183f48d0fe397e7d858837a7433329c2d30751566229cf23b85e3d6a8b3727c",
+    "docs/claude/INDEX.md": "29770fbb8fb039ff0426bbf87a1253946d5a812baf0e9093efd596fad7207aaa",
+    "docs/claude/chantiers-430-479.md": "727646de566e0fc63f9c65c47402056c9cf777ab75c6999b28c013d158c003fd",
+    "docs/claude/journal.md": "f3e8f5658ccc526640b32f4a3b04db6fa8512ae9078bcf5c4afb338afb4ebf16",
+    "docs/claude/modules.md": "e4675aa93395d8e83e1add83d2b3698ded35f498b5a7ab852d23b0c5fd43a98c",
+    "guide/08-cave.html": "26c86626320454fd3e24ad52fdb023890301e9f7d355789a0799ecf5c554f4a4",
+    "index.html": "23d62262916ce3e17e6709f4e27c80e993edc1513c2a219b362a4ab62b54ce17",
+    "public/sw.js": "ee8cb0d8cab457a4b9fa4424073858265893daf1ae60bc5fd8cd482ea2fd6340",
+    "scripts/harnais-claude-md.mjs": "671217f9fbd54f59dc3a22846018b13c3ce4bcac270755f788ccf629ca745d48",
+    "scripts/mv-harnais-diag1.mjs": "6ff5a6d74dd84ec2d3328263fc725932bf34efb412fddd643564c15ab1877a32",
+    "src/cave.js": "426f27de066af0d4c05a04fc7511ff70c2988b43dead9f98df2a75630c4fc0fa",
+    "src/diagnostic.js": "0eb9073c85ce3da1301c53c5019561a038307cd61851ed65ff28662e98315cc6",
+    "src/utils.js": "8a4d7353ce1f3b2ab7db3e26280d813fb239f1a8bd64a345bfaf3493705a7bb9"
+  }
+}
