@@ -478,3 +478,4 @@
 | 422 | 422. ★ BASCULE-1 — LA BASCULE MÉTÉO AU DESSIN DU JEU COMMUN : UN CADRE AUTOUR, DES OPTIONS DEDANS (22/10 — … | `docs/claude/chantiers-380-429.md` |
 | 423 | 423. ★★ TUTO-9 — LES TUTOS SUIVENT CHAQUE CHANGEMENT : LE TUTO DU JOURNAL VA AU BOUT, ET PLUS DE LIVRAISON … | `docs/claude/chantiers-380-429.md` |
 | 424 | 424. ★★ COTE-1 — LE TUTO À CÔTÉ DE L’APPLI, RIEN DESSOUS ; LE « + » DES BOUTONS D’AJOUT (22/10 — `src/tutos… | `docs/claude/chantiers-380-429.md` |
+| 425 | 425. ★★ TUTO-10 — LES TUTOS SUIVENT LES CHANGEMENTS SANS RALLONGER : L’AIGUILLAGE (22/10 — `scripts/mv-tuto… | `docs/claude/chantiers-380-429.md` |

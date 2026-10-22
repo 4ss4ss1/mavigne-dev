@@ -1125,3 +1125,32 @@ Nico (20/10), capture du PC : « la fenêtre est à droite et il y a un bouton �
 ### 424f. Ouvert
 - À voir chez Nico (§28) : sur SON PC à 125 %, avec ses vraies fenêtres ; « Fenêtre à part » (bloqueur de fenêtres) ; un écran de moins de 1 280 px.
 - Non mesuré : les écrans autres que les Maturités pendant un tuto côte à côte (Planning, Tracteur, Pilotage à ~1 040 px de large avec les règles d’un écran large) — le test ne mesure que la page des Maturités ; un tuto neuf sur un autre écran l’ajoutera de fait (le miroir joue sur l’écran du tuto).
+
+## 425. ★★ TUTO-10 — LES TUTOS SUIVENT LES CHANGEMENTS SANS RALLONGER : L’AIGUILLAGE (22/10 — `scripts/mv-tutos-concernes.mjs` (neuf) · `scripts/mv-tutos-jeu.mjs` (`--concernes`) · `scripts/mv-lot-marque.mjs` (la couverture) · `scripts/mv-harnais-tuto10.mjs` (neuf) · `scripts/mv-harnais-tuto9.mjs` (le compte des refus) · `scripts/mv-harnais-liste.mjs` · `.mv-base` · `lots/TUTO-10.json` · `CLAUDE.md` · `docs/claude/*` · aucun bump, base `cd6a7ef`)
+
+### 425a. La demande
+Nico, après COTE-1 : « que les tutos suivent s’il y a des modifications […] que ça se mette à jour en même temps. Le problème, c’est que je ne veux pas rallonger le temps de vérification […] créer une liste avec les modifs ». Expliqué en langage simple (ce qui suit seul, ce qui ne peut pas, ce que le test attrape), proposé : la liste des tutos concernés, CALCULÉE à chaque lot ; validé (« oui »).
+
+### 425b. Le constat
+- TUTO-9 faisait rejouer TOUS les tutos à chaque lot qui touche l’appli : ~1 min 30 par tuto (téléphone, ordinateur, panneau, miroir), 7 min pour quatre plus le côte à côte — une heure à quarante. Le catalogue doit grandir (820 gestes sans tuto) : la règle serait devenue le goulot.
+- Chaque tuto porte déjà sa fiche : son entrée de `TU_TUTOS`, `couvre` (tenu par `mv-harnais-tutos`), et les `data-tuto` qu’il vise. Rien à écrire à la main : il suffisait de la LIRE.
+
+### 425c. Ce qui est fait
+- **L’aiguillage** (`scripts/mv-tutos-concernes.mjs`), sans git au cœur (`concernes({ fichiers, avant, apres })`, jouable par un harnais) et branché sur git (`depuisGit(base)` : `git diff --name-only`, les fichiers nouveaux, `git show base:f`). Règles : TOUS — tutos.js hors de la liste des tutos (moteur, domaine d’entraînement), `public/boot.js`, `src/firebase.js`, et le chemin vers les modules (`_dockDef`, `_dockBuild`, `_dockGo`, `_railHtml`, `_railRubriques`, `_railBuild`) ; UN TUTO — son entrée, une fonction de `couvre`, la fonction (la plus intérieure) qui porte une de ses étiquettes ou la ligne d’index.html qui la porte, un tuto neuf ; LE CÔTE À CÔTE — coquille.js, styles.css, charte.css. Les commentaires sont blanchis comme au preflight, les espaces et fins de ligne écrasés : un mot changé dans un commentaire ne fait rien rejouer, un fichier passé en fins de ligne Windows non plus.
+- **`npm run test:tutos -- --concernes`** : la liste de l’aiguillage au lieu de la vraie liste ; le côte à côte seulement si sa mise en page est touchée ; le vieux boot.js seulement si tout l’est ; le rapport dit `mode` (`tous` / `concernes`), les tutos joués et `cote`. Sans l’option : tout, comme avant — c’est ce que joue la CI après chaque envoi.
+- **La marque** recalcule la liste du lot : aucun tuto concerné → rien à rejouer, la marque l’écrit (`concernes: []`) ; sinon le rapport doit être vert, fait sur les sources du lot, et COUVRIR la liste (un rapport `concernes` ne vaut pas quand tout est concerné) — un quatrième refus (code 4) : « le rapport ne couvre pas ce que le lot touche ».
+
+### 425d. Arbitrages
+- **Une liste calculée, pas tenue à la main** : une liste à jour à la main est une liste qui ment au premier oubli (la règle d’or n°3) ; les fiches existent et sont tenues par un harnais.
+- **Grossier là où le risque est large** : le moteur, les données partagées et le dock font tout rejouer — c’est rare, et c’est là qu’un oubli coûte le plus.
+- **Ce que l’aiguillage ne voit pas, assumé et rattrapé** : une feuille de styles qui cacherait un bouton visé, un écran changé sans toucher ni les fonctions enseignées ni les boutons visés. La CI rejoue TOUT après chaque envoi ; une prise de la CI est un lien manquant — à ajouter à `couvre` (une fonction que le tuto enseigne sans la nommer) ou à l’aiguillage.
+- **Pas de parallélisme pour l’instant** : rejouer plusieurs tutos à la fois raccourcirait la CI ; à mesurer sur la machine de la CI (cœurs), lot à part si utile.
+
+### 425e. Mesures
+- `mv-harnais-tuto10` : **20 verts** — quatorze changements joués sur les vrais fichiers (rien ; `openJEquipe` → jequipe ; un commentaire → rien ; `_jEqBtn` → jequipe ; la ligne d’« Enregistrer » d’index.html → jequipe ; `_matSaisie` → maturites ; `setJQui` → rien ; `_boucle` → tous ; `_tuJournal` → tous ; la fiche de jequipe → jequipe ; un tuto neuf → lui ; styles.css → côte à côte seul ; boot.js → tous ; `_dockDef` → tous) et six lectures des branchements ; contre-épreuves **9/9**. `mv-harnais-tuto9` : 27 verts, 12/12 (le compte des refus de la marque passe de 3 à 4).
+- **Essai réel, au navigateur** : `openJEquipe` changée (une ligne temporaire, retirée ensuite, `src/` revérifié propre) → l’aiguillage dit « corriger l’équipe d’une validation (jequipe) — openJEquipe a changé ; côte à côte : rien qui le touche » ; `test:tutos --concernes` : téléphone, ordinateur, panneau, miroir de ce seul tuto, **50 s** (contre ~7 min). La marque accepte ce rapport ; le même rapport vidé de sa liste est refusé (code 4, « le rapport ne couvre pas ce que le lot touche : jequipe »).
+- Sur l’historique : le changement de COTE-1 → TOUS (le moteur des tutos, et `_dockBuild`, qui porte l’icône du menu « Plus ») ; TUTO-9 + COTE-1 → TOUS (le domaine d’entraînement). Ce lot-ci (outillage seul) → aucun.
+
+### 425f. Ouvert
+- Le parallélisme de test:tutos dans la CI (à mesurer).
+- Les écrans des tutos (`pages`) ne sont pas lus par l’aiguillage : seuls les boutons visés et les fonctions enseignées le sont. Si une prise de la CI le montre utile, ajouter la fonction qui dessine l’écran au `couvre` du tuto.

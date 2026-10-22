@@ -96,7 +96,7 @@ async function jouer(S) {
   /* ══ 4. LA MARQUE D'UN LOT ══ */
   const mq = sansCommentaires(S.marque);
   t('la marque regarde si le lot touche l’appli', /if \(toucheAppli\(Object\.keys\(fichiers\)\)\)/.test(mq));
-  t('sans rapport, rapport d’autres sources, ou rapport rouge : refus', (mq.match(/process\.exit\(4\)/g) || []).length === 3 && /rap\.empreinte !== emp/.test(mq) && /!rap\.ok/.test(mq));
+  t('sans rapport, rapport d’autres sources, ou rapport rouge : refus', (mq.match(/process\.exit\(4\)/g) || []).length === 4   /* TUTO-10 (§425) : + « le rapport ne couvre pas ce que le lot touche » */ && /rap\.empreinte !== emp/.test(mq) && /!rap\.ok/.test(mq));
   t('l’exception se décide et s’écrit dans la marque', /opt\('--sans-tutos'\)/.test(mq) && /tutos = \{ saute: raison \}/.test(mq) && /date: new Date\(\)\.toISOString\(\)\.slice\(0, 10\), tutos, fichiers/.test(mq));
   try {
     const M = await import('data:text/javascript;base64,' + Buffer.from(S.emp).toString('base64'));

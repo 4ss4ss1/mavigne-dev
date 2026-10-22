@@ -7,6 +7,7 @@ import fs from 'fs'; import path from 'path'; import { execFileSync } from 'chil
 import { fileURLToPath } from 'url';
 import { empreinteDe } from './mv-lots.mjs';
 import { empreinteSources, toucheAppli } from './mv-tutos-empreinte.mjs';
+import { depuisGit } from './mv-tutos-concernes.mjs';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const a = process.argv.slice(2), lot = a[0];
 if (!lot || !/^[A-Z0-9][A-Z0-9+_-]*$/.test(lot)) { console.error('usage : node scripts/mv-lot-marque.mjs <LOT> [--section §NNN] [--inclut A,B]'); process.exit(2); }
@@ -34,13 +35,22 @@ if (toucheAppli(Object.keys(fichiers))) {
   const raison = opt('--sans-tutos');
   if (raison) tutos = { saute: raison };
   else {
-    let rap = null;
-    try { rap = JSON.parse(fs.readFileSync(path.join(R, 'rapports', 'tutos.json'), 'utf8')); } catch (e) { rap = null; }
-    const emp = empreinteSources(R);
-    if (!rap) { console.error('les tutos n’ont pas été rejoués : npm run build, puis npm run test:tutos (ou --sans-tutos "<raison>")'); process.exit(4); }
-    if (rap.empreinte !== emp) { console.error('les tutos ont été rejoués sur d’autres sources que celles du lot (un fichier a changé depuis) : npm run build, puis npm run test:tutos'); process.exit(4); }
-    if (!rap.ok) { console.error('npm run test:tutos est rouge (' + rap.rouges + ') : le tuto doit suivre l’écran avant la livraison'); process.exit(4); }
-    tutos = { ok: true, empreinte: emp, date: rap.date, joues: rap.joues };
+    // ★ TUTO-10 (§425) : l'aiguillage dit quels tutos ce lot touche ; aucun → rien à rejouer, rien à attendre. Sinon le rapport
+    //   doit les couvrir — TOUS si le moteur, le domaine d'entraînement ou le chemin vers les modules ont changé.
+    const aig = depuisGit('HEAD', R);
+    if (!aig.tous && !aig.ids.length && !aig.cote) tutos = { concernes: [], note: 'aucun tuto ne touche ce lot' };
+    else {
+      let rap = null;
+      try { rap = JSON.parse(fs.readFileSync(path.join(R, 'rapports', 'tutos.json'), 'utf8')); } catch (e) { rap = null; }
+      const emp = empreinteSources(R);
+      if (!rap) { console.error('les tutos n’ont pas été rejoués : npm run build, puis npm run test:tutos -- --concernes (ou --sans-tutos "<raison>")'); process.exit(4); }
+      if (rap.empreinte !== emp) { console.error('les tutos ont été rejoués sur d’autres sources que celles du lot (un fichier a changé depuis) : npm run build, puis npm run test:tutos -- --concernes'); process.exit(4); }
+      if (!rap.ok) { console.error('npm run test:tutos est rouge (' + rap.rouges + ') : le tuto doit suivre l’écran avant la livraison'); process.exit(4); }
+      const manque = aig.tous ? ((rap.mode || 'tous') === 'tous' ? [] : ['tous les tutos']) : aig.ids.filter((id) => !(rap.tutos || []).includes(id));
+      if (aig.cote && !rap.cote) manque.push('le côte à côte');
+      if (manque.length) { console.error('le rapport ne couvre pas ce que le lot touche : ' + manque.join(', ') + ' — npm run test:tutos -- --concernes'); process.exit(4); }
+      tutos = { ok: true, empreinte: emp, date: rap.date, joues: rap.joues, concernes: aig.tous ? 'tous' : aig.ids, cote: aig.cote };
+    }
   }
 }
 const marque = { lot, section: opt('--section'), base, inclut: (opt('--inclut') || '').split(',').filter(Boolean), date: new Date().toISOString().slice(0, 10), tutos, fichiers };

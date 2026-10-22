@@ -1,0 +1,22 @@
+{
+  "lot": "TUTO-10",
+  "section": "§425",
+  "base": "cd6a7ef1d34765e49088f169f70044857af0ec2e",
+  "inclut": [],
+  "date": "2026-10-22",
+  "tutos": null,
+  "fichiers": {
+    ".mv-base": "37205cb78ddfceca80e1296ad545062a86a6fe8d8a1908871d10b51349e5b31a",
+    "CLAUDE.md": "b940aa9b39d4ea22e820d2227771aef9779611afbb8cb1e1ee6a055fbe65c08d",
+    "docs/claude/INDEX.md": "c3070d21312edc4cbe7650b997706adfa4d8129ad0f3d8c5fe0de4ed2ed79926",
+    "docs/claude/chantiers-380-429.md": "2430578281fa51f1eca8a1c2a40b41691a363ce45170ad6e27b097dacf81230b",
+    "docs/claude/journal.md": "457be402fc0f3216d71ed0ce4fbadee9bd02e456d861ff78e4d022bda4b7e1ca",
+    "docs/claude/modules.md": "66cf2d4b43f9325bce32b63ca8a766f44bc32aa7f6dd974bf8b30bb37e127981",
+    "scripts/mv-harnais-liste.mjs": "d34d3e48fb4378112072ecf3f5e6d50323f048ef8a348dc7247341bfce2b2102",
+    "scripts/mv-harnais-tuto9.mjs": "b60e687a13da0b2c42e27d3183146cbf818aa1a905294761fb8eb8650c7930d9",
+    "scripts/mv-lot-marque.mjs": "fab0f8c25db646bae2fbc4613fea04e7f142375b26ea3502caf0824216a2bbd3",
+    "scripts/mv-tutos-jeu.mjs": "500f46d8051b34657eb553a8a239dff36dcf08c7414d59da6e3c77f493062025",
+    "scripts/mv-harnais-tuto10.mjs": "6a4bc6aee652bc6d79c6045ac12f9912df605e2facbf836d095487a06b1f2ef4",
+    "scripts/mv-tutos-concernes.mjs": "a6ad74c1bfb08e9c6c3bae2c45f6f9daaa88b65f533e03ace1b8138383b8717c"
+  }
+}

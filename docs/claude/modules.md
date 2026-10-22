@@ -2626,6 +2626,7 @@ côté explique (délai de grâce de 700 ms pendant le défilement) ; « Montre-
 
 **Où.** `src/tutos.js` (moteur, `TU_DONNEES`, `TU_TUTOS`). Entrée : « Me montrer comment faire » en tête
 de l'aide de chaque écran (`openAide`, utils.js) — les tutos de l'écran, puis « Tous les tutos ».
+**Quels tutos rejouer (TUTO-10, §425).** `scripts/mv-tutos-concernes.mjs` lit les fiches (`TU_TUTOS`, `couvre`, `data-tuto`) et le changement : tous (moteur, domaine d’entraînement, bac à sable, chemin des modules), un tuto (sa fiche, une fonction enseignée, la fonction ou la ligne qui porte un bouton visé), le côte à côte (barre latérale, styles). `npm run test:tutos -- --concernes` ne rejoue que cela ; la CI rejoue tout. Un tuto qui enseigne une fonction DOIT la nommer dans `couvre` : c’est ce qui le fait rejouer quand elle change.
 **À côté ou en plein écran (TUTO-2, §359).** ★ **COTE-1 (§424) : à partir de 1 280 px, le panneau est COLLÉ au bord droit (`html.mvtu-cote`, largeur `clamp(360px, 28vw, 420px)`) et l'appli se resserre à côté — ses couches fixes suivent (listes `COTE_*` de tutos.js, tenues par `mv-harnais-cote1`), la barre latérale se juge sur la place qui reste (`window._mvTutoCote`, `ouvert()` de coquille.js) ; au-dessous, plein écran. « De l'autre côté » n'existe plus (TUTO-3).** Ordinateur (≥ 1 024 px, pointeur fin) : panneau à droite avec un
 cadre de l'appli `?tuto=<id>&tuto_cadre=1` ; « De l'autre côté », « Fenêtre à part » (`window.open`), la croix ;
 le cadre demande sa fermeture par `postMessage({mvtu:'fermer'})`. Téléphone et tablette : plein écran.

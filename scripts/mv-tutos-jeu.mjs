@@ -19,11 +19,15 @@
    ★ TUTO-9 (§423) : chaque tuto de la liste est joué sur chaque écran, sous son vrai nom, et COMPTÉ ; un build plus ancien
    que les sources est refusé ; le rapport (rapports/tutos.json) dit sur quelles sources les tutos ont été rejoués — la
    marque d'un lot l'exige (scripts/mv-lot-marque.mjs).
+   ★ TUTO-10 (§425) : npm run test:tutos -- --concernes  ne rejoue que les tutos que le changement touche (l'aiguillage,
+   scripts/mv-tutos-concernes.mjs), le côte à côte si sa mise en page est touchée, tout si le moteur l'est. Sans l'option
+   (la CI, après chaque envoi) : TOUT, comme avant — le filet.
    ─────────────────────────────────────────────────────────────────────────── */
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { existsSync, writeFileSync, mkdirSync } from 'node:fs';
 import { empreinteSources, sourcesPlusRecentes } from './mv-tutos-empreinte.mjs';
+import { depuisGit, texte as texteConcernes } from './mv-tutos-concernes.mjs';
 import { join, extname, resolve } from 'node:path';
 
 const DIR = resolve(process.argv.includes('--dir') ? process.argv[process.argv.indexOf('--dir') + 1] : 'dist');
@@ -303,6 +307,10 @@ async function main() {
   const vieux = sourcesPlusRecentes('.', join(DIR, 'version.json'));
   if (vieux.length) { console.error(c.r('✖ le build est plus ancien que ' + vieux.slice(0, 3).join(', ') + (vieux.length > 3 ? '…' : '') + ' : npm run build, puis npm run test:tutos')); process.exit(2); }
   const empreinte = empreinteSources('.');
+  // ★ TUTO-10 (§425) — --concernes : seulement ce que le changement touche (rien de plus à attendre pour un lot qui ne touche
+  //   aucun tuto). Sans l'option : tout. --base <réf> : le point de départ de la comparaison (le dernier commit par défaut).
+  const aig = process.argv.includes('--concernes') ? depuisGit(process.argv.includes('--base') ? process.argv[process.argv.indexOf('--base') + 1] : 'HEAD') : null;
+  if (aig) console.log(texteConcernes(aig).split('\n').map((x) => '  ' + x).join('\n'));
   const srv = await serveur(DIR), base = 'http://127.0.0.1:' + srv.address().port + '/';
   const navigateur = await pw.chromium.launch(process.env.MV_CHROMIUM ? { executablePath: process.env.MV_CHROMIUM, args: ['--no-sandbox'] } : {});
   const ECRANS = [
@@ -315,7 +323,7 @@ async function main() {
   //   « jequipe » en tête, le téléphone affichait « jequipe ✓ 5/5 » pour… « equipes », et ne jouait jamais « jequipe ».
   //   On rejoue la vraie liste en entier (sans refaire ce qui est fait), chaque ligne porte le tuto JOUÉ, et on COMPTE :
   //   un tuto non joué est un rouge (§25 : compter les sites lus, pas seulement vérifier qu'un motif existe).
-  let liste = null, rouges = 0;
+  let liste = (aig && !aig.tous) ? aig.ids.slice() : null, rouges = 0;   // TUTO-10 : la liste de l'aiguillage, ou la vraie liste lue dans l'appli
   const joues = {};
   for (const ecran of ECRANS) {
     const faits = new Set();
@@ -352,13 +360,13 @@ async function main() {
     else { rouges++; console.log(c.r('  ✗ ') + 'miroir · ' + liste[i]); r.erreurs.slice(0, 6).forEach((e) => console.log('      ' + e)); }
   }
   joues['côte à côte'] = 0;
-  for (const [l, h] of [[1280, 800], [1536, 864], [1920, 1080]]) {
+  for (const [l, h] of ((!aig || aig.cote) ? [[1280, 800], [1536, 864], [1920, 1080]] : [])) {   // TUTO-10 : si sa mise en page est touchée
     const r = await jouerCote(navigateur, base, l, h);
     joues['côte à côte']++;
     if (r.ok) console.log(c.g('  ✓ ') + 'côte à côte · ' + l + ' × ' + h + ' · ' + r.lib);
     else { rouges++; console.log(c.r('  ✗ ') + 'côte à côte · ' + l + ' × ' + h); r.erreurs.slice(0, 6).forEach((e) => console.log('      ' + e)); }
   }
-  {
+  if (!aig || aig.tous) {   // TUTO-10 : le bac à sable n'est rejoué que si tout est concerné
     const r = await jouerVieuxBoot(navigateur, base);
     if (r.ok) console.log(c.g('  ✓ ') + 'boot.js d\u2019une version précédente · le panneau refuse et le dit ; ni entraînement, ni appli');
     else { rouges++; console.log(c.r('  ✗ ') + 'boot.js d\u2019une version précédente'); r.erreurs.forEach((e) => console.log('      ' + e)); }
@@ -366,7 +374,7 @@ async function main() {
   await navigateur.close(); srv.close();
   // ★ TUTO-9 (§423) — LE RAPPORT : sur QUELLES sources les tutos ont été rejoués. scripts/mv-lot-marque.mjs le lit : pas de
   //   marque de lot — donc pas de zip — sans tutos rejoués, au vert, sur les fichiers tels qu'ils partent.
-  try { mkdirSync('rapports', { recursive: true }); writeFileSync('rapports/tutos.json', JSON.stringify({ ok: !rouges, rouges, empreinte, date: new Date().toISOString(), tutos: liste, joues }, null, 2) + '\n'); }
+  try { mkdirSync('rapports', { recursive: true }); writeFileSync('rapports/tutos.json', JSON.stringify({ ok: !rouges, rouges, empreinte, date: new Date().toISOString(), tutos: liste, joues, mode: (!aig || aig.tous) ? 'tous' : 'concernes', cote: !aig || aig.cote }, null, 2) + '\n'); }
   catch (e) { rouges++; console.log(c.r('  ✗ rapport non écrit : ' + e.message)); }
   console.log('\n  ' + (rouges ? c.r(rouges + ' tuto(s) ne vont plus au bout : l\u2019écran a changé, le tuto doit suivre') : c.g('chaque tuto va au bout, sans rien envoyer au serveur')) + '\n');
   process.exit(rouges ? 1 : 0);

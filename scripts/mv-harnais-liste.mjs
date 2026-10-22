@@ -787,6 +787,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-tuto9.mjs --contre'],
   ['node scripts/mv-harnais-cote1.mjs'],             // COTE-1 (§424) : le panneau du tuto collé à droite, l'inventaire des couches fixes, la barre latérale, le « + »
   ['node scripts/mv-harnais-cote1.mjs --contre'],
+  ['node scripts/mv-harnais-tuto10.mjs'],            // TUTO-10 (§425) : l'aiguillage — seulement les tutos que le changement touche ; test:tutos --concernes ; la marque qui exige la couverture
+  ['node scripts/mv-harnais-tuto10.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────
