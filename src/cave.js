@@ -10157,7 +10157,13 @@ var LABO_ANA=[
   {k:'ph',   op:'ph',        h:'pH',                      t:'pH',                 ch:'pH',                    court:'pH',                  long:'pH',                        u:'',      mn:2, mx:2, lo:2.8, hi:4.2},
   {k:'so2l', op:'so2_libre', h:'SO<sub>2</sub> libre',    t:'SO2 libre',          ch:'SO<sub>2</sub> libre',  court:'SO<sub>2</sub> L',   long:'SO<sub>2</sub> libre',      u:'mg/L',  mn:0, mx:0, lo:0,   hi:100},
   {k:'so2t', op:'so2_total', h:'SO<sub>2</sub> total',    t:'SO2 total',          ch:'SO<sub>2</sub> total',  court:'SO<sub>2</sub> T',   long:'SO<sub>2</sub> total',      u:'mg/L',  mn:0, mx:0, lo:0,   hi:250},
-  {k:'mal',  op:'malique',   h:'Malique',                 t:'Malique',            ch:'Malique',               court:'Malique',             long:'Acide malique',             u:'g/L',   mn:1, mx:2, lo:0,   hi:8}
+  {k:'mal',  op:'malique',   h:'Malique',                 t:'Malique',            ch:'Malique',               court:'Malique',             long:'Acide malique',             u:'g/L',   mn:1, mx:2, lo:0,   hi:8},
+  /* ★ DIAG-3 (§431) — les analyses de confirmation du diagnostic du Chai, et l’azote de la vendange. Pas demandées par défaut :
+     la fiche reprend celles de l’envoi précédent. */
+  {k:'azote', op:'azote',          h:'Azote assimilable',       t:'Azote assimilable',  ch:'Azote assimilable',     court:'Azote',               long:'Azote assimilable',         u:'mg/L',  mn:0, mx:0, lo:0,   hi:600},
+  {k:'ep',    op:'ethylphenols',   h:'Éthylphénols',            t:'Éthylphénols',       ch:'Éthylphénols',          court:'4-EP + 4-EG',         long:'Éthylphénols (4-EP + 4-EG)', u:'µg/L', mn:0, mx:0, lo:0,   hi:5000},
+  {k:'acet',  op:'acetate_ethyle', h:'Acétate d’éthyle',        t:'Acétate d’éthyle',   ch:'Acétate d’éthyle',      court:'Acétate',             long:'Acétate d’éthyle',          u:'mg/L',  mn:0, mx:0, lo:0,   hi:600},
+  {k:'ethanal', op:'ethanal',      h:'Éthanal',                 t:'Éthanal',            ch:'Éthanal',               court:'Éthanal',             long:'Éthanal',                   u:'mg/L',  mn:0, mx:0, lo:0,   hi:500}
 ];
 var LABO_MALO={'':'pas dit', cours:'en cours', ok:'terminée'};
 var _LBO={vue:'liste', F:null, P:null, flash:null, envoi:false};

@@ -57,7 +57,7 @@ function dgnModele(cuvee, lab) {
     var ok = (l.lieu === 'chai' && String(l.cid) === String(cuvee.id)) || (cv && l.lieu === 'cuvier' && String(l.cid) === String(cv.id));
     if (!ok || !dgnOkD(l.date)) return;
     var d = dgnD(l.date), a = parD[d] || { d: d }, n = 0;
-    ['tav', 'dp', 'gf', 'av', 'at', 'ph', 'so2l', 'so2t', 'mal'].forEach(function (k) { var o = l.vals && l.vals[k]; if (o && isFinite(o.v)) { a[k] = +o.v; n++; } });
+    ['tav', 'dp', 'gf', 'av', 'at', 'ph', 'so2l', 'so2t', 'mal', 'azote', 'ep', 'acet', 'ethanal'].forEach(function (k) { var o = l.vals && l.vals[k]; if (o && isFinite(o.v)) { a[k] = +o.v; if (k === 'azote') a.nass = +o.v; n++; } });   /* DIAG-3 : les quatre analyses neuves du labo */
     if (l.malo === 'ok') { a.maloOk = true; n++; }
     if (n) parD[d] = a;
   });
@@ -482,9 +482,12 @@ function indices(M) {
   else mk('atdown', 'inconnu', 'Acidité totale en baisse', 'analyses insuffisantes', 'Labo', 'at');
   if (M.gf.last) mk('sucres_haut', M.gf.last.v >= 1 ? 'oui' : 'non', 'Sucres résiduels de 1 g/L ou plus', nf(M.gf.last.v, 1) + ' g/L', 'Labo', 'sucres');
   if (M.malLast) mk('malique', (M.maloEnd && M.malLast.v >= 0.1) ? 'oui' : 'non', 'Acide malique résiduel', M.malLast.v < 0.1 ? 'moins de 0,1 g/L' : nf(M.malLast.v, 1) + ' g/L', 'Labo', 'mal');
-  mk('ep', 'inconnu', 'Éthylphénols (4-EP, 4-EG)', 'non mesurés (nouvelle analyse)', 'Nouveau champ');
-  mk('acet', 'inconnu', 'Acétate d’éthyle', 'non mesuré (nouvelle analyse)', 'Nouveau champ');
-  mk('ethanal', 'inconnu', 'Éthanal', 'non mesuré (nouvelle analyse)', 'Nouveau champ');
+  /* DIAG-3 : l’analyse de confirmation, comparée au seuil de perception (4-EP 370 à 620 µg/L ; acétate d’éthyle 150 à 200 mg/L, AWRI ; éthanal 100 à 125 mg/L, AWRI) */
+  function laboDer(k) { return D.ana.filter(function (a) { return a[k] != null && !a.bouteille && t(a.d) <= M.ref; }).pop() || null; }
+  function confLabo(id, k, label, seuil, u, plur) { var x = laboDer(k); if (!x) { mk(id, 'inconnu', label, plur ? 'non mesurés' : 'non mesuré', 'Labo'); return; } var au = x[k] >= seuil; mk(id, au ? 'oui' : 'non', label, nf(x[k], 0) + ' ' + u + ' le ' + fd(t(x.d)) + (au ? ', au-dessus' : ', en dessous') + ' du seuil de perception (' + seuil + ')', 'Labo'); }
+  confLabo('ep', 'ep', 'Éthylphénols (4-EP, 4-EG)', 400, 'µg/L', true);
+  confLabo('acet', 'acet', 'Acétate d’éthyle', 150, 'mg/L', false);
+  confLabo('ethanal', 'ethanal', 'Éthanal', 100, 'mg/L', false);
   /* malo en cours */
   var mp = M.serie('mal');
   if (!M.maloEnd && mp.length >= 2) { var a0 = mp[mp.length - 2], a1 = mp[mp.length - 1], jj = (a1.ms - a0.ms) / J; mk('mal_stagne', (jj >= 10 && a0.v - a1.v < 0.2) ? 'oui' : 'non', 'Acide malique presque stable', nf(a0.v, 1) + ' puis ' + nf(a1.v, 1) + ' g/L en ' + Math.round(jj) + ' jours', 'Labo', 'mal'); }
@@ -496,7 +499,7 @@ function indices(M) {
   if (M.gf.fa || M.gf.last) { var gfin = (M.gf.fa || M.gf.last); mk('sucres_fin', gfin.v >= 1 ? 'oui' : 'non', 'Sucres résiduels de 1 g/L ou plus en fin de FA', nf(gfin.v, 1) + ' g/L', 'Labo', 'sucres'); }
   if (M.phLast != null) mk('ph_haut', M.phLast >= 3.5 ? 'oui' : 'non', 'pH de 3,5 ou plus', 'pH ' + nf(M.phLast, 2), 'Labo', 'ph');
   var nass = D.ana.filter(function (x) { return x.nass != null; })[0];
-  if (nass) mk('azote', (nass.nass < 150 || (M.dp >= 13 && nass.nass < 200)) ? 'oui' : 'non', 'Azote assimilable faible pour le degré', nass.nass + ' mg/L pour ' + nf(M.dp, 1) + ' % vol probable', 'Nouveau champ');
+  if (nass) mk('azote', (nass.nass < 150 || (M.dp >= 13 && nass.nass < 200)) ? 'oui' : 'non', 'Azote assimilable faible pour le degré', nass.nass + ' mg/L pour ' + nf(M.dp, 1) + ' % vol probable', 'Labo');
   /* en bouteille */
   if (s.mise) {
     mk('actif_mise', s.act < M.obj ? 'oui' : 'non', 'SO2 actif à la mise sous l’objectif', nf(s.act, 2) + ' mg/L pour un objectif de ' + nf(M.obj, 1), 'Calcul', 'so2');
@@ -532,9 +535,11 @@ function evaluer(R, I) {
   R.core.forEach(function (c) { var x = I[c[0]]; if (!x) return; lignes.push({ x: x, role: 'core' }); if (x.etat !== 'inconnu') connus++; if (x.etat === 'oui') { coreN++; score += c[1]; preuves.push(x); } else if (x.etat === 'inconnu') manque.push(x); });
   R.sup.forEach(function (c) { var x = I[c[0]]; if (!x) return; lignes.push({ x: x, role: 'sup' }); if (x.etat === 'oui') { score += c[1]; preuves.push(x); } else if (x.etat === 'inconnu') manque.push(x); });
   R.ctx.forEach(function (id) { var x = I[id]; if (!x) return; lignes.push({ x: x, role: 'ctx' }); if (coreN && x.etat === 'oui') { score += 1; contexte.push(x); } });
-  R.conf.forEach(function (id) { var x = I[id]; if (!x) return; lignes.push({ x: x, role: 'conf' }); if (x.etat === 'inconnu') manque.push(x); });
+  var contre = [], mesures = 0;   /* DIAG-3 : une analyse de confirmation au-dessus du seuil compte comme un indice fort ; en dessous, elle interdit « Signes forts » */
+  R.conf.forEach(function (id) { var x = I[id]; if (!x) return; lignes.push({ x: x, role: 'conf' }); if (x.etat === 'inconnu') { manque.push(x); return; } mesures++; if (x.etat === 'oui') { coreN++; score += 3; preuves.push(x); } else contre.push(x); });
   var st = coreN === 0 ? (connus === 0 ? 'inconnu' : 'rien') : ((coreN >= 2 && score >= 6) ? 'probable' : (score >= 3 ? 'possible' : 'surveiller'));
-  return { R: R, k: R.k, score: score, coreN: coreN, st: st, preuves: preuves, contexte: contexte, manque: manque, lignes: lignes, total: R.core.length + R.sup.length };
+  if (contre.length && st === 'probable') st = 'possible';
+  return { R: R, k: R.k, score: score, coreN: coreN, st: st, preuves: preuves, contexte: contexte, manque: manque, lignes: lignes, contre: contre, total: R.core.length + R.sup.length + mesures };
 }
 var RANG_ST = { probable: 0, possible: 1, surveiller: 2, inconnu: 3, rien: 4 };
 var ST_PILL = { probable: ['dan', 'Signes forts'], possible: ['att', 'Signes modérés'], surveiller: ['n', 'Signe isolé'], inconnu: ['n', 'Non évaluable'], rien: ['ok', 'Aucun signe'] };
@@ -847,7 +852,7 @@ function diagHtml(M) {
     e.preuves.forEach(function (x) {
       if (!ids[x.id]) { ids[x.id] = { x: x, pour: [], fort: false }; vus.push(ids[x.id]); }
       ids[x.id].pour.push(e.R.tc);
-      if (e.R.core.some(function (c) { return c[0] === x.id; })) ids[x.id].fort = true;
+      if (e.R.core.some(function (c) { return c[0] === x.id; }) || (e.R.conf || []).indexOf(x.id) >= 0) ids[x.id].fort = true;   /* DIAG-3 : une analyse de confirmation au-dessus du seuil est un indice principal */
     });
   });
   vus.sort(function (a, b) { return (b.fort - a.fort) || (b.pour.length - a.pour.length); });
@@ -857,6 +862,8 @@ function diagHtml(M) {
   var vF = vus.filter(function (v) { return v.fort; }), vS = vus.filter(function (v) { return !v.fort; });
   h += '<div class="dgn-diag-g"><div class="dgn-diag-bloc"><h3>Indices relevés</h3>' + (vF.length ? '<h4>Principaux</h4><ul class="dgn-preuves">' + vF.map(li).join('') + '</ul>' : '') + (vS.length ? '<h4>Secondaires</h4><ul class="dgn-preuves">' + vS.map(li).join('') + '</ul>' : '');
   var pasSuivi = []; top.forEach(function (e) { e.lignes.forEach(function (l) { if (l.role !== 'conf' && l.x.etat === 'inconnu' && pasSuivi.indexOf(l.x) < 0) pasSuivi.push(l.x); }); });
+  var contre = []; top.forEach(function (e) { (e.contre || []).forEach(function (x) { if (contre.indexOf(x) < 0) contre.push(x); }); });
+  if (contre.length) h += '<div class="dgn-terrain"><span>Analyse contraire</span>' + contre.map(function (x) { return '<span class="mvpas mvpas-etiquette">' + esc(x.label + ' : ' + x.val) + '</span>'; }).join('') + '</div>';
   if (terrain.length) h += '<div class="dgn-terrain"><span>Conditions favorables</span>' + terrain.map(function (x) { return '<span class="mvpas mvpas-etiquette">' + esc(x.val) + '</span>'; }).join('') + '</div>';
   if (pasSuivi.length) h += '<div class="dgn-terrain"><span>Non suivi à ce jour</span>' + pasSuivi.map(function (x) { return '<span class="mvpas mvpas-etiquette dgn-nonsuivi">' + esc(x.label) + '</span>'; }).join('') + '</div>';
   h += '</div><div class="dgn-diag-bloc"><h3>Pour confirmer</h3>';
@@ -1377,7 +1384,7 @@ var AIDE = [
   ['Fermentation alcoolique', [
     ['Densité, chaque jour', 'détecter tôt un ralentissement', 'oui'],
     ['Température de la cuve', 'au-delà de 30 à 32 °C, risque d’arrêt de fermentation', 'oui'],
-    ['Degré probable et azote assimilable', 'plus le degré probable est élevé, plus les levures ont besoin d’azote', 'azote'],
+    ['Degré probable et azote assimilable', 'plus le degré probable est élevé, plus les levures ont besoin d’azote', 'oui'],
     ['Sucres résiduels en fin de FA', 'fermentation achevée sous 2 g/L', 'oui']]],
   ['Fermentation malolactique', [
     ['Acide malique', 'suivre l’avancement de la malo', 'oui'],
@@ -1388,9 +1395,9 @@ var AIDE = [
     ['SO2 libre, SO2 total et pH', 'SO2 actif (protection) et SO2 combiné', 'oui'],
     ['Sucres résiduels', 'substrat des Brettanomyces', 'oui'],
     ['Acidité totale et pH', 'baisse d’acidité en cas de tourne', 'oui'],
-    ['Éthylphénols (4-EP, 4-EG)', 'confirmation des Brettanomyces', 'nouveau'],
-    ['Acétate d’éthyle', 'confirmation d’une piqûre acétique', 'nouveau'],
-    ['Éthanal', 'oxydation, levures de voile (fleur)', 'nouveau'],
+    ['Éthylphénols (4-EP, 4-EG)', 'confirmation des Brettanomyces (seuil de perception : 400 µg/L)', 'oui'],
+    ['Acétate d’éthyle', 'confirmation d’une piqûre acétique (seuil de perception : 150 mg/L)', 'oui'],
+    ['Éthanal', 'oxydation, levures de voile (seuil de perception : 100 mg/L)', 'oui'],
     ['Contrôle au nez, fût par fût', 'localiser le fût en cause', 'oui'],
     ['Fleur en surface', 'présence d’air au-dessus du vin', 'oui'],
     ['Ouillages, soutirages à l’air', 'apports d’oxygène', 'oui']]],
@@ -1408,7 +1415,7 @@ function renderTiroir() {
   if (!S.tiroir) return;
   var h = '';
   if (S.tiroir === 'aide') {
-    h += '<div class="dgn-tiroir-t"><h2>Méthode du diagnostic</h2><button type="button" class="mvbtn mvbtn-discret mvbtn-icone mvbtn-bureau" data-dgn="fermer" aria-label="Fermer">' + ico('fermer') + '</button></div><div class="dgn-tiroir-c"><p class="dgn-intro">L’onglet Diagnostic ne comporte aucune saisie : il croise les données déjà enregistrées dans Cuvées, Bouteilles et Labo.</p><div class="dgn-reg"><h3>Lecture des statuts</h3><ul class="dgn-aide dgn-statuts">' + [['dan', 'Signes forts', 'au moins deux indices principaux concordants'], ['att', 'Signes modérés', 'un indice principal, appuyé par d’autres indices'], ['n', 'Signe isolé', 'un indice principal seul'], ['ok', 'Aucun signe', 'aucun indice principal relevé'], ['n', 'Non évaluable', 'données manquantes ou trop anciennes']].map(function (s) { return '<li>' + pill([s[0], s[1]]) + '<span>' + s[2] + '</span></li>'; }).join('') + '</ul><p class="dgn-petit">Un statut décrit des indices, pas une certitude : il oriente les contrôles et l’analyse de confirmation.</p></div><h3 class="dgn-aide-t">Ce qui est surveillé, étape par étape</h3>';
+    h += '<div class="dgn-tiroir-t"><h2>Méthode du diagnostic</h2><button type="button" class="mvbtn mvbtn-discret mvbtn-icone mvbtn-bureau" data-dgn="fermer" aria-label="Fermer">' + ico('fermer') + '</button></div><div class="dgn-tiroir-c"><p class="dgn-intro">L’onglet Diagnostic ne comporte aucune saisie : il croise les données déjà enregistrées dans Cuvées, Bouteilles et Labo.</p><div class="dgn-reg"><h3>Lecture des statuts</h3><ul class="dgn-aide dgn-statuts">' + [['dan', 'Signes forts', 'au moins deux indices principaux concordants'], ['att', 'Signes modérés', 'un indice principal, appuyé par d’autres indices'], ['n', 'Signe isolé', 'un indice principal seul'], ['ok', 'Aucun signe', 'aucun indice principal relevé'], ['n', 'Non évaluable', 'données manquantes ou trop anciennes']].map(function (s) { return '<li>' + pill([s[0], s[1]]) + '<span>' + s[2] + '</span></li>'; }).join('') + '</ul><p class="dgn-petit">Un statut décrit des indices, pas une certitude : il oriente les contrôles et l’analyse de confirmation. Une analyse de confirmation au-dessus du seuil de perception compte comme un indice fort ; en dessous, elle empêche « Signes forts ».</p></div><h3 class="dgn-aide-t">Ce qui est surveillé, étape par étape</h3>';
     AIDE.forEach(function (et) {
       h += '<div class="dgn-reg"><h3>' + esc(et[0]) + '</h3><ul class="dgn-aide">' + et[1].map(function (l) {
         var tag = l[2] === 'oui' ? '<span class="dgn-src dgn-src-cuvees">Déjà saisi</span>' : (l[2] === 'azote' ? '<span class="dgn-src dgn-src-nouveau">Azote : nouveau champ</span>' : (l[2] === 'air' ? '<span class="dgn-src dgn-src-nouveau">« À l’air » : nouveau champ</span>' : '<span class="dgn-src dgn-src-nouveau">Nouveau champ</span>'));
