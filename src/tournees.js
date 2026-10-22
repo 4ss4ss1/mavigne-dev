@@ -177,7 +177,7 @@ function _trnMonte(){
     + '<div class="trn-titre"><label class="trn-sr" id="trn-nom-lbl" for="trn-nom">Nom de la tournée</label><input id="trn-nom" class="trn-nom" maxlength="40" autocomplete="off" spellcheck="false">'
     + '<p class="trn-aide trn-pconly">L’ordre complet du domaine. L’équipe ne voit que les parcelles qui lui restent à faire, numérotées dans cet ordre.</p></div>'
     + '<div class="trn-act"><span class="trn-etat" id="trn-etat"></span>'
-    + '<button type="button" class="trn-ic" data-trn="menu" aria-label="Plus d’actions" aria-haspopup="menu">' + _trnIc('plus', 18) + '</button>'
+    + '<button type="button" class="trn-ic" data-trn="menu" aria-label="Plus d’actions" aria-haspopup="menu">' + _trnIc('points', 18) + '</button>'
     + '<button type="button" class="trn-ok" id="trn-save" data-trn="save">Enregistrer</button></div></header>'
     + '<div class="trn-seg" role="tablist" aria-label="Affichage">'
     + '<button type="button" role="tab" id="trn-seg-l" data-trn="vue" data-v="liste">' + _trnIc('liste', 16) + 'Liste</button>'

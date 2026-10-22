@@ -197,6 +197,104 @@ async function jouerVieuxBoot(navigateur, base) {
   return { ok: !!r && !erreurs.length, erreurs };
 }
 
+// ★ COTE-1 (§424) — LE PANNEAU À CÔTÉ DE L'APPLI, MESURÉ AU NAVIGATEUR. La démo (Domaine des Grandes Vignes) ouvre le tuto
+//   des maturités par sa vraie entrée (« Me montrer comment faire » → « Commencer l'entraînement »), l'appli déjà sur
+//   Cave › Le Cuvier › Maturités. On exige : le panneau collé au bord droit, sur toute la hauteur, à sa largeur ; l'appli qui
+//   s'arrête à son bord ; le vrai « Noter des mesures » TOUCHABLE (elementFromPoint) et l'anneau doré visible dessus ; aucune
+//   couche fixe de l'appli sous le panneau, avant et après l'ouverture de la fenêtre de saisie ; la barre latérale repliée
+//   quand la place manque ; à la fermeture, la page qui reprend toute sa largeur. MV_TUTOS_CAPTURES=<dossier> : une capture.
+async function jouerCote(navigateur, base, l, h) {
+  const ctx = await navigateur.newContext({ serviceWorkers: 'block', locale: 'fr-FR', viewport: { width: l, height: h } });
+  await ctx.route('**/*', (route) => (route.request().url().startsWith(base) ? route.continue() : route.abort()));
+  const page = await ctx.newPage(), erreurs = [];
+  page.on('pageerror', (e) => { if (!benin(e.message)) erreurs.push('exception : ' + e.message); });
+  const W = Math.min(420, Math.max(360, l * 0.28)), rail = l - W >= 1200;
+  let a = null, b = null, f = null;
+  const sous = () => page.evaluate(() => {
+    const pL = document.getElementById('mvtu-panneau').getBoundingClientRect().left;
+    return [...document.querySelectorAll('body *')].filter((e) => {
+      if (e.closest('#mvtu-panneau') || e.classList.contains('mvtu-anneau')) return false;
+      const cs = getComputedStyle(e);
+      if (cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden' || Number(cs.opacity) === 0) return false;
+      const r = e.getBoundingClientRect();
+      return r.width > 0 && r.height > 0 && r.right > pL + 1 && r.left < window.innerWidth;
+    }).map((e) => (e.id ? '#' + e.id : (e.className && e.className.baseVal === undefined ? '.' + String(e.className).trim().split(/\s+/).join('.') : e.tagName)));
+  });
+  try {
+    let chargements = 0; page.on('load', () => { chargements++; });
+    await page.goto(base + '?tenant=e2e-test', { waitUntil: 'domcontentloaded' });
+    for (let k = 0; k < 40 && chargements < 2; k++) await page.waitForTimeout(250);
+    await page.waitForFunction(() => window.__MV_BOOTED === true && typeof window._startDemoVisite === 'function', null, { timeout: DELAI });
+    await page.waitForTimeout(1200);
+    await page.evaluate(() => { window.fbLoginDemo = async () => true; window._authReady = true; window._startDemoVisite(); });
+    await page.waitForFunction(() => { const ls = document.getElementById('login-screen'); return !ls || ls.style.display === 'none'; }, null, { timeout: 30000 });
+    await page.waitForTimeout(2000);
+    await page.evaluate(() => {
+      // la visite de la démo (#mvt…, .mvt-…) — PAS le panneau du tuto (#mvtu-panneau, qui commence pareil)
+      const cache = () => document.querySelectorAll('[id^="mvt"]:not([id^="mvtu"]), [class^="mvt-"], [class*=" mvt-"]').forEach((e) => { e.style.display = 'none'; });
+      cache(); window.__cacheMvt = setInterval(cache, 300);   // la visite de la démo ne doit pas se mettre en travers
+      const j = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+      const p = (window.PARCELLES || []).map((x) => x && x.nom).filter(Boolean);
+      window.applyFbData('cave_vendange', { config: { poids_caisse_kg: 25, ratio_min: 130, ratio_max: 140, sucre_par_degre: 16.83, mat_four: { r: { min: 205, max: 225 }, b: { min: 195, max: 215 } } },
+        analyses: p.slice(0, 3).map((n, i) => ({ id: 'cote' + i, parcelle: n, date: j(-1 - i), mode: 'sucre', val: 198 + i * 4, spd: 16.83 })), recoltes: [], cuves_vinif: [] });
+      window.goTo('cave');
+    });
+    await page.waitForTimeout(800);
+    await page.evaluate(() => { const c = document.querySelector('[data-tuto="cave.cuvier"]'); if (c) c.click(); });
+    await page.waitForTimeout(800);
+    await page.evaluate(() => { const c = document.querySelector('[data-tuto="cuv.maturites"]'); if (c) c.click(); });
+    await page.waitForTimeout(800);
+    await page.evaluate(() => {
+      const el = document.createElement('div'); document.body.appendChild(el);
+      el.innerHTML = window._mvTutoAideBloc(); window._mvTutoAideBrancher(el);
+      const v = el.querySelector('[data-tu="voir"][data-id="maturites"]'); if (v) v.click();
+      const go = el.querySelector('[data-tu="lancer"]'); if (go) go.click();
+      el.remove();
+    });
+    await page.waitForFunction(() => !!document.getElementById('mvtu-panneau'), null, { timeout: 10000 });
+    await page.waitForTimeout(6000);   // le cadre démarre, s'aligne sur l'écran de l'appli, demande l'anneau
+    a = await page.evaluate(() => {
+      const p = document.getElementById('mvtu-panneau').getBoundingClientRect(), app = document.getElementById('app-content-wrap').getBoundingClientRect();   // la carte visible de l'appli (#app-root se resserre par son rembourrage)
+      const bt = document.querySelector('[data-tuto="mat.noter"]'); let touche = false;
+      if (bt) { bt.scrollIntoView({ block: 'center' }); const r = bt.getBoundingClientRect(), e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); touche = !!(e && (e === bt || bt.contains(e))); }
+      const an = document.querySelector('.mvtu-anneau'), ar = an ? an.getBoundingClientRect() : null;
+      const u = bt ? bt.querySelector('use') : null;
+      return { vw: window.innerWidth, vh: window.innerHeight, pL: p.left, pR: p.right, pT: p.top, pB: p.bottom, appR: app.right, classe: document.documentElement.classList.contains('mvtu-cote'),
+        rail: document.body.classList.contains('mv-rail-ouvert'), bouton: !!bt, touche, ic: u ? u.getAttribute('href') : null,
+        anneau: !!(an && getComputedStyle(an).opacity === '1' && ar.width > 0 && ar.right <= p.left + 1) };
+    });
+    a.sous = await sous();
+    await page.evaluate(() => { const bt = document.querySelector('[data-tuto="mat.noter"]'); if (bt) bt.click(); });
+    await page.waitForTimeout(1200);
+    b = { sous: await sous(), fenetre: await page.evaluate(() => {
+      const pL = document.getElementById('mvtu-panneau').getBoundingClientRect().left;
+      const o = [...document.querySelectorAll('.overlay, .mvv-ov, .mvz-ov')].find((x) => { const cs = getComputedStyle(x), r = x.getBoundingClientRect(); return cs.display !== 'none' && Number(cs.opacity) > 0 && r.width > 0 && r.height > 0; });
+      return o ? { dedans: o.getBoundingClientRect().right <= pL + 1 } : null;
+    }) };
+    if (process.env.MV_TUTOS_CAPTURES) await page.screenshot({ path: join(process.env.MV_TUTOS_CAPTURES, 'cote-' + l + '.png') });
+    await page.evaluate(() => { const x = document.querySelector('#mvtu-panneau [data-p="fermer"]'); if (x) x.click(); });
+    await page.waitForTimeout(900);
+    f = await page.evaluate(() => ({ classe: document.documentElement.classList.contains('mvtu-cote'), appR: document.getElementById('app-content-wrap').getBoundingClientRect().right, vw: window.innerWidth }));
+  } catch (e) { erreurs.push('côte à côte : ' + String(e.message || e).split('\n')[0]); }
+  await ctx.close();
+  const pres = (x, y) => Math.abs(x - y) <= 1.5;
+  if (a) {
+    if (!a.classe) erreurs.push('la page ne fait pas sa place au panneau (html.mvtu-cote absent)');
+    if (!pres(a.pR, a.vw) || !pres(a.pT, 0) || !pres(a.pB, a.vh)) erreurs.push('le panneau n’est pas collé au bord droit sur toute la hauteur : ' + JSON.stringify([a.pL, a.pT, a.pR, a.pB]));
+    if (!pres(a.vw - a.pL, W)) erreurs.push('largeur du panneau ' + Math.round(a.vw - a.pL) + ' px au lieu de ' + Math.round(W));
+    if (a.appR > a.pL + 1.5) erreurs.push('l’appli passe sous le panneau : elle finit à ' + Math.round(a.appR) + ', le panneau commence à ' + Math.round(a.pL));
+    if (!a.bouton) erreurs.push('« Noter des mesures » introuvable dans l’appli');
+    else if (!a.touche) erreurs.push('« Noter des mesures » n’est pas touchable : un autre élément est dessus');
+    if (!a.anneau) erreurs.push('l’anneau doré n’est pas visible sur le vrai bouton');
+    if (a.ic !== '#ic-ajout') erreurs.push('le bouton dessine ' + a.ic + ' au lieu du « + » (#ic-ajout)');
+    if (a.rail !== rail) erreurs.push('barre latérale ' + (a.rail ? 'dépliée' : 'repliée') + ' : attendue ' + (rail ? 'dépliée' : 'repliée') + ' (place restante ' + Math.round(l - W) + ' px)');
+    if (a.sous.length) erreurs.push('sous le panneau, avant la fenêtre : ' + a.sous.slice(0, 4).join(', '));
+  } else erreurs.push('aucune mesure');
+  if (b) { if (!b.fenetre) erreurs.push('la fenêtre de saisie ne s’est pas ouverte'); else if (!b.fenetre.dedans) erreurs.push('la fenêtre de saisie passe sous le panneau'); if (b.sous.length) erreurs.push('sous le panneau, fenêtre ouverte : ' + b.sous.slice(0, 4).join(', ')); }
+  if (f && (f.classe || f.appR < f.vw - 40)) erreurs.push('à la fermeture, la page ne reprend pas toute sa largeur');
+  return { ok: !!(a && b && f) && !erreurs.length, erreurs, lib: a ? ('panneau ' + Math.round(a.vw - a.pL) + ' px, appli jusqu’à ' + Math.round(a.appR) + ', bouton touchable, anneau visible, barre ' + (a.rail ? 'dépliée' : 'repliée') + ', rien dessous') : '' };
+}
+
 async function main() {
   let pw;
   try { pw = await import('playwright'); } catch (e) { console.error(c.r('✖ Playwright absent : npm i -D playwright && npx playwright install chromium')); process.exit(2); }
@@ -252,6 +350,13 @@ async function main() {
     const r = await jouerMiroir(navigateur, base, liste[i]);
     if (r.ok) console.log(c.g('  ✓ ') + 'miroir · ' + liste[i] + ' · la fenêtre suit le domaine jusqu\u2019au bout ; ' + r.n + ' étape(s) vues faites côté domaine');
     else { rouges++; console.log(c.r('  ✗ ') + 'miroir · ' + liste[i]); r.erreurs.slice(0, 6).forEach((e) => console.log('      ' + e)); }
+  }
+  joues['côte à côte'] = 0;
+  for (const [l, h] of [[1280, 800], [1536, 864], [1920, 1080]]) {
+    const r = await jouerCote(navigateur, base, l, h);
+    joues['côte à côte']++;
+    if (r.ok) console.log(c.g('  ✓ ') + 'côte à côte · ' + l + ' × ' + h + ' · ' + r.lib);
+    else { rouges++; console.log(c.r('  ✗ ') + 'côte à côte · ' + l + ' × ' + h); r.erreurs.slice(0, 6).forEach((e) => console.log('      ' + e)); }
   }
   {
     const r = await jouerVieuxBoot(navigateur, base);

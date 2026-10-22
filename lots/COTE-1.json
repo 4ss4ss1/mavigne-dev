@@ -1,0 +1,43 @@
+{
+  "lot": "COTE-1",
+  "section": "§424",
+  "base": "bc73fa4961788beb94c291e09004008a03058f9c",
+  "inclut": [],
+  "date": "2026-10-22",
+  "tutos": {
+    "ok": true,
+    "empreinte": "d47fdc911dbaa6e2aa00dec6fd42422f6e6873c0cd043fefde5910121573f8c8",
+    "date": "2026-10-22T09:12:10.029Z",
+    "joues": {
+      "téléphone": 4,
+      "ordinateur": 4,
+      "côte à côte": 3
+    }
+  },
+  "fichiers": {
+    ".mv-base": "60f8b3c55a9d9d0dc5cddbc16d59e2a53a0d3c2b37877eb47f21ab2f689bb146",
+    "CLAUDE.md": "f9e7dddb53d37a859819dafb1055a16a00abf15cd04a0df8da82c9aa80b61e7e",
+    "docs/claude/INDEX.md": "828b1358223406d5571f8f0b4b431cc2806a56b9ba97444cdce159bc9f74781c",
+    "docs/claude/chantiers-380-429.md": "22b3f74d033cf13e66864b8e73746d6f714d84e7b3e49a449b2a07e55981be6b",
+    "docs/claude/journal.md": "290d5fb3b3e4ebde4ea67cb1b12f5e0b3bca3c194c0a3473c5be40c446f3aabf",
+    "docs/claude/modules.md": "8ced09c979e0b27185a0f12c0eef690f1d3d3c833669918adbeef3f505ef522f",
+    "guide/01-demarrer.html": "a0f75162c1b511bd9f23ac6355631736239b2250e6334c46b3da9d0f422d99b2",
+    "guide/05-saisons.html": "b8890fe67be6ed385dd0c3b45454c24c323245edaf33807a80501724ae7cc088",
+    "index.html": "765af49bf00063832426517ff22c960978314478f847221b0843d924883f1f1c",
+    "public/sw.js": "771718accaa1545992bc66ced669d5678bd884a3e080e89aee42ab6742f0cf55",
+    "scripts/mv-harnais-cave2.mjs": "665e6bf32bf16739a2b631b858dadb777fdbb269a3584b13d968b19c6eed1cc5",
+    "scripts/mv-harnais-liste.mjs": "71da81f7ae5bec69bc06020d45587412b92911a18c4b26ffba46ee8591bb68be",
+    "scripts/mv-harnais-tourcuv1.mjs": "ecaec436f9cc0fa366c3c63f81dce9a47f1a6bec55ffd4b15dd102dcfb97d61d",
+    "scripts/mv-tutos-jeu.mjs": "838052729af3d55ca660347480ffd4e39205bed866be4850c4809a530a42fe5b",
+    "scripts/typo-baseline.json": "9fedb60969db811793038f9ccc0299105e0fb5c956947b9b8990c69b5d7990c0",
+    "src/app.js": "f25e6ebf09e1c238a878f0a56e5e18c62b528a0ac4413988f6511b9c3b92fce0",
+    "src/cave.js": "8cf085ac4243fac77baab8fa15a0462655e7a04572ab3d963c1a5eb41644fb9b",
+    "src/comptes.js": "98cf32f3245922956132dd8e8a1e4cfbd9bfd7d2061101bc194ea4bc57340d92",
+    "src/coquille.js": "802d19ad84e485571b420cd8e0af8597304dd8e2485707f64dde02fd2c308e7a",
+    "src/cuvier.js": "fef25b1c4d2e34f5c8560fcfecf00fd904eb89d0252a4b05bcbefd22b68fb4b3",
+    "src/tournees.js": "ead2d340d477d46a343b73b852e3a1e503fd29d69f0776516ae31ffddb3a0041",
+    "src/tutos.js": "f92f918c13060b383287dc126d45bb70a32fb41d738032d6166c5db67bad1982",
+    "src/utils.js": "f162d073633440c7e878f8acbf8b449dcc163308c2570ae415b02efa77116ec4",
+    "scripts/mv-harnais-cote1.mjs": "51bfb51ecc2efcb4e7003936bae84438b2b4492598a00c6ce51b0a57fbc2a4ac"
+  }
+}

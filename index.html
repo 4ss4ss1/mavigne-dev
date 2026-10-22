@@ -161,7 +161,8 @@
   <symbol id="ic-pause" viewBox="0 0 24 24" data-src="pause"><rect x="14" y="3" width="5" height="18" rx="1" /> <rect x="5" y="3" width="5" height="18" rx="1" /></symbol>
   <symbol id="ic-personne" viewBox="0 0 24 24" data-src="user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /> <circle cx="12" cy="7" r="4" /></symbol>
   <symbol id="ic-pluie" viewBox="0 0 24 24" data-src="cloud-rain"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" /> <path d="M16 14v6" /> <path d="M8 14v6" /> <path d="M12 16v6" /></symbol>
-  <symbol id="ic-plus" viewBox="0 0 24 24" data-src="ellipsis"><circle cx="12" cy="12" r="1" /> <circle cx="19" cy="12" r="1" /> <circle cx="5" cy="12" r="1" /></symbol>
+  <symbol id="ic-points" viewBox="0 0 24 24" data-src="ellipsis"><circle cx="12" cy="12" r="1" /> <circle cx="19" cy="12" r="1" /> <circle cx="5" cy="12" r="1" /></symbol>
+  <symbol id="ic-ajout" viewBox="0 0 24 24" data-src="plus"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol>
   <symbol id="ic-pneu" viewBox="0 0 24 24" data-src="disc-3"><circle cx="12" cy="12" r="10" /> <path d="M6 12c0-1.7.7-3.2 1.8-4.2" /> <circle cx="12" cy="12" r="2" /> <path d="M18 12c0 1.7-.7 3.2-1.8 4.2" /></symbol>
   <symbol id="ic-pousse" viewBox="0 0 24 24" data-src="sprout"><path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3" /> <path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4" /> <path d="M5 21h14" /></symbol>
   <symbol id="ic-pulverisateur" viewBox="0 0 24 24" data-src="spray-can"><path d="M3 3h.01" /> <path d="M7 5h.01" /> <path d="M11 7h.01" /> <path d="M3 7h.01" /> <path d="M7 9h.01" /> <path d="M3 11h.01" /> <rect width="4" height="4" x="15" y="5" /> <path d="m19 9 2 2v10c0 .6-.4 1-1 1h-6c-.6 0-1-.4-1-1V11l2-2" /> <path d="m13 14 8-2" /> <path d="m13 19 8-2" /></symbol>
@@ -615,7 +616,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:var(--pt-txt,13px);margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v9.83</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v9.84</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -1093,7 +1094,7 @@
       <div class="cpt-row">
         <button type="button" class="cpt-pm" onclick="_cptTouche('moins')" aria-label="Un de moins"><svg class="mv-ic" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-moins"></use></svg></button>
         <output class="cpt-disp" id="cpt-disp" aria-live="polite">—</output>
-        <button type="button" class="cpt-pm" onclick="_cptTouche('plus')" aria-label="Un de plus"><svg class="mv-ic" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-plus"></use></svg></button>
+        <button type="button" class="cpt-pm" onclick="_cptTouche('plus')" aria-label="Un de plus"><svg class="mv-ic" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-ajout"></use></svg></button>
       </div>
       <div class="cpt-u" id="cpt-u"></div>
       <div class="cpt-pad" role="group" aria-label="Pavé numérique"><button type="button" onclick="_cptTouche('d','1')">1</button><button type="button" onclick="_cptTouche('d','2')">2</button><button type="button" onclick="_cptTouche('d','3')">3</button><button type="button" onclick="_cptTouche('d','4')">4</button><button type="button" onclick="_cptTouche('d','5')">5</button><button type="button" onclick="_cptTouche('d','6')">6</button><button type="button" onclick="_cptTouche('d','7')">7</button><button type="button" onclick="_cptTouche('d','8')">8</button><button type="button" onclick="_cptTouche('d','9')">9</button><button type="button" class="fn" onclick="_cptTouche('vider')">Effacer</button><button type="button" onclick="_cptTouche('d','0')">0</button><button type="button" class="fn" onclick="_cptTouche('retour')" aria-label="Effacer le dernier chiffre"><svg class="mv-ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-effacer"></use></svg></button></div>
@@ -1432,7 +1433,7 @@
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v9.83</div>
+        <div class="mod-header-sub">Ma Vigne v9.84</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
       
@@ -1546,7 +1547,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg></div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v9.83 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div class="ver-tag">Ma Vigne v9.84 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -3646,7 +3647,7 @@
     </div>
   </div>
 </div>
-<script src="/boot.js?v=9.83"></script>
+<script src="/boot.js?v=9.84"></script>
 <script type="module" src="/src/app.js"></script>
 
 <!-- ── Overlay erreur critique Ma Vigne (v2.68) ── -->
@@ -3738,7 +3739,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v9.83</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v9.84</span>
       </div>
     </div>
     <div class="modal-body">

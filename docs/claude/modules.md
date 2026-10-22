@@ -2626,7 +2626,7 @@ côté explique (délai de grâce de 700 ms pendant le défilement) ; « Montre-
 
 **Où.** `src/tutos.js` (moteur, `TU_DONNEES`, `TU_TUTOS`). Entrée : « Me montrer comment faire » en tête
 de l'aide de chaque écran (`openAide`, utils.js) — les tutos de l'écran, puis « Tous les tutos ».
-**À côté ou en plein écran (TUTO-2, §359).** Ordinateur (≥ 1 024 px, pointeur fin) : panneau à droite avec un
+**À côté ou en plein écran (TUTO-2, §359).** ★ **COTE-1 (§424) : à partir de 1 280 px, le panneau est COLLÉ au bord droit (`html.mvtu-cote`, largeur `clamp(360px, 28vw, 420px)`) et l'appli se resserre à côté — ses couches fixes suivent (listes `COTE_*` de tutos.js, tenues par `mv-harnais-cote1`), la barre latérale se juge sur la place qui reste (`window._mvTutoCote`, `ouvert()` de coquille.js) ; au-dessous, plein écran. « De l'autre côté » n'existe plus (TUTO-3).** Ordinateur (≥ 1 024 px, pointeur fin) : panneau à droite avec un
 cadre de l'appli `?tuto=<id>&tuto_cadre=1` ; « De l'autre côté », « Fenêtre à part » (`window.open`), la croix ;
 le cadre demande sa fermeture par `postMessage({mvtu:'fermer'})`. Téléphone et tablette : plein écran.
 **Titres.** Toujours une question : « Comment faire pour … ? » (tenu par `mv-harnais-tutos`).

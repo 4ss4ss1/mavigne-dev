@@ -108,11 +108,21 @@ window._railHtml = function (items, moi, dom) {
 // Le geste de la personne, pour la session : un redimensionnement reconstruit la barre (_dockBuild) et ne doit pas
 // défaire un dépliage fait à la main sous 1 200 px.
 let manuel = null;
+// ★ COTE-1 (§424) : le panneau du tuto, collé à droite sur ordinateur, prend sa largeur à la page. La règle de PRO-1 (barre
+//   repliée sous 1 200 px : le contenu garde ~960 px) se juge alors sur la place QUI RESTE ; et le choix fait à la main repart
+//   à zéro quand le panneau s'ouvre ou se ferme, comme quand la fenêtre passe le seuil.
+let coteVu = false;
+function coteTuto() {
+  try { return (typeof window._mvTutoCote === 'function') ? (Number(window._mvTutoCote()) || 0) : 0; }
+  catch (e) { if (window._mvAvale) window._mvAvale(e, 'coquille.js/coteTuto'); return 0; }
+}
 function ouvert() {
+  const cote = coteTuto();
+  if ((cote > 0) !== coteVu) { coteVu = cote > 0; manuel = null; }
   if (manuel !== null) return manuel;
   let v = null; try { v = localStorage.getItem('mv-rail'); } catch (e) { if (window._mvAvale) window._mvAvale(e, 'coquille.js/ouvert'); }
   const choix = v != null ? v === '1' : window.innerWidth >= 1280;
-  return choix && MQ_LARGE.matches;
+  return choix && MQ_LARGE.matches && window.innerWidth - cote >= 1200;
 }
 // PRO-1 (§269) : la page change de largeur pendant l'animation de la barre (0,4 s). Une fois la largeur posée, on
 //   prévient tout ce qui se recale sur un redimensionnement de fenêtre (carte des parcelles, graphiques, grilles) :

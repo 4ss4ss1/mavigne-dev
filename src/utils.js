@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.83';
+export const APP_VERSION = '9.84';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,12 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.84', d: '2026-10-22', items: [
+    { niv: 0, pour: ['admin'], emoji: 'doigt', titre: 'Sur ordinateur, le tuto se range à côté de l’appli',
+      desc: "Le panneau du tuto se posait par-dessus la droite de l’écran et cachait justement le bouton à toucher, celui que montre le cercle doré. Il se colle maintenant au bord droit et l’appli se resserre à côté : vous voyez et touchez les deux en même temps, fenêtres comprises. Si la place manque, la barre des modules se replie d’elle-même. Sur un écran de moins de 1 280 pixels, l’entraînement s’ouvre en plein écran, comme sur téléphone." },
+    { niv: 0, pour: ['tous'], emoji: 'ajout', titre: 'Le « + » des boutons d’ajout est revenu',
+      desc: "« Noter des mesures », « Nouvelle récolte », « Nouvelle cuve », « Saisir un rapport » et les autres boutons d’ajout montraient trois points au lieu d’un « + ». Ils ont retrouvé leur « + » ; les trois points restent au menu « Plus »." },
+  ] },
   { v: '9.83', d: '2026-10-22', items: [
     { niv: 0, pour: ['admin'], emoji: 'doigt', titre: 'Le tuto « corriger l’équipe d’une validation » va au bout',
       desc: "Il restait bloqué dès la première étape : le domaine d’entraînement n’avait aucune validation dans son Journal, donc aucun bouton « Équipe » à montrer. Il en a maintenant, et le tuto se joue jusqu’à « Enregistrer », sur téléphone comme sur ordinateur, et à côté de l’appli." },
@@ -2925,7 +2931,7 @@ donnent la même date. + et − déplacent une personne, la date de fin de chaqu
         + "navigation</b> : on les voyait à peine, et le bas du bouton ne répondait pas. "
         + "L’en-tête se range de nouveau en trois étages, et la barre se pose au-dessus "
         + "de la navigation." },
-    { emoji: 'plus', titre: 'Le + des boutons d’ajout n’était pas dessiné par la police de l’app',
+    { emoji: 'ajout', titre: 'Le + des boutons d’ajout n’était pas dessiné par la police de l’app',
       desc: "Le signe + de « + Ajouter », « + Nouvelle tâche », « + Nouvelle cuve » et de "
         + "soixante autres boutons était un caractère que <b>ni Cormorant ni Outfit ne "
         + "contiennent</b> : votre appareil le remplaçait par le sien, plus large et mal "
@@ -3600,7 +3606,7 @@ donnent la même date. + et − déplacent une personne, la date de fin de chaqu
   { v:'6.33', items:[
     { emoji: 'barrique', titre: "Cinq \u00e9crans gardaient encore les anciens dessins",
       desc: "Le Planning, La R\u00e9serve, Le Chai, Le Cuvier et Le mill\u00e9sime affichaient toujours de vieux pictogrammes en haut de page, l\u00e0 o\u00f9 le reste de l\u2019application avait chang\u00e9. C\u2019est align\u00e9. Au passage, <b>les f\u00fbts ont enfin un dessin de f\u00fbt</b> \u2014 c\u2019\u00e9tait un caddie dans La R\u00e9serve et un bidon dans Le Chai." },
-    { emoji: 'plus', titre: "Les modules du bas se voient mieux",
+    { emoji: 'ajout', titre: "Les modules du bas se voient mieux",
       desc: "Dans la barre du bas, chaque module vit d\u00e9sormais dans un carr\u00e9 en relief : creus\u00e9 quand il est ferm\u00e9, <b>en or quand il est ouvert</b>. Le petit trait dor\u00e9 tout en haut de la barre, qu\u2019on ne remarquait jamais, dispara\u00eet." }
   ] },
   { v:'6.32', items:[
@@ -4318,7 +4324,7 @@ donnent la même date. + et − déplacent une personne, la date de fin de chaqu
     { emoji: 'info', titre: 'Budget cuivre en direct dans le traitement', desc: "Lors d'une saisie de traitement au cuivre, l'assistant affiche pour chaque parcelle traitée le cumul de cuivre métal sur 7 ans face au plafond bio de 28 kg/ha — cumul actuel + apport de ce traitement. Un dépassement est signalé, mais n'empêche jamais l'enregistrement (le registre doit refléter la réalité). Le calcul est exactement celui de votre synthèse cuivre dans Réglages." }
   ] },
   { v: '5.17', items: [
-    { emoji: 'plus', titre: 'Ajouter : session ou traitement', desc: "Le bouton + de l'onglet Tracteur propose maintenant un choix — démarrer une session mécanique, ou saisir un traitement phytosanitaire (qui ouvre l'assistant réglementaire avec les produits E-Phy). Un seul point d'entrée pour les deux." }
+    { emoji: 'ajout', titre: 'Ajouter : session ou traitement', desc: "Le bouton + de l'onglet Tracteur propose maintenant un choix — démarrer une session mécanique, ou saisir un traitement phytosanitaire (qui ouvre l'assistant réglementaire avec les produits E-Phy). Un seul point d'entrée pour les deux." }
   ] },
   { v: '5.16', items: [
     { emoji: 'tracteur', titre: 'Module Tracteur repensé', desc: "L'onglet Tracteur fait peau neuve : le chantier en cours s'affiche désormais en grande carte « live » — avancement en hectares et bouton pour enregistrer directement. Le parc devient une bande de cartes où chaque machine indique d'un coup d'œil sa prochaine révision ou son passage au garage (touchez-la pour ouvrir son entretien). L'ensemble adopte le filet doré du domaine et un accent vert sur les sessions terminées." }

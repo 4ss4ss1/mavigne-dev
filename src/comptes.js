@@ -252,7 +252,7 @@ function openComptes(){
       +'<span class="cpts-st" id="cpts-st-'+i+'"></span></div>'
       +'<div class="cpts-pas"><button type="button" onclick="_cptsPas('+i+',-1)" aria-label="Un de moins, '+n+'">'+_mvIcon('moins',16)+'</button>'
       +'<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="cpts-in-'+i+'" value="'+_e(_CPTS[p.nom])+'" placeholder="\u2014" oninput="_cptsSaisie('+i+',this)" aria-label="Pieds marqués, '+n+'">'
-      +'<button type="button" onclick="_cptsPas('+i+',1)" aria-label="Un de plus, '+n+'">'+_mvIcon('plus',16)+'</button></div></div>';
+      +'<button type="button" onclick="_cptsPas('+i+',1)" aria-label="Un de plus, '+n+'">'+_mvIcon('ajout',16)+'</button></div></div>';
   }).join('');
   var vide=document.getElementById('cpts-vide'); if(vide) vide.hidden=true;
   _cptsMaj();

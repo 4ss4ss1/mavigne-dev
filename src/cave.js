@@ -10685,7 +10685,7 @@ function _laboVueListe(){
   var h='<div class="lbo-page">';
   if(mf!=='tous') h+='<div class="mvc-jmilnote">Millésime '+_escHtml(mf)+' seul'+(cache?' \u00b7 '+cache+' rapport'+(cache>1?'s':'')+' d’un autre millésime, visible'+(cache>1?'s':'')+' sur « Tous »':'')+'</div>';
   h+='<p class="lbo-intro">Une fiche par envoi au labo. Chaque rapport se range seul sur sa cuvée ou sa cuve : ses courbes, la projection de la malo et le suivi des sucres le lisent.</p>';
-  if(peut) h+='<button class="lbo-btn" id="lbo-saisir" onclick="window.openLabo({nouveau:true})">'+_mvIcon('plus',18)+'Saisir un rapport</button>';
+  if(peut) h+='<button class="lbo-btn" id="lbo-saisir" onclick="window.openLabo({nouveau:true})">'+_mvIcon('ajout',18)+'Saisir un rapport</button>';
   if(!dates.length) h+='<div class="lbo-vide">'+(cache?'Aucun rapport du labo sur ce millésime.':'Aucun rapport du labo pour l’instant.')+'</div>';
   dates.forEach(function(d){
     var ls=par[d], nom='';

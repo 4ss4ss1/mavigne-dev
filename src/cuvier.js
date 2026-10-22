@@ -1204,7 +1204,7 @@ function _recTeteHtml(D, canEdit){
   var der = D.recs.reduce(function(m, r){ return r.date > m ? r.date : m; }, '');
   var ref = D.courante ? 'au ' + _vendDateLongue(_mvToday()) : (der ? 'dernière pesée le ' + _vendDateLongue(der) + ' ' + _escHtml(D.an) : 'aucune pesée');
   return '<div class="mat-tete"><div class="mat-tete-g">' + titre + '<span class="mat-ref">' + ref + '</span></div>'
-    + (canEdit ? '<button type="button" class="mvbtn mvbtn-principal rec-nouv" onclick="openOvVendRec(null)">' + _mvIcon('plus', 16) + '<span class="lg">Nouvelle récolte</span><span class="sm">Récolte</span></button>' : '')
+    + (canEdit ? '<button type="button" class="mvbtn mvbtn-principal rec-nouv" onclick="openOvVendRec(null)">' + _mvIcon('ajout', 16) + '<span class="lg">Nouvelle récolte</span><span class="sm">Récolte</span></button>' : '')
     + '</div>';
 }
 
@@ -1371,7 +1371,7 @@ function _recFicheHtml(nom, D){
     h += '</div>';
   }
   if(D.courante && canWrite()) h += '<div class="mat-fi-act"><button type="button" class="mvbtn mvbtn-secondaire rec-large" data-nom="' + _escAttr(nom) + '" onclick="openOvVendRec(null,this.dataset.nom)">'
-    + _mvIcon('plus', 16) + (o ? 'Ajouter une pesée sur cette parcelle' : 'Peser une récolte sur cette parcelle') + '</button></div>';
+    + _mvIcon('ajout', 16) + (o ? 'Ajouter une pesée sur cette parcelle' : 'Peser une récolte sur cette parcelle') + '</button></div>';
   return h;
 }
 
@@ -1810,7 +1810,7 @@ function _vendTeteHtml(an, courante, canEdit, nAct){
     : '<span class="mat-an-t">Vendange '+_escHtml(an)+'</span>';
   return '<div class="mat-tete"><div class="mat-tete-g">'+titre+'<span class="mat-ref">'+(courante?'au '+_vendDateLongue(_mvToday()):'vendange passée')+'</span></div>'
     +(canEdit&&nAct>=2?'<button type="button" class="mvbtn mvbtn-secondaire" onclick="openVendFusion()">Fusionner</button>':'')
-    +(canEdit?'<button type="button" class="mvbtn mvbtn-principal rec-nouv" onclick="openOvVendCuve(null)">'+_mvIcon('plus',16)+'<span class="lg">Nouvelle cuve</span><span class="sm">Cuve</span></button>':'')
+    +(canEdit?'<button type="button" class="mvbtn mvbtn-principal rec-nouv" onclick="openOvVendCuve(null)">'+_mvIcon('ajout',16)+'<span class="lg">Nouvelle cuve</span><span class="sm">Cuve</span></button>':'')
     +'</div>';
 }
 
@@ -7311,7 +7311,7 @@ function renderVendTour(){
   h+='</div>';
   if(canEdit) h+='<div class="vt-bot">'
     +'<button type="button" class="mvbtn mvbtn-principal vt-fin" onclick="_vtFin()">Terminer la tournée <small id="vt-fin-n"></small></button>'
-    +'<button type="button" class="mvbtn mvbtn-secondaire vt-fab" onclick="_vtSheet()">'+_mvIcon('plus',16)+'<span>Intervention groupée</span></button>'   // ★ TOURCUV-1
+    +'<button type="button" class="mvbtn mvbtn-secondaire vt-fab" onclick="_vtSheet()">'+_mvIcon('ajout',16)+'<span>Intervention groupée</span></button>'   // ★ TOURCUV-1
     +'</div>';
   h+='</div>';
   host.innerHTML=h;
@@ -8425,7 +8425,7 @@ function renderVendAna(){
       + '<div class="mat-vide-ic">' + _mvIcon('raisin', 24) + '</div>'
       + '<div class="mat-vide-t">Pas encore de mesure pour la vendange ' + _escHtml(an) + '</div>'
       + '<div class="mat-vide-p">Notez la première mesure de sucre : l’ordre de maturité se construit dès la première, et la vitesse dès la deuxième sur une même parcelle.</div>'
-      + (canEdit ? '<button type="button" class="mat-btn prim mat-vide-b" onclick="_matSaisie(null)">' + _mvIcon('plus', 16) + 'Noter des mesures</button>' : '')
+      + (canEdit ? '<button type="button" class="mat-btn prim mat-vide-b" onclick="_matSaisie(null)">' + _mvIcon('ajout', 16) + 'Noter des mesures</button>' : '')
       + '</div>';
     el.innerHTML = h;
     _vendRefreshCockpit();
@@ -8457,7 +8457,7 @@ function _matTeteHtml(an, ref, canEdit){
   return '<div class="mat-tete"><div class="mat-tete-g">' + titre
     + '<span class="mat-ref">' + (ref ? 'relue au ' + lbl + ' ' + _escHtml(an) + ', date de la dernière mesure' : 'au ' + lbl) + '</span></div>'
     + '<button type="button" class="mat-btn mat-imp" onclick="_matExportChoix()">' + _mvIcon('imprimante', 16) + '<span>Imprimer le contrôle</span></button>'
-    + (canEdit ? '<button type="button" class="mat-btn prim" data-tuto="mat.noter" onclick="_matSaisie(null)">' + _mvIcon('plus', 16) + '<span class="lg">Noter des mesures</span><span class="sm">Mesures</span></button>' : '')
+    + (canEdit ? '<button type="button" class="mat-btn prim" data-tuto="mat.noter" onclick="_matSaisie(null)">' + _mvIcon('ajout', 16) + '<span class="lg">Noter des mesures</span><span class="sm">Mesures</span></button>' : '')
     + '</div>';
 }
 
@@ -8685,7 +8685,7 @@ function _matFicheHtml(nom, r, spd, four, courante){
       + '</div>';
   });
   h += '</div>';
-  if(canEdit && !e.rentree) h += '<div class="mat-fi-act"><button type="button" class="mat-btn large" data-nom="' + _escAttr(nom) + '" onclick="_matSaisie(this.dataset.nom)">' + _mvIcon('plus', 16) + 'Noter une mesure sur cette parcelle</button></div>';
+  if(canEdit && !e.rentree) h += '<div class="mat-fi-act"><button type="button" class="mat-btn large" data-nom="' + _escAttr(nom) + '" onclick="_matSaisie(this.dataset.nom)">' + _mvIcon('ajout', 16) + 'Noter une mesure sur cette parcelle</button></div>';
   return h;
 }
 

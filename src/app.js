@@ -5522,7 +5522,7 @@ function _dockBuild(){
   var main,ov;
   if(pc||items.length<=5){ main=items; ov=[]; } else { main=items.slice(0,4); ov=items.slice(4); }
   inner.innerHTML=main.map(function(x){return '<button class="mv-dk" data-page="'+x.p+'"><span class="mv-dk-ic">'+_mvIcon(x.ic,20)+'</span><span class="mv-dk-lb">'+x.l+'</span></button>';}).join('')
-    +(ov.length?'<button class="mv-dk mv-dk-plus" data-plus="1"><span class="mv-dk-ic">'+_mvIcon('plus',20)+'</span><span class="mv-dk-lb">Plus</span></button>':'');
+    +(ov.length?'<button class="mv-dk mv-dk-plus" data-plus="1"><span class="mv-dk-ic">'+_mvIcon('points',20)+'</span><span class="mv-dk-lb">Plus</span></button>':'');
   Array.prototype.forEach.call(inner.querySelectorAll('.mv-dk'),function(b){ b.onclick=function(){ if(b.getAttribute('data-plus')){ _dockPlus(); } else { _dockGo(b.getAttribute('data-page')); } }; });
   if(sheet){
     sheet.innerHTML=ov.map(function(x){return '<button class="mv-sg" data-page="'+x.p+'"><span class="mv-sg-ic">'+_mvIcon(x.ic,20)+'</span><span class="mv-sg-lb">'+x.l+'</span></button>';}).join('')

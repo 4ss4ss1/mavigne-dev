@@ -291,6 +291,7 @@ function _css() {
     '.mvtu-tous{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0;border:0;background:none;color:var(--or);font:600 var(--pt-base,14px) ' + _PF + ';cursor:pointer}',
     '.mvtu-mod{margin:14px 0 2px;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux)}',
     '.mvtu-panneau{position:fixed;top:12px;bottom:12px;right:12px;width:min(420px,calc(100vw - 24px));z-index:100005;display:flex;flex-direction:column;overflow:hidden;border-radius:var(--r-lg,16px);border:1px solid var(--gris);background:var(--bg-card);box-shadow:var(--shadow-lg,0 14px 56px rgba(0,0,0,.5))}',
+    _coteCss(),   // ★ COTE-1 (§424) : collé à droite, l'appli à côté
     '.mvtu-anneau{position:fixed;left:0;top:0;width:0;height:0;z-index:100004;border:2px solid var(--or-clair);border-radius:var(--r-md,12px);pointer-events:none;opacity:0;box-shadow:0 0 0 1px rgba(0,0,0,.2),0 0 16px rgba(216,188,114,.45);animation:mvtuPouls 1.7s ease-in-out infinite;transition:opacity var(--mv-d1,140ms)}',
     '.mvtu-bloque{position:fixed;inset:0;z-index:100030;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg-app);font-family:' + _PF + '}',
     '.mvtu-bloque > div{max-width:420px;padding:20px;border-radius:var(--r-lg,16px);border:1px solid var(--gris);background:var(--bg-card);color:var(--texte)}',
@@ -812,8 +813,42 @@ function _jouerVite() {
 function _rejouer(id) {
   window.location.replace(window.location.pathname + '?tuto=' + encodeURIComponent(id) + (_cadre() ? '&tuto_cadre=1' : ''));
 }
+/* ★★ COTE-1 (§424) — LE PANNEAU COLLÉ À DROITE, L'APPLI RESSERRÉE À CÔTÉ. Nico (20/10), capture à l'appui : le panneau posé
+   par-dessus la droite de l'appli cachait le bouton à toucher (« Noter des mesures », au bout de l'en-tête des Maturités) ;
+   l'anneau doré était bien sur le vrai bouton, mais dessous. TUTO-2 avait choisi « un panneau qui se déplace plutôt qu'une
+   appli qu'on retaille » : ce choix s'inverse. Le panneau prend sa largeur à la page ; l'appli — et tout ce qu'elle pose sur
+   la fenêtre : fenêtres, tiroirs, barres, messages, recherche — vit dans la place qui reste. Rien ne passe dessous.
+   Seuil 1 280 px (au-dessous, l'appli garderait moins de ~850 px : plein écran, comme au téléphone). Largeur de 360 px (le
+   plus petit téléphone courant) à 420 px, 28 % de l'écran entre les deux. Une fenêtre rétrécie sous le seuil APRÈS
+   l'ouverture rend au panneau son ancienne place, flottante : cas limite assumé.
+   ⚠ Une couche fixe NEUVE de la feuille (voile, tiroir, barre, message centré) se range ici ou s'exempte dans
+   mv-harnais-cote1, qui lit la feuille et rougit sinon ; test:tutos mesure la page au navigateur (rien sous le panneau). */
+var COTE_MQ = '(min-width: 1280px)';
+var COTE_L = 'clamp(360px, 28vw, 420px)';
+var COTE_VOILES = ['.overlay', '.mvv-ov', '.mvz-ov', '.pil-scrim', '.pil-diagwrap', '.pil-dz-shw', '.pil-dz-fm', '.mvds-bg', '.mv-pal-voile', '.ck-agr', '.trn-ov', '.trn-layer', '#mv-perime-ov', '#mv-expired-ov', '#ovCloture'];
+var COTE_DROITE = ['.pil-drawer'];
+var COTE_BARRES = ['#demo-banner', '#mv-trial-bar', '#mv-maj-barre', '.trn-toast', '.pl2-abar', '.pl2-mbar'];
+var COTE_CENTRES = ['#mv-toast', '#pv-toast', '.mv-pal', '.pil-dz-pk', '.vt-bot'];
+var COTE_BOUTONS = ['#trac-fab', '#phyto-fab'];
+function _coteCss() {
+  var h = function (l) { return l.map(function (s) { return 'html.mvtu-cote ' + s; }).join(','); };
+  return '@media ' + COTE_MQ + '{'
+    + 'html.mvtu-cote .mvtu-panneau{top:0;bottom:0;right:0;width:' + COTE_L + ';border-radius:0;border-width:0 0 0 1px;box-shadow:none}'
+    + 'html.mvtu-cote #app-root{padding-right:' + COTE_L + '}'
+    + h(COTE_VOILES) + '{right:' + COTE_L + '!important}'
+    + h(COTE_DROITE) + '{right:' + COTE_L + '!important}'
+    + h(COTE_BARRES) + '{right:' + COTE_L + '!important;width:auto!important}'
+    + h(COTE_CENTRES) + '{left:calc((100% - ' + COTE_L + ') / 2)!important}'
+    + h(COTE_BOUTONS) + '{right:calc(' + COTE_L + ' + 24px)!important}'
+    + '}';
+}
+// La page change de largeur sans que la fenêtre bouge : on prévient tout ce qui se recale sur un redimensionnement (barre
+// latérale, carte, graphiques, grilles) — le geste de coquille.js après avoir plié la barre (PRO-1).
+function _coteRecaler() {
+  setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) { _avale(e, '_coteRecaler'); } }, 60);
+}
 function _aCoteDispo() {
-  return !!(window.matchMedia && window.matchMedia('(min-width: 1024px)').matches && !window.matchMedia('(pointer: coarse)').matches);
+  return !!(window.matchMedia && window.matchMedia(COTE_MQ).matches && !window.matchMedia('(pointer: coarse)').matches);
 }
 // Depuis le vrai domaine. Ordinateur : le panneau. Sinon : on note où revenir, puis on recharge en entraînement.
 function _lancer(id) {
@@ -859,15 +894,17 @@ function _anneau(id, i) {
   if (!AN.tourne) { AN.tourne = true; window.requestAnimationFrame(_anneauDessin); }
 }
 var _ecoute = false;
-function _fermerPanneau() {
+function _fermerPanneau(remplace) {
   var p = document.getElementById('mvtu-panneau'); if (p && p.parentNode) p.parentNode.removeChild(p);
   _anneau('', -1);
+  // COTE-1 : la page reprend toute sa largeur — sauf quand un panneau en remplace un autre (pas de va-et-vient)
+  if (!remplace && document.documentElement.classList.contains('mvtu-cote')) { document.documentElement.classList.remove('mvtu-cote'); _coteRecaler(); }
 }
 function _panneau(id) {
   var t = _tuto(id); if (!t) return;
   _css();
   if (typeof window.closeAide === 'function') { try { window.closeAide(); } catch (e) { _avale(e, '_panneau#aide'); } }
-  _fermerPanneau();
+  _fermerPanneau(true);
   var url = window.location.pathname + '?tuto=' + encodeURIComponent(id) + '&tuto_cadre=1';
   var p = document.createElement('div');
   p.id = 'mvtu-panneau';
@@ -886,6 +923,8 @@ function _panneau(id) {
     else if (a === 'fenetre') { var w = window.open(url, 'mvtuto', 'popup=yes,width=440,height=900'); if (w) _fermerPanneau(); }
   });
   document.body.appendChild(p);
+  document.documentElement.classList.add('mvtu-cote');   // ★ COTE-1 : la page lui fait sa place
+  _coteRecaler();
   // TUTO-6 : « Préparation de l'entraînement… » jusqu'à ce que la première consigne soit prête (lue dans le cadre).
   var ifr = p.querySelector('iframe'), lo = p.querySelector('.mvtu-p-load'), t0 = Date.now();
   (function pret() {
@@ -931,7 +970,7 @@ function _confirmer(el, id) {
   el.innerHTML = '<div class="modal-hd"><div><div class="modal-title">' + _esc(t.titre) + '</div><div class="modal-sub">' + t.etapes.length + ' étapes, environ ' + _esc(t.duree) + '</div></div></div>'
     + '<div class="mvtu-aide"><h4>' + _ic('bouclier', 18) + ' Un entraînement, pas votre domaine</h4>'
     + '<p>Vous vous entraînez sur le ' + _esc(TU_DOMAINE) + ', un domaine fictif. Rien de ce que vous touchez n’arrive sur votre domaine. '
-    + (_aCoteDispo() ? 'Il s’ouvre à côté de l’appli : vous pouvez faire le geste pour de vrai en même temps.' : 'À la fin, un bouton vous y ramène.') + '</p></div>'
+    + (_aCoteDispo() ? 'Il s’ouvre à côté de l’appli, qui se resserre pour lui faire de la place : vous pouvez faire le geste pour de vrai en même temps.' : 'À la fin, un bouton vous y ramène.') + '</p></div>'
     + '<button type="button" class="mvtu-b1 mvtu-large" data-tu="lancer" data-id="' + _esc(t.id) + '">Commencer l’entraînement</button>'
     + '<button type="button" class="mvtu-b3 mvtu-large" data-tu="retour">Retour à l’aide</button>';
 }
@@ -1022,3 +1061,9 @@ window._mvTutoMiroirFait = function (id, i, memo) { var t = _tuto(id); return t 
 // TUTO-5 : la saisie de l'étape i sur CE domaine (valeur, et le champ a-t-il la main) ; l'anneau doré à la demande du panneau.
 window._mvTutoValeur = function (id, i) { var t = _tuto(id), e = t ? t.etapes[i] : null, c = e && e.cible ? _q(e.cible) : null; return c ? { v: c.value, focus: document.activeElement === c } : { v: undefined, focus: false }; };
 window._mvTutoAnneau = _anneau;
+// ★ COTE-1 (§424) : la largeur que le panneau prend à la page (0 s'il n'est pas collé) — coquille.js en juge la barre latérale.
+window._mvTutoCote = function () {
+  var p = document.getElementById('mvtu-panneau');
+  if (!p || !document.documentElement.classList.contains('mvtu-cote') || !window.matchMedia || !window.matchMedia(COTE_MQ).matches) return 0;
+  return Math.round(p.getBoundingClientRect().width) || 0;
+};
