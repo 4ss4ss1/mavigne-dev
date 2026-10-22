@@ -1175,8 +1175,11 @@ function _perAssureTaches(noms){
 }
 function saveSaison(){
   var nom=document.getElementById('ns-nom').value.trim();if(!nom){showToast('Nom requis','#B85A1A');return;}
-  var _d0=(document.getElementById('ns-debut')||{}).value||'',_f0=(document.getElementById('ns-fin')||{}).value||'';
-  if(!_d0||!_f0){showToast('Début et fin obligatoires — c\'est la date qui rattache une saisie','#B85A1A');return;}
+  // PERDATE-1 (§427) : une date impossible se lisait vide (« obligatoires ») — elle a son message, sa case passe en rouge.
+  var _dl=_perDateLue(document.getElementById('ns-debut')),_fl=_perDateLue(document.getElementById('ns-fin'));
+  var _d0=_dl.v,_f0=_fl.v;
+  var _dKo=(_dl.ko||_fl.ko)?_perDateKoMsg(_dl.ko,_fl.ko):((!_d0||!_f0)?'Début et fin obligatoires — c’est la date qui rattache une saisie':'');
+  if(_dKo){ _nsNote(); showToast(_dKo,'#B85A1A'); return; }
   if(_f0<_d0){showToast('La fin précède le début','#B85A1A');return;}
   if((window.SAISONS||[]).some(function(s){return (s.nom||'').trim().toLowerCase()===nom.toLowerCase();})){ showToast('La saison « '+nom+' » existe déjà — choisis un autre nom','#B85A1A'); return; }
   var _deb=(document.getElementById('ns-debut')||{}).value||'',_fin=(document.getElementById('ns-fin')||{}).value||'';
@@ -1522,17 +1525,50 @@ function openSaison(){
   _nsNote(); _nsBuildTaches(); window.openOv('ovSaison');
 }
 
+/* ★ PERDATE-1 (§427) — UNE DATE IMPOSSIBLE N'EST PAS UNE DATE VIDE (« Nouvelle période », « Modifier la période »).
+   Un champ date où l'on tape le 31/09 — ou le 29/02 d'une année non bissextile, ou une date à moitié tapée — GARDE à
+   l'écran ce qu'on a tapé, mais rend value === '' : le code lisait une case vide. La création répondait « Début et fin
+   obligatoires » (remonté du terrain le 22/10 : une fin au 31/09/2027) ; la modification enregistrait une fin vide, en
+   silence, avec « Période mise à jour ». Le seul signal est validity.badInput : le texte tapé n'est pas lisible depuis la
+   page. Mesuré au navigateur (Chromium, fr-FR) : 31/09/2027 et 29/02/2027 → value '' et badInput ; 30/09/2027 passe ;
+   depuis une case vide, seul « blur » part (ni input, ni change) ; poser .value par le code efface l'état.
+   _perDateLue LIT et MARQUE : aria-invalid sur une case impossible (le rouge du jeu des cases, CHARTE-6), retiré sinon.
+   ⚠️ Les autres champs date de l'appli ont le même défaut : lot à part (§427f). */
+function _perDateLue(el){
+  var ko=!!(el&&el.validity&&el.validity.badInput);
+  if(el){ if(ko) el.setAttribute('aria-invalid','true'); else el.removeAttribute('aria-invalid'); }
+  return { v:(el&&!ko)?String(el.value||''):'', ko:ko };
+}
+var _PER_KO=' : un jour qui n’existe pas dans le mois (un 31\u00a0septembre, un 29\u00a0février…), ou une date incomplète.';
+// Le message d'une saisie refusée (toast) : quelle case, et pourquoi, en une ligne.
+function _perDateKoMsg(dKo,fKo){
+  return (dKo&&fKo?'Dates de début et de fin impossibles':(dKo?'Date de début impossible':'Date de fin impossible'))
+    +' : jour inexistant ou date incomplète';
+}
+// Les alertes de dates, communes aux deux fenêtres (texte brut, échappé à l'affichage). sauf : le NOM de la période qu'on
+// modifie (elle ne se chevauche pas elle-même) — le nom, pas l'objet : une synchronisation remplace les objets de SAISONS.
+function _perDatesAlertes(d0,f0,sauf){
+  var a=[];
+  if(d0.ko) a.push('Date de début impossible'+_PER_KO);
+  if(f0.ko) a.push('Date de fin impossible'+_PER_KO);
+  if(a.length) return a;
+  if(d0.v&&f0.v&&f0.v<d0.v){ a.push('La fin précède le début.'); return a; }
+  if(d0.v&&f0.v){
+    var chev=(window.SAISONS||[]).filter(function(s){return s&&s.nom!==sauf&&s.debut&&s.fin&&d0.v<=s.fin&&f0.v>=s.debut;})
+      .map(function(s){return s.nom;});
+    if(chev.length) a.push('Chevauche : '+chev.join(', ')+'.');
+  }
+  return a;
+}
+function _perAlertesHtml(a){ return a.map(function(x){ return '<span style="color:var(--rouge)">'+_escHtml(x)+'</span>'; }).join('<br>'); }
+
 function _nsDateEdit(){_nsNote();}
 function _nsNote(){
-  var deb=(document.getElementById('ns-debut')||{}).value||'',fin=(document.getElementById('ns-fin')||{}).value||'';
+  var d0=_perDateLue(document.getElementById('ns-debut')),f0=_perDateLue(document.getElementById('ns-fin'));
   var n=document.getElementById('ns-note'); if(!n)return;
-  var msg=_mvIcon('calendrier',16)+' Période : <b>'+(_nsPeriode(deb,fin)||'—')+'</b>';
-  if(deb&&fin&&fin<deb) msg+='<br><span style="color:var(--rouge)">La fin précède le début.</span>';
-  else if(deb&&fin){
-    var chev=(window.SAISONS||[]).filter(function(s){return s&&s.debut&&s.fin&&deb<=s.fin&&fin>=s.debut;})
-      .map(function(s){return s.nom;});
-    if(chev.length) msg+='<br><span style="color:var(--rouge)">Chevauche : '+_escHtml(chev.join(', '))+'.</span>';
-  }
+  var a=_perDatesAlertes(d0,f0,null);
+  var msg=_mvIcon('calendrier',16)+' Période : <b>'+(_nsPeriode(d0.v,f0.v)||'—')+'</b>';
+  if(a.length) msg+='<br>'+_perAlertesHtml(a);
   msg+='<br><span style="opacity:0.75">Une saisie se rattache à la période qui contient sa date.</span>';
   n.innerHTML=msg;
 }
@@ -1674,21 +1710,32 @@ function _nsRefTaches(){
   });
   return out;
 }
+/* ★ PERDATE-1 (§427) — UNE SEULE LIGNE DE TÂCHE POUR LES DEUX FENÊTRES DE PÉRIODE. Chacune avait sa copie de la liste à cocher,
+   et elles avaient divergé : « Nouvelle période » écrivait « undefined h/ha » pour les travaux au temps réel, qui n'ont pas
+   d'heures dans la convention (Arrachage, Désherbage manuel, Effeuillage, Vendange), lisait niveaux et passagesHha sans vérifier
+   qu'ils existent, et n'échappait pas le nom d'une tâche du domaine ; « Modifier la période » écrivait « temps réel ».
+   Le CORPS de la ligne est commun (_perTacheCorps) ; l'enveloppe et son gestionnaire restent écrits en clair dans chaque fenêtre :
+   un nom passé en variable (onclick="'+clic+'(…") cachait les deux gestes au compte des gestes sans tuto (mv-harnais-tutos)
+   et au contrôle des clics morts du preflight — vu par la chaîne, contre-épreuve « un geste nouveau sans tuto » restée verte. */
+function _perTacheInfo(c){
+  if(c.trous) return 'tarière';
+  if(c.type==='niveaux'&&Array.isArray(c.niveaux)) return c.niveaux.reduce(function(s,n){return s+(Number(n&&n.hha)||0);},0)+' h/ha';
+  if(c.type==='passages'&&Array.isArray(c.passagesHha)) return c.passagesHha.map(function(x){return Number(x)||0;}).join('/')+' h/ha';
+  return Number(c.hha)>0?(Number(c.hha)+' h/ha'):'temps réel';
+}
+function _perTacheCorps(c,on){
+  var info=_perTacheInfo(c);
+  return '<span class="e">'+_mvIconTache(c.nom,18)+'</span>'
+    +'<span class="n">'+_escHtml(c.label||c.nom)+'</span>'
+    +'<span class="h">'+info+'</span>'
+    +'<span class="ck">'+(on?_mvIcon('check',16):'')+'</span>';
+}
 function _nsBuildTaches(){
   var host=document.getElementById('ns-taches-pick'); if(!host)return;
-  var oblig=_nsRefTaches();
   if(!_nsTachesTouched && !_nsTachesSel.size){ _nsTachesSel=new Set(); }
-  host.innerHTML=oblig.map(function(c){
+  host.innerHTML=_nsRefTaches().map(function(c){
     var on=_nsTachesSel.has(c.nom);
-    var info = c.trous?'tarière'
-      : c.type==='niveaux'?(c.niveaux.reduce(function(s,n){return s+n.hha;},0)+' h/ha')
-      : c.type==='passages'?(c.passagesHha.join('/')+' h/ha')
-      : (c.hha+' h/ha');
-    return '<div class="ns-tpick'+(on?' on':'')+'" onclick="_nsToggleTache(\''+_escAttr(c.nom)+'\')">'
-      +'<span class="e">'+_mvIconTache(c.nom,18)+'</span>'
-      +'<span class="n">'+c.label+'</span>'
-      +'<span class="h">'+info+'</span>'
-      +'<span class="ck">'+(on?_mvIcon('check',16):'')+'</span></div>';
+    return '<div class="ns-tpick'+(on?' on':'')+'" onclick="_nsToggleTache(\''+_escAttr(c.nom)+'\')">'+_perTacheCorps(c,on)+'</div>';
   }).join('');
   var cnt=document.getElementById('ns-taches-count'); if(cnt)cnt.textContent=_nsTachesSel.size+' sélectionnée'+(_nsTachesSel.size>1?'s':'');
 }
@@ -5785,15 +5832,7 @@ function _esBuildTaches(){
   var host=document.getElementById('es-taches-pick'); if(!host)return;
   host.innerHTML=_nsRefTaches().map(function(c){
     var on=_esTachesSel.has(c.nom);
-    var info = c.trous?'tarière'
-      : (c.type==='niveaux'&&c.niveaux)?(c.niveaux.reduce(function(s,n){return s+n.hha;},0)+' h/ha')
-      : (c.type==='passages'&&c.passagesHha)?(c.passagesHha.join('/')+' h/ha')
-      : (c.hha?(c.hha+' h/ha'):'temps réel');
-    return '<div class="ns-tpick'+(on?' on':'')+'" onclick="_esToggleTache(\''+_escAttr(c.nom)+'\')">'
-      +'<span class="e">'+_mvIconTache(c.nom,18)+'</span>'
-      +'<span class="n">'+_escHtml(c.label||c.nom)+'</span>'
-      +'<span class="h">'+info+'</span>'
-      +'<span class="ck">'+(on?_mvIcon('check',16):'')+'</span></div>';
+    return '<div class="ns-tpick'+(on?' on':'')+'" onclick="_esToggleTache(\''+_escAttr(c.nom)+'\')">'+_perTacheCorps(c,on)+'</div>';
   }).join('');
   var cnt=document.getElementById('es-taches-count');
   if(cnt)cnt.textContent=_esTachesSel.size+' sélectionnée'+(_esTachesSel.size>1?'s':'');
@@ -5820,13 +5859,35 @@ function _esBuildEch(){
   _esEchTasks=Array.from(_esTachesSel||[]);
   if(!_esEchTasks.length){
     host.innerHTML='<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);padding:4px 0">Aucune t\u00e2che pour cette p\u00e9riode \u2014 coche-les au-dessus.</div>';
-    return;
+    _esDatesNote(); return;
   }
   host.innerHTML=_esEchTasks.map(function(tn,i){
     var e=vus[tn]||base[tn]||{};
     return '<div class="es-ech-row"><div class="es-ech-nom">'+_escHtml(tn)+'</div>'
-      +'<div class="es-ech-dts"><input type="date" class="fi es-ech-d" id="es-ech-'+i+'-d1" value="'+_escAttr(e.d1||'')+'"><span class="es-ech-arrow">\u2192</span><input type="date" class="fi es-ech-d" id="es-ech-'+i+'-d2" value="'+_escAttr(e.d2||'')+'"></div></div>';
+      +'<div class="es-ech-dts"><input type="date" class="fi es-ech-d" id="es-ech-'+i+'-d1" value="'+_escAttr(e.d1||'')+'" onblur="_esDatesNote()" onchange="_esDatesNote()"><span class="es-ech-arrow">\u2192</span><input type="date" class="fi es-ech-d" id="es-ech-'+i+'-d2" value="'+_escAttr(e.d2||'')+'" onblur="_esDatesNote()" onchange="_esDatesNote()"></div></div>';
   }).join('');
+  _esDatesNote();
+}
+
+// PERDATE-1 (§427) — « Modifier la période » : ses cases date lues d'un coup (début, fin, dates de travaux estimées), marquées,
+// et leurs alertes dans #es-saison-note, caché quand tout va bien. Rendu au départ de chaque case (onblur, onchange) et à chaque
+// reconstruction des lignes ; saveEditSaison lit le même état AVANT de toucher à quoi que ce soit.
+function _esDatesEtat(){
+  var d0=_perDateLue(document.getElementById('es-saison-debut')),f0=_perDateLue(document.getElementById('es-saison-fin'));
+  var echKo=[];
+  (_esEchTasks||[]).forEach(function(tn,i){
+    var a=_perDateLue(document.getElementById('es-ech-'+i+'-d1')),b=_perDateLue(document.getElementById('es-ech-'+i+'-d2'));
+    if((a.ko||b.ko)&&echKo.indexOf(tn)<0) echKo.push(tn);
+  });
+  var nom=(document.getElementById('es-saison-nom')||{}).value||null;
+  var al=_perDatesAlertes(d0,f0,nom);
+  if(echKo.length) al.push((echKo.length>1?'Dates de travaux impossibles':'Date de travaux impossible')+' ('+echKo.join(', ')+')'+_PER_KO);
+  return {d0:d0,f0:f0,echKo:echKo,alertes:al};
+}
+function _esDatesNote(){
+  var e=_esDatesEtat(), n=document.getElementById('es-saison-note');
+  if(n){ n.innerHTML=_perAlertesHtml(e.alertes); n.hidden=!e.alertes.length; }
+  return e;
 }
 
 function openEditSaison(nom){
@@ -5871,6 +5932,14 @@ function saveEditSaison(){
   var nom=document.getElementById('es-saison-nom').value;
   var s=window.SAISONS.find(function(x){return x.nom===nom;});
   if(!s)return;
+  // PERDATE-1 (§427) : rien ne bouge (nom, tâches, dates) tant qu'une date est impossible ou que la fin précède le début.
+  //   Avant : la case impossible se lisait vide et la période perdait sa fin, en silence (« Période mise à jour ») ; une fin
+  //   avant le début passait, alors que la création la refuse.
+  var _et=_esDatesNote();
+  var _eKo=(_et.d0.ko||_et.f0.ko)?_perDateKoMsg(_et.d0.ko,_et.f0.ko)
+    :(_et.echKo.length?('Date de travaux impossible : '+_et.echKo.join(', ')+' — jour inexistant ou date incomplète')
+    :((_et.d0.v&&_et.f0.v&&_et.f0.v<_et.d0.v)?'La fin précède le début':''));
+  if(_eKo){ showToast(_eKo,'#B85A1A'); return; }
   var _new=(((document.getElementById('es-saison-nomlibre')||{}).value)||'').trim();
   var _renomme=false;
   if(_new && _new!==nom){
@@ -5938,6 +6007,7 @@ window.deleteTache           = deleteTache;
 window.openEditHha           = openEditHha;
 window.openSaison            = openSaison;
 window._esToggleTache        = _esToggleTache;
+window._esDatesNote          = _esDatesNote;
 window._nsDateEdit           = _nsDateEdit;
 window.openTacheCfg          = openTacheCfg;
 window.tcfgSave              = tcfgSave;

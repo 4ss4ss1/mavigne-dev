@@ -480,3 +480,4 @@
 | 424 | 424. ★★ COTE-1 — LE TUTO À CÔTÉ DE L’APPLI, RIEN DESSOUS ; LE « + » DES BOUTONS D’AJOUT (22/10 — `src/tutos… | `docs/claude/chantiers-380-429.md` |
 | 425 | 425. ★★ TUTO-10 — LES TUTOS SUIVENT LES CHANGEMENTS SANS RALLONGER : L’AIGUILLAGE (22/10 — `scripts/mv-tuto… | `docs/claude/chantiers-380-429.md` |
 | 426 | 426. ★★ ETAIN-1 — LES ICÔNES DES MODULES EN RELIEF : L’ÉTAIN AU REPOS, L’ÉMAIL LIE-DE-VIN POUR L’ÉCRAN OUVE… | `docs/claude/chantiers-380-429.md` |
+| 427 | 427. ★★ PERDATE-1 — UNE DATE IMPOSSIBLE N’EST PAS UNE CASE VIDE : LES DEUX FENÊTRES DE PÉRIODE ; UNE SEULE … | `docs/claude/chantiers-380-429.md` |

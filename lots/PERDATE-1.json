@@ -1,0 +1,28 @@
+{
+  "lot": "PERDATE-1",
+  "section": "§427",
+  "base": "a1177747003e3b2ed4d4b0b609167984968d9675",
+  "inclut": [],
+  "date": "2026-10-22",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "3e890053abbb29aa4955f9cc76d080e7cf92688c2bc6fc67e04bb884084b4cdf",
+    "CLAUDE.md": "fdccb206eb5ece5ebdb77287e623f21e8ffa52cf623abaeb009a0be76d4e44a8",
+    "docs/claude/INDEX.md": "2b551dde3af337aa8345f05a87b17692aefa008ffb256a8663a7b26730d10592",
+    "docs/claude/chantiers-380-429.md": "14b638c5cbedd16647db97b5a1ec4f615d237645e3c607028253c277339a9f52",
+    "docs/claude/journal.md": "cf50039a5cecd071304856e8cfef67bf086b6da6b0b608545af60881a11d16e7",
+    "docs/claude/modules.md": "5d4a3311f7228c91682be78c23a16c1db0637fbb191743023dcd3ea475c06cb0",
+    "guide/05-saisons.html": "f926c613fea3b60941109239092c70789601e3270c52617970a9c9864565ae6f",
+    "index.html": "12e4350d138d9b6093f6045e17fe9af044024ef75d9008b7be02e99eb82b7897",
+    "public/sw.js": "be7d1d78bff99a1a53ad0409dda235112e9d1045695aaad3e8fd179c0aad7341",
+    "scripts/harnais-claude-md.mjs": "d1171295e8fa4fc790cab0539ecc19ecb6c17a3f0709fa88a1f7cf97b1e6b396",
+    "scripts/mv-harnais-liste.mjs": "70a0da3170baa5ca9a3c7f61405dd8cca09e48e204484e20179e5a781a15796e",
+    "scripts/tutos-couverture.json": "a5e81d91108d86e71916fe0910faab12b054014485b76f69ffe5ec4f806fb828",
+    "src/reglages.js": "de9c702da32ecfeedac73fe21351c62366859c41b8eb7560d594b035abac95b6",
+    "src/utils.js": "e474b3e4d0741d56cd1e394f05df2a519e178d24aa4668deac7206ac5f3726c0",
+    "scripts/mv-harnais-perdate1.mjs": "f959e541772f42018e67ac8e92179815adc84ff414d065597ddfc3dc7d93c3f8"
+  }
+}

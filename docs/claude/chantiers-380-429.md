@@ -1226,3 +1226,113 @@ et à surveiller par-dessus la carte. Pastilles : la plus vivante, mais elle cas
 - La barre latérale **repliée** n’a pas été regardée en capture (l’outil photographie l’ordinateur à 1 366 px, barre dépliée) ; les
   tutos côte à côte la traversent à 1 280 et 1 536 px sans défaut. À regarder sur le PC de Nico (touche « [ »).
 - La couleur par module (rangée Pastilles du canevas) reste disponible si Nico veut un jour plus de couleur ailleurs.
+
+## 427. ★★ PERDATE-1 — UNE DATE IMPOSSIBLE N’EST PAS UNE CASE VIDE : LES DEUX FENÊTRES DE PÉRIODE ; UNE SEULE LISTE DE TÂCHES (22/10 — `src/reglages.js` (`_perDateLue`, `_perDateKoMsg`, `_perDatesAlertes`, `_perAlertesHtml`, `_perTacheInfo`, `_perTacheCorps`, `_nsNote`, `saveSaison`, `_nsBuildTaches`, `_esBuildTaches`, `_esBuildEch`, `_esDatesEtat`, `_esDatesNote`, `saveEditSaison`) · `index.html` (les cases de « Modifier la période », `#es-saison-note`, versions) · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `guide/05-saisons.html` · `scripts/mv-harnais-perdate1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/tutos-couverture.json` · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · APP 9.85 → 9.86, SW 10.64 → 10.65, base `a117774`)
+
+### 427a. La demande
+Nico (22/10), capture de « Nouvelle période » : « Vendange 2027 », du 01/08/2027 au 31/09/2027, le message « Début et fin
+obligatoires — c’est la date qui rattache une saisie », l’encadré « Période : — », et « undefined h/ha » devant Arrachage,
+Désherbage manuel, Effeuillage et Vendange : « explique-moi ce problème et corrige-le ». Expliqué, puis reformulé avant le travail
+(sa préférence : reformuler avant toute tâche de plus de quelques lignes), périmètre proposé — les deux fenêtres de période, les
+autres champs date en lot à part — et « go ».
+
+### 427b. La cause, mesurée
+- **Le 31 septembre n’existe pas.** Un `<input type="date">` où l’on tape une date impossible (ou incomplète) GARDE à l’écran ce
+  qu’on a tapé, mais rend `value === ''` et `validity.badInput === true`. Mesuré dans Chromium (fr-FR) : 31/09/2027 et 29/02/2027
+  → vides, 30/09/2027 → `2027-09-30` ; depuis une case vide, seul `blur` part (ni `input`, ni `change`) ; poser `.value` par le
+  code efface l’état. Le texte tapé n’est pas lisible depuis la page : on sait QUE la date est impossible, pas laquelle.
+- `saveSaison` lisait `value` : case vide, donc « obligatoires » — un message faux. `_nsNote` : « Période : — ».
+- **Pire dans « Modifier la période »** : `saveEditSaison` enregistrait `s.fin = ''` et disait « Période mise à jour » — la période
+  perdait sa fin, en silence ; les dates de travaux estimées de même. **Rejoué au navigateur sur l’appli d’avant** (construite depuis
+  `a117774`, démo, frappe au clavier) : création → « Début et fin obligatoires — c'est la date qui rattache une saisie » ;
+  modification → « Période mise à jour », fin enregistrée `""`.
+- **« undefined h/ha »** : chaque fenêtre avait sa copie de la liste à cocher, et elles avaient divergé. Celle de « Modifier »
+  écrivait « temps réel » pour un travail sans heures ; celle de « Nouvelle » écrivait `c.hha + ' h/ha'` — `undefined` pour les
+  quatre travaux au temps réel de la convention (`tempsReel`, sans `hha`). Elle lisait aussi `niveaux` et `passagesHha` sans garde,
+  et n’échappait pas le nom d’une tâche du domaine. Dégraffage affichait 28 h/ha : une tâche du domaine, avec ses propres heures.
+
+### 427c. Ce qui est fait
+- **`_perDateLue(el)` lit ET marque** : `{ v, ko }`, et `aria-invalid="true"` sur une case impossible, retiré sinon. Le rouge vient
+  du jeu des cases (CHARTE-6, §400 : `.fi[aria-invalid="true"]{border-color:var(--danger)}`) — posé alors, jamais employé : aucune
+  ligne de JS ne posait `aria-invalid`.
+- **Les alertes communes** (`_perDatesAlertes`) : date de début ou de fin impossible (« un jour qui n’existe pas dans le mois (un
+  31 septembre, un 29 février…), ou une date incomplète », avec espaces insécables), fin avant le début, chevauchement — la période
+  modifiée exclue par son NOM (une synchronisation remplace les objets de `SAISONS`).
+- **« Nouvelle période »** : la note le dit dès qu’on quitte la case ; `saveSaison` refuse avec « Date de fin impossible : jour
+  inexistant ou date incomplète » ; « Début et fin obligatoires » reste pour deux cases vraiment vides.
+- **« Modifier la période »** : ses cases réagissent au départ (`onblur` — elles n’avaient aucun gestionnaire) et au changement ;
+  une note sous « Fin » (`#es-saison-note`, cachée quand tout va bien) ; `saveEditSaison` lit l’état (`_esDatesNote`) AVANT de
+  toucher au nom, aux tâches ou aux dates, et refuse une date impossible (début, fin, date de travaux — la tâche nommée) et une fin
+  avant le début (la création la refusait, la modification la laissait passer). Les lignes des dates de travaux remettent la note à
+  jour à chaque reconstruction (cocher une tâche).
+- **Un seul corps de ligne de tâche** (`_perTacheCorps`, `_perTacheInfo`) pour les deux listes : « temps réel », « tarière », les
+  heures ; noms échappés. Chaque fenêtre garde l’enveloppe de sa ligne et son gestionnaire ÉCRIT EN CLAIR (`_nsToggleTache`,
+  `_esToggleTache`) : voir §427e, le défaut pris par la chaîne.
+- **Le guide** (`05-saisons.html`, « Créer une saison ») décrivait une fenêtre disparue — « Réglages › Domaine › Saisons › +
+  Nouvelle saison », une étape « Type ». Réécrit sur l’écran réel : Campagne › + Nouvelle période, le nom, les dates obligatoires et
+  la date impossible, « temps réel » et « tarière », activer en touchant la période dans la liste (`activateSaison`).
+- `MV_AIDE.reglages` relue : rien sur ces fenêtres, rien à changer. `_mvtSteps` : aucun sélecteur touché. Tutos : aucun concerné
+  (l’aiguillage, §425 : « aucun (4 tutos, aucun ne touche ce changement) »).
+
+### 427d. Arbitrages
+- **Le périmètre** : les deux fenêtres de période, validé par Nico. Les autres champs date ont la même faille : lot à part
+  (§427f). `_perDateLue` reste dans reglages.js tant qu’elle n’a qu’un module pour client ; elle remontera dans utils.js avec ce lot.
+- **`validity.badInput`, faute de mieux** : le texte tapé est inaccessible. Le message ne peut pas dire « le 31 septembre » ; il en
+  donne l’exemple, et couvre la date incomplète (même signal).
+- **Un seul toast par chemin refusé** : le message se calcule, puis un seul `showToast(…, '#B85A1A')` — pas une couleur en dur de
+  plus par message.
+- **Ajouté en route, dit à Nico** : la fin avant le début refusée en modification ; la note sous « Fin », qui montre aussi le
+  chevauchement, comme à la création.
+- **Un plafond qui baisse n’est pas toujours une bonne nouvelle** : 813 → 812 gestes sans tuto venait de deux gestes devenus
+  invisibles, pas d’un geste couvert. Le plafond n’a pas été abaissé : les gestes ont été rendus visibles, et le seul geste neuf
+  (`_esDatesNote`) exempté avec sa raison écrite.
+- **Écarté** : un écouteur unique sur tous les champs date de l’appli. Il aurait posé le rouge partout, mais au clic sur
+  « Enregistrer » le message de l’écran recouvre le sien, et l’écran enregistre quand même sa case vide : c’est le refus à
+  l’enregistrement, écran par écran, qui protège la donnée — le lot à part.
+
+### 427e. Mesures
+- **Preflight** : 0 erreur, 12 avertissements, les mêmes que la base (comparés ligne à ligne). ★ **Il a trouvé un vrai défaut du
+  lot** : la note s’appelait d’abord `es-note` — l’identifiant du champ « Note » de la fenêtre des sessions du tracteur (le préfixe
+  `es-` est partagé : « édition de session », « édition de saison »). `getElementById` aurait rendu le champ du tracteur, et
+  `hidden = true` l’aurait caché. Renommée `es-saison-note`, fonctions `_esDatesNote` et `_esDatesEtat` ; le harnais tient « es-note »
+  unique.
+- **Gestionnaires en ligne** (§6c, le preflight ne voit que `onclick`) : 47 dans reglages.js, tous exposés ; `_esDatesNote` exposée.
+- **`mv-harnais-perdate1`** : **35 verts** — les vraies fonctions extraites et exécutées dans un vm (faux document, champ au
+  `badInput`), sur le vrai `TACHES_CATALOGUE` et les vrais échappeurs ; `saveSaison` et `saveEditSaison` de bout en bout (fin
+  conservée, rien d’enregistré, aucun renommage avant correction, fin avant le début, date de travaux, cas juste) ; les deux listes
+  construites par leurs vraies fonctions ; le câblage lu. Contre-épreuves **11/11** (un motif absent compte comme raté, un plantage
+  comme vu). ⚠️ Une assertion rouge à la première écriture, et c’est le STUB qui mentait : `_mvIconTache` recopiait le
+  nom dans le HTML, ce que la vraie fonction ne fait jamais (elle le traduit en icône). Les échappeurs d’utils.js se découpent à la
+  ligne : leurs expressions régulières à guillemets (`/"/g`) trompent un découpage qui saute les chaînes.
+- `mv-harnais-tacheper1` vert, contre-épreuve comprise (ses ancres de `saveEditSaison` sont intactes).
+- **Au navigateur, l’appli construite** (démo, frappe réelle au clavier, 1 366 et 390 px, clair et sombre) : **44 verts** — la case
+  tapée 31/09/2027 est impossible pour le navigateur, rouge au départ de la case, la note le dit, la création est refusée avec le
+  bon message, la case corrigée au 30/09 perd sa marque et la période se crée ; en modification la note apparaît, l’enregistrement
+  est refusé, la fin reste au 30/09, la fenêtre reste ouverte ; le champ « Note » du tracteur intact. Captures regardées (PC clair,
+  PC sombre, téléphone clair). ⚠️ **Piège de l’outil** : sous Linux, la disposition jj/mm/aaaa d’un champ date suit la langue de
+  l’ENVIRONNEMENT (`LANG`, `LANGUAGE`), pas l’option `locale` du contexte Playwright ; sans elle, mm/jj/aaaa — « 31092027 » tapé
+  donnait l’année 92027. Et `openSaison` pré-remplit les dates : sur une case remplie, le focus ne va pas au jour (vider d’abord).
+- **La chaîne, premier passage** (499 commandes, 861 s, un cœur) : **un rouge, et c’était le lot** — `mv-harnais-tutos --contre`,
+  « un geste nouveau sans tuto → reste vert ». La première version passait le gestionnaire des listes en variable
+  (`onclick="'+clic+'(…`) : le compte des gestes sans tuto (une expression régulière sur `onclick="nom(`) ne voyait plus
+  `_nsToggleTache` ni `_esToggleTache`, il est tombé à 812 sous un plafond de 813, et le geste injecté par la contre-épreuve passait
+  dessous. Le contrôle des clics morts du preflight (C6) ne les voyait plus non plus. Repris : le corps de ligne commun
+  (`_perTacheCorps`), l’enveloppe et son gestionnaire en clair dans chaque fenêtre ; le compte remonte à 814 avec `_esDatesNote`
+  (branchée en `onchange`), exemptée dans `scripts/tutos-couverture.json` avec sa raison ; 813 pour un plafond de 813, contre-épreuves
+  24/24. ★ **Leçon** : un nom de fonction passé en variable dans un gestionnaire écrit en HTML échappe à tout ce qui lit le code — le
+  compte des gestes, le preflight, l’aiguillage des tutos. Écrire le nom en clair, toujours.
+- **La chaîne, second passage** : **499 commandes, 0 rouge** (902 s, un cœur, en arrière-plan — il s’arrête quand le bac à sable
+  dort entre deux tours et reprend au suivant). `npm run test:smoke` non joué : l’outil ne prend pas le Chromium du bac à sable
+  (`MV_CHROMIUM` ignoré) ; la vérification au navigateur ci-dessus n’a relevé aucune erreur JavaScript de page.
+
+### 427f. Ouvert
+- **Les autres champs date** : 69 dans le code hors des deux fenêtres (index.html 26, reglages.js 10, cuvier.js 8, planning.js 7,
+  reserve.js 5, admin-gt.js 4 — la console GT —, pilotage.js 4, phyto.js 3, cave.js 1, tracteur.js 1 ; un gabarit peut en
+  fabriquer plusieurs). Une date impossible s’y lit encore comme une case vide ; ce que chaque écran en fait (message faux, date
+  effacée, ou rien) reste à voir écran par écran. Le lot : remonter `_perDateLue` dans utils.js, la brancher partout, le refus à
+  l’enregistrement.
+- Les listes de tâches des périodes affichent les heures de `TACHES_CATALOGUE` (Côte de Nuits) : ni le barème régional
+  (`_mvBaremeRef`) ni la densité (`_mvHhaDens`), contrairement à l’écran du barème (`_tcvHha`). Pré-existant, non touché.
+- Les dates de travaux estimées : une fin avant le début n’y est pas contrôlée.
+- À voir chez Nico : les deux fenêtres sur SON PC (Windows, Chrome, zoom 125 %), une date impossible tapée. Au téléphone, le
+  sélecteur de date du système propose un calendrier : la frappe d’un 31/09 y est sans doute impossible — à confirmer.

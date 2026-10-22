@@ -444,6 +444,12 @@ nom de la saison**. Cassé net pour tout domaine nommant ses périodes autrement
 - ★★ **`_saisonForDate` prend la période dont le DÉBUT est le plus tardif** parmi celles qui
   contiennent la date → **les périodes peuvent se chevaucher**, la plus récemment commencée gagne.
   C'est ce qui rend sûr le découpage recopié d'un autre domaine (§18b).
+- ★ **Les deux fenêtres (`#ovSaison` « Nouvelle période », `#ovEditSaison` « Modifier la période ») — PERDATE-1 (§427)** : leurs
+  dates se lisent par `_perDateLue` (une date impossible — un 31/09 tapé — rend `value` vide et `validity.badInput` : ce n'est pas
+  une case vide), leurs alertes viennent de `_perDatesAlertes`, et leurs listes à cocher partagent UN corps de ligne (`_perTacheCorps`) —
+  l'enveloppe et son gestionnaire (`_nsToggleTache`, `_esToggleTache`) restent écrits en clair dans chaque fenêtre (§427e). La
+  modification ne touche à rien (nom, tâches, dates) tant qu'une date est impossible ou que la fin précède le début. ⚠️ Le préfixe
+  `es-` est partagé avec la fenêtre des sessions du tracteur (`es-note` est son champ « Note ») : vérifier un identifiant neuf.
 
 ⚠️ **Ne pas confondre PÉRIODE, CAMPAGNE et MILLÉSIME** — les axes du §11c.
 

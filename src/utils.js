@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.85';
+export const APP_VERSION = '9.86';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.86', d: '2026-10-22', items: [
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Une date qui n’existe pas est signalée',
+      desc: "En créant une période, une fin au 31 septembre faisait répondre « Début et fin obligatoires » alors que les deux cases étaient remplies : le 31 septembre n’existe pas, et la case se lisait vide. En modifiant une période, la même date effaçait sa fin sans prévenir. Une date impossible ou incomplète passe maintenant en rouge, avec son explication, et rien n’est enregistré tant qu’elle n’est pas corrigée — pas plus qu’une fin placée avant le début. Au passage, la liste des tâches d’une nouvelle période écrit « temps réel » là où elle affichait « undefined h/ha »." },
+  ] },
   { v: '9.85', d: '2026-10-22', items: [
     { niv: 1, pour: ['tous'], cible: '#mv-dock', emoji: 'oeil', titre: 'Les icônes des modules prennent du relief',
       desc: "En bas de l’écran comme dans la barre de gauche sur ordinateur, chaque module a maintenant son icône sur une petite tuile de métal gris, et celui où vous êtes ressort en lie-de-vin. Dans le menu « Plus », les modules sont rangés quatre par ligne, comme sur l’écran d’accueil d’un téléphone ; quand vous êtes dans l’un d’eux, c’est « Plus » qui s’allume." },
