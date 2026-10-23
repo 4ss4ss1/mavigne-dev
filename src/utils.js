@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.98';
+export const APP_VERSION = '9.99';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.99', d: '2026-10-23', items: [
+    { niv: 1, pour: ['admin'], emoji: 'tracteur', titre: 'Équipe & matériel : la carte du tracteur revient',
+      desc: "Depuis le nouveau cockpit, les cartes du tracteur ne s’affichaient plus nulle part. Elles reviennent dans Pilotage › Équipe & matériel, partie Matériel, sous le parc, la cuve et la consommation : les heures et les litres qu’il reste pour finir les travaux tracteur en cours, le gasoil qu’il restera ensuite dans la cuve, et si la révision tombe pendant ces travaux. Elles ne s’affichent que s’il y a quelque chose à dire, et se masquent depuis « Afficher dans cet onglet ». L’ancien écran Aujourd’hui, qui n’était plus affiché, est retiré de l’appli : rien ne change sur celui que vous voyez." }
+  ] },
   { v: '9.98', d: '2026-10-23', items: [
     { niv: 2, pour: ['admin'], emoji: 'calendrier', titre: 'Pilotage : les jours d’avance ou de retard se comptent sur votre planning',
       desc: "Les jours d’avance ou de retard d’Aujourd’hui, la date de fin calculée à la cadence et les jours des Échéances par tâche comptaient tous les jours du lundi au vendredi. Ils comptent maintenant les jours où votre équipe travaille au planning : un jour férié, un vendredi non travaillé de l’horaire d’hiver ou une semaine de fermeture ne comptent plus. Un retard compte les jours travaillés après l’objectif, jusqu’au jour de fin compris : un objectif posé un dimanche ne fait plus perdre un jour. Le chiffre a donc pu bouger d’un jour ou plus, surtout en novembre et en décembre : c’est le bon. Un férié travaillé compte s’il est saisi au planning." }
@@ -6081,26 +6085,6 @@ export const MV_INFO = {
     'Un <b>soutirage</b> se déclenche à la fin de la malo, pas à une date : la projection vient des valeurs d\u2019acide malique mesurées. Deux pentes sont calculées, la moyenne sur trois analyses projette la fin, les deux dernières détectent un blocage.'
   ] },
 
-  'pil.plan': { t: 'Le domaine en direct', p: [
-    'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine : deux parcelles de même surface ont la même taille. Elles sont rangées par appellation ; le trait sous chaque appellation montre son avancement. Une parcelle sans contour est un carré de sa surface, en pointillé. La vraie carte reste dans Parcelles.',
-    'La couleur dit l’état pour la tâche choisie, celui de la fiche de la parcelle pour la période : faite (validée ; une annulation la remet à faire), en cours (commencée), à faire, en retard (fenêtre passée), arrachée. Une parcelle où la tâche est désactivée sur sa fiche ou dans la liste de la tâche — ou pas choisie pour la campagne, pour l’arrachage, le désherbage et l’effeuillage — reste à sa place en contour pâle : ni à faire ni en retard, elle a sa ligne « Pas concernées » dans la légende et ne compte pas dans l’avancement de son appellation (un tiret quand aucune n’est concernée). Un arrachage fini pour l’équipe est fait : la loupe dit que la suite revient au prestataire. Une parcelle en cours porte les initiales de ceux qui l’ont commencée, même un autre jour : foncées et cerclées si c’est aujourd’hui, claires sinon. Sur ordinateur, la souris sur une parcelle ouvre une loupe (sa forme en grand, son état, l’équipe) ; toucher une parcelle ouvre sa fiche. Au téléphone, « Tout le plan » déplie les appellations repliées.' ] },
-  'pil.savoir': { t: 'À savoir', p: [
-    'Ce qui peut changer la journée ou la semaine. Sous chaque jour de la météo : le risque de pluie (le plus haut de la journée), le cumul en millimètres et le vent le plus fort (vent moyen, sans les rafales). Puis la pluie ou le vent des deux jours qui viennent, secteur par secteur quand le domaine s’étend sur plusieurs communes, avec ce qui est en cours dans les communes touchées — un fait, jamais un verdict : c’est à vous de juger si un travail peut se faire. Enfin les absences des sept prochains jours, les contrats qui finissent dans le mois (avec ce qu’une prolongation d’un mois ferait gagner), les tâches en retard, le matériel immobilisé et la cave.',
-    'Le plus pressant d’abord. Les motifs d’absence ne sont visibles que de l’admin : le Pilotage lui est réservé.' ] },
-  'pil.fil': { t: 'En direct', p: [
-    'Les validations et les débuts de parcelle de la journée, du plus récent au plus ancien, dès qu’ils arrivent du journal. Une ligne neuve s’éclaire une fois.',
-    'L’équipe passe d’abord ; celui qui a saisi n’y figure que s’il était dans les rangs (« sans moi » l’en retire). L’heure vient de l’enregistrement de la validation ; une ligne sans heure connue n’en affiche pas.' ] },
-  'pil.charge': { t: 'La charge restante', p: [
-    'Les heures qui restent au barème, une photo par jour (prise quand un administrateur ouvre le Pilotage), et aujourd’hui en direct.',
-    'Le pointillé prolonge jusqu’à la fin prévue, celle de la carte du haut ; le trait vertical marque votre objectif. Touchez ou survolez la courbe pour lire un jour.' ] },
-  'pil.marge': { t: 'La date de fin, et la marge', p: [
-    'La date r\u00e9pond \u00e0 une seule question : <b>si le planning et les contrats restent tels quels, quand tout est-il fini ?</b> Elle vient du m\u00eame simulateur que La campagne avec \u00ab aucun renfort \u00bb : chaque travail commence \u00e0 l\u2019ouverture de <b>sa fen\u00eatre</b> \u2014 pas au premier jour de la p\u00e9riode \u2014, les travaux ouverts en m\u00eame temps se <b>partagent l\u2019\u00e9quipe</b>, les heures de <b>tracteur</b> sont d\u00e9duites, et l\u2019\u00e9quipe est lue <b>jour par jour</b> dans le planning : horaire de chacun, cong\u00e9s, fermeture, contrats et dates de d\u00e9but, effectif d\u2019une \u00e9quipe collective.',
-    '<b>Trois diff\u00e9rences avec La campagne, voulues.</b> La date est prise <b>aux heures normales</b> du planning, sans les heures suppl\u00e9mentaires que le simulateur s\u2019autorise quand il cherche un renfort. Un travail hors fen\u00eatre <b>n\u2019est pas rallong\u00e9</b> : le simulateur suppose +15 % par semaine de retard pour dimensionner un renfort, une date \u00ab si je ne touche rien \u00bb lit les heures telles quelles. Et l\u2019<b>\u00e9cart de cadence</b> mesur\u00e9, quand il est applicable, multiplie les heures restantes \u2014 La campagne raisonne au bar\u00e8me.',
-    'Au-del\u00e0 de la derni\u00e8re semaine planifi\u00e9e, l\u2019\u00e9quipe de cette semaine-l\u00e0 est <b>reconduite</b> telle quelle : la date sort quand m\u00eame, pr\u00e9c\u00e9d\u00e9e de \u00ab vers le \u00bb, et la phrase dit ce qu\u2019il restait \u00e0 faire \u00e0 la fin du cadre.',
-    'La <b>marge</b> compte les <b>jours travaillés au planning</b> entre cette date et l’objectif posé pour la campagne : un jour où au moins une personne de l’équipe (hors bureau, sous contrat) y est prévue. Un week-end, un vendredi non travaillé de l’horaire annualisé, une fermeture ou un jour férié ne comptent pas — un férié compte si quelqu’un y est saisi au travail. Sans planning chargé : du lundi au vendredi, fériés retirés. « Charge restante » et les jours des Échéances se comptent de la même façon, depuis <b>aujourd’hui</b>.',
-    'Si le planning ne couvre pas encore la p\u00e9riode, l\u2019\u00e9cran retombe sur la cadence des quatre derni\u00e8res semaines \u2014 et l\u2019annonce, car cette cadence ignore les embauches d\u00e9j\u00e0 sign\u00e9es.',
-    'Les m\u00eames fins par travail se lisent dans <b>\u00c9ch\u00e9ances par t\u00e2che</b> (La campagne) : un travail qui finit apr\u00e8s sa fen\u00eatre y est marqu\u00e9 \u00ab d\u00e9borde de N sem. \u00bb. Le 10 septembre 2026, Aujourd\u2019hui affichait \u00ab +32 j d\u2019avance \u00bb pendant que La campagne montrait du travail en retard fin mars : le cockpit comptait l\u2019\u00e9quipe d\u2019octobre sur une taille qui n\u2019ouvre qu\u2019en novembre.'
-  ] },
 
   'pil.capacite': { t: 'Capacité au pic', p: [
     'Le pic est la <b>semaine la plus chargée</b>, jamais une moyenne. Une moyenne annuelle n\u2019existe aucun jour de l\u2019année ; c\u2019est le pic qui décide d\u2019un recrutement.',
@@ -6446,22 +6430,7 @@ export const MV_INFO = {
     'Ces mêmes pleins <b>sont</b> le coût carburant du Pilotage. Un plein non noté n\u2019est pas seulement un niveau de cuve faux : c\u2019est du carburant absent de vos coûts.'
   ] },
 
-  'pil.spark': { t: 'La petite courbe', p: [
-    'Elle montre les <b>14 derniers jours</b>. Chaque point dit de combien le chiffre s’écarte de <b>sa référence</b>, le pointillé au milieu.',
-    'Pour la cadence : chaque point est la cadence des <b>7 jours</b> qui finissent ce jour-là, comparée à la cadence des 4 dernières semaines — le chiffre affiché. Même mesure : les heures dans les rangs du planning, divisées par les jours travaillés.',
-    'La bande va de <b>−30 % à +30 %</b>, la même pour toutes les petites courbes : au-delà, le point reste collé au bord. Un jour sans mesure coupe la courbe ; il ne compte pas pour zéro.',
-    'Pour la tension : chaque point est l’écart de toute l’équipe, sur les 7 jours qui finissent ce jour-là, entre le travail effectif et le planning prévu.',
-    'Pour la charge restante et le budget, les points viennent de la <b>photo quotidienne</b> : chaque jour, à la première ouverture par un administrateur — une fois les données arrivées —, l’appli note la charge restante, le % consommé et le % fait (60 jours gardés, dans la configuration du domaine). Une photo à 0 h, ou prise sur une autre période, compte comme un jour sans photo. Charge : l’écart à la charge du premier jour de la fenêtre — descendre est favorable. Budget : consommé moins fait, en points — zéro veut dire que le budget suit le travail. Le point du jour est toujours la valeur en direct ; un jour sans ouverture est un trou.',
-    'Vert : favorable, ou à moins de 3 % de la référence. Orange : défavorable — pour la cadence, sous la moyenne ; pour la tension, au-dessus du prévu.'
-  ] },
 
-  'pil.tension': { t: 'Tension de l’équipe', p: [
-    'Pour chaque personne de l’équipe (hors bureau et hors équipe collective) : le <b>travail effectif</b> des 14 derniers jours, saisie du planning comprise, face au <b>prévu du modèle</b> sur les mêmes jours — la grille d’annualisation, sans les saisies.',
-    'Jamais face au contrat : en modulation, une semaine haute est <b>prévue</b>. Ce n’est pas de la fatigue, c’est le plan.',
-    'Une personne passe <b>au seuil</b> quand elle est à plus de 10 % au-dessus du prévu, ou quand une des deux dernières semaines (lundi à dimanche, la semaine en cours jusqu’à aujourd’hui) dépasse la <b>moyenne autorisée</b> réglée dans le Planning. Au-delà du <b>maximum absolu</b>, elle passe en rouge. Ce sont les mêmes repères que la fiche du salarié.',
-    'Le chiffre du haut est l’écart de toute l’équipe sur 14 jours. Le trait de chaque ligne marque le prévu ; la barre, le fait — même échelle pour tout le monde.',
-    'Le planning ne dit pas l’activité : les heures de cave ou d’atelier comptent aussi. Une personne sans aucune heure prévue ni faite n’a pas de ligne.'
-  ] },
 
   'pil.dzrdt': { t: 'Rendement de la tournée', p: [
     'Tout se lit sur la <b>même simulation</b> que le résultat juste au-dessus : l’équipe du planning de chaque jour, les trajets entre chaque parcelle et la suivante, à pied ou en camion selon la règle des trajets.',
@@ -6487,12 +6456,6 @@ export const MV_INFO = {
     'Ce que ce calcul <b>ne sait pas</b> encore : la pousse de la vigne (15 à 20 cm de pousse découvrent des feuilles neuves), et l’heure du traitement face à une pluie dans les deux heures qui suivent.'
   ] },
 
-  'pil.inaction': { t: 'Coût de l’inaction', p: [
-    'C’est ce que le <b>simulateur de renfort</b> de Décider répond quand personne n’est ajouté : les heures que le retard ajoute, et ce qu’elles coûtent au taux de l’équipe.',
-    'Le modèle : une tâche faite hors de sa fenêtre prend un peu plus de temps à chaque semaine de retard — <b>+15 % par semaine</b> par défaut, réglable dans les hypothèses de Décider. Les heures s’accumulent de semaine en semaine.',
-    'C’est une <b>hypothèse</b>, pas une mesure. Le chiffre sert à décider d’un renfort, pas à être inscrit dans un budget. Le bouton mène au simulateur, où le renfort s’essaie.',
-    '« Rien à rattraper » veut dire que chaque tâche finit dans sa fenêtre sans renfort, d’après la même simulation.'
-  ] },
 
   'pil.trx': { t: 'Travaux tracteur en cours', p: [
     'Un travail lancé — une session « En cours » — doit couvrir <b>tout le domaine</b> : toutes les parcelles, sauf les arrachées et celles désactivées dans la session. Ce qui reste = ces parcelles moins celles déjà cochées. C’est la même règle que la barre d’avancement de la session.',
@@ -6508,7 +6471,7 @@ export const MV_INFO = {
     'L’ordre réel des travaux peut différer, et le compteur n’avance qu’avec les sessions saisies : l’échéance est au plus tôt, jamais au plus tard.'
   ] },
 
-  'pil.trxgnr': { t: 'La cuve après les travaux en cours', p: [
+  'pil.trxgnr': { t: 'Gasoil après les travaux', p: [
     'Le niveau de la cuve, moins les litres qu’il faut pour <b>finir les travaux en cours</b>, travail par travail. La barre en bas est ce qu’il restera, face à votre seuil (le pointillé).',
     'L’échelle part de zéro et va un peu au-dessus du niveau du jour (ou du seuil s’il est plus haut), arrondie : la <b>même pour toutes les lignes</b>. La capacité de la cuve est écrite au-dessus, en clair.',
     'La consommation est celle du <b>tracteur</b>, pas celle du travail : un griffage et un rognage faits avec la même machine sont comptés au même litre par heure.',
@@ -6530,14 +6493,6 @@ export const MV_INFO = {
     'Ce compte est celui de la <b>campagne consultée</b>. Le cuivre, lui, se suit sur sept ans glissants : il a son propre écran, dans Conformité.'
   ] },
 
-  'pil.prio': { t: 'La tâche prioritaire', p: [
-    'La <b>priorité du moment</b> fixée par l\u2019administrateur passe toujours devant (Vigne \u203a Parcelles \u203a «\u00a0Définir une tâche prioritaire\u00a0»). Une priorité terminée ne compte plus.',
-    'Sans priorité fixée, l\u2019ordre vient des <b>dates de travaux</b> de chaque tâche, posées dans la saison (Réglages \u203a Domaine \u203a Saisons, le crayon, «\u00a0Dates de travaux estimées\u00a0») ou dans la roue crantée du Pilotage (fenêtres des tâches). Une seule tâche pas finie dans ses dates : c\u2019est elle.',
-    'Plusieurs tâches dans leurs dates en même temps : l\u2019application <b>ne choisit pas</b>. La priorité se décide, elle ne se calcule pas : le bouton de la carte, réservé à l\u2019administrateur, ouvre le choix — il est là dans tous les cas, pour fixer une priorité sans attendre un chevauchement.',
-    'Une tâche pas finie dont la date de fin est passée reste dans la course, marquée «\u00a0en retard\u00a0». Une tâche <b>sans dates à elle</b> court sur toute la saison : elle chevauche toutes les autres.',
-    'Aucune tâche dans ses dates aujourd\u2019hui : la carte montre la prochaine, avec sa date de début. <b>Le nombre d\u2019heures ne décide jamais</b> : la tâche la plus longue n\u2019est pas forcément celle qu\u2019on peut faire maintenant.',
-    'Ma part du chantier, sur l\u2019Accueil, et le travail coché par défaut dans Décider suivent la même règle.'
-  ] },
 
   'pil.traitement': { t: 'Fenêtre de traitement', p: [
     'Les créneaux sont calculés sur les <b>prévisions horaires AROME</b> de Météo-France, avec trois conditions réunies sur la même heure : <b>sec</b> (moins de 0,1 mm), <b>vent sous 19 km/h</b>, <b>température sous 25 °C</b>.',

@@ -177,7 +177,7 @@ t('« Traiter ? » existe', CK.length > 0);
 t('« Traiter ? » porte la fiche pil.traitement', CK.includes("_mvInfoBtn('pil.traitement')"));
 t('« Traiter ? » porte les cinq jours', CK.includes('_pilTreatRows(days)'));
 t('… derriere un depliant, pas etires dans la grille', CK.includes('<details class="pil-t5"'));
-t('le verdict du jour reste en grand, jamais replie', /pil-big[\s\S]{0,80}\+big\+/.test(CK));
+// PIL-RANGE-1b (§441) : la tuile « Traiter ? » d'avant (_pilCkTraiter) est retirée ; le verdict se dessine dans le cockpit v2.
 t('le dessin des cinq jours est PARTAGE, pas recopie',
   (PIL.match(/_pilTreatRows\(/g) || []).length === 2);
 t('plus aucun second rendu de la fenetre de traitement', !PIL.includes('_pilPanelTraitement'));

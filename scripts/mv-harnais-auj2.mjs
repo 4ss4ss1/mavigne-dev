@@ -1,4 +1,6 @@
 // HARNAIS — AUJ-2 (§261) : « À savoir » au cockpit d'Aujourd'hui.
+// PIL-RANGE-1b (§441) : le rendu de secours de cockpit.js (_ckAuj et ses aides) est retiré avec l'ancien Aujourd'hui ; ce harnais ne garde
+//   que ce qui vit encore et nourrit le cockpit v2. Les bulles « i » qu'on lit sont celles de cockpit-vue.js (INFO), plus MV_INFO pil.*.
 //   node scripts/mv-harnais-auj2.mjs           → doit être vert
 //   node scripts/mv-harnais-auj2.mjs --contre  → chaque défaut réinjecté doit rougir
 // Exécute le VRAI src/cockpit.js et la VRAIE _pilEtatEntree (pilotage.js) ; lit le reste sur le texte des sources.
@@ -7,7 +9,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC0 = { ck: L('src/cockpit.js'), pil: L('src/pilotage.js'), css: L('src/styles.css'), uti: L('src/utils.js'), guide: L('guide/11-pilotage.html') };
+const SRC0 = { vue: L('src/cockpit-vue.js'), ck: L('src/cockpit.js'), pil: L('src/pilotage.js'), css: L('src/styles.css'), uti: L('src/utils.js'), guide: L('guide/11-pilotage.html') };
 const fn = (src, sig) => { const i = src.indexOf(sig); if (i < 0) throw new Error('introuvable : ' + sig); return src.slice(i, src.indexOf('\n}\n', i) + 3); };
 
 function monde(S) {
@@ -55,28 +57,13 @@ function suite(S) {
   const rt = W._ckSvRetards([{ nom: 'Reparation', pct: 95 }, { nom: 'Taille', pct: 100 }, { nom: 'Tirage', pct: 40 }], { Reparation: true, Taille: true });
   T('en retard = fenêtre passée ET tâche pas finie', rt.length === 1 && rt[0].titre.startsWith('Reparation') && rt[0].sous.includes('95\u00a0%'));
 
-  const h = W._ckSavoirHtml([{ cat: 'equipe', prio: 2, quand: 'Demain', titre: '<img onerror=1>', sous: 'x', action: 'planning' }].concat(rt, ct), '<div class="mat">M</div>');
-  T('le plus pressant d\u2019abord, textes échappés, un bouton qui agit', h.indexOf('ck-sv-retard') < h.indexOf('ck-sv-equipe') && !h.includes('<img') && h.includes('&lt;img')
-    && h.includes("onclick=\"goTo('planning')\"") && h.includes("onclick=\"_pilSetTab('sim')\"") && h.includes("onclick=\"_pilSetTab('camp')\""));
-  T('le matériel et la cave se rangent au bas de l\u2019encart ; rien à dire : une phrase', h.endsWith('<div class="mat">M</div>') && W._ckSavoirHtml([], '').includes('Rien à signaler'));
-  W.METEO_HOURLY = H; W.MEMBRES = membres; W.PLANNING_ENTRIES = PE;
-  const o = { d: { data: brul }, m: {}, kpis: 'K', alertes: '<div class="pil-sec-h">Alertes matériel</div>A', cave: '<div class="cv">C</div>', retards: {}, journal: [] };
-  const avec = W._ckAuj(Object.assign({ montrer: { savoir: true, fil: true } }, o));
-  T('l\u2019encart ouvre la colonne de droite, avant le fil, avec le matériel et la cave dedans',
-    avec.includes('id="ck-savoir"') && avec.indexOf('ck-side') < avec.indexOf('ck-savoir') && avec.indexOf('ck-savoir') < avec.indexOf('Alertes matériel')
-    && avec.indexOf('class="cv"') < avec.indexOf('ck-fil-pan') && avec.includes('data-info="pil.savoir"'));
-  const sans = W._ckAuj(Object.assign({ montrer: { savoir: false, fil: true } }, o));
-  T('« À savoir » masqué : le matériel et la cave reviennent à leur place, rien ne se perd',
-    !sans.includes('ck-savoir') && sans.indexOf('ck-fil-pan') < sans.indexOf('Alertes matériel') && sans.includes('class="cv"'));
 
   const P = S.pil;
   T('pilotage.js écrit l\u2019état du jour une seule fois, et les présences le lisent',
     (P.match(/if\(e\.type==='cp'\) etat='cp';/g) || []).length === 1 && P.includes('var _ee=_pilEtatEntree(e), etat=_ee.etat, motif=_ee.motif;') && P.includes('window._pilEtatEntree=_pilEtatEntree;'));
-  T('la Cave part des indicateurs vers l\u2019encart, les retards sont passés, l\u2019encart se masque',
-    P.includes('kpis:kpis.slice(0,_ckK0), cave:_ckCave, retards:_pilRetards(),') && P.includes("savoir:_pilShow('auj_savoir')") && P.includes("['auj_savoir',"));
   // REF-1 (§266) : la feuille de cet ancien cockpit est remplacée par celle de la maquette validée, passée à la charte.
   T('l\u2019ancienne feuille a laissé la place à celle de la maquette (REF-1)', S.css.includes('★★★ REF-1 (§266) — LE COCKPIT D\'AUJOURD\'HUI : LA FEUILLE DE LA MAQUETTE VALIDÉE') && !S.css.includes('AUJ-2 (§261) — « À SAVOIR »'));
-  T('aide, bulle, guide et nouveauté (8.33, pastille sur l\u2019encart)', /'pil\.savoir': \{ t: 'À savoir'/.test(S.uti) && S.guide.includes('<b>À savoir</b>')
+  T('aide, bulle, guide et nouveauté (8.33, pastille sur l\u2019encart)', /\n  savoir: '/.test(S.vue) && S.guide.includes('<b>À savoir</b>')
     && /\{ v: '8\.33', d: '2026-10-07', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-savoir'/.test(S.uti));   // la version a avancé : on garde le bloc
   return out;
 }
@@ -92,10 +79,7 @@ if (CONTRE) {
     ['le bureau compté dans les absences', 'ck', "if(!m || m.statut === 'Inactif' || m.bureau || !m.nom) return;", "if(!m || m.statut === 'Inactif' || !m.nom) return;"],
     ['un contrat à 40 jours annoncé', 'ck', "m.fin_contrat < auj || m.fin_contrat > lim) return;", "m.fin_contrat < auj) return;"],
     ['une tâche finie dite en retard', 'ck', "if(!r || !R[r.nom] || (r.pct || 0) >= 100) return;", "if(!r || !R[r.nom]) return;"],
-    ['des textes non échappés', 'ck', '_ckEsc(x.titre)', 'x.titre'],
-    ['le matériel perdu quand l\u2019encart est affiché', 'ck', "window._ckSavoirHtml(sv, (o.alertes || '') + cave)", "window._ckSavoirHtml(sv, '')"],
     ['l\u2019état du jour réécrit à côté', 'pil', 'var _ee=_pilEtatEntree(e), etat=_ee.etat, motif=_ee.motif;', "var etat='present', motif=''; if(e){ if(e.type==='cp') etat='cp'; }"],
-    ['la Cave affichée deux fois', 'pil', 'kpis:kpis.slice(0,_ckK0), cave:_ckCave,', 'kpis:kpis, cave:_ckCave,'],
   ];
   let manques = 0;
   DEF.forEach(([nom, f, a, b]) => {

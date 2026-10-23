@@ -1,4 +1,6 @@
 // HARNAIS — PROL-1 (§265) : ce qu'une prolongation de contrat d'un mois ferait gagner.
+// PIL-RANGE-1b (§441) : le rendu de secours de cockpit.js et les fiches MV_INFO de l'ancien écran sont retirés ; ce qui passait par lui
+//   se lit désormais sur le modèle du cockpit v2 (_pilCk2Modele) et sur sa bulle (INFO de cockpit-vue.js).
 //   node scripts/mv-harnais-prol1.mjs           → doit être vert
 //   node scripts/mv-harnais-prol1.mjs --contre  → chaque défaut réinjecté doit rougir
 // Exécute la VRAIE _pilGainsProlong (pilotage.js) avec un simulateur de renfort simulé qui enregistre ses appels,
@@ -8,7 +10,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC0 = { pil: L('src/pilotage.js'), ck: L('src/cockpit.js'), uti: L('src/utils.js'), guide: L('guide/11-pilotage.html') };
+const SRC0 = { vue: L('src/cockpit-vue.js'), pil: L('src/pilotage.js'), ck: L('src/cockpit.js'), uti: L('src/utils.js'), guide: L('guide/11-pilotage.html') };
 const fn = (s, sig) => { const i = s.indexOf(sig); if (i < 0) throw new Error('introuvable : ' + sig); return s.slice(i, s.indexOf('\n}\n', i) + 3); };
 const iso = k => { const t = new Date(), x = new Date(t.getFullYear(), t.getMonth(), t.getDate() + k); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
 function monde(S, opt) {
@@ -48,8 +50,8 @@ function suite(S) {
   const now = new Date(), m = [{ nom: 'Paul', fin_contrat: iso(10) }];
   T('la phrase dit le gain', C._ckSvContrats(m, now, g)[0].sous === 'Le prolonger d’un mois éviterait 120\u202fh de rattrapage (env. 2\u202f760 €) et ramènerait 1 tâche dans sa fenêtre.');
   T('sans gain, elle le dit ; sans calcul, la phrase d\u2019avant', C._ckSvContrats(m, now, z)[0].sous.includes('ne changerait rien') && C._ckSvContrats(m, now)[0].sous.includes('simulez un renfort'));
-  T('_pilTabAuj passe les gains au cockpit, qui les donne à la ligne', S.pil.includes("prolong:_pilGainsProlong(d), dec:dec,") && S.ck.includes('window._ckSvContrats(window.MEMBRES, new Date(), o.prolong)'));
-  T('aide, guide et nouveauté (8.37)', S.uti.includes('avec ce qu’une prolongation d’un mois ferait gagner') && S.guide.includes("avec ce qu'une prolongation d'un mois éviterait")
+  T('le modèle du cockpit v2 passe les gains de prolongation à la ligne du contrat', S.pil.includes('window._ckSvContrats(window.MEMBRES, t0, _pilGainsProlong(d))'));
+  T('aide, guide et nouveauté (8.37)', S.guide.includes("avec ce qu'une prolongation d'un mois éviterait")
     && /\{ v: '8\.37', d: '2026-10-07', items: \[\n    \{ niv: 0, pour: \['admin'\]/.test(S.uti));
   return out;
 }
@@ -65,7 +67,7 @@ if (CONTRE) {
     ['un gain négatif possible', 'pil', "var h=Math.max(0,Math.round((base.induit||0)-(r.induit||0)));", "var h=Math.round((base.induit||0)-(r.induit||0));"],
     ['un gain inventé sans taux', 'pil', "if(!P||!P.dec||P.dec.noRate||P.fini) return out;", "if(!P||!P.dec||P.fini) return out;"],
     ['« aucun gain » non dit', 'ck', "  if(!(g.h >= 1) && !(g.taches >= 1)) return 'Le prolonger d’un mois ne changerait rien aux travaux de la campagne.';\n", ""],
-    ['les gains non passés à la ligne', 'ck', "window._ckSvContrats(window.MEMBRES, new Date(), o.prolong)", "window._ckSvContrats(window.MEMBRES, new Date())"],
+    ['les gains non passés à la ligne', 'pil', "window._ckSvContrats(window.MEMBRES, t0, _pilGainsProlong(d))", "window._ckSvContrats(window.MEMBRES, t0)"],
   ];
   let manques = 0;
   DEF.forEach(([nom, f, a, b]) => {

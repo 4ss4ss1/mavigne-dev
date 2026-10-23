@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// PIL-RANGE-1b (§441) : le rendu de secours de cockpit.js (fil, plan et cockpit de secours) est retiré avec l'ancien Aujourd'hui ;
+//   les assertions qui le visaient partent, celles du cockpit v2 et des lectures partagées restent.
 // HARNAIS — DIRECT-1 (§318) : « Début » enregistre l'équipe comme « Valider » ; « Changer » la donne aux parcelles en cours
 //   commencées sans équipe ; le cockpit met l'équipe d'abord et respecte « sans moi » ; « En direct » : en ce moment, puis la
 //   journée, tracteur compris. EXÉCUTE cockpit.js entier, les VRAIS gestes d'app.js (pQuickStart, marquerEnCours,
@@ -39,8 +41,6 @@ function run(S) {
   T('A5 l’auteur déjà dans l’équipe garde sa place, sans doublon', Q({ qui: 'Hugo', membresEquipe: ['Hugo', 'Léa'] }) === 'Hugo|Léa');
   T('A6 noms nettoyés, doublons et vides retirés', Q({ qui: ' Victor ', membresEquipe: ['Shana', '', null, 'Shana ', 'Victor'] }) === 'Shana|Victor');
   T('A7 « Victor, Shana et Alicia »', C._ckEt(['Victor', 'Shana', 'Alicia']) === 'Victor, Shana et Alicia' && C._ckEt(['A', 'B']) === 'A et B' && C._ckEt(['A']) === 'A');
-  T('A8 le fil de secours : l’équipe sans l’auteur « sans moi », en français', () => C._ckFilHtml([{ e: { id: 'x', qui: 'Nico', quiHors: true, membresEquipe: ['Victor', 'Shana', 'Alicia'], statut: 'Validé', tache: 'Taille', parcelle: 'X' }, ts: null }], null, Date.now())
-    .includes('<b>Victor, Shana et Alicia</b> ont validé'));
   // ── B. le tracteur du jour (cockpit.js/_ckTracJour)
   const S1 = { id: J0(7, 50).toString(16), date: AUJ, activite: 'Griffage', conducteur: 'Nico', statut: 'En cours', tracteurId: 'trac1',
     trace: [{ t: HIER(16), e: 'debut', p: 'Vieille' }, { t: HIER(17), e: 'fin', p: 'Vieille', m: 60 }, { t: J0(8), e: 'debut', p: 'Les Perrières' },
@@ -155,7 +155,6 @@ if (!contre) {
 const CONTRE = [
   ['l’auteur repasse devant l’équipe', 'ck', 'if(q && r.indexOf(q) < 0 && !(e.quiHors && r.length)) r.push(q);', 'if(q && r.indexOf(q) < 0 && !(e.quiHors && r.length)) r.unshift(q);'],
   ['« sans moi » ignoré', 'ck', '!(e.quiHors && r.length)', '!(false && r.length)'],
-  ['le fil de secours revient au « et » répété', 'ck', '_ckEsc(_ckEt(noms) || ', "_ckEsc(noms.join(' et ') || "],
   ['« Début » (carte) sans l’équipe', 'app', 'JOURNAL.unshift(_mvEqApplique(_mvDebutLigne({id:Date.now().toString(16),date:date,', 'JOURNAL.unshift(_mvEqApplique((function(e){ return e; })({id:Date.now().toString(16),date:date,'],
   ['« Démarrer » (fiche) sans l’équipe', 'app', 'JOURNAL.unshift(_mvEqApplique(_mvDebutLigne({id:Date.now().toString(16),date:today,', 'JOURNAL.unshift(_mvEqApplique((function(e){ return e; })({id:Date.now().toString(16),date:today,'],
   ['un début oublie « sans moi »', 'app', '  if(g.quiHors) e.quiHors=true;\n  return e;', '  return e;'],

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// PIL-RANGE-1b (§441) : l'ancien Aujourd'hui (tuiles d'avant, petites courbes, frise, carte Cave) est retiré ; ce harnais ne garde que ce qui vit encore.
 /* ─────────────────────────────────────────────────────────────────────────
    HARNAIS PHOTO-1 (§219) — LA PHOTO QUOTIDIENNE DES CHIFFRES DU COCKPIT
    Lancer :  node scripts/mv-harnais-photo.mjs            (scénarios)
@@ -16,7 +17,7 @@ const CONTRE = process.argv.includes('--contre');
 const PIL = readFileSync('src/pilotage.js', 'utf8');
 function corps(src, debut) { const i = src.indexOf(debut); if (i < 0) throw new Error('introuvable : ' + debut);
   let j = src.indexOf('{', i), n = 0; for (let k = j; k < src.length; k++) { if (src[k] === '{') n++; else if (src[k] === '}') { n--; if (n === 0) return src.slice(i, k + 1); } } throw new Error('accolades : ' + debut); }
-function bloc(src) { const a = src.indexOf('var _PIL_PHOTO_MAX='), b = src.indexOf('// ★ SPARK-1 (§214) — LA CADENCE'); if (a < 0 || b < a) throw new Error('bloc PHOTO introuvable'); return src.slice(a, b); }
+function bloc(src) { const a = src.indexOf('var _PIL_PHOTO_MAX='), b = src.indexOf('function _friseNorm(');   /* PIL-RANGE-1b (§441) : les petites courbes qui suivaient la photo sont retirées */ if (a < 0 || b < a) throw new Error('bloc PHOTO introuvable'); return src.slice(a, b); }
 const RealDate = Date, FIXED = new RealDate('2026-06-16T10:00:00').getTime();
 function FakeDate(...a) { return a.length ? new RealDate(...a) : new RealDate(FIXED); }
 FakeDate.prototype = RealDate.prototype; FakeDate.now = () => FIXED; FakeDate.parse = RealDate.parse;
@@ -64,15 +65,7 @@ function scenarios(src, journal) {
     const ph = [];
     for (let k = 13; k >= 1; k--) if (k !== 5) ph.push({ d: iso(k), reste: 1500 - (13 - k) * 20, cons: 40 + (13 - k), avc: 40 + (13 - k) * 0.5, p: '2026' });   // AUJ-6 : la petite courbe ne lit que les photos de la période
     const Xs = charger(src, { photo: ph });
-    const sC = Xs._pilSparkCharge({ totalReste: 1200 });
-    t('charge : 14 points, écart à la première photo (1 500 h), le jour sans photo est un trou', sC && sC.length === 14 && proche(sC[0], 0) && sC[8] === null && proche(sC[1], -20 / 1500 * 100), JSON.stringify(sC));
-    t('charge : le point du jour est la valeur en direct (1 200 h → −20 %)', sC && proche(sC[13], -20) && Xs.CONFIG.photo.length === 12);
-    const sB = Xs._pilSparkBudget({ configured: true, cons: 50, avc: 47 });
-    t('budget : consommé − fait, en points ; aujourd’hui en direct (+3)', sB && proche(sB[0], 0) && proche(sB[12], 12 - 6) && proche(sB[13], 3) && sB[8] === null, JSON.stringify(sB));
-    t('budget non configuré aujourd’hui : la série garde ses photos, le jour reste un trou', (() => { const s = Xs._pilSparkBudget({ configured: false }); return s && s[13] === null && proche(s[12], 6); })());
-    t('moins de deux photos : pas de courbe', charger(src)._pilSparkCharge({ totalReste: 1 }) === null && charger(src, { photo: [{ d: iso(3), reste: 100, p: '2026' }] })._pilSparkCharge({ totalReste: 90 }).length === 14 && charger(src)._pilSparkBudget({ configured: true, cons: 1, avc: 1 }) === null);
-    t('dernier point lu = la dernière valeur connue', Xs._pilSparkDernier([1, null, 3, null]) === 3 && Xs._pilSparkDernier(null) === null);
-    t('branché : écriture au rendu d’Aujourd’hui, courbes sur Charge restante et Budget', /try\{ _pilPhotoEcrire\(d\); \}/.test(src) && /_pilSparkCharge\(d\)/.test(src) && /_pilSparkBudget\(E\)/.test(src) && /mauvais:'haut',aria:'Charge restante/.test(src));
+    t('branché : écriture au rendu d’Aujourd’hui', /try\{ _pilPhotoEcrire\(d\); \}/.test(src));
   } catch (e) { t('les scénarios s’exécutent sans planter', false, e.stack); }
   return { ok, ko };
 }
@@ -83,9 +76,6 @@ const DEFAUTS = [
   ['un non-admin écrit', "if(!d||typeof window.isAdmin!=='function'||!window.isAdmin()||typeof window.saveData!=='function') return false;", "if(!d||typeof window.saveData!=='function') return false;"],
   ['une archive consultée photographie', "if(!sa||!sp||sa.nom!==sp.nom) return false;", ''],
   ['plus de 60 lignes', 'if(N.length>_PIL_PHOTO_MAX) N=N.slice(N.length-_PIL_PHOTO_MAX);', ''],
-  ['le point du jour n’est plus en direct', "var live=Number(d&&d.totalReste); if(isFinite(live)) s[13]=live;", ''],
-  ['un jour sans photo compte zéro', "out.push((typeof v==='number'&&isFinite(v))?v:null);", "out.push((typeof v==='number'&&isFinite(v))?v:0);"],
-  ['le budget oublie le travail fait', "(x.cons-x.avc):null; });", "(x.cons):null; });"],
   ['la photo part avant l’arrivée des données (AUJ-6)', "if(!window._dataReady||", "if("],
   ['une période sans travail prévu est photographiée (AUJ-6)', "!(Number(d.totalTotal)>0)||", ""],
 ];

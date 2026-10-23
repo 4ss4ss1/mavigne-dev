@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// PIL-RANGE-1b (§441) : le rendu de secours de cockpit.js (fil, plan et cockpit de secours) est retiré avec l'ancien Aujourd'hui ;
+//   les assertions qui le visaient partent, celles du cockpit v2 et des lectures partagées restent.
 // ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
 //  HORS-1 (§322) — LA PARCELLE PAS CONCERNÉE PAR LA TÂCHE AFFICHÉE : UN FANTÔME
 //  Nico (12/10, dicté) : « dans le pilotage, toutes les parcelles sont indiquées pour des tâches qui ne les concernent pas, qui ont
@@ -159,19 +161,6 @@ function suite(S) {
     const l = W._ckEnCours([{ nom: 'Taille', pct: 10 }], { parcs: [{ nom: 'A', taches: {} }, { nom: 'X', tachesExclues: ['Taille'], taches: {} }, { nom: 'C', taches: { Taille: 'En cours' } }],
       journal: [], fen: [{ nom: 'Taille', ws: ord(-5), we: ord(30) }] }, iso(0));
     return l.length === 1 && l[0].nom === 'Taille' && l[0].n === 2; });
-  // ── B. le plan de secours (cockpit.js/_ckPlanCorps)
-  T('B1 plan de secours : la parcelle hors dessinée « hors » et comptée à part ; le pourcentage d’une appellation ne compte que les concernées ; aucune : un tiret', () => {
-    const WH = lecture(S);
-    WH._pilSaison = () => ({ nom: 'Hiver 2026-2027', debut: iso(-60), fin: iso(120) });
-    const CK = vm.runInContext('_CK', WH);
-    CK.plan = { parcs: [{ nom: 'Clos', surface: 0.4, appellation: 'Gevrey-Chambertin', commune: 'Gevrey-Chambertin', taches: { Taille: 'Validé' } },
-      { nom: 'Combe', surface: 0.5, appellation: 'Gevrey-Chambertin', commune: 'Gevrey-Chambertin', tachesExclues: ['Taille'], taches: {} },
-      { nom: 'Loin', surface: 0.3, appellation: 'Bourgogne', commune: 'Brochon', tachesExclues: ['Taille'], taches: {} }],
-      journal: [], rows: [{ nom: 'Taille', pct: 100 }], fen: [{ nom: 'Taille', ws: ord(-20), we: ord(60) }], retards: {} };
-    CK.tachePlan = 'Taille';
-    const h = WH._ckPlanCorps();
-    return h.includes('class="ck-pl-p et-hors"') && h.includes('Taille : 100\u202f%') && h.includes('Taille : \u2014') && /Pas concernée <b>2<\/b>/.test(h) && !/À faire <b>/.test(h);
-  });
   // ── C. le VRAI modèle du cockpit (pilotage.js)
   let V = null; T('C0 le modèle se construit', () => { V = modele(S); return !!(V && V.etats && V.etats.taille); });
   if (V) {
@@ -229,7 +218,6 @@ function suite(S) {
   // ── G. l'aide, la bulle, le guide, les nouveautés, la liste (sur le texte)
   T('G1 l’aide (MV_AIDE Pilotage et Accueil, MV_INFO du plan), la bulle du cockpit et les deux pages du guide disent le contour pâle',
     S.uti.includes('colorée selon son état sur sa fiche pour la tâche choisie, en contour pâle quand cette tâche y est désactivée, rangée par appellation')
-    && S.uti.includes('reste à sa place en contour pâle : ni à faire ni en retard, elle a sa ligne « Pas concernées » dans la légende')
     && S.uti.includes('reste en contour pâle, en dernier, et ne compte pas dans l’avancement')
     && S.vue.includes('reste à sa place en contour pâle : ni à faire ni en retard, elle ne compte pas dans l’avancement')
     && S.g11.includes('en contour pâle quand cette tâche y est désactivée') && S.g04.includes("reste en contour pâle et ne compte pas dans l'avancement"));
@@ -253,8 +241,6 @@ if (CONTRE) {
     ['« hors » lu avant « arrachée »', 'ck', "    if(/arrach/i.test(String(p.statut || ''))){ etat[p.nom] = 'arr'; return; }\n    if(conc && !conc(p, tache)){ etat[p.nom] = 'hors'; return; }\n",
       "    if(conc && !conc(p, tache)){ etat[p.nom] = 'hors'; return; }\n    if(/arrach/i.test(String(p.statut || ''))){ etat[p.nom] = 'arr'; return; }\n"],
     ['une parcelle hors passe en retard', 'ck', "if(etat[n] === 'afaire') etat[n] = 'retard';", "if(etat[n] === 'afaire' || etat[n] === 'hors') etat[n] = 'retard';"],
-    ['le plan de secours compte les hors dans le pourcentage', 'ck', "if(e !== 'arr' && e !== 'hors') hc += sf;", "if(e !== 'arr') hc += sf;"],
-    ['le plan de secours oublie la légende des hors', 'ck', "'retard', 'arr', 'hors'].filter", "'retard', 'arr'].filter"],
     ['calc compte les hors dans l’appellation', 'vue', "const pc = S.vue ? ps.filter(p => S.etats[S.vue][p.id] !== 'hors') : ps,", 'const pc = ps,'],
     ['calc compte les hors dans la tâche', 'vue', "if (p.arr || S.etats[t.id][p.id] === 'hors') return;", 'if (p.arr) return;'],
     ['les rangs restent dessinés sur un fantôme', 'vue', " r.classList.toggle('hors', e === 'hors');", ''],

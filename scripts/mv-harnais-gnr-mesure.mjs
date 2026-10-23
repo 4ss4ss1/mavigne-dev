@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// PIL-RANGE-1b (§441) : « Alertes matériel » de l'ancien Aujourd'hui (_pilCkAlertes) est retiré ; les cartes du tracteur (_pilCkTracteur)
+//   sont relogées dans Équipe & matériel › Matériel (_pilTabMat). Les machines immobilisées sont dans « À savoir » du cockpit v2.
 /* ─────────────────────────────────────────────────────────────────────────
    HARNAIS GNR-M (§213) — LE TRACTEUR SUR LES TRAVAUX EN COURS, LA CONSO MESURÉE
    Lancer :  node scripts/mv-harnais-gnr-mesure.mjs            (scénarios)
@@ -37,7 +39,7 @@ function corps(src, nom) {
   throw new Error('accolades : ' + nom);
 }
 function bloc(src) {
-  const a = src.indexOf('function _pilCkAlertes(d){');
+  const a = Math.min(...['var _PIL_GM_', 'function _pilGm'].map(k => src.indexOf(k)).filter(i => i >= 0));   // PIL-RANGE-1b : le bloc part des aides GNR-M
   const b = src.indexOf("// ── Onglet AUJOURD'HUI (cockpit) ──");
   if (a < 0 || b < 0 || b < a) throw new Error('bloc GNR-M introuvable');
   return src.slice(a, b);
@@ -196,7 +198,7 @@ function scenarios(src, journal) {
     const H = X._pilCkTracteur(d);
     const nRows = (H.match(/class="pil-trx-job"/g) || []).length;
     t('④ une ligne par travail en cours (5)', nRows === 5, nRows);
-    t('④ cartes : travaux, révision, cuve', H.includes('Travaux tracteur en cours') && H.includes('Révision · Bobard') && H.includes('Cuve GNR'));
+    t('④ cartes : travaux, révision, gasoil après les travaux (plus deux « Cuve GNR » l’une sous l’autre, PIL-RANGE-1b)', H.includes('Travaux tracteur en cours') && H.includes('Révision · Bobard') && H.includes('Gasoil après les travaux') && !H.includes('>Cuve GNR<'));
     t('④ la session oubliée est signalée, une seule', (H.match(/aucune parcelle cochée depuis/g) || []).length === 1);
     const apres = 410 - (1.6 * 6) - 46.8 - (2.6 * 120 / 15.6) - (0.75 * 6);
     // GNR-2 (§256) : le chiffre en grand (.pil-big), la phrase à côté (.pil-trx-vu) — on lit les deux, collés, dans cet ordre.
@@ -219,12 +221,11 @@ function scenarios(src, journal) {
     t('④ aucun <div> dans un <button>', !/<button[^>]*>(?:(?!<\/button>)[\s\S])*<div/.test(H));
     const larg = [...H.matchAll(/(?:width|left):(-?[\d.]+)%/g)].map(m => +m[1]);
     t('④ largeurs et positions entre 0 et 100 %', larg.length > 0 && larg.every(v => v >= 0 && v <= 100), JSON.stringify(larg.filter(v => v < 0 || v > 100)));
-    const A1 = X._pilCkAlertes({ tracs: [{ id: 't1', nom: 'NH', revReste: 3, rep: { motif: 'embrayage' } }], gnr: null, refDate: '2026-06-16' });
-    t('④ la liste garde les machines immobilisées, la révision n’y est plus une ligne', A1.includes('immobilisé') && !A1.includes('Révision <b>') && A1.includes('pil-trx'));
     X.SESSIONS.length = 0; X.INTRANTS.fertil.length = 0;
-    const A2 = X._pilCkAlertes({ tracs: [{ id: 't1', nom: 'NH', revReste: 400 }], gnr: { capacite: 1500, niveau: 900, seuil: 300 } });
-    t('④ rien en cours, rien d’immobilisé, cuve haute : la phrase de calme', A2.includes('Rien à signaler'));
-    const A3 = X._pilCkAlertes({ tracs: [], gnr: { capacite: 1500, niveau: 250, seuil: 300 } });
+    const A2 = X._pilCkTracteur({ tracs: [{ id: 't1', nom: 'NH', revReste: 400 }], gnr: { capacite: 1500, niveau: 900, seuil: 300 } });
+    t('④ rien en cours, cuve haute : aucune carte (Matériel n’affiche pas le bloc)', A2 === '');
+    t('④ relogé : Équipe & matériel › Matériel pose les cartes sous la case mat_travaux, avec leur titre', /_pilShow\('mat_travaux'\)/.test(src) && /_trx=_pilCkTracteur\(d\)/.test(src) && src.includes("['mat_travaux','Pour finir les travaux tracteur en cours']"));
+    const A3 = X._pilCkTracteur({ tracs: [], gnr: { capacite: 1500, niveau: 250, seuil: 300 } });
     t('④ sans travail, une cuve sous le seuil garde sa carte', A3.includes('>250 L</span><span class="pil-trx-vu">sous le seuil</span>') && !A3.includes('Rien à signaler'));
     t('④ l’échelle suit le seuil quand il dépasse le niveau (300 L → 400 L)', A3.includes('<span>400 L</span>'));
     // la conso se calcule sur ENTRETIENS + SESSIONS : on recharge le monde pour la tuile

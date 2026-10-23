@@ -1,4 +1,6 @@
 // HARNAIS — CHANT-1 (§316) : l'ordre des chantiers — à faire ou en cours par date de début, l'arrachage fini pour l'équipe
+// PIL-RANGE-1b (§441) : le rendu de secours de cockpit.js et les fiches MV_INFO de l'ancien écran sont retirés ; ce qui passait par lui
+//   se lit désormais sur le modèle du cockpit v2 (_pilCk2Modele) et sur sa bulle (INFO de cockpit-vue.js).
 //   en tête des terminés, puis les terminés.
 //   node scripts/mv-harnais-chant1.mjs           → doit être vert
 //   node scripts/mv-harnais-chant1.mjs --contre  → chaque défaut réinjecté doit rougir
@@ -100,8 +102,8 @@ function suite(S) {
     const l = ligne(Vv, /const suiteFen = [^\n]*\n/), c = {}; vm.createContext(c); vm.runInContext(l.replace('const suiteFen', 'this.suiteFen'), c); const f = c.suiteFen;
     return f({ eqFini: true }, { etat: 'fait', pct: 50 }) === ', la suite au prestataire' && f({}, { etat: 'retard', pct: 40 }) === ', fenêtre passée'
       && f({ eqFini: true }, { etat: 'fait', pct: 100 }) === '' && f({}, { etat: 'cours', pct: 10 }) === '' && (Vv.match(/suiteFen\(t, x\)/g) || []).length === 2; });
-  T('le sous-titre dit la règle, ici et dans le repli (cockpit.js)', () => Vv.includes("'Par date de début, les terminés en bas'") && S.ck.includes("'Par date de début, les terminés en bas'")
-    && !Vv.includes('Dans l\u2019ordre des dates de la campagne') && !S.ck.includes('Dans l\u2019ordre des dates de la campagne'));
+  T('le sous-titre dit la règle dans le cockpit v2 (le repli de cockpit.js est retiré)', () => Vv.includes("'Par date de début, les terminés en bas'")
+    && !Vv.includes('Dans l\u2019ordre des dates de la campagne'));
   T('les deux lectures sont exposées (pilotage.js et le kit les appellent par window)', () => /window\._mvOrdreChantiers=_mvOrdreChantiers;/.test(sansCom(S.uti)) && /window\._mvChantiersCtx=_mvChantiersCtx;/.test(sansCom(S.app)));
   T('la mention a sa règle de feuille, aux jetons seuls', () => /\.mvk-note\{margin:0 0 var\(--e-1,4px\);font-size:var\(--pt-micro,11px\);color:var\(--texte-doux\);\}/.test(S.css));
   // ── l'accompagnement ──

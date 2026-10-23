@@ -1,4 +1,6 @@
 /* ───────────────────────────────────────────────────────
+// PIL-RANGE-1b (§441) : l'ancien Aujourd'hui (tuiles d'avant, petites courbes, frise, carte Cave) est retiré ; ce harnais ne garde que ce qui vit encore.
+//   La carte Cave d'avant (_pilCkCave) part : la Cave du Pilotage est la vue Cave du cockpit (CAVEPIL-1/2, leurs harnais).
    HARNAIS — L'ONGLET PILOTAGE › CAVE EST RENTRÉ DANS LA CAVE (lot CAVE-3, +④)
    Lancer :          node scripts/mv-harnais-cave-mil.mjs
    Contre-épreuves : node scripts/mv-harnais-cave-mil.mjs --contre
@@ -74,15 +76,11 @@ function jouer(cave, pil, rsv, ut, html, css, silencieux) {
   T(/cav:'auj'/.test(pil), 'la cl\u00e9 cav migre vers auj (_PIL_TAB_MIGR)');
   T(!/_PIL_CAVSUB|_pilLoadCav|_pilSaveCav|_pilTabCav|_pilAvertCav|_PCAV_MIL|_pcav|_pcrb/.test(pil), 'aucun reste de l\u2019onglet : ni sous-vue, ni handlers, ni fonctions');
   T(!/Ouillage <b>'\+_pilEsc/.test(pil), 'l\u2019alerte ouillage du Pilotage (seuil global) a disparu');
-  const ck = extraire(pil, '_pilCkCave') || '';
-  T(/window\._mlAgendaComplet/.test(ck) && /window\._mlVerdict/.test(ck), 'la carte Cave LIT _mlVerdict et _mlAgendaComplet de cave.js');
-  T(/_pilOuvrirCave\(\)/.test(ck) && /window\._pilOuvrirCave\s*=\s*function/.test(pil), 'la carte a son bouton, et il est sur window');
   /* REV-1 (§194) : la section devient un argument (le Revient ouvre Le millesime) ; la
      carte appelle _pilOuvrirCave() SANS argument, donc le defaut doit rester Aujourd'hui. */
   T(/_s=\(typeof sec==='string'&&sec\)\?sec:'aujourdhui'/.test(pil) && /selectCaveSection\(_s\)/.test(pil),
     'le bouton ouvre la Cave sur Aujourd\u2019hui (d\u00e9faut de _pilOuvrirCave)');
   T(/auj_cave:1/.test(pil) && /\['auj_cave','La Cave/.test(pil), 'la carte est un panneau param\u00e9trable (auj_cave)');
-  T(/\.pil-ck-btn\{/.test(css), 'le bouton de la carte a son style');
 
   L('Le millesime : une tete et quatre vues (RANGE-1)');
   T(/id="ml-tab-vie" onclick="_mlSetTab\('vie'\)"/.test(html) && /id="ml-tab-crb" onclick="_mlSetTab\('crb'\)"/.test(html), 'La ligne de vie et Les courbes dans #ml-tabs-row');

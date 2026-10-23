@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// PIL-RANGE-1b (§441) : l'ancien Aujourd'hui (tuiles d'avant, petites courbes, frise, carte Cave) est retiré ; ce harnais ne garde que ce qui vit encore.
 /* ───────────────────────────────────────────────────────────────────────────
    HARNAIS — TOUR-6 : DEUX CHEVAUCHEMENTS VUS PAR LE TOUR, TENUS PAR LE CALCUL (§182)
    Lancer : node scripts/mv-harnais-etiquettes.mjs          (+ --contre)
@@ -35,26 +36,6 @@ function jouer(S, silencieux) {
   let ok = 0, ko = 0; const rouges = [];
   const t = (lib, cond) => { if (cond) ok++; else { ko++; rouges.push(lib); } if (!silencieux) console.log('  ' + (cond ? c.g('✓') : c.r('✗')) + ' ' + lib); };
   try {
-    if (!silencieux) console.log('\n' + c.b('A. La frise du cockpit'));
-    const ec = (S.pil.match(/var _PIL_TL_ECART = [0-9.]+;/) || [])[0];
-    const tl = bloc(S.pil, 'function _pilCockpitTimeline(');
-    if (!ec || !tl) throw new Error('extraction frise impossible');
-    const F = new Function(ec + ' function _pilDfrObj(){ return "d"; }\n' + tl + '\nreturn _pilCockpitTimeline;')();
-    const J = 864e5, t0 = new Date(); t0.setHours(0, 0, 0, 0);
-    const niv = (p, o) => {
-      const h = F({ proj: new Date(t0.getTime() + p * J), obj: new Date(t0.getTime() + o * J), marge: 1 });
-      const r = {}; for (const m of h.matchAll(/class="cap( n(\d))?">(Auj\.|Fin prévue|Objectif)</g)) r[m[3]] = +(m[2] || 0);
-      r.frise = +((h.match(/class="pil-tl( n(\d))?"/) || [])[2] || 0); return r;
-    };
-    let r = niv(60, 90);
-    t('Repères éloignés : tout au même étage, frise normale', r['Auj.'] === 0 && r['Fin prévue'] === 0 && r['Objectif'] === 0 && r.frise === 0);
-    r = niv(60, 4);
-    t('Objectif près d\u2019aujourd\u2019hui : « Objectif » monte d\u2019un étage', r['Auj.'] === 0 && r['Objectif'] === 1 && r.frise === 1);
-    r = niv(3, 90);
-    t('Fin prévue près d\u2019aujourd\u2019hui : « Fin prévue » monte', r['Fin prévue'] === 1 && r['Objectif'] === 0);
-    r = niv(40, 42);
-    t('Fin prévue sur l\u2019objectif : les deux ne partagent pas l\u2019étage', r['Fin prévue'] !== r['Objectif']);
-    t('Les étages existent en CSS (cap.n1, cap.n2, pil-tl.n1, pil-tl.n2)', /\.pil-tl-mk \.cap\.n1\{top:-40px;\}/.test(S.css) && /\.pil-tl\.n2\{margin-top:calc\(var\(--e-8,40px\) \+ var\(--e-6,24px\)\);\}/.test(S.css));
 
     if (!silencieux) console.log('\n' + c.b('B. L\u2019échelle des mois des Archives'));
     const mo = (S.regl.match(/var _CMP_MOIS=\[[^\]]*\];/) || [])[0];
@@ -82,7 +63,6 @@ if (!process.argv.includes('--contre')) {
 }
 function muter(S, f, a, b) { if (!S[f].includes(a)) throw new Error('ancre introuvable : ' + a.slice(0, 50)); return Object.assign({}, S, { [f]: S[f].replace(a, b) }); }
 const MUT = [
-  ['la frise repose toutes les étiquettes au même étage', S => muter(S, 'pil', "    var n=0; while(n<2 && der[n]!=null && (o.x-der[n])<_PIL_TL_ECART) n++;", "    var n=0;")],
   ['l\u2019échelle ne cache plus rien sur téléphone', S => muter(S, 'regl', "    var imp=(pas===1) && i!==0 &&", "    var imp=false &&")],
   ['le mois qui suit l\u2019étiquette de tête reste visible', S => muter(S, 'regl', " || rang===1);", ");")],
 ];

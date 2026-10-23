@@ -1,4 +1,6 @@
 // HARNAIS — REF-1 (§266) : Aujourd'hui reprend la maquette validée, montée avec le modèle réel.
+// PIL-RANGE-1b (§441) : le rendu de secours de cockpit.js (fil, plan et cockpit de secours) est retiré avec l'ancien Aujourd'hui ;
+//   les assertions qui le visaient partent, celles du cockpit v2 et des lectures partagées restent.
 //   node scripts/mv-harnais-ref1.mjs           → doit être vert
 //   node scripts/mv-harnais-ref1.mjs --contre  → chaque défaut réinjecté doit rougir
 // Exécute le VRAI _pilCk2Modele (pilotage.js) et les VRAIES sources de cockpit.js sur des données au format de
@@ -72,10 +74,10 @@ function suite(S) {
     /function ouvrirFeuille\(pid\) \{ const p = PIDX\[pid\]; if \(p && !p\.arr\) \{ cacherLoupe\(\); if \(typeof window\.openDP === 'function'\) window\.openDP\(p\.nom\); \} \}/.test(vue) && !vue.includes('window.openSelParc')   /* FORME-1 (§301) : openSelParc = la feuille d'une TÂCHE */ && !vue.includes('function surValider(pid'));
   T('l\u2019entrée orchestrée ne se joue qu\u2019une fois par session', vue.includes('SANS_MVT = !!window._ck2EntreeFaite; entree(); SANS_MVT = false; window._ck2EntreeFaite = true;') && vue.includes('const reduit = () => MQ_REDUIT.matches || SANS_MVT;'));
   T('le squelette porte les blocs de la maquette et l\u2019accroche de la visite', ['id="ck-verdict"', 'id="ck-savoir"', 'id="ck-decision"', 'id="ck-plan"', 'id="ck-chant"', 'id="ck-courbe"', 'id="ck-fil"'].every(k => vue.includes(k)) && vue.includes('data-mvt=\\"traiter\\"') === false && vue.includes("' data-mvt=\"traiter\"'"));
-  T('_pilTabAuj monte la maquette avec le modèle réel, et garde l\u2019ancien cockpit en repli',
-    S.pil.includes("try{ var _V=_pilCk2Modele(d,m); _V.eco=_pilCk2Eco(d,_V); setTimeout(function(){ try{ window._ck2Monter(_V); _pilStickyH(); }")   /* VIF-1 : la hauteur du fil de portée posée au montage */ && S.pil.includes('return window._ck2Squelette(); }') && S.pil.includes('return window._ckAuj({')
+  T('_pilTabAuj monte la maquette avec le modèle réel ; en repli, un message (jamais d\u2019écran blanc, plus l\u2019ancien cockpit)',
+    S.pil.includes("try{ var _V=_pilCk2Modele(d,m); _V.eco=_pilCk2Eco(d,_V); setTimeout(function(){ try{ window._ck2Monter(_V); _pilStickyH(); }")   /* VIF-1 : la hauteur du fil de portée posée au montage */ && S.pil.includes('return window._ck2Squelette(); }') && !S.pil.includes('window._ckAuj(') && S.pil.includes('Le tableau de bord n\\u2019a pas pu s\\u2019afficher')
     && S.pil.includes("catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#ck2'); }"));
-  T('« Traiter ? » : un seul calcul, lu par la tuile et par le cockpit', S.pil.includes('var X=_pilTraiterCalc(), big=X.big') && S.pil.includes('return { big:big, bigCol:bigCol, rai:rai, ban:ban, pied:pied, _i:_i, fen:fen, risque:risque, prochaine:prochaine };'));
+  T('« Traiter ? » : un seul calcul (_pilTraiterCalc), lu par le cockpit', /_pilTraiterCalc\(\)/.test(S.pil.slice(S.pil.indexOf('function _pilCk2Modele('))) && S.pil.includes('return { big:big, bigCol:bigCol, rai:rai, ban:ban, pied:pied, _i:_i, fen:fen, risque:risque, prochaine:prochaine };'));
   T('le module est importé après cockpit.js, reserve.js reste dernier', /import '\.\/cockpit\.js';[^\n]*\nimport '\.\/cockpit-vue\.js';[^\n]*\n(?:import '[^']+';[^\n]*\n)*import '\.\/reserve\.js';/.test(S.app));
   const css = S.css.slice(S.css.indexOf('★★★ REF-1 (§266)'), S.css.indexOf('★ DS-4 (§270) — LE COCKPIT HABILLÉ') > 0 ? S.css.indexOf('★ DS-4 (§270) — LE COCKPIT HABILLÉ') : undefined);   // DS-4 : la feuille REF-1 seule, sans son habillage
   T('la feuille de la maquette est là, avec ses jetons propres, et l\u2019ancienne feuille est partie',

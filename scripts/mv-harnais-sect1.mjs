@@ -1,4 +1,6 @@
 // HARNAIS — SECT-1 (§264) : la météo par secteur dans « À savoir ».
+// PIL-RANGE-1b (§441) : le rendu de secours de cockpit.js et les fiches MV_INFO de l'ancien écran sont retirés ; ce qui passait par lui
+//   se lit désormais sur le modèle du cockpit v2 (_pilCk2Modele) et sur sa bulle (INFO de cockpit-vue.js).
 //   node scripts/mv-harnais-sect1.mjs           → doit être vert
 //   node scripts/mv-harnais-sect1.mjs --contre  → chaque défaut réinjecté doit rougir
 // Exécute les VRAIES _wxDeuxJours, _wxFromApi, window._wxSecteurs (app.js) et _ckSvMeteo (cockpit.js).
@@ -7,7 +9,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC0 = { app: L('src/app.js'), ck: L('src/cockpit.js'), uti: L('src/utils.js'), guide: L('guide/11-pilotage.html') };
+const SRC0 = { pil: L('src/pilotage.js'), vue: L('src/cockpit-vue.js'), app: L('src/app.js'), ck: L('src/cockpit.js'), uti: L('src/utils.js'), guide: L('guide/11-pilotage.html') };
 const bloc = (s, a, fin) => { const i = s.indexOf(a); if (i < 0) throw new Error('introuvable : ' + a); return s.slice(i, s.indexOf(fin, i) + fin.length); };
 function serie(j0, jours, f) { const o = { time: [], precipitation: [], windspeed_10m: [] }; jours.forEach((d, k) => { for (let h = 0; h < 24; h++) { o.time.push(d + 'T' + String(h).padStart(2, '0') + ':00'); const v = f(k, h); o.precipitation.push(v[0]); o.windspeed_10m.push(v[1]); } }); return o; }
 function monde(S, stock) {
@@ -57,8 +59,8 @@ function suite(S) {
   T('des secteurs sous les seuils l\u2019emportent sur la prévision du domaine : rien à dire', W._ckSvMeteo(H, [], now, sec, plan).length === 0);
   T('des secteurs touchés : une seule ligne par jour, la prévision du domaine ne s\u2019y ajoute pas', W._ckSvMeteo(H, [], now, sects, plan).filter(x => x.quand === 'Demain').length === 1);
   T('sans secteurs : la prévision du domaine, comme avant', W._ckSvMeteo(H, [], now, null, plan)[0].titre === 'Pluie annoncée : 6\u202fmm, de 8\u00a0h à 11\u00a0h');
-  T('le cockpit passe les secteurs et le plan à la règle', S.ck.includes("(typeof window._wxSecteurs === 'function' ? window._wxSecteurs() : null), { parcs: (o.parcs || window.PARCELLES || []), journal: o.journal, fen: o.fenetres }"));
-  T('aide, guide et nouveauté (8.36)', S.uti.includes('secteur par secteur quand le domaine s’étend sur plusieurs communes') && S.guide.includes("secteur par secteur si le domaine s'étend sur plusieurs communes")
+  T('le modèle du cockpit v2 passe les secteurs et le plan à la règle', S.pil.includes("window._ckSvMeteo(MH, d.data, t0, (typeof window._wxSecteurs==='function'?window._wxSecteurs():null), plan)"));
+  T('aide, guide et nouveauté (8.36)', /\n  savoir: '[^\n]*sur une commune où une tâche est en cours/.test(S.vue) && S.guide.includes("secteur par secteur si le domaine s'étend sur plusieurs communes")
     && /\{ v: '8\.36', d: '2026-10-07', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-savoir'/.test(S.uti));
   return out;
 }

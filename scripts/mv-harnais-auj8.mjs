@@ -1,4 +1,6 @@
 // HARNAIS — AUJ-8 (§312) : « À savoir » donne des faits, plus de verdict.
+// PIL-RANGE-1b (§441) : _ckSavoirHtml (rendu de secours de cockpit.js) et la fiche MV_INFO pil.savoir sont retirés ; la phrase vide se
+//   garde dans le cockpit v2 (contre-épreuve « la phrase vide écrite quand même »), le texte se lit sur la bulle INFO.savoir.
 //   node scripts/mv-harnais-auj8.mjs           → doit être vert
 //   node scripts/mv-harnais-auj8.mjs --contre  → chaque défaut réinjecté doit rougir
 // Nico (11/10) : « enlève la tâche de brûlage ici, ce n'est pas à l'appli de décider si oui ou non il est possible de faire une
@@ -73,8 +75,6 @@ function partieA(S, T) {
   const m4 = W._ckSvMeteo({ time: brochon.time, precip: brochon.precip, wind: brochon.wind }, quatre, now, null, { parcs, journal: [], fen: fen4 });
   T('A10 plus de trois tâches : les trois premières, puis le reste compté', m4[0] && m4[0].sous === 'En cours : taille, 4 parcelles pas encore faites ; brûlage, 4 ; pliage, 4 ; et 1 autre tâche.');
   T('A11 aucun verdict dans ce que disent les lignes', ![m1, m2, dom, oct, m4].some(m => VERDICT.test(JSON.stringify(m))));
-  const h = W._ckSavoirHtml([{ cat: 'meteo', prio: 2, quand: 'Demain', titre: 'Pluie', sous: '' }, { cat: 'meteo', prio: 1, quand: 'Jeudi', titre: 'Vent', sous: 'En cours : <b>x</b>' }], '');
-  T('A12 rien en cours : aucune phrase vide sous la ligne ; sinon la phrase, échappée', (h.match(/class="ck-sv-s"/g) || []).length === 1 && h.includes('En cours : &lt;b&gt;x&lt;/b&gt;'));
 }
 
 // ── B. pilotage.js dans l'appli entière ───────────────────────────────────────────────────────
@@ -144,9 +144,9 @@ function partieC(S, T) {
 
 // ── D. Ce qui se lit ───────────────────────────────────────────────────────────────────────────
 function partieD(S, T) {
-  const info = (S.uti.match(/'pil\.savoir': \{ t: 'À savoir', p: \[\n    '([^']*)'/) || [])[1] || '';
-  T('D1 la fiche MV_INFO dit les faits de la bande et ce qui est en cours, plus de « devront attendre »',
-    /risque de pluie/.test(info) && /vent le plus fort/.test(info) && /ce qui est en cours dans les communes touchées/.test(info) && !/brûlage/.test(info));
+  const info = (S.vue.match(/\n  savoir: '([^\n]*)',\n/) || [])[1] || '';
+  T('D1 la bulle « À savoir » du cockpit v2 dit les faits de la bande et ce qui est en cours, plus de « devront attendre »',
+    /risque de pluie/.test(info) && /vent le plus fort/.test(info) && /dans les communes touchées/.test(info) && !/brûlage/.test(info) && !/devront attendre/.test(info));
   T('D2 le guide décrit la bande et ce qui est en cours', S.guide.includes('le risque de pluie, le cumul en millimètres et le vent le plus fort') && S.guide.includes('avec ce qui est en cours dans les communes touchées'));
   T('D3 la nouveauté 8.80 : pastille sur « À savoir », pour l’admin', /\{ v: '8\.80', d: '2026-10-11', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-savoir'/.test(S.uti));
   T('D4 la feuille : la barre du brûlage partie, la barre du risque et la ligne du vent là, aucun jour grisé',

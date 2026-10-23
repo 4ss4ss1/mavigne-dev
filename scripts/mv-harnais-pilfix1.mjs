@@ -27,7 +27,7 @@ import { fileURLToPath } from 'node:url';
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
-const S0 = { pil: lire('src/pilotage.js'), plan: lire('src/planning.js'), utils: lire('src/utils.js'), liste: lire('scripts/mv-harnais-liste.mjs') };
+const S0 = { pil: lire('src/pilotage.js'), plan: lire('src/planning.js'), utils: lire('src/utils.js'), vue: lire('src/cockpit-vue.js'), liste: lire('scripts/mv-harnais-liste.mjs') };
 
 function corps(src, nom) {
   const i = src.indexOf('function ' + nom + '(');
@@ -133,11 +133,14 @@ function jouer(S) {
   t('⑦ la marge et la fin d’Aujourd’hui lisent _pilWdBetween / _pilWdDateObj', /marge=\(proj&&obj\)\?_pilWdBetween\(proj,obj\)/.test(corps(S.pil, '_pilMargeCalc')) && /_pilWdDateObj\(seasonJ,start/.test(corps(S.pil, '_pilMargeCalc')));
   t('⑦ les Échéances par tâche lisent _pilWdBetween', /_pilWdBetween\(m\.today,s\.fin\)/.test(corps(S.pil, '_pilPanelEcheances')));
   t('⑦ plus aucun test getDay() dans _pilWdBetween ni _pilWdDateObj', !/getDay\(\)/.test(corps(S.pil, '_pilWdBetween') + corps(S.pil, '_pilWdDateObj')));
-  const i = S.utils.indexOf("'pil.marge':"), fiche = S.utils.slice(i, S.utils.indexOf('] },', i));
-  t('⑦ la fiche « i » de la marge dit le planning et les fériés, plus « (lundi à vendredi) »', i > 0 && /jours travaillés au planning/.test(fiche) && /férié/.test(fiche) && !/\(lundi (à|\\u00e0) vendredi\)/.test(fiche));
+  // PIL-RANGE-1b (§441) : la fiche MV_INFO pil.marge est partie avec les tuiles d'avant ; la bulle qu'on lit est celle du
+  //   cockpit v2 (INFO.fin, src/cockpit-vue.js) — c'est elle qui doit dire le planning, jamais « lundi à vendredi ».
+  const fin = (/\n  fin: '([^\n]*)',\n/.exec(S.vue) || [])[1] || '';
+  t('⑦ la bulle « i » de la fin prévue dit le planning, pas « lundi à vendredi »', /planning/.test(fin) && !/lundi/.test(fin), fin.slice(0, 80) || 'INFO.fin absente');
   const wn = /\{ v: '([\d.]+)', d: '[^']*', items: \[\s*\{ niv: (\d), pour: \['admin'\], emoji: 'calendrier', titre: 'Pilotage : les jours/.exec(S.utils);
   const appv = (/export const APP_VERSION = '([\d.]+)'/.exec(S.utils) || [])[1];
-  t('⑦ le WHATS_NEW l’annonce en « À vérifier » (niv 2), à la version de l’appli', !!wn && wn[2] === '2' && wn[1] === appv, wn ? wn[1] + ' niv ' + wn[2] + ' / APP ' + appv : 'absent');
+  const num = (v) => v ? v.split('.').map(Number).reduce((a, x) => a * 100 + x, 0) : 0;
+  t('⑦ le WHATS_NEW l’annonce en « À vérifier » (bloc 9.98, niv 2) ; APP au moins 9.98', !!wn && wn[1] === '9.98' && wn[2] === '2' && num(appv) >= num('9.98'), wn ? wn[1] + ' niv ' + wn[2] + ' / APP ' + appv : 'absent');
   t('⑦ la liste des harnais joue ce fichier et sa contre-épreuve', S.liste.indexOf("mv-harnais-pilfix1.mjs'") > 0 && S.liste.indexOf("mv-harnais-pilfix1.mjs --contre'") > 0);
 }
 
@@ -156,13 +159,13 @@ if (!CONTRE) {
     ['la saisie sans heures fait un jour travaillé', (S) => R(S, 'return (Number(window._planWorkPersRange(m, d0, d0))||0)>0; }', 'return true; }')],
     ['la garde du planning muet disparaît', (S) => R(S, 'var _PIL_MUET_J=45;', 'var _PIL_MUET_J=100000;')],
     ['la fenêtre de chantier n’est plus 7 j/7', (S) => R(S, '    if(chantier) return true;\n', '')],
-    ['la fiche « i » redit « lundi à vendredi »', (S) => { const i = S.utils.indexOf("'La <b>marge</b> compte les"); const j = S.utils.indexOf("\n", i); return Object.assign({}, S, { utils: S.utils.slice(0, i) + "'La <b>marge</b> compte les jours ouvrés (lundi à vendredi).'," + S.utils.slice(j) }); }],
+    ['la bulle de la fin prévue redit « lundi à vendredi »', (S) => Object.assign({}, S, { vue: S.vue.replace(/\n  fin: '[^\n]*',\n/, "\n  fin: 'Les jours comptent du lundi au vendredi.',\n") })],
     ['la liste ne joue plus le harnais', (S) => Object.assign({}, S, { liste: S.liste.split("mv-harnais-pilfix1.mjs'").join("mv-harnais-pilfixX.mjs'") })],
   ];
   let bons = 0;
   for (const [nom, mut] of mutants) {
     const S = mut(S0);
-    if (S.pil === S0.pil && S.utils === S0.utils && S.liste === S0.liste) { console.log('  \x1b[31m✗\x1b[0m mutant sans effet : ' + nom); continue; }
+    if (S.pil === S0.pil && S.utils === S0.utils && S.liste === S0.liste && S.vue === S0.vue) { console.log('  \x1b[31m✗\x1b[0m mutant sans effet : ' + nom); continue; }
     ok = 0; ko = 0; const log = console.log; console.log = () => {};
     try { jouer(S); } catch (e) { ko++; }
     console.log = log;

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// PIL-RANGE-1b (§441) : l'ancien Aujourd'hui (tuiles d'avant, petites courbes, frise, carte Cave) est retiré ; ce harnais ne garde que ce qui vit encore.
 /* ─────────────────────────────────────────────────────────────────────────
    HARNAIS SPARK-1 (§214) — LA PETITE COURBE D'UN CHIFFRE
    Lancer :  node scripts/mv-harnais-spark.mjs            (scénarios)
@@ -50,7 +51,7 @@ function charger(ut, pil) {
   const code = [ligne(ut, 'var MV_GRAPH_MIN'), ligne(ut, 'var MV_GRAPH_PALIER'),
     apres(ut, 'window.MV_GRAPH_COL = {'), ligne(ut, 'window.MV_GRAPH_TXT ='), ligne(ut, 'window.MV_GRAPH_TRAIT ='),
     apres(ut, 'window._mvGraphCadre = function('), apres(ut, 'function _mvEsc('), apres(ut, 'window._mvGraphSvg = function('),
-    ligne(ut, 'window.MV_SPARK_BANDE ='), apres(ut, 'window._mvGraphSpark = function('), apres(pil, 'function _pilSparkCadence(')].join('\n');
+    ligne(ut, 'window.MV_SPARK_BANDE ='), apres(ut, 'window._mvGraphSpark = function(')].join('\n');
   vm.runInContext(code, ctx, { filename: 'spark-extrait.js' });
   return ctx;
 }
@@ -81,20 +82,6 @@ function scenarios(ut, pil, journal) {
     t('à moins de 3 % de la référence : vert, quel que soit le sens', col(S([0, -2], { mauvais: 'bas' })) === 'var(--vert-med)');
     t('aucun texte dans la petite courbe, aucun NaN', !/<text|NaN|undefined/.test(s1));
 
-    // la serie de cadence
-    const m = { cadH: 50, estim: false };
-    X.appels.length = 0;
-    const sc = X._pilSparkCadence(m);
-    t('cadence : 14 points', Array.isArray(sc) && sc.length === 14, sc && sc.length);
-    t('chaque point = 7 jours finissant ce jour-là (début = fin − 6)', X.appels.length === 14 && X.appels.every(([a, b]) => (new RealDate(b + 'T12:00:00') - new RealDate(a + 'T12:00:00')) / 86400000 === 6), JSON.stringify(X.appels[0]));
-    t('la dernière fenêtre finit aujourd’hui, la première il y a 13 jours', X.appels[13][1] === '2026-06-16' && X.appels[0][1] === '2026-06-03', JSON.stringify([X.appels[0][1], X.appels[13][1]]));
-    t('écart à la cadence affichée : 45 h/j contre 50 = −10 %, 60 = +20 %', sc && Math.abs(sc[13] + 10) < 1e-9 && Math.abs(sc[0] - 20) < 1e-9, sc && JSON.stringify([sc[0], sc[13]]));
-    t('une fenêtre sans jour travaillé est un trou (null), pas −100 %', sc && sc[7] === null, sc && sc[7]);
-    t('cadence estimée, nulle ou sans planning : pas de courbe', X._pilSparkCadence({ cadH: 50, estim: true }) === null && X._pilSparkCadence({ cadH: 0 }) === null && X._pilSparkCadence(null) === null);
-    const t0 = X._planTeamCadence; X._planTeamCadence = undefined;
-    t('planning absent : pas de courbe, sans planter', X._pilSparkCadence(m) === null); X._planTeamCadence = t0;
-    // epinglage : le KPI appelle bien la serie et la petite courbe
-    t('le KPI Cadence appelle _pilSparkCadence puis _mvGraphSpark', /_pilSparkCadence\(m\)[\s\S]{0,80}_mvGraphSpark\(_spC/.test(pil));
   } catch (e) { t('les scénarios s’exécutent sans planter', false, e.stack); }
   return { ok, ko };
 }
@@ -106,9 +93,6 @@ const DEFAUTS = [
   ['utils', 'un trou ne coupe plus la courbe', "if(!(typeof e === 'number' && isFinite(e))){ ouvert = false; continue; }", "if(!(typeof e === 'number' && isFinite(e))){ continue; }"],
   ['utils', 'le « à moins de 3 % » disparaît', 'var col = (Math.abs(eL) < 3 || !mauvais)', 'var col = (!mauvais)'],
   ['utils', 'une seule mesure trace une ligne', 'if(nOk < 2 || n < 2) return', 'if(nOk < 1 || n < 2) return'],
-  ['pil', 'la fenêtre passe à 8 jours', 'fin.getDate()-6)', 'fin.getDate()-7)'],
-  ['pil', 'l’écart oublie la référence', '((v-m.cadH)/m.cadH*100)', '(v)'],
-  ['pil', 'un jour sans mesure compte zéro', 'var v=(c&&c.cadence>0)?c.cadence:null;', 'var v=(c&&c.cadence>0)?c.cadence:0;'],
 ];
 let rougit = 0;
 for (const [f, nom, a, b] of DEFAUTS) {

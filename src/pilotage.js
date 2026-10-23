@@ -1143,52 +1143,6 @@ function _pilPhotoEcrire(d){
   window.saveData('config');
   return true;
 }
-// Les 14 derniers jours d'une mesure f(photo) : null = jour sans photo.
-function _pilPhotoSerie(f){
-  var by={}; _pilPhotoListe().forEach(function(x){ if(x&&typeof x.d==='string') by[x.d]=x; });
-  var t=new Date(), out=[];
-  for(var k=13;k>=0;k--){ var x=by[_pilPhotoIso(new Date(t.getFullYear(),t.getMonth(),t.getDate()-k))]; var v=x?f(x):null; out.push((typeof v==='number'&&isFinite(v))?v:null); }
-  return out;
-}
-function _pilSparkNOk(s){ var n=0; s.forEach(function(v){ if(v!=null) n++; }); return n; }
-// Charge restante : ecart % a la premiere photo de la fenetre (il y a jusqu'a 14 j).
-// Descendre est favorable (mauvais : haut). Le point du jour = la charge en direct.
-function _pilSparkCharge(d){
-  // AUJ-6 (§308) : la petite courbe lit les mêmes photos sûres que la grande — une photo à 0 h (prise avant l'arrivée des
-  //   données) ou d'une autre période est un trou, pas une chute.
-  var per=(_pilSaison()&&_pilSaison().nom)||'';
-  var s=_pilPhotoSerie(function(x){ return (typeof x.reste==='number'&&x.reste>0&&(!per||x.p===per))?x.reste:null; }), ref=null;
-  for(var i=0;i<s.length;i++){ if(s[i]!=null){ ref=s[i]; break; } }
-  if(!(ref>0)) return null;
-  var live=Number(d&&d.totalReste); if(isFinite(live)) s[13]=live;
-  var out=s.map(function(v){ return v==null?null:(v-ref)/ref*100; });
-  return _pilSparkNOk(out)>=2?out:null;
-}
-// Budget : consomme − fait, en points de %. Zero = le budget suit le travail ; au-dessus, defavorable.
-function _pilSparkBudget(E){
-  var s=_pilPhotoSerie(function(x){ return (typeof x.cons==='number'&&typeof x.avc==='number')?(x.cons-x.avc):null; });
-  if(E&&E.configured&&isFinite(Number(E.cons))&&isFinite(Number(E.avc))) s[13]=Number(E.cons)-Number(E.avc);
-  return _pilSparkNOk(s)>=2?s:null;
-}
-function _pilSparkDernier(s){ if(!s) return null; for(var i=s.length-1;i>=0;i--){ if(s[i]!=null) return s[i]; } return null; }
-// ★ SPARK-1 (§214) — LA CADENCE DES 14 DERNIERS JOURS, EN ECART A SA REFERENCE.
-// Chaque point = la cadence des 7 jours qui finissent ce jour-la, mesuree comme le
-// KPI (_planTeamCadence : heures dans les rangs ÷ jours travailles), comparee a la
-// cadence des 4 dernieres semaines — le chiffre affiche. Fenetre sans jour
-// travaille = trou (null), jamais zero. Cadence estimee (sans planning) : rien.
-function _pilSparkCadence(m){
-  if(!m || m.estim || !(m.cadH>0) || typeof window._planTeamCadence!=='function') return null;
-  var out=[], t=new Date(), nOk=0;
-  for(var k=13;k>=0;k--){
-    var fin=new Date(t.getFullYear(),t.getMonth(),t.getDate()-k);
-    var deb=new Date(fin.getFullYear(),fin.getMonth(),fin.getDate()-6), c=null;
-    try{ c=window._planTeamCadence(deb,fin); }catch(e){ c=null; if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilSparkCadence'); }
-    var v=(c&&c.cadence>0)?c.cadence:null;
-    out.push(v!=null?((v-m.cadH)/m.cadH*100):null);
-    if(v!=null) nOk++;
-  }
-  return nOk>=2?out:null;
-}
 function _friseNorm(s){ return String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
 // ⚠️ `memeSaison` : d.data (calcHeures) ne connait que la periode CONSULTEE. Sur
 //    une campagne zoomee qui n'est pas elle, un pourcentage emprunte declarerait
@@ -4230,162 +4184,12 @@ function _pilMargeCalc(d){
   return { cadH:cadH, estim:c.estim, seasonJ:seasonJ, proj:proj, objIso:objIso, obj:obj,
            marge:marge, fen:fen, start:start, today:today, src:src, capa:P };
 }
-// La phrase sous le grand chiffre. Elle nomme SUR QUOI la date est batie : une
-// projection dont on ignore l'assiette est une opinion presentee en gras.
-function _pilMargeSous(m){
-  if(m.src==='planning'){
-    var P=m.capa||{};
-    if(P.fini) return 'Plus rien \u00e0 faire sur cette campagne\u00a0: tout est fini.';
-    var kk=(P.kOk)
-      ? (' Cadence mesur\u00e9e \u00d7'+(Math.round((P.k||1)*100)/100).toString().replace('.',',')+' sur les heures restantes.')
-      : (P.kHors
-          ? (' Une heure pr\u00e9sente = une heure de bar\u00e8me (\u00e9cart de cadence mesur\u00e9 '+((P.kEcart>0)?'+':'')+Math.round(P.kEcart||0)+' %, hors bornes\u00a0: non retenu).')
-          : ' Une heure pr\u00e9sente = une heure de bar\u00e8me (cadence pas encore mesurable).');
-    var h='Si le planning et les contrats restent tels quels, tout est fini '
-      +(P.approx?('<b>vers le '+_pilDfrObj(m.proj)+'</b>'):('le <b>'+_pilDfrObj(m.proj)+'</b>'))+'. '
-      +'Comme La campagne sans renfort \u2014 chaque travail dans sa fen\u00eatre, tracteur d\u00e9duit \u2014 aux heures normales du planning.'+kk;
-    if(P.hors) h+=' <span style="opacity:.75">Au-del\u00e0 du '+_pilDfrObj(P.finCamp)+', l\u2019\u00e9quipe de la derni\u00e8re semaine planifi\u00e9e est reconduite\u00a0; il restait ~'+_pilNum(Math.round(P.resteFin||0))+' h ce jour-l\u00e0.</span>';
-    if(P.nDep>0) h+=' <b style="color:var(--rouge)">'+(P.nDep>1?(P.nDep+' travaux d\u00e9bordent leur fen\u00eatre'):'1 travail d\u00e9borde sa fen\u00eatre')+'</b> \u2014 voir La campagne.';
-    return h;
-  }
-  if(m.capa && !m.capa.ok){
-    return 'L\u2019\u00e9quipe planifi\u00e9e n\u2019absorbe pas la charge restante\u00a0: il resterait <b>~'
-      +_pilNum(Math.round(m.capa.manque||0))+' h</b> le '+_pilDfrObj(m.capa.finCamp)+', et plus aucune heure planifi\u00e9e ensuite. '
-      +'Embauche, d\u00e9calage d\u2019une t\u00e2che ou objectif repouss\u00e9 \u2014 voir La campagne.';
-  }
-  if(m.src==='cadence'){
-    return '\u00c0 la cadence actuelle (~'+Math.round(m.cadH)+' h/j'+(m.estim?' estim.':' \u00b7 4 sem.')
-      +'), fin le <b>'+_pilDfrObj(m.proj)+'</b>. '
-      +'<span style="opacity:.75">Le planning ne couvre pas la p\u00e9riode \u00e0 venir\u00a0: cette date ignore les embauches d\u00e9j\u00e0 sign\u00e9es.</span>';
-  }
-  return 'Cadence indisponible \u2014 renseigne le planning (4 derni\u00e8res semaines).';
-}
 
 // ── Frise de saison : aujourd'hui → objectif, fin prévue + marge ──
 var _PIL_TL_ECART = 0.22;   // TOUR-6 : sous cet ecart (part de la frise), deux etiquettes ne tiennent pas cote a cote
-function _pilCockpitTimeline(m){
-  if(!m.proj||!m.obj) return '';
-  var today=new Date(); today.setHours(0,0,0,0);
-  var T0=today.getTime(), endMs=Math.max(m.obj.getTime(),m.proj.getTime());
-  var span=endMs-T0; if(span<=0) span=86400000;
-  var buf=span*0.08+86400000*2, T1=endMs+buf;
-  function fr(t){ return Math.max(0,Math.min(1,(t-T0)/(T1-T0))); }
-  var fP=fr(m.proj.getTime()), fO=fr(m.obj.getTime());
-  var lo=Math.min(fP,fO)*100, hi=Math.max(fP,fO)*100, over=(m.marge!=null&&m.marge<0);
-  // TOUR-6 (27/09/2026) — les trois etiquettes se chevauchaient quand deux reperes
-  // tombent pres l'un de l'autre (objectif proche d'aujourd'hui, fin prevue sur
-  // l'objectif) : « AUJ. » sur « OBJECTIF », vu par npm run tour sur 17 ecrans, de
-  // 375 a 1280 px. Chaque etiquette monte d'un etage si elle est a moins de
-  // _PIL_TL_ECART de la derniere posee a son etage ; la frise s'ecarte d'autant.
-  var mk=[{k:'today',x:0},{k:'proj',x:fP},{k:'obj',x:fO}].sort(function(a,b){ return a.x-b.x; });
-  var der=[], niv={}, nMax=0;
-  mk.forEach(function(o){
-    var n=0; while(n<2 && der[n]!=null && (o.x-der[n])<_PIL_TL_ECART) n++;
-    der[n]=o.x; niv[o.k]=n; if(n>nMax) nMax=n;
-  });
-  var cap=function(k,lbl){ return '<span class="cap'+(niv[k]?(' n'+niv[k]):'')+'">'+lbl+'</span>'; };
-  return '<div class="pil-tl-wrap"><div class="pil-tl'+(nMax?(' n'+nMax):'')+'">'
-    +'<div class="pil-tl-marge'+(over?' over':'')+'" style="left:'+lo.toFixed(1)+'%;right:'+(100-hi).toFixed(1)+'%"></div>'
-    +'<div class="pil-tl-mk pil-tl-today" style="left:0">'+cap('today','Auj.')+'<span class="cap bot">'+_pilDfrObj(today)+'</span></div>'
-    +'<div class="pil-tl-mk pil-tl-proj" style="left:'+(fP*100).toFixed(1)+'%">'+cap('proj','Fin prévue')+'</div>'
-    +'<div class="pil-tl-mk pil-tl-obj" style="left:'+(fO*100).toFixed(1)+'%">'+cap('obj','Objectif')+'</div>'
-    +'</div></div>';
-}
 
 // ── Mini-KPI du cockpit ──
-// L'argent manquait a l'ecran qu'on ouvre le matin : le cockpit disait le TEMPS
-// (marge, charge, cadence, effectif) et rien du budget. Une seule tuile suffit,
-// celle qui porte la DERIVE — l'ecart entre ce qui est depense et ce qui est fait.
-// C'est le seul chiffre economique qui appelle une decision le jour meme.
-function _pilCkBudget(){
-  var E=_pecData();
-  if(!E.configured) return '<div class="pil-ck"><div class="kl">Budget consomm\u00e9</div><div class="kv">\u2014</div>'
-    +'<div class="ks">taux horaire \u00e0 renseigner (R\u00e9glages \u203A \u00c9quipe)</div></div>';
-  // \u2605 CINQUIEME POINT D'AFFICHAGE, OUBLIE LE MATIN. Les quatre points repris
-  //   pour annoncer la source etaient TOUS dans l'onglet Economie ; celui-ci et le
-  //   verdict sont sur l'ACCUEIL - les deux premiers chiffres que Nico voit. Un
-  //   ecart d'histoire affiche « cadence +193 % vs bareme » au present, c'est
-  //   exactement la faute de \u00a734 commise sur l'ecran le plus lu.
-  var ec=(E.cad.ok&&E.cad.applic)?E.cad.ecart:null;
-  var col = (ec===null)?'var(--texte)' : (ec>15?'var(--rouge)' : (ec>5?'var(--orange)' : 'var(--vert-med)'));
-  // Un ecart MESURE mais NON RETENU (hors bornes, ou lu sur la campagne
-  // precedente) se dit : sinon la tuile se tait la ou la marge, juste au-dessus,
-  // explique pourquoi elle ne l'applique pas.
-  var nr=(E.cad.ok&&!E.cad.applic)
-    ? (' \u00b7 \u00e9cart '+((E.cad.ecart>0)?'+':'')+Math.round(E.cad.ecart)+' % '+(E.cad.horsBornes?'hors bornes, non retenu':'lu sur la campagne pr\u00e9c\u00e9dente, non retenu'))
-    : '';
-  // PHOTO-1 (§219) : consomme − fait, en points, sur 14 jours de photos ; le point du jour en direct.
-  var _spB=_pilSparkBudget(E), _svgB=_spB?window._mvGraphSpark(_spB,{mauvais:'haut',aria:'Budget consommé moins travail fait, en points, sur les 14 derniers jours'}):'', _dB=_pilSparkDernier(_spB);
-  var _ksB=(_svgB&&_dB!=null)?(' \u00b7 consomm\u00e9 \u2212 fait : <b>'+(_dB>0?'+':'')+Math.round(_dB)+' pts</b>'):'';
-  return '<div class="pil-ck"><div class="kl">Budget consomm\u00e9'+(_svgB?_mvInfoBtn('pil.spark'):'')+'</div>'
-    +'<div class="pil-ck-row"><div class="kv" style="color:'+col+'">'+Math.round(E.cons)+'<span class="u"> %</span></div>'+(_svgB?'<span class="pil-spark">'+_svgB+'</span>':'')+'</div>'
-    +'<div class="ks">'+(ec===null
-        ? ('de '+_ecoEur(E.budget)+' \u00b7 '+Math.round(E.avc)+' % du travail fait'+nr)
-        : ('cadence <b style="color:'+col+'">'+(ec>0?'+':'')+Math.round(ec)+' %</b> vs bar\u00e8me \u00b7 fin \u2248 '+_pecEurK(E.projFin)))+_ksB+'</div></div>';
-}
-function _pilCkEtp(d){
-  // ★ Le KPI suit la PORTEE, comme la photo Effectif juste au-dessus de lui.
-  //   Il lisait _pilSaison() : sur l'annee entiere il repondait pour une seule
-  //   campagne (36,6) sous une photo qui repondait pour l'annee. Meme mot, deux
-  //   nombres, a quinze centimetres l'un de l'autre.
-  // ★★★ DEUX DATES SOUS UNE SEULE BARRE DE FRACTION (12/08/2026).
-  //   La tuile ecrivait « 1 / 38,6 pers. — sous-effectif au pic ». Le 1 etait
-  //   la presence d'AUJOURD'HUI, le 38,6 le besoin de la SEMAINE DU PIC. Un
-  //   12 aout, avec 40 vendangeurs sous contrat de groupe a partir du 26, la
-  //   tuile criait au sous-effectif pendant que la photo juste au-dessus
-  //   annoncait « 42 presents cette semaine-la ». Deux verdicts opposes a
-  //   quinze centimetres l'un de l'autre, et aucune contradiction dans les
-  //   donnees : c'est le RAPPROCHEMENT qui etait faux.
-  //   Le module savait deja repondre : PP.head (effectif de la semaine du pic)
-  //   et PP.manque, que « Capacite vs charge » lit deja depuis le 12/08. La
-  //   tuile compare desormais PP.head a PP.pic — meme semaine, meme unite —
-  //   et la presence du jour reste ou elle a un sens : la tuile
-  //   « A la vigne aujourd'hui », juste en dessous.
-  // \u2605\u2605\u2605 CET ECRAN S'APPELLE \u00ab AUJOURD'HUI \u00bb (06/09/2026, retour de Nico).
-  //   Il ne peut pas reclamer un renfort pour une semaine terminee. Le pic de
-  //   l'exercice est la vendange : consulte le 6 septembre, la tuile sortait
-  //   \u00ab manque 4,1 pers. au pic \u00b7 l'exercice \u00bb en orange sur un travail FAIT,
-  //   et rien a l'ecran ne disait que la semaine etait derriere. Une alerte sur
-  //   laquelle on ne peut rien n'est pas une alerte, c'est du bruit \u2014 et elle
-  //   use l'orange dont les vraies ont besoin.
-  //   On lit donc PP.av : meme moteur, memes semaines, filtrees sur celles qui
-  //   ne sont pas finies. Quand il n'en reste aucune (exercice epuise), on
-  //   montre le pic de la fenetre ET ON ECRIT qu'il est passe, au lieu de le
-  //   laisser passer pour une decision du jour.
-  var PP=_pilPicPortee();
-  var A=PP.av||null, fini=(!A && !!PP.ok);
-  var S=A||(fini?PP:null);
-  var req=S?S.pic:null;
-  var low=(!!A && (A.manque||0)>0.05);
-  // val et req sont la MEME grandeur A LA MEME DATE et DANS LA MEME UNITE : des
-  // ETP de la semaine du pic. `dispo`, pas `head` : un comptage de tetes proratise
-  // sur des jours de calendrier ne se soustrait pas d'un besoin en heures.
-  var val=(req!=null)?(S.dispo||0):(d.presentChamp!=null?d.presentChamp:0);
-  var reqTxt=(req!=null)?(' / '+_pilEtpFmt(req)+' pers.'):'';
-  var _sem=(S&&S.picW)?_pilSemLabO(S.picW.o0):'';
-  var sous = (req==null) ? 'à la vigne aujourd\'hui'
-    : (fini ? ('pic pass\u00e9 \u00b7 '+(_sem||_pilCadreLbl(PP)))
-            : ((low?('manque '+_pilEtpFmt(A.manque)+' pers.'):'couvert')+' au pic \u00b7 '+(_sem||_pilCadreLbl(PP))));
-  return '<div class="pil-ck"><div class="kl">Effectif au pic</div><div class="kv">'+_pilEtpFmt(val)+'<span class="u">'+reqTxt+'</span></div>'
-    +'<div class="ks"'+(low?' style="color:var(--orange);font-weight:600"':'')+'>'+_pilEsc(sous)+'</div></div>';
-}
 // ── La Cave, en une photo et un bouton (lot CAVE-3). L'onglet Pilotage › Cave
-//   est rentre dans la Cave ; ici on LIT le verdict et l'agenda de cave.js —
-//   une seule definition, la sienne — et on ouvre la Cave sur Aujourd'hui.
-function _pilCkCave(){
-  var sem=null, v=null;
-  try{
-    if(typeof window._mlAgendaComplet==='function') sem=window._mlAgendaComplet(_mvToday(),4);
-    if(sem&&typeof window._mlVerdict==='function') v=window._mlVerdict(sem,{phase:null,haReste:0,parc:null});
-  }catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'ck cave',err:e}); }
-  if(!sem||!v) return '';
-  // ★ CAVEAUJ-1 (§434) : des gestes, comme la bande de la Cave (une fin de FA estimée n'est pas à faire).
-  var n=(sem[0]&&sem[0].items)?((typeof window._mlGestes==='function')?window._mlGestes(sem[0].items).length:sem[0].items.length):0;
-  var col=v.cls==='due'?'#9B2D1F':(v.cls==='warn'?'#B85A1A':'#3D6B27');
-  return '<div class="pil-ck"><div class="kl">Cave</div><div class="kv" style="color:'+col+'">'+n+'<span class="u"> \u00e0 faire</span></div>'
-    +'<div class="ks">'+_pilEsc(v.t)+'</div>'
-    +'<button type="button" class="pil-ck-btn" onclick="_pilOuvrirCave()">Ouvrir la Cave</button></div>';
-}
 window._pilOuvrirCave=function(sec){
   // REV-1 : la section est un argument (défaut : Aujourd'hui) — le Revient ouvre Le millésime ou Le Cuvier.
   var _s=(typeof sec==='string'&&sec)?sec:'aujourdhui';
@@ -4393,40 +4197,8 @@ window._pilOuvrirCave=function(sec){
   if(typeof goTo==='function') goTo('cave');
   if(typeof window.selectCaveSection==='function'){ try{ window.selectCaveSection(_s); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilOuvrirCave#2'); } }
 };
-function _pilCkJours(){
-  var days=_pilTreatDays();
-  var n=(days&&days.length)?days.filter(function(x){return x.start!=null;}).length:null;
-  var tot=(days&&days.length)?days.length:5;
-  return '<div class="pil-ck"><div class="kl">Jours favorables</div><div class="kv">'+(n!=null?n:'—')+'<span class="u"> / '+tot+' j</span></div><div class="ks">fenêtres de traitement à venir</div></div>';
-}
 
 // ── Tuiles « décision du jour » ──
-function _pilCkPres(d){
-  var ind=(d.presences||[]).filter(function(p){ return !p.bureau && p.etat!=='present' && p.etat!=='repos'; });   // AUJ-5
-  var chips=ind.slice(0,4).map(function(p){
-    var lab=p.etat==='cp'?'\u2600\uFE0F '+p.nom+' · CP':p.etat==='recup'?'\u21BA '+p.nom+' · récup':p.etat==='maladie'?'\uD83E\uDD12 '+p.nom:'\u2715 '+p.nom;
-    var bg=p.etat==='cp'?'var(--orange-pale)':p.etat==='recup'?'rgba(123,109,184,.14)':'var(--rouge-pale)';
-    var col=p.etat==='cp'?'var(--orange)':p.etat==='recup'?'#7B6DB8':'var(--rouge)';
-    return '<span class="pil-chip2" style="background:'+bg+';color:'+col+'">'+_pilEsc(lab)+'</span>';
-  }).join('');
-  // \u26a0 CETTE TUILE COMPTE DES FICHES, et elle doit continuer : \u00ab 3 pr\u00e9sents
-  //   sur 4 \u00bb nomme les quatre lignes de l'equipe. Y mettre l'effectif pondere
-  //   donnerait \u00ab 28 pr\u00e9sents sur 4 \u00bb. Le nombre de PERSONNES est ajoute en
-  //   dessous, sous son propre nom, quand une equipe collective les separe.
-  var tot=(d.presences||[]).filter(function(p){return !p.bureau && p.etat!=='repos';}).length;
-  var pc=(d.presentFiches!=null?d.presentFiches:(d.presentChamp||0));
-  var pers=(d.presentChamp!=null?d.presentChamp:pc);
-  // ALIGN-1 (§236) : quatre étages comme les trois autres tuiles. La bande dit QUI : les absents
-  //   s'il y en a, sinon les présents, en initiales. Le pied mène au Planning.
-  var ici=(d.presences||[]).filter(function(p){ return !p.bureau && p.etat==='present'; });
-  var ban=chips||ici.slice(0,6).map(function(p){ var nm=String(p.nom||'?'); return '<span class="pil-tz-ini" title="'+_pilEsc(nm)+'">'+_pilEsc(nm.charAt(0).toUpperCase())+'</span>'; }).join('');
-  return '<div class="pil-tile2 pil-tz"><div class="pil-t2h"><span class="ic">'+_pilIco('equipe')+'</span><span class="t">À la vigne aujourd\'hui</span></div>'
-    +'<div class="pil-t2b"><div class="pil-tz-big pil-big green">'+pc+' présent'+(pc>1?'s':'')+'</div>'
-    +'<div class="pil-tz-rai pil-t2s">sur '+tot+(ind.length?' · '+ind.length+' indisponible'+(ind.length>1?'s':''):' · équipe au complet')
-      +(pers>pc+0.5?(' · <b>'+_pilEtpFmt(pers)+' personnes</b> au total (équipe collective)'):'')+'</div>'
-    +'<div class="pil-tz-ban">'+ban+'</div>'
-    +'<div class="pil-tz-pied"><button class="pil-diag-go ghost" data-diag="planning">Planning \u203A</button></div></div></div>';
-}
 // ════════════════════════════════════════════════════════════════════════
 // PROT-1 (§218) — LA PROTECTION RESTANTE, PARCELLE PAR PARCELLE
 // Le registre (TRAITEMENTS) dit QUAND et AVEC QUOI chaque parcelle a été traitée ;
@@ -4571,22 +4343,6 @@ function _pilGainsProlong(d){
   return out;
 }
 function _pilIsoJ(t,k){ var x=new Date(t.getFullYear(),t.getMonth(),t.getDate()+k); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); }
-function _pilCkInaction(d){
-  if(typeof _rfPair!=='function') return '';
-  var P=_rfPair(d); if(!P||!P.dec||P.fini||P.dec.noRate) return '';
-  var ctx=P.dec, res=_rfSim(ctx,_rfProf(ctx,null)); if(!res) return '';
-  var k=Math.round(((ctx.c&&ctx.c.k)||0)*100), h=res.induit||0, eur=h*(ctx.rate||0);
-  var ok=!(h>1)&&!res.deborde;
-  var big=ok?'Rien à rattraper':('+ '+_pilNum(h)+' h · env. '+_ecoEur(eur));
-  var sub=ok?'les travaux tiennent dans leurs fenêtres sans renfort'
-    :('ajoutées par le retard si rien n’est décidé · '+(res.horsDelai||0)+' tâche'+(res.horsDelai>1?'s':'')+' hors délai'+(res.deborde?' · déborde de la campagne':''));
-  return '<div class="pil-inaction'+(ok?' ok':'')+'"><div class="pil-t2s pil-prot-k">Coût de l’inaction '+_mvInfoBtn('pil.inaction')+'</div>'
-    +'<div class="pil-prot-big" style="color:'+(ok?'var(--vert-med)':'var(--orange)')+'">'+big+'</div>'
-    +'<div class="pil-t2s">'+sub+'</div>'
-    +'<div class="pil-t2s">modèle : le travail hors fenêtre prend <b>+'+k+' % par semaine</b> de retard (réglage) · au taux de l’équipe · hypothèse, pas une mesure</div>'
-    +(ok?'':'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="renfort">Décider › le renfort \u203A</button></div>')
-    +'</div>';
-}
 function _pilTraiterCalc(){
   // ALIGN-1 (§236) : quatre étages (verdict, raison, bande, pied) comme les trois autres tuiles. La
   //   bande montre la fenêtre sur les 24 heures ; le pied porte le dépliant des jours suivants. La
@@ -4627,13 +4383,6 @@ function _pilTraiterCalc(){
   //   meme titre que `.pil-dec` et `.pil-cockpit-card` (§20b). Ne pas renommer.
   return { big:big, bigCol:bigCol, rai:rai, ban:ban, pied:pied, _i:_i, fen:fen, risque:risque, prochaine:prochaine };
 }
-// REF-1 (§266) : la tuile garde son dessin ; le calcul est dans _pilTraiterCalc, que le cockpit lit aussi.
-function _pilCkTraiter(){
-  var X=_pilTraiterCalc(), big=X.big, bigCol=X.bigCol, rai=X.rai, ban=X.ban, pied=X.pied, _i=X._i;
-  return '<div class="pil-tile2 pil-tz" data-mvt="traiter"><div class="pil-t2h"><span class="ic">'+_pilIco('goutte')+'</span><span class="t">Traiter ?</span>'+_i+'</div>'
-    +'<div class="pil-t2b"><div class="pil-tz-big pil-big" style="color:'+bigCol+'">'+big+'</div>'
-    +'<div class="pil-tz-rai pil-t2s">'+rai+'</div><div class="pil-tz-ban">'+ban+'</div><div class="pil-tz-pied">'+pied+'</div></div></div>';
-}
 // ════════════════════════════════════════════════════════════════════════════
 // PRIO-1 (§235) — LA TÂCHE PRIORITAIRE SUIT LA RÈGLE COMMUNE (window._mvTacheDuMoment, app.js)
 // Avant : la tâche pas finie qui avait le plus d'heures restantes (« pôle long ») — la taille tout
@@ -4654,45 +4403,6 @@ function _pilPrioDuJour(d){
         fini:function(n){ return !byNom[n]||(byNom[n].pct||0)>=100; } })
     : null;
   return { M:M, byNom:byNom, data:data };
-}
-function _pilCkPrio(d){
-  var _pp=_pilPrioDuJour(d), data=_pp.data, byNom=_pp.byNom, M=_pp.M;
-  var _i=(typeof _mvInfoBtn==='function')?_mvInfoBtn('pil.prio'):'';
-  var H='<div class="pil-tile2 pil-tz" id="pil-prio"><div class="pil-t2h"><span class="ic">'+_pilIco('cible')+'</span><span class="t">Tâche prioritaire</span>'+_i+'</div>';
-  if(!M||!M.taches.length) return H+'<div class="pil-t2b"><div class="pil-t2s">aucune t\u00e2che en cours</div></div></div>';
-  var adm=(typeof window.isAdmin==='function')&&window.isAdmin();
-  var go=function(lbl){ return adm?'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="priorite">'+lbl+' \u203A</button></div>':''; };
-  var dt=function(n){ return (M.dates&&M.dates[n])||{}; };
-  if(M.mode==='choix'){
-    // ALIGN-1 (§236) : la bande nomme les tâches en une ligne (étiquettes) — une liste détaillée
-    //   étirerait la rangée des quatre tuiles.
-    var lis=M.taches.slice(0,6).map(function(n){
-      return '<span class="pil-chip2">'+_pilEsc(_pilTnom(n))+(M.retard[n]?' \u00b7 en retard':'')+'</span>';
-    }).join('')+(M.taches.length>6?'<span class="pil-chip2">+'+(M.taches.length-6)+'</span>':'');
-    return H+'<div class="pil-t2b"><div class="pil-tz-big pil-big">\u00c0 choisir</div>'
-      +'<div class="pil-tz-rai pil-t2s">'+M.taches.length+' t\u00e2ches dans leurs dates en m\u00eame temps \u2014 '+(adm?'\u00e0 vous de fixer la priorit\u00e9':'l\u2019administrateur fixe la priorit\u00e9')+'</div>'
-      +'<div class="pil-tz-ban">'+lis+'</div>'
-      +'<div class="pil-tz-pied">'+go('Choisir la priorit\u00e9')+'</div></div></div>';
-  }
-  var n=M.taches[0], t=byNom[n]||{}, e=dt(n), pq;
-  if(M.mode==='admin'){
-    var it=M.items[0]||{}, eq=(it.equipe||[]).filter(Boolean);
-    pq='priorit\u00e9 du moment, fix\u00e9e par l\u2019administrateur'+(eq.length?' \u00b7 '+_pilEsc(eq.join(', ')):'')
-      +(M.items.length>1?' \u00b7 aussi\u00a0: '+M.items.slice(1).map(function(x){ return _pilEsc(_pilTnom(x.t)); }).join(', '):'');
-  } else if(M.mode==='prochaine'){
-    pq='aucune t\u00e2che dans ses dates aujourd\u2019hui \u00b7 prochaine d\u00e8s le '+_pilFmtD(e.debut);
-  } else if(M.retard[n]){
-    pq='<b style="color:var(--rouge)">en retard</b>'+(e.fin?' \u00b7 fin pr\u00e9vue le '+_pilFmtD(e.fin):'');
-  } else {
-    pq='seule t\u00e2che dans ses dates'+(e.fin?' \u00b7 jusqu\u2019au '+_pilFmtD(e.fin):'');
-  }
-  // ALIGN-1 (§236) : le bouton de l'admin dans tous les cas (maquette validée le 04/10) — fixer une
-  //   priorité sans attendre qu'un chevauchement le demande.
-  return H+'<div class="pil-t2b"><div class="pil-tz-big pil-big">'+_pilEsc(_pilTnom(n))+'</div>'
-    +'<div class="pil-tz-rai pil-t2s">'+pq+'</div>'
-    +'<div class="pil-tz-ban"><div class="pil-gbar"><i style="width:'+Math.min(t.pct||0,100)+'%;background:'+_pilPctColor(t.pct||0)+'"></i></div>'
-    +'<div class="pil-t2s">'+(t.pct||0)+'\u00a0% fait \u00b7 '+_pilNum(t.h_reste||0)+' h restantes</div></div>'
-    +'<div class="pil-tz-pied">'+go(M.mode==='admin'?'Changer la priorit\u00e9':'Fixer une priorit\u00e9')+'</div></div></div>';
 }
 // ════════════════════════════════════════════════════════════════════════
 // TENS-1 (§215) — LA TENSION DE L'ÉQUIPE
@@ -4744,33 +4454,7 @@ function _pilTensData(d){
 }
 function _pilTensFmtEc(ec){ return ec==null?'—':((ec>0?'+':'')+Math.round(ec)+' %'); }
 // ── Le chiffre du bandeau ──
-function _pilCkTension(d){
-  var T=_pilTensData(d);
-  if(!T||!T.rows.length) return '<div class="pil-ck"><div class="kl">Tension équipe</div><div class="kv">—</div><div class="ks">'+(T?'aucune heure au planning sur 14 jours':'planning indisponible')+'</div></div>';
-  var col=T.nRouge?'var(--rouge)':(T.nSeuil?'var(--orange)':'var(--texte)');
-  var svg=window._mvGraphSpark(T.serie,{mauvais:'haut',aria:'Écart de l’équipe au planning prévu, sur 7 jours glissants, les 14 derniers jours'});
-  return '<div class="pil-ck"><div class="kl">Tension équipe'+_mvInfoBtn('pil.tension')+'</div>'
-    +'<div class="pil-ck-row"><div class="kv" style="color:'+col+'">'+(T.ec==null?'—':((T.ec>0?'+':'')+Math.round(T.ec)))+'<span class="u"> %</span></div>'+(svg?'<span class="pil-spark">'+svg+'</span>':'')+'</div>'
-    +'<div class="ks">travail effectif face au prévu \u00b7 14 j \u00b7 <b>'+T.nSeuil+' / '+T.rows.length+'</b> au seuil</div></div>';
-}
 // ── La carte de « La décision du jour » ──
-// ALIGN-1 (§236) — LA TUILE DE LA TENSION : le verdict et la personne la plus chargée, en quatre
-// étages comme les autres. Le détail, une ligne par personne, descend dans _pilCardTension.
-function _pilTuileTension(d){
-  var T=_pilTensData(d);
-  if(!T||!T.rows.length) return '';
-  var big=T.nRouge?(T.nRouge+' au-delà du maximum'):(T.nSeuil?(T.nSeuil+' personne'+(T.nSeuil>1?'s':'')+' au seuil'):'Personne au seuil');
-  var colB=T.nRouge?'var(--rouge)':(T.nSeuil?'var(--orange)':'var(--vert-med)');
-  var rang={rouge:2,orange:1};
-  var top=T.rows.slice().sort(function(a,b){ return ((rang[b.niv]||0)-(rang[a.niv]||0))||((b.ec||0)-(a.ec||0)); })[0];
-  var mx=Math.max(10,top.f||0,top.p||0), cls=top.niv==='rouge'?'b':(top.niv==='orange'?'o':'v');
-  var ban='<div class="pil-tz-tens"><b>'+_pilEsc(top.nom)+'</b><span class="k"><i class="'+cls+'" style="width:'+Math.min(100,(top.f||0)/mx*100).toFixed(1)+'%"></i></span><b>'+_pilTensFmtEc(top.ec)+'</b></div>';
-  return '<div class="pil-tile2 pil-tz"><div class="pil-t2h"><span class="ic">'+_pilIco('equipe')+'</span><span class="t">Tension de l’équipe</span>'+_mvInfoBtn('pil.tension')+'</div>'
-    +'<div class="pil-t2b"><div class="pil-tz-big pil-big" style="color:'+colB+'">'+big+'</div>'
-    +'<div class="pil-tz-rai pil-t2s">14 derniers jours \u00b7 travail effectif face au planning prévu</div>'
-    +'<div class="pil-tz-ban">'+ban+'</div>'
-    +'<div class="pil-tz-pied"><button class="pil-diag-go ghost" data-diag="planning">Planning \u203A</button></div></div></div>';
-}
 function _pilCardTension(d){
   var T=_pilTensData(d);
   if(!T||!T.rows.length) return '';
@@ -4794,21 +4478,6 @@ function _pilCardTension(d){
     +'<div class="pil-trx-leg"><span><i class="f"></i>fait</span><span><i class="m"></i>prévu au planning</span></div>'
     +'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="planning">Planning \u203A</button></div>'
     +'</div></div>';
-}
-function _pilCkAlertes(d){
-  // GNR-M (§213) : la revision et la cuve ne sont plus deux lignes de cette liste.
-  //   Elles deviennent des cartes qui se projettent sur les travaux en cours
-  //   (_pilCkTracteur). La liste garde ce qui est vrai AUJOURD'HUI : les machines
-  //   immobilisees. Sans aucune carte ni aucune immobilisation, la phrase de calme
-  //   reste — mais jamais a cote d'une carte qui dit le contraire.
-  var al=[];
-  (d.tracs||[]).forEach(function(t){ if(t.rep) al.push(['red','<b>'+_pilEsc(t.nom)+'</b> immobilisé'+(t.rep.motif?' — '+_pilEsc(t.rep.motif):''), t.rep.prevu_retour?('retour '+_pilDfr(t.rep.prevu_retour)):'chez le réparateur']); });
-  // ⚠️ L'ouillage en retard ne se calcule plus ici (seuil global, pas celui de
-  //   chaque millesime) : la carte Cave d'Aujourd'hui lit le verdict de cave.js.
-  var cartes=_pilCkTracteur(d);
-  if(!al.length) return cartes || '<div class="pil-tile2 pil-alertcard"><div class="pil-alerts"><div class="pil-alert"><span class="pt ok"></span><span>Rien à signaler — parc et GNR à jour</span></div></div></div>';
-  var inner=al.slice(0,8).map(function(a){ return '<div class="pil-alert"><span class="pt '+a[0]+'"></span><span>'+a[1]+'</span>'+(a[2]?'<span class="when">'+_pilEsc(a[2])+'</span>':'')+'</div>'; }).join('');
-  return '<div class="pil-tile2 pil-alertcard"><div class="pil-alerts">'+inner+'</div></div>'+cartes;
 }
 
 // ════════════════════════════════════════════════════════════════════════
@@ -5062,7 +4731,7 @@ function _pilGmTraitementOption(T){
   var h=T.domaine*hha;
   return {nom:act.nom, h:h, l:h*lh, fen:String(fen.label||'')+' '+fen.start+'h\u2192'+fen.end+'h', nNu:nNu, src:(c&&c.ok)?'mesure':'reglage', hhaSrc:(M?('cadence mesurée sur '+M.n+' traitement'+(M.n>1?'s':'')):'barème')};
 }
-// ── Les cartes d'Aujourd'hui (section « Alertes matériel ») ──
+// ── Les cartes du tracteur (Équipe & matériel › Matériel, PIL-RANGE-1b §441) ──
 function _pilCkTracteur(d){
   var T=_pilGmTravaux(), H='', nCote=0;   // GNR-2 (§256) : nCote = les cartes qui se projettent sur les travaux (révision, cuve)
   var trNom={}; (d.tracs||[]).forEach(function(t){ trNom[t.id]=t.nom; });
@@ -5149,7 +4818,7 @@ function _pilCkTracteur(d){
       var mes=avecL.some(function(j){ return j.src==='mesure'; }), reg=avecL.some(function(j){ return j.src==='reglage'; });
       var srcTxt=mes&&reg?'conso mesurée, réglage pour un tracteur sans mesure':(mes?'conso mesurée de chaque tracteur':'conso du réglage ('+_pilGmFr(T.cfgLh)+' L/h)');
       nCote++;
-      H+='<div class="pil-tile2 pil-trx-cuve"><div class="pil-t2h"><span class="ic">'+_pilIco('carburant')+'</span><span class="t">Cuve GNR</span>'+_mvInfoBtn('pil.trxgnr')+'</div>'
+      H+='<div class="pil-tile2 pil-trx-cuve"><div class="pil-t2h"><span class="ic">'+_pilIco('carburant')+'</span><span class="t">Gasoil après les travaux</span>'+_mvInfoBtn('pil.trxgnr')+'</div>'
         +'<div class="pil-t2b"><div class="pil-trx-v"><span class="pil-big" style="color:'+((bas||niv<=seuil)?'var(--orange)':'var(--vert-med)')+'">'+bigN+'</span><span class="pil-trx-vu">'+bigP+'</span></div>'
         +'<div class="pil-t2s">'+_pilNum(niv)+' L sur '+_pilNum(cap)+' \u00b7 seuil '+_pilNum(seuil)+' L'+(avecL.length?(' \u00b7 '+srcTxt):'')+(sansL?(' \u00b7 '+sansL+' travail sans barème, non compté'):'')
         +(opt?(' \u00b7 pointillé : '+_pilEsc(_pilTnom(opt.nom))+' conseillé ('+opt.nNu+' parcelle'+(opt.nNu>1?'s':'')+' à nu ou presque, fenêtre '+_pilEsc(opt.fen)+'), '+_pilGmFr(opt.h)+' h sur le domaine ('+opt.hhaSrc+'), pas encore lancé'):'')+'</div>'
@@ -5723,101 +5392,17 @@ function _pilTabAuj(d){
   //   à chaque affichage de l'écran d'arrivée, puis le `return` du cockpit v2 les jetait — trois générations
   //   calculées, une seule montrée (audit du 23/10). Le cockpit v2 passe en premier ; l'ancien ordre ne se
   //   construit QUE s'il manque (_pilTabAujAncien) : l'écran ne reste jamais blanc, et il ne calcule plus deux fois.
-  //   ⚠️ Rien ne change à l'écran : même squelette, même modèle (_pilCk2Modele), même montage. Les fonctions
-  //   de l'ancien ordre restent en place et testées (14 harnais) jusqu'à PIL-RANGE-1b, qui les retirera avec
-  //   cockpit.js et migrera leurs harnais — un lot à part, mesuré au §438.
+  //   ⚠️ Rien ne change à l'écran : même squelette, même modèle (_pilCk2Modele), même montage.
+  // ★★ PIL-RANGE-1b (§441) : l'ancien ordre est RETIRÉ (il n'était plus affiché depuis REF-1, 07/10), avec le rendu de
+  //   secours de cockpit.js (_ckAuj et ses aides) — la moitié de cockpit.js qui nourrit le cockpit v2 reste. Sa carte du
+  //   tracteur (GNR-M §213, GNR-2 §256) est relogée dans Équipe & matériel › Matériel (_pilTabMat), choix de Nico (« A »).
+  //   Si le cockpit v2 manque ou lève : un message, jamais un écran blanc (règle AUJ-1).
   if(typeof window._ck2Squelette==='function'&&typeof window._ck2Monter==='function'){
     try{ var _V=_pilCk2Modele(d,m); _V.eco=_pilCk2Eco(d,_V); setTimeout(function(){ try{ window._ck2Monter(_V); _pilStickyH(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#ck2m'); } },0);   // VIF-1 : la hauteur du fil de portée posée aussi sur Aujourd'hui
       return window._ck2Squelette(); }
     catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#ck2'); }
   }
-  return _pilTabAujAncien(d,m);
-}
-// L'ancien Aujourd'hui : les tuiles d'avant puis, s'il est là, le cockpit de secours (src/cockpit.js, AUJ-1).
-// Atteint seulement si cockpit-vue.js manque ou lève. Corps inchangé (PIL-RANGE-1), `m` reçu de l'appelant.
-function _pilTabAujAncien(d,m){
-  var admin=(typeof window.isAdmin==='function')&&window.isAdmin(), H='';
-  var cockpit='';
-  if(_pilShow('auj_marge')){
-    var ringPc=d.gaugePct, C=2*Math.PI*74, dash=(ringPc/100*C);
-    var vBig, vCol, badgeCls, badgeTxt;
-    if(m.marge==null){ vBig='—'; vCol='var(--texte-doux)'; badgeCls='b-warn';
-      badgeTxt=(m.proj?'\u25CF objectif à poser':(m.capa&&!m.capa.ok?'\u25CF capacité insuffisante':'\u25CF projection indispo')); }
-    else if(m.marge>1){ vBig='+'+m.marge+' j d\'avance'; vCol='var(--vert-med)'; badgeCls='b-ok'; badgeTxt='\u25CF dans les temps'; }
-    else if(m.marge>=0){ vBig=(m.marge===0?'pile dans les temps':'+'+m.marge+' j'); vCol='var(--vert-med)'; badgeCls='b-warn'; badgeTxt='\u25CF juste'; }
-    else { vBig=m.marge+' j de retard'; vCol='var(--rouge)'; badgeCls='b-bad'; badgeTxt='\u25CF à accélérer'; }
-    cockpit+='<div class="pil-hero">'
-      +'<div class="pil-ring"><svg width="168" height="168" viewBox="0 0 168 168"><circle cx="84" cy="84" r="74" fill="none" stroke="var(--gris-clair)" stroke-width="7"/><circle cx="84" cy="84" r="74" fill="none" stroke="'+_pilPctColor(ringPc)+'" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+dash.toFixed(1)+' '+C.toFixed(1)+'" transform="rotate(-90 84 84)"/></svg>'
-      +'<div class="pil-ring-mid"><div class="pc">'+ringPc+'%</div><div class="lb">saison faite</div></div></div>'
-      +'<div class="pil-verdict"><div class="vk">Marge sur votre objectif '+_mvInfoBtn('pil.marge')+'</div>'
-      +'<span class="pil-badge '+badgeCls+'">'+badgeTxt+'</span>'
-      +'<div class="vbig" style="color:'+vCol+'">'+vBig+'</div>'
-      +'<div class="vsub">'+_pilMargeSous(m)+'</div>'
-      +'<div class="pil-obj"><span class="ol">Objectif \u00b7 tout fini pour le</span>'
-      +'<input type="date" id="pil-obj-date" value="'+(m.objIso||'')+'"'+(admin?'':' disabled')+'>'
-      +'<span class="pil-obj-hint">'+(admin?'':'\uD83D\uDD12 admin')+'</span></div>'
-      +'</div></div>';
-    cockpit+=_pilCockpitTimeline(m);
-  }
-  var _ckHero=cockpit;   // AUJ-1 (§260) : la fin prévue et sa frise, rangées à part par le cockpit
-  if(_pilShow('auj_inaction')) cockpit+=_pilCkInaction(d);   // INACTION-1 (§218)
-  var _ckInac=cockpit.slice(_ckHero.length);   // AUJ-1 : le coût de l'inaction, seul
-  var kpis='';
-  if(_pilShow('auj_charge')){
-    var _ksC = (m.seasonJ==null) ? 'projection indisponible'
-      : ('\u2248 '+m.seasonJ+' j ouvrés '+(m.src==='planning'?'d’ici là':'à la cadence'));
-    // PHOTO-1 (§219) : la petite courbe lit les photos quotidiennes ; le point du jour est en direct.
-    var _spR=_pilSparkCharge(d), _svgR=_spR?window._mvGraphSpark(_spR,{mauvais:'haut',aria:'Charge restante des 14 derniers jours, en écart à la charge du premier jour de la fenêtre'}):'', _dR=_pilSparkDernier(_spR);
-    if(_svgR&&_dR!=null) _ksC+=' · 14 j : <b>'+(_dR>0?'+':'')+Math.round(_dR)+' %</b>';
-    kpis+='<div class="pil-ck"><div class="kl">Charge restante'+(_svgR?_mvInfoBtn('pil.spark'):'')+'</div><div class="pil-ck-row"><div class="kv">'+_pilNum(d.totalReste)+'<span class="u"> h</span></div>'+(_svgR?'<span class="pil-spark">'+_svgR+'</span>':'')+'</div><div class="ks">'+_ksC+'</div></div>';
-  }
-  if(_pilShow('auj_cadence')){
-    // SPARK-1 (§214) : la petite courbe dit si la cadence des 7 derniers jours est
-    //   au-dessus ou au-dessous du chiffre affiche (4 dernieres semaines).
-    var _spC=_pilSparkCadence(m), _svgC=_spC?window._mvGraphSpark(_spC,{mauvais:'bas',aria:'Cadence des 14 derniers jours, en écart à la moyenne des 4 dernières semaines'}):'';
-    var _lastC=null; if(_spC){ for(var _iC=_spC.length-1;_iC>=0;_iC--){ if(_spC[_iC]!=null){ _lastC=_spC[_iC]; break; } } }
-    var _ksCad=m.estim?'estimée (effectif)':('réelle · 4 dern. sem.'+((_svgC&&_lastC!=null)?(' · 7 derniers jours : <b>'+(_lastC>0?'+':'')+Math.round(_lastC)+' %</b>'):''));
-    kpis+='<div class="pil-ck"><div class="kl">Cadence équipe'+(_svgC?_mvInfoBtn('pil.spark'):'')+'</div>'
-      +'<div class="pil-ck-row"><div class="kv">'+(m.cadH>0?Math.round(m.cadH):'—')+'<span class="u"> h/j</span></div>'+(_svgC?'<span class="pil-spark">'+_svgC+'</span>':'')+'</div>'
-      +'<div class="ks">'+_ksCad+'</div></div>';
-  }
-  if(_pilShow('auj_tension')) kpis+=_pilCkTension(d);
-  var _ckB0=kpis.length;   // AUJ-4 (§263) : la tuile Budget part dans la vue Économie
-  if(_pilShow('auj_budget')) kpis+=_pilCkBudget();
-  var _ckBud=kpis.slice(_ckB0);
-  if(_pilShow('auj_etp')) kpis+=_pilCkEtp(d);
-  if(_pilShow('auj_jours')) kpis+=_pilCkJours();
-  var _ckK0=kpis.length;   // AUJ-2 (§261) : la Cave part dans « À savoir »
-  if(_pilShow('auj_cave')) kpis+=_pilCkCave();
-  var _ckCave=kpis.slice(_ckK0);
-  if(kpis) cockpit+='<div class="pil-cks">'+kpis+'</div>';
-  if(cockpit) H+='<div class="pil-cockpit-card">'+cockpit+'</div>';
-  // ALIGN-1 (§236) : la rangée du haut porte les quatre VERDICTS, bâtis pareil ; la rangée du dessous
-  //   (.pil-dec2) porte les DÉTAILS — la protection et la tension par personne, 5 lignes au plus.
-  var dec='', det='';
-  if(_pilShow('auj_pres')) dec+=_pilCkPres(d);
-  if(_pilShow('auj_traiter')) dec+=_pilCkTraiter();
-  if(_pilShow('auj_prio')) dec+=_pilCkPrio(d);
-  if(_pilShow('auj_tension')) dec+=_pilTuileTension(d);
-  if(_pilShow('auj_traiter')) det+=_pilProtCarte();
-  if(_pilShow('auj_tension')) det+=_pilCardTension(d);
-  if(dec) H+='<div class="pil-sec-h">La décision du jour</div><div class="pil-dec">'+dec+'</div>';
-  if(det) H+='<div class="pil-dec2">'+det+'</div>';
-  var _ckAl0=H.length;   // AUJ-1 (§260)
-  if(_pilShow('auj_alertes')) H+='<div class="pil-sec-h">Alertes matériel</div>'+_pilCkAlertes(d);
-  // ★ AUJ-1 (§260) — LE COCKPIT : src/cockpit.js range ces mêmes morceaux (aucun recalculé) et ajoute le
-  //   résumé, les chantiers en cours, la courbe de la charge restante et le fil En direct. Module absent
-  //   ou en erreur : l'ancien ordre, ci-dessous, s'affiche — l'écran ne reste jamais blanc.
-  if(H && typeof window._ckAuj==='function'){
-    try{
-      // ★ DATES-1 (§323) : les fenêtres d'« À savoir » (cockpit de secours) = les dates de toutes les tâches de la période (taskDates).
-      return window._ckAuj({ d:d, m:m, hero:_ckHero, inaction:_ckInac, kpis:kpis.slice(0,_ckK0), cave:_ckCave, retards:_pilRetards(), fenetres:(function(c){ return (Array.isArray(c.taskDates)?c.taskDates:c.taskWindows)||[]; })((typeof _rfCd==='function'&&_rfCd())||{}), parcs:(window.PARCELLES||[]), budget:_ckBud, eco:_pilShow('auj_eco'), prolong:_pilGainsProlong(d), dec:dec, det:det, alertes:H.slice(_ckAl0),
-        chantiers:(_pilShow('auj_chantiers')?window._mvkAvancement(d.data,_pilRetards()):''),
-        photos:_pilPhotoListe(), journal:(window.JOURNAL||[]),
-        montrer:{ resume:_pilShow('auj_resume'), charge:_pilShow('auj_courbe'), fil:_pilShow('auj_fil'), savoir:_pilShow('auj_savoir'), plan:_pilShow('auj_plan') } });
-    }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#cockpit'); }
-  }
-  return H || '<div class="pil-empty">Aucun indicateur affiché — activez-les via « Choisir les indicateurs ».</div>';
+  return '<div class="pil-empty">Le tableau de bord n\u2019a pas pu s\u2019afficher. Rechargez la page.</div>';
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -6460,6 +6045,14 @@ function _pilTabMat(d){
   if(_pilShow('mat_gnr')) H+=_pilPanelGnr(d);
   if(_pilShow('mat_conso')) H+=_pilPanelConso(d);
   H+='</div>';
+  // ★★ PIL-RANGE-1b (§441) — LA CARTE DU TRACTEUR REVIENT ICI (GNR-M §213, GNR-2 §256). Elle vivait dans l'ancien
+  //   Aujourd'hui et ne s'affichait plus depuis REF-1 (07/10) ; Nico a choisi de la reloger (« A », maquette validée
+  //   « go » le 23/10). Calculs inchangés : travaux tracteur en cours, gasoil après les travaux, révision pendant les
+  //   travaux. Rien à dire (aucun travail, révision et cuve non concernées) : rien n'est affiché, pas même le titre.
+  if(_pilShow('mat_travaux')){
+    var _trx=''; try{ _trx=_pilCkTracteur(d)||''; }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabMat#trx'); }
+    if(_trx) H+='<div class="pil-sec-h">Pour finir les travaux tracteur en cours</div>'+_trx;
+  }
   return H;
 }
 
@@ -11277,7 +10870,7 @@ var _PIL_PERSO_DEFS={
   auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_tension','Tension équipe'],['auj_inaction','Coût de l’inaction'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_cave','La Cave \u2014 la vue de la bascule Terrain / Cave / Économie'],['auj_cave_sv','Les points de cave dans « À savoir »'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ? · fenêtre 5 jours'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave'],['auj_resume','Le résumé du jour'],['auj_chantiers','Les chantiers en cours'],['auj_courbe','La courbe de la charge restante'],['auj_fil','En direct : le fil de l\'équipe'],['auj_savoir','À savoir : météo, absences, contrats, retards'],['auj_plan','Le domaine en direct'],['auj_eco','La vue Économie (bascule Terrain / Économie)']],
   an: [['an_budget','Le budget de l\'ann\u00e9e'],['an_frise','Le renfort \u00e0 pr\u00e9voir']],
   avc:[['avc_gauge','Jauge de saison'],['avc_bar','Avancement par tâche'],['avc_pie','Charge (donut)'],['avc_temps','Où va le temps de l\'équipe'],['avc_echeances','Échéances par tâche'],['avc_carte','Carte du domaine']],
-  equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_conso','Consommation mesurée']],
+  equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_conso','Consommation mesurée'],['mat_travaux','Pour finir les travaux tracteur en cours']],
   sim:[['sim_ordre','La tournée du jour'],['sim_etsi','Qui fait quoi'],['sim_cout','Renfort : combien et quand']],
   cfm:[['cfm_cuivre','Cuivre (bio · 7 ans)'],['cfm_ift','Passages phyto / IFT'],['mat_phyto','Registre phyto'],['cfm_dre','Délai de rentrée (DRE)']]
 };
@@ -12907,7 +12500,7 @@ function _pilFillContent(d){
   else if(tab==='equ'){
     var _hEqu=
         (_pilAnyShow(['prs_equipe','prs_presences','prs_capacite'])?'<div class="pil-sec-h">Personnel</div>'+_pilTabPrs(d):'')
-      + (_pilAnyShow(['mat_tracteur','mat_gnr','mat_conso'])?'<div class="pil-sec-h">Matériel</div>'+_pilTabMat(d):'');
+      + (_pilAnyShow(['mat_tracteur','mat_gnr','mat_conso','mat_travaux'])?'<div class="pil-sec-h">Matériel</div>'+_pilTabMat(d):'');
     // Les six autres onglets ont leur repli ; celui-ci sortait un ECRAN BLANC,
     // sans meme la phrase qui dit comment rallumer les tuiles.
     host.innerHTML=_hEqu || '<div class="pil-empty">Aucun indicateur affiché — activez-les via « Choisir les indicateurs ».</div>';

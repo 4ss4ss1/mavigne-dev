@@ -1,4 +1,5 @@
 /* ───────────────────────────────────────────────────────
+// PIL-RANGE-1b (§441) : la carte Cave de l'ancien Aujourd'hui (_pilCkCave) est retirée ; la Cave du Pilotage est la vue Cave du cockpit (CAVEPIL-1/2).
    HARNAIS — CAVEAUJ-1 (§434) : CAVE › AUJOURD'HUI AU DESSIN DE LA MAQUETTE VALIDÉE
    Lancer :          node scripts/mv-harnais-caveauj1.mjs
    Contre-épreuves : node scripts/mv-harnais-caveauj1.mjs --contre
@@ -72,7 +73,6 @@ function verifier(S) {
   // 3. des gestes, pas des lignes
   essai('la fin de FA estim\u00e9e et le d\u00e9marrage ne sont pas des gestes', () => M._mlGestes([{ kind: 'fa' }, { kind: 'demarrage' }, { kind: 'mesure' }, { kind: 'ouillage' }]).length === 2);
   T('la bande compte par _mlGestes, sous \u00ab \u00e0 faire cette semaine \u00bb', /var aFaire=_mlGestes\(sem\[0\]\.items\)\.length;/.test(S.cave) && /\[aFaire,'\\u00e0 faire cette semaine',aFaire>0\]/.test(S.cave));
-  T('la carte Cave du Pilotage compte par window._mlGestes', /window\._mlGestes\(sem\[0\]\.items\)\.length/.test(S.pil));
   // 4. une ligne par contenant
   essai('une ligne par contenant, dans l\u2019ordre : contr\u00f4le, d\u00fb, le reste ; le geste d\u00fb en t\u00eate de sa ligne', () => {
     const G = M._aujGrouper([

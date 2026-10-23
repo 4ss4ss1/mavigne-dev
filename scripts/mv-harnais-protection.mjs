@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// PIL-RANGE-1b (§441) : « Le coût de l'inaction » de l'ancien Aujourd'hui (_pilCkInaction) et la tuile « Traiter ? » (_pilCkTraiter)
+//   sont retirés ; la protection (calcul, carte posée par Conformité) reste.
 /* ─────────────────────────────────────────────────────────────────────────
    HARNAIS PROT-1 + INACTION-1 (§218)
    Lancer :  node scripts/mv-harnais-protection.mjs            (scénarios)
@@ -17,7 +19,7 @@ const CONTRE = process.argv.includes('--contre');
 const PIL = readFileSync('src/pilotage.js', 'utf8'), REG = readFileSync('src/reglages.js', 'utf8'), APP = readFileSync('src/app.js', 'utf8');
 function corps(src, debut) { const i = src.indexOf(debut); if (i < 0) throw new Error('introuvable : ' + debut);
   let j = src.indexOf('{', i), n = 0; for (let k = j; k < src.length; k++) { if (src[k] === '{') n++; else if (src[k] === '}') { n--; if (n === 0) return src.slice(i, k + 1); } } throw new Error('accolades : ' + debut); }
-function bloc(src) { const a = src.indexOf('var _PIL_PROT_DEF='), b = src.indexOf('function _pilCkTraiter(){'); if (a < 0 || b < a) throw new Error('bloc PROT introuvable'); return src.slice(a, b); }
+function bloc(src) { const a = src.indexOf('var _PIL_PROT_DEF='), b = src.indexOf('function _pilTraiterCalc('); if (a < 0 || b < a) throw new Error('bloc PROT introuvable'); return src.slice(a, b); }
 const RealDate = Date, FIXED = new RealDate('2026-06-16T10:00:00').getTime();
 function FakeDate(...a) { return a.length ? new RealDate(...a) : new RealDate(FIXED); }
 FakeDate.prototype = RealDate.prototype; FakeDate.now = () => FIXED; FakeDate.parse = RealDate.parse;
@@ -102,14 +104,7 @@ function scenarios(pil, reg, journal, app) {
     // jamais traitee
     const X3 = charger(pil); X3.TRAITEMENTS.length = 0; const P3 = X3._pilProtData();
     t('sans aucun traitement : toutes « jamais traitées », toutes à nu', P3.nu.length === 6 && P3.rows.every(r => r.jamais) && X3._pilProtHtml().includes('jamais traitée'));
-    // inaction
-    const I = X._pilCkInaction({});
-    t('inaction : + 214 h · ≈ 4 922 € (214 × 23), 2 tâches hors délai, modèle +15 % écrit', I.includes('+ 214 h · env. ') && /4[\s\u202f\u00a0]922 €/.test(I) && I.includes('2 tâches hors délai') && I.includes('+15 % par semaine'), I);
-    t('inaction : le bouton mène à Décider (cible renfort)', I.includes('data-diag="renfort"') && /cible==='renfort'/.test(pil));
-    const X4 = charger(pil, { sim: { induit: 0, horsDelai: 0, deborde: false } });
-    t('tout boucle : « Rien à rattraper », pas de bouton', X4._pilCkInaction({}).includes('Rien à rattraper') && !X4._pilCkInaction({}).includes('data-diag'));
-    t('campagne finie, ou sans taux, ou sans simulateur : rien', charger(pil, { fini: true })._pilCkInaction({}) === '' && charger(pil, { noRate: true })._pilCkInaction({}) === '' && charger(pil, { rf: 'none' })._pilCkInaction({}) === '');
-    t('branché : la carte « Protection restante » (rangée .pil-dec2, ALIGN-1 §236) appelle la protection, le cockpit appelle l’inaction', /det\+=_pilProtCarte\(\)/.test(pil) && /function _pilProtCarte\(\)\{\s*var h=_pilProtHtml\(\)/.test(pil) && /_pilShow\('auj_inaction'\)\) cockpit\+=_pilCkInaction\(d\)/.test(pil));
+    t('branché : la carte « Protection restante » est posée par Conformité (_pilTabCfm)', (() => { const i = pil.indexOf('function _pilTabCfm('); return i >= 0 && pil.slice(i, pil.indexOf('\n}\n', i)).includes('_pilProtCarte()'); })());
     // le reglage, pour de vrai
     const RG = chargerReg(reg);
     RG._ecoCfgSet('prot', 'penetrant', '11'); RG._ecoCfgSet('prot', 'autre', '99');
@@ -127,8 +122,6 @@ const DEFAUTS = [
   ['pil', 'le réglage n’est plus lu', "o[k]=(isFinite(v)&&v>0)?v:_PIL_PROT_DEF[k];", 'o[k]=_PIL_PROT_DEF[k];'],
   ['pil', 'les jours écoulés ne sont plus retirés', 'var reste=(j==null?null:e.rem-j), pluie=null', 'var reste=(j==null?null:e.rem), pluie=null'],
   ['pil', 'les arrachées reviennent', "if(!p||p.statut==='Arrachee') return;\n    var e=der[p.nom];", "if(!p) return;\n    var e=der[p.nom];"],
-  ['pil', 'les euros oublient le taux', 'eur=h*(ctx.rate||0);', 'eur=h;'],
-  ['pil', 'l’inaction s’affiche même quand la campagne est finie', 'if(!P||!P.dec||P.fini||P.dec.noRate) return', 'if(!P||!P.dec||P.dec.noRate) return'],
   ['pil', 'le seuil de lessivage n’est plus lu', "if(pluie!=null&&pluie>=cfg.lessivage){ lessive=true; reste=0; }", "if(false){ lessive=true; reste=0; }"],
   ['pil', 'le jour du traitement compte dans la pluie', "for(;;){ d.setDate(d.getDate()+1); var iso=_pilPhotoIso(d);", "for(var k0=0;;k0++){ if(k0) d.setDate(d.getDate()+1); var iso=_pilPhotoIso(d);"],
   ['pil', 'un jour manquant compte zéro', "if(v==null||!isFinite(Number(v))) return null; mm+=Number(v); }", "if(v==null||!isFinite(Number(v))) continue; mm+=Number(v); }"],

@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// PIL-RANGE-1b (§441) : « Alertes matériel » de l'ancien Aujourd'hui (_pilCkAlertes) est retiré ; les cartes du tracteur (_pilCkTracteur)
+//   sont relogées dans Équipe & matériel › Matériel (_pilTabMat). Les machines immobilisées sont dans « À savoir » du cockpit v2.
 /* ─────────────────────────────────────────────────────────────────────────
    HARNAIS GNR-2 (§256) — LA CUVE GNR SE LIT SUR TÉLÉPHONE COMME SUR ORDINATEUR
    Lancer :  node scripts/mv-harnais-gnr2.mjs            (scénarios)
@@ -46,9 +48,9 @@ function corps(src, nom) {
   throw new Error('accolades : ' + nom);
 }
 function bloc(src) {
-  const a = src.indexOf('function _pilCkAlertes(d){');
+  const a = Math.min(...['var _PIL_GM_', 'function _pilGm'].map(k => src.indexOf(k)).filter(i => i >= 0));   // PIL-RANGE-1b : le bloc part des aides GNR-M
   const b = src.indexOf("// ── Onglet AUJOURD'HUI (cockpit) ──");
-  if (a < 0 || b < 0 || b < a) throw new Error('bloc _pilCkAlertes → cockpit introuvable');
+  if (a < 0 || b < 0 || b < a) throw new Error('bloc _pilCkTracteur → cockpit introuvable');
   return src.slice(a, b);
 }
 const RealDate = Date;

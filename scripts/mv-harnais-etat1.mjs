@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// PIL-RANGE-1b (§441) : le rendu de secours de cockpit.js (fil, plan et cockpit de secours) est retiré avec l'ancien Aujourd'hui ;
+//   les assertions qui le visaient partent, celles du cockpit v2 et des lectures partagées restent.
 // ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
 //  ETAT-1 (§320) — LE PLAN DU COCKPIT LIT L'ÉTAT DE LA FICHE
 //  Nico (12/10) : une parcelle « Entreplantation fait » dans Le domaine en direct, « À faire » sur sa fiche, aucune
@@ -152,26 +154,13 @@ function suite(S) {
       && c.__f('arrachage', 'p2') === 'Arrachage en cours, Victor et Shana, <em>aujourd’hui</em>';
   });
   T('F2 le cockpit range les parcelles au prestataire reçues du modèle', S.vue.includes("S.presta[t.id] = {}; ((v.presta && v.presta[t.id]) || []).forEach(n => { const pid = parNom[n]; if (pid) S.presta[t.id][pid] = true; });"));
-  // ── H. le VRAI plan de secours (_ckPlanCorps, cockpit.js) : la même lecture, la période du Pilotage
-  T('H1 plan de secours : l’équipe d’une parcelle commencée avant la fenêtre est posée ; une validation d’une saison passée ne repeint rien', () => {
-    const WH = lecture(S);
-    WH._pilSaison = () => ({ nom: 'Hiver 2026-2027', debut: '2026-10-01', fin: '2027-03-31' });
-    const CK = vm.runInContext('_CK', WH);
-    CK.plan = { parcs: [{ nom: 'Clos', surface: 0.4, appellation: 'Gevrey-Chambertin', commune: 'Gevrey-Chambertin', taches: { Taille: 'En cours' } },
-      { nom: 'Combe', surface: 0.5, appellation: 'Gevrey-Chambertin', commune: 'Gevrey-Chambertin', taches: {} }],
-      journal: [{ date: '2026-10-20', parcelle: 'Clos', tache: 'Taille', qui: 'Hugo', membresEquipe: ['Hugo', 'Léa'], statut: 'En cours' }, { date: '2026-04-20', parcelle: 'Combe', tache: 'Taille', qui: 'Nico', statut: 'Validé' }],
-      rows: [{ nom: 'Taille', pct: 10 }], fen: [{ nom: 'Taille', ws: 334, we: 441 }], retards: {} };
-    CK.tachePlan = 'Taille';
-    const h = WH._ckPlanCorps();
-    return h.includes('>HL</text>') && h.includes('class="ck-pl-p et-cours"') && !h.includes('et-faite');
-  });
   // ── G. le branchement, l'aide, le guide, les nouveautés (sur le texte)
   const b = sansCom(fnDe(S.pil, 'function _pilCk2Modele(d, m){'));
   T('G1 le modèle passe la période aux deux lectures et publie presta ; plus de date de tâche pour l’état ni pour l’équipe',
     b.includes('window._ckPlanEtats(PARC, J, t.cle, perD, !!retards[t.cle], perO)') && b.includes('window._ckPlanDebuts(PARC, J, t.cle, perD, perO)') && b.includes('presta:presta') && !b.includes('t.cle, t.debut'));
   T('G2 la porte de l’arrachage au prestataire existe dans app.js avec la signature lue par le plan', /window\._mvAuPrestataire=function\(p,T\)\{/.test(S.app));
   T('G3 l’aide, la bulle du plan et le guide disent que la couleur suit la fiche',
-    S.uti.includes('celui de la fiche de la parcelle pour la période : faite (validée ; une annulation la remet à faire)') && S.uti.includes('colorée selon son état sur sa fiche pour la tâche choisie')
+    S.uti.includes('colorée selon son état sur sa fiche pour la tâche choisie')
     && S.vue.includes('celui de sa fiche pour la période : faite une fois validée') && S.guide.includes('colorée selon son état sur sa fiche pour la tâche choisie'));
   /* ★ LABO-2 (§321) : « en tête » ne tient que jusqu'au lot suivant, qui pose son bloc au-dessus et relève APP. La règle garde ce
      qui compte : le bloc 8.88 existe, avec son niveau et son public, et APP n'est pas redescendu sous 8.88. */
@@ -204,7 +193,6 @@ if (CONTRE) {
     ['le modèle oublie le prestataire', 'pil', '    if(pr.length) presta[t.id]=pr;\n', ''],
     ['la loupe sans la suite au prestataire', 'vue', "  if (e === 'faite' && (S.presta[t] || {})[pid]) return", '  if (false) return'],
     ['« Changer » lit la période consultée', 'app', "d0, { statut:function(p,t){ var s=p&&p.taches&&p.taches[t]; return typeof s==='string'?s:''; } });", 'd0);'],
-    ['le plan de secours borné à la fenêtre de la tâche', 'ck', 'var per = _ckPlanPeriode(), etats =', "var per = { debut: _ckPlanDebut(P.fen, t.nom), fin: '' }, etats ="],
   ];
   let manques = 0;
   DEF.forEach(([nom, f, a, bb]) => {

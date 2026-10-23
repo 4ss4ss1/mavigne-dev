@@ -301,8 +301,6 @@ export { _pilFinPlan,_pilMargeCalc,_pilWdBetween };`;
   const i=await finPlan(SRC.pil,{sel:{R:0,a:0,b:0,dP:3,base:'eng'}});
   t('⑭ la simulation en cours de La campagne (+3 permanents) ne bouge pas la date du cockpit', i.finSem===15, 'finSem='+i.finSem);
   t('⑭ capacité normale et sans rallongement : { hMax: ctx.c.hJour, k: 0 }', /\{ hMax: ctx\.c\.hJour, k: 0 \}/.test(fp));
-  const ms=fn(SRC.pil,'_pilMargeSous');
-  t('⑭ la phrase nomme le calcul, la reconduction et les débordements', /Comme La campagne sans renfort/.test(ms) && /est reconduite/.test(ms) && /d\\u00e9borde/.test(ms));
 }
 
 // ── Contre-epreuves : chaque defaut reintroduit doit ROUGIR ──────────────────

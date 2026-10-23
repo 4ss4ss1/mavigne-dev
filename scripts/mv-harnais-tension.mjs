@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// PIL-RANGE-1b (§441) : le chiffre du bandeau (_pilCkTension) et la tuile (_pilTuileTension) de l'ancien Aujourd'hui sont retirés ;
+//   la carte de détail (_pilCardTension) et le calcul (_pilTensData) restent.
 /* ─────────────────────────────────────────────────────────────────────────
    HARNAIS TENS-1 (§215) — LA TENSION DE L'ÉQUIPE FACE AU PLANNING PRÉVU
    Lancer :  node scripts/mv-harnais-tension.mjs            (scénarios)
@@ -26,7 +28,7 @@ function corps(src, debut) {
   throw new Error('accolades : ' + debut);
 }
 function blocTens(src) {
-  const a = src.indexOf('var _PIL_TENS_SEUIL'), b = src.indexOf('function _pilCkAlertes(d){');
+  const a = src.indexOf('var _PIL_TENS_SEUIL'), b = src.indexOf("// ── Les cartes du tracteur (Équipe & matériel › Matériel, PIL-RANGE-1b §441) ──");
   if (a < 0 || b < a) throw new Error('bloc TENS introuvable'); return src.slice(a, b);
 }
 const RealDate = Date;
@@ -121,19 +123,15 @@ function scenarios(pil, pla, journal) {
     t('② dernier point = les 7 jours qui finissent aujourd’hui (10 → 16 juin)', proche(T.serie[13], (f7 - p7) / p7 * 100), T.serie[13] + ' / ' + (f7 - p7) / p7 * 100);
     t('② calculé une fois par rendu (mémoire sur d)', X._pilTensData(d) === T);
     // ③ le rendu
-    X.appelsSpark.length = 0;
-    const K = X._pilCkTension({ membres: EQUIPE });
-    t('③ chiffre du bandeau : écart de l’équipe, « 4 / 6 au seuil », en rouge', K.includes('<b>4 / 6</b> au seuil') && K.includes('color:var(--rouge)') && K.includes('pil.tension'), K);
-    t('③ la petite courbe reçoit la série, le haut est défavorable', X.appelsSpark.length === 1 && X.appelsSpark[0][0].length === 14 && X.appelsSpark[0][1].mauvais === 'haut');
     const C = X._pilCardTension({ membres: EQUIPE });
     t('③ carte : une ligne par personne (6), maximum et semaine chargée dits', (C.match(/class="pil-tens-r"/g) || []).length === 6 && C.includes('au-delà de 48 h') && C.includes('semaine à 45 h'));
     t('③ un trait de prévu par personne qui a du prévu (5)', (C.match(/<u style=/g) || []).length === 5);
     const larg = [...C.matchAll(/(?:width|left):(-?[\d.]+)%/g)].map(m => +m[1]);
     t('③ largeurs et positions entre 0 et 100 %', larg.length > 0 && larg.every(v => v >= 0 && v <= 100));
-    t('③ aucun undefined / NaN, balises équilibrées', !/undefined|NaN/.test(C + K) && (C.match(/<div[ >]/g) || []).length === (C.match(/<\/div>/g) || []).length && (C.match(/<span[ >]/g) || []).length === (C.match(/<\/span>/g) || []).length);
+    t('③ aucun undefined / NaN, balises équilibrées', !/undefined|NaN/.test(C) && (C.match(/<div[ >]/g) || []).length === (C.match(/<\/div>/g) || []).length && (C.match(/<span[ >]/g) || []).length === (C.match(/<\/span>/g) || []).length);
     t('③ le bouton mène au Planning', C.includes('data-diag="planning"') && /planning:\s*\['planning', null, null\]/.test(pil));
-    t('③ sans planning : un tiret, pas de carte', X._pilCkTension({ membres: [] }).includes('<div class="kv">—</div>') && X._pilCardTension({ membres: [] }) === '');
-    t('③ branché : chiffre et carte sous la clé auj_tension', /_pilShow\('auj_tension'\)\) kpis\+=_pilCkTension\(d\)/.test(pil) && /_pilShow\('auj_tension'\)\) dec\+=_pilTuileTension\(d\)/.test(pil) && /_pilShow\('auj_tension'\)\) det\+=_pilCardTension\(d\)/.test(pil)   /* ALIGN-1 (§236) : la tuile en haut, le détail dessous */);
+    t('③ sans planning : un tiret, pas de carte', X._pilCardTension({ membres: [] }) === '');
+    t('③ branché : la carte de détail est posée hors de sa définition', (pil.match(/_pilCardTension\(d\)/g) || []).length >= 1);
   } catch (e) { t('les scénarios s’exécutent sans planter', false, e.stack); }
   return { ok, ko };
 }

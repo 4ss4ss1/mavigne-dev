@@ -1,4 +1,5 @@
 // HARNAIS — AUJ-6 (§308) : les dessins d'Aujourd'hui qui ne disparaissent plus, « À savoir » sous les barres collantes,
+// PIL-RANGE-1b (§441) : l'ancien Aujourd'hui (tuiles d'avant, petites courbes, frise, carte Cave) est retiré ; ce harnais ne garde que ce qui vit encore.
 //   la pastille « Nouveau » entière, la charge restante sans traits verticaux.
 //   node scripts/mv-harnais-auj6.mjs           → doit être vert
 //   node scripts/mv-harnais-auj6.mjs --contre  → chaque défaut réinjecté doit rougir
@@ -37,7 +38,7 @@ function partieA(S, T) {
 
 function corps(src, debut) { const i = src.indexOf(debut); if (i < 0) throw new Error('introuvable : ' + debut); let j = src.indexOf('{', i), n = 0;
   for (let k = j; k < src.length; k++) { if (src[k] === '{') n++; else if (src[k] === '}') { n--; if (n === 0) return src.slice(i, k + 1); } } throw new Error('accolades : ' + debut); }
-function bloc(src) { const a = src.indexOf('var _PIL_PHOTO_MAX='), b = src.indexOf('// ★ SPARK-1 (§214) — LA CADENCE'); if (a < 0 || b < a) throw new Error('bloc PHOTO introuvable'); return src.slice(a, b); }
+function bloc(src) { const a = src.indexOf('var _PIL_PHOTO_MAX='), b = src.indexOf('function _friseNorm(');   /* PIL-RANGE-1b (§441) : les petites courbes qui suivaient la photo sont retirées */ if (a < 0 || b < a) throw new Error('bloc PHOTO introuvable'); return src.slice(a, b); }
 const RealDate = Date, FIXED = new RealDate('2026-10-10T10:00:00').getTime();
 function FakeDate(...a) { return a.length ? new RealDate(...a) : new RealDate(FIXED); }
 FakeDate.prototype = RealDate.prototype; FakeDate.now = () => FIXED; FakeDate.parse = RealDate.parse;
@@ -60,8 +61,6 @@ function partieB(S, T) {
   T('B4 données là, travail prévu : la photo part, avec sa période', X1._pilPhotoEcrire(d) === true && X1.ecrits.length === 1 && X1.CONFIG.photo.length === 1 && X1.CONFIG.photo[0].reste === 2405 && X1.CONFIG.photo[0].p === 'Hiver');
   const iso = k => { const t = new RealDate(2026, 9, 10 - k); return t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0'); };
   const X2 = charger(S.pil, { photo: [{ d: iso(5), reste: 2500, p: 'Hiver' }, { d: iso(4), reste: 0, p: 'Hiver' }, { d: iso(3), reste: 300, p: 'Vendanges' }, { d: iso(2), reste: 2450 }, { d: iso(1), reste: 2440, p: 'Hiver' }] });
-  const sp = X2._pilSparkCharge({ totalReste: 2420 }), pts = sp ? sp.filter(v => v != null).length : 0;
-  T('B5 la petite courbe ignore le zéro, l’autre période et la photo sans période (3 points sûrs : ' + pts + ')', !!sp && pts === 3 && Math.min(...sp.filter(v => v != null)) > -5);
 }
 
 function partieC(S, T) {
@@ -99,7 +98,6 @@ if (!CONTRE) {
     ['deux valeurs le même jour', S => ({ ...S, ck: remp(S.ck, 'parJour[x.d] = x.reste;', "parJour[x.d + ' ' + Math.random()] = x.reste;") })],
     ['la photo part avant l’arrivée des données', S => ({ ...S, pil: remp(S.pil, 'if(!window._dataReady||', 'if(') })],
     ['une période sans travail prévu est photographiée', S => ({ ...S, pil: remp(S.pil, '!(Number(d.totalTotal)>0)||', '') })],
-    ['la petite courbe reprend les zéros', S => ({ ...S, pil: remp(S.pil, "x.reste>0&&(!per||x.p===per)", 'true') })],
     ['le montage garde les cadres d’avant', S => ({ ...S, vue: remp(S.vue, "G.c = null; G.w = 0; GE.c = null; GE.w = 0; GE.fait = GE.dep = GE.att = null; S.mode = 'terrain'; S.filtre = null;", '') })],
     ['une mise à jour qui lève arrête de nouveau l’entrée', S => ({ ...S, vue: remp(S.vue, ".forEach(f => { try { f(); } catch (e) { if (window._mvAvale) window._mvAvale(e, 'cockpit-vue.js/entree'); } });", '.forEach(f => f());') })],
     ['la boîte cachée se croit de nouveau dessinée', S => ({ ...S, vue: remp(S.vue, 'if (box.offsetParent === null) { G.w = 0; return; }', 'if (box.offsetParent === null) return;') })],

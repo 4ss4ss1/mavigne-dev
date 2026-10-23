@@ -1,4 +1,6 @@
 // HARNAIS — DATES-1 (§323) : les dates de travaux d'une période valent pour TOUTES ses tâches, heures au barème ou pas.
+// PIL-RANGE-1b (§441) : le rendu de secours de cockpit.js et les fiches MV_INFO de l'ancien écran sont retirés ; ce qui passait par lui
+//   se lit désormais sur le modèle du cockpit v2 (_pilCk2Modele) et sur sa bulle (INFO de cockpit-vue.js).
 //   node scripts/mv-harnais-dates1.mjs           → doit être vert
 //   node scripts/mv-harnais-dates1.mjs --contre  → chaque défaut réinjecté doit rougir
 // Nico (13/10, trois captures) : « Les dates de réglages ne se mettent pas à jour lors d'un changement dans réglage ». Dans
@@ -117,8 +119,6 @@ async function suite(S) {
     finally { s.echeances.Taille.d2 = e; } });
   // ── C. lu ──
   const P = sansCom(S.pil);
-  T('C1 le cockpit de secours (cockpit.js) reçoit aussi les dates de toutes les tâches', () =>
-    P.includes("fenetres:(function(c){ return (Array.isArray(c.taskDates)?c.taskDates:c.taskWindows)||[]; })"));
   T('C2 la nouveauté l\u2019annonce (bloc 8.91)', () => { const U = S.uti, i = U.indexOf("{ v: '8.91', d: '2026-10-13', items: ["), j = U.indexOf("{ v: '8.90'", i);
     return i > 0 && j > i && U.slice(i, j).includes('Les dates de travaux valent aussi pour les tâches sans barème') && U.slice(i, j).includes('sans recharger'); });
   const av = JOURNAL_ERR.slice(e0).filter(x => /planning|pilotage|cockpit|_mvChantiersCtx|_mvkRetards/.test(String((x && x.msg) || '')));
@@ -145,7 +145,6 @@ const CONTRES = [
   ['pilotage.js : l\u2019arrachage fini pour l\u2019équipe redevient « en retard »', () => sub('pil', "if(r.Arrachage&&typeof window._arrEquipeFiniePartout==='function'&&window._arrEquipeFiniePartout()) delete r.Arrachage;", '')],
   ['app.js : _arrEquipeFiniePartout n\u2019est plus exposée', () => sub('app', 'window._arrEquipeFiniePartout=_arrEquipeFiniePartout;', '')],
   ['pilotage.js : la mémoire de L\u2019année ignore les dates de travaux', () => sub('pil', "+'|'+JSON.stringify(p.echeances||{});", ';')],
-  ['pilotage.js : le cockpit de secours ne lit que les fenêtres', () => sub('pil', "fenetres:(function(c){ return (Array.isArray(c.taskDates)?c.taskDates:c.taskWindows)||[]; })((typeof _rfCd==='function'&&_rfCd())||{}),", "fenetres:((typeof _rfCd==='function'&&_rfCd())||{}).taskWindows||[],")],
 ];
 let mord = 0, muet = 0;
 for (const [n, mk] of CONTRES) {
