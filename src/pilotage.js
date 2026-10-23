@@ -348,6 +348,11 @@ window._pilEtatEntree=_pilEtatEntree;
 function _pilPrevuLe(m, dt){
   if(!m || !dt) return false;
   var d0=new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()), w=d0.getDay();
+  // ★ PIL-FIX-1 (§440) : un jour FÉRIÉ n'est « prévu » que si la personne y est SAISIE au travail — comme l'écran du
+  //   planning, qui l'affiche « férié » sans saisie (_planDayStatus). Le modèle annualisé recalé d'une année sur l'autre
+  //   peut poser des heures sur un férié (le 11 novembre 2027 tombe sur le 2ᵉ jeudi, travaillé en 2026) : elles ne font
+  //   ni une présence ni un jour ouvré. Sans planning chargé, un férié n'est pas prévu non plus.
+  if(_pilFerieLe(d0)) return _pilSaisiAuTravail(m, d0);
   if(typeof window._planPrevuPersRange!=='function' || typeof window._planWorkPersRange!=='function') return w!==0 && w!==6;
   try{ return (Number(window._planPrevuPersRange(m, d0, d0))||0)>0 || (Number(window._planWorkPersRange(m, d0, d0))||0)>0; }
   catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilPrevuLe'); return w!==0 && w!==6; }
@@ -357,8 +362,23 @@ window._pilPrevuLe=_pilPrevuLe;
 function _pilJourDomaine(dt){
   if(!dt) return false;
   var L=_pilMembresActifs(_pilPhotoIso(dt)).filter(function(m){ return m && !m.bureau; });
-  if(!L.length){ var w=dt.getDay(); return w!==0 && w!==6; }
+  if(!L.length) return _pilJourCalendrier(dt);   // PIL-FIX-1 (§440) : sans équipe, lundi→vendredi, fériés retirés
   return L.some(function(m){ return _pilPrevuLe(m, dt); });
+}
+// ★ PIL-FIX-1 (§440) — les fériés, lus à la source du planning (_feriesY : fixes et mobiles, la même table que l'écran).
+function _pilFerieLe(dt){
+  if(!dt || typeof window._feriesY!=='function') return false;
+  try{ var F=window._feriesY(dt.getFullYear()); return !!(F && F[dt.getMonth()] && F[dt.getMonth()][dt.getDate()]); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilFerieLe'); return false; }
+}
+// Le repli quand le planning ne dit rien : du lundi au vendredi, sans les fériés.
+function _pilJourCalendrier(dt){ var w=dt.getDay(); return w!==0 && w!==6 && !_pilFerieLe(dt); }
+// Une personne est-elle SAISIE au travail ce jour-là : une entrée du planning, et des heures de travail effectif ?
+function _pilSaisiAuTravail(m, d0){
+  var PE=window.PLANNING_ENTRIES||{}, an=(PE[m.nom]||{})[d0.getFullYear()], mo=an&&an[d0.getMonth()], e=mo&&mo[d0.getDate()];
+  if(!e || typeof window._planWorkPersRange!=='function') return false;
+  try{ return (Number(window._planWorkPersRange(m, d0, d0))||0)>0; }
+  catch(err){ if(window._mvAvale) window._mvAvale(err,'pilotage.js/_pilSaisiAuTravail'); return false; }
 }
 window._pilJourDomaine=_pilJourDomaine;
 function _pilData(){
@@ -4021,18 +4041,43 @@ window._pilObjectifRegler=function(iso){
 };
 
 // ── Jours ouvrés : objet Date + différence signée ──
+// ★★★ PIL-FIX-1 (§440) — UN JOUR OUVRÉ EST UN JOUR OÙ LE DOMAINE TRAVAILLE AU PLANNING (Nico, 10/10 : « toujours se baser
+//   sur le planning »). Avant : lundi→vendredi du calendrier, rien d'autre — le 11 novembre et le 25 décembre comptaient,
+//   et les vendredis chômés de l'annualisation aussi (modèle standard 2026 : deux vendredis travaillés sur quatre en
+//   novembre, aucun en décembre). La marge d'Aujourd'hui, la fin à la cadence et les « N j » des Échéances se trompaient
+//   d'autant (audit du 23/10, 23 oct → 15 nov : 15 jours comptés). Chaque jour est désormais demandé à _pilJourDomaine —
+//   la MÊME règle que l'Effectif et les Présences (AUJ-5), fériés compris (_pilPrevuLe).
+//   ⚠️ Garde : un planning muet _PIL_MUET_J jours de suite (des membres sous contrat, personne de prévu) n'est plus lu
+//   comme une fermeture : le compte repasse au calendrier. Sans elle, _pilWdDateObj pouvait courir 4 000 jours.
+//   ⚠️ `chantier` (fenêtre de chantier) reste ce qu'il était : tous les jours comptent.
+var _PIL_MUET_J=45;
+function _pilCompteurOuvre(chantier){
+  var C={}, vide=0, muet=false;
+  return function(dt){
+    if(chantier) return true;
+    if(muet) return _pilJourCalendrier(dt);
+    var k=_pilPhotoIso(dt), v=(k in C)?C[k]:(C[k]=_pilJourDomaine(dt));
+    if(v){ vide=0; return true; }
+    if(++vide>=_PIL_MUET_J){ muet=true; if(window.logError) window.logError({ level:'info', cat:'pilotage', msg:'jours ouvrés : planning muet '+_PIL_MUET_J+' j, repli sur le calendrier' }); }
+    return false;
+  };
+}
 function _pilWdDateObj(n,from,chantier){
   var dt=from?new Date(from):new Date(); if(n==null) return dt;
-  var added=0, guard=0;
-  while(added<n && guard<4000){ guard++; dt.setDate(dt.getDate()+1); var wd=dt.getDay(); if(chantier||(wd!==0&&wd!==6)) added++; }
+  var ouv=_pilCompteurOuvre(!!chantier), added=0, guard=0;
+  while(added<n && guard<4000){ guard++; dt.setDate(dt.getDate()+1); if(ouv(dt)) added++; }
   return dt;
 }
 function _pilWdBetween(a,b){
   var d=new Date(a), end=new Date(b); d.setHours(0,0,0,0); end.setHours(0,0,0,0);
   if(d.getTime()===end.getTime()) return 0;
-  var sign=end>d?1:-1, n=0, guard=0;
-  while(d.getTime()!==end.getTime() && guard<4000){ guard++; d.setDate(d.getDate()+sign); var wd=d.getDay(); if(wd!==0&&wd!==6) n+=sign; }
-  return n;
+  // ★ PIL-FIX-1 (§440) : les deux sens comptent la MÊME chose — les jours travaillés APRÈS la date la plus tôt, jusqu'à
+  //   la plus tardive comprise. Avant, le sens « retard » marchait à reculons et comptait [objectif, fin) : un objectif
+  //   posé un dimanche (le 15 novembre 2026) et une fin un mardi donnaient 1 jour de retard au lieu de 2.
+  var sign=end>d?1:-1; if(sign<0){ var x=d; d=end; end=x; }
+  var ouv=_pilCompteurOuvre(false), n=0, guard=0;
+  while(d.getTime()!==end.getTime() && guard<4000){ guard++; d.setDate(d.getDate()+1); if(ouv(d)) n++; }
+  return n*sign;
 }
 function _pilDfrObj(dt){ var M=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'], J=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.']; return J[dt.getDay()]+' '+dt.getDate()+' '+M[dt.getMonth()]; }
 function _pilEtpFmt(v){ return (Math.round((Number(v)||0)*10)/10).toString().replace('.',','); }

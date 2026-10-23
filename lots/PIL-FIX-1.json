@@ -1,0 +1,31 @@
+{
+  "lot": "PIL-FIX-1",
+  "section": "§440",
+  "base": "3e4590c4c67130264a1b0f9cba43e1f1ed0fa026",
+  "inclut": [],
+  "date": "2026-10-23",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "3f27953131e45f8d7ffe4f6da9d9bc71bc94a8184d2bedd40376e93bb3e83263",
+    "CLAUDE.md": "2cf3bb512694ac98f2f51e024ba4e4afa2325d273df568acf31678568f8f4aac",
+    "docs/claude/INDEX.md": "b2298d5ec888feb140232015a59aa5ccc394ce4f7a103e5a8670cf282f96f7e6",
+    "docs/claude/chantiers-430-479.md": "68c3809f83bf5c259e9db65321bcb096f9b3e93ddbceac7bc0cdb64ae31f4a80",
+    "docs/claude/journal.md": "1bd821af99dc4e8fd36465efc20be376acac4170ffe958065de24ef4d1f4d2df",
+    "guide/11-pilotage.html": "6480936c1560926bf1123cbce9b6938d2aee1779bbeeccb4831a773d4155d7ba",
+    "index.html": "eb86daa32ed624c86a7c630643977fda3f00e1d9c3852136ca061e6ae8a32440",
+    "public/sw.js": "5705353441bce48e4d037019db3fd1899d4ffa4184d6eb84778aa152ac292fb5",
+    "scripts/mv-harnais-direct2.mjs": "744baebf7c9b72f5162ac580bb3a2b3deea888751d051c333385abc0c09a3a3f",
+    "scripts/mv-harnais-etat1.mjs": "05ce55593ae095ac2dd62a0bf44458e3a79bf9ca7002102b8e427c2b4bfe10f9",
+    "scripts/mv-harnais-forme1.mjs": "af8ef8247e68a5908a60a02dd0b6cb1ade9f5dde8f7f4f1408a6fa65194dc614",
+    "scripts/mv-harnais-hors1.mjs": "ec7dd2a4dc54a5b35afb1a4cc64885d64c8da1290052e8a66b222c50a8e106e3",
+    "scripts/mv-harnais-liste.mjs": "aafbe0593643a29f62fbc82c93c99f270e0dadcb38830dae5068a8968e5bdad9",
+    "scripts/mv-harnais-pil-coherence.mjs": "f4130dc1649e0b4943a54bb3c692ba5f5d6c1ea5bbef05a44e9d1dd1c31e50c0",
+    "scripts/mv-harnais-ref1.mjs": "09a5df8b40aefa5372e7dce8e57b1b58f474099494448a77eb386d2bfeb538bd",
+    "src/pilotage.js": "561e7862ed98a12ae4fe3a4b210aa2f3d6d934aed265192885255be5ed184e98",
+    "src/utils.js": "5f15f60dfc7b3a0a7daa316b93d3263b496388c7a16ba0092f1f7c7e383d4276",
+    "scripts/mv-harnais-pilfix1.mjs": "3699a3aaed02090390578bc9b25b11ebb667842dbcf738596ed3e14c2f2b5b0f"
+  }
+}

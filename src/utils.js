@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '9.97';
+export const APP_VERSION = '9.98';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '9.98', d: '2026-10-23', items: [
+    { niv: 2, pour: ['admin'], emoji: 'calendrier', titre: 'Pilotage : les jours d’avance ou de retard se comptent sur votre planning',
+      desc: "Les jours d’avance ou de retard d’Aujourd’hui, la date de fin calculée à la cadence et les jours des Échéances par tâche comptaient tous les jours du lundi au vendredi. Ils comptent maintenant les jours où votre équipe travaille au planning : un jour férié, un vendredi non travaillé de l’horaire d’hiver ou une semaine de fermeture ne comptent plus. Un retard compte les jours travaillés après l’objectif, jusqu’au jour de fin compris : un objectif posé un dimanche ne fait plus perdre un jour. Le chiffre a donc pu bouger d’un jour ou plus, surtout en novembre et en décembre : c’est le bon. Un férié travaillé compte s’il est saisi au planning." }
+  ] },
   { v: '9.97', d: '2026-10-23', items: [
     { niv: 1, pour: ['admin'], emoji: 'verre', titre: 'Cave › Aujourd’hui : des boutons fins, à droite du nom',
       desc: "Dans « À faire aujourd’hui », chaque geste a maintenant un petit bouton à droite du nom de la cuve ou de la cuvée, au lieu d’un grand bouton sur toute la largeur : au téléphone, la liste prend un tiers de place en moins, et le bouton reste aussi facile à toucher. Une cuve qui a une alerte et un relevé en retard n’a plus deux « Relever » : un seul, qui ouvre la fenêtre du relevé — c’est le relevé qui contrôle l’alerte. Quand une cuvée a deux gestes (ouiller et soutirer), leurs boutons passent sous les raisons. « Faire la tournée » et « Nouvelle opération » sont moins hauts." }
@@ -6093,7 +6097,7 @@ export const MV_INFO = {
     'La date r\u00e9pond \u00e0 une seule question : <b>si le planning et les contrats restent tels quels, quand tout est-il fini ?</b> Elle vient du m\u00eame simulateur que La campagne avec \u00ab aucun renfort \u00bb : chaque travail commence \u00e0 l\u2019ouverture de <b>sa fen\u00eatre</b> \u2014 pas au premier jour de la p\u00e9riode \u2014, les travaux ouverts en m\u00eame temps se <b>partagent l\u2019\u00e9quipe</b>, les heures de <b>tracteur</b> sont d\u00e9duites, et l\u2019\u00e9quipe est lue <b>jour par jour</b> dans le planning : horaire de chacun, cong\u00e9s, fermeture, contrats et dates de d\u00e9but, effectif d\u2019une \u00e9quipe collective.',
     '<b>Trois diff\u00e9rences avec La campagne, voulues.</b> La date est prise <b>aux heures normales</b> du planning, sans les heures suppl\u00e9mentaires que le simulateur s\u2019autorise quand il cherche un renfort. Un travail hors fen\u00eatre <b>n\u2019est pas rallong\u00e9</b> : le simulateur suppose +15 % par semaine de retard pour dimensionner un renfort, une date \u00ab si je ne touche rien \u00bb lit les heures telles quelles. Et l\u2019<b>\u00e9cart de cadence</b> mesur\u00e9, quand il est applicable, multiplie les heures restantes \u2014 La campagne raisonne au bar\u00e8me.',
     'Au-del\u00e0 de la derni\u00e8re semaine planifi\u00e9e, l\u2019\u00e9quipe de cette semaine-l\u00e0 est <b>reconduite</b> telle quelle : la date sort quand m\u00eame, pr\u00e9c\u00e9d\u00e9e de \u00ab vers le \u00bb, et la phrase dit ce qu\u2019il restait \u00e0 faire \u00e0 la fin du cadre.',
-    'La <b>marge</b> compte les jours ouvr\u00e9s (lundi \u00e0 vendredi) entre cette date et l\u2019objectif pos\u00e9 pour la campagne. \u00ab Charge restante \u00bb et ses jours ouvr\u00e9s se comptent depuis <b>aujourd\u2019hui</b>.',
+    'La <b>marge</b> compte les <b>jours travaillés au planning</b> entre cette date et l’objectif posé pour la campagne : un jour où au moins une personne de l’équipe (hors bureau, sous contrat) y est prévue. Un week-end, un vendredi non travaillé de l’horaire annualisé, une fermeture ou un jour férié ne comptent pas — un férié compte si quelqu’un y est saisi au travail. Sans planning chargé : du lundi au vendredi, fériés retirés. « Charge restante » et les jours des Échéances se comptent de la même façon, depuis <b>aujourd’hui</b>.',
     'Si le planning ne couvre pas encore la p\u00e9riode, l\u2019\u00e9cran retombe sur la cadence des quatre derni\u00e8res semaines \u2014 et l\u2019annonce, car cette cadence ignore les embauches d\u00e9j\u00e0 sign\u00e9es.',
     'Les m\u00eames fins par travail se lisent dans <b>\u00c9ch\u00e9ances par t\u00e2che</b> (La campagne) : un travail qui finit apr\u00e8s sa fen\u00eatre y est marqu\u00e9 \u00ab d\u00e9borde de N sem. \u00bb. Le 10 septembre 2026, Aujourd\u2019hui affichait \u00ab +32 j d\u2019avance \u00bb pendant que La campagne montrait du travail en retard fin mars : le cockpit comptait l\u2019\u00e9quipe d\u2019octobre sur une taille qui n\u2019ouvre qu\u2019en novembre.'
   ] },

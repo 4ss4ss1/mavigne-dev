@@ -239,8 +239,11 @@ export {_pecZeros};`;
 async function finPlan(pilSrc, opt){
   opt=opt||{};
   const noms=['_pilFinPlan','_pilFinJour','_pilFacteurK','_pilMargeCalc','_pilOrdDate','_pilAnnOrd','_pilOrdIso','_pilOrdD','_pilWdBetween','_pilWdDateObj','_pilDfrObj',
-    '_rfCtx','_rfSim','_rfIso','_rfWOf','_rfCfg','_rfEstCouperet','_rfCapIn','_rfHIn','_rfWkEnd','_rfLabJ','_rfTracEtp','_pilEchelle','_friseNorm'];
-  let src='const window=globalThis;\n';
+    '_rfCtx','_rfSim','_rfIso','_rfWOf','_rfCfg','_rfEstCouperet','_rfCapIn','_rfHIn','_rfWkEnd','_rfLabJ','_rfTracEtp','_pilEchelle','_friseNorm',
+    // PIL-FIX-1 (§440) : _pilWdBetween/_pilWdDateObj demandent chaque jour au planning (_pilJourDomaine) ; sans MEMBRES ni
+    //   _feriesY dans ce bac à sable, ils retombent sur le lundi→vendredi — le comportement que ce harnais a toujours supposé.
+    '_pilCompteurOuvre','_pilJourDomaine','_pilJourCalendrier','_pilFerieLe','_pilSaisiAuTravail','_pilMembresActifs','_pilPrevuLe','_pilPhotoIso'];
+  let src='const window=globalThis;\n'+((/var _PIL_MUET_J=\d+;/.exec(pilSrc)||[''])[0])+'\n';
   for(const n of noms) src+=fn(pilSrc,n)+'\n';
   src+=winFn(SRC.plan,'_mvCapReelIn')+'\n';
   src+=`var _RF_SEL={R:0,a:0,b:0,dP:0,base:'eng'};

@@ -59,7 +59,7 @@ function modele(S) {
       : { mode: 'aucune', taches: [], items: [], dates: {}, retard: {} } });
   vm.createContext(ctx); vm.runInContext(regle(S), ctx); vm.runInContext(S.ck, ctx);
   vm.runInContext(fnDe(S.pil, 'function _pilEtatEntree(e){') + "window._mvEnContratLe = window._mvEnContratLe || function(){ return true; };\n" + fnDe(S.pil, 'function _pilPhotoIso(dt){')
-    + fnDe(S.pil, 'function _pilPrevuLe(m, dt){') + fnDe(S.pil, 'function _pilJourDomaine(dt){') + fnDe(S.pil, 'function _pilMembresActifs(ds){') + fnDe(S.pil, 'function _pilPrioDuJour(d){')
+    + fnDe(S.pil, 'function _pilPrevuLe(m, dt){') + fnDe(S.pil, 'function _pilFerieLe(dt){') + fnDe(S.pil, 'function _pilJourCalendrier(dt){') + fnDe(S.pil, 'function _pilSaisiAuTravail(m, d0){') + fnDe(S.pil, 'function _pilJourDomaine(dt){') + fnDe(S.pil, 'function _pilMembresActifs(ds){') + fnDe(S.pil, 'function _pilPrioDuJour(d){')
     + fnDe(S.pil, 'function _pilCk2Modele(d, m){') + `
     function _pilSaison(){ return { nom:'Hiver 2026-2027', debut:'${iso(-60)}', fin:'${iso(120)}' }; }
     function _pilFmtD(s){ return String(s || ''); }
