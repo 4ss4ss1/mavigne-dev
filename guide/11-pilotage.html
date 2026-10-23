@@ -2,7 +2,7 @@
 <section id="pilotage">
   <div class="sec-h">
     <div class="sec-ic" aria-hidden="true">{ic:graphique}</div>
-    <div><h2>Pilotage</h2><div class="sub">Aujourd'hui · La campagne · L'équipe &amp; le matériel · Décider · Économie · Conformité · Archives</div></div>
+    <div><h2>Pilotage</h2><div class="sub">Aujourd'hui · Travaux · L'équipe &amp; le matériel · Décider · Économie · Conformité · Archives</div></div>
   </div>
   <p class="lead">Le Pilotage est un tableau de bord de <b>lecture</b>, pensé pour décider :
   où en est-on, tiendra-t-on les délais, peut-on traiter demain, combien coûte cet hectare. Il ne
@@ -11,7 +11,7 @@
   Une grande mise à jour a repensé cet écran pour tirer le meilleur des prévisions possibles avec ce que vous saisissez chaque
   jour. Ce qui est nouveau, et où le trouver : le <b>tracteur</b> se projette sur les travaux en cours, avec sa révision, sa cuve
   et sa consommation mesurée sur vos pleins (Aujourd'hui, L'équipe &amp; le matériel) ; la <b>protection phyto</b> parcelle par parcelle, pluie comprise (Conformité) ; le <b>coût de l'inaction</b> (Aujourd'hui, vue Économie) ; la <b>tension de l'équipe</b> (Aujourd'hui, et par personne dans L'équipe &amp; le matériel) et les <b>petites courbes</b> de la cadence, de la charge et du budget (Aujourd'hui) ; le <b>rendement de la tournée</b> (Décider) ; la
-  <b>carte en cinq vues</b> (La campagne). Chaque chiffre neuf a son « i » qui dit d'où il vient. Prenez le temps de la prise
+  <b>carte en cinq vues</b> (Travaux). Chaque chiffre neuf a son « i » qui dit d'où il vient. Prenez le temps de la prise
   en main ; s'il reste des erreurs, signalez-les depuis l'application.</div></div>
   <div class="note"><span class="ni" aria-hidden="true">{ic:crayon}</span><div><b>Deux réglages s'y
   posent tout de même</b>, parce que c'est là qu'on voit qu'ils manquent : le <b>mois d'ouverture de
@@ -177,7 +177,7 @@
     ne se recadrent pas : l'Économie chiffre la période consultée (ses sous-vues Exercice et Revient ont chacune leur cadre), la
     Conformité roule sur sept ans glissants — chacun l'écrit au-dessus de ses chiffres, plutôt que
     de répondre en silence sur une autre fenêtre que celle affichée.</li>
-    <li><b>Trois chiffres en tête de « La campagne »</b> : les travaux, l'effectif,
+    <li><b>Trois chiffres en tête de « Travaux »</b> : les travaux, l'effectif,
     le budget, à la maille de ce que vous regardez. Toucher l'un d'eux ouvre l'écran qui le détaille.
     Sur l'année, l'effectif dit <b>combien de personnes manqueront</b>, et à partir de quand —
     plus le pic de la vendange passée ; sur une campagne choisie, il garde son pic.
@@ -249,7 +249,7 @@
     fini&nbsp;?</i> — et vient du <b>même calcul que La campagne sans renfort</b>&nbsp;: chaque travail
     dans <b>sa fenêtre</b>, l'équipe partagée entre les travaux ouverts en même temps, le tracteur
     déduit, aux heures normales du planning. C'est <b>la seule date de fin du module</b>&nbsp;: la carte
-    « Échéances par tâche » de La campagne lit la même simulation, travail par travail. « Vers le »
+    « Échéances par tâche » de Travaux lit la même simulation, travail par travail. « Vers le »
     signale une fin après la période, l'équipe de la dernière semaine reconduite.</li>
     <li><b>Charge restante</b>, exprimée en <b>jours travaillés au planning</b> comptés depuis aujourd'hui : un jour férié, un jour non travaillé de l'horaire annualisé ou une fermeture ne comptent pas.</li>
     <li><b>Cadence de l'équipe</b> sur les dernières semaines&nbsp;: les heures passées dans les rangs
@@ -299,16 +299,17 @@
   <p>Il n'y a pas d'heures de tracteur au planning : un travail pas encore lancé n'est pas compté.
   Les machines immobilisées sont dans « À savoir », sur Aujourd'hui.</p>
 
-  <h3>{ic:raisin} La campagne</h3>
+  <h3>{ic:raisin} Travaux (l'ancien « La campagne »)</h3>
   <ul class="dot">
-    <li><b>Jauge de saison</b> et <b>avancement par tâche</b>, avec comparatif de l'année précédente.
+    <li><b>Avancement par tâche</b>, avec comparatif de l'année précédente ; la <b>jauge de la saison</b>
+    l'ouvre (pourcentage, heures faites, restantes et prévues, tâches finies et en cours).
     Les tâches s'y rangent comme sur Aujourd'hui : par date de début, les terminées en bas ; l'arrachage fini pour l'équipe passe en tête des terminées, avec la mention « la suite au prestataire ».
     Une tâche sans heures prévues à l'hectare (arrachage, désherbage manuel) s'y lit en <b>surface</b>
     faite sur surface concernée — la même part que sur la liste des parcelles.</li>
     <li><b>Agrandir</b> : chaque graphique porte ce bouton ; le même dessin s'ouvre en grand, à la largeur de
     l'écran. Les barres d'avancement n'ont qu'un code de couleur, le même qu'à l'Accueil : <b>vert</b> fini,
     <b>doré</b> en cours, <b>orange</b> quand la fenêtre du travail est passée sans qu'il soit fini.</li>
-    <li><b>Donut de charge</b> : quelle tâche pèse le plus dans ce qui reste.</li>
+    <li><b>La charge par tâche</b> (le donut) : quelle tâche pèse le plus dans ce qui reste, ce qui est fait ou ce qui est prévu. À ne pas confondre avec <b>le temps de l'équipe</b>, qui dit où passent les heures de présence (vigne, tracteur, le reste).</li>
     <li><b>Carte du domaine, en cinq vues</b> : l'avancement, les jours depuis le dernier traitement, le cépage,
     les passages phyto de la campagne face à votre référence (des passages, pas un IFT), et le coût engagé à
     l'hectare. La légende suit la vue choisie ; une parcelle sans donnée reste grise. Touchez une parcelle pour
@@ -584,7 +585,7 @@
   vous suit d'une session à l'autre.</p>
 
   <details><summary>D'où vient la date de fin projetée&nbsp;?</summary>
-    <div class="dbody">Du <b>simulateur de La campagne</b>, avec « aucun renfort »&nbsp;: chaque travail
+    <div class="dbody">Du <b>simulateur de Travaux</b>, avec « aucun renfort »&nbsp;: chaque travail
     commence à l'ouverture de <b>sa fenêtre</b> — pas au premier jour de la période —, les travaux
     ouverts en même temps se <b>partagent l'équipe</b>, les heures de <b>tracteur</b> sont déduites, et
     l'équipe est lue <b>jour par jour</b> dans le planning&nbsp;: le modèle horaire de chacun, les

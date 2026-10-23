@@ -763,6 +763,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-pilrange2a.mjs --contre'],
   ['node scripts/mv-harnais-pilrange2b.mjs'],            // PIL-RANGE-2b (§444) : l'onglet L'année rangé (budget et avis → Économie, renfort → Équipe, « an » → « eco »)
   ['node scripts/mv-harnais-pilrange2b.mjs --contre'],
+  ['node scripts/mv-harnais-pilrange3.mjs'],             // PIL-RANGE-3 (§445) : « Travaux », la jauge dans « Avancement par tâche », « La charge par tâche »
+  ['node scripts/mv-harnais-pilrange3.mjs --contre'],
   ['node scripts/mv-harnais-cave2.mjs'],              // CAVE-2 (§289) : le Cuvier à la charte
   ['node scripts/mv-harnais-cave2.mjs --contre'],
   ['node scripts/mv-harnais-cave3.mjs'],              // CAVE-3 (§290) : le Chai en liste + fiche

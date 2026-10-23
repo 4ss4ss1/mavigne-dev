@@ -1,0 +1,37 @@
+{
+  "lot": "PIL-RANGE-3",
+  "section": "§445",
+  "base": "cf3a72958fe51bab156b1d0c3a6c257124aee9ce",
+  "inclut": [],
+  "date": "2026-10-23",
+  "tutos": {
+    "ok": true,
+    "empreinte": "db5476b9066f5edad4c3c9f86004e634f6a25e8943bdb8313ef202632d2b45ee",
+    "date": "2026-10-23T19:54:03.342Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "33af1d099112c4c287db7f18ccf012a3f0b67a570f0552dc34ea2de42e999456",
+    "CLAUDE.md": "6f0cb9a89d233cf552138901e7fd97f83d4f0f24a715ccbf752fb385c54fa166",
+    "docs/claude/INDEX.md": "bb15b0de1c639b673ceb071fde125626191ad5d569e805e808db9483e14ee27a",
+    "docs/claude/chantiers-430-479.md": "62cabb3ac929eeffd0cdf2e925c15c3a150cf62f137fd8009227a74f72ef86d0",
+    "docs/claude/journal.md": "43300e97c99f3ab30bc5715c35dc7f61462bf2b249e244fb9339184d400754f1",
+    "guide/11-pilotage.html": "779e543eab7fff80ed1f5ce2f2323fd45dd3471898b1a7e614ee1d9782bde3d7",
+    "index.html": "107c8b273b31f6a1f7b49213bde5e93c46468d43ffed40c65c1f0273fa37dda1",
+    "public/guide.html": "58c133dba28f11b15f45c42766ed2f0607521a59dfe308dce7191573d45e320b",
+    "public/sw.js": "355c5b63436faa195345954a53c7e43914141d25afdf660b1cf13553e5419244",
+    "scripts/mv-harnais-liste.mjs": "dbdc13fe90cfbc4d152958499316b31cff141d977ef02bd83a7b196bb413480f",
+    "src/app.js": "aab688f75ecba25c378c7a19c552cc00a6ec47cd21e93d87306fb42e56391f5f",
+    "src/cockpit-vue.js": "54965494f082685c157ce16e5139537a527e333f14d6cf94d81fe78bfe2a169f",
+    "src/coquille.js": "e3dfa207c70f7bb2991426f12f38045633a0ecdfc91cb3ea4e5e79cedf412f18",
+    "src/pilotage.js": "fd9fe66403be2c6a2c652f100967963e5fa3333f4ac699b5dd2c75cdc9a7f0cf",
+    "src/utils.js": "10879b2c76c0a914217c3a18b65f87e2ba8d0ff11c78724bee4910fbc8e7ea0d",
+    "scripts/mv-harnais-pilrange3.mjs": "01c3cc313271ba193d8dbe3a8be2b8d38bb5b47164446d3fa2efab43cf4318f8"
+  }
+}

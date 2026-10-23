@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **23 octobre 2026 (PIL-RANGE-2b)** — **PILOTAGE : L’ONGLET L’ANNÉE EST RANGÉ (BUDGET ET AVIS → ÉCONOMIE › SYNTHÈSE, RENFORT → ÉQUIPE & MATÉRIEL, « an » → « eco »)** (§444). Base `e7b9d8c` (« pilrange2a »). La barre « Vous regardez » choisit le cadre : L’année n’est plus un onglet. Sept onglets ; un « an » mémorisé migre vers Économie ; Synthèse d’Économie ouverte par les avis du cadre et le budget de l’année ; renfort dans Personnel ; photos sur La campagne, cibles suivies ; coquille, tutos, cockpit, aide, fiches, guide. Preflight : homonymes de « an » nommés ligne par motif. `mv-harnais-pilrange2b.mjs` : 13 vertes, 9 contre-épreuves. **APP 10.00 → 10.01, SW 10.80 → 10.81**.
+> Dernière consolidation : **23 octobre 2026 (PIL-RANGE-3)** — **PILOTAGE : « LA CAMPAGNE » DEVIENT « TRAVAUX » ; LA JAUGE OUVRE « AVANCEMENT PAR TÂCHE » ; « LA CHARGE PAR TÂCHE »** (§445). Base `cf3a729` (« pilrange2b »). Recommandation du rangement corrigée avant le code : le donut (charge par tâche) et « Le temps de l’équipe » (heures de présence par activité) ne sont pas la même chose, Présences et Capacité non plus — rien n’est fusionné. L’onglet s’appelle « Travaux » (la barre dit « La campagne ») ; la jauge de saison ouvre « Avancement par tâche » ; le donut s’appelle « La charge par tâche ». Six cartes → cinq, rien de perdu. `mv-harnais-pilrange3.mjs` : 12 vertes, 9 contre-épreuves. **APP 10.01 → 10.02, SW 10.81 → 10.82**.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -1942,7 +1942,7 @@ Maquettes validées (`maquette-pilotage-range-v1.html`, `maquette-cave-rangee-v1
 - ~~PIL-RANGE-1b~~ — **fait (§441, 23/10)** : l’ancien Aujourd’hui retiré (41 fonctions ; `cockpit.js` gardé pour ses lectures du v2), la carte du tracteur relogée dans Matériel, 27 harnais migrés, `auj4` supprimé. Reste : purger le CSS de l’ancien écran.
 - ~~PIL-FIX-1~~ — **fait (§440, 23/10)** : les jours ouvrés sur le planning, fériés retirés, retard symétrique.
 - ~~PIL-RANGE-2~~ — **fait** : la barre « Vous regardez » (§443), L’année rangée dans Économie et Équipe (§444).
-- **PIL-RANGE-3** — Travaux 6 → 4 cartes ; Équipe : présence + capacité en une carte, renfort venu de L’année.
+- ~~PIL-RANGE-3~~ — **fait (§445)**, corrigé : « Travaux », la jauge dans « Avancement par tâche », « La charge par tâche » ; donut / temps de l’équipe et Présences / Capacité restent séparés (questions différentes).
 - **PIL-RANGE-4** — Économie : Exercice → portée, 6 → 5 sous-vues ; « Afficher dans cet onglet » d’Aujourd’hui réduit aux cartes du cockpit v2 et branché dessus (17 cases sur 21 sont mortes aujourd’hui).
 - **CAVE-FIX-1** — part des anges annualisée (`_pcavAnges` : `pctAn` × 365 / jours couverts, ou libellé « sur la période »), `MV_INFO` `cave.anges`.
 - **CAVE-RANGE-1 à 3** — portée millésime (remplace `_caveMillFilter` et `_mlMil`) ; fiche de cuvée unique (Élevage · Volumes & origine · Analyses · Diagnostic) ouverte depuis toute liste ; Courbes → Cuvier › Cuves (mode Liste · Courbes), Le Millésime à deux onglets (Ensemble · Parcelles).

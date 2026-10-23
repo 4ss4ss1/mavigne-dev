@@ -452,7 +452,7 @@ function htmlPhotos(r) {
     + GENS.map(g => '<span class="ck-av-m' + (g.absent ? ' abs' : '') + '">' + esc(g.p.charAt(0)) + '</span>').join('') + '</span>';
   const okIc = '<svg class="ck-ok-ic" viewBox="0 0 32 32" role="img" aria-label="Tout est à jour"><circle cx="16" cy="16" r="13"/><path d="M10.5 16.5l3.6 3.6 7.4-8"/></svg>';
   return tuile('travaux', 'Travaux', '<b class="ck-cpt" id="ck-ph-trav" data-v="0">0</b><small>\u202f%</small>', spark(SPARK_TRAV, 'bas'),
-      '<span id="ck-ph-trav-c">' + nb(r.hF) + ' h faites sur ' + nb(r.hT) + ' h</span>', 'camp', 'La campagne')
+      '<span id="ck-ph-trav-c">' + nb(r.hF) + ' h faites sur ' + nb(r.hT) + ' h</span>', 'camp', 'Travaux')
     + tuile('effectif', 'Effectif', '<b class="ck-cpt" id="ck-ph-eff" data-v="0">0</b><small>\u202fsur ' + V.effectifTotal + '</small>', avs,
       esc(V.absTxt), 'equ', 'L’équipe et les tâches')
     + (V.eco ? tuile('budget', 'Budget', '<b class="ck-cpt" id="ck-ph-bud" data-v="0">0</b><small>\u202f%</small>', spark(SPARK_BUD, 'haut'),

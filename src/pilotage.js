@@ -183,7 +183,7 @@ var _PIL_TAB = 'auj';
 // ════════════════════════════════════════════════════════════════════════════
 var _PIL_TABS = [
   ['auj','chrono','Aujourd\'hui'],
-  ['avc','raisin','La campagne'],
+  ['avc','raisin','Travaux'],   // PIL-RANGE-3 (§445) : « La campagne » devient « Travaux » — la barre « Vous regardez » dit déjà « La campagne »
   // ★★ « L'equipe & les taches » ne montrait AUCUNE tache : son contenu est
   //   Personnel + Materiel. Les taches vivent au niveau ② (avancement par tache,
   //   echeances) et dans Economie › Postes. Les descendre ici les DUPLIQUERAIT —
@@ -221,7 +221,7 @@ var _PIL_ZOOM_FIN = 'sim';
 // le lot 5 declarait mort. Et `an` n'avait AUCUNE entree : le titre du niveau ①
 // sortait VIDE, la roue crantee flottant seule dans l'en-tete.
 // ⚠️ Les cles ne bougent pas ; seuls les mots changent.
-var _PIL_LABELS = {auj:'Aujourd\'hui',avc:'La campagne — avancement, temps et échéances',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, passages phyto et délai de rentrée',arc:'Archives des campagnes',sim:'Décider — la tournée du jour, qui fait quoi, et le renfort'};
+var _PIL_LABELS = {auj:'Aujourd\'hui',avc:'Travaux — où en est-on, et quand aura-t-on fini',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, passages phyto et délai de rentrée',arc:'Archives des campagnes',sim:'Décider — la tournée du jour, qui fait quoi, et le renfort'};
 var _PIL_VALID_TAB = {auj:1,avc:1,equ:1,cav:1,eco:1,cfm:1,arc:1,sim:1};
 // Migration des onglets memorises avant le regroupement.
 // Migration des cles memorisees : `ecf` (l'onglet composite) part sur l'economie.
@@ -501,9 +501,9 @@ window._pilData=_pilData;   // AUJ-5 (§307) : lu par mv-harnais-auj5
 // ── Données du donut selon la métrique choisie ───────────────────────
 function _pilPieData(d){
   var src=[], title='', unit='h';
-  if(_PIL_STATE.pie==='fait'){      title='Temps réalisé';     src=d.data.map(function(t){return {n:t.nom,v:Math.round(t.h_done||0)};}); }
-  else if(_PIL_STATE.pie==='plan'){ title='Charge planifiée';  src=d.data.map(function(t){return {n:t.nom,v:Math.round(t.h_total||0)};}); }
-  else {                            title='Charge restante';   src=d.data.map(function(t){return {n:t.nom,v:Math.round(t.h_reste||0)};}); }
+  if(_PIL_STATE.pie==='fait'){      title='La charge par tâche · réalisée';     src=d.data.map(function(t){return {n:t.nom,v:Math.round(t.h_done||0)};}); }
+  else if(_PIL_STATE.pie==='plan'){ title='La charge par tâche · planifiée';  src=d.data.map(function(t){return {n:t.nom,v:Math.round(t.h_total||0)};}); }
+  else {                            title='La charge par tâche · restante';   src=d.data.map(function(t){return {n:t.nom,v:Math.round(t.h_reste||0)};}); }
   src = src.filter(function(x){ return x.v>0; }).sort(function(a,b){ return b.v-a.v; });
   src.forEach(function(x,i){ x.c=_PIL_PIE_COLORS[i%_PIL_PIE_COLORS.length]; });
   return { title:title, unit:unit, items:src };
@@ -1870,7 +1870,7 @@ function _pilPanelEcheances(d){
   var statHtml=_pilStat(rows.length, ' tâche'+(rows.length>1?'s':''));
   var subHtml;
   if(m.proj) subHtml='fin de saison '+(m.capa&&m.capa.approx?'vers le ':'~')+_pilDfrObj(m.proj)+' · '+(seasonJ!=null?seasonJ:'—')+' j ouvrés · '
-    +(plan?'même calcul qu’Aujourd’hui — La campagne sans renfort, aux heures normales':('~'+Math.round(cadH)+' h/j'+(m.estim?' (estim.)':' (4 sem.)')+' — le planning ne couvre pas la suite'));
+    +(plan?'même calcul qu’Aujourd’hui — la campagne sans renfort, aux heures normales':('~'+Math.round(cadH)+' h/j'+(m.estim?' (estim.)':' (4 sem.)')+' — le planning ne couvre pas la suite'));
   else if(m.capa&&!m.capa.ok) subHtml='l’équipe planifiée n’absorbe pas la charge : il resterait ~'+_pilNum(Math.round(m.capa.manque||0))+' h le '+_pilDfrObj(m.capa.finCamp);
   else subHtml='cadence indisponible — repose sur le planning';
   var body;
@@ -5902,10 +5902,11 @@ function _pilAnEcoHtml(){
 
 function _pilTabAvc(d){
   var H='';
-  if(_pilShow('avc_gauge')) H+='<div class="pil-gauge" id="pil-gauge"></div>';
+  // ★ PIL-RANGE-3 (§445) : la jauge de saison n'est plus une carte à part ; elle ouvre « Avancement par tâche » (le
+  //   pourcentage, les heures faites, restantes et prévues, les tâches finies et en cours). Rien ne se perd, une carte de moins.
   var charts='';
-  if(_pilShow('avc_bar')) charts+='<div class="pil-panel"><div class="pil-panel-h"><div class="pil-panel-t">Avancement par tâche</div><div class="pil-seg" id="pil-bar-seg"><button data-b="saison" class="on">Cette saison</button><button data-b="cmp">Comparatif N-1</button></div></div><div class="pil-bar" id="pil-bar"></div></div>';
-  if(_pilShow('avc_pie')) charts+='<div class="pil-panel"><div class="pil-panel-h"><div class="pil-panel-t" id="pil-pie-title">Charge restante</div><div class="pil-seg" id="pil-pie-seg"><button data-m="reste" class="on">Restante</button><button data-m="fait">Réalisé</button><button data-m="plan">Planifié</button></div></div><div class="pil-pie-wrap"><div class="pil-donut" id="pil-donut"></div><div class="pil-pie-legend" id="pil-pie-legend"></div></div></div>';
+  if(_pilShow('avc_bar')) charts+='<div class="pil-panel"><div class="pil-panel-h"><div class="pil-panel-t">Avancement par tâche</div><div class="pil-seg" id="pil-bar-seg"><button data-b="saison" class="on">Cette saison</button><button data-b="cmp">Comparatif N-1</button></div></div><div class="pil-gauge pil-gauge-in" id="pil-gauge"></div><div class="pil-bar" id="pil-bar"></div></div>';
+  if(_pilShow('avc_pie')) charts+='<div class="pil-panel"><div class="pil-panel-h"><div class="pil-panel-t" id="pil-pie-title">La charge par tâche · restante</div><div class="pil-seg" id="pil-pie-seg"><button data-m="reste" class="on">Restante</button><button data-m="fait">Réalisé</button><button data-m="plan">Planifié</button></div></div><div class="pil-pie-wrap"><div class="pil-donut" id="pil-donut"></div><div class="pil-pie-legend" id="pil-pie-legend"></div></div></div>';
   if(charts) H+='<div class="pil-charts">'+charts+'</div>';
   var panels='';
   // « Charge & ETP » a QUITTE cet onglet : il porte une frise de douze mois,
@@ -10852,7 +10853,7 @@ function _pilTabCfm(d){
 // ── Personnalisation PAR ONGLET (visibilité des tuiles) ──
 var _PIL_PERSO_DEFS={
   auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_tension','Tension équipe'],['auj_inaction','Coût de l’inaction'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_cave','La Cave \u2014 la vue de la bascule Terrain / Cave / Économie'],['auj_cave_sv','Les points de cave dans « À savoir »'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ? · fenêtre 5 jours'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave'],['auj_resume','Le résumé du jour'],['auj_chantiers','Les chantiers en cours'],['auj_courbe','La courbe de la charge restante'],['auj_fil','En direct : le fil de l\'équipe'],['auj_savoir','À savoir : météo, absences, contrats, retards'],['auj_plan','Le domaine en direct'],['auj_eco','La vue Économie (bascule Terrain / Économie)']],
-  avc:[['avc_gauge','Jauge de saison'],['avc_bar','Avancement par tâche'],['avc_pie','Charge (donut)'],['avc_temps','Où va le temps de l\'équipe'],['avc_echeances','Échéances par tâche'],['avc_carte','Carte du domaine']],
+  avc:[['avc_bar','Avancement par tâche (et la saison)'],['avc_pie','La charge par tâche'],['avc_temps','Où va le temps de l\'équipe'],['avc_echeances','Échéances par tâche'],['avc_carte','Carte du domaine']],
   equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_conso','Consommation mesurée'],['mat_travaux','Pour finir les travaux tracteur en cours'],['an_frise','Le renfort \u00e0 pr\u00e9voir']],
   eco:[['an_budget','Le budget de l\'ann\u00e9e']],
   sim:[['sim_ordre','La tournée du jour'],['sim_etsi','Qui fait quoi'],['sim_cout','Renfort : combien et quand']],
@@ -11268,6 +11269,9 @@ function _pilCssV2(){
   +'.pil-ptpop-t{font-size:var(--pt-micro,12px);color:var(--texte-doux);margin:0 0 4px}'
   +'.pil-ptpop .pil-anfr{margin:8px 0 6px}'
   +'.pil-ptbornes{font-size:var(--pt-micro,12px);color:var(--texte-doux);white-space:nowrap}'
+  // PIL-RANGE-3 (§445) : la jauge de saison dans la carte « Avancement par tâche » — plus une carte dans la carte.
+  +'.pil-panel .pil-gauge-in{background:none;border:0;border-bottom:1px solid var(--gris-clair);border-radius:0;box-shadow:none;padding:0 0 12px;margin:0 0 12px}'
+  +'.pil-panel .pil-gauge-in::before{display:none}'
   +'.pil-crumb .pil-annav-b{min-width:32px;min-height:32px}'
   +'.pil-crumb .pil-annav-l{font-size:var(--pt-base,14px)}'
   +'.pil-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin:0 0 18px}'
@@ -12597,7 +12601,7 @@ window._pilParamOpen=function(){
 };
 function _pilAfterFill(tab,d){
   if(tab==='avc'){
-    if(_pilShow('avc_gauge')) _pilRenderGauge(d);
+    if(_pilShow('avc_bar')) _pilRenderGauge(d);   // PIL-RANGE-3 : la jauge vit dans « Avancement par tâche »
     if(_pilShow('avc_bar')) _pilRenderBar(d);
     if(_pilShow('avc_pie')) _pilRenderPie(d);
     var carteOpen=_pilShow('avc_carte') && !(_PIL_STATE.collapsed&&_PIL_STATE.collapsed.carte);

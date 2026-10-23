@@ -386,3 +386,21 @@ Suite du rangement (§439), maquette validée : la barre « Vous regardez » (§
 
 ### 444d. Ce qui reste
 PIL-RANGE-3 (Travaux 6 → 4 cartes ; Équipe : présence + capacité en une carte), PIL-RANGE-4, CAVE-FIX-1, CAVE-RANGE-1 à 3.
+
+## 445. ★ PIL-RANGE-3 — PILOTAGE : « LA CAMPAGNE » DEVIENT « TRAVAUX » ; LA JAUGE OUVRE « AVANCEMENT PAR TÂCHE » ; « LA CHARGE PAR TÂCHE » (23/10 — `src/pilotage.js` (`_PIL_TABS`, `_PIL_LABELS`, `_pilTabAvc`, `_pilPieData` (titres), `_PIL_PERSO_DEFS.avc`, rendu de la jauge sous `avc_bar`, style injecté) · `src/coquille.js` · `src/app.js` (recherche) · `src/cockpit-vue.js` (tuile Travaux) · `src/utils.js` (APP, WHATS_NEW niv 1, `MV_AIDE`) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `public/guide.html` · `scripts/mv-harnais-pilrange3.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/PIL-RANGE-3.json` · **APP 10.01 → 10.02, SW 10.81 → 10.82**, base `cf3a729` ; chaîne par le coureur : 522 commandes, 522 codes à 0)
+
+### 445a. D’où ça vient — une recommandation corrigée avant le code
+Le rangement (§439, maquette) prévoyait « Travaux 6 → 4 cartes » en fusionnant « Charge (donut) » et « Où va le temps », dits « deux dessins de la même répartition », et « Présences du jour » avec « Capacité vs charge ». **Vérifié sur le code avant d’écrire : faux.** Le donut montre la charge par tâche (restante, réalisée, planifiée, au barème) ; « Le temps de l’équipe » montre où passent les heures de présence (vigne, tracteur, autres), le prévu face au réel et l’écart. Présences (qui est là aujourd’hui) et Capacité (l’équipe face au travail des semaines, le pic) répondent aussi à deux questions. Nico, en langage simple : version corrigée validée (« go »).
+
+### 445b. Ce qui a été fait
+- **L’onglet s’appelle « Travaux »** (menu, intitulé, repli de la coquille, recherche, tuile du cockpit, aide — qui lit la liste dans le code —, guide). La barre « Vous regardez » garde « La campagne » : c’est ce qu’on regarde, pas l’onglet. Les textes où « la campagne » désigne la saison ne changent pas.
+- **La jauge de saison** n’est plus une carte en tête : elle ouvre « Avancement par tâche » (`#pil-gauge` dans le panneau, avant les barres), mêmes chiffres (pourcentage, heures faites, restantes, prévues, tâches finies et en cours), dessinée sous la case `avc_bar` ; sans cadre dans la carte (style injecté). La case « Jauge de saison » quitte « Afficher dans cet onglet ». Six cartes → cinq, rien de perdu.
+- **Le donut s’appelle « La charge par tâche »**, avec son mode : restante, réalisée, planifiée (`_pilPieData`) ; le guide dit la différence avec « Le temps de l’équipe ».
+- Équipe & matériel : inchangé (Présences et Capacité restent deux cartes).
+- WHATS_NEW 10.02 niv 1. Dans `index.html`, la montée de version ne touche que `v…` et `?v=…` : des tracés d’icônes contiennent « 10.01 ».
+
+### 445c. Harnais
+`mv-harnais-pilrange3.mjs` (12 vertes, 9 contre-épreuves) **exécute** `_pilTabAvc` (la jauge dans la carte, une seule, absente si la carte est décochée ; donut et temps de l’équipe séparés) et `_pilPieData` dans ses trois modes, et lit le rendu de la jauge, le style, les cases, le nom de l’onglet partout, la barre qui garde « La campagne », l’aide, le guide et la liste.
+
+### 445d. Ce qui reste
+PIL-RANGE-4 (Économie : la sous-vue Exercice → portée, 6 → 5 sous-vues ; « Afficher dans cet onglet » d’Aujourd’hui réduit aux cartes du cockpit v2), CAVE-FIX-1, CAVE-RANGE-1 à 3.
