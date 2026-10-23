@@ -5999,6 +5999,13 @@ function _mlVerdict(sem, ctx){
   var items=[]; (sem||[]).forEach(function(s){ items=items.concat(s.items); });
   function n(k,u){ return items.filter(function(i){ return i.kind===k&&(u==null||i.urgence===u); }).length; }
   var cand=[];
+  // ★★ CAVEPIL-1 (§436) : un signe fort du Diagnostic du Chai passe en tête, dans la Cave comme dans le Pilotage (même
+  //   définition — décision de Nico sur maquette, 23/10). ctx.diag = [{nom, txt}], signes forts seulement (_mlDiagForts).
+  var dgF=(ctx.diag||[]).filter(function(d){ return d&&d.nom; });
+  if(dgF.length===1) cand.push({cls:'due', t:'Un signe fort au Chai\u00a0: '+String(dgF[0].txt||'\u00e0 contr\u00f4ler').replace(/^./,function(c){ return c.toLowerCase(); }),
+    why:'Sur le '+dgF[0].nom+', le Diagnostic du Chai rel\u00e8ve des indices qui vont ensemble. Un statut d\u00e9crit des indices, pas une certitude.'});
+  else if(dgF.length>1) cand.push({cls:'due', t:dgF.length+' cuv\u00e9es montrent des signes forts au Chai',
+    why:dgF.map(function(d){ return d.nom; }).join(', ')+'\u00a0: le Diagnostic du Chai rel\u00e8ve des indices qui vont ensemble. Un statut d\u00e9crit des indices, pas une certitude.'});
   // Une cuve qui ralentit ET chauffe porte deux lignes d'alerte : on compte
   // les cuves, pas les lignes.
   // ★ CAVEAUJ-1 (§434) : le mot suit le contenant. Une alerte vient d'une CUVE (fermentation, température, sucres au
@@ -6367,6 +6374,74 @@ function _aujEtat(auj, parc){
   ch+='</section>';
   return _mlPhase()==='vendange'?cv+ch:ch+cv;
 }
+
+// ★★ CAVEPIL-1 (§436) — LES SIGNES FORTS DU DIAGNOSTIC, pour le verdict. Le Diagnostic (diagnostic.js) s'expose en lecture
+//   (_dgnSynthese) : même calcul que son onglet, sans rien dessiner. Une cuvée mise en bouteille n'en a plus.
+function _mlDiagForts(){
+  if(typeof window._dgnSynthese!=='function') return [];
+  var nom={}; (CAVE_ELEVAGE.cuvees||[]).forEach(function(c){ if(c&&c.id!=null) nom[String(c.id)]=_mlNomCuvee(c); });
+  try{ return (window._dgnSynthese()||[]).filter(function(x){ return x&&x.g==='dan'&&!x.mise&&nom[x.id]; })
+    .map(function(x){ return {id:x.id, nom:nom[x.id], txt:x.txt||''}; }); }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'verdict/diagnostic',err:e}); return []; }
+}
+// ★★ CAVEPIL-1 (§436) — LA CAVE, LUE PAR LE PILOTAGE (vue Cave du cockpit Aujourd'hui). UNE SEULE DÉFINITION (CAVE-3, §96) :
+//   tout vient des pièces de l'Aujourd'hui de la Cave — l'agenda des quatre semaines, le verdict, les cuves suivies
+//   (_vendSuivie), l'ouillage (_aujOuillageEtat), la malo (_aujMalo), la projection de fermentation (_mlProjFA), les derniers
+//   gestes (_aujRecents). Le Pilotage met en forme ; il ne refait aucun calcul de cave. L'état d'un contenant : « alerte »
+//   (une alerte ou une malo bloquée cette semaine), « faire » (un geste attendu cette semaine), sinon « cours » (fermentation,
+//   macération, malo qui suit son cours) ou « ok ».
+function _caveSynthese(auj){
+  auj=auj||_mlAuj();
+  var sem=_mlAgendaComplet(auj,_ML_SEM), s0=(sem[0]&&sem[0].items)||[], parRef={};
+  s0.forEach(function(i){ if(i&&i.ref!=null) (parRef[String(i.ref)]=parRef[String(i.ref)]||[]).push(i); });
+  var etat=function(ref, cours){
+    var L=parRef[String(ref)]||[];
+    if(L.some(function(i){ return i.kind==='alerte'||i.kind==='malo'; })) return 'alerte';
+    if(_mlGestes(L).length) return 'faire';
+    return cours?'cours':'ok';
+  };
+  var mil=_mlCampagne(), haR=0, parc=_mlParc();
+  try{ (_mlResteARentrer(mil)||[]).forEach(function(p){ haR+=parseFloat(p.surface)||0; }); }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'synthese/reste',err:e}); }
+  var diag=_mlDiagForts(), v=_mlVerdict(sem,{phase:_mlPhase(), haReste:haR, parc:parc, diag:diag});
+  var pro={}, mm={}, nomV={};
+  _mlOuillages(auj,_ML_SEM).forEach(function(o){ var id=o.cuvee&&o.cuvee.id; if(id&&!pro[id]&&o.date>auj) pro[id]=o; });
+  _mlMalo().forEach(function(x){ mm[x.id]=x; });
+  (CAVE_ELEVAGE.cuvees||[]).forEach(function(c){ if(c&&c.id!=null) nomV[c.id]=_mlNomCuvee(c); });
+  var cuves=(CAVE_VENDANGE.cuves_vinif||[]).filter(_vendSuivie).map(function(c){
+    var mes=[], p=null;
+    try{ mes=_vendTriMes(c)||[]; p=_vendMesGF(c).length?{etat:'labo'}:_mlProjFA(c,auj); }
+    catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'synthese/cuve',err:e}); }
+    var der=mes.length?mes[mes.length-1]:null, d20=der?_vendMesD20(der):null, dc=c.decuvage||null;
+    var dec=c.statut==='termine'||!!(dc&&dc.date), kg=_vendCuvKgDom(c.id)||0;
+    // La contenance : celle que porte le nom de la cuve (« Cuve 3 — inox 120 hL »), sinon son volume. ⚠️ volume_hl est le
+    //   volume LOGÉ (la cuverie de la démo dit « 182 sur 182 hL ») : pris pour contenance, chaque cuve paraissait pleine.
+    var capN=/(\d+(?:[.,]\d+)?)\s*hL\b/i.exec(String(c.nom||''));
+    return {id:c.id, nom:c.nom||'Cuve', statut:c.statut||'', cap:capN?parseFloat(capN[1].replace(',','.')):(parseFloat(c.volume_hl)||0), kg:kg,
+      hl:dec?0:Math.round((_vendHlKg(kg)||0)*10)/10, parcelles:(Array.isArray(c.parcelles)?c.parcelles:[]).map(function(x){ return (x&&x.nom)||(typeof x==='string'?x:''); }).filter(Boolean),
+      d20:d20!=null?Math.round(d20):null, temp:(der&&der.temp_c!=null)?der.temp_c:null, jRel:der?_aujDepuis(der.date,auj):null,
+      jEntree:_aujDepuis(c.date_entree,auj), note:(der&&der.note)?String(der.note):'',
+      faPct:(c.statut==='fa'&&d20!=null)?_vendFaPct(c,d20):null,
+      proj:p?{etat:p.etat||'', date:p.date||null, marge:p.marge!=null?p.marge:null, pente:p.pente!=null?p.pente:null}:null,
+      decuvage:dc?{date:dc.date||null, cuvee:nomV[dc.cuvee_id]||'', hl:parseFloat(c.vol_decuve_hl)||null, faFinie:dc.fa_finie!==false}:null,
+      e:etat(c.id,!dec)};
+  });
+  var cuvees=[], btl=[];
+  (CAVE_ELEVAGE.cuvees||[]).forEach(function(c){
+    if(!c) return;
+    if(c.statut==='embouteille'){ btl.push({id:c.id, nom:_mlNomCuvee(c), n:parseInt(c.nb_bouteilles,10)||0, date:c.date_embouteillage||null}); return; }
+    var x=mm[c.id], o=_aujOuillageEtat(c,auj,pro), m=_aujMalo(c,x);
+    var cours=m[1]==='mvpas-encours'||m[0]==='Apr\u00e8s la FA';
+    cuvees.push({id:c.id, nom:_mlNomCuvee(c), mil:c.millesime, futs:_caveNbTonneaux(c), hl:_mlHlCuvee(c),
+      tonneaux:(Array.isArray(c.tonneaux)?c.tonneaux:[]).filter(function(t){ return t&&typeof t==='object'; }).map(function(t){ return {annee:t.annee, nb:parseInt(t.nb,10)||0}; }),
+      ouillage:o?{g:o.g, s:o.s, d:o.d, cls:o.cls||'', last:c.last_ouillage||null}:null,
+      malo:{t:m[0], cls:m[1], s:m[2]}, soutirer:!!(x&&x.cas==='a_soutirer'), sout:(x&&x.sout)||null, analyse:c.last_analyse||null,
+      kinds:(parRef[String(c.id)]||[]).map(function(i){ return i.kind; }), e:etat(c.id,cours)});
+  });
+  return {auj:auj, mil:mil, sem:sem, verdict:v, diag:diag, cuves:cuves, cuvees:cuvees, btl:btl, recents:_aujRecents(auj),
+    parc:parc, phase:_mlPhase(), suivies:cuves.length};
+}
+window._caveSynthese=_caveSynthese;
 // Les derniers gestes, sur dix jours : opérations du Chai, relevés et décuvages du Cuvier, du plus récent au plus ancien.
 function _aujRecents(auj){
   var ev=[], nomV={}, depuis=_mlAddJ(auj,-10);
@@ -6411,7 +6486,7 @@ function _aujRender(){
   try{ (_mlResteARentrer(mil)||[]).forEach(function(p){ haR+=parseFloat(p.surface)||0; }); }
   catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'aujourdhui/reste',err:e}); }
   var parc=_mlParc();
-  var v=_mlVerdict(sem,{phase:_mlPhase(), haReste:haR, parc:parc});
+  var v=_mlVerdict(sem,{phase:_mlPhase(), haReste:haR, parc:parc, diag:_mlDiagForts()});   // CAVEPIL-1 (§436)
   var nSu=(CAVE_VENDANGE.cuves_vinif||[]).filter(_vendSuivie).length;
   var nEl=(CAVE_ELEVAGE.cuvees||[]).filter(function(c){ return c&&c.statut!=='embouteille'; }).length;
   var auj=_mlGestes((sem[0]&&sem[0].items)||[]).filter(function(i){ return i.date===from; });

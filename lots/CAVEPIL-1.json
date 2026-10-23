@@ -1,0 +1,43 @@
+{
+  "lot": "CAVEPIL-1",
+  "section": "§436",
+  "base": "a55f46247bb433fddc07963eb06f46340e815978",
+  "inclut": [],
+  "date": "2026-10-23",
+  "tutos": {
+    "ok": true,
+    "empreinte": "cdf8f09c42f9759dd0261a402d865d3b774deb61cbda77714041224f01b758b9",
+    "date": "2026-10-23T07:35:42.590Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "ff90f45d51394bbe1acfe2a790f7e01a0588c81351d982ac6e1a5ba540fb413f",
+    "CLAUDE.md": "a1cea250c805f642d3678781fcb4551ae0a04ae36d4e101aee0076ceb7224871",
+    "docs/claude/INDEX.md": "aad0fe0dbeda8b7d0e6cb39477956d9735e5c6c6e48c02db06ab2b84f6b3916a",
+    "docs/claude/chantiers-430-479.md": "f46c74bb7839c7c93ffac53a50c58aa7bcf45ec2bcae0c6a30d4229f4af2ae9f",
+    "docs/claude/journal.md": "7dbe5069abead1100d535b3e46b13035bae39b52ad9016f385e3cab915219f8f",
+    "docs/claude/modules.md": "dea2f5fa364baa91a1f02b66ac468f1d71a9c2f7b4709cf004044ec0aa95341f",
+    "guide/08-cave.html": "481c7526ba854201b06a45c2647ef8a5ce10a617728bae4b2d67bfc8a5690af4",
+    "guide/11-pilotage.html": "d89fa7072f5aeee48ad6c99ba29e8bdc19f57273b65d5e17c6366b9414eb0f96",
+    "index.html": "e08f97959e13284ce68be0af345c4341b6a87831c3624f52280f954773dbad73",
+    "public/guide.html": "621dcaaa314a6f0be5e4928d846309d6e474a533398e3a07ed6cb493c0ca3dd7",
+    "public/sw.js": "526b7b9417b6aee457835830c43c6288ffe093320019f66c5d59e7645c88f2ae",
+    "scripts/harnais-claude-md.mjs": "4fc9a76adba019fee4953eb7ba796db0cd166c0c3cac38cfb222342cb589717b",
+    "scripts/mv-harnais-liste.mjs": "1142360d0e662b841eaef21a97e3c148a842b0c869650e3cadd14777fcca8c56",
+    "scripts/typo-baseline.json": "c2e4402b85af550f23f2f033b1ce320f42b7fc9bf8277cd26a7910180b660a56",
+    "src/cave.js": "92d4ad228471eeb1ccff2f42542256f1d0f3f4d89f78d2eaf1e60bf1555097fa",
+    "src/charte.css": "a1c7f036d637708124cf4490fa86173b6e735a1bc5e8b3de5e1e056273c4c886",
+    "src/cockpit-vue.js": "66fccb9e6f49494bc114d4df5ed248b1a4c18de809fcb8b46386f24897853dbc",
+    "src/diagnostic.js": "4040d59f7846c01ca33050bc7acbf3af60fb531f0bec602c749f6b18093fc5ba",
+    "src/pilotage.js": "8bd06d5bf4937010538973d1177ed1bfd1834e14682456701bd951a1d3c676d1",
+    "src/styles.css": "cc5851d01513af1839c9cfff5ac579b89365f27c485470b67ffb675c52f19ff0",
+    "src/utils.js": "305b179626dcff5c16c4f58975da98764b15dd2e0b59d3b0ab402c86f510d477",
+    "scripts/mv-harnais-cavepil1.mjs": "c8529f82ceef1d60882b3c3c836e044316e8e0c9568cf00b93bee3cc2dcd94f6"
+  }
+}

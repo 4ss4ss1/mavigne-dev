@@ -1519,3 +1519,14 @@ var dernierW = 0;
 window.addEventListener('resize', function () { var w = window.innerWidth; if (Math.abs(w - dernierW) < 2) return; dernierW = w; var r = $(DGN_ROOT); if (!r || !r.offsetParent || !$('dgn-vue')) return; renderFrise(); renderCmpGraph(); });
 
 window.renderCaveDiag = render;
+// ★★ CAVEPIL-1 (§436) — LE DIAGNOSTIC EN LECTURE, pour le verdict de la Cave et la vue Cave du Pilotage. Même calcul que
+//   l'onglet (recalc puis statutListe), sans rien dessiner, sur TOUTES les cuvées (le filtre de millésime du Chai ne s'applique
+//   pas ici). g : dan (signes forts), att, n, ok — la lecture des statuts de la méthode. nAna : les analyses du labo lues.
+window._dgnSynthese = function () {
+  if (!window._dataReady || !window.CAVE_ELEVAGE) return [];
+  recalc();
+  return ((window.CAVE_ELEVAGE.cuvees) || []).filter(function (c) { return c && c.id != null && MOD[String(c.id)]; }).map(function (c) {
+    var M = MOD[String(c.id)], st = statutListe(M), D = M.D || {};
+    return { id: String(c.id), nom: D.nom || c.nom || '', mil: D.mil != null ? D.mil : c.millesime, g: st.g, txt: st.txt || '', mise: !!M.miseMs, nAna: Array.isArray(D.ana) ? D.ana.length : 0 };
+  });
+};

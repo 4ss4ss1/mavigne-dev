@@ -12,12 +12,12 @@
   "src/cave.js": {
     "dur": 28,
     "petit": 24,
-    "ko": 697
+    "ko": 717
   },
   "src/cockpit-vue.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 134
+    "ko": 156
   },
   "src/cockpit.js": {
     "dur": 0,
@@ -42,7 +42,7 @@
   "src/diagnostic.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 157
+    "ko": 158
   },
   "src/firebase.js": {
     "dur": 0,
@@ -77,7 +77,7 @@
   "src/pilotage.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 916
+    "ko": 938
   },
   "src/planning-vue.js": {
     "dur": 0,
@@ -122,7 +122,7 @@
   "src/utils.js": {
     "dur": 5,
     "petit": 2,
-    "ko": 1009
+    "ko": 1011
   },
   "index.html": {
     "dur": 77,
@@ -132,6 +132,6 @@
   "src/styles.css": {
     "dur": 256,
     "petit": 83,
-    "ko": 877
+    "ko": 900
   }
 }

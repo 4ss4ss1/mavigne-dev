@@ -7,7 +7,7 @@
 // toujours), la palette Ctrl K et la barre latérale (lots suivants, pour toute l'appli).
 // La feuille de style de la maquette est passée à la charte (convertisseur REF-1) : section REF-1 de styles.css.
 // ═════════════════════════════════════════════════════════════════════════════════════════════════
-window._ck2Squelette = function () { return '<div class="ck2"><div class="ck-page ck-entree" id="ck-page"> <div class="ck-tete" id="ck-tete"></div> <section class="ck-photos" id="ck-photos" aria-label="Les quatre photos du domaine"></section> <div class="ck-vue ck-gt" id="ck-vue-terrain"> <div class="ck-col" id="ck-t-a"> <section class="ck-verdict" id="ck-verdict" aria-label="Fin prévue des travaux"></section> <section class="ck-decision ck-panneau" id="ck-decision" aria-label="La décision du jour"></section> <aside class="ck-fil ck-panneau" id="ck-fil" aria-label="Fil en direct"></aside> </div> <div class="ck-col" id="ck-t-b"> <section class="ck-plan ck-panneau" id="ck-plan" aria-label="Le domaine en direct"></section> <section class="ck-chant ck-panneau" id="ck-chant" aria-label="Chantiers d’hiver"></section> <section class="ck-courbe ck-panneau" id="ck-courbe" aria-label="Charge restante"></section> </div> <div class="ck-col ck-col-c" id="ck-t-c"> <section class="ck-savoir ck-panneau" id="ck-savoir" aria-label="À savoir"></section> </div> </div> <div class="ck-vue ck-ge" id="ck-vue-eco" hidden> <div class="ck-col" id="ck-e-a"> <section class="ck-ever ck-verdict" id="ck-ever" aria-label="Atterrissage de la campagne"></section> <section class="ck-ekpi" id="ck-ekpi" aria-label="Indicateurs économiques"></section> </div> <div class="ck-col" id="ck-e-b"> <section class="ck-echart ck-panneau" id="ck-echart" aria-label="Dépensé face au fait"></section> <section class="ck-etac ck-panneau" id="ck-etac" aria-label="Écart au barème par tâche"></section> </div> <div class="ck-col ck-col-c" id="ck-e-c"> <section class="ck-epos ck-panneau" id="ck-epos" aria-label="Par poste"></section> <section class="ck-eapp ck-panneau" id="ck-eapp" aria-label="Par appellation"></section> </div> </div> </div> </div><div class="ck-sr" id="ck-annonce" aria-live="polite"></div>'; };
+window._ck2Squelette = function () { return '<div class="ck2"><div class="ck-page ck-entree" id="ck-page"> <div class="ck-tete" id="ck-tete"></div> <section class="ck-photos" id="ck-photos" aria-label="Les quatre photos du domaine"></section> <div class="ck-vue ck-gt" id="ck-vue-terrain"> <div class="ck-col" id="ck-t-a"> <section class="ck-verdict" id="ck-verdict" aria-label="Fin prévue des travaux"></section> <section class="ck-decision ck-panneau" id="ck-decision" aria-label="La décision du jour"></section> <aside class="ck-fil ck-panneau" id="ck-fil" aria-label="Fil en direct"></aside> </div> <div class="ck-col" id="ck-t-b"> <section class="ck-plan ck-panneau" id="ck-plan" aria-label="Le domaine en direct"></section> <section class="ck-chant ck-panneau" id="ck-chant" aria-label="Chantiers d’hiver"></section> <section class="ck-courbe ck-panneau" id="ck-courbe" aria-label="Charge restante"></section> </div> <div class="ck-col ck-col-c" id="ck-t-c"> <section class="ck-savoir ck-panneau" id="ck-savoir" aria-label="À savoir"></section> </div> </div> <div class="ck-vue ck-gc" id="ck-vue-cave" hidden> <div class="ck-col" id="ck-c-a"> <section class="ck-verdict cv-verdict" id="ck-cv-verdict" aria-label="Ce qui presse en cave"></section> <section class="ck-panneau cv-mil" id="ck-cv-mil" aria-label="Le millésime"></section> </div> <div class="ck-col" id="ck-c-b"> <section class="ck-panneau cv-plan" id="ck-cv-plan" aria-label="La cave en direct"></section> <section class="ck-panneau cv-semaine" id="ck-cv-semaine" aria-label="La cave dans la semaine"></section> </div> <div class="ck-col ck-col-c" id="ck-c-c"> <aside class="ck-panneau ck-fil cv-fil" id="ck-cv-fil" aria-label="En direct, la cave"></aside> <section class="ck-panneau ck-savoir cv-savoir" id="ck-cv-savoir" aria-label="À savoir, en cave"></section> </div> </div> <div class="ck-vue ck-ge" id="ck-vue-eco" hidden> <div class="ck-col" id="ck-e-a"> <section class="ck-ever ck-verdict" id="ck-ever" aria-label="Atterrissage de la campagne"></section> <section class="ck-ekpi" id="ck-ekpi" aria-label="Indicateurs économiques"></section> </div> <div class="ck-col" id="ck-e-b"> <section class="ck-echart ck-panneau" id="ck-echart" aria-label="Dépensé face au fait"></section> <section class="ck-etac ck-panneau" id="ck-etac" aria-label="Écart au barème par tâche"></section> </div> <div class="ck-col ck-col-c" id="ck-e-c"> <section class="ck-epos ck-panneau" id="ck-epos" aria-label="Par poste"></section> <section class="ck-eapp ck-panneau" id="ck-eapp" aria-label="Par appellation"></section> </div> </div> </div> </div><div class="ck-sr" id="ck-annonce" aria-live="polite"></div>'; };
 /* Ma Vigne — maquette « Pilotage › Aujourd’hui », le cockpit vivant.
    Données de démonstration. L’architecture est celle de l’appli : des fonctions
    de dessin qui rendent du HTML, une petite couche d’animation commune (Anim),
@@ -131,7 +131,7 @@ let V = null;
 let AUJ, DEBUT, VISEE, XMAX, TACHES = [], T = {}, PREREQ = {}, GENS = [], EQ = {}, APPS = [], AIDX = {},
   PLAN_H = 720, PLAN_W = 1000, PLAN_S = 1, PLAN_LARG = 0, HA_VIGNE = 0, PARCS = [], PIDX = {}, HA_TOT = 0, ORDRE = {}, TOTAL = 0, YMAX = 500, TAUX = 0,
   POSTES = [], HIST = [], METEO = [], T0 = Date.now(), MIN = 60e3, NEXT_ID = 1, SPARK_TRAV = [], SPARK_BUD = [], SPARK_ECART = [];
-const S = { etats: {}, presta: {}, dates: {}, equipes: [], evts: [], trac: [], vue: null, filtre: null, sel: null, onglet: 'auj', mode: 'terrain', svTout: false, filTout: false };
+const S = { etats: {}, presta: {}, dates: {}, equipes: [], evts: [], trac: [], vue: null, filtre: null, sel: null, onglet: 'auj', mode: 'terrain', svTout: false, filTout: false, cvFiltre: null, cvFil: false };   // CAVEPIL-1 : cvFiltre, cvFil
 const H_JOUR = 1;
 const effectif = () => (V ? V.presents : 0);
 const capacite = () => 0;
@@ -362,6 +362,13 @@ const signe = v => { const n = Math.round(v); return (n > 0 ? '+' : n < 0 ? '−
 const NF1 = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const pct1 = v => { const n = Math.round(v * 10) / 10; return (n > 0 ? '+' : n < 0 ? '−' : '') + NF1.format(Math.abs(n)) + '\u202f%'; };   // AUJ-7 : jamais « −0,0 % »
 const INFO = {
+  // ★ CAVEPIL-1 (§436) — la vue Cave
+  cvverdict: 'Le verdict de la Cave, mot pour mot — celui de Cave › Aujourd’hui : relevés de densité, dernier ouillage, analyses de malo, soutirages, et le Diagnostic du Chai quand il relève des signes forts. Le Pilotage le lit, il ne le refait pas. Les trois chiffres comptent les gestes des quatre semaines de la Cave.',
+  cvplan: 'Chaque cuve suivie au Cuvier et chaque fût du Chai, de la couleur de ce qu’il demande cette semaine : rouge pour une alerte (fermentation qui ralentit, malo bloquée, signe fort au Diagnostic), orange pour un geste attendu, gris pour ce qui suit son cours, vert pour ce qui est à jour. Le niveau d’une cuve est estimé d’après les caisses, comme au Cuvier. Toucher ouvre l’écran de la Cave.',
+  cvsemaine: 'Les journées de cave marquées au Planning (la journée, le matin ou l’après-midi), face aux gestes des quatre semaines de la Cave. Un ouillage qui tombe un week-end revient au vendredi, un jour férié à la veille, comme dans la Cave. Les journées de cave ne comptent pas pour la vigne : la fin prévue des travaux en tient compte.',
+  cvmil: 'La chaîne du millésime de la Cave : les kilos rentrés d’après les caisses, convertis à la règle du Cuvier ; « en cuve » reste une estimation tant que rien n’est décuvé ; « au chai » est le volume réellement entonné, jamais la taille des fûts. Le coût par bouteille est dans Économie › Revient.',
+  cvfil: 'Les derniers gestes de la cave, du plus récent au plus ancien : relevés du Cuvier, décuvages, ouillages, soutirages, sulfitages, analyses et dégustations du Chai. En tête, qui est en cave aujourd’hui d’après le Planning.',
+  cvsavoir: 'Ce qui demande une décision en cave : une alerte, un ouillage en retard, un soutirage à prévoir au planning, une fin de fermentation, ce que dit le Diagnostic du Chai.',
   fin: 'La fin prévue prend les heures qui restent au barème et les retire, jour après jour, de la capacité inscrite au planning : contrats en cours, absences, formations et congés compris, et les journées de cave marquées au Planning, même à venir. Elle avance quand une parcelle est validée.',
   travaux: 'Heures du barème des parcelles validées, sur le total des tâches de la campagne. Une parcelle commencée ne compte qu’à sa validation.',
   effectif: 'Personnes prévues au planning aujourd’hui, hors bureau, et celles qui manquent (congé, arrêt, récupération). Un jour sans travail au planning — week-end, jour chômé —, la tuile montre le prochain jour travaillé et le dit.',
@@ -425,9 +432,12 @@ function spark(vals, mauvais, w = 92, h = 34) {
 /* ── En-tête de l’écran : le résumé en une phrase, et la bascule ── */
 function htmlTete() {
   return '<div class="ck-tete-g"><p class="ck-tete-date">' + esc(V.dateTxt) + '</p><p class="ck-tete-res" id="ck-resume" aria-live="polite"></p></div>'
-    + (V.eco ? '<div class="ck-bascule" role="tablist" aria-label="Vue de la journée">'
+    + ((V.eco || V.cave) ? '<div class="ck-bascule" role="tablist" aria-label="Vue de la journée">'
       + '<button type="button" role="tab" data-mode="terrain" aria-selected="true">' + ICO.feuille + 'Terrain</button>'
-      + '<button type="button" role="tab" data-mode="eco" aria-selected="false">' + ICO.euro + 'Économie</button>'
+      // ★ CAVEPIL-1 (§436) : la vue Cave, entre les deux ; un point quand quelque chose presse (orange : un geste ; rouge : une alerte).
+      + (V.cave ? '<button type="button" role="tab" data-mode="cave" aria-selected="false"' + (V.cave.pt ? ' aria-label="Cave, un point demande votre attention"' : '') + '>' + ICO.cave + 'Cave'
+        + (V.cave.pt ? '<i class="ck-b-pt ' + V.cave.pt + '" aria-hidden="true"></i>' : '') + '</button>' : '')
+      + (V.eco ? '<button type="button" role="tab" data-mode="eco" aria-selected="false">' + ICO.euro + 'Économie</button>' : '')
       + '<span class="ck-bascule-ind" aria-hidden="true"></span></div>' : '');
 }
 
@@ -951,8 +961,11 @@ function majResume(r) {
   const e0 = Math.round(r.sous), argent = !(V.eco && r.budget > 0) ? '' : (e0 === 0 ? 'pile dans le budget' : e0 > 0 ? eur(e0) + ' sous le budget' : eur(-e0) + ' au-dessus du budget');   // AUJ-7 : à l'euro, comme partout
   // ★ ANTICIPE-1 (§420) : les points annoncés se touchent — le bouton mène à eux, en tête d'« À savoir » (allerAnticiper).
   const pts = n + ' point' + (n > 1 ? 's' : '') + ' à anticiper';
-  $('#ck-resume').innerHTML = '<b>' + maj1(temps) + '</b>, ' + (argent ? '<b>' + argent + '</b>, ' : '')
+  // ★ CAVEPIL-1 (§436) : quand la cave presse, la phrase la nomme — touchée, elle ouvre la vue Cave.
+  const cv = V.cave && V.cave.lien ? '<button type="button" class="ck-res-pts ck-res-cave' + (V.cave.lienAlerte ? ' alerte' : '') + '" data-fn="cave" aria-label="' + esc(V.cave.lien) + ', ouvrir la vue Cave">' + esc(V.cave.lien) + '</button>' : '';
+  const h = '<b>' + maj1(temps) + '</b>, ' + (argent ? '<b>' + argent + '</b>, ' : '')
     + (n ? '<button type="button" class="ck-res-pts" data-fn="anticiper" aria-label="' + pts + ', en tête d’« À savoir »">' + pts + '</button>.' : 'rien à anticiper.');
+  $('#ck-resume').innerHTML = cv ? h.slice(0, -1) + ', et ' + cv + '.' : h;   // CAVEPIL-1 : la phrase d'ANTICIPE-1, telle quelle, puis la cave
 }
 function majVerdict(r) {
   Anim.rouler($('#ck-v-fin'), dLong(r.fin));
@@ -1278,6 +1291,154 @@ function survoler(pid, ev) {
   const r = $('#ck-svg').getBoundingClientRect(), p = PIDX[pid];
   montrerLoupe(pid, r.left + p.cx / PLAN_W * r.width, r.top + p.cy / PLAN_H * r.height);
 }
+/* ═══ 11 bis. LA VUE CAVE — ★★ CAVEPIL-1 (§436) ═══
+   La maquette validée le 23/10, montée avec le modèle V.cave (pilotage.js, _pilCk2Cave), lui-même lu dans la Cave
+   (_caveSynthese). Le dessin des cuves (inox, bois), de leur niveau et des fûts est celui de la maquette ; les pastilles
+   sont celles de l'appli (.mvpas). Aucun bouton de geste : chaque ligne porte data-cave, la porte vers l'écran de la Cave. */
+const CV_PAS = { alerte: 'mvpas-retard', faire: 'mvpas-surveiller', cours: 'mvpas-encours', ok: 'mvpas-fait', vide: 'mvpas-afaire' };
+const CV_ETATS = [['alerte', 'Alerte'], ['faire', 'À faire'], ['cours', 'En cours'], ['ok', 'À jour']];
+const cvIc = (n, t) => (typeof window._mvIcon === 'function' ? window._mvIcon(n, t || 16) : '');
+let CV_TIPS = {};
+function cvCuveSvg(c) {
+  const W = Math.round(52 + Math.min(200, c.cap || 60) * 0.32), H = 120, x0 = 5, y0 = 12, w = W - 10, h = H - 32, r = 12;
+  const plein = c.cap ? Math.max(0, Math.min(1, (c.hl || 0) / c.cap)) : 0, yl = y0 + h * (1 - plein), id = 'ck-cv-k' + String(c.id).replace(/[^\w-]/g, '');
+  let s = '<svg class="cv-cuve-d" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true">'
+    + '<defs><clipPath id="' + id + '"><rect x="' + x0 + '" y="' + y0 + '" width="' + w + '" height="' + h + '" rx="' + r + '"/></clipPath></defs>'
+    + '<rect class="cv-anneau" x="' + (x0 - 3.5) + '" y="' + (y0 - 3.5) + '" width="' + (w + 7) + '" height="' + (h + 7) + '" rx="' + (r + 3) + '"/>'
+    + '<line class="cv-pied" x1="' + (x0 + 11) + '" y1="' + (y0 + h) + '" x2="' + (x0 + 9) + '" y2="' + (H - 5) + '"/>'
+    + '<line class="cv-pied" x1="' + (x0 + w - 11) + '" y1="' + (y0 + h) + '" x2="' + (x0 + w - 9) + '" y2="' + (H - 5) + '"/>'
+    + '<rect class="cv-corps" x="' + x0 + '" y="' + y0 + '" width="' + w + '" height="' + h + '" rx="' + r + '"/><g clip-path="url(#' + id + ')">';
+  if (plein > 0) s += '<rect class="cv-liq" x="' + x0 + '" y="' + yl.toFixed(1) + '" width="' + w + '" height="' + (y0 + h - yl).toFixed(1) + '"/>'
+    + '<line class="cv-surf" x1="' + x0 + '" y1="' + (yl + 1).toFixed(1) + '" x2="' + (x0 + w) + '" y2="' + (yl + 1).toFixed(1) + '"/>';
+  if (c.bulles && plein > 0) {
+    const monte = Math.max(20, Math.round(y0 + h - 8 - (yl + 6)));
+    [[0.22, 0, 1.5], [0.46, -1.3, 1.9], [0.7, -2.4, 1.3], [0.35, -0.7, 1.1], [0.6, -3.1, 1.6], [0.82, -1.8, 1.2]].forEach(([fx, dl, rr]) => {
+      s += '<circle class="cv-bulle" cx="' + (x0 + w * fx).toFixed(1) + '" cy="' + (y0 + h - 8) + '" r="' + rr + '" style="--monte:-' + monte + 'px;animation-delay:' + dl + 's"/>';
+    });
+  }
+  if (c.mat === 'bois') {
+    for (let x = x0 + 9; x < x0 + w - 4; x += 9) s += '<line class="cv-douve" x1="' + x + '" y1="' + y0 + '" x2="' + x + '" y2="' + (y0 + h) + '"/>';
+    [0.2, 0.8].forEach(k => { s += '<line class="cv-cercle" x1="' + x0 + '" y1="' + (y0 + h * k).toFixed(1) + '" x2="' + (x0 + w) + '" y2="' + (y0 + h * k).toFixed(1) + '"/>'; });
+  } else s += '<rect class="cv-reflet" x="' + (x0 + 6) + '" y="' + (y0 + 6) + '" width="5" height="' + (h - 12) + '" rx="2.5"/>';
+  s += '</g><rect class="cv-corps cv-trait" x="' + x0 + '" y="' + y0 + '" width="' + w + '" height="' + h + '" rx="' + r + '"/>'
+    + '<ellipse class="cv-trappe" cx="' + (x0 + w / 2) + '" cy="' + y0 + '" rx="' + Math.min(13, w / 4) + '" ry="3.6"/>';
+  if (c.froid) s += '<g transform="translate(' + (x0 + w - 9) + ',' + (y0 + 11) + ')"><circle class="cv-gel" r="9"/><path class="cv-gel-ic" d="M0-5.2V5.2M-4.5-2.6 4.5 2.6M-4.5 2.6 4.5-2.6"/></g>';
+  return s + '</svg>';
+}
+const cvFut = () => '<svg class="cv-fut" viewBox="0 0 16 16" aria-hidden="true"><circle class="o" cx="8" cy="8" r="6.8"/><circle class="r" cx="8" cy="8" r="4.1"/></svg>';
+function cvVerdict(C) {
+  const v = C.verdict;
+  return '<div class="ck-v-haut"><span class="ck-v-k">Ce qui presse en cave</span><span class="ck-etat ' + v.etat + '">' + esc(v.etatTxt) + '</span></div>'
+    + '<h2 class="ck-v-phrase">' + esc(v.phrase) + '</h2>' + (v.sous ? '<p class="ck-v-sous">' + esc(v.sous) + '</p>' : '')
+    + '<dl class="cv-sem3">' + v.sem.map(x => '<div><dt>' + esc(x[0]) + '</dt><dd><b>' + esc(x[1]) + '</b>' + esc(x[2]) + '</dd></div>').join('') + '</dl>'
+    + '<p class="ck-cadre"><span>' + esc(v.cadre) + btnI('cvverdict', 'Comment ce verdict est calculé') + '</span></p>'
+    + '<div class="ck-v-act">' + v.act.map((a, k) => '<button type="button" class="ck-btn ' + (k ? 'ck-btn-ghost' : 'ck-btn-pri') + '" data-cave="' + esc(a[1]) + '">' + esc(a[0]) + '</button>').join('') + '</div>';
+}
+function cvPlan(C) {
+  CV_TIPS = {};
+  const objets = C.cuvier.cuves.filter(c => c.e !== 'vide').concat(C.chai.cuvees), n = {};
+  objets.forEach(o => { n[o.e] = (n[o.e] || 0) + 1; });
+  const leg = CV_ETATS.map(e => '<button type="button" class="ck-leg-i cv-e-' + e[0] + '" data-f="' + e[0] + '" aria-pressed="' + (S.cvFiltre === e[0]) + '"' + (n[e[0]] ? '' : ' disabled') + '><i aria-hidden="true"></i>' + e[1] + ' <b>' + (n[e[0]] || 0) + '</b></button>').join('');
+  const cuves = C.cuvier.cuves.map(c => {
+    CV_TIPS['u' + c.id] = c.tip;
+    return '<button type="button" class="cv-cuve cv-' + c.mat + ' cv-e-' + c.e + '" data-e="' + c.e + '" data-tip="u' + esc(c.id) + '" data-cave="' + esc(c.go) + '" aria-label="' + esc(c.nom + ', ' + c.mat + ' ' + c.cap + ' hL : ' + c.puce + '. ' + c.v + '. ' + c.s) + '">'
+      + cvCuveSvg(c) + '<span class="cv-cuve-n">' + esc(c.nom) + '</span><span class="cv-cuve-m">' + esc(c.mat) + ' · ' + esc(String(c.cap).replace('.', ',')) + '\u00a0hL</span>'
+      + '<span class="mvpas mvpas-statut ' + (CV_PAS[c.e] || '') + '">' + esc(c.puce) + '</span><span class="cv-cuve-v">' + esc(c.v) + '</span>' + (c.s ? '<span class="cv-cuve-v">' + esc(c.s) + '</span>' : '') + '</button>';
+  }).join('');
+  const cuvees = C.chai.cuvees.map(c => {
+    CV_TIPS['c' + c.id] = c.tip;
+    return '<button type="button" class="cv-cuvee cv-e-' + c.e + '" data-e="' + c.e + '" data-tip="c' + esc(c.id) + '" data-cave="' + esc(c.go) + '" aria-label="' + esc(c.nom + ', ' + c.futs + ' fûts, ' + c.hl + ' : ' + c.puce + '. ' + c.s.replace(/<[^>]+>/g, '')) + '">'
+      + '<span class="cv-cuvee-h"><b>' + esc(c.nom) + '</b><span>' + c.futs + '\u00a0fût' + (c.futs > 1 ? 's' : '') + (c.hl ? ' · ' + esc(c.hl) : '') + '</span><span class="mvpas mvpas-statut ' + (CV_PAS[c.e] || '') + '">' + esc(c.puce) + '</span></span>'
+      + '<span class="cv-futs" aria-hidden="true">' + Array.from({ length: Math.min(c.futs, 400) }, cvFut).join('') + '</span>'
+      + (c.s ? '<span class="cv-cuvee-s">' + c.s.replace(/<(?!\/?span(?: class="rt")?>)[^>]+>/g, '') + '</span>' : '') + '</button>';
+  }).join('');
+  const btl = C.btl.l.map(b => '<button type="button" class="cv-btl" data-cave="' + esc(b.go) + '"><span class="cv-btl-ic">' + cvIc('bouteille', 16) + '</span><span><b>' + esc(b.nom) + '</b><span>' + esc(b.n + (b.s ? ' · ' + b.s : '')) + '</span></span></button>').join('');
+  return entete('La cave en direct', 'Chaque cuve et chaque fût, selon ce qu’il demande', 'cvplan')
+    + '<div class="ck-leg cv-leg" role="group" aria-label="Filtrer par état">' + leg + '</div>'
+    + '<div class="cv-zone"><div class="cv-zone-h"><b>Le Cuvier</b><span>' + esc(C.cuvier.resume) + '</span></div>'
+    + (C.cuvier.cuves.length ? '<div class="cv-cuves" style="--n:' + Math.max(3, C.cuvier.cuves.length) + '">' + cuves + '</div>' : '<p class="ck-vide">Aucune cuve suivie. Le Cuvier reprendra avec la prochaine vendange.</p>') + '</div>'
+    + '<div class="cv-zone"><div class="cv-zone-h"><b>Le Chai</b><span>' + esc(C.chai.resume) + '</span></div>'
+    + (C.chai.cuvees.length ? '<div class="cv-cuvees">' + cuvees + '</div>' : '<p class="ck-vide">Aucune cuvée en élevage.</p>') + '</div>'
+    + (btl ? '<div class="cv-zone"><div class="cv-zone-h"><b>En bouteille</b><span>' + esc(C.btl.resume) + '</span></div>' + btl + '</div>' : '');
+}
+function cvSemaine(C) {
+  const W = C.semaine, PART = { j: 'la journée', m: 'le matin', a: 'l’après-midi' };
+  const jours = W.jours.map(j => '<div class="cv-j' + (j.auj ? ' auj' : '') + (j.passe ? ' passe' : '') + '"' + (j.auj ? ' aria-current="date"' : '') + '>'
+    + '<p class="cv-j-n">' + esc(j.j) + '<b>' + esc(j.d) + '</b></p>'
+    + '<div class="cv-j-gens">' + j.gens.map(g => '<span class="cv-pers ' + g[1] + '" title="' + esc(g[0] + ', ' + PART[g[1]]) + '">' + esc(g[0].charAt(0).toUpperCase()) + '</span>').join('') + '</div>'
+    + (j.ev.length ? '<ul class="cv-j-ev">' + j.ev.map(e => '<li' + (e[1] ? ' class="fait"' : '') + '>' + esc(e[0]) + '</li>').join('') + '</ul>' : '<p class="cv-j-vide">' + (j.passe ? '\u2014' : 'rien') + '</p>') + '</div>').join('');
+  return entete('La cave dans la semaine', 'Les journées de cave du Planning, face aux gestes prévus par la Cave', 'cvsemaine')
+    + '<div class="cv-jours">' + jours + '</div>'
+    + '<p class="cv-leg-j"><span><i class="cv-pers j" aria-hidden="true"></i>la journée</span><span><i class="cv-pers m" aria-hidden="true"></i>le matin</span><span><i class="cv-pers a" aria-hidden="true"></i>l’après-midi</span><span>comme au Planning</span></p>'
+    + '<p class="cv-tot"><b>' + esc(W.tot) + '</b> ' + esc(W.totTxt) + '</p>'
+    + (W.manque ? '<div class="cv-manque">' + cvIc('calendrier', 16) + '<span>' + esc(W.manque) + '</span></div>' : '')
+    + '<ul class="cv-suite">' + W.suite.map(x => '<li class="cv-s"><div><b>' + esc(x[0]) + '</b><span class="d">' + esc(x[1]) + '</span></div><div><p>' + esc(x[2]) + '</p>'
+      + (x[3] ? '<p class="plan' + (x[4] ? ' vide' : '') + '">' + esc(x[3]) + '</p>' : '') + '</div>'
+      + (x[4] && V.admin ? '<button type="button" class="ck-sv-a" data-cave="planning">Prévoir</button>' : '<span></span>') + '</li>').join('') + '</ul>'
+    + '<div class="ck-v-act"><button type="button" class="ck-btn ck-btn-ghost ck-btn-s" data-cave="planning">Ouvrir le planning</button></div>';
+}
+function cvMil(C) {
+  const M = C.mil;
+  if (!M) return entete('Le millésime', 'De la vigne à la bouteille', 'cvmil') + '<p class="ck-vide">Pas encore de récolte saisie pour ce millésime.</p>';
+  const tot = M.barre.reduce((a, b) => a + b[1], 0) || 1;
+  return entete(esc(M.titre), esc(M.cadre), 'cvmil')
+    + '<p class="cv-mil-tete">' + M.tete + '</p>'
+    + '<div class="cv-barre" role="img" aria-label="' + esc(M.etapes.map(e => e[1] + ' ' + e[2]).join(', ')) + '">' + M.barre.filter(b => b[1] > 0).map(b => '<i class="' + b[0] + '" style="flex:' + (b[1] / tot).toFixed(4) + ' 1 0"></i>').join('') + '</div>'
+    + '<ul class="cv-etapes">' + M.etapes.map(e => '<li class="cv-et ' + e[0] + (e[4] ? ' a-venir' : '') + '"><span>' + esc(e[1]) + '</span><b>' + esc(e[2]) + '</b>' + (e[3] ? '<small>' + esc(e[3]) + '</small>' : '') + '</li>').join('') + '</ul>'
+    + '<div class="cv-rdt"><span>' + M.rdt + '</span><span class="cv-liens"><button type="button" class="cv-lien" data-cave="millesime">Le millésime</button><button type="button" class="cv-lien" data-cave="revient">Coût par bouteille</button></span></div>'
+    + (M.aussi.length ? '<ul class="cv-aussi" aria-label="Aussi en cave">' + M.aussi.map(a => '<li><b>' + esc(a[0]) + '</b>' + esc(a[1]) + '</li>').join('') + '</ul>' : '')
+    + '<p class="cv-note">' + esc(M.note) + '</p>';
+}
+function cvFil(C) {
+  const F = C.fil, ev = x => '<li class="ck-ev"><span class="ck-ev-ic cv-ev-ic">' + cvIc(x[0], 16) + '</span><span class="ck-ev-tx"><span class="ck-ev-t">' + esc(x[1]) + '</span>' + (x[2] ? '<span class="ck-ev-s">' + esc(x[2]) + '</span>' : '') + '</span><time>' + esc(x[3]) + '</time></li>';
+  const enCe = F.enCe.map(x => '<li class="ck-ev"><span class="ck-av ck-av-s cv-av">' + esc(x[0]) + '</span><span class="ck-ev-tx"><span class="ck-ev-t">' + esc(x[1]) + '</span></span><span class="ck-ev-tag">' + esc(x[3]) + '</span></li>').join('');
+  const long = F.items.length > 3;
+  return entete('<span class="ck-pt-fil" aria-hidden="true"></span>En direct', 'Les derniers gestes de la cave', 'cvfil')
+    + (long ? '<button type="button" class="ck-btn ck-btn-ghost ck-btn-s cv-fil-tout" id="ck-cv-fil-tout" aria-expanded="' + !!S.cvFil + '">' + (S.cvFil ? 'Replier' : 'Tout voir') + '</button>' : '')
+    + '<div class="' + (long ? 'cv-fil-corps' : '') + '">'
+    + (enCe ? '<p class="ck-fil-sec">En ce moment</p><ul class="ck-fil-c">' + enCe + '</ul><p class="ck-fil-sec">Les derniers gestes</p>' : '')
+    + (F.items.length ? '<ul class="ck-fil-l">' + F.items.map(ev).join('') + '</ul>' : '<p class="ck-vide">Aucun geste de cave ces dix derniers jours.</p>') + '</div>';
+}
+function cvSavoir(C) {
+  const lis = C.savoir.map(x => '<li class="ck-sv cv-c-' + x.c + (x.fort ? ' fort' : '') + (x.alerte ? ' cv-al' : '') + '"><span class="ck-sv-ic">' + cvIc(x.ic, 16) + '</span><div class="ck-sv-tx">'
+    + (x.k ? '<span class="ck-sv-k">' + esc(x.k) + '</span>' : '') + '<div class="ck-sv-h"><b>' + esc(x.t) + '</b><span class="ck-sv-q">' + esc(x.q) + '</span></div>'
+    + (x.s ? '<p class="ck-sv-s">' + esc(x.s) + '</p>' : '') + (x.a ? '<button type="button" class="ck-sv-a" data-cave="' + esc(x.go || 'auj') + '">' + esc(x.a) + '</button>' : '') + '</div></li>').join('');
+  return entete('À savoir', 'Ce qui peut changer la journée ou la semaine, en cave', 'cvsavoir')
+    + (lis ? '<ul class="ck-sv-l tout">' + lis + '</ul>' : '<p class="ck-vide">Rien à signaler en cave pour les jours qui viennent.</p>');
+}
+function majCave() {
+  const C = V && V.cave;
+  if (!C || !$('#ck-cv-plan')) return;
+  const pose = (id, h) => { const el = $(id); if (el && el.dataset.h !== h) { el.dataset.h = h; el.innerHTML = h; } };
+  pose('#ck-cv-verdict', cvVerdict(C)); pose('#ck-cv-plan', cvPlan(C)); pose('#ck-cv-semaine', cvSemaine(C));
+  pose('#ck-cv-mil', cvMil(C)); pose('#ck-cv-fil', cvFil(C)); pose('#ck-cv-savoir', cvSavoir(C));
+  const f = $('#ck-cv-fil'); if (f) f.classList.toggle('ouvert', !!S.cvFil);
+  cvFiltrer();
+}
+function cvFiltrer() {
+  const plan = $('#ck-cv-plan'); if (!plan) return;
+  plan.classList.toggle('cv-filtre', !!S.cvFiltre);
+  $$('.cv-cuve,.cv-cuvee', plan).forEach(o => o.classList.toggle('vis', !!S.cvFiltre && o.dataset.e === S.cvFiltre));
+  $$('.cv-leg .ck-leg-i', plan).forEach(b => b.setAttribute('aria-pressed', String(S.cvFiltre === b.dataset.f)));
+}
+function cvTip(el) {
+  const T = CV_TIPS[el.dataset.tip]; if (!T || !T.rows || !T.rows.length) return;
+  let b = document.getElementById('ck-cv-tip');
+  if (!b) { b = document.createElement('div'); b.id = 'ck-cv-tip'; b.className = 'ck-cv-tip ck2'; b.setAttribute('role', 'tooltip'); document.body.appendChild(b); }
+  b.innerHTML = '<b class="t">' + esc(T.t) + '</b><dl>' + T.rows.map(r => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl><p>Toucher ouvre l’écran de la Cave.</p>';
+  const r = el.getBoundingClientRect(), bw = Math.min(320, window.innerWidth - 16);
+  let x = r.right + 12; if (x + bw > window.innerWidth - 8) x = Math.max(8, r.left - bw - 12);
+  b.style.left = x + 'px'; b.style.top = Math.max(8, Math.min(r.top, window.innerHeight - 240)) + 'px';
+  b.hidden = false; b.classList.add('ouvert');
+}
+function cvCacherTip() { const b = document.getElementById('ck-cv-tip'); if (b) { b.classList.remove('ouvert'); b.hidden = true; } }
+// La phrase du haut et la ligne Cave d'« À savoir » mènent à la vue Cave, en haut de page.
+function allerCave() {
+  if (!V.cave) return;
+  if (S.mode !== 'cave') choisirMode('cave');
+  const v = $('#ck-cv-verdict'); if (v) requestAnimationFrame(() => v.scrollIntoView({ behavior: reduit() ? 'auto' : 'smooth', block: 'nearest' }));
+}
+
 /* ═══ 12. NAVIGATION : tâche du plan, bascule Terrain / Économie, onglets, thème, barre latérale ═══ */
 function placerInd(actif, ind) {
   if (!actif || !ind) return;
@@ -1303,11 +1464,12 @@ function choisirMode(m) {
   S.mode = m;
   $$('.ck-bascule [role="tab"]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.mode === m)));
   placerInd($('.ck-bascule [aria-selected="true"]'), $('.ck-bascule-ind'));
-  const vIn = $('#ck-vue-' + m), vOut = $('#ck-vue-' + avant), sens = m === 'eco' ? 1 : -1;
+  const ORDRE = ['terrain', 'cave', 'eco'], vIn = $('#ck-vue-' + m), vOut = $('#ck-vue-' + avant), sens = ORDRE.indexOf(m) > ORDRE.indexOf(avant) ? 1 : -1;   // CAVEPIL-1
   vOut.hidden = true;
   vIn.hidden = false;
-  if (m === 'eco') { redimEChart(true); majEco(R); } else { redimCourbe(true); }
+  if (m === 'eco') { redimEChart(true); majEco(R); } else if (m === 'terrain') { redimCourbe(true); } else { cvCacherTip(); }
   if (!reduit()) vIn.animate([{ opacity: 0, transform: 'translateX(' + (28 * sens) + 'px)' }, { opacity: 1, transform: 'none' }], { duration: 460, easing: 'cubic-bezier(.22,1,.36,1)' });
+  if (m === 'cave' && !reduit()) $$('#ck-vue-cave .cv-barre i').forEach((el, k) => el.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 700, delay: 120 + k * 60, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' }));
   if (m === 'eco' && !reduit()) {
     const sv = $$('#ck-vue-eco .ck-puce .dep, #ck-vue-eco .ck-ta-v');
     sv.forEach((el, k) => el.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 700, delay: 80 + k * 40, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' }));
@@ -1453,6 +1615,11 @@ const RANGS = {
   t: { large: [['verdict', 'decision'], ['plan', 'chant', 'courbe'], ['fil', 'savoir']],
        moyen: [['verdict', 'decision', 'plan', 'chant', 'courbe'], [], ['fil', 'savoir']],   // AUJ-5 : « À savoir » reste à droite
        petit: [['verdict', 'savoir', 'decision', 'plan', 'fil', 'chant', 'courbe'], [], []] },
+  // ★ CAVEPIL-1 (§436) : la vue Cave, comme la maquette — verdict et millésime à gauche, la cave en direct et la semaine au milieu,
+  //   « En direct » et « À savoir » collés à droite ; au téléphone, ce qui presse d'abord.
+  c: { large: [['cv-verdict', 'cv-mil'], ['cv-plan', 'cv-semaine'], ['cv-fil', 'cv-savoir']],
+       moyen: [['cv-verdict', 'cv-plan', 'cv-semaine', 'cv-mil'], [], ['cv-fil', 'cv-savoir']],
+       petit: [['cv-verdict', 'cv-plan', 'cv-savoir', 'cv-semaine', 'cv-mil', 'cv-fil'], [], []] },
   e: { large: [['ever', 'ekpi'], ['echart', 'etac'], ['epos', 'eapp']],
        moyen: [['ever', 'ekpi', 'epos'], ['echart', 'etac', 'eapp'], []],
        petit: [['ever', 'ekpi', 'echart', 'epos', 'eapp', 'etac'], [], []] },
@@ -1509,7 +1676,7 @@ function ranger() {
   const taille = w >= 1000 ? 'large' : w >= 760 ? 'moyen' : 'petit';   // AUJ-5 : la maquette dès 1 000 px (1 150 avant)
   if (pg.dataset.taille !== taille) {
     pg.dataset.taille = taille;
-    ['t', 'e'].forEach(v => RANGS[v][taille].forEach((ids, k) => {
+    ['t', 'c', 'e'].forEach(v => RANGS[v][taille].forEach((ids, k) => {
       const col = $('#ck-' + v + '-' + 'abc'[k]); if (!col) return;
       ids.forEach(id => { const el = $('#ck-' + id); if (el) col.appendChild(el); });
     }));
@@ -1580,6 +1747,7 @@ function monter() {
   $('#ck-plan').innerHTML = htmlPlan();
   $('#ck-chant').innerHTML = htmlChantiers(R);
   $('#ck-fil').innerHTML = htmlFil();
+  majCave();   // CAVEPIL-1 (§436)
   $('#ck-courbe').innerHTML = entete('Charge restante', '', 'courbe', 'ck-gr-cadre', '<button class="ck-btn ck-btn-ghost ck-btn-s" type="button" data-fn="agrandir">Agrandir</button>')
     + '<div class="ck-gr" id="ck-gr"></div>'
     + '<div class="ck-gr-leg" aria-hidden="true"><span><i class="lg-mes"></i>Reste mesuré</span><span><i class="lg-proj"></i>Projection</span><span><i class="lg-bes"></i>Allure pour finir à l’objectif</span></div>';
@@ -1627,13 +1795,26 @@ function monter() {
 /* ═══ 16. MONTAGE — dans l'onglet Aujourd'hui du Pilotage (REF-1, §266) ═══ */
 let R = null, branche = false, obs = null;
 function brancher() {
-  window.addEventListener('scroll', () => cacherLoupe(), { passive: true });   // FORME-1 : la loupe ne flotte pas pendant qu'on défile
+  window.addEventListener('scroll', () => { cacherLoupe(); cvCacherTip(); }, { passive: true, capture: true });   // FORME-1 ; CAVEPIL-1 : la bulle d'une cuve non plus
+  // ★ CAVEPIL-1 (§436) : la bulle d'une cuve ou d'une cuvée, au survol (souris) ou au clavier. Au doigt, pas de bulle : le
+  //   toucher ouvre l'écran de la Cave.
+  document.addEventListener('pointerover', ev => { const el = ev.target.closest && ev.target.closest('#ck-cv-plan [data-tip]'); if (el && ev.pointerType !== 'touch') cvTip(el); });
+  document.addEventListener('pointerout', ev => { const el = ev.target.closest && ev.target.closest('#ck-cv-plan [data-tip]'); if (el && !el.contains(ev.relatedTarget)) cvCacherTip(); });
+  document.addEventListener('focusin', ev => { const el = ev.target.closest && ev.target.closest('#ck-cv-plan [data-tip]'); if (el && el.matches(':focus-visible')) cvTip(el); });
+  document.addEventListener('focusout', ev => { if (ev.target.closest && ev.target.closest('#ck-cv-plan [data-tip]')) cvCacherTip(); });
   document.addEventListener('click', ev => {
     if (!document.getElementById('ck-page')) return;       // le cockpit n'est pas à l'écran
     const i = ev.target.closest('.ck-i');
     if (i) { ev.stopPropagation(); ouvrirInfo(i, ev.detail === 0); return; }
     const mo = ev.target.closest('.ck-bascule [role="tab"]');
     if (mo) { choisirMode(mo.dataset.mode); return; }
+    // ★ CAVEPIL-1 (§436) : la vue Cave — la légende filtre, « Tout voir » déplie En direct, chaque ligne ouvre la Cave.
+    const cl = ev.target.closest('.cv-leg .ck-leg-i');
+    if (cl) { if (!cl.disabled) { S.cvFiltre = S.cvFiltre === cl.dataset.f ? null : cl.dataset.f; cvFiltrer(); } return; }
+    const ct = ev.target.closest('#ck-cv-fil-tout');
+    if (ct) { S.cvFil = !S.cvFil; const f = $('#ck-cv-fil'); if (f) f.classList.toggle('ouvert', S.cvFil); ct.textContent = S.cvFil ? 'Replier' : 'Tout voir'; ct.setAttribute('aria-expanded', String(S.cvFil)); return; }
+    const ca = ev.target.closest('[data-cave]');
+    if (ca) { cvCacherTip(); if (typeof window._pilCaveAller === 'function') window._pilCaveAller(ca.dataset.cave); return; }
     const seg = ev.target.closest('.ck-seg [role="tab"]');
     if (seg) { choisirTache(seg.dataset.t); return; }
     const ch = ev.target.closest('.ck-ch');
@@ -1649,6 +1830,7 @@ function brancher() {
     const fn = ev.target.closest('[data-fn]');
     if (fn && fn.dataset.fn === 'voirRetard') { voirRetard(); return; }
     if (fn && fn.dataset.fn === 'anticiper') { allerAnticiper(); return; }   // ANTICIPE-1 (§420) : la phrase du haut
+    if (fn && fn.dataset.fn === 'cave') { allerCave(); return; }   // CAVEPIL-1 (§436) : la phrase du haut, la ligne Cave d'« À savoir »
     if (fn && fn.dataset.fn === 'export') { if (typeof window._pilEcoExport === 'function') window._pilEcoExport(); return; }
     // PRO-1 (§269) : « Agrandir » était branché sur une instruction vide ; « Changer la priorité » menait à l'onglet
     //   L'équipe & le matériel au lieu d'ouvrir le choix de la priorité.
@@ -1716,6 +1898,7 @@ window._ck2Monter = function (v) {
   placerInd($('.ck-bascule [aria-selected="true"]'), $('.ck-bascule-ind'));
   SANS_MVT = !!window._ck2EntreeFaite; entree(); SANS_MVT = false; window._ck2EntreeFaite = true;
   if (modeAvant === 'eco' && V.eco) { SANS_MVT = true; try { choisirMode('eco'); } finally { SANS_MVT = false; } }   // AUJ-6
+  if (modeAvant === 'cave' && V.cave) { SANS_MVT = true; try { choisirMode('cave'); } finally { SANS_MVT = false; } }   // CAVEPIL-1
 };
 window._ck2Maj = function (v) {
   // VIF-1 (§414) : la mise à jour en direct, appelée par pilotage.js (_pilRafraichirVif) quand les données changent. Les
@@ -1725,6 +1908,7 @@ window._ck2Maj = function (v) {
   Object.keys(S.etats).forEach(t => { avant[t] = Object.assign({}, S.etats[t]); });
   PARCS.forEach(p => { nom[p.id] = p.nom; });
   charger(v); majTout({});
+  try { majCave(); } catch (e) { if (window._mvAvale) window._mvAvale(e, 'cockpit-vue.js/_ck2Maj#cave'); }   // CAVEPIL-1 (§436)
   if (reduit()) return;
   const parNom = {}; PARCS.forEach(p => { parNom[p.nom] = p.id; });
   Object.keys(S.etats).forEach(t => Object.keys(avant[t] || {}).forEach(pid => {

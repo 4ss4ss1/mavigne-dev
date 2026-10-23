@@ -6896,6 +6896,182 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
   #page-cave .caj-plus{ display:none; }
 }
 /* ★ FIN CAVEAUJ-2 */
+/* ══ ★★ CAVEPIL-1 (§436) — LA VUE CAVE DU PILOTAGE (bascule Terrain · Cave · Économie), MAQUETTE VALIDÉE LE 23/10 ══
+   Nico (22/10) : « l'introduction du module Cave dans le module de pilotage » ; maquette validée (« go », « exactement comme la
+   maquette »). Portée sous .ck2, comme tout le cockpit. Les couleurs disent l'état (ok, attention, danger, encours) ; la matière
+   (le vin dans la cuve, le bois, l'inox, le froid de la macération) a ses jetons dans la charte (--vin-*, --bois*, --inox-*,
+   --froid*). Les pastilles sont celles de l'appli (.mvpas .mvpas-statut). Au plus près, la bulle d'une cuve (#ck-cv-tip). */
+.ck2 .ck-bascule button{position:relative}
+.ck2 .ck-b-pt{position:absolute;top:var(--e-2,8px);right:var(--e-2,8px);width:7px;height:7px;border-radius:50%;box-shadow:0 0 0 2px var(--gris-clair)}
+.ck2 .ck-b-pt.attention{background:var(--attention)}
+.ck2 .ck-b-pt.alerte{background:var(--danger)}
+.ck2 .ck-bascule button[aria-selected="true"] .ck-b-pt{box-shadow:0 0 0 2px var(--bg-card)}
+@media (max-width:699px){.ck2 .ck-bascule button{gap:var(--e-1,4px);padding:0 var(--e-2,8px)}}
+.ck2 .ck-res-cave{color:var(--texte);text-decoration-color:var(--attention)}
+.ck2 .ck-res-cave.alerte{text-decoration-color:var(--danger)}
+/* le verdict : les trois semaines */
+.ck2 .cv-sem3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:var(--e-5,20px) 0 0;padding:0;border-top:1px solid var(--ligne-forte);border-bottom:1px solid var(--ligne,#E7E6E2)}
+.ck2 .cv-sem3>div{display:flex;flex-direction:column;justify-content:space-between;gap:var(--e-1,4px);padding:var(--e-3,12px) var(--e-3,12px) var(--e-3,12px) 0}
+.ck2 .cv-sem3>div+div{padding-left:var(--e-3,12px);box-shadow:inset 1px 0 0 var(--ligne,#E7E6E2)}
+.ck2 .cv-sem3 dt{font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.ck2 .cv-sem3 dd{margin:0;font-size:var(--pt-txt,13px);color:var(--texte-med)}
+.ck2 .cv-sem3 dd b{margin-right:var(--e-1,4px);font-size:var(--pt-md,20px);font-weight:600;color:var(--texte);font-variant-numeric:lining-nums tabular-nums}
+.ck2 .cv-verdict .ck-cadre{margin-top:var(--e-3,12px);align-items:flex-start}
+.ck2 .cv-verdict .ck-cadre::before{margin-top:var(--e-2,8px)}
+/* la cave en direct : la légende filtre */
+.ck2 .cv-leg{margin:var(--e-1,4px) 0}
+.ck2 .cv-leg .ck-leg-i i{width:10px;height:10px;border-radius:3px;border:1.5px solid var(--encours);background:var(--piste)}
+.ck2 .cv-leg .cv-e-alerte i{border-color:var(--danger);background:var(--danger-doux)}
+.ck2 .cv-leg .cv-e-faire i{border-color:var(--attention);background:var(--attention-doux)}
+.ck2 .cv-leg .cv-e-ok i{border-color:var(--ok);background:var(--ok-doux)}
+.ck2 .cv-leg .ck-leg-i[disabled]{opacity:.5;cursor:default}
+.ck2 .cv-zone{margin-top:var(--e-4,16px)}
+.ck2 .cv-zone-h{display:flex;align-items:baseline;justify-content:space-between;gap:var(--e-2,8px);margin-bottom:var(--e-2,8px);padding-bottom:var(--e-1,4px);border-bottom:1px solid var(--ligne,#E7E6E2)}
+.ck2 .cv-zone-h b{font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)}
+.ck2 .cv-zone-h span{font-size:var(--pt-micro,12px);color:var(--texte-doux);font-variant-numeric:lining-nums tabular-nums}
+/* le Cuvier : les cuves dessinées, leur niveau, leur matière */
+.ck2 .cv-cuves{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));align-items:end;gap:var(--e-3,12px)}
+.ck2 .cv-cuve{display:flex;flex-direction:column;align-items:flex-start;gap:var(--e-1,4px);min-width:0;margin:calc(-1 * var(--e-1,4px));padding:var(--e-1,4px);border:0;border-radius:var(--r-md,8px);background:none;color:inherit;text-align:left;cursor:pointer;transition:background-color var(--mv-d2),opacity var(--mv-d3)}
+.ck2 .cv-cuve:hover{background:var(--survol)}
+.ck2 .cv-cuve-d{display:block;max-width:100%;height:auto;overflow:visible;margin-bottom:var(--e-1,4px)}
+.ck2 .cv-cuve-n{font-size:var(--pt-txt,13px);font-weight:600;line-height:1.2}
+.ck2 .cv-cuve-m,.ck2 .cv-cuve-v{font-size:var(--pt-micro,12px);line-height:1.3}
+.ck2 .cv-cuve-m{color:var(--texte-doux)}
+.ck2 .cv-cuve-v{color:var(--texte-med);font-variant-numeric:lining-nums tabular-nums}
+.ck2 .cv-cuve .mvpas{margin:var(--e-0,2px) 0}
+.ck2 .cv-corps{stroke-width:1.5}
+.ck2 .cv-inox .cv-corps{fill:var(--inox-corps);stroke:var(--ligne-forte)}
+.ck2 .cv-bois .cv-corps{fill:var(--bois-pale);stroke:var(--bois)}
+.ck2 .cv-corps.cv-trait{fill:none}
+.ck2 .cv-douve{stroke:var(--bois);stroke-width:.8;opacity:.32}
+.ck2 .cv-cercle{stroke:var(--bois);stroke-width:2.2;opacity:.55}
+.ck2 .cv-reflet{fill:var(--inox-reflet)}
+.ck2 .cv-liq{fill:var(--vin-liq)}
+.ck2 .cv-surf{fill:none;stroke:var(--vin-surf);stroke-width:2}
+.ck2 .cv-pied{stroke:var(--ligne-forte);stroke-width:2;stroke-linecap:round}
+.ck2 .cv-trappe{fill:var(--bg-card);stroke:var(--ligne-forte);stroke-width:1.2}
+.ck2 .cv-bois .cv-trappe{stroke:var(--bois)}
+.ck2 .cv-anneau{fill:none;stroke-width:2;opacity:0}
+.ck2 .cv-e-alerte .cv-anneau{stroke:var(--danger);opacity:1}
+.ck2 .cv-e-faire .cv-anneau{stroke:var(--attention);opacity:1}
+.ck2 .cv-e-vide .cv-corps{stroke-dasharray:4 4}
+.ck2 .cv-bulle{fill:var(--bulle);opacity:0;animation:cv-bulle 3.6s linear infinite}
+@keyframes cv-bulle{0%{transform:translateY(0);opacity:0}12%{opacity:.9}80%{opacity:.7}100%{transform:translateY(var(--monte,-40px));opacity:0}}
+.ck2 .cv-gel{fill:var(--froid-doux);stroke:var(--froid);stroke-width:1.2}
+.ck2 .cv-gel-ic{fill:none;stroke:var(--froid);stroke-width:1.4;stroke-linecap:round}
+/* le Chai : les fûts, cuvée par cuvée */
+.ck2 .cv-cuvees{display:flex;flex-direction:column;gap:var(--e-1,4px)}
+.ck2 .cv-cuvee{display:block;width:calc(100% + 2 * var(--e-2,8px));margin:0 calc(-1 * var(--e-2,8px));padding:var(--e-2,8px);border:0;border-radius:var(--r-md,8px);background:none;color:inherit;text-align:left;cursor:pointer;transition:background-color var(--mv-d2),opacity var(--mv-d3)}
+.ck2 .cv-cuvee:hover{background:var(--survol)}
+.ck2 .cv-cuvee-h{display:flex;align-items:baseline;flex-wrap:wrap;gap:var(--e-0,2px) var(--e-2,8px)}
+.ck2 .cv-cuvee-h b{font-size:var(--pt-base,14px);font-weight:600}
+.ck2 .cv-cuvee-h>span:not(.mvpas){font-size:var(--pt-micro,12px);color:var(--texte-doux);font-variant-numeric:lining-nums tabular-nums}
+.ck2 .cv-cuvee-h .mvpas{margin-left:auto}
+.ck2 .cv-futs{display:flex;flex-wrap:wrap;gap:var(--e-1,4px);margin-top:var(--e-2,8px)}
+.ck2 .cv-fut{display:block;width:16px;height:16px}
+.ck2 .cv-fut .o{fill:var(--piste);stroke:var(--encours);stroke-width:1.3}
+.ck2 .cv-fut .r{fill:none;stroke:var(--encours);stroke-width:.9;opacity:.5}
+.ck2 .cv-e-alerte .cv-fut .o{fill:var(--danger-doux);stroke:var(--danger)}.ck2 .cv-e-alerte .cv-fut .r{stroke:var(--danger)}
+.ck2 .cv-e-faire .cv-fut .o{fill:var(--attention-doux);stroke:var(--attention)}.ck2 .cv-e-faire .cv-fut .r{stroke:var(--attention)}
+.ck2 .cv-e-ok .cv-fut .o{fill:var(--ok-doux);stroke:var(--ok)}.ck2 .cv-e-ok .cv-fut .r{stroke:var(--ok)}
+.ck2 .cv-cuvee-s{display:block;margin-top:var(--e-1,4px);font-size:var(--pt-micro,12px);line-height:1.4;color:var(--texte-med)}
+.ck2 .cv-cuvee-s .rt{font-weight:600;color:var(--danger-texte)}
+.ck2 .cv-btl{display:flex;align-items:center;gap:var(--e-2,8px);width:calc(100% + 2 * var(--e-2,8px));margin:0 calc(-1 * var(--e-2,8px));padding:var(--e-2,8px);border:0;border-radius:var(--r-md,8px);background:none;color:inherit;text-align:left;cursor:pointer}
+.ck2 .cv-btl:hover{background:var(--survol)}
+.ck2 .cv-btl-ic{display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:var(--r-md,8px);background:var(--gris-clair);color:var(--texte-med)}
+.ck2 .cv-btl b{font-size:var(--pt-base,14px);font-weight:600}
+.ck2 .cv-btl span span{display:block;font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.ck2 .cv-filtre .cv-cuve:not(.vis),.ck2 .cv-filtre .cv-cuvee:not(.vis){opacity:.25}
+/* la semaine */
+.ck2 .cv-semaine,.ck2 .cv-mil{container-type:inline-size}
+.ck2 .cv-jours{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--e-1,4px)}
+.ck2 .cv-j{display:flex;flex-direction:column;gap:var(--e-2,8px);min-height:120px;padding:var(--e-2,8px) var(--e-1,4px);border-radius:var(--r-md,8px);background:var(--bg-doux)}
+.ck2 .cv-j.auj{background:var(--bg-card);box-shadow:inset 0 0 0 1.5px var(--encours)}
+.ck2 .cv-j.passe{opacity:.72}
+.ck2 .cv-j-n{margin:0;font-size:var(--pt-nano,11px);font-weight:600;color:var(--texte-doux);text-align:center}
+.ck2 .cv-j-n b{display:block;font-size:var(--pt-base,14px);color:var(--texte)}
+.ck2 .cv-j-gens{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--e-1,4px);min-height:24px}
+.ck2 .cv-pers{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font-size:var(--pt-nano,11px);font-weight:600;color:var(--texte);background:var(--bg-card);box-shadow:inset 0 0 0 1.5px var(--accent-texte)}
+.ck2 .cv-pers.j{background:var(--accent-doux)}
+.ck2 .cv-pers.m{background:linear-gradient(90deg,var(--accent-doux) 50%,var(--bg-card) 50%)}
+.ck2 .cv-pers.a{background:linear-gradient(90deg,var(--bg-card) 50%,var(--accent-doux) 50%)}
+.ck2 .cv-j-ev{display:flex;flex-direction:column;gap:var(--e-1,4px);margin:0;padding:0;list-style:none}
+.ck2 .cv-j-ev li{font-size:var(--pt-nano,11px);line-height:1.3;color:var(--texte-med);text-align:center}
+.ck2 .cv-j-ev li.fait,.ck2 .cv-j-vide{color:var(--texte-doux)}
+.ck2 .cv-j-vide{margin:auto 0 0;font-size:var(--pt-nano,11px);text-align:center}
+.ck2 .cv-leg-j{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-1,4px) var(--e-3,12px);margin:var(--e-2,8px) 0 0;font-size:var(--pt-nano,11px);color:var(--texte-doux)}
+.ck2 .cv-leg-j>span{display:inline-flex;align-items:center;gap:var(--e-1,4px);white-space:nowrap}
+.ck2 .cv-leg-j .cv-pers{display:inline-block;width:12px;height:12px;box-shadow:inset 0 0 0 1px var(--accent-texte)}
+.ck2 .cv-tot{margin:var(--e-3,12px) 0 0;font-size:var(--pt-txt,13px);line-height:1.5;color:var(--texte-med)}
+.ck2 .cv-tot b{font-size:var(--pt-base,14px);color:var(--texte)}
+.ck2 .cv-manque{display:flex;gap:var(--e-2,8px);align-items:flex-start;margin-top:var(--e-3,12px);padding:var(--e-2,8px) var(--e-3,12px);border-radius:var(--r-md,8px);background:var(--attention-doux);font-size:var(--pt-txt,13px);line-height:1.45;color:var(--texte)}
+.ck2 .cv-manque svg{flex:none;margin-top:var(--e-0,2px);color:var(--attention-texte)}
+.ck2 .cv-suite{margin:var(--e-3,12px) 0 0;padding:0;list-style:none}
+.ck2 .cv-s{display:grid;grid-template-columns:minmax(0,9em) minmax(0,1fr) auto;align-items:center;gap:var(--e-1,4px) var(--e-3,12px);padding:var(--e-2,8px) 0;box-shadow:inset 0 1px 0 var(--ligne,#E7E6E2)}
+.ck2 .cv-s b{display:block;font-size:var(--pt-txt,13px);font-weight:600}
+.ck2 .cv-s .d{display:block;font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.ck2 .cv-s p{margin:0;font-size:var(--pt-txt,13px);line-height:1.4;color:var(--texte-med)}
+.ck2 .cv-s p.plan{font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.ck2 .cv-s p.plan.vide{font-weight:500;color:var(--attention-texte)}
+.ck2 .cv-s .ck-sv-a{margin:0}
+@container (max-width:520px){
+  .ck2 .cv-s{grid-template-columns:minmax(0,1fr) auto;row-gap:var(--e-0,2px)}
+  .ck2 .cv-s>div:first-child{display:flex;align-items:baseline;gap:var(--e-2,8px);grid-column:1;grid-row:1}
+  .ck2 .cv-s>div:nth-child(2){grid-column:1;grid-row:2}
+  .ck2 .cv-s>.ck-sv-a,.ck2 .cv-s>span:last-child{grid-column:2;grid-row:1/3}
+}
+/* le millésime : de la vigne à la bouteille */
+.ck2 .cv-mil-tete{margin:0 0 var(--e-0,2px);font-size:var(--pt-txt,13px);line-height:1.45;color:var(--texte-med)}
+.ck2 .cv-mil-tete b{font-size:var(--pt-base,14px);color:var(--texte)}
+.ck2 .cv-barre{display:flex;height:14px;margin:var(--e-1,4px) 0 0;border-radius:var(--r-full,999px);overflow:hidden;background:var(--piste)}
+.ck2 .cv-barre i{display:block;height:100%;transform-origin:left center}
+.ck2 .cv-barre i+i{box-shadow:inset 2px 0 0 var(--bg-card)}
+.ck2 .cv-barre .vendu{background:repeating-linear-gradient(135deg,var(--gris) 0 4px,transparent 4px 7px)}
+.ck2 .cv-barre .cuve{background:var(--vin-liq)}
+.ck2 .cv-barre .chai{background:var(--vin-chai)}
+.ck2 .cv-barre .btl{background:var(--encours)}
+.ck2 .cv-etapes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--e-2,8px);margin:var(--e-3,12px) 0 0;padding:0;list-style:none}
+@container (max-width:440px){.ck2 .cv-etapes{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:var(--e-3,12px)}}
+.ck2 .cv-et{position:relative;padding-left:var(--e-3,12px)}
+.ck2 .cv-et::before{content:"";position:absolute;left:0;top:var(--e-1,4px);width:6px;height:6px;border-radius:2px;background:var(--encours)}
+.ck2 .cv-et.vendu::before{background:var(--gris)}
+.ck2 .cv-et.cuve::before{background:var(--vin-liq)}
+.ck2 .cv-et.chai::before{background:var(--vin-chai)}
+.ck2 .cv-et span{display:block;font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.ck2 .cv-et b{display:block;margin-top:var(--e-0,2px);font-size:var(--pt-md,20px);font-weight:600;letter-spacing:var(--ls-serre);font-variant-numeric:lining-nums;white-space:nowrap}
+.ck2 .cv-et small{display:block;margin-top:var(--e-0,2px);font-size:var(--pt-micro,12px);line-height:1.35;color:var(--texte-med)}
+.ck2 .cv-et.a-venir b{color:var(--texte-pale)}
+.ck2 .cv-rdt{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--e-2,8px) var(--e-3,12px);margin:var(--e-4,16px) 0 0;padding:var(--e-3,12px) 0 0;border-top:1px solid var(--ligne,#E7E6E2);font-size:var(--pt-txt,13px);color:var(--texte-med)}
+.ck2 .cv-rdt b{font-weight:600;color:var(--texte)}
+.ck2 .cv-liens{display:inline-flex;flex-wrap:wrap;gap:var(--e-3,12px)}
+.ck2 .cv-lien{padding:0;border:0;background:none;font-size:var(--pt-txt,13px);font-weight:600;color:var(--accent-texte);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.ck2 .cv-aussi{display:flex;flex-wrap:wrap;gap:var(--e-1,4px);margin:var(--e-2,8px) 0 0;padding:0;list-style:none}
+.ck2 .cv-aussi li{display:inline-flex;align-items:center;gap:var(--e-2,8px);min-height:var(--h-sm,28px);padding:0 var(--e-2,8px);border-radius:var(--r-md,8px);border:1px solid var(--ligne,#E7E6E2);background:var(--bg-doux);font-size:var(--pt-micro,12px);color:var(--texte-med)}
+.ck2 .cv-aussi b{font-weight:600;color:var(--texte)}
+.ck2 .cv-note{margin:var(--e-3,12px) 0 0;font-size:var(--pt-micro,12px);line-height:1.45;color:var(--texte-doux)}
+/* En direct et À savoir, en cave */
+.ck2 .cv-fil{position:relative}
+.ck2 .cv-fil-tout{position:absolute;top:var(--e-5,20px);right:var(--e-5,20px)}
+.ck2 .cv-fil-corps{position:relative;max-height:236px;overflow:hidden}
+.ck2 .cv-fil.ouvert .cv-fil-corps{max-height:none}
+.ck2 .cv-fil:not(.ouvert) .cv-fil-corps::after{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--e-8,40px);background:linear-gradient(transparent,var(--bg-card))}
+.ck2 .cv-ev-ic{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--gris-clair);color:var(--texte-med)}
+.ck2 .cv-c-faire .ck-sv-ic{background:var(--attention-doux);color:var(--attention-texte)}
+.ck2 .cv-c-alerte .ck-sv-ic{background:var(--danger-doux);color:var(--danger-texte)}
+.ck2 .cv-c-ok .ck-sv-ic{background:var(--ok-doux);color:var(--ok-texte)}
+.ck2 .ck-sv.fort.cv-al{background:var(--danger-doux)}
+.ck2 .ck-sv.fort.cv-al .ck-sv-q,.ck2 .ck-sv.fort.cv-al .ck-sv-k{color:var(--danger-texte)}
+/* la bulle d'une cuve ou d'une cuvée (posée sur <body>, position fixe) */
+.ck-cv-tip{position:fixed;z-index:var(--z-tip,800);max-width:320px;padding:var(--e-3,12px) var(--e-3,12px);border-radius:var(--r-lg,12px);background:var(--bg-card);border:1px solid var(--ligne-forte);box-shadow:var(--shadow-lg,0 16px 40px -8px rgba(20,18,14,.22),0 4px 10px -4px rgba(20,18,14,.10));font-size:var(--pt-txt,13px);line-height:1.45;color:var(--texte-med);pointer-events:none;opacity:0;transform:translateY(var(--e-1,4px));transition:opacity var(--mv-d1),transform var(--mv-d2) var(--mv-sortie)}
+.ck-cv-tip.ouvert{opacity:1;transform:none}
+.ck-cv-tip[hidden]{display:none}
+.ck-cv-tip .t{display:block;margin-bottom:var(--e-1,4px);font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)}
+.ck-cv-tip dl{display:grid;grid-template-columns:auto 1fr;gap:var(--e-0,2px) var(--e-3,12px);margin:0}
+.ck-cv-tip dt{color:var(--texte-doux)}
+.ck-cv-tip dd{margin:0;color:var(--texte);font-variant-numeric:lining-nums tabular-nums}
+.ck-cv-tip p{margin:var(--e-2,8px) 0 0;font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+@media (prefers-reduced-motion:reduce){.ck2 .cv-bulle{display:none}}
+/* ★ FIN CAVEPIL-1 */
 
 /* ★ CAVE-2 (§289) — LE CUVIER AU DESSIN DE LA MAQUETTE V8 (habit seulement).
    Le Cuvier dessine avec sa propre feuille (classes mvv-, injectée) ; ce bloc la recale sur les jetons par #page-cave. Cuves en

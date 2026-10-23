@@ -1445,6 +1445,8 @@ Marqueurs dorés numérotés, ligne pleine J1, pointillés ensuite, repli SVG ho
 **l'ancien `CONFIG.ordre_passage` n'était lu par AUCUN autre fichier : le message « partagé à
 l'équipe » était faux depuis le premier jour.**
 
+  ★★ **CAVEPIL-1 (§436)** : Aujourd’hui a trois vues — Terrain · **Cave** · Économie. La vue Cave lit la Cave (`_caveSynthese`, `_mlChaine`, `_dgnSynthese`, `CONFIG.cave_jours`) et ne fait aucun geste (`data-cave` → `_pilCaveAller`) ; modèle `_pilCk2Cave` (dans `_pilCk2Modele`), dessin `cockpit-vue.js` (`cv*`, `majCave`), feuille ★★ CAVEPIL-1 ; indicateurs `auj_cave` (la vue) et `auj_cave_sv` (ses points dans « À savoir »).
+
 ## 20c. La Réserve
 
 - Intrants, achats, inventaires, **bilan matière** (RE délégué UE 2021/771 art.1).

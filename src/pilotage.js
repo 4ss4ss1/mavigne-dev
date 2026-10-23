@@ -69,7 +69,7 @@ var _PIL_ST_V = 4;
 var _PIL_DEFAULT = {
   show: {
     // Aujourd'hui (cockpit)
-    auj_marge:1, auj_charge:1, auj_cadence:1, auj_budget:1, auj_etp:1, auj_jours:1, auj_cave:1, auj_pres:1, auj_traiter:1, auj_prio:1, auj_alertes:1, auj_tension:1, auj_inaction:1,
+    auj_marge:1, auj_charge:1, auj_cadence:1, auj_budget:1, auj_etp:1, auj_jours:1, auj_cave:1, auj_cave_sv:1, auj_pres:1, auj_traiter:1, auj_prio:1, auj_alertes:1, auj_tension:1, auj_inaction:1,
     // Avancement
     // L'annee (niveau ①)
     // ⚠️⚠️ CES DEUX CLES MANQUAIENT AUX DEFAUTS. _pilNormalize ne garde que les
@@ -5361,7 +5361,7 @@ function _pilCk2Modele(d, m){
   var diag=[]; try{ diag=_pilDiag().filter(function(x){ return x&&x.touche&&x.touche.indexOf('cfm')>=0; }); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#cfm'); }
   window._ckSavoirFort=(sv||[]).filter(function(x){ return x&&x.prio===1; }).length;   // VIF-1 : la pastille du Pilotage dans la barre
   if(typeof window._railAlertesMaj==='function') setTimeout(window._railAlertesMaj,0);
-  return {
+  var _ckV={
     auj:auj, debut:(debH.sort()[0])||(ph[0]&&ph[0].d)||auj,
     objectif:isoD(m&&m.obj), fin:isoD(m&&m.proj), marge:(m&&m.marge!=null)?m.marge:null,
     dateTxt:sem[t0.getDay()].replace(/^./,function(c){ return c.toUpperCase(); })+' '+t0.getDate()+' '+t0.toLocaleDateString('fr-FR',{month:'long'})+', semaine '+nSem,
@@ -5379,11 +5379,206 @@ function _pilCk2Modele(d, m){
     jourTravaille:!repos, jourEff:jEff?_pilPhotoIso(jEff):null, ouvres:OUVL, ouvresDe:_pilPhotoIso(t0), ouvresA:_pilPhotoIso(jusq),
     prio:pT?pT.id:null, admin:admin, sparkTrav:ph.slice(-14).map(function(x){ return hT?Math.round((hT-x.reste)/hT*1000)/10:0; }), eco:null
   };
+  // ★ CAVEPIL-1 (§436) : la vue Cave, lue dans la Cave — dans le modèle, pour les deux montages (REF-1 et la mise à jour en
+  //   direct de VIF-1) ; ses points s'ajoutent à « À savoir » de Terrain.
+  _ckV.cave=(typeof _pilCk2Cave==='function')?_pilCk2Cave(_ckV):null;   // typeof : les harnais qui extraient le modèle seul ne l'ont pas
+  return _ckV;
 }
 window._pilCk2Modele=_pilCk2Modele;
 // ★★ REF-2 (§267) — LA PHOTO ÉCONOMIQUE DU JOUR (la vue Économie de la maquette), lue dans _pecData : le MÊME moteur que
 //   l'onglet Économie, donc les mêmes chiffres et la même période. Pas de taux horaire (E.configured faux) : pas de photo,
 //   la bascule ne s'affiche pas. Le coût de l'inaction vient du simulateur de renfort (_rfPair → _rfSim), comme sa tuile.
+// ★★ CAVEPIL-1 (§436) — LA VUE CAVE DU COCKPIT (bascule Terrain · Cave · Économie), fidèle à la maquette validée le 23/10.
+//   Nico (22/10) : « l'introduction du module Cave dans le module de pilotage ». Le Pilotage, écran d'arrivée de l'admin, ne
+//   montrait plus rien de la cave depuis CAVE-3 (§96). La vue répond aux questions du gérant : la cave est-elle sous contrôle,
+//   combien de temps prend-elle à l'équipe, où en est le vin, qu'est-ce qui arrive, qui a fait quoi.
+//   ★ UNE SEULE DÉFINITION (CAVE-3) : tout est LU — _caveSynthese (cave.js : verdict, agenda, cuves, cuvées, derniers gestes),
+//     _mlChaine (le millésime), _dgnSynthese (le Diagnostic du Chai), CONFIG.cave_jours (les journées de cave du Planning).
+//     Ici, rien que de la mise en forme. ★ AUCUN BOUTON DE GESTE : chaque ligne ouvre l'écran de la Cave (_pilCaveAller).
+//   Rend null quand la vue n'a pas lieu d'être : module Cave masqué, vue décochée (« Choisir les indicateurs »), Cave absente.
+function _pilCk2Cave(V){
+  if(typeof window._caveSynthese!=='function'||!window.CAVE_ELEVAGE||!window.CAVE_VENDANGE) return null;
+  if((typeof window._mvModOff==='function'&&window._mvModOff('cave'))||(typeof window._canModule==='function'&&!window._canModule('cave'))) return null;
+  if(!_pilShow('auj_cave')) return null;
+  var Y=null; try{ Y=window._caveSynthese(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Cave'); }
+  if(!Y||!Y.sem||!Y.sem.length) return null;
+  var MC=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'], JC=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+  var dI=function(x){ var p=String(x||'').slice(0,10).split('-'); return new Date(+p[0],(+p[1])-1,+p[2]); };
+  var isoL=function(d){ return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); };
+  var add=function(x,n){ var d=dI(x); d.setDate(d.getDate()+n); return isoL(d); };
+  var dC=function(x){ if(!x) return ''; var d=dI(x); return (d.getDate()===1?'1er':String(d.getDate()))+'\u00a0'+MC[d.getMonth()]; };
+  var jC=function(x){ var d=dI(x); return JC[d.getDay()]+'\u00a0'+d.getDate(); };
+  var ecart=function(a,b){ return Math.round((dI(b)-dI(a))/864e5); };
+  var nb=function(v){ return String(v).replace('.',','); };
+  var point=function(x){ x=String(x||''); return /\.$/.test(x)?x:x+'.'; };   // « le 4 oct. » : l'abréviation porte déjà son point
+  var pl=function(n,a,b){ return n+'\u00a0'+(n>1?(b||a+'s'):a); };
+  var auj=Y.auj, sem=Y.sem, s0=sem[0].items||[], gestes=function(L){ return (typeof window._mlGestes==='function')?window._mlGestes(L||[]):(L||[]); };
+  var v=Y.verdict||{cls:'ok', t:'Rien ne presse aujourd\u2019hui', s:''}, dg=Y.diag||[];
+  var alerte=dg.length>0||s0.some(function(i){ return i&&(i.kind==='alerte'||i.kind==='malo'); });
+  var CJ=(window.CONFIG&&window.CONFIG.cave_jours&&typeof window.CONFIG.cave_jours==='object')?window.CONFIG.cave_jours:{};
+  var gensDu=function(x){ var J=CJ[x]; return (J&&typeof J==='object')?Object.keys(J).filter(function(n){ return J[n]==='j'||J[n]==='m'||J[n]==='a'; }).map(function(n){ return [n,J[n]]; }):[]; };
+  var joursDe=function(a,b){ var n=0, x=a, g=0; while(x<=b&&g++<40){ gensDu(x).forEach(function(p){ n+=p[1]==='j'?1:0.5; }); x=add(x,1); } return n; };
+  // — le verdict : celui de la Cave, mot pour mot (Prioritaire / À faire / À jour, comme sa pastille) —
+  var PL={due:['ko','Prioritaire'], warn:['juste','\u00c0 faire'], ok:['ok','\u00c0 jour']}[v.cls]||['ok','\u00c0 jour'];
+  var duDiag=dg.length>0&&/Chai/.test(v.t||'');
+  var phrase=String(v.t||'')+((v.cls==='due'&&!duDiag&&!/aujourd/.test(v.t||''))?' aujourd\u2019hui':'')+(/[?.!]$/.test(v.t||'')?'':'.');
+  var unite=function(L){ var g=gestes(L); if(!g.length) return ['\u2014','rien de pr\u00e9vu']; var tousOu=g.every(function(i){ return i.kind==='ouillage'; }); return [String(g.length), tousOu?(g.length>1?'ouillages':'ouillage'):(g.length>1?'gestes':'geste')]; };
+  var L34=[]; sem.slice(2).forEach(function(w){ L34=L34.concat(w.items||[]); });
+  var nCv=Y.cuvees.length, nCu=Y.suivies||0;
+  var verdict={etat:PL[0], etatTxt:PL[1], phrase:phrase, sous:v.s||'',
+    sem:[['Cette semaine'].concat(unite(s0)), ['Semaine prochaine'].concat(unite(sem[1]&&sem[1].items)), ['Dans 2 \u00e0 4 semaines'].concat(unite(L34))],
+    cadre:duDiag?'Le Diagnostic du Chai croise le labo, les gestes et les d\u00e9gustations. Un statut d\u00e9crit des indices, pas une certitude.'
+      :('Calcul\u00e9 par la Cave sur '+(nCu?pl(nCu,'cuve suivie','cuves suivies')+' au Cuvier et ':'')+pl(nCv,'cuv\u00e9e')+' en \u00e9levage, avec le seuil d\u2019ouillage de chaque mill\u00e9sime.'),
+    act:duDiag?[['Ouvrir le diagnostic','diag'],['Ouvrir la Cave','auj']]:[['Ouvrir la Cave','auj'],['Le Chai','elevage']]};
+  // — la cave en direct : les cuves suivies, les cuvées et leurs fûts, les bouteilles —
+  var kindsDe=function(ref){ return s0.filter(function(i){ return i&&String(i.ref)===String(ref); }).map(function(i){ return i.kind; }); };
+  var cuves=Y.cuves.map(function(c){
+    var mat=/bois|foudre|ch[e\u00ea]ne/i.test(c.nom)?'bois':'inox', dec=!!(c.decuvage&&c.decuvage.date), k=kindsDe(c.id), e=c.e;
+    if(dec&&e==='ok') e='vide';
+    var puce=e==='alerte'?'\u00c0 contr\u00f4ler':(e==='faire'?(k.indexOf('mesure')>=0?'\u00c0 mesurer':(k.indexOf('decuvage')>=0?'\u00c0 d\u00e9cuver':'\u00c0 faire'))
+      :(dec?'D\u00e9cuv\u00e9e':(c.statut==='mpf'?'Mac\u00e9ration'+(c.jEntree!=null?' \u00b7 J'+c.jEntree:''):('FA'+(c.faPct!=null?' \u00b7 '+c.faPct+'\u00a0%':'')))));
+    var lect=c.d20!=null?(c.d20+(c.temp!=null?' \u00b7 '+nb(c.temp)+'\u00a0\u00b0C':'')):'\u2014';
+    var p=c.proj||{}, suite=dec?('D\u00e9cuv\u00e9e le '+dC(c.decuvage.date)):(c.statut==='mpf'?'Mac\u00e9ration \u00e0 froid':(p.etat==='normal'&&p.date?'Fin estim\u00e9e '+jC(p.date):(p.etat==='sec'?'Vin sec, d\u00e9cuvage possible':(p.etat==='ralentit'?'Ralentit, \u00e0 contr\u00f4ler':''))));
+    var rows=[];
+    if(c.parcelles.length) rows.push(['Parcelles',c.parcelles.join(', ')]);
+    if(c.kg) rows.push(['Raisin',Math.round(c.kg).toLocaleString('fr-FR')+'\u00a0kg']);
+    if(!dec&&c.hl) rows.push(['En cuve','environ '+nb(Math.round(c.hl))+'\u00a0hL, d\u2019apr\u00e8s les caisses']);
+    if(dec) rows.push(['D\u00e9cuvage',dC(c.decuvage.date)+(c.decuvage.hl?' \u00b7 '+nb(c.decuvage.hl)+'\u00a0hL':'')+(c.decuvage.cuvee?' \u00b7 '+c.decuvage.cuvee:'')]);
+    if(c.jRel!=null) rows.push(['Dernier relev\u00e9',(c.jRel<=0?'aujourd\u2019hui':(c.jRel===1?'hier':'il y a '+c.jRel+'\u00a0j'))+(c.d20!=null?' \u00b7 '+lect:'')]);
+    if(c.note) rows.push(['Note','\u00ab\u00a0'+c.note+'\u00a0\u00bb']);
+    if(p.etat==='normal'&&p.date) rows.push(['Fin estim\u00e9e',jC(p.date)+(p.marge!=null?', \u00e0 '+pl(p.marge,'jour')+' pr\u00e8s':'')]);
+    return {id:c.id, nom:c.nom.split(/\s+[\u2014-]\s+/)[0], mat:mat, cap:c.cap, hl:c.hl, e:e, puce:puce, v:lect,
+      s:suite+(dec&&c.decuvage.cuvee?' \u00b7 '+c.decuvage.cuvee:''), bulles:c.statut==='fa'&&!dec&&c.hl>0, froid:c.statut==='mpf'&&!dec,
+      go:'cuve:'+c.id, tip:{t:c.nom, rows:rows}};
+  });
+  var fortsId={}; dg.forEach(function(d){ fortsId[String(d.id)]=d; });
+  var cuvees=Y.cuvees.map(function(c){
+    var k=c.kinds||[], o=c.ouillage, m=c.malo||{}, f=fortsId[String(c.id)], e=f?'alerte':c.e, parts=[];
+    var retard=(o&&o.cls==='due'&&/^\+(\d+)/.test(o.d||''))?parseInt((o.d||'').slice(1),10):0;
+    if(f) parts.push(String(f.txt||'Signes forts'));
+    if(retard) parts.push('<span class="rt">En retard de '+pl(retard,'jour')+'</span>');
+    if(m.t==='Finie') parts.push(c.soutirer?'malo finie, \u00e0 soutirer':'malo finie');
+    else if(m.t==='Apr\u00e8s la FA') parts.push('fermentation \u00e0 finir en f\u00fbts');
+    else if(/^Bloqu/.test(m.t||'')) parts.push('malo bloqu\u00e9e');
+    else if(/^En cours/.test(m.t||'')) parts.push('malo en cours'+(m.s?' \u00b7 '+m.s:''));
+    if(c.sout) parts.push('soutir\u00e9 le '+dC(c.sout));
+    if(o&&o.last&&!retard) parts.push('ouill\u00e9 le '+dC(o.last));
+    var puce=f?'Signes forts':(e==='alerte'?'Malo bloqu\u00e9e':(e==='faire'?(k.indexOf('ouillage')>=0&&o&&o.cls==='due'?'\u00c0 ouiller':(k.indexOf('soutirage')>=0?'\u00c0 soutirer':(k.indexOf('so2')>=0?'\u00c0 doser':'\u00c0 faire')))
+      :(e==='cours'?(m.t==='Apr\u00e8s la FA'?'Fermentation':(m.t||'En cours')):'\u00c0 jour')));
+    var parAn={}; (c.tonneaux||[]).forEach(function(t){ var a=t.annee||'?'; parAn[a]=(parAn[a]||0)+(t.nb||0); });
+    var futsTxt=Object.keys(parAn).sort().reverse().map(function(a){ return parAn[a]+' de '+a+(String(a)===String(c.mil)?' (neufs)':''); }).join(', ');
+    var rows=[];
+    if(futsTxt) rows.push(['F\u00fbts',futsTxt]);
+    if(c.hl) rows.push(['Volume',nb(c.hl)+'\u00a0hL']);
+    if(o&&o.last) rows.push(['Dernier ouillage',dC(o.last)]);
+    if(m.t) rows.push(['Malo',m.t+(m.s?', '+m.s:'')]);
+    if(c.sout) rows.push(['Dernier soutirage',dC(c.sout)]);
+    if(c.analyse) rows.push(['Derni\u00e8re analyse',dC(c.analyse)]);
+    if(f) rows.unshift(['Diagnostic','signes forts\u00a0: '+String(f.txt||'').toLowerCase()]);
+    return {id:c.id, nom:c.nom, futs:c.futs||0, hl:c.hl?nb(c.hl)+'\u00a0hL':'', e:e, puce:puce, s:parts.join(' \u00b7 '), go:f?'diag':'cuvee:'+c.id, tip:{t:c.nom, rows:rows},
+      r:e==='alerte'?0:(e==='faire'?(retard?1:2):(e==='cours'?3:4))};
+  }).sort(function(a,b){ return a.r-b.r; });
+  var tf=cuvees.reduce(function(a,c){ return a+c.futs; },0), th=Y.cuvees.reduce(function(a,c){ return a+(c.hl||0); },0);
+  var hlCu=cuves.reduce(function(a,c){ return a+(c.e==='vide'?0:(c.hl||0)); },0), capCu=cuves.reduce(function(a,c){ return a+(c.cap||0); },0);
+  var nBtl=Y.btl.reduce(function(a,b){ return a+b.n; },0);
+  // — la semaine : les journées de cave du Planning face aux gestes —
+  var lu=sem[0].lundi, LIBK={mesure:['relev\u00e9'], ouillage:['ouillage'], soutirage:['soutirage'], so2:['dose'], decuvage:['d\u00e9cuvage'], alerte:['contr\u00f4le'], malo:['contr\u00f4le de malo','contr\u00f4les de malo'], labo:['fin de FA \u00e0 d\u00e9clarer','fins de FA \u00e0 d\u00e9clarer']};
+  var jours=[0,1,2,3,4].map(function(n){
+    var x=add(lu,n), ev=[], cpt={};
+    gestes(s0.filter(function(i){ return i&&i.date===x; })).forEach(function(i){ cpt[i.kind]=(cpt[i.kind]||0)+1; });
+    Object.keys(cpt).forEach(function(kd){ var l=LIBK[kd]||['geste']; ev.push([cpt[kd]+'\u00a0'+(cpt[kd]>1?(l[1]||l[0]+'s'):l[0])]); });
+    if(x<auj){ var rf={}; (Y.recents||[]).forEach(function(r){ if(r.d===x&&r.t!=='Relev\u00e9') rf[r.t+(r.t==='D\u00e9cuvage'?' '+String(r.q||'').split(/\s+[\u2014\u2192-]\s+/)[0].replace(/^Cuve\s+/,'Cuve\u00a0'):'')]=1; });
+      Object.keys(rf).slice(0,3).forEach(function(t){ ev.push([t,1]); }); }
+    return {j:JC[dI(x).getDay()], d:String(dI(x).getDate()), auj:x===auj, passe:x<auj, gens:gensDu(x), ev:ev.slice(0,3)};
+  });
+  var jSem=joursDe(lu,add(lu,4)), lourds=gestes(s0).filter(function(i){ return i&&i.date>=auj&&(i.kind==='soutirage'||i.kind==='ouillage'); });
+  var manque='';
+  if(lourds.length&&!joursDe(auj,add(lu,4))){
+    var nS=lourds.filter(function(i){ return i.kind==='soutirage'; }).length, nO=lourds.length-nS;
+    manque=([nS?pl(nS,'soutirage'):'', nO?pl(nO,'ouillage'):''].filter(Boolean).join(' et '));
+    manque=(lourds.length>1?'Les ':'Le ')+manque+(lourds.length>1?' n\u2019ont':' n\u2019a')+' pas encore de journ\u00e9e de cave au planning.';
+  }
+  var resumeS=function(W, a, b){
+    var g=gestes(W), r={futs:0,litres:0};
+    g.forEach(function(i){ if(i.kind==='ouillage'){ r.futs+=(i.futs||0); var mm=/~(\d+)\s*L/.exec(i.detail||''); if(mm) r.litres+=parseInt(mm[1],10); } });
+    var nO=g.filter(function(i){ return i.kind==='ouillage'; }).length, nA=g.length-nO;
+    var txt=!g.length?'Rien de pr\u00e9vu par la Cave':([nO?pl(nO,'ouillage'):'', nA?pl(nA,'autre geste','autres gestes'):''].filter(Boolean).join(' \u00b7 ')+(r.futs?' \u00b7 '+pl(r.futs,'f\u00fbt')+(r.litres?' \u00b7 environ '+r.litres+'\u00a0L':''):''));
+    var jp=joursDe(a,b);
+    return {txt:txt, plan:g.length?(jp?nb(jp)+' '+(jp>1?'journ\u00e9es':'journ\u00e9e')+' de cave au planning':'Aucune journ\u00e9e de cave au planning'):'', vide:!!(g.length&&!jp)};
+  };
+  var w1=sem[1]||{items:[],lundi:add(lu,7)}, r1=resumeS(w1.items||[], w1.lundi, add(w1.lundi,4));
+  var d3=add(lu,14), f4=add(lu,25), r34=resumeS(L34, d3, f4);
+  var semaine={jours:jours, tot:jSem?nb(jSem)+' '+(jSem>1?'jours':'jour'):'Aucune journ\u00e9e', totTxt:jSem?'de l\u2019\u00e9quipe en cave cette semaine, d\u2019apr\u00e8s le Planning. Ils ne comptent pas pour la vigne\u00a0: la fin pr\u00e9vue des travaux en tient compte.':'de cave au planning cette semaine.',
+    manque:manque, suite:[['Semaine prochaine', dC(w1.lundi)+' \u2013 '+dC(add(w1.lundi,4)), r1.txt, r1.plan, r1.vide], ['Dans 2 \u00e0 4 semaines', dC(d3)+' \u2013 '+dC(f4), r34.txt, r34.plan, r34.vide]], vide:!jSem&&!lourds.length};
+  // — le millésime : la chaîne de la Cave —
+  var ch=null; try{ ch=(typeof window._mlChaine==='function')?window._mlChaine(Y.mil):null; }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Cave#chaine'); }
+  var mil=null;
+  if(ch){
+    var kgHl=ch.kgHl||135, hlVendu=ch.kgVendu?Math.round(ch.kgVendu/kgHl*10)/10:0, hlBtl=ch.btl?Math.round(ch.btl*0.0075*10)/10:0, rdt=null;
+    try{ rdt=(typeof window._mlRdtMoyen==='function')?window._mlRdtMoyen(ch):null; }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Cave#rdt'); }
+    var t=Math.round((ch.kg||0)/100)/10, aussi=[];
+    try{ ((typeof window._mlMillesimes==='function')?window._mlMillesimes():[]).forEach(function(mm){ if(String(mm)===String(Y.mil)) return; var c2=window._mlChaine(mm);
+      if(c2&&c2.hlFut>0) aussi.push([String(mm), nb(c2.hlFut)+'\u00a0hL au chai \u00b7 '+pl(c2.futs||0,'f\u00fbt')]); else if(c2&&c2.btl>0) aussi.push([String(mm), Number(c2.btl).toLocaleString('fr-FR')+' bouteilles']); }); }
+    catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Cave#aussi'); }
+    mil={titre:'Le mill\u00e9sime '+Y.mil, cadre:'De la vigne \u00e0 la bouteille', vide:!(ch.kg>0||ch.hlFut>0||ch.btl>0),
+      tete:'<b>'+nb(t)+'\u00a0t</b> rentr\u00e9es'+(ch.parcelles?' de '+pl(ch.parcelles,'parcelle'):'')+', soit environ '+Math.round((ch.kg||0)/kgHl)+'\u00a0hL \u00e0 '+kgHl+'\u00a0kg/hL',
+      barre:[['vendu',hlVendu],['cuve',ch.hlCuve||0],['chai',ch.hlFut||0],['btl',hlBtl]],
+      etapes:[['vendu','Vendu en raisin',ch.kgVendu?nb(Math.round(ch.kgVendu/100)/10)+'\u00a0t':'0\u00a0t',hlVendu?'environ '+nb(Math.round(hlVendu))+'\u00a0hL':''],
+        ['cuve','En cuve',(ch.hlCuve?'environ ':'')+nb(ch.hlCuve||0)+'\u00a0hL',ch.hlCuve?pl((ch.cuves||[]).filter(function(x){ return x&&x.statut!=='termine'; }).length,'cuve')+', d\u2019apr\u00e8s les caisses':'tout est d\u00e9cuv\u00e9'],
+        ['chai','Au chai',nb(ch.hlFut||0)+'\u00a0hL',ch.futs?pl(ch.futs,'f\u00fbt'):''],
+        ['btl','En bouteille',ch.btl?Number(ch.btl).toLocaleString('fr-FR'):'\u00e0 venir',ch.btl?'bouteilles':'',ch.btl?0:1]],
+      rdt:(rdt&&rdt.hlHa)?'Rendement du domaine\u00a0: <b>'+nb(Math.round(rdt.hlHa))+'\u00a0hL/ha</b>'+(rdt.ha?', sur '+nb(rdt.ha)+'\u00a0ha r\u00e9colt\u00e9s pour la cave':'')+'.':'Rendement du domaine\u00a0: il se lira au d\u00e9cuvage.',
+      aussi:aussi, note:'Les kilos sont convertis \u00e0 '+kgHl+'\u00a0kg/hL, la r\u00e8gle du Cuvier. Le volume au chai est mesur\u00e9.'};
+  }
+  // — En direct : les derniers gestes de la cave —
+  var rel=function(x){ var j=ecart(x,auj); return j<=0?'aujourd\u2019hui':(j===1?'hier':(j<7?JC[dI(x).getDay()]+'\u00a0'+dI(x).getDate():dC(x))); };
+  var moi=gensDu(auj).map(function(p){ return [p[0].charAt(0).toUpperCase(), p[0]+' est en cave '+(p[1]==='j'?'aujourd\u2019hui':(p[1]==='m'?'ce matin':'cet apr\u00e8s-midi')), '', 'en cave']; });
+  var fil={enCe:moi, items:(Y.recents||[]).slice(0,12).map(function(r){ return [r.ic||'journal', r.t+(r.q?'\u00a0: '+r.q:''), r.s||'', rel(r.d)]; })};
+  // — À savoir, en cave —
+  var sv=[], dgAll=[];
+  var enElev={}; Y.cuvees.forEach(function(c){ enElev[String(c.id)]=1; });   // les cuvées en élevage selon la Cave (une mise mal datée n'y est pas)
+  try{ dgAll=(typeof window._dgnSynthese==='function')?window._dgnSynthese().filter(function(x){ return x&&!x.mise&&enElev[String(x.id)]; }):[]; }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Cave#diag'); }
+  var nomCv={}; Y.cuvees.forEach(function(c){ nomCv[String(c.id)]=c.nom; });
+  dg.forEach(function(d,k){ sv.push({c:'alerte', fort:1, alerte:1, k:k?'':'Signes forts', ic:'microscope', t:d.nom+'\u00a0: '+String(d.txt||'').replace(/^./,function(x){ return x.toLowerCase(); }), q:'Diagnostic',
+    s:'Le Diagnostic du Chai rel\u00e8ve des indices qui vont ensemble. Un statut d\u00e9crit des indices, pas une certitude.', a:'Ouvrir le diagnostic', go:'diag'}); });
+  s0.forEach(function(i){ if(i&&(i.kind==='alerte'||i.kind==='malo')) sv.push({c:'alerte', fort:1, alerte:1, k:sv.length?'':'Alerte', ic:'alerte', t:i.titre+'\u00a0: '+(i.note||'\u00e0 contr\u00f4ler'), q:'Aujourd\u2019hui', s:i.detail||'', a:i.kind==='malo'?'Ouvrir la cuv\u00e9e':'Ouvrir le Cuvier', go:i.kind==='malo'?'cuvee:'+i.ref:'cuve:'+i.ref}); });
+  s0.forEach(function(i){ if(i&&i.kind==='ouillage'&&i.urgence==='due'){ var cv=Y.cuvees.filter(function(c){ return String(c.id)===String(i.ref); })[0], o=cv&&cv.ouillage, rt=(o&&/^\+(\d+)/.test(o.d||''))?parseInt(o.d.slice(1),10):0;
+    sv.push({c:'faire', fort:1, k:sv.length?'':'\u00c0 anticiper', ic:'goutte', t:i.titre+' \u00e0 ouiller', q:rt?'En retard de '+rt+'\u00a0j':'Aujourd\u2019hui', s:String(i.detail||'').replace('~','environ ')+(o&&o.last?'. Dernier ouillage le '+point(dC(o.last)):''), a:'Ouvrir la cuv\u00e9e', go:'cuvee:'+i.ref}); } });
+  var aSout=s0.filter(function(i){ return i&&i.kind==='soutirage'; });
+  if(aSout.length) sv.push({c:'faire', fort:1, k:sv.length?'':'\u00c0 anticiper', ic:'barrique', t:(aSout.length>1?aSout.length+' cuv\u00e9es ont fini leur malo':'1 cuv\u00e9e a fini sa malo'), q:'\u00c0 soutirer',
+    s:aSout.map(function(i){ return i.titre; }).join(' et ')+'.'+(manque&&/soutirage/.test(manque)?' Aucune journ\u00e9e de cave n\u2019est pr\u00e9vue au planning pour '+(aSout.length>1?'les':'la')+' soutirer.':''), a:'Pr\u00e9voir au planning', go:'planning'});
+  sem.slice(0,1).forEach(function(w){ (w.items||[]).forEach(function(i){ if(i&&i.kind==='fa') sv.push({c:'cours', ic:'sablier', t:'Fin de fermentation, '+String(i.titre||'').split(/\s+[\u2014-]\s+/)[0], q:jC(i.date),
+    s:'Estim\u00e9e '+String(i.detail||'').replace(/^fin de fermentation estim\u00e9e\s*\u00b7\s*/,'').replace('\u00b1 ','\u00e0 ').replace(/ j$/,'\u00a0jour pr\u00e8s')+(i.note?'\u00a0: '+i.note:'')+'. Le d\u00e9cuvage suivra.'}); }); });
+  if(!dg.length){
+    var att=dgAll.filter(function(x){ return x.g==='att'; }), sansA=dgAll.filter(function(x){ return !x.nAna; }).length, der=null;
+    // la dernière analyse, seulement si le Diagnostic en lit une chiffrée (sinon « aucune analyse » et « la dernière le … » se contrediraient)
+    if(sansA<dgAll.length) try{ ((typeof window._laboLignes==='function')?window._laboLignes():[]).forEach(function(l){ var x=String((l&&l.date)||'').slice(0,10); if(x&&x<=auj&&(!der||x>der)) der=x; }); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Cave#labo'); }
+    if(att.length) sv.push({c:'faire', ic:'microscope', t:(att.length>1?att.length+' cuv\u00e9es \u00e0 surveiller':(nomCv[att[0].id]||att[0].nom)+'\u00a0: '+String(att[0].txt||'').toLowerCase()), q:'Diagnostic', s:'Des indices au Diagnostic du Chai, sans aller jusqu\u2019aux signes forts.', a:'Ouvrir le diagnostic', go:'diag'});
+    else if(dgAll.length) sv.push({c:'ok', ic:'microscope', t:'Diagnostic du Chai\u00a0: aucun signe', q:pl(dgAll.length,'cuv\u00e9e'),
+      s:(sansA?pl(sansA,'cuv\u00e9e n\u2019a','cuv\u00e9es n\u2019ont')+' encore aucune analyse chiffr\u00e9e au labo\u00a0: une partie des risques n\u2019est pas \u00e9valuable.':'Toutes ont une analyse au labo.')+(der?' Derni\u00e8re analyse le '+point(dC(der)):''), a:'Ouvrir le diagnostic', go:'diag'});
+  }
+  // — le lien avec Terrain : la phrase du haut, le point de la bascule, la ligne d'« À savoir » —
+  var presse=v.cls!=='ok', lien=!presse?'':(duDiag?'un signe fort au Chai':String(v.t||'').replace(/^./,function(x){ return x.toLowerCase(); })+' en cave');
+  if(presse&&_pilShow('auj_cave_sv')&&Array.isArray(V.savoir)) V.savoir.push({cat:'cave', prio:2, titre:'Cave\u00a0: '+(duDiag?'signe fort au Chai':v.t), quand:'Aujourd\u2019hui',
+    sous:String(v.s||'').split(/\.\s/)[0].replace(/\.$/,'')+'.', action:'Voir la cave', fn:'cave'});
+  return {pt:presse?(alerte?'alerte':'attention'):'', lien:lien, lienAlerte:alerte, verdict:verdict,
+    cuvier:{resume:cuves.length?(pl(cuves.length,'cuve')+(hlCu?' \u00b7 environ '+nb(Math.round(hlCu))+'\u00a0hL en cuve':'')):'Cuverie vide', cuves:cuves, vide:!cuves.length, cap:capCu},
+    chai:{resume:pl(cuvees.length,'cuv\u00e9e')+' \u00b7 '+pl(tf,'f\u00fbt')+(th?' \u00b7 environ '+nb(Math.round(th))+'\u00a0hL':''), cuvees:cuvees},
+    btl:{resume:nBtl?Number(nBtl).toLocaleString('fr-FR')+' bouteilles':'', l:Y.btl.map(function(b){ return {nom:b.nom, n:Number(b.n).toLocaleString('fr-FR')+' bouteilles', s:b.date?'mises le '+dC(b.date):'', go:'elevage'}; })},
+    semaine:semaine, mil:mil, fil:fil, savoir:sv};
+}
+// La porte vers la Cave : chaque ligne de la vue Cave ouvre l'écran où se fait le geste — jamais le geste lui-même.
+window._pilCaveAller=function(go){
+  var g=String(go||'auj'), p=g.indexOf(':'), k=p>0?g.slice(0,p):g, id=p>0?g.slice(p+1):'';
+  try{
+    if(k==='planning'){ if(typeof goTo==='function') goTo('planning'); return; }
+    if(k==='revient'){ _PEC_SUB='rev'; if(typeof window._pilSetTab==='function') window._pilSetTab('eco'); return; }
+    if(k==='cuvee'||k==='diag'){ window._pilOuvrirCave('elevage');
+      setTimeout(function(){ try{ if(k==='diag'){ if(typeof window.switchCaveOng==='function') window.switchCaveOng('diag'); } else if(typeof window.openCuveeDetail==='function') window.openCuveeDetail(id); }
+        catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCaveAller#fiche'); } },80); return; }
+    window._pilOuvrirCave(k==='cuve'?'vendange':(k==='auj'?'aujourdhui':k));
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCaveAller'); }
+};
 function _pilCk2Eco(d, V){
   var E=null; try{ E=_pecData(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Eco'); }
   if(!E||!E.configured) return null;
@@ -11010,7 +11205,7 @@ function _pilTabCfm(d){
 
 // ── Personnalisation PAR ONGLET (visibilité des tuiles) ──
 var _PIL_PERSO_DEFS={
-  auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_tension','Tension équipe'],['auj_inaction','Coût de l’inaction'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_cave','La Cave \u2014 ce qui presse'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ? · fenêtre 5 jours'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave'],['auj_resume','Le résumé du jour'],['auj_chantiers','Les chantiers en cours'],['auj_courbe','La courbe de la charge restante'],['auj_fil','En direct : le fil de l\'équipe'],['auj_savoir','À savoir : météo, absences, contrats, retards'],['auj_plan','Le domaine en direct'],['auj_eco','La vue Économie (bascule Terrain / Économie)']],
+  auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_tension','Tension équipe'],['auj_inaction','Coût de l’inaction'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_cave','La Cave \u2014 la vue de la bascule Terrain / Cave / Économie'],['auj_cave_sv','Les points de cave dans « À savoir »'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ? · fenêtre 5 jours'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave'],['auj_resume','Le résumé du jour'],['auj_chantiers','Les chantiers en cours'],['auj_courbe','La courbe de la charge restante'],['auj_fil','En direct : le fil de l\'équipe'],['auj_savoir','À savoir : météo, absences, contrats, retards'],['auj_plan','Le domaine en direct'],['auj_eco','La vue Économie (bascule Terrain / Économie)']],
   an: [['an_budget','Le budget de l\'ann\u00e9e'],['an_frise','Le renfort \u00e0 pr\u00e9voir']],
   avc:[['avc_gauge','Jauge de saison'],['avc_bar','Avancement par tâche'],['avc_pie','Charge (donut)'],['avc_temps','Où va le temps de l\'équipe'],['avc_echeances','Échéances par tâche'],['avc_carte','Carte du domaine']],
   equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_conso','Consommation mesurée']],
