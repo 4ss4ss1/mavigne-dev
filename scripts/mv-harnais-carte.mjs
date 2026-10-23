@@ -126,7 +126,8 @@ t('une carte ouverte prend toute la ligne', /\.pil-tile\.open\{[^}]*grid-column:
 t('la grille descend a 250 px', /\.pil-panels\{[^}]*minmax\(250px/.test(C));
 
 /* ══ 5. AUCUN NOM NE BOUGE — la visite guidee et C22 en dependent ══ */
-for (const sel of ['pil-tile', 'data-pid', 'pil-th', 'pil-th-t', 'pil-th-stat', 'pil-tsub', 'pil-tbody', 'pil-cockpit-card', 'pil-dec'])
+for (const sel of ['pil-tile', 'data-pid', 'pil-th', 'pil-th-t', 'pil-th-stat', 'pil-tsub', 'pil-tbody'/* PIL-FIX-2 (§442) : 'pil-cockpit-card' et 'pil-dec' sont partis avec l'ancien Aujourd'hui (PIL-RANGE-1b, §441) ;
+     aucun sélecteur de la visite guidée ne les vise (src/ relu, C22 vert) */])
   t(`« ${sel} » intact`, P.includes(sel));
 t('#pil-body-<id> intact', /pil-body-'\+id/.test(P));
 t('les 27 appels a _pilTile tiennent toujours',

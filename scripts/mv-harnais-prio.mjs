@@ -28,7 +28,6 @@ const BASE = {
   save: sansCom(fn(APP, 'function savePriority(){')),
   clear: sansCom(fn(APP, 'function clearPriority(){')),
   prioJour: sansCom(fn(PIL, 'function _pilPrioDuJour(d){')),   // PRO-1 (§269) : la carte et le cockpit lisent la tâche du moment par elle
-  carte: sansCom(fn(PIL, 'function _pilCkPrio(d){')),
   dz: sansCom(fn(PIL, 'function _dzTachesDefaut(){')),
   go: sansCom(PIL.slice(iGo, PIL.indexOf('\n};\n', iGo) + 4)),
   aux: ligne(PIL, /function _pilFmtD\(iso\)\{[^\n]*\n/) + ligne(PIL, /function _dzPrioItems\(\)\{[^\n]*\n/) + ligne(PIL, /function _dzPrios\(\)\{[^\n]*\n/),
@@ -54,7 +53,7 @@ function monde(B, o) {
     _pilEsc: s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'),
     _pilTnom: s => s, _pilNum: n => String(Math.round(Number(n) || 0)), _pilPctColor: () => '#3D6B27' };
   ctx.window = ctx; vm.createContext(ctx);
-  vm.runInContext([B.regle, B.moment, B.defaut, B.part, B.prioJour, B.carte, B.dz, B.aux, B.go].join('\n'), ctx);
+  vm.runInContext([B.regle, B.moment, B.defaut, B.part, B.prioJour, B.dz, B.aux, B.go].join('\n'), ctx);
   return ctx;
 }
 const sansDivDansBouton = h => { let i = 0; while ((i = h.indexOf('<button', i)) >= 0) { const j = h.indexOf('</button>', i); if (j < 0 || h.slice(i, j).indexOf('<div') >= 0) return false; i = j; } return true; };
@@ -110,32 +109,8 @@ function suite(B) {
   T('Ma part : une journée en équipe compte pour chacun de l’équipe', c._mvPartTache() === 'Brûlage');
   c = monde(B, { auj: '2026-12-10', travaux: { 'Réparation': { pct: 100 } } });
   T('Ma part : rien travaillé → la première par date', c._mvPartTache() === 'Taille');
-  // ── La carte d'Aujourd'hui ──
-  const D = pr => ({ data: [{ nom: 'Réparation', pct: pr == null ? 100 : pr, h_reste: pr == null ? 0 : 120 }, { nom: 'Taille', pct: 0, h_reste: 805 }, { nom: 'Tirage', pct: 0, h_reste: 575 }, { nom: 'Brûlage', pct: 0, h_reste: 460 }] });
-  c = monde(B, { auj: '2026-12-10' });
-  let h = c._pilCkPrio(D());
-  T('carte, 10 déc. : « À choisir », les trois tâches, et le bouton pour l’admin', /À choisir/.test(h) && /Taille/.test(h) && /Tirage/.test(h) && /Brûlage/.test(h) && /data-diag="priorite"/.test(h));
-  T('carte : la cible de la pastille « Nouveau » et la pastille « i »', /id="pil-prio"/.test(h) && /data-k="pil\.prio"/.test(h));
-  T('carte : plus jamais « pôle long »', !/pôle long/.test(h) && !/pôle long|p\\u00f4le long/.test(B.carte));
-  T('carte : HTML propre (ni undefined, ni NaN, div équilibrés, pas de div dans un bouton)', propre(h));
-  c = monde(B, { auj: '2026-12-10', adm: false });
-  h = c._pilCkPrio(D());
-  T('carte, non-admin : pas de bouton, l’administrateur fixe la priorité', !/data-diag="priorite"/.test(h) && /administrateur fixe la priorit/.test(h));
-  c = monde(B, { auj: '2026-12-03' });
-  h = c._pilCkPrio(D());
-  T('carte, 3 déc. : la Taille, « seule tâche dans ses dates », jusqu’au 15 mars', /pil-big">Taille</.test(h) && /seule tâche dans ses dates/.test(h) && /15 mars/.test(h) && propre(h));
-  c = monde(B, { auj: '2026-10-04' });
-  h = c._pilCkPrio(D(40));
-  T('carte, 4 oct. : la Réparation (120 h), pas la Taille (805 h) — les heures ne décident pas', /pil-big">Réparation</.test(h));
-  c = monde(B, { auj: '2026-12-10', prios: [{ t: 'Réparation', equipe: ['Nico', 'Alicia'] }] });
-  h = c._pilCkPrio(D(40));
-  T('carte, priorité fixée : son nom, son équipe, « Changer la priorité »', /pil-big">Réparation</.test(h) && /fixée par l’administrateur/.test(h) && /Nico, Alicia/.test(h) && /Changer la priorit/.test(h) && propre(h));
-  c = monde(B, { auj: '2026-09-01' });
-  h = c._pilCkPrio(D(0));
-  T('carte, avant toute date : la prochaine, avec sa date', /pil-big">Réparation</.test(h) && /prochaine dès le 7 sept\./.test(h));
-  c = monde(B, { auj: '2026-12-10' });
-  h = c._pilCkPrio({ data: [{ nom: 'Taille', pct: 100, h_reste: 0 }] });
-  T('carte, tout fini : aucune tâche en cours', /aucune tâche en cours/.test(h) && propre(h));
+  // PIL-FIX-2 (§442) : la carte « Tâche prioritaire » de l'ancien Aujourd'hui (_pilCkPrio) est retirée (PIL-RANGE-1b, §441) ;
+  //   la tâche du moment se lit par _pilPrioDuJour, testé ci-dessus, et la tuile du cockpit v2 la dessine.
   // ── Décider ──
   const DZ = tots => { const tasks = Object.keys(tots).map(n => ({ nom: n, tot: tots[n] })); const byNom = {}; tasks.forEach(x => { byNom[x.nom] = x; }); return { tasks, byNom }; };
   c = monde(B, { auj: '2026-12-10', dz: DZ({ 'Réparation': 0, 'Taille': 800, 'Tirage': 575, 'Brûlage': 460 }) });
@@ -156,7 +131,7 @@ function suite(B) {
   T('le bouton de la carte ouvre l’éditeur de priorité (_pilGo « priorite »)', c.__ouvert === true);
   T('fixer ou effacer la priorité redessine l’Accueil et le Pilotage', /_prioRedessine\(\)/.test(B.save) && /_prioRedessine\(\)/.test(B.clear));
   T('le calcul « plus d’heures restantes » a quitté _pilData', !/prio\.h_reste/.test(sansCom(PIL)) && !/\bprio:prio\b/.test(PIL));
-  T('la fiche « i » de la carte existe (MV_INFO pil.prio)', /'pil\.prio':\s*\{\s*t:/.test(UTI));
+  // PIL-FIX-2 (§442) : la fiche pil.prio est partie avec la carte (PIL-RANGE-1b) — mv-harnais-pilrange1 vérifie qu’elle ne revient pas.
   return out;
 }
 function joue(B) { try { return suite(B); } catch (e) { return [['plantage : ' + (e && e.message), false]]; } }
@@ -170,10 +145,8 @@ const DEF = [
   ['une priorité terminée compte encore', B => ({ ...B, regle: B.regle.replace('return it&&it.t&&vivantes[it.t];', 'return it&&it.t;') })],
   ['une tâche en retard sort de la course', B => ({ ...B, regle: B.regle.replace('if(t.fin&&auj&&t.fin<auj)retard[t.nom]=1;', 'if(t.fin&&auj&&t.fin<auj)return false;') })],
   ['la priorité fixée ne passe plus devant', B => ({ ...B, regle: B.regle.replace('if(items.length){', 'if(false&&items.length){') })],
-  ['les heures décident de nouveau (pôle long)', B => ({ ...B, carte: B.carte.replace('var n=M.taches[0],', 'var n=data.filter(function(x){ return (x.pct||0)<100; }).sort(function(a,b){ return (b.h_reste||0)-(a.h_reste||0); })[0].nom,') })],
   ['Ma part ignore la priorité de son équipe', B => ({ ...B, part: B.part.replace("if(M.mode==='admin')return _prioDefaultTask(M.items);", '') })],
   ['Ma part compte le travail de toute l’équipe', B => ({ ...B, part: B.part.replace('if(j.qui!==me&&(j.membresEquipe||[]).indexOf(me)<0)return;', '') })],
-  ['le bouton « Choisir » n’est plus réservé à l’admin', B => ({ ...B, carte: B.carte.replace("var adm=(typeof window.isAdmin==='function')&&window.isAdmin();", 'var adm=true;') })],
   ['Décider retombe sur le travail aux plus d’heures', B => ({ ...B, dz: B.dz.replace("if(ok.length&&M.mode!=='admin')", 'if(false)') })],
   ['le bouton de la carte ne mène plus nulle part', B => ({ ...B, go: B.go.replace("cible==='priorite'", "cible==='priorite-x'") })],
   ['fixer la priorité ne redessine plus le Pilotage', B => ({ ...B, save: B.save.replace('_prioRedessine();', '') })],

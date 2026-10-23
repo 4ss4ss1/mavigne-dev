@@ -1,0 +1,27 @@
+{
+  "lot": "PIL-FIX-2",
+  "section": "§442",
+  "base": "15987be98def1d9d944cb07ef3d9b5ba40905eb7",
+  "inclut": [],
+  "date": "2026-10-23",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "32e26af6f37437c39d92c3ddca711e7f1008aa10ab340fa4b783a413dd48a4a9",
+    "CLAUDE.md": "a3f22b9fa60a3138c21b25eb4b5ea215737641111d59795e48490cd847ee7a60",
+    "docs/claude/INDEX.md": "61730ff672441061f119de62740cb6937b4fdd7ba4b7bede35c734c0bb6f9a06",
+    "docs/claude/chantiers-430-479.md": "b1c038c672c732924115420ed27ad61d8ce242803dd369bbec66c37265701cfb",
+    "docs/claude/journal.md": "835fde21121785897ca37f113c11a6c6d7fda28a053ffbda36a5cda768f76e79",
+    "index.html": "89ac1a50aa777dd7355662555510a1900365bce97bf7cd1bd2f6e3edc783b912",
+    "public/sw.js": "cc6ec93364d104a2af8b8d4ceecb7c0436f9b48b65436c1eea8527918939d63f",
+    "scripts/banc/garde-projection.mjs": "830f165b77030b292eda149f35e95fa4e58842929312b2867b466a61644f7ae7",
+    "scripts/mv-harnais-auj1.mjs": "f4f0bb1716bc80197269d1fb5cf9b0da22d75795a0f5e178c0b02fcc5798bfa3",
+    "scripts/mv-harnais-carte.mjs": "f3c08e0f5856dfd5e66839d530375d38d92b69820942bf6726906935e425d897",
+    "scripts/mv-harnais-echelle.mjs": "ff5b9b79cc0f1fadb33e0cba56c9c10ecf00fa81c4f9c7e4a368896362a4c2cc",
+    "scripts/mv-harnais-prio.mjs": "c63cc5ea9cbf00ff7bcaf3e18a7f86a64c0ea19440c40141a71dbec434750fce",
+    "scripts/tutos-couverture.json": "e74f27d66c6caa8b0bd7671c7f7f8360a5d46df2ce170bd86e35c3db3c88388d",
+    "src/utils.js": "bde4aa35f78a53667134987abf1335935bf85001b412786354319bb5f9da072a"
+  }
+}

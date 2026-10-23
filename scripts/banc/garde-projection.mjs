@@ -38,8 +38,9 @@ const sites = [
   //   extrapolés à l'avancement. La garde par cadAppl — l'intention de cette assertion — est inchangée.
   ['budget projete', /var projFin = cadAppl \? \(engage \+ resteBar \+ T\.moR\*ecart\)/],
   ['ligne de fin du graphe', /var pFin=\(E && E\.cad && E\.cad\.ok && E\.cad\.applic/],
-  ['legende fin projetee', /E\.cad\.ok&&E\.cad\.applic&&Math\.abs\(E\.cad\.ecart\)>5\?'<span class="pec-lg">/],
-  ['KPI budget accueil', /var ec=\(E\.cad\.ok&&E\.cad\.applic\)\?E\.cad\.ecart:null;/]
+  ['legende fin projetee', /E\.cad\.ok&&E\.cad\.applic&&Math\.abs\(E\.cad\.ecart\)>5\?'<span class="pec-lg">/]
+  // PIL-FIX-2 (§442) : « KPI budget accueil » (_pilCkBudget) est parti avec l'ancien Aujourd'hui (PIL-RANGE-1b, §441) ;
+  //   le balayage ci-dessous garde la règle : aucun site projectif non gardé ne subsiste.
 ];
 for (const [nom, re] of sites) t(nom + ' garde par applic', re.test(src));
 

@@ -326,3 +326,22 @@ Suite de PIL-RANGE-1 (§439c), dans l’ordre validé par Nico. La mesure au poi
 
 ### 441d. Ce qui reste
 L’ordre de §439e : PIL-RANGE-2 (portée unique, fin de L’année), PIL-RANGE-3, PIL-RANGE-4 (dont les 17 cases mortes d’« Afficher dans cet onglet » d’Aujourd’hui — plus aucun lecteur depuis ce lot), CAVE-FIX-1, CAVE-RANGE-1 à 3. Dette notée : du CSS de l’ancien Aujourd’hui reste (`.pil-tz-*`, `.pil-tl*`, `.pil-ck-btn`, `.pil-cockpit-card`…) — à purger avec un harnais des classes orphelines.
+
+## 442. ★ PIL-FIX-2 — CINQ CONTRÔLES ROUGES LIVRÉS PAR PIL-FIX-1 ET PIL-RANGE-1B, ET LA FAÇON DE LIRE LA CHAÎNE (23/10 — `index.html` (`boot.js?v=` 9.97 → 9.99) · `src/utils.js` (WHATS_NEW : titre 9.99 sans « & », cibles 8.32 et 8.35) · `public/sw.js` · `scripts/mv-harnais-echelle.mjs` · `scripts/mv-harnais-carte.mjs` · `scripts/banc/garde-projection.mjs` · `scripts/mv-harnais-prio.mjs` · `scripts/mv-harnais-auj1.mjs` · `scripts/tutos-couverture.json` (plafond 813 → 808) · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/PIL-FIX-2.json` · **APP 9.99 inchangé, SW 10.78 → 10.79**, base `15987be`)
+
+### 442a. D’où ça vient — une erreur de vérification
+Les livraisons de PIL-FIX-1 (§440) et PIL-RANGE-1B (§441) annonçaient « 515 commandes, 0 rouge ». C’était faux. La chaîne était jouée en trois tranches sous `timeout` ; les deux premières, coupées, **n’imprimaient jamais le bilan du lanceur** (les lignes « ✗ node … (code N) » ne sortent qu’à la fin), et seul le bilan de la dernière a été lu. Relu commande par commande puis rejoué sur le dépôt poussé (`15987be`), cinq contrôles étaient rouges :
+1. `mv-harnais-tutos` (I) : `index.html` chargeait `boot.js?v=9.97` — les deux montées de version (9.98, 9.99) ne remplaçaient que `v9.97` → `v9.98`, pas `?v=`. **Le seul point qui touche les utilisateurs** (le fichier de démarrage pouvait rester en cache).
+2. `mv-harnais-echelle` et 3. `mv-harnais-carte` : « `pil-cockpit-card` / `pil-dec` intact (visé par la visite guidée / C22) » — ces classes sont parties avec l’ancien Aujourd’hui ; aucun sélecteur de la visite ne les vise (src/ relu, C22 vert au preflight).
+4. `mv-whatsnew-check` (ANN-1) : le titre 9.99 portait « & » (« Équipe & matériel ») ; les blocs 8.32 et 8.35 visaient `#ck-fil-pan` et `#ck-bascule`, ids du rendu de secours retiré.
+5. `banc/garde-projection` : le site « KPI budget accueil » (`_pilCkBudget`) n’existe plus ; le balayage « aucun site projectif non gardé » reste.
+Et, trouvés par le coureur (§442c) sur la première chaîne complète de ce lot : `mv-harnais-prio` plantait depuis PIL-RANGE-1B (il extrayait `_pilCkPrio`, la carte « Tâche prioritaire » retirée — oublié de la migration) ; migré : le moteur de la tâche du moment reste testé en entier, la section de la carte et ses deux contre-épreuves partent ; `auj1` suit la nouvelle cible 8.32 (`#ck-fil`). Et une contre-épreuve masquée : `tutos --contre` « un geste nouveau sans tuto » ne mordait que parce que la base était rouge ; le retrait de PIL-RANGE-1B avait fait baisser le compte des gestes sans tuto (813 → 808) sans abaisser le plafond — un geste neuf passait sous le plafond.
+
+### 442b. Ce qui a été fait
+`boot.js?v=9.99` ; titre 9.99 « Équipe et matériel » ; cibles 8.32 → `#ck-fil` (le fil En direct du cockpit v2), 8.35 → `#ck-vue-eco` (la bascule du v2) ; les deux noms retirés des listes protégées d’`echelle` et `carte` (avec la raison) ; le site disparu retiré du banc (avec la raison) ; plafond des gestes sans tuto à 808 (le cliquet). SW 10.79 (un fichier servi change), APP inchangé (rien de nouveau à l’écran).
+
+### 442c. La règle qui change — lire le bilan, jamais le deviner
+La chaîne est désormais jouée par un **coureur** qui écrit, pour chaque commande de `mv-harnais-liste.mjs` (et le preflight), son **code de sortie** sur une ligne (`/tmp/chaine.jsonl`), en fond, jusqu’au bout ; le bilan se lit sur ces codes. « 0 rouge » ne s’écrit que si toutes les commandes ont un code et que tous valent 0. Une tranche coupée ne prouve rien. À reporter en leçon dans `CLAUDE.md` (§24) : *une chaîne coupée par un délai n’a pas de bilan*. Et à chaque montée de version : remplacer **toutes** les occurrences de l’ancienne version dans `index.html` (`v9.9x` et `?v=9.9x`), ce que `mv-harnais-tutos` (I) vérifie.
+
+### 442d. Ce qui reste
+PIL-RANGE-2a (la barre « Vous regardez ») est écrit et mis de côté (correctif sauvegardé hors dépôt) ; il reprend après ce lot, sur la base qui l’intégrera.

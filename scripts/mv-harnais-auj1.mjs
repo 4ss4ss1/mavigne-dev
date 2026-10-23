@@ -68,7 +68,7 @@ function suite(S) {
   T('la bulle du fil (cockpit v2), l\u2019aide et le guide décrivent l\u2019écran', /\n  fil: '/.test(S.vue) && S.uti.includes('Aujourd’hui se lit d’un coup d’œil')
     && S.guide.includes("le fil <b>En direct</b> : d'abord qui est où en ce moment"));
   T('la nouveauté d\u2019AUJ-1 reste au Journal (bloc 8.32, pastille sur le fil, pour l\u2019admin)',
-    /\{ v: '8\.32', d: '2026-10-07', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-fil-pan'/.test(S.uti));
+    /\{ v: '8\.32', d: '2026-10-07', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-fil'/.test(S.uti));   // PIL-FIX-2 (§442) : la pastille vise le fil du cockpit v2 (#ck-fil-pan est parti avec le rendu de secours)
   return out;
 }
 function jouer(S) { try { return suite(S); } catch (e) { return [['plantage : ' + (e && e.message), false]]; } }

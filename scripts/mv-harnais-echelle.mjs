@@ -121,7 +121,8 @@ t('chaque repli redit la valeur du pas', mauvais.length === 0,
 
 /* 7. RIEN D'AUTRE NE BOUGE : ni les selecteurs vises par la visite guidee,
       ni les cles d'onglet memorisees chez les clients. */
-for (const sel of ['pil-tile', 'data-pid', 'pil-cockpit-card', 'pil-dec', 'pil-th'])
+for (const sel of ['pil-tile', 'data-pid'/* PIL-FIX-2 (§442) : 'pil-cockpit-card' et 'pil-dec' sont partis avec l'ancien Aujourd'hui (PIL-RANGE-1b, §441) ;
+     aucun sélecteur de la visite guidée ne les vise (src/ relu, C22 vert) */, 'pil-th'])
   t(`« ${sel} » intact (vise par la visite guidee / C22)`, SRC.includes(sel));
 /* Lot CAVE-3 : l'onglet Cave est rentre dans la Cave. Sept cles vivantes, et la
    huitieme (cav) survit en MIGRATION : un client qui l'a memorisee atterrit. */

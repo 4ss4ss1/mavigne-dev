@@ -1059,7 +1059,7 @@ if(typeof document!=='undefined' && document.addEventListener){
 
 export const WHATS_NEW = [
   { v: '9.99', d: '2026-10-23', items: [
-    { niv: 1, pour: ['admin'], emoji: 'tracteur', titre: 'Équipe & matériel : la carte du tracteur revient',
+    { niv: 1, pour: ['admin'], emoji: 'tracteur', titre: 'Équipe et matériel : la carte du tracteur revient',
       desc: "Depuis le nouveau cockpit, les cartes du tracteur ne s’affichaient plus nulle part. Elles reviennent dans Pilotage › Équipe & matériel, partie Matériel, sous le parc, la cuve et la consommation : les heures et les litres qu’il reste pour finir les travaux tracteur en cours, le gasoil qu’il restera ensuite dans la cuve, et si la révision tombe pendant ces travaux. Elles ne s’affichent que s’il y a quelque chose à dire, et se masquent depuis « Afficher dans cet onglet ». L’ancien écran Aujourd’hui, qui n’était plus affiché, est retiré de l’appli : rien ne change sur celui que vous voyez." }
   ] },
   { v: '9.98', d: '2026-10-23', items: [
@@ -1921,7 +1921,7 @@ export const WHATS_NEW = [
       desc: "« À savoir » dit maintenant sur quelles communes la pluie ou le vent tombera demain et après-demain, et combien de parcelles de brûlage devront y attendre un temps sec." },
   ] },
   { v: '8.35', d: '2026-10-07', items: [
-    { niv: 1, pour: ['admin'], cible: '#ck-bascule', emoji: 'euro', titre: 'Aujourd’hui, côté terrain ou côté argent',
+    { niv: 1, pour: ['admin'], cible: '#ck-vue-eco', emoji: 'euro', titre: 'Aujourd’hui, côté terrain ou côté argent',
       desc: "Au Pilotage › Aujourd’hui, une bascule Terrain / Économie : la même journée vue du terrain (fin prévue, plan, chantiers, fil) ou de l’argent (coût de l’inaction, budget, et tout l’onglet Économie, avec les mêmes chiffres)." },
   ] },
   { v: '8.34', d: '2026-10-07', items: [
@@ -1933,7 +1933,7 @@ export const WHATS_NEW = [
       desc: "Au Pilotage › Aujourd’hui : la pluie ou le vent des deux jours qui viennent (et le brûlage qui attendra), les absences de la semaine, les contrats qui finissent dans le mois et les tâches en retard, avec le bouton pour agir. Le matériel immobilisé et la cave y sont rangés." },
   ] },
   { v: '8.32', d: '2026-10-07', items: [
-    { niv: 1, pour: ['admin'], cible: '#ck-fil-pan', emoji: 'graphique', titre: 'Aujourd’hui se lit d’un coup d’œil',
+    { niv: 1, pour: ['admin'], cible: '#ck-fil', emoji: 'graphique', titre: 'Aujourd’hui se lit d’un coup d’œil',
       desc: "Au Pilotage › Aujourd’hui : une phrase résume la journée, les chantiers en cours et la courbe de la charge restante ont leur place, et le fil « En direct » montre ce que l’équipe valide, dès que ça arrive. Tout ce qui s’affichait avant est toujours là." },
   ] },
   { v: '8.31', d: '2026-10-07', items: [
