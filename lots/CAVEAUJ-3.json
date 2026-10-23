@@ -1,0 +1,39 @@
+{
+  "lot": "CAVEAUJ-3",
+  "section": "§438",
+  "base": "85b2d19847d0aacd6e5ce01c45f7bd90cfe3e938",
+  "inclut": [],
+  "date": "2026-10-23",
+  "tutos": {
+    "ok": true,
+    "empreinte": "2ebb7e093c1cd1e7260f848a0e5c987b0638ac7a215891e69eab8b4018678f9e",
+    "date": "2026-10-23T10:25:17.441Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "2ef75e0b3edca929b45f2b180187b0dafd3ea3d437ebec2d9c73d3c330fe9055",
+    "CLAUDE.md": "97b7d4c88081b004496a90b2de451b82cab5b381f21cd502872ea193d8b29758",
+    "docs/claude/INDEX.md": "88be42ac84b0bbd8dc1e77624c5fb4114e908f85901fbd766d131a7e377225ce",
+    "docs/claude/chantiers-430-479.md": "9503870d9cdd38e676f274bac71c8b669b41cc243b2f54d3459e8c20b7c5ec5e",
+    "docs/claude/journal.md": "c6fd5a5444889bb9ef9ee37e7611050727a5a190fee6e24a8b4681e240524901",
+    "guide/08-cave.html": "09e0aa0297c4e37859fcac84754411875a6c70b1ce86d215f6e4ffa2f52859ae",
+    "index.html": "50eb5fb5240d1f0b17fd5a590b53d3998087f94d0dfb8c3f825d99eea567f270",
+    "public/guide.html": "67aada3ef9803a1520ced5ad7f950b8008f7f6b24aeaac0ec9d7fa57e6dad350",
+    "public/sw.js": "1452a819dca34edd524421e8d65d6e18d6127d1d3ba1ea49aace13741ba2f1e5",
+    "scripts/harnais-claude-md.mjs": "da9c02cde40dadd0370769adeb7df8ddc610f7a8551549d53f4b48362af54c18",
+    "scripts/mv-harnais-cave-auj.mjs": "025e73dfa9c1bf46350bc9029b40e40a4a5cbeee8293a7ca68808920f496f20d",
+    "scripts/mv-harnais-caveauj1.mjs": "085d94f9a4d465de42dd1e6c92cacb9b2d6e1de3143160e4bd2cd5691b910726",
+    "scripts/mv-harnais-caveauj2.mjs": "da365e3cb4ea5238b16b4586a1dc6926368072874d8ea4082d772f70e4fea762",
+    "scripts/mv-harnais-liste.mjs": "63d552946573276a2333375106edf65214ef85baa18bd757e72c59f9c873787f",
+    "src/cave.js": "de26ae415f86da7b622f69cbeb53a9c2c22c27ddb1b6c88c2e759bd1d131ea9e",
+    "src/styles.css": "abdc36a2e1dc6f3d80e71da6dd11b2146a267393d08f0f5da49bdd0773ced636",
+    "src/utils.js": "1632d628544bc07e5273162a03fa5022120e5f638429cd34c08fc8941884202b",
+    "scripts/mv-harnais-caveauj3.mjs": "c6cb7a204c2aadb05182f93a70a67240494d9cebf1faef6bbbc43dc3ac90638c"
+  }
+}

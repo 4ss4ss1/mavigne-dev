@@ -114,7 +114,7 @@ const MUT = [
   ['une ligne par geste (regroupement cass\u00e9)', (S) => ({ ...S, cave: S.cave.replace("k=(cuve?'c:':'v:')+(it.ref||it.titre);", "k=(cuve?'c:':'v:')+(it.ref||it.titre)+it.kind;") })],
   ['la colonne coll\u00e9e sans condition', (S) => ({ ...S, css: S.css.replace('#page-cave .caj-dr.colle{ position:sticky;', '#page-cave .caj-dr{ position:sticky;') })],
   ['le calendrier rentr\u00e9 dans la zone', (S) => ({ ...S, cave: S.cave.replace("'</aside></div>'\n    +_aujCal(sem,from);", "_aujCal(sem,from)+'</aside></div>';") })],
-  ['un bouton hors du jeu commun', (S) => ({ ...S, cave: S.cave.replace('class="mvbtn mvbtn-secondaire caj-b"', 'class="caj-b"') })],
+  ['un bouton hors du jeu commun', (S) => ({ ...S, cave: S.cave.replace('class="mvbtn mvbtn-secondaire mvbtn-compact caj-b"', 'class="caj-b"') })],
   ['une carte maison au lieu de .mvcarte', (S) => ({ ...S, cave: S.cave.replace('<section class="mvcarte caj-c caj-hero"', '<section class="caj-c caj-hero"') })],
   ['une couleur \u00e9crite dans le bloc', (S) => ({ ...S, css: S.css.replace('#page-cave .caj-ico.due{ background:var(--danger-doux);', '#page-cave .caj-ico.due{ background:#FAEAE8;') })],
 ];

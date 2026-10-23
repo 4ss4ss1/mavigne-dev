@@ -6723,20 +6723,24 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 #page-cave .caj-sec{ display:flex; align-items:baseline; justify-content:space-between; gap:var(--e-2,8px); margin:var(--e-5,20px) 0 var(--e-0,2px); padding-top:var(--e-4,16px); border-top:var(--bw) solid var(--ligne,#E7E6E2); font-size:var(--pt-micro,12px); font-weight:var(--fw-semi,600); color:var(--texte-doux); }
 #page-cave .caj-sec em{ font-style:normal; font-weight:var(--fw-med,500); }
 #page-cave .caj-ls{ list-style:none; margin:0; padding:0; }
-#page-cave .caj-l{ display:grid; grid-template-columns:var(--h-row) minmax(0,1fr); gap:var(--e-1,4px) var(--e-3,12px); align-items:start; padding:var(--e-3,12px) 0; border-top:var(--bw) solid var(--ligne,#E7E6E2); }
+/* ★ CAVEAUJ-3 (§438) : le geste à droite du nom, en taille compacte ; le détail et les raisons passent dessous, sur toute la largeur */
+#page-cave .caj-l{ display:grid; grid-template-columns:var(--h-row) minmax(0,1fr) auto; grid-template-rows:minmax(var(--h-sm,28px),auto); grid-template-areas:"ico nom acts" "ico meta meta" ". rs rs"; gap:0 var(--e-3,12px); align-items:start; padding:var(--e-3,12px) 0; border-top:var(--bw) solid var(--ligne,#E7E6E2); }
 #page-cave .caj-l:first-child{ border-top:0; }
-#page-cave .caj-ico{ display:grid; place-items:center; width:var(--h-row); height:var(--h-row); border-radius:var(--r-md,8px); background:var(--survol); color:var(--texte-med); }
+#page-cave .caj-ico{ grid-area:ico; align-self:center; display:grid; place-items:center; width:var(--h-row); height:var(--h-row); border-radius:var(--r-md,8px); background:var(--survol); color:var(--texte-med); }
 #page-cave .caj-ico.due{ background:var(--danger-doux); color:var(--danger-texte); }
-#page-cave .caj-lc{ display:flex; flex-direction:column; gap:var(--e-0,2px); min-width:0; }
-#page-cave .caj-nom{ font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); color:var(--texte); }
-#page-cave .caj-meta{ font-size:var(--pt-micro,12px); color:var(--texte-doux); }
-#page-cave .caj-rs{ display:flex; flex-direction:column; gap:var(--e-0,2px); margin-top:var(--e-1,4px); }
+#page-cave .caj-lc{ display:contents; }
+#page-cave .caj-nom{ grid-area:nom; align-self:center; min-width:0; font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); color:var(--texte); }
+#page-cave .caj-meta{ grid-area:meta; min-width:0; margin-top:var(--e-0,2px); font-size:var(--pt-micro,12px); color:var(--texte-doux); }
+#page-cave .caj-rs{ grid-area:rs; min-width:0; display:flex; flex-direction:column; gap:var(--e-0,2px); margin-top:calc(var(--e-0,2px) + var(--e-1,4px)); }
 #page-cave .caj-r{ display:flex; align-items:baseline; gap:var(--e-2,8px); font-size:var(--pt-txt,13px); line-height:var(--lh-ui); color:var(--texte-med); }
 #page-cave .caj-r > i{ flex:none; width:var(--e-2,8px); height:var(--e-2,8px); border-radius:50%; background:var(--k,var(--texte-pale)); }
 #page-cave .caj-r > span{ flex:1; min-width:0; }
 #page-cave .caj-r.due{ font-weight:var(--fw-semi,600); color:var(--danger-texte); }
-#page-cave .caj-acts{ grid-column:2; display:flex; flex-wrap:wrap; gap:var(--e-2,8px); margin-top:var(--e-2,8px); }
-#page-cave .caj-acts .mvbtn{ flex:1 1 0; }
+#page-cave .caj-acts{ grid-area:acts; align-self:center; display:flex; flex-wrap:wrap; gap:var(--e-2,8px); }
+#page-cave .caj-b{ position:relative; flex:none; }
+#page-cave .caj-b::before{ content:""; position:absolute; inset:calc(var(--e-2,8px) * -1 - var(--bw,1px)) calc(var(--e-1,4px) * -1 - var(--bw,1px)); }   /* le doigt garde 44 px de haut (28 + 2 × 8, au-delà du filet) */
+#page-cave .caj-l.plus{ grid-template-areas:"ico nom nom" "ico meta meta" ". rs rs" ". acts acts"; }   /* plusieurs gestes, au téléphone : sous les raisons, à droite */
+#page-cave .caj-l.plus .caj-acts{ justify-content:flex-end; margin-top:var(--e-2,8px); }
 #page-cave .caj-fait{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--e-1,4px) var(--e-3,12px); margin-top:var(--e-2,8px); padding:var(--e-2,8px) var(--e-3,12px); border-radius:var(--r-md,8px); background:var(--bg-doux); font-size:var(--pt-micro,12px); color:var(--texte-med); }
 #page-cave .caj-fait b{ font-weight:var(--fw-semi,600); color:var(--texte); }
 #page-cave .caj-fait > span{ display:inline-flex; align-items:center; gap:var(--e-1,4px); }
@@ -6750,8 +6754,8 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 #page-cave .caj-av + .caj-av{ margin-left:calc(var(--e-1,4px) * -1.5); }
 #page-cave .caj-eqn b{ font-weight:var(--fw-semi,600); color:var(--texte); }
 #page-cave .caj-ctas{ display:flex; flex-wrap:wrap; gap:var(--e-2,8px); margin-top:var(--e-4,16px); }
-#page-cave .caj-ctas .mvbtn{ flex:1 1 100%; }
-#page-cave .caj-ctan{ font-weight:var(--fw-med,500); }
+#page-cave .caj-ctas .mvbtn{ flex:1 1 auto; }
+#page-cave .caj-ctan{ margin-left:calc(var(--e-1,4px) * -1); font-weight:var(--fw-med,500); }   /* « · 2 cuves » à une espace du libellé, pas à huit pixels */
 #page-cave .caj-cadre{ display:flex; gap:var(--e-2,8px); align-items:flex-start; margin:var(--e-4,16px) 0 0; font-size:var(--pt-micro,12px); line-height:var(--lh-ui); color:var(--texte-doux); }
 #page-cave .caj-cadre > i{ flex:none; width:var(--bw-2); height:var(--e-3,12px); margin-top:var(--e-0,2px); border-radius:var(--bw-2); background:var(--ligne-forte); }
 #page-cave .caj-asl{ list-style:none; margin:0; padding:0; }
@@ -6806,9 +6810,9 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
   #page-cave .caj-c{ padding:var(--e-5,20px); }
   #page-cave .caj-hero{ padding:var(--e-6,24px); }
   #page-cave .caj-titre{ font-size:var(--pt-xxl,32px); }
-  #page-cave .caj-l{ grid-template-columns:var(--h-row) minmax(0,1fr) auto; }
-  #page-cave .caj-acts{ grid-column:auto; flex-wrap:nowrap; margin-top:0; }
-  #page-cave .caj-acts .mvbtn, #page-cave .caj-ctas .mvbtn{ flex:none; }
+  #page-cave .caj-l, #page-cave .caj-l.plus{ grid-template-rows:none; grid-template-areas:"ico nom acts" "ico meta acts" ". rs rs"; }   /* sur ordinateur, le détail tient : le geste se centre sur le nom et le détail */
+  #page-cave .caj-l.plus .caj-acts{ justify-content:normal; flex-wrap:nowrap; margin-top:0; }
+  #page-cave .caj-ctas .mvbtn{ flex:none; }
   #page-cave .caj-grille{ grid-template-columns:repeat(7,minmax(0,1fr)) calc(var(--e-10,64px) * 2.75); gap:var(--e-2,8px) var(--e-1,4px); }
   #page-cave .caj-js{ text-align:left; padding-left:var(--e-1,4px); }
   #page-cave .caj-jsum{ display:block; padding-left:var(--e-3,12px); }

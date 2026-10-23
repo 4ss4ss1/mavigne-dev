@@ -103,7 +103,7 @@ const MUT = [
   ['les derniers gestes dans le d\u00e9sordre', (S) => ({ ...S, cave: S.cave.replace('  ev.sort(function(a,b){ return a.d<b.d?1:(a.d>b.d?-1:0); });\n', '') })],
   ['une couleur \u00e9crite dans le bloc', (S) => ({ ...S, css: S.css.replace('#page-cave .caj-jg.due > i{ background:var(--danger); }', '#page-cave .caj-jg.due > i{ background:#C2381B; }') })],
   ['une pastille maison', (S) => ({ ...S, css: S.css.replace('#page-cave .caj-sub{', '#page-cave .caj-tag{') })],
-  ['un bouton hors du jeu commun', (S) => ({ ...S, cave: S.cave.replace('class="mvbtn mvbtn-secondaire caj-plus"', 'class="caj-plus"') })],
+  ['un bouton hors du jeu commun', (S) => ({ ...S, cave: S.cave.replace('class="mvbtn mvbtn-secondaire mvbtn-compact caj-plus"', 'class="caj-plus"') })],
 ];
 
 console.log('\n\u2500\u2500 CAVEAUJ-2 : Le Cuvier, Le Chai, les derniers gestes ; l\u2019ouillage au jour ouvr\u00e9\n');

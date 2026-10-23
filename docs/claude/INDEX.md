@@ -491,3 +491,4 @@
 | 435 | 435. ★★ CAVEAUJ-2 — CAVE › AUJOURD’HUI : LE CUVIER, LE CHAI ET LES DERNIERS GESTES D’UN COUP D’ŒIL ; L’OUIL… | `docs/claude/chantiers-430-479.md` |
 | 436 | 436. ★★ CAVEPIL-1 — PILOTAGE › AUJOURD’HUI : LA VUE CAVE (BASCULE TERRAIN · CAVE · ÉCONOMIE) ; UN SIGNE FOR… | `docs/claude/chantiers-430-479.md` |
 | 437 | 437. ★★ CAVEPIL-2 — PILOTAGE › VUE CAVE : LA FLEUR, LE PIQUÉ ET L’OXYDÉ SUR LE FÛT GOÛTÉ (23/10 — `src/cave… | `docs/claude/chantiers-430-479.md` |
+| 438 | 438. ★ CAVEAUJ-3 — CAVE › AUJOURD’HUI : UN BOUTON FIN PAR GESTE, À DROITE DU NOM ; L’ALERTE ET LE RELEVÉ DÛ… | `docs/claude/chantiers-430-479.md` |

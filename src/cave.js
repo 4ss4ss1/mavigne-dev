@@ -6123,13 +6123,20 @@ function _aujGrouper(items){
   out.sort(function(a,b){ return (a.rang-b.rang)||(a.ord-b.ord); });
   return out;
 }
+// ★ CAVEAUJ-3 (§438) : un bouton par geste RÉEL. Une alerte de cuve (fermentation qui ralentit, température haute, sucres du labo
+//   qui stagnent) se contrôle par un relevé — la fenêtre du relevé porte aussi les sucres du labo : son « Relever » ouvre
+//   cette fenêtre, comme celui du relevé dû (avant : l'onglet Cuves seulement, et deux « Relever » côte à côte sur la même
+//   cuve, vus par Nico le 23/10). Boutons en taille compacte du jeu commun ; plusieurs gestes : .plus (la rangée passe
+//   sous les raisons au téléphone).
+var _AUJ_GESTE={alerte:'mesure'};
 function _aujLigne(x){
-  var meta=_aujMeta(x);
-  var h='<li class="caj-l"><span class="caj-ico'+(x.rang<2?' due':'')+'">'+_mvIcon(x.cuve?'cuve':'barrique',18)+'</span>'
+  var meta=_aujMeta(x), vus={}, B=[];
+  x.G.forEach(function(it){ var k=_AUJ_GESTE[it.kind]||it.kind; if(vus[k]) return; vus[k]=1; B.push(k); });
+  var h='<li class="caj-l'+(B.length>1?' plus':'')+'"><span class="caj-ico'+(x.rang<2?' due':'')+'">'+_mvIcon(x.cuve?'cuve':'barrique',18)+'</span>'
     +'<div class="caj-lc"><span class="caj-nom">'+_escHtml(x.titre||'')+'</span>'+(meta?'<span class="caj-meta">'+_escHtml(meta)+'</span>':'')+'<span class="caj-rs">';
   x.G.forEach(function(it){ h+='<span class="caj-r k-'+_escAttr(it.kind)+(it.urgence==='due'?' due':'')+'"><i></i><span>'+_escHtml(_aujRaison(it))+'</span></span>'; });
   h+='</span></div><div class="caj-acts">';
-  x.G.forEach(function(it){ h+='<button type="button" class="mvbtn mvbtn-secondaire caj-b" onclick="_mlGo(\''+_escAttr(it.kind)+'\',\''+_escAttr(it.ref)+'\')">'+_escHtml(_AUJ_VERBE[it.kind]||'Voir')+'</button>'; });
+  B.forEach(function(k){ h+='<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact caj-b" onclick="_mlGo(\''+_escAttr(k)+'\',\''+_escAttr(x.ref)+'\')">'+_escHtml(_AUJ_VERBE[k]||'Voir')+'</button>'; });
   return h+'</div></li>';
 }
 // Ce qui est déjà fait aujourd'hui : les opérations du Chai datées du jour, les relevés et les décuvages du Cuvier.
@@ -6512,7 +6519,7 @@ function _aujRecentsHtml(auj){
       return '<div class="caj-edg"><div class="caj-edl">'+_escHtml(lab(g.d))+'</div>'+g.l.map(function(e){
         return '<div class="caj-ede"><span class="caj-edi'+(g.d===auj?' ok':'')+'">'+_mvIcon(g.d===auj?'check':e.ic,16)+'</span><span class="caj-edt"><b>'+_escHtml(e.t)+'</b>'+(e.q?' \u00b7 '+_escHtml(e.q):'')+(e.s?'<span>'+_escHtml(e.s)+'</span>':'')+'</span></div>';
       }).join('')+'</div>';
-    }).join('')+'</div><button type="button" class="mvbtn mvbtn-secondaire caj-plus" onclick="_aujVoirTout()" aria-expanded="'+_aujTout+'">'+(_aujTout?'Replier':'Tout voir ('+ev.length+')')+'</button></section>';
+    }).join('')+'</div><button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact caj-plus" onclick="_aujVoirTout()" aria-expanded="'+_aujTout+'">'+(_aujTout?'Replier':'Tout voir ('+ev.length+')')+'</button></section>';
 }
 window._aujVoirTout=function(){ _aujTout=!_aujTout; renderCaveAujourdhui(); };
 function _aujRender(){
@@ -6537,8 +6544,8 @@ function _aujRender(){
   h+=_aujEquipe(from);
   var nT=G.filter(function(x){ return x.cuve&&x.G.some(function(i){ return i.kind==='mesure'||i.kind==='alerte'; }); }).length;
   h+='<div class="caj-ctas">'
-    +(nT?'<button type="button" class="mvbtn mvbtn-principal caj-cta" onclick="selectCaveSection(\'vendange\');switchVendOng(\'tour\')">'+_mvIcon('parcours',18)+'Faire la tourn\u00e9e<span class="caj-ctan">\u00b7 '+nT+' cuve'+(nT>1?'s':'')+'</span></button>':'')
-    +'<button type="button" class="mvbtn mvbtn-secondaire caj-cta" onclick="openOvCaveOp()">'+_mvIcon('ajout',18)+'Nouvelle op\u00e9ration</button></div>'
+    +(nT?'<button type="button" class="mvbtn mvbtn-principal mvbtn-bureau caj-cta" onclick="selectCaveSection(\'vendange\');switchVendOng(\'tour\')">'+_mvIcon('parcours',18)+'Faire la tourn\u00e9e<span class="caj-ctan">\u00b7 '+nT+' cuve'+(nT>1?'s':'')+'</span></button>':'')
+    +'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-bureau caj-cta" onclick="openOvCaveOp()">'+_mvIcon('ajout',18)+'Nouvelle op\u00e9ration</button></div>'
     +'<p class="caj-cadre"><i></i><span>Calcul\u00e9 sur '+nSu+' cuve'+(nSu>1?'s':'')+' suivie'+(nSu>1?'s':'')+' et '+nEl+' cuv\u00e9e'+(nEl>1?'s':'')+' en \u00e9levage, avec le seuil d\u2019ouillage de chaque mill\u00e9sime.'
     +(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.auj'):'')+'</span></p></section>'+_aujEtat(from,parc)+'</div>'
     +'<aside class="caj-dr" id="caj-droite" aria-label="\u00c0 surveiller">'+_aujVeille(from,parc)+'</aside></div>'
