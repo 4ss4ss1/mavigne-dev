@@ -7072,6 +7072,29 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 .ck-cv-tip p{margin:var(--e-2,8px) 0 0;font-size:var(--pt-micro,12px);color:var(--texte-doux)}
 @media (prefers-reduced-motion:reduce){.ck2 .cv-bulle{display:none}}
 /* ★ FIN CAVEPIL-1 */
+/* ══ ★★ CAVEPIL-2 (§437) — LES SIGNES DE DÉGUSTATION SUR LES FÛTS (maquette du 23/10, « go ») ══
+   Le signe de la dernière dégustation, dans le coin du rond du fût goûté : fleur (pétales), piqué (triangle), oxydé (disque à
+   moitié plein) — la forme les distingue, pas seulement la couleur. Couleurs : jetons --sg-* de la charte, --danger, --bois. */
+.ck2 .cv-fw{position:relative;display:block;width:16px;height:16px}
+.ck2 .cv-fw[data-fut]{cursor:help}
+.ck2 .cv-fut{overflow:visible;transition:transform var(--mv-d1) var(--mv-sortie)}
+.ck2 .cv-fw[data-fut]:hover .cv-fut{transform:scale(1.25)}
+.ck2 .cv-sg .halo{fill:var(--bg-card)}
+.ck2 .sg-fl-p{fill:var(--sg-fleur);stroke:var(--sg-fleur-trait);stroke-width:.55}
+.ck2 .sg-fl-c{fill:var(--sg-fleur-coeur);stroke:none}
+.ck2 .sg-pi{fill:var(--danger);stroke:none}
+.ck2 .sg-pi-m{fill:none;stroke:var(--sg-marque);stroke-width:1.15;stroke-linecap:round}
+.ck2 .sg-ox-b{fill:var(--bg-card);stroke:var(--bois);stroke-width:.85}
+.ck2 .sg-ox-h{fill:var(--bois)}
+.ck2 .cv-sgi{flex:none;overflow:visible}
+.ck2 .cv-sgs{display:flex;flex-wrap:wrap;gap:var(--e-1,4px) var(--e-3,12px);margin-top:var(--e-1,4px);font-size:var(--pt-micro,12px);line-height:1.4;color:var(--texte-med)}
+.ck2 .cv-sgs>span{display:inline-flex;align-items:center;gap:var(--e-1,4px)}
+.ck2 .cv-sgs b{font-weight:600;color:var(--texte)}
+.ck2 .cv-sg-leg{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-1,4px) var(--e-3,12px);margin:0 0 var(--e-2,8px);font-size:var(--pt-nano,11px);color:var(--texte-doux)}
+.ck2 .cv-sg-leg>span{display:inline-flex;align-items:center;gap:var(--e-1,4px)}
+.ck2 .cv-sg-leg>span:first-child{font-weight:600;color:var(--texte-med)}
+.ck-cv-tip .t svg{vertical-align:-3px}
+/* ★ FIN CAVEPIL-2 */
 
 /* ★ CAVE-2 (§289) — LE CUVIER AU DESSIN DE LA MAQUETTE V8 (habit seulement).
    Le Cuvier dessine avec sa propre feuille (classes mvv-, injectée) ; ce bloc la recale sur les jetons par #page-cave. Cuves en

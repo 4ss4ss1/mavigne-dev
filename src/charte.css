@@ -363,12 +363,16 @@
 /* ★ CAVEPIL-1 (§436) — la matière de la cave, dessinée dans la vue Cave du Pilotage : le vin dans la cuve et au chai, le
    bois, l'inox, le froid de la macération. Un dessin, pas un état : l'état garde ses couleurs (ok, attention, danger). */
 :root{--vin-liq:color-mix(in srgb,var(--bordeaux) 37%,var(--bg-card));--vin-surf:color-mix(in srgb,var(--bordeaux) 60%,var(--bg-card));--vin-chai:color-mix(in srgb,var(--bordeaux) 62%,var(--bg-card));--bulle:rgba(255,255,255,.75);--bois:#9A6C47;--bois-pale:color-mix(in srgb,#9A6C47 11%,var(--bg-card));--inox-corps:color-mix(in srgb,var(--texte-doux) 7%,var(--bg-card));--inox-reflet:rgba(255,255,255,.85);--froid:#2F6EA3;--froid-doux:rgba(47,110,163,.13);}
+/* ★ CAVEPIL-2 (§437) — les signes de dégustation sur les fûts : la fleur (pétales et cœur) et la marque blanche du piqué. */
+:root{--sg-fleur:#FFFFFF;--sg-fleur-trait:#55534E;--sg-fleur-coeur:#E2B33C;--sg-marque:#FFFFFF;}
 
 #app-root[data-theme="dark"],:root[data-theme="dark"]{--vin-tx:#E8A882;--acier-tx:#8FC7E0;}
+#app-root[data-theme="dark"],:root[data-theme="dark"]{--sg-fleur:#F4F1EA;--sg-fleur-trait:#77736B;--sg-fleur-coeur:#E2B33C;--sg-marque:#151514;}
 #app-root[data-theme="dark"],:root[data-theme="dark"]{--vin-liq:color-mix(in srgb,#B3475A 42%,var(--bg-card));--vin-surf:color-mix(in srgb,#D7707F 60%,var(--bg-card));--vin-chai:color-mix(in srgb,#C25A6C 62%,var(--bg-card));--bulle:rgba(255,235,240,.55);--bois:#B88C66;--bois-pale:color-mix(in srgb,#B88C66 12%,var(--bg-card));--inox-corps:color-mix(in srgb,#C9C7C1 7%,var(--bg-card));--inox-reflet:rgba(255,255,255,.10);--froid:#8FBEE8;--froid-doux:rgba(143,190,232,.15);}
 
 @media(prefers-color-scheme:dark){
   #app-root:not([data-theme="light"]),:root:not([data-theme="light"]){--vin-tx:#E8A882;--acier-tx:#8FC7E0;}
+  #app-root:not([data-theme="light"]),:root:not([data-theme="light"]){--sg-fleur:#F4F1EA;--sg-fleur-trait:#77736B;--sg-fleur-coeur:#E2B33C;--sg-marque:#151514;}
   #app-root:not([data-theme="light"]),:root:not([data-theme="light"]){--vin-liq:color-mix(in srgb,#B3475A 42%,var(--bg-card));--vin-surf:color-mix(in srgb,#D7707F 60%,var(--bg-card));--vin-chai:color-mix(in srgb,#C25A6C 62%,var(--bg-card));--bulle:rgba(255,235,240,.55);--bois:#B88C66;--bois-pale:color-mix(in srgb,#B88C66 12%,var(--bg-card));--inox-corps:color-mix(in srgb,#C9C7C1 7%,var(--bg-card));--inox-reflet:rgba(255,255,255,.10);--froid:#8FBEE8;--froid-doux:rgba(143,190,232,.15);}
 }
 

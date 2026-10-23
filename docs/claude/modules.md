@@ -1446,6 +1446,7 @@ Marqueurs dorés numérotés, ligne pleine J1, pointillés ensuite, repli SVG ho
 l'équipe » était faux depuis le premier jour.**
 
   ★★ **CAVEPIL-1 (§436)** : Aujourd’hui a trois vues — Terrain · **Cave** · Économie. La vue Cave lit la Cave (`_caveSynthese`, `_mlChaine`, `_dgnSynthese`, `CONFIG.cave_jours`) et ne fait aucun geste (`data-cave` → `_pilCaveAller`) ; modèle `_pilCk2Cave` (dans `_pilCk2Modele`), dessin `cockpit-vue.js` (`cv*`, `majCave`), feuille ★★ CAVEPIL-1 ; indicateurs `auj_cave` (la vue) et `auj_cave_sv` (ses points dans « À savoir »).
+  ★★ **CAVEPIL-2 (§437)** : le signe de la dernière dégustation (fleur, piqué, oxydé) sur le fût goûté — `_caveSignesFuts` (cave.js, pure, clé `_copDgFutKey`), mis en forme par `_pilCk2Cave` (`futsD`), dessiné par `cvFut(sg)` ; jetons `--sg-*`.
 
 ## 20c. La Réserve
 

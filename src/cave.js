@@ -6384,6 +6384,40 @@ function _mlDiagForts(){
     .map(function(x){ return {id:x.id, nom:nom[x.id], txt:x.txt||''}; }); }
   catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'verdict/diagnostic',err:e}); return []; }
 }
+// ★★ CAVEPIL-2 (§437) — LES SIGNES DE DÉGUSTATION SUR LES FÛTS (vue Cave du Pilotage). Nico (23/10) : à l'entonnage, chaque
+//   fût est saisi avec son tonnelier, son année et sa référence — la dégustation du Chai désigne le fût par ces trois-là
+//   (op.data.fut, clé de _copDgFutKey). Chaque ligne d'entonnage garde le signe de SA dernière dégustation : fleur (« Fleur en
+//   surface »), piqué (« Volatile »), oxydé (« Oxydatif ») ; une dégustation plus récente du même fût qui ne le note plus
+//   l'efface. Une ligne de plusieurs fûts porte le signe sur UN seul rond (le repère noté dit lequel). Une dégustation de toute
+//   la cuvée (sans fût) donne un signe de cuvée. Plusieurs signes sur un fût : le rond montre le plus grave (piqué, puis oxydé,
+//   puis fleur), la bulle les dit tous. Fonction pure : elle lit la cuvée et les opérations qu'on lui donne.
+var _CAVE_SG={vol:'pique', oxy:'oxyde', fleur:'fleur'}, _CAVE_SG_ORDRE=['pique','oxyde','fleur'];
+function _caveSignesFuts(c, ops){
+  var lots=(Array.isArray(c&&c.tonneaux)?c.tonneaux:[]).filter(function(l){ return l&&typeof l==='object'; });
+  var cle=function(l){ return [(l&&l.annee!=null)?l.annee:'',(l&&l.four)||'',(l&&l.ref)||''].join('|'); };   // la clé de _copDgFutKey
+  var der={}, cuv=null;
+  (Array.isArray(ops)?ops:[]).forEach(function(o){
+    if(!o||o.type!=='degustation'||!o.data||typeof o.data!=='object') return;
+    var ids=(Array.isArray(o.cuvees_ids)&&o.cuvees_ids.length)?o.cuvees_ids:(o.cuvee_id!=null?[o.cuvee_id]:[]);
+    if(!c||!ids.some(function(x){ return String(x)===String(c.id); })) return;
+    var d=String(o.date||'').slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return;
+    var f=(o.data.fut&&typeof o.data.fut==='object')?o.data.fut:null, k=f?cle(f):'*', p=f?der[k]:cuv;
+    if(!p||d>=p.d){ if(f) der[k]={d:d, op:o}; else cuv={d:d, op:o}; }
+  });
+  var signes=function(o){ return (Array.isArray(o.data.signaux)?o.data.signaux:[]).map(function(s){ return _CAVE_SG[s]; }).filter(Boolean)
+    .filter(function(s,i,a){ return a.indexOf(s)===i; }).sort(function(a,b){ return _CAVE_SG_ORDRE.indexOf(a)-_CAVE_SG_ORDRE.indexOf(b); }); };
+  var futs=[];
+  lots.forEach(function(l){
+    var n=Math.max(1,parseInt(l.nb,10)||1), x=der[cle(l)], s=x?signes(x.op):[];
+    for(var i=0;i<n;i++){
+      var porte=s.length>0&&i===0;
+      futs.push({annee:l.annee!=null?l.annee:null, four:String(l.four||''), ref:String(l.ref||''), nb:n, sg:porte?s[0]:'', sgs:porte?s:[],
+        d:porte?x.d:null, qui:porte?String(x.op.operateur||''):'', rep:porte?String((x.op.data.fut&&x.op.data.fut.repere)||''):''});
+    }
+  });
+  var cs=cuv?signes(cuv.op):[];
+  return {futs:futs, cuvee:cs.length?{sgs:cs, d:cuv.d, qui:String(cuv.op.operateur||'')}:null};
+}
 // ★★ CAVEPIL-1 (§436) — LA CAVE, LUE PAR LE PILOTAGE (vue Cave du cockpit Aujourd'hui). UNE SEULE DÉFINITION (CAVE-3, §96) :
 //   tout vient des pièces de l'Aujourd'hui de la Cave — l'agenda des quatre semaines, le verdict, les cuves suivies
 //   (_vendSuivie), l'ouillage (_aujOuillageEtat), la malo (_aujMalo), la projection de fermentation (_mlProjFA), les derniers
@@ -6436,7 +6470,8 @@ function _caveSynthese(auj){
       tonneaux:(Array.isArray(c.tonneaux)?c.tonneaux:[]).filter(function(t){ return t&&typeof t==='object'; }).map(function(t){ return {annee:t.annee, nb:parseInt(t.nb,10)||0}; }),
       ouillage:o?{g:o.g, s:o.s, d:o.d, cls:o.cls||'', last:c.last_ouillage||null}:null,
       malo:{t:m[0], cls:m[1], s:m[2]}, soutirer:!!(x&&x.cas==='a_soutirer'), sout:(x&&x.sout)||null, analyse:c.last_analyse||null,
-      kinds:(parRef[String(c.id)]||[]).map(function(i){ return i.kind; }), e:etat(c.id,cours)});
+      kinds:(parRef[String(c.id)]||[]).map(function(i){ return i.kind; }), e:etat(c.id,cours),
+      signes:_caveSignesFuts(c, CAVE_ELEVAGE.operations)});   // CAVEPIL-2 (§437)
   });
   return {auj:auj, mil:mil, sem:sem, verdict:v, diag:diag, cuves:cuves, cuvees:cuvees, btl:btl, recents:_aujRecents(auj),
     parc:parc, phase:_mlPhase(), suivies:cuves.length};

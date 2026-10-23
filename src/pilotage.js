@@ -5452,6 +5452,8 @@ function _pilCk2Cave(V){
       go:'cuve:'+c.id, tip:{t:c.nom, rows:rows}};
   });
   var fortsId={}; dg.forEach(function(d){ fortsId[String(d.id)]=d; });
+  // ★ CAVEPIL-2 (§437) : les signes de la dernière dégustation, fût par fût (_caveSignesFuts, cave.js) — mis en forme ici.
+  var SGL={pique:'piqu\u00e9', oxyde:'oxyd\u00e9', fleur:'fleur'}, SGN={pique:'Piqu\u00e9 (volatile)', oxyde:'Oxyd\u00e9', fleur:'Fleur en surface'};
   var cuvees=Y.cuvees.map(function(c){
     var k=c.kinds||[], o=c.ouillage, m=c.malo||{}, f=fortsId[String(c.id)], e=f?'alerte':c.e, parts=[];
     var retard=(o&&o.cls==='due'&&/^\+(\d+)/.test(o.d||''))?parseInt((o.d||'').slice(1),10):0;
@@ -5475,7 +5477,16 @@ function _pilCk2Cave(V){
     if(c.sout) rows.push(['Dernier soutirage',dC(c.sout)]);
     if(c.analyse) rows.push(['Derni\u00e8re analyse',dC(c.analyse)]);
     if(f) rows.unshift(['Diagnostic','signes forts\u00a0: '+String(f.txt||'').toLowerCase()]);
+    var sgF=(c.signes&&Array.isArray(c.signes.futs))?c.signes.futs:[];
+    var futsD=(sgF.length&&sgF.length===(c.futs||0))?sgF.map(function(x){ return {t:'F\u00fbt'+(x.four?' '+x.four:'')+(x.annee!=null?' \u00b7 '+x.annee:''),
+      ref:(x.ref||'sans r\u00e9f\u00e9rence')+(x.nb>1?', lot de '+x.nb+' f\u00fbts':''), lot:x.nb>1?(x.ref||String(x.annee!=null?x.annee:'')):'', sg:x.sg||'',
+      sgs:(x.sgs||[]).map(function(k){ return SGN[k]; }), d:x.d?dC(x.d):'', qui:x.qui||'', rep:x.rep||''}; }):null;
+    var parSg={}; (futsD||[]).forEach(function(x){ if(x.sg) (parSg[x.sg]=parSg[x.sg]||[]).push(x.lot?'un f\u00fbt du lot '+x.lot+(x.rep?' ('+x.rep+')':''):String(x.ref).split(',')[0]); });
+    var sgRes=['pique','oxyde','fleur'].filter(function(k){ return parSg[k]; }).map(function(k){ return [k, SGL[k], parSg[k]]; });
+    var sgCv=(c.signes&&c.signes.cuvee)?{sgs:c.signes.cuvee.sgs, t:c.signes.cuvee.sgs.map(function(k){ return SGL[k]; }).join(', '), d:dC(c.signes.cuvee.d), qui:c.signes.cuvee.qui||''}:null;
+    if(sgRes.length||sgCv) rows.push(['D\u00e9gustation', sgRes.map(function(r){ return r[1]+'\u00a0: '+r[2].join(', '); }).concat(sgCv?[sgCv.t+' sur la cuv\u00e9e, le '+sgCv.d]:[]).join(' \u00b7 ')]);
     return {id:c.id, nom:c.nom, futs:c.futs||0, hl:c.hl?nb(c.hl)+'\u00a0hL':'', e:e, puce:puce, s:parts.join(' \u00b7 '), go:f?'diag':'cuvee:'+c.id, tip:{t:c.nom, rows:rows},
+      futsD:futsD, sgRes:sgRes, sgCv:sgCv,   // CAVEPIL-2
       r:e==='alerte'?0:(e==='faire'?(retard?1:2):(e==='cours'?3:4))};
   }).sort(function(a,b){ return a.r-b.r; });
   var tf=cuvees.reduce(function(a,c){ return a+c.futs; },0), th=Y.cuvees.reduce(function(a,c){ return a+(c.hl||0); },0);

@@ -364,7 +364,7 @@ const pct1 = v => { const n = Math.round(v * 10) / 10; return (n > 0 ? '+' : n <
 const INFO = {
   // ★ CAVEPIL-1 (§436) — la vue Cave
   cvverdict: 'Le verdict de la Cave, mot pour mot — celui de Cave › Aujourd’hui : relevés de densité, dernier ouillage, analyses de malo, soutirages, et le Diagnostic du Chai quand il relève des signes forts. Le Pilotage le lit, il ne le refait pas. Les trois chiffres comptent les gestes des quatre semaines de la Cave.',
-  cvplan: 'Chaque cuve suivie au Cuvier et chaque fût du Chai, de la couleur de ce qu’il demande cette semaine : rouge pour une alerte (fermentation qui ralentit, malo bloquée, signe fort au Diagnostic), orange pour un geste attendu, gris pour ce qui suit son cours, vert pour ce qui est à jour. Le niveau d’une cuve est estimé d’après les caisses, comme au Cuvier. Toucher ouvre l’écran de la Cave.',
+  cvplan: 'Chaque cuve suivie au Cuvier et chaque fût du Chai, de la couleur de ce qu’il demande cette semaine : rouge pour une alerte (fermentation qui ralentit, malo bloquée, signe fort au Diagnostic), orange pour un geste attendu, gris pour ce qui suit son cours, vert pour ce qui est à jour. Le niveau d’une cuve est estimé d’après les caisses, comme au Cuvier. Dans le coin d’un fût, le signe de sa dernière dégustation : fleur, piqué ou oxydé ; il part quand une dégustation plus récente du même fût ne le note plus. Toucher ouvre l’écran de la Cave.',
   cvsemaine: 'Les journées de cave marquées au Planning (la journée, le matin ou l’après-midi), face aux gestes des quatre semaines de la Cave. Un ouillage qui tombe un week-end revient au vendredi, un jour férié à la veille, comme dans la Cave. Les journées de cave ne comptent pas pour la vigne : la fin prévue des travaux en tient compte.',
   cvmil: 'La chaîne du millésime de la Cave : les kilos rentrés d’après les caisses, convertis à la règle du Cuvier ; « en cuve » reste une estimation tant que rien n’est décuvé ; « au chai » est le volume réellement entonné, jamais la taille des fûts. Le coût par bouteille est dans Économie › Revient.',
   cvfil: 'Les derniers gestes de la cave, du plus récent au plus ancien : relevés du Cuvier, décuvages, ouillages, soutirages, sulfitages, analyses et dégustations du Chai. En tête, qui est en cave aujourd’hui d’après le Planning.',
@@ -1325,7 +1325,31 @@ function cvCuveSvg(c) {
   if (c.froid) s += '<g transform="translate(' + (x0 + w - 9) + ',' + (y0 + 11) + ')"><circle class="cv-gel" r="9"/><path class="cv-gel-ic" d="M0-5.2V5.2M-4.5-2.6 4.5 2.6M-4.5 2.6 4.5-2.6"/></g>';
   return s + '</svg>';
 }
-const cvFut = () => '<svg class="cv-fut" viewBox="0 0 16 16" aria-hidden="true"><circle class="o" cx="8" cy="8" r="6.8"/><circle class="r" cx="8" cy="8" r="4.1"/></svg>';
+// ★★ CAVEPIL-2 (§437) — les signes de la dernière dégustation, dans le coin du rond du fût goûté (dessin de la maquette du 23/10) :
+//   fleur (pétales), piqué (triangle), oxydé (disque à moitié plein). La forme les distingue, pas seulement la couleur.
+const CV_SG = { pique: ['Piqué (volatile)', 'piqué'], oxyde: ['Oxydé', 'oxydé'], fleur: ['Fleur en surface', 'fleur'] };
+function cvSgSvg(k, cx, cy, s) {
+  const f = n => n.toFixed(2);
+  if (k === 'fleur') {
+    let p = '';
+    for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i * 2 * Math.PI / 5; p += '<circle class="sg-fl-p" cx="' + f(cx + Math.cos(a) * s * 0.56) + '" cy="' + f(cy + Math.sin(a) * s * 0.56) + '" r="' + f(s * 0.46) + '"/>'; }
+    return p + '<circle class="sg-fl-c" cx="' + f(cx) + '" cy="' + f(cy) + '" r="' + f(s * 0.36) + '"/>';
+  }
+  if (k === 'pique') return '<path class="sg-pi" d="M' + f(cx) + ' ' + f(cy - s) + 'L' + f(cx + s * 0.98) + ' ' + f(cy + s * 0.74) + 'H' + f(cx - s * 0.98) + 'Z"/>'
+    + '<path class="sg-pi-m" d="M' + f(cx) + ' ' + f(cy - s * 0.36) + 'V' + f(cy + s * 0.14) + 'M' + f(cx) + ' ' + f(cy + s * 0.44) + 'v.01"/>';
+  if (k === 'oxyde') return '<circle class="sg-ox-b" cx="' + f(cx) + '" cy="' + f(cy) + '" r="' + f(s * 0.9) + '"/>'
+    + '<path class="sg-ox-h" d="M' + f(cx) + ' ' + f(cy - s * 0.9) + 'A' + f(s * 0.9) + ' ' + f(s * 0.9) + ' 0 0 0 ' + f(cx) + ' ' + f(cy + s * 0.9) + 'Z"/>';
+  return '';
+}
+const cvFut = sg => '<svg class="cv-fut" viewBox="0 0 16 16" overflow="visible" aria-hidden="true"><circle class="o" cx="8" cy="8" r="6.8"/><circle class="r" cx="8" cy="8" r="4.1"/>'
+  + (CV_SG[sg] ? '<g class="cv-sg"><circle class="halo" cx="12.6" cy="3.4" r="4.3"/>' + cvSgSvg(sg, 12.6, 3.4, 3.5) + '</g>' : '') + '</svg>';
+const cvSgIcone = k => '<svg class="cv-sgi" viewBox="0 0 12 12" width="16" height="16" overflow="visible" aria-hidden="true">' + cvSgSvg(k, 6, 6.4, 4.8) + '</svg>';
+let CV_FUTS = {};
+function cvSgRes(c) {
+  const L = (c.sgRes || []).map(r => '<span>' + cvSgIcone(r[0]) + '<b>' + esc(r[1]) + '</b> ' + esc(r[2].join(', ')) + '</span>');
+  if (c.sgCv) L.push('<span>' + c.sgCv.sgs.map(cvSgIcone).join('') + '<b>' + esc(c.sgCv.t) + '</b> sur la cuvée, le ' + esc(c.sgCv.d) + '</span>');
+  return L.length ? '<span class="cv-sgs">' + L.join('') + '</span>' : '';
+}
 function cvVerdict(C) {
   const v = C.verdict;
   return '<div class="ck-v-haut"><span class="ck-v-k">Ce qui presse en cave</span><span class="ck-etat ' + v.etat + '">' + esc(v.etatTxt) + '</span></div>'
@@ -1335,7 +1359,7 @@ function cvVerdict(C) {
     + '<div class="ck-v-act">' + v.act.map((a, k) => '<button type="button" class="ck-btn ' + (k ? 'ck-btn-ghost' : 'ck-btn-pri') + '" data-cave="' + esc(a[1]) + '">' + esc(a[0]) + '</button>').join('') + '</div>';
 }
 function cvPlan(C) {
-  CV_TIPS = {};
+  CV_TIPS = {}; CV_FUTS = {};
   const objets = C.cuvier.cuves.filter(c => c.e !== 'vide').concat(C.chai.cuvees), n = {};
   objets.forEach(o => { n[o.e] = (n[o.e] || 0) + 1; });
   const leg = CV_ETATS.map(e => '<button type="button" class="ck-leg-i cv-e-' + e[0] + '" data-f="' + e[0] + '" aria-pressed="' + (S.cvFiltre === e[0]) + '"' + (n[e[0]] ? '' : ' disabled') + '><i aria-hidden="true"></i>' + e[1] + ' <b>' + (n[e[0]] || 0) + '</b></button>').join('');
@@ -1349,8 +1373,9 @@ function cvPlan(C) {
     CV_TIPS['c' + c.id] = c.tip;
     return '<button type="button" class="cv-cuvee cv-e-' + c.e + '" data-e="' + c.e + '" data-tip="c' + esc(c.id) + '" data-cave="' + esc(c.go) + '" aria-label="' + esc(c.nom + ', ' + c.futs + ' fûts, ' + c.hl + ' : ' + c.puce + '. ' + c.s.replace(/<[^>]+>/g, '')) + '">'
       + '<span class="cv-cuvee-h"><b>' + esc(c.nom) + '</b><span>' + c.futs + '\u00a0fût' + (c.futs > 1 ? 's' : '') + (c.hl ? ' · ' + esc(c.hl) : '') + '</span><span class="mvpas mvpas-statut ' + (CV_PAS[c.e] || '') + '">' + esc(c.puce) + '</span></span>'
-      + '<span class="cv-futs" aria-hidden="true">' + Array.from({ length: Math.min(c.futs, 400) }, cvFut).join('') + '</span>'
-      + (c.s ? '<span class="cv-cuvee-s">' + c.s.replace(/<(?!\/?span(?: class="rt")?>)[^>]+>/g, '') + '</span>' : '') + '</button>';
+      + '<span class="cv-futs" aria-hidden="true">' + (c.futsD ? (CV_FUTS['c' + c.id] = c.futsD).map((f, i) => '<span class="cv-fw" data-fut="c' + esc(c.id) + ':' + i + '">' + cvFut(f.sg) + '</span>').join('')
+        : Array.from({ length: Math.min(c.futs, 400) }, () => cvFut('')).join('')) + '</span>'
+      + (c.s ? '<span class="cv-cuvee-s">' + c.s.replace(/<(?!\/?span(?: class="rt")?>)[^>]+>/g, '') + '</span>' : '') + cvSgRes(c) + '</button>';
   }).join('');
   const btl = C.btl.l.map(b => '<button type="button" class="cv-btl" data-cave="' + esc(b.go) + '"><span class="cv-btl-ic">' + cvIc('bouteille', 16) + '</span><span><b>' + esc(b.nom) + '</b><span>' + esc(b.n + (b.s ? ' · ' + b.s : '')) + '</span></span></button>').join('');
   return entete('La cave en direct', 'Chaque cuve et chaque fût, selon ce qu’il demande', 'cvplan')
@@ -1358,6 +1383,7 @@ function cvPlan(C) {
     + '<div class="cv-zone"><div class="cv-zone-h"><b>Le Cuvier</b><span>' + esc(C.cuvier.resume) + '</span></div>'
     + (C.cuvier.cuves.length ? '<div class="cv-cuves" style="--n:' + Math.max(3, C.cuvier.cuves.length) + '">' + cuves + '</div>' : '<p class="ck-vide">Aucune cuve suivie. Le Cuvier reprendra avec la prochaine vendange.</p>') + '</div>'
     + '<div class="cv-zone"><div class="cv-zone-h"><b>Le Chai</b><span>' + esc(C.chai.resume) + '</span></div>'
+    + (C.chai.cuvees.some(c => (c.sgRes && c.sgRes.length) || c.sgCv) ? '<p class="cv-sg-leg"><span>Signes de la dernière dégustation</span>' + Object.keys(CV_SG).map(k => '<span>' + cvSgIcone(k) + CV_SG[k][1] + '</span>').join('') + '</p>' : '')
     + (C.chai.cuvees.length ? '<div class="cv-cuvees">' + cuvees + '</div>' : '<p class="ck-vide">Aucune cuvée en élevage.</p>') + '</div>'
     + (btl ? '<div class="cv-zone"><div class="cv-zone-h"><b>En bouteille</b><span>' + esc(C.btl.resume) + '</span></div>' + btl + '</div>' : '');
 }
@@ -1422,10 +1448,18 @@ function cvFiltrer() {
   $$('.cv-leg .ck-leg-i', plan).forEach(b => b.setAttribute('aria-pressed', String(S.cvFiltre === b.dataset.f)));
 }
 function cvTip(el) {
-  const T = CV_TIPS[el.dataset.tip]; if (!T || !T.rows || !T.rows.length) return;
+  // ★ CAVEPIL-2 (§437) : la bulle d'un fût — sa référence, ses signes, la date et qui a goûté ; sinon, celle de la cuve ou de la cuvée.
+  let T = null, sg = '';
+  if (el.dataset.fut) {
+    const [k, i] = el.dataset.fut.split(':'), f = (CV_FUTS[k] || [])[+i]; if (!f) return;
+    sg = f.sg;
+    T = { t: f.t, rows: [['Référence', f.ref]].concat(f.sgs.length ? [['Signe' + (f.sgs.length > 1 ? 's' : ''), f.sgs.join(', ')], ['Dégustation', f.d + (f.qui ? ', ' + f.qui : '')]].concat(f.rep ? [['Repère noté', '« ' + f.rep + ' »']] : []) : [['Signe', 'aucun à la dernière dégustation']]),
+      p: f.lot && f.sg ? 'Plusieurs fûts sous la même référence : le signe est posé sur un seul rond, le repère dit lequel.' : 'Le signe suit la dernière dégustation de ce fût ; il part quand une dégustation plus récente ne le note plus.' };
+  } else T = CV_TIPS[el.dataset.tip];
+  if (!T || !T.rows || !T.rows.length) return;
   let b = document.getElementById('ck-cv-tip');
   if (!b) { b = document.createElement('div'); b.id = 'ck-cv-tip'; b.className = 'ck-cv-tip ck2'; b.setAttribute('role', 'tooltip'); document.body.appendChild(b); }
-  b.innerHTML = '<b class="t">' + esc(T.t) + '</b><dl>' + T.rows.map(r => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl><p>Toucher ouvre l’écran de la Cave.</p>';
+  b.innerHTML = '<b class="t">' + (CV_SG[sg] ? cvSgIcone(sg) + ' ' : '') + esc(T.t) + '</b><dl>' + T.rows.map(r => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl><p>' + esc(T.p || 'Toucher ouvre l’écran de la Cave.') + '</p>';
   const r = el.getBoundingClientRect(), bw = Math.min(320, window.innerWidth - 16);
   let x = r.right + 12; if (x + bw > window.innerWidth - 8) x = Math.max(8, r.left - bw - 12);
   b.style.left = x + 'px'; b.style.top = Math.max(8, Math.min(r.top, window.innerHeight - 240)) + 'px';
@@ -1798,7 +1832,7 @@ function brancher() {
   window.addEventListener('scroll', () => { cacherLoupe(); cvCacherTip(); }, { passive: true, capture: true });   // FORME-1 ; CAVEPIL-1 : la bulle d'une cuve non plus
   // ★ CAVEPIL-1 (§436) : la bulle d'une cuve ou d'une cuvée, au survol (souris) ou au clavier. Au doigt, pas de bulle : le
   //   toucher ouvre l'écran de la Cave.
-  document.addEventListener('pointerover', ev => { const el = ev.target.closest && ev.target.closest('#ck-cv-plan [data-tip]'); if (el && ev.pointerType !== 'touch') cvTip(el); });
+  document.addEventListener('pointerover', ev => { const el = ev.target.closest && (ev.target.closest('#ck-cv-plan [data-fut]') || ev.target.closest('#ck-cv-plan [data-tip]')); if (el && ev.pointerType !== 'touch') cvTip(el); });   // CAVEPIL-2 : un fût d'abord
   document.addEventListener('pointerout', ev => { const el = ev.target.closest && ev.target.closest('#ck-cv-plan [data-tip]'); if (el && !el.contains(ev.relatedTarget)) cvCacherTip(); });
   document.addEventListener('focusin', ev => { const el = ev.target.closest && ev.target.closest('#ck-cv-plan [data-tip]'); if (el && el.matches(':focus-visible')) cvTip(el); });
   document.addEventListener('focusout', ev => { if (ev.target.closest && ev.target.closest('#ck-cv-plan [data-tip]')) cvCacherTip(); });

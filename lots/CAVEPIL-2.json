@@ -1,0 +1,40 @@
+{
+  "lot": "CAVEPIL-2",
+  "section": "§437",
+  "base": "4bb3ff07d60d75bc32f8c586ac5feadcfb4f698c",
+  "inclut": [],
+  "date": "2026-10-23",
+  "tutos": {
+    "ok": true,
+    "empreinte": "e8209afab615caddf3be1a296e217cf58ae3976d52a59849a5287c4290b17599",
+    "date": "2026-10-23T09:58:53.321Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "4961d9a967c086f9b393bf48ff5c5f2a2f0ba52989b3dbf12596cb807e111dd5",
+    "CLAUDE.md": "8f663192a6e445738dec385f9fef1c1c5fdfa98683616179f24106cab2a7b8b3",
+    "docs/claude/INDEX.md": "08b2b1027f9c72a9e0a30cefa0cd9e748b69211e4220fb2a29696655091711a2",
+    "docs/claude/chantiers-430-479.md": "76e1582679bdd26baef5c87f65d814292474cf9bb3fa7d94ebbd9dbbd195dd3c",
+    "docs/claude/journal.md": "19fb9ad5bf4e75b50eb3460d0fce906b208998757015efaaefe6b9ac289779e6",
+    "docs/claude/modules.md": "253583e50a98f6aceb5af44430171e8066bb4109b6d5ba606d1c66277ed3ece1",
+    "guide/11-pilotage.html": "85f3b1b4f3267e98bcc82826373d4857facae2a044465e0a50563b3208f2ef54",
+    "index.html": "76388d8ccd0f1d395d9025a06452ac442505d3a3fca67202719feb091b5096be",
+    "public/guide.html": "d98bc4d61e55445f5deb0344f2d0870a9d1867f4781e1edd682bbf37dd988d64",
+    "public/sw.js": "63a61c7dcc52d453070c4667c964482bbab03d5784b3a535ac72803f3b8efae2",
+    "scripts/harnais-claude-md.mjs": "3f93eef7d113201f035d65aa5a514a5861f24314196f8c1cf4dbbf902fdefc3c",
+    "scripts/mv-harnais-liste.mjs": "d26c24a45d6a578c29dbc2ea0548b5cfffad0f0a4ad6f592972cebcdef3d865d",
+    "src/cave.js": "babbc1e1f6d3cfdf76fb86536191244d52244fdaa3fd67fdf84e82372c0ffe16",
+    "src/charte.css": "52994fda2fc66374bf0c08a06f7f8c7429d64039a941802f185798839022045a",
+    "src/cockpit-vue.js": "8887dc670e1f6930fd78a5381516cdd59d43fa1b6af79c80940c04866e4d7d12",
+    "src/pilotage.js": "997f6bbd9c5c1f008a7256395f4f8826dd1597e77dc71cd8e43b9cc9dca99b72",
+    "src/styles.css": "a16abd20a72cb4396122500d6f727a329b4595ca15e0f485076f268b89c1d450",
+    "src/utils.js": "8645bf464392dc3baa15deba5e000f3928fbfccac2d6cca2f06f938b5eb1b719",
+    "scripts/mv-harnais-cavepil2.mjs": "d9f13f7ac4a021391370dbbd23d47299b6841674c378e9abfaa0e36d91ddcfc0"
+  }
+}
