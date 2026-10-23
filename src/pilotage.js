@@ -183,7 +183,6 @@ var _PIL_TAB = 'auj';
 // ════════════════════════════════════════════════════════════════════════════
 var _PIL_TABS = [
   ['auj','chrono','Aujourd\'hui'],
-  ['an', 'calendrier','L\'année'],
   ['avc','raisin','La campagne'],
   // ★★ « L'equipe & les taches » ne montrait AUCUNE tache : son contenu est
   //   Personnel + Materiel. Les taches vivent au niveau ② (avancement par tache,
@@ -222,12 +221,12 @@ var _PIL_ZOOM_FIN = 'sim';
 // le lot 5 declarait mort. Et `an` n'avait AUCUNE entree : le titre du niveau ①
 // sortait VIDE, la roue crantee flottant seule dans l'en-tete.
 // ⚠️ Les cles ne bougent pas ; seuls les mots changent.
-var _PIL_LABELS = {auj:'Aujourd\'hui',an:'L\'année — un cadre à la fois : budget et renfort',avc:'La campagne — avancement, temps et échéances',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, passages phyto et délai de rentrée',arc:'Archives des campagnes',sim:'Décider — la tournée du jour, qui fait quoi, et le renfort'};
-var _PIL_VALID_TAB = {auj:1,an:1,avc:1,equ:1,cav:1,eco:1,cfm:1,arc:1,sim:1};
+var _PIL_LABELS = {auj:'Aujourd\'hui',avc:'La campagne — avancement, temps et échéances',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, passages phyto et délai de rentrée',arc:'Archives des campagnes',sim:'Décider — la tournée du jour, qui fait quoi, et le renfort'};
+var _PIL_VALID_TAB = {auj:1,avc:1,equ:1,cav:1,eco:1,cfm:1,arc:1,sim:1};
 // Migration des onglets memorises avant le regroupement.
 // Migration des cles memorisees : `ecf` (l'onglet composite) part sur l'economie.
 // `eco` et `cfm` etaient des cles historiques deja vues : elles redeviennent valides.
-var _PIL_TAB_MIGR = {prs:'equ',mat:'equ',ecf:'eco',cav:'auj'};   // cav : l'onglet Cave est rentre dans la Cave (lot CAVE-3)
+var _PIL_TAB_MIGR = {prs:'equ',mat:'equ',ecf:'eco',cav:'auj',an:'eco'};   // an : PIL-RANGE-2b (§444), L'annee est rangee dans Economie et Equipe   // cav : l'onglet Cave est rentre dans la Cave (lot CAVE-3)
 // ★ 'param' (le Parametrage, lot NAV-3) ne passe PAS par _PIL_TAB_MIGR : C22 lit
 //   cette table comme la liste des cles mortes et rougirait sur le 'param' du
 //   Cuvier (cave.js, cle homonyme, tolerance CAVE-2). Il est traite a part :
@@ -5869,14 +5868,14 @@ function _pilAnRenfortSvg(R, w){
 // autre chose que la carte qu'elle ouvre serait un deuxieme chiffre.
 function _pilPhotoEffAn(D, flag){
   var C=D.cad, R=D.renf;
-  if(!C.enCours) return _pilPhotoHtml('Effectif','equipe','\u2014','', (C.cadre==='vig'?'ann\u00e9e close':'exercice clos')+' \u00b7 plus de renfort \u00e0 d\u00e9cider','an',flag||'','effectif');
-  if(!R || !R.ok) return _pilPhotoHtml('Effectif','equipe','\u2014','', 'aucune semaine dat\u00e9e dans ce cadre','an',flag||'','effectif');
+  if(!C.enCours) return _pilPhotoHtml('Effectif','equipe','\u2014','', (C.cadre==='vig'?'ann\u00e9e close':'exercice clos')+' \u00b7 plus de renfort \u00e0 d\u00e9cider','equ',flag||'','effectif');
+  if(!R || !R.ok) return _pilPhotoHtml('Effectif','equipe','\u2014','', 'aucune semaine dat\u00e9e dans ce cadre','equ',flag||'','effectif');
   var F=R.fen || [];
-  if(!F.length) return _pilPhotoHtml('Effectif','equipe','0',' pers.', '\u00e0 trouver \u00b7 l\u2019\u00e9quipe pr\u00e9vue suffit'+(R.finCouv?(' jusqu\u2019au '+_pilDfr(R.finCouv)):''),'an',flag||'','effectif');
+  if(!F.length) return _pilPhotoHtml('Effectif','equipe','0',' pers.', '\u00e0 trouver \u00b7 l\u2019\u00e9quipe pr\u00e9vue suffit'+(R.finCouv?(' jusqu\u2019au '+_pilDfr(R.finCouv)):''),'equ',flag||'','effectif');
   var f0=F[0];
   var s='\u00e0 trouver '+(f0.a<=C.auj?'cette semaine':('d\u00e8s le '+_pilDfr(f0.a)))
     +(F[1]?(' \u00b7 '+F[1].n+' en '+_PIL_AN_MOIS[_pilOrdD(F[1].oMax).getUTCMonth()]):'');
-  return _pilPhotoHtml('Effectif','equipe','+'+f0.n,' pers.', s,'an', flag||_pilFlag('o','Il manquera du monde : voir \u00ab Le renfort \u00e0 pr\u00e9voir \u00bb'),'effectif');
+  return _pilPhotoHtml('Effectif','equipe','+'+f0.n,' pers.', s,'equ', flag||_pilFlag('o','Il manquera du monde : voir \u00ab Le renfort \u00e0 pr\u00e9voir \u00bb'),'effectif');
 }
 function _pilPhotoBudAn(D, flag){
   var C=D.cad, B=D.bud;
@@ -5886,17 +5885,17 @@ function _pilPhotoBudAn(D, flag){
   var s=B.enCours
     ? ('d\u00e9pens\u00e9s au '+_pilDfr(B.coupe)+' \u00b7 <b>'+K(B.tot)+' k\u20ac</b> attendus au '+_pilDfr(C.d1))
     : ('d\u00e9pens\u00e9s sur '+(C.cadre==='vig'?'l\u2019ann\u00e9e vigne ':'l\u2019exercice ')+_pilEsc(C.court));
-  return _pilPhotoHtml('Budget','euro',K(B.dep),' k\u20ac', s,'an', flag||'','budget');
+  return _pilPhotoHtml('Budget','euro',K(B.dep),' k\u20ac', s,'eco', flag||'','budget');
 }
 
-function _pilTabAn(d){
-  // Le cadre se choisit dans la barre « Vous regardez » (PIL-RANGE-2a) ; ici, ses seuls avis.
+function _pilAnEcoHtml(){
+  // ★★ PIL-RANGE-2b (§444) — L'ONGLET L'ANNÉE EST RETIRÉ (maquette du rangement validée par Nico le 23/10).
+  //   Le cadre se choisit dans la barre « Vous regardez » (PIL-RANGE-2a) ; ses avis et son budget s'ouvrent ici, en
+  //   tête de la Synthèse d'Économie ; son renfort est dans Équipe & matériel › Personnel (_pilFillContent). Un ancien
+  //   onglet « an » enregistré migre vers Économie (_PIL_TAB_MIGR). Mêmes moteurs, mêmes chiffres.
   var H=_pilAnAvisHtml();
-  var pan='';
-  if(_pilShow('an_budget')) pan+=_pilPanelAnBudget();
-  if(_pilShow('an_frise'))  pan+=_pilPanelAnRenfort();
-  if(pan) H+='<div class="pil-panels">'+pan+'</div>';
-  return H || '<div class="pil-empty">Aucun indicateur affich\u00e9.</div>';
+  if(_pilShow('an_budget')) H+='<div class="pil-panels">'+_pilPanelAnBudget()+'</div>';
+  return H;
 }
 
 // ── Onglet AVANCEMENT ──
@@ -10682,7 +10681,7 @@ function _pilTabEco(d){
   else if(_PEC_SUB==='ach') body=_pachView();
   else if(_PEC_SUB==='exe') body=_pexView();
   else if(_PEC_SUB==='rev') body=_pecViewRevient();
-  else body=_pecViewSynthese(E,TL);
+  else body=_pilAnEcoHtml()+_pecViewSynthese(E,TL);   // PIL-RANGE-2b (§444) : les avis et le budget de l'annee, en tete de la Synthese
   return '<div class="pec-wrap">'+_pilCadreAvert(_pilAvertEco())+_pecSubNav(E)+body+'</div>';
 }
 
@@ -10853,9 +10852,9 @@ function _pilTabCfm(d){
 // ── Personnalisation PAR ONGLET (visibilité des tuiles) ──
 var _PIL_PERSO_DEFS={
   auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_tension','Tension équipe'],['auj_inaction','Coût de l’inaction'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_cave','La Cave \u2014 la vue de la bascule Terrain / Cave / Économie'],['auj_cave_sv','Les points de cave dans « À savoir »'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ? · fenêtre 5 jours'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave'],['auj_resume','Le résumé du jour'],['auj_chantiers','Les chantiers en cours'],['auj_courbe','La courbe de la charge restante'],['auj_fil','En direct : le fil de l\'équipe'],['auj_savoir','À savoir : météo, absences, contrats, retards'],['auj_plan','Le domaine en direct'],['auj_eco','La vue Économie (bascule Terrain / Économie)']],
-  an: [['an_budget','Le budget de l\'ann\u00e9e'],['an_frise','Le renfort \u00e0 pr\u00e9voir']],
   avc:[['avc_gauge','Jauge de saison'],['avc_bar','Avancement par tâche'],['avc_pie','Charge (donut)'],['avc_temps','Où va le temps de l\'équipe'],['avc_echeances','Échéances par tâche'],['avc_carte','Carte du domaine']],
-  equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_conso','Consommation mesurée'],['mat_travaux','Pour finir les travaux tracteur en cours']],
+  equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_conso','Consommation mesurée'],['mat_travaux','Pour finir les travaux tracteur en cours'],['an_frise','Le renfort \u00e0 pr\u00e9voir']],
+  eco:[['an_budget','Le budget de l\'ann\u00e9e']],
   sim:[['sim_ordre','La tournée du jour'],['sim_etsi','Qui fait quoi'],['sim_cout','Renfort : combien et quand']],
   cfm:[['cfm_cuivre','Cuivre (bio · 7 ans)'],['cfm_ift','Passages phyto / IFT'],['mat_phyto','Registre phyto'],['cfm_dre','Délai de rentrée (DRE)']]
 };
@@ -11191,7 +11190,7 @@ function _pilSkeleton(d,tab){
   //     menu ⚙ Outils, ou vivent deja Archives et Parametrage — c'est le meme
   //     genre de geste, rare et volontaire. `#pil-gear` ne bouge pas de nom :
   //     _pilBind le retrouve, et le panneau s'ouvre au meme endroit.
-  var avecPerso=(tab==='auj'||tab==='an'||tab==='avc'||tab==='equ'||tab==='sim'||tab==='cfm');
+  var avecPerso=(tab==='auj'||tab==='avc'||tab==='equ'||tab==='sim'||tab==='eco'||tab==='cfm');
   _pilCssV2(); _pilScopeLoad();
   // La barre de portee se pose ENTRE le masthead et les onglets : elle dit ou
   // l'on regarde avant de dire ce que l'on regarde. Les photos ouvrent le
@@ -11233,7 +11232,7 @@ function _pilSkeleton(d,tab){
 //   restante, la cadence, le budget consomme) : les photos y faisaient un
 //   troisieme emploi. Sur les cinq ecrans de detail, on y ARRIVE par une photo.
 // ════════════════════════════════════════════════════════════════════════════
-function _pilPhotosIci(tab){ return tab==='an' || tab==='avc'; }
+function _pilPhotosIci(tab){ return tab==='avc'; }   // PIL-RANGE-2b (§444) : L'annee rangee, les photos restent sur La campagne
 function _pilCssV2(){
   if(document.getElementById('pil-css-v2')) return;
   // ═══ L'ECHELLE DE TEXTE — ONZE PAS NOMMES ═══
@@ -11706,7 +11705,7 @@ function _pilPhotosHtml(){
   else if(camp) sT='de bar\u00e8me '+cadre;
   else sT='de bar\u00e8me \u00b7 '+D.nPer+' campagne'+(D.nPer>1?'s':'')+' dans '+((D.cad&&D.cad.cadre==='vig')?'l\u2019ann\u00e9e vigne':'l\u2019exercice')
     +(D.nChev>0?(' \u00b7 '+D.nChev+' \u00e0 cheval, au prorata de ses jours'):'');
-  var pTrav=_pilPhotoHtml('Travaux','feuille',_pilNb(D.hTot),' h', sT, camp?'avc':'an', fT, 'travaux');
+  var pTrav=_pilPhotoHtml('Travaux','feuille',_pilNb(D.hTot),' h', sT, 'avc', fT, 'travaux');
 
   // EFFECTIF — le pic, et le manque en clair s'il y en a un.
   var sE = D.pic>0
@@ -11872,8 +11871,9 @@ window._pilGo = function(cible){
   try{
     // Cible INTERNE : on ne quitte pas le module, on change de niveau.
     if(cible==='an_cadres'){
-      if(_PIL_TAB!=='an'){ _PIL_TAB='an'; _pilSaveTab('an'); renderPilotage(); }
-      setTimeout(function(){ _pilFlash(document.getElementById('pil-an-cadres')); }, 240);
+      // PIL-RANGE-2b (§444) : les avis du cadre sont en tête de la Synthèse d'Économie ; sans avis, la barre qui choisit le cadre.
+      if(_PIL_TAB!=='eco' || _PEC_SUB!=='syn'){ _PIL_TAB='eco'; _pilSaveTab('eco'); _PEC_SUB='syn'; _pecSaveSt(); renderPilotage(); }
+      setTimeout(function(){ _pilFlash(document.getElementById('pil-an-cadres')||document.getElementById('pil-crumb')); }, 240);
       return;
     }
     // Cible INTERNE (ALIGN-1, §236) : la carte « Protection restante » montre les 5 parcelles les plus
@@ -12540,11 +12540,11 @@ function _pilFillContent(d){
   _pilExoOublier(); _pilCdVueOublier();
   var tab=_PIL_TAB;
   if(tab==='auj') host.innerHTML=_pilTabAuj(d);
-  else if(tab==='an') host.innerHTML=_pilTabAn(d);
   else if(tab==='avc') host.innerHTML=_pilTabAvc(d);
   else if(tab==='equ'){
     var _hEqu=
-        (_pilAnyShow(['prs_equipe','prs_presences','prs_capacite'])?'<div class="pil-sec-h">Personnel</div>'+_pilTabPrs(d):'')
+        (_pilAnyShow(['prs_equipe','prs_presences','prs_capacite','an_frise'])?'<div class="pil-sec-h">Personnel</div>'+_pilTabPrs(d)
+          +(_pilShow('an_frise')?'<div class="pil-panels">'+_pilPanelAnRenfort()+'</div>':''):'')   // PIL-RANGE-2b : le renfort, venu de L'annee
       + (_pilAnyShow(['mat_tracteur','mat_gnr','mat_conso','mat_travaux'])?'<div class="pil-sec-h">Matériel</div>'+_pilTabMat(d):'');
     // Les six autres onglets ont leur repli ; celui-ci sortait un ECRAN BLANC,
     // sans meme la phrase qui dit comment rallumer les tuiles.

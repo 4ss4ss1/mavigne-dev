@@ -241,7 +241,8 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
   /* 9. NAV-3 — le Pilotage */
   T(!/pil-outils|_PIL_TOOLS/.test(pil) && !/pil-outils/.test(CSS), 'plus de bouton \u00ab Outils \u00bb, ni de menu, ni de CSS');
   T(/\['cfm','alerte','Conformit\u00e9'\],[\s\S]{0,600}\['arc','carton','Archives'\]\n\];/.test(pil), 'Archives est le dernier onglet de _PIL_TABS, apr\u00e8s Conformit\u00e9');
-  T(/var _PIL_VALID_TAB = \{auj:1,an:1,avc:1,equ:1,cav:1,eco:1,cfm:1,arc:1,sim:1\};/.test(pil), '_PIL_VALID_TAB ne conna\u00eet plus param');
+  // PIL-RANGE-2b (§444) : « an » quitte aussi la liste (L'année rangée ; un « an » mémorisé migre vers Économie).
+  T(/var _PIL_VALID_TAB = \{auj:1,avc:1,equ:1,cav:1,eco:1,cfm:1,arc:1,sim:1\};/.test(pil), '_PIL_VALID_TAB ne conna\u00eet plus param');
   T(!/param:'auj'/.test(pil) && /var _PIL_TAB_ROUE = 'param';/.test(pil), '\u2018param\u2019 est trait\u00e9 \u00e0 part, PAS dans _PIL_TAB_MIGR (C22 y lirait une cl\u00e9 morte et rougirait sur le Cuvier)');
   T(/if\(t===_PIL_TAB_ROUE\) t='auj';/.test(pil), 'un onglet m\u00e9moris\u00e9 sur param rouvre sur Aujourd\u2019hui');
   T(/if\(t===_PIL_TAB_ROUE\)\{ if\(window\._mvReglOpen\) window\._mvReglOpen\('pilotage'\); return false; \}/.test(pil), '_pilSetTab(param) ouvre la roue');

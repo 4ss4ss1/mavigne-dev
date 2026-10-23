@@ -18,7 +18,7 @@ const ORDRE_RUB = ['Terrain', 'Cave et réserve', 'Organisation'];
 const TETE = 'pilotage', PIED = 'reglages';
 // PRO-1 (§269) : les onglets du Pilotage se LISENT dans _PIL_TABS (une liste écrite ici proposait « Simuler » et
 //   « L’équipe et les tâches », deux noms disparus de la barre ; Archives manquait). Repli : les noms du jour.
-const ONGLETS_PIL_REPLI = [['auj', 'Aujourd’hui'], ['an', 'L’année'], ['avc', 'La campagne'], ['equ', 'L’équipe & le matériel'], ['sim', 'Décider'], ['eco', 'Économie'], ['cfm', 'Conformité'], ['arc', 'Archives']];
+const ONGLETS_PIL_REPLI = [['auj', 'Aujourd’hui'], ['avc', 'La campagne'], ['equ', 'L’équipe & le matériel'], ['sim', 'Décider'], ['eco', 'Économie'], ['cfm', 'Conformité'], ['arc', 'Archives']];
 const ongletsPil = () => { const T = window._PIL_TABS; return Array.isArray(T) && T.length ? T.filter(t => Array.isArray(t) && t[0]).map(t => [t[0], String(t[2] || t[0]).replace(/'/g, '’')]) : ONGLETS_PIL_REPLI; };
 const MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || '');
 const TOUCHE = MAC ? '⌘ K' : 'Ctrl K';

@@ -1511,7 +1511,7 @@ function choisirMode(m) {
 }
 function choisirOnglet(k) {
   // Les onglets de la maquette sont ceux du Pilotage : on y va pour de vrai.
-  const M = { camp: 'avc', equ: 'equ', sim: 'sim', eco: 'eco', conf: 'cfm', dec: 'equ', an: 'an' };
+  const M = { camp: 'avc', equ: 'equ', sim: 'sim', eco: 'eco', conf: 'cfm', dec: 'equ', an: 'eco' };
   if (typeof window._pilSetTab === 'function') window._pilSetTab(M[k] || k);
 }
 

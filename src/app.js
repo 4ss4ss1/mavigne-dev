@@ -3202,7 +3202,7 @@ function _mvtChapterClose(silent){
 // Les onglets du Pilotage vises par les chapitres. Table SEPAREE plutot que
 // cles ecrites dans la navigation : elles sont memorisees chez les clients et
 // verifiees par C22 (_PIL_VALID_TAB). Une cle morte se corrige ici, une fois.
-var _MVT_PILTAB={pilotage:'auj', annee:'an', campagne:'avc', etp:'equ', eco:'eco', conformite:'cfm', sim:'sim'};
+var _MVT_PILTAB={pilotage:'auj', annee:'eco', campagne:'avc', etp:'equ', eco:'eco', conformite:'cfm', sim:'sim'};
 function _mvtGoPilTab(tb){ _mvtPilTab(tb); }
 function _mvtGoCave(sec,after){
   if(window.goTo) window.goTo('cave');

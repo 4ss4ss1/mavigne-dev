@@ -2813,7 +2813,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 <section id="pilotage">
   <div class="sec-h">
     <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg></div>
-    <div><h2>Pilotage</h2><div class="sub">Aujourd'hui · L'année · La campagne · L'équipe &amp; le matériel · Décider · Économie · Conformité · Archives</div></div>
+    <div><h2>Pilotage</h2><div class="sub">Aujourd'hui · La campagne · L'équipe &amp; le matériel · Décider · Économie · Conformité · Archives</div></div>
   </div>
   <p class="lead">Le Pilotage est un tableau de bord de <b>lecture</b>, pensé pour décider :
   où en est-on, tiendra-t-on les délais, peut-on traiter demain, combien coûte cet hectare. Il ne
@@ -2988,12 +2988,12 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     ne se recadrent pas : l'Économie chiffre la période consultée (ses sous-vues Exercice et Revient ont chacune leur cadre), la
     Conformité roule sur sept ans glissants — chacun l'écrit au-dessus de ses chiffres, plutôt que
     de répondre en silence sur une autre fenêtre que celle affichée.</li>
-    <li><b>Trois chiffres en tête de « L'année » et de « La campagne »</b> : les travaux, l'effectif,
+    <li><b>Trois chiffres en tête de « La campagne »</b> : les travaux, l'effectif,
     le budget, à la maille de ce que vous regardez. Toucher l'un d'eux ouvre l'écran qui le détaille.
     Sur l'année, l'effectif dit <b>combien de personnes manqueront</b>, et à partir de quand —
     plus le pic de la vendange passée ; sur une campagne choisie, il garde son pic.
-    <br><b>Ils ne s'affichent que sur ces deux onglets</b>, et c'est voulu : ce sont les deux niveaux
-    de zoom. Sur « Aujourd'hui », le cockpit répond déjà aux mêmes questions, en mieux ; sur les
+    <br><b>Ils ne s'affichent que sur cet onglet</b>, et c'est voulu : c'est le niveau de zoom (ce que
+    vous regardez se choisit dans la barre du haut). Sur « Aujourd'hui », le cockpit répond déjà aux mêmes questions, en mieux ; sur les
     écrans de détail, on y arrive justement <i>en touchant</i> un de ces chiffres.
     <br><b>La conformité n'y figure plus.</b> Le cuivre roule sur <b>sept ans glissants</b> : il ne
     bouge pas quand vous cliquez une campagne. Un chiffre qui ignore la portée n'a pas sa place dans
@@ -3008,19 +3008,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     seconde. Un rond rouge sur un chiffre : il ne se calcule pas. Un rond orange : il sort, mais faux.</li>
   </ul>
 
-  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg> L'année</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg> Le budget de l'année et le renfort</h3>
+  <p>L'onglet « L'année » est rangé : le cadre (exercice comptable ou année vigne) se choisit dans la barre
+  « Vous regardez » ; le budget de l'année s'ouvre en tête d'<b>Économie › Synthèse</b>, avec les avis du cadre ;
+  le renfort à prévoir est dans <b>L'équipe &amp; le matériel</b>, partie Personnel. Mêmes calculs, mêmes chiffres.</p>
   <ul class="dot">
-    <li><b>Un cadre à la fois.</b> En tête de l'onglet, choisissez l'<b>exercice comptable</b> — d'un
-    bilan à l'autre, fixé par votre comptable — ou l'<b>année vigne</b>, qui suit le mois d'ouverture
-    de votre campagne (roue crantée d'Économie › Exercice), le même cadre que les Archives. Les flèches
-    remontent aux années passées ; au rechargement, l'écran revient à l'année en cours. Tout l'onglet
-    et les trois chiffres du haut suivent le cadre choisi. <b>Changer de cadre change les dates,
-    jamais le calcul</b> : les deux totaux ne s'affichent donc jamais côte à côte.</li>
-    <li><b>Les campagnes du cadre</b> s'alignent sur une frise, avec leurs heures de barème et leur
-    état — faite, en cours, à venir. Touchez-en une pour zoomer dessus : les trois chiffres du haut et
-    l'onglet « La campagne » la détaillent. Si votre année vigne a les mêmes dates que votre exercice,
-    l'écran le dit et vous emmène régler le mois de la campagne : choisissez celui qui suit vos
-    vendanges.</li>
     <li><b>Le budget de l'année</b>, en euros : <b>dépensé</b> à ce jour, <b>reste prévu</b> d'ici la
     fin du cadre, <b>total attendu</b>. C'est le moteur d'Économie › Exercice, joué sur les dates du
     cadre : salaires chargés au planning, carburant au plein, achats, réparations. Le reste prévu ne
@@ -3137,7 +3129,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     dépliables : la <b>frise prévu / réel</b> tâche par tâche, la <b>courbe des personnes nécessaires
     par semaine</b>, et l'<b>écart</b> entre ce qui était prévu et ce que dit le journal. Ces quatre
     blocs parlent d'<b>une campagne</b> : ils étaient rangés dans « L'année », ils sont ici.
-    Ce qui manquera en personnes d'ici la fin de l'année se lit dans « L'année »,
+    Ce qui manquera en personnes d'ici la fin de l'année se lit dans « L'équipe &amp; le matériel »,
     carte « Le renfort à prévoir ».</li>
     <li><b>Échéances par tâche</b> : date de fin projetée pour chacune, en jours travaillés au planning.</li>
     <li><b>La fenêtre d'une tâche s'arrête le jour écrit.</b> Si vous fixez la fin d'un travail au

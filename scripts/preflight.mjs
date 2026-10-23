@@ -911,12 +911,21 @@ function checkAideEtVisite() {
   if (pil) {
     const migr = (blankJsComments(pil).match(/var _PIL_TAB_MIGR\s*=\s*\{([^}]*)\}/) || [])[1];
     const mortes = migr ? [...migr.matchAll(/(\w+)\s*:/g)].map(m => m[1]) : [];
+    // Homonymes : une clé morte courte peut être un mot d'un autre module. On les nomme UNE PAR UNE, ligne par motif,
+    //   avec la raison — jamais un fichier entier exempté. PIL-RANGE-2b (§444) : « an » (L'année) est aussi le jalon
+    //   « Un an au domaine » et le mode « an » du suivi cuivre.
+    const HOMONYMES = { an: [
+      [/src\/jalons\.js$/, /id: 'an'|ajoute\('an'|cle: 'an'/, 'jalon « Un an au domaine »'],
+      [/src\/reglages\.js$/, /_cuState|_cuSetMode|mode==='an'/, 'mode « an » du suivi cuivre (année / 7 ans glissants)'],
+    ] };
+    const homonyme = (k, f, ligne) => (HOMONYMES[k] || []).some(([rf, rl]) => rf.test(f) && rl.test(ligne));
     for (const f of jsFiles) {
       if (f === 'src/pilotage.js') continue;
       const c = read(f); if (!c) continue;
       const blanked = blankJsComments(c);
       for (const k of mortes) {
         for (const m of blanked.matchAll(new RegExp(`['"]${k}['"]`, 'g'))) {
+          if (homonyme(k, f, c.split('\n')[lineOf(c, m.index) - 1] || '')) continue;
           add('ERROR', f, lineOf(c, m.index),
             `Onglet du Pilotage : la cle « ${k} » a ete RETIREE (elle ne figure plus que dans _PIL_TAB_MIGR, qui la migre). Ce fichier la demande encore — querySelector rendra null sans lever, et le repli ne se declenchera jamais.`);
         }

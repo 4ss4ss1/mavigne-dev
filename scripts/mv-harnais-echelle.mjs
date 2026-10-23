@@ -126,8 +126,9 @@ for (const sel of ['pil-tile', 'data-pid'/* PIL-FIX-2 (§442) : 'pil-cockpit-car
   t(`« ${sel} » intact (vise par la visite guidee / C22)`, SRC.includes(sel));
 /* Lot CAVE-3 : l'onglet Cave est rentre dans la Cave. Sept cles vivantes, et la
    huitieme (cav) survit en MIGRATION : un client qui l'a memorisee atterrit. */
-t('les sept cles d\'onglet sont intactes',
-  ['auj','an','avc','equ','sim','eco','cfm'].every(k => new RegExp(`\\['${k}',`).test(SRC)));
+t('les six cles d\'onglet sont intactes (L\'annee rangee, PIL-RANGE-2b)',
+  ['auj','avc','equ','sim','eco','cfm'].every(k => new RegExp(`\\['${k}',`).test(SRC)));
+t('la cle an est migree vers eco, pas perdue', /an:'eco'/.test(SRC) && !/\['an',/.test(SRC));
 t('la cle cav est migree, pas perdue', /cav:'auj'/.test(SRC) && !/\['cav',/.test(SRC));
 /* ⚠️ CE NOMBRE ETAIT ECRIT EN DUR (15), ET IL A PERIME AU LOT SUIVANT. AVALE-1 a
    instrumente les 5 catch vides de ce module qui vivaient dans du CODE ; les 10

@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **23 octobre 2026 (PIL-RANGE-2a)** — **PILOTAGE : LA BARRE « VOUS REGARDEZ » (LA CAMPAGNE · L’ANNÉE VIGNE · L’EXERCICE) REMPLACE LE FIL D’ARIANE ; LE CADRE QUITTE L’ONGLET L’ANNÉE** (§443). Base `db6d177` (« pilfix2 »). Maquette du rangement validée : une portée en haut, lue par tout le module. La barre rend `_PIL_SCOPE` visible (camp, cadre, recul) par ses chemins de toujours — aucun état nouveau ; la campagne par défaut est la période active ; la liste des campagnes (frise et puces) se calcule à l’ouverture ; L’année ne garde que ses avis, son budget et son renfort. `mv-harnais-pilrange2a.mjs` : 24 vertes, 10 contre-épreuves ; `annee`, `carte` suivent. Chaîne par le coureur (§442c). **APP 9.99 → 10.00, SW 10.79 → 10.80**.
+> Dernière consolidation : **23 octobre 2026 (PIL-RANGE-2b)** — **PILOTAGE : L’ONGLET L’ANNÉE EST RANGÉ (BUDGET ET AVIS → ÉCONOMIE › SYNTHÈSE, RENFORT → ÉQUIPE & MATÉRIEL, « an » → « eco »)** (§444). Base `e7b9d8c` (« pilrange2a »). La barre « Vous regardez » choisit le cadre : L’année n’est plus un onglet. Sept onglets ; un « an » mémorisé migre vers Économie ; Synthèse d’Économie ouverte par les avis du cadre et le budget de l’année ; renfort dans Personnel ; photos sur La campagne, cibles suivies ; coquille, tutos, cockpit, aide, fiches, guide. Preflight : homonymes de « an » nommés ligne par motif. `mv-harnais-pilrange2b.mjs` : 13 vertes, 9 contre-épreuves. **APP 10.00 → 10.01, SW 10.80 → 10.81**.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -1941,7 +1941,7 @@ Les absences d’« À savoir » au masculin (VIF-1, §414 ; l’élision et la 
 Maquettes validées (`maquette-pilotage-range-v1.html`, `maquette-cave-rangee-v1.html`, hors dépôt) et rapport `audit-pilotage-cave-2026-10-23.md`. Arbitrages pris : L’année supprimée (budget → Économie, renfort → Équipe, cadre → portée) ; donut + « où va le temps » fusionnés ; Archives en bout de barre ; fiche de cuvée unique à côté de la liste ; Diagnostic gardé en onglet.
 - ~~PIL-RANGE-1b~~ — **fait (§441, 23/10)** : l’ancien Aujourd’hui retiré (41 fonctions ; `cockpit.js` gardé pour ses lectures du v2), la carte du tracteur relogée dans Matériel, 27 harnais migrés, `auj4` supprimé. Reste : purger le CSS de l’ancien écran.
 - ~~PIL-FIX-1~~ — **fait (§440, 23/10)** : les jours ouvrés sur le planning, fériés retirés, retard symétrique.
-- **PIL-RANGE-2** — ~~2a~~ **fait (§443)** : la barre « Vous regardez ». **2b** : L’année retirée (budget → Économie, renfort → Équipe, avis → Économie, `_PIL_TAB_MIGR` `an` → `eco`) ; aide, guide 11.
+- ~~PIL-RANGE-2~~ — **fait** : la barre « Vous regardez » (§443), L’année rangée dans Économie et Équipe (§444).
 - **PIL-RANGE-3** — Travaux 6 → 4 cartes ; Équipe : présence + capacité en une carte, renfort venu de L’année.
 - **PIL-RANGE-4** — Économie : Exercice → portée, 6 → 5 sous-vues ; « Afficher dans cet onglet » d’Aujourd’hui réduit aux cartes du cockpit v2 et branché dessus (17 cases sur 21 sont mortes aujourd’hui).
 - **CAVE-FIX-1** — part des anges annualisée (`_pcavAnges` : `pctAn` × 365 / jours couverts, ou libellé « sur la période »), `MV_INFO` `cave.anges`.

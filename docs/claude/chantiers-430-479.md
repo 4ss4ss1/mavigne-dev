@@ -365,3 +365,24 @@ Rangement du Pilotage (§439), maquette `maquette-pilotage-range-v1.html` valid�
 
 ### 443d. Ce qui reste
 PIL-RANGE-2b (onglet L’année retiré, cartes déplacées, migration), puis 3, 4, CAVE-FIX-1, CAVE-RANGE-1 à 3.
+
+## 444. ★ PIL-RANGE-2b — PILOTAGE : L’ONGLET L’ANNÉE EST RANGÉ (BUDGET ET AVIS → ÉCONOMIE › SYNTHÈSE, RENFORT → ÉQUIPE & MATÉRIEL, « an » → « eco ») (23/10 — `src/pilotage.js` (`_PIL_TABS` sans « an », `_PIL_TAB_MIGR` + `an:'eco'`, `_PIL_VALID_TAB`, `_PIL_LABELS`, `_PIL_PERSO_DEFS` (eco : `an_budget` ; equ : `an_frise`), `avecPerso`, `_pilPhotosIci`, cibles des photos, `_pilFillContent` (Personnel + renfort), `_pilTabEco` (Synthèse + `_pilAnEcoHtml`), `_pilTabAn` → `_pilAnEcoHtml`, `_pilGo('an_cadres')`) · `src/coquille.js` · `src/app.js` (`_MVT_PILTAB`) · `src/cockpit-vue.js` (`choisirOnglet`) · `src/utils.js` (APP, WHATS_NEW niv 1, `MV_AIDE`, deux fiches) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `public/guide.html` · `scripts/preflight.mjs` (homonymes de « an ») · `scripts/mv-harnais-pilrange2b.mjs` (neuf) · `scripts/mv-harnais-annee.mjs` · `scripts/mv-harnais-pilrange2a.mjs` · `scripts/mv-harnais-echelle.mjs` · `scripts/mv-harnais-regl-module.mjs` · `scripts/mv-harnais-aide.mjs` · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/PIL-RANGE-2B.json` · **APP 10.00 → 10.01, SW 10.80 → 10.81**, base `e7b9d8c` ; chaîne par le coureur : 520 commandes, 520 codes à 0)
+
+### 444a. D’où ça vient
+Suite du rangement (§439), maquette validée : la barre « Vous regardez » (§443) choisit le cadre, donc L’année n’a plus de raison d’être un onglet. Arbitrage A de Nico (23/10) : L’année supprimée — budget → Économie, renfort → Équipe, cadre → portée.
+
+### 444b. Ce qui a été fait
+- **Menu** : sept onglets (Aujourd’hui · La campagne · L’équipe & le matériel · Décider ┃ Économie · Conformité · Archives). Un onglet « an » mémorisé **migre vers Économie** (`_PIL_TAB_MIGR`), comme « cav » avant lui.
+- **Économie › Synthèse** s’ouvre sur `_pilAnEcoHtml` : les avis du cadre (`_pilAnAvisHtml` — exercice à régler, année vigne aux mêmes dates, vendange à cheval sur deux exercices), puis le budget de l’année (`_pilPanelAnBudget`, case `an_budget`, désormais dans « Afficher dans cet onglet » d’Économie). Les autres sous-vues ne bougent pas.
+- **Équipe & matériel › Personnel** gagne « Le renfort à prévoir » (`_pilPanelAnRenfort`, case `an_frise`).
+- **Photos** : elles restent sur La campagne (`_pilPhotosIci`) ; leurs cibles suivent les chiffres (Effectif → equ, Budget → eco, Travaux → avc).
+- **« an_cadres »** (point « à compléter » de la vendange à cheval) mène à Économie › Synthèse et fait clignoter les avis, sinon la barre.
+- Coquille (repli des onglets), tutos (`_MVT_PILTAB` annee → eco), cockpit (`choisirOnglet` an → eco).
+- Aide (« Le budget de l’année et le renfort »), deux fiches qui renvoyaient à « L’année » (frise des 52 semaines, pic), guide 11 (menu, photos, section devenue « Le budget de l’année et le renfort »), `guide.html` reconstruit, WHATS_NEW 10.01 niv 1.
+- **Preflight** : la règle « une clé d’onglet retirée n’est plus demandée ailleurs » cherchait `'an'` partout ; elle nomme désormais ses deux homonymes ligne par motif, avec la raison (jalon « Un an au domaine », mode « an » du suivi cuivre) — jamais un fichier entier exempté.
+
+### 444c. Harnais
+`mv-harnais-pilrange2b.mjs` (13 vertes, 9 contre-épreuves) **exécute** `_pilAnEcoHtml` (avis puis budget, budget décoché), `_pilLoadTab` avec la vraie migration (« an » → eco, eco et avc restent), `_pilPhotosIci`, et lit le menu, les cases, les cibles des photos, « an_cadres », la coquille, le cockpit, les tutos, l’aide, le guide et la liste. `annee` (③ : L’année rangée), `pilrange2a` (les avis lus dans `_pilAnEcoHtml`) et `echelle` (six clés ; « an » migre) suivent. La chaîne a trouvé deux rouges de plus, corrigés : `regl-module` lisait la liste exacte des onglets valides (« an » en est sorti) ; `aide` (A9) gardait un plancher de huit onglets lus dans le code — l’aide du Pilotage, elle, lit la liste à l’ouverture et dit bien « Sept onglets » ; le plancher passe à sept.
+
+### 444d. Ce qui reste
+PIL-RANGE-3 (Travaux 6 → 4 cartes ; Équipe : présence + capacité en une carte), PIL-RANGE-4, CAVE-FIX-1, CAVE-RANGE-1 à 3.

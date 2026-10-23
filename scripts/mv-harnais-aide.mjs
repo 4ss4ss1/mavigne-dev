@@ -97,7 +97,7 @@ function partieA(M, T) {
   T('A7 le gras écrit devient du gras, apparié — l’amorce plus chaque <b> de la suite', !f7.length, f7);
   T('A8 aucune ligne perdue : une ligne affichée par point', !f8.length, f8);
   const vp = visible(voir('pilotage').html), nb = ctx._mvAideNb(tabs.length);
-  T('A9 l’aide du Pilotage compte ses onglets dans le code : « ' + nb + ' onglets », chacun nommé', tabs.length >= 8 && vp.includes(nb + ' onglets') && tabs.every(t => vp.includes(t[2])));
+  T('A9 l’aide du Pilotage compte ses onglets dans le code : « ' + nb + ' onglets », chacun nommé', tabs.length >= 7 /* PIL-RANGE-2b (§444) : L'année rangée, sept onglets — un plancher contre une lecture ratée du code */ && vp.includes(nb + ' onglets') && tabs.every(t => vp.includes(t[2])));
 }
 function partieB(M, T) {
   const t = M.ctx._mvAideTexte, e = M.ctx._escHtml;

@@ -1,0 +1,43 @@
+{
+  "lot": "PIL-RANGE-2B",
+  "section": "§444",
+  "base": "e7b9d8ca8b407982f400102fdf989e3e3eab7d6d",
+  "inclut": [],
+  "date": "2026-10-23",
+  "tutos": {
+    "ok": true,
+    "empreinte": "f41dd2a800e523ae52b7a7880d50770de86b88f2586d688e4ab8419ccc797ccf",
+    "date": "2026-10-23T19:07:52.266Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "01ba792401848476cdf4c868ccaaf0d374567ae3d9b9a8a196bad125bbd3eeb1",
+    "CLAUDE.md": "e3bd7febd4e69e19753567a110759fb1843414b50efc61a4c6df0854284515e9",
+    "docs/claude/INDEX.md": "594e2c1239bd5b468fc97d3a6677234f49dba3848a70222e795d06c17b5aa394",
+    "docs/claude/chantiers-430-479.md": "3fcb40f327b043417948c969074a2b4f2e1106bd75c8d2390f67a35f7705aa28",
+    "docs/claude/journal.md": "f1661f9b5234b8c89be683e8b1ae69b6eb2bda2a1f8f9df51230f49730b76bce",
+    "guide/11-pilotage.html": "5ece810c4c093b7261564ab18cf3e3ae60e0309f7008d01abfdd9cd23c3d8df1",
+    "index.html": "13720276a472e2d6f7e1ea59e6ba8efb0392266ff274c85545ee01b3f22c7f0a",
+    "public/guide.html": "8bdd4b3c8a3ff040df37ae245342ba474bccdde223d7a4ccf53e40cd77e34388",
+    "public/sw.js": "30c4eb8b8e8ba9a2421ddd71bee12b48bf64913d4a9896dea15e2ffe51befc7e",
+    "scripts/mv-harnais-aide.mjs": "e5b3fb8d6a3d202f387af57634263ddcf3e8f2d12445f0c4d71386d11b1d943f",
+    "scripts/mv-harnais-annee.mjs": "71576f4a78ede53d58ac3220d112eaa6eb30fe968f6517fc4558735d28ec3700",
+    "scripts/mv-harnais-echelle.mjs": "b03218219c7c22f860cb7be3387da4fdedbb0cfd13a87d341906732c62c30a90",
+    "scripts/mv-harnais-liste.mjs": "64c3e0a25157d6b921f5bd93d25203bab505a72c9fac9d1f3f5ace4bc0cc3833",
+    "scripts/mv-harnais-pilrange2a.mjs": "1e5e48e24cbe77709532f22c6db9e80b838e65a00c60a0328cf4e8a8ce78bb4b",
+    "scripts/mv-harnais-regl-module.mjs": "c7d6aea86de1c681812055033caa5a925ae2f48130ac404961a55794fb5e3644",
+    "scripts/preflight.mjs": "94adcf9cf99b64412470b7888b73fb812945a34f2834f618990bbc5f3267056c",
+    "src/app.js": "c7aeb3cdd5eca1685479aa6bfad21cc67cc1e6e2d9c0cf0f2644f7b2a56f3698",
+    "src/cockpit-vue.js": "c98359506bbf13078626b29f7fd3a127eec2589d420edba25eba4c8701a6a1ea",
+    "src/coquille.js": "a8b64bfcdb9e1b860af59e1f9f9357f4baedc735b2ed1bcc76982f1d2631e317",
+    "src/pilotage.js": "e4b9b791bd73a8531bce4b7239c967a4a27636be1fa57c89caf5fd53521c7907",
+    "src/utils.js": "c9c39396710c92be5899a2ac700ff0e197fb4f7fb38c252403f808d826bcc36c",
+    "scripts/mv-harnais-pilrange2b.mjs": "992b006b833d8aefa6030cb28ec36d0a5f671ad34053bc35f3ca9e6a17ac8e92"
+  }
+}

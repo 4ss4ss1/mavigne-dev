@@ -89,8 +89,10 @@ function verifier(PIL, UTI) {
   t('③ l\'année vigne est celle des Archives (_mvCampagneBornes)', /_mvCampagneBornes/.test(corps(NC, '_pilAnCadre')) && /_mvExerciceAn/.test(corps(NC, '_pilAnCadre')));
   t('③ le budget est le moteur de l\'Exercice, aux dates du cadre', /_pexData\(C\.F,true\)/.test(corps(NC, '_pilAnBudgetData')));
   t('③ les amendements prévus trouvent leur mois (byM.achP)', /byM\[_kp\]\.achP\+=/.test(corps(NC, '_pexData')));
-  const tab = corps(NC, '_pilTabAn');
-  t('③ l\'onglet s\'ouvre sur ses avis (le cadre se choisit dans la barre « Vous regardez », PIL-RANGE-2a), puis le budget et le renfort', /_pilAnAvisHtml\(\)/.test(tab) && /_pilPanelAnBudget\(\)/.test(tab) && /_pilPanelAnRenfort\(\)/.test(tab));
+  // PIL-RANGE-2b (§444) : l'onglet L'année est rangé — avis et budget en tête de la Synthèse d'Économie (_pilAnEcoHtml),
+  //   renfort dans Équipe & matériel › Personnel ; un onglet « an » mémorisé migre vers Économie.
+  const tab = corps(NC, '_pilAnEcoHtml');
+  t('③ L’année rangée : avis et budget en tête de la Synthèse d’Économie, renfort dans Personnel, « an » migre vers « eco »', /_pilAnAvisHtml\(\)/.test(tab) && /_pilPanelAnBudget\(\)/.test(tab) && /body=_pilAnEcoHtml\(\)\+_pecViewSynthese\(E,TL\)/.test(NC) && /_pilShow\('an_frise'\)\?'<div class="pil-panels">'\+_pilPanelAnRenfort\(\)/.test(NC) && /an:'eco'/.test(NC) && !/function _pilTabAn\(/.test(NC));
   t('③ « Deux façons de compter » et la frise du pic ont quitté le module', !/function _pilDeuxCadresHtml\(/.test(NC) && !/function _pilPanelEtp\(/.test(NC) && !/function _pilFriseAnneeSvg\(/.test(NC));
   t('③ les photos lisent le budget et le renfort du cadre', /_pilAnBudgetData\(\)/.test(corps(NC, '_pilPhotosData')) && /_pilAnRenfortData\(\)/.test(corps(NC, '_pilPhotosData')));
   t('③ la photo Effectif de l\'année lit les fenêtres de manque, pas le pic', /_pilPhotoEffAn\(D, drap\('effectif'\)\)/.test(corps(NC, '_pilPhotosHtml')) && /R\.fen/.test(corps(NC, '_pilPhotoEffAn')));
@@ -113,7 +115,7 @@ if (CONTRE) {
     ['les jours d\'avant aujourd\'hui comptés', 'P', 'for(var o=Math.max(w.o0,oAuj); o<=w.o1; o++){', 'for(var o=w.o0; o<=w.o1; o++){'],
     ['les fûts oubliés dans les mois', 'P', '+(b.fut||0)', ''],
     ['le recul mémorisé', 'P', '_PIL_SCOPE.recul=(isNaN(r)||r>0)?0:r; }', "_PIL_SCOPE.recul=(isNaN(r)||r>0)?0:r; try{ localStorage.setItem('x',String(r)); }catch(e){ r=0; } }"],
-    ['« Deux façons de compter » revient', 'P', 'function _pilTabAn(d){', "function _pilDeuxCadresHtml(ann){ return ''; }\nfunction _pilTabAn(d){"],
+    ['« Deux façons de compter » revient', 'P', 'function _pilAnEcoHtml(){', "function _pilDeuxCadresHtml(ann){ return ''; }\nfunction _pilAnEcoHtml(){"],
     ['le fil d\'Ariane relit X.debut', 'P', 'CA=_pilAnCadre();', 'CA=null; var X={}; X.debut;'],
     ['les amendements prévus sans mois', 'P', 'byM[_kp].achP+=', 'byM[_kp].achX+='],
     ['le bouton vers Décider retiré', 'P', '<button type="button" class="pil-diag-go" data-diag="renfort">', '<button type="button" class="pil-diag-go" data-diag="rien">'],

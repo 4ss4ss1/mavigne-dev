@@ -91,7 +91,7 @@ function jouer(S) {
   t('⑥ la liste se remplit à l’ouverture (_pilPorteePopHtml) et se ferme hors d’elle', /_po\.innerHTML=_pilPorteePopHtml\(\)/.test(bind) && /!e\.target\.closest\('\.pil-ptcamp'\)\)\{ _pop\.hidden=true;/.test(bind));
   t('⑥ la liste reprend la frise du cadre et ses puces (data-etpc, le zoom de toujours)', /_pilAnFriseCadre\(C, ann\)/.test(corps(P, '_pilPorteePopHtml')));
   const Pnu = P.split('\n').filter((l) => !l.trim().startsWith('//')).join('\n');   // les commentaires d'histoire ne comptent pas
-  t('⑥ plus de fil d’Ariane (croix, racine) ni de cadre dans L’année', !/pil-cr-x|pil-cr-root|data-ancadre/.test(Pnu) && !/function _pilAnCadreHtml\(/.test(P) && /var H=_pilAnAvisHtml\(\);/.test(corps(P, '_pilTabAn')));
+  t('⑥ plus de fil d’Ariane (croix, racine) ni de cadre dans L’année', !/pil-cr-x|pil-cr-root|data-ancadre/.test(Pnu) && !/function _pilAnCadreHtml\(/.test(P) && /var H=_pilAnAvisHtml\(\);/.test(corps(P, '_pilAnEcoHtml'))   /* PIL-RANGE-2b : L'année rangée dans Économie */);
   t('⑥ aucun état nouveau : la barre ne lit et n’écrit que _PIL_SCOPE', !/_PIL_SCOPE\.(mode|portee|vue)\b/.test(P) && !/var _PIL_PORTEE/.test(P));
   t('⑥ la liste cachée ne s’affiche pas, et sur téléphone l’étiquette et les dates s’effacent', P.includes("+'.pil-ptpop[hidden]{display:none}'") && /max-width:700px[\s\S]{0,900}\.pil-ptlab,\.pil-ptbornes\{display:none\}/.test(P));
   t('⑦ la liste des harnais joue ce fichier et sa contre-épreuve', S.liste.indexOf("mv-harnais-pilrange2a.mjs'") > 0 && S.liste.indexOf("mv-harnais-pilrange2a.mjs --contre'") > 0);
