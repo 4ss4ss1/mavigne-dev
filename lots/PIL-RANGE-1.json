@@ -1,0 +1,21 @@
+{
+  "lot": "PIL-RANGE-1",
+  "section": "§439",
+  "base": "cff51e09628702e3c7fe4d8e58c15d1488e78201",
+  "inclut": [],
+  "date": "2026-10-23",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "8fca44303a4e0bf00e881ce489c048e47b9742b601c120246c6a4fd5ca49b237",
+    "CLAUDE.md": "97d8c53a7d826809e6dd5d760415fbf1854d3a9de1c1ef8b623118ffb544ee39",
+    "docs/claude/INDEX.md": "9367cae76037e0b7f33c2aa8509a2cdc8b61a40f88802f2c4c6df3fc86dbdf95",
+    "docs/claude/chantiers-430-479.md": "f55eba0c2d304628c3243e364b75dd69ffd947a651e2202959dab14540e2233a",
+    "docs/claude/journal.md": "2ccfc92dcb3d0d6f489c783d207f7393989acf491a40fd9ba25f7c640331a28c",
+    "scripts/mv-harnais-liste.mjs": "a984e08182ce91e2e6104bc79487ffe1d87ac32e5ff8179a780d599bcc509018",
+    "src/pilotage.js": "a3540fad9d697e3714bc062cd85a5b4911cc5d188ece66e330a0b6223487f03c",
+    "scripts/mv-harnais-pilrange1.mjs": "79a4cace81694a9a8dc4e97b95792b2578547b5e1cbfcbbc871bb14eebe780e6"
+  }
+}

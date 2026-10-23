@@ -5670,9 +5670,28 @@ window._pilRafraichirVif=function(){
 // L'export comptable du cockpit est celui de l'onglet Économie (même tableau CSV, même moteur).
 window._pilEcoExport=function(){ if(typeof _pecExport==='function') _pecExport('csv', _pecData()); };
 function _pilTabAuj(d){
-  var m=_pilMargeCalc(d), admin=(typeof window.isAdmin==='function')&&window.isAdmin(), H='';
+  var m=_pilMargeCalc(d);
   // PHOTO-1 (§219) : la photo du jour, une fois, par l'admin, sur la periode active.
   try{ _pilPhotoEcrire(d); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilPhotoEcrire'); }
+  // ★★★ PIL-RANGE-1 (§438) — LE COCKPIT D'ABORD, ET RIEN D'AUTRE N'EST CALCULÉ.
+  //   Avant : les tuiles d'avant (marge, inaction, KPIs, décision du jour, alertes) se construisaient EN ENTIER
+  //   à chaque affichage de l'écran d'arrivée, puis le `return` du cockpit v2 les jetait — trois générations
+  //   calculées, une seule montrée (audit du 23/10). Le cockpit v2 passe en premier ; l'ancien ordre ne se
+  //   construit QUE s'il manque (_pilTabAujAncien) : l'écran ne reste jamais blanc, et il ne calcule plus deux fois.
+  //   ⚠️ Rien ne change à l'écran : même squelette, même modèle (_pilCk2Modele), même montage. Les fonctions
+  //   de l'ancien ordre restent en place et testées (14 harnais) jusqu'à PIL-RANGE-1b, qui les retirera avec
+  //   cockpit.js et migrera leurs harnais — un lot à part, mesuré au §438.
+  if(typeof window._ck2Squelette==='function'&&typeof window._ck2Monter==='function'){
+    try{ var _V=_pilCk2Modele(d,m); _V.eco=_pilCk2Eco(d,_V); setTimeout(function(){ try{ window._ck2Monter(_V); _pilStickyH(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#ck2m'); } },0);   // VIF-1 : la hauteur du fil de portée posée aussi sur Aujourd'hui
+      return window._ck2Squelette(); }
+    catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#ck2'); }
+  }
+  return _pilTabAujAncien(d,m);
+}
+// L'ancien Aujourd'hui : les tuiles d'avant puis, s'il est là, le cockpit de secours (src/cockpit.js, AUJ-1).
+// Atteint seulement si cockpit-vue.js manque ou lève. Corps inchangé (PIL-RANGE-1), `m` reçu de l'appelant.
+function _pilTabAujAncien(d,m){
+  var admin=(typeof window.isAdmin==='function')&&window.isAdmin(), H='';
   var cockpit='';
   if(_pilShow('auj_marge')){
     var ringPc=d.gaugePct, C=2*Math.PI*74, dash=(ringPc/100*C);
@@ -5741,12 +5760,6 @@ function _pilTabAuj(d){
   if(det) H+='<div class="pil-dec2">'+det+'</div>';
   var _ckAl0=H.length;   // AUJ-1 (§260)
   if(_pilShow('auj_alertes')) H+='<div class="pil-sec-h">Alertes matériel</div>'+_pilCkAlertes(d);
-  // ★★★ REF-1 (§266) : la maquette validée, montée avec le modèle réel (src/cockpit-vue.js). Repli : l'ancien cockpit.
-  if(typeof window._ck2Squelette==='function'&&typeof window._ck2Monter==='function'){
-    try{ var _V=_pilCk2Modele(d,m); _V.eco=_pilCk2Eco(d,_V); setTimeout(function(){ try{ window._ck2Monter(_V); _pilStickyH(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#ck2m'); } },0);   // VIF-1 : la hauteur du fil de portée posée aussi sur Aujourd'hui
-      return window._ck2Squelette(); }
-    catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#ck2'); }
-  }
   // ★ AUJ-1 (§260) — LE COCKPIT : src/cockpit.js range ces mêmes morceaux (aucun recalculé) et ajoute le
   //   résumé, les chantiers en cours, la courbe de la charge restante et le fil En direct. Module absent
   //   ou en erreur : l'ancien ordre, ci-dessous, s'affiche — l'écran ne reste jamais blanc.

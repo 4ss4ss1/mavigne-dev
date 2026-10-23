@@ -757,6 +757,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-cavepil2.mjs --contre'],
   ['node scripts/mv-harnais-caveauj3.mjs'],
   ['node scripts/mv-harnais-caveauj3.mjs --contre'],
+  ['node scripts/mv-harnais-pilrange1.mjs'],            // PIL-RANGE-1 (§438) : Aujourd'hui, le cockpit v2 d'abord — l'ancien ordre n'est plus calculé pour rien
+  ['node scripts/mv-harnais-pilrange1.mjs --contre'],
   ['node scripts/mv-harnais-cave2.mjs'],              // CAVE-2 (§289) : le Cuvier à la charte
   ['node scripts/mv-harnais-cave2.mjs --contre'],
   ['node scripts/mv-harnais-cave3.mjs'],              // CAVE-3 (§290) : le Chai en liste + fiche
