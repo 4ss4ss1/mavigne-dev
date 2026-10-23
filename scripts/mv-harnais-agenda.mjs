@@ -45,7 +45,7 @@ function pose(ok, nom) {
 /* ══ EXTRACTION — dans l'ordre du fichier ══════════════════════════════════ */
 const NOMS = ['_caveFutL', '_caveTonL', '_caveFutsL', '_caveCuvesBois', '_caveOuille', '_caveNbTonneaux',
   '_mlD', '_mlIso', '_mlAddJ', '_mlEcartJ', '_mlLundi',
-  '_mlVolParFut', '_mlOuillages', '_mlAMesurer', '_mlAgenda', '_mlResumeSem',
+  '_mlVolParFut', '_mlFerie', '_mlJourOuvre', '_mlOuillages', '_mlAMesurer', '_mlAgenda', '_mlResumeSem',
   '_vendIsActive', '_vendTriDate', '_vendTriMes', '_vendLastMes', '_vendLastD',
   /* CUV-9 : _mlAMesurer passe par _vendSuivie — extrait, c'est le sujet. */
   '_vendEstFusionnee', '_vendDecuvee', '_vendFaEnCours', '_vendSuivie',

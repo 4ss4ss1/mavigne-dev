@@ -6822,6 +6822,80 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
   #page-cave .caj-mk > span{ display:inline; overflow:hidden; text-overflow:ellipsis; }
 }
 /* ★ FIN CAVEAUJ-1 */
+/* ══ ★★ CAVEAUJ-2 (§435) — LE CUVIER, LE CHAI ET LES DERNIERS GESTES, D’UN COUP D’ŒIL (maquette validée, 22/10) ══
+   Une ligne par cuve suivie, une ligne par cuvée : un tableau sur ordinateur (colonnes alignées, en-tête), des lignes
+   empilées au téléphone. Pastilles du jeu commun (.mvpas) ; la courbe de densité est un petit SVG (le pointillé : le vin
+   sec). Par jetons. */
+#page-cave .caj-tab{ list-style:none; margin:0; padding:0; }
+#page-cave .caj-cv, #page-cave .caj-ch{ display:grid; grid-template-columns:minmax(0,1fr) auto; gap:var(--e-2,8px) var(--e-3,12px); align-items:center; padding:var(--e-3,12px) 0; border-top:var(--bw) solid var(--ligne,#E7E6E2); }
+#page-cave .caj-tab > li:first-child, #page-cave .caj-cvh + li{ border-top:0; }
+#page-cave .caj-cvh{ display:none; }
+#page-cave .caj-cvn{ display:flex; flex-direction:column; gap:var(--e-0,2px); min-width:0; }
+#page-cave .caj-dens{ grid-column:1 / -1; display:flex; align-items:center; gap:var(--e-3,12px); min-width:0; }
+#page-cave .caj-spark{ display:block; flex:none; width:calc(var(--e-10,64px) + var(--e-6,24px)); height:calc(var(--e-6,24px) + var(--e-1,4px)); overflow:visible; }
+#page-cave .caj-sp-l{ fill:none; stroke:var(--texte-med); stroke-width:1.6; stroke-linejoin:round; stroke-linecap:round; }
+#page-cave .caj-sp-sec{ stroke:var(--ligne-forte); stroke-width:1; stroke-dasharray:3 3; }
+#page-cave .caj-sp-p{ fill:var(--texte); }
+#page-cave .caj-dv b{ display:block; font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); color:var(--texte); font-variant-numeric:tabular-nums; }
+#page-cave .caj-dv{ min-width:0; }
+#page-cave .caj-dv span{ display:block; font-size:var(--pt-micro,12px); color:var(--texte-doux); }
+#page-cave .caj-cvf{ grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:var(--e-1,4px) var(--e-4,16px); }
+#page-cave .caj-c13{ display:inline-flex; align-items:center; gap:var(--e-1,4px); font-size:var(--pt-txt,13px); color:var(--texte-med); font-variant-numeric:tabular-nums; white-space:nowrap; }
+#page-cave .caj-c13.due{ font-weight:var(--fw-semi,600); color:var(--danger-texte); }
+#page-cave .caj-c13.ok{ font-weight:var(--fw-semi,600); color:var(--ok-texte); }
+#page-cave .caj-rel{ display:inline-flex; align-items:baseline; gap:var(--e-1,4px); min-width:0; font-size:var(--pt-txt,13px); color:var(--texte-med); }
+#page-cave .caj-fin{ font-size:var(--pt-txt,13px); color:var(--texte-med); }
+#page-cave .caj-fin b{ font-weight:var(--fw-semi,600); color:var(--texte); }
+#page-cave .caj-fin span{ margin-left:var(--e-1,4px); font-size:var(--pt-micro,12px); color:var(--texte-doux); }
+#page-cave .caj-cvf [data-l]::before{ content:attr(data-l); font-weight:var(--fw-reg,400); color:var(--texte-doux); }
+#page-cave .caj-st-fa{ --mvpas-point:var(--or); }
+#page-cave .caj-st-mpf{ --mvpas-point:var(--ink-info); }
+#page-cave .caj-st-dec{ --mvpas-point:var(--terre); }
+#page-cave .caj-fu{ display:none; }
+#page-cave .caj-jau{ grid-column:1 / -1; min-width:0; }
+#page-cave .caj-jgt{ display:flex; justify-content:space-between; gap:var(--e-2,8px); font-size:var(--pt-micro,12px); color:var(--texte-med); font-variant-numeric:tabular-nums; }
+#page-cave .caj-jgt b{ font-weight:var(--fw-semi,600); color:var(--texte); }
+#page-cave .caj-jgt .due{ font-weight:var(--fw-semi,600); color:var(--danger-texte); }
+#page-cave .caj-jg{ position:relative; display:block; height:calc(var(--e-1,4px) + var(--e-0,2px)); margin-top:var(--e-1,4px); border-radius:var(--r-full,999px); background:var(--piste); overflow:hidden; }
+#page-cave .caj-jg > i{ position:absolute; left:0; top:0; bottom:0; width:var(--p,0%); border-radius:inherit; background:var(--ok); }
+#page-cave .caj-jg.att > i{ background:var(--attention); }
+#page-cave .caj-jg.due > i{ background:var(--danger); }
+#page-cave .caj-chf{ grid-column:1 / -1; display:flex; flex-wrap:wrap; align-items:flex-start; gap:var(--e-2,8px); }
+#page-cave .caj-pm{ display:inline-flex; flex-direction:column; align-items:flex-start; gap:var(--e-0,2px); min-width:0; }
+#page-cave .caj-sub{ font-size:var(--pt-micro,12px); color:var(--texte-doux); }
+#page-cave .caj-foot{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--e-2,8px); margin:var(--e-1,4px) 0 0; padding-top:var(--e-3,12px); border-top:var(--bw) solid var(--ligne,#E7E6E2); font-size:var(--pt-micro,12px); color:var(--texte-med); }
+#page-cave .caj-vif{ flex:none; width:var(--e-2,8px); height:var(--e-2,8px); border-radius:50%; background:var(--ok); }
+#page-cave .caj-ed{ position:relative; }
+#page-cave .caj-ed.repli{ max-height:calc(var(--e-10,64px) * 4.5); overflow:hidden; }
+#page-cave .caj-ed.repli::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:var(--e-9,48px); background:linear-gradient(to bottom,transparent,var(--bg-card)); pointer-events:none; }
+#page-cave .caj-edg + .caj-edg{ margin-top:var(--e-3,12px); }
+#page-cave .caj-edl{ margin:0 0 var(--e-0,2px); font-size:var(--pt-nano,11px); font-weight:var(--fw-semi,600); color:var(--texte-doux); }
+#page-cave .caj-ede{ display:grid; grid-template-columns:var(--av) minmax(0,1fr); gap:var(--e-2,8px); align-items:center; min-height:var(--h-row,36px); padding:var(--e-0,2px) 0; }
+#page-cave .caj-edi{ display:grid; place-items:center; width:var(--av); height:var(--av); border-radius:50%; background:var(--bg-doux); color:var(--texte-med); }
+#page-cave .caj-edi.ok{ background:var(--ok-doux); color:var(--ok-texte); }
+#page-cave .caj-edt{ min-width:0; font-size:var(--pt-txt,13px); line-height:var(--lh-ui); color:var(--texte); }
+#page-cave .caj-edt b{ font-weight:var(--fw-semi,600); }
+#page-cave .caj-edt span{ display:block; font-size:var(--pt-micro,12px); color:var(--texte-doux); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#page-cave .caj-plus{ width:100%; margin-top:var(--e-2,8px); }
+@media (min-width:1024px){
+  #page-cave .caj-cv{ grid-template-columns:minmax(0,1.6fr) minmax(0,1.15fr) minmax(0,1.5fr) minmax(0,.95fr) minmax(0,.95fr); }
+  #page-cave .caj-ch{ grid-template-columns:minmax(0,1.5fr) minmax(0,.7fr) minmax(0,1.9fr) minmax(0,1fr) minmax(0,.9fr); }
+  #page-cave .caj-cvh{ display:grid; padding:0 0 var(--e-2,8px); font-size:var(--pt-nano,11px); font-weight:var(--fw-semi,600); color:var(--texte-doux); }
+  #page-cave .caj-dens, #page-cave .caj-jau{ grid-column:auto; }
+  #page-cave .caj-cvf, #page-cave .caj-chf{ display:contents; }
+  #page-cave .caj-cvf [data-l]::before{ content:none; }
+  #page-cave .caj-fin, #page-cave .caj-rel{ display:flex; flex-direction:column; align-items:flex-start; gap:0; }
+  #page-cave .caj-fin span{ margin-left:0; }
+  #page-cave .caj-fu{ display:flex; flex-direction:column; font-size:var(--pt-txt,13px); color:var(--texte-med); }
+  #page-cave .caj-fu span{ font-size:var(--pt-micro,12px); color:var(--texte-doux); }
+  #page-cave .caj-tel{ display:none; }
+  #page-cave .caj-ed{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--e-4,16px) var(--e-7,32px); align-items:start; }
+  #page-cave .caj-ed.repli{ max-height:none; overflow:visible; }
+  #page-cave .caj-ed.repli::after{ display:none; }
+  #page-cave .caj-edg + .caj-edg{ margin-top:0; }
+  #page-cave .caj-plus{ display:none; }
+}
+/* ★ FIN CAVEAUJ-2 */
 
 /* ★ CAVE-2 (§289) — LE CUVIER AU DESSIN DE LA MAQUETTE V8 (habit seulement).
    Le Cuvier dessine avec sa propre feuille (classes mvv-, injectée) ; ce bloc la recale sur les jetons par #page-cave. Cuves en

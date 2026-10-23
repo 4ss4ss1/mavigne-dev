@@ -749,6 +749,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-cave1.mjs --contre'],
   ['node scripts/mv-harnais-caveauj1.mjs'],
   ['node scripts/mv-harnais-caveauj1.mjs --contre'],
+  ['node scripts/mv-harnais-caveauj2.mjs'],
+  ['node scripts/mv-harnais-caveauj2.mjs --contre'],
   ['node scripts/mv-harnais-cave2.mjs'],              // CAVE-2 (§289) : le Cuvier à la charte
   ['node scripts/mv-harnais-cave2.mjs --contre'],
   ['node scripts/mv-harnais-cave3.mjs'],              // CAVE-3 (§290) : le Chai en liste + fiche

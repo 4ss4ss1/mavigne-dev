@@ -1,0 +1,38 @@
+{
+  "lot": "CAVEAUJ-2",
+  "section": "§435",
+  "base": "75b35b5c0edc55951f664d65926fea7c2b29ff95",
+  "inclut": [],
+  "date": "2026-10-23",
+  "tutos": {
+    "ok": true,
+    "empreinte": "8f4343b65d64cafc69b315d1b638a4821328804ace2e784114948aa88d6cd81e",
+    "date": "2026-10-23T05:33:29.224Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "49b3abfcb114fc1f3133fa1953ddbba95fd562e024811b5dabd583c9f0edb52c",
+    "CLAUDE.md": "ca11affd0f24cf42a9e54995c6cd99b6f915e0718690a6a1a317742501628924",
+    "docs/claude/INDEX.md": "62115eb08521782876cb0aaf60974d45df2876af31bd036ff2abc53b4554079d",
+    "docs/claude/chantiers-430-479.md": "702cd3d96dcacc9418de5555f71167a6d6241f617ba0eb43d01bbfc251f2c297",
+    "docs/claude/journal.md": "05182546ae8070ae6fcf688c903e2aecca20b27e8517ee74895c5f29a1c7474e",
+    "guide/08-cave.html": "2685661fbe0a514c3f415eeb3bb926dee2f50cbd39557667484f8534a183c6e0",
+    "index.html": "6f4bdfd750f3f1f3597e771d8bc8794f7ed74139fbd443bfb53e633273a6a503",
+    "public/guide.html": "928dac8d8c64fbb0edbef72a20ec42d63fb2cfbda8fb2f0ecba566d6293bcd27",
+    "public/sw.js": "22fc6baf60285c7b4540fd5b13ab503e84493efb411c46a3d9414ba79bf9db38",
+    "scripts/harnais-claude-md.mjs": "13ba651b4a65e2cac594552837670fdd436ba50e793facba8b3966d9b8f7073e",
+    "scripts/mv-harnais-agenda.mjs": "ef430169fd23b5e95d587c28b92762977689742c20ff68afc7a7ebbb17960fd2",
+    "scripts/mv-harnais-liste.mjs": "f621f013c4cdb9378a19d8e60089ce02a0eed6d4f2385355e79a2abef6283b73",
+    "scripts/tutos-couverture.json": "a61e7d24d936bc262cbc77909d4d4ce7612982f176fc4de9ec46b347d43e76c8",
+    "src/cave.js": "7e0160a8b48a079f618f2cab1f03b06d59938255d0e7635cb1171b749948d411",
+    "src/styles.css": "e1c32b2067bd20f8d8e19d077a14c144a72262ca932efa8a7e584d1dcd25fff2",
+    "src/utils.js": "0757a86f4d84c50977b9e6367aefc9203962a533fd3e48159d2aeeaf7d015bf1",
+    "scripts/mv-harnais-caveauj2.mjs": "18bbe70a46ebb0e8751fc8dff2e3b6d3f31e643918aa8943e7ef91e12cf9134a"
+  }
+}

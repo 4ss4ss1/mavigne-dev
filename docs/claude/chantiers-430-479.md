@@ -166,3 +166,32 @@ cinq tailles d’écran (aucun chevauchement de la colonne sur le calendrier) ; 
 ### 434e. Reste
 CAVEAUJ-2 : « Le Cuvier » et « Le Chai » en un coup d’œil, « Derniers gestes » (§28). À trancher : l’ouillage dû un dimanche ou un férié.
 
+## 435. ★★ CAVEAUJ-2 — CAVE › AUJOURD’HUI : LE CUVIER, LE CHAI ET LES DERNIERS GESTES D’UN COUP D’ŒIL ; L’OUILLAGE AU JOUR OUVRÉ D’AVANT (23/10 — `src/cave.js` (`_mlFerie`, `_mlJourOuvre`, `_mlOuillages` : la date avancée et `du` ; `_mlAgenda` : « avancé du … » ; `_aujDetail` ; `_aujVeille` : plus de « Parc à fûts » ; `_aujRender` : `_aujEtat` dans la colonne de « Ce qui presse », `_aujRecentsHtml` après le calendrier ; pièces neuves `_aujDepuis`, `_aujRel`, `_aujNb`, `_aujSpark`, `_aujCuveLigne`, `_aujOuillageEtat`, `_aujMalo`, `_aujChaiLigne`, `_aujEtat`, `_aujRecents`, `_aujRecentsHtml`, `_aujVoirTout`) · `src/styles.css` (bloc ★★ CAVEAUJ-2) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Cave, MV_INFO `cave.auj`) · `index.html` · `public/sw.js` · `guide/08-cave.html` + `public/guide.html` (régénéré) · `scripts/mv-harnais-caveauj2.mjs` (neuf) · `scripts/mv-harnais-agenda.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/tutos-couverture.json` · `scripts/harnais-claude-md.mjs` · `.mv-base` · `lots/CAVEAUJ-2.json` · **APP 9.93 → 9.94, SW 10.72 → 10.73**, base `75b35b5`)
+
+### 435a. D’où ça vient
+La suite de CAVEAUJ-1 (§434) — la maquette validée le 22/10 montrait aussi « Le Cuvier », « Le Chai » et « Derniers gestes ». Et la
+question laissée ouverte, tranchée par Nico (23/10) : « ouillage le jour avant le jour férié ou le vendredi si tombe un dimanche ou samedi ».
+
+### 435b. Ce qui change
+- **Le Cuvier** (sous « Ce qui presse », dans la colonne collée) : une ligne par cuve suivie — nom et cuvée, état (Fermentation,
+  Macération · J8, Décuvée), courbe de densité à 20 °C (le pointillé marque le vin sec) avec la dernière valeur et la pente, le dernier relevé
+  (rouge à deux jours) et sa température, la fin estimée (`_mlProjFA`, « Au labo » pour une cuve suivie par les sucres). Vide : « Le Cuvier
+  reprendra avec la prochaine vendange ».
+- **Le Chai** : une ligne par cuvée en élevage — fûts et volume, jauge d’ouillage (jours passés face au seuil du millésime, prochain ouillage),
+  malo (finie, bloquée, en cours avec le malique et la fin projetée, « après la FA » tant que la cuve qui l’a donnée n’a pas fini, évitée, pas
+  d’analyse), soutirage (à faire, fait le …) ; les cuvées qui demandent un geste en tête ; au pied, les fûts libres au magasin et le parc.
+- Pendant les vendanges (`_mlPhase()`), le Cuvier passe devant le Chai ; le reste de l’année, derrière.
+- **Derniers gestes**, tout en bas : dix jours d’opérations du Chai, de relevés et de décuvages, du plus récent au plus ancien, en trois
+  colonnes sur ordinateur ; « Tout voir » au téléphone (`_aujVoirTout`, exempté au compte des tutos : un affichage).
+- **L’ouillage au jour ouvré d’avant** : `_mlJourOuvre` recule un samedi ou un dimanche au vendredi, un férié à la veille (un lundi férié,
+  au vendredi), avec les fériés du Planning (`window._feriesY`). `_mlOuillages` place l’ouillage ce jour-là (jamais avant aujourd’hui ; un retard
+  reste un retard), garde la date d’origine (`du`) et compte le suivant à partir du jour avancé ; l’agenda dit « avancé du dim 1, férié ». La
+  bande, le calendrier, le Pilotage et la jauge du Chai lisent tous ces dates.
+- « À surveiller » ne redit plus les fûts libres (ils sont au pied du Chai).
+
+### 435c. Vérifié
+`mv-harnais-caveauj2` 19/19 + 10 contre-épreuves ; `mv-harnais-caveauj1`, `cave1`, `cave-auj`, `agenda`, `futcap`, `tete2`, `pastilles`, `cartes`,
+`jetons`, `charte`, `echelle`, `icones`, `boutons`, `subset`, `typo` verts ; preflight vert ; guide régénéré. Appli construite et capturée (démo),
+PC et téléphone : Le Cuvier (trois cuves), Le Chai (quatre cuvées : Gevrey « prochain ven 30 » — l’échéance du samedi 31 avancée), le calendrier,
+Derniers gestes. Chaîne complète (`npm run check`) verte : 507 commandes, 0 rouge ; tutos rejoués sur le build : au bout.
+

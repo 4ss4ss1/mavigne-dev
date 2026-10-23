@@ -4549,6 +4549,11 @@ function _mlVolParFut(cuvId){
 }
 
 // Echeances d'ouillage a venir. Jamais ouillee = due aujourd'hui.
+// ★ CAVEAUJ-2 (§435) — LE JOUR OÙ L'ON OUILLE. Nico (23/10) : « ouillage le jour avant le jour férié, ou le vendredi si
+// tombe un dimanche ou samedi ». Le jour ouvré d'avant, donc : un samedi ou un dimanche renvoie au vendredi, un férié à la
+// veille (un lundi férié, au vendredi). Les fériés viennent du Planning (window._feriesY) ; sans lui, les week-ends seuls.
+function _mlFerie(iso){ var d=_mlD(iso), F=(typeof window._feriesY==='function')?window._feriesY(d.getFullYear()):null; return !!(F&&F[d.getMonth()]&&F[d.getMonth()][d.getDate()]); }
+function _mlJourOuvre(iso){ var x=iso, g=0; while(g++<7){ var j=_mlD(x).getDay(); if(j!==0&&j!==6&&!_mlFerie(x)) return x; x=_mlAddJ(x,-1); } return iso; }
 function _mlOuillages(from,nSem){
   var fin=_mlAddJ(from,nSem*7-1), out=[];
   (CAVE_ELEVAGE.cuvees||[]).forEach(function(c){
@@ -4568,12 +4573,15 @@ function _mlOuillages(from,nSem){
     //   l'agenda du millesime avec lui. Le defaut est anterieur a CUV-1.
     var garde=0, futs=_caveNbTonneaux(c);
     while(d<=fin && garde++<12){
-      out.push({cuvee:c, date:d, futs:futs,
+      // ★ CAVEAUJ-2 (§435) : le jour ouvré d'avant (week-end, férié), jamais avant aujourd'hui ; le suivant part de ce jour-là.
+      var dj=_mlJourOuvre(d); if(dj<from) dj=from;
+      out.push({cuvee:c, date:dj, futs:futs,
                 // ★ FUT-CAP-2 — chaque fut a sa contenance : un demi-muid compte pour 2,2 pieces.
                 litres:Math.round(_caveFutsL(c)/_caveFutL()*_mlVolParFut(c.id)),
-                retard:(d===from)?retard:0,
-                jamais:(!c.last_ouillage && d===from)});
-      d=_mlAddJ(d,seuil);
+                retard:(dj===from)?retard:0,
+                jamais:(!c.last_ouillage && dj===from),
+                du:(dj!==d)?d:null});
+      d=_mlAddJ(dj,seuil);
     }
   });
   return out.sort(function(a,b){ return a.date<b.date?-1:a.date>b.date?1:0; });
@@ -4727,7 +4735,8 @@ function _mlAgenda(from,nSem){
   }
   _mlOuillages(from,nSem).forEach(function(o){
     var note = o.jamais ? 'jamais ouill\u00e9e depuis l\u2019entonnage'
-             : o.retard ? ('en retard de '+o.retard+' j') : '';
+             : o.retard ? ('en retard de '+o.retard+' j')
+             : o.du ? ('avanc\u00e9 du '+_mlFrJ(o.du)+(_mlFerie(o.du)?', f\u00e9ri\u00e9':'')) : '';
     pousse(o.date,{kind:'ouillage', titre:_mlNomCuvee(o.cuvee),
       detail:o.futs+' f\u00fbt'+(o.futs>1?'s':'')+' \u00b7 ~'+o.litres+' L',
       urgence:(o.retard||o.jamais)?'due':'', note:note, futs:o.futs, ref:o.cuvee.id});
@@ -6190,7 +6199,7 @@ function _aujVeille(auj, parc){
   });
   var sd=_mlSansDate(parc);
   sd.forEach(function(x){ L.push({c:'att', ic:_AUJ_ICO.fut||'barrique', t:x.titre, s:x.detail, v:'', go:1}); });
-  if(!sd.length&&parc&&parc.libres!=null) L.push({c:'ok', ic:'barrique', t:'Parc \u00e0 f\u00fbts', s:parc.libres+' f\u00fbt'+(parc.libres>1?'s':'')+' libre'+(parc.libres>1?'s':'')+' au magasin.', v:String(parc.libres)});
+  // ★ CAVEAUJ-2 : les fûts libres se lisent au pied du Chai — « À surveiller » ne les redit plus.
   var h='<section class="mvcarte caj-c caj-as" aria-labelledby="caj-as-t"><div class="caj-h">'+_mvIcon('cloche',16)+'<h3 class="caj-t" id="caj-as-t">\u00c0 surveiller</h3></div>';
   if(!L.length) return h+'<p class="caj-vide">Rien \u00e0 surveiller pour l\u2019instant.</p></section>';
   return h+'<ul class="caj-asl">'+L.map(function(x){
@@ -6222,7 +6231,7 @@ function _aujDetail(d, it, auj){
   var h='<div class="caj-x" aria-live="polite"><h4>'+_escHtml(_aujJourLong(d))+(d===auj?' <span>\u00b7 aujourd\u2019hui</span>':'')+'</h4>';
   if(!it.length) return h+'<p>Rien de pr\u00e9vu ce jour-l\u00e0.</p></div>';
   h+='<ul>'+it.map(function(x){
-    var q=x.kind==='ouillage'?String(x.detail||''):(x.kind==='fa'?String(x.detail||'').replace(/^fin de fermentation estim\u00e9e \u00b7 /,''):'');
+    var q=x.kind==='ouillage'?String(x.detail||'')+(/^avanc/.test(String(x.note||''))?' \u00b7 '+x.note:''):(x.kind==='fa'?String(x.detail||'').replace(/^fin de fermentation estim\u00e9e \u00b7 /,''):'');
     return '<li class="k-'+_escAttr(x.kind)+'"><i'+(x.kind==='fa'?' class="est"':'')+'></i><span><b>'+_escHtml((x.kind==='fa'||x.kind==='malo')?(_ML_LBL[x.kind]||x.kind):(_AUJ_VERBE[x.kind]||_ML_LBL[x.kind]||x.kind))+'</b> \u00b7 '+_escHtml(x.titre||'')+'</span>'+(q?'<em>'+_escHtml(q)+'</em>':'')+'</li>';
   }).join('')+'</ul>';
   if(d===auj) h+='<p>Les gestes du jour se font depuis \u00ab\u00a0Ce qui presse\u00a0\u00bb, en haut de l\u2019\u00e9cran.</p>';
@@ -6270,6 +6279,132 @@ function _aujColle(){
   dr.classList.toggle('colle',window.innerWidth>=1024&&(dr.offsetHeight+h+40)<=window.innerHeight);
   if(!_aujColleOk){ _aujColleOk=true; window.addEventListener('resize',function(){ clearTimeout(window._aujColleT); window._aujColleT=setTimeout(_aujColle,150); }); }
 }
+// ═══ ★★ CAVEAUJ-2 (§435) — LE CUVIER, LE CHAI ET LES DERNIERS GESTES, D'UN COUP D'ŒIL (maquette validée le 22/10) ═══
+// Sous « Ce qui presse » : « Le Cuvier » (une ligne par cuve suivie : état, courbe de densité, température, dernier relevé,
+// fin estimée) et « Le Chai » (une ligne par cuvée : fûts, jauge d'ouillage, malo, soutirage) — le Cuvier en tête pendant
+// les vendanges, le Chai le reste de l'année. Tout en bas, « Derniers gestes », sur dix jours. Rien ne s'y saisit.
+var _aujTout=false;   // « Tout voir » des derniers gestes (téléphone)
+function _aujDepuis(iso, auj){ return iso?_mlEcartJ(String(iso).slice(0,10),auj):null; }
+function _aujRel(j){ return j==null?'aucun relev\u00e9':(j<=0?'aujourd\u2019hui':(j===1?'hier':'il y a '+j+'\u00a0j')); }
+function _aujNb(v){ return String(v).replace('.',','); }
+function _aujSpark(serie, dsec){
+  var s=(serie||[]).filter(function(v){ return v!=null&&isFinite(v); });
+  if(s.length<2) return '<span class="caj-spark" aria-hidden="true"></span>';
+  var W=88, H=28, p=2, lo=Math.min(dsec!=null?dsec:s[0],Math.min.apply(null,s))-2, hi=Math.max.apply(null,s)+2;
+  function y(v){ return (p+(hi-v)/(hi-lo)*(H-2*p)).toFixed(1); }
+  var pts=s.map(function(v,i){ return (p+i*(W-2*p)/(s.length-1)).toFixed(1)+','+y(v); }), der=pts[pts.length-1].split(',');
+  return '<svg class="caj-spark" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'
+    +(dsec!=null?'<line class="caj-sp-sec" x1="0" x2="'+W+'" y1="'+y(dsec)+'" y2="'+y(dsec)+'"/>':'')
+    +'<polyline class="caj-sp-l" points="'+pts.join(' ')+'"/><circle class="caj-sp-p" cx="'+der[0]+'" cy="'+der[1]+'" r="2.4"/></svg>';
+}
+function _aujCuveLigne(c, auj){
+  var mes=[], p=null, dsec=null;
+  try{ mes=_vendTriMes(c)||[]; p=_vendMesGF(c).length?{etat:'labo'}:_mlProjFA(c,auj); dsec=_vendDSec(c); }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'aujourdhui/cuvier',err:e}); }
+  var der=mes.length?mes[mes.length-1]:null, jE=_aujDepuis(c.date_entree,auj), jR=der?_aujDepuis(der.date,auj):null, d20=der?_vendMesD20(der):null;
+  var st=c.statut==='mpf'?['mpf','Mac\u00e9ration'+(jE!=null?' \u00b7 J'+jE:'')]:(c.statut==='fa'?['fa','Fermentation']:['dec','D\u00e9cuv\u00e9e']);
+  var pente=(p&&p.pente!=null&&(p.etat==='normal'||p.etat==='ralentit'))?'\u2212'+_aujNb(p.pente)+' par jour':(c.statut==='mpf'?'stable':'');
+  var fin=!p?['\u2014','']:(p.etat==='normal'?['vers '+_mlFrJ(p.date),'\u00e0 '+p.marge+'\u00a0j pr\u00e8s']:(p.etat==='sec'?['Sec','d\u00e9cuvage possible']:(p.etat==='ralentit'?['Ralentit','\u00e0 contr\u00f4ler']:(p.etat==='mpf'?['\u2014','FA pas encore partie']:(p.etat==='labo'?['Au labo','suivie par les sucres']:['\u2014','trop t\u00f4t pour estimer'])))));
+  var rc=(jR==null||jR>=2)?' due':(jR===0?' ok':'');
+  return '<li class="caj-cv"><div class="caj-cvn"><span class="caj-nom">'+_escHtml(c.nom||'Cuve')+'</span>'+((c.cuvee_src||st[0]==='dec')?'<span class="caj-meta">'+_escHtml([c.cuvee_src||'',st[0]==='dec'?'FA en f\u00fbt':''].filter(Boolean).join(' \u00b7 '))+'</span>':'')+'</div>'
+    +'<span class="mvpas mvpas-statut caj-st-'+st[0]+'">'+_escHtml(st[1])+'</span>'
+    +'<div class="caj-dens">'+_aujSpark(mes.map(function(m){ return _vendMesD20(m); }),dsec)+'<span class="caj-dv"><b>'+(d20!=null?Math.round(d20):'\u2014')+'</b><span>'+_escHtml(pente)+'</span></span></div>'
+    +'<div class="caj-cvf"><span class="caj-rel" data-l="Relev\u00e9\u00a0: "><span class="caj-c13'+rc+'">'+(jR===0?_mvIcon('check',16):'')+_escHtml(_aujRel(jR))+'</span>'
+    +(der&&der.temp_c!=null?'<span class="caj-sub">'+_aujNb(der.temp_c)+'\u00a0\u00b0C</span>':'')+'</span>'
+    +'<span class="caj-fin" data-l="Fin\u00a0: "><b>'+_escHtml(fin[0])+'</b><span>'+_escHtml(fin[1])+'</span></span></div></li>';
+}
+// L'ouillage d'une cuvée : jours passés face au seuil de son millésime, puis le prochain (avancé s'il tombe un week-end
+// ou un jour férié). Une cuvée en cuve inox ne s'ouille pas.
+function _aujOuillageEtat(c, auj, pro){
+  if(!_caveOuille(c)) return null;
+  var seuil=_mlSeuil(c), j=c.last_ouillage?_aujDepuis(c.last_ouillage,auj):null, x=pro[c.id];
+  if(j==null) return {g:'jamais', s:'', d:'\u00e0 faire', cls:'due', p:100};
+  return {g:j===0?'aujourd\u2019hui':j+'\u00a0j', s:j?' sur '+seuil:'', cls:j>=seuil?'due':(j>=seuil*0.7?'att':''), p:Math.min(100,Math.round(j/seuil*100)),
+    d:j>seuil?'+'+(j-seuil)+'\u00a0j':(j===seuil?'aujourd\u2019hui':(x?'prochain '+_mlFrJ(x.date):''))};
+}
+function _aujMalo(c, x){
+  if(_caveFmlEtat(c)==='sans') return ['\u00c9vit\u00e9e','',''];
+  if(x&&x.finie) return ['Finie','mvpas-fait',''];
+  var fa=(CAVE_VENDANGE.cuves_vinif||[]).some(function(v){ return v&&v.decuvage&&v.decuvage.cuvee_id===c.id&&v.decuvage.fa_finie===false; });
+  if(fa) return ['Apr\u00e8s la FA','','la FA finit en f\u00fbt'];
+  var p=x&&x.p, gl=function(v){ return v==null?'':' \u00b7 '+_aujNb(Math.round(v*100)/100)+'\u00a0g/L'; };
+  if(p&&p.etat==='bloquee') return ['Bloqu\u00e9e'+gl(p.mal),'mvpas-retard','ne descend plus'];
+  if(p&&(p.etat==='normal'||p.etat==='demarrage'||p.etat==='irreguliere')) return ['En cours'+gl(p.mal),'mvpas-encours',(p.etat==='normal'&&p.date)?'fin vers le '+_mlFrC(p.date):(p.etat==='irreguliere'?'mesures irr\u00e9guli\u00e8res':'')];
+  return ['Pas d\u2019analyse','',''];
+}
+function _aujChaiLigne(c, auj, pro, mm){
+  var x=mm[c.id], o=_aujOuillageEtat(c,auj,pro), m=_aujMalo(c,x), nb=_caveNbTonneaux(c), hl=_mlHlCuvee(c);
+  var so=(x&&x.cas==='a_soutirer')?['\u00c0 faire','mvpas-surveiller']:((x&&x.sout)?['Fait le '+_mlFrC(x.sout),'']:['\u2014','']);
+  var fts=nb?nb+' f\u00fbt'+(nb>1?'s':''):'cuve', vol=hl?_aujNb(hl)+'\u00a0hL':'';
+  var jau=o?'<div class="caj-jau"><div class="caj-jgt"><span><b>'+o.g+'</b>'+o.s+'</span><span'+(o.cls==='due'?' class="due"':'')+'>'+o.d+'</span></div><span class="caj-jg'+(o.cls?' '+o.cls:'')+'"><i style="--p:'+o.p+'%"></i></span></div>'
+           :'<div class="caj-jau"><div class="caj-jgt"><span>pas d\u2019ouillage</span></div></div>';
+  return {r:((o&&o.cls==='due')||m[1]==='mvpas-retard')?0:(so[1]?1:2),
+    h:'<li class="caj-ch"><div class="caj-cvn"><span class="caj-nom">'+_escHtml(_mlNomCuvee(c))+'</span><span class="caj-meta caj-tel">'+_escHtml(fts+(vol?' \u00b7 '+vol:''))+'</span></div>'
+    +'<span class="caj-fu"><b>'+fts+'</b><span>'+vol+'</span></span>'+jau
+    +'<div class="caj-chf"><span class="caj-pm"><span class="mvpas mvpas-statut'+(m[1]?' '+m[1]:'')+'"><span class="caj-tel">Malo\u00a0: </span>'+_escHtml(m[0])+'</span>'+(m[2]?'<span class="caj-sub">'+_escHtml(m[2])+'</span>':'')+'</span>'
+    +'<span class="caj-pm"><span class="mvpas'+(so[1]?' mvpas-statut '+so[1]:'')+'"><span class="caj-tel">Soutirage\u00a0: </span>'+_escHtml(so[0])+'</span></span></div></li>'};
+}
+function _aujEtat(auj, parc){
+  var cuves=(CAVE_VENDANGE.cuves_vinif||[]).filter(_vendSuivie), cuvees=(CAVE_ELEVAGE.cuvees||[]).filter(function(c){ return c&&c.statut!=='embouteille'; });
+  var pro={}, mm={}, tf=0;
+  _mlOuillages(auj,_ML_SEM).forEach(function(o){ var id=o.cuvee&&o.cuvee.id; if(id&&!pro[id]&&o.date>auj) pro[id]=o; });
+  _mlMalo().forEach(function(x){ mm[x.id]=x; });
+  cuvees.forEach(function(c){ tf+=_caveNbTonneaux(c)||0; });
+  var cv='<section class="mvcarte caj-c" aria-labelledby="caj-cv-t"><div class="caj-h">'+_mvIcon('raisin',16)+'<h3 class="caj-t" id="caj-cv-t">Le Cuvier</h3>'
+    +(cuves.length?'<span class="caj-n">\u00b7 '+cuves.length+' cuve'+(cuves.length>1?'s suivies':' suivie')+'</span>':'')
+    +'<button type="button" class="mvbtn mvbtn-discret mvbtn-compact caj-lien" onclick="selectCaveSection(\'vendange\')">Ouvrir'+_mvIcon('chevron',16)+'</button></div>'
+    +(cuves.length?'<ul class="caj-tab"><li class="caj-cv caj-cvh" aria-hidden="true"><span>Cuve</span><span>\u00c9tat</span><span>Densit\u00e9 \u00e0 20\u00a0\u00b0C</span><span>Dernier relev\u00e9</span><span>Fin estim\u00e9e</span></li>'
+      +cuves.map(function(c){ return _aujCuveLigne(c,auj); }).join('')+'</ul>'
+      :'<p class="caj-vide">Aucune cuve suivie. Le Cuvier reprendra avec la prochaine vendange.</p>')+'</section>';
+  var L=cuvees.map(function(c){ return _aujChaiLigne(c,auj,pro,mm); }).sort(function(a,b){ return a.r-b.r; });
+  var ch='<section class="mvcarte caj-c" aria-labelledby="caj-ch-t"><div class="caj-h">'+_mvIcon('barrique',16)+'<h3 class="caj-t" id="caj-ch-t">Le Chai</h3>'
+    +'<span class="caj-n">\u00b7 '+cuvees.length+' cuv\u00e9e'+(cuvees.length>1?'s':'')+' \u00b7 '+tf+' f\u00fbt'+(tf>1?'s':'')+'</span>'
+    +'<button type="button" class="mvbtn mvbtn-discret mvbtn-compact caj-lien" onclick="selectCaveSection(\'elevage\')">Ouvrir'+_mvIcon('chevron',16)+'</button></div>'
+    +(L.length?'<ul class="caj-tab"><li class="caj-ch caj-cvh" aria-hidden="true"><span>Cuv\u00e9e</span><span>F\u00fbts</span><span>Ouillage</span><span>Malo</span><span>Soutirage</span></li>'+L.map(function(x){ return x.h; }).join('')+'</ul>'
+      :'<p class="caj-vide">Aucune cuv\u00e9e en \u00e9levage.</p>');
+  if(parc&&parc.libres!=null) ch+='<p class="caj-foot">'+_mvIcon('carton',16)+'<span>'+parc.libres+' f\u00fbt'+(parc.libres>1?'s libres':' libre')+' au magasin \u00b7 '+(parc.aReformer>0?parc.aReformer+' en fin de vie':'aucun en fin de vie')+'</span>'
+    +'<button type="button" class="mvbtn mvbtn-discret mvbtn-compact caj-lien" onclick="_mlGo(\'fut\',\'\')">Parc \u00e0 f\u00fbts'+_mvIcon('chevron',16)+'</button></p>';
+  ch+='</section>';
+  return _mlPhase()==='vendange'?cv+ch:ch+cv;
+}
+// Les derniers gestes, sur dix jours : opérations du Chai, relevés et décuvages du Cuvier, du plus récent au plus ancien.
+function _aujRecents(auj){
+  var ev=[], nomV={}, depuis=_mlAddJ(auj,-10);
+  var LIB={ouillage:['Ouillage','goutte'], soutirage:['Soutirage','hautbas'], soufre:['Sulfitage','fiole'], analyse:['Analyse','eprouvette'], degustation:['D\u00e9gustation','verre'], traitement:['Traitement','fiole'], filtration:['Filtration','fiole'], miseenbouteille:['Mise en bouteille','verre']};
+  (CAVE_ELEVAGE.cuvees||[]).forEach(function(c){ if(c&&c.id) nomV[c.id]=_mlNomCuvee(c); });
+  (CAVE_ELEVAGE.operations||[]).forEach(function(o){
+    var d=String((o&&o.date)||'').slice(0,10); if(!d||d<depuis||d>auj) return;
+    var ids=(o.cuvees_ids&&o.cuvees_ids.length)?o.cuvees_ids:(o.cuvee_id?[o.cuvee_id]:[]), l=LIB[o.type]||['Op\u00e9ration','journal'];
+    ev.push({d:d, ic:l[1], t:l[0], q:ids.map(function(i){ return nomV[i]; }).filter(Boolean).join(', '), s:o.operateur?'par '+o.operateur:''});
+  });
+  (CAVE_VENDANGE.cuves_vinif||[]).forEach(function(c){
+    if(!c) return;
+    var mes=[];
+    try{ mes=_vendTriMes(c)||[]; }catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'aujourdhui/recents',err:e}); }
+    mes.forEach(function(m){
+      var d=String((m&&m.date)||'').slice(0,10); if(!d||d<depuis||d>auj) return;
+      ev.push({d:d, ic:'thermometre', t:'Relev\u00e9', q:c.nom||'Cuve', s:m.densite!=null?Math.round(m.densite)+(m.temp_c!=null?' \u00e0 '+_aujNb(m.temp_c)+'\u00a0\u00b0C':''):''});
+    });
+    var dc=c.decuvage, dd=dc?String(dc.date||'').slice(0,10):'';
+    if(dd&&dd>=depuis&&dd<=auj) ev.push({d:dd, ic:'cuve', t:'D\u00e9cuvage', q:(c.nom||'Cuve')+(dc.cuvee_id&&nomV[dc.cuvee_id]?' \u2192 '+nomV[dc.cuvee_id]:''), s:''});
+  });
+  ev.sort(function(a,b){ return a.d<b.d?1:(a.d>b.d?-1:0); });
+  return ev.slice(0,16);
+}
+function _aujRecentsHtml(auj){
+  var ev=_aujRecents(auj), G=[], idx={};
+  ev.forEach(function(e){ if(idx[e.d]==null){ idx[e.d]=G.length; G.push({d:e.d, l:[]}); } G[idx[e.d]].l.push(e); });
+  function lab(d){ var j=_mlEcartJ(d,auj), t=_aujJourLong(d).split(' '); return j===0?'Aujourd\u2019hui':(j===1?'Hier \u00b7 '+t[0].toLowerCase()+' '+t[1]:t[0]+' '+t[1]); }
+  var h='<section class="mvcarte caj-c caj-rec" aria-labelledby="caj-rec-t"><div class="caj-h"><span class="caj-vif" aria-hidden="true"></span><h3 class="caj-t" id="caj-rec-t">Derniers gestes</h3>'
+    +'<button type="button" class="mvbtn mvbtn-discret mvbtn-compact caj-lien" onclick="selectCaveSection(\'elevage\');switchCaveOng(\'journal\')">Journal'+_mvIcon('chevron',16)+'</button></div>';
+  if(!G.length) return h+'<p class="caj-vide">Aucun geste ces dix derniers jours.</p></section>';
+  return h+'<div class="caj-ed'+(_aujTout?'':' repli')+'">'+G.map(function(g){
+      return '<div class="caj-edg"><div class="caj-edl">'+_escHtml(lab(g.d))+'</div>'+g.l.map(function(e){
+        return '<div class="caj-ede"><span class="caj-edi'+(g.d===auj?' ok':'')+'">'+_mvIcon(g.d===auj?'check':e.ic,16)+'</span><span class="caj-edt"><b>'+_escHtml(e.t)+'</b>'+(e.q?' \u00b7 '+_escHtml(e.q):'')+(e.s?'<span>'+_escHtml(e.s)+'</span>':'')+'</span></div>';
+      }).join('')+'</div>';
+    }).join('')+'</div><button type="button" class="mvbtn mvbtn-secondaire caj-plus" onclick="_aujVoirTout()" aria-expanded="'+_aujTout+'">'+(_aujTout?'Replier':'Tout voir ('+ev.length+')')+'</button></section>';
+}
+window._aujVoirTout=function(){ _aujTout=!_aujTout; renderCaveAujourdhui(); };
 function _aujRender(){
   var from=_mlAuj(), sem=_mlAgendaComplet(from,_ML_SEM);
   var mil=_mlCampagne(), haR=0;
@@ -6295,9 +6430,10 @@ function _aujRender(){
     +(nT?'<button type="button" class="mvbtn mvbtn-principal caj-cta" onclick="selectCaveSection(\'vendange\');switchVendOng(\'tour\')">'+_mvIcon('parcours',18)+'Faire la tourn\u00e9e<span class="caj-ctan">\u00b7 '+nT+' cuve'+(nT>1?'s':'')+'</span></button>':'')
     +'<button type="button" class="mvbtn mvbtn-secondaire caj-cta" onclick="openOvCaveOp()">'+_mvIcon('ajout',18)+'Nouvelle op\u00e9ration</button></div>'
     +'<p class="caj-cadre"><i></i><span>Calcul\u00e9 sur '+nSu+' cuve'+(nSu>1?'s':'')+' suivie'+(nSu>1?'s':'')+' et '+nEl+' cuv\u00e9e'+(nEl>1?'s':'')+' en \u00e9levage, avec le seuil d\u2019ouillage de chaque mill\u00e9sime.'
-    +(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.auj'):'')+'</span></p></section></div>'
+    +(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.auj'):'')+'</span></p></section>'+_aujEtat(from,parc)+'</div>'
     +'<aside class="caj-dr" id="caj-droite" aria-label="\u00c0 surveiller">'+_aujVeille(from,parc)+'</aside></div>'
     +_aujCal(sem,from);
+  h+=_aujRecentsHtml(from);
   return h;
 }
 
