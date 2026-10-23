@@ -1,0 +1,42 @@
+{
+  "lot": "CAVEAUJ-1",
+  "section": "§434",
+  "base": "fdacae333c27974cc7187e10b975eb8d6abb20de",
+  "inclut": [],
+  "date": "2026-10-23",
+  "tutos": {
+    "ok": true,
+    "empreinte": "d0aef06d78ec2fde21ac4fc06eba41d8b40150c498cb14ace48f5d276c6053a6",
+    "date": "2026-10-23T04:42:41.870Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "c30ab77a42197de9728a404a71e3b520944490c90f2052afd05e3e40c94cf71b",
+    "CLAUDE.md": "4b3ea590c221523f4c0d02d8896efcd783c3ecd96ee71a34d11fd1531fa65afb",
+    "docs/claude/INDEX.md": "059a997985188caac17ab0a117a746fd891cfd1c7b5a2aca173f05b4eda5897e",
+    "docs/claude/chantiers-430-479.md": "2c167afe1ba8585caf58b18d6be1608dc0fa2631cb0b76d669204755abff0706",
+    "docs/claude/journal.md": "c59a995ff8d000163644c7420465fd16e1ece09c995b8fdc595d181666436b14",
+    "guide/08-cave.html": "9f6df78dab3e29cd43b33ce3a983376b7afa76e8b6f8130f6918adeca82217e2",
+    "index.html": "bc8d96c1bf92a98c2642e70abc4cf957c0a30976a99a7360e520c4b558710534",
+    "public/guide.html": "38530c69d143e743046adc61e90824ee8b3eb5c5bbedb232d28ab19fec56eee9",
+    "public/sw.js": "da82115f95b7984f0a271a6499cc112b8227dc2f7c37125586f50535b1f76e60",
+    "scripts/harnais-claude-md.mjs": "fd4a7410980ce5bd8ffbff2504c011c758b0f7dcbcdae8ccc10a5ddee09fd834",
+    "scripts/mv-harnais-cave-auj.mjs": "c188e43a36b1db0bd9ae229434cf5aafc5af64109ace899e083fc125d3913384",
+    "scripts/mv-harnais-cave1.mjs": "6b9fee2e5e5ca46e949a33b28e14eb01104b04f36597476d167c8be7b725b91a",
+    "scripts/mv-harnais-liste.mjs": "b7e53ba43aae79d070e6a6317486613b533239152d8d819f3ea2a9ae2aba0d2b",
+    "scripts/tutos-couverture.json": "e86aa78a946b86cbba1fa503984e69d181aab31491d3a300d7c116a3a8da7075",
+    "scripts/typo-baseline.json": "08b8f5656e60f9134e0f1b7ff5cb0a2ea3dc20e49d1b4273348b5b916e0eca5c",
+    "src/cave.js": "d542368f7bc41fad6c3bfea09224bfdf1fc1c8447d88c640f74488037f54339e",
+    "src/coquille.js": "645da125e9feca2908963aa8a28967bbdc37b1663e6c2b15731c84c76f0062b9",
+    "src/pilotage.js": "912e320180a22203b1aa985c43c698297531a3256313f02b4d2aa1b8d6b0c6fc",
+    "src/styles.css": "6a928f70506b9a2d9c2c8e39cb335e10325fe909fe2440a8049071e85591d2cd",
+    "src/utils.js": "a9d72db40127a3dd7a33284a74db2e92de21e64a6195abe1d3f0c261ef4c12a1",
+    "scripts/mv-harnais-caveauj1.mjs": "ef056ec60b656cfdb31db73f8d8a193476391a8ce7f292568b01975400feabe6"
+  }
+}

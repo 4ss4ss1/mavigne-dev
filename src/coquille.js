@@ -54,7 +54,8 @@ window._railAlertes = function () {
   try {
     if (typeof window._mlAgendaComplet === 'function' && typeof window._mlVerdict === 'function' && typeof window._mvToday === 'function') {
       const sem = window._mlAgendaComplet(window._mvToday(), 4), v = sem ? window._mlVerdict(sem, { phase: null, haReste: 0, parc: null }) : null;
-      if (v && v.cls === 'due') a.cave = (sem[0] && sem[0].items) ? sem[0].items.length : 1;
+      // ★ CAVEAUJ-1 (§434) : des gestes, comme la bande de la Cave (une fin de fermentation estimée n'est pas à faire).
+      if (v && v.cls === 'due') a.cave = (sem[0] && sem[0].items) ? (typeof window._mlGestes === 'function' ? window._mlGestes(sem[0].items).length : sem[0].items.length) : 1;
     }
   } catch (e) { if (window._mvAvale) window._mvAvale(e, 'coquille.js/alertes#cave'); }
   Object.keys(a).forEach(k => { if (!(a[k] > 0)) delete a[k]; });

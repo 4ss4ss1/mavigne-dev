@@ -7,12 +7,12 @@
   "src/app.js": {
     "dur": 97,
     "petit": 56,
-    "ko": 948
+    "ko": 949
   },
   "src/cave.js": {
     "dur": 28,
     "petit": 24,
-    "ko": 679
+    "ko": 697
   },
   "src/cockpit-vue.js": {
     "dur": 0,
@@ -32,12 +32,17 @@
   "src/coquille.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 22
+    "ko": 23
   },
   "src/cuvier.js": {
     "dur": 0,
     "petit": 0,
     "ko": 586
+  },
+  "src/diagnostic.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 157
   },
   "src/firebase.js": {
     "dur": 0,
@@ -117,16 +122,16 @@
   "src/utils.js": {
     "dur": 5,
     "petit": 2,
-    "ko": 1001
+    "ko": 1009
   },
   "index.html": {
     "dur": 77,
     "petit": 30,
-    "ko": 361
+    "ko": 362
   },
   "src/styles.css": {
     "dur": 256,
     "petit": 83,
-    "ko": 831
+    "ko": 877
   }
 }

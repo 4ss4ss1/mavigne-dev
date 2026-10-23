@@ -160,9 +160,9 @@ pose(/(selectCaveSection\('aujourdhui'\)|_mvtGoCave\('aujourdhui')/.test(APPNU) 
   'app.js : la visite guid\u00e9e atterrit sur Aujourd\u2019hui');
 pose(/id:'aujourdhui'/.test(APPNU) && /id==='aujourdhui'/.test(APPNU), 'app.js : le chapitre d\u00e9mo « Aujourd\u2019hui » a sa branche');
 pose(/'cave\.auj':\s*\{/.test(UTNU) && /_mvInfoBtn\('cave\.auj'\)/.test(SRCNU), 'la fiche MV_INFO cave.auj existe et est pos\u00e9e');
-const ev = extraire(SRCNU, '_mlEvHtml')[1];
-pose((ev.match(/<button/g) || []).length === 1 && /class="auj-act"/.test(ev), 'une ligne = UN bouton, le verbe est un <span> (pas de bouton dans un bouton)');
-pose(/_mvIcon\(ico,16\)/.test(ev) && !/[\u{1F300}-\u{1FAFF}]/u.test(ev), 'la ligne porte une ic\u00f4ne du sprite, aucun \u00e9moji');
+const ev = extraire(SRCNU, '_aujLigne')[1];
+pose((ev.match(/<button/g) || []).length === 1 && /class="mvbtn mvbtn-secondaire caj-b"/.test(ev) && /onclick="_mlGo\(/.test(ev), 'CAVEAUJ-1 : une ligne = un contenant, un bouton du jeu commun par geste, le geste par _mlGo');
+pose(/_mvIcon\(x\.cuve\?'cuve':'barrique',18\)/.test(ev) && !/[\u{1F300}-\u{1FAFF}]/u.test(ev), 'la ligne porte une ic\u00f4ne du sprite, aucun \u00e9moji');
 const ac = extraire(SRCNU, '_mlAgendaComplet')[1];
 pose(/_mlAgenda\(from,nSem\)/.test(ac), '_mlAgendaComplet consomme _mlAgenda (il ne le recopie pas)');
 pose(!/\(ordre\[[a-z.]+\]\s*\|\|\s*9\)/.test(ac), 'l\u2019ordre ne s\u2019\u00e9crit pas (ordre[k]||9)');
@@ -206,7 +206,7 @@ console.log('\n  Soutirage & malo, ex\u00e9cut\u00e9s');
   pose(it.length === 1 && it[0].kind === 'malo' && it[0].urgence === 'due', 'malo bloqu\u00e9e \u2192 ligne « malo » due, aujourd\u2019hui');
   pose(/1,2 g\/L/.test(it[0].detail), '\u2026 avec le malique restant');
   const v = M._mlVerdict(M._mlAgendaComplet(AUJ, 4), {});
-  pose(v.cls === 'due' && /1 cuve demande un contr\u00f4le/.test(v.t), 'le verdict passe la malo bloqu\u00e9e en t\u00eate, comme une alerte');
+  pose(v.cls === 'due' && /1 cuv\u00e9e demande un contr\u00f4le/.test(v.t), 'le verdict passe la malo bloqu\u00e9e en t\u00eate, comme une alerte \u2014 et dit \u00ab cuv\u00e9e \u00bb (CAVEAUJ-1)');
 }
 {
   const bout = { id: 'b1', nom: 'Vieux', millesime: 2024, statut: 'embouteille' };
@@ -248,7 +248,7 @@ console.log('\n  Ordre et verdict, ex\u00e9cut\u00e9s');
   pose(kinds.join(' ') === 'alerte mesure soutirage ouillage ouillage', 'm\u00eame date : alerte, mesure, soutirage, puis les ouillages', kinds.join(' '));
   let v = M._mlVerdict(sem, {});
   pose(v.cls === 'due' && v.t === '1 cuve demande un contr\u00f4le', 'l\u2019alerte passe devant tout');
-  pose(/^Et 1 cuve \u00e0 mesurer\. /.test(v.s), 'la seconde ligne annonce ce qui suit (« Et \u2026 »)');
+  pose(/^La fermentation ralentit ou la temp\u00e9rature est haute\. C\u2019est le seul point qui ne peut pas attendre demain\. Puis\u00a0: 1 cuve \u00e0 mesurer \u00b7 /.test(v.s), 'la seconde ligne dit pourquoi, puis ce qui suit (\u00ab Puis : \u2026 \u00bb, CAVEAUJ-1)');
   // sans alerte : les mesures
   const M2 = monter(cave([CUV]), { agenda: i => i === 0 ? agenda(0).filter(x => x.kind !== 'alerte') : [] ,
     proj: { c1: { etat: 'finie', mal: 0.05, dernier: '2026-08-03', n: 4 } } });

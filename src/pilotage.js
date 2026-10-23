@@ -4334,7 +4334,8 @@ function _pilCkCave(){
     if(sem&&typeof window._mlVerdict==='function') v=window._mlVerdict(sem,{phase:null,haReste:0,parc:null});
   }catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'ck cave',err:e}); }
   if(!sem||!v) return '';
-  var n=(sem[0]&&sem[0].items)?sem[0].items.length:0;
+  // ★ CAVEAUJ-1 (§434) : des gestes, comme la bande de la Cave (une fin de FA estimée n'est pas à faire).
+  var n=(sem[0]&&sem[0].items)?((typeof window._mlGestes==='function')?window._mlGestes(sem[0].items).length:sem[0].items.length):0;
   var col=v.cls==='due'?'#9B2D1F':(v.cls==='warn'?'#B85A1A':'#3D6B27');
   return '<div class="pil-ck"><div class="kl">Cave</div><div class="kv" style="color:'+col+'">'+n+'<span class="u"> \u00e0 faire</span></div>'
     +'<div class="ks">'+_pilEsc(v.t)+'</div>'

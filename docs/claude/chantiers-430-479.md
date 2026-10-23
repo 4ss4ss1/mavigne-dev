@@ -113,3 +113,56 @@ bouteille, dépôts) et la part des anges par cuvée (mesure grisée de la Compa
 
 ### 433d. Ce qui reste
 Rien de la maquette. À suivre selon l’usage : une force de solution par soutirage, un relevé de température dédié s’il en faut un.
+
+## 434. ★★ CAVEAUJ-1 — CAVE › AUJOURD’HUI AU DESSIN DE LA MAQUETTE VALIDÉE ; LA MACÉRATION N’EST PLUS UNE FERMENTATION QUI RALENTIT (22/10 — `src/cave.js` (`_mlProjFA` : l’état `mpf` ; `_mlVerdict` : le mot suit le contenant, « leur malo », « Puis : … » ; `_mlGestes` ; `_caveKpisRender` ; `_aujRender` refait et ses pièces `_aujRaison`, `_aujMeta`, `_aujGrouper`, `_aujLigne`, `_aujFaits`, `_aujEquipe`, `_aujProchain`, `_aujMaceration`, `_aujVeille`, `_aujMarques`, `_aujResume`, `_aujDetail`, `_aujCal`, `_aujJourSel`, `_aujColle` ; `_mlEvHtml` retirée ; `_aujInjectCss` et `_mlInjectCss` débarrassées de l’ancien écran) · `src/pilotage.js` (`_pilCkCave` : des gestes) · `src/coquille.js` (le compteur de la barre : des gestes) · `src/styles.css` (bloc CAVE-1 réduit à la bande ; bloc ★★ CAVEAUJ-1) · `src/utils.js` (APP, WHATS_NEW, MV_AIDE Cave, MV_INFO `cave.auj`) · `index.html` (versions) · `public/sw.js` · `guide/08-cave.html` · `scripts/mv-harnais-caveauj1.mjs` (neuf) · `scripts/mv-harnais-cave1.mjs` · `scripts/mv-harnais-cave-auj.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/tutos-couverture.json` · `scripts/harnais-claude-md.mjs` · `.mv-base` · `lots/CAVEAUJ-1.json` · **APP 9.92 → 9.93, SW 10.71 → 10.72**, base `fdacae3`)
+
+### 434a. D’où ça vient
+Nico (22/10) : « dans la cave, dans aujourd’hui […] faut quelque chose de plus pro […] une bête de course ». Objectif confirmé (« oui ») : le
+vrai tableau de bord du maître de chai, au niveau de la refonte (Pilotage, Accueil Vigne), rapide à lire et rapide à agir. Mesuré sur l’appli
+construite (domaine de démo) : sur PC, « Ce qui presse » seul à gauche au-dessus d’un grand vide ; la liste répétait la même cuve (Cuve 5 deux
+fois) et la même cuvée (Fixin trois fois), les ouillages revenaient semaine après semaine ; textes doublés (« 3 fûts · ~21 L · 3 fûts »,
+« Fin de fermentation · fin de fermentation estimée ») ; au téléphone, le premier geste arrivait vers le bas de l’écran. Maquette HTML (publiée,
+hors dépôt), v1 : « j’aime beaucoup » — mais la colonne fixe de droite cachait le calendrier en bas de page ; v2 : seule « À surveiller » reste
+fixe, et seulement si elle tient. « go ».
+
+### 434b. Ce qui change
+- **« Ce qui presse »** : le verdict (pastille Prioritaire / À faire / À jour), pourquoi, puis ce qui suit (« Puis : … », trois au plus).
+  **Une ligne par contenant** — les gestes d’une même cuve (ou cuvée) réunis, contrôle et dû en tête — et un bouton du jeu commun par geste
+  (`_mlGo`, inchangé). « Déjà fait aujourd’hui » (opérations du Chai, relevés et décuvages du Cuvier datés du jour), « En cave aujourd’hui »
+  (`CONFIG.cave_jours`, lien Planning pour l’administrateur), « Faire la tournée » (la tournée du Cuvier) et « Nouvelle opération ». Quand tout
+  est fait, le prochain geste est dit.
+- **« À surveiller »** (à droite sur ordinateur, après « Ce qui presse » au téléphone) : macération plus longue que prévu, fin de
+  fermentation dans les trois jours, fûts en fin de vie (`_mlSansDate`) sinon fûts libres. **Collée seulement si elle tient dans l’écran**
+  (`_aujColle`, la règle de `_accColle`), et jamais au-delà de `.caj-zone` : le calendrier est rendu hors de la zone.
+- **« Les quatre semaines »** en calendrier 4 × 7 : chaque jour porte ses gestes (texte court sur ordinateur, points au téléphone) et les fins
+  de FA estimées (rond creux) ; une colonne résume la semaine (gestes, fûts et litres par `_mlResumeSem`), une liste la remplace au téléphone ;
+  un appui sur un jour montre son détail sous la grille (`_aujJourSel`, exempté au compte des tutos : un affichage).
+- **La bande** dit « à faire cette semaine » et compte des gestes (`_mlGestes`) ; la carte Cave du Pilotage et le compteur de la barre aussi.
+
+### 434c. Trouvé en route (corrigé)
+- **Fausse alerte en tête** : `_mlProjFA` lisait une cuve en macération (`statut 'mpf'`) comme une fermentation qui ralentit (densité stable) —
+  la démo affichait « 1 cuve demande un contrôle » pour Cuve 5, le Pilotage aussi. Elle rend désormais `{etat:'mpf'}` : ni alerte ni projection.
+- `_mlVerdict` : « 2 cuvées ont fini **sa** malo » → « **leur** malo » ; « 1 **cuve** demande un contrôle » pour une malo bloquée (une cuvée) →
+  « 1 **cuvée** » ; la seconde ligne (« Et … ») devient « pourquoi. Puis : … ».
+- La bande comptait la fin de fermentation estimée comme une chose à faire (7 → 5 sur la démo, avec la fausse alerte).
+- Le preflight a refusé `_mlResumeSem` sans appelant (son seul appelant était l’ancien écran) : les semaines du calendrier la lisent.
+- La chaîne, au premier passage : des icônes en 14 px (l’échelle est 16/18/20/24/40) → 16 ; une pastille (`caj-pill`) et une « tuile » (`caj-tile`)
+  maison faisaient remonter les plafonds de `mv-harnais-pastilles` et `mv-harnais-cartes` → `.mvpas .mvpas-statut`, `.mvcarte`, `caj-ico` ;
+  le filet `--ligne`, jeton du socle, prend son repli (`mv-harnais-jetons`) ; le bloc, posé d’abord après TETE-2 — qui doit fermer la feuille
+  (`mv-harnais-tete2`) —, puis juste avant lui, où sept harnais (Arrivée, Carte du domaine, Jalons, Premières fois, Présence, Rangement des
+  bouteilles, Saison en image) lisent « leur » style jusqu’à TETE-2 et y trouvaient le repli `#E7E6E2`, est rangé juste après CAVE-1 ;
+  « ₂ » et « ≈ », hors de la police (`mv-harnais-subset` : aucun fichier ne remonte), ne sont plus ajoutés — la légende dit « Doser », la marque
+  « Fin estimée », la raison d’une dose reprend `_ML_LBL.so2` ; le guide est régénéré (`build-guide --check`) ; `mv-harnais-typo` : la feuille
+  passait 5 % au-dessus de sa gravure (831 → 877 Kio, cumul des lots ; +11 Ko ici) — découpage examiné, la feuille reste unique, référence
+  regravée (`scripts/typo-baseline.json`).
+- Le compteur de la Cave dans la barre latérale (`coquille.js`) comptait aussi la fin de FA estimée : il dit désormais 5, comme la bande.
+
+### 434d. Vérifié
+`mv-harnais-caveauj1` 21/21 + 10 contre-épreuves ; chaîne complète (`npm run check`) verte ; `mv-harnais-cave1` 4/4 + 5/5 ; `mv-harnais-cave-auj` 51/51 + contre ; `mv-harnais-agenda` vert ;
+preflight vert ; ESLint propre. Appli construite et capturée (démo) : PC et téléphone, verdict « 2 cuves à mesurer — Pas de relevé depuis hier
+ou avant. Puis : 1 cuvée à ouiller · 2 cuvées ont fini leur malo. », quatre lignes, bande 5. La maquette v2 avait été contrôlée au défilement sur
+cinq tailles d’écran (aucun chevauchement de la colonne sur le calendrier) ; la règle est tenue au code par le harnais (point 6).
+
+### 434e. Reste
+CAVEAUJ-2 : « Le Cuvier » et « Le Chai » en un coup d’œil, « Derniers gestes » (§28). À trancher : l’ouillage dû un dimanche ou un férié.
+

@@ -6681,51 +6681,148 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 }
 #page-phyto #tab-fer-trac button[onclick*="_ferExportPdf"]{ border:0!important; border-radius:var(--r-sm,6px)!important; background:var(--accent)!important; color:var(--sur-accent)!important; box-shadow:var(--shadow-xs),var(--reflet)!important; }
 /* ★ FIN PHYTO-3 */
-/* ★ CAVE-1 (§288) — LA CAVE › AUJOURD'HUI ET LA BANDE AU DESSIN DE LA MAQUETTE V8.
-   Habit seulement (même verdict, même agenda, calculés par _aujRender depuis ce qui est saisi). La vue injecte ses feuilles
-   (_aujInjectCss, _mlInjectCss) : ce bloc les recale sur les jetons par une spécificité plus forte (#page-cave). La bande en
-   quatre cases fines ; « Ce qui presse » en carte, sa phrase en Outfit, la gravité en filet et en couleur ; les semaines en
-   cartes, la semaine en cours cerclée à l'accent ; sur ordinateur, le verdict à gauche et les semaines à droite. Par jetons. */
+/* ★ CAVE-1 (§288) — LA BANDE DE LA CAVE AU DESSIN DE LA MAQUETTE V8.
+   ★ CAVEAUJ-1 (§434) : « Ce qui presse » et les semaines de ce bloc ont été refaits (bloc CAVEAUJ-1, en fin de feuille) ;
+   ne restent ici que la bande en quatre cases fines, sa ligne de cadre et la note des écrans du Millésime. Par jetons. */
 #page-cave #cave-kpis{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0!important; border:var(--bw) solid var(--ligne,#E7E6E2); border-radius:var(--r-md,8px); background:var(--bg-card); overflow:hidden; }
 #page-cave #cave-kpis .mvu-kpi{ padding:var(--e-3,12px) var(--e-4,16px)!important; border:0!important; border-radius:0!important; background:transparent!important; box-shadow:none!important; text-align:left!important; }
 #page-cave #cave-kpis .mvu-kpi + .mvu-kpi{ border-left:var(--bw) solid var(--ligne,#E7E6E2)!important; }
 #page-cave #cave-kpis .mvu-kpi-v{ font-family:var(--font-ui)!important; font-size:var(--pt-md,20px)!important; font-weight:var(--fw-semi,600)!important; color:var(--texte)!important; }
 #page-cave #cave-kpis .mvu-kpi-l{ font-size:var(--pt-micro,12px)!important; letter-spacing:0!important; text-transform:none!important; color:var(--texte-doux)!important; }
 #page-cave .cave-kpis-note i{ background:var(--ligne-forte); }
-#page-cave .auj-hero{ padding:var(--e-4,16px) var(--e-5,20px); border:var(--bw) solid var(--ligne,#E7E6E2); border-radius:var(--r-md,8px); background:var(--bg-card); box-shadow:none; }
-#page-cave .auj-hero.due{ box-shadow:inset var(--bw-2) 0 0 var(--danger); }
-#page-cave .auj-hero.warn{ box-shadow:inset var(--bw-2) 0 0 var(--attention); }
-#page-cave .auj-hero.ok{ box-shadow:inset var(--bw-2) 0 0 var(--ok); }
-#page-cave .auj-k{ font-size:var(--pt-micro,12px); font-weight:var(--fw-med,500); letter-spacing:0; text-transform:none; color:var(--texte-doux); }
-#page-cave .auj-big{ font-family:var(--font-ui); font-size:var(--pt-lg,24px); font-weight:var(--fw-semi,600); line-height:var(--lh-serre); color:var(--texte); }
-#page-cave .auj-hero.due .auj-big{ color:var(--danger); }
-#page-cave .auj-hero.warn .auj-big{ color:var(--attention); }
-#page-cave .auj-hero.ok .auj-big{ color:var(--ok); }
-#page-cave .auj-sous{ color:var(--texte-med); }
-#page-cave .auj-cadre{ color:var(--texte-doux); }
-#page-cave .auj-cadre i{ background:var(--ligne-forte); }
-#page-cave .mlx-wk{ padding:var(--e-4,16px); border:var(--bw) solid var(--ligne,#E7E6E2); border-radius:var(--r-md,8px); background:var(--bg-card); box-shadow:none; }
-#page-cave .mlx-wk.now{ border-color:var(--accent); }
-#page-cave .mlx-wkt{ font-size:var(--pt-base,14px); color:var(--texte); }
-#page-cave .mlx-wknow{ padding:0 var(--e-2,8px); border-radius:var(--r-xs,4px); background:var(--accent-doux); color:var(--accent-texte); font-size:var(--pt-micro,12px); font-weight:var(--fw-med,500); letter-spacing:0; text-transform:none; }
-#page-cave .mlx-wks b{ color:var(--texte); }
-#page-cave .mlx-wks .al{ color:var(--danger); }
-#page-cave .mlx-ev + .mlx-ev{ border-top-color:var(--ligne,#E7E6E2); }
-#page-cave .mlx-ev.due .mlx-n{ color:var(--danger); }
-#page-cave .mlx-ev.warn .mlx-n{ color:var(--attention); }
-#page-cave .auj-ic{ border-radius:var(--r-sm,6px); background:var(--survol); color:var(--texte-med); }
-#page-cave .mlx-ev.due .auj-ic{ background:var(--danger-doux); color:var(--danger); }
-#page-cave .mlx-ev.warn .auj-ic{ background:var(--attention-doux); color:var(--attention); }
-#page-cave .auj-act{ border:var(--bw) solid var(--ligne-forte); border-radius:var(--r-sm,6px); background:var(--bg-card); color:var(--texte); font-family:var(--font-ui); font-weight:var(--fw-med,500); box-shadow:var(--shadow-xs); }
-#page-cave .mlx-ev.due .auj-act{ border-color:var(--danger); color:var(--danger); }
 #page-cave .mlx-hint{ font-style:normal; font-size:var(--pt-micro,12px); color:var(--texte-doux); }
-@media (min-width:1024px){
-  #page-cave #auj-body{ display:grid; grid-template-columns:minmax(0,7fr) minmax(0,5fr); column-gap:var(--e-3,12px); align-items:start; }
-  #page-cave #auj-body > *{ grid-column:1 / -1; min-width:0; }
-  #page-cave #auj-body > .auj-hero{ grid-column:1; grid-row:span 4; }
-  #page-cave #auj-body > :is(.mlx-wk,.mlx-empty){ grid-column:2; }
-}
 /* ★ FIN CAVE-1 */
+/* ══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+   ★★ CAVEAUJ-1 (§434) — CAVE › AUJOURD’HUI AU DESSIN DE LA MAQUETTE VALIDÉE (Nico, 22/10 : « j’aime beaucoup », « go »)
+   « Ce qui presse » : une ligne par contenant, un bouton par geste (jeu commun .mvbtn) ; ce qui est fait ; qui est en
+   cave ; la tournée. Sur ordinateur, « À surveiller » à droite — COLLÉE SEULEMENT PAR .colle (posée par _aujColle quand
+   elle tient dans l’écran) et jamais hors de .caj-zone : le calendrier est rendu hors de la zone, la colonne ne peut pas
+   descendre dessus (défaut de la maquette v1, vu par Nico). Dessous, les quatre semaines en calendrier. Par jetons.
+   ══════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+#page-cave #auj-body{ display:flex; flex-direction:column; gap:var(--e-3,12px); }
+#page-cave .caj-zone{ display:flex; flex-direction:column; gap:var(--e-3,12px); min-width:0; }
+#page-cave .caj-g, #page-cave .caj-dr{ display:flex; flex-direction:column; gap:var(--e-3,12px); min-width:0; }
+#page-cave .caj-c{ display:block; min-width:0; padding:var(--e-4,16px); }   /* la carte elle-même : .mvcarte (jeu commun) */
+#page-cave .caj-h{ display:flex; align-items:center; gap:var(--e-2,8px); margin:0 0 var(--e-3,12px); min-height:var(--h-badge); color:var(--texte-doux); }
+#page-cave .caj-t{ margin:0; font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); letter-spacing:var(--ls-serre); color:var(--texte); }
+#page-cave .caj-n{ font-size:var(--pt-micro,12px); color:var(--texte-doux); white-space:nowrap; }
+#page-cave .caj-lien{ margin-left:auto; }
+#page-cave .caj-lien .mv-ic{ transform:rotate(-90deg); }
+#page-cave .k-ouillage{ --k:var(--terre); }
+#page-cave .k-mesure, #page-cave .k-labo{ --k:var(--ink-info); }
+#page-cave .k-soutirage{ --k:var(--phyto-med); }
+#page-cave .k-so2{ --k:var(--vert-med); }
+#page-cave .k-fa, #page-cave .k-decuvage{ --k:var(--or); }
+#page-cave .k-alerte, #page-cave .k-malo{ --k:var(--danger); }
+#page-cave .caj-hero{ padding:var(--e-4,16px); }
+#page-cave .caj-hh{ display:flex; align-items:center; gap:var(--e-2,8px); }
+#page-cave .caj-hl{ display:inline-flex; align-items:center; gap:var(--e-1,4px); font-size:var(--pt-micro,12px); font-weight:var(--fw-semi,600); color:var(--accent-texte); }
+#page-cave .caj-etat{ margin-left:auto; }   /* la pastille : .mvpas .mvpas-statut (jeu commun) */
+#page-cave .caj-titre{ margin:var(--e-3,12px) 0 0; font-family:var(--font-ui); font-size:var(--pt-lg,24px); font-weight:var(--fw-semi,600); line-height:var(--lh-serre); letter-spacing:var(--ls-titre); color:var(--texte); }
+#page-cave .caj-why{ margin:var(--e-2,8px) 0 0; font-size:var(--pt-base,14px); line-height:var(--lh-texte); color:var(--texte-med); }
+#page-cave .caj-sec{ display:flex; align-items:baseline; justify-content:space-between; gap:var(--e-2,8px); margin:var(--e-5,20px) 0 var(--e-0,2px); padding-top:var(--e-4,16px); border-top:var(--bw) solid var(--ligne,#E7E6E2); font-size:var(--pt-micro,12px); font-weight:var(--fw-semi,600); color:var(--texte-doux); }
+#page-cave .caj-sec em{ font-style:normal; font-weight:var(--fw-med,500); }
+#page-cave .caj-ls{ list-style:none; margin:0; padding:0; }
+#page-cave .caj-l{ display:grid; grid-template-columns:var(--h-row) minmax(0,1fr); gap:var(--e-1,4px) var(--e-3,12px); align-items:start; padding:var(--e-3,12px) 0; border-top:var(--bw) solid var(--ligne,#E7E6E2); }
+#page-cave .caj-l:first-child{ border-top:0; }
+#page-cave .caj-ico{ display:grid; place-items:center; width:var(--h-row); height:var(--h-row); border-radius:var(--r-md,8px); background:var(--survol); color:var(--texte-med); }
+#page-cave .caj-ico.due{ background:var(--danger-doux); color:var(--danger-texte); }
+#page-cave .caj-lc{ display:flex; flex-direction:column; gap:var(--e-0,2px); min-width:0; }
+#page-cave .caj-nom{ font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); color:var(--texte); }
+#page-cave .caj-meta{ font-size:var(--pt-micro,12px); color:var(--texte-doux); }
+#page-cave .caj-rs{ display:flex; flex-direction:column; gap:var(--e-0,2px); margin-top:var(--e-1,4px); }
+#page-cave .caj-r{ display:flex; align-items:baseline; gap:var(--e-2,8px); font-size:var(--pt-txt,13px); line-height:var(--lh-ui); color:var(--texte-med); }
+#page-cave .caj-r > i{ flex:none; width:var(--e-2,8px); height:var(--e-2,8px); border-radius:50%; background:var(--k,var(--texte-pale)); }
+#page-cave .caj-r > span{ flex:1; min-width:0; }
+#page-cave .caj-r.due{ font-weight:var(--fw-semi,600); color:var(--danger-texte); }
+#page-cave .caj-acts{ grid-column:2; display:flex; flex-wrap:wrap; gap:var(--e-2,8px); margin-top:var(--e-2,8px); }
+#page-cave .caj-acts .mvbtn{ flex:1 1 0; }
+#page-cave .caj-fait{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--e-1,4px) var(--e-3,12px); margin-top:var(--e-2,8px); padding:var(--e-2,8px) var(--e-3,12px); border-radius:var(--r-md,8px); background:var(--bg-doux); font-size:var(--pt-micro,12px); color:var(--texte-med); }
+#page-cave .caj-fait b{ font-weight:var(--fw-semi,600); color:var(--texte); }
+#page-cave .caj-fait > span{ display:inline-flex; align-items:center; gap:var(--e-1,4px); }
+#page-cave .caj-fait .mv-ic{ color:var(--ok-texte); }
+#page-cave .caj-suite{ margin:var(--e-3,12px) 0 0; font-size:var(--pt-txt,13px); line-height:var(--lh-texte); color:var(--texte-med); }
+#page-cave .caj-suite b{ font-weight:var(--fw-semi,600); color:var(--texte); }
+#page-cave .caj-eq{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--e-2,8px) var(--e-3,12px); margin-top:var(--e-3,12px); padding-top:var(--e-3,12px); border-top:var(--bw) solid var(--ligne,#E7E6E2); font-size:var(--pt-txt,13px); color:var(--texte-med); }
+#page-cave .caj-eql{ display:inline-flex; align-items:center; gap:var(--e-1,4px); font-size:var(--pt-micro,12px); font-weight:var(--fw-semi,600); color:var(--texte-doux); }
+#page-cave .caj-eqa{ display:inline-flex; }
+#page-cave .caj-av{ display:inline-grid; place-items:center; width:calc(var(--av) - var(--e-1,4px)); height:calc(var(--av) - var(--e-1,4px)); border-radius:50%; background:var(--c,var(--accent)); color:var(--sur-accent); font-size:var(--pt-nano,11px); font-weight:var(--fw-semi,600); box-shadow:0 0 0 var(--bw-2) var(--bg-card); }
+#page-cave .caj-av + .caj-av{ margin-left:calc(var(--e-1,4px) * -1.5); }
+#page-cave .caj-eqn b{ font-weight:var(--fw-semi,600); color:var(--texte); }
+#page-cave .caj-ctas{ display:flex; flex-wrap:wrap; gap:var(--e-2,8px); margin-top:var(--e-4,16px); }
+#page-cave .caj-ctas .mvbtn{ flex:1 1 100%; }
+#page-cave .caj-ctan{ font-weight:var(--fw-med,500); }
+#page-cave .caj-cadre{ display:flex; gap:var(--e-2,8px); align-items:flex-start; margin:var(--e-4,16px) 0 0; font-size:var(--pt-micro,12px); line-height:var(--lh-ui); color:var(--texte-doux); }
+#page-cave .caj-cadre > i{ flex:none; width:var(--bw-2); height:var(--e-3,12px); margin-top:var(--e-0,2px); border-radius:var(--bw-2); background:var(--ligne-forte); }
+#page-cave .caj-asl{ list-style:none; margin:0; padding:0; }
+#page-cave .caj-asi{ display:grid; grid-template-columns:var(--h-ctl) minmax(0,1fr) auto; gap:var(--e-3,12px); align-items:start; padding:var(--e-3,12px) 0; border-top:var(--bw) solid var(--ligne,#E7E6E2); }
+#page-cave .caj-asi:first-child{ border-top:0; padding-top:0; }
+#page-cave .caj-asi:last-child{ padding-bottom:0; }
+#page-cave .caj-asic{ display:grid; place-items:center; width:var(--h-ctl); height:var(--h-ctl); border-radius:var(--r-md,8px); background:var(--survol); color:var(--texte-med); }
+#page-cave .caj-asi.att .caj-asic{ background:var(--attention-doux); color:var(--attention-texte); }
+#page-cave .caj-asi.ok .caj-asic{ background:var(--ok-doux); color:var(--ok-texte); }
+#page-cave .caj-asc{ display:flex; flex-direction:column; gap:var(--e-0,2px); min-width:0; }
+#page-cave .caj-asc b{ font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); color:var(--texte); }
+#page-cave .caj-asc > span{ font-size:var(--pt-micro,12px); line-height:var(--lh-ui); color:var(--texte-med); }
+#page-cave .caj-asc .caj-lien{ align-self:flex-start; margin:var(--e-1,4px) 0 0; }
+#page-cave .caj-asv{ font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); white-space:nowrap; color:var(--texte); }
+#page-cave .caj-asi.att .caj-asv{ color:var(--attention-texte); }
+#page-cave .caj-vide{ margin:0; font-size:var(--pt-txt,13px); line-height:var(--lh-texte); color:var(--texte-med); }
+#page-cave .caj-leg{ display:flex; flex-wrap:wrap; gap:var(--e-1,4px) var(--e-3,12px); margin:0 0 var(--e-3,12px); font-size:var(--pt-micro,12px); color:var(--texte-med); }
+#page-cave .caj-leg > span{ display:inline-flex; align-items:center; gap:var(--e-1,4px); }
+#page-cave .caj-leg i, #page-cave .caj-mk > i, #page-cave .caj-x li > i{ flex:none; width:var(--e-2,8px); height:var(--e-2,8px); border-radius:50%; background:var(--k,var(--texte-pale)); }
+#page-cave .caj-leg i.est, #page-cave .caj-mk > i.est, #page-cave .caj-x li > i.est{ background:transparent; box-shadow:inset 0 0 0 var(--bw-2) var(--k,var(--texte-pale)); }
+#page-cave .caj-grille{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:var(--e-1,4px); }
+#page-cave .caj-js{ padding:0 0 var(--e-1,4px); font-size:var(--pt-nano,11px); font-weight:var(--fw-semi,600); text-align:center; color:var(--texte-doux); }
+#page-cave .caj-jsum, #page-cave .caj-ws{ display:none; }
+#page-cave .caj-jour{ display:block; width:100%; min-width:0; height:auto; min-height:0; padding:0; border:0; text-align:left; }
+#page-cave .caj-jc{ display:flex; flex-direction:column; align-items:center; gap:var(--e-1,4px); min-height:var(--h-row-2); padding:var(--e-1,4px) var(--e-0,2px); border:var(--bw) solid var(--ligne,#E7E6E2); border-radius:var(--r-sm,6px); background:var(--bg-card); }
+#page-cave .caj-jour:hover .caj-jc{ background:var(--survol); }
+#page-cave .caj-jour.passe .caj-jc{ opacity:var(--o-off,.45); }
+#page-cave .caj-jour.sel .caj-jc{ background:var(--bg-doux); border-color:var(--ligne-forte); }
+#page-cave .caj-jour.auj .caj-jc{ border-color:var(--accent); box-shadow:inset 0 0 0 var(--bw) var(--accent); }
+#page-cave .caj-jn{ font-size:var(--pt-micro,12px); font-weight:var(--fw-semi,600); color:var(--texte-med); font-variant-numeric:tabular-nums; }
+#page-cave .caj-jour.auj .caj-jn{ color:var(--accent-texte); }
+#page-cave .caj-mks{ display:flex; flex-wrap:wrap; justify-content:center; gap:var(--e-0,2px) var(--e-1,4px); }
+#page-cave .caj-mk{ display:inline-flex; align-items:center; gap:var(--e-1,4px); min-width:0; font-size:var(--pt-nano,11px); color:var(--texte-med); white-space:nowrap; }
+#page-cave .caj-mk > span{ display:none; }
+#page-cave .caj-wsl{ list-style:none; margin:var(--e-3,12px) 0 0; padding:0; }
+#page-cave .caj-wsl li{ display:flex; justify-content:space-between; gap:var(--e-3,12px); padding:var(--e-2,8px) 0; border-top:var(--bw) solid var(--ligne,#E7E6E2); font-size:var(--pt-micro,12px); color:var(--texte-med); }
+#page-cave .caj-wsl li > span:last-child{ text-align:right; }
+#page-cave .caj-wsl b{ font-weight:var(--fw-semi,600); color:var(--texte); }
+#page-cave .caj-x{ margin-top:var(--e-3,12px); padding:var(--e-3,12px); border-radius:var(--r-md,8px); background:var(--bg-doux); }
+#page-cave .caj-x h4{ margin:0 0 var(--e-1,4px); font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); color:var(--texte); }
+#page-cave .caj-x h4 span{ font-weight:var(--fw-med,500); color:var(--texte-doux); }
+#page-cave .caj-x ul{ list-style:none; margin:0; padding:0; }
+#page-cave .caj-x li{ display:flex; align-items:baseline; gap:var(--e-2,8px); padding:var(--e-1,4px) 0; font-size:var(--pt-txt,13px); color:var(--texte-med); }
+#page-cave .caj-x li > span{ flex:1; min-width:0; }
+#page-cave .caj-x li b{ font-weight:var(--fw-semi,600); color:var(--texte); }
+#page-cave .caj-x li em{ font-style:normal; white-space:nowrap; color:var(--texte-doux); }
+#page-cave .caj-x p{ margin:var(--e-1,4px) 0 0; font-size:var(--pt-micro,12px); color:var(--texte-doux); }
+@media (min-width:1024px){
+  #page-cave #auj-body{ gap:var(--e-5,20px); }
+  #page-cave .caj-zone{ display:grid; grid-template-columns:minmax(0,1fr) var(--l-list); gap:var(--e-5,20px); align-items:start; }
+  #page-cave .caj-dr.colle{ position:sticky; top:calc(var(--caj-haut,0px) + var(--e-4,16px)); }
+  #page-cave .caj-c{ padding:var(--e-5,20px); }
+  #page-cave .caj-hero{ padding:var(--e-6,24px); }
+  #page-cave .caj-titre{ font-size:var(--pt-xxl,32px); }
+  #page-cave .caj-l{ grid-template-columns:var(--h-row) minmax(0,1fr) auto; }
+  #page-cave .caj-acts{ grid-column:auto; flex-wrap:nowrap; margin-top:0; }
+  #page-cave .caj-acts .mvbtn, #page-cave .caj-ctas .mvbtn{ flex:none; }
+  #page-cave .caj-grille{ grid-template-columns:repeat(7,minmax(0,1fr)) calc(var(--e-10,64px) * 2.75); gap:var(--e-2,8px) var(--e-1,4px); }
+  #page-cave .caj-js{ text-align:left; padding-left:var(--e-1,4px); }
+  #page-cave .caj-jsum{ display:block; padding-left:var(--e-3,12px); }
+  #page-cave .caj-ws{ display:flex; flex-direction:column; justify-content:center; gap:var(--e-0,2px); padding-left:var(--e-3,12px); font-size:var(--pt-micro,12px); line-height:var(--lh-ui); color:var(--texte-med); }
+  #page-cave .caj-ws b{ font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); color:var(--texte); }
+  #page-cave .caj-wnow{ align-self:flex-start; margin-bottom:var(--e-0,2px); padding:0 var(--e-2,8px); border-radius:var(--r-full,999px); background:var(--accent-doux); color:var(--accent-texte); font-size:var(--pt-nano,11px); font-weight:var(--fw-semi,600); }
+  #page-cave .caj-wsl{ display:none; }
+  #page-cave .caj-jc{ align-items:stretch; min-height:calc(var(--e-10,64px) + var(--e-5,20px)); padding:var(--e-2,8px); }
+  #page-cave .caj-mks{ flex-direction:column; flex-wrap:nowrap; justify-content:flex-start; gap:var(--e-1,4px); }
+  #page-cave .caj-mk{ font-size:var(--pt-micro,12px); overflow:hidden; }
+  #page-cave .caj-mk > span{ display:inline; overflow:hidden; text-overflow:ellipsis; }
+}
+/* ★ FIN CAVEAUJ-1 */
+
 /* ★ CAVE-2 (§289) — LE CUVIER AU DESSIN DE LA MAQUETTE V8 (habit seulement).
    Le Cuvier dessine avec sa propre feuille (classes mvv-, injectée) ; ce bloc la recale sur les jetons par #page-cave. Cuves en
    lignes au cadre neutre (la cuve ouverte cerclée à l'accent), nom en Outfit, onglets et puces en segmenté, alerte « à mesurer »
@@ -9069,6 +9166,7 @@ body:not(.mv-rail-ouvert) .mv-rail .mv-rail-point,body:not(.mv-rail-ouvert) .mv-
 .dgn-g-ligne .mvpas,.dgn-statuts .mvpas{min-width:118px;justify-content:center}
 .mvpas.dgn-nonsuivi{background:transparent;border:var(--bw,1px) dashed var(--ligne-forte);color:var(--texte-doux)}
 /* ★ FIN DIAG-1 */
+
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.
    Deux rangées partout, Pilotage compris (pilotage.js pose désormais un vrai .mod-header) : l'identité (icône, titre,
    sous-titre, gestes du module) puis la ligne du jour (saison, date — ou la météo, qui porte alors la date courte —,
