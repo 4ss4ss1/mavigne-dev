@@ -150,9 +150,10 @@ t('… et gardent leurs quatre cartes', /_pilPhotosHtml/.test(SQ));
 t('la fleche « voir le detail » seule disparait en frise', /\.pil-photo \.go\{display:none\}/.test(P));
 t('la largeur des photos est bornee en frise', /\.pil-photo\{flex:0 0 auto;width:auto;min-width:\d+px;max-width:\d+px/.test(P));
 t('le masthead se compacte sur telephone', /max-width:700px[\s\S]{0,900}\.pil-dom\{font-size:var\(--pt-lg/.test(P));
-t('l\'instruction du fil d\'Ariane quitte la barre collante sur telephone',
-  /max-width:700px[\s\S]{0,700}\.pil-cr-note\{display:none\}/.test(P));
-t('… mais reste sur grand ecran', /pil-cr-note">l\\u2019ann\\u00e9e enti\\u00e8re/.test(P));
+// PIL-RANGE-2a (§443) : le fil d'Ariane devient la barre « Vous regardez » ; sur telephone, son etiquette et ses dates s'effacent.
+t('l\'etiquette et les dates de la barre quittent la barre collante sur telephone',
+  /max-width:700px[\s\S]{0,900}\.pil-ptlab,\.pil-ptbornes\{display:none\}/.test(P));
+t('… mais restent sur grand ecran', /pil-ptlab">Vous regardez/.test(P));
 
 /* ══════════════════════════════════════════════════════════════════════════
    6. LA MIGRATION, EXECUTEE — pas relue.

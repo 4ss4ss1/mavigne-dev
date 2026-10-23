@@ -759,6 +759,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-pilrange1.mjs --contre'],
   ['node scripts/mv-harnais-pilfix1.mjs'],              // PIL-FIX-1 (§440) : les jours ouvrés du Pilotage (marge, fin, échéances) se comptent sur le planning, fériés retirés
   ['node scripts/mv-harnais-pilfix1.mjs --contre'],
+  ['node scripts/mv-harnais-pilrange2a.mjs'],            // PIL-RANGE-2a (§443) : la barre « Vous regardez » — la portée rendue visible, aucun état nouveau
+  ['node scripts/mv-harnais-pilrange2a.mjs --contre'],
   ['node scripts/mv-harnais-cave2.mjs'],              // CAVE-2 (§289) : le Cuvier à la charte
   ['node scripts/mv-harnais-cave2.mjs --contre'],
   ['node scripts/mv-harnais-cave3.mjs'],              // CAVE-3 (§290) : le Chai en liste + fiche

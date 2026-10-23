@@ -14,7 +14,7 @@ function suite(S) {
   const out = []; const T = (n, c) => out.push([n, !!c]); const B = bloc(S.css), dur = enDur(B);
   T('le bloc PIL-1 est posé après COUL-1… et RG-2, par jetons seulement (' + dur.length + ')', B.length > 4000 && S.css.indexOf('★ PIL-1 (§298)') > S.css.indexOf('★ FIN RG-2') && dur.length === 0);
   T('le Pilotage produit bien les composants recalés', ['pil-tile', 'pil-th-t', 'pil-seg', 'pil-anbadge', 'pil-photo', 'pil-dz-chip', 'pil-gauge-lab', 'pil-prot-big', 'pil-diagbtn', 'pil-cr'].every((c) => S.pil.includes(c) || S.css.includes('.' + c)));
-  T('l’exercice comptable en accent doux (plus de noir et or), « à compléter » en couleur d’état', B.includes('#page-pilotage .pil-cr.root{ border-color:transparent; background:var(--accent-doux); color:var(--accent-texte);') && B.includes('#page-pilotage .pil-diagbtn.grave{ border-color:var(--danger); background:var(--danger-doux); color:var(--danger); }'));
+  T('« à compléter » en couleur d’état ; le fil d’Ariane est devenu la barre « Vous regardez » (PIL-RANGE-2a) : ses règles .pil-cr sont parties', !B.includes('#page-pilotage .pil-cr.root{') && B.includes('#page-pilotage .pil-diagbtn.grave{ border-color:var(--danger); background:var(--danger-doux); color:var(--danger); }'));
   T('les titres de tuile et de panneau sans capitales, les chiffres en Outfit', B.includes('#page-pilotage .pil-th-t{ font-size:var(--pt-micro,12px); font-weight:var(--fw-semi,600); letter-spacing:0; text-transform:none;') && B.includes('#page-pilotage .pil-th-stat b{ font-family:var(--font-ui);') && B.includes('#page-pilotage .pil-prot-big{ font-family:var(--font-ui);'));
   T('les segmentés au kit (le choisi en carte, plus de noir et or)', B.includes('#page-pilotage :is(.pil-seg,.pil-anseg) button.on{ background:var(--bg-card); color:var(--texte);'));
   T('la jauge en vert plein (plus de dégradé brun), les puces de Décider à l’accent', B.includes('#page-pilotage .pil-gauge-fill{ background:var(--ok); }') && B.includes('#page-pilotage .pil-dz-chip.on{ border-color:var(--accent); background:var(--accent-doux);'));
@@ -29,7 +29,6 @@ console.log('\n' + (ko ? 'ROUGE ' + ko : 'VERT') + ' \u2014 ' + res.length + ' a
 if (CONTRE) {
   const DEF = [
     ['une couleur écrite en dur dans le bloc', 'css', '#page-pilotage .pil-gauge-fill{ background:var(--ok); }', '#page-pilotage .pil-gauge-fill{ background:#3D6B27; }', 0],
-    ['l’exercice repasse en noir et or', 'css', '#page-pilotage .pil-cr.root{ border-color:transparent; background:var(--accent-doux); color:var(--accent-texte);', '#page-pilotage .pil-cr.root{ border-color:transparent;', 2],
     ['les titres reprennent leurs capitales', 'css', '#page-pilotage .pil-th-t{ font-size:var(--pt-micro,12px); font-weight:var(--fw-semi,600); letter-spacing:0; text-transform:none;', '#page-pilotage .pil-th-t{ font-size:var(--pt-micro,12px); font-weight:var(--fw-semi,600);', 3],
     ['le segmenté choisi repasse en noir', 'css', '#page-pilotage :is(.pil-seg,.pil-anseg) button.on{ background:var(--bg-card); color:var(--texte);', '#page-pilotage :is(.pil-seg,.pil-anseg) button.on{ color:var(--texte);', 4],
     ['une règle déborde sur le cockpit', 'css', '/* ★ FIN PIL-1 */', '#page-pilotage .ck2 .ck-v-phrase{ color:var(--texte); }\n/* ★ FIN PIL-1 */', 6],

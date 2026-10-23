@@ -7690,9 +7690,6 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
    gestes). L'année, La campagne, L'équipe & le matériel, Décider, Économie, Conformité, Archives dessinaient encore avec les
    composants anciens (pil-) : tuiles à titres en capitales et pastilles dorées, segmentés noir et or, chiffres en Cormorant,
    jauge en dégradé brun. Recalés par #page-pilotage, comme le cockpit (.ck2) l'avait été. Par jetons. */
-#page-pilotage .pil-cr{ border:var(--bw) solid var(--ligne-forte); border-radius:var(--r-sm,6px); background:var(--bg-card); color:var(--texte-med); }
-#page-pilotage .pil-cr.root{ border-color:transparent; background:var(--accent-doux); color:var(--accent-texte); font-weight:var(--fw-semi,600); }
-#page-pilotage .pil-cr.sel{ border-color:var(--accent); background:var(--accent-doux); color:var(--accent-texte); }
 #page-pilotage .pil-diagbtn{ border-color:var(--attention); border-radius:var(--r-sm,6px); background:var(--attention-doux); color:var(--attention); }
 #page-pilotage .pil-diagbtn.grave{ border-color:var(--danger); background:var(--danger-doux); color:var(--danger); }
 #page-pilotage .pil-diagbtn.clean{ border-color:var(--ok); background:var(--ok-doux); color:var(--ok); }

@@ -90,13 +90,13 @@ function verifier(PIL, UTI) {
   t('③ le budget est le moteur de l\'Exercice, aux dates du cadre', /_pexData\(C\.F,true\)/.test(corps(NC, '_pilAnBudgetData')));
   t('③ les amendements prévus trouvent leur mois (byM.achP)', /byM\[_kp\]\.achP\+=/.test(corps(NC, '_pexData')));
   const tab = corps(NC, '_pilTabAn');
-  t('③ l\'onglet s\'ouvre sur le cadre, puis le budget et le renfort', /_pilAnCadreHtml\(\)/.test(tab) && /_pilPanelAnBudget\(\)/.test(tab) && /_pilPanelAnRenfort\(\)/.test(tab));
+  t('③ l\'onglet s\'ouvre sur ses avis (le cadre se choisit dans la barre « Vous regardez », PIL-RANGE-2a), puis le budget et le renfort', /_pilAnAvisHtml\(\)/.test(tab) && /_pilPanelAnBudget\(\)/.test(tab) && /_pilPanelAnRenfort\(\)/.test(tab));
   t('③ « Deux façons de compter » et la frise du pic ont quitté le module', !/function _pilDeuxCadresHtml\(/.test(NC) && !/function _pilPanelEtp\(/.test(NC) && !/function _pilFriseAnneeSvg\(/.test(NC));
   t('③ les photos lisent le budget et le renfort du cadre', /_pilAnBudgetData\(\)/.test(corps(NC, '_pilPhotosData')) && /_pilAnRenfortData\(\)/.test(corps(NC, '_pilPhotosData')));
   t('③ la photo Effectif de l\'année lit les fenêtres de manque, pas le pic', /_pilPhotoEffAn\(D, drap\('effectif'\)\)/.test(corps(NC, '_pilPhotosHtml')) && /R\.fen/.test(corps(NC, '_pilPhotoEffAn')));
   t('③ le fil d\'Ariane nomme le cadre (plus X.debut, qui n\'existe pas)', /_pilAnCadre\(\)/.test(corps(NC, '_pilCrumbHtml')) && !/X\.debut/.test(corps(NC, '_pilCrumbHtml')));
   t('③ la carte du renfort mène à Décider par un BOUTON', /<button type="button" class="pil-diag-go" data-diag="renfort">/.test(corps(NC, '_pilPanelAnRenfort')));
-  t('③ les deux sélecteurs passent par la portée', /\[data-ancadre\]/.test(NC) && /\[data-anrecul\]/.test(NC) && /_pilCadreSet\(_ac/.test(NC) && /_pilReculSet\(/.test(NC));
+  t('③ les sélecteurs passent par la portée (la barre : data-portee → _pilPorteeChoisir → _pilCadreSet ; les flèches : data-anrecul → _pilReculSet)', /\[data-portee\]/.test(NC) && /\[data-anrecul\]/.test(NC) && /_pilCadreSet\(m==='vig'\?'vig':'exo'\)/.test(NC) && /_pilReculSet\(/.test(NC));
   t('③ « an_cadres » n\'est plus un indicateur, « an_frise » porte le renfort', !/\['an_cadres',/.test(NC) && /\['an_frise','Le renfort/.test(NC));
   t('③ l\'ancre du constat « vendange à cheval » existe toujours', /id="pil-an-cadres"/.test(NC) && /cible:'an_cadres'/.test(NC));
   // ④ les fiches

@@ -5443,7 +5443,6 @@ function _pilAnDfrJM(iso){
   var j=parseInt(p[2],10);
   return (j===1?'1er':String(j))+' '+(_PIL_AN_MOIS[parseInt(p[1],10)-1]||'');
 }
-function _pilAnDfrLong(iso){ var p=String(iso||'').split('-'); return _pilAnDfrJM(iso)+(p.length===3?(' '+p[0]):''); }
 
 // Le cadre consulte : { cadre, an, d0, d1, court, titre, enCours, clos, prevOk, recul, F }.
 // null si utils.js ne sait pas borner l'exercice — l'onglet le dit, sans inventer.
@@ -5590,29 +5589,15 @@ function _pilAnRenfortData(){
 // ── LE BLOC DU CADRE (en tete d'onglet) ──────────────────────────────────────
 // ⚠️ L'id `pil-an-cadres` RESTE : le constat « vendange a cheval » (_pilDiag,
 //   cible interne `an_cadres`) y fait clignoter le bloc.
-function _pilAnCadreHtml(){
+function _pilAnAvisHtml(){
+  // ★ PIL-RANGE-2a (§442) : le choix du cadre, l'année et la frise des campagnes sont montés dans la barre
+  //   « Vous regardez » (_pilCrumbHtml). L'année ne garde ici que ce qui la concerne : l'exercice qui ne se borne
+  //   pas, l'année vigne aux mêmes dates que l'exercice, la vendange à cheval sur deux exercices.
   var C=_pilAnCadre();
   if(!C) return '<div id="pil-an-cadres" class="pil-anc">'
     +_pilEmptyGo('L\u2019exercice comptable ne se borne pas : fixez son mois d\u2019ouverture.','exercice','\u00c9conomie \u203a Exercice')+'</div>';
   var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
-  function on(c){ return C.cadre===c; }
-  var h='<div id="pil-an-cadres" class="pil-anc">'
-    +'<div class="pil-anc-l1">'
-    +'<div class="pil-seg pil-anseg" role="group" aria-label="Cadre de l\u2019ann\u00e9e">'
-    +'<button type="button" data-ancadre="exo" class="'+(on('exo')?'on':'')+'" aria-pressed="'+on('exo')+'">Exercice comptable</button>'
-    +'<button type="button" data-ancadre="vig" class="'+(on('vig')?'on':'')+'" aria-pressed="'+on('vig')+'">Ann\u00e9e vigne</button></div>'
-    +'<div class="pil-annav">'
-    +'<button type="button" class="pil-annav-b" data-anrecul="-1" aria-label="Ann\u00e9e pr\u00e9c\u00e9dente"'+(C.prevOk?'':' disabled')+'>\u2039</button>'
-    +'<span class="pil-annav-l">'+_pilEsc(C.court)+'</span>'
-    +'<button type="button" class="pil-annav-b" data-anrecul="1" aria-label="Ann\u00e9e suivante"'+(C.recul<0?'':' disabled')+'>\u203a</button></div>'
-    +'<span class="pil-anbadge'+(C.enCours?' on':'')+'">'+(C.enCours?'en cours':(C.cadre==='vig'?'close':'clos'))+'</span>'
-    +'<span class="pil-anc-sp"></span>'+_mvInfoBtn('pil.cadres')
-    +'</div>'
-    +'<div class="pil-anc-t">'+_pilEsc(C.titre)+'</div>'
-    +'<div class="pil-anc-d">Du '+_pilEsc(_pilAnDfrLong(C.d0))+' au '+_pilEsc(_pilAnDfrLong(C.d1))+'. '
-    +(C.cadre==='vig' ? 'Un cycle de production, d\u2019une vendange \u00e0 la suivante.' : 'Le cadre de votre bilan, fix\u00e9 par votre comptable.')
-    +' <b>Changer de cadre change les dates, jamais le calcul.</b></div>'
-    +_pilAnFriseCadre(C, ann);
+  var h='';
   if(C.memes){
     var mo=(typeof window._mvCampagneMois==='function')?_PIL_AN_MOIS[window._mvCampagneMois()]:'';
     h+='<div class="pil-anc-av">'+_mvIcon('info',16)+'<span>Votre ann\u00e9e vigne a les <b>m\u00eames dates</b> que votre exercice'
@@ -5620,7 +5605,7 @@ function _pilAnCadreHtml(){
       +'<button type="button" class="pil-diag-go ghost" data-diag="exercice">R\u00e9gler le mois de la campagne \u203a</button></span></div>';
   }
   if(C.cadre==='exo') h+=_pilAnCoupeHtml(C, ann);
-  return h+'</div>';
+  return h ? '<div id="pil-an-cadres" class="pil-anc">'+h+'</div>' : '';
 }
 // La frise du cadre : ses campagnes, leur etat, le jour. Les puces ZOOMENT
 // (data-etpc, le chemin de la portee) : c'est l'entree qu'offrait l'ancienne frise.
@@ -5905,8 +5890,8 @@ function _pilPhotoBudAn(D, flag){
 }
 
 function _pilTabAn(d){
-  // Le cadre se lit AVANT les chiffres : il dit de quelle annee on parle.
-  var H=_pilAnCadreHtml();
+  // Le cadre se choisit dans la barre « Vous regardez » (PIL-RANGE-2a) ; ici, ses seuls avis.
+  var H=_pilAnAvisHtml();
   var pan='';
   if(_pilShow('an_budget')) pan+=_pilPanelAnBudget();
   if(_pilShow('an_frise'))  pan+=_pilPanelAnRenfort();
@@ -11272,13 +11257,20 @@ function _pilCssV2(){
   +'body .pil-tabsbar{top:var(--pil-portee-h,0px);}'
   +'.pil-portee-in{max-width:1180px;margin:0 auto;padding:9px 16px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}'
   +'.pil-crumb{display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex:1;min-width:0}'
-  +'.pil-cr{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--gris);background:var(--bg-app);border-radius:9px;padding:5px 10px;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte);white-space:nowrap;min-height:34px;font-family:inherit;cursor:pointer}'
-  +'.pil-cr.root{background:var(--cave);border-color:var(--cave);color:var(--or-clair)}'
-  +'.pil-cr.sel{background:var(--terre-pale);border-color:var(--terre);color:var(--terre-tx,#8A5A38)}'
-  +'.pil-cr .x{border:0;background:none;color:inherit;opacity:.55;font-size:var(--pt-sm,16px);line-height:1;padding:0 0 0 3px;font-family:inherit;cursor:pointer;min-width:20px}'
-  +'.pil-cr .x:hover{opacity:1}'
-  +'.pil-cr-sep{color:var(--gris);font-size:var(--pt-txt,13px)}'
-  +'.pil-cr-note{font-size:var(--pt-micro,12px);color:var(--texte-doux);white-space:nowrap}'
+  // PIL-RANGE-2a (§442) : la barre « Vous regardez ».
+  +'.pil-crumb{gap:8px}'
+  +'.pil-ptlab{font-size:var(--pt-micro,12px);color:var(--texte-doux);white-space:nowrap}'
+  +'.pil-ptseg button{white-space:nowrap}'
+  +'.pil-ptcamp{position:relative;display:inline-flex}'
+  +'.pil-ptbtn{display:inline-flex;align-items:center;gap:6px;min-height:var(--h-ctl,32px);padding:0 12px;border:1px solid var(--gris);background:var(--bg-card);border-radius:var(--r-sm,6px);font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte);cursor:pointer;white-space:nowrap}'
+  +'.pil-ptbtn:hover{border-color:var(--or)}'
+  +'.pil-ptpop{position:absolute;top:calc(100% + 6px);left:0;z-index:70;width:min(560px,calc(100vw - 32px));background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:var(--r-md,8px);box-shadow:var(--shadow-md,0 6px 16px rgba(20,18,14,.12));padding:12px 14px}'
+  +'.pil-ptpop[hidden]{display:none}'
+  +'.pil-ptpop-t{font-size:var(--pt-micro,12px);color:var(--texte-doux);margin:0 0 4px}'
+  +'.pil-ptpop .pil-anfr{margin:8px 0 6px}'
+  +'.pil-ptbornes{font-size:var(--pt-micro,12px);color:var(--texte-doux);white-space:nowrap}'
+  +'.pil-crumb .pil-annav-b{min-width:32px;min-height:32px}'
+  +'.pil-crumb .pil-annav-l{font-size:var(--pt-base,14px)}'
   +'.pil-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin:0 0 18px}'
   +'.pil-photo{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:14px;padding:13px 14px 12px;box-shadow:var(--shadow-sm);text-align:left;width:100%;font-family:inherit;cursor:pointer;transition:border-color .12s;min-height:112px;display:block}'
   +'.pil-photo:hover{border-color:var(--or)}'
@@ -11341,7 +11333,7 @@ function _pilCssV2(){
   +'.pil-photo .s{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}'
   +'.pil-photo .go{display:none}'
   +'.pil-souslig{padding:6px 16px 0}'
-  +'.pil-cr-note{display:none}'
+  +'.pil-ptlab,.pil-ptbornes{display:none}'
   +'.pil-portee-in{padding:7px 16px;gap:7px}'
   +'}'
   +'@media(max-width:520px){.pil-tabsep{margin:0 5px}.pil-lvn{margin-right:4px}}'
@@ -11477,20 +11469,73 @@ function _pilAvertCfm(){
 }
 
 function _pilCrumbHtml(){
-  // ANNEE-1 (§234) : la racine NOMME le cadre consulte. Elle lisait X.debut/X.fin sur
-  //   _mvExercice(), qui rend d0/d1 : la racine affichait « Exercice » tout court.
-  var CA=null; try{ CA=_pilAnCadre(); }catch(eA){ CA=null; if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'fil: cadre illisible'}); }
-  var ex=CA ? CA.titre : 'Exercice comptable';
-  var h='<button class="pil-cr root" id="pil-cr-root" title="Revenir \u00e0 l\u2019ann\u00e9e enti\u00e8re">\u2302 '+_pilEsc(ex)+'</button>';
-  if(_PIL_SCOPE.camp){
-    h+='<span class="pil-cr-sep">\u203A</span><span class="pil-cr sel">'+_mvIcon('raisin',16)+' '+_pilEsc(_PIL_SCOPE.camp)
-      +'<button class="x" id="pil-cr-x" title="Revenir \u00e0 l\u2019ann\u00e9e">\u00d7</button></span>';
+  // ★★★ PIL-RANGE-2a (§442) — LA BARRE « VOUS REGARDEZ » (maquette du rangement validée par Nico le 23/10).
+  //   Avant : un fil d'Ariane (« ⌂ Exercice 2026-27 › Automne ») et, caché dans L'année, le choix du cadre et
+  //   des campagnes. Maintenant une seule barre, en haut, lue par tout le module : la campagne, l'année vigne
+  //   ou l'exercice, l'élément (la campagne choisie ou l'année, flèches), ses dates et le jour où l'on est.
+  //   ⚠️ AUCUN ÉTAT NOUVEAU : c'est _PIL_SCOPE rendu visible (camp, cadre, recul), par les chemins de toujours
+  //   (_pilScopeSet, _pilCadreSet, _pilReculSet, data-etpc). On n'ajoute pas un sixième sélecteur.
+  var CA=null; try{ CA=_pilAnCadre(); }catch(eA){ CA=null; if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'portee: cadre illisible'}); }
+  var mode=_pilPorteeMode();
+  function B(m,lib){ return '<button type="button" data-portee="'+m+'" class="'+(mode===m?'on':'')+'" aria-pressed="'+(mode===m)+'">'+lib+'</button>'; }
+  var h='<span class="pil-ptlab">Vous regardez</span>'
+    +'<div class="pil-seg pil-ptseg" role="group" aria-label="Ce que regarde le Pilotage">'
+    +B('camp','La campagne')+B('vig','L\u2019ann\u00e9e vigne')+B('exo','L\u2019exercice')+'</div>';
+  if(mode==='camp'){
+    var P=_pilPorteePeriode(_PIL_SCOPE.camp);
+    h+='<span class="pil-ptcamp"><button type="button" class="pil-ptbtn" data-ptpop="1" aria-expanded="false" aria-controls="pil-ptpop" title="Choisir la campagne">'
+      +_pilEsc(_PIL_SCOPE.camp)+' <span aria-hidden="true">\u25be</span></button><div class="pil-ptpop" id="pil-ptpop" hidden></div></span>'
+      +'<span class="pil-ptbornes">'+(P?_pilPorteeBornes(P.debut,P.fin):'campagne introuvable')+'</span>';
+  } else if(CA){
+    h+='<div class="pil-annav">'
+      +'<button type="button" class="pil-annav-b" data-anrecul="-1" aria-label="Ann\u00e9e pr\u00e9c\u00e9dente"'+(CA.prevOk?'':' disabled')+'>\u2039</button>'
+      +'<span class="pil-annav-l">'+_pilEsc(CA.court)+'</span>'
+      +'<button type="button" class="pil-annav-b" data-anrecul="1" aria-label="Ann\u00e9e suivante"'+(CA.recul<0?'':' disabled')+'>\u203a</button></div>'
+      +'<span class="pil-ptbornes">'+_pilPorteeBornes(CA.d0,CA.d1)+'</span>';
   } else {
-    // ★ Une INSTRUCTION : on l'apprend une fois, puis on la traverse. Elle disparait
-    //   sur telephone (CSS), ou elle prenait une ligne de la barre collante.
-    h+='<span class="pil-cr-note">l\u2019ann\u00e9e enti\u00e8re \u2014 touchez une campagne dans L\u2019ann\u00e9e pour zoomer</span>';
+    h+='<button type="button" class="pil-diag-go ghost" data-diag="exercice">R\u00e9gler l\u2019exercice \u203a</button>';
   }
-  return h;
+  return h+_mvInfoBtn('pil.cadres');
+}
+// Ce que regarde le Pilotage : une campagne choisie, sinon le cadre de l'année.
+function _pilPorteeMode(){ return _PIL_SCOPE.camp ? 'camp' : ((_PIL_SCOPE.cadre==='vig')?'vig':'exo'); }
+// Les campagnes datées (la même liste que le cadre de l'année : _pilAnCadre).
+function _pilPorteePeriodes(){
+  var L=(typeof window._cmpVisibles==='function')?(window._cmpVisibles()||[]):(window.SAISONS||[]);
+  return L.filter(function(p){ return p && p.nom && p.debut && p.fin; });
+}
+function _pilPorteePeriode(nom){ var L=_pilPorteePeriodes(); for(var i=0;i<L.length;i++){ if(L[i].nom===nom) return L[i]; } return null; }
+// « La campagne » sans campagne choisie : la période active, sinon celle en cours, sinon la dernière commencée.
+function _pilPorteeCampDefaut(){
+  var L=_pilPorteePeriodes(), auj=_pilAnAuj(), sa=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  if(sa && sa.nom && _pilPorteePeriode(sa.nom)) return sa.nom;
+  var enc=null, der=null;
+  L.forEach(function(p){ var d=String(p.debut).slice(0,10), f=String(p.fin).slice(0,10);
+    if(!enc && d<=auj && auj<=f) enc=p; if(d<=auj && (!der || d>String(der.debut).slice(0,10))) der=p; });
+  var x=enc||der||L[0]; return x?x.nom:null;
+}
+// Le geste de la barre : il écrit la portée par ses chemins de toujours, rien d'autre.
+function _pilPorteeChoisir(m){
+  if(m==='camp'){ if(!_PIL_SCOPE.camp){ var c=_pilPorteeCampDefaut(); if(c) _pilScopeSet(c); } return; }
+  _pilScopeSet(null); _pilCadreSet(m==='vig'?'vig':'exo');
+}
+// Les dates de ce qu'on regarde, et le jour où l'on est (jours du calendrier, comme la maquette).
+function _pilPorteeBornes(d0,d1){
+  if(!d0 || !d1) return '';
+  d0=String(d0).slice(0,10); d1=String(d1).slice(0,10);
+  var t='du '+_pilEsc(_pilDfr(d0))+' au '+_pilEsc(_pilDfr(d1)), a=_pilAnnOrd(d0), b=_pilAnnOrd(d1), o=_pilAnnOrd(_pilAnAuj());
+  if(!isNaN(a) && !isNaN(b) && !isNaN(o) && b>=a){
+    if(o<a) t+=' \u00b7 \u00e0 venir';
+    else if(o>b) t+=' \u00b7 termin\u00e9';
+    else t+=' \u00b7 '+(o-a+1)+'\u1d49 jour sur '+(b-a+1);
+  }
+  return t;
+}
+// La liste des campagnes de l'année regardée : la frise du cadre et ses puces (data-etpc), calculée à l'ouverture.
+function _pilPorteePopHtml(){
+  var C=_pilAnCadre(); if(!C) return '<div class="pil-empty">Aucune ann\u00e9e lisible.</div>';
+  var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilPorteePopHtml'); }
+  return '<div class="pil-ptpop-t">'+_pilEsc(C.titre)+'</div>'+_pilAnFriseCadre(C, ann);
 }
 
 // ── Les quatre photos ───────────────────────────────────────────────────────
@@ -12570,8 +12615,16 @@ function _pilBindContent(content){
     var nb=e.target.closest('.pil-names-btn'); if(nb){ e.stopPropagation(); _pilNamesOn=!_pilNamesOn; _pilApplyNames(); nb.textContent=_pilNamesOn?'\uD83C\uDFF7 Noms \u2713':'\uD83C\uDFF7 Noms'; return; }
     // ANNEE-1 (§234) : le cadre et l'annee consultes. Meme chemin que le zoom sur une
     // campagne : la portee change, le fil d'Ariane et les photos suivent.
-    var _ac=e.target.closest('[data-ancadre]');
-    if(_ac){ e.stopPropagation(); _pilCadreSet(_ac.getAttribute('data-ancadre')); _pilPortee(); _pilFillContent(_pilData()); return; }
+    // PIL-RANGE-2a (§442) : la barre « Vous regardez ». Un toucher hors de la liste des campagnes la referme.
+    var _pop=document.getElementById('pil-ptpop');
+    if(_pop && !_pop.hidden && !e.target.closest('.pil-ptcamp')){ _pop.hidden=true; var _pb0=document.querySelector('[data-ptpop]'); if(_pb0) _pb0.setAttribute('aria-expanded','false'); }
+    var _ptV=e.target.closest('[data-portee]');
+    if(_ptV){ e.stopPropagation(); _pilPorteeChoisir(_ptV.getAttribute('data-portee')); _pilPortee(); _pilFillContent(_pilData()); return; }
+    var _pp=e.target.closest('[data-ptpop]');
+    if(_pp){ e.stopPropagation(); var _po=document.getElementById('pil-ptpop');
+      if(_po){ var _ouv=_po.hidden; if(_ouv){ try{ _po.innerHTML=_pilPorteePopHtml(); }catch(eP){ if(window._mvAvale) window._mvAvale(eP,'pilotage.js/portee#liste'); } }
+        _po.hidden=!_ouv; _pp.setAttribute('aria-expanded',String(_ouv)); }
+      return; }
     var _ar=e.target.closest('[data-anrecul]');
     if(_ar){ e.stopPropagation(); if(_ar.disabled) return;
       _pilReculSet((parseInt(_PIL_SCOPE.recul,10)||0)+(parseInt(_ar.getAttribute('data-anrecul'),10)||0)); _pilPortee(); _pilFillContent(_pilData()); return; }
@@ -12612,11 +12665,6 @@ function _pilBindContent(content){
       else if(_pt===_PIL_TAB){ var _pc=document.getElementById('pil-content');
         if(_pc){ try{ _pc.scrollIntoView({behavior:'smooth',block:'start'}); }
           catch(e4){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'photo: defilement'}); } } }
-      return; }
-    // Le fil d'Ariane : la croix et la racine ramenent a l'annee entiere.
-    var _cx=e.target.closest('#pil-cr-x, #pil-cr-root');
-    if(_cx){ e.stopPropagation();
-      if(_PIL_SCOPE.camp){ _pilScopeSet(null); _pilPortee(); _pilFillContent(_pilData()); }
       return; }
     var _ea=e.target.closest('[data-etpc]');
     if(_ea){ e.stopPropagation(); var _en=_ea.getAttribute('data-etpc');

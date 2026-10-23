@@ -15,7 +15,7 @@ function suite(S) {
   T('le choix de la tâche dit qu’il défile : un fondu au bord, posé au rangement et au défilement',
     S.vue.includes("s.classList.toggle('deborde', deb);") && S.vue.includes('function ranger() {\n  indiceSeg();') && S.css.includes('.ck-seg.deborde{-webkit-mask-image:'));
   T('les lignes des chantiers tiennent dans leur carte', S.css.includes('.ck-ch{box-sizing:border-box}'));
-  T('le zoom d’une campagne dit dans l’aide (la phrase reste hors de la barre collante au téléphone, choix de CARTE)', S.uti.includes("['Zoomer sur une campagne', ") && S.pil.includes("+'.pil-cr-note{display:none}'"));
+  T('le choix de ce qu’on regarde dit dans l’aide (la barre « Vous regardez », PIL-RANGE-2a ; au téléphone, étiquette et dates hors de la barre collante)', S.uti.includes("['Choisir ce que vous regardez', ") && S.pil.includes("+'.pil-ptlab,.pil-ptbornes{display:none}'"));
   T('un arrachage en étapes dit qui y travaille : la dernière entrée de la tâche, faute d’entrée « En cours »',
     S.ck.includes("if(!e || e.tache !== tache || etat[e.parcelle] !== 'cours' || (deb[e.parcelle] && deb[e.parcelle].statut === 'En cours')) return;"));
   T('version (au moins 9.75) et nouveauté (9.75)', (() => { const v = (S.uti.match(/export const APP_VERSION = '(\d+)\.(\d+)';/) || []).slice(1).map(Number); return v.length === 2 && (v[0] > 9 || (v[0] === 9 && v[1] >= 75)); })() &&   // ACCV-1 (§416) : « au moins » — l’égalité stricte rougissait au lot suivant (cliquet à l’envers, §6c)
@@ -30,7 +30,7 @@ if (CONTRE) {
     ['fait revenu à la teinte douce', 'css', '--et-faite:color-mix(in srgb,var(--ok) 46%,var(--bg-card))', '--et-faite:var(--ok-doux)'],
     ['plus de fondu au sélecteur', 'vue', "s.classList.toggle('deborde', deb);", ''],
     ['les lignes des chantiers qui débordent', 'css', '.ck-ch{box-sizing:border-box}', ''],
-    ['le zoom absent de l’aide', 'uti', "['Zoomer sur une campagne', ", "['Zoomer', "],
+    ['le choix de ce qu’on regarde absent de l’aide', 'uti', "['Choisir ce que vous regardez', ", "['Choisir', "],
     ['l’arrachage en étapes sans équipe', 'ck', "(deb[e.parcelle] && deb[e.parcelle].statut === 'En cours')) return;", "true) return;"]];
   let m = 0; DEF.forEach(([nom, f, a, b]) => { const S = Object.assign({}, SRC0); if (S[f].split(a).length !== 2) { console.log('  ??  ' + nom); m++; return; } S[f] = S[f].replace(a, b); const rouge = jouer(S).some(x => !x[1]); if (!rouge) m++; console.log((rouge ? '  ok  rougit : ' : '  KO  reste vert : ') + nom); });
   console.log('\n' + (m ? 'CONTRE-ÉPREUVES ROUGES ' + m : 'CONTRE-ÉPREUVES VERTES') + ' — ' + DEF.length + ' défauts réinjectés'); process.exit(ko || m ? 1 : 0);

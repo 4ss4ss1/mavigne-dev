@@ -1,0 +1,39 @@
+{
+  "lot": "PIL-RANGE-2A",
+  "section": "§443",
+  "base": "db6d177c05fb5507e5a4acbdfa91fed1cb573b00",
+  "inclut": [],
+  "date": "2026-10-23",
+  "tutos": {
+    "ok": true,
+    "empreinte": "b13e3457aed0b252e44c902c2ae5314d4f832b462dde064f49a7d3e56afc5c2b",
+    "date": "2026-10-23T18:51:48.284Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "7ae0a1dc31eeb5c017a3d613d0582902bc905078c992a5524e5ebfc9be6ade99",
+    "CLAUDE.md": "ef3ebd41f4c75f0eb38ace806d4b7505086a8659eaf9659c92ee38d5cfcb7475",
+    "docs/claude/INDEX.md": "9bfe892132e3a17fb06a61dd8cd7bbd205a4ad129a31db5002f2a334abeb7a2b",
+    "docs/claude/chantiers-430-479.md": "b574a3b63f72aaeb920c790b912e493fdc8fb1b7de281e9f94880ca97c641645",
+    "docs/claude/journal.md": "8d8373f0c3856e45aa9f7efca0178918a656aee03dea02b65a7ffcc1942bc582",
+    "guide/11-pilotage.html": "c5504fe9bc77c9b801e670ba258f9014ab2901a0c95ea25c6b85afdd31f95ac2",
+    "index.html": "ca7813b8b3959aefed0dc1be802cca8270afb096c9fb7d5443ee0484dc891d1a",
+    "public/guide.html": "2009481313b7e31935aa8872769ca56ed0a2897d052b6f51f52982721f465ede",
+    "public/sw.js": "7c691be6f864e9a9ce22436ed24914f6d0a3a33ff28398ced4c34f7ffaa21cbe",
+    "scripts/mv-harnais-annee.mjs": "bd6fb265d2174a5375d86e2ec73c2c071cf66fc742a2a16113ce282d67c98862",
+    "scripts/mv-harnais-carte.mjs": "5b76fc75a47cc92a09dc0d03adfa64a0afffe7272184e013d172bf8b95c45f61",
+    "scripts/mv-harnais-etats1.mjs": "77b0f08ff514f609ebb0ea6e4b8c7c949a3d5e09bb601abe945c3167d72d6e37",
+    "scripts/mv-harnais-liste.mjs": "aecaf929bcb2043081c230d75f91ae9a0c54c5b79ab39080081ebc4a306c3b0c",
+    "scripts/mv-harnais-pil1.mjs": "d41e91b8fb0bad085b13d0b160071f30e980cce4110887678f8bbddfbfc6fc8e",
+    "src/pilotage.js": "e1b87f4603e37766d4921ba847d9a6ce6dbe570e756182653451e9ada356be63",
+    "src/styles.css": "1188a3a0b6b73b1de7921e93cba2d15338e23ffb3c3cf61b6eaa17c3b35c165f",
+    "src/utils.js": "335e4165a68885d6d9bf388fd27f5a3e64380ccb45c6e7c1c88c8c5a542ad04c",
+    "scripts/mv-harnais-pilrange2a.mjs": "59633e0974d0d15514560bb12d8546af1e2aac2ae8714eba17d18a7bab70e4ec"
+  }
+}
