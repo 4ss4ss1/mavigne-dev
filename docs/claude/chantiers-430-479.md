@@ -449,3 +449,17 @@ Par millésime, la **période réelle** : de la première entrée en fût de ses
 
 ### 448d. Ce qui reste
 CAVE-RANGE-1 à 3 (la portée millésime ; la fiche de cuvée unique ; Courbes → Cuvier, Le Millésime à deux onglets).
+
+## 449. ★ CAVE-RANGE-1 — CAVE : UN SEUL MILLÉSIME REGARDÉ, PARTAGÉ PAR LE CHAI ET LE MILLÉSIME (23/10 — `src/cave.js` (`_caveMillFilter` devient LE choix de la Cave ; `_mlMil` retiré ; `_mlMilActif`, `_mlSetMil`, `_caveSetMill` (section Millésime), renvoi « rdtmax », `_mlHead` (la phrase « Tous »), libellé « Millésime regardé ») · `src/utils.js` (APP, WHATS_NEW niv 1) · `index.html` · `public/sw.js` · `guide/08-cave.html` · `public/guide.html` · `scripts/mv-harnais-caverange1.mjs` (neuf) · `scripts/mv-harnais-hlha1.mjs` · `scripts/mv-harnais-range1.mjs` · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/CAVE-RANGE-1.json` · **APP 10.05 → 10.06, SW 10.85 → 10.86**, base `50e4f1b` ; chaîne par le coureur : 530 commandes, 530 codes à 0)
+
+### 449a. D’où ça vient — vérifié avant le code
+Rangement de la Cave (maquette `maquette-cave-rangee-v1.html`, validée par Nico le 23/10 : « une portée, le millésime »). Mesuré dans le code : **deux choix de millésime** — Le Chai (`_caveMillFilter`, « Tous · 2026 · 2025 », pour ses cinq onglets et son en-tête) et Le Millésime (`_mlMil`, ses boutons d’année). On pouvait filtrer le Chai sur 2025 et lire Le Millésime 2026 sans le voir.
+
+### 449b. Ce qui a été fait
+**Un seul état**, `_caveMillFilter`, lu par les deux sections : Le Millésime montre l’année choisie ; quand le Chai montre « Tous », il montre celle de la campagne en cours (il parle d’UN millésime) et **le dit** sous ses boutons. Choisir une année au Millésime la choisit pour toute la Cave (`_mlSetMil` → `_caveSetMill`, qui repeint la section à l’écran — Le Millésime et la bande, ou l’onglet du Chai, sa barre et son en-tête). Le renvoi « rendement maximum » écrit le même choix. La barre du Chai s’appelle « Millésime regardé ». Aujourd’hui (toute la cave) et Le Cuvier (la campagne) ne changent pas. Les boutons restent à leur place (sous les onglets du Chai ; en tête du Millésime) : la barre unique en haut de la Cave viendra avec la fiche de cuvée.
+
+### 449c. Harnais
+`mv-harnais-caverange1.mjs` (12 vertes, 6 contre-épreuves) **exécute** `_mlMilActif`, `_mlSetMil`, `_caveSetMill` et `_mlHead` : « Tous » → campagne en cours et la phrase ; choisir 2025 au Millésime l’écrit pour toute la Cave et repeint la bonne section ; « Tous » au Chai repeint l’onglet à l’écran et Le Millésime suit ; plus de `_mlMil` ; renvoi, libellé, nouveauté, guide, liste. `hlha1` et `range1` montent le choix partagé dans leurs bacs à sable.
+
+### 449d. Ce qui reste
+CAVE-RANGE-2 (la fiche de cuvée unique : Élevage · Volumes & origine · Analyses · Diagnostic, ouverte depuis toute liste ; la barre du millésime en haut de la Cave), CAVE-RANGE-3 (Courbes → Cuvier › Cuves ; Le Millésime à deux onglets).

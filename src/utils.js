@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.05';
+export const APP_VERSION = '10.06';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '10.06', d: '2026-10-23', items: [
+    { niv: 1, pour: ['admin'], emoji: 'raisin', titre: 'Cave : un seul millésime regardé',
+      desc: "Le Chai et Le Millésime avaient chacun leur choix de millésime : on pouvait filtrer le Chai sur 2025 et lire Le Millésime 2026 sans s’en rendre compte. Ils partagent maintenant le même choix : une année choisie dans l’un est choisie dans l’autre. Quand le Chai montre « Tous », Le Millésime montre celui de la campagne en cours, et le dit." }
+  ] },
   { v: '10.05', d: '2026-10-23', items: [
     { niv: 2, pour: ['admin'], emoji: 'sablier', titre: 'Cave : la part des anges d’un jeune millésime est juste',
       desc: "La part des anges s’affichait « par an », mais elle n’était pas ramenée à l’année : pour un millésime entré en fût il y a trois mois, le chiffre était environ quatre fois trop bas. Chaque ligne dit maintenant le pourcentage sur la période réelle (« 0,8 % en 3 mois ») et, à côté, son équivalent sur un an (« soit env. … %/an »). Pour un millésime en fût depuis plus de onze mois, rien ne change. Vérifiez vos jeunes millésimes dans La Réserve › Fûts." }

@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **23 octobre 2026 (CAVE-FIX-1)** — **LA PART DES ANGES D’UN JEUNE MILLÉSIME SE LIT SUR SA PÉRIODE RÉELLE, AVEC SON ÉQUIVALENT ANNUEL** (§448). Base `0ad38fa` (« pilrange4b »). Défaut C1 de l’audit : « %/an » mesuré sur douze mois glissants sans être ramené à l’année (trois mois d’élevage → quatre fois trop bas). Désormais la période réelle (première entrée en fût, sinon premier ouillage), son pourcentage, et l’équivalent annuel linéaire dès trente jours ; au-delà de onze mois, rien ne change. `mv-harnais-cavefix1.mjs` : 10 vertes, 7 contre-épreuves. **APP 10.04 → 10.05, SW 10.84 → 10.85**.
+> Dernière consolidation : **23 octobre 2026 (CAVE-RANGE-1)** — **CAVE : UN SEUL MILLÉSIME REGARDÉ, PARTAGÉ PAR LE CHAI ET LE MILLÉSIME** (§449). Base `50e4f1b` (« cavefix1 »). Vérifié avant le code : deux choix de millésime (`_caveMillFilter` au Chai, `_mlMil` au Millésime). Un seul état désormais, lu par les deux ; « Tous » au Chai → la campagne en cours au Millésime, dit à l’écran ; choisir au Millésime choisit pour toute la Cave. `mv-harnais-caverange1.mjs` : 12 vertes, 6 contre-épreuves. **APP 10.05 → 10.06, SW 10.85 → 10.86**.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 

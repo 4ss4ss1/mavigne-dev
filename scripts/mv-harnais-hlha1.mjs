@@ -81,7 +81,7 @@ var window = { logError: function(e){ __logs.push(e); }, PARCELLES: [], CONFIG: 
 var CAVE_VENDANGE = { config: {}, recoltes: [], cuves_vinif: [], cuvees: [] };
 var CAVE_ELEVAGE = { cuvees: [] };
 window.CAVE_VENDANGE = CAVE_VENDANGE; window.CAVE_ELEVAGE = CAVE_ELEVAGE;
-var _mlMil = null, _mlCuvSel = null, _mlCuvFiche = false;
+var _caveMillFilter = 'tous', _mlCuvSel = null, _mlCuvFiche = false;   // CAVE-RANGE-1 (§449) : le millésime regardé est celui de toute la Cave
 function _mlCampagne(){ return 2026; }
 function _vendClient(){ return null; }
 function _caveVolL(){ return 0; }

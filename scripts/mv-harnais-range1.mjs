@@ -82,7 +82,7 @@ var window = { logError: function(e){ __logs.push(e); } };
 var CAVE_VENDANGE = { config: {}, recoltes: [], cuves_vinif: [], cuvees: [] };
 var CAVE_ELEVAGE = { cuvees: [] };
 window.CAVE_VENDANGE = CAVE_VENDANGE; window.CAVE_ELEVAGE = CAVE_ELEVAGE;
-var _mlMil = null, _mlParcF = 'tout', _mlCuvSel = null, _mlCuvFiche = false, _pcrbVue = 'dens', _PCRB_ELEV = null;
+var _caveMillFilter = 'tous', _mlParcF = 'tout',   /* CAVE-RANGE-1 (§449) : le millésime regardé est celui de toute la Cave */ _mlCuvSel = null, _mlCuvFiche = false, _pcrbVue = 'dens', _PCRB_ELEV = null;
 function _mlCampagne(){ return 2026; }
 function _vendClient(){ return null; }
 function canWrite(){ return __ecrit; }
@@ -106,7 +106,7 @@ function __poser(v, e){
   CAVE_VENDANGE.cuves_vinif = v.cuves_vinif || []; CAVE_VENDANGE.cuvees = v.cuvees || [];
   CAVE_ELEVAGE.cuvees = (e && e.cuvees) || []; __logs.length = 0;
 }
-function __mil(m){ _mlMil = m; }
+function __mil(m){ _caveMillFilter = (m == null) ? 'tous' : String(m); }
 function __droit(b){ __ecrit = !!b; }
 function __parc(f){ _mlParcF = f; }
 function __cuv(k, f){ _mlCuvSel = k; _mlCuvFiche = !!f; }

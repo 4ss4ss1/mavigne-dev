@@ -3675,7 +3675,7 @@ window.openOvRetraitFut     = openOvRetraitFut;
 window.saveRetraitFut       = saveRetraitFut;
 window._retraitFutAdj       = _retraitFutAdj;
 window._retraitFutSetRaison = _retraitFutSetRaison;
-var _caveMillFilter  = 'tous';    // filtre millésime Le Chai
+var _caveMillFilter  = 'tous';    // LE millésime regardé par la Cave (Le Chai et Le Millésime) — CAVE-RANGE-1 (§449)
 var _caveBtlConfirm  = null;      // id cuvée en attente de confirmation d'embouteillage
 
 function _mvBtl(hl){ return Math.round((hl||0)*100/0.75); }               // bouteilles 75 cl
@@ -4093,7 +4093,7 @@ function _caveMillChipsHtml(){
   var act=cuvs.filter(function(c){return c.statut!=='embouteille';});
   var ms=_caveMilsDuChai();
   if(ms.length<2) return '';   // un seul millésime → pas de filtre utile
-  var h='<div class="mvcm-chips"><span class="mvcm-lab">Millésime</span>';
+  var h='<div class="mvcm-chips"><span class="mvcm-lab" title="Le même choix que Le Millésime (CAVE-RANGE-1)">Millésime regardé</span>';
   h+='<button class="mvcm-chip'+(_caveMillFilter==='tous'?' on':'')+'" onclick="_caveSetMill(\'tous\')">Tous<span class="mvcm-c">'+act.length+'</span></button>';
   ms.forEach(function(m){
     var n=act.filter(function(c){return String(c.millesime)===String(m);}).length;
@@ -4120,6 +4120,8 @@ function _caveMilBarRender(){
 }
 function _caveSetMill(m){
   _caveMillFilter=m;
+  // CAVE-RANGE-1 (§449) : Le Millésime lit le même choix — on repeint la section à l'écran.
+  if(caveSection==='millesime'){ renderCaveMillesime(); if(typeof _caveKpisRender==='function') _caveKpisRender(); return; }
   // Les TROIS vues suivent le filtre : repeindre celle qui est a l'ecran.
   if(caveTab==='journal') renderCaveJournal();
   else if(caveTab==='bouteille') renderCaveBouteille();
@@ -4450,7 +4452,6 @@ window._mvcRenderHeader  = _mvcRenderHeader;
 
 var _mlTab = 'vie';         // RANGE-1 (§335) : vie (Ensemble) | parc | cuv | crb
 var _mlParcF = 'tout', _mlCuvSel = null, _mlCuvFiche = false, _pcrbVue = 'dens';
-var _mlMil = null;           // millesime consulte ; null = campagne en cours
 var _ML_SEM = 4;             // horizon de l'agenda, en semaines
 /* ★ CUV-8 : ce n'est plus LE seuil, c'est le REPLI. Une cuve dont on ne peut
    pas lire le degre potentiel du mout n'a pas de seuil a elle : elle prend
@@ -4495,7 +4496,11 @@ function _mlCampagne(){
   var md=_mvCampMoisRepli()+1;
   var p=_mlAuj().split('-'); return (+p[1]>=md)?(+p[0]):(+p[0]-1);
 }
-function _mlMilActif(){ return _mlMil!=null?_mlMil:_mlCampagne(); }
+// ★★ CAVE-RANGE-1 (§449) — UN SEUL MILLÉSIME REGARDÉ POUR TOUTE LA CAVE. Avant, Le Chai avait le sien (_caveMillFilter,
+//   « Tous · 2026 · 2025 ») et Le Millésime le sien (_mlMil) : on pouvait filtrer le Chai sur 2025 et lire Le Millésime
+//   2026 sans le voir. Les deux lisent maintenant le même choix. Le Millésime parle d'UN millésime : quand le Chai montre
+//   « Tous », il montre celui de la campagne en cours, et le dit.
+function _mlMilActif(){ return (_caveMillFilter && _caveMillFilter!=='tous') ? Number(_caveMillFilter) : _mlCampagne(); }
 // Le millesime affiche son propre seuil : _mlSeuil prend la cuvee quand on
 // l'a, et retombe sur le global sinon (appels anciens sans argument).
 function _mlSeuil(c){ return _caveSeuilOu(c!=null?c:null); }
@@ -5189,7 +5194,7 @@ function _mlGo(kind,ref){
   if(kind==='rdtmax'){
     caveSection='millesime'; _mlTab='vie';
     var _rm=parseInt(ref,10);
-    if(isFinite(_rm)&&_rm>0) _mlMil=_rm;
+    if(isFinite(_rm)&&_rm>0) _caveMillFilter=String(_rm);   // CAVE-RANGE-1 : le choix partagé
     renderCave();
     return;
   }
@@ -5356,6 +5361,8 @@ function _mlHead(mil,ch,d){
     h+='<button type="button" class="mlh-b'+(on?' on':'')+'" aria-pressed="'+(on?'true':'false')+'" onclick="_mlSetMil('+m+')">'+m+'</button>';
   });
   h+='</div></div>';
+  // CAVE-RANGE-1 (§449) : le choix est celui de toute la Cave ; quand le Chai montre « Tous », on le dit ici.
+  if(_caveMillFilter==='tous') h+='<div class="mlh-tous" style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin:-4px 0 10px">Le Chai montre tous les mill\u00e9simes\u00a0; ici, celui de la campagne en cours. Choisir une ann\u00e9e la choisit pour toute la Cave.</div>';
   try{ h+=_mlTuiles(ch); }catch(e){ _pcavLog('tuiles',e); }
   return h;
 }
@@ -5832,7 +5839,7 @@ function _mlRdtProposeGroupe(val,mil,rendre){
   },260);
 }
 
-function _mlSetMil(m){ _mlMil=m; renderCaveMillesime(); }
+function _mlSetMil(m){ _caveSetMill(String(m)); }   // CAVE-RANGE-1 (§449) : le même choix que le Chai
 // ═══════════════════════════════════════════════════════════
 // AUJOURD'HUI — L'ECRAN D'ARRIVEE DE LA CAVE (lot CAVE-1)
 //
