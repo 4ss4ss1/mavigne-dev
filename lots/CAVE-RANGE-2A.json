@@ -1,0 +1,29 @@
+{
+  "lot": "CAVE-RANGE-2A",
+  "section": "§450",
+  "base": "e25b7ed7eaab1de3593b8d2308c9c81daadfdcc4",
+  "inclut": [],
+  "date": "2026-10-25",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "1b7d54ebf6526720c73bb63539745a9cfa36eaf50885c2ba6bd9618858998547",
+    "CLAUDE.md": "db1ace7b11da2687cfbd3e46214963ddae52c8e0e9707095ac0fdd1237dbe5cf",
+    "docs/claude/INDEX.md": "f9f3c758b73d78cbee3dcfa63921a452116dc6864a339bdc3eebb1e7388e2d28",
+    "docs/claude/chantiers-430-479.md": "0e2a30134ba3f1de978e84e462015186385e4cae429c4cfb2461be05b43163bf",
+    "docs/claude/journal.md": "51137f032e0b2dfc4439793cc94960ca8690aa51fdf156c64514658bde0219c9",
+    "guide/08-cave.html": "d4c8f36f39c212b6c41cbb77beecc8dc7b1453e627e8c09a38cd4d6b03858b86",
+    "index.html": "2f3a55b34cdcca1de9156e13d8c0cca04a394664fe117bfc930e26d68c6b8433",
+    "public/guide.html": "bad16d69747fe0b9ec6e28dd227dde8e0a7e09680ddd4fe8e758e581440ae217",
+    "public/sw.js": "4f154acdac9e09afa195ee76efdb3c95a470314d59eb7aa3e870a7eed0942825",
+    "scripts/mv-harnais-cave3.mjs": "1250e4361c3a955ef40013b76ccf0eee9e2f9c16fadfd8aedee2a386920dad45",
+    "scripts/mv-harnais-liste.mjs": "a48760fd248de0e221a6e86518fd5e7505ac33d7c33abc13f514d17cd3048937",
+    "scripts/tutos-couverture.json": "1ef61d5624c294874cf3a2c8d5e279f680f23b769d825d7355a7b66cdb4f7800",
+    "src/cave.js": "1d0a6e6343115e4b3804f35443bcfbad1a1f5dd2022a5e5fed7720794c061db3",
+    "src/diagnostic.js": "b6b838fa28fa173d637f6db2a5fe76331f9b48a56ad9f1664883739a06fa7d1c",
+    "src/utils.js": "79b53b08ed8ab1e6b5da46b73db6b8fcf5defd26e9ffa0abffcf13e81a941b5a",
+    "scripts/mv-harnais-caverange2a.mjs": "378f4a70347c8e21e7ce6a21a99acca6846a25cbbef03b683cbd50b2365c0a44"
+  }
+}

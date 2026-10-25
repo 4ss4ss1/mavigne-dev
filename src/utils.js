@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.06';
+export const APP_VERSION = '10.07';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '10.07', d: '2026-10-25', items: [
+    { niv: 1, pour: ['admin'], emoji: 'barrique', titre: 'Cave : une seule fiche par cuvée',
+      desc: "La fiche d’une cuvée a maintenant quatre volets : Élevage (les fûts, l’ouillage, le soutirage, le journal), Analyses (le labo), Volumes & origine (la chaîne des volumes, les parcelles, le hL/ha) et Diagnostic (ce qu’il dit de cette cuvée, et le chemin vers son détail). Elle s’ouvre depuis le Chai comme avant, et aussi depuis Le Millésime (« Fiche complète de la cuvée ») et depuis le Diagnostic (« Fiche de la cuvée »). Rien n’a disparu de ces écrans." }
+  ] },
   { v: '10.06', d: '2026-10-23', items: [
     { niv: 1, pour: ['admin'], emoji: 'raisin', titre: 'Cave : un seul millésime regardé',
       desc: "Le Chai et Le Millésime avaient chacun leur choix de millésime : on pouvait filtrer le Chai sur 2025 et lire Le Millésime 2026 sans s’en rendre compte. Ils partagent maintenant le même choix : une année choisie dans l’un est choisie dans l’autre. Quand le Chai montre « Tous », Le Millésime montre celui de la campagne en cours, et le dit." }

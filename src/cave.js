@@ -2563,7 +2563,57 @@ function _chaiSel(id){
 }
 window._chaiSel=_chaiSel;
 
-function openCuveeDetail(cuvId,dans){
+// ★★★ CAVE-RANGE-2a (§450) — LA FICHE UNIQUE D'UNE CUVÉE, QUATRE VOLETS. Vérifié avant le code (25/10) : une cuvée avait
+//   deux fiches (la fenêtre du Chai : élevage et labo ; la fiche du Millésime : volumes, parcelles, hL/ha) et un diagnostic
+//   qu'on ne voyait pas depuis elle. La fenêtre du Chai devient LA fiche : Élevage (ce qu'elle montrait), Analyses (le labo,
+//   déjà dedans), Volumes & origine (la fiche du Millésime, telle quelle), Diagnostic (la synthèse du Diagnostic, et le chemin
+//   vers son détail). Rien n'est retiré : Le Millésime garde sa fiche, le Diagnostic son écran ; ils mènent ici.
+var _CDV=[['elev','\u00c9levage'],['ana','Analyses'],['vol','Volumes & origine'],['dgn','Diagnostic']];
+function _cdvHtml(cuv, elevH, anaH, volet){
+  var on=(_CDV.some(function(v){ return v[0]===volet; }))?volet:'elev';
+  var secs={elev:elevH, ana:anaH||'<div class="pcav-vide">Aucune analyse pour cette cuv\u00e9e.</div>', vol:_cdvVolumesHtml(cuv), dgn:_cdvDiagHtml(cuv)};
+  var h='<div class="cdv"><div class="mvcm-chips cdv-tabs" role="tablist" aria-label="Volets de la fiche">';
+  _CDV.forEach(function(v){ h+='<button type="button" role="tab" class="mvcm-chip'+(v[0]===on?' on':'')+'" aria-selected="'+(v[0]===on)+'" data-k="'+v[0]+'" onclick="_cdvShow(this)">'+v[1]+'</button>'; });
+  h+='</div>';
+  _CDV.forEach(function(v){ h+='<div class="cdv-sec" data-k="'+v[0]+'"'+(v[0]===on?'':' hidden')+'>'+secs[v[0]]+'</div>'; });
+  return h+'</div>';
+}
+function _cdvShow(b){
+  var w=b&&b.closest('.cdv'); if(!w) return;
+  var k=b.getAttribute('data-k');
+  w.querySelectorAll('.cdv-tabs .mvcm-chip').forEach(function(x){ var o=x===b; x.classList.toggle('on',o); x.setAttribute('aria-selected',String(o)); });
+  w.querySelectorAll('.cdv-sec').forEach(function(x){ x.hidden=(x.getAttribute('data-k')!==k); });
+  // Les courbes du labo se mesurent à l'affichage : cachées, elles n'avaient pas de largeur.
+  if(k==='ana' && window._mvGraphRepeindre){ try{ window._mvGraphRepeindre(); }catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'fiche: repeint labo'}); } }
+}
+window._cdvShow=_cdvShow;
+// Volumes & origine : la ligne du Millésime de CETTE cuvée, dessinée par la fiche du Millésime (sans son bouton retour).
+function _cdvVolumesHtml(cuv){
+  if(!cuv || cuv.millesime==null) return '<div class="pcav-vide">Sans mill\u00e9sime : pas de cha\u00eene des volumes.</div>';
+  try{
+    if(typeof _pcavInjectCss==='function') _pcavInjectCss();
+    var d=_pcrbCvLignes(Number(cuv.millesime)), g0=null, l0=null;
+    (d&&d.groupes||[]).forEach(function(g){ (g.lignes||[]).forEach(function(l){ if(!l0 && !l.simple && l.cuvee && String(l.cuvee.id)===String(cuv.id)){ g0=g; l0=l; } }); });
+    if(!l0) return '<div class="pcav-vide">Cette cuv\u00e9e n\u2019a pas encore de cha\u00eene au Mill\u00e9sime (r\u00e9colte, cuve, entonnage).</div>';
+    return _mlCuvFicheHtml(g0, l0, {sansRetour:true});
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'cave.js/_cdvVolumesHtml'); return '<div class="pcav-vide">Les volumes n\u2019ont pas pu se lire.</div>'; }
+}
+// Diagnostic : la synthèse du Diagnostic pour cette cuvée, et le chemin vers son détail.
+function _cdvDiagHtml(cuv){
+  var L=[]; try{ L=(typeof window._dgnSynthese==='function')?(window._dgnSynthese()||[]):[]; }catch(e){ L=[]; if(window._mvAvale) window._mvAvale(e,'cave.js/_cdvDiagHtml'); }
+  var x=null; L.forEach(function(y){ if(!x && String(y.id)===String(cuv&&cuv.id)) x=y; });
+  if(!x) return '<div class="pcav-vide">Le diagnostic ne suit pas cette cuv\u00e9e (il lit les cuv\u00e9es du Chai, leurs analyses et leurs op\u00e9rations).</div>';
+  return '<div class="mvcarte-fond" style="padding:12px;margin-bottom:10px"><div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);margin-bottom:4px">Le diagnostic</div>'
+    +'<div style="font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">'+_escHtml(x.txt||'Rien \u00e0 signaler')+'</div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px">'+x.nAna+' analyse'+(x.nAna>1?'s':'')+' lue'+(x.nAna>1?'s':'')+(x.mise?' \u00b7 mise pr\u00e9vue':'')+'</div></div>'
+    +'<button type="button" class="mbtn" style="width:100%" data-id="'+_escHtml(String(x.id))+'" onclick="_cdvDiagOuvrir(this.getAttribute(\'data-id\'))">Ouvrir le diagnostic de cette cuv\u00e9e \u203a</button>';
+}
+function _cdvDiagOuvrir(id){
+  if(window.closeOv) window.closeOv(null,'ovCuveeDetail');
+  if(typeof window._dgnVoirCuvee==='function') window._dgnVoirCuvee(id);
+}
+window._cdvDiagOuvrir=_cdvDiagOuvrir;
+function openCuveeDetail(cuvId,dans,volet){
   // CAVE-3 (§290) : avec `dans` (l'id d'un conteneur), la même fiche s'écrit dans la page, sans fenêtre. Sur ordinateur, quand la
   //   liste des cuvées est affichée, TOUT appel (y compris le rafraîchissement après une opération) va dans la fiche de droite.
   if(!dans&&typeof _chaiDesk==='function'&&_chaiDesk()){ var _vw=document.getElementById('mvc-view-cuv'); if(_vw&&_vw.offsetParent!==null&&document.getElementById('chai-fiche')){ dans='chai-fiche'; _chaiSelId=cuvId; _chaiMarque(cuvId); } }
@@ -2655,7 +2705,7 @@ function openCuveeDetail(cuvId,dans){
   if(spark) window._mvGraphSuivre('#mvg-so2-'+_mvgId(cuvId), function(lg){ return _caveSparkSO2(cuvId,lg); });
   if(spark) spark='<div id="mvg-so2-'+_mvgId(cuvId)+'"></div>';
   if(spark)html+='<div class="mvcarte-fond" style="padding:11px;margin-bottom:12px"><div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);margin-bottom:6px">'+'\u00C9volution SO\u2082 libre (mg/L)</div>'+spark+'</div>';
-  html+=_laboCuveeHtml(cuv);   // ★ LABO-1 (§319) — « Au labo » : TAV, sucres, volatile, acidité, pH, malique, SO2 total
+  var _anaH=_laboCuveeHtml(cuv);   // ★ LABO-1 (§319) — « Au labo » ; CAVE-RANGE-2a (§450) : il a son volet, Analyses
   // Journal
   if(allIt.length){
     html+='<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);margin-bottom:8px">Journal</div>';
@@ -2710,7 +2760,8 @@ function openCuveeDetail(cuvId,dans){
     html+='<button onclick="closeOv(null,\'ovCuveeDetail\');deleteCuveeById(\''+cuv.id+'\')" style="padding:10px 14px;border:1px solid rgba(224,112,96,0.3);border-radius:10px;background:rgba(224,112,96,0.08);font-size:var(--pt-txt,13px);color:#E07060;cursor:pointer;min-height:44px;">\uD83D\uDDD1</button>';
     html+='</div>';
   }
-  bodyEl.innerHTML=html;
+  bodyEl.innerHTML=_cdvHtml(cuv, html, _anaH, volet);   // CAVE-RANGE-2a (§450) : la fiche unique, quatre volets
+  if(volet==='ana' && window._mvGraphRepeindre){ try{ window._mvGraphRepeindre(); }catch(eR){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'fiche: repeint labo'}); } }
   if(window._mvGraphRepeindre) window._mvGraphRepeindre();
   if(!dans){ var ov3=document.getElementById('ovCuveeDetail');if(ov3)ov3.classList.add('open'); }
 }
@@ -5652,11 +5703,13 @@ function _mlCuvSurf(cuveId,mil){
   });
   return { cuve:cuveId, ha:(ord.length&&!sans.length&&ha>0)?ha:null, par:par, sans:sans, prorata:prorata };
 }
-function _mlCuvFicheHtml(g,l){
+function _mlCuvFicheHtml(g,l,o){
   var ecrit=(typeof canWrite==='function'&&canWrite()&&_pcavHasW('_vendDvolCorriger'));
   var cv=l.cuveId?(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){ return x&&x.id===l.cuveId; }):null, cu=l.cuvee||null;
   var i=_mlCuvInfo(g,l), ch=l.ch||{};
-  var h='<button type="button" class="mlc-ret" onclick="_mlCuvRetour()">'+_mvIcon('gauche',16)+' Toutes les cuv\u00e9es</button>'
+  var dedans=!!(o&&o.sansRetour);   // CAVE-RANGE-2a : dans la fiche unique, pas de retour ni de lien vers elle-même
+  var h=(dedans?'':'<button type="button" class="mlc-ret" onclick="_mlCuvRetour()">'+_mvIcon('gauche',16)+' Toutes les cuv\u00e9es</button>')
+    +((!dedans && cu && cu.id!=null)?('<button type="button" class="mlc-ret" style="float:right" data-id="'+_escHtml(String(cu.id))+'" onclick="openCuveeDetail(this.getAttribute(\'data-id\'),null,\'vol\')">Fiche compl\u00e8te de la cuv\u00e9e \u203a</button>'):'')
     +'<div class="mlc-fh"><div class="mlc-ft"><h3>'+_escHtml(l.nom)+'</h3><span>'+_escHtml(l.sous||'')+'</span></div>'
     +'<span class="mlc-pill '+g.cle+'">'+i.etat+'</span>'+(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.cuvees'):'')+'</div>';
   /* ★ HLHA-1 (§413) : la surface de la cuve dont la chaine lit les kilos (ch.cuveId — deux cuves dans une

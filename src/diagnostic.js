@@ -936,6 +936,7 @@ function risquesHtml(M) {
 function ficheHtml() {
   var M = MOD[S.cuv], D = M.D, T = tuiles(M), tk = S.tuile;
   var h = '<button type="button" class="dgn-retour" data-dgn="retour">' + ico('chevg', 'ico-s') + 'Cuvées</button>';
+  h += '<button type="button" class="dgn-retour" style="float:right" data-dgn="fiche" data-v="' + esc(S.cuv) + '">Fiche de la cuvée' + ico('chevd', 'ico-s') + '</button>';   // CAVE-RANGE-2a (§450)
   h += '<div class="dgn-fiche-tete"><div style="min-width:0"><h2 class="dgn-fiche-nom">' + esc(D.nom) + ' <span>' + D.mil + '</span></h2><div class="dgn-meta">';
   var derA = D.ana.filter(function (a) { return !a.bouteille; }).pop();
   h += '<span>' + esc(etape(M)) + '</span><span>' + M.nbF + ' fûts, ' + Math.round(M.part * 100) + ' % de neufs</span><span>Âge moyen ' + vinsTxt(M.age) + '</span>';
@@ -1481,6 +1482,7 @@ function dgnClic(e) {
     case 'vue': S.vue = v; S.detail = false; break;
     case 'cuv': S.cuv = v; S.tuile = null; S.sel = null; S.selIdx = null; S.tab = null; S.focus = null; S.detail = true; window.scrollTo(0, 0); break;
     case 'retour': S.detail = false; break;
+    case 'fiche': if (typeof window.openCuveeDetail === 'function') window.openCuveeDetail(v, null, 'dgn'); return;   // CAVE-RANGE-2a (§450) : la fiche unique de la cuvée
     case 'filtre': S.filtre = v; break;
     case 'tuile': S.tuile = S.tuile === v ? null : v; break;
     case 'focus': S.focus = (v && S.focus !== v) ? v : null; break;
@@ -1522,6 +1524,11 @@ window.renderCaveDiag = render;
 // ★★ CAVEPIL-1 (§436) — LE DIAGNOSTIC EN LECTURE, pour le verdict de la Cave et la vue Cave du Pilotage. Même calcul que
 //   l'onglet (recalc puis statutListe), sans rien dessiner, sur TOUTES les cuvées (le filtre de millésime du Chai ne s'applique
 //   pas ici). g : dan (signes forts), att, n, ok — la lecture des statuts de la méthode. nAna : les analyses du labo lues.
+// CAVE-RANGE-2a (§450) : depuis la fiche unique d'une cuvée, ouvrir son diagnostic (Chai › Diagnostic, la cuvée choisie).
+window._dgnVoirCuvee = function (id) {
+  S.vue = 'suivi'; S.cuv = String(id); S.tuile = null; S.sel = null; S.tab = null; S.detail = true;
+  if (typeof window.switchCaveOng === 'function') window.switchCaveOng('diag'); else render();
+};
 window._dgnSynthese = function () {
   if (!window._dataReady || !window.CAVE_ELEVAGE) return [];
   recalc();
