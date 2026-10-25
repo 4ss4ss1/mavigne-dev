@@ -6930,13 +6930,12 @@ function _pecLoadSt(){
     if(o.sub==='syn'||o.sub==='pos'||o.sub==='par'||o.sub==='rev'||o.sub==='ach'||o.sub==='exe') _PEC_SUB=o.sub;
     if(o.axe==='nat'||o.axe==='ate') _PEC_AXE=o.axe;
     // Exercice consulte : une annee d'OUVERTURE, ou null = celui d'aujourd'hui.
-    _PEX_AN=(typeof o.exan==='number'&&isFinite(o.exan))?o.exan:null;
     if(typeof o.psort==='string') _PEC_PSORT=o.psort;
     if(o.pdir===1||o.pdir===-1) _PEC_PDIR=o.pdir;
   }catch(e){ _PEC_SUB='syn'; }
 }
 function _pecSaveSt(){
-  try{ localStorage.setItem(_pecStKey(), JSON.stringify({sub:_PEC_SUB,psort:_PEC_PSORT,pdir:_PEC_PDIR,exan:_PEX_AN,axe:_PEC_AXE})); }
+  try{ localStorage.setItem(_pecStKey(), JSON.stringify({sub:_PEC_SUB,psort:_PEC_PSORT,pdir:_PEC_PDIR,axe:_PEC_AXE})); }
   catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'pec state'}); }
 }
 
@@ -8949,11 +8948,14 @@ function _pecExport(kind,E){
 }
 
 // ── Barre de sous-vues ───────────────────────────────────────────────
-var _PEC_SUBS=[['syn','graphique','Synth\u00e8se'],['pos','cible','Postes & travaux'],['par','raisin','Parcelles'],['rev','bouteille','Revient'],['ach','euro','Achats'],['exe','calendrier','Exercice']];
+var _PEC_SUBS=[['syn','graphique','Synth\u00e8se'],['pos','cible','Postes & travaux'],['par','raisin','Parcelles'],['rev','bouteille','Revient'],['ach','euro','Achats'],['exe','calendrier','Le d\u00e9tail']];
+// Le nom de la sous-vue détaillée dit ce qu'elle montre : le cadre de la barre (PIL-RANGE-4b, §447).
+function _pecDetailLib(){ return (_PIL_SCOPE && _PIL_SCOPE.cadre==='vig') ? 'Le d\u00e9tail de l\u2019ann\u00e9e vigne' : 'Le d\u00e9tail de l\u2019exercice'; }
 function _pecSubNav(E){
   var b=_PEC_SUBS.map(function(s){
     var ic=(typeof _mvIcon==='function')?_mvIcon(s[1],16):'';
-    return '<button data-pec="sub" data-v="'+s[0]+'"'+(s[0]===_PEC_SUB?' class="on"':'')+'><span style="margin-right:6px;display:inline-flex;vertical-align:-3px">'+ic+'</span>'+s[2]+'</button>';
+    var lib=s[2]; if(s[0]==='exe') lib=_pecDetailLib();   // PIL-RANGE-4b : « Le détail de l'exercice » ou « … de l'année vigne », selon la barre
+    return '<button data-pec="sub" data-v="'+s[0]+'"'+(s[0]===_PEC_SUB?' class="on"':'')+'><span style="margin-right:6px;display:inline-flex;vertical-align:-3px">'+ic+'</span>'+lib+'</button>';
   }).join('');
   var ctx='<div class="pec-cs" style="text-align:right;min-width:0">'+_pilEsc(_pilSaisonNom()||'\u2014')+' \u00b7 '
     +_pilHa(E.tot.surf)+' ha \u00b7 taux moyen '+_pilEsc(_ecoEur2(E.rate))+' \u20AC/h</div>';
@@ -9003,10 +9005,14 @@ function _pecSubNav(E){
 
 // Exercice consulte (annee d'OUVERTURE). null = celui d'aujourd'hui. Memorise par
 // utilisateur et par domaine, comme la sous-vue et le tri du tableau parcelles.
-var _PEX_AN = null;
 function _pexEx(){
-  if(typeof window._mvExerciceAn!=='function') return null;
-  return (_PEX_AN==null) ? window._mvExercice() : window._mvExerciceAn(_PEX_AN);
+  // ★★ PIL-RANGE-4b (§447) — « LE DÉTAIL » SUIT LA BARRE « VOUS REGARDEZ ». Avant, la sous-vue gardait son propre choix
+  //   d'année (_PEX_AN, ses puces 2026-27 / 2025-26…) : la barre pouvait dire 2026-27 et le détail montrer 2025-26.
+  //   Elle lit maintenant le cadre de la barre (_pilAnCadre().F : l'exercice ou l'année vigne, avec les flèches) — la
+  //   même fenêtre que « Le budget de l'année ». Sans cadre lisible : l'exercice en cours.
+  var C=null; try{ C=_pilAnCadre(); }catch(e){ C=null; }
+  if(C && C.F) return C.F;
+  return (typeof window._mvExercice==='function') ? window._mvExercice() : null;
 }
 // ISO -> Date LOCALE. Jamais new Date('AAAA-MM-JJ') : cette forme est lue en UTC et
 // decale d'un jour a l'ouest de Greenwich comme a l'est selon l'heure.
@@ -9545,10 +9551,9 @@ function _pexSetMois(v){
     if(window.showToast) window.showToast('R\u00e9glage non enregistr\u00e9 \u2014 mise \u00e0 jour de R\u00e9glages requise','#B85A1A');
     return;
   }
-  _PEX_AN=null;
   _pecSaveSt();
   if(window.showToast) window.showToast('Exercice comptable mis \u00e0 jour','#3D6B27');
-  _pilFillContent(_pilData());
+  _pilFillContent(_pilData());   // repeint aussi la roue ouverte (_pilFillContent → _pilParamRefresh) : le réglage y vit (PIL-RANGE-4b)
 }
 window._pexSetMois=_pexSetMois;
 
@@ -9577,7 +9582,7 @@ function _pilSetCampMois(v){
   _pilExoOublier();
   _pecSaveSt();
   if(window.showToast) window.showToast('Ann\u00e9e vigne mise \u00e0 jour \u2014 Archives et bilan recadr\u00e9s','#3D6B27');
-  _pilFillContent(_pilData());
+  _pilFillContent(_pilData());   // repeint aussi la roue ouverte (_pilFillContent → _pilParamRefresh) : le réglage y vit (PIL-RANGE-4b)
 }
 window._pilSetCampMois=_pilSetCampMois;
 
@@ -9681,12 +9686,9 @@ function _pilCampMoisChoix(){
 
 // ── Vue « Exercice » ────────────────────────────────────────────────
 function _pexBarreEx(E){
-  var list=(typeof window._mvExerciceList==='function')?window._mvExerciceList(4):[];
-  var chips=list.map(function(x){
-    return '<button data-pec="exy" data-v="'+x.an+'"'+(x.an===E.ex.an?' class="on"':'')+'>'+_pilEsc(x.court)+'</button>';
-  }).join('');
-  return '<div class="pex-bar"><div class="pec-sub">'+chips+'</div>'
-    +'<div class="pex-win">'+_pilEsc(E.ex.lbl)+(E.enCours?' \u00b7 <b>en cours</b>':'')+'</div></div>';
+  // PIL-RANGE-4b (§447) : plus de puces d'année — l'année se choisit dans la barre « Vous regardez », en haut.
+  return '<div class="pex-bar"><div class="pex-win">'+_pilEsc(E.ex.lbl)+(E.enCours?' \u00b7 <b>en cours</b>':'')
+    +' \u00b7 <span style="color:var(--texte-doux)">l\u2019ann\u00e9e se choisit dans la barre \u00ab\u00a0Vous regardez\u00a0\u00bb</span></div></div>';
 }
 function _pexMoisChoix(){
   var cur=(typeof window._mvExerciceMois==='function')?window._mvExerciceMois():7;
@@ -10513,10 +10515,9 @@ function _pexView(){
     + _pexConso(E)
     + _pexTableSal(E)
     + _pexTableAch(E)
-    + _pexTableDep(E)
-    + _pexMoisChoix()
-    + _pilCampMoisChoix()          /* ★ AXE-1 : les deux cadres annuels, cote a cote */
-    + _pexFutChoix();
+    + _pexTableDep(E);
+  // PIL-RANGE-4b (§447) : les trois réglages (ouverture de l'exercice, ouverture de l'année vigne, compte des fûts) sont
+  //   des réglages, pas des chiffres à lire : ils vivent dans la roue crantée du Pilotage (_pilParamBody), côte à côte.
 }
 
 // ── La vue « Revient » (REV-1) ──────────────────────────────────────────────
@@ -12579,10 +12580,20 @@ function _pilFillContent(d){
 //   boutons « à compléter » (data-diag) — qui ferment la feuille avant d'aller.
 function _pilParamRender(d){
   var host=document.getElementById('pil-regl-host'); if(!host) return false;
-  host.innerHTML=_pilParamBody(d);
+  if(typeof _pecCss==='function') _pecCss();   // PIL-RANGE-4b : les réglages des années portent le style d'Économie
+  host.innerHTML=_pilParamBody(d)+_pilParamAnnees();
   _pilBindParam(d);
   if(window._ecoRenderIftCard) window._ecoRenderIftCard();
   return true;
+}
+// ★ PIL-RANGE-4b (§447) — LES TROIS RÉGLAGES DES ANNÉES, DANS LA ROUE. Ils vivaient au bas de la sous-vue Exercice ;
+//   ce sont des réglages, pas des chiffres à lire. Côte à côte comme avant (AXE-1 : les deux cadres annuels se règlent
+//   au même endroit), mêmes écrivains (_pexSetMois, _pilSetCampMois, _pexSetFutTrait).
+function _pilParamAnnees(){
+  var h='';
+  try{ h=_pexMoisChoix()+_pilCampMoisChoix()+_pexFutChoix(); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilParamAnnees'); return ''; }
+  return '<div class="pec-wrap" id="pil-param-annees" style="margin-top:4px"><div class="pil-sec-h">Les ann\u00e9es et les comptes</div>'+h+'</div>';
 }
 function _pilParamRefresh(d){
   var ov=document.getElementById('ovReglPilotage');
@@ -12595,6 +12606,9 @@ window._pilParamOpen=function(){
   if(host&&!host._mvDiagBound){
     host._mvDiagBound=true;
     host.addEventListener('click', function(e){
+      // PIL-RANGE-4b (§447) : « Un fût acheté, comment le compter ? » se règle ici désormais.
+      var fu=e.target.closest('[data-pec="futtr"]');
+      if(fu){ e.stopPropagation(); if(typeof window._pexSetFutTrait==='function') window._pexSetFutTrait(fu.getAttribute('data-v')); return; }   // _pexSetFutTrait → _pilFillContent → la roue se repeint
       var dg=e.target.closest('[data-diag]'); if(!dg) return;
       e.stopPropagation();
       if(window.closeOv) window.closeOv(null,'ovReglPilotage');
@@ -12694,7 +12708,6 @@ function _pilBindContent(content){
         if(_pk){ if(_pk===_PEC_PSORT) _PEC_PDIR=-_PEC_PDIR; else { _PEC_PSORT=_pk; _PEC_PDIR=(_pk==='nom')?1:-1; } _pecSaveSt(); _pilFillContent(_pilData()); }
         return;
       }
-      if(_pa==='exy'){ var _xv=parseInt(_pe.getAttribute('data-v'),10); if(!isNaN(_xv)){ _PEX_AN=_xv; _pecSaveSt(); _pilFillContent(_pilData()); } return; }
       if(_pa==='pachgo'){ if(_PEC_SUB!=='ach'){ _PEC_SUB='ach'; _pecSaveSt(); _pilFillContent(_pilData()); } return; }
       if(_pa==='pachf'){ var _fv=_pe.getAttribute('data-v');
         if((_fv==='tout'||_fv==='sans')&&_fv!==_PACH_FILT){ _PACH_FILT=_fv; _pilFillContent(_pilData()); } return; }

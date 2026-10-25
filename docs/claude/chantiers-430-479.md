@@ -418,3 +418,20 @@ Aujourd’hui ne propose plus que **la vue Cave** et **ses points dans « À sav
 
 ### 446d. Ce qui reste
 PIL-RANGE-4b — la sous-vue « Exercice » d’Économie : **à vérifier avant d’y toucher** (que montre-t-elle de plus que « Le budget de l’année » en tête de la Synthèse ?), puis CAVE-FIX-1, CAVE-RANGE-1 à 3.
+
+## 447. ★ PIL-RANGE-4b — ÉCONOMIE : « LE DÉTAIL DE L’EXERCICE » SUIT LA BARRE « VOUS REGARDEZ » ; SES TROIS RÉGLAGES DANS LA ROUE (23/10 — `src/pilotage.js` (`_pexEx` lit `_pilAnCadre().F` ; `_PEX_AN` et le geste « exy » retirés, plus mémorisés ; `_pexBarreEx` sans puces ; `_pexView` sans réglages ; `_PEC_SUBS` + `_pecDetailLib` ; `_pilParamAnnees` neuve, `_pilParamRender` (style d’Économie + section), geste des fûts dans la roue, `_pexSetMois`/`_pilSetCampMois` repeignent la roue) · `src/utils.js` (APP, WHATS_NEW niv 1) · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `public/guide.html` · `scripts/mv-harnais-pilrange4b.mjs` (neuf) · `scripts/mv-harnais-regl-module.mjs` · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/PIL-RANGE-4B.json` · **APP 10.03 → 10.04, SW 10.83 → 10.84**, base `42393c7` ; chaîne par le coureur : 526 commandes, 526 codes à 0)
+
+### 447a. D’où ça vient — vérifié avant le code
+Le rangement prévoyait « Exercice → portée, 6 → 5 sous-vues ». Vérifié : la sous-vue **ne doublait pas** « Le budget de l’année » (un résumé) — elle porte le détail comptable introuvable ailleurs (rythme mois par mois, salaires par personne, achats, dépenses, fiabilité et remarques) et trois réglages (ouverture de l’exercice, ouverture de l’année vigne, compte d’un fût acheté — et non « ce qui est à venir », comme écrit d’abord à Nico : corrigé ici). Le vrai défaut : **son propre choix d’année** (`_PEX_AN`, puces 2026-27 / 2025-26…), indépendant de la barre. Nico : « oui » à la proposition (garder, renommer, suivre la barre, réglages dans la roue).
+
+### 447b. Ce qui a été fait
+- `_pexEx` lit la fenêtre de la barre (`_pilAnCadre().F`, la même que « Le budget de l’année » ; exercice ou année vigne, flèches comprises) ; sans cadre lisible, l’exercice en cours. `_PEX_AN` n’existe plus ni en mémoire (`_pecSaveSt`) ni en geste.
+- La sous-vue s’appelle **« Le détail de l’exercice »** (ou **« … de l’année vigne »** quand la barre regarde l’année vigne : `_pecDetailLib`) ; sa ligne d’en-tête dit l’année et renvoie à la barre.
+- Les trois réglages quittent son bas de page pour la **roue crantée du Pilotage**, section « Les années et les comptes », côte à côte (règle AXE-1), mêmes écrivains ; la roue charge le style d’Économie et écoute le geste des fûts ; elle se repeint après un réglage par le chemin de toujours (`_pilFillContent` → `_pilParamRefresh`, une seule fois).
+- Guide (sous-vue renommée, « Le détail » suit la barre, Revient garde son cadre ; la note des réglages pointe la roue), WHATS_NEW 10.04 niv 1.
+
+### 447c. Harnais
+`mv-harnais-pilrange4b.mjs` (12 vertes, 8 contre-épreuves) ; `regl-module` suit (le corps de `_pilParamRender` gagne la section), trouvé par la chaîne **exécute** `_pexEx` (fenêtre de la barre, repli), `_pecDetailLib`, `_pexBarreEx` et `_pilParamAnnees`, et lit : plus de mémoire d’année propre, sous-vue sans réglages, nom calculé, roue (style, section, geste des fûts, repeint), nouveauté, guide, liste.
+
+### 447d. Ce qui reste
+Le rangement du Pilotage est fait (PIL-RANGE-1 à 4). Restent CAVE-FIX-1 (part des anges annualisée) et CAVE-RANGE-1 à 3.

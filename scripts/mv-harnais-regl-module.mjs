@@ -249,7 +249,7 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
   const fill = extraire(pil, '_pilFillContent') || '';
   T(!/tab==='param'/.test(fill) && /_pilParamRefresh\(d\);/.test(fill), '_pilFillContent n\u2019a plus de branche param et repeint la feuille ouverte');
   const prr = extraire(pil, '_pilParamRender') || '';
-  T(/getElementById\('pil-regl-host'\)/.test(prr) && /host\.innerHTML=_pilParamBody\(d\);/.test(prr) && /_pilBindParam\(d\);/.test(prr) && /window\._ecoRenderIftCard\(\)/.test(prr),
+  T(/getElementById\('pil-regl-host'\)/.test(prr) && /host\.innerHTML=_pilParamBody\(d\)\+_pilParamAnnees\(\);/.test(prr)   /* PIL-RANGE-4b (§447) : la section « Les années et les comptes » */ && /_pilBindParam\(d\);/.test(prr) && /window\._ecoRenderIftCard\(\)/.test(prr),
     '_pilParamRender : m\u00eame corps, m\u00eames \u00e9crivains, plus la carte IFT');
   const prf = extraire(pil, '_pilParamRefresh') || '';
   T(/getElementById\('ovReglPilotage'\)/.test(prf) && /classList\.contains\('open'\)/.test(prf), '_pilParamRefresh ne repeint que si la feuille est ouverte');
