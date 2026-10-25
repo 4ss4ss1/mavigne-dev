@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.90
+// MA VIGNE — Service Worker v10.91
+// v10.91 (25/10/2026) — AUJ-TETE-1 (§454) : Pilotage › Aujourd’hui — la bascule en haut à droite du cadre, la phrase sur toute la ligne, sous chaque chiffre sa référence (fin prévue et objectif, coût à la fin et budget) ; sous la date, la campagne que lisent ces chiffres.
 // v10.90 (25/10/2026) — CSS-MENAGE-1 (§453) : 67 règles de style de l’ancien Aujourd’hui et du plan v1, sans plus aucun producteur, retirées (rien ne change à l’écran).
 // v10.89 (25/10/2026) — CAVE-RANGE-3 (§452) : Cave — une cuvée du Chai s’ouvre dans la fiche unique depuis Le Millésime ; les bouteilles mènent à la fiche.
 // v10.88 (25/10/2026) — CAVE-RANGE-2b (§451) : Cave — une seule barre « Millésime regardé », sous les sections, pour Le Chai et Le Millésime.
@@ -4622,7 +4623,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.90';
+const CACHE_NAME   = 'mavigne-v10.91';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4639,7 +4640,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.90 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.91 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4659,7 +4660,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.90 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.91 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

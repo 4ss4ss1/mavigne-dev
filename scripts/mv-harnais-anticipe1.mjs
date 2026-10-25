@@ -89,19 +89,23 @@ function suite(S) {
       /En tête, surlignés et marqués « À anticiper »/.test(ctx.__info.savoir) && /toucher la phrase mène ici/.test(ctx.__info.savoir)
       && /risque de pluie/.test(ctx.__info.savoir) && /vent le plus fort/.test(ctx.__info.savoir) && /30 jours/.test(ctx.__info.savoir));
   }
-  // C. la phrase
+  // C. la phrase (AUJ-TETE-1, §454 : les chiffres portent leur référence, la ponctuation collée aux boutons — le bac à sable suit)
   {
-    const code = ['let V = null, HTML = ""; const $ = () => ({ set innerHTML(v) { HTML = v; } });', morceau(S.vue, 'const maj1 = s => ', '\n'),
-      morceau(S.vue, 'function savoirItems() {', '\n}\n'), morceau(S.vue, 'function majResume(r) {', '\n}\n'),
+    const code = ['let V = null, HTML = ""; const VISEE = new Date(Date.UTC(2027, 2, 5)); const $ = () => ({ set innerHTML(v) { HTML = v; } }); function calerRefs() {}',
+      morceau(S.vue, 'const NF0 = ', '\n'), morceau(S.vue, 'const nb = ', '\n'), morceau(S.vue, 'const esc = s => ', '\n'), morceau(S.vue, 'const maj1 = s => ', '\n'),
+      morceau(S.vue, 'const MOIS_L = ', '\n'), morceau(S.vue, 'const jourN = ', '\n'), morceau(S.vue, 'const dLong = ', '\n'), morceau(S.vue, 'const eur = v => ', '\n'),
+      morceau(S.vue, 'const btnI = ', '\n'), morceau(S.vue, 'function savoirItems() {', '\n}\n'), morceau(S.vue, 'const refChiffre = ', "join('') + '</span>';\n"),
+      morceau(S.vue, 'function majResume(r) {', '\n}\n'),
       'this.__m = (VV, r) => { V = VV; HTML = ""; majResume(r); return HTML; };'].join('\n');
-    const ctx = { Math, Number, String, Array, Object }; vm.createContext(ctx); vm.runInContext(code, ctx);
-    const r = { ecart: -45, sous: 0, budget: 0 };
+    const ctx = { Math, Number, String, Array, Object, Intl, Date }; vm.createContext(ctx); vm.runInContext(code, ctx);
+    const r = { ecart: -45, sous: 0, budget: 0, fin: new Date(Date.UTC(2027, 4, 7)) };
     const h4 = ctx.__m({ savoir: SV, eco: false }, r), h1 = ctx.__m({ savoir: SV.filter(x => x.cat !== 'retard' && x.cat !== 'contrat'), eco: false }, r),
       h0 = ctx.__m({ savoir: SV.filter(x => x.prio !== 1), eco: false }, r);
     T('C1 « 4 points à anticiper » est un bouton qui mène à eux (data-fn="anticiper"), son nom contient le texte vu',
-      h4.includes('<button type="button" class="ck-res-pts" data-fn="anticiper" aria-label="4 points à anticiper, en tête d’« À savoir »">4 points à anticiper</button>.') && h4.startsWith('<b>45 jours de retard</b>, '));
-    T('C2 un seul point : le singulier', h1.includes('>1 point à anticiper</button>.'));
-    T('C3 rien à anticiper : une phrase, pas de bouton', h0.endsWith('rien à anticiper.') && !h0.includes('<button'));
+      h4.includes('<span class="ck-tient"><button type="button" class="ck-res-pts" data-fn="anticiper" aria-label="4 points à anticiper, en tête d’« À savoir »">4 points à anticiper</button>.</span>')
+      && h4.startsWith('<span class="ck-fig"><span class="ck-fig-l"><button type="button" class="ck-fig-t" data-fn="allerFin" aria-describedby="ck-cap-t">45 jours de retard</button>,</span>'));
+    T('C2 un seul point : le singulier', h1.includes('>1 point à anticiper</button>.</span>'));
+    T('C3 rien à anticiper : une phrase, pas de bouton', h0.endsWith('rien à anticiper.') && !h0.includes('ck-res-pts'));
   }
   // D. le geste
   {
@@ -152,9 +156,9 @@ function suite(S) {
       ab.length === 4 && ti('Inès') === 'Absence d\u2019Inès' && ti('Hugo') === 'Absence d\u2019Hugo' && ti('Émile') === 'Absence d\u2019Émile' && ti('Sophie') === 'Absence de Sophie' && ckNu.includes("'Absence ' + _ckDe(m.nom)"));
   }
   // G. l'accompagnement
-  T('G1 la fiche MV_AIDE du Pilotage dit la phrase touchable et les points en tête', S.uti.includes('les points à anticiper — touchez-les pour y aller')
+  T('G1 la fiche MV_AIDE du Pilotage dit la phrase touchable et les points en tête', S.uti.includes('les points à anticiper à « À savoir »')
     && S.uti.includes('les <b>points à anticiper</b> y viennent en tête, surlignés et marqués « À anticiper »'));
-  T('G2 le guide dit la même chose', S.guide.includes("et les points à anticiper — touchez-les pour y aller") && S.guide.includes('y viennent en tête, surlignés et marqués « À anticiper »'));
+  T('G2 le guide dit la même chose', S.guide.includes('les points à anticiper à « À savoir »') && S.guide.includes('y viennent en tête, surlignés et marqués « À anticiper »'));
   T('G3 la nouveauté 9.80 : pastille sur « À savoir », pour l’admin ; la correction des absences au Journal',
     /\{ v: '9\.80', d: '2026-10-21', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-savoir'/.test(S.uti) && /\{ niv: 0, pour: \['admin'\], emoji: 'equipe', titre: 'Les absences s’écrivent sans faute d’accord'/.test(S.uti));
   return out;
@@ -166,7 +170,7 @@ if (CONTRE) {
   const DEF = [
     ['le tri retiré', 'vue', 'return L.filter(x => x.prio === 1).concat(L.filter(x => x.prio !== 1));', 'return L;'],
     ['l’étiquette retirée', 'vue', `(x.prio === 1 ? '<span class="ck-sv-k">À anticiper</span>' : '')`, `''`],
-    ['la phrase redevient du texte', 'vue', `(n ? '<button type="button" class="ck-res-pts" data-fn="anticiper" aria-label="' + pts + ', en tête d’« À savoir »">' + pts + '</button>.' : 'rien à anticiper.')`, `(n ? pts + '.' : 'rien à anticiper.')`],
+    ['la phrase redevient du texte', 'vue', `const ptsB = '<button type="button" class="ck-res-pts" data-fn="anticiper" aria-label="' + pts + ', en tête d’« À savoir »">' + pts + '</button>';`, 'const ptsB = pts;'],
     ['le geste débranché', 'vue', "    if (fn && fn.dataset.fn === 'anticiper') { allerAnticiper(); return; }", ''],
     ['Économie gardée', 'vue', "  if (S.mode !== 'terrain') { choisirMode('terrain'); }", ''],
     ['plus de cinq points restent cachés', 'vue', 'if (forts.length > 5 && !l.classList', 'if (forts.length > 50 && !l.classList'],
@@ -184,7 +188,7 @@ if (CONTRE) {
     ['« Absence de Inès » revenu', 'ck', "'Absence ' + _ckDe(m.nom)", "'Absence de ' + m.nom"],
     ['la bulle « i » sans l’ordre', 'vue', 'En tête, surlignés et marqués « À anticiper », ', ''],
     ['l’avatar au masculin', 'vue', "'Absence\\u00a0: ' + g.p", "g.p + ', absent'"],
-    ['le guide pas à jour', 'guide', ' — touchez-les pour y aller', ''],
+    ['le guide pas à jour', 'guide', 'les points à anticiper à « À savoir »', ''],
   ];
   let m = 0; DEF.forEach(([nom, f, a, b]) => { const S = Object.assign({}, SRC0); if (S[f].split(a).length !== 2) { console.log('  ??  ' + nom + ' — motif introuvable ou multiple'); m++; return; } S[f] = S[f].replace(a, b); const rouge = jouer(S).some(x => !x[1]); if (!rouge) m++; console.log((rouge ? '  ok  ' : '  KO  ') + nom + (rouge ? ' → rougit' : ' → reste vert')); });
   console.log('\n' + (m ? 'CONTRE-ÉPREUVES ROUGES ' + m : 'CONTRE-ÉPREUVES VERTES') + ' — ' + DEF.length + ' défauts réinjectés'); process.exit(ko || m ? 1 : 0);

@@ -7,7 +7,7 @@
 // toujours), la palette Ctrl K et la barre latérale (lots suivants, pour toute l'appli).
 // La feuille de style de la maquette est passée à la charte (convertisseur REF-1) : section REF-1 de styles.css.
 // ═════════════════════════════════════════════════════════════════════════════════════════════════
-window._ck2Squelette = function () { return '<div class="ck2"><div class="ck-page ck-entree" id="ck-page"> <div class="ck-tete" id="ck-tete"></div> <section class="ck-photos" id="ck-photos" aria-label="Les quatre photos du domaine"></section> <div class="ck-vue ck-gt" id="ck-vue-terrain"> <div class="ck-col" id="ck-t-a"> <section class="ck-verdict" id="ck-verdict" aria-label="Fin prévue des travaux"></section> <section class="ck-decision ck-panneau" id="ck-decision" aria-label="La décision du jour"></section> <aside class="ck-fil ck-panneau" id="ck-fil" aria-label="Fil en direct"></aside> </div> <div class="ck-col" id="ck-t-b"> <section class="ck-plan ck-panneau" id="ck-plan" aria-label="Le domaine en direct"></section> <section class="ck-chant ck-panneau" id="ck-chant" aria-label="Chantiers d’hiver"></section> <section class="ck-courbe ck-panneau" id="ck-courbe" aria-label="Charge restante"></section> </div> <div class="ck-col ck-col-c" id="ck-t-c"> <section class="ck-savoir ck-panneau" id="ck-savoir" aria-label="À savoir"></section> </div> </div> <div class="ck-vue ck-gc" id="ck-vue-cave" hidden> <div class="ck-col" id="ck-c-a"> <section class="ck-verdict cv-verdict" id="ck-cv-verdict" aria-label="Ce qui presse en cave"></section> <section class="ck-panneau cv-mil" id="ck-cv-mil" aria-label="Le millésime"></section> </div> <div class="ck-col" id="ck-c-b"> <section class="ck-panneau cv-plan" id="ck-cv-plan" aria-label="La cave en direct"></section> <section class="ck-panneau cv-semaine" id="ck-cv-semaine" aria-label="La cave dans la semaine"></section> </div> <div class="ck-col ck-col-c" id="ck-c-c"> <aside class="ck-panneau ck-fil cv-fil" id="ck-cv-fil" aria-label="En direct, la cave"></aside> <section class="ck-panneau ck-savoir cv-savoir" id="ck-cv-savoir" aria-label="À savoir, en cave"></section> </div> </div> <div class="ck-vue ck-ge" id="ck-vue-eco" hidden> <div class="ck-col" id="ck-e-a"> <section class="ck-ever ck-verdict" id="ck-ever" aria-label="Atterrissage de la campagne"></section> <section class="ck-ekpi" id="ck-ekpi" aria-label="Indicateurs économiques"></section> </div> <div class="ck-col" id="ck-e-b"> <section class="ck-echart ck-panneau" id="ck-echart" aria-label="Dépensé face au fait"></section> <section class="ck-etac ck-panneau" id="ck-etac" aria-label="Écart au barème par tâche"></section> </div> <div class="ck-col ck-col-c" id="ck-e-c"> <section class="ck-epos ck-panneau" id="ck-epos" aria-label="Par poste"></section> <section class="ck-eapp ck-panneau" id="ck-eapp" aria-label="Par appellation"></section> </div> </div> </div> </div><div class="ck-sr" id="ck-annonce" aria-live="polite"></div>'; };
+window._ck2Squelette = function () { return '<div class="ck2"><div class="ck-page ck-entree" id="ck-page"> <div class="ck-cadre-tete" id="ck-cadre-tete"></div> <div class="ck-tete" id="ck-tete"></div> <section class="ck-photos" id="ck-photos" aria-label="Les quatre photos du domaine"></section> <div class="ck-vue ck-gt" id="ck-vue-terrain"> <div class="ck-col" id="ck-t-a"> <section class="ck-verdict" id="ck-verdict" aria-label="Fin prévue des travaux"></section> <section class="ck-decision ck-panneau" id="ck-decision" aria-label="La décision du jour"></section> <aside class="ck-fil ck-panneau" id="ck-fil" aria-label="Fil en direct"></aside> </div> <div class="ck-col" id="ck-t-b"> <section class="ck-plan ck-panneau" id="ck-plan" aria-label="Le domaine en direct"></section> <section class="ck-chant ck-panneau" id="ck-chant" aria-label="Chantiers d’hiver"></section> <section class="ck-courbe ck-panneau" id="ck-courbe" aria-label="Charge restante"></section> </div> <div class="ck-col ck-col-c" id="ck-t-c"> <section class="ck-savoir ck-panneau" id="ck-savoir" aria-label="À savoir"></section> </div> </div> <div class="ck-vue ck-gc" id="ck-vue-cave" hidden> <div class="ck-col" id="ck-c-a"> <section class="ck-verdict cv-verdict" id="ck-cv-verdict" aria-label="Ce qui presse en cave"></section> <section class="ck-panneau cv-mil" id="ck-cv-mil" aria-label="Le millésime"></section> </div> <div class="ck-col" id="ck-c-b"> <section class="ck-panneau cv-plan" id="ck-cv-plan" aria-label="La cave en direct"></section> <section class="ck-panneau cv-semaine" id="ck-cv-semaine" aria-label="La cave dans la semaine"></section> </div> <div class="ck-col ck-col-c" id="ck-c-c"> <aside class="ck-panneau ck-fil cv-fil" id="ck-cv-fil" aria-label="En direct, la cave"></aside> <section class="ck-panneau ck-savoir cv-savoir" id="ck-cv-savoir" aria-label="À savoir, en cave"></section> </div> </div> <div class="ck-vue ck-ge" id="ck-vue-eco" hidden> <div class="ck-col" id="ck-e-a"> <section class="ck-ever ck-verdict" id="ck-ever" aria-label="Atterrissage de la campagne"></section> <section class="ck-ekpi" id="ck-ekpi" aria-label="Indicateurs économiques"></section> </div> <div class="ck-col" id="ck-e-b"> <section class="ck-echart ck-panneau" id="ck-echart" aria-label="Dépensé face au fait"></section> <section class="ck-etac ck-panneau" id="ck-etac" aria-label="Écart au barème par tâche"></section> </div> <div class="ck-col ck-col-c" id="ck-e-c"> <section class="ck-epos ck-panneau" id="ck-epos" aria-label="Par poste"></section> <section class="ck-eapp ck-panneau" id="ck-eapp" aria-label="Par appellation"></section> </div> </div> </div> </div><div class="ck-sr" id="ck-annonce" aria-live="polite"></div>'; };
 /* Ma Vigne — maquette « Pilotage › Aujourd’hui », le cockpit vivant.
    Données de démonstration. L’architecture est celle de l’appli : des fonctions
    de dessin qui rendent du HTML, une petite couche d’animation commune (Anim),
@@ -362,6 +362,15 @@ const signe = v => { const n = Math.round(v); return (n > 0 ? '+' : n < 0 ? '−
 const NF1 = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const pct1 = v => { const n = Math.round(v * 10) / 10; return (n > 0 ? '+' : n < 0 ? '−' : '') + NF1.format(Math.abs(n)) + '\u202f%'; };   // AUJ-7 : jamais « −0,0 % »
 const INFO = {
+  // ★★ AUJ-TETE-1 (§454) — les références de la phrase du haut : un titre, une idée par paragraphe (ouvrirInfo les lit).
+  resTemps: { t: 'Le délai : sur quoi il est compté', p: [
+    'Fin prévue : le jour où tout le travail de la campagne serait fini, si le planning et les contrats restent tels quels — absences, congés et journées de cave compris.',
+    'Objectif : la date « tout fini le » réglée sous la fin prévue, dans la vue Terrain. Sans elle, la fin de la campagne.',
+    'L’écart se compte en jours travaillés au planning : les jours où le domaine ne travaille pas — week-ends, fériés, vendredis chômés — ne comptent pas.'] },
+  resBudget: { t: 'L’écart au budget : sur quoi il est compté', p: [
+    'Budget : celui de la campagne, tous postes compris — main-d’œuvre au barème, tracteur, carburant, phyto, prestations.',
+    'Coût à la fin : ce qui est déjà payé, plus le travail qui reste, compté au barème et corrigé du rythme mesuré de l’équipe quand il compte, dès 40 % du travail fait.',
+    'Avant 40 %, l’écart est celui déjà constaté — la part du budget main-d’œuvre payée face à la part du travail validé —, reporté tel quel jusqu’à la fin. Une parcelle commencée ne compte comme faite qu’à sa validation.'] },
   // ★ CAVEPIL-1 (§436) — la vue Cave
   cvverdict: 'Le verdict de la Cave, mot pour mot — celui de Cave › Aujourd’hui : relevés de densité, dernier ouillage, analyses de malo, soutirages, et le Diagnostic du Chai quand il relève des signes forts. Le Pilotage le lit, il ne le refait pas. Les trois chiffres comptent les gestes des quatre semaines de la Cave.',
   cvplan: 'Chaque cuve suivie au Cuvier et chaque fût du Chai, de la couleur de ce qu’il demande cette semaine : rouge pour une alerte (fermentation qui ralentit, malo bloquée, signe fort au Diagnostic), orange pour un geste attendu, gris pour ce qui suit son cours, vert pour ce qui est à jour. Le niveau d’une cuve est estimé d’après les caisses, comme au Cuvier. Dans le coin d’un fût, le signe de sa dernière dégustation : fleur, piqué ou oxydé ; il part quand une dégustation plus récente du même fût ne le note plus. Toucher ouvre l’écran de la Cave.',
@@ -429,18 +438,39 @@ function spark(vals, mauvais, w = 92, h = 34) {
     + '<path class="l-' + cls + '" d="' + d + '"/><circle class="p-' + cls + '" cx="' + x(n - 1).toFixed(1) + '" cy="' + y(eL).toFixed(1) + '" r="2.6"/></svg>';
 }
 
-/* ── En-tête de l’écran : le résumé en une phrase, et la bascule ── */
-function htmlTete() {
-  return '<div class="ck-tete-g"><p class="ck-tete-date">' + esc(V.dateTxt) + '</p><p class="ck-tete-res" id="ck-resume" aria-live="polite"></p></div>'
-    + ((V.eco || V.cave) ? '<div class="ck-bascule" role="tablist" aria-label="Vue de la journée">'
+/* ── La ligne du cadre : son nom, puis la bascule et la roue, en haut à droite ── */
+// ★★ AUJ-TETE-1 (§454) — Nico (23/10, « je demande bien ») : la bascule Terrain · Cave · Économie en haut à droite du cadre
+//   Aujourd’hui, pas sous la phrase. La ligne du cadre vit DANS la page du cockpit : elle s’aligne sur les cartes à toutes les
+//   largeurs (la sous-ligne du Pilotage, « Aujourd’hui » et sa roue, avait 32 px d’écart avec elles ; elle se masque sur cet
+//   onglet, styles.css). La roue ouvre le même panneau « Choisir les indicateurs » : elle touche #pil-gear, resté dans la
+//   sous-ligne masquée (pilotage.js/_pilBind le branche).
+function htmlCadreTete() {
+  const roue = typeof document !== 'undefined' && document.getElementById('pil-gear');
+  return '<span class="ck-cadre-nom">Aujourd’hui</span>' + htmlBascule()
+    + (roue ? '<button type="button" class="ck-roue" data-fn="indicateurs" aria-label="Choisir les indicateurs" title="Choisir les indicateurs">' + cvIc('engrenage', 16) + '</button>' : '');
+}
+function htmlBascule() {
+  return (V.eco || V.cave) ? '<div class="ck-bascule" role="tablist" aria-label="Vue de la journée">'
       + '<button type="button" role="tab" data-mode="terrain" aria-selected="true">' + ICO.feuille + 'Terrain</button>'
       // ★ CAVEPIL-1 (§436) : la vue Cave, entre les deux ; un point quand quelque chose presse (orange : un geste ; rouge : une alerte).
-      + (V.cave ? '<button type="button" role="tab" data-mode="cave" aria-selected="false"' + (V.cave.pt ? ' aria-label="Cave, un point demande votre attention"' : '') + '>' + ICO.cave + 'Cave'
-        + (V.cave.pt ? '<i class="ck-b-pt ' + V.cave.pt + '" aria-hidden="true"></i>' : '') + '</button>' : '')
+      //   AUJ-TETE-1 (§454) : le point est accroché au mot (.ck-b-lab) — au téléphone, chaque bouton prend un tiers de la ligne.
+      + (V.cave ? '<button type="button" role="tab" data-mode="cave" aria-selected="false"' + (V.cave.pt ? ' aria-label="Cave, un point demande votre attention"' : '') + '>' + ICO.cave + '<span class="ck-b-lab">Cave'
+        + (V.cave.pt ? '<i class="ck-b-pt ' + V.cave.pt + '" aria-hidden="true"></i>' : '') + '</span></button>' : '')
       + (V.eco ? '<button type="button" role="tab" data-mode="eco" aria-selected="false">' + ICO.euro + 'Économie</button>' : '')
-      + '<span class="ck-bascule-ind" aria-hidden="true"></span></div>' : '');
+      + '<span class="ck-bascule-ind" aria-hidden="true"></span></div>' : '';
 }
-
+/* ── En-tête de l’écran : la date et la campagne lue, puis le résumé en une phrase, sur toute la ligne ── */
+// ★★ AUJ-TETE-1 (§454) — « 45 jours de retard par rapport à quoi ? Depuis quand ? » (Nico, 23/10). Sous la date, la campagne
+//   que lisent les chiffres de cette page (Aujourd’hui lit la campagne en cours, pas le choix de la barre « Vous regardez »),
+//   ses dates et le jour où l’on en est, avec les mots de la barre (pilotage.js/_pilCk2Per). La barre montre déjà cette
+//   campagne : sur ordinateur, la ligne garde le nom seul (au téléphone, la barre cache ses dates — la ligne les garde).
+function htmlTete() {
+  const P = V.per;
+  const per = P && P.nom ? '<span class="ck-tete-sep" aria-hidden="true"></span><span class="ck-per' + (P.meme ? ' meme' : '') + '"><span class="ck-per-nom">' + esc(P.nom) + '</span>'
+    + (P.bornesHtml ? '<span class="ck-per-d"><span>' + P.bornesHtml + '</span>'   // bornesHtml : déjà échappé par _pilPorteeBornes
+      + (typeof P.pct === 'number' ? '<span class="ck-per-piste" aria-hidden="true"><i style="width:' + P.pct.toFixed(1) + '%"></i></span>' : '') + '</span>' : '') + '</span>' : '';
+  return '<p class="ck-tete-ctx"><span class="ck-tete-date">' + esc(V.dateTxt) + '</span>' + per + '</p><p class="ck-tete-res" id="ck-resume" aria-live="polite"></p>';
+}
 const tuile = (id, lab, num, vis, cadre, onglet, cible) =>
   '<div class="ck-ph" data-ph="' + id + '">'
   + '<button class="ck-ph-go" type="button" data-onglet="' + onglet + '" aria-label="' + esc(lab) + ' : ouvrir ' + esc(cible) + '"></button>'
@@ -955,17 +985,46 @@ function htmlTaches(r) {
 const libEtat = (t, e) => ({ faite: T[t].f ? 'faite' : 'fait', cours: 'en cours', afaire: 'à faire', retard: 'en retard', arr: 'arrachée', hors: 'pas concernée' }[e]);
 const COUL = { faite: 'var(--et-faite-b)', cours: 'var(--et-cours-b)', afaire: 'var(--texte-doux)', retard: 'var(--et-retard-b)', arr: 'var(--texte-doux)', hors: 'var(--texte-doux)' };
 
+// ★★ AUJ-TETE-1 (§454) — la référence d’un chiffre : deux lignes, le libellé puis la valeur, le « i » au bout de la première.
+const refChiffre = (id, etat, lignes, info, lab) => '<span class="ck-cap' + (etat ? ' ' + etat : '') + '" id="' + id + '">'
+  + lignes.map((l, k) => '<span class="ck-cap-k">' + l[0] + '</span><b class="ck-cap-v">' + l[1] + '</b>' + (k === 0 ? btnI(info, lab) : '<span></span>')).join('') + '</span>';
 function majResume(r) {
   const n = savoirItems(r).filter(x => x.prio === 1).length;
-  const temps = r.ecart > 0 ? r.ecart + ' jour' + (r.ecart > 1 ? 's' : '') + ' d’avance' : r.ecart < 0 ? -r.ecart + ' jours de retard' : 'pile à l’heure';
+  const temps = r.ecart > 0 ? r.ecart + ' jour' + (r.ecart > 1 ? 's' : '') + ' d’avance' : r.ecart < 0 ? -r.ecart + ' jour' + (r.ecart < -1 ? 's' : '') + ' de retard' : 'pile à l’heure';
   const e0 = Math.round(r.sous), argent = !(V.eco && r.budget > 0) ? '' : (e0 === 0 ? 'pile dans le budget' : e0 > 0 ? eur(e0) + ' sous le budget' : eur(-e0) + ' au-dessus du budget');   // AUJ-7 : à l'euro, comme partout
   // ★ ANTICIPE-1 (§420) : les points annoncés se touchent — le bouton mène à eux, en tête d'« À savoir » (allerAnticiper).
   const pts = n + ' point' + (n > 1 ? 's' : '') + ' à anticiper';
   // ★ CAVEPIL-1 (§436) : quand la cave presse, la phrase la nomme — touchée, elle ouvre la vue Cave.
   const cv = V.cave && V.cave.lien ? '<button type="button" class="ck-res-pts ck-res-cave' + (V.cave.lienAlerte ? ' alerte' : '') + '" data-fn="cave" aria-label="' + esc(V.cave.lien) + ', ouvrir la vue Cave">' + esc(V.cave.lien) + '</button>' : '';
-  const h = '<b>' + maj1(temps) + '</b>, ' + (argent ? '<b>' + argent + '</b>, ' : '')
-    + (n ? '<button type="button" class="ck-res-pts" data-fn="anticiper" aria-label="' + pts + ', en tête d’« À savoir »">' + pts + '</button>.' : 'rien à anticiper.');
-  $('#ck-resume').innerHTML = cv ? h.slice(0, -1) + ', et ' + cv + '.' : h;   // CAVEPIL-1 : la phrase d'ANTICIPE-1, telle quelle, puis la cave
+  // ★★ AUJ-TETE-1 (§454) : sous chaque chiffre, sa référence — la fin prévue et l’objectif, le coût à la fin et le budget. Sans
+  //   objectif posé (VISEE n’est alors qu’un repère à 60 jours), la ligne « Objectif » ne s’écrit pas. Le chiffre se touche : le
+  //   délai mène au verdict de Terrain, l’écart au budget à la vue Économie.
+  const refT = refChiffre('ck-cap-t', r.ecart < 0 ? 'ko' : r.ecart > 0 ? 'ok' : '', [['Fin prévue', dLong(r.fin)]].concat(V.objectif ? [['Objectif', dLong(VISEE)]] : []), 'resTemps', 'Sur quoi ce délai est compté');
+  const refB = argent ? refChiffre('ck-cap-b', e0 < 0 ? 'ko' : e0 > 0 ? 'ok' : '', [['Coût à la fin', eur(r.att)], ['Budget', eur(r.budget)]], 'resBudget', 'Sur quoi cet écart est compté') : '';
+  const fig = (txt, fn, id, ref) => '<span class="ck-fig"><span class="ck-fig-l"><button type="button" class="ck-fig-t" data-fn="' + fn + '" aria-describedby="' + id + '">' + txt + '</button>,</span>' + ref + '</span>';
+  // AUJ-TETE-1 : un bouton garde sa ponctuation (.ck-tient). Au téléphone, « , et » partait seul en tête de ligne : le navigateur
+  //   coupe après un bouton, même devant une virgule (vu à la capture, déjà vrai avant ce lot).
+  const tient = (bt, p) => '<span class="ck-tient">' + bt + p + '</span>';
+  const ptsB = '<button type="button" class="ck-res-pts" data-fn="anticiper" aria-label="' + pts + ', en tête d’« À savoir »">' + pts + '</button>';
+  const suite = n ? (cv ? tient(ptsB, ',') + ' et ' + tient(cv, '.') : tient(ptsB, '.')) : (cv ? 'rien à anticiper, et ' + tient(cv, '.') : 'rien à anticiper.');   // CAVEPIL-1 : la cave après les points, « et » devant
+  $('#ck-resume').innerHTML = fig(maj1(temps), 'allerFin', 'ck-cap-t', refT) + ' ' + (argent ? fig(argent, 'allerBudget', 'ck-cap-b', refB) + ' ' : '') + suite;
+  calerRefs();
+}
+// ★★ AUJ-TETE-1 (§454) : une référence plus large que son chiffre (« 6 jours d’avance » sous « Fin prévue 25 février ») déborde
+//   dessous sans creuser la phrase ; la suivante, sur la même ligne, se décale d’autant — le bord réel du texte, pas la boîte —,
+//   avec 20 px d’air. Rejouée à chaque phrase et quand la page change de largeur (ranger).
+function calerRefs() {
+  const F = $$('#ck-resume .ck-fig');
+  F.forEach(f => { const c = f.querySelector('.ck-cap'); if (c) c.style.marginLeft = ''; });
+  for (let k = 1; k < F.length; k++) {
+    const la = F[k - 1].querySelector('.ck-fig-l'), lb = F[k].querySelector('.ck-fig-l'), ca = F[k - 1].querySelector('.ck-cap'), cb = F[k].querySelector('.ck-cap');
+    if (!la || !lb || !ca || !cb) continue;
+    const pa = la.getBoundingClientRect(), pb = lb.getBoundingClientRect();
+    if (Math.abs(pa.top - pb.top) > 4) continue;                       // pas sur la même ligne : rien à caler
+    const bord = Math.max(...Array.from(ca.children).map(x => x.getBoundingClientRect().right));
+    const d = Math.ceil(bord + 20 - pb.left);
+    if (d > 0) cb.style.marginLeft = d + 'px';
+  }
 }
 function majVerdict(r) {
   Anim.rouler($('#ck-v-fin'), dLong(r.fin));
@@ -1246,7 +1305,9 @@ function toast(o) {
    ici que le texte : la position, la pointe, le toucher à côté, Échap et le défilement sont ceux de toute l'appli. */
 function ouvrirInfo(btn, clavier) {
   if (typeof window._mvBulleOuvrir !== 'function') { if (window.logError) window.logError({ level: 'info', cat: 'cockpit', msg: '_mvBulleOuvrir absent' }); return; }
-  const k = btn.dataset.info;
+  const k = btn.dataset.info, f = INFO[k];
+  // ★ AUJ-TETE-1 (§454) : une fiche peut porter un titre et plusieurs paragraphes ({ t, p: [...] }) ; les autres restent une phrase.
+  if (f && typeof f === 'object') { window._mvBulleOuvrir(btn, { t: f.t, p: (f.p || []).map(esc) }, { sig: '.ck-i[data-info="' + k + '"]', clavier: !!clavier }); return; }
   window._mvBulleOuvrir(btn, { p: [esc(INFO[k] || '')] }, { sig: '.ck-i[data-info="' + k + '"]', clavier: !!clavier });
 }
 // ★ FORME-1 (§301) — LA LOUPE : au survol (souris), la parcelle en grand avec ce qu'il faut savoir. Au doigt, pas de
@@ -1471,6 +1532,16 @@ function allerCave() {
   if (!V.cave) return;
   if (S.mode !== 'cave') choisirMode('cave');
   const v = $('#ck-cv-verdict'); if (v) requestAnimationFrame(() => v.scrollIntoView({ behavior: reduit() ? 'auto' : 'smooth', block: 'nearest' }));
+}
+// ★ AUJ-TETE-1 (§454) : les deux chiffres de la phrase du haut mènent à leur détail, comme les points et la cave.
+function allerFin() {
+  if (S.mode !== 'terrain') choisirMode('terrain');
+  const v = $('#ck-verdict'); if (v) requestAnimationFrame(() => v.scrollIntoView({ behavior: reduit() ? 'auto' : 'smooth', block: 'nearest' }));
+}
+function allerBudget() {
+  if (!V.eco) return;
+  if (S.mode !== 'eco') choisirMode('eco');
+  const v = $('#ck-ever'); if (v) requestAnimationFrame(() => v.scrollIntoView({ behavior: reduit() ? 'auto' : 'smooth', block: 'nearest' }));
 }
 
 /* ═══ 12. NAVIGATION : tâche du plan, bascule Terrain / Économie, onglets, thème, barre latérale ═══ */
@@ -1701,6 +1772,7 @@ function indiceSeg() {
 }
 function ranger() {
   indiceSeg();
+  calerRefs();   // AUJ-TETE-1 (§454) : une phrase qui passe à la ligne ne garde pas un décalage qui ne vaut plus
   const pg = $('#ck-page');
   // PRO-1 (§269) : le cockpit a quitté l'écran (autre onglet, autre module) — l'observateur restait branché sur la
   //   page disparue et plantait à chaque redimensionnement (« reading 'clientWidth' », journalisé en erreur).
@@ -1773,6 +1845,7 @@ function choisirObjectif(btn) {
   catch (e) { inp.focus(); if (window._mvAvale) window._mvAvale(e, 'cockpit-vue.js/choisirObjectif'); }
 }
 function monter() {
+  $('#ck-cadre-tete').innerHTML = htmlCadreTete();   // AUJ-TETE-1 (§454) : la bascule et la roue, en haut à droite du cadre
   $('#ck-tete').innerHTML = htmlTete();
   $('#ck-photos').innerHTML = htmlPhotos(R);
   $('#ck-verdict').innerHTML = htmlVerdict(R);
@@ -1865,6 +1938,9 @@ function brancher() {
     if (fn && fn.dataset.fn === 'voirRetard') { voirRetard(); return; }
     if (fn && fn.dataset.fn === 'anticiper') { allerAnticiper(); return; }   // ANTICIPE-1 (§420) : la phrase du haut
     if (fn && fn.dataset.fn === 'cave') { allerCave(); return; }   // CAVEPIL-1 (§436) : la phrase du haut, la ligne Cave d'« À savoir »
+    if (fn && fn.dataset.fn === 'allerFin') { allerFin(); return; }         // AUJ-TETE-1 (§454) : le délai de la phrase mène au verdict de Terrain
+    if (fn && fn.dataset.fn === 'allerBudget') { allerBudget(); return; }   // AUJ-TETE-1 : l’écart au budget mène à la vue Économie
+    if (fn && fn.dataset.fn === 'indicateurs') { const g = document.getElementById('pil-gear'); if (g) g.click(); return; }   // AUJ-TETE-1 : la roue de la ligne du cadre
     if (fn && fn.dataset.fn === 'export') { if (typeof window._pilEcoExport === 'function') window._pilEcoExport(); return; }
     // PRO-1 (§269) : « Agrandir » était branché sur une instruction vide ; « Changer la priorité » menait à l'onglet
     //   L'équipe & le matériel au lieu d'ouvrir le choix de la priorité.

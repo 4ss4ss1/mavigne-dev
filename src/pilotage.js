@@ -5096,7 +5096,27 @@ function _pilCk2Modele(d, m){
   // ★ CAVEPIL-1 (§436) : la vue Cave, lue dans la Cave — dans le modèle, pour les deux montages (REF-1 et la mise à jour en
   //   direct de VIF-1) ; ses points s'ajoutent à « À savoir » de Terrain.
   _ckV.cave=(typeof _pilCk2Cave==='function')?_pilCk2Cave(_ckV):null;   // typeof : les harnais qui extraient le modèle seul ne l'ont pas
+  _ckV.per=(typeof _pilCk2Per==='function')?_pilCk2Per():null;   // AUJ-TETE-1 (§454) : la campagne que lisent ces chiffres — typeof, pour la même raison
   return _ckV;
+}
+// ★★ AUJ-TETE-1 (§454) — LA CAMPAGNE QUE LISENT LES CHIFFRES D'AUJOURD'HUI, pour la ligne de repère sous la date.
+//   Aujourd'hui ne suit pas la barre « Vous regardez » : il lit _pilSaison (la période consultée, sinon l'active). C'est la
+//   confusion relevée par Nico le 23/10 — « 45 jours de retard par rapport à quoi ? depuis quand ? » — la barre disant
+//   « l'exercice » pendant que la phrase chiffrait la campagne. Les mots et le décompte sont ceux de la barre
+//   (_pilPorteeBornes, jours du calendrier) : deux façons de compter les jours sur le même écran feraient douter des deux.
+//   « meme » : la barre montre déjà cette campagne — la ligne garde alors le nom seul sur ordinateur (styles.css).
+//   « pct » : la part écoulée de la campagne, seulement quand on est dedans (à venir ou terminée : pas de piste).
+function _pilCk2Per(){
+  var sa=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  if(!sa || !sa.nom) return null;
+  var d0=String(sa.debut||'').slice(0,10), d1=String(sa.fin||'').slice(0,10), iso=/^\d{4}-\d{2}-\d{2}$/;
+  var r={ nom:String(sa.nom), bornesHtml:'', pct:null, meme:(_PIL_SCOPE.camp===sa.nom) };
+  if(iso.test(d0) && iso.test(d1)){
+    r.bornesHtml=_pilPorteeBornes(d0,d1);
+    var a=_pilAnnOrd(d0), b=_pilAnnOrd(d1), o=_pilAnnOrd(_pilAnAuj());
+    if(!isNaN(a) && !isNaN(b) && !isNaN(o) && b>=a && o>=a && o<=b) r.pct=Math.round((o-a+1)/(b-a+1)*1000)/10;
+  }
+  return r;
 }
 window._pilCk2Modele=_pilCk2Modele;
 // ★★ REF-2 (§267) — LA PHOTO ÉCONOMIQUE DU JOUR (la vue Économie de la maquette), lue dans _pecData : le MÊME moteur que

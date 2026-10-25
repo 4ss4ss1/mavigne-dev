@@ -1,0 +1,39 @@
+{
+  "lot": "AUJ-TETE-1",
+  "section": "§454",
+  "base": "77158c553edad233c61c7a774686421eaa570467",
+  "inclut": [],
+  "date": "2026-10-25",
+  "tutos": {
+    "ok": true,
+    "empreinte": "4edd5a8e1a5f6f75d176e8a0f97162aa003bd5022178b5d2edd0f36cff2f4bab",
+    "date": "2026-10-25T14:13:09.106Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "d94c28822958f686fa630ffc94ec0add2a68d25a11474dbbd907149e8a7e6f9c",
+    "CLAUDE.md": "b2067f66b64c846209da453c7b409b252f38135f6c2e7a2b6bfd296c52939503",
+    "docs/claude/INDEX.md": "563e4cfff40c1a7e0db4d4fe328a379f8f880258b342b79ebc837cacfdb12007",
+    "docs/claude/chantiers-430-479.md": "c83450a4b72bd1bfc67117c51c60375fdf3046da8432beac609ea8d49d9f19f7",
+    "docs/claude/journal.md": "4da5fdb7151962851eaa091f51793e61fc8cdee4bf5dea7471a01cdd01ca4305",
+    "guide/11-pilotage.html": "6b3bcdd4d15af79989f507228f810a758416a4ef043c6aa4f7e6d37d2b429542",
+    "index.html": "87e645e5def1a8394e639e05a8117b283a4c4931c875ed3f9d678f5181a02e79",
+    "public/guide.html": "e4d239344ab0447342424ccac9c3afebf79da701879ae41525602e016d238006",
+    "public/sw.js": "6bc2a620f6b3bb2fad00a22b06e0a5c5de764d5fcd7258c5eacd418e654a2512",
+    "scripts/harnais-claude-md.mjs": "c779f1d17cd0435df08c0016d1ed4952589cfcde1de3609cd4d7af8a23d6a161",
+    "scripts/mv-harnais-anticipe1.mjs": "20ef976dace65e9a102eba1a809807b76ec45e6836bae6734c5329cf3c120b06",
+    "scripts/mv-harnais-liste.mjs": "f1fb3b2d4fe871c5a2cc5d84fe429ff0f7ce38937246fc0c81d52f7b2896e03a",
+    "scripts/typo-baseline.json": "47e13a7dfde8e0c447791f363b680d42ce896d6628d79de0b13d82b0dd8f654f",
+    "src/cockpit-vue.js": "ca6dc34be7497621ace3216d84ae26d98a93e28d68dbe558ea9af0d6d83520e5",
+    "src/pilotage.js": "4c269584798e36f826f97756cf6eec1cb9701f5a3abad7f69eb6e44251691094",
+    "src/styles.css": "b563b6c8cd613d82590f421eaa920157f270bee27ed806e0b88d32bb3e37b7ad",
+    "src/utils.js": "7a07588a1548ef78e2c89e25adb4a09b3745ea7717547750cbdfa7d992ca84b5",
+    "scripts/mv-harnais-autete1.mjs": "7141d820c95b6c199885847b26de35dd05cb116ce9c80ead178ccfaa402346d1"
+  }
+}
