@@ -1,0 +1,24 @@
+{
+  "lot": "CAVE-FIX-1",
+  "section": "§448",
+  "base": "0ad38fa0836e9db647059075230a6cba836ca9ca",
+  "inclut": [],
+  "date": "2026-10-25",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "e62ec8feaebf58219150f0c514a75d733929a490a33f2f870d95b74ccab755f6",
+    "CLAUDE.md": "e53d5010d1e170c358b21aaeb0caf92f6aff24cc671679a0c1376a677b7e058c",
+    "docs/claude/INDEX.md": "0765a9ecc692130b7ad9f10220812cd894923475ec0cdbdf2f144cb3a0341ed1",
+    "docs/claude/chantiers-430-479.md": "467b108a31e2aabf99059aa851902b4c72faf8b1fd3d98747df8c3c9be4d9331",
+    "docs/claude/journal.md": "690339e3dfaa6eaed20f8fcf7174b361e40542e71b73d7a69f298ba9da45937d",
+    "index.html": "ab5016d61b8bdf4ad142df44c16718d91b399f1e782a27c35a84db6d96858dcd",
+    "public/sw.js": "d743e4c668785df52e63a8e54990ab527db39eac2e991c587f6309ae787d98a1",
+    "scripts/mv-harnais-liste.mjs": "2d57eb336ed7899422bf6f2f17f5736867f0ef10bd0f7d79b5575d799ad83593",
+    "src/cave.js": "233ff28799c7751c9c6e36e32ed656f5f5cb83706f16b91ef4558bcd76ac55f7",
+    "src/utils.js": "0005f273457aed6a64345066dcc17b3058f6a8b9dfbf523bdb31b508bbce0a2c",
+    "scripts/mv-harnais-cavefix1.mjs": "4f018277fcca31cda015fef96ec039128ffcefac0b1ec581cc486999a61f3bd2"
+  }
+}

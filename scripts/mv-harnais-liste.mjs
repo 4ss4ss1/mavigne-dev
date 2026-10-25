@@ -769,6 +769,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-pilrange4a.mjs --contre'],
   ['node scripts/mv-harnais-pilrange4b.mjs'],            // PIL-RANGE-4b (§447) : « Le détail de l'exercice » suit la barre ; ses réglages dans la roue
   ['node scripts/mv-harnais-pilrange4b.mjs --contre'],
+  ['node scripts/mv-harnais-cavefix1.mjs'],              // CAVE-FIX-1 (§448) : la part des anges d'un jeune millésime sur sa période réelle, avec son équivalent annuel
+  ['node scripts/mv-harnais-cavefix1.mjs --contre'],
   ['node scripts/mv-harnais-cave2.mjs'],              // CAVE-2 (§289) : le Cuvier à la charte
   ['node scripts/mv-harnais-cave2.mjs --contre'],
   ['node scripts/mv-harnais-cave3.mjs'],              // CAVE-3 (§290) : le Chai en liste + fiche

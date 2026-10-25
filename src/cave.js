@@ -6867,10 +6867,14 @@ function _pcavAnges(c){
   var _d0=new Date(); _d0.setFullYear(_d0.getFullYear()-1);
   var d0=_mvISO(_d0);
   // Millesime de chaque cuvee, pour ventiler les ouillages.
-  var milDe={}, futDe={}, litDe={};
+  var milDe={}, futDe={}, litDe={}, entreeDe={};
   c.enElevage.forEach(function(x){
     if(!x||!x.id) return;
     milDe[x.id]=_pcavMilKey(x.millesime);
+    // CAVE-FIX-1 (§448) : la première entrée en fût du millésime borne sa fenêtre (un vin entonné il y a trois mois
+    //   n'a que trois mois d'ouillages dans « douze mois glissants »).
+    var de=String(x.date_entonnage||x.date_entree||'').slice(0,10);
+    if(/^\d{4}-\d{2}-\d{2}$/.test(de)){ var km=milDe[x.id]; if(!entreeDe[km] || de<entreeDe[km]) entreeDe[km]=de; }
     futDe[x.id]=(x.tonneaux||[]).reduce(function(s,t){ return s+(parseInt(t.nb,10)||0); },0);
     litDe[x.id]=_caveFutsL(x);   // ★ FUT-CAP : chaque fut a SA contenance
   });
@@ -6889,8 +6893,8 @@ function _pcavAnges(c){
     // un millesime sans ligne qu'une ligne fausse.
     if(mk.length!==1) return;
     var k=mk[0];
-    if(!par[k]) par[k]={mil:k, L:0, ops:0, futs:0, futL:0};
-    par[k].L+=v; par[k].ops++;
+    if(!par[k]) par[k]={mil:k, L:0, ops:0, futs:0, futL:0, prem:dt};
+    par[k].L+=v; par[k].ops++; if(dt<par[k].prem) par[k].prem=dt;
   });
   // Volume loge par millesime = ses futs en vin, chacun a SA contenance (FUT-CAP).
   c.enElevage.forEach(function(x){
@@ -6899,10 +6903,21 @@ function _pcavAnges(c){
     par[k].futs+=futDe[x.id]||0;
     par[k].futL+=litDe[x.id]||0;
   });
+  // ★★ CAVE-FIX-1 (§448) — « %/AN » ÉTAIT ÉCRIT SANS ÊTRE RAMENÉ À L'ANNÉE. Le pourcentage mesure ce qui a été remis
+  //   sur la fenêtre ; pour un millésime en fût depuis moins d'un an, la fenêtre est plus courte que douze mois et le
+  //   « %/an » sortait d'autant trop bas (trois mois → quatre fois trop bas). Désormais : la période réelle (de la première
+  //   entrée en fût, sinon du premier ouillage, à aujourd'hui, dans les douze mois), le pourcentage de cette période, et
+  //   son équivalent annuel (linéaire, « soit env. ») dès un mois couvert ; au-delà de onze mois, la période EST l'année.
+  var _j=function(a,b){ return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5)+1; };
   var lignes=Object.keys(par).map(function(k){
     var p=par[k], loge=p.futL/100;
-    return {mil:k, hlPerdu:p.L/100, ops:p.ops, futs:p.futs, hlLoge:loge,
-            pctAn:loge>0?(p.L/100)/(loge+p.L/100)*100:null,
+    var debut=entreeDe[k] || p.prem || d0; if(debut<d0) debut=d0;
+    var jours=Math.max(1, Math.min(366, _j(debut, d1)));
+    var pctPer=loge>0?(p.L/100)/(loge+p.L/100)*100:null;
+    var annee=jours>=335;
+    return {mil:k, hlPerdu:p.L/100, ops:p.ops, futs:p.futs, hlLoge:loge, jours:jours, debut:debut,
+            pctPeriode:pctPer, annee:annee,
+            pctAn:(pctPer==null)?null:(annee?pctPer:(jours>=30?pctPer*365/jours:null)),
             btl:Math.round(p.L/0.75)};
   }).filter(function(x){ return x.hlPerdu>0; })
     .sort(function(a,b){
@@ -7095,7 +7110,15 @@ function _pcavAngesCard(c){
   var rows='';
   a.lignes.forEach(function(x){
     var lbl=(x.mil==='?')?'Sans mill\u00e9sime':x.mil;
-    var pct=(x.pctAn==null)?'\u2014':(_pcavF1(x.pctAn)+' %/an');
+    // CAVE-FIX-1 (§448) : sur moins d'un an, le pourcentage de la période et son équivalent annuel (≈).
+    var pct='\u2014';
+    if(x.pctPeriode!=null){
+      if(x.annee) pct=_pcavF1(x.pctPeriode)+' %/an';
+      else {
+        var per=(x.jours>=45)?(Math.round(x.jours/30.44)+' mois'):(x.jours+' j');
+        pct=_pcavF1(x.pctPeriode)+' % en '+per+(x.pctAn!=null?'<small>soit env. '+_pcavF1(x.pctAn)+' %/an</small>':'')   /* pas de « ≈ » : hors du jeu de la police */;
+      }
+    }
     rows+='<div class="pcav-agr">'
       +'<div class="pcav-agm">'+_escHtml(lbl)+'<small>'+x.ops+' ouillage'+(x.ops>1?'s':'')+' \u00b7 '+x.futs+' f\u00fbts</small></div>'
       +'<div class="pcav-agv">'+_pcavF1(x.hlPerdu)+' <small>hL remis</small></div>'

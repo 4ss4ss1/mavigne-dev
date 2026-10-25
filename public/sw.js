@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.84
+// MA VIGNE — Service Worker v10.85
+// v10.85 (23/10/2026) — CAVE-FIX-1 (§448) : la part des anges d’un millésime en fût depuis moins d’un an se lit sur sa période réelle, avec son équivalent annuel.
 // v10.84 (23/10/2026) — PIL-RANGE-4b (§447) : Économie — « Le détail de l’exercice » suit la barre « Vous regardez » ; ses trois réglages rangés dans la roue crantée du Pilotage.
 // v10.83 (23/10/2026) — PIL-RANGE-4a (§446) : Pilotage — « Afficher dans cet onglet » d’Aujourd’hui réduit aux deux cases lues ; tension et protection rangées dans leur onglet ; « mat_travaux » aux défauts.
 // v10.82 (23/10/2026) — PIL-RANGE-3 (§445) : Pilotage — « La campagne » devient « Travaux » ; la jauge de saison ouvre « Avancement par tâche » ; « La charge par tâche ».
@@ -4616,7 +4617,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.84';
+const CACHE_NAME   = 'mavigne-v10.85';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4633,7 +4634,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.84 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.85 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4653,7 +4654,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.84 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.85 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

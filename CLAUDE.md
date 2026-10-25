@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **23 octobre 2026 (PIL-RANGE-4b)** — **ÉCONOMIE : « LE DÉTAIL DE L’EXERCICE » SUIT LA BARRE « VOUS REGARDEZ » ; SES TROIS RÉGLAGES DANS LA ROUE** (§447). Base `42393c7` (« pilrange4a »). Vérifié avant le code : la sous-vue Exercice ne doublait pas « Le budget de l’année » (elle porte le détail comptable et trois réglages) ; son défaut était son propre choix d’année (`_PEX_AN`). Elle suit maintenant la barre (`_pilAnCadre().F`), s’appelle « Le détail de l’exercice » (ou « … de l’année vigne »), et ses réglages (ouverture de l’exercice, de l’année vigne, compte des fûts) vivent dans la roue crantée. Le rangement du Pilotage est terminé. `mv-harnais-pilrange4b.mjs` : 12 vertes, 8 contre-épreuves. **APP 10.03 → 10.04, SW 10.83 → 10.84**.
+> Dernière consolidation : **23 octobre 2026 (CAVE-FIX-1)** — **LA PART DES ANGES D’UN JEUNE MILLÉSIME SE LIT SUR SA PÉRIODE RÉELLE, AVEC SON ÉQUIVALENT ANNUEL** (§448). Base `0ad38fa` (« pilrange4b »). Défaut C1 de l’audit : « %/an » mesuré sur douze mois glissants sans être ramené à l’année (trois mois d’élevage → quatre fois trop bas). Désormais la période réelle (première entrée en fût, sinon premier ouillage), son pourcentage, et l’équivalent annuel linéaire dès trente jours ; au-delà de onze mois, rien ne change. `mv-harnais-cavefix1.mjs` : 10 vertes, 7 contre-épreuves. **APP 10.04 → 10.05, SW 10.84 → 10.85**.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -1944,7 +1944,7 @@ Maquettes validées (`maquette-pilotage-range-v1.html`, `maquette-cave-rangee-v1
 - ~~PIL-RANGE-2~~ — **fait** : la barre « Vous regardez » (§443), L’année rangée dans Économie et Équipe (§444).
 - ~~PIL-RANGE-3~~ — **fait (§445)**, corrigé : « Travaux », la jauge dans « Avancement par tâche », « La charge par tâche » ; donut / temps de l’équipe et Présences / Capacité restent séparés (questions différentes).
 - ~~PIL-RANGE-4~~ — **fait** : une case = un lecteur (§446) ; « Le détail de l’exercice » suit la barre, ses réglages dans la roue (§447).
-- **CAVE-FIX-1** — part des anges annualisée (`_pcavAnges` : `pctAn` × 365 / jours couverts, ou libellé « sur la période »), `MV_INFO` `cave.anges`.
+- ~~CAVE-FIX-1~~ — **fait (§448)** : la période réelle, son pourcentage et l’équivalent annuel (≈).
 - **CAVE-RANGE-1 à 3** — portée millésime (remplace `_caveMillFilter` et `_mlMil`) ; fiche de cuvée unique (Élevage · Volumes & origine · Analyses · Diagnostic) ouverte depuis toute liste ; Courbes → Cuvier › Cuves (mode Liste · Courbes), Le Millésime à deux onglets (Ensemble · Parcelles).
 - Restent à jouer avant ces lots : le renfort (photo d’Équipe = chiffrage de Décider sur la même semaine), `_pecCadPresence` face aux journées de cave (JCAVE-1), `_mlChaine` à deux cuves.
 

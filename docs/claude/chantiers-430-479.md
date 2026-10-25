@@ -435,3 +435,17 @@ Le rangement prévoyait « Exercice → portée, 6 → 5 sous-vues ». Vérifié
 
 ### 447d. Ce qui reste
 Le rangement du Pilotage est fait (PIL-RANGE-1 à 4). Restent CAVE-FIX-1 (part des anges annualisée) et CAVE-RANGE-1 à 3.
+
+## 448. ★ CAVE-FIX-1 — LA PART DES ANGES D’UN JEUNE MILLÉSIME SE LIT SUR SA PÉRIODE RÉELLE, AVEC SON ÉQUIVALENT ANNUEL (23/10 — `src/cave.js` (`_pcavAnges` : première entrée en fût par millésime, période, `pctPeriode`, `pctAn` ramené à l’année ; `_pcavAngesCard` : « … % en N mois · soit env. … %/an ») · `src/utils.js` (APP, WHATS_NEW niv 2, `MV_INFO` `cave.anges`) · `index.html` · `public/sw.js` · `scripts/mv-harnais-cavefix1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/CAVE-FIX-1.json` · **APP 10.04 → 10.05, SW 10.84 → 10.85**, base `0ad38fa` ; chaîne par le coureur : 528 commandes, 528 codes à 0)
+
+### 448a. D’où ça vient
+Défaut C1 de l’audit du rangement (§439, §6b) : `_pcavAnges` calculait `perdu / (logé + perdu)` sur **douze mois glissants** et l’affichait « %/an » — sans le ramener à l’année. Un millésime entonné il y a trois mois n’a que trois mois d’ouillages dans la fenêtre : le « %/an » sortait environ quatre fois trop bas. Ordre des lots validé par Nico (23/10).
+
+### 448b. Ce qui a été fait
+Par millésime, la **période réelle** : de la première entrée en fût de ses cuvées (`date_entonnage`, sinon `date_entree`), à défaut du premier ouillage de la fenêtre, jusqu’à aujourd’hui, dans les douze mois. Le pourcentage **de cette période** (`pctPeriode`, la formule d’origine) et l’**équivalent annuel** linéaire (`pctAn` = × 365 / jours) dès trente jours ; au-delà de 335 jours la période **est** l’année (rien ne change pour un millésime ancien) ; sous trente jours, pas d’extrapolation. La carte de La Réserve › Fûts écrit « 1,7 % en 3 mois · soit env. 6,9 %/an », ou « … % en 14 j » (pas de « ≈ » : `mv-harnais-subset` l’a refusé, il n’est pas dans le jeu de la police). La règle des opérations mixtes (comptées au total, pas ventilées) est gardée. Fiche `cave.anges` : la période réelle et l’équivalent annuel, avec la réserve du bois neuf qui boit davantage au début. WHATS_NEW 10.05 **niv 2** (« À vérifier » : un chiffre bouge pour les jeunes millésimes).
+
+### 448c. Harnais
+`mv-harnais-cavefix1.mjs` (10 vertes, 7 contre-épreuves) **exécute** les vraies `_pcavAnges` et `_pcavAngesCard` sur des ouillages datés : millésime ancien (même chiffre qu’avant), entonné il y a 91 jours (période, pourcentage, équivalent ×365/91, texte de la carte), quatorze jours (pas d’extrapolation), sans date (premier ouillage), opération mixte (non ventilée), fiche, nouveauté, liste.
+
+### 448d. Ce qui reste
+CAVE-RANGE-1 à 3 (la portée millésime ; la fiche de cuvée unique ; Courbes → Cuvier, Le Millésime à deux onglets).

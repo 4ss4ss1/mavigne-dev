@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.04';
+export const APP_VERSION = '10.05';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '10.05', d: '2026-10-23', items: [
+    { niv: 2, pour: ['admin'], emoji: 'sablier', titre: 'Cave : la part des anges d’un jeune millésime est juste',
+      desc: "La part des anges s’affichait « par an », mais elle n’était pas ramenée à l’année : pour un millésime entré en fût il y a trois mois, le chiffre était environ quatre fois trop bas. Chaque ligne dit maintenant le pourcentage sur la période réelle (« 0,8 % en 3 mois ») et, à côté, son équivalent sur un an (« soit env. … %/an »). Pour un millésime en fût depuis plus de onze mois, rien ne change. Vérifiez vos jeunes millésimes dans La Réserve › Fûts." }
+  ] },
   { v: '10.04', d: '2026-10-23', items: [
     { niv: 1, pour: ['admin'], emoji: 'calendrier', titre: 'Économie : « Le détail de l’exercice » suit la barre du haut',
       desc: "La sous-vue « Exercice » d’Économie s’appelle maintenant « Le détail de l’exercice » (ou « … de l’année vigne », selon ce que vous regardez). Elle n’a plus ses propres boutons d’année : elle montre l’année choisie dans la barre « Vous regardez », la même que le budget de l’année. Ses trois réglages — le mois où s’ouvre l’exercice, celui où s’ouvre l’année vigne, et la façon de compter un fût acheté — sont rangés dans la roue crantée du Pilotage." }
@@ -6237,7 +6241,8 @@ export const MV_INFO = {
     'Ce que vous remettez en <b>ouillage</b> est exactement ce qui s\u2019est <b>évaporé</b> : c\u2019est une <b>mesure</b>, pas une valeur théorique tirée d\u2019un abaque.',
     'Chaque millésime a sa ligne — <b>on n\u2019ouille pas les fûts d\u2019une année avec le vin d\u2019une autre</b>.',
     '\u26a0\ufe0f Un <b>soutirage</b> retire aussi du volume sans être une évaporation. Sur un mois où vous avez soutiré, le chiffre est donc surévalué.',
-    'Le calcul demande le <b>volume total saisi à chaque ouillage</b>. Sans lui, cet écran reste vide plutôt que d\u2019inventer une moyenne.'
+    'Le calcul demande le <b>volume total saisi à chaque ouillage</b>. Sans lui, cet écran reste vide plutôt que d\u2019inventer une moyenne.',
+    'Un millésime en fût depuis <b>moins d\u2019un an</b> n\u2019a pas douze mois d\u2019ouillages : la ligne donne le pourcentage <b>de la période réelle</b> (depuis l\u2019entrée en fût) et, à côté, son <b>équivalent annuel</b> (environ, en ligne droite). Les premières semaines, le bois neuf boit davantage : cet équivalent est un ordre de grandeur, pas une promesse.'
   ] },
 
   'cave.rdt': { t: 'Rendement face au plafond', p: [
