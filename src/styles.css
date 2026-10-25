@@ -1960,11 +1960,10 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pil-sw:checked::after{left:16px;}
 .pil-perso-note{font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:8px;line-height:1.5;}
 /* — Système de cartes UNIFIÉ (filet or au survol) — */
-.pil-cockpit-card,.pil-panel,.pil-tile,.pil-tile2,.pil-gauge{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:15px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;}
-.pil-cockpit-card::before,.pil-panel::before,.pil-tile::before,.pil-tile2::before,.pil-gauge::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--or),transparent 60%);opacity:0;transition:opacity .25s;pointer-events:none;}
-.pil-cockpit-card:hover::before,.pil-panel:hover::before,.pil-tile:hover::before,.pil-tile2:hover::before,.pil-gauge:hover::before{opacity:1;}
+.pil-panel,.pil-tile,.pil-tile2,.pil-gauge{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:15px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;}
+.pil-panel::before,.pil-tile::before,.pil-tile2::before,.pil-gauge::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--or),transparent 60%);opacity:0;transition:opacity .25s;pointer-events:none;}
+.pil-panel:hover::before,.pil-tile:hover::before,.pil-tile2:hover::before,.pil-gauge:hover::before{opacity:1;}
 /* — Cockpit : verdict + anneau fin — */
-.pil-cockpit-card{margin-bottom:18px;}
 .pil-hero{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center;padding:24px 26px 20px;}
 .pil-ring{position:relative;width:168px;height:168px;flex:none;margin:0 auto;}
 .pil-ring-mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
@@ -1985,32 +1984,12 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pil-obj input:disabled{opacity:.7;}
 .pil-obj-hint{font-size:var(--pt-micro,11px);color:var(--texte-doux);}
 /* — Frise temporelle fine — */
-.pil-tl-wrap{margin:0 26px 22px;}
-.pil-tl{position:relative;height:2px;border-radius:2px;background:var(--gris-clair);margin:30px 8px 30px;}
-.pil-tl-marge{position:absolute;top:-3px;bottom:-3px;border-radius:4px;background:repeating-linear-gradient(45deg,rgba(61,107,39,.28),rgba(61,107,39,.28) 5px,transparent 5px,transparent 10px);}
-.pil-tl-marge.over{background:repeating-linear-gradient(45deg,rgba(160,41,30,.3),rgba(160,41,30,.3) 5px,transparent 5px,transparent 10px);}
-.pil-tl-mk{position:absolute;top:50%;width:11px;height:11px;margin-left:-5.5px;border-radius:50%;background:var(--bg-card);border:2.5px solid var(--texte-doux);transform:translateY(-50%);}
-.pil-tl-mk .cap{position:absolute;top:-24px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:var(--pt-nano,9.5px);font-weight:600;letter-spacing:0;text-transform:none;background:transparent;padding:0;}
-.pil-tl-mk .cap.n1{top:-40px;}.pil-tl-mk .cap.n2{top:-56px;}.pil-tl.n1{margin-top:calc(var(--e-8,40px) + var(--e-2,8px));}.pil-tl.n2{margin-top:calc(var(--e-8,40px) + var(--e-6,24px));}
-.pil-tl-mk .cap.bot{top:auto;bottom:-24px;color:var(--texte-doux);font-weight:500;letter-spacing:.2px;text-transform:none;font-size:var(--pt-lbl,10.5px);}
-.pil-tl-today{border-color:#9B2D1F;}.pil-tl-today .cap{color:#9B2D1F;}
-.pil-tl-proj{border-color:var(--vert-med);}.pil-tl-proj .cap{color:var(--vert-med);}
-.pil-tl-obj{border-color:var(--or);}.pil-tl-obj .cap{color:var(--terre);}
 /* — Rangée KPI : une carte segmentée par hairlines — */
-.pil-cks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));border-top:1px solid var(--gris-clair);}
-.pil-ck{padding:16px 22px;border-right:1px solid var(--gris-clair);border-bottom:1px solid var(--gris-clair);margin-bottom:-1px;}
 /* La carte Cave d'Aujourd'hui (lot CAVE-3) : une photo, un bouton — pas une seconde cave. */
-.pil-ck-btn{margin-top:8px;font-family:inherit;font-size:var(--pt-micro,12px);font-weight:600;border:1px solid var(--terre);color:var(--terre);background:transparent;border-radius:9px;padding:4px 12px;cursor:pointer;min-height:32px;}
-.pil-ck:last-child{border-right:none;}
-.pil-ck .kl{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--texte-doux);}
-.pil-ck .kv{font-family:var(--font-titre);font-size:var(--pt-xxl,32px);font-weight:600;margin-top:4px;color:var(--texte);line-height:1.05;font-variant-numeric:lining-nums tabular-nums;}
-.pil-ck .kv .u{font-size:15px;font-weight:500;color:var(--texte-doux);font-family:var(--font-titre);}
-.pil-ck .ks{font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px;}
 /* — En-têtes de section (filet or dégradé) — */
 .pil-sec-h{display:flex;align-items:center;gap:14px;font-family:var(--font-titre);font-weight:600;font-size:21px;color:var(--texte);text-transform:none;letter-spacing:.2px;margin:6px 0 12px;}
 .pil-sec-h::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--or) 0%,var(--gris-clair) 45%,transparent 100%);opacity:.75;}
 /* — Tuiles « décision du jour » — */
-.pil-dec{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:18px;}
 /* ═══ ALIGN-1 (§236, 04/10/2026) — LA DÉCISION DU JOUR : QUATRE TUILES BÂTIES PAREIL ═══
    Nico (capture du 04/10) : quatre cartes de même hauteur, contenu collé en haut, deux grands
    vides. Chaque tuile a désormais les mêmes étages — verdict, raison, bande, pied —, chaque étage
@@ -2018,32 +1997,13 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
    Les listes (parcelles à nu, tension par personne) descendent dans .pil-dec2, 5 lignes au plus.
    Une carte de détail seule prend toute la largeur. Sur téléphone, les tuiles vont par deux.
    Maquette validée le 04/10 (canevas « Ma Vigne — alignement Accueil et Pilotage »). */
-.pil-dec{align-items:stretch;}
-.pil-tz{display:flex;flex-direction:column;}
-.pil-tz>.pil-t2b{flex:1;display:flex;flex-direction:column;min-width:0;}
-.pil-tz-big{min-height:30px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pil-tz-rai{min-height:35px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.pil-tz-ban{margin-top:var(--e-3,12px);min-height:30px;min-width:0;}
-.pil-tz-ban .pil-gbar{margin-top:0;}
-.pil-tz-ban .pil-chip2{background:var(--gris-clair);color:var(--texte);}
-.pil-tz-pied{margin-top:auto;padding-top:var(--e-3,12px);}
-.pil-tz-pied:empty{display:none;}
 .pil-tz-strip{position:relative;height:10px;border-radius:5px;background:var(--gris-clair);overflow:hidden;}
 .pil-tz-strip i{position:absolute;top:0;bottom:0;background:var(--vert-clair);border-radius:5px;}
 .pil-tz-ax{display:flex;justify-content:space-between;}
-.pil-tz-ini{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--gris-clair);color:var(--texte);font-size:var(--pt-txt,13px);font-weight:700;margin:0 var(--e-1,4px) 0 0;}
-.pil-tz-tens{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:var(--e-2,8px);align-items:center;font-size:var(--pt-txt,13px);}
-.pil-tz-tens .k{display:block;height:7px;border-radius:4px;background:var(--gris-clair);overflow:hidden;}
-.pil-tz-tens .k i{display:block;height:100%;border-radius:4px;}
-.pil-tz-tens .k i.v{background:var(--vert-med);}
-.pil-tz-tens .k i.o{background:var(--orange);}
-.pil-tz-tens .k i.b{background:var(--rouge);}
-.pil-dec2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:18px;align-items:stretch;}
 .pil-det{display:flex;flex-direction:column;}
 .pil-det>.pil-t2b{flex:1;display:flex;flex-direction:column;}
 .pil-det .pil-prot{margin-top:0;padding-top:0;border-top:0;flex:1;display:flex;flex-direction:column;}
 .pil-det .pil-trx-go{margin-top:auto;padding-top:var(--e-3,12px);}
-@media (max-width:600px){.pil-dec{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--e-3,12px);}.pil-tz .pil-big{font-size:var(--pt-md,20px);}.pil-dec2{grid-template-columns:minmax(0,1fr);}}
 .pil-t2h{display:flex;align-items:center;gap:10px;padding:14px 16px 0;}
 .pil-t2h .ic{width:30px;height:30px;border-radius:9px;background:var(--or-pale);color:var(--terre);display:flex;align-items:center;justify-content:center;flex:none;}
 .pil-t2h .ic svg{width:16px;height:16px;}
@@ -2093,8 +2053,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pil-prot-pt.v{background:var(--vert-med);}.pil-prot-pt.o{background:var(--orange);}.pil-prot-pt.b{background:var(--rouge);}
 .pil-inaction{margin:12px 20px 4px;padding:12px;border:1px dashed var(--orange);border-radius:10px;}
 .pil-inaction.ok{border-color:var(--vert-med);}
-.pil-ck-row{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;}
-.pil-spark{flex:none;line-height:0;margin-bottom:4px;}
 .pil-alert .when{margin-left:auto;font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap;}
 /* — GNR-M (§213) : le tracteur se projette sur les travaux en cours — */
 /* GNR-2 (§256, 06/10) : le bloc tracteur a SA grille. Il partageait `.pil-dec` avec la décision du jour ; ALIGN-1 (§236)
@@ -2364,9 +2322,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
   .pil-cell{text-align:left;}
 }
 @media(max-width:640px){
-  .pil-cks{grid-template-columns:1fr;}
-  .pil-ck{border-right:none;}
-  .pil-h2{font-size:22px;}
+    .pil-h2{font-size:22px;}
   .pil-pie-wrap{flex-direction:column;}
 }
 @media(max-width:560px){.pil-cmp-row{grid-template-columns:96px 1fr;}}
@@ -3342,7 +3298,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .hv2-prog-fill{ border-radius:5px; }
 
 /* — Pilotage : finition papier + animations qui manquaient — */
-.pil-cockpit-card,.pil-panel,.pil-tile,.pil-tile2,.pil-gauge{
+.pil-panel,.pil-tile,.pil-tile2,.pil-gauge{
   box-shadow:var(--shadow-sm),inset 0 1px 0 var(--sheen);
 }
 .pil-gauge-fill,.pil-kbar i{ transform-origin:left; animation:mvuGrow .7s cubic-bezier(.4,0,.2,1); }
@@ -5239,8 +5195,7 @@ button.pil-dz-set{cursor:pointer;width:100%;}
 #graph-inner{width:100%;overflow-x:auto;}
 /* Les grands chiffres : chiffres ALIGNÉS et PROPORTIONNELS. En chasse fixe, le « 1 » de la Cormorant prend la
    largeur d'un « 0 » et laisse un trou : « 12 % » se lisait « I 2 % ». La chasse fixe reste aux colonnes. */
-.pil-th-stat b,.pil-big,.pil-ck .kv,.pil-kval,.pil-gauge-pct,.pil-ring-mid .pc,.pil-verdict .vbig,.pil-donut-c1,.pil-trx-co .v b,
-.hv2-card-val,.hv2-trac-val,.histo-col-pct,.hmsem-v,.pc-pct,.hc-total-val,.mvc-kpi-num,.pil-dom{font-variant-numeric:lining-nums proportional-nums;letter-spacing:0;}
+.pil-th-stat b,.pil-big,.pil-kval,.pil-gauge-pct,.pil-ring-mid .pc,.pil-verdict .vbig,.pil-donut-c1,.pil-trx-co .v b,.hv2-card-val,.hv2-trac-val,.histo-col-pct,.hmsem-v,.pc-pct,.hc-total-val,.mvc-kpi-num,.pil-dom{font-variant-numeric:lining-nums proportional-nums;letter-spacing:0;}
 .pil-wrap{max-width:var(--page-max,1200px);}
 @media (min-width:1200px){ #page-home,#page-parcelles,#page-journal,#page-pilotage,#page-tracteur,#page-phyto,#page-cave,#page-reserve,#page-planning,#page-reglages{max-width:var(--page-max,1200px);margin-left:auto;margin-right:auto;} }
 
@@ -5478,7 +5433,6 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 /* ═══ LE VERDICT ═══ */
 .ck-verdict{padding:4px 2px 4px}
 .ck-v-haut{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.ck-v-date{margin:0;font-size:var(--pt-txt,13px);font-weight:500;color:var(--texte-doux)}
 .ck-v-phrase{margin:12px 0 0;max-width:15em;font:600 clamp(var(--pt-xxl,32px),8.2vw,var(--pt-hero,40px))/1.06 var(--font-titre);letter-spacing:-.006em;color:var(--texte);text-wrap:balance}
 .ck-roule{display:inline-grid;overflow:hidden;vertical-align:bottom;padding:0 .02em .1em;margin-bottom:-.1em}
 .ck-roule>span{grid-area:1/1;white-space:nowrap}
@@ -5552,11 +5506,6 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .ck-carte-in{position:relative;width:100%;min-width:660px;aspect-ratio:1000/720}
 @media (min-width:700px){.ck-carte{margin:0;border:1px solid var(--ligne,#ECE6DA);border-radius:var(--ck-r-md);overflow:hidden}.ck-carte-in{min-width:0}}
 .ck-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
-.ck-relief path{fill:none;stroke:var(--plan-relief);stroke-width:1.2}
-.ck-lieu{font:italic 500 var(--pt-md,20px) var(--font-titre);fill:var(--texte-doux);opacity:.82}
-.ck-village rect{fill:none;stroke:var(--plan-trait);stroke-width:1.2}
-.ck-village rect.chai{stroke:var(--or);stroke-width:1.6}
-.ck-clos{fill:none;stroke:var(--plan-trait);stroke-width:1.4}
 .ck-pa{stroke-width:1.2;stroke-opacity:.55;stroke-linejoin:round;cursor:pointer;transition:fill var(--mv-d3) var(--mv-sortie),stroke var(--mv-d3) var(--mv-sortie),opacity .7s var(--mv-sortie)}
 .ck-pa:focus{}
 .ck-pa.et-faite{fill:var(--et-faite);stroke:var(--et-faite-b)}
@@ -5586,9 +5535,6 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .ck-onde{position:absolute;width:14px;height:14px;margin:-8px 0 0 -8px;border-radius:50%;border:2px solid var(--c,var(--or));pointer-events:none;opacity:0;animation:onde 1.3s var(--mv-sortie) forwards}
 .ck-onde.b{animation-delay:.2s}
 @keyframes onde{0%{transform:scale(.3);opacity:1}100%{transform:scale(7);opacity:0}}
-.ck-etiq{position:absolute;z-index:2;display:flex;align-items:center;gap:8px;padding:4px 12px;border-radius:var(--ck-r-full);transform:translate(-50%,calc(-100% - 16px));background:var(--verre-clair);-webkit-backdrop-filter:blur(12px) saturate(140%);backdrop-filter:blur(12px) saturate(140%);border:1px solid var(--verre-clair-b);box-shadow:var(--shadow-md,0 2px 4px rgba(40,30,15,0.06),0 12px 28px rgba(40,30,15,0.11));color:var(--texte);font-size:var(--pt-micro,12px);white-space:nowrap;transition:left var(--mv-d2) var(--mv-sortie),top var(--mv-d2) var(--mv-sortie)}
-.ck-etiq i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--c,var(--or));box-shadow:0 0 0 3px color-mix(in srgb,var(--c,var(--or)) 26%,transparent)}
-.ck-etiq b{font-weight:600}
 .ck-leg{display:flex;flex-wrap:wrap;gap:4px;margin-top:12px}
 .ck-leg-i{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 12px;border-radius:var(--ck-r-full);border:1px solid var(--ligne,#ECE6DA);background:transparent;color:var(--texte-med);font-size:var(--pt-txt,13px);cursor:pointer;transition:background-color var(--mv-d2),border-color var(--mv-d2)}
 .ck-leg-i b{font-weight:600;color:var(--texte);font-variant-numeric:lining-nums tabular-nums}
@@ -5657,9 +5603,6 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .ck-gr svg{display:block;overflow:visible}
 .ck-c-gl{stroke:var(--gris-clair);stroke-width:1}
 .ck-c-txt{font:400 var(--pt-nano,11px) var(--font-ui);fill:var(--texte-doux);paint-order:stroke;stroke:var(--bg-card);stroke-width:4px;stroke-linejoin:round}
-.ck-c-it{font:italic 500 var(--pt-txt,13px) var(--font-titre)}
-.ck-c-conges{fill:var(--gris-clair);opacity:.6}
-.ck-c-aire{fill:var(--terre);opacity:.08}
 .ck-c-ligne{fill:none;stroke:var(--terre);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
 .ck-c-proj{fill:none;stroke:var(--or);stroke-width:2.2;stroke-dasharray:.1 5.5;stroke-linecap:round}
 .ck-c-besoin{fill:none;stroke:var(--texte-doux);stroke-width:1.2;stroke-dasharray:5 4;opacity:.75}
@@ -5774,7 +5717,6 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 @media (max-width:520px){.ck-dz-g{grid-template-columns:minmax(0,1fr)}.ck-dz:nth-child(odd){border-right:0}.ck-dz:nth-child(-n+3){border-bottom:1px solid var(--ligne,#ECE6DA)}}
 
 /* ═══ LE PLAN PAR APPELLATION ═══ */
-.ck-zone-f{fill:var(--zone-fond);stroke:var(--plan-trait);stroke-width:1;stroke-dasharray:3 5}
 .ck-zone-rail{fill:var(--plan-trait);opacity:.55}
 .ck-zone-prog{fill:var(--or);transform-box:fill-box;transform-origin:left center;transform:scaleX(0);transition:transform var(--mv-d4) var(--mv-sortie),fill var(--mv-d3)}
 .ck-zone-prog.fini{fill:var(--vert-med)}
@@ -5796,7 +5738,6 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .ck-e-budget{stroke:var(--or);stroke-width:1.2;stroke-dasharray:4 4;opacity:.75}
 .ck-e-fait,.ck-e-dep{fill:none;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
 .ck-e-fait{stroke:var(--vert-med)}.ck-e-dep{stroke:var(--terre)}
-.ck-e-ecart{fill:var(--vert-med);opacity:.12}
 .ck-e-pfait,.ck-e-pdep{fill:none;stroke-width:2.2;stroke-dasharray:.1 5.5;stroke-linecap:round}
 .ck-e-pfait{stroke:var(--vert-med)}.ck-e-pdep{stroke:var(--terre)}
 .ck-e-bf{fill:var(--vert-med);stroke:var(--bg-card);stroke-width:2}
@@ -7814,7 +7755,7 @@ body.ck-agr-on{overflow:hidden}
   --verre-clair:var(--bg-card); --verre-clair-b:var(--ligne,#E7E6E2); --c:var(--encours);
   --ck-r-sm:var(--r-sm,6px); --ck-r-md:var(--r-md,8px); --ck-r-lg:var(--r-lg,12px); --ck-r-full:var(--r-full,999px);
 }
-.ck2 .ck-tete-res,.ck2 .ck-titre-p,.ck2 .ck-i,.ck2 .ck-v-phrase,.ck2 .ck-ph-n,.ck2 .ck-lieu,.ck2 .ck-c-it,.ck2 .ck-dz-v,.ck2 .ck-ek-calme,.ck2 .ck-po-tot .n{ font-family:var(--font-ui); font-style:normal; }
+.ck2 .ck-tete-res,.ck2 .ck-titre-p,.ck2 .ck-i,.ck2 .ck-v-phrase,.ck2 .ck-ph-n,.ck2 .ck-dz-v,.ck2 .ck-ek-calme,.ck2 .ck-po-tot .n{ font-family:var(--font-ui); font-style:normal; }
 .ck2 .ck-v-phrase,.ck2 .ck-ph-n,.ck2 .ck-dz-v,.ck2 .ck-ek-calme,.ck2 .ck-po-tot .n{ letter-spacing:var(--ls-titre); }
 .ck2 .ck-titre-p,.ck2 .ck-tete-res{ letter-spacing:var(--ls-serre); }
 .ck2 .ck-barre i::after{ display:none; }

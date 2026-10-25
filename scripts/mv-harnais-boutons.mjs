@@ -51,7 +51,7 @@ const EXEMPTIONS = [
   { selecteur: '#regl-view-domaine .mbtn.verte', raison: 'RG-1 (§295) : Réglages › Domaine peint ses « Enregistrer » en secondaire, exprès (mv-harnais-rg1)' },
   { selecteur: '#regl-view-equipe .mbtn.verte', raison: 'RG-2 (§296) : « Ajouter un membre » à l’accent, la pièce principale du jeu redite (mv-harnais-rg2)' }
 ];
-const PLAFOND = 66;   /* RSV-BTN (§402) : 70 → 66, les boutons de la Réserve passés au jeu */   /* CHAT-0 (§395) : 71 → 70, un bouton du chat retiré avec lui */   /* REVUE-2 (§390) : 72 → 71, le bouton du mur passé au jeu */   /* CHARTE-3c (§373) : 74 → 72, les « − / + » passés au jeu */   /* classes de boutons (hors bloc) qui posent leur propre fond ou arrondi — mesuré à CHARTE-3a ; ne peut que BAISSER */
+const PLAFOND = 65;   /* CSS-MENAGE-1 (§453) : 66 → 65, .pil-ck-btn (ancien Aujourd'hui, sans producteur) retiré */   /* RSV-BTN (§402) : 70 → 66, les boutons de la Réserve passés au jeu */   /* CHAT-0 (§395) : 71 → 70, un bouton du chat retiré avec lui */   /* REVUE-2 (§390) : 72 → 71, le bouton du mur passé au jeu */   /* CHARTE-3c (§373) : 74 → 72, les « − / + » passés au jeu */   /* classes de boutons (hors bloc) qui posent leur propre fond ou arrondi — mesuré à CHARTE-3a ; ne peut que BAISSER */
 const ALLURE = /^(background(-color|-image)?|color|border(-(color|width|style|radius))?|padding(-\w+)?|min-height|height|font-(size|weight|family))$/;
 
 const sansCom = s => s.replace(/\/\*[\s\S]*?\*\//g, '');

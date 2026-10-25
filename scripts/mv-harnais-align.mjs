@@ -20,7 +20,7 @@ function suite(PIL, CSS) {
   const out = []; const T = (n, c) => out.push([n, !!c]);
   const P = sansCom(PIL);
   T('la protection montre 5 parcelles, le bouton déplie les autres', /_PIL_PROT_TOUT\?tot:5/.test(P) && /data-diag="prot_tout"/.test(P) && /cible==='prot_tout'\)\{ _PIL_PROT_TOUT=!_PIL_PROT_TOUT; renderPilotage\(\); return; \}/.test(P));
-  T('le détail tient sa rangée, et prend toute la largeur quand il est seul', /\.pil-dec2\{display:grid;grid-template-columns:repeat\(auto-fit,minmax\(320px,1fr\)\)/.test(CSS));
+  // CSS-MENAGE-1 (§453) : .pil-dec2 n'a plus de producteur depuis PIL-RANGE-1b ; sa règle est partie avec le ménage du style.
   return out;
 }
 function joue(P, C) { try { return suite(P, C); } catch (e) { return [['plantage : ' + (e && e.message), false]]; } }
@@ -30,7 +30,6 @@ console.log(`\nALIGN-1 : ${ok} vertes, ${ko} rouges`);
 if (!CONTRE) process.exit(ko ? 1 : 0);
 if (ko) process.exit(1);
 const DEF = [
-  ['le détail perd sa grille', p => p, c => c.replace('.pil-dec2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))', '.pil-dec2{display:block;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))')],
   ['la liste des parcelles n’a plus de limite', p => p.replace('_PIL_PROT_TOUT?tot:5', '_PIL_PROT_TOUT?tot:tot'), c => c],
   ['le bouton « Et N autres » ne fait plus rien', p => p.replace("cible==='prot_tout'", "cible==='prot_tout_x'"), c => c],
 ];
