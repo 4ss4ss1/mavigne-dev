@@ -182,6 +182,10 @@ var _PIL_TAB = 'auj';
 //    chez les clients, citees par app.js et verifiees par C22. On renomme et
 //    on reordonne ; on ne renumerote rien en base.
 // ════════════════════════════════════════════════════════════════════════════
+// ★★ GABARIT-2 (§456) — LA BARRE DE GRAPHIQUE, UNE MESURE POUR TOUS LES GRAPHIQUES. Un attribut SVG ne lit pas var() : ces valeurs
+//   recopient la charte (--barre-graph-h, --jauge-h, --r-xs ; colonnes à 2 px d'arrondi) et mv-harnais-gabarit2 vérifie qu'elles collent.
+//   h : la barre d'un graphique (prévu, poste, écart) · h2 : la barre secondaire (le réel sous le prévu) · r : son arrondi · rv : celui d'une colonne.
+var _PIL_GB = { h:16, h2:10, r:4, rv:2 };
 var _PIL_TABS = [
   ['auj','chrono','Aujourd\'hui'],
   ['avc','raisin','Travaux'],   // PIL-RANGE-3 (§445) : « La campagne » devient « Travaux » — la barre « Vous regardez » dit déjà « La campagne »
@@ -1221,10 +1225,10 @@ function _pilFriseSvg(cd,real,w){
   });
   g+='<line x1="'+X(e+1).toFixed(1)+'" y1="'+padT+'" x2="'+X(e+1).toFixed(1)+'" y2="'+(padT+tw.length*rowH)+'" stroke="'+gc.col.grille+'"/>';
   tw.forEach(function(t,i){
-    var yC=padT+i*rowH, yP=yC+8, hP=16, yR=yC+30, hR=11;
+    var yC=padT+i*rowH, yP=yC+8, hP=_PIL_GB.h, yR=yC+30, hR=_PIL_GB.h2;
     var px0=X(_o(t.start)), px1=X(_o(t.end)+1), c=_taskColor(t.nom);
     g+='<text x="'+(padL-10)+'" y="'+(yC+rowH/2)+'" text-anchor="end" font-size="'+gc.txt.axe+'" font-weight="600" fill="var(--texte)" font-family="var(--font-ui,Outfit)">'+_pilEsc(t.nom)+'</text>';
-    g+='<rect x="'+px0.toFixed(1)+'" y="'+yP+'" width="'+Math.max(2,px1-px0).toFixed(1)+'" height="'+hP+'" rx="5" fill="'+c+'" opacity="0.92"/>';
+    g+='<rect x="'+px0.toFixed(1)+'" y="'+yP+'" width="'+Math.max(2,px1-px0).toFixed(1)+'" height="'+hP+'" rx="'+_PIL_GB.r+'" fill="'+c+'" opacity="0.92"/>';
     g+='<text x="'+(px0+6).toFixed(1)+'" y="'+(yP+12)+'" font-size="'+gc.txt.mini+'" fill="#fff" font-family="var(--font-ui,Outfit)" font-weight="600">'+Math.round(t.h)+' h</text>';
     var r=(real&&real[_friseNorm(t.nom)])||{state:'none'};
     if(r.state==='none'||!r.start){ g+='<text x="'+px0.toFixed(1)+'" y="'+(yR+9)+'" font-size="'+gc.txt.mini+'" fill="'+gc.col.texte+'" font-family="var(--font-ui,Outfit)" font-style="italic">non d\u00e9marr\u00e9</text>'; }
@@ -1234,7 +1238,7 @@ function _pilFriseSvg(cd,real,w){
       var rx0=X(ro0), rx1=X(ro1+1);
       var fill=r.state==='live'?gc.col.attention:'url(#pilhatch)';
       var stroke=r.state==='live'?gc.col.attention:'var(--texte)';
-      g+='<rect x="'+rx0.toFixed(1)+'" y="'+yR+'" width="'+Math.max(2,rx1-rx0).toFixed(1)+'" height="'+hR+'" rx="3" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1"/>';
+      g+='<rect x="'+rx0.toFixed(1)+'" y="'+yR+'" width="'+Math.max(2,rx1-rx0).toFixed(1)+'" height="'+hR+'" rx="'+_PIL_GB.r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1"/>';
       if(r.state==='live') g+='<text x="'+(rx1+4).toFixed(1)+'" y="'+(yR+9)+'" font-size="'+gc.txt.mini+'" fill="'+gc.col.attention+'" font-family="var(--font-ui,Outfit)" font-weight="600">en cours</text>';
     }
   });
@@ -1271,7 +1275,7 @@ function _pilDemandSvg(cd,w){
   var g='';
   for(var v=0;v<=yTop;v+=step){ g+='<line x1="'+padL+'" y1="'+Y(v).toFixed(1)+'" x2="'+(W-padR)+'" y2="'+Y(v).toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="1"/><text x="'+(padL-8)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'" font-family="var(--font-ui,Outfit)">'+v+'</text>'; }
   months.forEach(function(mo){ var x0=X(Math.max(s,_moO0(mo))); g+='<line x1="'+x0.toFixed(1)+'" y1="'+padT+'" x2="'+x0.toFixed(1)+'" y2="'+(padT+plotH)+'" stroke="'+c.col.grille+'" stroke-width="1"/>'; var xc=(X(Math.max(s,_moO0(mo)))+X(Math.min(e,_moO1(mo))+1))/2; g+='<text x="'+xc.toFixed(1)+'" y="'+(H-22)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="600" fill="'+c.col.texte+'" font-family="var(--font-ui,Outfit)">'+MN[mo.m]+'</text>'; });
-  wk.forEach(function(w){ if(w.cap<=0)return; var bx=X(w.o0)+2, bw=X(w.o1+1)-X(w.o0)-4; var over=w.need>((w.head||0)+0.001); g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(w.need).toFixed(1)+'" width="'+Math.max(1,bw).toFixed(1)+'" height="'+(padT+plotH-Y(w.need)).toFixed(1)+'" rx="2" fill="'+(over?_PIL_SEM.faute:_PIL_SEM.fait)+'" opacity="'+(over?0.95:0.8)+'"/>'; });
+  wk.forEach(function(w){ if(w.cap<=0)return; var bx=X(w.o0)+2, bw=X(w.o1+1)-X(w.o0)-4; var over=w.need>((w.head||0)+0.001); g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(w.need).toFixed(1)+'" width="'+Math.max(1,bw).toFixed(1)+'" height="'+(padT+plotH-Y(w.need)).toFixed(1)+'" rx="'+_PIL_GB.rv+'" fill="'+(over?_PIL_SEM.faute:_PIL_SEM.fait)+'" opacity="'+(over?0.95:0.8)+'"/>'; });
   // ★ Meme regle que la frise annuelle : une semaine SANS capacite (hors
   //   modele de semaine) n'a pas d'effectif mesure. La ligne s'y coupe. Avant,
   //   elle y tombait a `head||0` — un zero dessine est une mesure, et celle-ci
@@ -1819,7 +1823,7 @@ function _pilPanelTemps(d){
   _footR+=' <b>Une moyenne n\u2019est pas un pic.</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.avc.temps')):'')+'';
   var repartBlock='<div class="mvencadre" style="margin-bottom:12px">'
     +'<div style="font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux)">O\u00f9 va le temps de l\u2019\u00e9quipe</div>'
-    +'<div style="display:flex;align-items:baseline;gap:7px;margin:8px 0 3px"><span style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xl,28px);font-weight:600;color:var(--texte)">'+_pilNum(_prez)+' h</span><span style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">pr\u00e9sence \u00b7 '+_etpF(_prez)+' ETP \u00e9quipe</span></div>'
+    +'<div style="display:flex;align-items:baseline;gap:7px;margin:8px 0 3px"><span style="font-size:var(--pt-xl,28px);font-weight:600;color:var(--texte)">'+_pilNum(_prez)+' h</span><span style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">pr\u00e9sence \u00b7 '+_etpF(_prez)+' ETP \u00e9quipe</span></div>'
     +'<div style="display:flex;height:24px;border-radius:7px;overflow:hidden;border:1px solid var(--gris);margin:9px 0">'+_segR(_wV,'linear-gradient(180deg,#5C8A3A,#3D6B27)')+_segR(_wT,'linear-gradient(180deg,#6FB6D6,#4A9FC8)')+_segR(_wA,'linear-gradient(180deg,#B98A5E,#8A5A38)')+'</div>'
     +_rowR('#3D6B27','Travaux vigne','(bar\u00e8me)',_vig,_pV,_etpF(_vig))
     +((_tH>0)?_rowR('#4A9FC8','Tracteur','(estim\u00e9 h/ha)',_tH,_pT,_etpF(_tH)):'')
@@ -3802,8 +3806,8 @@ function _rfCalSvg(cal,lg){
   par.forEach(function(s,i){
     if(!(W[i]&&W[i].cap>0)){ g+='<rect x="'+X(i)+'" y="'+c.padT+'" width="'+iw+'" height="'+c.ih+'" fill="url(#rf2-h)"/>'; return; }
     var eq=Math.min(s.used,(s.dispo||0)*s.cap), rf=Math.max(0,s.used-eq), cx=X(i)+(iw-bw)/2;
-    if(eq>0) g+='<rect x="'+cx+'" y="'+Y(eq)+'" width="'+bw+'" height="'+(Y(0)-Y(eq))+'" fill="'+c.col.fait+'" rx="1.5"/>';
-    if(rf>0) g+='<rect x="'+cx+'" y="'+Y(eq+rf)+'" width="'+bw+'" height="'+(Y(eq)-Y(eq+rf))+'" fill="'+c.col.prevu+'" rx="1.5"/>';
+    if(eq>0) g+='<rect x="'+cx+'" y="'+Y(eq)+'" width="'+bw+'" height="'+(Y(0)-Y(eq))+'" fill="'+c.col.fait+'" rx="'+_PIL_GB.rv+'"/>';
+    if(rf>0) g+='<rect x="'+cx+'" y="'+Y(eq+rf)+'" width="'+bw+'" height="'+(Y(eq)-Y(eq+rf))+'" fill="'+c.col.prevu+'" rx="'+_PIL_GB.rv+'"/>';
   });
   var d='';
   par.forEach(function(s,i){ var yy=Y((s.dispo||0)*s.cap); d+=(i?'L':'M')+X(i)+' '+yy+' L'+(X(i)+iw)+' '+yy+' '; });
@@ -5745,8 +5749,8 @@ function _pilAnBudgetSvg(B, w){
   M.forEach(function(m, i){
     var x=pL+slot*i+(slot-bw)/2, cx=x+bw/2;
     var hd=Math.min(m.dep,top)/top*ih, hp=Math.min(m.prev, Math.max(0,top-m.dep))/top*ih;
-    if(hd>0.2) g+='<rect x="'+x.toFixed(1)+'" y="'+(base-hd).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hd.toFixed(1)+'" rx="2" fill="'+c.col.mesure+'"/>';
-    if(hp>0.2) g+='<rect x="'+x.toFixed(1)+'" y="'+(base-hd-hp).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hp.toFixed(1)+'" rx="2" fill="'+c.col.prevu+'" opacity="0.8"/>';
+    if(hd>0.2) g+='<rect x="'+x.toFixed(1)+'" y="'+(base-hd).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hd.toFixed(1)+'" rx="'+_PIL_GB.rv+'" fill="'+c.col.mesure+'"/>';
+    if(hp>0.2) g+='<rect x="'+x.toFixed(1)+'" y="'+(base-hd-hp).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hp.toFixed(1)+'" rx="'+_PIL_GB.rv+'" fill="'+c.col.prevu+'" opacity="0.8"/>';
     if(m.dep+m.prev>top){
       coupe=true;
       g+='<path d="M'+(x-1).toFixed(1)+' '+(pT+12)+' l'+(bw+2).toFixed(1)+' -5 M'+(x-1).toFixed(1)+' '+(pT+17)+' l'+(bw+2).toFixed(1)+' -5" stroke="var(--bg-card)" stroke-width="2.4" fill="none"/>'
@@ -5855,14 +5859,14 @@ function _pilAnRenfortSvg(R, w){
     var x0=X(x.o0), x1=X(x.o1+1), bw=Math.max(1, x1-x0-1.2), xa=x0+0.6;
     if(x.passe){
       var hp=H(x.need);
-      if(hp>0.2) g+='<rect x="'+xa.toFixed(1)+'" y="'+(base-hp).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hp.toFixed(1)+'" rx="1.5" fill="var(--gris)"/>';
+      if(hp>0.2) g+='<rect x="'+xa.toFixed(1)+'" y="'+(base-hp).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hp.toFixed(1)+'" rx="'+_PIL_GB.rv+'" fill="var(--gris)"/>';
       if(x.need>yTop) g+='<path d="M'+(xa-1).toFixed(1)+' '+(pT+10)+' l'+(bw+2).toFixed(1)+' -4" stroke="var(--bg-card)" stroke-width="2.2" fill="none"/>'
         +'<text x="'+(xa+bw/2).toFixed(1)+'" y="'+(pT-6)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="600" fill="'+c.col.texte+'">'+_pilUn(x.need)+'</text>';
       return;
     }
     var hc=H(Math.min(x.need, x.dispo)), hr=H(x.need)-hc, yc=base-H(x.dispo);
-    if(hc>0.2) g+='<rect x="'+xa.toFixed(1)+'" y="'+(base-hc).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hc.toFixed(1)+'" rx="1.5" fill="'+c.col.fait+'"/>';
-    if(hr>0.2) g+='<rect x="'+xa.toFixed(1)+'" y="'+(base-hc-hr).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hr.toFixed(1)+'" rx="1.5" fill="url(#pil-anr-hp)" stroke="'+c.col.alerte+'" stroke-width="0.8"/>';
+    if(hc>0.2) g+='<rect x="'+xa.toFixed(1)+'" y="'+(base-hc).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hc.toFixed(1)+'" rx="'+_PIL_GB.rv+'" fill="'+c.col.fait+'"/>';
+    if(hr>0.2) g+='<rect x="'+xa.toFixed(1)+'" y="'+(base-hc-hr).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hr.toFixed(1)+'" rx="'+_PIL_GB.rv+'" fill="url(#pil-anr-hp)" stroke="'+c.col.alerte+'" stroke-width="0.8"/>';
     g+='<line x1="'+(xa-0.6).toFixed(1)+'" y1="'+yc.toFixed(1)+'" x2="'+(xa+bw+0.6).toFixed(1)+'" y2="'+yc.toFixed(1)+'" stroke="var(--texte)" stroke-width="2"/>';
   });
   if(!isNaN(oA) && oA>=s && oA<=e){
@@ -6976,7 +6980,7 @@ function _pecCss(){
   +'.pec-sub button.on{background:var(--bg-card);color:var(--texte);box-shadow:var(--shadow-sm)}'
   +'.pec-card{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:15px;box-shadow:var(--shadow-sm);overflow:hidden;position:relative}'
   +'.pec-ch{display:flex;align-items:baseline;justify-content:space-between;gap:10px 18px;padding:15px 18px 8px;flex-wrap:wrap}'
-  +'.pec-ct{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-md,20px);font-weight:600;color:var(--texte);line-height:1.15}'
+  +'.pec-ct{font-size:var(--pt-md,20px);font-weight:600;color:var(--texte);line-height:1.15}'
   +'.pec-cs{font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5;flex:1;min-width:180px}'
   +'.pec-cb{padding:2px 18px 18px}'
   +'.pec-svg{max-width:100%;height:auto;display:block}'
@@ -6987,7 +6991,7 @@ function _pecCss(){
   +'.pec-k.pex-prevu .v{color:var(--texte-med)}'
   +'.pex-prevu-c{color:var(--texte-doux)}'
   +'.pec-k .l{display:flex;align-items:center;gap:6px;font-size:var(--pt-lbl,12px);font-weight:600;letter-spacing:0;text-transform:none;color:var(--texte-doux)}'
-  +'.pec-k .v{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xxl,32px);font-weight:600;margin-top:3px;line-height:1.05;color:var(--texte);font-variant-numeric:lining-nums tabular-nums}'
+  +'.pec-k .v{font-size:var(--pt-xxl,32px);font-weight:600;margin-top:3px;line-height:1.05;color:var(--texte);font-variant-numeric:lining-nums tabular-nums}'
   +'.pec-k .v small{font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte-doux)}'
   +'.pec-k .s{font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:4px;line-height:1.45}'
   +'.pec-bar{height:11px;border-radius:6px;background:var(--gris-clair);overflow:hidden;display:flex}'
@@ -7014,7 +7018,7 @@ function _pecCss(){
   +'.pec-fia.bad{background:var(--rouge-pale);border-color:rgba(160,41,30,.35)}'
   +'.pec-fia.ok{background:var(--vert-pale);border-color:rgba(61,107,39,.3)}'
   +'.pec-fia-h{display:flex;align-items:center;gap:13px}'
-  +'.pec-fia-n{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xxl,32px);font-weight:600;line-height:1;flex:none;font-variant-numeric:lining-nums tabular-nums}'
+  +'.pec-fia-n{font-size:var(--pt-xxl,32px);font-weight:600;line-height:1;flex:none;font-variant-numeric:lining-nums tabular-nums}'
   +'.pec-fia.bad .pec-fia-n{color:var(--rouge)}'
   +'.pec-fia.ok .pec-fia-n{color:var(--vert-med)}'
   +'.pec-fia-h>div{flex:1;min-width:0}'
@@ -7059,7 +7063,7 @@ function _pecCss(){
   +'.pec-note b{color:var(--texte-med)}'
   +'.pec-verdict{display:flex;gap:15px;align-items:flex-start;padding:17px 20px}'
   +'.pec-verdict .em{line-height:1;flex:none}'
-  +'.pec-verdict .t{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-lg,24px);font-weight:600;color:var(--texte);line-height:1.22}'
+  +'.pec-verdict .t{font-size:var(--pt-lg,24px);font-weight:600;color:var(--texte);line-height:1.22}'
   +'.pec-verdict .d{font-size:var(--pt-txt,13px);color:var(--texte-doux);margin-top:5px;line-height:1.6}'
   +'.pec-verdict .d b{color:var(--texte-med)}'
   // ★ MEME GRAMMAIRE QUE LA CARTE A TROIS ETAGES : filet dore devant, meme
@@ -7078,7 +7082,7 @@ function _pecCss(){
   +'.pec-mini{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--gris-clair);border-radius:12px;overflow:hidden;border:1px solid var(--gris-clair)}'
   +'.pec-mini>div{background:var(--bg-card);padding:12px 14px}'
   +'.pec-mini .l{font-size:var(--pt-nano,11px);font-weight:600;letter-spacing:0;text-transform:none;color:var(--texte-doux)}'
-  +'.pec-mini .v{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-lg,24px);font-weight:600;color:var(--texte);margin-top:2px;line-height:1.1;font-variant-numeric:lining-nums tabular-nums}'
+  +'.pec-mini .v{font-size:var(--pt-lg,24px);font-weight:600;color:var(--texte);margin-top:2px;line-height:1.1;font-variant-numeric:lining-nums tabular-nums}'
   +'.pec-mini .v small{font-size:var(--pt-txt,13px);color:var(--texte-doux);font-weight:600}'
   +'.pec-mini .s{font-size:var(--pt-lbl,12px);color:var(--texte-doux);margin-top:2px;line-height:1.4}'
   +'.pec-empty{font-size:var(--pt-txt,13px);color:var(--texte-doux);font-style:italic;padding:14px 2px}'
@@ -7099,7 +7103,7 @@ function _pecCss(){
   +'.pex-fopt.on .d{color:#3D6B27}'
   +'.pex-fopt:disabled{opacity:.62;cursor:default}'
   +'.pex-warn{border-left:3px solid var(--or);padding-left:13px}'
-  +'.pex-warn .t{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-md,20px);font-weight:600;color:var(--texte);line-height:1.25}'
+  +'.pex-warn .t{font-size:var(--pt-md,20px);font-weight:600;color:var(--texte);line-height:1.25}'
   +'.pex-warn .d{font-size:var(--pt-txt,13px);color:var(--texte-doux);margin-top:5px;line-height:1.6}'
   +'.pex-warn .d b{color:var(--texte-med)}'
   /* REV-1 — la sous-vue Revient (préfixe prv-, vérifié libre) */
@@ -7131,12 +7135,12 @@ function _pecCss(){
   +'.prv-flux{display:flex;flex-wrap:wrap;align-items:stretch}'
   +'.prv-fx{flex:1;min-width:120px;padding:10px 12px;border:1px solid var(--gris-clair);border-radius:12px}'
   +'.prv-fx .l{font-size:var(--pt-nano,11px);font-weight:600;letter-spacing:0;text-transform:none;color:var(--texte-doux)}'
-  +'.prv-fx .v{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-lg,24px);font-weight:600;color:var(--texte);font-variant-numeric:lining-nums tabular-nums}'
+  +'.prv-fx .v{font-size:var(--pt-lg,24px);font-weight:600;color:var(--texte);font-variant-numeric:lining-nums tabular-nums}'
   +'.prv-fx .s{font-size:var(--pt-lbl,12px);color:var(--texte-doux);line-height:1.4}'
   +'.prv-ar{align-self:center;padding:0 6px;color:var(--or);font-size:var(--pt-sm,16px)}'
   +'.prv-complet{margin-top:12px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;padding:10px 12px;border:1px dashed var(--or);border-radius:10px;background:var(--or-pale)}'
   +'.prv-cl{font-size:var(--pt-lbl,12px);font-weight:600;letter-spacing:0;text-transform:none;color:var(--texte-doux)}'
-  +'.prv-cv{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xl,28px);font-weight:600;color:var(--texte)}'
+  +'.prv-cv{font-size:var(--pt-xl,28px);font-weight:600;color:var(--texte)}'
   +'.prv-go{cursor:pointer}'
   +'.prv-go:hover{background:var(--bg-app)!important}'
   +'@media(max-width:640px){.prv-tbl{min-width:0;font-size:var(--pt-micro,12px)}.prv-tbl .prv-hs{display:none}.prv-tbl th,.prv-tbl td{padding:8px 4px;white-space:normal;letter-spacing:0}.prv-det td:first-child{padding-left:12px}.prv-tbl td:last-child{white-space:nowrap}.prv-jg{min-width:40px}}'
@@ -8202,7 +8206,7 @@ function _pecDonutSvg(items,c1,c2){
   // s'elargir. width et height en dur, plafonnes par max-width — jamais etire.
   return '<svg class="pec-svg" viewBox="0 0 200 200" width="168" height="168" style="max-width:168px;margin:0 auto" role="img" aria-label="R\u00e9partition du budget par poste, total '+_pilEsc(c1)+'">'
     +paths
-    +'<text x="100" y="97" text-anchor="middle" font-size="24" font-weight="600" font-family="var(--font-titre,Cormorant Garamond,serif)" fill="var(--texte)">'+_pilEsc(c1)+'</text>'
+    +'<text x="100" y="97" text-anchor="middle" font-size="24" font-weight="600" font-family="var(--font-ui,Outfit)" fill="var(--texte)">'+_pilEsc(c1)+'</text>'
     +'<text x="100" y="116" text-anchor="middle" font-size="11" fill="var(--texte-doux)">'+_pilEsc(c2)+'</text></svg>';
 }
 
@@ -8234,8 +8238,8 @@ function _pecTaskSvg(E,w){
        +'<text x="'+(lx+156)+'" y="15" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">Bar\u00e8me du fait</text>'):'');
   function _tsBar(x0, by, bh, t, wTot){
     var re=(t.reE!=null)?t.reE:t.fE, wRe=re/mx*iw, wIn=Math.min(wRe,wTot), o='';
-    o+='<rect x="'+x0+'" y="'+by+'" width="'+Math.max(0,wIn).toFixed(1)+'" height="'+bh+'" rx="4" fill="'+_PEC_COL.mo+'"/>';
-    if(wRe>wTot+0.5) o+='<rect x="'+(x0+wTot).toFixed(1)+'" y="'+by+'" width="'+(wRe-wTot).toFixed(1)+'" height="'+bh+'" rx="3" fill="var(--rouge)"/>';
+    o+='<rect x="'+x0+'" y="'+by+'" width="'+Math.max(0,wIn).toFixed(1)+'" height="'+bh+'" rx="'+_PIL_GB.r+'" fill="'+_PEC_COL.mo+'"/>';
+    if(wRe>wTot+0.5) o+='<rect x="'+(x0+wTot).toFixed(1)+'" y="'+by+'" width="'+(wRe-wTot).toFixed(1)+'" height="'+bh+'" rx="'+_PIL_GB.r+'" fill="var(--rouge)"/>';
     if(E.reOk && t.fE>0){ var xf=x0+t.fE/mx*iw; o+='<rect x="'+(xf-1).toFixed(1)+'" y="'+(by-3)+'" width="2" height="'+(bh+6)+'" fill="var(--texte)"/>'; }
     return o;
   }
@@ -8248,16 +8252,16 @@ function _pecTaskSvg(E,w){
     var y=pT+i*rowH;
     var wTot=t.bE/mx*iw;
     if(et){
-      var by=y+17, bh=14;
+      var by=y+17, bh=_PIL_GB.h;
       g+='<text x="0" y="'+(y+11)+'" font-size="'+c.txt.axe+'" font-weight="600" fill="var(--texte)">'+_pilEsc(_pecTrunc(_pilTnom(t.nom),22))+'</text>'
         +'<text x="'+W+'" y="'+(y+11)+'" text-anchor="end" font-size="'+c.txt.axe+'" font-weight="600" fill="var(--texte)">'+_pilEsc(_pecEurK(t.bE))+'</text>'
-        +'<rect x="0" y="'+by+'" width="'+Math.max(1,wTot).toFixed(1)+'" height="'+bh+'" rx="4" fill="'+_PEC_COL.mo+'" opacity=".22"/>'
+        +'<rect x="0" y="'+by+'" width="'+Math.max(1,wTot).toFixed(1)+'" height="'+bh+'" rx="'+_PIL_GB.r+'" fill="'+_PEC_COL.mo+'" opacity=".22"/>'
         +_tsBar(0, by, bh, t, wTot)
         +'<text x="'+W+'" y="'+(by+bh+11)+'" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+_tsCol(t)+'">'+_pilEsc(_tsDroite(t))+'</text>';
     } else {
-      var by2=y+5, bh2=17;
+      var by2=y+5, bh2=_PIL_GB.h;
       g+='<text x="'+(pL-12)+'" y="'+(by2+13)+'" text-anchor="end" font-size="'+c.txt.val+'" font-weight="600" fill="var(--texte)">'+_pilEsc(_pecTrunc(_pilTnom(t.nom),24))+'</text>'
-        +'<rect x="'+pL+'" y="'+by2+'" width="'+Math.max(1,wTot).toFixed(1)+'" height="'+bh2+'" rx="4" fill="'+_PEC_COL.mo+'" opacity=".22"/>'
+        +'<rect x="'+pL+'" y="'+by2+'" width="'+Math.max(1,wTot).toFixed(1)+'" height="'+bh2+'" rx="'+_PIL_GB.r+'" fill="'+_PEC_COL.mo+'" opacity=".22"/>'
         +_tsBar(pL, by2, bh2, t, wTot)
         +'<text x="'+(pL+Math.max(wTot,(t.reE||0)/mx*iw)+10).toFixed(1)+'" y="'+(by2+13)+'" font-size="'+c.txt.val+'" font-weight="600" fill="var(--texte)">'+_pilEsc(_pecEurK(t.bE))+'</text>'
         +'<text x="'+(W-4)+'" y="'+(by2+13)+'" text-anchor="end" font-size="'+c.txt.axe+'" fill="'+_tsCol(t)+'">'+_pilEsc(_tsDroite(t))+'</text>';
@@ -8288,10 +8292,10 @@ function _pecEcartSvg(E,w){
   var g='<line x1="'+cx+'" y1="'+(pT-10)+'" x2="'+cx+'" y2="'+(pT+rs.length*rowH)+'" stroke="'+c.col.texte+'" stroke-width="1.4" opacity=".55"/>'
        +'<text x="'+cx+'" y="'+(pT-16)+'" text-anchor="middle" font-size="'+c.txt.axe+'" font-weight="600" fill="'+c.col.texte+'">moyenne du domaine \u00b7 '+_pilEsc(_ecoEur(avg))+'/ha</text>';
   rs.forEach(function(r,i){
-    var y=pT+i*rowH, by=y+4, bh=et?16:15;
+    var y=pT+i*rowH, by=y+4, bh=_PIL_GB.h;
     var bw=Math.abs(r.ec)/mx*half, up=r.ec>=0;
     var col=up?(r.ec>25?c.col.alerte:c.col.attention):c.col.fait;
-    g+='<rect x="'+(up?cx:cx-bw).toFixed(1)+'" y="'+by+'" width="'+Math.max(1,bw).toFixed(1)+'" height="'+bh+'" rx="3" fill="'+col+'" opacity=".85"/>'
+    g+='<rect x="'+(up?cx:cx-bw).toFixed(1)+'" y="'+by+'" width="'+Math.max(1,bw).toFixed(1)+'" height="'+bh+'" rx="'+_PIL_GB.r+'" fill="'+col+'" opacity=".85"/>'
       +'<text x="'+(up?(cx-8):(cx+8))+'" y="'+(by+12)+'" text-anchor="'+(up?'end':'start')+'" font-size="'+c.txt.axe+'" fill="var(--texte)">'+_pilEsc(_pecTrunc(r.nom,et?13:20))+'</text>'
       +'<text x="'+(up?(cx+bw+9):(cx-bw-9)).toFixed(1)+'" y="'+(by+12)+'" text-anchor="'+(up?'start':'end')+'" font-size="'+(et?c.txt.mini:c.txt.unite)+'" font-weight="600" fill="'+col+'">'+(up?'+':'\u2212')+Math.round(Math.abs(r.ec))+' %</text>';
   });
@@ -9760,7 +9764,7 @@ function _pexGraph(E,w){
     [['sal',_PEC_COL.mo],['gnr',_PEC_COL.gnr],['ach',_PEC_COL.phy],['dep',_PEC_COL.dep],['fut',_PEC_COL.loc],['pre',_PEC_COL.pre],['salP','url(#pex-hach)']].forEach(function(pr){
       var v=b[pr[0]]||0; if(!(v>0)) return;
       var y0=Y(acc+v), y1=Y(acc), hh=Math.max(1,y1-y0);
-      g+='<rect x="'+x.toFixed(1)+'" y="'+y0.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hh.toFixed(1)+'" fill="'+pr[1]+'" opacity="0.92"'+(pr[0]==='salP'?(' stroke="'+_PEC_COL.mo+'" stroke-width=".8" stroke-opacity=".7"'):'')+'/>';
+      g+='<rect x="'+x.toFixed(1)+'" y="'+y0.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hh.toFixed(1)+'" rx="'+_PIL_GB.rv+'" fill="'+pr[1]+'" opacity="0.92"'+(pr[0]==='salP'?(' stroke="'+_PEC_COL.mo+'" stroke-width=".8" stroke-opacity=".7"'):'')+'/>';
       acc+=v;
     });
     if(E.enCoursC && E.coupe>=mo.d0 && E.coupe<=mo.d1){
@@ -11303,7 +11307,7 @@ function _pilCssV2(){
   +'.pil-photo{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:14px;padding:13px 14px 12px;box-shadow:var(--shadow-sm);text-align:left;width:100%;font-family:inherit;cursor:pointer;transition:border-color .12s;min-height:112px;display:block}'
   +'.pil-photo:hover{border-color:var(--or)}'
   +'.pil-photo .k{display:flex;align-items:center;gap:6px;font-size:var(--pt-nano,11px);letter-spacing:0;text-transform:none;color:var(--texte-doux);font-weight:600}'
-  +'.pil-photo .v{display:block;font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xxl,32px);font-weight:600;line-height:1.05;margin:5px 0 0;color:var(--texte);font-variant-numeric:lining-nums tabular-nums}'
+  +'.pil-photo .v{display:block;font-size:var(--pt-xxl,32px);font-weight:600;line-height:1.05;margin:5px 0 0;color:var(--texte);font-variant-numeric:lining-nums tabular-nums}'
   +'.pil-photo .u{display:inline;font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-base,14px);font-weight:600;color:var(--texte-doux)}'
   +'.pil-photo .s{display:block;font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:2px;line-height:1.35}'
   +'.pil-photo .go{display:block;font-size:var(--pt-lbl,12px);color:var(--terre);font-weight:600;margin-top:7px}'
@@ -11320,12 +11324,12 @@ function _pilCssV2(){
   +'.pil-diagwrap.show{display:flex}'
   +'.pil-diagsheet{background:var(--bg-app);width:100%;max-width:640px;max-height:86vh;overflow:auto;border-radius:18px 18px 0 0;padding:17px 17px calc(34px + env(safe-area-inset-bottom,0px))}'
   +'.pil-diag-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}'
-  +'.pil-diag-t{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-lg,24px);font-weight:600;color:var(--texte);line-height:1.15}'
+  +'.pil-diag-t{font-size:var(--pt-lg,24px);font-weight:600;color:var(--texte);line-height:1.15}'
   +'.pil-diag-s{font-size:var(--pt-txt,13px);color:var(--texte-doux);margin-top:2px}'
   +'.pil-diag-x{border:1px solid var(--gris);background:var(--bg-card);border-radius:8px;width:32px;height:32px;font-size:var(--pt-sm,16px);color:var(--texte-doux);flex-shrink:0;font-family:inherit;cursor:pointer}'
   +'.pil-diag-ok{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:13px;padding:16px;text-align:center;color:var(--vert-med);font-weight:600;margin-top:11px}'
   +'.pil-cov{display:flex;align-items:center;gap:12px;background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:13px;padding:11px 13px;margin:11px 0 13px}'
-  +'.pil-cov-v{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xxl,32px);font-weight:600;line-height:1;color:var(--orange);white-space:nowrap;flex-shrink:0}'
+  +'.pil-cov-v{font-size:var(--pt-xxl,32px);font-weight:600;line-height:1;color:var(--orange);white-space:nowrap;flex-shrink:0}'
   +'.pil-cov-t{font-size:var(--pt-txt,13px);line-height:1.45}'
   +'.pil-cov-t span{color:var(--texte-doux)}'
   +'.pil-dl{background:var(--bg-card);border:1px solid var(--gris-clair);border-left-width:4px;border-radius:11px;padding:11px 13px;margin-bottom:9px}'
@@ -11380,11 +11384,11 @@ function _pilCssV2(){
   +'.pil-annav{display:inline-flex;align-items:center;gap:4px}'
   +'.pil-annav-b{min-width:40px;min-height:40px;border:1px solid var(--gris-clair);background:var(--bg-card);color:var(--texte);border-radius:12px;font-size:var(--pt-sm,16px);line-height:1;cursor:pointer}'
   +'.pil-annav-b[disabled]{opacity:.35;cursor:default}'
-  +'.pil-annav-l{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-md,20px);font-weight:600;min-width:96px;text-align:center;font-variant-numeric:lining-nums tabular-nums}'
+  +'.pil-annav-l{font-size:var(--pt-md,20px);font-weight:600;min-width:96px;text-align:center;font-variant-numeric:lining-nums tabular-nums}'
   +'.pil-anbadge{font-size:var(--pt-lbl,12px);font-weight:600;letter-spacing:0;text-transform:none;padding:4px 8px;border-radius:999px;background:var(--tag-grey-bg);color:var(--tag-grey-tx)}'
   +'.pil-anbadge.on{background:var(--vert-pale);color:var(--vert-med)}'
   +'.pil-anc-sp{flex:1}'
-  +'.pil-anc-t{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-lg,24px);font-weight:600;color:var(--texte);margin:12px 0 4px}'
+  +'.pil-anc-t{font-size:var(--pt-lg,24px);font-weight:600;color:var(--texte);margin:12px 0 4px}'
   +'.pil-anc-d{font-size:var(--pt-txt,13px);line-height:1.55;color:var(--texte-med)}'
   +'.pil-anc-d b{color:var(--texte);font-weight:600}'
   +'.pil-anfr{margin:24px 0 8px}'
@@ -11408,7 +11412,7 @@ function _pilCssV2(){
   +'.pil-anf{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:12px 0 8px}'
   +'.pil-anf-c{background:var(--bg-app);border-radius:12px;padding:8px 12px}'
   +'.pil-anf-c .l{font-size:var(--pt-nano,11px);letter-spacing:0;text-transform:none;color:var(--texte-doux);font-weight:600}'
-  +'.pil-anf-c .v{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xl,28px);font-weight:600;line-height:1.1;margin-top:4px;font-variant-numeric:lining-nums tabular-nums;color:var(--texte)}'
+  +'.pil-anf-c .v{font-size:var(--pt-xl,28px);font-weight:600;line-height:1.1;margin-top:4px;font-variant-numeric:lining-nums tabular-nums;color:var(--texte)}'
   +'.pil-anf-c .v span{font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte-doux)}'
   +'.pil-anf-c.m .v{color:var(--terre)}'
   +'.pil-anf-c .s{font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:2px}'
@@ -12305,7 +12309,7 @@ window._pilDiagClose=_pilDiagClose;   // TOUR-2 : appelee par le retour Android 
 function _pilObjCard(cd,admin){
   var objIso=_pilObjectifGet();
   var cardCss='background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin-bottom:16px';
-  var ttlCss='font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:600;font-size:var(--pt-md,20px);color:var(--texte)';
+  var ttlCss='font-weight:600;font-size:var(--pt-md,20px);color:var(--texte)';
   var inCss='border:1px solid var(--gris);border-radius:7px;padding:5px 8px;font-family:var(--font-ui,Outfit);font-size:var(--pt-base,14px);font-weight:600;background:#fff;color:var(--texte)';
   var nom=cd?cd.saison:_pilSaisonNom();
   return '<div style="'+cardCss+'">'
@@ -12325,7 +12329,7 @@ function _pilObjCard(cd,admin){
 function _pilSimEcoCard(admin){
   var e=(window.CONFIG&&window.CONFIG.eco)||{};
   var cardCss='background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin-bottom:16px';
-  var ttlCss='font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:600;font-size:var(--pt-md,20px);color:var(--texte)';
+  var ttlCss='font-weight:600;font-size:var(--pt-md,20px);color:var(--texte)';
   var inCss='width:78px;padding:7px 8px;border:1.5px solid var(--gris-clair);border-radius:9px;font-family:inherit;font-size:var(--pt-base,14px);text-align:right;background:var(--bg-app);color:var(--texte);box-sizing:border-box';
   var dis=admin?'':' disabled';
   // Vide = valeur par defaut : on n'ecrit jamais le defaut en base, il reste dans le lecteur
@@ -12419,7 +12423,7 @@ function _pilParamBody(d){
   var cd=(window._chargeSaisonData&&window.getSaisonActive)?window._chargeSaisonData(window._pilSaison()):null;
   var admin=(typeof window.isAdmin==='function')&&window.isAdmin();
   var cardCss='background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin-bottom:16px';
-  var ttlCss='font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:600;font-size:var(--pt-md,20px);color:var(--texte)';
+  var ttlCss='font-weight:600;font-size:var(--pt-md,20px);color:var(--texte)';
   var thCss='text-align:left;font-size:var(--pt-micro,12px);text-transform:uppercase;letter-spacing:.04em;color:var(--texte-doux);padding:6px 8px;border-bottom:1px solid var(--gris-clair)';
   var tdCss='padding:7px 8px;border-bottom:1px solid #F0ECE1';
   if(!cd||!cd.taskWindows||!cd.taskWindows.length){

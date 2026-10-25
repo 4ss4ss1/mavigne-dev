@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.11';
+export const APP_VERSION = '10.12';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '10.12', d: '2026-10-25', items: [
+    { niv: 0, pour: ['admin'], emoji: 'graphique', titre: 'Pilotage : les barres des graphiques à la même mesure',
+      desc: "Dans la frise prévu / réel de Travaux, dans Économie › Postes & travaux et Parcelles, les barres des graphiques ont maintenant toutes la même épaisseur et le même arrondi, comme les jauges ; les colonnes des graphiques par mois ou par semaine, le même arrondi. Plus de barre plus épaisse ici, plus fine là." }
+  ] },
   { v: '10.11', d: '2026-10-25', items: [
     { niv: 1, pour: ['admin'], emoji: 'graphique', titre: 'Pilotage : tous les onglets se lisent de la même façon',
       desc: "Le même chiffre changeait de taille, de police ou de graisse d’un onglet à l’autre, et les jauges n’avaient pas la même épaisseur. Chaque élément a maintenant un seul style dans tout le Pilotage, calé sur Aujourd’hui : une seule police, le chiffre d’une carte, le titre d’un panneau, le nom et la valeur d’une ligne à la même taille partout, des jauges de même épaisseur à bout rond et des cartes au même dessin. Les sous-vues d’Économie et les choix dans les cartes prennent le dessin des bascules d’Aujourd’hui, et les trois chiffres de Travaux forment une bande, comme sur Aujourd’hui. Aucun calcul ne change." }

@@ -1,0 +1,28 @@
+{
+  "lot": "GABARIT-2",
+  "section": "§456",
+  "base": "57ae3e3893c734b95e71beeb1af2eafb0f3bb7ac",
+  "inclut": [],
+  "date": "2026-10-25",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".github/workflows/ci.yml": "266b64048d9206c548e2cf3b6e64357e22922f82e39bc743d10ca98b7266f0ca",
+    ".mv-base": "f1802f28c1e2752f36979320d906490f633dd6afb6abd7ca713ff4566c79bed3",
+    "CLAUDE.md": "7bb4dc2567c987f4613c840124b03b129696d88f0c9e8ceb74038c11ef5d8932",
+    "docs/claude/INDEX.md": "953a057cf689980f142dabd150247317cb517c6436955c2ee878dfd80cb111e6",
+    "docs/claude/chantiers-430-479.md": "606e2fd3fc5d8a9b7371a9b7a458becd2ef3a6483196b64780f25e7d0b1f0245",
+    "docs/claude/journal.md": "b151d5b7a33ff3d7eded366347f742d97cdbb0b64c2a3488ff44de78425def18",
+    "index.html": "185f23fc1880610929137e807844351e1c99720b384e81c30cc636dfef6782f9",
+    "package.json": "3a99d34386a9cfbd5b3c25ee7f1e88fca10d95fe9d0aba9692fa2731a8fd6c56",
+    "public/sw.js": "597a07bd045b2b999db5219eff6f742a0b8829e55cad651ab51c5ccbd927acc3",
+    "scripts/harnais-claude-md.mjs": "d091ab1965ee60d3beb53248cd052e85b0a9a86f2118186bda875ad01cbb79a1",
+    "scripts/mv-harnais-liste.mjs": "f084c2de7922de97486979a002ad77a673b84fc2db11e086c0e5d27372416863",
+    "src/pilotage.js": "19925b6063a82e8c5e3e0287c4e1b6034ba5f2243646d9fc0db8273fc97d7ca6",
+    "src/utils.js": "fe67efb7f18aad48e4af782a71c8d71b235ae320819ca7ef9f527f40ec5caa9d",
+    "scripts/mv-gabarit-rendu.mjs": "93dab431f5664902367425e2c0d054a2c9adacc1d2a2847024322c7699062dfa",
+    "scripts/mv-harnais-gabarit2.mjs": "1881b11e4ca032d56eba0cb3a74bd9cab3bd4f80140b073fd737e2829d7a21b9"
+  }
+}

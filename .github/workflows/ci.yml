@@ -84,6 +84,11 @@ jobs:
       - name: Tutos — chacun rejoue jusqu'au bout
         run: npm run test:tutos
 
+      # GABARIT-2 (§456) : le Pilotage mesuré à l'écran — une police, trois graisses, huit tailles, un style par rôle,
+      # des jauges de 10 px, des cartes arrondies à 12. Une pièce qui reprend sa propre taille fait rougir la mise en ligne.
+      - name: Gabarit du Pilotage — mesuré sur le build
+        run: npm run test:gabarit
+
       # Utile quand le smoke tombe : on recupere le bundle exact qui a echoue.
       - name: Garder le build en cas d'echec
         if: failure()
