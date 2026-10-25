@@ -787,6 +787,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-gabarit2.mjs --contre'],
   ['node scripts/mv-harnais-cavepil3.mjs'],             // CAVEPIL-3 (§457) : le Chai ne dessine que ce qui demande un geste ; en cours et à jour sur une rangée chacun, le fût marqué garde son rond
   ['node scripts/mv-harnais-cavepil3.mjs --contre'],
+  ['node scripts/mv-harnais-mapied1.mjs'],             // MAPIED-1 (§458) : la mise à pied disciplinaire — ni payée ni rattrapée, hors heures sup et récup ; sa ligne à retirer dans « Pour la compta »
+  ['node scripts/mv-harnais-mapied1.mjs --contre'],
   ['node scripts/mv-harnais-cave2.mjs'],              // CAVE-2 (§289) : le Cuvier à la charte
   ['node scripts/mv-harnais-cave2.mjs --contre'],
   ['node scripts/mv-harnais-cave3.mjs'],              // CAVE-3 (§290) : le Chai en liste + fiche

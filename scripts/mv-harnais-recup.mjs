@@ -343,7 +343,7 @@ function lance(R) {
   eq('L13 · verdict : il reste 3h', vd.indexOf('Il reste en r\u00e9cup</span><b>3h</b>') !== -1, true);
   const mot = R._planAbsMotifsHtml('perso', true);
   sain('L14 motifs', mot);
-  eq('L15 · sept motifs en journée, six en partie de journée', [(R._planAbsMotifsHtml('', false).match(/data-mo=/g) || []).length, (mot.match(/data-mo=/g) || []).length].join('/'), '7/6');
+  eq('L15 · huit motifs en journée (MAPIED-1 : la mise à pied disciplinaire, journée entière seulement), six en partie de journée', [(R._planAbsMotifsHtml('', false).match(/data-mo=/g) || []).length, (mot.match(/data-mo=/g) || []).length].join('/'), '8/6');
   eq('L16 · « Retard » ne se choisit plus', mot.indexOf('data-mo="retard"'), -1);
   sain('L17 section absence', R._planSheetAbsSection('', false));
   pages.length = 0;
@@ -1084,7 +1084,9 @@ const DEFAUTS = [
   // ★ MEP-1 (§192) : le relevé imprime la légende BRÈVE (c.bref) ; c'est elle que AC6 lit, c'est donc elle qu'on retire.
   ["AVANT-2 · la légende redit « majoration comprise » sans la règle d’avant", "    +(avantB?' * Avant '", "    +(false?' * Avant '"],
   // CLAIR-1 (§160)
-  ["CLAIR-1 · le salaire de base redit « Maintenu »", "'Retenue de '+F(ret):'Aucune retenue'", "'Retenue de '+F(ret):'Maintenu'"],
+  // ★ MAPIED-1 (§458) : la ligne du salaire de base dit « Aucune autre retenue » à côté d'une ligne à retirer (sans solde,
+  //   mise à pied) ; le défaut visé reste le même — « Maintenu » à la place de « Aucune retenue » quand il n'y en a pas.
+  ["CLAIR-1 · le salaire de base redit « Maintenu »", "'Retenue de '+F(ret):(NR.length?'Aucune autre retenue':'Aucune retenue')", "'Retenue de '+F(ret):(NR.length?'Aucune autre retenue':'Maintenu')"],
   // ⚰️ AVANT-2 : « les heures d'avant ne rejoignent plus la case de leur taux » visait `av.c25+=SP.est.c25` — du code MORT depuis que
   //   le stock est majoré à la bascule (dans un mois `act`, l'estimation ne rend plus que du « déjà majoré »). Ligne retirée, avec elle.
   ["CLAIR-1 · la case ne dit plus d’où viennent ses heures", "om.forEach(function(i){det.push(", "om.forEach(function(i){if(0)det.push("],

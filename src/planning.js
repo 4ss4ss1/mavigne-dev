@@ -468,6 +468,13 @@ var PLAN_ABS_MOTIFS=[
   // ★ RECUP-1 : les deux motifs qui manquaient pour dire POURQUOI une journee est ecourtee.
   {id:'perso',     ico:'maison',    nom:'Personnel (autoris\u00e9)',      sub:'Rendez-vous, affaire de famille, d\u00e9part demand\u00e9', suspend:false, assim:false, paye:false, heures:false, cpt:'retire'},
   {id:'domaine',   ico:'pluie',     nom:'D\u00e9cid\u00e9 par le domaine', sub:'Pluie, chantier termin\u00e9, attente de mat\u00e9riel', suspend:false, assim:false, paye:true, heures:false, cpt:'domaine'},
+  // ★★ MAPIED-1 (25/10/2026) — LA MISE À PIED DISCIPLINAIRE. Une sanction : le contrat est SUSPENDU (pas rompu) le temps des
+  //   jours notifiés. Mêmes drapeaux que le congé sans solde, et c'est voulu : heures ni dues ni payées (le plafond annuel
+  //   baisse, _planSuspH), jamais rattrapées, sans effet sur la récup ni sur les heures sup du mois — accord national agricole
+  //   du 23/12/1981, art. 10.4 (4.2 : le temps non travaillé d'une absence non payée n'est pas récupérable ; §2 : la déduction
+  //   se compte sur l'horaire programmé). Son nom suit partout où la feuille parle de paie (_pfNeutreRetire). Les collègues
+  //   voient « absent » (functions/planning-vues-calc.js, vueJour : motif « autre ») ; le Pilotage aussi (_dzMotif).
+  {id:'miseapied', ico:'balance',   nom:'Mise \u00e0 pied disciplinaire', sub:'Sanction notifi\u00e9e par \u00e9crit \u00b7 contrat suspendu', suspend:true,  assim:false, paye:false, heures:false, cpt:'', journee:true},
   // ⚠️ `cache` : ils se RELISENT (entrees anterieures) mais ne se CHOISISSENT plus. Le retard
   //    est devenu un creneau (« Arrive en retard ») suivi d'un motif ; « non precisee »
   //    reste le motif par defaut de toute entree anterieure aux motifs — et DOIT rester le
@@ -476,7 +483,7 @@ var PLAN_ABS_MOTIFS=[
   {id:'autre',     ico:'\u2014',    nom:'Absence non pr\u00e9cis\u00e9e', sub:'Sans effet sur le plafond annuel',                 suspend:false, assim:false, paye:false, heures:false, cpt:'', cache:true}
 ];
 // L'ordre de la maquette validee : ce que le chef d'equipe cherche d'abord.
-var PLAN_ABS_ORDRE=['perso','injustifie','domaine','arret','formation','famille','sansolde'];
+var PLAN_ABS_ORDRE=['perso','injustifie','domaine','arret','formation','famille','sansolde','miseapied'];
 function _planAbsDef(id){
   for(var i=0;i<PLAN_ABS_MOTIFS.length;i++)if(PLAN_ABS_MOTIFS[i].id===id)return PLAN_ABS_MOTIFS[i];
   return PLAN_ABS_MOTIFS[PLAN_ABS_MOTIFS.length-1];
@@ -2706,7 +2713,7 @@ function _planYearBalance(mbr,uptoMonth){
 // Distincte de la periode des CONGES PAYES (juin -> mai, cf. _planCpPeriode).
 // ════════════════════════════════════════════════════════════════════
 
-// Heures des jours d'absence SUSPENSIVE (arret de travail, conge sans solde).
+// Heures des jours d'absence SUSPENSIVE (arret de travail, conge sans solde, mise a pied disciplinaire).
 // Une suspension de contrat abaisse le plafond individuel : ces heures ne sont
 // ni a rattraper, ni comptees en deficit.
 function _planSuspH(mbr){
@@ -2794,12 +2801,13 @@ function _planAbsEffet(mo){
   if(mo.cpt==='retire') return {t:'Retir\u00e9 des heures sup \u00b7 le reste est retenu sur la paie',c:'pl2r-ret'};
   if(mo.cpt==='domaine')return {t:'Retir\u00e9 des heures sup \u00b7 jamais retenu sur la paie',c:'pl2r-ret'};
   if(mo.assim)return {t:'Compt\u00e9 comme travaill\u00e9',c:'pl2r-ass'};
+  if(mo.id==='miseapied')return {t:'Non pay\u00e9e, jamais rattrap\u00e9e \u00b7 sans effet sur les heures sup',c:'pl2r-ret'};   // ★ MAPIED-1
   if(mo.suspend&&!mo.paye)return {t:'Journ\u00e9e non pay\u00e9e \u00b7 sans effet sur les heures sup',c:'pl2r-neu'};
   return {t:'Sans effet sur les heures sup',c:'pl2r-neu'};
 }
 // Le nom court d'un motif, tel qu'il s'ecrit apres un creneau (« Absent 13:00 → 15:00 · personnel »)
 var PLAN_ABS_COURT={perso:'personnel',injustifie:'injustifi\u00e9e',domaine:'d\u00e9cid\u00e9 par le domaine',arret:'arr\u00eat de travail',
-  formation:'formation',famille:'\u00e9v\u00e9nement familial',sansolde:'cong\u00e9 sans solde',retard:'retard',autre:'non pr\u00e9cis\u00e9e'};
+  formation:'formation',famille:'\u00e9v\u00e9nement familial',sansolde:'cong\u00e9 sans solde',miseapied:'mise \u00e0 pied',retard:'retard',autre:'non pr\u00e9cis\u00e9e'};
 function _planAbsMotifsHtml(sel,partie){
   // `partie` : une absence d'une partie de la journee ne peut pas etre un conge sans solde.
   var h='';
@@ -4813,7 +4821,34 @@ function _planSemEffectif(mbr,mon){
 function _pfMark(cls,txt){return '<mark class="pf-hl pf-hl-'+cls+'">'+txt+'</mark>';}
 var PF_PAYE_LIB={cp:'Cong\u00e9 pay\u00e9',rec:'R\u00e9cup',dom:'D\u00e9cid\u00e9 par le domaine',formation:'Formation',famille:'\u00c9v\u00e9nement familial',
   sem:'Rattrap\u00e9e dans la semaine',att:'Compt\u00e9e avec sa semaine, le mois prochain'};
-var PF_NEUTRE_LIB={arret:'Arr\u00eat de travail',sansolde:'Cong\u00e9 sans solde',autre:'Absence non pr\u00e9cis\u00e9e'};
+var PF_NEUTRE_LIB={arret:'Arr\u00eat de travail',sansolde:'Cong\u00e9 sans solde',miseapied:'Mise \u00e0 pied disciplinaire',autre:'Absence non pr\u00e9cis\u00e9e'};
+// ★★ MAPIED-1 (25/10/2026) — UNE ABSENCE QUI SUSPEND LE CONTRAT SANS SALAIRE : congé sans solde, mise à pied disciplinaire.
+//   Ses heures (celles du planning, figées dans x.neutre) se retirent du salaire de base À PART, sur une ligne à son nom : la
+//   compta les saisit sous leur nom, et ni la récup ni les heures sup ne les couvrent (NET-1 ne concerne que les absences du
+//   salarié). Lue aux DRAPEAUX (suspend, non payée), pas à une liste d'identifiants : l'arrêt de travail suspend aussi, mais il
+//   est payé — il n'en est pas. Lecteurs : _pfCompta (la ligne et le salaire de base), _pfPaieDonnees (le total de la retenue),
+//   _pfV3 (« À retirer »), le jour par jour de l'écran et du relevé (« non payée »), la légende du relevé.
+function _pfNeutreRetire(t){var mo=_planAbsDef(t);return !!t&&mo.id===t&&!!mo.suspend&&!mo.paye;}
+var PF_NEUTRE_ART={sansolde:'le cong\u00e9 sans solde',miseapied:'la mise \u00e0 pied disciplinaire'};
+var PF_NEUTRE_NOTE={miseapied:'Contrat suspendu\u00a0: les heures du planning, non pay\u00e9es, jamais rattrap\u00e9es\u00a0; les heures sup du mois restent dues.'};
+// Les absences à retirer à part, une ligne par motif, dans l'ordre de la liste des motifs : [{t, l, h, jours, note}].
+function _pfNeutresRetire(P){
+  var out=[];
+  PLAN_ABS_ORDRE.forEach(function(t){
+    if(!_pfNeutreRetire(t))return;
+    var js=(P.jours||[]).filter(function(x){return !x.hors&&x.neutreType===t&&x.neutre>0.0001;});
+    if(!js.length)return;
+    out.push({t:t,l:PF_NEUTRE_LIB[t]||_planAbsDef(t).nom,h:js.reduce(function(a,x){return a+x.neutre;},0),
+      jours:js.map(function(x){return x.d;}),note:PF_NEUTRE_NOTE[t]||''});
+  });
+  return out;
+}
+// « La mise à pied disciplinaire se retire à part, ligne dessous. » — une ou deux lignes.
+function _pfNeutresPhrase(NR){
+  var a=NR.map(function(n){return PF_NEUTRE_ART[n.t]||('l\u2019absence \u00ab\u00a0'+n.l+'\u00a0\u00bb');});
+  var s=a.length>1?a.slice(0,-1).join(', ')+' et '+a[a.length-1]:a[0];
+  return s.charAt(0).toUpperCase()+s.slice(1)+(a.length>1?' se retirent \u00e0 part, lignes dessous.':' se retire \u00e0 part, ligne dessous.');
+}
 // ★ TAUX-1 — « de septembre », « d'octobre », « d'août », « d'avril » : le relevé écrivait « Les heures sup de octobre ».
 function _pfDeMois(m){var n=PLAN_MOIS[m].toLowerCase();return (/^[aeiouyh]/.test(n)?'d\u2019':'de ')+n;}
 function _pfMajNom(P){
@@ -4885,7 +4920,7 @@ function _pfV3(mbr,P,D,A){
   if(P.demande&&P.payeTotal>0.0001)info.push(['','Heures sup restantes \u00e0 payer','<b>'+F((A||_pfAnnee(mbr,m))[m].solde)+'</b>']);
   // ★ NET-1 — UNE RETENUE OU DES HEURES SUP A PAYER : la retenue dit ce que la récup et les heures sup n'ont pas couvert.
   var moinsL=[[P.nonPayees>0.0001?'pf-fort':'pf-rien','Retenue sur salaire',P.nonPayees>0.0001?'<b>'+F(P.nonPayees)+'</b>':'aucune']];
-  if((D.sansSolde||0)>0.0001)moinsL.push(['pf-fort','Cong\u00e9 sans solde','<b>'+F(D.sansSolde)+'</b>']);
+  (D.neutresRetire||_pfNeutresRetire(P)).forEach(function(n){moinsL.push(['pf-fort',n.l,'<b>'+F(n.h)+'</b>']);});   // ★ MAPIED-1 : sans solde, mise à pied
   moinsL.push([P.acomptesTotal>0.0001?'':'pf-rien','Acompte',P.acomptesTotal>0.0001?'<b>'+P.acomptesTotal.toLocaleString('fr-FR')+'\u202f\u20ac</b>':'aucun']);
   var semHs=(hm.semaines||[]).filter(function(sw){return sw.plus>0.0001;}),sumSem=semHs.reduce(function(a,sw){return a+sw.plus;},0);
   var pdTxt=(!P.act||Math.abs(sumSem-P.sup)>0.01)?('Heures sup du mois\u00a0: <b>'+F(P.sup)+'</b>')
@@ -4950,11 +4985,18 @@ function _pfCompta(mbr,P,D,V,A){
   if((RP.rendu||0)>0.0001)pq+=(pq?' ':'')+'Moins '+F(RP.rendu)+' retenues de trop en '+mR+'.';
   // ★ CLAIR-1 (20/09/2026) — Nico : « il faut que ça soit clair quand on marque aucune retenue ». « Maintenu » demandait de
   //   savoir ce qui l'était : la ligne dit « Aucune retenue », et ce que la compta en fait.
-  L.push({k:'base',l:'Salaire de base',v:ret>0.0001?'Retenue de '+F(ret):'Aucune retenue',ton:ret>0.0001?'ko':'ok',
-    p:(ret>0.0001?F(ret)+' \u00e0 retirer du salaire de base. ':'Le salaire de base se paie en entier. ')+pq});
-  var ss=JS(function(x){return x.neutreType==='sansolde'&&x.neutre>0.0001;});
-  if(ss.length)L.push({k:'sansolde',l:'Cong\u00e9 sans solde',v:F(som(ss,'neutre'))+' <small>\u00e0 retirer</small>',ton:'ko',
-    p:ss.length+' jour'+(ss.length>1?'s':'')+', '+_pfJoursTxt(ss.map(function(x){return x.d;}))+'.'});
+  // ★★ MAPIED-1 (25/10/2026) — LE SALAIRE DE BASE NE DIT PLUS « SE PAIE EN ENTIER » À CÔTÉ D'UNE LIGNE À RETIRER.
+  //   Un congé sans solde ou une mise à pied se retirent à part, chacun sur sa ligne (la compta les saisit sous leur nom) ;
+  //   la ligne du salaire de base reste celle des absences du salarié (NET-1) et le dit : « Aucune autre retenue ». Avant,
+  //   un mois avec un congé sans solde portait « Aucune retenue — le salaire de base se paie en entier » juste au-dessus de
+  //   « Congé sans solde : 7h à retirer ».
+  var NR=_pfNeutresRetire(P);
+  L.push({k:'base',l:'Salaire de base',v:ret>0.0001?'Retenue de '+F(ret):(NR.length?'Aucune autre retenue':'Aucune retenue'),ton:ret>0.0001?'ko':(NR.length?'':'ok'),
+    p:(ret>0.0001?F(ret)+' \u00e0 retirer du salaire de base. ':(NR.length?'Rien \u00e0 retirer pour les absences du salari\u00e9. ':'Le salaire de base se paie en entier. '))+pq+(NR.length?(pq?' ':'')+_pfNeutresPhrase(NR):'')});
+  NR.forEach(function(n){
+    L.push({k:n.t,l:n.l,v:F(n.h)+' <small>\u00e0 retirer</small>',ton:'ko',
+      p:n.jours.length+' jour'+(n.jours.length>1?'s':'')+', '+_pfJoursTxt(n.jours)+'.'+(n.note?' '+n.note:'')});
+  });
   // ── 2. Les heures sup à payer, une ligne par taux (FICHE-3), ou « aucune » et pourquoi.
   // ★★★ CLAIR-1 (20/09/2026) — TROIS TOTAUX, ET PLUS DE PHRASE. Nico : « il faut qu'il y ait le total d'heures sup à payer à
   //   25 %, le total à 50 %, le total de dimanche et de jours fériés à payer. Il ne faut pas de phrase type nombre d'heures sup
@@ -5109,8 +5151,8 @@ function _pfCadre(mbr,P){
   var trois=V?'<div><span class="pf-l">Absences</span>'+_pfMark('paye pf-v',_planFmt(V.AB.total))+'<span class="pf-s">'+(V.AB.total>0.0001?'par cause':'aucune')+'</span></div>'
              :'<div><span class="pf-l">Absences pay\u00e9es</span>'+_pfMark('paye pf-v',_planFmt(P.payees))+'<span class="pf-s">cong\u00e9s, r\u00e9cup\u2026</span></div>';
   var verdict=V?('<p class="'+(V.verdict.ko?'pf-ko':'pf-ok')+'">'+_mvIcon(V.verdict.ko?'alerte':'check',16)+'<span>'+V.verdict.t+'</span></p>')
-    :((P.nonPayees+D.sansSolde)<0.0001?'<p class="pf-ok">'+_mvIcon('check',16)+'<span>Maintenu\u00a0: les absences pay\u00e9es ne se retirent pas.</span></p>'
-      :'<p class="pf-ko">'+_mvIcon('alerte',16)+'<span>'+_planFmt(P.nonPayees+D.sansSolde)+' d\u2019absence ne sont pas pay\u00e9es\u00a0: \u00e0 retirer.</span></p>');
+    :(D.nonPayeTotal<0.0001?'<p class="pf-ok">'+_mvIcon('check',16)+'<span>Maintenu\u00a0: les absences pay\u00e9es ne se retirent pas.</span></p>'
+      :'<p class="pf-ko">'+_mvIcon('alerte',16)+'<span>'+_planFmt(D.nonPayeTotal)+' d\u2019absence ne sont pas pay\u00e9es\u00a0: \u00e0 retirer.</span></p>');
   return '<section class="pf-paie" aria-labelledby="pf-paie-t">'
     +'<header class="pf-paie-h"><h3 id="pf-paie-t">Pour la paie</h3><span>'+mois+(P.fige?' \u00b7 fig\u00e9 le '+_planFmtJour(P.fige.le):'')+'</span></header>'
     +'<div class="pf-grid">'
@@ -5517,8 +5559,10 @@ function _pfPaieDonnees(mbr,P){
   if(!D.plus.length)D.plus.push(['pf-rien','Aucune heure sup pay\u00e9e',(P.sup>0.0001?'elles vont en r\u00e9cup':'\u2014')]);
   if(!RS&&!P.lignes.some(function(l){return l.nat==='fer';}))D.plus.push(['pf-rien','Jours f\u00e9ri\u00e9s','0h']);
   D.sansSolde=P.neutres.sansolde||0;
+  // ★ MAPIED-1 — les absences à retirer à part (congé sans solde, mise à pied disciplinaire), et leur total pour la retenue.
+  D.neutresRetire=_pfNeutresRetire(P);D.neutreRetireH=D.neutresRetire.reduce(function(a,n){return a+n.h;},0);
   D.moins.push([P.nonPayees>0.0001?'pf-fort':'','Absences non pay\u00e9es','<b>'+_planFmt(P.nonPayees)+'</b>']);
-  if(D.sansSolde>0.0001)D.moins.push(['pf-fort','Cong\u00e9 sans solde','<b>'+_planFmt(D.sansSolde)+'</b>']);
+  D.neutresRetire.forEach(function(n){D.moins.push(['pf-fort',n.l,'<b>'+_planFmt(n.h)+'</b>']);});
   if(P.acomptes.length)P.acomptes.forEach(function(a){var dp=(a.date||'').split('-');D.moins.push(['','Acompte vers\u00e9 le '+(dp.length===3?parseInt(dp[2],10)+'/'+parseInt(dp[1],10):''),'<b>'+(a.montant||0).toLocaleString('fr-FR')+'\u202f\u20ac</b>']);});
   else D.moins.push(['pf-rien','Acompte','aucun']);
   var cpJ=P.jours.filter(function(x){return x.payeType==='cp';}).map(function(x){return x.d;});
@@ -5533,8 +5577,8 @@ function _pfPaieDonnees(mbr,P){
   if(P.c.dette>0.0001)D.info.push(['','\u00c0 compenser sur les prochaines heures sup','<b>'+_planFmt(P.c.dette)+'</b>']);
   D.neutres=Object.keys(P.neutres).reduce(function(a,k){return a+P.neutres[k];},0);
   D.ecart=P.faites+P.payees+D.neutres-P.prevues;
-  D.nonPayeTotal=P.nonPayees+D.sansSolde;
-  D.pied=_planFmt(P.faites)+' faites + '+_planFmt(P.payees)+' d\u2019absences pay\u00e9es'+(D.neutres>0.0001?' + '+_planFmt(D.neutres)+' d\u2019arr\u00eat ou de cong\u00e9 sans solde':'')
+  D.nonPayeTotal=P.nonPayees+D.neutreRetireH;
+  D.pied=_planFmt(P.faites)+' faites + '+_planFmt(P.payees)+' d\u2019absences pay\u00e9es'+(D.neutres>0.0001?' + '+_planFmt(D.neutres)+((P.neutres.miseapied||0)>0.0001?' d\u2019arr\u00eat, de cong\u00e9 sans solde ou de mise \u00e0 pied':' d\u2019arr\u00eat ou de cong\u00e9 sans solde'):'')
     +' \u2212 '+_planFmt(P.prevues)+' pr\u00e9vues = <b>'+_planFmtE(D.ecart)+(Math.abs(D.ecart-P.sup)<0.01&&P.sup>0.0001?', les heures sup':'')+'</b>'
     +((P.act&&Math.abs(D.ecart-P.sup)>=0.01)?'. Heures sup, compt\u00e9es \u00e0 la semaine\u00a0: <b>'+_planFmt(P.sup)+'</b>'+(P.sem>0.0001?' ('+_planFmt(P.sem)+' en plus ont rattrap\u00e9 leur semaine)':''):'');
   return D;
@@ -5612,7 +5656,7 @@ function _pfJours(mbr,P){
           if(st.length)obs.push(st.join(', '));
         }
         else if(x.paye>0.0001)faitC+=_pfMark('paye',PF_PAYE_LIB[x.payeType]||'Pay\u00e9e')+'<b>'+F(x.paye)+(x.payeType==='rec'?' prise'+(x.paye>1?'s':'')+' sur la r\u00e9cup':' pay\u00e9e'+(x.paye>1?'s':''))+'</b>';
-        if(x.neutre>0.0001)faitC+=_pfMark('paye',PF_NEUTRE_LIB[x.neutreType]||'Absence')+'<b>'+F(x.neutre)+'</b>';
+        if(x.neutre>0.0001){faitC+=_pfMark('paye',PF_NEUTRE_LIB[x.neutreType]||'Absence')+'<b>'+F(x.neutre)+'</b>';if(_pfNeutreRetire(x.neutreType))obs.push(F(x.neutre)+' non pay\u00e9es');}
       if(!faitC)faitC='<span class="pf-z">\u2014</span>';
       var ec;
       if(act)ec=x.hs>0.0001?'<span class="pf-ec up">+'+F(x.hs)+'</span>':'<span class="pf-ec"></span>';
@@ -8014,7 +8058,7 @@ function _planReleveFiche_(nom,mbr,_ctr){
         if(x.nonPaye>0.0001)st.push(q(x.nonPaye,'retenue','retenues'));
         if(x.surHs>0.0001)st.push(q(x.surHs,'reprise sur la r\u00e9cup','sur la r\u00e9cup'));   // ★ TAUX-1 : un seul nom (la page 1 et le compteur disent « récup »)
         if(x.aRatt>0.0001)st.push(q(x.aRatt,'\u00e0 rattraper','\u00e0 rattraper'));
-      } else if(x.neutre>0.0001){abT=PF_NEUTRE_LIB[x.neutreType]||'Absence';abH=F(x.neutre);}
+      } else if(x.neutre>0.0001){abT=PF_NEUTRE_LIB[x.neutreType]||'Absence';abH=F(x.neutre);if(_pfNeutreRetire(x.neutreType)){abC='non';st.push('non pay\u00e9e');}}
       // ★ TAUX-1 : « Congé payé payée », « Récup payée » — l'étiquette s'accorde, et une récup n'est pas payée : elle est prise.
       else if(x.paye>0.0001){abT=LIB[x.payeType]||'Pay\u00e9e';abH=F(x.paye);st.push(x.payeType==='rec'?'prise sur la r\u00e9cup':(x.payeType==='cp'?'pay\u00e9':(x.payeType==='famille'?'pay\u00e9':'pay\u00e9e')));}
       var obs=[];
@@ -8122,7 +8166,8 @@ function _planReleveFiche_(nom,mbr,_ctr){
         +'<li><b>Heures sup</b>\u00a0: au-del\u00e0 du planning de la semaine, du lundi au dimanche (cong\u00e9, r\u00e9cup, arr\u00eat comptent comme faits)\u00a0; la semaine compte dans le mois o\u00f9 elle finit. Les huit premi\u00e8res \u00e0 25\u202f%, les suivantes \u00e0 50\u202f%\u00a0; dimanche ou f\u00e9ri\u00e9\u00a0: le taux le plus fort, une fois. Une heure en plus qui rattrape une heure manqu\u00e9e de la semaine n\u2019est pas une heure sup \u2014 sauf un dimanche ou un f\u00e9ri\u00e9 non pr\u00e9vu, qui compte toujours en entier, \u00e0 son taux.</li>'
         +'<li><b>Absences du salari\u00e9</b> (injustifi\u00e9e, personnelle, retard)\u00a0: d\u2019abord rattrap\u00e9es par les heures en plus faites la m\u00eame semaine. Ce qu\u2019il en reste est pris sur la r\u00e9cup d\u00e9j\u00e0 acquise (1h d\u2019absence = 1h de r\u00e9cup), en vidant d\u2019abord la r\u00e9cup gagn\u00e9e au taux de 50\u00a0%. Ce qui manque encore est retenu sur le salaire.</li>'
         +'<li><b>Absences du domaine</b> (journ\u00e9e \u00e9court\u00e9e, pluie\u2026)\u00a0: jamais retenues. Rattrap\u00e9es dans la semaine apr\u00e8s celles du salari\u00e9, puis prises sur la r\u00e9cup\u00a0; le reste va aux heures \u00e0 rattraper, que les prochaines heures sup comblent.</li>'
-        +'<li><b>Paiement</b>\u00a0: une fois les absences couvertes, la feuille porte soit une retenue, soit des heures sup \u00e0 payer \u2014 jamais les deux'+(P.payable?', majoration du dimanche comprise':'')+'. S\u2019il reste des heures sup \u00e0 plusieurs taux, celles \u00e0 50\u00a0% sont toujours r\u00e9gl\u00e9es en premier. \u00ab\u00a0Pay\u00e9es\u00a0\u00bb\u00a0: l\u2019heure faite, la paie applique le taux. \u00ab\u00a0R\u00e9cup\u00a0\u00bb\u00a0: le temps \u00e0 prendre, majoration d\u00e9j\u00e0 comprise.</li>'
+        +((P.neutres.miseapied||0)>0.0001?'<li><b>Mise \u00e0 pied disciplinaire</b>\u00a0: le contrat est suspendu ces jours-l\u00e0. Leurs heures, celles du planning, se retirent du salaire \u00e0 part\u00a0; elles ne se rattrapent pas et ne touchent ni \u00e0 la r\u00e9cup ni aux heures sup, qui restent dues.</li>':'')   // ★ MAPIED-1
+        +'<li><b>Paiement</b>\u00a0: une fois les absences couvertes, la feuille porte soit une retenue, soit des heures sup \u00e0 payer \u2014 jamais les deux'+(P.payable?', majoration du dimanche comprise':'')+((D.neutreRetireH||0)>0.0001?' (un cong\u00e9 sans solde ou une mise \u00e0 pied se retirent \u00e0 part)':'')+'. S\u2019il reste des heures sup \u00e0 plusieurs taux, celles \u00e0 50\u00a0% sont toujours r\u00e9gl\u00e9es en premier. \u00ab\u00a0Pay\u00e9es\u00a0\u00bb\u00a0: l\u2019heure faite, la paie applique le taux. \u00ab\u00a0R\u00e9cup\u00a0\u00bb\u00a0: le temps \u00e0 prendre, majoration d\u00e9j\u00e0 comprise.</li>'
         // ★ DIM-2 : le point « Heures sup d'avant septembre » est retiré — la légende du détail de l'année dit la règle d'avant, et le
         //   compteur porte sa ligne (majoration reçue à la bascule) : trois fois la même chose, et la place manquait en page 2.
         +'</ul>'

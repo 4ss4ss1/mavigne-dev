@@ -103,7 +103,8 @@ function verifier(S) {
   T('6 la bulle « i » dit les rangées, « Tout voir » et le fût marqué', /tiennent chacune sur une ligne/.test(info) && /« Tout voir »/.test(info) && /garde toujours son rond/.test(info) && !/chaque fût du Chai/.test(info));
   T('6 l’aide du Pilotage et le guide disent la même chose', /tiennent chacune sur une ligne/.test(S.utils) && /garde son rond même quand sa cuvée est rangée/.test(S.utils) && !/et chaque fût du Chai, de la couleur/.test(S.utils)
     && /tiennent chacune sur <b>une ligne<\/b>/.test(S.guide) && /« Tout voir »/.test(S.guide) && !/puis chaque cuvée du Chai avec un rond par fût/.test(S.guide));
-  T('6 les nouveautés annoncent le changement, en tête', /export const WHATS_NEW = \[\n {2}\{ v: '10\.13', d: '2026-10-25', items: \[\n {4}\{ niv: 1, pour: \['admin'\], emoji: 'barrique', titre: 'Pilotage › vue Cave : seuls les fûts qui demandent un geste sont dessinés'/.test(S.utils));
+  // ★ MAPIED-1 (§458) : « en tête » ne tenait qu'un lot — le bloc 10.13 est cherché à sa place, où qu'elle soit.
+  T('6 les nouveautés annoncent le changement (bloc 10.13)', /\n {2}\{ v: '10\.13', d: '2026-10-25', items: \[\n {4}\{ niv: 1, pour: \['admin'\], emoji: 'barrique', titre: 'Pilotage › vue Cave : seuls les fûts qui demandent un geste sont dessinés'/.test(S.utils));
   T('ce harnais est branch\u00e9 dans la liste des contr\u00f4les', S.liste.includes("['node scripts/mv-harnais-cavepil3.mjs'],") && S.liste.includes("['node scripts/mv-harnais-cavepil3.mjs --contre'],"));
   return R;
 }

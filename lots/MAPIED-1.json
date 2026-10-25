@@ -1,0 +1,28 @@
+{
+  "lot": "MAPIED-1",
+  "section": "§458",
+  "base": "b57e4fe65a76e5bdc2360989c216a8bdec99df51",
+  "inclut": [],
+  "date": "2026-10-25",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "28b42c1c47200150448b13351bd33aa77b6bb61bf42b0c526f468e9506bd0371",
+    "CLAUDE.md": "fed52b0fc6689124252b8c91f48b64661bd000cc7c5525779fef1da29c0c7745",
+    "docs/claude/INDEX.md": "dffaf341462b5f05fad6b7172f424456dd3b0740b8f2895d520e146b831d8913",
+    "docs/claude/chantiers-430-479.md": "1aa34168ae80765f921ea56d2312c0c102846faabc09f700277e4bd044f57b59",
+    "docs/claude/journal.md": "0e33f756b8374b58d652d7b877bb332b6dd1886f5137c9c6185f7f50a8c771f8",
+    "docs/claude/modules.md": "91f2cabe3033616058cfda25f09d3ba3928e651a8d4557bc2aeb9d5b95662306",
+    "guide/10-planning.html": "295c0cdfbb1cd3f801732d629594851d6693c9c93d6694aedd52fd94dccd4ccd",
+    "index.html": "3d6e79b7867a10d57516a7e787f1c3ee72f118bd111105df9dfb34a3ec3c790d",
+    "public/sw.js": "89c936c5f1905ccfdaed4649c56ec88f3853e49077a7fb9f1af8edd1be552c5e",
+    "scripts/mv-harnais-cavepil3.mjs": "76b542ea852bdb60ce410bb7630a2bcea8b583118e95978a39a717b3fc935a57",
+    "scripts/mv-harnais-liste.mjs": "56dc664f58b4c00a59f5ebc5c49cb13e87ba0c2eabcc2b3d381329d246e0d13c",
+    "scripts/mv-harnais-recup.mjs": "d9ac3d2ee9af310fcbe3efcdc97f1401eca542d5e4b77c97a8b8a1edb6876ff0",
+    "src/planning.js": "d7353d88bdefb9da1646fdd6f638cda8dff6b0c600ec5c8f27e0ededaaea5a93",
+    "src/utils.js": "8298be10faab1c1a0eae059fc6665e7e7d0c687490426d42b88ff64b86c74965",
+    "scripts/mv-harnais-mapied1.mjs": "f35cb2f8615f83a6cf801e1a6d343e41d709931e9c559a759779678871df69b6"
+  }
+}

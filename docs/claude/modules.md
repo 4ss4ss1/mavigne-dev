@@ -902,7 +902,7 @@ le coupe de son historique.
 - **Horaire chaleur** = forme heures avec `canicule:true` et `comment:'Chaleur'` : 06:00 → 14:00 continu depuis la barre
   (`_planApplySimple('heat')`), horaires choisis depuis l'outil chaleur (`planCaniculeApply`).
 - **Équipe collective** : `effectif:n` se **fusionne** dans l'entrée existante, jamais seul (`planSelEffectif`).
-- `timing.debut`/`fin` = `'HH:MM'`. `motif` ∈ `PLAN_ABS_MOTIFS` : `arret` · `sansolde` · `famille` · `formation` ·
+- `timing.debut`/`fin` = `'HH:MM'`. `motif` ∈ `PLAN_ABS_MOTIFS` : `arret` · `sansolde` · `miseapied` (MAPIED-1, §458 : les drapeaux de `sansolde`) · `famille` · `formation` ·
   `injustifie` · `perso` · `domaine` · `retard` (seul `heures:true`) · `autre` (repli d'un id inconnu).
 - ⚠️ `fer`, `we`, `out` sont des **états d'affichage** du calendrier CP, **jamais** des `type` d'entrée.
 - Pas d'entrée = jour au modèle (heures prévues du modèle, rien de saisi).
