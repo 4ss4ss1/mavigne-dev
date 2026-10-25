@@ -1,5 +1,5 @@
 {
-  "plafond": 808,
+  "plafond": 807,
   "exempts": {
     "_homeDirectTout": "ACCV-2 (§417) : déplie « En direct » sur place, rien à apprendre — la carte montre déjà l’essentiel",
     "_esDatesNote": "PERDATE-1 (§427) : relit les dates de « Modifier la période » quand on quitte une case — rien à apprendre, c’est l’écran qui signale une date impossible",

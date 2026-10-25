@@ -477,3 +477,17 @@ La fenêtre du Chai devient **la fiche** : quatre volets (puces `mvcm-chip`), É
 
 ### 450d. Ce qui reste
 CAVE-RANGE-2b (le millésime regardé tout en haut de la Cave — la fiche à droite de la liste est déjà là pour le Chai) et CAVE-RANGE-3 (Le Millésime à deux onglets, après avoir vérifié qu’aucune cuvée ne devient introuvable).
+
+## 451. ★ CAVE-RANGE-2b — CAVE : LE MILLÉSIME REGARDÉ, UNE SEULE BARRE SOUS LES SECTIONS (LE CHAI ET LE MILLÉSIME) (25/10 — `src/cave.js` (`_caveMillChipsHtml` : la barre unique, années du Chai et du Millésime, phrase « Tous » au Millésime ; `_caveEnsureMilBar` : hôte `#cave-milbar` sous `#cave-sec-tabs`, l’ancien `#mvc-milbar` retiré ; `_caveMilBarRender` : visible au Chai et au Millésime seulement ; rendu par l’aiguillage des sections ; `_mlHead` sans ses boutons ; `_mlSetMil` et son export retirés ; styles `.mlh-sel`, `.mlh-b` retirés) · `src/utils.js` (APP, WHATS_NEW niv 1) · `index.html` · `public/sw.js` · `guide/08-cave.html` · `public/guide.html` · `scripts/mv-harnais-caverange1.mjs` · `scripts/mv-harnais-range1.mjs` · `scripts/tutos-couverture.json` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/CAVE-RANGE-2B.json` · **APP 10.07 → 10.08, SW 10.87 → 10.88**, base `b42cb1e` ; chaîne par le coureur : 532 commandes, 532 codes à 0)
+
+### 451a. D’où ça vient
+Maquette de la Cave validée (« le millésime, une portée en haut ») et §449d / §450d : après CAVE-RANGE-1 (un seul état), le choix restait **affiché à deux endroits** — sous les onglets du Chai (`#mvc-milbar`) et en tête du Millésime (`_mlHead`, `.mlh-sel`).
+
+### 451b. Ce qui a été fait
+**Une seule barre « Millésime regardé »**, juste sous les sections de la Cave (`#cave-milbar`), montrée au **Chai** et au **Millésime**, cachée à **Aujourd’hui** (toute la cave) et au **Cuvier** (la campagne). Ses années : celles du Chai et celles du Millésime (récoltes comprises), sans doublon, de la plus récente ; « Tous » avec le compte des cuvées en élevage ; un compteur par année. Règle d’origine gardée : un seul millésime → pas de barre. Au Millésime sur « Tous », la barre dit « il montre celui de la campagne en cours (2026) ». `_mlHead` perd ses boutons et sa phrase ; `_mlSetMil`, son export et les styles `.mlh-sel`/`.mlh-b` partent (le preflight a refusé `_mlSetMil` sans appelant). Guide : la barre unique, avec les phrases d’origine sur le millésime embouteillé et les chiffres du haut. WHATS_NEW 10.08 niv 1 (sans cible : `#cave-milbar` est créé par le code, `whatsnew-check` ne le trouve pas dans les sources).
+
+### 451c. Harnais
+`mv-harnais-caverange1.mjs` porte maintenant la barre unique (12 vertes, 6 contre-épreuves) : il **exécute** `_caveMillChipsHtml` (la phrase « Tous » au Millésime, absente sur une année) et `_caveSetMill` (au Millésime : Le Millésime, la bande et la barre repeints), et lit l’hôte sous les sections, la visibilité Chai/Millésime, l’absence de `_mlSetMil`/`.mlh-sel`, le guide. `range1` (B1) : la tête du Millésime n’a plus de boutons d’année. `cave6` : la règle « un seul millésime, pas de barre » tient. La chaîne a trouvé la contre-épreuve « un geste nouveau sans tuto » muette : le retrait de `_mlSetMil` avait fait baisser le compte des gestes sans tuto ; le plafond de `scripts/tutos-couverture.json` suit (cliquet).
+
+### 451d. Ce qui reste
+CAVE-RANGE-3 : Le Millésime à deux onglets (Courbes → Cuvier ; Cuvées → la fiche), après avoir vérifié qu’aucune cuvée, embouteillée ou vendue en vrac, ne devient introuvable.

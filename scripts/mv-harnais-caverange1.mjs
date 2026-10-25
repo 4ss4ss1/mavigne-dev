@@ -28,27 +28,28 @@ function monter(S, o) {
     _caveKpisRender: () => peint.push('bande'), _mvcRenderHeader: () => peint.push('entete'), _caveSaisBanner: () => {},
     _mlEtat: () => ({ pill: '', ligne: '' }), _escHtml: (x) => String(x), _mlMillesimes: () => [2026, 2025, 2024], _mlTuiles: () => '', _pcavLog: () => {} };
   vm.createContext(c);
-  vm.runInContext(['_mlMilActif', '_mlSetMil', '_caveSetMill', '_mlHead'].map((n) => corps(S.cave, n)).join('\n') + '\nthis.__lire = () => _caveMillFilter;', c);
+  c._caveMilsDuChai = () => [2026, 2025]; c.CAVE_ELEVAGE = { cuvees: [] };
+  vm.runInContext(['_mlMilActif', '_caveSetMill', '_caveMillChipsHtml'].map((n) => corps(S.cave, n)).join('\n') + '\nthis.__lire = () => _caveMillFilter;', c);
   return { c, peint };
 }
 function jouer(S) {
   const A = monter(S, { filtre: 'tous', section: 'millesime' });
   t('① « Tous » au Chai : Le Millésime montre la campagne en cours (2026)', A.c._mlMilActif() === 2026);
-  const hA = A.c._mlHead(2026, null, null);
-  t('① … et le dit sous ses boutons', /Le Chai montre tous les mill\\u00e9simes|Le Chai montre tous les millésimes/.test(hA) && /pour toute la Cave/.test(hA));
-  A.c._mlSetMil(2025);
-  t('② choisir 2025 dans Le Millésime le choisit pour toute la Cave (le même état)', A.c.__lire() === '2025' && A.c._mlMilActif() === 2025);
-  t('② … et repeint Le Millésime et la bande, pas les vues du Chai', A.peint.includes('millesime') && A.peint.includes('bande') && !A.peint.includes('cuvees'));
-  t('② la phrase « Tous » disparaît quand une année est choisie', !/pour toute la Cave/.test(A.c._mlHead(2025, null, null)));
+  const hA = A.c._caveMillChipsHtml();
+  t('① … et la barre le dit, au Millésime', /Le Millésime montre celui de la campagne en cours/.test(hA) && /pour toute la Cave/.test(hA));
+  A.c._caveSetMill('2025');
+  t('② choisir 2025 au Millésime le choisit pour toute la Cave (le même état)', A.c.__lire() === '2025' && A.c._mlMilActif() === 2025);
+  t('② … et repeint Le Millésime, la bande et la barre, pas les vues du Chai', A.peint.includes('millesime') && A.peint.includes('bande') && A.peint.includes('barre') && !A.peint.includes('cuvees'));
+  t('② la phrase « Tous » disparaît quand une année est choisie', !/pour toute la Cave/.test(A.c._caveMillChipsHtml()));
   const B = monter(S, { filtre: '2025', section: 'elevage', tab: 'labo' });
   B.c._caveSetMill('tous');
   t('③ « Tous » choisi au Chai repeint l’onglet du Chai à l’écran, sa barre et son en-tête', B.peint.includes('labo') && B.peint.includes('barre') && B.peint.includes('entete') && B.c.__lire() === 'tous');
   t('③ … et Le Millésime suit (campagne en cours)', B.c._mlMilActif() === 2026);
   const P = S.cave.split('\n').filter((l) => !l.trim().startsWith('//')).join('\n');
-  t('④ plus de choix propre au Millésime (_mlMil)', !/\b_mlMil\b/.test(P));
+  t('④ plus de choix propre au Millésime (_mlMil, ses boutons _mlSetMil)', !/\b_mlMil\b|_mlSetMil|mlh-sel/.test(P));
   t('④ un renvoi « rendement maximum » choisit le millésime pour toute la Cave', /if\(isFinite\(_rm\)&&_rm>0\) _caveMillFilter=String\(_rm\);/.test(S.cave));
-  t('④ la barre du Chai s’appelle « Millésime regardé »', /<span class="mvcm-lab"[^>]*>Millésime regardé<\/span>/.test(S.cave));
-  t('⑤ la nouveauté et le guide le disent', /titre: 'Cave : un seul millésime regardé'/.test(S.utils) && /<b>le même choix que Le Millésime<\/b>/.test(S.guide));
+  t('④ une seule barre « Millésime regardé », sous les sections de la Cave (CAVE-RANGE-2b)', /<span class="mvcm-lab">Millésime regardé<\/span>/.test(S.cave) && /var ref=document\.getElementById\('cave-sec-tabs'\);/.test(S.cave) && /var la=\(caveSection==='elevage' \|\| caveSection==='millesime'\);/.test(S.cave));
+  t('⑤ la nouveauté et le guide le disent', /titre: 'Cave : un seul millésime regardé'/.test(S.utils) && /une seule barre, juste sous les sections de la Cave/.test(S.guide));
   t('⑥ la liste des harnais joue ce fichier et sa contre-épreuve', S.liste.indexOf("mv-harnais-caverange1.mjs'") > 0 && S.liste.indexOf("mv-harnais-caverange1.mjs --contre'") > 0);
 }
 if (!CONTRE) {
@@ -59,9 +60,9 @@ if (!CONTRE) {
   const R = (S, a, b) => { if (S.cave.split(a).length !== 2) throw new Error('ancre : ' + a.slice(0, 50)); return Object.assign({}, S, { cave: S.cave.split(a).join(b) }); };
   const mutants = [
     ['Le Millésime ignore le choix du Chai', (S) => R(S, "function _mlMilActif(){ return (_caveMillFilter && _caveMillFilter!=='tous') ? Number(_caveMillFilter) : _mlCampagne(); }", 'function _mlMilActif(){ return _mlCampagne(); }')],
-    ['choisir dans Le Millésime n’écrit plus le choix partagé', (S) => R(S, 'function _mlSetMil(m){ _caveSetMill(String(m)); }', 'function _mlSetMil(m){ renderCaveMillesime(); }')],
-    ['le Chai repeint au lieu du Millésime', (S) => R(S, "  if(caveSection==='millesime'){ renderCaveMillesime(); if(typeof _caveKpisRender==='function') _caveKpisRender(); return; }\n", '')],
-    ['la phrase « Tous » disparaît', (S) => R(S, "  if(_caveMillFilter==='tous') h+='<div class=\"mlh-tous\"", "  if(false) h+='<div class=\"mlh-tous\"")],
+    ['le Chai repeint au lieu du Millésime', (S) => R(S, "  if(caveSection==='millesime'){ renderCaveMillesime(); if(typeof _caveKpisRender==='function') _caveKpisRender(); _caveMilBarRender(); return; }\n", '')],
+    ['la phrase « Tous » disparaît de la barre', (S) => R(S, "if(typeof caveSection!=='undefined' && caveSection==='millesime' && _caveMillFilter==='tous') h+=", 'if(false) h+=')],
+    ['la barre se montre aussi au Cuvier', (S) => R(S, "var la=(caveSection==='elevage' || caveSection==='millesime');", 'var la=true;')],
     ['le renvoi garde un choix à part', (S) => R(S, 'if(isFinite(_rm)&&_rm>0) _caveMillFilter=String(_rm);', 'if(isFinite(_rm)&&_rm>0) _mlMil=_rm;')],
     ['la liste ne joue plus ce fichier', (S) => Object.assign({}, S, { liste: S.liste.split("mv-harnais-caverange1.mjs'").join("mv-harnais-caverangeX.mjs'") })],
   ];

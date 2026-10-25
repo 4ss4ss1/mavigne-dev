@@ -224,11 +224,11 @@ const T = {
       v.recoltes.push(REC('r10', 'Vieilles Vignes', '2026-09-29', 'cv8', [P(28)])); });
     const d = A._pcrbCvLignes(2026), n = tous(d);
     return n.filter(x => x === 'Vieilles Vignes').length === 1 && n.includes('Cuve 8') && d.nCuves === 6; }],
-  B1: ['la tête : l’année, son état, les vendanges, les cuves décuvées, le choix du millésime et les tuiles', A => {
+  B1: ['la tête : l’année, son état, les vendanges, les cuves décuvées et les tuiles — le choix du millésime est monté dans la barre de la Cave (CAVE-RANGE-2b)', A => {
     avec(A); const h = A._mlHead(2026, {}, A._pcrbCvLignes(2026));
     return h.includes('<div class="mlh-an">2026</div>') && h.includes('<span class="mlh-pill">En cours</span>')
       && sp(h).includes('Vendanges du 20 au 28 sept. \u00b7 3 cuves d\u00e9cuv\u00e9es sur 5')
-      && h.includes('class="mlh-b on" aria-pressed="true" onclick="_mlSetMil(2026)"') && h.includes('onclick="_mlSetMil(2025)"')
+      && !h.includes('mlh-sel') && !h.includes('_mlSetMil(')
       && h.includes('class="TUILES"'); }],
   B2: ['« À surveiller » : le volume à mesurer, la parcelle au-dessus du maximum, les cuves en fermentation', A => {
     avec(A); const d = A._pcrbCvLignes(2026), h = A._mlBlocVeille(2026, d); A.__droit(false); const h2 = A._mlBlocVeille(2026, d);

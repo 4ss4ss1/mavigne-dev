@@ -1286,6 +1286,7 @@ function renderCave() {
   // seule fois ici — plus par chaque section (lot CAVE-1).
   _caveHeaderRender();
   _caveKpisRender();
+  _caveMilBarRender();   // CAVE-RANGE-2b (§451) : le millésime regardé, en haut, pour Le Chai et Le Millésime
   var _aujHost=document.getElementById('cave-view-auj'); if(_aujHost) _aujHost.style.display='none';
   var _regHost=document.getElementById('cave-view-reg'); if(_regHost) _regHost.style.display='none';
   if (caveSection === 'reglages') { _mvcHide(); _mlHideAutres(); renderCaveReglagesCave(); return; }
@@ -4140,39 +4141,51 @@ function _caveMilsDuChai(){
   return ms;
 }
 function _caveMillChipsHtml(){
+  // ★★ CAVE-RANGE-2b (§451) — LE MILLÉSIME REGARDÉ, UNE SEULE FOIS, EN HAUT DE LA CAVE. Il vivait à deux endroits : sous les
+  //   onglets du Chai (ici) et en tête du Millésime (_mlHead). Une seule barre, sous les sections, pour Le Chai et Le Millésime ;
+  //   Aujourd'hui (toute la cave) et Le Cuvier (la campagne) ne la montrent pas. Les années : celles du Chai et du Millésime.
   var cuvs=CAVE_ELEVAGE.cuvees||[];
   var act=cuvs.filter(function(c){return c.statut!=='embouteille';});
-  var ms=_caveMilsDuChai();
-  if(ms.length<2) return '';   // un seul millésime → pas de filtre utile
-  var h='<div class="mvcm-chips"><span class="mvcm-lab" title="Le même choix que Le Millésime (CAVE-RANGE-1)">Millésime regardé</span>';
-  h+='<button class="mvcm-chip'+(_caveMillFilter==='tous'?' on':'')+'" onclick="_caveSetMill(\'tous\')">Tous<span class="mvcm-c">'+act.length+'</span></button>';
+  var vus={}, ms=[];
+  _caveMilsDuChai().concat((typeof _mlMillesimes==='function')?(_mlMillesimes()||[]):[]).forEach(function(m){ var k=String(m); if(m!=null && k!=='' && !vus[k]){ vus[k]=1; ms.push(m); } });
+  ms.sort(function(a,b){ return Number(b)-Number(a); });
+  if(ms.length<2) return '';   // un seul millésime → pas de choix utile (règle d'origine)
+  var h='<div class="mvcm-chips" role="group" aria-label="Millésime regardé"><span class="mvcm-lab">Millésime regardé</span>';
+  h+='<button type="button" class="mvcm-chip'+(_caveMillFilter==='tous'?' on':'')+'" aria-pressed="'+(_caveMillFilter==='tous')+'" onclick="_caveSetMill(\'tous\')">Tous<span class="mvcm-c">'+act.length+'</span></button>';
   ms.forEach(function(m){
-    var n=act.filter(function(c){return String(c.millesime)===String(m);}).length;
-    h+='<button class="mvcm-chip'+(String(_caveMillFilter)===String(m)?' on':'')+'" onclick="_caveSetMill(\''+m+'\')">'+m
+    var n=act.filter(function(c){return String(c.millesime)===String(m);}).length, on=String(_caveMillFilter)===String(m);
+    h+='<button type="button" class="mvcm-chip'+(on?' on':'')+'" aria-pressed="'+on+'" onclick="_caveSetMill(\''+m+'\')">'+m
       +(n?'<span class="mvcm-c">'+n+'</span>':'')+'</button>';
   });
-  return h+'</div>';
+  h+='</div>';
+  // Le Millésime parle d'UN millésime : sur « Tous », il montre la campagne en cours, et la barre le dit.
+  if(typeof caveSection!=='undefined' && caveSection==='millesime' && _caveMillFilter==='tous') h+='<div class="mlh-tous" style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin:4px 0 0">Le Millésime montre celui de la campagne en cours (<b>'+_escHtml(String(_mlCampagne()))+'</b>). Choisir une année la choisit pour toute la Cave.</div>';
+  return h;
 }
 /* L'hote du filtre — meme patron que _caveEnsureBtlTab : l'onglet Bouteilles
    est deja cree en JS a cote de #mvc-tabs-row, on ne touche donc pas au HTML
    de la page pour un bloc qui vit au meme endroit. */
 function _caveEnsureMilBar(){
-  var ref=document.getElementById('mvc-tabs-row');
-  if(ref && !document.getElementById('mvc-milbar')){
+  // CAVE-RANGE-2b (§451) : la barre vit sous les sections de la Cave (#cave-sec-tabs), plus sous les onglets du Chai.
+  var vieille=document.getElementById('mvc-milbar'); if(vieille && vieille.parentNode) vieille.parentNode.removeChild(vieille);
+  var ref=document.getElementById('cave-sec-tabs');
+  if(ref && !document.getElementById('cave-milbar')){
     var d=document.createElement('div');
-    d.id='mvc-milbar';
+    d.id='cave-milbar'; d.style.margin='8px 0 4px';
     if(ref.nextSibling) ref.parentNode.insertBefore(d,ref.nextSibling); else ref.parentNode.appendChild(d);
   }
 }
 function _caveMilBarRender(){
   _caveEnsureMilBar();
-  var h=document.getElementById('mvc-milbar');
-  if(h) h.innerHTML=_caveMillChipsHtml();
+  var h=document.getElementById('cave-milbar'); if(!h) return;
+  var la=(caveSection==='elevage' || caveSection==='millesime');   // Aujourd'hui : toute la cave ; Le Cuvier : la campagne
+  h.style.display=la?'':'none';
+  h.innerHTML=la?_caveMillChipsHtml():'';
 }
 function _caveSetMill(m){
   _caveMillFilter=m;
   // CAVE-RANGE-1 (§449) : Le Millésime lit le même choix — on repeint la section à l'écran.
-  if(caveSection==='millesime'){ renderCaveMillesime(); if(typeof _caveKpisRender==='function') _caveKpisRender(); return; }
+  if(caveSection==='millesime'){ renderCaveMillesime(); if(typeof _caveKpisRender==='function') _caveKpisRender(); _caveMilBarRender(); return; }
   // Les TROIS vues suivent le filtre : repeindre celle qui est a l'ecran.
   if(caveTab==='journal') renderCaveJournal();
   else if(caveTab==='bouteille') renderCaveBouteille();
@@ -5406,14 +5419,8 @@ function _mlHead(mil,ch,d){
   var e=_mlEtat(mil,d);
   var h='<div class="mlh"><div class="mlh-t"><div class="mlh-k">Le mill\u00e9sime</div><div class="mlh-an">'+_escHtml(String(mil))+'</div>'
     +((e.pill||e.ligne)?('<div class="mlh-st">'+(e.pill?('<span class="mlh-pill">'+e.pill+'</span>'):'')+_escHtml(e.ligne)+'</div>'):'')
-    +'</div><div class="mlh-sel" role="group" aria-label="Choisir le mill\u00e9sime">';
-  _mlMillesimes().forEach(function(m){
-    var on=String(m)===String(mil);
-    h+='<button type="button" class="mlh-b'+(on?' on':'')+'" aria-pressed="'+(on?'true':'false')+'" onclick="_mlSetMil('+m+')">'+m+'</button>';
-  });
-  h+='</div></div>';
-  // CAVE-RANGE-1 (§449) : le choix est celui de toute la Cave ; quand le Chai montre « Tous », on le dit ici.
-  if(_caveMillFilter==='tous') h+='<div class="mlh-tous" style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin:-4px 0 10px">Le Chai montre tous les mill\u00e9simes\u00a0; ici, celui de la campagne en cours. Choisir une ann\u00e9e la choisit pour toute la Cave.</div>';
+    +'</div></div>';
+  // CAVE-RANGE-2b (§451) : le choix du millésime et sa phrase « Tous » sont dans la barre en haut de la Cave.
   try{ h+=_mlTuiles(ch); }catch(e){ _pcavLog('tuiles',e); }
   return h;
 }
@@ -5892,7 +5899,6 @@ function _mlRdtProposeGroupe(val,mil,rendre){
   },260);
 }
 
-function _mlSetMil(m){ _caveSetMill(String(m)); }   // CAVE-RANGE-1 (§449) : le même choix que le Chai
 // ═══════════════════════════════════════════════════════════
 // AUJOURD'HUI — L'ECRAN D'ARRIVEE DE LA CAVE (lot CAVE-1)
 //
@@ -7365,9 +7371,6 @@ function _pcavInjectCss(){
   +'.mlh-st{display:flex;align-items:center;flex-wrap:wrap;gap:var(--e-2,8px);margin-top:var(--e-1,4px);font-size:var(--pt-txt,13px);color:var(--texte-med)}'
   +'.mlh-pill,.mlc-pill,.mlp-t{flex:none;font-size:var(--pt-nano,10px);font-weight:600;padding:var(--e-0,2px) var(--e-2,8px);border-radius:var(--r-full,999px);background:var(--survol);color:var(--texte-med);white-space:nowrap}'
   +'.mlh-pill,.mlc-pill.btl{background:var(--accent-doux);color:var(--accent-texte)}'
-  +'.mlh-sel{display:flex;gap:var(--e-0,2px);padding:var(--e-0,2px);border-radius:var(--r-sm,6px);background:var(--survol)}'
-  +'.mlh-b{min-height:40px;padding:0 var(--e-4,16px);border:0;border-radius:var(--r-xs,4px);background:transparent;color:var(--texte-med);font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer}'
-  +'.mlh-b.on{background:var(--bg-card);color:var(--texte);box-shadow:var(--shadow-sm,0 1px 2px rgba(20,18,14,.05),0 1px 3px rgba(20,18,14,.04))}'
   +'.mlg{display:flex;flex-direction:column;gap:var(--e-4,16px)}'
   +'.mlg-a,.mlg-b{display:contents}'
   +'.mlg-veille{order:1}.mlg-flux{order:2}.mlg-cuv{order:3}.mlg-rep{order:4}.mlg-n1{order:5}.mlg-n1 .pcav-card{margin:0}'
@@ -8269,7 +8272,6 @@ window._mlVerdict          = _mlVerdict;
 window._mlMalo             = _mlMalo;
 window._mlSo2Doses         = _mlSo2Doses;
 window._caveKpisRender     = _caveKpisRender;
-window._mlSetMil           = _mlSetMil;
 window._mlSetRdtMax        = _mlSetRdtMax;
 window._mlSetCuv           = _mlSetCuv;
 window._mlCuvRetour        = _mlCuvRetour;

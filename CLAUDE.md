@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **25 octobre 2026 (CAVE-RANGE-2a)** — **CAVE : LA FICHE UNIQUE D’UNE CUVÉE, QUATRE VOLETS (ÉLEVAGE · ANALYSES · VOLUMES & ORIGINE · DIAGNOSTIC)** (§450). Base `e25b7ed` (« caverange1 »). Vérifié avant le code : deux fiches pour une cuvée (la fenêtre du Chai, la fiche du Millésime) et un diagnostic injoignable depuis elle ; la fiche du Chai s’ouvrait déjà à droite de la liste sur ordinateur. La fenêtre du Chai devient la fiche à quatre volets ; Le Millésime et le Diagnostic y mènent ; rien n’est retiré. `mv-harnais-caverange2a.mjs` : 13 vertes, 8 contre-épreuves. **APP 10.06 → 10.07, SW 10.86 → 10.87**.
+> Dernière consolidation : **25 octobre 2026 (CAVE-RANGE-2b)** — **CAVE : LE MILLÉSIME REGARDÉ, UNE SEULE BARRE SOUS LES SECTIONS (LE CHAI ET LE MILLÉSIME)** (§451). Base `b42cb1e` (« caverange2a »). Après l’état unique (§449), le choix restait affiché à deux endroits ; une seule barre « Millésime regardé » sous les sections, au Chai et au Millésime (cachée à Aujourd’hui et au Cuvier), années du Chai et du Millésime ; `_mlHead` sans boutons ; `_mlSetMil` retiré. `caverange1` porte la barre unique (12 vertes, 6 contre-épreuves). **APP 10.07 → 10.08, SW 10.87 → 10.88**.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
