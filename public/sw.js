@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v10.93
+// MA VIGNE — Service Worker v10.94
+// v10.94 (25/10/2026) — CAVEPIL-3 (§457) : Pilotage › vue Cave — le Chai ne dessine plus fût par fût que les cuvées qui demandent un geste ; les cuvées en cours (fermentation, malo) puis les cuvées à jour tiennent chacune sur une ligne (nombre, fûts, prochain ouillage), « Tout voir » ou la légende les déplie ; un fût marqué à la dégustation garde son rond sous la ligne.
 // v10.93 (25/10/2026) — GABARIT-2 (§456) : Pilotage — les barres des graphiques à la mesure de la charte (16 px, le réel sous le prévu à 10, arrondi 4 ; colonnes arrondies à 2) ; plus de police Cormorant écrite dans le module ; le gabarit mesuré sur le build (npm run test:gabarit, en CI).
 // v10.92 (25/10/2026) — GABARIT-1 (§455) : Pilotage — un rôle, un style, dans tous les onglets : une police, trois graisses, huit tailles lues dans la charte, la jauge d’Aujourd’hui (10 px, bout rond) et un seul habillage de carte ; les sous-vues d’Économie et les choix des cartes au dessin des bascules d’Aujourd’hui.
 // v10.91 (25/10/2026) — AUJ-TETE-1 (§454) : Pilotage › Aujourd’hui — la bascule en haut à droite du cadre, la phrase sur toute la ligne, sous chaque chiffre sa référence (fin prévue et objectif, coût à la fin et budget) ; sous la date, la campagne que lisent ces chiffres.
@@ -4625,7 +4626,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.93';
+const CACHE_NAME   = 'mavigne-v10.94';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4642,7 +4643,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.93 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.94 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4662,7 +4663,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.93 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.94 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

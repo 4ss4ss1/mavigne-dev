@@ -5225,6 +5225,7 @@ function _pilCk2Cave(V){
     if(sgRes.length||sgCv) rows.push(['D\u00e9gustation', sgRes.map(function(r){ return r[1]+'\u00a0: '+r[2].join(', '); }).concat(sgCv?[sgCv.t+' sur la cuv\u00e9e, le '+sgCv.d]:[]).join(' \u00b7 ')]);
     return {id:c.id, nom:c.nom, futs:c.futs||0, hl:c.hl?nb(c.hl)+'\u00a0hL':'', e:e, puce:puce, s:parts.join(' \u00b7 '), go:f?'diag':'cuvee:'+c.id, tip:{t:c.nom, rows:rows},
       futsD:futsD, sgRes:sgRes, sgCv:sgCv,   // CAVEPIL-2
+      pro:c.pro||'', proTxt:c.pro?JC[dI(c.pro).getDay()]+'\u00a0'+dC(c.pro):'', cours:e==='cours'?(m.t==='Apr\u00e8s la FA'?'fa':'malo'):'',   // ★ CAVEPIL-3 (§457) : la ligne « À jour » (prochain ouillage) et la ligne « En cours » (FA ou malo)
       r:e==='alerte'?0:(e==='faire'?(retard?1:2):(e==='cours'?3:4))};
   }).sort(function(a,b){ return a.r-b.r; });
   var tf=cuvees.reduce(function(a,c){ return a+c.futs; },0), th=Y.cuvees.reduce(function(a,c){ return a+(c.hl||0); },0);

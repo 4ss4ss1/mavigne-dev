@@ -1,0 +1,38 @@
+{
+  "lot": "CAVEPIL-3",
+  "section": "§457",
+  "base": "b19f1f34be1352a27f766066d44512f93200c728",
+  "inclut": [],
+  "date": "2026-10-25",
+  "tutos": {
+    "ok": true,
+    "empreinte": "c1a97bd7af573a254c125d69e0fa5cff7ee979e878a63819a868ea05d01d3a7c",
+    "date": "2026-10-25T17:23:09.453Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "6dc700eaf4bdbe8582f5b4ed22eea5d8dd1357193b0607b4f0cf586a1fe5b775",
+    "CLAUDE.md": "01c604625d58b98151291d2f7e17e942a71c38b03a8d2de215685d9a26d59b34",
+    "docs/claude/INDEX.md": "2ee08867f16bba7fbb1c4e42f8600bad525150c63fa9d0a99f6849a9c5791d8a",
+    "docs/claude/chantiers-430-479.md": "bcc05173337b0ff633f6af9bd31ee2cb5c59ee308d10548f07e3ee7f06c56807",
+    "docs/claude/journal.md": "a3f0c22e40902c60ecb3412a40b84508d72e340ae406f06cd0a4da36e1c8c80e",
+    "docs/claude/modules.md": "ed7a38a095582441e301823e4dc32bf4732b4e3316ebe8b9f0dc0945cf588f61",
+    "guide/11-pilotage.html": "2b36870285602aee54477478fa563e851aed5dfa7780f0e3b26093aead5bf3c1",
+    "index.html": "b2833c72cef6f4c342c2470e6514855655e232c7cf20aaef100ec52761125998",
+    "public/guide.html": "3b1a6631ce28d0e83d57065dc7bbb51b6bf8b5e5bfd8795e8e7d35f73de38596",
+    "public/sw.js": "791add4a3d1d18e74d1eac14ec875a6251afe3f146cc79cb16deb56ffc78591b",
+    "scripts/mv-harnais-liste.mjs": "69c3ed9fa05fbbd7ee61e93c7666ad2efd42e03ec4ad9ccfab8f40d9c1244183",
+    "src/cave.js": "2a19f3483082ef517d94b20401dc3c0013c99eb9cbf5f3cc95d00ad9092c2f7f",
+    "src/cockpit-vue.js": "baeebca279997b37d667465a197c32c2b4d49b414d17a6c6bd4131cad0403337",
+    "src/pilotage.js": "76d7e7fe89f61319f2a08e8b7c3dbccfff0ab331b1eb77ebc7be7b16b888d0e4",
+    "src/styles.css": "565e918b4eb48806e9fc1345add20d0cb09eb5b5b18b6045ac835fc4ae73abd8",
+    "src/utils.js": "8fb9584276aca36f4cba1afffbaccd894ee1af26d3ee0bc0b00fc5f9deb85bb2",
+    "scripts/mv-harnais-cavepil3.mjs": "75b1dbb0be12471c4effe0316a0e87a411c75e6ba8691e5c6cc77e44db766522"
+  }
+}

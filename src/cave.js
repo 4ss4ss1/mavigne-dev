@@ -6553,6 +6553,7 @@ function _caveSynthese(auj){
     cuvees.push({id:c.id, nom:_mlNomCuvee(c), mil:c.millesime, futs:_caveNbTonneaux(c), hl:_mlHlCuvee(c),
       tonneaux:(Array.isArray(c.tonneaux)?c.tonneaux:[]).filter(function(t){ return t&&typeof t==='object'; }).map(function(t){ return {annee:t.annee, nb:parseInt(t.nb,10)||0}; }),
       ouillage:o?{g:o.g, s:o.s, d:o.d, cls:o.cls||'', last:c.last_ouillage||null}:null,
+      pro:(pro[c.id]&&pro[c.id].date)||'',   // ★ CAVEPIL-3 (§457) : le prochain ouillage de l'agenda (jour ouvré), lu par la ligne « À jour » du Pilotage
       malo:{t:m[0], cls:m[1], s:m[2]}, soutirer:!!(x&&x.cas==='a_soutirer'), sout:(x&&x.sout)||null, analyse:c.last_analyse||null,
       kinds:(parRef[String(c.id)]||[]).map(function(i){ return i.kind; }), e:etat(c.id,cours),
       signes:_caveSignesFuts(c, CAVE_ELEVAGE.operations)});   // CAVEPIL-2 (§437)

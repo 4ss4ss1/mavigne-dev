@@ -1447,6 +1447,7 @@ l'équipe » était faux depuis le premier jour.**
 
   ★★ **CAVEPIL-1 (§436)** : Aujourd’hui a trois vues — Terrain · **Cave** · Économie. La vue Cave lit la Cave (`_caveSynthese`, `_mlChaine`, `_dgnSynthese`, `CONFIG.cave_jours`) et ne fait aucun geste (`data-cave` → `_pilCaveAller`) ; modèle `_pilCk2Cave` (dans `_pilCk2Modele`), dessin `cockpit-vue.js` (`cv*`, `majCave`), feuille ★★ CAVEPIL-1 ; indicateurs `auj_cave` (la vue) et `auj_cave_sv` (ses points dans « À savoir »).
   ★★ **CAVEPIL-2 (§437)** : le signe de la dernière dégustation (fleur, piqué, oxydé) sur le fût goûté — `_caveSignesFuts` (cave.js, pure, clé `_copDgFutKey`), mis en forme par `_pilCk2Cave` (`futsD`), dessiné par `cvFut(sg)` ; jetons `--sg-*`.
+  ★★ **CAVEPIL-3 (§457)** : au Chai, un rond par fût seulement pour ce qui demande un geste (alerte, à faire) ; « En cours » puis « À jour » sur une rangée chacune (`cvGroupe` : nombre, fûts, phase `cours`, prochain ouillage `pro`/`proTxt` — l’agenda de la Cave, passé par `_caveSynthese`) ; le fût marqué garde son rond sous la rangée ; `cvFiltrer` déplie (la rangée ou la légende, `S.cvGrp`) sans redessiner.
 
 ## 20c. La Réserve
 
