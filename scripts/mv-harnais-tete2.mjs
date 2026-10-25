@@ -73,9 +73,9 @@ const balance = h => (h.match(/<div[\s>]/g) || []).length === (h.match(/<\/div>/
 function suite(S) {
   const out = []; const T = (n, c) => out.push([n, !!c]); const B = bloc(S.css), dur = enDur(B);
   const fin = S.css.indexOf('★ FIN TETE-2');
-  T('le bloc TETE-2 est posé en fin de feuille, après TETE-1, sans aucune valeur en dur (' + dur.length + ')',
+  T('le bloc TETE-2 est posé en fin de feuille (seul le gabarit du Pilotage le suit), après TETE-1, sans aucune valeur en dur (' + dur.length + ')',
     B.length > 3000 && S.css.indexOf('★ TETE-2 (§329)') > S.css.indexOf('★ FIN TETE-1') && fin > 0
-    && S.css.slice(fin).replace(/^★ FIN TETE-2 \*\/\s*/, '') === '' && dur.length === 0);
+    && /^(\/\* ══ ★★ GABARIT-1 \(§455\)[\s\S]*\/\* ★ FIN GABARIT-1 \*\/\s*)?$/.test(S.css.slice(fin).replace(/^★ FIN TETE-2 \*\/\s*/, '')) && dur.length === 0);   // GABARIT-1 (§455) : seul le gabarit du Pilotage peut le suivre, et il ferme la feuille
   T('la ligne du jour reste sur une ligne, chaque morceau entier (plus de « Hiver / 2026 / - / 2027 »)',
     B.includes('body .mod-header .mod-meta-row{ flex-wrap:nowrap;') && B.includes('body .mod-header .mod-meta-row > *{ flex-shrink:0; }')
     && B.includes('body .mod-header .hv2-saison-pill > span,body .mod-header .hv2-meteo-mini,body .mod-header .mv-help-btn{ white-space:nowrap; }'));

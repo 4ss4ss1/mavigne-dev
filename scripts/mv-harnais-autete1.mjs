@@ -224,12 +224,12 @@ function suite(S) {
       S.guide.includes('la campagne que lisent les chiffres de la page') && S.guide.includes('le <b>coût à la fin</b> et le <b>budget</b> sous l\'écart au budget')
       && S.guide.includes("<b>Aujourd'hui</b> lit toujours la campagne en cours") && S.guide.includes("corrigé de la cadence mesurée de l'équipe dès 40 % du travail fait") && !S.guide.includes(', à la cadence\n  mesurée de l\'équipe.'));
     const iw = S.uti.indexOf('export const WHATS_NEW = ['), jw = S.uti.indexOf('\n];', iw);
-    const WN = vm.runInNewContext('(' + S.uti.slice(S.uti.indexOf('[', iw), jw + 2) + ')'), APP = (S.uti.match(/export const APP_VERSION = '([^']+)'/) || [])[1], w = WN[0];
-    T('I3 la nouveauté (exécutée) ouvre sur la version de l’appli : pour l’admin, pastille sur la phrase', w.v === APP && w.items.length === 1 && w.items[0].niv === 1
+    const WN = vm.runInNewContext('(' + S.uti.slice(S.uti.indexOf('[', iw), jw + 2) + ')'), APP = (S.uti.match(/export const APP_VERSION = '([^']+)'/) || [])[1], w = WN.find(b => b.v === '10.10') || {};   // GABARIT-1 (§455) : lue à sa version — un lot suivant prépend la sienne
+    T('I3 la nouveauté (exécutée) de la version 10.10 : pour l’admin, pastille sur la phrase', !!APP && Array.isArray(w.items) && w.items.length === 1 && w.items[0].niv === 1
       && w.items[0].pour.join() === 'admin' && w.items[0].cible === '#ck-resume' && /par rapport à quoi/.test(w.items[0].titre));
     const vsw = (S.sw.match(/^\/\/ MA VIGNE — Service Worker v([0-9.]+)/) || [])[1];
     T('I4 sw.js : une seule version partout, et la ligne du lot', vsw && S.sw.includes("const CACHE_NAME   = 'mavigne-v" + vsw + "';") && compte(S.sw, new RegExp('Ma Vigne v' + vsw.replace('.', '\\.') + ' (installé|activé)', 'g')) === 2
-      && S.sw.split('\n')[1].includes('AUJ-TETE-1 (§454)'));
+      && S.sw.split('\n').slice(1, 30).some(l => /^\/\/ v10\.91 .*AUJ-TETE-1 \(§454\)/.test(l)));   // GABARIT-1 (§455) : la ligne du lot, plus forcément la première
     T('I5 ce harnais est dans la chaîne, avec ses contre-épreuves', S.liste.includes("['node scripts/mv-harnais-autete1.mjs']") && S.liste.includes("['node scripts/mv-harnais-autete1.mjs --contre']"));
   }
   return out;

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.10';
+export const APP_VERSION = '10.11';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '10.11', d: '2026-10-25', items: [
+    { niv: 1, pour: ['admin'], emoji: 'graphique', titre: 'Pilotage : tous les onglets se lisent de la même façon',
+      desc: "Le même chiffre changeait de taille, de police ou de graisse d’un onglet à l’autre, et les jauges n’avaient pas la même épaisseur. Chaque élément a maintenant un seul style dans tout le Pilotage, calé sur Aujourd’hui : une seule police, le chiffre d’une carte, le titre d’un panneau, le nom et la valeur d’une ligne à la même taille partout, des jauges de même épaisseur à bout rond et des cartes au même dessin. Les sous-vues d’Économie et les choix dans les cartes prennent le dessin des bascules d’Aujourd’hui, et les trois chiffres de Travaux forment une bande, comme sur Aujourd’hui. Aucun calcul ne change." }
+  ] },
   { v: '10.10', d: '2026-10-25', items: [
     { niv: 1, pour: ['admin'], cible: '#ck-resume', emoji: 'graphique', titre: 'Pilotage : la phrase d’Aujourd’hui dit par rapport à quoi',
       desc: "Sous chaque chiffre de la phrase du haut, sa référence : sous l’avance ou le retard, la fin prévue et l’objectif ; sous l’écart au budget, le coût à la fin et le budget — le petit « i » dit comment c’est compté. Sous la date, la campagne que lisent ces chiffres, ses dates et le jour où vous en êtes : Aujourd’hui lit toujours la campagne en cours, quel que soit le choix de la barre « Vous regardez ». La phrase prend toute la ligne, et la bascule Terrain · Cave · Économie monte en haut à droite du cadre, à côté de la roue. Touchez un chiffre : le retard mène à la fin prévue, le budget à la vue Économie." }

@@ -1,0 +1,39 @@
+{
+  "lot": "GABARIT-1",
+  "section": "§455",
+  "base": "ca843dd8dfe80f64c879baa296e45e5bce7ec1a1",
+  "inclut": [],
+  "date": "2026-10-25",
+  "tutos": {
+    "ok": true,
+    "empreinte": "bcaedb8ecc040b8cb49b8a69425f814a82ffb29ae8f491f612696e5386623713",
+    "date": "2026-10-25T15:01:59.796Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "ac16a0e0df2d7630dd2bb49a485ee408c65002dff329d95e8f92f0c74e0b835a",
+    "CLAUDE.md": "59a0c406eb930a3aa5c1241cf17a4856afd33cc9b22a35a464c73f0fb287e7a6",
+    "docs/claude/INDEX.md": "f4110975c0972f9e182e96d699e8e1bc24306e8ecc1ee2b61abc433e9c9a33b7",
+    "docs/claude/chantiers-430-479.md": "d2eb0d762a205945fe9b02a0513a967e48578cf8ed41e6aa7d15f3e70dcef429",
+    "docs/claude/journal.md": "f17ba177efcccc50ce32b9247ccc5ea615bbf8d1be58563181e9ce1161c1d551",
+    "index.html": "5181d5c13126060f31b38a1a56f1a2708ba00cf722ba465cb4257ea0f57e63b3",
+    "public/sw.js": "31298cd80bf2c3373a42e2307948ed75f7fb9cb7dd7fbad2ca10e93b73e42341",
+    "scripts/harnais-claude-md.mjs": "9726edebc726b4d4458fb73a432bc96e92a768d33142fc8894b48a8ad0482f04",
+    "scripts/mv-harnais-autete1.mjs": "6e51f919a50b82202de6d2ed341b447ac4c46c1d9091e63aa1b16239a813af8f",
+    "scripts/mv-harnais-cadre1.mjs": "6ec21289918778d415ba00a4817269e33a80db2acafe024b2761f7b5cc95f3d6",
+    "scripts/mv-harnais-liste.mjs": "31edd54c63b19c4658a2220e584cad192b5a2f285ae31dc5f03837712e51deca",
+    "scripts/mv-harnais-tete2.mjs": "85547c0b60252980585be923071b5284dbbef26a4334c320509640975b2522c2",
+    "scripts/mv-jetons-baseline.json": "fc863bdf32b2694efab37eebe4e91c913dc537f702bf61cbda4421e173eedb41",
+    "src/charte.css": "e4cf2c9a910309f7d9c229ebe1accf98b5a701108c02a43bda55e4db2cf47ab3",
+    "src/pilotage.js": "133f4115e0ee797bae6743b83838c9a576c856b71f156c1daedd04b5412d9e25",
+    "src/styles.css": "e22a04e014da90d0c7a54b14948dd84e7a2c5751111ac118d7a039b7d915ae29",
+    "src/utils.js": "35211d7b410629a1563155126fa87ff88400556909c7b2f6fa26b3fac5d6306b",
+    "scripts/mv-harnais-gabarit1.mjs": "d9a86b495f677274ce46d9446930825abb2fb90b3f253ce378f1e258cc87264d"
+  }
+}

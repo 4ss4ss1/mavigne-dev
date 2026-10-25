@@ -954,7 +954,7 @@ function _pilBuildMap(d){
       Object.keys(_cg).forEach(function(key){
         var g=_cg[key], n=g.parc.length;
         var liste=g.parc.map(function(pp){var c=_pilLentCol(pp,_lo);return '<b>'+_pilEsc(pp.nom)+'</b> · '+(pp.surface||0)+' ha · '+(c?_pilEsc(c.txt):'sans donnée');}).join('<br>');
-        var ic=window.L.divIcon({className:'',iconSize:[24,24],iconAnchor:[12,12],html:'<div style="width:24px;height:24px;border-radius:50%;background:#C9A84C;color:#1C1813;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font:700 12px/1 system-ui,sans-serif;">'+n+'</div>'});
+        var ic=window.L.divIcon({className:'',iconSize:[24,24],iconAnchor:[12,12],html:'<div style="width:24px;height:24px;border-radius:50%;background:#C9A84C;color:#1C1813;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font:600 12px/1 system-ui,sans-serif;">'+n+'</div>'});
         window.L.marker([g.lat,g.lng],{icon:ic}).addTo(_pilMap)
           .bindPopup('<b>'+String.fromCodePoint(0x1F4CD)+' '+_pilEsc(g.nom)+'</b><br><span style="color:var(--texte-doux,#888);font-size:var(--pt-txt,13px);">'+n+' parcelle'+(n>1?'s':'')+' · commune</span><br>'+liste);
         bounds.push([g.lat,g.lng]);
@@ -1283,7 +1283,7 @@ function _pilDemandSvg(cd,w){
   var path=_pilPolyBreak(_pts);
   g+='<path d="'+path+'" fill="none" stroke="var(--texte)" stroke-width="2.5" stroke-linejoin="round"/>';
   var pk=0,pkw=null; wk.forEach(function(w){ if(w.cap>0&&w.need>pk){pk=w.need;pkw=w;} });
-  if(pkw && pkw.need>((pkw.head||0)+0.001)){ var px=(X(pkw.o0)+X(pkw.o1+1))/2; g+='<text x="'+px.toFixed(1)+'" y="'+(Y(pk)-7).toFixed(1)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="700" fill="'+_PIL_SEM.faute+'" font-family="var(--font-ui,Outfit)">pic '+(Math.round(pk*10)/10).toString().replace('.',',')+'</text>'; }
+  if(pkw && pkw.need>((pkw.head||0)+0.001)){ var px=(X(pkw.o0)+X(pkw.o1+1))/2; g+='<text x="'+px.toFixed(1)+'" y="'+(Y(pk)-7).toFixed(1)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="600" fill="'+_PIL_SEM.faute+'" font-family="var(--font-ui,Outfit)">pic '+(Math.round(pk*10)/10).toString().replace('.',',')+'</text>'; }
   var _tj=E.o(E.todayIso);
   if(_tj>=E.s && _tj<=E.e){ var _tx=X(_tj); g+='<line x1="'+_tx.toFixed(1)+'" y1="'+padT+'" x2="'+_tx.toFixed(1)+'" y2="'+(padT+plotH).toFixed(1)+'" stroke="'+c.col.texte+'" stroke-width="1.5" stroke-dasharray="4 3"/>'; }
   return window._mvGraphSvg(window._mvGraphCadre(W,H), 'Personnes n\u00e9cessaires par semaine, face \u00e0 l\u2019effectif pr\u00e9sent.', g);
@@ -1303,7 +1303,7 @@ function _pilEcartHtml(cd, real){
     return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #F0ECE1;flex-wrap:wrap">'
       +'<span style="font-weight:600;min-width:128px;display:flex;align-items:center;gap:7px"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:'+_taskColor(t.nom)+'"></span>'+_pilEsc(t.nom)+'</span>'
       +'<span style="color:var(--texte-doux);font-size:var(--pt-txt,13px)">pr\u00e9vu : <b style="color:var(--texte)">'+fmt(t.start)+'</b> \u2192 <b style="color:var(--texte)">'+fmt(t.end)+'</b> &nbsp;\u00b7&nbsp; '+seg+'</span>'
-      +'<span style="margin-left:auto;font-weight:700;font-size:var(--pt-micro,12px);padding:2px 8px;border-radius:20px;white-space:nowrap;background:'+dBg+';color:'+dCol+'">'+delta+'</span>'
+      +'<span style="margin-left:auto;font-weight:600;font-size:var(--pt-micro,12px);padding:2px 8px;border-radius:20px;white-space:nowrap;background:'+dBg+';color:'+dCol+'">'+delta+'</span>'
       +'</div>';
   }).join('');
   return '<div style="font-size:var(--pt-txt,13px)">'+rows+'</div>';
@@ -1802,8 +1802,8 @@ function _pilPanelTemps(d){
   var _base=_surch?_tot:(_prez||1);
   var _wV=_vig/_base*100, _wT=_tH/_base*100, _wA=_surch?0:Math.max(0,100-_wV-_wT);
   var _pV=Math.round(_wV), _pT=Math.round(_wT), _pA=_surch?0:Math.max(0,100-_pV-_pT);
-  var _segR=function(wd,gr){return (wd>0.5)?('<div style="width:'+wd+'%;background:'+gr+';display:flex;align-items:center;justify-content:center;font-size:var(--pt-lbl,12px);font-weight:700;color:#fff">'+Math.round(wd)+'\u00a0%</div>'):'';};
-  var _rowR=function(col,nm,sub,val,pct,etp){return '<div style="display:flex;align-items:center;gap:9px;font-size:var(--pt-txt,13px);padding:5px 0;border-top:1px solid var(--gris)"><span style="width:10px;height:10px;border-radius:3px;background:'+col+';flex-shrink:0"></span><span style="flex:1">'+nm+' <span style="font-size:var(--pt-micro,12px);color:var(--texte-doux)">'+sub+'</span></span><span style="font-weight:700">'+_pilNum(val)+' h</span><span style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-left:6px">'+pct+'\u00a0% \u00b7 '+etp+' ETP</span></div>';};
+  var _segR=function(wd,gr){return (wd>0.5)?('<div style="width:'+wd+'%;background:'+gr+';display:flex;align-items:center;justify-content:center;font-size:var(--pt-lbl,12px);font-weight:600;color:#fff">'+Math.round(wd)+'\u00a0%</div>'):'';};
+  var _rowR=function(col,nm,sub,val,pct,etp){return '<div style="display:flex;align-items:center;gap:9px;font-size:var(--pt-txt,13px);padding:5px 0;border-top:1px solid var(--gris)"><span style="width:10px;height:10px;border-radius:3px;background:'+col+';flex-shrink:0"></span><span style="flex:1">'+nm+' <span style="font-size:var(--pt-micro,12px);color:var(--texte-doux)">'+sub+'</span></span><span style="font-weight:600">'+_pilNum(val)+' h</span><span style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-left:6px">'+pct+'\u00a0% \u00b7 '+etp+' ETP</span></div>';};
   var _footR='Il faut <b style="color:#3D6B27">'+_etpF(_vig)+' ETP</b> pour la vigne'
     +((_tH>0)?(' et <b style="color:#4A9FC8">'+_etpF(_tH)+' ETP</b> au tracteur'):'')
     +' <b>en moyenne sur la p\u00e9riode</b>. ';
@@ -1818,8 +1818,8 @@ function _pilPanelTemps(d){
   //   seul endroit ou quelqu'un risque de le confondre avec un besoin reel.
   _footR+=' <b>Une moyenne n\u2019est pas un pic.</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.avc.temps')):'')+'';
   var repartBlock='<div class="mvencadre" style="margin-bottom:12px">'
-    +'<div style="font-size:var(--pt-micro,12px);font-weight:700;color:var(--texte-doux)">O\u00f9 va le temps de l\u2019\u00e9quipe</div>'
-    +'<div style="display:flex;align-items:baseline;gap:7px;margin:8px 0 3px"><span style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xl,28px);font-weight:700;color:var(--texte)">'+_pilNum(_prez)+' h</span><span style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">pr\u00e9sence \u00b7 '+_etpF(_prez)+' ETP \u00e9quipe</span></div>'
+    +'<div style="font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux)">O\u00f9 va le temps de l\u2019\u00e9quipe</div>'
+    +'<div style="display:flex;align-items:baseline;gap:7px;margin:8px 0 3px"><span style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xl,28px);font-weight:600;color:var(--texte)">'+_pilNum(_prez)+' h</span><span style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">pr\u00e9sence \u00b7 '+_etpF(_prez)+' ETP \u00e9quipe</span></div>'
     +'<div style="display:flex;height:24px;border-radius:7px;overflow:hidden;border:1px solid var(--gris);margin:9px 0">'+_segR(_wV,'linear-gradient(180deg,#5C8A3A,#3D6B27)')+_segR(_wT,'linear-gradient(180deg,#6FB6D6,#4A9FC8)')+_segR(_wA,'linear-gradient(180deg,#B98A5E,#8A5A38)')+'</div>'
     +_rowR('#3D6B27','Travaux vigne','(bar\u00e8me)',_vig,_pV,_etpF(_vig))
     +((_tH>0)?_rowR('#4A9FC8','Tracteur','(estim\u00e9 h/ha)',_tH,_pT,_etpF(_tH)):'')
@@ -1959,7 +1959,7 @@ function _pilTreatDays(){
     return { label:lab, reason:reason };
   });
 }
-function _pilTBdg(bg,col,txt){ return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:var(--pt-micro,12px);font-weight:700;padding:3px 8px;border-radius:7px;line-height:1.2;background:'+bg+';color:'+col+'">'+txt+'</span>'; }
+function _pilTBdg(bg,col,txt){ return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:var(--pt-micro,12px);font-weight:600;padding:3px 8px;border-radius:7px;line-height:1.2;background:'+bg+';color:'+col+'">'+txt+'</span>'; }
 function _pilMm(v){ return (v%1===0?String(v):v.toFixed(1)).replace('.',',')+' mm'; }
 // \u2605\u2605\u2605 UNE SEULE FENETRE DE TRAITEMENT, ET ELLE EST DANS LA JOURNEE.
 //   Deux cartes lisaient le MEME _pilTreatDays() : \u00ab Traiter ? \u00bb sur Aujourd'hui
@@ -1985,15 +1985,15 @@ function _pilTreatRows(days){
       }
       return '<div style="padding:8px 11px;border-radius:10px;background:'+bg+';border-left:3px solid '+bd+'">'
         + '<div style="display:flex;align-items:center;gap:9px">'
-        + '<span style="width:70px;font-size:var(--pt-txt,13px);font-weight:700;color:var(--texte);flex:none">'+_pilEsc(x.label)+'</span>'
-        + '<span style="flex:1;font-size:var(--pt-base,14px);font-weight:800;color:'+bd+'">'+x.start+'h \u2192 '+x.end+'h</span>'
+        + '<span style="width:70px;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte);flex:none">'+_pilEsc(x.label)+'</span>'
+        + '<span style="flex:1;font-size:var(--pt-base,14px);font-weight:600;color:'+bd+'">'+x.start+'h \u2192 '+x.end+'h</span>'
         + '<span style="font-size:var(--pt-lbl,12px);color:var(--texte-doux);white-space:nowrap">'+x.wMax+' km/h \u00b7 '+x.tMax+'\u00b0</span>'
         + '</div>'
         + '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px">'+bdgs+'</div>'
         + '</div>';
     }
     return '<div style="display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:10px;border-left:3px solid var(--gris-clair)">'
-      + '<span style="width:70px;font-size:var(--pt-txt,13px);font-weight:700;color:var(--texte-doux);flex:none">'+_pilEsc(x.label)+'</span>'
+      + '<span style="width:70px;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte-doux);flex:none">'+_pilEsc(x.label)+'</span>'
       + '<span style="flex:1;font-size:var(--pt-txt,13px);color:var(--texte-doux);font-style:italic">aucune fen\u00eatre \u00b7 '+x.reason+'</span>'
       + '</div>';
   }).join('');
@@ -2873,12 +2873,12 @@ function _opMapSvg(seqRows,w){
   if(startPt){ var path='M '+X(startPt).toFixed(1)+' '+Y(startPt).toFixed(1); todoGeo.forEach(function(p){ path+=' L '+X(p).toFixed(1)+' '+Y(p).toFixed(1); }); svg+='<path d="'+path+'" fill="none" stroke="#C9A84C" stroke-width="2" stroke-opacity=".5" stroke-linejoin="round"/>'; }
   cib.forEach(function(cp){ svg+='<circle class="mv-cible-svg" cx="'+X(cp).toFixed(1)+'" cy="'+Y(cp).toFixed(1)+'" r="13" fill="none" stroke="#C9A84C" stroke-width="2"/>'; });
   doneGeo.forEach(function(p){ if(startPt&&p.nom===startPt.nom) return; svg+='<circle cx="'+X(p).toFixed(1)+'" cy="'+Y(p).toFixed(1)+'" r="4.5" fill="#3a352c" stroke="#5a5248" stroke-width="1"/>'; });
-  todoGeo.forEach(function(p){ var x=X(p).toFixed(1),y=Y(p).toFixed(1); svg+='<circle cx="'+x+'" cy="'+y+'" r="9" fill="#14110D" stroke="#C9A84C" stroke-width="1.6"/><text x="'+x+'" y="'+(parseFloat(y)+3.5)+'" text-anchor="middle" font-size="'+gc.txt.mini+'" font-weight="800" fill="#C9A84C" font-family="var(--font-ui,Outfit,sans-serif)">'+seqNom[p.nom]+'</text>'; });
+  todoGeo.forEach(function(p){ var x=X(p).toFixed(1),y=Y(p).toFixed(1); svg+='<circle cx="'+x+'" cy="'+y+'" r="9" fill="#14110D" stroke="#C9A84C" stroke-width="1.6"/><text x="'+x+'" y="'+(parseFloat(y)+3.5)+'" text-anchor="middle" font-size="'+gc.txt.mini+'" font-weight="600" fill="#C9A84C" font-family="var(--font-ui,Outfit,sans-serif)">'+seqNom[p.nom]+'</text>'; });
   if(startPt){ var sx=X(startPt).toFixed(1),sy=Y(startPt).toFixed(1); svg+='<circle cx="'+sx+'" cy="'+sy+'" r="6.5" fill="#6FBF5A"/><path d="M'+(parseFloat(sx)+0.5)+' '+(parseFloat(sy)-6.5)+' v-8 h6 l-2 2.5 2 2.5 h-6" fill="#6FBF5A" stroke="#0d1f0b" stroke-width=".5"/>'; }
   var dist=_opRouteLen(todoGeo,startPt);
   return '<div style="position:relative;background:radial-gradient(130% 100% at 30% 0%,#1f2a1c,#161d14);border:1px solid var(--gris-clair);border-radius:12px;overflow:hidden;margin-bottom:11px">'
     +window._mvGraphSvg(gc,'Tourn\u00e9e hors ligne : '+todoGeo.length+' parcelles \u00e0 faire, trajet d\u2019environ '+_opFmtM(dist)+'.',svg)
-    +'<div style="position:absolute;right:9px;top:8px;font-size:var(--pt-micro,12px);font-weight:700;color:#C9A84C;background:rgba(20,17,13,.6);padding:3px 8px;border-radius:8px">trajet ~ '+_opFmtM(dist)+'</div>'
+    +'<div style="position:absolute;right:9px;top:8px;font-size:var(--pt-micro,12px);font-weight:600;color:#C9A84C;background:rgba(20,17,13,.6);padding:3px 8px;border-radius:8px">trajet ~ '+_opFmtM(dist)+'</div>'
     +'<div style="position:absolute;left:9px;bottom:7px;font-size:var(--pt-lbl,12px);color:#A79E8C;background:rgba(20,17,13,.55);padding:2px 7px;border-radius:8px">\uD83D\uDFE2 d\u00e9part \u00b7 \uD83D\uDFE1 \u00e0 faire \u00b7 \u26AB fait</div></div>';
 }
 
@@ -3013,7 +3013,7 @@ function _dzLayers(map,D,noms){
   seq.forEach(function(o){
     var ring=(o.i===li), pr=(sim&&sim.per)?sim.per[o.i]:null;
     var jour=(pr&&pr.d0!=null)?('jour '+(pr.d0+1)+(pr.d1>pr.d0?'\u2192'+(pr.d1+1):'')):'';
-    var mk=L.marker([o.g.lat,o.g.lng],{icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],html:'<div style="width:26px;height:26px;border-radius:50%;background:#14110D;border:2px solid #C9A84C;color:#C9A84C;display:flex;align-items:center;justify-content:center;font:800 12px/1 var(--font-ui,Outfit,system-ui,sans-serif);box-shadow:'+(ring?'0 0 0 4px rgba(201,168,76,.45),':'')+'0 1px 4px rgba(0,0,0,.4)">'+(o.i+1)+'</div>'})}).addTo(map)
+    var mk=L.marker([o.g.lat,o.g.lng],{icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],html:'<div style="width:26px;height:26px;border-radius:50%;background:#14110D;border:2px solid #C9A84C;color:#C9A84C;display:flex;align-items:center;justify-content:center;font:600 12px/1 var(--font-ui,Outfit,system-ui,sans-serif);box-shadow:'+(ring?'0 0 0 4px rgba(201,168,76,.45),':'')+'0 1px 4px rgba(0,0,0,.4)">'+(o.i+1)+'</div>'})}).addTo(map)
       .bindPopup('<b>'+(o.i+1)+' \u00b7 '+_pilEsc(o.r.nom)+'</b><br>'+_opFmtH(o.r.reste)+' \u00e0 faire'+(jour?' \u00b7 '+jour:'')+(ring?'<br>le soir du 1er jour':''));
     if(noms) mk.bindTooltip(_pilEsc(o.r.nom),{permanent:true,direction:'right',offset:[12,0],className:'pil-plabel'});
   });
@@ -3811,7 +3811,7 @@ function _rfCalSvg(cal,lg){
   _rfPeriodes(cal).forEach(function(p){
     var x0=X(p.a)+1, w0=Math.max(4,X(p.b+1)-X(p.a)-2);
     g+='<rect x="'+x0+'" y="6" width="'+w0+'" height="15" rx="7.5" fill="var(--or-pale)" stroke="var(--or)"/>';
-    if(w0>58) g+='<text x="'+(x0+w0/2)+'" y="17" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="700" fill="var(--texte)">'+p.R+' saisonnier'+(p.R>1?'s':'')+'</text>';
+    if(w0>58) g+='<text x="'+(x0+w0/2)+'" y="17" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="600" fill="var(--texte)">'+p.R+' saisonnier'+(p.R>1?'s':'')+'</text>';
   });
   var last=-1;
   for(k=0;k<n;k++){ var m=W[k].m; if(m!=null && m!==last){ last=m; g+='<text x="'+(X(k)+2)+'" y="'+(c.h-8)+'" font-size="'+c.txt.axe+'" fill="var(--texte-doux)">'+_RF_MOIS[m]+'</text>'; } }
@@ -6926,7 +6926,7 @@ function _pecEcEur(ec){ if(ec===null || ec===undefined) return '\u2014'; var r=M
 function _pecEcTd(ec, base){
   if(ec===null || ec===undefined) return '<td class="r" style="color:var(--texte-doux)">\u2014</td>';
   var pc=_pecEcPct(ec, base);
-  return '<td class="r" style="color:'+_pecEcCol(pc)+';font-weight:700">'+_pilEsc(_pecEcEur(ec))
+  return '<td class="r" style="color:'+_pecEcCol(pc)+';font-weight:600">'+_pilEsc(_pecEcEur(ec))
     +(pc!==null?('<div style="font-weight:400;font-size:var(--pt-micro,12px)">'+(pc>0?'+':(pc<0?'\u2212':''))+_pilEsc(_pecPct(Math.abs(pc)))+'</div>'):'')+'</td>';
 }
 function _pecMoisCourt(m){ return ['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'][m]||''; }
@@ -6998,7 +6998,7 @@ function _pecCss(){
   +'.pec-lg b{color:var(--texte);font-variant-numeric:lining-nums tabular-nums}'
   +'.pec-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}'
   +'.pec-tbl{width:100%;border-collapse:collapse;font-size:var(--pt-txt,13px);min-width:620px}'
-  +'.pec-tbl th{text-align:left;font-size:var(--pt-nano,11px);text-transform:none;letter-spacing:0;color:var(--texte-doux);padding:9px 10px;border-bottom:1px solid var(--gris-clair);white-space:nowrap;font-weight:700}'
+  +'.pec-tbl th{text-align:left;font-size:var(--pt-nano,11px);text-transform:none;letter-spacing:0;color:var(--texte-doux);padding:9px 10px;border-bottom:1px solid var(--gris-clair);white-space:nowrap;font-weight:600}'
   +'.pec-tbl th.s{cursor:pointer;user-select:none}'
   +'.pec-tbl th.s:hover{color:var(--texte)}'
   +'.pec-tbl th.on{color:var(--texte)}'
@@ -7006,7 +7006,7 @@ function _pecCss(){
   +'.pec-tbl td.r,.pec-tbl th.r{text-align:right;font-variant-numeric:lining-nums tabular-nums;white-space:nowrap}'
   +'.pec-tbl td.n{color:var(--texte);font-weight:600}'
   +'.pec-tbl tbody tr:last-child td{border-bottom:0}'
-  +'.pec-tbl tfoot td{border-top:2px solid var(--gris);border-bottom:0;font-weight:700;color:var(--texte);padding-top:12px}'
+  +'.pec-tbl tfoot td{border-top:2px solid var(--gris);border-bottom:0;font-weight:600;color:var(--texte);padding-top:12px}'
   // ══ LA CARTE DE FIABILITE ══
   //   .pec-a (le pave colore) n'est plus produit par _pecAlertes ; ses regles
   //   restent en place, d'autres vues peuvent encore s'en servir.
@@ -7014,11 +7014,11 @@ function _pecCss(){
   +'.pec-fia.bad{background:var(--rouge-pale);border-color:rgba(160,41,30,.35)}'
   +'.pec-fia.ok{background:var(--vert-pale);border-color:rgba(61,107,39,.3)}'
   +'.pec-fia-h{display:flex;align-items:center;gap:13px}'
-  +'.pec-fia-n{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xxl,32px);font-weight:700;line-height:1;flex:none;font-variant-numeric:lining-nums tabular-nums}'
+  +'.pec-fia-n{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xxl,32px);font-weight:600;line-height:1;flex:none;font-variant-numeric:lining-nums tabular-nums}'
   +'.pec-fia.bad .pec-fia-n{color:var(--rouge)}'
   +'.pec-fia.ok .pec-fia-n{color:var(--vert-med)}'
   +'.pec-fia-h>div{flex:1;min-width:0}'
-  +'.pec-fia-t{font-size:var(--pt-txt,13px);font-weight:700;color:var(--texte);line-height:1.3}'
+  +'.pec-fia-t{font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte);line-height:1.3}'
   +'.pec-fia-s{font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:2px;line-height:1.4}'
   +'.pec-fia-go{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}'
   +'.pec-fia-x{font-size:var(--pt-micro,12px);color:var(--texte-doux);font-style:italic;align-self:center}'
@@ -7028,7 +7028,7 @@ function _pecCss(){
   +'font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte-med);text-align:left}'
   +'.pec-remq:hover{border-color:var(--or);background:var(--or-pale)}'
   +'.pec-remq-n{flex:none;min-width:21px;height:21px;border-radius:7px;background:var(--or);color:#1C1813;'
-  +'display:flex;align-items:center;justify-content:center;font-size:var(--pt-micro,12px);font-weight:800}'
+  +'display:flex;align-items:center;justify-content:center;font-size:var(--pt-micro,12px);font-weight:600}'
   +'.pec-remq-c{margin-left:auto;color:var(--texte-doux)}'
   +'.pec-a{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;border:1px solid;font-size:var(--pt-txt,13px);line-height:1.55;color:var(--texte-med)}'
   +'.pec-a+.pec-a{margin-top:9px}'
@@ -7041,16 +7041,16 @@ function _pecCss(){
   +'.pec-btn{border:1px solid var(--gris-clair);background:var(--bg-card);color:var(--texte-med);border-radius:10px;padding:10px 14px;font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;min-height:42px;display:inline-flex;align-items:center;gap:7px}'
   +'.pec-btn:hover{background:var(--bg-app);color:var(--texte)}'
   +'.pec-acts{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}'
-  +'.pec-tbl tr.pex-ag td{background:var(--bg-app);font-weight:700;color:var(--texte);font-size:var(--pt-micro,12px);text-transform:none;letter-spacing:0;padding:7px 10px}'
+  +'.pec-tbl tr.pex-ag td{background:var(--bg-app);font-weight:600;color:var(--texte);font-size:var(--pt-micro,12px);text-transform:none;letter-spacing:0;padding:7px 10px}'
   +'.pec-tbl tr.pex-ag td em{width:9px;height:9px;border-radius:3px;display:inline-block;font-style:normal;margin-right:7px}'
-  +'.pach-p{border:1px dashed var(--gris);background:transparent;color:var(--texte);border-radius:8px;padding:5px 10px;font:inherit;font-size:var(--pt-txt,13px);font-weight:700;cursor:pointer;white-space:nowrap}'
+  +'.pach-p{border:1px dashed var(--gris);background:transparent;color:var(--texte);border-radius:8px;padding:5px 10px;font:inherit;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;white-space:nowrap}'
   +'.pach-p:hover{border-style:solid;border-color:var(--or);background:var(--or-pale)}'
   +'.pach-p.vide{color:var(--orange);border-style:dotted}'
   +'.pach-p.ok{color:var(--vert-med)}'
   +'.pec-btn.on{background:var(--bg-app);color:var(--texte);border-color:var(--gris)}'
   +'.pex-apill{display:inline-block;font-size:var(--pt-lbl,12px);font-weight:600;border-radius:7px;padding:3px 8px;line-height:1.4;white-space:nowrap}'
   +'.pex-ctrl{margin-top:14px;border:1px dashed var(--gris);border-radius:13px;padding:12px 15px;background:var(--bg-app);font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.7}'
-  +'.pex-ctrl .l{font-size:var(--pt-lbl,12px);letter-spacing:0;text-transform:none;font-weight:700;color:var(--texte-med);margin-bottom:2px}'
+  +'.pex-ctrl .l{font-size:var(--pt-lbl,12px);letter-spacing:0;text-transform:none;font-weight:600;color:var(--texte-med);margin-bottom:2px}'
   +'.pex-ctrl b{color:var(--texte)}'
   +'.pex-ctrl b.ok{color:var(--vert-med)}'
   +'.pex-ctrl.bad{border-color:rgba(160,41,30,.45);background:var(--rouge-pale)}'
@@ -7074,10 +7074,10 @@ function _pecCss(){
   +'.pec-vcadre>span{flex:1;min-width:0}'
   +'.pec-vcadre b{color:var(--texte-med)}'
   +'.pec-vgo{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}'
-  +'.pec-pill{display:inline-block;font-size:var(--pt-lbl,12px);font-weight:700;border-radius:9px;padding:3px 9px;line-height:1.5}'
+  +'.pec-pill{display:inline-block;font-size:var(--pt-lbl,12px);font-weight:600;border-radius:9px;padding:3px 9px;line-height:1.5}'
   +'.pec-mini{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--gris-clair);border-radius:12px;overflow:hidden;border:1px solid var(--gris-clair)}'
   +'.pec-mini>div{background:var(--bg-card);padding:12px 14px}'
-  +'.pec-mini .l{font-size:var(--pt-nano,11px);font-weight:700;letter-spacing:0;text-transform:none;color:var(--texte-doux)}'
+  +'.pec-mini .l{font-size:var(--pt-nano,11px);font-weight:600;letter-spacing:0;text-transform:none;color:var(--texte-doux)}'
   +'.pec-mini .v{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-lg,24px);font-weight:600;color:var(--texte);margin-top:2px;line-height:1.1;font-variant-numeric:lining-nums tabular-nums}'
   +'.pec-mini .v small{font-size:var(--pt-txt,13px);color:var(--texte-doux);font-weight:600}'
   +'.pec-mini .s{font-size:var(--pt-lbl,12px);color:var(--texte-doux);margin-top:2px;line-height:1.4}'
@@ -7106,7 +7106,7 @@ function _pecCss(){
   +'.prv-mils{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 12px}'
   +'.prv-mils button{border:1px solid var(--gris-clair);background:var(--bg-app);color:var(--texte-doux);border-radius:16px;padding:6px 13px;font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;min-height:36px}'
   +'.prv-mils button.on{background:var(--bg-card);color:var(--texte);border-color:var(--gris)}'
-  +'.prv-e{display:inline-block;font-size:var(--pt-nano,11px);font-weight:700;letter-spacing:0;text-transform:none;border-radius:8px;padding:2px 7px;margin-left:6px}'
+  +'.prv-e{display:inline-block;font-size:var(--pt-nano,11px);font-weight:600;letter-spacing:0;text-transform:none;border-radius:8px;padding:2px 7px;margin-left:6px}'
   +'.prv-e-p{background:var(--tag-amber-bg);color:var(--tag-amber-tx)}'
   +'.prv-e-c{background:var(--vert-pale);color:var(--vert-med)}'
   +'.prv-e-j{background:var(--tag-blue-bg);color:var(--tag-blue-tx)}'
@@ -7117,12 +7117,12 @@ function _pecCss(){
   +'.prv-det td{background:var(--bg-app);font-size:var(--pt-micro,12px)}'
   +'.prv-det td:first-child{padding-left:28px}'
   +'.prv-hid{display:none}'
-  +'.prv-tot td{font-weight:700;border-bottom:0}'
+  +'.prv-tot td{font-weight:600;border-bottom:0}'
   +'.prv-tbl td:first-child{min-width:0}'
   +'.prv-jg{height:5px;background:var(--gris-clair);border-radius:3px;margin-top:4px;overflow:hidden;min-width:56px}'
   +'.prv-jg i{display:block;height:100%;background:var(--vert-med)}'
   +'.prv-jg i.est{background:repeating-linear-gradient(90deg,var(--orange) 0 4px,transparent 4px 7px)}'
-  +'.prv-src{font-size:var(--pt-nano,11px);font-weight:700;border-radius:6px;padding:1px 6px;margin-left:4px;white-space:nowrap}'
+  +'.prv-src{font-size:var(--pt-nano,11px);font-weight:600;border-radius:6px;padding:1px 6px;margin-left:4px;white-space:nowrap}'
   +'.prv-src.r{background:var(--vert-pale);color:var(--vert-med)}'
   +'.prv-src.h,.prv-src.m{background:var(--tag-amber-bg);color:var(--tag-amber-tx)}'
   +'.prv-src.n{background:var(--gris-clair);color:var(--texte-doux)}'
@@ -7130,13 +7130,13 @@ function _pecCss(){
   +'.prv-rep{color:var(--texte-doux)}'
   +'.prv-flux{display:flex;flex-wrap:wrap;align-items:stretch}'
   +'.prv-fx{flex:1;min-width:120px;padding:10px 12px;border:1px solid var(--gris-clair);border-radius:12px}'
-  +'.prv-fx .l{font-size:var(--pt-nano,11px);font-weight:700;letter-spacing:0;text-transform:none;color:var(--texte-doux)}'
-  +'.prv-fx .v{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-lg,24px);font-weight:700;color:var(--texte);font-variant-numeric:lining-nums tabular-nums}'
+  +'.prv-fx .l{font-size:var(--pt-nano,11px);font-weight:600;letter-spacing:0;text-transform:none;color:var(--texte-doux)}'
+  +'.prv-fx .v{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-lg,24px);font-weight:600;color:var(--texte);font-variant-numeric:lining-nums tabular-nums}'
   +'.prv-fx .s{font-size:var(--pt-lbl,12px);color:var(--texte-doux);line-height:1.4}'
   +'.prv-ar{align-self:center;padding:0 6px;color:var(--or);font-size:var(--pt-sm,16px)}'
   +'.prv-complet{margin-top:12px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;padding:10px 12px;border:1px dashed var(--or);border-radius:10px;background:var(--or-pale)}'
-  +'.prv-cl{font-size:var(--pt-lbl,12px);font-weight:700;letter-spacing:0;text-transform:none;color:var(--texte-doux)}'
-  +'.prv-cv{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xl,28px);font-weight:700;color:var(--texte)}'
+  +'.prv-cl{font-size:var(--pt-lbl,12px);font-weight:600;letter-spacing:0;text-transform:none;color:var(--texte-doux)}'
+  +'.prv-cv{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xl,28px);font-weight:600;color:var(--texte)}'
   +'.prv-go{cursor:pointer}'
   +'.prv-go:hover{background:var(--bg-app)!important}'
   +'@media(max-width:640px){.prv-tbl{min-width:0;font-size:var(--pt-micro,12px)}.prv-tbl .prv-hs{display:none}.prv-tbl th,.prv-tbl td{padding:8px 4px;white-space:normal;letter-spacing:0}.prv-det td:first-child{padding-left:12px}.prv-tbl td:last-child{white-space:nowrap}.prv-jg{min-width:40px}}'
@@ -8150,26 +8150,26 @@ function _pecBurnSvg(E,TL,w){
   if(TL.budget>0){
     var yb=Y(TL.budget);
     g+='<line x1="'+pL+'" y1="'+yb.toFixed(1)+'" x2="'+(W-pR)+'" y2="'+yb.toFixed(1)+'" stroke="'+c.col.prevu+'" stroke-width="'+c.trait.prevu+'" stroke-dasharray="9 6"/>'
-      +'<text x="'+(W-pR)+'" y="'+(yb-7).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.axe+'" font-weight="700" fill="'+c.col.texte+'">Budget '+_pilEsc(_pecEurK(TL.budget))+'</text>';
+      +'<text x="'+(W-pR)+'" y="'+(yb-7).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.axe+'" font-weight="600" fill="'+c.col.texte+'">Budget '+_pilEsc(_pecEurK(TL.budget))+'</text>';
   }
   // Cout final projete par la CADENCE mesuree (temps passe / bareme). Trace seulement
   // quand il s'ecarte vraiment du budget : deux lignes qui se superposent ne disent rien.
   if(pFin>0){
     var yf=Y(pFin), au=(pFin>TL.budget), cf=au?c.col.alerte:c.col.fait;
     g+='<line x1="'+pL+'" y1="'+yf.toFixed(1)+'" x2="'+(W-pR)+'" y2="'+yf.toFixed(1)+'" stroke="'+cf+'" stroke-width="'+c.trait.seuil+'" stroke-dasharray="3 5"/>'
-      +'<text x="'+(W-pR)+'" y="'+(yf+(au?-7:15)).toFixed(1)+'" text-anchor="end" font-size="'+(et?c.txt.mini:c.txt.unite)+'" font-weight="700" fill="'+cf+'">'+(et?'\u00c0 la cadence \u00b7 ':'Fin projet\u00e9e \u00e0 la cadence \u00b7 ')+_pilEsc(_pecEurK(pFin))+'</text>';
+      +'<text x="'+(W-pR)+'" y="'+(yf+(au?-7:15)).toFixed(1)+'" text-anchor="end" font-size="'+(et?c.txt.mini:c.txt.unite)+'" font-weight="600" fill="'+cf+'">'+(et?'\u00c0 la cadence \u00b7 ':'Fin projet\u00e9e \u00e0 la cadence \u00b7 ')+_pilEsc(_pecEurK(pFin))+'</text>';
   }
   // Aujourd'hui : un repere, pas une alerte. Le rouge reste au depassement.
   if(TL.tToday!=null && TL.tToday>=TL.t0 && TL.tToday<=tMax){
     var xt=X(TL.tToday);
     g+='<line x1="'+xt.toFixed(1)+'" y1="'+(pT-4)+'" x2="'+xt.toFixed(1)+'" y2="'+(pT+ih)+'" stroke="'+c.col.texte+'" stroke-width="1.4" stroke-dasharray="4 3"/>'
-      +'<text x="'+xt.toFixed(1)+'" y="'+(pT-8)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="700" fill="'+c.col.texte+'">auj.</text>';
+      +'<text x="'+xt.toFixed(1)+'" y="'+(pT-8)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="600" fill="'+c.col.texte+'">auj.</text>';
   }
   // Objectif de fin des travaux : une date decidee, donc --or comme le budget.
   if(TL.objMs!=null && TL.objMs>=TL.t0 && TL.objMs<=tMax){
     var xo=X(TL.objMs);
     g+='<line x1="'+xo.toFixed(1)+'" y1="'+pT+'" x2="'+xo.toFixed(1)+'" y2="'+(pT+ih)+'" stroke="'+c.col.prevu+'" stroke-width="'+c.trait.prevu+'" stroke-dasharray="3 4"/>'
-      +'<text x="'+xo.toFixed(1)+'" y="'+(pT+ih+(et?32:34))+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="700" fill="'+c.col.texte+'">objectif</text>';
+      +'<text x="'+xo.toFixed(1)+'" y="'+(pT+ih+(et?32:34))+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="600" fill="'+c.col.texte+'">objectif</text>';
   }
   var aria='Rythme d\u2019engagement des d\u00e9penses : '+_pecEurK(TL.cum)+' engag\u00e9s'
     +(TL.budget>0?(' sur un budget de '+_pecEurK(TL.budget)):'')
@@ -8250,7 +8250,7 @@ function _pecTaskSvg(E,w){
     if(et){
       var by=y+17, bh=14;
       g+='<text x="0" y="'+(y+11)+'" font-size="'+c.txt.axe+'" font-weight="600" fill="var(--texte)">'+_pilEsc(_pecTrunc(_pilTnom(t.nom),22))+'</text>'
-        +'<text x="'+W+'" y="'+(y+11)+'" text-anchor="end" font-size="'+c.txt.axe+'" font-weight="700" fill="var(--texte)">'+_pilEsc(_pecEurK(t.bE))+'</text>'
+        +'<text x="'+W+'" y="'+(y+11)+'" text-anchor="end" font-size="'+c.txt.axe+'" font-weight="600" fill="var(--texte)">'+_pilEsc(_pecEurK(t.bE))+'</text>'
         +'<rect x="0" y="'+by+'" width="'+Math.max(1,wTot).toFixed(1)+'" height="'+bh+'" rx="4" fill="'+_PEC_COL.mo+'" opacity=".22"/>'
         +_tsBar(0, by, bh, t, wTot)
         +'<text x="'+W+'" y="'+(by+bh+11)+'" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+_tsCol(t)+'">'+_pilEsc(_tsDroite(t))+'</text>';
@@ -8259,7 +8259,7 @@ function _pecTaskSvg(E,w){
       g+='<text x="'+(pL-12)+'" y="'+(by2+13)+'" text-anchor="end" font-size="'+c.txt.val+'" font-weight="600" fill="var(--texte)">'+_pilEsc(_pecTrunc(_pilTnom(t.nom),24))+'</text>'
         +'<rect x="'+pL+'" y="'+by2+'" width="'+Math.max(1,wTot).toFixed(1)+'" height="'+bh2+'" rx="4" fill="'+_PEC_COL.mo+'" opacity=".22"/>'
         +_tsBar(pL, by2, bh2, t, wTot)
-        +'<text x="'+(pL+Math.max(wTot,(t.reE||0)/mx*iw)+10).toFixed(1)+'" y="'+(by2+13)+'" font-size="'+c.txt.val+'" font-weight="700" fill="var(--texte)">'+_pilEsc(_pecEurK(t.bE))+'</text>'
+        +'<text x="'+(pL+Math.max(wTot,(t.reE||0)/mx*iw)+10).toFixed(1)+'" y="'+(by2+13)+'" font-size="'+c.txt.val+'" font-weight="600" fill="var(--texte)">'+_pilEsc(_pecEurK(t.bE))+'</text>'
         +'<text x="'+(W-4)+'" y="'+(by2+13)+'" text-anchor="end" font-size="'+c.txt.axe+'" fill="'+_tsCol(t)+'">'+_pilEsc(_tsDroite(t))+'</text>';
     }
   });
@@ -8286,14 +8286,14 @@ function _pecEcartSvg(E,w){
   var half=Math.max(28, cx-lab-10);
   var mx=Math.max(12, rs.reduce(function(a,b){ return Math.max(a,Math.abs(b.ec)); },0));
   var g='<line x1="'+cx+'" y1="'+(pT-10)+'" x2="'+cx+'" y2="'+(pT+rs.length*rowH)+'" stroke="'+c.col.texte+'" stroke-width="1.4" opacity=".55"/>'
-       +'<text x="'+cx+'" y="'+(pT-16)+'" text-anchor="middle" font-size="'+c.txt.axe+'" font-weight="700" fill="'+c.col.texte+'">moyenne du domaine \u00b7 '+_pilEsc(_ecoEur(avg))+'/ha</text>';
+       +'<text x="'+cx+'" y="'+(pT-16)+'" text-anchor="middle" font-size="'+c.txt.axe+'" font-weight="600" fill="'+c.col.texte+'">moyenne du domaine \u00b7 '+_pilEsc(_ecoEur(avg))+'/ha</text>';
   rs.forEach(function(r,i){
     var y=pT+i*rowH, by=y+4, bh=et?16:15;
     var bw=Math.abs(r.ec)/mx*half, up=r.ec>=0;
     var col=up?(r.ec>25?c.col.alerte:c.col.attention):c.col.fait;
     g+='<rect x="'+(up?cx:cx-bw).toFixed(1)+'" y="'+by+'" width="'+Math.max(1,bw).toFixed(1)+'" height="'+bh+'" rx="3" fill="'+col+'" opacity=".85"/>'
       +'<text x="'+(up?(cx-8):(cx+8))+'" y="'+(by+12)+'" text-anchor="'+(up?'end':'start')+'" font-size="'+c.txt.axe+'" fill="var(--texte)">'+_pilEsc(_pecTrunc(r.nom,et?13:20))+'</text>'
-      +'<text x="'+(up?(cx+bw+9):(cx-bw-9)).toFixed(1)+'" y="'+(by+12)+'" text-anchor="'+(up?'start':'end')+'" font-size="'+(et?c.txt.mini:c.txt.unite)+'" font-weight="700" fill="'+col+'">'+(up?'+':'\u2212')+Math.round(Math.abs(r.ec))+' %</text>';
+      +'<text x="'+(up?(cx+bw+9):(cx-bw-9)).toFixed(1)+'" y="'+(by+12)+'" text-anchor="'+(up?'start':'end')+'" font-size="'+(et?c.txt.mini:c.txt.unite)+'" font-weight="600" fill="'+col+'">'+(up?'+':'\u2212')+Math.round(Math.abs(r.ec))+' %</text>';
   });
   var svg=window._mvGraphSvg(c, '\u00c9cart au co\u00fbt moyen \u00e0 l\u2019hectare, '+rs.length+' parcelles compar\u00e9es \u00e0 '+_ecoEur(avg)+' par hectare.', g);
   if(trunc) svg+='<div class="pec-note">Les 14 parcelles les plus ch\u00e8res et les 14 les moins ch\u00e8res \u00e0 l\u2019hectare. Le tableau de l\u2019onglet <b>Parcelles</b> les porte toutes.</div>';
@@ -8883,7 +8883,7 @@ function _pecViewParcelles(E){
     var pcol=_pilPctColor(r.pct);
     return '<tr><td class="n">'+_pilEsc(r.nom)+'<div style="margin-top:4px;display:flex;gap:5px;flex-wrap:wrap">'+badge+plants+ret+'</div></td>'
       +'<td class="r">'+_pilHa(r.surf)+'</td>'
-      +(r.arr?'<td class="r">\u2014</td>':('<td class="r" style="color:'+pcol+';font-weight:700">'+Math.round(r.pct)+' %</td>'))
+      +(r.arr?'<td class="r">\u2014</td>':('<td class="r" style="color:'+pcol+';font-weight:600">'+Math.round(r.pct)+' %</td>'))
       +'<td class="r">'+_pilEsc(_ecoEur(r.moRe))+'</td>'
       +'<td class="r">'+(r.tracF>0?_pilEsc(_ecoEur(r.tracF)):'\u2014')+'</td>'
       +'<td class="r">'+(r.gnrF>0?_pilEsc(_ecoEur(r.gnrF)):'\u2014')+'</td>'
@@ -10624,7 +10624,7 @@ function _pecViewRevient(){
         +(ref>0?('<div class="prv-jg"><i'+(g.est?' class="est"':'')+' style="width:'+Math.round(w)+'%"></i></div>'):'')+'</td>'
       +'<td class="prv-hs" style="text-align:right;color:var(--texte-doux)">'+_pecRevMax(g)+'</td>'
       +'<td style="text-align:right">'+(g.cols>0?_pilNum(g.cols):'\u2014')+'</td>'
-      +'<td style="text-align:right;font-weight:700">'+(g.eurCol!=null?(_pecRevE2(g.eurCol)+' \u20AC'):'\u2014')+'</td></tr>';
+      +'<td style="text-align:right;font-weight:600">'+(g.eurCol!=null?(_pecRevE2(g.eurCol)+' \u20AC'):'\u2014')+'</td></tr>';
     g.rows.forEach(function(r){
       tb+='<tr class="prv-det prv-hid" data-prv="'+i+'"><td>'+_pilEsc(r.nom)+' <span class="prv-src '+r.src+'">'+_PEC_REV_SRC[r.src]+'</span>'
         +(r.src==='r'&&r.share<1?(' <span class="prv-src n">'+(r.share>0?('domaine '+Math.round(r.share*100)+' %'):'tout vendu')+'</span>'):'')+'</td>'
@@ -11302,39 +11302,39 @@ function _pilCssV2(){
   +'.pil-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin:0 0 18px}'
   +'.pil-photo{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:14px;padding:13px 14px 12px;box-shadow:var(--shadow-sm);text-align:left;width:100%;font-family:inherit;cursor:pointer;transition:border-color .12s;min-height:112px;display:block}'
   +'.pil-photo:hover{border-color:var(--or)}'
-  +'.pil-photo .k{display:flex;align-items:center;gap:6px;font-size:var(--pt-nano,11px);letter-spacing:0;text-transform:none;color:var(--texte-doux);font-weight:700}'
-  +'.pil-photo .v{display:block;font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xxl,32px);font-weight:700;line-height:1.05;margin:5px 0 0;color:var(--texte);font-variant-numeric:lining-nums tabular-nums}'
+  +'.pil-photo .k{display:flex;align-items:center;gap:6px;font-size:var(--pt-nano,11px);letter-spacing:0;text-transform:none;color:var(--texte-doux);font-weight:600}'
+  +'.pil-photo .v{display:block;font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xxl,32px);font-weight:600;line-height:1.05;margin:5px 0 0;color:var(--texte);font-variant-numeric:lining-nums tabular-nums}'
   +'.pil-photo .u{display:inline;font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-base,14px);font-weight:600;color:var(--texte-doux)}'
   +'.pil-photo .s{display:block;font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:2px;line-height:1.35}'
-  +'.pil-photo .go{display:block;font-size:var(--pt-lbl,12px);color:var(--terre);font-weight:700;margin-top:7px}'
-  +'.pil-flag{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;font-size:var(--pt-lbl,12px);font-weight:800;color:#fff;flex-shrink:0}'
-  +'.pil-lvn{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--gris-clair);color:var(--texte-doux);font-size:var(--pt-lbl,12px);font-weight:800;margin-right:6px;flex-shrink:0;font-family:var(--font-ui,Outfit,sans-serif)}'
+  +'.pil-photo .go{display:block;font-size:var(--pt-lbl,12px);color:var(--terre);font-weight:600;margin-top:7px}'
+  +'.pil-flag{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;font-size:var(--pt-lbl,12px);font-weight:600;color:#fff;flex-shrink:0}'
+  +'.pil-lvn{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--gris-clair);color:var(--texte-doux);font-size:var(--pt-lbl,12px);font-weight:600;margin-right:6px;flex-shrink:0;font-family:var(--font-ui,Outfit,sans-serif)}'
   +'.mvu-tab.active .pil-lvn{background:var(--cave);color:var(--or-clair)}'
   // Le filet dit ou s'arrete le zoom. Sans lui, « Cave » se lit comme un
   // cinquieme niveau, et la barre redevient une liste de sujets.
   +'.pil-tabsep{display:inline-block;width:1px;align-self:stretch;min-height:22px;margin:0 9px;background:var(--gris);flex-shrink:0}'
-  +'.pil-diagbtn{border:1px solid var(--orange);background:var(--orange-pale);color:var(--orange);border-radius:9px;padding:6px 11px;font-size:var(--pt-txt,13px);font-weight:700;white-space:nowrap;min-height:34px;font-family:inherit;cursor:pointer}'
+  +'.pil-diagbtn{border:1px solid var(--orange);background:var(--orange-pale);color:var(--orange);border-radius:9px;padding:6px 11px;font-size:var(--pt-txt,13px);font-weight:600;white-space:nowrap;min-height:34px;font-family:inherit;cursor:pointer}'
   +'.pil-diagbtn.grave{border-color:var(--rouge);background:var(--rouge-pale);color:var(--rouge-tx,#A0291E)}'
   +'.pil-diagbtn.clean{border-color:var(--vert-med);background:var(--vert-pale);color:var(--vert-med)}'
   +'.pil-diagwrap{position:fixed;inset:0;background:rgba(20,17,13,.45);z-index:8905;display:none;align-items:flex-end;justify-content:center}'
   +'.pil-diagwrap.show{display:flex}'
   +'.pil-diagsheet{background:var(--bg-app);width:100%;max-width:640px;max-height:86vh;overflow:auto;border-radius:18px 18px 0 0;padding:17px 17px calc(34px + env(safe-area-inset-bottom,0px))}'
   +'.pil-diag-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}'
-  +'.pil-diag-t{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-lg,24px);font-weight:700;color:var(--texte);line-height:1.15}'
+  +'.pil-diag-t{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-lg,24px);font-weight:600;color:var(--texte);line-height:1.15}'
   +'.pil-diag-s{font-size:var(--pt-txt,13px);color:var(--texte-doux);margin-top:2px}'
   +'.pil-diag-x{border:1px solid var(--gris);background:var(--bg-card);border-radius:8px;width:32px;height:32px;font-size:var(--pt-sm,16px);color:var(--texte-doux);flex-shrink:0;font-family:inherit;cursor:pointer}'
   +'.pil-diag-ok{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:13px;padding:16px;text-align:center;color:var(--vert-med);font-weight:600;margin-top:11px}'
   +'.pil-cov{display:flex;align-items:center;gap:12px;background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:13px;padding:11px 13px;margin:11px 0 13px}'
-  +'.pil-cov-v{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xxl,32px);font-weight:700;line-height:1;color:var(--orange);white-space:nowrap;flex-shrink:0}'
+  +'.pil-cov-v{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xxl,32px);font-weight:600;line-height:1;color:var(--orange);white-space:nowrap;flex-shrink:0}'
   +'.pil-cov-t{font-size:var(--pt-txt,13px);line-height:1.45}'
   +'.pil-cov-t span{color:var(--texte-doux)}'
   +'.pil-dl{background:var(--bg-card);border:1px solid var(--gris-clair);border-left-width:4px;border-radius:11px;padding:11px 13px;margin-bottom:9px}'
   +'.pil-dl.r{border-left-color:var(--rouge)}.pil-dl.o{border-left-color:var(--orange)}.pil-dl.b{border-left-color:#4A9FC8}'
-  +'.pil-dl-t{font-weight:700;font-size:var(--pt-base,14px);display:flex;align-items:center;gap:7px;margin-bottom:2px}'
-  +'.pil-dl-g{font-size:var(--pt-lbl,12px);letter-spacing:0;text-transform:none;color:var(--texte-doux);font-weight:700;margin-bottom:5px}'
+  +'.pil-dl-t{font-weight:600;font-size:var(--pt-base,14px);display:flex;align-items:center;gap:7px;margin-bottom:2px}'
+  +'.pil-dl-g{font-size:var(--pt-lbl,12px);letter-spacing:0;text-transform:none;color:var(--texte-doux);font-weight:600;margin-bottom:5px}'
   +'.pil-dl-f{font-size:var(--pt-txt,13px);color:var(--texte-doux);line-height:1.5}'
   +'.pil-dl-f b{color:var(--texte)}'
-  +'.pil-diag-go{margin-top:9px;border:1px solid var(--cave);background:var(--cave);color:var(--or-clair);border-radius:8px;padding:7px 13px;font-size:var(--pt-txt,13px);font-weight:700;font-family:inherit;cursor:pointer;min-height:34px}'
+  +'.pil-diag-go{margin-top:9px;border:1px solid var(--cave);background:var(--cave);color:var(--or-clair);border-radius:8px;padding:7px 13px;font-size:var(--pt-txt,13px);font-weight:600;font-family:inherit;cursor:pointer;min-height:34px}'
   +'.pil-diag-go.ghost{background:var(--bg-card);color:var(--texte)}'
   +'.pil-flag{cursor:pointer}'
   // ══ LA SOUS-LIGNE — ce qui reste du bandeau de titre ══
@@ -11368,7 +11368,7 @@ function _pilCssV2(){
   // Le depliant des cinq jours dans \u00ab Traiter ? \u00bb. Il vit ici et non dans
   // styles.css : c'est une regle de composant, propre a une seule carte.
   +'.pil-t5{margin-top:10px;border-top:1px solid var(--gris-clair);padding-top:8px}'
-  +'.pil-t5>summary{cursor:pointer;list-style:none;font-size:var(--pt-micro,12px);font-weight:700;letter-spacing:0;text-transform:none;color:var(--terre)}'
+  +'.pil-t5>summary{cursor:pointer;list-style:none;font-size:var(--pt-micro,12px);font-weight:600;letter-spacing:0;text-transform:none;color:var(--terre)}'
   +'.pil-t5>summary::-webkit-details-marker{display:none}'
   +'.pil-t5>summary::after{content:\" \u25b8\";display:inline-block;transition:transform .15s}'
   +'.pil-t5[open]>summary::after{transform:rotate(90deg)}'
@@ -11380,11 +11380,11 @@ function _pilCssV2(){
   +'.pil-annav{display:inline-flex;align-items:center;gap:4px}'
   +'.pil-annav-b{min-width:40px;min-height:40px;border:1px solid var(--gris-clair);background:var(--bg-card);color:var(--texte);border-radius:12px;font-size:var(--pt-sm,16px);line-height:1;cursor:pointer}'
   +'.pil-annav-b[disabled]{opacity:.35;cursor:default}'
-  +'.pil-annav-l{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-md,20px);font-weight:700;min-width:96px;text-align:center;font-variant-numeric:lining-nums tabular-nums}'
-  +'.pil-anbadge{font-size:var(--pt-lbl,12px);font-weight:700;letter-spacing:0;text-transform:none;padding:4px 8px;border-radius:999px;background:var(--tag-grey-bg);color:var(--tag-grey-tx)}'
+  +'.pil-annav-l{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-md,20px);font-weight:600;min-width:96px;text-align:center;font-variant-numeric:lining-nums tabular-nums}'
+  +'.pil-anbadge{font-size:var(--pt-lbl,12px);font-weight:600;letter-spacing:0;text-transform:none;padding:4px 8px;border-radius:999px;background:var(--tag-grey-bg);color:var(--tag-grey-tx)}'
   +'.pil-anbadge.on{background:var(--vert-pale);color:var(--vert-med)}'
   +'.pil-anc-sp{flex:1}'
-  +'.pil-anc-t{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-lg,24px);font-weight:700;color:var(--texte);margin:12px 0 4px}'
+  +'.pil-anc-t{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-lg,24px);font-weight:600;color:var(--texte);margin:12px 0 4px}'
   +'.pil-anc-d{font-size:var(--pt-txt,13px);line-height:1.55;color:var(--texte-med)}'
   +'.pil-anc-d b{color:var(--texte);font-weight:600}'
   +'.pil-anfr{margin:24px 0 8px}'
@@ -11407,8 +11407,8 @@ function _pilCssV2(){
   +'.pil-anc-av .pil-diag-go{margin-top:4px}'
   +'.pil-anf{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:12px 0 8px}'
   +'.pil-anf-c{background:var(--bg-app);border-radius:12px;padding:8px 12px}'
-  +'.pil-anf-c .l{font-size:var(--pt-nano,11px);letter-spacing:0;text-transform:none;color:var(--texte-doux);font-weight:700}'
-  +'.pil-anf-c .v{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xl,28px);font-weight:700;line-height:1.1;margin-top:4px;font-variant-numeric:lining-nums tabular-nums;color:var(--texte)}'
+  +'.pil-anf-c .l{font-size:var(--pt-nano,11px);letter-spacing:0;text-transform:none;color:var(--texte-doux);font-weight:600}'
+  +'.pil-anf-c .v{font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:var(--pt-xl,28px);font-weight:600;line-height:1.1;margin-top:4px;font-variant-numeric:lining-nums tabular-nums;color:var(--texte)}'
   +'.pil-anf-c .v span{font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte-doux)}'
   +'.pil-anf-c.m .v{color:var(--terre)}'
   +'.pil-anf-c .s{font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:2px}'
@@ -11420,13 +11420,13 @@ function _pilCssV2(){
   +'.pil-anp>div{display:contents}'
   +'.pil-anp span{padding:8px;border-top:1px solid var(--gris-clair);text-align:right;font-variant-numeric:lining-nums tabular-nums}'
   +'.pil-anp span:first-child{text-align:left}'
-  +'.pil-anp .hd span{border-top:0;font-size:var(--pt-nano,11px);letter-spacing:0;text-transform:none;color:var(--texte-doux);font-weight:700}'
-  +'.pil-anp .tt span{font-weight:700;border-top:1px solid var(--gris)}'
+  +'.pil-anp .hd span{border-top:0;font-size:var(--pt-nano,11px);letter-spacing:0;text-transform:none;color:var(--texte-doux);font-weight:600}'
+  +'.pil-anp .tt span{font-weight:600;border-top:1px solid var(--gris)}'
   +'.pil-ann{font-size:var(--pt-micro,12px);line-height:1.5;color:var(--texte-doux);margin-top:8px}'
   +'.pil-anr-l{display:flex;align-items:center;gap:4px 12px;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--gris-clair)}'
   +'.pil-anr-l i,.pil-anb-leg em.pil-anr-h{width:16px;height:12px;border-radius:4px;flex:none;background:repeating-linear-gradient(135deg,var(--rouge) 0 2px,var(--rouge-pale) 2px 4px)}'
   +'.pil-anr-l b{font-weight:600;font-size:var(--pt-txt,13px);min-width:150px}'
-  +'.pil-anr-l .n{font-weight:700;font-size:var(--pt-base,14px);color:var(--rouge);min-width:110px}'
+  +'.pil-anr-l .n{font-weight:600;font-size:var(--pt-base,14px);color:var(--rouge);min-width:110px}'
   +'.pil-anr-l .s{font-size:var(--pt-micro,12px);color:var(--texte-doux)}'
   +'.pil-anr-go{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;font-size:var(--pt-txt,13px);color:var(--texte-med)}'
   +'.pil-anb-leg{display:flex;gap:15px;flex-wrap:wrap;font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:9px}'
@@ -12305,13 +12305,13 @@ window._pilDiagClose=_pilDiagClose;   // TOUR-2 : appelee par le retour Android 
 function _pilObjCard(cd,admin){
   var objIso=_pilObjectifGet();
   var cardCss='background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin-bottom:16px';
-  var ttlCss='font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-md,20px);color:var(--texte)';
-  var inCss='border:1px solid var(--gris);border-radius:7px;padding:5px 8px;font-family:var(--font-ui,Outfit);font-size:var(--pt-base,14px);font-weight:700;background:#fff;color:var(--texte)';
+  var ttlCss='font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:600;font-size:var(--pt-md,20px);color:var(--texte)';
+  var inCss='border:1px solid var(--gris);border-radius:7px;padding:5px 8px;font-family:var(--font-ui,Outfit);font-size:var(--pt-base,14px);font-weight:600;background:#fff;color:var(--texte)';
   var nom=cd?cd.saison:_pilSaisonNom();
   return '<div style="'+cardCss+'">'
     +'<div style="'+ttlCss+';margin-bottom:4px">\uD83C\uDFAF Objectif de fin des travaux</div>'
     +'<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);margin-bottom:12px">Date à laquelle vous voulez que toutes les tâches de la saison soient terminées. La marge du tableau de bord compare la projection (cadence réelle) à cette date — indépendante de la fin de saison.</div>'
-    +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:var(--pt-txt,13px);font-weight:700">Saison '+_pilEsc(nom||'—')+' — terminer pour le</span>'
+    +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:var(--pt-txt,13px);font-weight:600">Saison '+_pilEsc(nom||'—')+' — terminer pour le</span>'
     +'<input type="date" id="pil-obj-param" value="'+(objIso||'')+'"'+(admin?'':' disabled')+' style="'+inCss+'">'
     +(admin?'':'<span style="font-size:var(--pt-micro,12px);color:var(--texte-doux)">\uD83D\uDD12 admin</span>')+'</div></div>';
 }
@@ -12325,7 +12325,7 @@ function _pilObjCard(cd,admin){
 function _pilSimEcoCard(admin){
   var e=(window.CONFIG&&window.CONFIG.eco)||{};
   var cardCss='background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin-bottom:16px';
-  var ttlCss='font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-md,20px);color:var(--texte)';
+  var ttlCss='font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:600;font-size:var(--pt-md,20px);color:var(--texte)';
   var inCss='width:78px;padding:7px 8px;border:1.5px solid var(--gris-clair);border-radius:9px;font-family:inherit;font-size:var(--pt-base,14px);text-align:right;background:var(--bg-app);color:var(--texte);box-sizing:border-box';
   var dis=admin?'':' disabled';
   // Vide = valeur par defaut : on n'ecrit jamais le defaut en base, il reste dans le lecteur
@@ -12419,7 +12419,7 @@ function _pilParamBody(d){
   var cd=(window._chargeSaisonData&&window.getSaisonActive)?window._chargeSaisonData(window._pilSaison()):null;
   var admin=(typeof window.isAdmin==='function')&&window.isAdmin();
   var cardCss='background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin-bottom:16px';
-  var ttlCss='font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-md,20px);color:var(--texte)';
+  var ttlCss='font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:600;font-size:var(--pt-md,20px);color:var(--texte)';
   var thCss='text-align:left;font-size:var(--pt-micro,12px);text-transform:uppercase;letter-spacing:.04em;color:var(--texte-doux);padding:6px 8px;border-bottom:1px solid var(--gris-clair)';
   var tdCss='padding:7px 8px;border-bottom:1px solid #F0ECE1';
   if(!cd||!cd.taskWindows||!cd.taskWindows.length){
@@ -12457,8 +12457,8 @@ function _pilParamBody(d){
     //   fenetre par defaut — et il le DIT, au lieu de laisser croire que la
     //   consigne s'applique.
     var tag=t.horsPeriode
-      ? '<span style="font-size:var(--pt-lbl,12px);color:#9B2D1F;font-weight:700" title="Une fen\u00eatre est enregistr\u00e9e pour cette t\u00e2che, mais ses dates sont hors de cette p\u00e9riode. La fen\u00eatre par d\u00e9faut est appliqu\u00e9e.">\u26a0 hors p\u00e9riode</span>'
-      : (t.custom?'<span style="font-size:var(--pt-lbl,12px);color:var(--orange);font-weight:700">\u2022 perso</span>':'<span style="font-size:var(--pt-lbl,12px);color:var(--texte-doux)">auto</span>');
+      ? '<span style="font-size:var(--pt-lbl,12px);color:#9B2D1F;font-weight:600" title="Une fen\u00eatre est enregistr\u00e9e pour cette t\u00e2che, mais ses dates sont hors de cette p\u00e9riode. La fen\u00eatre par d\u00e9faut est appliqu\u00e9e.">\u26a0 hors p\u00e9riode</span>'
+      : (t.custom?'<span style="font-size:var(--pt-lbl,12px);color:var(--orange);font-weight:600">\u2022 perso</span>':'<span style="font-size:var(--pt-lbl,12px);color:var(--texte-doux)">auto</span>');
     var inCss='border:1px solid var(--gris);border-radius:7px;padding:3px 5px;font-family:var(--font-ui,Outfit);font-size:var(--pt-txt,13px);background:var(--bg-card,#fff);color:var(--texte)';
     var nCss='width:58px;text-align:center;border:1px solid var(--gris);border-radius:7px;padding:3px 0;font-family:var(--font-ui,Outfit);font-size:var(--pt-txt,13px);background:var(--bg-card,#fff);color:var(--texte)';
     return '<tr>'

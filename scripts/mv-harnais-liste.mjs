@@ -781,6 +781,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-cssmenage1.mjs --contre'],
   ['node scripts/mv-harnais-autete1.mjs'],              // AUJ-TETE-1 (§454) : la tête d'Aujourd'hui — la bascule en haut à droite du cadre, chaque chiffre avec sa référence, la campagne lue sous la date
   ['node scripts/mv-harnais-autete1.mjs --contre'],
+  ['node scripts/mv-harnais-gabarit1.mjs'],             // GABARIT-1 (§455) : un rôle, un style dans tout le Pilotage — réglages dans la charte, bloc final sans taille ni graisse à lui, pilotage.js sans graisse > 600
+  ['node scripts/mv-harnais-gabarit1.mjs --contre'],
   ['node scripts/mv-harnais-cave2.mjs'],              // CAVE-2 (§289) : le Cuvier à la charte
   ['node scripts/mv-harnais-cave2.mjs --contre'],
   ['node scripts/mv-harnais-cave3.mjs'],              // CAVE-3 (§290) : le Chai en liste + fiche

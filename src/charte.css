@@ -174,6 +174,20 @@
   --focus-ombre:0 0 0 var(--bw-2,2px) var(--bg-card),0 0 0 calc(var(--bw-2,2px) * 2) var(--anneau); --focus-dedans:inset 0 0 0 var(--bw-2,2px) var(--anneau);
   --font-ui:Outfit,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --font-titre:"Cormorant Garamond",Georgia,"Times New Roman",serif; --font-code:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --lh-serre:1.15; --lh-ui:1.35; --lh-texte:1.5; --ls-serre:-0.011em; --ls-titre:-0.02em; --fw-reg:400; --bw:1px; --bw-2:2px;
+  /* ★★ GABARIT-1 (§455) — LE GABARIT DU PILOTAGE : un rôle = un style, dans tous les onglets (maquette validée le 25/10).
+     Une police, trois graisses (400 · 500 · 600), huit tailles prises sur les crans --pt-*. Les pièces du Pilotage
+     LISENT ces réglages (bloc ★★ GABARIT-1 en fin de styles.css) : changer un rôle ici le change partout. */
+  --t-police:var(--font-ui);
+  --t-verdict:var(--pt-xl,28px);   /* la phrase du jour                                  */
+  --t-heros:var(--pt-xl,28px);     /* le chiffre-roi d'un panneau (jauge, centre d'anneau) */
+  --t-chiffre:var(--pt-lg,24px);   /* le chiffre d'une carte                              */
+  --t-titre:var(--pt-md,20px);     /* titre de panneau · chiffre secondaire               */
+  --t-section:var(--pt-sm,16px);   /* titre de section, entre les cartes                  */
+  --t-ligne:var(--pt-base,14px);   /* nom et valeur d'une ligne · sous-titre de bloc      */
+  --t-texte:var(--pt-txt,13px);    /* texte courant · étiquette · bouton · choix          */
+  --t-note:var(--pt-micro,12px);   /* ligne de cadre · note · légende                     */
+  --t-axe:var(--pt-nano,11px);     /* axe de graphique · en-tête de colonne               */
+  --jauge-h:10px; --jauge-fine-h:6px; --barre-graph-h:16px; --carte-pad:20px;
   --h-kbd:20px; --h-badge:20px; --h-sm:28px; --h-ctl:32px; --h-row:36px; --h-row-2:48px; --h-top:52px; --h-dock:56px;
   --ic-xs:14px; --ic-sm:16px; --ic-md:18px; --ic-lg:20px; --av:28px; --o-off:.45;
   --l-side:248px; --l-rail:56px; --l-inset:8px; --l-ecran:100vh; --l-cmdk:600px; --h-cmdk:52px; --l-list:400px; --l-fiche:440px;

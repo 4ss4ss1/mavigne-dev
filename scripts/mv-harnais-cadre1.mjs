@@ -51,7 +51,8 @@ function suite(S) {
   T('la barre de sélection reste sous les fenêtres (' + zB.join('/') + ' < ' + zDe(zOv || '') + ')', zB.length > 0 && zOv && zB.every(z => z < zDe(zOv)));
   // 5. Aucune page affichée hors de son état actif (§24 CSS n°1)
   const pages = [];
-  RG.forEach(r => r.sel.split(',').forEach(x => { x = x.trim(); if (/#page-[a-z-]+(\.[\w-]+)*$/.test(x) && /(^|;)\s*display\s*:\s*(?!none)/.test(r.decl) && !/\.active\b/.test(x)) pages.push(x); }));
+  const coupe = sel => { const o = []; let p = 0, b = ''; for (const ch of sel) { if (ch === '(') p++; if (ch === ')') p--; if (ch === ',' && p === 0) { o.push(b); b = ''; } else b += ch; } o.push(b); return o; };   // GABARIT-1 (§455) : « :is(#page-pilotage, #ovReglPilotage) x » coupé à sa virgule intérieure se lisait « :is(#page-pilotage »
+  RG.forEach(r => coupe(r.sel).forEach(x => { x = x.trim(); if (/#page-[a-z-]+(\.[\w-]+)*$/.test(x) && /(^|;)\s*display\s*:\s*(?!none)/.test(r.decl) && !/\.active\b/.test(x)) pages.push(x); }));
   T('aucune règle n’affiche une page qui n’est pas la page active' + (pages.length ? ' : ' + pages.join(' | ') : ''), pages.length === 0);
   // 6. La fiche rangée n'est plus une fenêtre (la vraie _plGensDock)
   let a = {}; try { a = scene(S); } catch (e) { a = { erreur: e.message }; }
