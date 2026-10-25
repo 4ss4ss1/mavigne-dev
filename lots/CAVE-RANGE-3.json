@@ -1,0 +1,40 @@
+{
+  "lot": "CAVE-RANGE-3",
+  "section": "§452",
+  "base": "d6af8e784c62b3a004671a64ea0e236752622a7d",
+  "inclut": [],
+  "date": "2026-10-25",
+  "tutos": {
+    "ok": true,
+    "empreinte": "e42bdac4fbbe08fb943ff80f9fa203e9b1ae6c56b036055321ab120d8b494af8",
+    "date": "2026-10-25T12:11:12.356Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "5c4e818a2384646e2ec17a4c596ae9e1e7a15a1f3045370510254daebd315440",
+    "CLAUDE.md": "3797f2353a3d941899b03e443c39df36f9dffa5b13b9c48e8914ddeb1fcfcc45",
+    "docs/claude/INDEX.md": "d0299d1881ce4f4d23613f4083796a7c2675c43185c8017b09b83d3ef91a67c9",
+    "docs/claude/chantiers-430-479.md": "9bf2d2415c049e03e0b1924b4063cc83da2f93bb0b100ef2fb07ce76654bb8c3",
+    "docs/claude/journal.md": "47bbe83759c0f0aa1cc1793e8cb40d4a696889c36aaf9ad47dd310076fc896fc",
+    "guide/08-cave.html": "77ac3dfbbeae7c5d5ded9d2fd4a99059cce3d546b292c40dd603444333bf1b74",
+    "index.html": "9e4d4af3d442b8393cf0f317eac14f3f48ee0e90d8ef25907b00ae281c229251",
+    "public/guide.html": "02efc99be942752b0210f4155fcf32606188ecf3fc6600012aed96f07a4534a9",
+    "public/sw.js": "69b6dd69d3f94c3668e70b5868eb1908f15b743f2c0be078225f1ae7d9769d52",
+    "scripts/mv-harnais-cave3.mjs": "33ecf8f9f619f608afdbf9eb6eb79ce0defafeafaaf57f37a58dee4b703fc7ad",
+    "scripts/mv-harnais-caverange2a.mjs": "0299db49f15e2ce90d6f85774ed953beb4011001d5195702797f7984f90bb725",
+    "scripts/mv-harnais-liste.mjs": "f48f37e63d16d5af7a8350584d89b56385abb9b058c923ea9bf48438649ceceb",
+    "scripts/mv-harnais-phyto1.mjs": "f98e9aa7fea96b89f63fb70b2fcbb22946bdf0b9b057a1bc2aa70757e1f393ab",
+    "scripts/mv-harnais-phyto2.mjs": "3d29f72800e0892886aa8c5ba7deee6afd4d85d2b7f195cba41d64220ca9e2a1",
+    "scripts/mv-harnais-range1.mjs": "e57828e9db5980172049353c353524217a6870f1501571015983e4eb0b55f629",
+    "src/cave.js": "f9f194256ef1ca8a471b8ce4a3a6d61d739c395be07bee04f05675ba52b7fb78",
+    "src/styles.css": "a257339031469d5015b80df07f83d2bbdabe71d53e47dd6ccc7115dc16877473",
+    "src/utils.js": "97e27f1f57ced2896f95221f78e0c496a3398c5d2e5b118d49dad9c921b3cab2",
+    "scripts/mv-harnais-caverange3.mjs": "23f90e9b12acaaab27543d905889a8369f48a3aba752cdb7b26be210086432d8"
+  }
+}

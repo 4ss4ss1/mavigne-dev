@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **25 octobre 2026 (CAVE-RANGE-2b)** — **CAVE : LE MILLÉSIME REGARDÉ, UNE SEULE BARRE SOUS LES SECTIONS (LE CHAI ET LE MILLÉSIME)** (§451). Base `b42cb1e` (« caverange2a »). Après l’état unique (§449), le choix restait affiché à deux endroits ; une seule barre « Millésime regardé » sous les sections, au Chai et au Millésime (cachée à Aujourd’hui et au Cuvier), années du Chai et du Millésime ; `_mlHead` sans boutons ; `_mlSetMil` retiré. `caverange1` porte la barre unique (12 vertes, 6 contre-épreuves). **APP 10.07 → 10.08, SW 10.87 → 10.88**.
+> Dernière consolidation : **25 octobre 2026 (CAVE-RANGE-3)** — **CAVE : LE MILLÉSIME GARDE SES QUATRE ONGLETS ; UNE CUVÉE DU CHAI S’Y OUVRE DANS LA FICHE UNIQUE ; LES BOUTEILLES MÈNENT À LA FICHE** (§452). Base `d6af8e7` (« caverange2b »). Recommandation corrigée avant le code : « Cuvées » est le tableau du millésime (embouteillées, raisin vendu, récoltes sans cuve) et « Courbes » couvre toutes les années — rien n’est retiré. Plus de seconde fiche : une cuvée du Chai s’ouvre dans la fiche unique, dans le panneau du Millésime ; la fiche en panneau cherche ses éléments dans son panneau ; Bouteilles mène à la fiche. Le rangement Pilotage et Cave est terminé. `mv-harnais-caverange3.mjs` : 9 vertes, 5 contre-épreuves. **APP 10.08 → 10.09, SW 10.88 → 10.89**.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -1945,7 +1945,7 @@ Maquettes validées (`maquette-pilotage-range-v1.html`, `maquette-cave-rangee-v1
 - ~~PIL-RANGE-3~~ — **fait (§445)**, corrigé : « Travaux », la jauge dans « Avancement par tâche », « La charge par tâche » ; donut / temps de l’équipe et Présences / Capacité restent séparés (questions différentes).
 - ~~PIL-RANGE-4~~ — **fait** : une case = un lecteur (§446) ; « Le détail de l’exercice » suit la barre, ses réglages dans la roue (§447).
 - ~~CAVE-FIX-1~~ — **fait (§448)** : la période réelle, son pourcentage et l’équivalent annuel (≈).
-- **CAVE-RANGE-1 à 3** — portée millésime (remplace `_caveMillFilter` et `_mlMil`) ; fiche de cuvée unique (Élevage · Volumes & origine · Analyses · Diagnostic) ouverte depuis toute liste ; Courbes → Cuvier › Cuves (mode Liste · Courbes), Le Millésime à deux onglets (Ensemble · Parcelles).
+- ~~CAVE-RANGE-1 à 3~~ — **fait** : un seul millésime regardé, en haut (§449, §451) ; la fiche unique à quatre volets (§450) ; Le Millésime garde ses quatre onglets, sans seconde fiche (§452 — la maquette corrigée).
 - Restent à jouer avant ces lots : le renfort (photo d’Équipe = chiffrage de Décider sur la même semaine), `_pecCadPresence` face aux journées de cave (JCAVE-1), `_mlChaine` à deux cuves.
 
 ### ★ CAVEAUJ (22-23/10, §434-435) — Cave › Aujourd’hui : ce qui reste

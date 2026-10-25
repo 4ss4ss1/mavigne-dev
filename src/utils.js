@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.08';
+export const APP_VERSION = '10.09';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '10.09', d: '2026-10-25', items: [
+    { niv: 1, pour: ['admin'], emoji: 'barrique', titre: 'Cave : une cuvée s’ouvre dans sa fiche, depuis Le Millésime et les bouteilles',
+      desc: "Dans Le Millésime › Cuvées, une cuvée du Chai s’ouvre maintenant dans sa fiche à quatre volets, sur « Volumes & origine », au lieu d’une seconde fiche à part ; une cuve pas encore décuvée garde son détail. Dans Le Chai › Bouteilles, une cuvée embouteillée a son bouton « Fiche de la cuvée ». Le Millésime garde ses quatre onglets : son tableau des cuvées et ses courbes ne se trouvent nulle part ailleurs." }
+  ] },
   { v: '10.08', d: '2026-10-25', items: [
     { niv: 1, pour: ['admin'], emoji: 'raisin', titre: 'Cave : le millésime regardé, en haut',
       desc: "Le choix du millésime n’est plus à deux endroits (sous les onglets du Chai, en tête du Millésime) : une seule barre « Millésime regardé », juste sous les sections de la Cave, pour Le Chai et Le Millésime. Aujourd’hui et Le Cuvier ne la montrent pas : l’un regarde toute la cave, l’autre la campagne." }

@@ -775,6 +775,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-caverange1.mjs --contre'],
   ['node scripts/mv-harnais-caverange2a.mjs'],           // CAVE-RANGE-2a (§450) : la fiche unique d'une cuvée, quatre volets
   ['node scripts/mv-harnais-caverange2a.mjs --contre'],
+  ['node scripts/mv-harnais-caverange3.mjs'],            // CAVE-RANGE-3 (§452) : Le Millésime garde ses onglets ; une cuvée du Chai s'y ouvre dans la fiche unique ; les bouteilles y mènent
+  ['node scripts/mv-harnais-caverange3.mjs --contre'],
   ['node scripts/mv-harnais-cave2.mjs'],              // CAVE-2 (§289) : le Cuvier à la charte
   ['node scripts/mv-harnais-cave2.mjs --contre'],
   ['node scripts/mv-harnais-cave3.mjs'],              // CAVE-3 (§290) : le Chai en liste + fiche

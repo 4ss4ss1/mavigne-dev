@@ -491,3 +491,22 @@ Maquette de la Cave validée (« le millésime, une portée en haut ») et §449
 
 ### 451d. Ce qui reste
 CAVE-RANGE-3 : Le Millésime à deux onglets (Courbes → Cuvier ; Cuvées → la fiche), après avoir vérifié qu’aucune cuvée, embouteillée ou vendue en vrac, ne devient introuvable.
+
+## 452. ★ CAVE-RANGE-3 — CAVE : LE MILLÉSIME GARDE SES QUATRE ONGLETS ; UNE CUVÉE DU CHAI S’Y OUVRE DANS LA FICHE UNIQUE ; LES BOUTEILLES MÈNENT À LA FICHE (25/10 — `src/cave.js` (`_mlRenderCuv` : la fiche unique dans le panneau `#ml-fiche` pour une cuvée du Chai ; `openCuveeDetail` : en panneau, ses éléments cherchés DANS le panneau ; lien « Fiche complète » retiré de `_mlCuvFicheHtml` ; Bouteilles : « Fiche de la cuvée ») · `src/styles.css` (en-tête de fiche aussi pour `#ml-fiche`) · `src/utils.js` (APP, WHATS_NEW niv 1) · `index.html` · `public/sw.js` · `guide/08-cave.html` · `public/guide.html` · `scripts/mv-harnais-caverange3.mjs` (neuf) · `scripts/mv-harnais-caverange2a.mjs` · `scripts/mv-harnais-range1.mjs` · `scripts/mv-harnais-cave3.mjs` · `scripts/mv-harnais-phyto1.mjs` · `scripts/mv-harnais-phyto2.mjs` · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/CAVE-RANGE-3.json` · **APP 10.08 → 10.09, SW 10.88 → 10.89**, base `d6af8e7` ; chaîne par le coureur : 534 commandes, 534 codes à 0)
+
+### 452a. D’où ça vient — une recommandation corrigée avant le code
+La maquette prévoyait Le Millésime à deux onglets (« Cuvées » → la fiche, « Courbes » → Le Cuvier). **Vérifié : faux.** « Cuvées » (`_pcrbCvLignes`) est le **tableau du millésime** : toutes ses cuvées côte à côte avec leur chaîne, les **embouteillées** (que Bouteilles ne menait pas à leur fiche — elles seraient devenues introuvables), le **raisin vendu** (par parcelle, kg, acheteurs) et les **récoltes sans cuve**. « Courbes » (`_pcavVueCourbes`) montre les fermentations du millésime choisi, **n’importe quelle année** ; Le Cuvier ne regarde que la campagne. Nico, en langage simple : version corrigée validée (« oui »).
+
+### 452b. Ce qui a été fait
+- **Quatre onglets gardés.**
+- **Plus de seconde fiche** : dans Le Millésime › Cuvées, une cuvée du Chai s’ouvre dans **la fiche unique**, dans le panneau du Millésime (`#ml-fiche`, `openCuveeDetail(id,'ml-fiche','vol')`, au tour suivant du rendu), sur « Volumes & origine » ; la colonne garde sa classe `.mlc-fiche` et son « Toutes les cuvées » (téléphone). Une cuve sans cuvée garde son détail (`_mlCuvFicheHtml`). Le lien « Fiche complète » de cette seconde fiche, devenu sans objet, part.
+- **La fiche en panneau cherche ses éléments DANS son panneau** (`_pn.querySelector('#cuvf-…')`) : deux panneaux (Chai, Millésime) portent les mêmes identifiants internes ; `getElementById` aurait écrit dans le premier trouvé.
+- **L’en-tête de fiche** a le même style dans le panneau du Millésime (les 26 règles `:is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche)` gagnent `#ml-fiche`, et `#ml-fiche .catf-bd`).
+- **Bouteilles** : une cuvée embouteillée a « Fiche de la cuvée » (volet Volumes).
+- Guide (les chemins de la fiche), WHATS_NEW 10.09 niv 1.
+
+### 452c. Harnais
+`mv-harnais-caverange3.mjs` (9 vertes, 5 contre-épreuves) lit les quatre onglets, la fiche unique dans le panneau du Millésime (et le détail gardé pour une cuve sans cuvée), la recherche DANS le panneau, le style, le chemin des bouteilles, la nouveauté, le guide, la liste. Suivent : `caverange2a` (Le Millésime ouvre la fiche unique), `range1` (B5 : la première cuvée ouverte dans la fiche unique quand elle est du Chai ; `setTimeout` dans le bac à sable), `cave3`, `phyto1`, `phyto2` (la liste `:is()` du style partagé). Le panneau de tuto côte à côte (touché par la feuille de style commune) **rejoué sur le build** (`npm run test:tutos -- --concernes`) : 1280 × 800, 1536 × 864, 1920 × 1080, tout va au bout.
+
+### 452d. Ce qui reste
+Le rangement de la Cave est fait (CAVE-FIX-1, CAVE-RANGE-1 à 3). Avec celui du Pilotage, le chantier « ranger Pilotage et Cave » du 23/10 est terminé ; les écarts à la maquette sont écrits (§445, §447, §452) : chaque fois, la vérification du code a montré qu’on aurait perdu de l’information.

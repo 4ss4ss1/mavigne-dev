@@ -46,7 +46,7 @@ function jouer(S) {
   const c3 = monter(S, { syn: [] });
   t('③ une cuvée que le diagnostic ne suit pas le dit', /ne suit pas cette cuv/.test(c3._cdvDiagHtml({ id: 'c1' })));
   t('④ la fenêtre du Chai écrit la fiche à volets, et accepte le volet à ouvrir', /function openCuveeDetail\(cuvId,dans,volet\)\{/.test(S.cave) && /bodyEl\.innerHTML=_cdvHtml\(cuv, html, _anaH, volet\);/.test(S.cave) && !/html\+=_laboCuveeHtml\(cuv\);/.test(S.cave));
-  t('④ la fiche du Millésime mène à la fiche complète (volet Volumes)', /openCuveeDetail\(this\.getAttribute\(\\'data-id\\'\),null,\\'vol\\'\)/.test(S.cave));
+  t('④ Le Millésime ouvre la fiche unique d’une cuvée du Chai (volet Volumes) — CAVE-RANGE-3', /openCuveeDetail\(_cid,'ml-fiche','vol'\)/.test(S.cave));
   t('④ le Diagnostic mène à la fiche (volet Diagnostic), et la fiche à son diagnostic', /case 'fiche': if \(typeof window\.openCuveeDetail === 'function'\) window\.openCuveeDetail\(v, null, 'dgn'\); return;/.test(S.dgn) && /data-dgn="fiche" data-v="' \+ esc\(S\.cuv\)/.test(S.dgn) && /window\._dgnVoirCuvee = function \(id\)/.test(S.dgn));
   t('⑤ changer de volet repeint les courbes du labo (elles se mesurent à l’affichage)', /if\(k==='ana' && window\._mvGraphRepeindre\)/.test(corps(S.cave, '_cdvShow')));
   t('⑥ la nouveauté le dit, et la liste joue ce fichier', /titre: 'Cave : une seule fiche par cuvée'/.test(S.utils) && S.liste.indexOf("mv-harnais-caverange2a.mjs'") > 0 && S.liste.indexOf("mv-harnais-caverange2a.mjs --contre'") > 0);

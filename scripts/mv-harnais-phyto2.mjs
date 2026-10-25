@@ -30,7 +30,7 @@ function suite(S) {
   T('la fiche suit la liste filtrée (garde de type pour les harnais qui jouent ephyRender seule)', S.tr.includes("  if(typeof _catFicheSync==='function')_catFicheSync(l);   // PHYTO-2 (§286)"));
   T('la page a la colonne de fiche', S.html.includes('<aside class="phf" id="cat-fiche"'));
   T('le bloc PHYTO-2 est posé après PHYTO-1, par jetons seulement (' + dur.length + ')', B.length > 2000 && S.css.indexOf('★ PHYTO-2 (§286)') > S.css.indexOf('★ FIN PHYTO-1') && dur.length === 0);
-  T('liste + fiche au large, fiche collante ; la fiche partage les règles des autres fiches', B.includes('#page-phyto #tab-cat-trac{ display:grid; grid-template-columns:minmax(0,1fr) var(--l-fiche,440px);') && S.css.includes(':is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-hd{'));
+  T('liste + fiche au large, fiche collante ; la fiche partage les règles des autres fiches', B.includes('#page-phyto #tab-cat-trac{ display:grid; grid-template-columns:minmax(0,1fr) var(--l-fiche,440px);') && S.css.includes(':is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-hd{'));
   T('l’aide dit la fiche du catalogue', S.uti.includes('Dans le Catalogue, toucher un produit ouvre de la même façon sa fiche E-Phy à droite'));
   T('ce harnais est branché dans la liste des contrôles', S.liste.includes("['node scripts/mv-harnais-phyto2.mjs'],") && S.liste.includes("['node scripts/mv-harnais-phyto2.mjs --contre'],"));
   return out;

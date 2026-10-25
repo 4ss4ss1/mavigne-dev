@@ -2621,11 +2621,11 @@ function openCuveeDetail(cuvId,dans,volet){
   var cuv=(CAVE_ELEVAGE.cuvees||[]).find(function(c){return c.id===cuvId;});
   if(!cuv)return;
   var bodyEl;
-  if(dans){ var _pn=document.getElementById(dans); if(!_pn) return; _pn.innerHTML='<div class="trf-hd"><div class="trf-id"><h2 class="trf-t" id="cuvf-t"></h2><div class="trf-tags"><span class="trf-tag" id="cuvf-s"></span></div></div></div><div class="catf-bd" id="cuvf-bd"></div>'; bodyEl=document.getElementById('cuvf-bd'); }
+  if(dans){ var _pn=document.getElementById(dans); if(!_pn) return; _pn.innerHTML='<div class="trf-hd"><div class="trf-id"><h2 class="trf-t" id="cuvf-t"></h2><div class="trf-tags"><span class="trf-tag" id="cuvf-s"></span></div></div></div><div class="catf-bd" id="cuvf-bd"></div>'; bodyEl=_pn.querySelector('#cuvf-bd'); }   // CAVE-RANGE-3 (§452) : DANS le panneau (le Chai et Le Millésime ont chacun le leur)
   else bodyEl=document.getElementById('cuvd-body');
   if(!bodyEl){var ov2=document.getElementById('ovCuveeDetail');if(ov2)ov2.classList.add('open');return;}
   var nbT=_caveNbTonneaux(cuv);
-  var tEl=document.getElementById(dans?'cuvf-t':'cuvd-title');var sEl=document.getElementById(dans?'cuvf-s':'cuvd-sub');
+  var tEl=dans?_pn.querySelector('#cuvf-t'):document.getElementById('cuvd-title');var sEl=dans?_pn.querySelector('#cuvf-s'):document.getElementById('cuvd-sub');
   if(tEl)tEl.textContent=cuv.nom+(cuv.millesime?' '+cuv.millesime:'');
   // ⚠️ Ecrivait « N tonneaux » en dur : faux des qu'une cuve est logee. Le
   //   libelle est DERIVE, donc juste dans les trois cas (futs / cuve / mixte).
@@ -4351,6 +4351,7 @@ function renderCaveBouteille(){
         var perteTot=(ch.recolteKg!=null&&c.nb_bouteilles)?Math.round((1-c.nb_bouteilles/_mvBtl(ch.recolteKg/_mlKgHl()))*100):null;
         html+='<div class="mvb-card"><div class="mvb-name">'+_escHtml(c.nom)+'</div>'
           +'<div class="mvb-meta">Mis en bouteille'+(c.date_embouteillage?' · '+_caveDateFr(c.date_embouteillage):'')+'</div>'
+          +'<button type="button" class="mlc-ret" style="margin:4px 0 6px" data-id="'+_escHtml(String(c.id))+'" onclick="openCuveeDetail(this.getAttribute(\'data-id\'),null,\'vol\')">Fiche de la cuv\u00e9e \u203a</button>'   /* CAVE-RANGE-3 (§452) */
           +'<div class="mvb-split"><div><div class="mvb-tot">'+(c.nb_bouteilles||0)+'<small>bouteilles en stock</small></div></div>'
           +(perteTot!=null?'<div style="margin-left:auto;text-align:right"><div class="mvb-tot" style="font-size:var(--pt-lg,24px)">\u2212'+perteTot+'%<small>perte récolte → bouteille</small></div></div>':'')
           +'</div>';
@@ -5716,7 +5717,6 @@ function _mlCuvFicheHtml(g,l,o){
   var i=_mlCuvInfo(g,l), ch=l.ch||{};
   var dedans=!!(o&&o.sansRetour);   // CAVE-RANGE-2a : dans la fiche unique, pas de retour ni de lien vers elle-même
   var h=(dedans?'':'<button type="button" class="mlc-ret" onclick="_mlCuvRetour()">'+_mvIcon('gauche',16)+' Toutes les cuv\u00e9es</button>')
-    +((!dedans && cu && cu.id!=null)?('<button type="button" class="mlc-ret" style="float:right" data-id="'+_escHtml(String(cu.id))+'" onclick="openCuveeDetail(this.getAttribute(\'data-id\'),null,\'vol\')">Fiche compl\u00e8te de la cuv\u00e9e \u203a</button>'):'')
     +'<div class="mlc-fh"><div class="mlc-ft"><h3>'+_escHtml(l.nom)+'</h3><span>'+_escHtml(l.sous||'')+'</span></div>'
     +'<span class="mlc-pill '+g.cle+'">'+i.etat+'</span>'+(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.cuvees'):'')+'</div>';
   /* ★ HLHA-1 (§413) : la surface de la cuve dont la chaine lit les kilos (ch.cuveId — deux cuves dans une
@@ -5805,6 +5805,17 @@ function _mlRenderCuv(d){
         +'<span class="mlc-dots" aria-hidden="true">'+i.dots+'</span><span class="mlg-cf'+(i.att?' att':'')+'">'+i.chiffre+'</span></button>';
     });
   });
+  // ★★ CAVE-RANGE-3 (§452) — UNE CUVÉE DU CHAI S'OUVRE DANS LA FICHE UNIQUE, ICI MÊME (volet Volumes & origine). Avant, Le
+  //   Millésime dessinait sa propre fiche à côté de la liste : une seconde fiche de la même cuvée. Une cuve sans cuvée (pas encore
+  //   décuvée) garde son détail, la fiche unique ayant besoin d'une cuvée. Vérifié avant le code (25/10) : la LISTE reste —
+  //   c'est le tableau du millésime (toutes ses cuvées côte à côte, les embouteillées, le raisin vendu, les récoltes sans cuve).
+  if(sel && sel.l && sel.l.cuvee && sel.l.cuvee.id!=null){
+    var _cid=String(sel.l.cuvee.id);
+    setTimeout(function(){ var p=document.getElementById('ml-fiche'); if(p && p.getAttribute('data-cuv')===_cid && typeof openCuveeDetail==='function') openCuveeDetail(_cid,'ml-fiche','vol'); },0);
+    // La colonne garde sa classe (.mlc-fiche : cachée au téléphone tant qu'on est sur la liste ; son « Toutes les cuvées » aussi).
+    return h+'</section><div class="mlc-fiche"><button type="button" class="mlc-ret" onclick="_mlCuvRetour()">'+_mvIcon('gauche',16)+' Toutes les cuv\u00e9es</button>'
+      +'<section class="pcav-card" id="ml-fiche" data-cuv="'+_escHtml(_cid)+'"></section></div></div>';
+  }
   return h+'</section><section class="pcav-card mlc-fiche">'
     +(sel?_mlCuvFicheHtml(sel.g,sel.l):'<div class="pcav-vide">Aucune cha\u00eene \u00e0 d\u00e9tailler pour ce mill\u00e9sime.</div>')+'</section></div>';
 }

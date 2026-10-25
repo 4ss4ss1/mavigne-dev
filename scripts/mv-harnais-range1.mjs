@@ -84,6 +84,7 @@ var CAVE_ELEVAGE = { cuvees: [] };
 window.CAVE_VENDANGE = CAVE_VENDANGE; window.CAVE_ELEVAGE = CAVE_ELEVAGE;
 var _caveMillFilter = 'tous', _mlParcF = 'tout',   /* CAVE-RANGE-1 (§449) : le millésime regardé est celui de toute la Cave */ _mlCuvSel = null, _mlCuvFiche = false, _pcrbVue = 'dens', _PCRB_ELEV = null;
 function _mlCampagne(){ return 2026; }
+var __timeouts = []; function setTimeout(f){ __timeouts.push(f); }   // CAVE-RANGE-3 (§452) : la fiche unique s'ouvre au tour suivant
 function _vendClient(){ return null; }
 function canWrite(){ return __ecrit; }
 function isAdmin(){ return __adm; }
@@ -252,10 +253,12 @@ const T = {
       && sp(t).includes('\u2248 98 %') && nb(t, /class="mlx-chip[ "]/g) === 4 && t.includes('class="mlp-h"')
       && nb(d, /class="mlp-l/g) === 1 && d.includes('Vieilles Vignes') && nb(v, /class="mlp-l/g) === 1 && v.includes('En Bertrange')
       && p.includes('En Jouise') && p.includes('encore sur pied') && !p.includes('_mlSetRdtMax'); }],
-  B5: ['Cuvées : la liste, la première chaîne ouverte par défaut, la cuvée choisie marquée, les lignes simples sans bouton', A => {
+  B5: ['Cuvées : la liste, la première chaîne ouverte par défaut (une cuvée du Chai dans la fiche unique — CAVE-RANGE-3), la cuvée choisie marquée, les lignes simples sans bouton', A => {
     avec(A); const d = A._pcrbCvLignes(2026), h1 = A._mlRenderCuv(d); A.__cuv('cv:cv2', true); const h2 = A._mlRenderCuv(d);
-    return h1.startsWith('<div class="mlc">') && h1.includes('<h3>Clos du Moulin</h3>') && h2.startsWith('<div class="mlc fiche">')
-      && h2.includes('<h3>Les Perri\u00e8res</h3>') && h2.includes('class="mlc-l on" aria-pressed="true" onclick="_mlSetCuv(\'cv:cv2\')"')
+    const [, l1] = GL(d, 'Clos du Moulin'), [, l2] = GL(d, 'Les Perri\u00e8res');
+    const ouvre = (h, l, titre) => (l && l.cuvee && l.cuvee.id != null) ? (h.includes('id="ml-fiche" data-cuv="' + l.cuvee.id + '"') && !h.includes('<h3>' + titre + '</h3>')) : h.includes('<h3>' + titre + '</h3>');
+    return h1.startsWith('<div class="mlc">') && ouvre(h1, l1, 'Clos du Moulin') && h2.startsWith('<div class="mlc fiche">')
+      && ouvre(h2, l2, 'Les Perri\u00e8res') && h2.includes('class="mlc-l on" aria-pressed="true" onclick="_mlSetCuv(\'cv:cv2\')"')
       && h2.includes('<div class="mlc-l s"><span class="mlg-cn"><b>En Bertrange</b>') && nb(h2, /onclick="_mlSetCuv\(/g) === 5; }],
   B6: ['la fiche : d’où vient la cuvée (kilos du domaine), ses dates, ses contenants, le bon bouton', A => {
     avec(A); const d = A._pcrbCvLignes(2026), [g, l] = GL(d, 'Charmes-Combotte'), [g4, l4] = GL(d, 'Clos du Moulin');

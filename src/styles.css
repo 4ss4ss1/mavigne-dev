@@ -6513,32 +6513,32 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
   #page-tracteur #trac-panel-sessions{ display:grid; grid-template-columns:minmax(0,1fr) var(--l-fiche,440px); column-gap:var(--e-4,16px); align-items:start; }
   #page-tracteur #trac-panel-sessions > *{ grid-column:1; min-width:0; }
   #page-tracteur #trac-panel-sessions > #trac-fiche{ display:block; grid-column:2; grid-row:1 / span 20; position:sticky; top:var(--e-4,16px); max-height:calc(100vh - var(--e-8,40px)); overflow:auto; border:var(--bw) solid var(--ligne,#E7E6E2); border-radius:var(--r-md,8px); background:var(--bg-card); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-hd{ display:flex; align-items:flex-start; justify-content:space-between; gap:var(--e-4,16px); padding:var(--e-5,20px) var(--e-5,20px) var(--e-4,16px); border-bottom:var(--bw) solid var(--ligne,#E7E6E2); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-t{ margin:0; font-family:var(--font-titre); font-size:var(--pt-xl,28px); font-weight:var(--fw-semi,600); line-height:var(--lh-serre); color:var(--texte); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-tags{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--e-1,4px); margin-top:var(--e-2,8px); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-tag{ display:inline-flex; align-items:center; height:var(--h-badge); padding:0 var(--e-2,8px); border-radius:var(--r-xs,4px); background:var(--survol); color:var(--texte-med); font-size:var(--pt-micro,12px); font-weight:var(--fw-med,500); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-btn{ white-space:nowrap; height:var(--h-ctl); padding:0 var(--e-3,12px); border:var(--bw) solid var(--ligne-forte); border-radius:var(--r-sm,6px); background:var(--bg-card); color:var(--texte); font-family:var(--font-ui); font-size:var(--pt-txt,13px); font-weight:var(--fw-med,500); cursor:pointer; box-shadow:var(--shadow-xs); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-btn.trf-prim{ border:0; background:var(--accent); color:var(--sur-accent); box-shadow:var(--shadow-xs),var(--reflet); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-alerte{ margin:var(--e-4,16px) var(--e-5,20px) 0; padding:var(--e-3,12px); border-radius:var(--r-sm,6px); background:var(--danger-doux); color:var(--danger); font-size:var(--pt-txt,13px); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-kpis{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border-bottom:var(--bw) solid var(--ligne,#E7E6E2); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-kpi{ display:flex; flex-direction:column; gap:var(--e-1,4px); padding:var(--e-4,16px) var(--e-5,20px); min-width:0; }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-kpi + .trf-kpi{ border-left:var(--bw) solid var(--ligne,#E7E6E2); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-kpi .l{ font-size:var(--pt-micro,12px); color:var(--texte-doux); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-kpi .v{ font-size:var(--pt-lg,24px); font-weight:var(--fw-semi,600); line-height:var(--lh-serre); color:var(--texte); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-kpi .v small{ font-size:var(--pt-micro,12px); font-weight:var(--fw-reg,400); color:var(--texte-doux); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-bar{ display:block; position:relative; height:var(--e-1,4px); border-radius:var(--r-full,999px); background:var(--piste); overflow:hidden; }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-bar i{ position:absolute; inset:0 auto 0 0; width:var(--p,0%); border-radius:inherit; background:var(--encours); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-bar i.ok{ background:var(--ok); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-sec{ padding:var(--e-4,16px) var(--e-5,20px); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-sec + .trf-sec{ border-top:var(--bw) solid var(--ligne,#E7E6E2); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-sec-t{ margin-bottom:var(--e-2,8px); font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); color:var(--texte); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-parcs{ display:flex; flex-wrap:wrap; gap:var(--e-1,4px); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-p{ display:inline-flex; align-items:center; height:var(--h-badge); padding:0 var(--e-2,8px); border-radius:var(--r-xs,4px); background:var(--bg-doux); color:var(--texte-doux); font-size:var(--pt-micro,12px); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-p.fait{ background:var(--ok-doux); color:var(--ok); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-note{ margin:0; font-size:var(--pt-txt,13px); line-height:var(--lh-texte); color:var(--texte-med); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-rien{ color:var(--texte-doux); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-vide{ display:flex; flex-direction:column; align-items:center; gap:var(--e-2,8px); padding:var(--e-8,40px) var(--e-6,24px); text-align:center; font-size:var(--pt-txt,13px); color:var(--texte-med); }
-  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche) .trf-vide b{ font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); color:var(--texte); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-hd{ display:flex; align-items:flex-start; justify-content:space-between; gap:var(--e-4,16px); padding:var(--e-5,20px) var(--e-5,20px) var(--e-4,16px); border-bottom:var(--bw) solid var(--ligne,#E7E6E2); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-t{ margin:0; font-family:var(--font-titre); font-size:var(--pt-xl,28px); font-weight:var(--fw-semi,600); line-height:var(--lh-serre); color:var(--texte); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-tags{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--e-1,4px); margin-top:var(--e-2,8px); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-tag{ display:inline-flex; align-items:center; height:var(--h-badge); padding:0 var(--e-2,8px); border-radius:var(--r-xs,4px); background:var(--survol); color:var(--texte-med); font-size:var(--pt-micro,12px); font-weight:var(--fw-med,500); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-btn{ white-space:nowrap; height:var(--h-ctl); padding:0 var(--e-3,12px); border:var(--bw) solid var(--ligne-forte); border-radius:var(--r-sm,6px); background:var(--bg-card); color:var(--texte); font-family:var(--font-ui); font-size:var(--pt-txt,13px); font-weight:var(--fw-med,500); cursor:pointer; box-shadow:var(--shadow-xs); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-btn.trf-prim{ border:0; background:var(--accent); color:var(--sur-accent); box-shadow:var(--shadow-xs),var(--reflet); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-alerte{ margin:var(--e-4,16px) var(--e-5,20px) 0; padding:var(--e-3,12px); border-radius:var(--r-sm,6px); background:var(--danger-doux); color:var(--danger); font-size:var(--pt-txt,13px); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-kpis{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border-bottom:var(--bw) solid var(--ligne,#E7E6E2); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-kpi{ display:flex; flex-direction:column; gap:var(--e-1,4px); padding:var(--e-4,16px) var(--e-5,20px); min-width:0; }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-kpi + .trf-kpi{ border-left:var(--bw) solid var(--ligne,#E7E6E2); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-kpi .l{ font-size:var(--pt-micro,12px); color:var(--texte-doux); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-kpi .v{ font-size:var(--pt-lg,24px); font-weight:var(--fw-semi,600); line-height:var(--lh-serre); color:var(--texte); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-kpi .v small{ font-size:var(--pt-micro,12px); font-weight:var(--fw-reg,400); color:var(--texte-doux); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-bar{ display:block; position:relative; height:var(--e-1,4px); border-radius:var(--r-full,999px); background:var(--piste); overflow:hidden; }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-bar i{ position:absolute; inset:0 auto 0 0; width:var(--p,0%); border-radius:inherit; background:var(--encours); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-bar i.ok{ background:var(--ok); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-sec{ padding:var(--e-4,16px) var(--e-5,20px); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-sec + .trf-sec{ border-top:var(--bw) solid var(--ligne,#E7E6E2); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-sec-t{ margin-bottom:var(--e-2,8px); font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); color:var(--texte); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-parcs{ display:flex; flex-wrap:wrap; gap:var(--e-1,4px); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-p{ display:inline-flex; align-items:center; height:var(--h-badge); padding:0 var(--e-2,8px); border-radius:var(--r-xs,4px); background:var(--bg-doux); color:var(--texte-doux); font-size:var(--pt-micro,12px); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-p.fait{ background:var(--ok-doux); color:var(--ok); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-note{ margin:0; font-size:var(--pt-txt,13px); line-height:var(--lh-texte); color:var(--texte-med); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-rien{ color:var(--texte-doux); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-vide{ display:flex; flex-direction:column; align-items:center; gap:var(--e-2,8px); padding:var(--e-8,40px) var(--e-6,24px); text-align:center; font-size:var(--pt-txt,13px); color:var(--texte-med); }
+  :is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-vide b{ font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); color:var(--texte); }
 }
 /* ★ FIN TRAC-1 */
 /* ★ TRAC-2 (§283) — L'ENTRETIEN DU TRACTEUR AU DESSIN DE LA MAQUETTE V6.
@@ -7504,6 +7504,7 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
   #page-cave #mvc-view-cuv:not([style*="none"]){ display:grid!important; grid-template-columns:minmax(0,1fr) var(--l-fiche,440px); column-gap:var(--e-4,16px); align-items:start; }
   #page-cave #mvc-view-cuv > #chai-fiche{ display:block; position:sticky; top:var(--e-4,16px); max-height:calc(100vh - var(--e-8,40px)); overflow:auto; border:var(--bw) solid var(--ligne,#E7E6E2); border-radius:var(--r-md,8px); background:var(--bg-card); }
   #chai-fiche .catf-bd{ padding:var(--e-4,16px) var(--e-5,20px); }
+  #ml-fiche .catf-bd{ padding:var(--e-4,16px) var(--e-5,20px); }   /* CAVE-RANGE-3 (§452) : la fiche unique dans Le Millésime */
 }
 /* ★ FIN CAVE-3 */
 /* ★ CAVE-4 (§291) — LE MILLÉSIME AU DESSIN DE LA MAQUETTE V8 (habit seulement : mêmes tuiles face à N-1, mêmes courbes).
