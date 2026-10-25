@@ -69,7 +69,8 @@ var _PIL_ST_V = 4;
 var _PIL_DEFAULT = {
   show: {
     // Aujourd'hui (cockpit)
-    auj_marge:1, auj_charge:1, auj_cadence:1, auj_budget:1, auj_etp:1, auj_jours:1, auj_cave:1, auj_cave_sv:1, auj_pres:1, auj_traiter:1, auj_prio:1, auj_alertes:1, auj_tension:1, auj_inaction:1,
+    // PIL-RANGE-4a (§446) : seules les clés lues restent (la vue Cave et ses points ; la tension, réglée dans Équipe ; la protection, dans Conformité).
+    auj_cave:1, auj_cave_sv:1, auj_traiter:1, auj_tension:1,
     // Avancement
     // L'annee (niveau ①)
     // ⚠️⚠️ CES DEUX CLES MANQUAIENT AUX DEFAUTS. _pilNormalize ne garde que les
@@ -82,11 +83,11 @@ var _PIL_DEFAULT = {
     //   navigation, toujours affichee ; `an_frise` porte « Le renfort a prevoir ».
     an_budget:1, an_frise:1,
     // Avancement (`avc_etp` RETIRE : deplace vers `an_frise`, cf. _PIL_SHOW_MIGR)
-    avc_gauge:1, avc_bar:1, avc_pie:1, avc_temps:1, avc_echeances:1, avc_carte:1,
+    avc_bar:1, avc_pie:1, avc_temps:1, avc_echeances:1, avc_carte:1,   // avc_gauge parti : la jauge ouvre « Avancement par tâche » (PIL-RANGE-3)
     // Personnel
     prs_equipe:1, prs_presences:1, prs_capacite:1,
     // Matériel
-    mat_tracteur:1, mat_gnr:1, mat_conso:1,
+    mat_tracteur:1, mat_gnr:1, mat_conso:1, mat_travaux:1,   // mat_travaux : PIL-RANGE-4a — absente des défauts, la case décochée se recochait au chargement
     // Simulation
     sim_ordre:1, sim_etsi:1, sim_cout:1,
     // Conformité (`mat_phyto` garde son NOM et change d'onglet — cf. _pilTabCfm)
@@ -10851,13 +10852,16 @@ function _pilTabCfm(d){
 
 
 // ── Personnalisation PAR ONGLET (visibilité des tuiles) ──
+// ★ PIL-RANGE-4a (§446) : une case = un lecteur. Aujourd'hui ne propose plus que ce que le cockpit v2 lit (la vue Cave,
+//   ses points dans « À savoir ») ; la tension par personne se règle dans Équipe, la protection dans Conformité (là où elles
+//   s'affichent, mêmes clés : les choix mémorisés restent). Toute case doit aussi figurer aux défauts (_pilNormalize purge le reste).
 var _PIL_PERSO_DEFS={
-  auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_tension','Tension équipe'],['auj_inaction','Coût de l’inaction'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_cave','La Cave \u2014 la vue de la bascule Terrain / Cave / Économie'],['auj_cave_sv','Les points de cave dans « À savoir »'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ? · fenêtre 5 jours'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave'],['auj_resume','Le résumé du jour'],['auj_chantiers','Les chantiers en cours'],['auj_courbe','La courbe de la charge restante'],['auj_fil','En direct : le fil de l\'équipe'],['auj_savoir','À savoir : météo, absences, contrats, retards'],['auj_plan','Le domaine en direct'],['auj_eco','La vue Économie (bascule Terrain / Économie)']],
+  auj:[['auj_cave','La Cave \u2014 la vue de la bascule Terrain / Cave / Économie'],['auj_cave_sv','Les points de cave dans « À savoir »']],
   avc:[['avc_bar','Avancement par tâche (et la saison)'],['avc_pie','La charge par tâche'],['avc_temps','Où va le temps de l\'équipe'],['avc_echeances','Échéances par tâche'],['avc_carte','Carte du domaine']],
-  equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_conso','Consommation mesurée'],['mat_travaux','Pour finir les travaux tracteur en cours'],['an_frise','Le renfort \u00e0 pr\u00e9voir']],
+  equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['auj_tension','La tension par personne'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_conso','Consommation mesurée'],['mat_travaux','Pour finir les travaux tracteur en cours'],['an_frise','Le renfort \u00e0 pr\u00e9voir']],
   eco:[['an_budget','Le budget de l\'ann\u00e9e']],
   sim:[['sim_ordre','La tournée du jour'],['sim_etsi','Qui fait quoi'],['sim_cout','Renfort : combien et quand']],
-  cfm:[['cfm_cuivre','Cuivre (bio · 7 ans)'],['cfm_ift','Passages phyto / IFT'],['mat_phyto','Registre phyto'],['cfm_dre','Délai de rentrée (DRE)']]
+  cfm:[['auj_traiter','Protection restante (fenêtre de traitement)'],['cfm_cuivre','Cuivre (bio · 7 ans)'],['cfm_ift','Passages phyto / IFT'],['mat_phyto','Registre phyto'],['cfm_dre','Délai de rentrée (DRE)']]
 };
 function _pilPersoHtml(tab){
   var defs=_PIL_PERSO_DEFS[tab]; if(!defs) return '';
@@ -12547,7 +12551,7 @@ function _pilFillContent(d){
   else if(tab==='avc') host.innerHTML=_pilTabAvc(d);
   else if(tab==='equ'){
     var _hEqu=
-        (_pilAnyShow(['prs_equipe','prs_presences','prs_capacite','an_frise'])?'<div class="pil-sec-h">Personnel</div>'+_pilTabPrs(d)
+        (_pilAnyShow(['prs_equipe','prs_presences','prs_capacite','an_frise','auj_tension'])?'<div class="pil-sec-h">Personnel</div>'+_pilTabPrs(d)
           +(_pilShow('an_frise')?'<div class="pil-panels">'+_pilPanelAnRenfort()+'</div>':''):'')   // PIL-RANGE-2b : le renfort, venu de L'annee
       + (_pilAnyShow(['mat_tracteur','mat_gnr','mat_conso','mat_travaux'])?'<div class="pil-sec-h">Matériel</div>'+_pilTabMat(d):'');
     // Les six autres onglets ont leur repli ; celui-ci sortait un ECRAN BLANC,

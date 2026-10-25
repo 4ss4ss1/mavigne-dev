@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.02';
+export const APP_VERSION = '10.03';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '10.03', d: '2026-10-23', items: [
+    { niv: 1, pour: ['admin'], emoji: 'engrenage', titre: 'Pilotage : « Afficher dans cet onglet » ne propose que ce qui sert',
+      desc: "Sur Aujourd’hui, la liste des cartes à afficher proposait 21 cases, dont 17 ne faisaient plus rien depuis le nouveau cockpit. Il en reste deux, qui agissent vraiment : la vue Cave et ses points dans « À savoir ». La tension par personne se règle maintenant dans L’équipe et le matériel, la protection restante dans Conformité, là où elles s’affichent ; vos choix sont gardés. Et la case « Pour finir les travaux tracteur en cours », une fois décochée, reste décochée." }
+  ] },
   { v: '10.02', d: '2026-10-23', items: [
     { niv: 1, pour: ['admin'], emoji: 'raisin', titre: 'Pilotage : l’onglet « La campagne » devient « Travaux »',
       desc: "La barre « Vous regardez » dit déjà « La campagne » : l’onglet qui montre l’avancement des travaux s’appelle maintenant « Travaux ». La jauge de la saison n’est plus une carte à part : elle ouvre « Avancement par tâche », avec les mêmes chiffres. Le donut s’appelle « La charge par tâche », pour le distinguer du « Temps de l’équipe », qui montre où passent les heures de présence." }

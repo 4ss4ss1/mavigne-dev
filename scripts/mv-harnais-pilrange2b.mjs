@@ -33,7 +33,7 @@ function jouer(S) {
   t('① case « Le budget de l’année » décochée : les avis seuls', ctx._pilAnEcoHtml().indexOf('BUDGET') < 0 && /AVIS/.test(ctx._pilAnEcoHtml()));
   t('① posés en tête de la Synthèse, pas des autres sous-vues', /else body=_pilAnEcoHtml\(\)\+_pecViewSynthese\(E,TL\);/.test(corps(P, '_pilTabEco')));
   // ② le renfort dans Personnel
-  t('② le renfort dans Équipe & matériel › Personnel, sous sa case an_frise', /_pilAnyShow\(\['prs_equipe','prs_presences','prs_capacite','an_frise'\]\)/.test(P) && /\(_pilShow\('an_frise'\)\?'<div class="pil-panels">'\+_pilPanelAnRenfort\(\)\+'<\/div>':''\)/.test(P));
+  t('② le renfort dans Équipe & matériel › Personnel, sous sa case an_frise', /_pilAnyShow\(\['prs_equipe','prs_presences','prs_capacite','an_frise'(,'auj_tension')?\]\)/.test(P)   /* PIL-RANGE-4a : la tension réveille aussi Personnel */ && /\(_pilShow\('an_frise'\)\?'<div class="pil-panels">'\+_pilPanelAnRenfort\(\)\+'<\/div>':''\)/.test(P));
   // ③ l'onglet mémorisé
   const mem = { v: null };
   const c2 = { localStorage: { getItem: () => mem.v }, _pilTabKey: () => 'k', _PIL_TAB_ROUE: 'roue' };

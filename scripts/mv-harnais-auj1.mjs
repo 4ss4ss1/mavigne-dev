@@ -58,8 +58,9 @@ function suite(S) {
 
 
   const P = S.pil;
-  T('« Choisir les indicateurs » propose les quatre blocs neufs, et « Charge restante » garde sa clé à lui',
-    ["['auj_resume',", "['auj_chantiers',", "['auj_courbe',", "['auj_fil',"].every(k => P.includes(k)) && (P.match(/\['auj_charge',/g) || []).length === 1);
+  // PIL-RANGE-4a (§446) : les quatre blocs de l'ancien cockpit (résumé, chantiers, courbe, alertes) n'ont plus de case — le cockpit v2
+  //   ne les lit pas ; la règle « une case = un lecteur » est gardée par mv-harnais-pilrange4a.
+  T('« Afficher dans cet onglet » d’Aujourd’hui ne propose plus les blocs que le cockpit v2 ne lit pas', !/\['auj_resume',|\['auj_chantiers',|\['auj_courbe',/.test(S.pil) && /\['auj_cave',/.test(S.pil));
   T('le module est importé juste après pilotage.js, et reserve.js reste dernier',
     /import '\.\/pilotage\.js';\nimport '\.\/cockpit\.js';[^\n]*\nimport '\.\/cockpit-vue\.js';[^\n]*\n(?:import '[^']+';[^\n]*\n)*import '\.\/reserve\.js';/.test(S.app));
   // Les jetons portent leur repli (règle du socle, mv-harnais-jetons) : on lit le style SANS les var(…).

@@ -404,3 +404,17 @@ Le rangement (§439, maquette) prévoyait « Travaux 6 → 4 cartes » en fusion
 
 ### 445d. Ce qui reste
 PIL-RANGE-4 (Économie : la sous-vue Exercice → portée, 6 → 5 sous-vues ; « Afficher dans cet onglet » d’Aujourd’hui réduit aux cartes du cockpit v2), CAVE-FIX-1, CAVE-RANGE-1 à 3.
+
+## 446. ★ PIL-RANGE-4a — PILOTAGE : « AFFICHER DANS CET ONGLET » NE PROPOSE QUE CE QUI SERT (UNE CASE = UN LECTEUR) ; « mat_travaux » AUX DÉFAUTS (23/10 — `src/pilotage.js` (`_PIL_PERSO_DEFS` : Aujourd’hui à deux cases, `auj_tension` → equ, `auj_traiter` → cfm ; `_PIL_DEFAULT.show` : 17 clés mortes et `avc_gauge` retirées, `mat_travaux` ajoutée ; Personnel réveillé par `auj_tension`) · `src/utils.js` (APP, WHATS_NEW niv 1) · `index.html` · `public/sw.js` · `scripts/mv-harnais-pilrange4a.mjs` (neuf) · `scripts/mv-harnais-auj1.mjs` · `scripts/mv-harnais-pilrange2b.mjs` · `scripts/mv-harnais-liste.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/PIL-RANGE-4A.json` · **APP 10.02 → 10.03, SW 10.82 → 10.83**, base `0b4a078` ; chaîne par le coureur : 524 commandes, 524 codes à 0)
+
+### 446a. D’où ça vient
+Défaut P1 de l’audit (§439) : sur Aujourd’hui, 21 cases, dont **17 sans aucun lecteur** depuis le cockpit v2 (`auj_marge`, `auj_charge`, `auj_cadence`, `auj_inaction`, `auj_budget`, `auj_etp`, `auj_jours`, `auj_prio`, `auj_alertes`, `auj_pres`, `auj_resume`, `auj_chantiers`, `auj_courbe`, `auj_fil`, `auj_savoir`, `auj_plan`, `auj_eco`) ; deux réglaient des cartes d’autres onglets (`auj_tension` → la tension par personne, dans Équipe ; `auj_traiter` → la protection restante, dans Conformité). En mesurant la table contre les défauts, un **défaut de PIL-RANGE-1b** : `mat_travaux` manquait à `_PIL_DEFAULT.show` ; or `_pilNormalize` ne garde que les clés des défauts — la case décochée se recochait au chargement (le piège déjà décrit pour `an_frise`). Et sept des cases mortes (`auj_resume`…) n’avaient jamais été aux défauts : elles se recochaient aussi. (Une tentative antérieure de ce lot, trouvée non livrée dans le dossier de travail — réponse relancée —, a été écartée et le lot refait.)
+
+### 446b. Ce qui a été fait
+Aujourd’hui ne propose plus que **la vue Cave** et **ses points dans « À savoir »** (les deux clés que le cockpit v2 lit). **La tension par personne** se règle dans Équipe (et réveille seule la partie Personnel), **la protection restante** dans Conformité — là où elles s’affichent, **mêmes clés** : les choix mémorisés restent. Les défauts suivent exactement la table (25 clés de part et d’autre) : les 17 clés mortes et `avc_gauge` (PIL-RANGE-3) partent, `mat_travaux` entre. WHATS_NEW 10.03 niv 1.
+
+### 446c. Harnais
+`mv-harnais-pilrange4a.mjs` (9 vertes, 8 contre-épreuves) garde une **règle générale sur tous les onglets** : une case = un lecteur (`_pilShow`/`_pilAnyShow` hors de la table, ou un autre module) ; la table et les défauts ont les mêmes clés ; il **exécute** `_pilNormalize` (une case décochée reste décochée ; une clé morte mémorisée disparaît sans bruit) et lit la place des deux cases rangées. `auj1` suit (plus de case pour les blocs que le v2 ne lit pas) ; `pilrange2b` aussi (la liste qui réveille Personnel gagne `auj_tension`), trouvé par la chaîne.
+
+### 446d. Ce qui reste
+PIL-RANGE-4b — la sous-vue « Exercice » d’Économie : **à vérifier avant d’y toucher** (que montre-t-elle de plus que « Le budget de l’année » en tête de la Synthèse ?), puis CAVE-FIX-1, CAVE-RANGE-1 à 3.

@@ -1,0 +1,26 @@
+{
+  "lot": "PIL-RANGE-4A",
+  "section": "§446",
+  "base": "0b4a078264a783c11e64c57c349e1193cf714f0a",
+  "inclut": [],
+  "date": "2026-10-25",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "a2aa6f922db3dcc3d4e32ca20791e7f04c4b262563beda416aec574f88402cea",
+    "CLAUDE.md": "67e444e656b22a9e4f79f43d85da0f70c093c051454a2458a3fcde222d5d77b2",
+    "docs/claude/INDEX.md": "4efe89194888f908c61b2cd4691fe8c39873eb956179c194a407984a19a0826b",
+    "docs/claude/chantiers-430-479.md": "aa78278834dc898984f35c1008d2b67a537c7b36862d38a0151fde4c6a88c7f5",
+    "docs/claude/journal.md": "906ce323138737a88317a39a7474cbc102e75f48e1757b808065d67fe4099e67",
+    "index.html": "a3d6eb474414d2e7a75ab5934506ccf4001d69f00075bca8c870ad7410e9b79b",
+    "public/sw.js": "7cb26ec8d6ca7d506d37231831fd9779b39244d3eed86938a7ee16f8a8e4f330",
+    "scripts/mv-harnais-auj1.mjs": "ada785870be92f579d7fe4307e131191eeac09df34e9647fe4a064822ec697a2",
+    "scripts/mv-harnais-liste.mjs": "a282b6e11002c735fcee79e263d09ba4ed43fd8ee2043dbac4862ab85e077ba6",
+    "scripts/mv-harnais-pilrange2b.mjs": "8d4d5622afb8ed02b4e498881957c99f74a5adaaaeb81b3b915465fc9d306f2e",
+    "src/pilotage.js": "2d0353157fa452799501d5da7f1866e96e6e8735fc8e01d8e41248d68ed713e8",
+    "src/utils.js": "161c320b821b40607f57fc6ef830651595f6d7187536d51aeaf00b8e667de2dc",
+    "scripts/mv-harnais-pilrange4a.mjs": "18a564939648997500d6407cfac40d7b865a5593f5de8f83747def10aeda64cf"
+  }
+}
