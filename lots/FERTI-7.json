@@ -1,0 +1,32 @@
+{
+  "lot": "FERTI-7",
+  "section": "§464",
+  "base": "41c3bd95c40828c1ac028793c9052429f41c723f",
+  "inclut": [],
+  "date": "2026-10-26",
+  "tutos": {
+    "ok": true,
+    "empreinte": "c5c72adcb250fa977a65b87e6a74424674b770d4df6e52456ff4d0fe1f9bc7c3",
+    "date": "2026-10-26T18:28:59.120Z",
+    "joues": {
+      "téléphone": 6,
+      "ordinateur": 6,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "13bd889446ff368bb531696eaacc1c5ed962c23f1b90abae2880d3d480e2e548",
+    "CLAUDE.md": "6acebce2bf2545f8e72d8fc5a11a5de084d18c05f13c0facb8aca4f0d3c859ee",
+    "docs/claude/INDEX.md": "4f30f72860027cd7bb1b9e67b323820cf222bd0350548cad95bdc4dfbc3a1ea2",
+    "docs/claude/chantiers-430-479.md": "1cc73b243ba6bba24ea15c0fc123cbc122a3559cffc45b216eb8db0090aa8bf7",
+    "docs/claude/journal.md": "0991041ee3e8a195cba90733fb4753d65471e795f7f36be3d5da6bb8255a374d",
+    "index.html": "8e1c1c43151dced6ae919ca6495416e270eccfdb6ea58ee44f7d42a7f860f1c0",
+    "public/sw.js": "c23702d23f6d27dfc3dc7341c7fa33b01b67a614e4fbc1b871cd6dfe7bccd74d",
+    "scripts/typo-baseline.json": "fdc99397c97539ab0777f5785fca709d43787299ac50a1cdc4eb864771e1a651",
+    "src/phyto.js": "88163596e51e5eb1255ed79daafabf79da42a7ad3337ff20b39cab701a4f8108",
+    "src/tutos.js": "5cdf64a1739f32b32977b06fef10df0bd34e08f74cc0140902a68b5b37d6d292",
+    "src/utils.js": "d9b4440ba395676f4c66054faf3f66c87901ae745209f83af425c071f0a3c4b9"
+  }
+}

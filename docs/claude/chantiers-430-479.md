@@ -812,3 +812,24 @@ Nico (26/10, dicté) : « au domaine, toutes les parcelles qui sont en dessous d
 ### 463d. Reste ouvert
 - La seule catégorie « Arboriculture fruitière et vigne » (102 MFSC, §461b) : à trancher.
 - La règle ne s’enregistre pas : elle se refait à chaque apport (non demandé).
+
+## 464. ★ FERTI-7 — LA CHAÎNE REVERDIT : UN TUTO POUR L’AMENDEMENT, DEUX LIGNES DE TAILLE REGRAVÉES (26/10 — `src/tutos.js` · `src/phyto.js` · `index.html` · `src/utils.js` (APP, WHATS_NEW) · `public/sw.js` · `scripts/typo-baseline.json` · **bump APP 10.17 → 10.18, SW 10.98 → 10.99**, base `41c3bd9`)
+
+### 464a. D’où ça vient
+Nico (26/10) colle la sortie du lanceur : 250 commandes sur 555, arrêt sur `mv-harnais-typo` (« aucun module n’enfle de plus de 5 % en un lot → `src/phyto.js` 147 → 166 ko »). La chaîne s’arrête au premier rouge : la suite a été jouée ici — la chaîne jusqu’à la commande 214, les 58 contrôles qui lisent `phyto.js`, `tracteur.js`, le guide Phyto ou E-Phy, puis aide, charte et gabarit, tous verts — et un second rouge l’attendait : `mv-harnais-tutos`, « gestes sans tuto : 817 (plafond 807) ». Les dix gestes neufs de FERTI-5 et FERTI-6, sans tuto. La règle interdit de relever un plafond après une hausse : la correction est un tuto. Reformulé, « go ».
+
+### 464b. Ce qui a été fait
+- **Le tuto `amendement`** (« Comment faire pour saisir un amendement ? », 12 étapes, 2 min, administrateur) : Phyto › Fertilisation ; le bouton « nouveau » ; le nom d’un produit normé (pas d’AMM, donc pas dans E-Phy) ; la norme NF U 42-001 en un geste ; l’exemple d’étiquette ; la formule 4-10-1 (azote, phosphore, potasse remplis) ; la nature (le type nitrates suit) ; l’étape 2 ; « Bourgogne » retirée ; « Cocher ces parcelles ». `couvre` : `switchPhytoTab`, `_phytoFab`, `_ferSet`, `_ferNorme`, `_ferSacTog`, `_ferNpk`, `_ferNat`, `_ferTog`, `_ferSauf`, `_ferRegleGo`.
+- ★ **Le bouton « nouveau » a deux formes** : rond (`#phyto-fab`) sous 1 024 px, en texte (`#ph-new-btn`) au-dessus — chacune cachée de l’autre côté. `_q` rend le premier dans le document, pas le visible : l’étape porte un `cible` calculé (`get cible()` → `_tuFerNouveau()`, qui teste `_vis`). Les deux étiquettes (`phy.nouveau`, `phy.nouveau.pc`) sont posées dans `index.html`.
+- ★ **Le domaine d’entraînement n’a ni catalogue E-Phy ni vendange** (la porte bloque Firestore ; `TU_DONNEES` n’a ni récoltes ni catalogue) : le tuto enseigne le produit normé, saisi à la main, et la règle par appellation seule. `TU_DONNEES.parcelles` prend `appellation` et `cepage` (trois Bourgognes sur huit) ; la règle coche alors cinq parcelles.
+- ★ **La nature est un `<select>`, le moteur tape** (`input` lettre à lettre) : `oninput="_ferNat(this.value)"` à côté du `onchange` — sans danger, `_ferNat` est sans effet de bord en double.
+- Étiquettes `data-tuto` dans la fiche : `fer.nom`, `fer.norme` (sur NF U 42-001 seulement), `fer.sac`, `fer.npk`, `fer.nat`, `fer.etape2` (posée par `_ferStep` pour l’étape 2), `fer.aoc` (+ `data-aoc`), `fer.regle`, `fer.plist` ; et `phy.fer` sur l’onglet.
+- **Les deux lignes de taille** : `phyto.js` 147 → 166 ko, `tutos.js` 82 → 88 ko, seules leurs lignes regravées dans `typo-baseline.json` (le `--baseline` complet aurait avalé d’autres croissances). La question du découpage, posée : `tutos.js` est le registre des tutos, il grossit d’une entrée par tuto, rien à sortir ; `phyto.js` porte tout le bloc FERTI — à sortir dans un lot à part (backlog), pas dans une correction.
+- Nouveauté 10.18 (le tuto).
+
+### 464c. Mesuré
+`npm run test:tutos -- --concernes` (tous concernés : le domaine d’entraînement a changé) : 6 tutos × téléphone, ordinateur et panneau côte à côte, tous au bout — `amendement` 12/12 en 36 s partout. `mv-harnais-tutos` : vert, 807 sans tuto pour un plafond de 807, 27 couverts (17 avant). `mv-harnais-typo` vert après les deux regravures. FERTI-5 34, FERTI-6 17, fertil 70 ; preflight 0 erreur. Chaîne complète : non rejouée en entier dans le bac à sable (lente ici) — à rejouer chez Nico.
+
+### 464d. Reste ouvert
+- Sortir la fertilisation de `phyto.js` (backlog).
+- La seule catégorie « Arboriculture fruitière et vigne » (102 MFSC, §461b) : à trancher.

@@ -1500,7 +1500,7 @@ function _ferIn(id, label, val, unit, attrs){
 function _ferStep(n, titre, corps){
   var ouv=!!(_fer.ouvert&&_fer.ouvert[n]);
   return '<div class="fer-c'+(ouv?'':' ferme')+'" id="fer-s'+n+'">'
-    +'<div class="fer-st" onclick="_ferTog('+n+')"><div class="fer-n" id="fer-n'+n+'">'+n+'</div><div class="fer-stt">'+titre+'</div><div class="fer-str" id="fer-r'+n+'"></div></div>'
+    +'<div class="fer-st"'+(n===2?' data-tuto="fer.etape2"':'')+' onclick="_ferTog('+n+')"><div class="fer-n" id="fer-n'+n+'">'+n+'</div><div class="fer-stt">'+titre+'</div><div class="fer-str" id="fer-r'+n+'"></div></div>'
     +'<div class="fer-bd">'+corps+'</div></div>';
 }
 function openOvFerti(){
@@ -1520,13 +1520,13 @@ function openOvFerti(){
     +'<div class="mvr-fl" style="margin-top:0">Chercher dans E-Phy</div>'
     +'<input class="mvr-fi" id="fer-q" type="text" autocomplete="off" placeholder="Nom commercial ou n\u00b0 d\u2019AMM" oninput="_ferSearch(this.value)">'
     +'<div id="fer-res"></div><div id="fer-etat"></div>'
-    +'<div class="mvr-fl">Nom du produit</div><input class="mvr-fi" id="fer-nom" type="text" autocomplete="off" value="" oninput="_ferSet(\'prod.nom\',this.value)">'
+    +'<div class="mvr-fl">Nom du produit</div><input class="mvr-fi" id="fer-nom" data-tuto="fer.nom" type="text" autocomplete="off" value="" oninput="_ferSet(\'prod.nom\',this.value)">'
     +'<div class="mvr-fl">Norme ou AMM</div>'
     +'<div class="fer-norms" id="fer-norms" role="group" aria-label="Normes courantes">'
-      +FER_NORMES.map(function(n){ return '<button type="button" class="fer-norm" data-ref="'+_escAttr(n.ref)+'" aria-pressed="false" onclick="_ferNorme(this.getAttribute(\'data-ref\'))"><b>'+n.t+'</b>'+n.s+'</button>'; }).join('')
+      +FER_NORMES.map(function(n){ return '<button type="button" class="fer-norm"'+(n.ref==='NF U 42-001'?' data-tuto="fer.norme"':'')+' data-ref="'+_escAttr(n.ref)+'" aria-pressed="false" onclick="_ferNorme(this.getAttribute(\'data-ref\'))"><b>'+n.t+'</b>'+n.s+'</button>'; }).join('')
     +'</div>'
     +'<input class="mvr-fi" id="fer-ref" type="text" autocomplete="off" placeholder="ou recopiez ce qui est \u00e9crit sur le sac" oninput="_ferSet(\'prod.ref\',this.value)">'
-    +'<div class="fer-h">La norme est imprim\u00e9e \u00e0 c\u00f4t\u00e9 du nom du type, en majuscules. La phrase \u00ab\u00a0utilisable en agriculture biologique conform\u00e9ment au r\u00e8glement\u2026\u00a0\u00bb n\u2019est pas la norme\u00a0: c\u2019est la mention bio, elle se coche plus bas. <span class="fer-lk" id="fer-sac-lk" role="button" tabindex="0" onclick="_ferSacTog()">O\u00f9 lire tout \u00e7a sur le sac</span></div>'
+    +'<div class="fer-h">La norme est imprim\u00e9e \u00e0 c\u00f4t\u00e9 du nom du type, en majuscules. La phrase \u00ab\u00a0utilisable en agriculture biologique conform\u00e9ment au r\u00e8glement\u2026\u00a0\u00bb n\u2019est pas la norme\u00a0: c\u2019est la mention bio, elle se coche plus bas. <span class="fer-lk" id="fer-sac-lk" data-tuto="fer.sac" role="button" tabindex="0" onclick="_ferSacTog()">O\u00f9 lire tout \u00e7a sur le sac</span></div>'
     +'<div id="fer-sac" style="display:none"><div class="fer-sac"><div class="fer-sac-t">Exemple d\u2019\u00e9tiquette, invent\u00e9</div>'
       +'<div class="fer-sac-l"><span class="fer-sac-n">1</span><span><b>AMENDEMENT ORGANIQUE NF U 44-051</b><br>Compost de fumier et de marc de raisin</span></div>'
       +'<div class="fer-sac-l"><span class="fer-sac-n">2</span><span>N 2\u00a0% \u00b7 P<sub>2</sub>O<sub>5</sub> 1,5\u00a0% \u00b7 K<sub>2</sub>O 3\u00a0% \u00b7 mati\u00e8re organique 30\u00a0%</span></div>'
@@ -1534,7 +1534,7 @@ function openOvFerti(){
       +'<div class="fer-sac-cap"><b>1</b> va dans \u00ab\u00a0Norme ou AMM\u00a0\u00bb. <b>2</b> va dans la composition\u00a0; sur un engrais, elle tient en trois chiffres, comme \u00ab\u00a04-10-1\u00a0\u00bb\u00a0: azote, phosphore, potasse. <b>3</b> se coche\u00a0: \u00ab\u00a0Utilisable en agriculture biologique\u00a0\u00bb.</div></div>'
     +'<div class="mvr-fl">Fournisseur</div><input class="mvr-fi" id="fer-four" type="text" autocomplete="off" oninput="_ferSet(\'prod.four\',this.value)">'
     +'<div class="mvr-fl">Composition \u2014 lue sur l\u2019\u00e9tiquette du sac</div>'
-    +'<div class="mvr-f2" style="align-items:center"><div style="position:relative"><input class="mvr-fi" id="fer-npk" type="text" inputmode="decimal" autocomplete="off" placeholder="ex. 4-10-1" oninput="_ferNpk(this.value)" style="padding-right:60px"><span class="fer-unit">N-P-K</span></div>'
+    +'<div class="mvr-f2" style="align-items:center"><div style="position:relative"><input class="mvr-fi" id="fer-npk" data-tuto="fer.npk" type="text" inputmode="decimal" autocomplete="off" placeholder="ex. 4-10-1" oninput="_ferNpk(this.value)" style="padding-right:60px"><span class="fer-unit">N-P-K</span></div>'
       +'<div class="fer-h" style="margin-top:0">Les trois chiffres du sac\u00a0: azote, phosphore, potasse, dans cet ordre.</div></div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'
       +'<div>'+_ferIn('fer-N','Azote',P.N,'% N','oninput="_ferSet(\'prod.N\',this.value)"')+'</div>'
@@ -1544,7 +1544,7 @@ function openOvFerti(){
       +'<div>'+_ferIn('fer-CN','Rapport C/N',P.CN,'C/N','oninput="_ferSet(\'prod.CN\',this.value)"')+'</div></div>'
     +'<div class="fer-src" id="fer-src" style="display:none"></div>'
     +'<div class="mvr-fl">Ce que c\u2019est</div>'
-    +'<select class="mvr-fi" id="fer-nat" onchange="_ferNat(this.value)"><option value="">Choisir\u2026</option>'+Object.keys(FER_NAT).map(function(k){ return '<option value="'+k+'">'+FER_NAT[k].l+'</option>'; }).join('')+'</select>'
+    +'<select class="mvr-fi" id="fer-nat" data-tuto="fer.nat" onchange="_ferNat(this.value)" oninput="_ferNat(this.value)"><option value="">Choisir\u2026</option>'+Object.keys(FER_NAT).map(function(k){ return '<option value="'+k+'">'+FER_NAT[k].l+'</option>'; }).join('')+'</select>'
     +'<div class="fer-box" id="fer-typ-h"></div>'
     +'<select class="mvr-fi" id="fer-typ" style="display:none;margin-top:8px" aria-label="Type au sens de la directive nitrates" onchange="_ferTypMain(this.value)">'+typOpts+'</select>'
     +'<label class="fer-pl" style="border:0"><input type="checkbox" id="fer-ab" '+(P.ab?'checked':'')+' onchange="_ferSet(\'prod.ab\',this.checked)" style="width:20px;height:20px"><span style="font-size:var(--pt-txt,13px)">Utilisable en agriculture biologique (UAB)</span></label>'
@@ -1562,13 +1562,13 @@ function openOvFerti(){
       +'<div class="mvr-f2" style="align-items:end"><div>'+_ferIn('fer-seuil','Rendement '+F._mil+' sous',F.seuil,'hL/ha','placeholder="\u2014" oninput="_ferSeuil(this.value)"')+'</div>'
       +'<div class="fer-h" style="margin:0 0 10px">Celui de la vendange, repris du Cuvier.</div></div>'
       +'<div class="mvr-fl">Sauf les appellations</div><div class="fer-aocs" id="fer-aocs" role="group" aria-label="Appellations \u00e0 retirer"></div>'
-      +'<button type="button" class="mvr-btn mvr-btn-p fer-rgo" id="fer-regle-go" onclick="_ferRegleGo()"></button>'
+      +'<button type="button" class="mvr-btn mvr-btn-p fer-rgo" id="fer-regle-go" data-tuto="fer.regle" onclick="_ferRegleGo()"></button>'
       +'<div class="fer-h" id="fer-regle-h"></div></div>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
       +'<button type="button" class="mvr-btn mvr-btn-o" style="flex:none" onclick="_ferAll(1)">Tout cocher</button>'
       +'<button type="button" class="mvr-btn mvr-btn-o" style="flex:none" onclick="_ferAll(0)">Tout d\u00e9cocher</button>'
       +'<button type="button" class="mvr-btn mvr-btn-o" style="flex:none" onclick="_ferAll(\'zv\')">Zone vuln\u00e9rable</button></div>'
-    +'<div id="fer-plist"></div>'
+    +'<div id="fer-plist" data-tuto="fer.plist"></div>'
     +'<div class="fer-h">Sacs arrondis au demi-sac par parcelle\u00a0; la commande est arrondie au sac entier sur le total. <span class="fer-chip zv">ZV</span> = zone vuln\u00e9rable, d\u00e9clar\u00e9e dans le registre de fertilisation, parcelle par parcelle.</div>'
     +'<div id="fer-ilot"></div>')
   +_ferStep(3,'Le passage tracteur',''
@@ -1630,7 +1630,7 @@ function _ferRegleUp(){
   var ps=_ferParcs(), A={};
   ps.forEach(function(p){ var k=String(p.appellation||'').trim(); A[k]=(A[k]||0)+1; });
   el.innerHTML=Object.keys(A).sort(function(a,b){ return a.localeCompare(b,'fr'); }).map(function(k){ var on=!!_fer.sauf[k];
-    return '<button type="button" class="fer-aoc'+(on?' on':'')+'" data-aoc="'+_escAttr(k)+'" aria-pressed="'+on+'" onclick="_ferSauf(this.getAttribute(\'data-aoc\'))"><span>'+_escHtml(k||'Sans appellation')+'</span><small>'+A[k]+'</small></button>'; }).join('');
+    return '<button type="button" class="fer-aoc'+(on?' on':'')+'" data-tuto="fer.aoc" data-aoc="'+_escAttr(k)+'" aria-pressed="'+on+'" onclick="_ferSauf(this.getAttribute(\'data-aoc\'))"><span>'+_escHtml(k||'Sans appellation')+'</span><small>'+A[k]+'</small></button>'; }).join('');
   var R=_ferRegleCalc(ps,_fer._rdt,_fer.seuil,_fer.sauf), n=R.inc.length, ha=R.inc.reduce(function(a,p){ return a+_ferSurf(p); },0), connus=Object.keys(_fer._rdt||{}).length;
   var go=document.getElementById('fer-regle-go');
   if(go){ go.disabled=!n; go.textContent=n?('Cocher '+(n>1?'ces ':'cette ')+n+'\u00a0parcelle'+(n>1?'s':'')+' \u00b7 '+_ferFr(ha,2)+'\u00a0ha'):'Aucune parcelle ne r\u00e9pond \u00e0 la r\u00e8gle'; }

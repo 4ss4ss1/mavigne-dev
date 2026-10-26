@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.17';
+export const APP_VERSION = '10.18';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,10 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '10.18', d: '2026-10-26', items: [
+    { niv: 0, pour: ['admin'], emoji: 'pousse', titre: 'Un tuto\u00a0: comment saisir un amendement',
+      desc: "Dans les tutos, «\u00a0Comment faire pour saisir un amendement\u00a0?\u00a0» montre, sur un domaine d’entraînement, un produit vendu sans AMM\u00a0: sa norme écrite sur le sac, la formule «\u00a04-10-1\u00a0», ce qu’est le produit, puis les parcelles cochées en retirant une appellation. Sur votre domaine, rien ne bouge." }
+  ] },
   { v: '10.17', d: '2026-10-26', items: [
     { niv: 1, pour: ['admin'], emoji: 'pousse', titre: 'Fertilisation : cocher les parcelles par règle',
       desc: "À l’étape «\u00a0Les parcelles\u00a0» d’un amendement, donnez un seuil de rendement (celui de la vendange, repris du Cuvier) et touchez les appellations à retirer, par exemple Bourgogne\u00a0: «\u00a0Cocher ces parcelles\u00a0» coche celles qui restent. Une parcelle sans rendement connu reste de côté, et l’écran la nomme. Chaque ligne montre maintenant son appellation et son rendement." }

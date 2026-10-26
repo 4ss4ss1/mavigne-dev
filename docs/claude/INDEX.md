@@ -517,3 +517,4 @@
 | 461 | 461. ★★ FERTI-4 — LE CATALOGUE E-PHY GARDE LES MATIÈRES FERTILISANTES VALABLES EN VIGNE (26/10 — `functions… | `docs/claude/chantiers-430-479.md` |
 | 462 | 462. ★★ FERTI-5 — LA FICHE « LE PRODUIT » DE L’AMENDEMENT, AU DESSIN DE LA MAQUETTE VALIDÉE (26/10 — `src/p… | `docs/claude/chantiers-430-479.md` |
 | 463 | 463. ★ FERTI-6 — CHOISIR LES PARCELLES PAR RÈGLE À L’ÉTAPE 2 DE L’AMENDEMENT (26/10 — `src/phyto.js` · `src… | `docs/claude/chantiers-430-479.md` |
+| 464 | 464. ★ FERTI-7 — LA CHAÎNE REVERDIT : UN TUTO POUR L’AMENDEMENT, DEUX LIGNES DE TAILLE REGRAVÉES (26/10 — `… | `docs/claude/chantiers-430-479.md` |

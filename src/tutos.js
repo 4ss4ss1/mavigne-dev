@@ -41,7 +41,7 @@
 // Repris de public/mavigne_demo_data.json (le domaine de la démo : Marie, Jean, Sophie, Paul), plus
 // la cuve GNR du tuto « Noter un plein ». Il repart NEUF à chaque tuto : même départ pour tous.
 var TU_DOMAINE = 'Domaine des Grandes Vignes';
-var TU_DONNEES = {"config":{"domaine_nom":"Domaine des Grandes Vignes","lat":47.22,"lon":4.97,"onboarding_done":true,"gnr":{"capacite":2000,"niveau":650,"seuil":300,"maj":"2026-10-02"}},"membres":[{"nom":"Marie","roles":["admin","ouvrier","tractoriste"],"couleur":"#3D6B27","statut":"actif"},{"nom":"Jean","roles":["ouvrier","tractoriste"],"couleur":"#1A4A7A","statut":"actif"},{"nom":"Sophie","roles":["ouvrier"],"couleur":"#7A4F2E","statut":"actif"},{"nom":"Paul","roles":["ouvrier","tractoriste"],"couleur":"#5B2D8E","statut":"actif"}],"saisons":[{"nom":"Printemps 2026","periode":"Mars — Juillet 2026","active":true,"taches":["Ebourgeonnage","Relevage","Accolage","Pioche","Palissage"]},{"nom":"Hiver 2025-2026","periode":"Nov. 2025 — Fév. 2026","active":false,"taches":["Taille","Tirage","Brulage"]}],"taches":[{"nom":"Taille","hha":70,"saison":"Hiver"},{"nom":"Tirage","hha":40,"saison":"Hiver"},{"nom":"Brulage","hha":40,"saison":"Hiver"},{"nom":"Ebourgeonnage","hha":35,"saison":"Printemps"},{"nom":"Relevage","hha":50,"saison":"Printemps"},{"nom":"Accolage","hha":50,"saison":"Printemps"},{"nom":"Pioche","hha":40,"saison":"Printemps"},{"nom":"Palissage","hha":50,"saison":"Printemps"}],"parcelles":[{"nom":"Clos du Moulin","surface":0.45,"statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":null,"ov":null},"Relevage":{"n1":null,"n2":null,"n3":null,"ov":null},"Accolage":null,"Pioche":{"p1":"Valide","p2":null,"ov":null},"Palissage":null}},{"nom":"Les Charmes","surface":1.2,"statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":"Valide","ov":null},"Relevage":{"n1":"Valide","n2":null,"n3":null,"ov":null},"Accolage":"Valide","Pioche":{"p1":"Valide","p2":"Valide","ov":null},"Palissage":null}},{"nom":"Vieilles Vignes","surface":0.8,"statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":null,"ov":null},"Relevage":{"n1":null,"n2":null,"n3":null,"ov":null},"Accolage":null,"Pioche":{"p1":null,"p2":null,"ov":null},"Palissage":null}},{"nom":"Les Perrières","surface":1.05,"statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":"Valide","ov":"Valide"},"Relevage":{"n1":"Valide","n2":"Valide","n3":null,"ov":null},"Accolage":"Valide","Pioche":{"p1":"Valide","p2":null,"ov":null},"Palissage":null}},{"nom":"Champ de la Croix","surface":0.62,"statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":"Valide","ov":null},"Relevage":{"n1":"Valide","n2":null,"n3":null,"ov":null},"Accolage":null,"Pioche":{"p1":"Valide","p2":null,"ov":null},"Palissage":null}},{"nom":"En Bertrange","surface":0.9,"statut":"Active","taches":{"Ebourgeonnage":{"p1":null,"p2":null,"ov":null},"Relevage":{"n1":null,"n2":null,"n3":null,"ov":null},"Accolage":null,"Pioche":{"p1":null,"p2":null,"ov":null},"Palissage":null}},{"nom":"La Combotte","surface":1.5,"statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":"Valide","ov":null},"Relevage":{"n1":"Valide","n2":"Valide","n3":"Valide","ov":null},"Accolage":"Valide","Pioche":{"p1":"Valide","p2":"Valide","ov":null},"Palissage":null}},{"nom":"Aux Murgers","surface":0.5,"statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":null,"ov":null},"Relevage":{"n1":null,"n2":null,"n3":null,"ov":null},"Accolage":null,"Pioche":{"p1":null,"p2":null,"ov":null},"Palissage":null}}],"conducteurs":[{"nom":"Marie"},{"nom":"Jean"},{"nom":"Paul"}],"activites":[{"nom":"Griffage"},{"nom":"Buttage"},{"nom":"Intercep"},{"nom":"Traitement"},{"nom":"Broyage"}]};
+var TU_DONNEES = {"config":{"domaine_nom":"Domaine des Grandes Vignes","lat":47.22,"lon":4.97,"onboarding_done":true,"gnr":{"capacite":2000,"niveau":650,"seuil":300,"maj":"2026-10-02"}},"membres":[{"nom":"Marie","roles":["admin","ouvrier","tractoriste"],"couleur":"#3D6B27","statut":"actif"},{"nom":"Jean","roles":["ouvrier","tractoriste"],"couleur":"#1A4A7A","statut":"actif"},{"nom":"Sophie","roles":["ouvrier"],"couleur":"#7A4F2E","statut":"actif"},{"nom":"Paul","roles":["ouvrier","tractoriste"],"couleur":"#5B2D8E","statut":"actif"}],"saisons":[{"nom":"Printemps 2026","periode":"Mars — Juillet 2026","active":true,"taches":["Ebourgeonnage","Relevage","Accolage","Pioche","Palissage"]},{"nom":"Hiver 2025-2026","periode":"Nov. 2025 — Fév. 2026","active":false,"taches":["Taille","Tirage","Brulage"]}],"taches":[{"nom":"Taille","hha":70,"saison":"Hiver"},{"nom":"Tirage","hha":40,"saison":"Hiver"},{"nom":"Brulage","hha":40,"saison":"Hiver"},{"nom":"Ebourgeonnage","hha":35,"saison":"Printemps"},{"nom":"Relevage","hha":50,"saison":"Printemps"},{"nom":"Accolage","hha":50,"saison":"Printemps"},{"nom":"Pioche","hha":40,"saison":"Printemps"},{"nom":"Palissage","hha":50,"saison":"Printemps"}],"parcelles":[{"nom":"Clos du Moulin","surface":0.45,"appellation":"Gevrey-Chambertin","cepage":"Pinot noir","statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":null,"ov":null},"Relevage":{"n1":null,"n2":null,"n3":null,"ov":null},"Accolage":null,"Pioche":{"p1":"Valide","p2":null,"ov":null},"Palissage":null}},{"nom":"Les Charmes","surface":1.2,"appellation":"Gevrey-Chambertin 1er cru","cepage":"Pinot noir","statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":"Valide","ov":null},"Relevage":{"n1":"Valide","n2":null,"n3":null,"ov":null},"Accolage":"Valide","Pioche":{"p1":"Valide","p2":"Valide","ov":null},"Palissage":null}},{"nom":"Vieilles Vignes","surface":0.8,"appellation":"Gevrey-Chambertin","cepage":"Pinot noir","statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":null,"ov":null},"Relevage":{"n1":null,"n2":null,"n3":null,"ov":null},"Accolage":null,"Pioche":{"p1":null,"p2":null,"ov":null},"Palissage":null}},{"nom":"Les Perrières","surface":1.05,"appellation":"Bourgogne","cepage":"Chardonnay","statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":"Valide","ov":"Valide"},"Relevage":{"n1":"Valide","n2":"Valide","n3":null,"ov":null},"Accolage":"Valide","Pioche":{"p1":"Valide","p2":null,"ov":null},"Palissage":null}},{"nom":"Champ de la Croix","surface":0.62,"appellation":"Bourgogne","cepage":"Pinot noir","statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":"Valide","ov":null},"Relevage":{"n1":"Valide","n2":null,"n3":null,"ov":null},"Accolage":null,"Pioche":{"p1":"Valide","p2":null,"ov":null},"Palissage":null}},{"nom":"En Bertrange","surface":0.9,"appellation":"Côte de Nuits-Villages","cepage":"Pinot noir","statut":"Active","taches":{"Ebourgeonnage":{"p1":null,"p2":null,"ov":null},"Relevage":{"n1":null,"n2":null,"n3":null,"ov":null},"Accolage":null,"Pioche":{"p1":null,"p2":null,"ov":null},"Palissage":null}},{"nom":"La Combotte","surface":1.5,"appellation":"Bourgogne","cepage":"Pinot noir","statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":"Valide","ov":null},"Relevage":{"n1":"Valide","n2":"Valide","n3":"Valide","ov":null},"Accolage":"Valide","Pioche":{"p1":"Valide","p2":"Valide","ov":null},"Palissage":null}},{"nom":"Aux Murgers","surface":0.5,"appellation":"Fixin","cepage":"Pinot noir","statut":"Active","taches":{"Ebourgeonnage":{"p1":"Valide","p2":null,"ov":null},"Relevage":{"n1":null,"n2":null,"n3":null,"ov":null},"Accolage":null,"Pioche":{"p1":null,"p2":null,"ov":null},"Palissage":null}}],"conducteurs":[{"nom":"Marie"},{"nom":"Jean"},{"nom":"Paul"}],"activites":[{"nom":"Griffage"},{"nom":"Buttage"},{"nom":"Intercep"},{"nom":"Traitement"},{"nom":"Broyage"}]};
 
 // ★ TUTO-4 (§361) — UN ENTRAÎNEMENT EXIGE LE boot.js DE SA VERSION. boot.js (sans numéro dans son nom) a survécu à des
 //   mises à jour dans le cache : un panneau démarré avec un ancien boot.js ne savait plus qu'il était un panneau — et avec
@@ -70,6 +70,8 @@ function _v() { return _tactile() ? 'touchez' : 'cliquez'; }
 function _esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function _num(x) { var n = parseFloat(String(x == null ? '' : x).replace(/\s/g, '').replace(',', '.')); return isFinite(n) ? n : NaN; }
 function _nb(n) { return Math.round(Number(n) || 0).toLocaleString('fr-FR'); }
+// FERTI-7 (§464) : le bouton « nouveau » de Phyto est rond au téléphone, en texte sur ordinateur — viser celui qui se voit.
+function _tuFerNouveau() { return _vis(_q('[data-tuto="phy.nouveau.pc"]')) ? '[data-tuto="phy.nouveau.pc"]' : '[data-tuto="phy.nouveau"]'; }
 function _ouvert(id) { var o = document.getElementById(id); return !!(o && o.classList.contains('open')); }
 function _gnr() { var c = window.CONFIG || {}; return c.gnr || { capacite: 0, niveau: 0 }; }
 // ★ JCAVE-1 (§428) : le nombre de cases marquées en cave (CONFIG.cave_jours), pour voir qu'une marque vient d'être posée.
@@ -219,6 +221,65 @@ var TU_TUTOS = [
         ok: 'Le message vert confirme l’appoint.' },
       { type: 'regarder', cible: '[data-tuto="gnr.carte"]',
         txt: function () { var g = _gnr(); return 'La cuve remonte à ' + _nb(g.niveau) + ' litres sur ' + _nb(g.capacite) + '. Sur votre domaine, rien n’a bougé : c’était un entraînement.'; } }
+    ] },
+  // ★ FERTI-7 (§464) — l'amendement (FERTI-5 et FERTI-6) : un produit normé, sa norme, sa formule, sa nature, puis les
+  //   parcelles choisies par appellation. Il fait redescendre le compte des gestes sans tuto (817 → 807 et moins).
+  //   Le domaine d'entraînement n'a ni catalogue E-Phy ni vendange : le produit est un engrais normé (pas d'AMM, saisi à
+  //   la main), et la règle joue sur les appellations seules. Le bouton « nouveau » est rond au téléphone, en texte sur
+  //   ordinateur : _tuFerNouveau() vise celui qui se voit.
+  { id: 'amendement', titre: 'Comment faire pour saisir un amendement\u00a0?', fin: 'saisir un amendement',
+    module: 'Phyto', pages: ['phyto'], pour: 'admin', duree: '2 min', depart: 'home',
+    couvre: ['switchPhytoTab', '_phytoFab', '_ferSet', '_ferNorme', '_ferSacTog', '_ferNpk', '_ferNat', '_ferTog', '_ferSauf', '_ferRegleGo'],
+    retenir: ['Phyto › Fertilisation › le bouton « nouveau ».',
+              'Un produit normé n’a pas d’AMM : son nom, puis sa norme, écrite sur le sac. La formule « 4-10-1 » remplit azote, phosphore et potasse.',
+              '« Ce que c’est » pose le type nitrates ; aux parcelles, « Choisir par règle » coche sous un rendement, sauf des appellations.'],
+    etapes: [
+      { type: 'aller', page: 'phyto', pourquoi: 'L’amendement se saisit dans le module Phyto, onglet Fertilisation.' },
+      { type: 'toucher', chemin: true, cible: '[data-tuto="phy.fer"]',
+        txt: function () { return '{T} l’onglet « ' + (L('[data-tuto="phy.fer"]') || 'Fertilisation') + ' ».'; },
+        fait: function () { var b = _q('[data-tuto="phy.fer"]'); return !!(b && b.classList.contains('active')); },
+        ok: 'Voici le registre de fertilisation de la campagne.' },
+      { type: 'toucher', get cible() { return _tuFerNouveau(); },
+        txt: function () { return /\.pc/.test(_tuFerNouveau()) ? 'Le fournisseur est passé. {T} « ' + L(_tuFerNouveau()) + ' ».' : 'Le fournisseur est passé. {T} le bouton rond, en bas à droite.'; },
+        fait: function () { return _ouvert('ovFerti') && !!_q('[data-tuto="fer.nom"]'); },
+        ok: 'L’amendement s’ouvre sur le produit.' },
+      { type: 'taper', cible: '[data-tuto="fer.nom"]', exemple: 'Engrais organique 4-10-1',
+        txt: function () { return 'Un produit vendu sous une norme n’a pas de numéro d’AMM : il n’est pas dans E-Phy. Tapez son nom, par exemple «\u00a0Engrais organique 4-10-1\u00a0».'; },
+        txtReel: 'le nom écrit sur votre sac.',
+        valide: function (x) { return String(x || '').trim().length >= 2; },
+        ok: 'Le nom est noté.' },
+      { type: 'toucher', cible: '[data-tuto="fer.norme"]',
+        txt: function () { return 'La norme est imprimée sur le sac, à côté du nom du type\u00a0: pour un engrais, ' + (L('[data-tuto="fer.norme"] b') || 'NF U 42-001') + '. {T} ce bouton.'; },
+        fait: function () { var r = _q('#fer-ref'); return !!(r && r.value === 'NF U 42-001'); },
+        ok: 'La norme est posée. Le champ reste libre si votre sac dit autre chose.' },
+      { type: 'toucher', cible: '[data-tuto="fer.sac"]',
+        txt: function () { return 'Où lire tout ça\u00a0? {T} « ' + (L('[data-tuto="fer.sac"]') || 'Où lire tout ça sur le sac') + ' ».'; },
+        fait: function () { var b = _q('#fer-sac'); return !!(b && b.style.display !== 'none'); },
+        ok: 'Un exemple d’étiquette montre où lire la norme, la composition et la mention bio.' },
+      { type: 'taper', cible: '[data-tuto="fer.npk"]', exemple: '4-10-1',
+        txt: function () { return 'Les trois chiffres du sac sont l’azote, le phosphore et la potasse. Tapez la formule, par exemple 4-10-1.'; },
+        txtReel: 'la formule de votre sac.',
+        valide: function (x) { return /\d+\D+\d+/.test(String(x || '')); },
+        ok: function () { var v = function (k) { var e = _q('#fer-' + k); return e && e.value ? e.value : '\u2014'; }; return 'Azote ' + v('N') + '\u00a0%, phosphore ' + v('P') + '\u00a0%, potasse ' + v('K') + '\u00a0% : remplis.'; } },
+      { type: 'taper', cible: '[data-tuto="fer.nat"]', exemple: 'orga',
+        txt: function () { return 'Dites ce qu’est le produit\u00a0: choisissez «\u00a0Engrais organique, fientes, fumier de volaille\u00a0».'; },
+        txtReel: 'ce qu’est votre produit.',
+        valide: function (x) { return !!x; },
+        ok: 'Le type nitrates est posé, avec sa raison juste en dessous.' },
+      { type: 'toucher', cible: '[data-tuto="fer.etape2"]',
+        txt: function () { return 'Passons aux parcelles. {T} « Les parcelles ».'; },
+        fait: function () { var s = _q('#fer-s2'); return !!(s && !s.classList.contains('ferme')) && !!_q('[data-tuto="fer.regle"]'); },
+        ok: 'En tête, « Choisir par règle ».' },
+      { type: 'toucher', cible: '[data-tuto="fer.aoc"][data-aoc="Bourgogne"]',
+        txt: function () { return 'Au domaine, les Bourgognes ne reçoivent pas cet amendement. {T} «\u00a0Bourgogne\u00a0» pour les retirer.'; },
+        fait: function () { var b = _q('[data-tuto="fer.aoc"][data-aoc="Bourgogne"]'); return !!(b && b.classList.contains('on')); },
+        ok: 'Bourgogne est barrée\u00a0: la règle la laisse de côté.' },
+      { type: 'toucher', cible: '[data-tuto="fer.regle"]',
+        txt: function () { return '{T} « ' + (L('[data-tuto="fer.regle"]') || 'Cocher ces parcelles') + ' ».'; },
+        fait: function () { return document.querySelectorAll('[data-tuto="fer.plist"] .fer-pl.on').length > 0; },
+        ok: function () { var n = document.querySelectorAll('[data-tuto="fer.plist"] .fer-pl.on').length; return n + '\u00a0parcelle' + (n > 1 ? 's cochées' : ' cochée') + '. Vous pouvez encore en cocher ou décocher à la main.'; } },
+      { type: 'regarder', cible: '[data-tuto="fer.plist"]',
+        txt: function () { return 'Chaque ligne montre son appellation, ses sacs et son azote. Avec un seuil, la règle garderait aussi les parcelles sous ce rendement, celui de la vendange au Cuvier. Sur votre domaine, rien n’a bougé\u00a0: c’était un entraînement.'; } }
     ] },
   // ★ TUTO-8 (§388) — les maturités (MATU-1) : la saisie en série. Il fait redescendre le compte des gestes sans tuto.
   { id: 'maturites', titre: 'Comment faire pour noter des mesures de maturité\u00a0?', fin: 'noter des mesures de maturité',
