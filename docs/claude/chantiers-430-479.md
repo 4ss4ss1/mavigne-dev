@@ -657,3 +657,51 @@ Nico (22/10, dicté) : ajouter aux absences du planning une « absence pour moti
 - Son téléphone et son PC : la fiche du jour avec le motif, la ligne de la compta, le relevé PDF regardé.
 - **Laissé exprès** : la mise à pied conservatoire ; la valeur des suspensions dans le plafond annuel (Cass. 3 juin 2026) ; les absences injustifiées reprises sur la récup (NET-1) face à l’accord (4.2) — décisions, §28.
 - **Ouvert, comme le congé sans solde (§151)** : une mise à pied posée après « Figer » n’entre pas dans le report du mois suivant.
+
+## 459. ★★ UX-0 — LE CLIQUET DE L’EXPÉRIENCE D’USAGE : LES DIX PAGES, AU TÉLÉPHONE ET SUR ORDINATEUR, MESURÉES SUR LE BUILD, EN CI (26/10 — `scripts/mv-ux-rendu.mjs` (neuf) · `scripts/mv-ux-baseline.json` (neuf) · `scripts/mv-harnais-ux0.mjs` (neuf) · `package.json` (`test:ux`) · `.github/workflows/ci.yml` (étape après le gabarit) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` (§6b, §28, consolidation) · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/UX-0.json` · **aucun bump**, base `42c2543`)
+
+### 459a. D’où ça vient
+Nico (25/10, dicté) : « inspire-toi des plus grands […] Apple, Google, Facebook » pour l’ergonomie et l’expérience ; puis « reprends l’intégralité de toutes les améliorations […] chiffre le travail et le nombre de lots […] l’appli doit correspondre parfaitement aux maquettes ». Livrés hors dépôt : l’audit des fonctions face aux références du marché (`audit-niveau-au-dessus-2026-10-25.md`), l’audit d’expérience d’usage mesuré sur la démo construite (`audit-ux-2026-10-25.md`), le plan en 22 lots (`plan-mise-en-place-2026-10-25.md`), trois maquettes (`maquette-niveau-au-dessus-v1.html`, `maquette-ux-v1.html`, `maquette-ux-v2.html`). Trois décisions le 25/10 (§28). UX-0 ouvre le plan : poser le cliquet avant de faire baisser les chiffres, pour qu’ils ne remontent plus.
+
+### 459b. Ce qui est mesuré, et comment
+- **Dix pages** (`home` à `reglages`), au téléphone (390 × 844, tactile) et sur ordinateur (1366 × 900), **dans la page active** — le dock, commun à toutes, reste hors mesure.
+- `c24` / `c44` : les cibles visibles (`button`, `a[href]`, `[onclick]`, champs, `[role=button]`, `label[for]`, `summary`) dont le plus petit côté, arrondi, est sous 24 / 44 px. Un lien pris dans une phrase n’est pas une cible (l’exception de WCAG 2.2).
+- `t11` / `t12` : les textes visibles sous 11 / 12 px (taille calculée), exposants exclus.
+- `chrome` : la pile des bandeaux collés en tête — collés (sticky) ou fixes, au moins la moitié de la largeur, contigus à 24 px près —, au repos ; `chromeDefile`, la même après 900 px de défilement (ou ce que la page permet, 300 px au moins).
+- `pouce` : au téléphone, sur les pages de liste, les actions du tiers haut de l’écran moins celles du tiers bas.
+- **Neuf gestes** de la maquette v2 : le haut de la session en cours du tracteur (`.scard-enc`), les cibles sous `#trac-fab`, les dates `AAAA-MM-JJ` du registre phyto, Relever / Ouiller / Soutirer sous 44 px, un sommaire collé dans la Cave, une action flottante dans la Réserve, le haut de `.pl2-grid`, le haut du premier `.set-row` des Réglages, le plus petit côté du bouton `pQuickValidate`.
+
+### 459c. Les arbitrages
+- **L’horloge** : `page.clock.install({ time })` puis `page.clock.resume()` — posée au mardi 27/10/2026 à 9 h (Paris), puis elle tourne. `setFixedTime` écarté : un `Date.now()` figé bloque tout code qui attend qu’un délai s’écoule. Sans horloge posée, le relevé suivrait le jour de la semaine : la démo se construit autour d’« aujourd’hui ».
+- **La marge** : 1 cible, ou 4 px pour une hauteur ; aucune pour les textes, les dates et les oui/non. La police est la même partout (`dist/fonts`), le navigateur non : le bac à sable joue Chromium 141.0.7390.37, la CI celui de Playwright 1.61.
+- **Regraver** : refusé dès qu’une mesure monte ; `--accepte "<raison>"` écrit la raison dans `regravures`. Une hausse voulue se décide, elle ne se glisse pas — un sommaire collé qui allonge `chromeDefile`, par exemple (CAVE-UX-1).
+- **Une page perdue ou une pièce introuvable rougit** : un harnais qui déménage doit rougir, on le suit (§6c).
+- **Hors `npm run check`** (il faut un build et un navigateur), comme le gabarit (§456) ; `mv-harnais-ux0` garde le branchement à chaque check.
+
+### 459d. La référence gravée (26/10, base `42c2543`)
+| | téléphone | ordinateur |
+|---|---|---|
+| cibles sous 24 px | 19 sur 416 | 19 sur 428 |
+| cibles sous 44 px | 322 (77 %) | 271 (63 %) |
+| textes sous 11 px | 68 sur 1 363 | 64 sur 1 487 |
+| textes sous 12 px | 172 (13 %) | 190 (13 %) |
+| bandeaux au repos | 178 à 309 px | 187 à 241 px |
+| bandeaux en défilant | 178 à 192 px | 178 à 232 px |
+
+Gestes : la session du tracteur à 474 px ; 1 cible sous le « + » ; 15 dates écrites `2026-09-08` ; 5 gestes de la Cave à 28 px ; ni sommaire collé dans la Cave, ni action flottante dans la Réserve ; la grille du Planning à 472 px ; le premier réglage à 385 px ; Valider à 48 px.
+⚠️ Ce ne sont pas les chiffres de l’audit (69 % de cibles sous 44 px au téléphone) : l’audit comptait aussi le dock, sans horloge posée. **La référence, c’est ce fichier.**
+
+### 459e. Mesuré
+- Trois gravures et deux relevés de comparaison : aucun écart. Le relevé complet prend 89 à 92 s, la contre-épreuve 27 s.
+- Contre-épreuve : sept défauts posés à l’écran (les cibles, les textes et le bandeau du Journal, la grille du Planning, le « + » du tracteur, une date au registre, un geste de la Cave) → 7/7 rougissent. ★ Un défaut était muet : un `margin-bottom` sur `.pl2-perbar` ne déplaçait pas la grille ; remplacé par un `padding-bottom` sur `#plan-stats-band`.
+- Regravure : refusée sur une hausse sans raison (testé) ; acceptée avec `--accepte`, la raison écrite (testé sur une copie, puis la vraie référence remise) ; `--accepte` sans raison refusé.
+- `mv-harnais-ux0` : 14 assertions, 14/14 mutants mordent ; `mv-harnais-lanceur` 23 verts ; `mv-harnais-portes` 13 verts.
+
+### 459f. Trouvé en route
+- ★ **La validation rapide a déjà son « Annuler cette validation »** — la feuille de fin (`_mvdsOpen`, `pQuickUndoEntry`). L’audit d’expérience d’usage annonçait zéro « Annuler » dans l’appli : faux pour ce geste. ANNULER-1 part de là, le même patron pour les gestes réversibles qui restent.
+- ★ Sur ordinateur, la page commence 9 px sous le haut : la première mesure des bandeaux y lisait 0 — d’où la contiguïté à 24 px.
+- ★ La règle F de `mv-harnais-lanceur` ne garde que les scripts **de la liste** : déclarer `mv-ux-rendu.mjs` dans `ECRIT_HORS_LISTE` l’y rendait « périmé ». Le compagnon vérifie à la place que la liste ne le joue jamais.
+
+### 459g. Ce qui reste ouvert
+- **Le premier passage en CI** — un autre navigateur : s’il rougit, ce sera d’abord sur les textes (marge zéro). Lire l’écart, puis décider : une marge d’un texte, ou une regravure `--accepte` si l’écart vient du navigateur et non de l’appli. **À confirmer.**
+- Le plan continue (§28) : CIBLE-1, puis ANNULER-1.

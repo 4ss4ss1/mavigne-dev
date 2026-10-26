@@ -89,6 +89,12 @@ jobs:
       - name: Gabarit du Pilotage — mesuré sur le build
         run: npm run test:gabarit
 
+      # UX-0 (§459) : le cliquet de l'expérience d'usage — les dix pages au téléphone et sur ordinateur, neuf gestes de la
+      # maquette v2, comparés à scripts/mv-ux-baseline.json. Une cible plus petite, un texte plus fin ou un bandeau plus haut
+      # qu'à la référence fait rougir la mise en ligne ; une baisse se regrave (npm run test:ux -- --baseline).
+      - name: Expérience d'usage — le cliquet mesuré sur le build
+        run: npm run test:ux
+
       # Utile quand le smoke tombe : on recupere le bundle exact qui a echoue.
       - name: Garder le build en cas d'echec
         if: failure()

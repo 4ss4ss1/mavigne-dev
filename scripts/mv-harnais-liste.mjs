@@ -789,6 +789,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-cavepil3.mjs --contre'],
   ['node scripts/mv-harnais-mapied1.mjs'],             // MAPIED-1 (§458) : la mise à pied disciplinaire — ni payée ni rattrapée, hors heures sup et récup ; sa ligne à retirer dans « Pour la compta »
   ['node scripts/mv-harnais-mapied1.mjs --contre'],
+  ['node scripts/mv-harnais-ux0.mjs'],                 // UX-0 (§459) : le cliquet de l'expérience d'usage branché (npm, CI après le gabarit), sa référence couvre dix pages, deux écrans, neuf gestes
+  ['node scripts/mv-harnais-ux0.mjs --contre'],
   ['node scripts/mv-harnais-cave2.mjs'],              // CAVE-2 (§289) : le Cuvier à la charte
   ['node scripts/mv-harnais-cave2.mjs --contre'],
   ['node scripts/mv-harnais-cave3.mjs'],              // CAVE-3 (§290) : le Chai en liste + fiche

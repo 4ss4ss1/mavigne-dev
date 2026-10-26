@@ -1,0 +1,22 @@
+{
+  "lot": "UX-0",
+  "section": "§459",
+  "base": "42c2543901ea2ff3bde43595369f0e2c6e8f2dfe",
+  "inclut": [],
+  "date": "2026-10-26",
+  "tutos": null,
+  "fichiers": {
+    ".github/workflows/ci.yml": "ed17c08d9fc8acfeb94ee69cbeec63a55aaa080d02e51879827fec62d68a1930",
+    ".mv-base": "7aa13509d3e00798d90beba86a5d499d4541f6d1b47d95d6575d2d044ca9d691",
+    "CLAUDE.md": "c6086d0f8706394383e05077c8b4f4e48768b57b34925025c75793b625211efb",
+    "docs/claude/INDEX.md": "0f9afe9ba4c9ccfcea95071aec781f9bc47da8a9b9edf89a044ea43113b2e604",
+    "docs/claude/chantiers-430-479.md": "30dbe65deacfae208ff403d50ed4d275ceb1a6e50733d4163dba4e3983cc9ba1",
+    "docs/claude/journal.md": "21474c1ebdf0af94119f156e1aea76a2dee9b72478756e012d7c61918420cbe8",
+    "package.json": "f3eb72d3632b66d076a272e1f2ce1ba463a5d603ff3bc4fb5158ba69c26d9121",
+    "scripts/harnais-claude-md.mjs": "ea704664fa209909bb068e05572846772c099e8556e029c41dd0899edf102ce8",
+    "scripts/mv-harnais-liste.mjs": "70f658b068437eef3110f5cc2ce74be31e9b480f5d1913bf56a43bed2b6bddab",
+    "scripts/mv-harnais-ux0.mjs": "58279723535554d6e5252209d7137a8a338c557148d66657ce173296bffb0c75",
+    "scripts/mv-ux-baseline.json": "d4613fa3e9162b358364d32815e68dd82a7a6319830c9c48bea9bbf5dcf2f28f",
+    "scripts/mv-ux-rendu.mjs": "b4dc8c0b89ca37383bd7f243d665a923e4df734d3a52a94508400c5700115d15"
+  }
+}
