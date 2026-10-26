@@ -1,0 +1,39 @@
+{
+  "lot": "FERTI-5",
+  "section": "§462",
+  "base": "4e187d99aba9cd5983d1cbb62e1e605d45323cfd",
+  "inclut": [
+    "FERTI-4"
+  ],
+  "date": "2026-10-26",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".gitignore": "ddb14fc54bee288fa438cb8a8f353e7c0375ac5ad79a8a32795d204c92ae8d49",
+    ".mv-base": "25ee3af6b5e8daeb9f52e98d3ea563d573473d521a8ed9e1323c2b67b93d17ef",
+    "CLAUDE.md": "9abce262f5cddb247565037e309ffa68fbfb56d561f2de94e0cb8b4cda793bc6",
+    "docs/claude/INDEX.md": "5275ddb11ad6d2ae4b7c37ab4b3b2a43252b8e50621c37278263e3e28b5cede2",
+    "docs/claude/chantiers-430-479.md": "fbdeef32becc32fa112be39413719e6c1c00b84c8a8c275f95e9d8609885865e",
+    "docs/claude/journal.md": "928dc0d36ef2a3c906c1c36aa6808fc2dbb2b554b9a30fd9fb5356ef63c6b2ea",
+    "functions/ephy.js": "01aa43f254b44bdc0b5738b63d7510bd716641028ed6e3ce03522baa9d5ac8c3",
+    "guide/07-phyto.html": "95e2af9e4b6f35d66a73f1484108cf87673b42a7b7a0e7f2d8d38bcbbe52dd94",
+    "index.html": "bc2050a0cf2ffef3ca4edb69aeb6e1c85b45bf07bb6b197aec0ddcf54fe4dc45",
+    "public/sw.js": "93e68dee8df4a4cbdabd1759775bfd39f1644d19851a0f53a7d10266df3b9602",
+    "scripts/mv-harnais-liste.mjs": "028c17fe17589e195b1d5a5b939b3e529ef701d63e25dee5741bcec7b676d931",
+    "src/phyto.js": "29cc89e87c5b21e260ef4782b843699dbcfb7c241c7182818d3710b285793695",
+    "src/tracteur.js": "e8bbd9f8575ebefb8b855696b1c90d746da17e1fe501fe1f7577e57a6160f759",
+    "src/utils.js": "3ebaa7f37128fcfd26a246a4dee29c29c414321cc0e83936dad8d14a0a027934",
+    "functions/ephy-calc.js": "bfdcd0126a8a6e99a518f51eb6fd1df34943701707d66f2e0358cf3aa78364d1",
+    "scripts/fixtures/ephy-mfsc/LISEZMOI.txt": "e3ac805f002e1c289bce0996538335d6c2a2d080fba687b84f63bab8821434f3",
+    "scripts/fixtures/ephy-mfsc/mfsc_et_mixte_composition_utf8.csv": "157801620370d6bb201e5064d66b9db5734de67a10b7546c98225fc9509eadf3",
+    "scripts/fixtures/ephy-mfsc/mfsc_et_mixte_usage_utf8.csv": "2c09916a9462534dd06cc50217dad0ac6f5ff8d4af6f31c18f687bb0c312733d",
+    "scripts/fixtures/ephy-mfsc/produits_usages_utf8.csv": "f41e1a458a4b0e152dd5e44863547fdc37499f337806628e78981b3edaaea759",
+    "scripts/fixtures/ephy-mfsc/produits_utf8.csv": "dcdb55dac0ffe3ce0c61fcf2d9aad1a332e2722bf1f615f1b824c1b2ea42529b",
+    "scripts/fixtures/ephy-mfsc/roles.json": "c5eccf15df622637620ae4783c66b3f2c8da24d47751bd6b0daa9f544cc0f164",
+    "scripts/fixtures/ephy-mfsc/usages_des_produits_autorises_utf8.csv": "0fe5f409a86463fed45a5678fb4ed4ca4661b6eb3ffd8ec77d3a4f360e8e8400",
+    "scripts/mv-harnais-ephy-mfsc.mjs": "2f01e1bb4b710611667bfda7df07894acd01cbfedb0d3738152bde1c96ff8e16",
+    "scripts/mv-harnais-ferti5.mjs": "b4a4167fe686fa3196812dc9678dd3dc1134716f8887836ec8e6982008bac16e"
+  }
+}

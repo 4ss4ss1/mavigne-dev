@@ -1,0 +1,11 @@
+type produit;numero AMM;nom produit;seconds noms commerciaux;titulaire;type commercial;gamme usage;mentions autorisees;restrictions usage;restrictions usage libelle;Substances actives;fonctions;formulations;Etat d’autorisation;Date de retrait du produit;Date de première autorisation;Numéro AMM du produit de référence;Nom du produit de référence
+PPP;2180347;APPLAUD STAR;;Nichino Europe Co., Ltd;Produit de référence;Professionnel;;;;buprofézine (Buprofezin) 250.0 g/L;Insecticide;Suspension concentrée;AUTORISE;;03/10/2018;;
+PPP;2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;;INDUSTRIAS QUIMICAS DEL VALLES;Deuxième gamme;Amateur / emploi autorisé dans les jardins;Production biologique amateur | Emploi autorisé dans les jardins;;;bouillie bordelaise (Copper compounds) 733.4 g/kg;Fongicide;Granulé dispersable;AUTORISE;;15/07/2025;2090137;BORDO 20 MICRO
+MFSC;1150019;PREMIER TECH-GHA180;;PREMIER TECH GHA SAS;Produit de référence;;;;;;Préparation bactérienne;Suspension concentrée;AUTORISE;;10/03/2016;;
+MFSC;1160001;TRADIBASE MG;;SEDE ENVIRONNEMENT;Produit de référence;;;;;;Amendement minéral basique;;AUTORISE;;13/09/2016;;
+MFSC;1210082;KITOGREEN YIELD;;KITOZYME SA;Produit de référence;;;;;;Matière fertilisante;;AUTORISE;;02/02/2021;;
+MFSC;1180074;KTS;;TESSENDERLO GROUP;Produit de référence;;;;;;Matière fertilisante;;AUTORISE;;22/03/2018;;
+MFSC;1180798;CORNACTYL;;TIMAC AGRO SAS;Produit de référence;;;;;;Matière fertilisante;;AUTORISE;;06/12/2018;;
+MFSC;1020004;SOLRIZE;;AGRAUXINE;Produit de référence;Professionnel;;;;;Matière fertilisante;;RETIRE;19/08/2021;11/04/2002;;
+MFSC;1170609;BACTERIOLIS;NUTRIVERT V | LE V BY FERTECH;CYBELE AGROCARE SAS;Produit de référence;;;;;;Préparation bactérienne;;AUTORISE;;25/09/2017;;
+MFSC;1210642;SVL-204;;SERVALESA S.L.U.;Produit de référence;;;;;;Matière fertilisante;;AUTORISE;;18/10/2021;;

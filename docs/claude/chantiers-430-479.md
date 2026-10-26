@@ -742,3 +742,73 @@ Nico (25/10, capture de la vue Économie d’Aujourd’hui, « Hiver 2026 - 2027
 - **À voir chez Nico** : la vue Économie d’Aujourd’hui sur ses données (la démo n’a pas d’économie) — la tuile égale au total de la carte, la Réparation et le Dégraffage en heures, la pointe, le tiret ; son téléphone et son PC à 125 %, clair et sombre.
 - **Les 108 h de Réparation** : ses journées de cave d’octobre sont-elles toutes marquées (§428e) ? Son estimation du 22/10 (33 h, puis deux personnes quelques jours) tomberait vers 75 à 105 h : si elle est juste, c’est le barème de 15 h qui est bas pour ces parcelles. **À confirmer avec lui.**
 - « Temps réel contre barème » (onglet Économie) n’a pas de ligne Total ; la tuile d’Aujourd’hui la donne.
+
+## 461. ★★ FERTI-4 — LE CATALOGUE E-PHY GARDE LES MATIÈRES FERTILISANTES VALABLES EN VIGNE (26/10 — `functions/ephy.js` · `functions/ephy-calc.js` (neuf) · `scripts/mv-harnais-ephy-mfsc.mjs` (neuf) · `scripts/fixtures/ephy-mfsc/` (neuf) · `scripts/mv-harnais-liste.mjs` · `.gitignore` (exception pour le jeu d’essai : `*.csv` y est ignoré) · **aucun bump**, base `4e187d9`)
+
+### 461a. D’où ça vient
+Nico (26/10, dicté) : « pour l’amendement, pour le E-Phy, j’ai des petits soucis de recherche » — Terrafumur (tapé « terrafumure ») et un « engrais organique 4-10-1 UAB », dont il n’avait que la mention du règlement. Réponse d’abord : les deux sont normés, donc sans AMM et absents d’E-Phy par nature ; « 4-10-1 » est la composition (N, P₂O₅, K₂O en % du poids) ; « conformément au règlement 834/2007 ou 2018/848 » est la mention bio, pas la norme ; Terrafumur s’écrit sans « e » (amendement organique Florentaise, NF U 44-051). Puis objectif reformulé et confirmé (« oui ») : vérifier le catalogue, ensuite maquetter la fiche.
+
+### 461b. La vérification — sur des données réelles, pas sur le code
+data.gouv.fr est fermé au bac à sable. Un export E-Phy complet du 24/02/2026 (`decisionamm-intrant-format-csv-20260224-utf8`) vit dans un dépôt public (`a-maurin/phytoDB`) : `functions/ephy.js` y a été rejoué tel quel, modules Firebase et réseau doublés. Mesuré : 925 MFSC autorisées, 364 au catalogue. Les 561 absentes : 122 « toutes cultures » (le type « Traitements généraux » ne porte que ça), 11 qui nomment la vigne autrement (« raisin de cuve », « viticulture »), 41 sans aucune culture, 387 pour d’autres cultures seulement. Pour toutes, la fiche répondait « pas dans E-Phy, s’il est normé, tapez sa norme » : faux, elles ont une AMM.
+★ `mfsc_et_mixte_usage` n’a pas de colonne « identifiant usage » : `classify()` le range dans les fichiers PRODUITS, et seul le repli 6 le lisait — au mot « vigne ».
+★ Trouvé en route, laissé ouvert : 102 MFSC passent pour « vigne » par le seul nom de catégorie « Arboriculture fruitière et vigne », dont certaines ne visent que des arbres fruitiers (commentaire « pommier, poirier… »). Inchangé ici.
+★ La taille : le garde-fou comptait en JSON (909 Ko après deux compactions) ; Firestore compte ~776 Ko pour le même document. Les compactions restent utiles : 1,10 Mo au premier passage, en taille Firestore.
+★ E-Phy donne les teneurs déclarées de 439 MFSC sur 925 (l’azote total de 360) : de quoi remplir la composition à la place de l’utilisateur (FERTI-5).
+
+### 461c. Ce qui a été fait
+- `functions/ephy-calc.js` (neuf, pur, hors `index.js` comme `planning-vues-calc.js`) : `classeVigne` (v · tc · nc · non), `lireCompo` (totaux N, P₂O₅, K₂O, MO, C ; « dont » et « soluble dans l’eau » ignorés), `tailleFs`.
+- `functions/ephy.js`, étape 6bis : chaque MFSC reçoit son rapport à la vigne ; entrent celles qui nomment la vigne (tous statuts, comme avant), puis les « toutes cultures » et « sans culture » **autorisées** ; `vg` et `compo` posés sur les fiches MFSC ; tailles en `tailleFs` ; au-delà de 1 040 000 octets, rien n’est écrit (l’ancien catalogue reste) plutôt qu’un refus de Firestore. Rejoué sur l’export complet : 3 754 → 3 928 entrées, MFSC autorisées 364 → 538, 850 Ko.
+- `INCLURE_HORS_VIGNE = false` : les 387 « autres cultures » entreront avec FERTI-5, quand l’appli saura les marquer « Pas la vigne » ; avant, la recherche de l’amendement, celle d’un traitement et l’onglet Catalogue les montreraient comme des produits vigne.
+- Harnais `mv-harnais-ephy-mfsc.mjs` sur un extrait réel de 10 AMM (`scripts/fixtures/ephy-mfsc`, lecture CSV sans dépendance : la CI n’installe pas `functions/node_modules`), 21 vertes ; `--contre` pose deux défauts (« toutes cultures » oublié ; les « autres cultures » entrent) : 2/2 attrapés. ★ Premier passage : 1 rouge, et c’était le jeu d’essai (les lignes vigne du PPP coupées par une limite de 40 lignes). Soupçonner le test d’abord.
+
+### 461d. La maquette (hors dépôt, publiée)
+`maquette-amendement-v2.html`, l’artefact de la v1 mis à jour : la vraie feuille de l’appli, l’écran « Avant » relevé dans la démo. Étape 1, validée (« c’est parfait ») : statut vigne dans les résultats (Vigne · Toutes cultures · Culture non précisée · Pas la vigne, ce dernier choisissable avec avertissement), « Pas dans E-Phy » réservé aux produits sans AMM, normes en un geste (NF U 44-051, NF U 42-001, fertilisant UE 2019/1009), formule « 4-10-1 » qui remplit N, P, K, teneurs reprises d’E-Phy, « Ce que c’est » qui pose le type nitrates avec sa raison (liste nommée du 7e programme), UAB expliqué.
+Étape 2, à valider. Nico (26/10) : « toutes les parcelles qui sont en dessous d’un certain nombre d’hectos par hectare ont été sélectionnées pour l’amendement, pour les renforcer […] et sur cette sélection, nous avons retiré aussi les Bourgognes » ; objectif reformulé et confirmé. Choix par règle : rendement de la vendange (`_mlRendements`, déjà la source du cahier) sous un seuil, sauf des appellations (`p.appellation`), un bouton « Cocher ces N parcelles · X ha » ; une parcelle sans rendement connu reste de côté, nommée. Mesuré : au téléphone, cadre de 390 px comme l’appli, écran « Avant » 2 056 px contre 2 076 (1 %, cause non trouvée).
+
+### 461e. Reste ouvert
+- **FERTI-5** : la fiche « Le produit » au dessin de la maquette validée ; `vg` et `compo` lus partout où E-Phy est cherché (fertilisation, traitement, onglet Catalogue) ; puis `INCLURE_HORS_VIGNE = true` dans le même lot ; aide, guide, nouveautés, tutos.
+- **FERTI-6** : les parcelles par règle, après validation de la maquette v2.
+- La seule catégorie « Arboriculture fruitière et vigne » (102 MFSC) : à trancher.
+
+## 462. ★★ FERTI-5 — LA FICHE « LE PRODUIT » DE L’AMENDEMENT, AU DESSIN DE LA MAQUETTE VALIDÉE (26/10 — `src/phyto.js` · `src/tracteur.js` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE phyto) · `index.html` · `public/sw.js` · `guide/07-phyto.html` · `functions/ephy.js` · `scripts/mv-harnais-ferti5.mjs` (neuf) · `scripts/mv-harnais-ephy-mfsc.mjs` · `scripts/mv-harnais-liste.mjs` · **bump APP 10.15 → 10.16, SW 10.96 → 10.97**, base `4e187d9`, zip cumulatif avec FERTI-4)
+
+### 462a. D’où ça vient
+Maquette v1, étape 1 (§461d) : « Ok, c’est parfait ». Maquette v2, parcelles par règle : « go ». Ce lot pose l’étape 1 ; FERTI-6 posera l’étape 2.
+
+### 462b. Ce qui a été fait
+- **La recherche** : chaque résultat porte son statut (`FER_VG`, lu dans `p.vg` posé par la synchro), et « vendu aussi sous … » quand c’est un nom de revente qui a trouvé. Sous la recherche, `_ferEtat` dit ce que l’autorisation du produit choisi permet ; « Pas la vigne » en encadré orange, avec ses cultures (`p.cult`). « Pas dans E-Phy » seulement quand le catalogue est chargé et ne trouve rien, avec « Prendre « … » comme nom du produit » ; catalogue absent (hors connexion) : dit tel quel, plus de faux « pas dans E-Phy ».
+- **Les teneurs déclarées** (`p.compo`, FERTI-4) remplacent la saisie seulement si E-Phy en donne ; une teneur retouchée efface la mention « reprise d’E-Phy » (`_ferSet`).
+- **Les normes en un geste** (`FER_NORMES`, `_ferNorme`) ; le champ reste libre. Toucher une norme fait du produit un produit normé : AMM et statut retirés.
+- **La formule** « 4-10-1 » (`_ferLireNpk`) remplit azote, phosphore, potasse ; deux chiffres laissent la potasse vide ; « NPK 8,5-0-12 + 2 MgO » lit 8,5 · 0 · 12.
+- **« Ce que c’est »** (`FER_NAT`, liste nommée du 7e programme) pose le type et dit pourquoi ; « Choisir le type soi-même » ouvre l’ancien choix (`_ferTypMain`). « Chaux, dolomie » ne pose pas de type : `typ:''`, écrit « — » partout (`_ferTypLbl` : liste des apports, cahier imprimé, tableur) — l’ancien repli `FER_TYP.II` l’aurait écrit « Type II ».
+- **L’enregistrement** garde `nat` et `vg` sur l’apport.
+- **Ailleurs** : « Pas la vigne » dans la recherche d’un traitement (`_phyEphyMeta` porte `vg`, pastille dans `_tratResultRow`) et dans l’onglet Catalogue (« · pas la vigne » / « · toutes cultures » à côté de MFSC).
+- **Le serveur** : `INCLURE_HORS_VIGNE = true` ; fiche réduite pour les « autres cultures » (ni usages ni composition en texte ; `cult` = trois cultures au plus). Rejoué sur l’export du 24/02 : 4 315 entrées, 902 Ko en taille Firestore, sous le plafond d’écriture (1 040 000).
+
+### 462c. Mesuré, et vu en route
+`mv-harnais-ferti5.mjs` : 34 vertes, contre-épreuve 3/3 (formule qui lit le phosphore à la place de l’azote, compost classé II, statut oublié dans la recherche d’un traitement). `mv-harnais-ephy-mfsc.mjs` : 21 vertes, 2/2, sa contre-épreuve retournée (les « autres cultures » qui resteraient dehors). `mv-harnais-fertil.mjs` : 70 vertes. Preflight : 0 erreur après correction — ★ C24b a vu une interpolation `'+i+'` dans le `onkeydown` neuf d’une ligne de résultat : remplacée par `this.click()`, qui rejoue le `onclick`. Tutos concernés : aucun (5 tutos, aucun ne touche la fiche). Rendu regardé dans l’appli construite, démo, gestes réels joués au clavier et à la souris, catalogue injecté : KTS (encadré « Pas la vigne »), recherche « sv », KITOGREEN YIELD (6 % N repris), l’engrais 4-10-1 (nom pris de la recherche, NF U 42-001, 20 kg N/ha), clair et sombre. Chaîne complète : non jouée en entier dans le bac à sable.
+★ Dans l’appli, la ligne choisie prend la teinte de la charte (mauve), pas le vert de la maquette — la ligne « Pas la vigne » aussi : une règle de la charte l’emporte sur `.fer-ri.on.hors`. Le statut reste porté par la pastille et l’encadré. Non corrigé.
+
+### 462d. Reste ouvert
+- **FERTI-6** : les parcelles par règle (maquette v2).
+- La seule catégorie « Arboriculture fruitière et vigne » (102 MFSC) : à trancher.
+
+## 463. ★ FERTI-6 — CHOISIR LES PARCELLES PAR RÈGLE À L’ÉTAPE 2 DE L’AMENDEMENT (26/10 — `src/phyto.js` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE phyto) · `index.html` · `public/sw.js` · `guide/07-phyto.html` · `scripts/mv-harnais-ferti6.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · **bump APP 10.16 → 10.17, SW 10.97 → 10.98**, base `4e187d9`, zip cumulatif avec FERTI-5 et FERTI-4)
+
+### 463a. D’où ça vient
+Nico (26/10, dicté) : « au domaine, toutes les parcelles qui sont en dessous d’un certain nombre d’hectos par hectare ont été sélectionnées pour l’amendement, pour les renforcer […] et sur cette sélection, nous avons retiré aussi les Bourgognes. Il faudrait qu’il y ait une possibilité de filtre de sélection des parcelles ». Objectif reformulé et confirmé (« oui ») ; maquette v2 (§461d) validée : « go ».
+
+### 463b. Ce qui a été fait
+- `_ferRegleCalc(parcs, rdt, seuil, sauf)`, pure : rendement **strictement** sous le seuil (virgule acceptée), sauf les appellations retirées (`p.appellation` sans les espaces) ; sans seuil, seules les appellations jouent ; une parcelle sans rendement connu reste de côté, rendue à part pour être nommée.
+- À l’ouverture, une fois : `_fer._mil` = la campagne (`_ferCampDe`), `_fer._rdt` = ses rendements (`_ferRdt` → `_mlRendements`, la source du cahier) ; aucun → la vendange précédente. Pas à chaque frappe : `_mlRendements` parcourt toutes les récoltes.
+- Les appellations en pastilles comptées, « Sans appellation » quand une parcelle n’en a pas ; la valeur est lue dans `data-aoc` par le geste — aucune valeur interpolée dans un gestionnaire (C24b).
+- Le bouton « Cocher ces N parcelles · X ha » **remplace** la sélection ; Tout cocher, Tout décocher et Zone vulnérable restent, et on ajuste à la main.
+- Chaque ligne : l’appellation après le cépage, puis le rendement de la vendange (gras sous le seuil) ou « Rendement 2026 inconnu » — seulement quand au moins un rendement est connu : un domaine sans vendange saisie ne voit pas une colonne de « inconnu ».
+- Aide (fiche Phyto), guide (étape « Les parcelles »), nouveautés 10.17.
+
+### 463c. Mesuré
+`mv-harnais-ferti6.mjs` : 17 vertes, contre-épreuve 3/3 (« sous » devenu « jusqu’à » ; appellations retirées oubliées ; parcelle sans rendement cochée d’office). ★ Premier passage : 1 rouge, et c’était le contrôle — il cherchait `id="fer-seuil"` en dur, alors que `_ferIn('fer-seuil', …)` le pose. Preflight 0 erreur ; FERTI-5 34 vertes ; fertil 70. Rendu dans l’appli construite (démo, 14 parcelles et leurs rendements injectés, gestes réels) : seuil 35, Bourgogne retirée → « Cocher ces 6 parcelles · 3,98 ha », « Les Jeunes Rois » nommée, 6 cochées dont 1 en ZV — les chiffres de la maquette. Clair et sombre. Tutos concernés : aucun.
+
+### 463d. Reste ouvert
+- La seule catégorie « Arboriculture fruitière et vigne » (102 MFSC, §461b) : à trancher.
+- La règle ne s’enregistre pas : elle se refait à chaque apport (non demandé).

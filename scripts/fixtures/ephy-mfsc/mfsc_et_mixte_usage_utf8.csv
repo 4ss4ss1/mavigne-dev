@@ -1,0 +1,47 @@
+type produit;numero AMM;nom produit;type culture libelle;dose min par apport;dose min par apport unite;dose max par apport;dose max par apport unite;stade cultural min (BBCH);stade cultural max (BBCH);etat usage;saison application min;saison application max;saison application min commentaire;saison application max commentaire; date decision;culture commentaire
+MFSC;1150019;PREMIER TECH-GHA180;Cultures ornementales;6.0;L/ha;12.0;L/ha;;;Autorisé;A la plantation;A la plantation;;;10/03/2016;Fleurs et plantes ornementales. Au semis ou à la transplantation
+MFSC;1150019;PREMIER TECH-GHA180;Cultures légumières;6.0;L/ha;12.0;L/ha;;;Autorisé;A la plantation;A la plantation;;;10/03/2016;Légumes à fruit : Tomate aubergine, cerise de terre et poivrons. Légume-feuille : Laitue, roquette, épinard, cresson, etc.  Cucurbitacées : Concombre, cantaloup, melon, courge, melon d'eau et citrouille Les choux : Brocoli, chou de Bruxelles, chou, chou-fleur, etc. Légumes bulbes : incluant Oignon, poireaux et échalotes. Au semis ou à la transplantation
+MFSC;1150019;PREMIER TECH-GHA180;Arboriculture fruitière et vigne;6.0;L/ha;12.0;L/ha;;;Autorisé;A la plantation;A la plantation;;;10/03/2016;Petits fruits :  Mûre framboise et fraise Au semis ou à la transplantation
+MFSC;1150019;PREMIER TECH-GHA180;Cultures légumières;6.0;L/ha;12.0;L/ha;;;Autorisé;A la plantation;A la plantation;;;10/03/2016;Légumineuses : Haricots, gourgane, féverole, pois chiche, etc. A la plantation ou immédiatement après la plantation, mais avant l'émergence
+MFSC;1160001;TRADIBASE MG;Traitements généraux;1.0;t/ha;2.0;t/ha;;;Autorisé;Octobre;Mars;avant semis;avant semis;13/09/2016;Toutes cultures
+MFSC;1210082;KITOGREEN YIELD;Traitements généraux;0.15;kg/ha;0.3;kg/ha;;;Autorisé;;;du stade BBCH 0-9 au stade BBCH 89 Application toutes les 2 à 3 semaines;;02/02/2021;Toutes cultures
+MFSC;1210082;KITOGREEN YIELD;Traitements généraux;50.0;g/L;100.0;g/L;;;Autorisé;;;;;02/02/2021;Toutes cultures
+MFSC;1180074;KTS;Grandes cultures;25.0;L/ha;50.0;L/ha;;;Autorisé;;;Pré-semis, sortie d'hiver, en cours de culture directement au sol;;22/03/2018;Apport au sol
+MFSC;1180074;KTS;Cultures maraîchères;25.0;L/ha;50.0;L/ha;;;Autorisé;;;Pré-semis, sortie d'hiver, en cours de culture directement au sol;;22/03/2018;Apport au sol
+MFSC;1180074;KTS;Cultures ornementales;1.0;L/ha;3.0;L/ha;;;Autorisé;;;Pré-semis, sortie d'hiver, en cours de culture directement au sol;;22/03/2018;Apport au sol
+MFSC;1180074;KTS;Autres;1.0;L/ha;3.0;L/ha;;;Autorisé;;;Pré-semis, sortie d'hiver, en cours de culture directement au sol;;22/03/2018;Cultures pérennes Apport au sol
+MFSC;1180074;KTS;;1.0;L/ha;3.0;L/ha;;;Autorisé;;;Pré-semis, sortie d'hiver, en cours de culture directement au sol;;22/03/2018;Apport au sol
+MFSC;1180074;KTS;Grandes cultures;10.0;L/ha;50.0;L/ha;;;Autorisé;;;Au moment du semis, injection localisée dans le sol;;22/03/2018;Injection
+MFSC;1180074;KTS;Cultures maraîchères;10.0;L/ha;50.0;L/ha;;;Autorisé;;;Au moment du semis, injection localisée dans le sol;;22/03/2018;Injection
+MFSC;1180074;KTS;Cultures ornementales;10.0;L/ha;50.0;L/ha;;;Autorisé;;;Au moment du semis, injection localisée dans le sol;;22/03/2018;Injection
+MFSC;1180074;KTS;Autres;10.0;L/ha;50.0;L/ha;;;Autorisé;;;Au moment du semis, injection localisée dans le sol;;22/03/2018;Cultures pérennes Injection
+MFSC;1180074;KTS;;10.0;L/ha;50.0;L/ha;;;Autorisé;;;Au moment du semis, injection localisée dans le sol;;22/03/2018;Injection
+MFSC;1180074;KTS;Grandes cultures;5.0;L/ha;20.0;L/ha;;;Autorisé;;;A adapter selon cycles de cultures BBCH 10 à 79;;22/03/2018;Foliaire
+MFSC;1180074;KTS;Cultures maraîchères;5.0;L/ha;20.0;L/ha;;;Autorisé;;;A adapter selon cycles de cultures BBCH 10 à 79;;22/03/2018;Foliaire
+MFSC;1180074;KTS;Cultures ornementales;5.0;L/ha;20.0;L/ha;;;Autorisé;;;A adapter selon cycles de cultures BBCH 10 à 79;;22/03/2018;Foliaire
+MFSC;1180074;KTS;Autres;5.0;L/ha;20.0;L/ha;;;Autorisé;;;A adapter selon cycles de cultures BBCH 10 à 79;;22/03/2018;Cultures pérennes Foliaire
+MFSC;1180074;KTS;;5.0;L/ha;20.0;L/ha;;;Autorisé;;;A adapter selon cycles de cultures BBCH 10 à 79;;22/03/2018;Foliaire
+MFSC;1180074;KTS;Grandes cultures;5.0;L/ha;40.0;L/ha;;;Autorisé;;;A adapter au type de cultures et au débit des goutteurs;;22/03/2018;Goutte à goutte
+MFSC;1180074;KTS;Cultures maraîchères;5.0;L/ha;40.0;L/ha;;;Autorisé;;;A adapter au type de cultures et au débit des goutteurs;;22/03/2018;Goutte à goutte
+MFSC;1180074;KTS;Cultures ornementales;5.0;L/ha;40.0;L/ha;;;Autorisé;;;A adapter au type de cultures et au débit des goutteurs;;22/03/2018;Goutte à goutte
+MFSC;1180074;KTS;Autres;5.0;L/ha;40.0;L/ha;;;Autorisé;;;A adapter au type de cultures et au débit des goutteurs;;22/03/2018;Cultures pérennes Goutte à goutte
+MFSC;1180074;KTS;;5.0;L/ha;40.0;L/ha;;;Autorisé;;;A adapter au type de cultures et au débit des goutteurs;;22/03/2018;Goutte à goutte
+MFSC;1180074;KTS;Grandes cultures;15.0;L/ha;45.0;L/ha;;;Autorisé;;;Durant les périodes d'arrosage BBCH 30 à 79;;22/03/2018;Aspersion
+MFSC;1180074;KTS;Cultures maraîchères;15.0;L/ha;45.0;L/ha;;;Autorisé;;;Durant les périodes d'arrosage BBCH 30 à 79;;22/03/2018;Aspersion
+MFSC;1180074;KTS;Cultures ornementales;15.0;L/ha;45.0;L/ha;;;Autorisé;;;Durant les périodes d'arrosage BBCH 30 à 79;;22/03/2018;Aspersion
+MFSC;1180074;KTS;Autres;15.0;L/ha;45.0;L/ha;;;Autorisé;;;Durant les périodes d'arrosage BBCH 30 à 79;;22/03/2018;Cultures pérennes Asperion
+MFSC;1180074;KTS;;15.0;L/ha;45.0;L/ha;;;Autorisé;;;Durant les périodes d'arrosage BBCH 30 à 79;;22/03/2018;Aspersion
+MFSC;1180798;CORNACTYL;;7.0;L/ha;7.0;L/ha;;;Autorisé;;;Printemps : appliquer dès le stade 2 à 4 feuilles.;;06/12/2018;
+MFSC;1020004;SOLRIZE;Autres;10.0;kg d'inoculum/ha;10000.0;kg d'inoculum/ha;;;Retrait;;;multiplication, rempotage;;19/08/2021;Toutes cultures sauf noisetiers, châtaigniers, myrtilles, Pinacées, Fagacées, tilleuls, bouleaux, charmes, Cistacées, Crucifères, Chénopodiacées, Polygonacées, Caryophyllacées, Ericacées, et orchidées.  Hors sol.
+MFSC;1020004;SOLRIZE;Autres;200.0;kg d'inoculum/ha;3500.0;kg d'inoculum/ha;;;Retrait;;;Semis, aération;;19/08/2021;Toutes cultures sauf noisetiers, châtaigniers, myrtilles, Pinacées, Fagacées, tilleuls, bouleaux, charmes, Cistacées, Crucifères, Chénopodiacées, Polygonacées, Caryophyllacées, Ericacées, et orchidées.  Semis pleine terre.
+MFSC;1020004;SOLRIZE;Autres;80.0;kg d'inoculum/ha;200.0;kg d'inoculum/ha;;;Retrait;A la plantation;;;;19/08/2021;Toutes cultures sauf noisetiers, châtaigniers, myrtilles, Pinacées, Fagacées, tilleuls, bouleaux, charmes, Cistacées, Crucifères, Chénopodiacées, Polygonacées, Caryophyllacées, Ericacées, et orchidées.  Plantation pleine terre.
+MFSC;1170609;BACTERIOLIS;;0.1;kg/ha;0.2;kg/ha;;;Autorisé;;;;;25/09/2017;Application par trempage ou arrosage ou pulvérisation au moment du semis ou des plantations  Ou  En mélange avec des engrais ou amendements
+MFSC;1170609;BACTERIOLIS;;0.1;kg/ha;0.2;kg/ha;;;Autorisé;;;;;25/09/2017;Application par trempage ou arrosage ou pulvérisation au moment du semis ou des plantations  Ou  En mélange avec des engrais ou amendements
+MFSC;1170609;BACTERIOLIS;;0.1;kg/ha;0.2;kg/ha;;;Autorisé;;;;;25/09/2017;Application par trempage ou arrosage ou pulvérisation au moment du semis ou des plantations  Ou  En mélange avec des engrais ou amendements
+MFSC;1170609;BACTERIOLIS;Cultures légumières;0.2;kg/ha;0.5;kg/ha;;;Autorisé;;;;;25/09/2017;Application par trempage ou arrosage ou pulvérisation au moment du semis ou des plantations  Ou  En mélange avec des engrais ou amendements
+MFSC;1170609;BACTERIOLIS;;0.2;kg/ha;0.5;kg/ha;;;Autorisé;;;;;25/09/2017;Application par trempage ou arrosage ou pulvérisation au moment du semis ou des plantations  Ou  En mélange avec des engrais ou amendements
+MFSC;1170609;BACTERIOLIS;Autres;0.2;kg/ha;0.5;kg/ha;;;Autorisé;;;;;25/09/2017;Viticulture	 Application par trempage ou arrosage ou pulvérisation au moment du semis ou des plantations  Ou  En mélange avec des engrais ou amendements
+MFSC;1210642;SVL-204;;;;1.8;L/ha;;;Autorisé;;;Entre les stades  BBCH 69 et BBCH 73;;18/10/2021;Fruits à pépins Stimulation de la croissance (montrée sur poirier). Application par pulvérisation foliaire.
+MFSC;1210642;SVL-204;;;;1.8;L/ha;;;Autorisé;;;Entre les stades  BBCH 57 et BBCH 66;;18/10/2021;Raisin de cuve Stimulation de la croissance. Application par pulvérisation foliaire.
+MFSC;1210642;SVL-204;;;;1.8;L/ha;;;Autorisé;;;Entre les stades  BBCH 69 et BBCH 89;;18/10/2021;Raisin de table. Stimulation de la croissance et amélioration de la qualité des raisins de table. Application par pulvérisation foliaire.
+MFSC;1210642;SVL-204;;;;1.5;L/ha;;;Autorisé;;;Entre les stades  BBCH 60 et BBCH 85;;18/10/2021;Fraisier Stimulation de la croissance. Application par pulvérisation foliaire.

@@ -1,0 +1,4 @@
+Extrait de l'export E-Phy du 24/02/2026 (Anses, data.gouv.fr, Licence Ouverte), pour scripts/mv-harnais-ephy-mfsc.mjs (FERTI-4, §461).
+Les points-virgules et guillemets internes aux cellules sont remplacés par des espaces (lecture simple sans dépendance).
+AMM : 1020004, 1150019, 1160001, 1170609, 1180074, 1180798, 1210082, 1210642, 2180347, 2250161
+Rôles : 1210082 toutes cultures (N 6) · 1180798 sans culture (10-5-7) · 1210642 « raisin de cuve » · 1170609 « viticulture » · 1180074 autres cultures (KTS) · 1160001 toutes cultures · 1150019 vigne par la seule catégorie « Arboriculture fruitière et vigne » · 1020004 retiré, toutes cultures · 2250161 PPP vigne · 2180347 PPP sans vigne.

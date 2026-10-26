@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.15';
+export const APP_VERSION = '10.17';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1058,6 +1058,16 @@ if(typeof document!=='undefined' && document.addEventListener){
 }
 
 export const WHATS_NEW = [
+  { v: '10.17', d: '2026-10-26', items: [
+    { niv: 1, pour: ['admin'], emoji: 'pousse', titre: 'Fertilisation : cocher les parcelles par règle',
+      desc: "À l’étape «\u00a0Les parcelles\u00a0» d’un amendement, donnez un seuil de rendement (celui de la vendange, repris du Cuvier) et touchez les appellations à retirer, par exemple Bourgogne\u00a0: «\u00a0Cocher ces parcelles\u00a0» coche celles qui restent. Une parcelle sans rendement connu reste de côté, et l’écran la nomme. Chaque ligne montre maintenant son appellation et son rendement." }
+  ] },
+  { v: '10.16', d: '2026-10-26', items: [
+    { niv: 1, pour: ['admin'], emoji: 'pousse', titre: 'Fertilisation : la recherche E-Phy trouve tous les produits qui ont une autorisation',
+      desc: "Une matière fertilisante autorisée «\u00a0toutes cultures\u00a0», sans culture précisée, ou dont l’autorisation écrit «\u00a0raisin de cuve\u00a0» restait introuvable\u00a0: la recherche répondait «\u00a0pas dans E-Phy\u00a0». Chaque résultat dit maintenant ce que son autorisation permet\u00a0: <b>Vigne</b>, <b>Toutes cultures</b>, <b>Culture non précisée</b> ou <b>Pas la vigne</b>. Ce dernier reste choisissable, avec un avertissement. Choisi dans E-Phy, un produit apporte ses teneurs déclarées. «\u00a0Pas dans E-Phy\u00a0» ne vise plus que les produits sans numéro d’AMM, vendus sous une norme." },
+    { niv: 1, pour: ['admin'], emoji: 'pousse', titre: 'Fertilisation : la norme, la formule du sac et le type nitrates en un geste',
+      desc: "Sous «\u00a0Norme ou AMM\u00a0», trois boutons\u00a0: NF U 44-051, NF U 42-001, fertilisant UE. Tapez la formule du sac, comme <b>4-10-1</b>\u00a0: l’azote, le phosphore et la potasse se remplissent. «\u00a0Ce que c’est\u00a0» pose le type nitrates et dit pourquoi\u00a0: un compost de fumier ou de marc est de type I.a. La mention «\u00a0utilisable en agriculture biologique\u00a0» n’est pas la norme\u00a0: elle se coche." }
+  ] },
   { v: '10.15', d: '2026-10-26', items: [
     { niv: 0, pour: ['admin'], emoji: 'graphique', titre: 'Pilotage › Aujourd’hui, vue Économie : l’écart au barème dit la même chose partout',
       desc: "La tuile «\u00a0Écart au barème\u00a0» affichait 0,0\u00a0% tant que 40\u00a0% du travail de la période n’était pas validé, même quand la carte d’à côté montrait des tâches bien au-dessus du barème. Elle donne maintenant le total de la carte «\u00a0Écart au barème, par tâche\u00a0» : les heures réellement passées sur les parcelles validées face à leur barème, journées de cave retirées, et un tiret tant que rien n’est à comparer. Dans la carte, le pourcentage se calcule sur les heures écrites dessous — il était calculé en euros —, avec les chiffres de «\u00a0Temps réel contre barème\u00a0» de l’onglet Économie. Les barres sont à l’échelle jusqu’à 50\u00a0% : au-delà, elles sont pleines et finissent en pointe (elles s’arrêtaient à 10\u00a0%, et +13\u00a0% avait la même longueur que +620\u00a0%)." }
@@ -5775,7 +5785,7 @@ var MV_AIDE = {
       ['Le bouton rond en bas \u00e0 droite', "ouvre un nouveau traitement sur l\u2019onglet Registre, un nouvel amendement sur l\u2019onglet Fertilisation (administrateur)."],
       ['Le délai de rentrée', "se déduit des mentions de danger du produit : la parcelle traitée se ferme d’elle-même jusqu’à son heure de libération."],
       ['Le registre des traitements sort sous deux formes', "depuis la roue crantée en haut à droite : le PDF à présenter, et un fichier tableur avec une ligne par produit et par parcelle. Ce second format est celui qui sera attendu en contrôle à partir du 1er janvier 2027."],
-      ['L\u2019onglet Fertilisation', "tient le registre des amendements et engrais. Le bouton rond (administrateur) ouvre un amendement en cinq \u00e9tapes conseill\u00e9es\u00a0: le produit et sa composition, les parcelles, le passage tracteur, la semaine pr\u00e9vue, puis ce qui s\u2019ajoute. Les sacs de chaque parcelle, la commande, l\u2019azote par hectare et le temps tracteur se calculent seuls."],
+      ['L\u2019onglet Fertilisation', "tient le registre des amendements et engrais. Le bouton rond (administrateur) ouvre un amendement en cinq \u00e9tapes conseill\u00e9es\u00a0: le produit et sa composition (la recherche E-Phy dit ce que l\u2019autorisation permet\u00a0: Vigne, Toutes cultures, Culture non pr\u00e9cis\u00e9e ou Pas la vigne\u00a0; normes en un geste\u00a0; la formule \u00ab\u00a04-10-1\u00a0\u00bb remplit azote, phosphore et potasse\u00a0; \u00ab\u00a0Ce que c\u2019est\u00a0\u00bb pose le type nitrates), les parcelles (une r\u00e8gle coche celles dont le rendement de la vendange est sous un seuil, sauf des appellations), le passage tracteur, la semaine pr\u00e9vue, puis ce qui s\u2019ajoute. Les sacs de chaque parcelle, la commande, l\u2019azote par hectare et le temps tracteur se calculent seuls."],
       ['Le temps utile', "est la part du temps o\u00f9 le semoir s\u00e8me vraiment dans le rang. Le reste : demi-tours, recharges de sacs, traverses. 75 % = 3 heures de semis sur 4 heures dans la parcelle. Avec la vitesse et l\u2019\u00e9cartement, il donne le bar\u00e8me en heures par hectare."],
       ['La date d\u2019\u00e9pandage', "ne se saisit pas : c\u2019est le jour o\u00f9 la parcelle est valid\u00e9e, dans une session tracteur de l\u2019activit\u00e9 \u00ab Amendement \u00bb ou en validant la t\u00e2che. La session coche aussi la t\u00e2che, marqu\u00e9e \u00ab faite au tracteur \u00bb : le Pilotage ne recompte pas ces heures. Sans l\u2019un ni l\u2019autre, l\u2019administrateur la pose \u00e0 la main sur la ligne de la parcelle."],
       ['Ce qu\u2019un contr\u00f4le va demander', "en bas de l\u2019onglet : les parcelles en zone vuln\u00e9rable, leur \u00eelot PAC et leur sol (touchez le nom d\u2019une parcelle pour les poser), l\u2019analyse de sol au-del\u00e0 de 3 ha, le fractionnement de l\u2019azote min\u00e9ral. La fiche d\u2019une parcelle prend aussi son ann\u00e9e de plantation. Le cahier s\u2019imprime ou sort en fichier tableur au m\u00eame endroit."],

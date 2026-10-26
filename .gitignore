@@ -64,6 +64,8 @@ serviceAccountKey.json
 *.kml
 *.kmz
 *.csv
+# FERTI-4 (§461) : le jeu d’essai réel du harnais mv-harnais-ephy-mfsc (extrait E-Phy, données publiques) doit partir dans le dépôt
+!scripts/fixtures/ephy-mfsc/*.csv
 sauvegardes/
 exports/
 rapports/

@@ -1,0 +1,81 @@
+numero AMM;nom produit;identifiant usage; date decision;stade cultural min (BBCH);tade cultural max (BBCH);etat usage;dose retenue;dose retenue unite;delai avant recolte jour;delai avant recolte bbch;nombre max d'application;date fin distribution;date fin utilisation;condition emploi;ZNT aquatique (en m);ZNT arthropodes non cibles (en m);ZNT plantes non cibles (en m);mentions autorisees;intervalle minimum entre applications (jour)
+2180347;APPLAUD STAR;Arbres et arbustes*Trt Part.Aer.*Aleurodes;03/10/2018;11;89;Autorisé;1.0;L/ha;;;3;;;Uniquement autorisé sous abri Intervalle minimum entre les applications : 7 jours;;;;;7.0
+2180347;APPLAUD STAR;Rosier*Trt Part.Aer.*Aleurodes;03/10/2018;11;89;Autorisé;1.0;L/ha;;;3;;;Uniquement autorisé sous abri Intervalle minimum entre les applications : 7 jours;;;;;7.0
+2180347;APPLAUD STAR;Cultures florales et plantes vertes*Trt Part.Aer.*Aleurodes;03/10/2018;11;89;Autorisé;1.0;L/ha;;;3;;;Uniquement autorisé sous abri Intervalle minimum entre les applications : 7 jours;;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Amandier*Trt Part.Aer.*Cloque(s);15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Amandier*Trt Part.Aer.*Coryneum;15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Amandier*Trt Part.Aer.*Moniliose(s);15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Carotte*Trt Part.Aer.*Bactériose(s);15/07/2025;15;47;Autorisé;5.0;g/10 m²;14;;4;;;Uniquement sur céleri rave, panais, raifort, topinambour, persil à grosse racine, salsifis et scorsonère.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Carotte*Trt Part.Aer.*Champignons (pythiacées);15/07/2025;15;47;Autorisé;5.0;g/10 m²;14;;4;;;Uniquement sur céleri rave, panais, raifort, topinambour, persil à grosse racine, salsifis et scorsonère.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Carotte*Trt Part.Aer.*Maladies des taches brunes;15/07/2025;15;47;Autorisé;5.0;g/10 m²;14;;4;;;Uniquement sur céleri rave, panais, raifort, topinambour, persil à grosse racine, salsifis et scorsonère.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Cerisier*Trt Part.Aer.*Anthracnose(s);15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Cerisier*Trt Part.Aer.*Bactériose(s);15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Cerisier*Trt Part.Aer.*Coryneum et polystigma;15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Cerisier*Trt Part.Aer.*Moniliose(s) et pourriture grise;15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Cucurbitacées à peau comestible*Trt Part.Aer.*Bactériose(s);15/07/2025;10;89;Autorisé;5.0;g/10 m²;3;;4;;;Également autorisé sous abri.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Cucurbitacées à peau comestible*Trt Part.Aer.*Maladies des taches brunes;15/07/2025;10;89;Autorisé;5.0;g/10 m²;3;;4;;;Également autorisé sous abri.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Cucurbitacées à peau comestible*Trt Part.Aer.*Mildiou(s);15/07/2025;10;89;Autorisé;5.0;g/10 m²;3;;4;;;Également autorisé sous abri.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Fruits à coque*Trt Part.Aer.*Bactériose(s);15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Fruits à pépins*Trt Part.Aer.*Bactériose(s);15/07/2025;91;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Fruits à pépins*Trt Part.Aer.*Chancre européen;15/07/2025;91;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Fruits à pépins*Trt Part.Aer.*Feu bactérien;15/07/2025;91;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Fruits à pépins*Trt Part.Aer.*Moniliose(s);15/07/2025;91;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Fruits à pépins*Trt Part.Aer.*Tavelure(s);15/07/2025;91;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Haricots et Pois écossés frais*Trt Part.Aer.*Bactériose(s);15/07/2025;14;89;Autorisé;5.0;g/10 m²;3;;4;;;Uniquement sur pois sabre, flageolet, fève, lima et niébé.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Haricots et Pois écossés frais*Trt Part.Aer.*Maladies des taches brunes;15/07/2025;14;89;Autorisé;5.0;g/10 m²;3;;4;;;Uniquement sur pois sabre, flageolet, fève, lima et niébé.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Haricots et pois non écossés frais*Trt Part.Aer.*Maladies des taches brunes;15/07/2025;14;89;Autorisé;5.0;g/10 m²;3;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Haricots et pois non écossés frais*Trt Part.Aer.*Mildiou(s);15/07/2025;14;89;Autorisé;5.0;g/10 m²;3;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Laitue*Trt Part.Aer.*Bactériose(s);15/07/2025;12;49;Autorisé;5.0;g/10 m²;7;;4;;;Uniquement sous abri.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Laitue*Trt Part.Aer.*Maladies des taches brunes;15/07/2025;12;49;Autorisé;5.0;g/10 m²;7;;4;;;Uniquement sous abri.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Laitue*Trt Part.Aer.*Mildiou(s);15/07/2025;12;49;Autorisé;5.0;g/10 m²;7;;4;;;Uniquement sous abri.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Noisetier*Trt Part.Aer.*Dépérissement cryptogamique;15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Oignon*Trt Part.Aer.*Bactériose(s);15/07/2025;14;47;Autorisé;5.0;g/10 m²;3;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Oignon*Trt Part.Aer.*Maladies des taches brunes;15/07/2025;14;47;Autorisé;5.0;g/10 m²;3;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Oignon*Trt Part.Aer.*Mildiou(s);15/07/2025;14;47;Autorisé;5.0;g/10 m²;3;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Olivier*Trt Part.Aer.*Bactériose(s);15/07/2025;10;85;Autorisé;5.0;g/10 m²;14;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Olivier*Trt Part.Aer.*Maladies des fruits;15/07/2025;10;85;Autorisé;5.0;g/10 m²;14;;4;;;Efficacité montrée sur anthracnose.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Olivier*Trt Part.Aer.*Maladies du feuillage;15/07/2025;10;85;Autorisé;5.0;g/10 m²;14;;4;;;Efficacité montrée sur anthracnose.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Pêcher - Abricotier*Trt Part.Aer.*Bactériose(s);15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Pêcher - Abricotier*Trt Part.Aer.*Cloque(s);15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Pêcher - Abricotier*Trt Part.Aer.*Coryneum et polystigma;15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Pêcher - Abricotier*Trt Part.Aer.*Moniliose(s);15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Prunier*Trt Part.Aer.*Bactériose(s);15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Prunier*Trt Part.Aer.*Cloque(s);15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Prunier*Trt Part.Aer.*Coryneum et polystigma;15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Prunier*Trt Part.Aer.*Moniliose(s);15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Tomate - Aubergine*Trt Part.Aer.*Bactériose(s);15/07/2025;15;89;Autorisé;5.0;g/10 m²;10;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Tomate - Aubergine*Trt Part.Aer.*Maladies des taches brunes;15/07/2025;15;89;Autorisé;5.0;g/10 m²;10;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Tomate - Aubergine*Trt Part.Aer.*Mildiou(s);15/07/2025;15;89;Autorisé;5.0;g/10 m²;10;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Vigne*Trt Part.Aer.*Bactériose(s);15/07/2025;15;91;Autorisé;5.0;g/10 m²;21;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Vigne*Trt Part.Aer.*Mildiou(s);15/07/2025;15;91;Autorisé;5.0;g/10 m²;21;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Agrumes*Trt Part.Aer.*Bactériose(s);15/07/2025;15;89;Autorisé;5.0;g/10 m²;14;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Agrumes*Trt Part.Aer.*Chancre du collet;15/07/2025;15;89;Autorisé;5.0;g/10 m²;14;;4;;;Efficacité montrée sur Phytophthora sp. sur fruits.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Agrumes*Trt Part.Aer.*Maladies des feuilles et fruits;15/07/2025;15;89;Autorisé;5.0;g/10 m²;14;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Arbres et arbustes*Trt Part.Aer.*Maladies des taches foliaires;15/07/2025;;;Autorisé;5.0;g/10 m²;;;3;;;Également autorisé sous abri. 3 applications maximum par an et par culture.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Arbres et arbustes*Trt Part.Aer.*Anthracnose(s);15/07/2025;;;Autorisé;5.0;g/10 m²;;;3;;;Également autorisé sous abri. 3 applications maximum par an et par culture.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Arbres et arbustes*Trt Part.Aer.*Moniliose(s);15/07/2025;;;Autorisé;5.0;g/10 m²;;;3;;;Également autorisé sous abri. 3 applications maximum par an et par culture.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Cultures florales et plantes vertes*Trt Part.Aer.*Mildiou(s);15/07/2025;;;Autorisé;5.0;g/10 m²;;;3;;;Également autorisé sous abri.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Cultures florales et plantes vertes*Trt Part.Aer.*Maladies des taches foliaires;15/07/2025;;;Autorisé;5.0;g/10 m²;;;3;;;Également autorisé sous abri.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Rosier*Trt Part.Aer.*Mildiou(s);15/07/2025;;;Autorisé;5.0;g/10 m²;;;3;;;Également autorisé sous abri;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Fruits à coque*Trt Part.Aer.*Maladies du feuillage;15/07/2025;95;53;Autorisé;5.0;g/10 m²;;;4;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Agrumes*Trt Part.Aer.*Bactériose(s);15/07/2025;15;89;Autorisé;4.0;g/10 m²;14;;5;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Agrumes*Trt Part.Aer.*Maladies des feuilles et fruits;15/07/2025;15;89;Autorisé;4.0;g/10 m²;14;;5;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Carotte*Trt Part.Aer.*Bactériose(s);15/07/2025;15;47;Autorisé;4.0;g/10 m²;14;;5;;;Uniquement sur céleri rave, panais, raifort, topinambour, persil à grosse racine, salsifis et scorsonère.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Carotte*Trt Part.Aer.*Champignons (pythiacées);15/07/2025;15;47;Autorisé;4.0;g/10 m²;14;;5;;;Uniquement sur céleri rave, panais, raifort, topinambour, persil à grosse racine, salsifis et scorsonère.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Carotte*Trt Part.Aer.*Maladies des taches brunes;15/07/2025;15;47;Autorisé;4.0;g/10 m²;14;;5;;;Uniquement sur céleri rave, panais, raifort, topinambour, persil à grosse racine, salsifis et scorsonère.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Cucurbitacées à peau comestible*Trt Part.Aer.*Bactériose(s);15/07/2025;10;89;Autorisé;4.0;g/10 m²;3;;5;;;Également autorisé sous abri.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Cucurbitacées à peau comestible*Trt Part.Aer.*Maladies des taches brunes;15/07/2025;10;89;Autorisé;4.0;g/10 m²;3;;5;;;Également autorisé sous abri.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Cucurbitacées à peau comestible*Trt Part.Aer.*Mildiou(s);15/07/2025;10;89;Autorisé;4.0;g/10 m²;3;;5;;;Également autorisé sous abri.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Haricots et Pois écossés frais*Trt Part.Aer.*Maladies des taches brunes;15/07/2025;14;89;Autorisé;4.0;g/10 m²;3;;5;;;Uniquement sur pois sabre, flageolet, fève, lima et niébé.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Haricots et pois non écossés frais*Trt Part.Aer.*Maladies des taches brunes;15/07/2025;14;89;Autorisé;4.0;g/10 m²;3;;5;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Haricots et pois non écossés frais*Trt Part.Aer.*Mildiou(s);15/07/2025;14;89;Autorisé;4.0;g/10 m²;3;;5;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Laitue*Trt Part.Aer.*Bactériose(s);15/07/2025;12;49;Autorisé;4.0;g/10 m²;7;;5;;;Uniquement sous abri.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Laitue*Trt Part.Aer.*Maladies des taches brunes;15/07/2025;12;49;Autorisé;4.0;g/10 m²;7;;5;;;Uniquement sous abri.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Laitue*Trt Part.Aer.*Mildiou(s);15/07/2025;12;49;Autorisé;4.0;g/10 m²;7;;5;;;Uniquement sous abri.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Oignon*Trt Part.Aer.*Bactériose(s);15/07/2025;14;47;Autorisé;4.0;g/10 m²;3;;5;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Oignon*Trt Part.Aer.*Maladies des taches brunes;15/07/2025;14;47;Autorisé;4.0;g/10 m²;3;;5;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Oignon*Trt Part.Aer.*Mildiou(s);15/07/2025;14;47;Autorisé;4.0;g/10 m²;3;;5;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Olivier*Trt Part.Aer.*Maladies des fruits;15/07/2025;10;85;Autorisé;4.0;g/10 m²;14;;5;;;Efficacité montrée sur anthracnose.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Olivier*Trt Part.Aer.*Bactériose(s);15/07/2025;10;85;Autorisé;4.0;g/10 m²;14;;5;;;;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Olivier*Trt Part.Aer.*Maladies du feuillage;15/07/2025;10;85;Autorisé;4.0;g/10 m²;14;;5;;;Efficacité montrée sur anthracnose.;5.0;;;;7.0
+2250161;BOUILLIE BORDELAISE 20 MICRO JARDIN;Tomate - Aubergine*Trt Part.Aer.*Bactériose(s);15/07/2025;15;89;Autorisé;4.0;g/10 m²;10;;5;;;;5.0;;;;7.0

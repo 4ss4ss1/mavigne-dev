@@ -1,4 +1,6 @@
-// MA VIGNE — Service Worker v10.96
+// MA VIGNE — Service Worker v10.98
+// v10.98 (26/10/2026) — FERTI-6 (§463) : Phyto › Fertilisation — étape « Les parcelles » : choisir par règle (rendement de la vendange sous un seuil, sauf des appellations ; « Cocher ces N parcelles · X ha » ; une parcelle sans rendement connu reste de côté, nommée) ; chaque ligne montre son appellation et son rendement
+// v10.97 (26/10/2026) — FERTI-5 (§462) : Phyto › Fertilisation — la fiche « Le produit » : statut vigne de chaque résultat E-Phy (Vigne, Toutes cultures, Culture non précisée, Pas la vigne), « Pas dans E-Phy » réservé aux produits sans AMM, normes en un geste, formule N-P-K, « Ce que c’est » qui pose le type nitrates, teneurs reprises d’E-Phy ; « Pas la vigne » aussi dans la recherche d’un traitement et le Catalogue (avec FERTI-4 : la synchro E-Phy garde les matières fertilisantes valables en vigne)
 // v10.96 (26/10/2026) — ECART-1 (§460) : Pilotage › Aujourd’hui, vue Économie — l’écart au barème lu en heures : la tuile est le total de la carte « par tâche » (plus « 0,0 % » sous 40 % du travail validé : un tiret tant que rien n’est à comparer) ; chaque ligne compte les heures du temps réel face au barème des mêmes validations (le pourcentage était en euros) ; barres à l’échelle jusqu’à ±50 %, pointe au-delà.
 // v10.95 (25/10/2026) — MAPIED-1 (§458) : un motif d’absence « Mise à pied disciplinaire » (journées entières) — contrat suspendu : ni payée ni rattrapée, sans effet sur la récup ni sur les heures sup du mois, plafond annuel abaissé ; « Pour la compta » lui donne une ligne à retirer à son nom, et le salaire de base dit « Aucune autre retenue » à côté d’un congé sans solde ou d’une mise à pied (il disait « se paie en entier ») ; « non payée » sur le jour par jour et le relevé, un point de légende. planning.js, utils.js, index.html, guide/10-planning.html. APP 10.13 → 10.14.
 // v10.94 (25/10/2026) — CAVEPIL-3 (§457) : Pilotage › vue Cave — le Chai ne dessine plus fût par fût que les cuvées qui demandent un geste ; les cuvées en cours (fermentation, malo) puis les cuvées à jour tiennent chacune sur une ligne (nombre, fûts, prochain ouillage), « Tout voir » ou la légende les déplie ; un fût marqué à la dégustation garde son rond sous la ligne.
@@ -4628,7 +4630,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v10.96';
+const CACHE_NAME   = 'mavigne-v10.98';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4645,7 +4647,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.96 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.98 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4665,7 +4667,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v10.96 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v10.98 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

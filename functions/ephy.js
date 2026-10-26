@@ -34,6 +34,7 @@ const { logger } = require('firebase-functions/v2');
 const admin = require('firebase-admin');
 const AdmZip = require('adm-zip');
 const { parse } = require('csv-parse/sync');
+const { classeVigne, lireCompo, tailleFs } = require('./ephy-calc');   // FERTI-4 (§461)
 
 if (!admin.apps.length) admin.initializeApp();
 const db = admin.firestore();
@@ -48,7 +49,15 @@ const TARGET_COL = 'ephy';
 const TARGET_DOC = 'vigne';
 const CULTURE_MATCH = 'vigne';
 
-const MAX_DOC_BYTES = 950000;   // marge sous la limite Firestore 1 Mo
+// ★ FERTI-4 (§461) — la taille se mesure comme Firestore la compte (tailleFs, ephy-calc.js), plus en
+//   JSON : le JSON comptait ~17 % de trop. HARD_DOC_BYTES : au-delà, rien n'est écrit (l'ancien
+//   catalogue reste) plutôt qu'une écriture refusée par Firestore à 1 048 576 octets.
+const MAX_DOC_BYTES = 950000;   // seuil des compactions, en taille Firestore
+const HARD_DOC_BYTES = 1040000;
+// ★ FERTI-4 puis FERTI-5 (§462) — les matières fertilisantes dont l'AMM ne cite pas la vigne (d'autres
+//   cultures seulement) entrent, marquées `vg:'non'` et réduites (ni usages ni composition en texte ; leurs
+//   cultures dans `cult`) : l'appli les signale « Pas la vigne » partout où E-Phy est cherché.
+const INCLURE_HORS_VIGNE = true;
 const USAGES_CAP_OK = 4;        // usages max conservés (produit autorisé)
 const USAGES_CAP_KO = 1;        // usages max conservés (produit retiré)
 const NOMS2_CAP     = 40;       // garde-fou noms de revente par produit
@@ -325,6 +334,40 @@ async function runSync() {
     }
   }
 
+  // 6bis) ★ FERTI-4 (§461) — LES MATIÈRES FERTILISANTES PAR LEUR RAPPORT À LA VIGNE.
+  //   Le repli 6 ne gardait qu'une ligne contenant le mot « vigne » : une AMM « toutes cultures »,
+  //   sans culture renseignée, ou qui écrit « raisin de cuve » / « viticulture » restait dehors, et la
+  //   recherche de l'amendement répondait « pas dans E-Phy » à un produit qui a une AMM.
+  //   Les teneurs déclarées (N, P2O5, K2O, MO, C) sont lues au passage : la fiche les reprendra.
+  const vgByAmm = new Map(), compoByAmm = new Map(), lignesMfsc = new Map(), cultByAmm = new Map();
+  for (const { f, c } of classified) {
+    if (!norm(f.base).includes('mfsc') || !c.amm) continue;
+    const cType = findCol(f.headers, 'type culture libelle'), cCom = findCol(f.headers, 'culture commentaire');
+    const cCompo = findCol(f.headers, 'composition');
+    for (const r of f.rows) {
+      const amm = val(r, c.amm); if (!amm) continue;
+      if (cType || cCom) { const a = lignesMfsc.get(amm) || []; a.push({ type: val(r, cType), com: val(r, cCom) }); lignesMfsc.set(amm, a); }
+      if (cCompo && !compoByAmm.has(amm)) { const k = lireCompo(val(r, cCompo)); if (k) compoByAmm.set(amm, k); }
+    }
+  }
+  const vgCompte = { v: 0, tc: 0, nc: 0, non: 0 };
+  for (const [amm, p] of idx) {
+    if (deriveType(p.typeProduit, '', '', '') !== 'MFSC') continue;
+    const vg = classeVigne(lignesMfsc.get(amm));
+    vgByAmm.set(amm, vg);
+    if (vg === 'non') {                                 // FERTI-5 : ses cultures, pour le dire à l'écran
+      const ty = [];
+      (lignesMfsc.get(amm) || []).forEach(l => { const t = String(l.type || '').trim().toLowerCase(); if (t && norm(t) !== 'autres' && ty.indexOf(t) < 0) ty.push(t); });
+      if (ty.length) cultByAmm.set(amm, ty.slice(0, 3).join(', '));
+    }
+    if (p.statut === 'ok') vgCompte[vg]++;
+    if (byAmm.has(amm)) continue;                       // déjà gardée : le mot « vigne » est dans ses lignes
+    if (vg === 'non' && !INCLURE_HORS_VIGNE) continue;
+    if (vg !== 'v' && p.statut !== 'ok') continue;      // toutes cultures, sans culture : les autorisées seulement
+    addUsage(amm, vg === 'tc' ? 'Toutes cultures' : (vg === 'v' ? 'Vigne' : '—'), '—', '—', '—', 0);
+  }
+  logger.info('DIAG MFSC autorisées par rapport à la vigne', vgCompte);
+
   // 7) Construction du tableau de sortie (1 entrée par AMM)
   const finalAmms = new Set([...byAmm.keys()]);
   function buildEntry(amm, usagesCap) {
@@ -348,6 +391,9 @@ async function runSync() {
     var _dreCLP = dreByAmm.get(amm);
     if (_dreCLP && _dreCLP.h > 0) { e.dreH = _dreCLP.h; if (_dreCLP.code) e.dreHc = _dreCLP.code; }
     if (p.noms2 && p.noms2.length) e.noms2 = p.noms2;
+    if (e.type === 'MFSC' && vgByAmm.has(amm)) e.vg = vgByAmm.get(amm);         // FERTI-4 : v · tc · nc (· non au lot suivant)
+    if (e.type === 'MFSC' && compoByAmm.has(amm)) e.compo = compoByAmm.get(amm); // FERTI-4 : teneurs déclarées, en %
+    if (e.type === 'MFSC' && e.vg === 'non') { e.usages = []; e.sub = ''; if (cultByAmm.has(amm)) e.cult = cultByAmm.get(amm); }   // FERTI-5 : fiche réduite
     if (e.statut === 'ko' && p.retraitDate) e.retraitDate = p.retraitDate;
     if (e.statut === 'ko' && p.ecoulement) e.ecoulement = p.ecoulement;
     return e;
@@ -364,17 +410,18 @@ async function runSync() {
 
   // 8) Garde-fou taille Firestore (compaction progressive)
   let produitsOut = buildAll(USAGES_CAP_OK, USAGES_CAP_KO);
-  let bytes = Buffer.byteLength(JSON.stringify(produitsOut), 'utf8');
+  let bytes = tailleFs(produitsOut);
   if (bytes > MAX_DOC_BYTES) {
     logger.warn('Catalogue volumineux — compaction niveau 1', { bytes, count: produitsOut.length });
     produitsOut = buildAll(2, 0);
-    bytes = Buffer.byteLength(JSON.stringify(produitsOut), 'utf8');
+    bytes = tailleFs(produitsOut);
   }
   if (bytes > MAX_DOC_BYTES) {
     logger.warn('Catalogue volumineux — compaction niveau 2 (retirés réduits)', { bytes });
     for (const e of produitsOut) { if (e.statut === 'ko') { e.usages = []; if (e.noms2) delete e.noms2; } }
-    bytes = Buffer.byteLength(JSON.stringify(produitsOut), 'utf8');
+    bytes = tailleFs(produitsOut);
   }
+  if (bytes > HARD_DOC_BYTES) throw new Error('Catalogue E-Phy trop volumineux pour un document (' + bytes + ' octets en taille Firestore) : rien n’est écrit, l’ancien catalogue reste en place');
 
   // ── DIAG DRE/CLP : distribution du délai de rentrée dérivé ──────────
   var _withDre = produitsOut.filter(function (e) { return e.dreH > 0; });
@@ -399,7 +446,7 @@ async function runSync() {
   const summary = {
     count: produitsOut.length, ammVigne: finalAmms.size, bytes,
     productFiles: productFiles.length, usageFiles: usageFiles.length, byType,
-    dre48: _d48, dre24: _d24, ms: Date.now() - t0,
+    dre48: _d48, dre24: _d24, mfscVigne: vgCompte, ms: Date.now() - t0,
   };
   logger.info('E-Phy : synchro terminée', summary);
   return summary;

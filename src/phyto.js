@@ -150,7 +150,7 @@ function _phyEphyMeta(p){
   var u=(p.usages&&p.usages[0])||{};
   var dar=(u.dar!=null&&u.dar!=='—')?parseInt(u.dar,10):0; if(isNaN(dar))dar=0;
   var znt=(u.znt!=null&&u.znt!=='—')?parseFloat(u.znt):null; if(znt!=null&&isNaN(znt))znt=null;
-  return {nom:p.nom,type:p.type||'Fongicide',amm:p.amm||'',dar:dar,drae:p.drae||0,znt:znt,sub:p.sub||'',dose:(u.dose&&u.dose!=='—')?u.dose:'',statut:p.statut||'ok',source:'ephy'};
+  return {nom:p.nom,type:p.type||'Fongicide',amm:p.amm||'',dar:dar,drae:p.drae||0,znt:znt,sub:p.sub||'',dose:(u.dose&&u.dose!=='—')?u.dose:'',statut:p.statut||'ok',source:'ephy',vg:p.vg||''};
 }
 function _phyLookup(nom){
   var n=_phyNorm(nom);
@@ -244,6 +244,7 @@ function _tratResultRow(m, section, i){
   var minis='<span class="mvpas mvpas-type mvpas-ambre">DAR '+(m.dar>0?m.dar+'j':'0j')+'</span> ';
   if(m.znt!=null) minis+='<span class="mvpas mvpas-type mvpas-rouge">ZNT '+m.znt+'m</span> ';
   minis+='<span class="mvpas mvpas-type mvpas-orange">DRE '+(m.drae||0)+'h</span>';
+  if(m.vg==='non') minis+=' <span class="mvpas mvpas-type mvpas-rouge">Pas la vigne</span>';   // FERTI-5 (§462) : AMM pour d'autres cultures
   var stat=isE?(m.statut==='ok'
       ?' <span class="mvpas mvpas-fait">&#x2713; Autoris&#xe9;</span>'
       :' <span class="mvpas mvpas-retard">&#x26d4; Retir&#xe9;</span>'):'';
@@ -1254,6 +1255,27 @@ var FER_TYP = {
           aide:'Ammonitrate, ur\u00e9e. Au-del\u00e0 de 60 kg N/ha d\u2019azote min\u00e9ral sur la campagne, l\u2019apport se fractionne en deux au moins.' }
 };
 var FER_RD = [ {v:65, l:'rangs courts'}, {v:75, l:'moyens'}, {v:85, l:'longs'} ];
+// FERTI-5 (§462) — LA FICHE « LE PRODUIT », au dessin de la maquette validée par Nico le 26/10.
+// Les normes courantes en un geste ; le champ reste libre (une norme se recopie telle qu'imprimée).
+var FER_NORMES = [ {ref:'NF U 44-051', t:'NF U 44-051', s:'amendement organique'}, {ref:'NF U 42-001', t:'NF U 42-001', s:'engrais'}, {ref:'R\u00e8glement (UE) 2019/1009', t:'Fertilisant UE', s:'r\u00e8glement 2019/1009'} ];
+// La nature du produit pose le type nitrates : liste nommée du 7e programme d'actions (composts de fumier,
+// de marc, de déchets verts mûrs en I.a ; fumiers avec litière, composts de biodéchets en I.b ; fientes et
+// fumier de volaille en II ; marc frais, composts de déchets verts jeunes en 0). Un fertilisant non nommé,
+// sans indicateurs connus, est de type II. Sans azote (chaux, dolomie) : pas de type.
+var FER_NAT = {
+  compost: { l:'Compost : fumier, marc, d\u00e9chets verts m\u00fbrs', t:'Ia', w:'Le 7e programme nitrates range nomm\u00e9ment en I.a les composts de fumier, de marc et de d\u00e9chets verts m\u00fbrs.' },
+  fumier:  { l:'Fumier pailleux, compost de biod\u00e9chets', t:'Ib', w:'Les fumiers avec liti\u00e8re et les composts de biod\u00e9chets sont nomm\u00e9s en I.b.' },
+  orga:    { l:'Engrais organique, fientes, fumier de volaille', t:'II', w:'Fientes et fumier de volaille sont nomm\u00e9s en II\u00a0; un engrais organique dont on ne conna\u00eet pas le C/N y est class\u00e9 par d\u00e9faut.' },
+  mineral: { l:'Engrais min\u00e9ral ou \u00e0 l\u2019ur\u00e9e', t:'III', w:'Au-del\u00e0 de 60\u00a0kg N/ha d\u2019azote min\u00e9ral sur la campagne, l\u2019apport se fractionne en deux au moins.' },
+  frais:   { l:'Marc frais, compost de d\u00e9chets verts jeune', t:'0', w:'Marc frais et composts de d\u00e9chets verts jeunes sont nomm\u00e9s en type 0\u00a0: \u00e9pandage interdit du 15\u00a0d\u00e9cembre au 15\u00a0janvier en zone vuln\u00e9rable.' },
+  chaux:   { l:'Chaux, dolomie\u00a0: pas d\u2019azote', t:'', w:'Le produit n\u2019apporte pas d\u2019azote\u00a0: il ne compte pas dans l\u2019azote de la campagne.' },
+  nsp:     { l:'Je ne sais pas', t:'II', w:'Sans C/N ni part d\u2019azote min\u00e9ral connus, la r\u00e8gle classe le produit en type II.' }
+};
+// Le rapport à la vigne posé par la synchro E-Phy (functions/ephy-calc.js, FERTI-4).
+var FER_VG = { v:['Vigne','ok'], tc:['Toutes cultures','ok'], nc:['Culture non pr\u00e9cis\u00e9e','n'], non:['Pas la vigne','al'] };
+function _ferTypLbl(t){ return (t==='')?'\u2014':(FER_TYP[t]||FER_TYP.II).lbl; }
+function _ferLireNpk(v){ var m=String(v==null?'':v).match(/\d+(?:[.,]\d+)?/g); if(!m||m.length<2) return null; return { N:m[0].replace('.',','), P:m[1].replace('.',','), K:m[2]?m[2].replace('.',','):'' }; }
+function _ferFmt(x){ var c=Math.round(x*100), d=(c%100===0)?0:((c%10===0)?1:2); return _ferFr(x,d); }
 
 function _ferNum(x){ var v=parseFloat(String(x==null?'':x).replace(',','.')); return (isNaN(v)||v<0)?0:v; }
 function _ferFr(x,d){ d=d||0; return (Math.round(x*Math.pow(10,d))/Math.pow(10,d)).toLocaleString('fr-FR',{minimumFractionDigits:d,maximumFractionDigits:d}); }
@@ -1363,10 +1385,10 @@ function _ferNeuf(){
   var vg=(typeof window._mvVigne==='function')?window._mvVigne():null;
   var tr=(window.TRACTEURS_LIST||[])[0]||null;
   var act=(window.ACTIVITES||[]).find(function(a){ return a&&a.nom===FER_ACT; });
-  return { q:'', prod:{nom:'', ref:'', origine:'norme', amm:'', four:'', N:'', P:'', K:'', MO:'', CN:'', typ:'II', ab:!!(window.CONFIG&&window.CONFIG.bio)},
+  return { q:'', prod:{nom:'', ref:'', origine:'norme', amm:'', four:'', N:'', P:'', K:'', MO:'', CN:'', typ:'II', ab:!!(window.CONFIG&&window.CONFIG.bio), nat:'', vg:'', cult:'', src:false, npk:'', typMan:false},
            dose:'', kg:'25', prix:'', pu:'t', parcs:{},
            v:'4', ec:vg?String(vg.ec_rang):'', rd:'75', mach:(act&&act.tracteurDefautId)||(tr?tr.id:''),
-           sem:'', enf:'non', ouvert:{1:true} };
+           sem:'', enf:'non', ouvert:{1:true}, seuil:'', sauf:{} };
 }
 function _ferCalc(){
   var F=_fer, o={dose:_ferNum(F.dose), kg:_ferNum(F.kg), prix:_ferNum(F.prix)};
@@ -1428,7 +1450,31 @@ function _ferCss(){
   +'.fer-ic{width:24px;height:24px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:var(--pt-micro,11px);font-weight:700}'
   +'.fer-ic.ok{background:var(--vert-pale,#EAF3E2);color:var(--vert-med,#3D6B27)}.fer-ic.al{background:var(--orange-pale,#FBF0E6);color:var(--texte,#1A1A14);box-shadow:inset 0 0 0 1px var(--orange,#B85A1A)}.fer-ic.n{background:var(--gris-clair,#ECE6DA);color:var(--texte-med,#4A4A3A)}'
   +'.fer-cf b{font-size:var(--pt-txt,13px);font-weight:600;display:block;color:var(--texte,#1A1A14)}.fer-cf small{font-size:var(--pt-micro,11px);color:var(--texte-med,#4A4A3A);line-height:1.45}'
-  +'.fer-lk{color:var(--phyto,#5B2D8E);font-weight:600;cursor:pointer;text-decoration:underline}';
+  +'.fer-lk{color:var(--phyto,#5B2D8E);font-weight:600;cursor:pointer;text-decoration:underline}'
+  // FERTI-5 (§462) : normes en un geste, statut vigne des résultats, étiquette d'exemple
+  +'.fer-norms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0 0 8px}'
+  +'.fer-norm{-webkit-appearance:none;appearance:none;border:1px solid var(--gris,#DED7C9);background:var(--bg-card,#fff);border-radius:12px;padding:7px 10px;font-family:inherit;font-size:var(--pt-micro,12px);line-height:1.3;color:var(--texte-med,#4A4A3A);cursor:pointer;text-align:left;min-height:44px}'
+  +'.fer-norm b{display:block;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte,#1A1A14)}'
+  +'.fer-norm.on{border-color:var(--vert-med,#3D6B27);background:var(--vert-pale,#EAF3E2);box-shadow:inset 0 0 0 1px var(--vert-med,#3D6B27)}'
+  +'.fer-norm:focus-visible,.fer-ri:focus-visible,.fer-lk:focus-visible{outline:2px solid var(--vert-med,#3D6B27);outline-offset:2px}'
+  +'.fer-ri .fer-chip{flex:none}.fer-ri.hors .fer-rt{color:var(--texte-med,#4A4A3A)}.fer-ri.on.hors{background:var(--orange-pale,#FBF0E6)}.fer-ri.on .fer-chip.ok{box-shadow:inset 0 0 0 1px var(--vert-med,#3D6B27)}'
+  +'.fer-unit{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F);pointer-events:none}'
+  +'.fer-sac{border:1px dashed var(--gris,#DED7C9);border-radius:12px;padding:10px 12px;margin-top:8px;background:var(--blanc,#FBFAF6)}'
+  +'.fer-sac-t{font-size:var(--pt-micro,12px);color:var(--texte-doux,#5F5F5F);margin-bottom:4px}'
+  +'.fer-sac-l{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--gris-clair,#ECE6DA);font-size:var(--pt-txt,13px);line-height:1.45;color:var(--texte,#1A1A14)}.fer-sac-t+.fer-sac-l{border-top:0}'
+  +'.fer-sac-n,.fer-sac-cap b{width:20px;height:20px;border-radius:50%;flex:none;display:inline-grid;place-items:center;font-size:var(--pt-nano,11px);font-weight:700;background:var(--or-pale,#FAF3E0);color:var(--texte,#1A1A14);box-shadow:inset 0 0 0 1px var(--or,#B8862B)}'
+  +'.fer-sac-cap{font-size:var(--pt-micro,12px);color:var(--texte-med,#4A4A3A);line-height:1.7;margin-top:8px}.fer-sac-cap b{width:18px;height:18px;vertical-align:-4px;margin:0 2px 0 0}'
+  +'.fer-src{font-size:var(--pt-micro,12px);color:var(--texte-doux,#5F5F5F);margin-top:6px;line-height:1.45}'
+  // FERTI-6 (§463) : choisir les parcelles par règle
+  +'.fer-regle{background:var(--blanc,#FBFAF6);border:1px solid var(--gris-clair,#ECE6DA);border-radius:12px;padding:12px;margin-bottom:12px}'
+  +'.fer-regle-t{font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte,#1A1A14);margin-bottom:2px}'
+  +'.fer-aocs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}'
+  +'.fer-aoc{-webkit-appearance:none;appearance:none;border:1px solid var(--gris,#DED7C9);background:var(--bg-card,#fff);border-radius:999px;padding:6px 12px;font-family:inherit;font-size:var(--pt-micro,12px);color:var(--texte,#1A1A14);cursor:pointer;min-height:36px;display:inline-flex;align-items:center;gap:6px}'
+  +'.fer-aoc small{color:var(--texte-doux,#5F5F5F);font-size:inherit;font-variant-numeric:tabular-nums}'
+  +'.fer-aoc.on{background:var(--orange-pale,#FBF0E6);border-color:var(--orange,#B85A1A);box-shadow:inset 0 0 0 1px var(--orange,#B85A1A)}.fer-aoc.on span{text-decoration:line-through;text-decoration-thickness:1.5px}'
+  +'.fer-aoc:focus-visible{outline:2px solid var(--vert-med,#3D6B27);outline-offset:2px}'
+  +'.fer-rgo{display:block;width:100%;min-height:44px}.fer-rgo[disabled]{opacity:.55;cursor:default}'
+  +'.fer-rdt-in{color:var(--texte,#1A1A14);font-weight:600}';
   document.head.appendChild(st);
 }
 function _ferEnsureOv(){
@@ -1461,6 +1507,8 @@ function openOvFerti(){
   if(!isAdmin()){ showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#C0392B'); return; }
   _ferEnsureOv();
   _fer=_ferNeuf();
+  // FERTI-6 (§463) : les rendements de la dernière vendange connue (celle de la campagne, sinon la précédente).
+  _fer._mil=_ferCampDe(_mvToday()); _fer._rdt=_ferRdt(_fer._mil); if(!Object.keys(_fer._rdt).length){ var _rp=_ferRdt(_fer._mil-1); if(Object.keys(_rp).length){ _fer._mil-=1; _fer._rdt=_rp; } }
   var F=_fer, P=F.prod;
   var tracs=(window.TRACTEURS_LIST||[]);
   var sa=(typeof window.getSaisonActive==='function')?window.getSaisonActive():null;
@@ -1471,30 +1519,51 @@ function openOvFerti(){
   +_ferStep(1,'Le produit',''
     +'<div class="mvr-fl" style="margin-top:0">Chercher dans E-Phy</div>'
     +'<input class="mvr-fi" id="fer-q" type="text" autocomplete="off" placeholder="Nom commercial ou n\u00b0 d\u2019AMM" oninput="_ferSearch(this.value)">'
-    +'<div id="fer-res"></div>'
-    +'<div class="fer-h">M\u00eame catalogue que pour un traitement, famille <b>MFSC</b> (mati\u00e8res fertilisantes). Un amendement <b>norm\u00e9</b> (NF U 44-051, NF U 42-001\u2026) n\u2019a pas d\u2019AMM\u00a0: tapez son nom ci-dessous et sa norme, \u00e9crite sur le sac.</div>'
+    +'<div id="fer-res"></div><div id="fer-etat"></div>'
     +'<div class="mvr-fl">Nom du produit</div><input class="mvr-fi" id="fer-nom" type="text" autocomplete="off" value="" oninput="_ferSet(\'prod.nom\',this.value)">'
-    +'<div class="mvr-f2"><div><div class="mvr-fl">Norme ou AMM</div><input class="mvr-fi" id="fer-ref" type="text" autocomplete="off" placeholder="ex. NF U 44-051" oninput="_ferSet(\'prod.ref\',this.value)"></div>'
-    +'<div><div class="mvr-fl">Fournisseur</div><input class="mvr-fi" id="fer-four" type="text" autocomplete="off" oninput="_ferSet(\'prod.four\',this.value)"></div></div>'
+    +'<div class="mvr-fl">Norme ou AMM</div>'
+    +'<div class="fer-norms" id="fer-norms" role="group" aria-label="Normes courantes">'
+      +FER_NORMES.map(function(n){ return '<button type="button" class="fer-norm" data-ref="'+_escAttr(n.ref)+'" aria-pressed="false" onclick="_ferNorme(this.getAttribute(\'data-ref\'))"><b>'+n.t+'</b>'+n.s+'</button>'; }).join('')
+    +'</div>'
+    +'<input class="mvr-fi" id="fer-ref" type="text" autocomplete="off" placeholder="ou recopiez ce qui est \u00e9crit sur le sac" oninput="_ferSet(\'prod.ref\',this.value)">'
+    +'<div class="fer-h">La norme est imprim\u00e9e \u00e0 c\u00f4t\u00e9 du nom du type, en majuscules. La phrase \u00ab\u00a0utilisable en agriculture biologique conform\u00e9ment au r\u00e8glement\u2026\u00a0\u00bb n\u2019est pas la norme\u00a0: c\u2019est la mention bio, elle se coche plus bas. <span class="fer-lk" id="fer-sac-lk" role="button" tabindex="0" onclick="_ferSacTog()">O\u00f9 lire tout \u00e7a sur le sac</span></div>'
+    +'<div id="fer-sac" style="display:none"><div class="fer-sac"><div class="fer-sac-t">Exemple d\u2019\u00e9tiquette, invent\u00e9</div>'
+      +'<div class="fer-sac-l"><span class="fer-sac-n">1</span><span><b>AMENDEMENT ORGANIQUE NF U 44-051</b><br>Compost de fumier et de marc de raisin</span></div>'
+      +'<div class="fer-sac-l"><span class="fer-sac-n">2</span><span>N 2\u00a0% \u00b7 P<sub>2</sub>O<sub>5</sub> 1,5\u00a0% \u00b7 K<sub>2</sub>O 3\u00a0% \u00b7 mati\u00e8re organique 30\u00a0%</span></div>'
+      +'<div class="fer-sac-l"><span class="fer-sac-n">3</span><span>Utilisable en agriculture biologique conform\u00e9ment au r\u00e8glement (UE) 2018/848</span></div></div>'
+      +'<div class="fer-sac-cap"><b>1</b> va dans \u00ab\u00a0Norme ou AMM\u00a0\u00bb. <b>2</b> va dans la composition\u00a0; sur un engrais, elle tient en trois chiffres, comme \u00ab\u00a04-10-1\u00a0\u00bb\u00a0: azote, phosphore, potasse. <b>3</b> se coche\u00a0: \u00ab\u00a0Utilisable en agriculture biologique\u00a0\u00bb.</div></div>'
+    +'<div class="mvr-fl">Fournisseur</div><input class="mvr-fi" id="fer-four" type="text" autocomplete="off" oninput="_ferSet(\'prod.four\',this.value)">'
     +'<div class="mvr-fl">Composition \u2014 lue sur l\u2019\u00e9tiquette du sac</div>'
+    +'<div class="mvr-f2" style="align-items:center"><div style="position:relative"><input class="mvr-fi" id="fer-npk" type="text" inputmode="decimal" autocomplete="off" placeholder="ex. 4-10-1" oninput="_ferNpk(this.value)" style="padding-right:60px"><span class="fer-unit">N-P-K</span></div>'
+      +'<div class="fer-h" style="margin-top:0">Les trois chiffres du sac\u00a0: azote, phosphore, potasse, dans cet ordre.</div></div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'
       +'<div>'+_ferIn('fer-N','Azote',P.N,'% N','oninput="_ferSet(\'prod.N\',this.value)"')+'</div>'
       +'<div>'+_ferIn('fer-P','Phosphore',P.P,'% P<sub>2</sub>O<sub>5</sub>','oninput="_ferSet(\'prod.P\',this.value)"')+'</div>'
       +'<div>'+_ferIn('fer-K','Potasse',P.K,'% K<sub>2</sub>O','oninput="_ferSet(\'prod.K\',this.value)"')+'</div></div>'
     +'<div class="mvr-f2"><div>'+_ferIn('fer-MO','Mati\u00e8re organique',P.MO,'%','oninput="_ferSet(\'prod.MO\',this.value)"')+'</div>'
       +'<div>'+_ferIn('fer-CN','Rapport C/N',P.CN,'C/N','oninput="_ferSet(\'prod.CN\',this.value)"')+'</div></div>'
-    +'<div class="mvr-fl">Type au sens de la directive nitrates</div>'
-    +'<select class="mvr-fi" id="fer-typ" onchange="_ferSet(\'prod.typ\',this.value)">'+typOpts+'</select>'
-    +'<div class="fer-h" id="fer-typ-h"></div>'
-    +'<label class="fer-pl" style="border:0"><input type="checkbox" id="fer-ab" '+(P.ab?'checked':'')+' onchange="_ferSet(\'prod.ab\',this.checked)" style="width:20px;height:20px"><span style="font-size:var(--pt-txt,13px)">Utilisable en agriculture biologique</span></label>'
+    +'<div class="fer-src" id="fer-src" style="display:none"></div>'
+    +'<div class="mvr-fl">Ce que c\u2019est</div>'
+    +'<select class="mvr-fi" id="fer-nat" onchange="_ferNat(this.value)"><option value="">Choisir\u2026</option>'+Object.keys(FER_NAT).map(function(k){ return '<option value="'+k+'">'+FER_NAT[k].l+'</option>'; }).join('')+'</select>'
+    +'<div class="fer-box" id="fer-typ-h"></div>'
+    +'<select class="mvr-fi" id="fer-typ" style="display:none;margin-top:8px" aria-label="Type au sens de la directive nitrates" onchange="_ferTypMain(this.value)">'+typOpts+'</select>'
+    +'<label class="fer-pl" style="border:0"><input type="checkbox" id="fer-ab" '+(P.ab?'checked':'')+' onchange="_ferSet(\'prod.ab\',this.checked)" style="width:20px;height:20px"><span style="font-size:var(--pt-txt,13px)">Utilisable en agriculture biologique (UAB)</span></label>'
+    +'<div class="fer-h" style="margin-top:-6px">Cochez si le sac porte \u00ab\u00a0UAB\u00a0\u00bb ou \u00ab\u00a0utilisable en agriculture biologique\u00a0\u00bb.</div>'
     +'<div class="mvr-f2"><div>'+_ferIn('fer-dose','Dose conseill\u00e9e',F.dose,'t/ha','oninput="_ferSet(\'dose\',this.value)"')+'</div>'
       +'<div>'+_ferIn('fer-kg','Poids d\u2019un sac',F.kg,'kg','oninput="_ferSet(\'kg\',this.value)"')+'</div></div>'
+    +'<div class="fer-h">La dose se compte en tonnes par hectare\u00a0: 500\u00a0kg/ha s\u2019\u00e9crit 0,5.</div>'
     +'<div class="fer-box" id="fer-calcN"></div>'
     +'<div class="mvr-fl">Prix fournisseur (facultatif)</div>'
     +'<div class="mvr-f2"><div style="position:relative"><input class="mvr-fi" id="fer-prix" type="text" inputmode="decimal" autocomplete="off" placeholder="\u2014" oninput="_ferSet(\'prix\',this.value)" style="text-align:right;padding-right:70px"><span id="fer-pu" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F)">\u20ac HT/t</span></div>'
     +'<div class="fer-seg" id="fer-useg"><button type="button" class="on" onclick="_ferUnit(\'t\')">\u00e0 la tonne</button><button type="button" onclick="_ferUnit(\'s\')">au sac</button></div></div>'
     +'<div class="fer-h">Sans prix, le co\u00fbt reste \u00ab\u00a0\u2014\u00a0\u00bb. Il se pose \u00e0 la facture, depuis l\u2019achat dans La R\u00e9serve.</div>')
   +_ferStep(2,'Les parcelles',''
+    +'<div class="fer-regle"><div class="fer-regle-t">Choisir par r\u00e8gle</div>'
+      +'<div class="mvr-f2" style="align-items:end"><div>'+_ferIn('fer-seuil','Rendement '+F._mil+' sous',F.seuil,'hL/ha','placeholder="\u2014" oninput="_ferSeuil(this.value)"')+'</div>'
+      +'<div class="fer-h" style="margin:0 0 10px">Celui de la vendange, repris du Cuvier.</div></div>'
+      +'<div class="mvr-fl">Sauf les appellations</div><div class="fer-aocs" id="fer-aocs" role="group" aria-label="Appellations \u00e0 retirer"></div>'
+      +'<button type="button" class="mvr-btn mvr-btn-p fer-rgo" id="fer-regle-go" onclick="_ferRegleGo()"></button>'
+      +'<div class="fer-h" id="fer-regle-h"></div></div>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
       +'<button type="button" class="mvr-btn mvr-btn-o" style="flex:none" onclick="_ferAll(1)">Tout cocher</button>'
       +'<button type="button" class="mvr-btn mvr-btn-o" style="flex:none" onclick="_ferAll(0)">Tout d\u00e9cocher</button>'
@@ -1537,6 +1606,7 @@ function openOvFerti(){
 }
 function _ferTog(n){ _fer.ouvert[n]=!_fer.ouvert[n]; var el=document.getElementById('fer-s'+n); if(el) el.classList.toggle('ferme', !_fer.ouvert[n]); }
 function _ferSet(k,v){
+  if(_fer&&_fer.prod&&/^prod\.(N|P|K|MO|CN)$/.test(k)) _fer.prod.src=false;   // FERTI-5 (§462)
   if(!_fer) return;
   if(k.indexOf('prod.')===0) _fer.prod[k.slice(5)]=v; else _fer[k]=v;
   _ferUp();
@@ -1545,28 +1615,99 @@ function _ferUnit(u){ _fer.pu=u; var s=document.getElementById('fer-useg'); if(s
 function _ferRd(v){ _fer.rd=String(v); var i=document.getElementById('fer-rd'); if(i) i.value=v; _ferUp(); }
 function _ferAll(m){ _fer.parcs={}; _ferParcs().forEach(function(p){ if(m===1||(m==='zv'&&p.zv)) _fer.parcs[p.nom]=1; }); _ferUp(); }
 function _ferPick(i){ var p=_ferParcs()[i]; if(!p) return; if(_fer.parcs[p.nom]) delete _fer.parcs[p.nom]; else _fer.parcs[p.nom]=1; _ferUp(); }
+// FERTI-6 (§463) — CHOISIR LES PARCELLES PAR RÈGLE (maquette v2, « go » de Nico le 26/10 : « toutes les parcelles
+// qui sont en dessous d'un certain nombre d'hectos par hectare […] et sur cette sélection, nous avons retiré les
+// Bourgognes »). Rendement de la vendange (_ferRdt, la source du cahier) strictement sous le seuil, sauf les
+// appellations choisies (p.appellation, celle du plafond de rendement). Sans seuil : seules les appellations
+// jouent. Une parcelle sans rendement connu reste de côté — l'écran la nomme, on la coche à la main.
+function _ferRegleCalc(parcs, rdt, seuil, sauf){ var s=parseFloat(String(seuil==null?'':seuil).replace(',','.')); s=(isFinite(s)&&s>0)?s:0; var inc=[], sans=[]; (parcs||[]).forEach(function(p){ var a=String((p&&p.appellation)||'').trim(); if(sauf&&sauf[a]) return; var r=rdt?rdt[p.nom]:null; if(s){ if(r==null||!isFinite(r)){ sans.push(p); return; } if(!(r<s)) return; } inc.push(p); }); return {inc:inc, sans:sans, s:s}; }
+function _ferSeuil(v){ if(!_fer) return; _fer.seuil=v; _ferUp(); }
+function _ferSauf(k){ if(!_fer) return; if(_fer.sauf[k]) delete _fer.sauf[k]; else _fer.sauf[k]=1; _ferUp(); }
+function _ferRegleGo(){ if(!_fer) return; var R=_ferRegleCalc(_ferParcs(), _fer._rdt, _fer.seuil, _fer.sauf); _fer.parcs={}; R.inc.forEach(function(p){ _fer.parcs[p.nom]=1; }); _ferUp(); }
+function _ferRdtLigne(p){ var T=(_fer&&_fer._rdt)||{}; if(!Object.keys(T).length) return ''; var r=T[p.nom], s=parseFloat(String(_fer.seuil||'').replace(',','.')); return '<div class="fer-rs">'+((r!=null&&isFinite(r))?'<span class="'+((s>0&&r<s)?'fer-rdt-in':'')+'">'+_ferFr(r,1)+'\u00a0hL/ha en '+_fer._mil+'</span>':'Rendement '+_fer._mil+' inconnu')+'</div>'; }
+function _ferRegleUp(){
+  if(!_fer) return; var el=document.getElementById('fer-aocs'); if(!el) return;
+  var ps=_ferParcs(), A={};
+  ps.forEach(function(p){ var k=String(p.appellation||'').trim(); A[k]=(A[k]||0)+1; });
+  el.innerHTML=Object.keys(A).sort(function(a,b){ return a.localeCompare(b,'fr'); }).map(function(k){ var on=!!_fer.sauf[k];
+    return '<button type="button" class="fer-aoc'+(on?' on':'')+'" data-aoc="'+_escAttr(k)+'" aria-pressed="'+on+'" onclick="_ferSauf(this.getAttribute(\'data-aoc\'))"><span>'+_escHtml(k||'Sans appellation')+'</span><small>'+A[k]+'</small></button>'; }).join('');
+  var R=_ferRegleCalc(ps,_fer._rdt,_fer.seuil,_fer.sauf), n=R.inc.length, ha=R.inc.reduce(function(a,p){ return a+_ferSurf(p); },0), connus=Object.keys(_fer._rdt||{}).length;
+  var go=document.getElementById('fer-regle-go');
+  if(go){ go.disabled=!n; go.textContent=n?('Cocher '+(n>1?'ces ':'cette ')+n+'\u00a0parcelle'+(n>1?'s':'')+' \u00b7 '+_ferFr(ha,2)+'\u00a0ha'):'Aucune parcelle ne r\u00e9pond \u00e0 la r\u00e8gle'; }
+  var h=document.getElementById('fer-regle-h'); if(!h) return;
+  if(!connus) h.textContent='Aucun rendement connu pour la vendange '+_fer._mil+'\u00a0: laissez le seuil vide pour choisir par appellation.';
+  else if(!R.s) h.textContent='Sans seuil, la r\u00e8gle retire seulement les appellations choisies.';
+  else if(R.sans.length) h.textContent=R.sans.length+'\u00a0parcelle'+(R.sans.length>1?'s':'')+' sans rendement connu '+(R.sans.length>1?'restent':'reste')+' de c\u00f4t\u00e9\u00a0: '+R.sans.map(function(p){ return p.nom; }).join(', ')+'. \u00c0 cocher \u00e0 la main si besoin.';
+  else h.textContent='Toutes les parcelles ont un rendement connu pour '+_fer._mil+'.';
+}
 function _ferSearch(q){
   if(!_fer) return; _fer.q=q||'';
   var el=document.getElementById('fer-res'); if(!el) return;
   var n=_phyNorm(_fer.q);
-  if(n.length<2){ el.innerHTML=''; _fer._res=[]; return; }
+  if(n.length<2){ el.innerHTML=''; _fer._res=[]; _ferEtat(); return; }
   var res=_phyEphy().filter(function(p){ return p && p.type==='MFSC' && (_phyNorm(p.nom).indexOf(n)>=0 || String(p.amm||'').indexOf(n)>=0 || (p.noms2||[]).some(function(x){ return _phyNorm(x).indexOf(n)>=0; })); }).slice(0,8);
   _fer._res=res;
+  // FERTI-5 : chaque résultat dit ce que son autorisation permet (p.vg, posé par la synchro).
   el.innerHTML=res.length
-    ? '<div class="fer-res">'+res.map(function(p,i){ return '<div class="fer-ri'+(_fer.prod.amm&&_fer.prod.amm===p.amm?' on':'')+'" onclick="_ferPickEphy('+i+')"><div style="flex:1;min-width:0"><div class="fer-rt">'+_escHtml(p.nom)+'</div><div class="fer-rs">E-Phy MFSC \u00b7 AMM '+_escHtml(p.amm||'\u2014')+(p.sub?' \u00b7 '+_escHtml(p.sub):'')+(p.statut&&p.statut!=='ok'?' \u00b7 retir\u00e9':'')+'</div></div></div>'; }).join('')+'</div>'
-    : '<div class="fer-h">Aucune mati\u00e8re fertilisante de ce nom dans E-Phy. S\u2019il est norm\u00e9, saisissez-le ci-dessous avec sa norme.</div>';
+    ? '<div class="fer-res">'+res.map(function(p,i){
+        var g=FER_VG[p.vg]||null, alias=(_phyNorm(p.nom).indexOf(n)<0)?((p.noms2||[]).filter(function(x){ return _phyNorm(x).indexOf(n)>=0; })[0]||''):'';
+        return '<div class="fer-ri'+(_fer.prod.amm&&_fer.prod.amm===p.amm?' on':'')+(p.vg==='non'?' hors':'')+'" role="button" tabindex="0" onclick="_ferPickEphy('+i+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">'
+          +'<div style="flex:1;min-width:0"><div class="fer-rt">'+_escHtml(p.nom)+'</div><div class="fer-rs">AMM '+_escHtml(p.amm||'\u2014')+(alias?' \u00b7 vendu aussi sous '+_escHtml(alias):'')+(p.statut&&p.statut!=='ok'?' \u00b7 retir\u00e9':'')+'</div></div>'
+          +(g?'<span class="fer-chip '+g[1]+'">'+g[0]+'</span>':'')+'</div>';
+      }).join('')+'</div>'
+    : '';
+  _ferEtat();
 }
+// FERTI-5 : sous la recherche, le statut du produit choisi — ou ce que veut dire « pas dans E-Phy ».
+function _ferEtat(){
+  var el=document.getElementById('fer-etat'); if(!el||!_fer) return;
+  var P=_fer.prod, q=String(_fer.q||'').trim(), h='';
+  if(P.origine==='ephy'&&P.amm){
+    if(P.vg==='non') h='<div class="fer-box al"><b>Son autorisation ne cite pas la vigne.</b> E-Phy le donne pour\u00a0: '+_escHtml(P.cult||'d\u2019autres cultures')+'. Il s\u2019enregistre quand m\u00eame\u00a0; v\u00e9rifiez avant d\u2019\u00e9pandre sur une vigne.</div>';
+    else h='<div class="fer-box"><b>Dans E-Phy, AMM '+_escHtml(P.amm)+'.</b> '+(P.vg==='tc'?'Autoris\u00e9 sur toutes cultures, donc sur la vigne.':(P.vg==='nc'?'E-Phy n\u2019indique aucune culture pour ce produit\u00a0: v\u00e9rifiez l\u2019\u00e9tiquette.':'Son autorisation cite la vigne.'))+'</div>';
+  } else if(_phyNorm(q).length>=2&&!_phyEphy().length){
+    h='<div class="fer-box">Le catalogue E-Phy n\u2019est pas charg\u00e9\u00a0: la recherche reprendra avec la connexion. Le produit peut se saisir ci-dessous.</div>';
+  } else if(_phyNorm(q).length>=2&&!(_fer._res||[]).length){
+    h='<div class="fer-box"><b>Pas dans E-Phy.</b> C\u2019est normal si le sac ne porte pas de num\u00e9ro d\u2019AMM\u00a0: le produit est vendu sous une norme, ou comme fertilisant UE. Saisissez-le ci-dessous, avec sa norme.'
+      +(String(P.nom||'').trim()?'':'<br><span class="fer-lk" role="button" tabindex="0" onclick="_ferNomQ()">Prendre \u00ab\u00a0'+_escHtml(q)+'\u00a0\u00bb comme nom du produit</span>')+'</div>';
+  }
+  el.innerHTML=h;
+}
+function _ferNomQ(){ if(!_fer) return; var q=String(_fer.q||'').trim(); if(!q) return; _fer.prod.nom=q; var e=document.getElementById('fer-nom'); if(e) e.value=q; _ferEtat(); _ferUp(); }
+function _ferNorme(ref){ if(!_fer) return; var P=_fer.prod; P.ref=ref; P.origine='norme'; P.amm=''; P.vg=''; P.cult=''; var e=document.getElementById('fer-ref'); if(e) e.value=ref; _ferSearch(_fer.q); _ferUp(); }
+function _ferNpk(v){ if(!_fer) return; var P=_fer.prod, r=_ferLireNpk(v); P.npk=v; if(r){ P.N=r.N; P.P=r.P; P.K=r.K; P.src=false; ['N','P','K'].forEach(function(k){ var e=document.getElementById('fer-'+k); if(e) e.value=P[k]; }); } _ferUp(); }
+function _ferNat(v){ if(!_fer) return; var P=_fer.prod; P.nat=v; if(v&&FER_NAT[v]){ P.typ=FER_NAT[v].t; P.typMan=false; } else if(!P.typMan) P.typ='II'; var s=document.getElementById('fer-typ'); if(s&&P.typ) s.value=P.typ; _ferUp(); }
+function _ferTypMain(v){ if(!_fer) return; var P=_fer.prod; P.typ=v; P.typMan=true; P.nat=''; var s=document.getElementById('fer-nat'); if(s) s.value=''; _ferUp(); }
+function _ferTypTog(){ if(!_fer) return; _fer.showTyp=!_fer.showTyp; var s=document.getElementById('fer-typ'); if(s){ s.style.display=_fer.showTyp?'':'none'; if(_fer.prod.typ) s.value=_fer.prod.typ; } _ferTypBox(); }
+function _ferSacTog(){ if(!_fer) return; _fer.sac=!_fer.sac; var b=document.getElementById('fer-sac'); if(b) b.style.display=_fer.sac?'':'none'; var l=document.getElementById('fer-sac-lk'); if(l) l.textContent=_fer.sac?'Masquer l\u2019exemple d\u2019\u00e9tiquette':'O\u00f9 lire tout \u00e7a sur le sac'; }
+function _ferTypBox(){
+  var el=document.getElementById('fer-typ-h'); if(!el||!_fer) return;
+  var P=_fer.prod, h;
+  if(P.nat==='chaux') h='<b>Pas de type nitrates.</b> '+FER_NAT.chaux.w;
+  else h='<b>'+(FER_TYP[P.typ]||FER_TYP.II).long+'.</b> '+((P.nat&&FER_NAT[P.nat])?FER_NAT[P.nat].w:(P.typMan?(FER_TYP[P.typ]||FER_TYP.II).aide:'Choisi par d\u00e9faut tant que rien n\u2019est dit\u00a0: indiquez ce qu\u2019est le produit pour le pr\u00e9ciser.'));
+  el.innerHTML=h+' <span class="fer-lk" role="button" tabindex="0" onclick="_ferTypTog()">'+(_fer.showTyp?'Fermer':'Choisir le type soi-m\u00eame')+'</span>';
+}
+function _ferNormesUp(){ if(!_fer) return; var r=_phyNorm(_fer.prod.ref||''); document.querySelectorAll('#fer-norms .fer-norm').forEach(function(b){ var on=!!r&&_phyNorm(b.getAttribute('data-ref'))===r; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on?'true':'false'); }); }
+function _ferSrcUp(){ var e=document.getElementById('fer-src'); if(!e||!_fer) return; var P=_fer.prod; e.style.display=P.src?'':'none'; e.textContent=P.src?('Teneurs reprises d\u2019E-Phy, telles que d\u00e9clar\u00e9es \u00e0 l\u2019autorisation'+(P.CN?'\u00a0; C/N calcul\u00e9':'')+'. \u00c0 comparer avec le sac.'):''; }
 function _ferPickEphy(i){
   var p=(_fer._res||[])[i]; if(!p) return;
-  _fer.prod.nom=p.nom; _fer.prod.amm=p.amm||''; _fer.prod.ref=p.amm?('AMM '+p.amm):''; _fer.prod.origine='ephy';
-  var a=document.getElementById('fer-nom'); if(a) a.value=p.nom;
-  var r=document.getElementById('fer-ref'); if(r) r.value=_fer.prod.ref;
+  var P=_fer.prod, c=p.compo||{};
+  P.nom=p.nom; P.amm=p.amm||''; P.ref=p.amm?('AMM '+p.amm):''; P.origine='ephy'; P.vg=p.vg||''; P.cult=p.cult||'';
+  // FERTI-5 : les teneurs déclarées à l'AMM remplacent la saisie seulement si E-Phy en donne.
+  if(c.N!=null||c.P!=null||c.K!=null||c.MO!=null){
+    P.N=c.N!=null?_ferFmt(c.N):''; P.P=c.P!=null?_ferFmt(c.P):''; P.K=c.K!=null?_ferFmt(c.K):''; P.MO=c.MO!=null?_ferFmt(c.MO):'';
+    P.CN=(c.C!=null&&c.N)?_ferFmt(Math.round(c.C/c.N*10)/10):''; P.src=true; P.npk='';
+    ['N','P','K','MO','CN'].forEach(function(k){ var e=document.getElementById('fer-'+k); if(e) e.value=P[k]; });
+    var np=document.getElementById('fer-npk'); if(np) np.value='';
+  }
+  var a=document.getElementById('fer-nom'); if(a) a.value=P.nom;
+  var r=document.getElementById('fer-ref'); if(r) r.value=P.ref;
   _ferSearch(_fer.q); _ferUp();
 }
 function _ferUp(){
   if(!_fer) return;
   var F=_fer, P=F.prod, o=_ferCalc(), g=function(id){ return document.getElementById(id); };
-  var th=g('fer-typ-h'); if(th) th.textContent=(FER_TYP[P.typ]||FER_TYP.II).aide;
+  _ferTypBox(); _ferNormesUp(); _ferSrcUp();   // FERTI-5 (§462)
   // étape 1
   var ok1=!!(o.dose&&o.kg);
   g('fer-calcN').innerHTML=(o.dose&&o.nha!=null)
@@ -1580,9 +1721,10 @@ function _ferUp(){
     var on=!!F.parcs[p.nom], s=_ferSurf(p), t=o.dose*s, sc=o.kg?t*1000/o.kg:0;
     return '<div class="fer-pl'+(on?' on':'')+'" onclick="_ferPick('+i+')"><div class="fer-ck">'+(on?_mvIcon('check',16):'')+'</div>'
       +'<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:var(--pt-base,14px)">'+_escHtml(p.nom)+(p.zv?' <span class="fer-chip zv">ZV</span>':'')+'</div>'
-      +'<div class="fer-rs">'+_ferFr(s,2)+'\u00a0ha'+(p.cepage?' \u00b7 '+_escHtml(p.cepage):'')+(p.ilot?' \u00b7 '+_escHtml(p.ilot):'')+'</div></div>'
+      +'<div class="fer-rs">'+_ferFr(s,2)+'\u00a0ha'+(p.cepage?' \u00b7 '+_escHtml(p.cepage):'')+(p.appellation?' \u00b7 '+_escHtml(p.appellation):'')+(p.ilot?' \u00b7 '+_escHtml(p.ilot):'')+'</div>'+_ferRdtLigne(p)+'</div>'
       +'<div class="fer-pv"><b>'+(ok1?_ferSacs(sc)+' sacs':'\u2014')+'</b>'+(o.dose?_ferFr(t*1000)+'\u00a0kg':'dose\u00a0?')+(o.nha!=null&&o.dose?' \u00b7 '+_ferFr(o.nha*s,1)+'\u00a0kg N':'')+(o.hha?'<br>'+_ferHm(o.hha*s):'')+'</div></div>';
   }).join('') || '<div class="fer-h">Aucune parcelle en exploitation.</div>';
+  _ferRegleUp();   // FERTI-6 (§463)
   var miss=o.list.filter(function(p){ return p.zv && !p.ilot; });
   g('fer-ilot').innerHTML=miss.length?'<div class="fer-box al"><b>'+miss.map(function(p){ return _escHtml(p.nom); }).join(', ')+'\u00a0: \u00eelot PAC non renseign\u00e9.</b><br>L\u2019apport s\u2019enregistre. Le cahier imprimera un tiret \u00e0 cet endroit tant que l\u2019\u00eelot n\u2019est pas pos\u00e9 (registre de fertilisation, carte \u00ab\u00a0Ce qu\u2019un contr\u00f4le va demander\u00a0\u00bb).</div>':'';
   g('fer-r2').innerHTML=o.list.length?o.list.length+' parcelle'+(o.list.length>1?'s':'')+' \u00b7 '+_ferFr(o.surf,2)+'\u00a0ha'+(o.nzv?'<br>dont '+o.nzv+' en ZV':''):'<span class="fer-chip al">aucune</span>';
@@ -1643,7 +1785,7 @@ function _ferSave(){
   var hha=o.hha?Math.round(o.hha*100)/100:0;
   var op={ id:'f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), cree:_mvToday(),
     prodId:prod.id,
-    prod:{ nom:nomP, ref:String(P.ref||'').trim(), origine:P.origine||'norme', amm:P.amm||'', four:String(P.four||'').trim(),
+    prod:{ nom:nomP, ref:String(P.ref||'').trim(), origine:P.origine||'norme', amm:P.amm||'', four:String(P.four||'').trim(), nat:P.nat||'', vg:P.vg||'',
            N:num(P.N), P:num(P.P), K:num(P.K), MO:num(P.MO), CN:num(P.CN), typ:P.typ||'II', ab:!!P.ab },
     dose:num(F.dose), kgSac:num(F.kg), prix:num(F.prix), pu:F.pu, cout:o.cout||null, sacs:o.sacsCmd||null,
     parcs:o.list.map(function(p){ return p.nom; }),
@@ -1784,7 +1926,7 @@ function _ferRender(){
     h+='<div class="fer-c">'
       +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div style="min-width:0">'
         +'<div class="fer-stt" style="font-size:var(--pt-md,20px)">'+_escHtml(P.nom||'\u2014')+'</div>'
-        +'<div class="fer-rs" style="margin-top:3px;line-height:1.5">'+(FER_TYP[P.typ]||FER_TYP.II).lbl+' \u00b7 '+(nha!=null?_ferFr(nha)+'\u00a0kg N/ha':'azote \u2014')+(P.ref?' \u00b7 '+_escHtml(P.ref):'')+(P.ab?' \u00b7 <span class="fer-chip ok">AB</span>':'')
+        +'<div class="fer-rs" style="margin-top:3px;line-height:1.5">'+_ferTypLbl(P.typ)+' \u00b7 '+(nha!=null?_ferFr(nha)+'\u00a0kg N/ha':'azote \u2014')+(P.ref?' \u00b7 '+_escHtml(P.ref):'')+(P.ab?' \u00b7 <span class="fer-chip ok">AB</span>':'')
         +'<br>'+(op.dose?_ferFr(op.dose,1)+'\u00a0t/ha':'dose \u2014')+(op.sacs?' \u00b7 '+op.sacs+' sacs de '+_ferFr(op.kgSac||0)+'\u00a0kg':'')+(op.cout?' \u00b7 '+_ferFr(op.cout)+'\u00a0\u20ac HT pr\u00e9vus':'')+'</div></div>'
         +'<span class="fer-chip '+(pct>=100?'ok':'al')+'">'+(pct>=100?'fait':'en cours')+'</span></div>'
       +'<div class="fer-trk"><div class="fer-fil" style="width:'+pct+'%"></div></div>'
@@ -1853,7 +1995,7 @@ function _ferExportPdf(){
       +'<table class="fer-kv"><tr><td><span>\u00celot PAC</span>'+e((p&&p.ilot)||'\u2014')+'</td><td><span>Surface</span>'+_ferFr(_ferSurf(p),2)+'\u00a0ha</td><td><span>Type de sol</span>'+e((p&&p.sol)||'\u2014')+'</td></tr>'
       +'<tr><td><span>Culture</span>Vigne (VITVI)</td><td><span>Plantation</span>'+e((p&&p.plantee)?String(p.plantee):'\u2014')+/* FERTI-2 : p.plantee, pos\u00e9e depuis la fiche fertilisation */'</td><td><span>Rendement r\u00e9alis\u00e9 '+C+'</span>'+(rdt[nom]!=null?_ferFr(rdt[nom],1)+'\u00a0hL/ha':'\u2014')+'</td></tr></table>'
       +'<table class="fer-t"><tr><th>Date</th><th class="r">Superficie</th><th>Fertilisant</th><th>Type</th><th class="r">% N</th><th class="r">Quantit\u00e9 d\u2019azote</th></tr>'
-      +(ls.length?ls.map(function(l){ var P=l.op.prod||{}; return '<tr><td>'+_ferDfr(l.date)+'</td><td class="r">'+_ferFr(l.surf,2)+'\u00a0ha</td><td>'+e(P.nom||'')+'<br><span class="fer-g">'+e(P.ref||'')+(l.op.dose?' \u00b7 '+_ferFr(l.op.dose*1000)+'\u00a0kg/ha':'')+(l.op.enf&&l.op.enf!=='non'?' \u00b7 enfoui sous '+e(l.op.enf):'')+'</span></td><td>'+(FER_TYP[P.typ]||FER_TYP.II).lbl.replace('Type ','')+'</td><td class="r">'+(P.N!=null?_ferFr(P.N,1):'\u2014')+'</td><td class="r"><b>'+(l.nTot!=null?_ferFr(l.nTot,1)+'\u00a0kg':'\u2014')+'</b></td></tr>'; }).join('')
+      +(ls.length?ls.map(function(l){ var P=l.op.prod||{}; return '<tr><td>'+_ferDfr(l.date)+'</td><td class="r">'+_ferFr(l.surf,2)+'\u00a0ha</td><td>'+e(P.nom||'')+'<br><span class="fer-g">'+e(P.ref||'')+(l.op.dose?' \u00b7 '+_ferFr(l.op.dose*1000)+'\u00a0kg/ha':'')+(l.op.enf&&l.op.enf!=='non'?' \u00b7 enfoui sous '+e(l.op.enf):'')+'</span></td><td>'+_ferTypLbl(P.typ).replace('Type ','')+'</td><td class="r">'+(P.N!=null?_ferFr(P.N,1):'\u2014')+'</td><td class="r"><b>'+(l.nTot!=null?_ferFr(l.nTot,1)+'\u00a0kg':'\u2014')+'</b></td></tr>'; }).join('')
         :'<tr><td colspan="6" class="fer-g">Aucun apport de fertilisant azot\u00e9 enregistr\u00e9 sur la campagne.</td></tr>')
       +'</table></div>';
   });
@@ -1876,7 +2018,7 @@ function _ferExportCsv(){
   var cols=['SIRET','Campagne','Parcelle','Ilot PAC','Zone vulnerable','Type de sol','Culture','Rendement realise (hL/ha)','Date epandage','Superficie (ha)','Fertilisant','Norme ou AMM','Type nitrates','Teneur N (%)','Dose (kg/ha)','Azote par ha (kg N/ha)','Quantite totale azote (kg N)','P2O5 (kg/ha)','K2O (kg/ha)','Utilisable AB','Enfouissement','Origine de la date','Annee de plantation'];
   var lines=[cols.map(cell).join(';')];
   L.forEach(function(l){ var P=l.op.prod||{}, p=l.p||{};
-    lines.push([siret,_ferCampLbl(C),l.nom,p.ilot||'',p.zv?'oui':'non',p.sol||'','VITVI',dec(rdt[l.nom],1),_ferDfr(l.date),dec(l.surf,2),P.nom||'',P.ref||'',(FER_TYP[P.typ]||FER_TYP.II).lbl.replace('Type ',''),dec(P.N,2),dec(l.op.dose!=null?l.op.dose*1000:null,0),dec(l.nha,1),dec(l.nTot,1),dec(l.pha,1),dec(l.kha,1),P.ab?'oui':'non',l.op.enf||'non',(l.src==='session'?'session tracteur':(l.src==='journal'?'tache validee':'saisie admin')),p.plantee||''].map(cell).join(';'));
+    lines.push([siret,_ferCampLbl(C),l.nom,p.ilot||'',p.zv?'oui':'non',p.sol||'','VITVI',dec(rdt[l.nom],1),_ferDfr(l.date),dec(l.surf,2),P.nom||'',P.ref||'',_ferTypLbl(P.typ).replace('Type ',''),dec(P.N,2),dec(l.op.dose!=null?l.op.dose*1000:null,0),dec(l.nha,1),dec(l.nTot,1),dec(l.pha,1),dec(l.kha,1),P.ab?'oui':'non',l.op.enf||'non',(l.src==='session'?'session tracteur':(l.src==='journal'?'tache validee':'saisie admin')),p.plantee||''].map(cell).join(';'));
   });
   var csv='\uFEFF'+lines.join('\r\n')+'\r\n';
   var slug=String(window.DOMAINE_NOM||'domaine').toLowerCase().normalize('NFD').split('').filter(function(c){ var k=c.charCodeAt(0); return k<768||k>879; }).join('').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
@@ -1886,6 +2028,8 @@ function _ferExportCsv(){
 
 window.openOvFerti=openOvFerti; window._ferTog=_ferTog; window._ferSet=_ferSet; window._ferUnit=_ferUnit; window._ferRd=_ferRd;
 window._ferAll=_ferAll; window._ferPick=_ferPick; window._ferSearch=_ferSearch; window._ferPickEphy=_ferPickEphy; window._ferSave=_ferSave;
+window._ferNomQ=_ferNomQ; window._ferNorme=_ferNorme; window._ferNpk=_ferNpk; window._ferNat=_ferNat; window._ferTypMain=_ferTypMain; window._ferTypTog=_ferTypTog; window._ferSacTog=_ferSacTog;   // FERTI-5 (§462)
+window._ferSeuil=_ferSeuil; window._ferSauf=_ferSauf; window._ferRegleGo=_ferRegleGo;   // FERTI-6 (§463)
 window.openFerParc=openFerParc; window._ferParcSave=_ferParcSave; window._ferMan=_ferMan; window._ferDel=_ferDel;
 window._ferRender=_ferRender; window._ferCamp=_ferCamp; window._ferExportPdf=_ferExportPdf; window._ferExportCsv=_ferExportCsv;
 window._ferFaits=_ferFaits; window._ferSyncSessions=_ferSyncSessions; window._ferLignes=_ferLignes; window._ferHha=_ferHha;

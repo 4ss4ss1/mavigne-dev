@@ -108,7 +108,7 @@ function ephyRender(){
       + '<div class="cat-l"><div class="cat-nom">'+_escHtml(p.nom)+'</div>'
       + '<div class="cat-det"><span style="font-family:monospace">AMM '+_escHtml(p.amm)+'</span> · '+_escHtml(p.sub||'—')+'</div>'
       + (minis.length?'<div class="ephy-minis">'+minis.join('')+'</div>':'')+'</div>'
-      + '<div class="cat-r"><span class="cat-db '+(TCLS[p.type]||'tfc')+'">'+_escHtml(p.type)+'</span>'+stat+'</div></div>';
+      + '<div class="cat-r"><span class="cat-db '+(TCLS[p.type]||'tfc')+'">'+_escHtml(p.type)+((p.type==='MFSC'&&p.vg==='non')?' \u00b7 pas la vigne':((p.type==='MFSC'&&p.vg==='tc')?' \u00b7 toutes cultures':''))+'</span>'+stat+'</div></div>';
   }).join('');
   if(typeof _catFicheSync==='function')_catFicheSync(l);   // PHYTO-2 (§286)
 }

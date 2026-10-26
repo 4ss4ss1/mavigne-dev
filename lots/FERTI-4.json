@@ -1,0 +1,27 @@
+{
+  "lot": "FERTI-4",
+  "section": "§461",
+  "base": "4e187d99aba9cd5983d1cbb62e1e605d45323cfd",
+  "inclut": [],
+  "date": "2026-10-26",
+  "tutos": null,
+  "fichiers": {
+    ".gitignore": "ddb14fc54bee288fa438cb8a8f353e7c0375ac5ad79a8a32795d204c92ae8d49",
+    ".mv-base": "e63555479bb3ff34267f1018da462ce7060752d0e897345288731ca1d4b6de57",
+    "CLAUDE.md": "33e47a0853a7f6939066b02243a58219f149d2d316307f15b69785c11f909b8f",
+    "docs/claude/INDEX.md": "887b5b4f95a2a0a360a7ee83d969685b732413713db8a2b73c3e2ceef0d7996e",
+    "docs/claude/chantiers-430-479.md": "4324b379e4d7c8081f54d6999191a56cc116fd6f97544c6fa08e6c298df8da8f",
+    "docs/claude/journal.md": "e4df17e810f58ebafb796ae8939492f8789061897591c3c516e5828230883408",
+    "functions/ephy.js": "de030a7df3bf753848ad08820491b98b2fa1b66138e955fcab2a035b20182b6d",
+    "scripts/mv-harnais-liste.mjs": "1cb8180de46dacc2dc24c4ebff0f5841148aa31d2ad33c839ddfa4de93350db6",
+    "functions/ephy-calc.js": "bfdcd0126a8a6e99a518f51eb6fd1df34943701707d66f2e0358cf3aa78364d1",
+    "scripts/fixtures/ephy-mfsc/LISEZMOI.txt": "e3ac805f002e1c289bce0996538335d6c2a2d080fba687b84f63bab8821434f3",
+    "scripts/fixtures/ephy-mfsc/mfsc_et_mixte_composition_utf8.csv": "157801620370d6bb201e5064d66b9db5734de67a10b7546c98225fc9509eadf3",
+    "scripts/fixtures/ephy-mfsc/mfsc_et_mixte_usage_utf8.csv": "2c09916a9462534dd06cc50217dad0ac6f5ff8d4af6f31c18f687bb0c312733d",
+    "scripts/fixtures/ephy-mfsc/produits_usages_utf8.csv": "f41e1a458a4b0e152dd5e44863547fdc37499f337806628e78981b3edaaea759",
+    "scripts/fixtures/ephy-mfsc/produits_utf8.csv": "dcdb55dac0ffe3ce0c61fcf2d9aad1a332e2722bf1f615f1b824c1b2ea42529b",
+    "scripts/fixtures/ephy-mfsc/roles.json": "c5eccf15df622637620ae4783c66b3f2c8da24d47751bd6b0daa9f544cc0f164",
+    "scripts/fixtures/ephy-mfsc/usages_des_produits_autorises_utf8.csv": "0fe5f409a86463fed45a5678fb4ed4ca4661b6eb3ffd8ec77d3a4f360e8e8400",
+    "scripts/mv-harnais-ephy-mfsc.mjs": "d4dd070f7e321924bb3173ca9c6fb94afe8e01595af6639c2c27ddda52b98871"
+  }
+}

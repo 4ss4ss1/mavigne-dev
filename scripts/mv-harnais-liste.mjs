@@ -399,6 +399,12 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-tri2.mjs'],
   ['node scripts/mv-harnais-parc-xls.mjs'],
   ['node scripts/mv-harnais-fertil.mjs'],          // FERTI-1 : amendement et registre de fertilisation
+  ['node scripts/mv-harnais-ephy-mfsc.mjs'],       // FERTI-4 (§461) : le catalogue E-Phy garde les matières fertilisantes valables en vigne (toutes cultures, sans culture, vigne nommée autrement), statut et teneurs
+  ['node scripts/mv-harnais-ephy-mfsc.mjs --contre'],
+  ['node scripts/mv-harnais-ferti5.mjs'],           // FERTI-5 (§462) : la fiche « Le produit » — statut vigne, « pas dans E-Phy », normes, formule N-P-K, nature → type, teneurs reprises
+  ['node scripts/mv-harnais-ferti5.mjs --contre'],
+  ['node scripts/mv-harnais-ferti6.mjs'],           // FERTI-6 (§463) : les parcelles par règle — rendement sous un seuil, sauf des appellations ; sans rendement connu, de côté et nommée
+  ['node scripts/mv-harnais-ferti6.mjs --contre'],
   ['node scripts/mv-harnais-tri3.mjs'],
   ['node scripts/mv-harnais-cuvgr3.mjs'],
   ['node scripts/mv-harnais-crb2.mjs', 'crb-2-le-couloir-des-courbes'],
