@@ -5776,16 +5776,19 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .ck-ap-s{margin-top:4px;font-size:var(--pt-micro,12px);color:var(--texte-doux)}
 .ck-ap-note{margin:12px 0 0;padding:12px 12px;border-radius:10px;background:var(--hover);font-size:var(--pt-micro,12px);line-height:1.5;color:var(--texte-med)}
 .ck-ta-ax{display:flex;justify-content:space-between;margin:0 40px 4px 40px;font-size:var(--pt-nano,11px);color:var(--texte-doux)}
-.ck-ta{display:grid;grid-template-columns:112px minmax(0,1fr) 64px;align-items:center;gap:4px 0;padding:12px 0}
+.ck-ta{display:grid;grid-template-columns:112px minmax(0,1fr) 64px;align-items:center;gap:4px 8px;padding:12px 0}   /* ECART-1 (§460) : 8 px entre la barre et l’écart — la pointe touchait « +602,6 % » */
 .ck-ta-n{font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)}
 .ck-ta-b{position:relative;height:14px;border-radius:4px;background:var(--hover)}
 .ck-ta-zero{position:absolute;left:50%;top:-4px;bottom:-4px;width:1.5px;transform:translateX(-.75px);background:var(--texte-doux);opacity:.55}
 .ck-ta-v{position:absolute;top:2px;bottom:2px;border-radius:3px;transition:width var(--mv-d4) var(--mv-sortie)}
 .ck-ta-v.lent{background:var(--orange);transform-origin:left center}.ck-ta-v.vite{background:var(--vert-med);transform-origin:right center}
+/* ECART-1 (§460) : au-delà de l'échelle (±50 %), la barre est pleine et finit en pointe, vers l'extérieur. */
+.ck-ta-v.hors.lent{clip-path:polygon(0 0,calc(100% - 7px) 0,100% 50%,calc(100% - 7px) 100%,0 100%)}
+.ck-ta-v.hors.vite{clip-path:polygon(7px 0,100% 0,100% 100%,7px 100%,0 50%)}
 .ck-ta-e{justify-self:end;font-size:var(--pt-txt,13px);font-weight:600;font-variant-numeric:lining-nums tabular-nums}
 .ck-ta-e.lent{color:var(--orange-tx)}.ck-ta-e.vite{color:var(--vert-tx)}
 .ck-ta-s{grid-column:2/4;font-size:var(--pt-micro,12px);color:var(--texte-doux)}
-@media (max-width:520px){.ck-ta{grid-template-columns:88px minmax(0,1fr) 56px}.ck-ta-ax{margin:0 40px 4px 40px}}
+@media (max-width:520px){.ck-ta{grid-template-columns:88px minmax(0,1fr) 64px}.ck-ta-ax{margin:0 40px 4px 40px}}
 
 /* ═══ L’ENTRÉE — un seul moment orchestré ═══ */
 .ck-entree .ck-pa{opacity:0}

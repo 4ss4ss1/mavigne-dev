@@ -24,15 +24,21 @@ function eco(S, E) {
 //   fin projetée du moteur (projFin), plus « engagé + reste d'argent » — qui valait le budget par construction.
 const E0 = { configured: true, rate: 23, budget: 70800, engage: 45230, resteE: 30000, projFin: 79000, avc: 61, hbH: 0, tot: { moB: 61412, moF: 37600, moR: 28300 },
   postes: [{ k: 'mo', lab: 'Main-d’œuvre', fait: 41000, budget: 61412 }, { k: 'gnr', lab: 'Carburant', fait: 1080, budget: 2400, det: 'GNR <b>des</b> tracteurs', proj: true }, { k: 'pre', lab: 'Prestations', fait: 900, budget: 500 }],
-  cad: { ok: true, applic: true, ecart: 1.6, hJour: 35 }, tasks: [{ nom: 'Taille', fE: 1000, ecE: 15, reH: 456 }, { nom: 'Brulage', fE: 500, ecE: -11, reH: 64.6 }, { nom: 'Sans', fE: 0, ecE: null }],
+  // ECART-1 (§460) : chaque tâche porte aussi le barème des mêmes validations que ses heures (reB) ; « Vide » a un barème sans heure
+  //   versée, « Arr » est un travail à l'heure — ni l'une ni l'autre n'ont de ligne.
+  cad: { ok: true, applic: true, ecart: 1.6, hJour: 35 }, tasks: [{ nom: 'Taille', fE: 1000, ecE: 15, reH: 456, reB: 400 }, { nom: 'Brulage', fE: 500, ecE: -11, reH: 64.6, reB: 68 }, { nom: 'Sans', fE: 0, ecE: null },
+    { nom: 'Vide', fE: 200, ecE: -200, reH: 0, reB: 10 }, { nom: 'Arr', fE: 0, ecE: null, reH: 30, reB: 12, reHb: true }],
   pairs: [{ parc: 'A1', eur: 2400 }, { parc: 'B1', eur: 1800 }, { parc: 'X', eur: 999 }] };
 function suite(S) {
   const out = []; const T = (n, c) => out.push([n, !!c]);
   const e = eco(S, E0);
   T('budget, engagé et atterrissage viennent du moteur (atterrissage = fin projetée ; main-d’œuvre payée, son reste à la cadence)', e.budget === 70800 && e.dep === 45230 && e.att === 79000 && e.moBudget === 61412 && e.moDep === 41000 && Math.abs(e.moAtt - (41000 + 28300 * 1.016)) < 1e-6 && e.cadAppl === true);
   T('les postes hors main-d’œuvre, sans balises ; l’atterrissage d’un poste n’est jamais sous son dépensé', e.postes.length === 2 && e.postes[0].note === 'GNR des tracteurs' && e.postes[0].ref === 'proj' && e.postes[0].att === 2400 && e.postes[1].ref === 'cout' && e.postes[1].att === 900);
-  T('écart au barème : celui du moteur ; plus de « cadence » prêtée à l’équipe (c’était la journée de référence)', Math.abs(e.ecartMoy - .016) < 1e-9 && !('cadence' in e));
-  T('par tâche : écart du réalisé sur le fait et heures réelles (rien d’inventé sans fait)', Math.abs(e.ecTache.Taille - .015) < 1e-9 && e.hReelTache.Brulage === 65 && !('Sans' in e.ecTache) && e.hReel === 521);
+  // ECART-1 (§460) : la tuile est le total de la carte par tâche, en heures — plus l'écart de cadence (1,6 %), ni l'écart en euros.
+  T('écart au barème : le total de la carte par tâche, en heures (ni la cadence du moteur, ni « cadence » prêtée à l’équipe)', Math.abs(e.ecartMoy - (456 + 64.6 - 400 - 68) / (400 + 68)) < 1e-9 && !('cadence' in e));
+  T('par tâche : les heures réelles face au barème des mêmes validations (rien d’inventé sans heure ni barème, pas de travail à l’heure)', Math.abs(e.ecTache.Taille - 56 / 400) < 1e-9 && Math.abs(e.ecTache.Brulage - (64.6 - 68) / 68) < 1e-9
+    && e.hReelTache.Brulage === 64.6 && e.hBarTache.Taille === 400 && !('Sans' in e.ecTache) && !('Vide' in e.ecTache) && !('Arr' in e.ecTache) && e.hReel === 551);
+  T('rien à comparer : la tuile rend null (un tiret à l’écran), jamais 0', eco(S, Object.assign({}, E0, { tasks: [{ nom: 'Taille', fE: 1000, ecE: 15, reH: 0, reB: 400 }] })).ecartMoy === null);
   T('par appellation : la main-d’œuvre engagée à l’hectare EN PRODUCTION (l’arrachée ne compte pas)', e.coutHaApp.Bourgogne === 2400 && e.coutHaApp['1er cru'] === 3600);
   T('coût de l’inaction : le simulateur de renfort, comme sa tuile', e.inaction.h === 40 && e.inaction.eur === 920 && e.inaction.horsDelai === 1);
   T('sans temps réel, pas de courbe inventée', Array.isArray(e.serie) && e.serie.length === 0);
@@ -57,7 +63,9 @@ if (CONTRE) {
     ['la main-d’œuvre redevient le barème du fait', 'pil', "var moDep=num(Pk.mo?Pk.mo.fait:T.moF)", "var moDep=num(T.moF)"],
     ['un poste atterrit sous son dépensé', 'pil', "att:Math.max(f,b) };", "att:b };"],
     ['l’arrachée comptée dans les hectares', 'pil', "if(!p||/arrach/i.test(String(p.statut||''))) return; var a=p.appellation", "if(!p) return; var a=p.appellation"],
-    ['un écart inventé sans fait', 'pil', "if(t.ecE!=null&&t.fE>0) ecTache[t.nom]=t.ecE/t.fE;", "ecTache[t.nom]=t.fE?t.ecE/t.fE:0;"],
+    ['un « −100 % » sans heure versée', 'pil', "if(h>0 && b>0 && !t.reHb){", "if(b>0 && !t.reHb){"],
+    ['l’écart par tâche repasse en euros', 'pil', "ecTache[t.nom]=(h-b)/b;", "ecTache[t.nom]=t.fE>0?t.ecE/t.fE:0;"],
+    ['la tuile retombe sur la cadence', 'pil', "att:att, ecartMoy:ecartMoy,", "att:att, ecartMoy:(E.cad&&E.cad.ok&&E.cad.ecart!=null)?E.cad.ecart/100:0,"],
     ['une photo économique sans taux', 'pil', "if(!E||!E.configured) return null;", "if(!E) return null;"],
     ['la cadence de démonstration revenue', 'vue', "'<b>' + nb(r.capMoy) + '</b><small>\\u202fh/j</small>'", "'<b>35</b><small>\\u202fh/j</small>'"],
   ];

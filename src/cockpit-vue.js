@@ -330,7 +330,8 @@ function calc() {
     const pct = t.pct != null ? t.pct : (haT ? haF / haT * 100 : 0);
     const etat = (pct >= 99.95 || t.eqFini) ? 'fait' : (AUJ > t.fin ? 'retard' : 'cours');   // CHANT-1 : fini pour l’équipe = vert
     const ecT = ((V.eco || {}).ecTache || {})[t.cle || t.nom], hRt = ((V.eco || {}).hReelTache || {})[t.cle || t.nom];
-    r.t[t.id] = { haF, haT, hF: t.hDone != null ? t.hDone : haF * t.hha, hT: t.hTotal != null ? t.hTotal : haT * t.hha, hR: hRt || 0, pct, etat, ecart: ecT != null ? ecT : 0 };
+    const hBt = ((V.eco || {}).hBarTache || {})[t.cle || t.nom];   // ★ ECART-1 (§460) : le barème des mêmes validations que les heures réelles
+    r.t[t.id] = { haF, haT, hF: t.hDone != null ? t.hDone : haF * t.hha, hT: t.hTotal != null ? t.hTotal : haT * t.hha, hR: hRt || 0, hB: hBt || 0, pct, etat, ecart: ecT != null ? ecT : 0 };
   });
   APPS.forEach(a => {
     const ps = PARCS.filter(p => p.app === a.id && !p.arr), ha = ps.reduce((s, p) => s + p.ha, 0);
@@ -342,7 +343,7 @@ function calc() {
   });
   r.pct = v.pct != null ? v.pct : (r.hT ? r.hF / r.hT * 100 : 0);
   r.reste = v.reste || 0;
-  r.ecartMoy = (v.eco || {}).ecartMoy || 0;
+  { const em = (v.eco || {}).ecartMoy; r.ecartMoy = (em == null || !isFinite(em)) ? null : em; }   // ECART-1 : rien à comparer = null (un tiret), jamais 0
   r.fin = finPrevue(); r.finPaul = r.fin;
   r.ecart = v.marge != null ? v.marge : Math.round((VISEE - r.fin) / 864e5);
   r.capMoy = v.capMoy || 0; r.besoin = v.besoin || 0;   // AUJ-7 : la cadence de l'ÉQUIPE (l'économie prêtait la journée de référence, 7 h)
@@ -361,6 +362,18 @@ const eur100 = v => nb(Math.round(v / 100) * 100) + '\u202f€';
 const signe = v => { const n = Math.round(v); return (n > 0 ? '+' : n < 0 ? '−' : '') + nb(Math.abs(n)); };   // AUJ-7 : arrondi AVANT le signe — jamais « −0 »
 const NF1 = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const pct1 = v => { const n = Math.round(v * 10) / 10; return (n > 0 ? '+' : n < 0 ? '−' : '') + NF1.format(Math.abs(n)) + '\u202f%'; };   // AUJ-7 : jamais « −0,0 % »
+// ★★ ECART-1 (§460) — L'ÉCART AU BARÈME. La tuile écrit un tiret quand rien n'est à comparer : elle écrivait « 0,0 % », qui n'est pas
+//   une mesure. Les heures de la carte sont écrites au dixième sous 100 h, pour que le pourcentage se retrouve à partir des deux
+//   chiffres écrits dessous. La barre est à l'échelle jusqu'à ±TA_ECH % ; au-delà, pleine, sa pointe dit « hors échelle » (AUJ-7
+//   l'arrêtait à 10 % : +13 % et +620 % remplissaient la même longueur). Une seule règle pour le dessin et la mise à jour.
+const NFH = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 });
+const ecTxt = v => (v == null || !isFinite(v)) ? '\u2014' : pct1(v * 100);
+const ecCadre = r => r.ecartMoy == null ? 'rien de validé à comparer' : 'heures réelles face au barème';
+const hTxt = h => (Math.abs(h) < 100 ? NFH.format(Math.round(h * 10) / 10) : nb(h)) + '\u202fh';
+const TA_ECH = 50;
+const taBarre = e => ({ w: Math.min(TA_ECH, Math.abs(e)) / TA_ECH * 50, hors: Math.abs(e) > TA_ECH });
+const taClasse = e => 'ck-ta-v ' + (e > 0 ? 'lent' : 'vite') + (taBarre(e).hors ? ' hors' : '');
+const taHeures = x => hTxt(x.hB) + ' de barème, ' + hTxt(x.hR) + ' réelles';
 const INFO = {
   // ★★ AUJ-TETE-1 (§454) — les références de la phrase du haut : un titre, une idée par paragraphe (ouvrirInfo les lit).
   resTemps: { t: 'Le délai : sur quoi il est compté', p: [
@@ -390,13 +403,13 @@ const INFO = {
   courbe: 'Le reste mesuré : une ligne relie la photo de chaque jour au point d’aujourd’hui, en direct. La photo est prise à la première ouverture du Pilotage par un administrateur, une fois les données arrivées (60 jours gardés) ; un jour sans photo est un trou. L’axe part de la première photo. La projection suit la capacité du planning ; la ligne fine montre l’allure qu’il faudrait pour finir pile à l’objectif.',
   atterrissage: 'La fin projetée de l’onglet Économie : ce qui est déjà dépensé, plus le travail qui reste, compté au barème et corrigé de la cadence mesurée de l’équipe quand elle s’applique (sinon au barème seul). Tracteur, GNR et phyto suivent l’avancement ; les prestations et les travaux à l’heure comptent ce qu’ils ont coûté.',
   coutha: 'L’atterrissage de la campagne, divisé par les hectares en production (une vigne arrachée n’en a plus). Le prévu est le budget, divisé de la même façon.',
-  ecart: 'Les heures passées dans les rangs (planning), moins le tracteur et les travaux à l’heure (arrachage, désherbage manuel… : rien au barème en face), face aux heures du barème du travail validé. Au-dessus de zéro, l’équipe met plus longtemps que le barème.',
+  ecart: 'Le total de la carte « Écart au barème, par tâche » : toutes les heures réellement versées aux parcelles validées des tâches au barème, face au barème de ce même travail — les chiffres de « Temps réel contre barème », dans l’onglet Économie. Ni la cave (journées, matins ou après-midis marqués au Planning, jours d’opération du Chai), ni le tracteur, ni les travaux à l’heure (arrachage…). Au-dessus de zéro, l’équipe met plus longtemps que le barème ; un tiret tant que rien n’est à comparer. La cadence qui corrige l’atterrissage est un autre calcul : toute la présence du planning, à partir de 40 % du travail fait (onglet Économie).',
   cadence: 'Heures de barème validées par jour travaillé, sur les quatre dernières semaines, face à l’allure qu’il faut tenir pour finir à l’objectif.',
   inaction: 'Ce que coûterait le retard si rien n’est décidé : le travail hors de sa fenêtre prend du temps en plus chaque semaine. C’est une hypothèse de calcul, pas une mesure.',
   echart: 'Du début de la période à aujourd’hui : le budget main-d’œuvre payé (heures du planning, au jour où elles ont été faites, hors travaux à l’heure) et le travail fait au barème (à la date des validations). Tant que le payé reste sous le fait, la main-d’œuvre coûte moins que prévu. Les pointillés prolongent jusqu’à la fin prévue.',
   postes: 'Main-d’œuvre : la barre est son budget, la partie pleine ce qui est payé, le trait la fin prévue ; à droite, l’écart prévu. Tracteur, GNR, phyto : leur prévu suit l’avancement ; à droite, ce qui reste à dépenser. Prestations et travaux à l’heure (arrachage…) : payés au réel, sans prévu.',
   apps: 'Le barème du travail validé dans chaque appellation, au coût horaire de l’équipe, divisé par ses hectares en production. Une appellation sans travail validé ne se compare pas.',
-  taches: 'Pour chaque tâche au barème qui a du travail validé : l’écart entre les heures réellement versées et le barème. Les heures de cave n’y entrent pas : les journées, matins ou après-midis marqués au Planning, et les jours d’opération du Chai. À droite du zéro, l’équipe va moins vite que le barème. Un travail à l’heure (arrachage…) n’a pas de barème : il a sa ligne dans « Par poste ».',
+  taches: 'Pour chaque tâche au barème qui a du travail validé : les heures réellement versées à ses parcelles validées, face au barème de ces mêmes parcelles — les chiffres de « Temps réel contre barème », dans l’onglet Économie. Les heures de cave n’y entrent pas : les journées, matins ou après-midis marqués au Planning, et les jours d’opération du Chai. À droite du zéro, l’équipe va moins vite que le barème. La barre est à l’échelle jusqu’à 50 % ; au-delà, elle est pleine et finit en pointe. Un travail à l’heure (arrachage…) n’a pas de barème : il a sa ligne dans « Par poste ».',
 };
 const SVG = (d, cls) => '<svg' + (cls ? ' class="' + cls + '"' : '') + ' viewBox="0 0 24 24" aria-hidden="true">' + d + '</svg>';
 const ICO = {
@@ -867,7 +880,7 @@ function htmlEKpis(r) {
     + '<p class="ck-cadre">' + cadreTxt + '</p></div>';
   return '<div class="ck-ek-g">'
     + k('coutha', 'Coût à l’hectare', '<b id="ck-ek-ha" data-v="0">0</b><small>\u202f€/ha</small>', '', '<span id="ck-ek-ha-c">prévu : ' + nb(r.coutHaPrevu) + '\u202f€/ha</span>', 'coutha')
-    + k('ecart', 'Écart au barème', '<b id="ck-ek-ec">' + pct1(r.ecartMoy * 100) + '</b>', spark(SPARK_ECART, 'haut'), 'heures réelles face au barème', 'ecart')
+    + k('ecart', 'Écart au barème', '<b id="ck-ek-ec">' + ecTxt(r.ecartMoy) + '</b>', spark(SPARK_ECART, 'haut'), '<span id="ck-ek-ec-c">' + ecCadre(r) + '</span>', 'ecart')   // ECART-1 : le total de la carte
     + k('cadence', 'Cadence de l’équipe', '<b>' + nb(r.capMoy) + '</b><small>\u202fh/j</small>', '', '<span id="ck-ek-cad-c">il en faut ' + nb(r.besoin) + ' pour finir le ' + dLong(VISEE) + '</span>', 'cadence')
     + (function () { const x = (V.eco || {}).inaction; const ok = !x || !(x.h > 1);
         return k('inaction', 'Coût de l’inaction', ok ? '<b class="ck-ek-calme">Rien à rattraper</b>' : '<b>+\u202f' + nb(x.h) + '</b><small>\u202fh</small>', '',
@@ -967,16 +980,16 @@ function htmlApps(r) {
 //   tâche pas commencée rien à comparer — elles s'affichaient à « 0,0 % », « 0 h de barème, 0 h réelles ».
 const tachesE = () => TACHES.filter(t => ((V && V.eco && V.eco.ecTache) || {})[t.cle || t.nom] != null);
 function htmlTaches(r) {
-  const B = 10, L = tachesE(), tete = entete('Écart au barème, par tâche', 'Heures réelles face au barème, sur les parcelles validées', 'taches');
+  const L = tachesE(), tete = entete('Écart au barème, par tâche', 'Heures réelles face au barème, sur les parcelles validées', 'taches');
   if (!L.length) return tete + '<p class="ck-fil-vide">Aucun travail au barème validé pour l’instant : rien à comparer.</p>';
   return tete
     + '<div class="ck-ta-ax" aria-hidden="true"><span>plus rapide</span><span>barème</span><span>plus lent</span></div>'
     + '<ul class="ck-ta-l">' + L.map(t => {
-      const x = r.t[t.id], e = x.ecart * 100, w = Math.min(B, Math.abs(e)) / B * 50;
+      const x = r.t[t.id], e = x.ecart * 100, b = taBarre(e);   // ECART-1 : à l'échelle jusqu'à ±50 %, la pointe au-delà
       return '<li class="ck-ta" data-ta="' + t.id + '"><span class="ck-ta-n">' + esc(t.nom) + '</span>'
-        + '<span class="ck-ta-b"><i class="ck-ta-zero"></i><i class="ck-ta-v ' + (e > 0 ? 'lent' : 'vite') + '" id="ck-ta-v-' + t.id + '" style="' + (e > 0 ? 'left:50%' : 'right:50%') + ';width:' + w.toFixed(1) + '%"></i></span>'
+        + '<span class="ck-ta-b"><i class="ck-ta-zero"></i><i class="' + taClasse(e) + '" id="ck-ta-v-' + t.id + '" style="' + (e > 0 ? 'left:50%' : 'right:50%') + ';width:' + b.w.toFixed(1) + '%"></i></span>'
         + '<span class="ck-ta-e ' + (e > 0 ? 'lent' : 'vite') + '" id="ck-ta-e-' + t.id + '">' + pct1(e) + '</span>'
-        + '<span class="ck-ta-s" id="ck-ta-s-' + t.id + '">' + nb(x.hF) + ' h de barème, ' + nb(x.hR) + ' h réelles</span></li>';
+        + '<span class="ck-ta-s" id="ck-ta-s-' + t.id + '">' + taHeures(x) + '</span></li>';
     }).join('') + '</ul>';
 }
 
@@ -1259,20 +1272,24 @@ function majEco(r) {
   $('#ck-ef-att').textContent = 'Atterrissage, ' + eur(r.att);
   $('#ck-ef-bud').textContent = 'Budget, ' + eur(r.budget);
   Anim.compter($('#ck-ek-ha'), r.coutHa);
-  $('#ck-ek-ec').textContent = pct1(r.ecartMoy * 100);
+  $('#ck-ek-ec').textContent = ecTxt(r.ecartMoy);
+  $('#ck-ek-ec-c').textContent = ecCadre(r);
   $('#ck-ek-cad-c').textContent = 'il en faut ' + nb(r.besoin) + ' pour finir le ' + dLong(VISEE);
   majPostes(r);   // AUJ-7 : les textes sont posés au montage ; seules les barres pleines bougent
-  tachesE().forEach(t => {   // AUJ-7 : les seules tâches dessinées
-    const x = r.t[t.id], e = x.ecart * 100, w = Math.min(10, Math.abs(e)) / 10 * 50;
+  // ★ ECART-1 (§460) : une tâche qui devient comparable en direct n'a pas encore sa ligne — la carte se redessine. Avant, la ligne
+  //   introuvable levait, et toute la page se remontait (VIF-1 : le repli de _pilRafraichirVif).
+  if (tachesE().length !== $$('#ck-etac .ck-ta').length || tachesE().some(t => !$('#ck-ta-v-' + t.id))) $('#ck-etac').innerHTML = htmlTaches(r);
+  else tachesE().forEach(t => {   // AUJ-7 : les seules tâches dessinées
+    const x = r.t[t.id], e = x.ecart * 100, b = taBarre(e);
     const v = $('#ck-ta-v-' + t.id);
-    v.className = 'ck-ta-v ' + (e > 0 ? 'lent' : 'vite');
+    v.className = taClasse(e);
     v.style.left = e > 0 ? '50%' : '';
     v.style.right = e > 0 ? '' : '50%';
-    v.style.width = w.toFixed(1) + '%';
+    v.style.width = b.w.toFixed(1) + '%';
     const te = $('#ck-ta-e-' + t.id);
     te.textContent = pct1(e);
     te.className = 'ck-ta-e ' + (e > 0 ? 'lent' : 'vite');
-    $('#ck-ta-s-' + t.id).textContent = nb(x.hF) + ' h de barème, ' + nb(x.hR) + ' h réelles';
+    $('#ck-ta-s-' + t.id).textContent = taHeures(x);
   });
   majEChart(r);
 }

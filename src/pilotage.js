@@ -5361,9 +5361,25 @@ function _pilCk2Eco(d, V){
   var appDe={}; (window.PARCELLES||[]).forEach(function(p){ if(p&&!/arrach/i.test(String(p.statut||''))) appDe[p.nom]=p.appellation||'Sans appellation'; });   // les parcelles EN PRODUCTION, comme les hectares
   (E.pairs||[]).forEach(function(x){ var a=appDe[x.parc]; if(a) parApp[a]=(parApp[a]||0)+(Number(x.eur)||0); });
   var coutHaApp={}; Object.keys(haApp).forEach(function(a){ coutHaApp[a]=haApp[a]>0?Math.round((parApp[a]||0)/haApp[a]):0; });
-  // Par tâche : l'écart des heures réelles au barème (écart en euros du réalisé sur le fait, RÉAL-1). Seules les tâches AU BARÈME
-  //   qui ont du travail validé : un travail à l'heure (arrachage…) n'a pas de barème en face, un travail pas commencé rien à comparer.
-  var ecTache={}, hReelTache={}, hReel=0; (E.tasks||[]).forEach(function(t){ if(!t||!t.nom) return; if(t.ecE!=null&&t.fE>0) ecTache[t.nom]=t.ecE/t.fE; if(t.reH>0){ hReelTache[t.nom]=Math.round(t.reH); hReel+=t.reH; } });
+  // ★★ ECART-1 (§460) — L'ÉCART AU BARÈME SE LIT EN HEURES, ET LA TUILE EST LE TOTAL DE LA CARTE. Nico (25/10, capture) : la tuile
+  //   « Écart au barème » à 0,0 %, juste à côté de la Réparation à +620 % et du Dégraffage à +13 %. Trois défauts sous un même nom :
+  //   · la tuile lisait l'écart de CADENCE (toute la présence du planning face à tout le barème fait), qui ne se calcule qu'à 40 %
+  //     du travail validé (_PEC_CAD_AVC) : en dessous, 0 envoyé, et l'écran l'écrivait « 0,0 % » comme une mesure ;
+  //   · la carte annonçait « heures réelles face au barème » et calculait en EUROS (réalisé sur fait, RÉAL-1), sous des heures de
+  //     barème venues d'un troisième calcul (calcHeures) : « 322 h de barème, 374 h réelles » (+16 %) à côté de « +13,1 % ».
+  //   MAINTENANT : par tâche au barème, les heures versées par le temps réel (TV-1 ; cave, tracteur retirés) face au barème des
+  //   MÊMES validations (t.reB) — la carte « Temps réel contre barème » de l'onglet Économie, au chiffre près. Une ligne seulement
+  //   quand les deux côtés existent : sans heure versée, pas de « −100 % » ; un travail à l'heure n'a pas de barème en face. La
+  //   tuile = la somme des heures sur la somme des barèmes de ces lignes ; rien à comparer → null, un tiret à l'écran.
+  //   La cadence garde sa place : la projection de l'atterrissage (E.cad, inchangé — consigne du 23/09).
+  var ecTache={}, hReelTache={}, hBarTache={}, hReel=0, sH=0, sB=0;
+  (E.tasks||[]).forEach(function(t){
+    if(!t||!t.nom) return;
+    var h=num(t.reH), b=num(t.reB);
+    if(h>0){ hReelTache[t.nom]=Math.round(h*10)/10; hReel+=h; }
+    if(h>0 && b>0 && !t.reHb){ ecTache[t.nom]=(h-b)/b; hBarTache[t.nom]=Math.round(b*10)/10; sH+=h; sB+=b; }
+  });
+  var ecartMoy=sB>0?(sH-sB)/sB:null;
   var inac=null;
   try{ if(typeof _rfPair==='function'){ var P2=_rfPair(d); if(P2&&P2.dec&&!P2.fini&&!P2.dec.noRate){ var r2=_rfSim(P2.dec,_rfProf(P2.dec,null)); if(r2) inac={ h:Math.round(r2.induit||0), eur:Math.round((r2.induit||0)*(P2.dec.rate||0)), horsDelai:r2.horsDelai||0 }; } } }
   catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Eco#inaction'); }
@@ -5387,8 +5403,8 @@ function _pilCk2Eco(d, V){
     if(serie.length){ var z=serie[serie.length-1]; z.dep=Math.round(moDep/moBudget*1000)/10; z.fait=Math.round(avcP*10)/10; }   // le point du jour = les chiffres du jour, au dixième
   }
   return { taux:num(E.rate), moBudget:moBudget, moDep:moDep, moAtt:moAtt, moH:moH, cadAppl:cadAppl,
-    budget:budget, dep:dep, att:att, ecartMoy:(E.cad&&E.cad.ok&&E.cad.ecart!=null)?E.cad.ecart/100:0,
-    postes:postes, coutHaApp:coutHaApp, ecTache:ecTache, hReelTache:hReelTache, hReel:Math.round(hReel), inaction:inac,
+    budget:budget, dep:dep, att:att, ecartMoy:ecartMoy,
+    postes:postes, coutHaApp:coutHaApp, ecTache:ecTache, hReelTache:hReelTache, hBarTache:hBarTache, hReel:Math.round(hReel), inaction:inac,
     serie:serie, sparkBud:serie.slice(-14).map(function(x){ return x.dep; }) };
 }
 window._pilCk2Eco=_pilCk2Eco;
@@ -7937,6 +7953,11 @@ function _pecData(){
     if(x) tvVus[nk]=1;
     t.reE = tvOk ? (x ? x.eur : 0) : t.fE;
     t.reH = x ? x.h : 0;
+    // ★ ECART-1 (§460) : le barème des MÊMES validations que ces heures (temps réel ; une revalidation ne le recompte pas, RÉAL-1)
+    //   — l'écart en heures de la carte « Temps réel contre barème », que lit aussi la carte par tâche d'Aujourd'hui. Un travail à
+    //   l'heure (arrachage…) n'a pas de barème en face.
+    t.reB = x ? (Number(x.bar)||0) : 0;
+    t.reHb = !!(x && x.hb);
     t.ecE = (tvOk && (t.fE>0 || t.reE>0)) ? (t.reE - t.fE) : null;
     return t; }).sort(function(a,b){ return b.bE-a.bE; });
   // Heures versées à un travail absent de la liste de la période (tâche retirée de la saison) :

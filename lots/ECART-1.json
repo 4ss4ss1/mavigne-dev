@@ -1,0 +1,39 @@
+{
+  "lot": "ECART-1",
+  "section": "§460",
+  "base": "6f02a8229ef2d74b82f8b3b02e59340ae7830b92",
+  "inclut": [],
+  "date": "2026-10-26",
+  "tutos": {
+    "ok": true,
+    "empreinte": "4d1aac91548ce96700788da7855adb2b06effd71e669067b9203d774f0c1f577",
+    "date": "2026-10-26T08:46:02.273Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "e205eca08f6bdb2b32e29b943c46b3d13d92ffc57634e92ca37de9d90d319807",
+    "CLAUDE.md": "c557b3d84047380ddbedf0f5b536144f844042abd3ca2357d7a60f3fef75b37c",
+    "docs/claude/INDEX.md": "85841a7a2bd20087c3250213224811f76742b29b67c737f063d78dde4966eca2",
+    "docs/claude/chantiers-430-479.md": "d13a434ccbf2a212f0d704c5da7a66048cdc28a000f42e8e4b52e0e20ddd51dd",
+    "docs/claude/journal.md": "6a7f967fcffd1852f9f5c23ee110d31b0457c3056f44a64e1b379c8f508bc21e",
+    "guide/11-pilotage.html": "5e00ef5339c30420e5eb17441763727679f5ed7dfd1f649e691da5f30bbdf80f",
+    "index.html": "9c02239e57fc06580c4b945a66863dfebf74f23dc924fdd8e112cc4ccf890df9",
+    "public/sw.js": "e01ec498954d054b287f3affcb2baabd216f38ebb70efd23655489442f528e85",
+    "scripts/harnais-claude-md.mjs": "be3c63c56d5de4964686bb8695a6792cfc7022c561f32231e100b096f42cd01f",
+    "scripts/mv-captures.mjs": "38210ccfb7a7fc8d105c6ab5c9e26355c308177ac31f99e016ab428dba5124fe",
+    "scripts/mv-harnais-auj7.mjs": "3edf92b0a3fc21d7105d222ea1510bf41a48c6bcb4bce72e09c1f79fe6f6689d",
+    "scripts/mv-harnais-liste.mjs": "769ca3b3aae266349eb9a9dc48d1aed895c4a61fc3b36a093f08cffcf60a9a25",
+    "scripts/mv-harnais-ref2.mjs": "ef2894297fe64835b4948838f5c8a4f1017a68dbf961e014b12004a79c2e20f7",
+    "src/cockpit-vue.js": "ea934bc8bc7c6704123a1bf97174b48cbfc1c967570f2b969eed48a40a23d9ce",
+    "src/pilotage.js": "98ebd8cef00685811755a2498965de39717a9ab9250046201d2088dbc66e4174",
+    "src/styles.css": "5a504164d211e88084c626a93a855775e4c4c1dda99b7c6f7fc084fbfe28d398",
+    "src/utils.js": "7973a20b79f0c58c42c49ac206884aa7e2fdbc2a6309d11f44a69d23aa366cc0",
+    "scripts/mv-harnais-ecart1.mjs": "03cabc6625cde725f8fffa8c4ba5bcc7f281ecddc4c91a1a0f160def0cd09bca"
+  }
+}

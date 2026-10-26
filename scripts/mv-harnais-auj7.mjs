@@ -123,7 +123,7 @@ const DEFAUTS = [
   ['le cockpit reprend le barème du fait pour la main-d’œuvre', 'pil', 'var moDep=num(Pk.mo?Pk.mo.fait:T.moF)', 'var moDep=num(T.moF)'],
   ['la journée de référence revient comme cadence', 'vue', '  r.capMoy = v.capMoy || 0;', '  r.capMoy = (v.eco && v.eco.cadence) || v.capMoy || 0;'],
   ['le « −0 » revient', 'vue', "const signe = v => { const n = Math.round(v);", "const signe = v => { const n = v;"],
-  ['les tâches pas comparables reviennent', 'vue', "const B = 10, L = tachesE(),", "const B = 10, L = TACHES,"],
+  ['les tâches pas comparables reviennent', 'vue', "const L = tachesE(), tete", "const L = TACHES, tete"],   // ECART-1 (§460) : plus de « B = 10 »
   ['une fonte perd son espace fine', 'fonts', "@font-face{font-family:'Outfit';font-style:normal;font-weight:600;font-display:swap;src:url('/fonts/espace-fine.woff2') format('woff2');unicode-range:U+202F;}\n", ''],
 ];
 console.log('\n  MA VIGNE — Harnais AUJ-7, contre-épreuves (' + DEFAUTS.length + ')\n');
