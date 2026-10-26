@@ -833,3 +833,20 @@ Nico (26/10) colle la sortie du lanceur : 250 commandes sur 555, arrêt sur `mv-
 ### 464d. Reste ouvert
 - Sortir la fertilisation de `phyto.js` (backlog).
 - La seule catégorie « Arboriculture fruitière et vigne » (102 MFSC, §461b) : à trancher.
+
+## 465. FERTI-7B — LE BOUTON DE SAISIE DE PHYTO D’UN SEUL TENANT ; LA CHAÎNE COMPLÈTE VERTE (26/10 — `index.html` · `src/utils.js` (APP, WHATS_NEW technique) · `public/sw.js` · **bump APP 10.18 → 10.19, SW 10.99 → 11.00**, base `b178b05`)
+
+### 465a. D’où ça vient
+Nico (26/10) colle la sortie du lanceur après FERTI-7 : 283 commandes sur 555, arrêt sur `mv-harnais-phyto1` et `mv-harnais-phyto1 --contre`. L’assertion « la page a la colonne de fiche et le bouton de saisie ; l’onglet Registre pose la classe et montre le bouton à qui peut saisir » lit `id="ph-new-btn" onclick="_phytoFab()"` d’un seul tenant ; FERTI-7 (§464) avait posé `data-tuto="phy.nouveau.pc"` entre les deux. `mv-harnais-phyto3` lit la même chaîne (assertion « le bouton passe par _phytoFab ») et s’en sert d’ancre pour sa contre-épreuve « le bouton ouvre toujours un traitement » : le rouge suivant.
+
+### 465b. Ce qui a été fait
+- `index.html` : `data-tuto="phy.nouveau.pc"` après `onclick="_phytoFab()"`. Les deux contrôles redeviennent verts sans être touchés.
+- ★ Pourquoi pas les contrôles : ils tiennent le contrat de la page, et `phyto3` pose un défaut sur cette chaîne exacte ; les assouplir aurait obligé à réécrire sa contre-épreuve. L’ordre des attributs ne coûte rien.
+- Version technique (`index.html` touché ⇒ bump) : APP 10.19 avec `items: []`, SW 11.00 (la bascule 9.99 → 10.00 fait jurisprudence).
+- Checklist de clôture (§ « La checklist de clôture d’un lot ») : une ligne — un lot qui touche `index.html`, `utils.js` ou `tutos.js` se vérifie par la chaîne complète.
+
+### 465c. Mesuré
+`phyto1`, `phyto3` et leurs contre-épreuves verts ; `mv-harnais-tutos` vert ; `mv-whatsnew-check` vert ; preflight 0 erreur. **Chaîne complète rejouée ici : 555 commandes, 0 rouge** (856 s, une à la fois — le bac à sable n’a qu’un cœur). Tutos concernés : aucun ; rejoués, rapport vert.
+
+### 465d. La leçon
+Après FERTI-7, seuls les contrôles du module (tutos, typo, FERTI-5/6, fertil) avaient été rejoués : les 58 contrôles ciblés du §464 dataient d’avant le lot, et `phyto1`/`phyto3` lisent `index.html`, pas `phyto.js` — le filtre « qui lit phyto.js » ne pouvait pas les trouver. Un rouge de plus chez Nico. D’où la ligne de la checklist.

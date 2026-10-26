@@ -1,0 +1,21 @@
+{
+  "lot": "FERTI-7B",
+  "section": "§465",
+  "base": "b178b05722fa1a6cc5563432f19550ef8f1c639b",
+  "inclut": [],
+  "date": "2026-10-26",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "f01f44c56cbc86f494ee319208e5b50eaa94526eb68a75d3248b04418e37f7e1",
+    "CLAUDE.md": "7d4663718b14c5033a93de84812a791ff58dda89e84817c99529432f11a636af",
+    "docs/claude/INDEX.md": "d9ff3fab98302606ccd04d3f3c10313e0b9b1ea85dfe0ab92c35020d5102e41a",
+    "docs/claude/chantiers-430-479.md": "3fdc9eb2c51d92fc954f346799df59772eb0b9f038b90e7ae71a390c13b3b16e",
+    "docs/claude/journal.md": "324f015646646f5497584c33b7e0448733fc9112616f33324058669411fa0af4",
+    "index.html": "27e0ec1302f13721fd49886a06a5d3dd5f7755db8375b9786fc8c7a981a103f6",
+    "public/sw.js": "7f8ec61c670f31585675ba4665eaedf58e5b47a348126cbcd3162eff87adf237",
+    "src/utils.js": "14ee0941e4be0d687912d0588ddf0ee0c82a5a271a3ccf92a70731ae825734e5"
+  }
+}
