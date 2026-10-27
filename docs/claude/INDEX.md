@@ -521,3 +521,4 @@
 | 465 | 465. FERTI-7B — LE BOUTON DE SAISIE DE PHYTO D’UN SEUL TENANT ; LA CHAÎNE COMPLÈTE VERTE (26/10 — `index.ht… | `docs/claude/chantiers-430-479.md` |
 | 466 | 466. ★★ FERTI-8 — « VOS PRODUITS » DANS LA RECHERCHE DE L’AMENDEMENT ; LES TENEURS DE CHAQUE CAMPAGNE ; LA … | `docs/claude/chantiers-430-479.md` |
 | 467 | 467. ★★ UX-1 — LE CLIQUET MESURE LA ZONE D’APPUI, PAS LA BOÎTE : UX-0 AVAIT REFAIT L’ERREUR DE §175 (26/10 … | `docs/claude/chantiers-430-479.md` |
+| 468 | 468. ★★ MAQ-1 — LES MAQUETTES DU PLAN ENTRENT DANS LE DÉPÔT (27/10 — `docs/maquettes/` (neuf : trois maquet… | `docs/claude/chantiers-430-479.md` |

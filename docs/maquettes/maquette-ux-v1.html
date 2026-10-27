@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ma Vigne — maquette expérience d’usage v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --font-ui:Outfit,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-titre:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --bg-app:#F0EEE9;--bg-card:#FFFFFF;--bg-doux:#F7F5F1;
+  --texte:#1B1A18;--texte-med:#55534E;--texte-doux:#686660;
+  --ligne:#E7E6E2;--ligne-forte:#CDCAC2;--survol:rgba(28,26,22,.055);
+  --vert:#1E3A12;--vert-med:#3D6B27;--vert-clair:#6BA34A;--vert-pale:#EAF3E2;
+  --or:#C2A14D;--or-pale:#FAF3E0;--acier:#2C3E50;--acier-pale:#ECF0F4;--phyto:#5B2D8E;--phyto-pale:#F0EAF8;
+  --bleu:#1A4A7A;--bleu-pale:#E8F0FA;--rouge:#A0291E;--rouge-pale:#FAEAE8;--orange:#B85A1A;--orange-pale:#FBF0E6;
+  --accent:#7A2850;--accent-texte:#7A2850;--accent-doux:rgba(122,40,80,.11);
+  --ok:#237A47;--ok-doux:rgba(35,122,71,.15);--attention:#A15C00;--attention-doux:rgba(161,92,0,.15);
+  --inverse:#1F1E1B;--sur-inverse:#F5F4F1;--cadre:#1F1E1B;
+  --shadow-sm:0 1px 2px rgba(20,18,14,.05),0 1px 3px rgba(20,18,14,.04);
+  --shadow-md:0 6px 16px -4px rgba(20,18,14,.12),0 2px 4px -2px rgba(20,18,14,.06);
+  --r-sm:6px;--r-md:8px;--r-lg:12px;--r-full:999px;
+  --pt-xxl:32px;--pt-xl:28px;--pt-lg:24px;--pt-md:20px;--pt-sm:16px;--pt-base:14px;--pt-txt:13px;--pt-micro:12px;--pt-nano:11px;
+}
+:root[data-theme="dark"],:root[data-theme="dark"] body{color-scheme:dark}
+:root[data-theme="dark"]{
+  --bg-app:#0D0D0C;--bg-card:#151514;--bg-doux:#1A1A19;--texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;
+  --ligne:#272624;--ligne-forte:#3E3D39;--survol:rgba(255,248,235,.055);
+  --vert:#5A9E3A;--vert-med:#6AB845;--vert-clair:#8DC868;--vert-pale:rgba(90,158,58,0.22);--or:#D8BC72;--or-pale:rgba(216,188,114,0.20);
+  --acier:#4A80C4;--acier-pale:rgba(74,128,196,0.22);--phyto:#8B5CC8;--phyto-pale:rgba(139,92,200,0.22);--bleu:#4A80C4;--bleu-pale:rgba(74,128,196,0.22);
+  --rouge:#E05545;--rouge-pale:rgba(224,85,69,0.22);--orange:#D4721A;--orange-pale:rgba(212,114,26,0.20);
+  --accent:#8A3560;--accent-texte:#E59ABD;--accent-doux:rgba(229,154,189,.15);--ok:#76C995;--ok-doux:rgba(118,201,149,.17);--attention:#E9AA4A;--attention-doux:rgba(233,170,74,.17);
+  --inverse:#EDECE9;--sur-inverse:#151514;--cadre:#2B2A27;--shadow-sm:0 1px 2px rgba(0,0,0,.40);--shadow-md:0 8px 20px -6px rgba(0,0,0,.60);
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg-app:#0D0D0C;--bg-card:#151514;--bg-doux:#1A1A19;--texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;
+  --ligne:#272624;--ligne-forte:#3E3D39;--survol:rgba(255,248,235,.055);
+  --vert:#5A9E3A;--vert-med:#6AB845;--vert-clair:#8DC868;--vert-pale:rgba(90,158,58,0.22);--or:#D8BC72;--or-pale:rgba(216,188,114,0.20);
+  --acier:#4A80C4;--acier-pale:rgba(74,128,196,0.22);--phyto:#8B5CC8;--phyto-pale:rgba(139,92,200,0.22);--bleu:#4A80C4;--bleu-pale:rgba(74,128,196,0.22);
+  --rouge:#E05545;--rouge-pale:rgba(224,85,69,0.22);--orange:#D4721A;--orange-pale:rgba(212,114,26,0.20);
+  --accent:#8A3560;--accent-texte:#E59ABD;--accent-doux:rgba(229,154,189,.15);--ok:#76C995;--ok-doux:rgba(118,201,149,.17);--attention:#E9AA4A;--attention-doux:rgba(233,170,74,.17);
+  --inverse:#EDECE9;--sur-inverse:#151514;--cadre:#2B2A27;--shadow-sm:0 1px 2px rgba(0,0,0,.40);--shadow-md:0 8px 20px -6px rgba(0,0,0,.60);
+}}
+
+*{box-sizing:border-box}
+html{scroll-padding-top:72px}
+body{margin:0;background:var(--bg-app);color:var(--texte);font-family:var(--font-ui);font-size:var(--pt-txt);line-height:1.5}
+h1,h2,h3{font-family:var(--font-titre);font-weight:600;letter-spacing:-0.02em;margin:0;line-height:1.15}
+p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+.entete{position:sticky;top:0;z-index:10;background:var(--bg-card);border-bottom:1px solid var(--ligne);padding:12px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.entete h1{font-size:var(--pt-lg)}
+.entete .base{color:var(--texte-med);font-size:var(--pt-micro)}
+.entete nav{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.entete nav a{color:var(--texte);text-decoration:none;border:1px solid var(--ligne-forte);border-radius:var(--r-full);padding:4px 10px;font-size:var(--pt-micro)}
+.entete button{font:inherit;font-size:var(--pt-micro);border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);border-radius:var(--r-full);padding:4px 10px;cursor:pointer}
+.entete button:focus-visible,.entete nav a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.page{max-width:1240px;margin:0 auto;padding:28px 20px 80px;overflow-x:clip}
+.intro{max-width:72ch;margin-bottom:22px;color:var(--texte-med)}
+.intro b{color:var(--texte)}
+.mesures{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:36px}
+.mesure{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:14px 16px}
+.mesure .k{font-size:var(--pt-xxl);font-weight:600;line-height:1.05}
+.mesure .k small{font-size:var(--pt-base);font-weight:400;color:var(--texte-med);margin-left:4px}
+.mesure .l{color:var(--texte-med);font-size:var(--pt-micro);margin-top:4px}
+.mesure .b{color:var(--texte);font-size:var(--pt-micro);margin-top:6px}
+
+section.ecart{margin:0 0 56px;padding-top:12px;border-top:1px solid var(--ligne-forte)}
+.ecart-tete{display:grid;gap:6px;margin-bottom:18px}
+.ecart-tete h2{font-size:var(--pt-xl)}
+.ecart-tete .ou{color:var(--texte-med)}
+.ecart-tete .ou b{color:var(--texte);font-weight:600}
+.ecart-tete .pourquoi{max-width:78ch}
+.ecrans{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;align-items:start}
+@media (min-width:1000px){.ecrans.deux-tel{grid-template-columns:410px 410px;justify-content:start}.ecrans.pc-tel{grid-template-columns:minmax(0,1fr) 410px}.ecrans.trois-tel{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.legende-ecran{color:var(--texte-doux);font-size:var(--pt-micro);margin:0 0 6px}
+
+.pc{background:var(--bg-app);border:1px solid var(--ligne-forte);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-md)}
+.pc-corps{padding:0;overflow-x:auto}
+.tel{width:390px;max-width:100%;min-width:0;margin:0 auto;background:var(--bg-app);border:9px solid var(--cadre);border-radius:38px;overflow:hidden;box-shadow:var(--shadow-md);position:relative}
+.tel-barre{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 6px;font-size:var(--pt-micro);color:var(--texte-med)}
+.tel-corps{padding:0 12px 14px;min-height:520px}
+.tel-dock{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--ligne);background:var(--bg-card);padding:8px 6px 10px;font-size:10px;color:var(--texte-doux);text-align:center}
+.tel-dock span.on{color:var(--accent-texte);font-weight:600}
+.tel-dock span i{display:block;width:40px;height:30px;margin:0 auto 3px;border-radius:10px;background:var(--bg-doux);border:1px solid var(--ligne)}
+.tel-dock span.on i{background:var(--accent);border-color:var(--accent)}
+
+/* pièces */
+.carte{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:14px 16px;box-shadow:var(--shadow-sm)}
+.carte + .carte{margin-top:10px}
+.carte h3{font-size:var(--pt-md);margin-bottom:4px}
+.cadre-ligne{color:var(--texte-doux);font-size:var(--pt-micro);margin-bottom:8px}
+.etiq{display:inline-block;font-size:var(--pt-nano);font-weight:600;letter-spacing:.04em;padding:2px 8px;border-radius:var(--r-full);background:var(--bg-doux);color:var(--texte-med);border:1px solid var(--ligne)}
+.etiq.ok{background:var(--ok-doux);color:var(--ok);border-color:transparent}
+.etiq.att{background:var(--attention-doux);color:var(--attention);border-color:transparent}
+.etiq.danger{background:var(--rouge-pale);color:var(--rouge);border-color:transparent}
+.ligne{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--ligne);font-size:var(--pt-base)}
+.ligne:first-of-type{border-top:0}
+.ligne .nom{font-weight:600}
+.ligne .sous{color:var(--texte-med);font-size:var(--pt-micro);font-weight:400;display:block}
+.note{color:var(--texte-doux);font-size:var(--pt-micro)}
+.bouton{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:inherit;font-size:var(--pt-base);font-weight:600;border-radius:var(--r-md);padding:12px 16px;border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);min-height:44px}
+.bouton.plein{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:var(--pt-txt);padding:8px 12px;border-radius:var(--r-full);border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);min-height:36px;display:inline-flex;align-items:center}
+.chip.on{background:var(--vert);border-color:var(--vert);color:#fff;font-weight:600}
+
+/* en-têtes : l'ancien, empilé, et le nouveau */
+.bande{background:var(--bg-card);border-bottom:1px solid var(--ligne);padding:8px 12px;display:flex;align-items:center;gap:10px}
+.bande .t{font-weight:600;font-size:var(--pt-sm)}
+.bande .s{color:var(--texte-med);font-size:var(--pt-nano);display:block;line-height:1.2}
+.ico{width:32px;height:32px;border-radius:50%;border:1px solid var(--ligne);display:inline-block;background:var(--bg-doux)}
+.ico.g{width:44px;height:44px;border-radius:12px}
+.bande2{display:flex;gap:8px;padding:8px 12px;background:var(--bg-app)}
+.pill{font-size:var(--pt-nano);padding:4px 10px;border-radius:var(--r-full);background:var(--bg-card);border:1px solid var(--ligne)}
+.onglets{display:flex;gap:16px;padding:6px 12px 0;font-size:var(--pt-base);color:var(--texte-med)}
+.onglets b{color:var(--texte);border-bottom:2px solid var(--accent);padding-bottom:6px}
+.segment{display:flex;gap:4px;background:var(--bg-doux);border:1px solid var(--ligne);border-radius:var(--r-full);padding:3px;margin:8px 12px 0}
+.segment span{flex:1;text-align:center;padding:7px 6px;border-radius:var(--r-full);font-size:var(--pt-txt);color:var(--texte-med);min-height:36px;display:flex;align-items:center;justify-content:center}
+.segment span.on{background:var(--bg-card);color:var(--texte);font-weight:600;box-shadow:var(--shadow-sm)}
+.mesure-chrome{position:absolute;right:14px;width:0;border-right:2px dashed var(--rouge);z-index:3}
+.mesure-chrome::after{content:attr(data-h);position:absolute;right:6px;top:100%;transform:translateY(-50%);white-space:nowrap;font-size:var(--pt-nano);font-weight:600;color:var(--rouge);background:var(--bg-card);padding:1px 6px;border-radius:4px;border:1px solid var(--rouge)}
+.mesure-chrome.ok{border-color:var(--ok)}.mesure-chrome.ok::after{color:var(--ok);border-color:var(--ok)}
+
+/* journal, contenu d'abord */
+.entree{background:var(--bg-card);border:1px solid var(--ligne);border-left:4px solid var(--vert-clair);border-radius:var(--r-md);padding:10px 12px;display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;min-height:56px;margin-top:8px}
+.entree .av{width:28px;height:28px;border-radius:50%;background:var(--vert-med);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.entree .t{font-weight:600;font-size:var(--pt-base)}
+.entree .s{color:var(--texte-med);font-size:var(--pt-micro)}
+.jour{display:flex;align-items:center;gap:8px;color:var(--texte-doux);font-size:var(--pt-micro);margin-top:12px}
+.jour::after{content:"";flex:1;height:1px;background:var(--ligne)}
+.barre-basse{position:absolute;left:0;right:0;bottom:70px;display:flex;gap:8px;padding:8px 12px;background:linear-gradient(to bottom,transparent,var(--bg-app) 40%)}
+.barre-basse .champ{flex:1;min-height:44px;border-radius:var(--r-full);background:var(--bg-card);border:1px solid var(--ligne-forte);display:flex;align-items:center;padding:0 14px;color:var(--texte-doux);box-shadow:var(--shadow-sm)}
+.barre-basse .filtrer{min-height:44px;border-radius:var(--r-full);background:var(--bg-card);border:1px solid var(--ligne-forte);display:flex;align-items:center;gap:6px;padding:0 14px;font-weight:600;box-shadow:var(--shadow-sm)}
+.barre-basse .filtrer b{background:var(--accent);color:#fff;border-radius:var(--r-full);padding:0 7px;font-size:var(--pt-nano);min-width:20px;text-align:center}
+.fab{position:absolute;right:14px;bottom:128px;width:56px;height:56px;border-radius:18px;background:var(--accent);color:#fff;font-size:30px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-md)}
+.feuille{position:absolute;left:0;right:0;bottom:70px;background:var(--bg-card);border-radius:20px 20px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.18);padding:10px 14px 14px}
+.feuille .poignee{width:40px;height:4px;border-radius:2px;background:var(--ligne-forte);margin:0 auto 10px}
+.feuille h3{font-size:var(--pt-md)}
+.feuille .groupe{margin-top:10px}
+.feuille .groupe .l{font-size:var(--pt-micro);color:var(--texte-med);margin-bottom:6px}
+.voile{position:absolute;inset:0;background:rgba(0,0,0,.25)}
+
+/* cibles */
+.av-ex{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.hit{position:relative;display:inline-flex;align-items:center;justify-content:center}
+.hit::before{content:"";position:absolute;inset:0;border:1px dashed var(--rouge);border-radius:8px;pointer-events:none}
+.hit.ok::before{border-color:var(--ok)}
+.b-discret{font-size:var(--pt-micro);padding:0 10px;border-radius:6px;border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte-med);font-weight:500;display:inline-flex;align-items:center}
+.i-bulle{border-radius:50%;border:1px solid var(--ligne-forte);background:var(--bg-card);display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-titre);font-style:italic;font-weight:700;color:var(--texte-med)}
+.avant-apres{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.avant-apres > div{background:var(--bg-doux);border:1px solid var(--ligne);border-radius:var(--r-md);padding:12px}
+.avant-apres .l{font-size:var(--pt-nano);font-weight:600;letter-spacing:.04em;color:var(--texte-doux);margin-bottom:8px}
+.cote{font-size:var(--pt-nano);color:var(--texte-doux)}
+
+/* toast */
+.toast{position:absolute;left:12px;right:12px;bottom:84px;background:var(--inverse);color:var(--sur-inverse);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-md);font-size:var(--pt-base)}
+.toast b{color:#F1C2D6;font-weight:600;margin-left:auto;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.08);min-height:40px;display:inline-flex;align-items:center}
+.toast .temps{height:3px;position:absolute;left:14px;right:14px;bottom:0;background:rgba(255,255,255,.18);border-radius:2px}
+.toast .temps i{display:block;height:100%;width:70%;background:#F1C2D6;border-radius:2px}
+table{width:100%;border-collapse:collapse;font-size:var(--pt-txt)}
+th{text-align:left;font-size:var(--pt-nano);font-weight:600;color:var(--texte-med);letter-spacing:.03em;padding:6px 8px;border-bottom:1px solid var(--ligne-forte)}
+td{padding:8px;border-bottom:1px solid var(--ligne);vertical-align:top}
+
+/* PC liste-détail */
+.pc-app{display:grid;grid-template-columns:176px 220px minmax(0,1fr) 320px;min-height:620px;min-width:1180px}
+.rail{background:var(--bg-card);border-right:1px solid var(--ligne);padding:12px}
+.rail .logo{font-family:var(--font-titre);font-size:var(--pt-md);font-weight:600;margin-bottom:10px}
+.rail .cherche{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--ligne-forte);border-radius:8px;padding:6px 8px;font-size:var(--pt-micro);color:var(--texte-doux);margin-bottom:12px}
+.rail .cherche kbd{font:inherit;font-size:10px;border:1px solid var(--ligne-forte);border-radius:4px;padding:0 4px}
+.rail .grp{font-size:var(--pt-nano);color:var(--texte-doux);margin:10px 0 4px}
+.rail .it{padding:7px 8px;border-radius:8px;font-size:var(--pt-txt);display:flex;align-items:center;gap:8px;min-height:36px}
+.rail .it.on{background:var(--accent-doux);color:var(--accent-texte);font-weight:600}
+.filtres{background:var(--bg-app);border-right:1px solid var(--ligne);padding:14px 10px}
+.filtres h4{margin:0 0 6px;font-size:var(--pt-nano);font-weight:600;letter-spacing:.04em;color:var(--texte-doux)}
+.filtres .opt{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:8px;font-size:var(--pt-txt);min-height:36px}
+.filtres .opt.on{background:var(--bg-card);border:1px solid var(--ligne);font-weight:600}
+.filtres .opt .n{color:var(--texte-doux);font-size:var(--pt-nano)}
+.liste{background:var(--bg-app);border-right:1px solid var(--ligne)}
+.liste .tete{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg-card);border-bottom:1px solid var(--ligne)}
+.liste .tete .t{font-weight:600;font-size:var(--pt-sm)}
+.liste .tete .n{color:var(--texte-med);font-size:var(--pt-micro)}
+.liste .tete .plus{margin-left:auto;background:var(--accent);color:#fff;border-radius:8px;padding:8px 12px;font-weight:600;font-size:var(--pt-txt)}
+.lig{display:grid;grid-template-columns:54px 22px minmax(0,1fr) 78px 50px;gap:8px;align-items:center;padding:0 12px;height:48px;white-space:nowrap;border-bottom:1px solid var(--ligne);font-size:var(--pt-txt);background:var(--bg-card)}
+.lig.sel{background:var(--accent-doux);box-shadow:inset 3px 0 0 var(--accent)}
+.lig .d{color:var(--texte-doux);font-size:var(--pt-micro)}
+.lig .a{width:22px;height:22px;border-radius:50%;background:var(--vert-med);color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.lig .p{color:var(--texte-med)}
+.lig > span{overflow:hidden;text-overflow:ellipsis}
+.lig small{display:block;font-size:var(--pt-nano);color:var(--texte-doux);line-height:1.2}
+.lig .h{color:var(--texte-doux);font-size:var(--pt-micro);text-align:right}
+.detail{background:var(--bg-card);padding:16px}
+.detail h3{font-size:var(--pt-lg);margin-bottom:2px}
+.kbd{display:inline-block;font-size:10px;border:1px solid var(--ligne-forte);border-radius:4px;padding:0 5px;color:var(--texte-med);background:var(--bg-doux);margin-right:4px}
+.raccourcis{display:flex;flex-wrap:wrap;gap:10px;padding:8px 14px;background:var(--bg-doux);border-top:1px solid var(--ligne);font-size:var(--pt-nano);color:var(--texte-doux)}
+
+footer{color:var(--texte-doux);font-size:var(--pt-micro);border-top:1px solid var(--ligne-forte);padding-top:14px}
+@media (max-width:700px){.avant-apres{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="entete">
+  <div>
+    <h1>Ma Vigne — expérience d’usage, maquette v1</h1>
+    <div class="base">Base <span class="num">b57e4fe</span> · APP <span class="num">10.13</span> · 25 octobre 2026 · mesuré sur la démo construite</div>
+  </div>
+  <nav aria-label="Les cinq écrans">
+    <a href="#tete">1 · L’en-tête</a>
+    <a href="#contenu">2 · Le contenu d’abord</a>
+    <a href="#cibles">3 · Les cibles</a>
+    <a href="#annuler">4 · Annuler</a>
+    <a href="#pc">5 · PC liste-détail</a>
+    <button type="button" id="theme" onclick="basculer()">Sombre</button>
+  </nav>
+</header>
+
+<main class="page">
+  <p class="intro">Cinq réglages, pas une refonte : le style reste, ce sont les gestes, les tailles et l’ordre des choses qui changent. Les chiffres viennent du relevé Playwright joint (<b>audit-ux-2026-10-25.md</b>). Chaque écran est dessiné au téléphone et à l’ordinateur sur la charte actuelle.</p>
+
+  <div class="mesures" aria-label="Ce qui a été mesuré au téléphone">
+    <div class="mesure"><div class="k num">69<small>%</small></div><div class="l">des 478 cibles tactiles font moins de 44 px</div><div class="b">budget : 15 %</div></div>
+    <div class="mesure"><div class="k num">19</div><div class="l">cibles sous 24 px, le minimum WCAG 2.2 — dont 12 bulles « i » du Pilotage</div><div class="b">budget : 0</div></div>
+    <div class="mesure"><div class="k num">67</div><div class="l">textes sous 11 px, jusqu’à 7 px (initiales du Journal)</div><div class="b">budget : 0</div></div>
+    <div class="mesure"><div class="k num">170<small>px</small></div><div class="l">de chrome avant le contenu, sur 844, à chaque page de la Vigne</div><div class="b">budget : 120 au repos, 56 en défilant</div></div>
+    <div class="mesure"><div class="k num">2<small>taps</small></div><div class="l">pour valider une tâche depuis Parcelles, sans rien taper</div><div class="b">à garder</div></div>
+  </div>
+
+  <!-- ═══ 1. L'EN-TÊTE ═══ -->
+  <section class="ecart" id="tete">
+    <div class="ecart-tete">
+      <h2>1 · L’en-tête qui se replie</h2>
+      <p class="ou">Où dans l’appli : <b>toutes les pages</b> ; mesuré sur la Vigne (3 bandes) et le Pilotage (6).</p>
+      <p class="pourquoi">Trois bandes avant le contenu : le module et ses quatre icônes, la campagne et la date, les onglets. Apple replie son grand titre en une ligne dès qu’on défile ; Google aussi. Ici : au repos, une bande et un segment ; en défilant, une seule ligne de 56 px avec le module, l’onglet et l’action. La campagne et la date descendent dans la ligne de cadre de la première carte, là où le Pilotage les met déjà.</p>
+    </div>
+    <div class="ecrans trois-tel">
+      <div>
+        <p class="legende-ecran">Aujourd’hui — mesuré : 3 bandes, 170 px</p>
+        <div class="tel">
+          <div class="mesure-chrome" style="top:0;height:178px" data-h="170 px"></div>
+          <div class="tel-barre"><span class="num">09:41</span><span>Gevrey · 17 °C</span></div>
+          <div class="bande"><span class="ico" style="width:28px;height:28px"></span><div style="flex:1;min-width:0"><div class="t">Vigne</div><span class="s">14 entrées</span></div><span class="pill" style="background:var(--accent);color:#fff;border-color:var(--accent)">+ Ajouter</span><span class="ico" style="width:28px;height:28px"></span><span class="ico" style="width:28px;height:28px"></span></div>
+          <div class="bande2"><span class="pill">● Après-vendange 2026-27</span><span class="pill">Dim. 25 octobre</span><span class="ico" style="width:24px;height:24px;margin-left:auto"></span></div>
+          <div class="onglets"><span>Accueil</span><span>Parcelles</span><b>Journal</b></div>
+          <div class="tel-corps" style="padding-top:10px;min-height:440px">
+            <div class="carte" style="opacity:.55"><div class="cadre-ligne">la liste commence ici, vers 480 px après les filtres</div><div class="chips"><span class="chip">Tous</span><span class="chip">Marie</span><span class="chip">Jean</span></div></div>
+          </div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span class="on"><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span><i></i>Plus</span></div>
+        </div>
+      </div>
+      <div>
+        <p class="legende-ecran">Proposé, au repos — 1 bande + 1 segment, 104 px</p>
+        <div class="tel">
+          <div class="mesure-chrome ok" style="top:0;height:112px" data-h="104 px"></div>
+          <div class="tel-barre"><span class="num">09:41</span><span>Gevrey · 17 °C</span></div>
+          <div class="bande" style="padding:6px 12px"><span class="ico"></span><div style="flex:1"><div class="t">Journal</div><span class="s">Vigne · 14 entrées</span></div><span class="ico g" aria-label="Aide et réglages"></span></div>
+          <div class="segment"><span>Accueil</span><span>Parcelles</span><span class="on">Journal</span></div>
+          <div class="tel-corps" style="padding-top:10px;min-height:440px">
+            <div class="jour">24 octobre · 2 <span class="pill" style="margin-left:auto">Après-vendange 2026-2027</span></div>
+            <div class="entree"><div class="av">S</div><div><div class="t">Palissage · Les Perrières</div><div class="s">Équipe Sophie, Paul · 14 h 20</div></div><span class="etiq ok">validé</span></div>
+            <div class="entree"><div class="av">J</div><div><div class="t">Palissage · La Combotte</div><div class="s">Équipe Jean, Marie · 11 h 05</div></div><span class="etiq ok">validé</span></div>
+            <div class="jour">23 octobre · 1</div>
+            <div class="entree"><div class="av">P</div><div><div class="t">Palissage · Les Charmes</div><div class="s">Paul · 16 h 40</div></div><span class="etiq ok">validé</span></div>
+          </div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span class="on"><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span><i></i>Plus</span></div>
+        </div>
+      </div>
+      <div>
+        <p class="legende-ecran">Proposé, en défilant — une ligne, 56 px</p>
+        <div class="tel">
+          <div class="mesure-chrome ok" style="top:0;height:64px" data-h="56 px"></div>
+          <div class="tel-barre"><span class="num">09:41</span><span>Gevrey · 17 °C</span></div>
+          <div class="bande" style="padding:4px 12px;min-height:44px"><div style="flex:1;display:flex;align-items:baseline;gap:8px"><span class="t" style="font-size:var(--pt-base)">Journal</span><span class="s" style="display:inline">· Vigne · Journal · 14</span></div><span class="pill" style="background:var(--accent);color:#fff;border-color:var(--accent)">+ Ajouter</span></div>
+          <div class="tel-corps" style="padding-top:10px;min-height:440px">
+            <div class="jour">17 octobre · 3</div>
+            <div class="entree"><div class="av">M</div><div><div class="t">Tirage · Aux Murgers</div><div class="s">Marie · 15 h 10</div></div><span class="etiq ok">validé</span></div>
+            <div class="entree"><div class="av">J</div><div><div class="t">Tirage · La Combotte</div><div class="s">Jean · 9 h 50</div></div><span class="etiq ok">validé</span></div>
+            <div class="entree" style="border-left-color:var(--or)"><div class="av" style="background:var(--or)">S</div><div><div class="t">Taille · Clos du Moulin</div><div class="s">Sophie · démarré 8 h 05</div></div><span class="etiq att">en cours</span></div>
+            <div class="jour">16 octobre · 2</div>
+            <div class="entree"><div class="av">P</div><div><div class="t">Tirage · Les Charmes</div><div class="s">Paul · 16 h 40</div></div><span class="etiq ok">validé</span></div>
+            <p class="note" style="margin-top:12px;text-align:center">Le segment Accueil · Parcelles · Journal revient en touchant la ligne ou en remontant.</p>
+          </div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span class="on"><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span><i></i>Plus</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:14px;max-width:80ch">Sur ordinateur, la même règle : la bande du module et la bande campagne fusionnent en une ligne, les onglets restent sous elle, collés. Le Pilotage garde sa barre « Vous regardez » mais perd la bande campagne, redite dans la portée.</p>
+  </section>
+
+  <!-- ═══ 2. CONTENU D'ABORD ═══ -->
+  <section class="ecart" id="contenu">
+    <div class="ecart-tete">
+      <h2>2 · Le contenu d’abord, les filtres en feuille</h2>
+      <p class="ou">Où dans l’appli : <b>Journal</b> et <b>Parcelles</b> au téléphone ; même patron pour le Phyto et la Réserve.</p>
+      <p class="pourquoi">Quatre rangées de filtres avant la première entrée : la liste commence après la moitié de l’écran. Les grandes applis montrent la liste, et une pastille « Filtrer » avec le nombre de filtres actifs. Ici, la recherche et « Filtrer » vivent dans une barre basse, sous le pouce ; l’ajout devient un bouton flottant ; les filtres s’ouvrent en feuille du bas, et seuls les filtres actifs restent en chips sous la liste.</p>
+    </div>
+    <div class="ecrans deux-tel">
+      <div>
+        <p class="legende-ecran">Journal, proposé — la liste dès 104 px, la barre basse</p>
+        <div class="tel">
+          <div class="tel-barre"><span class="num">09:41</span><span>Gevrey · 17 °C</span></div>
+          <div class="bande" style="padding:6px 12px"><span class="ico"></span><div style="flex:1"><div class="t">Journal</div><span class="s">Vigne · 14 entrées · campagne 2026-27</span></div><span class="ico g"></span></div>
+          <div class="segment"><span>Accueil</span><span>Parcelles</span><span class="on">Journal</span></div>
+          <div class="tel-corps" style="padding-top:8px;min-height:560px">
+            <div class="chips" style="margin-top:4px"><span class="chip on">Palissage ×</span><span class="chip on">Marie ×</span></div>
+            <div class="jour">24 octobre · 2</div>
+            <div class="entree"><div class="av">S</div><div><div class="t">Palissage · Les Perrières</div><div class="s">Équipe Sophie, Marie · 14 h 20</div></div><span class="etiq ok">validé</span></div>
+            <div class="entree"><div class="av">M</div><div><div class="t">Palissage · La Combotte</div><div class="s">Équipe Marie, Jean · 11 h 05</div></div><span class="etiq ok">validé</span></div>
+            <div class="jour">22 octobre · 1</div>
+            <div class="entree"><div class="av">M</div><div><div class="t">Palissage · Les Charmes</div><div class="s">Marie · 16 h 40</div></div><span class="etiq ok">validé</span></div>
+            <div class="jour">19 octobre · 1</div>
+            <div class="entree"><div class="av">M</div><div><div class="t">Palissage · En Bertrange</div><div class="s">Marie · 10 h 15</div></div><span class="etiq ok">validé</span></div>
+          </div>
+          <div class="fab" aria-label="Ajouter une entrée">+</div>
+          <div class="barre-basse"><div class="champ">Parcelle, tâche, ouvrier…</div><div class="filtrer">Filtrer <b>2</b></div></div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span class="on"><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span><i></i>Plus</span></div>
+        </div>
+      </div>
+      <div>
+        <p class="legende-ecran">La feuille des filtres — un tap sur « Filtrer »</p>
+        <div class="tel">
+          <div class="tel-barre"><span class="num">09:41</span><span>Gevrey · 17 °C</span></div>
+          <div class="bande" style="padding:6px 12px"><span class="ico"></span><div style="flex:1"><div class="t">Journal</div><span class="s">Vigne · 14 entrées</span></div><span class="ico g"></span></div>
+          <div class="tel-corps" style="min-height:596px;position:relative">
+            <div class="jour" style="opacity:.4">24 octobre · 2</div>
+            <div class="entree" style="opacity:.4"><div class="av">S</div><div><div class="t">Palissage · Les Perrières</div><div class="s">14 h 20</div></div></div>
+          </div>
+          <div class="voile"></div>
+          <div class="feuille">
+            <div class="poignee"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between"><h3>Filtrer le Journal</h3><span class="note">Tout effacer</span></div>
+            <div class="groupe"><div class="l">Qui</div><div class="chips"><span class="chip">Tous</span><span class="chip on">Marie</span><span class="chip">Jean</span><span class="chip">Sophie</span><span class="chip">Paul</span></div></div>
+            <div class="groupe"><div class="l">Tâche</div><div class="chips"><span class="chip">Toutes</span><span class="chip">Taille</span><span class="chip">Tirage</span><span class="chip on">Palissage</span><span class="chip">Brulage</span></div></div>
+            <div class="groupe"><div class="l">Quand</div><div class="chips"><span class="chip on">Cette campagne</span><span class="chip">7 jours</span><span class="chip">30 jours</span><span class="chip">Dates…</span></div></div>
+            <div class="groupe"><div class="l">Parcelle</div><div class="chips"><span class="chip on">Toutes</span><span class="chip">Aux Murgers</span><span class="chip">Champ de la Croix</span><span class="chip">+ 5</span></div></div>
+            <div style="margin-top:14px"><span class="bouton plein" style="width:100%">Voir 4 entrées</span></div>
+          </div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span class="on"><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span><i></i>Plus</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:14px;max-width:80ch">Le bouton de la feuille dit ce qu’il va montrer (« Voir 4 entrées ») : le compte se met à jour à chaque chip, avant de fermer. Sur Parcelles, les compteurs Finies · En cours · Arrachées restent en tête ; les chips de tâche et Liste / Carte passent dans la même feuille.</p>
+  </section>
+
+  <!-- ═══ 3. CIBLES ═══ -->
+  <section class="ecart" id="cibles">
+    <div class="ecart-tete">
+      <h2>3 · Les cibles et les textes — quatre classes, trois jetons</h2>
+      <p class="ou">Où dans l’appli : <b>la charte</b> (<code>--h-sm</code>, <code>--h-ctl</code>, le plancher de texte) et quatre classes : <code>.mvbtn-discret</code>, <code>.tfchip</code>, <code>.ck-i</code>, <code>.java</code> / <code>.pl2-name-s</code>.</p>
+      <p class="pourquoi">Le visuel ne change presque pas : c’est la zone qu’on peut toucher qui grandit, par un pseudo-élément transparent de 44 px autour. Le pointillé rouge ci-dessous est ce que le doigt doit atteindre aujourd’hui ; le vert, ce qu’il atteindra.</p>
+    </div>
+    <div class="carte">
+      <div class="avant-apres">
+        <div>
+          <div class="l">Aujourd’hui, mesuré</div>
+          <div class="av-ex" style="margin-bottom:12px"><span class="hit"><span class="b-discret" style="height:28px">Équipe</span></span><span class="cote">bouton discret 66 × 28 — 14 fois sur le Journal</span></div>
+          <div class="av-ex" style="margin-bottom:12px"><span class="hit"><span class="chip" style="min-height:29px;padding:4px 10px">Palissage</span></span><span class="cote">chip de filtre, 29 px de haut</span></div>
+          <div class="av-ex" style="margin-bottom:12px"><span class="hit"><span class="i-bulle" style="width:18px;height:18px;font-size:12px">i</span></span><span class="cote">bulle « i » 18 × 18 — sous les 24 px du niveau AA, 12 fois sur le Pilotage</span></div>
+          <div class="av-ex" style="margin-bottom:12px"><span class="hit"><span class="ico" style="width:28px;height:28px"></span></span><span class="cote">aide 28 × 28, synchro 32 × 32</span></div>
+          <div class="av-ex"><span style="display:inline-flex;gap:-4px"><span style="width:18px;height:18px;border-radius:50%;background:var(--vert-med);color:#fff;font-size:7px;display:inline-flex;align-items:center;justify-content:center">MJ</span><span style="width:18px;height:18px;border-radius:50%;background:var(--or);color:#fff;font-size:7px;display:inline-flex;align-items:center;justify-content:center;margin-left:-4px">SP</span></span><span class="cote">initiales d’équipe à 7 px (<code>.java</code>), noms du Planning à 9 px</span></div>
+        </div>
+        <div>
+          <div class="l">Proposé</div>
+          <div class="av-ex" style="margin-bottom:12px"><span class="hit ok" style="padding:4px 0"><span class="b-discret" style="height:36px;font-size:var(--pt-txt)">Équipe</span></span><span class="cote">36 px visibles, 44 touchables (<code>::before</code> de 4 px tout autour)</span></div>
+          <div class="av-ex" style="margin-bottom:12px"><span class="hit ok" style="padding:4px 0"><span class="chip">Palissage</span></span><span class="cote">chip à 36 px, zone 44</span></div>
+          <div class="av-ex" style="margin-bottom:12px"><span class="hit ok" style="width:44px;height:44px"><span class="i-bulle" style="width:24px;height:24px;font-size:14px">i</span></span><span class="cote">bulle 24 px visibles dans 44 — le niveau AAA, et personne ne rate plus l’explication</span></div>
+          <div class="av-ex" style="margin-bottom:12px"><span class="hit ok" style="width:44px;height:44px"><span class="ico" style="width:32px;height:32px"></span></span><span class="cote">aide et synchro : 32 visibles, 44 touchables</span></div>
+          <div class="av-ex"><span style="display:inline-flex"><span style="width:28px;height:28px;border-radius:50%;background:var(--vert-med);color:#fff;font-size:11px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;border:2px solid var(--bg-card)">M</span><span style="width:28px;height:28px;border-radius:50%;background:var(--or);color:#fff;font-size:11px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;margin-left:-8px;border:2px solid var(--bg-card)">S</span><span style="width:28px;height:28px;border-radius:50%;background:var(--acier);color:#fff;font-size:11px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;margin-left:-8px;border:2px solid var(--bg-card)">+2</span></span><span class="cote">une initiale à 11 px dans un rond de 28, « +2 » au-delà de deux ; au Planning, le nom tronqué à 12 px plutôt qu’entier à 9</span></div>
+        </div>
+      </div>
+      <table style="margin-top:16px">
+        <thead><tr><th>Jeton ou classe</th><th>Aujourd’hui</th><th>Proposé</th><th>Combien de cibles ça règle (téléphone)</th></tr></thead>
+        <tbody>
+          <tr><td><code>--h-sm</code> (boutons discrets, secondaires)</td><td>28 px</td><td>36 px + zone 44</td><td>Journal 14, Cave 6, Pilotage 2</td></tr>
+          <tr><td><code>.tfchip</code>, chips de filtre</td><td>29 px</td><td>36 px + zone 44</td><td>Journal 9, Parcelles 8</td></tr>
+          <tr><td><code>.ck-i</code>, bulles « i »</td><td>16 à 18 px</td><td>24 px + zone 44</td><td>Pilotage 12 — les 12 sous 24 px</td></tr>
+          <tr><td><code>.mv-help-btn</code>, <code>.mv-syncdot</code>, <code>.mod-home-btn</code></td><td>28 à 32 px</td><td>zone 44</td><td>3 par page, toutes les pages</td></tr>
+          <tr><td>plancher de texte</td><td>7, 9, 10, 11 px</td><td>11 px partout, 12 au téléphone ; <code>.java</code> 7 → 11, <code>.pl2-name-s</code> 9 → 12 tronqué</td><td>67 textes sous 11 px → 0</td></tr>
+          <tr><td>cellules du Planning <code>.pl2-cell</code></td><td>42 × 50, week-end 30</td><td>inchangées : une grille est l’exception prévue par WCAG, si le tap ouvre la journée entière</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══ 4. ANNULER ═══ -->
+  <section class="ecart" id="annuler">
+    <div class="ecart-tete">
+      <h2>4 · Annuler plutôt que confirmer</h2>
+      <p class="ou">Où dans l’appli : <b><code>showToast</code></b> gagne une action ; les 46 fenêtres de confirmation se trient en deux listes.</p>
+      <p class="pourquoi">« Êtes-vous sûr ? » se valide par réflexe. Pour ce qui se répare, Gmail et Keep font autrement : l’action part tout de suite, et un toast « Annuler » reste six secondes. La fenêtre de confirmation reste pour l’irréversible, avec un bouton qui dit ce qu’il fait.</p>
+    </div>
+    <div class="ecrans pc-tel">
+      <div>
+        <div class="carte">
+          <h3>Le tri des 46 confirmations</h3>
+          <div class="cadre-ligne">inventaire par <code>openConfirmDel</code> et double appui, à vérifier une par une au premier lot</div>
+          <table>
+            <thead><tr><th>Action</th><th>Aujourd’hui</th><th>Proposé</th><th>Pourquoi</th></tr></thead>
+            <tbody>
+              <tr><td>Dévalider une tâche (remettre en cours)</td><td>toast, sans retour</td><td>toast <b>Annuler</b></td><td>se refait en un tap</td></tr>
+              <tr><td>Retirer un fût, un intrant d’une liste</td><td>confirmation</td><td>toast <b>Annuler</b></td><td>rien n’est perdu, la ligne revient</td></tr>
+              <tr><td>Déplacer ou effacer une journée du Planning</td><td>confirmation</td><td>toast <b>Annuler</b></td><td>réversible, fréquent</td></tr>
+              <tr><td>Supprimer un traitement du registre</td><td>confirmation</td><td>confirmation, bouton « Supprimer ce traitement »</td><td>registre opposable</td></tr>
+              <tr><td>Supprimer un membre de l’équipe</td><td>double appui</td><td>confirmation, « Supprimer Jean »</td><td>irréversible, rare</td></tr>
+              <tr><td>Clôturer la campagne, restaurer une sauvegarde</td><td>confirmation</td><td>confirmation + taper le nom</td><td>touche tout le domaine</td></tr>
+            </tbody>
+          </table>
+          <p class="note" style="margin-top:10px">Règle : réversible et fréquent → Annuler ; irréversible → confirmer, en nommant la conséquence ; touche tout le domaine → taper le nom. Jamais « Oui / Non ».</p>
+        </div>
+      </div>
+      <div>
+        <p class="legende-ecran">Téléphone — Parcelles, juste après un tap sur « Valider »</p>
+        <div class="tel">
+          <div class="tel-barre"><span class="num">11:02</span><span>Aux Murgers</span></div>
+          <div class="bande" style="padding:6px 12px"><span class="ico"></span><div style="flex:1"><div class="t">Parcelles</div><span class="s">Vigne · 8 actives</span></div><span class="ico g"></span></div>
+          <div class="segment"><span>Accueil</span><span class="on">Parcelles</span><span>Journal</span></div>
+          <div class="tel-corps" style="min-height:520px">
+            <div class="carte" style="margin-top:8px"><div style="font-weight:600;font-size:var(--pt-base)">Aux Murgers</div><div class="note">Palissage · fait aujourd’hui, par Marie, Jean, Sophie</div><div style="display:flex;gap:8px;margin-top:10px"><span class="bouton" style="flex:1;min-height:44px">Dévalider</span><span class="bouton" style="flex:1;min-height:44px;background:var(--ok-doux);color:var(--ok);border-color:transparent">✓ Validé</span></div></div>
+            <div class="carte"><div style="font-weight:600;font-size:var(--pt-base)">Champ de la Croix</div><div class="note">Palissage, pas commencé</div><div style="display:flex;gap:8px;margin-top:10px"><span class="bouton" style="flex:1;min-height:44px">Début</span><span class="bouton plein" style="flex:1.4;min-height:44px">Valider</span></div></div>
+            <div class="carte" style="opacity:.6"><div style="font-weight:600;font-size:var(--pt-base)">Clos du Moulin</div><div class="note">Palissage, pas commencé</div></div>
+          </div>
+          <div class="toast" role="status"><span>Palissage validé · Aux Murgers</span><b>Annuler</b><div class="temps"><i></i></div></div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span class="on"><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span><i></i>Plus</span></div>
+        </div>
+        <p class="note" style="margin-top:8px;text-align:center">Six secondes, une barre qui s’épuise, « Annuler » à 40 px de haut ; l’écriture part quand même tout de suite — Annuler écrit l’inverse.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 5. PC LISTE-DÉTAIL ═══ -->
+  <section class="ecart" id="pc">
+    <div class="ecart-tete">
+      <h2>5 · Ordinateur — le Journal en liste-détail</h2>
+      <p class="ou">Où dans l’appli : <b>Journal</b> sur PC d’abord ; puis Phyto et Réserve, qui ont la même forme (une liste, un détail).</p>
+      <p class="pourquoi">Sur grand écran, le Journal montre quatre entrées par écran dans une seule colonne, avec les filtres au-dessus. Gmail, Linear, Notion : trois colonnes — filtres à gauche, liste dense au centre, détail à droite — et le clavier. Quinze entrées visibles au lieu de quatre, et la fiche sans quitter la liste.</p>
+    </div>
+    <div class="ecrans">
+      <div>
+        <p class="legende-ecran">Ordinateur, 1 366 px — Vigne › Journal</p>
+        <div class="pc"><div class="pc-corps">
+          <div class="pc-app">
+            <div class="rail">
+              <div class="logo">Ma Vigne</div>
+              <div class="cherche"><span>Rechercher</span><kbd>⌘K</kbd></div>
+              <div class="it">Pilotage</div>
+              <div class="grp">Terrain</div>
+              <div class="it on">Vigne</div><div class="it">Tracteur</div><div class="it">Phyto</div>
+              <div class="grp">Cave et réserve</div>
+              <div class="it">Cave</div><div class="it">Réserve</div>
+              <div class="grp">Organisation</div>
+              <div class="it">Planning</div>
+            </div>
+            <div class="filtres">
+              <h4>Qui</h4>
+              <div class="opt on"><span>Tous</span><span class="n">14</span></div><div class="opt"><span>Marie</span><span class="n">5</span></div><div class="opt"><span>Jean</span><span class="n">4</span></div><div class="opt"><span>Sophie</span><span class="n">3</span></div><div class="opt"><span>Paul</span><span class="n">2</span></div>
+              <h4 style="margin-top:14px">Tâche</h4>
+              <div class="opt on"><span>Toutes</span><span class="n">14</span></div><div class="opt"><span>Palissage</span><span class="n">6</span></div><div class="opt"><span>Tirage</span><span class="n">5</span></div><div class="opt"><span>Taille</span><span class="n">3</span></div>
+              <h4 style="margin-top:14px">Quand</h4>
+              <div class="opt on"><span>Cette campagne</span></div><div class="opt"><span>30 jours</span></div><div class="opt"><span>Dates…</span></div>
+            </div>
+            <div class="liste">
+              <div class="tete"><span class="t">Journal</span><span class="n">14 entrées · Après-vendange 2026-2027</span><span class="plus">+ Ajouter</span></div>
+              <div class="lig"><span class="d">24 oct.</span><span class="a">S</span><span><b>Palissage</b> <span class="p">· Les Perrières</span><small>Équipe Sophie, Paul</small></span><span class="etiq ok">validé</span><span class="h">14 h 20</span></div>
+              <div class="lig sel"><span class="d">24 oct.</span><span class="a">J</span><span><b>Palissage</b> <span class="p">· La Combotte</span><small>Équipe Jean, Marie</small></span><span class="etiq ok">validé</span><span class="h">11 h 05</span></div>
+              <div class="lig"><span class="d">23 oct.</span><span class="a">P</span><span><b>Palissage</b> <span class="p">· Les Charmes</span><small>Paul</small></span><span class="etiq ok">validé</span><span class="h">16 h 40</span></div>
+              <div class="lig"><span class="d">22 oct.</span><span class="a">M</span><span><b>Tirage</b> <span class="p">· Aux Murgers</span><small>Marie</small></span><span class="etiq ok">validé</span><span class="h">15 h 10</span></div>
+              <div class="lig"><span class="d">22 oct.</span><span class="a" style="background:var(--or)">S</span><span><b>Taille</b> <span class="p">· Clos du Moulin</span><small>Sophie</small></span><span class="etiq att">en cours</span><span class="h">8 h 05</span></div>
+              <div class="lig"><span class="d">21 oct.</span><span class="a">J</span><span><b>Tirage</b> <span class="p">· La Combotte</span><small>Jean</small></span><span class="etiq ok">validé</span><span class="h">9 h 50</span></div>
+              <div class="lig"><span class="d">21 oct.</span><span class="a">P</span><span><b>Tirage</b> <span class="p">· Les Charmes</span><small>Paul</small></span><span class="etiq ok">validé</span><span class="h">16 h 40</span></div>
+              <div class="lig"><span class="d">20 oct.</span><span class="a">M</span><span><b>Tirage</b> <span class="p">· En Bertrange</span><small>Marie, Jean</small></span><span class="etiq ok">validé</span><span class="h">10 h 15</span></div>
+              <div class="lig"><span class="d">17 oct.</span><span class="a">S</span><span><b>Taille</b> <span class="p">· Vieilles Vignes</span><small>Sophie</small></span><span class="etiq ok">validé</span><span class="h">17 h 00</span></div>
+              <div class="lig"><span class="d">17 oct.</span><span class="a">J</span><span><b>Taille</b> <span class="p">· Aux Murgers</span><small>Jean</small></span><span class="etiq ok">validé</span><span class="h">12 h 30</span></div>
+              <div class="lig"><span class="d">16 oct.</span><span class="a">P</span><span><b>Brulage</b> <span class="p">· Les Perrières</span><small>Paul</small></span><span class="etiq ok">validé</span><span class="h">15 h 45</span></div>
+              <div class="lig"><span class="d">16 oct.</span><span class="a">M</span><span><b>Tirage</b> <span class="p">· Champ de la Croix</span><small>Marie</small></span><span class="etiq ok">validé</span><span class="h">9 h 20</span></div>
+              <div class="raccourcis"><span><span class="kbd">J</span><span class="kbd">K</span> descendre, monter</span><span><span class="kbd">↵</span> ouvrir</span><span><span class="kbd">E</span> modifier</span><span><span class="kbd">N</span> nouvelle entrée</span><span><span class="kbd">/</span> filtrer</span></div>
+            </div>
+            <div class="detail">
+              <div class="note">24 octobre · 11 h 05</div>
+              <h3>Palissage · La Combotte</h3>
+              <div class="note" style="margin-bottom:12px">0,61 ha · validé par Jean</div>
+              <div class="ligne"><span class="nom">Équipe</span><span>Jean, Marie</span></div>
+              <div class="ligne"><span class="nom">Durée</span><span class="num">3 h 10 · chrono</span></div>
+              <div class="ligne"><span class="nom">Cadence</span><span class="num">5,2 h/ha · barème 6,0</span></div>
+              <div class="ligne"><span class="nom">Météo</span><span>12 °C, sec</span></div>
+              <div class="ligne"><span class="nom">Note</span><span>—</span></div>
+              <div style="display:flex;gap:8px;margin-top:14px"><span class="bouton" style="flex:1">Équipe</span><span class="bouton" style="flex:1">Modifier</span></div>
+              <p class="note" style="margin-top:12px">Les flèches passent d’une entrée à l’autre sans fermer la fiche. « Dévalider » : toast Annuler, comme au téléphone.</p>
+            </div>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Maquette hors dépôt, v1 du 25 octobre 2026. Les noms et les heures sont ceux de la démo ou des exemples ; les mesures et les règles sont dans le rapport. Le style (polices, couleurs, cartes) est celui de la charte actuelle ; rien d’autre ne change que les gestes, les tailles et l’ordre.
+  </footer>
+</main>
+
+<script>
+function basculer(){
+  var r=document.documentElement, b=document.getElementById('theme');
+  var sombreSysteme=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var actuel=r.getAttribute('data-theme')||(sombreSysteme?'dark':'light');
+  var suivant=actuel==='dark'?'light':'dark';
+  r.setAttribute('data-theme',suivant);
+  b.textContent=suivant==='dark'?'Clair':'Sombre';
+}
+(function(){ var b=document.getElementById('theme'); if(window.matchMedia('(prefers-color-scheme: dark)').matches) b.textContent='Clair'; })();
+</script>
+</body>
+</html>

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ma Vigne — maquette « un niveau au-dessus » v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── Jetons recopiés de src/charte.css (clair), bloc sombre en dessous ── */
+:root{
+  color-scheme:light;
+  --font-ui:Outfit,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-titre:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --bg-app:#F0EEE9;--bg-card:#FFFFFF;--bg-doux:#F7F5F1;
+  --texte:#1B1A18;--texte-med:#55534E;--texte-doux:#686660;
+  --ligne:#E7E6E2;--ligne-forte:#CDCAC2;--survol:rgba(28,26,22,.055);
+  --vert:#1E3A12;--vert-med:#3D6B27;--vert-clair:#6BA34A;--vert-pale:#EAF3E2;
+  --or:#C2A14D;--or-pale:#FAF3E0;--terre:#8A5A38;--terre-pale:#F3EADF;
+  --acier:#2C3E50;--acier-pale:#ECF0F4;--phyto:#5B2D8E;--phyto-pale:#F0EAF8;
+  --bleu:#1A4A7A;--bleu-pale:#E8F0FA;--rouge:#A0291E;--rouge-pale:#FAEAE8;
+  --bordeaux:#7A1020;--orange:#B85A1A;--orange-pale:#FBF0E6;
+  --accent:#7A2850;--accent-texte:#7A2850;--accent-doux:rgba(122,40,80,.11);
+  --ok:#237A47;--ok-doux:rgba(35,122,71,.15);--attention:#A15C00;--attention-doux:rgba(161,92,0,.15);
+  --inverse:#1F1E1B;--sur-inverse:#F5F4F1;--cadre:#1F1E1B;
+  --shadow-sm:0 1px 2px rgba(20,18,14,.05),0 1px 3px rgba(20,18,14,.04);
+  --shadow-md:0 6px 16px -4px rgba(20,18,14,.12),0 2px 4px -2px rgba(20,18,14,.06);
+  --r-sm:6px;--r-md:8px;--r-lg:12px;--r-full:999px;
+  --pt-hero:40px;--pt-xxl:32px;--pt-xl:28px;--pt-lg:24px;--pt-md:20px;--pt-sm:16px;
+  --pt-base:14px;--pt-txt:13px;--pt-micro:12px;--pt-nano:11px;
+  --jauge-h:10px;
+  /* stades : du plus tardif au plus avancé */
+  --st-1:#DCE8CF;--st-2:#B9D39A;--st-3:#8CB868;--st-4:#C2A14D;--st-5:#B85A1A;--st-6:#7A1020;
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg-app:#0D0D0C;--bg-card:#151514;--bg-doux:#1A1A19;
+  --texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;
+  --ligne:#272624;--ligne-forte:#3E3D39;--survol:rgba(255,248,235,.055);
+  --vert:#5A9E3A;--vert-med:#6AB845;--vert-clair:#8DC868;--vert-pale:rgba(90,158,58,0.22);
+  --or:#D8BC72;--or-pale:rgba(216,188,114,0.20);--terre:#A07050;--terre-pale:rgba(160,112,80,0.22);
+  --acier:#4A80C4;--acier-pale:rgba(74,128,196,0.22);--phyto:#8B5CC8;--phyto-pale:rgba(139,92,200,0.22);
+  --bleu:#4A80C4;--bleu-pale:rgba(74,128,196,0.22);--rouge:#E05545;--rouge-pale:rgba(224,85,69,0.22);
+  --bordeaux:#E8848C;--orange:#D4721A;--orange-pale:rgba(212,114,26,0.20);
+  --accent:#8A3560;--accent-texte:#E59ABD;--accent-doux:rgba(229,154,189,.15);
+  --ok:#76C995;--ok-doux:rgba(118,201,149,.17);--attention:#E9AA4A;--attention-doux:rgba(233,170,74,.17);
+  --inverse:#EDECE9;--sur-inverse:#151514;--cadre:#2B2A27;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.40),0 1px 3px rgba(0,0,0,.25);
+  --shadow-md:0 8px 20px -6px rgba(0,0,0,.60),0 2px 6px -2px rgba(0,0,0,.40);
+  --st-1:#2E3A26;--st-2:#4E6B38;--st-3:#6AB845;--st-4:#D8BC72;--st-5:#D4721A;--st-6:#E8848C;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg-app:#0D0D0C;--bg-card:#151514;--bg-doux:#1A1A19;
+  --texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;
+  --ligne:#272624;--ligne-forte:#3E3D39;--survol:rgba(255,248,235,.055);
+  --vert:#5A9E3A;--vert-med:#6AB845;--vert-clair:#8DC868;--vert-pale:rgba(90,158,58,0.22);
+  --or:#D8BC72;--or-pale:rgba(216,188,114,0.20);--terre:#A07050;--terre-pale:rgba(160,112,80,0.22);
+  --acier:#4A80C4;--acier-pale:rgba(74,128,196,0.22);--phyto:#8B5CC8;--phyto-pale:rgba(139,92,200,0.22);
+  --bleu:#4A80C4;--bleu-pale:rgba(74,128,196,0.22);--rouge:#E05545;--rouge-pale:rgba(224,85,69,0.22);
+  --bordeaux:#E8848C;--orange:#D4721A;--orange-pale:rgba(212,114,26,0.20);
+  --accent:#8A3560;--accent-texte:#E59ABD;--accent-doux:rgba(229,154,189,.15);
+  --ok:#76C995;--ok-doux:rgba(118,201,149,.17);--attention:#E9AA4A;--attention-doux:rgba(233,170,74,.17);
+  --inverse:#EDECE9;--sur-inverse:#151514;--cadre:#2B2A27;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.40),0 1px 3px rgba(0,0,0,.25);
+  --shadow-md:0 8px 20px -6px rgba(0,0,0,.60),0 2px 6px -2px rgba(0,0,0,.40);
+  --st-1:#2E3A26;--st-2:#4E6B38;--st-3:#6AB845;--st-4:#D8BC72;--st-5:#D4721A;--st-6:#E8848C;
+}}
+
+*{box-sizing:border-box}
+html{scroll-padding-top:72px}
+body{margin:0;background:var(--bg-app);color:var(--texte);font-family:var(--font-ui);font-size:var(--pt-txt);line-height:1.5}
+h1,h2,h3{font-family:var(--font-titre);font-weight:600;letter-spacing:-0.02em;margin:0;line-height:1.15}
+p{margin:0}
+.num{font-family:var(--font-ui);font-variant-numeric:tabular-nums}
+
+/* ── En-tête et sommaire de la maquette ── */
+.entete{position:sticky;top:0;z-index:10;background:var(--bg-card);border-bottom:1px solid var(--ligne);padding:12px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.entete h1{font-size:var(--pt-lg)}
+.entete .base{color:var(--texte-med);font-size:var(--pt-micro)}
+.entete nav{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.entete nav a{color:var(--texte);text-decoration:none;border:1px solid var(--ligne-forte);border-radius:var(--r-full);padding:4px 10px;font-size:var(--pt-micro)}
+.entete nav a:hover{background:var(--survol)}
+.entete button{font:inherit;font-size:var(--pt-micro);border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);border-radius:var(--r-full);padding:4px 10px;cursor:pointer}
+.entete button:focus-visible,.entete nav a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.page{max-width:1240px;margin:0 auto;padding:28px 20px 80px;overflow-x:clip}
+.intro{max-width:72ch;margin-bottom:28px;color:var(--texte-med)}
+.intro b{color:var(--texte)}
+
+section.ecart{margin:0 0 56px;padding-top:12px;border-top:1px solid var(--ligne-forte)}
+.ecart-tete{display:grid;grid-template-columns:1fr;gap:6px;margin-bottom:18px}
+.ecart-tete h2{font-size:var(--pt-xl)}
+.ecart-tete .ou{color:var(--texte-med)}
+.ecart-tete .ou b{color:var(--texte);font-weight:600}
+.ecart-tete .pourquoi{max-width:78ch}
+.ecrans{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;align-items:start}
+@media (min-width:1000px){.ecrans{grid-template-columns:minmax(0,1fr) 410px}.ecrans.pc-seul{grid-template-columns:1fr}}
+.legende-ecran{color:var(--texte-doux);font-size:var(--pt-micro);margin:0 0 6px}
+
+/* ── Cadres : ordinateur et téléphone ── */
+.pc{background:var(--bg-app);border:1px solid var(--ligne-forte);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-md)}
+.pc-barre{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--bg-card);border-bottom:1px solid var(--ligne);font-size:var(--pt-micro);color:var(--texte-med)}
+.pc-barre b{color:var(--texte);font-weight:600}
+.pc-corps{padding:16px;overflow-x:auto}
+.tel{width:390px;max-width:100%;margin:0 auto;background:var(--bg-app);border:9px solid var(--cadre);border-radius:38px;overflow:hidden;box-shadow:var(--shadow-md)}
+.tel-barre{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px;font-size:var(--pt-micro);color:var(--texte-med)}
+.tel-titre{display:flex;align-items:center;gap:8px;padding:0 16px 10px}
+.tel-titre h3{font-size:var(--pt-md)}
+.tel-titre .retour{color:var(--accent-texte);font-size:var(--pt-base)}
+.tel-corps{padding:0 12px 14px;min-height:560px}
+.tel-dock{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--ligne);background:var(--bg-card);padding:8px 6px 10px;font-size:10px;color:var(--texte-doux);text-align:center}
+.tel-dock span.on{color:var(--accent-texte);font-weight:600}
+
+/* ── Cartes et pièces, à la mesure de la charte ── */
+.carte{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:16px;box-shadow:var(--shadow-sm)}
+.carte + .carte{margin-top:12px}
+.carte h3{font-size:var(--pt-md);margin-bottom:4px}
+.cadre-ligne{color:var(--texte-doux);font-size:var(--pt-micro);margin-bottom:10px}
+.verdict{font-family:var(--font-titre);font-size:var(--pt-xl);font-weight:600;line-height:1.15;margin:2px 0 6px}
+.chiffre{font-family:var(--font-ui);font-size:var(--pt-lg);font-weight:600;line-height:1.15}
+.etiq{display:inline-block;font-size:var(--pt-nano);font-weight:600;letter-spacing:.04em;padding:2px 8px;border-radius:var(--r-full);background:var(--bg-doux);color:var(--texte-med);border:1px solid var(--ligne)}
+.etiq.ok{background:var(--ok-doux);color:var(--ok);border-color:transparent}
+.etiq.att{background:var(--attention-doux);color:var(--attention);border-color:transparent}
+.etiq.danger{background:var(--rouge-pale);color:var(--rouge);border-color:transparent}
+.etiq.phyto{background:var(--phyto-pale);color:var(--phyto);border-color:transparent}
+.etiq.bleu{background:var(--bleu-pale);color:var(--bleu);border-color:transparent}
+.ligne{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--ligne);font-size:var(--pt-base)}
+.ligne:first-of-type{border-top:0}
+.ligne .nom{font-weight:600}
+.ligne .sous{color:var(--texte-med);font-size:var(--pt-micro);font-weight:400;display:block}
+.ligne .val{text-align:right;white-space:nowrap}
+.bouton{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:inherit;font-size:var(--pt-base);font-weight:600;border-radius:var(--r-md);padding:12px 16px;border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);width:100%}
+.bouton.plein{background:var(--accent);color:#fff;border-color:var(--accent)}
+.bouton.ghost{background:transparent}
+.jauge{height:var(--jauge-h);background:var(--bg-doux);border-radius:var(--r-full);overflow:hidden;border:1px solid var(--ligne)}
+.jauge i{display:block;height:100%;background:var(--vert-med)}
+.note{color:var(--texte-doux);font-size:var(--pt-micro)}
+.deux{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:var(--pt-txt);padding:8px 12px;border-radius:var(--r-full);border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.chip.gros{flex:1;text-align:center;padding:14px 10px;font-weight:600;border-radius:var(--r-md)}
+
+/* ── 1. Phénologie : la mosaïque de précocité ── */
+.mosaique{display:grid;grid-template-columns:repeat(8,1fr);grid-auto-rows:46px;gap:4px}
+.tuile{border-radius:var(--r-sm);padding:5px 7px;font-size:var(--pt-nano);line-height:1.15;color:#1B1A18;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;position:relative}
+.tuile b{font-weight:600;font-size:var(--pt-micro);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tuile.s1{background:var(--st-1)}.tuile.s2{background:var(--st-2)}.tuile.s3{background:var(--st-3)}
+.tuile.s4{background:var(--st-4)}.tuile.s5{background:var(--st-5);color:#fff}.tuile.s6{background:var(--st-6);color:#fff}
+:root[data-theme="dark"] .tuile.s1,:root[data-theme="dark"] .tuile.s2{color:#EDECE9}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .tuile.s1, :root:not([data-theme="light"]) .tuile.s2{color:#EDECE9} }
+.tuile .pt{position:absolute;top:5px;right:6px;width:9px;height:9px;border-radius:50%;background:var(--rouge);border:2px solid var(--bg-card)}
+.echelle{display:flex;gap:4px;margin-top:10px;align-items:center;flex-wrap:wrap;font-size:var(--pt-micro);color:var(--texte-med)}
+.echelle i{display:inline-block;width:18px;height:10px;border-radius:3px;vertical-align:middle;margin-right:4px}
+.barres{display:flex;flex-direction:column;gap:6px}
+.barre{display:grid;grid-template-columns:150px 1fr 56px;align-items:center;gap:10px;font-size:var(--pt-txt)}
+.barre .b{height:16px;border-radius:4px;background:var(--bg-doux);border:1px solid var(--ligne);overflow:hidden}
+.barre .b i{display:block;height:100%}
+.barre .n{text-align:right;font-weight:600}
+.frise{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.frise .jalon{display:flex;justify-content:space-between;align-items:baseline;gap:10px;background:var(--bg-doux);border:1px solid var(--ligne);border-radius:var(--r-md);padding:8px 12px}
+.frise .jalon .q{font-size:var(--pt-micro);color:var(--texte-med)}
+.frise .jalon .d{font-weight:600;font-size:var(--pt-base)}
+
+/* ── 2. Observation ── */
+.grille-types{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.type{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--ligne-forte);border-radius:var(--r-md);background:var(--bg-card);font-size:var(--pt-base);font-weight:500}
+.type i{width:22px;height:22px;border-radius:6px;flex:none}
+.type.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-doux)}
+.photo{display:flex;align-items:center;gap:12px;padding:12px;border:1px dashed var(--ligne-forte);border-radius:var(--r-md);background:var(--bg-doux)}
+.photo .vignette{width:64px;height:64px;border-radius:var(--r-sm);background:linear-gradient(135deg,#3D6B27,#6BA34A 55%,#C2A14D);flex:none;position:relative}
+.photo .vignette::after{content:"";position:absolute;inset:14px 22px 18px 20px;background:rgba(255,255,255,.55);border-radius:50% 40% 50% 45%}
+.carte-points{position:relative}
+.ligne-asavoir{display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:start;padding:10px 0;border-top:1px solid var(--ligne)}
+.ligne-asavoir:first-of-type{border-top:0}
+.ligne-asavoir .pastille{width:10px;height:10px;border-radius:50%;margin-top:6px;justify-self:center}
+
+/* ── 3. Fenêtre ── */
+.heures{min-width:620px;display:grid;grid-template-columns:52px repeat(24,1fr);gap:2px;align-items:center}
+.heures .j{font-size:var(--pt-micro);color:var(--texte-med);font-weight:600}
+.heures .h{height:20px;border-radius:3px;background:var(--bg-doux);border:1px solid var(--ligne)}
+.heures .h.ok{background:var(--vert-med);border-color:transparent}
+.heures .h.vent{background:var(--acier);opacity:.45;border-color:transparent}
+.heures .h.pluie{background:var(--bleu);border-color:transparent;opacity:.75}
+.heures .h.chaud{background:var(--orange);opacity:.5;border-color:transparent}
+.heures .h.soir{background:var(--or);border-color:transparent}
+.heures .h.nuit{background:var(--bg-doux);opacity:.5}
+.axe{min-width:620px;display:grid;grid-template-columns:52px repeat(24,1fr);gap:2px;font-size:10px;color:var(--texte-doux);margin-top:4px}
+.axe span{text-align:center}
+.leg{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:var(--pt-micro);color:var(--texte-med)}
+.leg i{display:inline-block;width:14px;height:10px;border-radius:3px;vertical-align:middle;margin-right:5px}
+
+/* ── 4. Récolte ── */
+.tableau{overflow-x:auto}
+table{width:100%;min-width:720px;border-collapse:collapse;font-size:var(--pt-txt)}
+th{text-align:left;font-size:var(--pt-nano);font-weight:600;color:var(--texte-med);letter-spacing:.03em;padding:6px 8px;border-bottom:1px solid var(--ligne-forte)}
+td{padding:8px;border-bottom:1px solid var(--ligne);vertical-align:middle}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.total td{font-weight:600;border-top:2px solid var(--ligne-forte)}
+.pieds{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.pied{text-align:center;padding:10px 4px;border:1px solid var(--ligne-forte);border-radius:var(--r-md);background:var(--bg-card)}
+.pied .k{font-size:var(--pt-nano);color:var(--texte-doux)}
+.pied .v{font-size:var(--pt-lg);font-weight:600;line-height:1.1}
+
+/* ── 5. Registre ── */
+.verif{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:start;padding:9px 0;border-top:1px solid var(--ligne)}
+.verif:first-of-type{border-top:0}
+.verif .coche{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.verif .coche.ok{background:var(--ok-doux);color:var(--ok)}
+.verif .coche.att{background:var(--attention-doux);color:var(--attention)}
+.verif .coche.non{background:var(--rouge-pale);color:var(--rouge)}
+.verif .t{font-size:var(--pt-base);font-weight:600}
+.verif .s{color:var(--texte-med);font-size:var(--pt-micro)}
+
+footer{color:var(--texte-doux);font-size:var(--pt-micro);border-top:1px solid var(--ligne-forte);padding-top:14px}
+@media (max-width:700px){.deux{grid-template-columns:1fr}.barre{grid-template-columns:110px 1fr 48px}.mosaique{grid-template-columns:repeat(4,1fr)}.ligne .val{white-space:normal}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="entete">
+  <div>
+    <h1>Ma Vigne — un niveau au-dessus, maquette v1</h1>
+    <div class="base">Base <span class="num">b19f1f3</span> · APP <span class="num">10.12</span> · 25 octobre 2026 · chiffres d’exemple</div>
+  </div>
+  <nav aria-label="Les cinq écrans">
+    <a href="#pheno">1 · Où en est la vigne</a>
+    <a href="#obs">2 · Signaler</a>
+    <a href="#fenetre">3 · Traiter ?</a>
+    <a href="#recolte">4 · Récolte prévue</a>
+    <a href="#registre">5 · Registre 2027</a>
+    <button type="button" id="theme" onclick="basculer()">Sombre</button>
+  </nav>
+</header>
+
+<main class="page">
+  <p class="intro">Cinq écarts, classés dans <b>audit-niveau-au-dessus-2026-10-25.md</b>. Chaque écran est dessiné sur la charte actuelle (Outfit pour les chiffres, Cormorant pour les titres), au téléphone et à l’ordinateur. Rien ici n’est intégré : c’est à valider, corriger ou écarter avant le premier lot.</p>
+
+  <!-- ═══════════════ 1. PHÉNOLOGIE ═══════════════ -->
+  <section class="ecart" id="pheno">
+    <div class="ecart-tete">
+      <h2>1 · Où en est la vigne — la phénologie par parcelle</h2>
+      <p class="ou">Où dans l’appli : <b>Vigne › Parcelles</b>, nouvelle vue « Stades » ; une carte résumée dans <b>Pilotage › Aujourd’hui › Terrain</b>. La saisie se fait au téléphone, depuis la parcelle.</p>
+      <p class="pourquoi">Aujourd’hui, le stade n’est tapé que sur un traitement. Ici, on note le stade atteint par parcelle (ou par cépage, reporté sur ses parcelles), et l’appli en tire la précocité des parcelles, la somme de températures, une prévision de floraison et de véraison, et le stade BBCH tout seul au registre.</p>
+    </div>
+    <div class="ecrans">
+      <div>
+        <p class="legende-ecran">Ordinateur — Vigne › Parcelles › Stades, le 25 mai</p>
+        <div class="pc">
+          <div class="pc-barre"><b>Vigne</b> › Parcelles › Stades <span style="margin-left:auto">Parcelles · Carte · Stades · Journal</span></div>
+          <div class="pc-corps">
+            <div class="carte">
+              <h3>Où en est la vigne</h3>
+              <div class="cadre-ligne">45 parcelles · stades notés entre le 20 et le 24 mai · températures du domaine (archive Open-Meteo, puis prévision)</div>
+              <div class="verdict">Boutons séparés sur les trois quarts du domaine, la floraison commence aux Crais</div>
+              <div class="mosaique" aria-label="Mosaïque des parcelles colorées par stade">
+                <div class="tuile s4" style="grid-column:span 2"><b>Les Crais</b><span>début floraison · 61</span></div>
+                <div class="tuile s3" style="grid-column:span 2"><b>Les Grandes Vignes</b><span>boutons séparés · 57</span></div>
+                <div class="tuile s3" style="grid-column:span 2"><b>Clos Prieur</b><span>57</span></div>
+                <div class="tuile s3" style="grid-column:span 2"><b>En Champs</b><span>57</span></div>
+                <div class="tuile s2" style="grid-column:span 2"><b>Bel Air</b><span>55</span></div>
+                <div class="tuile s3" style="grid-column:span 3"><b>Gevrey vieilles vignes</b><span>boutons séparés · 57</span></div>
+                <div class="tuile s2" style="grid-column:span 3"><b>Les Evocelles</b><span>agglomérés · 55</span></div>
+                <div class="tuile s3" style="grid-column:span 2"><b>La Justice</b><span>57</span></div>
+                <div class="tuile s4" style="grid-column:span 2"><b>Aux Combottes</b><span>début floraison · 61</span></div>
+                <div class="tuile s2" style="grid-column:span 2"><b>Chazière</b><span>55</span></div>
+                <div class="tuile s1" style="grid-column:span 2"><b>Les Corvées</b><span>8 feuilles · 18</span></div>
+                <div class="tuile s3" style="grid-column:span 2"><b>Les Cognées</b><span>57</span></div>
+                <div class="tuile s1" style="grid-column:span 2"><b>Champerrier</b><span>8 feuilles · 18</span></div>
+                <div class="tuile s2" style="grid-column:span 2"><b>Les Seuvrées</b><span>55</span></div>
+                <div class="tuile s3" style="grid-column:span 2"><b>Craipillot</b><span>57</span></div>
+                <div class="tuile s2" style="grid-column:span 2"><b>Les Jeunes Rois</b><span>55</span></div>
+                <div class="tuile s3" style="grid-column:span 2"><b>En Vosne</b><span>57</span></div>
+                <div class="tuile s2" style="grid-column:span 2"><b>Les Marchais</b><span>55</span></div>
+                <div class="tuile s3" style="grid-column:span 2"><b>Clos des Varoilles</b><span>57</span></div>
+                <div class="tuile s3" style="grid-column:span 2"><b>Les Goulots</b><span>57</span></div>
+                <div class="tuile s2" style="grid-column:span 2"><b>Au Vellé</b><span>55</span></div>
+              </div>
+              <div class="echelle"><span><i style="background:var(--st-1)"></i>8 feuilles</span><span><i style="background:var(--st-2)"></i>boutons agglomérés</span><span><i style="background:var(--st-3)"></i>boutons séparés</span><span><i style="background:var(--st-4)"></i>début floraison</span><span><i style="background:var(--st-5)"></i>pleine floraison</span><span><i style="background:var(--st-6)"></i>nouaison</span><span style="margin-left:auto">de la plus tardive à la plus précoce</span></div>
+            </div>
+            <div class="deux" style="margin-top:12px">
+              <div class="carte">
+                <h3>Par stade</h3>
+                <div class="cadre-ligne">parcelles, en surface</div>
+                <div class="barres">
+                  <div class="barre"><span>Début floraison (61)</span><div class="b"><i style="width:14%;background:var(--st-4)"></i></div><span class="n num">1,6 ha</span></div>
+                  <div class="barre"><span>Boutons séparés (57)</span><div class="b"><i style="width:68%;background:var(--st-3)"></i></div><span class="n num">7,9 ha</span></div>
+                  <div class="barre"><span>Agglomérés (55)</span><div class="b"><i style="width:15%;background:var(--st-2)"></i></div><span class="n num">1,8 ha</span></div>
+                  <div class="barre"><span>8 feuilles (18)</span><div class="b"><i style="width:4%;background:var(--st-1)"></i></div><span class="n num">0,5 ha</span></div>
+                </div>
+                <p class="note" style="margin-top:10px">2 parcelles sans stade depuis 12 jours : Champerrier, Les Corvées — <a href="#" style="color:var(--accent-texte)">noter</a></p>
+              </div>
+              <div class="carte">
+                <h3>Ce qui vient</h3>
+                <div class="cadre-ligne">moyennes journalières depuis le 1ᵉʳ mars, base 0 °C · modèle GFV (Parker et al. 2011, 2013)</div>
+                <div class="chiffre num">1 060 °C·j <span style="font-size:var(--pt-micro);font-weight:400;color:var(--texte-med)">· +45 face à l’an dernier à la même date</span></div>
+                <div class="frise">
+                  <div class="jalon"><div class="q">Pleine floraison, Pinot noir</div><div class="d">vers le 4 juin, à une semaine près</div></div>
+                  <div class="jalon"><div class="q">Véraison, Pinot noir</div><div class="d">vers le 6 août, à une semaine près</div></div>
+                </div>
+                <p class="note" style="margin-top:10px">Seuils publiés : Pinot noir 1 219 et 2 511 °C·j, Chardonnay 1 217 et 2 541. Au-delà des 16 jours de prévision, la moyenne des dix dernières années. Chaque stade noté recale la suite.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="legende-ecran">Téléphone — depuis la fiche d’une parcelle</p>
+        <div class="tel">
+          <div class="tel-barre"><span class="num">14:12</span><span>Gevrey · 21 °C</span></div>
+          <div class="tel-titre"><span class="retour">‹</span><h3>Les Crais · noter le stade</h3></div>
+          <div class="tel-corps">
+            <div class="carte">
+              <div class="cadre-ligne">Dernier stade noté : boutons séparés (57), le 20 mai</div>
+              <div class="chips">
+                <span class="chip">6–8 feuilles · 16</span>
+                <span class="chip">Agglomérés · 55</span>
+                <span class="chip">Séparés · 57</span>
+                <span class="chip on">Début floraison · 61</span>
+                <span class="chip">Pleine floraison · 65</span>
+                <span class="chip">Nouaison · 71</span>
+                <span class="chip">Fermeture · 79</span>
+                <span class="chip">Véraison · 81</span>
+              </div>
+            </div>
+            <div class="carte">
+              <div class="ligne"><span><span class="nom">Reporter sur les Pinot noir du même secteur</span><span class="sous">Aux Combottes, Clos Prieur, En Champs · 3 parcelles</span></span><span class="val" style="color:var(--accent-texte);font-weight:600">Oui</span></div>
+              <div class="ligne"><span><span class="nom">Date</span></span><span class="val num">aujourd’hui, 25 mai</span></div>
+              <div class="ligne"><span><span class="nom">Le modèle, Pinot noir</span><span class="sous">Les Crais est en avance : ce que vous notez la recale</span></span><span class="val num">pleine floraison vers le 4 juin</span></div>
+            </div>
+            <div style="margin-top:12px"><button class="bouton plein" type="button">Enregistrer le stade</button></div>
+            <p class="note" style="margin-top:10px;text-align:center">Trois taps. Le stade sert au registre, à la protection et à l’alerte gel.</p>
+          </div>
+          <div class="tel-dock"><span class="on">Vigne</span><span>Journal</span><span>Tracteur</span><span>Phyto</span><span>Plus</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ 2. OBSERVATION ═══════════════ -->
+  <section class="ecart" id="obs">
+    <div class="ecart-tete">
+      <h2>2 · Signaler — l’observation de terrain, avec photo</h2>
+      <p class="ou">Où dans l’appli : bouton <b>Signaler</b> sur la fiche parcelle et sur la carte du jour de l’ouvrier ; les signalements remontent dans <b>« À savoir »</b>, sur la <b>carte</b> et dans la <b>fiche parcelle</b>.</p>
+      <p class="pourquoi">Ce que le chef voit dans les rangs n’entre nulle part aujourd’hui, sauf en note libre sur un traitement. Un signalement, c’est un type, une intensité, une photo, le point GPS — trois taps et l’appareil photo. L’ouvrier peut signaler ; l’admin voit, trie, clôt.</p>
+    </div>
+    <div class="ecrans">
+      <div>
+        <p class="legende-ecran">Ordinateur — Pilotage › Aujourd’hui › Terrain, la carte et « À savoir »</p>
+        <div class="pc">
+          <div class="pc-barre"><b>Pilotage</b> › Aujourd’hui › Terrain</div>
+          <div class="pc-corps">
+            <div style="display:grid;gap:12px">
+              <div class="carte carte-points">
+                <h3>Signalements de la semaine</h3>
+                <div class="cadre-ligne">7 signalements · 4 ouverts · du 19 au 25 mai</div>
+                <div class="mosaique">
+                  <div class="tuile s3" style="grid-column:span 2"><b>Les Crais</b><span>oïdium · fort</span><i class="pt"></i></div>
+                  <div class="tuile s3" style="grid-column:span 2"><b>Les Grandes Vignes</b><span>—</span></div>
+                  <div class="tuile s3" style="grid-column:span 2"><b>Clos Prieur</b><span>oïdium · moyen</span><i class="pt"></i></div>
+                  <div class="tuile s3" style="grid-column:span 2"><b>En Champs</b><span>oïdium · moyen</span><i class="pt"></i></div>
+                  <div class="tuile s3" style="grid-column:span 3"><b>Gevrey vieilles vignes</b><span>manquants · 14 pieds</span><i class="pt" style="background:var(--terre)"></i></div>
+                  <div class="tuile s2" style="grid-column:span 2"><b>Les Evocelles</b><span>—</span></div>
+                  <div class="tuile s4" style="grid-column:span 3"><b>Aux Combottes</b><span>grêle · faible</span><i class="pt" style="background:var(--acier)"></i></div>
+                  <div class="tuile s2" style="grid-column:span 2"><b>Chazière</b><span>—</span></div>
+                  <div class="tuile s3" style="grid-column:span 2"><b>Les Cognées</b><span>palissage</span><i class="pt" style="background:var(--texte-doux)"></i></div>
+                  <div class="tuile s2" style="grid-column:span 2"><b>Bel Air</b><span>—</span></div>
+                  <div class="tuile s3" style="grid-column:span 2"><b>La Justice</b><span>—</span></div>
+                  <div class="tuile s1" style="grid-column:span 2"><b>Les Corvées</b><span>—</span></div>
+                </div>
+                <div class="echelle"><span><i style="background:var(--rouge)"></i>maladie</span><span><i style="background:var(--terre)"></i>manquants</span><span><i style="background:var(--acier)"></i>gel, grêle</span><span><i style="background:var(--texte-doux)"></i>palissage, autre</span><span style="margin-left:auto">fond : le stade (écran 1)</span></div>
+              </div>
+              <div class="carte">
+                <h3>À savoir</h3>
+                <div class="cadre-ligne">ce qui a bougé cette semaine</div>
+                <div class="ligne-asavoir"><i class="pastille" style="background:var(--rouge)"></i><div><div style="font-weight:600;font-size:var(--pt-base)">Oïdium signalé 3 fois, dont 1 fort</div><div class="note">Les Crais (fort, Victor, mardi) · Clos Prieur · En Champs. Les trois sont à nu depuis 4 jours.</div></div><span class="etiq danger">ouvert</span></div>
+                <div class="ligne-asavoir"><i class="pastille" style="background:var(--terre)"></i><div><div style="font-weight:600;font-size:var(--pt-base)">14 pieds manquants comptés, Gevrey vieilles vignes</div><div class="note">Alicia, jeudi · photo · le plan d’entreplantation est mis à jour.</div></div><span class="etiq ok">pris en compte</span></div>
+                <div class="ligne-asavoir"><i class="pastille" style="background:var(--acier)"></i><div><div style="font-weight:600;font-size:var(--pt-base)">Grêle légère aux Combottes</div><div class="note">Nico, dimanche 18 h · 2 photos · quelques feuilles trouées, grappes intactes.</div></div><span class="etiq">clos</span></div>
+                <div class="ligne-asavoir"><i class="pastille" style="background:var(--texte-doux)"></i><div><div style="font-weight:600;font-size:var(--pt-base)">Palissage : 3 piquets cassés, Les Cognées</div><div class="note">Shana, lundi · ajouté aux réparations de l’été.</div></div><span class="etiq">ouvert</span></div>
+                <p class="note" style="margin-top:10px">Un signalement de maladie sur une parcelle à nu monte en tête. Le registre de production garde la trace des organismes nuisibles signalés.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="legende-ecran">Téléphone — Signaler, en deux écrans</p>
+        <div class="tel">
+          <div class="tel-barre"><span class="num">09:41</span><span>Les Crais · position prise</span></div>
+          <div class="tel-titre"><span class="retour">‹</span><h3>Signaler · Les Crais</h3></div>
+          <div class="tel-corps">
+            <div class="grille-types" aria-label="Type de signalement">
+              <div class="type on"><i style="background:var(--rouge)"></i>Oïdium</div>
+              <div class="type"><i style="background:var(--rouge)"></i>Mildiou</div>
+              <div class="type"><i style="background:var(--rouge)"></i>Botrytis</div>
+              <div class="type"><i style="background:var(--orange)"></i>Ravageur</div>
+              <div class="type"><i style="background:var(--or)"></i>Carence</div>
+              <div class="type"><i style="background:var(--acier)"></i>Gel, grêle</div>
+              <div class="type"><i style="background:var(--terre)"></i>Pieds manquants</div>
+              <div class="type"><i style="background:var(--texte-doux)"></i>Palissage</div>
+            </div>
+            <div class="carte" style="margin-top:12px">
+              <div class="cadre-ligne">Intensité</div>
+              <div class="chips"><span class="chip gros">Faible</span><span class="chip gros">Moyen</span><span class="chip gros on">Fort</span></div>
+            </div>
+            <div class="photo" style="margin-top:12px"><div class="vignette" aria-hidden="true"></div><div><div style="font-weight:600;font-size:var(--pt-base)">1 photo · 180 ko</div><div class="note">Prise à 9 h 40 · rang 12, côté est · 47.221, 4.964</div></div></div>
+            <div class="carte" style="margin-top:12px"><div class="note">Note (facultatif)</div><div style="font-size:var(--pt-base)">Feutrage sur grappes, 3 pieds de suite.</div></div>
+            <div style="margin-top:12px"><button class="bouton plein" type="button">Enregistrer le signalement</button></div>
+            <p class="note" style="margin-top:8px;text-align:center">Hors réseau : le signalement part tout de suite, la photo se reprend au retour du réseau.</p>
+          </div>
+          <div class="tel-dock"><span class="on">Vigne</span><span>Journal</span><span>Tracteur</span><span>Phyto</span><span>Plus</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ 3. FENÊTRE ═══════════════ -->
+  <section class="ecart" id="fenetre">
+    <div class="ecart-tete">
+      <h2>3 · Traiter ? — la fenêtre croisée avec la protection et la floraison</h2>
+      <p class="ou">Où dans l’appli : la tuile <b>Traiter ?</b> de <b>Pilotage › Aujourd’hui</b>, qui existe, et sa carte de détail.</p>
+      <p class="pourquoi">La tuile sait déjà dire « sec, vent sous 19 km/h, moins de 25 °C ». Elle ne sait pas encore dire quoi traiter, ni compter l’hygrométrie, ni la pluie qui suivra, ni l’heure du coucher du soleil pour les parcelles en fleur. Ici, les trois lectures se croisent en une phrase.</p>
+    </div>
+    <div class="ecrans">
+      <div>
+        <p class="legende-ecran">Ordinateur — le détail de la tuile, sur cinq jours</p>
+        <div class="pc">
+          <div class="pc-barre"><b>Pilotage</b> › Aujourd’hui › Terrain › Traiter ?</div>
+          <div class="pc-corps">
+            <div class="carte">
+              <h3>Traiter ?</h3>
+              <div class="cadre-ligne">prévisions AROME horaires · lessivage réglé à 20 mm · coucher du soleil 21 h 22 à Gevrey</div>
+              <div class="verdict">Mardi 6 h – 11 h, 6 parcelles à nu · le soir pour les 3 en fleur</div>
+              <div class="heures" aria-label="Créneaux heure par heure">
+                <span class="j">lun 26</span>
+                <i class="h nuit"></i><i class="h nuit"></i><i class="h nuit"></i><i class="h nuit"></i><i class="h nuit"></i><i class="h pluie"></i><i class="h pluie"></i><i class="h pluie"></i><i class="h pluie"></i><i class="h vent"></i><i class="h vent"></i><i class="h vent"></i><i class="h vent"></i><i class="h vent"></i><i class="h vent"></i><i class="h vent"></i><i class="h vent"></i><i class="h vent"></i><i class="h"></i><i class="h soir"></i><i class="h soir"></i><i class="h soir"></i><i class="h soir"></i><i class="h soir"></i>
+                <span class="j">mar 27</span>
+                <i class="h nuit"></i><i class="h nuit"></i><i class="h nuit"></i><i class="h nuit"></i><i class="h nuit"></i><i class="h"></i><i class="h ok"></i><i class="h ok"></i><i class="h ok"></i><i class="h ok"></i><i class="h ok"></i><i class="h"></i><i class="h chaud"></i><i class="h chaud"></i><i class="h chaud"></i><i class="h chaud"></i><i class="h chaud"></i><i class="h chaud"></i><i class="h"></i><i class="h soir"></i><i class="h soir"></i><i class="h soir"></i><i class="h soir"></i><i class="h soir"></i>
+                <span class="j">mer 28</span>
+                <i class="h nuit"></i><i class="h nuit"></i><i class="h nuit"></i><i class="h nuit"></i><i class="h nuit"></i><i class="h"></i><i class="h ok"></i><i class="h ok"></i><i class="h ok"></i><i class="h"></i><i class="h vent"></i><i class="h vent"></i><i class="h vent"></i><i class="h vent"></i><i class="h vent"></i><i class="h vent"></i><i class="h vent"></i><i class="h"></i><i class="h"></i><i class="h soir"></i><i class="h soir"></i><i class="h soir"></i><i class="h soir"></i><i class="h soir"></i>
+                <span class="j">jeu 29</span>
+                <i class="h nuit"></i><i class="h nuit"></i><i class="h nuit"></i><i class="h pluie"></i><i class="h pluie"></i><i class="h pluie"></i><i class="h pluie"></i><i class="h pluie"></i><i class="h pluie"></i><i class="h pluie"></i><i class="h pluie"></i><i class="h"></i><i class="h"></i><i class="h"></i><i class="h"></i><i class="h"></i><i class="h"></i><i class="h"></i><i class="h"></i><i class="h pluie"></i><i class="h pluie"></i><i class="h pluie"></i><i class="h pluie"></i><i class="h pluie"></i>
+                <span class="j">ven 30</span>
+                <i class="h nuit"></i><i class="h nuit"></i><i class="h nuit"></i><i class="h nuit"></i><i class="h nuit"></i><i class="h"></i><i class="h"></i><i class="h ok"></i><i class="h ok"></i><i class="h ok"></i><i class="h ok"></i><i class="h ok"></i><i class="h ok"></i><i class="h"></i><i class="h"></i><i class="h"></i><i class="h"></i><i class="h"></i><i class="h"></i><i class="h soir"></i><i class="h soir"></i><i class="h soir"></i><i class="h soir"></i><i class="h soir"></i>
+              </div>
+              <div class="axe"><span></span><span>0</span><span></span><span></span><span>3</span><span></span><span></span><span>6</span><span></span><span></span><span>9</span><span></span><span></span><span>12</span><span></span><span></span><span>15</span><span></span><span></span><span>18</span><span></span><span></span><span>21</span><span></span><span></span></div>
+              <div class="leg"><span><i style="background:var(--vert-med)"></i>bon créneau</span><span><i style="background:var(--or)"></i>créneau du soir, parcelles en fleur (2 h avant, 3 h après le coucher)</span><span><i style="background:var(--bleu)"></i>pluie</span><span><i style="background:var(--acier);opacity:.45"></i>vent ≥ 19 km/h</span><span><i style="background:var(--orange);opacity:.5"></i>plus de 25 °C</span><span><i style="background:var(--bg-doux)"></i>hygrométrie sous 50 % ou nuit</span></div>
+            </div>
+            <div class="deux" style="margin-top:12px">
+              <div class="carte">
+                <h3>À nu, à traiter d’abord</h3>
+                <div class="cadre-ligne">la protection restante, lue par la pousse (stade entre 16 et 79 : un contact couvre 7 jours, pas 10)</div>
+                <div class="ligne"><span><span class="nom">Les Crais</span><span class="sous">oïdium signalé fort · à nu depuis 4 j · en fleur → le soir</span></span><span class="val"><span class="etiq danger">à nu</span></span></div>
+                <div class="ligne"><span><span class="nom">Clos Prieur</span><span class="sous">à nu depuis 4 j · contact du 19 mai, lessivé 23 mm</span></span><span class="val"><span class="etiq danger">à nu</span></span></div>
+                <div class="ligne"><span><span class="nom">En Champs</span><span class="sous">à nu depuis 2 j</span></span><span class="val"><span class="etiq danger">à nu</span></span></div>
+                <div class="ligne"><span><span class="nom">Aux Combottes</span><span class="sous">à nu demain · en fleur → le soir</span></span><span class="val"><span class="etiq att">demain</span></span></div>
+                <div class="ligne"><span><span class="nom">Gevrey vieilles vignes, Bel Air, Chazière</span><span class="sous">à nu d’ici 2 jours</span></span><span class="val"><span class="etiq att">2 j</span></span></div>
+                <div class="ligne"><span><span class="nom">37 autres parcelles</span><span class="sous">encore couvertes 3 à 8 jours</span></span><span class="val"><span class="etiq ok">couvert</span></span></div>
+              </div>
+              <div class="carte">
+                <h3>Mardi 6 h – 11 h</h3>
+                <div class="cadre-ligne">ce que disent les cinq heures</div>
+                <div class="ligne"><span class="nom">Pluie</span><span class="val num">0 mm · 4 mm jeudi, sous les 20 mm</span></div>
+                <div class="ligne"><span class="nom">Vent</span><span class="val num">6 à 11 km/h</span></div>
+                <div class="ligne"><span class="nom">Température</span><span class="val num">14 à 21 °C</span></div>
+                <div class="ligne"><span class="nom">Hygrométrie</span><span class="val num">78 à 61 %</span></div>
+                <div class="ligne"><span><span class="nom">Parcelles en fleur</span><span class="sous">Les Crais, Aux Combottes, Craipillot</span></span><span class="val num">19 h 22 – 00 h 22</span></div>
+                <p class="note" style="margin-top:10px">Le créneau du soir vient de l’arrêté abeilles : en floraison, 2 h avant et 3 h après le coucher du soleil. Une parcelle en fleur ne reçoit pas de créneau de jour.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="legende-ecran">Téléphone — la tuile, dans le cockpit</p>
+        <div class="tel">
+          <div class="tel-barre"><span class="num">07:05</span><span>lundi 26 mai</span></div>
+          <div class="tel-titre"><h3>Aujourd’hui</h3><span class="note" style="margin-left:auto">Terrain · Cave · Économie</span></div>
+          <div class="tel-corps">
+            <div class="carte">
+              <div class="cadre-ligne">Traiter ? · AROME · lessivage 20 mm</div>
+              <div class="verdict" style="font-size:var(--pt-lg)">Mardi 6 h – 11 h, 6 parcelles à nu</div>
+              <div class="jauge" aria-label="Part du domaine encore couvert"><i style="width:82%"></i></div>
+              <p class="note" style="margin-top:6px">82 % du domaine couvert · 3 à nu · 3 à nu d’ici 2 jours</p>
+              <div class="ligne" style="margin-top:6px"><span><span class="nom">Les Crais</span><span class="sous">oïdium fort · en fleur</span></span><span class="val"><span class="etiq danger">à nu · soir</span></span></div>
+              <div class="ligne"><span><span class="nom">Clos Prieur</span><span class="sous">lessivé 23 mm</span></span><span class="val"><span class="etiq danger">à nu</span></span></div>
+              <div class="ligne"><span><span class="nom">En Champs</span></span><span class="val"><span class="etiq danger">à nu</span></span></div>
+              <div class="ligne"><span><span class="nom">3 en fleur</span><span class="sous">créneau du soir seulement</span></span><span class="val num">19 h 22 – 00 h 22</span></div>
+              <div style="margin-top:12px"><button class="bouton ghost" type="button">Voir les 5 jours</button></div>
+            </div>
+            <div class="carte">
+              <div class="cadre-ligne">Après le créneau</div>
+              <div class="ligne"><span class="nom">Pluie jeudi</span><span class="val num">4 mm, sous le seuil</span></div>
+              <div class="ligne"><span class="nom">Hygrométrie mardi matin</span><span class="val num">78 → 61 %</span></div>
+            </div>
+          </div>
+          <div class="tel-dock"><span>Vigne</span><span>Journal</span><span>Tracteur</span><span>Phyto</span><span class="on">Pilotage</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ 4. RÉCOLTE PRÉVUE ═══════════════ -->
+  <section class="ecart" id="recolte">
+    <div class="ecart-tete">
+      <h2>4 · Récolte prévue — compter les grappes, prévoir les hectolitres</h2>
+      <p class="ou">Où dans l’appli : <b>Cave › Le Cuvier › Récoltes</b>, un volet « Prévu » avant les apports ; le comptage se fait au téléphone, depuis la parcelle, entre fermeture de grappe et véraison.</p>
+      <p class="pourquoi">Le Cuvier sait le hL/ha une fois la vendange rentrée. Il ne sait rien avant. Ici : dix pieds comptés par parcelle, un poids moyen de grappe par cépage, les pieds présents (densité, surface, manquants déjà comptés), et le domaine voit ses hectolitres face au rendement de l’appellation et à la cuverie.</p>
+    </div>
+    <div class="ecrans">
+      <div>
+        <p class="legende-ecran">Ordinateur — Cave › Le Cuvier › Récoltes › Prévu, le 18 juillet</p>
+        <div class="pc">
+          <div class="pc-barre"><b>Cave</b> › Le Cuvier › Récoltes <span style="margin-left:auto">Prévu · Apports · Cuves · Tournée</span></div>
+          <div class="pc-corps">
+            <div class="carte">
+              <h3>Récolte prévue, millésime 2026</h3>
+              <div class="cadre-ligne">comptages du 12 au 18 juillet, 10 pieds par parcelle · poids moyen de grappe réglé par cépage, recalé sur 2025 · 0,70 L par kg en rouge</div>
+              <div class="verdict">Environ 480 hL, 41 hL/ha : Chazière au-dessus de son appellation, une cuve trop petite</div>
+              <div class="deux" style="margin-bottom:12px">
+                <div style="display:flex;gap:20px;flex-wrap:wrap">
+                  <div><div class="chiffre num">480 hL</div><div class="note">prévus, ± 10 %</div></div>
+                  <div><div class="chiffre num">40,9</div><div class="note">hL/ha du domaine</div></div>
+                  <div><div class="chiffre num">10 j</div><div class="note">de vendange à 40 personnes, au rythme 2025</div></div>
+                </div>
+                <div class="note" style="align-self:center">Le poids moyen est une hypothèse : à la récolte, l’écart prévu / réel le recale pour l’an prochain.</div>
+              </div>
+              <div class="tableau"><table>
+                <thead><tr><th>Cuvée · parcelles</th><th class="n">Pieds présents</th><th class="n">Grappes / pied</th><th class="n">Poids moyen</th><th class="n">kg</th><th class="n">hL prévus</th><th class="n">hL/ha</th><th class="n">AOC max</th><th>Cuve</th></tr></thead>
+                <tbody>
+                  <tr><td><b>Gevrey vieilles vignes</b> · 3 parcelles, 2,40 ha</td><td class="n num">22 900</td><td class="n num">4,6</td><td class="n num">118 g</td><td class="n num">12 430</td><td class="n num">87,0</td><td class="n num">36,3</td><td class="n num">40</td><td><span class="etiq ok">cuve 12, 100 hL</span></td></tr>
+                  <tr><td><b>Chazière</b> · 2 parcelles, 1,02 ha</td><td class="n num">9 840</td><td class="n num">5,2</td><td class="n num">118 g</td><td class="n num">6 038</td><td class="n num">42,3</td><td class="n num" style="color:var(--rouge);font-weight:600">41,4</td><td class="n num">40</td><td><span class="etiq att">cuve 4, 30 hL : manque 12</span></td></tr>
+                  <tr><td><b>Les Crais</b> · 1 parcelle, 0,66 ha</td><td class="n num">6 360</td><td class="n num">4,1</td><td class="n num">118 g</td><td class="n num">3 077</td><td class="n num">21,5</td><td class="n num">32,6</td><td class="n num">40</td><td><span class="etiq att">oïdium : poids à revoir</span></td></tr>
+                  <tr><td><b>Bourgogne Chardonnay</b> · 4 parcelles, 3,00 ha</td><td class="n num">29 100</td><td class="n num">5,9</td><td class="n num">142 g</td><td class="n num">24 380</td><td class="n num">170,7</td><td class="n num">56,9</td><td class="n num">60</td><td><span class="etiq ok">cuves 1 à 3</span></td></tr>
+                  <tr><td><b>Autres</b> · 35 parcelles, 4,68 ha</td><td class="n num">—</td><td class="n num">—</td><td class="n num">—</td><td class="n num">22 700</td><td class="n num">159,0</td><td class="n num">34,0</td><td class="n num">—</td><td><span class="etiq">12 parcelles non comptées</span></td></tr>
+                  <tr class="total"><td>Domaine · 11,76 ha</td><td class="n num">—</td><td class="n num">—</td><td class="n num">—</td><td class="n num">68 625</td><td class="n num">480</td><td class="n num">40,9</td><td class="n num"></td><td></td></tr>
+                </tbody>
+              </table></div>
+              <p class="note" style="margin-top:10px">Pieds présents = pieds/ha des écartements du domaine (Réglages › Vigne, déjà utilisés par le barème) × surface − manquants comptés à l’entreplantation. Les 12 parcelles non comptées prennent la moyenne de leur cépage, en italique dans l’appli.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="legende-ecran">Téléphone — compter les grappes</p>
+        <div class="tel">
+          <div class="tel-barre"><span class="num">10:20</span><span>Chazière haut · 17 juillet</span></div>
+          <div class="tel-titre"><span class="retour">‹</span><h3>Chazière haut · compter les grappes</h3></div>
+          <div class="tel-corps">
+            <div class="carte">
+              <div class="cadre-ligne">10 pieds pris au hasard, hors bout de rang · tapez le nombre de grappes</div>
+              <div class="pieds">
+                <div class="pied"><div class="k">1</div><div class="v num">5</div></div>
+                <div class="pied"><div class="k">2</div><div class="v num">6</div></div>
+                <div class="pied"><div class="k">3</div><div class="v num">4</div></div>
+                <div class="pied"><div class="k">4</div><div class="v num">6</div></div>
+                <div class="pied"><div class="k">5</div><div class="v num">5</div></div>
+                <div class="pied"><div class="k">6</div><div class="v num">5</div></div>
+                <div class="pied"><div class="k">7</div><div class="v num">6</div></div>
+                <div class="pied"><div class="k">8</div><div class="v num">4</div></div>
+                <div class="pied" style="border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-doux)"><div class="k">9</div><div class="v num">6</div></div>
+                <div class="pied"><div class="k">10</div><div class="v" style="color:var(--texte-doux)">–</div></div>
+              </div>
+            </div>
+            <div class="carte">
+              <div class="ligne"><span class="nom">Moyenne sur 9 pieds</span><span class="val num">5,2 grappes</span></div>
+              <div class="ligne"><span><span class="nom">Pieds présents</span><span class="sous">écartements du domaine 1 × 1 m · 10 000 / ha × 0,55 ha − 190 manquants</span></span><span class="val num">5 310</span></div>
+              <div class="ligne"><span><span class="nom">Poids moyen, Pinot noir</span><span class="sous">réglage · recalé sur 2025</span></span><span class="val num">118 g</span></div>
+              <div class="ligne"><span class="nom">Récolte prévue</span><span class="val"><span class="chiffre num">23 hL</span></span></div>
+            </div>
+            <div style="margin-top:12px"><button class="bouton plein" type="button">Enregistrer le comptage</button></div>
+          </div>
+          <div class="tel-dock"><span>Vigne</span><span>Journal</span><span>Tracteur</span><span class="on">Cave</span><span>Plus</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ 5. REGISTRE 2027 ═══════════════ -->
+  <section class="ecart" id="registre">
+    <div class="ecart-tete">
+      <h2>5 · Registre 2027 — le contrôle avant le contrôleur, et l’IFT réel</h2>
+      <p class="ou">Où dans l’appli : <b>Pilotage › Conformité</b>, qui existe ; l’export CSV de <b>Phyto</b> est déjà au format de l’annexe II.</p>
+      <p class="pourquoi">Au 1ᵉʳ janvier 2027, le registre doit être électronique et complet ; un contrôleur peut l’exiger sous dix jours ouvrables. L’appli l’est presque. Cet écran dit, ligne par ligne, ce qui manque encore avant d’exporter — et remplace « des passages » par un vrai IFT, celui que demandent HVE et les comparaisons régionales.</p>
+    </div>
+    <div class="ecrans pc-seul">
+      <div>
+        <p class="legende-ecran">Ordinateur — Pilotage › Conformité › Registre</p>
+        <div class="pc">
+          <div class="pc-barre"><b>Pilotage</b> › Conformité <span style="margin-left:auto">Registre · Cuivre · IFT · DRE et DAR · Documents</span></div>
+          <div class="pc-corps">
+            <div class="deux">
+              <div class="carte">
+                <h3>Le registre, exercice 2026</h3>
+                <div class="cadre-ligne">38 traitements · 164 lignes au format de l’annexe II · vérifié avant export</div>
+                <div class="verdict">Prêt pour 2027, à 5 lignes près</div>
+                <div class="verif"><span class="coche ok">✓</span><div><div class="t">SIRET, produit, numéro d’AMM à 7 chiffres</div><div class="s">164 lignes complètes</div></div><span class="etiq ok">ok</span></div>
+                <div class="verif"><span class="coche ok">✓</span><div><div class="t">Date, dose et unité, culture (VITVI), bio</div><div class="s">164 lignes</div></div><span class="etiq ok">ok</span></div>
+                <div class="verif"><span class="coche ok">✓</span><div><div class="t">Localisation GPS de chaque parcelle</div><div class="s">le point représentatif est lu dans le contour</div></div><span class="etiq ok">ok</span></div>
+                <div class="verif"><span class="coche att">3</span><div><div class="t">Stade BBCH</div><div class="s">3 lignes sans stade (traitements du 4 avril). Avec l’écran 1, le stade de la parcelle se propose tout seul.</div></div><span class="etiq att">à compléter</span></div>
+                <div class="verif"><span class="coche att">2</span><div><div class="t">Surface traitée</div><div class="s">2 traitements sur quelques rangs sont déclarés en surface entière (Les Cognées, 12 et 19 juin). Saisir la part traitée.</div></div><span class="etiq att">à corriger</span></div>
+                <div class="verif"><span class="coche ok">✓</span><div><div class="t">Horaires de début et de fin</div><div class="s">renseignés sur les 9 traitements en floraison, dans le créneau du soir</div></div><span class="etiq ok">ok</span></div>
+                <div class="verif"><span class="coche ok">—</span><div><div class="t">Rentrée anticipée</div><div class="s">aucune déclarée cette année</div></div><span class="etiq">rien à dire</span></div>
+                <div class="verif"><span class="coche ok">✓</span><div><div class="t">Cible et mode d’application</div><div class="s">facultatifs au texte · préremplis depuis le catalogue, modifiables</div></div><span class="etiq ok">ok</span></div>
+                <div style="margin-top:12px;display:flex;gap:10px"><button class="bouton plein" type="button" style="width:auto">Exporter le registre 2026</button><button class="bouton ghost" type="button" style="width:auto">Voir les 5 lignes</button></div>
+                <p class="note" style="margin-top:10px">Les conversions d’un exercice se font avant le 31 janvier de l’année suivante ; dès 2030, sous 30 jours.</p>
+              </div>
+              <div>
+                <div class="carte">
+                  <h3>IFT 2026</h3>
+                  <div class="cadre-ligne">dose appliquée ÷ dose homologuée × surface traitée ÷ surface du domaine · biocontrôle à part</div>
+                  <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end">
+                    <div><div class="chiffre num" style="font-size:var(--pt-xxl)">9,4</div><div class="note">IFT total</div></div>
+                    <div><div class="chiffre num">8,1</div><div class="note">hors biocontrôle</div></div>
+                    <div><div class="chiffre num">12,6</div><div class="note">référence régionale, réglage</div></div>
+                  </div>
+                  <div class="jauge" style="margin-top:10px" aria-label="IFT face à la référence"><i style="width:75%;background:var(--phyto)"></i></div>
+                  <p class="note" style="margin-top:6px">25 % sous la référence · 14 passages, dont 5 à dose réduite</p>
+                </div>
+                <div class="carte">
+                  <h3>Par parcelle</h3>
+                  <div class="cadre-ligne">les cinq IFT les plus hauts</div>
+                  <div class="ligne"><span class="nom">Les Crais</span><span class="val num">11,2</span></div>
+                  <div class="ligne"><span class="nom">Clos Prieur</span><span class="val num">10,8</span></div>
+                  <div class="ligne"><span class="nom">En Champs</span><span class="val num">10,1</span></div>
+                  <div class="ligne"><span class="nom">Aux Combottes</span><span class="val num">9,7</span></div>
+                  <div class="ligne"><span class="nom">Chazière</span><span class="val num">9,5</span></div>
+                  <p class="note" style="margin-top:8px">Les trois premières sont celles où l’oïdium a été signalé (écran 2) : un passage de plus, à dose pleine.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Maquette hors dépôt, v1 du 25 octobre 2026. Les noms de parcelles et tous les chiffres sont des exemples ; les formules et les textes réglementaires sont dans le rapport. Ce qui est dessiné ici n’existe pas dans l’appli, sauf la tuile « Traiter ? » et la protection restante, qui existent et que l’écran 3 complète.
+  </footer>
+</main>
+
+<script>
+function basculer(){
+  var r=document.documentElement, b=document.getElementById('theme');
+  var sombreSysteme=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var actuel=r.getAttribute('data-theme')||(sombreSysteme?'dark':'light');
+  var suivant=actuel==='dark'?'light':'dark';
+  r.setAttribute('data-theme',suivant);
+  b.textContent=suivant==='dark'?'Clair':'Sombre';
+}
+(function(){ var b=document.getElementById('theme'); if(window.matchMedia('(prefers-color-scheme: dark)').matches) b.textContent='Clair'; })();
+</script>
+</body>
+</html>

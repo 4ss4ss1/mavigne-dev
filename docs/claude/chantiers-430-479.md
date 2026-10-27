@@ -905,3 +905,15 @@ UX-0 mesurait chaque cible par `getBoundingClientRect()` : la boîte du dessin. 
 ### 467f. Ce qui reste ouvert
 - Le premier passage en CI de la mesure corrigée (un autre Chromium). **À confirmer.**
 - **Décidé par Nico le 26/10 (« ok »)** : la décision du 26/09 tient pour les puces, les bulles « i » et la roue ; LISIBLE-1 ajoute une zone de 44 px aux boutons « discrets » et secondaires (dessin inchangé) et passe `.mvbtn-option` à 44 px de large ; les onglets attendent TETE-3.
+
+## 468. ★★ MAQ-1 — LES MAQUETTES DU PLAN ENTRENT DANS LE DÉPÔT (27/10 — `docs/maquettes/` (neuf : trois maquettes HTML, le plan, deux audits, LISEZMOI) · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `scripts/harnais-claude-md.mjs` · `.mv-base` · `lots/MAQ-1.json` · aucun bump, base `5623d3b`)
+
+### 468a. D’où ça vient
+Nico, le 27/10, refusant de reprendre dans une nouvelle conversation : « à chaque fois que je recommence une nouvelle conversation, les maquettes ne sont pas respectées ». Les maquettes du plan (25-26/10) vivaient hors dépôt, dans les fichiers d’une conversation : une session neuve ne les avait pas.
+
+### 468b. Ce qui change
+`docs/maquettes/` : `maquette-niveau-au-dessus-v1.html`, `maquette-ux-v1.html`, `maquette-ux-v2.html`, `plan-mise-en-place-2026-10-25.md`, `audit-ux-2026-10-25.md`, `audit-niveau-au-dessus-2026-10-25.md`, et un LISEZMOI : **un lot qui touche un écran dessiné l’ouvre et s’y compare avant d’être livré** ; les corrections faites depuis y sont dites (zone d’appui, §467 ; décision du 26/09, §176d). §28 le rappelle.
+
+### 468c. Ce qui reste ouvert
+- `wn-coupe1-en-cours.patch` (hors dépôt) : la coupe de WHATS_NEW est écrite et ses onze lecteurs nommés suivent ; la chaîne a trouvé d’autres harnais qui vérifient leur annonce dans `utils.js` sans nommer WHATS_NEW (`revient`, `vol1`, `asm1`, `creux`, au moins) — à finir, section §469.
+- `lisible1-en-attente.patch` (hors dépôt) : après la coupe — APP 10.22, SW 11.03, §470.

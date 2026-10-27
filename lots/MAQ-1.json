@@ -1,0 +1,23 @@
+{
+  "lot": "MAQ-1",
+  "section": "§468",
+  "base": "5623d3b233cb2f3c84431fb09356013a8e610e93",
+  "inclut": [],
+  "date": "2026-10-27",
+  "tutos": null,
+  "fichiers": {
+    ".mv-base": "bdf1fc2b3de08b9cd134c5e65cf42fd70153bdb8890a7fe167d2ea3f38abc4aa",
+    "CLAUDE.md": "5e68e48bfa22c26c62bd829b6cdd6e7be82ef65bdabbbbb806281f74e3f3e84c",
+    "docs/claude/INDEX.md": "1b44df4845ef979e167f87579910ef30c78423e13377c0b5ad9d857c3e77f120",
+    "docs/claude/chantiers-430-479.md": "fac0dfbcf8377f552cc74fd450210ff84cc1cc5d497890c23308ec34c1258686",
+    "docs/claude/journal.md": "ca77b2109936af1111409b50c52c6f462a7732b8a1bf5ae8f8fc903dcac4d1b1",
+    "scripts/harnais-claude-md.mjs": "d45e73353fb6052695ba2116ead4552b0b9c63b87306573c042c79bc8d447590",
+    "docs/maquettes/LISEZMOI.md": "d2fe49b6bcd8197f336afd9576f02f47b1728efbf1f82a8cf485009c260a688f",
+    "docs/maquettes/audit-niveau-au-dessus-2026-10-25.md": "771da84978fb4f9a8b5a40a0064cc347930a0ae541eb28189e71bc0e717f1df9",
+    "docs/maquettes/audit-ux-2026-10-25.md": "9712e0ede56881203eae5c23b8be2cd01e81325d8569c1ad77157a81977f5a6d",
+    "docs/maquettes/maquette-niveau-au-dessus-v1.html": "02b1e8e59a204c7dee93935167b1b2135b9b0ac1fe3e81f973dfeda834e737e1",
+    "docs/maquettes/maquette-ux-v1.html": "2738272a7abeb981afe5afca48874bc237b3d20ba3bd3cc282bed981783f812e",
+    "docs/maquettes/maquette-ux-v2.html": "8e795da1fdf55a0e7b35ee277391220f68ab295646498597c90f7be2129281f0",
+    "docs/maquettes/plan-mise-en-place-2026-10-25.md": "9eadd50e5a363d7fc86237e5329449b1ee531e291aa01ddf9514f374b1b866fa"
+  }
+}

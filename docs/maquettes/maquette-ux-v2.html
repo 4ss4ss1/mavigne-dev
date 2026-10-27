@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ma Vigne — maquette expérience d’usage v2, module par module</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --font-ui:Outfit,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-titre:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --bg-app:#F0EEE9;--bg-card:#FFFFFF;--bg-doux:#F7F5F1;
+  --texte:#1B1A18;--texte-med:#55534E;--texte-doux:#686660;
+  --ligne:#E7E6E2;--ligne-forte:#CDCAC2;--survol:rgba(28,26,22,.055);
+  --vert:#1E3A12;--vert-med:#3D6B27;--vert-clair:#6BA34A;--vert-pale:#EAF3E2;
+  --or:#C2A14D;--or-pale:#FAF3E0;--acier:#2C3E50;--acier-pale:#ECF0F4;--phyto:#5B2D8E;--phyto-pale:#F0EAF8;
+  --bleu:#1A4A7A;--bleu-pale:#E8F0FA;--rouge:#A0291E;--rouge-pale:#FAEAE8;--orange:#B85A1A;--orange-pale:#FBF0E6;
+  --accent:#7A2850;--accent-texte:#7A2850;--accent-doux:rgba(122,40,80,.11);
+  --ok:#237A47;--ok-doux:rgba(35,122,71,.15);--attention:#A15C00;--attention-doux:rgba(161,92,0,.15);
+  --inverse:#1F1E1B;--sur-inverse:#F5F4F1;--cadre:#1F1E1B;
+  --shadow-sm:0 1px 2px rgba(20,18,14,.05),0 1px 3px rgba(20,18,14,.04);
+  --shadow-md:0 6px 16px -4px rgba(20,18,14,.12),0 2px 4px -2px rgba(20,18,14,.06);
+  --r-sm:6px;--r-md:8px;--r-lg:12px;--r-full:999px;
+  --pt-xxl:32px;--pt-xl:28px;--pt-lg:24px;--pt-md:20px;--pt-sm:16px;--pt-base:14px;--pt-txt:13px;--pt-micro:12px;--pt-nano:11px;
+}
+:root[data-theme="dark"],:root[data-theme="dark"] body{color-scheme:dark}
+:root[data-theme="dark"]{
+  --bg-app:#0D0D0C;--bg-card:#151514;--bg-doux:#1A1A19;--texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;
+  --ligne:#272624;--ligne-forte:#3E3D39;--survol:rgba(255,248,235,.055);
+  --vert:#5A9E3A;--vert-med:#6AB845;--vert-clair:#8DC868;--vert-pale:rgba(90,158,58,0.22);--or:#D8BC72;--or-pale:rgba(216,188,114,0.20);
+  --acier:#4A80C4;--acier-pale:rgba(74,128,196,0.22);--phyto:#8B5CC8;--phyto-pale:rgba(139,92,200,0.22);--bleu:#4A80C4;--bleu-pale:rgba(74,128,196,0.22);
+  --rouge:#E05545;--rouge-pale:rgba(224,85,69,0.22);--orange:#D4721A;--orange-pale:rgba(212,114,26,0.20);
+  --accent:#8A3560;--accent-texte:#E59ABD;--accent-doux:rgba(229,154,189,.15);--ok:#76C995;--ok-doux:rgba(118,201,149,.17);--attention:#E9AA4A;--attention-doux:rgba(233,170,74,.17);
+  --inverse:#EDECE9;--sur-inverse:#151514;--cadre:#2B2A27;--shadow-sm:0 1px 2px rgba(0,0,0,.40);--shadow-md:0 8px 20px -6px rgba(0,0,0,.60);
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg-app:#0D0D0C;--bg-card:#151514;--bg-doux:#1A1A19;--texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;
+  --ligne:#272624;--ligne-forte:#3E3D39;--survol:rgba(255,248,235,.055);
+  --vert:#5A9E3A;--vert-med:#6AB845;--vert-clair:#8DC868;--vert-pale:rgba(90,158,58,0.22);--or:#D8BC72;--or-pale:rgba(216,188,114,0.20);
+  --acier:#4A80C4;--acier-pale:rgba(74,128,196,0.22);--phyto:#8B5CC8;--phyto-pale:rgba(139,92,200,0.22);--bleu:#4A80C4;--bleu-pale:rgba(74,128,196,0.22);
+  --rouge:#E05545;--rouge-pale:rgba(224,85,69,0.22);--orange:#D4721A;--orange-pale:rgba(212,114,26,0.20);
+  --accent:#8A3560;--accent-texte:#E59ABD;--accent-doux:rgba(229,154,189,.15);--ok:#76C995;--ok-doux:rgba(118,201,149,.17);--attention:#E9AA4A;--attention-doux:rgba(233,170,74,.17);
+  --inverse:#EDECE9;--sur-inverse:#151514;--cadre:#2B2A27;--shadow-sm:0 1px 2px rgba(0,0,0,.40);--shadow-md:0 8px 20px -6px rgba(0,0,0,.60);
+}}
+
+*{box-sizing:border-box}
+html{scroll-padding-top:72px}
+body{margin:0;background:var(--bg-app);color:var(--texte);font-family:var(--font-ui);font-size:var(--pt-txt);line-height:1.5}
+h1,h2,h3{font-family:var(--font-titre);font-weight:600;letter-spacing:-0.02em;margin:0;line-height:1.15}
+p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+.entete{position:sticky;top:0;z-index:10;background:var(--bg-card);border-bottom:1px solid var(--ligne);padding:12px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.entete h1{font-size:var(--pt-lg)}
+.entete .base{color:var(--texte-med);font-size:var(--pt-micro)}
+.entete nav{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.entete nav a{color:var(--texte);text-decoration:none;border:1px solid var(--ligne-forte);border-radius:var(--r-full);padding:4px 10px;font-size:var(--pt-micro)}
+.entete button{font:inherit;font-size:var(--pt-micro);border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);border-radius:var(--r-full);padding:4px 10px;cursor:pointer}
+.entete button:focus-visible,.entete nav a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.page{max-width:1240px;margin:0 auto;padding:28px 20px 80px;overflow-x:clip}
+.intro{max-width:72ch;margin-bottom:22px;color:var(--texte-med)}
+.intro b{color:var(--texte)}
+.mesures{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:36px}
+.mesure{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:14px 16px}
+.mesure .k{font-size:var(--pt-xxl);font-weight:600;line-height:1.05}
+.mesure .k small{font-size:var(--pt-base);font-weight:400;color:var(--texte-med);margin-left:4px}
+.mesure .l{color:var(--texte-med);font-size:var(--pt-micro);margin-top:4px}
+.mesure .b{color:var(--texte);font-size:var(--pt-micro);margin-top:6px}
+
+section.ecart{margin:0 0 56px;padding-top:12px;border-top:1px solid var(--ligne-forte)}
+.ecart-tete{display:grid;gap:6px;margin-bottom:18px}
+.ecart-tete h2{font-size:var(--pt-xl)}
+.ecart-tete .ou{color:var(--texte-med)}
+.ecart-tete .ou b{color:var(--texte);font-weight:600}
+.ecart-tete .pourquoi{max-width:78ch}
+.ecrans{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;align-items:start}
+@media (min-width:1000px){.ecrans.deux-tel{grid-template-columns:410px 410px;justify-content:start}.ecrans.pc-tel{grid-template-columns:minmax(0,1fr) 410px}.ecrans.trois-tel{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.legende-ecran{color:var(--texte-doux);font-size:var(--pt-micro);margin:0 0 6px}
+
+.pc{background:var(--bg-app);border:1px solid var(--ligne-forte);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-md)}
+.pc-corps{padding:0;overflow-x:auto}
+.tel{width:390px;max-width:100%;min-width:0;margin:0 auto;background:var(--bg-app);border:9px solid var(--cadre);border-radius:38px;overflow:hidden;box-shadow:var(--shadow-md);position:relative}
+.tel-barre{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 6px;font-size:var(--pt-micro);color:var(--texte-med)}
+.tel-corps{padding:0 12px 14px;min-height:520px}
+.tel-dock{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--ligne);background:var(--bg-card);padding:8px 6px 10px;font-size:10px;color:var(--texte-doux);text-align:center}
+.tel-dock span.on{color:var(--accent-texte);font-weight:600}
+.tel-dock span i{display:block;width:40px;height:30px;margin:0 auto 3px;border-radius:10px;background:var(--bg-doux);border:1px solid var(--ligne)}
+.tel-dock span.on i{background:var(--accent);border-color:var(--accent)}
+
+/* pièces */
+.carte{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:14px 16px;box-shadow:var(--shadow-sm)}
+.carte + .carte{margin-top:10px}
+.carte h3{font-size:var(--pt-md);margin-bottom:4px}
+.cadre-ligne{color:var(--texte-doux);font-size:var(--pt-micro);margin-bottom:8px}
+.etiq{display:inline-block;font-size:var(--pt-nano);font-weight:600;letter-spacing:.04em;padding:2px 8px;border-radius:var(--r-full);background:var(--bg-doux);color:var(--texte-med);border:1px solid var(--ligne)}
+.etiq.ok{background:var(--ok-doux);color:var(--ok);border-color:transparent}
+.etiq.att{background:var(--attention-doux);color:var(--attention);border-color:transparent}
+.etiq.danger{background:var(--rouge-pale);color:var(--rouge);border-color:transparent}
+.ligne{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--ligne);font-size:var(--pt-base)}
+.ligne:first-of-type{border-top:0}
+.ligne .nom{font-weight:600}
+.ligne .sous{color:var(--texte-med);font-size:var(--pt-micro);font-weight:400;display:block}
+.note{color:var(--texte-doux);font-size:var(--pt-micro)}
+.bouton{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:inherit;font-size:var(--pt-base);font-weight:600;border-radius:var(--r-md);padding:12px 16px;border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);min-height:44px}
+.bouton.plein{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:var(--pt-txt);padding:8px 12px;border-radius:var(--r-full);border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);min-height:36px;display:inline-flex;align-items:center}
+.chip.on{background:var(--vert);border-color:var(--vert);color:#fff;font-weight:600}
+
+/* en-têtes : l'ancien, empilé, et le nouveau */
+.bande{background:var(--bg-card);border-bottom:1px solid var(--ligne);padding:8px 12px;display:flex;align-items:center;gap:10px}
+.bande .t{font-weight:600;font-size:var(--pt-sm)}
+.bande .s{color:var(--texte-med);font-size:var(--pt-nano);display:block;line-height:1.2}
+.ico{width:32px;height:32px;border-radius:50%;border:1px solid var(--ligne);display:inline-block;background:var(--bg-doux)}
+.ico.g{width:44px;height:44px;border-radius:12px}
+.bande2{display:flex;gap:8px;padding:8px 12px;background:var(--bg-app)}
+.pill{font-size:var(--pt-nano);padding:4px 10px;border-radius:var(--r-full);background:var(--bg-card);border:1px solid var(--ligne)}
+.onglets{display:flex;gap:16px;padding:6px 12px 0;font-size:var(--pt-base);color:var(--texte-med)}
+.onglets b{color:var(--texte);border-bottom:2px solid var(--accent);padding-bottom:6px}
+.segment{display:flex;gap:4px;background:var(--bg-doux);border:1px solid var(--ligne);border-radius:var(--r-full);padding:3px;margin:8px 12px 0}
+.segment span{flex:1;text-align:center;padding:7px 6px;border-radius:var(--r-full);font-size:var(--pt-txt);color:var(--texte-med);min-height:36px;display:flex;align-items:center;justify-content:center}
+.segment span.on{background:var(--bg-card);color:var(--texte);font-weight:600;box-shadow:var(--shadow-sm)}
+.mesure-chrome{position:absolute;right:14px;width:0;border-right:2px dashed var(--rouge);z-index:3}
+.mesure-chrome::after{content:attr(data-h);position:absolute;right:6px;top:100%;transform:translateY(-50%);white-space:nowrap;font-size:var(--pt-nano);font-weight:600;color:var(--rouge);background:var(--bg-card);padding:1px 6px;border-radius:4px;border:1px solid var(--rouge)}
+.mesure-chrome.ok{border-color:var(--ok)}.mesure-chrome.ok::after{color:var(--ok);border-color:var(--ok)}
+
+/* journal, contenu d'abord */
+.entree{background:var(--bg-card);border:1px solid var(--ligne);border-left:4px solid var(--vert-clair);border-radius:var(--r-md);padding:10px 12px;display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;min-height:56px;margin-top:8px}
+.entree .av{width:28px;height:28px;border-radius:50%;background:var(--vert-med);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.entree .t{font-weight:600;font-size:var(--pt-base)}
+.entree .s{color:var(--texte-med);font-size:var(--pt-micro)}
+.jour{display:flex;align-items:center;gap:8px;color:var(--texte-doux);font-size:var(--pt-micro);margin-top:12px}
+.jour::after{content:"";flex:1;height:1px;background:var(--ligne)}
+.barre-basse{position:absolute;left:0;right:0;bottom:70px;display:flex;gap:8px;padding:8px 12px;background:linear-gradient(to bottom,transparent,var(--bg-app) 40%)}
+.barre-basse .champ{flex:1;min-height:44px;border-radius:var(--r-full);background:var(--bg-card);border:1px solid var(--ligne-forte);display:flex;align-items:center;padding:0 14px;color:var(--texte-doux);box-shadow:var(--shadow-sm)}
+.barre-basse .filtrer{min-height:44px;border-radius:var(--r-full);background:var(--bg-card);border:1px solid var(--ligne-forte);display:flex;align-items:center;gap:6px;padding:0 14px;font-weight:600;box-shadow:var(--shadow-sm)}
+.barre-basse .filtrer b{background:var(--accent);color:#fff;border-radius:var(--r-full);padding:0 7px;font-size:var(--pt-nano);min-width:20px;text-align:center}
+.fab{position:absolute;right:14px;bottom:128px;width:56px;height:56px;border-radius:18px;background:var(--accent);color:#fff;font-size:30px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-md)}
+.feuille{position:absolute;left:0;right:0;bottom:70px;background:var(--bg-card);border-radius:20px 20px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.18);padding:10px 14px 14px}
+.feuille .poignee{width:40px;height:4px;border-radius:2px;background:var(--ligne-forte);margin:0 auto 10px}
+.feuille h3{font-size:var(--pt-md)}
+.feuille .groupe{margin-top:10px}
+.feuille .groupe .l{font-size:var(--pt-micro);color:var(--texte-med);margin-bottom:6px}
+.voile{position:absolute;inset:0;background:rgba(0,0,0,.25)}
+
+/* cibles */
+.av-ex{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.hit{position:relative;display:inline-flex;align-items:center;justify-content:center}
+.hit::before{content:"";position:absolute;inset:0;border:1px dashed var(--rouge);border-radius:8px;pointer-events:none}
+.hit.ok::before{border-color:var(--ok)}
+.b-discret{font-size:var(--pt-micro);padding:0 10px;border-radius:6px;border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte-med);font-weight:500;display:inline-flex;align-items:center}
+.i-bulle{border-radius:50%;border:1px solid var(--ligne-forte);background:var(--bg-card);display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-titre);font-style:italic;font-weight:700;color:var(--texte-med)}
+.avant-apres{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.avant-apres > div{background:var(--bg-doux);border:1px solid var(--ligne);border-radius:var(--r-md);padding:12px}
+.avant-apres .l{font-size:var(--pt-nano);font-weight:600;letter-spacing:.04em;color:var(--texte-doux);margin-bottom:8px}
+.cote{font-size:var(--pt-nano);color:var(--texte-doux)}
+
+/* toast */
+.toast{position:absolute;left:12px;right:12px;bottom:84px;background:var(--inverse);color:var(--sur-inverse);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-md);font-size:var(--pt-base)}
+.toast b{color:#F1C2D6;font-weight:600;margin-left:auto;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.08);min-height:40px;display:inline-flex;align-items:center}
+.toast .temps{height:3px;position:absolute;left:14px;right:14px;bottom:0;background:rgba(255,255,255,.18);border-radius:2px}
+.toast .temps i{display:block;height:100%;width:70%;background:#F1C2D6;border-radius:2px}
+table{width:100%;border-collapse:collapse;font-size:var(--pt-txt)}
+th{text-align:left;font-size:var(--pt-nano);font-weight:600;color:var(--texte-med);letter-spacing:.03em;padding:6px 8px;border-bottom:1px solid var(--ligne-forte)}
+td{padding:8px;border-bottom:1px solid var(--ligne);vertical-align:top}
+
+/* PC liste-détail */
+.pc-app{display:grid;grid-template-columns:176px 220px minmax(0,1fr) 320px;min-height:620px;min-width:1180px}
+.rail{background:var(--bg-card);border-right:1px solid var(--ligne);padding:12px}
+.rail .logo{font-family:var(--font-titre);font-size:var(--pt-md);font-weight:600;margin-bottom:10px}
+.rail .cherche{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--ligne-forte);border-radius:8px;padding:6px 8px;font-size:var(--pt-micro);color:var(--texte-doux);margin-bottom:12px}
+.rail .cherche kbd{font:inherit;font-size:10px;border:1px solid var(--ligne-forte);border-radius:4px;padding:0 4px}
+.rail .grp{font-size:var(--pt-nano);color:var(--texte-doux);margin:10px 0 4px}
+.rail .it{padding:7px 8px;border-radius:8px;font-size:var(--pt-txt);display:flex;align-items:center;gap:8px;min-height:36px}
+.rail .it.on{background:var(--accent-doux);color:var(--accent-texte);font-weight:600}
+.filtres{background:var(--bg-app);border-right:1px solid var(--ligne);padding:14px 10px}
+.filtres h4{margin:0 0 6px;font-size:var(--pt-nano);font-weight:600;letter-spacing:.04em;color:var(--texte-doux)}
+.filtres .opt{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:8px;font-size:var(--pt-txt);min-height:36px}
+.filtres .opt.on{background:var(--bg-card);border:1px solid var(--ligne);font-weight:600}
+.filtres .opt .n{color:var(--texte-doux);font-size:var(--pt-nano)}
+.liste{background:var(--bg-app);border-right:1px solid var(--ligne)}
+.liste .tete{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg-card);border-bottom:1px solid var(--ligne)}
+.liste .tete .t{font-weight:600;font-size:var(--pt-sm)}
+.liste .tete .n{color:var(--texte-med);font-size:var(--pt-micro)}
+.liste .tete .plus{margin-left:auto;background:var(--accent);color:#fff;border-radius:8px;padding:8px 12px;font-weight:600;font-size:var(--pt-txt)}
+.lig{display:grid;grid-template-columns:54px 22px minmax(0,1fr) 78px 50px;gap:8px;align-items:center;padding:0 12px;height:48px;white-space:nowrap;border-bottom:1px solid var(--ligne);font-size:var(--pt-txt);background:var(--bg-card)}
+.lig.sel{background:var(--accent-doux);box-shadow:inset 3px 0 0 var(--accent)}
+.lig .d{color:var(--texte-doux);font-size:var(--pt-micro)}
+.lig .a{width:22px;height:22px;border-radius:50%;background:var(--vert-med);color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.lig .p{color:var(--texte-med)}
+.lig > span{overflow:hidden;text-overflow:ellipsis}
+.lig small{display:block;font-size:var(--pt-nano);color:var(--texte-doux);line-height:1.2}
+.lig .h{color:var(--texte-doux);font-size:var(--pt-micro);text-align:right}
+.detail{background:var(--bg-card);padding:16px}
+.detail h3{font-size:var(--pt-lg);margin-bottom:2px}
+.kbd{display:inline-block;font-size:10px;border:1px solid var(--ligne-forte);border-radius:4px;padding:0 5px;color:var(--texte-med);background:var(--bg-doux);margin-right:4px}
+.raccourcis{display:flex;flex-wrap:wrap;gap:10px;padding:8px 14px;background:var(--bg-doux);border-top:1px solid var(--ligne);font-size:var(--pt-nano);color:var(--texte-doux)}
+
+footer{color:var(--texte-doux);font-size:var(--pt-micro);border-top:1px solid var(--ligne-forte);padding-top:14px}
+@media (max-width:700px){.avant-apres{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<style>
+/* pièces propres à la v2 */
+.verdict{font-family:var(--font-titre);font-weight:600;line-height:1.15;letter-spacing:-0.02em;margin:2px 0 6px}
+.kpi-ligne{display:flex;gap:14px;flex-wrap:wrap;color:var(--texte-med);font-size:var(--pt-micro);padding:6px 2px 2px}
+.kpi-ligne b{color:var(--texte);font-size:var(--pt-base);font-weight:600;margin-right:3px}
+.session{background:var(--bg-card);border:1px solid var(--ligne);border-left:4px solid var(--accent);border-radius:var(--r-lg);padding:14px;box-shadow:var(--shadow-sm);margin-top:8px}
+.session .t{font-family:var(--font-titre);font-size:var(--pt-lg);font-weight:600;line-height:1.1}
+.session .pct{font-size:var(--pt-xxl);font-weight:600;line-height:1}
+.jauge{height:10px;background:var(--bg-doux);border-radius:var(--r-full);overflow:hidden;border:1px solid var(--ligne)}
+.jauge i{display:block;height:100%;background:var(--vert-med)}
+.deux-btn{display:flex;gap:8px;margin-top:12px}
+.deux-btn .bouton{flex:1}
+.sommaire{display:flex;gap:6px;overflow-x:auto;padding:8px 12px 6px;scrollbar-width:none;background:var(--bg-app);position:sticky;top:0}
+.sommaire::-webkit-scrollbar{display:none}
+.sommaire span{flex:none;font-size:var(--pt-txt);padding:8px 12px;border-radius:var(--r-full);border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte-med);min-height:36px;display:inline-flex;align-items:center;gap:6px}
+.sommaire span.on{background:var(--inverse);color:var(--sur-inverse);border-color:var(--inverse);font-weight:600}
+.sommaire span b{background:var(--rouge);color:#fff;border-radius:var(--r-full);padding:0 6px;font-size:10px;min-width:18px;text-align:center}
+.contenant{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--ligne)}
+.contenant:first-of-type{border-top:0}
+.contenant .n{font-weight:600;font-size:var(--pt-base)}
+.contenant .s{color:var(--texte-med);font-size:var(--pt-micro)}
+.contenant .s.att{color:var(--attention)}
+.contenant .s.danger{color:var(--rouge)}
+.gestes{display:flex;gap:6px}
+.gestes .bouton{min-height:44px;padding:0 14px;font-size:var(--pt-txt)}
+.registre{background:var(--bg-card);border:1px solid var(--ligne);border-left:4px solid var(--phyto);border-radius:var(--r-md);padding:10px 12px;margin-top:8px}
+.registre .l1{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.registre .l1 b{font-size:var(--pt-base)}
+.registre .l1 .d{color:var(--texte-med);font-size:var(--pt-micro);white-space:nowrap}
+.registre .l2{color:var(--texte-med);font-size:var(--pt-micro);margin-top:2px}
+.registre .l3{margin-top:6px;font-size:var(--pt-micro);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pyr{display:grid;grid-template-columns:64px 1fr 92px;gap:8px;align-items:center;font-size:var(--pt-micro);padding:4px 0}
+.pyr .b{height:14px;border-radius:3px;background:var(--terre);position:relative}
+.pyr .b i{position:absolute;left:0;top:0;bottom:0;background:var(--vert-med);border-radius:3px 0 0 3px}
+.pyr .y{font-weight:600;font-size:var(--pt-txt)}
+.pyr .r{text-align:right;color:var(--texte-med)}
+.grille{display:grid;grid-template-columns:92px repeat(7,1fr);gap:3px;font-size:var(--pt-micro)}
+.grille .h{text-align:center;color:var(--texte-doux);padding:4px 0;font-size:var(--pt-nano)}
+.grille .h b{display:block;font-size:var(--pt-txt);color:var(--texte)}
+.grille .nom{font-size:var(--pt-micro);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:4px}
+.grille .nom small{display:block;font-weight:400;color:var(--texte-doux);font-size:var(--pt-nano)}
+.grille .c{height:44px;border-radius:6px;background:var(--vert-pale);display:flex;align-items:center;justify-content:center;color:var(--vert);font-weight:600;font-size:var(--pt-txt)}
+.grille .c.we{background:var(--bg-doux);color:var(--texte-doux);font-weight:400}
+.grille .c.att{background:var(--attention-doux);color:var(--attention)}
+.grille .c.vide{background:transparent;border:1px dashed var(--ligne-forte)}
+.menu-feuille .opt{display:flex;align-items:center;gap:12px;padding:12px 4px;border-top:1px solid var(--ligne);font-size:var(--pt-base);min-height:48px}
+.menu-feuille .opt:first-of-type{border-top:0}
+.menu-feuille .opt .ico{width:32px;height:32px;border-radius:8px}
+.regl{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--ligne);min-height:48px;font-size:var(--pt-base)}
+.regl:first-of-type{border-top:0}
+.regl .ico{width:36px;height:36px;border-radius:10px;flex:none}
+.regl .t{font-weight:600}
+.regl .s{display:block;color:var(--texte-med);font-size:var(--pt-micro);font-weight:400}
+.regl .v{margin-left:auto;color:var(--texte-med);font-size:var(--pt-txt);white-space:nowrap}
+.pc-deux{display:grid;grid-template-columns:150px minmax(0,1fr) minmax(0,1fr);min-height:560px;min-width:720px}
+.pc-trois{display:grid;grid-template-columns:200px 220px minmax(0,1fr) 340px;min-height:560px;min-width:1180px}
+.colonne{padding:16px;border-right:1px solid var(--ligne);background:var(--bg-app)}
+.colonne:last-child{border-right:0;background:var(--bg-card)}
+.colonne h4{margin:0 0 8px;font-family:var(--font-titre);font-size:var(--pt-md);font-weight:600}
+.rail-somm .it{display:flex;justify-content:space-between;align-items:center;padding:9px 10px;border-radius:8px;font-size:var(--pt-txt);min-height:40px}
+.rail-somm .it.on{background:var(--bg-card);border:1px solid var(--ligne);font-weight:600}
+.rail-somm .it b{background:var(--rouge);color:#fff;border-radius:var(--r-full);padding:0 7px;font-size:10px}
+</style>
+
+<header class="entete">
+  <div>
+    <h1>Ma Vigne — expérience d’usage, maquette v2 · module par module</h1>
+    <div class="base">Base <span class="num">b57e4fe</span> · APP <span class="num">10.13</span> · 25 octobre 2026 · suite de la v1 (en-tête, filtres, cibles, annuler, liste-détail)</div>
+  </div>
+  <nav aria-label="Les six modules">
+    <a href="#tracteur">Tracteur</a>
+    <a href="#phyto">Phyto</a>
+    <a href="#cave">Cave</a>
+    <a href="#reserve">Réserve</a>
+    <a href="#planning">Planning</a>
+    <a href="#reglages">Réglages</a>
+    <button type="button" id="theme" onclick="basculer()">Sombre</button>
+  </nav>
+</header>
+
+<main class="page">
+  <p class="intro">Un écran par module, avec les cinq patrons de la v1 appliqués (bande compacte de 104 px, filtres en barre basse, cibles à 44, Annuler, liste-détail sur PC) <b>plus</b> ce que chaque module a de particulier — tiré du relevé Playwright du 25/10 et des captures. Le style ne change pas.</p>
+
+  <!-- ═══ TRACTEUR ═══ -->
+  <section class="ecart" id="tracteur">
+    <div class="ecart-tete">
+      <h2>Tracteur — la session en cours en tête</h2>
+      <p class="ou">Mesuré : 22 cibles sur 30 sous 44 px ; la session en cours arrivait après quatre compteurs (deux à zéro) et deux rangées de chips de 28 px ; le « + » flottant recouvrait le crayon de la carte suivante.</p>
+      <p class="pourquoi">Le tractoriste ouvre le module pour une chose : dire où il en est. Sa session passe en tête, avec deux boutons de 44 px. Les compteurs tiennent sur une ligne, les zéros disparaissent. Les chips (conducteur, tâche) vont dans « Filtrer », en bas. Le « + » reste, mais la liste garde 90 px de marge sous elle : il ne recouvre plus rien.</p>
+    </div>
+    <div class="ecrans pc-tel">
+      <div>
+        <p class="legende-ecran">Ordinateur — Tracteur › Sessions : la session en cours à gauche, le parc et l’entretien à droite</p>
+        <div class="pc"><div class="pc-corps">
+          <div class="pc-deux">
+            <div class="rail">
+              <div class="logo">Ma Vigne</div>
+              <div class="cherche"><span>Rechercher</span><kbd>⌘K</kbd></div>
+              <div class="it">Pilotage</div><div class="grp">Terrain</div><div class="it">Vigne</div><div class="it on">Tracteur</div><div class="it">Phyto</div><div class="grp">Cave et réserve</div><div class="it">Cave</div><div class="it">Réserve</div><div class="grp">Organisation</div><div class="it">Planning</div>
+            </div>
+            <div class="colonne">
+              <h4>En cours</h4>
+              <div class="session" style="margin-top:0">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div><div class="t">Griffage</div><div class="note">Marie · New Holland T4.90F · démarré 8 h 05</div></div><div class="pct num">35<small style="font-size:var(--pt-base)"> %</small></div></div>
+                <div class="jauge" style="margin-top:10px"><i style="width:35%"></i></div>
+                <div class="note" style="margin-top:4px">2,46 ha sur 7,02 · Aux Murgers, La Combotte faites · Les Charmes en cours</div>
+                <div class="deux-btn"><span class="bouton plein">Enregistrer l’avancement</span><span class="bouton">Terminer</span></div>
+              </div>
+              <div class="kpi-ligne" style="margin-top:12px"><span><b>2</b>sessions</span><span><b>1</b>en cours</span><span><b>14 h 20</b>de moteur ce mois</span></div>
+              <h4 style="margin-top:16px">Sessions récentes</h4>
+              <div class="carte" style="padding:0 14px">
+                <div class="ligne"><span><span class="nom">Broyage · Les Perrières</span><span class="sous">Jean · hier · 1 h 50</span></span><span class="etiq ok">terminé</span></div>
+                <div class="ligne"><span><span class="nom">Buttage · Clos du Moulin</span><span class="sous">Paul · 22 oct. · 3 h 10</span></span><span class="etiq ok">terminé</span></div>
+                <div class="ligne"><span><span class="nom">Intercep · Vieilles Vignes</span><span class="sous">Marie · 21 oct. · 2 h 40</span></span><span class="etiq ok">terminé</span></div>
+              </div>
+            </div>
+            <div class="colonne">
+              <h4>Le parc</h4>
+              <div class="carte" style="padding:0 14px">
+                <div class="ligne"><span><span class="nom">New Holland T4.90F</span><span class="sous">1 248 h · vidange dans 52 h</span></span><span class="etiq">en service</span></div>
+                <div class="ligne"><span><span class="nom">Fendt 211 V</span><span class="sous">2 031 h · <span style="color:var(--attention)">révision dépassée de 18 h</span></span></span><span class="etiq att">entretien</span></div>
+                <div class="ligne"><span><span class="nom">Enjambeur Bobard</span><span class="sous">412 h</span></span><span class="etiq">en service</span></div>
+              </div>
+              <h4 style="margin-top:16px">GNR</h4>
+              <div class="carte" style="padding:0 14px">
+                <div class="ligne"><span><span class="nom">Cuve</span><span class="sous">dernier appoint 18 oct. · 600 L</span></span><span class="num">1 240 L</span></div>
+                <div class="ligne"><span><span class="nom">Ce mois</span><span class="sous">14 h 20 de moteur</span></span><span class="num">186 L · 1,12 €/L</span></div>
+              </div>
+              <p class="note" style="margin-top:10px">Mêmes données qu’aujourd’hui, rangées par ordre d’urgence : ce qui tourne, ce qui doit passer à l’atelier, ce qui se vide.</p>
+            </div>
+          </div>
+        </div></div>
+      </div>
+      <div>
+        <p class="legende-ecran">Téléphone — Tracteur › Sessions</p>
+        <div class="tel">
+          <div class="tel-barre"><span class="num">08:12</span><span>Gevrey · 9 °C</span></div>
+          <div class="bande" style="padding:6px 12px"><span class="ico"></span><div style="flex:1"><div class="t">Tracteur</div><span class="s">Parc · saison 2026 · 2 sessions</span></div><span class="ico g"></span></div>
+          <div class="segment"><span class="on">Sessions</span><span>Entretien</span></div>
+          <div class="tel-corps" style="min-height:560px;padding-bottom:150px">
+            <div class="session">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div><div class="t">Griffage</div><div class="note">Marie · T4.90F · démarré 8 h 05</div></div><div class="pct num">35<small style="font-size:var(--pt-base)"> %</small></div></div>
+              <div class="jauge" style="margin-top:10px"><i style="width:35%"></i></div>
+              <div class="note" style="margin-top:4px">2,46 ha sur 7,02</div>
+              <div class="deux-btn"><span class="bouton plein">Enregistrer l’avancement</span><span class="bouton" style="flex:.6">Terminer</span></div>
+            </div>
+            <div class="kpi-ligne"><span><b>2</b>sessions</span><span><b>1</b>en cours</span><span><b>14 h 20</b>moteur ce mois</span></div>
+            <div class="carte" style="padding:0 14px;margin-top:8px">
+              <div class="ligne"><span><span class="nom">Broyage · Les Perrières</span><span class="sous">Jean · hier · 1 h 50</span></span><span class="etiq ok">terminé</span></div>
+              <div class="ligne"><span><span class="nom">Buttage · Clos du Moulin</span><span class="sous">Paul · 22 oct. · 3 h 10</span></span><span class="etiq ok">terminé</span></div>
+              <div class="ligne"><span><span class="nom">Intercep · Vieilles Vignes</span><span class="sous">Marie · 21 oct. · 2 h 40</span></span><span class="etiq ok">terminé</span></div>
+            </div>
+            <p class="note" style="text-align:center;margin-top:10px">90 px de marge sous la liste : le « + » ne recouvre plus de crayon.</p>
+          </div>
+          <div class="fab" aria-label="Nouvelle session">+</div>
+          <div class="barre-basse"><div class="champ">Tâche, parcelle, conducteur…</div><div class="filtrer">Filtrer <b>1</b></div></div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span><i></i>Vigne</span><span class="on"><i></i>Tracteur</span><span><i></i>Phyto</span><span><i></i>Plus</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PHYTO ═══ -->
+  <section class="ecart" id="phyto">
+    <div class="ecart-tete">
+      <h2>Phyto — des dates qui se lisent, une ligne qui dit où en est le délai</h2>
+      <p class="ou">Mesuré : le module le plus propre côté cibles (6 sur 27) ; 15 textes à 10 px ; dates affichées en format machine « 2026-09-08 ».</p>
+      <p class="pourquoi">Le registre est une liste qu’on consulte dans les rangs pour une question : « je peux y retourner ? ». Chaque ligne le dit, en français, avec la date écrite comme on la dit. Sur PC, le liste-détail du Journal (v1) s’applique tel quel : filtres à gauche, lignes de 48 px, la fiche à droite.</p>
+    </div>
+    <div class="ecrans deux-tel">
+      <div>
+        <p class="legende-ecran">Téléphone — Phyto › Registre, proposé</p>
+        <div class="tel">
+          <div class="tel-barre"><span class="num">10:40</span><span>Gevrey · 17 °C</span></div>
+          <div class="bande" style="padding:6px 12px"><span class="ico"></span><div style="flex:1"><div class="t">Registre</div><span class="s">Phyto · 15 traitements · 2026</span></div><span class="ico g"></span></div>
+          <div class="segment"><span class="on">Registre</span><span>Catalogue</span><span>Fertilisation</span></div>
+          <div class="tel-corps" style="min-height:560px;padding-bottom:150px">
+            <div class="registre" style="border-left-color:var(--rouge)"><div class="l1"><b>Bouillie bordelaise RSR</b><span class="d">hier, 6 h 30</span></div><div class="l2">1,8 kg/ha · Clos du Moulin, Les Charmes · Jean</div><div class="l3"><span class="etiq danger">rentrée interdite</span><span class="note">jusqu’à aujourd’hui 6 h 30 · l’Accueil des ouvriers le dit aussi</span></div></div>
+            <div class="registre"><div class="l1"><b>Soufre mouillable</b><span class="d">8 sept. 2026</span></div><div class="l2">8 kg/ha · Les Charmes, La Combotte, Les Perrières + 1 · Paul</div><div class="l3"><span class="etiq ok">rentrée libre</span><span class="note">depuis le 9 sept. · DAR passé</span></div></div>
+            <div class="registre"><div class="l1"><b>Bouillie bordelaise RSR</b><span class="d">23 août 2026</span></div><div class="l2">1,5 kg/ha · Clos du Moulin, Vieilles Vignes, Champ de la Croix + 1 · Marie</div><div class="l3"><span class="etiq ok">rentrée libre</span><span class="note">cuivre : 1,1 kg Cu/ha · 2,9 sur 4 cette année</span></div></div>
+            <div class="registre"><div class="l1"><b>Vacciplant</b><span class="d">11 août 2026</span></div><div class="l2">0,75 L/ha · Aux Murgers, En Bertrange · Jean</div><div class="l3"><span class="etiq">biocontrôle</span><span class="note">sans délai</span></div></div>
+            <p class="note" style="text-align:center;margin:10px 60px 0 0">Du plus récent au plus ancien ; les tags à 12 px.</p>
+          </div>
+          <div class="fab" aria-label="Nouveau traitement" style="background:var(--phyto)">+</div>
+          <div class="barre-basse"><div class="champ">Produit, parcelle, opérateur…</div><div class="filtrer">Filtrer <b>0</b></div></div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span><i></i>Vigne</span><span><i></i>Tracteur</span><span class="on"><i></i>Phyto</span><span><i></i>Plus</span></div>
+        </div>
+      </div>
+      <div>
+        <p class="legende-ecran">Téléphone — l’assistant « nouveau traitement », l’étape 1 sur 3, inchangée dans sa forme</p>
+        <div class="tel">
+          <div class="tel-barre"><span class="num">10:41</span><span>Étape 1 sur 3</span></div>
+          <div class="bande" style="padding:6px 12px"><span class="note" style="color:var(--accent-texte);font-size:var(--pt-base)">‹ Annuler</span><div style="flex:1;text-align:center"><div class="t">Quoi</div></div><span style="width:70px"></span></div>
+          <div style="height:4px;background:var(--bg-doux);margin:0 12px;border-radius:2px"><i style="display:block;width:33%;height:100%;background:var(--phyto);border-radius:2px"></i></div>
+          <div class="tel-corps" style="min-height:560px;padding-top:10px">
+            <div class="carte"><div class="cadre-ligne">Produit</div><div class="champ" style="min-height:44px;border:1px solid var(--ligne-forte);border-radius:var(--r-md);display:flex;align-items:center;padding:0 12px;color:var(--texte-doux)">Chercher dans le catalogue…</div>
+              <div class="note" style="margin:10px 0 6px">Récents</div>
+              <div class="chips"><span class="chip">Soufre mouillable</span><span class="chip">Bouillie bordelaise RSR</span><span class="chip">Vacciplant</span></div></div>
+            <div class="carte"><div class="cadre-ligne">Dose</div><div style="display:flex;align-items:center;gap:10px"><span class="bouton" style="width:44px;padding:0">−</span><span class="num" style="font-size:var(--pt-xl);font-weight:600;flex:1;text-align:center">8 <small style="font-size:var(--pt-base);font-weight:400;color:var(--texte-med)">kg/ha</small></span><span class="bouton" style="width:44px;padding:0">+</span></div><div class="note" style="margin-top:6px;text-align:center">homologuée 8 kg/ha · le clavier numérique s’ouvre au tap sur le chiffre</div></div>
+            <div style="margin-top:12px"><span class="bouton plein" style="width:100%;background:var(--phyto);border-color:var(--phyto)">Suivant : où</span></div>
+            <p class="note" style="text-align:center;margin-top:10px">Trois étapes, un bouton par étape, le retour en haut à gauche : la forme actuelle est bonne, seules les tailles changent.</p>
+          </div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span><i></i>Vigne</span><span><i></i>Tracteur</span><span class="on"><i></i>Phyto</span><span><i></i>Plus</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CAVE ═══ -->
+  <section class="ecart" id="cave">
+    <div class="ecart-tete">
+      <h2>Cave — les gestes du maître de chai à 44 px, un sommaire qui suit</h2>
+      <p class="ou">Mesuré : 49 cibles sur 54 sous 44 px ; Relever, Ouiller, Soutirer en boutons de 28 px ; page de 4 018 px, cinq écrans.</p>
+      <p class="pourquoi">Les actions les plus fréquentes de l’appli étaient ses plus petites cibles. Ici, chaque contenant à faire porte son geste principal en plein, à 44 px, le second à côté. Un sommaire collant (Ce qui presse · À faire · Cuves · Fûts) reste sous la bande quand on descend. Les quatre compteurs tiennent sur une ligne.</p>
+    </div>
+    <div class="ecrans">
+      <div>
+        <p class="legende-ecran">Ordinateur — Cave › Aujourd’hui : sommaire, à faire, le contenant choisi</p>
+        <div class="pc"><div class="pc-corps">
+          <div class="pc-trois">
+            <div class="rail">
+              <div class="logo">Ma Vigne</div>
+              <div class="cherche"><span>Rechercher</span><kbd>⌘K</kbd></div>
+              <div class="it">Pilotage</div><div class="grp">Terrain</div><div class="it">Vigne</div><div class="it">Tracteur</div><div class="it">Phyto</div><div class="grp">Cave et réserve</div><div class="it on">Cave</div><div class="it">Réserve</div><div class="grp">Organisation</div><div class="it">Planning</div>
+            </div>
+            <div class="colonne rail-somm">
+              <h4>Aujourd’hui</h4>
+              <div class="it on"><span>Ce qui presse</span><b>2</b></div>
+              <div class="it"><span>À faire</span><b>5</b></div>
+              <div class="it"><span>Cuves</span><span class="note">7</span></div>
+              <div class="it"><span>Fûts</span><span class="note">43</span></div>
+              <div class="it"><span>Relevés du jour</span><span class="note">0</span></div>
+              <div class="kpi-ligne" style="margin-top:14px;flex-direction:column;gap:6px"><span><b>≈ 182</b>hL en cuve</span><span><b>43</b>fûts en vin</span><span><b>36 t</b>rentrées</span></div>
+            </div>
+            <div class="colonne">
+              <h4>Ce qui presse</h4>
+              <div class="verdict" style="font-size:var(--pt-lg)">2 cuves à mesurer, 3 fûts à ouiller</div>
+              <p class="note" style="margin-bottom:10px">Pas de relevé depuis hier ou avant · 1 cuvée à ouiller · 2 cuvées ont fini leur malo.</p>
+              <div class="carte" style="padding:0 14px">
+                <div class="contenant"><div><div class="n">Cuve 7 · inox 60 hL</div><div class="s">Vieilles Vignes 2026 · décuvée, FA en fût</div><div class="s att">dernier relevé il y a 2 jours</div></div><div class="gestes"><span class="bouton plein">Relever</span></div></div>
+                <div class="contenant"><div><div class="n">Fixin 1er Cru ’25</div><div class="s">3 fûts · 6,8 hL</div><div class="s danger">ouillage en retard de 5 j · ~21 L</div></div><div class="gestes"><span class="bouton plein">Ouiller</span><span class="bouton">Soutirer</span></div></div>
+                <div class="contenant"><div><div class="n">Cuve 3 · béton 40 hL</div><div class="s">Chazière 2026 · malo finie</div><div class="s">pas encore soutirée</div></div><div class="gestes"><span class="bouton plein">Soutirer</span></div></div>
+                <div class="contenant"><div><div class="n">Gevrey VV ’25</div><div class="s">12 fûts · malo finie</div></div><div class="gestes"><span class="bouton">Déguster</span></div></div>
+              </div>
+            </div>
+            <div class="colonne">
+              <div class="note">Cuve 7 · inox 60 hL</div>
+              <h3 style="font-size:var(--pt-lg);margin-bottom:2px">Vieilles Vignes 2026</h3>
+              <div class="note" style="margin-bottom:12px">décuvée le 12 oct. · FA en fût</div>
+              <div class="ligne"><span class="nom">Densité</span><span class="num">0,994 · il y a 2 j</span></div>
+              <div class="ligne"><span class="nom">Température</span><span class="num">17 °C</span></div>
+              <div class="ligne"><span class="nom">Volume</span><span class="num">58 hL</span></div>
+              <div class="ligne"><span class="nom">Dernier geste</span><span>remontage, 21 oct.</span></div>
+              <div class="deux-btn"><span class="bouton plein">Relever</span><span class="bouton">Autre geste</span></div>
+              <p class="note" style="margin-top:12px">Le relevé s’enregistre sans quitter la liste ; « Annuler » reste six secondes.</p>
+            </div>
+          </div>
+        </div></div>
+      </div>
+      <div>
+        <p class="legende-ecran">Téléphone — Cave › Aujourd’hui, en défilant : le sommaire suit</p>
+        <div class="tel">
+          <div class="tel-barre"><span class="num">07:30</span><span>Chai · 12 °C</span></div>
+          <div class="bande" style="padding:4px 12px;min-height:44px"><div style="flex:1;display:flex;align-items:baseline;gap:8px"><span class="t" style="font-size:var(--pt-base)">Cave</span><span class="s" style="display:inline">· Aujourd’hui · campagne 2026</span></div><span class="ico" style="width:36px;height:36px"></span></div>
+          <div class="sommaire"><span class="on">Ce qui presse <b>2</b></span><span>À faire <b>5</b></span><span>Cuves</span><span>Fûts</span><span>Relevés</span></div>
+          <div class="tel-corps" style="min-height:540px;padding-top:4px">
+            <div class="kpi-ligne"><span><b>≈ 182</b>hL</span><span><b>43</b>fûts</span><span><b>5</b>à faire</span><span><b>36 t</b>rentrées</span></div>
+            <div class="carte" style="margin-top:6px">
+              <div class="cadre-ligne">Ce qui presse</div>
+              <div class="verdict" style="font-size:var(--pt-lg)">2 cuves à mesurer</div>
+              <div class="contenant" style="margin-top:6px"><div><div class="n">Cuve 7 · inox 60 hL</div><div class="s att">dernier relevé il y a 2 j</div></div><div class="gestes"><span class="bouton plein">Relever</span></div></div>
+              <div class="contenant"><div><div class="n">Fixin 1er Cru ’25</div><div class="s danger">ouillage en retard de 5 j · ~21 L</div></div><div class="gestes"><span class="bouton plein">Ouiller</span></div></div>
+              <div class="contenant"><div><div class="n">Cuve 3 · béton 40 hL</div><div class="s">malo finie, pas soutirée</div></div><div class="gestes"><span class="bouton plein">Soutirer</span></div></div>
+            </div>
+            <div class="carte">
+              <div class="cadre-ligne">À faire cette semaine · 5 gestes, 4 contenants</div>
+              <div class="contenant"><div><div class="n">Gevrey VV ’25</div><div class="s">12 fûts · malo finie</div></div><div class="gestes"><span class="bouton">Déguster</span></div></div>
+              <div class="contenant"><div><div class="n">Cuve 1 · inox 100 hL</div><div class="s">Bourgogne Chardonnay · FA</div></div><div class="gestes"><span class="bouton">Relever</span></div></div>
+            </div>
+            <p class="note" style="text-align:center;margin-top:10px">Un geste → son panneau, la date et l’heure préremplies, un chiffre à taper, « Enregistrer ». Deux taps et un nombre.</p>
+          </div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span class="on"><i></i>Plus</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ RÉSERVE ═══ -->
+  <section class="ecart" id="reserve">
+    <div class="ecart-tete">
+      <h2>Réserve — une action principale, et l’état vide qui dit quoi faire</h2>
+      <p class="ou">Mesuré : premier écran = une carte vide (« Aucun volume d’ouillage saisi ») puis la pyramide ; aucun « + » ; étiquettes à 10 px.</p>
+      <p class="pourquoi">La Réserve se remplit par des mouvements : une entrée, une sortie, un ouillage. Le bouton flottant les propose en trois choix. La pyramide des âges, qui a des données, passe en premier ; la part des anges, vide, devient une invitation d’une ligne avec son bouton, pas un paragraphe. Sur PC, les fûts prennent le liste-détail du Journal.</p>
+    </div>
+    <div class="ecrans deux-tel">
+      <div>
+        <p class="legende-ecran">Téléphone — Réserve › Fûts, proposé</p>
+        <div class="tel">
+          <div class="tel-barre"><span class="num">14:05</span><span>Chai</span></div>
+          <div class="bande" style="padding:6px 12px"><span class="ico"></span><div style="flex:1"><div class="t">Réserve</div><span class="s">Intrants, stock et fûts · 55 barriques</span></div><span class="ico g"></span></div>
+          <div class="segment"><span class="on">Fûts</span><span>Intrants</span><span>Bilan matière</span></div>
+          <div class="tel-corps" style="min-height:560px;padding-bottom:150px">
+            <div class="carte" style="margin-top:8px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="font-size:var(--pt-md)">Pyramide des âges</h3><span class="note">55 barriques</span></div>
+              <div class="pyr"><span class="y">2026 <small class="note">neuf</small></span><div class="b" style="width:60%"><i style="width:50%"></i></div><span class="r">6 en vin · 6 libres</span></div>
+              <div class="pyr"><span class="y">2025 <small class="note">1 vin</small></span><div class="b" style="width:100%"><i style="width:0"></i></div><span class="r">17 en vin · 6 libres</span></div>
+              <div class="pyr"><span class="y">2024 <small class="note">2 vins</small></span><div class="b" style="width:40%"></div><span class="r">8 en vin · 0 libre</span></div>
+              <div class="pyr"><span class="y">2023 <small class="note">3 vins</small></span><div class="b" style="width:55%"></div><span class="r">12 en vin · 0 libre</span></div>
+              <div class="note" style="margin-top:8px;display:flex;gap:12px;flex-wrap:wrap"><span><i style="display:inline-block;width:10px;height:10px;background:var(--vert-med);border-radius:2px;vertical-align:middle;margin-right:4px"></i>neuf</span><span><i style="display:inline-block;width:10px;height:10px;background:var(--terre);border-radius:2px;vertical-align:middle;margin-right:4px"></i>en cours de vie</span><span><i style="display:inline-block;width:10px;height:10px;background:var(--bg-doux);border:1px solid var(--ligne-forte);border-radius:2px;vertical-align:middle;margin-right:4px"></i>partie libre</span></div>
+            </div>
+            <div class="carte">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div style="font-weight:600;font-size:var(--pt-base)">Part des anges</div><div class="note">Aucun ouillage saisi sur douze mois. Au premier, cet écran mesure ce que l’élevage coûte.</div></div><span class="bouton" style="flex:none">Saisir</span></div>
+            </div>
+            <div class="carte" style="padding:0 14px">
+              <div class="ligne"><span><span class="nom">12 fûts libres</span><span class="sous">6 neufs, 6 d’un vin</span></span><span class="etiq ok">disponibles</span></div>
+              <div class="ligne"><span><span class="nom">3 fûts à vérifier</span><span class="sous">cerclage, signalés en août</span></span><span class="etiq att">à voir</span></div>
+            </div>
+          </div>
+          <div class="fab" aria-label="Nouveau mouvement">+</div>
+          <div class="barre-basse"><div class="champ">Fût, tonnelier, millésime…</div><div class="filtrer">Filtrer <b>0</b></div></div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span class="on"><i></i>Plus</span></div>
+        </div>
+      </div>
+      <div>
+        <p class="legende-ecran">Le « + » de la Réserve — trois mouvements, une feuille</p>
+        <div class="tel">
+          <div class="tel-barre"><span class="num">14:05</span><span>Chai</span></div>
+          <div class="bande" style="padding:6px 12px"><span class="ico"></span><div style="flex:1"><div class="t">Réserve</div><span class="s">Intrants, stock et fûts</span></div><span class="ico g"></span></div>
+          <div class="tel-corps" style="min-height:596px;position:relative"><div class="carte" style="opacity:.4;margin-top:8px"><div class="cadre-ligne">Pyramide des âges</div></div></div>
+          <div class="voile"></div>
+          <div class="feuille menu-feuille">
+            <div class="poignee"></div>
+            <h3>Nouveau mouvement</h3>
+            <div class="opt" style="margin-top:6px"><span class="ico" style="background:var(--vert-pale);border-color:transparent"></span><div><div style="font-weight:600">Entrée</div><div class="note">livraison d’intrants, fûts neufs</div></div></div>
+            <div class="opt"><span class="ico" style="background:var(--or-pale);border-color:transparent"></span><div><div style="font-weight:600">Sortie</div><div class="note">intrant utilisé, fût vendu ou réformé</div></div></div>
+            <div class="opt"><span class="ico" style="background:var(--bleu-pale);border-color:transparent"></span><div><div style="font-weight:600">Ouillage</div><div class="note">volume, contenants, date — la part des anges se calcule</div></div></div>
+            <p class="note" style="margin-top:8px">Trois lignes de 48 px, un tap chacune. La feuille se ferme en glissant.</p>
+          </div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span class="on"><i></i>Plus</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PLANNING ═══ -->
+  <section class="ecart" id="planning">
+    <div class="ecart-tete">
+      <h2>Planning — la grille d’abord, les actions rares dans une feuille</h2>
+      <p class="ou">Mesuré : « Congés sur une période » et « Chaleur sur une période » au-dessus de la grille, qui commençait vers 520 px ; noms et sous-totaux à 9 px ; bascule d’année à trois états dans 28 px.</p>
+      <p class="pourquoi">La grille est le quotidien, les périodes sont l’exception : elles passent dans un menu « … » à côté de la semaine. Les noms reviennent à 12 px, tronqués s’il le faut, les heures dessous à 11. Les cases font 44 px de haut ; le week-end reste étroit, un tap l’ouvre en entier. Sur PC, la grille actuelle est déjà la bonne forme : rien à changer sauf les tailles.</p>
+    </div>
+    <div class="ecrans deux-tel">
+      <div>
+        <p class="legende-ecran">Téléphone — Planning › Le mois, proposé</p>
+        <div class="tel">
+          <div class="tel-barre"><span class="num">17:20</span><span>semaine 43</span></div>
+          <div class="bande" style="padding:6px 12px"><span class="ico"></span><div style="flex:1"><div class="t">Planning</div><span class="s">Heures équipe · 10 salariés · 2026</span></div><span class="ico g"></span></div>
+          <div class="segment"><span class="on">Le mois</span><span>Les gens</span></div>
+          <div class="tel-corps" style="min-height:560px">
+            <div style="display:flex;align-items:center;gap:8px;margin-top:8px"><span class="ico" style="width:44px;height:44px;border-radius:12px"></span><div style="flex:1;text-align:center"><div style="font-weight:600;font-size:var(--pt-base)">Semaine 43</div><div class="note">19 – 25 octobre 2026</div></div><span class="ico" style="width:44px;height:44px;border-radius:12px"></span><span class="ico" style="width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-weight:700">…</span></div>
+            <div class="kpi-ligne" style="justify-content:space-between"><span><b>278 h 51</b>charge</span><span><b>1 523 h</b>capacité</span><span><b>1,81</b>ETP</span><span style="color:var(--attention)"><b style="color:var(--attention)">6</b>sem. &gt; max</span></div>
+            <div class="carte" style="padding:10px;margin-top:6px">
+              <div class="grille">
+                <div></div><div class="h">Lu<b>19</b></div><div class="h">Ma<b>20</b></div><div class="h">Me<b>21</b></div><div class="h">Je<b>22</b></div><div class="h">Ve<b>23</b></div><div class="h">Sa<b>24</b></div><div class="h" style="color:var(--accent-texte)">Di<b>25</b></div>
+                <div class="nom">Marie<small>173 h / 152</small></div><div class="c">8h</div><div class="c">8h</div><div class="c">8h</div><div class="c">8h</div><div class="c">8h</div><div class="c we">·</div><div class="c we">·</div>
+                <div class="nom">Jean<small>166 h / 146</small></div><div class="c">8h</div><div class="c">8h</div><div class="c">8h</div><div class="c">8h</div><div class="c att">6h</div><div class="c we">·</div><div class="c we">·</div>
+                <div class="nom">Sophie<small>168 h / 147</small></div><div class="c">8h</div><div class="c">8h</div><div class="c">8h</div><div class="c">8h</div><div class="c">8h</div><div class="c we">·</div><div class="c we">·</div>
+                <div class="nom">Paul<small>151 h / 140</small></div><div class="c">8h</div><div class="c">8h</div><div class="c vide"></div><div class="c">8h</div><div class="c">8h</div><div class="c we">·</div><div class="c we">·</div>
+                <div class="nom">Alicia<small>160 h / 152</small></div><div class="c">8h</div><div class="c">8h</div><div class="c">8h</div><div class="c">8h</div><div class="c">8h</div><div class="c we">·</div><div class="c we">·</div>
+              </div>
+              <p class="note" style="margin-top:8px">Un tap sur une case : la journée (durée, congé, chaleur, cave) ; un tap sur le nom : la personne.</p>
+            </div>
+          </div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span class="on"><i></i>Plus</span></div>
+        </div>
+      </div>
+      <div>
+        <p class="legende-ecran">Le menu « … » du Planning</p>
+        <div class="tel">
+          <div class="tel-barre"><span class="num">17:20</span><span>semaine 43</span></div>
+          <div class="bande" style="padding:6px 12px"><span class="ico"></span><div style="flex:1"><div class="t">Planning</div><span class="s">Heures équipe</span></div><span class="ico g"></span></div>
+          <div class="tel-corps" style="min-height:596px;position:relative"><div class="carte" style="opacity:.4;margin-top:8px"><div class="cadre-ligne">Semaine 43</div></div></div>
+          <div class="voile"></div>
+          <div class="feuille menu-feuille">
+            <div class="poignee"></div>
+            <h3>Semaine 43 · et au-delà</h3>
+            <div class="opt" style="margin-top:6px"><span class="ico" style="background:var(--or-pale);border-color:transparent"></span><div><div style="font-weight:600">Congés sur une période</div><div class="note">une personne, du … au …</div></div></div>
+            <div class="opt"><span class="ico" style="background:var(--orange-pale);border-color:transparent"></span><div><div style="font-weight:600">Horaires chaleur sur une période</div><div class="note">toute l’équipe, du … au …</div></div></div>
+            <div class="opt"><span class="ico" style="background:var(--bleu-pale);border-color:transparent"></span><div><div style="font-weight:600">Journées de cave</div><div class="note">marquer matin, après-midi ou journée</div></div></div>
+            <div class="opt"><span class="ico" style="background:var(--bg-doux)"></span><div><div style="font-weight:600">Année 2027</div><div class="note">vide — préparer depuis 2026</div></div></div>
+            <div class="opt"><span class="ico" style="background:var(--bg-doux)"></span><div><div style="font-weight:600">Relevé d’heures du mois</div><div class="note">PDF pour la compta</div></div></div>
+          </div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span class="on"><i></i>Plus</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ RÉGLAGES ═══ -->
+  <section class="ecart" id="reglages">
+    <div class="ecart-tete">
+      <h2>Réglages — l’en-tête en une ligne, les lignes à 48</h2>
+      <p class="ou">Mesuré : la carte « Ma Vigne · Domaine des Grandes Vignes » prend 150 px avant le premier réglage ; textes à 8 et 9 px ; les lignes de réglage, elles, sont déjà à 44.</p>
+      <p class="pourquoi">Apple et Google ouvrent les réglages sur la liste, l’identité tient en une ligne. Ici, le domaine devient la première ligne de la liste (nom, campagne, surface), et chaque réglage est une ligne de 48 px avec sa valeur à droite — on voit ce qui est réglé sans ouvrir. Les textes de 8 et 9 px n’existent plus.</p>
+    </div>
+    <div class="ecrans deux-tel">
+      <div>
+        <p class="legende-ecran">Téléphone — Réglages › Domaine, proposé</p>
+        <div class="tel">
+          <div class="tel-barre"><span class="num">21:10</span><span>Admin</span></div>
+          <div class="bande" style="padding:6px 12px"><span class="ico"></span><div style="flex:1"><div class="t">Réglages</div><span class="s">Ma Vigne 10.13 · administrateur</span></div><span class="ico g"></span></div>
+          <div class="segment"><span class="on">Domaine</span><span>Équipe</span><span>Moi</span></div>
+          <div class="tel-corps" style="min-height:560px">
+            <div class="carte" style="padding:4px 14px;margin-top:8px">
+              <div class="regl"><span class="ico" style="background:var(--accent-doux);border:0"></span><div><div class="t">Domaine des Grandes Vignes</div><span class="s">Après-vendange 2026-2027 · 8 parcelles · 7,02 ha</span></div><span class="v">›</span></div>
+            </div>
+            <div class="note" style="margin:12px 2px 4px">Campagne</div>
+            <div class="carte" style="padding:4px 14px">
+              <div class="regl"><span class="ico" style="background:var(--vert-pale);border:0"></span><div><div class="t">Campagne en cours</div><span class="s">1ᵉʳ mars 2026 → 28 fév. 2027 · couverte sans trou</span></div><span class="v">›</span></div>
+              <div class="regl"><span class="ico" style="background:var(--or-pale);border:0"></span><div><div class="t">Préparer 2027</div><span class="s">tâches, barèmes, équipes</span></div><span class="v">vide ›</span></div>
+            </div>
+            <div class="note" style="margin:12px 2px 4px">Travail</div>
+            <div class="carte" style="padding:4px 14px">
+              <div class="regl"><span class="ico" style="background:var(--bg-doux)"></span><div><div class="t">Tâches et barèmes</div></div><span class="v">14 tâches ›</span></div>
+              <div class="regl"><span class="ico" style="background:var(--bg-doux)"></span><div><div class="t">Tournées</div></div><span class="v">hiver, été ›</span></div>
+              <div class="regl"><span class="ico" style="background:var(--bg-doux)"></span><div><div class="t">Jalons</div></div><span class="v">annoncés ›</span></div>
+            </div>
+            <div class="note" style="margin:12px 2px 4px">Conformité</div>
+            <div class="carte" style="padding:4px 14px">
+              <div class="regl"><span class="ico" style="background:var(--phyto-pale);border:0"></span><div><div class="t">Protection et lessivage</div></div><span class="v">10 j · 20 mm ›</span></div>
+              <div class="regl"><span class="ico" style="background:var(--phyto-pale);border:0"></span><div><div class="t">Registre phyto</div><span class="s">SIRET, bio, export 2027</span></div><span class="v">prêt ›</span></div>
+            </div>
+          </div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span class="on"><i></i>Plus</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="carte">
+          <h3>Ce que la v2 ajoute au budget du cliquet</h3>
+          <div class="cadre-ligne">en plus des lignes de la v1 ; mesurables par le même script</div>
+          <table>
+            <thead><tr><th>Module</th><th>Mesure</th><th>Aujourd’hui</th><th>Budget</th></tr></thead>
+            <tbody>
+              <tr><td>Tracteur</td><td>la session en cours visible sans défiler</td><td>non (y ≈ 460)</td><td>oui, y ≤ 200</td></tr>
+              <tr><td>Tracteur</td><td>le « + » ne recouvre aucune cible</td><td>recouvre un crayon</td><td>0 recouvrement</td></tr>
+              <tr><td>Phyto</td><td>dates au format machine</td><td>15</td><td>0</td></tr>
+              <tr><td>Cave</td><td>gestes principaux sous 44 px</td><td>Relever, Ouiller, Soutirer à 28</td><td>0</td></tr>
+              <tr><td>Cave</td><td>sommaire visible en défilant</td><td>non</td><td>oui</td></tr>
+              <tr><td>Réserve</td><td>action principale sans défiler</td><td>aucune</td><td>1 (le « + »)</td></tr>
+              <tr><td>Planning</td><td>grille visible sans défiler</td><td>y ≈ 520</td><td>y ≤ 300</td></tr>
+              <tr><td>Planning</td><td>textes sous 11 px</td><td>11</td><td>0</td></tr>
+              <tr><td>Réglages</td><td>premier réglage</td><td>y ≈ 330</td><td>y ≤ 200</td></tr>
+            </tbody>
+          </table>
+          <p class="note" style="margin-top:10px">Lots proposés, dans l’ordre après ceux de la v1 : <b>TRAC-UX-1</b>, <b>CAVE-UX-1</b>, <b>RSV-UX-1</b>, <b>PLAN-UX-1</b>, <b>PHY-UX-1</b>, <b>REGL-UX-1</b>. Chacun d’un module, petit, avec son aide et son What’s New.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Maquette hors dépôt, v2 du 25 octobre 2026. Chiffres et noms de la démo ou d’exemple ; les mesures sont dans le relevé joint à la v1. Le style est celui de la charte actuelle ; rien ne change que l’ordre, les tailles et les gestes.
+  </footer>
+</main>
+
+<script>
+function basculer(){
+  var r=document.documentElement, b=document.getElementById('theme');
+  var sombreSysteme=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var actuel=r.getAttribute('data-theme')||(sombreSysteme?'dark':'light');
+  var suivant=actuel==='dark'?'light':'dark';
+  r.setAttribute('data-theme',suivant);
+  b.textContent=suivant==='dark'?'Clair':'Sombre';
+}
+(function(){ var b=document.getElementById('theme'); if(window.matchMedia('(prefers-color-scheme: dark)').matches) b.textContent='Clair'; })();
+</script>
+</body>
+</html>
