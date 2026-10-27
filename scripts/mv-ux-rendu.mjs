@@ -4,9 +4,10 @@
 // -----------------------------------------------------------------------------
 // Lancer :  npm run build (ou, sans la chaîne : node scripts/mv-gt-page.mjs, npx vite build, inject-precache, mv-version-json)
 //           npm run test:ux                                   (CI : job des tests sur le build, après le gabarit)
-//           npm run test:ux -- --contre                       (contre-épreuve : sept défauts posés à l’écran doivent rougir)
+//           npm run test:ux -- --contre                       (contre-épreuve : huit défauts posés à l’écran doivent rougir)
 //           npm run test:ux -- --baseline                     (regraver la référence après une BAISSE — refusé s’il y a une hausse)
 //           npm run test:ux -- --baseline --accepte "<raison>"   (une hausse VOULUE : la raison est écrite dans la référence)
+//           npm run test:ux -- --baseline --motif "<texte>"     (dire pourquoi on regrave, par exemple une mesure corrigée)
 // Bac à sable de Claude : MV_CHROMIUM=<chemin d’un Chromium>.
 //
 // POURQUOI. L’audit d’expérience d’usage du 25/10 (hors dépôt : audit-ux-2026-10-25.md, maquettes ux v1 et v2) a mesuré la
@@ -14,8 +15,9 @@
 // 7 px, près de 180 px de bandeaux avant le contenu. Le plan en 22 lots va faire baisser ces chiffres ; ce contrôle garantit
 // qu’ils ne remontent plus. UN CLIQUET, comme le preflight (§6c) : hausse → rouge nommé ; égal → silence ; baisse → regraver.
 // ★ CE QUI EST MESURÉ — dix pages, au téléphone (390 × 844) et sur ordinateur (1366 × 900), dans la page active :
-//   c24 / c44  les cibles cliquables visibles dont le plus petit côté est sous 24 / 44 px (un lien dans une phrase n’est pas une cible) ;
-//   t11 / t12  les textes visibles sous 11 / 12 px (exposants exclus) ;
+//   c24 / c44  les cibles cliquables visibles dont la ZONE D’APPUI (la boîte, plus un ::before / ::after transparent qui
+//              déborde — UX-1, §467) a son plus petit côté sous 24 / 44 px (un lien dans une phrase n’est pas une cible) ;
+//   t11 / t12  les textes visibles sous 11 / 12 px (exposants exclus ; un texte à 0 px est un libellé caché, pas un petit texte) ;
 //   chrome     la hauteur des bandeaux collés en tête de page, au repos ; chromeDefile, la même après 900 px de défilement
 //              (ou ce que la page permet, 300 px au moins) ;
 //   pouce      au téléphone, sur les pages de liste : les actions du tiers haut de l’écran moins celles du tiers bas (0 au mieux) ;
@@ -24,8 +26,9 @@
 // ★ L’HORLOGE est posée au mardi 27/10/2026, 9 h (Paris), puis elle tourne : la démo se construit autour d’« aujourd’hui »,
 //   et un relevé qui changerait avec le jour de la semaine ferait un cliquet menteur (voir les harnais qui rougissent entre
 //   minuit et 2 h, §28).
-// ★ LA MARGE : 1 cible, ou 4 px pour une hauteur, de jeu — la CI joue un autre Chromium que le bac à sable (la police, elle,
-//   est la même : servie par dist/fonts). Les textes, les dates, les oui/non : aucune marge.
+// ★ LA MARGE : 1 cible, 1 texte, ou 4 px pour une hauteur, de jeu — la CI joue un autre Chromium que le bac à sable (la police,
+//   elle, est la même : servie par dist/fonts). Les dates et les oui/non : aucune marge. UX-1 (§467) : un texte de jeu, parce
+//   qu’un relevé sur deux voyait 13 textes sous 12 px au lieu de 12 au Planning sur ordinateur, sans rien changer à l’appli.
 // ★ Une page qui revient à l’écran de connexion, ou une mesure qui disparaît, rougit (CAPTURES-1, §371) : un harnais qui
 //   déménage doit rougir (§6c), on le suit, on ne le contourne pas.
 // =============================================================================
@@ -41,6 +44,8 @@ let playwright; try { playwright = await import('playwright'); } catch (e) { con
 const ARGS = process.argv.slice(2);
 const CONTRE = ARGS.includes('--contre'), GRAVER = ARGS.includes('--baseline');
 const iAcc = ARGS.indexOf('--accepte'), ACCEPTE = iAcc >= 0 ? String(ARGS[iAcc + 1] || '').trim() : '';
+const iMot = ARGS.indexOf('--motif'), MOTIF = iMot >= 0 ? String(ARGS[iMot + 1] || '').trim() : '';
+if (iMot >= 0 && !MOTIF) { console.error('--motif demande son texte : --motif "<pourquoi on regrave>"'); process.exit(2); }
 if (iAcc >= 0 && !ACCEPTE) { console.error('--accepte demande sa raison : --accepte "<pourquoi cette hausse est voulue>"'); process.exit(2); }
 
 const HORLOGE = '2026-10-27T08:00:00Z';   // mardi 27 octobre 2026, 9 h à Paris (heure d’hiver)
@@ -51,8 +56,8 @@ const ECRANS = [{ id: 'téléphone', w: 390, h: 844, tel: true }, { id: 'ordinat
 const MESURES = {
   c24: { sens: 'bas', tol: 1, obj: '0', lib: 'cibles sous 24 px' },
   c44: { sens: 'bas', tol: 1, obj: '≤ 15 % des cibles', lib: 'cibles sous 44 px' },
-  t11: { sens: 'bas', tol: 0, obj: '0', lib: 'textes sous 11 px' },
-  t12: { sens: 'bas', tol: 0, obj: '≤ 3 % au téléphone', lib: 'textes sous 12 px' },
+  t11: { sens: 'bas', tol: 1, obj: '0', lib: 'textes sous 11 px' },
+  t12: { sens: 'bas', tol: 1, obj: '≤ 3 % au téléphone', lib: 'textes sous 12 px' },
   chrome: { sens: 'bas', tol: 4, obj: '≤ 120 px', lib: 'bandeaux en tête, au repos (px)' },
   chromeDefile: { sens: 'bas', tol: 4, obj: '≤ 56 px', lib: 'bandeaux en tête, en défilant (px)' },
   pouce: { sens: 'bas', tol: 1, obj: '0', lib: 'actions plus haut que le pouce (téléphone, listes)' },
@@ -69,13 +74,14 @@ const GESTES = {
   'parcelles.valider': { sens: 'haut', tol: 1, obj: '≥ 44 px', lib: 'Parcelles : le plus petit côté du bouton Valider (px)' },
 };
 
-// La contre-épreuve pose SEPT défauts à l’écran, chacun visé par une mesure. ⚠️ Avec un identifiant de page en tête : une
+// La contre-épreuve pose HUIT défauts à l’écran, chacun visé par une mesure (le huitième, UX-1 : une zone d’appui retirée). ⚠️ Avec un identifiant de page en tête : une
 // règle moins spécifique que celles de styles.css perdrait contre elles, et la contre-épreuve passerait pour muette.
 const DEFAUTS = '#page-journal #tache-chips-row button,#page-journal #tache-chips-row [onclick]{height:18px!important;min-height:0!important;max-height:18px!important;padding:0 3px!important;line-height:1!important;font-size:9px!important;overflow:hidden!important}'
   + '#page-journal .mod-header{padding-bottom:80px!important}'
   + '#page-planning #plan-stats-band{padding-bottom:200px!important}'
+  + '#page-pilotage .ck-i::after{content:none!important}'   // UX-1 : les « i » perdent leur zone d’appui → ils retombent sous 24 px
   + '#page-tracteur #trac-fab{top:470px!important;bottom:auto!important;left:20px!important;right:auto!important;width:330px!important;height:240px!important}';
-const attendus = ['journal › téléphone › c24', 'journal › téléphone › t11', 'journal › téléphone › chrome', 'planning.grille_y', 'tracteur.fab_recouvre', 'phyto.dates_machine', 'cave.gestes_44'];
+const attendus = ['pilotage › téléphone › c24', 'journal › téléphone › c24', 'journal › téléphone › t11', 'journal › téléphone › chrome', 'planning.grille_y', 'tracteur.fab_recouvre', 'phyto.dates_machine', 'cave.gestes_44'];
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json', '.woff2': 'font/woff2', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json' };
 const srv = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split('?')[0]); if (p === '/') p = '/index.html'; const f = path.join(DIST, p);
@@ -86,6 +92,26 @@ const U = 'http://localhost:' + srv.address().port;
 const exe = process.env.MV_CHROMIUM || '';
 const nav = await playwright.chromium.launch({ headless: true, ...(exe ? { executablePath: exe, args: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage', '--no-zygote'] } : {}) });
 
+// ── UX-1 (§467) — UNE CIBLE SE MESURE PAR SA ZONE D’APPUI, PAS PAR SA BOÎTE (la leçon de §175, qu’UX-0 avait refaite à
+// l’envers). Les pastilles « i », l’Aide, la synchronisation et les puces portent une zone transparente en ::before / ::after
+// (position absolue, insets négatifs) : un appui dessus va à l’élément. On l’ajoute à la boîte — seulement si l’élément est
+// positionné (sinon l’inset se lirait sur un autre bloc), si le pseudo-élément reçoit les appuis, et en la coupant aux bords
+// d’un ancêtre qui rogne (overflow), sans jamais rogner la boîte elle-même (une puce sortie d’un ruban qui défile reste une cible).
+const ZONE_INIT = `window.__mvZone = function (e) {
+  var r = e.getBoundingClientRect(), t = r.top, l = r.left, b = r.bottom, d = r.right, cs = getComputedStyle(e);
+  if (cs.position !== 'static' && !/(hidden|clip)/.test(cs.overflowX + ' ' + cs.overflowY)) {
+    ['::before', '::after'].forEach(function (pe) { var p = getComputedStyle(e, pe);
+      if (!p || p.content === 'none' || p.content === 'normal' || p.position !== 'absolute' || p.pointerEvents === 'none' || p.display === 'none' || p.visibility === 'hidden') return;
+      var v = function (x) { var n = parseFloat(x); return isFinite(n) ? Math.min(0, n) : 0; };
+      t = Math.min(t, r.top + v(p.top)); l = Math.min(l, r.left + v(p.left)); b = Math.max(b, r.bottom - v(p.bottom)); d = Math.max(d, r.right - v(p.right)); });
+  }
+  for (var a = e.parentElement; a && a !== document.body; a = a.parentElement) { var ac = getComputedStyle(a);
+    if (ac.overflowX === 'visible' && ac.overflowY === 'visible') continue; var ar = a.getBoundingClientRect();
+    if (ac.overflowY !== 'visible') { t = Math.max(t, Math.min(r.top, ar.top)); b = Math.min(b, Math.max(r.bottom, ar.bottom)); }
+    if (ac.overflowX !== 'visible') { l = Math.max(l, Math.min(r.left, ar.left)); d = Math.min(d, Math.max(r.right, ar.right)); } }
+  return { w: Math.max(0, d - l), h: Math.max(0, b - t), y: (t + b) / 2 };
+};`;
+
 // ── Mesure d’une page (exécutée dans le navigateur). Tout se lit dans la page ACTIVE : le dock est commun à toutes. ──
 const MESURE = ([tel, liste]) => {
   const ls = document.getElementById('login-screen'); if (ls && ls.style.display !== 'none') return { connexion: true };
@@ -95,10 +121,10 @@ const MESURE = ([tel, liste]) => {
   const ferme = (el) => { const o = el.closest('.overlay'); return !!(o && !o.classList.contains('open')); };
   const SEL = 'button, a[href], [onclick], input:not([type=hidden]), select, textarea, [role=button], label[for], summary';
   const enLigne = (e) => e.tagName === 'A' && !!e.closest('p,li,td') && !e.closest('button,[onclick]');
-  const cibles = Array.from(pg.querySelectorAll(SEL)).filter((e) => vis(e) && !ferme(e) && !enLigne(e)).map((e) => { const r = e.getBoundingClientRect(); return { m: Math.round(Math.min(r.width, r.height)), y: r.top + r.height / 2 }; });
+  const cibles = Array.from(pg.querySelectorAll(SEL)).filter((e) => vis(e) && !ferme(e) && !enLigne(e)).map((e) => { const z = window.__mvZone(e); return { m: Math.round(Math.min(z.w, z.h)), y: z.y }; });
   const tailles = []; const vus = new Set(); const w = document.createTreeWalker(pg, NodeFilter.SHOW_TEXT);
   while (w.nextNode()) { const t = w.currentNode; if (!t.nodeValue.trim()) continue; const el = t.parentElement; if (!el || vus.has(el)) continue; vus.add(el);
-    if (el.closest('script,style,sup,sub') || ferme(el) || !vis(el)) continue; tailles.push(parseFloat(getComputedStyle(el).fontSize)); }
+    if (el.closest('script,style,sup,sub') || ferme(el) || !vis(el)) continue; const fs = parseFloat(getComputedStyle(el).fontSize); if (fs > 0) tailles.push(fs); }   // 0 px : un libellé caché, pas un petit texte
   // Les bandeaux collés en tête : on empile, du haut vers le bas, ce qui est collé (sticky) ou fixe, large (la moitié de l’écran au
   // moins : ni un « + », ni une colonne), et touche la pile à 24 px près (sur ordinateur, la page commence 9 px sous le haut).
   const pile = () => { const els = Array.from(pg.querySelectorAll('*')).filter((e) => { const p = getComputedStyle(e).position; return (p === 'sticky' || p === 'fixed') && vis(e) && !ferme(e); })
@@ -139,7 +165,7 @@ const L = {
     return n;
   },
   caveGestes: () => Array.from(document.querySelectorAll('#page-cave button, #page-cave [onclick]')).filter((e) => /^(Relever|Ouiller|Soutirer)$/.test((e.textContent || '').trim()))
-    .map((e) => e.getBoundingClientRect()).filter((r) => r.width >= 1 && r.height >= 1 && Math.round(Math.min(r.width, r.height)) < 44).length,
+    .filter((e) => { const r = e.getBoundingClientRect(); return r.width >= 1 && r.height >= 1; }).map((e) => window.__mvZone(e)).filter((z) => Math.round(Math.min(z.w, z.h)) < 44).length,
   caveSommaire: () => {
     const pg = document.getElementById('page-cave'); const vh = window.innerHeight;
     return Array.from(pg.querySelectorAll('*')).some((e) => { const p = getComputedStyle(e).position; if (p !== 'sticky' && p !== 'fixed') return false;
@@ -151,7 +177,7 @@ const L = {
   planning: () => { const g = Array.from(document.querySelectorAll('#page-planning .pl2-grid')).find((e) => e.getBoundingClientRect().height >= 1); return g ? Math.round(g.getBoundingClientRect().top) : null; },
   reglages: () => { const g = Array.from(document.querySelectorAll('#regl-view-domaine .set-row')).find((e) => e.getBoundingClientRect().height >= 1); return g ? Math.round(g.getBoundingClientRect().top) : null; },
   valider: () => { const b = Array.from(document.querySelectorAll('#page-parcelles [onclick^="pQuickValidate"]')).find((e) => e.getBoundingClientRect().height >= 1);
-    if (!b) return null; const r = b.getBoundingClientRect(); return Math.round(Math.min(r.width, r.height)); },
+    if (!b) return null; const z = window.__mvZone(b); return Math.round(Math.min(z.w, z.h)); },
 };
 async function gestes(page, aller) {
   const G = {};
@@ -171,7 +197,7 @@ async function gestesContre(page, aller) {
   await aller('tracteur'); G['tracteur.fab_recouvre'] = (await page.evaluate(L.tracteur)).recouvre;
   await aller('phyto'); await page.evaluate(() => { const s = document.createElement('span'); s.textContent = '2026-01-01'; (document.querySelector('#page-phyto .content') || document.getElementById('page-phyto')).prepend(s); });
   G['phyto.dates_machine'] = await page.evaluate(L.phyto);
-  await aller('cave'); await page.evaluate(() => { const b = Array.from(document.querySelectorAll('#page-cave button, #page-cave [onclick]')).find((e) => /^(Relever|Ouiller|Soutirer)$/.test((e.textContent || '').trim())); if (b) b.after(b.cloneNode(true)); });
+  await aller('cave'); await page.evaluate(() => { const b = Array.from(document.querySelectorAll('#page-cave button, #page-cave [onclick]')).find((e) => /^(Relever|Ouiller|Soutirer)$/.test((e.textContent || '').trim())); if (b) { const c = b.cloneNode(true); c.style.cssText += ';height:20px!important;min-height:0!important;overflow:hidden!important'; b.after(c); } });   // sans sa zone d’appui (rognée)
   G['cave.gestes_44'] = await page.evaluate(L.caveGestes);
   await aller('planning'); G['planning.grille_y'] = await page.evaluate(L.planning);
   return G;
@@ -181,11 +207,12 @@ async function gestesContre(page, aller) {
 const releve = { mesures: {}, gestes: {} }; const erreurs = []; let connexion = 0, chromium = '';
 try { chromium = nav.version(); } catch (e) { chromium = ''; }
 const ECRANS_JOUES = CONTRE ? ECRANS.filter((e) => e.tel) : ECRANS;
-const PAGES_CONTRE = ['journal', 'planning'];
+const PAGES_CONTRE = ['journal', 'planning', 'pilotage'];
 for (const ecran of ECRANS_JOUES) {
   const ctx = await nav.newContext({ viewport: { width: ecran.w, height: ecran.h }, reducedMotion: 'reduce', serviceWorkers: 'block', timezoneId: 'Europe/Paris', locale: 'fr-FR', isMobile: ecran.tel, hasTouch: ecran.tel });
   const page = await ctx.newPage();
   await page.clock.install({ time: new Date(HORLOGE) }); await page.clock.resume();   // l’horloge posée, puis elle tourne
+  await page.addInitScript(ZONE_INIT);   // UX-1 : la zone d’appui, lue dans chaque page
   await page.route('**/*', (r) => { const u = r.request().url(); return (u.startsWith(U) || u.startsWith('data:') || u.startsWith('blob:')) ? r.continue() : r.abort(); });
   let chargements = 0; page.on('load', () => { chargements++; });
   page.on('pageerror', (e) => erreurs.push(ecran.id + ' : ' + String(e && e.message).slice(0, 160)));
@@ -281,7 +308,7 @@ if (GRAVER) {
   let base = ''; try { base = execFileSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: RACINE, encoding: 'utf8' }).trim(); } catch (e) { base = ''; }
   const jour = new Intl.DateTimeFormat('fr-CA', { timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
   const regravures = (ref && Array.isArray(ref.regravures)) ? ref.regravures.slice() : [];
-  if (ref) regravures.push({ date: jour, base, motif: ACCEPTE ? 'hausse acceptée : ' + ACCEPTE : 'baisse', hausses: hausses.map((x) => x.cle + ' : ' + x.base + ' → ' + x.now), baisses: baisses.slice(0, 40) });
+  if (ref) regravures.push({ date: jour, base, motif: ACCEPTE ? 'hausse acceptée : ' + ACCEPTE : (MOTIF || 'baisse'), hausses: hausses.map((x) => x.cle + ' : ' + x.base + ' → ' + x.now), baisses: baisses.slice(0, 40) });
   const garder = (m) => { const o = {}; ['cibles', 'c24', 'c44', 'textes', 't11', 't12', 'chrome', 'chromeDefile', 'pouce', 'hauteur'].forEach((k) => { o[k] = m[k] === undefined ? null : m[k]; }); return o; };
   const mesures = {}; for (const [eid, pages] of Object.entries(releve.mesures)) { mesures[eid] = {}; for (const p of PAGES) if (pages[p]) mesures[eid][p] = garder(pages[p]); }
   const sortie = { lot: 'UX-0', section: '§459', date: jour, base, horloge: HORLOGE, chromium,

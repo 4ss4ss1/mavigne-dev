@@ -1,0 +1,19 @@
+{
+  "lot": "UX-1",
+  "section": "§467",
+  "base": "6b893b0d2889a3f8f4e980d329f00b52ceeb97d0",
+  "inclut": [],
+  "date": "2026-10-27",
+  "tutos": null,
+  "fichiers": {
+    ".mv-base": "57ebb89bca3f5d7a1ea3ef8437294c108ae970fee00767e798d41fa88bd4edfe",
+    "CLAUDE.md": "a5264d89c65b5257bc05ca68a260bf8356b65591437ca7cc0b97625ae7c82bff",
+    "docs/claude/INDEX.md": "3b4f88bd147889fd4848d3c201c14fced7bdcc2a581f8b10f9570b37c581eb7d",
+    "docs/claude/chantiers-430-479.md": "2af1d206ab9f43c77802c1a29ceba1d6301a66e36326b1dbc3be3fa56638158e",
+    "docs/claude/journal.md": "abb687eae31e18e62827ef3b1b746ddf53d4dec551ba68620bb0a1cbfdb3fa1a",
+    "scripts/harnais-claude-md.mjs": "77aa081862ab4d3e7022259c9081859f4e568d3d6afa6553ba51be4bf08e3150",
+    "scripts/mv-harnais-ux0.mjs": "02b367fa8f84eb8b6c50d24b5dbfbd0cb6409ccaa38f04e76d938f405ddbf126",
+    "scripts/mv-ux-baseline.json": "08b9bcd0f0dba0636082f592df0ce44b876a253f847d63eec465ec09fdd1eaad",
+    "scripts/mv-ux-rendu.mjs": "6ab7fb01f8ff16d9e66cf0cc8bb996f41238a0f7b3c83983650d32dd42e57654"
+  }
+}

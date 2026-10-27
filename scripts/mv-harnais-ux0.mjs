@@ -1,5 +1,6 @@
 /* ───────────────────────────────────────────────────────
-   HARNAIS — UX-0 (§459) : LE CLIQUET DE L’EXPÉRIENCE D’USAGE EST BRANCHÉ, ET SA RÉFÉRENCE TIENT DEBOUT
+   HARNAIS — UX-0 (§459), UX-1 (§467) : LE CLIQUET DE L’EXPÉRIENCE D’USAGE EST BRANCHÉ, SA RÉFÉRENCE TIENT DEBOUT,
+   ET UNE CIBLE S’Y MESURE PAR SA ZONE D’APPUI
    Lancer :          node scripts/mv-harnais-ux0.mjs
    Contre-épreuves : node scripts/mv-harnais-ux0.mjs --contre
 
@@ -53,7 +54,10 @@ function jouer(S) {
   t('⑤ il lit et écrit sa référence là où ce harnais la lit', /path\.join\(ICI, 'mv-ux-baseline\.json'\)/.test(S.rendu));
   t('⑥ il refuse de regraver une hausse sans raison écrite (--accepte)', /if \(ref && hausses\.length && !ACCEPTE\)/.test(S.rendu) && /process\.exit\(1\)/.test(S.rendu));
   const mA = S.rendu.match(/const attendus = \[([^\]]+)\]/);
-  t('⑦ il garde sa contre-épreuve (des défauts posés à l’écran, sept attendus)', /const DEFAUTS = /.test(S.rendu) && !!mA && (mA[1].match(/'/g) || []).length === 14);
+  t('⑦ il garde sa contre-épreuve (des défauts posés à l’écran, huit attendus, dont une zone d’appui retirée)', /const DEFAUTS = /.test(S.rendu) && !!mA && (mA[1].match(/'/g) || []).length === 16 && /\.ck-i::after\{content:none!important\}/.test(S.rendu));
+  t('⑨ une cible se mesure par sa zone d’appui, pas par sa boîte (UX-1, §467)', /window\.__mvZone = function/.test(S.rendu) && /await page\.addInitScript\(ZONE_INIT\)/.test(S.rendu)
+    && /const z = window\.__mvZone\(e\); return \{ m: Math\.round\(Math\.min\(z\.w, z\.h\)\)/.test(S.rendu));
+  t('⑨ un texte à 0 px (libellé caché) n’est pas compté comme petit', /if \(fs > 0\) tailles\.push\(fs\)/.test(S.rendu));
   t('⑧ la liste joue ce fichier et sa contre-épreuve', S.liste.indexOf("mv-harnais-ux0.mjs'") > 0 && S.liste.indexOf("mv-harnais-ux0.mjs --contre'") > 0);
   t('⑧ la liste ne joue pas le contrôle au rendu (build et navigateur ; il écrit sous --baseline)', S.liste.indexOf('scripts/mv-ux-rendu.mjs') < 0);
 }
@@ -76,6 +80,9 @@ if (!CONTRE) {
     ['le contrôle ne pose plus l’horloge', (S) => Object.assign({}, S, { rendu: S.rendu.replace('await page.clock.resume()', 'await page.waitForTimeout(0)') })],
     ['le contrôle regrave une hausse sans raison', (S) => Object.assign({}, S, { rendu: S.rendu.replace('if (ref && hausses.length && !ACCEPTE)', 'if (false)') })],
     ['le contrôle perd sa contre-épreuve', (S) => Object.assign({}, S, { rendu: S.rendu.replace('const DEFAUTS = ', 'const SANS = ') })],
+    ['le contrôle remesure la boîte au lieu de la zone d’appui', (S) => Object.assign({}, S, { rendu: S.rendu.replace('const z = window.__mvZone(e); return { m: Math.round(Math.min(z.w, z.h))', 'const z = e.getBoundingClientRect(); return { m: Math.round(Math.min(z.width, z.height))') })],
+    ['le contrôle ne pose plus le relevé de zone dans la page', (S) => Object.assign({}, S, { rendu: S.rendu.replace('await page.addInitScript(ZONE_INIT)', 'await page.waitForTimeout(0)') })],
+    ['le contrôle recompte les textes à 0 px', (S) => Object.assign({}, S, { rendu: S.rendu.replace('if (fs > 0) tailles.push(fs)', 'tailles.push(fs)') })],
     ['la liste ne joue plus ce fichier', (S) => Object.assign({}, S, { liste: S.liste.split("mv-harnais-ux0.mjs'").join("mv-harnais-uxY.mjs'") })],
     ['la liste joue le contrôle au rendu', (S) => Object.assign({}, S, { liste: S.liste.replace("  ['node scripts/mv-harnais-ux0.mjs'],", "  ['node scripts/mv-ux-rendu.mjs'],\n  ['node scripts/mv-harnais-ux0.mjs'],") })],
   ];

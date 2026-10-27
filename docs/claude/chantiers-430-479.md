@@ -874,3 +874,34 @@ Les archives de campagne (ARCH-1, `_arcSnapshot`, Pilotage › Archives) photogr
 ### 466e. Reste ouvert
 - Sortir la fertilisation de `phyto.js` (backlog) — plus pressant à chaque lot.
 - La seule catégorie « Arboriculture fruitière et vigne » (102 MFSC, §461b) : à trancher.
+
+## 467. ★★ UX-1 — LE CLIQUET MESURE LA ZONE D’APPUI, PAS LA BOÎTE : UX-0 AVAIT REFAIT L’ERREUR DE §175 (26/10 — `scripts/mv-ux-rendu.mjs` (`ZONE_INIT` / `window.__mvZone`, posé par `addInitScript` ; `MESURE` et les gestes de la Cave et de Valider par la zone ; les textes à 0 px hors du compte ; `--motif` ; un huitième défaut en contre-épreuve) · `scripts/mv-ux-baseline.json` (regravée, motif écrit) · `scripts/mv-harnais-ux0.mjs` (assertions ⑦ et ⑨, trois mutants) · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` (consolidation, §6b, §28) · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/UX-1.json` · **aucun bump**, base `6b893b0`)
+
+### 467a. D’où ça vient
+« suite » : le lot suivant du plan (§28), CIBLE-1 — agrandir les cibles et relever les textes. Deux choses trouvées en le préparant, avant d’écrire une ligne : **le nom CIBLE-1 est pris** (§163, ce que les cartes montrent) ; et **la mesure d’UX-0 était fausse**.
+
+### 467b. L’erreur, et la leçon qu’elle refaisait
+UX-0 mesurait chaque cible par `getBoundingClientRect()` : la boîte du dessin. Or l’appli porte déjà, sur ses petites pièces, une zone d’appui transparente en pseudo-élément — `.ck-i::after` (inset −13 px : 18 + 26 = 44), `.mv-i::after` (−12 : 44), `.mv-help-btn::after` (−9/−6), la pastille de synchronisation dans l’en-tête (−6), les puces `.chip` / `.fchip` / `.tfchip` / `.ptfchip` (−5/−3), et les boutons de la Cave. Un appui sur le pseudo-élément va à l’élément. **« Une cible se mesure par sa zone d’appui, pas par sa boîte »** : c’était déjà écrit au §175, quand un premier outil avait compté l’Aide et la pastille « i » comme trop petites. UX-0 a refait la même erreur, et l’audit d’expérience d’usage du 25/10 (hors dépôt) avec lui : les « 12 bulles « i » sous 24 px » et les « Relever, Ouiller, Soutirer à 28 px » étaient des boîtes, pas des cibles.
+
+### 467c. La mesure corrigée
+- `window.__mvZone(e)` : la boîte, plus ce qui déborde d’un `::before` / `::after` en position absolue (insets négatifs seulement), **si** l’élément est positionné (sinon l’inset se lirait sur un autre bloc), si le pseudo-élément reçoit les appuis (`pointer-events`, `display`, `visibility`) et si l’élément ne rogne pas lui-même. La zone est ensuite coupée aux bords des ancêtres qui rognent (`overflow`), **sans jamais rogner la boîte** : une puce sortie d’un ruban qui défile reste une cible, on y arrive en défilant.
+- Posé une fois par page, avant ses scripts (`addInitScript`) : `MESURE`, le compte des gestes de la Cave et le côté du bouton Valider lisent la même fonction.
+- Les textes à **0 px** sortent du compte : c’est un libellé caché (le « Aide » de l’en-tête au téléphone), pas un petit texte.
+- `--motif "<texte>"` : une regravure dit pourquoi — ici, une mesure corrigée n’est pas une baisse de l’appli.
+- **Un texte de jeu**, comme une cible : la première regravure sur `e064e23` a été refusée — « planning › ordinateur › t12 : 12 → 13 » — alors que le relevé d’avant, sur la même appli, voyait 12. Un texte qui paraît ou non selon l’instant du relevé ; la marge des textes passe de 0 à 1.
+- ⚠️ Ce que la mesure ne fait pas : une zone dessinée par une largeur explicite (au lieu d’insets négatifs), ou un chevauchement entre deux zones voisines.
+
+### 467d. Mesuré
+- Sur la base `4e187d9`, puis de nouveau sur `e064e23` (après FERTI-4 à FERTI-7B) et sur `6b893b0` (après FERTI-8) — mêmes chiffres, sans changer l’appli : **45 baisses, aucune hausse** — téléphone 19 → **5** cibles sous 24 px, 322 → **297** sous 44 (71 %), 68 → **58** textes sous 11 px ; ordinateur 19 → 5, 271 → 232 (54 %) ; gestes de la Cave sous 44 px : 5 → **0**. Regravée avec son motif.
+- Les 5 cibles qui restent sous 24 px, partout : deux tuiles de la mosaïque de l’Accueil (`.hpc-p`, 37 × 23), « Pourquoi ? » (`.mv-pq`, 20 de haut), le crayon de la priorité (`#priority-edit-btn`, 16 × 23), les champs de recherche de Parcelles et du Journal (`#pSearch`, `#jSearch` : 16 de haut dans une boîte de 42 qui, elle, n’est pas la cible).
+- Contre-épreuve : **8/8** — le huitième défaut retire la zone des « i » du Pilotage, qui repassent de 0 à 12 cibles sous 24 px : la preuve que la zone est lue. Le défaut de la Cave a dû perdre sa propre zone (un clone rogné) pour mordre encore.
+- `mv-harnais-ux0` : 16 assertions, 17/17 mutants (dont « remesure la boîte », « ne pose plus le relevé de zone », « recompte les textes à 0 px »).
+
+### 467e. Ce que ça change au plan
+- **CIBLE-1 n’existe plus sous ce nom.** Ce qui reste certain devient **LISIBLE-1** : plus aucun texte sous 11 px (58 au téléphone — les initiales du Journal à 7 px, « 173h / 152h » du Planning à 9, l’échelle de la campagne des Réglages à 8-9, les étiquettes du Phyto, de la Réserve et de la priorité à 10), et les 5 cibles ci-dessus.
+- **Les puces, les bulles « i », la roue du Pilotage** : décision de Nico du 26/09 (« on laisse », §176d). Le plan du 25/10 la contredisait sur une mesure fausse : à reconfirmer avec lui avant d’y toucher. Les boutons « discrets » et secondaires (28 px, sans zone), les onglets (40 px) et `.mvbtn-option` (43 px de large) n’ont jamais été tranchés.
+- **CAVE-UX-1** : les gestes ont déjà 44 px de zone ; il lui reste le sommaire collé et l’accent mis sur le geste principal.
+
+### 467f. Ce qui reste ouvert
+- Le premier passage en CI de la mesure corrigée (un autre Chromium). **À confirmer.**
+- **Décidé par Nico le 26/10 (« ok »)** : la décision du 26/09 tient pour les puces, les bulles « i » et la roue ; LISIBLE-1 ajoute une zone de 44 px aux boutons « discrets » et secondaires (dessin inchangé) et passe `.mvbtn-option` à 44 px de large ; les onglets attendent TETE-3.
