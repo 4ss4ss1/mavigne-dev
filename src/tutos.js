@@ -71,6 +71,12 @@ function _esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '
 function _num(x) { var n = parseFloat(String(x == null ? '' : x).replace(/\s/g, '').replace(',', '.')); return isFinite(n) ? n : NaN; }
 function _nb(n) { return Math.round(Number(n) || 0).toLocaleString('fr-FR'); }
 // FERTI-7 (§464) : le bouton « nouveau » de Phyto est rond au téléphone, en texte sur ordinateur — viser celui qui se voit.
+// FERTI-8 (§466) : deux apports de Terrafumur, aux teneurs différentes d'une campagne à l'autre, pour « Vos produits ».
+function _tuIntrants() {
+  var op = function (id, cree, N, P, K, MO) { return { id: id, cree: cree, prodId: 'tu-terra', prod: { nom: 'Terrafumur', ref: 'NF U 44-051', origine: 'norme', amm: '', four: 'Coopérative de la Côte', nat: 'compost', vg: '', N: N, P: P, K: K, MO: MO, CN: null, typ: 'Ia', ab: true }, dose: 2, kgSac: 25, prix: null, pu: 't', cout: null, sacs: null, parcs: ['Clos du Moulin'], trac: {}, sem: '', enf: 'non', man: {} }; };
+  return { produits: [{ id: 'tu-terra', nom: 'Terrafumur', cat: 'vigne', unite: 'kg', contenance: 25, contLbl: 'sac', conso_src: 'manual', conso_manuel: 0, amm: '' }],
+           fertil: [op('tu-f1', '2024-11-14', 2, 1.7, 3.5, 30), op('tu-f2', '2025-11-20', 2.2, 1.6, 3.8, 32)] };
+}
 function _tuFerNouveau() { return _vis(_q('[data-tuto="phy.nouveau.pc"]')) ? '[data-tuto="phy.nouveau.pc"]' : '[data-tuto="phy.nouveau"]'; }
 function _ouvert(id) { var o = document.getElementById(id); return !!(o && o.classList.contains('open')); }
 function _gnr() { var c = window.CONFIG || {}; return c.gnr || { capacite: 0, niveau: 0 }; }
@@ -280,6 +286,38 @@ var TU_TUTOS = [
         ok: function () { var n = document.querySelectorAll('[data-tuto="fer.plist"] .fer-pl.on').length; return n + '\u00a0parcelle' + (n > 1 ? 's cochées' : ' cochée') + '. Vous pouvez encore en cocher ou décocher à la main.'; } },
       { type: 'regarder', cible: '[data-tuto="fer.plist"]',
         txt: function () { return 'Chaque ligne montre son appellation, ses sacs et son azote. Avec un seuil, la règle garderait aussi les parcelles sous ce rendement, celui de la vendange au Cuvier. Sur votre domaine, rien n’a bougé\u00a0: c’était un entraînement.'; } }
+    ] },
+  // ★ FERTI-8 (§466) — « Vos produits » : reprendre un produit déjà utilisé, puis les teneurs d'une autre campagne.
+  { id: 'produit-repris', titre: 'Comment faire pour reprendre un produit déjà utilisé\u00a0?', fin: 'reprendre un produit déjà utilisé',
+    module: 'Phyto', pages: ['phyto'], pour: 'admin', duree: '1 min', depart: 'home',
+    couvre: ['_ferSearch', '_ferPickVos', '_ferVer'],
+    retenir: ['La recherche trouve d’abord vos produits : la fiche se remplit comme au dernier apport.',
+              'Les teneurs changent d’une année à l’autre : celles de chaque campagne restent à un geste, à vérifier sur le sac.'],
+    etapes: [
+      { type: 'aller', page: 'phyto', pourquoi: 'L’amendement se saisit dans le module Phyto, onglet Fertilisation.' },
+      { type: 'toucher', chemin: true, cible: '[data-tuto="phy.fer"]',
+        txt: function () { return '{T} l’onglet « ' + (L('[data-tuto="phy.fer"]') || 'Fertilisation') + ' ».'; },
+        fait: function () { var b = _q('[data-tuto="phy.fer"]'); return !!(b && b.classList.contains('active')); },
+        ok: 'Voici le registre de fertilisation.' },
+      { type: 'toucher', get cible() { return _tuFerNouveau(); },
+        txt: function () { return /\.pc/.test(_tuFerNouveau()) ? '{T} « ' + L(_tuFerNouveau()) + ' ».' : '{T} le bouton rond, en bas à droite.'; },
+        fait: function () { return _ouvert('ovFerti') && !!_q('[data-tuto="fer.q"]'); },
+        ok: 'L’amendement s’ouvre sur la recherche.' },
+      { type: 'taper', cible: '[data-tuto="fer.q"]', exemple: 'terra',
+        txt: function () { return 'Cherchez le produit, par exemple «\u00a0terra\u00a0» pour Terrafumur.'; },
+        txtReel: 'le début du nom de votre produit.',
+        valide: function (x) { return String(x || '').trim().length >= 2; },
+        ok: 'Vos produits d’abord, E-Phy ensuite.' },
+      { type: 'toucher', cible: '[data-tuto="fer.vos"]',
+        txt: function () { return '{T} «\u00a0Terrafumur\u00a0», sous «\u00a0Vos produits\u00a0».'; },
+        fait: function () { var e = _q('#fer-nom'); return !!(e && e.value === 'Terrafumur'); },
+        ok: 'La fiche est remplie comme au dernier apport, avec les teneurs de la dernière campagne.' },
+      { type: 'toucher', cible: '[data-tuto="fer.ver"][data-ver="1"]',
+        txt: function () { return 'Les teneurs changent d’une année à l’autre. {T} celles de l’autre campagne.'; },
+        fait: function () { var b = _q('[data-tuto="fer.ver"][data-ver="1"]'); return !!(b && b.classList.contains('on')); },
+        ok: 'Les teneurs de cette campagne-là sont reprises.' },
+      { type: 'regarder', cible: '[data-tuto="fer.src"]',
+        txt: function () { return 'La date des teneurs est rappelée. Comparez-les avec le sac ou l’analyse de cette année\u00a0: retouchées, elles partent avec ce nouvel apport. Sur votre domaine, rien n’a bougé.'; } }
     ] },
   // ★ TUTO-8 (§388) — les maturités (MATU-1) : la saisie en série. Il fait redescendre le compte des gestes sans tuto.
   { id: 'maturites', titre: 'Comment faire pour noter des mesures de maturité\u00a0?', fin: 'noter des mesures de maturité',
@@ -1118,6 +1156,7 @@ function _charger() {
   });
   if (typeof window.applyFbData === 'function') { try { window.applyFbData('cave_vendange', _tuCave()); } catch (e) { _avale(e, '_charger#cave_vendange'); } }
   if (typeof window.applyFbData === 'function') { try { window.applyFbData('journal', _tuJournal()); } catch (e) { _avale(e, '_charger#journal'); } }   // TUTO-9
+    if (typeof window.applyFbData === 'function') { try { window.applyFbData('intrants', _tuIntrants()); } catch (e) { _avale(e, '_charger#intrants'); } }   // FERTI-8 (§466)
 }
 function _demarrer() {
   var t = _tuto(String(window.__MV_TUTO || ''));

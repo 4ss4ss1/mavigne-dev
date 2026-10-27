@@ -1,0 +1,35 @@
+{
+  "lot": "FERTI-8",
+  "section": "§466",
+  "base": "e064e236c99c94e9b724fb707a36ebdb0edc1759",
+  "inclut": [],
+  "date": "2026-10-27",
+  "tutos": {
+    "ok": true,
+    "empreinte": "ce258e1a9416d354f572eba15955dd3c524e4b35bfe08b629694490502a7a306",
+    "date": "2026-10-27T01:57:21.430Z",
+    "joues": {
+      "téléphone": 7,
+      "ordinateur": 7,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "f734ab029a9fd0bd5fc4ba5aa1229e8c9c5a8ff7da2f1c3fee6cd03e3302cfff",
+    "CLAUDE.md": "c12b35d8f85afbe7dfd4eef5e85cccb58ecefceb07a63c05a572649467f118bc",
+    "docs/claude/INDEX.md": "02f50488a72cb355018f34a822bfd7c959e169f3f25298dcff81eb4961957dd3",
+    "docs/claude/chantiers-430-479.md": "a3a1bfe87145e47827352e71dd7363e40fc59d35716606bac1c4eb874127b7c5",
+    "docs/claude/journal.md": "da3911a74c4d22b7e512310d081e8e6d75792b04047914efa0bdb7ab66568a7b",
+    "guide/07-phyto.html": "995c7eeb41650f1df29eba83767332abb21515af3bbb00400a3459e1d586265c",
+    "index.html": "55e14740f175af418a53a11ae3db40e378576de043cf48f82bee8c4057bb18ad",
+    "public/sw.js": "f84ef3b9c68bd1de9d3a26833901816555b8b1c711aaeb81551477059c18201b",
+    "scripts/mv-harnais-liste.mjs": "a24de1ef11bb8051cb889442c13f7dc04a85333a24738fc9e35643fbdedd9c1d",
+    "scripts/tutos-couverture.json": "dd302acb00842e36f98c8b5ac92841aed79aa6c30e7973e7122af8fe76afe6f2",
+    "src/phyto.js": "100c61d9a6cdfd1c477ca0b3a8f56e77b8fa9f1a51d91cbbe040b7a776854b28",
+    "src/tutos.js": "b6fa9a917477c1ee1109028968f71a6c6f81aeff22220262c0504756f34d057a",
+    "src/utils.js": "81f74722737566522829759074131c1f203d247b3c0b02c37e6ce7b08a3115ca",
+    "scripts/mv-harnais-ferti8.mjs": "db6067d07fc0a78435d343990c59fe53d711e3defb347d44c9e3fbb1f2513772"
+  }
+}

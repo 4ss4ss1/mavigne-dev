@@ -850,3 +850,27 @@ Nico (26/10) colle la sortie du lanceur après FERTI-7 : 283 commandes sur 555, 
 
 ### 465d. La leçon
 Après FERTI-7, seuls les contrôles du module (tutos, typo, FERTI-5/6, fertil) avaient été rejoués : les 58 contrôles ciblés du §464 dataient d’avant le lot, et `phyto1`/`phyto3` lisent `index.html`, pas `phyto.js` — le filtre « qui lit phyto.js » ne pouvait pas les trouver. Un rouge de plus chez Nico. D’où la ligne de la checklist.
+
+## 466. ★★ FERTI-8 — « VOS PRODUITS » DANS LA RECHERCHE DE L’AMENDEMENT ; LES TENEURS DE CHAQUE CAMPAGNE ; LA CHAUX SANS TYPE (26/10 — `src/phyto.js` · `src/tutos.js` · `src/utils.js` (APP, WHATS_NEW, MV_AIDE phyto) · `index.html` · `public/sw.js` · `guide/07-phyto.html` · `scripts/mv-harnais-ferti8.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/tutos-couverture.json` (plafond 807 → 806) · **bump APP 10.19 → 10.20, SW 11.00 → 11.01**, base `e064e23`)
+
+### 466a. D’où ça vient
+Nico (26/10), après la mise en ligne de FERTI-5 à 7B : « Terrafumur et 4-10-1 ne sont pas dans chercher dans e-phy ». Normal pour E-Phy — sans AMM, jamais —, mais le vrai manque était derrière : tout retaper à chaque apport. Objectif reformulé (« Exact »), avec sa réserve : « attention, les produits peuvent changer quelque peu de concentration en fonction des années et des analyses menées sur eux (vérifie dans les archives) ». Maquette v3 (« Vos produits », l’artefact des v1 et v2 mis à jour), validée : « Go ».
+
+### 466b. Les archives, vérifiées
+Les archives de campagne (ARCH-1, `_arcSnapshot`, Pilotage › Archives) photographient parcelles, journal, sessions, tâches et travaux — **pas La Réserve**. Les amendements restent dans `INTRANTS.fertil`, campagne après campagne, et chaque apport garde SES teneurs (`prod.N`…`prod.CN`) et sa date (`cree`) : l’historique des teneurs d’un même produit, année par année, existait déjà. C’est lui que « Vos produits » lit.
+★ Vu en vérifiant : `_ferSave` écrivait `typ:P.typ||'II'` — un apport « Chaux, dolomie » (FERTI-5, `typ:''`) s’enregistrait en type II, et `_ferTypLbl` ne recevait jamais le vide. Corrigé : `typ:(P.nat==='chaux'?'':(P.typ||'II'))`.
+
+### 466c. Ce qui a été fait
+- `_ferVosCalc(list, n)`, pure : apports groupés par nom (`_phyNorm` : « TERRAFUMUR » et « Terrafumur » sont un seul produit) ; versions = teneurs distinctes (N, P, K, MO, C/N), la plus récente d’abord ; filtre sur le nom ou la norme ; le produit le plus récemment utilisé en tête.
+- La recherche devient « Chercher un produit » : vos produits (cinq au plus) au-dessus, puis E-Phy ; « Pas dans E-Phy » et « catalogue pas chargé » seulement si rien des deux côtés.
+- `_ferPickVos` remplit la fiche comme au dernier apport (nom, norme ou AMM et son statut vigne, fournisseur, nature et type, mention bio, dose, sac, prix et son unité) avec les teneurs de la version la plus récente, datées (`srcVos`) ; `_ferVer` reprend celles d’une autre campagne. Une teneur retouchée, une formule tapée ou un produit E-Phy effacent la reprise ; les nouvelles teneurs partent avec le nouvel apport, les anciennes restent dans l’historique.
+- ★ `_ferDfr` existait déjà (même rôle) : le doublon écrit d’abord a cassé la syntaxe — retiré. Chercher avant d’ajouter, toujours.
+- Tuto `produit-repris` (« Comment faire pour reprendre un produit déjà utilisé ? », 7 étapes : onglet, bouton « nouveau », « terra », Terrafumur sous « Vos produits », les teneurs de l’autre campagne, la date des teneurs). `couvre` : `_ferSearch`, `_ferPickVos`, `_ferVer` — le compte des gestes sans tuto reste sous son plafond. Le domaine d’entraînement charge `intrants` (`_tuIntrants` : deux apports de Terrafumur, 2024 et 2025, aux teneurs différentes) par `applyFbData('intrants', …)`, comme le Cuvier et le journal.
+- Aide (fiche Phyto), guide (étape « Le produit »), nouveautés 10.20.
+
+### 466d. Mesuré
+`mv-harnais-ferti8.mjs` : 13 vertes ; contre-épreuve 3/3 (le plus ancien apport pris pour le dernier ; le phosphore oublié dans les teneurs ; la chaux de nouveau en type II). ★ Premier passage : le harnais extrayait `_phyNorm` sur une seule ligne — or elle en compte plusieurs : exception, et une contre-épreuve « verte » qui ne prouvait rien. Extraite en entier, la base est verte et la contre-épreuve vraie. FERTI-5 34, FERTI-6 17, fertil 70, phyto1 et phyto3, tutos et typo verts ; preflight 0 erreur. Rendu regardé dans l’appli construite (gestes réels, clair et sombre) : « terra » → Terrafumur sous « Vos produits », fiche remplie, teneurs 2025-2026 puis 2024-2025 au geste, datées. Tutos : 7 × téléphone, ordinateur et panneau côte à côte, tous au bout (`produit-repris` 7/7). Chaîne complète, rejouée jusqu’au bout avant la livraison, en quatre reprises : les commandes 1 à 170 ; puis `harnais-claude-md` (rouge tant que le nouveau contrôle n’était pas nommé dans le document — vert une fois la documentation écrite) ; puis `build-guide --check` (rouge tant que `public/guide.html` n’est pas refait — `npm run site` le refait ; page dérivée, non livrée, comme `sitemap.xml`) ; puis ★ `mv-harnais-tutos --contre` : le compte des gestes sans tuto avait baissé à 806, le plafond restait à 807, et la contre-épreuve « un geste nouveau sans tuto » ne rougissait plus faute de marge nulle — plafond abaissé à 806 (le harnais le demande lui-même), 24/24 ; enfin les 300 dernières commandes : 0 rouge.
+
+### 466e. Reste ouvert
+- Sortir la fertilisation de `phyto.js` (backlog) — plus pressant à chaque lot.
+- La seule catégorie « Arboriculture fruitière et vigne » (102 MFSC, §461b) : à trancher.

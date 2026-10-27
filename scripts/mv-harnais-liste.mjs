@@ -405,6 +405,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-ferti5.mjs --contre'],
   ['node scripts/mv-harnais-ferti6.mjs'],           // FERTI-6 (§463) : les parcelles par règle — rendement sous un seuil, sauf des appellations ; sans rendement connu, de côté et nommée
   ['node scripts/mv-harnais-ferti6.mjs --contre'],
+  ['node scripts/mv-harnais-ferti8.mjs'],           // FERTI-8 (§466) : « Vos produits » — apports passés groupés, teneurs par campagne, la plus récente d’abord ; la chaux sans type
+  ['node scripts/mv-harnais-ferti8.mjs --contre'],
   ['node scripts/mv-harnais-tri3.mjs'],
   ['node scripts/mv-harnais-cuvgr3.mjs'],
   ['node scripts/mv-harnais-crb2.mjs', 'crb-2-le-couloir-des-courbes'],

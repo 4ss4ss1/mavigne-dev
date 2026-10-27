@@ -1275,6 +1275,11 @@ var FER_NAT = {
 var FER_VG = { v:['Vigne','ok'], tc:['Toutes cultures','ok'], nc:['Culture non pr\u00e9cis\u00e9e','n'], non:['Pas la vigne','al'] };
 function _ferTypLbl(t){ return (t==='')?'\u2014':(FER_TYP[t]||FER_TYP.II).lbl; }
 function _ferLireNpk(v){ var m=String(v==null?'':v).match(/\d+(?:[.,]\d+)?/g); if(!m||m.length<2) return null; return { N:m[0].replace('.',','), P:m[1].replace('.',','), K:m[2]?m[2].replace('.',','):'' }; }
+// FERTI-8 (§466) — « VOS PRODUITS » : les produits de vos apports passés, toutes campagnes (La Réserve les garde ; les
+// archives de campagne, non). Chaque apport garde SES teneurs : un même produit en a plusieurs d'une campagne à l'autre,
+// selon l'analyse du produit (Nico, 26/10). Groupés par nom ; versions = teneurs distinctes, la plus récente d'abord.
+function _ferVosCalc(list, n){ var G={}, ordre=[]; (list||[]).forEach(function(op){ if(!op||!op.prod||!op.prod.nom) return; var k=_phyNorm(op.prod.nom); if(!G[k]){ G[k]={key:k, nom:op.prod.nom, ops:[]}; ordre.push(k); } G[k].ops.push(op); }); return ordre.map(function(k){ var g=G[k], vu={}; g.ops.sort(function(a,b){ return String(a.cree||'')<String(b.cree||'')?1:-1; }); g.last=g.ops[0]; g.versions=[]; g.ops.forEach(function(op){ var p=op.prod, s=[p.N,p.P,p.K,p.MO,p.CN].map(function(v){ return v==null?'':v; }).join('|'); if(!vu[s]){ vu[s]=1; g.versions.push({date:op.cree||'', c:p}); } }); return g; }).filter(function(g){ return !n || g.key.indexOf(n)>=0 || _phyNorm(g.last.prod.ref||'').indexOf(n)>=0; }).sort(function(a,b){ return String(a.last.cree||'')<String(b.last.cree||'')?1:-1; }); }
+function _ferNpkTxt(c){ return ['N','P','K'].filter(function(k){ return c&&c[k]!=null; }).map(function(k){ return k+' '+_ferFmt(c[k]); }).join(' \u00b7 ')||'teneurs non saisies'; }
 function _ferFmt(x){ var c=Math.round(x*100), d=(c%100===0)?0:((c%10===0)?1:2); return _ferFr(x,d); }
 
 function _ferNum(x){ var v=parseFloat(String(x==null?'':x).replace(',','.')); return (isNaN(v)||v<0)?0:v; }
@@ -1385,7 +1390,7 @@ function _ferNeuf(){
   var vg=(typeof window._mvVigne==='function')?window._mvVigne():null;
   var tr=(window.TRACTEURS_LIST||[])[0]||null;
   var act=(window.ACTIVITES||[]).find(function(a){ return a&&a.nom===FER_ACT; });
-  return { q:'', prod:{nom:'', ref:'', origine:'norme', amm:'', four:'', N:'', P:'', K:'', MO:'', CN:'', typ:'II', ab:!!(window.CONFIG&&window.CONFIG.bio), nat:'', vg:'', cult:'', src:false, npk:'', typMan:false},
+  return { q:'', prod:{nom:'', ref:'', origine:'norme', amm:'', four:'', N:'', P:'', K:'', MO:'', CN:'', typ:'II', ab:!!(window.CONFIG&&window.CONFIG.bio), nat:'', vg:'', cult:'', src:false, npk:'', typMan:false, srcVos:''},
            dose:'', kg:'25', prix:'', pu:'t', parcs:{},
            v:'4', ec:vg?String(vg.ec_rang):'', rd:'75', mach:(act&&act.tracteurDefautId)||(tr?tr.id:''),
            sem:'', enf:'non', ouvert:{1:true}, seuil:'', sauf:{} };
@@ -1474,7 +1479,12 @@ function _ferCss(){
   +'.fer-aoc.on{background:var(--orange-pale,#FBF0E6);border-color:var(--orange,#B85A1A);box-shadow:inset 0 0 0 1px var(--orange,#B85A1A)}.fer-aoc.on span{text-decoration:line-through;text-decoration-thickness:1.5px}'
   +'.fer-aoc:focus-visible{outline:2px solid var(--vert-med,#3D6B27);outline-offset:2px}'
   +'.fer-rgo{display:block;width:100%;min-height:44px}.fer-rgo[disabled]{opacity:.55;cursor:default}'
-  +'.fer-rdt-in{color:var(--texte,#1A1A14);font-weight:600}';
+  +'.fer-rdt-in{color:var(--texte,#1A1A14);font-weight:600}'
+  // FERTI-8 (§466) : vos produits, leurs teneurs connues
+  +'.fer-res-t{font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux,#5F5F5F);padding:9px 12px 3px}.fer-res+.fer-res-t{margin-top:8px}'
+  +'.fer-vers{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}.fer-vers span{font-size:var(--pt-micro,12px);color:var(--texte-doux,#5F5F5F)}'
+  +'.fer-ver{-webkit-appearance:none;appearance:none;border:1px solid var(--gris,#DED7C9);background:var(--bg-card,#fff);border-radius:999px;padding:6px 11px;font-family:inherit;font-size:var(--pt-micro,12px);color:var(--texte,#1A1A14);cursor:pointer;min-height:34px;font-variant-numeric:tabular-nums}'
+  +'.fer-ver.on{border-color:var(--vert-med,#3D6B27);background:var(--vert-pale,#EAF3E2);box-shadow:inset 0 0 0 1px var(--vert-med,#3D6B27)}.fer-ver:focus-visible{outline:2px solid var(--vert-med,#3D6B27);outline-offset:2px}';
   document.head.appendChild(st);
 }
 function _ferEnsureOv(){
@@ -1517,8 +1527,8 @@ function openOvFerti(){
   var b=''
   +'<div class="fer-h" style="margin:0 0 12px">Cinq \u00e9tapes conseill\u00e9es, aucune obligatoire. Ce qui manque reste \u00ab\u00a0\u2014\u00a0\u00bb\u00a0: rien n\u2019est invent\u00e9, et le reste s\u2019enregistre quand m\u00eame.</div>'
   +_ferStep(1,'Le produit',''
-    +'<div class="mvr-fl" style="margin-top:0">Chercher dans E-Phy</div>'
-    +'<input class="mvr-fi" id="fer-q" type="text" autocomplete="off" placeholder="Nom commercial ou n\u00b0 d\u2019AMM" oninput="_ferSearch(this.value)">'
+    +'<div class="mvr-fl" style="margin-top:0">Chercher un produit</div>'
+    +'<input class="mvr-fi" id="fer-q" data-tuto="fer.q" type="text" autocomplete="off" placeholder="Vos produits, nom commercial ou n\u00b0 d\u2019AMM" oninput="_ferSearch(this.value)">'
     +'<div id="fer-res"></div><div id="fer-etat"></div>'
     +'<div class="mvr-fl">Nom du produit</div><input class="mvr-fi" id="fer-nom" data-tuto="fer.nom" type="text" autocomplete="off" value="" oninput="_ferSet(\'prod.nom\',this.value)">'
     +'<div class="mvr-fl">Norme ou AMM</div>'
@@ -1542,7 +1552,7 @@ function openOvFerti(){
       +'<div>'+_ferIn('fer-K','Potasse',P.K,'% K<sub>2</sub>O','oninput="_ferSet(\'prod.K\',this.value)"')+'</div></div>'
     +'<div class="mvr-f2"><div>'+_ferIn('fer-MO','Mati\u00e8re organique',P.MO,'%','oninput="_ferSet(\'prod.MO\',this.value)"')+'</div>'
       +'<div>'+_ferIn('fer-CN','Rapport C/N',P.CN,'C/N','oninput="_ferSet(\'prod.CN\',this.value)"')+'</div></div>'
-    +'<div class="fer-src" id="fer-src" style="display:none"></div>'
+    +'<div class="fer-src" id="fer-src" data-tuto="fer.src" style="display:none"></div>'
     +'<div class="mvr-fl">Ce que c\u2019est</div>'
     +'<select class="mvr-fi" id="fer-nat" data-tuto="fer.nat" onchange="_ferNat(this.value)" oninput="_ferNat(this.value)"><option value="">Choisir\u2026</option>'+Object.keys(FER_NAT).map(function(k){ return '<option value="'+k+'">'+FER_NAT[k].l+'</option>'; }).join('')+'</select>'
     +'<div class="fer-box" id="fer-typ-h"></div>'
@@ -1606,7 +1616,7 @@ function openOvFerti(){
 }
 function _ferTog(n){ _fer.ouvert[n]=!_fer.ouvert[n]; var el=document.getElementById('fer-s'+n); if(el) el.classList.toggle('ferme', !_fer.ouvert[n]); }
 function _ferSet(k,v){
-  if(_fer&&_fer.prod&&/^prod\.(N|P|K|MO|CN)$/.test(k)) _fer.prod.src=false;   // FERTI-5 (§462)
+  if(_fer&&_fer.prod&&/^prod\.(N|P|K|MO|CN)$/.test(k)) { _fer.prod.src=false; _fer.prod.srcVos=''; }   // FERTI-5 (§462) · FERTI-8 (§466)
   if(!_fer) return;
   if(k.indexOf('prod.')===0) _fer.prod[k.slice(5)]=v; else _fer[k]=v;
   _ferUp();
@@ -1641,14 +1651,22 @@ function _ferRegleUp(){
   else h.textContent='Toutes les parcelles ont un rendement connu pour '+_fer._mil+'.';
 }
 function _ferSearch(q){
-  if(!_fer) return; _fer.q=q||'';
+  if(!_fer) return; var nq=q||''; if(nq!==_fer.q) _fer.own=null; _fer.q=nq;
   var el=document.getElementById('fer-res'); if(!el) return;
   var n=_phyNorm(_fer.q);
-  if(n.length<2){ el.innerHTML=''; _fer._res=[]; _ferEtat(); return; }
+  if(n.length<2){ el.innerHTML=''; _fer._res=[]; _fer._vos=[]; _ferEtat(); return; }
+  // FERTI-8 : vos produits (apports passés, toutes campagnes) avant E-Phy.
+  var vos=_ferVosCalc(_ferList(), n).slice(0,5); _fer._vos=vos;
   var res=_phyEphy().filter(function(p){ return p && p.type==='MFSC' && (_phyNorm(p.nom).indexOf(n)>=0 || String(p.amm||'').indexOf(n)>=0 || (p.noms2||[]).some(function(x){ return _phyNorm(x).indexOf(n)>=0; })); }).slice(0,8);
   _fer._res=res;
-  // FERTI-5 : chaque résultat dit ce que son autorisation permet (p.vg, posé par la synchro).
-  el.innerHTML=res.length
+  var hv=vos.length
+    ? '<div class="fer-res-t">Vos produits</div><div class="fer-res">'+vos.map(function(g,i){ var L=g.last;
+        return '<div class="fer-ri'+(_fer.own&&_fer.own.key===g.key?' on':'')+'"'+(i===0?' data-tuto="fer.vos"':'')+' role="button" tabindex="0" data-own="'+i+'" onclick="_ferPickVos(+this.getAttribute(\'data-own\'))" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">'
+          +'<div style="flex:1;min-width:0"><div class="fer-rt">'+_escHtml(g.nom)+'</div><div class="fer-rs">'+_escHtml(L.prod.ref||'\u2014')+' \u00b7 '+g.ops.length+'\u00a0apport'+(g.ops.length>1?'s':'')+', le dernier le '+_ferDfr(L.cree)+(g.versions.length>1?' \u00b7 '+g.versions.length+' teneurs connues':'')+'</div></div></div>';
+      }).join('')+'</div>'
+    : '';
+  // FERTI-5 : chaque résultat E-Phy dit ce que son autorisation permet (p.vg, posé par la synchro).
+  var he=res.length
     ? '<div class="fer-res">'+res.map(function(p,i){
         var g=FER_VG[p.vg]||null, alias=(_phyNorm(p.nom).indexOf(n)<0)?((p.noms2||[]).filter(function(x){ return _phyNorm(x).indexOf(n)>=0; })[0]||''):'';
         return '<div class="fer-ri'+(_fer.prod.amm&&_fer.prod.amm===p.amm?' on':'')+(p.vg==='non'?' hors':'')+'" role="button" tabindex="0" onclick="_ferPickEphy('+i+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">'
@@ -1656,18 +1674,41 @@ function _ferSearch(q){
           +(g?'<span class="fer-chip '+g[1]+'">'+g[0]+'</span>':'')+'</div>';
       }).join('')+'</div>'
     : '';
+  el.innerHTML=hv+(hv&&he?'<div class="fer-res-t">E-Phy</div>':'')+he;
   _ferEtat();
 }
-// FERTI-5 : sous la recherche, le statut du produit choisi — ou ce que veut dire « pas dans E-Phy ».
+// FERTI-8 : reprendre un produit de vos apports — la fiche comme au dernier apport, les teneurs de la version choisie.
+function _ferPickVos(i){ var g=(_fer._vos||[])[i]; if(!g) return; _fer.own={key:g.key, g:g, vi:0}; _ferVosApplique(false); }
+function _ferVer(vi){ if(!_fer||!_fer.own) return; _fer.own.vi=vi; _ferVosApplique(true); }
+function _ferVosApplique(seulTeneurs){
+  var g=_fer.own.g, L=g.last, v=g.versions[_fer.own.vi]||g.versions[0], P=_fer.prod, F=_fer, c=v.c||{};
+  var set=function(id,val){ var e=document.getElementById(id); if(e) e.value=val; };
+  if(!seulTeneurs){
+    P.nom=L.prod.nom; P.ref=L.prod.ref||''; P.origine=L.prod.origine||'norme'; P.amm=L.prod.amm||''; P.vg=L.prod.vg||''; P.cult=''; P.four=L.prod.four||'';
+    P.nat=L.prod.nat||''; P.typ=(L.prod.typ==null)?'II':L.prod.typ; P.typMan=false; P.ab=!!L.prod.ab;
+    if(L.dose!=null) F.dose=_ferFmt(L.dose); if(L.kgSac!=null) F.kg=_ferFmt(L.kgSac); F.prix=(L.prix!=null)?_ferFmt(L.prix):'';
+    set('fer-nom',P.nom); set('fer-ref',P.ref); set('fer-four',P.four); set('fer-dose',F.dose||''); set('fer-kg',F.kg||''); set('fer-prix',F.prix||'');
+    var na=document.getElementById('fer-nat'); if(na) na.value=P.nat; var ab=document.getElementById('fer-ab'); if(ab) ab.checked=P.ab;
+    if(L.pu==='t'||L.pu==='s') _ferUnit(L.pu);
+  }
+  ['N','P','K','MO','CN'].forEach(function(k){ P[k]=(c[k]!=null)?_ferFmt(c[k]):''; set('fer-'+k,P[k]); });
+  P.src=false; P.npk=''; set('fer-npk',''); P.srcVos=_ferDfr(v.date);
+  _ferSearch(_fer.q); _ferUp();
+}
 function _ferEtat(){
   var el=document.getElementById('fer-etat'); if(!el||!_fer) return;
   var P=_fer.prod, q=String(_fer.q||'').trim(), h='';
-  if(P.origine==='ephy'&&P.amm){
+  if(_fer.own&&_fer.own.g){
+    var og=_fer.own.g, OL=og.last;
+    h='<div class="fer-box"><b>Repris de votre apport du '+_ferDfr(OL.cree)+'.</b> Norme, fournisseur, nature, mention bio, dose et sac sont remplis. Les teneurs aussi, mais elles changent d\u2019une ann\u00e9e \u00e0 l\u2019autre selon l\u2019analyse du produit\u00a0: v\u00e9rifiez-les sur le sac ou l\u2019analyse de cette ann\u00e9e.'
+      +(og.versions.length>1?'<div class="fer-vers"><span>Teneurs connues\u00a0:</span>'+og.versions.map(function(v,i){ var on=(i===_fer.own.vi);
+          return '<button type="button" class="fer-ver'+(on?' on':'')+'" data-tuto="fer.ver" data-ver="'+i+'" aria-pressed="'+on+'" onclick="_ferVer(+this.getAttribute(\'data-ver\'))">'+_ferCampLbl(_ferCampDe(v.date))+' \u00b7 '+_ferNpkTxt(v.c)+'</button>'; }).join('')+'</div>':'')+'</div>';
+  } else if(P.origine==='ephy'&&P.amm){
     if(P.vg==='non') h='<div class="fer-box al"><b>Son autorisation ne cite pas la vigne.</b> E-Phy le donne pour\u00a0: '+_escHtml(P.cult||'d\u2019autres cultures')+'. Il s\u2019enregistre quand m\u00eame\u00a0; v\u00e9rifiez avant d\u2019\u00e9pandre sur une vigne.</div>';
     else h='<div class="fer-box"><b>Dans E-Phy, AMM '+_escHtml(P.amm)+'.</b> '+(P.vg==='tc'?'Autoris\u00e9 sur toutes cultures, donc sur la vigne.':(P.vg==='nc'?'E-Phy n\u2019indique aucune culture pour ce produit\u00a0: v\u00e9rifiez l\u2019\u00e9tiquette.':'Son autorisation cite la vigne.'))+'</div>';
-  } else if(_phyNorm(q).length>=2&&!_phyEphy().length){
+  } else if(_phyNorm(q).length>=2&&!_phyEphy().length&&!(_fer._vos||[]).length){
     h='<div class="fer-box">Le catalogue E-Phy n\u2019est pas charg\u00e9\u00a0: la recherche reprendra avec la connexion. Le produit peut se saisir ci-dessous.</div>';
-  } else if(_phyNorm(q).length>=2&&!(_fer._res||[]).length){
+  } else if(_phyNorm(q).length>=2&&!(_fer._res||[]).length&&!(_fer._vos||[]).length){
     h='<div class="fer-box"><b>Pas dans E-Phy.</b> C\u2019est normal si le sac ne porte pas de num\u00e9ro d\u2019AMM\u00a0: le produit est vendu sous une norme, ou comme fertilisant UE. Saisissez-le ci-dessous, avec sa norme.'
       +(String(P.nom||'').trim()?'':'<br><span class="fer-lk" role="button" tabindex="0" onclick="_ferNomQ()">Prendre \u00ab\u00a0'+_escHtml(q)+'\u00a0\u00bb comme nom du produit</span>')+'</div>';
   }
@@ -1675,7 +1716,7 @@ function _ferEtat(){
 }
 function _ferNomQ(){ if(!_fer) return; var q=String(_fer.q||'').trim(); if(!q) return; _fer.prod.nom=q; var e=document.getElementById('fer-nom'); if(e) e.value=q; _ferEtat(); _ferUp(); }
 function _ferNorme(ref){ if(!_fer) return; var P=_fer.prod; P.ref=ref; P.origine='norme'; P.amm=''; P.vg=''; P.cult=''; var e=document.getElementById('fer-ref'); if(e) e.value=ref; _ferSearch(_fer.q); _ferUp(); }
-function _ferNpk(v){ if(!_fer) return; var P=_fer.prod, r=_ferLireNpk(v); P.npk=v; if(r){ P.N=r.N; P.P=r.P; P.K=r.K; P.src=false; ['N','P','K'].forEach(function(k){ var e=document.getElementById('fer-'+k); if(e) e.value=P[k]; }); } _ferUp(); }
+function _ferNpk(v){ if(!_fer) return; var P=_fer.prod, r=_ferLireNpk(v); P.npk=v; if(r){ P.N=r.N; P.P=r.P; P.K=r.K; P.src=false; P.srcVos=''; ['N','P','K'].forEach(function(k){ var e=document.getElementById('fer-'+k); if(e) e.value=P[k]; }); } _ferUp(); }
 function _ferNat(v){ if(!_fer) return; var P=_fer.prod; P.nat=v; if(v&&FER_NAT[v]){ P.typ=FER_NAT[v].t; P.typMan=false; } else if(!P.typMan) P.typ='II'; var s=document.getElementById('fer-typ'); if(s&&P.typ) s.value=P.typ; _ferUp(); }
 function _ferTypMain(v){ if(!_fer) return; var P=_fer.prod; P.typ=v; P.typMan=true; P.nat=''; var s=document.getElementById('fer-nat'); if(s) s.value=''; _ferUp(); }
 function _ferTypTog(){ if(!_fer) return; _fer.showTyp=!_fer.showTyp; var s=document.getElementById('fer-typ'); if(s){ s.style.display=_fer.showTyp?'':'none'; if(_fer.prod.typ) s.value=_fer.prod.typ; } _ferTypBox(); }
@@ -1688,10 +1729,11 @@ function _ferTypBox(){
   el.innerHTML=h+' <span class="fer-lk" role="button" tabindex="0" onclick="_ferTypTog()">'+(_fer.showTyp?'Fermer':'Choisir le type soi-m\u00eame')+'</span>';
 }
 function _ferNormesUp(){ if(!_fer) return; var r=_phyNorm(_fer.prod.ref||''); document.querySelectorAll('#fer-norms .fer-norm').forEach(function(b){ var on=!!r&&_phyNorm(b.getAttribute('data-ref'))===r; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on?'true':'false'); }); }
-function _ferSrcUp(){ var e=document.getElementById('fer-src'); if(!e||!_fer) return; var P=_fer.prod; e.style.display=P.src?'':'none'; e.textContent=P.src?('Teneurs reprises d\u2019E-Phy, telles que d\u00e9clar\u00e9es \u00e0 l\u2019autorisation'+(P.CN?'\u00a0; C/N calcul\u00e9':'')+'. \u00c0 comparer avec le sac.'):''; }
+function _ferSrcUp(){ var e=document.getElementById('fer-src'); if(!e||!_fer) return; var P=_fer.prod; e.style.display=(P.src||P.srcVos)?'':'none'; e.textContent=P.srcVos?('Teneurs de votre apport du '+P.srcVos+'. Elles changent d\u2019une ann\u00e9e \u00e0 l\u2019autre\u00a0: comparez avec le sac ou l\u2019analyse de cette ann\u00e9e. Retouch\u00e9es, elles partent avec ce nouvel apport.'):(P.src?('Teneurs reprises d\u2019E-Phy, telles que d\u00e9clar\u00e9es \u00e0 l\u2019autorisation'+(P.CN?'\u00a0; C/N calcul\u00e9':'')+'. \u00c0 comparer avec le sac.'):''); }
 function _ferPickEphy(i){
   var p=(_fer._res||[])[i]; if(!p) return;
   var P=_fer.prod, c=p.compo||{};
+  _fer.own=null; P.srcVos='';   // FERTI-8 (§466) : un produit E-Phy remplace la reprise
   P.nom=p.nom; P.amm=p.amm||''; P.ref=p.amm?('AMM '+p.amm):''; P.origine='ephy'; P.vg=p.vg||''; P.cult=p.cult||'';
   // FERTI-5 : les teneurs déclarées à l'AMM remplacent la saisie seulement si E-Phy en donne.
   if(c.N!=null||c.P!=null||c.K!=null||c.MO!=null){
@@ -1786,7 +1828,7 @@ function _ferSave(){
   var op={ id:'f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), cree:_mvToday(),
     prodId:prod.id,
     prod:{ nom:nomP, ref:String(P.ref||'').trim(), origine:P.origine||'norme', amm:P.amm||'', four:String(P.four||'').trim(), nat:P.nat||'', vg:P.vg||'',
-           N:num(P.N), P:num(P.P), K:num(P.K), MO:num(P.MO), CN:num(P.CN), typ:P.typ||'II', ab:!!P.ab },
+           N:num(P.N), P:num(P.P), K:num(P.K), MO:num(P.MO), CN:num(P.CN), typ:(P.nat==='chaux'?'':(P.typ||'II')), ab:!!P.ab },
     dose:num(F.dose), kgSac:num(F.kg), prix:num(F.prix), pu:F.pu, cout:o.cout||null, sacs:o.sacsCmd||null,
     parcs:o.list.map(function(p){ return p.nom; }),
     trac:{ v:num(F.v), ec:num(F.ec), rd:num(F.rd), hha:hha||null, mach:F.mach||'' },
@@ -2030,6 +2072,7 @@ window.openOvFerti=openOvFerti; window._ferTog=_ferTog; window._ferSet=_ferSet; 
 window._ferAll=_ferAll; window._ferPick=_ferPick; window._ferSearch=_ferSearch; window._ferPickEphy=_ferPickEphy; window._ferSave=_ferSave;
 window._ferNomQ=_ferNomQ; window._ferNorme=_ferNorme; window._ferNpk=_ferNpk; window._ferNat=_ferNat; window._ferTypMain=_ferTypMain; window._ferTypTog=_ferTypTog; window._ferSacTog=_ferSacTog;   // FERTI-5 (§462)
 window._ferSeuil=_ferSeuil; window._ferSauf=_ferSauf; window._ferRegleGo=_ferRegleGo;   // FERTI-6 (§463)
+window._ferPickVos=_ferPickVos; window._ferVer=_ferVer;   // FERTI-8 (§466)
 window.openFerParc=openFerParc; window._ferParcSave=_ferParcSave; window._ferMan=_ferMan; window._ferDel=_ferDel;
 window._ferRender=_ferRender; window._ferCamp=_ferCamp; window._ferExportPdf=_ferExportPdf; window._ferExportCsv=_ferExportCsv;
 window._ferFaits=_ferFaits; window._ferSyncSessions=_ferSyncSessions; window._ferLignes=_ferLignes; window._ferHha=_ferHha;

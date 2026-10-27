@@ -519,3 +519,4 @@
 | 463 | 463. ★ FERTI-6 — CHOISIR LES PARCELLES PAR RÈGLE À L’ÉTAPE 2 DE L’AMENDEMENT (26/10 — `src/phyto.js` · `src… | `docs/claude/chantiers-430-479.md` |
 | 464 | 464. ★ FERTI-7 — LA CHAÎNE REVERDIT : UN TUTO POUR L’AMENDEMENT, DEUX LIGNES DE TAILLE REGRAVÉES (26/10 — `… | `docs/claude/chantiers-430-479.md` |
 | 465 | 465. FERTI-7B — LE BOUTON DE SAISIE DE PHYTO D’UN SEUL TENANT ; LA CHAÎNE COMPLÈTE VERTE (26/10 — `index.ht… | `docs/claude/chantiers-430-479.md` |
+| 466 | 466. ★★ FERTI-8 — « VOS PRODUITS » DANS LA RECHERCHE DE L’AMENDEMENT ; LES TENEURS DE CHAQUE CAMPAGNE ; LA … | `docs/claude/chantiers-430-479.md` |
