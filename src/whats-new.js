@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.32', d: '2026-10-28', items: [
+    { niv: 0, pour: ['tous'], emoji: 'tracteur', titre: 'Tracteur : la session en cours en tête, et « Terminer »',
+      desc: "La session en cours passe tout en haut, avant les compteurs, avec deux boutons\u00a0: «\u00a0Enregistrer l’avancement\u00a0» et, nouveau, «\u00a0Terminer\u00a0» — la session se ferme aujourd’hui, les parcelles pas faites restent à faire, et «\u00a0Annuler\u00a0» rattrape pendant six secondes. Les compteurs tiennent sur une ligne, sans leurs zéros. Au téléphone, les conducteurs et les activités sont dans «\u00a0Filtrer\u00a0», en bas, avec une recherche\u00a0; le «\u00a0+\u00a0» ne cache plus la dernière session." },
+  ] },
   { v: '10.31', d: '2026-10-28', items: [
     { niv: 0, pour: ['admin'], emoji: 'ecran', titre: 'Le Registre phyto et Le Chai au clavier',
       desc: "Sur ordinateur, comme au Journal\u00a0: dans le Registre phyto et dans Le Chai, J et K (ou les flèches) passent d’une ligne à l’autre et la fiche suit\u00a0; dans le Registre, N ouvre la saisie d’un traitement." },

@@ -19,6 +19,9 @@ const SAIN = { tutos: lire('src/tutos.js'), coq: lire('src/coquille.js'), css: l
   autres: SRC.filter((f) => fs.existsSync(f)).map(lire).join('\n') };
 // Les couches fixes posées sur toute la largeur qui n'ont pas à suivre le panneau — chacune avec sa raison.
 const EXEMPT = {
+  '#page-tracteur .t-feuille': 'TRAC-UX-1A (§480) : la feuille des filtres du Tracteur, au téléphone seulement',
+  'body.t-feuille-ouverte #page-tracteur .t-voile': 'TRAC-UX-1A (§480) : son voile, au téléphone seulement',
+  '#page-tracteur .t-barre': 'TRAC-UX-1A (§480) : la barre basse du Tracteur (recherche, « Filtrer »), au téléphone seulement',
   '#page-parcelles .p-srow': 'FILTRE-1B (§477) : la barre basse de Parcelles (recherche, « Filtres »), au téléphone seulement',
   // ★ FILTRE-1A (§476) — au téléphone seulement (moins de 768 px) : jamais visibles à côté du panneau, qui s'ouvre à 1 280 px et plus.
   '#page-journal .j-feuille': 'FILTRE-1A (§476) : la feuille des filtres du Journal, au téléphone seulement',

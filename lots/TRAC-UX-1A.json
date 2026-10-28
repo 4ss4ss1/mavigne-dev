@@ -1,0 +1,41 @@
+{
+  "lot": "TRAC-UX-1A",
+  "section": "§480",
+  "base": "3cc562d98fdc42fe0fae34de0776f04305b3ec42",
+  "inclut": [],
+  "date": "2026-10-28",
+  "tutos": {
+    "ok": true,
+    "empreinte": "c52359ccb28ccc0e59257914c227fc8b30015ba165f290b11c9ad15a6d396641",
+    "date": "2026-10-28T20:36:14.038Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "229d9fafbcee9a82476dd93bbdcf744fc31b0611fa21a8833676d83c06039ed2",
+    "CLAUDE.md": "577533bb4cafdaa96811e32366c2cf074cd34a307b723d9e256e8cb90e1ac87d",
+    "docs/claude/INDEX.md": "76f30e783dd9946d89e410d9a14cc956e0936c88fdf4e4f7f28df29ede67d67b",
+    "docs/claude/journal.md": "5bbf05ec93c8d9a8a3e45f7492b5c836c57073ba61bc189ae7b0972b2614eaf1",
+    "guide/06-tracteur.html": "e10b461d0f44420f864dbc91010a99dd44e9698faf72f29c3a78aff8c3a67e06",
+    "index.html": "be7f661d7ce8c273794b0a1e3ee6301c71ad9182470be6de0f894556b1dde196",
+    "public/sw.js": "d6b0c576815d5bc9b756e4249747250895eb760766e813f07186e2bf12ecd871",
+    "scripts/harnais-claude-md.mjs": "f1c6a8ced1e4544f2bf56935bda79fe7258dda6c4a5e1161f7e081e5a4bb4717",
+    "scripts/mv-harnais-cote1.mjs": "457cc287be74bf71b05bb08f0f7d4fd72423253c18a7c38c32d82c36f724fd67",
+    "scripts/mv-harnais-kit4.mjs": "c07b51c4f3bcd2f4e557e157d92ca804a7886ff75f99df9ccbd431db1acef11d",
+    "scripts/mv-harnais-liste.mjs": "1e8a5aa337a9d4f15578b82e347c7790cf05ceb86d8cd03e3132de814a0d4890",
+    "scripts/mv-ux-baseline.json": "7b61c27423e18e7d165412a64986efc2a3d86493a5575d1da16a82c438a014c7",
+    "scripts/mv-ux-rendu.mjs": "c1693b2b6c2f66adae303c4633cbc9b17b122bba62bf81a56126bd1432cd1bd0",
+    "scripts/tutos-couverture.json": "f8e99d5490da622921b184681113f3451e33d0044041ef5fd8d475bbd960a48f",
+    "src/styles.css": "72134bcc5bf70979ae9ffb881954361d5f5c0c36feef6b3ba0331f743a640a9c",
+    "src/tracteur.js": "ec545a59038174d430783383db01aab558d2f20bf9b8266c0c4883b573be888e",
+    "src/utils.js": "59ca9faa8e728d43b3a54e86526c7f76bb6e5710675c4ce50d810162ceb5d27a",
+    "src/whats-new.js": "41fa13873b130e650ec0a735f67a77756a3fdfe5de7f2ea122d07639d7f5683f",
+    "docs/claude/chantiers-480-529.md": "78cb6054498048f14c116abd32ad8cfeaeda5b6ec3029cc6a7472b0825562233",
+    "scripts/mv-harnais-traux1a.mjs": "af5c52d419264a4126dc5bf5958dc4a0608d162aae7ec375f3842ee30747b4fe"
+  }
+}

@@ -3774,6 +3774,46 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
   #page-journal .jfx-act{margin-top:var(--e-3,12px);}
   #page-journal .jfx-rien{color:var(--texte-doux,#686660);}
 }
+/* ★ TRAC-UX-1A (§480) — maquette-ux-v2, Tracteur : la session en cours en tête (deux boutons de 44 px), les compteurs sur une
+   ligne sans leurs zéros ; au téléphone, les pastilles dans « Filtrer », la recherche à côté, en bas ; le « + » au-dessus de la
+   barre, et la liste garde sa marge sous lui. Le bandeau « session en cours » laisse la place à la carte. */
+#trac-enc-banner{display:none!important;}
+.trac-encours:empty{display:none;}
+.trac-encours{padding:var(--e-3,12px) var(--e-4,16px) 0;}
+.trx{padding:var(--e-4,16px);border:1px solid var(--ligne,#E7E6E2);border-left:4px solid var(--accent,#7A2850);border-radius:var(--r-lg,12px);background:var(--bg-card,#FFFFFF);}
+.trx + .trx{margin-top:var(--e-3,12px);}
+.trx-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--e-3,12px);}
+.trx-k{font-size:var(--pt-micro,12px);font-weight:600;color:var(--accent-texte,#7A2850);}
+.trx-t{font-size:var(--pt-md,20px);font-weight:600;color:var(--texte,#1B1A18);}
+.trx-m,.trx-ha{font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
+.trx-pct{font-size:var(--pt-md,20px);font-weight:600;color:var(--texte,#1B1A18);}
+.trx-barre{height:8px;margin:var(--e-2,8px) 0 var(--e-1,4px);border-radius:var(--r-full,999px);background:var(--piste,rgba(28,26,22,.10));overflow:hidden;}
+.trx-barre span{display:block;height:100%;border-radius:var(--r-full,999px);background:var(--accent,#7A2850);}
+.trx-act{display:flex;gap:var(--e-2,8px);margin-top:var(--e-3,12px);}
+.trx-act button{flex:1;min-height:44px;border-radius:var(--r-full,999px);font-weight:600;font-size:var(--pt-micro,12px);}
+.trx-av{border:0;background:var(--accent,#7A2850);color:var(--sur-accent,#FFFFFF);}
+.trx-fin{border:1px solid var(--ligne-forte,#C9C7C1);background:var(--bg-card,#FFFFFF);color:var(--texte,#1B1A18);}
+#trac-kpis{display:flex;flex-wrap:wrap;gap:var(--e-1,4px) var(--e-4,16px);padding:var(--e-3,12px) var(--e-4,16px) 0;}
+#trac-kpis .mvu-kpi{display:flex;align-items:baseline;gap:var(--e-1,4px);padding:0;border:0;background:none;box-shadow:none;min-height:0;}
+#trac-kpis .mvu-kpi[hidden]{display:none;}
+#trac-kpis .mvu-kpi-v{font-size:var(--pt-base,15px);}
+.t-feuille-tete,.t-feuille-lbl,.t-feuille-voir,.t-voile,.t-filtrer{display:none;}
+.t-barre{margin-bottom:var(--e-3,12px);}
+@media (max-width:767.98px){
+  #page-tracteur #trac-parc-pills{display:none!important;}
+  #page-tracteur .t-feuille{display:none;position:fixed;left:0;right:0;bottom:0;z-index:1200;max-height:80vh;overflow-y:auto;background:var(--bg-card,#FFFFFF);border-radius:var(--r-lg,12px) var(--r-lg,12px) 0 0;box-shadow:0 -8px 24px var(--voile,rgba(16,15,13,.30));padding:var(--e-3,12px) var(--e-4,16px) calc(env(safe-area-inset-bottom,0px) + 12px);}
+  body.t-feuille-ouverte #page-tracteur .t-feuille{display:block;}
+  body.t-feuille-ouverte #page-tracteur .t-voile{display:block;position:fixed;inset:0;z-index:1199;background:var(--voile,rgba(16,15,13,.30));}
+  #page-tracteur .t-feuille-tete{display:flex;justify-content:space-between;align-items:center;gap:var(--e-2,8px);padding-bottom:var(--e-2,8px);}
+  #page-tracteur .t-feuille-lbl{display:block;padding:var(--e-2,8px) 0 var(--e-1,4px);font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux,#686660);}
+  #page-tracteur .t-feuille-voir{display:block;width:100%;margin-top:var(--e-3,12px);min-height:44px;border:0;border-radius:var(--r-full,999px);background:var(--accent,#7A2850);color:var(--sur-accent,#FFFFFF);font-weight:700;font-size:var(--pt-base,15px);}
+  #page-tracteur .t-barre{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 72px);z-index:89;display:flex;align-items:center;gap:var(--e-2,8px);margin:0;padding:var(--e-2,8px) var(--e-3,12px);background:var(--bg-app,#F0EEE9);border-top:1px solid var(--ligne,#E7E6E2);}
+  #page-tracteur .t-barre .sbox{flex:1;min-width:0;}
+  #page-tracteur .t-filtrer{display:inline-flex;align-items:center;gap:var(--e-2,8px);min-height:44px;padding:0 var(--e-4,16px);border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-full,999px);background:var(--bg-card,#FFFFFF);color:var(--texte,#1B1A18);font-weight:600;font-size:var(--pt-micro,12px);}
+  #page-tracteur .t-filtrer-n:not(:empty){min-width:20px;height:20px;padding:0 var(--e-1,4px);border-radius:var(--r-full,999px);background:var(--accent,#7A2850);color:var(--sur-accent,#FFFFFF);display:inline-flex;align-items:center;justify-content:center;}
+  #page-tracteur #trac-fab{bottom:calc(env(safe-area-inset-bottom,0px) + 72px + 72px)!important;}
+  #page-tracteur #trac-panel-sessions{padding-bottom:calc(var(--e-8,40px) * 6)!important;}   /* la barre, le « + » et 90 px de marge sous la liste */
+}
 /* ★ FILTRE-1B (§477) — Parcelles au téléphone, le même patron : les compteurs restent en tête ; l'état, les tâches et Liste / Carte
    passent dans la feuille « Filtres » (celle d'ARRIVEE-4, pour tous désormais) ; la recherche et « Filtres » en barre basse. Sur la
    carte, Liste / Carte revient en haut (la barre vit dans la liste). Sur ordinateur, rien ne bouge. */

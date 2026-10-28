@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.12
+// MA VIGNE — Service Worker v11.13
+// v11.13 (28/10/2026) — TRAC-UX-1A (§480) : Tracteur — la session en cours en tête (Enregistrer l'avancement, Terminer avec Annuler), les compteurs sans zéros ; au téléphone, « Filtrer » et la recherche en bas.
 // v11.12 (28/10/2026) — PC-LISTE-2 (§479) : le clavier des listes avec fiche — le Registre phyto et Le Chai (J / K, les flèches ; N au Registre).
 // v11.11 (28/10/2026) — PC-LISTE-1 (§478) : le Journal sur ordinateur en trois colonnes — filtres, liste dense, fiche de l'entrée choisie ; J / K / N / « / ».
 // v11.10 (28/10/2026) — FILTRE-1B (§477) : Parcelles au téléphone, la liste d'abord — l'état, les tâches et Liste / Carte dans « Filtres », la recherche et « Filtres » en barre basse.
@@ -4644,7 +4645,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.12';
+const CACHE_NAME   = 'mavigne-v11.13';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4661,7 +4662,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.12 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.13 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4681,7 +4682,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.12 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.13 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

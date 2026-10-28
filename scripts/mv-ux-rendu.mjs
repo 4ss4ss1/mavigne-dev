@@ -151,7 +151,7 @@ const L = {
   tracteur: () => {
     const pg = document.getElementById('page-tracteur'); const o = {};
     const vis = (el) => { const r = el.getBoundingClientRect(); return r.width >= 1 && r.height >= 1; };
-    const s = Array.from(pg.querySelectorAll('.scard-enc')).find(vis); o.session = s ? Math.round(s.getBoundingClientRect().top) : null;
+    const s = Array.from(pg.querySelectorAll('#trac-encours .trx, .scard-enc')).find(vis);   /* TRAC-UX-1A (§480) : la session en cours est la carte de tête */ o.session = s ? Math.round(s.getBoundingClientRect().top) : null;
     const fab = document.getElementById('trac-fab'); o.recouvre = null;
     if (fab && vis(fab)) { const f = fab.getBoundingClientRect();
       o.recouvre = Array.from(pg.querySelectorAll('button, a[href], [onclick], input:not([type=hidden]), select'))

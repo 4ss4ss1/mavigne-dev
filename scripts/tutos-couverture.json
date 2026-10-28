@@ -11,6 +11,10 @@
     "_jFeuille": "FILTRE-1A (§476) : ouvre et ferme la feuille des filtres du Journal au téléphone — « Filtrer » et « Voir N entrées » disent ce qu’ils font ; les filtres dedans sont les gestes d’avant",
     "_jRetire": "FILTRE-1A (§476) : retire un filtre actif d’un appui sur sa pastille, le « × » dedans — rien à apprendre",
     "_pFxVue": "FILTRE-1B (§477) : Liste ou Carte depuis la feuille « Filtres » de Parcelles — le même choix que les onglets Liste / Carte (switchPTab), rien de neuf à apprendre",
-    "_jSel": "PC-LISTE-1 (§478) : choisir une entrée du Journal sur ordinateur — sa fiche s’affiche à côté ; rien à apprendre, c’est la liste qui montre"
+    "_jSel": "PC-LISTE-1 (§478) : choisir une entrée du Journal sur ordinateur — sa fiche s’affiche à côté ; rien à apprendre, c’est la liste qui montre",
+    "_tFeuille": "TRAC-UX-1A (§480) : ouvre et ferme la feuille des filtres du Tracteur au téléphone — le même patron que le Journal ; les pastilles dedans sont les gestes d’avant",
+    "_tFiltresEffacer": "TRAC-UX-1A (§480) : « Tout effacer » dans la feuille des filtres — rien à apprendre",
+    "_tCherche": "TRAC-UX-1A (§480) : la recherche des sessions (activité, conducteur, parcelle) — un champ qui cherche en tapant",
+    "_trTerminer": "TRAC-UX-1A (§480) : « Terminer » sur la carte de la session en cours — le bouton dit ce qu’il fait, et « Annuler » rattrape six secondes ; un tuto viendra avec celui de la session"
   }
 }

@@ -1464,6 +1464,58 @@ function _repairSessSaisons(){
   if(window.showToast)window.showToast(nOk+' session'+(nOk>1?'s':'')+' recalée'+(nOk>1?'s':'')+(nNeutre?(' · '+nNeutre+' hors saison'):''),'#3D6B27');
 }
 window._repairSessSaisons=_repairSessSaisons;
+// ★ TRAC-UX-1A (§480) — LA SESSION EN COURS EN TÊTE (docs/maquettes/maquette-ux-v2.html, Tracteur) : le tractoriste ouvre le module
+//   pour dire où il en est. Sa session passe en tête : l'activité, qui, quel tracteur, depuis quand, l'avancement, et deux boutons de
+//   44 px — « Enregistrer l'avancement » (la feuille de travail qui existe) et « Terminer » (décision de Nico, 28/10 : la session se
+//   ferme aujourd'hui, les parcelles pas faites restent à faire ; « Annuler » six secondes). Les compteurs tiennent sur une ligne,
+//   les zéros disparaissent ; au téléphone, les pastilles vont dans « Filtrer », avec une recherche à côté.
+function _trEncoursHtml(s){
+  var pct=Number(s.avancement)||0, skip=s.parcellesSkip||[];
+  var act=PARCELLES.filter(function(p){ return p.statut!=='Arrachee'&&skip.indexOf(p.nom)<0; });
+  var tot=act.reduce(function(a,p){ return a+(parseFloat(p.surface)||0); },0);
+  var faites=(s.parcellesFaites||[]).map(function(x){ return typeof x==='string'?x:((x&&x.nom)||''); });
+  var fait=act.filter(function(p){ return faites.indexOf(p.nom)>=0; }).reduce(function(a,p){ return a+(parseFloat(p.surface)||0); },0);
+  var trac=(TRACTEURS_LIST||[]).find(function(t){ return t.id===s.tracteurId; });
+  var peut=(typeof isTractoriste==='function'&&isTractoriste())||(typeof isAdmin==='function'&&isAdmin());
+  var meta=[s.conducteur||'', trac?trac.nom:'', s.date?('depuis le '+_fmtDate(s.date)):''].filter(Boolean).join(' \u00b7 ');
+  return '<div class="trx" data-sid="'+_escAttr(s.id)+'">'
+    +'<div class="trx-hd"><div><div class="trx-k">En cours</div><div class="trx-t">'+_escHtml(s.activite||'Session')+'</div><div class="trx-m">'+_escHtml(meta)+'</div></div><div class="trx-pct">'+pct+'\u00a0%</div></div>'
+    +'<div class="trx-barre" aria-hidden="true"><span style="width:'+Math.max(0,Math.min(100,pct))+'%"></span></div>'
+    +'<div class="trx-ha">'+_escHtml(window._mvHaT?window._mvHaT(fait):String(fait))+' ha sur '+_escHtml(window._mvHaT?window._mvHaT(tot):String(tot))+'</div>'
+    +(peut?'<div class="trx-act"><button type="button" class="trx-av" onclick="openSessionDetail(this.closest(\'.trx\').dataset.sid)">Enregistrer l\u2019avancement</button><button type="button" class="trx-fin" onclick="_trTerminer(this.closest(\'.trx\').dataset.sid)">Terminer</button></div>':'')
+    +'</div>';
+}
+function _trTerminer(id){
+  var s=(SESSIONS||[]).find(function(x){ return x.id===id; }); if(!s||s.statut!=='En cours') return;
+  if(!((typeof isTractoriste==='function'&&isTractoriste())||(typeof isAdmin==='function'&&isAdmin()))) return;
+  var avant={ statut:s.statut, dateFin:s.dateFin, termineeMain:s.termineeMain };
+  s.statut='Termin\u00e9'; s.dateFin=_gnrTodayISO(); s.termineeMain=true;
+  _saveData('sessions'); renderTracteur();
+  var annuler=function(){
+    var s2=(SESSIONS||[]).find(function(x){ return x.id===id; }); if(!s2) return;
+    s2.statut=avant.statut;
+    if(avant.dateFin===undefined) delete s2.dateFin; else s2.dateFin=avant.dateFin;
+    if(avant.termineeMain===undefined) delete s2.termineeMain; else s2.termineeMain=avant.termineeMain;
+    _saveData('sessions'); renderTracteur(); showToast('Session reprise','#3D6B27');
+  };
+  if(typeof window.showToastAnnuler==='function') window.showToastAnnuler((s.activite||'Session')+' termin\u00e9e', annuler); else showToast('Session termin\u00e9e','#3D6B27');
+}
+function _tTrouve(s,q){
+  q=String(q||'').trim().toLowerCase(); if(!q) return true;
+  var faites=(s.parcellesFaites||[]).map(function(x){ return typeof x==='string'?x:((x&&x.nom)||''); });
+  return [s.activite,s.conducteur].concat(s.parcelles||[],faites,s.produits||[]).join(' ').toLowerCase().indexOf(q)>=0;
+}
+function _tCompteurs(){
+  ['trac-stat-sessions','trac-stat-enc','trac-stat-rep','trac-stat-h'].forEach(function(id){
+    var v=document.getElementById(id); if(!v||!v.parentNode) return;
+    var n=parseFloat(String(v.textContent||'').replace(',','.').replace(/[^0-9.]/g,''));
+    v.parentNode.hidden=!(n>0);
+  });
+}
+function _tFeuille(ouvrir){ document.body.classList.toggle('t-feuille-ouverte', !!ouvrir); }
+function _tFiltresEffacer(){ window.fCond='tous'; window.fAct='toutes'; renderTracteur(); }
+function _tCherche(v){ window.fTracQ=String(v||''); renderTracteur(); }
+window._trTerminer=_trTerminer; window._tFeuille=_tFeuille; window._tFiltresEffacer=_tFiltresEffacer; window._tCherche=_tCherche;
 function renderTracteur(){
   // Init sélection tracteur au premier render
   if(!_tracSelId&&TRACTEURS_LIST.length)_tracSelId=TRACTEURS_LIST[0].id;
@@ -1535,9 +1587,14 @@ function renderTracteur(){
     +ACTIVITES.map(a=>`<div class="chip ${window.fAct===a.nom?'active ac':''}" onclick="window.fAct='${_escAttr(a.nom)}';renderTracteur()">${_mvIcon(_actIcone(a.emoji),16)} ${_escHtml(a.nom)}</div>`).join('');
 
   // Données filtrées + triées (en cours en premier)
-  let data=_SS.filter(s=>{if(window.fCond!=='tous'&&s.conducteur!==window.fCond)return false;if(window.fAct!=='toutes'&&s.activite!==window.fAct)return false;return true;});
+  let data=_SS.filter(s=>{if(window.fCond!=='tous'&&s.conducteur!==window.fCond)return false;if(window.fAct!=='toutes'&&s.activite!==window.fAct)return false;return _tTrouve(s,window.fTracQ);});   // TRAC-UX-1A (§480) : la recherche
   const isTrait=s=>s.type==='traitement';
   const dataEnc=data.filter(s=>s.statut==='En cours'&&!isTrait(s)).sort((a,b)=>b.date.localeCompare(a.date));
+  // ★ TRAC-UX-1A (§480) : la session en cours en tête de la page (ses deux boutons), les compteurs sans leurs zéros, « Filtrer · n ».
+  var _enc=document.getElementById('trac-encours'); if(_enc) _enc.innerHTML=dataEnc.map(_trEncoursHtml).join('');
+  _tCompteurs();
+  var _fn=document.getElementById('t-filtrer-n'), _nf=(window.fCond!=='tous'?1:0)+(window.fAct!=='toutes'?1:0); if(_fn) _fn.textContent=_nf?String(_nf):'';
+  var _fv=document.getElementById('t-feuille-voir'); if(_fv) _fv.textContent='Voir '+data.length+' session'+(data.length>1?'s':'');
   const dataTer=data.filter(s=>s.statut!=='En cours'&&!isTrait(s)).sort((a,b)=>b.date.localeCompare(a.date));
   // ── Sessions de traitement regroupées par date (affichage seul — données/registre intacts) ──
   const _prodType={};(window.TRAITEMENTS||[]).forEach(function(t){if(t&&t.produit)_prodType[t.produit]=t.type;});
@@ -1663,7 +1720,7 @@ function renderTracteur(){
   var _terItems=dataTer.map(function(s){return {date:s.date||'',html:mkScard(s)};})
     .concat(traitGroups.map(function(g){return {date:g.date||'',html:mkTraitGroupCard(g)};}))
     .sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
-  sl.innerHTML=dataEnc.map(mkScard).join('')+_terItems.map(function(x){return x.html;}).join('');
+  sl.innerHTML=_terItems.map(function(x){return x.html;}).join('');   // ★ TRAC-UX-1A (§480) : la session en cours est en tête de la page, plus dans la liste
   if(_trDesk())_trFicheSync(dataEnc.concat(dataTer));   // TRAC-1 (§282)
   _fillNewSessionForm();
 }

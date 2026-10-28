@@ -2,7 +2,7 @@
  "lot": "UX-0",
  "section": "§459",
  "date": "2026-10-28",
- "base": "81a82bd",
+ "base": "3cc562d",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "141.0.7390.37",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -202,6 +202,21 @@
     "pilotage › ordinateur › chrome : 222 → 66",
     "pilotage › ordinateur › chromeDefile : 213 → 171"
    ]
+  },
+  {
+   "date": "2026-10-28",
+   "base": "3cc562d",
+   "motif": "TRAC-UX-1A (§480) : Tracteur — la session en cours en tête, le « + » ne recouvre plus rien ; la mesure lit la carte de tête",
+   "hausses": [],
+   "baisses": [
+    "parcelles › téléphone › c44 : 14 → 6",
+    "parcelles › téléphone › pouce : 2 → 0",
+    "journal › téléphone › c44 : 31 → 5",
+    "journal › téléphone › pouce : 9 → 0",
+    "tracteur › téléphone › c44 : 20 → 5",
+    "tracteur.session_y : 462 → 178",
+    "tracteur.fab_recouvre : 1 → 0"
+   ]
   }
  ],
  "mesures": {
@@ -219,40 +234,40 @@
     "hauteur": 3153
    },
    "parcelles": {
-    "cibles": 42,
+    "cibles": 36,
     "c24": 0,
-    "c44": 14,
-    "textes": 71,
+    "c44": 6,
+    "textes": 61,
     "t11": 1,
     "t12": 1,
     "chrome": 111,
     "chromeDefile": 57,
-    "pouce": 2,
-    "hauteur": 2027
+    "pouce": 0,
+    "hauteur": 1945
    },
    "journal": {
-    "cibles": 47,
+    "cibles": 37,
     "c24": 0,
-    "c44": 31,
-    "textes": 180,
+    "c44": 5,
+    "textes": 153,
     "t11": 1,
     "t12": 1,
     "chrome": 111,
     "chromeDefile": 57,
-    "pouce": 9,
-    "hauteur": 2759
+    "pouce": 0,
+    "hauteur": 2670
    },
    "tracteur": {
-    "cibles": 25,
+    "cibles": 12,
     "c24": 0,
-    "c44": 20,
-    "textes": 50,
+    "c44": 5,
+    "textes": 32,
     "t11": 1,
     "t12": 1,
     "chrome": 111,
     "chromeDefile": null,
-    "pouce": 1,
-    "hauteur": 1083
+    "pouce": 2,
+    "hauteur": 941
    },
    "phyto": {
     "cibles": 22,
@@ -353,28 +368,28 @@
     "hauteur": 1095
    },
    "journal": {
-    "cibles": 47,
+    "cibles": 62,
     "c24": 0,
     "c44": 31,
-    "textes": 180,
+    "textes": 196,
     "t11": 1,
     "t12": 33,
     "chrome": 120,
     "chromeDefile": 111,
     "pouce": null,
-    "hauteur": 2766
+    "hauteur": 2352
    },
    "tracteur": {
-    "cibles": 26,
+    "cibles": 27,
     "c24": 0,
     "c44": 22,
-    "textes": 83,
+    "textes": 77,
     "t11": 1,
     "t12": 1,
     "chrome": 120,
     "chromeDefile": null,
     "pouce": null,
-    "hauteur": 954
+    "hauteur": 1133
    },
    "phyto": {
     "cibles": 23,
@@ -451,8 +466,8 @@
   }
  },
  "gestes": {
-  "tracteur.session_y": 462,
-  "tracteur.fab_recouvre": 1,
+  "tracteur.session_y": 178,
+  "tracteur.fab_recouvre": 0,
   "phyto.dates_machine": 15,
   "cave.gestes_44": 0,
   "cave.sommaire": 0,
