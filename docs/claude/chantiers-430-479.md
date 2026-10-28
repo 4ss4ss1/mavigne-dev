@@ -1128,3 +1128,25 @@ Le lot suivant du plan (« suite »), dessiné dans `docs/maquettes/maquette-ux-
 ### 476e. Ce qui reste ouvert
 - **FILTRE-1B** (Parcelles), puis FILTRE-2 (Phyto, Réserve).
 - **À vérifier chez Nico, au téléphone** : la barre basse au-dessus du dock (ni cachée ni flottante), la feuille et « Voir N entrées », une pastille retirée, « + ».
+
+## 477. ★★ FILTRE-1B — PARCELLES AU TÉLÉPHONE, LA LISTE D’ABORD : L’ÉTAT, LA TÂCHE ET LISTE / CARTE DANS « FILTRES », LA RECHERCHE ET « FILTRES » EN BARRE BASSE (28/10 — `src/app.js` (`_pFxRender`, `_pFxBadge`, `_pFxVue`, `switchPTab`) · `src/styles.css` · `guide/04-vigne.html` · `src/utils.js` (APP 10.29) · `index.html` · `src/whats-new.js` · `public/sw.js` (SW 11.10) · `scripts/mv-harnais-filtre1b.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/mv-harnais-cote1.mjs` · `scripts/tutos-couverture.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/FILTRE-1B.json` · base `5c7107d`)
+
+### 477a. D’où ça vient
+La deuxième moitié de FILTRE-1 (§476a), dessinée dans `docs/maquettes/maquette-ux-v1.html`, partie 2 : « Sur Parcelles, les compteurs Finies · En cours · Arrachées restent en tête ; les chips de tâche et Liste / Carte passent dans la même feuille. » ★ **La feuille existait déjà** : « Filtres » (ARRIVEE-4, §355), pour l’ouvrier arrivé sur sa priorité — l’état (à faire, toutes, finies, en cours, arrachées), l’ordre (proximité ou normal, ou la tournée imposée), « Tout remettre », « Voir N parcelles ». Ce lot la donne à tout le monde au téléphone.
+
+### 477b. Ce qui change (au téléphone ; sur ordinateur, rien ne bouge)
+- **La feuille** gagne deux sections : **Tâche** — la rangée du haut recopiée telle quelle, ses gestes avec (`setPTacheFilter`) ; la feuille ouverte se redessine après chaque rendu de la liste (`_pFxBadge`, au tour suivant) — et **Affichage** — Liste / Carte (`_pFxVue` : la feuille se ferme sur la vue choisie).
+- **La pastille « Filtres »** compte une tâche choisie — sauf chez l’ouvrier sur sa priorité (`p-arrivee`), où la tâche est celle de l’admin.
+- **En haut**, l’état, les tâches et Liste / Carte sont cachés ; les compteurs restent (sauf, comme avant, chez l’ouvrier sur sa priorité). **La barre** recherche · « Filtres » · carte (ARRIVEE-4) passe en bas, au-dessus du dock, pour tous. **Sur la carte**, la barre (qui vit dans la liste) disparaît : Liste / Carte revient en haut (`switchPTab` marque `p-vue-carte`).
+- Un geste neuf, `_pFxVue`, exempté de tuto, motivé (le même choix que les onglets) ; la barre exemptée du panneau côte à côte (au téléphone seulement).
+
+### 477c. Mesuré
+- `mv-harnais-filtre1b` : 8 assertions — `_pFxRender` et `_pFxBadge` JOUÉES (la feuille : l’état, la tâche recopiée et ses gestes, Liste / Carte, l’ordre, « Voir 7 parcelles » ; pas de section vide ; la vue active ; la pastille avec une tâche, et sans elle chez l’ouvrier sur sa priorité), la règle CSS, `switchPTab` et `_pFxVue` ; **6/6 mutants**.
+- `test:ux`, tutos et chaîne : voir la note de livraison.
+
+### 477d. Fiches et guide
+`guide/04-vigne.html` : la ligne d’ARRIVEE-4 réécrite (au téléphone, pour tout le monde). `MV_AIDE` relue : rien sur ces rangées.
+
+### 477e. Ce qui reste ouvert
+- **FILTRE-2** : le même patron sur Phyto (Registre) et Réserve.
+- **À vérifier chez Nico et chez un ouvrier, au téléphone** : la barre basse (au-dessus du dock), « Filtres » et sa tâche, Liste / Carte et le retour depuis la carte, l’ouvrier sur sa priorité.

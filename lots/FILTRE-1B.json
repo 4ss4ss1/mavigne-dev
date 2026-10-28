@@ -1,0 +1,38 @@
+{
+  "lot": "FILTRE-1B",
+  "section": "§477",
+  "base": "5c7107d5957294f320178b3261d5659bad3f1797",
+  "inclut": [],
+  "date": "2026-10-28",
+  "tutos": {
+    "ok": true,
+    "empreinte": "ae5006d590e73707e73ba6e4984ac6e18385ac2269581b8e7c899463c3231ed2",
+    "date": "2026-10-28T18:38:02.704Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "b0585f5b12ca85ca01b6c98bb28953b428b3c7b53edd9b6ce6e23e16b6d36d7e",
+    "CLAUDE.md": "b8cfbf29cb4f18647283f934a662c2c9affb9278a997663d91e8b1fa3bd116af",
+    "docs/claude/INDEX.md": "ae5d7dac864949f083b249e83fd13ee9840a121f8d96677b1460379f2518db18",
+    "docs/claude/chantiers-430-479.md": "56f8304aad001c0e46253cd028ae8569ffe676ce0c146a881b815be56f21b7bc",
+    "docs/claude/journal.md": "641cf9fba60be99dcf1d439968afbf63d1440fa5d008c59ca3a1769c99a66bd4",
+    "guide/04-vigne.html": "cd76f50b8689ad3554f7c1363d4aa499bbd41347adddd1db72db20889f788892",
+    "index.html": "2c0ac26abbc1e86e4cb9b146396f1c44ea210ba44d84554cbe2468b80a2274b8",
+    "public/sw.js": "5ddff07a6a157df6385f3b970203070a902055a9b214caf33d0a31fae5fece59",
+    "scripts/harnais-claude-md.mjs": "168fb12404b22aab4bca8bfea36c5f8fd85b359daa6068eda18cecc636c86992",
+    "scripts/mv-harnais-cote1.mjs": "9ddf67723ff35123f37c91bcba613c70a9ff36a6cceaf9b80f2ad8a38abc3941",
+    "scripts/mv-harnais-liste.mjs": "0bfe4e4ef9beffeee42d98282ead352bb73650b30e7762b81b10b000bc693b90",
+    "scripts/tutos-couverture.json": "bd186c7a8432a7da20a4c73f135fcce373b622e146bc1e78d69ee40c2ea035ac",
+    "src/app.js": "c1a54971d9975127171028edb4f608e89f1bfd84777402514e9ff9b172391b85",
+    "src/styles.css": "9b77966ad6735069ab712bc96cfffce7d2c76dfa67bd000161de4e675603db5c",
+    "src/utils.js": "72954209aa8239e27e30815efd66c815764767120c308475cface0170e09e534",
+    "src/whats-new.js": "c5d3aadb920d043b580d9277a4dd0df569da2811c8f8bf59822af9f898d5ba2e",
+    "scripts/mv-harnais-filtre1b.mjs": "648e6ebf3295e9682995ec3db1b3cd72dedf80898250746429a975ed69a65a6e"
+  }
+}

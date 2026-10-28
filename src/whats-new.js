@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.29', d: '2026-10-28', items: [
+    { niv: 0, pour: ['tous'], emoji: 'loupe', titre: 'Parcelles au téléphone : la liste d’abord',
+      desc: "Au téléphone, Parcelles garde ses compteurs en haut et montre les parcelles tout de suite. La recherche et «\u00a0Filtres\u00a0» sont dans une barre en bas\u00a0; «\u00a0Filtres\u00a0» ouvre une feuille avec ce qu’on affiche (à faire, finies, en cours…), la tâche, la liste ou la carte, et l’ordre — et son bouton dit combien de parcelles il va montrer. Sur la carte, «\u00a0Liste\u00a0» revient en haut. Sur ordinateur, rien ne change." },
+  ] },
   { v: '10.28', d: '2026-10-28', items: [
     { niv: 0, pour: ['admin'], emoji: 'loupe', titre: 'Le Journal au téléphone : la liste d’abord',
       desc: "Au téléphone, le Journal montre ses entrées dès le haut de l’écran. La recherche et «\u00a0Filtrer\u00a0» sont dans une barre en bas, sous le pouce\u00a0; «\u00a0Filtrer\u00a0» ouvre une feuille (qui, tâche, quand, parcelle) dont le bouton dit combien d’entrées il va montrer. Les filtres actifs restent en pastilles sous l’en-tête — un appui en retire un — et «\u00a0+\u00a0» ajoute une entrée. Sur ordinateur, rien ne change." },

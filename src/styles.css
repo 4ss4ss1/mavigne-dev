@@ -3747,6 +3747,17 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
   #page-journal #journal-add-btn,#page-journal .j-filtres-pill{display:none!important;}
   #page-journal .timeline{padding-bottom:150px;}
 }
+/* ★ FILTRE-1B (§477) — Parcelles au téléphone, le même patron : les compteurs restent en tête ; l'état, les tâches et Liste / Carte
+   passent dans la feuille « Filtres » (celle d'ARRIVEE-4, pour tous désormais) ; la recherche et « Filtres » en barre basse. Sur la
+   carte, Liste / Carte revient en haut (la barre vit dans la liste). Sur ordinateur, rien ne bouge. */
+@media (max-width:767.98px){
+  #page-parcelles .frow,#page-parcelles .tabs2,#page-parcelles #p-tache-filter-row{display:none!important;}
+  #page-parcelles.p-vue-carte .tabs2{display:flex!important;}
+  #page-parcelles .p-srow{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 72px);z-index:89;display:flex;align-items:center;gap:8px;margin:0;padding:8px 12px;background:var(--bg-app,#F0EEE9);border-top:1px solid var(--ligne,#E7E6E2);}
+  #page-parcelles .p-srow .sbox{flex:1;min-width:0;}
+  #page-parcelles .p-fx-btn{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 12px;border-radius:var(--r-full,999px);border:1px solid var(--ligne,#E7E6E2);background:var(--bg-card,#FFFFFF);color:var(--texte,#1B1A18);}
+  #page-parcelles #pwrapliste{padding-bottom:96px;}
+}
 .mod-header > .mod-header-top{padding-top:calc(env(safe-area-inset-top,0px) + 8px)!important;padding-bottom:4px!important;margin-bottom:0;min-height:44px!important;}   /* la bande et le segment, serrés vers la maquette (104 px au repos ; mesuré : la ligne portait 31 px de marges pour 44 de contenu) */
 .mod-header-mod + span:not(:empty)::before{content:'\00a0\00b7\00a0';}   /* « Vigne · 14 entrées » ; « Vigne » seul quand la page n'a rien à ajouter */
 .mod-header + .mod-meta-row.mvu-meta{position:relative;z-index:5;padding:8px 16px 2px!important;min-height:0;}

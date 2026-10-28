@@ -9,6 +9,7 @@
     "_cdvShow": "CAVE-RANGE-2a (§450) : change de volet dans la fiche d’une cuvée (Élevage, Analyses, Volumes & origine, Diagnostic) — un affichage, rien ne s’enregistre",
     "_cdvDiagOuvrir": "CAVE-RANGE-2a (§450) : depuis la fiche d’une cuvée, ouvre son diagnostic — un chemin vers un écran qui a son propre fonctionnement, rien ne s’enregistre",
     "_jFeuille": "FILTRE-1A (§476) : ouvre et ferme la feuille des filtres du Journal au téléphone — « Filtrer » et « Voir N entrées » disent ce qu’ils font ; les filtres dedans sont les gestes d’avant",
-    "_jRetire": "FILTRE-1A (§476) : retire un filtre actif d’un appui sur sa pastille, le « × » dedans — rien à apprendre"
+    "_jRetire": "FILTRE-1A (§476) : retire un filtre actif d’un appui sur sa pastille, le « × » dedans — rien à apprendre",
+    "_pFxVue": "FILTRE-1B (§477) : Liste ou Carte depuis la feuille « Filtres » de Parcelles — le même choix que les onglets Liste / Carte (switchPTab), rien de neuf à apprendre"
   }
 }

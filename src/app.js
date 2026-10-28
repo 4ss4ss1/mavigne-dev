@@ -7933,7 +7933,11 @@ function _pFxActifs(etat, prox){ return (etat!=='afaire'?1:0)+(prox?1:0); }
 function _pFxBadge(){
   var b=document.getElementById('p-fx-badge'); if(!b) return;
   var n=_pFxActifs(_pFxEtat(pFilter,!!window.pShowDone), !!_pProxPos);
+  // ★ FILTRE-1B (§477) : une tâche choisie compte — sauf chez l'ouvrier sur sa priorité (p-arrivee), où la tâche est celle de l'admin.
+  var pg=document.getElementById('page-parcelles');
+  if(pTacheFilter!=='toutes'&&!(pg&&pg.classList.contains('p-arrivee'))) n++;
   if(n>0){ b.textContent=String(n); b.hidden=false; } else { b.textContent=''; b.hidden=true; }
+  var ov=document.getElementById('ovPFiltres'); if(ov&&ov.classList.contains('open')) setTimeout(_pFxRender,0);   // la feuille ouverte suit la liste
 }
 function _pFxRender(){
   var box=document.getElementById('p-fx-corps'); if(!box) return;
@@ -7949,11 +7953,21 @@ function _pFxRender(){
   } else {
     h+=opt('prox','Par proximité','la parcelle la plus proche de vous d’abord',!!_pProxPos)+opt('normal','Ordre normal','l’ordre des parcelles du domaine',!_pProxPos);
   }
+  // ★ FILTRE-1B (§477) — maquette-ux-v1, partie 2 : les pastilles de tâche et Liste / Carte passent dans la même feuille. La
+  //   rangée des tâches est celle du haut, recopiée telle quelle (ses gestes : setPTacheFilter) ; la feuille se redessine après.
+  var tr=document.getElementById('p-tache-filter-row');
+  if(tr&&String(tr.innerHTML||'').trim()) h+='<div class="p-fx-k">Tâche</div><div class="p-fx-chips p-fx-taches">'+tr.innerHTML+'</div>';
+  var carte=!!(document.getElementById('tbc')&&document.getElementById('tbc').classList.contains('active'));
+  h+='<div class="p-fx-k">Affichage</div><div class="p-fx-chips">'
+    +'<button type="button" class="p-fx-chip'+(carte?'':' on')+'" data-v="liste" onclick="_pFxVue(this.dataset.v)">Liste</button>'
+    +'<button type="button" class="p-fx-chip'+(carte?' on':'')+'" data-v="carte" onclick="_pFxVue(this.dataset.v)">Carte</button></div>';
   var n=document.querySelectorAll('#pwrapliste .pc-row').length;   // une ligne .pc-row par carte de parcelle (la carte : .mv-c)
   h+='<div class="p-fx-act"><button type="button" onclick="_pFxRemettre()">Tout remettre</button><button type="button" class="p" onclick="closeOv(null,\'ovPFiltres\')">Voir '+n+' parcelle'+(n>1?'s':'')+'</button></div>';
   box.innerHTML=h;
 }
 function openPFiltres(){ _pFxRender(); if(typeof openOv==='function') openOv('ovPFiltres'); }
+// ★ FILTRE-1B (§477) — Liste ou Carte, depuis la feuille : la feuille se ferme sur la vue choisie.
+function _pFxVue(v){ switchPTab(v==='carte'?'carte':'liste'); if(typeof closeOv==='function') closeOv(null,'ovPFiltres'); }
 function _pFxAfficher(v){
   var f={finies:'complet',encours:'avance',arrachees:'arrachee'}[v]||'toutes';
   pFilter=f; window.pShowDone=(v==='toutes');   // la tâche prioritaire reste : on ne remet pas pTacheFilter à « toutes »
@@ -11191,6 +11205,7 @@ function _ensureLeaflet(){
 window._ensureLeaflet=_ensureLeaflet;
 function _mvLeafletFail(){ if(window.showToast) showToast('Carte indisponible hors ligne','#C0392B'); }
 function switchPTab(tab){
+  var _pg=document.getElementById('page-parcelles'); if(_pg) _pg.classList.toggle('p-vue-carte',tab==='carte');   // ★ FILTRE-1B (§477) : au téléphone, Liste / Carte revient en haut sur la carte
   document.getElementById('tbl').classList.toggle('active',tab==='liste');
   document.getElementById('tbc').classList.toggle('active',tab==='carte');
   document.getElementById('pwrapliste').classList.toggle('vis',tab==='liste');
@@ -13219,6 +13234,7 @@ async function refreshApp(){
   if (typeof openEditSession !== "undefined") window.openEditSession = openEditSession;
   if (typeof toggleTravail !== "undefined") window.toggleTravail = toggleTravail;
   window._jFeuille = _jFeuille; window._jRetire = _jRetire;   // ★ FILTRE-1A (§476) : appelés par la feuille et les chips
+  window._pFxVue = _pFxVue;   // ★ FILTRE-1B (§477) : Liste / Carte dans la feuille « Filtres »
   if (typeof marquerEnCours !== "undefined") window.marquerEnCours = marquerEnCours;
   if (typeof toggleExcluTache !== "undefined") window.toggleExcluTache = toggleExcluTache;
   if (typeof pickEmoji !== "undefined") window.pickEmoji = pickEmoji;
