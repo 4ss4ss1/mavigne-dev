@@ -11221,12 +11221,12 @@ function _pilHdrHtml(d){
     +'<div class="mod-header-sub" id="pil-dom-nom">'+_pilEsc(d.domaine)+'<span class="pil-vgn"> \u00b7 '+d.nActives+' parcelles \u00b7 '+_pilHa(d.surfTot)+' ha</span></div></div>'
     // La roue crantée du module (lot NAV-3) : ce qui se règle, et le bilan de campagne.
     +(((typeof window.isAdmin==='function')&&window.isAdmin())?'<button class="mod-home-btn mv-regl-gear" id="pil-regl-gear" title="R\u00e9glages" aria-label="R\u00e9glages et documents du Pilotage">'+_mvIcon('engrenage',18)+'</button>':'')
-    +'</div>'
+    +'</div></div>'   // ★ TETE-3C (§475) : l'en-tête se ferme ici — la bande campagne/date passe dessous, comme partout (§474)
     +'<div class="mod-meta-row mvu-meta'+(d.meteo?' mvu-avec-meteo':'')+'">'
     +'<div class="hv2-saison-pill"><span class="hv2-dot"></span>&nbsp;<span id="pil-saison">'+_pilEsc(d.saison)+'</span></div>'
     +'<div class="hv2-sep"></div><div class="hv2-date" data-mv-date></div>'
     +'<div class="hv2-meteo-mini" id="pil-meteo" style="'+(d.meteo?'':'display:none')+'"></div>'
-    +'</div></div>';
+    +'</div>';
 }
 function _pilSkeleton(d,tab){
   // L'onglet Économie n'a pas de roue crantée : ses trois sous-vues remplacent la

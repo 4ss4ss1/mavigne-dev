@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.27', d: '2026-10-28', items: [
+    { niv: 0, pour: ['tous'], emoji: 'aide', titre: 'Le bouton « ? Aide » est revenu',
+      desc: "Depuis la mise à jour précédente, le bouton «\u00a0? Aide\u00a0» avait disparu en haut de huit modules (Vigne, Tracteur, Phyto, Réglages, Planning, Cave)\u00a0: il est revenu, sur la ligne de la campagne et de la date. Le Pilotage et la Réserve prennent le même en-tête que les autres modules." },
+  ] },
   { v: '10.26', d: '2026-10-28', items: [
     { niv: 0, pour: ['tous'], emoji: 'fleche-haut', titre: 'Un en-tête plus court, en haut de chaque page',
       desc: "L’en-tête tient en une bande et un cadre d’onglets\u00a0: dans la Vigne, le titre dit la page («\u00a0Journal\u00a0», «\u00a0Vigne · 14 entrées\u00a0») et les onglets n’ont plus d’icônes. La campagne et la date sont sur une ligne juste en dessous, qui défile avec la page\u00a0; sur l’Accueil, on y choisit toujours une campagne passée." },

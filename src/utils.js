@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.26';
+export const APP_VERSION = '10.27';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2668,7 +2668,9 @@ function closeAide() {
 // Un module rendu en JS (Pilotage, La Réserve) n'a qu'à rappeler
 // window._mvInjectHelpBtn() après son rendu, comme il rappelle _mvMetaSync().
 function _mvInjectHelpBtn() {
-  var rows = document.querySelectorAll('.mod-header .mod-meta-row');
+  // ★ TETE-3C (§475) — la bande campagne/date est SOUS l'en-tête depuis TETE-3B (§474) : ce sélecteur ne cherchait que DANS
+  //   l'en-tête, et « ? Aide » avait disparu des huit modules sans qu'aucun contrôle le voie. Les deux places sont lues.
+  var rows = document.querySelectorAll('.mod-header .mod-meta-row, .mod-header + .mod-meta-row');
   for (var i = 0; i < rows.length; i++) {
     if (rows[i].querySelector('.mv-help-btn')) continue;
     var b = document.createElement('button');

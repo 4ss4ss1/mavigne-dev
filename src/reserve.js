@@ -265,16 +265,17 @@ function renderReserve(){
         // La roue crantée (lot NAV-4) : les deux inventaires. L'en-tête est rendu en JS : admin seulement, ici.
         +(((typeof window.isAdmin==='function')&&window.isAdmin())?'<button class="mod-home-btn mv-regl-gear" onclick="_mvReglOpen(\'reserve\')" style="margin-left:auto" aria-label="Documents de la R\u00e9serve" title="R\u00e9glages">'+_mvIcon('engrenage',18)+'</button>':'')
       +'</div>'
-      +'<div class="mod-meta-row mvu-meta">'
-        +'<div class="hv2-saison-pill" data-mv-pill><span class="hv2-dot"></span>&nbsp;<span data-mv-saison></span></div>'
-        +'<div class="hv2-sep"></div>'
-        +'<div class="hv2-date" data-mv-date></div>'
-      +'</div>'
       +'<div class="mvu-tabs mvr-tabs">'
         +'<button class="mvu-tab'+(_rsvTab==='futs'?' on':'')+'" onclick="_rsvTabTo(\'futs\')"><span class="mvu-tab-em">'+_mvIcon('barrique',18)+'</span>Fûts</button>'
         +'<button class="mvu-tab'+(_rsvTab==='intrants'?' on':'')+'" onclick="_rsvTabTo(\'intrants\')"><span class="mvu-tab-em">'+_mvIcon('fiole',18)+'</span>Intrants</button>'
         +'<button class="mvu-tab'+(_rsvTab==='audit'?' on':'')+'" onclick="_rsvTabTo(\'audit\')"><span class="mvu-tab-em">'+_mvIcon('liste',18)+'</span>Bilan matière</button>'
       +'</div>'
+    +'</div>'
+    // ★ TETE-3C (§475) : la bande campagne/date sous l'en-tête, comme partout (§474) ; « ? Aide » la trouve (utils.js).
+    +'<div class="mod-meta-row mvu-meta">'
+      +'<div class="hv2-saison-pill" data-mv-pill><span class="hv2-dot"></span>&nbsp;<span data-mv-saison></span></div>'
+      +'<div class="hv2-sep"></div>'
+      +'<div class="hv2-date" data-mv-date></div>'
     +'</div>';
   page.innerHTML=head+'<div id="mvr-body" class="mvr-body"></div>';
   // Module rendu en JS → il rappelle lui-même les deux injecteurs globaux, exactement

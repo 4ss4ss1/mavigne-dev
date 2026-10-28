@@ -1080,3 +1080,28 @@ La deuxième marche de TETE-3 (§473a), dessinée dans `docs/maquettes/maquette-
 ### 474e. Ce qui reste ouvert
 - **TETE-3C** : l’ordinateur (la maquette y fusionne la bande du module et la bande campagne), le Pilotage (garde « Vous regardez ») et la Réserve.
 - **À vérifier chez Nico** : l’en-tête au repos sur son téléphone et son PC, le menu des campagnes de l’Accueil (il s’ouvre au-dessus des cartes), la mini-météo lisible, en clair et en sombre.
+
+## 475. ★★ TETE-3C — « ? AIDE » RETROUVÉ ; LE PILOTAGE ET LA RÉSERVE AU MÊME EN-TÊTE (28/10 — `src/utils.js` (`_mvInjectHelpBtn`, APP 10.27) · `src/pilotage.js` (`_pilHdrHtml`) · `src/reserve.js` (`renderReserve`) · `src/styles.css` · `index.html` · `src/whats-new.js` · `public/sw.js` (SW 11.08) · `scripts/mv-harnais-tete3c.mjs` (neuf) · `scripts/mv-harnais-tete3b.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/mv-ux-baseline.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/TETE-3C.json` · base `81a82bd`)
+
+### 475a. D’où ça vient
+La troisième marche de TETE-3 (§473a) : l’ordinateur, le Pilotage, la Réserve. ★ **Trouvé en lisant le code de la Réserve** — son commentaire disait : « utils.js ne l’injecte que sur « .mod-header .mod-meta-row » ». L’injecteur de « ? Aide » ne cherchait la bande campagne/date que DANS l’en-tête ; TETE-3B (§474) l’en a sortie : **depuis `tete3b`, « ? Aide » avait disparu de huit modules** (Accueil, Parcelles, Journal, Tracteur, Phyto, Réglages, Planning, Cave) — et `#home-aide-btn`, la cible de la pastille « Nouveau » des tutos, avec lui. Aucun des 569 contrôles ne l’a vu : ils lisent les sources, pas le bouton posé à l’exécution.
+
+### 475b. Ce qui change
+- **`_mvInjectHelpBtn`** lit les deux places : `.mod-header .mod-meta-row, .mod-header + .mod-meta-row`.
+- **Le Pilotage** (`_pilHdrHtml`) et **la Réserve** (`renderReserve`) ferment leur en-tête avant la bande campagne/date, comme les huit autres (la Réserve garde ses onglets dans l’en-tête : la règle de LISIBILITE 2 l’exige). Le Pilotage garde « Vous regardez » (la maquette).
+- **Les règles communes** de TETE-3B passent de `.page > …` à `.mod-header + …` et `.mod-header > …` : elles trouvent la bande et la ligne d’en-tête où qu’elles soient (le Pilotage n’est pas posé directement dans `.page`).
+- **L’ordinateur** : la maquette y fusionne la bande du module et la bande campagne ; la décision de Nico (§474a, « la même partout ») couvre l’ordinateur — rien de plus à faire.
+- ⚠️ **Le passage de version** : un tracé SVG d’`index.html` contient « M10.268 » — compter « 10.26 » en trouvait six. Les cinq affichages sont maintenant visés par leur forme (`v10.27`, `?v=10.27"`).
+- Annonce 10.27 : « Le bouton « ? Aide » est revenu ».
+
+### 475c. Mesuré
+- `mv-harnais-tete3c` : 5 assertions — l’injecteur aux deux places ; l’en-tête du Pilotage JOUÉ (`_pilHdrHtml` exécutée, la profondeur des `<div>` comptée : l’en-tête se ferme avant la bande, qui le suit aussitôt) ; la Réserve (une seule bande, après les onglets) ; les règles communes ; **5/5 mutants**.
+- `test:ux`, tutos et chaîne : voir la note de livraison.
+
+### 475d. Fiches et guide
+Rien ne change à ce que disent l’aide et le guide (« ? Aide » y est décrit à sa place, qu’il retrouve).
+
+### 475e. Ce qui reste ouvert
+- ★ **Un contrôle au rendu manque** : « chaque page porte son « ? Aide » » — `test:ux` ou les tutos peuvent le compter sur le build (au backlog).
+- La hauteur du Pilotage en défilant (« Vous regardez » collant, ~130 px) ; la hausse liée à l’heure (§470e).
+- **À vérifier chez Nico** : « ? Aide » en haut de chaque module ; le Pilotage et la Réserve.

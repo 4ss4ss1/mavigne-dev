@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.07
+// MA VIGNE — Service Worker v11.08
+// v11.08 (28/10/2026) — TETE-3C (§475) : « ? Aide » revenu dans les huit modules (perdu au déplacement des bandes, §474) ; le Pilotage et la Réserve prennent le même en-tête (la bande campagne/date dessous).
 // v11.07 (28/10/2026) — TETE-3B (§474) : l'en-tête au repos en une bande et un segment — la campagne et la date sur une ligne sous l'en-tête, qui défile ; dans la Vigne, le titre dit la page ; les onglets en segment, texte seul.
 // v11.06 (28/10/2026) — TETE-3A (§473) : l'en-tête qui se replie au téléphone — en descendant, une ligne ; la campagne, la date et les onglets reviennent en remontant ou d'un appui.
 // v11.05 (28/10/2026) — ANNULER-2 (§472) : le tri des confirmations — huit gestes de plus en « Annuler », chaque fenêtre qui reste nomme son geste (« Marquer le retour » ne dit plus « Supprimer »), la zone de danger demande le nom.
@@ -4639,7 +4640,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.07';
+const CACHE_NAME   = 'mavigne-v11.08';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4656,7 +4657,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.07 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.08 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4676,7 +4677,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.07 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.08 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

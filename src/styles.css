@@ -3727,14 +3727,14 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .mod-header > .mvu-tabs .mvu-tab{min-height:36px;padding:7px 12px;border-radius:var(--r-full,999px);}
 .mod-header > .mvu-tabs .mvu-tab:not(.active):not(.on){background:transparent;}
 .mod-header > .mvu-tabs .mvu-tab-em{display:none;}
-.page > .mod-header > .mod-header-top{padding-top:calc(env(safe-area-inset-top,0px) + 8px)!important;padding-bottom:4px!important;margin-bottom:0;min-height:44px!important;}   /* la bande et le segment, serrés vers la maquette (104 px au repos ; mesuré : la ligne portait 31 px de marges pour 44 de contenu) */
+.mod-header > .mod-header-top{padding-top:calc(env(safe-area-inset-top,0px) + 8px)!important;padding-bottom:4px!important;margin-bottom:0;min-height:44px!important;}   /* la bande et le segment, serrés vers la maquette (104 px au repos ; mesuré : la ligne portait 31 px de marges pour 44 de contenu) */
 .mod-header-mod + span:not(:empty)::before{content:'\00a0\00b7\00a0';}   /* « Vigne · 14 entrées » ; « Vigne » seul quand la page n'a rien à ajouter */
-.page > .mod-meta-row.mvu-meta{position:relative;z-index:5;padding:8px 16px 2px!important;min-height:0;}
-.page > .mod-meta-row.mvu-meta .hv2-saison-pill{background:var(--bg-card,#FFFFFF);border:1px solid var(--ligne,#E7E6E2);color:var(--texte,#1B1A18);}
-.page > .mod-meta-row.mvu-meta .hv2-date{color:var(--texte-doux,#686660)!important;}
-.page > .mod-meta-row.mvu-meta .hv2-meteo-mini{background:var(--bg-card,#FFFFFF);border-color:var(--ligne,#E7E6E2);backdrop-filter:none;}
-.page > .mod-meta-row.mvu-meta .hv2-meteo-mini,.page > .mod-meta-row.mvu-meta .hv2-meteo-mini *{color:var(--texte-med,#55534E);}
-.page > .mod-meta-row.mvu-meta .hv2-meteo-mini-temp{color:var(--texte,#1B1A18);}
+.mod-header + .mod-meta-row.mvu-meta{position:relative;z-index:5;padding:8px 16px 2px!important;min-height:0;}
+.mod-header + .mod-meta-row.mvu-meta .hv2-saison-pill{background:var(--bg-card,#FFFFFF);border:1px solid var(--ligne,#E7E6E2);color:var(--texte,#1B1A18);}
+.mod-header + .mod-meta-row.mvu-meta .hv2-date{color:var(--texte-doux,#686660)!important;}
+.mod-header + .mod-meta-row.mvu-meta .hv2-meteo-mini{background:var(--bg-card,#FFFFFF);border-color:var(--ligne,#E7E6E2);backdrop-filter:none;}
+.mod-header + .mod-meta-row.mvu-meta .hv2-meteo-mini,.mod-header + .mod-meta-row.mvu-meta .hv2-meteo-mini *{color:var(--texte-med,#55534E);}
+.mod-header + .mod-meta-row.mvu-meta .hv2-meteo-mini-temp{color:var(--texte,#1B1A18);}
 
 /* Bande de stats descendue dans le corps — cartes papier (suit le dark mode via les vars) */
 .mvu-kpis{display:flex;gap:8px;padding:14px 16px 2px;}
