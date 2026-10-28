@@ -11620,6 +11620,7 @@ function renderJournalList(){
       _pillEl.style.display='none';
     }
   }
+  _jFeuilleMaj(tot);   // ★ FILTRE-1A (§476) : « Filtrer · n », « Voir N entrées », les chips des filtres actifs
   const grouped={};
   data.forEach(r=>{if(!grouped[r.date])grouped[r.date]=[];grouped[r.date].push(r);});
   const tl=document.getElementById('timeline');
@@ -12040,6 +12041,34 @@ function clearJDateFilter(){
   var clr=document.getElementById('jDateClear');
   if(clr)clr.style.display='none';
   renderJournalList();
+}
+// ★ FILTRE-1A (§476) — LA FEUILLE DES FILTRES DU JOURNAL (docs/maquettes/maquette-ux-v1.html, partie 2), au téléphone : les rangées
+//   de filtres vivent dans une feuille du bas ; la barre basse porte la recherche et « Filtrer · n » ; seuls les filtres actifs
+//   restent, en chips qu'un appui retire ; le bouton de la feuille dit ce qu'il va montrer (« Voir 4 entrées »), mis à jour à
+//   chaque chip. Les rangées et leurs gestes sont les mêmes qu'avant : seule leur place change (CSS, au téléphone).
+function _jFeuille(ouvrir){ document.body.classList.toggle('j-feuille-ouverte', !!ouvrir); }
+function _jRetire(k){
+  if(k==='qui') jQui='tous';
+  else if(k==='tache') jTache='toutes';
+  else if(k==='parcelle') jParcelle='toutes';
+  else if(k==='dates'){ jDateDeb=''; jDateFin=''; var dd=document.getElementById('jDateDeb'),df=document.getElementById('jDateFin'),c=document.getElementById('jDateClear'); if(dd)dd.value=''; if(df)df.value=''; if(c)c.style.display='none'; }
+  else if(k==='recherche'){ jSearch=''; var js=document.getElementById('jSearch'),jc=document.getElementById('jSearch-clear'); if(js)js.value=''; if(jc)jc.style.display='none'; }
+  _jPage=0; renderJournalList();
+}
+function _jFeuilleMaj(tot){
+  var n=(jQui!=='tous'?1:0)+(jTache!=='toutes'?1:0)+(jParcelle!=='toutes'?1:0)+((jDateDeb||jDateFin)?1:0);
+  var e=document.getElementById('j-filtrer-n'); if(e) e.textContent=n?String(n):'';
+  var v=document.getElementById('j-feuille-voir'); if(v) v.textContent='Voir '+tot+' entr\u00e9e'+(tot>1?'s':'');
+  var f=document.getElementById('j-fab'), b=document.getElementById('journal-add-btn'); if(f&&b) f.hidden=(b.style.display==='none');
+  var a=document.getElementById('j-actifs'); if(!a) return;
+  var puce=function(k,l){ return '<button type="button" class="tfchip active j-actif" onclick="_jRetire(\''+_escAttr(k)+'\')" aria-label="Retirer le filtre '+_escHtml(l)+'">'+_escHtml(l)+' <span aria-hidden="true">\u00d7</span></button>'; };
+  var ch=[];
+  if(jTache!=='toutes') ch.push(puce('tache',tNom(jTache)));
+  if(jQui!=='tous') ch.push(puce('qui',jQui));
+  if(jParcelle!=='toutes') ch.push(puce('parcelle',jParcelle));
+  if(jDateDeb||jDateFin) ch.push(puce('dates','Dates'));
+  if(jSearch) ch.push(puce('recherche','\u00ab '+jSearch+' \u00bb'));
+  a.innerHTML=ch.join('');
 }
 function clearAllJFiltres(){
   jQui='tous';jTache='toutes';jParcelle='toutes';jSearch='';jDateDeb='';jDateFin='';_jPage=0;
@@ -13189,6 +13218,7 @@ async function refreshApp(){
   if (typeof openSessionDetail !== "undefined") window.openSessionDetail = openSessionDetail;
   if (typeof openEditSession !== "undefined") window.openEditSession = openEditSession;
   if (typeof toggleTravail !== "undefined") window.toggleTravail = toggleTravail;
+  window._jFeuille = _jFeuille; window._jRetire = _jRetire;   // ★ FILTRE-1A (§476) : appelés par la feuille et les chips
   if (typeof marquerEnCours !== "undefined") window.marquerEnCours = marquerEnCours;
   if (typeof toggleExcluTache !== "undefined") window.toggleExcluTache = toggleExcluTache;
   if (typeof pickEmoji !== "undefined") window.pickEmoji = pickEmoji;

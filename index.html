@@ -616,7 +616,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:var(--pt-txt,13px);margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v10.27</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v10.28</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -1278,16 +1278,29 @@
     <div class="mvu-kpi"><div class="mvu-kpi-v" id="js-e">0</div><div class="mvu-kpi-l">En cours</div></div>
   </div>
   <div class="readonly-banner saisonnier-readonly-banner" style="display:none;margin:12px 16px 0;"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cadenas"></use></svg> Accès lecture seule — vous consultez le journal en mode saisonnier</div>
-  <div class="orow" id="ouvrier-chips-row"></div>
-  <div class="tfilters" id="tache-chips-row"></div>
-  <div style="padding:0 16px 4px"><div class="sbox"><span><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-loupe"></use></svg></span><input type="text" id="jSearch" placeholder="Parcelle, tâche, ouvrier…"><span id="jSearch-clear" onclick="clearJSearch()" style="display:none;cursor:pointer;font-size:var(--pt-sm,16px);color:var(--texte-doux);padding:2px 4px;line-height:1"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-croix"></use></svg></span></div></div>
-  <div class="j-date-range">
+  <!-- ★ FILTRE-1A (§476) — maquette-ux-v1, partie 2 : au téléphone, la liste d’abord — la recherche et « Filtrer » en barre basse,
+       les filtres en feuille du bas, seuls les actifs en chips sous l’en-tête, l’ajout en bouton flottant. Sur ordinateur, rien ne bouge. -->
+  <div class="j-feuille" id="j-feuille" role="dialog" aria-label="Filtrer le Journal">
+    <div class="j-feuille-tete"><b>Filtrer le Journal</b><button type="button" class="mvbtn mvbtn-discret" onclick="clearAllJFiltres()">Tout effacer</button></div>
+    <div class="j-feuille-lbl">Qui</div>
+    <div class="orow" id="ouvrier-chips-row"></div>
+  <div class="j-feuille-lbl">Tâche</div>
+    <div class="tfilters" id="tache-chips-row"></div>
+    <div class="j-feuille-lbl">Quand</div>
+    <div class="j-date-range">
     <input type="date" id="jDateDeb" class="j-date-input" onchange="applyJDateFilter()">
     <span class="j-date-sep">→</span>
     <input type="date" id="jDateFin" class="j-date-input" onchange="applyJDateFilter()">
     <span class="j-date-clear" id="jDateClear" onclick="clearJDateFilter()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-croix"></use></svg> Dates</span>
   </div>
-  <div class="tfilters" id="j-parcelle-filter-row" style="padding:0 16px 12px;overflow-x:auto;scrollbar-width:none;display:flex;gap:6px;flex-wrap:nowrap"></div>
+    <div class="j-feuille-lbl">Parcelle</div>
+    <div class="tfilters" id="j-parcelle-filter-row" style="padding:0 16px 12px;overflow-x:auto;scrollbar-width:none;display:flex;gap:6px;flex-wrap:nowrap"></div>
+    <button type="button" class="j-feuille-voir" id="j-feuille-voir" onclick="_jFeuille(false)">Voir les entrées</button>
+  </div>
+  <div class="j-voile" onclick="_jFeuille(false)"></div>
+  <div class="j-barre" id="j-barre"><div class="sbox"><span><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-loupe"></use></svg></span><input type="text" id="jSearch" placeholder="Parcelle, tâche, ouvrier…"><span id="jSearch-clear" onclick="clearJSearch()" style="display:none;cursor:pointer;font-size:var(--pt-sm,16px);color:var(--texte-doux);padding:2px 4px;line-height:1"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-croix"></use></svg></span></div><button type="button" class="j-filtrer" id="j-filtrer" onclick="_jFeuille(true)">Filtrer<span class="j-filtrer-n" id="j-filtrer-n"></span></button></div>
+  <div class="j-actifs" id="j-actifs"></div>
+  <button type="button" class="j-fab" id="j-fab" onclick="openJournalEntry()" aria-label="Ajouter une entrée au journal">+</button>
   <div id="j-filtres-pill" class="j-filtres-pill" style="display:none"></div>
   <div class="timeline" id="timeline"></div>
 </div>
@@ -1438,7 +1451,7 @@
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v10.27</div>
+        <div class="mod-header-sub">Ma Vigne v10.28</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
       
@@ -1553,7 +1566,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg></div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v10.27 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div class="ver-tag">Ma Vigne v10.28 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -3662,7 +3675,7 @@
     </div>
   </div>
 </div>
-<script src="/boot.js?v=10.27"></script>
+<script src="/boot.js?v=10.28"></script>
 <script type="module" src="/src/app.js"></script>
 
 <!-- ── Overlay erreur critique Ma Vigne (v2.68) ── -->
@@ -3754,7 +3767,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v10.27</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v10.28</span>
       </div>
     </div>
     <div class="modal-body">

@@ -1,0 +1,38 @@
+{
+  "lot": "FILTRE-1A",
+  "section": "§476",
+  "base": "db732d0c2440e896ed59cee37deeb7e2fa5d9f48",
+  "inclut": [],
+  "date": "2026-10-28",
+  "tutos": {
+    "ok": true,
+    "empreinte": "564fc7fc06c0f0fafed17c49e66b8b0153a488226a5680e6d4be401f2f75f55b",
+    "date": "2026-10-28T18:07:37.804Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "538247d43ddc52ffd82153be0fa260675784e09bd5ad8ae439db577ad4912709",
+    "CLAUDE.md": "5a4b5da1f3d99c599f66cf4d1f614544e69f44791985ed1905994dec6890c294",
+    "docs/claude/INDEX.md": "afb6c8548a5a9ddfbbd30bdb36492931779ab81a59f646130671221d354838ba",
+    "docs/claude/chantiers-430-479.md": "aa826be0bb215e62b532e908515406ded8125004b90c58cc859c40d6894bacfd",
+    "docs/claude/journal.md": "18a213949e5dc581bc40841c1fb7ceaaf20f5d31236f44f821123c53489908cd",
+    "guide/04-vigne.html": "87823c2dc24e9e1d641a8442fb16f4b96f7da6379545ec823e2feab13e441e01",
+    "index.html": "5eb957bf1f5b5b1a8823b2b22b0f962a4fe78c1bc64b004c273c1ad1f5c20084",
+    "public/sw.js": "b66b920eb223401e85e4c6d50248fa03edc2f3d0d914a971ce34e5a28e75115a",
+    "scripts/harnais-claude-md.mjs": "7c7ee14b034fc25b85143478a5d51b24d748f533ec2d688c0a300934f95cbacd",
+    "scripts/mv-harnais-cote1.mjs": "5814d97a679fea726e5963765607e41b2f1749775504bb0c8fa4da056f95a9df",
+    "scripts/mv-harnais-liste.mjs": "44b7761440340ab66a30b7abeb70aa0c77534b3e0e46b7bd6e14869b0e372594",
+    "scripts/tutos-couverture.json": "bdc743d7decf7707a7be0b1c83e6bcec97c4140d03b4b60f5a0bcf2bc78dc490",
+    "src/app.js": "878bf925bc051ca90dd70028b05c03a35a673d45ef47bc547655d3627fff731c",
+    "src/styles.css": "64b938268f71c1dc2814e09d8569e1c120c2c4ea513d40dde78da5293a6eb289",
+    "src/utils.js": "0b8471fc6b9ea3c427a01adb30afa527f3aa57a4102932f389c6af160853a0d8",
+    "src/whats-new.js": "ddccb5777d18d8ff143b1e384e7cf09ca754ec486552ec981275c10e477df54e",
+    "scripts/mv-harnais-filtre1a.mjs": "eeba1e43c76bf216820430a76e0fc6f073c7c37102f3c9ad03f0f55d7ca27c56"
+  }
+}

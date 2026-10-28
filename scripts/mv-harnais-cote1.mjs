@@ -19,6 +19,10 @@ const SAIN = { tutos: lire('src/tutos.js'), coq: lire('src/coquille.js'), css: l
   autres: SRC.filter((f) => fs.existsSync(f)).map(lire).join('\n') };
 // Les couches fixes posées sur toute la largeur qui n'ont pas à suivre le panneau — chacune avec sa raison.
 const EXEMPT = {
+  // ★ FILTRE-1A (§476) — au téléphone seulement (moins de 768 px) : jamais visibles à côté du panneau, qui s'ouvre à 1 280 px et plus.
+  '#page-journal .j-feuille': 'FILTRE-1A (§476) : la feuille des filtres du Journal, au téléphone seulement',
+  'body.j-feuille-ouverte #page-journal .j-voile': 'FILTRE-1A (§476) : son voile, au téléphone seulement',
+  '#page-journal .j-barre': 'FILTRE-1A (§476) : la barre basse du Journal (recherche, « Filtrer »), au téléphone seulement',
   '#login-screen': 'écran de connexion : pas de tuto avant d’être connecté',
   '#onboarding-screen': 'assistant de démarrage : pas de tuto pendant',
   '#ob-toast': 'message de l’assistant de démarrage',

@@ -529,3 +529,4 @@
 | 473 | 473. ★★ TETE-3A — L’EN-TÊTE QUI SE REPLIE AU TÉLÉPHONE : EN DESCENDANT, UNE LIGNE ; SOUS LA MAIN SEULEMENT … | `docs/claude/chantiers-430-479.md` |
 | 474 | 474. ★★ TETE-3B — L’EN-TÊTE AU REPOS, UNE BANDE ET UN SEGMENT : LA CAMPAGNE ET LA DATE SUR UNE LIGNE SOUS L… | `docs/claude/chantiers-430-479.md` |
 | 475 | 475. ★★ TETE-3C — « ? AIDE » RETROUVÉ ; LE PILOTAGE ET LA RÉSERVE AU MÊME EN-TÊTE (28/10 — `src/utils.js` (… | `docs/claude/chantiers-430-479.md` |
+| 476 | 476. ★★ FILTRE-1A — LE JOURNAL AU TÉLÉPHONE, LA LISTE D’ABORD : LES FILTRES EN FEUILLE, LA RECHERCHE ET « F… | `docs/claude/chantiers-430-479.md` |

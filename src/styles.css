@@ -3727,6 +3727,26 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .mod-header > .mvu-tabs .mvu-tab{min-height:36px;padding:7px 12px;border-radius:var(--r-full,999px);}
 .mod-header > .mvu-tabs .mvu-tab:not(.active):not(.on){background:transparent;}
 .mod-header > .mvu-tabs .mvu-tab-em{display:none;}
+/* ★ FILTRE-1A (§476) — maquette-ux-v1, partie 2 : le Journal au téléphone, la liste d'abord. Sur ordinateur, la feuille est un bloc
+   ordinaire (les rangées comme avant), la barre est la recherche ; les pièces du téléphone y sont cachées. */
+.j-feuille-tete,.j-feuille-lbl,.j-feuille-voir,.j-voile,.j-filtrer,.j-actifs,.j-fab{display:none;}
+.j-barre{padding:0 16px 4px;}
+@media (max-width:767.98px){
+  #page-journal .j-feuille{display:none;position:fixed;left:0;right:0;bottom:0;z-index:1200;max-height:80vh;overflow-y:auto;background:var(--bg-card,#FFFFFF);border-radius:var(--r-lg,12px) var(--r-lg,12px) 0 0;box-shadow:0 -8px 24px var(--voile,rgba(16,15,13,.30));padding:12px 0 calc(env(safe-area-inset-bottom,0px) + 12px);}
+  body.j-feuille-ouverte #page-journal .j-feuille{display:block;}
+  body.j-feuille-ouverte #page-journal .j-voile{display:block;position:fixed;inset:0;z-index:1199;background:var(--voile,rgba(16,15,13,.30));}
+  #page-journal .j-feuille-tete{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 16px 8px;font-size:var(--pt-base,15px);}
+  #page-journal .j-feuille-lbl{display:block;padding:8px 16px 4px;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux,#686660);}
+  #page-journal .j-feuille-voir{display:block;width:calc(100% - 32px);margin:12px 16px 0;min-height:44px;border:0;border-radius:var(--r-full,999px);background:var(--accent,#7A2850);color:var(--sur-accent,#FFFFFF);font-weight:700;font-size:var(--pt-base,15px);}
+  #page-journal .j-barre{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 72px);z-index:89;display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg-app,#F0EEE9);border-top:1px solid var(--ligne,#E7E6E2);}
+  #page-journal .j-barre .sbox{flex:1;min-width:0;}
+  #page-journal .j-filtrer{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-full,999px);background:var(--bg-card,#FFFFFF);color:var(--texte,#1B1A18);font-weight:600;font-size:var(--pt-micro,12px);}
+  #page-journal .j-filtrer-n:not(:empty){min-width:20px;height:20px;padding:0 4px;border-radius:var(--r-full,999px);background:var(--accent,#7A2850);color:var(--sur-accent,#FFFFFF);display:inline-flex;align-items:center;justify-content:center;}
+  #page-journal .j-actifs:not(:empty){display:flex;flex-wrap:wrap;gap:8px;padding:8px 16px 0;}
+  #page-journal .j-fab:not([hidden]){display:flex;align-items:center;justify-content:center;position:fixed;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 72px + 72px);z-index:89;width:56px;height:56px;border:0;border-radius:var(--r-full,999px);background:var(--accent,#7A2850);color:var(--sur-accent,#FFFFFF);font-size:var(--pt-xl,28px);line-height:1;box-shadow:0 4px 16px var(--voile,rgba(16,15,13,.30));}
+  #page-journal #journal-add-btn,#page-journal .j-filtres-pill{display:none!important;}
+  #page-journal .timeline{padding-bottom:150px;}
+}
 .mod-header > .mod-header-top{padding-top:calc(env(safe-area-inset-top,0px) + 8px)!important;padding-bottom:4px!important;margin-bottom:0;min-height:44px!important;}   /* la bande et le segment, serrés vers la maquette (104 px au repos ; mesuré : la ligne portait 31 px de marges pour 44 de contenu) */
 .mod-header-mod + span:not(:empty)::before{content:'\00a0\00b7\00a0';}   /* « Vigne · 14 entrées » ; « Vigne » seul quand la page n'a rien à ajouter */
 .mod-header + .mod-meta-row.mvu-meta{position:relative;z-index:5;padding:8px 16px 2px!important;min-height:0;}

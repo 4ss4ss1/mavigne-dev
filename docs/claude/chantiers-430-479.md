@@ -1105,3 +1105,26 @@ Rien ne change à ce que disent l’aide et le guide (« ? Aide » y est décrit
 - ★ **Un contrôle au rendu manque** : « chaque page porte son « ? Aide » » — `test:ux` ou les tutos peuvent le compter sur le build (au backlog).
 - La hauteur du Pilotage en défilant (« Vous regardez » collant, ~130 px) ; la hausse liée à l’heure (§470e).
 - **À vérifier chez Nico** : « ? Aide » en haut de chaque module ; le Pilotage et la Réserve.
+
+## 476. ★★ FILTRE-1A — LE JOURNAL AU TÉLÉPHONE, LA LISTE D’ABORD : LES FILTRES EN FEUILLE, LA RECHERCHE ET « FILTRER » EN BARRE BASSE (28/10 — `index.html` (la feuille, la barre basse, les pastilles, « + » flottant) · `src/app.js` (`_jFeuille`, `_jRetire`, `_jFeuilleMaj`) · `src/styles.css` · `guide/04-vigne.html` · `src/utils.js` (APP 10.28) · `src/whats-new.js` · `public/sw.js` (SW 11.09) · `scripts/mv-harnais-filtre1a.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/mv-ux-baseline.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/FILTRE-1A.json` · base `db732d0`)
+
+### 476a. D’où ça vient
+Le lot suivant du plan (« suite »), dessiné dans `docs/maquettes/maquette-ux-v1.html`, partie 2 « Le contenu d’abord, les filtres en feuille » : quatre rangées de filtres avant la première entrée — la liste commençait après la moitié de l’écran. **Découpé en deux**, l’arrivée restant la maquette : **1A** le Journal (ce lot) ; **1B** Parcelles (les compteurs Finies · En cours · Arrachées restent en tête ; les chips de tâche et Liste / Carte passent dans la même feuille — l’écran de travail des ouvriers, à part).
+
+### 476b. Ce qui change (au téléphone ; sur ordinateur, rien ne bouge — PC-LISTE-1 viendra)
+- **La feuille** (`#j-feuille`) : les quatre rangées du Journal — Qui, Tâche, Quand (les deux dates), Parcelle — avec leurs étiquettes, « Tout effacer » (`clearAllJFiltres`) et un bouton qui dit ce qu’il va montrer : « Voir 4 entrées », mis à jour à chaque chip. Les rangées gardent leurs identifiants, leur rendu et leurs gestes : seule leur place change (CSS, au téléphone, cachées tant que la feuille est fermée ; un voile la ferme).
+- **La barre basse** (`#j-barre`, au-dessus du dock) : la recherche et « Filtrer · n » — n compte les filtres de la feuille, pas la recherche, qui a sa place.
+- **Les filtres actifs seuls**, en pastilles sous l’en-tête (`#j-actifs`) ; un appui en retire un (`_jRetire` : les dates vidées dans leurs champs, la recherche dans le sien, la liste relancée page 0). Le résumé « n filtres actifs » de l’ordinateur est caché au téléphone.
+- **« + » flottant** (`#j-fab`) pour l’ajout ; « + Ajouter » de l’en-tête caché au téléphone ; le bouton flottant se cache quand « + Ajouter » l’est (les rôles).
+
+### 476c. Mesuré
+- `mv-harnais-filtre1a` : 9 assertions — la structure lue dans `index.html` (les quatre rangées et « Voir » dans la feuille, la recherche hors d’elle, la barre, les pastilles, « + »), `_jFeuilleMaj` et `_jRetire` JOUÉES (le compte, « Voir 4 entrées », les pastilles, le retrait des dates, « + » caché avec « + Ajouter »), la règle CSS, l’exposition ; **7/7 mutants**.
+- **Une première chaîne (573 commandes) : six règles du projet que le code neuf ne suivait pas**, toutes suivies — la valeur glissée dans le `onclick` des pastilles passe par `_escAttr` (C24b) ; les espacements pris dans l’échelle (2 · 4 · 8 · 12 · 16 · 20 · 24…) ; « + » au cran `--pt-xl` ; les boutons à l’accent de la charte (« une seule couleur d’accent ») et leur texte en `--sur-accent` — j’avais écrit une couleur de surface en couleur de texte ; `_jFeuille` et `_jRetire` exemptés de tuto, motivés (« Filtrer » et « Voir N entrées » disent ce qu’ils font ; le × d’une pastille), le plafond inchangé ; la feuille, son voile et la barre exemptés du panneau côte à côte (au téléphone seulement, jamais à côté d’un panneau qui s’ouvre à 1 280 px). Plus `build-guide --check`, attendu.
+- Tutos et chaîne finale : voir la note de livraison.
+
+### 476d. Fiches et guide
+`guide/04-vigne.html` : le Journal au téléphone (la barre, la feuille, les pastilles, « + »). `MV_AIDE` relue : aucune fiche ne décrit les rangées de filtres du Journal.
+
+### 476e. Ce qui reste ouvert
+- **FILTRE-1B** (Parcelles), puis FILTRE-2 (Phyto, Réserve).
+- **À vérifier chez Nico, au téléphone** : la barre basse au-dessus du dock (ni cachée ni flottante), la feuille et « Voir N entrées », une pastille retirée, « + ».

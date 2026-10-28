@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.28', d: '2026-10-28', items: [
+    { niv: 0, pour: ['admin'], emoji: 'loupe', titre: 'Le Journal au téléphone : la liste d’abord',
+      desc: "Au téléphone, le Journal montre ses entrées dès le haut de l’écran. La recherche et «\u00a0Filtrer\u00a0» sont dans une barre en bas, sous le pouce\u00a0; «\u00a0Filtrer\u00a0» ouvre une feuille (qui, tâche, quand, parcelle) dont le bouton dit combien d’entrées il va montrer. Les filtres actifs restent en pastilles sous l’en-tête — un appui en retire un — et «\u00a0+\u00a0» ajoute une entrée. Sur ordinateur, rien ne change." },
+  ] },
   { v: '10.27', d: '2026-10-28', items: [
     { niv: 0, pour: ['tous'], emoji: 'aide', titre: 'Le bouton « ? Aide » est revenu',
       desc: "Depuis la mise à jour précédente, le bouton «\u00a0? Aide\u00a0» avait disparu en haut de huit modules (Vigne, Tracteur, Phyto, Réglages, Planning, Cave)\u00a0: il est revenu, sur la ligne de la campagne et de la date. Le Pilotage et la Réserve prennent le même en-tête que les autres modules." },
