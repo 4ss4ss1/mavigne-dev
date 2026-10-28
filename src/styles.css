@@ -3747,6 +3747,33 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
   #page-journal #journal-add-btn,#page-journal .j-filtres-pill{display:none!important;}
   #page-journal .timeline{padding-bottom:150px;}
 }
+/* ★ PC-LISTE-1 (§478) — maquette-ux-v1, partie 5 : le Journal sur ordinateur en trois colonnes — les filtres à gauche, la liste dense
+   au centre (une entrée = une ligne), la fiche de l'entrée choisie à droite, collante ; les touches sous la liste. Au téléphone,
+   rien ne change. La grille place les colonnes de côté au plus haut libre (dense) : les bandes de tête prennent toute la largeur. */
+.jfx,.j-touches{display:none;}
+@media (min-width:1024px){
+  #page-journal.active{display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr) minmax(0,360px);grid-auto-flow:row dense;column-gap:var(--e-6,24px);align-items:start;}
+  #page-journal.active > *{grid-column:2;min-width:0;}
+  #page-journal.active > .mod-header,#page-journal.active > .mod-meta-row,#page-journal.active > #jour-kpis,#page-journal.active > .readonly-banner{grid-column:1 / -1;}
+  #page-journal.active > #j-feuille{grid-column:1;grid-row:span 20;position:sticky;top:var(--e-4,16px);}
+  #page-journal.active > #j-fiche{display:block;grid-column:3;grid-row:span 20;position:sticky;top:var(--e-4,16px);max-height:calc(100vh - var(--e-8,40px));overflow:auto;padding:var(--e-4,16px);border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-lg,12px);background:var(--bg-card,#FFFFFF);}
+  #page-journal .j-feuille .j-feuille-lbl{display:block;padding:var(--e-3,12px) 0 var(--e-1,4px);font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux,#686660);}
+  #page-journal .j-feuille .orow,#page-journal .j-feuille .tfilters,#page-journal .j-feuille .j-date-range{flex-wrap:wrap;overflow:visible;padding-left:0;padding-right:0;}
+  #page-journal .jitem .jdotcol,#page-journal .jitem .eq-trace,#page-journal .jitem .meteo-snap{display:none;}
+  #page-journal .jitem{cursor:pointer;min-height:48px;}
+  #page-journal .jitem[aria-selected="true"] .jcard{outline:2px solid var(--accent,#7A2850);outline-offset:-2px;}
+  #page-journal .jitem .jcard-inner .mv-hd > div:first-child{display:flex;align-items:center;gap:var(--e-3,12px);min-width:0;}
+  #page-journal .j-touches{display:block;padding:var(--e-2,8px) 0;font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
+  #page-journal .j-touches kbd{display:inline-block;min-width:20px;padding:0 var(--e-1,4px);border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-xs,4px);background:var(--bg-card,#FFFFFF);font-family:inherit;text-align:center;}
+  #page-journal .jfx-d{font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
+  #page-journal .jfx-t{margin:var(--e-1,4px) 0 var(--e-2,8px);font-size:var(--pt-base,15px);font-weight:600;color:var(--texte,#1B1A18);}
+  #page-journal .jfx-s{display:flex;align-items:center;gap:var(--e-2,8px);margin-bottom:var(--e-3,12px);}
+  #page-journal .jfx-dl{display:grid;grid-template-columns:auto 1fr;gap:var(--e-1,4px) var(--e-3,12px);margin:0 0 var(--e-3,12px);}
+  #page-journal .jfx-dl dt{color:var(--texte-doux,#686660);font-size:var(--pt-micro,12px);}
+  #page-journal .jfx-dl dd{margin:0;}
+  #page-journal .jfx-act{margin-top:var(--e-3,12px);}
+  #page-journal .jfx-rien{color:var(--texte-doux,#686660);}
+}
 /* ★ FILTRE-1B (§477) — Parcelles au téléphone, le même patron : les compteurs restent en tête ; l'état, les tâches et Liste / Carte
    passent dans la feuille « Filtres » (celle d'ARRIVEE-4, pour tous désormais) ; la recherche et « Filtres » en barre basse. Sur la
    carte, Liste / Carte revient en haut (la barre vit dans la liste). Sur ordinateur, rien ne bouge. */

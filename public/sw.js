@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.10
+// MA VIGNE — Service Worker v11.11
+// v11.11 (28/10/2026) — PC-LISTE-1 (§478) : le Journal sur ordinateur en trois colonnes — filtres, liste dense, fiche de l'entrée choisie ; J / K / N / « / ».
 // v11.10 (28/10/2026) — FILTRE-1B (§477) : Parcelles au téléphone, la liste d'abord — l'état, les tâches et Liste / Carte dans « Filtres », la recherche et « Filtres » en barre basse.
 // v11.09 (28/10/2026) — FILTRE-1A (§476) : le Journal au téléphone, la liste d'abord — la recherche et « Filtrer » en barre basse, les filtres en feuille, les filtres actifs en pastilles, « + » flottant.
 // v11.08 (28/10/2026) — TETE-3C (§475) : « ? Aide » revenu dans les huit modules (perdu au déplacement des bandes, §474) ; le Pilotage et la Réserve prennent le même en-tête (la bande campagne/date dessous).
@@ -4642,7 +4643,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.10';
+const CACHE_NAME   = 'mavigne-v11.11';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4659,7 +4660,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.10 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.11 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4679,7 +4680,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.10 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.11 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

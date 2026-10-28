@@ -11635,6 +11635,7 @@ function renderJournalList(){
       _pillEl.style.display='none';
     }
   }
+  setTimeout(_jFicheSync,0);   // ★ PC-LISTE-1 (§478) : la fiche suit la liste, une fois rendue
   _jFeuilleMaj(tot);   // ★ FILTRE-1A (§476) : « Filtrer · n », « Voir N entrées », les chips des filtres actifs
   const grouped={};
   data.forEach(r=>{if(!grouped[r.date])grouped[r.date]=[];grouped[r.date].push(r);});
@@ -11669,7 +11670,7 @@ function renderJournalList(){
         const repSuffix=(r.reparation_types&&r.reparation_types.length)?_escHtml(' · '+r.reparation_types.join(', ')+(r.reparation_qte?(' ×'+r.reparation_qte):'')):'';
         const quiAffE=_escHtml(quiAff);
         const parcelleE=_escHtml(r.parcelle);
-        return `<div class="jitem"><div class="jdotcol"><div class="jdot ${sc}"></div>${hasNext?'<div class="jlinev"></div>':''}</div><div class="jcard mv-c" style="margin-bottom:0"><div class="jcard-bar ${barCls}"></div><div class="jcard-col"><div class="jcard-inner"><div class="mv-hd" style="flex:1;min-width:0"><div style="min-width:0"><div class="mv-v" style="font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">${tacheAff}${repSuffix}</div><div class="jmeta">${_jAvas(r, col)}<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${quiAffE}</span><span style="color:var(--gris-clair)">\u00b7</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${parcelleE}</span></div>${_jEqTrace(r)}</div>${_mvBadge(r.statut, isValide?'vert':isInfo?'neutre':'ambre')}${_jEqBtn(r)}</div></div>${r.meteo_snapshot?_renderMeteoSnapshot(r.meteo_snapshot):''}</div></div></div>`;
+        return `<div class="jitem" data-jid="${_escAttr(String(r.id==null?'':r.id))}" onclick="_jSel(this.dataset.jid)"><div class="jdotcol"><div class="jdot ${sc}"></div>${hasNext?'<div class="jlinev"></div>':''}</div><div class="jcard mv-c" style="margin-bottom:0"><div class="jcard-bar ${barCls}"></div><div class="jcard-col"><div class="jcard-inner"><div class="mv-hd" style="flex:1;min-width:0"><div style="min-width:0"><div class="mv-v" style="font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">${tacheAff}${repSuffix}</div><div class="jmeta">${_jAvas(r, col)}<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${quiAffE}</span><span style="color:var(--gris-clair)">\u00b7</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${parcelleE}</span></div>${_jEqTrace(r)}</div>${_mvBadge(r.statut, isValide?'vert':isInfo?'neutre':'ambre')}${_jEqBtn(r)}</div></div>${r.meteo_snapshot?_renderMeteoSnapshot(r.meteo_snapshot):''}</div></div></div>`;
       }).join('')}
     </div>`).join('');
   // ── Bouton "Charger plus" ──────────────────────────────────────────────────
@@ -12085,6 +12086,52 @@ function _jFeuilleMaj(tot){
   if(jSearch) ch.push(puce('recherche','\u00ab '+jSearch+' \u00bb'));
   a.innerHTML=ch.join('');
 }
+// ★ PC-LISTE-1 (§478) — LE JOURNAL SUR ORDINATEUR EN LISTE ET FICHE (docs/maquettes/maquette-ux-v1.html, partie 5) : un appui sur une
+//   entrée la choisit, et sa fiche s'affiche à droite sans quitter la liste ; J / K (ou ↓ / ↑) passent d'une entrée à l'autre,
+//   N ouvre une entrée neuve, / la recherche. Au téléphone, rien ne change (l'appui ne fait rien de neuf). La fiche dit ce que
+//   l'entrée porte — rien d'inventé : il n'existe pas d'éditeur d'une entrée passée (« Modifier » et E de la maquette attendent).
+var _jSelId='';
+function _jDesk(){ return !!(window.matchMedia&&window.matchMedia('(min-width: 1024px)').matches); }
+function _jFicheHtml(r){
+  if(!r) return '<div class="jfx-rien">Choisissez une entr\u00e9e dans la liste.</div>';
+  var p=(PARCELLES||[]).find(function(x){return x&&x.nom===r.parcelle;}), su=p?(p.surface||p.surf||''):'';
+  var eq=r.equipe||r.qui==='Equipe';
+  var qui=r.quiHors?((_jFaitPar(r).join(', ')||'\u2014')+' \u00b7 valid\u00e9 par '+(r.qui||'?')):(eq?('\u00c9quipe '+[r.qui&&r.qui!=='Equipe'?r.qui:''].concat(r.membresEquipe||[]).filter(Boolean).join(', ')):(r.qui||'Non assign\u00e9'));
+  return '<div class="jfx-d">'+_escHtml(fmtDate(r.date)+(r.time?' \u00b7 '+r.time:''))+'</div>'
+    +'<div class="jfx-t">'+_escHtml(tNom(r.tache)+(r.etapeLbl?' \u00b7 '+r.etapeLbl:'')+(r.parcelle?' \u00b7 '+r.parcelle:''))+'</div>'
+    +'<div class="jfx-s">'+_mvBadge(r.statut, r.statut==='Valid\u00e9'?'vert':(r.statut==='Info'?'neutre':'ambre'))+(su?'<span>'+_escHtml(String(su).replace('.',','))+' ha</span>':'')+'</div>'
+    +'<dl class="jfx-dl"><dt>Qui</dt><dd>'+_escHtml(qui)+'</dd></dl>'
+    +_jEqTrace(r)
+    +(r.meteo_snapshot?_renderMeteoSnapshot(r.meteo_snapshot):'')
+    +'<div class="jfx-act">'+_jEqBtn(r)+'</div>';
+}
+function _jRows(){ return [].slice.call(document.querySelectorAll('#timeline .jitem[data-jid]')); }
+function _jMontre(id){
+  _jSelId=id||'';
+  _jRows().forEach(function(x){ x.setAttribute('aria-selected',String(x.dataset.jid===_jSelId)); });
+  var el=document.getElementById('j-fiche'); if(!el) return;
+  el.innerHTML=_jFicheHtml((JOURNAL||[]).find(function(e){ return e&&String(e.id==null?'':e.id)===_jSelId; }));
+}
+function _jSel(id){ if(!_jDesk()) return; _jMontre(id); }
+function _jFicheSync(){
+  if(!_jDesk()) return;
+  var rows=_jRows(), ids=rows.map(function(x){return x.dataset.jid;});
+  _jMontre(ids.indexOf(_jSelId)>=0?_jSelId:(ids[0]||''));
+}
+document.addEventListener('keydown',function(ev){
+  if(ev.ctrlKey||ev.metaKey||ev.altKey||!_jDesk()) return;
+  var pg=document.getElementById('page-journal'); if(!pg||!pg.classList.contains('active')) return;
+  if(ev.target&&ev.target!==document.body) return;
+  if(document.querySelector('.overlay.open')) return;
+  var k=ev.key;
+  if(k==='/'){ var s=document.getElementById('jSearch'); if(s){ ev.preventDefault(); s.focus(); } return; }
+  if(k==='n'||k==='N'){ var b=document.getElementById('journal-add-btn'); if(b&&b.style.display!=='none'){ ev.preventDefault(); openJournalEntry(); } return; }
+  var bas=(k==='j'||k==='J'||k==='ArrowDown'), haut=(k==='k'||k==='K'||k==='ArrowUp'); if(!bas&&!haut) return;
+  var rows=_jRows(); if(!rows.length) return;
+  var i=rows.findIndex(function(x){return x.dataset.jid===_jSelId;});
+  var n=bas?Math.min(rows.length-1,i+1):Math.max(0,i<0?0:i-1);
+  ev.preventDefault(); _jMontre(rows[n].dataset.jid); if(rows[n].scrollIntoView) rows[n].scrollIntoView({block:'nearest'});
+});
 function clearAllJFiltres(){
   jQui='tous';jTache='toutes';jParcelle='toutes';jSearch='';jDateDeb='';jDateFin='';_jPage=0;
   var dd=document.getElementById('jDateDeb');var df=document.getElementById('jDateFin');
@@ -13235,6 +13282,7 @@ async function refreshApp(){
   if (typeof toggleTravail !== "undefined") window.toggleTravail = toggleTravail;
   window._jFeuille = _jFeuille; window._jRetire = _jRetire;   // ★ FILTRE-1A (§476) : appelés par la feuille et les chips
   window._pFxVue = _pFxVue;   // ★ FILTRE-1B (§477) : Liste / Carte dans la feuille « Filtres »
+  window._jSel = _jSel;   // ★ PC-LISTE-1 (§478) : un appui sur une entrée du Journal, sur ordinateur
   if (typeof marquerEnCours !== "undefined") window.marquerEnCours = marquerEnCours;
   if (typeof toggleExcluTache !== "undefined") window.toggleExcluTache = toggleExcluTache;
   if (typeof pickEmoji !== "undefined") window.pickEmoji = pickEmoji;

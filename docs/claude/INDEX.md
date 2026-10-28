@@ -531,3 +531,4 @@
 | 475 | 475. ★★ TETE-3C — « ? AIDE » RETROUVÉ ; LE PILOTAGE ET LA RÉSERVE AU MÊME EN-TÊTE (28/10 — `src/utils.js` (… | `docs/claude/chantiers-430-479.md` |
 | 476 | 476. ★★ FILTRE-1A — LE JOURNAL AU TÉLÉPHONE, LA LISTE D’ABORD : LES FILTRES EN FEUILLE, LA RECHERCHE ET « F… | `docs/claude/chantiers-430-479.md` |
 | 477 | 477. ★★ FILTRE-1B — PARCELLES AU TÉLÉPHONE, LA LISTE D’ABORD : L’ÉTAT, LA TÂCHE ET LISTE / CARTE DANS « FIL… | `docs/claude/chantiers-430-479.md` |
+| 478 | 478. ★★ PC-LISTE-1 — LE JOURNAL SUR ORDINATEUR EN LISTE ET FICHE : TROIS COLONNES, LE CLAVIER ; FILTRE-2 FE… | `docs/claude/chantiers-430-479.md` |

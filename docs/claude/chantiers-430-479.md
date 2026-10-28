@@ -1150,3 +1150,31 @@ La deuxième moitié de FILTRE-1 (§476a), dessinée dans `docs/maquettes/maquet
 ### 477e. Ce qui reste ouvert
 - **FILTRE-2** : le même patron sur Phyto (Registre) et Réserve.
 - **À vérifier chez Nico et chez un ouvrier, au téléphone** : la barre basse (au-dessus du dock), « Filtres » et sa tâche, Liste / Carte et le retour depuis la carte, l’ouvrier sur sa priorité.
+
+## 478. ★★ PC-LISTE-1 — LE JOURNAL SUR ORDINATEUR EN LISTE ET FICHE : TROIS COLONNES, LE CLAVIER ; FILTRE-2 FERMÉ SANS RIEN CHANGER (28/10 — `index.html` (la fiche, les touches) · `src/app.js` (`_jFicheHtml`, `_jMontre`, `_jSel`, `_jFicheSync`, le clavier ; `data-jid` sur chaque entrée) · `src/styles.css` · `guide/04-vigne.html` · `src/utils.js` (APP 10.30) · `src/whats-new.js` · `public/sw.js` (SW 11.11) · `scripts/mv-harnais-pcliste1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/tutos-couverture.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/PC-LISTE-1.json` · base `6e21d45`)
+
+### 478a. FILTRE-2, fermé sans rien changer (décision de Nico, 28/10)
+Le plan voulait « le même patron sur Phyto (Registre) et Réserve ». L’inventaire l’a contredit : le Registre n’a qu’une rangée de pastilles (le type) et pas de recherche, son « + » flottant existe déjà ; la Réserve n’a qu’une rangée (les millésimes, sur l’onglet Fûts). La maquette répond à quatre rangées avant la première entrée ; ici, la feuille aurait coûté un appui par filtre pour ~44 px. Nico : « Fermer FILTRE-2, passer à PC-LISTE-1 ».
+
+### 478b. D’où vient PC-LISTE-1
+`docs/maquettes/maquette-ux-v1.html`, partie 5 : sur grand écran, quatre entrées par écran dans une colonne, les filtres au-dessus ; Gmail, Linear, Notion en trois colonnes et le clavier — quinze entrées visibles, la fiche sans quitter la liste.
+
+### 478c. Ce qui change (sur ordinateur, à partir de 1 024 px ; au téléphone, rien)
+- **Trois colonnes** : la page Journal devient une grille — les bandes de tête sur toute la largeur ; à gauche la feuille des filtres de FILTRE-1A (ses étiquettes Qui · Tâche · Quand · Parcelle montrées, les rangées en retour à la ligne), collante ; au centre la recherche, la liste et les touches ; à droite la fiche, collante. `grid-auto-flow: dense` pose les colonnes de côté au plus haut libre.
+- **La liste dense** : une entrée = une ligne (le fil de dates, la trace d’équipe et la météo de chaque carte cachés ici — la fiche les montre) ; l’entrée choisie est cerclée de l’accent.
+- **La fiche** (`_jFicheHtml`) : date et heure, tâche (et étape) et parcelle, le statut, la surface de la parcelle, qui (l’équipe en entier, ou « fait par … · validé par … »), la trace d’équipe, la météo, le bouton Équipe qui existe. **Rien d’inventé** : il n’y a pas d’éditeur d’une entrée passée — « Modifier » et la touche E de la maquette attendent qu’il existe.
+- **La sélection** : un clic sur une entrée (`_jSel` ; `data-jid` par `_escAttr`, le gestionnaire lit `this.dataset`) ; après chaque rendu, la choisie reste — ou la première la remplace si un filtre l’a ôtée (`_jFicheSync`).
+- **Le clavier** (page Journal active, rien sous le focus, aucune fenêtre ouverte) : J / K et ↓ / ↑ passent d’une entrée à l’autre, la fiche suit ; N ouvre une entrée neuve si « + Ajouter » se montre ; « / » va à la recherche.
+- `_jSel` exempté de tuto, motivé (choisir une entrée, la fiche s’affiche à côté).
+
+### 478d. Mesuré
+- `mv-harnais-pcliste1` : 10 assertions — la fiche et la sélection JOUÉES (la première d’office, un clic en choisit une autre, la disparue remplacée, la fiche dit date et heure, tâche, parcelle, statut, surface, l’équipe, le bouton Équipe ; au téléphone rien de neuf), l’entrée cliquable sans valeur glissée, la grille, la fiche posée après la liste, le clavier ; **7/7 mutants**.
+- `test:ux`, tutos et chaîne : voir la note de livraison.
+
+### 478e. Fiches et guide
+`guide/04-vigne.html` : le Journal sur ordinateur (les trois colonnes, J / K / N / « / »). `MV_AIDE` relue : rien sur la mise en page du Journal.
+
+### 478f. Ce qui reste ouvert
+- **« Modifier » et E** : un éditeur d’entrée passée, à décider (aujourd’hui, on corrige l’équipe ; le reste se ressaisit).
+- **PC-LISTE-2**, le lot suivant du plan.
+- **À vérifier chez Nico, sur son PC** : les trois colonnes à 1 366 px et à 125 %, la fiche qui suit J / K, une entrée choisie puis filtrée.
