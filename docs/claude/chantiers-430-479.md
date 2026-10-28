@@ -1178,3 +1178,24 @@ Le plan voulait « le même patron sur Phyto (Registre) et Réserve ». L’inve
 - **« Modifier » et E** : un éditeur d’entrée passée, à décider (aujourd’hui, on corrige l’équipe ; le reste se ressaisit).
 - **PC-LISTE-2**, le lot suivant du plan.
 - **À vérifier chez Nico, sur son PC** : les trois colonnes à 1 366 px et à 125 %, la fiche qui suit J / K, une entrée choisie puis filtrée.
+
+## 479. ★★ PC-LISTE-2 — LE CLAVIER DES LISTES AVEC FICHE : LE REGISTRE PHYTO ET LE CHAI (28/10 — `src/app.js` (`_MV_LISTES`, `_mvListeTouche`) · `guide/07-phyto.html` · `guide/08-cave.html` · `src/utils.js` (APP 10.31) · `index.html` · `src/whats-new.js` · `public/sw.js` (SW 11.12) · `scripts/mv-harnais-pcliste2.mjs` (neuf) · `scripts/mv-harnais-pcliste1.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/PC-LISTE-2.json` · base `dbdad11`)
+
+### 479a. D’où ça vient — et ce que l’inventaire a corrigé
+Le dernier lot de la Phase 1 du plan : « même chose [que PC-LISTE-1] pour le Registre phyto, la Réserve (fûts) et Le Chai ». Relu dans le code : **le Registre et Le Chai avaient déjà leur liste et leur fiche** sur ordinateur (PHYTO-1 §285 : `#ph-fiche`, `_phSel` ; CAVE-3 §290 : `#chai-fiche`, `_chaiSel`) ; **les lots de fûts de la Réserve sont des cartes complètes** — référence, loué ou acheté, nombre et ses + / −, millésime, loyer ou prix, « Modifier », « Retirer » : une fiche à côté les doublerait. Le manque réel, commun aux deux listes : **le clavier** du Journal.
+
+### 479b. Ce qui change (sur ordinateur)
+- `_MV_LISTES` décrit les deux listes (la page, quand elle est la bonne vue — le Registre, l’onglet Le Chai —, ses lignes, son bouton « Saisir ») ; `_mvListeTouche` les sert : J / K et ↓ / ↑ **cliquent** la ligne suivante ou précédente — le geste existant, la fiche suit — ; la première si aucune n’est choisie ; on reste aux bornes ; N clique « Saisir un traitement » s’il se montre. La ligne choisie se lit dans `aria-selected`, que les deux listes posent déjà.
+- Rien au téléphone, dans un champ, sous une fenêtre ouverte, sur une autre page ou un autre onglet.
+
+### 479c. Mesuré
+- `mv-harnais-pcliste2` : 8 assertions — `_mvListeTouche` JOUÉE sur des lignes posées (J, ↓ aux bornes, K, la première d’office, N montré ou caché, Le Chai montré ou non, Phyto hors du Registre, le téléphone, une fenêtre, un champ), l’écoute posée ; **6/6 mutants**.
+- Chaîne (579 commandes) : un rouge à moi — la contre-épreuve de PC-LISTE-1 (« le clavier agit dans un champ ») visait le texte de la garde, qui revient désormais dans `_mvListeTouche` : le mutant ôtait la première, l’assertion lisait la seconde. Elle vise maintenant la garde du Journal (`scripts/mv-harnais-pcliste1.mjs`), 7/7. Plus `build-guide --check`, attendu.
+- `test:ux` et tutos : voir la note de livraison.
+
+### 479d. Fiches et guide
+`guide/07-phyto.html` et `guide/08-cave.html` : une phrase chacun (le clavier). `MV_AIDE` relue : rien.
+
+### 479e. Ce qui reste ouvert
+- **La Phase 1 du plan est finie** (UX-0 → PC-LISTE-2). La suite du plan : TRAC-UX-1, CAVE-UX-1, RSV-UX-1, PLAN-UX-1, PHY-UX-1, REGL-UX-1.
+- **À vérifier chez Nico, sur son PC** : J / K dans le Registre et dans Le Chai, N au Registre.

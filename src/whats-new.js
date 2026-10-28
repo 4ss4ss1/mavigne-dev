@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.31', d: '2026-10-28', items: [
+    { niv: 0, pour: ['admin'], emoji: 'ecran', titre: 'Le Registre phyto et Le Chai au clavier',
+      desc: "Sur ordinateur, comme au Journal\u00a0: dans le Registre phyto et dans Le Chai, J et K (ou les flèches) passent d’une ligne à l’autre et la fiche suit\u00a0; dans le Registre, N ouvre la saisie d’un traitement." },
+  ] },
   { v: '10.30', d: '2026-10-28', items: [
     { niv: 0, pour: ['admin'], emoji: 'ecran', titre: 'Le Journal sur ordinateur : la liste et la fiche côte à côte',
       desc: "Sur ordinateur, le Journal passe en trois colonnes\u00a0: les filtres à gauche, les entrées en lignes au centre, et à droite la fiche de l’entrée choisie (date et heure, tâche, parcelle, surface, qui, l’équipe). Un appui sur une entrée la choisit\u00a0; au clavier, J et K passent d’une entrée à l’autre, N en ouvre une nouvelle, «\u00a0/\u00a0» va à la recherche. Au téléphone, rien ne change." },

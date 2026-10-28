@@ -48,7 +48,7 @@ function jouer(S) {
   t('④ la fiche et les touches posées après la liste', /<div class="timeline" id="timeline"><\/div>\n  <!-- ★ PC-LISTE-1 \(§478\)[^\n]*\n  <aside class="jfx" id="j-fiche"/.test(S.html) && S.html.includes('<div class="j-touches" id="j-touches"'));
   t('⑤ le clavier : J / K et les flèches, N (si « + Ajouter » se montre), « / » vers la recherche ; jamais dans un champ ni sous une fenêtre',
     S.app.includes("var bas=(k==='j'||k==='J'||k==='ArrowDown'), haut=(k==='k'||k==='K'||k==='ArrowUp');") && S.app.includes("if(b&&b.style.display!=='none'){ ev.preventDefault(); openJournalEntry(); }") && S.app.includes("if(k==='/'){ var s=document.getElementById('jSearch');")
-    && S.app.includes("if(ev.target&&ev.target!==document.body) return;\n  if(document.querySelector('.overlay.open')) return;"));
+    && S.app.includes("var pg=document.getElementById('page-journal'); if(!pg||!pg.classList.contains('active')) return;\n  if(ev.target&&ev.target!==document.body) return;\n  if(document.querySelector('.overlay.open')) return;"));   /* PC-LISTE-2 (§479) : la garde du Journal, pas celle des autres listes (le même texte y revient) */
   t('⑥ exposée ; la liste joue ce fichier et sa contre-épreuve', S.app.includes('window._jSel = _jSel;') && S.liste.indexOf("mv-harnais-pcliste1.mjs'") > 0 && S.liste.indexOf("mv-harnais-pcliste1.mjs --contre'") > 0);
 }
 if (!CONTRE) {
@@ -65,7 +65,7 @@ if (!CONTRE) {
     ['la fiche perd la surface', m('app', "+(su?'<span>'+_escHtml(String(su).replace('.',','))+' ha</span>':'')", '')],
     ['la fiche perd l’équipe', m('app', ".concat(r.membresEquipe||[])", '')],
     ['la grille n’est plus dense (la fiche descend sous la liste)', m('css', 'grid-auto-flow:row dense;', '')],
-    ['le clavier agit dans un champ', m('app', "if(ev.target&&ev.target!==document.body) return;\n  if(document.querySelector('.overlay.open')) return;", "if(document.querySelector('.overlay.open')) return;")],
+    ['le clavier agit dans un champ', m('app', "if(!pg||!pg.classList.contains('active')) return;\n  if(ev.target&&ev.target!==document.body) return;\n  if(document.querySelector('.overlay.open')) return;", "if(!pg||!pg.classList.contains('active')) return;\n  if(document.querySelector('.overlay.open')) return;")],
     ['la liste ne joue plus ce fichier', (S) => Object.assign({}, S, { liste: S.liste.split("mv-harnais-pcliste1.mjs'").join("mv-harnais-pclisteZ.mjs'") })],
   ];
   let bons = 0;

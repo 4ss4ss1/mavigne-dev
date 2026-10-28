@@ -12132,6 +12132,34 @@ document.addEventListener('keydown',function(ev){
   var n=bas?Math.min(rows.length-1,i+1):Math.max(0,i<0?0:i-1);
   ev.preventDefault(); _jMontre(rows[n].dataset.jid); if(rows[n].scrollIntoView) rows[n].scrollIntoView({block:'nearest'});
 });
+// ★ PC-LISTE-2 (§479) — LE CLAVIER DES LISTES AVEC FICHE (maquette-ux-v1, partie 5 : « puis Phyto et Réserve, qui ont la même forme »).
+//   Le Registre phyto et Le Chai avaient déjà leur liste et leur fiche sur ordinateur (PHYTO-1 §285, CAVE-3 §290) : il leur manquait
+//   le clavier du Journal. J / K ou ↓ / ↑ passent à la ligne suivante ou précédente — un clic sur elle, par le geste existant : la
+//   fiche suit ; N ouvre une saisie là où le bouton « Saisir » se montre. Sur ordinateur, page active, rien sous le focus, aucune
+//   fenêtre ouverte. La ligne choisie se lit dans aria-selected, que les deux listes posent déjà.
+var _MV_LISTES=[
+  { page:'page-phyto', actif:function(pg){ return pg.classList.contains('ph-reg-on'); }, lignes:'#traitements-list-trac .phyto-row[data-pidx]', nouveau:'ph-new-btn' },
+  { page:'page-cave', actif:function(){ var v=document.getElementById('mvc-view-cuv'); return !!(v&&v.offsetParent!==null); }, lignes:'#mvc-body-cuv .mvc-cuv[data-cuv]', nouveau:'' }
+];
+function _mvListeTouche(ev){
+  if(ev.ctrlKey||ev.metaKey||ev.altKey) return;
+  if(!(window.matchMedia&&window.matchMedia('(min-width: 1024px)').matches)) return;
+  if(ev.target&&ev.target!==document.body) return;
+  if(document.querySelector('.overlay.open')) return;
+  var k=ev.key, bas=(k==='j'||k==='J'||k==='ArrowDown'), haut=(k==='k'||k==='K'||k==='ArrowUp'), neuf=(k==='n'||k==='N');
+  if(!bas&&!haut&&!neuf) return;
+  for(var c=0;c<_MV_LISTES.length;c++){
+    var L=_MV_LISTES[c], pg=document.getElementById(L.page);
+    if(!pg||!pg.classList.contains('active')||!L.actif(pg)) continue;
+    if(neuf){ var b=L.nouveau?document.getElementById(L.nouveau):null; if(b&&b.offsetParent!==null){ ev.preventDefault(); b.click(); } return; }
+    var rows=[].slice.call(document.querySelectorAll(L.lignes)); if(!rows.length) return;
+    var i=rows.findIndex(function(r){ return r.getAttribute('aria-selected')==='true'; });
+    var n=bas?Math.min(rows.length-1,i+1):Math.max(0,i<0?0:i-1);
+    ev.preventDefault(); rows[n].click(); if(rows[n].scrollIntoView) rows[n].scrollIntoView({block:'nearest'});
+    return;
+  }
+}
+document.addEventListener('keydown',_mvListeTouche);
 function clearAllJFiltres(){
   jQui='tous';jTache='toutes';jParcelle='toutes';jSearch='';jDateDeb='';jDateFin='';_jPage=0;
   var dd=document.getElementById('jDateDeb');var df=document.getElementById('jDateFin');

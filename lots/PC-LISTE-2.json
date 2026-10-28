@@ -1,0 +1,29 @@
+{
+  "lot": "PC-LISTE-2",
+  "section": "§479",
+  "base": "dbdad11ad1aad414538f4e59fa758cc399703e37",
+  "inclut": [],
+  "date": "2026-10-28",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "1a50af2f6fa6905e35463e1b41f539807bbc9817cd9c6c47c05f1818df0dc3dc",
+    "CLAUDE.md": "e34e4a4243149f8975fea6e6b0123376fac2cd91719c7c9ec5ed475ebb74c77c",
+    "docs/claude/INDEX.md": "af1b6818a83ac7ab68a8245f7ffdd45a6c81931a724a799accfcb42cd548d820",
+    "docs/claude/chantiers-430-479.md": "8b54eb19dc1f59c61a1bf7db6cc63b48937370e784f665a3eec8c862fb1b647e",
+    "docs/claude/journal.md": "bee574b5a89e8123022fd692f63f4561d09d0b5311faffd0558ae6039d01ac92",
+    "guide/07-phyto.html": "6de34da74c311da48cae435c58c2e55f26ef56bbe39e7da5c4c984268fb73f41",
+    "guide/08-cave.html": "6df9dd3502880d6e33539ba518404c63659e9b1324df288e12c9cc7a5ee2ad8f",
+    "index.html": "12569fb1903711a7d5f3aed19d82e85a80c74fa240877cb5cdaf116617564d70",
+    "public/sw.js": "1ce291959f536fe8b107fca518ee232d548e90d22f5c63cd9c0a2f80c45c9c54",
+    "scripts/harnais-claude-md.mjs": "8a0f18bc8e6e912a0f3a619a106f5fa97f2529866fcdbb57630d78769a8d70ac",
+    "scripts/mv-harnais-liste.mjs": "c8c522cf714018e73a226cf8e9281b113501da4f530fc06731d5475fbb329516",
+    "scripts/mv-harnais-pcliste1.mjs": "1c4c207f00cb49d2214529b4cd0061fa62806d646c9d19253d963aea21eb44c0",
+    "src/app.js": "de5047d3050010f28fff3b1ec58256d109f63a9c442c979bc3f1bc2a40511f2a",
+    "src/utils.js": "b0b9bb47cdc9f382af207f598b0e7bff5fb50018979cd314b742c887b0c9256d",
+    "src/whats-new.js": "af8b0b8be16a6c2f266b7c95737b00a439216950dba347ff5334f8fd936f8142",
+    "scripts/mv-harnais-pcliste2.mjs": "d1dc744726a7e3861c552a151b4128155c40d40c04054058137cf933ef9fe542"
+  }
+}
