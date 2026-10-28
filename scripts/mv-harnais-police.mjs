@@ -57,9 +57,9 @@ const lire = f => fs.readFileSync(path.join(RACINE, f), 'utf8');
 /* ══ EXEMPTIONS — chacune porte SA RAISON, et son compte exact ═══════════════
    `extrait` est un morceau de LA LIGNE qui porte le nom ; `n` le nombre de noms qu'elle couvre. */
 const EXEMPTIONS = [
-  { fichier: 'src/utils.js', extrait: 'ni Cormorant ni Outfit ne', n: 2,
+  { fichier: 'src/whats-new.js', extrait: 'ni Cormorant ni Outfit ne', n: 2,
     raison: 'texte affiché (une fiche qui raconte l’espace fine des nombres) : il parle des polices, il n’en pose aucune' },
-  { fichier: 'src/utils.js', extrait: 'passent en Cormorant', n: 1,
+  { fichier: 'src/whats-new.js', extrait: 'passent en Cormorant', n: 1,
     raison: 'texte d’une annonce (WHATS_NEW) : il nomme la police, il ne la pose pas' },
   { fichier: 'src/cockpit-vue.js', extrait: "return POLICE_UI || 'Outfit, system-ui, sans-serif';", n: 1,
     raison: 'une toile (canvas) ne lit pas les variables CSS : policeUi() lit --font-ui au premier dessin ; '
@@ -210,7 +210,7 @@ if (!CONTRE) {
     ['--sans revient', 'F',
       () => muter(FEUILLE, s => s + '\n.zz-c{font:600 13px var(--sans)}\n')],
     ['une exemption ne sert plus', 'G',
-      () => muter('src/utils.js', s => s.replace('passent en Cormorant', 'passent en serif'))]
+      () => muter('src/whats-new.js', s => s.replace('passent en Cormorant', 'passent en serif'))]
   ];
   for (const [nom, regle, fab] of CAS) {
     let S; try { S = fab(); } catch (e) { t(nom + ' — ' + e.message, false); continue; }

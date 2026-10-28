@@ -18,7 +18,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = f => fs.readFileSync(path.join(R, f), 'utf8');
-const BASE = { uti: lire('src/utils.js'), pil: lire('src/pilotage.js'), app: lire('src/app.js'), html: lire('index.html'), guide: lire('guide/11-pilotage.html') };
+const BASE = { uti: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')), pil: lire('src/pilotage.js'), app: lire('src/app.js'), html: lire('index.html'), guide: lire('guide/11-pilotage.html') };
 // Le corps d'une fonction, par comptage d'accolades.
 function corps(src, nom) {
   const i = src.indexOf('function ' + nom + '('); if (i < 0) throw new Error('introuvable : ' + nom);

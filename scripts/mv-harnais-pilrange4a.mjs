@@ -20,7 +20,7 @@ const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
 const AUTRES = fs.readdirSync(path.join(RACINE, 'src')).filter((f) => f.endsWith('.js') && f !== 'pilotage.js').map((f) => lire('src/' + f)).join('\n');
-const S0 = { pil: lire('src/pilotage.js'), utils: lire('src/utils.js'), liste: lire('scripts/mv-harnais-liste.mjs') };
+const S0 = { pil: lire('src/pilotage.js'), utils: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')), liste: lire('scripts/mv-harnais-liste.mjs') };
 function corps(src, nom) { const i = src.indexOf('function ' + nom + '('); if (i < 0) throw new Error('fonction absente : ' + nom); const j = src.indexOf('{', i); let p = 0, k = j; for (; k < src.length; k++) { const c = src[k]; if (c === '{') p++; else if (c === '}' && --p === 0) break; } return src.slice(i, k + 1); }
 function bloc(src, debut) { const i = src.indexOf(debut); if (i < 0) throw new Error('absent : ' + debut); const j = src.indexOf('{', i); let p = 0, k = j; for (; k < src.length; k++) { const c = src[k]; if (c === '{') p++; else if (c === '}' && --p === 0) break; } return src.slice(i, k + 2); }
 let ok = 0, ko = 0;

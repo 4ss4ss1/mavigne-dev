@@ -16,7 +16,7 @@ const SAIN = {
   cuv: fs.readFileSync('src/cuvier.js', 'utf8'),
   html: fs.readFileSync('index.html', 'utf8'),
   css: fs.readFileSync('src/styles.css', 'utf8'),
-  utils: fs.readFileSync('src/utils.js', 'utf8'),
+  utils: (fs.readFileSync('src/utils.js', 'utf8') + '\n' + fs.readFileSync('src/whats-new.js', 'utf8')),
 };
 function bornes(src, nom) {
   const m = [...src.matchAll(new RegExp('^function ' + nom + '\\s*\\(', 'gm'))];

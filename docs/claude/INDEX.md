@@ -522,3 +522,5 @@
 | 466 | 466. ★★ FERTI-8 — « VOS PRODUITS » DANS LA RECHERCHE DE L’AMENDEMENT ; LES TENEURS DE CHAQUE CAMPAGNE ; LA … | `docs/claude/chantiers-430-479.md` |
 | 467 | 467. ★★ UX-1 — LE CLIQUET MESURE LA ZONE D’APPUI, PAS LA BOÎTE : UX-0 AVAIT REFAIT L’ERREUR DE §175 (26/10 … | `docs/claude/chantiers-430-479.md` |
 | 468 | 468. ★★ MAQ-1 — LES MAQUETTES DU PLAN ENTRENT DANS LE DÉPÔT (27/10 — `docs/maquettes/` (neuf : trois maquet… | `docs/claude/chantiers-430-479.md` |
+| 469 | 469. ★★ WN-COUPE-1 — LE JOURNAL WHATS_NEW SORT DE `utils.js` ; SOIXANTE-DEUX CONTRÔLES LISAIENT LEUR ANNONC… | `docs/claude/chantiers-430-479.md` |
+| 470 | 470. ★★ LISIBLE-1 — LES TEXTES ET LES CIBLES COMME LA MAQUETTE : 11 px PARTOUT, 12 AU TÉLÉPHONE ; LES INITI… | `docs/claude/chantiers-430-479.md` |

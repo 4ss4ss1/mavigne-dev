@@ -799,6 +799,10 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-mapied1.mjs --contre'],
   ['node scripts/mv-harnais-ux0.mjs'],                 // UX-0 (§459) : le cliquet de l'expérience d'usage branché (npm, CI après le gabarit), sa référence couvre dix pages, deux écrans, neuf gestes
   ['node scripts/mv-harnais-ux0.mjs --contre'],
+  ['node scripts/mv-harnais-wncoupe1.mjs'],            // WN-COUPE-1 (§469) : WHATS_NEW vit dans src/whats-new.js, utils.js le réexporte et garde 64 ko de marge sous 1024 ko
+  ['node scripts/mv-harnais-wncoupe1.mjs --contre'],
+  ['node scripts/mv-harnais-lisible1.mjs'],            // LISIBLE-1 (§470) : les textes et les cibles comme la maquette (11 px, 12 au téléphone ; initiales du Journal ; zones des boutons discrets), la décision du 26/09 tenue
+  ['node scripts/mv-harnais-lisible1.mjs --contre'],
   ['node scripts/mv-harnais-ecart1.mjs'],              // ECART-1 (§460) : l'écart au barème d'Aujourd'hui › Économie en heures — la tuile est le total de la carte (un tiret sans rien à comparer), barres à l'échelle jusqu'à ±50 %
   ['node scripts/mv-harnais-ecart1.mjs --contre'],
   ['node scripts/mv-harnais-cave2.mjs'],              // CAVE-2 (§289) : le Cuvier à la charte

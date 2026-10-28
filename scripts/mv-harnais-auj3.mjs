@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC0 = { vue: L('src/cockpit-vue.js'), ck: L('src/cockpit.js'), pil: L('src/pilotage.js'), css: L('src/styles.css'), uti: L('src/utils.js'), guide: L('guide/11-pilotage.html') };
+const SRC0 = { vue: L('src/cockpit-vue.js'), ck: L('src/cockpit.js'), pil: L('src/pilotage.js'), css: L('src/styles.css'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')), guide: L('guide/11-pilotage.html') };
 function monde(S) {
   const ouverts = [];
   const ctx = { Math, Number, String, Array, Object, JSON, Date, Set, parseInt, isFinite, setTimeout: () => 0, localStorage: { getItem: () => null } };

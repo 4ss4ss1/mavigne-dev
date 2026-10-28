@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const S0 = { app: L('src/app.js'), css: L('src/styles.css'), uti: L('src/utils.js'), guide: L('guide/04-vigne.html'), html: L('index.html'), liste: L('scripts/mv-harnais-liste.mjs') };
+const S0 = { app: L('src/app.js'), css: L('src/styles.css'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')), guide: L('guide/04-vigne.html'), html: L('index.html'), liste: L('scripts/mv-harnais-liste.mjs') };
 function fonction(src, debut) { const i = src.indexOf(debut); if (i < 0) return ''; let k = src.indexOf('{', i), p = 0; for (; k < src.length; k++) { if (src[k] === '{') p++; else if (src[k] === '}' && --p === 0) break; } return src.slice(i, k + 1); }
 function bloc(css) { const i = css.indexOf('★ ACCV-2 (§417)'); if (i < 0) return ''; const j = css.indexOf('★ FIN ACCV-2', i); return css.slice(i, j < 0 ? undefined : j); }
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -18,6 +18,10 @@ const F = k => ISO(new Date(2026, 9, 23 + k));
 const N0 = new Date(), LUN = new Date(N0.getFullYear(), N0.getMonth(), N0.getDate() - ((N0.getDay() + 6) % 7));   // le journal : la semaine réelle
 const J = k => ISO(new Date(LUN.getFullYear(), LUN.getMonth(), LUN.getDate() + k));
 const LUNDI = VEN;
+// ★ WN-COUPE-1 (§469) — une horloge figée pour la carte « À savoir » : renderHomeSavoir lit _accSavoirItems(new Date()), l’heure RÉELLE, et
+//   les lignes attendues sont calculées au vendredi 23/10, 11 h 50. Passé 14 h le 27/10 (le vent du mardi après-midi), le compte divergeait
+//   (vert à 7 h, rouge à 18 h, déjà sur la base) ; tous les jours suivants aussi. Le paramètre `Date` du monde ne fige que le monde qui le demande.
+const horlogeFigee = (t0) => class extends Date { constructor(...a) { if (a.length) super(...a); else super(t0.getTime()); } static now() { return t0.getTime(); } };
 function monde(S, o) {
   o = o || {};
   const els = {}, el = id => (els[id] = els[id] || { id, innerHTML: '', textContent: '', className: '', style: {}, classList: { toggle() {}, add() {} } });
@@ -43,7 +47,7 @@ function monde(S, o) {
     CONFIG: { gnr: { niveau: 180, capacite: 1000 } }, _sessInSaison: () => true, _mvAvale: () => {}
   };
   const S2 = [{ date: J(-2), activite: 'Griffage', conducteur: 'Jean', tracteurId: 't1', parcellesFaites: ['a', 'b', 'c'], statut: 'Terminé' }, { date: J(0), activite: 'Intercep', conducteur: 'Marie', statut: 'En cours' }];
-  const noms = ['document', 'window', 'currentUser', 'PARCELLES', 'JOURNAL', 'SESSIONS', 'getTachesSaison', 'getSaisonActive', '_parcConcern', 'getTacheStatut', 'tNom', '_escHtml', '_mvIcon', '_hvJour', '_hvHeure', '_mvToday', '_prioItems', 'getHomeCardData', '_visuSaison', '_arrEquipeFiniePartout', '_mvTraceData', '_mvPartTache', '_mvPartCalc', 'isTractoriste', '_mvMoiAdmin', 'fmtDate', '_homeDreLignes'];
+  const noms = ['document', 'window', 'currentUser', 'PARCELLES', 'JOURNAL', 'SESSIONS', 'getTachesSaison', 'getSaisonActive', '_parcConcern', 'getTacheStatut', 'tNom', '_escHtml', '_mvIcon', '_hvJour', '_hvHeure', '_mvToday', '_prioItems', 'getHomeCardData', '_visuSaison', '_arrEquipeFiniePartout', '_mvTraceData', '_mvPartTache', '_mvPartCalc', 'isTractoriste', '_mvMoiAdmin', 'fmtDate', '_homeDreLignes', 'Date'];
   const f = new Function(...noms, fn + '\nreturn { savoir: _accSavoirItems, rS: renderHomeSavoir, rSa: renderHomeSaison, rM: renderHomeMoi, rT: renderHomeTrac, rD: renderHomeDirect };');
   const now = LUNDI;
   const X = f(doc, win, { nom: o.qui || 'Sophie' }, P, JR, S2,
@@ -52,7 +56,7 @@ function monde(S, o) {
     d => (d === J(0) ? 'Aujourd’hui' : d === J(-1) ? 'Hier' : d), j => { const m = /^([0-9a-f]{10,12})-/.exec(j.id || ''); if (!m) return ''; const d = new Date(parseInt(m[1], 16)); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); },
     () => J(0), () => [{ t: 'Réparation' }], () => ({ pctGlobal: 41, rienAMesurer: false }), () => 'Après-vendange 2026-2027', () => true,
     () => (o.vide ? { total: 0, jours: 0 } : { total: 2.31, jours: 12 }), (out) => 'Réparation', () => ({ mine: 1, done: 1.5, them: 0.5, tot: 2, rest: 0.5 }),
-    () => !!o.trac, () => !!o.admin, d => 'le ' + d, (now2) => (o.dre ? [{ g: { parcelles: ['Les Crais', 'Bel Air'], produits: ['Produit A'] }, fin: new Date(2026, 9, 23, 16, 0), diffH: 4.2 }] : []));
+    () => !!o.trac, () => !!o.admin, d => 'le ' + d, (now2) => (o.dre ? [{ g: { parcelles: ['Les Crais', 'Bel Air'], produits: ['Produit A'] }, fin: new Date(2026, 9, 23, 16, 0), diffH: 4.2 }] : []), o.maintenant ? horlogeFigee(o.maintenant) : Date);
   return { X, els, blocs, now, win };
 }
 function suite(S) {
@@ -64,7 +68,7 @@ function suite(S) {
     T('À savoir : la pluie du lundi (85 %) avec ses heures ; le samedi pluvieux, avant lui, ne compte pas', it.some(x => x.t === 'pluie' && /lundi/.test(x.ti) && x.v === '85\u00a0%' && /entre 8\u00a0h et 16\u00a0h/.test(x.d)) && !it.some(x => /samedi/.test(x.ti)));
     T('À savoir : le gel du lundi, le vent du mardi après-midi (31 km/h) ; le vent du samedi ne compte pas', it.some(x => x.t === 'att' && /Gel annonc\u00e9 lundi/.test(x.ti) && x.v === '-2\u00b0') && it.some(x => /Vent mardi apr\u00e8s-midi/.test(x.ti) && x.v === '31\u00a0km/h') && !it.some(x => /40/.test(x.v)));
     T('À savoir : un délai de rentrée en cours passe en tête, en rouge, avec ses parcelles et son heure de fin', Dr[0] && Dr[0].t === 'dan' && Dr[0].d.startsWith('Les Crais et Bel Air') && Dr[0].v === 'jusqu\u2019\u00e0 16\u00a0h\u00a000');
-    A.X.rS(); T('la carte À savoir rend ses lignes et son compte', A.els['home-savoir'].innerHTML.includes('class="hk-as-l pluie"') && A.els['home-savoir-n'].textContent === String(it.length) && A.els['home-savoir-n'].className === 'mvpas mvpas-compteur');
+    const Ah = monde(S, { maintenant: LUNDI }); Ah.X.rS(); T('la carte À savoir rend ses lignes et son compte', Ah.els['home-savoir'].innerHTML.includes('class="hk-as-l pluie"') && Ah.els['home-savoir-n'].textContent === String(it.length) && Ah.els['home-savoir-n'].className === 'mvpas mvpas-compteur');
     Sa = monde(S, {}); Sa.X.rSa(); const h = Sa.els['home-saison'].innerHTML; if (process.env.MV_VOIR) console.log(h);
     T('La saison : le pourcentage de la saison (getHomeCardData), la priorité marquée, ce qui reste en hectares et en parcelles', h.includes('41<small>') && /Réparation<span class="mvpas mvpas-etiquette">/.test(h) && h.includes('reste 1,00\u00a0ha, 2 parcelles') && !/\d\s?h restantes|heures/.test(h));
     T('La saison : en cours par date de début, puis à venir avec sa date (« dès le 1er déc. »), puis terminé — l’arrachage fini pour l’équipe', h.indexOf('>Réparation<') < h.indexOf('>Entreplantation<') && h.indexOf('À venir') < h.indexOf('dès le 1er déc.') && h.includes('fini pour l\u2019\u00e9quipe') && h.indexOf('Terminé') > h.indexOf('dès le 1er déc.'));

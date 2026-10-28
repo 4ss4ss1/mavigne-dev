@@ -1,4 +1,6 @@
-// MA VIGNE — Service Worker v11.01
+// MA VIGNE — Service Worker v11.03
+// v11.03 (27/10/2026) — LISIBLE-1 (§470) : les textes et les cibles comme la maquette — plus aucun texte sous 11 px, 12 px au téléphone (le jeton --pt-nano) ; initiales du Journal dans un rond de 28, deux au plus puis « +N » ; « 173h / 152h » du Planning à 12 px, tronqué ; les dernières cibles sous 24 px agrandies ; une zone de 44 px aux boutons « discrets » et secondaires, dessin inchangé ; les jours de la Cave à 44 px.
+// v11.02 (27/10/2026) — WN-COUPE-1 (§469) : WHATS_NEW sort de src/utils.js vers src/whats-new.js (utils.js touchait le plafond de 1024 ko) ; rien ne change à l’écran.
 // v11.01 (26/10/2026) — FERTI-8 (§466) : Phyto › Fertilisation — « Vos produits » dans la recherche (apports passés, toutes campagnes ; la fiche remplie comme au dernier apport ; teneurs de chaque campagne à un geste) ; « Chaux, dolomie » enregistré sans type ; tuto « reprendre un produit déjà utilisé »
 // v11.00 (26/10/2026) — FERTI-7B (§465) : version technique — sur le bouton « Saisir un traitement / un amendement », l’étiquette du tuto passe après son geste (phyto1 et phyto3 lisent le bouton et son geste d’un seul tenant)
 // v10.99 (26/10/2026) — FERTI-7 (§464) : un tuto « Comment faire pour saisir un amendement ? » (produit normé, norme, formule N-P-K, nature, parcelles par appellation) ; étiquettes data-tuto de la fiche, de l’onglet Fertilisation et des deux boutons « nouveau » ; appellations dans le domaine d’entraînement
@@ -4633,7 +4635,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.01';
+const CACHE_NAME   = 'mavigne-v11.03';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4650,7 +4652,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.01 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.03 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4670,7 +4672,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.01 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.03 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

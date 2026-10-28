@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 const RAC = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const L = f => fs.readFileSync(path.join(RAC, f), 'utf8');
 const CONTRE = process.argv.includes('--contre');
-const SRC0 = { ck: L('src/cockpit.js'), pil: L('src/pilotage.js'), vue: L('src/cockpit-vue.js'), app: L('src/app.js'), uti: L('src/utils.js'), css: L('src/styles.css'),
+const SRC0 = { ck: L('src/cockpit.js'), pil: L('src/pilotage.js'), vue: L('src/cockpit-vue.js'), app: L('src/app.js'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')), css: L('src/styles.css'),
   g11: L('guide/11-pilotage.html'), g04: L('guide/04-vigne.html'), liste: L('scripts/mv-harnais-liste.mjs') };
 const fnDe = (s, sig) => { const i = s.indexOf(sig); if (i < 0) throw new Error('introuvable : ' + sig); return s.slice(i, s.indexOf('\n}\n', i) + 3); };
 const fonction = (src, debut) => { const i = src.indexOf(debut); if (i < 0) throw new Error('introuvable : ' + debut); let k = src.indexOf('{', i), p = 0;

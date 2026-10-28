@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC = { ut: lire('src/utils.js'), app: lire('src/app.js'), reg: lire('src/reglages.js'), pla: lire('src/planning.js'), pil: lire('src/pilotage.js') };
+const SRC = { ut: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')), app: lire('src/app.js'), reg: lire('src/reglages.js'), pla: lire('src/planning.js'), pil: lire('src/pilotage.js') };
 const HTML = lire('index.html'), G04 = lire('guide/04-vigne.html');
 const sansCom = s => s.replace(/^\s*\/\/.*$/gm, '');
 function bloc(src, a, b, nom) {

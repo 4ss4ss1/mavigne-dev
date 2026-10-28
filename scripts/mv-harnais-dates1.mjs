@@ -17,7 +17,7 @@ import { fileURLToPath, pathToFileURL } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC0 = { pla: lire('src/planning.js'), uti: lire('src/utils.js'), app: lire('src/app.js'), pil: lire('src/pilotage.js') };
+const SRC0 = { pla: lire('src/planning.js'), uti: lire('src/utils.js'), app: lire('src/app.js'), pil: lire('src/pilotage.js'), wn: lire('src/whats-new.js') };   // WN-COUPE-1 (§469) : le journal vit dans whats-new.js — lu à part, il n’est pas réécrit (FICH)
 const FICH = { pla: 'planning.js', uti: 'utils.js', app: 'app.js', pil: 'pilotage.js' };
 const { chargerApp } = await import(pathToFileURL(path.join(R, 'scripts/mv-app-node.mjs')).href);
 const sansCom = s => s.replace(/^\s*\/\/.*$/gm, '');
@@ -119,7 +119,7 @@ async function suite(S) {
     finally { s.echeances.Taille.d2 = e; } });
   // ── C. lu ──
   const P = sansCom(S.pil);
-  T('C2 la nouveauté l\u2019annonce (bloc 8.91)', () => { const U = S.uti, i = U.indexOf("{ v: '8.91', d: '2026-10-13', items: ["), j = U.indexOf("{ v: '8.90'", i);
+  T('C2 la nouveauté l\u2019annonce (bloc 8.91)', () => { const U = S.wn, i = U.indexOf("{ v: '8.91', d: '2026-10-13', items: ["), j = U.indexOf("{ v: '8.90'", i);
     return i > 0 && j > i && U.slice(i, j).includes('Les dates de travaux valent aussi pour les tâches sans barème') && U.slice(i, j).includes('sans recharger'); });
   const av = JOURNAL_ERR.slice(e0).filter(x => /planning|pilotage|cockpit|_mvChantiersCtx|_mvkRetards/.test(String((x && x.msg) || '')));
   T('C3 aucune erreur avalée en route' + (av.length ? ' (' + String(av[0].msg).slice(0, 120) + ')' : ''), () => av.length === 0);

@@ -10,7 +10,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC0 = { app: L('src/app.js'), uti: L('src/utils.js'), pil: L('src/pilotage.js'), g04: L('guide/04-vigne.html') };
+const SRC0 = { app: L('src/app.js'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')), pil: L('src/pilotage.js'), g04: L('guide/04-vigne.html') };
 const sansCom = s => s.replace(/^\s*\/\/.*$/gm, '');
 function fn(src, sig) { const i = src.indexOf(sig); if (i < 0) throw new Error('introuvable : ' + sig); return src.slice(i, src.indexOf('\n}\n', i) + 3); }
 function ligne(src, re) { const m = src.match(re); if (!m) throw new Error('introuvable : ' + re); return m[0]; }

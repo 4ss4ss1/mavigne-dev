@@ -17,7 +17,7 @@ const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = f => fs.readFileSync(path.join(R, f), 'utf8');
 const BASE = { ck: lire('src/cockpit.js'), pil: lire('src/pilotage.js'), vue: lire('src/cockpit-vue.js'), css: lire('src/styles.css'),
-  uti: lire('src/utils.js'), guide: lire('guide/11-pilotage.html') };
+  uti: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')), guide: lire('guide/11-pilotage.html') };
 const { chargerApp } = await import(pathToFileURL(path.join(R, 'scripts/mv-app-node.mjs')).href);
 const morceau = (src, debut, fin) => { const i = src.indexOf(debut); if (i < 0) throw new Error('introuvable : ' + debut); const j = src.indexOf(fin, i); if (j < 0) throw new Error('fin introuvable : ' + fin); return src.slice(i, j + fin.length); };
 const VERDICT = /attendra|craint|possible|Non travaill/;

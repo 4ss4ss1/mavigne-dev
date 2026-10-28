@@ -917,3 +917,57 @@ Nico, le 27/10, refusant de reprendre dans une nouvelle conversation : « à cha
 ### 468c. Ce qui reste ouvert
 - `wn-coupe1-en-cours.patch` (hors dépôt) : la coupe de WHATS_NEW est écrite et ses onze lecteurs nommés suivent ; la chaîne a trouvé d’autres harnais qui vérifient leur annonce dans `utils.js` sans nommer WHATS_NEW (`revient`, `vol1`, `asm1`, `creux`, au moins) — à finir, section §469.
 - `lisible1-en-attente.patch` (hors dépôt) : après la coupe — APP 10.22, SW 11.03, §470.
+
+## 469. ★★ WN-COUPE-1 — LE JOURNAL WHATS_NEW SORT DE `utils.js` ; SOIXANTE-DEUX CONTRÔLES LISAIENT LEUR ANNONCE DANS `utils.js` (27/10 — `src/whats-new.js` (neuf) · `src/utils.js` (import et réexport, APP 10.21) · `index.html` · `public/sw.js` (SW 11.02) · 63 contrôles de `scripts/` (liste en 469b) · `scripts/mv-harnais-wncoupe1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/mv-icones-baseline.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/WN-COUPE-1.json` · base `bdc9522`)
+
+### 469a. D’où ça vient
+LISIBLE-1 butait sur `mv-harnais-typo` : `src/utils.js` pesait 1 048 995 octets (1024,4 ko, le plafond : « au-delà, on découpe ») et son annonce en ajoutait 685. Nico (27/10) : « A », la coupe d’abord. Un patch l’avait écrite la veille, hors dépôt (§468c) ; la chaîne avait alors trouvé quatre contrôles qui cherchaient leur annonce dans `utils.js` sans nommer WHATS_NEW (`revient`, `vol1`, `asm1`, `creux`), « liste incomplète ». Repris ce jour sur la base de MAQ-1 : la partie code du patch s’applique telle quelle ; sa partie documentation était périmée (elle se numérotait §468, pris par MAQ-1, et recopiait `docs/maquettes/`).
+
+### 469b. Ce qui change
+- `src/whats-new.js` porte le tableau, même format, la version 10.21 en tête (`items: []`). `utils.js` : `import { WHATS_NEW } from './whats-new.js'; export { WHATS_NEW };` — le code de l’appli ne voit rien. **Le déplacement est exact** : le bloc d’avant (537 338 octets) et le corps du fichier neuf, ligne 10.21 retirée, sont identiques au caractère près ; hors du bloc, `utils.js` ne change que de la version et des deux lignes d’import. `utils.js` : 500 748 octets (489 ko).
+- **Les lecteurs du journal** — la méthode : jouer, sur la coupe, les 271 commandes de la chaîne dont le script lit `utils.js` ; 92 rougissent. Rejouées sur la base : toutes vertes sauf `accv2` (469d). La coupe est donc la seule cause, et la liste est complète pour ce qui lit `utils.js`.
+  - 9 suivis par le patch : `preflight` (C27), `mv-whatsnew-check`, `annonces`, `autete1`, `forme2`, `futcap`, `pilfix1`, `police` (ses deux exemptions dans `whats-new.js`), `icones` (le module compté ; cliquet regravé 639 → 623, rien n’a monté).
+  - 51 lisent `utils.js` puis le journal, bout à bout, dans leur objet de sources : `acc2`, `accv1`, `accv2`, `accv4`, `aide`, `anticipe1`, `arrach9`, `asm1`, `auj1`, `auj2`, `auj3`, `auj8`, `cavefix1`, `cavepil3`, `caverange1`, `caverange2a`, `caverange3`, `cavereg1`, `cavereg2`, `chant1`, `creux`, `cuves1`, `direct1`, `direct2`, `ecart1`, `etat1`, `etats1`, `hors1`, `jeq1`, `manque1`, `matu1`, `minaoc1`, `mouv1`, `parc1`, `pilrange4a`, `pilrange4b`, `prol1`, `rec1`, `ref1`, `ref2`, `retrait1`, `revient`, `sansrec1`, `sect1`, `sessions`, `tap`, `tourcuv1`, `trac1`, `tuto8`, `vif1`, `vol1`.
+  - ⚠️ 2 lisent le journal **à part** (`wn`) : `dates1` et `tournee1` réécrivent `utils.js` dans un dossier et rechargent l’appli entière (`mv-app-node`) — recollé, le journal y aurait été déclaré deux fois (`import` puis `export const`), et l’appli ne se chargeait plus.
+  - `icones-contre` : son bac copie aussi `whats-new.js` (sans lui, `icones` plantait avant la première épreuve — « étendre un contrôle, c’est étendre son bac »).
+- `mv-harnais-wncoupe1` garde la coupe : le tableau déclaré une fois, dans `whats-new.js` ; `utils.js` le réexporte et garde 64 ko de marge ; le journal s’ouvre sur l’APP ; `mv-whatsnew-check` et le preflight lisent le fichier ; la liste le joue.
+- ★ **La règle, écrite en règle d’or n°4** : une annonce se vérifie dans `src/whats-new.js`. Un contrôle neuf qui la chercherait dans `utils.js` rougirait d’emblée.
+- La regravure de la référence UX que portait le patch est retirée : rien ne change à l’écran ; LISIBLE-1 remesure (§470).
+
+### 469c. Mesuré
+- Les 91 commandes rouges (hors `recup --contre`, joué à part) rejouées sur la coupe corrigée : vertes, sauf `harnais-claude-md` avant cette section. `accv2` et sa contre-épreuve (8/8) verts à trois heures du jour (Paris, Honolulu, Tokyo).
+- `mv-harnais-wncoupe1` : 6 assertions, 6/6 mutants. Chaîne complète : voir la note de livraison.
+
+### 469d. Vu en route — `accv2` rougissait sur la base, selon l’heure
+`renderHomeSavoir` lit `_accSavoirItems(new Date())` — l’heure réelle — et le contrôle comparait son compte à des lignes calculées au vendredi 23/10, 11 h 50. Passé 14 h le 27/10 (le vent du mardi après-midi), les deux comptes divergeaient : vert à 7 h, rouge à 18 h ; et chaque jour suivant, toute la journée — de quoi arrêter un `npm run build` du soir. Corrigé dans le contrôle, pas dans l’appli : le monde prend un paramètre `Date` (`horlogeFigee`), et seul le monde de la carte le demande ; les autres gardent la semaine réelle que le journal exige.
+
+### 469e. Ce qui reste ouvert
+- LISIBLE-1 sur cette base (§470).
+- La hausse du Pilotage sur ordinateur (39 → 42 cibles sous 44 px), qui dépend de l’heure réelle (§468d du patch d’origine, non retrouvée) : **à suivre** au relevé de LISIBLE-1.
+
+## 470. ★★ LISIBLE-1 — LES TEXTES ET LES CIBLES COMME LA MAQUETTE : 11 px PARTOUT, 12 AU TÉLÉPHONE ; LES INITIALES DU JOURNAL DANS UN ROND DE 28, DEUX AU PLUS PUIS « +N » (27/10 — `src/charte.css` · `src/styles.css` · `src/app.js` (`_jAvas`) · `index.html` · `src/reserve.js` · `src/tracteur.js` · `src/utils.js` (APP 10.22) · `src/whats-new.js` · `public/sw.js` (SW 11.03) · `scripts/mv-harnais-lisible1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/mv-gabarit-rendu.mjs` · `scripts/mv-harnais-textea.mjs` · `scripts/mv-ux-baseline.json` (regravée) · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/LISIBLE-1.json` (inclut WN-COUPE-1) · base `bdc9522`)
+
+### 470a. D’où ça vient
+Le lot que le plan du 25/10 appelait CIBLE-1, ramené par UX-1 (§467) à ce qui était vraiment trop petit. Un patch l’avait écrit le 27/10 au matin, hors dépôt, bloqué par le plafond d’`utils.js` (§469). **Comparé à sa maquette avant d’être intégré** (`docs/maquettes/maquette-ux-v1.html`, partie 3 « Les cibles et les textes » — la règle de MAQ-1, §468), il s’en écartait sur trois points que la décision de Nico du 26/10 ne couvre pas : les initiales du Journal dans un rond de 20, sans « +N » (maquette : 28, deux ronds au plus) ; la ligne d’heures du Planning à 11 px (maquette : 12, tronquée) ; aucun plancher de 12 px au téléphone (maquette : « 11 px partout, 12 au téléphone »). Le reste de l’écart (boutons discrets à 36 px, puces, bulles « i », roue) est tranché le 26/10. Nico (27/10) : « Comme la maquette ».
+
+### 470b. Ce qui change
+- **Le plancher de texte** : `src/charte.css` — `@media (max-width:767.98px){ :root{ --pt-nano:12px; } }` (la bascule de l’appli : 768 px = ordinateur). Seul le plus petit cran monte, et tout ce qui le lit suit. Les textes que le patch relevait à 11 px passent par ce jeton : `.oava`, `.pv-team-lbl`, `.mv-syncdot .mvs-cnt`, `.cmp-scale` (et son `em`), « Priorité du moment », `.mvr-u`, l’étiquette du registre du tracteur.
+- **Les initiales du Journal** : `.java` 28 × 28, bordé, 11 px (12 au téléphone), graisse 600 ; `.java-grp` les fait se chevaucher (−8 px) ; `.java-plus` sur l’acier. `_jAvas(r, col)` (app.js) : ceux qui ont fait le travail quand un autre a validé (`_jFaitPar`), sinon l’auteur puis l’équipe, chacun une fois ; deux ronds au plus, puis « +N » ; `aria-hidden` (les noms sont écrits juste après).
+- **La ligne d’heures du Planning** (`.pl2-name-s`, « 173h / 152h ») : 12 px, sur une ligne, tronquée.
+- Du patch, tels quels : les cinq cibles sous 24 px (tuiles de l’Accueil et « Pourquoi ? » à 24 px, crayon de la priorité 24 × 24 avec une zone de 44, champs de recherche à la hauteur de leur boîte) ; la zone de 44 px (`::after` centré) des boutons « discrets » et secondaires, dessin inchangé ; les 7 jours de la Cave à 44 px.
+- **Le gabarit du Pilotage** compte un style par rôle **et par écran** : l’en-tête de colonne, 11 px sur ordinateur et 12 au téléphone, le faisait rougir — pour une règle voulue. Sa contre-épreuve mord toujours (5/5).
+- **TEXTE-A** (`mv-harnais-textea`) refusait toute seconde définition des petits crans : le plancher du téléphone est désormais la seule permise, mot pour mot (il ne fait que monter) ; un second plancher plus bas rougit (contre-épreuve neuve). Trouvé par la chaîne complète, seul rouge de ses 561 commandes.
+- Annonce 10.22, niveau 0, pour tous.
+
+### 470c. Mesuré
+- `test:ux` (build du lot, horloge au 27/10, 9 h) : **téléphone** 162 → **0** texte sous 12 px, 58 → 0 sous 11, 5 → 0 cible sous 24, 297 → 245 sous 44 ; **ordinateur** 64 → 0 sous 11, 5 → 0 sous 24, 232 → 211 sous 44, 191 textes sous 12 (13 % ; l’objectif du plan ne vise que le téléphone). Le plancher en un jeton a suffi : relevé détaillé, plus aucune valeur écrite en dur sous 12 px à la largeur du téléphone.
+- Référence regravée, 38 baisses, **deux hausses écrites** : Journal sur ordinateur 22 → 33 textes sous 12 px (23 ronds d’initiales à 11 px au lieu de 14 à 7 : voulu) ; Pilotage sur ordinateur 39 → 42 cibles sous 44 px (470e).
+- `mv-harnais-lisible1` : 14 assertions (dont `_jAvas` exécutée : un auteur → 1 rond ; une équipe de quatre → 2 ronds et « +2 » ; un doublon compté une fois ; validé par un autre → ceux qui ont fait), 14/14 mutants. Gabarit 15/15, contre-épreuve 5/5. Tutos : aucun concerné ; le panneau côte à côte rejoué.
+
+### 470d. Fiches et guide
+`MV_AIDE` (Journal, Planning, Réglages) et le guide relus : aucune phrase ne décrit la taille des initiales ni de la ligne d’heures — rien à changer.
+
+### 470e. Ce qui reste ouvert
+- **La hausse du Pilotage sur ordinateur** (39 → 42 cibles sous 44 px) : revue le 27/10, absente d’un relevé fini à 18 h 42, présente au suivant (18 h 49) sans rien changer. Cause non trouvée ; tant qu’elle ne l’est pas, la référence porte 42.
+- **À vérifier chez Nico** : le Journal sur son téléphone et son PC à 125 % (une équipe de trois et plus, le « +N »), la ligne d’heures du Planning sur un écran étroit, l’échelle de la campagne dans Réglages, en clair et en sombre.
+- Les onglets (40 px) avec TETE-3 ; le prochain lot du plan : ANNULER-1.

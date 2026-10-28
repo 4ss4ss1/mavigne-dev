@@ -132,8 +132,11 @@ t('trois graisses : ' + GRAISSES.join(', '), graisses.length === 0, graisses.sli
 const tailles = tous.filter((x) => !TAILLES.includes(x.fs));
 t('huit tailles : ' + TAILLES.join(', ') + ' px', tailles.length === 0, tailles.slice(0, 3).map((x) => x.fs + ' px « ' + x.t + ' » ' + x.ch.split(' < ')[0] + ' (' + x.ou + ')').join(' · '));
 for (const [nom, motifs, max] of ROLES) {
-  const st = new Map(); tous.filter((x) => motifs.some((m) => m.test(x.ch))).forEach((x) => { const k = x.fs + ' px · ' + x.fw; if (!st.has(k)) st.set(k, x.ou); });
-  t('un rôle, un style — ' + nom + (st.size ? ' (' + [...st.keys()].join(' / ') + ')' : ' (absent des vues)'), st.size <= max, [...st.entries()].map(([k, o]) => k + ' dans ' + o).join(' · '));
+  // ★ LISIBLE-1 (§470) — UN STYLE PAR RÔLE ET PAR ÉCRAN : le plancher de texte monte à 12 px au téléphone (la charte, --pt-nano ;
+  //   maquette-ux-v1, partie 3) ; un rôle à 11 px sur ordinateur et à 12 au téléphone garde un seul style sur chaque écran.
+  const parEcran = new Map(); tous.filter((x) => motifs.some((m) => m.test(x.ch))).forEach((x) => { const e = x.ou.split(' › ')[0]; if (!parEcran.has(e)) parEcran.set(e, new Map()); const st = parEcran.get(e), k = x.fs + ' px · ' + x.fw; if (!st.has(k)) st.set(k, x.ou); });
+  const styles = [...parEcran.entries()].map(([e, st]) => e + ' : ' + [...st.keys()].join(' / ')), trop = [...parEcran.values()].some((st) => st.size > max);
+  t('un rôle, un style par écran — ' + nom + (styles.length ? ' (' + styles.join(' ; ') + ')' : ' (absent des vues)'), !trop, [...parEcran.values()].flatMap((st) => [...st.entries()].map(([k, o]) => k + ' dans ' + o)).join(' · '));
 }
 const jg = relevés.flatMap((r) => r.jauges.map((j) => ({ ...j, ou: ou(r) }))).filter((j) => Math.abs(j.h - 10) > 0.6);
 t('les jauges ont 10 px', jg.length === 0, jg.slice(0, 3).map((j) => j.s + ' : ' + j.h + ' px (' + j.ou + ')').join(' · '));

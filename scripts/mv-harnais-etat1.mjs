@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url';
 const RAC = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const L = f => fs.readFileSync(path.join(RAC, f), 'utf8');
 const CONTRE = process.argv.includes('--contre');
-const SRC0 = { ck: L('src/cockpit.js'), pil: L('src/pilotage.js'), vue: L('src/cockpit-vue.js'), app: L('src/app.js'), uti: L('src/utils.js'), guide: L('guide/11-pilotage.html') };
+const SRC0 = { ck: L('src/cockpit.js'), pil: L('src/pilotage.js'), vue: L('src/cockpit-vue.js'), app: L('src/app.js'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')), guide: L('guide/11-pilotage.html') };
 const fnDe = (s, sig) => { const i = s.indexOf(sig); if (i < 0) throw new Error('introuvable : ' + sig); return s.slice(i, s.indexOf('\n}\n', i) + 3); };
 const ligne = (s, re) => { const m = s.match(re); if (!m) throw new Error('absente : ' + re); return m[0] + '\n'; };
 const sansCom = s => s.replace(/^\s*\/\/.*$/gm, '');

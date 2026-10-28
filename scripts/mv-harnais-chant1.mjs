@@ -12,7 +12,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC0 = { uti: L('src/utils.js'), app: L('src/app.js'), pil: L('src/pilotage.js'), vue: L('src/cockpit-vue.js'), ck: L('src/cockpit.js'),
+const SRC0 = { uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')), app: L('src/app.js'), pil: L('src/pilotage.js'), vue: L('src/cockpit-vue.js'), ck: L('src/cockpit.js'),
   css: L('src/styles.css'), g04: L('guide/04-vigne.html'), g11: L('guide/11-pilotage.html') };
 const sansCom = s => s.replace(/^\s*\/\/.*$/gm, '');
 function fn(src, sig) { const i = src.indexOf(sig); if (i < 0) throw new Error('introuvable : ' + sig); return src.slice(i, src.indexOf('\n}\n', i) + 3); }

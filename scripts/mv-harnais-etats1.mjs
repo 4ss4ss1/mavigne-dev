@@ -4,7 +4,7 @@
 import fs from 'fs'; import path from 'path'; import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'); const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC0 = { css: L('src/styles.css'), vue: L('src/cockpit-vue.js'), ck: L('src/cockpit.js'), pil: L('src/pilotage.js'), uti: L('src/utils.js') };
+const SRC0 = { css: L('src/styles.css'), vue: L('src/cockpit-vue.js'), ck: L('src/cockpit.js'), pil: L('src/pilotage.js'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')) };
 function suite(S) {
   const out = []; const T = (n, c) => out.push([n, !!c]);
   T('fait : un vrai vert (46 % de --ok), plus la teinte douce', S.css.includes('--et-faite:color-mix(in srgb,var(--ok) 46%,var(--bg-card))') && S.css.includes('.mv-fo.et-faite{fill:color-mix(in srgb,var(--ok) 46%,var(--bg-card))'));

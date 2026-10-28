@@ -676,7 +676,7 @@ function _rsvInjectCss(){
     +'.mvr-sgname{font-family:var(--font-titre,Cormorant Garamond,Georgia,serif);font-size:var(--pt-md,20px);font-weight:700;color:var(--texte,#2A241C);line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
     +'.mvr-sgline{font-size:var(--pt-micro,11px);color:var(--muted,#7A7060);margin-top:1px}'
     +'.mvr-sgbadge{flex:none;background:var(--cave,#14110D);color:#F0E2C8;border-radius:999px;padding:5px 11px;font-size:var(--pt-txt,13px);font-weight:600;display:flex;align-items:baseline;gap:4px}'
-    +'.mvr-sgbadge .mvr-u{font-size:10px;opacity:.7;font-weight:500}'
+    +'.mvr-sgbadge .mvr-u{font-size:var(--pt-nano,11px);opacity:.7;font-weight:500}'
     +'.mvr-sgchev{flex:none;color:var(--muted,#7A7060);font-size:var(--pt-micro,12px);transition:transform .25s ease;margin-left:2px}'
     +'.mvr-sgrp.open .mvr-sgchev{transform:rotate(90deg)}'
     +'.mvr-sgbody{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s ease}'

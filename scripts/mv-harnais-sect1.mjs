@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC0 = { pil: L('src/pilotage.js'), vue: L('src/cockpit-vue.js'), app: L('src/app.js'), ck: L('src/cockpit.js'), uti: L('src/utils.js'), guide: L('guide/11-pilotage.html') };
+const SRC0 = { pil: L('src/pilotage.js'), vue: L('src/cockpit-vue.js'), app: L('src/app.js'), ck: L('src/cockpit.js'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')), guide: L('guide/11-pilotage.html') };
 const bloc = (s, a, fin) => { const i = s.indexOf(a); if (i < 0) throw new Error('introuvable : ' + a); return s.slice(i, s.indexOf(fin, i) + fin.length); };
 function serie(j0, jours, f) { const o = { time: [], precipitation: [], windspeed_10m: [] }; jours.forEach((d, k) => { for (let h = 0; h < 24; h++) { o.time.push(d + 'T' + String(h).padStart(2, '0') + ':00'); const v = f(k, h); o.precipitation.push(v[0]); o.windspeed_10m.push(v[1]); } }); return o; }
 function monde(S, stock) {

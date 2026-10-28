@@ -15,7 +15,7 @@ const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = f => fs.readFileSync(path.join(R, f), 'utf8');
 const BASE = { pil: lire('src/pilotage.js'), app: lire('src/app.js'), cpt: lire('src/comptes.js'), css: lire('src/styles.css'),
-  uti: lire('src/utils.js'), guide: lire('guide/11-pilotage.html') };
+  uti: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')), guide: lire('guide/11-pilotage.html') };
 const { chargerApp } = await import(pathToFileURL(path.join(R, 'scripts/mv-app-node.mjs')).href);
 const sansCom = s => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 // Le corps d'une fonction, par comptage d'accolades (déclaration `function X(` ou `window.X = function(`).

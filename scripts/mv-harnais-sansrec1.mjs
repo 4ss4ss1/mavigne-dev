@@ -12,7 +12,7 @@ import { lireCave } from './mv-cave-src.mjs';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC = { ut: lire('src/utils.js'), cav: lireCave(R), app: lire('src/app.js'), pil: lire('src/pilotage.js') };
+const SRC = { ut: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')), cav: lireCave(R), app: lire('src/app.js'), pil: lire('src/pilotage.js') };
 const DOC = { g04: lire('guide/04-vigne.html'), g08: lire('guide/08-cave.html'), g11: lire('guide/11-pilotage.html') };
 const sansCom = s => s.replace(/^\s*\/\/.*$/gm, '');
 function bloc(src, a, b, nom) { const i = src.indexOf(a), j = src.indexOf(b, i); if (i < 0 || j < 0) throw new Error('bloc introuvable : ' + nom); return src.slice(i, j + b.length); }

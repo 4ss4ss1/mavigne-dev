@@ -4,7 +4,7 @@
 import fs from 'fs'; import path from 'path'; import vm from 'vm'; import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'); const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC0 = { coq: L('src/coquille.js'), pil: L('src/pilotage.js'), vue: L('src/cockpit-vue.js'), ck: L('src/cockpit.js'), app: L('src/app.js'), css: L('src/styles.css'), uti: L('src/utils.js') };
+const SRC0 = { coq: L('src/coquille.js'), pil: L('src/pilotage.js'), vue: L('src/cockpit-vue.js'), ck: L('src/cockpit.js'), app: L('src/app.js'), css: L('src/styles.css'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')) };
 const iso = k => { const t = new Date(), x = new Date(t.getFullYear(), t.getMonth(), t.getDate() + k); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
 function coquille(S, opts) {
   const ctx = { Math, String, Array, Object, JSON, Number, Date, setTimeout: () => 0, requestAnimationFrame: () => 0,

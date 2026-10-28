@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const S0 = { app: L('src/app.js'), css: L('src/styles.css'), html: L('index.html'), uti: L('src/utils.js'), guide: L('guide/04-vigne.html'), liste: L('scripts/mv-harnais-liste.mjs') };
+const S0 = { app: L('src/app.js'), css: L('src/styles.css'), html: L('index.html'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')), guide: L('guide/04-vigne.html'), liste: L('scripts/mv-harnais-liste.mjs') };
 function bloc(css) { const i = css.indexOf('★ PARC-1 (§274)'); if (i < 0) return ''; const j = css.indexOf('★ FIN PARC-1', i); return css.slice(i, j < 0 ? undefined : j); }
 function sansVar(s) { let out = '', i = 0; for (;;) { const k = s.indexOf('var(--', i); if (k < 0) return out + s.slice(i); out += s.slice(i, k); let p = 0, j = k + 3; for (; j < s.length; j++) { if (s[j] === '(') p++; else if (s[j] === ')' && --p === 0) break; } i = j + 1; } }
 const enDur = b => sansVar(b.replace(/\/\*[\s\S]*?\*\//g, '').replace(/@media[^{]*\{/g, '')).match(/#[0-9A-Fa-f]{3,8}\b|rgba?\(|(?<![\w.-])(?!0px)\d*\.?\d+(?:px|m?s\b|deg)/g) || [];

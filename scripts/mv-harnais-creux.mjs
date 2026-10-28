@@ -29,7 +29,7 @@ import { lireCave } from './mv-cave-src.mjs';
 
 const CONTRE = process.argv.includes('--contre');
 const lire = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
-const SAIN = { cave: lireCave(), utils: lire('src/utils.js'), g08: lire('guide/08-cave.html') };
+const SAIN = { cave: lireCave(), utils: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')), g08: lire('guide/08-cave.html') };
 
 /* ══ EXTRACTION — accolades comptées hors chaînes et hors commentaires ══ */
 function bornes(src, nom) {

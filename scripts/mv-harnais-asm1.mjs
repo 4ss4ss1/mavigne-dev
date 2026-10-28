@@ -25,7 +25,7 @@ import vm from 'node:vm';
 import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
 const CONTRE = process.argv.includes('--contre');
 const lire = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
-const SAIN = { cave: lireCave(), utils: lire('src/utils.js'), g08: lire('guide/08-cave.html') };
+const SAIN = { cave: lireCave(), utils: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')), g08: lire('guide/08-cave.html') };
 
 function bornes(src, nom) {
   const m = [...src.matchAll(new RegExp('^(?:export )?function ' + nom + '\\s*\\(', 'gm'))];

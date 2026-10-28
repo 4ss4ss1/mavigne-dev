@@ -19,7 +19,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const CONTRE = process.argv.includes('--contre');
-const U = readFileSync('src/utils.js', 'utf8');
+const U = (readFileSync('src/utils.js', 'utf8') + '\n' + readFileSync('src/whats-new.js', 'utf8'));
 
 function corps(src, debut) {
   const i = src.indexOf(debut);

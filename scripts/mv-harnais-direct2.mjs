@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 const RAC = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const L = f => fs.readFileSync(path.join(RAC, f), 'utf8');
 const CONTRE = process.argv.includes('--contre');
-const SRC0 = { app: L('src/app.js'), pil: L('src/pilotage.js'), ck: L('src/cockpit.js'), vue: L('src/cockpit-vue.js'), uti: L('src/utils.js') };
+const SRC0 = { app: L('src/app.js'), pil: L('src/pilotage.js'), ck: L('src/cockpit.js'), vue: L('src/cockpit-vue.js'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')) };
 const sansCom = s => s.replace(/^\s*\/\/.*$/gm, '');
 // Une fonction de premier niveau : de sa signature à l'accolade fermante en colonne 0 (« } » ou « }; »).
 const fnDe = (s, sig) => {

@@ -27,7 +27,7 @@ import { fileURLToPath } from 'node:url';
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
-const S0 = { pil: lire('src/pilotage.js'), plan: lire('src/planning.js'), utils: lire('src/utils.js'), vue: lire('src/cockpit-vue.js'), liste: lire('scripts/mv-harnais-liste.mjs') };
+const S0 = { pil: lire('src/pilotage.js'), plan: lire('src/planning.js'), utils: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')), vue: lire('src/cockpit-vue.js'), liste: lire('scripts/mv-harnais-liste.mjs') };
 
 function corps(src, nom) {
   const i = src.indexOf('function ' + nom + '(');

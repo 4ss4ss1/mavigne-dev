@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 
 const ICI    = path.dirname(fileURLToPath(import.meta.url));
 const RACINE = path.resolve(process.argv[2] || path.join(ICI, '..'));
-const SRC    = fs.readFileSync(path.join(RACINE, 'src', 'utils.js'), 'utf8');
+const SRC    = fs.readFileSync(path.join(RACINE, 'src', 'utils.js'), 'utf8') + '\n' + fs.readFileSync(path.join(RACINE, 'src', 'whats-new.js'), 'utf8');   // WN-COUPE-1 (§469)
 
 const i = SRC.indexOf('export const WHATS_NEW = [');
 if (i < 0) { console.error('WHATS_NEW introuvable dans src/utils.js'); process.exit(1); }

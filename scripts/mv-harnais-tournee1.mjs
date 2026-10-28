@@ -17,7 +17,7 @@ import { fileURLToPath, pathToFileURL } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC0 = { uti: lire('src/utils.js'), app: lire('src/app.js'), g04: lire('guide/04-vigne.html') };
+const SRC0 = { uti: lire('src/utils.js'), app: lire('src/app.js'), g04: lire('guide/04-vigne.html'), wn: lire('src/whats-new.js') };   // WN-COUPE-1 (§469) : le journal vit dans whats-new.js — lu à part, il n’est pas réécrit (FICH)
 const FICH = { uti: 'utils.js', app: 'app.js' };
 const { chargerApp } = await import(pathToFileURL(path.join(R, 'scripts/mv-app-node.mjs')).href);
 const sansCom = s => s.replace(/^\s*\/\/.*$/gm, '');
@@ -171,7 +171,7 @@ async function suite(S) {
   T('C1 rien n\u2019est effacé : les six tournées restent enregistrées, celle des vendanges comprise', () => {
     puces(W); const m = W.G.CONFIG && W.G.CONFIG.ordre_passage_t, v = W.G._mvOrdreFor('Vendange');
     return !!m && Object.keys(m).length === 6 && !!v && v.ordre.join() === 'C,B,A'; });
-  T('C2 la nouveauté l\u2019annonce (bloc 8.92)', () => { const U = S.uti, i = U.indexOf("{ v: '8.92', d: '2026-10-13', items: ["), j = U.indexOf("{ v: '8.91'", i), b = U.slice(i, j);
+  T('C2 la nouveauté l\u2019annonce (bloc 8.92)', () => { const U = S.wn, i = U.indexOf("{ v: '8.92', d: '2026-10-13', items: ["), j = U.indexOf("{ v: '8.91'", i), b = U.slice(i, j);
     return i > 0 && j > i && b.includes('La tournée ne propose plus les travaux finis') && b.includes('Reprendre la tournée du domaine') && b.includes('… terminé'); });
   T('C3 l\u2019aide de Parcelles le dit (le numéro, l\u2019encart)', () => S.uti.includes('qu\u2019il reste une parcelle à faire sur ce travail ; les parcelles se rangent alors dans cet ordre.')
     && S.uti.includes('seulement ceux de la campagne en cours où il reste une parcelle à faire.'));

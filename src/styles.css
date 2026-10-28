@@ -226,7 +226,7 @@ body{font-family:var(--font-ui);background:#0F1319;color:var(--texte);max-width:
 .orow::-webkit-scrollbar{display:none;}
 .ochip{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:var(--pt-micro,11px);font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:var(--bg-card);transition:all 0.15s;}
 .ochip.active{border-color:var(--vert);background:var(--vert-pale);color:var(--vert);}
-.oava{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;}
+.oava{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:var(--pt-nano,11px);font-weight:700;color:white;}
 .tfilters{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none;}
 .tfilters::-webkit-scrollbar{display:none;}
 .tfchip{flex-shrink:0;padding:5px 12px;border-radius:16px;font-size:var(--pt-micro,11px);font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:var(--bg-card);transition:all 0.15s;}
@@ -269,7 +269,11 @@ body{font-family:var(--font-ui);background:#0F1319;color:var(--texte);max-width:
 .jms-periode{font-size:var(--pt-nano,9.5px);color:var(--texte-doux);background:rgba(0,0,0,0.06);border-radius:4px;padding:1px 5px;margin-right:2px;white-space:nowrap;}
 .jtache{font-size:var(--pt-txt,13px);font-weight:700;color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .jmeta{font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px;display:flex;align-items:center;gap:4px;flex-wrap:nowrap;overflow:hidden;}
-.java{width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:white;flex-shrink:0;}
+.java{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:var(--pt-nano,11px);font-weight:600;color:white;flex-shrink:0;border:2px solid var(--bg-card);}
+/* LISIBLE-1 (§470) — maquette-ux-v1, partie 3 : une initiale à 11 px (12 au téléphone) dans un rond de 28, deux ronds au plus, puis « +N » (_jAvas, app.js). */
+.java-grp{display:flex;flex-shrink:0;}
+.java-grp .java + .java{margin-left:-8px;}
+.java.java-plus{background:var(--acier);}
 /* `.eq-tag` (la pastille 👥) a ete retiree du journal par la charte DS-2 :
    « Equipe (Victor + Lea) » dit deja la meme chose, en mots. La regle part
    avec l'usage — une regle morte finit toujours par etre recopiee ailleurs. */
@@ -1847,7 +1851,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pv-team-bar:active{transform:scale(.99);}
 .pv-team-ico{font-size:18px;flex-shrink:0;}
 .pv-team-info{flex:1;min-width:0;}
-.pv-team-lbl{font-size:10px;color:var(--texte-doux);text-transform:none;letter-spacing:0;}
+.pv-team-lbl{font-size:var(--pt-nano,11px);color:var(--texte-doux);text-transform:none;letter-spacing:0;}
 .pv-team-names{font-size:13.5px;font-weight:600;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .pv-team-avs{display:flex;}
 .pv-team-av{width:26px;height:26px;border-radius:50%;border:2px solid var(--bg-card);margin-left:-8px;color:#fff;font-size:var(--pt-micro,11px);font-weight:700;display:flex;align-items:center;justify-content:center;}
@@ -1879,7 +1883,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .mv-syncdot.offline .mvs-dot{background:#E0922C;}
 .mv-syncdot .mvs-lbl{white-space:nowrap;}
 .mv-syncdot.synced .mvs-lbl{display:none;}
-.mv-syncdot .mvs-cnt{background:#E0922C;color:#231203;font-size:10px;font-weight:800;border-radius:9px;min-width:17px;height:17px;display:flex;align-items:center;justify-content:center;padding:0 4px;}
+.mv-syncdot .mvs-cnt{background:#E0922C;color:#231203;font-size:var(--pt-nano,11px);font-weight:800;border-radius:9px;min-width:17px;height:17px;display:flex;align-items:center;justify-content:center;padding:0 4px;}
 @keyframes mvsPulse{0%,100%{opacity:1;}50%{opacity:.35;}}
 .mv-syncdot:focus-visible{outline:3px solid #6BA34A;outline-offset:2px;}
 /* popover détail */
@@ -2442,7 +2446,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pl2-ava-xl{width:44px;height:44px;font-size:var(--pt-sm,16px);}
 .pl2-name-t{min-width:0;}
 .pl2-name-n{display:block;font-size:var(--pt-txt,13px);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pl2-name-s{display:block;font-size:9px;color:var(--texte-doux);font-variant-numeric:lining-nums tabular-nums;}
+.pl2-name-s{display:block;font-size:var(--pt-micro,12px);color:var(--texte-doux);font-variant-numeric:lining-nums tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .pl2-cell{border:none;border-top:1px solid var(--gris-clair);border-left:1px solid rgba(128,118,100,0.10);min-height:50px;display:flex;align-items:center;justify-content:center;padding:3px 1px;position:relative;background:transparent;cursor:pointer;font-family:inherit;}
 .pl2-cell.pl2-we{background:rgba(128,118,100,0.06);}
 .pl2-cell.pl2-tdcol{background:rgba(61,107,39,0.06);}
@@ -5971,6 +5975,21 @@ body .mv-rail .mv-rail-logo{ background:url(/logo-barre.png) center / contain no
 /* La tête (Pilotage, sans titre) prend un peu d'air sous la recherche ; le pied (Réglages) vit dans .mv-rail-bas. */
 body .mv-rail .mv-rail-cherche + .mv-rail-b{ margin-top:var(--e-1,4px); }
 /* ★ FIN RAIL-1 */
+/* ═══ LISIBLE-1 (§470) — les textes et les cibles comme la maquette (docs/maquettes/maquette-ux-v1.html, partie 3) ═══════════
+   Mesuré par npm run test:ux (UX-0, UX-1). Le plancher de texte, 11 px partout et 12 au téléphone, vit dans la charte (--pt-nano) ;
+   les initiales du Journal et la ligne d'heures du Planning sont posées à leur règle. Décision de Nico du 26/10 : les puces, les
+   bulles « i » et la roue restent à leur taille (26/09, §176d) ; les boutons « discrets » et secondaires gagnent une zone de 44 px
+   SANS changer de dessin ; .mvbtn-option passe à 44 px. La zone : un ::after transparent de 44 px de haut, centré sur le bouton —
+   un appui dessus va au bouton. ══════════════ */
+:where(.mvbtn-discret, .mvbtn-secondaire, .mv-pq, #priority-edit-btn){ position:relative; }
+.mvbtn-discret::after, .mvbtn-secondaire::after, .mv-pq::after{ content:''; position:absolute; left:0; right:0; top:calc(50% - 22px); bottom:calc(50% - 22px); }
+#page-cave .mvbtn.mvbtn-option{ min-width:44px; }   /* les 7 jours de la Cave (seuls .mvbtn-option sous 44 px) : 43,4 → 44 px, 0,6 px pris sur l’écart */
+.mv-pq{ min-height:var(--e-6,24px); }
+#priority-edit-btn{ min-width:var(--e-6,24px); min-height:var(--e-6,24px); text-align:center; }
+#priority-edit-btn::after{ content:''; position:absolute; inset:-10px; }
+#page-home .hpc-p{ min-height:var(--e-6,24px); }
+.sbox > input{ align-self:stretch; margin:-10px 0; padding:10px 0; }   /* le champ prend la hauteur de sa boîte : 16 → 39 px */
+
 /* ★ TETE-1 (§272) — LES EN-TÊTES ET LES ONGLETS AU DESSIN DE LA MAQUETTE V2.
    Même balisage partout (les dix .mod-header, le bandeau et la barre d'onglets du Pilotage) : ce bloc ne change que
    l'habit, par jetons. En-têtes sur la surface, un filet dessous ; l'icône du module sans boîte ; titres en Outfit ;

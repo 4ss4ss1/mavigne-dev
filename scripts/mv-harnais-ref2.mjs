@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC0 = { pil: L('src/pilotage.js'), vue: L('src/cockpit-vue.js'), uti: L('src/utils.js') };
+const SRC0 = { pil: L('src/pilotage.js'), vue: L('src/cockpit-vue.js'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')) };
 const fnDe = (s, sig) => { const i = s.indexOf(sig); if (i < 0) throw new Error('introuvable : ' + sig); return s.slice(i, s.indexOf('\n}\n', i) + 3); };
 function eco(S, E) {
   const ctx = { Math, Number, String, Array, Object, JSON, Date, parseInt, isFinite };

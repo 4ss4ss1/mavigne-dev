@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
-const S0 = { cave: lire('src/cave.js'), utils: lire('src/utils.js'), liste: lire('scripts/mv-harnais-liste.mjs') };
+const S0 = { cave: lire('src/cave.js'), utils: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')), liste: lire('scripts/mv-harnais-liste.mjs') };
 function corps(src, nom) { const i = src.indexOf('function ' + nom + '('); if (i < 0) throw new Error('fonction absente : ' + nom); const j = src.indexOf('{', i); let p = 0, k = j; for (; k < src.length; k++) { const c = src[k]; if (c === '{') p++; else if (c === '}' && --p === 0) break; } return src.slice(i, k + 1); }
 let ok = 0, ko = 0;
 const t = (nom, cond, det) => { if (cond) { ok++; console.log('  \x1b[32m✓\x1b[0m ' + nom); } else { ko++; console.log('  \x1b[31m✗\x1b[0m ' + nom + (det ? '\n      → ' + det : '')); } };

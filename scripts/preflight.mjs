@@ -282,7 +282,7 @@ function checkDivInButtonJs() {
 //    NB : APP_VERSION et SW sont 2 séquences INDÉPENDANTES → jamais comparées.
 // ============================================================================
 function checkVersions() {
-  const utils = read('src/utils.js');
+  const utils = (read('src/utils.js') + '\n' + read('src/whats-new.js'));
   const html = read('index.html');
   const sw = read('public/sw.js');
 
@@ -900,7 +900,7 @@ const AIDE_EXEMPT = {
 const WIN_NATIF = new Set(['scrollTo', 'open', 'location', 'setTimeout', 'addEventListener', 'document', 'print', 'innerWidth']);
 
 function checkAideEtVisite() {
-  const app = read('src/app.js'), ut = read('src/utils.js'), pil = read('src/pilotage.js');
+  const app = read('src/app.js'), ut = (read('src/utils.js') + '\n' + read('src/whats-new.js')), pil = read('src/pilotage.js');
   const idx = read('index.html');
   const jsFiles = listDir('src', '.js');
   const corpus = jsFiles.map(f => read(f) || '').join('\n') + '\n' + (idx || '');

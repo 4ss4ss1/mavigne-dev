@@ -11556,6 +11556,22 @@ function saveJEquipe(){
   showToast(n>1?(n+' validations corrig\u00e9es'):'\u00c9quipe corrig\u00e9e');
 }
 window.saveJEquipe=saveJEquipe;
+// ★ LISIBLE-1 (§470) — les initiales du Journal comme la maquette (docs/maquettes/maquette-ux-v1.html, partie 3) : une initiale à
+//   11 px (12 au téléphone) dans un rond de 28, deux ronds au plus, puis « +N ». Les noms sont écrits juste après : les ronds sont un
+//   repère, pas un texte (aria-hidden). Les personnes : celles qui ont fait le travail quand un autre a validé (_jFaitPar), sinon
+//   l'auteur puis l'équipe, chacune une fois ; la couleur de l'auteur est celle que la ligne calculait déjà.
+function _jAvas(r, col){
+  var isEq=r.equipe||r.qui==='Equipe', noms=[];
+  if(r.quiHors) noms=(_jFaitPar(r)||[]).slice();
+  else if(isEq){ if(r.qui&&r.qui!=='Equipe') noms.push(r.qui); (r.membresEquipe||[]).forEach(function(n){ noms.push(n); }); }
+  else noms=[r.qui||'?'];
+  noms=noms.filter(function(n,i,a){ return n && a.indexOf(n)===i; });
+  if(!noms.length) noms=['?'];
+  var coul=function(n){ if(n===r.qui&&!r.quiHors) return col; var m=MEMBRES.find(function(x){ return x.nom===n; }); return (m&&m.couleur)||COULEURS_MBR[n]||'#888'; };
+  var h=noms.slice(0,2).map(function(n){ return '<span class="java" style="background:'+_escHtml(coul(n))+'">'+_escHtml(Array.from(String(n))[0])+'</span>'; }).join('');
+  if(noms.length>2) h+='<span class="java java-plus">+'+(noms.length-2)+'</span>';
+  return '<span class="java-grp" aria-hidden="true">'+h+'</span>';
+}
 function renderJournalList(){
   if(!window._dataReady){ var _skj=document.getElementById('timeline'); if(_skj)_skj.innerHTML=window._mvSk('journal'); return; }
   // Rafraîchir les chips de parcelle à chaque rendu
@@ -11634,7 +11650,7 @@ function renderJournalList(){
         const repSuffix=(r.reparation_types&&r.reparation_types.length)?_escHtml(' · '+r.reparation_types.join(', ')+(r.reparation_qte?(' ×'+r.reparation_qte):'')):'';
         const quiAffE=_escHtml(quiAff);
         const parcelleE=_escHtml(r.parcelle);
-        return `<div class="jitem"><div class="jdotcol"><div class="jdot ${sc}"></div>${hasNext?'<div class="jlinev"></div>':''}</div><div class="jcard mv-c" style="margin-bottom:0"><div class="jcard-bar ${barCls}"></div><div class="jcard-col"><div class="jcard-inner"><div class="mv-hd" style="flex:1;min-width:0"><div style="min-width:0"><div class="mv-v" style="font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">${tacheAff}${repSuffix}</div><div class="jmeta"><div class="java" style="background:${col}">${_escHtml((r.qui||'?')[0])}</div><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${quiAffE}</span><span style="color:var(--gris-clair)">\u00b7</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${parcelleE}</span></div>${_jEqTrace(r)}</div>${_mvBadge(r.statut, isValide?'vert':isInfo?'neutre':'ambre')}${_jEqBtn(r)}</div></div>${r.meteo_snapshot?_renderMeteoSnapshot(r.meteo_snapshot):''}</div></div></div>`;
+        return `<div class="jitem"><div class="jdotcol"><div class="jdot ${sc}"></div>${hasNext?'<div class="jlinev"></div>':''}</div><div class="jcard mv-c" style="margin-bottom:0"><div class="jcard-bar ${barCls}"></div><div class="jcard-col"><div class="jcard-inner"><div class="mv-hd" style="flex:1;min-width:0"><div style="min-width:0"><div class="mv-v" style="font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">${tacheAff}${repSuffix}</div><div class="jmeta">${_jAvas(r, col)}<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${quiAffE}</span><span style="color:var(--gris-clair)">\u00b7</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${parcelleE}</span></div>${_jEqTrace(r)}</div>${_mvBadge(r.statut, isValide?'vert':isInfo?'neutre':'ambre')}${_jEqBtn(r)}</div></div>${r.meteo_snapshot?_renderMeteoSnapshot(r.meteo_snapshot):''}</div></div></div>`;
       }).join('')}
     </div>`).join('');
   // ── Bouton "Charger plus" ──────────────────────────────────────────────────

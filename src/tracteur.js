@@ -258,7 +258,7 @@ function renderPhytoTrac(){
         <span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">${_escHtml(t.date)}</span>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;${meta3?'margin-bottom:6px':''}">
-        <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:7px;background:${tb};color:${tc}">${emj}${_escHtml(m.type||'—')}</span>
+        <span style="font-size:var(--pt-nano,11px);font-weight:700;padding:2px 8px;border-radius:7px;background:${tb};color:${tc}">${emj}${_escHtml(m.type||'—')}</span>
         ${m.dose?'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);background:var(--gris-clair);padding:2px 8px;border-radius:7px">'+_escHtml(m.dose)+'</span>':''}
         ${darBadge}
         ${draeBadge}

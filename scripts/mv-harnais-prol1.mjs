@@ -10,7 +10,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC0 = { vue: L('src/cockpit-vue.js'), pil: L('src/pilotage.js'), ck: L('src/cockpit.js'), uti: L('src/utils.js'), guide: L('guide/11-pilotage.html') };
+const SRC0 = { vue: L('src/cockpit-vue.js'), pil: L('src/pilotage.js'), ck: L('src/cockpit.js'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')), guide: L('guide/11-pilotage.html') };
 const fn = (s, sig) => { const i = s.indexOf(sig); if (i < 0) throw new Error('introuvable : ' + sig); return s.slice(i, s.indexOf('\n}\n', i) + 3); };
 const iso = k => { const t = new Date(), x = new Date(t.getFullYear(), t.getMonth(), t.getDate() + k); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
 function monde(S, opt) {

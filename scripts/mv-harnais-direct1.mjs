@@ -8,7 +8,7 @@
 import fs from 'fs'; import vm from 'vm'; import path from 'path'; import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC0 = { ck: L('src/cockpit.js'), app: L('src/app.js'), pil: L('src/pilotage.js'), vue: L('src/cockpit-vue.js'), uti: L('src/utils.js'),
+const SRC0 = { ck: L('src/cockpit.js'), app: L('src/app.js'), pil: L('src/pilotage.js'), vue: L('src/cockpit-vue.js'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')),
   css: L('src/styles.css'), g04: L('guide/04-vigne.html'), g11: L('guide/11-pilotage.html') };
 const sansCom = s => s.replace(/^\s*\/\/.*$/gm, '');
 function fnDe(src, sig) {

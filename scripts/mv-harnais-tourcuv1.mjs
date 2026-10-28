@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const CONTRE = process.argv.includes('--contre');
-const SAIN = { cuv: fs.readFileSync('src/cuvier.js', 'utf8'), utils: fs.readFileSync('src/utils.js', 'utf8'), guide: fs.readFileSync('guide/08-cave.html', 'utf8') };
+const SAIN = { cuv: fs.readFileSync('src/cuvier.js', 'utf8'), utils: (fs.readFileSync('src/utils.js', 'utf8') + '\n' + fs.readFileSync('src/whats-new.js', 'utf8')), guide: fs.readFileSync('guide/08-cave.html', 'utf8') };
 function bornes(src, nom) {
   const m = [...src.matchAll(new RegExp('^function ' + nom + '\\s*\\(', 'gm'))];
   if (m.length !== 1) throw new Error(nom + ' : ' + m.length + ' définition(s)');

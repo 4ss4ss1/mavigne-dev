@@ -26,7 +26,10 @@ function suite(B) {
   T('les trois petits crans sont relevés dans :root (12 · 11,5 · 11 px)', Object.keys(CRANS).every(k => val(k) === CRANS[k]));
   T('plus aucun cran sous 11 px', Object.keys(CRANS).every(k => val(k) >= 11));
   const redef = new RegExp('--pt-(micro|lbl|nano)\\s*:', 'g');
-  const ailleurs = [].concat((reste.match(redef) || []).map(() => 'styles.css'), (B.html.match(redef) || []).map(() => 'index.html'),
+  // ★ LISIBLE-1 (§470) — le plancher du téléphone (maquette-ux-v1, partie 3 : « 11 px partout, 12 au téléphone ») est la SEULE redéfinition
+  //   permise : ce bloc-là, mot pour mot, qui ne fait que MONTER le plus petit cran. Toute autre — ou plus bas — rougit comme avant.
+  const PLANCHER = '@media (max-width:767.98px){ :root{ --pt-nano:12px; } }';
+  const ailleurs = [].concat((reste.split(PLANCHER).join('').match(redef) || []).map(() => 'styles.css'), (B.html.match(redef) || []).map(() => 'index.html'),
     ...Object.entries(B.modules).map(([f, s]) => (s.match(redef) || []).map(() => f)));
   T('aucune autre définition ne les écrase (styles.css hors :root, index.html, modules)', ailleurs.length === 0);
   T('le harnais typographique porte le même barème', /'--pt-micro': 12,/.test(B.typo) && /'--pt-lbl': 12, '--pt-nano': 11 /.test(B.typo));
@@ -63,6 +66,7 @@ if (ko) process.exit(1);
 const DEF = [
   ['--pt-micro redescend à 11 px', B => ({ ...B, css: B.css.replace('--pt-micro:12px;', '--pt-micro:11px;') })],
   ['--pt-nano redescend à 9,5 px', B => ({ ...B, css: B.css.replace('--pt-nano:11px;', '--pt-nano:9.5px;') })],
+  ['un second plancher, plus bas, sous un @media (LISIBLE-1, §470)', B => ({ ...B, css: B.css + '\n@media (max-width:500px){ :root{ --pt-nano:10px; } }\n' })],
   ['un module redéfinit --pt-lbl en douce', B => ({ ...B, modules: { ...B.modules, 'app.js': B.modules['app.js'] + "\nvar _x='<style>#app-root{--pt-lbl:10.5px}</style>';" } })],
   ['la ligne repasse en flex-wrap', B => ({ ...B, trac: B.trac.replace('<div class="phyto-row-meta" style="display:flex;gap:12px;', '<div class="phyto-row-meta" style="display:flex;flex-wrap:wrap;gap:12px;') })],
   ['les noms ne se raccourcissent plus', B => ({ ...B, trac: B.trac.replace('<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">', '<span>') })],

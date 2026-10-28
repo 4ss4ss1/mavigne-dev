@@ -504,3 +504,7 @@
 #app-root[data-hicontrast="1"],:root[data-hicontrast="1"]{--texte:#0A0A06;--texte-med:#16160F;--texte-doux:#33332A;}
 #app-root[data-theme="dark"][data-hicontrast="1"],:root[data-theme="dark"][data-hicontrast="1"]{--texte:#FFFFFF;--texte-doux:#DCDCD2;--texte-med:#F0F0E8;}
 @media(prefers-color-scheme:dark){#app-root:not([data-theme="light"])[data-hicontrast="1"],:root:not([data-theme="light"])[data-hicontrast="1"]{--texte:#FFFFFF;--texte-doux:#DCDCD2;--texte-med:#F0F0E8;}}
+
+/* ★ LISIBLE-1 (§470) — LE PLANCHER DE TEXTE AU TÉLÉPHONE : 12 px (maquette-ux-v1, partie 3 : « 11 px partout, 12 au téléphone »).
+   Seul le plus petit cran monte, et lui seul : tout ce qui le lit suit. La bascule est celle de l'appli (app.js : 768 px = ordinateur). */
+@media (max-width:767.98px){ :root{ --pt-nano:12px; } }

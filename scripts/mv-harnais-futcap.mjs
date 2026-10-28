@@ -35,7 +35,7 @@ import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave
 const CONTRE = process.argv.includes('--contre');
 const lire = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const SAIN = {
-  cave: lireCave(), utils: lire('src/utils.js'), rsv: lire('src/reserve.js'),
+  cave: lireCave(), utils: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')), rsv: lire('src/reserve.js'),
   idx: lire('index.html'), g08: lire('guide/08-cave.html'), g09: lire('guide/09-reserve.html')
 };
 

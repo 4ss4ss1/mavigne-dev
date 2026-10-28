@@ -40,7 +40,7 @@ const ICI    = path.dirname(fileURLToPath(import.meta.url));
 const RACINE = path.resolve(ICI, '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = f => fs.readFileSync(path.join(RACINE, f), 'utf8');
-const BASE = { trac: lire('src/tracteur.js'), css: lire('src/styles.css'), utils: lire('src/utils.js'),
+const BASE = { trac: lire('src/tracteur.js'), css: lire('src/styles.css'), utils: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')),
                guide: lire('guide/06-tracteur.html') };
 
 /* ── Lecture ─────────────────────────────────────────────────────────────── */

@@ -29,7 +29,7 @@
 import fs from 'fs'; import path from 'path'; import vm from 'vm'; import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'); const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC0 = { vue: L('src/cockpit-vue.js'), pil: L('src/pilotage.js'), css: L('src/styles.css'), uti: L('src/utils.js'),
+const SRC0 = { vue: L('src/cockpit-vue.js'), pil: L('src/pilotage.js'), css: L('src/styles.css'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')),
   guide: L('guide/11-pilotage.html'), sw: L('public/sw.js'), liste: L('scripts/mv-harnais-liste.mjs') };
 const morceau = (src, debut, fin) => { const i = src.indexOf(debut); if (i < 0) throw new Error('introuvable : ' + debut); const j = src.indexOf(fin, i); if (j < 0) throw new Error('fin introuvable : ' + fin); return src.slice(i, j + fin.length); };
 const sansCom = s => s.replace(/^\s*\/\/.*$/gm, '');

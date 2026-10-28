@@ -11,7 +11,7 @@ import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const S0 = { app: L('src/app.js'), css: L('src/styles.css'), uti: L('src/utils.js'), guide: L('guide/04-vigne.html'), liste: L('scripts/mv-harnais-liste.mjs') };
+const S0 = { app: L('src/app.js'), css: L('src/styles.css'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')), guide: L('guide/04-vigne.html'), liste: L('scripts/mv-harnais-liste.mjs') };
 function fonction(src, debut) { const i = src.indexOf(debut); if (i < 0) return ''; let k = src.indexOf('{', i), p = 0; for (; k < src.length; k++) { if (src[k] === '{') p++; else if (src[k] === '}' && --p === 0) break; } return src.slice(i, k + 1); }
 function bloc(css) { const i = css.indexOf('★ ACC-2 (§277)'); if (i < 0) return ''; const j = css.indexOf('★ FIN ACC-2', i); return css.slice(i, j < 0 ? undefined : j); }
 function sansVar(s) { let out = '', i = 0; for (;;) { const k = s.indexOf('var(--', i); if (k < 0) return out + s.slice(i); out += s.slice(i, k); let p = 0, j = k + 3; for (; j < s.length; j++) { if (s[j] === '(') p++; else if (s[j] === ')' && --p === 0) break; } i = j + 1; } }

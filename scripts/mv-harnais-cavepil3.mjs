@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url';
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
-const S0 = { vue: lire('src/cockpit-vue.js'), pil: lire('src/pilotage.js'), cave: lire('src/cave.js'), css: lire('src/styles.css'), utils: lire('src/utils.js'),
+const S0 = { vue: lire('src/cockpit-vue.js'), pil: lire('src/pilotage.js'), cave: lire('src/cave.js'), css: lire('src/styles.css'), utils: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')),
   guide: lire('guide/11-pilotage.html'), liste: lire('scripts/mv-harnais-liste.mjs') };
 
 function corps(src, nom) {

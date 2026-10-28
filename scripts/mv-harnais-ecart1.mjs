@@ -159,7 +159,7 @@ function partieC(S, T) {
 
 let ok = 0, ko = 0; const echecs = [];
 const T = (nom, c, det) => { if (c) { ok++; if (!CONTRE) console.log('   ok     ' + nom); } else { ko++; echecs.push(nom); if (!CONTRE) console.log('   ROUGE  ' + nom + (det ? '  → ' + det : '')); } };
-const BASE = { pil: lire('src/pilotage.js'), vue: lire('src/cockpit-vue.js'), css: lire('src/styles.css'), uti: lire('src/utils.js'), guide: lire('guide/11-pilotage.html'), liste: lire('scripts/mv-harnais-liste.mjs') };
+const BASE = { pil: lire('src/pilotage.js'), vue: lire('src/cockpit-vue.js'), css: lire('src/styles.css'), uti: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')), guide: lire('guide/11-pilotage.html'), liste: lire('scripts/mv-harnais-liste.mjs') };
 const garde = (f, S) => { try { f(S, T); } catch (e) { ko++; echecs.push('plantage : ' + (e && e.message)); if (!CONTRE) console.log('   ROUGE  plantage : ' + (e && e.message)); } };
 
 if (!CONTRE) {

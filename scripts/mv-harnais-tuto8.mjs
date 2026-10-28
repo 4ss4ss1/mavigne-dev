@@ -10,7 +10,7 @@ import vm from 'node:vm';
 
 const CONTRE = process.argv.includes('--contre');
 const SAIN = { tutos: fs.readFileSync('src/tutos.js', 'utf8'), cuv: fs.readFileSync('src/cuvier.js', 'utf8'), html: fs.readFileSync('index.html', 'utf8'),
-  couv: fs.readFileSync('scripts/tutos-couverture.json', 'utf8'), utils: fs.readFileSync('src/utils.js', 'utf8') };
+  couv: fs.readFileSync('scripts/tutos-couverture.json', 'utf8'), utils: (fs.readFileSync('src/utils.js', 'utf8') + '\n' + fs.readFileSync('src/whats-new.js', 'utf8')) };
 function bornes(src, nom) {
   const m = [...src.matchAll(new RegExp('^function ' + nom + '\\s*\\(', 'gm'))];
   if (m.length !== 1) throw new Error(nom + ' : ' + m.length + ' définition(s)');

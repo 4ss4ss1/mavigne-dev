@@ -30,7 +30,7 @@ const RACINE = path.resolve(ICI, '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = f => fs.readFileSync(path.join(RACINE, f), 'utf8');
 const BASE = { trac: lire('src/tracteur.js'), app: lire('src/app.js'), html: lire('index.html'),
-               utils: lire('src/utils.js'), guide: lire('guide/06-tracteur.html') };
+               utils: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')), guide: lire('guide/06-tracteur.html') };
 
 function fonction(src, nom) {
   const tete = 'function ' + nom + '(';

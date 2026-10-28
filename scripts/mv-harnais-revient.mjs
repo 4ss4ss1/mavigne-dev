@@ -29,7 +29,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 const CONTRE = process.argv.includes('--contre');
 const lire = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
-const SAIN = { pil: lire('src/pilotage.js'), utils: lire('src/utils.js'), reg: lire('src/reglages.js'),
+const SAIN = { pil: lire('src/pilotage.js'), utils: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')), reg: lire('src/reglages.js'),
                g11: lire('guide/11-pilotage.html') };
 
 /* ══ EXTRACTION — accolades comptées hors chaînes et hors commentaires ══ */
