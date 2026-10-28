@@ -126,8 +126,10 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
     'aucun goHub dans index.html ; le seul, celui du panneau GT, est dans la console de gt.html', 'goHub index : ' + hubs.length);
   T(!/goHub/.test(rsv), 'la R\u00e9serve n\u2019a plus de bouton maison');
   T(!/pil-back/.test(pil), 'le Pilotage n\u2019a plus son \u2302');
-  T(nb(html, /<div class="mod-header-title">Vigne<\/div>/g) === 3, 'le titre dit \u00ab Vigne \u00bb sur les trois pages du module');
-  T(!/mod-header-title">(Accueil|Mes Parcelles|Journal)</.test(html), 'plus de titre Accueil / Mes Parcelles / Journal');
+  // ★ TETE-3B (§474) — la maquette du 25/10 (maquette-ux-v1, partie 1) met la PAGE en titre et le module dans le sous-titre :
+  //   « Journal » / « Vigne · 14 entrées ». La règle de ce lot (« Vigne » en titre sur les trois pages) est remplacée, pas perdue.
+  T(nb(html, /<span class="mod-header-mod">Vigne<\/span>/g) === 3, 'le module dit \u00ab Vigne \u00bb sur les trois pages, dans le sous-titre');
+  T(/mod-header-title">Accueil</.test(html) && /mod-header-title">Parcelles</.test(html) && /mod-header-title">Journal</.test(html) && !/mod-header-title">Mes Parcelles</.test(html), 'le titre dit la page : Accueil, Parcelles, Journal (plus de \u00ab Mes Parcelles \u00bb)');
 
   /* 4. Le voyant de synchro */
   const dots = extraire(app, '_syncEnsureDots') || '';

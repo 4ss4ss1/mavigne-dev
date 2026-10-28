@@ -1,0 +1,40 @@
+{
+  "lot": "TETE-3B",
+  "section": "§474",
+  "base": "fa6f60ee0436a8ec6b34c49478f9ca1777acac9d",
+  "inclut": [],
+  "date": "2026-10-28",
+  "tutos": {
+    "ok": true,
+    "empreinte": "4c026966b9985fe4e9606c74186169e03f0177f05786aefac8ca9464e440769a",
+    "date": "2026-10-28T16:51:32.917Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "f982869f5b1094570b89e3909354e729d73dd75776657e3804b10d80ddd7162a",
+    "CLAUDE.md": "9899c9d2ca5a99929aa478fe9981f77af2e939016e1ba1a1b186015975d1f3e0",
+    "docs/claude/INDEX.md": "fcfc6787890cfaab291260e1177baf8d630e300540ec722791d06334b3f9ff45",
+    "docs/claude/chantiers-430-479.md": "1b48e454218933a0b2ff9b60e7db5732d222f02e2f145dc3a312d576a8f7786d",
+    "docs/claude/journal.md": "f7f2ce265f07224f7c4e8b63a4d49f31755fb46414d98a4231496d4df5fdd0d8",
+    "guide/01-demarrer.html": "ba1210122c103a558a9db9b8d4057116491f63c9bec112ec8544840ede327090",
+    "index.html": "66821926bc48e4dafea49ba53e30bcc99294a7b50ea889f8a04e2a4ce9d0e619",
+    "public/sw.js": "d0bd4fcc580bd627ea66d13d498043aec71f9a6ab33dafd8389e8ba9ad1330ed",
+    "scripts/harnais-claude-md.mjs": "4d48a10ab7457ac2e72d0419ec8b9b9f2e3168b8644bdffcef75d9ab90b9fc1e",
+    "scripts/mv-harnais-liste.mjs": "a8acef7e8176c476c19b3f8e1197b574261e324e8da0b8e1b63c0c378fbfff5e",
+    "scripts/mv-harnais-regl-module.mjs": "deeae5f881b529733f73ce9a42899949c21e809755bc5fe6d09b2923f46a4733",
+    "scripts/mv-harnais-tete2.mjs": "9759a754f8f36f888d573db5d924ecd9d731e3d6642c6455a097e96c7f599fde",
+    "scripts/mv-harnais-tete3a.mjs": "da7ca1657534b5e3e4c025195a0028dd06783c2e74466824ba1669d097c8f26a",
+    "scripts/mv-ux-baseline.json": "36decb23aaa6eb0f369083aa381a031805238d6115503ed36b094e035dd173a4",
+    "src/app.js": "c6ae481e6a03c10d902f00bb5994ef2d11e2cc8348948bb6d6861c572ffb0fd5",
+    "src/styles.css": "45ca3adc55d80c6b313ee8484c5bda9f426bf7107841090f57ab5789483d3cae",
+    "src/utils.js": "40da40bcd2ed89a85e5c903301afa6cac590d4cb451976720f1e38b8716480ad",
+    "src/whats-new.js": "825116a1b69350fda5f83709cb2f010ea60b650ac7c0d90a85e9217fadfc3e23",
+    "scripts/mv-harnais-tete3b.mjs": "fd67c35c1466e80f1abefb3265094b2151098255d5bbf13bc6d10ee6ec73c139"
+  }
+}

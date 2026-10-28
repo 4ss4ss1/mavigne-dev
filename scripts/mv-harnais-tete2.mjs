@@ -123,7 +123,7 @@ function suite(S) {
     && S.idx.includes('<span class="hv2-meteo-mini-txt"><span class="hv2-meteo-mini-desc" id="hv2-mini-desc"></span><span class="hv2-meteo-mini-jour" id="hv2-mini-jour"></span></span></div>'));
   T('les sous-titres ne répètent plus la saison (Accueil, Parcelles, Journal)',
     S.app.includes("if(sub)sub.textContent='Tableau de bord';") && !S.app.includes('sub.textContent=_visuSaison()')
-    && S.app.includes("document.getElementById('p-saison-sub').textContent='Parcelles';")
+    && S.app.includes("document.getElementById('p-saison-sub').textContent='';")   /* TETE-3B (§474) : « Parcelles » est devenu le titre */
     && S.app.includes("document.getElementById('j-sub').textContent=`${tot} entrée${tot>1?'s':''}`;") && !/j-sub'\)\.textContent=[^;]*_visuSaison/.test(S.app));
   let d1 = '', d2 = '', d3 = ''; try { d1 = dateCourte(S, new Date(2026, 9, 14)); d2 = dateCourte(S, new Date(2027, 1, 1)); d3 = dateCourte(S, new Date(2026, 7, 15)); } catch (e) { d1 = ''; }
   T('la date courte EXÉCUTÉE : « mer. 14 oct. », « lun. 1 févr. », « sam. 15 août » (' + [d1, d2, d3].join(' / ') + ')',

@@ -7865,7 +7865,7 @@ function computePStats(){
   [['pf-n-c',c],['pf-n-e',e],['pf-n-a',a]].forEach(function(x){ var el=document.getElementById(x[0]); if(el) el.textContent=x[1]; });   // ★ ARRIVEE-2 (§338) : les nombres des tuiles, sur les filtres d'état
   const pcBadge=document.getElementById('pc-badge');
   if(pcBadge)pcBadge.textContent=(c+e+r)+' actives';
-  document.getElementById('p-saison-sub').textContent='Parcelles';   // ★ TETE-2 : le compte est dans le badge, la saison dans la ligne du jour
+  document.getElementById('p-saison-sub').textContent='';   /* ★ TETE-3B (§474) : « Parcelles » est le titre ; le sous-titre dit « Vigne » */   // ★ TETE-2 : le compte est dans le badge, la saison dans la ligne du jour
   if(typeof _updateSaisonSelector==='function')_updateSaisonSelector();
 }
 /* ── Tri des parcelles par proximité GPS (lecture seule, tous rôles) ── */
@@ -13492,22 +13492,26 @@ function savePTeamJour(){_pvApplyTeam(_pvTeamSel.slice());}
 //   bande campagne/date et les onglets se rangent et l'en-tête tient en une ligne ; il revient en remontant, en haut de page, ou
 //   d'un appui sur la ligne. Seul un défilement de la MAIN replie (molette, doigt) : un défilement programmé — un tuto, un test,
 //   un scrollIntoView — ne cache jamais ce qu'il va viser. Le Pilotage et la Réserve gardent le leur (pas de .mod-header).
-var _mvRepliY=0,_mvRepliGeste=0,_mvRepliRaf=0;
+var _mvRepliY=0,_mvRepliGeste=0,_mvRepliGel=0;
 function _mvRepliMaj(){
-  _mvRepliRaf=0;
   var y=window.scrollY||(document.documentElement&&document.documentElement.scrollTop)||0, d=y-_mvRepliY, b=document.body;
   var tel=!window.matchMedia||window.matchMedia('(max-width: 767.98px)').matches;
   if(!tel||y<24){ b.classList.remove('mv-replie'); _mvRepliY=y; return; }
-  if(Date.now()-_mvRepliGeste<900){
-    if(d>6&&y>72) b.classList.add('mv-replie');
-    else if(d<-6) b.classList.remove('mv-replie');
+  // ★ TETE-3B (§474) — se replier raccourcit la page de 50 px : le navigateur décale le défilement d'autant (l'ancrage), et ce saut
+  //   ressemblait à « la main remonte » → l'en-tête se dépliait, la page rallongeait, il se repliait… Pendant 350 ms après un
+  //   changement, le défilement n'est que noté (relevé au rendu : Parcelles ou la Cave restaient dépliées une fois sur deux).
+  if(Date.now()<_mvRepliGel){ _mvRepliY=y; return; }
+  if(Date.now()-_mvRepliGeste<2500){   // 900 ms ne suffisaient pas quand la page est lourde
+    var replie=b.classList.contains('mv-replie');
+    if(d>6&&y>72&&!replie){ b.classList.add('mv-replie'); _mvRepliGel=Date.now()+350; }
+    else if(d<-6&&replie){ b.classList.remove('mv-replie'); _mvRepliGel=Date.now()+350; }
   }
   if(Math.abs(d)>6) _mvRepliY=y;
 }
 function _mvRepliArme(){ _mvRepliGeste=Date.now(); }
 window.addEventListener('wheel',_mvRepliArme,{passive:true});
 window.addEventListener('touchmove',_mvRepliArme,{passive:true});
-window.addEventListener('scroll',function(){ if(!_mvRepliRaf) _mvRepliRaf=requestAnimationFrame(_mvRepliMaj); },{passive:true});
+window.addEventListener('scroll',_mvRepliMaj,{passive:true});   // ★ TETE-3B (§474) : traité tout de suite — une image d'attente (requestAnimationFrame) pouvait arriver après la fenêtre du geste ; le corps ne touche la page que s'il change d'état
 document.addEventListener('click',function(e){
   var b=document.body; if(!b.classList.contains('mv-replie')||!e.target||!e.target.closest) return;
   if(e.target.closest('.page.active .mod-header')&&!e.target.closest('button,a,input,select')) b.classList.remove('mv-replie');

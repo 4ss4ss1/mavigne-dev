@@ -2,7 +2,7 @@
  "lot": "UX-0",
  "section": "§459",
  "date": "2026-10-28",
- "base": "f1cc6fa",
+ "base": "fa6f60e",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "141.0.7390.37",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -118,81 +118,140 @@
     "pilotage › ordinateur › c44 : 42 → 39",
     "pilotage › ordinateur › t12 : 59 → 58"
    ]
+  },
+  {
+   "date": "2026-10-28",
+   "base": "fa6f60e",
+   "motif": "hausse acceptée : TETE-3B (§474) : Réglages sur ordinateur ne défile plus assez pour la mesure « en défilant » — la page a perdu sa bande campagne/date collante et 19 px de marges d’en-tête",
+   "hausses": [
+    "reglages › ordinateur › chromeDefile : 178 → perdue"
+   ],
+   "baisses": [
+    "home › téléphone › c44 : 23 → 22",
+    "home › téléphone › chrome : 178 → 111",
+    "home › téléphone › chromeDefile : 178 → 57",
+    "parcelles › téléphone › c44 : 15 → 14",
+    "parcelles › téléphone › chrome : 178 → 111",
+    "parcelles › téléphone › chromeDefile : 76 → 57",
+    "journal › téléphone › c44 : 32 → 31",
+    "journal › téléphone › chrome : 178 → 111",
+    "journal › téléphone › chromeDefile : 76 → 57",
+    "journal › téléphone › pouce : 10 → 9",
+    "tracteur › téléphone › c44 : 21 → 20",
+    "tracteur › téléphone › chrome : 178 → 111",
+    "phyto › téléphone › c44 : 5 → 4",
+    "phyto › téléphone › chrome : 178 → 111",
+    "phyto › téléphone › chromeDefile : 76 → 57",
+    "cave › téléphone › c44 : 7 → 6",
+    "cave › téléphone › chrome : 178 → 111",
+    "cave › téléphone › chromeDefile : 76 → 57",
+    "reserve › téléphone › chrome : 192 → 153",
+    "reserve › téléphone › chromeDefile : 192 → 99",
+    "planning › téléphone › c44 : 79 → 78",
+    "planning › téléphone › chrome : 178 → 111",
+    "planning › téléphone › chromeDefile : 178 → 57",
+    "pilotage › téléphone › chrome : 309 → 290",
+    "reglages › téléphone › c44 : 6 → 5",
+    "reglages › téléphone › chrome : 178 → 111",
+    "reglages › téléphone › chromeDefile : 64 → 45",
+    "home › ordinateur › t12 : 21 → 20",
+    "home › ordinateur › chrome : 187 → 120",
+    "home › ordinateur › chromeDefile : 178 → 111",
+    "parcelles › ordinateur › t12 : 7 → 6",
+    "parcelles › ordinateur › chrome : 187 → 120",
+    "journal › ordinateur › t12 : 33 → 32",
+    "journal › ordinateur › chrome : 187 → 120",
+    "journal › ordinateur › chromeDefile : 178 → 111",
+    "tracteur › ordinateur › t12 : 1 → 0",
+    "tracteur › ordinateur › chrome : 187 → 120",
+    "phyto › ordinateur › t12 : 16 → 15",
+    "phyto › ordinateur › chrome : 187 → 120",
+    "phyto › ordinateur › chromeDefile : 178 → 111"
+   ]
+  },
+  {
+   "date": "2026-10-28",
+   "base": "fa6f60e",
+   "motif": "hausse acceptée : Pilotage sur ordinateur 39 → 42 cibles sous 44 px : la hausse liée à l’heure réelle (§470e), revenue à ce relevé — la référence la garde à 42 pour ne pas faire rougir un relevé fait à une autre heure",
+   "hausses": [],
+   "baisses": [
+    "reserve › ordinateur › t12 : 7 → 6"
+   ]
   }
  ],
  "mesures": {
   "téléphone": {
    "home": {
-    "cibles": 29,
+    "cibles": 28,
     "c24": 0,
-    "c44": 23,
+    "c44": 22,
     "textes": 174,
     "t11": 0,
     "t12": 0,
-    "chrome": 178,
-    "chromeDefile": 178,
+    "chrome": 111,
+    "chromeDefile": 57,
     "pouce": null,
-    "hauteur": 3165
+    "hauteur": 3138
    },
    "parcelles": {
-    "cibles": 42,
+    "cibles": 41,
     "c24": 0,
-    "c44": 15,
-    "textes": 70,
+    "c44": 14,
+    "textes": 69,
     "t11": 0,
     "t12": 0,
-    "chrome": 178,
-    "chromeDefile": 76,
+    "chrome": 111,
+    "chromeDefile": 57,
     "pouce": 0,
-    "hauteur": 2039
+    "hauteur": 2009
    },
    "journal": {
-    "cibles": 47,
+    "cibles": 46,
     "c24": 0,
-    "c44": 32,
+    "c44": 31,
     "textes": 178,
     "t11": 0,
     "t12": 0,
-    "chrome": 178,
-    "chromeDefile": 76,
-    "pouce": 10,
-    "hauteur": 2771
+    "chrome": 111,
+    "chromeDefile": 57,
+    "pouce": 9,
+    "hauteur": 2741
    },
    "tracteur": {
-    "cibles": 25,
+    "cibles": 24,
     "c24": 0,
-    "c44": 21,
-    "textes": 49,
+    "c44": 20,
+    "textes": 48,
     "t11": 0,
     "t12": 0,
-    "chrome": 178,
+    "chrome": 111,
     "chromeDefile": null,
     "pouce": 1,
-    "hauteur": 1095
+    "hauteur": 1065
    },
    "phyto": {
-    "cibles": 22,
+    "cibles": 21,
     "c24": 0,
-    "c44": 5,
-    "textes": 116,
+    "c44": 4,
+    "textes": 115,
     "t11": 0,
     "t12": 0,
-    "chrome": 178,
-    "chromeDefile": 76,
+    "chrome": 111,
+    "chromeDefile": 57,
     "pouce": 3,
-    "hauteur": 1962
+    "hauteur": 1933
    },
    "cave": {
-    "cibles": 49,
+    "cibles": 48,
     "c24": 0,
-    "c44": 7,
-    "textes": 260,
+    "c44": 6,
+    "textes": 259,
     "t11": 0,
     "t12": 0,
-    "chrome": 178,
-    "chromeDefile": 76,
+    "chrome": 111,
+    "chromeDefile": 57,
     "pouce": null,
-    "hauteur": 4037
+    "hauteur": 4007
    },
    "reserve": {
     "cibles": 27,
@@ -201,22 +260,22 @@
     "textes": 93,
     "t11": 0,
     "t12": 0,
-    "chrome": 192,
-    "chromeDefile": 192,
+    "chrome": 153,
+    "chromeDefile": 99,
     "pouce": 6,
-    "hauteur": 1476
+    "hauteur": 1437
    },
    "planning": {
-    "cibles": 91,
+    "cibles": 90,
     "c24": 0,
-    "c44": 79,
-    "textes": 141,
+    "c44": 78,
+    "textes": 140,
     "t11": 0,
     "t12": 0,
-    "chrome": 178,
-    "chromeDefile": 178,
+    "chrome": 111,
+    "chromeDefile": 57,
     "pouce": null,
-    "hauteur": 1428
+    "hauteur": 1398
    },
    "pilotage": {
     "cibles": 68,
@@ -225,156 +284,156 @@
     "textes": 244,
     "t11": 0,
     "t12": 0,
-    "chrome": 309,
+    "chrome": 290,
     "chromeDefile": 191,
     "pouce": null,
-    "hauteur": 4772
+    "hauteur": 4753
    },
    "reglages": {
-    "cibles": 16,
+    "cibles": 15,
     "c24": 0,
-    "c44": 6,
-    "textes": 49,
+    "c44": 5,
+    "textes": 48,
     "t11": 0,
     "t12": 0,
-    "chrome": 178,
-    "chromeDefile": 64,
+    "chrome": 111,
+    "chromeDefile": 45,
     "pouce": null,
-    "hauteur": 1437
+    "hauteur": 1407
    }
   },
   "ordinateur": {
    "home": {
-    "cibles": 29,
+    "cibles": 28,
     "c24": 0,
     "c44": 22,
-    "textes": 175,
+    "textes": 174,
     "t11": 0,
-    "t12": 21,
-    "chrome": 187,
-    "chromeDefile": 178,
+    "t12": 20,
+    "chrome": 120,
+    "chromeDefile": 111,
     "pouce": null,
-    "hauteur": 1491
+    "hauteur": 1463
    },
    "parcelles": {
-    "cibles": 53,
+    "cibles": 52,
     "c24": 0,
     "c44": 41,
-    "textes": 107,
+    "textes": 105,
     "t11": 0,
-    "t12": 7,
-    "chrome": 187,
+    "t12": 6,
+    "chrome": 120,
     "chromeDefile": null,
     "pouce": null,
-    "hauteur": 1124
+    "hauteur": 1095
    },
    "journal": {
-    "cibles": 47,
+    "cibles": 46,
     "c24": 0,
     "c44": 31,
-    "textes": 179,
+    "textes": 178,
     "t11": 0,
-    "t12": 33,
-    "chrome": 187,
-    "chromeDefile": 178,
+    "t12": 32,
+    "chrome": 120,
+    "chromeDefile": 111,
     "pouce": null,
-    "hauteur": 2788
+    "hauteur": 2766
    },
    "tracteur": {
-    "cibles": 26,
+    "cibles": 25,
     "c24": 0,
     "c44": 22,
-    "textes": 83,
+    "textes": 81,
     "t11": 0,
-    "t12": 1,
-    "chrome": 187,
+    "t12": 0,
+    "chrome": 120,
     "chromeDefile": null,
     "pouce": null,
-    "hauteur": 983
+    "hauteur": 954
    },
    "phyto": {
-    "cibles": 23,
+    "cibles": 22,
     "c24": 0,
     "c44": 6,
-    "textes": 140,
+    "textes": 138,
     "t11": 0,
-    "t12": 16,
-    "chrome": 187,
-    "chromeDefile": 178,
+    "t12": 15,
+    "chrome": 120,
+    "chromeDefile": 111,
     "pouce": null,
-    "hauteur": 2024
+    "hauteur": 1995
    },
    "cave": {
-    "cibles": 48,
+    "cibles": 47,
     "c24": 0,
     "c44": 6,
-    "textes": 274,
+    "textes": 272,
     "t11": 0,
-    "t12": 29,
-    "chrome": 187,
-    "chromeDefile": 178,
+    "t12": 28,
+    "chrome": 120,
+    "chromeDefile": 111,
     "pouce": null,
-    "hauteur": 3245
+    "hauteur": 3216
    },
    "reserve": {
     "cibles": 27,
     "c24": 0,
     "c44": 23,
-    "textes": 94,
+    "textes": 93,
     "t11": 0,
-    "t12": 7,
-    "chrome": 201,
-    "chromeDefile": 192,
+    "t12": 6,
+    "chrome": 162,
+    "chromeDefile": 153,
     "pouce": null,
-    "hauteur": 1321
+    "hauteur": 1282
    },
    "planning": {
-    "cibles": 91,
+    "cibles": 90,
     "c24": 0,
     "c44": 12,
-    "textes": 152,
+    "textes": 150,
     "t11": 0,
-    "t12": 3,
-    "chrome": 187,
-    "chromeDefile": 178,
+    "t12": 2,
+    "chrome": 120,
+    "chromeDefile": 111,
     "pouce": null,
-    "hauteur": 1268
+    "hauteur": 1238
    },
    "pilotage": {
     "cibles": 61,
     "c24": 0,
     "c44": 39,
-    "textes": 250,
+    "textes": 251,
     "t11": 0,
     "t12": 58,
-    "chrome": 241,
-    "chromeDefile": 232,
+    "chrome": 222,
+    "chromeDefile": 213,
     "pouce": null,
-    "hauteur": 2225
+    "hauteur": 2206
    },
    "reglages": {
-    "cibles": 16,
+    "cibles": 15,
     "c24": 0,
     "c44": 6,
-    "textes": 56,
+    "textes": 54,
     "t11": 0,
-    "t12": 17,
-    "chrome": 187,
-    "chromeDefile": 178,
+    "t12": 16,
+    "chrome": 120,
+    "chromeDefile": null,
     "pouce": null,
-    "hauteur": 1215
+    "hauteur": 1185
    }
   }
  },
  "gestes": {
-  "tracteur.session_y": 474,
+  "tracteur.session_y": 444,
   "tracteur.fab_recouvre": 1,
   "phyto.dates_machine": 15,
   "cave.gestes_44": 0,
   "cave.sommaire": 0,
   "reserve.action": 0,
-  "planning.grille_y": 472,
-  "reglages.premier_y": 385,
+  "planning.grille_y": 442,
+  "reglages.premier_y": 355,
   "parcelles.valider": 48
  }
 }
