@@ -803,6 +803,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-wncoupe1.mjs --contre'],
   ['node scripts/mv-harnais-lisible1.mjs'],            // LISIBLE-1 (§470) : les textes et les cibles comme la maquette (11 px, 12 au téléphone ; initiales du Journal ; zones des boutons discrets), la décision du 26/09 tenue
   ['node scripts/mv-harnais-lisible1.mjs --contre'],
+  ['node scripts/mv-harnais-annuler1.mjs'],            // ANNULER-1 (§471) : le toast commun (6 s, la barre), Dévalider, le lot de fûts, les gestes du Planning — chaque Annuler joué
+  ['node scripts/mv-harnais-annuler1.mjs --contre'],
   ['node scripts/mv-harnais-ecart1.mjs'],              // ECART-1 (§460) : l'écart au barème d'Aujourd'hui › Économie en heures — la tuile est le total de la carte (un tiret sans rien à comparer), barres à l'échelle jusqu'à ±50 %
   ['node scripts/mv-harnais-ecart1.mjs --contre'],
   ['node scripts/mv-harnais-cave2.mjs'],              // CAVE-2 (§289) : le Cuvier à la charte

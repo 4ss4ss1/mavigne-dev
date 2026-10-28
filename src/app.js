@@ -12,7 +12,7 @@ import { isAdmin, isTractoriste, isSaisonnier, canWrite,
          getRoleLabel, showToast, wmoDesc, wmoIcone, tNom,
          applyTheme, setThemeMode, initTheme, logError, _closeCriticalOverlay, _escHtml, _escAttr,
          GT_ADMIN_EMAIL, DEMO_TENANT, DEMO_FIREBASE_EMAIL, DEMO_FIREBASE_PWD, dreEffectif,
-         _mvBadge, _mvIcon, _mvIconTache, _mvIconInline, _actIcone,
+         _mvBadge, _mvIcon, _mvIconTache, _mvIconInline, _actIcone, showToastAnnuler
 } from './utils.js';
 // ★ SYNC-1 (26/09/2026) — passer par window.showSyncBadge, jamais par l'import de utils.js.
 //   app.js enveloppe window.showSyncBadge pour piloter le POINT de synchro ; l'import
@@ -13485,18 +13485,9 @@ function _pvApplyTeam(team){
 }
 function savePTeamJour(){_pvApplyTeam(_pvTeamSel.slice());}
 
-/* Toast dédié avec bouton Annuler */
-var _pvUndoFn=null,_pvUndoTimer=null;
-function _pvToast(msg,undoFn){
-  var t=document.getElementById('pv-toast'),m=document.getElementById('pv-toast-msg'),u=document.getElementById('pv-toast-undo');
-  if(!t){showToast(msg,'#3D6B27');return;}
-  m.textContent=msg;
-  if(undoFn){u.style.display='';_pvUndoFn=undoFn;u.onclick=function(){if(_pvUndoFn){_pvUndoFn();_pvUndoFn=null;}_pvHideToast();};}
-  else{u.style.display='none';_pvUndoFn=null;}
-  t.classList.add('show');
-  clearTimeout(_pvUndoTimer);_pvUndoTimer=setTimeout(_pvHideToast,undoFn?4500:2200);
-}
-function _pvHideToast(){var t=document.getElementById('pv-toast');if(t)t.classList.remove('show');_pvUndoFn=null;}
+/* Toast avec Annuler — ★ ANNULER-1 (§471) : c'est désormais le composant de toute l'appli (showToastAnnuler, utils.js : 6 s, la
+   barre, « Annuler » à 40 px). Les deux noms d'ici restent, pour les appelants et les tutos qui les connaissent. */
+function _pvToast(msg,undoFn){ showToastAnnuler(msg,undoFn||null); }
 
 /* Validation rapide 1-tap */
 function pQuickValidate(nom,evt){
@@ -13579,13 +13570,24 @@ function pQuickUndo(nom){
   if(!canWrite())return;
   var p=PARCELLES.find(function(x){return x.nom===nom;});if(!p)return;
   var task=pTacheFilter,type=_pvType(task);
+  var avant=(p.taches[task]&&typeof p.taches[task]==='object')?JSON.parse(JSON.stringify(p.taches[task])):p.taches[task];   // ★ ANNULER-1 (§471) : l'état d'avant, pour Annuler
   if(type==='simple'){p.taches[task]='En cours';}
   else if(p.taches[task]&&typeof p.taches[task]==='object'){p.taches[task][_pvPrefix(task)+pCurStep]='Non démarré';}
   recalcTravaux(task);
   saveData('parcelles');saveData('travaux');
   if(navigator.vibrate)navigator.vibrate(30);
   renderParcelles();computePStats();
-  showToast(tNom(task)+(type!=='simple'?' '+_pvStepLabel(task)+pCurStep:'')+' remis · '+nom,'#B85A1A');
+  showToastAnnuler(tNom(task)+(type!=='simple'?' '+_pvStepLabel(task)+pCurStep:'')+' remis · '+nom,function(){ _pvRemettre(nom,task,avant); });
+}
+// ★ ANNULER-1 (§471) — « Dévalider » (le bouton « Fait » de la carte) se refait en un tap : Annuler remet l'état d'avant de la
+//   tâche TEL QUEL (un passage d'une tâche à étapes compris) — le journal n'avait pas bougé, il ne bouge pas.
+function _pvRemettre(nom,task,avant){
+  var p=PARCELLES.find(function(x){return x.nom===nom;});if(!p)return;
+  if(avant===undefined){delete p.taches[task];}else{p.taches[task]=(avant&&typeof avant==='object')?JSON.parse(JSON.stringify(avant)):avant;}
+  recalcTravaux(task);
+  saveData('parcelles');saveData('travaux');
+  renderParcelles();computePStats();
+  showToast(tNom(task)+' · '+nom+' : remis comme avant','#3D6B27');
 }
 function pQuickStart(nom,evt){
   if(_mvValidBlocked())return;

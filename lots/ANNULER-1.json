@@ -1,0 +1,39 @@
+{
+  "lot": "ANNULER-1",
+  "section": "§471",
+  "base": "dfb5f87644a1da634a3333d784ed4a544410675b",
+  "inclut": [],
+  "date": "2026-10-28",
+  "tutos": {
+    "ok": true,
+    "empreinte": "b029e737589dbc1452e628c4c7c7e5bda6df624b85b36845327af6890b1b992c",
+    "date": "2026-10-28T07:45:14.830Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "bb527c84a6d10ca9242534a6b2cc3affb1d2879e42e5a6518250cd60fa75b6a5",
+    "CLAUDE.md": "8431a2af6258ae8b533e599184df245b3b3ca8836cac7e3846fdf94300057fa3",
+    "docs/claude/INDEX.md": "9c2155a11e94551239622f0cd8ad5a81d79b4b3c39226028859c3e516010b649",
+    "docs/claude/chantiers-430-479.md": "70bae14864bbdd9b8558dd7d3310f29c825ca0c1d12fe3a88b54a02918011889",
+    "docs/claude/journal.md": "a3c6c7c363f95aeaa723c3d3434fa5e1c84025af2e7cfee0ac42a2ed0554aef9",
+    "guide/04-vigne.html": "ff1147c5c224d11a2f5e602d6b0cf93e433fac6a4caa7c7571940b7b238665c2",
+    "guide/10-planning.html": "4c5d9b90dd4ce10881dd6985d5c4f80785e774195be04e14aadad3a8375b6f9c",
+    "index.html": "3cf0f459aa9e932ab013eed7c1da1e63f8b73926f281004e5a237fc34769cecc",
+    "public/sw.js": "c290c834750df92ee6e6bc752420a826a122f6979d2f51a28e293e27ac0dc52f",
+    "scripts/harnais-claude-md.mjs": "2f5de42aded2079af565a8828137e7cae04da5728dc500f21b10cbf6db4a6f2e",
+    "scripts/mv-harnais-liste.mjs": "b5abd20675c204974982cc75c069efa68d50d43e35a060d3cd855233700b49ae",
+    "src/app.js": "0ac0a95c88aa0968590422423cbb184320890075066160bb343f9440d4b76ec8",
+    "src/planning.js": "0dcde8f72529c9fc19b7b6142bd5ee71f5ca6fe684b75610b94f18e5f94424be",
+    "src/reserve.js": "df6f7d00f42350c03941357bca85b8d1b6be6976c20a40b1b5c3fd3e9e5dd477",
+    "src/styles.css": "ac0da7a73fd2bf46523f8c1634782bf80862b194d6db4dd251cf58a74e30037d",
+    "src/utils.js": "391cd64827a6673b3420c75b706c0c9271bf6aa94f5617f3b8ed2a63ae114f08",
+    "src/whats-new.js": "c071f84ff9b750dde6217513fdd8efe65ec48475cc82844a6e90d75626d11d90",
+    "scripts/mv-harnais-annuler1.mjs": "dc7c4642038397a9d3567f94debcf59ba1004f12dfe35a3e3b1aa1a6fd7baea7"
+  }
+}

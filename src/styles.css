@@ -1700,6 +1700,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 
 /* ════ LOT 3 — DOCK BAS + sidebar retirée ════ */
 #mv-toast{bottom:calc(env(safe-area-inset-bottom,0px) + 84px)!important;}
+#pv-toast{bottom:calc(env(safe-area-inset-bottom,0px) + 84px)!important;}   /* ★ ANNULER-1 (§471) : le toast « Annuler » sert partout — à la même hauteur que l'autre, au-dessus du dock */
 #mv-dock{display:none;position:fixed;left:0;right:0;bottom:0;z-index:90;background:linear-gradient(0deg,var(--cave) 60%,var(--cave-2));justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);}
 #mv-dock::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--horizon);opacity:.85;}
 #mv-dock-inner{display:flex;width:100%;}
@@ -1868,7 +1869,11 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 #pv-toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);left:50%;transform:translateX(-50%) translateY(20px);background:#1A1A14;color:#fff;border-radius:50px;padding:9px 10px 9px 18px;font-size:var(--pt-txt,13px);font-weight:600;font-family:var(--font-ui);display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,0.28);z-index:9999;opacity:0;transition:opacity .25s,transform .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;white-space:nowrap;max-width:92vw;}
 #pv-toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
 #pv-toast #pv-toast-msg{overflow:hidden;text-overflow:ellipsis;}
-#pv-toast #pv-toast-undo{background:rgba(255,255,255,0.16);border:none;color:#fff;font-weight:700;font-size:var(--pt-micro,12px);border-radius:50px;padding:6px 14px;cursor:pointer;flex-shrink:0;font-family:var(--font-ui);min-height:34px;}
+#pv-toast #pv-toast-undo{background:rgba(255,255,255,0.16);border:none;color:#fff;font-weight:700;font-size:var(--pt-micro,12px);border-radius:50px;padding:6px 16px;cursor:pointer;flex-shrink:0;font-family:var(--font-ui);min-height:40px;}
+/* ★ ANNULER-1 (§471) — maquette-ux-v1, partie 4 : « Annuler » à 40 px de haut, et une barre qui s'épuise en six secondes (MV_ANNULER_MS, utils.js). */
+#pv-toast.mv-ann::after{content:'';position:absolute;left:18px;right:18px;bottom:3px;height:3px;border-radius:2px;background:rgba(255,255,255,0.55);transform-origin:left center;animation:mvAnnBarre 6s linear forwards;pointer-events:none;}
+@keyframes mvAnnBarre{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@media (prefers-reduced-motion: reduce){ #pv-toast.mv-ann::after{animation:none;} }
 #pv-toast #pv-toast-undo:active{background:rgba(255,255,255,0.30);}
 
 
@@ -8046,6 +8051,7 @@ html .ck-agr-voile{ background:var(--voile); }
 body.mv-maj-barre .page::after{content:"";display:block;height:44px}
 body.mv-maj-barre #trac-fab,body.mv-maj-barre #phyto-fab{bottom:calc(116px + env(safe-area-inset-bottom,0px))!important}
 body.mv-maj-barre #mv-toast{bottom:calc(env(safe-area-inset-bottom,0px) + 128px)!important}
+body.mv-maj-barre #pv-toast{bottom:calc(env(safe-area-inset-bottom,0px) + 128px)!important}
 /* Ordinateur : la carte en bas de la barre latérale ; repliée, la pastille (bulle par data-tip). */
 .mv-rail-maj-slot:empty{display:none}
 .mv-rail-maj-slot:not(:empty){margin-top:auto;padding-top:var(--e-2,8px)}

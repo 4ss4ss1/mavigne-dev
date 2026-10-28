@@ -524,3 +524,4 @@
 | 468 | 468. ★★ MAQ-1 — LES MAQUETTES DU PLAN ENTRENT DANS LE DÉPÔT (27/10 — `docs/maquettes/` (neuf : trois maquet… | `docs/claude/chantiers-430-479.md` |
 | 469 | 469. ★★ WN-COUPE-1 — LE JOURNAL WHATS_NEW SORT DE `utils.js` ; SOIXANTE-DEUX CONTRÔLES LISAIENT LEUR ANNONC… | `docs/claude/chantiers-430-479.md` |
 | 470 | 470. ★★ LISIBLE-1 — LES TEXTES ET LES CIBLES COMME LA MAQUETTE : 11 px PARTOUT, 12 AU TÉLÉPHONE ; LES INITI… | `docs/claude/chantiers-430-479.md` |
+| 471 | 471. ★★ ANNULER-1 — ANNULER PLUTÔT QUE CONFIRMER : UN SEUL TOAST « ANNULER » POUR TOUTE L’APPLI, ET CHAQUE … | `docs/claude/chantiers-430-479.md` |

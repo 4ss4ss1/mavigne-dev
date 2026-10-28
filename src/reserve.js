@@ -589,15 +589,21 @@ window._rsvSaveFut=_rsvSaveFut;
 
 function _rsvDelFut(id){
   if(!isAdmin()) return;
-  var f=INTRANTS.futs.find(function(x){return x.id===id;});
-  if(!f) return;
+  var i=INTRANTS.futs.findIndex(function(x){return x.id===id;});
+  if(i<0) return;
+  var f=INTRANTS.futs[i];
   var label=(f.ref||f.four||'ce lot')+' — '+(parseInt(f.qte)||0)+' fût'+((parseInt(f.qte)||0)>1?'s':'');
-  if(window.openConfirmDel){
-    window.openConfirmDel('Supprimer ce lot de fûts ?', label, function(){
-      INTRANTS.futs=INTRANTS.futs.filter(function(x){return x.id!==id;});
-      saveIntrants(); _rsvRenderBody(); showToast('Lot supprimé','#C0392B');
-    }, 'carton');
-  }
+  // ★ ANNULER-1 (§471) — plus de fenêtre « Supprimer ce lot de fûts ? » : le lot part tout de suite, et « Annuler » le remet à
+  //   sa place, avec son identifiant (les fûts de la Cave qui le citent le retrouvent). Rien n'est perdu pendant six secondes.
+  INTRANTS.futs=INTRANTS.futs.filter(function(x){return x.id!==id;});
+  saveIntrants(); _rsvRenderBody();
+  var annuler=function(){
+    if(INTRANTS.futs.some(function(x){return x.id===id;})) return;   // déjà revenu (un autre appareil, un double appui)
+    INTRANTS.futs.splice(Math.min(i,INTRANTS.futs.length),0,f);
+    saveIntrants(); _rsvRenderBody(); showToast('Lot remis','#3D6B27');
+  };
+  if(typeof window.showToastAnnuler==='function') window.showToastAnnuler('Lot retiré · '+label, annuler);
+  else showToast('Lot retiré','#C0392B');
 }
 window._rsvDelFut=_rsvDelFut;
 // ── +/− : ajuster le nombre de fûts d'un lot déjà saisi (min. 1 ; corbeille = retirer le lot) ──

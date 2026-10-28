@@ -3978,13 +3978,38 @@ function planSelAction(kind){
   if(!isAdmin())return;
   var keys=_planSelKeys();
   if(!keys.length)return;
+  var avant=_planInstantane(keys);   // ★ ANNULER-1 (§471) : les jours tels qu'ils étaient, pour Annuler
   var r=_planApplySimple(keys,kind,keys.length===1);
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
   var lbl={rec:'R\u00e9cup pos\u00e9es',heat:'Horaires chaleur 06:00 \u2192 14:00',clr:'Saisies effac\u00e9es'}[kind]||'Fait';
-  window.fbSaveToast(r.n>0?{planning_entries:PLANNING_ENTRIES}:null,
-    r.n>0?(lbl+' \u00b7 '+r.n+' j'+(r.skip>0?' \u00b7 '+r.skip+' pr\u00e9serv\u00e9'+(r.skip>1?'s':''):'')):'Aucun jour applicable dans la s\u00e9lection',
-    r.n>0?'#3D6B27':'#E07060');
+  var dit=r.n>0?(lbl+' \u00b7 '+r.n+' j'+(r.skip>0?' \u00b7 '+r.skip+' pr\u00e9serv\u00e9'+(r.skip>1?'s':''):'')):'Aucun jour applicable dans la s\u00e9lection';
+  // ★ ANNULER-1 (§471) — Effacer, Récup, Chaleur s'appliquaient sans retour : le geste part tout de suite (enregistré sans
+  //   second toast — un échec d'envoi parle toujours), et « Annuler » remet chaque jour tel qu'il était.
+  if(r.n>0&&typeof window.showToastAnnuler==='function'){
+    window.fbSaveToast({planning_entries:PLANNING_ENTRIES},'');
+    window.showToastAnnuler(dit,function(){ _planRemettre(avant); });
+  } else window.fbSaveToast(r.n>0?{planning_entries:PLANNING_ENTRIES}:null,dit,r.n>0?'#3D6B27':'#E07060');
   planSelClear();
+  _pl2Refresh();
+}
+// ★ ANNULER-1 (§471) — la photo des jours touchés : le mois et le seau de l'année sont gardés (on peut naviguer pendant les
+//   six secondes) ; un jour sans saisie est noté vide, pour qu'Annuler retire ce que le geste a posé.
+function _planInstantane(keys){
+  return keys.map(function(k){
+    var p=_planSelParse(k),yb=_pEntYear(p.nom),m=planMonth;
+    var e=(yb&&yb[m]&&yb[m][p.d]!==undefined)?JSON.parse(JSON.stringify(yb[m][p.d])):undefined;
+    return {nom:p.nom,m:m,d:p.d,yb:yb,e:e};
+  });
+}
+function _planRemettre(inst){
+  var n=0;
+  inst.forEach(function(x){
+    var yb=x.yb||_pEntYear(x.nom); if(!yb)return;
+    if(x.e===undefined){ if(yb[x.m]&&yb[x.m][x.d]!==undefined){ delete yb[x.m][x.d]; n++; } }
+    else { if(!yb[x.m])yb[x.m]={}; yb[x.m][x.d]=JSON.parse(JSON.stringify(x.e)); n++; }
+  });
+  window.PLANNING_ENTRIES=PLANNING_ENTRIES;
+  window.fbSaveToast({planning_entries:PLANNING_ENTRIES},'Remis comme avant \u00b7 '+n+' j','#3D6B27');
   _pl2Refresh();
 }
 

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.22';
+export const APP_VERSION = '10.23';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1625,6 +1625,27 @@ export function showToast(msg, color) {
   t.classList.add('show');
   _toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2200);
 }
+// ★ ANNULER-1 (§471) — « ANNULER PLUTÔT QUE CONFIRMER » (docs/maquettes/maquette-ux-v1.html, partie 4). Pour un geste qui se
+//   répare, l'action est DÉJÀ écrite quand le toast paraît ; il reste six secondes, une barre qui s'épuise, « Annuler » à 40 px,
+//   et Annuler écrit l'inverse. Un seul toast à la fois : un nouveau remplace l'ancien (l'annulation du précédent n'est plus
+//   offerte, comme dans Gmail). Le toast est celui que Parcelles portait déjà pour Valider (#pv-toast, 4,5 s) : un seul
+//   composant pour toute l'appli, mêmes identifiants (les tutos et le panneau côte à côte les lisent).
+export const MV_ANNULER_MS = 6000;
+var _mvAnnFn = null, _mvAnnTimer = null;
+export function showToastAnnuler(msg, annuler) {
+  var t = document.getElementById('pv-toast'), m = document.getElementById('pv-toast-msg'), u = document.getElementById('pv-toast-undo');
+  if (!t || !m || !u) { showToast(msg, '#3D6B27'); return; }
+  var fn = (typeof annuler === 'function') ? annuler : null;
+  m.textContent = msg;
+  _mvAnnFn = fn;
+  u.style.display = fn ? '' : 'none';
+  u.onclick = function () { var f = _mvAnnFn; _mvAnnFn = null; _mvAnnCacher(); if (f) { try { f(); } catch (e) { if (window._mvAvale) window._mvAvale(e, 'utils.js/showToastAnnuler'); } } };
+  t.classList.remove('show', 'mv-ann'); void t.offsetWidth;   // la barre repart de plein à chaque toast
+  t.classList.add('show'); if (fn) t.classList.add('mv-ann');
+  if (navigator.vibrate) navigator.vibrate(40);
+  clearTimeout(_mvAnnTimer); _mvAnnTimer = setTimeout(_mvAnnCacher, fn ? MV_ANNULER_MS : 2200);
+}
+function _mvAnnCacher() { var t = document.getElementById('pv-toast'); if (t) t.classList.remove('show', 'mv-ann'); _mvAnnFn = null; }
 
 // ════ DARK MODE ════
 export function applyTheme(mode) {
@@ -3816,6 +3837,7 @@ window._actIcone          = _actIcone;
 window._PIL_SEM           = _PIL_SEM;
 window.showSyncBadge      = showSyncBadge;
 window.showToast          = showToast;
+window.showToastAnnuler   = showToastAnnuler;   // ★ ANNULER-1 (§471)
 window.setThemeMode       = setThemeMode;
 window.applyTheme         = applyTheme;
 window.initTheme          = initTheme;

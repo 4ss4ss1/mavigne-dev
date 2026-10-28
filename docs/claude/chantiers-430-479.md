@@ -971,3 +971,35 @@ Le lot que le plan du 25/10 appelait CIBLE-1, ramené par UX-1 (§467) à ce qui
 - **La hausse du Pilotage sur ordinateur** (39 → 42 cibles sous 44 px) : revue le 27/10, absente d’un relevé fini à 18 h 42, présente au suivant (18 h 49) sans rien changer. Cause non trouvée ; tant qu’elle ne l’est pas, la référence porte 42.
 - **À vérifier chez Nico** : le Journal sur son téléphone et son PC à 125 % (une équipe de trois et plus, le « +N »), la ligne d’heures du Planning sur un écran étroit, l’échelle de la campagne dans Réglages, en clair et en sombre.
 - Les onglets (40 px) avec TETE-3 ; le prochain lot du plan : ANNULER-1.
+
+## 471. ★★ ANNULER-1 — ANNULER PLUTÔT QUE CONFIRMER : UN SEUL TOAST « ANNULER » POUR TOUTE L’APPLI, ET CHAQUE ANNULER REMET L’ÉTAT D’AVANT TEL QUEL (28/10 — `src/utils.js` (`showToastAnnuler`, `_mvAnnCacher`, `MV_ANNULER_MS`, APP 10.23) · `src/app.js` (`_pvToast` délègue, `pQuickUndo`, `_pvRemettre`) · `src/reserve.js` (`_rsvDelFut`) · `src/planning.js` (`planSelAction`, `_planInstantane`, `_planRemettre`) · `src/styles.css` · `index.html` · `src/whats-new.js` · `public/sw.js` (SW 11.04) · `guide/04-vigne.html` · `guide/10-planning.html` · `scripts/mv-harnais-annuler1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/ANNULER-1.json` · base `dfb5f87`)
+
+### 471a. D’où ça vient
+Le troisième lot du plan du 25/10 (« suite »), dessiné dans `docs/maquettes/maquette-ux-v1.html`, partie 4 : « Êtes-vous sûr ? » se valide par réflexe ; pour ce qui se répare, l’action part tout de suite et un toast « Annuler » reste six secondes, une barre qui s’épuise, « Annuler » à 40 px — Annuler écrit l’inverse. La maquette le dit elle-même : l’inventaire est « à vérifier une par une au premier lot ».
+
+### 471b. L’inventaire, vérifié dans le code — il corrige le plan
+- **Valider avait déjà son Annuler** : `_pvToast` (#pv-toast, 4,5 s) après une validation rapide, et la feuille « parcelle finie » a le sien. L’audit comptait « 0 toast avec Annuler » : faux, comme sa mesure des cibles (§467).
+- **28 fenêtres `openConfirmDel`, pas 46**, réparties sur 8 fichiers ; **aucune au Planning**.
+- **« Dévalider »**, c’est le bouton « Fait » de la carte (`pQuickUndo`) : un toast sans retour.
+- **« Retirer un fût »** : le lot de fûts de la Réserve (`_rsvDelFut`, une fenêtre). **« Retirer un intrant »** : aucune fenêtre de ce genre dans la Réserve — rien d’inventé ; à reprendre au tri d’ANNULER-2.
+- **« Déplacer ou effacer une journée »** : le Planning n’a pas de geste « déplacer » ; « Effacer » (avec « Récup » et « Chaleur », la barre de sélection) s’appliquait **sans confirmation et sans retour** — le cas le plus utile des cinq.
+
+### 471c. Ce qui change
+- **Un composant** : `showToastAnnuler(msg, inverse)` (utils.js) sur le toast que Parcelles portait déjà — mêmes identifiants, que lisent les tutos et le panneau côte à côte. Six secondes (`MV_ANNULER_MS`), la barre (`#pv-toast.mv-ann::after`, rien d’animé si l’on réduit les animations), « Annuler » à 40 px, `role="status"`. Un nouveau toast remplace l’ancien ; Annuler n’appelle l’inverse qu’une fois. Sans inverse : 2,2 s, sans bouton. Posé à la hauteur de l’autre toast, au-dessus du dock (il restait à 22 px du bas).
+- **Valider** : `_pvToast` délègue — son Annuler passe à six secondes, avec la barre.
+- **Dévalider** (« Fait ») : `pQuickUndo` garde une copie de la tâche AVANT le geste ; Annuler (`_pvRemettre`) la remet telle quelle — un passage d’une tâche à étapes compris — et l’enregistre. Le journal n’avait pas bougé, il ne bouge pas.
+- **Un lot de fûts** : plus de fenêtre ; retiré tout de suite, Annuler le remet à sa place avec son identifiant (les fûts de la Cave qui le citent le retrouvent) ; un second Annuler, ou le lot revenu d’ailleurs, ne le double pas.
+- **Planning, Effacer / Récup / Chaleur** : `_planInstantane` photographie chaque jour touché AVANT (le mois et le seau de l’année gardés — on peut naviguer pendant les six secondes ; un jour vide noté vide) ; le geste est enregistré sans second toast (un échec d’envoi parle toujours) ; Annuler (`_planRemettre`) remet chaque jour, retire ce que le geste a posé, et l’enregistre.
+- Annonce 10.23, niveau 0, pour tous.
+
+### 471d. Mesuré
+- `mv-harnais-annuler1` : 11 assertions sur les vraies fonctions extraites (le toast, Dévalider simple et à étapes, le lot de fûts, Effacer et Récup), **12/12 mutants**. Sa contre-épreuve vérifie d’abord que la base est verte : un premier passage, sur une base qui plantait, « mordait » 12/12 pour rien.
+- Construit : le panneau côte à côte rejoué (vert) ; `test:ux` 17/17 vert, aucune hausse.
+- Chaîne complète : 563 commandes en 811 s, **trois rouges**, corrigés et rejoués verts : le preflight (`_pvHideToast` n’avait plus d’appelant — retirée) ; la contre-épreuve de PRES-1, qui s’accroche au texte de l’import d’`utils.js` dans `app.js` (les noms neufs vont en fin de liste, l’ancre reste intacte) ; `build-guide --check`, attendu — le guide a changé et `public/guide.html` est dérivé : `npm run site` le remet en phase (vérifié, puis rendu tel quel : il ne se livre pas).
+
+### 471e. Fiches et guide
+`guide/04-vigne.html` (Annuler : six secondes, et après « Fait ») et `guide/10-planning.html` (Effacer, Récup, Chaleur : Annuler) mis à jour. `MV_AIDE` relue : aucune phrase ne décrit ces fenêtres ni ce délai — rien à changer.
+
+### 471f. Ce qui reste ouvert
+- **ANNULER-2** : le tri des 28 `openConfirmDel` — réversible → Annuler (retirer une cuve du parc, une cuve d’une cuvée, une tâche d’une période…) ; irréversible → une fenêtre qui nomme la conséquence ; tout le domaine → taper le nom. Jamais « Oui / Non ».
+- **À vérifier chez Nico** : le toast « Annuler » au téléphone, au-dessus du dock, sur Parcelles, la Réserve et le Planning ; la barre ; un Annuler après « Fait ».

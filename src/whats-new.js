@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.23', d: '2026-10-28', items: [
+    { niv: 0, pour: ['tous'], emoji: 'retour', titre: 'Annuler plutôt que confirmer',
+      desc: "Un geste qui se répare part tout de suite, et un bandeau «\u00a0Annuler\u00a0» reste six secondes, avec une barre qui s’épuise. C’était déjà le cas après Valider\u00a0; c’est maintenant le cas quand on remet une tâche en cours (le bouton «\u00a0Fait\u00a0»), quand on retire un lot de fûts de la Réserve (plus de fenêtre «\u00a0Supprimer ce lot de fûts\u00a0?\u00a0») et quand on efface des saisies, pose des récups ou des horaires de chaleur au Planning — ces trois-là s’appliquaient sans retour possible." },
+  ] },
   { v: '10.22', d: '2026-10-27', items: [
     { niv: 0, pour: ['tous'], emoji: 'oeil', titre: 'Des textes plus grands, et des petits boutons plus faciles à toucher',
       desc: "Plus aucun texte n’est sous 11\u00a0px, et au téléphone plus rien sous 12\u00a0px\u00a0: les heures du Planning («\u00a0173h / 152h\u00a0»), l’échelle de la campagne dans Réglages et quelques étiquettes descendaient jusqu’à 7\u00a0px. Au Journal, chaque initiale est dans un rond plus grand, deux au plus, puis «\u00a0+2\u00a0» pour les autres. Les petits boutons «\u00a0discrets\u00a0» et secondaires se touchent sur 44\u00a0px de haut sans changer de dessin\u00a0; le crayon de la priorité, «\u00a0Pourquoi\u00a0?\u00a0», les tuiles de l’Accueil et les champs de recherche sont plus faciles à attraper." },
