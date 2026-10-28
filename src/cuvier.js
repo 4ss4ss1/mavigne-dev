@@ -2255,7 +2255,7 @@ function deleteVendRec() {
     _vendUnrecordRendement(id,pnom);
     if(window.closeOv) window.closeOv(null,'ovVendRec');
     renderVendRec();
-  });
+  },null, 'Supprimer la récolte',null);
 }
 function _vndToggleMpf() {
   _vcuvMpfActive=!_vcuvMpfActive;
@@ -2466,7 +2466,7 @@ function deleteVendCuve() {
     _vendFbSave('Cuve supprim\u00e9e','#B85A1A');
     if(window.closeOv) window.closeOv(null,'ovVendCuve');
     renderVendCuves();
-  });
+  },null, 'Supprimer la cuve et ses mesures',null);
 }
 // —— L'historique des releves : sans lui, « corriger » n'a pas de porte ——
 function _vendMesHist(c,canEdit){
@@ -2548,15 +2548,22 @@ function _vendMesDel(){
   if(!_vendGarde()) return;
   var cuveId=_vmesureCuveId, mesId=_vmesureEditId;
   if(!cuveId||!mesId) return;
-  window.openConfirmDel('Supprimer ce relevé ?','La courbe de fermentation et la fin estimée seront recalculées sans lui.',function(){
-    var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===cuveId;});
-    if(!c) return;
-    c.mesures_fa=(c.mesures_fa||[]).filter(function(x){return x.id!==mesId;});
-    _vmesureEditId=null;
-    window.CAVE_VENDANGE=CAVE_VENDANGE;
-    _vendFbSave('Relevé supprimé','#B85A1A');
-    if(window.closeOv) window.closeOv(null,'ovVendMesure');
-    renderVendCuves();
+  // ★ ANNULER-2 (§472) — un relevé se répare : il part tout de suite, « Annuler » le remet à sa place (plus de fenêtre).
+  var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===cuveId;});
+  if(!c) return;
+  var i=(c.mesures_fa||[]).findIndex(function(x){return x.id===mesId;}); if(i<0) return;
+  var m=JSON.parse(JSON.stringify(c.mesures_fa[i]));
+  c.mesures_fa=(c.mesures_fa||[]).filter(function(x){return x.id!==mesId;});
+  _vmesureEditId=null;
+  window.CAVE_VENDANGE=CAVE_VENDANGE;
+  _vendFbSave('','#B85A1A');
+  if(window.closeOv) window.closeOv(null,'ovVendMesure');
+  renderVendCuves();
+  window.showToastAnnuler('Relevé supprimé',function(){
+    var c2=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===cuveId;}); if(!c2) return;
+    c2.mesures_fa=c2.mesures_fa||[]; if(c2.mesures_fa.some(function(x){return x.id===m.id;})) return;
+    c2.mesures_fa.splice(Math.min(i,c2.mesures_fa.length),0,m);
+    window.CAVE_VENDANGE=CAVE_VENDANGE; _vendFbSave('Relevé remis','#3D6B27'); renderVendCuves();
   });
 }
 function saveVendMesure() {
@@ -5227,7 +5234,7 @@ function _vendOpDel(){
     _vendFbSave('Opération supprimée','#B85A1A');
     _vendSheetClose();
     renderVendCuves();
-  });
+  },null, 'Supprimer la '+_vendOpLbl(op.type).toLowerCase(),null);
 }
 // Le detail court d'une operation, partage par le resume et l'historique.
 function _vendOpDet(o){
@@ -5655,7 +5662,7 @@ function deleteVendClient(i){
     window.CAVE_VENDANGE=CAVE_VENDANGE;
     _vendFbSave('Client supprimé','#B85A1A');
     openVendClients();
-  });
+  },null, 'Supprimer \u00ab '+nm+' \u00bb',null);
 }
 
 /* ═════ CHANGER L'ETAPE, ET LA DATER — PARC-1 ═════
@@ -5747,13 +5754,19 @@ function _vendStatDel(){
   var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===_vstCuveId;});
   if(!c||!_vstEditId) return;
   var _id=_vstEditId;
-  window.openConfirmDel('Supprimer cette \u00e9tape ?',
-    'Le parcours perdra cette date. Le statut de la cuve ne change pas.',function(){
-    c.statut_hist=(c.statut_hist||[]).filter(function(x){return x.id!==_id;});
-    window.CAVE_VENDANGE=CAVE_VENDANGE;
-    _vendFbSave('\u00c9tape supprim\u00e9e','#B85A1A');
-    _vendSheetClose();
-    renderVendCuves();
+  // ★ ANNULER-2 (§472) — une étape du parcours se répare : elle part, « Annuler » la remet (le statut de la cuve n'a pas bougé).
+  var i=(c.statut_hist||[]).findIndex(function(x){return x.id===_id;}); if(i<0) return;
+  var e=JSON.parse(JSON.stringify(c.statut_hist[i])), cid=c.id;
+  c.statut_hist=(c.statut_hist||[]).filter(function(x){return x.id!==_id;});
+  window.CAVE_VENDANGE=CAVE_VENDANGE;
+  _vendFbSave('','#B85A1A');
+  _vendSheetClose();
+  renderVendCuves();
+  window.showToastAnnuler('\u00c9tape supprim\u00e9e',function(){
+    var c2=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===cid;}); if(!c2) return;
+    c2.statut_hist=c2.statut_hist||[]; if(c2.statut_hist.some(function(x){return x.id===e.id;})) return;
+    c2.statut_hist.splice(Math.min(i,c2.statut_hist.length),0,e);
+    window.CAVE_VENDANGE=CAVE_VENDANGE; _vendFbSave('\u00c9tape remise','#3D6B27'); renderVendCuves();
   });
 }
 

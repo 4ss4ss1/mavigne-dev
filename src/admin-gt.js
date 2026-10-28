@@ -2479,7 +2479,7 @@ function agtRevokeEssai(id){
       'Supprimer ce code ?',
       'Le code d\'acc\u00e8s ne fonctionnera plus.',
       function(){ _agtDoRevokeEssai(id); },
-      '\u{1F5D1}\u{FE0F}', 'Supprimer', '#C0392B'
+      '\u{1F5D1}\u{FE0F}', 'Supprimer le code', '#C0392B'
     );
     return;
   }

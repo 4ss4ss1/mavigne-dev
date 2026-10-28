@@ -1,0 +1,32 @@
+{
+  "lot": "ANNULER-2",
+  "section": "§472",
+  "base": "ebb4d8377e6787da46ab3ff4c62313c6855a74f7",
+  "inclut": [],
+  "date": "2026-10-28",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "27f8840232e96341892aace56c5716ac20beb33f6495572ccf37a70aa23e795d",
+    "CLAUDE.md": "21626271e5f452bdafc8f7dab257942b9c5e329a3e110efa7433d71b1a0ef107",
+    "docs/claude/INDEX.md": "4323798931d2cfa8307b1fecf63fb1fe6384f9c0e28adb6a2281ca5c9ef5384a",
+    "docs/claude/chantiers-430-479.md": "1e50c066fcc45900909b468ab716732bf7a44f9c18a0dda715fb159828f36c02",
+    "docs/claude/journal.md": "ac65b5cb455a33919c0219f3b403a8964bf378854b5649535915bad2f18b1860",
+    "index.html": "f3f2b1bd0385b0c0cb2726ef9f6d8ac1ddd864822903f6ab197ee56d50e7dfd2",
+    "public/sw.js": "af36e91d548fb24704c92a4f3ba3cf3427e8e5169a2236bc1aa52ff844e8e729",
+    "scripts/harnais-claude-md.mjs": "aae9769008dcf25de6c839e8d5268d8bce2128320c9389cb2cbb1b807c393428",
+    "scripts/mv-harnais-liste.mjs": "9f1545176142af871bb4d4542a2e98f04d591dc28e71468da658e0b1ce524afa",
+    "src/admin-gt.js": "26fbbee0ce0b469dbe73172e47693f33033bbde0b3ae5c8454c15c794e376d67",
+    "src/app.js": "3f501afb178b9ab99d1c850ed5476615d76b4b70b4a5fc717441e9575c72bcff",
+    "src/cave.js": "31148c86948f80c9e4ee021188f28ae72325417381e2048668ed746d2c5066ff",
+    "src/cuvier.js": "bdd2516a1609df5fe553c8b44741394bdb983a88bd08fb21de297e93e4b49ea4",
+    "src/phyto.js": "0655d330ab80ceed30b58b8f3fbd350376992e9988a5325ae8afa765bbfd533d",
+    "src/reglages.js": "5f7615501bf98b4b93a1192b6d911311a3a3c3b245b6e0e575e5519fff6d4a40",
+    "src/tracteur.js": "686d217d229767fd35139ec06b20db3e909383c44afe0d2dfd84b7f59d20426d",
+    "src/utils.js": "7a1ba98e0db48d1776dcdc608c4ce8d389c463b8d5cbb2e1190cda7b5f9167ec",
+    "src/whats-new.js": "aabb1c36654b357990b2f278198d603a96e8991f300c47c19139f6e0aba0e24b",
+    "scripts/mv-harnais-annuler2.mjs": "fefe57313ff7042a46da6f362a80e538d3ad38f3ca65a84de5e6d18a42c21ec2"
+  }
+}

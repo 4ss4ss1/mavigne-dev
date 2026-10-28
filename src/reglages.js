@@ -830,16 +830,19 @@ function saveEditActTrac(){
 function deleteActivite(){
   var actNom=document.getElementById('eat-act-nom').value;
   if(!actNom)return;
-  window.openConfirmDel('Supprimer "'+actNom+'" ?','Les sessions existantes ne seront pas affectées.',function(){
-    window.ACTIVITES=window.ACTIVITES.filter(function(a){return a.nom!==actNom;});
-    window.ACTIVITES=window.ACTIVITES;
-    if(navigator.vibrate)navigator.vibrate([80,60,80]);
-    window.saveData('activites');
-    window.closeOv(null,'ovEditActTrac');
-    renderActTracList();
-    window.renderTracteur();
-    showToast('"'+actNom+'" supprimée','#C0392B');
-  },'tracteur');
+  // ★ ANNULER-2 (§472) — une activité se remet : retirée tout de suite (les sessions ne sont pas touchées), « Annuler » la replace.
+  var i=(window.ACTIVITES||[]).findIndex(function(a){return a.nom===actNom;}); if(i<0) return;
+  var a0=window.ACTIVITES[i];
+  window.ACTIVITES=window.ACTIVITES.filter(function(a){return a.nom!==actNom;});
+  window.saveData('activites');
+  window.closeOv(null,'ovEditActTrac');
+  renderActTracList();
+  window.renderTracteur();
+  window.showToastAnnuler('« '+actNom+' » supprimée',function(){
+    if((window.ACTIVITES||[]).some(function(a){return a.nom===actNom;})) return;
+    window.ACTIVITES.splice(Math.min(i,window.ACTIVITES.length),0,a0);
+    window.saveData('activites'); renderActTracList(); window.renderTracteur(); showToast('« '+actNom+' » remise','#3D6B27');
+  });
 }
 
 // ── Ouvrir overlay nouvelle activité (reset + pré-remplissage) ──
@@ -1747,7 +1750,7 @@ function deleteSaison(nom){
   window.DANGER_CFG.deleteSaison={
     icon:'calendrier', title:'Supprimer la saison « '+nom+' » ?',
     sub:'La saison et son repérage de dates seront retirés.',
-    word:'SUPPRIMER', btn:'Supprimer la saison', successSub:'Saison supprimée.',
+    word:nom, btn:'Supprimer la saison', successSub:'Saison supprimée.',   // ★ ANNULER-2 (§472) : taper le nom
     items:['Les parcelles et le journal ne sont pas effacés','L\'avancement enregistré pour cette saison reste dans les parcelles','Les sessions conservent leur date'],
     exec:function(){
       var wasActive=s.active;
@@ -1782,13 +1785,18 @@ function removeTacheFromSaison(nom){
     return s && s.nom!==perN && Array.isArray(s.taches) && s.taches.indexOf(nom)>=0;
   }).map(function(s){return s.nom;});
   if(autres.length){
-    window.openConfirmDel('Retirer « '+nom+' » de '+perN+' ?','La tâche reste sur : '+autres.join(', ')+'.',
-      function(){
-        if(!Array.isArray(per.taches))per.taches=[];
-        var k=per.taches.indexOf(nom); if(k>=0)per.taches.splice(k,1);
-        window.SAISONS=window.SAISONS;
-        window.saveData('saisons',nom+' retirée de '+perN); renderReglages();
-      },'feuille','Retirer de cette période','#8A5A38');
+    // ★ ANNULER-2 (§472) — retirer une tâche d'UNE période (elle reste sur les autres) se répare : tout de suite, « Annuler » la remet.
+    if(!Array.isArray(per.taches))per.taches=[];
+    var k=per.taches.indexOf(nom); if(k<0) return;
+    per.taches.splice(k,1);
+    window.SAISONS=window.SAISONS;
+    window.saveData('saisons'); renderReglages();
+    window.showToastAnnuler(nom+' retirée de '+perN,function(){
+      var p2=(window.SAISONS||[]).find(function(s){return s&&s.nom===perN;}); if(!p2) return;
+      if(!Array.isArray(p2.taches))p2.taches=[]; if(p2.taches.indexOf(nom)>=0) return;
+      p2.taches.splice(Math.min(k,p2.taches.length),0,nom);
+      window.SAISONS=window.SAISONS; window.saveData('saisons'); renderReglages(); showToast(nom+' remise sur '+perN,'#3D6B27');
+    });
   } else {
     window.openConfirmDel('Supprimer « '+nom+' » ?',perN+' est la seule période de cette tâche → elle sera retirée du domaine.',
       delAll,'feuille','Supprimer la tâche','#C0392B');
@@ -1799,7 +1807,7 @@ function deleteTache(nom){
   window.DANGER_CFG.deleteTache={
     icon:'feuille',title:'Supprimer "'+nom+'" ?',
     sub:'Cette tâche sera retirée de toutes les saisons.',
-    word:'SUPPRIMER',btn:'Supprimer la tâche',successSub:'Tâche supprimée.',
+    word:nom,btn:'Supprimer la tâche',successSub:'Tâche supprimée.',   // ★ ANNULER-2 (§472) : taper le nom
     items:['L\'historique journal n\'est pas affecté','Les stats de cette tâche disparaîtront'],
     exec:function(){window.TACHES=window.TACHES.filter(t=>t.nom!==nom);window.TACHES=window.TACHES;window.saveData('taches','Tâche supprimée');renderReglages();}
   };
@@ -3363,7 +3371,7 @@ function archiveSaisonActive(){
     icon: existing>=0 ? 'rotation' : 'carton',
     title: existing>=0 ? 'Écraser le snapshot ?' : 'Archiver la saison ?',
     sub: existing>=0 ? 'Le snapshot existant de "'+saison.nom+'" sera remplacé par l\'état actuel.' : 'Sauvegarde l\'état actuel des parcelles, du journal et des sessions.',
-    word: 'ARCHIVER',
+    word: existing>=0 ? saison.nom : 'ARCHIVER',   // ★ ANNULER-2 (§472) : écraser un snapshot, c'est taper le nom ; archiver garde son mot
     btn: existing>=0 ? 'Écraser le snapshot' : 'Archiver la saison',
     successSub: 'Enregistrement en cours \u2014 un message confirme la fin.',
     items: existing>=0
@@ -3844,7 +3852,7 @@ function deleteHistoSnapshot(nomSaison){
     icon:'corbeille',
     title:'Supprimer ce snapshot ?',
     sub:'Snapshot de "'+nomSaison+'" — action irréversible.',
-    word:'SUPPRIMER',
+    word:nomSaison,   // ★ ANNULER-2 (§472) : taper le nom
     btn:'Supprimer le snapshot',
     successSub:'Snapshot supprimé.',
     items:['Toutes les données de ce snapshot seront perdues','Cette action est irréversible'],
@@ -6535,7 +6543,7 @@ window._aocSupprimer=function(nom){
       if(n&&window.saveData) window.saveData('parcelles');
       if(window.showToast) window.showToast('\u00ab '+a.nom+' \u00bb supprim\u00e9e','#B85A1A');
       _aocRenderCard();
-    },'corbeille','Supprimer','#C0392B');
+    },'corbeille', 'Supprimer \u00ab '+a.nom+' \u00bb','#C0392B');
 };
 
 /* ★ MINAOC-1 (§385) — LE MINIMUM DE MATURITÉ DE L'APPELLATION. La richesse minimale en sucre de son cahier des charges,

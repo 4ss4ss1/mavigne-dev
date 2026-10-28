@@ -1211,13 +1211,17 @@ function _cavePkDel(){
   // ⚠️ Double filet : le bouton n'apparait pas si la cuve est prise, et on
   //   reverifie ici — l'occupation peut avoir change depuis le rendu.
   if(_caveCuveOcc(id)){ showToast('Cuve occup\u00e9e \u2014 videz-la d\u2019abord','#B85A1A'); return; }
-  var go=function(){
-    _caveParcSave(_caveParc().filter(function(x){ return x.id!==id; }));
-    _cavePkForm=null; renderCaveReglages();
-    showToast('Cuve retir\u00e9e du parc','#B85A1A');
+  // ★ ANNULER-2 (§472) — retirer une cuve libre du parc se répare : tout de suite, « Annuler » la remet à sa place.
+  var L0=_caveParc(), i=L0.findIndex(function(x){ return x.id===id; }), p0=JSON.parse(JSON.stringify(p));
+  _caveParcSave(L0.filter(function(x){ return x.id!==id; }));
+  _cavePkForm=null; renderCaveReglages();
+  var annuler=function(){
+    var L=_caveParc(); if(L.some(function(x){ return x.id===id; })) return;
+    L=L.slice(); L.splice(Math.min(i<0?L.length:i,L.length),0,p0); _caveParcSave(L); renderCaveReglages();
+    showToast((p0.nom||'La cuve')+' remise au parc','#3D6B27');
   };
-  if(typeof window.openConfirmDel==='function') window.openConfirmDel('Retirer '+(p.nom||'cette cuve')+' du parc ?','',go);
-  else go();
+  if(typeof window.showToastAnnuler==='function') window.showToastAnnuler((p.nom||'Cuve')+' retir\u00e9e du parc',annuler);
+  else showToast('Cuve retir\u00e9e du parc','#B85A1A');
 }
 
 function _caveSeuilStep(delta){
@@ -2778,7 +2782,7 @@ function deleteCuveeById(cuvId) {
     window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Cuv\u00E9e supprim\u00E9e','#B85A1A');
     _cavePdfPurge(_pdfAvant);
     renderCave();
-  });
+  },null, 'Supprimer la cuvée et ses opérations',null);
 }
 
 // \u2500\u2500 Edit analyse metadata \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -2866,7 +2870,7 @@ function deleteCaveOp(opId) {
     else window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Op\u00E9ration supprim\u00E9e','#3D6B27');
     _cavePdfPurge(_pdfAvant);
     renderCave();
-  },null,_asm?'D\u00e9faire':undefined);
+  },null, _asm?'D\u00e9faire':'Supprimer l\u2019op\u00e9ration',null);
 }
 
 window.openOvCaveExport = function() {
@@ -3462,18 +3466,24 @@ function _caveAffRetirer(cuvId, ref){
   if(typeof canWrite==='function' && !canWrite()){ showToast('Acc\u00e8s lecture seule','#B85A1A'); return; }
   var cuv=(CAVE_ELEVAGE.cuvees||[]).find(function(c){return c.id===cuvId;}); if(!cuv) return;
   var p=_caveCuve(ref);
-  var go=function(){
-    cuv.cuves=((cuv.cuves)||[]).filter(function(x){ return !(x&&x.ref===ref); });
-    window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-    window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Cuve lib\u00e9r\u00e9e','#B85A1A');
+  // ★ ANNULER-2 (§472) — retirer une cuve d'une cuvée se répare : son volume sort du total tout de suite, « Annuler » la remet.
+  var i=((cuv.cuves)||[]).findIndex(function(x){ return x&&x.ref===ref; }); if(i<0) return;
+  var e0=JSON.parse(JSON.stringify(cuv.cuves[i]));
+  var dessiner=function(){
     if(typeof _mvcRenderHeader==='function') _mvcRenderHeader();
     if(typeof renderCaveCuvees==='function') renderCaveCuvees();
     openCuveeDetail(cuvId);
   };
-  if(typeof window.openConfirmDel==='function')
-    window.openConfirmDel('Retirer '+((p&&p.nom)||'cette cuve')+' de la cuv\u00e9e ?',
-      'Le volume qu\u2019elle portait sortira du total de la cuv\u00e9e.',go);
-  else go();
+  cuv.cuves=((cuv.cuves)||[]).filter(function(x){ return !(x&&x.ref===ref); });
+  window.CAVE_ELEVAGE=CAVE_ELEVAGE;
+  window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'');
+  dessiner();
+  window.showToastAnnuler(((p&&p.nom)||'Cuve')+' lib\u00e9r\u00e9e de la cuv\u00e9e',function(){
+    var c2=(CAVE_ELEVAGE.cuvees||[]).find(function(c){return c.id===cuvId;}); if(!c2) return;
+    c2.cuves=c2.cuves||[]; if(c2.cuves.some(function(x){ return x&&x.ref===ref; })) return;
+    c2.cuves.splice(Math.min(i,c2.cuves.length),0,e0);
+    window.CAVE_ELEVAGE=CAVE_ELEVAGE; window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Cuve remise dans la cuv\u00e9e','#3D6B27'); dessiner();
+  });
 }
 
 function openOvRetraitFut(cuvId){
@@ -11526,7 +11536,7 @@ window._laboRetirer = function(id){
     _laboRender();
     try{ renderCave(); }catch(e){ if(window.logError) window.logError({level:'info', cat:'cave', msg:'LABO-1 : Chai non redessiné après retrait', detail:String(e&&e.message||e)}); }
   };
-  if(typeof window.openConfirmDel==='function') window.openConfirmDel('Retirer ce rapport ?','Ses chiffres quittent '+_laboNomCible(x.lieu,x.cid)+' et ses courbes.',go,null,'Retirer');
+  if(typeof window.openConfirmDel==='function') window.openConfirmDel('Retirer ce rapport ?','Ses chiffres quittent '+_laboNomCible(x.lieu,x.cid)+' et ses courbes.',go,null, 'Retirer le rapport',null);
 };
 window._laboRap = function(el){
   var F=_LBO.F, i=+el.getAttribute('data-i'); if(!F||!F.lignes[i]) return;

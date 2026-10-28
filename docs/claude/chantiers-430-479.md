@@ -1003,3 +1003,26 @@ Le troisième lot du plan du 25/10 (« suite »), dessiné dans `docs/maquettes/
 ### 471f. Ce qui reste ouvert
 - **ANNULER-2** : le tri des 28 `openConfirmDel` — réversible → Annuler (retirer une cuve du parc, une cuve d’une cuvée, une tâche d’une période…) ; irréversible → une fenêtre qui nomme la conséquence ; tout le domaine → taper le nom. Jamais « Oui / Non ».
 - **À vérifier chez Nico** : le toast « Annuler » au téléphone, au-dessus du dock, sur Parcelles, la Réserve et le Planning ; la barre ; un Annuler après « Fait ».
+
+## 472. ★★ ANNULER-2 — LE TRI DES FENÊTRES DE CONFIRMATION : HUIT GESTES DE PLUS EN « ANNULER », CHAQUE FENÊTRE QUI RESTE NOMME SON GESTE, LA ZONE DE DANGER DEMANDE LE NOM (28/10 — `src/cuvier.js` (`_vendMesDel`, `_vendStatDel` ; 4 boutons) · `src/tracteur.js` (`delRepHist`, `deleteFiche`, `deleteCond` ; 2 boutons) · `src/reglages.js` (`deleteActivite`, la tâche d’une période, la zone de danger ; 1 bouton) · `src/cave.js` (`_cavePkDel`, `_caveAffRetirer` ; 3 boutons) · `src/phyto.js` (2 boutons) · `src/admin-gt.js` (1 bouton) · `src/app.js` (`checkDangerConf`) · `src/utils.js` (APP 10.24) · `index.html` · `src/whats-new.js` · `public/sw.js` (SW 11.05) · `scripts/mv-harnais-annuler2.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/ANNULER-2.json` · base `ebb4d83`)
+
+### 472a. D’où ça vient
+Le lot suivant du plan (« suite ») : la règle de `docs/maquettes/maquette-ux-v1.html`, partie 4 — réversible et fréquent → « Annuler » ; irréversible → une fenêtre qui nomme la conséquence ; tout le domaine → taper le nom ; jamais « Oui / Non ». L’inventaire d’ANNULER-1 (§471b) : 28 appels à `openConfirmDel`. Relu un par un pour ce lot, avec les appels par le relais du Tracteur : 31.
+
+### 472b. Le tri, appel par appel
+- **→ « Annuler » (8 gestes, plus de fenêtre)** : un relevé du Cuvier, une étape du parcours d’une cuve, une ligne de l’historique des réparations, une fiche d’entretien (la fenêtre disait « irréversible » : faux, la fiche se remet), un conducteur, une activité du Tracteur, une cuve libre retirée du parc, une cuve retirée d’une cuvée — et une tâche retirée d’UNE période (elle reste sur les autres). Chaque fois : une copie prise avant, le retrait tout de suite, l’enregistrement sans second toast, et Annuler qui remet l’élément à sa place — une seule fois, même si un autre appareil l’a déjà remis.
+- **→ une fenêtre dont le bouton dit ce qu’il fait** : « Supprimer ce traitement » et « Retirer cet apport » (le registre, opposable : la maquette le garde en fenêtre) ; « Supprimer la cuvée et ses opérations » ; « Supprimer l’opération » (un assemblage gardait déjà « Défaire » — ASM-1 le vérifie) ; « Retirer le rapport » ; « Supprimer la récolte » ; « Supprimer la cuve et ses mesures » ; « Supprimer la [opération du Cuvier] » ; « Supprimer « client » » ; « Supprimer [tracteur] et ses fiches » ; « Supprimer « AOC » » ; « Supprimer le code ». Les autres nommaient déjà leur geste (« Renvoyer », « Abandonner », « Reconstruire (n) », « Corriger », « Appliquer », « Décocher », « Supprimer la tâche »).
+- ★ **Un défaut trouvé au tri** : « Retour de [tracteur] ? » — archiver une réparation finie — portait le bouton par défaut, **« Supprimer » en rouge**. Il dit maintenant « Marquer le retour », en vert.
+- **→ taper le nom** : la zone de danger demandait « SUPPRIMER » ou « ARCHIVER » ; supprimer une saison, une tâche du domaine ou un snapshot demande maintenant leur nom, et écraser un snapshot aussi (archiver garde son mot : rien n’est perdu). La comparaison ignore accents, majuscules et espaces doubles (`checkDangerConf`) : « apres-vendange 2026 » ouvre « Après-vendange 2026 ».
+
+### 472c. Mesuré
+- `mv-harnais-annuler2` : 12 assertions — chaque appel qui reste lu **dans ses arguments** (24 appels : un bouton nommé chacun, le relais du Tracteur passe le sien) ; six des huit gestes JOUÉS sur les vraies fonctions (retrait, Annuler, second Annuler sans doublon, la place) ; la zone de danger exécutée. **11/11 mutants**, base verte exigée d’abord.
+- ⚠️ **L’analyseur d’arguments se trompait sur un commentaire** : un `// … l’application` dans la fonction passée en troisième argument ouvrait une « chaîne » — il lisait 3 arguments au lieu de 6. Il saute désormais les commentaires ; les treize boutons modifiés ont été relus avec lui, argument par argument.
+- Chaîne, tutos et relevé UX : voir la note de livraison.
+
+### 472d. Fiches et guide
+Guide et `MV_AIDE` relus : aucune phrase ne décrit ces fenêtres ni le mot à taper — rien à changer.
+
+### 472e. Ce qui reste ouvert
+- Deux des huit gestes (le conducteur, la cuve du parc) et la tâche d’une période sont gardés par lecture, pas exécutés.
+- **À vérifier chez Nico** : un relevé du Cuvier supprimé puis remis ; « Marquer le retour » d’un tracteur ; la suppression d’une saison qui demande son nom.

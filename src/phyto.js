@@ -792,7 +792,7 @@ function confirmDeleteTraitement(){
     closeOv(null,'ovTraitDetail');
     _traitDetailIdx=null;
     renderPhyto();
-  },'🌿');
+  },'🌿', 'Supprimer ce traitement',null);
 }
 // ════ MODIFICATION D'UN TRAITEMENT (correction date/dose/parcelles/conducteur/stade…) ════
 let _phEdit={idx:null,parc:[]};
@@ -1922,7 +1922,7 @@ function _ferDel(opId){
   if(!isAdmin()) return;
   var L=_ferList(), i=L.findIndex(function(x){ return x && x.id===opId; }); if(i<0) return;
   var go=function(){ L.splice(i,1); window.saveIntrants(); _ferRender(); showToast('Apport retir\u00e9 du registre','#8A8072'); };
-  if(typeof window.openConfirmDel==='function') window.openConfirmDel('Retirer cet apport du registre\u00a0?', 'La t\u00e2che, l\u2019activit\u00e9 tracteur et le produit de La R\u00e9serve restent en place.', go, 'corbeille', 'Retirer');
+  if(typeof window.openConfirmDel==='function') window.openConfirmDel('Retirer cet apport du registre\u00a0?', 'La t\u00e2che, l\u2019activit\u00e9 tracteur et le produit de La R\u00e9serve restent en place.', go, 'corbeille', 'Retirer cet apport',null);
 }
 
 // -- L'onglet « Fertilisation » ---------------------------------------------

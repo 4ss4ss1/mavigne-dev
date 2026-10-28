@@ -451,13 +451,18 @@ function delRepHist(tracId,idx){
   var H=window.REPARATEUR_HIST||{};
   if(!H[tracId]||!H[tracId][idx])return;
   var r=H[tracId][idx];
-  _openConfirmDel('Supprimer cette réparation ?',_fmtDate(r.depuis)+' → '+_fmtDate(r.retour),function(){
-    H[tracId].splice(idx,1);
-    if(!H[tracId].length)delete H[tracId];
-    window.REPARATEUR_HIST=H;
-    _saveData('reparateur_hist');
-    renderRepHist();
-    showToast('Réparation supprimée','#C0392B');
+  // ★ ANNULER-2 (§472) — une ligne d'historique se répare : elle part, « Annuler » la remet à sa place.
+  var copie=JSON.parse(JSON.stringify(r));
+  H[tracId].splice(idx,1);
+  if(!H[tracId].length)delete H[tracId];
+  window.REPARATEUR_HIST=H;
+  _saveData('reparateur_hist');
+  renderRepHist();
+  window.showToastAnnuler('Réparation supprimée',function(){
+    var H2=window.REPARATEUR_HIST||{}; var L=H2[tracId]=H2[tracId]||[];
+    if(L.some(function(x){return JSON.stringify(x)===JSON.stringify(copie);})) return;
+    L.splice(Math.min(idx,L.length),0,copie);
+    window.REPARATEUR_HIST=H2; _saveData('reparateur_hist'); renderRepHist(); showToast('Réparation remise','#3D6B27');
   });
 }
 
@@ -521,7 +526,7 @@ function retourReparateur(){
     renderTracTabs();
     renderRepBanner();
     showToast('Tracteur de retour — réparation archivée','#3D6B27');
-  },'','Oui, rentré','#3D6B27');
+  },'', 'Marquer le retour','#3D6B27');
 }
 
 function saveReporter(){
@@ -1161,13 +1166,18 @@ function renderListeFiches(){
 // ── Supprimer une fiche (admin) ──
 function deleteFiche(id){
   if(!isAdmin())return;
-  _openConfirmDel('Supprimer cette fiche ?','Cette action est irréversible.',function(){
-    ENTRETIENS=ENTRETIENS.filter(function(f){return f.id!==id;});
-    window.ENTRETIENS=ENTRETIENS;
-    _saveData('entretiens');
-    renderListeFiches();
-    renderEntretiens();
-    showToast('Fiche supprimée','#C0392B');
+  // ★ ANNULER-2 (§472) — une fiche d'entretien se répare : elle part, « Annuler » la remet (la fenêtre disait « irréversible »).
+  var i=ENTRETIENS.findIndex(function(f){return f.id===id;}); if(i<0) return;
+  var f0=ENTRETIENS[i];
+  ENTRETIENS=ENTRETIENS.filter(function(f){return f.id!==id;});
+  window.ENTRETIENS=ENTRETIENS;
+  _saveData('entretiens');
+  renderListeFiches();
+  renderEntretiens();
+  window.showToastAnnuler('Fiche supprimée',function(){
+    if(ENTRETIENS.some(function(f){return f.id===id;})) return;
+    ENTRETIENS.splice(Math.min(i,ENTRETIENS.length),0,f0); window.ENTRETIENS=ENTRETIENS;
+    _saveData('entretiens'); renderListeFiches(); renderEntretiens(); showToast('Fiche remise','#3D6B27');
   });
 }
 
@@ -1414,7 +1424,7 @@ function deleteTracteur(){
     renderEntretiens();
     renderTracteurSet();
     showToast('Tracteur supprimé','#C0392B');
-  });
+  },null, 'Supprimer '+t.nom+' et ses fiches',null);
 }
 
 // ── Libellé dates d'une session : début → fin (flèche) ──
@@ -3250,7 +3260,7 @@ function editCond(nom){
   _openOv('ovEditCond');
 }
 function saveEditCond(){if(!isAdmin())return;const nom=document.getElementById('ec-nom').value;const c=CONDUCTEURS.find(x=>x.nom===nom);if(c)c.statut=document.getElementById('ec-st').value;_saveData('conducteurs','Conducteur mis à jour');document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
-function deleteCond(){const nom=document.getElementById('ec-nom').value;if(nom==='Nico'){showToast('Impossible — admin protégé','#C0392B');return;}_openConfirmDel('Supprimer '+nom+' ?','Ce conducteur sera retiré de la liste.',function(){CONDUCTEURS=CONDUCTEURS.filter(c=>c.nom!==nom);window.CONDUCTEURS=CONDUCTEURS;_saveData('conducteurs');_closeOv(null,'ovEditCond');renderTracteur();showToast(nom+' supprimé','#C0392B');});}
+function deleteCond(){const nom=document.getElementById('ec-nom').value;if(nom==='Nico'){showToast('Impossible — admin protégé','#C0392B');return;}/* ★ ANNULER-2 (§472) : un conducteur se remet — retiré tout de suite, « Annuler » le replace */ var i=CONDUCTEURS.findIndex(c=>c.nom===nom); if(i<0) return; var c0=CONDUCTEURS[i]; CONDUCTEURS=CONDUCTEURS.filter(c=>c.nom!==nom);window.CONDUCTEURS=CONDUCTEURS;_saveData('conducteurs');_closeOv(null,'ovEditCond');renderTracteur();window.showToastAnnuler(nom+' retiré des conducteurs',function(){ if(CONDUCTEURS.some(c=>c.nom===nom)) return; CONDUCTEURS.splice(Math.min(i,CONDUCTEURS.length),0,c0); window.CONDUCTEURS=CONDUCTEURS; _saveData('conducteurs'); renderTracteur(); showToast(nom+' remis','#3D6B27'); });}
 
 
 // ── Exposition window.* ──

@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.24', d: '2026-10-28', items: [
+    { niv: 0, pour: ['tous'], emoji: 'retour', titre: 'Huit gestes de plus se rattrapent avec « Annuler »',
+      desc: "Supprimer un relevé du Cuvier ou une étape d’une cuve, une fiche d’entretien, une réparation de l’historique, un conducteur, une activité du Tracteur, retirer une cuve du parc ou d’une cuvée, ou une tâche d’une période\u00a0: plus de fenêtre, le geste part tout de suite et «\u00a0Annuler\u00a0» reste six secondes. La fiche d’entretien était annoncée «\u00a0irréversible\u00a0»\u00a0: elle se remet." },
+    { niv: 0, pour: ['admin'], emoji: 'alerte', titre: 'Les fenêtres qui restent disent ce qu’elles font',
+      desc: "Le bouton nomme le geste («\u00a0Supprimer ce traitement\u00a0», «\u00a0Supprimer la cuvée et ses opérations\u00a0»…). Le retour d’un tracteur de réparation affichait «\u00a0Supprimer\u00a0» en rouge\u00a0: il dit «\u00a0Marquer le retour\u00a0». Pour supprimer une saison, une tâche du domaine ou un snapshot, on tape maintenant son nom (accents et majuscules comme on veut) au lieu de «\u00a0SUPPRIMER\u00a0»." },
+  ] },
   { v: '10.23', d: '2026-10-28', items: [
     { niv: 0, pour: ['tous'], emoji: 'retour', titre: 'Annuler plutôt que confirmer',
       desc: "Un geste qui se répare part tout de suite, et un bandeau «\u00a0Annuler\u00a0» reste six secondes, avec une barre qui s’épuise. C’était déjà le cas après Valider\u00a0; c’est maintenant le cas quand on remet une tâche en cours (le bouton «\u00a0Fait\u00a0»), quand on retire un lot de fûts de la Réserve (plus de fenêtre «\u00a0Supprimer ce lot de fûts\u00a0?\u00a0») et quand on efface des saisies, pose des récups ou des horaires de chaleur au Planning — ces trois-là s’appliquaient sans retour possible." },

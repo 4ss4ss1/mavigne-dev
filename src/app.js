@@ -1118,8 +1118,11 @@ function closeOvDanger(e) {
 }
 
 function checkDangerConf() {
-  const val = document.getElementById('ovDangerInput').value.trim().toUpperCase();
-  const word = (DANGER_CFG[_dangerAction] || {}).word || '';
+  // ★ ANNULER-2 (§472) — on tape LE NOM de ce qu'on supprime (maquette-ux-v1, partie 4) : accents, majuscules et espaces
+  //   doubles ne comptent pas — « apres-vendange 2026 » ouvre « Après-vendange 2026 ».
+  const _dzNorm = (x) => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim().toUpperCase();
+  const val = _dzNorm(document.getElementById('ovDangerInput').value);
+  const word = _dzNorm((DANGER_CFG[_dangerAction] || {}).word || '');
   const btn = document.getElementById('ovDangerBtn');
   const inp = document.getElementById('ovDangerInput');
   if(val === word){ btn.classList.add('unlocked'); inp.classList.add('valid'); }
