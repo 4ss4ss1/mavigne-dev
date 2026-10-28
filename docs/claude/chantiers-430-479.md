@@ -1026,3 +1026,30 @@ Guide et `MV_AIDE` relus : aucune phrase ne décrit ces fenêtres ni le mot à t
 ### 472e. Ce qui reste ouvert
 - Deux des huit gestes (le conducteur, la cuve du parc) et la tâche d’une période sont gardés par lecture, pas exécutés.
 - **À vérifier chez Nico** : un relevé du Cuvier supprimé puis remis ; « Marquer le retour » d’un tracteur ; la suppression d’une saison qui demande son nom.
+
+## 473. ★★ TETE-3A — L’EN-TÊTE QUI SE REPLIE AU TÉLÉPHONE : EN DESCENDANT, UNE LIGNE ; SOUS LA MAIN SEULEMENT (28/10 — `src/app.js` (`_mvRepliMaj`, `_mvRepliArme`, trois écouteurs) · `src/styles.css` · `guide/01-demarrer.html` · `scripts/mv-ux-rendu.mjs` (la molette avant de défiler) · `src/utils.js` (APP 10.25) · `index.html` · `src/whats-new.js` · `public/sw.js` (SW 11.06) · `scripts/mv-harnais-tete3a.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/mv-ux-baseline.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/TETE-3A.json` · base `f1cc6fa`)
+
+### 473a. D’où ça vient
+Le lot suivant du plan (« suite ») : TETE-3, « l’en-tête qui se replie, sur tous les modules », dessiné dans `docs/maquettes/maquette-ux-v1.html`, partie 1 — au repos une bande et un segment (104 px) ; en défilant une seule ligne de 56 px ; la campagne et la date descendues dans la ligne de cadre de la première carte ; sur ordinateur, la bande du module et la bande campagne fusionnées ; le Pilotage garde « Vous regardez ». Le plan le dit « gros » et demande l’essai sur l’iPhone de Nico avant le déploiement général. **Découpé en trois, l’arrivée restant la maquette** : TETE-3A (ce lot) le repli au défilement, au téléphone — le gain d’usage le plus fort, et l’objectif « en défilant ≤ 56 px » de UX-0 ; TETE-3B le repos à 104 px (la bande campagne/date dans la première carte de chaque module, les onglets en segment) ; TETE-3C l’ordinateur, le Pilotage, la Réserve.
+
+### 473b. L’inventaire
+Les huit modules à `.mod-header` (Vigne : Accueil, Parcelles, Journal ; Tracteur, Phyto, Réglages, Planning, Cave) ont la MÊME structure : `.mod-header-top` (icône, titre, sous-titre, actions), `.mod-meta-row` (la bande campagne/date), `.mvu-tabs` (les onglets) ; l’en-tête est déjà collant (`position:sticky`). Mesuré par `test:ux` avant le lot : 178 px de bandeaux au repos ET en défilant, partout au téléphone (Réserve 192, Pilotage 309 / 191).
+
+### 473c. Ce qui change
+- **Le repli** (`_mvRepliMaj`, app.js) : au téléphone (sous 768 px), un défilement vers le bas passé 72 px ajoute `mv-replie` au `body` ; remonter de quelques pixels, revenir en haut (sous 24 px) ou toucher la ligne (hors boutons) l’enlève. L’écoute du défilement est passive et cadencée par `requestAnimationFrame`.
+- ★ **Sous la main seulement** : le repli ne s’arme que si une molette ou un doigt a bougé dans les 900 ms (`_mvRepliArme`, sur `wheel` et `touchmove`). Un défilement programmé — un tuto qui fait venir sa cible, un test, `scrollIntoView` — ne cache donc jamais l’onglet qu’il va viser.
+- **La ligne repliée** (styles.css, au téléphone) : la bande campagne/date et les onglets cachés, l’icône du module aussi ; le titre à la taille de base, le sous-titre sur la même ligne, tronqué, précédé d’un « · » ; les actions restent (« + Ajouter », la roue). Environ 56 px.
+- **`test:ux`** envoie une molette avant de faire défiler : sans elle, sa mesure « en défilant » n’aurait jamais vu l’en-tête replié (son défilement est programmé).
+- Le Pilotage et la Réserve (sans `.mod-header`) et l’ordinateur ne changent pas : TETE-3C.
+
+### 473d. Mesuré
+- `mv-harnais-tete3a` : 10 assertions — `_mvRepliMaj` JOUÉE sur une horloge et un défilement posés (un défilement programmé ne replie pas ; un petit geste sous 72 px non plus ; la main vers le bas, passé 72 px, replie ; remonter déplie ; le haut déplie sans geste ; l’ordinateur jamais), la règle CSS, l’appui, la molette de `test:ux` ; **7/7 mutants**.
+- `test:ux` (référence regravée, 7 baisses, aucune hausse) : **en défilant, au téléphone, 178 → 64 px** (Réglages) à 76 px — Accueil, Parcelles, Cave, Planning, et la Réserve (192 → 76 : elle a un `.mod-header`) ; le Pilotage reste à 191 (TETE-3C). L’objectif de 56 px n’est pas atteint au pixel : la ligne garde ses boutons de 44 px et, sur les pages à « + Ajouter », le bouton d’action. Premier relevé : **rien n’avait bougé** — le défilement programmé de `test:ux` d’un seul saut, avec une seule molette, laissait passer la fenêtre de 900 ms sur les pages lourdes ; il défile maintenant en six pas, une molette à chaque pas, comme une main.
+- Tutos et chaîne : voir la note de livraison.
+
+### 473e. Fiches et guide
+`guide/01-demarrer.html` : une phrase (au téléphone, en descendant, l’en-tête se range ; il revient en remontant, en haut, ou d’un appui). `MV_AIDE` relue : aucune fiche ne décrit l’en-tête.
+
+### 473f. Ce qui reste ouvert
+- **TETE-3B** et **TETE-3C** (473a).
+- **À vérifier chez Nico, sur son iPhone en PWA** (le plan le demande) : le repli en descendant dans le Journal et Parcelles, le retour en remontant et d’un appui ; l’en-tête qui ne saute pas au rebond du haut de page.

@@ -4475,6 +4475,19 @@ a[href^="mailto:"]{color:var(--or-tx);}
       .h-planning portait deja position:sticky/top:0 — cette regle, placee
       apres, aligne simplement son z-index. Rien a changer dans le HTML. */
 .mod-header{position:sticky;top:0;z-index:80;background:var(--bg-app);}
+/* ★ TETE-3A (§473) — l'en-tête replié (maquette-ux-v1, partie 1) : au téléphone, en descendant, une seule ligne (≈ 56 px) — le
+   titre, la page, l'action ; la bande campagne/date et les onglets reviennent en remontant ou d'un appui (_mvRepliMaj, app.js). */
+@media (max-width:767.98px){
+  body.mv-replie .page.active .mod-header{padding-top:calc(env(safe-area-inset-top,0px) + 5px);padding-bottom:5px;cursor:pointer;}
+  body.mv-replie .page.active .mod-header > .mod-meta-row,
+  body.mv-replie .page.active .mod-header > .mvu-tabs{display:none;}
+  body.mv-replie .page.active .mod-header .mod-header-top{min-height:44px;margin-bottom:0;}
+  body.mv-replie .page.active .mod-header .mod-header-icon{display:none;}
+  body.mv-replie .page.active .mod-header .mod-header-titles{display:flex;align-items:baseline;gap:6px;min-width:0;}
+  body.mv-replie .page.active .mod-header .mod-header-title{font-size:var(--pt-base,15px);}
+  body.mv-replie .page.active .mod-header .mod-header-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  body.mv-replie .page.active .mod-header .mod-header-sub::before{content:'\00b7\00a0';}
+}
 
 /* 2. Bandeau d'essai (#mv-trial-bar, fixed z-index:120) : l'en-tete se cale
       dessous, exactement comme le padding-top pose sur #app-root. */

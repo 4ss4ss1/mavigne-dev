@@ -13488,6 +13488,31 @@ function _pvApplyTeam(team){
 }
 function savePTeamJour(){_pvApplyTeam(_pvTeamSel.slice());}
 
+// ★ TETE-3A (§473) — L'EN-TÊTE QUI SE REPLIE (docs/maquettes/maquette-ux-v1.html, partie 1), au téléphone : en descendant, la
+//   bande campagne/date et les onglets se rangent et l'en-tête tient en une ligne ; il revient en remontant, en haut de page, ou
+//   d'un appui sur la ligne. Seul un défilement de la MAIN replie (molette, doigt) : un défilement programmé — un tuto, un test,
+//   un scrollIntoView — ne cache jamais ce qu'il va viser. Le Pilotage et la Réserve gardent le leur (pas de .mod-header).
+var _mvRepliY=0,_mvRepliGeste=0,_mvRepliRaf=0;
+function _mvRepliMaj(){
+  _mvRepliRaf=0;
+  var y=window.scrollY||(document.documentElement&&document.documentElement.scrollTop)||0, d=y-_mvRepliY, b=document.body;
+  var tel=!window.matchMedia||window.matchMedia('(max-width: 767.98px)').matches;
+  if(!tel||y<24){ b.classList.remove('mv-replie'); _mvRepliY=y; return; }
+  if(Date.now()-_mvRepliGeste<900){
+    if(d>6&&y>72) b.classList.add('mv-replie');
+    else if(d<-6) b.classList.remove('mv-replie');
+  }
+  if(Math.abs(d)>6) _mvRepliY=y;
+}
+function _mvRepliArme(){ _mvRepliGeste=Date.now(); }
+window.addEventListener('wheel',_mvRepliArme,{passive:true});
+window.addEventListener('touchmove',_mvRepliArme,{passive:true});
+window.addEventListener('scroll',function(){ if(!_mvRepliRaf) _mvRepliRaf=requestAnimationFrame(_mvRepliMaj); },{passive:true});
+document.addEventListener('click',function(e){
+  var b=document.body; if(!b.classList.contains('mv-replie')||!e.target||!e.target.closest) return;
+  if(e.target.closest('.page.active .mod-header')&&!e.target.closest('button,a,input,select')) b.classList.remove('mv-replie');
+});
+
 /* Toast avec Annuler — ★ ANNULER-1 (§471) : c'est désormais le composant de toute l'appli (showToastAnnuler, utils.js : 6 s, la
    barre, « Annuler » à 40 px). Les deux noms d'ici restent, pour les appelants et les tutos qui les connaissent. */
 function _pvToast(msg,undoFn){ showToastAnnuler(msg,undoFn||null); }

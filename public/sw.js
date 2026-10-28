@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.05
+// MA VIGNE — Service Worker v11.06
+// v11.06 (28/10/2026) — TETE-3A (§473) : l'en-tête qui se replie au téléphone — en descendant, une ligne ; la campagne, la date et les onglets reviennent en remontant ou d'un appui.
 // v11.05 (28/10/2026) — ANNULER-2 (§472) : le tri des confirmations — huit gestes de plus en « Annuler », chaque fenêtre qui reste nomme son geste (« Marquer le retour » ne dit plus « Supprimer »), la zone de danger demande le nom.
 // v11.04 (28/10/2026) — ANNULER-1 (§471) : Annuler plutôt que confirmer — un seul toast « Annuler » pour toute l'appli (6 s, une barre, 40 px) ; Annuler après « Fait » (dévalider), au retrait d'un lot de fûts (plus de confirmation) et après Effacer / Récup / Chaleur au Planning.
 // v11.03 (27/10/2026) — LISIBLE-1 (§470) : les textes et les cibles comme la maquette — plus aucun texte sous 11 px, 12 px au téléphone (le jeton --pt-nano) ; initiales du Journal dans un rond de 28, deux au plus puis « +N » ; « 173h / 152h » du Planning à 12 px, tronqué ; les dernières cibles sous 24 px agrandies ; une zone de 44 px aux boutons « discrets » et secondaires, dessin inchangé ; les jours de la Cave à 44 px.
@@ -4637,7 +4638,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.05';
+const CACHE_NAME   = 'mavigne-v11.06';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4654,7 +4655,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.05 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.06 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4674,7 +4675,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.05 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.06 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

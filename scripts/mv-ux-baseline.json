@@ -1,8 +1,8 @@
 {
  "lot": "UX-0",
  "section": "§459",
- "date": "2026-10-27",
- "base": "bdc9522",
+ "date": "2026-10-28",
+ "base": "f1cc6fa",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "141.0.7390.37",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -103,6 +103,21 @@
     "pilotage › ordinateur › t11 : 1 → 0",
     "reglages › ordinateur › t11 : 15 → 0"
    ]
+  },
+  {
+   "date": "2026-10-28",
+   "base": "f1cc6fa",
+   "motif": "TETE-3A (§473) : l'en-tête qui se replie au téléphone, sous la main ; test:ux défile en six pas de molette",
+   "hausses": [],
+   "baisses": [
+    "parcelles › téléphone › chromeDefile : 178 → 76",
+    "journal › téléphone › chromeDefile : 178 → 76",
+    "phyto › téléphone › chromeDefile : 178 → 76",
+    "cave › téléphone › chromeDefile : 178 → 76",
+    "reglages › téléphone › chromeDefile : 178 → 64",
+    "pilotage › ordinateur › c44 : 42 → 39",
+    "pilotage › ordinateur › t12 : 59 → 58"
+   ]
   }
  ],
  "mesures": {
@@ -127,7 +142,7 @@
     "t11": 0,
     "t12": 0,
     "chrome": 178,
-    "chromeDefile": 178,
+    "chromeDefile": 76,
     "pouce": 0,
     "hauteur": 2039
    },
@@ -139,7 +154,7 @@
     "t11": 0,
     "t12": 0,
     "chrome": 178,
-    "chromeDefile": 178,
+    "chromeDefile": 76,
     "pouce": 10,
     "hauteur": 2771
    },
@@ -163,7 +178,7 @@
     "t11": 0,
     "t12": 0,
     "chrome": 178,
-    "chromeDefile": 178,
+    "chromeDefile": 76,
     "pouce": 3,
     "hauteur": 1962
    },
@@ -175,7 +190,7 @@
     "t11": 0,
     "t12": 0,
     "chrome": 178,
-    "chromeDefile": 178,
+    "chromeDefile": 76,
     "pouce": null,
     "hauteur": 4037
    },
@@ -183,7 +198,7 @@
     "cibles": 27,
     "c24": 0,
     "c44": 9,
-    "textes": 92,
+    "textes": 93,
     "t11": 0,
     "t12": 0,
     "chrome": 192,
@@ -223,7 +238,7 @@
     "t11": 0,
     "t12": 0,
     "chrome": 178,
-    "chromeDefile": 178,
+    "chromeDefile": 64,
     "pouce": null,
     "hauteur": 1437
    }
@@ -305,9 +320,9 @@
     "cibles": 27,
     "c24": 0,
     "c44": 23,
-    "textes": 93,
+    "textes": 94,
     "t11": 0,
-    "t12": 6,
+    "t12": 7,
     "chrome": 201,
     "chromeDefile": 192,
     "pouce": null,
@@ -317,21 +332,21 @@
     "cibles": 91,
     "c24": 0,
     "c44": 12,
-    "textes": 151,
+    "textes": 152,
     "t11": 0,
-    "t12": 2,
+    "t12": 3,
     "chrome": 187,
     "chromeDefile": 178,
     "pouce": null,
     "hauteur": 1268
    },
    "pilotage": {
-    "cibles": 69,
+    "cibles": 61,
     "c24": 0,
-    "c44": 42,
+    "c44": 39,
     "textes": 250,
     "t11": 0,
-    "t12": 59,
+    "t12": 58,
     "chrome": 241,
     "chromeDefile": 232,
     "pouce": null,

@@ -807,6 +807,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-annuler1.mjs --contre'],
   ['node scripts/mv-harnais-annuler2.mjs'],            // ANNULER-2 (§472) : le tri des confirmations — boutons nommés, huit gestes en Annuler joués, la zone de danger au nom
   ['node scripts/mv-harnais-annuler2.mjs --contre'],
+  ['node scripts/mv-harnais-tete3a.mjs'],              // TETE-3A (§473) : l'en-tête qui se replie au téléphone — sous la main seulement, déplié en remontant
+  ['node scripts/mv-harnais-tete3a.mjs --contre'],
   ['node scripts/mv-harnais-ecart1.mjs'],              // ECART-1 (§460) : l'écart au barème d'Aujourd'hui › Économie en heures — la tuile est le total de la carte (un tiret sans rien à comparer), barres à l'échelle jusqu'à ±50 %
   ['node scripts/mv-harnais-ecart1.mjs --contre'],
   ['node scripts/mv-harnais-cave2.mjs'],              // CAVE-2 (§289) : le Cuvier à la charte

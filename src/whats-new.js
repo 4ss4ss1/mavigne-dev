@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.25', d: '2026-10-28', items: [
+    { niv: 0, pour: ['tous'], emoji: 'fleche-haut', titre: 'L’en-tête se range quand on descend',
+      desc: "Au téléphone, en descendant dans une page, l’en-tête tient en une ligne\u00a0: la campagne, la date et les onglets se cachent et laissent la place à la liste. Ils reviennent en remontant, en haut de la page, ou en touchant la ligne." },
+  ] },
   { v: '10.24', d: '2026-10-28', items: [
     { niv: 0, pour: ['tous'], emoji: 'retour', titre: 'Huit gestes de plus se rattrapent avec « Annuler »',
       desc: "Supprimer un relevé du Cuvier ou une étape d’une cuve, une fiche d’entretien, une réparation de l’historique, un conducteur, une activité du Tracteur, retirer une cuve du parc ou d’une cuvée, ou une tâche d’une période\u00a0: plus de fenêtre, le geste part tout de suite et «\u00a0Annuler\u00a0» reste six secondes. La fiche d’entretien était annoncée «\u00a0irréversible\u00a0»\u00a0: elle se remet." },

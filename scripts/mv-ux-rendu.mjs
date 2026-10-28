@@ -143,7 +143,8 @@ const PILE_SEULE = () => {   // la même pile, après défilement
     .map((e) => e.getBoundingClientRect()).filter((r) => r.width >= vw * 0.5 && r.top >= -1 && r.top <= vh * 0.6).sort((a, b) => a.top - b.top);
   let bas = 0; els.forEach((r) => { if (r.top <= bas + 24) bas = Math.max(bas, r.bottom); }); return Math.round(bas);
 };
-const defiler = async (page, y) => { await page.evaluate((y) => { window.scrollTo(0, y); const pg = document.querySelector('.page.active'); if (pg) pg.scrollTop = y; }, y); await page.waitForTimeout(450); };
+const defiler = async (page, y) => { await page.evaluate(async (y) => { const y0 = window.scrollY, pg = document.querySelector('.page.active');   /* ★ TETE-3A (§473) : six pas de molette, comme une main — l'en-tête ne se replie que sous la main */
+  for (let k = 1; k <= 6; k++) { window.dispatchEvent(new WheelEvent('wheel', { deltaY: y > y0 ? 1 : -1 })); const v = Math.round(y0 + (y - y0) * k / 6); window.scrollTo(0, v); if (pg) pg.scrollTop = v; await new Promise((r) => setTimeout(r, 60)); } }, y); await page.waitForTimeout(450); };
 
 // ── Les neuf gestes (au téléphone). Chaque lecteur rend null s’il ne trouve pas sa pièce : la comparaison le dira. ──
 const L = {

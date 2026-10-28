@@ -1,0 +1,38 @@
+{
+  "lot": "TETE-3A",
+  "section": "§473",
+  "base": "f1cc6fa96cd380d942086e4fff1477131ed75197",
+  "inclut": [],
+  "date": "2026-10-28",
+  "tutos": {
+    "ok": true,
+    "empreinte": "ba95cdc887260a81761457339bbb98aedc393747199a51bb67c533095a9c8973",
+    "date": "2026-10-28T09:52:53.237Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "97e3eac3c018ae7b55b06178a04bb0f240d586df125dabd2fe6bff0edf208345",
+    "CLAUDE.md": "e663096869ad02bfa073abe2f7211817b7687f07a7534311210be943d47721ce",
+    "docs/claude/INDEX.md": "7b2bec6cbb8aa1adcbd8c659ffdb740295a780eb989573ec827f79f3d0c42670",
+    "docs/claude/chantiers-430-479.md": "8c1b03f85c630d29ffa3b30f5fce2b96ab2b628610ceec7215c3952eec684711",
+    "docs/claude/journal.md": "57f747668cb246e2c38ef7f59ed9c2c657c96a98982882b786f15c8244abac03",
+    "guide/01-demarrer.html": "458a7b3f652cd361561b4f1c307a7279d7cff9997fbdcf0c15f9a0226dbe710b",
+    "index.html": "8b49d33ff8836ca2e0973b6070e1e6dbbe84b8dbbdbe97137a07fe1a9c222365",
+    "public/sw.js": "1327a0d0575a569e2d238a2642f01892ab6c9de42f82a2078a105635508a1729",
+    "scripts/harnais-claude-md.mjs": "faa0d25dea745003e0d6b2a9b0aebdbe1e980f03339fd28a00c9c1720c75290b",
+    "scripts/mv-harnais-liste.mjs": "ee0561b8e85cb0d4547cac7a9f78c53be4d4faab8924ab590c7e440b0362d217",
+    "scripts/mv-ux-baseline.json": "9f7e0afb58c7c1266e67aed836e88c4b5157bb33ef4ecb0d762291c0a7faaee2",
+    "scripts/mv-ux-rendu.mjs": "1ced20e3ca39551c576a85f8928a33571234a1499efd88963fb4eff8a85c80d8",
+    "src/app.js": "099bf138cb9fce1f7ea6fd398fb303ffc6c0b51d196541b30a9445fc0b929235",
+    "src/styles.css": "3c1f3183181c212e75f2277802de5bd2cbfd6834e5f9e4ab9c759695a69e2a47",
+    "src/utils.js": "005adbb3d9e1fa24b03e20b9caac44abccb23dfe814f2d5f2e87fb50bab612b1",
+    "src/whats-new.js": "2b5a620ee54025448447611ae7598b43d4c726ec9f52ddf013419db397e3efd5",
+    "scripts/mv-harnais-tete3a.mjs": "80ef41607dc2627386c12ad2328e42c6b00c3bd6808ae89f21251565cb91cffa"
+  }
+}
