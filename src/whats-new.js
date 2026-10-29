@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.34', d: '2026-10-29', items: [
+    { niv: 0, pour: ['tous'], emoji: 'ecran', titre: 'La ligne de la campagne et de la date, remise d’aplomb',
+      desc: "Depuis le nouvel en-tête, la ligne de la campagne et de la date, juste en dessous, s’était déformée\u00a0: au téléphone, la campagne et la date passaient sur deux lignes, la date trop pâle\u00a0; dans le Pilotage, la date s’écrivait en double à côté de la météo\u00a0; «\u00a0? Aide\u00a0» s’écrivait en toutes lettres. Elle retrouve sa forme\u00a0: une seule ligne, la campagne dans une pastille blanche, la date en entier ou terminée par «\u00a0…\u00a0», et au téléphone un «\u00a0?\u00a0» rond, plus facile à toucher. Quand on regarde une campagne passée, la pastille reste orangée." },
+  ] },
   { v: '10.33', d: '2026-10-28', items: [
     { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'tracteur', titre: 'Tracteur sur ordinateur : le parc et le GNR à droite',
       desc: "Sur ordinateur, la session en cours, les compteurs et la liste sont à gauche\u00a0; à droite, le parc — au garage, révision dépassée ou toute proche d’abord — et la cuve de GNR, avec les heures de moteur du mois. Toucher une session ouvre sa feuille, comme au téléphone\u00a0; toucher un tracteur ouvre son entretien. L’onglet Entretien garde sa mise en page." },

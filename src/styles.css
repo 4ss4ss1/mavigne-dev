@@ -3852,6 +3852,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .mod-header-mod + span:not(:empty)::before{content:'\00a0\00b7\00a0';}   /* « Vigne · 14 entrées » ; « Vigne » seul quand la page n'a rien à ajouter */
 .mod-header + .mod-meta-row.mvu-meta{position:relative;z-index:5;padding:8px 16px 2px!important;min-height:0;}
 .mod-header + .mod-meta-row.mvu-meta .hv2-saison-pill{background:var(--bg-card,#FFFFFF);border:1px solid var(--ligne,#E7E6E2);color:var(--texte,#1B1A18);}
+.mod-header + .mod-meta-row.mvu-meta .hv2-saison-pill:not(.consult){background:var(--bg-card,#FFFFFF)!important;border-color:var(--ligne,#E7E6E2)!important;}   /* ★ TETE-3D (§482) : la règle d'UI-3 « .hv2-saison-pill » (!important, plus haut) la peignait en gris — la pastille blanche de la maquette ne s'était jamais affichée ; une campagne passée garde son ambre (.consult) */
 .mod-header + .mod-meta-row.mvu-meta .hv2-date{color:var(--texte-doux,#686660)!important;}
 .mod-header + .mod-meta-row.mvu-meta .hv2-meteo-mini{background:var(--bg-card,#FFFFFF);border-color:var(--ligne,#E7E6E2);backdrop-filter:none;}
 .mod-header + .mod-meta-row.mvu-meta .hv2-meteo-mini,.mod-header + .mod-meta-row.mvu-meta .hv2-meteo-mini *{color:var(--texte-med,#55534E);}
@@ -9657,32 +9658,50 @@ body .mod-header .mv-syncdot.synced{ width:var(--h-ctl,32px); padding:0!importan
 body .mod-header .mv-syncdot::after{ content:''; position:absolute; inset:calc(var(--e-1,4px) * -1.5); }
 body .mod-header .mod-header-action{ display:inline-flex; align-items:center; justify-content:center; align-self:center; min-height:0!important; line-height:var(--lh-serre,1.15); white-space:nowrap; }
 body .mod-header #regl-role-badge.mod-header-badge{ color:var(--texte-med)!important; background:var(--survol)!important; border:0!important; }
-/* — La ligne du jour — */
-body .mod-header .mod-meta-row{ flex-wrap:nowrap; align-items:center; gap:var(--e-2,8px); min-height:var(--h-sm,28px); }
-body .mod-header .mod-meta-row > *{ flex-shrink:0; }
-body .mod-header .hv2-saison-pill{ height:var(--h-sm,28px)!important; gap:var(--e-1,4px); }
-body .mod-header .hv2-saison-pill > span,body .mod-header .hv2-meteo-mini,body .mod-header .mv-help-btn{ white-space:nowrap; }
-body .mod-header .hv2-sc-chev{ display:inline-flex; margin-left:0; opacity:1; color:var(--texte-doux); }
-body .mod-header .hv2-sc-chev svg{ width:var(--ic-sm,16px); height:var(--ic-sm,16px); }
-body .mod-header .hv2-sep{ width:var(--e-1,4px); height:var(--e-1,4px); background:var(--ligne-forte)!important; }
-body .mod-header .hv2-date{ flex-shrink:1!important; min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-weight:var(--fw-reg,400)!important; color:var(--texte-doux)!important; }
-body .mod-header .mod-meta-row.mvu-avec-meteo > .hv2-date,body .mod-header .mod-meta-row.mvu-avec-meteo > .hv2-sep{ display:none!important; }
+/* — La ligne du jour — ★ TETE-3D (§482) : TETE-3B (§474) l'a sortie de l'en-tête, et plus rien ici ne la visait (la date en
+     graisse 300, la saison sur deux lignes, la date longue à côté de la météo, « Aide » en toutes lettres au téléphone). Chaque
+     règle la vise désormais à ses deux places : « body .mod-header + .mod-meta-row » en tête, l'ancienne derrière. — */
+body .mod-header + .mod-meta-row,body .mod-header .mod-meta-row{ flex-wrap:nowrap; align-items:center; gap:var(--e-2,8px); min-height:var(--h-sm,28px); }
+body .mod-header + .mod-meta-row > *,body .mod-header .mod-meta-row > *{ flex-shrink:0; }
+body .mod-header + .mod-meta-row .hv2-saison-pill,body .mod-header .hv2-saison-pill{ height:var(--h-sm,28px)!important; gap:var(--e-1,4px); }
+body .mod-header + .mod-meta-row .hv2-saison-pill > span,body .mod-header + .mod-meta-row .hv2-meteo-mini,body .mod-header + .mod-meta-row .mv-help-btn,body .mod-header .hv2-saison-pill > span,body .mod-header .hv2-meteo-mini,body .mod-header .mv-help-btn{ white-space:nowrap; }
+body .mod-header + .mod-meta-row .hv2-sc-chev,body .mod-header .hv2-sc-chev{ display:inline-flex; margin-left:0; opacity:1; color:var(--texte-doux); }
+body .mod-header + .mod-meta-row .hv2-sc-chev svg,body .mod-header .hv2-sc-chev svg{ width:var(--ic-sm,16px); height:var(--ic-sm,16px); }
+body .mod-header + .mod-meta-row .hv2-sep,body .mod-header .hv2-sep{ width:var(--e-1,4px); height:var(--e-1,4px); background:var(--ligne-forte)!important; }
+body .mod-header + .mod-meta-row .hv2-date,body .mod-header .hv2-date{ flex-shrink:1!important; min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-weight:var(--fw-reg,400)!important; color:var(--texte-doux)!important; }
+body .mod-header + .mod-meta-row.mvu-avec-meteo > .hv2-date,body .mod-header + .mod-meta-row.mvu-avec-meteo > .hv2-sep,body .mod-header .mod-meta-row.mvu-avec-meteo > .hv2-date,body .mod-header .mod-meta-row.mvu-avec-meteo > .hv2-sep{ display:none!important; }
 body .mod-header .hv2-meteo-mini{ height:var(--h-sm,28px); padding:0 var(--e-2,8px)!important; gap:var(--e-1,4px)!important; background:var(--survol)!important; border:0!important; border-radius:var(--r-xs,4px)!important; -webkit-backdrop-filter:none; backdrop-filter:none!important; color:var(--texte-med); }
-body .mod-header .hv2-meteo-mini-ico{ display:inline-flex; color:var(--texte-doux); }
-body .mod-header .hv2-meteo-mini-ico svg{ width:var(--ic-sm,16px); height:var(--ic-sm,16px); }
-body .mod-header .hv2-meteo-mini-ico use[href="#ic-soleil"]{ color:var(--attention); }
-body .mod-header .hv2-meteo-mini-ico use[href="#ic-pluie"],body .mod-header .hv2-meteo-mini-ico use[href="#ic-orage"],body .mod-header .hv2-meteo-mini-ico use[href="#ic-neige"]{ color:var(--bleu); }
-body .mod-header .hv2-meteo-mini-temp{ font-family:var(--font-ui)!important; font-size:var(--pt-txt,13px)!important; font-weight:var(--fw-semi,600)!important; color:var(--texte)!important; font-variant-numeric:lining-nums tabular-nums; line-height:1; }
-body .mod-header .hv2-meteo-mini-txt{ display:flex; flex-direction:column; justify-content:center; gap:var(--e-0,2px); }
+body .mod-header + .mod-meta-row .hv2-meteo-mini-ico,body .mod-header .hv2-meteo-mini-ico{ display:inline-flex; color:var(--texte-doux); }
+body .mod-header + .mod-meta-row .hv2-meteo-mini-ico svg,body .mod-header .hv2-meteo-mini-ico svg{ width:var(--ic-sm,16px); height:var(--ic-sm,16px); }
+body .mod-header + .mod-meta-row .hv2-meteo-mini-ico use[href="#ic-soleil"],body .mod-header .hv2-meteo-mini-ico use[href="#ic-soleil"]{ color:var(--attention); }
+body .mod-header + .mod-meta-row .hv2-meteo-mini-ico use[href="#ic-pluie"],body .mod-header + .mod-meta-row .hv2-meteo-mini-ico use[href="#ic-orage"],body .mod-header + .mod-meta-row .hv2-meteo-mini-ico use[href="#ic-neige"],body .mod-header .hv2-meteo-mini-ico use[href="#ic-pluie"],body .mod-header .hv2-meteo-mini-ico use[href="#ic-orage"],body .mod-header .hv2-meteo-mini-ico use[href="#ic-neige"]{ color:var(--bleu); }
+body .mod-header + .mod-meta-row .hv2-meteo-mini-temp,body .mod-header .hv2-meteo-mini-temp{ font-family:var(--font-ui)!important; font-size:var(--pt-txt,13px)!important; font-weight:var(--fw-semi,600)!important; color:var(--texte)!important; font-variant-numeric:lining-nums tabular-nums; line-height:1; }
+body .mod-header + .mod-meta-row .hv2-meteo-mini-txt,body .mod-header .hv2-meteo-mini-txt{ display:flex; flex-direction:column; justify-content:center; gap:var(--e-0,2px); }
 body .mod-header .hv2-meteo-mini-desc,body .mod-header .hv2-meteo-mini-jour{ font-size:var(--pt-nano,11px)!important; color:var(--texte-doux)!important; margin:0!important; line-height:1; }
-body .mod-header .mv-help-btn{ height:var(--h-sm,28px); min-height:0; padding:0 var(--e-2,8px) 0 var(--e-1,4px)!important; gap:var(--e-1,4px); background:transparent!important; border:var(--bw,1px) solid var(--ligne-forte)!important; border-radius:var(--r-full,999px)!important; color:var(--texte-med)!important; font-family:var(--font-ui); font-size:var(--pt-micro,12px)!important; font-weight:var(--fw-med,500)!important; }
-body .mod-header .mv-help-btn:hover{ background:var(--survol)!important; color:var(--texte)!important; }
-body .mod-header .mv-help-btn:active{ background:var(--presse)!important; }
-body .mod-header .mv-help-btn .mvh-q{ width:var(--ic-sm,16px); height:var(--ic-sm,16px); background:var(--texte-med)!important; color:var(--sur-inverse)!important; font-size:var(--pt-nano,11px); }
+body .mod-header + .mod-meta-row .mv-help-btn,body .mod-header .mv-help-btn{ height:var(--h-sm,28px); min-height:0; padding:0 var(--e-2,8px) 0 var(--e-1,4px)!important; gap:var(--e-1,4px); background:transparent!important; border:var(--bw,1px) solid var(--ligne-forte)!important; border-radius:var(--r-full,999px)!important; color:var(--texte-med)!important; font-family:var(--font-ui); font-size:var(--pt-micro,12px)!important; font-weight:var(--fw-med,500)!important; }
+body .mod-header + .mod-meta-row .mv-help-btn:hover,body .mod-header .mv-help-btn:hover{ background:var(--survol)!important; color:var(--texte)!important; }
+body .mod-header + .mod-meta-row .mv-help-btn:active,body .mod-header .mv-help-btn:active{ background:var(--presse)!important; }
+body .mod-header + .mod-meta-row .mv-help-btn .mvh-q,body .mod-header .mv-help-btn .mvh-q{ width:var(--ic-sm,16px); height:var(--ic-sm,16px); background:var(--texte-med)!important; color:var(--sur-inverse)!important; font-size:var(--pt-nano,11px); }
+/* — TETE-3D (§482), sous l'en-tête seulement : la saison et la météo en pastilles rondes, comme la .pill de la maquette ux-v1 (leurs
+     couleurs restent celles de la page, règle « .mod-header + .mod-meta-row.mvu-meta » de TETE-3B) ; les deux lignes de la météo à
+     12 px et non 11 (LISIBLE-1, §470 : le cliquet des textes sous 12 px) ; le point de la saison au vert du thème, comme avant. */
+body .mod-header + .mod-meta-row .hv2-saison-pill,body .mod-header + .mod-meta-row .hv2-meteo-mini{ padding:0 var(--e-2,8px)!important; border-radius:var(--r-full,999px)!important; box-shadow:none!important; }
+body .mod-header + .mod-meta-row .hv2-meteo-mini{ height:var(--h-sm,28px); gap:var(--e-1,4px)!important; -webkit-backdrop-filter:none; backdrop-filter:none!important; }
+body .mod-header + .mod-meta-row .hv2-meteo-mini-desc,body .mod-header + .mod-meta-row .hv2-meteo-mini-jour{ font-size:var(--pt-micro,12px)!important; color:var(--texte-doux)!important; margin:0!important; line-height:1; }
+body .mod-header + .mod-meta-row .hv2-dot{ background:var(--ok)!important; box-shadow:none!important; }
+/* — À côté de la météo (la date longue cachée), c'est la campagne qui cède en « … » : à 360 px, la météo du Pilotage poussait
+     « ? » hors de l'écran (déjà vrai dans l'en-tête avant TETE-3B, vu à la capture). — */
+body .mod-header + .mod-meta-row.mvu-avec-meteo > .hv2-saison-pill{ flex-shrink:1; min-width:0; }
+body .mod-header + .mod-meta-row.mvu-avec-meteo > .hv2-saison-pill > span:not(.hv2-dot):not(.hv2-sc-chev){ min-width:0; overflow:hidden; text-overflow:ellipsis; }
 /* — Au téléphone : « ? » seul (aria-label garde « Aide sur cet écran »), le vignoble du Pilotage sous-entendu — */
 @media (max-width:600px){
   body .mod-header .mv-help-btn{ width:var(--h-sm,28px); padding:0!important; justify-content:center; font-size:0!important; gap:0; }
   body .mod-header .mv-help-btn .mvh-q{ background:transparent!important; color:var(--texte-med)!important; font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); }
+  /* TETE-3D (§482) : la même chose sous l'en-tête ; et le « ? » rond garde 44 px d'appui en largeur (UX-1, §467 : sa zone en ::after
+     débordait de 6 px de chaque côté, pensée pour « ? Aide » — 40 px autour de 28) */
+  body .mod-header + .mod-meta-row .mv-help-btn{ width:var(--h-sm,28px); padding:0!important; justify-content:center; font-size:0!important; gap:0; }
+  body .mod-header + .mod-meta-row .mv-help-btn .mvh-q{ background:transparent!important; color:var(--texte-med)!important; font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); }
+  body .mod-header + .mod-meta-row .mv-help-btn::after{ left:calc(var(--e-2,8px) * -1); right:calc(var(--e-2,8px) * -1); }
   body .mod-header .pil-vgn{ display:none; }
 }
 /* — Pilotage : la barre de portée sous l'en-tête. Le fil d'Ariane pouvait rétrécir sous son libellé (min-width:0) et passer

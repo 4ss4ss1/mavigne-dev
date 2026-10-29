@@ -1,0 +1,38 @@
+{
+  "lot": "TETE-3D",
+  "section": "§482",
+  "base": "98b75bde42f35b4f441259173cd449191e62c9ae",
+  "inclut": [],
+  "date": "2026-10-29",
+  "tutos": {
+    "ok": true,
+    "empreinte": "8c9fb58bd4d210edcc5e873acbf1e8825a45df88d604f98ec70e17a66ef49231",
+    "date": "2026-10-29T06:45:54.272Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "d290c0a526e9eac189c1ff6afa73ddc3e79874c500d203cfae8407c14ce99d36",
+    "CLAUDE.md": "77c05947b1413d5499c12d76226a74df39e7ad3ea7deeaa275817cca1a23cf58",
+    "docs/claude/INDEX.md": "26d4d805d11645bd417311293eba69080185ff43b125733b399bcaf4285b378f",
+    "docs/claude/chantiers-430-479.md": "8e8ab3a589c2bc8e70e5d3557000b6aad2f6af535d508ba38ec9893ca0c9452d",
+    "docs/claude/chantiers-480-529.md": "a34d7d2525fb18a5fc0be5f03fc7b228adde4046e7f67bf5d1c7fd8e0043a009",
+    "docs/claude/journal.md": "98475bcf65f265de97a43bdd49b8ac83e8a6c637f6b8a8530e860305ac37ba04",
+    "index.html": "1f280ef2e0ae9e82d19630cf3da0b986b221e7bf93124a97851cb35ef2bef7fc",
+    "public/sw.js": "2f2fbf9151b1fa2dc751f3ccb5644ce23efd330ea51aeca4b7aabe5566079add",
+    "scripts/harnais-claude-md.mjs": "929fa0879d5f733d71e6f70c2bf9947230f57e825b2913e65e5dd7303264c909",
+    "scripts/mv-harnais-liste.mjs": "da195b64ddddffc6d637fc8b82ee94dc8cd549c11b38f90ec17492a8b64cc095",
+    "scripts/mv-harnais-ux0.mjs": "c815e681e1935d80c00f40ce5b470874a352429e8c78a724d0f428c17f683684",
+    "scripts/mv-ux-baseline.json": "4f1c71b9ecdbe070ff1f4335a0a64218e41ba045dc205ba144a99c4450f680ad",
+    "scripts/mv-ux-rendu.mjs": "1a85be8ca76061290f1c4b3713cb95477c218bdf2a2b46d7b0dbe734906fb1e0",
+    "src/styles.css": "dafe4abd723a9d3d5e16e84cebdd144c82c1ad8061cd34a70bd171bca9e11a7f",
+    "src/utils.js": "f62bd0f0bf911b653c0797bf6e6a96428c7d3f2be010b17ee79698ad603c5336",
+    "src/whats-new.js": "65716e4b67b80c10411dfbcd29c5f99c822325d8e4b8abd44cd1d6f6b4f90b0b",
+    "scripts/mv-harnais-tete3d.mjs": "62454691efdf7d18bfaec1db3d432dd2c3a1fc11424afc6f51ea463c93795d3c"
+  }
+}

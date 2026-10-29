@@ -1,8 +1,8 @@
 {
  "lot": "UX-0",
  "section": "§459",
- "date": "2026-10-28",
- "base": "3cc562d",
+ "date": "2026-10-29",
+ "base": "98b75bd",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "141.0.7390.37",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -217,6 +217,48 @@
     "tracteur.session_y : 462 → 178",
     "tracteur.fab_recouvre : 1 → 0"
    ]
+  },
+  {
+   "date": "2026-10-29",
+   "base": "98b75bd",
+   "motif": "TETE-3D (§482) : la bande campagne/date sous l’en-tête retrouve sa forme — « ? » rond à 13 px au téléphone (le « ? » de « ? Aide » était à 10 px depuis TETE-3C), sa zone d’appui à 44 px, la bande sur une ligne (le contenu remonte de 17 px) ; Pilotage sur ordinateur gardé à 42 cibles sous 44 px, à la main : la valeur qui suit l’heure réelle (§470e), relevée ici à 39 — la CI peut voir 42",
+   "hausses": [],
+   "baisses": [
+    "home › téléphone › t11 : 1 → 0",
+    "home › téléphone › t12 : 1 → 0",
+    "parcelles › téléphone › t11 : 1 → 0",
+    "parcelles › téléphone › t12 : 1 → 0",
+    "journal › téléphone › t11 : 1 → 0",
+    "journal › téléphone › t12 : 1 → 0",
+    "tracteur › téléphone › t11 : 1 → 0",
+    "tracteur › téléphone › t12 : 1 → 0",
+    "phyto › téléphone › t11 : 1 → 0",
+    "phyto › téléphone › t12 : 1 → 0",
+    "cave › téléphone › t11 : 1 → 0",
+    "cave › téléphone › t12 : 1 → 0",
+    "reserve › téléphone › t11 : 1 → 0",
+    "reserve › téléphone › t12 : 1 → 0",
+    "planning › téléphone › t11 : 1 → 0",
+    "planning › téléphone › t12 : 1 → 0",
+    "pilotage › téléphone › t11 : 1 → 0",
+    "pilotage › téléphone › t12 : 1 → 0",
+    "reglages › téléphone › t11 : 1 → 0",
+    "reglages › téléphone › t12 : 1 → 0",
+    "home › ordinateur › t11 : 1 → 0",
+    "parcelles › ordinateur › t11 : 1 → 0",
+    "journal › ordinateur › t11 : 1 → 0",
+    "tracteur › ordinateur › c44 : 22 → 21",
+    "tracteur › ordinateur › t11 : 1 → 0",
+    "phyto › ordinateur › t11 : 1 → 0",
+    "cave › ordinateur › t11 : 1 → 0",
+    "reserve › ordinateur › t11 : 1 → 0",
+    "planning › ordinateur › t11 : 1 → 0",
+    "pilotage › ordinateur › t11 : 1 → 0",
+    "reglages › ordinateur › t11 : 1 → 0",
+    "tracteur.session_y : 178 → 161",
+    "planning.grille_y : 460 → 443",
+    "reglages.premier_y : 372 → 356"
+   ]
   }
  ],
  "mesures": {
@@ -224,122 +266,122 @@
    "home": {
     "cibles": 29,
     "c24": 0,
-    "c44": 21,
-    "textes": 176,
-    "t11": 1,
-    "t12": 1,
+    "c44": 22,
+    "textes": 175,
+    "t11": 0,
+    "t12": 0,
     "chrome": 111,
     "chromeDefile": 57,
     "pouce": null,
-    "hauteur": 3153
+    "hauteur": 3136
    },
    "parcelles": {
     "cibles": 36,
     "c24": 0,
     "c44": 6,
-    "textes": 61,
-    "t11": 1,
-    "t12": 1,
+    "textes": 60,
+    "t11": 0,
+    "t12": 0,
     "chrome": 111,
     "chromeDefile": 57,
     "pouce": 0,
-    "hauteur": 1945
+    "hauteur": 1928
    },
    "journal": {
     "cibles": 37,
     "c24": 0,
     "c44": 5,
-    "textes": 153,
-    "t11": 1,
-    "t12": 1,
+    "textes": 152,
+    "t11": 0,
+    "t12": 0,
     "chrome": 111,
     "chromeDefile": 57,
     "pouce": 0,
-    "hauteur": 2670
+    "hauteur": 2654
    },
    "tracteur": {
     "cibles": 12,
     "c24": 0,
     "c44": 5,
-    "textes": 32,
-    "t11": 1,
-    "t12": 1,
+    "textes": 31,
+    "t11": 0,
+    "t12": 0,
     "chrome": 111,
     "chromeDefile": null,
     "pouce": 2,
-    "hauteur": 941
+    "hauteur": 924
    },
    "phyto": {
     "cibles": 22,
     "c24": 0,
     "c44": 4,
-    "textes": 117,
-    "t11": 1,
-    "t12": 1,
+    "textes": 116,
+    "t11": 0,
+    "t12": 0,
     "chrome": 111,
     "chromeDefile": 57,
     "pouce": 4,
-    "hauteur": 1950
+    "hauteur": 1933
    },
    "cave": {
     "cibles": 49,
     "c24": 0,
     "c44": 6,
-    "textes": 261,
-    "t11": 1,
-    "t12": 1,
+    "textes": 260,
+    "t11": 0,
+    "t12": 0,
     "chrome": 111,
     "chromeDefile": 57,
     "pouce": null,
-    "hauteur": 4024
+    "hauteur": 4008
    },
    "reserve": {
     "cibles": 27,
     "c24": 0,
     "c44": 8,
-    "textes": 94,
-    "t11": 1,
-    "t12": 1,
+    "textes": 93,
+    "t11": 0,
+    "t12": 0,
     "chrome": 111,
     "chromeDefile": 57,
     "pouce": 6,
-    "hauteur": 1450
+    "hauteur": 1433
    },
    "planning": {
     "cibles": 91,
     "c24": 0,
     "c44": 78,
-    "textes": 142,
-    "t11": 1,
-    "t12": 1,
+    "textes": 141,
+    "t11": 0,
+    "t12": 0,
     "chrome": 111,
     "chromeDefile": 57,
     "pouce": null,
-    "hauteur": 1416
+    "hauteur": 1399
    },
    "pilotage": {
     "cibles": 68,
     "c24": 0,
     "c44": 47,
-    "textes": 246,
-    "t11": 1,
-    "t12": 1,
+    "textes": 244,
+    "t11": 0,
+    "t12": 0,
     "chrome": 57,
     "chromeDefile": 191,
     "pouce": null,
-    "hauteur": 4801
+    "hauteur": 4749
    },
    "reglages": {
     "cibles": 16,
     "c24": 0,
     "c44": 5,
-    "textes": 50,
-    "t11": 1,
-    "t12": 1,
+    "textes": 49,
+    "t11": 0,
+    "t12": 0,
     "chrome": 111,
     "chromeDefile": 45,
     "pouce": null,
-    "hauteur": 1425
+    "hauteur": 1408
    }
   },
   "ordinateur": {
@@ -348,19 +390,19 @@
     "c24": 0,
     "c44": 22,
     "textes": 176,
-    "t11": 1,
+    "t11": 0,
     "t12": 21,
     "chrome": 120,
     "chromeDefile": 111,
     "pouce": null,
-    "hauteur": 1463
+    "hauteur": 1462
    },
    "parcelles": {
     "cibles": 53,
     "c24": 0,
     "c44": 41,
     "textes": 107,
-    "t11": 1,
+    "t11": 0,
     "t12": 7,
     "chrome": 120,
     "chromeDefile": null,
@@ -372,31 +414,31 @@
     "c24": 0,
     "c44": 31,
     "textes": 196,
-    "t11": 1,
+    "t11": 0,
     "t12": 33,
     "chrome": 120,
     "chromeDefile": 111,
     "pouce": null,
-    "hauteur": 2352
+    "hauteur": 2353
    },
    "tracteur": {
-    "cibles": 27,
+    "cibles": 28,
     "c24": 0,
-    "c44": 22,
-    "textes": 77,
-    "t11": 1,
+    "c44": 21,
+    "textes": 54,
+    "t11": 0,
     "t12": 1,
     "chrome": 120,
     "chromeDefile": null,
     "pouce": null,
-    "hauteur": 1133
+    "hauteur": 977
    },
    "phyto": {
     "cibles": 23,
     "c24": 0,
     "c44": 6,
     "textes": 140,
-    "t11": 1,
+    "t11": 0,
     "t12": 16,
     "chrome": 120,
     "chromeDefile": 111,
@@ -408,7 +450,7 @@
     "c24": 0,
     "c44": 6,
     "textes": 274,
-    "t11": 1,
+    "t11": 0,
     "t12": 29,
     "chrome": 120,
     "chromeDefile": 111,
@@ -420,7 +462,7 @@
     "c24": 0,
     "c44": 23,
     "textes": 93,
-    "t11": 1,
+    "t11": 0,
     "t12": 6,
     "chrome": 120,
     "chromeDefile": 111,
@@ -432,48 +474,48 @@
     "c24": 0,
     "c44": 12,
     "textes": 152,
-    "t11": 1,
+    "t11": 0,
     "t12": 3,
     "chrome": 120,
     "chromeDefile": 111,
     "pouce": null,
-    "hauteur": 1238
+    "hauteur": 1239
    },
    "pilotage": {
-    "cibles": 69,
+    "cibles": 61,
     "c24": 0,
     "c44": 42,
     "textes": 251,
-    "t11": 1,
+    "t11": 0,
     "t12": 56,
     "chrome": 66,
     "chromeDefile": 171,
     "pouce": null,
-    "hauteur": 2204
+    "hauteur": 2202
    },
    "reglages": {
     "cibles": 16,
     "c24": 0,
     "c44": 6,
     "textes": 56,
-    "t11": 1,
+    "t11": 0,
     "t12": 17,
     "chrome": 120,
     "chromeDefile": null,
     "pouce": null,
-    "hauteur": 1185
+    "hauteur": 1186
    }
   }
  },
  "gestes": {
-  "tracteur.session_y": 178,
+  "tracteur.session_y": 161,
   "tracteur.fab_recouvre": 0,
   "phyto.dates_machine": 15,
   "cave.gestes_44": 0,
   "cave.sommaire": 0,
   "reserve.action": 0,
-  "planning.grille_y": 460,
-  "reglages.premier_y": 372,
+  "planning.grille_y": 443,
+  "reglages.premier_y": 356,
   "parcelles.valider": 48
  }
 }

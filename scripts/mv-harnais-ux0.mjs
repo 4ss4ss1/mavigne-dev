@@ -54,7 +54,7 @@ function jouer(S) {
   t('⑤ il lit et écrit sa référence là où ce harnais la lit', /path\.join\(ICI, 'mv-ux-baseline\.json'\)/.test(S.rendu));
   t('⑥ il refuse de regraver une hausse sans raison écrite (--accepte)', /if \(ref && hausses\.length && !ACCEPTE\)/.test(S.rendu) && /process\.exit\(1\)/.test(S.rendu));
   const mA = S.rendu.match(/const attendus = \[([^\]]+)\]/);
-  t('⑦ il garde sa contre-épreuve (des défauts posés à l’écran, huit attendus, dont une zone d’appui retirée)', /const DEFAUTS = /.test(S.rendu) && !!mA && (mA[1].match(/'/g) || []).length === 16 && /\.ck-i::after\{content:none!important\}/.test(S.rendu));
+  t('⑦ il garde sa contre-épreuve (des défauts posés à l’écran, dix attendus, dont une zone d’appui retirée et deux sur la bande campagne/date — TETE-3D, §482)', /const DEFAUTS = /.test(S.rendu) && !!mA && (mA[1].match(/'/g) || []).length === 20 && /\.ck-i::after\{content:none!important\}/.test(S.rendu));
   t('⑨ une cible se mesure par sa zone d’appui, pas par sa boîte (UX-1, §467)', /window\.__mvZone = function/.test(S.rendu) && /await page\.addInitScript\(ZONE_INIT\)/.test(S.rendu)
     && /const z = window\.__mvZone\(e\); return \{ m: Math\.round\(Math\.min\(z\.w, z\.h\)\)/.test(S.rendu));
   t('⑨ un texte à 0 px (libellé caché) n’est pas compté comme petit', /if \(fs > 0\) tailles\.push\(fs\)/.test(S.rendu));

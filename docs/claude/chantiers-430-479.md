@@ -1102,7 +1102,7 @@ La troisième marche de TETE-3 (§473a) : l’ordinateur, le Pilotage, la Réser
 Rien ne change à ce que disent l’aide et le guide (« ? Aide » y est décrit à sa place, qu’il retrouve).
 
 ### 475e. Ce qui reste ouvert
-- ★ **Un contrôle au rendu manque** : « chaque page porte son « ? Aide » » — `test:ux` ou les tutos peuvent le compter sur le build (au backlog).
+- ★ **Un contrôle au rendu manque** : « chaque page porte son « ? Aide » » — `test:ux` ou les tutos peuvent le compter sur le build (au backlog). → ✅ **fait, §482** (TETE-3D : `test:ux` lit la bande des vingt vues, « ? Aide » compris).
 - La hauteur du Pilotage en défilant (« Vous regardez » collant, ~130 px) ; la hausse liée à l’heure (§470e).
 - **À vérifier chez Nico** : « ? Aide » en haut de chaque module ; le Pilotage et la Réserve.
 

@@ -4,7 +4,7 @@
 // -----------------------------------------------------------------------------
 // Lancer :  npm run build (ou, sans la chaîne : node scripts/mv-gt-page.mjs, npx vite build, inject-precache, mv-version-json)
 //           npm run test:ux                                   (CI : job des tests sur le build, après le gabarit)
-//           npm run test:ux -- --contre                       (contre-épreuve : huit défauts posés à l’écran doivent rougir)
+//           npm run test:ux -- --contre                       (contre-épreuve : dix défauts posés à l’écran doivent rougir)
 //           npm run test:ux -- --baseline                     (regraver la référence après une BAISSE — refusé s’il y a une hausse)
 //           npm run test:ux -- --baseline --accepte "<raison>"   (une hausse VOULUE : la raison est écrite dans la référence)
 //           npm run test:ux -- --baseline --motif "<texte>"     (dire pourquoi on regrave, par exemple une mesure corrigée)
@@ -23,6 +23,11 @@
 //   pouce      au téléphone, sur les pages de liste : les actions du tiers haut de l’écran moins celles du tiers bas (0 au mieux) ;
 //   et neuf GESTES de la maquette v2 : la session du tracteur, le « + » du tracteur, les dates du registre, les gestes de la Cave,
 //   son sommaire, l’action de la Réserve, la grille du Planning, le premier réglage, le bouton Valider des Parcelles.
+// ★ ET UNE RÈGLE, PAS UN CLIQUET (TETE-3D, §482) — la bande campagne/date juste sous l’en-tête, sur les vingt vues : une seule
+//   ligne, chaque pièce entière et dans la bande, la saison, la météo et l’aide à 28 px, « ? Aide » présent (« ? » seul au téléphone),
+//   la date en 400 avec « … », ou cachée quand la météo porte la date courte ; la température à chiffres droits. TETE-3B (§474) l’avait
+//   sortie de l’en-tête : les règles de TETE-1 et TETE-2 ne la visaient plus, et 569 contrôles qui lisent les sources n’ont rien vu.
+//   Un défaut ici rougit toujours, et bloque une regravure.
 // ★ L’HORLOGE est posée au mardi 27/10/2026, 9 h (Paris), puis elle tourne : la démo se construit autour d’« aujourd’hui »,
 //   et un relevé qui changerait avec le jour de la semaine ferait un cliquet menteur (voir les harnais qui rougissent entre
 //   minuit et 2 h, §28).
@@ -74,14 +79,20 @@ const GESTES = {
   'parcelles.valider': { sens: 'haut', tol: 1, obj: '≥ 44 px', lib: 'Parcelles : le plus petit côté du bouton Valider (px)' },
 };
 
-// La contre-épreuve pose HUIT défauts à l’écran, chacun visé par une mesure (le huitième, UX-1 : une zone d’appui retirée). ⚠️ Avec un identifiant de page en tête : une
+// La contre-épreuve pose DIX défauts à l’écran, chacun visé par une mesure (le huitième, UX-1 : une zone d’appui retirée ; les deux derniers, TETE-3D :
+// la bande campagne/date — la date du Journal en graisse 300 sur deux lignes, « Aide » en toutes lettres au Pilotage). ⚠️ Avec un identifiant de page en tête : une
 // règle moins spécifique que celles de styles.css perdrait contre elles, et la contre-épreuve passerait pour muette.
-const DEFAUTS = '#page-journal #tache-chips-row button,#page-journal #tache-chips-row [onclick]{height:18px!important;min-height:0!important;max-height:18px!important;padding:0 3px!important;line-height:1!important;font-size:9px!important;overflow:hidden!important}'
+// ★ TETE-3D (§482) : depuis FILTRE-1A (§476), les puces du Journal vivent dans la feuille, cachée au téléphone — ce premier défaut ne
+// rougissait plus (contre-épreuve rouge sur tracux1b, avant ce lot : « journal › téléphone › c24, t11 ») ; il vise aussi « Filtrer », la recherche
+// et le « + », toujours à l’écran (deux au moins : la marge est d’une cible et d’un texte).
+const DEFAUTS = '#page-journal #tache-chips-row button,#page-journal #tache-chips-row [onclick],#page-journal #j-filtrer,#page-journal #jSearch,#page-journal #j-fab{height:18px!important;min-height:0!important;max-height:18px!important;padding:0 3px!important;line-height:1!important;font-size:9px!important;overflow:hidden!important}'
   + '#page-journal .mod-header{padding-bottom:80px!important}'
   + '#page-planning #plan-stats-band{padding-bottom:200px!important}'
   + '#page-pilotage .ck-i::after{content:none!important}'   // UX-1 : les « i » perdent leur zone d’appui → ils retombent sous 24 px
-  + '#page-tracteur #trac-fab{top:470px!important;bottom:auto!important;left:20px!important;right:auto!important;width:330px!important;height:240px!important}';
-const attendus = ['pilotage › téléphone › c24', 'journal › téléphone › c24', 'journal › téléphone › t11', 'journal › téléphone › chrome', 'planning.grille_y', 'tracteur.fab_recouvre', 'phyto.dates_machine', 'cave.gestes_44'];
+  + '#page-tracteur #trac-fab{top:470px!important;bottom:auto!important;left:20px!important;right:auto!important;width:330px!important;height:240px!important}'
+  + '#page-journal .mod-header + .mod-meta-row .hv2-date{font-weight:300!important;white-space:normal!important;text-overflow:clip!important}'   // TETE-3D : la date d’avant le correctif
+  + '#page-pilotage .mod-header + .mod-meta-row .mv-help-btn{width:auto!important;font-size:12px!important;padding:0 8px!important}';   // TETE-3D : « Aide » en toutes lettres au téléphone
+const attendus = ['pilotage › téléphone › c24', 'journal › téléphone › c24', 'journal › téléphone › t11', 'journal › téléphone › chrome', 'planning.grille_y', 'tracteur.fab_recouvre', 'phyto.dates_machine', 'cave.gestes_44', 'journal › téléphone › bande', 'pilotage › téléphone › bande'];
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json', '.woff2': 'font/woff2', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json' };
 const srv = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split('?')[0]); if (p === '/') p = '/index.html'; const f = path.join(DIST, p);
@@ -135,6 +146,30 @@ const MESURE = ([tel, liste]) => {
     textes: tailles.length, t11: tailles.filter((f) => f < 11).length, t12: tailles.filter((f) => f < 12).length,
     chrome: pile(), hauteur: Math.max(document.documentElement.scrollHeight, pg.scrollHeight),
     pouce: (tel && liste) ? Math.max(0, visibles.filter((c) => c.y < vh / 3).length - visibles.filter((c) => c.y > vh * 2 / 3).length) : null };
+};
+// ── TETE-3D (§482) — la bande campagne/date, lue dans la page active. Rend la liste de ses défauts (vide au mieux). ──
+const BANDE = (tel) => {
+  const pg = document.querySelector('.page.active'); if (!pg) return ['aucune page active'];
+  const b = pg.querySelector('.mod-header + .mod-meta-row'); if (!b) return ['pas de bande campagne/date juste sous l’en-tête'];
+  const vis = (e) => { const r = e.getBoundingClientRect(); return r.width >= 1 && r.height >= 1 && getComputedStyle(e).visibility !== 'hidden'; };
+  const nom = (e) => (e.id ? '#' + e.id : '.' + String(e.className).trim().split(/\s+/)[0]);
+  const d = []; const pieces = Array.from(b.children).filter(vis); const cb = getComputedStyle(b), rb = b.getBoundingClientRect();
+  const g = rb.left + parseFloat(cb.paddingLeft) - 1, dr = Math.min(rb.right - parseFloat(cb.paddingRight), window.innerWidth) + 1;
+  const rs = pieces.map((e) => e.getBoundingClientRect());
+  if (rs.length && Math.max(...rs.map((r) => r.bottom)) - Math.min(...rs.map((r) => r.top)) > 30) d.push('sur deux lignes');
+  rs.forEach((r, i) => { if (r.left < g || r.right > dr) d.push(nom(pieces[i]) + ' sort de la bande'); });
+  ['.hv2-saison-pill', '.hv2-meteo-mini', '.mv-help-btn'].forEach((s) => { const e = b.querySelector(':scope > ' + s);
+    if (e && vis(e) && Math.abs(e.getBoundingClientRect().height - 28) > 1.5) d.push(s + ' à ' + Math.round(e.getBoundingClientRect().height) + ' px'); });
+  const aide = b.querySelector(':scope > .mv-help-btn');
+  if (!aide || !vis(aide)) d.push('« ? Aide » absent');
+  else { const fz = parseFloat(getComputedStyle(aide).fontSize), w = aide.getBoundingClientRect().width;
+    if (tel && (fz > 0 || w > 30)) d.push('« Aide » en toutes lettres au téléphone'); if (!tel && fz === 0) d.push('« Aide » caché sur ordinateur'); }
+  const date = b.querySelector(':scope > .hv2-date'), met = b.querySelector(':scope > .hv2-meteo-mini');
+  const dv = !!(date && vis(date)), mv = !!(met && vis(met));
+  if (dv && mv) d.push('la date longue à côté de la météo'); if (!dv && !mv) d.push('ni date ni météo');
+  if (dv) { const c = getComputedStyle(date); if (c.fontWeight !== '400') d.push('la date en graisse ' + c.fontWeight); if (c.whiteSpace !== 'nowrap' || c.textOverflow !== 'ellipsis') d.push('la date sans « … »'); }
+  if (mv) { const t = met.querySelector('.hv2-meteo-mini-temp'); const c = t && getComputedStyle(t); if (c && (!/tabular-nums/.test(c.fontVariantNumeric) || /Cormorant/.test(c.fontFamily))) d.push('la température sans ses chiffres droits'); }
+  return d;
 };
 const PILE_SEULE = () => {   // la même pile, après défilement
   const pg = document.querySelector('.page.active'); if (!pg) return null; const vh = window.innerHeight, vw = window.innerWidth;
@@ -233,6 +268,7 @@ for (const ecran of ECRANS_JOUES) {
     for (const p of (CONTRE ? PAGES_CONTRE : PAGES)) {
       await aller(p);
       const m = await page.evaluate(MESURE, [ecran.tel, LISTES.includes(p)]);
+      if (!m.connexion && !m.absente) m.bande = await page.evaluate(BANDE, ecran.tel);   // TETE-3D : au repos, avant de défiler
       if (m.connexion) { connexion++; continue; }
       if (m.absente) { erreurs.push(ecran.id + ' › ' + p + ' : aucune page active'); continue; }
       m.chromeDefile = null;   // défiler de 900 px, ou de ce que la page permet ; une page qui défile de moins de 300 px n’a pas de « en défilant »
@@ -271,6 +307,12 @@ if (ref) {
   if (!CONTRE) for (const [eid, pages] of Object.entries(ref.mesures || {})) for (const p of Object.keys(pages)) if (!(releve.mesures[eid] || {})[p]) ecarts.push({ cle: p + ' › ' + eid, base: 'relevée', now: 'perdue', hausse: true });
   for (const [k, def] of Object.entries(GESTES)) if (!CONTRE || k in releve.gestes) comparer(k, def, (ref.gestes || {})[k], releve.gestes[k]);
 }
+// TETE-3D (§482) — la bande campagne/date : une règle, pas un cliquet (rien de gravé ; chaque défaut est une hausse, qui bloque une regravure)
+const bandeKO = [];
+for (const [eid, pages] of Object.entries(releve.mesures)) for (const [p, m] of Object.entries(pages)) if (m.bande && m.bande.length) {
+  bandeKO.push(p + ' › ' + eid + ' : ' + m.bande.join(', ')); ecarts.push({ cle: p + ' › ' + eid + ' › bande', base: 0, now: m.bande.length + ' défaut(s)', hausse: true }); }
+t('la bande campagne/date sous l’en-tête garde sa forme sur les ' + nbReleve + ' pages — une ligne, les pastilles à 28 px, « ? Aide » (« ? » seul au téléphone), la date en 400 ou cachée par la météo',
+  bandeKO.length === 0, bandeKO.slice(0, 6).join(' · '));
 // un résumé par mesure, avec l’objectif du plan
 for (const [k, def] of Object.entries(MESURES)) {
   const parEcran = ECRANS_JOUES.map((e) => { const ps = Object.values(releve.mesures[e.id] || {}); const v = ps.map((m) => m[k]).filter((x) => x !== null && x !== undefined);

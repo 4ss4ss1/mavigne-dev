@@ -52,3 +52,39 @@ La seconde moitié de TRAC-UX-1 (§480a) : sur ordinateur, `docs/maquettes/maque
 - Les pastilles du parc (`renderTracParcPills`) : cachées partout, à retirer avec leur code.
 - **CAVE-UX-1**, le lot suivant du plan.
 - **À vérifier chez Nico, sur son PC** : la colonne de droite, l’ordre du parc, un appui sur un tracteur, l’onglet Entretien, une session ouverte en feuille.
+
+## 482. ★★ TETE-3D — LA BANDE CAMPAGNE/DATE, SOUS L’EN-TÊTE, RETROUVE SA FORME ; TEST:UX LA GARDE AU RENDU (29/10 — `src/styles.css` (le bloc TETE-2 aux deux places ; la pastille blanche) · `scripts/mv-ux-rendu.mjs` (la règle de la bande, la contre-épreuve) · `scripts/mv-ux-baseline.json` · `scripts/mv-harnais-tete3d.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/mv-harnais-ux0.mjs` · `src/utils.js` (APP 10.34) · `index.html` · `src/whats-new.js` · `public/sw.js` (SW 11.15) · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-480-529.md` · `docs/claude/chantiers-430-479.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/TETE-3D.json` · base `98b75bd`)
+
+### 482a. D’où ça vient
+La CI rougissait depuis `tete3c` (run #326) à l’étape « Gabarit du Pilotage » : la date de la bande campagne/date en graisse 300 (« Mercredi 28 octobre », Aujourd’hui › Terrain, Cave et Économie, sur ordinateur). Neuf runs de suite sans un vert (#324 à #332, rouges ou annulés) ; l’étape suivante, `test:ux`, sautée depuis. Capture du run #331 envoyée par Nico. ★ **La cause** : TETE-3B (§474) a sorti la bande des en-têtes ; ce qui la mettait en forme — TETE-1 (§272) et TETE-2 (§329), écrits `body .mod-header .X` — ne la visait plus. 26 règles perdues, relevées une à une dans le navigateur (la bande remise dans l’en-tête, puis à sa place : les règles qui la trouvaient dedans et plus dehors). Le Gabarit avait raison : hors de l’en-tête, la bande n’est plus une « pièce commune ».
+
+### 482b. Mesuré avant de toucher — dix modules, téléphone et ordinateur, clair et sombre, l’avant-TETE-3B contre `tracux1b`
+- Au téléphone, la saison sur deux lignes (45 px au lieu de 28), la date aussi, en graisse 300, sans « … ».
+- Le Pilotage au téléphone : une bande de 90 px au lieu de 42 — la date longue à côté de la météo, qui porte déjà la date courte.
+- « ? Aide » en toutes lettres au téléphone (68 px au lieu d’un « ? » de 28), son « ? » à 10 px ; la température en Cormorant 15 px, sans chiffres droits.
+- ★ **Vu en route** : la pastille blanche à filet fin que TETE-3B croyait poser (la `.pill` de la maquette ux-v1) ne s’est jamais affichée — la règle d’UI-3 CORRECTIFS 2 `.hv2-saison-pill{background:var(--gris-clair)!important…}` l’emportait. Son harnais lisait la source : la leçon de §475, encore.
+- ★ **Vu à la capture** : à 360 px, la météo du Pilotage poussait « ? » hors de l’écran — déjà vrai dans l’en-tête, avant TETE-3B.
+
+### 482c. Ce qui change
+- **Le bloc TETE-2** (le dernier de la feuille : son harnais exige que seul GABARIT-1 le suive) : chaque règle de la ligne du jour porte en tête la nouvelle place, `body .mod-header + .mod-meta-row` ; les chaînes que lit `mv-harnais-tete2` restent entières (au téléphone, une règle à part pour la même raison). La météo y prend la forme de TETE-2, pas sa peau grise (les couleurs de la page, celles de TETE-3B, restent) ; ses deux lignes à 12 px et non 11 (LISIBLE-1, §470 : le cliquet des textes sous 12 px) ; le point de la saison au vert du thème.
+- ★ **Décision de Nico (29/10)** : la pastille saison **blanche**, filet fin, ronde — la maquette et l’intention de TETE-3B — plutôt que le gris affiché depuis le 28/10. Une règle `:not(.consult)` à côté de celle de TETE-3B : une campagne passée garde son ambre.
+- **À côté de la météo** (la date longue cachée), c’est la campagne qui cède en « … » ; le « ? » rond du téléphone garde 44 px d’appui en largeur (sa zone d’UX-1, §467, débordait de 6 px : pensée pour « ? Aide », 40 px autour de 28).
+
+### 482d. Le contrôle au rendu — le point ouvert de §475e
+- `test:ux` porte une **règle, pas un cliquet** : sur les vingt vues, la bande juste sous l’en-tête tient sur une ligne, chaque pièce entière, la saison, la météo et l’aide à 28 px, « ? Aide » présent (« ? » seul au téléphone), la date en 400 avec « … » ou cachée par la météo, la température à chiffres droits. Rien n’est gravé : un défaut rougit toujours, et bloque une regravure. Sa contre-épreuve pose deux défauts de plus (la date du Journal en 300, « Aide » au Pilotage).
+- ★ **La contre-épreuve de `test:ux` était déjà rouge sur `tracux1b` intact** (« journal › téléphone › c24, t11 ») : son premier défaut visait les puces du Journal, rangées dans la feuille cachée depuis FILTRE-1A (§476). Il vise aussi « Filtrer », la recherche et le « + » ; après la regravure : **10/10**.
+- `mv-harnais-tete3d` : 8 assertions (le bloc TETE-2 aux deux places, la peau blanche et l’ambre, le téléphone, la campagne qui cède, la règle de `test:ux` et sa contre-épreuve, la CI qui le joue) ; **15/15 mutants**.
+
+### 482e. Mesuré après
+- `test:gabarit` : **vert**, 15 vérifications. `test:ux` : vert, 18 vérifications ; référence regravée, 34 baisses — plus aucun texte sous 11 px nulle part, aucun sous 12 au téléphone ; le contenu remonte de 17 px (session du Tracteur 178 → 161, grille du Planning 460 → 443, premier réglage 372 → 356). L’Accueil au téléphone compte une cible sous 44 px de plus (21 → 22, dans la marge) : la pastille saison, qu’on touche pour changer de campagne, revient à 28 px — sur deux lignes, elle en mesurait 45. ⚠️ **Le Pilotage sur ordinateur gardé à 42 à la main** dans la référence (relevé ici à 39 : la valeur qui suit l’heure réelle, §470e).
+- La bande contre l’avant-TETE-3B : identique sur les vingt vues, sauf le voulu (blanche et ronde ; 38 px au lieu de 42, le resserrement de TETE-3B ; la météo à 12 px). Captures à 360 px, clair et sombre.
+- `mv-harnais-tete2` 17 (17/17), `tete3b` 6 (7/7), `tete3c` 5 (5/5) : inchangés. Preflight : 0 erreur, 14 avertissements, les mêmes que sur `tracux1b`. Tutos concernés : aucun (7 tutos) ; panneau côte à côte rejoué, vert.
+- Chaîne complète (585 commandes, 1 084 s) : **un rouge, suivi** — `mv-harnais-ux0` comptait huit défauts attendus dans la contre-épreuve de `test:ux` ; il en attend dix (16 assertions, 17/17), rejoué vert.
+
+### 482f. Fiches et guide
+`guide/01-demarrer.html` relu (« la campagne et la date sont sur la ligne juste en dessous » reste juste) ; `13-donnees` et `14-depannage` disent la pastille « ? Aide » « en haut de chaque écran » — juste. `MV_AIDE` : aucune fiche ne décrit la bande, rien à changer. `MV_INFO` : aucun calcul touché.
+
+### 482g. Ce qui reste ouvert
+- Le Pilotage sur ordinateur dans `test:ux` (39 ↔ 42 selon l’heure, §470e) : trouver ce qui lit l’heure réelle malgré l’horloge posée.
+- Les règles de TETE-1 et TETE-2 « dans l’en-tête » ne trouvent plus rien (aucune bande n’y vit) : gardées, comme l’injecteur de l’aide lit les deux places.
+- **À vérifier chez Nico** : la bande au téléphone (une ligne, « ? » rond), le Pilotage avec la météo, une campagne passée choisie sur l’Accueil (la pastille orangée), en clair et en sombre.

@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.14
+// MA VIGNE — Service Worker v11.15
+// v11.15 (29/10/2026) — TETE-3D (§482) : la bande campagne/date sous l’en-tête retrouve sa forme (TETE-1 et TETE-2 la visent de nouveau) — une ligne, la date en 400 ou cachée à côté de la météo, « ? » seul au téléphone, la pastille blanche ; test:ux la garde au rendu.
 // v11.14 (28/10/2026) — TRAC-UX-1B (§481) : le Tracteur sur ordinateur — le parc par urgence et le GNR à droite, la session en feuille partout.
 // v11.13 (28/10/2026) — TRAC-UX-1A (§480) : Tracteur — la session en cours en tête (Enregistrer l'avancement, Terminer avec Annuler), les compteurs sans zéros ; au téléphone, « Filtrer » et la recherche en bas.
 // v11.12 (28/10/2026) — PC-LISTE-2 (§479) : le clavier des listes avec fiche — le Registre phyto et Le Chai (J / K, les flèches ; N au Registre).
@@ -4646,7 +4647,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.14';
+const CACHE_NAME   = 'mavigne-v11.15';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4663,7 +4664,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.14 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.15 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4683,7 +4684,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.14 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.15 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
