@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.34';
+export const APP_VERSION = '10.35';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2348,6 +2348,7 @@ var MV_AIDE = {
       ['À deux', " : pour la tarière, l’ensemencement et l’engrais, la nouvelle session propose un <b>coéquipier</b>, choisi avec l’activité ; il apparaît dans la fiche de la session. L’admin règle quelles activités se font à deux (réglages du tracteur, « Se fait à deux »)."],
       ['Pourquoi ?', " : dans la fiche d’une session, la pastille <b>« Pourquoi ? »</b> sous l’activité explique pourquoi on la fait : rognage, labour, tarière, engrais, ensemencement, traitements."],
       ['Sur un ordinateur', "la session en cours, les compteurs et la liste sont à gauche ; à droite, le parc (au garage, révision dépassée ou proche d’abord) et la cuve de GNR, avec les heures de moteur du mois. Toucher une session ouvre sa feuille, comme au téléphone ; toucher un tracteur ouvre son entretien. Dans l’Entretien, les machines et la cuve de GNR passent à gauche, la révision et les derniers contrôles à droite."],
+      ['Le compteur d’heures', "avance tout seul entre deux relevés : le dernier relevé, plus les heures notées par les sessions (chrono, sinon barème), corrigées par l’écart appris à chaque relevé — la route et le ralenti tournent au cadran sans être notés ; « env. » dit qu’il est estimé. Une fois par jour et par tracteur, en refermant la feuille après y avoir coché, ou en terminant, Ma Vigne demande le chiffre du cadran (« Pas devant le tracteur » repose la question au geste suivant) ; au plein, il est demandé à chaque fois ; « Relever », dans l’Entretien, le note quand on veut. Plus bas que le dernier relevé, ou impossible dans le temps écoulé : refusé ; beaucoup plus que prévu : à confirmer. Un compteur changé se corrige au crayon de « Prochaine révision ». Une révision dépassée s’écrit « dépassée de n h »."],
       ['Heures et GNR d’une session', "les heures viennent du chrono quand il a mesuré la parcelle, sinon du barème de l’activité (h/ha × surface) ; la fiche dit lesquelles. Le GNR est ces heures fois la consommation réglée dans Réglages, 6 L par heure tant qu’elle ne l’est pas — la même valeur que le Pilotage. La bande du haut fait le total de la saison."],
       ['Une session \u00ab Amendement \u00bb', "coche la t\u00e2che \u00ab Amendement \u00bb de chaque parcelle faite, marqu\u00e9e \u00ab faite au tracteur \u00bb dans le journal. Le temps compt\u00e9 est celui de la session, pas une journ\u00e9e d\u2019\u00e9quipe. L\u2019amendement lui-m\u00eame se pr\u00e9pare dans Phyto \u203a Fertilisation."],
       ['Onglet Sessions', ": le travail fait avec la machine. Onglet Entretien : révisions, réparations, appoints de cuve."],
@@ -3092,7 +3093,7 @@ export const MV_INFO = {
 
   'pil.tracteur': { t: 'Parc tracteur', p: [
     'Le compte inclut les machines de traitement, signalées « pulvé ».',
-    'Les heures avant révision se décomptent des <b>sessions saisies</b>. Une session non saisie ne fait pas avancer le compteur : l\u2019échéance affichée est donc au plus tôt, jamais au plus tard.',
+    'Les heures avant révision partent du <b>dernier relevé</b> du compteur, plus les heures notées par les sessions depuis (chrono, sinon barème), corrigées par l\u2019écart appris à chaque relevé — la route et le ralenti tournent au cadran sans être notés. Une session oubliée n\u2019avance pas l\u2019estimation : l\u2019échéance paraît plus loin qu\u2019elle n\u2019est, jusqu\u2019au prochain relevé, que Ma Vigne demande une fois par jour.',
     'Une machine <b>en réparation</b> reste dans le parc et dans le compte — elle existe toujours, elle n\u2019est simplement pas disponible. Le nombre en orange à côté du total dit combien.'
   ] },
 
@@ -3139,9 +3140,9 @@ export const MV_INFO = {
   ] },
 
   'pil.trxrev': { t: 'Révision dans les travaux en cours', p: [
-    'Les heures avant la révision (révision moins compteur), face aux heures des <b>travaux en cours</b> sur ce tracteur, mis bout à bout dans l’ordre où ils ont été lancés. Le trait rouge tombe dans le travail pendant lequel la révision sera atteinte.',
+    'Les heures avant la révision (révision moins le compteur estimé : le dernier relevé, plus les heures notées depuis), face aux heures des <b>travaux en cours</b> sur ce tracteur, mis bout à bout dans l’ordre où ils ont été lancés. Le trait rouge tombe dans le travail pendant lequel la révision sera atteinte.',
     'Le repère en jours vient du <b>rythme mesuré</b> du tracteur : ses heures notées sur les 4 dernières semaines, divisées par les jours ouvrés. Ce n’est pas une date promise.',
-    'L’ordre réel des travaux peut différer, et le compteur n’avance qu’avec les sessions saisies : l’échéance est au plus tôt, jamais au plus tard.'
+    'L’ordre réel des travaux peut différer. Entre deux relevés, le compteur n’avance qu’avec les sessions saisies : une session oubliée rend l’échéance plus lointaine qu’elle n’est, jusqu’au prochain relevé.'
   ] },
 
   'pil.trxgnr': { t: 'Gasoil après les travaux', p: [

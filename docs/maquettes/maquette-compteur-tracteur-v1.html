@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ma Vigne — le compteur des tracteurs, maquette v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --font-ui:Outfit,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-titre:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --bg-app:#F0EEE9;--bg-card:#FFFFFF;--bg-doux:#F7F5F1;
+  --texte:#1B1A18;--texte-med:#55534E;--texte-doux:#686660;--texte-pale:#A3A19B;
+  --ligne:#E7E6E2;--ligne-forte:#CDCAC2;--survol:rgba(28,26,22,.055);--presse:rgba(28,26,22,.095);
+  --vert:#1E3A12;--vert-med:#3D6B27;--vert-clair:#6BA34A;--vert-pale:#EAF3E2;
+  --rouge:#A0291E;--rouge-pale:#FAEAE8;--orange:#B85A1A;--orange-pale:#FBF0E6;
+  --accent:#7A2850;--accent-texte:#7A2850;--accent-doux:rgba(122,40,80,.11);--sur-accent:#FFFFFF;--anneau:rgba(122,40,80,.42);
+  --ok:#237A47;--ok-doux:rgba(35,122,71,.15);--ok-texte:#217343;
+  --attention:#A15C00;--attention-doux:rgba(161,92,0,.15);--attention-texte:#975600;
+  --danger:#C2381B;--danger-doux:rgba(194,56,27,.13);--danger-texte:#BA361A;
+  --inverse:#1F1E1B;--sur-inverse:#F5F4F1;--cadre:#1F1E1B;
+  --cadran-fond:#1F1E1B;--cadran-texte:#F5F4F1;
+  --shadow-sm:0 1px 2px rgba(20,18,14,.05),0 1px 3px rgba(20,18,14,.04);
+  --shadow-md:0 6px 16px -4px rgba(20,18,14,.12),0 2px 4px -2px rgba(20,18,14,.06);
+  --r-sm:6px;--r-md:8px;--r-lg:12px;--r-full:999px;
+  --pt-xxl:32px;--pt-xl:28px;--pt-lg:24px;--pt-md:20px;--pt-sm:16px;--pt-base:14px;--pt-txt:13px;--pt-micro:12px;--pt-nano:11px;
+}
+:root[data-theme="dark"],:root[data-theme="dark"] body{color-scheme:dark}
+:root[data-theme="dark"]{
+  --bg-app:#0D0D0C;--bg-card:#151514;--bg-doux:#1A1A19;--texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;--texte-pale:#5F5D58;
+  --ligne:#272624;--ligne-forte:#3E3D39;--survol:rgba(255,248,235,.055);--presse:rgba(255,248,235,.09);
+  --vert:#5A9E3A;--vert-med:#6AB845;--vert-clair:#8DC868;--vert-pale:rgba(90,158,58,0.22);
+  --rouge:#E05545;--rouge-pale:rgba(224,85,69,0.22);--orange:#D4721A;--orange-pale:rgba(212,114,26,0.20);
+  --accent:#8A3560;--accent-texte:#E59ABD;--accent-doux:rgba(229,154,189,.15);--sur-accent:#FFFFFF;--anneau:rgba(229,154,189,.50);
+  --ok:#76C995;--ok-doux:rgba(118,201,149,.17);--ok-texte:#76C995;
+  --attention:#E9AA4A;--attention-doux:rgba(233,170,74,.17);--attention-texte:#E9AA4A;
+  --danger:#F28B6A;--danger-doux:rgba(242,139,106,.17);--danger-texte:#F28B6A;
+  --inverse:#EDECE9;--sur-inverse:#151514;--cadre:#2B2A27;
+  --cadran-fond:#0A0A09;--cadran-texte:#F5F4F1;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.40);--shadow-md:0 8px 20px -6px rgba(0,0,0,.60);
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg-app:#0D0D0C;--bg-card:#151514;--bg-doux:#1A1A19;--texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;--texte-pale:#5F5D58;
+  --ligne:#272624;--ligne-forte:#3E3D39;--survol:rgba(255,248,235,.055);--presse:rgba(255,248,235,.09);
+  --vert:#5A9E3A;--vert-med:#6AB845;--vert-clair:#8DC868;--vert-pale:rgba(90,158,58,0.22);
+  --rouge:#E05545;--rouge-pale:rgba(224,85,69,0.22);--orange:#D4721A;--orange-pale:rgba(212,114,26,0.20);
+  --accent:#8A3560;--accent-texte:#E59ABD;--accent-doux:rgba(229,154,189,.15);--sur-accent:#FFFFFF;--anneau:rgba(229,154,189,.50);
+  --ok:#76C995;--ok-doux:rgba(118,201,149,.17);--ok-texte:#76C995;
+  --attention:#E9AA4A;--attention-doux:rgba(233,170,74,.17);--attention-texte:#E9AA4A;
+  --danger:#F28B6A;--danger-doux:rgba(242,139,106,.17);--danger-texte:#F28B6A;
+  --inverse:#EDECE9;--sur-inverse:#151514;--cadre:#2B2A27;
+  --cadran-fond:#0A0A09;--cadran-texte:#F5F4F1;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.40);--shadow-md:0 8px 20px -6px rgba(0,0,0,.60);
+}}
+
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:72px}
+body{margin:0;background:var(--bg-app);color:var(--texte);font-family:var(--font-ui);font-size:var(--pt-txt);line-height:1.5}
+h1,h2,h3{font-family:var(--font-titre);font-weight:600;letter-spacing:-0.02em;margin:0;line-height:1.15}
+p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ── page ── */
+.entete{position:sticky;top:0;z-index:20;background:var(--bg-card);border-bottom:1px solid var(--ligne);padding:12px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.entete h1{font-size:var(--pt-lg)}
+.entete .base{color:var(--texte-med);font-size:var(--pt-micro)}
+.entete nav{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.entete nav a{color:var(--texte);text-decoration:none;border:1px solid var(--ligne-forte);border-radius:var(--r-full);padding:4px 10px;font-size:var(--pt-micro)}
+.entete nav a:hover{background:var(--survol)}
+.entete button{font-size:var(--pt-micro);border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);border-radius:var(--r-full);padding:4px 10px;cursor:pointer}
+.page{max-width:1240px;margin:0 auto;padding:28px 20px 80px;overflow-x:clip}
+.intro{max-width:72ch;margin-bottom:22px;color:var(--texte-med);font-size:var(--pt-base)}
+.intro b{color:var(--texte)}
+.mesures{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.mesure{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:14px 16px}
+.mesure .k{font-size:var(--pt-xxl);font-weight:600;line-height:1.05}
+.mesure .k small{font-size:var(--pt-base);font-weight:400;color:var(--texte-med);margin-left:4px}
+.mesure .l{color:var(--texte);font-size:var(--pt-micro);margin-top:6px}
+.mesure .b{color:var(--texte-doux);font-size:var(--pt-micro);margin-top:6px}
+.mesure code,.integ code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.92em;background:var(--bg-doux);border:1px solid var(--ligne);border-radius:4px;padding:0 4px}
+section.ecart{margin:0 0 56px;padding-top:12px;border-top:1px solid var(--ligne-forte)}
+.ecart-tete{display:grid;gap:6px;margin-bottom:18px}
+.ecart-tete h2{font-size:var(--pt-xl)}
+.ecart-tete .ou{color:var(--texte-med)}
+.ecart-tete .pourquoi{max-width:78ch;font-size:var(--pt-base)}
+.ecrans{display:grid;grid-template-columns:minmax(0,1fr);gap:28px 22px;align-items:start}
+@media (min-width:1000px){
+  .ecrans.deux-tel{grid-template-columns:410px 410px;justify-content:start}
+  .ecrans.trois-tel{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .ecrans.trois-tel .legende-ecran{min-height:38px}
+}
+.legende-ecran{color:var(--texte-med);font-size:var(--pt-micro);margin:0 0 6px;max-width:400px}
+.legende-ecran b{color:var(--texte);font-weight:600}
+.sous-ecran{color:var(--texte-doux);font-size:var(--pt-micro);margin-top:8px;max-width:400px}
+.demo{display:flex;flex-wrap:nowrap;gap:6px;margin:0 0 8px;max-width:400px;overflow-x:auto;scrollbar-width:none;padding:1px 0}
+.demo::-webkit-scrollbar{display:none}
+.demo button{flex:none;font-size:var(--pt-micro);border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);border-radius:var(--r-full);padding:6px 10px;min-height:36px;cursor:pointer}
+.demo button.ic{min-width:36px;padding:4px 10px;font-size:16px;line-height:1}
+.demo button:hover{background:var(--survol)}
+.demo button:active{transform:translateY(1px)}
+
+/* ── cadres ── */
+.pc{background:var(--bg-app);border:1px solid var(--ligne-forte);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-md)}
+.pc-corps{padding:0;overflow-x:auto}
+.tel{width:390px;max-width:100%;min-width:0;margin:0;background:var(--bg-app);border:9px solid var(--cadre);border-radius:38px;overflow:hidden;box-shadow:var(--shadow-md);position:relative}
+.tel.haut{height:812px}
+.tel:focus-visible{outline:3px solid var(--anneau);outline-offset:3px}
+.tel-barre{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 6px;font-size:var(--pt-micro);color:var(--texte-med)}
+.tel-corps{padding:0 12px 14px}
+.tel-dock{position:absolute;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--ligne);background:var(--bg-card);padding:8px 6px 12px;font-size:10px;color:var(--texte-doux);text-align:center}
+.tel-dock span.on{color:var(--accent-texte);font-weight:600}
+.tel-dock span i{display:block;width:40px;height:28px;margin:0 auto 3px;border-radius:10px;background:var(--bg-doux);border:1px solid var(--ligne)}
+.tel-dock span.on i{background:var(--accent);border-color:var(--accent)}
+.bande{background:var(--bg-card);border-bottom:1px solid var(--ligne);padding:6px 12px;display:flex;align-items:center;gap:10px}
+.bande .t{font-weight:600;font-size:var(--pt-sm)}
+.bande .s{color:var(--texte-med);font-size:var(--pt-nano);display:block;line-height:1.2}
+.ico{width:32px;height:32px;border-radius:50%;border:1px solid var(--ligne);display:inline-block;background:var(--bg-doux);flex:none}
+.segment{display:flex;gap:4px;background:var(--bg-doux);border:1px solid var(--ligne);border-radius:var(--r-full);padding:3px;margin:8px 12px}
+.segment span{flex:1;text-align:center;padding:7px 6px;border-radius:var(--r-full);font-size:var(--pt-txt);color:var(--texte-med);min-height:36px;display:flex;align-items:center;justify-content:center}
+.segment span.on{background:var(--bg-card);color:var(--texte);font-weight:600;box-shadow:var(--shadow-sm)}
+
+/* ── pièces ── */
+.carte{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:14px 16px;box-shadow:var(--shadow-sm)}
+.carte + .carte{margin-top:10px}
+.carte h3{font-size:var(--pt-md);margin-bottom:4px}
+.cadre-ligne{color:var(--texte-doux);font-size:var(--pt-micro);margin-bottom:8px}
+.etiq{display:inline-flex;align-items:center;gap:4px;font-size:var(--pt-nano);font-weight:600;letter-spacing:.02em;padding:2px 8px;border-radius:var(--r-full);background:var(--bg-doux);color:var(--texte-med);border:1px solid var(--ligne);white-space:nowrap}
+.etiq.ok{background:var(--ok-doux);color:var(--ok-texte);border-color:transparent}
+.etiq.att{background:var(--attention-doux);color:var(--attention-texte);border-color:transparent}
+.etiq.danger{background:var(--danger-doux);color:var(--danger-texte);border-color:transparent}
+.ligne{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--ligne);font-size:var(--pt-base)}
+.ligne:first-child{border-top:0}
+.ligne .nom{font-weight:600;display:block}
+.ligne .sous{color:var(--texte-med);font-size:var(--pt-micro);font-weight:400;display:block}
+.ligne .sous.att{color:var(--attention-texte)}
+.ligne .sous.danger{color:var(--danger-texte)}
+.note{color:var(--texte-doux);font-size:var(--pt-micro)}
+.bouton{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:var(--pt-base);font-weight:600;border-radius:var(--r-md);padding:11px 16px;border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);min-height:44px;cursor:pointer;text-align:center;line-height:1.2}
+.bouton:hover{background:var(--survol)}
+.bouton:active{transform:translateY(1px)}
+.bouton.plein{background:var(--accent);color:var(--sur-accent);border-color:var(--accent)}
+.bouton.plein:hover{filter:brightness(1.06)}
+.bouton.plein[disabled]{background:var(--bg-doux);color:var(--texte-pale);border-color:var(--ligne);cursor:not-allowed;filter:none;transform:none}
+.bouton.petit{min-height:40px;padding:8px 12px;font-size:var(--pt-txt);white-space:nowrap;flex:none}
+.lien{background:none;border:0;color:var(--texte-med);font-size:var(--pt-txt);text-decoration:underline;text-underline-offset:3px;min-height:44px;cursor:pointer;padding:0 8px}
+.session{background:var(--bg-card);border:1px solid var(--ligne);border-left:4px solid var(--accent);border-radius:var(--r-lg);padding:14px;box-shadow:var(--shadow-sm);margin-top:4px}
+.session .k{font-size:var(--pt-nano);font-weight:600;color:var(--accent-texte);letter-spacing:.02em}
+.session .t{font-family:var(--font-titre);font-size:var(--pt-lg);font-weight:600;line-height:1.1}
+.session .pct{font-size:var(--pt-xxl);font-weight:600;line-height:1}
+.session .ligne-cpt{margin-top:8px;font-size:var(--pt-micro);color:var(--texte-med);display:flex;align-items:center;gap:6px;min-height:20px}
+.session .ligne-cpt.ok{color:var(--ok-texte)}
+.session .ligne-cpt.att{color:var(--attention-texte);font-weight:600}
+.jauge{height:10px;background:var(--bg-doux);border-radius:var(--r-full);overflow:hidden;border:1px solid var(--ligne)}
+.jauge i{display:block;height:100%;background:var(--vert-med)}
+.jauge.att i{background:var(--attention)}
+.jauge.danger i{background:var(--danger)}
+.deux-btn{display:flex;gap:8px;margin-top:12px}
+.deux-btn .bouton{flex:1}
+.kpi-ligne{display:flex;gap:14px;flex-wrap:wrap;color:var(--texte-med);font-size:var(--pt-micro);padding:8px 2px 2px}
+.kpi-ligne b{color:var(--texte);font-size:var(--pt-base);font-weight:600;margin-right:3px}
+.voile{position:absolute;inset:0;background:rgba(0,0,0,.32);transition:opacity .25s cubic-bezier(.22,1,.36,1)}
+.feuille{position:absolute;left:0;right:0;bottom:0;background:var(--bg-card);border-radius:20px 20px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.18);padding:8px 16px 14px;transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .25s}
+.feuille .poignee{width:40px;height:4px;border-radius:2px;background:var(--ligne-forte);margin:0 auto 10px}
+.cache{opacity:0;pointer-events:none}
+.feuille.cache{transform:translateY(24px)}
+.toast{position:absolute;left:12px;right:12px;bottom:86px;background:var(--inverse);color:var(--sur-inverse);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-md);font-size:var(--pt-base);transition:opacity .25s,transform .3s cubic-bezier(.22,1,.36,1);z-index:5}
+.toast.cache{transform:translateY(10px)}
+.toast .annuler{color:#F1C2D6;font-weight:600;margin-left:auto;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.08);min-height:40px;border:0;cursor:pointer}
+:root[data-theme="dark"] .toast .annuler{color:var(--accent)}
+.toast .temps{height:3px;position:absolute;left:14px;right:14px;bottom:0;background:rgba(127,127,127,.25);border-radius:2px;overflow:hidden}
+.toast .temps i{display:block;height:100%;width:100%;background:#F1C2D6;border-radius:2px;transform-origin:left}
+.toast.court .temps,.toast.court .annuler{display:none}
+.toast.anim .temps i{animation:decompte 6s linear forwards}
+@keyframes decompte{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+
+/* ── le relevé : cadran et pavé ── */
+.rel-t{font-family:var(--font-titre);font-size:var(--pt-lg);font-weight:600;line-height:1.1}
+.rel-s{color:var(--texte-med);font-size:var(--pt-micro);margin-top:2px}
+.rel-ref{display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px 10px;font-size:var(--pt-micro);color:var(--texte-med);margin-top:10px;padding-top:8px;border-top:1px solid var(--ligne)}
+.rel-ref b{color:var(--texte);font-weight:600}
+.cadran{display:flex;align-items:flex-end;justify-content:center;gap:4px;margin:12px 0 8px;min-height:60px}
+.cadran .c{width:38px;height:56px;border-radius:7px;background:var(--cadran-fond);color:var(--cadran-texte);font-size:32px;font-weight:600;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;box-shadow:inset 0 -12px 14px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.07);border:1px solid var(--ligne-forte)}
+.cadran .c.sep{margin-left:9px}
+.cadran .c.vide{background:transparent;border:1.5px dashed var(--ligne-forte);box-shadow:none}
+.cadran .c.dix{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cadran .c.caret::after{content:"";width:2px;height:28px;background:var(--accent-texte);animation:clign 1.05s steps(1) infinite}
+.cadran .virg{font-size:32px;font-weight:600;line-height:1;margin:0 1px 6px}
+.cadran .u{font-size:var(--pt-md);color:var(--texte-med);margin:0 0 9px 8px}
+@keyframes clign{50%{opacity:0}}
+.rel-msg{display:flex;align-items:flex-start;gap:8px;font-size:var(--pt-txt);padding:9px 11px;border-radius:10px;background:var(--bg-doux);color:var(--texte-med);min-height:42px;line-height:1.35}
+.rel-msg small{display:block;font-size:var(--pt-micro);opacity:.9;margin-top:2px}
+.rel-msg.ok{background:var(--ok-doux);color:var(--ok-texte)}
+.rel-msg.att{background:var(--attention-doux);color:var(--attention-texte)}
+.rel-msg.danger{background:var(--danger-doux);color:var(--danger-texte)}
+.rel-msg .pic{flex:none;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:1.5px solid currentColor;margin-top:1px}
+.pave{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.pave button{height:52px;border-radius:12px;border:1px solid var(--ligne);background:var(--bg-doux);color:var(--texte);font-size:24px;font-weight:600;cursor:pointer;touch-action:manipulation;font-variant-numeric:tabular-nums}
+.pave button:hover{background:var(--survol)}
+.pave button:active{transform:translateY(1px);background:var(--presse)}
+.pave button.ef{font-size:20px;color:var(--texte-med)}
+.rel-act{display:grid;gap:4px;margin-top:12px}
+.rel-act .bouton{min-height:48px;font-size:var(--pt-sm)}
+.banniere{display:flex;gap:10px;align-items:flex-start;background:var(--danger-doux);color:var(--danger-texte);border-radius:10px;padding:10px 12px;font-size:var(--pt-txt);font-weight:500;line-height:1.35;margin-top:10px}
+.banniere .pic{flex:none;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:1.5px solid currentColor;margin-top:1px}
+.champs2{display:grid;grid-template-columns:1fr 1.35fr;gap:8px;margin-top:10px}
+.champ-num{border:1.5px solid var(--ligne-forte);border-radius:12px;padding:7px 11px;background:var(--bg-card);text-align:left;cursor:pointer;min-height:62px}
+.champ-num .l{display:block;font-size:var(--pt-micro);color:var(--texte-med)}
+.champ-num .v{display:block;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.25}
+.champ-num.actif{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-doux)}
+.champ-num .ob{font-size:var(--pt-nano);color:var(--accent-texte);font-weight:600;margin-left:4px}
+.mini-form{display:grid;gap:8px;margin-top:10px}
+.mini-form .ch{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--ligne);border-radius:10px;padding:8px 11px;font-size:var(--pt-base);background:var(--bg-doux)}
+.mini-form .ch .l{color:var(--texte-med);font-size:var(--pt-micro)}
+
+/* ── onglet Entretien ── */
+.tchips{display:flex;gap:6px;overflow-x:auto;padding:0 0 8px;scrollbar-width:none}
+.tchips::-webkit-scrollbar{display:none}
+.tchip{flex:none;padding:8px 12px;border-radius:var(--r-full);border:1px solid var(--ligne-forte);background:var(--bg-card);font-size:var(--pt-txt);min-height:40px;display:inline-flex;align-items:center;gap:6px;color:var(--texte)}
+.tchip.on{background:var(--inverse);color:var(--sur-inverse);border-color:var(--inverse);font-weight:600}
+.pt{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.pt.danger{background:var(--danger)}
+.pt.att{background:var(--attention)}
+.pt.ok{background:var(--ok)}
+.tete-carte{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.tete-carte .l{font-size:var(--pt-micro);color:var(--texte-med);font-weight:500}
+.gros{font-size:var(--pt-xxl);font-weight:600;line-height:1.05;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.gros .ap{color:var(--texte-doux);font-weight:500;margin-right:3px}
+.gros small{font-size:var(--pt-base);color:var(--texte-med);font-weight:500;margin-left:3px}
+.puce-est{display:flex;align-items:flex-start;gap:7px;font-size:var(--pt-micro);color:var(--texte-med);margin-top:4px}
+.puce-est i{flex:none;width:12px;height:0;border-top:2px dashed var(--texte-doux);display:inline-block;margin-top:8px}
+.plan-l{padding:10px 0;border-top:1px solid var(--ligne)}
+.plan-l:first-child{border-top:0;padding-top:2px}
+.plan-l .hd{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.plan-l .n{font-weight:600;font-size:var(--pt-base)}
+.plan-l .s{color:var(--texte-med);font-size:var(--pt-micro);margin-top:4px}
+.plan-l .jauge{margin-top:8px;height:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:var(--pt-txt);padding:8px 12px;border-radius:var(--r-full);border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);min-height:40px;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.chip.on{background:var(--vert);border-color:var(--vert);color:#fff;font-weight:600}
+:root[data-theme="dark"] .chip.on{color:#0D0D0C}
+.groupe{margin-top:12px}
+.groupe > .l{font-size:var(--pt-micro);color:var(--texte-med);margin-bottom:6px;display:block}
+.resultat{margin-top:12px;background:var(--bg-doux);border:1px solid var(--ligne);border-radius:10px;padding:10px 12px;font-size:var(--pt-txt)}
+.resultat .l{font-size:var(--pt-micro);color:var(--texte-med)}
+.resultat div + div{margin-top:4px}
+.resultat b{font-weight:600}
+
+/* ── ordinateur ── */
+.pc-deux{display:grid;grid-template-columns:150px minmax(0,1fr) minmax(0,1fr);min-height:560px;min-width:860px}
+.pc-fiche{display:grid;grid-template-columns:150px 210px minmax(0,1fr);min-height:640px;min-width:1100px}
+.rail{background:var(--bg-card);border-right:1px solid var(--ligne);padding:12px}
+.rail .logo{font-family:var(--font-titre);font-size:var(--pt-md);font-weight:600;margin-bottom:10px}
+.rail .grp{font-size:var(--pt-nano);color:var(--texte-doux);margin:10px 0 4px}
+.rail .it{padding:7px 8px;border-radius:8px;font-size:var(--pt-txt);display:flex;align-items:center;gap:8px;min-height:36px}
+.rail .it.on{background:var(--accent-doux);color:var(--accent-texte);font-weight:600}
+.colonne{padding:16px;border-right:1px solid var(--ligne);background:var(--bg-app)}
+.colonne:last-child{border-right:0}
+.colonne.claire{background:var(--bg-card)}
+.colonne h4{margin:0 0 8px;font-family:var(--font-titre);font-size:var(--pt-md);font-weight:600}
+.tliste{background:var(--bg-app);border-right:1px solid var(--ligne);padding:12px 8px}
+.tliste h4{margin:4px 6px 8px;font-family:var(--font-titre);font-size:var(--pt-md);font-weight:600}
+.titem{display:block;padding:9px 10px;border-radius:10px;margin-bottom:4px;border:1px solid transparent}
+.titem.on{background:var(--bg-card);border-color:var(--ligne);box-shadow:var(--shadow-sm)}
+.titem .n{font-weight:600;font-size:var(--pt-txt);display:flex;align-items:center;gap:6px}
+.titem .s{color:var(--texte-med);font-size:var(--pt-micro)}
+.detail{background:var(--bg-card);padding:16px 18px}
+.detail h3{font-size:var(--pt-lg)}
+.grille-2{display:grid;grid-template-columns:1.1fr 1fr;gap:12px;margin-top:12px}
+.grille-2b{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:12px}
+.plan-grille{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 22px}
+.plan-grille .plan-l{border-top:0;padding-top:2px}
+.encadre .tete-enc{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.encadre .tete-enc h5{margin:0}
+.releves td:first-child,.releves td.r,.releves th{white-space:nowrap}
+.encadre{border:1px solid var(--ligne);border-radius:var(--r-lg);padding:12px 14px;background:var(--bg-card)}
+.encadre h5{margin:0 0 8px;font-size:var(--pt-base);font-weight:600}
+.appris{display:grid;gap:8px;font-size:var(--pt-txt);color:var(--texte-med)}
+.appris b{color:var(--texte);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:var(--pt-txt)}
+th{text-align:left;font-size:var(--pt-nano);font-weight:600;color:var(--texte-med);letter-spacing:.02em;padding:6px 8px;border-bottom:1px solid var(--ligne-forte);white-space:nowrap}
+td{padding:7px 8px;border-bottom:1px solid var(--ligne);vertical-align:middle}
+td.r,th.r{text-align:right}
+tr.estime td{background:var(--bg-doux);color:var(--texte-med)}
+tr.manque td{color:var(--texte-doux)}
+tr .act{opacity:0;transition:opacity .2s}
+tr:hover .act,tr:focus-within .act{opacity:1}
+.act a{color:var(--accent-texte);font-size:var(--pt-micro);margin-left:8px;text-decoration:none}
+.graph svg{width:100%;height:auto;display:block}
+.graph text{font-family:var(--font-ui);font-size:11px;fill:var(--texte-doux)}
+.legende-graph{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:var(--pt-micro);color:var(--texte-med);margin-top:6px}
+.legende-graph span{display:inline-flex;align-items:center;gap:6px}
+
+/* ── constat, grands, règles, intégration ── */
+.grands{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:12px}
+.grand{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.grand h3{font-size:var(--pt-md)}
+.grand .cat{font-size:var(--pt-micro);color:var(--texte-doux)}
+.grand p{font-size:var(--pt-txt);color:var(--texte-med)}
+.grand .retenir{margin-top:auto;padding-top:8px;border-top:1px solid var(--ligne);color:var(--texte);font-weight:500}
+.principes{margin-top:14px;background:var(--bg-card);border:1px solid var(--ligne-forte);border-radius:var(--r-lg);padding:14px 18px}
+.principes h3{font-size:var(--pt-md);margin-bottom:6px}
+.principes ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:var(--pt-base)}
+.regles{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.regle{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:16px}
+.regle h3{font-size:var(--pt-md);margin-bottom:6px}
+.regle p{font-size:var(--pt-txt);color:var(--texte-med)}
+.regle .qui{display:inline-block;font-size:var(--pt-nano);font-weight:600;color:var(--accent-texte);background:var(--accent-doux);border-radius:var(--r-full);padding:2px 8px;margin-bottom:8px}
+.pourquoi-pas{margin-top:14px;display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+@media (min-width:900px){.pourquoi-pas{grid-template-columns:1.3fr 1fr}}
+.pourquoi-pas .carte p{font-size:var(--pt-base);color:var(--texte-med);max-width:72ch}
+.pourquoi-pas .carte p + p{margin-top:8px}
+.pourquoi-pas .carte b{color:var(--texte)}
+.integ{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+@media (min-width:900px){.integ{grid-template-columns:1fr 1fr}}
+.integ .carte p,.integ .carte li{font-size:var(--pt-txt);color:var(--texte-med)}
+.integ .carte ul{margin:6px 0 0;padding-left:18px;display:grid;gap:6px}
+.integ .carte b{color:var(--texte);font-weight:600}
+.lots{display:grid;gap:8px;margin-top:6px}
+.lot{display:grid;grid-template-columns:76px minmax(0,1fr);gap:10px;align-items:baseline;font-size:var(--pt-txt);color:var(--texte-med)}
+.lot b{color:var(--texte);font-weight:600}
+footer{color:var(--texte-doux);font-size:var(--pt-micro);border-top:1px solid var(--ligne-forte);padding-top:14px;max-width:90ch}
+@media (max-width:520px){
+  .page{padding:20px 12px 64px}
+  .entete{padding:10px 12px}
+  .tel{border-width:7px;border-radius:32px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header class="entete">
+  <div>
+    <h1>Ma Vigne — le compteur des tracteurs, maquette v1</h1>
+    <div class="base">Base <span class="num">98b75bd</span> · APP <span class="num">10.33</span> · 29 octobre 2026 · suite de TRAC-UX-1B, à ranger dans docs/maquettes/</div>
+  </div>
+  <nav aria-label="Sections">
+    <a href="#constat">Constat</a>
+    <a href="#grands">Les grands</a>
+    <a href="#proposition">Proposition</a>
+    <a href="#releve">Relevé</a>
+    <a href="#entretien">Entretien</a>
+    <a href="#ordinateur">Ordinateur</a>
+    <a href="#integration">Intégration</a>
+    <button type="button" id="theme" onclick="basculer()">Sombre</button>
+  </nav>
+</header>
+
+<main class="page">
+  <p class="intro">Aujourd’hui, le compteur d’un tracteur ne bouge que si quelqu’un va le retaper dans un coin de l’onglet Entretien. Alors il se fige, et l’alerte de révision ment. <b>Cette maquette fait l’inverse : le compteur avance tout seul avec les sessions, et le tractoriste le relève au passage</b>, dans des gestes qu’il fait déjà. Trois secondes, une fois par jour.</p>
+
+  <!-- ═══ CONSTAT ═══ -->
+  <section class="ecart" id="constat">
+    <div class="ecart-tete">
+      <h2>Ce qui coince aujourd’hui</h2>
+      <p class="ou">Mesuré dans le code, base 98b75bd (TRAC-UX-1B compris). Aucune supposition.</p>
+    </div>
+    <div class="mesures">
+      <div class="mesure"><div class="k">1<small>endroit</small></div><div class="l">pour saisir le compteur : Tracteur › Entretien › « Prochaine révision », deux champs tapés à la main, compteur et cible.</div><div class="b"><code>saveRev</code> est le seul geste qui écrit <code>compteur_h</code>.</div></div>
+      <div class="mesure"><div class="k">0<small>lien</small></div><div class="l">avec les heures que les sessions calculent déjà (chrono, sinon barème).</div><div class="b"><code>_trMinutes</code> les compte pour le GNR, jamais pour le compteur.</div></div>
+      <div class="mesure"><div class="k">0<small>date</small></div><div class="l">aucun historique : 1 168 h, est-ce d’hier ou de mars ? Après une révision, la cible suivante se calcule de tête et se retape.</div><div class="b">Un seul chiffre par tracteur, sans auteur ni jour.</div></div>
+      <div class="mesure"><div class="k">5<small>écrans</small></div><div class="l">lisent ce chiffre figé : le parc de la colonne de droite, la carte Révision, l’accueil du tractoriste, le rapport de saison, le Pilotage.</div><div class="b">Le Pilotage calcule même « atteinte pendant » tel travail, et un repère en jours : sur un compteur faux.</div></div>
+      <div class="mesure"><div class="k">4<small>endroits</small></div><div class="l">écrivent encore « révision dans -20 h » quand elle est dépassée : la carte Révision de l’Entretien, le rapport de saison, la liste et la tuile du Pilotage.</div><div class="b">TRAC-UX-1B l’écrit déjà juste à droite ; la bande des pastilles, masquée, garde sa table de couleurs morte.</div></div>
+    </div>
+  </section>
+
+  <!-- ═══ LES GRANDS ═══ -->
+  <section class="ecart" id="grands">
+    <div class="ecart-tete">
+      <h2>Ce que font les plus grands</h2>
+      <p class="ou">Constructeur, gestion de flotte, boîtier connecté, GMAO. Résumé de leurs aides en ligne et de la presse agricole, reformulé.</p>
+    </div>
+    <div class="grands">
+      <article class="grand">
+        <div class="cat">Constructeur</div>
+        <h3>John Deere Operations Center</h3>
+        <p>Machines connectées : les heures moteur remontent seules et nourrissent les plans d’entretien d’usine. Machines non connectées : le conducteur tape les heures du cadran à la fin de son travail, sur un seul écran, et la réalisation d’un entretien se note à la main.</p>
+        <p class="retenir">Le relevé se demande à la fin du travail, pas dans un menu.</p>
+      </article>
+      <article class="grand">
+        <div class="cat">Gestion de flotte</div>
+        <h3>Fleetio, le relevé</h3>
+        <p>Pas d’écran « compteur » : il se saisit dans les gestes existants (plein, inspection, entretien, affectation, signalement). Chaque valeur est contrôlée contre l’historique : trop basse, on corrige ; un peu haute au regard de l’usage habituel, on confirme ; trop haute, on refuse. Sur un entretien, le relevé est exigé par défaut.</p>
+        <p class="retenir">Le compteur vient avec ce qu’on fait déjà. Contrôle immédiat, à trois niveaux.</p>
+      </article>
+      <article class="grand">
+        <div class="cat">Gestion de flotte</div>
+        <h3>Fleetio, les rappels</h3>
+        <p>Chaque entretien a son intervalle en heures et/ou en temps, déclenché au premier atteint, avec un seuil « bientôt dû ». La date suivante se prévoit d’après l’usage moyen de la machine, ce qui demande moins de relevés.</p>
+        <p class="retenir">Des intervalles, plus de cible à retaper. Une date repère.</p>
+      </article>
+      <article class="grand">
+        <div class="cat">Boîtier connecté, France</div>
+        <h3>Karnott</h3>
+        <p>Un boîtier posé sur la machine compte seul le temps et les surfaces, vigne comprise. Aucune saisie : l’utilisateur ne fait que consulter.</p>
+        <p class="retenir">L’idéal est de ne rien demander ; à défaut, le moins possible.</p>
+      </article>
+      <article class="grand">
+        <div class="cat">GMAO</div>
+        <h3>Oracle Maintenance</h3>
+        <p>Le rythme d’usage d’une machine se recalcule à chaque relevé et nourrit la prévision des entretiens. La saisie du compteur peut être rendue obligatoire quand c’est la source principale.</p>
+        <p class="retenir">L’obligation se règle selon l’enjeu.</p>
+      </article>
+    </div>
+    <div class="principes">
+      <h3>Ce qu’on en retient</h3>
+      <ul>
+        <li>Le compteur arrive avec un geste qu’on fait déjà : fin de travail, plein, entretien. Jamais sur un écran à part.</li>
+        <li>Chaque chiffre est contrôlé contre le précédent, tout de suite, là où il est tapé.</li>
+        <li>Des intervalles en heures ou en mois, au premier atteint. Pas une cible.</li>
+        <li>Entre deux relevés, l’usage mesuré fait le travail : moins de relevés, et une date repère.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══ PROPOSITION ═══ -->
+  <section class="ecart" id="proposition">
+    <div class="ecart-tete">
+      <h2>La proposition</h2>
+      <p class="pourquoi">Quatre règles. Le tractoriste n’en voit qu’une, la deuxième ; les trois autres travaillent pour lui.</p>
+    </div>
+    <div class="regles">
+      <div class="regle">
+        <span class="qui">Ma Vigne, en silence</span>
+        <h3>Il avance tout seul</h3>
+        <p>Entre deux relevés, Ma Vigne ajoute au dernier relevé les heures notées par les sessions (chrono, sinon barème), corrigées par l’écart qu’elle apprend à chaque relevé : la route, le ralenti. Le chiffre s’affiche « ≈ » : on voit qu’il est estimé, et depuis quand.</p>
+      </div>
+      <div class="regle">
+        <span class="qui">Le tractoriste, 3 secondes</span>
+        <h3>On le relève au passage</h3>
+        <p>Une fois par jour et par tracteur, au premier « Enregistrer l’avancement » ou « Terminer » de la journée. Au plein et à la révision faite, le compteur fait partie de la fiche. Un pavé large, le dernier relevé et le chiffre attendu sous les yeux, un contrôle immédiat.</p>
+      </div>
+      <div class="regle">
+        <span class="qui">Quand ça compte</span>
+        <h3>Obligatoire au démarrage</h3>
+        <p>Révision à 50 h ou moins, ou dépassée, ou plus de 7 jours sans vrai relevé : pas de nouvelle session sur ce tracteur sans son compteur. On n’empêche jamais d’enregistrer un travail : on exige le chiffre au moment où le tractoriste est devant la machine.</p>
+      </div>
+      <div class="regle">
+        <span class="qui">L’admin, une fois</span>
+        <h3>La révision se recalcule</h3>
+        <p>On règle une fois l’intervalle : toutes les 500 h ou tous les 12 mois, au premier atteint. « Révision faite » avec son compteur, et la suivante se calcule. Seuils inchangés : orange à 120 h, rouge à 50 h.</p>
+      </div>
+    </div>
+    <div class="pourquoi-pas">
+      <div class="carte">
+        <h3>Pourquoi pas un relevé à chaque utilisation ?</h3>
+        <p>Le demander à chaque geste, c’est le demander quand le tractoriste est au bureau, ou chez lui le soir. Il finit par taper n’importe quoi pour passer : c’est précisément l’erreur de saisie pressée contre laquelle Fleetio a bâti ses contrôles.</p>
+        <p>Or une révision tombe toutes les 500 h, et une journée en fait 4 ou 5. <b>Un vrai relevé par jour d’utilisation suffit largement</b>, l’estimation couvre les trous, et l’obligation stricte se déclenche là où l’exactitude compte : près de la révision, ou quand les relevés manquent depuis une semaine.</p>
+      </div>
+      <div class="carte">
+        <h3>Corrigé au passage</h3>
+        <p>« Dans -20 h » devient « dépassée de 20 h » là où il s’écrit encore : la carte Révision, le rapport de saison, la liste et la tuile du Pilotage. La colonne de droite de TRAC-UX-1B, l’accueil et la carte Révision du Pilotage le disent déjà bien. La bande des pastilles, masquée partout, part avec sa table de couleurs qui ne lisait jamais ses clés.</p>
+      </div>
+    </div>
+  </section>
+  <!-- ═══ RELEVÉ AU PASSAGE ═══ -->
+  <section class="ecart" id="releve">
+    <div class="ecart-tete">
+      <h2>Téléphone — le relevé au passage</h2>
+      <p class="ou">Trois moments, un seul geste : le même pavé, les mêmes contrôles. Les écrans répondent : tape un chiffre.</p>
+      <p class="pourquoi">Le cadran reprend celui du tracteur : on recopie ce qu’on voit, chiffre par chiffre, le dixième à part comme sur le compteur. Touches de 52 px, utilisables avec des gants ; le bouton dit exactement ce qui sera noté. Trois niveaux de contrôle, comme Fleetio : plus bas que le précédent, refusé ; beaucoup plus que prévu, à confirmer ; impossible dans le temps écoulé, refusé.</p>
+    </div>
+    <div class="ecrans trois-tel">
+
+      <!-- A · fin de journée -->
+      <div>
+        <p class="legende-ecran"><b>Fin de journée.</b> Après « Enregistrer l’avancement », la première fois du jour sur ce tracteur.</p>
+        <div class="demo" aria-label="Cas à essayer sur ce téléphone">
+          <button type="button" data-demo="telA" data-val="1189,4">Cohérent</button>
+          <button type="button" data-demo="telA" data-val="1116,8">Trop bas</button>
+          <button type="button" data-demo="telA" data-val="1218">Beaucoup</button>
+          <button type="button" data-demo="telA" data-val="11894">Impossible</button>
+          <button type="button" class="ic" data-rejouer="telA" aria-label="Rejouer" title="Rejouer">↺</button>
+        </div>
+        <div class="tel haut" id="telA" tabindex="0" aria-label="Téléphone : relevé de fin de journée">
+          <div class="tel-barre"><span class="num">12:04</span><span>Gevrey · 14 °C</span></div>
+          <div class="bande"><span class="ico"></span><div style="flex:1"><div class="t">Tracteur</div><span class="s">Parc · saison 2026 · 2 sessions</span></div></div>
+          <div class="segment"><span class="on">Sessions</span><span>Entretien</span></div>
+          <div class="tel-corps">
+            <div class="session">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+                <div><div class="k">En cours</div><div class="t">Griffage</div><div class="note">Marie · New Holland T4.90F · depuis le 26 oct.</div></div>
+                <div class="pct num">35<small style="font-size:var(--pt-base)"> %</small></div>
+              </div>
+              <div class="jauge" style="margin-top:10px"><i style="width:35%"></i></div>
+              <div class="note" style="margin-top:4px">2,46 ha sur 7,02</div>
+              <div class="ligne-cpt" data-ligne-cpt>Compteur ≈ 1 187 h, estimé</div>
+              <div class="deux-btn"><span class="bouton plein">Enregistrer l’avancement</span><span class="bouton" style="flex:.6">Terminer</span></div>
+            </div>
+            <div class="kpi-ligne"><span><b>2</b>sessions</span><span><b>1</b>en cours</span><span><b>186 h</b>de moteur</span></div>
+            <div class="carte" style="padding:0 14px;margin-top:8px">
+              <div class="ligne"><span><span class="nom">Broyage · Les Perrières</span><span class="sous">Jean · hier · 1 h 50</span></span><span class="etiq ok">terminé</span></div>
+              <div class="ligne"><span><span class="nom">Buttage · Clos du Moulin</span><span class="sous">Paul · 22 oct. · 3 h 10</span></span><span class="etiq ok">terminé</span></div>
+            </div>
+          </div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span><i></i>Vigne</span><span class="on"><i></i>Tracteur</span><span><i></i>Phyto</span><span><i></i>Plus</span></div>
+          <div class="voile" data-voile></div>
+          <div class="feuille" data-feuille role="dialog" aria-label="Compteur du New Holland T4.90F">
+            <div class="poignee"></div>
+            <div class="rel-t">Compteur du New Holland T4.90F</div>
+            <div class="rel-s">Relevé du jour : le chiffre du cadran, une seule fois aujourd’hui.</div>
+            <div class="rel-ref"><span>Dernier : <b>1 168,0 h</b> lundi, Marie</span><span>attendu <b>≈ 1 187 h</b></span></div>
+            <div class="cadran" data-cadran aria-live="polite"></div>
+            <div class="rel-msg" data-msg></div>
+            <div class="pave" role="group" aria-label="Pavé numérique">
+              <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+              <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+              <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+              <button type="button" data-k="," aria-label="Virgule">,</button><button type="button" data-k="0">0</button><button type="button" data-k="del" class="ef" aria-label="Effacer le dernier chiffre">⌫</button>
+            </div>
+            <div class="rel-act">
+              <button type="button" class="bouton plein" data-valider disabled>Valider</button>
+              <button type="button" class="lien" data-plustard>Pas devant le tracteur</button>
+            </div>
+          </div>
+          <div class="toast cache" data-toast role="status"><span data-toast-t></span><button type="button" class="annuler" data-annuler>Annuler</button><span class="temps"><i></i></span></div>
+        </div>
+        <p class="sous-ecran">Le travail est déjà enregistré quand la feuille monte : la question ne bloque jamais l’avancement. « Pas devant le tracteur » la repose au geste suivant ; la journée reste estimée, et l’admin le voit.</p>
+      </div>
+
+      <!-- B · au plein -->
+      <div>
+        <p class="legende-ecran"><b>Au plein.</b> Le compteur fait partie de la fiche, comme le litrage.</p>
+        <div class="demo" aria-label="Cas à essayer sur ce téléphone">
+          <button type="button" data-demo="telB" data-val="1189,4">Exemple</button>
+          <button type="button" class="ic" data-rejouer="telB" aria-label="Rejouer" title="Rejouer">↺</button>
+        </div>
+        <div class="tel haut" id="telB" tabindex="0" aria-label="Téléphone : plein avec relevé du compteur">
+          <div class="tel-barre"><span class="num">17:52</span><span>Gevrey · 12 °C</span></div>
+          <div class="bande"><span class="ico"></span><div style="flex:1"><div class="t">Tracteur</div><span class="s">Parc · 3 machines</span></div></div>
+          <div class="segment"><span>Sessions</span><span class="on">Entretien</span></div>
+          <div class="tel-corps">
+            <div class="tchips"><span class="tchip on">T4.90F</span><span class="tchip"><i class="pt danger"></i>Fendt 211 V</span><span class="tchip"><i class="pt att"></i>Bobard</span></div>
+            <div class="carte"><div class="tete-carte"><span class="l">Compteur</span></div><div class="gros"><span class="ap">≈</span>1 187<small>h</small></div></div>
+          </div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span><i></i>Vigne</span><span class="on"><i></i>Tracteur</span><span><i></i>Phyto</span><span><i></i>Plus</span></div>
+          <div class="voile" data-voile></div>
+          <div class="feuille" data-feuille role="dialog" aria-label="Plein du New Holland T4.90F">
+            <div class="poignee"></div>
+            <div class="rel-t">Plein — New Holland T4.90F</div>
+            <div class="rel-s">Cuve GNR : 1 240 L · fiche « Plein fait » au nom de Marie</div>
+            <div class="champs2">
+              <button type="button" class="champ-num" data-champ="l"><span class="l">Litres mis</span><span class="v num" data-v="l">96 L</span></button>
+              <button type="button" class="champ-num actif" data-champ="h"><span class="l">Compteur<span class="ob">obligatoire</span></span><span class="v num" data-v="h">— h</span></button>
+            </div>
+            <div class="rel-ref"><span>Dernier : <b>1 168,0 h</b> lundi, Marie</span><span>attendu <b>≈ 1 187 h</b></span></div>
+            <div class="cadran" data-cadran aria-live="polite"></div>
+            <div class="rel-msg" data-msg></div>
+            <div class="pave" role="group" aria-label="Pavé numérique">
+              <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+              <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+              <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+              <button type="button" data-k="," aria-label="Virgule">,</button><button type="button" data-k="0">0</button><button type="button" data-k="del" class="ef" aria-label="Effacer le dernier chiffre">⌫</button>
+            </div>
+            <div class="rel-act">
+              <button type="button" class="bouton plein" data-valider disabled>Noter le plein</button>
+            </div>
+          </div>
+          <div class="toast cache" data-toast role="status"><span data-toast-t></span><button type="button" class="annuler" data-annuler>Annuler</button><span class="temps"><i></i></span></div>
+        </div>
+        <p class="sous-ecran">Au plein, on est devant la machine : le chiffre est exigé, sans échappatoire. C’est le relevé le plus sûr de la semaine. Touche « Litres mis » pour corriger le litrage avec le même pavé.</p>
+      </div>
+
+      <!-- C · démarrage, révision dépassée -->
+      <div>
+        <p class="legende-ecran"><b>Au démarrage, quand ça compte.</b> Le Fendt a dépassé sa révision : on ne démarre pas sans son compteur.</p>
+        <div class="demo" aria-label="Cas à essayer sur ce téléphone">
+          <button type="button" data-demo="telC" data-val="2029,5">Exemple</button>
+          <button type="button" class="ic" data-rejouer="telC" aria-label="Rejouer" title="Rejouer">↺</button>
+        </div>
+        <div class="tel haut" id="telC" tabindex="0" aria-label="Téléphone : démarrage d’une session, compteur exigé">
+          <div class="tel-barre"><span class="num">07:46</span><span>Gevrey · 8 °C</span></div>
+          <div class="bande"><span class="ico"></span><div style="flex:1"><div class="t">Tracteur</div><span class="s">Parc · saison 2026 · 2 sessions</span></div></div>
+          <div class="segment"><span class="on">Sessions</span><span>Entretien</span></div>
+          <div class="tel-corps">
+            <div class="carte" style="padding:0 14px">
+              <div class="ligne"><span><span class="nom">Broyage · Les Perrières</span><span class="sous">Jean · hier · 1 h 50</span></span><span class="etiq ok">terminé</span></div>
+            </div>
+          </div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span><i></i>Vigne</span><span class="on"><i></i>Tracteur</span><span><i></i>Phyto</span><span><i></i>Plus</span></div>
+          <div class="voile" data-voile></div>
+          <div class="feuille" data-feuille role="dialog" aria-label="Nouvelle session">
+            <div class="poignee"></div>
+            <div class="rel-t">Nouvelle session</div>
+            <div class="mini-form">
+              <div class="ch"><span><span class="l">Activité et tracteur</span><br>Rognage · Fendt 211 V</span><span class="etiq danger">révision dépassée</span></div>
+            </div>
+            <div class="banniere" data-ban><span class="pic">!</span><span data-ban-t>Révision dépassée d’environ 18 h. Donne le compteur du Fendt 211 V pour démarrer.</span></div>
+            <div class="rel-ref"><span>Dernier : <b>2 018,0 h</b> vendredi, Paul</span><span>attendu <b>≈ 2 031 h</b></span></div>
+            <div class="cadran" data-cadran aria-live="polite"></div>
+            <div class="rel-msg" data-msg></div>
+            <div class="pave" role="group" aria-label="Pavé numérique">
+              <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+              <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+              <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+              <button type="button" data-k="," aria-label="Virgule">,</button><button type="button" data-k="0">0</button><button type="button" data-k="del" class="ef" aria-label="Effacer le dernier chiffre">⌫</button>
+            </div>
+            <div class="rel-act">
+              <button type="button" class="bouton plein" data-valider disabled>Valider et démarrer</button>
+            </div>
+          </div>
+          <div class="toast cache" data-toast role="status"><span data-toast-t></span><button type="button" class="annuler" data-annuler>Annuler</button><span class="temps"><i></i></span></div>
+        </div>
+        <p class="sous-ecran">Seuls cas sans échappatoire : révision à 50 h ou moins, dépassée, ou 7 jours sans vrai relevé. La session démarre aussitôt : on n’arrête jamais le travail, on exige le chiffre au seul moment où le tractoriste est forcément devant la machine.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ ONGLET ENTRETIEN ═══ -->
+  <section class="ecart" id="entretien">
+    <div class="ecart-tete">
+      <h2>Téléphone — l’onglet Entretien</h2>
+      <p class="ou">La carte « Prochaine révision » et ses deux champs disparaissent. Le compteur et ses échéances se lisent, rien ne se retape.</p>
+    </div>
+    <div class="ecrans deux-tel">
+
+      <!-- D · onglet Entretien -->
+      <div>
+        <p class="legende-ecran"><b>Entretien › New Holland T4.90F.</b> Le chiffre estimé dit d’où il vient ; l’échéance dit quand.</p>
+        <div class="tel" style="min-height:812px" aria-label="Téléphone : onglet Entretien">
+          <div class="tel-barre"><span class="num">08:12</span><span>Gevrey · 9 °C</span></div>
+          <div class="bande"><span class="ico"></span><div style="flex:1"><div class="t">Tracteur</div><span class="s">Parc · 3 machines</span></div></div>
+          <div class="segment"><span>Sessions</span><span class="on">Entretien</span></div>
+          <div class="tel-corps" style="padding-bottom:96px">
+            <div class="tchips"><span class="tchip on">T4.90F</span><span class="tchip"><i class="pt danger"></i>Fendt 211 V</span><span class="tchip"><i class="pt att"></i>Bobard</span></div>
+            <div class="carte">
+              <div class="tete-carte"><span class="l">Compteur</span><span class="bouton petit">Relever</span></div>
+              <div class="gros" style="margin-top:2px"><span class="ap">≈</span>1 187<small>h</small></div>
+              <div class="puce-est"><i></i><span>estimé : 1 168,0 h relevés lundi par Marie, plus 14 h 40 notées × 1,3</span></div>
+            </div>
+            <div class="carte">
+              <div class="tete-carte"><span style="font-weight:600;font-size:var(--pt-base)">Révision 500 h</span><span class="etiq att">dans 63 h</span></div>
+              <div class="jauge att" style="margin-top:10px"><i style="width:87%"></i></div>
+              <div class="note" style="margin-top:6px;color:var(--texte-med)">à 1 250 h ou le 14 mars 2027, au premier atteint</div>
+              <div class="note">Repère : environ 14 jours ouvrés, au rythme du compteur.</div>
+              <div style="margin-top:10px"><span class="bouton">Révision faite</span></div>
+            </div>
+            <div class="carte" style="padding:2px 16px">
+              <div class="ligne"><span><span class="nom">Vidange pont et boîte</span><span class="sous">toutes les 1 000 h</span></span><span class="etiq">dans 333 h</span></div>
+              <div class="ligne"><span><span class="nom">Filtre à air cabine</span><span class="sous">tous les 12 mois</span></span><span class="etiq">3 mars 2027</span></div>
+            </div>
+            <div class="carte" style="padding:2px 16px">
+              <div class="ligne"><span><span class="nom">Cuve GNR</span><span class="sous">1 240 L · dernier appoint 18 oct.</span></span><span class="bouton petit">Faire le plein</span></div>
+            </div>
+          </div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span><i></i>Vigne</span><span class="on"><i></i>Tracteur</span><span><i></i>Phyto</span><span><i></i>Plus</span></div>
+        </div>
+        <p class="sous-ecran">« Relever » ouvre le même pavé, à tout moment. Les pastilles du Fendt et du Bobard disent déjà ce qui presse, sans ouvrir.</p>
+      </div>
+
+      <!-- E · révision faite -->
+      <div>
+        <p class="legende-ecran"><b>Révision faite.</b> Le compteur est exigé : la suivante se calcule dessus.</p>
+        <div class="tel haut" id="telE" aria-label="Téléphone : révision faite">
+          <div class="tel-barre"><span class="num">16:20</span><span>Gevrey · 13 °C</span></div>
+          <div class="bande"><span class="ico"></span><div style="flex:1"><div class="t">Tracteur</div><span class="s">Parc · 3 machines</span></div></div>
+          <div class="segment"><span>Sessions</span><span class="on">Entretien</span></div>
+          <div class="tel-corps">
+            <div class="tchips"><span class="tchip on">T4.90F</span><span class="tchip"><i class="pt danger"></i>Fendt 211 V</span><span class="tchip"><i class="pt att"></i>Bobard</span></div>
+          </div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span><i></i>Vigne</span><span class="on"><i></i>Tracteur</span><span><i></i>Phyto</span><span><i></i>Plus</span></div>
+          <div class="voile"></div>
+          <div class="feuille" role="dialog" aria-label="Révision faite">
+            <div class="poignee"></div>
+            <div class="rel-t">Révision faite</div>
+            <div class="rel-s">New Holland T4.90F</div>
+            <div class="groupe"><span class="l">Quand</span><div class="chips"><span class="chip on">Aujourd’hui</span><span class="chip">Autre jour</span></div></div>
+            <div class="groupe"><span class="l">Compteur <span class="ob" style="font-size:var(--pt-nano);color:var(--accent-texte);font-weight:600">obligatoire</span></span>
+              <div class="champ-num actif" style="cursor:default"><span class="v num">1 189,4 h</span></div>
+              <div class="rel-msg ok" style="margin-top:6px"><span class="pic">✓</span><span>+21,4 h depuis lundi : cohérent.</span></div>
+            </div>
+            <div class="groupe"><span class="l">Ce qui a été fait</span>
+              <div class="chips" data-faits>
+                <button type="button" class="chip on" data-item="rev" aria-pressed="true">Révision 500 h</button>
+                <button type="button" class="chip" data-item="pont" aria-pressed="false">Vidange pont et boîte</button>
+                <button type="button" class="chip" data-item="filtre" aria-pressed="false">Filtre à air cabine</button>
+              </div>
+            </div>
+            <div class="groupe"><span class="l">Par</span><div class="chips"><span class="chip on">Au domaine</span><span class="chip">Garage</span></div></div>
+            <div class="resultat" data-resultat aria-live="polite"></div>
+            <div class="rel-act"><span class="bouton plein">Enregistrer la révision</span></div>
+          </div>
+        </div>
+        <p class="sous-ecran">Coche une autre ligne : sa prochaine échéance se calcule. Les intervalles se règlent une fois par l’admin ; la cible d’aujourd’hui devient la première échéance.</p>
+      </div>
+    </div>
+  </section>
+  <!-- ═══ ORDINATEUR ═══ -->
+  <section class="ecart" id="ordinateur">
+    <div class="ecart-tete">
+      <h2>Ordinateur — le parc et la fiche du tracteur</h2>
+      <p class="ou">Dans la mise en page de TRAC-UX-1B : la session et la liste à gauche, le parc et le GNR à droite ; l’onglet Entretien garde la sienne, machines à gauche.</p>
+    </div>
+    <div class="ecrans">
+      <div>
+        <p class="legende-ecran" style="max-width:none"><b>Tracteur › Sessions.</b> La colonne de droite de TRAC-UX-1B telle qu’elle est, rangée par urgence, plus deux choses : l’estimé (« ≈ ») et le relevé qui manque.</p>
+        <div class="pc"><div class="pc-corps"><div class="pc-deux">
+          <div class="rail">
+            <div class="logo">Ma Vigne</div>
+            <div class="it">Pilotage</div>
+            <div class="grp">Terrain</div><div class="it">Vigne</div><div class="it on">Tracteur</div><div class="it">Phyto</div>
+            <div class="grp">Cave et réserve</div><div class="it">Cave</div><div class="it">Réserve</div>
+            <div class="grp">Organisation</div><div class="it">Planning</div><div class="it">Réglages</div>
+          </div>
+          <div class="colonne">
+            <h4>En cours</h4>
+            <div class="session" style="margin-top:0">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+                <div><div class="k">En cours</div><div class="t">Griffage</div><div class="note">Marie · New Holland T4.90F · depuis le 26 oct.</div></div>
+                <div class="pct num">35<small style="font-size:var(--pt-base)"> %</small></div>
+              </div>
+              <div class="jauge" style="margin-top:10px"><i style="width:35%"></i></div>
+              <div class="note" style="margin-top:4px">2,46 ha sur 7,02 · Aux Murgers, La Combotte faites</div>
+              <div class="ligne-cpt">Compteur ≈ 1 187 h, estimé · pas encore relevé aujourd’hui</div>
+              <div class="deux-btn"><span class="bouton plein">Enregistrer l’avancement</span><span class="bouton">Terminer</span></div>
+            </div>
+            <div class="kpi-ligne" style="margin-top:8px"><span><b>2</b>sessions</span><span><b>1</b>en cours</span><span><b>186 h</b>de moteur</span></div>
+            <h4 style="margin-top:16px">Sessions récentes</h4>
+            <div class="carte" style="padding:0 14px">
+              <div class="ligne"><span><span class="nom">Broyage · Les Perrières</span><span class="sous">Jean · hier · 1 h 50</span></span><span class="etiq ok">terminé</span></div>
+              <div class="ligne"><span><span class="nom">Buttage · Clos du Moulin</span><span class="sous">Paul · 22 oct. · 3 h 10</span></span><span class="etiq ok">terminé</span></div>
+              <div class="ligne"><span><span class="nom">Intercep · Vieilles Vignes</span><span class="sous">Marie · 21 oct. · 2 h 40</span></span><span class="etiq ok">terminé</span></div>
+            </div>
+          </div>
+          <div class="colonne claire">
+            <h4>Le parc</h4>
+            <div class="carte" style="padding:0 14px">
+              <div class="ligne"><span><span class="nom">Fendt 211 V</span><span class="sous danger">≈ 2 031 h · révision dépassée d’environ 18 h</span><span class="sous">estimé, relevé vendredi · compteur exigé au démarrage</span></span><span class="etiq danger">Entretien</span></div>
+              <div class="ligne"><span><span class="nom">New Holland T4.90F</span><span class="sous att">≈ 1 187 h · révision dans 63 h</span><span class="sous">estimé, relevé lundi · repère : environ 14 jours ouvrés</span></span><span class="etiq att">En service</span></div>
+              <div class="ligne"><span><span class="nom">Enjambeur Bobard</span><span class="sous">≈ 1 412 h · révision dans 238 h</span><span class="sous att">pas relevé depuis 9 jours · compteur exigé au démarrage</span></span><span class="etiq att">À relever</span></div>
+            </div>
+            <h4 style="margin-top:16px">GNR</h4>
+            <div class="carte" style="padding:0 14px">
+              <div class="ligne"><span><span class="nom">Cuve</span><span class="sous">1 240 / 1 500 L · relevée le 18 oct.</span></span></div>
+              <div class="ligne"><span><span class="nom">Ce mois</span><span class="sous">41,5 h de moteur</span></span></div>
+            </div>
+            <p class="note" style="margin-top:10px">Les deux lignes qui pressent remontent aussi dans Pilotage › Aujourd’hui › « À&nbsp;savoir ».</p>
+          </div>
+        </div></div></div>
+      </div>
+
+      <div>
+        <p class="legende-ecran" style="max-width:none"><b>Tracteur › Entretien › New Holland T4.90F.</b> Le compteur, sa courbe, ses échéances et ses relevés, avec l’écart à l’estimé : on voit si l’estimation tient.</p>
+        <div class="pc"><div class="pc-corps"><div class="pc-fiche">
+          <div class="rail">
+            <div class="logo">Ma Vigne</div>
+            <div class="it">Pilotage</div>
+            <div class="grp">Terrain</div><div class="it">Vigne</div><div class="it on">Tracteur</div><div class="it">Phyto</div>
+            <div class="grp">Cave et réserve</div><div class="it">Cave</div><div class="it">Réserve</div>
+            <div class="grp">Organisation</div><div class="it">Planning</div><div class="it">Réglages</div>
+          </div>
+          <div class="tliste">
+            <h4>Le parc</h4>
+            <div class="titem on"><div class="n"><i class="pt att"></i>New Holland T4.90F</div><div class="s">≈ 1 187 h · révision dans 63 h</div></div>
+            <div class="titem"><div class="n"><i class="pt danger"></i>Fendt 211 V</div><div class="s">≈ 2 031 h · dépassée de 18 h</div></div>
+            <div class="titem"><div class="n"><i class="pt att"></i>Enjambeur Bobard</div><div class="s">≈ 1 412 h · pas relevé depuis 9 j</div></div>
+          </div>
+          <div class="detail">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+              <div><h3>New Holland T4.90F</h3><div class="note">mécanique · en service · conduit par Marie, Jean, Paul</div></div>
+              <div style="display:flex;gap:8px"><span class="bouton petit">Relever maintenant</span><span class="bouton petit plein">Révision faite</span></div>
+            </div>
+            <div class="grille-2">
+              <div class="encadre">
+                <h5>Compteur</h5>
+                <div class="gros"><span class="ap">≈</span>1 187<small>h</small></div>
+                <div class="puce-est"><i></i><span>estimé : 1 168,0 h relevés lundi par Marie, plus 14 h 40 notées × 1,3</span></div>
+              </div>
+              <div class="encadre">
+                <h5>Ce que Ma Vigne a appris</h5>
+                <div class="appris">
+                  <div><b>× 1,3</b> : le cadran tourne 1,3 fois les heures notées (route, ralenti), sur les 6 derniers relevés.</div>
+                  <div><b>4,6 h</b> par jour ouvré au compteur, sur 4 semaines : le rythme du repère.</div>
+                  <div><b>6 jours sur 7</b> d’utilisation relevés. Le 22 oct., Jean n’était pas devant le tracteur.</div>
+                </div>
+              </div>
+            </div>
+            <div class="encadre" style="margin-top:12px">
+              <h5>Le compteur depuis fin septembre</h5>
+              <div class="graph" data-graph aria-label="Courbe du compteur : relevés, estimé, repère de révision"></div>
+              <div class="legende-graph">
+                <span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4" fill="currentColor"/></svg>relevé de fin de journée</span>
+                <span><svg width="12" height="12" aria-hidden="true"><rect x="2" y="2" width="8" height="8" rx="1" fill="currentColor"/></svg>relevé au plein</span>
+                <span><svg width="24" height="8" aria-hidden="true"><line x1="0" y1="4" x2="24" y2="4" stroke="currentColor" stroke-width="2" stroke-dasharray="4 3"/></svg>estimé depuis lundi</span>
+                <span><svg width="24" height="8" aria-hidden="true"><line x1="1" y1="4" x2="23" y2="4" stroke="var(--attention)" stroke-width="2.5" stroke-dasharray="0.5 5" stroke-linecap="round"/></svg>repère au rythme mesuré</span>
+              </div>
+            </div>
+            <div class="grille-2b">
+              <div class="encadre">
+                <div class="tete-enc"><h5>Entretiens programmés</h5><span class="bouton petit">Ajouter un entretien</span></div>
+                <div class="plan-grille">
+                <div class="plan-l">
+                  <div class="hd"><span class="n">Révision 500 h</span><span class="etiq att">dans 63 h</span></div>
+                  <div class="jauge att"><i style="width:87%"></i></div>
+                  <div class="s">Huile moteur et filtres · à 1 250 h ou le 14 mars 2027, au premier atteint</div>
+                  <div class="s">Repère : environ 14 jours ouvrés · dernière à 750 h, le 14 mars 2026</div>
+                </div>
+                <div class="plan-l">
+                  <div class="hd"><span class="n">Vidange pont et boîte</span><span class="etiq">dans 333 h</span></div>
+                  <div class="jauge"><i style="width:67%"></i></div>
+                  <div class="s">Toutes les 1 000 h · à 1 520 h · dernière à 520 h</div>
+                </div>
+                <div class="plan-l">
+                  <div class="hd"><span class="n">Filtre à air cabine</span><span class="etiq">3 mars 2027</span></div>
+                  <div class="jauge"><i style="width:66%"></i></div>
+                  <div class="s">Tous les 12 mois · dernier le 3 mars 2026</div>
+                </div>
+                </div>
+              </div>
+              <div class="encadre">
+                <div class="tete-enc"><h5>Relevés</h5><span class="note">les 7 derniers jours d’utilisation</span></div>
+                <table class="releves">
+                  <thead><tr><th>Jour</th><th class="r">Compteur</th><th>D’où</th><th>Par</th><th class="r">Écart à l’estimé</th><th><span class="cache-txt" style="position:absolute;left:-9999px">Actions</span></th></tr></thead>
+                  <tbody>
+                    <tr class="estime"><td>jeu. 29 oct.</td><td class="r num">≈ 1 187 h</td><td>estimé, pas encore relevé</td><td>—</td><td class="r">—</td><td></td></tr>
+                    <tr tabindex="0"><td>lun. 26 oct.</td><td class="r num">1 168,0 h</td><td>fin de journée</td><td>Marie</td><td class="r num">+1,5 h</td><td class="act"><a href="#ordinateur">Corriger</a><a href="#ordinateur">Écarter</a></td></tr>
+                    <tr tabindex="0"><td>ven. 23 oct.</td><td class="r num">1 163,5 h</td><td>plein · 117 L</td><td>Jean</td><td class="r num">−2,0 h</td><td class="act"><a href="#ordinateur">Corriger</a><a href="#ordinateur">Écarter</a></td></tr>
+                    <tr class="manque"><td>jeu. 22 oct.</td><td class="r">—</td><td>« pas devant le tracteur »</td><td>Jean</td><td></td><td></td></tr>
+                    <tr tabindex="0"><td>mar. 20 oct.</td><td class="r num">1 154,0 h</td><td>fin de journée</td><td>Marie</td><td class="r num">+0,5 h</td><td class="act"><a href="#ordinateur">Corriger</a><a href="#ordinateur">Écarter</a></td></tr>
+                    <tr tabindex="0"><td>ven. 16 oct.</td><td class="r num">1 141,5 h</td><td>plein · 118 L</td><td>Paul</td><td class="r num">+3,0 h</td><td class="act"><a href="#ordinateur">Corriger</a><a href="#ordinateur">Écarter</a></td></tr>
+                    <tr tabindex="0"><td>mer. 14 oct.</td><td class="r num">1 133,0 h</td><td>fin de journée</td><td>Marie</td><td class="r num">−1,0 h</td><td class="act"><a href="#ordinateur">Corriger</a><a href="#ordinateur">Écarter</a></td></tr>
+                  </tbody>
+                </table>
+                <p class="note" style="margin-top:8px">« Écarter » ignore un chiffre faux sans le supprimer, comme le « void » de Fleetio. Admin seulement.</p>
+              </div>
+            </div>
+          </div>
+        </div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ INTÉGRATION ═══ -->
+  <section class="ecart" id="integration">
+    <div class="ecart-tete">
+      <h2>Pour l’intégration</h2>
+      <p class="ou">Ce qui est vérifié dans le dépôt, et ce qui reste à trancher au lot.</p>
+    </div>
+    <div class="integ">
+      <div class="carte">
+        <h3>Données</h3>
+        <ul>
+          <li>Sur chaque tracteur de <code>tracteurs_list</code>, <code>releves[]</code> : jour, valeur, auteur, d’où (fin de journée, plein, révision, démarrage, à la main). « Pas devant le tracteur » se note sans valeur. Plafonné, comme les appoints de cuve.</li>
+          <li><code>entretiens_prog[]</code> : nom, toutes les N heures et/ou tous les N mois, dernière fois (heures et jour). La cible d’aujourd’hui, <code>revision_h</code>, devient la première échéance ; l’intervalle se demande une fois à l’admin.</li>
+          <li><code>compteur_h</code> reste écrit (le dernier vrai relevé) le temps que tous les lecteurs basculent.</li>
+          <li>La fiche du plein porte déjà <code>litres_plein</code> : on y ajoute le compteur.</li>
+          <li><b>Règles Firestore : rien à toucher, vérifié.</b> <code>tracteurs_list</code> et <code>entretiens</code> sont dans le bloc « métier courant », écrits par tout membre qui n’est pas en lecture seule.</li>
+        </ul>
+      </div>
+      <div class="carte">
+        <h3>Calculs : une fonction, lue partout</h3>
+        <ul>
+          <li><b>Estimation</b> = dernier relevé + heures notées depuis (<code>_trMinutes</code> : chrono, sinon barème) × écart appris. L’écart est la médiane des derniers rapports « compteur ÷ heures notées », 1 tant qu’il n’y a pas trois relevés, borné. Elle ne recule jamais sous le dernier relevé.</li>
+          <li><b>Repère</b> = heures au compteur sur 28 jours ÷ jours ouvrés : la règle de <code>_pilGmRythme</code>, nourrie par les relevés au lieu des heures notées. Toujours dit comme un repère.</li>
+          <li><b>Contrôles</b> : plus bas que le précédent, refus (seul l’admin pose une nouvelle base si le compteur a été changé) ; plus de 24 h par jour écoulé, refus ; plus de 1,5 fois l’attendu et plus de 10 h d’écart, confirmation.</li>
+          <li><b>Une question par jour et par tracteur</b> : à la première personne qui enregistre l’avancement ou termine, ce jour-là, sur ce tracteur.</li>
+        </ul>
+      </div>
+      <div class="carte">
+        <h3>Lecteurs à rebrancher (vérifiés)</h3>
+        <ul>
+          <li><code>tracteur.js</code> : <code>_trParcEtat</code> (la colonne de droite de TRAC-UX-1B), <code>_revCardHtml</code> (la carte à deux champs, remplacée). <code>renderTracParcPills</code> remplit une bande masquée partout : à retirer, comme le note §481.</li>
+          <li><code>app.js</code> : <code>renderHomeTrac</code> (l’accueil du tractoriste), <code>exportRapportSaison</code> (le bloc Parc et entretien).</li>
+          <li><code>pilotage.js</code> : <code>_pilData</code> (la liste et la tuile), <code>_pilGmRevision</code> (« atteinte pendant », le repère).</li>
+          <li>Tous font aujourd’hui <code>revision_h − compteur_h</code>. Ils liront la même fonction, qui rend le reste, son état et s’il est estimé.</li>
+          <li><b>Vocabulaire à trancher</b> : la case « Heures de moteur » des sessions compte des heures notées, pas le cadran. Avec l’écart appris, elle pourrait dire vrai.</li>
+        </ul>
+      </div>
+      <div class="carte">
+        <h3>Découpage proposé</h3>
+        <div class="lots">
+          <div class="lot"><b>COMPT-1</b><span>La fonction d’estimation, lue par les cinq écrans ; le relevé au passage (avancement, Terminer, plein) ; les trois contrôles ; « dépassée de n h » partout ; la bande des pastilles retirée.</span></div>
+          <div class="lot"><b>COMPT-2</b><span>Les intervalles, « Révision faite », la reprise de <code>revision_h</code>, l’obligation au démarrage.</span></div>
+          <div class="lot"><b>COMPT-3</b><span>La fiche du tracteur sur ordinateur, dans l’onglet Entretien : courbe, relevés, Corriger et Écarter.</span></div>
+        </div>
+        <p style="margin-top:10px">Harnais : un relevé plus bas refusé, l’impossible refusé, « beaucoup » confirmé ; une seule question par jour et par tracteur ; une estimation qui ne recule jamais ; la pastille rouge à 50 h ; plus jamais « dans - ».</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Maquette v1 du 29 octobre 2026. Noms et chiffres de démonstration ; le style est celui de la charte actuelle. Benchmark tiré des aides en ligne de Fleetio, des pages John Deere (Operations Center, Equipment Mobile, Operations Center PRO Golf), de la presse agricole sur Karnott et de la documentation Oracle Maintenance ; tout est reformulé.
+  </footer>
+</main>
+<script>
+function basculer(){
+  var r=document.documentElement, b=document.getElementById('theme');
+  var sombreSysteme=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var actuel=r.getAttribute('data-theme')||(sombreSysteme?'dark':'light');
+  var suivant=actuel==='dark'?'light':'dark';
+  r.setAttribute('data-theme',suivant);
+  b.textContent=suivant==='dark'?'Clair':'Sombre';
+}
+(function(){
+  'use strict';
+  var bt=document.getElementById('theme');
+  if(bt&&window.matchMedia('(prefers-color-scheme: dark)').matches) bt.textContent='Clair';
+
+  var NB='\u202f', NBS='\u00a0';
+  function fmt(n,un){ return Number(n).toLocaleString('fr-FR',{minimumFractionDigits:un?1:0,maximumFractionDigits:1}); }
+  function parse(b){ if(!b) return null; var s=b.replace(',','.'); if(s.slice(-1)==='.') s=s.slice(0,-1); if(s==='') return null; var v=parseFloat(s); return isFinite(v)?v:null; }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+  /* Le cadran : un chiffre par case, comme le compteur du tracteur ; le dixième à part. */
+  function cadranHtml(buf,unite){
+    var h='', p=buf.split(','), ent=p[0], dec=p.length>1?p[1]:null, i;
+    if(!ent){ for(i=0;i<4;i++) h+='<span class="c vide'+(i===0?' caret':'')+'"></span>'; }
+    else{
+      var n=ent.length;
+      for(i=0;i<n;i++){ var sep=(i>0&&(n-i)%3===0)?' sep':''; h+='<span class="c'+sep+'">'+ent.charAt(i)+'</span>'; }
+      if(dec!==null) h+='<span class="virg">,</span>'+(dec?'<span class="c'+(unite==='h'?' dix':'')+'">'+dec+'</span>':'<span class="c vide caret"></span>');
+    }
+    return h+'<span class="u">'+unite+'</span>';
+  }
+
+  /* Les trois contrôles (repris de Fleetio) : trop bas, impossible, beaucoup. */
+  var PIC={ok:'\u2713',att:'!',danger:'!'};
+  function etat(v,cfg){
+    if(v==null) return {k:'vide',c:'',t:'Recopie le chiffre du cadran.'};
+    if(v<cfg.last) return {k:'bas',c:'danger',t:'Plus bas que '+cfg.quand+' ('+fmt(cfg.last,true)+NBS+'h). Vérifie le chiffre.',s:'Compteur changé'+NB+'? Seul l’admin peut repartir d’une nouvelle base.'};
+    var d=v-cfg.last, max=24*cfg.jours;
+    if(d>max) return {k:'imp',c:'danger',t:'+'+fmt(d)+NBS+'h en '+cfg.jours+' jour'+(cfg.jours>1?'s':'')+NBS+': impossible. Un chiffre en trop'+NB+'?'};
+    var att=cfg.attendu-cfg.last;
+    if(d>att*1.5&&d-att>10) return {k:'beaucoup',c:'att',t:'+'+fmt(d)+NBS+'h depuis '+cfg.quand+', on attendait environ +'+fmt(Math.round(att))+NBS+'h. C’est bien le chiffre'+NB+'?'};
+    return {k:'ok',c:'ok',t:'+'+fmt(d)+NBS+'h depuis '+cfg.quand+NBS+': cohérent.'};
+  }
+
+  var ESTIME='Compteur ≈ 1'+NB+'187'+NBS+'h, estimé';
+
+  function Releve(id,cfg){
+    var root=document.getElementById(id); if(!root) return null;
+    function q(s){ return root.querySelector(s); }
+    var elC=q('[data-cadran]'), elM=q('[data-msg]'), elV=q('[data-valider]'), elF=q('[data-feuille]'), elVo=q('[data-voile]'),
+        elT=q('[data-toast]'), elTT=q('[data-toast-t]'), elA=q('[data-annuler]'), elP=q('[data-plustard]'), elL=document.querySelector('#'+id+' [data-ligne-cpt]');
+    var litresInit=cfg.litres||'', bufs={h:'',l:litresInit}, actif='h', minut=null;
+
+    function ouverte(){ return !elF.classList.contains('cache'); }
+    function press(k){
+      if(!ouverte()) return;
+      var b=bufs[actif];
+      if(k==='del') b=b.slice(0,-1);
+      else if(k===','){ if(b.indexOf(',')<0) b=(b||'0')+','; }
+      else if(/^[0-9]$/.test(k)){
+        var p=b.split(',');
+        if(p.length===2){ if(p[1].length>=1) return; b+=k; }
+        else{ if(p[0].length>=(actif==='l'?4:6)) return; b=(b==='0')?k:b+k; }
+      } else return;
+      bufs[actif]=b; render();
+    }
+    function render(){
+      var vh=parse(bufs.h), e=etat(vh,cfg), vl=parse(bufs.l);
+      elC.innerHTML=cadranHtml(bufs[actif],actif==='l'?'L':'h');
+      if(cfg.mode==='plein'&&actif==='l'){
+        elM.className='rel-msg'+(vl>0?' ok':'');
+        elM.innerHTML=vl>0?'<span class="pic">'+PIC.ok+'</span><span>Cuve GNR'+NBS+': 1'+NB+'240'+NBS+'L, puis '+fmt(Math.max(0,1240-vl))+NBS+'L après ce plein.</span>':'<span>Les litres mis dans le réservoir.</span>';
+      } else {
+        elM.className='rel-msg'+(e.c?' '+e.c:'');
+        elM.innerHTML=(PIC[e.c]?'<span class="pic">'+PIC[e.c]+'</span>':'')+'<span>'+esc(e.t)+(e.s?'<small>'+esc(e.s)+'</small>':'')+'</span>';
+      }
+      if(cfg.mode==='plein'){
+        q('[data-v="l"]').textContent=(vl!=null?fmt(vl):'—')+NBS+'L';
+        q('[data-v="h"]').textContent=(vh!=null?fmt(vh):'—')+NBS+'h';
+        root.querySelectorAll('[data-champ]').forEach(function(c){ c.classList.toggle('actif',c.getAttribute('data-champ')===actif); });
+      }
+      if(cfg.mode==='demarrage'){
+        var btx=q('[data-ban-t]');
+        if(vh!=null&&(e.k==='ok'||e.k==='beaucoup')){
+          var dep=vh-cfg.rev;
+          btx.textContent=dep>0?('Révision dépassée de '+fmt(dep)+NBS+'h. Valide pour démarrer'+NBS+': l’admin la verra dans «'+NBS+'À'+NBS+'savoir'+NBS+'».'):('Révision dans '+fmt(-dep)+NBS+'h. Valide pour démarrer.');
+        } else btx.textContent='Révision dépassée d’environ '+fmt(Math.round(cfg.attendu-cfg.rev))+NBS+'h. Donne le compteur du Fendt 211'+NBS+'V pour démarrer.';
+      }
+      var okH=(e.k==='ok'||e.k==='beaucoup'), okL=(cfg.mode!=='plein')||(vl>0), lab;
+      elV.disabled=!(okH&&okL);
+      if(cfg.mode==='plein') lab=(okH&&okL)?((e.k==='beaucoup'?'Oui, noter'+NBS+': ':'Noter le plein'+NBS+': ')+fmt(vl)+NBS+'L à '+fmt(vh)+NBS+'h'):'Noter le plein';
+      else if(cfg.mode==='demarrage') lab=okH?(e.k==='beaucoup'?('Oui, '+fmt(vh)+NBS+'h'+NBS+': démarrer'):('Valider '+fmt(vh)+NBS+'h et démarrer')):'Valider et démarrer';
+      else lab=okH?(e.k==='beaucoup'?('Oui, '+fmt(vh)+NBS+'h est le bon chiffre'):('Valider '+fmt(vh)+NBS+'h')):'Valider';
+      elV.textContent=lab;
+    }
+    function ouvrir(o){ elF.classList.toggle('cache',!o); elVo.classList.toggle('cache',!o); elF.setAttribute('aria-hidden',o?'false':'true'); }
+    function toast(txt,annulable){
+      clearTimeout(minut);
+      elTT.textContent=txt;
+      elT.classList.toggle('court',!annulable);
+      elT.classList.remove('anim'); void elT.offsetWidth; if(annulable) elT.classList.add('anim');
+      elT.classList.remove('cache');
+      minut=setTimeout(function(){ elT.classList.add('cache'); },annulable?6000:3200);
+    }
+    function ligne(txt,cls){ if(elL){ elL.textContent=txt; elL.className='ligne-cpt'+(cls?' '+cls:''); } }
+    elV.addEventListener('click',function(){
+      if(elV.disabled) return;
+      var vh=parse(bufs.h);
+      ouvrir(false);
+      if(cfg.mode==='jour'){ toast('Compteur noté · '+fmt(vh)+NBS+'h',true); ligne('Compteur relevé à l’instant'+NBS+': '+fmt(vh)+NBS+'h','ok'); }
+      else if(cfg.mode==='plein') toast('Plein noté · '+fmt(parse(bufs.l))+NBS+'L · compteur '+fmt(vh)+NBS+'h',true);
+      else toast('Session démarrée · compteur '+fmt(vh)+NBS+'h',true);
+    });
+    if(elA) elA.addEventListener('click',function(){ clearTimeout(minut); elT.classList.add('cache'); ouvrir(true); ligne(ESTIME,''); });
+    if(elP) elP.addEventListener('click',function(){ ouvrir(false); toast('Redemandé au prochain enregistrement',false); ligne('Compteur à relever aujourd’hui','att'); });
+    root.querySelectorAll('[data-k]').forEach(function(b){ b.addEventListener('click',function(){ press(b.getAttribute('data-k')); }); });
+    root.querySelectorAll('[data-champ]').forEach(function(c){ c.addEventListener('click',function(){ actif=c.getAttribute('data-champ'); render(); }); });
+    root.addEventListener('keydown',function(ev){
+      var k=ev.key, surBouton=ev.target&&ev.target.closest&&ev.target.closest('button');
+      if(surBouton&&(k==='Enter'||k===' ')) return;
+      if(/^[0-9]$/.test(k)){ press(k); ev.preventDefault(); }
+      else if(k===','||k==='.'){ press(','); ev.preventDefault(); }
+      else if(k==='Backspace'){ press('del'); ev.preventDefault(); }
+      else if(k==='Enter'&&ouverte()&&!elV.disabled){ elV.click(); ev.preventDefault(); }
+    });
+    function reset(){ clearTimeout(minut); elT.classList.add('cache'); bufs={h:'',l:litresInit}; actif='h'; ouvrir(true); ligne(ESTIME,''); render(); }
+    function set(v){ clearTimeout(minut); elT.classList.add('cache'); ouvrir(true); actif='h'; bufs.h=v; render(); }
+    render();
+    return {reset:reset,set:set};
+  }
+
+  var R={
+    telA:Releve('telA',{mode:'jour',last:1168,quand:'lundi',attendu:1187,jours:3}),
+    telB:Releve('telB',{mode:'plein',last:1168,quand:'lundi',attendu:1187,jours:3,litres:'96'}),
+    telC:Releve('telC',{mode:'demarrage',last:2018,quand:'vendredi',attendu:2031,jours:6,rev:2013})
+  };
+  document.querySelectorAll('[data-demo]').forEach(function(b){ b.addEventListener('click',function(){ var r=R[b.getAttribute('data-demo')]; if(r) r.set(b.getAttribute('data-val')); }); });
+  document.querySelectorAll('[data-rejouer]').forEach(function(b){ b.addEventListener('click',function(){ var r=R[b.getAttribute('data-rejouer')]; if(r) r.reset(); }); });
+
+  /* Révision faite : chaque ligne cochée calcule sa prochaine échéance. */
+  (function(){
+    var root=document.getElementById('telE'); if(!root) return;
+    var res=root.querySelector('[data-resultat]'), base=1189.4;
+    var ITEMS={rev:{n:'Révision 500'+NBS+'h',h:500,mois:12},pont:{n:'Vidange pont et boîte',h:1000},filtre:{n:'Filtre à air cabine',mois:12}};
+    function rend(){
+      var on=[].slice.call(root.querySelectorAll('[data-faits] .chip.on')).map(function(c){ return c.getAttribute('data-item'); });
+      if(!on.length){ res.innerHTML='<div class="l">Coche au moins une ligne.</div>'; return; }
+      res.innerHTML='<div class="l">Prochaines échéances</div>'+on.map(function(k){
+        var it=ITEMS[k], parts=[];
+        if(it.h) parts.push('à '+fmt(Math.round(base+it.h))+NBS+'h');
+        if(it.mois) parts.push('le 29'+NBS+'octobre 2027');
+        return '<div><b>'+it.n+'</b>'+NBS+': '+parts.join(' ou ')+(it.h&&it.mois?', au premier atteint':'')+'</div>';
+      }).join('');
+    }
+    root.querySelectorAll('[data-faits] .chip').forEach(function(c){ c.addEventListener('click',function(){ var on=!c.classList.contains('on'); c.classList.toggle('on',on); c.setAttribute('aria-pressed',on?'true':'false'); rend(); }); });
+    rend();
+  })();
+
+  /* La courbe du compteur (ordinateur). */
+  (function(){
+    var el=document.querySelector('[data-graph]'); if(!el) return;
+    var W=640,H=214,L=52,Rm=16,T=16,B=30, d0=Date.UTC(2026,8,28), d1=Date.UTC(2026,10,30), y0=1080, y1=1270;
+    function X(iso){ var p=iso.split('-'); return L+(Date.UTC(+p[0],+p[1]-1,+p[2])-d0)/(d1-d0)*(W-L-Rm); }
+    function Y(h){ return T+(1-(h-y0)/(y1-y0))*(H-T-B); }
+    function f(n){ return n.toFixed(1); }
+    var rel=[['2026-09-29',1090,'j'],['2026-10-05',1101,'j'],['2026-10-09',1119.5,'p'],['2026-10-14',1133,'j'],['2026-10-16',1141.5,'p'],['2026-10-20',1154,'j'],['2026-10-23',1163.5,'p'],['2026-10-26',1168,'j']];
+    var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Relevés du New Holland T4.90F de fin septembre à fin octobre, estimé jusqu’à aujourd’hui, repère de révision vers le 18 novembre">';
+    [1100,1150,1200,1250].forEach(function(h){ s+='<line x1="'+L+'" x2="'+(W-Rm)+'" y1="'+f(Y(h))+'" y2="'+f(Y(h))+'" style="stroke:var(--ligne)" stroke-width="1"/><text x="'+(L-8)+'" y="'+f(Y(h)+4)+'" text-anchor="end">'+fmt(h)+'</text>'; });
+    [['2026-10-01','1 oct.'],['2026-10-15','15 oct.'],['2026-11-01','1 nov.'],['2026-11-15','15 nov.'],['2026-11-30','30 nov.']].forEach(function(a,i,arr){ s+='<text x="'+f(X(a[0]))+'" y="'+(H-9)+'" text-anchor="'+(i===arr.length-1?'end':'middle')+'">'+a[1].replace(' ',NBS)+'</text>'; });
+    s+='<line x1="'+L+'" x2="'+(W-Rm)+'" y1="'+f(Y(1250))+'" y2="'+f(Y(1250))+'" style="stroke:var(--danger)" stroke-width="1.5" stroke-dasharray="6 4"/>';
+    s+='<text x="'+(L+8)+'" y="'+f(Y(1250)-7)+'" style="fill:var(--danger-texte);font-weight:600">Révision à 1'+NB+'250'+NBS+'h</text>';
+    var xt=X('2026-10-29'), xr=X('2026-11-18');
+    s+='<line x1="'+f(xt)+'" x2="'+f(xt)+'" y1="'+T+'" y2="'+(H-B)+'" style="stroke:var(--ligne-forte)" stroke-width="1"/><text x="'+f(xt+5)+'" y="'+(H-B-6)+'">aujourd’hui</text>';
+    s+='<polyline fill="none" style="stroke:var(--texte-med)" stroke-width="2" stroke-linejoin="round" points="'+rel.map(function(r){ return f(X(r[0]))+','+f(Y(r[1])); }).join(' ')+'"/>';
+    s+='<line x1="'+f(X('2026-10-26'))+'" y1="'+f(Y(1168))+'" x2="'+f(xt)+'" y2="'+f(Y(1187))+'" style="stroke:var(--texte-med)" stroke-width="2" stroke-dasharray="4 3"/>';
+    s+='<line x1="'+f(xt)+'" y1="'+f(Y(1187))+'" x2="'+f(xr)+'" y2="'+f(Y(1250))+'" style="stroke:var(--attention)" stroke-width="2.5" stroke-dasharray="0.5 5" stroke-linecap="round"/>';
+    s+='<line x1="'+f(xr)+'" x2="'+f(xr)+'" y1="'+f(Y(1250))+'" y2="'+(H-B)+'" style="stroke:var(--attention)" stroke-width="1" stroke-dasharray="2 3"/>';
+    s+='<text x="'+f(xr)+'" y="'+f(Y(1250)+17)+'" text-anchor="middle" style="fill:var(--attention-texte);font-weight:600">repère ≈ 18'+NBS+'nov.</text>';
+    rel.forEach(function(r){ var x=X(r[0]), y=Y(r[1]); s+=r[2]==='p'?'<rect x="'+f(x-4)+'" y="'+f(y-4)+'" width="8" height="8" rx="1" style="fill:var(--texte)"/>':'<circle cx="'+f(x)+'" cy="'+f(y)+'" r="4" style="fill:var(--texte)"/>'; });
+    s+='<circle cx="'+f(xt)+'" cy="'+f(Y(1187))+'" r="4.5" style="fill:var(--bg-card);stroke:var(--texte-med)" stroke-width="2"/>';
+    s+='<text x="'+f(xt-8)+'" y="'+f(Y(1187)-9)+'" text-anchor="end" style="fill:var(--texte);font-weight:600">≈ 1'+NB+'187'+NBS+'h</text>';
+    el.innerHTML=s+'</svg>';
+  })();
+})();
+</script>
+</body>
+</html>

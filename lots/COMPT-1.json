@@ -1,0 +1,43 @@
+{
+  "lot": "COMPT-1",
+  "section": "§483",
+  "base": "336a8e148ed6c4720eb39abe751bef0581249fe9",
+  "inclut": [],
+  "date": "2026-10-29",
+  "tutos": {
+    "ok": true,
+    "empreinte": "5f81b2d76833c418f0af3bc68585bd72346cdce84e06641c9a128275cfce2ebd",
+    "date": "2026-10-29T13:31:37.576Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "7b9b9b88132d4b8832474c782fc7465d709f33be0bfefbd66faab0c7f89e6daa",
+    "CLAUDE.md": "c825b333738b030f367e877a9fd0e6546c2db992eccece5062501e7252fbdd1c",
+    "docs/claude/INDEX.md": "a1ab79d0a1ddfcba38bd9b8dc39c7364a7a13cdb1e7bc379a8699aefda565d24",
+    "docs/claude/chantiers-480-529.md": "25658fa5afae2e9a2621e05812f589c9f9d65cb9ccd0e264ab75aefb1bface23",
+    "docs/claude/journal.md": "5ffeb2c739aa9eaeef41fe42739046f8af5d03db95e1ec4af0a58acaa94fd254",
+    "docs/maquettes/LISEZMOI.md": "84553eedccde8fd88075751441a4b24bca9c79f564a412e9526877c90c69a412",
+    "guide/06-tracteur.html": "84010500449479e51ba609013478c0305a028dd61ad926db3758f6462579afed",
+    "index.html": "d64ecaecea36dc8df0238edd5d9e0a488efd381b6ce1c70378ce06beabdcf4a4",
+    "public/guide.html": "00f2c8e7bf040857381d0c2986a9d173f09c93bb8c412dbc40faae045805717b",
+    "public/sw.js": "5a1a28d7f1b9a8dc08c1e174b9cc7a301c6073e801e87a66b28857b3b3136ac6",
+    "scripts/harnais-claude-md.mjs": "c7e565826afacc7c81b44c4cd5c839946467ded0f80642840ab9ea70c825f5a4",
+    "scripts/mv-harnais-liste.mjs": "d2854fe1e0d90723e4919ad4bc37cc5567bbea9884fd93b1e888a538db83e60f",
+    "scripts/tutos-couverture.json": "0c50ad4406cac64f53fdd066969bcb9075521131d40bc6c972a5392d4b6d94bd",
+    "scripts/typo-baseline.json": "455a683d4377a84d11b4be8857a9d17e2c56d3cb4fba709147d399b896838a16",
+    "src/app.js": "9523ca579568dd14d0b412ac9c51ae317bca86d3806e23cc68aff53882edc3de",
+    "src/pilotage.js": "b81014fa3eb2573ac7799e183acb00954ab2812d3f1aa6a9e675d83493a1e901",
+    "src/styles.css": "d7fc3ff387eeca2fdd4d218f27f0afc33afdf689d508cb847b406716440791b7",
+    "src/tracteur.js": "11c2711fb006c9427e52a52b9f59949c4e120413ed117422f45c1793024621e1",
+    "src/utils.js": "97bdd6417c08a72d4a19057b91ccdc98dea1b8c722d61915c5f89b5d3ef4f8ce",
+    "src/whats-new.js": "43694a4b2141cb832a9a94b5d7188b434b2b77404a86ef124ca763bb7e6ea5d0",
+    "docs/maquettes/maquette-compteur-tracteur-v1.html": "9e02af8562c23dd4d3bf22737b3ce142327e7a23620ebf04e93c63a70ff98735",
+    "scripts/mv-harnais-compt1.mjs": "fa75fa734a74c1e3e4747581d25b29b342ee5e319917ed1ba1008b8ea534b90e"
+  }
+}

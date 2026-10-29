@@ -15,6 +15,10 @@
     "_tFeuille": "TRAC-UX-1A (§480) : ouvre et ferme la feuille des filtres du Tracteur au téléphone — le même patron que le Journal ; les pastilles dedans sont les gestes d’avant",
     "_tFiltresEffacer": "TRAC-UX-1A (§480) : « Tout effacer » dans la feuille des filtres — rien à apprendre",
     "_tCherche": "TRAC-UX-1A (§480) : la recherche des sessions (activité, conducteur, parcelle) — un champ qui cherche en tapant",
-    "_trTerminer": "TRAC-UX-1A (§480) : « Terminer » sur la carte de la session en cours — le bouton dit ce qu’il fait, et « Annuler » rattrape six secondes ; un tuto viendra avec celui de la session"
+    "_trTerminer": "TRAC-UX-1A (§480) : « Terminer » sur la carte de la session en cours — le bouton dit ce qu’il fait, et « Annuler » rattrape six secondes ; un tuto viendra avec celui de la session",
+    "_relTouche": "COMPT-1 (§483) : une touche du pavé du compteur — la feuille arrive seule et se lit, rien à apprendre",
+    "_relValider": "COMPT-1 (§483) : valide le chiffre recopié ; le bouton dit ce qu’il note",
+    "_relPlusTard": "COMPT-1 (§483) : « Pas devant le tracteur » repose la question au geste suivant, rien à apprendre",
+    "_trRelever": "COMPT-1 (§483) : « Relever » ouvre la même feuille que le relevé au passage"
   }
 }

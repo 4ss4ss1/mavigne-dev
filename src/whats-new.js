@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.35', d: '2026-10-29', items: [
+    { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'tracteur', titre: 'Le compteur des tracteurs avance tout seul',
+      desc: "Le compteur d’heures ne restait juste que si quelqu’un allait le retaper dans l’Entretien. Désormais, entre deux relevés, il ajoute les heures de vos sessions («\u00a0env.\u00a0» le dit), et l’alerte de révision tombe juste. Une fois par jour, en refermant la feuille ou en terminant, Ma Vigne demande le chiffre du cadran\u00a0: un pavé large, trois secondes, contrôlé tout de suite. Au plein, il est demandé à chaque fois\u00a0; «\u00a0Relever\u00a0», dans l’Entretien, le note quand vous voulez. Une révision dépassée s’écrit enfin «\u00a0dépassée de 18\u00a0h\u00a0», plus «\u00a0dans −18\u00a0h\u00a0»." },
+  ] },
   { v: '10.34', d: '2026-10-29', items: [
     { niv: 0, pour: ['tous'], emoji: 'ecran', titre: 'La ligne de la campagne et de la date, remise d’aplomb',
       desc: "Depuis le nouvel en-tête, la ligne de la campagne et de la date, juste en dessous, s’était déformée\u00a0: au téléphone, la campagne et la date passaient sur deux lignes, la date trop pâle\u00a0; dans le Pilotage, la date s’écrivait en double à côté de la météo\u00a0; «\u00a0? Aide\u00a0» s’écrivait en toutes lettres. Elle retrouve sa forme\u00a0: une seule ligne, la campagne dans une pastille blanche, la date en entier ou terminée par «\u00a0…\u00a0», et au téléphone un «\u00a0?\u00a0» rond, plus facile à toucher. Quand on regarde une campagne passée, la pastille reste orangée." },

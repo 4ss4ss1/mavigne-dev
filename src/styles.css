@@ -9644,6 +9644,35 @@ body:not(.mv-rail-ouvert) .mv-rail .mv-rail-point,body:not(.mv-rail-ouvert) .mv-
 .mvpas.dgn-nonsuivi{background:transparent;border:var(--bw,1px) dashed var(--ligne-forte);color:var(--texte-doux)}
 /* ★ FIN DIAG-1 */
 
+/* ★ COMPT-1 (§483) — LE RELEVÉ DU COMPTEUR (#ovReleve) : le cadran du tracteur, chiffre par chiffre, le dixième à part ;
+   un pavé large (gants, plein soleil) ; le contrôle sous le cadran. Que des jetons de la charte. */
+#ovReleve .rel-ref{display:flex;justify-content:space-between;flex-wrap:wrap;gap:var(--e-1,4px) var(--e-3,12px);font-size:var(--pt-micro,12px);color:var(--texte-doux);padding-bottom:var(--e-2,8px);border-bottom:1px solid var(--ligne,var(--gris-clair))}
+#ovReleve .rel-ref b{color:var(--texte);font-weight:600}
+#ovReleve .rel-cadran{display:flex;align-items:flex-end;justify-content:center;gap:var(--e-1,4px);margin:var(--e-3,12px) 0 var(--e-2,8px);min-height:56px}
+#ovReleve .rel-c{width:38px;height:56px;border-radius:var(--r-sm,6px);background:var(--bg-doux);color:var(--texte);border:1px solid var(--ligne-forte);font-size:var(--pt-xxl,32px);font-weight:600;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+#ovReleve .rel-c.rel-sep{margin-left:var(--e-2,8px)}
+#ovReleve .rel-c.rel-vide{background:transparent;border:2px dashed var(--ligne-forte)}
+#ovReleve .rel-c.rel-dix{background:var(--accent);color:var(--sur-accent)}
+#ovReleve .rel-c.rel-curseur::after{content:"";width:2px;height:28px;background:var(--accent-texte);animation:rel-clign 1.05s steps(1) infinite}
+#ovReleve .rel-virg{font-size:var(--pt-xxl,32px);font-weight:600;line-height:1;margin-bottom:var(--e-1,4px)}
+#ovReleve .rel-u{font-size:var(--pt-md,20px);color:var(--texte-doux);margin:0 0 var(--e-2,8px) var(--e-2,8px)}
+@keyframes rel-clign{50%{opacity:0}}
+#ovReleve .rel-msg{display:flex;align-items:center;font-size:var(--pt-txt,13px);line-height:1.35;padding:var(--e-2,8px) var(--e-3,12px);border-radius:var(--r-md,8px);background:var(--bg-doux);color:var(--texte-doux);min-height:44px}
+#ovReleve .rel-msg small{display:block;font-size:var(--pt-micro,12px);margin-top:var(--e-0,2px)}
+#ovReleve .rel-msg.rel-ok{background:var(--ok-doux);color:var(--ok-texte)}
+#ovReleve .rel-msg.rel-att{background:var(--attention-doux);color:var(--attention-texte)}
+#ovReleve .rel-msg.rel-ko{background:var(--danger-doux);color:var(--danger-texte)}
+#ovReleve .rel-pave{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--e-2,8px);margin:var(--e-3,12px) 0}
+#ovReleve .rel-pave button{min-height:52px;border-radius:var(--r-lg,12px);border:1px solid var(--ligne,var(--gris-clair));background:var(--bg-doux);color:var(--texte);font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-lg,24px);font-weight:600;cursor:pointer;touch-action:manipulation;font-variant-numeric:tabular-nums}
+#ovReleve .rel-pave button:active{background:var(--presse)}
+#ovReleve .rel-pave .rel-ef{color:var(--texte-doux)}
+#ovReleve #rel-ok[disabled]{opacity:.45;cursor:not-allowed}
+#ovReleve .rel-tard{display:block;margin:var(--e-1,4px) auto 0;background:none;border:0;color:var(--texte-doux);font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-txt,13px);text-decoration:underline;min-height:44px;cursor:pointer;padding:0 var(--e-2,8px)}
+#ovReleve .rel-tard[hidden]{display:none}
+.rel-vu{font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:var(--e-0,2px)}
+.rel-relever{margin-left:auto;padding:var(--e-2,8px) var(--e-3,12px);border:1px solid var(--ligne-forte);border-radius:var(--r-md,8px);background:transparent;color:var(--texte);font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;min-height:44px}
+@media (prefers-reduced-motion:reduce){#ovReleve .rel-c.rel-curseur::after{animation:none}}
+
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.
    Deux rangées partout, Pilotage compris (pilotage.js pose désormais un vrai .mod-header) : l'identité (icône, titre,
    sous-titre, gestes du module) puis la ligne du jour (saison, date — ou la météo, qui porte alors la date courte —,
@@ -9707,6 +9736,7 @@ body .mod-header + .mod-meta-row.mvu-avec-meteo > .hv2-saison-pill > span:not(.h
 /* — Pilotage : la barre de portée sous l'en-tête. Le fil d'Ariane pouvait rétrécir sous son libellé (min-width:0) et passer
      SOUS « N choses à compléter » ; il garde sa largeur, le bouton passe à la ligne s'il le faut. — */
 body #page-pilotage .pil-portee .pil-crumb{ min-width:auto; }
+
 /* ★ FIN TETE-2 */
 
 /* ══ ★★ GABARIT-1 (§455) — UN RÔLE, UN STYLE, DANS TOUT LE PILOTAGE (maquette « Pilotage — un seul gabarit », validée le 25/10) ══

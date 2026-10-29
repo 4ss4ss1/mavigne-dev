@@ -6700,7 +6700,7 @@ function renderHomeTrac(){
   var fx=function(ic,l,v,s){ return '<div class="hk-fx"><span class="hk-lbl">'+_mvIcon(ic,16)+'<span>'+l+'</span></span><span class="hk-val">'+v+'</span><span class="hk-s">'+s+'</span></div>'; };
   var f1=fx('chrono','Votre derni\u00e8re session',der?'<span>'+_escHtml(der.activite||'Session')+(der.date?', '+_escHtml(typeof fmtDate==='function'?fmtDate(der.date):der.date):'')+'</span>':'<span>Aucune pour l\u2019instant</span>',der?(np?np+' parcelle'+(np>1?'s':''):_escHtml(der.statut||'')):'la premi\u00e8re s\u2019affichera ici');
   var f2='';
-  if(tc){ var cp=parseFloat(tc.compteur_h), rv=parseFloat(tc.revision_h), reste=(rv>0&&cp>=0)?Math.round(rv-cp):null;
+  if(tc){ var _kc=(typeof window!=='undefined'&&window._trCompteur)?window._trCompteur(tc):null, cp=_kc?_kc.h:parseFloat(tc.compteur_h), rv=parseFloat(tc.revision_h), reste=(rv>0&&cp>=0)?Math.round(rv-cp):null;
     f2=fx('tracteur',_escHtml(tc.nom||'Tracteur'),'<span>'+(isNaN(cp)?'\u2014':Math.round(cp)+'\u00a0h')+'</span>'+((reste!=null&&reste<=50)?'<span class="mvpas mvpas-statut mvpas-surveiller">'+(reste>0?'r\u00e9vision dans '+reste+'\u00a0h':'r\u00e9vision d\u00e9pass\u00e9e')+'</span>':''),'au compteur'); }
   var f3;
   if(adm){ var g=(window.CONFIG&&window.CONFIG.gnr)||null, niv=g?parseFloat(g.niveau):NaN, cap=g?parseFloat(g.capacite):NaN, pc=(cap>0&&niv>=0)?Math.round(niv/cap*100):null;
@@ -14451,10 +14451,10 @@ function exportRapportSaison(seasonNom){
     var cfgG=(window.CONFIG&&window.CONFIG.gnr)||null;
     var pcards=TL.map(function(t){
       var isMeca=(t.type==='m\u00e9canique'), rep=REP[t.id];
-      var comp=t.compteur_h, rev=t.revision_h;
+      var _kr=(typeof window!=='undefined'&&window._trCompteur)?window._trCompteur(t):null, comp=_kr?_kr.h:t.compteur_h, rev=t.revision_h;   // ★ COMPT-1 (§483) : le compteur estimé
       var pill;
       if(rep){ pill='<div class="tc-pill gar">'+_mvIcon('outil',16)+' Au garage'+(rep.prevu_retour?' \u00b7 retour '+frD(rep.prevu_retour):'')+'</div>'; }
-      else if(comp!=null&&rev!=null&&comp!==''&&rev!==''){ var reste=(parseFloat(rev)||0)-(parseFloat(comp)||0); var cc=reste<=50?'bad':reste<=120?'warn':'ok'; pill='<div class="tc-pill '+cc+'">'+(reste<=50?'\u26a0\ufe0f ':'')+'r\u00e9vision dans '+reste+' h</div>'; }
+      else if(comp!=null&&rev!=null&&comp!==''&&rev!==''){ var reste=Math.round((parseFloat(rev)||0)-(parseFloat(comp)||0)); var cc=reste<=50?'bad':reste<=120?'warn':'ok'; pill='<div class="tc-pill '+cc+'">'+(reste<=50?'\u26a0\ufe0f ':'')+(reste<0?'r\u00e9vision d\u00e9pass\u00e9e de '+(-reste)+' h':'r\u00e9vision dans '+reste+' h')+'</div>'; }
       else { pill='<div class="tc-pill warn">R\u00e9vision \u00e0 renseigner</div>'; }
       return '<div class="tcard '+(rep?'rep':(isMeca?'meca':'hydro'))+'">'
         +'<div class="tc-nom">'+esc(t.nom)+'</div>'

@@ -5,6 +5,7 @@ LA référence des écrans du plan en 22 lots (CLAUDE.md §28). **Un lot qui tou
 - `maquette-niveau-au-dessus-v1.html` — phénologie, signalements, Traiter ?, récolte prévue, registre 2027 et IFT.
 - `maquette-ux-v1.html` — en-tête qui se replie, contenu d’abord, cibles, Annuler, Journal en liste-détail sur PC.
 - `maquette-ux-v2.html` — Tracteur, Phyto, Cave, Réserve, Planning, Réglages.
+- `maquette-compteur-tracteur-v1.html` — le compteur des tracteurs (29/10) : relevé au passage, estimé entre deux relevés, révision qui se recalcule ; lots COMPT-1 à COMPT-3 (§483).
 - `plan-mise-en-place-2026-10-25.md` — les lots, leur taille, les maquettes face à l’appli, les décisions du 25/10.
 - `audit-ux-2026-10-25.md`, `audit-niveau-au-dessus-2026-10-25.md` — les relevés et le benchmark d’origine.
 

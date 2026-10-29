@@ -825,6 +825,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-traux1a.mjs --contre'],
   ['node scripts/mv-harnais-traux1b.mjs'],             // TRAC-UX-1B (§481) : le Tracteur sur ordinateur — le parc par urgence et le GNR à droite, la session en feuille
   ['node scripts/mv-harnais-traux1b.mjs --contre'],
+  ['node scripts/mv-harnais-compt1.mjs'],              // COMPT-1 (§483) : le compteur des tracteurs — estimé entre deux relevés, relevé au passage, trois contrôles
+  ['node scripts/mv-harnais-compt1.mjs --contre'],
   ['node scripts/mv-harnais-tete3d.mjs'],              // TETE-3D (§482) : la bande campagne/date sous l'en-tête retrouve sa forme (TETE-1 et TETE-2 la visent), blanche ; test:ux la garde au rendu
   ['node scripts/mv-harnais-tete3d.mjs --contre'],
   ['node scripts/mv-harnais-ecart1.mjs'],              // ECART-1 (§460) : l'écart au barème d'Aujourd'hui › Économie en heures — la tuile est le total de la carte (un tiret sans rien à comparer), barres à l'échelle jusqu'à ±50 %

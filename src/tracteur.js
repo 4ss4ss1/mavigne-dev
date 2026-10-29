@@ -874,13 +874,15 @@ function _revCardHtml(t){
       +'<button onclick="window.cancelRevEdit()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-base,14px);cursor:pointer;min-height:44px">Annuler</button>'
       +'</div></div>';
   }
-  var hasComp=(comp!=null&&comp!==''&&rev!=null&&rev!=='');
+  var _k=_trCompteur(t), hasComp=(!!_k&&rev!=null&&rev!=='');   // ★ COMPT-1 (§483) : le compteur estimé ; « dépassée de n h », plus « dans −n h »
   var sub, col='var(--texte-doux)', fw='400';
-  if(hasComp){ var reste=Number(rev)-Number(comp); col=reste<=50?'var(--rouge)':reste<=120?'var(--orange)':'var(--vert-med)'; fw='600'; sub='R\u00e9vision dans '+_gnrNum(reste)+' h \u00b7 '+_gnrNum(comp)+'/'+_gnrNum(rev)+' h'; }
-  else { sub='\u00c0 renseigner'; }
+  if(hasComp){ var reste=Math.round(Number(rev)-_k.h); col=reste<=50?'var(--rouge)':reste<=120?'var(--orange)':'var(--vert-med)'; fw='600'; sub=(reste<0?'R\u00e9vision d\u00e9pass\u00e9e de '+_gnrNum(-reste)+' h':'R\u00e9vision dans '+_gnrNum(reste)+' h')+' \u00b7 '+_trHeuresTxt(_k)+' / '+_gnrNum(rev)+' h'; }
+  else { sub=_k?(_trHeuresTxt(_k)+' \u00b7 r\u00e9vision \u00e0 renseigner'):'\u00c0 renseigner'; }
+  var _vu=(_k&&_k.base&&_k.base.d)?('Relev\u00e9 le '+_escHtml(_fmtDate(_k.base.d))+(_k.base.par?' par '+_escHtml(_k.base.par):'')+(_k.estime?' \u00b7 depuis, '+_trHeuresFr(_k.notees)+' h not\u00e9es \u00d7 '+String(Math.round(_k.coef*10)/10).replace('.',','):'')):(_k?'Jamais relev\u00e9 ici\u00a0: touchez \u00ab\u00a0Relever\u00a0\u00bb.':'');
   return '<div class="ent-resume-card" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">'
     +'<div><div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">'+_mvIcon('engrenage',16)+' Prochaine r\u00e9vision</div>'
-    +'<div style="font-size:var(--pt-micro,11px);color:'+col+';font-weight:'+fw+';margin-top:2px">'+sub+'</div></div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:'+col+';font-weight:'+fw+';margin-top:2px">'+sub+'</div>'+(_vu?'<div class="rel-vu">'+_vu+'</div>':'')+'</div>'
+    +(canEdit?'<button type="button" class="rel-relever" onclick="_trRelever()">Relever</button>':'')
     +(canEdit?'<button onclick="window.openRevEdit()" style="padding:8px 12px;border:1px solid var(--gris);border-radius:8px;background:transparent;color:var(--texte-doux);font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-txt,13px);cursor:pointer;min-width:44px;min-height:44px">'+_mvIcon('crayon',18)+'</button>':'')
   +'</div>';
 }
@@ -953,7 +955,9 @@ function saveRev(){
   var t=_tracSelId?getTracteurSel():null; if(!t){_revEdit=false;renderEntretiens();return;}
   var compEl=document.getElementById('rev-comp'), revEl=document.getElementById('rev-target');
   var compV=compEl?compEl.value:'', revV=revEl?revEl.value:'';
-  t.compteur_h = compV===''?'':(parseFloat(compV)||0);
+  var _nv=compV===''?'':(parseFloat(compV)||0);   // ★ COMPT-1 (§483) : un compteur corrigé ici est un relevé « à la main » — la nouvelle base, même plus basse (compteur changé)
+  if(_nv!==''&&String(_nv)!==String(t.compteur_h)) t.releves=(t.releves||[]).concat([{ d:_gnrTodayISO(), ts:Date.now(), h:Number(_nv), par:(currentUser&&currentUser.nom)||'', src:'manuel' }]).slice(-_TR_REL_MAX);
+  t.compteur_h = _nv;
   t.revision_h = revV===''?'':(parseFloat(revV)||0);
   window.TRACTEURS_LIST=TRACTEURS_LIST;
   _saveData('tracteurs_list');
@@ -982,12 +986,15 @@ function savePleinFiche(){
   var t=_tracSelId?getTracteurSel():null; if(!t){showToast('Sélectionne un tracteur','#C0392B');return;}
   var inp=document.getElementById('plein-litres'); var n=parseFloat(inp&&inp.value)||0;
   if(n<=0){showToast('Indique les litres mis dans le réservoir','#C0392B');return;}
+  // ★ COMPT-1 (§483) : au plein, on est devant la machine — le compteur est exigé, et la fiche s'enregistre avec lui.
+  if(!window.__MV_TUTO&&_trPleinH==null){ _relOuvrir(t.id,'plein',function(h){ _trPleinH=h; try{ savePleinFiche(); } finally { _trPleinH=null; } }); return; }
   // 1) Cuve : decompte du plein — par _gnrCuveDelta, seul point d'ecriture du
   //    niveau. Le repli couvre le cas « pas de cuve » (deja refuse plus haut).
   var lvl=_gnrCuveDelta(-n); if(lvl==null) lvl=Number(g.niveau)||0;
   // 2) Fiche d'entretien auto : « Plein fait » coché, date du jour, au nom du conducteur courant
   var cond=(currentUser&&currentUser.nom)||(_condList()[0]&&_condList()[0].nom)||'';
   var fiche={ id:'ent'+Date.now(), tracteurId:t.id, date:todayStr(), conducteur:cond, anomalie:'', anomalie_traitee:false, litres_plein:n };
+  if(_trPleinH!=null) fiche.compteur_h=_trPleinH;   // ★ COMPT-1 (§483) : le compteur lu au plein
   _entFields.forEach(function(f){ fiche[f.key]=(f.key==='plein'); });
   ENTRETIENS.unshift(fiche); window.ENTRETIENS=ENTRETIENS;
   // 3) Sauvegardes
@@ -1499,6 +1506,7 @@ function _trTerminer(id){
     _saveData('sessions'); renderTracteur(); showToast('Session reprise','#3D6B27');
   };
   if(typeof window.showToastAnnuler==='function') window.showToastAnnuler((s.activite||'Session')+' termin\u00e9e', annuler); else showToast('Session termin\u00e9e','#3D6B27');
+  if(typeof _trRelevePassage==='function') _trRelevePassage(id,'terminer');   // ★ COMPT-1 (§483) : le relevé au passage
 }
 function _tTrouve(s,q){
   q=String(q||'').trim().toLowerCase(); if(!q) return true;
@@ -1523,7 +1531,7 @@ window._trTerminer=_trTerminer; window._tFeuille=_tFeuille; window._tFiltresEffa
 function _trParcEtat(t){
   var rep=REPARATEUR[t.id];
   if(rep){ var r=rep.prevu_retour||''; return { rang:0, txt:r?('au garage \u00b7 retour '+_fmtDate(r)):'au garage', badge:_mvBadge('Au garage','rouge') }; }
-  var comp=t.compteur_h, rev=t.revision_h, aComp=(comp!=null&&comp!=='');
+  var _k=(typeof _trCompteur==='function')?_trCompteur(t):null, comp=_k?(_k.estime?Math.round(_k.h):_k.h):t.compteur_h, rev=t.revision_h, aComp=(comp!=null&&comp!=='');   // ★ COMPT-1 (§483) : le compteur estimé (dernier relevé + heures notées), sinon le dernier relevé
   if(!aComp||rev==null||rev==='') return { rang:3, txt:(aComp?_gnrNum(comp)+' h \u00b7 ':'')+'r\u00e9vision \u00e0 renseigner', badge:_mvBadge('En service','neutre') };
   var reste=Number(rev)-Number(comp);
   if(reste<0) return { rang:1, txt:_gnrNum(comp)+' h \u00b7 r\u00e9vision d\u00e9pass\u00e9e de '+_gnrNum(-reste)+' h', badge:_mvBadge('Entretien','rouge') };
@@ -1532,7 +1540,7 @@ function _trParcEtat(t){
 function _trDroiteHtml(){
   var parc=(TRACTEURS_LIST||[]).map(function(t,i){ return { t:t, i:i, e:_trParcEtat(t) }; }).sort(function(a,b){ return (a.e.rang-b.e.rang)||(a.i-b.i); });
   var h='<section class="trd-sec"><h3 class="trd-t">Le parc</h3>'+(parc.length?parc.map(function(x){
-      return '<button type="button" class="trd-l" data-tid="'+_escAttr(x.t.id)+'" onclick="switchTracOnglet(\'entretiens\');selectTracteur(this.dataset.tid)"><span class="trd-n">'+_escHtml(x.t.nom)+'</span><span class="trd-s">'+_escHtml(x.e.txt)+'</span>'+x.e.badge+'</button>';
+      return '<button type="button" class="trd-l" data-tid="'+_escAttr(x.t.id)+'" onclick="switchTracOnglet(\'entretiens\');selectTracteur(this.dataset.tid)"><span class="trd-n">'+_escHtml(x.t.nom)+'</span><span class="trd-s">'+_escHtml(((typeof _trCompteur==='function')&&(_trCompteur(x.t)||{}).estime?'env.\u00a0':'')+x.e.txt)+'</span>'+x.e.badge+'</button>';
     }).join(''):'<div class="trd-rien">Aucun tracteur au parc.</div>')+'</section>';
   var g=(window.CONFIG&&window.CONFIG.gnr)||null;
   h+='<section class="trd-sec"><h3 class="trd-t">GNR</h3>';
@@ -1544,6 +1552,164 @@ function _trDroiteHtml(){
   if(min>0) h+='<div class="trd-l trd-fixe"><span class="trd-n">Ce mois</span><span class="trd-s">'+_escHtml(_trHeuresFr(min/60))+' de moteur</span></div>';
   return h+'</section>';
 }
+// ★ COMPT-1 (§483) — LE COMPTEUR AVANCE TOUT SEUL, ON LE RELÈVE AU PASSAGE (docs/maquettes/maquette-compteur-tracteur-v1.html ; « go » de Nico, 29/10)
+//   Chaque tracteur garde ses relevés : t.releves = [{d, ts, h, par, src}] (src : jour, plein, manuel ; « pas devant le tracteur »
+//   = {d, ts, par, src:'jour', manque:true}, sans h ; les 120 derniers). compteur_h reste le DERNIER VRAI RELEVÉ : ce qui le lit
+//   encore reste juste. Entre deux relevés, le compteur S'ESTIME : dernier relevé + heures notées depuis (chrono, sinon barème —
+//   la règle de _pilGmHeuresSession, pilotage.js) × l'écart appris (médiane « compteur ÷ heures notées » des cinq derniers
+//   intervalles d'au moins 2 h notées ; 1 tant qu'il y en a moins de deux ; borné 0,8–2 : la route et le ralenti tournent au
+//   cadran sans être notés). Jamais sous le relevé. Le relevé se demande AU PASSAGE : une fois par jour et par tracteur, quand on
+//   referme la feuille après y avoir coché ou mesuré, ou qu'on termine ; au plein, il est exigé. Trois contrôles (Fleetio) :
+//   plus bas que le dernier, refusé ; plus de 24 h par jour écoulé, refusé ; plus de 1,5 fois l'attendu et 10 h d'écart, à confirmer.
+var _TR_REL_MAX=120, _trSdAvant=null, _trPleinH=null, _rel={tid:null, src:'jour', buf:'', apres:null};
+function _trIso(d){ var m=d.getMonth()+1, j=d.getDate(); return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(j<10?'0':'')+j; }
+function _trJours(a,b){ var x=Date.UTC(+a.slice(0,4),+a.slice(5,7)-1,+a.slice(8,10)), y=Date.UTC(+b.slice(0,4),+b.slice(5,7)-1,+b.slice(8,10)); return Math.round((y-x)/86400000); }
+function _trTidSession(s){
+  var v=(s&&s.tracteurId)||'';
+  if(!v){ var a=(window.ACTIVITES||[]).find(function(x){ return x&&s&&x.nom===s.activite; }); v=(a&&a.tracteurDefautId)||''; }
+  var t=(TRACTEURS_LIST||[]).find(function(x){ return x.id===v||x.nom===v; });
+  return t?t.id:v;
+}
+function _trHeuresNotees(tid){
+  var acts=window.ACTIVITES||[], parcs=window.PARCELLES||[], out=[];
+  (window.SESSIONS||[]).forEach(function(se){
+    if(!se||_trTidSession(se)!==tid) return;
+    var act=acts.find(function(a){ return a&&a.nom===se.activite; }), hha=act?(parseFloat(act.h_ha)||0):0;
+    (Array.isArray(se.parcellesFaites)?se.parcellesFaites:[]).forEach(function(x){
+      var nom=_chrNom(x); if(!nom) return;
+      var m=_chrMes(x), h;
+      if(m>0) h=m/60;
+      else { if(hha<=0) return; var p=parcs.find(function(pp){ return pp&&pp.nom===nom; }); h=(p?(parseFloat(p.surface)||0):0)*hha; }
+      if(!(h>0)) return;
+      var ts=(x&&typeof x==='object'&&typeof x.t1==='number')?x.t1:null;
+      var iso=ts?_trIso(new Date(ts)):String(se.date||'').slice(0,10);
+      if(iso) out.push({ts:ts, iso:iso, h:h});
+    });
+  });
+  return out;
+}
+function _trNoteesEntre(liste,a,b){
+  return liste.reduce(function(acc,r){
+    var apres=(r.ts&&a.ts)?(r.ts>a.ts):(r.iso>a.d), avant=!b?true:((r.ts&&b.ts)?(r.ts<=b.ts):(r.iso<=b.d));
+    return acc+((apres&&avant)?r.h:0);
+  },0);
+}
+function _trEcart(vrais,liste){
+  var rap=[];
+  for(var i=1;i<vrais.length;i++){ var dh=Number(vrais[i].h)-Number(vrais[i-1].h), n=_trNoteesEntre(liste,vrais[i-1],vrais[i]); if(n>=2&&dh>=0) rap.push(dh/n); }
+  rap=rap.slice(-5); if(rap.length<2) return 1;
+  rap.sort(function(x,y){ return x-y; });
+  var k=rap.length, med=k%2?rap[(k-1)/2]:(rap[k/2-1]+rap[k/2])/2;
+  return Math.min(2,Math.max(0.8,med));
+}
+function _trVrais(t){
+  return ((t&&Array.isArray(t.releves))?t.releves:[]).filter(function(r){ return r&&!r.manque&&r.d&&r.h!==''&&r.h!=null&&isFinite(Number(r.h)); })
+    .slice().sort(function(a,b){ return String(a.d).localeCompare(String(b.d))||((a.ts||0)-(b.ts||0)); });
+}
+function _trCompteur(t){
+  if(!t) return null;
+  var vrais=_trVrais(t), base=vrais.length?vrais[vrais.length-1]:null, c=t.compteur_h;
+  if(!base&&c!=null&&c!==''&&isFinite(Number(c))) base={h:Number(c), d:null, ts:null, par:'', src:'ancien'};
+  if(!base) return null;
+  var auj=_gnrTodayISO(), liste=base.d?_trHeuresNotees(t.id):[], coef=base.d?_trEcart(vrais,liste):1, notees=base.d?_trNoteesEntre(liste,base,null):0;
+  return { h:Math.round((Number(base.h)+notees*coef)*10)/10, base:base, estime:notees>0, notees:notees, coef:coef, aujourdhui:base.d===auj, jours:base.d?_trJours(base.d,auj):null };
+}
+function _trHeuresTxt(k){ return k?((k.estime?'env.\u00a0':'')+_gnrNum(k.estime?Math.round(k.h):k.h)+'\u00a0h'):''; }
+// ── La feuille du relevé (#ovReleve, index.html) ──
+function _relVal(){ var s=_rel.buf; if(!s) return null; s=s.replace(',','.'); if(s.slice(-1)==='.') s=s.slice(0,-1); if(s==='') return null; var v=parseFloat(s); return isFinite(v)?v:null; }
+function _relEtat(v,k){
+  if(v==null) return {k:'vide', t:'Recopie le chiffre du cadran.'};
+  if(!k) return {k:'ok', t:'Premier relev\u00e9 de ce tracteur.'};
+  var b=Number(k.base.h), d=Math.round((v-b)*10)/10;
+  if(v<b) return {k:'bas', t:'Plus bas que le dernier relev\u00e9 ('+_gnrNum(b)+'\u00a0h). V\u00e9rifie le chiffre.', s:'Compteur chang\u00e9\u202f? On le corrige au crayon de \u00ab\u00a0Prochaine r\u00e9vision\u00a0\u00bb.'};
+  if(!k.base.d) return {k:'ok', t:'Le chiffre d\u2019avant n\u2019avait pas de date\u00a0: rien \u00e0 comparer.'};
+  var j=Math.max(1,k.jours||0), att=Math.max(0,k.h-b);
+  if(d>24*j) return {k:'imp', t:'+'+_gnrNum(d)+'\u00a0h en '+j+' jour'+(j>1?'s':'')+'\u00a0: impossible. Un chiffre en trop\u202f?'};
+  if(d>att*1.5&&d-att>10) return {k:'beaucoup', t:'+'+_gnrNum(d)+'\u00a0h depuis le dernier relev\u00e9, on attendait environ +'+_gnrNum(Math.round(att))+'\u00a0h. C\u2019est bien le chiffre\u202f?'};
+  return {k:'ok', t:'+'+_gnrNum(d)+'\u00a0h depuis le dernier relev\u00e9\u00a0: coh\u00e9rent.'};
+}
+function _relCadran(buf){
+  var p=buf.split(','), ent=p[0], dec=p.length>1?p[1]:null, h='', i;
+  if(!ent){ for(i=0;i<4;i++) h+='<span class="rel-c rel-vide'+(i?'':' rel-curseur')+'"></span>'; }
+  else{
+    for(i=0;i<ent.length;i++) h+='<span class="rel-c'+((i>0&&(ent.length-i)%3===0)?' rel-sep':'')+'">'+ent.charAt(i)+'</span>';
+    if(dec!==null) h+='<span class="rel-virg">,</span>'+(dec?'<span class="rel-c rel-dix">'+dec+'</span>':'<span class="rel-c rel-vide rel-curseur"></span>');
+  }
+  return h+'<span class="rel-u">h</span>';
+}
+function _relRendu(){
+  var t=(TRACTEURS_LIST||[]).find(function(x){ return x.id===_rel.tid; }); if(!t) return;
+  var k=_trCompteur(t), v=_relVal(), e=_relEtat(v,k), el=function(id){ return document.getElementById(id); };
+  if(el('rel-cadran')) el('rel-cadran').innerHTML=_relCadran(_rel.buf);
+  var m=el('rel-msg'); if(m){ m.className='rel-msg'+(e.k==='ok'&&v!=null?' rel-ok':e.k==='beaucoup'?' rel-att':(e.k==='bas'||e.k==='imp')?' rel-ko':''); m.innerHTML='<span>'+_escHtml(e.t)+(e.s?'<small>'+_escHtml(e.s)+'</small>':'')+'</span>'; }
+  var b=el('rel-ok'), bon=(e.k==='ok'||e.k==='beaucoup')&&v!=null;
+  if(b){ b.disabled=!bon; b.textContent=!bon?(_rel.src==='plein'?'Valider le plein':'Valider'):(e.k==='beaucoup'?('Oui, '+_gnrNum(v)+'\u00a0h est le bon chiffre'):(_rel.src==='plein'?('Valider le plein \u00e0 '+_gnrNum(v)+'\u00a0h'):('Valider '+_gnrNum(v)+'\u00a0h'))); }
+}
+function _relOuvrir(tid,src,apres){
+  var t=(TRACTEURS_LIST||[]).find(function(x){ return x.id===tid; }); if(!t) return;
+  _rel={tid:tid, src:src||'jour', buf:'', apres:apres||null};
+  var k=_trCompteur(t), el=function(id){ return document.getElementById(id); };
+  if(el('rel-sub')) el('rel-sub').textContent=t.nom+(_rel.src==='plein'?' \u00b7 au plein, le chiffre est demand\u00e9':_rel.src==='jour'?' \u00b7 une fois aujourd\u2019hui, le chiffre du cadran':' \u00b7 le chiffre du cadran');
+  if(el('rel-ref')) el('rel-ref').innerHTML=!k?'<span>Aucun relev\u00e9\u00a0: ce sera le premier.</span>'
+    :('<span>Dernier relev\u00e9\u00a0: <b>'+_escHtml(_gnrNum(k.base.h))+'\u00a0h</b>'+(k.base.d?' le '+_escHtml(_fmtDate(k.base.d))+(k.base.par?', '+_escHtml(k.base.par):''):' (sans date)')+'</span>'+(k.estime?'<span>attendu <b>env.\u00a0'+_escHtml(_gnrNum(Math.round(k.h)))+'\u00a0h</b></span>':''));
+  if(el('rel-tard')) el('rel-tard').hidden=(_rel.src!=='jour');
+  _relRendu(); _openOv('ovReleve');
+}
+function _relTouche(k){
+  var b=_rel.buf;
+  if(k==='del') b=b.slice(0,-1);
+  else if(k===','){ if(b.indexOf(',')<0) b=(b||'0')+','; }
+  else if(/^[0-9]$/.test(k)){ var p=b.split(','); if(p.length===2){ if(p[1].length>=1) return; b+=k; } else { if(p[0].length>=6) return; b=(b==='0')?k:b+k; } }
+  else return;
+  _rel.buf=b; _relRendu();
+}
+function _relValider(){
+  var t=(TRACTEURS_LIST||[]).find(function(x){ return x.id===_rel.tid; }); if(!t) return;
+  var k=_trCompteur(t), v=_relVal(), e=_relEtat(v,k);
+  if(v==null||!(e.k==='ok'||e.k==='beaucoup')) return;
+  var avant={ releves:(t.releves||[]).slice(), compteur_h:t.compteur_h }, apres=_rel.apres;
+  t.releves=(t.releves||[]).concat([{ d:_gnrTodayISO(), ts:Date.now(), h:v, par:(currentUser&&currentUser.nom)||'', src:_rel.src }]).slice(-_TR_REL_MAX);
+  t.compteur_h=v;
+  window.TRACTEURS_LIST=TRACTEURS_LIST; _saveData('tracteurs_list');
+  _closeOv(null,'ovReleve');
+  if(apres){ apres(v); return; }
+  var revoir=function(){ renderTracteur(); if(_tracOnglet==='entretiens'&&typeof renderEntretiens==='function') renderEntretiens(); };
+  revoir();
+  var annuler=function(){ t.releves=avant.releves; t.compteur_h=avant.compteur_h; window.TRACTEURS_LIST=TRACTEURS_LIST; _saveData('tracteurs_list'); revoir(); showToast('Relev\u00e9 retir\u00e9','#3D6B27'); };
+  if(typeof window.showToastAnnuler==='function') window.showToastAnnuler('Compteur not\u00e9 \u00b7 '+_gnrNum(v)+'\u00a0h', annuler); else showToast('Compteur not\u00e9','#3D6B27');
+}
+function _relPlusTard(){
+  var t=(TRACTEURS_LIST||[]).find(function(x){ return x.id===_rel.tid; }), auj=_gnrTodayISO(), par=(currentUser&&currentUser.nom)||'';
+  if(t&&_rel.src==='jour'&&!(t.releves||[]).some(function(r){ return r&&r.manque&&r.d===auj&&r.par===par; })){
+    t.releves=(t.releves||[]).concat([{ d:auj, ts:Date.now(), par:par, src:'jour', manque:true }]).slice(-_TR_REL_MAX);
+    window.TRACTEURS_LIST=TRACTEURS_LIST; _saveData('tracteurs_list');
+  }
+  _closeOv(null,'ovReleve'); showToast('Redemand\u00e9 au prochain enregistrement','#55534E');
+}
+function _trRelever(){ if(!isAdmin()&&!isTractoriste()){ showToast('R\u00e9serv\u00e9 aux tractoristes et \u00e0 l\u2019admin','#C0392B'); return; } var t=_tracSelId?getTracteurSel():null; if(t) _relOuvrir(t.id,'manuel'); }
+function _trSdOuvert(id){ var s=(SESSIONS||[]).find(function(x){ return x.id===id; }); _trSdAvant=s?JSON.stringify(s.parcellesFaites||[]):null; }
+function _trRelevePassage(sid,dou){
+  try{
+    if(window.__MV_TUTO) return;                                   // l'entraînement ne demande pas de compteur
+    if(!((typeof isTractoriste==='function'&&isTractoriste())||(typeof isAdmin==='function'&&isAdmin()))) return;
+    var s=(SESSIONS||[]).find(function(x){ return x.id===sid; }); if(!s) return;
+    if(dou==='feuille'&&_trSdAvant===JSON.stringify(s.parcellesFaites||[])) return;   // regarder une feuille ne demande rien
+    var tid=_trTidSession(s), t=(TRACTEURS_LIST||[]).find(function(x){ return x.id===tid; });
+    if(!t||(REPARATEUR&&REPARATEUR[t.id])) return;
+    var auj=_gnrTodayISO();
+    if((t.releves||[]).some(function(r){ return r&&!r.manque&&r.d===auj; })) return;   // une fois par jour et par tracteur
+    setTimeout(function(){ _relOuvrir(t.id,'jour'); },320);
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/_trRelevePassage'); }
+}
+window._trCompteur=_trCompteur; window._trHeuresTxt=_trHeuresTxt; window._relTouche=_relTouche; window._relValider=_relValider; window._relPlusTard=_relPlusTard; window._trRelever=_trRelever;
+if(typeof document!=='undefined'&&document.addEventListener) document.addEventListener('keydown',function(ev){
+  var o=document.getElementById('ovReleve'); if(!o||!o.classList.contains('open')) return;
+  var k=ev.key;
+  if(/^[0-9]$/.test(k)){ _relTouche(k); ev.preventDefault(); }
+  else if(k===','||k==='.'){ _relTouche(','); ev.preventDefault(); }
+  else if(k==='Backspace'){ _relTouche('del'); ev.preventDefault(); }
+  else if(k==='Enter'){ var b=document.getElementById('rel-ok'); if(b&&!b.disabled){ _relValider(); ev.preventDefault(); } }
+});
 function renderTracteur(){
   // Init sélection tracteur au premier render
   if(!_tracSelId&&TRACTEURS_LIST.length)_tracSelId=TRACTEURS_LIST[0].id;
@@ -2403,6 +2569,7 @@ function _trEntDock(){
 function openSessionDetail(id){
   const s=SESSIONS.find(x=>x.id===id);if(!s)return;
   window.tracSessionId=id;sdShowDone=false;sdSkipMode=false;
+  if(typeof _trSdOuvert==='function') _trSdOuvert(id);   // ★ COMPT-1 (§483) : l'état des parcelles à l'ouverture (regarder ne demande pas de relevé)
   if(!s.parcellesFaites)s.parcellesFaites=[];
   if(!s.parcellesSkip)s.parcellesSkip=[];
   const amap=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
@@ -2787,6 +2954,7 @@ function closeSessionDetail(){
   _closeOv(null,'ovSessionDetail');
   renderTracteur();
   showToast('Passage enregistré','#3D6B27');
+  if(typeof _trRelevePassage==='function') _trRelevePassage(window.tracSessionId,'feuille');   // ★ COMPT-1 (§483) : le relevé au passage, une fois par jour
 }
 function deleteSessionFromDetail(btn){
   if(!isAdmin())return;

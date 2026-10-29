@@ -446,8 +446,9 @@ function _pilData(){
       (ts[0].parcellesFaites||[]).forEach(function(x){ var nm=typeof x==='string'?x:(x&&x.nom); var p=parc.find(function(pp){ return pp&&pp.nom===nm; }); if(p) sd+=(p.surface||0); });
       sAdv = surfTot>0 ? Math.round(sd/surfTot*100) : 0; sess=ts[0];
     }
-    var hasComp = (t.compteur_h!=null && t.compteur_h!=='' && t.revision_h!=null && t.revision_h!=='');
-    var revReste = hasComp ? (Number(t.revision_h)-Number(t.compteur_h)) : null;
+    var _kp = (typeof window!=='undefined' && window._trCompteur) ? window._trCompteur(t) : null;   // ★ COMPT-1 (§483) : le compteur estimé de tracteur.js, sinon le dernier relevé
+    var hasComp = ((_kp || (t.compteur_h!=null && t.compteur_h!=='')) && t.revision_h!=null && t.revision_h!=='');
+    var revReste = hasComp ? Math.round((Number(t.revision_h)-(_kp?_kp.h:Number(t.compteur_h)))*10)/10 : null;
     return { id:t.id, nom:t.nom, traitementOnly:t.traitementOnly, rep:rep, lastCtrl:lastCtrl, sess:sess, sAdv:sAdv, revReste:revReste };
   });
   var nRepar = tracs.filter(function(t){ return t.rep; }).length;
@@ -1019,7 +1020,7 @@ function _pilPanelTracteur(d){
     var sub='';
     if(s.trac_revision){
       if(t.revReste!=null){ var col=t.revReste<=50?'var(--rouge)':t.revReste<=120?'var(--orange)':'var(--vert-med)';
-        sub += '<div class="pil-li-s" style="color:'+col+';font-weight:600">Révision dans '+_pilNum(t.revReste)+' h</div>';
+        sub += '<div class="pil-li-s" style="color:'+col+';font-weight:600">'+(t.revReste<0?'Révision dépassée de '+_pilNum(-t.revReste):'Révision dans '+_pilNum(t.revReste))+' h</div>';   // ★ COMPT-1 (§483) : plus de « dans −n h »
       } else { sub += '<div class="pil-li-s" style="opacity:.6">Révision : à renseigner</div>'; }
     }
     if(s.trac_controle){ sub += '<div class="pil-li-s">Dernier contrôle : '+(t.lastCtrl?_pilDfr(t.lastCtrl):'jamais')+'</div>'; }
@@ -1033,7 +1034,7 @@ function _pilPanelTracteur(d){
   //   vient verifier sans deplier. Il fallait ouvrir la carte pour la voir.
   var _pr=null;
   (d.tracs||[]).forEach(function(t){ if(t.revReste!=null && (_pr===null || t.revReste<_pr.revReste)) _pr=t; });
-  var _cad = _pr ? ('prochaine révision dans '+_pilNum(_pr.revReste)+' h \u00b7 '+_pilEsc(_pilTnom(_pr.nom||'')))
+  var _cad = _pr ? ((_pr.revReste<0?'révision dépassée de '+_pilNum(-_pr.revReste):'prochaine révision dans '+_pilNum(_pr.revReste))+' h \u00b7 '+_pilEsc(_pilTnom(_pr.nom||'')))
                  : 'aucune échéance de révision renseignée';
   return _pilTile('tracteur','#4A9FC8','Parc tracteur', _pilStat(n,' tracteur'+(n>1?'s':''), d.nRepar?('🔧 '+d.nRepar):null), _cad, null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.tracteur');
 }
