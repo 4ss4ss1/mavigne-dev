@@ -20,6 +20,7 @@
     "_relValider": "COMPT-1 (§483) : valide le chiffre recopié ; le bouton dit ce qu’il note",
     "_relPlusTard": "COMPT-1 (§483) : « Pas devant le tracteur » repose la question au geste suivant, rien à apprendre",
     "_trRelever": "COMPT-1 (§483) : « Relever » ouvre la même feuille que le relevé au passage",
-    "_trRevFaite": "COMPT-2 (§484) : « Révision faite » ouvre la feuille du compteur, la même que le relevé ; le bouton dit ce qu’il fait"
+    "_trRevFaite": "COMPT-2 (§484) : « Révision faite » ouvre la feuille du compteur, la même que le relevé ; le bouton dit ce qu’il fait",
+    "_trRelEcarte": "COMPT-3 (§485) : « Écarter » / « Rétablir » un relevé dans la fiche du compteur (admin, ordinateur) — le bouton dit ce qu’il fait, « Annuler » rattrape"
   }
 }

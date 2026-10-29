@@ -112,7 +112,7 @@
   "src/tracteur.js": {
     "dur": 10,
     "petit": 10,
-    "ko": 223
+    "ko": 241
   },
   "src/tutos.js": {
     "dur": 0,
@@ -122,12 +122,12 @@
   "src/utils.js": {
     "dur": 5,
     "petit": 2,
-    "ko": 492
+    "ko": 493
   },
   "src/whats-new.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 546
+    "ko": 547
   },
   "index.html": {
     "dur": 74,
@@ -137,6 +137,6 @@
   "src/styles.css": {
     "dur": 239,
     "petit": 71,
-    "ko": 944
+    "ko": 947
   }
 }

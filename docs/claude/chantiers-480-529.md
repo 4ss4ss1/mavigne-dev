@@ -148,3 +148,27 @@ Le deuxième lot de `docs/maquettes/maquette-compteur-tracteur-v1.html` (§483) 
 - Le plan à plusieurs entretiens (vidange pont et boîte, filtres) : un seul intervalle par tracteur pour l’instant.
 - La date de l’intervalle ne remonte ni au Pilotage, ni à l’accueil, ni au rapport de saison, qui lisent les heures ; un tracteur suivi à la date seule s’affiche « révision à renseigner » dans le parc.
 - Toujours ouverts depuis §483e : la fiche « Plein fait » sans compteur, la bande des pastilles à retirer, la ligne d’aide des pastilles, le vocabulaire « Heures de moteur ».
+
+## 485. ★★ COMPT-3 — LA FICHE DU COMPTEUR, SUR ORDINATEUR (29/10 — `src/tracteur.js` (`_trUtc`, `_trJoursOuvres`, `_trAjoutOuvres`, `_trRythme`, `_trRepere`, `_trLignesReleves`, `_trCourbeSvg`, `_trFicheCptHtml`, `_trRelEcarte` ; `_trVrais`, `renderEntretiens`) · `index.html` (v10.37) · `src/styles.css` · `src/utils.js` (APP 10.37, l’aide du Tracteur) · `src/whats-new.js` · `guide/06-tracteur.html` · `public/sw.js` (SW 11.18) · `scripts/mv-harnais-compt3.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/tutos-couverture.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-480-529.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/COMPT-3.json` · base `913f01b`)
+
+### 485a. D’où ça vient
+Le troisième lot de `docs/maquettes/maquette-compteur-tracteur-v1.html` (§483, écran « Tracteur › Entretien › la fiche du tracteur ») ; « suite » de Nico (29/10). L’admin voyait un chiffre estimé sans pouvoir juger s’il tenait, ni retirer un relevé faux.
+
+### 485b. Ce qui change
+- **La fiche du compteur** (`_trFicheCptHtml`), à partir de 1 024 px (`.cpt-fiche`, cachée au téléphone), dans sa zone `#cpt-fiche-zone` : le dernier enfant du panneau de l’Entretien, sur toute la largeur de sa grille (`grid-column:1 / -1`), sous les deux colonnes — dans la colonne de droite, elle n’avait que 194 px ; un tracteur non suivi n’en a pas.
+- **Ce que Ma Vigne a appris** : l’écart (× 1,3 « appris sur n intervalles », ou « pas encore appris » sous deux intervalles d’au moins 2 h notées) ; **le rythme au compteur** (`_trRythme` : les vrais relevés des 4 dernières semaines, Δ heures ÷ jours ouvrés du lundi au vendredi, `_trJoursOuvres`) ; **le repère de révision** (`_trRepere` : reste ÷ rythme, arrondi au jour ouvré supérieur, `_trAjoutOuvres`), dit comme un repère, pas une date promise ; le nombre de relevés en 30 jours.
+- **La courbe** (`_trCourbeSvg`) : les douze derniers vrais relevés (rond, carré au plein), l’estimé en pointillé jusqu’à aujourd’hui, la révision en rouge, le repère en orange. Couleurs par jetons.
+- **Les relevés** (`_trLignesReleves`) : les dix derniers, « pas devant le tracteur » compris, l’estimé du jour en tête ; **l’écart à l’estimé** de chaque vrai relevé = relevé − (relevé d’avant + heures notées entre les deux × l’écart d’aujourd’hui).
+- **« Écarter » / « Rétablir »** (`_trRelEcarte`, admin) : le relevé reste écrit, barré, mais ne compte plus (`ecarte:true`, exclu par `_trVrais` : ni base, ni écart, ni rythme) ; `compteur_h` redevient le dernier vrai relevé ; Annuler six secondes. Exempté de tuto.
+
+### 485c. Mesuré
+- `mv-harnais-compt3` : 11 assertions — les jours ouvrés, le rythme (92 h en 20 jours ouvrés = 4,6 h) et le repère (14 jours ouvrés, le 18 nov.), l’écart à l’estimé ligne par ligne, la fiche (appris, rythme, repère, courbe, tableau, boutons de l’admin seulement, pas de fiche pour un tracteur non suivi), « Écarter » refusé à un non-admin, qui retire le chiffre et recalcule, « Annuler », le branchement et l’ordinateur seul ; **10/10 mutants**. `compt1`, `compt2`, `traux1a`, `traux1b`, `robustesse-tracteur` verts, contre-épreuves comprises.
+- **Chaîne complète verte sur les sources finales** : 591 commandes, en quatre reprises (le bac à sable coupe une commande à cinq minutes). Rougis en route et corrigés : un filet de la courbe sans repli (`mv-harnais-jetons` lit aussi tracteur.js) ; tracteur.js qui enfle de plus de 5 % — `typo-baseline.json` regravé, 223 → 241 ko (COMPT-2 et COMPT-3), le découpage laissé à Nico : le compteur pèse environ 45 ko dans tracteur.js.
+- **Build** : app 10.37. **Tutos concernés : aucun** (7 tutos, aucun ne touche ce changement) ; panneau côte à côte rejoué après le dernier retouché, 3/3.
+- **Essai réel sur le build** (mode entraînement, Chromium) : ★ **vu en route** — la fiche, rendue d’abord dans la colonne de droite de l’Entretien, n’y avait que 194 px à 1 280 (le panneau d’entraînement, le rail et la colonne de 400 px se partagent l’écran) : texte tassé, tableau à défiler. Dans sa zone pleine largeur : 784 px pour une appli de 1 280 (viewport 1 700 avec le panneau), 610 px à 1 280 avec le panneau ; le tableau tient (782 px, 608 px). Appris, rythme (4,7 h par jour ouvré), repère (16 jours ouvrés, le 20 nov. 2026), courbe, six lignes, cinq « Écarter » pour l’admin ; cachée au téléphone ; aucune erreur.
+
+### 485d. Ce qui reste ouvert
+- « Corriger » un relevé : pour l’instant, on l’écarte et on relève à nouveau (le nouveau chiffre porte la date du jour).
+- Le repère compte les jours du lundi au vendredi, sans les jours fériés ni le planning (le Pilotage, lui, lit le planning — §440).
+- Un tracteur dont tous les vrais relevés sont écartés garde son `compteur_h` d’avant.
+- Toujours ouverts depuis §484d et §483e : le plan à plusieurs entretiens, la date au Pilotage, la fiche « Plein fait » sans compteur, la bande des pastilles, la ligne d’aide des pastilles, « Heures de moteur ».

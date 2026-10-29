@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.37', d: '2026-10-29', items: [
+    { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'tracteur', titre: 'Sur ordinateur, la fiche du compteur',
+      desc: "Dans l’Entretien d’un tracteur, sous la révision\u00a0: ce que Ma Vigne a appris (l’écart de la route et du ralenti, le rythme au compteur, un repère de révision), la courbe des relevés jusqu’à aujourd’hui, et les dix derniers relevés avec leur écart à l’estimé — on voit si l’estimation tient. Un chiffre faux\u00a0? L’administrateur l’écarte\u00a0: il reste écrit, barré, et ne compte plus\u00a0; «\u00a0Rétablir\u00a0» le remet." },
+  ] },
   { v: '10.36', d: '2026-10-29', items: [
     { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'tracteur', titre: 'La révision se recalcule toute seule',
       desc: "Réglez une fois l’intervalle au crayon de «\u00a0Prochaine révision\u00a0»\u00a0: toutes les 500\u00a0h, tous les 12 mois, ou les deux — au premier atteint. Après l’entretien, «\u00a0Révision faite\u00a0» demande le chiffre du cadran et calcule la suivante\u00a0: plus rien à retaper. Pour démarrer une session sur un tracteur dont la révision approche ou est dépassée, ou qui n’a pas été relevé depuis une semaine, Ma Vigne demande d’abord le compteur. Un tracteur sans compteur ni révision n’est jamais interrogé." },

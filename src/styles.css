@@ -9675,6 +9675,30 @@ body:not(.mv-rail-ouvert) .mv-rail .mv-rail-point,body:not(.mv-rail-ouvert) .mv-
 #ovReleve .rel-ban{margin-bottom:var(--e-2,8px);padding:var(--e-2,8px) var(--e-3,12px);border-radius:var(--r-md,8px);background:var(--danger-doux);color:var(--danger-texte);font-size:var(--pt-txt,13px);font-weight:600;line-height:1.35}
 #ovReleve .rel-ban[hidden]{display:none}
 .rel-faite{display:inline-flex;align-items:center;margin-top:var(--e-2,8px);padding:var(--e-2,8px) var(--e-3,12px);border:1px solid var(--ligne-forte);border-radius:var(--r-md,8px);background:transparent;color:var(--texte);font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;min-height:44px}
+/* ★ COMPT-3 (§485) : la fiche du compteur — sur ordinateur seulement, sous la carte Révision */
+.cpt-fiche{display:none}
+@media (min-width:1024px){ #page-tracteur .cpt-fiche{display:block} }
+#page-tracteur #trac-panel-entretiens > #cpt-fiche-zone{grid-column:1 / -1;min-width:0}
+#page-tracteur .cpt-fiche{width:100%;min-width:0;box-sizing:border-box;margin-top:var(--e-4,16px)}
+.cpt-tab{overflow-x:auto}
+@media (max-width:1279px){ .cpt-grille{grid-template-columns:minmax(0,1fr)} }
+.cpt-titre{font-family:var(--font-titre,'Cormorant Garamond',serif);font-size:var(--pt-md,20px);font-weight:600;margin-bottom:var(--e-2,8px)}
+.cpt-grille{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:var(--e-4,16px);align-items:start}
+.cpt-appris{display:grid;gap:var(--e-2,8px);font-size:var(--pt-txt,13px);color:var(--texte-doux);line-height:1.45}
+.cpt-appris b{color:var(--texte);font-weight:600}
+.cpt-courbe svg{width:100%;height:auto;display:block}
+.cpt-courbe .cpt-ax{font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-nano,11px);fill:var(--texte-doux)}
+.cpt-courbe .cpt-rev{fill:var(--rouge);font-weight:600}
+.cpt-courbe .cpt-rep{fill:var(--orange);font-weight:600}
+.cpt-releves{width:100%;border-collapse:collapse;margin-top:var(--e-3,12px);font-size:var(--pt-txt,13px)}
+.cpt-releves th{text-align:left;font-size:var(--pt-nano,11px);font-weight:600;color:var(--texte-doux);padding:var(--e-1,4px) var(--e-2,8px);border-bottom:1px solid var(--ligne-forte);white-space:nowrap}
+.cpt-releves td{padding:var(--e-1,4px) var(--e-2,8px);border-bottom:1px solid var(--ligne,var(--gris-clair));white-space:nowrap}
+.cpt-releves .r{text-align:right}
+.cpt-releves .cpt-est td{background:var(--bg-doux);color:var(--texte-doux)}
+.cpt-releves .cpt-manque td,.cpt-releves .cpt-ecarte td{color:var(--texte-doux)}
+.cpt-releves .cpt-ecarte td:nth-child(2){text-decoration:line-through}
+.cpt-act{min-height:36px;padding:0 var(--e-2,8px);border:1px solid var(--ligne-forte);border-radius:var(--r-sm,6px);background:transparent;color:var(--texte);font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-micro,12px);cursor:pointer}
+.cpt-cache{position:absolute;left:-9999px}
 @media (prefers-reduced-motion:reduce){#ovReleve .rel-c.rel-curseur::after{animation:none}}
 
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.
