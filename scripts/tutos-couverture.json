@@ -22,6 +22,12 @@
     "_trRelever": "COMPT-1 (§483) : « Relever » ouvre la même feuille que le relevé au passage",
     "_trRevFaite": "COMPT-2 (§484) : « Révision faite » ouvre la feuille du compteur, la même que le relevé ; le bouton dit ce qu’il fait",
     "_trRelEcarte": "COMPT-3 (§485) : « Écarter » / « Rétablir » un relevé dans la fiche du compteur (admin, ordinateur) — le bouton dit ce qu’il fait, « Annuler » rattrape",
-    "_trRelCorriger": "COMPT-4 (§486) : « Corriger » un relevé dans la fiche du compteur (admin, ordinateur) — la feuille du relevé, bornée ; « Annuler » rattrape"
+    "_trRelCorriger": "COMPT-4 (§486) : « Corriger » un relevé dans la fiche du compteur (admin, ordinateur) — la feuille du relevé, bornée ; « Annuler » rattrape",
+    "_trEntEdit": "COMPT-5 (§487) : « Ajouter » / le crayon d’un autre entretien (admin) — un petit formulaire sur place",
+    "_trEntAnnuler": "COMPT-5 (§487) : « Annuler » le formulaire d’un autre entretien — rien à apprendre",
+    "_trEntSave": "COMPT-5 (§487) : « Enregistrer » un autre entretien — le formulaire dit ce qui manque",
+    "_trEntSuppr": "COMPT-5 (§487) : « Retirer » un autre entretien — « Annuler » rattrape",
+    "_trEntFait": "COMPT-5 (§487) : « Fait » sur un autre entretien — la feuille du compteur, la même que le relevé",
+    "_relFait": "COMPT-5 (§487) : une case « Fait aussi » dans la feuille de la révision — rien à apprendre"
   }
 }

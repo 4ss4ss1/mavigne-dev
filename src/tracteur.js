@@ -1021,7 +1021,7 @@ function renderEntretiens(){
   var hasAnoActive=anomActives.length>0;
 
   if(!fiches.length){
-    el.innerHTML=(_gnrCardHtml()+_revCardHtml(t))+'<div class="empty-state" style="padding:32px 20px"><div class="ei">'+_mvIcon('outil',40)+'</div><div class="et">Aucune fiche d\'entretien</div><div class="ed">Ajoutez une fiche avec le bouton + pour commencer le suivi.</div></div>';
+    el.innerHTML=(_gnrCardHtml()+_revCardHtml(t)+(typeof _trEntProgHtml==='function'?_trEntProgHtml(t):''))+'<div class="empty-state" style="padding:32px 20px"><div class="ei">'+_mvIcon('outil',40)+'</div><div class="et">Aucune fiche d\'entretien</div><div class="ed">Ajoutez une fiche avec le bouton + pour commencer le suivi.</div></div>';
     return;
   }
 
@@ -1055,7 +1055,7 @@ function renderEntretiens(){
   var nbF=fiches.length;
   var nbAnoText=hasAnoActive?('<span style="margin-left:8px;color:var(--rouge);font-weight:700">'+anomActives.length+' non traitée'+(anomActives.length>1?'s':'')+'</span>'):'';
 
-  el.innerHTML=(_gnrCardHtml()+_revCardHtml(t))+'<div class="ent-resume-card'+(hasAnoActive?' has-ano-active':'')+'">'
+  el.innerHTML=(_gnrCardHtml()+_revCardHtml(t)+(typeof _trEntProgHtml==='function'?_trEntProgHtml(t):''))+'<div class="ent-resume-card'+(hasAnoActive?' has-ano-active':'')+'">'
     +'<div class="ent-resume-hd">'
       +'<div>'
         +'<div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">Derniers contrôles</div>'
@@ -1516,7 +1516,7 @@ function _trParcEtat(t){
 function _trDroiteHtml(){
   var parc=(TRACTEURS_LIST||[]).map(function(t,i){ return { t:t, i:i, e:_trParcEtat(t) }; }).sort(function(a,b){ return (a.e.rang-b.e.rang)||(a.i-b.i); });
   var h='<section class="trd-sec"><h3 class="trd-t">Le parc</h3>'+(parc.length?parc.map(function(x){
-      return '<button type="button" class="trd-l" data-tid="'+_escAttr(x.t.id)+'" onclick="switchTracOnglet(\'entretiens\');selectTracteur(this.dataset.tid)"><span class="trd-n">'+_escHtml(x.t.nom)+'</span><span class="trd-s">'+_escHtml(((typeof _trCompteur==='function')&&(_trCompteur(x.t)||{}).estime?'env.\u00a0':'')+x.e.txt+((typeof _trReleveExige==='function')&&_trReleveExige(x.t)==='vieux'?' \u00b7 \u00e0 relever':''))+'</span>'+x.e.badge+'</button>';
+      return '<button type="button" class="trd-l" data-tid="'+_escAttr(x.t.id)+'" onclick="switchTracOnglet(\'entretiens\');selectTracteur(this.dataset.tid)"><span class="trd-n">'+_escHtml(x.t.nom)+'</span><span class="trd-s">'+_escHtml(((typeof _trCompteur==='function')&&(_trCompteur(x.t)||{}).estime?'env.\u00a0':'')+x.e.txt+((typeof _trReleveExige==='function')&&_trReleveExige(x.t)==='vieux'?' \u00b7 \u00e0 relever':'')+((typeof _trEntUrgent==='function')?_trEntUrgent(x.t):''))+'</span>'+x.e.badge+'</button>';
     }).join(''):'<div class="trd-rien">Aucun tracteur au parc.</div>')+'</section>';
   var g=(window.CONFIG&&window.CONFIG.gnr)||null;
   h+='<section class="trd-sec"><h3 class="trd-t">GNR</h3>';
@@ -1617,6 +1617,8 @@ function _trReleveExige(t){
   var e=_trRevEtat(t);
   if(e&&e.depasse) return 'depassee';
   if(e&&((e.reste!=null&&e.reste<=50)||(e.jours!=null&&e.jours<=14))) return 'proche';
+  var _eu=(typeof _trEntPlusUrgent==='function')?_trEntPlusUrgent(t):null;   // ★ COMPT-5 (§487) : un autre entretien rouge compte aussi
+  if(_eu&&_eu.depasse) return 'depassee'; if(_eu&&_eu.rouge) return 'proche';
   if(!k||!k.base.d||k.jours>=7) return 'vieux';
   return '';
 }
@@ -1702,6 +1704,106 @@ function _relEtatCorr(v,b){
   if(v>b.max) return {k:'imp', t:'Plus haut que le relev\u00e9 d\u2019apr\u00e8s ('+_gnrNum(b.max)+'\u00a0h).'};
   return {k:'ok', t:'Entre le relev\u00e9 d\u2019avant et celui d\u2019apr\u00e8s\u00a0: coh\u00e9rent.'};
 }
+// ★ COMPT-5 (§487) — PLUSIEURS ENTRETIENS PAR TRACTEUR (maquette-compteur-tracteur-v1.html, « Entretiens programmés »)
+//   t.entretiens_prog = [{id, nom, tous_h, tous_mois, fait_h, fait_d}] : ce qui se fait à côté de la révision (vidange de pont et
+//   boîte, filtres, graissage…). Échéance au premier atteint : fait_h + tous_h (au compteur estimé), fait_d + tous_mois. Seuils à
+//   la mesure de l'intervalle — rouge à un dixième (5 h au moins) ou 14 jours, orange au quart (10 h au moins) ou 30 jours —,
+//   parce qu'un graissage toutes les 50 h serait sinon toujours rouge. « Fait » demande le compteur (la feuille, src 'entretien') ;
+//   « Révision faite » propose de cocher ceux faits en même temps. L'admin ajoute, règle, retire. Le plus urgent remonte dans le
+//   parc et compte pour le compteur exigé au démarrage. La révision elle-même reste sur revision_h (tous les lecteurs le lisent).
+var _entProgEdit=null;
+function _trEntEtat(t,e){
+  var k=_trCompteur(t), th=Number(e&&e.tous_h)||0, tm=Number(e&&e.tous_mois)||0;
+  var aH=th>0&&!!k&&e.fait_h!==''&&e.fait_h!=null&&isFinite(Number(e.fait_h)), aD=tm>0&&!!e.fait_d&&/^\d{4}-\d{2}-\d{2}$/.test(String(e.fait_d));
+  var ph=aH?Math.round((Number(e.fait_h)+th)*10)/10:null, pd=aD?_trAjoutMois(String(e.fait_d),tm):null;
+  var reste=aH?Math.round(ph-k.h):null, j=pd?_trJours(_gnrTodayISO(),pd):null;
+  if(reste==null&&j==null) return {connu:false, ph:null, pd:null, reste:null, jours:null, depasse:false, rouge:false, orange:false};
+  var sr=Math.max(5,th*0.1), so=Math.max(10,th*0.25);
+  var dep=(reste!=null&&reste<0)||(j!=null&&j<0), rouge=dep||(reste!=null&&reste<=sr)||(j!=null&&j<=14), orange=!rouge&&((reste!=null&&reste<=so)||(j!=null&&j<=30));
+  return {connu:true, ph:ph, pd:pd, reste:reste, jours:j, depasse:dep, rouge:rouge, orange:orange};
+}
+function _trEntTexte(e,s){
+  if(!s.connu) return 'jamais not\u00e9';
+  var p=[];
+  if(s.reste!=null) p.push(s.reste<0?'d\u00e9pass\u00e9 de '+_gnrNum(-s.reste)+'\u00a0h':'dans '+_gnrNum(s.reste)+'\u00a0h');
+  if(s.pd) p.push(s.jours<0?'date d\u00e9pass\u00e9e':'le '+_trDateAn(s.pd));
+  return p.join(' ou ');
+}
+function _trEntIntervalle(e){ var th=Number(e.tous_h)||0, tm=Number(e.tous_mois)||0; return (th>0&&tm>0)?('toutes les '+_gnrNum(th)+'\u00a0h ou '+_gnrNum(tm)+' mois'):th>0?('toutes les '+_gnrNum(th)+'\u00a0h'):tm>0?('tous les '+_gnrNum(tm)+' mois'):''; }
+function _trEntPlusUrgent(t){
+  var best=null;
+  ((t&&t.entretiens_prog)||[]).forEach(function(e){ var s=_trEntEtat(t,e); if(!s.connu) return; var rang=s.depasse?0:s.rouge?1:s.orange?2:3; if(!best||rang<best.rang) best={e:e, s:s, rang:rang, depasse:s.depasse, rouge:s.rouge}; });
+  return best;
+}
+function _trEntUrgent(t){ var b=_trEntPlusUrgent(t); return (b&&b.rouge)?(' \u00b7 '+[b.e.nom,_trEntTexte(b.e,b.s)].join(' ')):''; }
+function _trEntForm(e){
+  var v=e||{};
+  return '<div class="ep-form">'
+    +'<div class="ep-l">Nom</div><input type="text" id="ep-nom" class="mvchamp" value="'+_escAttr(v.nom||'')+'" placeholder="ex. Vidange pont et bo\u00eete" style="width:100%">'
+    +'<div class="ep-2">'+_gnrField('ep-tous-h','Toutes les (h)',v.tous_h)+_gnrField('ep-tous-mois','ou tous les (mois)',v.tous_mois)+'</div>'
+    +'<div class="ep-2">'+_gnrField('ep-fait-h','Dernier \u00e0 (h)',v.fait_h)+'<div><div class="ep-l">le</div><input type="date" id="ep-fait-d" class="mvchamp" value="'+_escAttr(v.fait_d||'')+'" style="width:100%"></div></div>'
+    +'<div class="ep-actions"><button type="button" class="mbtn acre" onclick="_trEntSave()">Enregistrer</button>'+(e?'<button type="button" class="mvbtn mvbtn-secondaire ep-btn ep-suppr" onclick="_trEntSuppr()">Retirer</button>':'')+'<button type="button" class="mvbtn mvbtn-secondaire ep-btn" onclick="_trEntAnnuler()">Annuler</button></div>'
+  +'</div>';
+}
+function _trEntProgHtml(t){
+  if(!t) return '';
+  var canEdit=isAdmin()||isTractoriste(), adm=isAdmin(), L=Array.isArray(t.entretiens_prog)?t.entretiens_prog:[];
+  if(!L.length&&!adm) return '';
+  var h='<div class="ent-resume-card ent-prog"><div class="ep-tete"><span class="ep-titre">'+_mvIcon('outil',16)+' Autres entretiens</span>'+(adm&&_entProgEdit!=='nouveau'?'<button type="button" class="mvbtn mvbtn-secondaire ep-btn" onclick="_trEntEdit(\'nouveau\')">Ajouter</button>':'')+'</div>';
+  if(_entProgEdit==='nouveau'&&adm) h+=_trEntForm(null);
+  if(!L.length&&_entProgEdit!=='nouveau') h+='<div class="ep-vide">Vidange de pont et bo\u00eete, filtres, graissage\u00a0: ajoutez ce qui se fait \u00e0 c\u00f4t\u00e9 de la r\u00e9vision.</div>';
+  L.forEach(function(e){
+    if(_entProgEdit===e.id&&adm){ h+=_trEntForm(e); return; }
+    var st=_trEntEtat(t,e), cls=st.rouge?' danger':st.orange?' att':'';
+    h+='<div class="ep-ligne"><div class="ep-g"><div class="ep-n">'+_escHtml(e.nom)+'</div><div class="ep-s">'+_escHtml(_trEntIntervalle(e))+(e.fait_d?' \u00b7 dernier le '+_escHtml(_fmtDate(e.fait_d))+(e.fait_h!=null&&e.fait_h!==''?' \u00e0 '+_escHtml(_gnrNum(e.fait_h))+'\u00a0h':''):'')+'</div></div>'
+      +'<span class="ep-etat'+cls+'">'+_escHtml(_trEntTexte(e,st))+'</span>'
+      +(canEdit?'<button type="button" class="mvbtn mvbtn-secondaire ep-btn" onclick="_trEntFait(\''+_escAttr(e.id)+'\')">Fait</button>':'')
+      +(adm?'<button type="button" class="mvbtn mvbtn-secondaire ep-btn ep-ic" aria-label="R\u00e9gler '+_escAttr(e.nom)+'" onclick="_trEntEdit(\''+_escAttr(e.id)+'\')">'+_mvIcon('crayon',16)+'</button>':'')
+      +'</div>';
+  });
+  return h+'</div>';
+}
+function _trEntEdit(id){ if(!isAdmin()){ showToast('R\u00e9serv\u00e9 \u00e0 l\u2019admin','#C0392B'); return; } _entProgEdit=id; renderEntretiens(); var n=document.getElementById('ep-nom'); if(n&&n.focus) n.focus(); }
+function _trEntAnnuler(){ _entProgEdit=null; renderEntretiens(); }
+function _trEntSave(){
+  if(!isAdmin()) return;
+  var t=_tracSelId?getTracteurSel():null; if(!t) return;
+  var g=function(id){ var x=document.getElementById(id); return x?String(x.value||'').trim():''; };
+  var nom=g('ep-nom'), th=parseFloat(g('ep-tous-h'))||0, tm=parseInt(g('ep-tous-mois'),10)||0, fh=g('ep-fait-h'), fd=g('ep-fait-d');
+  if(!nom){ showToast('Donnez un nom \u00e0 l\u2019entretien','#C0392B'); return; }
+  if(!(th>0)&&!(tm>0)){ showToast('R\u00e9glez un intervalle\u00a0: des heures, des mois, ou les deux','#C0392B'); return; }
+  if(!Array.isArray(t.entretiens_prog)) t.entretiens_prog=[];
+  var e=_entProgEdit==='nouveau'?null:t.entretiens_prog.find(function(x){ return x.id===_entProgEdit; });
+  if(!e){ e={id:'ep'+Date.now().toString(36)}; t.entretiens_prog.push(e); }
+  e.nom=nom; e.tous_h=th>0?th:''; e.tous_mois=tm>0?tm:''; e.fait_h=(fh!==''&&isFinite(parseFloat(fh)))?parseFloat(fh):''; e.fait_d=/^\d{4}-\d{2}-\d{2}$/.test(fd)?fd:'';
+  _entProgEdit=null; window.TRACTEURS_LIST=TRACTEURS_LIST; _saveData('tracteurs_list'); renderEntretiens(); renderTracteur();
+  showToast('Entretien enregistr\u00e9 \u00b7 '+nom,'#3D6B27');
+}
+function _trEntSuppr(){
+  if(!isAdmin()) return;
+  var t=_tracSelId?getTracteurSel():null; if(!t||!Array.isArray(t.entretiens_prog)) return;
+  var i=t.entretiens_prog.findIndex(function(x){ return x.id===_entProgEdit; }); if(i<0) return;
+  var e=t.entretiens_prog.splice(i,1)[0];
+  _entProgEdit=null; window.TRACTEURS_LIST=TRACTEURS_LIST; _saveData('tracteurs_list'); renderEntretiens(); renderTracteur();
+  var annuler=function(){ t.entretiens_prog.splice(Math.min(i,t.entretiens_prog.length),0,e); window.TRACTEURS_LIST=TRACTEURS_LIST; _saveData('tracteurs_list'); renderEntretiens(); renderTracteur(); };
+  if(typeof window.showToastAnnuler==='function') window.showToastAnnuler('Entretien retir\u00e9 \u00b7 '+e.nom, annuler); else showToast('Entretien retir\u00e9','#3D6B27');
+}
+function _trEntFait(id){
+  if(!isAdmin()&&!isTractoriste()){ showToast('R\u00e9serv\u00e9 aux tractoristes et \u00e0 l\u2019admin','#C0392B'); return; }
+  var t=_tracSelId?getTracteurSel():null; if(!t) return;
+  var e=(t.entretiens_prog||[]).find(function(x){ return x.id===id; }); if(!e) return;
+  _relOuvrir(t.id,'entretien',function(h){
+    var av={h:e.fait_h, d:e.fait_d}; e.fait_h=h; e.fait_d=_gnrTodayISO();
+    window.TRACTEURS_LIST=TRACTEURS_LIST; _saveData('tracteurs_list');
+    var revoir=function(){ renderTracteur(); if(typeof renderEntretiens==='function') renderEntretiens(); };
+    revoir();
+    var st=_trEntEtat(t,e), msg=e.nom+' not\u00e9 \u00b7 prochain '+[st.ph!=null?'\u00e0 '+_gnrNum(st.ph)+'\u00a0h':'', st.pd?'le '+_trDateAn(st.pd):''].filter(Boolean).join(' ou ');
+    var annuler=function(){ if(av.h===undefined) delete e.fait_h; else e.fait_h=av.h; if(av.d===undefined) delete e.fait_d; else e.fait_d=av.d; window.TRACTEURS_LIST=TRACTEURS_LIST; _saveData('tracteurs_list'); revoir(); };
+    if(typeof window.showToastAnnuler==='function') window.showToastAnnuler(msg, annuler); else showToast(msg,'#3D6B27');
+  });
+  var sub=document.getElementById('rel-sub'); if(sub) sub.textContent=[t.nom,e.nom].join(' \u00b7 ')+'\u00a0: le chiffre du cadran';
+}
+function _relFait(id,on){ if(!_rel.faits) _rel.faits=[]; var i=_rel.faits.indexOf(id); if(on&&i<0) _rel.faits.push(id); else if(!on&&i>=0) _rel.faits.splice(i,1); }
 function _trRelCorriger(tid,ts){
   if(!isAdmin()){ showToast('R\u00e9serv\u00e9 \u00e0 l\u2019admin','#C0392B'); return; }
   var t=(TRACTEURS_LIST||[]).find(function(x){ return x.id===tid; }); if(!t) return;
@@ -1714,6 +1816,7 @@ function _trRelCorriger(tid,ts){
   if(el('rel-ref')) el('rel-ref').innerHTML='<span>Not\u00e9\u00a0: <b>'+_escHtml(_gnrNum(r.h))+'\u00a0h</b>'+(r.par?', '+_escHtml(r.par):'')+'</span><span>entre <b>'+_escHtml(_gnrNum(_rel.borne.min))+'\u00a0h</b>'+(apres?' et <b>'+_escHtml(_gnrNum(_rel.borne.max))+'\u00a0h</b>':' et plus')+'</span>';
   if(el('rel-tard')) el('rel-tard').hidden=true;
   if(el('rel-ban')){ el('rel-ban').textContent=''; el('rel-ban').hidden=true; }
+  if(el('rel-faits')) el('rel-faits').hidden=true;
   _relRendu(); _openOv('ovReleve');
 }
 function _relValiderCorr(){
@@ -1755,11 +1858,14 @@ function _trRevFaite(){
     t.rev_fait_h=h; t.rev_fait_d=auj;
     if(hN>0) t.revision_h=Math.round((h+hN)*10)/10;
     t.rev_date=mN>0?_trAjoutMois(auj,mN):(t.rev_date||'');
+    var _faits=(typeof _rel!=='undefined'&&_rel&&_rel.faits)||[], _avEp=[];   // ★ COMPT-5 (§487) : les entretiens faits en même temps
+    (t.entretiens_prog||[]).forEach(function(e){ if(_faits.indexOf(e.id)<0) return; _avEp.push({e:e, h:e.fait_h, d:e.fait_d}); e.fait_h=h; e.fait_d=auj; });
     window.TRACTEURS_LIST=TRACTEURS_LIST; _saveData('tracteurs_list');
     var revoir=function(){ renderTracteur(); if(typeof renderEntretiens==='function') renderEntretiens(); };
     revoir();
     var msg=(hN>0||mN>0)?('R\u00e9vision not\u00e9e \u00b7 prochaine '+[hN>0?'\u00e0 '+_gnrNum(t.revision_h)+'\u00a0h':'', mN>0?'le '+_trDateAn(t.rev_date):''].filter(Boolean).join(' ou ')):'R\u00e9vision not\u00e9e \u00b7 r\u00e9glez l\u2019intervalle au crayon pour que la suivante se calcule';
-    var annuler=function(){ Object.keys(avant).forEach(function(c){ if(avant[c]===undefined) delete t[c]; else t[c]=avant[c]; }); window.TRACTEURS_LIST=TRACTEURS_LIST; _saveData('tracteurs_list'); revoir(); showToast('R\u00e9vision retir\u00e9e (le relev\u00e9 reste)','#3D6B27'); };
+    if(_avEp.length) msg+=' \u00b7 '+_avEp.map(function(x){ return x.e.nom; }).join(', ')+' aussi';
+    var annuler=function(){ Object.keys(avant).forEach(function(c){ if(avant[c]===undefined) delete t[c]; else t[c]=avant[c]; }); _avEp.forEach(function(x){ if(x.h===undefined) delete x.e.fait_h; else x.e.fait_h=x.h; if(x.d===undefined) delete x.e.fait_d; else x.e.fait_d=x.d; }); window.TRACTEURS_LIST=TRACTEURS_LIST; _saveData('tracteurs_list'); revoir(); showToast('R\u00e9vision retir\u00e9e (le relev\u00e9 reste)','#3D6B27'); };
     if(typeof window.showToastAnnuler==='function') window.showToastAnnuler(msg, annuler); else showToast(msg,'#3D6B27');
   });
 }
@@ -1797,10 +1903,12 @@ function _relOuvrir(tid,src,apres,raison){
   var t=(TRACTEURS_LIST||[]).find(function(x){ return x.id===tid; }); if(!t) return;
   _rel={tid:tid, src:src||'jour', buf:'', apres:apres||null};
   var k=_trCompteur(t), el=function(id){ return document.getElementById(id); };
-  var _SUB={plein:' \u00b7 au plein, le chiffre est demand\u00e9', jour:' \u00b7 une fois aujourd\u2019hui, le chiffre du cadran', revision:' \u00b7 r\u00e9vision faite\u00a0: le chiffre du cadran', demarrage:' \u00b7 pour d\u00e9marrer, le chiffre du cadran'};
+  var _SUB={plein:' \u00b7 au plein, le chiffre est demand\u00e9', jour:' \u00b7 une fois aujourd\u2019hui, le chiffre du cadran', revision:' \u00b7 r\u00e9vision faite\u00a0: le chiffre du cadran', demarrage:' \u00b7 pour d\u00e9marrer, le chiffre du cadran', entretien:' \u00b7 entretien fait\u00a0: le chiffre du cadran'};
   if(el('rel-sub')) el('rel-sub').textContent=t.nom+(_SUB[_rel.src]||' \u00b7 le chiffre du cadran');
   var _BAN={depassee:'R\u00e9vision d\u00e9pass\u00e9e\u00a0: le compteur est demand\u00e9 pour d\u00e9marrer.', proche:'R\u00e9vision toute proche\u00a0: le compteur est demand\u00e9 pour d\u00e9marrer.', vieux:'Pas de vrai relev\u00e9 depuis plus de 7 jours\u00a0: le compteur est demand\u00e9 pour d\u00e9marrer.'};   // ★ COMPT-2 (§484)
   if(el('rel-ban')){ el('rel-ban').textContent=_BAN[raison]||''; el('rel-ban').hidden=!_BAN[raison]; }
+  _rel.faits=[]; var _epf=(_rel.src==='revision'&&Array.isArray(t.entretiens_prog))?t.entretiens_prog:[];   // ★ COMPT-5 (§487) : « Fait aussi »
+  if(el('rel-faits')){ el('rel-faits').innerHTML=_epf.length?('<span class="rel-faits-l">Fait aussi\u00a0:</span>'+_epf.map(function(e){ return '<label class="rel-fait"><input type="checkbox" data-ep="'+_escAttr(e.id)+'" onchange="_relFait(this.dataset.ep,this.checked)"> '+_escHtml(e.nom)+'</label>'; }).join('')):''; el('rel-faits').hidden=!_epf.length; }
   if(el('rel-ref')) el('rel-ref').innerHTML=!k?'<span>Aucun relev\u00e9\u00a0: ce sera le premier.</span>'
     :('<span>Dernier relev\u00e9\u00a0: <b>'+_escHtml(_gnrNum(k.base.h))+'\u00a0h</b>'+(k.base.d?' le '+_escHtml(_fmtDate(k.base.d))+(k.base.par?', '+_escHtml(k.base.par):''):' (sans date)')+'</span>'+(k.estime?'<span>attendu <b>env.\u00a0'+_escHtml(_gnrNum(Math.round(k.h)))+'\u00a0h</b></span>':''));
   if(el('rel-tard')) el('rel-tard').hidden=(_rel.src!=='jour');
@@ -1854,7 +1962,7 @@ function _trRelevePassage(sid,dou){
     setTimeout(function(){ _relOuvrir(t.id,'jour'); },320);
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/_trRelevePassage'); }
 }
-window._trCompteur=_trCompteur; window._trHeuresTxt=_trHeuresTxt; window._trRevFaite=_trRevFaite; window._trRelEcarte=_trRelEcarte; window._trRelCorriger=_trRelCorriger; window._trDateAn=_trDateAn; window._trRevEtat=_trRevEtat; window._relTouche=_relTouche; window._relValider=_relValider; window._relPlusTard=_relPlusTard; window._trRelever=_trRelever;
+window._trCompteur=_trCompteur; window._trHeuresTxt=_trHeuresTxt; window._trRevFaite=_trRevFaite; window._trRelEcarte=_trRelEcarte; window._trRelCorriger=_trRelCorriger; window._trEntEdit=_trEntEdit; window._trEntAnnuler=_trEntAnnuler; window._trEntSave=_trEntSave; window._trEntSuppr=_trEntSuppr; window._trEntFait=_trEntFait; window._relFait=_relFait; window._trDateAn=_trDateAn; window._trRevEtat=_trRevEtat; window._relTouche=_relTouche; window._relValider=_relValider; window._relPlusTard=_relPlusTard; window._trRelever=_trRelever;
 if(typeof document!=='undefined'&&document.addEventListener) document.addEventListener('keydown',function(ev){
   var o=document.getElementById('ovReleve'); if(!o||!o.classList.contains('open')) return;
   var k=ev.key;

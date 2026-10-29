@@ -77,7 +77,7 @@
   "src/pilotage.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 924
+    "ko": 925
   },
   "src/planning-vue.js": {
     "dur": 0,
@@ -112,7 +112,7 @@
   "src/tracteur.js": {
     "dur": 10,
     "petit": 10,
-    "ko": 241
+    "ko": 254
   },
   "src/tutos.js": {
     "dur": 0,
@@ -122,12 +122,12 @@
   "src/utils.js": {
     "dur": 5,
     "petit": 2,
-    "ko": 493
+    "ko": 494
   },
   "src/whats-new.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 547
+    "ko": 548
   },
   "index.html": {
     "dur": 74,
@@ -135,8 +135,8 @@
     "ko": 369
   },
   "src/styles.css": {
-    "dur": 239,
-    "petit": 71,
-    "ko": 947
+    "dur": 237,
+    "petit": 69,
+    "ko": 946
   }
 }

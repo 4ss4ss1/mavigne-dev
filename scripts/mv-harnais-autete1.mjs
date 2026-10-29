@@ -229,7 +229,7 @@ function suite(S) {
       && w.items[0].pour.join() === 'admin' && w.items[0].cible === '#ck-resume' && /par rapport à quoi/.test(w.items[0].titre));
     const vsw = (S.sw.match(/^\/\/ MA VIGNE — Service Worker v([0-9.]+)/) || [])[1];
     T('I4 sw.js : une seule version partout, et la ligne du lot', vsw && S.sw.includes("const CACHE_NAME   = 'mavigne-v" + vsw + "';") && compte(S.sw, new RegExp('Ma Vigne v' + vsw.replace('.', '\\.') + ' (installé|activé)', 'g')) === 2
-      && S.sw.split('\n').slice(1, 30).some(l => /^\/\/ v10\.91 .*AUJ-TETE-1 \(§454\)/.test(l)));   // GABARIT-1 (§455) : la ligne du lot, plus forcément la première
+      && S.sw.split('\n').slice(1, 80).some(l => /^\/\/ v10\.91 .*AUJ-TETE-1 \(§454\)/.test(l)));   // GABARIT-1 (§455) : la ligne du lot, plus forcément la première. COMPT-5 (§487) : chaque lot ajoute une ligne en tête — la fenêtre passe de 30 à 80 lignes
     T('I5 ce harnais est dans la chaîne, avec ses contre-épreuves', S.liste.includes("['node scripts/mv-harnais-autete1.mjs']") && S.liste.includes("['node scripts/mv-harnais-autete1.mjs --contre']"));
   }
   return out;

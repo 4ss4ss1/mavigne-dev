@@ -196,3 +196,27 @@ Nico (29/10) : « finir ce qui est resté ouvert en un lot ». Proposé et accep
 - **COMPT-5** : plusieurs entretiens par tracteur (la maquette : révision, vidange pont et boîte, filtre à air cabine, « Ajouter un entretien »).
 - **Le module du compteur** à part (environ 45 ko dans tracteur.js).
 - La carte Révision du Pilotage (`_pilGmRevision`) ne lit que les heures.
+
+## 487. ★★ COMPT-5 — PLUSIEURS ENTRETIENS PAR TRACTEUR (29/10 — `src/tracteur.js` (`_trEntEtat`, `_trEntTexte`, `_trEntIntervalle`, `_trEntPlusUrgent`, `_trEntUrgent`, `_trEntProgHtml`, `_trEntForm`, `_trEntEdit`, `_trEntAnnuler`, `_trEntSave`, `_trEntSuppr`, `_trEntFait`, `_relFait` ; `_relOuvrir`, `_trRelCorriger`, `_trRevFaite`, `_trReleveExige`, `_trDroiteHtml`, `renderEntretiens`) · `index.html` (`#rel-faits`, v10.39) · `src/styles.css` · `src/utils.js` (APP 10.39, l’aide du Tracteur) · `src/whats-new.js` · `guide/06-tracteur.html` · `public/sw.js` (SW 11.20) · `scripts/mv-harnais-compt5.mjs` (neuf) · `scripts/mv-harnais-autete1.mjs` (sa fenêtre) · `scripts/typo-baseline.json` · `scripts/mv-harnais-liste.mjs` · `scripts/tutos-couverture.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-480-529.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/COMPT-5.json` · base `541b1c5`)
+
+### 487a. D’où ça vient
+Le dernier lot fonctionnel du plan accepté par Nico (29/10, §486a) ; « go » de Nico. La maquette (`docs/maquettes/maquette-compteur-tracteur-v1.html`, « Entretiens programmés ») : révision 500 h, vidange pont et boîte 1 000 h, filtre à air cabine 12 mois, « Ajouter un entretien ».
+
+### 487b. Ce qui change
+- **Les autres entretiens** : `t.entretiens_prog` = [{id, nom, tous_h, tous_mois, fait_h, fait_d}], à côté de la révision — qui reste sur `revision_h`, que tous les lecteurs lisent déjà.
+- **L’échéance au premier atteint** (`_trEntEtat`) : `fait_h + tous_h` au compteur estimé, `fait_d + tous_mois` ; **seuils à la mesure de l’intervalle** — rouge à un dixième (5 h au moins) ou 14 jours, orange au quart (10 h au moins) ou 30 jours : un graissage toutes les 50 h serait sinon toujours rouge (pour 500 h : 50 et 125, les seuils de la révision). Jamais noté : dit tel quel.
+- **La carte « Autres entretiens »** (`_trEntProgHtml`) sous la carte Révision : chaque entretien, son intervalle, sa dernière fois, son échéance en couleur ; « Fait » (tractoriste, admin) ; le crayon et « Ajouter » (admin) ouvrent un formulaire sur place (`_trEntForm` : nom, heures et/ou mois, dernière fois) ; « Retirer » avec Annuler.
+- **« Fait »** (`_trEntFait`) : la feuille du compteur (src `entretien`, le nom de l’entretien en sous-titre), puis `fait_h`/`fait_d` et le prochain dans le toast ; Annuler.
+- **« Fait aussi »** dans la feuille de « Révision faite » (`#rel-faits`, des cases, `_relFait`) : les entretiens cochés sont notés au même compteur ; le toast les nomme ; Annuler les défait avec la révision.
+- **Le plus urgent** (`_trEntPlusUrgent` : dépassé, puis rouge, puis orange) : rouge, il s’ajoute à la ligne du tracteur dans le parc de droite (`_trEntUrgent`) et compte pour le compteur exigé au démarrage (`_trReleveExige` : dépassé → « dépassée », rouge → « proche »).
+- **Six gestes neufs exemptés de tuto**, chacun avec sa raison.
+
+### 487c. Mesuré
+- `mv-harnais-compt5` : 13 assertions — l’échéance aux heures, aux mois et au premier atteint, « jamais noté », les seuils proportionnels (un graissage de 50 h à 14 h, à 10 h, à 4 h), le plus urgent, le compteur exigé, le formulaire (nom et intervalle obligatoires, un nouvel entretien complet, l’admin seul, « Retirer » annulable), « Fait » et son Annuler, « Fait aussi » à la révision et son Annuler, les branchements ; **9/9 mutants**. Les harnais du compteur (`compt1` à `compt4`), du Tracteur et du style restent verts, contre-épreuves comprises.
+- **Chaîne complète verte** : 595 commandes, en sept reprises. Rougis en route et corrigés : le **preflight** (C19 : `'+e.nom+'` à moins de 260 caractères d’un `<div` — du texte, échappé plus loin par `_trDroiteHtml`, ou posé en `textContent` ; écrit par `join`), **tracteur.js** qui enfle (241 → 254 ko, `typo-baseline.json` regravé), **les boutons « maison »** (66 pour 65 au plafond : les boutons de la carte prennent le kit `mvbtn mvbtn-secondaire`), et **AUTETE-1** (I4 cherchait la ligne d’AUJ-TETE-1 dans les 30 premières lignes de sw.js ; chaque lot en ajoute une en tête : la fenêtre passe à 80). Après le dernier retouché : preflight, les harnais du compteur et du style verts.
+- **Build** : app 10.39. **Tutos concernés : aucun** (7 tutos, aucun ne touche ce changement) ; panneau côte à côte rejoué, 3/3.
+- **Essai réel sur le build** (mode entraînement, Chromium 390 px) : la carte « Autres entretiens » (vidange pont et boîte « dans 334 h », graissage de 50 h « dans 4 h ») ; « Ajouter » ouvre le formulaire, « Filtre à air cabine », 12 mois, enregistré ; « Révision faite » montre « Fait aussi » avec les trois cases ; graissage coché, 1 190 → révision suivante à 1 690 h, graissage noté à 1 190 h, la vidange intacte, le toast « … · Graissage aussi ». Aucune erreur.
+
+### 487d. Ce qui reste ouvert
+- **Le module du compteur** à part : tracteur.js porte maintenant la série entière.
+- La carte Révision du Pilotage (`_pilGmRevision`) ne lit que les heures de la révision ; les autres entretiens n’y remontent pas.

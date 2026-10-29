@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.39', d: '2026-10-29', items: [
+    { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'tracteur', titre: 'Plusieurs entretiens par tracteur',
+      desc: "À côté de la révision, ajoutez dans l’Entretien ce qui se fait à son rythme\u00a0: vidange de pont et boîte toutes les 1\u202f000\u00a0h, filtre à air tous les 12 mois, graissage toutes les 50\u00a0h… Chacun dit son échéance\u00a0; «\u00a0Fait\u00a0» demande le compteur et calcule le suivant, et «\u00a0Révision faite\u00a0» propose de cocher ceux faits en même temps. Le plus urgent remonte dans le parc." },
+  ] },
   { v: '10.38', d: '2026-10-29', items: [
     { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'tracteur', titre: 'Le compteur des tracteurs, les finitions',
       desc: "Dans la fiche du compteur, l’administrateur peut «\u00a0Corriger\u00a0» un relevé faux\u00a0: le bon chiffre, entre le relevé d’avant et celui d’après. Le repère de révision saute les jours fériés. La date de la prochaine révision s’affiche aussi dans le Pilotage, à l’accueil et dans le rapport de saison. La fiche d’entretien «\u00a0Plein fait\u00a0» demande le compteur, comme le bouton «\u00a0Plein\u00a0» — et seulement pour un tracteur suivi. Les «\u00a0heures de moteur\u00a0» s’appellent désormais «\u00a0heures de travail\u00a0» : ce sont les heures notées par les sessions, pas le cadran." },

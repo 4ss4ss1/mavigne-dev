@@ -1,0 +1,40 @@
+{
+  "lot": "COMPT-5",
+  "section": "§487",
+  "base": "541b1c5cf26b1e55dddc35759de237b244164c4d",
+  "inclut": [],
+  "date": "2026-10-29",
+  "tutos": {
+    "ok": true,
+    "empreinte": "0a3bbba7036f98608eb8330a4464f1b89c917a58701ccc7f204fd4830945dabf",
+    "date": "2026-10-29T19:41:56.613Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "4cd22de32b43139fd342fa664305a49f11df79278704521290d22cad601e5938",
+    "CLAUDE.md": "2924a18716208da59680f92c4488184b1b69f9b2b3ee7708614a9ebd902f0643",
+    "docs/claude/INDEX.md": "3af28770705391570822dbf85c919faf74565d1e89a2a5607612d8f94b554dd6",
+    "docs/claude/chantiers-480-529.md": "7a6dff96f4a00863cd2d6d6b58c2f17a1f04c7f6450fd0b52ddec53b0c03ae66",
+    "docs/claude/journal.md": "95a75b0479ad6a6d0c013d1da9d38ae5a69ce7750c55503d21eef583684c4756",
+    "guide/06-tracteur.html": "530c1af1ee0ec25191078435aac3f2fdfe72238244f87cf784b392f12df06625",
+    "index.html": "14e22cbd7edad02787d232971d3bad109be884c3f9d6c56e2a2e15ff5bde1556",
+    "public/guide.html": "33102b8483248c92258328e914cd02743e7299b5e608b8806ed3ff703d72760f",
+    "public/sw.js": "682403e8a949696f93f2327aa8ce733799792903c7e0ec9fb2973ba3106e8039",
+    "scripts/harnais-claude-md.mjs": "201c2c4630975316c4a2067a08b92786a681a9134bf74dda22fbfba522a4ac86",
+    "scripts/mv-harnais-autete1.mjs": "05a58ade9c461edfaa038b794a29433e659e789812ebfa53254e5124faeb3c27",
+    "scripts/mv-harnais-liste.mjs": "13f9ad1ae3141ea1e43f334f286e3ecd00412656db8453458724a59b1d30fac7",
+    "scripts/tutos-couverture.json": "4e257c10ab411fde990bad56d64712454889eb5f8bd862898d96a89d9525b9b9",
+    "scripts/typo-baseline.json": "fd2cd8cef7087f0ce6d8a5dafce38e49341f4def16d8c5e918f04cc0a40629b0",
+    "src/styles.css": "b1d75d227178eb1970c90e0fd0044e8cbfda065deaaed0e6f2764dc851b609ad",
+    "src/tracteur.js": "1da973c59a2a359616c145883249590cb71bf1f5166703ddcac863f758d299f5",
+    "src/utils.js": "601918c1a237623c155c1d3615e433d37c640dda1ca3b76ba7d1d8007cf4e105",
+    "src/whats-new.js": "d12df0cf39fb6a54feeb7ded012979029575cd0d51abee766906d05ad1e5da38",
+    "scripts/mv-harnais-compt5.mjs": "a9a1d948978f6373814f5bfef8ee37ef5961125e9f853806797d9bc6cf6305d1"
+  }
+}

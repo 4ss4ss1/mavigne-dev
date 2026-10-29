@@ -9666,6 +9666,28 @@ body:not(.mv-rail-ouvert) .mv-rail .mv-rail-point,body:not(.mv-rail-ouvert) .mv-
 .cpt-releves .cpt-ecarte td:nth-child(2){text-decoration:line-through}
 .cpt-act{min-height:36px;padding:0 var(--e-2,8px);border:1px solid var(--ligne-forte);border-radius:var(--r-sm,6px);background:transparent;color:var(--texte);font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-micro,12px);cursor:pointer}
 .cpt-cache{position:absolute;left:-9999px}
+/* ★ COMPT-5 (§487) : les autres entretiens (carte de l'Entretien) ; « Fait aussi » dans la feuille de la révision */
+.ent-prog .ep-tete{display:flex;justify-content:space-between;align-items:center;gap:var(--e-2,8px);margin-bottom:var(--e-1,4px)}
+.ent-prog .ep-titre{font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte);display:inline-flex;align-items:center;gap:var(--e-1,4px)}
+.ent-prog .ep-ligne{display:flex;align-items:center;gap:var(--e-2,8px);padding:var(--e-2,8px) 0;border-top:1px solid var(--ligne,var(--gris-clair))}
+.ent-prog .ep-g{flex:1;min-width:0}
+.ent-prog .ep-n{font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)}
+.ent-prog .ep-s{font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.ent-prog .ep-etat{font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux);white-space:nowrap}
+.ent-prog .ep-etat.att{color:var(--attention-texte)}
+.ent-prog .ep-etat.danger{color:var(--danger-texte)}
+.ent-prog .ep-btn{min-height:44px;flex:none}
+.ent-prog .ep-ic{min-width:44px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+.ent-prog .ep-vide{font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.ent-prog .ep-form{border-top:1px solid var(--ligne,var(--gris-clair));padding-top:var(--e-2,8px);margin-top:var(--e-1,4px)}
+.ent-prog .ep-l{font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-bottom:var(--e-1,4px)}
+.ent-prog .ep-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--e-2,8px);margin-top:var(--e-2,8px)}
+.ent-prog .ep-actions{display:flex;flex-wrap:wrap;gap:var(--e-2,8px);margin-top:var(--e-2,8px)}
+.ent-prog .ep-suppr{color:var(--danger-texte)}
+#ovReleve .rel-faits{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-1,4px) var(--e-3,12px);margin-bottom:var(--e-2,8px)}
+#ovReleve .rel-faits[hidden]{display:none}
+#ovReleve .rel-faits-l{font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+#ovReleve .rel-fait{display:inline-flex;align-items:center;gap:var(--e-1,4px);min-height:44px;font-size:var(--pt-txt,13px);color:var(--texte);cursor:pointer}
 @media (prefers-reduced-motion:reduce){#ovReleve .rel-c.rel-curseur::after{animation:none}}
 
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.
