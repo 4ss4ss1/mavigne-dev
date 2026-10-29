@@ -869,6 +869,7 @@ function _revCardHtml(t){
       +'<div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte);margin-bottom:10px">'+_mvIcon('engrenage',16)+' '+_escHtml(t.nom)+' \u2014 prochaine r\u00e9vision</div>'
       +_gnrField('rev-comp','Compteur actuel (h)',comp)
       +_gnrField('rev-target','Prochaine r\u00e9vision \u00e0 (h)',rev)
+      +_gnrField('rev-tous-h','Toutes les (h)',t.rev_h)+_gnrField('rev-tous-mois','ou tous les (mois), au premier atteint',t.rev_mois)   // ★ COMPT-2 (§484) : l'intervalle, réglé une fois
       +'<div style="display:flex;gap:8px;margin-top:6px">'
       +'<button onclick="window.saveRev()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;min-height:44px">Enregistrer</button>'
       +'<button onclick="window.cancelRevEdit()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-base,14px);cursor:pointer;min-height:44px">Annuler</button>'
@@ -878,10 +879,14 @@ function _revCardHtml(t){
   var sub, col='var(--texte-doux)', fw='400';
   if(hasComp){ var reste=Math.round(Number(rev)-_k.h); col=reste<=50?'var(--rouge)':reste<=120?'var(--orange)':'var(--vert-med)'; fw='600'; sub=(reste<0?'R\u00e9vision d\u00e9pass\u00e9e de '+_gnrNum(-reste)+' h':'R\u00e9vision dans '+_gnrNum(reste)+' h')+' \u00b7 '+_trHeuresTxt(_k)+' / '+_gnrNum(rev)+' h'; }
   else { sub=_k?(_trHeuresTxt(_k)+' \u00b7 r\u00e9vision \u00e0 renseigner'):'\u00c0 renseigner'; }
+  var _e=(typeof _trRevEtat==='function')?_trRevEtat(t):null;   // ★ COMPT-2 (§484) : heures ET date, au premier atteint
+  if(_e){ col=_e.rouge?'var(--rouge)':_e.orange?'var(--orange)':'var(--vert-med)'; fw='600'; if(_e.date) sub=(hasComp?sub+' \u00b7 ':'')+(_e.jours<0?'date d\u00e9pass\u00e9e ('+_escHtml(_trDateAn(_e.date))+')':(hasComp?'ou le ':'R\u00e9vision le ')+_escHtml(_trDateAn(_e.date))); }
+  var _ivh=Number(t.rev_h)>0, _ivm=Number(t.rev_mois)>0;
+  var _iv=(_ivh||_ivm)?('Toutes les '+[_ivh?_gnrNum(t.rev_h)+' h':'',_ivm?_gnrNum(t.rev_mois)+' mois':''].filter(Boolean).join(' ou ')+(_ivh&&_ivm?', au premier atteint':'')+(t.rev_fait_d?' \u00b7 derni\u00e8re le '+_escHtml(_fmtDate(t.rev_fait_d))+(t.rev_fait_h!=null&&t.rev_fait_h!==''?' \u00e0 '+_gnrNum(t.rev_fait_h)+' h':''):'')):(hasComp?'Intervalle \u00e0 r\u00e9gler au crayon\u00a0: la suivante se calculera seule.':'');
   var _vu=(_k&&_k.base&&_k.base.d)?('Relev\u00e9 le '+_escHtml(_fmtDate(_k.base.d))+(_k.base.par?' par '+_escHtml(_k.base.par):'')+(_k.estime?' \u00b7 depuis, '+_trHeuresFr(_k.notees)+' h not\u00e9es \u00d7 '+String(Math.round(_k.coef*10)/10).replace('.',','):'')):(_k?'Jamais relev\u00e9 ici\u00a0: touchez \u00ab\u00a0Relever\u00a0\u00bb.':'');
   return '<div class="ent-resume-card" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">'
     +'<div><div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">'+_mvIcon('engrenage',16)+' Prochaine r\u00e9vision</div>'
-    +'<div style="font-size:var(--pt-micro,11px);color:'+col+';font-weight:'+fw+';margin-top:2px">'+sub+'</div>'+(_vu?'<div class="rel-vu">'+_vu+'</div>':'')+'</div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:'+col+';font-weight:'+fw+';margin-top:2px">'+sub+'</div>'+(_vu?'<div class="rel-vu">'+_vu+'</div>':'')+(_iv?'<div class="rel-vu">'+_iv+'</div>':'')+(canEdit?'<button type="button" class="rel-faite" onclick="_trRevFaite()">R\u00e9vision faite</button>':'')+'</div>'
     +(canEdit?'<button type="button" class="rel-relever" onclick="_trRelever()">Relever</button>':'')
     +(canEdit?'<button onclick="window.openRevEdit()" style="padding:8px 12px;border:1px solid var(--gris);border-radius:8px;background:transparent;color:var(--texte-doux);font-family:var(--font-ui,\'Outfit\',sans-serif);font-size:var(--pt-txt,13px);cursor:pointer;min-width:44px;min-height:44px">'+_mvIcon('crayon',18)+'</button>':'')
   +'</div>';
@@ -959,6 +964,9 @@ function saveRev(){
   if(_nv!==''&&String(_nv)!==String(t.compteur_h)) t.releves=(t.releves||[]).concat([{ d:_gnrTodayISO(), ts:Date.now(), h:Number(_nv), par:(currentUser&&currentUser.nom)||'', src:'manuel' }]).slice(-_TR_REL_MAX);
   t.compteur_h = _nv;
   t.revision_h = revV===''?'':(parseFloat(revV)||0);
+  var _ih=document.getElementById('rev-tous-h'), _im=document.getElementById('rev-tous-mois');   // ★ COMPT-2 (§484) : l'intervalle, réglé une fois
+  if(_ih){ var _vh=_ih.value===''?0:(parseFloat(_ih.value)||0); t.rev_h=_vh>0?_vh:''; }
+  if(_im){ var _vm=_im.value===''?0:(parseInt(_im.value,10)||0); t.rev_mois=_vm>0?_vm:''; t.rev_date=_vm>0?(t.rev_fait_d?_trAjoutMois(t.rev_fait_d,_vm):(t.rev_date||'')):''; }
   window.TRACTEURS_LIST=TRACTEURS_LIST;
   _saveData('tracteurs_list');
   _revEdit=false; renderEntretiens();
@@ -1534,13 +1542,14 @@ function _trParcEtat(t){
   var _k=(typeof _trCompteur==='function')?_trCompteur(t):null, comp=_k?(_k.estime?Math.round(_k.h):_k.h):t.compteur_h, rev=t.revision_h, aComp=(comp!=null&&comp!=='');   // ★ COMPT-1 (§483) : le compteur estimé (dernier relevé + heures notées), sinon le dernier relevé
   if(!aComp||rev==null||rev==='') return { rang:3, txt:(aComp?_gnrNum(comp)+' h \u00b7 ':'')+'r\u00e9vision \u00e0 renseigner', badge:_mvBadge('En service','neutre') };
   var reste=Number(rev)-Number(comp);
+  var _dt=(typeof _trRevDate==='function')?_trRevDate(t):null; if(_dt&&_dt.jours<0&&reste>=0) return { rang:1, txt:_gnrNum(comp)+' h \u00b7 r\u00e9vision d\u00e9pass\u00e9e (date du '+(typeof _trDateAn==='function'?_trDateAn(_dt.d):_fmtDate(_dt.d))+')', badge:_mvBadge('Entretien','rouge') };   // ★ COMPT-2 (§484) : la date atteinte d'abord
   if(reste<0) return { rang:1, txt:_gnrNum(comp)+' h \u00b7 r\u00e9vision d\u00e9pass\u00e9e de '+_gnrNum(-reste)+' h', badge:_mvBadge('Entretien','rouge') };
   return { rang:reste<=50?1:(reste<=120?2:3), txt:_gnrNum(comp)+' h \u00b7 r\u00e9vision dans '+_gnrNum(reste)+' h', badge:_mvBadge(reste<=50?'Entretien':'En service', reste<=50?'rouge':(reste<=120?'ambre':'neutre')) };
 }
 function _trDroiteHtml(){
   var parc=(TRACTEURS_LIST||[]).map(function(t,i){ return { t:t, i:i, e:_trParcEtat(t) }; }).sort(function(a,b){ return (a.e.rang-b.e.rang)||(a.i-b.i); });
   var h='<section class="trd-sec"><h3 class="trd-t">Le parc</h3>'+(parc.length?parc.map(function(x){
-      return '<button type="button" class="trd-l" data-tid="'+_escAttr(x.t.id)+'" onclick="switchTracOnglet(\'entretiens\');selectTracteur(this.dataset.tid)"><span class="trd-n">'+_escHtml(x.t.nom)+'</span><span class="trd-s">'+_escHtml(((typeof _trCompteur==='function')&&(_trCompteur(x.t)||{}).estime?'env.\u00a0':'')+x.e.txt)+'</span>'+x.e.badge+'</button>';
+      return '<button type="button" class="trd-l" data-tid="'+_escAttr(x.t.id)+'" onclick="switchTracOnglet(\'entretiens\');selectTracteur(this.dataset.tid)"><span class="trd-n">'+_escHtml(x.t.nom)+'</span><span class="trd-s">'+_escHtml(((typeof _trCompteur==='function')&&(_trCompteur(x.t)||{}).estime?'env.\u00a0':'')+x.e.txt+((typeof _trReleveExige==='function')&&_trReleveExige(x.t)==='vieux'?' \u00b7 \u00e0 relever':''))+'</span>'+x.e.badge+'</button>';
     }).join(''):'<div class="trd-rien">Aucun tracteur au parc.</div>')+'</section>';
   var g=(window.CONFIG&&window.CONFIG.gnr)||null;
   h+='<section class="trd-sec"><h3 class="trd-t">GNR</h3>';
@@ -1615,6 +1624,52 @@ function _trCompteur(t){
   return { h:Math.round((Number(base.h)+notees*coef)*10)/10, base:base, estime:notees>0, notees:notees, coef:coef, aujourdhui:base.d===auj, jours:base.d?_trJours(base.d,auj):null };
 }
 function _trHeuresTxt(k){ return k?((k.estime?'env.\u00a0':'')+_gnrNum(k.estime?Math.round(k.h):k.h)+'\u00a0h'):''; }
+// ★ COMPT-2 (§484) — LA RÉVISION SE RECALCULE ; LE COMPTEUR EXIGÉ AU DÉMARRAGE QUAND ÇA COMPTE (maquette-compteur-tracteur-v1.html)
+//   Un tracteur règle une fois son intervalle : t.rev_h (toutes les N heures) et/ou t.rev_mois (tous les N mois), au premier
+//   atteint. « Révision faite » demande le compteur (la feuille du relevé, src 'revision'), note t.rev_fait_h / t.rev_fait_d et
+//   calcule la suivante : revision_h = compteur + rev_h (tous les lecteurs le lisent déjà), t.rev_date = aujourd'hui + rev_mois.
+//   Sans intervalle, la révision est notée et la carte dit de le régler. Au démarrage d'une session (saveSession), un tracteur
+//   SUIVI dont la révision est à 50 h ou moins, à 14 jours ou dépassée — ou sans vrai relevé depuis 7 jours — exige son compteur :
+//   la session part avec lui. Un tracteur NON SUIVI (ni révision, ni compteur, ni relevé, ni intervalle : un domaine qui ne tient
+//   pas les heures) n'est jamais interrogé — au passage non plus.
+var _trDemH=null;
+function _trSuivi(t){ return !!t&&((t.revision_h!=null&&t.revision_h!=='')||(t.compteur_h!=null&&t.compteur_h!=='')||(Array.isArray(t.releves)&&t.releves.length>0)||Number(t.rev_h)>0||Number(t.rev_mois)>0); }
+function _trAjoutMois(iso,n){ var y=+iso.slice(0,4), m=+iso.slice(5,7)-1+Number(n), d=+iso.slice(8,10); var dt=new Date(Date.UTC(y,m,1)), fin=new Date(Date.UTC(dt.getUTCFullYear(),dt.getUTCMonth()+1,0)).getUTCDate(); dt.setUTCDate(Math.min(d,fin)); return dt.toISOString().slice(0,10); }
+function _trDateAn(iso){ try{ return new Date(String(iso)+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}); }catch(e){ return String(iso); } }   // une échéance d'un an dit son année
+function _trRevDate(t){ var d=t&&t.rev_date; if(!d||!/^\d{4}-\d{2}-\d{2}$/.test(String(d))) return null; return {d:String(d), jours:_trJours(_gnrTodayISO(),String(d))}; }
+function _trRevEtat(t){
+  var k=_trCompteur(t), rev=t&&t.revision_h, aH=!!k&&rev!=null&&rev!=='', dt=_trRevDate(t);
+  if(!aH&&!dt) return null;
+  var reste=aH?Math.round(Number(rev)-k.h):null, j=dt?dt.jours:null;
+  var dep=(reste!=null&&reste<0)||(j!=null&&j<0), rouge=dep||(reste!=null&&reste<=50)||(j!=null&&j<=14), orange=!rouge&&((reste!=null&&reste<=120)||(j!=null&&j<=30));
+  return {k:k, reste:reste, jours:j, date:dt?dt.d:null, depasse:dep, rouge:rouge, orange:orange};
+}
+function _trReleveExige(t){
+  if(!t||!_trSuivi(t)||(REPARATEUR&&REPARATEUR[t.id])) return '';
+  var k=_trCompteur(t); if(k&&k.aujourdhui) return '';
+  var e=_trRevEtat(t);
+  if(e&&e.depasse) return 'depassee';
+  if(e&&((e.reste!=null&&e.reste<=50)||(e.jours!=null&&e.jours<=14))) return 'proche';
+  if(!k||!k.base.d||k.jours>=7) return 'vieux';
+  return '';
+}
+function _trRevFaite(){
+  if(!isAdmin()&&!isTractoriste()){ showToast('R\u00e9serv\u00e9 aux tractoristes et \u00e0 l\u2019admin','#C0392B'); return; }
+  var t=_tracSelId?getTracteurSel():null; if(!t) return;
+  _relOuvrir(t.id,'revision',function(h){
+    var avant={ revision_h:t.revision_h, rev_fait_h:t.rev_fait_h, rev_fait_d:t.rev_fait_d, rev_date:t.rev_date };
+    var auj=_gnrTodayISO(), hN=Number(t.rev_h)||0, mN=Number(t.rev_mois)||0;
+    t.rev_fait_h=h; t.rev_fait_d=auj;
+    if(hN>0) t.revision_h=Math.round((h+hN)*10)/10;
+    t.rev_date=mN>0?_trAjoutMois(auj,mN):(t.rev_date||'');
+    window.TRACTEURS_LIST=TRACTEURS_LIST; _saveData('tracteurs_list');
+    var revoir=function(){ renderTracteur(); if(typeof renderEntretiens==='function') renderEntretiens(); };
+    revoir();
+    var msg=(hN>0||mN>0)?('R\u00e9vision not\u00e9e \u00b7 prochaine '+[hN>0?'\u00e0 '+_gnrNum(t.revision_h)+'\u00a0h':'', mN>0?'le '+_trDateAn(t.rev_date):''].filter(Boolean).join(' ou ')):'R\u00e9vision not\u00e9e \u00b7 r\u00e9glez l\u2019intervalle au crayon pour que la suivante se calcule';
+    var annuler=function(){ Object.keys(avant).forEach(function(c){ if(avant[c]===undefined) delete t[c]; else t[c]=avant[c]; }); window.TRACTEURS_LIST=TRACTEURS_LIST; _saveData('tracteurs_list'); revoir(); showToast('R\u00e9vision retir\u00e9e (le relev\u00e9 reste)','#3D6B27'); };
+    if(typeof window.showToastAnnuler==='function') window.showToastAnnuler(msg, annuler); else showToast(msg,'#3D6B27');
+  });
+}
 // ── La feuille du relevé (#ovReleve, index.html) ──
 function _relVal(){ var s=_rel.buf; if(!s) return null; s=s.replace(',','.'); if(s.slice(-1)==='.') s=s.slice(0,-1); if(s==='') return null; var v=parseFloat(s); return isFinite(v)?v:null; }
 function _relEtat(v,k){
@@ -1643,13 +1698,16 @@ function _relRendu(){
   if(el('rel-cadran')) el('rel-cadran').innerHTML=_relCadran(_rel.buf);
   var m=el('rel-msg'); if(m){ m.className='rel-msg'+(e.k==='ok'&&v!=null?' rel-ok':e.k==='beaucoup'?' rel-att':(e.k==='bas'||e.k==='imp')?' rel-ko':''); m.innerHTML='<span>'+_escHtml(e.t)+(e.s?'<small>'+_escHtml(e.s)+'</small>':'')+'</span>'; }
   var b=el('rel-ok'), bon=(e.k==='ok'||e.k==='beaucoup')&&v!=null;
-  if(b){ b.disabled=!bon; b.textContent=!bon?(_rel.src==='plein'?'Valider le plein':'Valider'):(e.k==='beaucoup'?('Oui, '+_gnrNum(v)+'\u00a0h est le bon chiffre'):(_rel.src==='plein'?('Valider le plein \u00e0 '+_gnrNum(v)+'\u00a0h'):('Valider '+_gnrNum(v)+'\u00a0h'))); }
+  if(b){ b.disabled=!bon; b.textContent=!bon?(_rel.src==='plein'?'Valider le plein':_rel.src==='revision'?'Noter la r\u00e9vision':_rel.src==='demarrage'?'Valider et d\u00e9marrer':'Valider'):(e.k==='beaucoup'?('Oui, '+_gnrNum(v)+'\u00a0h est le bon chiffre'):(_rel.src==='plein'?('Valider le plein \u00e0 '+_gnrNum(v)+'\u00a0h'):_rel.src==='revision'?('Noter la r\u00e9vision \u00e0 '+_gnrNum(v)+'\u00a0h'):_rel.src==='demarrage'?('Valider '+_gnrNum(v)+'\u00a0h et d\u00e9marrer'):('Valider '+_gnrNum(v)+'\u00a0h'))); }
 }
-function _relOuvrir(tid,src,apres){
+function _relOuvrir(tid,src,apres,raison){
   var t=(TRACTEURS_LIST||[]).find(function(x){ return x.id===tid; }); if(!t) return;
   _rel={tid:tid, src:src||'jour', buf:'', apres:apres||null};
   var k=_trCompteur(t), el=function(id){ return document.getElementById(id); };
-  if(el('rel-sub')) el('rel-sub').textContent=t.nom+(_rel.src==='plein'?' \u00b7 au plein, le chiffre est demand\u00e9':_rel.src==='jour'?' \u00b7 une fois aujourd\u2019hui, le chiffre du cadran':' \u00b7 le chiffre du cadran');
+  var _SUB={plein:' \u00b7 au plein, le chiffre est demand\u00e9', jour:' \u00b7 une fois aujourd\u2019hui, le chiffre du cadran', revision:' \u00b7 r\u00e9vision faite\u00a0: le chiffre du cadran', demarrage:' \u00b7 pour d\u00e9marrer, le chiffre du cadran'};
+  if(el('rel-sub')) el('rel-sub').textContent=t.nom+(_SUB[_rel.src]||' \u00b7 le chiffre du cadran');
+  var _BAN={depassee:'R\u00e9vision d\u00e9pass\u00e9e\u00a0: le compteur est demand\u00e9 pour d\u00e9marrer.', proche:'R\u00e9vision toute proche\u00a0: le compteur est demand\u00e9 pour d\u00e9marrer.', vieux:'Pas de vrai relev\u00e9 depuis plus de 7 jours\u00a0: le compteur est demand\u00e9 pour d\u00e9marrer.'};   // ★ COMPT-2 (§484)
+  if(el('rel-ban')){ el('rel-ban').textContent=_BAN[raison]||''; el('rel-ban').hidden=!_BAN[raison]; }
   if(el('rel-ref')) el('rel-ref').innerHTML=!k?'<span>Aucun relev\u00e9\u00a0: ce sera le premier.</span>'
     :('<span>Dernier relev\u00e9\u00a0: <b>'+_escHtml(_gnrNum(k.base.h))+'\u00a0h</b>'+(k.base.d?' le '+_escHtml(_fmtDate(k.base.d))+(k.base.par?', '+_escHtml(k.base.par):''):' (sans date)')+'</span>'+(k.estime?'<span>attendu <b>env.\u00a0'+_escHtml(_gnrNum(Math.round(k.h)))+'\u00a0h</b></span>':''));
   if(el('rel-tard')) el('rel-tard').hidden=(_rel.src!=='jour');
@@ -1696,12 +1754,13 @@ function _trRelevePassage(sid,dou){
     if(dou==='feuille'&&_trSdAvant===JSON.stringify(s.parcellesFaites||[])) return;   // regarder une feuille ne demande rien
     var tid=_trTidSession(s), t=(TRACTEURS_LIST||[]).find(function(x){ return x.id===tid; });
     if(!t||(REPARATEUR&&REPARATEUR[t.id])) return;
+    if(typeof _trSuivi==='function'&&!_trSuivi(t)) return;   // ★ COMPT-2 (§484) : un tracteur non suivi n'est jamais interrogé
     var auj=_gnrTodayISO();
     if((t.releves||[]).some(function(r){ return r&&!r.manque&&r.d===auj; })) return;   // une fois par jour et par tracteur
     setTimeout(function(){ _relOuvrir(t.id,'jour'); },320);
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/_trRelevePassage'); }
 }
-window._trCompteur=_trCompteur; window._trHeuresTxt=_trHeuresTxt; window._relTouche=_relTouche; window._relValider=_relValider; window._relPlusTard=_relPlusTard; window._trRelever=_trRelever;
+window._trCompteur=_trCompteur; window._trHeuresTxt=_trHeuresTxt; window._trRevFaite=_trRevFaite; window._trRevEtat=_trRevEtat; window._relTouche=_relTouche; window._relValider=_relValider; window._relPlusTard=_relPlusTard; window._trRelever=_trRelever;
 if(typeof document!=='undefined'&&document.addEventListener) document.addEventListener('keydown',function(ev){
   var o=document.getElementById('ovReleve'); if(!o||!o.classList.contains('open')) return;
   var k=ev.key;
@@ -3439,6 +3498,9 @@ function saveSession(){
   if(!tracteurId&&TRACTEURS_LIST.length)tracteurId=TRACTEURS_LIST[0].id;
   var act=ACTIVITES.find(function(x){return x.nom===a;});
   var tracteurOverride=tracteurId!==act?.tracteurDefautId;
+  // ★ COMPT-2 (§484) : quand ça compte — révision à 50 h ou moins, à 14 jours, dépassée, ou 7 jours sans vrai relevé —, la session part avec le compteur.
+  var _tEx=(TRACTEURS_LIST||[]).find(function(x){ return x.id===tracteurId; }), _rx=(typeof _trReleveExige==='function'&&typeof window!=='undefined'&&!window.__MV_TUTO&&(typeof _trDemH==='undefined'||_trDemH==null)&&_tEx)?_trReleveExige(_tEx):'';
+  if(_rx){ _relOuvrir(_tEx.id,'demarrage',function(h){ _trDemH=h; try{ saveSession(); } finally { _trDemH=null; } },_rx); return; }
   var _coeqEl=document.querySelector('#s-coeq-pick .pchk.sel'), _coeq=(_mvActCoeq(act)&&_coeqEl)?(_coeqEl.dataset.val||''):'';   // COEQ-1 (§343)
   var _sess={
     id:Date.now().toString(16),

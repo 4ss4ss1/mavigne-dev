@@ -123,3 +123,28 @@ Demande de Nico (29/10) : la prise des heures de révision des tracteurs n’est
 - `renderTracParcPills` remplit toujours une bande masquée partout (§481e) : à retirer.
 - L’aide dit encore « Le parc s’affiche en pastilles sous les chiffres » : la bande est masquée depuis UI-3, à réécrire.
 - Vocabulaire : la case « Heures de moteur » compte des heures notées ; avec l’écart appris, elle pourrait dire vrai.
+
+## 484. ★★ COMPT-2 — LA RÉVISION SE RECALCULE ; LE COMPTEUR EXIGÉ AU DÉMARRAGE QUAND ÇA COMPTE (29/10 — `src/tracteur.js` (`_trSuivi`, `_trAjoutMois`, `_trRevDate`, `_trRevEtat`, `_trReleveExige`, `_trRevFaite` ; `_relOuvrir`, `_relRendu`, `_trRelevePassage`, `_revCardHtml`, `saveRev`, `_trParcEtat`, `_trDroiteHtml`, `saveSession`) · `index.html` (`#rel-ban`, v10.36) · `src/styles.css` · `src/utils.js` (APP 10.36, l’aide du Tracteur) · `src/whats-new.js` · `guide/06-tracteur.html` · `public/sw.js` (SW 11.17) · `scripts/mv-harnais-compt2.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/tutos-couverture.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-480-529.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/COMPT-2.json` · base `aa11e82`)
+
+### 484a. D’où ça vient
+Le deuxième lot de `docs/maquettes/maquette-compteur-tracteur-v1.html` (§483) ; « go » de Nico (29/10). Après une révision, la cible suivante se calculait de tête et se retapait au crayon ; et COMPT-1 interrogeait tous les tracteurs, même ceux d’un domaine qui ne tient pas les heures.
+
+### 484b. Ce qui change
+- **L’intervalle**, au crayon de « Prochaine révision » : `t.rev_h` (toutes les N heures) et/ou `t.rev_mois` (tous les N mois), au premier atteint.
+- **« Révision faite »** (`_trRevFaite`) : la feuille du compteur (src `revision`), puis `rev_fait_h` et `rev_fait_d` ; `revision_h` = compteur + `rev_h` — tous les lecteurs le lisent déjà ; `rev_date` = aujourd’hui + `rev_mois` (`_trAjoutMois`, la fin de mois gardée). Annuler six secondes ; le relevé reste, c’est un vrai chiffre. Sans intervalle, la révision est notée et la carte dit de le régler.
+- **L’échéance au premier atteint** (`_trRevEtat`) : heures et date ; rouge à 50 h ou 14 jours, orange à 120 h ou 30 jours. La carte Révision dit « ou le … » ou « date dépassée (…) », l’intervalle et la dernière révision ; le parc de droite range une date dépassée avec les révisions dépassées, et dit « à relever » quand le dernier vrai relevé a plus de 7 jours.
+- **Le compteur exigé au démarrage** (`saveSession`, `_trReleveExige`) : révision dépassée, à 50 h ou moins, à 14 jours ou moins, ou 7 jours sans vrai relevé (un ancien chiffre sans date compte) → la feuille, son bandeau (`#rel-ban`), sans « Pas devant le tracteur » ; la session part avec le compteur. Jamais en entraînement, au garage, ni le jour d’un relevé. Le travail n’est pas arrêté : la session se crée dès le chiffre donné.
+- **Les tracteurs non suivis** (`_trSuivi` : ni compteur, ni révision, ni relevé, ni intervalle) ne sont jamais interrogés — au démarrage comme au passage.
+- **« Révision faite »** exempté de tuto (la feuille est celle du relevé).
+
+### 484c. Mesuré
+- `mv-harnais-compt2` : 16 assertions — l’ajout de mois, l’échéance heures et date, le compteur exigé (dépassée, proche en heures et en jours, vieux relevé, ancien chiffre ; pas le jour d’un relevé, pas au garage, pas un tracteur non suivi), « Révision faite » qui calcule et s’annule, sans intervalle, le passage, les branchements ; **9/9 mutants**. `compt1`, `traux1a`, `traux1b`, `coeq1`, `sessions`, `trac3` restent verts, contre-épreuves comprises.
+- **Chaîne complète verte** : 589 commandes, en quatre reprises (le bac à sable coupe une commande à cinq minutes), juste avant le dernier retouché. Après lui : preflight, les harnais du Tracteur (`compt1`, `compt2`, `traux1a`, `traux1b`, `coeq1`, `sessions`, `trac3`, `tap`, contre-épreuves comprises) et du style (`typo`, `subset`, `contraste`, `jetons`, `globaux`) verts.
+- **Build** : app 10.36. **Tutos concernés : aucun** (7 tutos, aucun ne touche ce changement) ; panneau côte à côte rejoué après le dernier retouché, 3/3.
+- **Essai réel sur le build** (mode entraînement, Chromium 390 px) : la carte dit « Toutes les 500 h ou 12 mois, au premier atteint » et porte « Révision faite » ; la feuille dit « révision faite : le chiffre du cadran », puis « Noter la révision à 485 h » ; après : `revision_h` 985, `rev_fait_h` 485, `rev_date` 2027-10-29, aucune erreur. ★ **Vu en route** : la carte et le toast écrivaient « ou le 29 Oct » — `fmtDate` tait l’année, et une échéance d’un an la perd. D’où `_trDateAn` (« 29 oct. 2027 »), le dernier retouché, vérifié par le harnais. Le compteur exigé au démarrage, coupé en entraînement par choix, n’est vérifié que par le harnais.
+
+### 484d. Ce qui reste ouvert
+- **COMPT-3** : la fiche du tracteur sur ordinateur — la courbe, les relevés, Corriger et Écarter.
+- Le plan à plusieurs entretiens (vidange pont et boîte, filtres) : un seul intervalle par tracteur pour l’instant.
+- La date de l’intervalle ne remonte ni au Pilotage, ni à l’accueil, ni au rapport de saison, qui lisent les heures ; un tracteur suivi à la date seule s’affiche « révision à renseigner » dans le parc.
+- Toujours ouverts depuis §483e : la fiche « Plein fait » sans compteur, la bande des pastilles à retirer, la ligne d’aide des pastilles, le vocabulaire « Heures de moteur ».

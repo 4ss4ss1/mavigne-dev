@@ -9671,6 +9671,10 @@ body:not(.mv-rail-ouvert) .mv-rail .mv-rail-point,body:not(.mv-rail-ouvert) .mv-
 #ovReleve .rel-tard[hidden]{display:none}
 .rel-vu{font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:var(--e-0,2px)}
 .rel-relever{margin-left:auto;padding:var(--e-2,8px) var(--e-3,12px);border:1px solid var(--ligne-forte);border-radius:var(--r-md,8px);background:transparent;color:var(--texte);font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;min-height:44px}
+/* ★ COMPT-2 (§484) : le bandeau du démarrage exigé, le bouton « Révision faite » */
+#ovReleve .rel-ban{margin-bottom:var(--e-2,8px);padding:var(--e-2,8px) var(--e-3,12px);border-radius:var(--r-md,8px);background:var(--danger-doux);color:var(--danger-texte);font-size:var(--pt-txt,13px);font-weight:600;line-height:1.35}
+#ovReleve .rel-ban[hidden]{display:none}
+.rel-faite{display:inline-flex;align-items:center;margin-top:var(--e-2,8px);padding:var(--e-2,8px) var(--e-3,12px);border:1px solid var(--ligne-forte);border-radius:var(--r-md,8px);background:transparent;color:var(--texte);font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;min-height:44px}
 @media (prefers-reduced-motion:reduce){#ovReleve .rel-c.rel-curseur::after{animation:none}}
 
 /* ★ TETE-2 (§329) — UN SEUL MODÈLE D'EN-TÊTE, LISIBLE ET CALÉ, SUR TOUTES LES VUES.

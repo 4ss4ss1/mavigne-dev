@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.36', d: '2026-10-29', items: [
+    { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'tracteur', titre: 'La révision se recalcule toute seule',
+      desc: "Réglez une fois l’intervalle au crayon de «\u00a0Prochaine révision\u00a0»\u00a0: toutes les 500\u00a0h, tous les 12 mois, ou les deux — au premier atteint. Après l’entretien, «\u00a0Révision faite\u00a0» demande le chiffre du cadran et calcule la suivante\u00a0: plus rien à retaper. Pour démarrer une session sur un tracteur dont la révision approche ou est dépassée, ou qui n’a pas été relevé depuis une semaine, Ma Vigne demande d’abord le compteur. Un tracteur sans compteur ni révision n’est jamais interrogé." },
+  ] },
   { v: '10.35', d: '2026-10-29', items: [
     { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'tracteur', titre: 'Le compteur des tracteurs avance tout seul',
       desc: "Le compteur d’heures ne restait juste que si quelqu’un allait le retaper dans l’Entretien. Désormais, entre deux relevés, il ajoute les heures de vos sessions («\u00a0env.\u00a0» le dit), et l’alerte de révision tombe juste. Une fois par jour, en refermant la feuille ou en terminant, Ma Vigne demande le chiffre du cadran\u00a0: un pavé large, trois secondes, contrôlé tout de suite. Au plein, il est demandé à chaque fois\u00a0; «\u00a0Relever\u00a0», dans l’Entretien, le note quand vous voulez. Une révision dépassée s’écrit enfin «\u00a0dépassée de 18\u00a0h\u00a0», plus «\u00a0dans −18\u00a0h\u00a0»." },

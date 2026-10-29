@@ -19,6 +19,7 @@
     "_relTouche": "COMPT-1 (§483) : une touche du pavé du compteur — la feuille arrive seule et se lit, rien à apprendre",
     "_relValider": "COMPT-1 (§483) : valide le chiffre recopié ; le bouton dit ce qu’il note",
     "_relPlusTard": "COMPT-1 (§483) : « Pas devant le tracteur » repose la question au geste suivant, rien à apprendre",
-    "_trRelever": "COMPT-1 (§483) : « Relever » ouvre la même feuille que le relevé au passage"
+    "_trRelever": "COMPT-1 (§483) : « Relever » ouvre la même feuille que le relevé au passage",
+    "_trRevFaite": "COMPT-2 (§484) : « Révision faite » ouvre la feuille du compteur, la même que le relevé ; le bouton dit ce qu’il fait"
   }
 }
