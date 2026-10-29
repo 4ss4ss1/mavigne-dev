@@ -282,48 +282,12 @@ function switchTracOnglet(ong){
   // FAB visible seulement sur Sessions si tractoriste
   var fab = document.getElementById('trac-fab');
   if(fab) fab.style.display = (ong==='sessions' && isTractoriste()) ? 'flex' : 'none';
-  if(ong==='entretiens') { renderTracParcPills(); renderRepBanner(); renderEntretiens(); renderEntTracFilter(); }
+  if(ong==='entretiens') { renderRepBanner(); renderEntretiens(); renderEntTracFilter(); }
 }
 
 // ── Pills parc tracteurs dans l'en-tête ──
-function renderTracParcPills(){
-  var el = document.getElementById('trac-parc-pills');
-  if(!el) return;
-  var today = todayStr();
-  el.innerHTML = TRACTEURS_LIST.map(function(t){
-    var col = couleurTracType(t.type);
-    var rep = REPARATEUR[t.id];
-    var badge='', pill='';
-    if(rep){
-      var retour = rep.prevu_retour||'';
-      var depasse = retour && today>retour;
-      var proche  = retour && (today===retour || today===addDays(retour,-1));
-      var pc = depasse?'bad':(proche?'warn':'info');
-      var ptxt = retour ? ('Retour '+_fmtDate(retour)) : 'Au garage';
-      badge = _mvBadge('Au garage','rouge');
-      pill  = '<span class="tpc-pill '+pc+'">'+ptxt+'</span>';
-    } else {
-      var comp=t.compteur_h, rev=t.revision_h;
-      var hasComp=(comp!=null&&comp!==''&&rev!=null&&rev!=='');
-      if(hasComp){
-        var reste=Number(rev)-Number(comp);
-        var rc=reste<=50?'bad':(reste<=120?'warn':'ok');
-        pill=_mvBadge('Révision dans '+_gnrNum(reste)+' h', rc==='urg'?'rouge':rc==='soon'?'ambre':'neutre');
-      } else {
-        pill=_mvBadge('Révision à renseigner','neutre');
-      }
-    }
-    return '<div class="tpc'+(rep?' rep':'')+'" onclick="switchTracOnglet(\'entretiens\');selectTracteur(\''+_escAttr(t.id)+'\')">'
-      +badge
-      +'<div class="tpc-ic" style="background:'+col+'26;color:'+col+'">'+_mvIcon('tracteur',20)+'</div>'
-      +'<div class="tpc-b">'
-        +'<div class="tpc-n">'+_escHtml(t.nom)+'</div>'
-        +'<div class="tpc-m">'+_escHtml(t.modele||t.type||'')+'</div>'
-        +pill
-      +'</div>'
-    +'</div>';
-  }).join('');
-}
+// ★ COMPT-4 (§486) : renderTracParcPills retirée — elle remplissait une bande masquée partout (UI-3), §481e.
+
 
 // ── Pills filtre tracteur dans onglet Entretiens ──
 function renderEntTracFilter(){
@@ -357,7 +321,6 @@ function couleurTracType(type){
 function renderTracTabs(){
   // Les onglets par tracteur sont remplacés par les pills dans renderTracParcPills()
   // Appel redirigé vers renderTracParcPills si on est sur la page tracteur
-  renderTracParcPills();
 }
 
 // ── Sélection d'un tracteur ──
@@ -733,6 +696,9 @@ function saveEntretien(){
   // Litres du plein : meme regle que le bouton « Plein » dedie. La fiche porte le
   // chiffre, la cuve en est decomptee UNE fois. Sans case cochee, aucun champ.
   var _pl=fiche.plein?_pleinBlocVal('ent'):0;
+  // ★ COMPT-4 (§486) : la fiche « Plein fait » demande aussi le compteur d'un tracteur suivi, comme le bouton « Plein ».
+  if(_pl>0&&typeof window!=='undefined'&&!window.__MV_TUTO&&typeof _trSuivi==='function'&&_trSuivi(t)&&(typeof _trEntH==='undefined'||_trEntH==null)){ _relOuvrir(t.id,'plein',function(h){ _trEntH=h; try{ saveEntretien(); } finally { _trEntH=null; } }); return; }
+  if(typeof _trEntH!=='undefined'&&_trEntH!=null) fiche.compteur_h=_trEntH;
   if(_pl>0) fiche.litres_plein=_pl;
   ENTRETIENS.unshift(fiche);
   window.ENTRETIENS=ENTRETIENS;
@@ -995,7 +961,7 @@ function savePleinFiche(){
   var inp=document.getElementById('plein-litres'); var n=parseFloat(inp&&inp.value)||0;
   if(n<=0){showToast('Indique les litres mis dans le réservoir','#C0392B');return;}
   // ★ COMPT-1 (§483) : au plein, on est devant la machine — le compteur est exigé, et la fiche s'enregistre avec lui.
-  if(!window.__MV_TUTO&&_trPleinH==null){ _relOuvrir(t.id,'plein',function(h){ _trPleinH=h; try{ savePleinFiche(); } finally { _trPleinH=null; } }); return; }
+  if(!window.__MV_TUTO&&_trPleinH==null&&_trSuivi(t)){ _relOuvrir(t.id,'plein',function(h){ _trPleinH=h; try{ savePleinFiche(); } finally { _trPleinH=null; } }); return; }
   // 1) Cuve : decompte du plein — par _gnrCuveDelta, seul point d'ecriture du
   //    niveau. Le repli couvre le cas « pas de cuve » (deja refuse plus haut).
   var lvl=_gnrCuveDelta(-n); if(lvl==null) lvl=Number(g.niveau)||0;
@@ -1559,7 +1525,7 @@ function _trDroiteHtml(){
     h+='<div class="trd-l trd-fixe"><span class="trd-n">Cuve</span><span class="trd-s">'+_gnrNum(niv)+' / '+_gnrNum(g.capacite)+' L'+(g.maj?' \u00b7 relev\u00e9 le '+_fmtDate(g.maj):'')+'</span>'+(bas?_mvBadge('Sous le seuil','ambre'):'')+'</div>';
   } else h+='<div class="trd-rien">Cuve non renseign\u00e9e (Entretien \u203a GNR).</div>';
   var mois=String(_gnrTodayISO()).slice(0,7), min=(SESSIONS||[]).filter(function(s){ return s.type!=='traitement'&&String(s.date||'').slice(0,7)===mois; }).reduce(function(a,s){ return a+(_trMinutes(s).total||0); },0);
-  if(min>0) h+='<div class="trd-l trd-fixe"><span class="trd-n">Ce mois</span><span class="trd-s">'+_escHtml(_trHeuresFr(min/60))+' de moteur</span></div>';
+  if(min>0) h+='<div class="trd-l trd-fixe"><span class="trd-n">Ce mois</span><span class="trd-s">'+_escHtml(_trHeuresFr(min/60))+' de travail</span></div>';
   return h+'</section>';
 }
 // ★ COMPT-1 (§483) — LE COMPTEUR AVANCE TOUT SEUL, ON LE RELÈVE AU PASSAGE (docs/maquettes/maquette-compteur-tracteur-v1.html ; « go » de Nico, 29/10)
@@ -1633,7 +1599,7 @@ function _trHeuresTxt(k){ return k?((k.estime?'env.\u00a0':'')+_gnrNum(k.estime?
 //   SUIVI dont la révision est à 50 h ou moins, à 14 jours ou dépassée — ou sans vrai relevé depuis 7 jours — exige son compteur :
 //   la session part avec lui. Un tracteur NON SUIVI (ni révision, ni compteur, ni relevé, ni intervalle : un domaine qui ne tient
 //   pas les heures) n'est jamais interrogé — au passage non plus.
-var _trDemH=null;
+var _trDemH=null, _trEntH=null;
 function _trSuivi(t){ return !!t&&((t.revision_h!=null&&t.revision_h!=='')||(t.compteur_h!=null&&t.compteur_h!=='')||(Array.isArray(t.releves)&&t.releves.length>0)||Number(t.rev_h)>0||Number(t.rev_mois)>0); }
 function _trAjoutMois(iso,n){ var y=+iso.slice(0,4), m=+iso.slice(5,7)-1+Number(n), d=+iso.slice(8,10); var dt=new Date(Date.UTC(y,m,1)), fin=new Date(Date.UTC(dt.getUTCFullYear(),dt.getUTCMonth()+1,0)).getUTCDate(); dt.setUTCDate(Math.min(d,fin)); return dt.toISOString().slice(0,10); }
 function _trDateAn(iso){ try{ return new Date(String(iso)+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}); }catch(e){ return String(iso); } }   // une échéance d'un an dit son année
@@ -1662,8 +1628,9 @@ function _trReleveExige(t){
 //   écart, ni rythme) ; « Rétablir » le remet. Le « void » de Fleetio.
 var _TR_SRC={jour:'fin de journ\u00e9e', plein:'plein', revision:'r\u00e9vision faite', demarrage:'d\u00e9marrage', manuel:'\u00e0 la main'};
 function _trUtc(iso){ return Date.UTC(+iso.slice(0,4),+iso.slice(5,7)-1,+iso.slice(8,10)); }
-function _trJoursOuvres(a,b){ var n=0, y=_trUtc(b); for(var d=_trUtc(a)+86400000; d<=y; d+=86400000){ var w=new Date(d).getUTCDay(); if(w>=1&&w<=5) n++; } return n; }
-function _trAjoutOuvres(iso,n){ var d=_trUtc(iso), k=0; while(k<n){ d+=86400000; var w=new Date(d).getUTCDay(); if(w>=1&&w<=5) k++; } return new Date(d).toISOString().slice(0,10); }
+function _trFerie(ms){ var F=(typeof window!=='undefined'&&typeof window._feriesY==='function')?window._feriesY(new Date(ms).getUTCFullYear()):null, dt=new Date(ms); return !!(F&&F[dt.getUTCMonth()]&&F[dt.getUTCMonth()][dt.getUTCDate()]); }   // ★ COMPT-4 (§486) : les fériés du planning (_feriesY)
+function _trJoursOuvres(a,b){ var n=0, y=_trUtc(b); for(var d=_trUtc(a)+86400000; d<=y; d+=86400000){ var w=new Date(d).getUTCDay(); if(w>=1&&w<=5&&!_trFerie(d)) n++; } return n; }
+function _trAjoutOuvres(iso,n){ var d=_trUtc(iso), k=0; while(k<n){ d+=86400000; var w=new Date(d).getUTCDay(); if(w>=1&&w<=5&&!_trFerie(d)) k++; } return new Date(d).toISOString().slice(0,10); }
 function _trRythme(t){
   var auj=_gnrTodayISO(), lim=new Date(_trUtc(auj)-28*86400000).toISOString().slice(0,10);
   var v=_trVrais(t).filter(function(r){ return r.d>=lim; }); if(v.length<2) return null;
@@ -1718,7 +1685,7 @@ function _trFicheCptHtml(t){
     var r=L.r, src=r.manque?'\u00ab\u00a0pas devant le tracteur\u00a0\u00bb':(_TR_SRC[r.src]||'relev\u00e9');
     var ec=(L.ecart==null||r.ecarte)?'\u2014':((L.ecart>=0?'+':'\u2212')+_gnrNum(Math.abs(Math.round(L.ecart*10)/10))+'\u00a0h');
     var cls=r.manque?'cpt-manque':(r.ecarte?'cpt-ecarte':''), act='';
-    if(adm) act=(!r.manque&&r.ts)?'<td class="r"><button type="button" class="cpt-act" onclick="_trRelEcarte(\''+_escAttr(t.id)+'\','+Number(r.ts)+')">'+(r.ecarte?'R\u00e9tablir':'\u00c9carter')+'</button></td>':'<td></td>';
+    if(adm) act=(!r.manque&&r.ts)?'<td class="r">'+(r.ecarte?'':'<button type="button" class="cpt-act" onclick="_trRelCorriger(\''+_escAttr(t.id)+'\','+Number(r.ts)+')">Corriger</button> ')+'<button type="button" class="cpt-act" onclick="_trRelEcarte(\''+_escAttr(t.id)+'\','+Number(r.ts)+')">'+(r.ecarte?'R\u00e9tablir':'\u00c9carter')+'</button></td>':'<td></td>';
     rows+='<tr'+(cls?' class="'+cls+'"':'')+'><td>'+_escHtml(_fmtDate(r.d))+'</td><td class="r">'+(r.manque?'\u2014':_escHtml(_gnrNum(r.h))+'\u00a0h')+'</td><td>'+src+(r.ecarte?' \u00b7 \u00e9cart\u00e9':'')+'</td><td>'+_escHtml(r.par||'\u2014')+'</td><td class="r">'+ec+'</td>'+act+'</tr>';
   });
   return '<section class="ent-resume-card cpt-fiche" aria-label="Le compteur du tracteur">'
@@ -1726,6 +1693,44 @@ function _trFicheCptHtml(t){
     +'<div class="cpt-grille"><div class="cpt-appris">'+appris+'</div><div class="cpt-courbe">'+_trCourbeSvg(t)+'</div></div>'
     +(rows?'<div class="cpt-tab"><table class="cpt-releves"><thead><tr><th>Jour</th><th class="r">Compteur</th><th>D\u2019o\u00f9</th><th>Par</th><th class="r">\u00c9cart \u00e0 l\u2019estim\u00e9</th>'+(adm?'<th><span class="cpt-cache">Actions</span></th>':'')+'</tr></thead><tbody>'+rows+'</tbody></table></div>':'')
   +'</section>';
+}
+// ★ COMPT-4 (§486) — « CORRIGER » UN RELEVÉ (admin, la fiche du compteur) : la même feuille, bornée entre le vrai relevé
+//   d'avant et celui d'après (le contrôle de séquence de Fleetio). Le chiffre d'avant reste dans r.corrige ; Annuler le remet.
+function _relEtatCorr(v,b){
+  if(v==null) return {k:'vide', t:'Tape le bon chiffre.'};
+  if(v<b.min) return {k:'bas', t:'Plus bas que le relev\u00e9 d\u2019avant ('+_gnrNum(b.min)+'\u00a0h).'};
+  if(v>b.max) return {k:'imp', t:'Plus haut que le relev\u00e9 d\u2019apr\u00e8s ('+_gnrNum(b.max)+'\u00a0h).'};
+  return {k:'ok', t:'Entre le relev\u00e9 d\u2019avant et celui d\u2019apr\u00e8s\u00a0: coh\u00e9rent.'};
+}
+function _trRelCorriger(tid,ts){
+  if(!isAdmin()){ showToast('R\u00e9serv\u00e9 \u00e0 l\u2019admin','#C0392B'); return; }
+  var t=(TRACTEURS_LIST||[]).find(function(x){ return x.id===tid; }); if(!t) return;
+  var r=(t.releves||[]).find(function(x){ return x&&x.ts===ts; }); if(!r||r.manque||r.ecarte) return;
+  var avant=null, apres=null;
+  _trVrais(t).forEach(function(x){ if(x===r) return; var c=String(x.d).localeCompare(String(r.d))||((x.ts||0)-(r.ts||0)); if(c<0) avant=x; else if(c>0&&!apres) apres=x; });
+  _rel={tid:tid, src:'correction', buf:'', apres:null, borne:{ min:avant?Number(avant.h):0, max:apres?Number(apres.h):Infinity, ts:ts }};
+  var el=function(id){ return document.getElementById(id); };
+  if(el('rel-sub')) el('rel-sub').textContent=t.nom+' \u00b7 corriger le relev\u00e9 du '+_fmtDate(r.d);
+  if(el('rel-ref')) el('rel-ref').innerHTML='<span>Not\u00e9\u00a0: <b>'+_escHtml(_gnrNum(r.h))+'\u00a0h</b>'+(r.par?', '+_escHtml(r.par):'')+'</span><span>entre <b>'+_escHtml(_gnrNum(_rel.borne.min))+'\u00a0h</b>'+(apres?' et <b>'+_escHtml(_gnrNum(_rel.borne.max))+'\u00a0h</b>':' et plus')+'</span>';
+  if(el('rel-tard')) el('rel-tard').hidden=true;
+  if(el('rel-ban')){ el('rel-ban').textContent=''; el('rel-ban').hidden=true; }
+  _relRendu(); _openOv('ovReleve');
+}
+function _relValiderCorr(){
+  var t=(TRACTEURS_LIST||[]).find(function(x){ return x.id===_rel.tid; }), b=_rel.borne; if(!t||!b) return;
+  var r=(t.releves||[]).find(function(x){ return x&&x.ts===b.ts; }), v=_relVal(), e=_relEtatCorr(v,b);
+  if(!r||e.k!=='ok') return;
+  var avant={ h:r.h, corrige:r.corrige, compteur_h:t.compteur_h };
+  if(r.corrige===undefined) r.corrige=Number(r.h);
+  r.h=v;
+  var vr=_trVrais(t); if(vr.length) t.compteur_h=Number(vr[vr.length-1].h);
+  window.TRACTEURS_LIST=TRACTEURS_LIST; _saveData('tracteurs_list');
+  _closeOv(null,'ovReleve');
+  var revoir=function(){ renderTracteur(); if(typeof renderEntretiens==='function') renderEntretiens(); };
+  revoir();
+  var annuler=function(){ r.h=avant.h; if(avant.corrige===undefined) delete r.corrige; else r.corrige=avant.corrige; t.compteur_h=avant.compteur_h; window.TRACTEURS_LIST=TRACTEURS_LIST; _saveData('tracteurs_list'); revoir(); };
+  var msg='Relev\u00e9 corrig\u00e9 \u00b7 '+_gnrNum(v)+'\u00a0h (\u00e9tait '+_gnrNum(avant.h)+'\u00a0h)';
+  if(typeof window.showToastAnnuler==='function') window.showToastAnnuler(msg, annuler); else showToast(msg,'#3D6B27');
 }
 function _trRelEcarte(tid,ts){
   if(!isAdmin()){ showToast('R\u00e9serv\u00e9 \u00e0 l\u2019admin','#C0392B'); return; }
@@ -1782,11 +1787,11 @@ function _relCadran(buf){
 }
 function _relRendu(){
   var t=(TRACTEURS_LIST||[]).find(function(x){ return x.id===_rel.tid; }); if(!t) return;
-  var k=_trCompteur(t), v=_relVal(), e=_relEtat(v,k), el=function(id){ return document.getElementById(id); };
+  var k=_trCompteur(t), v=_relVal(), e=(_rel.src==='correction'&&_rel.borne)?_relEtatCorr(v,_rel.borne):_relEtat(v,k), el=function(id){ return document.getElementById(id); };
   if(el('rel-cadran')) el('rel-cadran').innerHTML=_relCadran(_rel.buf);
   var m=el('rel-msg'); if(m){ m.className='rel-msg'+(e.k==='ok'&&v!=null?' rel-ok':e.k==='beaucoup'?' rel-att':(e.k==='bas'||e.k==='imp')?' rel-ko':''); m.innerHTML='<span>'+_escHtml(e.t)+(e.s?'<small>'+_escHtml(e.s)+'</small>':'')+'</span>'; }
   var b=el('rel-ok'), bon=(e.k==='ok'||e.k==='beaucoup')&&v!=null;
-  if(b){ b.disabled=!bon; b.textContent=!bon?(_rel.src==='plein'?'Valider le plein':_rel.src==='revision'?'Noter la r\u00e9vision':_rel.src==='demarrage'?'Valider et d\u00e9marrer':'Valider'):(e.k==='beaucoup'?('Oui, '+_gnrNum(v)+'\u00a0h est le bon chiffre'):(_rel.src==='plein'?('Valider le plein \u00e0 '+_gnrNum(v)+'\u00a0h'):_rel.src==='revision'?('Noter la r\u00e9vision \u00e0 '+_gnrNum(v)+'\u00a0h'):_rel.src==='demarrage'?('Valider '+_gnrNum(v)+'\u00a0h et d\u00e9marrer'):('Valider '+_gnrNum(v)+'\u00a0h'))); }
+  if(b){ b.disabled=!bon; b.textContent=(_rel.src==='correction')?(bon?('Corriger\u00a0: '+_gnrNum(v)+'\u00a0h'):'Corriger'):!bon?(_rel.src==='plein'?'Valider le plein':_rel.src==='revision'?'Noter la r\u00e9vision':_rel.src==='demarrage'?'Valider et d\u00e9marrer':'Valider'):(e.k==='beaucoup'?('Oui, '+_gnrNum(v)+'\u00a0h est le bon chiffre'):(_rel.src==='plein'?('Valider le plein \u00e0 '+_gnrNum(v)+'\u00a0h'):_rel.src==='revision'?('Noter la r\u00e9vision \u00e0 '+_gnrNum(v)+'\u00a0h'):_rel.src==='demarrage'?('Valider '+_gnrNum(v)+'\u00a0h et d\u00e9marrer'):('Valider '+_gnrNum(v)+'\u00a0h'))); }
 }
 function _relOuvrir(tid,src,apres,raison){
   var t=(TRACTEURS_LIST||[]).find(function(x){ return x.id===tid; }); if(!t) return;
@@ -1810,6 +1815,7 @@ function _relTouche(k){
   _rel.buf=b; _relRendu();
 }
 function _relValider(){
+  if(_rel.src==='correction') return _relValiderCorr();   // ★ COMPT-4 (§486)
   var t=(TRACTEURS_LIST||[]).find(function(x){ return x.id===_rel.tid; }); if(!t) return;
   var k=_trCompteur(t), v=_relVal(), e=_relEtat(v,k);
   if(v==null||!(e.k==='ok'||e.k==='beaucoup')) return;
@@ -1848,7 +1854,7 @@ function _trRelevePassage(sid,dou){
     setTimeout(function(){ _relOuvrir(t.id,'jour'); },320);
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/_trRelevePassage'); }
 }
-window._trCompteur=_trCompteur; window._trHeuresTxt=_trHeuresTxt; window._trRevFaite=_trRevFaite; window._trRelEcarte=_trRelEcarte; window._trRevEtat=_trRevEtat; window._relTouche=_relTouche; window._relValider=_relValider; window._relPlusTard=_relPlusTard; window._trRelever=_trRelever;
+window._trCompteur=_trCompteur; window._trHeuresTxt=_trHeuresTxt; window._trRevFaite=_trRevFaite; window._trRelEcarte=_trRelEcarte; window._trRelCorriger=_trRelCorriger; window._trDateAn=_trDateAn; window._trRevEtat=_trRevEtat; window._relTouche=_relTouche; window._relValider=_relValider; window._relPlusTard=_relPlusTard; window._trRelever=_trRelever;
 if(typeof document!=='undefined'&&document.addEventListener) document.addEventListener('keydown',function(ev){
   var o=document.getElementById('ovReleve'); if(!o||!o.classList.contains('open')) return;
   var k=ev.key;
@@ -1874,7 +1880,6 @@ function renderTracteur(){
   if(stRep)stRep.textContent=Object.keys(REPARATEUR).length;
 
   // Render pills parc tracteurs en en-tête
-  renderTracParcPills();
   var _dr=document.getElementById('trac-droite'); if(_dr) _dr.innerHTML=_trDroiteHtml();   // ★ TRAC-UX-1B (§481) : le parc et le GNR, à droite sur ordinateur
 
   // FAB visible si tractoriste + onglet sessions
@@ -2685,7 +2690,7 @@ function _trFicheHtml(s){
     +'<div class="trf-kpi"><span class="l">Parcelles</span><span class="v">'+done.length+'<small>\u00a0sur '+actives.length+'</small></span></div></div>';
   // TRAC-3 (§284) : heures (chrono, sinon barème) et GNR (heures × consommation réglée, 6 L/h par défaut).
   var mn=_trMinutes(s), hh=mn.total/60, lh=_trConsoLh(), regle=!!(window.CONFIG&&window.CONFIG.eco&&window.CONFIG.eco.conso_gnr_lh!=null&&window.CONFIG.eco.conso_gnr_lh!=='');
-  h+='<div class="trf-kpis trf-kpis-2"><div class="trf-kpi"><span class="l">Heures de moteur</span><span class="v">'+_trHeuresFr(hh)+'<small>\u00a0h</small></span>'
+  h+='<div class="trf-kpis trf-kpis-2"><div class="trf-kpi"><span class="l">Heures de travail</span><span class="v">'+_trHeuresFr(hh)+'<small>\u00a0h</small></span>'
     +'<span class="trf-s">'+(mn.total?(mn.bar?(mn.mes?_trHeuresFr(mn.mes/60)+'\u00a0h au chrono, '+_trHeuresFr(mn.bar/60)+'\u00a0h au barème':'au barème, sans chrono'):'au chrono'):'rien de mesuré')+'</span></div>'
     +'<div class="trf-kpi"><span class="l">GNR</span><span class="v">'+Math.round(hh*lh)+'<small>\u00a0L</small></span><span class="trf-s">'+_trHeuresFr(lh)+'\u00a0L par heure'+(regle?'':', valeur par défaut')+'</span></div></div>';
   h+='<section class="trf-sec"><div class="trf-sec-t">Parcelles</div><div class="trf-parcs">'+actives.map(function(p){ return '<span class="trf-p'+(done.indexOf(p.nom)>=0?' fait':'')+'">'+_escHtml(p.nom)+'</span>'; }).join('')+'</div></section>';
@@ -3674,7 +3679,6 @@ window.openEphyDetail = openEphyDetail;
 window.renderCatalogueTrac = renderCatalogueTrac;
 window.renderPhytoTrac = renderPhytoTrac;
 window.switchTracOnglet = switchTracOnglet;
-window.renderTracParcPills = renderTracParcPills;
 window.renderEntTracFilter = renderEntTracFilter;
 window.getTracteurSel = getTracteurSel;
 window.couleurTracType = couleurTracType;

@@ -22,7 +22,7 @@ function fonction(src, debut) { const i = src.indexOf(debut); if (i < 0) throw n
 let ok = 0, ko = 0;
 const t = (nom, cond, detail) => { if (cond) { ok++; console.log('  \x1b[32m✓\x1b[0m ' + nom); } else { ko++; console.log('  \x1b[31m✗\x1b[0m ' + nom + (detail !== undefined ? '  → ' + detail : '')); } };
 const FONCS = ['_trIso', '_trJours', '_trTidSession', '_trHeuresNotees', '_trNoteesEntre', '_trEcart', '_trVrais', '_trCompteur', '_trHeuresTxt', '_trSuivi', '_trAjoutMois', '_trDateAn', '_trRevDate', '_trRevEtat',
-  '_trUtc', '_trJoursOuvres', '_trAjoutOuvres', '_trRythme', '_trRepere', '_trLignesReleves', '_trCourbeSvg', '_trFicheCptHtml', '_trRelEcarte'].map((n) => 'function ' + n + '(');
+  '_trUtc', '_trFerie', '_trJoursOuvres', '_trAjoutOuvres', '_trRythme', '_trRepere', '_trLignesReleves', '_trCourbeSvg', '_trFicheCptHtml', '_trRelEcarte'].map((n) => 'function ' + n + '(');
 function monde(S, o) {
   const toasts = [];
   const ctx = {
@@ -83,7 +83,7 @@ if (!CONTRE) {
   const mutants = [
     ['un relevé écarté compte encore', m('tr', 'return r&&!r.manque&&!r.ecarte&&r.d&&', 'return r&&!r.manque&&r.d&&')],
     ['« Écarter » ne recalcule pas le dernier relevé', m('tr', 'var v=_trVrais(t); if(v.length) t.compteur_h=Number(v[v.length-1].h);', '')],
-    ['les week-ends comptent comme des jours ouvrés', m('tr', 'if(w>=1&&w<=5) n++;', 'n++;')],
+    ['les week-ends comptent comme des jours ouvrés', m('tr', 'if(w>=1&&w<=5&&!_trFerie(d)) n++;', 'n++;')],
     ['le repère oublie le rythme', m('tr', 'var n=Math.ceil(e.reste/r.h);', 'var n=Math.ceil(e.reste);')],
     ['l’écart à l’estimé ne se calcule plus', m('tr', 'if(vrai&&prev) ecart=', 'if(false) ecart=')],
     ['un non-admin écarte', m('tr', "if(!isAdmin()){ showToast('R\\u00e9serv\\u00e9 \\u00e0 l\\u2019admin','#C0392B'); return; }", '')],

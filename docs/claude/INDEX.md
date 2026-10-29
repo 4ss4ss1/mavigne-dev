@@ -539,3 +539,4 @@
 | 483 | 483. ★★ COMPT-1 — LE COMPTEUR DES TRACTEURS AVANCE TOUT SEUL ; ON LE RELÈVE AU PASSAGE (29/10 — `src/tracte… | `docs/claude/chantiers-480-529.md` |
 | 484 | 484. ★★ COMPT-2 — LA RÉVISION SE RECALCULE ; LE COMPTEUR EXIGÉ AU DÉMARRAGE QUAND ÇA COMPTE (29/10 — `src/t… | `docs/claude/chantiers-480-529.md` |
 | 485 | 485. ★★ COMPT-3 — LA FICHE DU COMPTEUR, SUR ORDINATEUR (29/10 — `src/tracteur.js` (`_trUtc`, `_trJoursOuvre… | `docs/claude/chantiers-480-529.md` |
+| 486 | 486. ★★ COMPT-4 — LE COMPTEUR, LES FINITIONS (29/10 — `src/tracteur.js` (`_trFerie`, `_trRelCorriger`, `_re… | `docs/claude/chantiers-480-529.md` |

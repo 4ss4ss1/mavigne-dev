@@ -1,0 +1,45 @@
+{
+  "lot": "COMPT-4",
+  "section": "§486",
+  "base": "39924bfd62d36058a149a8d69d7f16b59e7f344c",
+  "inclut": [],
+  "date": "2026-10-29",
+  "tutos": {
+    "ok": true,
+    "empreinte": "26aff137ddbd09694170ebe1fb2ebb40aa6ae75815b0a262eaba5ff8303cf57b",
+    "date": "2026-10-29T19:06:58.973Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "6cc1ac748fbedbb444aa3a0b8784a7a6545a2bc661c5fcfded3846461260b11d",
+    "CLAUDE.md": "68e06c4bdb48bf4284a367bc5b729216ad258ab03bac51b7147ecfdef7da119c",
+    "docs/claude/INDEX.md": "f295e7d0334586ea4499dc8c96ee9e77e8c911f83f462c8bd1f2a6f242a158b7",
+    "docs/claude/chantiers-480-529.md": "30ac8c75038135433864618a5440c64e1ab106692fc2882fb5c1857b1ba02a0b",
+    "docs/claude/journal.md": "5646b4641b8c74913dbd2685ab3d2e4770b70daf5401a876d1005b016d9a695a",
+    "guide/06-tracteur.html": "ed3de496cbcf6cc477b38bb85129811146806a10d4c0d9a4338545e8b6e870cd",
+    "index.html": "79c861fb038cb4d596a52997ac3148b17a8c2d575121c1576fc47c1e4591931b",
+    "public/guide.html": "0ab7e91b7c4fa4a7e5d8f57798d86e9239d01e65c4dcc8b52c0cda412e8a818b",
+    "public/sw.js": "e39674f93faa5ddf3f0d0b4d2064ed66b79250067b677fdb995ecfea2e747f34",
+    "scripts/harnais-claude-md.mjs": "6f4458a7e6a8a43c890822b85a81e44364b548dae600fd87d319b9ce0b4d6677",
+    "scripts/mv-harnais-compt1.mjs": "41edfb38e30cf03f881bf6f00c4eb3bec257cfed6894a48d5964b492a7dd76a2",
+    "scripts/mv-harnais-compt3.mjs": "cba729c5ea7124673c149ec9dce95c48b47f3969667723fa13f698f85389c1bf",
+    "scripts/mv-harnais-liste.mjs": "92528d5dafd43cbae19799ddf73ea41c0f3f82d84ecc5a44f5b6d98c010f4c53",
+    "scripts/mv-harnais-pastilles.mjs": "6e9aacabeefe3c3bd95b4c66318d76e617111e4f23cff84e8091d7ace21996b1",
+    "scripts/mv-harnais-trac3.mjs": "3674d24a86067d95366f4e934f5cd07000e715f50947d13837bf7d51ead80292",
+    "scripts/mv-harnais-traux1b.mjs": "9be76e836ce27ea92e66156b47eeb074764e21294f8ebb994cff0f8d633b4303",
+    "scripts/tutos-couverture.json": "9d195b8fc971069fe1adf7d59679282308fadf140d09b452d178ce5d56d544bd",
+    "src/app.js": "33117bc431494baeb7fa4ffcaaa7849b8b913366487cc7e9ed8880d0132c3b15",
+    "src/pilotage.js": "1345968f1833bf946890df66d578fc03d764728c79752b8ccb830ee2d7f96acc",
+    "src/styles.css": "7897ec4e4e0b76780525549d9abc4b4186237768fa18d646b57824f0cfb89b92",
+    "src/tracteur.js": "4fe4483e23bc6f7edc29fc1ce1736ee1dcc091b814d8cefcfdd8d447ef8e4dab",
+    "src/utils.js": "f2e773ce4185651bda1f5358fef0b7cad4549a81ea07336d6b453c841861237b",
+    "src/whats-new.js": "c1b6377805db88fb6d4ee1492a28d281392f2eb3009a3c14a36c63798eb1c9b8",
+    "scripts/mv-harnais-compt4.mjs": "28353f66462e3ed1508fca2cdd4086973bd2f4db86b723c9cdaea5d33e3c839f"
+  }
+}

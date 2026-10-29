@@ -33,12 +33,12 @@ function jouer(S) {
   t('① le parc par urgence : au garage, révision dépassée, toute proche (≤ 50 h), le reste', ordre.every((x, i) => x > 0 && (i === 0 || x > ordre[i - 1])));
   t('① « révision dépassée de 18 h » (pas « dans −18 h ») ; « au garage · retour 2026-11-02 »', h.includes('2031 h · révision dépassée de 18 h') && h.includes('au garage · retour 2026-11-02') && !h.includes('dans -'));
   t('① un tracteur ouvre son entretien (la valeur lue dans data-tid)', h.includes('data-tid="b" onclick="switchTracOnglet(\'entretiens\');selectTracteur(this.dataset.tid)"'));
-  t('② la cuve : 240 / 1500 L, relevée le 2026-10-18, sous le seuil ; les heures du mois sans les traitements ni le mois d’avant', h.includes('240 / 1500 L · relevé le 2026-10-18') && h.includes('Sous le seuil') && h.includes('14.333333333333334 h de moteur'));
+  t('② la cuve : 240 / 1500 L, relevée le 2026-10-18, sous le seuil ; les heures du mois sans les traitements ni le mois d’avant', h.includes('240 / 1500 L · relevé le 2026-10-18') && h.includes('Sous le seuil') && h.includes('14.333333333333334 h de travail'));
   const B = monde(S, { parc: [] }); const hb = B.droite();
   t('② sans parc ni cuve : on le dit, rien d’inventé', hb.includes('Aucun tracteur au parc.') && hb.includes('Cuve non renseignée'));
   t('③ sur ordinateur, la grille : à gauche le reste, à droite la colonne collante ; la fiche et les pastilles cachées ; l’Entretien sans colonne',
     S.css.includes('#page-tracteur.active{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,360px);grid-auto-flow:row dense;') && S.css.includes('#page-tracteur.active > #trac-droite{display:block;grid-column:2;grid-row:span 20;position:sticky;')
-    && S.css.includes('#page-tracteur #trac-parc-pills,#page-tracteur #trac-panel-sessions > #trac-fiche{display:none!important;}') && S.css.includes('#page-tracteur.trac-ent-on > #trac-droite{display:none!important;}'));
+    && S.css.includes('#page-tracteur #trac-panel-sessions > #trac-fiche{display:none!important;}') && S.css.includes('#page-tracteur.trac-ent-on > #trac-droite{display:none!important;}'));
   t('③ la colonne se remplit à chaque rendu ; une session s’ouvre en feuille partout ; l’onglet Entretien marqué', S.tr.includes("if(_dr) _dr.innerHTML=_trDroiteHtml();") && S.tr.includes("const clk=canOpen?`onclick=\"openSessionDetail('${s.id}')\"") && S.tr.includes("_pgT.classList.toggle('trac-ent-on',_tracOnglet==='entretiens');")
     && S.html.includes('<aside class="trac-droite" id="trac-droite" aria-label="Le parc et le GNR"></aside>'));
   t('④ la liste joue ce fichier et sa contre-épreuve', S.liste.indexOf("mv-harnais-traux1b.mjs'") > 0 && S.liste.indexOf("mv-harnais-traux1b.mjs --contre'") > 0);

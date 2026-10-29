@@ -449,7 +449,8 @@ function _pilData(){
     var _kp = (typeof window!=='undefined' && window._trCompteur) ? window._trCompteur(t) : null;   // ★ COMPT-1 (§483) : le compteur estimé de tracteur.js, sinon le dernier relevé
     var hasComp = ((_kp || (t.compteur_h!=null && t.compteur_h!=='')) && t.revision_h!=null && t.revision_h!=='');
     var revReste = hasComp ? Math.round((Number(t.revision_h)-(_kp?_kp.h:Number(t.compteur_h)))*10)/10 : null;
-    return { id:t.id, nom:t.nom, traitementOnly:t.traitementOnly, rep:rep, lastCtrl:lastCtrl, sess:sess, sAdv:sAdv, revReste:revReste };
+    var _ep = (typeof window!=='undefined' && window._trRevEtat) ? window._trRevEtat(t) : null;   // ★ COMPT-4 (§486) : la date de l'intervalle
+    return { id:t.id, nom:t.nom, traitementOnly:t.traitementOnly, rep:rep, lastCtrl:lastCtrl, sess:sess, sAdv:sAdv, revReste:revReste, revDate:(_ep&&_ep.date)||null, revJours:_ep?_ep.jours:null };
   });
   var nRepar = tracs.filter(function(t){ return t.rep; }).length;
 
@@ -1020,8 +1021,8 @@ function _pilPanelTracteur(d){
     var sub='';
     if(s.trac_revision){
       if(t.revReste!=null){ var col=t.revReste<=50?'var(--rouge)':t.revReste<=120?'var(--orange)':'var(--vert-med)';
-        sub += '<div class="pil-li-s" style="color:'+col+';font-weight:600">'+(t.revReste<0?'Révision dépassée de '+_pilNum(-t.revReste):'Révision dans '+_pilNum(t.revReste))+' h</div>';   // ★ COMPT-1 (§483) : plus de « dans −n h »
-      } else { sub += '<div class="pil-li-s" style="opacity:.6">Révision : à renseigner</div>'; }
+        sub += '<div class="pil-li-s" style="color:'+col+';font-weight:600">'+(t.revReste<0?'Révision dépassée de '+_pilNum(-t.revReste):'Révision dans '+_pilNum(t.revReste))+' h'+(t.revDate?(t.revJours<0?' \u00b7 date dépassée':' \u00b7 ou le '+((typeof window!=='undefined'&&window._trDateAn)?window._trDateAn(t.revDate):t.revDate)):'')+'</div>';   // ★ COMPT-1 (§483) : plus de « dans −n h »
+      } else if(t.revDate){ sub += '<div class="pil-li-s" style="color:'+(t.revJours<0?'var(--rouge)':t.revJours<=30?'var(--orange)':'var(--vert-med)')+';font-weight:600">'+(t.revJours<0?'Révision : date dépassée':'Révision le '+((typeof window!=='undefined'&&window._trDateAn)?window._trDateAn(t.revDate):t.revDate))+'</div>'; } else { sub += '<div class="pil-li-s" style="opacity:.6">Révision : à renseigner</div>'; }
     }
     if(s.trac_controle){ sub += '<div class="pil-li-s">Dernier contrôle : '+(t.lastCtrl?_pilDfr(t.lastCtrl):'jamais')+'</div>'; }
     if(s.trac_intercep && t.sess && t.sAdv<100){ var isI=/intercep/i.test(t.sess.activite||''); sub += '<div class="pil-li-s" style="color:var(--acier-med)">'+(isI?'✂️':'🚜')+' '+_pilEsc(t.sess.activite||'Session')+' · '+t.sAdv+' %</div>'; }

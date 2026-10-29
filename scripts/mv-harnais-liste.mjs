@@ -831,6 +831,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-compt2.mjs --contre'],
   ['node scripts/mv-harnais-compt3.mjs'],              // COMPT-3 (§485) : la fiche du compteur sur ordinateur — appris, courbe, relevés et leur écart, Écarter / Rétablir
   ['node scripts/mv-harnais-compt3.mjs --contre'],
+  ['node scripts/mv-harnais-compt4.mjs'],              // COMPT-4 (§486) : corriger, jours fériés, la date partout, « Plein fait », la bande retirée, heures de travail
+  ['node scripts/mv-harnais-compt4.mjs --contre'],
   ['node scripts/mv-harnais-tete3d.mjs'],              // TETE-3D (§482) : la bande campagne/date sous l'en-tête retrouve sa forme (TETE-1 et TETE-2 la visent), blanche ; test:ux la garde au rendu
   ['node scripts/mv-harnais-tete3d.mjs --contre'],
   ['node scripts/mv-harnais-ecart1.mjs'],              // ECART-1 (§460) : l'écart au barème d'Aujourd'hui › Économie en heures — la tuile est le total de la carte (un tiret sans rien à comparer), barres à l'échelle jusqu'à ±50 %

@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.38', d: '2026-10-29', items: [
+    { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'tracteur', titre: 'Le compteur des tracteurs, les finitions',
+      desc: "Dans la fiche du compteur, l’administrateur peut «\u00a0Corriger\u00a0» un relevé faux\u00a0: le bon chiffre, entre le relevé d’avant et celui d’après. Le repère de révision saute les jours fériés. La date de la prochaine révision s’affiche aussi dans le Pilotage, à l’accueil et dans le rapport de saison. La fiche d’entretien «\u00a0Plein fait\u00a0» demande le compteur, comme le bouton «\u00a0Plein\u00a0» — et seulement pour un tracteur suivi. Les «\u00a0heures de moteur\u00a0» s’appellent désormais «\u00a0heures de travail\u00a0» : ce sont les heures notées par les sessions, pas le cadran." },
+  ] },
   { v: '10.37', d: '2026-10-29', items: [
     { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'tracteur', titre: 'Sur ordinateur, la fiche du compteur',
       desc: "Dans l’Entretien d’un tracteur, sous la révision\u00a0: ce que Ma Vigne a appris (l’écart de la route et du ralenti, le rythme au compteur, un repère de révision), la courbe des relevés jusqu’à aujourd’hui, et les dix derniers relevés avec leur écart à l’estimé — on voit si l’estimation tient. Un chiffre faux\u00a0? L’administrateur l’écarte\u00a0: il reste écrit, barré, et ne compte plus\u00a0; «\u00a0Rétablir\u00a0» le remet." },

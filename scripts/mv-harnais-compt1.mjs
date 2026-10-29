@@ -119,7 +119,7 @@ if (!CONTRE) {
     ['la question revient plusieurs fois par jour', m('tr', 'if((t.releves||[]).some(function(r){ return r&&!r.manque&&r.d===auj; })) return;', '')],
     ['l’entraînement demande un compteur', m('tr', '    if(window.__MV_TUTO) return;', '')],
     ['une feuille seulement regardée demande un relevé', m('tr', "if(dou==='feuille'&&_trSdAvant===JSON.stringify(s.parcellesFaites||[])) return;", '')],
-    ['le plein ne demande plus le compteur', m('tr', "_relOuvrir(t.id,'plein',", "_relOuvrirX(t.id,'plein',")],
+    ['le plein ne demande plus le compteur', m('tr', "_relOuvrir(t.id,'plein',function(h){ _trPleinH=h;", "_relOuvrirX(t.id,'plein',function(h){ _trPleinH=h;")],
     ['la liste du Pilotage écrit « dans −n h »', m('pil', "(t.revReste<0?'Révision dépassée de '+_pilNum(-t.revReste):'Révision dans '+_pilNum(t.revReste))", "'Révision dans '+_pilNum(t.revReste)")],
     ['la liste ne joue plus ce fichier', (S) => Object.assign({}, S, { liste: S.liste.split("mv-harnais-compt1.mjs'").join("mv-harnais-comptZ.mjs'") })],
   ];

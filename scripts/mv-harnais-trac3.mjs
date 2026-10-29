@@ -42,7 +42,7 @@ if (CONTRE) {
     ['le chrono est ignoré', 'tr', "var m=_chrMes(x); if(m>0){ mes+=m; return; }", 'var m=0;', 0],
     ['le défaut passe à 5 L/h', 'tr', "var c=(e.conso_gnr_lh!=null&&e.conso_gnr_lh!=='')?Number(e.conso_gnr_lh):6; return isFinite(c)&&c>0?c:6;", "var c=(e.conso_gnr_lh!=null&&e.conso_gnr_lh!=='')?Number(e.conso_gnr_lh):5; return isFinite(c)&&c>0?c:5;", 1],
     ['la consommation réglée est ignorée', 'tr', "var c=(e.conso_gnr_lh!=null&&e.conso_gnr_lh!=='')?Number(e.conso_gnr_lh):6;", 'var c=6;', 1],
-    ['la bande perd sa quatrième case', 'html', ' <div class="mvu-kpi"><div class="mvu-kpi-v" id="trac-stat-h">0</div><div class="mvu-kpi-l">Heures de moteur</div></div>', '', 3],
+    ['la bande perd sa quatrième case', 'html', ' <div class="mvu-kpi"><div class="mvu-kpi-v" id="trac-stat-h">0</div><div class="mvu-kpi-l">Heures de travail</div></div>', '', 3],
     ['une couleur écrite en dur dans le bloc', 'css', '#page-tracteur .trac-new:hover{ background:var(--accent-survol); }', '#page-tracteur .trac-new:hover{ background:#6A2246; }', 5],
     ['le bouton flottant reste sur ordinateur', 'css', '  #trac-fab{ display:none!important; }\n', '', 6],
     ['le harnais sort de la liste', 'liste', "['node scripts/mv-harnais-trac3.mjs'],", '', 8]

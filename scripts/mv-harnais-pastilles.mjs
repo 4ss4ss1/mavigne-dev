@@ -36,7 +36,7 @@ const EXEMPTIONS = [
 ];
 const PLAFOND_MAIN = 56;   // CHARTE-4c (§378) : les pastilles faites à la main (petit bloc arrondi dont le fond, une marge de 0 à 3 px et la taille
                          //   du texte sont écrits sur place) — relevé après en avoir rendu 34 au jeu ; ne peut que baisser (F)
-const PLAFOND = 90;   // CHARTE-4a (§374) : relevé au premier passage (92) ; ne peut que baisser. CHARTE-4b (§377) : 92 → 91. JEQ-1 (§421) : 91 → 90 (le compteur de la barre)
+const PLAFOND = 88;   // CHARTE-4a (§374) : relevé au premier passage (92) ; ne peut que baisser. CHARTE-4b (§377) : 92 → 91. JEQ-1 (§421) : 91 → 90 (le compteur de la barre). COMPT-4 (§486) : 90 → 88 (.tpc-pill et .trac-parc-pill, partis avec la bande des pastilles)
 const ALLURE = /^(background(-color|-image)?|color|border(-(color|width|style|radius|top|bottom|left|right))?|box-shadow|font|font-(size|weight|family)|padding(-[a-z]+)?|height|min-height|line-height|text-transform|letter-spacing)$/;
 const sansCom = s => s.replace(/\/\*[\s\S]*?\*\//g, '');
 const porte = (sel, c) => new RegExp('\\.' + c.replace(/-/g, '\\-') + '(?![\\w-])').test(sel.replace(/:not\([^)]*\)/g, ''));
