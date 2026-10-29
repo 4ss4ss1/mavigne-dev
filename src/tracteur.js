@@ -1516,6 +1516,34 @@ function _tFeuille(ouvrir){ document.body.classList.toggle('t-feuille-ouverte', 
 function _tFiltresEffacer(){ window.fCond='tous'; window.fAct='toutes'; renderTracteur(); }
 function _tCherche(v){ window.fTracQ=String(v||''); renderTracteur(); }
 window._trTerminer=_trTerminer; window._tFeuille=_tFeuille; window._tFiltresEffacer=_tFiltresEffacer; window._tCherche=_tCherche;
+// ★ TRAC-UX-1B (§481) — SUR ORDINATEUR, LA COLONNE DE DROITE (docs/maquettes/maquette-ux-v2.html, Tracteur ; décision de Nico, 28/10) :
+//   le parc rangé par urgence — au garage, révision dépassée ou toute proche, le reste — et la cuve de GNR, avec les heures de moteur du
+//   mois. Les mêmes données qu'ailleurs, rien d'inventé ; un tracteur ouvre son entretien. Elle remplace la fiche de session (TRAC-1),
+//   qui s'ouvre en feuille comme au téléphone.
+function _trParcEtat(t){
+  var rep=REPARATEUR[t.id];
+  if(rep){ var r=rep.prevu_retour||''; return { rang:0, txt:r?('au garage \u00b7 retour '+_fmtDate(r)):'au garage', badge:_mvBadge('Au garage','rouge') }; }
+  var comp=t.compteur_h, rev=t.revision_h, aComp=(comp!=null&&comp!=='');
+  if(!aComp||rev==null||rev==='') return { rang:3, txt:(aComp?_gnrNum(comp)+' h \u00b7 ':'')+'r\u00e9vision \u00e0 renseigner', badge:_mvBadge('En service','neutre') };
+  var reste=Number(rev)-Number(comp);
+  if(reste<0) return { rang:1, txt:_gnrNum(comp)+' h \u00b7 r\u00e9vision d\u00e9pass\u00e9e de '+_gnrNum(-reste)+' h', badge:_mvBadge('Entretien','rouge') };
+  return { rang:reste<=50?1:(reste<=120?2:3), txt:_gnrNum(comp)+' h \u00b7 r\u00e9vision dans '+_gnrNum(reste)+' h', badge:_mvBadge(reste<=50?'Entretien':'En service', reste<=50?'rouge':(reste<=120?'ambre':'neutre')) };
+}
+function _trDroiteHtml(){
+  var parc=(TRACTEURS_LIST||[]).map(function(t,i){ return { t:t, i:i, e:_trParcEtat(t) }; }).sort(function(a,b){ return (a.e.rang-b.e.rang)||(a.i-b.i); });
+  var h='<section class="trd-sec"><h3 class="trd-t">Le parc</h3>'+(parc.length?parc.map(function(x){
+      return '<button type="button" class="trd-l" data-tid="'+_escAttr(x.t.id)+'" onclick="switchTracOnglet(\'entretiens\');selectTracteur(this.dataset.tid)"><span class="trd-n">'+_escHtml(x.t.nom)+'</span><span class="trd-s">'+_escHtml(x.e.txt)+'</span>'+x.e.badge+'</button>';
+    }).join(''):'<div class="trd-rien">Aucun tracteur au parc.</div>')+'</section>';
+  var g=(window.CONFIG&&window.CONFIG.gnr)||null;
+  h+='<section class="trd-sec"><h3 class="trd-t">GNR</h3>';
+  if(g&&Number(g.capacite)>0){
+    var niv=Number(g.niveau)||0, bas=(g.seuil!=null&&g.seuil!==''&&niv<=Number(g.seuil));
+    h+='<div class="trd-l trd-fixe"><span class="trd-n">Cuve</span><span class="trd-s">'+_gnrNum(niv)+' / '+_gnrNum(g.capacite)+' L'+(g.maj?' \u00b7 relev\u00e9 le '+_fmtDate(g.maj):'')+'</span>'+(bas?_mvBadge('Sous le seuil','ambre'):'')+'</div>';
+  } else h+='<div class="trd-rien">Cuve non renseign\u00e9e (Entretien \u203a GNR).</div>';
+  var mois=String(_gnrTodayISO()).slice(0,7), min=(SESSIONS||[]).filter(function(s){ return s.type!=='traitement'&&String(s.date||'').slice(0,7)===mois; }).reduce(function(a,s){ return a+(_trMinutes(s).total||0); },0);
+  if(min>0) h+='<div class="trd-l trd-fixe"><span class="trd-n">Ce mois</span><span class="trd-s">'+_escHtml(_trHeuresFr(min/60))+' de moteur</span></div>';
+  return h+'</section>';
+}
 function renderTracteur(){
   // Init sélection tracteur au premier render
   if(!_tracSelId&&TRACTEURS_LIST.length)_tracSelId=TRACTEURS_LIST[0].id;
@@ -1534,6 +1562,7 @@ function renderTracteur(){
 
   // Render pills parc tracteurs en en-tête
   renderTracParcPills();
+  var _dr=document.getElementById('trac-droite'); if(_dr) _dr.innerHTML=_trDroiteHtml();   // ★ TRAC-UX-1B (§481) : le parc et le GNR, à droite sur ordinateur
 
   // FAB visible si tractoriste + onglet sessions
   var fab=document.getElementById('trac-fab');
@@ -1550,6 +1579,7 @@ function renderTracteur(){
   // ── Onglet actif : s'assurer du bon état ──
   document.getElementById('trac-panel-sessions').style.display=_tracOnglet==='sessions'?'':'none';
   document.getElementById('trac-panel-entretiens').style.display=_tracOnglet==='entretiens'?'':'none';
+  var _pgT=document.getElementById('page-tracteur'); if(_pgT) _pgT.classList.toggle('trac-ent-on',_tracOnglet==='entretiens');   // ★ TRAC-UX-1B (§481) : l'Entretien garde sa propre mise en page (machines à gauche, révision à droite)
   var btnS=document.getElementById('trac-ong-sessions');
   var btnE=document.getElementById('trac-ong-entretiens');
   if(btnS)btnS.classList.toggle('active',_tracOnglet==='sessions');
@@ -1664,7 +1694,7 @@ function renderTracteur(){
     const canOpen=(isTractoriste()&&isEnc)||isAdm;
     // TRAC-1 (§282) : sur ordinateur, toucher une session la CHOISIT (sa fiche s'ouvre à droite) ; la fiche porte le bouton
     //   qui ouvre la feuille de travail (chrono, parcelles). Au téléphone, rien ne change.
-    const clk=_trDesk()?`onclick="_trSel('${s.id}')" style="cursor:pointer" data-sid="${s.id}" aria-selected="${s.id===_trSelId}"`:(canOpen?`onclick="openSessionDetail('${s.id}')" style="cursor:pointer"`:'');
+    const clk=canOpen?`onclick="openSessionDetail('${s.id}')" style="cursor:pointer" data-sid="${s.id}"`:'';   // ★ TRAC-UX-1B (§481) : sur ordinateur aussi, la session s'ouvre en feuille — la colonne de droite porte le parc et le GNR
     const editBtn=isAdm?`<button class="mv-gh sc-edit-btn" onclick="event.stopPropagation();openEditSession('${s.id}')" title="Modifier" aria-label="Modifier">${_mvIcon('crayon',18)}</button>`:'';
     const encCls=isEnc?' scard-enc':'';
     // Badge tracteur
@@ -2324,11 +2354,7 @@ function _trFicheSync(liste){
   _trMarque(_trSelId);
   el.innerHTML=_trFicheHtml(SESSIONS.find(function(x){return x.id===_trSelId;}));
 }
-function _trSel(id){
-  if(!_trDesk()){ openSessionDetail(id); return; }
-  _trSelId=id; _trMarque(id);
-  var el=document.getElementById('trac-fiche'); if(el)el.innerHTML=_trFicheHtml(SESSIONS.find(function(x){return x.id===id;}));
-}
+// ★ TRAC-UX-1B (§481) : _trSel retirée — sur ordinateur aussi, toucher une session ouvre sa feuille (openSessionDetail).
 function _trFicheHtml(s){
   if(!s)return '<div class="trf-vide"><b>Choisissez une session</b><span>Sa fiche s\u2019ouvre ici.</span></div>';
   var isEnc=s.statut==='En cours', canOpen=(isTractoriste()&&isEnc)||isAdmin(), pct=Number(s.avancement)||0, skip=s.parcellesSkip||[];
@@ -2353,7 +2379,7 @@ function _trFicheHtml(s){
   h+='<section class="trf-sec"><div class="trf-sec-t">Note</div><p class="trf-note">'+(s.note?_escHtml(s.note):'<span class="trf-rien">Aucune note sur cette session.</span>')+'</p></section>';
   return h;
 }
-window._trSel=_trSel;
+
 if(window.matchMedia)window.matchMedia('(min-width:1024px)').addEventListener('change',function(){ try{ if(window._dataReady)renderTracteur(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/_trDesk'); } });
 
 // ── TRAC-2 (§283) : SUR ORDINATEUR, L'ENTRETIEN SUR DEUX COLONNES (maquette v6) ──

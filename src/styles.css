@@ -3814,6 +3814,29 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
   #page-tracteur #trac-fab{bottom:calc(env(safe-area-inset-bottom,0px) + 72px + 72px)!important;}
   #page-tracteur #trac-panel-sessions{padding-bottom:calc(var(--e-8,40px) * 6)!important;}   /* la barre, le « + » et 90 px de marge sous la liste */
 }
+/* ★ TRAC-UX-1B (§481) — maquette-ux-v2, Tracteur, sur ordinateur : la session en cours, les compteurs et la liste à gauche ; le parc
+   et le GNR à droite, collants (décision de Nico, 28/10 : ils remplacent la fiche de session, qui s'ouvre en feuille). */
+.trac-droite{display:none;}
+@media (min-width:1024px){
+  #page-tracteur.active{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,360px);grid-auto-flow:row dense;column-gap:var(--e-6,24px);align-items:start;}
+  #page-tracteur.active > *{grid-column:1;min-width:0;}
+  #page-tracteur.active > .mod-header,#page-tracteur.active > .mod-meta-row{grid-column:1 / -1;}
+  #page-tracteur.active > #trac-droite{display:block;grid-column:2;grid-row:span 20;position:sticky;top:var(--e-4,16px);margin-top:var(--e-3,12px);max-height:calc(100vh - var(--e-8,40px));overflow:auto;}
+  #page-tracteur #trac-parc-pills,#page-tracteur #trac-panel-sessions > #trac-fiche{display:none!important;}
+  #page-tracteur #trac-panel-sessions{display:block!important;}
+  #page-tracteur.active.trac-ent-on{display:block;}
+  #page-tracteur.trac-ent-on > #trac-droite{display:none!important;}
+}
+.trd-sec{padding:var(--e-4,16px);border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-lg,12px);background:var(--bg-card,#FFFFFF);}
+.trd-sec + .trd-sec{margin-top:var(--e-3,12px);}
+.trd-t{margin:0 0 var(--e-2,8px);font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux,#686660);}
+.trd-l{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:var(--e-2,8px);align-items:center;width:100%;min-height:44px;padding:var(--e-2,8px) 0;border:0;border-top:1px solid var(--ligne,#E7E6E2);background:none;text-align:left;color:var(--texte,#1B1A18);font:inherit;cursor:pointer;}
+.trd-l:first-of-type{border-top:0;}
+.trd-l.trd-fixe{cursor:default;}
+.trd-n{grid-column:1;font-weight:600;}
+.trd-s{grid-column:1;font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
+.trd-l > .mvpas,.trd-l > span:last-child:not(.trd-s):not(.trd-n){grid-column:2;grid-row:1 / span 2;}
+.trd-rien{font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
 /* ★ FILTRE-1B (§477) — Parcelles au téléphone, le même patron : les compteurs restent en tête ; l'état, les tâches et Liste / Carte
    passent dans la feuille « Filtres » (celle d'ARRIVEE-4, pour tous désormais) ; la recherche et « Filtres » en barre basse. Sur la
    carte, Liste / Carte revient en haut (la barre vit dans la liste). Sur ordinateur, rien ne bouge. */

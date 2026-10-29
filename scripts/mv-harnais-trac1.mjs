@@ -26,13 +26,13 @@ function suite(S) {
   T('la fiche : activité (échappée), conducteur, tracteur, dates, état', a.includes('Rognage &lt;2&gt;') && !a.includes('Rognage <2>') && a.includes('Paul') && a.includes('John Deere') && a.includes('[En cours]'));
   T('surface faite pondérée (1,5 ha sur 3,5 ha, la parcelle désactivée et l’arrachée exclues), parcelles 2 sur 3', a.includes('1,5<small>\u00a0ha sur 3,5\u00a0ha') && a.includes('2<small>\u00a0sur 3</small>'));
   T('le bouton suit le droit : tractoriste sur une session en cours → « Enregistrer l’avancement » ; terminée sans être admin → rien ; admin → « Ouvrir la session »', a.includes('Enregistrer l\u2019avancement') && !b.includes('openSessionDetail') && c.includes('Ouvrir la session'));
-  T('sur ordinateur, toucher une session la choisit ; au téléphone, elle ouvre toujours la feuille de travail', S.tr.includes("const clk=_trDesk()?`onclick=\"_trSel('${s.id}')\"") && S.tr.includes("function _trSel(id){\n  if(!_trDesk()){ openSessionDetail(id); return; }"));
+  T('sur ordinateur comme au téléphone, toucher une session ouvre sa feuille (TRAC-UX-1B, §481 : la colonne de droite porte le parc et le GNR)', S.tr.includes("const clk=canOpen?`onclick=\"openSessionDetail('${s.id}')\"") && !S.tr.includes('function _trSel('));
   T('la fiche suit la liste affichée (et une liste vide montre l’invite)', S.tr.includes("if(_trDesk())_trFicheSync(dataEnc.concat(dataTer));   // TRAC-1 (§282)") && S.tr.includes("if(_trDesk())_trFicheSync([]);   // TRAC-1 (§282)"));
-  T('la page a sa colonne de fiche, et _trSel est joignable', S.html.includes('<aside class="trf" id="trac-fiche"') && S.tr.includes('window._trSel=_trSel;'));
+  T('la page garde sa colonne de fiche (cachée sur ordinateur depuis TRAC-UX-1B, §481)', S.html.includes('<aside class="trf" id="trac-fiche"'));
   T('le bloc TRAC-1 est posé après PLAN-3, par jetons seulement (' + dur.length + ')', B.length > 4000 && S.css.indexOf('★ TRAC-1 (§282)') > S.css.indexOf('★ FIN PLAN-3') && dur.length === 0);
   T('deux colonnes sur ordinateur, fiche collante ; l’invite au doigt cachée sur ordinateur', B.includes('#page-tracteur #trac-panel-sessions{ display:grid; grid-template-columns:minmax(0,1fr) var(--l-fiche,440px);') && B.includes('#page-tracteur .scard-enc-hint{ display:none!important; }'));
   T('la carte en cours lisible sur fond clair (date, conducteur, surface)', B.includes('#page-tracteur .sc-date{ color:var(--texte-doux)!important; }') && B.includes('#page-tracteur .sc-blbl span{ color:var(--texte-doux)!important; }'));
-  T('l’aide et les nouveautés disent la fiche sur ordinateur', S.uti.includes("['Sur un ordinateur', \"toucher une session la choisit") && S.uti.includes("titre: 'Tracteur : les sessions en liste et fiche'"));
+  T('l’aide dit l’ordinateur de TRAC-UX-1B (§481) ; les nouveautés gardent celle de TRAC-1', S.uti.includes("['Sur un ordinateur', \"la session en cours, les compteurs et la liste sont à gauche ; à droite, le parc") && S.uti.includes("titre: 'Tracteur : les sessions en liste et fiche'"));
   T('ce harnais est branché dans la liste des contrôles', S.liste.includes("['node scripts/mv-harnais-trac1.mjs'],") && S.liste.includes("['node scripts/mv-harnais-trac1.mjs --contre'],"));
   return out;
 }
@@ -45,7 +45,7 @@ if (CONTRE) {
     ['l’activité n’est plus échappée', 'tr', "<h2 class=\"trf-t\">'+_escHtml(s.activite)+'</h2>", "<h2 class=\"trf-t\">'+s.activite+'</h2>", 0],
     ['la parcelle désactivée compte dans la surface', 'tr', "var actives=PARCELLES.filter(function(p){return p.statut!=='Arrachee'&&skip.indexOf(p.nom)<0;});\n  var done=", "var actives=PARCELLES.filter(function(p){return p.statut!=='Arrachee';});\n  var done=", 1],
     ['le bouton s’affiche sans le droit', 'tr', "var isEnc=s.statut==='En cours', canOpen=(isTractoriste()&&isEnc)||isAdmin(),", "var isEnc=s.statut==='En cours', canOpen=true,", 2],
-    ['au téléphone, toucher choisit au lieu d’ouvrir', 'tr', "  if(!_trDesk()){ openSessionDetail(id); return; }\n", '', 3],
+    ['sur ordinateur, toucher ne rouvre plus la feuille (TRAC-UX-1B, §481)', 'tr', "const clk=canOpen?`onclick=\"openSessionDetail('${s.id}')\"", "const clk=canOpen?`onclick=\"_trChoisir('${s.id}')\"", 3],
     ['la fiche ne suit plus la liste', 'tr', "if(_trDesk())_trFicheSync(dataEnc.concat(dataTer));   // TRAC-1 (§282)", '', 4],
     ['une couleur écrite en dur dans le bloc', 'css', '#page-tracteur .sc-date{ color:var(--texte-doux)!important; }', '#page-tracteur .sc-date{ color:#6E6C66!important; }', 6],
     ['l’invite au doigt reste sur ordinateur', 'css', '#page-tracteur .scard-enc-hint{ display:none!important; }', '', 7],

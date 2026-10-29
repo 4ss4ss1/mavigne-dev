@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.33', d: '2026-10-28', items: [
+    { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'tracteur', titre: 'Tracteur sur ordinateur : le parc et le GNR à droite',
+      desc: "Sur ordinateur, la session en cours, les compteurs et la liste sont à gauche\u00a0; à droite, le parc — au garage, révision dépassée ou toute proche d’abord — et la cuve de GNR, avec les heures de moteur du mois. Toucher une session ouvre sa feuille, comme au téléphone\u00a0; toucher un tracteur ouvre son entretien. L’onglet Entretien garde sa mise en page." },
+  ] },
   { v: '10.32', d: '2026-10-28', items: [
     { niv: 0, pour: ['tous'], emoji: 'tracteur', titre: 'Tracteur : la session en cours en tête, et « Terminer »',
       desc: "La session en cours passe tout en haut, avant les compteurs, avec deux boutons\u00a0: «\u00a0Enregistrer l’avancement\u00a0» et, nouveau, «\u00a0Terminer\u00a0» — la session se ferme aujourd’hui, les parcelles pas faites restent à faire, et «\u00a0Annuler\u00a0» rattrape pendant six secondes. Les compteurs tiennent sur une ligne, sans leurs zéros. Au téléphone, les conducteurs et les activités sont dans «\u00a0Filtrer\u00a0», en bas, avec une recherche\u00a0; le «\u00a0+\u00a0» ne cache plus la dernière session." },

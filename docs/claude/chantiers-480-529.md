@@ -28,3 +28,27 @@ Le premier lot après la Phase 1 du plan, dessiné dans `docs/maquettes/maquette
 ### 480e. Ce qui reste ouvert
 - **TRAC-UX-1B** : l’ordinateur — la session en cours et la liste à gauche, le parc (heures, prochain entretien) et le GNR (cuve, consommation) à droite ; la fiche de session s’ouvrira en feuille, comme au téléphone.
 - **À vérifier chez Nico et chez un tractoriste, au téléphone** : la carte en tête, « Terminer » puis « Annuler », la recherche, « Filtrer », le « + » qui ne cache plus la dernière session.
+
+## 481. ★★ TRAC-UX-1B — LE TRACTEUR SUR ORDINATEUR : LE PARC ET LE GNR À DROITE, LA SESSION EN FEUILLE (28/10 — `src/tracteur.js` (`_trParcEtat`, `_trDroiteHtml` ; le clic des sessions ; `_trSel` retirée) · `src/styles.css` · `index.html` (`#trac-droite`) · `src/utils.js` (l’aide du Tracteur, APP 10.33) · `guide/06-tracteur.html` · `src/whats-new.js` · `public/sw.js` (SW 11.14) · `scripts/mv-harnais-traux1b.mjs` (neuf) · `scripts/mv-harnais-trac1.mjs` · `scripts/tutos-couverture.json` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-480-529.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/TRAC-UX-1B.json` · base `faaf11a`)
+
+### 481a. D’où ça vient
+La seconde moitié de TRAC-UX-1 (§480a) : sur ordinateur, `docs/maquettes/maquette-ux-v2.html` met la session en cours à gauche, le parc et l’entretien à droite, « mêmes données qu’aujourd’hui, rangées par ordre d’urgence : ce qui tourne, ce qui doit passer à l’atelier, ce qui se vide ». Décision de Nico (28/10) : **comme la maquette** — la colonne de droite remplace la fiche de session de TRAC-1 (§282).
+
+### 481b. Ce qui change (à partir de 1 024 px ; au téléphone, rien)
+- **La grille** : la page Tracteur en deux colonnes — à gauche la session en cours, les compteurs, la recherche et la liste ; à droite `#trac-droite`, collante. Les pastilles du parc et la fiche de session sont cachées ; **l’onglet Entretien garde sa propre mise en page** (`trac-ent-on` : machines et cuve à gauche, révision à droite), sans la colonne.
+- **Le parc** (`_trParcEtat`, `_trDroiteHtml`) rangé par urgence — au garage (et la date de retour), révision dépassée ou à 50 h ou moins, à 120 h ou moins, le reste ; l’ordre du parc à égalité. Chaque ligne : le tracteur, ses heures, « révision dans n h » ou ★ **« révision dépassée de n h »**, un badge ; un appui ouvre son entretien.
+- **Le GNR** : la cuve (niveau / capacité, relevée le …, « Sous le seuil ») et les heures de moteur du mois (les sessions du mois, hors traitements). La maquette dit aussi les litres et le prix du mois : les appoints vivent dans `paie` (lecture admin seule) et les litres par mois ne sont pas tenus — rien d’inventé.
+- **Une session s’ouvre en feuille partout** (`openSessionDetail`) ; `_trSel`, sans appelant, retirée. **TRAC-1 suit** (`scripts/mv-harnais-trac1.mjs`) : son assertion du clic et celle de l’aide réécrites, sa contre-épreuve vise le geste neuf (8/8). L’aide du Tracteur (`MV_AIDE`, « Sur un ordinateur ») réécrite.
+
+### 481c. Vu en route — les pastilles du parc ne passaient jamais au rouge
+`renderTracParcPills` calculait `rc` en 'bad' / 'warn' / 'ok' puis choisissait la couleur sur 'urg' / 'soon' : toujours neutre. Et une révision dépassée s’écrivait « Révision dans −18 h ». La colonne de droite le dit juste ; les pastilles, cachées partout désormais, n’ont pas été retouchées (à retirer si rien ne les rappelle).
+
+### 481d. Mesuré
+- `mv-harnais-traux1b` : 8 assertions — le parc et le GNR JOUÉS (l’ordre d’urgence, « dépassée de 18 h », « au garage · retour », l’entretien d’un appui, la cuve et son seuil, les heures du mois sans les traitements ni le mois d’avant, l’absence dite), la grille, l’Entretien sans colonne, le remplissage, le clic ; **6/6 mutants**.
+- Chaîne (583 commandes) : la contre-épreuve du contrôle des tutos (« un geste nouveau sans tuto ») restait verte — `_trSel` retirée, les gestes sans tuto sont passés de 806 à 805, un cran sous le plafond ; le contrôle le demandait lui-même : **le plafond descend à 805** (`scripts/tutos-couverture.json`), le cliquet mord de nouveau. Plus `build-guide --check`, attendu.
+- `test:ux` et tutos : voir la note de livraison.
+
+### 481e. Ce qui reste ouvert
+- Les pastilles du parc (`renderTracParcPills`) : cachées partout, à retirer avec leur code.
+- **CAVE-UX-1**, le lot suivant du plan.
+- **À vérifier chez Nico, sur son PC** : la colonne de droite, l’ordre du parc, un appui sur un tracteur, l’onglet Entretien, une session ouverte en feuille.

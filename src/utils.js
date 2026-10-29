@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.32';
+export const APP_VERSION = '10.33';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2347,7 +2347,7 @@ var MV_AIDE = {
       ['La tarière préremplie', " : une activité qui alimente les trous de l’entreplantation propose, pour chaque parcelle cochée, le nombre de pieds marqués au repérage — confirmez, ou corrigez avant de valider."],
       ['À deux', " : pour la tarière, l’ensemencement et l’engrais, la nouvelle session propose un <b>coéquipier</b>, choisi avec l’activité ; il apparaît dans la fiche de la session. L’admin règle quelles activités se font à deux (réglages du tracteur, « Se fait à deux »)."],
       ['Pourquoi ?', " : dans la fiche d’une session, la pastille <b>« Pourquoi ? »</b> sous l’activité explique pourquoi on la fait : rognage, labour, tarière, engrais, ensemencement, traitements."],
-      ['Sur un ordinateur', "toucher une session la choisit : sa fiche s’ouvre à droite — avancement, surface, parcelles, note. Le bouton de la fiche ouvre la feuille de travail (chrono, parcelles), comme un appui au téléphone. Dans l’Entretien, les machines et la cuve de GNR passent à gauche, la révision et les derniers contrôles à droite."],
+      ['Sur un ordinateur', "la session en cours, les compteurs et la liste sont à gauche ; à droite, le parc (au garage, révision dépassée ou proche d’abord) et la cuve de GNR, avec les heures de moteur du mois. Toucher une session ouvre sa feuille, comme au téléphone ; toucher un tracteur ouvre son entretien. Dans l’Entretien, les machines et la cuve de GNR passent à gauche, la révision et les derniers contrôles à droite."],
       ['Heures et GNR d’une session', "les heures viennent du chrono quand il a mesuré la parcelle, sinon du barème de l’activité (h/ha × surface) ; la fiche dit lesquelles. Le GNR est ces heures fois la consommation réglée dans Réglages, 6 L par heure tant qu’elle ne l’est pas — la même valeur que le Pilotage. La bande du haut fait le total de la saison."],
       ['Une session \u00ab Amendement \u00bb', "coche la t\u00e2che \u00ab Amendement \u00bb de chaque parcelle faite, marqu\u00e9e \u00ab faite au tracteur \u00bb dans le journal. Le temps compt\u00e9 est celui de la session, pas une journ\u00e9e d\u2019\u00e9quipe. L\u2019amendement lui-m\u00eame se pr\u00e9pare dans Phyto \u203a Fertilisation."],
       ['Onglet Sessions', ": le travail fait avec la machine. Onglet Entretien : révisions, réparations, appoints de cuve."],

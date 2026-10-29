@@ -1,0 +1,38 @@
+{
+  "lot": "TRAC-UX-1B",
+  "section": "§481",
+  "base": "faaf11a9824ccfd502b5cb2b5fe2c1c300aa9fa4",
+  "inclut": [],
+  "date": "2026-10-29",
+  "tutos": {
+    "ok": true,
+    "empreinte": "65afbde7dd8b3aceecded0caf29d7ba90afc8f4738e81a5c2da7f26a8bbf8e34",
+    "date": "2026-10-28T21:14:33.058Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "0ba2fa5118f4993c5cb8b976e78505a31be068c319b1f3e84f975ea5e0cc0ba2",
+    "CLAUDE.md": "83ab95e3f9c38e25ac36c5eb6ef8220707feb34dcc9244d5ab55da44d7e4bba3",
+    "docs/claude/INDEX.md": "05def83ba4740226818f263bbdb0c6122ffc2701cf4f8593464c17e528d3793a",
+    "docs/claude/chantiers-480-529.md": "98db89161deb0338cd5ef26316f4a061c5d41af27c71e47e6018e45768424817",
+    "docs/claude/journal.md": "8fe69fe3a15d5e22118614cffcf91352545a94b9477fae476d6ccef8a454f08f",
+    "guide/06-tracteur.html": "8349041643fa4c51ea17fd0c328ee824701d7843ba5542f3cb7cc51140f75c68",
+    "index.html": "4ae0d15e5e56c847f93721edaf00960e22a383164e98bade72231f456355f5be",
+    "public/sw.js": "2ad7d96ae2b059b1d8a11c40e6a33b613a7e21014c01575e9e0f1ea94aeaf708",
+    "scripts/harnais-claude-md.mjs": "fa267883bc35b1bf9f1e3f6016b7519b797fbcc203d942dc697996fd194571de",
+    "scripts/mv-harnais-liste.mjs": "5aab02f4a06614bdb58c4236ed4005cd78679ee28b6aeb4c61a506eca697fd67",
+    "scripts/mv-harnais-trac1.mjs": "bf4fe0db68e39f0044ce4fb5ba950b7c7ee8e86ec31b046705401f7243c96bf6",
+    "scripts/tutos-couverture.json": "d04e8e1d5343e62bed309de241c3ddb97a94ceae20daeaf58955f30dcc6f58e4",
+    "src/styles.css": "6a378e2006d4a6266add6891dcf0488ed4d064f9519ffcd7264426c4abb3ae31",
+    "src/tracteur.js": "aee07c1289981d783f384b94c59e2ac8b8069f6b38cfc55b5cedf5df76c0f954",
+    "src/utils.js": "5a566aa02ba4cc1a59743f0e9cd9b7503cc129c5d5395fab1727df62a38b346e",
+    "src/whats-new.js": "54e8c845b81b1b8858d1fb1e7656b046b70c5cac790ba4634d644523442ae302",
+    "scripts/mv-harnais-traux1b.mjs": "e35b2d8c687e8cd3cecad9ddcd665495a3d7ad8baae3de95def3529a1ea8d272"
+  }
+}
