@@ -220,3 +220,26 @@ Le dernier lot fonctionnel du plan accepté par Nico (29/10, §486a) ; « go » 
 ### 487d. Ce qui reste ouvert
 - **Le module du compteur** à part : tracteur.js porte maintenant la série entière.
 - La carte Révision du Pilotage (`_pilGmRevision`) ne lit que les heures de la révision ; les autres entretiens n’y remontent pas.
+
+## 488. ★ COMPT-6 — LE COMPTEUR DANS SON MODULE (29/10 — `src/compteur.js` (neuf) · `src/tracteur.js` · `scripts/mv-harnais-compt1.mjs` à `compt5.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-480-529.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/COMPT-6.json` · base `42235ca`)
+
+### 488a. D’où ça vient
+Laissé ouvert par COMPT-3 à COMPT-5 (§485d–§487d) ; « go » de Nico (29/10). La série du compteur avait porté tracteur.js de 199 à 258 ko, avec trois regravures du plafond de croissance (`typo-baseline.json`).
+
+### 488b. Ce qui change
+- **`src/compteur.js`** : tout le compteur des tracteurs, d’un bloc — relevés, estimation, feuille du relevé, relevé au passage, révision et intervalles, compteur exigé, fiche sur ordinateur, autres entretiens (53 fonctions, 44 ko). **tracteur.js l’importe en tête** (`import './compteur.js'`) : `app.js` ne change pas, la place dans l’ordre des imports non plus.
+- **Le pont** (`window._trPont`, posé par tracteur.js) : ce que le compteur emprunte au Tracteur — ses outils (`_gnrNum`, `_fmtDate`, `_saveData`, `_openOv`…), ses rendus, et la sélection (`selId`, `onglet`). Un objet à part, pour ne rien écraser sur `window`. Côté compteur, de petits délégués aux mêmes noms, et `_trSelTracteur()` à la place de `_tracSelId?getTracteurSel():null`.
+- **Les relais** dans tracteur.js : les seize noms que le Tracteur appelle (`_trCompteur`, `_relOuvrir`, `_trRelevePassage`…), en `var … = function` qui passe par `window` (`_cpt`, avec le repli d’avant si le compteur manque). **Les gestes du Tracteur n’ont pas changé d’une lettre** ; un harnais qui joue une fonction de tracteur.js sans le compteur retombe sur le repli d’avant.
+- **Les drapeaux de reprise** (`_trPleinH`, `_trDemH`, `_trEntH`) restent dans tracteur.js, où vivent les gestes qui les posent ; `_TR_REL_MAX` (120) est redit dans les deux fichiers.
+- **Les harnais compt1 à compt5** lisent tracteur.js + compteur.js, bout à bout (le précédent de WN-COUPE-1, §469) ; compt2 et compt5 fournissent `_trSelTracteur`.
+- **Rien ne change à l’écran** : ni aide, ni guide, ni nouveautés. **Pas de montée de version** : seuls des fichiers de module bougent (la règle des modules).
+
+### 488c. Mesuré
+- tracteur.js : **258 → 221 ko** ; compteur.js : 44 ko.
+- **Chaîne complète verte** : 595 commandes, en quatre reprises, puis la tête (62 commandes) rejouée après le dernier retouché. **Un rouge, et il avait raison** : `mv-harnais-globaux` a vu un nom libre `a` dans tracteur.js — les replis de deux relais (`_trAjoutMois`, `_trDateAn`) lisaient `a[0]`, qui n’existe pas à cet endroit : un ReferenceError en production à la première révision réglée en mois. Écrits `arguments[0]`, vérifiés à la main (repli et relais).
+- Harnais du compteur (`compt1` à `compt5`) et du Tracteur (`traux1a`, `traux1b`, `trac3`, `robustesse-tracteur`, `sessions`, `coeq1`), couverture des tutos : verts, contre-épreuves comprises.
+- **Build** vert. **Tutos concernés : aucun.**
+- **Essai réel sur le build** (mode entraînement, Chromium 1 280 px) : `window._trPont` posé, `_trCompteur` et `_relOuvrir` joignables ; la fiche du compteur, la carte « Autres entretiens » et la révision s’affichent par les relais ; « Relever » ouvre la feuille (geste global), 1 190 validé → le relevé `manuel` rangé, `compteur_h` à 1 190 ; le parc dit « 1 190 h · révision dans 510 h · Graissage dans 0 h ». Aucune erreur.
+
+### 488d. Ce qui reste ouvert
+- La carte Révision du Pilotage (`_pilGmRevision`) ne lit que les heures de la révision ; les autres entretiens et les dates n’y remontent pas.

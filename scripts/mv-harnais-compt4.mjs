@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
-const S0 = { tr: lire('src/tracteur.js'), app: lire('src/app.js'), pil: lire('src/pilotage.js'), ut: lire('src/utils.js'), html: lire('index.html'), css: lire('src/styles.css'), couv: lire('scripts/tutos-couverture.json'), liste: lire('scripts/mv-harnais-liste.mjs') };
+const S0 = { tr: lire('src/tracteur.js') + '\n' + lire('src/compteur.js'), app: lire('src/app.js'), pil: lire('src/pilotage.js'), ut: lire('src/utils.js'), html: lire('index.html'), css: lire('src/styles.css'), couv: lire('scripts/tutos-couverture.json'), liste: lire('scripts/mv-harnais-liste.mjs') };
 const sansCom = (x) => x.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"\\])\/\/[^\n]*/g, '$1');
 function fonction(src, debut) { const i = src.indexOf(debut); if (i < 0) throw new Error('introuvable : ' + debut); let k = src.indexOf('{', i), p = 0; for (; k < src.length; k++) { if (src[k] === '{') p++; else if (src[k] === '}' && --p === 0) break; } return src.slice(i, k + 1); }
 let ok = 0, ko = 0;

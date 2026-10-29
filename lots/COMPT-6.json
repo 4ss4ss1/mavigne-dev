@@ -1,0 +1,26 @@
+{
+  "lot": "COMPT-6",
+  "section": "§488",
+  "base": "42235cadba02397caee4902519a972a72984e68e",
+  "inclut": [],
+  "date": "2026-10-29",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "88033ffac2972e2d59f19a13bb45201b28961cc0560946c946d2917741ea9e82",
+    "CLAUDE.md": "ccc04803ac246ed31b87842b862098ecc840f08981c9357d330ec54c858fa7ff",
+    "docs/claude/INDEX.md": "479b346e5e426546c9052199b18fba32836dd353c50c8813edc71c405d575e94",
+    "docs/claude/chantiers-480-529.md": "14041c1a80cb3faa98c61c7f10a2aa6fe02ff9a6076eea65e5b50806aaffca90",
+    "docs/claude/journal.md": "206850090b4ab79c0424970a23bdb56e802ea896f66dce75d8937b23eb494fbe",
+    "scripts/harnais-claude-md.mjs": "21a3f9cc3773730f3d90d991f8454eaaf486135f67868ed76d53e3ff7cf0be00",
+    "scripts/mv-harnais-compt1.mjs": "c97619c2c000001b60a4bc101d59375c4771913990a3f9b5b610f86aea894e87",
+    "scripts/mv-harnais-compt2.mjs": "f5e4189dc3b7936117b52d3a6e468320975793c6218dd34b0747e5e4605c4ecf",
+    "scripts/mv-harnais-compt3.mjs": "9ebab09da2e209036004b46b8272cd3a883c4ac6651bee6461213edf395b78ea",
+    "scripts/mv-harnais-compt4.mjs": "aff13223aa2fa964ab3f437400463ae53996430d93ee2740176e7a9025663e7a",
+    "scripts/mv-harnais-compt5.mjs": "ec0766f88ff66553411d81d2a5c34d067edda6ad8dfe17345c0bc39d7c9ad4bd",
+    "src/tracteur.js": "eeef936846fc9d046a26d8d5584812a7dd443eaa537b63c6863ef418f3381d30",
+    "src/compteur.js": "37dc9b001bad19c3bb4ec7449f4e154a2da7faf73aa4caae4d73011c61c07b35"
+  }
+}

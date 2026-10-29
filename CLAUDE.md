@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **29 octobre 2026 (COMPT-5)** — **PLUSIEURS ENTRETIENS PAR TRACTEUR** (§487). Base `541b1c5` (« compt4 »). APP 10.38 → 10.39, SW 11.19 → 11.20. Le dernier lot fonctionnel de la série du compteur. À côté de la révision, `t.entretiens_prog` (vidange de pont et boîte, filtres, graissage…) : échéance au premier atteint, **seuils à la mesure de l’intervalle** (un dixième ou 14 jours, un quart ou 30 jours), la carte « Autres entretiens » (« Fait », le formulaire de l’admin, « Retirer » annulable), **« Fait aussi »** dans « Révision faite », **le plus urgent** au parc et au compteur exigé. `mv-harnais-compt5` : 13 assertions, 9/9 mutants. Reste : le module du compteur à part, la carte Révision du Pilotage aux heures seules.
+> Dernière consolidation : **29 octobre 2026 (COMPT-6)** — **LE COMPTEUR DANS SON MODULE** (§488). Base `42235ca` (« compt5 »). Pas de montée de version (fichiers de module seulement). Le compteur des tracteurs (COMPT-1 à 5) sort de tracteur.js d’un bloc dans **`src/compteur.js`**, importé en tête de tracteur.js : tracteur.js **258 → 221 ko**. Le compteur emprunte au Tracteur par **`window._trPont`** ; le Tracteur l’appelle par **seize relais** aux noms d’avant, avec le repli d’avant. Les harnais compt1 à compt5 lisent les deux fichiers bout à bout. Rien ne change à l’écran. Reste : la carte Révision du Pilotage aux heures seules.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 

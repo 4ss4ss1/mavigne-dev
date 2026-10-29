@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
-const S0 = { tr: lire('src/tracteur.js'), html: lire('index.html'), couv: lire('scripts/tutos-couverture.json'), liste: lire('scripts/mv-harnais-liste.mjs') };
+const S0 = { tr: lire('src/tracteur.js') + '\n' + lire('src/compteur.js'), html: lire('index.html'), couv: lire('scripts/tutos-couverture.json'), liste: lire('scripts/mv-harnais-liste.mjs') };
 function fonction(src, debut) { const i = src.indexOf(debut); if (i < 0) throw new Error('introuvable : ' + debut); let k = src.indexOf('{', i), p = 0; for (; k < src.length; k++) { if (src[k] === '{') p++; else if (src[k] === '}' && --p === 0) break; } return src.slice(i, k + 1); }
 let ok = 0, ko = 0;
 const t = (nom, cond, detail) => { if (cond) { ok++; console.log('  \x1b[32m✓\x1b[0m ' + nom); } else { ko++; console.log('  \x1b[31m✗\x1b[0m ' + nom + (detail !== undefined ? '  → ' + detail : '')); } };
@@ -31,7 +31,7 @@ function monde(S, o) {
     document: { getElementById: (id) => (id in vals ? { value: vals[id] } : null) },
     _gnrTodayISO: () => '2026-10-29', _gnrNum: (n) => String(n), _fmtDate: (d) => d, _escHtml: (x) => String(x), _chrNom: (x) => (typeof x === 'string' ? x : (x && x.nom) || ''), _chrMes: () => 0,
     isAdmin: () => o.admin !== false, isTractoriste: () => true, showToast: (m) => toasts.push({ m }), _saveData: () => {}, renderTracteur: () => {}, renderEntretiens: () => {},
-    getTracteurSel: () => o.parc[0], _relOuvrir: (tid, src, cb) => { if (cb && o.h != null) cb(o.h); },
+    getTracteurSel: () => o.parc[0], _trSelTracteur: () => o.parc[0], _relOuvrir: (tid, src, cb) => { if (cb && o.h != null) cb(o.h); },
   };
   vm.createContext(ctx);
   vm.runInContext(FONCS.map((d) => fonction(S.tr, d)).join('\n') + '\nthis.etat=_trEntEtat; this.texte=_trEntTexte; this.urg=_trEntPlusUrgent; this.suff=_trEntUrgent; this.exige=_trReleveExige; this.save=_trEntSave; this.suppr=_trEntSuppr; this.fait=_trEntFait; this.revFaite=_trRevFaite;', ctx);
