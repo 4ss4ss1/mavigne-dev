@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.43', d: '2026-10-30', items: [
+    { niv: 0, pour: ['admin'], emoji: 'equipe', titre: 'Personne hors équipe dans les Équipes du jour',
+      desc: "Dans «\u00a0Équipes du jour\u00a0», quelqu’un laissé sur «\u00a0Aucune\u00a0» n’était dans aucune équipe\u00a0: son téléphone retombait sur sa propre équipe, souvent «\u00a0Moi seul\u00a0». «\u00a0Aucune\u00a0» disparaît. En ouvrant la fenêtre, tout le monde est en Équipe\u00a01\u00a0: si vous enregistrez sans rien toucher, tout le monde travaille ensemble. Pour mettre quelqu’un seul, donnez-lui une équipe à lui — il y en a maintenant quatre. «\u00a0Cave\u00a0» ne change pas, ni un jour où la fenêtre n’est pas enregistrée." },
+  ] },
   { v: '10.42', d: '2026-10-30', items: [
     { niv: 0, pour: ['tous'], emoji: 'carte', titre: 'La carte de votre saison se lit enfin',
       desc: "Dans «\u00a0Ma trace\u00a0», la carte de votre saison paraissait vide sur un grand domaine\u00a0: posée à sa vraie place sur plusieurs kilomètres, chaque parcelle ne faisait qu’un ou deux pixels, et «\u00a01 passage\u00a0» était presque blanc. Elle montre désormais vos parcelles en mosaïque, comme la carte du jour de l’Accueil\u00a0: chacune à sa forme et à sa taille, avec ses rangs, de la plus parcourue à la moins parcourue, en or de plus en plus plein. Toucher une parcelle ouvre sa fiche. Le chiffre du haut compte les parcelles en vigne." },

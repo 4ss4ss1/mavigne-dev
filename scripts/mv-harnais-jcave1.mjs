@@ -294,7 +294,8 @@ function scenarios(S) {
     r = F.save();
     ok('F', 'F7 · rien de coché : comme avant (Tout le monde ensemble)', r.clear === 1);
     F.set({}, {});
-    ok('F', 'F8 · le choix « Cave » reste « cave », un numéro reste un numéro', F.pick('Julien', 'cave') === 'cave' && F.pick('Marion', '2') === 2 && F.pick('Julien', '0') === undefined);
+    // EQDEF-1 (§492) : « Aucune » (le « 0 ») a disparu de la fenêtre — un « 0 » ne sort plus personne de son choix.
+    ok('F', 'F8 · le choix « Cave » reste « cave », un numéro reste un numéro, un « 0 » ne retire personne', F.pick('Julien', 'cave') === 'cave' && F.pick('Marion', '2') === 2 && F.pick('Julien', '0') === 'cave');
     F.set({ Paul: 'cave' }, { 'Marion|2026-10-22': 'a' });
     const rows = F.rows();
     ok('F', 'F9 · la pastille « Cave » allumée pour Paul, éteinte pour les autres', /class="pchk sel cave" data-eqj-n="Paul" data-eqj-k="cave"/.test(rows) && (rows.match(/data-eqj-k="cave"/g) || []).length === 4);

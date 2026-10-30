@@ -1,0 +1,40 @@
+{
+  "lot": "EQDEF-1",
+  "section": "§492",
+  "base": "6ebc8160c4a6ca345886a28823debfa6a1fc8202",
+  "inclut": [],
+  "date": "2026-10-30",
+  "tutos": {
+    "ok": true,
+    "empreinte": "0fe5497012867381a02d03407425d9f0934644a6ef945ba86340b653e1e1c660",
+    "date": "2026-10-30T06:10:30.810Z",
+    "joues": {
+      "téléphone": 1,
+      "ordinateur": 1,
+      "côte à côte": 0
+    },
+    "concernes": [
+      "equipes"
+    ],
+    "cote": false
+  },
+  "fichiers": {
+    ".mv-base": "430ef3fe55c56b98291915e5d2623a865defebdca607c972b2c4329d77aa4d12",
+    "CLAUDE.md": "ae0a2b50822db4c11fb3acb4f0311aacda55fb1b713afe3bcae7ca655f7e34f5",
+    "docs/claude/INDEX.md": "9027fbc921b1ae07ce5c694991df1b7da399de2f6f75f75f232b01ea8b546313",
+    "docs/claude/chantiers-480-529.md": "8f0648f0ccb63dd3d6092df620247ef94c0f0999883671a38f4906478bfa5ce9",
+    "docs/claude/journal.md": "9ed51f7ac08bd2c822443787ca57c353c50d3459272fcd47dc9093306170179d",
+    "guide/04-vigne.html": "82086b42263cf40b34f7c37d6b6d0b74e6e1f3c8fbdcdcb6583c5f9139427890",
+    "index.html": "0d9f2ec075dff5efea4c6f987412950400b55e5303a9c3e1257c10e67ab980a6",
+    "public/sw.js": "169f423698fc921b37dc2fcda9d32cfcd3f2d57c9b2a590912d21a9845cda25d",
+    "scripts/harnais-claude-md.mjs": "da4e87234558bf85a92c663e3d653c4a25c535c5b08a4d72d511f4b0462008e5",
+    "scripts/mv-harnais-jcave1.mjs": "a5b978c1c46c5131544c28fe723f8d97c657eb1e30b5d25ce98d6bc38ad9ed9a",
+    "scripts/mv-harnais-liste.mjs": "b94810bb0c94bdd22466454820a0855b4f3ae23394387eec67fd67d9110c6479",
+    "scripts/mv-harnais-tuto9.mjs": "49f32f9fd72afa5a2fb776747d5895f673e23e633d70a94ac5ae7234aeae746c",
+    "src/app.js": "ac98aba7743d796065eee0b44282bac5de45a7de0a3156735ae5190918114ff3",
+    "src/tutos.js": "0f658300bebe4d26d91af8e72e3480584d2598f3e4f130271f29fbec9e1ce123",
+    "src/utils.js": "0aae7a3fddaddd2dd89675559074a449d05da186c3daa39c916692e824bca52f",
+    "src/whats-new.js": "1e38e5e6adbcd91ba0289c3f01e990b1895ae60aa071ca91ea1a0d76dc50b94f",
+    "scripts/mv-harnais-eqdef1.mjs": "995c666062a36d08b29cebd47a1e5634b4de91d0225175ae95d397d06ae5f953"
+  }
+}

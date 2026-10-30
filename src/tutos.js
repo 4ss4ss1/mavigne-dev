@@ -134,7 +134,7 @@ var TU_TUTOS = [
     module: 'Vigne', pages: ['home'], pour: 'admin', duree: '1 min', depart: 'home',
     couvre: ['openEqJour', '_mvEqPick', 'saveEqJour'],
     retenir: ['Accueil › pastille « Équipes du jour ».',
-              'Une équipe par personne. « Aucune » garde ses heures pour ses propres validations.',
+              'Tout le monde arrive en Équipe 1. Pour mettre quelqu’un seul, donnez-lui une équipe à lui.',
               '« Enregistrer pour aujourd’hui » vaut jusqu’à ce soir.'],
     etapes: [
       { type: 'toucher', cible: '[data-tuto="home.eqj"]',
@@ -142,17 +142,14 @@ var TU_TUTOS = [
         fait: function () { return _ouvert('ovEqJour'); },
         reel: function (memo) { var o = _ouvert('ovEqJour'); if (o) { memo.eqjVu = true; memo.eqjAvant = L('#home-eqj-txt'); } return o; },
         ok: 'La fenêtre des équipes s’est ouverte.' },
-      { type: 'choisir', options: ['[data-eqj-n="Jean"][data-eqj-k="1"]', '[data-eqj-n="Sophie"][data-eqj-k="1"]'], zone: _zoneEquipe,
-        txt: function () { return 'Mettez Jean et Sophie dans « ' + L('[data-eqj-n="Jean"][data-eqj-k="1"]') + ' ».'; },
-        // TUTO-7 (§364) : pas de `reel` ici — sur le vrai domaine, « Jean et Sophie » et « Paul » ne se distinguent pas ; les
-        //   deux étapes de choix avaient la même vérification, et un seul choix chez le client faisait sauter la seconde.
-        //   Le panneau suit quand le client ENREGISTRE (étape suivante), et rejoue alors les choix d'un coup.
-        txtReel: 'choisissez l’équipe de chacun, puis enregistrez.', cibleReel: '#eqj-rows',
-        ok: 'Jean et Sophie travailleront ensemble aujourd’hui.' },
+      // ★ EQDEF-1 (§492) : plus de « Aucune » — tout le monde arrive en Équipe 1. Jean, Sophie et Marie y sont déjà : l'ancienne
+      //   étape « Mettez Jean et Sophie dans Équipe 1 » se serait validée toute seule. Il reste le seul geste à apprendre : sortir
+      //   quelqu'un de l'Équipe 1. TUTO-7 (§364) : pas de `reel` sur un choix — sur le vrai domaine, on ne sait pas qui le client
+      //   déplace ; le panneau suit quand le client ENREGISTRE (étape suivante), et rejoue alors les choix d'un coup.
       { type: 'choisir', options: ['[data-eqj-n="Paul"][data-eqj-k="2"]'], zone: _zoneEquipe,
-        txt: function () { return 'Paul part seul au tracteur : mettez-le dans « ' + L('[data-eqj-n="Paul"][data-eqj-k="2"]') + ' ». Marie reste sur « ' + L('[data-eqj-n="Marie"][data-eqj-k="0"]') + ' » : ses heures iront à ses propres validations.'; },
-        txtReel: 'une équipe par personne ; « Aucune » garde ses heures pour ses propres validations.', cibleReel: '#eqj-rows',
-        ok: 'Paul a son équipe à lui.' },
+        txt: function () { return 'Tout le monde arrive dans « ' + L('[data-eqj-n="Jean"][data-eqj-k="1"]') + ' » : Jean, Sophie et Marie travailleront ensemble. Paul part seul au tracteur : mettez-le dans « ' + L('[data-eqj-n="Paul"][data-eqj-k="2"]') + ' », une équipe à lui.'; },
+        txtReel: 'tout le monde arrive en Équipe 1 ; touchez l’équipe de ceux qui travaillent ailleurs — une équipe à lui pour quelqu’un de seul —, puis enregistrez.', cibleReel: '#eqj-rows',
+        ok: 'Paul a son équipe à lui ; les autres restent ensemble.' },
       { type: 'toucher', cible: '[data-tuto="eqj.save"]',
         txt: function () { return '{T} « ' + L('[data-tuto="eqj.save"]') + ' ».'; },
         fait: function () { return !_ouvert('ovEqJour') && /Jean/.test(L('#home-eqj-txt')); },

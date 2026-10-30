@@ -10027,6 +10027,16 @@ function _mvEqJourRender(){
   if(!T){ w.classList.add('home-prio-pill-vide'); tx.textContent='\u00c9quipes du jour : tout le monde ensemble'; }
   else { w.classList.remove('home-prio-pill-vide'); tx.textContent='\u00c9quipes du jour : '+T.map(function(t){ return t.join(' + '); }).join(' \u00b7 '); }
 }
+// ★★ EQDEF-1 (§492, 30/10/2026) — PERSONNE HORS ÉQUIPE : « AUCUNE » RETIRÉE, TOUT LE MONDE ARRIVE EN ÉQUIPE 1.
+//   Nico (30/10, message dicté) : « il faut retirer aucune, parce que ça fait planter la sélection des équipes une fois qu'on est
+//   sur l'ouvrier… on démarre à partir de équipe 1 ; si on ne change rien, tout le monde est dans l'équipe 1… l'équipe seule,
+//   c'est l'administrateur qui décidera ». Lu dans le code : « Aucune » ne rangeait l'ouvrier dans AUCUNE équipe du jour
+//   (_mvEqDe rendait null) ; son téléphone retombait alors sur l'équipe de la priorité s'il y était coché, sinon sur sa propre
+//   mémoire — par défaut « Moi seul ». Décision (« oui », les deux recommandations) : seule la fenêtre change — un jour où elle
+//   n'est pas enregistrée, rien ne change. Qui n'est ni dans une équipe enregistrée ni en cave arrive en Équipe 1 ; « Équipe 4 »
+//   prend la case de « Aucune » (sans elle, chaque personne mise seule prend un numéro) ; un « 0 » ne sort plus personne.
+//   ⚠️ La règle joue à l'ENREGISTREMENT : une journée déjà enregistrée (des « Aucune » d'avant ce lot) n'est relue autrement
+//   ni par les téléphones ni par le temps réel du Pilotage — l'histoire ne se réécrit pas. Elle se corrige en rouvrant la fenêtre.
 function openEqJour(){
   if(!_mvMoiAdmin()) return;
   var iso=_mvToday(), T=window._mvEqJour(iso)||[];
@@ -10035,6 +10045,7 @@ function openEqJour(){
   _mvEqBrut(iso).forEach(function(t,i){ if(t.t) _EQJ_TRN[i+1]=String(t.t); });
   // ★ JCAVE-1 (§428) : une personne en cave toute la journée (Planning ou ici) arrive sur « Cave ».
   if(typeof window._mvCaveJour==='function') _mvEqMembres().forEach(function(m){ if(window._mvCaveJour(m.nom,iso)==='j') _EQJ_SEL[m.nom]='cave'; });
+  _mvEqMembres().forEach(function(m){ if(_EQJ_SEL[m.nom]==null) _EQJ_SEL[m.nom]=1; });   // ★ EQDEF-1 (§492) : personne hors équipe — Équipe 1, sauf équipe enregistrée ou cave
   var d=document.getElementById('eqj-date');
   if(d){ var p=iso.split('-'); d.textContent='Aujourd\u2019hui, '+p[2]+'/'+p[1]+'/'+p[0]; }
   _mvEqRows();
@@ -10043,9 +10054,9 @@ function openEqJour(){
 function _mvEqRows(){
   var c=document.getElementById('eqj-rows'); if(!c) return;
   var h=_mvEqMembres().map(function(m){
-    var cur=_EQJ_SEL[m.nom]||0;
-    var ch=[0,1,2,3].map(function(k){
-      return '<div class="pchk'+(cur===k?' sel vert':'')+'" data-eqj-n="'+_escAttr(m.nom)+'" data-eqj-k="'+k+'" onclick="_mvEqPick(this)">'+(k?('\u00c9quipe '+k):'Aucune')+'</div>';
+    var cur=_EQJ_SEL[m.nom];   // ★ EQDEF-1 (§492) : 1 à 4 ou « cave » — openEqJour range chacun ; plus de « Aucune »
+    var ch=[1,2,3,4].map(function(k){
+      return '<div class="pchk'+(cur===k?' sel vert':'')+'" data-eqj-n="'+_escAttr(m.nom)+'" data-eqj-k="'+k+'" onclick="_mvEqPick(this)">\u00c9quipe '+k+'</div>';
     }).join('')
       // ★ JCAVE-1 (§428) : « Cave » = la journée en cave. Ses heures ne vont pas à la vigne et elle quitte les équipes.
       +'<div class="pchk'+(cur==='cave'?' sel cave':'')+'" data-eqj-n="'+_escAttr(m.nom)+'" data-eqj-k="cave" onclick="_mvEqPick(this)">Cave</div>';
@@ -10076,7 +10087,8 @@ function _mvEqBrut(iso){
 }
 function _mvEqPick(el){
   var n=el.getAttribute('data-eqj-n'), ka=el.getAttribute('data-eqj-k'), k=(ka==='cave')?'cave':(parseInt(ka,10)||0);   // JCAVE-1 (§428)
-  if(k) _EQJ_SEL[n]=k; else delete _EQJ_SEL[n];
+  if(!k) return;   // ★ EQDEF-1 (§492) : un « 0 » (l'ancienne « Aucune ») ne sort plus personne de son équipe
+  _EQJ_SEL[n]=k;
   _mvEqRows();
 }
 function _mvEqEcrire(iso, teams, trn){

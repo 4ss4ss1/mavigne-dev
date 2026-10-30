@@ -85,7 +85,9 @@ async function jouer(S) {
   //   seul : « e.forEach is not a function » à l'étape 2, sur tous les écrans. Règle pour TOUS les tutos.
   const debut = tu.indexOf('var TU_TUTOS = ['), fin = tu.indexOf('\n];', debut), tous = debut < 0 ? '' : tu.slice(debut, fin);
   const zones = [...tous.matchAll(/zone: (function \(\w*\) \{[^\n]*?\}|_\w+),/g)].map((m) => m[1]);
-  t('chaque zone de choix rend une liste (' + zones.length + ' zones lues)', zones.length >= 3 && zones.every((z) => /^_zone\w+$/.test(z) ? /return \[|return nom \?/.test(fn(tu, z)) : /return [^;]*\[/.test(z)), zones.join(' | '));
+  //   EQDEF-1 (§492) : le tuto des équipes n'a plus qu'un choix (tout le monde arrive en Équipe 1) — deux zones dans les tutos, le
+  //   plancher suit le compte réel : il garde contre un motif qui ne lirait plus rien, pas contre un tuto raccourci.
+  t('chaque zone de choix rend une liste (' + zones.length + ' zones lues)', zones.length >= 2 && zones.every((z) => /^_zone\w+$/.test(z) ? /return \[|return nom \?/.test(fn(tu, z)) : /return [^;]*\[/.test(z)), zones.join(' | '));
   /* ══ 3. TEST:TUTOS JOUE TOUT, SOUS LE BON NOM ══ */
   const jeu = sansCommentaires(S.jeu);
   t('chaque ligne porte le tuto JOUÉ', jeu.includes("const lib = ecran.nom + ' · ' + id + ' · '") && !jeu.includes("ecran.nom + ' · ' + liste[i]"));
