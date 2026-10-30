@@ -544,3 +544,4 @@
 | 488 | 488. ★ COMPT-6 — LE COMPTEUR DANS SON MODULE (29/10 — `src/compteur.js` (neuf) · `src/tracteur.js` · `scrip… | `docs/claude/chantiers-480-529.md` |
 | 489 | 489. ★★ COMPT-7 — LA CARTE DE LA RÉVISION DU PILOTAGE DIT L’ENTRETIEN LE PLUS PRESSANT (29/10 — `src/pilota… | `docs/claude/chantiers-480-529.md` |
 | 490 | 490. ★★ EQFIXE-1 — L’ÉQUIPE POSÉE PAR L’ADMIN S’IMPOSE AU SALARIÉ ET SE LIT À CHAQUE AFFICHAGE (30/10 — `sr… | `docs/claude/chantiers-480-529.md` |
+| 491 | 491. ★★ CARTEDOM-2 — « LA CARTE DE VOTRE SAISON » EN MOSAÏQUE, COMME LA CARTE DU JOUR ; LES RANGS DE LA CAR… | `docs/claude/chantiers-480-529.md` |

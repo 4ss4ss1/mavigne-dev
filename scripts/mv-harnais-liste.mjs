@@ -447,6 +447,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-rangbout1.mjs --contre', 'premieres-fois'],
   ['node scripts/mv-harnais-cartedom1.mjs', 'premieres-fois'],   // CARTEDOM-1 (§350) : « La carte de votre saison »
   ['node scripts/mv-harnais-cartedom1.mjs --contre', 'premieres-fois'],
+  ['node scripts/mv-harnais-cartedom2.mjs', 'premieres-fois'],   // CARTEDOM-2 (§491) : la carte de votre saison en mosaïque (la forme, la taille, les rangs par-dessus, la fiche)
+  ['node scripts/mv-harnais-cartedom2.mjs --contre', 'premieres-fois'],
   ['node scripts/mv-harnais-saisonimg1.mjs', 'premieres-fois'],   // SAISONIMG-1 (§351) : « Ma saison en images »
   ['node scripts/mv-harnais-saisonimg1.mjs --contre', 'premieres-fois'],
   ['node scripts/mv-harnais-tacheper1.mjs', 'periodes-taches-du-domaine'],   // TACHEPER-1 (§352) : une tâche cochée en modifiant une période entre dans le domaine

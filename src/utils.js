@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.41';
+export const APP_VERSION = '10.42';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2275,7 +2275,7 @@ var MV_AIDE = {
     ico: 'feuille', titre: 'Accueil', ancre: 'vigne',
     points: [
       ['Ma saison en images', " : dans « Ma trace », six cartes qui racontent votre saison ; « Enregistrer en PDF » en garde une copie."],
-      ['La carte de votre saison', " : dans « Ma trace », les parcelles colorées selon vos passages depuis le début de la saison ; elle s’affiche aussi sans réseau."],
+      ['La carte de votre saison', " : dans « Ma trace », vos parcelles en mosaïque, chacune à sa forme et à sa taille, avec ses rangs — de la plus parcourue à la moins parcourue, en or de plus en plus plein selon vos passages depuis le début de la saison (aucun, 1, 2 à 3, 4 et plus). Le chiffre compte les parcelles en vigne. Toucher une parcelle ouvre sa fiche. Elle s’affiche aussi sans réseau."],
       ['Les vins de votre travail', " : dans « Ma trace », pour chaque millésime, les cuvées nées des parcelles où vous avez travaillé, et ce que vous y avez fait."],
       ['Annoncer mes jalons', " : Réglages › Moi › Mon compte. Coupée, l’annonce « Nouveau jalon » se tait après une validation ; les jalons se comptent quand même (« Ma trace »)."],
       ['Vos premières fois', " : dans « Ma trace », la frise de votre parcours au domaine, avec les vraies dates ; celles qui viennent attendent en pointillé."],

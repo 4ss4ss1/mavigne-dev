@@ -6434,6 +6434,23 @@ function _homeForme(f,r){
   if(!/^[0-9MLZ .-]+$/.test(d)) return null;   // un point illisible (NaN) : pas de dessin plutôt qu'un dessin faux
   return { fw:Math.sqrt(s*a).toFixed(3), fh:Math.sqrt(s/a).toFixed(3), vb:'0 0 '+x(f.w)+' '+x(f.h), d:d };
 }
+// ★ CARTEDOM-2 (§491) — LES RANGS DE VIGNE DANS UNE FORME, sortis de _homePrioCarte pour servir aussi à « La carte de votre
+//   saison » (jalons.js) : une seule copie. Un trait vertical tous les ~3,4 px à l'écran (la forme mesure ~62 px par unité de
+//   --fw, voir la feuille), coupé exactement au contour — les intersections triées vont par paires (une forme en équerre aussi).
+//   Rend les traits seuls : chaque carte les range dans SON groupe (hpc-rg sur l'Accueil, mtr-cd-rg dans « Ma trace »).
+function _homeRangs(fo,fw){
+  if(!fo||!Array.isArray(fo.rings)||!(fo.w>0)||!(fo.h>0)) return '';
+  var n=Math.max(3,Math.min(60,Math.floor((parseFloat(fw)||0)*62/3.4))), pas=fo.w/n, out='', x=function(v){ return String(Math.round(v*10)/10); };
+  for(var k=1;k<n;k++){
+    var X=k*pas, ys=[];
+    fo.rings.forEach(function(q){ for(var i=0;i<q.length;i++){ var a=q[i], b=q[(i+1)%q.length]; if((a[0]<=X&&b[0]>X)||(b[0]<=X&&a[0]>X)) ys.push(a[1]+(X-a[0])*(b[1]-a[1])/(b[0]-a[0])); } });
+    ys.sort(function(u,v){ return u-v; });
+    for(var m=0;m+1<ys.length;m+=2){ if(ys[m+1]-ys[m]>fo.h*0.06&&isFinite(ys[m])&&isFinite(ys[m+1])) out+='<line x1="'+x(X)+'" y1="'+x(ys[m])+'" x2="'+x(X)+'" y2="'+x(ys[m+1])+'"/>'; }
+  }
+  return out;
+}
+window._homeForme=_homeForme;   // ★ CARTEDOM-2 (§491) : la forme et les rangs de la carte du jour, lus par « La carte de votre saison » (jalons.js)
+window._homeRangs=_homeRangs;
 // ★★ ACCV-1 (§416) — LA CARTE DU JOUR AU DESSIN DE LA MAQUETTE DE L'ACCUEIL (Nico, 21/10 : « go comme la maquette »).
 //   La tâche du jour en grand (police des titres), le message de l'administrateur, l'avancement en hectares et ce qui a avancé
 //   aujourd'hui et hier (la petite victoire), l'équipe, la parcelle en cours, la fin prévue, puis « Aller aux parcelles » et
@@ -6475,19 +6492,9 @@ function _homePrioCarte(){
   //   sélection et rendait la main sans rien ouvrir — le défaut que FORME-1 (§301c) a corrigé dans le cockpit, pas ici.
   var lireForme=(typeof window._mvParcForme==='function')?window._mvParcForme:function(){ return null; };
   var avecContours=act.some(function(p){ return !!lireForme(p.nom); });
-  // Les rangs de vigne dans une forme : un trait vertical tous les ~3,4 px à l'écran (la forme mesure ~62 px par unité de
-  //   --fw, voir la feuille), coupé exactement au contour — les intersections triées vont par paires (une forme en équerre aussi).
-  var rangs=function(fo,fw){
-    if(!fo||!Array.isArray(fo.rings)||!(fo.w>0)||!(fo.h>0)) return '';
-    var n=Math.max(3,Math.min(60,Math.floor((parseFloat(fw)||0)*62/3.4))), pas=fo.w/n, out='', x=function(v){ return String(Math.round(v*10)/10); };
-    for(var k=1;k<n;k++){
-      var X=k*pas, ys=[];
-      fo.rings.forEach(function(q){ for(var i=0;i<q.length;i++){ var a=q[i], b=q[(i+1)%q.length]; if((a[0]<=X&&b[0]>X)||(b[0]<=X&&a[0]>X)) ys.push(a[1]+(X-a[0])*(b[1]-a[1])/(b[0]-a[0])); } });
-      ys.sort(function(u,v){ return u-v; });
-      for(var m=0;m+1<ys.length;m+=2){ if(ys[m+1]-ys[m]>fo.h*0.06&&isFinite(ys[m])&&isFinite(ys[m+1])) out+='<line x1="'+x(X)+'" y1="'+x(ys[m])+'" x2="'+x(X)+'" y2="'+x(ys[m+1])+'"/>'; }
-    }
-    return out?'<g class="hpc-rg">'+out+'</g>':'';
-  };
+  // Les rangs de vigne dans une forme : _homeRangs (sortie d'ici par CARTEDOM-2, §491 — la même pour « La carte de votre saison »).
+  //   Lue SI elle existe : la carte se dessine aussi dans les harnais qui l'extraient seule (ACC-2, FORME-2, HORS-1).
+  var rangs=function(fo,fw){ var l=(typeof _homeRangs==='function')?_homeRangs(fo,fw):''; return l?'<g class="hpc-rg">'+l+'</g>':''; };
   // Les délais de rentrée en cours : la même règle que la carte « Délai de rentrée » (_homeDreLignes).
   var dreL=[]; try{ if(typeof _homeDreLignes==='function') dreL=_homeDreLignes(new Date()).filter(function(r){ return r.diffH>0; }); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_homePrioCarte#dre'); }
   var dreN={}, dreTout=false; dreL.forEach(function(r){ var l=(r.g&&r.g.parcelles)||[]; if(!l.length) dreTout=true; l.forEach(function(n){ dreN[n]=1; }); });
@@ -6496,7 +6503,7 @@ function _homePrioCarte(){
     var e=etat(p), r=_homeSurf(p)/maxS, fo=lireForme(p.nom), f=_homeForme(fo,r), dre=dreTout||!!dreN[p.nom], lib=p.nom+', '+_pvSurfFr(p.surface)+' ha'+(e==='hors'?', pas concern\u00e9e':'')+(dre?', rentr\u00e9e interdite':'');   // HORS-1 : le titre le dit
     nb[e]=(nb[e]||0)+1;
     return '<button type="button" class="hpc-p'+(f?' hpc-fo':(avecContours?' hpc-sans':''))+' hpc-'+e+(dre?' hpc-dre':'')+'" style="'+(f?'--fw:'+f.fw+';--fh:'+f.fh:'--s:'+Math.sqrt(r).toFixed(3))+'" data-nom="'+_escAttr(p.nom)+'" title="'+_escAttr((f||!avecContours)?lib:lib+', pas de contour enregistr\u00e9')+'" aria-label="'+_escAttr(p.nom)+'" onclick="openDP(this.dataset.nom)">'
-      +(f?'<svg viewBox="'+f.vb+'" aria-hidden="true" focusable="false">'+rangs(fo,f.fw)+'<path d="'+f.d+'"/></svg>':'')
+      +(f?'<svg viewBox="'+f.vb+'" aria-hidden="true" focusable="false"><path d="'+f.d+'"/>'+rangs(fo,f.fw)+'</svg>':'')   // ★ CARTEDOM-2 (§491) : les rangs APRÈS la forme — dessinés avant, ils restaient sous sa couleur (jamais vus depuis ACCV-1)
       +(e==='cours'?'<span class="hpc-ici" aria-hidden="true"></span>':'')+(dre?'<span class="hpc-dre-i" aria-hidden="true">'+ico('interdit',16)+'</span>':'')+'</button>';
   }).join('');
   // Sans priorité : les chantiers du moment (PRIO-1, _mvTacheDuMoment) ; sans rien du tout : la carte dit quoi faire.

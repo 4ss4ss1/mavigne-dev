@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.42', d: '2026-10-30', items: [
+    { niv: 0, pour: ['tous'], emoji: 'carte', titre: 'La carte de votre saison se lit enfin',
+      desc: "Dans «\u00a0Ma trace\u00a0», la carte de votre saison paraissait vide sur un grand domaine\u00a0: posée à sa vraie place sur plusieurs kilomètres, chaque parcelle ne faisait qu’un ou deux pixels, et «\u00a01 passage\u00a0» était presque blanc. Elle montre désormais vos parcelles en mosaïque, comme la carte du jour de l’Accueil\u00a0: chacune à sa forme et à sa taille, avec ses rangs, de la plus parcourue à la moins parcourue, en or de plus en plus plein. Toucher une parcelle ouvre sa fiche. Le chiffre du haut compte les parcelles en vigne." },
+    { niv: 0, pour: ['tous'], emoji: 'pousse', titre: 'Les rangs se voient dans la carte du jour',
+      desc: "Sur l’Accueil, les parcelles de la carte du jour devaient porter leurs rangs\u00a0: ils étaient dessinés sous la couleur de la parcelle, qui les cachait. Ils se voient désormais, sur chaque parcelle qui a son contour." },
+  ] },
   { v: '10.41', d: '2026-10-30', items: [
     { niv: 0, pour: ['tous'], emoji: 'equipe', titre: 'L’équipe de la priorité, dès l’ouverture',
       desc: "Un ouvrier coché dans une équipe sur la tâche prioritaire arrivait bien sur la tâche, mais la barre «\u00a0Équipe sur…\u00a0» des Parcelles pouvait garder une ancienne équipe — surtout quand l’appli était restée ouverte. Désormais, l’équipe cochée par l’administrateur dans «\u00a0Priorité du moment\u00a0» (ou dans «\u00a0Équipes du jour\u00a0») s’affiche à l’ouverture de l’appli et quand on y revient, suit chacun de ses changements et part avec chaque validation. Le salarié ne la change plus\u00a0: la barre dit «\u00a0Fixée\u00a0», un appui donne les noms. Un salarié coché dans aucune équipe garde son propre choix." },

@@ -315,9 +315,13 @@ function _mvRangBouteille(nom, D) {
   return out.slice(0, 2);
 }
 // ★★ CARTEDOM-1 (§350) — « LA CARTE DE VOTRE SAISON » : les parcelles du domaine, colorées selon les passages de la
-//   personne depuis le début de la saison (maquette GRATIF : « Carte du domaine — parcelles colorées selon passages »). Les
-//   contours sont ceux de la carte des Parcelles (`KML_POLYGONS_DYNAMIC`) ; le dessin est un SVG, sans fond de carte : il
-//   s'affiche aussi hors réseau, dans les vignes.
+//   personne depuis le début de la saison (maquette GRATIF : « Carte du domaine — parcelles colorées selon passages »).
+// ★★ CARTEDOM-2 (§491) — PLUS DE VRAIE GÉOGRAPHIE. Sur un vrai domaine (46 contours étalés sur plusieurs kilomètres, du nord
+//   au sud), la carte tenait dans une bande d'environ 100 px, chaque parcelle y faisait 1 à 3 px sous un liseré blanc, et
+//   « 1 passage » était un crème presque blanc : elle paraissait vide (Nico, 30/10 ; vérifiée jusque-là sur 4 contours).
+//   Elle se range désormais comme la mosaïque de la carte du jour (FORME-2, ACCV-1) : les parcelles EN VIGNE (la règle de
+//   la carte du jour, statut ≠ « Arrachee » — le total comptait les contours), la plus parcourue d'abord, puis la plus
+//   grande, puis le nom. Le moteur reste pur : la forme se lit au dessin (_mvCarteDomaineSection).
 function _mvCarteDomaine(nom, D) {
   D = D || {};
   var iso = function (x) { var s = String(x || '').slice(0, 10); return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : ''; };
@@ -330,24 +334,13 @@ function _mvCarteDomaine(nom, D) {
     if (vus[cle]) return; vus[cle] = 1;
     var p = String(j.parcelle).toLowerCase(); n[p] = (n[p] || 0) + 1;
   });
-  var zones = (D.polygones || []).filter(function (k) { return k && k.name && Array.isArray(k.pts) && k.pts.length >= 3; })
-    .map(function (k) { return { nom: k.name, pts: k.pts, n: n[String(k.name).toLowerCase()] || 0 }; });
+  var surf = function (p) { return parseFloat(String(p.surface == null ? '' : p.surface).replace(',', '.')) || 0; };
+  var zones = (D.parcelles || []).filter(function (p) { return p && p.nom && p.statut !== 'Arrachee'; })
+    .map(function (p) { return { nom: String(p.nom), surface: surf(p), n: n[String(p.nom).toLowerCase()] || 0 }; })
+    .sort(function (a, b) { return (b.n - a.n) || (b.surface - a.surface) || a.nom.localeCompare(b.nom, 'fr'); });
   return { zones: zones, travaillees: zones.filter(function (z) { return z.n > 0; }).length, total: zones.length };
 }
 function _mvCarteNiveau(x) { return x <= 0 ? 0 : (x === 1 ? 1 : (x <= 3 ? 2 : 3)); }
-// La projection : équirectangulaire autour du centre (à l'échelle d'un domaine, c'est juste), dans une boîte de 1000 de large.
-function _mvCarteSvgPoints(zones) {
-  var lats = [], lngs = [];
-  zones.forEach(function (z) { z.pts.forEach(function (p) { lats.push(+p[0]); lngs.push(+p[1]); }); });
-  if (!lats.length) return { l: 0, h: 0, poly: [] };
-  var minLa = Math.min.apply(null, lats), maxLa = Math.max.apply(null, lats), minLo = Math.min.apply(null, lngs), maxLo = Math.max.apply(null, lngs);
-  var k = Math.cos(((minLa + maxLa) / 2) * Math.PI / 180), w = Math.max((maxLo - minLo) * k, 1e-9), hh = Math.max(maxLa - minLa, 1e-9);
-  var L = 1000, H = Math.max(120, Math.round(L * hh / w)), s = L / w;
-  if (H > 1400) { H = 1400; s = H / hh; L = Math.round(w * s); }
-  return { l: L, h: H, poly: zones.map(function (z) {
-    return z.pts.map(function (p) { return Math.round(((+p[1] - minLo) * k) * s) + ',' + Math.round((maxLa - +p[0]) * s); }).join(' ');
-  }) };
-}
 // ★★ SAISONIMG-1 (§351) — « MA SAISON EN IMAGES » : six cartes qui racontent la saison de la personne (maquette GRATIF :
 //   « style Spotify Wrapped, 6 cartes, PDF » ; « peu de chiffres personnels, racontés comme une histoire »). Tout vient des
 //   calculs déjà là : le journal (sa part), le tracteur, le Chai et le Cuvier, les jalons datés, les premières fois, les vins.
@@ -586,22 +579,37 @@ function _mvRangBouteilleSection() {
 }
 window._mvRangBouteilleSection = _mvRangBouteilleSection;
 // ★★ CARTEDOM-1 (§350) — la carte dans « Ma trace » : depuis le début de la saison active (sinon un an).
+// ★★ CARTEDOM-2 (§491) — LA MOSAÏQUE DE LA CARTE DU JOUR, dessinée par les fonctions de l'Accueil (app.js, FORME-2 et ACCV-1) :
+//   chaque parcelle à sa forme et à la taille de sa surface déclarée (_homeForme), avec ses rangs (_homeRangs) ; sans contour,
+//   le rectangle de sa surface, en pointillé quand le domaine a des contours (plein chez un domaine qui n'en a aucun). Un
+//   appui ouvre sa fiche (openDP : openOv la pose au-dessus de « Ma trace »). Teintes par classes (cd-n0 à cd-n3), aucune
+//   couleur dans le JavaScript. Sans réseau, rien ne change : tout est déjà dans le téléphone.
 function _mvCarteDomaineSection() {
   var u = window.currentUser; if (!u || !u.nom) return '';
   var esc = (typeof window._escHtml === 'function') ? window._escHtml : _mvJalEnc;
-  var polys = (window.KML_POLYGONS_DYNAMIC && window.KML_POLYGONS_DYNAMIC.length) ? window.KML_POLYGONS_DYNAMIC : (window.KML_DATA || []);
+  var escA = (typeof window._escAttr === 'function') ? window._escAttr : _mvJalEnc;
   var sa = (window.SAISONS || []).find(function (s) { return s && s.active; });
   var depuis = (sa && sa.debut) ? String(sa.debut).slice(0, 10) : _mvJalDemiJournee(new Date(Date.now() - 365 * 86400000)).slice(0, 10);
-  var C = _mvCarteDomaine(u.nom, { polygones: polys, journal: window.JOURNAL, depuis: depuis });
+  var C = _mvCarteDomaine(u.nom, { parcelles: window.PARCELLES, journal: window.JOURNAL, depuis: depuis });
   if (!C.total) return '';
-  var P = _mvCarteSvgPoints(C.zones);
+  var lire = (typeof window._mvParcForme === 'function') ? window._mvParcForme : function () { return null; };
+  var forme = (typeof window._homeForme === 'function') ? window._homeForme : function () { return null; };
+  var rangs = (typeof window._homeRangs === 'function') ? window._homeRangs : function () { return ''; };
+  var fos = C.zones.map(function (z) { return lire(z.nom); }), avecContours = fos.some(Boolean);
+  var maxS = Math.max.apply(null, C.zones.map(function (z) { return z.surface; }).concat([0.0001]));
   var h = '<div class="mtr-lab">La carte de votre saison</div><div class="mtr-card mtr-cd">'
     + '<div class="mtr-cd-n"><b>' + C.travaillees + '</b> parcelle' + (C.travaillees > 1 ? 's' : '') + ' sur ' + C.total + ' depuis le ' + esc(_mvJalDateFr(depuis)) + '</div>'
-    + '<svg class="mtr-cd-svg" viewBox="0 0 ' + P.l + ' ' + P.h + '" role="img" aria-label="Carte du domaine, parcelles colorées selon vos passages">';
+    + '<div class="mtr-cd-mos" role="group" aria-label="Vos parcelles, colorées selon vos passages">';
   C.zones.forEach(function (z, i) {
-    h += '<polygon class="cd-n' + _mvCarteNiveau(z.n) + '" points="' + P.poly[i] + '"><title>' + esc(z.nom + ' — ' + z.n + ' passage' + (z.n > 1 ? 's' : '')) + '</title></polygon>';
+    var fo = fos[i], r = z.surface / maxS, f = forme(fo, r), rg = f ? rangs(fo, f.fw) : '';
+    var lib = z.nom + ' — ' + (z.n ? z.n + ' passage' + (z.n > 1 ? 's' : '') : 'aucun passage') + ((f || !avecContours) ? '' : ', pas de contour enregistré');
+    h += '<button type="button" class="mtr-cd-p cd-n' + _mvCarteNiveau(z.n) + (f ? ' mtr-cd-fo' : (avecContours ? ' mtr-cd-sans' : '')) + '"'
+      + ' style="' + (f ? '--fw:' + f.fw + ';--fh:' + f.fh : '--s:' + Math.sqrt(r > 0 ? r : 0).toFixed(3)) + '"'
+      + ' data-nom="' + escA(z.nom) + '" title="' + escA(lib) + '" aria-label="' + escA(lib) + '" onclick="openDP(this.dataset.nom)">'
+      + (f ? '<svg viewBox="' + f.vb + '" aria-hidden="true" focusable="false"><path d="' + f.d + '"/>' + (rg ? '<g class="mtr-cd-rg">' + rg + '</g>' : '') + '</svg>' : '')   // les rangs PAR-DESSUS la forme : dessous, sa couleur les cache
+      + '</button>';
   });
-  h += '</svg><div class="mtr-cd-leg"><span><i class="cd-n0"></i>aucun</span><span><i class="cd-n1"></i>1</span><span><i class="cd-n2"></i>2 à 3</span><span><i class="cd-n3"></i>4 et plus</span></div>';
+  h += '</div><div class="mtr-cd-leg"><span><i class="cd-n0"></i>aucun</span><span><i class="cd-n1"></i>1</span><span><i class="cd-n2"></i>2 à 3</span><span><i class="cd-n3"></i>4 et plus</span></div>';
   return h + '</div>';
 }
 window._mvCarteDomaineSection = _mvCarteDomaineSection;

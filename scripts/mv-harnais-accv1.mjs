@@ -32,7 +32,7 @@ function jouer(S, o) {
     { id: hexDe(11, 48) + '-qv', date: AUJ, parcelle: 'La Justice', tache: 'Réparation', qui: 'Jean', statut: 'En cours', membresEquipe: ['Sophie'] }
   ];
   const fin = new Date(2026, 10, 3);
-  const corpsF = ['function _homeSurf(p){', 'function _homeHa(x){', 'function _homeForme(f,r){', 'function _homeDreLignes(now){', 'function _homePrioCarte(){'].map(d => fonction(S.app, d)).join('\n');
+  const corpsF = ['function _homeSurf(p){', 'function _homeHa(x){', 'function _homeForme(f,r){', 'function _homeRangs(fo,fw){', 'function _homeDreLignes(now){', 'function _homePrioCarte(){'].map(d => fonction(S.app, d)).join('\n');   // ★ CARTEDOM-2 (§491) : les rangs vivent dans _homeRangs
   const noms = ['document', 'PARCELLES', '_prioItems', '_prioForMember', 'getTacheStatut', 'getPCls', 'tNom', '_escAttr', '_escHtml', '_pvSurfFr', 'window', 'currentUser', '_mvMoiAdmin', '_mvIcon', 'JOURNAL', 'MEMBRES', 'priorityMessage', '_mvToday', '_mvISO', '_mvPartCalc', '_mvPartDate', '_mvPartTache', '_hvHeure', 'fmtDate', '_mvEqBrut', 'dreEffectif'];
   const f = new Function(...noms, corpsF + '\n_homePrioCarte(); return document.getElementById(\'home-prio-corps\');');
   const win = {

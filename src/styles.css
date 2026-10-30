@@ -8635,21 +8635,34 @@ input[type="checkbox"], input[type="radio"]{ accent-color:var(--accent); }
 .mtr-rb-e{color:var(--texte-doux);white-space:nowrap}
 .mtr-rb-p{margin-top:var(--e-1,4px);color:var(--texte)}
 
-/* CARTEDOM-1 (§350) — « La carte de votre saison » : un SVG sans fond de carte, quatre teintes de passages. */
-.mtr-cd-n{margin-bottom:var(--e-2,8px)}
-.mtr-cd-svg{display:block;width:100%;height:auto;max-height:420px}
-.mtr-cd-svg polygon{stroke:var(--bg-card);stroke-width:3;stroke-linejoin:round}
-.cd-n0{fill:var(--gris-clair)}
-.cd-n1{fill:var(--or-pale)}
-.cd-n2{fill:var(--or);fill-opacity:.55}
-.cd-n3{fill:var(--or)}
-.mtr-cd-leg{display:flex;flex-wrap:wrap;gap:var(--e-3,12px);margin-top:var(--e-2,8px);font-size:var(--pt-micro,11px);color:var(--texte-doux)}
+/* CARTEDOM-1 (§350) — « La carte de votre saison ». ★ CARTEDOM-2 (§491) : la mosaïque de la carte du jour (FORME-2, ACCV-1),
+   plus la vraie géographie (sur un domaine étendu, chaque parcelle tombait à 1-3 px). Chaque parcelle à sa forme et à la
+   taille de sa surface (--fw, --fh, posés par _homeForme, en parts de --h-row-2, à 1,4 comme le panneau de la carte du jour),
+   ses rangs, et quatre teintes de passages : « aucun » est le blanc cerné du « à faire » de l'Accueil, puis l'or de plus en
+   plus plein. Sans contour : le rectangle de sa surface (--s), en pointillé si le domaine a des contours. */
+.mtr-cd-n{margin-bottom:var(--e-3,12px)}
+.mtr-cd-mos{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:var(--e-2,8px)}
+.mtr-cd-p{display:inline-flex;align-items:center;justify-content:center;width:calc(var(--h-row-2) * 1.4 * var(--s,1));min-width:var(--e-4,16px);min-height:var(--e-4,16px);max-width:100%;aspect-ratio:8 / 5;padding:0;border:var(--bw) solid var(--texte-doux);border-radius:var(--r-xs,4px);background:var(--bg-card);cursor:pointer}
+.mtr-cd-p.mtr-cd-fo{width:auto;aspect-ratio:auto;border:0;background:transparent}
+.mtr-cd-p.mtr-cd-sans{border-style:dashed}
+.mtr-cd-p:hover,.mtr-cd-p:focus-visible{outline:var(--bw-2) solid var(--accent-texte);outline-offset:var(--bw)}
+.mtr-cd-fo svg{display:block;width:calc(var(--h-row-2) * 1.4 * var(--fw));height:calc(var(--h-row-2) * 1.4 * var(--fh));max-width:100%;overflow:visible}
+.mtr-cd-fo path{stroke-width:1.4;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.mtr-cd-rg line{stroke:var(--or-tx);stroke-width:.75;stroke-opacity:.5;vector-effect:non-scaling-stroke}
+.mtr-cd-fo.cd-n0 path{fill:var(--bg-card);stroke:var(--texte-doux)}
+.mtr-cd-fo.cd-n0 .mtr-cd-rg line{stroke:var(--ligne-forte)}
+.mtr-cd-fo.cd-n1 path{fill:color-mix(in srgb,var(--or) 30%,var(--bg-card));stroke:var(--or)}
+.mtr-cd-fo.cd-n2 path{fill:color-mix(in srgb,var(--or) 62%,var(--bg-card));stroke:var(--or)}
+.mtr-cd-fo.cd-n3 path{fill:var(--or);stroke:var(--or-tx)}
+.mtr-cd-p:not(.mtr-cd-fo).cd-n1{background:color-mix(in srgb,var(--or) 30%,var(--bg-card));border-color:var(--or)}
+.mtr-cd-p:not(.mtr-cd-fo).cd-n2{background:color-mix(in srgb,var(--or) 62%,var(--bg-card));border-color:var(--or)}
+.mtr-cd-p:not(.mtr-cd-fo).cd-n3{background:var(--or);border-color:var(--or-tx)}
+.mtr-cd-leg{display:flex;flex-wrap:wrap;gap:var(--e-3,12px);margin-top:var(--e-3,12px);font-size:var(--pt-micro,11px);color:var(--texte-doux)}
 .mtr-cd-leg span{display:inline-flex;align-items:center;gap:var(--e-1,4px)}
-.mtr-cd-leg i{display:inline-block;width:var(--e-3,12px);height:var(--e-3,12px);border-radius:var(--r-xs,4px)}
-.mtr-cd-leg i.cd-n0{background:var(--gris-clair)}
-.mtr-cd-leg i.cd-n1{background:var(--or-pale)}
-.mtr-cd-leg i.cd-n2{background:var(--or);opacity:.55}
-.mtr-cd-leg i.cd-n3{background:var(--or)}
+.mtr-cd-leg i{display:inline-block;width:var(--e-3,12px);height:var(--e-3,12px);border-radius:var(--r-xs,4px);border:var(--bw) solid var(--texte-doux);background:var(--bg-card)}
+.mtr-cd-leg i.cd-n1{background:color-mix(in srgb,var(--or) 30%,var(--bg-card));border-color:var(--or)}
+.mtr-cd-leg i.cd-n2{background:color-mix(in srgb,var(--or) 62%,var(--bg-card));border-color:var(--or)}
+.mtr-cd-leg i.cd-n3{background:var(--or);border-color:var(--or-tx)}
 
 /* SAISONIMG-1 (§351) — « Ma saison en images » : six cartes à faire défiler, une par écran. */
 .si-cartes{display:flex;gap:var(--e-3,12px);overflow-x:auto;scroll-snap-type:x mandatory;padding:var(--e-1,4px) var(--e-4,16px) var(--e-3,12px);-webkit-overflow-scrolling:touch}

@@ -1,0 +1,41 @@
+{
+  "lot": "CARTEDOM-2",
+  "section": "§491",
+  "base": "03df0d4605a4cb61e5eb0faadd69eb7e36c70798",
+  "inclut": [],
+  "date": "2026-10-30",
+  "tutos": {
+    "ok": true,
+    "empreinte": "ef7e55c630977ba17dba60ea55e5509c98e7fc25a986ae49c812dd41da67ae23",
+    "date": "2026-10-30T05:47:43.276Z",
+    "joues": {
+      "téléphone": 1,
+      "ordinateur": 1,
+      "côte à côte": 3
+    },
+    "concernes": [
+      "equipes"
+    ],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "cfd6f961461696b3a0c989476c4f47c048019bacc9c86784b27b1a4142abd159",
+    "CLAUDE.md": "3c161fd850f3055a9d144f207a559458d413ff8da81274ca86d578285a21786f",
+    "docs/claude/INDEX.md": "19cc9ef42161f8489a27aeaa1d2dcdd52e0726509d292018febbc7a7f9978cdf",
+    "docs/claude/chantiers-480-529.md": "35d1ea1691abe2ee4e3b50afdd5578360d70472ec0aab18379b9b1f0ee387c3a",
+    "docs/claude/journal.md": "c3bb36848ef0d1cc2e8955db96769cbb6215553fa3f3933d7e304013fbb8e445",
+    "guide/04-vigne.html": "82e7e1a2017fd9976409cf3856396eca1b4d63673bd89c6d99a644fb353f755e",
+    "index.html": "b60dc090b6dbcd753fe8992a828e11d56c465af78ccccc217e3551bfc46f63f3",
+    "public/sw.js": "b659f9680759aef596857887d7a4349a5e9909c71e9099c813e11e8aa8cb372c",
+    "scripts/harnais-claude-md.mjs": "c4f7978a279423f4865f36429005edeed4107c2d0ce07d6c8268fee40de74ba4",
+    "scripts/mv-harnais-accv1.mjs": "addb8170de0763c0b09d3161c9cca2e9ee597bccfed2d60e226e3c0d80ae806b",
+    "scripts/mv-harnais-cartedom1.mjs": "fd8143141743234a3afa6ec2c223ba204ecc10cf030cc1655670007d3641fc6f",
+    "scripts/mv-harnais-liste.mjs": "ce3a667809a6448f1e865c9fd3e96648b58cb40f647e4eab08e52bdfcec64f1c",
+    "src/app.js": "15d224545762986964d7285b06aa745f2a0a181fb6f76193d690d09ee0a6e6cc",
+    "src/jalons.js": "764b563eaa837c51383f6738d005093fd0c888faa075ccc718725fee97a34d98",
+    "src/styles.css": "48076d6f785633260ec72486c1322214feefe49ebe4eb0b512d53bbd390a2ea2",
+    "src/utils.js": "edadd65338446a1bd627e3dae208de6ed8381162b7673e507c9c1117adba802e",
+    "src/whats-new.js": "afe92ef995128728753d0247c1b33bd8291b99bd2d29a6c6b672e031492b705c",
+    "scripts/mv-harnais-cartedom2.mjs": "94786b01ac1f72cef3790dbc1b6b7730ed76e4c7b81f7263d136d537067f516e"
+  }
+}
