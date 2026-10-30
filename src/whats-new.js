@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.47', d: '2026-10-30', items: [
+    { niv: 0, pour: ['tous'], emoji: 'bouclier', titre: 'Un enregistrement bloqué se dit en clair',
+      desc: "À l’ouverture de l’appli, un réglage pouvait être refusé avec «\u00a0Erreur critique\u00a0» et un message technique. C’est corrigé\u00a0: la configuration du domaine est relue sur le téléphone dès le démarrage. Et si la protection anti-perte bloque un jour un enregistrement, la fenêtre dit en clair ce qui n’est pas parti — rien n’est perdu, c’est gardé dans Réglages › Saisies non enregistrées." },
+  ] },
   { v: '10.46', d: '2026-10-30', items: [
     { niv: 0, pour: ['admin'], emoji: 'barrique', titre: 'La Réserve : un « + » pour chaque mouvement',
       desc: "Au téléphone, le «\u00a0+\u00a0» de la Réserve ouvre «\u00a0Nouveau mouvement\u00a0» : une entrée (livraison d’intrants, fûts neufs), une sortie (fûts vendus ou réformés, un intrant recompté) ou un ouillage — chaque ligne ouvre son formulaire. En tête de Fûts, la pyramide des âges passe en premier ; la part des anges sans ouillage saisi tient sur une ligne, avec «\u00a0Saisir\u00a0»." },

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.46';
+export const APP_VERSION = '10.47';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1978,7 +1978,7 @@ export function logError(opts) {
   if(opts.silencieux) {
     /* rien a l'ecran */
   } else if(level === 'critical') {
-    _showCriticalOverlay(entry);
+    _showCriticalOverlay(entry, opts);
   } else if(level === 'error') {
     _mvSuppressToastCapture = true;
     showToast('⚠️ ' + entry.msg, '#B85A1A');
@@ -1993,13 +1993,19 @@ export function logError(opts) {
   return entry;
 }
 
-function _showCriticalOverlay(entry) {
+// ★ CFG-1 (§496) — `opts.ecran` / `opts.titre` : ce que la personne lit, en clair (la garde anti-écrasement, firebase.js
+//   _mvGardeEcran). Le message technique passe alors sous « Détail technique », le journal le garde tel quel (entry
+//   n'en porte rien). Sans eux : « Erreur critique » et le message, comme avant. Le titre est remis à chaque ouverture.
+function _showCriticalOverlay(entry, opts) {
   var ov = document.getElementById('mv-critical-overlay');
   if(!ov) return;
+  var o = opts || {};
+  var tEl = document.getElementById('mce-titre');
   var msgEl = document.getElementById('mce-msg');
   var detEl = document.getElementById('mce-detail');
-  if(msgEl) msgEl.textContent = entry.msg;
-  if(detEl) detEl.textContent = entry.detail || '';
+  if(tEl) tEl.textContent = o.titre || 'Erreur critique';
+  if(msgEl) msgEl.textContent = o.ecran || entry.msg;
+  if(detEl) detEl.textContent = o.ecran ? (entry.msg + (entry.detail ? '\n' + entry.detail : '')) : (entry.detail || '');
   ov.style.display = 'flex';
 }
 

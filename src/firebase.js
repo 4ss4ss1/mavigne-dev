@@ -565,7 +565,7 @@ function _mvFileParDessus(key, value) {
 // enregistrées), plus jamais jetée.
 function _mvFileBloquee(key, value, detail) {
   _mvStashDenied(key, value);
-  if (window.logError) window.logError({ level: 'critical', cat: 'guard', msg: 'flush ' + key + ' BLOQUE (anti-ecrasement) -- retire de la file, saisie mise au coffre', detail: detail || '' });
+  if (window.logError) window.logError(Object.assign({ level: 'critical', cat: 'guard', msg: 'flush ' + key + ' BLOQUE (anti-ecrasement) -- retire de la file, saisie mise au coffre', detail: detail || '' }, _mvGardeEcran(key)));
   showSyncBadge('Envoi bloqu\u00e9 (protection) \u2014 ' + _mvKeyLbl(key) + ' \u00b7 saisie conserv\u00e9e', '#7A1020');
 }
 
@@ -1334,6 +1334,13 @@ var _MV_KEYLBL = {
   planning_acomptes:'Planning', planning_hsup:'Planning'
 };
 function _mvKeyLbl(k) { return _MV_KEYLBL[k] || k; }
+// ★ CFG-1 (§496) — ce que la fenêtre critique dit d'une écriture refusée par la garde anti-écrasement : en clair, pour la
+//   personne. Le message technique reste au journal et sous « Détail technique » (utils.js, _showCriticalOverlay). Vécu le
+//   27/10 : « fbSave config BLOQUE (anti-ecrasement) » et « cur=34 new=2 » affichés tels quels sous « Erreur critique ».
+function _mvGardeEcran(key) {
+  return { titre: 'Enregistrement bloqu\u00e9',
+    ecran: 'L\u2019appli a refus\u00e9 d\u2019envoyer une version incompl\u00e8te de \u00ab\u00a0' + _mvKeyLbl(key) + '\u00a0\u00bb. Rien n\u2019est perdu\u00a0: ce qui n\u2019est pas parti est gard\u00e9 dans R\u00e9glages \u203a Saisies non enregistr\u00e9es.' };
+}
 
 // ── VD-SAVE generalise : LE MESSAGE DE SUCCES ATTEND LE SUCCES ──────────────
 // `fbSave` rend un etat depuis le 25/08 (§68). `saveData(key,msg)` le lit. Mais les
@@ -1857,7 +1864,7 @@ async function _mvBlockDestructive(key, value) {
     var curN = _mvDocSize(key, snap.data().value);
     var newN = _mvDocSize(key, value);
     if (curN >= _MV_GUARD_FLOORS[key] && newN < curN * 0.5) {
-      if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'fbSave ' + key + ' BLOQUE (anti-ecrasement)', detail:'cur=' + curN + ' new=' + newN });
+      if (window.logError) window.logError(Object.assign({ level:'critical', cat:'guard', msg:'fbSave ' + key + ' BLOQUE (anti-ecrasement)', detail:'cur=' + curN + ' new=' + newN }, _mvGardeEcran(key)));
       return true;
     }
   } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_mvBlockDestructive'); }
@@ -1985,7 +1992,7 @@ async function _mvFbSaveServeur(key, value) {
       var _pRes = await _mvEnvoiBorne(_retryAsync(function(){ return _saveParcellesMerged(_pL0, undefined, _jeton); }, 3, 1000, _jeton), _jeton);
       if (_pRes && _pRes.__mvTrop) return _mvTropGros('parcelles', value, _pRes.octets);   // ★★ TAILLE-2
       if (_pRes && _pRes.__mvBlocked) {
-        if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'fbSave parcelles BLOQUE (anti-ecrasement)', detail:'remoteProg='+_pRes.remoteProg+' mergedProg='+_pRes.mergedProg });
+        if (window.logError) window.logError(Object.assign({ level:'critical', cat:'guard', msg:'fbSave parcelles BLOQUE (anti-ecrasement)', detail:'remoteProg='+_pRes.remoteProg+' mergedProg='+_pRes.mergedProg }, _mvGardeEcran('parcelles')));
         _mvStashDenied('parcelles', value);   // ★ ENVOI-1 : rien n'est jeté — au coffre
         try { var _sH = await getDoc(fbDocRef('parcelles')); if (_sH.exists()) applyFbData('parcelles', _sH.data().value); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/fbSave'); }
         if (typeof showSyncBadge === 'function') showSyncBadge('\ud83d\udee1\ufe0f Sauvegarde ignoree (protection)', '#B5621A');
@@ -2011,7 +2018,7 @@ async function _mvFbSaveServeur(key, value) {
       var _fRes = await _mvEnvoiBorne(_retryAsync(function(){ return _mvSauverFusion(key, _fL0, _fB0, _jeton); }, 3, 1000, _jeton), _jeton);
       if (_fRes && _fRes.trop) return _mvTropGros(key, value, _fRes.octets);   // ★★ TAILLE-2
       if (_fRes && _fRes.bloque) {
-        if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'fbSave ' + key + ' BLOQUE (anti-ecrasement)', detail:'cur=' + _fRes.curN + ' new=' + _fRes.newN });
+        if (window.logError) window.logError(Object.assign({ level:'critical', cat:'guard', msg:'fbSave ' + key + ' BLOQUE (anti-ecrasement)', detail:'cur=' + _fRes.curN + ' new=' + _fRes.newN }, _mvGardeEcran(key)));
         _mvStashDenied(key, value);   // ★ ENVOI-1 : rien n'est jeté — au coffre
         try { var _sH3 = await getDoc(fbDocRef(key)); if (_sH3.exists()) { applyFbData(key, _sH3.data().value); _mvBaseNoter(key, _sH3.data().value, _sH3.metadata); } } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/fbSave#fusion'); }
         if (typeof showSyncBadge === 'function') showSyncBadge('Sauvegarde ignorée (protection)', '#B5621A');

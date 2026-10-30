@@ -1052,6 +1052,23 @@ function loadData() {
     if (d.PLANNING_HSUP && typeof d.PLANNING_HSUP === 'object') { Object.keys(window.PLANNING_HSUP||{}).forEach(function(k){delete window.PLANNING_HSUP[k];}); Object.assign(window.PLANNING_HSUP, d.PLANNING_HSUP); }
     if (d.CONFIG && d.CONFIG.domaine_nom) { DOMAINE_NOM = d.CONFIG.domaine_nom; }
     if (d.CONFIG && d.CONFIG.saison_passages) { SAISON_PASSAGES = Object.assign({Ebourgeonnage:2, Pioche:2, Relevage:3}, d.CONFIG.saison_passages); window.SAISON_PASSAGES = SAISON_PASSAGES; }
+    // ★★ CFG-1 (§496) — LA CONFIGURATION REVIENT AVEC LA COPIE DU TÉLÉPHONE, ET CETTE COPIE SERT DE BASE DE FUSION.
+    //   Avant : seuls domaine_nom et saison_passages en revenaient ; CONFIG restait {} jusqu'à la lecture du serveur,
+    //   et l'écran se dessine avant elle (_mvApresEntree → goHub). Un réglage enregistré dans cet intervalle partait
+    //   d'une config VIDE ; rangé en file sur une saisie de config qui y attendait déjà (sa PREMIÈRE base est gardée,
+    //   _queueSave, _mvFileFusionner), ce vide se lisait « tous les autres réglages supprimés » ; la mémoire le prenait
+    //   à l'arrivée du serveur (_mvFileParDessus) et l'envoi suivant était bloqué — « fbSave config BLOQUE
+    //   (anti-ecrasement) · cur=34 new=2 » (vécu le 27/10, à l'ouverture). AUJ-6 (§308) avait vu la config écrite
+    //   avant la lecture et gardé la seule photo du jour ; ici, la cause. La base suit la règle d'ENTREE-1 (§244) :
+    //   un réglage enregistré avant la lecture n'envoie que ce qu'il change, jamais la copie entière par-dessus ce
+    //   qu'un autre appareil a réglé depuis. Jamais par-dessus une config déjà lue du serveur ; une copie vide ne
+    //   remplace rien (pas de base non plus : l'envoi fera l'union).
+    if (d.CONFIG && typeof d.CONFIG === 'object' && !Array.isArray(d.CONFIG) && Object.keys(d.CONFIG).length && !_mvKeyLoaded.config) {
+      CONFIG = d.CONFIG; window.CONFIG = CONFIG;
+      if (typeof window._fbBasesDepuisAppareil === 'function') {
+        try { window._fbBasesDepuisAppareil({ config: CONFIG }); } catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/loadData#cfg1'); }
+      }
+    }
     return true;
   } catch(e) { return false; }
 }

@@ -73,7 +73,8 @@ function affectation(src, nom) {
 const VARS = ['_MV_FUSION_EXCLUES', '_fbBases', '_offlineBases', '_MV_FILE_BASE_CLE', '_MV_GUARD_FLOORS',
   '_mvFileMemSeule', '_mvFileAlerte', '_mvPersistDemande', '_MV_TAILLE_ALERTE', '_mvTropDit', '_MV_STASH_KEY',
   '_MV_PAGE', '_MV_ENVOI_PFX', '_MV_ENVOI_MAX_MS', '_MV_ENVOI_LENT', '_mvEnvoiDernier', '_mvEnvoiN', '_mvFlushP'];
-const FNS = ['_mvDeepEqual', '_mvIsObj', '_mvMerge3', '_mvMergeParcelles', '_mvEgal', '_mvCanon', '_mvFusion',
+// ★ CFG-1 (§496) : _mvGardeEcran — la phrase en clair que la garde passe à logError (sans elle, la branche « bloqué » plante ici).
+const FNS = ['_mvDeepEqual', '_mvIsObj', '_mvGardeEcran', '_mvMerge3', '_mvMergeParcelles', '_mvEgal', '_mvCanon', '_mvFusion',
   '_mvFusionObjet', '_mvIdentite', '_mvClesListes', '_mvFusionListe', '_mvBaseNoter', '_mvBaseDe', '_mvBaseMem',
   '_mvSauverFusion', '_mvApresFusion', '_mvParcellesApres', '_entryHasProg', '_tachesBlockHasProg', '_mvParcProgCount',
   '_mvIntrantsCount', '_mvPaieCount', '_mvDocSize', '_mvBlockDestructive', '_saveParcellesMerged', '_fsNoNestedArrays',
@@ -381,8 +382,8 @@ if (CONTRE) {
   await mord('★★ le coffre remplace de nouveau la saisie précédente',
     "        else if (key !== 'kml_polygons') v = _mvFusion(undefined, value, st[key].value);", '        else v = value;', ESSAIS.coffreFusion);
   await mord('★★ l’écriture directe refusée n’est plus gardée',
-    "        if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'fbSave ' + key + ' BLOQUE (anti-ecrasement)', detail:'cur=' + _fRes.curN + ' new=' + _fRes.newN });\n        _mvStashDenied(key, value);",
-    "        if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'fbSave ' + key + ' BLOQUE (anti-ecrasement)', detail:'cur=' + _fRes.curN + ' new=' + _fRes.newN });", ESSAIS.gardeDirecte);
+    "        if (window.logError) window.logError(Object.assign({ level:'critical', cat:'guard', msg:'fbSave ' + key + ' BLOQUE (anti-ecrasement)', detail:'cur=' + _fRes.curN + ' new=' + _fRes.newN }, _mvGardeEcran(key)));\n        _mvStashDenied(key, value);",
+    "        if (window.logError) window.logError(Object.assign({ level:'critical', cat:'guard', msg:'fbSave ' + key + ' BLOQUE (anti-ecrasement)', detail:'cur=' + _fRes.curN + ' new=' + _fRes.newN }, _mvGardeEcran(key)));", ESSAIS.gardeDirecte);   // ancre suivie de CFG-1 (§496)
   await mord('★★★ un envoi plus ancien efface l’entrée du plus récent',
     '  if (_mvEnvoiDernier[key] !== n) return;\n', '', ESSAIS.deuxEnvois);
   await mord('★★ deux vidages à la fois',

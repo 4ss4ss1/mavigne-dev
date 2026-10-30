@@ -77,7 +77,8 @@ function affectation(src, nom) {
 const VARS = ['_MV_FUSION_EXCLUES', '_fbBases', '_offlineBases', '_MV_FILE_BASE_CLE', '_MV_GUARD_FLOORS',
   '_mvFileMemSeule', '_mvFileAlerte', '_mvPersistDemande',   // STOCK-1 (§180)
   '_MV_TAILLE_ALERTE', '_mvTropDit', '_MV_PAGE', '_MV_ENVOI_PFX', '_MV_ENVOI_MAX_MS', '_MV_ENVOI_LENT', '_mvEnvoiDernier', '_mvEnvoiN', '_mvFlushP'];                        // TAILLE-2 (§246)
-const FNS = ['_mvDeepEqual', '_mvIsObj', '_mvMerge3', '_mvMergeParcelles', '_mvEgal', '_mvCanon', '_mvFusion',
+// ★ CFG-1 (§496) : _mvGardeEcran — la phrase en clair que la garde passe à logError (sans elle, la branche « bloqué » plante ici).
+const FNS = ['_mvDeepEqual', '_mvIsObj', '_mvGardeEcran', '_mvMerge3', '_mvMergeParcelles', '_mvEgal', '_mvCanon', '_mvFusion',
   '_mvFusionObjet', '_mvIdentite', '_mvClesListes', '_mvFusionListe', '_mvBaseNoter', '_mvBaseDe', '_mvBaseMem',
   '_mvSauverFusion', '_mvApresFusion', '_mvParcellesApres', '_entryHasProg', '_tachesBlockHasProg', '_mvParcProgCount',
   '_mvIntrantsCount', '_mvPaieCount', '_mvDocSize', '_mvBlockDestructive', '_saveParcellesMerged', '_fsNoNestedArrays',
