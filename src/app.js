@@ -6528,9 +6528,9 @@ function _homePrioCarte(){
     var f1;
     if(adm) f1=eqBtn();
     else {
-      var eqj=(me&&iso&&typeof window._mvEqDe==='function')?window._mvEqDe(me,iso):null, eqL=(eqj&&eqj.length)?eqj:((it&&it.equipe&&it.equipe.length)?it.equipe:null), trn='';
+      var eqj=(me&&iso&&typeof window._mvEqDe==='function')?window._mvEqDe(me,iso):null, eqL=(eqj&&eqj.length)?eqj:((it&&it.equipe&&it.equipe.indexOf(me)>=0)?it.equipe:null), trn='';   // EQFIXE-1 (§490) : l'équipe de la priorité seulement si on y est coché — la règle des Parcelles
       try{ if(eqj&&typeof window._mvEqJour==='function'&&typeof _mvEqBrut==='function'&&typeof window._mvTourneesLues==='function'){ var TJ2=window._mvEqJour(iso)||[], k=-1; TJ2.forEach(function(x,i){ if(x.indexOf(me)>=0) k=i; }); var br=k>=0?(_mvEqBrut(iso)[k]||{}):{}; if(br.t){ var o=window._mvTourneesLues().find(function(x){ return String(x.id)===String(br.t); }); if(o) trn=o.nom; } } }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_homePrioCarte#tournee'); }
-      f1='<div class="hpc-fx"><span class="hpc-lbl">'+ico('equipe',16)+'<span>Votre \u00e9quipe</span></span><span class="hpc-val">'+(eqL?eqL.map(avt).join('')+'<span>'+_escHtml(noms(eqL))+'</span>':'<span>Toute l\u2019\u00e9quipe</span>')+'</span><span class="hpc-s">'+(trn?'tourn\u00e9e \u00ab\u00a0'+_escHtml(trn)+'\u00a0\u00bb':(eqj?'\u00e9quipe du jour':'pas d\u2019\u00e9quipe indiqu\u00e9e'))+'</span></div>';
+      f1='<div class="hpc-fx"><span class="hpc-lbl">'+ico('equipe',16)+'<span>Votre \u00e9quipe</span></span><span class="hpc-val">'+(eqL?eqL.map(avt).join('')+'<span>'+_escHtml(noms(eqL))+'</span>':'<span>Toute l\u2019\u00e9quipe</span>')+'</span><span class="hpc-s">'+(trn?'tourn\u00e9e \u00ab\u00a0'+_escHtml(trn)+'\u00a0\u00bb':(eqj?'\u00e9quipe du jour':(eqL?'\u00e9quipe de la priorit\u00e9':'pas d\u2019\u00e9quipe indiqu\u00e9e')))+'</span></div>';
     }
     var ici=t?act.filter(function(p){ return etat(p)==='cours'; }):[], f2;
     if(ici.length){
@@ -8204,7 +8204,7 @@ function renderParcelles(){
   });
   // Verrouillage du filtre tâche pour l'équipe quand une tâche prioritaire est active
   if(_prioLocked && !_prioIts.some(function(it){return it.t===pTacheFilter;})){ var _pdef=_prioDefaultTask(_prioIts); pTacheFilter=_pdef; pCurStep=_pvSmartStep(_pdef); }
-  if(_prioLocked) _prioSeedEquipe(pTacheFilter);
+  // EQFIXE-1 (§490) : plus de recopie de l'équipe de la priorité dans la mémoire du téléphone — _eqtFor la lit à chaque affichage
   const tfRow=document.getElementById('p-tache-filter-row');
   if(tfRow){
     if(_prioLocked){
@@ -9745,7 +9745,6 @@ function savePriority(){
   window.CONFIG=cfg; if(typeof CONFIG!=='undefined') CONFIG=cfg;
   priorityTask=items.length?items[0].t:''; // compat ancien format (appareils non recharges)
   _prioOverride=false;
-  _prioEqSeeded={}; // re-appliquer les equipes affectees sur cet appareil
   document.getElementById('ovPriority').classList.remove('open');
   savePriorityData();
   renderParcelles();
@@ -9761,7 +9760,6 @@ function clearPriority(){
   delete cfg.tachesPrio;
   window.CONFIG=cfg; if(typeof CONFIG!=='undefined') CONFIG=cfg;
   _prioOverride=false;
-  _prioEqSeeded={};
   document.getElementById('ovPriority').classList.remove('open');
   savePriorityData();
   renderParcelles();
@@ -9899,14 +9897,51 @@ function _mvEqJourMoi(){
     return T ? T.filter(function(n){ return n!==me; }) : null;
   }catch(e){ return null; }
 }
+// ★★ EQFIXE-1 (§490, 30/10/2026) — L'ÉQUIPE DE LA PRIORITÉ, LUE À CHAQUE AFFICHAGE ET IMPOSÉE AU SALARIÉ.
+//   Nico (30/10) : « un ouvrier sélectionné dans une équipe et sur une tâche prioritaire, lorsqu'il allume son application,
+//   n'est pas dans l'équipe définie par l'administrateur ; il est bien sur la tâche ». La tâche se recalculait à chaque
+//   affichage ; l'équipe cochée dans « Priorité du moment » était RECOPIÉE une fois par session et par tâche dans la mémoire
+//   du téléphone (_prioSeedEquipe, verrou _prioEqSeeded, remis à zéro sur le seul téléphone de l'admin qui enregistre).
+//   Appli restée ouverte (le cas courant d'une appli installée) ou premier dessin sur d'anciennes données : un changement
+//   d'équipe sur la même tâche n'arrivait jamais.
+//   Décision de Nico (« Oui », 30/10) : l'équipe posée par l'admin s'impose au salarié et suit ses changements — les
+//   Équipes du jour d'abord (ÉQUIPES-1), puis l'équipe de la priorité où il est coché. Plus de recopie : on lit CONFIG à
+//   chaque fois. L'administrateur garde la main (rien ne lui est imposé) ; un salarié coché dans aucune équipe de la
+//   priorité garde son propre choix — on ne lui donne plus d'office l'équipe des autres.
+//   _mvEqPrioDe(nom, tâche) : l'équipe de la priorité de cette tâche si `nom` y figure (tous ses noms), sinon null.
+//   _mvEqPrioMoi(tâche) : chez un salarié, les AUTRES noms de cette équipe ([] = seul, et c'est imposé) ; null sinon.
+function _mvEqPrioDe(nom, task){
+  if(nom==null || !task || typeof _prioItems!=='function') return null;
+  var its=_prioItems();
+  for(var i=0;i<its.length;i++){
+    var it=its[i];
+    if(it && it.t===task && Array.isArray(it.equipe) && it.equipe.indexOf(String(nom))>=0) return it.equipe.slice();
+  }
+  return null;
+}
+function _mvEqPrioMoi(task){
+  try{
+    var me=currentUser&&currentUser.nom;
+    if(!me || _mvMoiAdmin()) return null;
+    var T=_mvEqPrioDe(me, task);
+    return T ? T.filter(function(n){ return n!==me; }) : null;
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvEqPrioMoi'); return null; }
+}
+// Le message d'un appui sur une équipe imposée : les noms en toutes lettres (à l'arrivée, la barre ne montre que les pastilles).
+function _mvEqFixeeMot(autres, duJour){
+  var me=(currentUser&&currentUser.nom)||'';
+  var qui=(autres&&autres.length)?[me].concat(autres).join(' + '):'personne d\u2019autre que vous';
+  return (duJour?'\u00c9quipe du jour fix\u00e9e':'\u00c9quipe fix\u00e9e')+' par l\u2019administrateur\u00a0: '+qui;
+}
 function _mvEqApplique(e){
   try{
     if(!e || !e.qui || typeof window._mvEqDe!=='function') return e;
-    var T=window._mvEqDe(e.qui, e.date||_mvToday());
+    var T=window._mvEqDe(e.qui, e.date||_mvToday()), duJour=!!T;
+    if(!T && typeof _mvEqPrioDe==='function' && !_mvMoiAdmin()) T=_mvEqPrioDe(e.qui, e.tache);   // ★ EQFIXE-1 (§490) : sinon, l'équipe de la priorité où il est coché
     if(!T) return e;
     var autres=T.filter(function(n){ return n!==e.qui; });
     if(!_mvMoiAdmin()){
-      e.equipe=autres.length>0; e.membresEquipe=autres.slice(); delete e.quiHors; e.eqJour=true;
+      e.equipe=autres.length>0; e.membresEquipe=autres.slice(); delete e.quiHors; if(duJour) e.eqJour=true;
     } else if(!(Array.isArray(e.membresEquipe) && e.membresEquipe.length)){
       e.equipe=autres.length>0; e.membresEquipe=autres.slice(); if(autres.length) e.eqJour=true;
     }
@@ -9922,7 +9957,8 @@ function _mvEqUi(prefix){
     var note=document.getElementById(prefix+'-eqj-note');
     if(!note){ note=document.createElement('div'); note.id=prefix+'-eqj-note'; note.className='mv-l'; note.style.display='none'; pick.parentNode.insertBefore(note,pick); }
     var me=currentUser&&currentUser.nom;
-    var T=(me && typeof window._mvEqDe==='function') ? window._mvEqDe(me,_mvToday()) : null;
+    var T=(me && typeof window._mvEqDe==='function') ? window._mvEqDe(me,_mvToday()) : null, duJour=!!T;
+    if(!T && me && !_mvMoiAdmin()) T=_mvEqPrioDe(me, _mvEqUiTache(prefix));   // ★ EQFIXE-1 (§490) : l'équipe de la priorité, imposée comme celle du jour
     if(!T){ note.style.display='none'; pick.style.display=''; return; }
     var autres=T.filter(function(n){ return n!==me; });
     note.style.display='';
@@ -9930,7 +9966,7 @@ function _mvEqUi(prefix){
       pick.style.display='none';
       var sec=document.getElementById(prefix+'-equipe-section'); if(sec) sec.style.display='none';
       var hv=document.getElementById(prefix+'-equipe-val'); if(hv) hv.value=autres.length?'oui':'non';
-      note.textContent='\u00c9quipe du jour : '+T.join(' + ');
+      note.textContent=(duJour?'\u00c9quipe du jour : ':'\u00c9quipe fix\u00e9e par l\u2019administrateur : ')+T.join(' + ');
       return;
     }
     pick.style.display='';
@@ -9943,6 +9979,13 @@ function _mvEqUi(prefix){
       });
     }
   }catch(err){ if(window._mvAvale) window._mvAvale(err,'app.js/_mvEqUi'); }
+}
+// La tâche du panneau ouvert (EQFIXE-1, §490) : chaque panneau garde la sienne.
+function _mvEqUiTache(prefix){
+  if(prefix==='vp') return _validTache;
+  if(prefix==='niv') return _nivTache;
+  if(prefix==='pass') return _passTache;
+  var s=document.getElementById(prefix+'-tache'); return s?s.value:'';
 }
 // ── La carte de l'Accueil et son réglage ──
 var _EQJ_SEL={}, _EQJ_TRN={};   // TRN-2 (§331) : _EQJ_TRN[n° d'équipe] = id de sa tournée
@@ -10230,7 +10273,7 @@ function openJournalEntry(){
   document.getElementById('je-equipe-section').style.display='none';
   document.getElementById('je-statut').value='Validé';
   _buildMembresCheckboxes('je-membres-pick','');
-  var _jeTs=document.getElementById('je-tache'); if(_jeTs){_jeTs.onchange=function(){ _jePrefillTeam(); _jeEtapeMaj(); };}   // ARRACH-4
+  var _jeTs=document.getElementById('je-tache'); if(_jeTs){_jeTs.onchange=function(){ _jePrefillTeam(); _jeEtapeMaj(); _mvEqUi('je'); };}   // ARRACH-4 · EQFIXE-1 (§490) : la note d'équipe suit la tâche
   var _jePn=document.getElementById('je-pn'); if(_jePn) _jePn.value='';
   var _jePm=document.getElementById('je-pm'); if(_jePm) _jePm.value='';
   var _jePf=document.getElementById('je-pf'); if(_jePf) _jePf.value='';
@@ -13447,7 +13490,7 @@ function _eqtSave(){try{localStorage.setItem(_eqtKey(),JSON.stringify(EQUIPE_TAC
 //   (clé réservée __hors, comme __default). Lu seulement pour un administrateur.
 function _eqtHors(task){ if(!_eqtLoaded)_eqtLoad(); if(!_mvMoiAdmin()) return false; if(_mvEqJourMoi()) return false; var h=EQUIPE_TACHE.__hors; return !!(h&&typeof h==='object'&&!Array.isArray(h)&&h[task]); }
 function _eqtSetHors(task,v){ if(!_eqtLoaded)_eqtLoad(); var h=(EQUIPE_TACHE.__hors&&typeof EQUIPE_TACHE.__hors==='object'&&!Array.isArray(EQUIPE_TACHE.__hors))?EQUIPE_TACHE.__hors:{}; if(v) h[task]=1; else delete h[task]; EQUIPE_TACHE.__hors=h; _eqtSave(); }
-function _eqtFor(task){ if(!_eqtLoaded)_eqtLoad(); var _dj=_mvEqJourMoi(); if(_dj) return _eqtClean(_dj);   /* ÉQUIPES-1 : l'équipe du jour d'abord */ var t=(EQUIPE_TACHE[task]!==undefined)?EQUIPE_TACHE[task]:(EQUIPE_TACHE.__default||[]); return _eqtClean(t); }
+function _eqtFor(task){ if(!_eqtLoaded)_eqtLoad(); var _dj=_mvEqJourMoi(); if(_dj) return _eqtClean(_dj);   /* ÉQUIPES-1 : l'équipe du jour d'abord */ var _dp=_mvEqPrioMoi(task); if(_dp) return _eqtClean(_dp);   /* ★ EQFIXE-1 (§490) : puis, chez un salarié, l'équipe de la priorité où il est coché — lue à chaque appel, jamais recopiée */ var t=(EQUIPE_TACHE[task]!==undefined)?EQUIPE_TACHE[task]:(EQUIPE_TACHE.__default||[]); return _eqtClean(t); }
 function _eqtSet(task,team){ if(!_eqtLoaded)_eqtLoad(); team=_eqtClean(team); EQUIPE_TACHE[task]=team; _eqtPushRecent(team); _eqtSave(); }
 // ★★ DIRECT-1 (§318) — « DÉBUT » ENREGISTRE L'ÉQUIPE, COMME « VALIDER ».
 //   Nico (12/10) : « l'équipe est bien programmée mais c'est encore moi d'indiqué dessus ». « Valider » (pQuickValidate)
@@ -13555,15 +13598,17 @@ function _pvRenderTeamBar(){
   var w=document.getElementById('p-team-bar');if(!w)return;
   if(pTacheFilter==='toutes'||!canWrite()){w.innerHTML='';return;}
   var team=_eqtFor(pTacheFilter);
+  var _fixe=!_mvMoiAdmin()&&!!(_mvEqJourMoi()||_mvEqPrioMoi(pTacheFilter));   // EQFIXE-1 (§490) : l'équipe posée par l'admin ne se change pas chez le salarié
   var names=team.length?(team.join(', ')+(_eqtHors(pTacheFilter)?' \u00b7 sans moi':'')):'Moi seul';
   var avs=team.length?team.slice(0,4).map(function(n){return '<div class="pv-team-av" style="background:'+(COULEURS_MBR[n]||'#3D6B27')+'">'+(n[0]||'?')+'</div>';}).join(''):'<div class="pv-team-av" style="background:#3D6B27"></div>';
   var tl=(typeof tNom==='function')?tNom(pTacheFilter):pTacheFilter;
-  w.innerHTML='<div class="pv-team-bar" onclick="openPTeamJour()"><span class="pv-team-ico"></span><div class="pv-team-info"><div class="pv-team-lbl">Équipe sur <b>'+_escHtml(tl)+'</b></div><div class="pv-team-names">'+_escHtml(names)+'</div></div><div class="pv-team-avs">'+avs+'</div><span class="pv-team-edit">Changer</span></div>';
+  w.innerHTML='<div class="pv-team-bar" onclick="openPTeamJour()"><span class="pv-team-ico"></span><div class="pv-team-info"><div class="pv-team-lbl">Équipe sur <b>'+_escHtml(tl)+'</b></div><div class="pv-team-names">'+_escHtml(names)+'</div></div><div class="pv-team-avs">'+avs+'</div><span class="pv-team-edit">'+(_fixe?'Fix\u00e9e':'Changer')+'</span></div>';
 }
 
 var _pvTeamSel=[], _pvMoiHors=false;
 function openPTeamJour(){
-  if(_mvEqJourMoi()){ if(_mvMoiAdmin()) openEqJour(); else showToast('\u00c9quipe du jour fix\u00e9e par l\u2019administrateur','#7A4F2E'); return; }   // ÉQUIPES-1
+  if(_mvEqJourMoi()){ if(_mvMoiAdmin()) openEqJour(); else showToast(_mvEqFixeeMot(_mvEqJourMoi(),true),'#7A4F2E'); return; }   // ÉQUIPES-1
+  var _dp=_mvEqPrioMoi(pTacheFilter); if(_dp){ showToast(_mvEqFixeeMot(_dp,false),'#7A4F2E'); return; }   // ★ EQFIXE-1 (§490) : l'équipe de la priorité ne se change pas non plus
   _pvTeamSel=_eqtFor(pTacheFilter).slice();
   _pvMoiHors=_eqtHors(pTacheFilter);
   var tt=document.getElementById('pv-team-task');if(tt)tt.textContent=((typeof tNom==='function')?tNom(pTacheFilter):pTacheFilter);
@@ -13913,22 +13958,12 @@ window._mvChantiersCtx=_mvChantiersCtx;
 function _prioPick(i){
   var its=_prioItems(); var it=its[i]; if(!it) return;
   pTacheFilter=it.t; pCurStep=_pvSmartStep(it.t);
-  _prioSeedEquipe(it.t);
   renderParcelles();
 }
 window._prioPick=_prioPick;
-var _prioEqSeeded={};
-function _prioSeedEquipe(task){
-  // Pre-selectionne l'equipe affectee (bandeau Equipe) - 1x par session/tache, modifiable ensuite (guidage souple)
-  try{
-    if(_prioEqSeeded[task]) return;
-    var it=_prioItems().filter(function(x){return x.t===task;})[0];
-    if(!it||!(it.equipe&&it.equipe.length)) return;
-    _prioEqSeeded[task]=true;
-    var cur=_eqtFor(task).slice().sort().join('|'), tgt=it.equipe.slice().sort().join('|');
-    if(cur!==tgt) _eqtSet(task, it.equipe.slice());
-  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_prioSeedEquipe'); }
-}
+// EQFIXE-1 (§490) : _prioSeedEquipe est retirée. Elle recopiait l'équipe de la priorité UNE fois par session dans la mémoire du
+//   téléphone (« guidage souple », v5.05) : un changement de l'admin sur la même tâche n'arrivait plus. _eqtFor la lit à chaque
+//   affichage (_mvEqPrioMoi), seulement chez un salarié coché dans cette équipe.
 function _pvActions(p){
   if(!canWrite()||p.statut==='Arrachee')return '';
   var task=pTacheFilter,type=_pvType(task);

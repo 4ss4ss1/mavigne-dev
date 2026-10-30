@@ -23,10 +23,12 @@ function jouerCarte(S, avecPrio) {
   const doc = { querySelector: () => w, getElementById: (id) => (id === 'home-kpis' ? kp : id === 'home-eqj-wrap' ? eq : id === 'home-prio-corps' ? corps.v : null), createElement: () => el('home-prio-corps') };
   const P = [{ nom: 'Les Crais', surface: '0,5', statut: 'En cours' }, { nom: 'Bel <Air>', surface: '2', statut: 'En cours' }, { nom: 'Arrachée', surface: '1', statut: 'Arrachee' }];
   const ST = { 'Les Crais': 'Validé', 'Bel <Air>': 'En cours' };
-  const ctx = new Function('document', 'PARCELLES', '_prioItems', 'getTacheStatut', 'getPCls', 'tNom', '_escAttr', '_escHtml', '_pvSurfFr', 'window',
+  // EQFIXE-1 (§490) : « Votre équipe » ne montre l'équipe de la priorité qu'à quelqu'un qui y est coché — le monde a donc un
+  //   utilisateur, Lucas, dans l'équipe ; sans lui (nom vide), la carte écrit « Toute l'équipe », et c'est juste.
+  const ctx = new Function('document', 'PARCELLES', '_prioItems', 'getTacheStatut', 'getPCls', 'tNom', '_escAttr', '_escHtml', '_pvSurfFr', 'window', 'currentUser',
     fonction(S.app, 'function _homeSurf(p){') + '\n' + fonction(S.app, 'function _homeHa(x){') + '\n' + fonction(S.app, 'function _homeForme(f,r){') + '\n' + fonction(S.app, 'function _homePrioCarte(){') + '\n_homePrioCarte(); return document.getElementById(\'home-prio-corps\');');
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  const c = ctx(doc, P, () => (avecPrio ? [{ t: 'Chaussage', equipe: ['Lucas', 'Inès'] }] : []), (p) => ST[p.nom], (p) => ({ pct: p.nom === 'Les Crais' ? 100 : 40 }), (t) => t, esc, esc, (s) => s, { _mvParcForme: () => null });
+  const c = ctx(doc, P, () => (avecPrio ? [{ t: 'Chaussage', equipe: ['Lucas', 'Inès'] }] : []), (p) => ST[p.nom], (p) => ({ pct: p.nom === 'Les Crais' ? 100 : 40 }), (t) => t, esc, esc, (s) => s, { _mvParcForme: () => null }, { nom: 'Lucas' });
   return { html: c ? c.innerHTML : '', kpRange: kp.parentNode === w };
 }
 function suite(S) {

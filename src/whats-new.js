@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.41', d: '2026-10-30', items: [
+    { niv: 0, pour: ['tous'], emoji: 'equipe', titre: 'L’équipe de la priorité, dès l’ouverture',
+      desc: "Un ouvrier coché dans une équipe sur la tâche prioritaire arrivait bien sur la tâche, mais la barre «\u00a0Équipe sur…\u00a0» des Parcelles pouvait garder une ancienne équipe — surtout quand l’appli était restée ouverte. Désormais, l’équipe cochée par l’administrateur dans «\u00a0Priorité du moment\u00a0» (ou dans «\u00a0Équipes du jour\u00a0») s’affiche à l’ouverture de l’appli et quand on y revient, suit chacun de ses changements et part avec chaque validation. Le salarié ne la change plus\u00a0: la barre dit «\u00a0Fixée\u00a0», un appui donne les noms. Un salarié coché dans aucune équipe garde son propre choix." },
+  ] },
   { v: '10.40', d: '2026-10-29', items: [
     { niv: 0, pour: ['admin'], emoji: 'tracteur', titre: 'Le Pilotage dit l’entretien le plus pressant',
       desc: "La carte de la révision, dans le tracteur du Pilotage, prend désormais l’entretien le plus pressant de chaque tracteur\u00a0: la révision à ses heures ou à sa date, ou un autre entretien (vidange, filtres, graissage…). Ce qui est dépassé d’abord, puis ce qui tombe pendant les travaux en cours ou dans les 14 jours\u00a0; les autres en vue sont dits en dessous." },
