@@ -2,7 +2,7 @@
  "lot": "UX-0",
  "section": "§459",
  "date": "2026-10-30",
- "base": "e2ff4dd",
+ "base": "9f29e4d",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "141.0.7390.37",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -270,6 +270,16 @@
    "baisses": [
     "cave.sommaire : 0 → 1"
    ]
+  },
+  {
+   "date": "2026-10-30",
+   "base": "9f29e4d",
+   "motif": "RSV-UX-1 (§495) : la Réserve a son action principale flottante (0 → 1)",
+   "hausses": [],
+   "baisses": [
+    "reserve › téléphone › pouce : 6 → 4",
+    "reserve.action : 0 → 1"
+   ]
   }
  ],
  "mesures": {
@@ -347,16 +357,16 @@
     "hauteur": 4028
    },
    "reserve": {
-    "cibles": 27,
+    "cibles": 29,
     "c24": 0,
     "c44": 8,
-    "textes": 93,
+    "textes": 95,
     "t11": 0,
     "t12": 0,
     "chrome": 111,
     "chromeDefile": 57,
-    "pouce": 6,
-    "hauteur": 1433
+    "pouce": 4,
+    "hauteur": 1532
    },
    "planning": {
     "cibles": 91,
@@ -469,16 +479,16 @@
     "hauteur": 3640
    },
    "reserve": {
-    "cibles": 27,
+    "cibles": 28,
     "c24": 0,
     "c44": 23,
-    "textes": 93,
+    "textes": 94,
     "t11": 0,
     "t12": 6,
     "chrome": 120,
     "chromeDefile": 111,
     "pouce": null,
-    "hauteur": 1278
+    "hauteur": 1265
    },
    "planning": {
     "cibles": 91,
@@ -524,7 +534,7 @@
   "phyto.dates_machine": 15,
   "cave.gestes_44": 0,
   "cave.sommaire": 1,
-  "reserve.action": 0,
+  "reserve.action": 1,
   "planning.grille_y": 443,
   "reglages.premier_y": 356,
   "parcelles.valider": 48

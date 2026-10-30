@@ -7250,7 +7250,7 @@ function _pcavPyramide(c){
 function _pcavAngesCard(c){
   var a=c.anges;
   if(!a) return _pcavCard(_mvIcon('sablier',16),'#A0291E','Part des anges','\u2014',
-    '<div class="pcav-vide">Aucun volume d\u2019ouillage saisi sur les douze derniers mois.<br>Renseignez le volume total \u00e0 chaque ouillage : cet \u00e9cran mesurera alors ce que l\u2019\u00e9levage vous co\u00fbte r\u00e9ellement.</div>','');
+    '<div class="pcav-vide pcav-vide1"><span>Aucun ouillage saisi sur douze mois\u00a0: au premier, la part des anges se calcule.</span><button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" onclick="openOvCaveOp()">Saisir</button></div>','');   // ★ RSV-UX-1 (§495) : une invitation d\u2019une ligne, pas un paragraphe
   var rows='';
   a.lignes.forEach(function(x){
     var lbl=(x.mil==='?')?'Sans mill\u00e9sime':x.mil;
@@ -7286,9 +7286,10 @@ function _pcavVueParc(c){
   // la pyramide des ages et la part des anges.
   // ⚠ La part des anges se calcule sur les FUTS DES CUVEES, pas sur le parc :
   // elle reste disponible meme si l'inventaire de La Reserve est vide.
+  // ★ RSV-UX-1 (§495) : la pyramide, qui a des données, passe en premier ; la part des anges ensuite (vide : une ligne et son bouton).
   var h='';
-  try{ h+=_pcavAngesCard(c)||''; }catch(e){ _pcavLog('angescard',e); }
   if(c.parc){ try{ h+=_pcavPyramide(c)||''; }catch(e){ _pcavLog('pyramide',e); } }
+  try{ h+=_pcavAngesCard(c)||''; }catch(e){ _pcavLog('angescard',e); }
   return h;
 }
 

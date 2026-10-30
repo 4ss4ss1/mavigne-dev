@@ -277,7 +277,22 @@ function renderReserve(){
       +'<div class="hv2-sep"></div>'
       +'<div class="hv2-date" data-mv-date></div>'
     +'</div>';
-  page.innerHTML=head+'<div id="mvr-body" class="mvr-body"></div>';
+  // ★ RSV-UX-1 (§495) — maquette-ux-v2, Réserve : une action principale. Le « + » (admin, au téléphone) ouvre « Nouveau mouvement » :
+  //   une entrée (livraison d'intrants, fûts neufs), une sortie (fûts vendus ou réformés, un intrant recompté), un ouillage — chaque
+  //   ligne ouvre le formulaire qui existe déjà. Rangées de 48 px ; un voile ferme la feuille.
+  var _fab=(typeof isAdmin==='function'&&isAdmin())?'<button type="button" class="mvr-fab" id="mvr-fab" onclick="_rsvMvt()" aria-label="Nouveau mouvement">+</button>'
+    +'<div class="mvr-mvt-voile" onclick="_rsvMvtFermer()"></div>'
+    +'<div class="mvr-mvt" id="mvr-mvt" role="dialog" aria-label="Nouveau mouvement"><div class="mvr-mvt-t">Nouveau mouvement</div>'
+    +'<div class="mvr-mvt-k">Entr\u00e9e</div>'
+    +'<button type="button" class="mvr-mvt-l" data-m="achat" onclick="_rsvMvtVa(this.dataset.m)"><b>Livraison d\u2019intrants</b><span>un achat entre en stock</span></button>'
+    +'<button type="button" class="mvr-mvt-l" data-m="futs" onclick="_rsvMvtVa(this.dataset.m)"><b>F\u00fbts neufs</b><span>un lot rejoint le parc</span></button>'
+    +'<div class="mvr-mvt-k">Sortie</div>'
+    +'<button type="button" class="mvr-mvt-l" data-m="sep" onclick="_rsvMvtVa(this.dataset.m)"><b>F\u00fbts vendus ou r\u00e9form\u00e9s</b><span>ils quittent le parc</span></button>'
+    +'<button type="button" class="mvr-mvt-l" data-m="inv" onclick="_rsvMvtVa(this.dataset.m)"><b>Recompter un intrant</b><span>l\u2019inventaire remet le stock au compte r\u00e9el</span></button>'
+    +'<div class="mvr-mvt-k">Ouillage</div>'
+    +'<button type="button" class="mvr-mvt-l" data-m="ouill" onclick="_rsvMvtVa(this.dataset.m)"><b>Un ouillage</b><span>volume, contenants, date \u2014 la part des anges se calcule</span></button>'
+    +'</div>':'';
+  page.innerHTML=head+'<div id="mvr-body" class="mvr-body"></div>'+_fab;
   // Module rendu en JS → il rappelle lui-même les deux injecteurs globaux, exactement
   // comme le prévoit le commentaire d'utils.js. Appels gardés, PAS de try/catch vide
   // (C14 est un cliquet : un catch(_e){} de plus = erreur nommée au prebuild).
@@ -1553,6 +1568,17 @@ function _rsvDateFr(iso){
 // ── SE SEPARER DE FUTS ────────────────────────────────────────────────────
 // Sortie definitive du parc, avec motif et trace. Distincte de _rsvDelFut, qui
 // efface une ligne saisie par erreur : effacer une erreur n'est pas un mouvement.
+// ★ RSV-UX-1 (§495) — la feuille « Nouveau mouvement » : chaque ligne ferme la feuille et ouvre le formulaire qui existe.
+var _RSV_MVT={ achat:'_rsvOpenAchat', futs:'_rsvOpenFut', sep:'_rsvOpenSep', inv:'_rsvOpenInv', ouill:'openOvCaveOp' };
+function _rsvMvt(){ document.body.classList.add('mvr-mvt-ouvert'); }
+function _rsvMvtFermer(){ document.body.classList.remove('mvr-mvt-ouvert'); }
+function _rsvMvtVa(m){
+  _rsvMvtFermer();
+  var f=_RSV_MVT[m]; if(!f) return;
+  var fn=(typeof window[f]==='function')?window[f]:null;
+  if(fn) fn();
+}
+window._rsvMvt=_rsvMvt; window._rsvMvtFermer=_rsvMvtFermer; window._rsvMvtVa=_rsvMvtVa;
 function _rsvOpenSep(){
   if(!isAdmin()){ showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur du domaine','#C0392B'); return; }
   var st = window._mvFutStock ? window._mvFutStock(INTRANTS) : {lots:[], total:0};

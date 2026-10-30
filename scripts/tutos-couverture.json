@@ -30,6 +30,9 @@
     "_trEntFait": "COMPT-5 (§487) : « Fait » sur un autre entretien — la feuille du compteur, la même que le relevé",
     "_relFait": "COMPT-5 (§487) : une case « Fait aussi » dans la feuille de la révision — rien à apprendre",
     "_aujSel": "CAVE-UX-1 (§494) : choisir un contenant de « Ce qui presse » sur ordinateur — sa fiche s’affiche à côté ; rien à apprendre",
-    "_aujVers": "CAVE-UX-1 (§494) : une entrée du sommaire de la Cave mène à sa partie de la page — un lien"
+    "_aujVers": "CAVE-UX-1 (§494) : une entrée du sommaire de la Cave mène à sa partie de la page — un lien",
+    "_rsvMvt": "RSV-UX-1 (§495) : le « + » de la Réserve ouvre « Nouveau mouvement » — chaque ligne ouvre un formulaire qui existe",
+    "_rsvMvtFermer": "RSV-UX-1 (§495) : le voile ferme la feuille — rien à apprendre",
+    "_rsvMvtVa": "RSV-UX-1 (§495) : une ligne de « Nouveau mouvement » ouvre son formulaire (achat, fûts neufs, se séparer, inventaire, ouillage) — les gestes d’avant"
   }
 }

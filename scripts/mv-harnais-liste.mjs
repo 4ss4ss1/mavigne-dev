@@ -829,6 +829,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-traux1b.mjs --contre'],
   ['node scripts/mv-harnais-cavux1.mjs'],              // CAVE-UX-1 (§494) : Cave › Aujourd’hui — le sommaire qui suit, les trois colonnes, la fiche du contenant
   ['node scripts/mv-harnais-cavux1.mjs --contre'],
+  ['node scripts/mv-harnais-rsvux1.mjs'],              // RSV-UX-1 (§495) : la Réserve — le « + » et « Nouveau mouvement », la pyramide d’abord, la part des anges vide en une ligne
+  ['node scripts/mv-harnais-rsvux1.mjs --contre'],
   ['node scripts/mv-harnais-compt1.mjs'],              // COMPT-1 (§483) : le compteur des tracteurs — estimé entre deux relevés, relevé au passage, trois contrôles
   ['node scripts/mv-harnais-compt1.mjs --contre'],
   ['node scripts/mv-harnais-compt2.mjs'],              // COMPT-2 (§484) : la révision se recalcule, le compteur exigé au démarrage, les tracteurs non suivis laissés tranquilles

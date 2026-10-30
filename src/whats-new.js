@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.46', d: '2026-10-30', items: [
+    { niv: 0, pour: ['admin'], emoji: 'barrique', titre: 'La Réserve : un « + » pour chaque mouvement',
+      desc: "Au téléphone, le «\u00a0+\u00a0» de la Réserve ouvre «\u00a0Nouveau mouvement\u00a0» : une entrée (livraison d’intrants, fûts neufs), une sortie (fûts vendus ou réformés, un intrant recompté) ou un ouillage — chaque ligne ouvre son formulaire. En tête de Fûts, la pyramide des âges passe en premier ; la part des anges sans ouillage saisi tient sur une ligne, avec «\u00a0Saisir\u00a0»." },
+  ] },
   { v: '10.45', d: '2026-10-30', items: [
     { niv: 0, pour: ['admin'], emoji: 'cave', titre: 'Cave › Aujourd’hui : un sommaire, et le contenant à côté',
       desc: "En haut de l’onglet Aujourd’hui, un sommaire — Ce qui presse, À faire, Cuves, Fûts, À surveiller, Relevés du jour, chacun avec son nombre — reste sous l’en-tête quand on descend et mène à chaque partie. Les compteurs tiennent sur une ligne, sans leurs zéros. Sur ordinateur, trois colonnes\u00a0: le sommaire, la page, et la fiche du contenant choisi dans «\u00a0Ce qui presse\u00a0» (ses raisons, sa densité ou ses fûts, ses gestes)\u00a0; «\u00a0À surveiller\u00a0» passe dans le fil de la page." },

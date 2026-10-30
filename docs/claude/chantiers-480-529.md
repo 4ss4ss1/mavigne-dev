@@ -400,3 +400,23 @@ Le lot suivant du plan, dessiné dans `docs/maquettes/maquette-ux-v2.html` (« C
 ### 494d. Ce qui reste ouvert
 - **RSV-UX-1**, le lot suivant du plan.
 - **À vérifier chez Nico** : au téléphone, le sommaire collé (l’en-tête replié puis non), une entrée qui mène à sa partie ; sur ordinateur, les trois colonnes, la fiche qui suit le choix, « Relever » depuis la fiche.
+
+## 495. ★★ RSV-UX-1 — LA RÉSERVE : UN « + » POUR CHAQUE MOUVEMENT, LA PYRAMIDE D’ABORD, LA PART DES ANGES VIDE EN UNE LIGNE (30/10 — `src/reserve.js` (`_RSV_MVT`, `_rsvMvt`, `_rsvMvtFermer`, `_rsvMvtVa` ; le « + » et la feuille dans `renderReserve`) · `src/cave.js` (`_pcavVueParc`, `_pcavAngesCard`) · `src/styles.css` · `src/utils.js` (l’aide « En tête de Fûts », APP 10.46) · `guide/09-reserve.html` · `index.html` · `src/whats-new.js` · `public/sw.js` (SW 11.27) · `scripts/mv-harnais-rsvux1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/mv-harnais-cote1.mjs` · `scripts/tutos-couverture.json` · `scripts/mv-ux-baseline.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-480-529.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/RSV-UX-1.json` · base `9f29e4d`)
+
+### 495a. D’où ça vient
+Le lot suivant du plan, dessiné dans `docs/maquettes/maquette-ux-v2.html` (« Réserve — une action principale, et l’état vide qui dit quoi faire ») : mesuré, premier écran = une carte vide (« Aucun volume d’ouillage saisi ») puis la pyramide ; aucun « + » ; étiquettes à 10 px. Relu dans le code : **les étiquettes sont déjà à 12** (`--pt-lbl` et `--pt-micro` valent 12 depuis TEXTE-A et LISIBLE-1) — rien à faire.
+
+### 495b. Ce qui change
+- **Le « + » de la Réserve** (au téléphone, pour l’administrateur ; sur ordinateur, les boutons de la barre restent) ouvre **« Nouveau mouvement »**, rangées de 48 px : *Entrée* — livraison d’intrants (`_rsvOpenAchat`), fûts neufs (`_rsvOpenFut`) ; *Sortie* — fûts vendus ou réformés (`_rsvOpenSep`), un intrant recompté (`_rsvOpenInv`) ; *Ouillage* (`openOvCaveOp`, qui s’ouvre sur l’ouillage). **Rien d’inventé** : la maquette dit « intrant utilisé » — l’usage se compte déjà depuis les opérations ; la ligne honnête est l’inventaire. Chaque ligne ferme la feuille et ouvre le formulaire qui existe ; un voile la ferme.
+- **La pyramide des âges passe devant la part des anges** (`_pcavVueParc`, cave.js — c’est la Cave qui dessine ces deux cartes en tête de Fûts).
+- **La part des anges vide** tient sur une ligne avec « Saisir » (le formulaire d’ouillage), au lieu d’un paragraphe.
+- L’aide « En tête de Fûts » et le guide de la Réserve suivent. Trois gestes neufs exemptés de tuto, motivés ; la feuille et son voile exemptés du panneau côte à côte (au téléphone seulement).
+
+### 495c. Mesuré
+- `mv-harnais-rsvux1` : 8 assertions — `_rsvMvtVa` JOUÉE (chaque ligne ouvre son formulaire et ferme la feuille ; une clé inconnue, rien), le « + » réservé à l’admin et ses cinq lignes lues dans `data-m`, les formulaires exposés, la pyramide devant, la part des anges vide en une ligne avec « Saisir », la règle CSS ; **6/6 mutants**.
+- `test:ux` (référence regravée) : **« Réserve : une action principale flottante », 0 → 1** ; 18 vérifications vertes.
+- Tutos et chaîne : voir la note de livraison.
+
+### 495d. Ce qui reste ouvert
+- **PLAN-UX-1**, le lot suivant du plan.
+- **À vérifier chez Nico, au téléphone** : le « + », ses cinq lignes et leurs formulaires, la pyramide en tête, la part des anges vide.

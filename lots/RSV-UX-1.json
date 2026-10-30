@@ -1,0 +1,40 @@
+{
+  "lot": "RSV-UX-1",
+  "section": "§495",
+  "base": "9f29e4d80f0128731a7650c706967e39718f4899",
+  "inclut": [],
+  "date": "2026-10-30",
+  "tutos": {
+    "ok": true,
+    "empreinte": "f8b19a924da6e24b2320ef0af6b6007dc153c33e58a835209034cc8eb574dc91",
+    "date": "2026-10-30T15:59:59.659Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "ab79a7732a26250a758dc12cff99298be70a6ac56a610c5e678146da6ba6d873",
+    "CLAUDE.md": "7b4ad2bf2a28fd53c132d328473f5ea1957d0611a75fa6669f9961288ca0b5ec",
+    "docs/claude/INDEX.md": "3b85086d611d761f428cba25a35c292861312edf623c77dab57cfe45de11048c",
+    "docs/claude/chantiers-480-529.md": "c64e058023ce141e405e148acc864d9e6907994c0b273d3370612269bb21283d",
+    "docs/claude/journal.md": "b6fa8aa65f1cc4368049adc92bfccedbc2e042c8c0ae2bb2980cc4b942bf1702",
+    "guide/09-reserve.html": "4eeb7b82b3a7c14ae6304db26634b779d47a29aeed250a0dc83be2f72993e873",
+    "index.html": "94f26c63d00b907376911d5c2a3ea0a63a4b3614cad163f11850168814e97e6b",
+    "public/sw.js": "f7bd0bdd4dcc02bebc7e2b112834f93063351c613437c2f80335e5cda7e588ff",
+    "scripts/harnais-claude-md.mjs": "35795dddb2abca44b682d04738014f723bd1244005d1c3008e7905cdb7b78067",
+    "scripts/mv-harnais-cote1.mjs": "8cf83b9d8c88e300746ad947e5459df33b2ffc56065e01ecb4be9614e97d73e0",
+    "scripts/mv-harnais-liste.mjs": "7c9ca00a0b5e546e13218ea6a370f405e50822f981bffb85e7a5626f68ddf66a",
+    "scripts/mv-ux-baseline.json": "405e45759e0a41c5df4bc8d7c0eaf378cf8c98172bd58017e0fcd7dc056cc72f",
+    "scripts/tutos-couverture.json": "32b97e9c04ca690d64189fc9142a16d988d4f4ddd255da7cb385b788611e9aa5",
+    "src/cave.js": "05a3b2f14a2a588a4272e71a686abbb374ad26b3220c87fee46b8fb511fae3ec",
+    "src/reserve.js": "0e3b1bbcc19d30f1de717eaa57cd7998c12113fecaae03ace2d6b746459395ac",
+    "src/styles.css": "103f82475d5e7101cba6bf200e8f11b032a3912cd2c2c9539bf92cae56697eae",
+    "src/utils.js": "8960bb8e8ad0d54a02bb4f60e8eb5e22113943152e75b2eb1fe7e92e0c77e97b",
+    "src/whats-new.js": "0638b965e98da7729d42f2946c0075ef1131b35efa477aeed3c6af310438a48f",
+    "scripts/mv-harnais-rsvux1.mjs": "56b722717846baad8cae54f453f144cddac8365b5da7a1fb1d026a088cb0c2d4"
+  }
+}

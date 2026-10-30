@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.45';
+export const APP_VERSION = '10.46';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2522,7 +2522,7 @@ var MV_AIDE = {
           "C’est la comptabilité matière du domaine, pensée pour le contrôle bio.");
       },
       ['L’onglet Fûts porte le parc entier', "les fûts vides du magasin et ceux qui sont en vin au chai, additionnés. Ce ne sont pas deux comptabilités : ce sont deux états du même fût."],
-      ['En tête de Fûts', "deux lectures venues de la Cave : la part des anges — ce que l’ouillage a réellement remis dans chaque cuvée sur douze mois, une ligne par millésime — et la pyramide des âges du parc, avec les barriques au-delà de la durée de vie fixée. Elles étaient dans le Pilotage ; le parc n’a plus qu’un chez-soi."],
+      ['En tête de Fûts', "deux lectures venues de la Cave : d’abord la pyramide des âges du parc, avec les barriques au-delà de la durée de vie fixée, puis la part des anges — ce que l’ouillage a réellement remis dans chaque cuvée sur douze mois, une ligne par millésime ; sans ouillage saisi, elle tient sur une ligne avec « Saisir ». Au téléphone, le « + » (administrateur) ouvre « Nouveau mouvement » : une entrée (livraison d’intrants, fûts neufs), une sortie (fûts vendus ou réformés, un intrant recompté) ou un ouillage. Elles étaient dans le Pilotage ; le parc n’a plus qu’un chez-soi."],
       ['Entonner, embouteiller ou retirer', "ne change pas le nombre de fûts du domaine. Seuls acheter et se séparer le font."],
       ['La contenance d’un lot', "vide, le lot suit le réglage du domaine (roue crantée de la Cave, bloc Le Chai). Pour un demi-muid, une feuillette ou un fût de 300 L, écrivez sa contenance dans le lot : elle part avec les fûts au décuvage et revient avec eux à la mise en bouteille. Une étiquette la rappelle sur la carte du lot, et l’inventaire PDF l’imprime."],
       ['Le registre des mouvements', "en bas de l’onglet garde chaque entrée et chaque sortie, avec son motif."],

@@ -3835,6 +3835,21 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .caj-fx-dl dd{margin:0;}
 .caj-fx-act{display:flex;flex-wrap:wrap;gap:var(--e-2,8px);}
 .caj-fx-rien{color:var(--texte-doux,#686660);}
+/* ★ RSV-UX-1 (§495) — maquette-ux-v2, Réserve : le « + » de la Réserve (au téléphone ; sur ordinateur, les boutons de la barre
+   restent) et sa feuille « Nouveau mouvement », rangées de 48 px. La part des anges vide tient sur une ligne. */
+.mvr-fab,.mvr-mvt,.mvr-mvt-voile{display:none;}
+.pcav-vide1{display:flex;align-items:center;justify-content:space-between;gap:var(--e-3,12px);}
+@media (max-width:767.98px){
+  #page-reserve .mvr-fab{display:flex;align-items:center;justify-content:center;position:fixed;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 84px);z-index:89;width:56px;height:56px;border:0;border-radius:var(--r-full,999px);background:var(--accent,#7A2850);color:var(--sur-accent,#FFFFFF);font-size:var(--pt-xl,28px);line-height:1;box-shadow:0 4px 16px var(--voile,rgba(16,15,13,.30));}
+  body.mvr-mvt-ouvert #page-reserve .mvr-mvt-voile{display:block;position:fixed;inset:0;z-index:1199;background:var(--voile,rgba(16,15,13,.30));}
+  body.mvr-mvt-ouvert #page-reserve .mvr-mvt{display:block;position:fixed;left:0;right:0;bottom:0;z-index:1200;max-height:80vh;overflow-y:auto;padding:var(--e-3,12px) var(--e-4,16px) calc(env(safe-area-inset-bottom,0px) + 12px);background:var(--bg-card,#FFFFFF);border-radius:var(--r-lg,12px) var(--r-lg,12px) 0 0;box-shadow:0 -8px 24px var(--voile,rgba(16,15,13,.30));}
+  #page-reserve .mvr-body{padding-bottom:calc(var(--e-8,40px) * 3);}
+}
+.mvr-mvt-t{padding-bottom:var(--e-2,8px);font-size:var(--pt-base,15px);font-weight:700;color:var(--texte,#1B1A18);}
+.mvr-mvt-k{padding:var(--e-2,8px) 0 var(--e-1,4px);font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux,#686660);}
+.mvr-mvt-l{display:flex;flex-direction:column;justify-content:center;width:100%;min-height:48px;padding:var(--e-2,8px) 0;border:0;border-top:1px solid var(--ligne,#E7E6E2);background:none;text-align:left;font:inherit;color:var(--texte,#1B1A18);cursor:pointer;}
+.mvr-mvt-l b{font-weight:600;}
+.mvr-mvt-l span{font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
 /* ★ FILTRE-1B (§477) — Parcelles au téléphone, le même patron : les compteurs restent en tête ; l'état, les tâches et Liste / Carte
    passent dans la feuille « Filtres » (celle d'ARRIVEE-4, pour tous désormais) ; la recherche et « Filtres » en barre basse. Sur la
    carte, Liste / Carte revient en haut (la barre vit dans la liste). Sur ordinateur, rien ne bouge. */
