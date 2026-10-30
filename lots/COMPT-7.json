@@ -1,0 +1,29 @@
+{
+  "lot": "COMPT-7",
+  "section": "§489",
+  "base": "8116939fdc2c048f83f747e4d1ba5eb9660d383d",
+  "inclut": [],
+  "date": "2026-10-29",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "844078cd6461e71072ac3229cf10f7eab96df92bc5cc5dbdfdf44a9af9d8ab93",
+    "CLAUDE.md": "dd9c8687082ceeac4fc7e72ec26dab77eedcc8d44aaa101cad09c61a457183d7",
+    "docs/claude/INDEX.md": "8b52a33763233614c3cb3e724bace815b74ff427cb10e41e6473f50375dde6ac",
+    "docs/claude/chantiers-480-529.md": "eda02fa0372f5eb3bacf06e330b4b1b0f9b049eb5b6e9a49a446f705a8038de4",
+    "docs/claude/journal.md": "fd182e586c118c9be626b8a2ace1b457b22909d7893e6a79b1fc92daa0306cc8",
+    "guide/11-pilotage.html": "bf85dbd66aa93ca2de261cb965b41a4299c03c8637abee50185a24204b4bb934",
+    "index.html": "2eae3553d2fd64995820b3f42da4e1419664aec3b950da87a51b381bde5c72af",
+    "public/guide.html": "a8698e8148a34f0d8409ddd6e070ede5d95ac131c4d50a46d9948fa9abee5831",
+    "public/sw.js": "a54234bcbacb72fda15138faa854dca47fb917efb93a074abf086466979562b2",
+    "scripts/harnais-claude-md.mjs": "dfd109b5b4a66a3cd04efc8fef9e88f3643b7f9c78b1acc04124b68d55bef250",
+    "scripts/mv-harnais-liste.mjs": "8207575ef4c5e712ca248f36cb019271bd050382922fc1bf99477e0a9c2a7e3c",
+    "src/compteur.js": "5cd6c289ee6fc6ded60b4fb4108b88167f42a28e2205df96340c12f5c9eab0ab",
+    "src/pilotage.js": "02fa578cd89387eb2a8dfeb95a6e39461afd88721aa6aaff027e84bf65007d62",
+    "src/utils.js": "6fa03c997c7f1af573dfee2990fd18682b6ffb0dc9d16a31c6d2a158409907f6",
+    "src/whats-new.js": "de79e0d6b65bba865481df82102f451c0c6da4f5f439289d01cfebea2901b690",
+    "scripts/mv-harnais-compt7.mjs": "fc312a82e09a82bb93c64bc3d5b1283f5dd1d7dfe4442572ac28ea19d31482ac"
+  }
+}

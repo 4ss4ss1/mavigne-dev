@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.39';
+export const APP_VERSION = '10.40';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -3142,7 +3142,8 @@ export const MV_INFO = {
     'Il n’y a pas d’heures de tracteur au planning : le planning porte des heures par personne, jamais une machine. Un travail pas encore lancé n’est donc pas compté.'
   ] },
 
-  'pil.trxrev': { t: 'Révision dans les travaux en cours', p: [
+  'pil.trxrev': { t: 'L’entretien le plus pressant, dans les travaux en cours', p: [
+    'La carte prend, pour chaque tracteur, l’entretien le plus pressant : la <b>révision</b> (ses heures, et la date de son intervalle) ou un <b>autre entretien</b> réglé dans le Tracteur (vidange, filtres, graissage…). D’abord ce qui est dépassé, aux heures ou à la date ; puis ce qui sera atteint pendant les travaux en cours, ou dû dans les 14 jours ; puis ce qui approche. Les autres en vue sont dits en dessous.',
     'Les heures avant la révision (révision moins le compteur estimé : le dernier relevé, plus les heures notées depuis), face aux heures des <b>travaux en cours</b> sur ce tracteur, mis bout à bout dans l’ordre où ils ont été lancés. Le trait rouge tombe dans le travail pendant lequel la révision sera atteinte.',
     'Le repère en jours vient du <b>rythme mesuré</b> du tracteur : ses heures notées sur les 4 dernières semaines, divisées par les jours ouvrés. Ce n’est pas une date promise.',
     'L’ordre réel des travaux peut différer. Entre deux relevés, le compteur n’avance qu’avec les sessions saisies : une session oubliée rend l’échéance plus lointaine qu’elle n’est, jusqu’au prochain relevé.'

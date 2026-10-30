@@ -542,3 +542,4 @@
 | 486 | 486. ★★ COMPT-4 — LE COMPTEUR, LES FINITIONS (29/10 — `src/tracteur.js` (`_trFerie`, `_trRelCorriger`, `_re… | `docs/claude/chantiers-480-529.md` |
 | 487 | 487. ★★ COMPT-5 — PLUSIEURS ENTRETIENS PAR TRACTEUR (29/10 — `src/tracteur.js` (`_trEntEtat`, `_trEntTexte`… | `docs/claude/chantiers-480-529.md` |
 | 488 | 488. ★ COMPT-6 — LE COMPTEUR DANS SON MODULE (29/10 — `src/compteur.js` (neuf) · `src/tracteur.js` · `scrip… | `docs/claude/chantiers-480-529.md` |
+| 489 | 489. ★★ COMPT-7 — LA CARTE DE LA RÉVISION DU PILOTAGE DIT L’ENTRETIEN LE PLUS PRESSANT (29/10 — `src/pilota… | `docs/claude/chantiers-480-529.md` |

@@ -243,3 +243,23 @@ Laissé ouvert par COMPT-3 à COMPT-5 (§485d–§487d) ; « go » de Nico (29/1
 
 ### 488d. Ce qui reste ouvert
 - La carte Révision du Pilotage (`_pilGmRevision`) ne lit que les heures de la révision ; les autres entretiens et les dates n’y remontent pas.
+
+## 489. ★★ COMPT-7 — LA CARTE DE LA RÉVISION DU PILOTAGE DIT L’ENTRETIEN LE PLUS PRESSANT (29/10 — `src/pilotage.js` (`_pilGmRevision` réécrite, `_pilGmRevOrdre`, `_pilGmDateAn`, `_pilGmRevTxt` ; `_pilData` : `ents` ; la carte ② du tracteur) · `src/compteur.js` (`window._trEntEtat`) · `src/utils.js` (APP 10.40, l’info `pil.trxrev`) · `index.html` (v10.40) · `src/whats-new.js` · `guide/11-pilotage.html` · `public/sw.js` (SW 11.21) · `scripts/mv-harnais-compt7.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-480-529.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/COMPT-7.json` · base `8116939`)
+
+### 489a. D’où ça vient
+Le dernier point laissé ouvert par la série du compteur (§486d–§488d) ; « suite » de Nico (29/10). La carte « Révision » du tracteur, dans le Pilotage, ne lisait que les heures de la révision : une révision dépassée à la date, un tracteur suivi à la date seule, un graissage dû demain restaient muets.
+
+### 489b. Ce qui change
+- **`_pilGmRevision` prend l’entretien le plus pressant** de chaque tracteur : la révision (heures restantes, et la date de son intervalle) et les autres entretiens (`_pilData` les lit par `window._trEntEtat`, avec leurs propres seuils, §487). **Rang 0** : dépassé, aux heures ou à la date ; **rang 1** : atteint pendant les travaux en cours, ou dû dans les 14 jours ; **rang 2** : proche (révision à 120 h ou 30 jours, entretien orange) — sinon rien, comme avant. Entre égaux : les heures, puis les jours.
+- **Comme avant pour la révision aux heures** : même objet rendu (`t`, `seq`, `tot`, `dans`, `sansBareme`), mêmes textes (« Révision dépassée de n h », « Atteinte pendant : … », « Pas atteinte par les travaux en cours ») ; `mv-harnais-gnr-mesure` et `gnr2` restent verts sans retouche.
+- **La carte** lit l’entretien choisi (`R.it`), plus `revReste` : son titre le nomme (« Graissage · NH »), la ligne en grand dit « date dépassée (le …) » ou « … le 5 nov. » quand c’est la date qui presse, la date vient sous la carte quand elle n’est pas déjà dite, et **« Aussi »** nomme les autres en vue du même tracteur.
+- **L’info de la carte** (`pil.trxrev`) le dit ; le guide du Pilotage aussi.
+
+### 489c. Mesuré
+- `mv-harnais-compt7` : 9 assertions — la compatibilité (révision atteinte pendant un travail devant une plus proche hors travaux, le Griffage à 82 %, dépassée d’abord, loin = rien), la date (400 h devant mais la date passée → dépassée ; suivi à la date seule, dû dans 7 jours → montré), un autre entretien qui prend la carte (le graissage pendant le Rognage), « aussi », un entretien loin qui ne fait rien, les textes, la carte qui ne lit plus `revReste`, `_pilData` et l’export ; **8/8 mutants**.
+- `mv-harnais-gnr-mesure` (dont ④, qui rend `_pilCkTracteur` en entier avec la nouvelle carte) et `gnr2` verts sans retouche, contre-épreuves comprises ; `compt1`, `compt4`, `compt5`, `robustesse-pilotage` verts.
+- **Chaîne complète verte** : 597 commandes, en quatre reprises, sans un rouge. **Build** : app 10.40. **Tutos concernés : aucun.**
+- **Pas vérifiable en entraînement** : le Pilotage ne s’ouvre pas dans le domaine fictif (déjà noté en §486c). Les nouvelles branches de la carte — le titre au nom de l’entretien, la date en grand, « Aussi » — ne sont gardées que par le harnais (logique jouée, texte du rendu vérifié dans la source) : **à regarder sur le vrai Pilotage après déploiement**.
+
+### 489d. Ce qui reste ouvert
+- La série du compteur est close. La liste des tracteurs du Pilotage dit toujours la seule révision (heures et date, §486) ; les autres entretiens n’y sont pas.

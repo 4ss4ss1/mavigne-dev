@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.20
+// MA VIGNE — Service Worker v11.21
+// v11.21 (29/10/2026) — COMPT-7 (§489) : la carte de la révision du Pilotage dit l’entretien le plus pressant — heures, dates, autres entretiens.
 // v11.20 (29/10/2026) — COMPT-5 (§487) : plusieurs entretiens par tracteur — échéance au premier atteint, « Fait », « Fait aussi » à la révision, le plus urgent dans le parc et au démarrage.
 // v11.19 (29/10/2026) — COMPT-4 (§486) : corriger un relevé, les jours fériés dans le repère, la date d’échéance au Pilotage, à l’accueil et au rapport, la fiche « Plein fait » demande le compteur, la bande des pastilles retirée, « heures de travail ».
 // v11.18 (29/10/2026) — COMPT-3 (§485) : sur ordinateur, la fiche du compteur dans l’Entretien — ce que Ma Vigne a appris, la courbe, les relevés et leur écart à l’estimé ; « Écarter » et « Rétablir » pour l’admin.
@@ -4652,7 +4653,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.20';
+const CACHE_NAME   = 'mavigne-v11.21';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4669,7 +4670,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.20 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.21 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4689,7 +4690,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.20 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.21 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -467,3 +467,4 @@ if(typeof document!=='undefined'&&document.addEventListener) document.addEventLi
   else if(k==='Enter'){ var b=document.getElementById('rel-ok'); if(b&&!b.disabled){ _relValider(); ev.preventDefault(); } }
 });
 window._trSuivi=_trSuivi; window._trAjoutMois=_trAjoutMois; window._trRevDate=_trRevDate; window._trReleveExige=_trReleveExige; window._trFicheCptHtml=_trFicheCptHtml; window._trEntUrgent=_trEntUrgent; window._trEntProgHtml=_trEntProgHtml; window._relOuvrir=_relOuvrir; window._trSdOuvert=_trSdOuvert; window._trRelevePassage=_trRelevePassage;
+window._trEntEtat=_trEntEtat;   // ★ COMPT-7 (§489) : le Pilotage lit l'échéance de chaque entretien

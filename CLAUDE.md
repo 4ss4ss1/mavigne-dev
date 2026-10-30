@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **29 octobre 2026 (COMPT-6)** — **LE COMPTEUR DANS SON MODULE** (§488). Base `42235ca` (« compt5 »). Pas de montée de version (fichiers de module seulement). Le compteur des tracteurs (COMPT-1 à 5) sort de tracteur.js d’un bloc dans **`src/compteur.js`**, importé en tête de tracteur.js : tracteur.js **258 → 221 ko**. Le compteur emprunte au Tracteur par **`window._trPont`** ; le Tracteur l’appelle par **seize relais** aux noms d’avant, avec le repli d’avant. Les harnais compt1 à compt5 lisent les deux fichiers bout à bout. Rien ne change à l’écran. Reste : la carte Révision du Pilotage aux heures seules.
+> Dernière consolidation : **29 octobre 2026 (COMPT-7)** — **LA CARTE DE LA RÉVISION DU PILOTAGE DIT L’ENTRETIEN LE PLUS PRESSANT** (§489). Base `8116939` (« compt6 »). APP 10.39 → 10.40, SW 11.20 → 11.21. `_pilGmRevision` prend, par tracteur, la révision (heures **et date**) et les **autres entretiens** (`window._trEntEtat`) : dépassé, puis atteint pendant les travaux ou dû dans les 14 jours, puis proche. La carte nomme l’entretien, dit la date quand c’est elle qui presse, et **« Aussi »** pour les autres. Comme avant pour la révision aux heures (`gnr-mesure`, `gnr2` verts sans retouche). `mv-harnais-compt7` : 9 assertions, 8/8 mutants. La série du compteur est close.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 

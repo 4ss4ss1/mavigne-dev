@@ -450,7 +450,8 @@ function _pilData(){
     var hasComp = ((_kp || (t.compteur_h!=null && t.compteur_h!=='')) && t.revision_h!=null && t.revision_h!=='');
     var revReste = hasComp ? Math.round((Number(t.revision_h)-(_kp?_kp.h:Number(t.compteur_h)))*10)/10 : null;
     var _ep = (typeof window!=='undefined' && window._trRevEtat) ? window._trRevEtat(t) : null;   // ★ COMPT-4 (§486) : la date de l'intervalle
-    return { id:t.id, nom:t.nom, traitementOnly:t.traitementOnly, rep:rep, lastCtrl:lastCtrl, sess:sess, sAdv:sAdv, revReste:revReste, revDate:(_ep&&_ep.date)||null, revJours:_ep?_ep.jours:null };
+    var _ents = (typeof window!=='undefined' && window._trEntEtat && Array.isArray(t.entretiens_prog)) ? t.entretiens_prog.map(function(e){ var s=window._trEntEtat(t,e); return (s&&s.connu)?{ nom:e.nom, reste:s.reste, pd:s.pd, jours:s.jours, depasse:s.depasse, rouge:s.rouge, orange:s.orange }:null; }).filter(Boolean) : [];   // ★ COMPT-7 (§489) : les autres entretiens
+    return { id:t.id, nom:t.nom, traitementOnly:t.traitementOnly, rep:rep, lastCtrl:lastCtrl, sess:sess, sAdv:sAdv, revReste:revReste, revDate:(_ep&&_ep.date)||null, revJours:_ep?_ep.jours:null, ents:_ents };
   });
   var nRepar = tracs.filter(function(t){ return t.rep; }).length;
 
@@ -4669,21 +4670,44 @@ function _pilGmTravaux(){
 // ★ LA REVISION LA PLUS PROCHE, PLACEE DANS LES TRAVAUX EN COURS. Les travaux d'un
 // tracteur se mettent bout a bout dans l'ordre ou ils ont ete lances.
 function _pilGmRevision(d, T){
+  // ★ COMPT-7 (§489) : l'entretien le plus pressant, plus seulement la révision aux heures. Pour chaque tracteur : la révision
+  //   (ses heures, et la date de son intervalle, §484) et les autres entretiens (§487, avec leurs propres seuils). Rang 0 :
+  //   dépassé, aux heures ou à la date ; rang 1 : atteint pendant les travaux en cours, ou dû dans les 14 jours ; rang 2 :
+  //   proche (révision à 120 h ou 30 jours, entretien orange) — sinon rien, comme avant. Les autres en vue : « aussi ».
   var c=[];
   (d.tracs||[]).forEach(function(t){
-    if(t.revReste==null) return;
     var seq=T.jobs.filter(function(j){ return j.tid===t.id&&j.h!=null; });
-    var acc=0, dans=null;
-    seq.forEach(function(j){ if(dans==null&&t.revReste>0&&acc+j.h>=t.revReste) dans={job:j, pc:(t.revReste-acc)/j.h}; acc+=j.h; });
-    c.push({ t:t, seq:seq, tot:acc, dans:dans,
+    var tot=0; seq.forEach(function(j){ tot+=j.h; });
+    var items=[];
+    if(t.revReste!=null||t.revDate) items.push({ nom:'R\u00e9vision', rev:true, reste:t.revReste, pd:t.revDate||null, jours:t.revDate?t.revJours:null,
+      proche:(t.revReste!=null&&t.revReste<=120)||(!!t.revDate&&t.revJours!=null&&t.revJours<=30) });
+    (t.ents||[]).forEach(function(e){ items.push({ nom:e.nom, rev:false, reste:e.reste, pd:e.pd||null, jours:e.pd?e.jours:null, proche:!!(e.rouge||e.orange||e.depasse) }); });
+    items.forEach(function(it){
+      var acc=0, dans=null;
+      if(it.reste!=null&&it.reste>0) seq.forEach(function(j){ if(dans==null&&acc+j.h>=it.reste) dans={job:j, pc:(it.reste-acc)/j.h}; acc+=j.h; });
+      it.dans=dans;
+      it.rang=((it.reste!=null&&it.reste<=0)||(it.jours!=null&&it.jours<0))?0:((dans||(it.jours!=null&&it.jours<=14))?1:2);
+    });
+    var vus=items.filter(function(it){ return it.rang<2||it.proche; }).sort(_pilGmRevOrdre);
+    if(!vus.length) return;
+    c.push({ t:t, seq:seq, tot:tot, dans:vus[0].dans, it:vus[0], aussi:vus.slice(1),
       sansBareme:T.jobs.filter(function(j){ return j.tid===t.id&&j.h==null; }).length });
   });
-  function rang(x){ return x.t.revReste<=0?0:(x.dans?1:2); }
-  c.sort(function(a,b){ return (rang(a)-rang(b))||(a.t.revReste-b.t.revReste); });
-  var r=c[0]||null;
-  if(!r) return null;
-  if(rang(r)===2&&r.t.revReste>120) return null;   // loin, et hors des travaux : rien a dire
-  return r;
+  c.sort(function(a,b){ return _pilGmRevOrdre(a.it,b.it); });
+  return c[0]||null;
+}
+function _pilGmRevOrdre(a,b){
+  if(a.rang!==b.rang) return a.rang-b.rang;
+  if(a.reste!=null&&b.reste!=null) return a.reste-b.reste;
+  if(a.jours!=null&&b.jours!=null) return a.jours-b.jours;
+  return (a.reste!=null?0:1)-(b.reste!=null?0:1);
+}
+function _pilGmDateAn(iso){ return (typeof window!=='undefined'&&typeof window._trDateAn==='function')?window._trDateAn(iso):String(iso||''); }
+function _pilGmRevTxt(it){
+  var p=[];
+  if(it.reste!=null) p.push(it.reste<=0?('d\u00e9pass\u00e9'+(it.rev?'e':'')+' de '+_pilNum(-it.reste)+' h'):('dans '+_pilNum(it.reste)+' h'));
+  if(it.pd) p.push(it.jours<0?'date d\u00e9pass\u00e9e':('le '+_pilGmDateAn(it.pd)));
+  return (it.rev?'r\u00e9vision':_pilEsc(it.nom))+' '+p.join(' ou ');
 }
 function _pilGmLibJob(j){ return _pilEsc(_pilTnom(j.nom)); }
 // ★ TRAIT-CUVE (§221) — LE TRAITEMENT CONSEILLÉ, EN POINTILLÉ DANS LA CUVE.
@@ -4773,25 +4797,30 @@ function _pilCkTracteur(d){
   // ② La révision
   var R=_pilGmRevision(d,T);
   if(R){
-    var t=R.t, big, col='var(--texte)';
-    if(t.revReste<=0){ big='Révision dépassée de '+_pilNum(-t.revReste)+' h'; col='var(--rouge)'; }
-    else if(R.dans){ big='Atteinte pendant : '+_pilGmLibJob(R.dans.job); col='var(--orange)'; }
-    else big='Pas atteinte par les travaux en cours';
-    var axMax=Math.max(10, Math.ceil(Math.max(t.revReste>0?t.revReste:0, R.tot)*1.15/10)*10);
+    var t=R.t, it=R.it, rs=it.reste, big, col='var(--texte)', bigDate=false;   // ★ COMPT-7 (§489) : l'entretien le plus pressant
+    var nomIt=it.rev?'Révision':_pilEsc(it.nom), dIt=it.pd?_pilEsc(_pilGmDateAn(it.pd)):'';
+    if(rs!=null&&rs<=0){ big=it.rev?('Révision dépassée de '+_pilNum(-rs)+' h'):(nomIt+'\u00a0: dépassé de '+_pilNum(-rs)+' h'); col='var(--rouge)'; }
+    else if(it.jours!=null&&it.jours<0){ big=nomIt+'\u00a0: date dépassée ('+dIt+')'; col='var(--rouge)'; bigDate=true; }
+    else if(R.dans){ big=(it.rev?'Atteinte pendant : ':nomIt+' atteint pendant : ')+_pilGmLibJob(R.dans.job); col='var(--orange)'; }
+    else if(it.jours!=null&&it.jours<=14){ big=nomIt+' le '+dIt; col='var(--orange)'; bigDate=true; }
+    else big=it.rev?'Pas atteinte par les travaux en cours':(nomIt+'\u00a0: pas atteint par les travaux en cours');
+    var axMax=Math.max(10, Math.ceil(Math.max(rs>0?rs:0, R.tot)*1.15/10)*10);
     var cols=['var(--terre)','var(--or)','var(--vert-med)'], seg='';
     R.seq.forEach(function(j,k){ seg+='<i style="width:'+(j.h/axMax*100).toFixed(2)+'%;background:'+cols[k%3]+'" title="'+_pilEsc(_pilTnom(j.nom))+' \u00b7 '+_pilGmFr(j.h)+' h"></i>'; });
-    if(t.revReste>0) seg+='<u style="left:'+Math.min(100,t.revReste/axMax*100).toFixed(2)+'%"></u>';
+    if(rs>0) seg+='<u style="left:'+Math.min(100,rs/axMax*100).toFixed(2)+'%"></u>';
     var ry=_pilGmRythme(t.id,d.refDate), rep='';
-    if(ry&&t.revReste>0) rep='<div class="pil-t2s">Repère : au rythme mesuré de ce tracteur ('+_pilGmFr(ry)+' h par jour ouvré, 4 dernières semaines), environ '+Math.ceil(t.revReste/ry)+' jour'+(Math.ceil(t.revReste/ry)>1?'s':'')+' ouvré'+(Math.ceil(t.revReste/ry)>1?'s':'')+'.</div>';
+    if(ry&&rs>0) rep='<div class="pil-t2s">Repère : au rythme mesuré de ce tracteur ('+_pilGmFr(ry)+' h par jour ouvré, 4 dernières semaines), environ '+Math.ceil(rs/ry)+' jour'+(Math.ceil(rs/ry)>1?'s':'')+' ouvré'+(Math.ceil(rs/ry)>1?'s':'')+'.</div>';
     var leg=R.seq.map(function(j,k){ return '<span><i style="background:'+cols[k%3]+'"></i>'+_pilGmLibJob(j)+' \u00b7 '+_pilGmFr(j.h)+' h</span>'; }).join('');
     nCote++;
-    H+='<div class="pil-tile2 pil-trx-rev"><div class="pil-t2h"><span class="ic">'+_pilIco('cle')+'</span><span class="t">Révision \u00b7 '+_pilEsc(t.nom||'Tracteur')+'</span>'+_mvInfoBtn('pil.trxrev')+'</div>'
+    H+='<div class="pil-tile2 pil-trx-rev"><div class="pil-t2h"><span class="ic">'+_pilIco('cle')+'</span><span class="t">'+nomIt+' \u00b7 '+_pilEsc(t.nom||'Tracteur')+'</span>'+_mvInfoBtn('pil.trxrev')+'</div>'
       +'<div class="pil-t2b"><div class="pil-big" style="color:'+col+'">'+big+'</div>'
-      +'<div class="pil-t2s">'+(t.revReste>0?_pilNum(t.revReste)+' h avant la révision \u00b7 ':'')+_pilGmFr(R.tot)+' h en cours sur ce tracteur'+(R.dans?(' \u00b7 à '+Math.round(R.dans.pc*100)+' % de ce travail'):'')+(R.sansBareme?(' \u00b7 '+R.sansBareme+' travail sans barème'):'')+'</div>'
+      +'<div class="pil-t2s">'+(rs>0?_pilNum(rs)+' h avant '+(it.rev?'la révision':'cet entretien')+' \u00b7 ':'')+_pilGmFr(R.tot)+' h en cours sur ce tracteur'+(R.dans?(' \u00b7 à '+Math.round(R.dans.pc*100)+' % de ce travail'):'')+(R.sansBareme?(' \u00b7 '+R.sansBareme+' travail sans barème'):'')+'</div>'
       +'<div class="pil-trx-carnet">'+seg+'</div>'
       +'<div class="pil-trx-ax"><span>0</span><span>'+(axMax/2)+'</span><span>'+axMax+' h</span></div>'
       +(leg?'<div class="pil-trx-leg">'+leg+'</div>':'')
       +rep
+      +((dIt&&!bigDate)?'<div class="pil-t2s">\u00c0 la date\u00a0: le '+dIt+'</div>':'')
+      +((R.aussi&&R.aussi.length)?'<div class="pil-t2s">Aussi\u00a0: '+R.aussi.map(_pilGmRevTxt).join(' \u00b7 ')+'</div>':'')
       +'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="entretien">Tracteur \u203A Entretien \u203A</button></div>'
       +'</div></div>';
   }

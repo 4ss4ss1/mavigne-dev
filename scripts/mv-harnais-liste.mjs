@@ -835,6 +835,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-compt4.mjs --contre'],
   ['node scripts/mv-harnais-compt5.mjs'],              // COMPT-5 (§487) : plusieurs entretiens par tracteur — échéance, Fait, Fait aussi, le plus urgent
   ['node scripts/mv-harnais-compt5.mjs --contre'],
+  ['node scripts/mv-harnais-compt7.mjs'],              // COMPT-7 (§489) : la carte du Pilotage dit l’entretien le plus pressant — heures, dates, autres entretiens
+  ['node scripts/mv-harnais-compt7.mjs --contre'],
   ['node scripts/mv-harnais-tete3d.mjs'],              // TETE-3D (§482) : la bande campagne/date sous l'en-tête retrouve sa forme (TETE-1 et TETE-2 la visent), blanche ; test:ux la garde au rendu
   ['node scripts/mv-harnais-tete3d.mjs --contre'],
   ['node scripts/mv-harnais-ecart1.mjs'],              // ECART-1 (§460) : l'écart au barème d'Aujourd'hui › Économie en heures — la tuile est le total de la carte (un tiret sans rien à comparer), barres à l'échelle jusqu'à ±50 %

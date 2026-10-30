@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.40', d: '2026-10-29', items: [
+    { niv: 0, pour: ['admin'], emoji: 'tracteur', titre: 'Le Pilotage dit l’entretien le plus pressant',
+      desc: "La carte de la révision, dans le tracteur du Pilotage, prend désormais l’entretien le plus pressant de chaque tracteur\u00a0: la révision à ses heures ou à sa date, ou un autre entretien (vidange, filtres, graissage…). Ce qui est dépassé d’abord, puis ce qui tombe pendant les travaux en cours ou dans les 14 jours\u00a0; les autres en vue sont dits en dessous." },
+  ] },
   { v: '10.39', d: '2026-10-29', items: [
     { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'tracteur', titre: 'Plusieurs entretiens par tracteur',
       desc: "À côté de la révision, ajoutez dans l’Entretien ce qui se fait à son rythme\u00a0: vidange de pont et boîte toutes les 1\u202f000\u00a0h, filtre à air tous les 12 mois, graissage toutes les 50\u00a0h… Chacun dit son échéance\u00a0; «\u00a0Fait\u00a0» demande le compteur et calcule le suivant, et «\u00a0Révision faite\u00a0» propose de cocher ceux faits en même temps. Le plus urgent remonte dans le parc." },
